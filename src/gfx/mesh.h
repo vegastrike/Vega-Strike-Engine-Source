@@ -224,8 +224,8 @@ private:
     int load_stage;
     int point_state;
     int vertex_state;
-    float scale;
-    float lodscale;
+	Vector scale;
+    Vector lodscale;
     vector <ZeTexture> decals;
     bool recalc_norm;
     int num_vertices;
@@ -267,7 +267,7 @@ private:
     int faction;
   } *xml;
   ///Loads XML data into this mesh.
-  void LoadXML(const char *filename, float scale, int faction, class Flightgroup * fg);
+  void LoadXML(const char *filename, const Vector & scale, int faction, class Flightgroup * fg);
   ///loads binary data into this mesh
   void LoadBinary (const char * filename, int faction);
   ///Creates all logos with given XML data info
@@ -281,7 +281,7 @@ private:
 protected:
   ///Loads a mesh that has been found in the hash table into this mesh (copying original data)
   bool LoadExistant (Mesh *mesh);
-  bool LoadExistant (const string filehash, float scale, int faction);
+  bool LoadExistant (const string filehash, const Vector & scale, int faction);
   ///the position of the center of this mesh for collision detection
   Vector local_pos; 
   ///The hash table of all meshes
@@ -335,7 +335,7 @@ public:
   BLENDFUNC getBlendSrc() {return blendSrc;}
   BLENDFUNC getBlendDst() {return blendDst;}		
   ///Loading a mesh from an XML file.  faction specifies the logos.  Orig is for internal (LOD) use only!
-  Mesh( const char *filename, const float scale,int faction,class Flightgroup * fg, bool orig=false);
+  Mesh( const char *filename, const Vector & scalex,int faction,class Flightgroup * fg, bool orig=false);
   ///Forks the mesh across the plane a,b,c,d into two separate meshes...upon which this may be deleted
   void Fork (Mesh * &one, Mesh * &two, float a, float b, float c, float d);
   ///Destructor... kills orig if refcount of orig becomes zero

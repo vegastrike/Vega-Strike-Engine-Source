@@ -1061,7 +1061,7 @@ void updateMax (Vector &mn, Vector & mx, const GFXVertex &ver) {
 }
 const bool USE_RECALC_NORM=true;
 const bool FLAT_SHADE=true;
-void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup * fg) {
+void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flightgroup * fg) {
   const int chunk_size = 16384;
   std::vector <unsigned int> ind;  
   FILE* inFile = fopen (filename, "r");
@@ -1411,16 +1411,20 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
     poly_offsets[o_index]=xml->linestrips[a].size();
     o_index++;
   }
-  mn *=xml->scale;
-  mx *=xml->scale;
+  mn.i *=xml->scale.i;
+  mn.j *=xml->scale.j;
+  mn.k *=xml->scale.k;
+  mx.i *=xml->scale.i;
+  mx.j *=xml->scale.j;
+  mx.k *=xml->scale.k;  
   float x_center = (mn.i + mx.i)/2.0,
     y_center = (mn.j + mx.j)/2.0,
     z_center = (mn.k + mx.k)/2.0;
   local_pos = Vector (x_center, y_center, z_center);
   for(a=0; a<totalvertexsize; a++) {
-    vertexlist[a].x*=xml->scale;//FIXME
-    vertexlist[a].y*=xml->scale;
-    vertexlist[a].z*=xml->scale;
+    vertexlist[a].x*=xml->scale.i;//FIXME
+    vertexlist[a].y*=xml->scale.j;
+    vertexlist[a].z*=xml->scale.k;
     vertexlist[a].i*=-1;
     vertexlist[a].j*=-1;
     vertexlist[a].k*=-1;
@@ -1432,9 +1436,9 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
     */
   }
   for (a=0;a<xml->vertices.size();a++) {
-    xml->vertices[a].x*=xml->scale;//FIXME
-    xml->vertices[a].y*=xml->scale;
-    xml->vertices[a].z*=xml->scale;
+    xml->vertices[a].x*=xml->scale.i;//FIXME
+    xml->vertices[a].y*=xml->scale.j;
+    xml->vertices[a].z*=xml->scale.k;
     xml->vertices[a].i*=-1;    xml->vertices[a].k*=-1;    xml->vertices[a].j*=-1;
     /*
     xml->vertices[a].x -= x_center;

@@ -9,8 +9,8 @@ extern std::vector <unorigdest *> pendingjump;
 // From star_system_jump.cpp
 inline bool CompareDest (Unit * un, StarSystem * origin) {
   for (unsigned int i=0;i<un->GetDestinations().size();i++) {
-    if ((origin==star_system_table.Get (string(un->GetDestinations()[i])))||(origin==star_system_table.Get (string(un->GetDestinations()[i])+string (".system")))) 
-      return true;
+	  if (std::string(origin->getFileName())==std::string(un->GetDestinations()[i]))
+		  return true;
   }
   return false;
 }
@@ -96,9 +96,17 @@ void GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
 	iter.advance();
       }
       if (!possibilities.empty()) {
-	static int jumpdest=235034;
-	this->SetCurPosition(possibilities[jumpdest%possibilities.size()]->Position());
-	jumpdest+=23231;
+		  static int jumpdest=235034;
+		  Unit * jumpnode = possibilities[jumpdest%possibilities.size()];
+		  this->SetCurPosition(jumpnode->Position());
+		  if (jumpnode->isUnit()==UNITPTR) {
+			  QVector Offset (jumpnode->Position().i<0?1:-1,
+							  jumpnode->Position().j<0?1:-1,
+							  jumpnode->Position().k<0?1:-1);
+			  Offset*=jumpnode->rSize()*2+rSize()*2;
+			  this->SetPosAndCumPos(jumpnode->Position()+Offset);
+          }
+          jumpdest+=23231;
       }
       DealPossibleJumpDamage (this);
       static int jumparrive=AUDCreateSound(vs_config->getVariable ("unitaudio","jumparrive", "sfx43.wav"),false);

@@ -109,6 +109,6 @@ Mesh * GetWarpMesh (int faction, warptrails * w) {
   else
     fclose (fp);
   if (!w->factions[faction])
-    w->factions[faction] = new Mesh (fac.c_str(),1,faction,NULL,false);
+    w->factions[faction] = new Mesh (fac.c_str(),Vector(1,1,1),faction,NULL,false);
   return w->factions[faction];
 }

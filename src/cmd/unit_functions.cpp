@@ -23,19 +23,19 @@
 // Wrappers used in unit_xml.cpp
 void addShieldMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
 {
-	xml->shieldmesh = new Mesh(filename, scale, faction,fg);
+	xml->shieldmesh = new Mesh(filename, Vector(scale,scale,scale), faction,fg);
 }
 void addRapidMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
 {
-	xml->rapidmesh = new Mesh(filename, scale, faction,fg);
+	xml->rapidmesh = new Mesh(filename, Vector(scale,scale,scale), faction,fg);
 }
 void addBSPMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
 {
-	xml->bspmesh = new Mesh(filename, scale, faction,fg);
+	xml->bspmesh = new Mesh(filename, Vector(scale,scale,scale), faction,fg);
 }
 void pushMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
 {
-	xml->meshes.push_back(new Mesh(filename, scale, faction,fg));
+	xml->meshes.push_back(new Mesh(filename, Vector(scale,scale,scale), faction,fg));
 }
 
 Mount * createMount(const std::string& name, short int ammo=-1, short int volume=-1)

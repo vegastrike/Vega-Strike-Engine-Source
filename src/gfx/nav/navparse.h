@@ -88,7 +88,7 @@ bool NavigationSystem::ParseFile(string filename)
 					screenskipby4[3] = y_large;
 
 
-					mesh[0] = new Mesh(mesh_.c_str(),scale_,0,NULL);
+					mesh[0] = new Mesh(mesh_.c_str(),Vector(scale_,scale_,scale_),0,NULL);
 				}
 
 
@@ -120,7 +120,7 @@ bool NavigationSystem::ParseFile(string filename)
 					buttonskipby4_1[3] = y_ + dy_;
 
 
-					mesh[1] = new Mesh(mesh_.c_str(),scale_,0,NULL);
+					mesh[1] = new Mesh(mesh_.c_str(),Vector(scale_,scale_,scale_),0,NULL);
 				}
 
 
@@ -153,7 +153,7 @@ bool NavigationSystem::ParseFile(string filename)
 					buttonskipby4_2[3] = y_ + dy_;
 
 
-					mesh[2] = new Mesh(mesh_.c_str(),scale_,0,NULL);
+					mesh[2] = new Mesh(mesh_.c_str(),Vector(scale_,scale_,scale_),0,NULL);
 				}
 
 
@@ -186,7 +186,7 @@ bool NavigationSystem::ParseFile(string filename)
 					buttonskipby4_3[3] = y_ + dy_;
 
 
-					mesh[3] = new Mesh(mesh_.c_str(),scale_,0,NULL);
+					mesh[3] = new Mesh(mesh_.c_str(),Vector(scale_,scale_,scale_),0,NULL);
 				}
 
 
@@ -219,7 +219,7 @@ bool NavigationSystem::ParseFile(string filename)
 					buttonskipby4_4[3] = y_ + dy_;
 
 
-					mesh[4] = new Mesh(mesh_.c_str(),scale_,0,NULL);
+					mesh[4] = new Mesh(mesh_.c_str(),Vector(scale_,scale_,scale_),0,NULL);
 				}
 
 
@@ -252,7 +252,7 @@ bool NavigationSystem::ParseFile(string filename)
 					buttonskipby4_5[3] = y_ + dy_;
 
 
-					mesh[5] = new Mesh(mesh_.c_str(),scale_,0,NULL);
+					mesh[5] = new Mesh(mesh_.c_str(),Vector (scale_,scale_,scale_),0,NULL);
 				}
 
 
@@ -285,7 +285,7 @@ bool NavigationSystem::ParseFile(string filename)
 					buttonskipby4_6[3] = y_ + dy_;
 
 
-					mesh[6] = new Mesh(mesh_.c_str(),scale_,0,NULL);
+					mesh[6] = new Mesh(mesh_.c_str(),Vector(scale_,scale_,scale_),0,NULL);
 				}
 
 
@@ -318,7 +318,7 @@ bool NavigationSystem::ParseFile(string filename)
 					buttonskipby4_7[3] = y_ + dy_;
 
 
-					mesh[7] = new Mesh(mesh_.c_str(),scale_,0,NULL);
+					mesh[7] = new Mesh(mesh_.c_str(),Vector (scale_,scale_,scale_),0,NULL);
 				}
 
 

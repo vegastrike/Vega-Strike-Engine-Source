@@ -109,7 +109,7 @@ Vector Mesh::GetVertex (int index) const {
 int Mesh::numVertices() const {
 	return vlist->GetNumVertices();
 }
-bool Mesh::LoadExistant (const string filehash, float scale, int faction) {
+bool Mesh::LoadExistant (const string filehash, const Vector& scale, int faction) {
   Mesh * oldmesh;
 
   hash_name = GetHashName (filehash,scale,faction);
@@ -134,7 +134,7 @@ Mesh::Mesh (const Mesh & m) {
     return;
   }
 }
-Mesh:: Mesh(const char * filename,const float scale, int faction, Flightgroup *fg, bool orig):hash_name(filename)
+Mesh:: Mesh(const char * filename,const Vector & scale, int faction, Flightgroup *fg, bool orig):hash_name(filename)
 {
   this->orig=NULL;
   InitUnit();

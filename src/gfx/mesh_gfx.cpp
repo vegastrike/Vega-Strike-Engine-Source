@@ -707,7 +707,7 @@ void Mesh::CreateLogos(int faction, Flightgroup * fg) {
 	Ref[ri]=norm2;
 	PolyNormal[ri]=norm;
 	center[ri] = Cent;
-	sizes[ri]=xml->logos[ind].size*xml->scale;
+	sizes[ri]=xml->logos[ind].size*xml->scale.k;
 	rotations[ri]=xml->logos[ind].rotate;
 	offset[ri]=xml->logos[ind].offset;
 	totoffset+=offset[ri];

@@ -1549,9 +1549,21 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
 		  if( Network==NULL && !SERVER)
 		  {
 			  if (nonautosave.empty()) {
+				  mkdir (modifications
+#ifndef _WIN32
+						 ,0xFFFFFFFF
+#endif
+					  );
 				vschdir (modifications);
 			  }else {
+				  mkdir (nonautosave.c_str()
+#ifndef _WIN32
+						 ,0xFFFFFFFF
+#endif
+					  );
+					  
 				vschdir (nonautosave.c_str());
+				
 			  }
 		  }
 		  // If in network mode on client side we expect saves to be in ./save

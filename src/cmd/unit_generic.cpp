@@ -626,7 +626,7 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 		char meshfilename[64];
 		float x,y,z;
 		ReadMesh(meshfilename, x,y,z);
-		meshdata.push_back(new Mesh(meshfilename, 1, faction,NULL));
+		meshdata.push_back(new Mesh(meshfilename, Vector(1,1,1), faction,NULL));
 		//		meshdata[meshcount]->SetPosition(Vector (x,y,z));
 	}
 	meshdata.push_back(NULL);

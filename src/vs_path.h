@@ -20,13 +20,13 @@ extern std::string datadir;
 extern std::string homedir;//including subdir
 ///gets the hash name for an item with name in curdir
 std::string GetHashName (const std::string &name);
-std::string GetHashName (const std::string &name,float scale, int faction);
+std::string GetHashName (const std::string &name,const class Vector & scale, int faction);
 std::string GetSharedSoundPath (const std::string &name);
 std::string GetSharedTexturePath (const std::string &name);
 std::string GetSharedTextureHashName(const std::string &);
 std::string GetSharedSoundHashName(const std::string&);
 std::string GetSharedMeshPath (const std::string &name);
-std::string GetSharedMeshHashName(const std::string &, float scale, int faction);
+std::string GetSharedMeshHashName(const std::string &, const class Vector &scale, int faction);
 std::string GetSharedUnitPath ();
 ///takes out all forward slasshes
 std::string MakeSharedStarSysPath (const std::string &);
