@@ -68,10 +68,6 @@ public:
   void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal,  float dist);
   void gravitate(UnitCollection *units);
 
-  bool isAtmospheric  () {
-    return hasLights()||atmospheric;
-  }
-
   friend class Planet::PlanetIterator;
   friend class PlanetaryOrbit;
 

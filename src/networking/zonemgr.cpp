@@ -3,6 +3,7 @@
 #include "universe_generic.h"
 #include "star_system_generic.h"
 #include "cmd/unit_generic.h"
+#include "gfx/cockpit_generic.h"
 #include "packet.h"
 //#include "netserver.h"
 #include "zonemgr.h"
@@ -19,7 +20,8 @@ StarSystem *	ZoneMgr::addZone( string starsys)
 	list<Client *> lst;
 	StarSystem * sts;
 	// Generate the StarSystem
-	sts = _Universe->GenerateStarSystem (starsys.c_str(),"",Vector(0,0,0));
+	string starsysfile = starsys+".system";
+	sts = _Universe->GenerateStarSystem (starsysfile.c_str(),"",Vector(0,0,0));
 	// Add it in the star_system vector
 	_Universe->star_system.push_back( sts);
 	// Add an empty list of clients to the zone_list vector
@@ -48,9 +50,12 @@ void	ZoneMgr::addClient( Client * clt, int zone)
 bool	ZoneMgr::addClient( Client * clt)
 {
 	// Remove the client from old starsystem if needed and add it in the new one
-	StarSystem * sts;
-	string starsys = clt->save.GetStarSystem();
+	/*
 	string oldstarsys = clt->save.GetOldStarSystem();
+	*/
+	StarSystem * sts;
+	Cockpit * cp = _Universe->isPlayerStarship( clt->game_unit.GetUnit());
+	string starsys = cp->savegame->GetStarSystem();
 	// TO BE DONE IN JUMP HANDLING !!!
 	/*
 	if( starsys!=oldstarsys)

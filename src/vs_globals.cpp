@@ -14,6 +14,7 @@ Mission *mission=NULL;
 
 double benchmark=-1.0;
 bool STATIC_VARS_DESTROYED=false;
+const char *mission_key="unit_to_dock_with";
 
 /* for speed test */
 int loop_count=0;

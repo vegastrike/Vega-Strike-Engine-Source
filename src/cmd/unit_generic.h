@@ -161,7 +161,7 @@ public:
        int         faction,
        std::string customizedUnit=string(""),
        Flightgroup *flightgroup=NULL,
-       int         fg_subnumber=0 );
+       int         fg_subnumber=0, char * netxml=NULL);
   friend class UnitFactory;
 
 public:    

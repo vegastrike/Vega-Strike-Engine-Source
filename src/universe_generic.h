@@ -88,6 +88,7 @@ private:
   virtual void activateLightMap() {}
   virtual void SelectCamera(int cam) {}
   //virtual unsigned int CurrentCockpit(){return 0;}
+  Cockpit * createCockpit( std::string player);
 
   vector <std::string> getAdjacentStarSystems(const std::string &ss);
   std::string getGalaxyProperty (const std::string &sys, const std::string & prop);

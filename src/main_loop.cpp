@@ -480,7 +480,7 @@ void InitializeInput() {
 
 //Cockpit *cockpit;
 static Texture *tmpcockpittexture;
-void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSystem *> &ssys, std::vector <QVector>& savedloc ) {
+void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSystem *> &ssys, std::vector <QVector>& savedloc, vector<vector<std::string> > &savefiles) {
   vector <std::string> fighter0mods;
   vector <int> fighter0indices;
   //  GFXFogMode (FOG_OFF);
@@ -607,8 +607,16 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 
  			// In networking mode we name the ship save with .xml as they are xml files
 			if( Network!=NULL)
+			{
+				char * buf = new char[savefiles[a][0].length()+1];
+				buf[savefiles[a][0].length()]=0;
+				memcpy( buf, savefiles[a][0].c_str(), savefiles[a][0].length());
 				modifications = modifications+".xml";
-  			fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s);
+  				fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s, buf);
+				delete buf;
+			}
+			else
+  				fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s);
 			if( Network!=NULL)
 			{
 				fighters[a]->SetNetworkMode();

@@ -92,7 +92,7 @@ class	NetClient
 		void	sendPosition( const ClientState* cs );
 		void	sendAlive();
 
-		char *	loginLoop( string str_name, string str_passwd); // Loops until receiving login response
+		vector<string>	loginLoop( string str_name, string str_passwd); // Loops until receiving login response
 		void	disable() { enabled=false;}
 		int		isEnabled() { return enabled; }
 		void	setNetworkedMode( bool mode) { enabled = mode;}

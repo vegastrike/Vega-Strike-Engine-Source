@@ -140,7 +140,7 @@ int		NetClient::authenticate()
 /**** Login loop                                          ****/
 /*************************************************************/
 
-char *	NetClient::loginLoop( string str_name, string str_passwd)
+vector<string>	NetClient::loginLoop( string str_name, string str_passwd)
 {
 	COUT << "enter " << __FUNCTION__ << endl;
 
@@ -150,6 +150,7 @@ char *	NetClient::loginLoop( string str_name, string str_passwd)
 	// HAVE TO DELETE netbuf after return in calling function
 	char *	netbuf = new char[MAXBUFFER];
 	char	name[NAMELEN], passwd[NAMELEN];
+	vector<string> savefiles;
 
 	memset( buffer, 0, tmplen+1);
 	memset( name, 0, NAMELEN);
@@ -208,15 +209,22 @@ char *	NetClient::loginLoop( string str_name, string str_passwd)
 		cout<<"Save size = "<<save_size<<endl;
 		// Write temp save files
 		//changehome();
-		WriteXMLUnit( homedir+"/save/"+str_name+".xml", netbuf+2*NAMELEN+sizeof( unsigned int), xml_size);
-		WriteXMLUnit( homedir+"/save/"+str_name+".save", netbuf+2*NAMELEN+sizeof( unsigned int)*2+xml_size, save_size);
+		//WriteXMLUnit( homedir+"/save/"+str_name+".xml", netbuf+2*NAMELEN+sizeof( unsigned int), xml_size);
+		//WriteXMLUnit( homedir+"/save/"+str_name+".save", netbuf+2*NAMELEN+sizeof( unsigned int)*2+xml_size, save_size);
+
+		// Set the end of the string after the save content and at the end of the xml content
+		netbuf[2*NAMELEN+sizeof( unsigned int)+xml_size]=0;
+		netbuf[2*NAMELEN+2*sizeof( unsigned int)+xml_size+save_size]=0;
+		// First element is XML Unit and second element is player save
+		savefiles.push_back( string( netbuf+2*NAMELEN+sizeof( unsigned int)));
+		savefiles.push_back( string( netbuf+2*NAMELEN+2*sizeof( unsigned int)+xml_size));
 	}
 	else
 	{
 		delete netbuf;
 		netbuf=NULL;
 	}
-	return netbuf;
+	return savefiles;
 }
 
 /*************************************************************/

@@ -53,7 +53,6 @@
 /*
  * Globals 
  */
-const char *mission_key="unit_to_dock_with";
 ForceFeedback *forcefeedback;
 Universe * _Universe;
 // GameUniverse _Universe;
@@ -89,49 +88,7 @@ VegaConfig * createVegaConfig( char * file)
 	return new GameVegaConfig( file);
 }
 
-void DockToSavedBases (int playernum) {
-	string str="MiningBase";
-	Unit *plr=_Universe->AccessCockpit(playernum)->GetParent();
-	if (!plr) {
-		return;
-	}
-	vector <string> strs=loadStringList(playernum,mission_key);
-	if (strs.size()) {
-		str=strs[0];
-	}
-	un_iter iter=_Universe->activeStarSystem()->getUnitList().createIterator();
-	Unit *closestUnit=NULL;
-	float lastdist=0;
-	float dist=0;
-	while (iter.current()) {
-		Unit *un=iter.current();
-		if (un->name==str) {
-			dist=UnitUtil::getSignificantDistance(plr,un);
-			if (closestUnit==NULL||dist<lastdist) {
-				lastdist=dist;
-				closestUnit=un;
-			}
-		}
-		iter.advance();
-	}
-	if (closestUnit) {
-		if (UnitUtil::getSignificantDistance(plr,closestUnit)>0&&closestUnit->isUnit()!=PLANETPTR) {
-			plr->SetPosAndCumPos(UniverseUtil::SafeEntrancePoint(closestUnit->Position(),plr->rSize()));
-		}
-		vector <DockingPorts> dprt=closestUnit->image->dockingports;
-		int i;
-		for (i=0;;i++) {
-			if (i>=dprt.size()) {
-				return;
-			}
-			if (!dprt[i].used) {
-				break;
-			}
-		}
-		plr->ForceDock(closestUnit,i);
-		closestUnit->image->clearedunits.push_back(plr);
-	}
-}
+extern void DockToSavedBases (int playernum);
 
 std::string ParseCommandLine(int argc, char ** CmdLine);
 void cleanup(void)
@@ -496,6 +453,7 @@ void bootstrap_main_loop () {
 	vector <QVector> playerNloc;
 
 	/************************* NETWORK INIT ***************************/
+	  vector<vector<std::string> > savefiles;
 	char * srvipadr;
 	int port;
 	if ( srvip != "")
@@ -550,9 +508,9 @@ void bootstrap_main_loop () {
 			exit( 1);
 		}
 		//sleep( 3);
-		cout<<"Waiting for player "<<(k+1)<<" = "<<(*it)<<":"<<(*jt)<<"login response...";
-		savedata = Network[k].loginLoop( (*it), (*jt));
-		if( savedata==0)
+		cout<<"Waiting for player "<<(k)<<" = "<<(*it)<<":"<<(*jt)<<"login response...";
+		savefiles.push_back( Network[k].loginLoop( (*it), (*jt)));
+		if( savefiles[k].empty())
 		{
 			cout<<"No server response, cannot connect, exiting"<<endl;
 			cleanup();
@@ -561,12 +519,20 @@ void bootstrap_main_loop () {
 		else
 		{
 			cout<<" logged in !"<<endl;
-			delete savedata;
-			savegamefile = homedir+"/save/"+(*it)+".save";
+			//savegamefile = homedir+"/save/"+(*it)+".save";
 		}
 	  }
 		/************* NETWORK PART ***************/
-	  saved=_Universe->AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k);
+	  if( Network!=NULL)
+	  {
+	    char * buf = new char[savefiles[k][1].length()+1];
+		buf[savefiles[k][1].length()]=0;
+		memcpy( buf, savefiles[k][1].c_str(), savefiles[k][1].length());
+		saved=_Universe->AccessCockpit(k)->savegame->ParseSaveGame ("",mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k, buf);
+		delete buf;
+	  }
+	  else
+		saved=_Universe->AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k);
 	  
 	  playersaveunit.push_back(_Universe->AccessCockpit()->GetUnitFileName());
 	  _Universe->AccessCockpit(k)->credits=credits;
@@ -588,7 +554,7 @@ void bootstrap_main_loop () {
 
     vs_config->bindKeys();//gotta do this before we do ai
 
-    createObjects(playersaveunit,ss,playerNloc);
+    createObjects(playersaveunit,ss,playerNloc, savefiles);
 
     if (setplayerloc&&fighters) {
       if (fighters[0]) {

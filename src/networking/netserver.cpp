@@ -23,6 +23,8 @@
 #include <math.h>
 
 #include "cmd/unit_generic.h"
+#include "gfx/cockpit_generic.h"
+#include "universe_util_generic.h"
 #include "client.h"
 #include "packet.h"
 #include "lin_time.h"
@@ -168,23 +170,38 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		char * save = buf + NAMELEN*2 + sizeof( unsigned int)*2 + xml_size;
 		unsigned int save_size = ntohl( *( (unsigned int *)(buf+ NAMELEN*2 + sizeof( unsigned int) + xml_size)));
 		cout<<"XML="<<xml_size<<" bytes - SAVE="<<save_size<<" bytes"<<endl;
-		QVector tmpvec( 0, 0, 0);
+		string PLAYER_CALLSIGN( clt->name);
+		QVector tmpvec( 0, 0, 0), safevec;
 		float credits;
 		vector<string> savedships;
 		string str("");
-		clt->save.ParseSaveGame( "", str, "", tmpvec, update, credits, savedships, clt->serial, save, false);
-		cout<<"Credits = "<<credits<<endl;
+		// Create a cockpit for the player and parse its savegame
+		Cockpit * cp = _Universe->createCockpit( PLAYER_CALLSIGN);
+		cp->Init ("");
+		cout<<"-> LOADING SAVE FROM NETWORK"<<endl;
+		cp->savegame->ParseSaveGame( "", str, "", tmpvec, update, credits, savedships, clt->serial, save, false);
+		safevec = UniverseUtil::SafeEntrancePoint( tmpvec);
+		cout<<"\tcredits = "<<credits<<endl;
+		cout<<"\tcredits = "<<credits<<endl;
+		cout<<"\tposition : x="<<safevec.i<<" y="<<safevec.j<<" z="<<safevec.k<<endl;
+		cout<<"-> SAVE LOADED"<<endl;
 
 		// WARNING : WE DON'T SAVE FACTION NOR FLIGHTGROUP YET
+		cout<<"-> LOADING XML UNIT"<<endl;
+//----> MAYBE USE UNITFACTORY SO THAT WE LOAD MESH INFO TOO !!!!!
 		Unit * un = new Unit();
 		un->LoadXML( "", "", xml, xml_size);
-		string PLAYER_CALLSIGN( clt->name);
+		cout<<"\tafter LoadXML"<<endl;
 		// We may have to determine which is the current ship of the player if we handle several ships for one player
 		string PLAYER_SHIPNAME = savedships[0];
-		// WE DON'T KNOW THE FACTION YET !!!
+		// WE DON'T KNOW THE FACTION YET !!! SO I MAKE IT DEFAULT TO "privateer"
 		string PLAYER_FACTION_STRING( "privateer");
 		un->SetFg( Flightgroup::newFlightgroup (PLAYER_CALLSIGN,PLAYER_SHIPNAME,PLAYER_FACTION_STRING,"default",1,1,"","",mission), 0);
 		clt->game_unit.SetUnit( un);
+		// Affect the created unit to the cockpit
+		cout<<"-> UNIT LOADED"<<endl;
+		cp->SetParent( un,"","",safevec);
+		cout<<"-> COCKPIT AFFECTED TO UNIT"<<endl;
 		// The Unit will be added in the addClient function
 
 		//string strname( name);
@@ -1119,6 +1136,17 @@ void	NetServer::closeAllSockets()
 /**** Save the server state                                ****/
 /**************************************************************/
 
+// For now it only save units and player saves
 void	NetServer::save()
 {
+	Cockpit * cp;
+	Unit * un;
+	// Loop through all cockpits and write save files
+	for( int i=0; i<_Universe->numPlayers(); i++)
+	{
+		cp = _Universe->AccessCockpit( i);
+		un = cp->GetParent();
+		un->WriteUnit("");
+		cp->savegame->WriteSaveGame (cp->activeStarSystem->getFileName().c_str(),un->LocalPosition(),cp->credits,cp->unitfilename,0);
+	}
 }

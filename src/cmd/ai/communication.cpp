@@ -2,6 +2,7 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include <assert.h>
+
 FSM::FSM (const char * filename) {
     //loads a conversation finite state machine with deltaRelation weight transition from an XML?
   if (strlen(filename)==0) {

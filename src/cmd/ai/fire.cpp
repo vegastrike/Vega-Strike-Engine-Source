@@ -7,7 +7,49 @@
 #include "cmd/unit_util.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/role_bitmask.h"
+#include "cmd/ai/communication.h"
 #include <algorithm>
+static bool NoDockWithClear() {
+	static bool nodockwithclear = XMLSupport::parse_bool (vs_config->getVariable ("physics","dock_with_clear_planets","true"));
+	return nodockwithclear;
+}
+Unit * getAtmospheric (Unit * targ) {
+  if (targ) {
+    Unit * un;
+    for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
+	 (un=*i)!=NULL;
+	 ++i) {
+      if (un->isUnit()==PLANETPTR) {
+	if ((targ->Position()-un->Position()).Magnitude()<targ->rSize()*.5) {
+	  if (!(((Planet *)un)->isAtmospheric())) {
+	    return un;
+	  }
+	}
+      }
+    }
+  }
+  return NULL;
+  
+}
+
+bool RequestClearence(Unit *parent, Unit *targ, unsigned char sex) {
+	if (!targ->DockingPortLocations().size())
+		return false;
+	if (targ->isUnit()==PLANETPTR) {
+		if (((Planet * )targ)->isAtmospheric()&&NoDockWithClear()) {
+			targ = getAtmospheric (targ);
+			if (!targ) {
+				return false;
+			}
+			parent->Target(targ);
+		}
+	}
+	CommunicationMessage c(parent,targ,NULL,sex);
+	c.SetCurrentState(c.fsm->GetRequestLandNode(),NULL,sex);
+	targ->getAIState()->Communicate (c);
+	return true;
+}
+
 using Orders::FireAt;
 void FireAt::ReInit (float reaction_time, float aggressivitylevel) {
   static float missileprob = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MissileProbability",".01"));

@@ -817,25 +817,6 @@ static bool UnDockNow (Unit* me, Unit * targ) {
   }
   return ret;
 }
-static Unit * getAtmospheric (Unit * targ) {
-  if (targ) {
-    Unit * un;
-    for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
-	 (un=*i)!=NULL;
-	 ++i) {
-      if (un->isUnit()==PLANETPTR) {
-	if ((targ->Position()-un->Position()).Magnitude()<targ->rSize()*.5) {
-	  if (!(((GamePlanet *)un)->isAtmospheric())) {
-	    return un;
-	  }
-	}
-      }
-    }
-  }
-  return NULL;
-  
-}
-
 //#include <cmd/music.h>
 //extern Music *muzak;
 
@@ -899,30 +880,13 @@ static bool NoDockWithClear() {
 	static bool nodockwithclear = XMLSupport::parse_bool (vs_config->getVariable ("physics","dock_with_clear_planets","true"));
 	return nodockwithclear;
 }
-bool RequestClearence(Unit *parent, Unit *targ, unsigned char sex) {
-	if (!targ->DockingPortLocations().size())
-		return false;
-	if (targ->isUnit()==PLANETPTR) {
-		if (((GamePlanet * )targ)->isAtmospheric()&&NoDockWithClear()) {
-			targ = getAtmospheric (targ);
-			if (!targ) {
-				return false;
-			}
-			parent->Target(targ);
-		}
-	}
-	CommunicationMessage c(parent,targ,NULL,sex);
-	c.SetCurrentState(c.fsm->GetRequestLandNode(),NULL,sex);
-	targ->getAIState()->Communicate (c);
-	return true;
-}
 
 static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsigned char sex) {
   bool nodockwithclear=NoDockWithClear();
   bool wasdock=vectorOfKeyboardInput[playa].doc;
     if (vectorOfKeyboardInput[playa].doc) {
      if (targ->isUnit()==PLANETPTR) {
-      if (((GamePlanet * )targ)->isAtmospheric()&&nodockwithclear) {
+      if (((Planet * )targ)->isAtmospheric()&&nodockwithclear) {
 	targ = getAtmospheric (targ);
 	if (!targ) {
 	  mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");

@@ -48,7 +48,6 @@ struct	Client
 {
 	/* Network and identification properties */
 	UnitContainer	game_unit;
-	SaveGame		save;
 	CubicSpline		spline;
 	AddressIP		cltadr;
 	bool            is_tcp;

@@ -10,10 +10,64 @@
 #include "xml_support.h"
 #include "cmd/script/mission.h"
 #include "vs_path.h"
+#include "save_util.h"
+#include "cmd/unit_util.h"
+#include "universe_util_generic.h"
 
 using namespace GalaxyXML;
 
 extern StarSystem *GetLoadedStarSystem(const char * file);
+
+Cockpit * Universe::createCockpit( std::string player)
+{
+	Cockpit * cp = new Cockpit ("",NULL,player);
+	cockpit.push_back( cp);
+	return cp;
+}
+
+void DockToSavedBases (int playernum) {
+	string str="MiningBase";
+	Unit *plr=_Universe->AccessCockpit(playernum)->GetParent();
+	if (!plr) {
+		return;
+	}
+	vector <string> strs=loadStringList(playernum,mission_key);
+	if (strs.size()) {
+		str=strs[0];
+	}
+	un_iter iter=_Universe->activeStarSystem()->getUnitList().createIterator();
+	Unit *closestUnit=NULL;
+	float lastdist=0;
+	float dist=0;
+	while (iter.current()) {
+		Unit *un=iter.current();
+		if (un->name==str) {
+			dist=UnitUtil::getSignificantDistance(plr,un);
+			if (closestUnit==NULL||dist<lastdist) {
+				lastdist=dist;
+				closestUnit=un;
+			}
+		}
+		iter.advance();
+	}
+	if (closestUnit) {
+		if (UnitUtil::getSignificantDistance(plr,closestUnit)>0&&closestUnit->isUnit()!=PLANETPTR) {
+			plr->SetPosAndCumPos(UniverseUtil::SafeEntrancePoint(closestUnit->Position(),plr->rSize()));
+		}
+		vector <DockingPorts> dprt=closestUnit->image->dockingports;
+		int i;
+		for (i=0;;i++) {
+			if (i>=dprt.size()) {
+				return;
+			}
+			if (!dprt[i].used) {
+				break;
+			}
+		}
+		plr->ForceDock(closestUnit,i);
+		closestUnit->image->clearedunits.push_back(plr);
+	}
+}
 
 using namespace std;
 Cockpit * Universe::isPlayerStarship(const Unit * doNotDereference) {

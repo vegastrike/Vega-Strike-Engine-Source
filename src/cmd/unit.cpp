@@ -203,7 +203,7 @@ vector <Mesh *> GameUnit<UnitType>::StealMeshes() {
 
 extern void update_ani_cache();
 template <class UnitType>
-GameUnit<UnitType>::GameUnit<UnitType>(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber) {
+GameUnit<UnitType>::GameUnit<UnitType>(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, char * netxml) {
 	this->GameUnit::Init();
 	update_ani_cache();
 	//if (!SubU)

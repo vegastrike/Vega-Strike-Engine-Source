@@ -2,6 +2,7 @@
 #ifndef __SAVEGAME_H
 #define __SAVEGAME_H
 
+#include "cmd/unit_generic.h"
 // WARNING, SAVE FILES ARE LIMITED TO MAXBUFFER SIZE !!! (LOOK IN NETWORKING/CONST.H)
 
 #include <vector>

@@ -885,10 +885,17 @@ GameCockpit::GameCockpit (const char * file, Unit * parent,const std::string &pi
 void GameCockpit::SelectProperCamera () {
     SelectCamera(view);
 }
-static vector <int> respawnunit;
-static vector <int> switchunit;
-static vector <int> turretcontrol;
-static vector <int> suicide;
+extern vector <int> respawnunit;
+extern vector <int> switchunit;
+extern vector <int> turretcontrol;
+extern vector <int> suicide;
+
+void DoCockpitKeys()
+{
+	CockpitKeys::Pan(0,PRESS);
+	CockpitKeys::Inside(0,PRESS);
+}
+
 void RespawnNow (Cockpit * cp) {
   while (respawnunit.size()<=_Universe->numPlayers())
     respawnunit.push_back(0);
@@ -1032,57 +1039,6 @@ int GameCockpit::Autopilot (Unit * target) {
   }
   return retauto;
 }
-void SwitchUnits (Unit * ol, Unit * nw) {
-  bool pointingtool=false;
-  bool pointingtonw=false;
-
-  for (int i=0;i<_Universe->numPlayers();i++) {
-    if (i!=(int)_Universe->CurrentCockpit()) {
-      if (_Universe->AccessCockpit(i)->GetParent()==ol)
-	pointingtool=true;
-      if (_Universe->AccessCockpit(i)->GetParent()==nw)
-	pointingtonw=true;
-    }
-  }
-
-  if (ol&&(!pointingtool)) {
-    Unit * oltarg = ol->Target();
-    if (oltarg) {
-      if (ol->getRelation (oltarg)>=0) {
-	ol->Target(NULL);
-      }
-    }
-    ol->PrimeOrders();
-    ol->SetAI (new Orders::AggressiveAI ("default.agg.xml","default.int.xml"));
-    ol->SetVisible (true);
-  }
-  if (nw) {
-    nw->PrimeOrders();
-    nw->EnqueueAI (new FireKeyboard (_Universe->CurrentCockpit(),_Universe->CurrentCockpit()));
-    nw->EnqueueAI (new FlyByJoystick (_Universe->CurrentCockpit()));
-    static bool LoadNewCockpit = XMLSupport::parse_bool (vs_config->getVariable("graphics","UnitSwitchCockpitChange","false"));
-    if (nw->getCockpit().length()>0&&LoadNewCockpit) {
-      _Universe->AccessCockpit()->Init (nw->getCockpit().c_str());
-    }else {
-      static bool DisCockpit = XMLSupport::parse_bool (vs_config->getVariable("graphics","SwitchCockpitToDefaultOnUnitSwitch","false"));
-      if (DisCockpit) {
-	_Universe->AccessCockpit()->Init ("disabled-cockpit.cpt");
-      }
-    }
-  }
-}
-static void SwitchUnitsTurret (Unit *ol, Unit *nw) {
-  static bool FlyStraightInTurret = XMLSupport::parse_bool (vs_config->getVariable("physics","ai_pilot_when_in_turret","true"));
-  if (FlyStraightInTurret) {
-    SwitchUnits (ol,nw);
-  }else {
-    ol->PrimeOrders();
-    SwitchUnits (NULL,nw);
-    
-  }
-
-}
-
 extern void reset_time_compression(int i, KBSTATE a);
 void GameCockpit::Shake (float amt) {
   static float shak= XMLSupport::parse_float(vs_config->getVariable("graphics","cockpit_shake","3"));
@@ -1357,21 +1313,6 @@ int GameCockpit::getScrollOffset (unsigned int whichtype) {
   return 0;
 }
 
-
-
-
-Unit * GetFinalTurret(Unit * baseTurret) {
-  Unit * un = baseTurret;
-  un_iter uj= un->getSubUnits();
-  Unit * tur;
-  while ((tur=uj.current())) {
-    SwitchUnits (NULL,tur);
-    un = GetFinalTurret (tur);
-    ++uj;
-  }
-  return un;
-}
-
 string GameCockpit::getsoundending(int which) {
 	static bool gotten=false;
 	static string strs [9];
@@ -1423,7 +1364,8 @@ string GameCockpit::getsoundfile(string sound) {
 	}
 }
 
-void GameCockpit::Update () {
+void GameCockpit::UpdAutoPilot()
+{
   if (autopilot_time!=0) {
     autopilot_time-=SIMULATION_ATOM;
     if (autopilot_time<= 0) {
@@ -1445,163 +1387,26 @@ void GameCockpit::Update () {
       }
     }
   }
-  Unit * par=GetParent();
-  if (!par) {
-    if (respawnunit.size()>_Universe->CurrentCockpit())
-      if (respawnunit[_Universe->CurrentCockpit()]){
-	parentturret.SetUnit(NULL);
-	zoomfactor=1.5;
-	respawnunit[_Universe->CurrentCockpit()]=0;
-	string newsystem = savegame->GetStarSystem()+".system";
-	StarSystem * ss = _Universe->GenerateStarSystem (newsystem.c_str(),"",Vector(0,0,0));
-	_Universe->getActiveStarSystem(0)->SwapOut();
-	this->activeStarSystem=ss;
-	_Universe->pushActiveStarSystem(ss);
-
-
-	vector <StarSystem *> saved;
-	while (_Universe->getNumActiveStarSystem()) {
-	  saved.push_back (_Universe->activeStarSystem());
-	  _Universe->popActiveStarSystem();
-	}
-	if (!saved.empty()) {
-	  saved.back()=ss;
-	}
-	unsigned int mysize = saved.size();
-	for (unsigned int i=0;i<mysize;i++) {
-	  _Universe->pushActiveStarSystem (saved.back());
-	  saved.pop_back();
-	}
-	ss->SwapIn();
-	int fgsnumber = 0;
-	if (fg) {
-	  fgsnumber=fg->flightgroup_nr++;
-	  fg->nr_ships++;
-	  fg->nr_ships_left++;
-	}
-	Unit * un = UnitFactory::createUnit (GetUnitFileName().c_str(),false,this->unitfaction,unitmodname,fg,fgsnumber);
-	un->SetCurPosition (UniverseUtil::SafeEntrancePoint (savegame->GetPlayerLocation()));
-	ss->AddUnit (un);
-
-	this->SetParent(un,GetUnitFileName().c_str(),unitmodname.c_str(),savegame->GetPlayerLocation());
-	//un->SetAI(new FireKeyboard ())
-	SwitchUnits (NULL,un);
-	credits = savegame->GetSavedCredits();
-	CockpitKeys::Pan(0,PRESS);
-	CockpitKeys::Inside(0,PRESS);
-	savegame->ReloadPickledData();
-	_Universe->popActiveStarSystem();
-	DockToSavedBases((int)(this - _Universe->AccessCockpit(0)));
-      }
-  }
-  if (turretcontrol.size()>_Universe->CurrentCockpit())
-  if (turretcontrol[_Universe->CurrentCockpit()]) {
-    turretcontrol[_Universe->CurrentCockpit()]=0;
-    Unit * par = GetParent();
-    if (par) {
-      static int index=0;
-      int i=0;bool tmp=false;bool tmpgot=false;
-      if (parentturret.GetUnit()==NULL) {
-	tmpgot=true;
-	un_iter ui= par->getSubUnits();
-	Unit * un;
-	while ((un=ui.current())) {
-		if (_Universe->isPlayerStarship(un)){
-			++ui;
-			continue;
-		}
-
-	  if (i++==index) {
-	    index++;
-	    if (un->name.find ("accessory")==string::npos) {
-	      tmp=true;
-	      SwitchUnitsTurret(par,un);
-	      parentturret.SetUnit(par);
-	      Unit * finalunit = GetFinalTurret(un);
-	      this->SetParent(finalunit,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
-	      break;
-	    }
-	  }
-	  ++ui;
-	}
-      }
-      if (tmp==false) {
-	if (tmpgot) index=0;
-	Unit * un = parentturret.GetUnit();
-	if (un&&(!_Universe->isPlayerStarship(un))) {
-	  
-	  SetParent (un,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
-	  SwitchUnits (NULL,un);
-	  parentturret.SetUnit(NULL);
-	  un->SetTurretAI();
-	}
-      }
-    }
-  }
-  static bool autoclear=XMLSupport::parse_bool(vs_config->getVariable("AI","autodock","false"));
-  par=GetParent();
-  if (autoclear&&par) {
-    Unit *targ=par->Target();
-	if (targ) {
-    if ((UnitUtil::getSignificantDistance(targ,par)<=0)&&(!(par->IsCleared(targ)||targ->IsCleared(par)||par->isDocked(targ)||targ->isDocked(par)))&&(par->getRelation(targ)>=0)&&(targ->getRelation(par)>=0)) {
-      RequestClearence(par,targ,0);//sex is always 0... don't know how to get it.
-    } else if (((par->IsCleared(targ)||targ->IsCleared(par)&&(!(par->isDocked(targ)||targ->isDocked(par)))))&&(UnitUtil::getSignificantDistance(par,targ)>(targ->rSize()+par->rSize()))) {
-      par->EndRequestClearance(targ);
-      targ->EndRequestClearance(par);
-	}
-	}
-  }
-  if (switchunit.size()>_Universe->CurrentCockpit())
-  if (switchunit[_Universe->CurrentCockpit()]) {
-    parentturret.SetUnit(NULL);
-
-    zoomfactor=1.5;
-    static int index=0;
-    switchunit[_Universe->CurrentCockpit()]=0;
-    un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();
-    Unit * un;
-    bool found=false;
-    int i=0;
-    while ((un=ui.current())) {
-      if (un->faction==this->unitfaction) {
-	
-	if ((i++)>=index&&(!_Universe->isPlayerStarship(un))) {
-	  found=true;
-	  index++;
-	  Unit * k=GetParent(); 
-	  SwitchUnits (k,un);
-	  this->SetParent(un,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
-	  //un->SetAI(new FireKeyboard ())
-	  break;
-	}
-      }
-      ++ui;
-    }
-    if (!found)
-      index=0;
-  }
-  if (ejecting) {
-    ejecting=false;
-    Unit * un = GetParent();
-    if (un) {
-      un->EjectCargo((unsigned int)-1);
-    }
-  }else {
-  if (suicide.size()>_Universe->CurrentCockpit()) {
-    if (suicide[_Universe->CurrentCockpit()]) {
-      Unit * un=NULL;
-      if ((un = parent.GetUnit())) {
-	unsigned short armor[4];
-	un->ArmorData(armor);
-	un->DealDamageToHull(Vector(0,0,.1),un->GetHull()+2+armor[0]);
-      }
-      suicide[_Universe->CurrentCockpit()]=0;
-    }
-
-  }
-  }
-
 }
+
+void SwitchUnits2( Unit *nw)
+{
+  if (nw) {
+    nw->PrimeOrders();
+    nw->EnqueueAI (new FireKeyboard (_Universe->CurrentCockpit(),_Universe->CurrentCockpit()));
+    nw->EnqueueAI (new FlyByJoystick (_Universe->CurrentCockpit()));
+    static bool LoadNewCockpit = XMLSupport::parse_bool (vs_config->getVariable("graphics","UnitSwitchCockpitChange","false"));
+    if (nw->getCockpit().length()>0&&LoadNewCockpit) {
+      _Universe->AccessCockpit()->Init (nw->getCockpit().c_str());
+    }else {
+      static bool DisCockpit = XMLSupport::parse_bool (vs_config->getVariable("graphics","SwitchCockpitToDefaultOnUnitSwitch","false"));
+      if (DisCockpit) {
+	_Universe->AccessCockpit()->Init ("disabled-cockpit.cpt");
+      }
+    }
+  }
+}
+
 GameCockpit::~GameCockpit () {
   Delete();
   delete savegame;

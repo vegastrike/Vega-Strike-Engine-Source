@@ -7,6 +7,7 @@
 #include "star_system_generic.h"
 #include "cmd/unit_generic.h"
 #include "cmd/unit_factory.h"
+#include "cmd/unit_util.h"
 #include "cmd/iterator.h"
 #include "cmd/collection.h"
 #include "lin_time.h"//for fps
@@ -23,11 +24,17 @@
 //#include "animation.h"
 //#include "mesh.h"
 #include "universe_util.h"
+#include "cmd/ai/fire.h"
 //#include "in_mouse.h"
 //#include "gui/glut_support.h"
 //#include "networking/netclient.h"
 extern float rand01();
 #define SWITCH_CONST .9
+
+vector <int> respawnunit;
+vector <int> switchunit;
+vector <int> turretcontrol;
+vector <int> suicide;
 
 void Cockpit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Cockpit*)userData)->beginElement(name, AttributeList(atts));
@@ -240,7 +247,8 @@ int Cockpit::Autopilot (Unit * target) {
   }
   return retauto;
 }
-/*
+
+extern void SwitchUnits2( Unit * nw);
 void SwitchUnits (Unit * ol, Unit * nw) {
   bool pointingtool=false;
   bool pointingtonw=false;
@@ -264,20 +272,6 @@ void SwitchUnits (Unit * ol, Unit * nw) {
     ol->PrimeOrders();
     ol->SetAI (new Orders::AggressiveAI ("default.agg.xml","default.int.xml"));
     ol->SetVisible (true);
-  }
-  if (nw) {
-    nw->PrimeOrders();
-    nw->EnqueueAI (new FireKeyboard (_Universe->CurrentCockpit(),_Universe->CurrentCockpit()));
-    nw->EnqueueAI (new FlyByJoystick (_Universe->CurrentCockpit()));
-    static bool LoadNewCockpit = XMLSupport::parse_bool (vs_config->getVariable("graphics","UnitSwitchCockpitChange","false"));
-    if (nw->getCockpit().length()>0&&LoadNewCockpit) {
-      _Universe->AccessCockpit()->Init (nw->getCockpit().c_str());
-    }else {
-      static bool DisCockpit = XMLSupport::parse_bool (vs_config->getVariable("graphics","SwitchCockpitToDefaultOnUnitSwitch","false"));
-      if (DisCockpit) {
-	_Universe->AccessCockpit()->Init ("disabled-cockpit.cpt");
-      }
-    }
   }
 }
 static void SwitchUnitsTurret (Unit *ol, Unit *nw) {
@@ -305,12 +299,11 @@ Unit * GetFinalTurret(Unit * baseTurret) {
   return un;
 }
 
-void Cockpit::Update () {
-  if (autopilot_time!=0) {
+void Cockpit::UpdAutoPilot()
+{
+	if (autopilot_time!=0) {
     autopilot_time-=SIMULATION_ATOM;
     if (autopilot_time<= 0) {
-      AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
-      SetView(CP_FRONT);
       autopilot_time=0;
       Unit * par = GetParent();
       if (par) {
@@ -322,6 +315,13 @@ void Cockpit::Update () {
       }
     }
   }
+}
+
+extern void DoCockpitKeys();
+extern void DockToSavedBases (int playernum);
+
+void Cockpit::Update () {
+  UpdAutoPilot();
   Unit * par=GetParent();
   if (!par) {
     if (respawnunit.size()>_Universe->CurrentCockpit())
@@ -356,18 +356,18 @@ void Cockpit::Update () {
 	  fg->nr_ships++;
 	  fg->nr_ships_left++;
 	}
-	Unit * un = UnitFactory::createUnit (unitfilename.c_str(),false,this->unitfaction,unitmodname,fg,fgsnumber);
+	Unit * un = UnitFactory::createUnit (GetUnitFileName().c_str(),false,this->unitfaction,unitmodname,fg,fgsnumber);
 	un->SetCurPosition (UniverseUtil::SafeEntrancePoint (savegame->GetPlayerLocation()));
 	ss->AddUnit (un);
 
-	this->SetParent(un,unitfilename.c_str(),unitmodname.c_str(),savegame->GetPlayerLocation());
+	this->SetParent(un,GetUnitFileName().c_str(),unitmodname.c_str(),savegame->GetPlayerLocation());
 	//un->SetAI(new FireKeyboard ())
 	SwitchUnits (NULL,un);
 	credits = savegame->GetSavedCredits();
-	CockpitKeys::Pan(0,PRESS);
-	CockpitKeys::Inside(0,PRESS);
+	DoCockpitKeys();
 	savegame->ReloadPickledData();
 	_Universe->popActiveStarSystem();
+	DockToSavedBases((int)(this - _Universe->AccessCockpit(0)));
       }
   }
   if (turretcontrol.size()>_Universe->CurrentCockpit())
@@ -394,7 +394,7 @@ void Cockpit::Update () {
 	      SwitchUnitsTurret(par,un);
 	      parentturret.SetUnit(par);
 	      Unit * finalunit = GetFinalTurret(un);
-	      this->SetParent(finalunit,this->unitfilename.c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
+	      this->SetParent(finalunit,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
 	      break;
 	    }
 	  }
@@ -406,13 +406,26 @@ void Cockpit::Update () {
 	Unit * un = parentturret.GetUnit();
 	if (un&&(!_Universe->isPlayerStarship(un))) {
 	  
-	  SetParent (un,unitfilename.c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
+	  SetParent (un,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
 	  SwitchUnits (NULL,un);
 	  parentturret.SetUnit(NULL);
 	  un->SetTurretAI();
 	}
       }
     }
+  }
+  static bool autoclear=XMLSupport::parse_bool(vs_config->getVariable("AI","autodock","false"));
+  par=GetParent();
+  if (autoclear&&par) {
+    Unit *targ=par->Target();
+	if (targ) {
+    if ((UnitUtil::getSignificantDistance(targ,par)<=0)&&(!(par->IsCleared(targ)||targ->IsCleared(par)||par->isDocked(targ)||targ->isDocked(par)))&&(par->getRelation(targ)>=0)&&(targ->getRelation(par)>=0)) {
+      RequestClearence(par,targ,0);//sex is always 0... don't know how to get it.
+    } else if (((par->IsCleared(targ)||targ->IsCleared(par)&&(!(par->isDocked(targ)||targ->isDocked(par)))))&&(UnitUtil::getSignificantDistance(par,targ)>(targ->rSize()+par->rSize()))) {
+      par->EndRequestClearance(targ);
+      targ->EndRequestClearance(par);
+	}
+	}
   }
   if (switchunit.size()>_Universe->CurrentCockpit())
   if (switchunit[_Universe->CurrentCockpit()]) {
@@ -433,7 +446,7 @@ void Cockpit::Update () {
 	  index++;
 	  Unit * k=GetParent(); 
 	  SwitchUnits (k,un);
-	  this->SetParent(un,this->unitfilename.c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
+	  this->SetParent(un,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
 	  //un->SetAI(new FireKeyboard ())
 	  break;
 	}
@@ -465,7 +478,7 @@ void Cockpit::Update () {
   }
 
 }
-*/
+
 Cockpit::~Cockpit () {
   Delete();
   if( savegame!=NULL)

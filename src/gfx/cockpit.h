@@ -116,7 +116,8 @@ private:
   void Init (const char * file);
   ///Draws Cockpit then restores viewport
   void Draw();
-  void Update();//respawns and the like.
+  //void Update();//respawns and the like.
+  void UpdAutoPilot();
   ///Sets up the world for rendering...call before draw
   void SetupViewPort (bool clip=true);
   void VDUSwitch (int vdunum);

@@ -265,7 +265,7 @@ Unit::Unit (std::vector <string> & meshes, bool SubU, int fact) {
   calculate_extent(false);
 }
 
-Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber) {
+Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, char * netxml) {
 	Init();
 	//update_ani_cache();
 	//if (!SubU)

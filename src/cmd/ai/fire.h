@@ -3,6 +3,8 @@
 #include "comm_ai.h"
 #include "event_xml.h"
 //all unified AI's should inherit from FireAt, so they can choose targets together.
+bool RequestClearence(class Unit *parent, class Unit *targ, unsigned char sex);
+Unit * getAtmospheric (Unit * targ);
 namespace Orders {
 
 class FireAt: public CommunicatingAI {

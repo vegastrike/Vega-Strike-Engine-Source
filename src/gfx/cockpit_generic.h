@@ -109,7 +109,8 @@ protected:
   Unit * GetSaveParent ();
   ///Draws Cockpit then restores viewport
   virtual void Draw() {}
-  virtual void Update() {}//respawns and the like.
+  void Update(); //respawns and the like.
+  virtual void UpdAutoPilot();
   ///Sets up the world for rendering...call before draw
   virtual void SetupViewPort (bool clip=true) {}
   virtual void VDUSwitch (int vdunum) {}

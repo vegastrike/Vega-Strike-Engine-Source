@@ -30,14 +30,14 @@ Unit* UnitFactory::createUnit( const char *filename,
 		               int         faction,
 		               std::string customizedUnit,
 		               Flightgroup *flightgroup,
-		               int         fg_subnumber )
+		               int         fg_subnumber, char * netxml)
 {
     return new Unit( filename,
                      SubUnit,
                      faction,
                      customizedUnit,
                      flightgroup,
-                     fg_subnumber );
+                     fg_subnumber, netxml);
 }
 Unit* UnitFactory::createServerSideUnit( const char *filename,
 		               bool        SubUnit,

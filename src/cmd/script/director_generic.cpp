@@ -20,9 +20,127 @@
 
 #include "pythonmission.h"
 #include "mission.h"
+#include "savegame.h"
 extern bool have_yy_error;
 
 PYTHON_INIT_INHERIT_GLOBALS(Director,PythonMissionBaseClass);
+float getSaveData (int whichcp, string key, unsigned int num) {
+  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+    return 0;
+  }
+  olist_t * ans =&(_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key));
+  if (num >=ans->size()) {
+    return 0;
+  }
+  return (*ans)[num]->float_val;
+}
+unsigned int getSaveDataLength (int whichcp, string key) {
+  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+    return 0;
+  }
+  olist_t * ans =&(_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key));
+  return ans->size();
+}
+unsigned int pushSaveData (int whichcp, string key, float val) {
+  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+    return 0;
+  }
+  olist_t * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
+  varInst * vi = new varInst (VI_IN_OBJECT);//not belong to a mission...not sure should inc counter
+  vi->type = VAR_FLOAT;
+  vi->float_val=val;
+  ans->push_back (vi);
+  return ans->size()-1;
+
+}
+
+void putSaveData (int whichcp, string key, unsigned int num, float val) {
+  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+    return;
+  }
+  olist_t * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
+  if (num<ans->size()) {
+    (*ans)[num]->float_val = val;
+  }
+}
+
+vector <string> loadStringList (int playernum,string mykey) {
+	if (playernum<0||playernum>=_Universe->numPlayers()) {
+		return vector<string> ();
+	}
+	olist_t * ans =&((_Universe->AccessCockpit(playernum)->savegame->getMissionData (mykey)));
+	int lengt = ans->size();
+	if (lengt<1) {
+		return vector<string> ();
+	}
+	vector<string> rez;
+	string curstr;
+	int length = (*ans)[0]->float_val;
+	for (int j=0;j<length&&j<lengt;j++) {
+		char myint=(char)(*ans)[j+1]->float_val;
+		if (myint != '\0') {
+			curstr += myint;
+		} else {
+			rez.push_back(curstr);
+			curstr="";
+		}
+	}
+	return rez;
+}
+void saveStringList (int playernum,string mykey,vector<string> names) {
+	if (playernum<0||playernum>=_Universe->numPlayers()) {
+		return;
+	}
+	olist_t * ans =&((_Universe->AccessCockpit(playernum)->savegame->getMissionData (mykey)));
+	int length=ans->size();
+	int k=1;
+	int tot=0;
+	int i;
+	for (i=0;i<names.size();i++) {
+		tot += names[i].size()+1;
+	}
+	if (length==0) {
+		pushSaveData(playernum,mykey,tot);
+	} else {
+		(*ans)[0]->float_val=tot;
+	}
+	for (i=0;i<names.size();i++) {
+		for (int j=0;j<names[i].size();j++) {
+			if (k < length) {
+				(*ans)[k]->float_val=(float)names[i][j];
+			} else {
+				pushSaveData(playernum,mykey,(float)names[i][j]);
+			}
+			k+=1;
+		}
+		if (k < length) {
+			(*ans)[k]->float_val=0;
+		} else {
+			pushSaveData(playernum,mykey,0);
+		}
+		k+=1;
+	}
+}
+
+PYTHON_BEGIN_MODULE(Director)
+PYTHON_BEGIN_INHERIT_CLASS(Director,pythonMission,PythonMissionBaseClass,"Mission")
+  PYTHON_DEFINE_METHOD_DEFAULT(Class,&PythonMissionBaseClass::Pickle,"Pickle",pythonMission::default_Pickle);
+  PYTHON_DEFINE_METHOD_DEFAULT(Class,&PythonMissionBaseClass::UnPickle,"UnPickle",pythonMission::default_UnPickle);
+  PYTHON_DEFINE_METHOD_DEFAULT(Class,&PythonMissionBaseClass::Execute,"Execute",pythonMission::default_Execute);
+PYTHON_END_CLASS(Director,pythonMission)
+  PYTHON_DEFINE_GLOBAL(Director,&putSaveData,"putSaveData");
+  PYTHON_DEFINE_GLOBAL(Director,&pushSaveData,"pushSaveData");
+  PYTHON_DEFINE_GLOBAL(Director,&getSaveData,"getSaveData");
+  PYTHON_DEFINE_GLOBAL(Director,&getSaveDataLength,"getSaveDataLength");
+PYTHON_END_MODULE(Director)
+
+void InitDirector() {
+	Python::reseterrors();
+	PYTHON_INIT_MODULE(Director);
+	Python::reseterrors();
+}
+
+
 void Mission::loadModule(string modulename){
   missionNode *node=director;
 

@@ -121,11 +121,9 @@ public:
     }
   };
   UnIterator *createIterator() { return new PlanetIterator(this);}
-  /*
   bool isAtmospheric  () {
     return hasLights()||atmospheric;
   }
-  */
 
   bool hasLights() { return !lights.empty(); }
   const std::vector <int> & activeLights() { return lights; }

@@ -1,5 +1,6 @@
 #include "vs_globals.h"
 #include "configxml.h"
+#include "cmd/unit_generic.h"
 
 void cleanup()
 {
@@ -19,3 +20,8 @@ void	UpdateTerrain() {}
 void	UpdateCameraSnds() {}
 void	NebulaUpdate( StarSystem * ss) {}
 void	TestMusic() {}
+void SwitchUnits2( Unit * nw) {
+	if (nw)
+		nw->PrimeOrders();
+}
+void DoCockpitKeys() {}
