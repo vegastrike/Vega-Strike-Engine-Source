@@ -387,8 +387,8 @@ void StarSystem::LoadXML(const char *filename) {
   }
 
   xml = new StarXML;
-  xml->starsp = 1000;
-  xml->numstars=800;
+  xml->starsp = 200;
+  xml->numstars=1000;
   xml->backgroundname = string("cube");
   xml->reflectivity=.5;
   xml->unitlevel=0;
