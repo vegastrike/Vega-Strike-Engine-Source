@@ -1,10 +1,12 @@
-#ifndef _GL_LIGHT_H_
+ #ifndef _GL_LIGHT_H_
 #define _GL_LIGHT_H_
 #include "gfxlib.h"
+#include "hashtable_3d.h"
+#include "cmd_collide.h"
 
-int GFX_MAX_LIGHTS=8;
-int GFX_OPTIMAL_LIGHTS=4;
-GFXBOOL GFXLIGHTING=GFXFALSE;
+extern int GFX_MAX_LIGHTS;
+extern int GFX_OPTIMAL_LIGHTS;
+extern GFXBOOL GFXLIGHTING;
 #define GFX_ATTENUATED 1
 //#define GFX_DIFFUSE 2
 //#define GFX_SPECULAR 4
