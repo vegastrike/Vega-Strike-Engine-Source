@@ -260,6 +260,9 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
 
 
 void Planet::reactToCollision(Unit * un, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist) {
+#ifdef JUMP_DEBUG
+  fprintf (stderr,"%s reacting to collision with %s drive %d", name.c_str(),un->name.c_str(), un->GetJumpStatus().drive);
+#endif
   if (terrain&&un->isUnit()!=PLANETPTR) {
     un->SetPlanetOrbitData (terraintrans);
     Matrix top;
@@ -284,6 +287,10 @@ void Planet::reactToCollision(Unit * un, const Vector & biglocation, const Vecto
     terrain->Collide (un,top);      
   }
   if (!destination.empty()&&un->GetJumpStatus().drive>=0) {
+#ifdef JUMP_DEBUG
+  fprintf (stderr,"Deactivating drive, jumping to %s",destination[un->getJumpStatus().drive%destination.size()]);
+#endif
+
     un->DeactivateJumpDrive();
     _Universe->activeStarSystem()->JumpTo (un, this, std::string(destination[un->GetJumpStatus().drive%destination.size()]));
   }
