@@ -148,10 +148,11 @@ bool Unit::Dock (Unit * utdw) {
 	docked|= DOCKED;
       }
       image->DockedTo.SetUnit (utdw);
+      computer.set_speed=0;
       if (this==_Universe->AccessCockpit()->GetParent()) {
 	_Universe->AccessCockpit()->RestoreGodliness();
       }
-
+      
       return true;
     }
   }
