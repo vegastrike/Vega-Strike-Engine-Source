@@ -78,7 +78,6 @@ private:
   virtual Camera *AccessHudCamera() { return NULL; }
   ///Wrapper function for star system
   virtual void SetViewport() {}
-  virtual int numPlayers () {return 0;}
   void SetActiveCockpit (int whichcockpit);
   void SetActiveCockpit (Cockpit * which);
   virtual void WriteSaveGame(bool auto_save) {}
@@ -133,7 +132,7 @@ private:
   ///Accessor to cockpit
   //unsigned int CurrentCockpit(){return current_cockpit;}
   //Cockpit *AccessCockpit() {return cockpit[current_cockpit];}
-  //int numPlayers () {return cockpit.size();}
+  int numPlayers () {return cockpit.size();}
   //Cockpit *AccessCockpit (int i) {return cockpit[i];}
   ///Wrapper function for Star System
   /*

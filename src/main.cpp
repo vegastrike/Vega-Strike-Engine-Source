@@ -95,13 +95,14 @@ void cleanup(void)
 	if( Network!=NULL)
 	{
 		for( int i=0; i<_Universe->numPlayers(); i++)
-			Network[i].logout();
+				Network[i].logout();
 		delete [] Network;
 	}
 
   STATIC_VARS_DESTROYED=true;
   printf ("Thank you for playing!\n");
-  _Universe->WriteSaveGame(true);
+  if( _Universe != NULL)
+	  _Universe->WriteSaveGame(true);
   winsys_shutdown();
   //    write_config_file();
   AUDDestroy();
@@ -362,23 +363,47 @@ void bootstrap_main_loop () {
     mission->GetOrigin(pos,planetname);
     bool setplayerloc=false;
     string mysystem = mission->getVariable("system","sol.system");
-    int numplayers = XMLSupport::parse_int (mission->getVariable ("num_players","1"));
+	string srvip = vs_config->getVariable("network","server_ip","");
+	string nbplayers = vs_config->getVariable("network","nbplayers","1");
+	int numplayers;
+	/* Test if nb players if present in netwokr section */
+	if( srvip != "" && nbplayers != "")
+	{
+		numplayers = atoi( nbplayers.c_str());
+	}
+	else
+	{
+		numplayers = XMLSupport::parse_int (mission->getVariable ("num_players","1"));
+	}
     vector <std::string>playername;
     vector <std::string>playerpasswd;
+	string pname, ppasswd;
     for (int p=0;p<numplayers;p++) {
-      playername.push_back(vs_config->getVariable("player"+((p>0)?tostring(p+1):string("")),"callsign",""));
-	  playerpasswd.push_back(vs_config->getVariable("player"+((p>0)?tostring(p+1):string("")),"password",""));
+	  pname = vs_config->getVariable("player"+((p>0)?tostring(p+1):string("")),"callsign","");
+	  ppasswd = vs_config->getVariable("player"+((p>0)?tostring(p+1):string("")),"password","");
+	  if ( srvip != "")
+	  {
+		  // In network mode, test if all player sections are present
+		  if( pname=="")
+		  {
+			  cout<<"Missing or incomlpete section for player "<<p<<endl;
+		      cleanup();
+			  exit(1);
+		  }
+	  }
+      playername.push_back( pname);
+	  playerpasswd.push_back(ppasswd);
     }
+    _Universe->SetupCockpits(playername);
 
 	/************************* NETWORK INIT ***************************/
-	cout<<"Number of local players = "<<numplayers<<endl;
+	cout<<"Number of local players = "<<_Universe->numPlayers()<<endl;
 	// Initiate the network if in networking play mode for each local player
-	string srvip = vs_config->getVariable("network","server_ip","");
 	if( srvip != "")
 	{
 		string srvport = vs_config->getVariable("network","server_port", "6777");
 		// Get the number of local players
-		Network = new NetClient[numplayers];
+		Network = new NetClient[_Universe->numPlayers()];
 
 		cout<<endl<<"Server IP : "<<srvip<<" - port : "<<srvport<<endl<<endl;
 		char * srvipadr = new char[srvip.length()+1];
@@ -401,14 +426,16 @@ void bootstrap_main_loop () {
 			//sleep( 3);
 			cout<<"Waiting for player "<<(nbii+1)<<" = "<<(*i)<<":"<<(*j)<<"login response...";
 			nbok = Network[nbii].loginLoop( (*i), (*j));
-			if( !nbok)
+			if( nbok==0)
 			{
 				cout<<"No server response, exiting"<<endl;
+				cleanup();
 				exit(1);
 			}
 			else if( nbok==-1)
 			{
 				cout<<"Cannot connect to server"<<endl;
+				cleanup();
 				exit(1);
 			}
 			else
@@ -422,7 +449,6 @@ void bootstrap_main_loop () {
 	}
 	/************************* NETWORK INIT ***************************/
 
-    _Universe->SetupCockpits(playername);
     float credits=XMLSupport::parse_float (mission->getVariable("credits","0"));
     g_game.difficulty=XMLSupport::parse_float (mission->getVariable("difficulty","1"));
     string savegamefile = mission->getVariable ("savegame","");
@@ -511,7 +537,7 @@ void bootstrap_main_loop () {
 	cout<<"Loading completed"<<endl;
 	// Send a network msg saying we are ready
 	if( Network!=NULL) {
-		for( int l=0; l<numplayers; l++)
+		for( int l=0; l<_Universe->numPlayers(); l++)
 			Network[l].inGame();
 	}
 

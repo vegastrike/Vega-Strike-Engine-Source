@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include "cmd/unit_generic.h"
 #include "const.h"
+#include <assert.h>
 
 using std::cout;
 using std::endl;
@@ -52,6 +53,12 @@ class Account
 
 		// Assume player has created ship/char -> to remove in the future
 		Account() { haschar=1; connected=false; };
+		Account( char * sname, char * spasswd)
+		{
+			assert( strlen( name)<NAMELEN && strlen( passwd)<NAMELEN);
+			strcpy( name, sname);
+			strcpy( passwd, spasswd);
+		}
 
 		void	display();
 		short	isNew() { return !haschar;}
@@ -59,16 +66,30 @@ class Account
 
 		ObjSerial	getSerial() { return this->serial;}
 		void		setSerial( ObjSerial sernum) { this->serial = sernum;}
+		void		set( char * sname, char * spasswd)
+		{
+			assert( strlen( name)<NAMELEN && strlen( passwd)<NAMELEN);
+			strcpy( name, sname);
+			strcpy( passwd, spasswd);
+		}
 
 		int		compareName( char *str)
 		{
-			//cout<<"Name : "<<name<<" - compared to : "<<str<<endl;
-			return strncmp( name, str, strlen( name));
+			int ret = 0;
+			cout<<"Name compared to : "<<this->name;
+			ret=strncmp( name, str, strlen( name));
+			if( ret)
+				cout<<endl;
+			else
+				cout<<" - ";
+			return ret;
 		}
 		int		comparePass( char *str)
 		{
-			//cout<<"Pass : "<<passwd<<" - compared to : "<<str<<endl;
-			return strncmp( passwd, str, strlen( passwd));
+			int ret = 0;
+			cout<<"Passwd compared to : "<<this->passwd;
+			ret=strncmp( passwd, str, strlen( passwd));
+			return ret;
 		}
 		int		isConnected()
 		{

@@ -116,7 +116,7 @@ int		NetClient::loginLoop( string str_name, string str_passwd)
 	}
 	delete buffer;
 	// Now the loop
-	int timeout=0, recv=0;
+	int timeout=0, recv=0, ret=0;
 	UpdateTime();
 	while( !timeout && !recv)
 	{
@@ -126,10 +126,16 @@ int		NetClient::loginLoop( string str_name, string str_passwd)
 			cout<<"Timed out"<<endl;
 			timeout = 1;
 		}
-		if( this->checkMsg())
+		ret=this->checkMsg();
+		if( ret>0)
 		{
 			cout<<"Got a response"<<endl;
 			recv = 1;
+		}
+		else if( ret<0)
+		{
+			cout<<"Error, dead connection to server"<<endl;
+			recv=-1;
 		}
 
 		micro_sleep( 40000);
@@ -289,7 +295,10 @@ int		NetClient::recvMsg()
 	int len=0;
 
 	if( (len=Network->recvbuf( this->clt_sock, (char *)&packet, len2, &this->cltadr))<=0)
+	{
+		perror( "Error recv -1 ");
 		Network->closeSocket( this->clt_sock);
+	}
 	else
 	{
 		packet.received();
@@ -702,7 +711,7 @@ void	NetClient::logout()
 	if( Network->sendbuf( this->clt_sock, (char *) &p, p.getSendLength(), &this->cltadr) == -1)
 	{
 		perror( "Error send logout ");
-		exit(1);
+		//exit(1);
 	}
 	Network->disconnect( "Closing network");
 }

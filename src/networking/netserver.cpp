@@ -55,9 +55,9 @@ NetServer::NetServer()
 	this->srvtimeout.tv_usec = 0;
 	/***** number of zones should be determined as server loads zones files *****/
 	zonemgr = new ZoneMgr( 10);
-	// Here 500 could be something else between 1 and 0xFFFF
 	UpdateTime();
 	srand( (unsigned int) getNewTime());
+	// Here 500 could be something else between 1 and 0xFFFF
 	serial_seed = (ObjSerial) (rand()*(500./(((double)(RAND_MAX))+1)));
 }
 
@@ -165,9 +165,9 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		// Write temp XML file for unit
 		string tmp;
 		tmp = tmpdir+name+".xml";
-		//WriteXMLUnit( tmp.c_str(), xml, xml_size);
+		WriteXMLUnit( tmp.c_str(), xml, xml_size);
 		// Then load it in the Unit struct
-		//LoadXMLUnit( clt->game_unit, tmp.c_str(), NULL);
+		LoadXMLUnit( clt->game_unit, tmp.c_str(), NULL);
 		packet2.create( LOGIN_ACCEPT, clt->serial, xml, xml_size, 1);
 		//cout<<" 1st packet -------------"<<endl;
 		//packet2.displayHex();
@@ -635,13 +635,11 @@ void	NetServer::recvMsg( Client * clt)
 	unsigned int ts = 0;
 	//unsigned int tstmp = 0;
 
-#ifdef _USP_PROTO
 	// This should only happen in UDP mode
 	if( clt!=NULL)
 	{
 		sockclt = clt->sock;
 	}
-#endif
 
 	if( (len=Network->recvbuf( sockclt, (char *)&packet, len2, &ipadr))<=0)
 	{

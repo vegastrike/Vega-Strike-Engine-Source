@@ -9,6 +9,7 @@ string acctdir;
 
 AccountServer::AccountServer()
 {
+	cout<<"AccountServer init"<<endl;
 	Network = new TCPNetUI();
 	newaccounts = 0;
 	UpdateTime();
@@ -73,6 +74,11 @@ void	AccountServer::start()
 	LoadAccounts( "accounts.xml");
 	// Gets hashtable accounts elements and put them in vector Cltacct
 	Cltacct = getAllAccounts();
+	if(Cltacct.size()<=0)
+	{
+		cout<<"No account found in accounts.xml"<<endl;
+		exit(1);
+	}
 	cout<<Cltacct.size()<<" accounts loaded."<<endl;
 
 	// Create and bind socket
@@ -194,7 +200,9 @@ void	AccountServer::recvMsg( TCPSOCKET sock)
 					else
 					{
 						cout<<"Login/passwd not found"<<endl;
+						elem = new Account( name, passwd);
 						this->sendUnauthorized( sock, elem);
+						delete elem;
 					}
 				}
 				else

@@ -59,9 +59,14 @@ class NETCLASS
 			srvtimeout.tv_sec = 0;
 			srvtimeout.tv_usec = 0;
 	#if defined(_WIN32) && !defined(__CYGWIN__)
+	  cout<<"Initializing Winsock"<<endl;
 	  WORD wVersionRequested = MAKEWORD( 1, 1 );
 	  WSADATA wsaData; 
-	  WSAStartup(wVersionRequested,&wsaData);
+	  int res = WSAStartup(wVersionRequested,&wsaData);
+	  if( res != 0)
+		  cout<<"Error initializing Winsock"<<endl;
+	#else
+		cout<<"Not win32 VC++"<<endl;
 	#endif
 #endif
 		}
@@ -332,6 +337,7 @@ inline SOCKETALT	NETCLASS::createSocket( char * host, unsigned short port, int s
 			}
 			cout<<"Connected to "<<inet_ntoa( this->srv_ip.sin_addr)<<" on port "<<srv_port<<endl;
 		}
+		this->max_sock = this->sock;
 #endif
 		ret=this->sock;
 		cout<<"SOCKETALT n° : "<<ret<<endl;
@@ -411,13 +417,18 @@ inline SOCKETALT	NETCLASS::acceptNewConn( AddressIP * ipadr)
 #else
 			socklen_t len;
 #endif
-
+			len = sizeof( struct sockaddr);
 			FD_ZERO( &conn_set);
 			FD_SET( this->sock, &conn_set);
 			if( (s = select( (this->sock)+1, &conn_set, NULL, NULL, &this->srvtimeout)) == SOCKET_ERROR )
 			{
-				cout<<"Socket used : "<<this->sock<<endl;
+#if defined(_WIN32) && !defined(__CYGWIN__)
+				if( WSAGetLastError()!=WSAEINVAL)
+					cout<<"WIN32 error : "<<WSAGetLastError()<<endl;
+#else
+				cout<<"Select accept new connection failed, descriptor = "<<(this->sock)<<endl;
 				perror( "Select failed : ");
+#endif
 				ret = 0;
 			}
 			if( s > 0)
@@ -426,7 +437,11 @@ inline SOCKETALT	NETCLASS::acceptNewConn( AddressIP * ipadr)
 					ret = bsock;
 				else
 				{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+					cout<<"WIN32 error : "<<WSAGetLastError()<<endl;
+#else
 					printf("Error accepting new conn\n");
+#endif
 					ret = 0;
 				}
 			}
@@ -465,14 +480,15 @@ inline void	NETCLASS::watchSocket( SOCKET bsock)
 	#endif
 #else
 	// Now bsock is used to check client's descriptors (contains the max desc)
-	FD_SET( bsock, &client_set);
 	#ifdef _TCP_PROTO
 		if( bsock > max_sock)
 			max_sock = bsock;
 	#else
 		if( bsock < this->sock)
 			bsock = this->sock;
+		//cout<<"NETUI : watching descriptor "<<bsock<<endl;
 	#endif
+	FD_SET( bsock, &client_set);
 #endif
 }
 
@@ -486,9 +502,14 @@ inline int		NETCLASS::activeSockets()
 			int ret = 0;
 #ifndef HAVE_SDLnet
 			int s;
-			if( (s = select( max_sock+1, &client_set, NULL, NULL, &srvtimeout))<0)
+			if( (s = select( (this->max_sock)+1, &client_set, 0, 0, &this->srvtimeout)) == SOCKET_ERROR )
 			{
-				cout<<"Select conn failed"<<endl;
+#if defined(_WIN32) && !defined(__CYGWIN__)
+				if( WSAGetLastError()!=WSAEINVAL)
+					cout<<"WIN32 error : "<<WSAGetLastError()<<endl;
+#else
+				cout<<"Select conn failed, descriptor = "<<(this->max_sock+1)<<endl;
+#endif
 				return -1;
 			}
 			if( s > 0)
@@ -579,14 +600,20 @@ inline int		NETCLASS::recvbuf( SOCKETALT bsock, char *buffer, unsigned int &len,
 			socklen_t len1;
 #endif
 		// In UDP mode, always receive data on sock
+		len1 = sizeof( struct sockaddr);
 		if( (ret = recvfrom( this->sock, buffer, MAXBUFFER, 0, (sockaddr *) from, &len1)) <= 0)
 		{
 			cout<<"Received "<<ret<<" bytes : "<<buffer<<endl;
+#if defined(_WIN32) && !defined(__CYGWIN__)
+			cout<<"WIN32 error : "<<WSAGetLastError()<<endl;
+#else
 			//getIPof( *from);
 			perror( "Error receiving ");
+#endif
 			ret = -1;
 		}
 		len = len1;
+		cout<<"NETUI : Recvd "<<len<<" bytes"<<" <- "<<inet_ntoa( from->sin_addr)<<":"<<ntohs(from->sin_port)<<endl;
 		#endif
 	#endif
 	//cout<<"Received "<<ret<<" bytes"<<endl;
@@ -662,12 +689,18 @@ inline int		NETCLASS::sendbuf( SOCKETALT bsock, void *buffer, unsigned int len, 
 		if( (numsent = sendto( this->sock, buffer, len, 0, (sockaddr *) dest, sizeof( struct sockaddr)))<0)
 #endif
 		{
-			perror( "Error sending data ");
+#if defined(_WIN32) && !defined(__CYGWIN__)
+				if( WSAGetLastError()!=WSAEINVAL)
+					cout<<"WIN32 error : "<<WSAGetLastError()<<endl;
+#else
+			//getIPof( *from);
+			perror( "Error sending ");
+#endif
 			return -1;
 		}
+		cout<<"NETUI : Sent "<<numsent<<" bytes"<<" -> "<<inet_ntoa( dest->sin_addr)<<":"<<ntohs(dest->sin_port)<<endl;
 		#endif
 	#endif
-	//cout<<"Sent "<<numsent<<" bytes"<<endl; // to "<<inet_ntoa( srv_ip.sin_addr)<<" on port "<<ntohs(srv_ip.sin_port)<<endl;
 	return 0;
 }
 
@@ -697,7 +730,7 @@ inline void	NETCLASS::disconnect( char *s)
 	}
 	cout<<s<<" :\t";
 	perror( "Warning: disconnected");
-	exit(1);
+	//exit(1);
 }
 
 inline void	NETCLASS::showIP( SOCKET socket)

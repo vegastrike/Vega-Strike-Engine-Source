@@ -78,11 +78,6 @@ void GameUniverse::Init( int argc, char** argv, const char * galaxy)
 	this->Universe::Init();
 	this->galaxy = new GalaxyXML::Galaxy (galaxy);
 }
-void GameUniverse::SetupCockpits(vector  <string> playerNames) {
-	for (unsigned int i=0;i<playerNames.size();i++) {
-	  cockpit.push_back( new GameCockpit ("",NULL,playerNames[i]));
-	}
-}
 GameUniverse::GameUniverse(int argc, char** argv, const char * galaxy)
 {
 	this->Init( argc, argv, galaxy);
@@ -98,6 +93,12 @@ GameUniverse::~GameUniverse()
   GFXShutdown();
 }
 //sets up all the stuff... in this case the ships to be rendered
+
+void GameUniverse::SetupCockpits(vector  <string> playerNames) {
+	for (unsigned int i=0;i<playerNames.size();i++) {
+	  cockpit.push_back( new GameCockpit ("",NULL,playerNames[i]));
+	}
+}
 
 void GameUniverse::activateLightMap() {
 	getActiveStarSystem(0)->activateLightMap();
