@@ -387,7 +387,7 @@ void StarSystem::LoadXML(const char *filename) {
 //  shield.number=0;
   const int chunk_size = 16384;
  // rrestricted=yrestricted=prestricted=false;
-  FILE * inFile = fopen (filename, "r+b");
+  FILE * inFile = fopen (filename, "r");
   if(!inFile) {
     assert(0);
     return;
@@ -398,7 +398,7 @@ void StarSystem::LoadXML(const char *filename) {
   xml->numnearstars=4000;
   xml->numstars=800;
   xml->backgroundname = string("cube");
-  xml->reflectivity=.5;
+  xml->reflectivity=.7;
   xml->unitlevel=0;
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
@@ -421,7 +421,7 @@ void StarSystem::LoadXML(const char *filename) {
 	LightMap[4]=new Texture ((xml->backgroundname+"_front_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Z);
 	LightMap[5]=new Texture ((xml->backgroundname+"_back_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Z);
 #else
-	FILE * tempo = fopen ((xml->backgroundname+"_light.bmp").c_str(),"r+b");
+	FILE * tempo = fopen ((xml->backgroundname+"_light.bmp").c_str(),"rb");
 	if (!tempo) {
 		EnvironmentMapGeneratorMain (xml->backgroundname.c_str(),(xml->backgroundname+"_light").c_str(), 0,xml->reflectivity,1);
 	}else {

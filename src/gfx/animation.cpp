@@ -48,7 +48,7 @@ Animation::Animation (char * FileName, bool Rep,  float priority,enum FILTER ism
 	char tempalp [256];
 	float alp;
 	int zeroval;
-	FILE * fp = fopen (FileName, "r+b");
+	FILE * fp = fopen (FileName, "r");
 	if (!fp)
 		; // do something 
 	fscanf (fp,"%d %f",&numframes,&timeperframe);

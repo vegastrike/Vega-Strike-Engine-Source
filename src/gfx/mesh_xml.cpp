@@ -943,7 +943,7 @@ const bool FLAT_SHADE=true;
 void Mesh::LoadXML(const char *filename) {
   const int chunk_size = 16384;
   
-  FILE* inFile = fopen (filename, "r+b");
+  FILE* inFile = fopen (filename, "r");
   if(!inFile) {
     assert(0);
     return;

@@ -155,7 +155,7 @@ static void GenerateLightMap ()
 
 
 
-	FILE * fp = fopen ("blank.bmp", "r+b");
+	FILE * fp = fopen ("blank.bmp", "rb");
 	BITMAPFILEHEADER bmfh;
 	fread (&bmfh,SIZEOF_BITMAPFILEHEADER,1,fp);
 	long temp;
@@ -164,7 +164,7 @@ static void GenerateLightMap ()
 	fclose (fp);
 	char tmp [256];
 	strcpy (tmp,OutputName);
-	fp = fopen (strcat (tmp,"1.bmp"), "w+b");
+	fp = fopen (strcat (tmp,"1.bmp"), "wb");
 	fwrite (&bmfh,SIZEOF_BITMAPFILEHEADER,1,fp);
 	fwrite (&info, SIZEOF_BITMAPINFOHEADER,1,fp);
 	fwrite (LightMap,256*256*3,1,fp);
@@ -270,7 +270,7 @@ static bool LoadTex(char * FileName, unsigned char scdata [256][256][3]){
 
   unsigned char ctemp;
   FILE *fp = NULL;
-  fp = fopen (FileName, "r+b");
+  fp = fopen (FileName, "rb");
 	if (!fp)
 	{
 		return false;
@@ -666,7 +666,7 @@ static void GenerateSphereMap()
 
 
 	/** used to determine the consts
-	FILE * fp = fopen ("blank.bmp", "r+b");
+	FILE * fp = fopen ("blank.bmp", "rb");
 	
 	fread (&bmfh,SIZEOF_BITMAPFILEHEADER,1,fp);
 	long temp;
@@ -689,7 +689,7 @@ static void GenerateSphereMap()
 
 	char tmp [256];
 	strcpy (tmp,OutputName);
-	fp = fopen (strcat (tmp,".bmp"), "w+b");
+	fp = fopen (strcat (tmp,".bmp"), "wb");
 	fwrite (&bmfh,SIZEOF_BITMAPFILEHEADER,1,fp);
 	fwrite (&info, SIZEOF_BITMAPINFOHEADER,1,fp);
 	fwrite (LightMap,256*256*3,1,fp);
@@ -768,7 +768,7 @@ static void GenerateTexMap ()
 	}
 	char tmp [256]="";
 	strcpy (tmp,OutputName);
-	FILE * fp = fopen (strcat (tmp,".bmp"), "w+b");
+	FILE * fp = fopen (strcat (tmp,".bmp"), "wb");
 	fwrite (Disc,256*256*3,1,fp);
 	fclose (fp);
 	delete [] Disc;	

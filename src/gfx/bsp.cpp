@@ -20,6 +20,7 @@
  */
 #include <stdio.h>
 #include "bsp.h"
+#include "file_main.h"
 #include <float.h>
 //All or's are coded with the assumption that the inside of the object has a much bigger impact than the outside of the object when both need to be analyzed
 
@@ -144,16 +145,16 @@ BSPTree::BSPTree(const char *filename) {
   BSPDiskNode *nodes = new BSPDiskNode[numRecords];
   BSPDiskNode * tmpnode;
   for(int a=0; a<numRecords; a++) {
-    fread(&nodes[a].x, sizeof(float), 1, fp);
-    fread(&nodes[a].y, sizeof(float), 1, fp);
-    fread(&nodes[a].z, sizeof(float), 1, fp);
-    fread(&nodes[a].d, sizeof(float), 1, fp);
+    nodes[a].x= readf (fp);
+    nodes[a].y= readf (fp);
+    nodes[a].z= readf (fp);
+    nodes[a].d= readf (fp);
     nodes[a].isVirtual = false;
     char byte;
-    fread(&byte, 1, 1, fp);
+    byte = readc (fp);
     if(byte) nodes[a].hasFront = true;
     else nodes[a].hasFront = false;
-    fread(&byte, 1, 1, fp);
+    byte = readc (fp);
     if(byte) nodes[a].hasBack = true;
     else nodes[a].hasBack = false;
   }

@@ -24,7 +24,7 @@ void Mesh::LoadBinary (const char * filename) {
 
 	FILE* fp = NULL;
 	int jj;
-	fp = fopen (filename, "r+b");
+	fp = fopen (filename, "rb");
 	if (!fp)
 	{
 	  fprintf (stderr,"Failed to load file %s",filename);

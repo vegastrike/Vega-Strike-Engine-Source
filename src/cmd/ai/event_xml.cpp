@@ -89,7 +89,7 @@ namespace AIEvents {
   void LoadAI(const char * filename, ElemAttrMap &result) {
     const int chunk_size = 16384;
     result.curtime=result.maxtime=10/SIMULATION_ATOM;
-    FILE * inFile = fopen (filename, "r+b");
+    FILE * inFile = fopen (filename, "r");
     if(!inFile) {
       assert(0);
       return;

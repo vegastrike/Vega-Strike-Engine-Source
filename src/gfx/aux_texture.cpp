@@ -137,7 +137,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
   image_target=imagetarget;
   this->stage = stage;
 	FILE *fp = NULL;
-	fp = fopen (FileName, "r+b");
+	fp = fopen (FileName, "rb");
 	if (!fp)
 	{
 	  fprintf (stderr, "%s, not found",FileName);
@@ -160,7 +160,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	t[strlen(FileName)-3] = 'a';
 	t[strlen(FileName)-2] = 'l';
 	t[strlen(FileName)-1] = 'p';
-	FILE *fp2 = fopen(t, "r+b");
+	FILE *fp2 = fopen(t, "rb");
 
 	string texfilename = string(FileName);
 	
@@ -242,7 +242,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	texture_target=target;
 	image_target=imagetarget;
 	FILE *fp = NULL;
-	fp = fopen (FileNameRGB, "r+b");
+	fp = fopen (FileNameRGB, "rb");
 	if (!fp)
 	{
 		data = NULL;
@@ -268,7 +268,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 
 	if (FileNameA)
 	{
-		fp1 = fopen (FileNameA, "r+b");
+		fp1 = fopen (FileNameA, "rb");
 		if (!fp1)
 		{
 			data = NULL;

@@ -232,7 +232,7 @@ void Universe::Faction::ParseAllies () {
 void Universe::Faction::LoadXML(const char * filename) {
   unitlevel=0;
   const int chunk_size = 16384;
-  FILE * inFile = fopen (filename, "r+b");
+  FILE * inFile = fopen (filename, "r");
   if(!inFile) {
 	assert(0);
 	return;

@@ -322,7 +322,7 @@ weapon_info* getTemplate(const string &key) {
 
 void LoadWeapons(const char *filename) {
   const int chunk_size = 16384;
-  FILE * inFile= fopen (filename,"r+b");
+  FILE * inFile= fopen (filename,"r");
   if (!inFile) {
     return;
   }

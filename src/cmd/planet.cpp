@@ -113,7 +113,7 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
   tmpname +=temp;
   tmpname +=".bsp";
   
-  FILE * fp = fopen (tmpname.c_str(), "r+b");
+  FILE * fp = fopen (tmpname.c_str(), "rb");
   if (!fp) {
     meshdata[1]= new SphereMesh (radius,8,8,textname, alpha);
     BuildBSPTree (tmpname.c_str(),true,meshdata[1]);

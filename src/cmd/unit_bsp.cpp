@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "endianness.h"
 #ifndef PROPHECY
 #include "gfx/mesh.h"
 #include "unit.h"
@@ -236,11 +237,13 @@ void Unit::BuildBSPTree(const char *filename, bool vplane, Mesh * hull) {
  
  bsp = buildbsp (bsp,tri,triplane, vplane?VPLANE_ALL:0);
  if (bsp) {
-   o = fopen (filename, "w+b");
-   write_bsp_tree(bsp,0);
-   fclose (o);
-   bsp_stats (bsp);
-   FreeBSP (&bsp);
+   o = fopen (filename, "wb");
+   if (o) {
+     write_bsp_tree(bsp,0);
+     fclose (o);
+     bsp_stats (bsp);
+     FreeBSP (&bsp);
+   }
  }	
 
 }
@@ -401,7 +404,7 @@ int main(int argc, char * argv) {
  }
  bsp = buildbsp (bsp,tri,triplane, 0);
  if (bsp) {
-   o = fopen ("output.bsp", "w+b");
+   o = fopen ("output.bsp", "wb");
    write_bsp_tree(bsp,0);
    fclose (o);
    bsp_stats (bsp);
@@ -740,8 +743,8 @@ printf ("}\n");
 }
 
 
-static void wrtf (float f) {fwrite (&f,sizeof (float),1,o);}
-static void wrtb (bool b) {fwrite (&b,sizeof (bool),1,o);}
+static void wrtf (float f) {f = le32_to_cpu(f); fwrite (&f,sizeof (float),1,o);}
+static void wrtb (const bool b) {fwrite (&b,sizeof (bool),1,o);}
 
 static void write_bsp_tree (bsp_tree *tree,int level)//assume open file
 {

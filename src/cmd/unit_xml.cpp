@@ -705,7 +705,7 @@ void Unit::LoadXML(const char *filename) {
   shield.number=0;
   const int chunk_size = 16384;
  // rrestricted=yrestricted=prestricted=false;
-  FILE * inFile = fopen (filename, "r+b");
+  FILE * inFile = fopen (filename, "r");
   if(!inFile) {
     assert(0);
     return;
@@ -771,7 +771,7 @@ fclose (inFile);
 
   if (xml->shieldmesh) {
     meshdata[nummesh] = xml->shieldmesh;
-    FILE * fp = fopen ((tmpname+"_shield.bsp").c_str(),"r+b");
+    FILE * fp = fopen ((tmpname+"_shield.bsp").c_str(),"rb");
     if (!fp) {
       BuildBSPTree ((tmpname+"_shield.bsp").c_str(), false, meshdata[nummesh]);
     }else {
@@ -787,13 +787,13 @@ fclose (inFile);
   meshdata[nummesh]->EnableSpecialFX();
   if (xml->hasBSP) {
     tmpname += ".bsp";
-    FILE * fp = fopen (tmpname.c_str(),"r+b");
+    FILE * fp = fopen (tmpname.c_str(),"rb");
     if (!fp) {
       BuildBSPTree (tmpname.c_str(), false, xml->bspmesh);
     }else {
       fclose (fp);
     }
-    fp = fopen (tmpname.c_str(),"r+b");
+    fp = fopen (tmpname.c_str(),"rb");
     if (fp) {
       fclose (fp);
       bspTree = new BSPTree (tmpname.c_str());
