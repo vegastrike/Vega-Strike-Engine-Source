@@ -73,9 +73,16 @@ GFXVertexList::GFXVertexList(int numVertices,int numTriangle, int numQuad, GFXVe
 		
 	//glDrawArrays(GL_TRIANGLES, 0, numTriangles*3);
 	//glDrawArrays(GL_QUADS, numTriangles*3, numQuads*4);
-
+	int a;
 	glBegin(GL_TRIANGLES);
-	for(int a=0; a<numTriangles*3; a++) {
+	for(a=0; a<numTriangles*3; a++) {
+	  glNormal3f(myVertices[a].i,myVertices[a].j,myVertices[a].k);
+	  glTexCoord2f(myVertices[a].s, myVertices[a].t);
+	  glVertex3f(myVertices[a].x,myVertices[a].y,myVertices[a].z);
+	}
+	glEnd();
+	glBegin (GL_QUADS);
+	for(a=numTriangles*3; a<numTriangles*3+numQuads*4; a++) {
 	  glNormal3f(myVertices[a].i,myVertices[a].j,myVertices[a].k);
 	  glTexCoord2f(myVertices[a].s, myVertices[a].t);
 	  glVertex3f(myVertices[a].x,myVertices[a].y,myVertices[a].z);

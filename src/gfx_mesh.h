@@ -103,13 +103,16 @@ private:
     int vertex_state;
 
     string decal_name;
-
+    bool recalc_norm;
     int num_vertices;
     vector<GFXVertex> vertices;
+    vector<int>vertexcount;//keep count to make averaging easy 
     vector<GFXVertex> tris;
     vector<GFXVertex> quads;
-
+    vector<int> triind;//for possible normal computation
+    vector<int> quadind;
     vector<GFXVertex> *active_list;
+    vector<int> *active_ind;
     GFXVertex vertex;
   } *xml;
 

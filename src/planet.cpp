@@ -40,7 +40,7 @@ void Planet::InitPlanet(FILE *fp) {
   fscanf(fp, "%f %f\n", &orbital_velocity, &orbital_position);
   SetAI(new PlanetaryOrbit(this, orbital_velocity, orbital_position, x_axis, y_axis));
 
-  cerr << texname << " " << orbital_position << endl;
+  //  cerr << texname << " " << orbital_position << endl;
 
   fscanf(fp, "%d\n", &numSatellites);
   satellites = new Planet*[numSatellites];
@@ -71,7 +71,7 @@ Planet::Planet(char *filename) : Unit(), radius(0.0f), origin(0,0,0), satellites
   FILE *fp = fopen(filename, "r");
   InitPlanet(fp);
   SetAI(new AI()); // no behavior
-  cerr << "\nPlanet: " << this << endl;
+  //cerr << "\nPlanet: " << this << endl;
   fclose(fp);
 }
 

@@ -558,7 +558,7 @@ Vector MouseCoordinate (int x, int y, float zplane) {
   xyz.j=zplane*(-2.*y/g_game.y_resolution+1) /*  *g_game.MouseSensitivityY*/  *GFXGetYInvPerspective();
 
   mouseline = xyz;
-  cerr << "mouseline: " << mouseline << endl;
+  //cerr << "mouseline: " << mouseline << endl;
   return xyz;
 }
 
@@ -577,7 +577,7 @@ bool Unit::querySphere (int mouseX, int mouseY, float err, Camera * activeCam) {
 
   Vector CamP,CamQ,CamR;
   for (i=0;i<nummesh;i++) {
-    cerr << "pretransform position: " << meshdata[i]->Position() << endl;
+    //cerr << "pretransform position: " << meshdata[i]->Position() << endl;
     TargetPoint = Transform(transformation,meshdata[i]->Position());
     
     mousePoint = Transform (vw,TargetPoint);
@@ -627,7 +627,7 @@ bool Unit::querySphere (Matrix t,int mouseX, int mouseY, float err, Camera * act
 #endif
   Vector CamP,CamQ,CamR;
   for (i=0;i<nummesh;i++) {
-    cerr << "pretransform position: " << meshdata[i]->Position() << endl;
+    //cerr << "pretransform position: " << meshdata[i]->Position() << endl;
     TargetPoint = Transform (tmpo,meshdata[i]->Position());
     mousePoint = Transform (vw,TargetPoint);
     if (mousePoint.k>0)
@@ -818,7 +818,7 @@ void Unit::DrawBoundingBox() {
   glLoadMatrixf(view);
   glMultMatrixf(transformation);
 
-  cerr << "Bounding box eye coordinates for " << name << ": " << Vector(corner_max.i,corner_min.j,corner_max.k).Transform(transformation).Transform(view) << ", " << Vector(corner_min.i,corner_max.j,corner_max.k).Transform(transformation).Transform(view) << endl;
+  //cerr << "Bounding box eye coordinates for " << name << ": " << Vector(corner_max.i,corner_min.j,corner_max.k).Transform(transformation).Transform(view) << ", " << Vector(corner_min.i,corner_max.j,corner_max.k).Transform(transformation).Transform(view) << endl;
   
   realDrawBoundingBox();
 }

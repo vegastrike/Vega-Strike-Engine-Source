@@ -182,12 +182,17 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	assert(0);
       }
     }
-    assert(xml->point_state & (XML::P_I |
+    if (xml->point_state & (XML::P_I |
 			       XML::P_J |
-			       XML::P_K) == 
+			       XML::P_K) != 
 	   (XML::P_I |
 	    XML::P_J |
-	    XML::P_K) );
+	    XML::P_K) ) {
+      if (!xml->recalc_norm) {
+	cerr.form ("Invalid Normal Data for point: <%f,%f,%f>\n",xml->vertex.x,xml->vertex.y, xml->vertex.z); 
+	xml->recalc_norm=true;
+      }
+    }
     break;
   case XML::POLYGONS:
     assert(top==XML::MESH);
@@ -201,6 +206,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 
     xml->num_vertices=3;
     xml->active_list = &xml->tris;
+    xml->active_ind = &xml->triind;
     break;
   case XML::QUAD:
     assert(top==XML::POLYGONS);
@@ -208,6 +214,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 
     xml->num_vertices=4;
     xml->active_list = &xml->quads;
+    xml->active_ind = &xml->quadind;
     break;
   case XML::VERTEX:
     assert(top==XML::TRI || top==XML::QUAD);
@@ -250,12 +257,14 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 
     memset(&xml->vertex, 0, sizeof(xml->vertex));
     xml->vertex = xml->vertices[index];
+    xml->vertexcount[index]+=1;
     xml->vertex.x *= scale;
     xml->vertex.y *= scale;
     xml->vertex.z *= scale;
     xml->vertex.s = s;
     xml->vertex.t = t;
     xml->active_list->push_back(xml->vertex);
+    xml->active_ind->push_back(index);
     xml->num_vertices--;
     break;
   default:
@@ -288,6 +297,7 @@ void Mesh::endElement(const string &name) {
 	    XML::P_J |
 	    XML::P_K) );
     xml->vertices.push_back(xml->vertex);
+    xml->vertexcount.push_back(0);
     break;
   case XML::POINTS:
     xml->load_stage = 3;
@@ -350,7 +360,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
 
   xml = new XML;
   xml->load_stage = 0;
-
+  xml->recalc_norm=false;
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &Mesh::beginElement, &Mesh::endElement);
