@@ -2875,12 +2875,33 @@ bool BaseComputer::changeToPlayerInfoMode(const EventCommandId& command, Control
     return true;
 }
 
+// Faction colors 2-Sept-03.  mbyron.
+/*
+ 0. r=0.5 g=0.5 b=1
+ 1. r=0 g=0 b=1
+ 2. r=0 g=1 b=0
+ 3. r=0.5 g=0.5 b=1
+ 4. r=0.75 g=0.5 b=0.25
+ 5. r=0 g=0.5 b=1
+ 6. r=0.5 g=0 b=1
+ 7. r=0.5 g=0.5 b=1
+ 8. r=0.5 g=0.5 b=1
+ 9. r=1 g=0.5 b=0
+10. r=0.4 g=0.2 b=0.7
+11. r=1 g=1 b=1
+12. r=0.5 g=0.5 b=1
+13. r=1 g=0 b=0
+14. r=0.5 g=0.5 b=1
+*/
 
 // Given a faction number, return a PaintText color command for the faction.
 // This lightens up the faction colors to make them more easily seen on the dark background.
 static std::string factionColorTextString(int faction) {
 		// The following gets the spark (faction) color.
 		const float *spark = FactionUtil::GetSparkColor(faction);
+
+		// This line puts the faction colors on the std out.
+		// printf("%2d. r=%g g=%g b=%g\n", faction, spark[0], spark[1], spark[2]);
 		
 		// Brighten up the raw colors by multiplying each channel by 2/3, then adding back 1/3.
 		// The darker colors are too hard to read.
