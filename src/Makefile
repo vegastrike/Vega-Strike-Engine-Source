@@ -110,7 +110,7 @@ gfx_click_list.o sdl_audio.o sdl_audio_data.o sdl_init.o joystick.o
 vegastrike_LDADD = $(LDADD)
 vegastrike_DEPENDENCIES = 
 vegastrike_LDFLAGS = 
-CXXFLAGS =  -g -Wall -I/usr/include/SDL -D_REENTRANT -ftest-coverage -fprofile-arcs -pg
+CXXFLAGS =  -g -Wall -I/usr/include/SDL -D_REENTRANT -ftest-coverage -fprofile-arcs -pg 
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@

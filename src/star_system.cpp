@@ -7,11 +7,12 @@
 StarSystem::StarSystem(Planet *primaries) : 
   primaries(primaries), 
   units(new UnitCollection()), 
+  drawList(new UnitCollection()),
   missiles(new UnitCollection()) {
   currentcamera = 0;	
 
   Iterator *iter = primaries->createIterator();
-  units->prepend(iter);
+  drawList->prepend(iter);
 
   delete iter;
   // Calculate movement arcs; set behavior of primaries to follow these arcs
@@ -25,7 +26,7 @@ StarSystem::~StarSystem() {
 }
 
 ClickList *StarSystem::getClickList() {
-  return new ClickList (this, units);
+  return new ClickList (this, drawList);
 
 }
 
@@ -35,6 +36,7 @@ void StarSystem::modelGravity() {
 
 void StarSystem::AddUnit(Unit *unit) {
   units->prepend(unit);
+  drawList->prepend(unit);
 }
 
 void StarSystem::RemoveUnit(Unit *unit) {
@@ -44,7 +46,7 @@ void StarSystem::RemoveUnit(Unit *unit) {
 void StarSystem::Draw() {
   //primaries->Draw();
 
-  Iterator *iter = units->createIterator();
+  Iterator *iter = drawList->createIterator();
   Unit *unit;
   while((unit = iter->current())!=NULL) {
     unit->TDraw();
@@ -56,7 +58,7 @@ void StarSystem::Draw() {
 void StarSystem::Update() {
   modelGravity();
 
-  Iterator *iter = units->createIterator();
+  Iterator *iter = drawList->createIterator();
   Unit *unit;
   while((unit = iter->current())!=NULL) {
     unit->ResolveForces();

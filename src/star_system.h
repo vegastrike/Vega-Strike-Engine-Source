@@ -22,6 +22,7 @@ class StarSystem {
   Planet *primaries; // Stars, planets, etc. Orbital mechanics
                    // pre-calculated. Cannot be 
 
+  UnitCollection *drawList;    // Everything to be drawn. Fold missiles in here someday
   UnitCollection *units;    // Objects subject to global physics
   UnitCollection *missiles; // no physics modelling, not searched
                             // through for clicks

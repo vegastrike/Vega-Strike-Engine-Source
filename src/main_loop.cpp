@@ -489,15 +489,16 @@ void createObjects() {
   //  
   for(int a = 0; a < numf; a++) {
     fighters[a] = new Unit("uosprey.dat");
-    fighters[a]->SetPosition((a%8)/8.0 - 2.0, (a/8)/8.0 - 2.0,5.0);
-    fighters[a]->SetPosition((a%16)*5 - 40.0F, (a/16)*5 - 40.0F,25.0F);
+    //fighters[a]->SetPosition((a%8)/8.0 - 2.0, (a/8)/8.0 - 2.0,5.0);
+    fighters[a]->SetPosition((a%16)*5 - 40.0F, (a/16)*5 - 40.0F,7.0F);
     fighters[a]->Pitch(PI/2);
+    fighters[a]->Scale(Vector(0.5,0.5,0.5));
     _GFX->activeStarSystem()->AddUnit(fighters[a]);
   }
 
 
-  _GFX->activeStarSystem()->AddUnit(fighter);
-  _GFX->activeStarSystem()->AddUnit(carrier);
+  //_GFX->activeStarSystem()->AddUnit(fighter);
+  //_GFX->activeStarSystem()->AddUnit(carrier);
   shipList = _GFX->activeStarSystem()->getClickList();
   BindKey (1,startselect);
   BindKey (0,clickhandler);
