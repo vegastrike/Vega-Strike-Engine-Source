@@ -142,8 +142,8 @@ Sprite * GameUnit<UnitType>::getHudImage () const{
 }
 
 template <class UnitType>
-GameUnit<UnitType>::GameUnit<UnitType> (std::vector <Mesh *>& meshes, bool SubU, int fact) {
-	Unit( meshes, SubU, fact);
+GameUnit<UnitType>::GameUnit<UnitType> (std::vector <Mesh *>& meshes, bool SubU, int fact):Unit( meshes, SubU, fact) {
+
 }
 extern void update_ani_cache();
 template <class UnitType>
