@@ -226,12 +226,17 @@ void	Packet::displayHex()
 		cout<<databuffer[i]<<" ";
 	cout<<endl;
 }
-
+union floatint {
+  float f;
+  int i;
+};
 void	Packet::received()
 {
 	// TO CHANGE IF ObjSerial IS NOT A SHORT ANYMORE
 	this->serial = ntohs( this->serial);
-	this->timestamp = ntohl( this->timestamp);
+	floatint f;f.f=this->timestamp;
+	f.i = ntohl(f.i);
+	this->timestamp = f.f;
 	//this->delay = ntohl( this->delay);
 	this->data_length = ntohs( this->data_length);
 }
@@ -240,7 +245,9 @@ void	Packet::tosend()
 {
 	// TO CHANGE IF ObjSerial IS NOT A SHORT ANYMORE
 	this->serial = htons( this->serial);
-	this->timestamp = htonl( this->timestamp);
+	floatint f;f.f=this->timestamp;
+	f.i = ntohl(f.i);
+	this->timestamp = f.f;	
 	//this->delay = htonl( this->delay);
 	this->data_length = htons( this->data_length);
 }
