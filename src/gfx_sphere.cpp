@@ -77,4 +77,5 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture) : Me
 	quadstrips[i] = new GFXQuadstrip((slices+1) * 2, vertexlist);
       }
       Decal = new Texture(texture, 0);
+      envMap = FALSE;
 }

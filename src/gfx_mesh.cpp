@@ -693,11 +693,12 @@ void Mesh::Draw()
 	  GFXDisable(TEXTURE1);
 	}
 	Decal->MakeActive();
-	_GFX->getLightMap()->MakeActive();
-	GFXSelectTexcoordSet(0, 0);
-	if(envMap)
-	  GFXSelectTexcoordSet(1, 1);
 
+	GFXSelectTexcoordSet(0, 0);
+	if(envMap) {
+	  _GFX->getLightMap()->MakeActive();
+	  GFXSelectTexcoordSet(1, 1);
+	}
 	vlist->Draw();
 	if(quadstrips!=NULL) {
 	  for(int a=0; a<numQuadstrips; a++)
