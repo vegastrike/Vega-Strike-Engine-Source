@@ -93,13 +93,13 @@ void Sprite::Draw()
 		GFXColor(1.00f, 1.00f, 1.00f, 1.00f);
 		GFXBegin(QUADS);
 		
-		GFXTexCoord2f(0.00f, 0.00f);
+		GFXTexCoord2f(1.00f, 0.00f);
 		GFXVertex3f(left, bottom, 0.00f);
-		GFXTexCoord2f(1.00f, 0.00f);
-		GFXVertex3f(right, bottom, 0.00f);
-		GFXTexCoord2f(1.00f, 0.00f);
-		GFXVertex3f(right, top, 0.00f);
 		GFXTexCoord2f(0.00f, 0.00f);
+		GFXVertex3f(right, bottom, 0.00f);
+		GFXTexCoord2f(0.00f, 1.00f);
+		GFXVertex3f(right, top, 0.00f);
+		GFXTexCoord2f(1.00f, 1.00f);
 		GFXVertex3f(left, top, 0.00f);
 
 		GFXEnd();

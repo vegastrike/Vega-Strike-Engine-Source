@@ -424,7 +424,7 @@ void InitializeInput() {
 	BindKey('s', FighterPitchUp);*/
 }
 Animation * s;
-Animation * greenexp;
+
 Sprite *fihneCarriah;
 void createObjects() {
 
@@ -439,8 +439,6 @@ void createObjects() {
   fighter2 = new Unit("uosprey.dat");
   s = new Animation ("explosion_orange.ani",true);
   s->SetPosition (0,0,5);
-  greenexp = new Animation ("explosion_green.ani");
-  greenexp->SetPosition (0,0,5);
   fihneCarriah = new Sprite ("carrier.spr");
   bg = new Background("cube");
   //bg2 = new SphereMesh (20.0,8,8,"sun.bmp",true,true);
@@ -527,7 +525,6 @@ void destroyObjects() {
   delete bg;
   //  delete bg2;  if you delete a sphere wiht paletted texture and its refcount you'll get a malloc problem
   delete s;
-  delete greenexp;
   delete fihneCarriah;
 }
 
@@ -570,7 +567,6 @@ void main_loop() {
 
   _GFX->activeStarSystem()->Draw();
   s->Draw();
-  //greenexp->Draw();
   fihneCarriah->Draw();
   _GFX->activeStarSystem()->Update();
   ProcessKB();

@@ -46,6 +46,7 @@ typedef struct {
 #define NumLights 1
 char InputName [256]="cube";
 char OutputName[256]="light";
+bool pushdown=false;
   float affine=0;
   float multiplicitive=1;
   float power=1;
@@ -183,8 +184,14 @@ float abso (float x)
 void gluSphereMap (CubeCoord &Tex, Vector Normal, float Theta) {
   Tex.TexMap=0;
   float vert = Normal.j;
-  Tex.t = vert*128+128;
-  Tex.s = Theta;//((int)((int)Theta+128)%256);
+  if (!pushdown) {
+    Tex.t = vert*128+128;
+    Tex.s = Theta;//((int)((int)Theta+128)%256);
+  } else {
+    Tex.t = ((int)(vert*128))%255;
+    Tex.s = Theta;
+  }
+
   /*  float horiz;
   if (Normal.i>0)
     horiz = 1- (Normal.k+1)*.5;
@@ -359,9 +366,12 @@ void Spherize (CubeCoord Tex [256][256],CubeCoord gluSph [256][256],unsigned cha
 		return;
 	char tmp[256];
 	if (!(LoadTex (strcat (strcpy(tmp,InputName),"_front.bmp"),Data[0].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_back.bmp"),Data[1].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_left.bmp"),Data[2].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_right.bmp"),Data[3].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_up.bmp"),Data[4].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_down.bmp"),Data[5].D))) {
-	   LoadTex (strcat (strcpy(tmp,InputName),"_sphere.bmp"),Data[0].D );
+	  if (!LoadTex (strcat (strcpy(tmp,InputName),"_sphere.bmp"),Data[0].D )) {
+	    LoadTex (strcat (strcpy(tmp,InputName),".bmp"),Data[0].D);
+	  }
 	  sphere=true;
 	  Tex = gluSph;
+	  
 	}
 	int NumPix;
 	float sleft,sright,tdown,tup;
@@ -781,6 +791,10 @@ void main(int argc, char **argv)
     if (argv[i][0]=='-'&&argv[i][1]=='p') {//affine
       i++;
       sscanf (argv[i],"%f",&power);
+      continue;
+    }
+    if (argv[i][0]=='-'&&argv[i][1]=='w') {
+      pushdown = true;
       continue;
     }
     if (tmp==1&&argv[i][0]!='-') {
