@@ -555,7 +555,7 @@ bool Unit::querySphere (const QVector &pnt, float err) const{
   
   Vector TargetPoint (tmpo->getP());
 #ifdef VARIABLE_LENGTH_PQR
-  float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint));//adjust the ship radius by the scale of local coordinates
+  double SizeScaleFactor = sqrt(TargetPoint.Dot(TargetPoint));//adjust the ship radius by the scale of local coordinates
 #endif
   for (i=0;i<nummesh();i++) {
     TargetPoint = (Transform (*tmpo,meshdata[i]->Position()).Cast()-pnt).Cast();
@@ -604,7 +604,7 @@ float Unit::querySphere (const QVector &start, const QVector &end, float min_rad
 float Unit::querySphereNoRecurse (const QVector & start, const QVector & end, float min_radius) const {
 //	return querySphere(start,a(end-start).Magnitude());
   int i;
-  float tmp;
+  double tmp;
   QVector st,dir;
   //if( min_radius<0.00001)
   // min_radius = 0;
@@ -614,13 +614,13 @@ float Unit::querySphereNoRecurse (const QVector & start, const QVector & end, fl
 	}
 	if (isUnit()==PLANETPTR&&i>0)
 		break;
-    float a, b,c;
-    st = start - Transform (cumulative_transformation_matrix,meshdata[i]->Position()).Cast();	
+    double a, b,c;
+    st = start - Transform (cumulative_transformation_matrix,meshdata[i]->Position().Cast());	
     dir = end-start;//now start and end are based on mesh's position
     // v.Dot(v) = r*r; //equation for sphere
     // (x0 + (x1 - x0) *t) * (x0 + (x1 - x0) *t) = r*r
     c = st.Dot (st);
-	float temp1 = (min_radius+meshdata[i]->rSize());
+	double temp1 = (min_radius+meshdata[i]->rSize());
 	if( min_radius!=-FLT_MAX)
 		c = c - temp1*temp1;
 	else
@@ -639,8 +639,8 @@ float Unit::querySphereNoRecurse (const QVector & start, const QVector & end, fl
       continue;
     a *=2;
       
-    tmp = (-b + sqrtf (c))/a;
-    c = (-b - sqrtf (c))/a;
+    tmp = (-b + sqrt (c))/a;
+    c = (-b - sqrt (c))/a;
     if (tmp>0&&tmp<=1) {
       return (c>0&&c<tmp) ? c : tmp;
     } else if (c>0&&c<=1) {
