@@ -748,6 +748,7 @@ void Cockpit::Draw() {
   GFXLoadIdentity(MODEL);
   GFXDisable(LIGHTING);
   GFXDisable (DEPTHTEST);
+  GFXDisable (DEPTHWRITE);
   GFXColor4f(1,1,1,1);
   DrawTargetBox();
   if(draw_all_boxes){
@@ -885,6 +886,7 @@ void Cockpit::Draw() {
   }
   GFXAlphaTest (ALWAYS,0);  
   GFXHudMode (false);
+  GFXEnable (DEPTHWRITE);
   GFXEnable (DEPTHTEST);
 }
 int Cockpit::getScrollOffset (unsigned int whichtype) {
