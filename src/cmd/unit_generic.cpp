@@ -14,6 +14,7 @@
 #include "script/flightgroup.h"
 #include "cmd/ai/fire.h"
 #include "cmd/ai/turretai.h"
+#include "cmd/ai/communication.h"
 #include "cmd/ai/navigation.h"
 #include "cmd/ai/script.h"
 #include "cmd/ai/missionscript.h"
@@ -30,6 +31,7 @@
 #include "gfx/warptrail.h"
 #include "networking/netserver.h"
 #include "networking/netclient.h"
+#include "gfx/cockpit_generic.h"
 
 #ifdef _WIN32
 #define strcasecmp stricmp
@@ -384,6 +386,10 @@ Unit::~Unit()
   fprintf (stderr,"%d", 0);
   fflush (stderr);
 #endif
+  for(unsigned int meshcount = 0; meshcount < meshdata.size(); meshcount++)
+    if (meshdata[meshcount])
+      delete meshdata[meshcount];
+  meshdata.clear();
 }
 
 void Unit::Init()
@@ -693,6 +699,98 @@ void Unit::calculate_extent(bool update_collide_queue) {
   if (isUnit()==PLANETPTR) {
     radial_size = corner_max.i;
   }
+}
+
+void Unit::scanSystem(){
+
+  double nowtime=mission->getGametime();
+
+  if(scanner.last_scantime==nowtime){
+    return;
+  }
+
+    StarSystem *ssystem=_Universe->activeStarSystem();
+    un_iter uiter(ssystem->getUnitList().createIterator());
+    
+    float min_enemy_dist=9999999.0;
+    float min_friend_dist=9999999.0;
+    float min_ship_dist=9999999.0;
+    Unit * min_enemy=NULL;
+    Unit * min_friend=NULL;
+    Unit * min_ship=NULL;
+    
+    int leader_num=getFgSubnumber(); //my own subnumber
+    Unit *my_leader=this; // say I'm the leader
+    Flightgroup *my_fg=getFlightgroup();
+    
+    Unit *unit=uiter.current();
+    while(unit!=NULL){
+      
+      if(this!=unit){
+	// won;t scan ourselves
+	
+	QVector unit_pos=unit->Position();
+	double dist=getMinDis(unit_pos);
+	float relation=getRelation(unit);
+	
+	if(relation<0.0){
+	  //we are enmies
+	  if(dist<min_enemy_dist){
+	    min_enemy_dist=dist;
+	    min_enemy=unit;
+	  }
+	}
+	if(relation>0.0){
+	//we are friends
+	  if(dist<min_friend_dist){
+	    min_friend_dist=dist;
+	  min_friend=unit;
+	  }
+	  // check for flightgroup leader
+	  if(my_fg!=NULL && my_fg==unit->getFlightgroup()){
+	    // it's a ship from our flightgroup
+	    int fgnum=unit->getFgSubnumber();
+	    if(fgnum<leader_num){
+	      //set this to be our leader
+	      my_leader=unit;
+	      leader_num=fgnum;
+	    }
+	  }
+	}
+	// for all ships
+	if(dist<min_ship_dist){
+	  min_ship_dist=dist;
+	  min_ship=unit;
+	}
+      }
+      
+      unit=++(uiter);
+  }
+    
+    scanner.nearest_enemy_dist=min_enemy_dist;
+    scanner.nearest_enemy=min_enemy;
+    
+    scanner.nearest_friend_dist=min_friend_dist;
+    scanner.nearest_friend=min_friend;
+
+    scanner.nearest_ship_dist=min_ship_dist;
+    scanner.nearest_ship=min_ship;
+    
+    scanner.leader=my_leader;
+}
+
+StarSystem * Unit::getStarSystem () {
+
+  if (activeStarSystem) {
+    return activeStarSystem;
+  }else {
+    Cockpit * cp=_Universe->isPlayerStarship(this);
+    if (cp) {
+      if (cp->activeStarSystem)
+	return cp->activeStarSystem;
+    }
+  }
+  return _Universe->activeStarSystem();
 }
 
 void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner, int zone) {
@@ -2308,11 +2406,28 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
   return 1;
 }
 
+extern void ScoreKill (Cockpit * cp, Unit * un, int faction);
 // Changed order of things -> Vectors and ApplyLocalDamage are computed before Cockpit thing now
 void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit, const GFXColor & color, Unit * ownerDoNotDereference, float phasedamage) {
+  Cockpit * cp = _Universe->isPlayerStarship (ownerDoNotDereference);
+
+  if (cp) {
+      //now we can dereference it because we checked it against the parent
+      CommunicationMessage c(ownerDoNotDereference,this,NULL,0);
+      c.SetCurrentState(c.fsm->GetHitNode(),NULL,0);
+      if (this->getAIState()) this->getAIState()->Communicate (c);      
+      Threaten (ownerDoNotDereference,10);//the dark danger is real!
+  }
+  bool mykilled = hull<0;
   Vector localpnt (InvTransform(cumulative_transformation_matrix,pnt));
   Vector localnorm (ToLocalCoordinates (normal));
   ApplyLocalDamage(localpnt, localnorm, amt,affectedUnit,color,phasedamage);
+  if (hull<0&&(!mykilled)) {
+    if (cp) {
+      ScoreKill (cp,ownerDoNotDereference,faction);
+      
+    }
+  }
 }
 
 // NUMGAUGES has been moved to images.h in UnitImages
@@ -2502,6 +2617,16 @@ void Unit::Kill(bool erasefromsave) {
   //if (erasefromsave)
   //  _Universe->AccessCockpit()->savegame->RemoveUnitFromSave((long)this);
   
+  if (this->colTrees)
+    this->colTrees->Dec();//might delete
+  this->colTrees=NULL;
+  for (int beamcount=0;beamcount<GetNumMounts();beamcount++) {
+    AUDStopPlaying(mounts[beamcount].sound);
+    AUDDeleteSound(mounts[beamcount].sound);
+    if (mounts[beamcount].ref.gun&&mounts[beamcount].type->type==weapon_info::BEAM)
+      delete mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
+  }
+
   if (docked&(DOCKING_UNITS)) {
     vector <Unit *> dockedun;
     unsigned int i;
@@ -2941,8 +3066,6 @@ void Unit::Target (Unit *targ) {
   	  mounts[i].time_to_lock = mounts[i].type->LockTime;
         }
         computer.target.SetUnit(targ);
-		if( Network!=NULL)
-			Network->targetRequest( targ);
 	LockTarget(false);
       }
     }else {

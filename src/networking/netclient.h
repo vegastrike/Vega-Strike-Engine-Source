@@ -133,7 +133,7 @@ class	NetClient
 
 		/********************* Weapon stuff **********************/
 		// Functions called when we receive a firing order from the server (other clients or ai or us)
-		void	targetRequest( Unit * target);
+		void	scanRequest( Unit * target);
 		void	fireRequest( ObjSerial serial, int mount_index, char mis);
 		void	unfireRequest( ObjSerial serial, int mount_index);
 

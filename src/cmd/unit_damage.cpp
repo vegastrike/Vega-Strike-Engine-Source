@@ -30,21 +30,6 @@ static list<Unit*> Unitdeletequeue;
 extern std::vector <Mesh *> MakeMesh(unsigned int mysize);
 
 template<class UnitType>
-void GameUnit<UnitType>::Kill(bool eraseFromSave)
-{
-  if (this->colTrees)
-    this->colTrees->Dec();//might delete
-  this->colTrees=NULL;
-  for (int beamcount=0;beamcount<GetNumMounts();beamcount++) {
-    AUDStopPlaying(mounts[beamcount].sound);
-    AUDDeleteSound(mounts[beamcount].sound);
-    if (mounts[beamcount].ref.gun&&mounts[beamcount].type->type==weapon_info::BEAM)
-      delete mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
-  }
-  UnitType::Kill(eraseFromSave);
-}
-
-template<class UnitType>
 void GameUnit<UnitType>::Split (int level) {
   Vector PlaneNorm;
   int i;
@@ -200,33 +185,9 @@ float GameUnit<UnitType>::ApplyLocalDamage (const Vector & pnt, const Vector & n
 }
 */
 
-extern void ScoreKill (Cockpit * cp, Unit * un, int faction);
 
-template <class UnitType>
-void GameUnit<UnitType>::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit, const GFXColor & color, Unit * ownerDoNotDereference, float phasedamage) {
-  Cockpit * cp = _Universe->isPlayerStarship (ownerDoNotDereference);
-
-  if (cp) {
-      //now we can dereference it because we checked it against the parent
-      CommunicationMessage c(ownerDoNotDereference,this,NULL,0);
-      c.SetCurrentState(c.fsm->GetHitNode(),NULL,0);
-      if (this->getAIState()) this->getAIState()->Communicate (c);      
-      Threaten (ownerDoNotDereference,10);//the dark danger is real!
-  }
-  bool mykilled = hull<0;
-  Vector localpnt (InvTransform(cumulative_transformation_matrix,pnt));
-  Vector localnorm (ToLocalCoordinates (normal));
-  ApplyLocalDamage(localpnt, localnorm, amt,affectedUnit,color,phasedamage);
-  if (hull<0&&(!mykilled)) {
-    if (cp) {
-      ScoreKill (cp,ownerDoNotDereference,faction);
-      
-    }
-  }
-}
 extern Animation * GetVolatileAni (unsigned int);
 extern unsigned int AddAnimation (const QVector &, const float, bool, const std::string &, float percentgrow);
-
 
 extern Animation * getRandomCachedAni() ;
 extern std::string getRandomCachedAniString() ;

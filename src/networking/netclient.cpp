@@ -561,8 +561,8 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				}
 
 			break;
-			case CMD_TARGET :
-				// We received the target info with the target serial in the packet
+			case CMD_SCAN :
+				// We received the target info with the target serial in the packet as an answer to a scanRequest
 
 				// Update info with received buffer
 
@@ -1071,7 +1071,7 @@ Transformation NetClient::spline_interpolate( ObjSerial clientid, double blend)
 /******************************************************************************************/
 
 // Send a info request about the target
-void	NetClient::targetRequest( Unit * target)
+void	NetClient::scanRequest( Unit * target)
 {
 	Packet p;
 	NetBuffer netbuf;

@@ -932,6 +932,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 	char mis;
 	// Find the unit
 	Unit * un = NULL;
+	Unit * unclt = NULL;
 	ObjSerial target_serial;
 
     switch( cmd)
@@ -1062,12 +1063,34 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 				un->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false, zone);
 		}
 	break;
-	case CMD_TARGET :
-		// Received a target request
+	case CMD_SCAN :
+	{
+		// Received a target scan request
+		// WE SHOULD FIND A WAY TO CHECK THAT THE CLIENT HAS THE RIGHT SCAN SYSTEM FOR THAT
 		target_serial = netbuf.getSerial();
 		zone = netbuf.getInt32();
 		un = zonemgr->getUnit( target_serial, zone);
 		// Get the un Unit data and send it in a packet
+		// Here we should get what a scanner could get on the target ship
+		// Get the unit that asked for target info
+		netbuf.Reset();
+		unclt = zonemgr->getUnit( packet.getSerial(), zone);
+		//float distance = UnitUtil::getDistance( unclt, un);
+		// Add armor data
+		/*
+		netbuf.addShort();
+		netbuf.addShort();
+		netbuf.addShort();
+		netbuf.addShort();
+		*/
+		// Add shield data
+		//netbuf.addFloat();
+		// ??
+		// Add hull
+		//netbuf.addFloat( un->hull);
+		// Add distance
+		//netbuf.addFloat( distance);
+	}
 	break;
 
 	// SHOULD WE HANDLE A BOLT SERIAL TO UPDATE POSITION ON CLIENT SIDE ???

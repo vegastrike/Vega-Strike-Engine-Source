@@ -452,7 +452,7 @@ public:
 // SHOULD TRY TO COME BACK HERE
   virtual bool TransferUnitToSystem (StarSystem *NewSystem);
   virtual void TransferUnitToSystem (unsigned int whichJumpQueue, class StarSystem *&previouslyActiveStarSystem, bool DoSightAndSound) {}
-  virtual StarSystem * getStarSystem() {return NULL;}
+  StarSystem * getStarSystem();
     struct UnitJump {
     short energy;
     short insysenergy;
@@ -472,7 +472,7 @@ public:
  protected:
   struct Scanner scanner;
  public:
-  virtual void scanSystem() {}
+  void scanSystem();
   struct Scanner *getScanner() { return &scanner; };
   void ActivateJumpDrive (int destination=0);
   void DeactivateJumpDrive ();
@@ -604,7 +604,7 @@ public:
   ///cloaks or decloaks the starship depending on the bool
   void Cloak (bool cloak);
   ///deletes
-  virtual void Kill(bool eraseFromSave=true);
+  void Kill(bool eraseFromSave=true);
   ///Is dead yet?
   inline bool Killed() const {return killed;}
   ///returns the current ammt of armor left
@@ -662,7 +662,7 @@ public:
   ///Applies damage to the local area given by pnt
   virtual float ApplyLocalDamage (const Vector &pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &, float phasedamage=0);
   ///Applies damage to the pre-transformed area of the ship
-  virtual void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &,  Unit *ownerDoNotDereference, float phasedamage=0 );
+  void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &,  Unit *ownerDoNotDereference, float phasedamage=0 );
   ///Deals remaining damage to the hull at point and applies lighting effects
   float DealDamageToHullReturnArmor (const Vector &pnt, float Damage, unsigned short * &targ);
   virtual void ArmorDamageSound( const Vector &pnt) {};

@@ -817,14 +817,16 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
   tp->SetSize (x+w,y-h-.5*fabs(w/cols));
   targ = parent->GetComputerData().target.GetUnit();
   switch (thismode.back()) {
-  case TARGET:
-    if (targ)
-	{
+  case SCANNING:
 		if( !got_target_info)
 			DrawScanningMessage();
+		/*
 		else
-   		    DrawTarget(parent,targ);
-	}
+			DrawScanner();
+		*/
+  case TARGET:
+    if (targ)
+   	    DrawTarget(parent,targ);
     break;
   case MANIFEST:
     DrawManifest (parent,parent);
@@ -893,8 +895,8 @@ void UpdateViewstyle (VIEWSTYLE &vs) {
 void VDU::SwitchMode() {
   if (!posmodes)
     return;
-  // If we switch from TARGET VDU VIEW_MODE we loose target info
-  if( thismode.back()==TARGET && Network!=NULL)
+  // If we switch from SCANNING VDU VIEW_MODE we loose target info
+  if( thismode.back()==SCANNING && Network!=NULL)
 		got_target_info = false;
   if (thismode.back()==VIEW&&viewStyle!=CP_CHASE&&(thismode.back()&posmodes)) {
     UpdateViewstyle (viewStyle);
@@ -909,7 +911,7 @@ void VDU::SwitchMode() {
       }
     }
   }
-  // If we switch to TARGET MODE we consider we lost target info
-  if( thismode.back()==TARGET && Network!=NULL)
+  // If we switch to SCANNING MODE we consider we lost target info
+  if( thismode.back()==SCANNING && Network!=NULL)
 		got_target_info = false;
 }

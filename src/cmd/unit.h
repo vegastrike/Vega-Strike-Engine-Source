@@ -153,12 +153,10 @@ public:
   PlanetaryTransform *GetPlanetOrbit () const;
   //bool TransferUnitToSystem (StarSystem *NewSystem);
   void TransferUnitToSystem (unsigned int whichJumpQueue, class StarSystem *&previouslyActiveStarSystem, bool DoSightAndSound);
-  StarSystem * getStarSystem();
   //void ActivateJumpDrive (int destination=0);
   //void DeactivateJumpDrive ();
   ///Begin and continue explosion
   bool Explode(bool draw, float timeit);
-  void Kill(bool eraseFromSave=true);
   const LineCollide &GetCollideInfo () {return CollideInfo;}
   ///Takes out of the collide table for this system.
   void RemoveFromSystem ();
@@ -220,19 +218,11 @@ public:
   void Thrust(const Vector &amt,bool afterburn = false);
   ///Resolves forces of given unit on a physics frame
   Vector ResolveForces (const Transformation &, const Matrix&);
-  ///Applies damage to the local area given by pnt
-  //float ApplyLocalDamage (const Vector &pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &, float phasedamage=0);
-  ///Applies damage to the pre-transformed area of the ship
-  void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &,  Unit *ownerDoNotDereference, float phasedamage=0 );
-  ///Deals remaining damage to the hull at point and applies lighting effects
-  // float DealDamageToHullReturnArmor (const Vector &pnt, float Damage, unsigned short * &t);
   //these functions play the damage sounds
   virtual void ArmorDamageSound( const Vector &pnt);
   virtual void HullDamageSound( const Vector &pnt);
   ///applies damage from the given pnt to the shield, and returns % damage applied and applies lighitn
   float DealDamageToShield (const Vector & pnt, float &Damage);
-
-  void scanSystem();
 
 /***************************************************************************************/
 /**** CUSTOMIZE/UPGRADE STUFF                                                          */

@@ -50,6 +50,7 @@ const char* displayCmd( Cmd cmd )
     CASE( CMD_FIREREQUEST  )
     CASE( CMD_UNFIREREQUEST)
     CASE( CMD_TARGET       )
+    CASE( CMD_SCAN         )
 
     CASE( CMD_NEWSUBSCRIBE )
 
