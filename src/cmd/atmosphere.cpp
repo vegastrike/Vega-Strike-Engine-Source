@@ -8,7 +8,7 @@
 #include "cmd/planet.h"
 #include "gfxlib.h"
 
-int divisions = 16;
+int divisions = 64;
 int l0,l1,l2;
 
 void setArray(float c0[4], const GFXColor&c1) {
@@ -66,7 +66,7 @@ void Atmosphere::Update(const Vector &position, const Matrix tmatrix)
 			/* for now just assume all planets with lights are really bright */
 			Vector direction = (currPlanet->Position()-position);
 			direction.Normalize();
-			float rho = direction * TransformNormal(tmatrix,Vector(0,1,0));
+			float rho = direction * InvTransformNormal(tmatrix,Vector(0,1,0));
 			if(rho > 0) { /* above the horizon */
 				Vector localDirection = InvTransformNormal(tmatrix,direction);
 				
@@ -91,22 +91,22 @@ void Atmosphere::Update(const Vector &position, const Matrix tmatrix)
 		}
 	}
 	if(!sunboxes.empty()) {
-		float rho=acos(rho1)/(PI/2)-0.1;
+		float rho=acos(rho1)/(PI/2);
 		float radius = user_params.radius;
 		/* index 0 is the top color, index 1 is the bottom color */
-		GFXLight light0 = GFXLight(true,Vector(0,0,0));
-		setArray(light0.ambient, rho*user_params.high_ambient_color[0] + (1-rho)*user_params.low_ambient_color[0]);
-		setArray(light0.diffuse, rho*user_params.high_color[0] + (1-rho)*user_params.low_color[0]);
-		setArray(light0.attenuate, GFXColor(0,0.5,0));
-		setArray(light0.vect, GFXColor(0,1.1*radius,0,1));
+		GFXLight light0 = GFXLight();
+		light0.SetProperties(AMBIENT,rho*user_params.high_ambient_color[0] + (1-rho)*user_params.low_ambient_color[0]);
+		light0.SetProperties(DIFFUSE,rho*user_params.high_color[0] + (1-rho)*user_params.low_color[0]);
+		light0.SetProperties(ATTENUATE,0.5*GFXColor(1,0.25/radius,0));
+		light0.SetProperties(POSITION,GFXColor(0,1.1*radius,0,1));
 
 		/* do a linear interpolation between this and the next one */
 		
-		GFXLight light1 = GFXLight(true,Vector (0,0,0));
-		setArray(light1.ambient, (1-rho)*user_params.high_ambient_color[1] + rho*user_params.low_ambient_color[1]);
-		setArray(light1.diffuse, (1-rho)*user_params.high_color[1] + rho*user_params.low_color[1]);
-		setArray(light1.attenuate, GFXColor(0,0,0.5));
-		setArray(light1.vect, GFXColor(0,-1.1*radius,0,1));
+		GFXLight light1 = GFXLight();
+		light1.SetProperties(AMBIENT, (1-rho)*user_params.high_ambient_color[1] + rho*user_params.low_ambient_color[1]);
+		light1.SetProperties(DIFFUSE, (1-rho)*user_params.high_color[1] + rho*user_params.low_color[1]);
+		light1.SetProperties(ATTENUATE, 0.5*GFXColor(1,0.75/radius,0));
+		light1.SetProperties(POSITION, GFXColor(0,-1.1*radius,0,1));
 
 		/* Note!! make sure that this light never goes too far around the sphere */
 		GFXLight light2 = light1; /* -80 degree declination from sun position */
@@ -116,23 +116,20 @@ void Atmosphere::Update(const Vector &position, const Matrix tmatrix)
 		Rotate(m,r,-80*(PI/180));
 		r = Transform(m,Vector(0,0,1));
 		float sradius = 1.1 * radius;
-		setArray(light2.vect, GFXColor(sradius * r.i,sradius * r.j,sradius * r.k,1));
+		light2.SetProperties(POSITION,GFXColor(sradius * r.i,sradius * r.j,sradius * r.k,1));
 
 		GFXCreateLight(l0,light0,true);
 		GFXCreateLight(l1,light1,true);
-		GFXCreateLight(l2,light2,true);
+		//GFXCreateLight(l2,light2,true);
+		GFXEnableLight(l0);
+		GFXEnableLight(l1);
+		//GFXEnableLight(l2);
 	}
 }
 
 void Atmosphere::Draw(const Vector &position, const Matrix tmatrix)
 {
   GFXDisable (TEXTURE1);
-  GFXDisable (DEPTHWRITE);
-  GFXEnable (TEXTURE0);
-  GFXEnable (LIGHTING);
-	Update(position,tmatrix);
-	GFXLoadMatrix(MODEL,tmatrix);
-
 	/*
 [ 1 0 0 0 ]
 [ 0 0 1 0 ]
@@ -145,17 +142,21 @@ void Atmosphere::Draw(const Vector &position, const Matrix tmatrix)
 	Matrix rot1;
 	MultMatrix(rot1,tmatrix,rot);
 	GFXMaterial a = {0,0,0,0,
-					.01,.01,.01,1,
+					1,1,1,1,
 					0,0,0,0,
-					0.5,0.5,0.5,1,
+					0,0,0,0,
 					0};
-	GFXDisable(DEPTHWRITE);
-	dome->DrawNow(10,GFXTRUE,identity_transformation,rot1);
-	//GFXEnable(DEPTHWRITE);
+	dome->SetMaterial(a);
+    GFXLoadMatrix(MODEL,rot1);
+	Update(position,rot1);
 
+	GFXDisable(DEPTHWRITE);
+	dome->DrawNow(100000,GFXTRUE,identity_transformation,rot1);
+	GFXDisableLight (l0);
+	GFXDisableLight (l1);
 	GFXDeleteLight(l0);
 	GFXDeleteLight(l1);
-	GFXDeleteLight(l2);
+	//GFXDeleteLight(l2);
 }
 
 void Atmosphere::DrawAtmospheres()

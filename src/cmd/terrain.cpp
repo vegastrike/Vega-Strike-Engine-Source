@@ -78,7 +78,9 @@ static GFXColor getTerrainColor() {
 void Terrain::CollideAll () {
 
   for (unsigned int i=0;i<allterrains.size();i++) {
-    allterrains[i]->Collide();
+    if (allterrains[i]->draw) {
+      allterrains[i]->Collide();
+    }
   }
 }
 void Terrain::DeleteAll () {
@@ -109,10 +111,11 @@ void Terrain::UpdateAll (int resolution ) {
     }
   }
   for (unsigned int i=0;i<allterrains.size();i++) {
-    allterrains[i]->Update (res,allterrains[i]->whichstage%res,allterrains[i]->updatetransform);
-    allterrains[i]->whichstage++;
+    if (allterrains[i]->draw) {
+      allterrains[i]->Update (res,allterrains[i]->whichstage%res,allterrains[i]->updatetransform);
+      allterrains[i]->whichstage++;
+    }
   }
-  
 
 }
 Vector Terrain::GetUpVector (const Vector & pos) {

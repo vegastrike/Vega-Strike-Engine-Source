@@ -158,32 +158,10 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
 }
 void Planet::Draw(const Transformation & quat, const Matrix m) {
   //Do lighting fx
-  Vector t (_Universe->AccessCamera()->GetPosition()-quat.position);
-  if (t.Magnitude()<corner_max.i) {
-    if (!inside) {
-      TerrainUp = t;
-      Normalize(TerrainUp);
-      TerrainH = TerrainUp.Cross (Vector (-TerrainUp.i+.25, TerrainUp.j-.24,-TerrainUp.k+.24));
-      Normalize (TerrainH);
-      inside =true;
-      if (terrain)
-	terrain->EnableDraw();
-    }
-  }
-  if (inside) {
-    if (t.Dot (TerrainH)>radius*1.2) {
-      inside=false;
-      ///somehow warp unit to reasonable place outisde of planet
-      if (terrain) {
-	
-	terrain->DisableDraw();
-      }
-    }
-  }
   if (inside&&terrain) {
     Matrix tmp;
     Vector p(-TerrainH.Cross (TerrainUp));
-    VectorAndPositionToMatrix (tmp,p,TerrainUp,TerrainH,quat.position);
+    VectorAndPositionToMatrix (tmp,p,TerrainUp,TerrainH,cumulative_transformation.position);
     terrain->SetTransformation (tmp);
   }
   // if cam inside don't draw?
@@ -192,6 +170,32 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
   for (unsigned int i=0;i<lights.size();i++) {
     GFXSetLight (lights[i], POSITION,GFXColor (cumulative_transformation.position));
   }
+  static int counter=0;
+  if ((counter++)>100) { 
+    Vector t (_Universe->AccessCamera()->GetPosition()-Position());
+    if (t.Magnitude()<corner_max.i) {
+      if (!inside) {
+	TerrainUp = t;
+	Normalize(TerrainUp);
+	TerrainH = TerrainUp.Cross (Vector (-TerrainUp.i+.25, TerrainUp.j-.24,-TerrainUp.k+.24));
+	Normalize (TerrainH);
+	inside =true;
+	if (terrain)
+	  terrain->EnableDraw();
+      }
+    }
+    if (inside) {
+      if (t.Dot (TerrainH)>corner_max.i) {
+	inside=false;
+	///somehow warp unit to reasonable place outisde of planet
+	if (terrain) {
+	  
+	  terrain->DisableDraw();
+	}
+      }
+    }
+  }
+
 }
 
 
