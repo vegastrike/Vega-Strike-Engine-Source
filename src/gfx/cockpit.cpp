@@ -1385,7 +1385,8 @@ void GameCockpit::Draw() {
   }
   RestoreViewPort();
   GFXBlendMode (ONE,ZERO);
-  GFXAlphaTest (GREATER,.1);
+  static float AlphaTestingCutoff =XMLSupport::parse_float(vs_config->getVariable("graphics","AlphaTestCutoff",".8"));
+  GFXAlphaTest (GREATER,AlphaTestingCutoff);
   GFXColor4f(1,1,1,1);
   if (view<CP_CHASE) {
     if (Pit[view]) 
