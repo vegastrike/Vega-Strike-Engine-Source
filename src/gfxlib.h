@@ -111,8 +111,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
 void /*GFXDRVAPI*/ GFXPrioritizeTexture (unsigned int handle, float priority);
 void /*GFXDRVAPI*/ GFXAttachPalette(unsigned char *palette, int handle);
 GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer, int handle, enum TEXTURE_IMAGE_TARGET image2D=TEXTURE_2D);
-GFXBOOL /*GFXDRVAPI*/ GFXDeleteTexture(int handle);
-GFXBOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage=0);
+void /*GFXDRVAPI*/ GFXDeleteTexture(int handle);
+void /*GFXDRVAPI*/ GFXDestroyAllTextures();
+void  /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage=0);
 
 
 
@@ -126,6 +127,7 @@ void /*GFXDRVAPI*/ GFXTextureAddressMode(ADDRESSMODE);
 void /*GFXDRVAPI*/ GFXBlendMode(enum BLENDFUNC src, enum BLENDFUNC dst);
 void /*GFXDRVAPI*/ GFXPushBlendMode();
 void /*GFXDRVAPI*/ GFXPopBlendMode();
+void /*GFXDRVAPI*/ GFXActiveTexture (int stage);
 void /*GFXDRVAPI*/ GFXSelectTexcoordSet(int stage, int texset);
 
 //primitive Begin/End 

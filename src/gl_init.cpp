@@ -111,6 +111,7 @@ void init_opengl_extensions()
 
     }
 }
+extern void GFXInitTextureManager();
 void GFXInit (int argc, char ** argv){
     glutInit( &argc, argv );
      
@@ -161,10 +162,10 @@ void GFXInit (int argc, char ** argv){
 
 
     init_opengl_extensions();
-
+    GFXInitTextureManager();
     
     if (g_game.Multitexture)
-      glActiveTextureARB(GL_TEXTURE0_ARB);
+      GFXActiveTexture(0);
     glEnable(GL_TEXTURE_2D);
         glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -178,7 +179,7 @@ void GFXInit (int argc, char ** argv){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     if (g_game.Multitexture){
-      glActiveTextureARB(GL_TEXTURE1_ARB);
+      GFXActiveTexture(1);
       glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
       glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 #ifdef NV_CUBE_MAP
@@ -258,6 +259,7 @@ void GFXLoop(void main_loop()) {
 
 
 void GFXShutdown () {
+  GFXDestroyAllTextures();
   if ( g_game.fullscreen ) {
     glutLeaveGameMode();
   }

@@ -25,6 +25,7 @@
 #include <stack>
 GFXBOOL bTex0 = GFXTRUE;
 GFXBOOL bTex1 = GFXTRUE;
+int activeTextureStage=0;
 extern GFXBOOL GFXLIGHTING;
 void /*GFXDRVAPI*/ GFXEnable (STATE state)
 {
@@ -264,6 +265,14 @@ void /*GFXDRVAPI*/ GFXSelectTexcoordSet(int stage, int texset)
 	}
 }
 
+void GFXActiveTexture (int stage) {
+  if (stage!=activeTextureStage) {
+    glActiveTextureARB(GL_TEXTURE0_ARB+stage);
+    activeTextureStage=stage;
+  }
+
+}
+
 GFXBOOL GFXSetTexFunc(int stage, int texset)
 {
 
@@ -277,17 +286,15 @@ GFXBOOL GFXSetTexFunc(int stage, int texset)
 	}	
 	if (g_game.Multitexture)
 	{
-		if (!stage)
-		{
-			glActiveTextureARB(GL_TEXTURE0_ARB);	
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		}
-		if (stage==1)
-		{
-			glActiveTextureARB(GL_TEXTURE1_ARB);	
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		}
-		glActiveTextureARB(GL_TEXTURE0_ARB);	
+	  GFXActiveTexture(stage);	
+	  if (!stage) {
+	    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	  }
+	  if (stage==1) {
+	    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	  }
+	  GFXActiveTexture(stage);
+		
 	}	
 	else return FALSE;
 	
