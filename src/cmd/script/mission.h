@@ -524,7 +524,7 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
   tagMap tagmap;
   char *nextpythonmission;
   std::string unpickleData;
-
+public:
   struct Runtime {
     vector<missionThread *> threads;
 	PythonMissionBaseClass * pymissions;
@@ -535,6 +535,7 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
     varInstVec global_varvec;
     //    vector<const void *()> callbacks;
   } runtime;
+private:
   friend void UnpickleMission (std::string pickled);
   // used only for parsing
   vector<missionNode *> scope_stack;
