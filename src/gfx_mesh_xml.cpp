@@ -164,7 +164,6 @@ will be no need for this sort of checking
  */
 
 void Mesh::beginElement(const string &name, const AttributeList &attributes) {
-  //cerr << "Start tag: " << name << endl;
   //static bool flatshadeit=false;
   AttributeList::const_iterator iter;
 

@@ -9,7 +9,6 @@
 using XMLSupport::tostring;
 
 SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char *alpha, bool Insideout,bool centeredOnShip) : Mesh() {
-  //strcpy(name, "Sphere");
 
   SphereMesh *oldmesh;
   string hash_key = string("@@Sphere") + "#" + tostring(radius) + "#" + texture + "#" + tostring(stacks) + "#" + tostring(slices) + "#" + (Insideout?"yes":"no");
