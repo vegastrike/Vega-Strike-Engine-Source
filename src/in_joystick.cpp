@@ -30,16 +30,11 @@
 #include "in_joystick.h"
 
 JoyStick *joystick[MAX_JOYSTICKS]; // until I know where I place it
-/*
-<<<<<<< in_joystick.cpp
-=======
-//static KBHandler joyBindings [MAX_BUTTONS];
-KBSTATE buttonState[MAX_BUTTONS];
 
-
->>>>>>> 1.7
-*/
 void InitJoystick(){
+  //  SDL_EventState (SDL_KEYDOWN,SDL_ENABLE);
+  //  SDL_EventState (SDL_KEYUP,SDL_ENABLE);
+
   for (int i=0;i<NUMJBUTTONS;i++) {
     for (int j=0;j<MAX_JOYSTICKS;j++) {
       UnbindJoyKey (j,i);
@@ -57,12 +52,6 @@ void InitJoystick(){
     }
     joystick[i]=new JoyStick(i); // SDL_Init is done in main.cpp
   }
-  /*
-  for(int a=0; a<joystick[0]->NumButtons(); a++) {
-    buttonState[a] = UP;
-    UnbindButton(a);
-  }
-  */
   
 #endif
 }
@@ -168,7 +157,7 @@ void JoyStick::GetJoyStick(float &x,float &y,int &buttons)
         return;
     }
 #if defined(HAVE_SDL)
-    SDL_JoystickUpdate();//FIXME isn't this supposed to be called already by SDL?
+    //    SDL_JoystickUpdate();//FIXME isn't this supposed to be called already by SDL?
 
     Sint16 xi =  SDL_JoystickGetAxis(joy,0);
     Sint16 yi =  SDL_JoystickGetAxis(joy,1);
