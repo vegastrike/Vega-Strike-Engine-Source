@@ -2965,9 +2965,10 @@ string buildShipDescription(Cargo &item,std::string & texturedescription) {
                  std::string shipname= hudimage.substr(doublepng+4);
                  if (shipname.find(".png")!=string::npos||shipname.find(".jpg")!=string::npos) {
                     hudimage = hudimage.substr(0,doublepng+4-shipname.length());
-                    unsigned int ship = hudimage.rfind(item.content);
-                    if (1||ship!=string::npos) {
-                       texturedescription="../units/"+item.content+"/"+shipname;
+                    string shipnoblank = item.content.substr(0,item.content.find("."));
+                    unsigned int ship = hudimage.rfind(shipnoblank);
+                    if (ship!=string::npos) {
+                       texturedescription="../units/"+shipnoblank+"/"+shipname;
                     }else {
                        texturedescription=shipname;
                     }                    
