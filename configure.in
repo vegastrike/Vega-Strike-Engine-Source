@@ -1095,16 +1095,36 @@ CPPFLAGS="$saved_CPPFLAGS"
 dnl --------------------------------------------------------------------------
 dnl Check for network communication system
 dnl --------------------------------------------------------------------------
-TESTNETCOMM="0"
-TESTNETCOMM_NOSOUND="1"
+TESTNETCOMM_NOSOUND="0"
 TESTNETCOMM_NOWEBCAM="1"
-AC_ARG_ENABLE(netcomm, AC_HELP_STRING([--enable-netcomm], [Enable hazardous network communications (Webcam and VOIP)]), [TESTNETCOMM="1"; echo "Network communication system enabled"])
+TESTNETCOMM_JVOIP="0"
+TESTNETCOMM_PORTAUDIO="0"
 
-if test "$TESTNETCOMM" = "1" ; then
-    AC_DEFINE(NETCOMM,1,[enable hazardous network communications (Webcam and VOIP)])
-   	TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM"
+	dnl NOTE : CLIENT WITH JVOIP SUPPORT WILL ONLY HEAR OTHER JVOIP CLIENTS
+	dnl        AND IT GOES THE SAME FOR PORTAUDIO
+	AC_ARG_ENABLE(	netcomm,
+				AC_HELP_STRING([--enable-netcomm=TYPE],
+				[Enable hazardous network communications (TYPE=none (default), jvoip, portaudio)]),
+				[
+    				AC_DEFINE(NETCOMM,1,[enable hazardous network communications (Webcam and VoIP)])
+   					TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM"
+					case "$enableval" in
+						"n" | "none" | "no")
+						echo "No sound support for networking communications"
+					;;
+						"j" | "jvoip")
+							TESTNETCOMM_JVOIP="1"
+							echo "Trying to enable JVoIP support... "
+					;;
+						"pa" | "portaudio")
+							TESTNETCOMM_PORTAUDIO="1"
+							echo "Trying to enable PortAudio support... "
+					;;
+					esac
+				],
+				[])
 
-	dnl check for oss headers
+	dnl check for oss headers under Linux
 	saved_CPPFLAGS="$CPPFLAGS"
 
 	AC_DEFUN( CHECK_FOR_OSS_H, [
@@ -1113,14 +1133,45 @@ if test "$TESTNETCOMM" = "1" ; then
 	    AC_MSG_RESULT([$have_oss_h])
 	])
 
-	CHECK_FOR_OSS_H
+	if test "$LINUX" = "1" ; then
+		CHECK_FOR_OSS_H
+		if test "x$have_oss_h" = "xno" ; then
+			TESTNETCOMM_JVOIP="0"
+			TESTNETCOMM_PORTAUDIO="0"
+		fi
+	fi
 
-	if test "x$have_oss_h" = "xno" ; then
-	    echo "*** OSS headers not found : sound communications disabled."
-    	TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM_NOSOUND"
-    	AC_DEFINE(NETCOMM_NOSOUND,1,[disable sound with NETCOMM])
+	AC_DEFUN( CHECK_FOR_COREAUDIO_H, [
+	    AC_MSG_CHECKING([for CoreAudio/CoreAudio.h])
+	    AC_TRY_CPP( [ #include <CoreAudio/CoreAudio.h> ], have_core_audio_h=yes, have_core_audio_h=no )
+	    AC_MSG_RESULT([$have_core_audio_h])
+	])
+
+	if test "x$is_macosx" = "xyes" ; then
+		if test "$TESTNETCOMM_JVOIP" = "1" ; then
+			CHECK_FOR_COREAUDIO_H
+			TESTNETCOMM_JVOIP="0"
+			echo "JVoIP lib does not support MacOS X yet"
+		else
+			if test "x$have_core_audio_h" = "xno" ; then
+				TESTNETCOMM_PORTAUDIO="0"
+			fi
+		fi
+	fi
+
+	dnl Add the CFLAGS that correspond to sound choice
+	if test "$TESTNETCOMM_JVOIP" = "1" ; then
+   		TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM_JVOIP"
+   		AC_DEFINE(NETCOMM_JVOIP,1,[enable JVoIP library for sound support with NETCOMM])
+		echo "VoIP support enabled."
 	else
-		TESTNETCOMM_NOSOUND="0"
+		if test "$TESTNETCOMM_PORTAUDIO" = "1" ; then
+   			TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM_PORTAUDIO"
+   			AC_DEFINE(NETCOMM_PORTAUDIO,1,[enable PortAudio library for sound support with NETCOMM])
+			echo "VoIP support enabled."
+		else
+			echo "VoIP support disabled."
+		fi
 	fi
 
 	dnl Check for video for linux headers under linux
@@ -1130,36 +1181,51 @@ if test "$TESTNETCOMM" = "1" ; then
 	    AC_MSG_RESULT([$have_vfl_h])
 	])
 
+	echo "Trying to enable webcam support... "
+
 	dnl Test to check VFL headers
 	if test "$LINUX" = "1" ; then
 		CHECK_FOR_VFL_H
-		if test "x$have_vfl" = "xyes" ; then
-			echo "Webcam support enabled"
+		if test "x$have_vfl_h" = "xyes" ; then
+			echo "Webcam support enabled."
 			TESTNETCOMM_NOWEBCAM="0"
 		else
-	    	echo "*** Video For Linux headers not found : video communications disabled."
     		TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM_NOWEBCAM"
     		AC_DEFINE(NETCOMM_NOWEBCAM,1,[disable video with NETCOMM])
+			echo "*** Webcam support disabled."
 		fi
 	fi
+
+	dnl Check for QuickTime headers under MacOS X
+	dnl  <QuickTimeComponents.h>
+	saved_TR_CPPFLAGS="$TR_CPPFLAGS"
+	TR_CPPFLAGS="$TR_CPPFLAGS -I/System/Library/Frameworks/QuickTime.framework/Headers -I/System/Library/Frameworks/Carbon.framework/Versions/A/Headers"
+	AC_DEFUN( CHECK_FOR_QT_H, [
+	    AC_MSG_CHECKING([for QuickTimeComponents.h])
+	    AC_TRY_CPP( [ #include <QuickTimeComponents.h> ], have_qt_h=yes, have_qt_h=no )
+	    AC_MSG_RESULT([$have_qt_h])
+	])
+
 	if test "$is_macosx" = "yes" ; then
-		dnl SHOULD TEST FOR QUICKTIME FRAMEWORK HERE !!!!
-		dnl if quicktime_headers_present ; then
-			echo "Webcam support enabled"
+		CHECK_FOR_QT_H
+		if test "x$have_qt_h" = "xyes" ; then
 			TESTNETCOMM_NOWEBCAM="0"
    			LIBS="$LIBS -framework QuickTime -framework Carbon -lz"
-		dnl else
-	    dnl	echo "*** QuickTime Video headers not found : video communications disabled."
-    	dnl	TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM_NOWEBCAM"
-    	dnl	AC_DEFINE(NETCOMM_NOWEBCAM,1,[disable video with NETCOMM])
-		dnl fi
+			echo "Webcam support enabled."
+		else
+    		TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM_NOWEBCAM"
+    		AC_DEFINE(NETCOMM_NOWEBCAM,1,[disable video with NETCOMM])
+			echo "*** Webcam support disabled."
+		fi
 
 	fi
-fi
+	TR_CPPFLAGS="$saved_TR_CPPFLAGS"
 
 AM_CONDITIONAL(NETCOMM, test "$TESTNETCOMM" = "1")
 AM_CONDITIONAL(NETCOMM_NOSOUND, test "$TESTNETCOMM_NOSOUND" = "1")
 AM_CONDITIONAL(NETCOMM_NOWEBCAM, test "$TESTNETCOMM_NOWEBCAM" = "1")
+AM_CONDITIONAL(NETCOMM_JVOIP, test "$TESTNETCOMM_JVOIP" = "1")
+AM_CONDITIONAL(NETCOMM_PORTAUDIO, test "$TESTNETCOMM_PORTAUDIO" = "1")
 
 dnl --------------------------------------------------------------------------
 dnl Check for win32 winsock 2 support

@@ -3,16 +3,16 @@
 #ifndef NETCOMM_NOWEBCAM
 #include "networking/webcam_support.h"
 #endif /* NETCOMM_NOWEBCAM */
-#ifndef NETCOMM_NOSOUND
+#ifdef NETCOMM_JVOIP
 #include "jvoipsession.h"
 #include "jvoiprtptransmission.h"
-#endif /* NETCOMM_NOSOUND */
+#endif /* NETCOMM_JVOIP */
 
 #define VOIP_PORT	5000
 
 #include "networkcomm.h"
 
-#ifndef NETCOMM_NOSOUND
+#ifdef NETCOMM_JVOIP
 void	CheckVOIPError( int val)
 {
 	if( val>=0)
@@ -21,18 +21,18 @@ void	CheckVOIPError( int val)
 	cerr<<"!!! JVOIP ERROR : "<<error<<endl;
 	exit(1);
 }
-#endif /* NETCOMM_NOSOUND */
+#endif /* NETCOMM_JVOIP */
 
 NetworkCommunication::NetworkCommunication()
 {
 	this->active = false;
 	this->max_messages = 25;
 	this->method = 1;
-#ifndef NETCOMM_NOSOUND
+#ifdef NETCOMM_JVOIP
 	this->session = NULL;
 	this->params = NULL;
 	this->rtpparams = NULL;
-#endif /* NETCOMM_NOSOUND */
+#endif /* NETCOMM_JVOIP */
 #ifndef NETCOMM_NOWEBCAM
 	this->Webcam = NULL;
 	string webcam_enable = vs_config->getVariable ("network","use_webcam","false");
@@ -58,17 +58,17 @@ NetworkCommunication::NetworkCommunication( int nb)
 void	NetworkCommunication::AddToSession( ClientPtr clt)
 {
 	this->commClients.push_back( clt);
-#ifndef NETCOMM_NOSOUND
+#ifdef NETCOMM_JVOIP
 	CheckVOIPError( this->session->AddDestination( ntohl( clt->cltadr.inaddr() ), VOIP_PORT));
-#endif /* NETCOMM_NOSOUND */
+#endif /* NETCOMM_JVOIP */
 }
 
 void	NetworkCommunication::RemoveFromSession( ClientPtr clt)
 {
 	this->commClients.remove( clt);
-#ifndef NETCOMM_NOSOUND
+#ifdef NETCOMM_JVOIP
 	CheckError( this->session->AddDestination( ntohl( clt->cltadr.inaddr() ), VOIP_PORT));
-#endif /* NETCOMM_NOSOUND */
+#endif /* NETCOMM_JVOIP */
 }
 
 void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, string message)
@@ -132,7 +132,7 @@ void	NetworkCommunication::SendImage( SOCKETALT & send_sock)
 int		NetworkCommunication::InitSession( float frequency)
 {
 	// Init the VoIP session
-#ifndef NETCOMM_NOSOUND
+#ifdef NETCOMM_JVOIP
 	this->session = new JVOIPSession;
 	this->session->SetSampleInterval(100);
 
@@ -140,7 +140,7 @@ int		NetworkCommunication::InitSession( float frequency)
 	this->rtpparams = new JVOIPRTPTransmissionParams;
 
 	CheckVOIPError( this->session->Create( *(this->params)));
-#endif /* NETCOMM_NOSOUND */
+#endif /* NETCOMM_JVOIP */
 
 #ifndef NETCOMM_NOWEBCAM
 	if( Webcam)
@@ -155,7 +155,7 @@ int		NetworkCommunication::InitSession( float frequency)
 int		NetworkCommunication::DestroySession()
 {
 	this->active = false;
-#ifndef NETCOMM_NOSOUND
+#ifdef NETCOMM_JVOIP
 	CheckVOIPError( this->session->Destroy());
 
 	if( this->session)
@@ -164,7 +164,7 @@ int		NetworkCommunication::DestroySession()
 		delete this->params;
 	if( this->rtpparams)
 		delete this->rtpparams;
-#endif /* NETCOMM_NOSOUND */
+#endif /* NETCOMM_JVOIP */
 #ifndef NETCOMM_NOWEBCAM
 	if( this->Webcam)
 		this->Webcam->EndCapture();
@@ -175,14 +175,14 @@ int		NetworkCommunication::DestroySession()
 
 NetworkCommunication::~NetworkCommunication()
 {
-#ifndef NETCOMM_NOSOUND
+#ifdef NETCOMM_JVOIP
 	if( this->session)
 		delete this->session;
 	if( this->params)
 		delete this->params;
 	if( this->rtpparams)
 		delete this->rtpparams;
-#endif /* NETCOMM_NOSOUND */
+#endif /* NETCOMM_JVOIP */
 #ifndef NETCOMM_NOWEBCAM
 	if( this->Webcam)
 	{

@@ -11,7 +11,7 @@
 #ifndef NETCOMM_NOWEBCAM
 class WebcamSupport;
 #endif
-#ifndef NETCOMM_NOSOUND
+#ifdef NETCOMM_JVOIP
 class JVOIPSession;
 class JVOIPSessionParams;
 class JVOIPRTPTransmissionParams;
@@ -35,7 +35,7 @@ class NetworkCommunication
 		// Webcam support
 		WebcamSupport *		Webcam;
 #endif
-#ifndef NETCOMM_NOSOUND
+#ifdef NETCOMM_JVOIP
 		JVOIPSession *				session;
 		JVOIPSessionParams *		params;
 		JVOIPRTPTransmissionParams* rtpparams;
