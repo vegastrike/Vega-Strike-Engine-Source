@@ -224,6 +224,7 @@ void init_opengl_extensions()
         winsys_exit(0);
     }
 
+defaultcg->shaderContext = cgCreateContext();
 defaultcg->cgLoadMedia("programs/bump_reflection", "vertex.cg", true);
 defaultcg->cgLoadMedia("programs/bump_reflection", "pixel.cg", false);
 #endif
