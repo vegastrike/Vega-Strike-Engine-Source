@@ -61,11 +61,11 @@ AI *PlanetaryOrbit::Execute() {
 void Planet::endElement() {  
 }
 
-void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,float radius,char * filename,int level,bool isunit){
+void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,float radius,char * filename,char * alpha,vector<char *> dest,int level,bool isunit){
   if (level>2) {
 	  assert(numSatellites!=0);
 	  if (satellites[numSatellites-1]->isUnit()==PLANETPTR) {
-		((Planet *)satellites[numSatellites-1])->beginElement(x,y,vely,pos,gravity,radius,filename,level-1,isunit);
+		((Planet *)satellites[numSatellites-1])->beginElement(x,y,vely,pos,gravity,radius,filename,alpha,dest,level-1,isunit);
 	  } else {
 		  isUnit();
 //		  ((Unit *)satellites[numSatellites-1])->Planet::beginElement(x,y,vely,pos,gravity,radius,filename,level-1,isunit);
@@ -82,7 +82,7 @@ void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,f
 	satellites[numSatellites-1]=new Unit (filename, true);
 	satellites[numSatellites-1]->SetAI (new PlanetaryOrbit (satellites[numSatellites-1],vely,pos,x,y)) ;
   }else
-	satellites [numSatellites-1]=new Planet(x,y,vely,pos,gravity,radius,filename);
+	satellites [numSatellites-1]=new Planet(x,y,vely,pos,gravity,radius,filename,alpha,dest);
 }
 
 Planet::Planet()  : Unit(), radius(0.0f), satellites(NULL), numSatellites(0) {
@@ -91,11 +91,11 @@ Planet::Planet()  : Unit(), radius(0.0f), satellites(NULL), numSatellites(0) {
   SetAI(new AI()); // no behavior
 }
 
-Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radius,char * textname) : Unit(), radius(0.0f),  satellites(NULL), numSatellites(0) {
+Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest) : Unit(), radius(0.0f),  satellites(NULL), numSatellites(0) {
   numSatellites = 0;
   satellites = NULL;
   calculatePhysics=false;
-
+  destination=dest;
   Init();
   killed=false;
   name = "Planet - ";
@@ -108,7 +108,7 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
   //cerr << "\nPlanet: " << this << endl;
 //  fclose(fp);
   meshdata = new Mesh*[1];
-  meshdata[0] = new SphereMesh(radius, 16, 16, textname);
+  meshdata[0] = new SphereMesh(radius, 16, 16, textname, alpha);
   meshdata[0]->setEnvMap(GFXFALSE);
   nummesh = 1;
   calculate_extent();
@@ -116,7 +116,11 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
 }
 
 Planet::~Planet() { 
-	for (int i=0;i<numSatellites;i++) {
+	int i;
+	for (i=0;i<this->destination.size();i++) {
+		delete [] destination[i];
+	}
+	for (i=0;i<numSatellites;i++) {
 		delete satellites[i];
 	}
 	if (numSatellites)

@@ -53,7 +53,8 @@ class PlanetaryOrbit;
 enum clsptr {
 	UNITPTR,
 	PLANETPTR,
-	TEXTPTR
+	TEXTPTR,
+	JUMPPTR
 };
 class Unit {
 friend class PlanetaryOrbit;

@@ -8,7 +8,7 @@ class SphereMesh : public Mesh {
   bool centered;
   bool insideout;
  public:
-  SphereMesh(float radius, int stacks, int slices, char *texture, bool insideout=false,bool centeredOnShip=false);
+  SphereMesh(float radius, int stacks, int slices, char *texture, char *alpha=NULL, bool insideout=false,bool centeredOnShip=false);
   void Draw(const Transformation &transform = identity_transformation);
   void ProcessDrawQueue();
 };

@@ -8,7 +8,7 @@
 
 using XMLSupport::tostring;
 
-SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool Insideout,bool centeredOnShip) : Mesh() {
+SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char *alpha, bool Insideout,bool centeredOnShip) : Mesh() {
   //strcpy(name, "Sphere");
 
   SphereMesh *oldmesh;
@@ -103,7 +103,15 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool
    vlist = new GFXVertexList(modes,numvertex, vertexlist, numQuadstrips ,QSOffsets);
    delete [] modes;
    delete [] QSOffsets;
-   Decal = new Texture(texture, 0);
+   if (alpha) {
+	   blendSrc = SRCALPHA;
+	   blendDst = INVSRCALPHA;
+	   Decal = new Texture(texture, alpha);
+   }else {
+		blendSrc = ONE;
+		blendDst = ZERO;
+		Decal = new Texture (texture);
+   }
    centered?envMap = FALSE:envMap=TRUE;
    
    if(centered) {
@@ -138,7 +146,7 @@ void SphereMesh::ProcessDrawQueue() {
     GFXDisable(TEXTURE1);
   }
   Decal->MakeActive();
-  GFXBlendMode(ONE, ZERO);
+  GFXBlendMode(blendSrc, blendDst);
   
   GFXSelectTexcoordSet(0, 0);
   if(envMap) {
@@ -146,7 +154,7 @@ void SphereMesh::ProcessDrawQueue() {
     _Universe->activateLightMap();
     GFXSelectTexcoordSet(1, 1);
   }
-  if (insideout) 
+  if (insideout||(blendDst!=ZERO)) 
     GFXDisable (CULLFACE);
   if (centered) {
     GFXDisable(LIGHTING);

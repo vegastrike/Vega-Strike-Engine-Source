@@ -13,6 +13,23 @@ void StarSystem::endElement(void *userData, const XML_Char *name) {
   ((StarSystem*)userData)->endElement(name);
 }
 
+vector <char *> ParseDestinations (const string &value) {
+	vector <char *> tmp;
+	int i;
+	int j;
+	int k;
+	for (j=0;value[j]!=0;){
+		for (i=0;value[j]!=' '&&value[j]!='\0';i++,j++) {
+		}
+		tmp.push_back(new char [i+1]);
+		for (k=0;k<i;k++) {
+			tmp[tmp.size()-1][k]=value[k+j-i];
+		}
+		tmp[tmp.size()-1][i]='\0';
+		j++;
+	}
+	return tmp;
+}
 
 namespace StarXML {
     enum Names {
@@ -35,19 +52,25 @@ namespace StarXML {
       SYSTEM,
       PLANET,
       UNIT,
-      BACKGROUND
+      BACKGROUND,
+	  ALPHA,
+	  DESTINATION,
+	  JUMP
     };
 
   const EnumMap::Pair element_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("Planet", PLANET),
     EnumMap::Pair ("System", SYSTEM),
-	EnumMap::Pair ("Unit", UNIT)
+	EnumMap::Pair ("Unit", UNIT),
+	EnumMap::Pair ("Jump", JUMP)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("background", BACKGROUND), 
-    EnumMap::Pair ("file", XFILE), 
+    EnumMap::Pair ("file", XFILE),
+    EnumMap::Pair ("alpha", ALPHA),
+    EnumMap::Pair ("destination", DESTINATION), 
     EnumMap::Pair ("x", X), 
     EnumMap::Pair ("y", Y), 
     EnumMap::Pair ("z", Z), 
@@ -65,8 +88,8 @@ namespace StarXML {
 
 };
 
-  const EnumMap element_map(element_names, 4);
-  const EnumMap attribute_map(attribute_names, 17);
+  const EnumMap element_map(element_names, 5);
+  const EnumMap attribute_map(attribute_names, 19);
 }
 
 using XMLSupport::EnumMap;
@@ -76,9 +99,13 @@ using namespace StarXML;
 
 void StarSystem::beginElement(const string &name, const AttributeList &attributes) {
   xml->cursun.i=0;
+
   xml->cursun.j=0;
+
   xml->cursun.k=0;
+  vector <char *>dest;
   char * filename =NULL;
+  char * alpha = NULL;
   float gravity=0;
   float velocity=0;
   float position=0;
@@ -121,6 +148,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 
     break;
 
+  case JUMP:
   case PLANET:
 	assert (xml->unitlevel>0);
 	xml->unitlevel++;
@@ -128,12 +156,22 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     R = Vector (0,0,1);
 	filename = new char [1];
 	filename[0]='\0';
+	alpha=new char[1];
+	alpha[0]='\0';
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
 	delete []filename;
     filename = new char [strlen((*iter).value.c_str())+1];
 	strcpy(filename,(*iter).value.c_str());
+	break;
+	  case DESTINATION:
+	dest=ParseDestinations((*iter).value);
+	break;
+	  case ALPHA:
+	delete []alpha;
+    alpha = new char [strlen((*iter).value.c_str())+1];
+	strcpy(alpha,(*iter).value.c_str());
 	break;
       case RI:
 	R.i=parse_float((*iter).value);
@@ -155,16 +193,25 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	break;
       case X:
  	assert(xml->unitlevel==2);
+
  	xml->cursun.i=parse_float((*iter).value);
+
  	break;
+
       case Y:
  	assert(xml->unitlevel==2);
+
  	xml->cursun.j=parse_float((*iter).value);
+
  	break;
+
       case Z:
  	assert(xml->unitlevel==2);
+
  	xml->cursun.k=parse_float((*iter).value);
+
  	break;
+
       case RADIUS:
 	radius=parse_float((*iter).value);
 	break;
@@ -179,12 +226,16 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	break;
       }
 
-    }  
+    }
+	if (alpha[0]==0) {
+		delete [] alpha;
+		alpha=NULL;
+	}
     if (xml->unitlevel>2) {
       assert(xml->moons.size()!=0);
-      xml->moons[xml->moons.size()-1]->beginElement(R,S,velocity,position,gravity,radius,filename,xml->unitlevel-1);
+      xml->moons[xml->moons.size()-1]->beginElement(R,S,velocity,position,gravity,radius,filename,alpha,dest,xml->unitlevel-1);
     } else {
-      xml->moons.push_back(new Planet(R,S,velocity,position,gravity,radius,filename));
+      xml->moons.push_back(new Planet(R,S,velocity,position,gravity,radius,filename,alpha,dest));
       xml->moons[xml->moons.size()-1]->SetOrigin(xml->cursun);
 	}
     delete []filename;
@@ -223,16 +274,23 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	break;
       case X:
  	assert(xml->unitlevel==2);
+
  	xml->cursun.i=parse_float((*iter).value);
+
  	break;
       case Y:
  	assert(xml->unitlevel==2);
+
  	xml->cursun.j=parse_float((*iter).value);
+
  	break;
       case Z:
  	assert(xml->unitlevel==2);
+
  	xml->cursun.k=parse_float((*iter).value);
+
  	break;
+
       case PPOSITION:
 	position=parse_float((*iter).value);
 	break;
@@ -244,7 +302,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     }  
     if (xml->unitlevel>2) {
       assert(xml->moons.size()!=0);
-      xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,xml->unitlevel-1,true);
+      xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,0,vector <char *>(),xml->unitlevel-1,true);
     } else {
       xml->moons.push_back((Planet *)new Unit(filename,true));
       xml->moons[xml->moons.size()-1]->SetAI(new PlanetaryOrbit(xml->moons[xml->moons.size()-1],velocity,position,R,S));

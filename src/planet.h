@@ -50,15 +50,15 @@ class Planet : public Unit {
  private:
   float radius;
   float gravity;
-
+  vector <char *> destination;
   Unit **satellites;
   int numSatellites;
 
  public:
   Planet();
   void endElement();
-  void beginElement(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename,int level,bool isunit=false);
-  Planet(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename);
+  void beginElement(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename,char * alpha,vector<char *>dest,int level,bool isunit=false);
+  Planet(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename,char *alpha,vector<char *> dest);
   ~Planet();
   virtual enum clsptr isUnit() {return PLANETPTR;}
 
