@@ -119,7 +119,7 @@ void InitJoystick(){
           printf ("setting joystick functionality:: joystick online");
           glutJoystickFunc (myGlutJoystickCallback,JoystickPollingRate());
           num_joysticks=1;
-      }
+      
   }
 #endif
 #endif
