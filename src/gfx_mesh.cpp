@@ -41,7 +41,7 @@
 
 #include <GL/gl.h>
 using std::list;
-Hashtable<string, Mesh, char [513]> Mesh::meshHashTable;
+Hashtable<string, Mesh, char [127]> Mesh::meshHashTable;
 class OrigMeshContainer {
 public:
   Mesh * orig;

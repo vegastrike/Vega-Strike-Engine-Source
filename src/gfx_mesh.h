@@ -195,7 +195,7 @@ protected:
  
   Vector local_pos; 
 
-  static Hashtable<string, Mesh,char[513]> meshHashTable;
+  static Hashtable<string, Mesh,char[127]> meshHashTable;
   int refcount;
   Vector mx;//bounding box
   Vector mn;
