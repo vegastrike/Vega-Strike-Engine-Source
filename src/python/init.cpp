@@ -180,7 +180,9 @@ BOOST_PYTHON_MODULE_INIT(Vegastrike)
 }
 //boost::python::detail::extension_instance::wrapped_objects
 
-
+/*Orders::FireAt & from_python(PyObject *p,boost::python::type<Orders::FireAt &>) {
+	return from_python(p,boost::python::type<Orders::FireAt &>());
+}*/
 void Python::initpaths(){
   char pwd[2048];
   getcwd (pwd,2047);
