@@ -95,6 +95,40 @@ public:
 			virtual ~BaseObj () {}
 			explicit BaseObj (std::string ind) : index(ind) {}
 		};
+		class BasePython : public BaseObj{
+		public:
+			const std::string pythonfile;
+			float timeleft;
+			float maxtime;
+			virtual void Draw (::BaseInterface *base);
+#ifdef BASE_MAKER
+			virtual void EndXML(FILE *fp);
+#endif
+			virtual ~BasePython () {}
+			BasePython (std::string ind, std::string python, float time) : BaseObj(ind), pythonfile(python), maxtime(time), timeleft(0) {}
+		};
+		class BaseText : public BaseObj{
+		public:
+			TextPlane text;
+			virtual void Draw (::BaseInterface *base);
+#ifdef BASE_MAKER
+			virtual void EndXML(FILE *fp);
+#endif
+			virtual ~BaseText () {}
+			BaseText (std::string texts, float posx, float posy, float wid, float hei, float charsizemult, GFXColor backcol, GFXColor forecol, std::string ind) : BaseObj(ind), text(backcol, forecol) {
+				text.SetPos(posx,posy);
+				text.SetSize(wid,hei);
+				float cx=0, cy=0;
+				text.GetCharSize(cx, cy);
+				cx*=charsizemult;
+				cy*=charsizemult;
+				text.SetCharSize(cx, cy);
+				text.SetText(texts);
+			}
+			void SetText(std::string newtext) {
+				text.SetText(newtext);
+			}
+		};
 		class BaseShip : public BaseObj {
 		public:
 			virtual void Draw (::BaseInterface *base);

@@ -31,6 +31,28 @@ namespace BaseUtil {
 		newroom->objs.push_back(new BaseInterface::Room::BaseShip(P.i,P.j,P.k,Q.i,Q.j,Q.k,R.i,R.j,R.k,pos,index));
 //		return BaseInterface::CurrentBase->rooms[BaseInterface::CurrentBase->curroom]->links.size()-1;
 	}
+	void RunScript (int room, std::string ind, std::string pythonfile, float time) {
+		BaseInterface::Room *newroom=CheckRoom(room);
+		if (!newroom) return;
+		newroom->objs.push_back(new BaseInterface::Room::BasePython(ind, pythonfile, time));
+	}
+	void TextBox (int room, std::string ind, std::string text, float x, float y, float wid, float hei, float charsizemult, Vector backcol, float backalp, Vector forecol) {
+		BaseInterface::Room *newroom=CheckRoom(room);
+		if (!newroom) return;
+		newroom->objs.push_back(new BaseInterface::Room::BaseText(text, x, y, wid, hei, charsizemult, GFXColor(backcol, backalp), GFXColor(forecol), ind));
+	}
+	void SetTextBoxText(int room, std::string ind, std::string text) {
+		BaseInterface::Room *newroom=CheckRoom(room);
+		if (!newroom) return;
+		for (int i=0;i<newroom->objs.size();i++) {
+			if (newroom->objs[i]) {
+				if (newroom->objs[i]->index==ind) {
+					// FIXME: Will crash if not a Text object.
+					dynamic_cast<BaseInterface::Room::BaseText*>(newroom->objs[i])->SetText(text);
+				}
+			}
+		}
+	}
 	static void BaseLink (BaseInterface::Room *room,float x, float y, float wid, float hei, std::string text,bool reverse=false) {
 		BaseInterface::Room::Link *lnk;
 		if (reverse) {
@@ -162,6 +184,12 @@ namespace BaseUtil {
 	int GetCurRoom () {
 		if (!BaseInterface::CurrentBase) return -1;
 		return BaseInterface::CurrentBase->curroom;
+	}
+	void SetCurRoom (int room) {
+		BaseInterface::Room *newroom=CheckRoom(room);
+		if (!newroom) return;
+		if (!BaseInterface::CurrentBase) return;
+		BaseInterface::CurrentBase->GotoLink(room);
 	}
 	int GetNumRoom () {
 		if (!BaseInterface::CurrentBase) return -1;

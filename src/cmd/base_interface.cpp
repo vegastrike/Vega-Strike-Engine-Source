@@ -132,6 +132,46 @@ BaseInterface::Room::BaseTalk::BaseTalk (std::string msg,std::string ind, bool o
 	active_talks.push_back(this);
 }
 
+void BaseInterface::Room::BaseText::Draw (BaseInterface *base) {
+	text.Draw();
+}
+
+void RunPython(const char *filnam) {
+	printf("Run python:\n%s\n", filnam);
+	if (filnam[0]) {
+		if (filnam[0]=='#') {
+			::Python::reseterrors();
+			PyRun_SimpleString(const_cast<char*>(filnam));
+			::Python::reseterrors();
+		}else {
+			FILE *fp=VSFileSystem::vs_open(filnam,"r");
+			if (fp) {
+				int length=strlen(filnam);
+				char *newfile=new char[length+1];
+				strncpy(newfile,filnam,length);
+				newfile[length]='\0';
+				::Python::reseterrors();
+				PyRun_SimpleFile(fp,newfile);
+				::Python::reseterrors();
+				fclose(fp);
+				processDelayedMissions();
+			} else {
+				fprintf(stderr,"Warning:python link file '%s' not found\n",filnam);
+			}
+		}
+	}
+}
+
+void BaseInterface::Room::BasePython::Draw (BaseInterface *base) {
+	timeleft+=GetElapsedTime()/getTimeCompression();
+	if (timeleft>=maxtime) {
+		timeleft=0;
+		printf("Running python script... ");
+		RunPython(this->pythonfile.c_str());
+		return; //do not do ANYTHING with 'this' after the previous statement...
+	}
+}
+
 void BaseInterface::Room::BaseTalk::Draw (BaseInterface *base) {
 /*	GFXColor4f(1,1,1,1);
 	GFXBegin(GFXLINESTRIP);
@@ -723,30 +763,9 @@ void BaseInterface::Room::Talk::Click (BaseInterface *base,float x, float y, int
 
 void BaseInterface::Room::Link::Click (BaseInterface *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {
-		const char * filnam=this->pythonfile.c_str();
-		if (filnam[0]) {
-                  if (filnam[0]=='#') {
-                    ::Python::reseterrors();
-                    PyRun_SimpleString(const_cast<char*>(filnam));
-                    ::Python::reseterrors();
-                  }else {
-			FILE *fp=VSFileSystem::vs_open(filnam,"r");
-			if (fp) {
-				int length=strlen(filnam);
-				char *newfile=new char[length+1];
-				strncpy(newfile,filnam,length);
-				newfile[length]='\0';
-				::Python::reseterrors();
-				PyRun_SimpleFile(fp,newfile);
-				::Python::reseterrors();
-				fclose(fp);
-                                processDelayedMissions();
-			} else {
-				fprintf(stderr,"Warning:python link file '%s' not found\n",filnam);
-			}
-                  }
-		}
-	}}
+		RunPython(this->pythonfile.c_str());
+	}
+}
 
 struct BaseColor {
   unsigned char r,g,b,a;

@@ -16,8 +16,12 @@ namespace BaseUtil {
 	void EnqueueMessageToRoom(int room, std::string text);
 	void Message(std::string text);
 	void EnqueueMessage(std::string text);
+	void RunScript (int room, std::string ind, std::string pythonfile, float time);
+	void TextBox (int room, std::string ind, std::string text, float x, float y, float wid, float hei, float charsizemult, Vector backcol, float backalp, Vector forecol);
+	void SetTextBoxText(int room, std::string ind, std::string text);
 	void EraseLink (int room, std::string index);
 	void EraseObj (int room, std::string index);
 	int GetCurRoom ();
+	void SetCurRoom (int room);
 	int GetNumRoom ();
 }
