@@ -1,6 +1,10 @@
 #include "mesh_io.h"
 #include "from_BFXM.h"
 
+string inverseblend[16]={"ZERO","ZERO","ONE","SRCCOLOR","INVSRCCOLOR","SRCALPHA","INVSRCALPHA",
+"DESTALPHA","INVDESTALPHA","DESTCOLOR","INVDESTCOLOR","SRCALPHASAT","CONSTALPHA","INVCONSTALPHA",
+"CONSTCOLOR","INVCONSTCOLOR"};
+
 void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile){
   int32bit intbuf;
   int32bit word32index=0;
@@ -90,7 +94,7 @@ void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile){
 		  int32bit VSAbeginword=word32index;
 		  int32bit LengthOfArbitraryLengthAttributes=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//Length of Arbitrary length attributes section in bytes
 		  word32index+=1;
-		  fprintf(Outputfile,"<Mesh scale=\"%f\" reverse=\"%d\" forcetexture=\"%d\" sharevert=\"%d\" polygonoffset=\"%f\" blendmode=\"%d %d\" ",scale,reverse,forcetexture,sharevert,polygonoffset,bsrc,bdst);
+		  fprintf(Outputfile,"<Mesh scale=\"%f\" reverse=\"%d\" forcetexture=\"%d\" sharevert=\"%d\" polygonoffset=\"%f\" blendmode=\"%s %s\" ",scale,reverse,forcetexture,sharevert,polygonoffset,inverseblend[bsrc%16].c_str(),inverseblend[bdst%16].c_str());
 		  
 		  string detailtexturename="";
 		  int32bit detailtexturenamelen=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//detailtexture name length
