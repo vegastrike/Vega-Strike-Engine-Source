@@ -35,10 +35,11 @@ Animation::Animation ():Primitive()
 	Decal = NULL;
 }
 
-Animation::Animation (char * FileName, bool Rep):Primitive()
+Animation::Animation (char * FileName, bool Rep, bool camorient):Primitive()
 {	
   repeat = Rep;
 	cumtime = 0;
+	camup = camorient;
 	char temp [256];
 	char tempalp [256];
 	float alp;
@@ -110,25 +111,28 @@ void Animation:: Draw()
 			Vector p1,q1,r1;
 			Vector camp,camq,camr;
 			Camera* TempCam = _GFX ->AccessCamera();
-			
 			_GFX->AccessCamera()->GetPQR(camp,camq,camr);
-			q1.i = orientation[1];
-			q1.j = orientation[5];
-			q1.k = orientation[9];
+			if (camup)  {
+			  p1=camp; q1 =  camq ; r1=camr;
+			}else{
+			  q1.i = orientation[1];
+			  q1.j = orientation[5];
+			  q1.k = orientation[9];
 			
-			p1 = (q1.Dot(camq))*camq;
-			q1 = (q1.Dot(camp))*camp+p1;			
-			Vector posit;
-			TempCam->GetPosition (posit);
-			r1.i = -pos.i+posit.i;
-			r1.j = -pos.j+posit.j;
-			r1.k = -pos.k+posit.k;
-			Normalize (r1);
+			  p1 = (q1.Dot(camq))*camq;
+			  q1 = (q1.Dot(camp))*camp+p1;			
+			  Vector posit;
+			  TempCam->GetPosition (posit);
+			  r1.i = -pos.i+posit.i;
+			  r1.j = -pos.j+posit.j;
+			  r1.k = -pos.k+posit.k;
+			  Normalize (r1);
 
 
-			ScaledCrossProduct (q1,r1,p1);		
-			ScaledCrossProduct (r1,p1,q1); 
+			  ScaledCrossProduct (q1,r1,p1);		
+			  ScaledCrossProduct (r1,p1,q1); 
 			//if the vectors are linearly dependant we're phucked :) fun fun fun
+			}
 			static float ShipMat [16];
 			VectorToMatrix (ShipMat,p1,q1,r1);
 			Translate(translation, pos.i, pos.j, pos.k);
