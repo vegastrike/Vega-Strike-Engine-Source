@@ -33,6 +33,7 @@ libnetgeneric = \
 	$(libacctserver) \
 	cubicsplines.cpp		\
 	cubicsplines.h		\
+	inet_file.cpp		\
 	prediction.cpp		\
 	prediction.h		\
 	mangle.cpp		\
