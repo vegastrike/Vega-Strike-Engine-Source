@@ -339,6 +339,9 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       case XML::TEXTURE:
 	xml->decal_name = (*iter).value;
+	if (xml->decal_name=="") {
+	  xml->decal_name="missing_this_file";
+	}
 	texture_found = true;
 	break;
       case XML::ALPHAMAP:
