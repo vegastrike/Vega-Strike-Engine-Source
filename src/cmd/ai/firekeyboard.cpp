@@ -32,6 +32,7 @@ void FireKeyboard::FireKey(int key, KBSTATE k) {
   if (k==UP&&firekey==RELEASE) {
 
   } else {
+
     firekey = k;
     //    printf("firekey %d %d\n",k,key);
   }
@@ -55,7 +56,8 @@ void FireKeyboard::MisSelKey(int, KBSTATE k) {
 } 
 
 void FireKeyboard::MissileKey(int, KBSTATE k) {
-  missilekey = k;
+  if (missilekey!=PRESS)
+   missilekey = k;
 }
 
 void FireKeyboard::ChooseTargets () {
@@ -128,10 +130,15 @@ void FireKeyboard::Execute () {
   } else {
     ChooseTargets();
   }
-  if (firekey==DOWN||jfirekey==DOWN) 
+  if (firekey==PRESS||jfirekey==PRESS||firekey==DOWN||jfirekey==DOWN) 
     parent->Fire(false);
-  if (missilekey==DOWN||jmissilekey==DOWN)
+  if (missilekey==DOWN||missilekey==PRESS||jmissilekey==PRESS||jmissilekey==DOWN) {
     parent->Fire(true);
+    if (missilekey==PRESS)
+      missilekey = DOWN;
+    if (jmissilekey==PRESS)
+      jmissilekey=DOWN;
+  }
   else if (firekey==RELEASE||jfirekey==RELEASE) {
     firekey=UP;
     jfirekey=UP;

@@ -4,8 +4,8 @@
 #include "vs_globals.h"
 #include "aux_texture.h"
 #include "decalqueue.h"
-
-
+#include "config_xml.h"
+#include "xml_support.h"
 static DecalQueue halodecal;
 static vector <GFXQuadList *> halodrawqueue;
 
@@ -36,11 +36,11 @@ Halo::~Halo () {
 }
 void Halo::Draw (const Transformation &quat, const Matrix m, float alpha) {
   Vector pos,p,q,r, offset;
-
+  static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable ("graphics","HaloOffset",".1"));
   pos=  position.Transform(m);
   offset = (_Universe->AccessCamera()->GetPosition()-pos);
   offset.Normalize();
-  offset*=(sizex>sizey?sizex:sizey);
+  offset*=HaloOffset*(sizex>sizey?sizex:sizey);
   _Universe->AccessCamera()->GetPQR(p,q,r);
   p=p*sizex;
   r =-r;

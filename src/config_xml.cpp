@@ -91,6 +91,7 @@ VegaConfig::VegaConfig(char *configfile){
 /*
 for i in `cat cmap` ; do echo "  command_map[\""$i"\"]=FlyByKeyboard::"$i ";" ; done
  */
+#ifdef HAVE_AL
 const float volinc = 1;
 const float dopinc = .1;
 void incvol (int i, KBSTATE a) {
@@ -119,6 +120,7 @@ void decdop (int i, KBSTATE a) {
 		AUDChangeDoppler (AUDGetDoppler()-dopinc);
 	}
 }
+#endif
 void VegaConfig::initKeyMap(){
   // mapping from special key string to glut key
   key_map["space"]=' ';
@@ -161,12 +163,13 @@ void VegaConfig::initKeyMap(){
   using namespace CockpitKeys;
 
 void VegaConfig::initCommandMap(){
+#ifdef HAVE_AL
   command_map["NoPositionalKey"]=mute;
   command_map["DopplerInc"]=incdop;
   command_map["DopplerDec"]=decdop;
   command_map["VolumeInc"]=incvol;
   command_map["VolumeDec"]=decvol;
-
+#endif
   // mapping from command string to keyboard handler
   command_map["SheltonKey"]=FlyByKeyboard::SheltonKey ;
   command_map["StartKey"]=FlyByKeyboard::StartKey ;

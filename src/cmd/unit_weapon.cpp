@@ -17,6 +17,7 @@ void Unit::UnFire () {
 extern unsigned short apply_float_to_short (float tmp);
 
 void Unit::Fire (bool Missile) {
+
   if (cloaking>=0)
     return;
   for (int i=0;i<nummounts;i++) {
