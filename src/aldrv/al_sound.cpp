@@ -255,6 +255,7 @@ void AUDStopPlaying (const int sound){
 #endif
 }
 static bool AUDReclaimSource (const int sound) {
+#ifdef HAVE_AL
   if (sounds[sound].source==(ALuint)0) {
     if (unusedsrcs.empty())
       return false;
@@ -263,7 +264,8 @@ static bool AUDReclaimSource (const int sound) {
     alSourcei(sounds[sound].source, AL_BUFFER, sounds[sound].buffer );
     alSourcei(sounds[sound].source, AL_LOOPING, sounds[sound].looping);    
   }
-  return true;			 
+  return true;
+#endif			 
 }
 void AUDStartPlaying (const int sound){
 #ifdef HAVE_AL
