@@ -81,9 +81,14 @@ void Cockpit::Init (const char * file, bool isDisabled) {
     Init (disname.c_str());
     return;
   }
+  string cpdir=vs_config->getVariable("data","cockpits","");
+  if (cpdir.length())
+	  vschdir (cpdir.c_str());  
   vschdir (file);
   FILE *tempfp = fopen(file, "rb");
   vscdup();
+  if (cpdir.length())
+	  vscdup();  
   if (tempfp) {
 	  fclose(tempfp);
   } else {
@@ -98,7 +103,7 @@ void Cockpit::Init (const char * file, bool isDisabled) {
 	  return;
   }
   Delete();
-  string cpdir=vs_config->getVariable("data","cockpits","");
+//  string cpdir=vs_config->getVariable("data","cockpits","");
   if (cpdir.length())
 	  vschdir (cpdir.c_str());
   vschdir (file);
