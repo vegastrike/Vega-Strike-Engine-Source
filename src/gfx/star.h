@@ -15,7 +15,7 @@ class StarVlist {
 	Vector camq;
 	double lasttime;
 public:
-	StarVlist (int num, float spread,const class std::string &our_system_name);
+	StarVlist (int num, float spread,const std::string &our_system_name);
 	~StarVlist();
 	void BeginDrawState(const QVector &center, const Vector & vel,bool rotate, bool yawpitch);
 	void Draw();
