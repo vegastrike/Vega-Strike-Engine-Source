@@ -286,49 +286,20 @@ void GFXVertexList::GetPolys (GFXVertex **vert, int *numpolys, int *numtris) {
     }
 }
 
-GFXTVertex *GFXVertexList::LockTransformed()
+
+GFXVertex *GFXVertexList::Lock()
 {
   if (tessellation)
-    tesslist->LockTransformed();
-	return NULL;
-} // Stuff to support environment mapping
-
-void GFXVertexList::UnlockTransformed()
-{
-  if (tessellation)
-    tesslist->UnlockTransformed();
-
-}
-
-GFXVertex *GFXVertexList::LockUntransformed()
-{
-  if (tessellation)
-    tesslist->LockUntransformed();
+    tesslist->Lock();
   return myVertices;
 }// Stuff to support environment mapping
 
-void GFXVertexList::UnlockUntransformed()
+void GFXVertexList::Unlock()
 {
   if (tessellation)
-    tesslist->UnlockUntransformed();
+    tesslist->Unlock();
 }
 
-
-GFXBOOL GFXVertexList::SwapUntransformed()
-{
-  if (tessellation)
-    tesslist->SwapUntransformed();
-  
-	return GFXFALSE;
-}
-
-GFXBOOL GFXVertexList::SwapTransformed()
-{
-  if (tessellation)
-    tesslist->SwapTransformed();
-
-	return GFXFALSE;
-}
 
 void GFXVertexList::LoadDrawState() {
 #ifdef USE_DISPLAY_LISTS
