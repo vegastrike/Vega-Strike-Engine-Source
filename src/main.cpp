@@ -440,7 +440,7 @@ void bootstrap_main_loop () {
     //    SplashScreen = new Animation (mission->getVariable ("splashscreen",vs_config->getVariable ("graphics","splash_screen","vega_splash.ani")).c_str(),0); 
     bootstrap_draw ("Vegastrike Loading...",-.135,0,SplashScreen);
   if (g_game.music_enabled) {
-#ifdef _WIN32
+#if defined( _WIN32) && !defined( __CYGWIN__)
 	  static bool isconsole=XMLSupport::parse_bool(vs_config->getVariable("audio","music_in_console","true"));
 	  if (isconsole) {
 	    int pid=(int)ShellExecute(NULL,"open","./soundserver.exe","","./",SW_MINIMIZE);
