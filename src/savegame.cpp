@@ -23,6 +23,14 @@ if( Network==NULL)
     changehome(false);
     //char c[2]={'\0','\0'};
     FILE * fp = fopen (("save.txt"),"r");
+    if (!fp) {
+      fp = fopen ("save.txt","w");
+      if (fp) {
+	fwrite ("default\n",8,1,fp);
+	fclose (fp);
+      }
+      fp = fopen (("save.txt"),"r");
+    }
     if (fp) {
       fseek (fp,0,SEEK_END);
       int length = ftell (fp);
