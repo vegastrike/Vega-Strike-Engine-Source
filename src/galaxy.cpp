@@ -298,7 +298,9 @@ StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpb
   LoadStarSystem (ss);
 
   pushActiveStarSystem(ss);
-  for (float tume=0;tume<=4*SIMULATION_ATOM;tume+=.001+GetElapsedTime()) {
+  int blah=0;
+  for (float tume=0;tume<=4*SIMULATION_ATOM||blah<10;tume+=.001+GetElapsedTime()) {
+    blah++;
     //make sure the planets are aligned right before calling director
     ss->Update(1,false);
   }

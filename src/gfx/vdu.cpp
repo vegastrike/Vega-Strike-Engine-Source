@@ -712,7 +712,7 @@ int VDU::DrawVDUObjective (void * obj, int offset) {
     rez+=mo->objective;
     return tp->Draw (rez,0,true);  
   }
-  return 0;
+  return offset+1;
 }
 void VDU::DrawVDUObjectives (Unit *parent) {
   GFXColor col (tp->col);

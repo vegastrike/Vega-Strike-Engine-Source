@@ -294,7 +294,7 @@ static int applyto (unsigned short &shield, const unsigned short max, const floa
 }
 
 float Unit::MaxShieldVal() const{
-  float maxshield;
+  float maxshield=0;
   switch (shield.number) {
   case 2:
     maxshield = .5*(shield.fb[2]+shield.fb[3]);

@@ -211,6 +211,9 @@ namespace UniverseUtil {
 			return 0;
 		}
 	}
+    int numActiveMissions() {
+        return active_missions.size();
+    }
     void IOmessage(int delay,string from,string to,string message){
 		mission->msgcenter->add(from,to,message,delay);
 	}
