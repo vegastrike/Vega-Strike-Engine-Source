@@ -131,7 +131,7 @@ namespace CockpitXML {
     EnumMap::Pair ("type", VDUTYPE),
   };
 
-  const EnumMap element_map(element_names, 26);
+  const EnumMap element_map(element_names, 29);
   const EnumMap attribute_map(attribute_names, 28);
 }
 
