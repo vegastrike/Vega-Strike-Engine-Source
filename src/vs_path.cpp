@@ -171,7 +171,11 @@ std::string MakeSharedStarSysPath (const std::string &s){
   string newpath =getStarSystemSector (s);
  
   if (chdir (newpath.c_str())==-1) {
+#ifdef _WIN32
+    mkdir (newpath.c_str());
+#else
     mkdir (newpath.c_str(), 0xFFFFFFFF);
+#endif
     //system ("mkdir " HOMESUBDIR "/generatedbsp");
   }else {
     chdir ("..");
