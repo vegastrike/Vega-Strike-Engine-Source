@@ -401,61 +401,48 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 	}
 	else
 	{
-		// Should get the data about the player state and data so they can be sent with ACCEPT
-		char	buf[MAXBUFFER];
-		memcpy( buf, packet.getData(), NAMELEN*2);
-		unsigned int maxsave = MAXBUFFER - Packet::getHeaderLength() - 2*NAMELEN - 2*sizeof( unsigned int);
-		unsigned int readsize=0, readsize2=0;
+		unsigned int readsize=0, readsize2=0, xmlsize=0, savesize=0;
+		// Put maxsave value to a high value that will be always bigger than simple player saves
+		int maxsave = 9999999999;
 
-		// Read the XML unit file
+	// Try to save xml file
 		string acctfile = acctdir+acct->name+".save";
 		cout<<"Trying to open : "<<acctfile<<endl;
 		FILE *fp = fopen( acctfile.c_str(), "r");
 		if( fp == NULL)
 		{
-			cout<<"Account file does not exists... sending default one to game server"<<endl;
+			cout<<"Account save file does not exists... sending default one to game server"<<endl;
 			acctfile = acctdir+"default.save";
 			cout<<"Trying to open : "<<acctfile<<endl;
 			fp = fopen( acctfile.c_str(), "r");
 		}
+	// Try to open xml file
+		string acctsave = acctdir+acct->name+".xml";
+		FILE * fp2 = fopen( acctsave.c_str(), "r");
+		if( fp2 == NULL)
+		{
+			cout<<"XML save file does not exists... sending default one to game server"<<endl;
+			acctsave = acctdir+"default.xml";
+			cout<<"Trying to open : "<<acctsave<<endl;
+			fp2 = fopen( acctsave.c_str(), "r");
+		}
+	// Allocate the needed buffer
+		char * buf;
+		if( fp!=NULL && fp2!=NULL)
+		{
+			savesize = fseek( fp, 0, SEEK_END);
+			fseek( fp, 0, SEEK_SET);
+			xmlsize = fseek( fp2, 0, SEEK_END);
+			fseek( fp2, 0, SEEK_SET);
+			buf = new char[savesize+xmlsize];
+		}
+	// Read the XML unit file
 		if( fp!=NULL)
 		{
 			readsize = fread( (buf+2*NAMELEN+sizeof( unsigned int)), sizeof( char), maxsave, fp);
-			if( readsize>=maxsave)
+			if( readsize!=xmlsize)
 			{
-				cout<<"Error : account file is bigger than "<<maxsave<<" ("<<readsize<<")"<<endl;
-				exit( 1);
-			}
-			fclose( fp);
-		}
-		else
-		{
-			cout<<"Error, default xml save not found"<<endl;
-			cleanup();
-		}
-		// Put the size of the first save file in the buffer to send
-		unsigned int savesize = htonl( readsize);
-		memcpy( buf+2*NAMELEN, &savesize, sizeof( unsigned int));
-		//unsigned int xml_size = ntohl( *( (unsigned int *)(buf+NAMELEN*2)));
-		//cout<<"XML reversed = "<<xml_size<<endl;
-
-		// Read the save file
-		string acctsave = acctdir+acct->name+".xml";
-		fp = fopen( acctsave.c_str(), "r");
-		if( fp == NULL)
-		{
-			cout<<"Save file does not exists... sending default one to game server"<<endl;
-			acctsave = acctdir+"default.xml";
-			cout<<"Trying to open : "<<acctsave<<endl;
-			fp = fopen( acctsave.c_str(), "r");
-		}
-		if( fp!=NULL)
-		{
-			// Read the XML unit file
-			readsize2 = fread( (buf+readsize+2*NAMELEN+2*sizeof( unsigned int)), sizeof( char), maxsave, fp);
-			if( (readsize2+readsize) >= maxsave)
-			{
-				cout<<"Error : save file is bigger than "<<maxsave<<" ("<<readsize2<<")"<<endl;
+				cout<<"Error reading save file : "<<readsize<<" read ("<<xmlsize<<" to read)"<<endl;
 				exit( 1);
 			}
 			fclose( fp);
@@ -465,8 +452,33 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 			cout<<"Error, default save not found"<<endl;
 			cleanup();
 		}
+		// Put the name and passwd of the player in the packet
+		memcpy( buf, packet.getData(), NAMELEN*2);
+		// Put the size of the first save file in the buffer to send
+		savesize = htonl( readsize);
+		memcpy( buf+2*NAMELEN, &savesize, sizeof( unsigned int));
+		//unsigned int xml_size = ntohl( *( (unsigned int *)(buf+NAMELEN*2)));
+		//cout<<"XML reversed = "<<xml_size<<endl;
+
+	// Read the save file
+		if( fp2!=NULL)
+		{
+			// Read the XML unit file
+			readsize2 = fread( (buf+readsize+2*NAMELEN+2*sizeof( unsigned int)), sizeof( char), maxsave, fp2);
+			if( savesize!=readsize2)
+			{
+				cout<<"Error reading xml save file : "<<readsize2<<" read ("<<xmlsize<<" to read)"<<endl;
+				exit( 1);
+			}
+			fclose( fp2);
+		}
+		else
+		{
+			cout<<"Error, default xml not found"<<endl;
+			cleanup();
+		}
 		// Put the size of the second save file in the buffer to send
-		unsigned int xmlsize = htonl( readsize2);
+		xmlsize = htonl( readsize2);
 		//cout<<"NETWORK FORMAT : XML size = "<<xmlsize<<" --- SAVE size = "<<savesize<<endl;
 		//cout<<"HOST FORMAT : XML size = "<<ntohl(xmlsize)<<" --- SAVE size = "<<ntohl(savesize)<<endl;
 		memcpy( buf+2*NAMELEN+sizeof( unsigned int)+readsize, &xmlsize, sizeof( unsigned int));
