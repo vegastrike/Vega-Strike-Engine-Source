@@ -146,7 +146,23 @@ using XMLSupport::AttributeList;
 using namespace CockpitXML;
 
 
-
+string getRes(string inp) {
+  string::size_type where=inp.rfind(".");
+  int x = g_game.x_resolution;
+  if (x<700) x=640;
+  else if (x<840) x=800;
+  else if (x<1100) x=1024;
+  else if (x<1400) x=1280;
+  else if (x<1700) x=1600;
+  else x=1600;
+  string rez =XMLSupport::tostring(x);
+  
+  if (where==string::npos) {
+    return inp+"_"+rez+".spr";
+  }else {
+    return inp.substr(0,where)+"_"+rez+".spr";
+  } 
+}
 void GameCockpit::beginElement(const string &name, const AttributeList &attributes) {
   static bool cockpit_smooth=XMLSupport::parse_bool(vs_config->getVariable("graphics","cockpit_smooth_texture","false"));
   static bool crosshair_smooth=XMLSupport::parse_bool(vs_config->getVariable("graphics","crosshair_smooth_texture","true"));
@@ -190,7 +206,14 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
 		  cockpit_offset = XMLSupport::parse_float ((*iter).value);
 	break;
       case XFILE:
-	Pit[0]= new VSSprite ((*iter).value.c_str(),cockpit_smooth?BILINEAR:NEAREST);
+        {
+          std::string tmp=getRes((*iter).value);
+          Pit[0]= new VSSprite (tmp.c_str(),cockpit_smooth?BILINEAR:NEAREST);
+          if (!Pit[0]->LoadSuccess()){
+            delete Pit[0];
+            Pit[0]= new VSSprite ((*iter).value.c_str(),cockpit_smooth?BILINEAR:NEAREST);
+          }
+        }
 	break;
       case SOUNDFILE:
 	SetSoundFile((*iter).value);
@@ -202,7 +225,14 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
       case BACK:
       case LEFT:
       case RIGHT:
-	Pit[attr-FRONT] = new VSSprite ((*iter).value.c_str(),cockpit_smooth?BILINEAR:NEAREST);
+        {
+          std::string tmp=getRes((*iter).value);
+          Pit[attr-FRONT] = new VSSprite ((*iter).value.c_str(),cockpit_smooth?BILINEAR:NEAREST);
+          if (!Pit[attr-FRONT]->LoadSuccess()) {
+            delete Pit[attr-FRONT];
+            Pit[attr-FRONT] = new VSSprite ((*iter).value.c_str(),cockpit_smooth?BILINEAR:NEAREST);
+          }
+        }
 	break;
 	  default:
 		  break;

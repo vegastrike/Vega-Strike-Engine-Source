@@ -6,6 +6,14 @@ VSSprite * createVSSprite(const char *file)
 {
 	return NULL;
 }
+bool isVSSpriteLoaded(const VSSprite *file)
+{
+  return true;
+}
+void deleteVSSprite(VSSprite *file)
+{
+
+}
 
 void cache_ani (string s) {}
 void update_ani_cache () {}

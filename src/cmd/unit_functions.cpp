@@ -23,9 +23,14 @@
 // Wrappers used in unit_xml.cpp
 VSSprite * createVSSprite(const char *file)
 {
-	return new VSSprite (file);
+  return new VSSprite (file);
 }
-
+bool isVSSpriteLoaded(const VSSprite* sprite) {
+  return sprite->LoadSuccess();
+}
+void deleteVSSprite(VSSprite * sprite) {
+  delete sprite;
+}
 // From communication_xml.cpp
 int createSound( string file, bool val)
 {

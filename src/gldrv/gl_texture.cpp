@@ -99,11 +99,11 @@ bool isPowerOfTwo (int num, int &which) {
 GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette , int texturestage, enum FILTER mipmap, enum TEXTURE_TARGET texture_target)
 {
   int dummy=0;
-  if (!isPowerOfTwo (width,dummy)) {
+  if ((mipmap&(MIPMAP|TRILINEAR))&&!isPowerOfTwo (width,dummy)) {
     VSFileSystem::vs_fprintf (stderr,"Width %d not a power of two",width);
     //    assert (false);
   }
-  if (!isPowerOfTwo (height,dummy)) {
+  if ((mipmap&(MIPMAP|TRILINEAR))&&!isPowerOfTwo (height,dummy)) {
     VSFileSystem::vs_fprintf (stderr,"Height %d not a power of two",height);
     //    assert (false);
     
@@ -205,15 +205,24 @@ static void DownSampleTexture (unsigned char **newbuf,const unsigned char * oldb
       for (m=0;m<pixsize;m++) {
 	temp[m]=0;
       }
-      for (k=0;k<scaleheight;k++) {
-	for (l=0;l<scalewidth;l++) {
-	  for (m=0;m<pixsize;m++) {
-	    temp[m] += oldbuf[m+pixsize*(j*scalewidth+l+width*(i*scaleheight+k))];
-	  }
-	}
+      float xshift = width*(float)j/(float)newwidth;
+      float yshift = height*(float)i/(float)newheight;
+      int x =(int)xshift;
+      int y =(int)yshift;
+      yshift-=y;
+      xshift-=x;
+      x=x<width?x:width-1;
+      y=y<height?y:height-1;
+      int xpp = x+1<width?x+1:x;
+      int ypp = y+1<height?y+1:y;
+      for (m=0;m<pixsize;++m) {
+        temp[m] += (1-yshift)*(1-xshift)*oldbuf[(x+y*width)*pixsize+m];
+        temp[m] += (1-yshift)*xshift*oldbuf[(xpp+y*width)*pixsize+m];
+        temp[m] += yshift*(1-xshift)*oldbuf[(x+ypp*width)*pixsize+m];
+        temp[m] += yshift*xshift*oldbuf[(xpp+ypp*width)*pixsize+m];      
       }
       for (m=0;m<pixsize;m++) {
-	(*newbuf)[m+pixsize*(j+i*newwidth)] = (unsigned char)((1-newfade)*128+temp[m]*newfade/(scaleheight*scalewidth));
+	(*newbuf)[m+pixsize*(j+i*newwidth)] = (unsigned char)((1-newfade)*128+temp[m]*newfade);
       }
     }
   }
@@ -310,7 +319,8 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
     return GFXFALSE;
   int logsize=1;
   int logwid=1;
-  if (!isPowerOfTwo (textures[handle].width,logwid)|| !isPowerOfTwo (textures[handle].height,logsize)) {
+  
+  if ((textures[handle].mipmapped&(TRILINEAR|MIPMAP))&&(!isPowerOfTwo (textures[handle].width,logwid)|| !isPowerOfTwo (textures[handle].height,logsize))) {
     static unsigned char NONPOWEROFTWO[1024]={255,127,127,255,
 					    255,255,0,255,
 					    255,255,0,255,
@@ -387,11 +397,11 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 	  free(tempbuf);
 	return GFXFALSE;
       }
-      if (textures[handle].mipmapped&&gl_options.mipmap>=2){
+      if ((textures[handle].mipmapped&(MIPMAP|TRILINEAR))&&gl_options.mipmap>=2){
 			  gluBuild2DMipmaps(image2D, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
       }else{
-		  glTexImage2D(image2D, 0, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, 0, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
-	  }
+        glTexImage2D(image2D, 0, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, 0, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
+      }
 #if 0
       error = glGetError();
       if (error) {

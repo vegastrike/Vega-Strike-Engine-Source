@@ -506,7 +506,14 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   fullname=row["Name"];
   //image->description=row["Description"];
   if ((tmpstr=row["Hud_image"]).length()!=0) {
-    image->hudImage = createVSSprite(tmpstr.c_str());
+    std::string fac =FactionUtil::GetFaction(faction);
+    fac+="_";
+    fac+=tmpstr;
+    image->hudImage = createVSSprite(fac.c_str());
+    if (!isVSSpriteLoaded(image->hudImage)) {
+      deleteVSSprite(image->hudImage);
+      image->hudImage = createVSSprite(tmpstr.c_str());
+    }
   }  
   combat_role=ROLES::getRole(row["Combat_Role"]);
   graphicOptions.NumAnimationPoints=stoi(row["Num_Animation_Stages"],0);

@@ -10,6 +10,8 @@ void pushMesh( Unit::XML * xml, const char *filename, const float scale,int fact
 
 Mount * createMount( const std::string& name, int ammo, int volume, float xyscale=0, float zscale=0); //short fix
 VSSprite * createVSSprite(const char *file);
+bool isVSSpriteLoaded(const VSSprite *);
+void deleteVSSprite(VSSprite *);
 
 void cache_ani (string s);
 

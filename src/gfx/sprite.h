@@ -44,7 +44,7 @@ class VSSprite {
 public:
 	VSSprite (const char *file, enum FILTER texturefilter=BILINEAR, GFXBOOL force=GFXFALSE);
 	~VSSprite();
-	bool LoadSuccess() {return surface!=NULL;}
+	bool LoadSuccess()const {return surface!=NULL;}
 	void Draw();
 	void DrawHere (Vector &ll, Vector &lr, Vector &ur, Vector &ul);
 	void Rotate(const float &rad){ rotation += rad;};
