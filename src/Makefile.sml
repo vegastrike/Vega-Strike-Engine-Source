@@ -23,8 +23,6 @@ SRCS = 	star_system_xml.cpp			\
 	main_loop.cpp				\
 	physics.cpp				\
 	star_system.cpp 			\
-	UnitCollection.cpp			\
-	UnitContainer.cpp			\
 	universe.cpp				\
 	xml_support.cpp				
 
@@ -35,8 +33,8 @@ $(MAIN):  $(OBJS)
 	for dir in $(SUBDIRS); do \
                 (cd $$dir &&  $(MAKE) -f Makefile.sml); \
         done
-	-$(CC) $(CFLAGS) $(OBJS) gldrv/gl_quad_list.o gldrv/libgldrv.a gfx/libgfx.a -o $(MAIN) $(LFLAGS)
-	-$(CC) $(CFLAGS) $(OBJS) gldrv/gl_quad_list.o gldrv/libgldrv.a gfx/libgfx.a -o $(MAIN) $(LTWOFLAGS)
+	-$(CC) $(CFLAGS) $(OBJS)                      gldrv/libgldrv.a gfx/libgfx.a -o $(MAIN) $(LFLAGS)
+	-$(CC) $(CFLAGS) $(OBJS)  cmd/ai/libai.a  cmd/libcmd.a      gldrv/libgldrv.a gfx/libgfx.a -o $(MAIN) $(LTWOFLAGS)
 .cpp.o:
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<
 

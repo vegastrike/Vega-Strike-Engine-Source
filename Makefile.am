@@ -1,4 +1,10 @@
 SUBDIRS = src
 EXTRA_DIST =						\
-	vc98/vegastrike.dsp				\
-	vc98/vegastrike.dsw
+	vegastrike.dsp					\
+	vegastrike.dsw					\
+	README						\
+	NEWS						\
+	TODO						\
+	Resources.rc					\
+	resource.h					\
+	ts.ico

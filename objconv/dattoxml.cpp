@@ -79,20 +79,13 @@ struct drawdata {
 	short NumPoints;
 	point *FixP;
 	point *VarP;
-	//short NumPlane;	short** PlaneLight;
-	//short NumRevPlane; 	short* RevPlane;
-	//short NumAve2, NumAve3, NumAve4, NumAve5, NumAve6;
-	//short** AvLight2; short**  AvLight3; short**  AvLight4; short**  AvLight5; short** AvLight6;
 	unsigned char **TriTexture;
 	unsigned char **QuadTexture;
 	unsigned char **PentTexture;
 	unsigned char **HexTexture;
-//	Gu3dfInfo* DecalInfo;
 	char * DecalFileName;
 	short NumTris, NumQuads, NumPents, NumHexs;
 	short** Tris; short**  Quads;short**  Pents;short**  Hexs;
-	//short NumPlnAve2, NumPlnAve3, NumPlnAve4;
-	//short** AvPlnLight2; short** AvPlnLight3;short**  AvPlnLight4;
 	short NumRevTris, NumRevQuads, NumRevPents, NumRevHexs;
 	short** RevTris; short**  RevQuads;short**  RevPents;short**  RevHexs;
 	short NumLines;
@@ -289,36 +282,6 @@ int main (int argc, char ** argv)
 		for (int j=0; j<6; j++)
 			DrawDat.Hexs[i][j] = readf(shp);	
 
-/*	DrawDat.NumRevPlane = readf(shp);
-	DrawDat.RevPlane = new short [DrawDat.NumRevPlane];
-	for (i=0; i<DrawDat.NumRevPlane; i++)
-		DrawDat.RevPlane[i] = readf(shp);
-// these values are for points that are both on the top
-//	and the bottom of a plane
-	DrawDat.NumPlnAve2 = readf (shp);
-	DrawDat.AvPlnLight2 = new short * [DrawDat.NumPlnAve2];
-	for (i=0; i<DrawDat.NumPlnAve2; i++)
-		DrawDat.AvPlnLight2[i] = new short [2];
-	for (i=0; i<DrawDat.NumPlnAve2; i++)
-		for (j=0; j<2; j++)
-			DrawDat.AvPlnLight2 [i][j] = readf(shp);
-
-	DrawDat.NumPlnAve3 = readf (shp);
-	DrawDat.AvPlnLight3 = new short * [DrawDat.NumPlnAve3];
-	for (i=0; i<DrawDat.NumPlnAve3; i++)
-		DrawDat.AvPlnLight3[i] = new short [3];
-	for (i=0; i<DrawDat.NumPlnAve3; i++)
-		for (j=0; j<3; j++)
-			DrawDat.AvPlnLight3 [i][j] = readf(shp);
-
-
-	DrawDat.NumPlnAve4 = readf (shp);
-	DrawDat.AvPlnLight4 = new short * [DrawDat.NumPlnAve4];
-	for (i=0; i<DrawDat.NumPlnAve4; i++)
-		DrawDat.AvPlnLight4[i] = new short [4];
-	for (i=0; i<DrawDat.NumPlnAve4; i++)
-		for (j=0; j<4; j++)
-			DrawDat.AvPlnLight4 [i][j] = readf(shp);*/
 	int * revpnts = new int [DrawDat.NumPoints];
 	for (int i=0;i<DrawDat.NumPoints;i++) {
 	  revpnts[i]=-1;
@@ -759,7 +722,7 @@ int main (int argc, char ** argv)
 	  StrWrite ("<Mount weapon=\"");
 	  switch (Stat.GunType[i]) {
 	  case FLUX:
-	    StrWrite ("flux\" size=\"Light\"");
+	    StrWrite ("Flux\" size=\"Light\"");
 	    break;
 	  case MASSDRIVER:
 	    StrWrite ("MassDriver\" size=\"Medium\"");
@@ -777,7 +740,7 @@ int main (int argc, char ** argv)
 	    StrWrite ("Particle\" size=\"Heavy\"");
 	    break;
 	  case TACH:
-	    StrWrite ("Tach\" size=\"Heavy\"");
+	    StrWrite ("Tachyon\" size=\"Heavy\"");
 	    break;
 	  case PLASMA:
 	    StrWrite ("Plasma\" size=\"heavy\"");
@@ -799,7 +762,7 @@ int main (int argc, char ** argv)
 	    break;
 	  case LASER:
 	  default:
-	    StrWrite ("laser\" size=\"Light\"");
+	    StrWrite ("Laser\" size=\"Light\"");
 	    break;
 	  }
 	  StrWrite (" x=");
@@ -859,20 +822,27 @@ int main (int argc, char ** argv)
 	  }
 	}
 	Tab();Tag ("Thrust");
-	Tab(2);fprintf (fp,"<Engine Afterburner=\"%d\" Forward=\"%d\" Retro=\"%d\" Left=\"%d\" Right=\"%d\" Top=\"%d\" Bottom=\"%d\"/>\n",600,240,240,50,50,50,50);
-	Tab(2);fprintf (fp,"<Maneuver yaw=\"%d\" pitch=\"%d\" roll=\"%d\"/>\n",1400, 1450, 1400);
+	float abspeed =.066666666666666666667*((float)Stat.MaxAftSpd);
+	float nspeed = .0666666666666666666667*((float)Stat.MaxSpeed);
+	LVector ypr;
+	ypr.i = 2.3*Stat.Yaw*180/3.1415926536;
+	ypr.j = 2.3*Stat.Pitch*180/3.1415926536;
+	ypr.k = 2.3*Stat.Roll*180/3.1415926536;
+	float shrch = Stat.ShieldRecharge/6;
+	Tab(2);fprintf (fp,"<Engine Afterburner=\"%f\" Forward=\"%f\" Retro=\"%f\" Left=\"%f\" Right=\"%f\" Top=\"%f\" Bottom=\"%f\"/>\n",10*abspeed,8*nspeed,7*nspeed,4*nspeed,4*nspeed,4*nspeed,4*nspeed);
+	Tab(2);fprintf (fp,"<Maneuver yaw=\"%f\" pitch=\"%f\" roll=\"%f\"/>\n",ypr.i*33, ypr.j*33, ypr.k*33);
 	Tab();ETag("Thrust");
 	Tab();Tag ("Defense");
-	Tab(2);fprintf (fp,"<Armor front=\"%d\" back=\"%d\" left=\"%d\" right=\"%d\"/>\n", 40,40,40,40);
+	Tab(2);fprintf (fp,"<Armor front=\"%d\" right=\"%d\" left=\"%d\" back=\"%d\"/>\n", Stat.Armor[0],Stat.Armor[1],Stat.Armor[2],Stat.Armor[3]);
 	if (Stat.NumShieldFacing==2) {
-	  Tab(2);fprintf (fp,"<Shields front=\"%d\" back=\"%d\" recharge=\"%d\"/>\n", 40,40,3);
+	  Tab(2);fprintf (fp,"<Shields front=\"%d\" back=\"%d\" recharge=\"%f\"/>\n", Stat.MaxShield[0], Stat.MaxShield[1],shrch);
 	}else {
-	  Tab(2);fprintf (fp,"<Shields front=\"%d\" back=\"%d\" left=\"%d\" right=\"%d\" recharge=\"%d\"/>\n", 40,40,40,40,3);
+	  Tab(2);fprintf (fp,"<Shields front=\"%d\" right=\"%d\" left=\"%d\" back=\"%d\" recharge=\"%f\"/>\n", Stat.MaxShield[0],Stat.MaxShield[1],Stat.MaxShield[2],Stat.MaxShield[3],shrch);
 	}
-	Tab(2); fprintf (fp, "<Hull strength=\"%d\"/>\n", 5);
+	Tab(2); fprintf (fp, "<Hull strength=\"%d\"/>\n", Stat.Hull);
 	Tab();ETag("Defense");
-	Tab();fprintf (fp,"<Stats mass=\"%d\" momentofinertia=\"%d\" fuel=\"%d\"></Stats>\n",2,2,20000);
-	Tab();fprintf (fp,"<Computer yaw=\"%d\" pitch=\"%d\" roll=\"%d\" afterburner=\"%d\" maxspeed=\"%d\"/>\n",180,180,180,60,21);
+	Tab();fprintf (fp,"<Stats mass=\"%d\" momentofinertia=\"%d\" fuel=\"%d\"></Stats>\n",Stat.Mass,Stat.Mass,20000);
+	Tab();fprintf (fp,"<Computer yaw=\"%f\" pitch=\"%f\" roll=\"%f\" afterburner=\"%f\" maxspeed=\"%f\"/>\n",ypr.i,ypr.j,ypr.k,abspeed,nspeed);
 	Tab();Tag("Energy");
 	Tab(2);fprintf (fp,"<Reactor recharge=\"%d\" limit=\"%d\"/>\n",10,100);
 	Tab();ETag("Energy");

@@ -19,6 +19,7 @@ SRCS = 	beam.cpp				\
 	hud.cpp				\
 	click_list.cpp			\
 	unit.cpp				\
+	unit_bsp.cpp			\
 	unit_click.cpp			\
 	unit_damage.cpp			\
 	unit_xml.cpp  			\

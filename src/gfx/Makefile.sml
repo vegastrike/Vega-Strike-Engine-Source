@@ -18,7 +18,6 @@ SRCS =		\
 	bounding_box.cpp	\
 	box.cpp		\
 	bsp.cpp		\
-	bsp_gent.cpp	\
 	camera.cpp	\
 	coord_select.cpp	\
 	env_map_gent.cpp	\
@@ -30,6 +29,7 @@ SRCS =		\
 	mesh_fx.cpp	\
 	mesh_poly.cpp	\
 	mesh_xml.cpp	\
+	star.cpp	\
 	sphere.cpp	\
 	sprite.cpp	\
 	matrix.cpp	\

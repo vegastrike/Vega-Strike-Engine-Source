@@ -13,6 +13,7 @@ SRCS =		\
  	event_xml.cpp	\
 	navigation.cpp	\
 	flykeyboard.cpp	\
+	firekeyboard.cpp \
 	fire.cpp	\
 	order.cpp	\
 	aggressive.cpp	\
