@@ -1506,21 +1506,16 @@ void Unit::LoadXML(const char *filename, const char * modifications)
     delete xml->mountz[a];			//do it stealthily... no cons/destructor
   }
   for (a=0;a<nummounts;a++) {
-#define HALF_MOUNT_SOUNDS 
-#ifdef HALF_MOUNT_SOUNDS
-	if (a%2==parity) {
-		int b=a;
-		if(a % 4 == 2 && a < (nummounts-1)) 
-			if (mounts[a].type.type != weapon_info::PROJECTILE&&mounts[a+1].type.type != weapon_info::PROJECTILE)
-			  b=a+1;
-		mounts[b].sound = AUDCreateSound (mounts[b].type.sound,mounts[b].type.type!=weapon_info::PROJECTILE);
-    }
-	else if (mounts[a].type.type == weapon_info::PROJECTILE) {
-#endif
+    static bool half_sounds = XMLSupport::parse_bool(vs_config->getVariable ("audio","every_other_mount","false"));
+    if (a%2==parity) {
+      int b=a;
+      if(a % 4 == 2 && a < (nummounts-1)) 
+	if (mounts[a].type.type != weapon_info::PROJECTILE&&mounts[a+1].type.type != weapon_info::PROJECTILE)
+	  b=a+1;
+      mounts[b].sound = AUDCreateSound (mounts[b].type.sound,mounts[b].type.type!=weapon_info::PROJECTILE);
+    } else if ((!half_sounds)||mounts[a].type.type == weapon_info::PROJECTILE) {
       mounts[a].sound = AUDCreateSound (mounts[a].type.sound,false);      
-#ifdef HALF_MOUNT_SOUNDS
     }
-#endif
   }
   for( a=0; a<(int)xml->units.size(); a++) {
     SubUnits.prepend(xml->units[a]);
