@@ -112,6 +112,8 @@ PYTHON_END_CLASS(VS,UnitWrapper)
 
 PYTHON_BEGIN_CLASS(VS,UnitCollection::UnitIterator,"un_iter")
   PYTHON_DEFINE_METHOD(Class,&UnitCollection::UnitIterator::current,"current");
+  PYTHON_DEFINE_METHOD(Class,&UnitCollection::UnitIterator::isDone,"isDone");
+  PYTHON_DEFINE_METHOD(Class,&UnitCollection::UnitIterator::notDone,"notDone");
   PYTHON_DEFINE_METHOD(Class,&UnitCollection::UnitIterator::advance,"advance");
   PYTHON_DEFINE_METHOD(Class,&UnitCollection::UnitIterator::next,"next");
   PYTHON_DEFINE_METHOD(Class,&UnitCollection::UnitIterator::remove,"remove");

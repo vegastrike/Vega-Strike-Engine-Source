@@ -51,6 +51,8 @@ class UnitCollection {
     UnitIterator(){pos=NULL;}
     ///Creates this unit iterator
     UnitIterator(UnitListNode *start) : pos(start) {GetNextValidUnit();}
+	bool isDone(){return current()==NULL;}
+	bool notDone() {return current()!=NULL;}
     ///removes something after pos.  eg the first valid unit. or current()
     void remove();
     ///inserts in front of current
@@ -77,6 +79,8 @@ class UnitCollection {
     }
     const Unit * next() {advance();return current();}	  	  
     const Unit *current() const  {return pos->next->unit;}
+	bool isDone()const{return current()==NULL;}
+	bool notDone()const{return current()!=NULL;}	  
     void advance() {pos = pos->next;GetNextValidUnit();}
     inline const Unit * operator ++() {advance();return current();}
     inline const Unit * operator ++(int) {const Unit * un=current();advance();return un;}

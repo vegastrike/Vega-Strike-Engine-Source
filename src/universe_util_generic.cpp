@@ -202,10 +202,14 @@ namespace UniverseUtil {
 	}
 	Unit *getUnit(int index) {
 		un_iter iter=activeSys->getUnitList().createIterator();
-		for(int i=0;iter.current()&&i<index;i++) {
-			iter.advance();
+		Unit * un=NULL;
+		for(int i=-1;(un=iter.current())&&i<index;iter.advance()) {
+			if (un->GetHull()>0)
+				i++;
+			if (i==index)
+				break;
 		}
-		return iter.current();
+		return un;
 	}
         int getNumUnits() {
 	  int count=0;
