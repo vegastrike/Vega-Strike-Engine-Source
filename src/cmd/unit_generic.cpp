@@ -2684,10 +2684,6 @@ bool Unit::UpgradeSubUnitsWithFactory (const Unit * up, int subunitoffset, bool 
 	  if (un->image->unitwriter!=NULL) {
 	    un->image->unitwriter->setName (un->name);
 	  }
-	  un->curr_physical_state=addtome->curr_physical_state;
-
-	  un->prev_physical_state=addtome->prev_physical_state;
-	  
 	  un->SetRecursiveOwner(this);
 	}
       }
