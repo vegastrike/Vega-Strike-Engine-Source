@@ -5,7 +5,8 @@
 #  define png_jmpbuf(png_ptr) ((png_ptr)->jmpbuf)
 #endif
 
-#define FINAL_SIZE 128
+#define FINAL_WIDTH 128
+#define FINAL_HEIGHT 128
 int PNG_HAS_PALETTE =1;
 int PNG_HAS_COLOR=2;
 int PNG_HAS_ALPHA=4;
@@ -173,13 +174,13 @@ errort	WritePNG( FILE * fp , unsigned char * data, unsigned int sizeX, unsigned 
   return Ok;
 }
 
-void ModifyImage(unsigned int sizex,unsigned int sizey,int img_depth,int img_alpha,unsigned char **row_pointers, unsigned char output[FINAL_SIZE][FINAL_SIZE][4],int offsetx, int offsety) {
-  memset (output,0,sizeof(unsigned char)*FINAL_SIZE*FINAL_SIZE*4);
+void ModifyImage(unsigned int sizex,unsigned int sizey,int img_depth,int img_alpha,unsigned char **row_pointers, unsigned char output[FINAL_HEIGHT][FINAL_WIDTH][4],int offsetx, int offsety) {
+  memset (output,0,sizeof(unsigned char)*FINAL_WIDTH*FINAL_HEIGHT*4);
   int stride = (img_depth/8)*(img_alpha?4:3);
   for (unsigned int i=0;i<sizey;++i) {
     for (unsigned int j=0;j<sizex;++j) {
       if (((int)i)+offsetx>0&&((int)j)+offsety>0) {
-        if (i+offsetx<FINAL_SIZE&&j+offsety<FINAL_SIZE) {
+        if (i+offsetx<FINAL_WIDTH&&j+offsety<FINAL_HEIGHT&&i+offsetx>0&&j+offsety>0) {
           output[i+offsetx][j+offsety][0]=row_pointers[i][j*stride+0];
           output[i+offsetx][j+offsety][1]=row_pointers[i][j*stride+1];
           output[i+offsetx][j+offsety][2]=row_pointers[i][j*stride+2];
@@ -202,11 +203,11 @@ int main (int argc , char ** argv) {
       unsigned char * data = ReadPNG(fp,sizex,sizey,img_depth,img_alpha,&row_pointers);
       fclose(fp);
       if (data&&(img_alpha&PNG_HAS_ALPHA)) {
-        unsigned char output[FINAL_SIZE][FINAL_SIZE][4]={0};
+        unsigned char output[FINAL_HEIGHT][FINAL_WIDTH][4]={0};
         ModifyImage (sizex,sizey,img_depth,img_alpha&PNG_HAS_ALPHA,row_pointers,output,deltax,deltay);
         free(row_pointers);
         FILE * wr = fopen(argv[4],"wb");
-        WritePNG(wr,(unsigned char *)output,FINAL_SIZE,FINAL_SIZE,8,PNG_HAS_ALPHA);
+        WritePNG(wr,(unsigned char *)output,FINAL_WIDTH,FINAL_HEIGHT,8,PNG_HAS_ALPHA);
         fclose(wr);
       }
     }
