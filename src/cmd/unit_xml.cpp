@@ -1261,6 +1261,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   const int chunk_size = 16384;
  // rrestricted=yrestricted=prestricted=false;
   FILE * inFile=NULL;
+  std::string collideTreeHash = GetHashName(string(modifications)+"#"+string(filename));
   if (modifications) {
     if (strlen(modifications)!=0) {
       changehome();
@@ -1440,7 +1441,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   *myscale=xml->unitscale;
   string tmpname (filename);
   vector <bsp_polygon> polies;
-  std::string collideTreeHash = string(filename)+string(modifications)+XMLSupport::tostring(faction);
+
   colTrees = collideTrees::Get(collideTreeHash);
   if (colTrees) {
     colTrees->Inc();
