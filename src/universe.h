@@ -94,6 +94,8 @@ private:
     vector <faction_stuff> faction;
     ///Logos used by the ships of that faction
     Texture * logo;
+    //if the squadron doens't; have its own particular logo
+    Texture * secondaryLogo;
     ///char * of the name
     char * factionname; 
     std::vector <std::vector <class Animation *> > comm_faces;

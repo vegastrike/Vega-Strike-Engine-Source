@@ -15,7 +15,7 @@
 #include "vec.h"
 #include "config_xml.h"
 #include "vs_globals.h"
-
+#include "cmd/script/mission.h"
 #ifdef max
 #undef max
 #endif
@@ -643,7 +643,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
       case XML::UNKNOWN:
 	break;
       case XML::LODFILE:
-	xml->lod.push_back(new Mesh ((*iter).value.c_str(),true,xml->faction,true));//make orig mesh
+	xml->lod.push_back(new Mesh ((*iter).value.c_str(),true,xml->faction,xml->fg,true));//make orig mesh
 	break;
       case XML::SIZE:
 	flotsize = XMLSupport::parse_float ((*iter).value);
@@ -998,7 +998,7 @@ void updateMax (Vector &mn, Vector & mx, const GFXVertex &ver) {
 }
 const bool USE_RECALC_NORM=true;
 const bool FLAT_SHADE=true;
-void Mesh::LoadXML(const char *filename, float scale, int faction) {
+void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup * fg) {
   const int chunk_size = 16384;
   std::vector <unsigned int> ind;  
   FILE* inFile = fopen (filename, "r");
@@ -1008,6 +1008,7 @@ void Mesh::LoadXML(const char *filename, float scale, int faction) {
   }
 
   xml = new XML;
+  xml->fg = fg;
   xml->sharevert=false;
   xml->faction = faction;
   GFXGetMaterial (0, xml->material);//by default it's the default material;
@@ -1425,7 +1426,7 @@ void Mesh::LoadXML(const char *filename, float scale, int faction) {
     index+= xml->quadstrips[a].size();
   }
   */
-  CreateLogos(faction);
+  CreateLogos(faction,fg);
   // Calculate bounding sphere
   
   if (mn.i==FLT_MAX) {
@@ -1447,7 +1448,7 @@ void Mesh::LoadXML(const char *filename, float scale, int faction) {
   delete xml;
 }
 
-void Mesh::CreateLogos(int faction) {
+void Mesh::CreateLogos(int faction, Flightgroup * fg) {
   numforcelogo=numsquadlogo =0;
   unsigned int index;
   for (index=0;index<xml->logos.size();index++) {
@@ -1459,7 +1460,10 @@ void Mesh::CreateLogos(int faction) {
   unsigned int nfl=numforcelogo;
   Logo ** tmplogo;
   Texture * Dec;
-  for (index=0,nfl=numforcelogo,tmplogo=&forcelogos,Dec=_Universe->getForceLogo(faction);index<2;index++,nfl=numsquadlogo,tmplogo=&squadlogos,Dec=_Universe->getSquadLogo(faction)) {
+  for (index=0,nfl=numforcelogo,tmplogo=&forcelogos,Dec=_Universe->getForceLogo(faction);index<2;index++,nfl=numsquadlogo,tmplogo=&squadlogos,Dec=(fg==NULL?_Universe->getSquadLogo(faction):fg->squadLogo)) {
+    if (Dec==NULL) {
+      Dec = _Universe->getSquadLogo(faction);
+    }
     if (nfl==0)
       continue;
     Vector *PolyNormal = new Vector [nfl];

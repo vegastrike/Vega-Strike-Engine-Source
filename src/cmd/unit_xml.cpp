@@ -383,7 +383,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
 	ADDELEM(stringHandler,(*iter).value);
-	xml->shieldmesh =(new Mesh((*iter).value.c_str(), xml->unitscale, faction));
+	xml->shieldmesh =(new Mesh((*iter).value.c_str(), xml->unitscale, faction,flightgroup));
 	break;
       case SHIELDTIGHT: 
 	ADDDEFAULT;
@@ -401,7 +401,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
 	ADDDEFAULT;
-	xml->bspmesh =(new Mesh((*iter).value.c_str(), xml->unitscale, faction));
+	xml->bspmesh =(new Mesh((*iter).value.c_str(), xml->unitscale, faction,NULL));
 	xml->hasBSP = true;	
 	break;
       case RAPID:
@@ -503,7 +503,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
 	ADDDEFAULT;
-	xml->meshes.push_back(new Mesh((*iter).value.c_str(), xml->unitscale, faction));
+	xml->meshes.push_back(new Mesh((*iter).value.c_str(), xml->unitscale, faction,flightgroup));
 	break;
       }
     }

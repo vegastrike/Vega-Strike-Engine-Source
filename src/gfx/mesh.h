@@ -197,7 +197,7 @@ private:
       ///the weight of the points in weighted average of refpnts
       vector <float> refweight;
     };
-
+    class Flightgroup * fg;
     static const EnumMap::Pair element_names[];
     static const EnumMap::Pair attribute_names[];
     static const EnumMap element_map;
@@ -253,11 +253,11 @@ private:
     int faction;
   } *xml;
   ///Loads XML data into this mesh.
-  void LoadXML(const char *filename, float scale, int faction);
+  void LoadXML(const char *filename, float scale, int faction, class Flightgroup * fg);
   ///loads binary data into this mesh
   void LoadBinary (const char * filename, int faction);
   ///Creates all logos with given XML data info
-  void CreateLogos(int faction);
+  void CreateLogos(int faction, class Flightgroup *fg);
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
   
@@ -315,7 +315,7 @@ protected:
 public:
   Mesh();
   ///Loading a mesh from an XML file.  faction specifies the logos.  Orig is for internal (LOD) use only!
-  Mesh( const char *filename, const float scale,int faction, bool orig=false);
+  Mesh( const char *filename, const float scale,int faction,class Flightgroup * fg, bool orig=false);
   ///Forks the mesh across the plane a,b,c,d into two separate meshes...upon which this may be deleted
   void Fork (Mesh * &one, Mesh * &two, float a, float b, float c, float d);
   ///Destructor... kills orig if refcount of orig becomes zero

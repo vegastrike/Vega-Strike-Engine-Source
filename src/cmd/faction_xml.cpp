@@ -22,6 +22,8 @@ namespace FactionXML {
 	NAME,
 	LOGORGB,
 	LOGOA,
+	SECLOGORGB,
+	SECLOGOA,
 	RELATION,
 	STATS,
 	FRIEND,
@@ -50,6 +52,8 @@ namespace FactionXML {
 	EnumMap::Pair ("name", NAME), 
 	EnumMap::Pair ("logoRGB", LOGORGB), 
 	EnumMap::Pair ("logoA", LOGOA), 
+	EnumMap::Pair ("secLogoRGB", SECLOGORGB), 
+	EnumMap::Pair ("secLogoA", SECLOGOA), 
 	EnumMap::Pair ("relation",RELATION),
 	EnumMap::Pair ("Conversation", CONVERSATION),
 	EnumMap::Pair ("Contraband",CONTRABAND),
@@ -58,7 +62,7 @@ namespace FactionXML {
 
 
   const EnumMap element_map(element_names, 9);
-  const EnumMap attribute_map(attribute_names, 8);
+  const EnumMap attribute_map(attribute_names, 10);
 
 }
 
@@ -75,7 +79,8 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
   Names elem = (Names)element_map.lookup(name);
   char * tmpstr=NULL;
   char RGBfirst=0;
-
+  std::string secString;
+  std::string secStringAlph;
   switch(elem) {
   case UNKNOWN:
 	unitlevel++;
@@ -160,6 +165,23 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
 			thisuni->factions[thisuni->factions.size()-1]->logo=new Texture(tmpstr,(*iter).value.c_str());
 		}
 		break;
+      case SECLOGORGB:
+	secString= (*iter).value;
+	break;
+
+      case SECLOGOA:
+	secStringAlph= (*iter).value;
+	break;
+
+      }
+
+    }
+    thisuni->factions[thisuni->factions.size()-1]->secondaryLogo=NULL;
+    if (!secString.empty()) {
+      if (secStringAlph.empty()) {
+	thisuni->factions[thisuni->factions.size()-1]->secondaryLogo=new Texture(secString.c_str());
+      }else {
+	thisuni->factions[thisuni->factions.size()-1]->secondaryLogo=new Texture(secString.c_str(),secStringAlph.c_str());
       }
 
     }
@@ -247,7 +269,11 @@ Texture * Universe::getForceLogo (int faction) {
 }
 //fixme--add squads in here
 Texture *Universe::getSquadLogo (int faction) {
-  return getForceLogo (faction);
+  if (!factions[faction]->secondaryLogo) {
+    return getForceLogo (faction);
+  }else {
+    return factions[faction]->secondaryLogo;
+  }
 }
 std::vector <Animation *>* Universe::GetAnimation (int faction, int n, unsigned char &sex) {
   sex = factions[faction]->comm_face_sex[n];

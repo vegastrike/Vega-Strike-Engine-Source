@@ -2,6 +2,7 @@
 #include "missile.h"
 #include "vegastrike.h"
 #include "vs_globals.h"
+#include "config_xml.h"
 #include "images.h"
 #include "collection.h"
 void StarSystem::UpdateMissiles() {
@@ -54,12 +55,16 @@ void Missile::Kill (bool erase) {
   Unit::Kill(erase);
 }
 void Missile::reactToCollision (Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist) {
-    Unit::reactToCollision (smaller,biglocation,bignormal,smalllocation,smallnormal,dist);
-    Discharge();
-    if (!killed)
-      DealDamageToHull (smalllocation,hull+1);//should kill, applying addmissile effect
+  static bool doesmissilebounce  = XMLSupport::parse_bool (vs_config->getVariable("physics","missile_bounce","false"));
+  if (doesmissilebounce) {
 
+    Unit::reactToCollision (smaller,biglocation,bignormal,smalllocation,smallnormal,dist);
   }
+  Discharge();
+  if (!killed)
+    DealDamageToHull (smalllocation,hull+1);//should kill, applying addmissile effect
+  
+}
 void Missile::UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL){
     Unit * targ;
     if ((targ=Target())) {

@@ -44,7 +44,7 @@
 #include "cmd/ai/order.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/missionscript.h"
-
+#include "gfx/aux_texture.h"
 #include "mission.h"
 #include "easydom.h"
 #include "msgcenter.h"
@@ -185,6 +185,8 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     int nr_of_waves=checkIntExpr(nrw_node,mode);
     varInst *destination_vi;
     string destinations;
+    string logo_tex;
+    string logo_alp;
     if (method_id==CMT_UNIT_launchJumppoint) {
       missionNode *destination_node=getArgument(node,mode,6);
       destination_vi=checkObjectExpr(faction_node,mode);
@@ -197,6 +199,12 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     for(int i=0;i<3;i++){
       pos_node[i]=getArgument(node,mode,6+i);
       pos[i]=checkFloatExpr(pos_node[i],mode);
+    }
+    if (node->subnodes.size()>9) {
+      logo_tex=getStringArgument (node,mode,9);
+      if (node->subnodes.size()>10) {
+	logo_alp=getStringArgument (node,mode,10);
+      }
     }
 
 	Unit * my_unit=NULL;
@@ -213,7 +221,14 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       string ai_string=*((string *)ai_vi->object);
      
       Flightgroup *fg=new Flightgroup;
-
+      if (!logo_tex.empty()) {
+	
+	if (logo_alp.empty()) {
+	  fg->squadLogo=new Texture (logo_tex.c_str(),0,MIPMAP);
+	}else {
+	  fg->squadLogo=new Texture (logo_tex.c_str(),logo_alp.c_str(),0,MIPMAP);
+	}
+      }
       fg->name=name_string;
       fg->type=type_string;
       fg->ainame=ai_string;

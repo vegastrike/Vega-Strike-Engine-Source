@@ -125,7 +125,7 @@ bool Mesh::LoadExistant (const char * filehash, float scale) {
   //  fprintf (stderr,"cannot cache %s",GetSharedMeshHashName(filehash,scale).c_str());
   return false;
 }
-Mesh:: Mesh(const char * filename,const float scale, int faction, bool orig):hash_name(filename)
+Mesh:: Mesh(const char * filename,const float scale, int faction, Flightgroup *fg, bool orig):hash_name(filename)
 {
   this->orig=NULL;
   InitUnit();
@@ -142,7 +142,7 @@ Mesh:: Mesh(const char * filename,const float scale, int faction, bool orig):has
   }
   bool xml=true;
   if(xml) {
-    LoadXML(shared?GetSharedMeshPath(filename).c_str():filename,scale,faction);
+    LoadXML(shared?GetSharedMeshPath(filename).c_str():filename,scale,faction,fg);
     oldmesh = this->orig;
   } else {
     this->xml= NULL;

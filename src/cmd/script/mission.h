@@ -66,6 +66,7 @@ typedef map<string,varInst *> omap_t;
 std::string varToString (varInst * s);
 class Flightgroup {
  public:
+  Texture * squadLogo;//null if not there
   string name; // flightgroup name
   string faction;
   string type; // unit type
@@ -86,6 +87,17 @@ class Flightgroup {
 
   map<string,string> ordermap;
   olist_t *orderlist;
+  Flightgroup () {//betterto have a flightgroup constructor
+    squadLogo=NULL;
+    orderlist=NULL;
+    domnode=NULL;
+    nr_waves_left=nr_ships_left=ship_nr=flightgroup_nr=waves=nr_ships=terrain_nr=0;
+  }
+  Flightgroup (Flightgroup & other) {
+    *this = other;
+  }
+  Flightgroup& operator =(Flightgroup &);
+  ~Flightgroup();
 };
 
 #ifndef VS_MIS_SEL

@@ -33,7 +33,7 @@
 // this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
 #include <unistd.h>
 #endif
-
+#include "gfx/aux_texture.h"
 //#include <expat.h>
 //#include "xml_support.h"
 
@@ -226,6 +226,20 @@ void Mission::doFlightgroups(easyDomNode *node){
 
 }
 
+Flightgroup::~Flightgroup() {
+  if (squadLogo){
+    delete squadLogo;
+  }
+}
+
+Flightgroup& Flightgroup::operator = (Flightgroup & other) {
+  printf ("warning: may not work properly");
+  if (squadLogo) {
+    squadLogo = other.squadLogo->Clone();
+  }
+  return other;
+}
+
 /* *********************************************************** */
 
 void Mission::checkFlightgroup(easyDomNode *node){
@@ -233,6 +247,12 @@ void Mission::checkFlightgroup(easyDomNode *node){
     cout << "not a flightgroup" << endl;
     return;
   }
+
+  // nothing yet
+  string texture=node->attr_value("logo");
+  string texture_alpha=node->attr_value("logo_alpha");
+
+
 
   string name=node->attr_value("name");
   string faction=node->attr_value("faction");
@@ -262,6 +282,18 @@ void Mission::checkFlightgroup(easyDomNode *node){
   rot[0]=rot[1]=rot[2]=0.0;
 
   Flightgroup *fg=new Flightgroup();
+  if (!texture.empty()){
+    if (texture_alpha.empty()) {
+      fg->squadLogo = new Texture (texture.c_str(),
+				   0,
+				   MIPMAP);
+    }else {
+      fg->squadLogo = new Texture (texture.c_str(),
+				   texture_alpha.c_str(),
+				   0,
+				   MIPMAP);
+    }  
+  }
 
   vector<easyDomNode *>::const_iterator siter;
 
@@ -274,8 +306,9 @@ void Mission::checkFlightgroup(easyDomNode *node){
     }
     else if((*siter)->Name()=="order"){
       doOrder(*siter,fg);
-    }
+    }     
   }
+  
 
   if(!have_pos){
     cout << "don;t have a position in flightgroup " << name << endl;
