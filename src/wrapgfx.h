@@ -123,7 +123,7 @@ public:
 	Camera *AccessCamera(int num)
 	{
 	  if (star_system!=NULL) {
-	    return star_system->AccessCamera();
+	    return star_system->AccessCamera(num);
 	  } else
 	    return NULL;
 	}

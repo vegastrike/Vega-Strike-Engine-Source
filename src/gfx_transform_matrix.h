@@ -182,7 +182,26 @@ inline Vector Transform (const Matrix t, const Vector & v) {
 		 t[14]+v.i*t[2]+v.j*t[6]+v.k*t[10]);
 }
 
+inline Vector Transform (const Matrix t, const float x, const float y, const float z) {
+  //    Vector tLocation (t[12],t[13],t[14]);
+//    Vector tP (t[0],t[1],t[2]);//the p vector of the plane being selected on
+//    Vector tQ (t[4],t[5],t[6]);//the q vector of the plane being selected on
+//    Vector tR (t[8],t[9],t[10]);//the q vector of the plane being selected on
+  return Vector (t[12]+x*t[0]+y*t[4]+z*t[8],
+		 t[13]+x*t[1]+y*t[5]+z*t[9],
+		 t[14]+x*t[2]+y*t[6]+z*t[10]);
+}
 
+inline Vector TransformNormal (const Matrix t, const Vector & v) {
+  return Vector (v.i*t[0]+v.j*t[4]+v.k*t[8],
+		 v.i*t[1]+v.j*t[5]+v.k*t[9],
+		 v.i*t[2]+v.j*t[6]+v.k*t[10]);
+}
+inline Vector TransformNormal (const Matrix t, const float x, const float y, const float z) {
+  return Vector (x*t[0]+y*t[4]+z*t[8],
+		 x*t[1]+y*t[5]+z*t[9],
+		 x*t[2]+y*t[6]+z*t[10]);
+}
 int invert (float b[], float a[]);
 
 

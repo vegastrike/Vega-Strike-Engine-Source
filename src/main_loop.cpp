@@ -310,7 +310,8 @@ static void Quit(KBSTATE newState) {
 Unit *carrier=NULL;
 Unit *fighter = NULL;
 Unit *fighter2=NULL;
-
+const int numf = 256;
+Unit *fighters[numf];
 LocationSelect *locSel=NULL;
 
 Background * bg = NULL;
@@ -484,14 +485,15 @@ void createObjects() {
   fighter2->SetPosition(0.0, 1.0, 50.0);
   fighter2->Pitch(PI/2);
   
-  //  const int numf = 256;
-  //  Unit *fighters[numf];
-  //for(int a = 0; a < numf; a++) {
-    //fighters[a] = new Unit("uosprey.dat");
-    //fighters[a]->SetPosition((a%8)/8.0 - 2.0, (a/8)/8.0 - 2.0,5.0);
-    //fighters[a]->SetPosition((a%16)*5 - 40.0F, (a/16)*5 - 40.0F,25.0F);
-    //fighters[a]->Pitch(PI/2);
-  //}
+  //  
+  //  
+  for(int a = 0; a < numf; a++) {
+    fighters[a] = new Unit("uosprey.dat");
+    fighters[a]->SetPosition((a%8)/8.0 - 2.0, (a/8)/8.0 - 2.0,5.0);
+    fighters[a]->SetPosition((a%16)*5 - 40.0F, (a/16)*5 - 40.0F,25.0F);
+    fighters[a]->Pitch(PI/2);
+    //_GFX->activeStarSystem()->AddUnit(fighters[a]);
+  }
 
 
   _GFX->activeStarSystem()->AddUnit(fighter);
@@ -502,8 +504,8 @@ void createObjects() {
 }
 
 void destroyObjects() {  
-  //	for(a = 0; a < numf; a++)
-  //	delete fighters[a];
+  for(int a = 0; a < numf; a++)
+  	delete fighters[a];
   delete textplane;
   //delete locSel;
   //delete t;
@@ -539,7 +541,7 @@ void main_loop() {
   GFXEnable(DEPTHTEST);
   GFXEnable(TEXTURE0);
   GFXEnable(TEXTURE1);
-
+  //GFXDisable(TEXTURE1);
   GFXMaterial mat;
   GFXGetMaterial(0, mat);
   mat.ar = 1.0;
