@@ -78,6 +78,8 @@ esac
 
 dnl Check for compilers.  We set CXXFLAGS to null if unset, so
 dnl that these macros won't set them to default values that we don't want.
+CPPFLAGS=""
+CXXFLAGS=""
 if test "x${CXXFLAGS:-notset}" = "xnotset" ; then
     export CXXFLAGS
     CXXFLAGS=""
@@ -157,7 +159,7 @@ AC_CHECK_FUNCS([access atexit bzero clock_gettime floor getcwd gethostbyname get
 
 dnl Check for non-standard floating point functions and headers
 
-qAC_CHECK_FUNCS([finite _finite isnan _isnan])
+AC_CHECK_FUNCS([finite _finite isnan _isnan])
 
 AC_CHECK_HEADERS([ieeefp.h zlib.h])
 
@@ -1530,34 +1532,6 @@ LIBS="${LIBS} ${VS_LIBS} ${PYTHON_LIBS} ${PTHREAD_LIBS} ${CG_LIBS}"
 
 AC_CONFIG_FILES(Makefile
                  common/Makefile
-                 data/Makefile
-                 data/ai/Makefile
-                 data/ai/events/Makefile
-                 data/ai/script/Makefile
-                 data/animations/Makefile
-                 data/animations/explosion_orange.ani/Makefile
-                 data/animations/locationselect.ani/Makefile
-                 data/animations/locationselect_up.ani/Makefile
-                 data/animations/static.ani/Makefile
-                 data/bomber-cockpit.cpt/Makefile
-                 data/disabled-cockpit.cpt/Makefile
-                 data/heavy-cockpit.cpt/Makefile
-                 data/hornet-cockpit.cpt/Makefile
-                 data/light_cockpit.cpt/Makefile
-                 data/medium_cockpit.cpt/Makefile
-                 data/meshes/Makefile
-                 data/rlaan-cockpit.cpt/Makefile
-                 data/sounds/Makefile
-                 data/sprites/Makefile
-                 data/textures/Makefile
-                 data/units/Makefile
-                 data/units/confed/Makefile
-                 data/units/drydock/Makefile
-                 data/units/dumbfire/Makefile
-                 data/units/merchant/Makefile
-                 data/units/militia/Makefile
-                 data/units/planetary-ring/Makefile
-                 data/units/retro/Makefile
                  launcher/Makefile
                  mission/Makefile
                  objconv/Makefile
