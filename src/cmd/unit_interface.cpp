@@ -524,7 +524,7 @@ void CargoToMission (const char * item,TextArea * ta) {
 }
 extern void RespawnNow (Cockpit * cp);
 void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
-	char floatprice [100];
+	char floatprice [640];
   switch (mode) {
   case BRIEFINGMODE:
     switch (submode) {
@@ -586,6 +586,9 @@ void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
           oldprice/=3.0;
         }
 	sprintf(floatprice,"Price: %.2f",oldprice);
+	if (mode==SELLMODE) {
+	  sprintf (floatprice,"Price %.2f Purchase@ %.2f",oldprice,(*CurrentList)[cargonumber].price);
+	}
 	CargoInfo->ChangeTextItem ("price",floatprice);
 	sprintf(floatprice,"Mass: %.2f",(*CurrentList)[cargonumber].mass);
 	CargoInfo->ChangeTextItem ("mass",floatprice);
