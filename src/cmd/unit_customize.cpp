@@ -101,7 +101,7 @@ double computeDowngradePercent (double old, double upgrade, double isnew) {
   }
 }
 
-bool Unit::UpgradeMounts (Unit *up, int mountoffset, bool touchme, bool downgrade, int &numave,double &percentage) {
+bool Unit::UpgradeMounts (Unit *up, int mountoffset, bool touchme, bool downgrade, int &numave, Unit * templ, double &percentage) {
   int j;
   int i;
   bool cancompletefully=true;
@@ -111,6 +111,14 @@ bool Unit::UpgradeMounts (Unit *up, int mountoffset, bool touchme, bool downgrad
       if (!downgrade) {//if we wish to add guns instead of remove
 	if (up->mounts[i].type.size==(up->mounts[i].type.size&mounts[jmod].size)) {//only look at this mount if it can fit in the rack
 	  numave++;//ok now we can compute percentage of used parts
+	  if (templ) {
+	    if (templ->nummounts>i) {
+	      int maxammo = templ->mounts[i].ammo;
+	      if ((up->mounts[i].ammo>maxammo||up->mounts[i].ammo==-1)&&maxammo!=-1) {
+		up->mounts[i].ammo = maxammo;
+	      }
+	    }
+	  }
 	  percentage+=mounts[jmod].Percentage(up->mounts[i]);//compute here
 	  if (touchme) {//if we wish to modify the mounts
 	    mounts[jmod].SwapMounts (up->mounts[i]);//switch this mount with the upgrador mount
@@ -243,7 +251,7 @@ bool Unit::Downgrade (Unit * downgradeor, int mountoffset, int subunitoffset,  d
 bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, bool additive, bool forcetransaction, double &percentage) {
   percentage=0;
   int numave=0;
-  bool cancompletefully=UpgradeMounts(up,mountoffset,touchme,downgrade,numave,percentage);
+  bool cancompletefully=UpgradeMounts(up,mountoffset,touchme,downgrade,numave,templ,percentage);
   bool cancompletefully1=UpgradeSubUnits(up,subunitoffset,touchme,downgrade,numave,percentage);
   cancompletefully=cancompletefully&&cancompletefully1;
   adder Adder;

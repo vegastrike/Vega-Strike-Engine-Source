@@ -97,7 +97,7 @@ class PlanetaryTransform;
 struct PlanetaryOrbitData;
 class Unit {
   bool Unit::UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage);
-  bool Unit::UpgradeMounts (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage);
+  bool Unit::UpgradeMounts (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, Unit * templ, double &percentage);
 
   Nebula * nebula;
   PlanetaryOrbitData * planet;
