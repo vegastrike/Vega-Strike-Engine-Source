@@ -1081,27 +1081,8 @@ string Unit::WriteUnitString () {
   }
   return ret;
 }
-
-Unit * Unit::makeMasterPartList() {
-  static std::string mpl = vs_config->getVariable("data","master_part_list","master_part_list");
-  Unit * ret = new Unit();
-  ret->name="master_part_list";
-  CSVTable table(mpl);
-  unsigned int siz=table.rows.size();
-  unsigned int i;
-  for (i=0;i<siz;++i) {
-    CSVRow row(&table,i);
-    Cargo carg;
-    carg.content=row["file"];
-    carg.category=row["categoryname"];
-    carg.volume=stof(row["volume"],1);
-    carg.mass=stof(row["mass"],1);
-	carg.quantity=1;
-    carg.price=stoi(row["price"],1);
-    carg.description=row["description"];    
-    ret->GetImageInformation().cargo.push_back(carg);
-  } 
-  for (i=0;i<_Universe->numPlayers();++i) {
+void UpdateMasterPartList(Unit * ret) {
+  for (int i=0;i<_Universe->numPlayers();++i) {
     Cockpit* cp = _Universe->AccessCockpit(i);
     std::vector<std::string>* addedcargoname= &cp->savegame->getMissionStringData("master_part_list_content");
     std::vector<std::string>* addedcargocat= &cp->savegame->getMissionStringData("master_part_list_category");
@@ -1121,6 +1102,38 @@ Unit * Unit::makeMasterPartList() {
       ret->GetImageInformation().cargo.push_back(carg);
     }
   }
-  ret->SortCargo();
+  std::sort(ret->GetImageInformation().cargo.begin(),  ret->GetImageInformation().cargo.end());
+  {
+    Cargo last_cargo;
+    for (int i=ret->numCargo()-1;i>=0;--i) {
+      if (ret->GetCargo(i).content==last_cargo.content&&
+          ret->GetCargo(i).category==last_cargo.category) {
+        ret->RemoveCargo(i,ret->GetCargo(i).quantity,true);
+      }else {
+        last_cargo=ret->GetCargo(i);
+      }
+    }
+  }
+}
+Unit * Unit::makeMasterPartList() {
+  static std::string mpl = vs_config->getVariable("data","master_part_list","master_part_list");
+  Unit * ret = new Unit();
+  ret->name="master_part_list";
+  CSVTable table(mpl);
+  unsigned int siz=table.rows.size();
+  unsigned int i;
+  for (i=0;i<siz;++i) {
+    CSVRow row(&table,i);
+    Cargo carg;
+    carg.content=row["file"];
+    carg.category=row["categoryname"];
+    carg.volume=stof(row["volume"],1);
+    carg.mass=stof(row["mass"],1);
+	carg.quantity=1;
+    carg.price=stoi(row["price"],1);
+    carg.description=row["description"];    
+    ret->GetImageInformation().cargo.push_back(carg);
+  } 
+  UpdateMasterPartList(ret);
   return ret;
 }

@@ -4653,6 +4653,7 @@ bool Unit::RefillWarpEnergy() {
   }
   return false;
 }
+void      UpdateMasterPartList(Unit*);
 int Unit::ForceDock (Unit * utdw, int whichdockport) {
 	if (utdw->image->dockingports.size()<=whichdockport)
 		return 0;
@@ -4674,6 +4675,7 @@ int Unit::ForceDock (Unit * utdw, int whichdockport) {
 		  this->RestoreGodliness();
 	//_Universe->AccessCockpit()->RestoreGodliness();
       }
+      UpdateMasterPartList(UniverseUtil::GetMasterPartList());
       int cockpit=UnitUtil::isPlayerStarship(this);
       if (this->RefillWarpEnergy()){
         if (cockpit>=0&&cockpit<_Universe->numPlayers()) {
