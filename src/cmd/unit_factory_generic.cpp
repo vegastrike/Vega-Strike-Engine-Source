@@ -19,6 +19,17 @@ void UnitFactory::getUnitBuffer( NetBuffer & netbuf, const char *filename,
 		netbuf.addString( flightgroup->name);
 		netbuf.addInt32( fg_subnumber);
 }
+Unit* UnitFactory::getMasterPartList( )
+{
+
+    if( _masterPartList == NULL )
+    {
+		std::string mpl=getMasterPartListUnitName();
+                _masterPartList = Unit::makeMasterPartList();
+        
+    }
+    return _masterPartList;
+}
 
 void UnitFactory::getPlanetBuffer( NetBuffer & netbuf, QVector x,
                                    QVector y,

@@ -1048,7 +1048,7 @@ string Unit::WriteUnitString () {
   return ret;
 }
 
-Unit * makeMPL() {
+Unit * Unit::makeMasterPartList() {
   static std::string mpl = vs_config->getVariable("data","master_part_list","master_part_list");
   Unit * ret = new Unit();
   ret->name="master_part_list";

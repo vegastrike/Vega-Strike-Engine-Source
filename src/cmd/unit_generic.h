@@ -974,6 +974,7 @@ public:
 protected:
   void SortCargo();
 public:
+  static Unit* makeMasterPartList();
   bool CanAddCargo (const Cargo &carg) const;
   void AddCargo (const Cargo &carg,bool sort=true);
   int RemoveCargo (unsigned int i, int quantity, bool eraseZero=true);
