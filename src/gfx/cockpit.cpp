@@ -768,7 +768,7 @@ void RespawnNow (Cockpit * cp) {
     respawnunit.push_back(0);
   for (unsigned int i=0;i<_Universe->numPlayers();i++) {
     if (_Universe->AccessCockpit(i)==cp) {
-      respawnunit[i]=1;
+      respawnunit[i]=2;
     }
   }
 }
@@ -1110,7 +1110,9 @@ void Cockpit::Draw() {
 		float x; float y;
 		if (dietime==0) {
 		  if (respawnunit.size()>_Universe->CurrentCockpit()) 
-		    respawnunit[_Universe->CurrentCockpit()]=0;
+		    if (respawnunit[_Universe->CurrentCockpit()]==1) {
+		      respawnunit[_Universe->CurrentCockpit()]=0;
+		    }
 			text->GetCharSize (x,y);
 			text->SetCharSize (x*4,y*4);
 			text->SetPos (0-(x*2*14),0-(y*2));
