@@ -29,6 +29,7 @@
 #include "universe_util.h"
 #include "in_mouse.h"
 #include "gui/glut_support.h"
+#include "networking/netclient.h"
 extern float rand01();
 #define SWITCH_CONST .9
 
@@ -639,6 +640,11 @@ float Cockpit::LookupTargetStat (int stat, Unit *target) {
     }
 	if( fpsval)
    	 return 1./fpsval;
+  case LAG:
+    if ( Network != NULL)
+   	 return Network[0].getLag();
+	else
+	 return 0;
   }
   return 1;
 }
