@@ -29,7 +29,8 @@
 #include "xml_support.h"
 //#include "glut.h"
 
-TextPlane::TextPlane() {
+TextPlane::TextPlane(const GFXColor & c) {
+  col=c;
   myDims.i = 2;  myDims.j=-2;
   char font[64]={0};
   char fonta[64]={0};
@@ -63,6 +64,7 @@ static char * CreateLists() {
 }
 void TextPlane::Draw(const string & newText, int offset,bool startlower, bool force_highquality)
 {
+  GFXColorf(this->col);
   static char * display_lists=CreateLists ();
 	// some stuff to draw the text stuff
   string::const_iterator text_it = newText.begin();

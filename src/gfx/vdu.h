@@ -34,25 +34,25 @@ class VDU: public Sprite {
   void DrawVDUObjective (void * obj, int offset);//obj is of type Mission::Objective
   void DrawVDUObjectives(Unit * parent);
   ///Draws a shield display in the VDU
-  void DrawVDUShield (Unit * parent, const GFXColor & c);
+  void DrawVDUShield (Unit * parent);
   ///Draws the target display of Unit *target (only call with nonNULL)
-  void DrawTarget(Unit * parent, Unit *target, const GFXColor & c);
+  void DrawTarget(Unit * parent, Unit *target);
   ///Draws a list of cargo contents
-  void DrawManifest (Unit * parent, Unit * target, const GFXColor & c);
+  void DrawManifest (Unit * parent, Unit * target);
   ///Draws the message from the messagecenter
-  void DrawMessages(Unit *target, const GFXColor & c);
+  void DrawMessages(Unit *target);
   ///Draws the nav point this unit is heading to
-  void DrawNav(const Vector &navPoint, const GFXColor & c);
+  void DrawNav(const Vector &navPoint);
   ///Draws the comm screen this unit can use to communicate
-  void DrawComm(const GFXColor & c);
+  void DrawComm();
   ///Draws the damage this unit has sustained
-  void DrawDamage(Unit * parent, const GFXColor & c);
+  void DrawDamage(Unit * parent);
   ///Draws the weapons activated on current unit
-  void DrawWeapon(Unit *parent, const GFXColor & c);
+  void DrawWeapon(Unit *parent);
   ///Draws the sprite representing the current starship. Returns proper location and size for future use (with weaps and damage display)
   void DrawTargetSpr(Sprite * s,float percent, float &x, float &y, float &w, float &h);
   ///draws the target camera
-void  DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewStyle,Unit *parent,Unit *target, const GFXColor & c);
+void  DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewStyle,Unit *parent,Unit *target);
 public:
  unsigned int getMode() {return thismode.back();}
   int scrolloffset;

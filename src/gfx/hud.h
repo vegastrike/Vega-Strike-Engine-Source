@@ -20,7 +20,7 @@
  */
 #include <string>
 #include "vec.h"
-
+#include "gfxlib_struct.h"
 struct Texture;
 
 class TextPlane {
@@ -36,7 +36,8 @@ class TextPlane {
 	} myGlyphPos[256];
 	*/
 public:
-	TextPlane();
+	GFXColor col;
+	TextPlane(const struct GFXColor &col=GFXColor(1,1,1,1));
 	~TextPlane();
 	void SetPos (float x, float y) {
 	  myFontMetrics.k = y;
