@@ -165,9 +165,13 @@ void StarSystem::Draw() {
 
   stars->Draw();
   static bool doInputDFA = XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
-  if (doInputDFA)
-    systemInputDFA->Draw();
   _Universe->AccessCockpit()->Draw();
+  if (doInputDFA) {
+    GFXHudMode (true);
+    systemInputDFA->Draw();
+    GFXHudMode (false);
+  }
+
 }
 
 extern double interpolation_blend_factor;
