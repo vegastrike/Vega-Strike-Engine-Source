@@ -27,6 +27,7 @@
 #include <deque>
 #include "vs_globals.h"
 #include "config_xml.h"
+#include "in_joystick.h"
 using std::deque;
 #define NUM_BUTTONS 15
 
@@ -105,14 +106,16 @@ void mouseMotion(int x, int y) {
     mouseBindings[i](MouseState[i],x,y,x-mousex,y-mousey,0);
   }
  if (warp_pointer) {
+   if (joystick[MOUSE_JOYSTICK]->player<_Universe->numPlayers()) {
     if (x<mouse_warp_zone||y<mouse_warp_zone||x>g_game.x_resolution-mouse_warp_zone||y>g_game.y_resolution-mouse_warp_zone) {
-    warpMousePointer(g_game.x_resolution/2,g_game.y_resolution/2);
-    warpedmouse=true;
-    x= x-mousex+g_game.x_resolution/2;
-    y= y-mousey+g_game.y_resolution/2;
-  }
-  mousex = x;
-  mousey = y;
+      warpMousePointer(g_game.x_resolution/2,g_game.y_resolution/2);
+      warpedmouse=true;
+      x= x-mousex+g_game.x_resolution/2;
+      y= y-mousey+g_game.y_resolution/2;
+    }
+   }
+   mousex = x;
+   mousey = y;
 
   }
 }
