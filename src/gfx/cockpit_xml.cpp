@@ -119,7 +119,7 @@ namespace CockpitXML {
   };
 
   const EnumMap element_map(element_names, 24);
-  const EnumMap attribute_map(attribute_names, 24);
+  const EnumMap attribute_map(attribute_names, 25);
 }
 
 using XMLSupport::EnumMap;
