@@ -75,7 +75,7 @@ public:
   ~Animation();
 
   void Draw();
-
+  void SetFaceCam(bool face);
   void CalculateOrientation (Matrix &result);
 
   void DrawNow(const Matrix & final_orientation);

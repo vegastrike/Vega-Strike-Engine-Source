@@ -774,6 +774,8 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
     }
   }
 }
+extern Animation * GetVolatileAni (unsigned int);
+extern unsigned int AddAnimation (const QVector &, const float, bool, const std::string &, float percentgrow);
 
 
 float Unit::ExplosionRadius() {
@@ -820,6 +822,29 @@ bool Unit::Explode (bool drawit, float timeit) {
 
 	  un=_Universe->AccessCockpit()->GetParent();
 	  if (isUnit()==UNITPTR) {
+	    static float percentage_shock=XMLSupport::parse_float(vs_config->getVariable ("graphics","percent_shockwave",".5"));
+	    if (rand () < RAND_MAX*percentage_shock&&(!SubUnit)) {
+	      static float shockwavegrowth=XMLSupport::parse_float(vs_config->getVariable ("graphics","shockwave_growth","1.05"));
+	      static string shockani (vs_config->getVariable ("graphics","shockwave_animation","explosion_wave.ani"));
+	      
+	      static Animation * __shock__ani = new Animation (shockani.c_str(),true,.1,MIPMAP,false);
+	      __shock__ani->SetFaceCam(false);
+	      unsigned int which = AddAnimation (Position(),ExplosionRadius(),true,shockani,shockwavegrowth);
+	      Animation * ani = GetVolatileAni (which);
+	      if (ani) {
+		ani->SetFaceCam(false);
+		Vector p,q,r;
+		GetOrientation(p,q,r);
+		int tmp = rand();
+		if (tmp < RAND_MAX/3) {
+		  ani->SetOrientation (Vector(1,0,0),Vector(0,1,0),Vector(0,0,1));
+		}else if (tmp< 2*(RAND_MAX/3)) {
+		  ani->SetOrientation (Vector(0,1,0),Vector(0,0,1),Vector(1,0,0));
+		}else {
+		  ani->SetOrientation (Vector(0,0,1),Vector(1,0,0),Vector(0,1,0));
+		}
+	      }
+	    }
 		  if (un ) {
 			static float badrel=XMLSupport::parse_float(vs_config->getVariable("sound","loss_relationship","-.1"));
 			static float goodrel=XMLSupport::parse_float(vs_config->getVariable("sound","victory_relationship",".5"));

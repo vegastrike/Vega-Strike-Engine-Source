@@ -66,7 +66,7 @@ string varToString (varInst * vi) {
   }
 }
 
-extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name );
+extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name ,float per);
 void Mission::doCall_toxml(string module,varInst *ovi){
   if(module=="_olist"){
     call_olist_toxml(NULL,SCRIPT_RUN,ovi);
@@ -186,7 +186,7 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
       loc.k= getFloatArg(node,mode,3);     
       float size = getFloatArg(node,mode,4);
       if (mode==SCRIPT_RUN) {
-	AddAnimation(loc,size,true,aniName);
+	AddAnimation(loc,size,true,aniName,1);
       }
       vi = newVarInst (VI_TEMP);
       vi->type=VAR_VOID;

@@ -13,7 +13,7 @@
 #include "load_mission.h"
 #include "config_xml.h"
 extern class Music *muzak;
-extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name );
+extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );
 
 extern Universe *_Universe;
 
@@ -184,7 +184,10 @@ namespace UniverseUtil {
 	  anis.push_back (new Animation(aniName.c_str()));
         }
 	void playAnimation(string aniName, QVector loc, float size) {
-		AddAnimation(loc,size,true,aniName);
+		AddAnimation(loc,size,true,aniName,1);
+	}
+	void playAnimationGrow(string aniName, QVector loc, float size, float growpercent) {
+		AddAnimation(loc,size,true,aniName,growpercent);
 	}
 	void terminateMission(bool Win){
 		mission->terminateMission();

@@ -73,6 +73,7 @@ namespace UniverseUtil {
 	void playSound(string soundName, QVector loc, Vector speed);
 ///this plays an image (explosion or warp animation) at a location
 	void playAnimation(string aniName, QVector loc, float size);
+	void playAnimationGrow(string aniName, QVector loc, float size,float growpercent);
 ///this ends the mission with either success or failure
 	void terminateMission(bool term);
 ///this gets the player belonging to this mission

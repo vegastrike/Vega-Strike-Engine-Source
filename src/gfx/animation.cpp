@@ -30,6 +30,8 @@
 #include "config_xml.h"
 #include "xml_support.h"
 #include "sprite.h"
+#include <algorithm>
+using std::vector;
 using std::stack;
 static vector<Animation *> far_animationdrawqueue;
 static vector
@@ -43,6 +45,13 @@ Animation::Animation ()
   VSCONSTRUCT2('a')
 	height = 0.001F;
 	width = 0.001F;
+}
+void Animation::SetFaceCam(bool face) {
+  if (face) {
+    options|=ani_up;
+  }else {
+    options &= (~ani_up);
+  }
 }
 Animation::Animation (const char * FileName, bool Rep,  float priority,enum FILTER ismipmapped,  bool camorient, bool appear_near_by_radius, const GFXColor &c) : mycolor(c)
 {	
@@ -77,6 +86,14 @@ Animation::Animation (const char * FileName, bool Rep,  float priority,enum FILT
   vscdup();
 }
 Animation:: ~Animation () {
+  vector <Animation   *>::iterator i;
+  while ( (i=std::find(far_animationdrawqueue.begin(),far_animationdrawqueue.end(),this))!=far_animationdrawqueue.end()) {
+    far_animationdrawqueue.erase(i);
+  }
+  while ( (i=std::find(animationdrawqueue.begin(),animationdrawqueue.end(),this))!=animationdrawqueue.end()) {
+    animationdrawqueue.erase(i);
+  }
+
   VSDESTRUCT2  
 }
 void Animation::SetPosition (const QVector &p) {

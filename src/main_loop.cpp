@@ -1,4 +1,5 @@
 #include <stdlib.h>
+
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -58,6 +59,8 @@ using namespace std;
 #define KEYDOWN(name,key) (name[key] & 0x80)
 
 Unit **fighters;
+  void SuicideKey(int,KBSTATE newState);
+//  void Respawn(int,KBSTATE newState);
 
 
  GFXBOOL capture;
@@ -677,6 +680,9 @@ void restore_main_loop() {
 
 }
 void main_loop() {
+  //  SuicideKey (0,PRESS);
+
+  //  Cockpit::Respawn (0,PRESS);
   /*  static int i=0;
   setTimeCompression(i);
   i++;
