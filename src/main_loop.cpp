@@ -50,7 +50,7 @@
 #include "cmd/cont_terrain.h"
 #include "cmd/script/flightgroup.h"
 #include "force_feedback.h"
-
+#include "universe_util.h"
 using namespace std;
 
  Music * muzak=NULL;
