@@ -151,7 +151,15 @@ void Cockpit::InitStatic () {
   radar_time=0;
   cockpit_time=0;
 }
-
+bool Cockpit::unitInAutoRegion(Unit * un) {
+  static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));     
+  Unit * targ =autopilot_target.GetUnit();
+  if (targ) {
+    return UnitUtil::getSignificantDistance(un,targ)<autopilot_term_distance*2.5;// if both guys just auto'd in.
+  }else {
+    return false;
+  }
+}
 Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name): view(CP_FRONT),parent (parent), cockpit_offset(0), viewport_offset(0), zoomfactor (XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"))),savegame (new SaveGame(pilot_name)) {
   //  static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
   //int i;

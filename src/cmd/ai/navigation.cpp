@@ -241,23 +241,28 @@ void ChangeHeading::Execute() {
   Vector local_velocity (parent->UpCoordinateLevel(ang_vel));
   Vector local_heading (parent->ToLocalCoordinates ((final_heading-parent->Position()).Cast()));
   //Vector local_heading (parent->UpCoordinateLevel(ang_vel));
-  char xswitch = ((local_heading.i>0)!=(last_velocity.i>0)||(!local_heading.i))?1:0;
-  char yswitch = ((local_heading.j>0)!=(last_velocity.j>0)||(!local_heading.j))?1:0;
+  char xswitch = ((local_heading.i>0)!=(last_velocity.i>0)||(!local_heading.i))&&last_velocity.i!=0?1:0;
+  char yswitch = ((local_heading.j>0)!=(last_velocity.j>0)||(!local_heading.j))&&last_velocity.j!=0?1:0;
   static bool AICheat = XMLSupport::parse_bool(vs_config->getVariable ("AI","turn_cheat","true"));
   if (AICheat) {
     if (xswitch||yswitch) {   
 
       if (xswitch) {
 	if (yswitch) {
-	  local_velocity.j=local_velocity.i =0.0;
+	  local_velocity.j=.0f;
+          local_velocity.i=.0f;
+          ang_vel.i=.0f;
+          ang_vel.j=.0f;
 	}else {
-	  local_velocity.i=0.0;;
+	  local_velocity.i=.0f;
+          ang_vel.i=.0f;
 	}
       }else if (yswitch) {
-	  local_velocity.j=0.0;;
+	  local_velocity.j=.0f;
+          ang_vel.j=.0f;
       }
       
-      parent->SetAngularVelocity(parent->DownCoordinateLevel (local_velocity));
+      parent->SetAngularVelocity(ang_vel);
     }
   }
   terminatingX += xswitch;

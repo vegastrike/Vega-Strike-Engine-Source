@@ -12,7 +12,9 @@
 #include "xml_support.h"
 #include "gfx/animation.h"
 #include "gfx/vsimage.h"
-
+bool VDU::staticable() {
+  return (posmodes&(posmodes-1))!=0;// check not power of two
+}
 ///ALERT to change must change enum in class
 const std::string vdu_modes [] = {"Target","Nav","Objectives","Comm","Weapon","Damage","Shield", "Manifest", "TargetManifest","View","Message"};
 string reformatName (string nam) {

@@ -814,7 +814,7 @@ public:
     MoveTo::Execute();
     Unit * un=NULL;
     static float mintime=XMLSupport::parse_float(vs_config->getVariable("AI","min_time_to_auto","20"));
-    if (_Universe->AccessCockpit()->autoInProgress()&&getNewTime()-creationtime>mintime&&(un =ChooseNearNavPoint(parent,targetlocation,0))!=NULL) {
+    if (_Universe->AccessCockpit()->autoInProgress()&&getNewTime()-creationtime>mintime&&(!_Universe->AccessCockpit()->unitInAutoRegion(parent))&&(un =ChooseNearNavPoint(parent,targetlocation,0))!=NULL) {
       WarpToP(parent,un);
     }else {
       WarpToP(parent,targetlocation,0);
@@ -837,7 +837,7 @@ void AggressiveAI::ExecuteNoEnemies() {
       static bool can_warp_to=XMLSupport::parse_bool(vs_config->getVariable("AI","warp_to_no_enemies","true"));      
       if (can_warp_to) {
         WarpToP(parent,dest);
-      }else if (_Universe->AccessCockpit()->autoInProgress()) {
+      }else if (_Universe->AccessCockpit()->autoInProgress()&&!_Universe->AccessCockpit()->unitInAutoRegion(parent)) {
         static float mintime=XMLSupport::parse_float(vs_config->getVariable("AI","min_time_to_auto","20"));
         if (getNewTime()-creationtime>mintime) {
           WarpToP(parent,dest);
@@ -933,13 +933,22 @@ void AggressiveAI::Execute () {
     }
   }
   }
-  if ((!isjumpable) &&interruptcurtime<=0) {
+  if ((!isjumpable) &&interruptcurtime<=0&&target) {
 //	  fprintf (stderr,"i");
 	  ProcessLogic (*logic, true);
   }
+  if (!target) {
+    logiccurtime-=SIMULATION_ATOM;
+    if (logiccurtime<0) {
+      logiccurtime=20;
+      currentpriority=-FLT_MAX;
+      eraseType (Order::FACING);
+      eraseType (Order::MOVEMENT);      
+    }
+  }
+
   //  if (parent->getAIState()->queryType (Order::FACING)==NULL&&parent->getAIState()->queryType (Order::MOVEMENT)==NULL) { 
   
-
 
   if (queryAny (Order::FACING|Order::MOVEMENT)==NULL) { 
     if (isjumpable) {

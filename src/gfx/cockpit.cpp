@@ -1462,29 +1462,30 @@ void GameCockpit::Draw() {
 	  vdu[vd]->Draw(un,textcol);
 	  GFXColor4f (1,1,1,1);
 	  float damage = un->GetImageInformation().cockpit_damage[(1+vd)%(MAXVDUS+1)];
-	if (damage<.985) {
-	  if (vdu_time[vd]>=0) {
-	    if (damage>.001&&(cockpit_time>(vdu_time[vd]+(1-damage)))) {
-	      if (rand01()>SWITCH_CONST) {
-		vdu_time[vd]=-cockpit_time;
-	      }
-	    } else {
-	      static Animation vdu_ani("static.ani",true,.1,BILINEAR);
-	      GFXEnable(TEXTURE0);
-	      vdu_ani.DrawAsVSSprite(vdu[vd]);	
-	    }
-	  } else {
-	    if (cockpit_time>((1-(-vdu_time[vd]))+(damage))) {
-	      if (rand01()>SWITCH_CONST) {
-		vdu_time[vd]=cockpit_time;
-	      }
+          if (vdu[vd]->staticable()) {
+            if (damage<.985) {
+              if (vdu_time[vd]>=0) {
+                if (damage>.001&&(cockpit_time>(vdu_time[vd]+(1-damage)))) {
+                  if (rand01()>SWITCH_CONST) {
+                    vdu_time[vd]=-cockpit_time;
+                  }
+                } else {
+                  static Animation vdu_ani("static.ani",true,.1,BILINEAR);
+                  GFXEnable(TEXTURE0);
+                  vdu_ani.DrawAsVSSprite(vdu[vd]);	
+                  
+                }
+              } else {
+                if (cockpit_time>((1-(-vdu_time[vd]))+(damage))) {
+                  if (rand01()>SWITCH_CONST) {
+                    vdu_time[vd]=cockpit_time;
+                  }
+                }
+              }
 	    }
 	  }
-	}
-	  //process VDU, damage VDU, targetting VDU
-	}
-      }
-
+        }              //process VDU, damage VDU, targetting VDU
+      }      
     }
     GFXColor4f (1,1,1,1);
     if (un->GetHull()>=0)
