@@ -134,10 +134,10 @@ void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE * mtl
 		  float32bit	sg=VSSwapHostFloatToLittle(inmemfile[meshbeginword+23].f32val);//Specular: green
 		  float32bit	sb=VSSwapHostFloatToLittle(inmemfile[meshbeginword+24].f32val);//Specular: blue
 		  float32bit	sa=VSSwapHostFloatToLittle(inmemfile[meshbeginword+25].f32val);//Specular: Alpha
-		  int32bit cullface=VSSwapHostIntToLittle(inmemfile[meshbeginword+26].i32val);//CullFace
-		  int32bit lighting=VSSwapHostIntToLittle(inmemfile[meshbeginword+27].i32val);//lighting
-		  int32bit reflect=VSSwapHostIntToLittle(inmemfile[meshbeginword+28].i32val);//reflect
-		  int32bit usenormals=VSSwapHostIntToLittle(inmemfile[meshbeginword+29].i32val);//usenormals
+		  int32bit cullface=(VSSwapHostIntToLittle(inmemfile[meshbeginword+26].i32val)!=0)?1:0;//CullFace
+		  int32bit lighting=(VSSwapHostIntToLittle(inmemfile[meshbeginword+27].i32val)!=0)?1:0;//lighting
+		  int32bit reflect=(VSSwapHostIntToLittle(inmemfile[meshbeginword+28].i32val)!=0)?1:0;//reflect
+		  int32bit usenormals=(VSSwapHostIntToLittle(inmemfile[meshbeginword+29].i32val)!=0)?1:0;//usenormals
 		  //End Header
 		  // Go to Arbitrary Length Attributes section
 		  word32index=meshbeginword+(meshheaderlength/4);
