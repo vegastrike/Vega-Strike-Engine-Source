@@ -13,7 +13,7 @@
 ///objects that go over 16 sectors are considered huge and better to check against everything.
 #define HUGEOBJECT sizeof (CTHUGE)
 //const int HUGEOBJECT=12; 
-
+class StarSystem;
 /**
  * Hashtable3d is a 3d datastructure that holds various starships that are
  * near enough to crash into each other (or also lights that are big enough
@@ -24,7 +24,11 @@ template <class CTSIZ, class CTACCURACY, class CTHUGE> class UnitHash3d {
   UnitCollection hugeobjects;
   ///The hash table itself. Holds most units to be collided with
   UnitCollection table [COLLIDETABLESIZE][COLLIDETABLESIZE][COLLIDETABLESIZE];
+  StarSystem * activeStarSystem;
+  Unit * debugUnit;
+
   ///hashes 3 values into the appropriate spot in the hash table
+
   static void hash_vec (float i, float j, float k, int &x, int &y, int &z) {
     x = hash_int(i);
     y = hash_int(j);
@@ -35,10 +39,19 @@ template <class CTSIZ, class CTACCURACY, class CTHUGE> class UnitHash3d {
     hash_vec(t.i,t.j,t.k,x,y,z);
   }
 public:
+  UnitHash3d (StarSystem * ss) {
+    activeStarSystem = ss;
+  }
   void updateBloc (unsigned int whichblock) {
     un_iter ui =table  [whichblock%COLLIDETABLESIZE][(whichblock/COLLIDETABLESIZE)%COLLIDETABLESIZE][((whichblock/COLLIDETABLESIZE)/COLLIDETABLESIZE)%COLLIDETABLESIZE].createIterator();
-    while (*ui) {
-      ++ui;
+    Unit * un;
+    while ((un=*ui)=NULL) {
+      if (un==debugUnit||!un->InCorrectStarSystem(activeStarSystem)) {
+	fprintf (stderr,"Collide Queue Error. Not anywhere near fatal. Report with mission name to hellcatv@hotmail.com");
+	ui.remove();
+      }else {
+	++ui;
+      }
     }
   }
   ///Hashes a single value to a value on the collide table truncated to all 3d constraints.  Consider using a swizzle
@@ -205,7 +218,7 @@ const int coltablesize=20;
 class CollideTable {
   unsigned int blocupdate;
  public:
-  CollideTable ():blocupdate(0) {}
+  CollideTable (StarSystem *ss):blocupdate(0),c(ss) {}
   void Update () {c.updateBloc(blocupdate++);}
   UnitHash3d <char[coltablesize],char[coltableacc], char [tablehuge]> c;
 };

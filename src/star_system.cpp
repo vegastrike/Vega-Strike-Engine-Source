@@ -57,7 +57,7 @@ StarSystem::StarSystem(const char * filename, const Vector & centr,const float t
   _Universe->pushActiveStarSystem (this);
   GFXCreateLightContext (lightcontext);
   bolts = new bolt_draw;
-  collidetable = new CollideTable;
+  collidetable = new CollideTable(this);
   //  cout << "origin: " << centr.i << " " << centr.j << " " << centr.k << " " << planetname << endl;
 
   current_stage=PHY_AI;

@@ -174,7 +174,7 @@ class Unit {
   StarSystem * activeStarSystem;//the star system I'm in
   bool BuyCargo (unsigned int i, unsigned int quantity, Unit * buyer, float &creds);
   bool BuyCargo (const std::string &cargo,unsigned int quantity, Unit * buyer, float & creds);
-
+  
   void SetPlanetHackTransformation (Transformation *&ct, float *&ctm);
 
   UnitSounds * sound;
@@ -494,7 +494,7 @@ public:
   float cosAngleFromMountTo (Unit * target, float & distance) const;
   ///won't collide with owner
   void SetOwner(Unit *target);
-
+  bool InCorrectStarSystem (StarSystem *active) {return active==activeStarSystem;}
   Unit *Target() {return computer.target.GetUnit(); }
   Unit *VelocityReference() {return computer.velocity_ref.GetUnit(); }
   Unit *Threat() {return computer.threat.GetUnit(); }

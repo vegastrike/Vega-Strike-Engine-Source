@@ -231,6 +231,7 @@ void Unit::EjectCargo (unsigned int index) {
 	  }
 	}
 	if (cp) {
+	  cargo->SetOwner(NULL);
 	  PrimeOrders();
 	  cargo->SetTurretAI();
 	  cargo->faction=faction;

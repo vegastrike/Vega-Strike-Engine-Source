@@ -1,9 +1,11 @@
 
+#include "star_system.h"
+
 
 #include "weapon_xml.h"
 #include <assert.h>
 #include "audiolib.h"
-#include "star_system.h"
+#include "unit.h"
 #include "beam.h"
 weapon_info::weapon_info(const weapon_info &tmp) {
   *this = tmp;

@@ -21,6 +21,8 @@ libai_a_SOURCES =	\
 	flykeyboard.h	\
 	flyjoystick.h	\
 	flyjoystick.cpp	\
+	hard_coded_scripts.cpp	\
+	hard_coded_scripts.h	\
 	order.cpp	\
 	order_comm.cpp \
 	aggressive.cpp	\
