@@ -107,9 +107,10 @@ void AUDListener (const Vector & pos, const Vector & vel) {
 #ifdef HAVE_AL
   mylistener.pos = pos;
   mylistener.vel = vel;
-  
-  alListener3f (AL_POSITION, scalepos*pos.i,scalepos*pos.j,scalepos*pos.k);
-  alListener3f (AL_VELOCITY, scalevel*vel.i,scalevel*vel.j,scalevel*vel.k);
+  if (usepositional)
+	alListener3f (AL_POSITION, scalepos*pos.i,scalepos*pos.j,scalepos*pos.k);
+  if (usedoppler)
+	alListener3f (AL_VELOCITY, scalevel*vel.i,scalevel*vel.j,scalevel*vel.k);
   //  printf ("(%f,%f,%f) <%f %f %f>\n",pos.i,pos.j,pos.k,vel.i,vel.j,vel.k);
 #endif
 }

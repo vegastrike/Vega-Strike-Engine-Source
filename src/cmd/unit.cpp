@@ -523,7 +523,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
       subunits[subcount]->Draw(cumulative_transformation, cumulative_transformation_matrix);
     }
     if(selected) {
-      selectionBox->Draw(g_game.x_resolution,cumulative_transformation, cumulative_transformation_matrix);
+      //selectionBox->Draw(g_game.x_resolution,cumulative_transformation, cumulative_transformation_matrix);
     }
   } else {
     //        UpdateHudMatrix();

@@ -43,5 +43,12 @@ void AUDStartPlaying (const int sound);
 void AUDPlay (const int sound, const Vector & pos, const Vector & vel, const float gain);
 ///Pauses a loaded sound
 void AUDPausePlaying (const int sound);
+///Changes the volume (generally 0 or between 1 and 1000)
+void AUDChangeVolume (float volume);
+float AUDGetVolume();
+///changes the scale used for doppler...generally between 0 for off or .01 and 10
+void AUDChangeDoppler(float doppler);
+///Gets current doppler val
+float AUDGetDoppler();
 //#define PERFRAMESOUND
 #endif

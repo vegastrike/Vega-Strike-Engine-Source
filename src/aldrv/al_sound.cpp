@@ -212,7 +212,9 @@ void AUDAdjustSound (const int sound, const Vector &pos, const Vector &vel){
     float p []= {scalepos*pos.i,scalepos*pos.j,scalepos*pos.k};
     float v []= {scalevel*vel.i,scalevel*vel.j,scalevel*vel.k};
     sounds[sound].pos = pos;
-    alSourcefv(sounds[sound].source,AL_POSITION,p);
+	if (usepositional)
+	    alSourcefv(sounds[sound].source,AL_POSITION,p);
+  if (usedoppler)
     alSourcefv(sounds[sound].source,AL_VELOCITY,v);
   }
 #endif

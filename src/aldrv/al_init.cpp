@@ -87,6 +87,31 @@ static void fixup_function_pointers(void) {
 	return;
 }
 
+void AUDChangeVolume (float volume) {
+	if (volume==0) {
+		usepositional=false;
+		return;
+	} else {
+		usepositional=true;
+	}
+	scalepos= 1./volume;
+}
+float AUDGetVolume () {
+	return 1./scalepos;
+}
+void AUDChangeDoppler (float doppler) {
+	if (doppler<=0) {
+		usedoppler=false;
+	}else {
+		usedoppler=true;
+	}
+	scalevel = doppler;
+}
+float AUDGetDoppler () {
+	return scalevel;
+}
+
+
 ///I don't think we'll need to switch contexts or devices in vegastrike
 static ALCdevice *dev=NULL;
 
@@ -97,8 +122,11 @@ static ALCcontext * context_id=NULL;
 #endif
 #endif
 bool AUDInit () {
-  scalepos = 1/XMLSupport::parse_float (vs_config->getVariable ("audio","Volume","100"));;
-  scalevel=XMLSupport::parse_float (vs_config->getVariable ("audio","Doppler","1"));;
+  usedoppler = XMLSupport::parse_bool (vs_config->getVariable ("audio","Doppler","false"));
+  usepositional = XMLSupport::parse_bool (vs_config->getVariable ("audio","Positional","true"));
+
+  scalepos = 1/XMLSupport::parse_float (vs_config->getVariable ("audio","Volume","100"));
+  scalevel=XMLSupport::parse_float (vs_config->getVariable ("audio","Doppler","1"));
   //  enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","enabled","true"));
   g_game.audio_frequency_mode = XMLSupport::parse_int (vs_config->getVariable ("audio","frequency","22050"));
   g_game.sound_enabled = false;

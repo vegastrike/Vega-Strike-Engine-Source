@@ -25,6 +25,8 @@ typedef ALboolean (mp3Loader)(ALuint, ALvoid *, ALint);
 extern mp3Loader *alutLoadMP3p;
 extern unsigned int maxallowedsingle;
 extern unsigned int maxallowedtotal;
+extern bool usedoppler;
+extern bool usepositional;
 char AUDQueryAudability (const int sound, const Vector &pos, const Vector & vel, const float gain);
 void AUDAddWatchedPlayed (const int sound, const Vector &pos);
 #endif
