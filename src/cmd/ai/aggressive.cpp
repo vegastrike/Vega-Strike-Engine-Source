@@ -20,7 +20,7 @@
 #include "warpto.h"
 #include "cmd/csv.h"
 #include "universe_util.h"
-
+#include "vs_random.h"
 using namespace Orders;
 using std::map;
 const EnumMap::Pair element_names[] = {
@@ -204,9 +204,11 @@ static float aggressivity=2.01;
 static int randomtemp;
 AggressiveAI::AggressiveAI (const char * filename, Unit * target):FireAt(), logic (getProperScript(NULL,NULL,"default",randomtemp=rand())) {
   currentpriority=0;
+  nav=QVector(0,0,0);
   personalityseed=randomtemp;
   last_jump_distance=FLT_MAX;
   interruptcurtime=0;
+  creationtime=getNewTime();
   jump_time_check=1;
   last_time_insys=true;
   logiccurtime=logic->maxtime;//set it to the time allotted
@@ -768,6 +770,118 @@ void AggressiveAI::ReCommandWing(Flightgroup * fg) {
     }
   }
 }
+static Unit * ChooseNavPoint(Unit * parent) {
+  Unit* un;
+  vector <Unit*> navs;
+  for (un_iter i= _Universe->activeStarSystem()->getUnitList().createIterator();
+       (un=*i)!=NULL;
+       ++i) {
+    if (UnitUtil::isSignificant(un)) {
+      if (parent->getRelation(un)>=-.05) {
+        navs.push_back(un);
+      }
+    }
+  } 
+  if (navs.size()>0) {
+    return navs[vsrandom.genrand_int32()%navs.size()];
+  }
+  return NULL;
+}
+static Unit * ChooseNearNavPoint(Unit * parent,QVector location, float locradius) {
+  Unit * candidate=NULL;
+  float dist = FLT_MAX;
+  Unit * un;
+  for (un_iter i= _Universe->activeStarSystem()->getUnitList().createIterator();
+       (un=*i)!=NULL;
+       ++i) {
+    if (UnitUtil::isSignificant(un)&&un!=parent) {
+      float newdist = (location-un->Position()).Magnitude()-un->rSize()-locradius;
+      if (candidate==NULL||newdist<=dist) {
+        candidate=un;
+        dist=newdist;
+      }              
+    }
+  }
+  return candidate;
+}
+
+class FlyTo:public Orders::MoveTo {
+  float creationtime;
+public:
+  FlyTo(const QVector &target, bool aft, bool terminating=true, float creationtime=0) : MoveTo(target,aft,4,terminating) {this->creationtime=creationtime;}
+
+  virtual void Execute() {
+    MoveTo::Execute();
+    Unit * un=NULL;
+    static float mintime=XMLSupport::parse_float(vs_config->getVariable("AI","min_time_to_auto","20"));
+    if (_Universe->AccessCockpit()->autoInProgress()&&getNewTime()-creationtime>mintime&&(un =ChooseNearNavPoint(parent,targetlocation,0))!=NULL) {
+      WarpToP(parent,un);
+    }else {
+      WarpToP(parent,targetlocation,0);
+    }
+  }
+};
+static void GoTo(AggressiveAI * ai, Unit * parent, const QVector &nav, float creationtime) {
+  static bool can_afterburn = XMLSupport::parse_bool(vs_config->getVariable("AI","afterburn_to_no_enemies","true")); 
+  Order * mt=new FlyTo(nav,can_afterburn,true,creationtime);
+  Order * ch=new Orders::ChangeHeading(nav,16,.1f,true);
+  mt->SetParent(parent);
+  ch->SetParent(parent);
+  ai->ReplaceOrder(mt);
+  ai->EnqueueOrder(ch);
+}
+void AggressiveAI::ExecuteNoEnemies() {
+  if (nav.i==0&&nav.j==0&&nav.k==0) {
+    Unit * dest=ChooseNavPoint (parent);
+    if (dest) {
+      static bool can_warp_to=XMLSupport::parse_bool(vs_config->getVariable("AI","warp_to_no_enemies","true"));      
+      if (can_warp_to) {
+        WarpToP(parent,dest);
+      }else if (_Universe->AccessCockpit()->autoInProgress()) {
+        static float mintime=XMLSupport::parse_float(vs_config->getVariable("AI","min_time_to_auto","20"));
+        if (getNewTime()-creationtime>mintime) {
+          WarpToP(parent,dest);
+        }
+      }
+      Vector dir = parent->Position()-dest->Position();
+      dir.Normalize();
+      dir*=dest->rSize();
+      if (dest->isUnit()==PLANETPTR) {
+        float planetpct=UniverseUtil::getPlanetRadiusPercent();
+        dir *=planetpct+1.0f;
+      }
+      nav=dest->Position()+dir;      
+      GoTo(this,parent,nav,creationtime);
+    }
+  }else {          
+    if ((nav-parent->Position()).MagnitudeSquared()<4*parent->rSize()*parent->rSize()) {
+      nav=QVector(0,0,0);
+      Unit * dest =ChooseNearNavPoint(parent,parent->Position(),parent->rSize());
+      if (dest) {
+        if (dest->GetDestinations().size()>0&&UniverseUtil::systemInMemory(dest->GetDestinations()[0])) {
+          parent->ActivateJumpDrive(0);
+          parent->Target(dest);// fly there, baby!          
+        }else if (dest->GetDestinations().size()==0&&UnitUtil::isDockableUnit(dest)){          
+          UnitUtil::performDockingOperations(parent,dest,0);//dock there, baby
+        }else {
+          ExecuteNoEnemies();//find a new place to go
+        }
+      }else {
+        ExecuteNoEnemies();//no suitable docking point found, recursive call which will take door1
+      }
+      // go dock to the nav point
+    }else {
+      GoTo(this,parent,nav,creationtime);
+    }
+  }
+  /*
+    Order * ord = new Orders::MatchLinearVelocity (parent->ClampVelocity(Vector (0,0,10000),false),true,true,false);
+    ord->SetParent(parent);
+    EnqueueOrder (ord);
+  */
+}
+
+
 void AggressiveAI::AfterburnerJumpTurnTowards (Unit * target) {
   AfterburnTurnTowards(this,parent);
   if (jump_time_check==0) {
@@ -835,12 +949,7 @@ void AggressiveAI::Execute () {
       if (target) {
 		  ProcessLogic(*logic,false);
       }else {
-	FlyStraight(this,parent);
-	/*
-	Order * ord = new Orders::MatchLinearVelocity (parent->ClampVelocity(Vector (0,0,10000),false),true,true,false);
-	ord->SetParent(parent);
-	EnqueueOrder (ord);
-	*/
+        ExecuteNoEnemies();
       }
     }
   } else {

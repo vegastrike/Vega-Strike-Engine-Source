@@ -82,7 +82,7 @@ protected:
  
  public:
   ///takes in the destination target, and the ammount of accuracy (how many times it should miss destination and come back) should be used
-   ChangeHeading(const QVector &final_heading, int switchback, float turning_speed=1) : Order(FACING,SLOCATION), turningspeed(turning_speed), switchbacks(switchback),terminatingX(0),terminatingY(0),last_velocity(0,0,0),final_heading(final_heading), terminating(false) {}
+   ChangeHeading(const QVector &final_heading, int switchback, float turning_speed=1, bool term=false) : Order(FACING,SLOCATION), turningspeed(turning_speed), switchbacks(switchback),terminatingX(0),terminatingY(0),last_velocity(0,0,0),final_heading(final_heading), terminating(term) {}
   void SetDest (const QVector&);
   virtual void Execute();
   virtual string getOrderDescription() { return "chhead"; };

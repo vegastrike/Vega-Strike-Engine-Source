@@ -2169,31 +2169,37 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
       AddWarp(this,RealPosition(this),warptrailtime);
     }
     //    sep =UniverseUtil::SafeEntrancePoint (sep);
-	if (!nowhere)
-		SetCurPosition(sep);
-    if (_Universe->isPlayerStarship (this)&&getFlightgroup()!=NULL) {
-      Unit * other=NULL;
-      if (recursive_level>0)
-      for (un_iter ui=ss->getUnitList().createIterator(); NULL!=(other = *ui); ++ui) {
-    	Flightgroup * ff = other->getFlightgroup();
-	bool leadah=(ff==getFlightgroup());
-	if (ff) {
-	  if (ff->leader.GetUnit()==this) {
-	    leadah=true;
-	  }
-	}
-	Order * otherord = other->getAIState();
-	if (otherord)
-	  if (otherord->PursueTarget (this,leadah)) {
-	    other->AutoPilotTo(this,ignore_energy_requirements,recursive_level-1);
-	    if (leadah) {
-	      if (NULL==_Universe->isPlayerStarship (other)) {
-		other->SetPosition(AutoSafeEntrancePoint (LocalPosition(),other->rSize()*1.5,other));
-	      }
-	    }
-	  }
+    if (!nowhere)
+      SetCurPosition(sep);
+    Cockpit * cp;
+    if ((cp=_Universe->isPlayerStarship (this))!=NULL){
       
+
+      if (getFlightgroup()!=NULL) {
+        Unit * other=NULL;
+        if (recursive_level>0)
+          for (un_iter ui=ss->getUnitList().createIterator(); NULL!=(other = *ui); ++ui) {
+            Flightgroup * ff = other->getFlightgroup();
+            bool leadah=(ff==getFlightgroup());
+            if (ff) {
+              if (ff->leader.GetUnit()==this) {
+                leadah=true;
+              }
+            }
+            Order * otherord = other->getAIState();
+            if (otherord)
+              if (otherord->PursueTarget (this,leadah)) {
+                other->AutoPilotTo(this,ignore_energy_requirements,recursive_level-1);
+                if (leadah) {
+                  if (NULL==_Universe->isPlayerStarship (other)) {
+                    other->SetPosition(AutoSafeEntrancePoint (LocalPosition(),other->rSize()*1.5,other));
+                  }
+                }
+              }
+            
+          }      
       }
+
     }
   }
   return ok;

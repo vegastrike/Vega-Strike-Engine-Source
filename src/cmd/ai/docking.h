@@ -8,9 +8,11 @@ class DockingOps : public MoveTo {
   Order * oldstate;
   float timer;
   int port;
+  bool physicallyDock;
+  bool facedtarget;
  public:
-  
-  DockingOps (Unit * unitToDockWith, Order * oldstate);
+  QVector Movement(Unit * utdw);
+  DockingOps (Unit * unitToDockWith, Order * oldstate, bool physical_docking=false);
   virtual void SetParent (Unit * par);
   void Execute();
   bool RequestClearence(Unit * );

@@ -88,6 +88,9 @@ protected:
   double TimeOfLastCollision;
   char jumpok;
   virtual void	ReceivedTargetInfo() {}
+  bool autoInProgress() {
+    return autopilot_time>0;
+  }
   std::vector<std::string> unitfilename;
   ///Sets the current viewstyle
   void SetView (const enum VIEWSTYLE tmp) {view = tmp;}

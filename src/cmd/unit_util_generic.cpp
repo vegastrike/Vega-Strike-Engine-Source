@@ -309,11 +309,11 @@ namespace UnitUtil {
 		}
 		return found;
 	}
-        void performDockingOperations (Unit * un, Unit * unitToDockWith) {
+        void performDockingOperations (Unit * un, Unit * unitToDockWith,int actually_dock) {
 	  if (un && unitToDockWith) {
 	    Order * ai = un->aistate;
 	    un->aistate = NULL;
-	    un->PrimeOrders (new Orders::DockingOps (unitToDockWith, ai));
+	    un->PrimeOrders (new Orders::DockingOps (unitToDockWith, ai,actually_dock!=0));
 	  }
 	}
 }

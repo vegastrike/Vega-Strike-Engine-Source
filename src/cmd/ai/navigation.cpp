@@ -177,6 +177,14 @@ bool MoveToParent::Execute(Unit * parent, const QVector& targetlocation) {
     OptimizeSpeed (parent,last_velocity.j,thrust.j);
   }
   parent->ApplyLocalForce (thrust);
+
+  /*moved to subclass
+  if (_Universe->AccessCockpit()->autoInProgress()) {
+    WarpToP(parent,dest);
+  }else {
+    WarpToP(parent,targetlocation,0);
+  }
+*/
   return done;
 }
 MoveTo::~MoveTo () {
@@ -254,7 +262,7 @@ void ChangeHeading::Execute() {
   }
   terminatingX += xswitch;
   terminatingY += yswitch;
-  last_velocity = local_heading;
+  last_velocity = local_velocity;
 
   if (done||(xswitch&&yswitch)) return ;
   Vector torque (parent->Limits().pitch, parent->Limits().yaw,0);//set torque to max accel in any direction
