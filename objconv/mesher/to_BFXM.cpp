@@ -877,7 +877,7 @@ XML LoadXML(const char *filename, float32bit unitscale) {
   fclose (inFile);
   XML_ParserFree (parser);
   // Now, copy everything into the mesh data structures
-  boundscheck(xml);
+//  boundscheck(xml);
   return xml;
 }
 
