@@ -11,5 +11,8 @@
 	<Energy file="blasterpower.spr" xcent="0" ycent="-.175" width=".275" height=".09" GaugeLeft="1"/> 
 	<Lock file="locklight.spr" xcent=".22" ycent="-.425"/>
 	<Eject file="eject.spr"/>
+	<Speed file="radar.spr" xcent="-.28" ycent="-.30" width=".02" height=".04"/>
+	<SetSpeed file="radar.spr" xcent=".28" ycent="-.30" width=".02" height=".04"/>
+
 
 </Cockpit>
