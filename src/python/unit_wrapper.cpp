@@ -25,6 +25,11 @@ using Orders::FireAt;
 extern void DefineOddUnitFunctions (boost::python::class_builder <UnitWrapper> &Class);
 extern void ExportUnit (boost::python::class_builder <UnitWrapper> &Class);
 #include "unit_from_to_python.h"
+#if _MSC_VER <=1200
+#else
+#include "define_odd_unit_functions.h"
+#endif
+
 namespace UniverseUtil {
 
 	UnitWrapper newGetPlayer() {
