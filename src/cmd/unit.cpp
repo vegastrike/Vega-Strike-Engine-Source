@@ -298,7 +298,7 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
 //      Mesh * gun = WeaponMeshCache::getCachedMutable (mounts[i]->type->weapon_name);
 	 if (mahnt->xyscale!=0&&mahnt->zscale!=0) {		
            Mesh * gun = mahnt->type->gun;	  
-           if (gun) {
+           if (gun&&mahnt->status!=Mount::UNCHOSEN) {
              glEnable(GL_NORMALIZE);
              Transformation mountLocation(mahnt->GetMountOrientation(),mahnt->GetMountLocation().Cast());
              Matrix mountmat; mountLocation.to_matrix(mountmat);
