@@ -21,6 +21,7 @@
 #include "collide/rapcol.h"
 #include "unit_collide.h"
 #include "vs_path.h"
+#include "gfx/cockpit.h"
 #define VS_PI 3.1415926536
 void Unit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Unit*)userData)->beginElement(name, AttributeList(atts));
@@ -140,10 +141,12 @@ namespace UnitXML {
       CATEGORY,
       IMPORT,
       PRICESTDDEV,
-      QUANTITYSTDDEV
+      QUANTITYSTDDEV,
+	  DAMAGE,
+	  COCKPITDAMAGE
     };
 
-  const EnumMap::Pair element_names[] = {
+  const EnumMap::Pair element_names[34] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("Unit", UNIT),
     EnumMap::Pair ("SubUnit", SUBUNIT),
@@ -176,10 +179,11 @@ namespace UnitXML {
     EnumMap::Pair ("Hold",HOLD),
     EnumMap::Pair ("Cargo",CARGO),
     EnumMap::Pair ("Category",CATEGORY),
-    EnumMap::Pair ("Import",IMPORT)
+    EnumMap::Pair ("Import",IMPORT),
+	EnumMap::Pair ("CockpitDamage",COCKPITDAMAGE)
 
   };
-  const EnumMap::Pair attribute_names[] = {
+  const EnumMap::Pair attribute_names[81] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -259,11 +263,13 @@ namespace UnitXML {
     EnumMap::Pair ("Volume",VOLUME),
     EnumMap::Pair ("Quantity",QUANTITY),
     EnumMap::Pair ("PriceStdDev",PRICESTDDEV),
-    EnumMap::Pair ("QuantityStdDev",QUANTITYSTDDEV)
-};
+    EnumMap::Pair ("QuantityStdDev",QUANTITYSTDDEV),
+	EnumMap::Pair ("Damage",DAMAGE)
 
-  const EnumMap element_map(element_names, 33);
-  const EnumMap attribute_map(attribute_names, 80);
+  };
+
+  const EnumMap element_map(element_names, 34);
+  const EnumMap attribute_map(attribute_names, 81);
 }
 
 using XMLSupport::EnumMap;
@@ -698,6 +704,16 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     xml->units[indx]->limits.limitmin=fbrltb[0];
     
     break;
+  case COCKPITDAMAGE:
+	  xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      	  switch (attribute_map.lookup((*iter).name)) {
+		  case DAMAGE:
+			image->cockpit_damage[xml->damageiterator++]=parse_float((*iter).value);
+			break;
+		  }
+	  }
+	  break;
   case JUMP:
     //serialization covered in LoadXML
     assert (xml->unitlevel==1);
@@ -714,7 +730,10 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	//serialization covered in LoadXML
 	jump.energy = CLAMP_SHORT(parse_float((*iter).value));
 	break;
-      case DELAY:
+  case DAMAGE:
+	  jump.damage=CLAMP_SHORT (parse_float((*iter).value));
+	  break;
+  case DELAY:
 	//serialization covered in LoadXML
 	jump.delay = parse_int ((*iter).value);
 	break;
@@ -1395,6 +1414,14 @@ void Unit::LoadXML(const char *filename, const char * modifications)
     image->unitwriter->EndTag ("Jump");
   }
   {
+  unsigned int i;
+  for (i=0;i<=(Cockpit::NUMGAUGES+MAXVDUS);i++) {
+	image->unitwriter->AddTag("CockpitDamage");
+	image->unitwriter->AddElement("damage",floatStarHandler,XMLType(&image->cockpit_damage[i]));
+	image->unitwriter->EndTag("CockpitDamage");
+  }}
+
+  {
     image->unitwriter->AddTag("Defense");
     image->unitwriter->AddElement("HudImage",stringStarHandler,XMLType (myhudim));
     
@@ -1460,6 +1487,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   }
   image->CockpitCenter.Set (0,0,0);
   xml = new XML;
+  xml->damageiterator=0;
   xml->unitModifications = modifications;
   xml->shieldmesh = NULL;
   xml->bspmesh = NULL;

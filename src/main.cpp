@@ -90,7 +90,7 @@ void cleanup(void)
   AUDDestroy();
   //destroyObjects();
   Unit::ProcessDeleteQueue();
-  delete _Universe;
+//  delete _Universe;
   
 }
 

@@ -269,7 +269,7 @@ Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,fl
   }
   string cargounitname =getCargoUnitName (textname);
  
-  Unit * un = new Unit (cargounitname.c_str(),false,_Universe->GetFaction("planets"));
+  Unit * un = new Unit (cargounitname.c_str(),true,_Universe->GetFaction("planets"));
   if (un->name!=string("LOAD_FAILED")) {
     image->cargo=un->GetImageInformation().cargo;
     image->cargo_volume=un->GetImageInformation().cargo_volume;

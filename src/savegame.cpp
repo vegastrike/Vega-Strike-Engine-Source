@@ -47,10 +47,11 @@ vector <SavedUnits> ReadSavedUnits (FILE * fp) {
   char unitname[1024];
   char factname[1024];
   while (3==fscanf (fp,"%d %s %s",&a,unitname,factname)) {
-    su.push_back (SavedUnits (unitname,(clsptr)a,factname));
     if (a==0&&0==strcmp(unitname,"factions")&&0==strcmp(factname,"begin")) {
       _Universe->LoadSerializedFaction(fp);
-    }
+    }else {
+	    su.push_back (SavedUnits (unitname,(clsptr)a,factname));
+	}
   }
   return su;
 }

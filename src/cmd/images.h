@@ -1,3 +1,4 @@
+
 struct DockingPorts {
   ///Center
   Vector pos;
@@ -56,6 +57,8 @@ struct UnitImages {
   Animation *explosion; 
   float timeexplode;
   Box *selectionBox;
+
+  float *cockpit_damage; //0 is radar, 1 to MAXVDU is vdus and >MAXVDU is gauges
 
   ///How much energy cloaking takes per frame
   float cloakenergy;

@@ -302,6 +302,10 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   STDUPGRADE(computer.max_roll,up->computer.max_roll,templ->computer.max_roll,0);
   STDUPGRADE(fuel,up->fuel,templ->fuel,0);
   STDUPGRADE(image->cargo_volume,up->image->cargo_volume,templ->image->cargo_volume,0);
+  for (unsigned int upgr=0;upgr<Cockpit::NUMGAUGES+1+MAXVDUS;upgr++) {
+	STDUPGRADE(image->cockpit_damage[upgr],up->image->cockpit_damage[upgr],templ->image->cockpit_damage[upgr],1);
+
+  }
   if (shield.number==up->shield.number) {
     switch (shield.number) {
     case 2:

@@ -34,6 +34,8 @@ struct GFXColor;
 #include "xml_support.h"
 #include "container.h"
 #include "collection.h"
+#include "gfx/cockpit.h"
+
 using std::string;
 
 class Flightgroup;
@@ -108,6 +110,7 @@ class Unit {
   friend class VDU;
   friend class UpgradingInfo;//needed to actually upgrade unit through interface
  public:
+  void DamageRandSys (float dam,const Vector &vec);
   void SetNebula (Nebula *neb);
   inline Nebula * GetNebula () const{return nebula;}
   const std::vector <char *> &GetDestinations () const;
@@ -396,6 +399,7 @@ class Unit {
   void SetRecursiveOwner(Unit *target);
   bool UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, bool additive, bool forcetransaction, double &percentage);
 public:
+  void FixGauges();
   bool CanAddCargo (const Cargo &carg) const;
   void AddCargo (const Cargo &carg);
   int RemoveCargo (unsigned int i, int quantity, bool eraseZero=true);
@@ -752,6 +756,7 @@ struct Unit::XML {
   float rmin, rmax, rcur;
   std::string cargo_category;
   std::string hudimage;
+  int damageiterator;
 };
 
 inline Unit * UnitContainer::GetUnit() {

@@ -288,6 +288,168 @@ void Unit::RegenShields () {
 
 }
 
+float rand01 () {
+	return ((float)rand()/(float)RAND_MAX);
+}
+
+void Unit::DamageRandSys(float dam, const Vector &vec) {
+	float deg = fabs(180*atan2 (vec.i,vec.k)/M_PI);
+	float randnum=rand01();
+	float degrees=deg;
+	if (degrees>180) {
+		degrees=360-degrees;
+	}
+	if (degrees>=0&&degrees<20) {
+		//DAMAGE COCKPIT
+		if (randnum>=.85) {
+			computer.set_speed=(rand01()*computer.max_speed*(5/3))-(computer.max_speed*(2/3)); //Set the speed to a random speed
+		} else if (randnum>=.775) {
+			computer.itts=false; //Set the computer to not have an itts
+		} else if (randnum>=.7) {
+			computer.radar.color=false; //set the radar to not have color
+		} else if (randnum>=.5) {
+			computer.target=NULL; //set the target to NULL
+		} else if (randnum>=.4) {
+			limits.retro*=dam;
+		} else if (randnum>=.325) {
+			computer.radar.maxcone+=(1-dam);
+			if (computer.radar.maxcone>.99)
+				computer.radar.maxcone=.99;
+		} else if (randnum>=.25) {
+			computer.radar.mintargetsize+=(rSize()/2);
+			if (computer.radar.mintargetsize>rSize())
+				computer.radar.mintargetsize=rSize();
+		} else if (randnum>=.175) {
+			computer.radar.maxrange*=dam;
+		} else {
+			image->cockpit_damage[rand()%(1+Cockpit::NUMGAUGES+MAXVDUS)]*=dam;
+		}
+		return;
+	}
+	if (degrees>=20&&degrees<35) {
+		//DAMAGE MOUNT
+		if (nummounts) {
+			unsigned int whichmount=rand()%nummounts;
+			if (randnum>=.9) {
+				mounts[whichmount].status=Unit::Mount::DESTROYED;
+			} else if (mounts[whichmount].ammo>0) {
+				mounts[whichmount].ammo*=dam;
+			}
+		}
+		return;
+	}
+	if (degrees>=35&&degrees<60) {
+		//DAMAGE FUEL
+		if (randnum>=.75) {
+			fuel*=dam;
+		} else if (randnum>=.5) {
+			this->afterburnenergy+=((1-dam)*recharge);
+		} else if (randnum>=.25) {
+			image->cargo_volume*=dam;
+		} else {  //Do something NASTY to the cargo
+			if (image->cargo.size()>0) {
+				int i=0;
+				unsigned int cargorand;
+				do {
+					cargorand=rand()%image->cargo.size();
+				} while (image->cargo[cargorand].quantity!=0&&++i<image->cargo.size());
+				image->cargo[cargorand].quantity*=dam;
+			}
+		}
+		return;
+	}
+	if (degrees>=60&&degrees<90) {
+		//DAMAGE ROLL/YAW/PITCH/THRUST
+		if (randnum>=.8) {
+			computer.max_pitch*=dam;
+		} else if (randnum>=.6) {
+			computer.max_yaw*=dam;
+		} else if (randnum>=.55) {
+			computer.max_roll*=dam;
+		} else if (randnum>=.5) {
+			limits.roll*=dam;
+		} else if (randnum>=.3) {
+			limits.yaw*=dam;
+		} else if (randnum>=.1) {
+			limits.pitch*=dam;
+		} else {
+			limits.lateral*=dam;
+		}
+		return;
+	}
+	if (degrees>=90&&degrees<120) {
+		//DAMAGE Shield
+		//DAMAGE cloak
+		if (randnum>=.95) {
+			this->cloaking=-1;
+		} else if (randnum>=.78) {
+			image->cloakenergy+=((1-dam)*recharge);
+		} else if (randnum>=.7) {
+			cloakmin+=(rand()%(32000-cloakmin));
+		}
+		switch (shield.number) {
+		case 2:
+			if (randnum>=.35&&randnum<.7) {
+				shield.fb[2]*=dam;
+			} else {
+				shield.fb[3]*=dam;
+			}
+			break;
+		case 4:
+			if (randnum>=.5&&randnum<.7) {
+				shield.fbrl.frontmax*=dam;
+			} else if (randnum>=.3) {
+				shield.fbrl.backmax*=dam;
+			} else if (deg>180) {
+				shield.fbrl.leftmax*=dam;
+			} else {
+				shield.fbrl.rightmax*=dam;
+			}
+			break;
+		case 6:
+			if (randnum>=.4&&randnum<.7) {
+				shield.fbrltb.fbmax*=dam;
+			} else {
+				shield.fbrltb.rltbmax*=dam;
+			}
+			break;
+		}
+		return;
+	}
+	if (degrees>=120&&degrees<150) {
+		//DAMAGE Reactor
+		//DAMAGE JUMP
+		if (randnum>=.9) {
+			shield.leak+=((1-dam)*100);
+		} else if (randnum>=.7) {
+			shield.recharge*=dam;
+		} else if (randnum>=.5) {
+			this->recharge*=dam;
+		} else if (randnum>=.3) {
+			this->maxenergy*=dam;
+		} else if (randnum>=.2) {
+			this->jump.energy*=(2-dam);
+		} else {
+			this->jump.damage+=100*(1-dam);
+		}
+		return;
+	}
+	if (degrees>=150&&degrees<=180) {
+		//DAMAGE ENGINES
+		if (randnum>=.8) {
+			computer.max_ab_speed*=dam;
+		} else if (randnum>=.6) {
+			computer.max_speed*=dam;
+		} else if (randnum>=.4) {
+			limits.afterburn*=dam;
+		} else if (randnum>=.2) {
+			limits.vertical*=dam;
+		} else {
+			limits.forward*=dam;
+		}
+		return;
+	}
+}
 float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
   float percent;
   unsigned short * targ;
@@ -318,7 +480,10 @@ float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
       AUDAdjustSound (sound->hull,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity);
     damage -= ((float)*targ);
     *targ= 0;
+	static float system_failure=XMLSupport::parse_float(vs_config->getVariable ("physics","indiscriminate_system_destruction",".25"));
+	DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(damage/hull)),pnt);
     hull -=damage;
+
   }
   if (hull <0) {
     Destroy();

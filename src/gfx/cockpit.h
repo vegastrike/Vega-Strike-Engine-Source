@@ -12,15 +12,19 @@ class Gauge;
 class Unit;
 #include "vdu.h"
 #include "in_kb.h"
-
+#define MAXVDUS 10
 /**
  * The Cockpit Contains all displayable information about a particular Unit *
  * Gauges are used to indicate analog controls, and some diagital ones
  * The ones starting from KPS are digital with text readout
  */
 class Cockpit {
-
+public:
   enum GAGUES {ARMORF,ARMORB,ARMORR,ARMORL,FUEL, SHIELDF,SHIELDR,SHIELDL,SHIELDB, ENERGY, EJECT, LOCK, HULL, KPS, SETKPS, FPS, NUMGAUGES};
+private:
+  float radar_time;
+  float gauge_time [NUMGAUGES];
+  float vdu_time [MAXVDUS];
   /// 4 armor vals and 1 for startfuel
   unsigned short StartArmor[5];
   ///saved values to compare with current values (might need more for damage)
@@ -86,8 +90,10 @@ class Cockpit {
   void DrawEliteBlips(Unit * un);
   ///Draws gauges
   void DrawGauges(Unit * un);
+  float cockpit_time;
  public:
-  ///Restores the view from the IDentity Matrix needed to draw sprites
+
+ ///Restores the view from the IDentity Matrix needed to draw sprites
   void RestoreViewPort();
   std::string GetUnitFileName () {return unitfilename;}
   std::string GetUnitModifications() {return unitmodname;}

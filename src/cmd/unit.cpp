@@ -158,6 +158,11 @@ void Unit::Init()
   planet=NULL;
   nebula=NULL;
   image = new UnitImages;
+ int numg= 1+MAXVDUS+Cockpit::NUMGAUGES;
+  image->cockpit_damage=(float*)malloc((numg)*sizeof(float));
+  for (unsigned int damageiterator=0;damageiterator<numg;damageiterator++) {
+	image->cockpit_damage[damageiterator]=1;
+  }
   sound = new UnitSounds;
   limits.structurelimits=Vector(0,0,1);
   limits.limitmin=-1;
@@ -433,6 +438,7 @@ void Unit::AddDestination (const char * dest) {
 
 Unit::~Unit()
 {
+	free(image->cockpit_damage);
   if ((!killed)) {
     fprintf (stderr,"Assumed exit on unit %s(if not quitting, report error)\n",name.c_str());
   }
