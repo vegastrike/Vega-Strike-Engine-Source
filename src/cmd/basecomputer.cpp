@@ -3860,9 +3860,11 @@ bool BaseComputer::showPlayerInfo(const EventCommandId& command, Control* contro
 		if (currentplayer) {
 	        relation = FactionUtil::GetIntRelation(i, currentplayer->faction );
 		}
+                if (relation<-1) relation=-1;
+                if (relation>1) relation=1;
 //        relation = relation * 0.5;
 //        relation = relation + 0.5;
-        const int percent = (int)(relation * 100.0);
+                const int percent = (int)(relation * 100.0);
 
 		// Faction name.
 		text += factionColorTextString(i) + FactionUtil::GetFactionName(i) + ":#-c  ";
