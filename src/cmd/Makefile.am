@@ -15,7 +15,10 @@ libcmdserver_a_SOURCES =			\
 	collection.h					\
 	collection.cpp					\
 	container.h						\
-	container.cpp
+	container.cpp	\
+	unit_const_cache.cpp \
+	unit_const_cache.h
+
 
 libcmd_a_SOURCES =				\
 	atmosphere.h			\
@@ -81,4 +84,7 @@ libcmd_a_SOURCES =				\
 	container.h				\
 	container.cpp			\
 	missile.h			\
-	missile.cpp
+	missile.cpp			\
+	unit_const_cache.cpp \
+	unit_const_cache.h
+
