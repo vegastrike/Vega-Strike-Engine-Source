@@ -1742,8 +1742,12 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
               if (item.description==""||item.description[0]!='@'){
                 item.description=buildCargoDescription(item);
               }
-              sprintf(tempString, "Value: #b#%.2f#-b, purchased for %.2f#n#",
-                      item.mission?0.0f:baseUnit->PriceCargo(item.content), item.price);
+              if (item.mission) {
+                sprintf(tempString, "Destroy evidence of mission cargo. Credit received: 0.00.");
+              }else {
+                sprintf(tempString, "Value: #b#%.2f#-b, purchased for %.2f#n#",
+                        baseUnit->PriceCargo(item.content), item.price);
+              }
               descString += tempString;
               sprintf(tempString, "Cargo volume: %.2f;  Mass: %.2f#n1.5#", item.volume, item.mass);
               descString += tempString;
