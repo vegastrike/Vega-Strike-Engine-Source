@@ -5,41 +5,45 @@ $float = "-?\\d*\\.\\d*";
 @vertex_list = ();
 @normal_list = ();
 @texcoord_list = ();
-%encountered_vertices = ();
-$faceoutput = "<Polygons>\n";
+#%encountered_vertices = ();
+%encountered_vertices = (); # hashmap associating textures with their vertices
+%vertex_output = ();
+%face_output = ();
 
-if(@ARGV == 0) {
-print "Usage: obj2xml <inputfile>\n";
+if(@ARGV != 2) {
+print "Usage: obj2xml <objfile> <wcpfile>\n";
 exit;
 }
 
 $inputfile = $ARGV[0];
+$texturefile = $ARGV[1];
 open(INPUT, "<$inputfile") or die "Could not open $inputfile";
+open(TEXTUREINPUT, "<$texturefile") or die "Could not open $texturefile";
+
+binmode(TEXTUREINPUT);
 
 print << 'HEAD' 
 <Unit>
-<Mesh>
-<VertexData>
 HEAD
 ;
 
 while($line = <INPUT>) {
 	$line =~ s/#.*$//;
 	if($line =~ /v +($float) +($float) +($float)/i) {
-		print STDERR "vertex: $line\n";
 		push @vertex_list, [$1, $2, $3];
 	} elsif($line =~ /vn +($float) +($float) +($float)/i) {
-		print STDERR "normal: $line\n";
 		push @normal_list, [$1, $2, $3];
 	} elsif($line =~ /vt +($float) +($float)/i) {
-		print STDERR "texcoord: $line\n";
 		push @texcoord_list, [$1, $2];
 	} elsif($line =~ m/f/i) {
-		print STDERR "face: $line\n";
 		chomp $line;
 		@vertices = split /[ \r\n]/, $line;
 		shift @vertices; # dump out the 'f'
 		@output_vertices = ();
+
+		# read in texture name
+		read TEXTUREINPUT, $packedinfo, 7*4;
+		$texture = (unpack("V7", $packedinfo))[2];
 		while(@vertices) {
 			($vertex, $texcoord, $normal) = split m|/|, shift(@vertices);
 			$vertex--; $texcoord--; $normal--;
@@ -51,33 +55,42 @@ while($line = <INPUT>) {
 	</Vertex>
 VERTEX
 ;
-			unless(defined $encountered_vertices{$vertex}) {
-				$encountered_vertices{$vertex} = keys %encountered_vertices;
-				print $vertex;
+			unless(exists $encountered_vertices{$texture}) {
+				$encountered_vertices{$texture} = {};
+				$vertex_output{$texture} = "<Vertices>\n";
+				$face_output{$texture} = "<Polygons>\n";
 			}
-			push @output_vertices, $encountered_vertices{$vertex};
+			unless(defined $encountered_vertices{$texture}->{$vertex}) {
+				$encountered_vertices{$texture}->{$vertex} = keys %{$encountered_vertices{$texture}};
+				$vertex_output{$texture} .= $vertex;
+			}
+			push @output_vertices, $encountered_vertices{$texture}->{$vertex};
 		}
 
 		if(@output_vertices==3) {
-			$faceoutput .= "<Tri"
+			$face_output{$texture} .= "<Tri"
 		} elsif (@output_vertices==4) {
-			$faceoutput .= "<Quad"
+			$face_output{$texture} .= "<Quad"
 		} else {
 			die "Invalid number of vertices in face: $line";
 		}
 		for($v=0;$v<@output_vertices;$v++) {
-			$faceoutput .= " v$v=\"$output_vertices[$v]\"";
+			$face_output{$texture} .= " v$v=\"$output_vertices[$v]\"";
 		}
-		$faceoutput .= "/>\n"
+		$face_output{$texture} .= "/>\n"
 	}
 }
 
-print "</VertexData>\n";
-
-$faceoutput .= "</Polygons>";
+for(keys %encountered_vertices) {
+	$texture = $_;
+	print "<Mesh texture=\"$texture\">\n";
+	print $vertex_output{$texture};
+	print "</Vertices>\n\n";
+	print $face_output{$texture};
+	print "</Polygons>\n\n";
+	print "</Mesh>\n";
+}
 print << "FOOT"
-$faceoutput
-</Mesh>
 </Unit>
 FOOT
 ;

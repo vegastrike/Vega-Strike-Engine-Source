@@ -1,6 +1,6 @@
 <Unit>
 <Mesh Texture="blah">
-<VertexData>
+<Vertices>
 <Vertex>
 <Location x=0 y=0 z=0/>
 <Normal i=0 j=0 k=0/>
