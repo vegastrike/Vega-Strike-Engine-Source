@@ -340,7 +340,11 @@ float Unit::querySphere (const Vector &start, const Vector &end) {
     dir = end-start;//now start and end are based on mesh's position
     // v.Dot(v) = r*r; //equation for sphere
     // (x0 + (x1 - x0) *t) * (x0 + (x1 - x0) *t) = r*r
-    c = st.Dot (st) - meshdata[i]->rSize()*meshdata[i]->rSize();
+    c = st.Dot (st) - meshdata[i]->rSize()*meshdata[i]->rSize()
+#ifdef VARIABLE_LENGTH_PQR
+      *SizeScaleFactor*SizeScaleFactor
+#endif
+      ;
     b = 2 * (dir.Dot (st));
     a = dir.Dot(dir);
     //b^2-4ac
