@@ -96,7 +96,7 @@ void Cockpit::DrawBlips (Unit * un) {
   }
   GFXEnd();
   GFXPointSize (1);
-  GFXColor (1,1,1,1);
+  GFXColor4f (1,1,1,1);
   GFXEnable (TEXTURE0);
   delete iter;
 }
