@@ -204,8 +204,10 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
       //printf ("um >1 for %s with %s\n",bigger->name.c_str(),smaller->name.c_str());
     }
 #endif
-    const csReversibleTransform bigtransform (/*WarpMatrixForCollisions(bigger)*/bigger->cumulative_transformation_matrix);
-	const csReversibleTransform smalltransform (/*WarpMatrixForCollisions(smaller)*/smaller->cumulative_transformation_matrix);
+    csReversibleTransform bigtransform (/*WarpMatrixForCollisions(bigger)*/bigger->cumulative_transformation_matrix);
+    csReversibleTransform smalltransform (/*WarpMatrixForCollisions(smaller)*/smaller->cumulative_transformation_matrix);
+    smalltransform.SetO2TTranslation(csVector3(smaller->cumulative_transformation_matrix.p-bigger->cumulative_transformation_matrix.p));
+      bigtransform.SetO2TTranslation(csVector3(0,0,0));
 #ifdef SUPERCOLLIDER
     for (int iter=1;iter<=/*um*/1;++iter) 
 #endif
