@@ -767,8 +767,9 @@ void Mesh::ProcessDrawQueue() {
     DrawContext c = draw_queue->back();
     draw_queue->pop_back();
     //GFXLoadIdentity (MODEL);
-    GFXPickLights (c.mat/*GetPosition()*/);
+
     GFXLoadMatrix(MODEL, c.mat);
+    GFXPickLights (c.mat/*GetPosition()*/);
     vlist->Draw();
     if(quadstrips!=NULL) {
       for(int a=0; a<numQuadstrips; a++)

@@ -507,7 +507,7 @@ void createObjects() {
     //fighters[a]->SetPosition((a%8)/8.0 - 2.0, (a/8)/8.0 - 2.0,5.0);
 
     //Vector position((a%20)/0.25 - 4.0F, (a/20)/0.25 - 4.0F,2.0F);
-    Vector position = Vector(0,6,2);
+    Vector position = Vector(0,0,2);
     fighters[a]->SetPosition(position);
     position.k += 6;
     Vector v(0,1,0);
@@ -515,9 +515,9 @@ void createObjects() {
     //fighters[a]->SetAI(new Orders::MoveTo(Vector(5,10,1), 1.0));
     v = Vector(1,1,-1);
     v.Normalize();
-    fighters[a]->SetAI(new Order());
-    fighters[a]->EnqueueAI(new Orders::ChangeHeading(v, 0.04));
-    fighters[a]->EnqueueAI(new Orders::MoveTo(v*10 + position, 1.75));
+        fighters[a]->SetAI(new Order());
+    //    fighters[a]->EnqueueAI(new Orders::ChangeHeading(v, 0.04));
+    //    fighters[a]->EnqueueAI(new Orders::MoveTo(v*10 + position, 1.75));
     //fighters[a]->SetPosition(0, 0, -2.0F);
   
     //fighters[a]->Pitch(PI/2);

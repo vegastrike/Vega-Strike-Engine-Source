@@ -149,13 +149,22 @@ void SphereMesh::ProcessDrawQueue() {
     GFXDisable(DEPTHTEST);
     GFXDisable(TEXTURE1);
   }	
-  
+  static float theta=0;
   while(draw_queue->size()) {
     DrawContext c = draw_queue->back();
     draw_queue->pop_back();
+    Matrix tmp;	
+    Matrix tmp2;
+    Identity (tmp);
+    if (!centered){
+      VectorToMatrix (tmp,Vector (cos (theta),0,sin(theta)), Vector (0,1,0), Vector (-sin (theta),0,cos(theta)));
+      
 
-    GFXLoadMatrix(MODEL, c.mat);
-    GFXPickLights (c.mat);
+    }
+    MultMatrix (tmp2, c.mat, tmp);
+    GFXLoadMatrix(MODEL, tmp2);
+    GFXPickLights (tmp2);
+    theta+=.01;
 	vlist->Draw();
 	if(quadstrips!=NULL) {
 	  for(int a=0; a<numQuadstrips; a++)
