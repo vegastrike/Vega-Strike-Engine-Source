@@ -230,6 +230,7 @@ PYTHON_END_CLASS(VS,UnitCollection::UnitIterator)
 typedef PythonAI<FireAt> PythonAIFireAt;
 PYTHON_BEGIN_INHERIT_CLASS(VS,PythonAIFireAt ,FireAt,"PythonAI")
   Class.def (&FireAt::Execute,"Execute",PythonAI< FireAt >::default_Execute);
+  Class.def (&FireAt::ChooseTarget,"ChooseTarget",PythonAI< FireAt >::default_ChooseTarget);
   Class.def (&FireAt::SetParent,"init",PythonAI< FireAt >::default_SetParent);
   Class.def (&FireAt::GetParent,"GetParent");
   Class.def (&FireAt::AddReplaceLastOrder,"AddReplaceLastOrder");
@@ -414,6 +415,7 @@ class Cargo:
 class PythonAI:
   voidWRAPPED1(init,Unit,un)
   voidWRAPPED0(Execute)
+  voidWRAPPED0(ChooseTarget)
   WRAPPED0(Unit,GetParent,Unit())
   def __init__(self):
     print 'PythonAI constructor called with (self)'

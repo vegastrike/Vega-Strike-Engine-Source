@@ -18,11 +18,15 @@ protected:
   float gunrange;
   void FireWeapons (bool shouldfire,bool lockmissile);
   //  bool DealWithMultipleTargets();
-  void ChooseTargets(int num, bool force=false);//chooses n targets and puts the best to attack in unit's target container
+  virtual void ChooseTargets(int num, bool force=false);//chooses n targets and puts the best to attack in unit's target container
   bool isJumpablePlanet(Unit *);
   void ReInit (float rxntime, float agglevel);
 public:
   //Other new Order functions that can be called from Python.
+  virtual void ChooseTarget () {
+    ChooseTargets (1,true);
+  }
+
   void AddReplaceLastOrder (bool replace);
   void ExecuteLastScriptFor(float time);
   void FaceTarget (bool end);

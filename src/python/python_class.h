@@ -149,12 +149,18 @@ public:
   virtual void Execute () {
     boost::python::callback <void>::call_method (self,"Execute");
   }
+  virtual void ChooseTarget () {
+    boost::python::callback <void>::call_method (self,"ChooseTarget");
+  }
   virtual void SetParent (Unit * parent) {
     SuperClass::SetParent (parent);
     boost::python::callback<void>::call_method (self,"init",parent);
   }
   static void default_Execute(SuperClass & self_) {
     (self_).SuperClass::Execute();
+  }
+  static void default_ChooseTarget(SuperClass & self_) {
+    (self_).SuperClass::ChooseTarget();
   }
   static void default_SetParent (SuperClass &self_, Unit * parent) {
   }

@@ -5,6 +5,7 @@
 #include "cmd/planet.h"
 #include "config_xml.h"
 #include "vs_globals.h"
+#include "cmd/unit_util.h"
 #include "cmd/script/flightgroup.h"
 using Orders::FireAt;
 void FireAt::ReInit (float reaction_time, float aggressivitylevel) {
@@ -27,30 +28,59 @@ FireAt::FireAt (): CommunicatingAI (WEAPON,STARGET) {
 }
 //temporary way of choosing
 void FireAt::ChooseTargets (int numtargs, bool force) {
-  static float TargetSwitchProbability =XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","TargetSwitchReactionTime",".8"));
-  if (!force) {
-    if ((((float)rand())/RAND_MAX)<TargetSwitchProbability) {
-      return;
-    }
-  }
-  UnitCollection::UnitIterator iter (_Universe->activeStarSystem()->getUnitList().createIterator());
-  Unit * un =NULL;
+  parent->getAverageGunSpeed (gunspeed,gunrange);  
+  Unit * inRangeThreat =NULL;
+  Unit * outRangeThreat=NULL;
+  Unit * inRangeHate =NULL;
+  Unit * outRangeHate=NULL;
+  float irt=FLT_MAX;
+  float ort=FLT_MAX;
+  float irrelation=0;
+  float irh=FLT_MAX;
+  float orh=FLT_MAX;
   float relation=1;
-  float range=0;
   float worstrelation=0;
   un_iter subun = parent->getSubUnits();
   Unit * su=NULL;
   double dist;
+  UnitCollection::UnitIterator iter (_Universe->activeStarSystem()->getUnitList().createIterator());
+  Unit * un=NULL;
   while ((un = iter.current())) {
-    //how to choose a target?? "if looks particularly juicy... :-) tmp.prepend (un);
+    float range=UnitUtil::getDistance(parent,un);
     relation = GetEffectiveRelationship (un);
     bool tmp = parent->InRange (un,dist,false,false,true);
-    if (tmp&&((relation<worstrelation||(relation==worstrelation&&dist<range)))) {
-      worstrelation = relation;
-      range = dist;
-      parent->Target (un);
+    if (tmp && relation<0) {
+      if (((relation<worstrelation||(relation==worstrelation&&range<orh)))) {
+	worstrelation = relation;
+	orh = range;
+	outRangeHate=un;
+      }
+
+      bool threat = (un->Target()==parent);
+      bool aturret=false;
+      if (threat) {
+	if (range<ort) {
+	  ort = range;
+	  outRangeThreat = un;
+	}
+      }
+      if (range < gunrange) {
+	aturret=true;
+	if (threat) {
+	  if (range < irt) {
+	    irt = range;
+	    inRangeThreat = un;
+	  }
+	}else {
+	  if (((relation<irrelation||(relation==irrelation&&range<irh)))) {
+	    irh = range;
+	    irrelation=relation;
+	    inRangeHate = un;
+	  }
+	}
+      }
       su = *subun;
-      if (su) {
+      if (su&&aturret) {
 	//	while (su->InRange (un,t,false,false)) {
 	  su->Target (un);
 	  su->TargetTurret(un);
@@ -62,17 +92,20 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
     }
     iter.advance();
   }
-  if (worstrelation>0) {
-    parent->Target (NULL);
-  }else {
-    for (;(su=*subun)!=NULL;++subun) {
-      un=parent->Target();
-      su->Target (un);
-      su->TargetTurret(un);
-      if (un) {
-	//	fprintf (stderr,"turret %s targetting %s",parent->name.c_str(),un->name.c_str());
+  Unit * mytarg = inRangeThreat;
+  if (!mytarg) {
+    mytarg = inRangeHate;
+    if (!mytarg) {
+      mytarg = outRangeThreat;
+      if (!mytarg) {
+	mytarg = outRangeHate;
       }
     }
+  }
+  parent->Target (mytarg);
+  for (;(su=*subun)!=NULL;++subun) {
+    su->Target (mytarg);
+    su->TargetTurret(mytarg);
   }
 }
 /* Proper choosing of targets
@@ -152,7 +185,7 @@ bool FireAt::isJumpablePlanet(Unit * targ) {
     if (istargetjumpableplanet) {
       istargetjumpableplanet=(!((Planet*)targ)->GetDestinations().empty())&&(parent->GetJumpStatus().drive>=0);
       if (!istargetjumpableplanet) {
-	ChooseTargets(1);
+	ChooseTarget();
       }
     }
     return istargetjumpableplanet;
@@ -198,7 +231,7 @@ void FireAt::Execute () {
 	  shouldfire |= ShouldFire (targ,missilelock);
       }
     }else {
-      ChooseTargets(1,true);
+      ChooseTarget();
     }
     static float targetswitchprobability = XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","TargetSwitchProbability",".01"));
     if ((!istargetjumpableplanet)&&(float(rand())/RAND_MAX)<targetswitchprobability*SIMULATION_ATOM) {
@@ -212,11 +245,11 @@ void FireAt::Execute () {
 	}
       }
       if (switcht) {
-	ChooseTargets(1,true);
+	ChooseTarget();
       }
     }
   } else {
-    ChooseTargets(1,false);
+    ChooseTarget();
   }
   if (parent->GetNumMounts ()>0) {
     FireWeapons (shouldfire,missilelock);
