@@ -212,6 +212,7 @@ void gfx_light::ResetProperties (const enum LIGHT_TARGET light_targ, const GFXCo
       break;
     SendGLPosition (GL_LIGHT0+target);
     break;
+  default:
   case ATTENUATE:
     attenuate[0]=color.r; attenuate[1]=color.g; attenuate[2]=color.b;
     apply_attenuate(attenuated());

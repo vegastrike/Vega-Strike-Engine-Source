@@ -62,7 +62,7 @@ struct GFXStats{
 #  undef GL_EXT_compiled_vertex_array
 # endif	// PFNGLLOCKARRAYSEXTPROC
 #endif // GL_EXT_compiled_vertex_array
-
+#define GL_GLEXT_PROTOTYPES
 #include <GL/glext.h>
 
 #define GL_TEXTURE0_ARB 0x84C0
@@ -113,6 +113,7 @@ typedef void (*PFNGLUNLOCKARRAYSEXTPROC)(void);
 #  undef GL_EXT_compiled_vertex_array
 # endif
 #endif
+#define GL_GLEXT_PROTOTYPES
 #if defined(__APPLE__) || defined(MACOSX)
         #include <OpenGL/glext.h>
     #else
