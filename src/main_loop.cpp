@@ -188,6 +188,10 @@ namespace CockpitKeys {
   }
 bool cockpitfront=true;
   void Inside(int,KBSTATE newState) {
+    {
+      static bool back= XMLSupport::parse_bool (vs_config->getVariable ("graphics","background","true"));
+      _Universe->activeStarSystem()->getBackground()->EnableBG(back);
+    }
   const int cockpiton=1;
   const int backgroundoff=2;
   const int max = 4;
@@ -200,7 +204,8 @@ bool cockpitfront=true;
     }
 	static int i=1;
 	if (i--==1){
-	  //  _Universe->activeStarSystem()->getBackground()->EnableBG(!(tmp&backgroundoff));
+	  
+	  //_Universe->activeStarSystem()->getBackground()->EnableBG(!(backgroundoff));
 	}
     tmp--;
     if (tmp<0) tmp=max-1;
