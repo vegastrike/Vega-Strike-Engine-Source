@@ -1,0 +1,14 @@
+In order to compile VegaStrike under Cygwin there are a few things to check :
+
+- it only works with gcc 2.x for now (gcc 3.2 seems to have internal probs)
+- glext.h needs to be added (from the vega-new-proj for example)
+- package inetutils is needed
+- when using libpng 1.2, --with-png-inc=DIR is needed
+- OpenGL might be a problem since GL libs provided with the XFree 4.x package
+  should *not* be used. Instead, we have to use the cygwin OpenGL package
+  which provides some complements to another win32 GL distro (M$, or nVidia
+  ...).
+  So in order to get OpenGL to work, you have to specify at configure time :
+      --with-gl-lib-name=opengl32 --with-glu-lib-name=glu32
+  Glut should work ok but if VS cmoplains about not finding glut.dll
+  just copy your /bin/glut32.dll to /bin/glut.dll
