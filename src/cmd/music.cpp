@@ -70,7 +70,7 @@ bool Music::LoadMusic (const char *file) {
   VSFile f;
   VSError err = f.OpenReadOnly(file, UnknownFile);
   if (err>Ok)
-     err = f.OpenReadOnly( VSFileSystem::HOMESUBDIR +file, UnknownFile);
+     err = f.OpenReadOnly( VSFileSystem::HOMESUBDIR +"/"+file, UnknownFile);
 
   char songname[1024];
   this->playlist.push_back(std::vector <std::string> ());
