@@ -43,6 +43,7 @@
 //#include "vs_globals.h"
 //#include "vegastrike.h"
 
+/* *********************************************************** */
 
 VegaConfig::VegaConfig(char *configfile){
 
@@ -81,6 +82,9 @@ VegaConfig::VegaConfig(char *configfile){
 /*
 for i in `cat cmap` ; do echo "  command_map[\""$i"\"]=FlyByKeyboard::"$i ";" ; done
  */
+
+/* *********************************************************** */
+
 #if 1
 const float volinc = 1;
 const float dopinc = .1;
@@ -111,6 +115,9 @@ void decdop (int i, KBSTATE a) {
 	}
 }
 #endif
+
+/* *********************************************************** */
+
 void VegaConfig::initKeyMap(){
   // mapping from special key string to glut key
   key_map["space"]=' ';
@@ -149,6 +156,8 @@ void VegaConfig::initKeyMap(){
 #if 0
   sed 's/\(.*void \)\(.*\)(.*/ command_map[\"Cockpit::\2\"]=CockpitKeys::\2;/'
 #endif
+
+/* *********************************************************** */
 
   using namespace CockpitKeys;
 
@@ -211,6 +220,8 @@ void VegaConfig::initCommandMap(){
 
 }
 
+/* *********************************************************** */
+
 bool VegaConfig::checkConfig(configNode *node){
   if(node->Name()!="vegaconfig"){
     cout << "this is no Vegastrike config file" << endl;
@@ -239,6 +250,8 @@ bool VegaConfig::checkConfig(configNode *node){
   return true;
 }
 
+/* *********************************************************** */
+
 void VegaConfig::doVariables(configNode *node){
   if(variables!=NULL){
     cout << "only one variable section allowed" << endl;
@@ -254,12 +267,9 @@ void VegaConfig::doVariables(configNode *node){
   }
 }
 
-void VegaConfig::checkSection(configNode *node, enum section_t section_type){
-    if(node->Name()!="section"){
-      cout << "not a section" << endl;
-    return;
-  }
+/* *********************************************************** */
 
+void VegaConfig::doSection(configNode *node, enum section_t section_type){
   string section=node->attr_value("name");
   if(section.empty()){
     cout << "no name given for section" << endl;
@@ -273,18 +283,33 @@ void VegaConfig::checkSection(configNode *node, enum section_t section_type){
       checkColor(cnode);
     }
     else if(section_type==SECTION_VAR){
-      checkVar(cnode);
+      if(cnode->Name()=="var"){
+	doVar(cnode);
+      }
+      else if(cnode->Name()=="section"){
+	doSection(cnode,section_type);
+      }
+      else{
+	cout << "neither a variable nor a section" << endl;
+      }
     }
   }
-
 }
 
-void VegaConfig::checkVar(configNode *node){
-    if(node->Name()!="var"){
-      cout << "not a variable" << endl;
+/* *********************************************************** */
+
+void VegaConfig::checkSection(configNode *node, enum section_t section_type){
+    if(node->Name()!="section"){
+      cout << "not a section" << endl;
     return;
   }
 
+    doSection(node,section_type);
+}
+
+/* *********************************************************** */
+
+void VegaConfig::doVar(configNode *node){
   string name=node->attr_value("name");
   string value=node->attr_value("value");
 
@@ -293,6 +318,19 @@ void VegaConfig::checkVar(configNode *node){
     cout << "no name or value given for variable" << endl;
   }
 }
+
+/* *********************************************************** */
+
+void VegaConfig::checkVar(configNode *node){
+    if(node->Name()!="var"){
+      cout << "not a variable" << endl;
+    return;
+  }
+
+    doVar(node);
+}
+
+/* *********************************************************** */
 
 bool VegaConfig::checkColor(configNode *node){
   if(node->Name()!="color"){
@@ -358,6 +396,7 @@ bool VegaConfig::checkColor(configNode *node){
   return true;
 }
 
+/* *********************************************************** */
 
 void VegaConfig::doColors(configNode *node){
   if(colors!=NULL){
@@ -383,6 +422,8 @@ void VegaConfig::doColors(configNode *node){
 #endif
 }
 
+/* *********************************************************** */
+
 void VegaConfig::doBindings(configNode *node){
   vector<easyDomNode *>::const_iterator siter;
   
@@ -400,6 +441,8 @@ void VegaConfig::doBindings(configNode *node){
     }
   }
 }
+
+/* *********************************************************** */
 
 void VegaConfig::doAxis(configNode *node){
 
@@ -464,6 +507,8 @@ void VegaConfig::doAxis(configNode *node){
 
 }
 
+/* *********************************************************** */
+
 void VegaConfig::checkHatswitch(int nr,configNode *node){
   if(node->Name()!="hatswitch"){
     cout << "not a hatswitch node " << endl;
@@ -485,6 +530,8 @@ void VegaConfig::checkHatswitch(int nr,configNode *node){
 
   hs_value_index++;
 }
+
+/* *********************************************************** */
 
 void VegaConfig::checkBind(configNode *node){
   if(node->Name()!="bind"){
@@ -564,9 +611,26 @@ void VegaConfig::checkBind(configNode *node){
     cout << "no key or joystick binding found" << endl;
     return;
   }
-
-
 }
+
+/* *********************************************************** */
+
+string VegaConfig::getVariable(string section,string subsection,string name,string defaultvalue){
+  configNode *secnode=findSection(section,variables);
+  if(secnode!=NULL){
+    configNode *subnode=findSection(subsection,secnode);
+    if(subnode!=NULL){
+      configNode *entrynode=findEntry(name,subnode);
+      if(entrynode!=NULL){
+	return entrynode->attr_value("value");
+      }
+    }
+  }
+
+  return defaultvalue;
+}
+
+/* *********************************************************** */
 
 string VegaConfig::getVariable(string section,string name,string defaultval){
    vector<easyDomNode *>::const_iterator siter;
@@ -584,8 +648,10 @@ string VegaConfig::getVariable(string section,string name,string defaultval){
   cout << "WARNING: no section named " << section << endl;
 
   return defaultval;
- 
 }
+
+/* *********************************************************** */
+
 string VegaConfig::getVariable(configNode *section,string name,string defaultval){
     vector<easyDomNode *>::const_iterator siter;
   
@@ -598,9 +664,10 @@ string VegaConfig::getVariable(configNode *section,string name,string defaultval
 
   cout << "WARNING: no var named " << name << " in section " << section->attr_value("name") << " using default: " << defaultval << endl;
 
-  return defaultval;
- 
+  return defaultval; 
 }
+
+/* *********************************************************** */
 
 void VegaConfig::getColor(string section, string name, float color[4],int hexcolor){
   color[2]=((float)(hexcolor & 0xff))/256.0;
@@ -611,6 +678,7 @@ void VegaConfig::getColor(string section, string name, float color[4],int hexcol
   getColor(section,name,color);
 }
 
+/* *********************************************************** */
 
 void VegaConfig::getColor(string section, string name, float color[4]){
    vector<easyDomNode *>::const_iterator siter;
@@ -631,6 +699,8 @@ void VegaConfig::getColor(string section, string name, float color[4]){
   return;
   
 }
+
+/* *********************************************************** */
 
 void VegaConfig::getColor(configNode *node,string name,float color[4]){
   vector<easyDomNode *>::const_iterator siter;
@@ -655,14 +725,19 @@ void VegaConfig::getColor(configNode *node,string name,float color[4]){
   cout << "WARNING: color " << name << " not defined, using default (white)" << endl;
 }
 
+/* *********************************************************** */
+
 void VegaConfig::bindKeys(){
   doBindings(bindings);
 }
 
+/* *********************************************************** */
 
 configNode *VegaConfig::findEntry(string name,configNode *startnode){
   return findSection(name,startnode);
 }
+
+/* *********************************************************** */
 
 configNode *VegaConfig::findSection(string section,configNode *startnode){
    vector<easyDomNode *>::const_iterator siter;
@@ -684,9 +759,13 @@ configNode *VegaConfig::findSection(string section,configNode *startnode){
   
 }
 
+/* *********************************************************** */
+
 void VegaConfig::setVariable(configNode *entry,string value){
       entry->set_attribute("value",value);
 }
+
+/* *********************************************************** */
 
 bool VegaConfig::setVariable(string section,string name,string value){
   configNode *sectionnode=findSection(section,variables);

@@ -141,10 +141,14 @@ class Mission {
 
   string getVariable(string name,string defaultval);
 
+  void GetOrigin(float pos[3],string &planetname);
+
  private:
   //  string getVariable(easyDomNode *section,string name,string defaultval);
 
   easyDomNode *variables;
+  easyDomNode *origin_node;
+
   tagDomNode *director;
 
   struct Runtime {
@@ -166,7 +170,8 @@ class Mission {
   void checkFlightgroup(easyDomNode *node);
   bool doPosition(easyDomNode *node,float pos[3]);
   bool doRotation(easyDomNode *node,float rot[3]);
-
+  void doOrigin(easyDomNode *node);
+  void doSettings(easyDomNode *node);
 
 void  doModule(missionNode *node,int mode);
  scriptContext * addContext(missionNode *node);

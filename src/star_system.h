@@ -87,7 +87,7 @@ class StarSystem {
     cam[currentcamera].UpdateGFX();
   }
   ///Loads the star system from an XML file
-  StarSystem(char * filename, const Vector & centroid=Vector (0,0,0));
+  StarSystem(char * filename, const Vector & centroid=Vector (0,0,0), const string planetname=string());
   ~StarSystem();
   UnitCollection * getUnitList();
   /// returns xy sorted bounding spheres of all units in current view

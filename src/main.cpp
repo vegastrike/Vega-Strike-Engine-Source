@@ -102,6 +102,10 @@ int main( int argc, char *argv[] )
     string news=vs_config->getVariable("general","testvar","new-def-value");
 
     cout << "old " << olds << " new " << news << endl;
+
+
+    string varstr=vs_config->getVariable("graphics","mesh","testvar","1024");
+    cout << "testvar: " << varstr << endl;
     //            exit(0);
 
     //read_vs_config_file();
@@ -141,7 +145,13 @@ int main( int argc, char *argv[] )
 #endif
     */
     _Universe= new Universe(argc,argv);   
-    _Universe->Init (mission->getVariable("system","sol.system"));
+
+    float pos[3];
+    string planetname;
+  
+    mission->GetOrigin(pos,planetname);
+
+    _Universe->Init (mission->getVariable("system","sol.system"),Vector(pos[0],pos[1],pos[2]),planetname);
     createObjects();
 
        InitializeInput();

@@ -45,6 +45,8 @@
 //#include "vs_globals.h"
 //#include "vegastrike.h"
 
+/* *********************************************************** */
+
 Mission::Mission(char *configfile){
   number_of_flightgroups=0;
   number_of_ships=0;
@@ -60,9 +62,12 @@ Mission::Mission(char *configfile){
   //top->walk(0);
 
   variables=NULL;
+  origin_node=NULL;
 
   checkMission(top);
 }
+
+/* *********************************************************** */
 
 bool Mission::checkMission(easyDomNode *node){
   if(node->Name()!="mission"){
@@ -79,6 +84,9 @@ bool Mission::checkMission(easyDomNode *node){
     else if(((*siter)->Name()=="flightgroups")){
       doFlightgroups(*siter);
     }
+    else if(((*siter)->Name()=="settings")){
+      doSettings(*siter);
+    }
     else if(((*siter)->Name()=="module")){
       //      doModule(*siter);
     }
@@ -88,6 +96,48 @@ bool Mission::checkMission(easyDomNode *node){
   }
   return true;
 }
+
+/* *********************************************************** */
+
+void Mission::doOrigin(easyDomNode *node){
+  origin_node=node;
+}
+
+/* *********************************************************** */
+
+void Mission::GetOrigin(float pos[3],string &planetname){
+  //  float pos[3];
+
+  if(origin_node==NULL){
+    pos[0]=pos[1]=pos[2]=0.0;
+    planetname=string();
+    return;
+  }
+
+  bool ok=doPosition(origin_node,pos);
+
+  if(!ok){
+    pos[0]=pos[1]=pos[2]=0.0;
+  }
+
+  planetname=origin_node->attr_value("planet");
+}
+
+/* *********************************************************** */
+
+void Mission::doSettings(easyDomNode *node){
+  vector<easyDomNode *>::const_iterator siter;
+  
+  for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
+    easyDomNode *mnode=*siter;
+    if(mnode->Name()=="origin"){
+      doOrigin(mnode);
+    }
+  }
+}
+
+
+/* *********************************************************** */
 
 void Mission::doVariables(easyDomNode *node){
   if(variables!=NULL){
@@ -103,6 +153,7 @@ void Mission::doVariables(easyDomNode *node){
   }
 }
 
+/* *********************************************************** */
 
 void Mission::checkVar(easyDomNode *node){
     if(node->Name()!="var"){
@@ -117,6 +168,8 @@ void Mission::checkVar(easyDomNode *node){
   }
 }
 
+/* *********************************************************** */
+
 void Mission::doFlightgroups(easyDomNode *node){
   vector<easyDomNode *>::const_iterator siter;
 
@@ -125,6 +178,8 @@ void Mission::doFlightgroups(easyDomNode *node){
   }
 
 }
+
+/* *********************************************************** */
 
 void Mission::checkFlightgroup(easyDomNode *node){
   if(node->Name()!="flightgroup"){
@@ -205,6 +260,8 @@ void Mission::checkFlightgroup(easyDomNode *node){
   number_of_ships+=nr_ships_i;
 }
 
+/* *********************************************************** */
+
 bool Mission::doPosition(easyDomNode *node,float pos[3]){
   string x=node->attr_value("x");
   string y=node->attr_value("y");
@@ -238,6 +295,8 @@ bool Mission::doPosition(easyDomNode *node,float pos[3]){
   return true;
 }
 
+/* *********************************************************** */
+
 Flightgroup *Mission::findFlightgroup(string offset_name){
   vector<Flightgroup *>::const_iterator siter;
 
@@ -251,10 +310,14 @@ Flightgroup *Mission::findFlightgroup(string offset_name){
   return NULL;
 }
 
+/* *********************************************************** */
+
 bool Mission::doRotation(easyDomNode *node,float rot[3]){
   //not yet
   return true;
 }
+
+/* *********************************************************** */
 
 void Mission::doOrder(easyDomNode *node,Flightgroup *fg){
   // nothing yet
@@ -271,6 +334,7 @@ void Mission::doOrder(easyDomNode *node,Flightgroup *fg){
   fg->ordermap[order]=target;
 }
 
+/* *********************************************************** */
 
 string Mission::getVariable(string name,string defaultval){
    vector<easyDomNode *>::const_iterator siter;

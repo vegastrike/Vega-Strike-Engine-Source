@@ -1,4 +1,13 @@
+2001-11-09 Alexander Rawass <alexannika@users.sourceforge.net>
 
+	* modified config_xml to have variable subsections
+	* modified missions to have a settings section
+	* modified missions to have an origin inside settings
+	* modified star_system to take three args (3rd: planetname)
+	* modified Universe::Init to take those args
+	* modified main.cpp to use the new Universe::Init
+	
+	
 2001-11-08 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* modified vegastrike.spec

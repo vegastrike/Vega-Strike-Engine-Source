@@ -27,9 +27,8 @@
 #include "gfx/aux_texture.h"
 #include "profile.h"
 #include "gfx/cockpit.h"
-
-
-
+//#include "mission.h"
+//#include "vs_globals.h"
 
 Universe::Universe(int argc, char** argv)
 {
@@ -45,11 +44,10 @@ Universe::Universe(int argc, char** argv)
 	cockpit = new Cockpit ("",NULL);
 	LoadFactionXML("factions.xml");	
 }
-void Universe::Init (string systemfile) {
+void Universe::Init (string systemfile, const Vector & centr,const string planetname) {
 
-  //	star_system = new StarSystem("test.xml");
   string fullname=systemfile+".system";
-	star_system = new StarSystem((char *)fullname.c_str());
+  star_system = new StarSystem((char *)fullname.c_str(),centr,planetname);
 
 }
 Universe::~Universe()

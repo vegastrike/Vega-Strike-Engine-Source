@@ -29,11 +29,14 @@ vector<Vector> perplines;
 //static SphereMesh *foo;
 //static Unit *earth;
 
-StarSystem::StarSystem(char * filename, const Vector & centr) : 
+StarSystem::StarSystem(char * filename, const Vector & centr,const string planetname) : 
 //  primaries(primaries), 
   drawList(new UnitCollection),//what the hell is this...maybe FALSE FIXME
   units(new UnitCollection), 
   missiles(new UnitCollection) {
+
+  cout << "origin: " << centr.i << " " << centr.j << " " << centr.k << " " << planetname << endl;
+
   current_stage=PHY_AI;
   currentcamera = 0;	
   systemInputDFA = new InputDFA (this);

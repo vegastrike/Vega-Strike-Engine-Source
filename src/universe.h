@@ -124,7 +124,7 @@ private:
 	///Loads Defaults in Graphics Drivers
 	void StartGFX();
 	///Should load the Universe data file. Now just inits system with test.xml
-	void Init(string systemfile);
+	void Init(string systemfile, const Vector & centroid=Vector (0,0,0), const string planetname=string());
 	///Begins a scene
 	void StartDraw();
 	///Runs the main loop

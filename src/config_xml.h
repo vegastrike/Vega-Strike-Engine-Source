@@ -62,18 +62,22 @@ class VegaConfig {
   VegaConfig(char *configfile);
 
   void getColor(configNode *node,string name, float color[4]);
-  string getVariable(string section,string name,string defaultvalue);
   void getColor(string section, string name, float color[4]);
   void getColor(string section,string name,float color[4],int hexcolor);
   void getColor(string name, float color[4]) { getColor("default",name,color); };
 
-  void setVariable(configNode *entry,string value);
+  string getVariable(string section,string name,string defaultvalue);
+  string getVariable(string section,string subsection,string name,string defaultvalue);
 
-  bool setVariable(string section,string name,string value);
   configNode *findSection(string section,configNode *startnode);
   configNode *findEntry(string name,configNode *startnode);
 
+  void setVariable(configNode *entry,string value);
+  bool setVariable(string section,string name,string value);
+
   void bindKeys();
+
+  easyDomNode *Variables() { return variables; };
 
 #define MAX_AXIS 4
 
@@ -116,6 +120,8 @@ class VegaConfig {
   void doBindings(configNode *node);
   void checkSection(configNode *node,enum section_t section_type);
   void checkVar(configNode *node);
+  void doSection(configNode *node,enum section_t section_type);
+  void doVar(configNode *node);
   void doColors(configNode *node);
   bool checkColor(configNode *node);
   void checkBind(configNode *node);
