@@ -123,7 +123,7 @@ struct UpgradingInfo {
 
       }else {
 	if (!curcategory.empty()) {
-	  if (mode==BUYMODE||mode==SELLMODE) 
+	  if (mode==BUYMODE||mode==SELLMODE||curcategory.size()>1) 
 	    CargoList->AddTextItem ("[Back To Categories]","[Back To Categories]");
 	  for (unsigned int i=0;i<CurrentList->size();i++) {
 	    if (match(curcategory.begin(),curcategory.end(),(*CurrentList)[i].category.begin(),(*CurrentList)[i].category.end(),true)) {
