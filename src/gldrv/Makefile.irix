@@ -1,0 +1,44 @@
+SHELL = /bin/sh
+
+.SUFFIXES:
+.SUFFIXES: .S .c .cpp .o .s
+
+.cpp.o:
+	$(CXX) $(CXXFLAGS) -c $<
+
+CC = cc
+CXX = CC
+RANLIB = :
+
+LFLAGS	= -n32 -mips3 -LANG:std
+DEFS	= -DIRIX -DHAVE_CONFIG_H -DUSE_STENCIL_BUFFER -MDupdate Makedepend
+COPT	= -O3 -OPT:Olimit=0 -OPT:IEEE_arithmetic=1 \
+	  -OPT:roundoff=0 -TENV:X=1 -OPT:wrap_around_unsafe_opt=off \
+	  -DEBUG:optimize_space=on -OPT:space=on -CG:unique_exit=on \
+	  -OPT:unroll_times=0
+
+INCLUDES = -I/usr/freeware/include -I. -I..
+
+CFLAGS	 = ${LFLAGS} ${COPT} ${DEFS} ${INCLUDES}
+CXXFLAGS = ${LFLAGS} ${COPT} ${DEFS} ${INCLUDES}
+LDFLAGS	 = ${LFLAGS}
+LIBS	 = -lGL -lGLU -L/usr/freeware/lib32 -lglut -lexpat -lX11 -lm
+
+SOURCES = gl_clip.cpp gl_globals.cpp gl_init.cpp gl_light.cpp \
+	  gl_light_pick.cpp gl_light_state.cpp gl_material.cpp \
+	  gl_matrix.cpp gl_misc.cpp gl_quad_list.cpp gl_state.cpp \
+	  gl_texture.cpp gl_vertex_list.cpp
+
+OBJECTS = ${SOURCES:.cpp=.o}
+
+all: libgldrv.a
+
+libgldrv.a:	${OBJECTS}
+	-rm -f $@
+	${CXX} -ar -WR,-v -o $@ ${OBJECTS}
+
+clean:;
+	-rm -f libgldrv.a ${OBJECTS}
+
+include Makedepend
+
