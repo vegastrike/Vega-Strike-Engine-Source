@@ -343,17 +343,19 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   computer.radar.color=UpgradeBoolval(computer.radar.color,up->computer.radar.color,touchme,downgrade,numave,percentage);
   computer.itts=UpgradeBoolval(computer.itts,up->computer.radar.color,touchme,downgrade,numave,percentage);
   ///do the two reversed ones below
+  
   double myleak=100-shield.leak;
   double upleak=100-up->shield.leak;
   double templeak=100-(templ!=NULL?templ->shield.leak:0);
+  /*
   STDUPGRADE(myleak,upleak,templeak,0);
   if (touchme&&myleak<=100&&myleak>0)shield.leak=100-myleak;
-
-  myleak = -computer.radar.maxcone;
-  upleak=-up->computer.radar.maxcone;
+  */
+  myleak = 1-computer.radar.maxcone;
+  upleak=1-up->computer.radar.maxcone;
   templeak=-(templ!=NULL?templ->computer.radar.maxcone:0);
-  STDUPGRADE(myleak,upleak,templeak,-1);
-  if (touchme&&myleak<=100&&myleak>0)computer.radar.maxcone=-myleak;
+  STDUPGRADE(myleak,upleak,templeak,0);
+  if (touchme)computer.radar.maxcone=1-myleak;
   
   //NO CLUE FOR BELOW
   if (downgrade) {
