@@ -25,6 +25,7 @@ HardCodedMap MakeHardCodedScripts() {
   tmp.insert (MyPair ("match velocity",&MatchVelocity));
   tmp.insert (MyPair ("fly straight",&FlyStraight));
   tmp.insert (MyPair ("fly straight afterburner",&FlyStraightAfterburner));
+  tmp.insert (MyPair ("afterburn fly straight",&FlyStraightAfterburner));
   tmp.insert (MyPair ("afterburn turn towards",&AfterburnTurnTowards));  
   tmp.insert (MyPair ("afterburn turn towards itts",&AfterburnTurnTowardsITTS));  
   tmp.insert (MyPair ("cloak",&CloakForScript));  
