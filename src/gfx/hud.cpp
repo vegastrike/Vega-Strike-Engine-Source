@@ -92,6 +92,30 @@ void DrawSquare(float left,float right, float top, float bot) {
 
 	GFXEnd ();
 }
+float charWidth (char c, float myFontMetrics) {
+  static bool use_bit = XMLSupport::parse_bool(vs_config->getVariable ("graphics","high_quality_font","false"));
+  void * fnt = use_bit?(g_game.x_resolution>=800?GLUT_BITMAP_HELVETICA_12:GLUT_BITMAP_HELVETICA_10):GLUT_STROKE_ROMAN;  
+  float charwid = use_bit?glutBitmapWidth(fnt,c):glutStrokeWidth(fnt,c);
+  float dubyawid = use_bit?glutBitmapWidth(fnt,'W'):glutStrokeWidth(fnt,'W');
+  return charwid*myFontMetrics/dubyawid;
+}
+bool doNewLine(string::const_iterator begin,
+               string::const_iterator end,
+               float cur_pos,
+               float end_pos,
+               float metrics) {
+  if (*begin=='\n')
+    return true;
+  if (*begin==' ') {
+    cur_pos+=charWidth(*begin,metrics);
+    *begin++;
+    for (;begin!=end&&cur_pos<=end_pos&&!isspace(*begin);begin++) {
+      cur_pos+=charWidth(*begin,metrics);
+    }
+    return cur_pos>end_pos;
+  }
+  return cur_pos+((begin+1!=end)?charWidth(*begin,metrics):0)>=end_pos;
+}
 int TextPlane::Draw(const string & newText, int offset,bool startlower, bool force_highquality)
 {
   int retval=1;
@@ -222,7 +246,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
 		  col+=myFontMetrics.i*glutStrokeWidth(GLUT_STROKE_ROMAN,*text_it)/std_wid;
       }
     }
-    if(col+((text_it+1!=newText.end())?(use_bit?(glutBitmapWidth(fnt,*text_it)/(float)(.5*g_game.x_resolution)):myFontMetrics.i):0)>=myDims.i||*text_it == '\n') {
+    if(doNewLine(text_it,newText.end(),col,myDims.i, myFontMetrics.i)){
       GetPos (tmp,col);
       row -= rowheight;
       glPopMatrix();

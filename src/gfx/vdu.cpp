@@ -524,9 +524,8 @@ bool VDU::SetCommAnimation (Animation * ani, bool force) {
         thismode.push_back(COMM);
       else if (comm_ani!=NULL&&thismode.size()>1&&ani!=NULL)
         thismode.back()=COMM;
-      comm_ani = ani;
       if (ani){
-        
+        comm_ani = ani;       
         ani->Reset();
       }
       return true;
