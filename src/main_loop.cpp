@@ -326,7 +326,7 @@ static void Quit(int,KBSTATE newState) {
 Unit *carrier=NULL;
 Unit *fighter = NULL;
 Unit *fighter2=NULL;
-const int numf = 10;
+const int numf = 4;
 Unit *fighters[numf];
 CoordinateSelect *locSel=NULL;
 //Background * bg = NULL;
@@ -487,7 +487,7 @@ void createObjects() {
 
   //  
   //  
-  for(int a = 0; a < 20; a++) {
+  for(int a = 0; a < numf; a++) {
     //fighters[a] = new Unit("uosprey.dat");
     //fighters[a] = new Unit("Homeworld-HeavyCorvette.xml", true);
     switch(0) {
@@ -498,7 +498,7 @@ void createObjects() {
       break;
     case 0:
       fighters[a] = new Unit("hornet.xunit", true);
-      fighters[a]->SetPosition (1000+100*a,100,100);
+      fighters[a]->SetPosition (1000+150*a,100,100);
       break;
     case 2:
       fighters[a] = new Unit("Heavycorvette.xunit", true);

@@ -24,14 +24,14 @@ void AddCollideQueue (const LineCollide &tmp) {
 void Unit::UpdateCollideQueue () {
   Vector Puffmin (Position().i-radial_size,Position().j-radial_size,Position().k-radial_size);
   Vector Puffmax (Position().i+radial_size,Position().j+radial_size,Position().k+radial_size);
-  CollideInfo.Mini= Puffmin;
-  CollideInfo.Maxi=Puffmax;
   if (CollideInfo.object == NULL||TableLocationChanged(CollideInfo,Puffmin,Puffmax)) {//assume not mutable
     if (CollideInfo.object!=NULL)
       KillCollideTable(&CollideInfo);
     CollideInfo.object = this;
     AddCollideQueue (CollideInfo);
   }
+  CollideInfo.Mini= Puffmin;
+  CollideInfo.Maxi=Puffmax;
 }
 
 void Unit::CollideAll() {
