@@ -298,10 +298,13 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 				if( !found)
 				{
 					// Add the account at the end of accounts.xml
-					FILE * fp = fopen( "./accounts.xml", "r+");
+					string acctpath = datadir+"/accounts.xml";
+					FILE * fp = fopen( acctpath.c_str(), "r+");
 					if( fp==NULL)
 					{
 						cout<<"ERROR opening accounts file";
+						if( packet2.send( (Cmd) 0, packet.getSerial(), NULL, 0, SENDRELIABLE, NULL, sock, __FILE__, __LINE__ ) < 0 )
+							cout<<"ERROR sending errormsg to subscription website"<<endl;
 						exit(1);
 					}
 					else
@@ -310,19 +313,39 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 						//fseek( fp, 0, SEEK_SET);
 						char * fbuf = new char[MAXBUFFER];
 						size_t i=0;
+						vector<string> acctlines;
 						// Read a line per account and one line for the "<ACCOUNTS>" tag
 						for( i=0; i<Cltacct.size()+1; i++)
 						{
 							fbuf=fgets( fbuf, MAXBUFFER, fp);
+							acctlines.push_back( fbuf);
 							cout<<"Read line : "<<fbuf<<endl;
 						}
-						string acctstr = "\t<PLAYER name=\""+callsign+"\"\tpassword=\""+passwd+"\" />\n"+"</ACCOUNTS>\n";
-						cout<<"Adding to file : "<<acctstr<<endl;
+						fclose( fp);
+						fp = fopen( acctpath.c_str(), "w");
+						if( !fp)
+						{
+							cerr<<"!!! ERROR : opening account file in write mode !!!"<<endl;
+							exit(1);
+						}
+						acctlines.push_back( "\t<PLAYER name=\""+callsign+"\"\tpassword=\""+passwd+"\" />\n");
+						acctlines.push_back( "</ACCOUNTS>\n");
+						//cout<<"Adding to file : "<<acctstr<<endl;
+						for( i=0; i<acctlines.size(); i++)
+						{
+							if( fputs( acctlines[i].c_str(), fp) < 0)
+							{
+								cout<<"!!! ERROR : writing to account file !!!"<<endl;
+								exit(1);
+							}
+						}
+						/*
 						if( fputs( acctstr.c_str(), fp) < 0)
 						{
 							cout<<"ERROR writing new account to account file"<<endl;
 							exit(1);
 						}
+						*/
 						fclose( fp);
 						Cltacct.push_back( new Account( callsign, passwd));
 					}
