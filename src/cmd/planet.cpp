@@ -146,6 +146,7 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
   }else if (0==strcmp ("ONE ONE",alpha)) {
     blendSrc = ONE;
     blendDst = ONE;
+    alpha = NULL;
   }
   meshdata[0] = new SphereMesh(radius, stacks, stacks, textname, alpha,false,blendSrc,blendDst);
   meshdata[0]->setEnvMap(GFXFALSE);
