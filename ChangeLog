@@ -1,3 +1,13 @@
+2002-03-24 Daniel Horn <hellcatv@hotmail.com>
+	* Added sounds to comms (electricity.wav playes when someone hates you
+	* Added bases to flightgroup Base, Nebuale to flightgroup Nebula
+	* Added Damage effects to the HUD
+	* Added Damage to any system of your starship
+	* Added cockpit damage float [] to images (saves and loads and upgrades)
+	* Added Damage Repair droid <Defense RepairDroid="4"> ...
+	* Made Starsystem load and position orbits before running mission loadsys script
+	* Added a parameter to increment and decrement cargo (script): quantity
+	
 2002-03-23 Daniel Horn <hellcatv@hotmail.com>
 	* Finished up comms
 	* Added comm animations
