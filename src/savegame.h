@@ -2,6 +2,7 @@
 #ifndef __SAVEGAME_H
 #define __SAVEGAME_H
 
+#include "gfx/vec.h"
 
 // WARNING, SAVE FILES ARE LIMITED TO MAXBUFFER SIZE !!! (LOOK IN NETWORKING/CONST.H)
 
@@ -57,7 +58,7 @@ class SaveGame {
   void	 SetPlayerFaction( std::string faction) { playerfaction = faction;}
   std::string WriteSavedUnit (SavedUnits *su);
   std::string WriteSaveGame (const char * systemname, const class QVector &Pos,float credits, std::vector <std::string> unitname, int player_num, std::string fact="", bool write=true);
-  std::string WritePlayerData( const QVector &FP, std::vector<std::string> unitname, const char * systemname, float credits, string fact="");
+  std::string WritePlayerData( const QVector &FP, std::vector<std::string> unitname, const char * systemname, float credits, std::string fact="");
   std::string WriteDynamicUniverse();
   ///cast address to long (for 64 bits compatibility)
   void AddUnitToSave (const char * unitname, int type, const char * faction, long address);
