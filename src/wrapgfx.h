@@ -73,15 +73,6 @@ protected:
 	
 public:
 	class Faction {
-
-	private:
-		struct faction_stuff;
-		vector <faction_stuff> faction;
-		friend class Universe;
-		Texture * logo; //the logos
-		char * factionname; //char * of the name
-		static void ParseAllAllies();
-		void ParseAllies();
 	public:
 		struct faction_stuff {
 			union faction_name {
@@ -90,6 +81,14 @@ public:
 			} stats;
 			float relationship;
 		};		
+	private:
+		vector <faction_stuff> faction;
+		friend class Universe;
+		Texture * logo; //the logos
+		char * factionname; //char * of the name
+		static void ParseAllAllies();
+		void ParseAllies();
+	public:
 		static void LoadXML(const char * factionfile);  //load the xml
 		static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
 		static void endElement(void *userData, const XML_Char *name);
