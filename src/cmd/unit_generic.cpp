@@ -2347,6 +2347,8 @@ Vector Unit::ToWorldCoordinates(const Vector &v) const {
 /***********************************************************************************/
 
 // NEW TESTING MODIFICATIONS
+// We do it also on client side to display hits on shields/armor -> not to compute damage
+// Damage are computed on server side and shield/armor data are sent with the DAMAGE SNAPSHOT
 float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit,const GFXColor &color, float phasedamage) {
   static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
   //  #ifdef REALLY_EASY
@@ -2362,9 +2364,7 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
   //  #endif
   float absamt= amt>=0?amt:-amt;  
   float ppercentage=0;
-  // Only check docking if on server side or non-networking mode
-  if( SERVER || Network==NULL)
-  {
+  // We also do the following lock on client side in order not to display shield hits 
     static bool nodockdamage = XMLSupport::parse_float (vs_config->getVariable("physics","no_damage_to_docked_ships","false"));
     if (nodockdamage) {
       if (DockedOrDocking()&(DOCKED_INSIDE|DOCKED)) {
@@ -2375,7 +2375,7 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
 	  affectedUnit->ApplyLocalDamage (pnt,normal,amt,affectedUnit,color,phasedamage);
 	  return -1;
 	}
-  }
+
   if (aistate)
    aistate->ChooseTarget();
 

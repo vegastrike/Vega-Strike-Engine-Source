@@ -17,10 +17,13 @@
 
 - Load whole system description when generating a system (if not already done)
 - Transfer system description when a player enter in a system (planets, bases, ...)
-- Turn mount_num into a char
+- Turn mount_num into a char ?
 - Put back a control with keyboard to be able to SAVE, SEE MEMORY USED...
-- Add position stuff transmission for other units than clients (ai, missiles);
+
+DONE - Add position stuff transmission for other units than clients (ai, missiles)
+- Make the difference between ships/ai and planets/bases that move really slowly so updates are not required that often
 - Add position stuff transmission for planets (with high update period) and for bases if needed
+
 - When a request to jump -> check if the destination is reachable by origin system with UniverseUtil::GetAdjacentSystems()
 - Think about transfering config data such as difficulty, physics...
 - Find all the used vars in Unit stuff and integrate them in the serverconfig
@@ -31,6 +34,7 @@ TO LOOK AT - When receiving a packet : look at timestamp and compare it to lates
 
 *** CLIENT SIDE *********************************************************
 
+- Write the function that receive damage snapshot
 - Find the jump call and make it only send a jump request to server
 - Should wait for CMD_ADDEDYOU just before entering in the main game loop
 - Find a way not to use MAXOBJECTS in netclient.h

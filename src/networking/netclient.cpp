@@ -634,6 +634,16 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				cp = _Universe->isPlayerStarship( this->game_unit.GetUnit());
 				cp->ReceivedTargetInfo();
 			break;
+			case CMD_SNAPDAMAGE :
+			{
+				// In case we use damage snapshots : we do not call ApplyNetDamage
+				// In fact we trusted the client only for visual FX : Check where they are done !
+				// but the server computes the damage itself
+
+				// SHOULD READ THE DAMAGE SNAPSHOT HERE !
+			}
+			break;
+#ifdef NET_SHIELD_SYSTEM_1
 			case CMD_DAMAGE :
 			{
 				float amt = netbuf.getFloat();
@@ -667,6 +677,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				*/
 			}
 			break;
+#endif
 			case CMD_KILL :
 				un = UniverseUtil::GetUnitFromSerial( p1.getSerial());
 				if( un)

@@ -422,8 +422,11 @@ void	ZoneMgr::broadcastDamage( )
 						// Put the altered stucts after the damage enum flag
 						if( damages & Unit::SHIELD_DAMAGED)
 						{
-							// Add needed vectors here and in ARMOR_DAMAGE !!!!!!!
 							netbuf.addShield( un->shield);
+						}
+						if( damages & Unit::SHIELD_DAMAGED)
+						{
+							netbuf.addArmor( un->armor);
 						}
 						if( damages & Unit::COMPUTER_DAMAGED)
 						{
