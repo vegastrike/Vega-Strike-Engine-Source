@@ -3,7 +3,7 @@
 #include "universe_util.h"
 #include "config_xml.h"
 float max_allowable_travel_time () {
-  static float mat = XMLSupport::parse_float (vs_config->getVariable ("AI","max_allowable_travel_time","1000"));
+  static float mat = XMLSupport::parse_float (vs_config->getVariable ("AI","max_allowable_travel_time","100"));
   return mat;
 }
 bool DistanceWarrantsWarpTo (Unit * parent, float dist){
@@ -41,10 +41,10 @@ void WarpToP(Unit * parent, Unit * target) {
 			} else {
 				Vector vel = parent->GetVelocity();
 				vel.Normalize();
-				Vector dir = parent->Position()-target->Position();
+				Vector dir = target->Position()-parent->Position();
 				dir.Normalize();
 				float dirveldot=dir.Dot(vel);
-				if(dirveldot>.86){
+				if(dirveldot>.75){
 					parent->graphicOptions.InWarp=1;
 				} else {
 					parent->graphicOptions.InWarp=0;
