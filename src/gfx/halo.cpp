@@ -48,9 +48,9 @@ void Halo::Draw (const Transformation &quat, const Matrix m, float alpha) {
   if (offmag<rad+.5*g_game.zfar) {
     offset*=HaloOffset*rad;
   }else {
-    offset *= (offmag-.5*g_game.zfar);
-    wid/=((offmag-rad)/(.5*g_game.zfar));
-    hei/=((offmag-rad)/(.5*g_game.zfar));
+    offset *= (offmag-2*g_game.znear);//-rad-.4*g_game.zfar);
+    wid/=((offmag)/(g_game.znear));//it's 1 time away from znear 
+    hei/=((offmag)/(g_game.znear));
   }
   _Universe->AccessCamera()->GetPQR(p,q,r);
   p=p*wid;
