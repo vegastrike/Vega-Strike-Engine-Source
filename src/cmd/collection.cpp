@@ -56,7 +56,7 @@ void UnitCollection::UnitListNode::PostInsert (Unit * unit) {
   if(next->unit!=NULL)
     next->next = new UnitListNode(unit, next->next);
   else
-    next = new UnitListNode(unit, next->next);
+    next = new UnitListNode(unit, next);
 }
 void UnitCollection::UnitIterator::postinsert(Unit *unit) {
   pos->PostInsert (unit);
