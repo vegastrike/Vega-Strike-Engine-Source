@@ -1,3 +1,4 @@
+
 /* unitCollection.h
  * 
  *****/
@@ -16,10 +17,9 @@ class UnitCollection {
     Unit *unit;
     UnitList *next;
     
-    UnitList(Unit *unit) : unit(unit), next(NULL) { }
+    UnitList(Unit *unit) : unit(unit), next(0) { }
     UnitList(Unit *unit, UnitList *next) : unit(unit), next(next) { }
     ~UnitList() { if(0!=next) delete next; }
-    
     void insert(Unit *unit);
     void append(Unit *unit);
     void remove(Unit *unit);
@@ -27,9 +27,8 @@ class UnitCollection {
   *units;
 
  public:
-  UnitCollection() : units(NULL) { }
-  ~UnitCollection() { delete units; }
-
+  UnitCollection() : units(0) { }
+  ~UnitCollection() { if (units) delete units; }
   class UnitIterator : public Iterator {
   private:
     UnitList *pos;

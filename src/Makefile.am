@@ -54,10 +54,14 @@ vegastrike_SOURCES =				\
 	gfx_aux_texture.h			\
 	gfx_background.cpp			\
 	gfx_background.h			\
+	gfx_bounding_box.cpp			\
+	gfx_bounding_box.h			\
 	gfx_bsp.cpp				\
 	gfx_bsp.h				\
 	gfx_camera.cpp				\
 	gfx_camera.h				\
+	gfx_click_list.h			\
+	gfx_click_list.cpp			\
 	gfx_hud.cpp				\
 	gfx_hud.h				\
 	gfx_location_select.cpp			\

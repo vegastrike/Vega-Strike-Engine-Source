@@ -57,6 +57,9 @@ void setup_game_data ( ){ //pass in config file l8r??
   g_game.fov=78;
   g_game.PaletteExt=1;
   g_game.cubemap=0;
+  g_game.MouseSensitivityX=2;
+  g_game.MouseSensitivityY=4;
+
 }
 void ParseCommandLine(int argc, char ** CmdLine);
 void cleanup(void)

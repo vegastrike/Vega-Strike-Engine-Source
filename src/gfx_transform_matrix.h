@@ -24,7 +24,7 @@
 #include "gfx_transform_vector.h"
 
 typedef float Matrix[16];
-
+/** moves a vector struct to a matrix */
 inline void VectorToMatrix(float matrix[], const Vector &v1, const Vector &v2, const Vector &v3)
 {
 	matrix[0] = v1.i;
@@ -48,7 +48,8 @@ inline void VectorToMatrix(float matrix[], const Vector &v1, const Vector &v2, c
 	matrix[15] = 1;
 }
 
-
+/** zeros out a 4x4 matrix quickly
+ */
 inline void Zero(float matrix[])
 {
 	matrix[0] = 0;
@@ -72,7 +73,8 @@ inline void Zero(float matrix[])
 	matrix[15] = 0;
 }
 
-
+/** Computes a 4x4 identity matrix
+ */
 inline void Identity(float matrix[])
 {
 	matrix[0] = 1;
@@ -95,7 +97,8 @@ inline void Identity(float matrix[])
 	matrix[14] = 0;
 	matrix[15] = 1;
 }
-
+/** Computes a Translation matrix based on x,y,z translation
+ */
 inline void Translate(float matrix[], float x, float y, float z)
 {
 	matrix[0] = 1;
@@ -118,7 +121,9 @@ inline void Translate(float matrix[], float x, float y, float z)
 	matrix[14] = z;
 	matrix[15] = 1;
 }
-
+/** Multiplies m1 and m2 and pops the result into dest;
+ *  dest != m1, dest !=m2
+ */
 inline void MultMatrix(float dest[], float m1[], float m2[])
 {
 	Zero(dest);
@@ -127,11 +132,25 @@ inline void MultMatrix(float dest[], float m1[], float m2[])
 			for(int mcount = 0; mcount <4; mcount ++)
 			dest[colcount*4+rowcount] += m1[mcount*4+rowcount]*m2[colcount*4+mcount];
 }
-
+/**
+ * Copies Matrix source into the destination Matrix 
+ */ 
 inline void CopyMatrix(Matrix dest, const Matrix source)
 {
 	for(int matindex = 0; matindex<16; matindex++)
 		dest[matindex] = source[matindex];
+}
+/**
+ * moves a vector in the localspace to world space through matrix t
+*/
+inline Vector Transform (const Matrix t, const Vector & v) {
+  //    Vector tLocation (t[12],t[13],t[14]);
+//    Vector tP (t[0],t[1],t[2]);//the p vector of the plane being selected on
+//    Vector tQ (t[4],t[5],t[6]);//the q vector of the plane being selected on
+//    Vector tR (t[8],t[9],t[10]);//the q vector of the plane being selected on
+  return Vector (t[12]+v.i*t[0]+v.j*t[4]+v.k*t[8],
+		 t[13]+v.i*t[1]+v.j*t[5]+v.k*t[9],
+		 t[14]+v.i*t[2]+v.j*t[6]+v.k*t[10]);
 }
 
 

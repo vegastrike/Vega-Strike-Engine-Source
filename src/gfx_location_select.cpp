@@ -15,8 +15,6 @@ extern KBSTATE keyState[KEYMAP_SIZE];
 Vector DeltaPosition(0,0,0);
 bool changed = false;
 bool vert = false;
-float MouseSensitivityX=2;
-float MouseSensitivityY=4;
 #define DELTA_MOVEMENT
 
 
@@ -147,8 +145,8 @@ void LocationSelect:: Draw () {
     if (zvalueXY<-1000)
       zvalueXY = -1000;
 
-      LocalPosition.i= fabs(zvalueXY)*(((2*DeltaPosition.i/g_game.x_resolution - 1)*MouseSensitivityX*GFXGetXInvPerspective()*tP.i)-((2*DeltaPosition.j/g_game.y_resolution - 1)*MouseSensitivityY*GFXGetYInvPerspective()*tP.j));
-      LocalPosition.j= fabs(zvalueXY)*(((2*DeltaPosition.i/g_game.x_resolution - 1)*MouseSensitivityX*GFXGetXInvPerspective()*tQ.i)-((2*DeltaPosition.j/g_game.y_resolution - 1)*tQ.j*MouseSensitivityY*GFXGetYInvPerspective()));
+      LocalPosition.i= fabs(zvalueXY)*(((2*DeltaPosition.i/g_game.x_resolution - 1)*g_game.MouseSensitivityX*GFXGetXInvPerspective()*tP.i)-((2*DeltaPosition.j/g_game.y_resolution - 1)*g_game.MouseSensitivityY*GFXGetYInvPerspective()*tP.j));
+      LocalPosition.j= fabs(zvalueXY)*(((2*DeltaPosition.i/g_game.x_resolution - 1)*g_game.MouseSensitivityX*GFXGetXInvPerspective()*tQ.i)-((2*DeltaPosition.j/g_game.y_resolution - 1)*tQ.j*g_game.MouseSensitivityY*GFXGetYInvPerspective()));
       DeltaPosition= Vector(0,0,0);
       //    Vector TransPQR (t[0]*i+t[4]*LocalPosition.j+t[8]*LocalPosition.k+t[12],t[1]*LocalPosition.i+t[5]*LocalPosition.j+t[9]*LocalPosition.k+t[13],t[2]*LocalPosition.i+t[6]*LocalPosition.j+t[10]*LocalPosition.k+t[14]);
       changed=false;
@@ -161,7 +159,7 @@ void LocationSelect:: Draw () {
     if (zvalueXY<-1000)
       zvalueXY = -1000;
 
-      LocalPosition.k= fabs(zvalueXY)*(((2*DeltaPosition.i/g_game.x_resolution - 1)*MouseSensitivityX*GFXGetXInvPerspective()*tR.i)-((2*DeltaPosition.j/g_game.y_resolution -1)*MouseSensitivityY*GFXGetYInvPerspective()*tR.j));
+      LocalPosition.k= fabs(zvalueXY)*(((2*DeltaPosition.i/g_game.x_resolution - 1)*g_game.MouseSensitivityX*GFXGetXInvPerspective()*tR.i)-((2*DeltaPosition.j/g_game.y_resolution -1)*g_game.MouseSensitivityY*GFXGetYInvPerspective()*tR.j));
       if (DeltaPosition.k) {
 	LocalPosition.k=0;
 	DeltaPosition.k=0;

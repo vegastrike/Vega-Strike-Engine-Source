@@ -24,6 +24,7 @@
 #include "gfx_transform.h"
 #include "gfx_aux.h"
 #include "gfx_camera.h"
+#include "gfx_bounding_box.h"
 #include <math.h>
 
 #include <string>
@@ -923,7 +924,14 @@ bool Mesh::intersects(const Vector &start, const Vector &end) {
 	return bspTree->intersects(start, end);
 }
 
-
+BoundingBox * Mesh::getBoundingBox() {
+  BoundingBox * tbox = new BoundingBox (Vector (minSizeX,0,0),Vector (maxSizeX,0,0),
+					Vector (0,minSizeY,0),Vector (0,maxSizeY,0),
+					Vector (0,0,minSizeZ),Vector (0,0,maxSizeZ));
+  tbox->Transform (p,q,r);
+  tbox->Transform (pos);
+  return tbox;
+}
 
 bool Mesh::intersects(const Vector &pt) {
   if (pt.i < maxSizeX||pt.i <minSizeX||pt.j>maxSizeY||pt.j<minSizeY||pt.k>maxSizeZ||pt.k<minSizeZ)

@@ -24,7 +24,7 @@
 #include "gfx_primitive.h"
 #include "gfx_vertex.h"
 #include "gfx_bsp.h"
-
+#include "gfx_bounding_box.h"
 #include "gfxlib.h"
 /*TODO: Stick in local translation stuff and the restrictions, etc*/
 
@@ -108,12 +108,23 @@ public:
 	void Rotate(const Vector &torque);
 
   void Scale(const Vector &scale) {this->scale = scale;SetOrientation();};
-
+  BoundingBox * getBoundingBox();
+  float rSize () {return radialSize;}
 	bool intersects(const Vector &start, const Vector &end);
 	bool intersects(const Vector &pt);
 	bool intersects(Mesh *mesh);
 };
 #endif
+
+
+
+
+
+
+
+
+
+
 
 
 

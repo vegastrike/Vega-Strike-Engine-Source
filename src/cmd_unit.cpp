@@ -27,50 +27,6 @@
 
 #include "gfx_hud.h"
 
-/*
-void MeshGroup::Draw()
-{
-	Vector np = pp, 
-		nq = pq,
-		nr = pr,
-		npos = ppos;
-
-	for(int meshcount = 0; meshcount < nummesh; meshcount++)
-	{
-		GFXLoadMatrix(MODEL, tmatrix); // not a problem with overhead if the mesh count is kept down
-
-		meshdata[meshcount]->Draw(np, nq, nr, npos);
-	}
-}
-
-void MeshGroup::Draw(Matrix tmatrix)
-{
-	CopyMatrix(this->tmatrix, tmatrix);
-	Draw();
-}
-
-void MeshGroup::Draw(Matrix tmatrix, const Vector &pp, const Vector &pq, const Vector &pr, const Vector &ppos)
-{
-	Matrix orientation;
-	Matrix translation;
-	//Matrix tmatrix;
-
-	this->pp = pp;
-	this->pq = pq;
-	this->pr = pr;
-	this->ppos = ppos;
-
-	VectorToMatrix(orientation, pp,pq,pr);
-	Translate(translation, ppos.i,ppos.j,ppos.k);
-
-	MultMatrix(tmatrix, translation, orientation);
-
-	CopyMatrix(this->tmatrix, tmatrix);
-	Draw();
-}
-*/
-/*UNIT CRAP*/
-
 void Unit::Init()
 {
 	meshdata = NULL;
@@ -202,6 +158,85 @@ Unit::~Unit()
 		delete [] subsidiary;
 	}
 */
+}
+
+bool Unit::querySphere (const Vector &pnt, float err) {
+  UpdateMatrix();
+  int i;
+  Vector TargetPoint;
+  for (i=0;i<nummesh;i++) {
+    TargetPoint = Transform(transformation,meshdata[i]->Position())-pnt;
+    if (sqrtf (TargetPoint.Dot (TargetPoint))< err+meshdata[i]->rSize())
+      return true;
+  }
+  for (int i=0;i<numsubunit;i++) {
+    if (querySphere (transformation,pnt,err))
+      return true;
+  }
+  return false;
+}
+
+bool Unit::querySphere (Matrix t,const Vector &pnt, float err) {
+  UpdateMatrix();
+  int i;
+  Matrix tmpo;
+  MultMatrix (tmpo,t,transformation);
+  
+  Vector TargetPoint;
+  for (i=0;i<nummesh;i++) {
+    TargetPoint = Transform (tmpo,meshdata[i]->Position())-pnt;
+    if (sqrtf (TargetPoint.Dot (TargetPoint))< err+meshdata[i]->rSize())
+      return true;
+  }
+  for (int i=0;i<numsubunit;i++) {
+    if (querySphere (tmpo,pnt,err))
+      return true;
+  }
+  return false;
+}
+
+bool Unit::queryBoundingBox (const Vector &pnt, float err) {
+  UpdateMatrix();
+  int i;
+  BoundingBox * bbox=NULL;
+  for (i=0;i<nummesh;i++) {
+    bbox = meshdata[i]->getBoundingBox();
+    bbox->Transform (transformation);
+    if (bbox->Within(pnt,err)) {
+      delete bbox;
+      return true;
+    }
+    delete bbox;
+  }
+  for (i=0;i<numsubunit;i++) {
+    if (subunits[i]->queryBoundingBox (transformation,pnt,err)) 
+      return true;
+  }
+  return false;
+}
+
+bool Unit::queryBoundingBox (Matrix t,const Vector &pnt, float err) {
+  int i;
+  Matrix tmpo;
+  MultMatrix (tmpo,t, transformation);
+  BoundingBox *bbox=0;
+  for (i=0;i<nummesh;i++) {
+    bbox = meshdata[i]->getBoundingBox();
+    bbox->Transform (tmpo);
+    if (bbox->Within(pnt,err)){
+      delete bbox;
+      return true;
+    }
+    delete bbox;
+  }
+  if (numsubunit>0) {
+    for (i=0;i<numsubunit;i++) {
+      if (subunits[i]->queryBoundingBox (tmpo,pnt,err))
+	return true;
+    }
+  }
+  return false;
+
 }
 
 void Unit::Draw()

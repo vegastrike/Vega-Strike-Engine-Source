@@ -22,7 +22,7 @@
 #define _UNIT_H_
 #include <time.h>
 #include "gfx.h"
-
+#include "gfx_transform_matrix.h"
 //#include "Gun.h"
 //#include "Warhead.h"
 /*EXPLANATION OF TERMS:
@@ -114,7 +114,10 @@ public:
 	virtual void TDraw(){GFXLoadIdentity(MODEL); Draw();};
 	virtual void Draw(Matrix tmatrix);
 	virtual void Draw(Matrix tmatrix, const Vector &pp, const Vector &pq, const Vector &pr, const Vector &ppos);
-
+	virtual bool querySphere (const Vector &pnt, float err);
+	virtual bool querySphere (Matrix,const Vector &pnt, float err);
+	virtual bool queryBoundingBox(const Vector &pnt, float err);
+	virtual bool queryBoundingBox(Matrix,const Vector &, float);
 	void SetAI(AI *newAI);
 	Vector &Position(){return pos;};
         Vector &Nose(){return pr;};
