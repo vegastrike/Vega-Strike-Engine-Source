@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <vector>
 #include "al_globals.h"
+#include "vs_globals.h"
 using std::vector;
 struct Listener {
   Vector pos;
