@@ -90,12 +90,9 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
   case EXPLOSION:
     assert (unitlevel==2);
     unitlevel++;
-    thisuni->factions.back()->explosion.push_back (NULL);
-    thisuni->factions.back()->explosion_name.push_back ("");
-      case NAME:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
-
+      case NAME:
 	thisuni->factions.back()->explosion.push_back (new Animation ((*iter).value.c_str()));
 	thisuni->factions.back()->explosion_name.push_back ((*iter).value);
 	break;
