@@ -410,7 +410,7 @@ cout << "Starting docking\n";
 
 	                      //(x, y, width, height, with scrollbar)
 	CargoList = new TextArea(-1, 1, 1, 1.8, 1);
-	CargoInfo = new TextArea(0, 1, 1, 1.8, 1);
+	CargoInfo = new TextArea(0, 1, 1, 1.8, 0);
 
 	CargoList->AddTextItem("a","Just a test item");
 	CargoList->AddTextItem("b","And another just to be sure");
@@ -507,8 +507,8 @@ void ProcessMouse(int type, int x, int y, int button, int state) {
 	ours = CargoList->DoMouse(type, cur_x, cur_y, button, state);
 	if (ours == 1 && type == 1) {
 		buy_name = CargoList->GetSelectedItemName();
-		CargoInfo->ChangeTextItem("name", buy_name);
-		CargoInfo->ChangeTextItem("price", "Random. Hah.");
+		CargoInfo->ChangeTextItem("name", (string("name: ")+buy_name).c_str());
+		CargoInfo->ChangeTextItem("price", "Price: Random. Hah.");
 	}
 	// Commented out because they don't need to use the mouse with CargoInfo
 	//if (ours == 0) { ours = CargoInfo->DoMouse(type, cur_x, cur_y, button, state); }
