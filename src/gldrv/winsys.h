@@ -116,7 +116,7 @@ typedef enum {
     WSK_RMETA = SDLK_RMETA,
     WSK_LMETA = SDLK_LMETA,
 
-    WSK_LAST
+    WSK_LAST=SDLK_LAST
 
 } winsys_keysym_t;
 typedef enum {
