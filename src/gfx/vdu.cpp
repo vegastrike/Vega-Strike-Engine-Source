@@ -464,6 +464,8 @@ void VDU::SetViewingStyle(VIEWSTYLE vs) {
   viewStyle = vs;
 }
 void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewStyle,Unit *parent,Unit *target) {
+
+
   VIEWSTYLE which=viewStyle;
   _Universe->AccessCamera(which)->SetSubwindow (x,y,w,h);
   _Universe->SelectCamera(which);
@@ -471,21 +473,29 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
   _Universe->AccessCockpit()->SetView (viewStyle);
   _Universe->AccessCockpit()->SelectProperCamera();
    _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
-  GFXClear (GFXTRUE);
+  GFXClear (GFXFALSE);
+  GFXColor4f(1,1,1,1);
   _Universe->activeStarSystem()->Draw(false);
   _Universe->AccessCamera (which)->SetSubwindow (0,0,1,1);
   _Universe->AccessCockpit()->SetView (tmp);
   _Universe->AccessCockpit()->SelectProperCamera();
    _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
-  GFXLoadIdentity(MODEL);
-  GFXLoadIdentityView();
+  GFXRestoreHudMode();
+  GFXColor4f (1,1,1,1);       
+  GFXBlendMode (ONE,ZERO);
+  GFXDisable(TEXTURE1);
+  GFXDisable(TEXTURE0);
+  GFXDisable(DEPTHTEST);   
 
   char buf[1024];
   if (target) {
     sprintf(buf,"\n%s:%s\n",target->getFgID().c_str(),target->name.c_str());
+  } else {
+    sprintf (buf,"\nThis is a test of the emergencyBroadcastSystem\n");
   }
   tp->Draw(buf);
   // _Universe->AccessCockpit()->RestoreViewPort();
+  GFXEnable(DEPTHTEST);   
 }
 
 

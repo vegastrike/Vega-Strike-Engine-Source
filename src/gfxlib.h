@@ -142,6 +142,8 @@ void /*GFXDRVAPI*/ GFXSelectMaterial(const unsigned int number);
  * Caution: use of other matrix functions in HudMode could alter state.
  */
 void /*GFXDRVAPI*/ GFXHudMode(const bool Enter);
+//this resets the matrices to what they were when we entered it, without chanigng pushed orpoped matrices
+void /*GFXDRVAPI*/ GFXRestoreHudMode ();
 void /*GFXDRVAPI*/ GFXCenterCamera (const bool Enter);
 void /*GFXDRVAPI*/ GFXTranslateView (const Vector &r);
 void /*GFXDRVAPI*/ GFXLoadMatrixView (const Matrix matrix, const Vector &camloc);

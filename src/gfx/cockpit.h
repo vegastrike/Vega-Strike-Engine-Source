@@ -47,8 +47,6 @@ class Cockpit {
    * two values that represent the adjustment to perspective needed to center teh crosshairs in the perceived view.
    */
   float cockpit_offset, viewport_offset;
-  ///Restores the view from the IDentity Matrix needed to draw sprites
-  void RestoreViewPort();
   ///style of current view (chase cam, inside)
   enum VIEWSTYLE view;
   ///flag to decide whether to draw all target boxes
@@ -88,6 +86,8 @@ class Cockpit {
   ///Draws gauges
   void DrawGauges(Unit * un);
  public:
+  ///Restores the view from the IDentity Matrix needed to draw sprites
+  void RestoreViewPort();
 
   float credits;//how much money player has
   ///How far away chasecam and pan cam is

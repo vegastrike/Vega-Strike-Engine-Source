@@ -351,7 +351,12 @@ void GFXCenterCamera (bool Enter) {
     GFXLoadIdentity (MODEL);
   }
 }
-
+void GFXRestoreHudMode () {
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glMatrixMode (GL_PROJECTION);
+    glLoadIdentity();  
+}
 void GFXHudMode (const bool Enter) {
   if (Enter) {
     glMatrixMode(GL_MODELVIEW);
