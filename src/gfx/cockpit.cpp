@@ -575,7 +575,7 @@ void Cockpit::RestoreGodliness() {
   if (godliness>maxgodliness)
     godliness=maxgodliness;
 }
-Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name): parent (parent),textcol (1,1,1,1),text(NULL),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.2),savegame (new SaveGame(pilot_name)) {
+Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name): parent (parent),textcol (1,1,1,1),text(NULL),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.5),savegame (new SaveGame(pilot_name)) {
   currentcamera = 0;	
   Radar=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
   RestoreGodliness();
@@ -655,6 +655,7 @@ void Cockpit::Autopilot (Unit * target) {
 	AccessCamera(CP_PAN)->myPhysics.ApplyBalancedLocalTorque(_Universe->AccessCamera()->P,
 							      _Universe->AccessCamera()->R,
 							      GetElapsedTime()/100);
+	zoomfactor=1.5;
 	static float autotime = XMLSupport::parse_float (vs_config->getVariable ("physics","autotime","10"));//10 seconds for auto to kick in;
 	autopilot_time=autotime;
 	autopilot_target.SetUnit (target);
@@ -903,7 +904,7 @@ void Cockpit::Update () {
     if (respawnunit.size()>_Universe->CurrentCockpit())
       if (respawnunit[_Universe->CurrentCockpit()]){
 	parentturret.SetUnit(NULL);
-	zoomfactor=1;
+	zoomfactor=1.5;
 	respawnunit[_Universe->CurrentCockpit()]=0;
 	Unit * un = new Unit (unitfilename.c_str(),false,this->unitfaction,unitmodname);
 	un->SetCurPosition (unitlocation);
@@ -968,7 +969,7 @@ void Cockpit::Update () {
   if (switchunit[_Universe->CurrentCockpit()]) {
     parentturret.SetUnit(NULL);
 
-    zoomfactor=1;
+    zoomfactor=1.5;
     static int index=0;
     switchunit[_Universe->CurrentCockpit()]=0;
     un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();
