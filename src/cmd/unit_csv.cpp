@@ -244,7 +244,7 @@ static vector<SubUnitStruct> GetSubUnits(std::string subunits) {
       Q.i=stof(nextElement(subunit));
       Q.j=stof(nextElement(subunit));
       Q.k=stof(nextElement(subunit));
-      double restricted=stof(nextElement(subunit),-1);
+      double restricted=cos(stof(nextElement(subunit),-1)*180./VS_PI);
       ret.push_back(SubUnitStruct(filename,pos,R,Q,restricted));
     }
   }
@@ -570,10 +570,10 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   computer.max_combat_ab_speed=stof(row["Afterburner_Speed_Governor"])*game_speed;
   computer.itts = XMLSupport::parse_bool(row["ITTS"]);
   computer.radar.color=XMLSupport::parse_bool(row["Radar_Color"]);
-  computer.radar.maxrange=XMLSupport::parse_bool(row["Radar_Range"]);
-  computer.radar.maxcone=cos(stof(row["Max_Cone"]))*180./VS_PI;
-  computer.radar.trackingcone=cos(stof(row["Tracking_Cone"]))*180./VS_PI;
-  computer.radar.lockcone=cos(stof(row["Lock_Cone"]))*180./VS_PI;
+  computer.radar.maxrange=XMLSupport::parse_float(row["Radar_Range"]);
+  computer.radar.maxcone=cos(stof(row["Max_Cone"])*VS_PI/180.);
+  computer.radar.trackingcone=cos(stof(row["Tracking_Cone"])*VS_PI/180);
+  computer.radar.lockcone=cos(stof(row["Lock_Cone"])*VS_PI/180.);
   cloakmin=(int)(stof(row["Cloak_Min"])*100);
   if (!XMLSupport::parse_bool(row["Can_Cloak"]))
     cloaking=-1;
@@ -861,7 +861,7 @@ string Unit::WriteUnitString () {
                       subunits[k].R.i,
                       subunits[k].R.j,
                       subunits[k].R.k,
-                      subunits[k].restricted);
+                      ((double)acos(subunits[k].restricted)*180./VS_PI));
               str+="{"+subunits[k].filename+tmp;
             }
             unit["Sub_Units"]=str;
@@ -961,9 +961,9 @@ string Unit::WriteUnitString () {
         unit["ITTS"]=tos(computer.itts);
         unit["Radar_Color"]=tos(computer.radar.color);
         unit["Radar_Range"]=tos(computer.radar.maxrange);
-        unit["Tracking_Cone"]=tos(acos(computer.radar.trackingcone*VS_PI/180));
-        unit["Max_Cone"]=tos(acos(computer.radar.maxcone*VS_PI/180));
-        unit["Lock_Cone"]=tos(acos(computer.radar.lockcone*VS_PI/180));
+        unit["Tracking_Cone"]=tos(acos(computer.radar.trackingcone)*180./VS_PI);
+        unit["Max_Cone"]=tos(acos(computer.radar.maxcone)*180./VS_PI);
+        unit["Lock_Cone"]=tos(acos(computer.radar.lockcone)*180./VS_PI);
         unit["Cloak_Min"]=tos(cloakmin/100.0);
         unit["Can_Cloak"]=tos(cloaking>=-1);
         unit["Cloak_Rate"]=tos(image->cloakrate/2147483647.);
