@@ -30,7 +30,7 @@ cp vssetup $RPM_BUILD_ROOT/usr/local/bin/
 mkdir $RPM_BUILD_ROOT/usr/local/share
 mkdir $RPM_BUILD_ROOT/usr/local/share/vegastrike
 mkdir $RPM_BUILD_ROOT/usr/local/share/vegastrike/data
-mv $RPM_BUILD_ROOT/usr/local/bin/soundserver $RPM_BUILD_ROOT/usr/local/share/vegastrike/data/
+cp $RPM_BUILD_ROOT/usr/local/bin/soundserver $RPM_BUILD_ROOT/usr/local/share/vegastrike/data/
 %clean
 rm -rf $RPM_BUILD_ROOT
 

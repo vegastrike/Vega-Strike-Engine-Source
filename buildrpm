@@ -3,8 +3,8 @@
 # Attempt to automatically update this directory and build a RPM file
 # Must be root
 
-cvs -z3 up -d
-make distclean
+#cvs -z3 up -d
+#make distclean
 
 cp vegastrike.spec /usr/src/RPM/SPECS/
 cp vegastrike.xpm /usr/src/RPM/SOURCES/
