@@ -900,6 +900,7 @@ namespace VSFileSystem
 		SubDirectories[MeshFile].push_back( "nav/default");
 
 		Directories[TextureFile] = sharedtextures;
+		SubDirectories[TextureFile].push_back( "mounts");
 		SubDirectories[TextureFile].push_back( "nav/default");
 
 		// We will also look in subdirectories with universe name
