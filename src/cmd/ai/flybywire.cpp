@@ -15,8 +15,8 @@ using Orders::MatchAngularVelocity;
 //#define MATCHLINVELSETUP()   Vector desired (desired_velocity);  /* cout << "desired= " << desired << endl; */ if (!(desired.i==-2 && desired.j==0 && desired.k==0) && !LocalVelocity) {     desired = parent->ToLocalCoordinates (desired);   }   Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
 //#define MATCHLINVELEXECUTE()  if(!(desired.i==-2 && desired.j==0 && desired.k==0)){ parent->Thrust ( (parent->GetMass()*(desired-velocity)/SIMULATION_ATOM), afterburn); }
 
-#define MATCHLINVELSETUP()   Unit *match=parent->VelocityReference(); Vector desired (desired_velocity);  if (!LocalVelocity) {     desired = parent->ToLocalCoordinates (desired+(match?match->GetVelocity():Vector(0,0,0)));   } else if (match) {desired+=parent->ToLocalCoordinates(match->GetVelocity());}   Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
-#define MATCHLINVELEXECUTE()  { parent->Thrust ( (parent->GetMass()*(parent->ClampVelocity(desired,afterburn)-velocity)/SIMULATION_ATOM), afterburn); }
+#define MATCHLINVELSETUP()   Unit *match=parent->VelocityReference(); Vector desired (desired_velocity); Vector FrameOfRef ((match!=NULL)?parent->ToLocalCoordinates(match->GetVelocity()):Vector(0,0,0));  if (!LocalVelocity) {desired = parent->ToLocalCoordinates (desired);}   Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
+#define MATCHLINVELEXECUTE()  { parent->Thrust ( (parent->GetMass()*(parent->ClampVelocity(desired,afterburn)+FrameOfRef-velocity)/SIMULATION_ATOM), afterburn); }
 /**
  * don't need to clamp thrust since the Thrust does it for you
  * caution might change 
@@ -24,7 +24,7 @@ using Orders::MatchAngularVelocity;
 void MatchLinearVelocity::Execute () {
   MATCHLINVELSETUP()
   if (willfinish) {
-    if ((done = fabs(desired.i-velocity.i)<VELTHRESHOLD&&fabs(desired.j-velocity.j)<VELTHRESHOLD&&fabs(desired.k-velocity.k)<VELTHRESHOLD))
+    if ((done = fabs(desired.i+FrameOfRef.i-velocity.i)<VELTHRESHOLD&&fabs(desired.j+FrameOfRef.j-velocity.j)<VELTHRESHOLD&&fabs(desired.k+FrameOfRef.k-velocity.k)<VELTHRESHOLD))
       return;
   }
   MATCHLINVELEXECUTE();
