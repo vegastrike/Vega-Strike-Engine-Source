@@ -1,6 +1,6 @@
 #include "quadtree.h"
 #include "matrix.h"
-
+#include "aux_texture.h"
 #include "universe.h"
 #include "vegastrike.h"
 const GFXVertex InitialVertices [4]= { GFXVertex (Vector(0,0,0),Vector (0,1,0), 0,0),
@@ -21,9 +21,19 @@ QuadTree::QuadTree ():vertices (GFXTRI,4,InitialVertices,4,true) {
   RootCornerData.Verts[1].Y = 0;   RootCornerData.Verts[1].vertindex=1;
   RootCornerData.Verts[2].Y = 0;   RootCornerData.Verts[2].vertindex=2;
   RootCornerData.Verts[3].Y = 0;   RootCornerData.Verts[3].vertindex=3;
-  VertexAllocated = VertexCount = 4;
+  RootCornerData.Verts[0].Tex=0;
+  RootCornerData.Verts[1].Tex=0;
+  RootCornerData.Verts[2].Tex=9;
+  RootCornerData.Verts[3].Tex=9;
   
-  quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform);
+
+  VertexAllocated = VertexCount = 4;
+  for (int i=0;i<10;i++) {
+    char name[]="terrainX.bmp";
+    name[7] = '0'+i;
+    textures.push_back (new Texture (name));
+  }
+  quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform, &textures);
   root = new quadsquare (&RootCornerData);
   LoadData();
 }
@@ -48,11 +58,11 @@ void QuadTree::Update () {
 void QuadTree::Render () {
   GFXLoadMatrix (MODEL,transformation);
   GFXBoxInFrustumModel (transformation);
+  GFXEnable (TEXTURE0);
   GFXDisable (TEXTURE1);
-  GFXDisable (TEXTURE0);
   GFXEnable (LIGHTING);
   GFXBlendMode (ONE,ZERO);
-  quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform);
+  quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform,&textures);
   root->Render (RootCornerData);
 }
 void	QuadTree::LoadData()

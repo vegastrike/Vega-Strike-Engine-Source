@@ -1,7 +1,7 @@
 #ifndef QUADTREE_H_
 #define QUADTREE_H_
 #include "quadsquare.h"
-
+class Texture;
 /** 
  * This class is a wrapper class for quadsquare
  * It takes care of activating textures, having possession of the vlist
@@ -12,6 +12,7 @@ class QuadTree {
   Matrix transformation;
   quadcornerdata RootCornerData;
   quadsquare *root;
+  std::vector <Texture *> textures;
   std::vector <unsigned int> unusedvertices;
   GFXVertexList vertices;
   unsigned int VertexAllocated;

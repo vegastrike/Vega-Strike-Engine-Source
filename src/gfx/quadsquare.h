@@ -24,6 +24,15 @@ struct HeightMapInfo {
 
 	float	Sample(int x, int z) const;
 };
+/**
+ * This has 4 lists of indices, one for "numbers of corners" a triangle may be filled 
+ * If the trianlge has 0 vertices filled, it is a nonblended one with all 4 filled
+ */
+const int quadsquare_num_corners =3;
+struct TextureIndex {
+  std::vector <unsigned int> q[quadsquare_num_corners];
+  void Clear();
+};
 
 /**
  * We could make it virtual and ahve a sphere-map or cube-map version of this
@@ -37,14 +46,18 @@ class IdentityTransform {
   virtual Vector InvTransform (const Vector &);
   ///Transforms a min and a max vector and figures out what is bigger
   virtual void TransformBox (Vector &min, Vector &max);
+  float TransformS (float x);
+  float TransformT (float y);
 };
 
 struct	VertInfo {
-  float	Y;
+  unsigned short Y;
+  char Tex;
+  char unused;
   unsigned int vertindex;
 };
 
-
+class Texture;
 class quadsquare;
 
 /**
@@ -59,7 +72,7 @@ struct quadcornerdata {
 	int	xorg, zorg;
 	VertInfo	Verts[4];	// ne, nw, sw, se
 };
-
+class Texture;
 /**
  * A node in the quad tree
  * holds its own relevant vertex data (middle and either even or odd 4 sets of data (corners or diagonals
@@ -91,7 +104,7 @@ class quadsquare {
 
 	float	GetHeight(const quadcornerdata& cd, float x, float z);
 	static Vector MakeLightness (float xslope, float zslope);
-  static void SetCurrentTerrain (unsigned int * VertexAllocated, unsigned int * VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unusedvertices, IdentityTransform * transform );
+  static void SetCurrentTerrain (unsigned int * VertexAllocated, unsigned int * VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unusedvertices, IdentityTransform * transform, std::vector <Texture *> *texturelist );
 	
 private:
   ///Sets the 5 vertices in vertexs array in 3space from a quadcornerdata and return half of the size
@@ -116,7 +129,8 @@ private:
 	static unsigned int * VertexCount;
 	static GFXVertexList *vertices;
 	static std::vector <unsigned int> *unusedvertices;
-	static std::vector <unsigned int> indices;
+	static std::vector <Texture  *> *textures;
+	static std::vector <TextureIndex> indices;
 };
 
 

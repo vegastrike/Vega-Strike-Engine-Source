@@ -16,8 +16,8 @@
 #include <math.h>
 #include "quadsquare.h"
 #include "gfxlib.h"
-
-
+#include "aux_texture.h"
+using std::vector;
 Vector IdentityTransform::Transform (const Vector & v) {
   return v;
 }
@@ -29,14 +29,26 @@ void IdentityTransform::TransformBox (Vector &min, Vector & max) {
 Vector IdentityTransform::InvTransform (const Vector &v) {
   return v;
 }
+float IdentityTransform::TransformS (float x) {
+  return x/256;
+}
+float IdentityTransform::TransformT (float y) {
+  return y/256;
+}
 
 unsigned int * quadsquare::VertexAllocated;
 unsigned int *quadsquare::VertexCount;
 GFXVertexList *quadsquare::vertices;
-std::vector <unsigned int> quadsquare::indices;
+std::vector <TextureIndex> quadsquare::indices;
 std::vector <unsigned int> *quadsquare::unusedvertices;
 IdentityTransform *quadsquare::nonlinear_trans;
+std::vector <Texture *> *quadsquare::textures;
 
+void TextureIndex::Clear() {
+  for (int i=0;i<quadsquare_num_corners;i++) {
+    q[i].clear();
+  }
+}
 
 unsigned int quadsquare::SetVertices (GFXVertex * vertexs, const quadcornerdata &pcd) {
 	unsigned int half= 1<<pcd.Level;
@@ -53,6 +65,7 @@ unsigned int quadsquare::SetVertices (GFXVertex * vertexs, const quadcornerdata 
 	v[4].k = pcd.zorg + half*2;
 	for (unsigned int i=0;i<5;i++) {
 	  v[i].j = Vertex[i].Y;
+	  vertexs[Vertex[i].vertindex].SetTexCoord (nonlinear_trans->TransformS(v[i].i),nonlinear_trans->TransformT(v[i].k));
 	  vertexs[Vertex[i].vertindex].SetVertex (nonlinear_trans->Transform(v[i]));
 	}
 	return half;  
@@ -81,11 +94,16 @@ quadsquare::quadsquare(quadcornerdata* pcd) {
 
 	// Set default vertex positions by interpolating from given corners.
 	// Just bilinear interpolation.
-	Vertex[0].Y = 0.25 * (pcd->Verts[0].Y + pcd->Verts[1].Y + pcd->Verts[2].Y + pcd->Verts[3].Y);
-	Vertex[1].Y = 0.5 * (pcd->Verts[3].Y + pcd->Verts[0].Y);
-	Vertex[2].Y = 0.5 * (pcd->Verts[0].Y + pcd->Verts[1].Y);
-	Vertex[3].Y = 0.5 * (pcd->Verts[1].Y + pcd->Verts[2].Y);
-	Vertex[4].Y = 0.5 * (pcd->Verts[2].Y + pcd->Verts[3].Y);
+	Vertex[0].Y = (unsigned short) (0.25 * (pcd->Verts[0].Y + pcd->Verts[1].Y + pcd->Verts[2].Y + pcd->Verts[3].Y));
+	Vertex[0].Tex = pcd->Verts[0].Tex;
+	Vertex[1].Y = (unsigned short) (0.5 * (pcd->Verts[3].Y + pcd->Verts[0].Y));
+	Vertex[1].Tex = pcd->Verts[3].Tex;
+	Vertex[2].Y = (unsigned short) (0.5 * (pcd->Verts[0].Y + pcd->Verts[1].Y));
+	Vertex[2].Tex = pcd->Verts[0].Tex;
+	Vertex[3].Y = (unsigned short) (0.5 * (pcd->Verts[1].Y + pcd->Verts[2].Y));
+	Vertex[3].Tex = pcd->Verts[1].Tex;
+	Vertex[4].Y = (unsigned short) (0.5 * (pcd->Verts[2].Y + pcd->Verts[3].Y));
+	Vertex[4].Tex = pcd->Verts[2].Tex;
 
 	for (i = 0; i < 2; i++) {
 		Error[i] = 0;
@@ -455,7 +473,7 @@ void	quadsquare::StaticCullAux(const quadcornerdata& cd, float ThresholdDetail, 
 		if (s == NULL || (s->Child[1] == NULL && s->Child[2] == NULL)) {
 
 			// Force vertex height to the edge value.
-			float	y = (cd.Verts[0].Y + cd.Verts[3].Y) * 0.5;
+			unsigned short y = (unsigned short) ((cd.Verts[0].Y + cd.Verts[3].Y) * 0.5);
 			Vertex[1].Y = y;
 			Error[0] = 0;
 			
@@ -469,7 +487,7 @@ void	quadsquare::StaticCullAux(const quadcornerdata& cd, float ThresholdDetail, 
 	if (Child[2] == NULL && Child[3] == NULL && Error[1] * ThresholdDetail < size) {
 		quadsquare*	s = GetNeighbor(3, cd);
 		if (s == NULL || (s->Child[0] == NULL && s->Child[1] == NULL)) {
-			float	y = (cd.Verts[2].Y + cd.Verts[3].Y) * 0.5;
+			unsigned short y = (unsigned short) ((cd.Verts[2].Y + cd.Verts[3].Y) * 0.5);
 			Vertex[4].Y = y;
 			Error[1] = 0;
 			
@@ -796,26 +814,36 @@ int	quadsquare::Render(const quadcornerdata& cd)
   
   vertices->LoadDrawState();
   vertices->BeginDrawState (GFXTRUE);
-  indices.clear();
 
-	RenderAux(cd, GFX_PARTIALLY_VISIBLE);
+  int totsize=0;
+  RenderAux(cd, GFX_PARTIALLY_VISIBLE);
 
-	unsigned int isize = indices.size();
-	vertices->Draw(GFXTRI,isize, indices.begin());
+  vector <TextureIndex>::iterator i=indices.begin();
+  for (vector <Texture *>::iterator k=textures->begin();k!=textures->end();i++,k++) {
+
+    (*k)->MakeActive();
+    for (int j=0;j<quadsquare_num_corners;j++) {
+	unsigned int isize = i->q[j].size();
+	totsize+=isize;
+	vertices->Draw(GFXTRI,isize, i->q[j].begin());
 	vertices->EndDrawState();
+#if 0
 	unsigned int xmin = -1;
 	unsigned int xmax = 0;
-#if 0
+
 	for (unsigned int i=0;i<isize;i++) {
+
 	  if (indices[i]<xmin)
 	    xmin = indices[i];
 	  if (indices[i]>xmax)
 	    xmax = indices[i];
 	}
-	
 	fprintf (stderr,"Minvertex %d, MaxVertex %d\n",xmin,xmax);
 #endif
-	return isize;
+    }
+    i->Clear();
+  }
+  return totsize;
 }
 
 
@@ -878,37 +906,46 @@ void	quadsquare::RenderAux(const quadcornerdata& cd,  CLIPSTATE vis)
 
 	
 // Local macro to make the triangle logic shorter & hopefully clearer.
-#define tri(aa,bb,cc) (indices.push_back (aa), indices.push_back (bb), indices.push_back (cc))
+#define tri(aa,ta,bb,tb,cc,tc) (indices[ta].q[0].push_back (aa), indices[ta].q[0].push_back (bb), indices[ta].q[0].push_back (cc))
 #define V0 (Vertex[0].vertindex)
+#define T0 (Vertex[0].Tex)
 #define V1 (Vertex[1].vertindex)
+#define T1 (Vertex[1].Tex)
 #define V2 (cd.Verts[0].vertindex)
+#define T2 (cd.Verts[0].Tex)
 #define V3 (Vertex[2].vertindex)
+#define T3 (Vertex[2].Tex)
 #define V4 (cd.Verts[1].vertindex)
+#define T4 (cd.Verts[1].Tex)
 #define V5 (Vertex[3].vertindex)
+#define T5 (Vertex[3].Tex)
 #define V6 (cd.Verts[2].vertindex)
+#define T6 (cd.Verts[2].Tex)
 #define V7 (Vertex[4].vertindex)
+#define T7 (Vertex[4].Tex)
 #define V8 (cd.Verts[3].vertindex)
+#define T8 (cd.Verts[3].Tex)
 	
 	// Make the list of triangles to draw.
-	if ((EnabledFlags & 1) == 0) tri(V0, V8, V2);
+	if ((EnabledFlags & 1) == 0) tri(V0,T0, V8,T8, V2,T2);
 	else {
-		if (flags & 8) tri(V0, V8, V1);
-		if (flags & 1) tri(V0, V1, V2);
+		if (flags & 8) tri(V0,T0, V8,T8, V1,T1);
+		if (flags & 1) tri(V0,T0, V1,T1, V2,T2);
 	}
-	if ((EnabledFlags & 2) == 0) tri(V0, V2, V4);
+	if ((EnabledFlags & 2) == 0) tri(V0,T0, V2,T2, V4,T4);
 	else {
-		if (flags & 1) tri(V0, V2, V3);
-		if (flags & 2) tri(V0, V3, V4);
+		if (flags & 1) tri(V0,T0, V2,T2, V3,T3);
+		if (flags & 2) tri(V0,T0, V3,T3, V4,T4);
 	}
-	if ((EnabledFlags & 4) == 0) tri(V0, V4, V6);
+	if ((EnabledFlags & 4) == 0) tri(V0,T0, V4,T4, V6,T6);
 	else {
-		if (flags & 2) tri(V0, V4, V5);
-		if (flags & 4) tri(V0, V5, V6);
+		if (flags & 2) tri(V0,T0, V4,T4, V5,T5);
+		if (flags & 4) tri(V0,T0, V5,T5, V6,T6);
 	}
-	if ((EnabledFlags & 8) == 0) tri(V0, V6, V8);
+	if ((EnabledFlags & 8) == 0) tri(V0,T0, V6,T6, V8,T8);
 	else {
-		if (flags & 4) tri(V0, V6, V7);
-		if (flags & 8) tri(V0, V7, V8);
+		if (flags & 4) tri(V0,T0, V6,T6, V7,T7);
+		if (flags & 8) tri(V0,T0, V7,T7, V8,T8);
 	}
 #undef V1
 #undef V2
@@ -919,6 +956,15 @@ void	quadsquare::RenderAux(const quadcornerdata& cd,  CLIPSTATE vis)
 #undef V7
 #undef V8
 #undef tri
+#undef T1
+#undef T2
+#undef T3
+#undef T4
+#undef T5
+#undef t6
+#undef T7
+#undef T8
+
 	// Draw 'em.
 	//	glDrawElements(GL_TRIANGLES, vcount, GL_UNSIGNED_BYTE, VertList);
 
@@ -998,12 +1044,18 @@ void	quadsquare::SetupCornerData(quadcornerdata* q, const quadcornerdata& cd, in
 		break;
 	}	
 }
-void quadsquare::SetCurrentTerrain (unsigned int *VertexAllocated, unsigned int *VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unvert, IdentityTransform * nlt ) {
+void quadsquare::SetCurrentTerrain (unsigned int *VertexAllocated, unsigned int *VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unvert, IdentityTransform * nlt, std::vector <Texture *> *tex ) {
   quadsquare::VertexAllocated = VertexAllocated;
   quadsquare::VertexCount = VertexCount;
   quadsquare::vertices = vertices;
   quadsquare::unusedvertices = unvert;
   nonlinear_trans = nlt;
+  textures = tex;
+  if (indices.size()<tex->size()) {
+    while (indices.size()<tex->size()) {
+      indices.push_back (TextureIndex ());
+    }
+  }
 }
 
 void	quadsquare::AddHeightMap(const quadcornerdata& cd, const HeightMapInfo& hm)
@@ -1045,18 +1097,20 @@ void	quadsquare::AddHeightMap(const quadcornerdata& cd, const HeightMapInfo& hm)
 			Child[i]->AddHeightMap(q, hm);
 		}
 	}
-	float	s[5];
-	s[0] = hm.Sample(cd.xorg + half, cd.zorg + half);
-	s[1] = hm.Sample(cd.xorg + half*2, cd.zorg + half);
-	s[2] = hm.Sample(cd.xorg + half, cd.zorg);
-	s[3] = hm.Sample(cd.xorg, cd.zorg + half);
-	s[4] = hm.Sample(cd.xorg + half, cd.zorg + half*2);
+	//don't want to bother changing things if the sample won't change things :-)
+	int s[5];
+	s[0] = (int)hm.Sample(cd.xorg + half, cd.zorg + half);
+	s[1] = (int)hm.Sample(cd.xorg + half*2, cd.zorg + half);
+	s[2] = (int)hm.Sample(cd.xorg + half, cd.zorg);
+	s[3] = (int)hm.Sample(cd.xorg, cd.zorg + half);
+	s[4] = (int)hm.Sample(cd.xorg + half, cd.zorg + half*2);
 	// Modify the vertex heights if necessary, and set the dirty
 	// flag if any modifications occur, so that we know we need to
 	// recompute error data later.
-
+	
 	
 	for (i = 0; i < 5; i++) {
+	  Vertex[i].Tex = ((cd.xorg+half+cd.zorg+half)/1000)%10;
 		if (s[i] != 0) {
 			Dirty = true;
 			Vertex[i].Y += s[i];
