@@ -30,14 +30,12 @@ void FlyByJoystick::Execute() {
   if (joystick[which_joystick]->isAvailable()) {
     JoyStick *joy=joystick[which_joystick];
 
-    float x,y;
-    int buttons;
-    joy->GetJoyStick(x,y,buttons);
+    //    joy->GetJoyStick(x,y,z,buttons);
     //printf("flybyjoy x=%f y=%f\n",x,y);
 
-    Up(-y);   // pretty easy
-    Right(-x);
-
+    Up(-joy->joy_y);   // pretty easy
+    Right(-joy->joy_x);
+    RollRight (-joy->joy_z);
 #if 0
     for(int i=0;i<joystick[0]->NumButtons();i++){
       if( ( (1<<i) & buttons )==(1<<i)){

@@ -62,7 +62,7 @@ class JoyStick {
     // initializes the joystick
     JoyStick(int);
     // engine calls GetJoyStick to get coordinates and buttons
-    void GetJoyStick(float &x,float &y,int &buttons);
+    void GetJoyStick(float &x,float &y, float &z, int &buttons);
     bool isAvailable(void);
     bool is_around(float axe, float hswitch);
     int NumButtons();
@@ -77,8 +77,8 @@ class JoyStick {
 
     int joy_buttons;
     bool joy_available;
-    float joy_xmin,joy_xmax,joy_ymin,joy_ymax;
-    float joy_x,joy_y;
+    float joy_xmin,joy_xmax,joy_ymin,joy_ymax, joy_zmin, joy_zmax;
+    float joy_x,joy_y,joy_z;
     float  deadzone;
 }
 ;

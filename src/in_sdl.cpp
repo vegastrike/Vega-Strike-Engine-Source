@@ -22,8 +22,9 @@ void BindJoyKey (int key, int joystick, JoyHandler handler) {
 }
 
 void ProcessJoystick () {
+  SDL_JoystickUpdate();//FIXME isn't this supposed to be called already by SDL?
   SDL_Event event;
-  float x,y;
+  float x,y,z;
   int buttons;
   //  SDL_PumpEvents();
 #ifdef SDLEVENTSNOW
@@ -32,7 +33,7 @@ void ProcessJoystick () {
     case SDL_JOYBUTTONDOWN:
       if (event.jbutton.which<NUMJBUTTONS) {
 	if (joystick[event.jbutton.which]->isAvailable()) {
-	  joystick[event.jbutton.which]->GetJoyStick (x,y,buttons);
+	  joystick[event.jbutton.which]->GetJoyStick (x,y,z,buttons);
 	}
 	JoystickBindings[event.jbutton.which][event.jbutton.button](PRESS,x,y,buttons);
 	JoystickState[event.jbutton.which][event.jbutton.button]=DOWN;
@@ -41,7 +42,7 @@ void ProcessJoystick () {
     case SDL_JOYBUTTONUP:
       if (event.jbutton.which<NUMJBUTTONS) {
 	if (joystick[event.jbutton.which]->isAvailable()) {
-	  joystick[event.jbutton.which]->GetJoyStick (x,y,buttons);
+	  joystick[event.jbutton.which]->GetJoyStick (x,y,z,buttons);
 	}
 	JoystickBindings[event.jbutton.which][event.jbutton.button](RELEASE,x,y,buttons);
 	JoystickState[event.jbutton.which][event.jbutton.button]=UP;
@@ -67,7 +68,7 @@ void ProcessJoystick () {
   for (int i=0;i<MAX_JOYSTICKS;i++) {
     buttons=0;
     if (joystick[event.jbutton.which]->isAvailable()) {
-      joystick[event.jbutton.which]->GetJoyStick (x,y,buttons);
+      joystick[event.jbutton.which]->GetJoyStick (x,y,z,buttons);
     }
     for (int j=0;j<NUMJBUTTONS;j++) {
       if (buttons&(1<<j)) {
