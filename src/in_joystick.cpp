@@ -113,13 +113,11 @@ void InitJoystick(){
   printf("The names of the joysticks are:\n");
 #else
   //use glut
-  if (1) {//glutDeviceGet(GLUT_HAS_JOYSTICK)) {
-      if (XMLSupport::parse_bool(vs_config->getVariable("joystick",
-                                                        "force_use_of_joystick",
-                                                        "false"))) {
+  if (glutDeviceGet(GLUT_HAS_JOYSTICK)||XMLSupport::parse_bool(vs_config->getVariable("joystick",
+										      "force_use_of_joystick",
+										      "false"))) {
           printf ("setting joystick functionality:: joystick online");
           glutJoystickFunc (myGlutJoystickCallback,JoystickPollingRate());
-                            
           num_joysticks=1;
       }
   }
