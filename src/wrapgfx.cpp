@@ -172,7 +172,6 @@ void WrapGFX::StartDraw()
 
 	//HandleMouse(); //do what you will with the data. we might wanna place the DX stuff elsewhere so it can be used in a more well rounded way?
 	//HandleKeyboard();
-	UpdateTime();
 
 	SetViewport();
 }

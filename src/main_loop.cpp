@@ -98,7 +98,7 @@ AI *Line::Execute()
 		return this;
 }
 
-const float timek = .005;
+const float timek = .01;
 bool _Slew = true;
 static void Slew (int,KBSTATE newState){
 	
@@ -314,7 +314,7 @@ static void Quit(int,KBSTATE newState) {
 Unit *carrier=NULL;
 Unit *fighter = NULL;
 Unit *fighter2=NULL;
-const int numf = 2;
+const int numf = 40;
 Unit *fighters[numf];
 CoordinateSelect *locSel=NULL;
 Background * bg = NULL;

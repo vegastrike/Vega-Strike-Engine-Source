@@ -34,6 +34,7 @@ class StarSystem {
   int currentcamera;
   InputDFA * systemInputDFA;
   void modelGravity();
+  double time;
  public:
   Camera *AccessCamera() {return &cam[currentcamera];}
   Camera *AccessCamera(int);

@@ -30,8 +30,7 @@ void Unit:: Rotate (const Vector &axis)
 	float ootheta = 1/theta;
 	float s = cos (theta * .5);
 	Quaternion rot = Quaternion(s, axis * (sinf (theta*.5)*ootheta));
-	local_transformation.orientation *= rot;
-	//local_transformation.orientation.Normalize();
+	curr_physical_state.orientation *= rot;
 }
 
 void Unit:: FireEngines (Vector Direction/*unit vector... might default to "r"*/,
@@ -61,7 +60,7 @@ void Unit::Accelerate(Vector Vforce)
 void Unit::ApplyTorque (Vector Vforce, Vector Location)
 {
 	NetForce += Vforce;
-	NetTorque += Vforce.Cross (Location-local_transformation.position);
+	NetTorque += Vforce.Cross (Location-curr_physical_state.position);
 }
 void Unit::ApplyLocalTorque (Vector Vforce, Vector Location)
 {
@@ -89,8 +88,29 @@ void Unit::ResolveForces () // don't call this 2x
 		float y = (1-magvel*magvel*oocc);
 		temp = temp * powf (y,1.5);
 		}*/
-	local_transformation.position += (Velocity+.5*temp)*SIMULATION_ATOM;
+	curr_physical_state.position += (Velocity+.5*temp)*SIMULATION_ATOM;
 	Velocity += temp;
 	NetForce = Vector(0,0,0);
 	NetTorque = Vector(0,0,0);
+}
+
+void Unit::ResolveLast() {
+  prev_physical_state = curr_physical_state;
+  ResolveForces();
+}
+
+void Unit::GetOrientation(Vector &p, Vector &q, Vector &r) {
+  Matrix m;
+  curr_physical_state.to_matrix(m);
+  p.i = m[0];
+  p.j = m[1];
+  p.k = m[2];
+
+  q.i = m[4];
+  q.j = m[5];
+  q.k = m[6];
+
+  r.i = m[8];
+  r.j = m[9];
+  r.k = m[10];
 }

@@ -29,12 +29,17 @@
 #include "cmd_ai.h"
 #include "cmd_order.h"
 #include "gfx_box.h"
+
+#include "gfx_lerp.h"
+
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
 extern Vector mouseline;
 extern vector<Vector> perplines;
 Vector MouseCoordinate (int mouseX, int mouseY);
+
+double interpolation_blend_factor;
 
 void Unit::calculate_extent() {  
   for(int a=0; a<nummesh; a++) {
@@ -58,7 +63,7 @@ void Unit::Init()
 	active = TRUE;
 
 	Identity(cumulative_transformation_matrix);
-	local_transformation = identity_transformation;
+	curr_physical_state = prev_physical_state = identity_transformation;
 	fpos = 0;
 	mass = 1;
 	fuel = 0;
@@ -474,7 +479,7 @@ void Unit::UpdateHudMatrix() {
 void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 {
   //Matrix cumulative_transformation_matrix;
-  cumulative_transformation = local_transformation;
+  Transformation cumulative_transformation = linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor);
   cumulative_transformation.Compose(parent, parentMatrix);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
 
@@ -508,6 +513,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 
 void Unit::DrawStreak(const Vector &v)
 {
+  /*
 	Vector v1 = v;
 	int steps = (int)v.Magnitude()*10;
 	v1 = v1 * (1.0/steps);
@@ -519,6 +525,7 @@ void Unit::DrawStreak(const Vector &v)
 	}
 	GFXColor(1.0, 1.0, 1.0, 1.0);
 	local_transformation.position = opos;
+  */
 }
 
 void Unit::ProcessDrawQueue() {

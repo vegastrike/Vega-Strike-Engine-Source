@@ -14,6 +14,7 @@ AI *PlanetaryOrbit::Execute() {
   
   parent->SetPosition(parent->origin - focus + 
 		      x_offset + y_offset);
+  clog << "planet position updated\n";
   return this;
 }
 
@@ -105,7 +106,7 @@ void Planet::gravitate(UnitCollection *uc) {
 
   // fake gravity
   for(int a=0; a<numSatellites; a++) {
-    satellites[a]->origin = origin + local_transformation.position;
+    satellites[a]->origin = origin + curr_physical_state.position;
     satellites[a]->gravitate(uc);
   }
 }

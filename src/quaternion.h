@@ -11,8 +11,9 @@ struct Quaternion {
     v = Vector(0,0,0);
   }
   inline Quaternion(float s, Vector v) {this->s = s; this->v = v;};
-  
+
   inline Quaternion Conjugate() const {return Quaternion(s, Vector(-v.i, -v.j, -v.k));};
+
   inline float Magnitude() const {return sqrtf(s*s+v.i*v.i+v.j*v.j+v.k*v.k);};
   inline Quaternion operator* (const Quaternion &rval) const { 
 	  return Quaternion(s*rval.s - DotProduct(v, rval.v), 
@@ -26,6 +27,17 @@ struct Quaternion {
   static Quaternion from_vectors(const  Vector &v1, const Vector &v2, const Vector &v3);
   static Quaternion from_axis_angle(const Vector &axis, float angle);
 };
+
+inline Quaternion operator-(const Quaternion &a, const Quaternion &b) {
+  return Quaternion(a.s - b.s, a.v-b.v);
+}
+inline Quaternion operator+(const Quaternion &a, const Quaternion &b) {
+  return Quaternion(a.s + b.s, a.v+b.v);
+}
+
+inline Quaternion operator*(const Quaternion &a, const double &b) {
+  return Quaternion(a.s * b, a.v * b);
+}
 
 const Quaternion identity_quaternion(1, Vector(0,0,0));
 

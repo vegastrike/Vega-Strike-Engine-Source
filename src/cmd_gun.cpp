@@ -73,7 +73,8 @@ void Gun::Draw()
 void Gun::Fire()
 {
   //////??????????? FIXME VEGASTRIKE
-	Vector pos = this->local_transformation.position;
+  /*Vector pos = this->local_transformation.position;
 	projectiles[num_proj] = new Missile(missilename);
 	num_proj++;
+  */
 }

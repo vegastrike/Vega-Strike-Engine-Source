@@ -51,6 +51,8 @@ StarSystem::StarSystem(Planet *primaries) :
   cam[2].LookAt(Vector(0,0,0), Vector(0,-1,0));
   //cam[2].SetPosition(Vector(5,0,-2.5));
   cam[2].SetSubwindow(0.10,0,0.10,0.10);
+  UpdateTime();
+  time = 0;
 }
 
 StarSystem::~StarSystem() {
@@ -196,21 +198,36 @@ void StarSystem::Draw() {
 */
 }
 
-void StarSystem::Update() {
-  modelGravity();
+extern double interpolation_blend_factor;
 
-  Iterator *iter = drawList->createIterator();
+void StarSystem::Update() {
   Unit *unit;
-  scalar_t time = GetElapsedTime();
-  float lerp = time;
-  while((unit = iter->current())!=NULL) {
-        unit->ResolveForces();
-    // Do something with AI state here eventually
-    unit->ExecuteAI();
-    iter->advance();
-  }
   UpdateTime();
-  delete iter;
+  time += GetElapsedTime();
+  //clog << "time: " << time << "\n";
+  //time = SIMULATION_ATOM+SIMULATION_ATOM/2.0;
+  if(time/SIMULATION_ATOM>=1.0) {
+    while(time/SIMULATION_ATOM >= 1.0) { // Chew up all SIMULATION_ATOMs that have elapsed since last update
+      Iterator *iter = drawList->createIterator();
+      modelGravity();
+      
+      while((unit = iter->current())!=NULL) {
+	// Do something with AI state here eventually
+	if(time>2.0) 
+	  unit->ResolveForces();
+	else
+	  unit->ResolveLast();
+	unit->ExecuteAI(); // must execute AI afterwards, since position might update (and ResolveLast saves the 2nd to last position for proper interpolation)
+	iter->advance();
+      }
+
+      time -= SIMULATION_ATOM;
+      delete iter;
+    }
+    UpdateTime();
+  }
+  interpolation_blend_factor = time/SIMULATION_ATOM;
+  //clog << "blend factor: " << interpolation_blend_factor << "\n";
 }
 
 

@@ -86,6 +86,7 @@ int main( int argc, char **argv )
     sdl_init();
 #endif
     InitTime();
+    UpdateTime();
     ParseCommandLine(argc,argv);
 
 

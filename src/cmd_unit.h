@@ -66,8 +66,9 @@ class Unit {
   void endElement(const string &name);
 
 protected:
-  Transformation local_transformation;
-  Transformation cumulative_transformation;
+  //used for physics
+  Transformation prev_physical_state;
+  Transformation curr_physical_state;
   Matrix cumulative_transformation_matrix;
 
   int nummesh;
@@ -171,14 +172,12 @@ public:
   void SetAI(AI *newAI);
   void EnqueueAI(AI *newAI);
 
-  Vector &Position(){return local_transformation.position;};
-  void SetPosition(const Vector &pos) {local_transformation.position = pos;}
-  void SetPosition(float x, float y, float z) {local_transformation.position = Vector(x,y,z);}
+  Vector Position(){return curr_physical_state.position;};
+  void SetPosition(const Vector &pos) {/*prev_physical_state.position = curr_physical_state.position;*/
+  curr_physical_state.position = pos;}
+  void SetPosition(float x, float y, float z) {/*prev_physical_state.position = curr_physical_state.position;*/
+  curr_physical_state.position = Vector(x,y,z);}
 
-  Vector Nose() {return Vector(cumulative_transformation_matrix[8],
-			       cumulative_transformation_matrix[9],
-			       cumulative_transformation_matrix[10]);};
-  
   void Destroy(){active = false;};
   virtual void Fire(){};
 
@@ -202,6 +201,8 @@ public:
   void ApplyLocalTorque (Vector Vforce, Vector Location);
   void ApplyBalancedLocalTorque (Vector Vforce, Vector Location); //usually from thrusters remember if I have 2 balanced thrusters I should multiply their effect by 2 :)
   void ResolveForces ();
+  void ResolveLast(); // used for lerp
+  void GetOrientation(Vector &p, Vector &q, Vector &r);
 
   inline bool queryCalculatePhysics() { return calculatePhysics; }
   void ExecuteAI();
