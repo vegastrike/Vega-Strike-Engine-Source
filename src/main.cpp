@@ -179,13 +179,14 @@ int main( int argc, char *argv[] )
 #else
     int pid=fork();
     if (!pid) {
+      pid=execlp("./soundserver","./soundserver",NULL);
       g_game.music_enabled=false;
       fprintf(stderr,"Unable to spawn music player server\n");
-    }
-    pid=execlp("./soundserver","./soundserver",NULL);
-    if (!pid) {
-      g_game.music_enabled=false;
-      fprintf(stderr,"Unable to spawn music player server\n");
+      exit (0);
+    } else {
+      if (pid==-1) {
+	g_game.music_enabled=false;
+      }
     }
 #endif
   }
