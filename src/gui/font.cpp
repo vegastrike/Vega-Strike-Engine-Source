@@ -96,7 +96,7 @@ void Font::calcMetricsIfNeeded(void) const {
 }
 
 // Draw a character.
-void Font::drawChar(char c) const {
+float Font::drawChar(char c) const {
     calcMetricsIfNeeded();
     if (useStroke()) {
       glutStrokeCharacter(GLUT_STROKE_ROMAN, c);
@@ -106,8 +106,11 @@ void Font::drawChar(char c) const {
       } else {
         glTranslated(m_extraCharWidth, 0.0, 0.0);
       }
+      return 0;
     }else {
       glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,c);
+      return glutBitmapWidth(GLUT_BITMAP_HELVETICA_12,c);
+      
     }
 }
 

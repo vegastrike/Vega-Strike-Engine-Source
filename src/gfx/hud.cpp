@@ -111,7 +111,9 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
   myFontMetrics.i/=.5*g_game.x_resolution;
   myFontMetrics.j/=.5*g_game.y_resolution;
   float tmp,row, col;
+  float origcol,origrow;
   GetPos (row,col);
+  GetPos(row,origcol);
   float rowheight=(use_bit)?((fnt==GLUT_BITMAP_HELVETICA_12)?(26./g_game.y_resolution):(22./g_game.y_resolution)):(myFontMetrics.j);
   myFontMetrics.j=rowheight;
 
@@ -148,7 +150,6 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
   }
   GFXColorf(this->col);
 
-  glRasterPos2f(0,0);
   int entercount=0;
   for (;entercount<offset&&text_it!=newText.end();text_it++) {
     if (*text_it=='\n')
@@ -180,6 +181,9 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
 		     b,
 		     this->col.a);
 	}
+        static bool setRasterPos= XMLSupport::parse_bool(vs_config->getVariable("graphics","set_raster_text_color","true"));
+        if (use_bit&&setRasterPos)
+          glRasterPos2f(col-origcol,0);
 	text_it = text_it+6;
       } else {
         break;
