@@ -18,6 +18,7 @@
 extern bool cleanexit;
 
 bool use_pa;
+bool use_secured;
 
 #include "gldrv/winsys.h"
 #include "packet.h"
@@ -122,8 +123,8 @@ NetworkCommunication::NetworkCommunication()
 	this->active = false;
 	this->max_messages = 25;
 	this->method = ClientBroadcast;
-	memcpy( this->crypt_key, vs_config->getVariable( "network", "encryption_key", "").c_str(), DESKEY_SIZE);
 	use_pa = XMLSupport::parse_bool( vs_config->getVariable( "network", "use_portaudio", "false"));
+	use_secured = 0;
 
 #ifdef NETCOMM_JVOIP
 
@@ -180,6 +181,34 @@ NetworkCommunication::NetworkCommunication()
     _sock_set.addDownloadManager( _downloadServer );
 
 #endif /* NETCOMM_NOWEBCAM */
+#ifdef CRYPTO
+	string privKeyFilename = vs_config->getVariable( "network", "encryption_private_key_file", "");
+	string pubKeyFilename = vs_config->getVariable( "network", "encryption_public_key_file", "");
+	string seed = vs_config->getVariable( "network", "encryption_seed", "I love VegaStrike"); // ;)
+	// Key length is only used when we need to generate a key
+	this->key_length = XMLSupport::parse_int( vs_config->getVariable( "network", "encryption_keylength", "40"));
+	bool use_keys = true;
+	if( privKeyFilename=="")
+	{
+		use_keys = false;
+		privKeyFilename = datadir+"vsnet_private.key";
+		pubKeyFilename = datadir+"vsnet_public.key";
+	}
+	crypto_method = vs_config->getVariable( "network", "encryption_method", "");
+	if( crypto_method=="blowfish")
+	{
+		use_secured = 1;
+	}
+	else if( crypto_method=="rsa")
+	{
+		use_secured = 1;
+		if( !use_keys)
+			this->GenerateKey( privKeyFilename, pubKeyFilename);
+	}
+	else
+		cerr<<"WARNING : Unknown encryption method - encryption disabled"<<endl;
+
+#endif
 }
 
 char	NetworkCommunication::HasWebcam()
@@ -511,7 +540,7 @@ void	NetworkCommunication::SwitchSecured()
 		secured=0;
 	else
 	{
-		if( crypt_key[0]!=0)
+		if( use_secured && crypt_key[0]!=0)
 			secured = 1;
 	}
 #else
@@ -519,4 +548,67 @@ void	NetworkCommunication::SwitchSecured()
 	secured = 0;
 #endif
 }
+
+#ifdef CRYPTO
+void	NetworkCommunication::GenerateKey( string privKeyFilename, pubKeyFilename)
+{
+	if( crypto_method == "rsa")
+	{
+		RandomPool randPool;
+		randPool.Put((byte *)this->seed.c_str(), this->seed.length());
+
+		RSAES_OAEP_SHA_Decryptor priv(randPool, this->key_length);
+		HexEncoder privFile(new FileSink(privKeyFilename));
+		priv.DEREncode(privFile);
+		privFile.MessageEnd();
+
+		RSAES_OAEP_SHA_Encryptor pub(priv);
+		HexEncoder pubFile(new FileSink(pubKeyFilename));
+		pub.DEREncode(pubFile);
+		pubFile.MessageEnd();
+	}
+	else if( 1)
+	{
+	}
+	else
+	{
+	}
+}
+
+string	NetworkCommunication::EncryptBuffer( string pubKeyFilename, const char * buffer);
+{
+	if( crypto_method == "rsa")
+	{
+		FileSource pubFile(pubKeyFilename, true, new HexDecoder);
+		RSAES_OAEP_SHA_Encryptor pub(pubFile);
+
+		RandomPool randPool;
+		randPool.Put((byte *)seed, strlen(seed));
+
+		string result;
+		StringSource(message, true, new PK_EncryptorFilter(randPool, pub, new HexEncoder(new StringSink(result))));
+		return result;
+	}
+	else if( 1)
+	{
+	}
+	else
+	{
+	}
+}
+
+string	NetworkCommunication::DecryptBuffer( string pubKeyFilename, const char * buffer)
+{
+	if( crypto_method == "rsa")
+	{
+	}
+	else if
+	{
+	}
+	else
+	{
+	}
+}
+
+#endif
 

@@ -131,3 +131,6 @@ JVoIPlib : http://lumumba.luc.ac.be/jori/jvoiplib/jvoiplib.html
 Crypto++ : http://www.eskimo.com/~weidai/cryptlib.html
 POSH : http://www.pyrogon.com/poshlib/index.html
 
+
+CRYPTO SUPPORT :
+- For RSA and other encryption methods that needs key files, the files must be in VS datadir/

@@ -83,7 +83,14 @@ class NetworkCommunication
 		friend int	Pa_PlayCallback( void * inputBuffer, void * outputBuffer, unsigned long framesPerBuffer, PaTimestamp outTime, void * userdata);
 #endif
 #ifdef CRYPTO
-		Algorithm *			cryptalgo;
+		//Algorithm *			cryptalgo;
+		string				crypto_method;
+		string				seed;
+		unsigned int		key_length;
+
+		void				GenerateKey( string privKeyFilename, pubKeyFilename);
+		string				EncryptBuffer( string pubKeyFilename, char * buffer);
+		string				DecryptBuffer( string pubKeyFilename, char * buffer);
 #endif
 
 	public:
