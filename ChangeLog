@@ -1,3 +1,10 @@
+2002-03-06 Corey O'Connor <zoldar256@users.sourceforge.net>
+        * A few small changes to OS X target
+	  - GLUT mission selector now compiles
+	  - VegaStrikeOSXApp now includes GLUT mission selector
+	    as a front end to the vegastrike executable in 
+	    Resources.
+
 2002-03-05 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* homepage/docu

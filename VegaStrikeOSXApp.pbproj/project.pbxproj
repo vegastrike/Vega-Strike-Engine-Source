@@ -127,6 +127,7 @@
 			children = (
 				F545BE3A022F432401AD3AF8,
 				29B97317FDCFA39411CA2CEA,
+				F5760B5C02360A5501AD3AF8,
 				29B97323FDCFA39411CA2CEA,
 				19C28FACFE9D520D11CA2CBB,
 			);
@@ -3417,6 +3418,139 @@
 			isa = PBXBuildFile;
 			settings = {
 			};
+		};
+		F5760B5C02360A5501AD3AF8 = {
+			children = (
+				F5760B5D02360A5501AD3AF8,
+				F5760B5E02360A5501AD3AF8,
+				F5760B5F02360A5501AD3AF8,
+				F5760B6002360A5501AD3AF8,
+				F5760B6102360A5501AD3AF8,
+				F5760B6202360A5501AD3AF8,
+				F5760B6302360A5501AD3AF8,
+				F5760B6402360A5501AD3AF8,
+				F5760B6502360A5501AD3AF8,
+				F5760B6602360A5501AD3AF8,
+				F5760B6702360A5501AD3AF8,
+				F5760B6802360A5501AD3AF8,
+				F5760B6902360A5501AD3AF8,
+				F5760B6A02360A5501AD3AF8,
+				F5760B6B02360A5501AD3AF8,
+				F5760B6C02360A5501AD3AF8,
+				F5760B6D02360A5501AD3AF8,
+				F5760B6E02360A5501AD3AF8,
+				F5760B6F02360A5501AD3AF8,
+				F5760B7002360A5501AD3AF8,
+				F5760B7102360A5501AD3AF8,
+			);
+			isa = PBXGroup;
+			path = mission;
+			refType = 4;
+		};
+		F5760B5D02360A5501AD3AF8 = {
+			isa = PBXFileReference;
+			path = button.cpp;
+			refType = 4;
+		};
+		F5760B5E02360A5501AD3AF8 = {
+			isa = PBXFileReference;
+			path = button.h;
+			refType = 4;
+		};
+		F5760B5F02360A5501AD3AF8 = {
+			isa = PBXFileReference;
+			path = easydom.cpp;
+			refType = 4;
+		};
+		F5760B6002360A5501AD3AF8 = {
+			isa = PBXFileReference;
+			path = easydom.h;
+			refType = 4;
+		};
+		F5760B6102360A5501AD3AF8 = {
+			isa = PBXFileReference;
+			path = file.cpp;
+			refType = 4;
+		};
+		F5760B6202360A5501AD3AF8 = {
+			isa = PBXFileReference;
+			path = file.h;
+			refType = 4;
+		};
+		F5760B6302360A5501AD3AF8 = {
+			isa = PBXFileReference;
+			path = general.cpp;
+			refType = 4;
+		};
+		F5760B6402360A5501AD3AF8 = {
+			isa = PBXFileReference;
+			path = general.h;
+			refType = 4;
+		};
+		F5760B6502360A5501AD3AF8 = {
+			isa = PBXFileReference;
+			path = glut_support.cpp;
+			refType = 4;
+		};
+		F5760B6602360A5501AD3AF8 = {
+			isa = PBXFileReference;
+			path = glut_support.h;
+			refType = 4;
+		};
+		F5760B6702360A5501AD3AF8 = {
+			isa = PBXFileReference;
+			path = graphics.cpp;
+			refType = 4;
+		};
+		F5760B6802360A5501AD3AF8 = {
+			isa = PBXFileReference;
+			path = graphics.h;
+			refType = 4;
+		};
+		F5760B6902360A5501AD3AF8 = {
+			isa = PBXFileReference;
+			path = hashtable.cpp;
+			refType = 4;
+		};
+		F5760B6A02360A5501AD3AF8 = {
+			isa = PBXFileReference;
+			path = hashtable.h;
+			refType = 4;
+		};
+		F5760B6B02360A5501AD3AF8 = {
+			isa = PBXFileReference;
+			path = select.cpp;
+			refType = 4;
+		};
+		F5760B6C02360A5501AD3AF8 = {
+			isa = PBXFileReference;
+			path = selector.cpp;
+			refType = 4;
+		};
+		F5760B6D02360A5501AD3AF8 = {
+			isa = PBXFileReference;
+			path = selector.h;
+			refType = 4;
+		};
+		F5760B6E02360A5501AD3AF8 = {
+			isa = PBXFileReference;
+			path = text_area.cpp;
+			refType = 4;
+		};
+		F5760B6F02360A5501AD3AF8 = {
+			isa = PBXFileReference;
+			path = text_area.h;
+			refType = 4;
+		};
+		F5760B7002360A5501AD3AF8 = {
+			isa = PBXFileReference;
+			path = xml_support.cpp;
+			refType = 4;
+		};
+		F5760B7102360A5501AD3AF8 = {
+			isa = PBXFileReference;
+			path = xml_support.h;
+			refType = 4;
 		};
 		F57B9BC50231750F01AD3AF8 = {
 			isa = PBXTargetDependency;

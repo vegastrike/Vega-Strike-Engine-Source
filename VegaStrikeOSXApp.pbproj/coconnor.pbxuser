@@ -4,7 +4,7 @@
 		activeBuildStyle = 4A9504CCFFE6A4B311CA0CBA;
 		activeTarget = 29B97326FDCFA39411CA2CEA;
 		addToTargets = (
-			29B97326FDCFA39411CA2CEA,
+			F545BE36022F3FB301AD3AF8,
 		);
 		perUserDictionary = {
 			PBXWorkspaceConfiguration = {
@@ -13,10 +13,9 @@
 					ActiveTab = 0;
 					Frame = "{{0, 23}, {1174, 891}}";
 					Split0 = {
-						ActiveTab = 2;
 						Frame = "{{224, 0}, {950, 891}}";
 						Split0 = {
-							Frame = "{{0, 453}, {950, 438}}";
+							Frame = "{{0, 24}, {950, 867}}";
 						};
 						SplitCount = 1;
 						Tab0 = {
@@ -75,12 +74,12 @@
 						Frame = "{{0, 0}, {200, 100}}";
 					};
 					Tab3 = {
-						Frame = "{{0, 0}, {200, 100}}";
+						Frame = "{{0, 0}, {200, 891}}";
 						Split0 = {
-							Frame = "{{0, 0}, {200, 45}}";
+							Frame = "{{0, 0}, {200, 436}}";
 						};
 						Split1 = {
-							Frame = "{{0, 54}, {200, 46}}";
+							Frame = "{{0, 445}, {200, 446}}";
 						};
 						SplitCount = 2;
 					};
