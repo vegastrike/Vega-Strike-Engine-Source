@@ -457,7 +457,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   Cockpit * player_cockpit=GetVelocityDifficultyMult (difficulty);
 
  curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
-  }
+  
 #ifdef DEPRECATEDPLANETSTUFF
   if (planet) {
     Matrix basis;
