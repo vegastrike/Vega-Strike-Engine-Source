@@ -806,12 +806,12 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
 	  return jumpok?1:0;
   case UnitImages::KPS:
 	if (lie) 
-		return (target->GetVelocity().Magnitude())*10/game_speed;
+		return (target->GetVelocity().Magnitude())/game_speed;
 	else
 		return target->GetVelocity().Magnitude()*3.6;
   case UnitImages::SETKPS:
 	if (lie) 
-	    return target->GetComputerData().set_speed*10/game_speed;
+	    return target->GetComputerData().set_speed/game_speed;
 	else
 		return target->GetComputerData().set_speed*3.6;
   case UnitImages::AUTOPILOT:

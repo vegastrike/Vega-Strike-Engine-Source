@@ -376,7 +376,7 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
   static bool lie=XMLSupport::parse_bool (vs_config->getVariable("physics","game_speed_lying","true"));
   if(lie){
-	  sprintf (qr,"Distance: %.2f",((parent->Position()-target->Position()).Magnitude()-((target->isUnit()==PLANETPTR)?target->rSize():0))*10./game_speed);
+	  sprintf (qr,"Distance: %.2f",((parent->Position()-target->Position()).Magnitude()-((target->isUnit()==PLANETPTR)?target->rSize():0))/game_speed);
   } else {
 	double dist=((parent->Position()-target->Position()).Magnitude()-((target->isUnit()==PLANETPTR)?target->rSize():0));
 	if(dist<100000){
@@ -491,7 +491,7 @@ void VDU::DrawNav (const Vector & nav) {
   string nam="none";
   if (targ)
 	  nam= reformatName(targ->name);
-  sprintf (navdata,"Navigation\n----------\n%s\nTarget:\n  %s\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",_Universe->activeStarSystem()->getName().c_str(),nam.c_str(),nav.i,nav.j,nav.k,lie?(10*nav.Magnitude()/game_speed):nav.Magnitude());
+  sprintf (navdata,"Navigation\n----------\n%s\nTarget:\n  %s\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",_Universe->activeStarSystem()->getName().c_str(),nam.c_str(),nav.i,nav.j,nav.k,lie?(nav.Magnitude()/game_speed):nav.Magnitude());
   tp->Draw (MangleString (navdata,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true,true);  
   delete [] navdata;
 
