@@ -69,14 +69,14 @@ void CommunicationMessage::Init (Unit * send, Unit * recv) {
   this->prevstate=this->curstate = fsm->getDefaultState(_Universe->GetRelation(send->faction,recv->faction));
 }
 void CommunicationMessage::SetAnimation (std::vector <Animation *>*ani) {
-  float mood= fsm->getDeltaRelation(this->prevstate,this->curstate);
-  mood+=1;
-  mood*=ani->size()/2.;
-  unsigned int index=(unsigned int)mood;
-  if (index>=ani->size()) {
-    index=ani->size()-1;
-  }
   if (ani){ 
+	float mood= fsm->getDeltaRelation(this->prevstate,this->curstate);
+    mood+=1;
+    mood*=ani->size()/2.;
+    unsigned int index=(unsigned int)mood;
+    if (index>=ani->size()) {
+      index=ani->size()-1;
+	}
     this->ani=(*ani)[index];
   }else {
     this->ani=NULL;

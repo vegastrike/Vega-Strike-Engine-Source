@@ -260,8 +260,8 @@ string Order::createFullOrderDescription(int level){
 
   string desc=tabs+"+"+getOrderDescription()+"\n";
 
-  for (unsigned int i=0;i<suborders.size();i++) {
-    desc=desc+suborders[i]->createFullOrderDescription(level+1);
+  for (unsigned int j=0;j<suborders.size();j++) {
+    desc=desc+suborders[j]->createFullOrderDescription(level+1);
   }
 
   return desc;
