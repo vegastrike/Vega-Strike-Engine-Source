@@ -6,7 +6,6 @@
 #include <string.h>
 #include <list>
 #include "const.h"
-#include "netclass.h"
 #include "vsnet_cmd.h"
 #include "vsnet_address.h"
 #include "vsnet_socket.h"
@@ -55,6 +54,7 @@ class Packet
 
         Packet();
         Packet( const void* buffer, size_t sz );
+        Packet( PacketMem& buffer );
         Packet( const Packet &a );
 
         ~Packet();

@@ -25,7 +25,6 @@
 #include <string.h>
 #include "gfx/quaternion.h"
 #include "const.h"
-#include "netclass.h"
 #include "cubicsplines.h"
 #include "configxml.h"
 #include "vsnet_clientstate.h"
@@ -49,6 +48,7 @@ struct	Client
 	Unit	*		game_unit;
 	CubicSpline		spline;
 	AddressIP		cltadr;
+	bool            is_tcp;
 	SOCKETALT		sock;
 	ObjSerial		serial;
 	// 2 timeout vals to check a timeout for client connections
@@ -82,7 +82,33 @@ struct	Client
 		ingame=0;
 	}
 
+	Client( SOCKETALT& s, bool tcp )
+	    : is_tcp(tcp)
+	    , sock(s)
+	{
+		memset( &old_state, 0, sizeof( ClientState));
+		memset( &current_state, 0, sizeof( ClientState));
+		latest_timestamp=0;
+		old_timestamp=0;
+		latest_timeout=0;
+		old_timeout=0;
+		deltatime=0;
+		ingame=0;
+	}
+
+	inline bool isTcp( ) const {
+	    return is_tcp;
+	}
+
+	inline bool isUdp( ) const {
+	    return !is_tcp;
+	}
+
 	friend std::ostream& operator<<( std::ostream& ostr, const Client& c );
+
+private:
+	Client( const Client& );
+	Client& operator=( const Client& );
 };
 
 void	LoadXMLUnit( Unit * unit, const char * filename, char * buf);

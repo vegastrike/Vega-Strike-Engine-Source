@@ -56,7 +56,7 @@ public:
     inline int  get_tcp_sock( ) const { return _fd; }
     inline const AddressIP& get_adr( ) const { return _srv_ip; }
 
-    inline void watch( SocketSet& set ) { set.set(_fd); }
+    inline void watch( SocketSet& set ) { set.setRead(_fd); }
     inline bool isActive( SocketSet& set ) const { return set.is_set(_fd); }
 
     virtual void      watchForNewConn( SocketSet& set, int ) = 0;

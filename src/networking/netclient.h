@@ -43,9 +43,7 @@ extern bool isLocalSerial( ObjSerial sernum);
 
 class	NetClient
 {
-		NetUI *				NetInt;		// Network interface
 		Unit *				game_unit;		// Unit struct from the game corresponding to that client
-		// Packet				_packet;			// Network data packet
 
 		SOCKETALT			clt_sock;		// Comm. socket
 		ObjSerial			serial;			// Serial # of client

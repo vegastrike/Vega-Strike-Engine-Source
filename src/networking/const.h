@@ -21,6 +21,7 @@
 #ifndef __CONST_H
 #define __CONST_H
 
+#include "config.h"
 #include <assert.h>
 #include <stdio.h>
 
@@ -44,14 +45,20 @@ extern double NETWORK_ATOM;
 #define COUT std::cout << __FILE__ << ":" << __LINE__ << " "
 
 #ifndef NDEBUG
+#define VSNET_DEBUG
+#else
+#undef VSNET_DEBUG
+#endif
 
-#include <assert.h>
-#include <stdio.h>
-
-/** These macros are intended for default versions a class validity
+/* --- BEGIN memory debugging macros --- */
+/** The following macros are intended for default versions a class validity
  *  debugging. The idea is to increase the likelyhood that uninitialized
  *  and re-initialized memory areas are captured as well as possible.
  */
+#ifndef NDEBUG
+
+#include <assert.h>
+#include <stdio.h>
 
 #define DECLARE_VALID \
 private: \
@@ -90,6 +97,7 @@ public: \
 #  define CHECK_VALID_OBJ(a)
 #  define ASSERT(a)
 #endif /* NDEBUG */
+/* --- END memory debugging macros --- */
 
 #ifndef _WIN32
 #define LOCALCONST_DECL(Type,Name,Value) static const Type Name = Value;

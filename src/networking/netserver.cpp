@@ -41,7 +41,6 @@ string	tmpdir;
 
 NetServer::NetServer()
 {
-	// Network = new DefaultNetUI;
 	this->nbclients = 0;
 	this->nbaccts = 0;
 	this->keeprun = 1;
@@ -58,9 +57,6 @@ NetServer::NetServer()
 
 NetServer::~NetServer()
 {
-	// if( Network!=NULL) delete Network;
-	if( NetAcct!=NULL)
-		delete NetAcct;
 	delete zonemgr;
 }
 
@@ -125,15 +121,18 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
     strcpy( name, buf);
     strcpy( passwd, buf+NAMELEN);
 
-#ifdef _UDP_PROTO
-	// In UDP mode, client is created here
+    if( clt == NULL )
+	{
+	    // This must be UDP mode, because the client would exist otherwise.
+	    // In UDP mode, client is created here.
 	clt = newConnection_udp( ipadr );
 	if( !clt)
 	{
-		cout<<"Error creating new client connection"<<endl;
+		    COUT << "Error creating new client connection"<<endl;
 		exit(1);
 	}
-#endif
+	}
+
 	memcpy( &clt->cltadr, &ipadr, sizeof( AddressIP));
 	strcpy( clt->name, buf);
 	strcpy( clt->passwd, buf+NAMELEN);
@@ -233,11 +232,9 @@ Client* NetServer::newConnection_udp( const AddressIP& ipadr )
 {
     COUT << " enter " << __FUNCTION__ << endl;
 
-    if( Network == NULL ) return NULL;
+    SOCKETALT sock( udpNetwork->get_udp_sock(), SOCKETALT::UDP, ipadr );
 
-    SOCKETALT sock( Network->get_udp_sock(), SOCKETALT::UDP, ipadr );
-
-    Client* ret = addNewClient( sock);
+    Client* ret = addNewClient( sock, false );
     nbclients++;
 
     return ret;
@@ -251,13 +248,13 @@ Client* NetServer::newConnection_tcp( SocketSet& set )
     // Just ignore the client for now
 
     // Get new connections if there are - do nothing in standard UDP mode
-    if( Network->isActive( set ) )
+    if( tcpNetwork->isActive( set ) )
     {
         COUT << " enter " << __FUNCTION__ << endl;
-        sock = Network->acceptNewConn( set );
+        sock = tcpNetwork->acceptNewConn( set );
         if( sock.valid() )
         {
-            ret = this->addNewClient( sock);
+            ret = this->addNewClient( sock, true );
             nbclients++;
         }
     }
@@ -268,16 +265,20 @@ Client* NetServer::newConnection_tcp( SocketSet& set )
 /**** Adds a new client                                    ****/
 /**************************************************************/
 
-Client* NetServer::addNewClient( SOCKETALT sock)
+Client* NetServer::addNewClient( SOCKETALT sock, bool is_tcp )
 {
-    Client * newclt = new Client;
+    Client * newclt = new Client( sock, is_tcp );
     // New client -> now registering it in the active client list "Clients"
-
     // Store the associated socket
-    newclt->sock = sock;
+
     // Adds the client
-    Clients.push_back( newclt);
-    COUT<<"Added client with socket n°"<<sock<<" - Actual number of clients : "<<Clients.size()<<endl;
+	if( is_tcp )
+        tcpClients.push_back( newclt);
+	else
+        udpClients.push_back( newclt);
+    COUT << "Added client with socket n°" << sock
+         << " - Actual number of clients : "
+         << tcpClients.size() + udpClients.size() << endl;
 
     return newclt;
 }
@@ -342,7 +343,6 @@ void	NetServer::start()
 	}
 	else
 	{
-		NetAcct = new TCPNetUI();
 		cout<<"Initializing connection to account server..."<<endl;
 		char srvip[256];
 		if( vs_config->getVariable( "network", "accountsrvip", "")=="")
@@ -357,13 +357,15 @@ void	NetServer::start()
 			tmpport = ACCT_PORT;
 		else
 			tmpport = atoi((vs_config->getVariable( "network", "accountsrvport", "")).c_str());
-		acct_sock = NetAcct->createSocket( srvip, tmpport );
+		acct_sock = NetUITCP::createSocket( srvip, tmpport );
 		COUT <<"accountserver on socket "<<acct_sock<<" done."<<endl;
 	}
 
-	// Create and bind socket
-	COUT << "Initializing network..." << endl;
-	Network = NetworkToClient.createServerSocket( atoi((vs_config->getVariable( "network", "serverport", "")).c_str()) );
+	// Create and bind sockets
+	COUT << "Initializing TCP server ..." << endl;
+	tcpNetwork = NetUITCP::createServerSocket( atoi((vs_config->getVariable( "network", "serverport", "")).c_str()) );
+	COUT << "Initializing UDP server ..." << endl;
+	udpNetwork = NetUIUDP::createServerSocket( atoi((vs_config->getVariable( "network", "serverport", "")).c_str()) );
 	COUT << "done." << endl;
 	
 	// Server loop
@@ -376,18 +378,15 @@ void	NetServer::start()
 		// Check a key press
 		// this->checkKey();
 		// Handle new connections in TCP mode
-#ifdef _TCP_PROTO
-		Network->watchForNewConn( set, 0 );
-#endif
+		tcpNetwork->watchForNewConn( set, 0 );
+
 		// Check received communications
 		prepareCheckMsg( set );
 		if( acctserver && acct_con) prepareCheckAcctMsg( set );
 		nb = set.select( NULL );
 		if( nb > 0 )
 		{
-#ifdef _TCP_PROTO
 			newConnection_tcp( set );
-#endif
 			checkMsg( set );
 			if( acctserver && acct_con)
 			{
@@ -398,10 +397,8 @@ void	NetServer::start()
 			}
 		}
 
-#ifdef _UDP_PROTO
 		// See if we have some timed out clients and disconnect them
-		this->checkTimedoutClients();
-#endif
+		this->checkTimedoutClients_udp();
 
 		// Remove all clients to be disconnected
 		LI j;
@@ -422,7 +419,7 @@ void	NetServer::start()
 		if( snapchanged && snaptime>NETWORK_ATOM)
 		{
 			//cout<<"SENDING SNAPSHOT ----------"<<end;
-			zonemgr->broadcastSnapshots( &NetworkToClient );
+			zonemgr->broadcastSnapshots( ); // &NetworkToClient );
 			snapchanged = 0;
 		}
 
@@ -489,12 +486,10 @@ void	NetServer::prepareCheckAcctMsg( SocketSet& set )
 
 void	NetServer::checkAcctMsg( SocketSet& set )
 {
-	unsigned int len2;
 	int len=0;
 	AddressIP	ipadr, ip2;
 	Client *	clt = NULL;
 	unsigned char cmd=0;
-	char buffer[MAXBUFFER];
 
 	// Watch account server socket
 	// Get the number of active clients
@@ -503,8 +498,8 @@ void	NetServer::checkAcctMsg( SocketSet& set )
 		//cout<<"Net activity !"<<endl;
 		// Receive packet and process according to command
 
-		len2 = MAXBUFFER;
-		if( (len=acct_sock.recvbuf( buffer, len2, &ip2))>0)
+		PacketMem mem;
+		if( (len=acct_sock.recvbuf( mem, &ip2 ))>0 )
 		{
 			// Maybe copy that in a "else" condition too if when it fails we have to disconnect a client
 
@@ -516,23 +511,28 @@ void	NetServer::checkAcctMsg( SocketSet& set )
 				cout<<"Error : trying to remove client on empty waitList"<<" - len="<<len<<endl;
 				exit( 1);
 			}
-#ifdef _TCP_PROTO
-			clt = waitList.front();
-#else
-			ipadr = waitList.front();
+            WaitListEntry& entry( waitList.front() );
+			if( entry.tcp )
+			{
+			    clt = entry.t;
+			    COUT << "Got response for TCP client" << endl;
+			}
+			else
+			{
+			    ipadr = entry.u;
 			COUT << "Got response for client IP : " << ipadr << endl;
-#endif
+			}
 			waitList.pop();
 
-			Packet p( buffer, len );
+			Packet p( mem );
 			packeta = p;
 			switch( packeta.getCommand())
 			{
 				case LOGIN_NEW :
-					cout<<">>> NEW LOGIN =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
+					COUT << ">>> NEW LOGIN =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 					// We received a login authorization for a new account (no ship created)
 					this->sendLoginAccept( clt, ipadr, 1);
-					cout<<"<<< NEW LOGIN ----------------------------------------------------------------"<<endl;
+					COUT << "<<< NEW LOGIN ----------------------------------------------------------------"<<endl;
 				break;
 				case LOGIN_ACCEPT :
 					// Login is ok
@@ -571,45 +571,39 @@ void	NetServer::checkAcctMsg( SocketSet& set )
 
 void	NetServer::prepareCheckMsg( SocketSet& set )
 {
-#ifdef _TCP_PROTO
 	// First add all clients to be watched
-	for( LI i=Clients.begin(); i!=Clients.end(); i++)
+	for( LI i=tcpClients.begin(); i!=tcpClients.end(); i++)
 	{
 		(*i)->sock.watch( set );
 	}
-#endif
-#ifdef _UDP_PROTO
-	Network->watch( set );
-#endif
+	udpNetwork->watch( set );
 }
 
 void	NetServer::checkMsg( SocketSet& set )
 {
-#ifdef _TCP_PROTO
-	for( LI i=Clients.begin(); i!=Clients.end(); i++)
+	for( LI i=tcpClients.begin(); i!=tcpClients.end(); i++)
 	{
 		if( (*i)->sock.isActive( set ) )
 		{
 			this->recvMsg_tcp( (*i));
 		}
 	}
-#endif
-#ifdef _UDP_PROTO
-	this->recvMsg_udp( );
-#endif
+	if( udpNetwork->isActive( set ) )
+	{
+	    recvMsg_udp( );
+	}
 }
 
 /**************************************************************/
 /**** Disconnects timed out clients                        ****/
 /**************************************************************/
 
-#ifdef _UDP_PROTO
-void	NetServer::checkTimedoutClients()
+void	NetServer::checkTimedoutClients_udp()
 {
 	/********* Method 1 : compare latest_timestamp to current time and see if > CLIENTTIMEOUT */
 	double curtime = (unsigned int) getNewTime();
 	double deltatmp = 0;
-	for (LI i=Clients.begin(); i!=Clients.end(); i++)
+	for (LI i=udpClients.begin(); i!=udpClients.end(); i++)
 	{
 		deltatmp = (fabs(curtime - (*i)->latest_timeout));
 		if( (*i)->latest_timeout!=0)
@@ -641,7 +635,6 @@ void	NetServer::checkTimedoutClients()
 		}
 	}
 }
-#endif
 
 /**************************************************************/
 /**** Receive a message from a client                      ****/
@@ -651,16 +644,15 @@ void	NetServer::recvMsg_tcp( Client * clt)
 {
     char	command;
     AddressIP	ipadr;
-    int nbpackets = 0;
+    // int nbpackets = 0;
     double ts = 0;
 
     assert( clt != NULL );
 
     SOCKETALT sockclt( clt->sock );
-    char      buffer[MAXBUFFER];
-    unsigned int    len = MAXBUFFER;
+	PacketMem mem;
 
-    int recvbytes = sockclt.recvbuf( buffer, len, &ipadr );
+    int recvbytes = sockclt.recvbuf( mem, &ipadr );
 
     if( recvbytes <= 0 )
     {
@@ -670,7 +662,7 @@ void	NetServer::recvMsg_tcp( Client * clt)
     }
     else
     {
-        Packet packet( buffer, len );
+        Packet packet( mem );
 	packet.setNetwork( &ipadr, sockclt );
         ts      = packet.getTimestamp();
 	command = packet.getCommand( );
@@ -685,9 +677,10 @@ void	NetServer::recvMsg_tcp( Client * clt)
             clt->latest_timestamp = ts;
         }
 
+#ifdef VSNET_DEBUG
 	COUT << "Created a packet with command " << displayCmd(Cmd(command)) << endl;
-	PacketMem m( buffer, len );
-	m.dump( cout, 3 );
+	    mem.dump( cout, 3 );
+#endif
 
         this->processPacket( clt, command, ipadr, packet );
     }
@@ -695,17 +688,16 @@ void	NetServer::recvMsg_tcp( Client * clt)
 
 void NetServer::recvMsg_udp( )
 {
-    SOCKETALT sockclt( Network->get_udp_sock(), SOCKETALT::UDP, Network->get_adr() );
+    SOCKETALT sockclt( udpNetwork->get_udp_sock(), SOCKETALT::UDP, udpNetwork->get_adr() );
     Client*   clt = NULL;
     AddressIP ipadr;
 
-    char   buffer[MAXBUFFER];
-    unsigned int len = MAXBUFFER;
+	PacketMem mem;
     int    ret;
-    ret = sockclt.recvbuf( buffer, len, &ipadr );
+    ret = sockclt.recvbuf( mem, &ipadr );
     if( ret > 0 )
     {
-        Packet packet( buffer, len );
+        Packet packet( mem );
 	packet.setNetwork( &ipadr, sockclt );
 
         double    ts      = packet.getTimestamp();
@@ -717,7 +709,7 @@ void NetServer::recvMsg_udp( )
         // Find the corresponding client
         Client* tmp   = NULL;
 	bool    found = false;
-        for( LI i=Clients.begin(); i!=Clients.end(); i++)
+        for( LI i=udpClients.begin(); i!=udpClients.end(); i++)
         {
             tmp = (*i);
             if( tmp->serial == nserial)
@@ -735,15 +727,16 @@ void NetServer::recvMsg_udp( )
             return;
         }
 
-        // Check if the client's IP is still the same (a very little protection against spoofing client serial#)
+        // Check if the client's IP is still the same (a very little protection
+		// against spoofing client serial#)
         if( clt!=NULL && ipadr!=clt->cltadr )
         {
 	    assert( command != CMD_LOGIN ); // clt should be 0 because ObjSerial was 0
 
             COUT << "Error : IP changed for client # " << clt->serial << endl;
             discList.push_back( clt);
-	    /* It is not entirely impossible for this to happen; it would be nice to add an additional identity
-	     * check. For now we consider it an error.
+	    	/* It is not entirely impossible for this to happen; it would be nice
+			 * to add an additional identity check. For now we consider it an error.
 	     */
         }
         else
@@ -792,14 +785,24 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
             else
             {
                 const AddressIP* iptmp;
-#ifdef _TCP_PROTO
-                this->waitList.push( clt);
+				if( clt != NULL )
+				{
+				    // This must be a TCP client
+					WaitListEntry entry;
+					entry.tcp = true;
+					entry.t   = clt;
+                    this->waitList.push( entry );
                 iptmp = &clt->cltadr;
-#else
-                this->waitList.push( ipadr);
+				}
+				else
+				{
+					WaitListEntry entry;
+					entry.tcp = false;
+					entry.u   = ipadr;
+                    this->waitList.push( entry );
                 iptmp = &ipadr;
                 COUT << "Waiting authorization for client IP : " << ipadr << endl;
-#endif
+				}
                 // Redirect the login request packet to account server
                 COUT << "Redirecting login request to account server on socket " << acct_sock << endl
                 << "*** Packet to copy length : " << packet.getDataLength()<<endl;
@@ -890,7 +893,7 @@ void	NetServer::addClient( Client * clt)
 	// For now assuming a default ship on client side
 	packet2.bc_create( CMD_ENTERCLIENT, clt->serial, (char *) &tmpcs, sizeof( ClientState), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
 	cout<<"<<< SEND ENTERCLIENT -----------------------------------------------------------------------"<<endl;
-	zonemgr->broadcast( clt, &packet2, &NetworkToClient );
+	zonemgr->broadcast( clt, &packet2 ); // , &NetworkToClient );
 	cout<<">>> SEND ADDED YOU =( serial n°"<<clt->serial<<" )= --------------------------------------"<<endl;
 	clt->ingame = 1;
 
@@ -914,7 +917,7 @@ void	NetServer::posUpdate( Client * clt)
 {
 	//Packet	pckt;
 	//pckt.create( CMD_UPDATECLT, clt->serial, (char*) packet.getData(), sizeof( ClientState));
-	//zonemgr->broadcast( clt, pckt, this->Network);
+	//zonemgr->broadcast( clt, pckt );
 
 	// Set old position
 	//memcpy( &clt->old_state, &clt->current_state, sizeof( ClientState));
@@ -965,33 +968,47 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
 		memcpy( buf+NAMELEN, clt->passwd, NAMELEN);
 		buf[nbc] = 0;
 		Packet p2;
-		if( p2.send( CMD_LOGOUT, clt->serial, buf, NAMELEN+NAMELEN , SENDANDFORGET, NULL, acct_sock, __FILE__, __LINE__ ) < 0 )
+		if( p2.send( CMD_LOGOUT, clt->serial, buf, NAMELEN+NAMELEN,
+		             SENDANDFORGET, NULL, acct_sock, __FILE__, __LINE__ ) < 0 )
+        {
 			cout<<"ERROR sending LOGOUT to account server"<<endl;
+		}
 		delete buf;
 	}
 
-#ifdef _TCP_PROTO
-	// Network->closeSocket( clt->sock);
+    if( clt->isTcp() )
+	{
 	clt->sock.disconnect( __PRETTY_FUNCTION__, false );
-#else
+	    COUT << "Client " << clt->serial << " disconnected" << endl;
+	    if( clt->ingame )
+		    zonemgr->removeClient( clt );
+	    COUT << "There were "
+	         << tcpClients.size()+udpClients.size() << " clients - ";
+	    tcpClients.remove( clt);
+	}
+	else
+	{
 	Packet p1;
-	p1.send( CMD_DISCONNECT, clt->serial, NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
-#endif
-	cout<<"Client "<<clt->serial<<" disconnected"<<endl;
+	    p1.send( CMD_DISCONNECT, clt->serial, NULL, 0,
+		         SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
+	    COUT << "Client " << clt->serial << " disconnected" << endl;
 	if( clt->ingame)
 		zonemgr->removeClient( clt);
-	cout<<"There was "<<Clients.size()<<" clients - ";
-	Clients.remove( clt);
+	    COUT << "There were "
+	         << tcpClients.size()+udpClients.size() << " clients - ";
+	    udpClients.remove( clt);
+	}
 	// Broadcast client EXIT zone
 	Packet p;
-	p.bc_create( CMD_EXITCLIENT, clt->serial, NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
-	zonemgr->broadcast( clt, &p, &NetworkToClient );
+	p.bc_create( CMD_EXITCLIENT, clt->serial, NULL, 0,
+	             SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
+	zonemgr->broadcast( clt, &p );
 	if( clt != NULL)
 	{
 		delete clt;
 		clt = NULL;
 	}
-	cout<<Clients.size()<<" clients left"<<endl;
+	COUT << tcpClients.size()+udpClients.size() << " clients left" << endl;
 	nbclients--;
 	//exit( 1);
 }
@@ -1012,28 +1029,36 @@ void	NetServer::logout( Client * clt)
 		delete buf;
 	}
 
-#ifdef _TCP_PROTO
-	// Network->closeSocket( clt->sock);
+    if( clt->isTcp() )
+	{
 	clt->sock.disconnect( __PRETTY_FUNCTION__, false );
-#endif
-	cout<<"Client "<<clt->serial<<" disconnected"<<endl;
+	    COUT <<"Client "<<clt->serial<<" disconnected"<<endl;
 	if( clt->ingame)
 		zonemgr->removeClient( clt);
-	cout<<"There was "<<Clients.size()<<" clients - ";
-	Clients.remove( clt);
+	    COUT <<"There was "<< udpClients.size()+tcpClients.size() <<" clients - ";
+	    tcpClients.remove( clt );
+	}
+	else
+	{
+	    COUT <<"Client "<<clt->serial<<" disconnected"<<endl;
+	    if( clt->ingame)
+		    zonemgr->removeClient( clt);
+	    COUT <<"There was "<< udpClients.size()+tcpClients.size() <<" clients - ";
+	    udpClients.remove( clt );
+	}
 	// Broadcast client EXIT zone
 	if( clt->ingame)
 	{
 		// p.create( CMD_EXITCLIENT, clt->serial, NULL, 0, SENDRELIABLE, &clt->cltadr, clt->serial);
 		p.bc_create( CMD_EXITCLIENT, clt->serial, NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
-		zonemgr->broadcast( clt, &p, &NetworkToClient );
+		zonemgr->broadcast( clt, &p );
 	}
 	if( clt != NULL)
 	{
 		delete clt;
 		clt = NULL;
 	}
-	cout<<Clients.size()<<" clients left"<<endl;
+	COUT << udpClients.size()+tcpClients.size() <<" clients left"<<endl;
 	nbclients--;
 	//exit( 1);
 }
@@ -1044,14 +1069,12 @@ void	NetServer::logout( Client * clt)
 
 void	NetServer::closeAllSockets()
 {
-	Network->disconnect( "Closing sockets" );
-#ifdef _TCP_PROTO
-	for( LI i=Clients.begin(); i!=Clients.end(); i++)
+	tcpNetwork->disconnect( "Closing sockets" );
+	udpNetwork->disconnect( "Closing sockets" );
+	for( LI i=tcpClients.begin(); i!=tcpClients.end(); i++)
 	{
-		// Network->closeSocket( (*i)->sock);
 		(*i)->sock.disconnect( __PRETTY_FUNCTION__, false );
 	}
-#endif
 }
 
 /**************************************************************/

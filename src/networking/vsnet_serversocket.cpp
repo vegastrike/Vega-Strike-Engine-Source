@@ -3,6 +3,7 @@
 #include "vsnet_serversocket.h"
 
 #include "const.h"
+#include "vsnet_err.h"
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -55,7 +56,7 @@ void ServerSocket::disconnect( const char *s, bool fexit )
 void ServerSocketTCP::watchForNewConn( SocketSet& set, int )
 {
     cout << __FILE__ << ":" << __LINE__ << " enter " << __PRETTY_FUNCTION__ << endl;
-    set.set( _fd );
+    set.setRead( _fd );
 }
 
 SOCKETALT ServerSocketTCP::acceptNewConn( SocketSet& set )
@@ -80,11 +81,7 @@ SOCKETALT ServerSocketTCP::acceptNewConn( SocketSet& set )
         }
         else
         {
-#if defined(_WIN32) && !defined(__CYGWIN__)
-            cout<<"WIN32 error : "<<WSAGetLastError()<<endl;
-#else
-            perror("Error accepting new conn\n");
-#endif
+            COUT << "Error accepting new conn: " << vsnetLastError() << endl;
             SOCKETALT ret( 0, SOCKETALT::TCP, remote_ip );
 	    return ret;
         }
@@ -107,7 +104,7 @@ void ServerSocketUDP::watchForNewConn( SocketSet& , int )
 {
 }
 
-SOCKETALT ServerSocketUDP::acceptNewConn( SocketSet& /*set*/ )
+SOCKETALT ServerSocketUDP::acceptNewConn( SocketSet& )
 {
     SOCKETALT ret( _fd, SOCKETALT::UDP, _srv_ip );
     return ret;

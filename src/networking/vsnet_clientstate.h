@@ -25,7 +25,6 @@
 #include <string.h>
 #include "gfx/quaternion.h"
 #include "const.h"
-#include "netclass.h"
 #include "cubicsplines.h"
 #include "configxml.h"
 

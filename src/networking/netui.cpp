@@ -1,7 +1,6 @@
 #include <config.h>
 
 #include "const.h"
-#include "netclass.h"
 #include "netui.h"
 #include "vsnet_serversocket.h"
 
@@ -15,17 +14,21 @@
 	#include <fcntl.h>
 #endif
 
-NetUIBase::NetUIBase( )
+static void static_initNetwork( )
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-	std::cout<<"Initializing Winsock"<<std::endl;
+    static bool first_time = true;
+    if( first_time )
+    {
+        first_time = false;
+
+        COUT <<"Initializing Winsock"<<std::endl;
 	WORD wVersionRequested = MAKEWORD( 1, 1 );
 	WSADATA wsaData; 
 	int res = WSAStartup(wVersionRequested,&wsaData);
 	if( res != 0)
-		std::cout<<"Error initializing Winsock"<<std::endl;
-#else
-	COUT << "Not win32 VC++" << std::endl;
+            COUT <<"Error initializing Winsock"<<std::endl;
+    }
 #endif
 }
 
@@ -39,7 +42,9 @@ NetUIBase::NetUIBase( )
 
 SOCKETALT NetUITCP::createSocket( char * host, unsigned short srv_port )
 {
-    COUT "enter " << __PRETTY_FUNCTION__ << std::endl;
+    COUT << "enter " << __PRETTY_FUNCTION__ << std::endl;
+
+    static_initNetwork( );
 
 	int            local_fd;
 	AddressIP      remote_ip;
@@ -67,7 +72,7 @@ SOCKETALT NetUITCP::createSocket( char * host, unsigned short srv_port )
 		if( (he = gethostbyname( host)) == NULL)
 			f_error( "\nCould not resolve hostname ");
 		memcpy( &remote_ip.sin_addr.s_addr, he->h_addr_list[0], he->h_length);
-		std::cout<<"found : "<<inet_ntoa( remote_ip.sin_addr)<<std::endl;
+		COUT <<"found : "<<inet_ntoa( remote_ip.sin_addr)<<std::endl;
 	}
 	else
 	{
@@ -92,13 +97,15 @@ SOCKETALT NetUITCP::createSocket( char * host, unsigned short srv_port )
 	COUT << "Connected to " << inet_ntoa( remote_ip.sin_addr) << ":" << srv_port << std::endl;
 
 	SOCKETALT ret( local_fd, SOCKETALT::TCP, remote_ip );
-	std::cout << "SOCKETALT n° : " << ret.get_fd() << std::endl;
+	COUT << "SOCKETALT n° : " << ret.get_fd() << std::endl;
 	return ret;
 }
 
 ServerSocket* NetUITCP::createServerSocket( unsigned short port )
 {
-    std::cout << __FILE__ << ":" << __LINE__ << " enter " << __PRETTY_FUNCTION__ << std::endl;
+    COUT << "enter " << __PRETTY_FUNCTION__ << std::endl;
+
+    static_initNetwork( );
     
     int       local_fd;
     AddressIP local_ip;
@@ -124,21 +131,21 @@ ServerSocket* NetUITCP::createServerSocket( unsigned short port )
     local_ip.sin_port        = htons( port );
     local_ip.sin_family      = AF_INET;
     // binds socket
-    std::cout << "Bind on " << ntohl(local_ip.sin_addr.s_addr) << ", port " << ntohs( local_ip.sin_port) << std::endl;
+    COUT << "Bind on " << ntohl(local_ip.sin_addr.s_addr) << ", port " << ntohs( local_ip.sin_port) << std::endl;
     if( bind( local_fd, (sockaddr *)&local_ip, sizeof( struct sockaddr_in) )==SOCKET_ERROR )
     {
         perror( "Problem binding socket" );
         exit( -1 );
     }
 
-    std::cout << "Accepting max : " << SOMAXCONN << std::endl;
+    COUT << "Accepting max : " << SOMAXCONN << std::endl;
     if( listen( local_fd, SOMAXCONN)==SOCKET_ERROR)
     {
         perror( "Problem listening on socket" );
         exit( -1 );
     }
-    std::cout << "Listening on socket " << local_fd << std::endl;
-    std::cout << "ServerSocket n° : " << local_fd << std::endl;
+    COUT << "Listening on socket " << local_fd << std::endl
+         << "*** ServerSocket n° : " << local_fd << std::endl;
     return new ServerSocketTCP( local_fd, local_ip );
 }
 
@@ -152,6 +159,7 @@ ServerSocket* NetUITCP::createServerSocket( unsigned short port )
 SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port )
 {
     COUT << " enter " << __PRETTY_FUNCTION__ << std::endl;
+    static_initNetwork( );
 
     AddressIP local_ip;
     AddressIP remote_ip;
@@ -192,11 +200,11 @@ SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port )
 
     if( host[0]<48 || host[0]>57)
     {
-        std::cout<<"Resolving host name... ";
+        COUT <<"Resolving host name... ";
         if( (he = gethostbyname( host)) == NULL)
         f_error( "\nCould not resolve hostname ");
         memcpy( &remote_ip.sin_addr.s_addr, he->h_addr_list[0], he->h_length);
-        std::cout<<"found : "<<inet_ntoa( remote_ip.sin_addr)<<std::endl;
+        COUT <<"found : "<<inet_ntoa( remote_ip.sin_addr)<<std::endl;
     }
     else
     {
@@ -231,10 +239,12 @@ SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port )
 
 ServerSocket* NetUIUDP::createServerSocket( unsigned short port )
 {
-    std::cout << __FILE__ << ":" << __LINE__ << " enter " << __PRETTY_FUNCTION__ << std::endl;
+    COUT << "enter " << __PRETTY_FUNCTION__ << std::endl;
+    static_initNetwork( );
 
     int       local_fd;
     AddressIP local_ip;
+
 #if defined(_WIN32) && !defined(__CYGWIN__)
     static const int sockerr= INVALID_SOCKET;
 #else

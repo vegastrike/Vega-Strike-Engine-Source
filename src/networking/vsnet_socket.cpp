@@ -2,8 +2,9 @@
 
 #include <list>
 #include <fcntl.h>
-#include "vsnet_socket.h"
 #include "const.h"
+#include "vsnet_socket.h"
+#include "vsnet_err.h"
 
 using std::cout;
 using std::cerr;
@@ -46,12 +47,14 @@ public:
 
     virtual int  sendbuf( PacketMem& packet, const AddressIP* to);
     virtual int  recvbuf( void *buffer, unsigned int &len, AddressIP *from);
+    virtual int  recvbuf( PacketMem& buffer, AddressIP *from);
     virtual void ack( );
 
     virtual void disconnect( const char *s, bool fexit );
 
     virtual void dump( std::ostream& ostr );
 
+    virtual void watch( SocketSet& set );
     virtual bool isActive( SocketSet& set ) { return set.is_set(fd); }
 };
 
@@ -91,36 +94,40 @@ public:
 
     virtual int  sendbuf( PacketMem& packet, const AddressIP* to);
     virtual int  recvbuf( void *buffer, unsigned int &len, AddressIP *from);
+    virtual int  recvbuf( PacketMem& buffer, AddressIP *from);
     virtual void ack( );
 
     virtual void disconnect( const char *s, bool fexit );
 
     virtual void dump( std::ostream& ostr );
 
+    virtual void watch( SocketSet& set );
     virtual bool isActive( SocketSet& set );
 
 private:
-    struct blob
+    /* --- BEGIN section for nonblocking receive support --- */
+
+    struct Blob
     {
         char*  buf;
 	size_t present_len;
 	size_t expected_len;
 
-	blob( ) : buf(0), present_len(0), expected_len(0) { }
+        Blob( ) : buf(0), present_len(0), expected_len(0) { }
 
-	blob( size_t len ) : present_len(0), expected_len(len)
+        Blob( size_t len ) : present_len(0), expected_len(len)
 	{
 	    buf = new char[len];
 	}
 	
-	~blob( )
+        ~Blob( )
 	{
 	    delete [] buf;
 	}
 
     private:
-        blob( const blob& orig );             // forbidden
-        blob& operator=( const blob& orig );  // forbidden
+        Blob( const Blob& orig );             // forbidden
+        Blob& operator=( const Blob& orig );  // forbidden
     };
 
     /** if we have received part of a TCP packet but not the complete packet,
@@ -129,8 +136,8 @@ private:
      *  the application processes them one at a time, the received, unprocessed
      *  packets are stored in the list.
      */
-    std::list<blob*> _complete_packets;
-    blob*       _incomplete_packet;
+    std::list<Blob*> _complete_packets;
+    Blob*            _incomplete_packet;
 
     /** We send 4 bytes as a packet length indicator. Unfortunately, even these
      *  4 bytes may be split by TCP. These two variables are needed for collecting
@@ -146,6 +153,8 @@ private:
      *  notices it.
      */
     bool        _connection_closed;
+
+    /* --- END section for nonblocking receive support --- */
 };
 
 /***********************************************************************
@@ -266,11 +275,6 @@ bool VsnetSocket::valid() const
     return (fd>0);
 }
 
-void VsnetSocket::watch( SocketSet& set )
-{
-    set.set(fd);
-}
-
 bool VsnetSocket::eq( const VsnetSocket& r )
 {
     const VsnetSocket* r2 = (const VsnetSocket*)&r;
@@ -282,7 +286,6 @@ bool VsnetSocket::eq( const VsnetSocket& r )
  ***********************************************************************/
  
 int VsnetUDPSocket::sendbuf( PacketMem& packet, const AddressIP* to)
-// int VsnetUDPSocket::sendbuf( void *buffer, unsigned int len, const AddressIP* to)
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << endl;
     int numsent;
@@ -293,18 +296,10 @@ int VsnetUDPSocket::sendbuf( PacketMem& packet, const AddressIP* to)
 
     assert( dest != NULL );
 
-    // if( (numsent = sendto( fd, buffer, len, 0, (sockaddr*) dest, sizeof(struct sockaddr_in)))<0)
     if( (numsent = sendto( fd, packet.getConstBuf(), packet.len(), 0, (sockaddr*) dest, sizeof(struct sockaddr_in)))<0)
     {
-#if defined(_WIN32) && !defined(__CYGWIN__)
-    // if( (numsent = sendto( fd, (char *) buffer, len, 0, (sockaddr*) dest, sizeof(struct sockaddr_in)))<0)
-        if( WSAGetLastError()!=WSAEINVAL)
-            cout << "WIN32 error : " << WSAGetLastError() << endl;
+        COUT << "Error sending: " << vsnetLastError() << endl;
         return -1;
-#else
-        perror( "Error sending ");
-        return -1;
-#endif
     }
     cout<<"Sent "<<numsent<<" bytes"<<" -> "<<inet_ntoa( dest->sin_addr)<<":"<<ntohs(dest->sin_port)<<endl;
     return numsent;
@@ -336,12 +331,7 @@ int VsnetUDPSocket::recvbuf( void *buffer, unsigned int& len, AddressIP* from)
     ret = recvfrom( fd, (char *)buffer, len, 0, (sockaddr*)(sockaddr_in*)from, &len1 );
     if( ret < 0 )
     {
-        COUT << " fd=" << fd << " error receiving: ";
-#if defined(_WIN32) && !defined(__CYGWIN__)
-        cout << WSAGetLastError() << endl;
-#else
-        cout << strerror(errno) << endl;
-#endif
+        COUT << " fd=" << fd << " error receiving: " << vsnetLastError() << endl;
         ret = -1;
     }
     else if( ret == 0 )
@@ -358,6 +348,21 @@ int VsnetUDPSocket::recvbuf( void *buffer, unsigned int& len, AddressIP* from)
     return ret;
 }
 
+int VsnetUDPSocket::recvbuf( PacketMem& buffer, AddressIP* from)
+{
+    char         buf[MAXBUFFER];
+    unsigned int len = MAXBUFFER;
+    int          ret = 0;
+
+    ret = this->VsnetUDPSocket::recvbuf( buf, len, from );
+    if( ret > 0 )
+    {
+        buffer.set( buf, len, PacketMem::LeaveOwnership );
+    }
+
+    return ret;
+}
+
 void VsnetUDPSocket::disconnect( const char *s, bool fexit )
 {
     if( fexit )
@@ -369,6 +374,11 @@ void VsnetUDPSocket::dump( std::ostream& ostr )
     ostr << "( s=" << fd << " UDP r=" << _remote_ip << " )";
 }
 
+void VsnetUDPSocket::watch( SocketSet& set )
+{
+    set.setRead(fd);
+}
+
 /***********************************************************************
  * VsnetTCPSocket - definition
  ***********************************************************************/
@@ -377,7 +387,7 @@ VsnetTCPSocket::~VsnetTCPSocket( )
 {
     while( !_complete_packets.empty() )
     {
-        blob* b = _complete_packets.front();
+        Blob* b = _complete_packets.front();
 	_complete_packets.pop_front();
 	delete b;
     }
@@ -388,13 +398,12 @@ VsnetTCPSocket::~VsnetTCPSocket( )
     }
 }
 
-// int VsnetTCPSocket::sendbuf( void *buffer, unsigned int len, const AddressIP* to)
 int VsnetTCPSocket::sendbuf( PacketMem& packet, const AddressIP* to)
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << endl;
     int numsent;
 
-#if 1
+#ifdef VSNET_DEBUG
     //
     // DEBUG block - remove soon
     //
@@ -427,7 +436,7 @@ int VsnetTCPSocket::recvbuf( void *buffer, unsigned int& len, AddressIP* from)
 {
     if( _complete_packets.empty() == false )
     {
-        blob* b = _complete_packets.front();
+        Blob* b = _complete_packets.front();
         _complete_packets.pop_front();
         assert( b );
         assert( b->present_len == b->expected_len );
@@ -448,6 +457,33 @@ int VsnetTCPSocket::recvbuf( void *buffer, unsigned int& len, AddressIP* from)
     }
 }
 
+int VsnetTCPSocket::recvbuf( PacketMem& buffer, AddressIP* )
+{
+    if( _complete_packets.empty() == false )
+    {
+	unsigned int ret;
+        Blob* b = _complete_packets.front();
+        _complete_packets.pop_front();
+        assert( b );
+        assert( b->present_len == b->expected_len );
+
+	ret = b->present_len;
+	buffer.set( b->buf, ret, PacketMem::TakeOwnership );
+	b->buf = NULL;
+        delete b;
+        return ret;
+    }
+    else
+    {
+        if( _connection_closed )
+        {
+            COUT << __PRETTY_FUNCTION__ << " connection is closed" << endl;
+            return 0;
+        }
+        return -1;
+    }
+}
+
 void VsnetTCPSocket::disconnect( const char *s, bool fexit )
 {
     if( fd > 0 )
@@ -461,7 +497,9 @@ void VsnetTCPSocket::disconnect( const char *s, bool fexit )
     cout << __FILE__ << ":" << __LINE__ << " "
          << s << " :\tWarning: disconnected" << strerror(errno) << endl;
     if( fexit )
+    {
         exit(1);
+}
 }
 
 void VsnetTCPSocket::dump( std::ostream& ostr )
@@ -469,17 +507,21 @@ void VsnetTCPSocket::dump( std::ostream& ostr )
     ostr << "( s=" << fd << " TCP r=" << _remote_ip << " )";
 }
 
+void VsnetTCPSocket::watch( SocketSet& set )
+{
+    set.setRead( fd );
+    if( _complete_packets.empty() == false )
+    {
+        set.setReadAlwaysTrue( fd );
+    }
+    }
+
 bool VsnetTCPSocket::isActive( SocketSet& set )
 {
     COUT << "enter " << __FUNCTION__ << endl;
 
-    if( _complete_packets.empty() == false )
-    {
-        COUT << "leave " << __FUNCTION__ << endl;
-        return true;
-    }
-
-    /* True is the correct answer: the app must call recvbuf once after this to receive 0
+    /* True is the correct answer when the connection is closed:
+     * the app must call recvbuf once after this to receive 0
      * and start close processing.
      */
     if( _connection_closed )
@@ -488,10 +530,18 @@ bool VsnetTCPSocket::isActive( SocketSet& set )
         return true;
     }
 
-    if( set.is_set(fd) == false )
+    if( set.is_setRead(fd) == false )
+    {
+        if( _complete_packets.empty() == false )
+        {
+            COUT << "leave " << __FUNCTION__ << endl;
+            return true;
+        }
+        else
     {
         COUT << "leave " << __FUNCTION__ << endl;
         return false;
+    }
     }
 
     bool endless   = true;
@@ -501,7 +551,7 @@ bool VsnetTCPSocket::isActive( SocketSet& set )
     int arg = fcntl( fd, F_GETFL, 0 );
     if( arg == -1 )
     {
-        COUT << "Can't very blocking mode, assume blocking" << endl;
+        COUT << "Can't verify blocking mode, assume blocking" << endl;
         endless = false;
     }
     else if( (arg & O_NONBLOCK) == false )
@@ -534,11 +584,7 @@ bool VsnetTCPSocket::isActive( SocketSet& set )
                     COUT << "leave " << __FUNCTION__ << endl;
 		    return ( _complete_packets.empty() == false );
 		}
-#if !defined(_WIN32) || defined(__CYGWIN__)
-	        if( errno == EWOULDBLOCK )
-#else
-			 if( WSAGetLastError()==WSAEWOULDBLOCK)
-#endif
+                if( vsnetEWouldBlock() )
 		{
                     COUT << "leave " << __FUNCTION__ << endl;
 		    return ( _complete_packets.empty() == false );
@@ -555,7 +601,7 @@ bool VsnetTCPSocket::isActive( SocketSet& set )
 	        _incomplete_len_field = 0;
 		len = ntohl( *(unsigned int*)_len_field );
 		COUT << "Next packet to receive has length " << len << endl;
-		_incomplete_packet = new blob( len );
+                _incomplete_packet = new Blob( len );
 	    }
 	}
         if( _incomplete_packet != 0 )
@@ -571,11 +617,7 @@ bool VsnetTCPSocket::isActive( SocketSet& set )
                     COUT << "leave " << __FUNCTION__ << endl;
 		    return ( _complete_packets.empty() == false );
 		}
-#if !defined(_WIN32) || defined(__CYGWIN__)
-	        if( errno == EWOULDBLOCK )
-#else
-			 if( WSAGetLastError()==WSAEWOULDBLOCK)
-#endif
+                if( vsnetEWouldBlock() )
 		{
                     COUT << "leave " << __FUNCTION__ << endl;
 		    return ( _complete_packets.empty() == false );
@@ -592,12 +634,12 @@ bool VsnetTCPSocket::isActive( SocketSet& set )
 		assert( _incomplete_packet->expected_len == _incomplete_packet->present_len );
 	        _complete_packets.push_back( _incomplete_packet );
 		gotpacket = true;
-#if 1
+#ifdef VSNET_DEBUG
                 //
                 // DEBUG block - remove soon
                 //
                 {
-		    blob* b = _incomplete_packet;
+                    Blob* b = _incomplete_packet;
                     COUT << "received buffer with len " << b->present_len << ": " << endl;
 		    PacketMem m( b->buf, b->present_len, PacketMem::LeaveOwnership );
 		    m.dump( cout, 3 );

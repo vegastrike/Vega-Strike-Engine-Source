@@ -38,25 +38,21 @@
 #include <sys/time.h>
 #include <unistd.h>
 #endif
+
 class SocketSet
 {
-    fd_set _s3t;
-    int    _max_sock;
+    fd_set _read_set_select;
+    int    _max_sock_select;
+    fd_set _read_set_always_true;
+    int    _max_sock_always_true;
 public:
-    SocketSet( ) : _max_sock( 0 )
-    {
-	clear();
-    }
+    SocketSet( );
 
-    void set( int fd ) {
-	FD_SET( fd, &this->_s3t);
-		if( fd >= _max_sock ) _max_sock = fd+1;
-    }
-    bool is_set( int fd ) const { 
-      bool i=FD_ISSET( fd, &this->_s3t); 
-      return i;
-    }
-    void clear( ) { FD_ZERO( &this->_s3t ); }
+    void setRead( int fd );
+    void setReadAlwaysTrue( int fd );
+    bool is_set( int fd ) const;
+    bool is_setRead( int fd ) const;
+    void clear( );
 
     int select( timeval* timeout );
 

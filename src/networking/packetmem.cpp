@@ -20,7 +20,6 @@ LOCALCONST_DEF(PacketMem,bool,LeaveOwnership,0)
 
 PacketMem::PacketMem( )
 {
-    MAKE_VALID
     _buffer  = NULL;
     _len     = 0;
     _cnt     = NULL;
@@ -28,7 +27,6 @@ PacketMem::PacketMem( )
 
 PacketMem::PacketMem( const PacketMem& orig )
 {
-    MAKE_VALID
     _buffer  = orig._buffer;
     _len     = orig._len;
     _cnt     = orig._cnt;
@@ -38,7 +36,6 @@ PacketMem::PacketMem( const PacketMem& orig )
 
 PacketMem::PacketMem( size_t bytesize )
 {
-    MAKE_VALID
     _buffer  = new char[bytesize];
     _len     = bytesize;
     _cnt     = new size_t;
@@ -47,7 +44,6 @@ PacketMem::PacketMem( size_t bytesize )
 
 PacketMem::PacketMem( const void* buffer, size_t size )
 {
-    MAKE_VALID
     if( buffer != NULL )
     {
         _buffer  = new char[size];
@@ -67,7 +63,6 @@ PacketMem::PacketMem( const void* buffer, size_t size )
 
 PacketMem::PacketMem( void* buffer, size_t size, bool own )
 {
-    MAKE_VALID
     inner_set( buffer, size, own );
 }
 
@@ -80,7 +75,6 @@ void PacketMem::set( void* buffer, size_t size, bool own )
 PacketMem::~PacketMem( )
 {
     release( );
-    MAKE_INVALID
 }
 
 PacketMem& PacketMem::operator=( const PacketMem& orig )

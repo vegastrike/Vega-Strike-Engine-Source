@@ -64,13 +64,21 @@ public:
 
     bool valid() const;
 
-    void         watch( SocketSet& set );
+    virtual void watch( SocketSet& set ) = 0;
     virtual bool isActive( SocketSet& set ) = 0;
 
     bool eq( const VsnetSocket& r );
 
     virtual int  sendbuf( PacketMem& packet, const AddressIP* to) = 0;
+
+    /** This function copies or moves data into the given PacketMem variable.
+     *  It is preferred over the other recvbuf function because it may reduce
+     *  the number of copy operations by at least one.
+     */
+    virtual int  recvbuf( PacketMem& buffer, AddressIP* from ) = 0;
+
     virtual int  recvbuf( void *buffer, unsigned int &len, AddressIP *from) = 0;
+
     virtual void ack( ) = 0;
 
     virtual void disconnect( const char *s, bool fexit ) = 0;
@@ -108,6 +116,10 @@ public:
         if(!_sock.isNull()) _sock->watch(set);
     }
 
+    inline bool isTcp( ) {
+        return (_sock.isNull() ? false : _sock->isTcp());
+    }
+
     inline bool isActive( SocketSet& set ) {
         return (_sock.isNull() ? false : _sock->isActive(set));
     }
@@ -122,6 +134,10 @@ public:
 
     inline int recvbuf( void *buffer, unsigned int &len, AddressIP *from) {
         return ( _sock.isNull() ? -1 : _sock->recvbuf( buffer, len, from ) );
+    }
+
+    inline int recvbuf( PacketMem& buffer, AddressIP *from) {
+        return ( _sock.isNull() ? -1 : _sock->recvbuf( buffer, from ) );
     }
 
     inline void disconnect( const char *s, bool fexit = true ) {

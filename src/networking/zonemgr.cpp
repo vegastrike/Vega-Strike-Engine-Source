@@ -61,7 +61,7 @@ void	ZoneMgr::removeClient( Client * clt)
 }
 
 // Broadcast a packet to a client's zone clients
-void	ZoneMgr::broadcast( Client * clt, Packet * pckt, NetUI *net)
+void	ZoneMgr::broadcast( Client * clt, Packet * pckt )
 {
 	//cout<<"Sending update to "<<(zone_list[clt->zone].size()-1)<<" clients"<<endl;
 	for( LI i=zone_list[clt->zone].begin(); i!=zone_list[clt->zone].end(); i++)
@@ -78,7 +78,7 @@ void	ZoneMgr::broadcast( Client * clt, Packet * pckt, NetUI *net)
 }
 
 // Broadcast all snapshots
-void	ZoneMgr::broadcastSnapshots( NetUI * net)
+void	ZoneMgr::broadcastSnapshots( )
 {
 	ClientState cstmp;
 	char buffer[MAXBUFFER];

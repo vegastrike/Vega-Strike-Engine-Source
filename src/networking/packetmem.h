@@ -52,8 +52,6 @@ private:
     void inner_set( void* buffer, size_t size, bool own );
     void ref( );
     void unref( );
-
-    DECLARE_VALID
 };
 
 #endif

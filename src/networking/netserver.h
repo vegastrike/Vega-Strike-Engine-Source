@@ -30,7 +30,6 @@
 #include "configxml.h"
 #include "accountsxml.h"
 #include "const.h"
-#include "netclass.h"
 #include "netui.h"
 #include "zonemgr.h"
 #include "client.h"
@@ -46,10 +45,8 @@ struct ServerSocket;
 /** Class Netserver : runs the server */
 class NetServer
 {
-		DefaultNetUI	NetworkToClient;
-		ServerSocket*	Network;
-		// NetUI *			Network;				// Network Interface
-		TCPNetUI *		NetAcct;				// TCP Network Interface for requesting accounts server
+        ServerSocket*   tcpNetwork;
+        ServerSocket*   udpNetwork;
 		Packet			packet;					// Network data packet
 		Packet			packeta;				// Network data packet for account server
 
@@ -66,14 +63,19 @@ class NetServer
 		timeval				srvtimeout;			// timer
 
 		vector<Account *>	Cltacct;			// Client accounts
-		list<Client *>		Clients;			// Active client connections
+        list<Client *>      tcpClients;         // Active TCP client connections
+        list<Client *>      udpClients;         // Active UDP client connections
 		list<Client *>		discList;			// Client connections to be disconnected
 		list<Client *>		logoutList;			// Client connections that logged out
-#ifdef _TCP_PROTO
-		queue<Client *>		waitList;			// Client connections waiting for login response
-#else
-		queue<AddressIP>	waitList;			// Client addresses waiting for login response
-#endif
+
+	    struct WaitListEntry
+	    {
+	        bool tcp;
+	        Client*   t; // Client connections waiting for login response
+		    AddressIP u; // Client addresses waiting for login response
+	    };
+
+        queue<WaitListEntry> waitList;
 
 		//void			loadConfig();					// Loads configuration from server.xml
 		void			authenticate( Client * clt, AddressIP sernum, Packet& packet );	// Authenticate a connected client
@@ -95,9 +97,9 @@ class NetServer
 		void			disconnect( Client * clt, const char* debug_from_file, int debug_from_line );		// Disconnect a client
 		void			logout( Client * clt);			// Clean disconnect a client
 		void			closeAllSockets();				// Disconnect all clients for shutdown
-		void			checkTimedoutClients();			// Check for timed out clients	
+        void            checkTimedoutClients_udp();     // Check for timed out clients  
 
-		Client *		addNewClient( SOCKETALT sock);	// Adds a new client to listen for
+        Client *        addNewClient( SOCKETALT sock, bool is_tcp );  // Adds a new client to listen for
 		ObjSerial		getUniqueSerial();				// Get a pseudo-unique serial
 		void			sendLoginError( Client * clt, AddressIP ipadr);
 		void			sendLoginAlready( Client * clt, AddressIP ipadr);
@@ -116,3 +118,4 @@ class NetServer
 //void	str_cat( char *res, char c, char *s);
 
 #endif
+

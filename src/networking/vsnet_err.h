@@ -1,6 +1,3 @@
-#ifndef VS_NETUI_H
-#define VS_NETUI_H
-
 /* 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,30 +14,32 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-/*
-  netUI - Network Interface - written by Stephane Vaxelaire <svax@free.fr>
-*/
+#ifndef VSNET_ERR_H
+#define VSNET_ERR_H
 
-#include "const.h"
-#include "vsnet_socket.h"
+#include <assert.h>
+#include <sstream>
+#include <string>
 
-struct ServerSocket;
-
-void f_error( char *s );
-
-class NetUITCP
+inline std::string vsnetLastError( )
 {
-public:
-    static SOCKETALT		createSocket( char * host, unsigned short port );
-    static ServerSocket*	createServerSocket( unsigned short port );
-};
+    std::ostringstream ostr;
+#if defined(_WIN32) && !defined(__CYGWIN__)
+    ostr << WSAGetLastError() << std::ends;
+#else
+    ostr << strerror(errno) << std::ends;
+#endif
+    return ostr.str();
+}
 
-class NetUIUDP
+inline bool vsnetEWouldBlock( )
 {
-public:
-    static SOCKETALT		createSocket( char * host, unsigned short port );
-    static ServerSocket*	createServerSocket( unsigned short port );
-};
+#if defined(_WIN32) && !defined(__CYGWIN__)
+    return ( WSAGetLastError() == WSAEWOULDBLOCK );
+#else
+    return ( errno == EWOULDBLOCK );
+#endif
+}
 
-#endif /* VS_NETUI_H */
+#endif /* VSNET_ERR_H */
 

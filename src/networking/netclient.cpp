@@ -40,7 +40,6 @@
 #include "vsnet_clientstate.h"
 #include "cmd/unit_generic.h"
 #include "vegastrike.h"
-#include "netclass.h"
 #include "client.h"
 
 using std::cout;
@@ -82,8 +81,6 @@ Unit * getNetworkUnit( ObjSerial cserial)
 
 NetClient::~NetClient()
 {
-    if( NetInt!=NULL)
-        delete NetInt;
     for( int i=0; i<MAXCLIENTS; i++)
     {
         if( Clients[i]!=NULL)
@@ -238,10 +235,18 @@ SOCKETALT	NetClient::init( char * addr, unsigned short port)
 	else
 		NETWORK_ATOM = (double) atoi( strnetatom.c_str());
 
-	NetInt = new DefaultNetUI;
-	this->clt_sock = NetInt->createSocket( addr, port );
-	cout << __FILE__ << ":" << __LINE__
-	     << ", createSocket(" << addr << "," << port << ") -> " << this->clt_sock << endl;
+	string nettransport;
+	nettransport = vs_config->getVariable( "network", "transport", "udp" );
+	if( nettransport == "tcp" )
+	{
+	    this->clt_sock = NetUITCP::createSocket( addr, port );
+	}
+	else
+	{
+	    this->clt_sock = NetUIUDP::createSocket( addr, port );
+	}
+	COUT << "created " << (this->clt_sock.isTcp() ? "TCP" : "UDP")
+	     << "socket (" << addr << "," << port << ") -> " << this->clt_sock << endl;
 
 	/*
 	if( this->authenticate() == -1)
@@ -270,7 +275,16 @@ void	NetClient::start( char * addr, unsigned short port)
 	this->readDatafiles();
 
 	cout<<"Initializing network connection..."<<endl;
-	this->clt_sock = NetInt->createSocket( addr, port );
+	string nettransport;
+	nettransport = vs_config->getVariable( "network", "transport", "udp" );
+	if( nettransport == "tcp" )
+	{
+	    this->clt_sock = NetUITCP::createSocket( addr, port );
+	}
+	else
+	{
+	    this->clt_sock = NetUIUDP::createSocket( addr, port );
+	}
 
 	if( this->authenticate() == -1)
 	{
@@ -292,7 +306,6 @@ void	NetClient::start( char * addr, unsigned short port)
 void	NetClient::checkKey()
 {
 	/*
-	Packet	packet2;
 	fd_set	fd_keyb;
 	int		s;
 	char	c;
@@ -313,12 +326,13 @@ void	NetClient::checkKey()
 		if( c != 0x0a)
 		{
 			if( c == 'Q' || c == 'q')
+			{
 				keeprun = 0;
+			}
 			else if( serial!=0)
 			{
-				packet2.create( CMD_POSUPDATE, this->serial, &c, sizeof(char));
-				packet2.tosend();
-				NetInt->sendbuf( this->clt_sock, (char *) &packet2, packet2.getSendLength(), NULL);
+				Packet	packet2;
+				packet2.send( CMD_POSUPDATE, this->serial, &c, sizeof(char), SENDRELIABLE, NULL, clt_sock, __FILE__, __LINE__ );
 			}
 		}
 	}
@@ -353,7 +367,6 @@ int		NetClient::isTime()
 
 // void	NetClient::sendMsg()
 // {
-// 	sendQueue.send( this->NetInt);
 // }
 
 /**************************************************************/
@@ -396,8 +409,6 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
     char      buffer[MAXBUFFER];
     unsigned int    len = MAXBUFFER;
     int recvbytes = clt_sock.recvbuf( buffer, len, &sender_adr );
-
-    // nbpackets = recvQueue.receive( this->NetInt, this->clt_sock, sender_adr, this->serial );
 
     if( recvbytes <= 0)
     {
@@ -764,10 +775,11 @@ void	NetClient::inGame()
 
 void	NetClient::sendAlive()
 {
-#ifdef _UDP_PROTO
+    if( clt_sock.isTcp() == false )
+    {
 	Packet	p;
 	p.send( CMD_PING, this->serial, NULL, 0, SENDANDFORGET, NULL, this->clt_sock, __FILE__, __LINE__ );
-#endif
+    }
 }
 
 /*************************************************************/

@@ -4,10 +4,8 @@
 #include "packet.h"
 #include "lin_time.h"
 
-#ifdef _UDP_PROTO
-    char    nbpackets = 0;
-    int     char_size = sizeof( char)*8;
-#endif
+    // char    nbpackets = 0;
+    // int     char_size = sizeof( char)*8;
 
 static  unsigned int microtime;
 LOCALCONST_DEF(Packet,unsigned short,header_length,sizeof( struct Header))
@@ -42,12 +40,8 @@ Packet::Packet( const void* buffer, size_t sz )
 {
     if( sz >= header_length )
     {
-#if 0
-        _packet = PacketMem( buffer, sz );
-#else
         PacketMem mem( buffer, sz );
         _packet = mem;
-#endif
 
 	assert( ((const char*)buffer)[0] == _packet.getConstBuf()[0] );
 	h.ntoh( _packet.getConstBuf() );
@@ -69,6 +63,40 @@ Packet::Packet( const void* buffer, size_t sz )
 	         << endl;
 	    assert( ((const char*)buffer)[0] == _packet.getConstBuf()[0] );
 	    assert( ((unsigned char*)buffer)[0] == h.command );
+	}
+    }
+    else
+    {
+        COUT << "Packet not correctly received, not enough data for header" << endl;
+    }
+    flags = NONE;
+    nbsent = 0;
+    destaddr = NULL;
+}
+
+Packet::Packet( PacketMem& buffer )
+{
+    if( buffer.len() >= header_length )
+    {
+        _packet = buffer;
+
+	h.ntoh( _packet.getConstBuf() );
+	size_t sz = buffer.len();
+        sz -= header_length;
+        if( h.data_length > sz )
+        {
+            COUT << "Packet not correctly received, not enough data for buffer" << endl
+	         << "    should be still " << h.data_length << " but buffer has only " << sz << endl;
+	    display( __FILE__, __LINE__ );
+        }
+	else
+	{
+	    COUT << "Parsed a packet with"
+	         << " cmd=" << Cmd(h.command) << "(" << (int)h.command << ")"
+	         << " ser=" << h.serial
+	         << " ts=" << h.timestamp
+	         << " len=" << h.data_length
+	         << endl;
 	}
     }
     else
