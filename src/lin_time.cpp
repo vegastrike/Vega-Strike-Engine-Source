@@ -80,7 +80,7 @@ double GetElapsedTime() {
 void UpdateTime() {
 #ifdef WIN32
   QueryPerformanceCounter((LARGE_INTEGER*)&newtime);
-  elapsedtime = ((float)(newtime-ttime))/freq;
+  elapsedtime = ((double)(newtime-ttime))/freq;
   ttime = newtime;
 #else
   lasttime = newtime;
