@@ -4842,6 +4842,8 @@ const Unit * loadUnitByCache(std::string name,int faction) {
 	  return temprate;
 }
 bool Unit::ReduceToTemplate() {
+	vector <Cargo> savedCargo;
+	savedCargo.swap(image->cargo);
 	int upfac = FactionUtil::GetFaction("upgrades");
 	const Unit * temprate = makeFinalBlankUpgrade (name,faction);
     bool success=false;
@@ -4851,6 +4853,7 @@ bool Unit::ReduceToTemplate() {
 	if (pct>0)
 	  success=true;
     }
+	savedCargo.swap(image->cargo);
     return success;
 }
 
@@ -4869,6 +4872,8 @@ int Unit::RepairCost () {
 	return cost;
 }
 int Unit::RepairUpgrade () {
+	vector <Cargo> savedCargo;
+	savedCargo.swap(image->cargo);
 	int upfac = FactionUtil::GetFaction("upgrades");
 	const Unit * temprate = makeFinalBlankUpgrade (name,faction);
     int success=0;
@@ -4878,6 +4883,7 @@ int Unit::RepairUpgrade () {
 	if (pct>0)
 	  success=1;
     }
+	savedCargo.swap(image->cargo);
     UnitImages * im= &GetImageInformation();
     for (int i=0;i < 1+MAXVDUS+UnitImages::NUMGAUGES;i++) {
         if (im->cockpit_damage[i]!=1) {
