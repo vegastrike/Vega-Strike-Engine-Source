@@ -73,12 +73,20 @@ class MatchVelocity : public MatchAngularVelocity {
  */
 class FlyByWire : public Orders::MatchVelocity {
  protected:
+  Vector DesiredThrust;
   ///If shelton slide, do not have the computer match linear
   bool sheltonslide;
+  bool controltype;//false for car
  public:
   FlyByWire ();
   ~FlyByWire ();
+  void SwitchFlightMode () {
+    controltype=!controltype;
+  }
   ///Turns on or off velocity resolution
+  void ThrustRight (float percent);
+  void ThrustUp (float percent);
+  void ThrustFront(float percent);
   void SheltonSlide (bool onoff);
   ///Stops... sets desired velocity to 0
   void Stop (float percentage);

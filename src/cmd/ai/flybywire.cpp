@@ -153,8 +153,8 @@ MatchVelocity::~MatchVelocity () {
 
 
 
-FlyByWire::FlyByWire (): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false,false), sheltonslide(false){
-
+FlyByWire::FlyByWire (): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false,false), sheltonslide(false),controltype(true){
+  DesiredThrust= Vector(0,0,0);
 
 
 }
@@ -251,19 +251,40 @@ void FlyByWire::Accel (float per) {
 
 
 #define FBWABS(m) (m>=0?m:-m)
-
-void FlyByWire::Execute () {
-
-  if (sheltonslide) {
-
-    MatchAngularVelocity::Execute();//only match turning, keep velocity same
-
+void FlyByWire::ThrustRight (float percent) {
+  DesiredThrust.i = parent->Limits().lateral * percent;
+}
+void FlyByWire::ThrustUp (float percent) {
+  DesiredThrust.j = parent->Limits().vertical * percent;
+}
+void FlyByWire::ThrustFront (float percent) {
+  if (percent>0) {
+    DesiredThrust.k = parent->Limits().forward * percent;
   }else {
-
-    MatchVelocity::Execute();
-
+    DesiredThrust.k = parent->Limits().retro *percent;
   }
+}
+void FlyByWire::Execute () {
+  bool desireThrust=false;
+  if (DesiredThrust.i||DesiredThrust.j||DesiredThrust.k) {
+    desired_velocity = parent->UpCoordinateLevel(parent->GetVelocity())+(SIMULATION_ATOM*DesiredThrust);
+    parent->GetComputerData().set_speed = desired_velocity.Magnitude();
 
+    desireThrust=true;
+  }
+  if (!controltype) {
+    if (desired_velocity.k<0) {
+      desired_velocity.k=0;
+      parent->GetComputerData().set_speed = 0;
+  
+    }
+  }
+  if (sheltonslide&&(!desireThrust)) {
+    MatchAngularVelocity::Execute();//only match turning, keep velocity same
+  }else {
+    MatchVelocity::Execute();
+  }
+  DesiredThrust.Set(0,0,0);
 } 
 
 

@@ -231,6 +231,15 @@ void GameVegaConfig::initCommandMap(){
   command_map["TimeDec"]=dec_time_compression;
   command_map["TimeReset"]=reset_time_compression;
   // mapping from command string to keyboard handler
+  command_map["ThrustModeKey"]=FlyByKeyboard::KSwitchFlightMode ;
+  command_map["ThrustRight"]=FlyByKeyboard::KThrustRight ;
+  command_map["ThrustLeft"]=FlyByKeyboard::KThrustLeft ;
+  command_map["ThrustBack"]=FlyByKeyboard::KThrustBack ;
+  command_map["ThrustFront"]=FlyByKeyboard::KThrustFront ;
+  command_map["ThrustDown"]=FlyByKeyboard::KThrustDown ;
+  command_map["ThrustUp"]=FlyByKeyboard::KThrustUp ;
+
+
   command_map["SheltonKey"]=FlyByKeyboard::SheltonKey ;
   command_map["MatchSpeedKey"]=FlyByKeyboard::MatchSpeedKey ;
   command_map["PauseKey"]=pause_key;

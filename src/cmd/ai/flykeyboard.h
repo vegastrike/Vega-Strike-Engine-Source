@@ -18,6 +18,13 @@ class FlyByKeyboard: public FlyByWire {
   float clamp_axis(float v);
   float reduce_axis (float v);
  public:
+  static void KSwitchFlightMode (int,KBSTATE);
+  static void KThrustRight (int,KBSTATE);
+  static void KThrustLeft (int,KBSTATE);
+  static void KThrustUp (int,KBSTATE);
+  static void KThrustDown (int,KBSTATE);
+  static void KThrustFront (int,KBSTATE);
+  static void KThrustBack (int,KBSTATE);
   static void SheltonKey (int,KBSTATE);
   static void StartKey (int,KBSTATE);
   static void StopKey (int, KBSTATE);

@@ -6,10 +6,14 @@
 #include "xml_support.h"
 #include "vs_globals.h"
 struct StarShipControlKeyboard {
+  bool switchmode;
   bool setunvel;
   bool setnulvel;
   bool matchspeed;
   bool jumpkey;
+  signed char axial;
+  signed char vertical;
+  signed char horizontal;
   int sheltonpress;
   int sheltonrelease;
   int uppress;//negative if not pressed last
@@ -36,7 +40,7 @@ struct StarShipControlKeyboard {
   bool autopilot;
   bool terminateauto;
   bool realauto;
-  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=terminateauto=setunvel=setnulvel=realauto=matchspeed=false;}
+  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=terminateauto=setunvel=switchmode=setnulvel=realauto=matchspeed=false;axial=vertical=horizontal=0;}
   StarShipControlKeyboard() {UnDirty();}
 };
 static vector <StarShipControlKeyboard> starshipcontrolkeys;
@@ -263,6 +267,16 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
   } else {
     SheltonSlide(false);
   }
+  if (SSCK.switchmode) {
+    FlyByWire::SwitchFlightMode();
+  }
+  if (SSCK.vertical) {
+    FlyByWire::ThrustUp (SSCK.vertical);
+  }
+  if (SSCK.horizontal)
+    FlyByWire::ThrustRight(SSCK.horizontal);
+  if (SSCK.axial)
+    FlyByWire::ThrustFront(SSCK.axial);
   if (SSCK.autopilot&&!autopilot) {
     autopilot = new Orders::FaceTarget (false,1);
     autopilot->SetParent (parent);
@@ -357,6 +371,79 @@ void FlyByKeyboard::UpKey(int, KBSTATE k) {
   default:break;
   }
 }
+void FlyByKeyboard::KThrustRight (int,KBSTATE k) {
+  if (g().dirty)g().UnDirty();
+  switch (k) {
+  case DOWN:g().horizontal+=1;
+    break;
+  case UP:
+  case PRESS:
+  case RELEASE:
+  case RESET:
+    break;
+  }
+}
+void FlyByKeyboard::KThrustLeft (int,KBSTATE k) {
+  if (g().dirty)g().UnDirty();
+  switch (k) {
+  case DOWN:g().horizontal-=1;
+    break;
+  case UP:
+  case PRESS:
+  case RELEASE:
+  case RESET:
+    break;
+  }
+}
+void FlyByKeyboard::KThrustUp (int,KBSTATE k) {
+  if (g().dirty)g().UnDirty();
+  switch (k) {
+  case DOWN:g().vertical+=1;
+    break;
+  case UP:
+  case PRESS:
+  case RELEASE:
+  case RESET:
+    break;
+  }
+}
+void FlyByKeyboard::KThrustDown (int,KBSTATE k) {
+  if (g().dirty)g().UnDirty();
+  switch (k) {
+  case DOWN:g().vertical-=1;
+    break;
+  case UP:
+  case PRESS:
+  case RELEASE:
+  case RESET:
+    break;
+  }
+}
+void FlyByKeyboard::KThrustFront(int,KBSTATE k) {
+  if (g().dirty)g().UnDirty();
+  switch (k) {
+  case DOWN:g().axial+=1;
+    break;
+  case UP:
+  case PRESS:
+  case RELEASE:
+  case RESET:
+    break;
+  }
+}
+void FlyByKeyboard::KThrustBack (int,KBSTATE k) {
+  if (g().dirty)g().UnDirty();
+  switch (k) {
+  case DOWN:g().axial-=1;
+    break;
+  case UP:
+  case PRESS:
+  case RELEASE:
+  case RESET:
+    break;
+  }
+}
+
 void FlyByKeyboard::DownKey (int,KBSTATE k) {
   if (g().dirty)g().UnDirty();
   switch (k) {
@@ -371,6 +458,8 @@ void FlyByKeyboard::DownKey (int,KBSTATE k) {
   default:break;
   }
 }
+
+
 void FlyByKeyboard::LeftKey (int, KBSTATE k) {
   if (g().dirty) g().UnDirty();
   switch (k) {
@@ -383,6 +472,16 @@ void FlyByKeyboard::LeftKey (int, KBSTATE k) {
   case RELEASE: g().leftpress=-FBWABS(g().leftpress);
     break;
   default:break;
+  }
+}
+void FlyByKeyboard::KSwitchFlightMode (int,KBSTATE k) {
+  if (g().dirty) g().UnDirty();
+  switch (k) {
+  case PRESS:
+    g().switchmode=true;
+    break;
+  default:
+    break;
   }
 }
 void FlyByKeyboard::RightKey (int,KBSTATE k) {
