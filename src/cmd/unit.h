@@ -88,6 +88,7 @@ class Unit {
   PlanetaryOrbitData * planet;
   ///The orbit needs to have access to the velocity directly to disobey physics laws to precalculate orbits
   friend class PlanetaryOrbit;
+  friend class ContinuousTerrain;
   ///VDU needs mount data to draw weapon displays
   friend void VDU::DrawWeapon (Unit * parent);
   friend void VDU::DrawDamage (Unit * parent);
@@ -558,6 +559,7 @@ public:
   void CollideAll();
   ///Returns the current world space position
   Vector Position() const{return cumulative_transformation.position;};
+  const float*  GetTransformation () const {return &cumulative_transformation_matrix[0];}
   ///Returns the unit-space position
   Vector LocalPosition() const {return curr_physical_state.position;};
   ///Sets the unit-space position

@@ -1,6 +1,11 @@
 #include "terrain.h"
 class StarSystem;
 const int numcontterr=4;
+struct MeshDat {
+  class Mesh * mesh;
+  class csRapidCollider * collider;
+  Matrix mat;
+};
 class ContinuousTerrain {
   Vector Scales;
   float sizeX;
@@ -8,6 +13,7 @@ class ContinuousTerrain {
   int width;
   int numcontterr;
   Terrain **data;
+  MeshDat * md;
   Matrix transformation;
   Vector *location;
   bool *dirty;
@@ -19,6 +25,8 @@ class ContinuousTerrain {
    *  Centers terrain around camera
    */
   void AdjustTerrain(StarSystem *);
+
+  void AdjustTerrain(Matrix transform, const Matrix transformation, const Vector &unitpos,int i);
   ~ContinuousTerrain();
   void DisableDraw();
   void EnableDraw();
