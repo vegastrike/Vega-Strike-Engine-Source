@@ -57,6 +57,9 @@ void BaseInterface::Room::BaseShip::Draw (BaseInterface *base) {
 		GFXEnable (DEPTHWRITE);
 		Vector p,q,r;
 		_Universe->AccessCamera()->GetOrientation (p,q,r);
+		co=_Universe->AccessCamera()->getCockpitOffset();
+		_Universe->AccessCamera()->setCockpitOffset(0);
+		_Universe->AccessCamera()->UpdateGFX();
 		QVector pos =  _Universe->AccessCamera ()->GetPosition();
 		Matrix cam (p.i,p.j,p.k,q.i,q.j,q.k,r.i,r.j,r.k,pos);
 		Matrix final;
@@ -69,7 +72,9 @@ void BaseInterface::Room::BaseShip::Draw (BaseInterface *base) {
 		(un)->DrawNow(final);
 		GFXDisable (DEPTHTEST);
 		GFXDisable (DEPTHWRITE);
-		_Universe->AccessCockpit()->SetView (CP_PAN);
+		_Universe->AccessCamera()->setCockpitOffset(co);
+		_Universe->AccessCamera()->UpdateGFX();
+//		_Universe->AccessCockpit()->SetView (CP_PAN);
 		GFXHudMode (GFXTRUE);
 	}
 }
