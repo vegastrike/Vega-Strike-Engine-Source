@@ -2260,7 +2260,7 @@ static std::string GarnerInfoFromSaveGame(string text) {
   savegame.ParseSaveGame(text,system,"Gemini/troy",pos,updatepos,creds,Ships,_Universe->CurrentCockpit(),"",true);
   CurrentSaveGameName=sillytemp;
   text="Savegame: "+text+"#n#_________________#n#";  
-  text+="Credits: "+tostring((int)creds)+"."+tostring(((int)(creds*100))%100)+"#n#";
+  text+="Credits: "+tostring((unsigned int)creds)+"."+tostring(((unsigned int)(creds*100))%100)+"#n#";
   text+=simplePrettySystem(system)+"#n#";
   if (Ships.size()) {
     text+="Starship: "+simplePrettyShip(Ships[0])+"#n#";
