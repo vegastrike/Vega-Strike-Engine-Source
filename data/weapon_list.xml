@@ -1,5 +1,5 @@
 <Weapons>
-<Beam name="Laser" mountsize="light"> 
+<Bolt name="Laser" mountsize="light"> 
 <Energy rate="1" stability="4" refire=".4">
 </Energy>
 <Damage rate="18" damage="50" longrange="1">
@@ -8,7 +8,7 @@
 </Distance>
 <Appearance file="bolt.bmp" r="1" g="0" b="0" a="1" >
 </Appearance>
-</Beam>
+</Bolt>
 
 <Missile name="Dumbfire">
 <Locktime time="3">
@@ -203,7 +203,7 @@
 </Appearance>
 </Missile>
 
-<Missile name="Heat Seaking Missile">
+<Missile name="HeatSeaker">
 <Locktime time= "3">
 </Locktime>
 <Energy rate="0" stability="6" refire=".3">

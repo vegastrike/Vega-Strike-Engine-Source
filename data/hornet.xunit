@@ -1,15 +1,18 @@
 <Unit>
 	<Meshfile file="hornet-mesh.xml"/>
 	<BspMesh/>
-	<Light file="supernova.bmp" red=".1" green=".7" blue="0" x="-.5" y="-0" z="-2.9" size= ".6"/>
-	<Light file="supernova.bmp" red=".1" green=".7" blue="0" x=".5" y="-0" z="-2.9" size= ".6"/>
        
 
 <!-- new elements added -->
-<Light file="supernova.bmp" x="0.628506" y="-0.174670" z="-2.450000" size="1"/>
-<Light file="supernova.bmp" x="-0.577965" y="-0.147953" z="-2.450000" size="1"/>
-<Mount weapon="Laser" size="Light" x="-4.000000" y="-0.140000" z="4.000000" ri="-0.000000" rj="0.000000" rk="1.000000" qi="-0.053776" qj="-0.998553" qk="0.000000"/>
-<Mount weapon="Laser" size="Light" x="4.000000" y="-0.140000" z="4.000000" ri="0.000000" rj="0.000000" rk="1.000000" qi="-0.044586" qj="-0.999006" qk="0.000000"/>
+<Light file="supernova.bmp" x="0.628506" y="0.174670" z="-2.450000" size="1"/>
+<Light file="supernova.bmp" x="-0.577965" y="0.147953" z="-2.450000" size="1"/>
+<Mount weapon="Laser" size="Light" x="-4.000000" y="0.140000" z="4.000000" ri="-0.000000" rj="0.000000" rk="1.000000" qi="-0.053776" qj="-0.998553" qk="0.000000"/>
+<Mount weapon="Laser" size="Light" x="4.000000" y="0.140000" z="4.000000" ri="0.000000" rj="0.000000" rk="1.000000" qi="-0.044586" qj="-0.999006" qk="0.000000"/>
+
+<Mount weapon="Dumbfire" size="Light-Missile" x="4.000000" y="00000" z="2.000000" ri="0.000000" rj="0.000000" rk="1.000000" qi="-0.044586" qj="-0.999006" qk="0.000000"/>
+<Mount weapon="Dumbfire" size="Light-Missile" x="-4.000000" y="00000" z="2.000000" ri="0.000000" rj="0.000000" rk="1.000000" qi="-0.044586" qj="-0.999006" qk="0.000000"/>
+<Mount weapon="Heatseeker" size="Light-Missile" x="0.000000" y="00000" z="2.000000" ri="0.000000" rj="0.000000" rk="1.000000" qi="-0.044586" qj="-0.999006" qk="0.000000"/>
+
 <Thrust> 
 	<Engine Afterburner="1300"
 		  Forward="400"
