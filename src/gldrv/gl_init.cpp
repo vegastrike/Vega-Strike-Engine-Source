@@ -20,6 +20,8 @@
  */
 
 #include "vs_globals.h"
+#include "xml_support.h"
+#include "vegaconfig.h"
 //#include "gl_globals.h"
 
 #ifndef WIN32
@@ -116,14 +118,11 @@ void init_opengl_extensions()
 
  static void initfov () {
 
-    g_game.fov = 78;
-
-    g_game.aspect = 1.33F;
-
-    g_game.znear = 1.00F;
-
-    g_game.zfar = 100000.00F;
-
+    g_game.fov = XMLSupport::parse_float (vs_config->getVariable ("graphics","fov","78"));
+    g_game.aspect = XMLSupport::parse_float (vs_config->getVariable ("graphics","aspect","1.33"));
+    g_game.znear = XMLSupport::parse_float (vs_config->getVariable ("graphics","znear","1"));
+    g_game.zfar = XMLSupport::parse_float (vs_config->getVariable ("graphics","zfar","100000"));
+    /*
     FILE * fp = fopen ("glsetup.txt","r");
     if (fp) {
       fscanf (fp,"fov %f\n",&g_game.fov);
@@ -132,6 +131,7 @@ void init_opengl_extensions()
       fscanf (fp,"zfar %f\n",&g_game.zfar);
       fclose (fp);
     }
+    */
  }
 static void Reshape (int x, int y) {
   g_game.x_resolution = x;

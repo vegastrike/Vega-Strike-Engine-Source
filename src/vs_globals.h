@@ -31,5 +31,8 @@ typedef struct {
 } game_data_t;
 
 extern game_data_t g_game;
+
+class VegaConfig;
+extern VegaConfig *vs_config;
 #endif
 

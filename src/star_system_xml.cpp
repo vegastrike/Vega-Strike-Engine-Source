@@ -7,6 +7,7 @@
 #include "cmd/planet.h"
 #include "gfx/star.h"
 #include "vs_globals.h"
+#include "vegaconfig.h"
 #include "vegastrike.h"
 void StarSystem::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((StarSystem*)userData)->beginElement(name, AttributeList(atts));
@@ -408,7 +409,7 @@ void StarSystem::LoadXML(const char *filename) {
   }
 
   xml = new StarXML;
-  xml->fade = true;
+  xml->fade = (vs_config->getVariable ("graphics","starblend","true")==string("true"));
   xml->starsp = 150;
   xml->numnearstars=400;
   xml->numstars=800;

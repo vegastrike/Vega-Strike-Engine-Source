@@ -62,8 +62,8 @@ void Stars::Draw() {
   vlist->EndDrawState();
   GFXEnable (TEXTURE0);
   GFXEnable (TEXTURE1);
-
-  GFXDeleteLight (ligh);
+  if (fade)
+    GFXDeleteLight (ligh);
   GFXLoadIdentity(MODEL);
 }
 static void upd (float &a, float &b, float &c, float &d, float &e, float &f, float &g, float &h, float &i, const float cp, const float spread) {
