@@ -1609,6 +1609,7 @@ AC_CONFIG_FILES(Makefile
                  src/networking/Makefile
                  src/networking/lowlevel/Makefile
                  src/python/Makefile
+		 objconv/mesher/Makefile
                  tools/Makefile
                  )
 AC_OUTPUT()
