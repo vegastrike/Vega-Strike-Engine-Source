@@ -728,6 +728,8 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
   const float fpsmax=1;
   static float numtimes=fpsmax;
   float armordat[8]; //short fix
+  float retval;
+  int armori;
   Unit * tmpunit;
   switch (stat) {
   case UnitImages::SHIELDF:
@@ -743,10 +745,23 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
   case UnitImages::ARMORL:
   case UnitImages::ARMORB:
     target->ArmorData (armordat);
-    if (armordat[stat-UnitImages::ARMORF]>StartArmor[stat-UnitImages::ARMORF]) {
-      StartArmor[stat-UnitImages::ARMORF]=armordat[stat-UnitImages::ARMORF];
-    }
-    return ((float)armordat[stat-UnitImages::ARMORF])/StartArmor[stat-UnitImages::ARMORF];
+	for (armori=0;armori<8;++armori) {	   
+		if (armordat[armori]>StartArmor[armori]) {
+			StartArmor[armori]=armordat[armori];
+		}
+		armordat[armori]/=StartArmor[armori];		
+	}
+	switch (stat) {
+	case UnitImages::ARMORR:
+		return .25*(armordat[0]+armordat[1]+armordat[4]+armordat[5]);	   
+	case UnitImages::ARMORL:
+		return .25*(armordat[2]+armordat[3]+armordat[6]+armordat[7]);		
+	case UnitImages::ARMORB:
+		return .25*(armordat[1]+armordat[3]+armordat[5]+armordat[7]);
+	case UnitImages::ARMORF:
+	default:
+		return .25*(armordat[0]+armordat[2]+armordat[4]+armordat[6]);		
+	}
   case UnitImages::FUEL:
 	if (target->FuelData()>maxfuel)
 		maxfuel=target->FuelData();
