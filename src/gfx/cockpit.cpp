@@ -22,9 +22,12 @@ static GFXColor relationToColor (float relation) {
     GFXColor (1,relation+1,relation+1,.5);
 }
 void Cockpit::DrawTargetBox () {
+  float speed,range;
+  
   Unit * un = parent.GetUnit();
   if (!un)
     return;
+  
   Unit *target = un->Target();
   if (!target)
     return;
@@ -35,14 +38,24 @@ void Cockpit::DrawTargetBox () {
   GFXDisable (TEXTURE0);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (LIGHTING);
-  if (Loc.k>0) {
-    GFXColorf (relationToColor(_Universe->GetRelation(un->faction,target->faction)));
-    GFXBegin (GFXLINESTRIP); 
-    GFXVertexf (Loc+(CamP+CamQ)*un->rSize());
-    GFXVertexf (Loc+(CamP-CamQ)*un->rSize());
-    GFXVertexf (Loc+(-CamP-CamQ)*un->rSize());
-    GFXVertexf (Loc+(CamQ-CamP)*un->rSize());
-    GFXVertexf (Loc+(CamP+CamQ)*un->rSize());
+  GFXColorf (relationToColor(_Universe->GetRelation(un->faction,target->faction)));
+  GFXBegin (GFXLINESTRIP); 
+  GFXVertexf (Loc+(CamP+CamQ)*un->rSize());
+  GFXVertexf (Loc+(CamP-CamQ)*un->rSize());
+  GFXVertexf (Loc+(-CamP-CamQ)*un->rSize());
+  GFXVertexf (Loc+(CamQ-CamP)*un->rSize());
+  GFXVertexf (Loc+(CamP+CamQ)*un->rSize());
+  GFXEnd();
+  if (un->GetComputerData().itts) {
+    un->getAverageGunSpeed (speed,range);
+    Loc = target->PositionITTS (un->Position(),speed);
+    
+    GFXBegin (GFXLINESTRIP);
+    GFXVertexf (Loc+(CamP)*2*un->rSize());
+    GFXVertexf (Loc+(-CamQ)*2*un->rSize());
+    GFXVertexf (Loc+(-CamP)*2*un->rSize());
+    GFXVertexf (Loc+(CamQ)*2*un->rSize());
+    GFXVertexf (Loc+(CamP)*2*un->rSize());
     GFXEnd();
   }
   GFXEnable (TEXTURE0);
