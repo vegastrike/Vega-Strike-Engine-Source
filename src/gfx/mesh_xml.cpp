@@ -343,7 +343,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	xml->scale =  parse_float ((*iter).value);
 	break;
       case XML::SHAREVERT:
-	xml->sharevert = parse_bool ((*iter).value);
+	xml->sharevert = (parse_bool ((*iter).value)&&XMLSupport::parse_bool (vs_config->getVariable ("graphics","SharedVertexArrays","true")));
 	break;
       case XML::BLENDMODE:
 	sscanf (((*iter).value).c_str(),"%s %s",csrc,cdst);
@@ -1389,7 +1389,7 @@ void Mesh::LoadXML(const char *filename, int faction) {
     vlist = new GFXVertexList (polytypes, xml->vertices.size(),myvert,o_index,poly_offsets,false,myind);
   }else {
     static bool usopttmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","OptimizeVertexArrays","true")));
-    static float optvertexlimit= (XMLSupport::parse_float (vs_config->getVariable ("graphics", "OptimizeVertexCondition",".75")));
+    static float optvertexlimit= (XMLSupport::parse_float (vs_config->getVariable ("graphics", "OptimizeVertexCondition","1.0")));
     bool cachunk=false;
     if (usopttmp) {
       int numopt =totalvertexsize;      

@@ -119,6 +119,7 @@ void Unit::Init()
   jump.damage=0;
   jump.drive=-2;// disabled
   planet=NULL;
+  nebula=NULL;
   image = new UnitImages;
   sound = new UnitSounds;
   limits.structurelimits=Vector(0,0,1);

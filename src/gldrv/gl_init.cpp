@@ -100,16 +100,13 @@ void init_opengl_extensions()
 	const unsigned char * extensions = glGetString(GL_EXTENSIONS);
 
 	(void) fprintf(stderr, "OpenGL Extensions supported: %s\n", extensions);
-#if 1
-    if (glutExtensionSupported( "GL_EXT_compiled_vertex_array")) {
+    if (glutExtensionSupported( "GL_EXT_compiled_vertex_array")&&XMLSupport::parse_bool (vs_config->getVariable ("graphics","LockVertexArrays","true"))) {
 	glLockArraysEXT_p = (PFNGLLOCKARRAYSEXTPROC) 
 	    GET_GL_PROC( (GET_GL_PTR_TYP) "glLockArraysEXT" );
 	glUnlockArraysEXT_p = (PFNGLUNLOCKARRAYSEXTPROC) 
 	    GET_GL_PROC( (GET_GL_PTR_TYP) "glUnlockArraysEXT" );
 	(void) fprintf(stderr, "OpenGL::GL_EXT_compiled_vertex_array supported\n");
-    } else
-#endif
-	{
+    } else {
 	glLockArraysEXT_p = NULL;
 	glUnlockArraysEXT_p = NULL;
 	(void) fprintf(stderr, "OpenGL::GL_EXT_compiled_vertex_array unsupported\n");
