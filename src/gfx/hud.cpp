@@ -90,7 +90,7 @@ void TextPlane::Draw(const string & newText, int offset)
     }
     
     if(*text_it=='\t') {
-      col+=glutBitmapWidth (fnt,' ')*5./g_game.x_resolution;;
+      col+=glutBitmapWidth (fnt,' ')*5./(2*g_game.x_resolution);;
       glutBitmapCharacter (fnt,' ');
       glutBitmapCharacter (fnt,' ');
       glutBitmapCharacter (fnt,' ');
@@ -98,11 +98,11 @@ void TextPlane::Draw(const string & newText, int offset)
       glutBitmapCharacter (fnt,' ');
     } else {
       col+=myFontMetrics.i;
-      col+=glutBitmapWidth (fnt,*text_it)/(float)g_game.x_resolution;;
+      col+=glutBitmapWidth (fnt,*text_it)/(float)(2*g_game.x_resolution);;
     }
-    if(col+((text_it+1!=newText.end())?(glutBitmapWidth(fnt,*text_it)/(float)g_game.x_resolution):0)>=myDims.i||*text_it == '\n') {
+    if(col+((text_it+1!=newText.end())?(glutBitmapWidth(fnt,*text_it)/(float)(2*g_game.x_resolution)):0)>=myDims.i||*text_it == '\n') {
       GetPos (tmp,col);
-      row -= (fnt==GLUT_BITMAP_HELVETICA_12)?(18./g_game.y_resolution):(16./g_game.y_resolution);
+      row -= (fnt==GLUT_BITMAP_HELVETICA_12)?(26./g_game.y_resolution):(22./g_game.y_resolution);
       glPopMatrix();
       glPushMatrix ();
       glTranslatef (col,row,0);
