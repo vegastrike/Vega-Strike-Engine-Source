@@ -643,6 +643,7 @@ void bootstrap_main_loop () {
 	  }
 	  else
 		_Universe->AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k);
+          CopySavedShips(playername[k],k,_Universe->AccessCockpit()->unitfilename,true);
 	  playersaveunit.push_back(_Universe->AccessCockpit(k)->GetUnitFileName());
 	  _Universe->AccessCockpit(k)->credits=credits;
 		  ss.push_back (_Universe->Init (mysystem,Vector(0,0,0),planetname));

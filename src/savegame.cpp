@@ -289,8 +289,50 @@ string createPipedString(vector <string> s) {
     ret+=s.back();
   return ret;
 }
+void CopySavedShips(std::string filename, int player_num, const std::vector<std::string> &starships, bool load) {
+  Cockpit * cp = _Universe->AccessCockpit(player_num);
+  for (int i=0;i<starships.size();i+=2) {
+    if (i==2) i=1;
+    VSFile src,dst;
+    string srcnam=filename;//cp->GetUnitModifications();
+    string dstnam= GetWritePlayerSaveGame(player_num);
+    string tmp;
+    if (load) {
+      tmp=srcnam;
+      srcnam=dstnam;
+      dstnam=tmp;
+    }
+    VSError e = src.OpenReadOnly(srcnam+"/"+starships[i]+".csv",UnitSaveFile);
+    if (e<=Ok) {
+
+      VSFileSystem::CreateDirectoryHome (VSFileSystem::savedunitpath+"/"+dstnam);
+      VSError f = dst.OpenCreateWrite(dstnam+"/"+starships[i]+".csv",UnitFile);
+      if (f<=Ok) {
+        string srcdata=src.ReadFull();
+        dst.Write(srcdata);
+      }else {
+        printf ("Error: Cannot Copy Unit %s from save file %s to %s\n",
+                    starships[i].c_str(),
+                srcnam.c_str(),
+                dstnam.c_str());
+        
+      }
+    }else {
+      printf ("Error: Cannot Open Unit %s from save file %s.\n",
+              starships[i].c_str(),
+              srcnam.c_str());
+      
+    }        
+  }
+
+}
 void WriteSaveGame (Cockpit * cp,bool auto_save) {
-  int player_num= cp-_Universe->AccessCockpit(0);
+  
+  int player_num= 0;
+  for (int kk=0;kk<_Universe->numPlayers();++kk) {
+    if (_Universe->AccessCockpit(kk)==cp)
+      player_num=kk;
+  }
   Unit * un = cp->GetSaveParent();
   if (!un) {
     return;
@@ -303,33 +345,7 @@ void WriteSaveGame (Cockpit * cp,bool auto_save) {
       cp->savegame->SetStarSystem(cp->activeStarSystem->getFileName());
       //      un->WriteUnit(GetWritePlayerSaveGame(player_num).c_str());
       cp->savegame->SetPlayerLocation(un->LocalPosition());    
-      for (int i=0;i<cp->unitfilename.size();i+=2) {
-        if (i==2) i=1;
-        VSFile src,dst;
-        string srcnam=cp->GetUnitModifications();
-
-        VSError e = src.OpenReadOnly(srcnam+"/"+cp->unitfilename[i]+".csv",UnitSaveFile);
-        if (e<=Ok) {
-          string dstnam= GetWritePlayerSaveGame(player_num);
-          VSFileSystem::CreateDirectoryHome (VSFileSystem::savedunitpath+"/"+dstnam);
-          VSError f = dst.OpenCreateWrite(dstnam+"/"+cp->unitfilename[i]+".csv",UnitFile);
-          if (f<=Ok) {
-            string srcdata=src.ReadFull();
-            dst.Write(srcdata);
-          }else {
-            printf ("Error: Cannot Copy Unit %s from save file %s to %s\n",
-                    cp->unitfilename[i].c_str(),
-                    srcnam.c_str(),
-                    dstnam.c_str());
-                    
-          }
-        }else {
-            printf ("Error: Cannot Open Unit %s from save file %s.\n",
-                    cp->unitfilename[i].c_str(),
-                    srcnam.c_str());
-                    
-        }        
-      }
+      CopySavedShips(cp->GetUnitModifications(),player_num,cp->unitfilename,false);
     }
   }
 

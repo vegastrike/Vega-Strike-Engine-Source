@@ -398,9 +398,11 @@ void Cockpit::Update () {
 		  break;
 		}
 		if (k==_Universe->numPlayers()) k=0;
+                int whichcp=k;
 		string newsystem;QVector pos; bool setplayerXloc;
                 savegame->SetStarSystem("");
 		savegame->ParseSaveGame(savegamefile,newsystem,newsystem,pos,setplayerXloc,this->credits,unitfilename,k);
+                CopySavedShips(savegame->GetCallsign(),whichcp,unitfilename,true);
 		bool actually_have_save=false;
 		if (savegame->GetStarSystem()!="") {
 			actually_have_save=true;
@@ -445,8 +447,9 @@ void Cockpit::Update () {
 		savegame->ReloadPickledData();
 		_Universe->popActiveStarSystem();
 		_Universe->pushActiveStarSystem(ss);
-		if (actually_have_save)
-			DockToSavedBases((int)(this - _Universe->AccessCockpit(0)));
+		if (actually_have_save) {
+                  DockToSavedBases(whichcp);
+                }
 		_Universe->popActiveStarSystem();
       }
 	} 
