@@ -310,6 +310,12 @@ bool StarVlist::BeginDrawState (const QVector &center, const Vector & velocity, 
 		Vector vel (-velocity*velstreakscale);
 		if (vel.MagnitudeSquared()>=minstreak*minstreak) {
 			ret=true;
+                        float speed = vel.Magnitude();
+                        static float streakcap  = XMLSupport::parse_float (vs_config->getVariable ("graphics","velocity_star_streak_max","50"));
+                        if (speed>streakcap) {
+                          vel.Normalize();
+                          vel=vel*streakcap;
+                        }
 			GFXColorVertex * v = vlist->BeginMutate(0)->colors;
 			int numvertices = vlist->GetNumVertices();
 
