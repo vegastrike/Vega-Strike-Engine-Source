@@ -2100,7 +2100,8 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
 	  Unit * un;
 	  for (un_iter i=ss->getUnitList().createIterator(); (un=*i)!=NULL; ++i) {
 		  if (un->isUnit()==ASTEROIDPTR) {
-			  if (UnitUtil::getDistance(this,un)<0) {
+                    static float minasteroiddistance = XMLSupport::parse_float(vs_config->getVariable("physics","min_asteroid_distance","-100"));
+			  if (UnitUtil::getDistance(this,un)<minasteroiddistance) {
 				  return false;//no auto in roid field
 			  }
 		  }
