@@ -12,6 +12,7 @@
 #include "vegastrike.h"
 #include "cmd/cont_terrain.h"
 #include <assert.h>	/// needed for assert() calls.
+#include "gfx/mesh.h"
 #include "cmd/building.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/atmosphere.h"

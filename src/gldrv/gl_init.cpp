@@ -125,6 +125,23 @@ void init_opengl_extensions()
       glActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureEXT");
     }
 #endif
+    if (glutExtensionSupported ("GL_NV_fog_distance")) {
+      fprintf (stderr,"OpenGL::Accurate Fog Distance supported\n");
+      int foglev=XMLSupport::parse_int (vs_config->getVariable ("graphics","fogdetail","0"));
+      switch (foglev) {
+      case 0:
+	glFogi (GL_FOG_DISTANCE_MODE_NV,GL_EYE_PLANE_ABSOLUTE_NV);
+	break;
+      case 1:
+	glFogi (GL_FOG_DISTANCE_MODE_NV,GL_EYE_PLANE);
+	break;
+      case 2:
+	glFogi (GL_FOG_DISTANCE_MODE_NV,GL_EYE_RADIAL_NV);
+	break;
+      }
+    }else {
+      fprintf (stderr,"OpenGL::Accurate Fog Distance unsupported\n");
+    }
     if (glutExtensionSupported ("GL_ARB_texture_compression")) {
       fprintf (stderr,"OpenGL::Generic Texture Compression supported\n");
     }else {

@@ -305,6 +305,11 @@ void /*GFXDRVAPI*/ GFXEnd();
 ///Optimizes a list to reuse repeated vertices! 
 void GFXOptimizeList (GFXVertex *old, int numV, GFXVertex **newlist, int *numnewVertices, unsigned int ** indices);
 
+void GFXFogMode (const FOGMODE fog);
+void GFXFogDensity (const float fogdensity);
+void GFXFogLimits (const float fognear, const float fogfar);
+void GFXFogColor (GFXColor c);
+void GFXFogIndex (const int index);
 //display list
 ///Creates a Display list. 0 is returned if no memory is avail for a display list
 int /*GFXDRVAPI*/ GFXCreateList();

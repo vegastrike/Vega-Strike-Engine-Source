@@ -3,6 +3,8 @@ SUBDIRS = ai script
 INCLUDES = -I ../
 
 libcmd_a_SOURCES =				\
+	atmosphere.h			\
+	atmosphere.cpp			\
 	beam.h				\
 	beam.cpp				\
 	bolt.h				\

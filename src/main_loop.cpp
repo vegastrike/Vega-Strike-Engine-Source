@@ -326,7 +326,7 @@ static void SetTurretAI (Unit * fighter) {
 
 
 void createObjects() {
-
+  //  GFXFogMode (FOG_OFF);
   explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
   LoadWeapons("weapon_list.xml");
   Vector TerrainScale (XMLSupport::parse_float (vs_config->getVariable ("terrain","xscale","1")),XMLSupport::parse_float (vs_config->getVariable ("terrain","yscale","1")),XMLSupport::parse_float (vs_config->getVariable ("terrain","zscale","1")));

@@ -418,6 +418,13 @@ enum ADDRESSMODE{
 	CLAMP,
 	BORDER
 };
+
+enum FOGMODE {
+  FOG_OFF,
+  FOG_EXP,
+  FOG_EXP2,
+  FOG_LINEAR
+};
 /**
  * Blend functions that a blendmode may have Not all work for all systems
  */

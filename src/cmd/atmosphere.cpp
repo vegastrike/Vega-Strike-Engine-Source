@@ -1,3 +1,4 @@
+#include "gfx/mesh.h"
 #include "atmosphere.h"
 #include "vegastrike.h"
 #include "star_system.h"
@@ -52,7 +53,7 @@ void Atmosphere::Update(const Vector &position, const Matrix tmatrix)
 	Planet *currPlanet;
 	StarSystem *system = _Universe->activeStarSystem();
 
-	for(a=0; a<sunboxes.size(); a++) {
+	for(a=0; a<(int)sunboxes.size(); a++) {
 		delete sunboxes[a];
 	}
 	sunboxes.clear();
@@ -125,6 +126,7 @@ void Atmosphere::Update(const Vector &position, const Matrix tmatrix)
 
 void Atmosphere::Draw(const Vector &position, const Matrix tmatrix)
 {
+  GFXDisable (TEXTURE1);
 	Update(position,tmatrix);
 	GFXLoadMatrix(MODEL,tmatrix);
 
@@ -145,7 +147,7 @@ void Atmosphere::Draw(const Vector &position, const Matrix tmatrix)
 					0.5,0.5,0.5,1,
 					0};
 	GFXDisable(DEPTHWRITE);
-	dome->DrawNow(10,TRUE,identity_transformation,rot1);
+	dome->DrawNow(10,GFXTRUE,identity_transformation,rot1);
 	//GFXEnable(DEPTHWRITE);
 
 	//GFXDeleteLight(l0);

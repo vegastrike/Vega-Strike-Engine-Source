@@ -203,6 +203,11 @@ void StarSystem::Draw() {
   }
   GFXDisable (LIGHTING);
   bg->Draw();
+  GFXFogMode (FOG_EXP2);
+  GFXFogDensity (.0005);
+  GFXFogLimits (1,1000);
+  GFXFogIndex (0);
+  GFXFogColor (GFXColor(.5,.5,.5,.5));
 
   Iterator *iter = drawList->createIterator();
   Unit *unit;
@@ -219,20 +224,23 @@ void StarSystem::Draw() {
   Mesh::ProcessZFarMeshes();
   Terrain::RenderAll();
   Mesh::ProcessUndrawnMeshes(true);
-  GFXPopGlobalEffects();
-
+  GFXFogMode (FOG_OFF);
   Matrix ident;
   Identity(ident);
   theAtmosphere->Draw(Vector(0,1,0),ident);
 
+  GFXPopGlobalEffects();
+
+
   GFXLightContextAmbient(tmpcol);
   Halo::ProcessDrawQueue();
+  GFXFogMode (FOG_EXP2);
   Beam::ProcessDrawQueue();
   Animation::ProcessDrawQueue();
   Bolt::Draw();
 
   stars->Draw();
-
+  GFXFogMode (FOG_OFF);
 
   static bool doInputDFA = XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
   _Universe->AccessCockpit()->Draw();
