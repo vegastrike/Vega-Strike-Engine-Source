@@ -60,10 +60,6 @@ Mission::~Mission() {
 }
 Mission::Mission(const char *configfile, bool loadscripts){
   briefing=NULL;
-  objectives.push_back(Mission::Objective(.5,"hehe"));
-  objectives.push_back(Mission::Objective(0,"haha"));
-  objectives.push_back(Mission::Objective(1,"i win"));
-  objectives.push_back(Mission::Objective(-1,"hoho"));
   number_of_flightgroups=0;
   number_of_ships=0;
   runtime.pymissions=NULL;

@@ -30,6 +30,9 @@ class VDU: public Sprite {
   
   ///Rows and columns of text this VDU can display
   short rows,cols;
+
+  void DrawVDUObjective (void * obj, int offset);//obj is of type Mission::Objective
+  void DrawVDUObjectives(Unit * parent);
   ///Draws a shield display in the VDU
   void DrawVDUShield (Unit * parent, const GFXColor & c);
   ///Draws the target display of Unit *target (only call with nonNULL)
@@ -54,7 +57,7 @@ public:
  unsigned int getMode() {return thismode.back();}
   int scrolloffset;
   ///Alert! To add a mode must change const array on the bottom. VIEW must remain LAST
-  enum VDU_MODE {TARGET=0x1,NAV=0x2,COMM=0x4, WEAPON=0x8, DAMAGE=0x10, SHIELD=0x20,  MANIFEST=0x40, TARGETMANIFEST=0x80, VIEW=0x100, MSG=0x200};
+  enum VDU_MODE {TARGET=0x1,NAV=0x2,OBJECTIVES=0x4, COMM=0x8, WEAPON=0x10, DAMAGE=0x20, SHIELD=0x40,  MANIFEST=0x80, TARGETMANIFEST=0x100, VIEW=0x200, MSG=0x400};
   VDU(const char *file, TextPlane *textp,unsigned short modes, short rows, short cols, unsigned short *MaxArmor, float * maxhull);
   ///Draws the entire VDU, all data, etc
   void Draw(Unit * parent, const GFXColor & c);
