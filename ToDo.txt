@@ -36,7 +36,11 @@ Goals for 'Sometime over the rainbow'
 * UI:
 ** Merge BaseComputer modes with NavScreen?
 
-
+* Universe consistency
+** make pirates... more pirate-like
+** grappling hooks?
+** Area effect modeling
+** Bomb-pumped laser modeling?
 
 Emacs mode info:
 Local Variables:
