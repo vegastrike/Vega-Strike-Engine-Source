@@ -128,7 +128,8 @@ protected:
   ///the position of the center of this mesh for collision detection
   Vector local_pos; 
   ///The hash table of all meshes
-  static Hashtable<string, Mesh, 127> meshHashTable;
+  static Hashtable<std::string, Mesh, 127> meshHashTable;
+  static Hashtable<std::string, std::vector<int>,127> animationSequences;
   ///The refcount:: how many meshes are referencing the appropriate original
   int refcount;
   ///bounding box
@@ -181,6 +182,7 @@ public:
   float getFramesPerSecond()const;
   float getCurrentFrame() const;
   void setCurrentFrame(float);
+  int getNumAnimationFrames(string which="")const;
   int getNumLOD()const;
   int getNumTextureFrames();
   float getTextureFramesPerSecond();

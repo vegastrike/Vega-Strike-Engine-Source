@@ -50,9 +50,19 @@
 #include <float.h>
 #include <algorithm>
 using std::list;
-Hashtable<string, Mesh, 127> Mesh::meshHashTable;
+Hashtable<std::string, Mesh, 127> Mesh::meshHashTable;
+Hashtable<std::string, std::vector<int>, 127> Mesh::animationSequences;
 Vector mouseline;
-
+int Mesh::getNumAnimationFrames(string which="")const {
+   if (which.empty()) {
+      vector<int>* animSeq = animationSequences.Get(hash_name);
+      if (animSeq) return animSeq->size();
+   }else {
+      vector<int>* animSeq = animationSequences.Get(hash_name+"*"+which);
+      if (animSeq) return animSeq->size();
+   }
+   return 0;      
+}
 
 void Mesh::InitUnit() {
   polygon_offset=0;
