@@ -7,7 +7,7 @@ string inverseblend[16]={"ZERO","ZERO","ONE","SRCCOLOR","INVSRCCOLOR","SRCALPHA"
 
 void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE * mtl,std::string meshname){
   int32bit intbuf;
-  char8bit bytebuf;
+  int32bit bytebuf;
   int32bit word32index=0;
   union chunk32{
 	  int32bit i32val;
