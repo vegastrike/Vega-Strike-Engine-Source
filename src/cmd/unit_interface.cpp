@@ -437,9 +437,9 @@ void UpgradingInfo::SetupCargoList () {
 		}
 	}else {
 		int playernum=UnitUtil::isPlayerStarship(buyer.GetUnit());
-		unsigned int len=getSaveStringLength(playernum,news_name);
-		for (unsigned int i=0;i<len;i++) {
-			string tmp = tostring(i)+" "+getSaveString(playernum,news_name,i);
+		int len=getSaveStringLength(playernum,news_name);
+		for (int i=len-1;i>=0;i--) {
+			string tmp = tostring(len-i-1)+" "+getSaveString(playernum,news_name,i);
 			CargoList->AddTextItem(tmp.c_str(),getSaveString(playernum,news_name,i).c_str());
 			
 		}
