@@ -182,8 +182,7 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
   AttributeList::const_iterator iter;
   switch(elem) {
   case DEFAULT:
-    assert(xml->unitlevel==1);
-    xml->unitlevel++;
+    xml->unitlevel+=2;//pretend it's at a reasonable level
     break;
   case UNKNOWN:
     xml->unitlevel++;
@@ -192,7 +191,6 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
     return;
 
   case SCRIPT:
-    assert (xml->unitlevel==0);
     xml->unitlevel++;
     break;
 
@@ -200,7 +198,6 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
     xml->lin=1;
   case ANGULAR:
   case VECTOR:
-    assert (xml->unitlevel>=2);
     xml->unitlevel++;
     xml->vectors.push(Vector(0,0,0));
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -267,7 +264,6 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
     }
     break;
   case MOVETO:
-    assert (xml->unitlevel>=1);
     xml->unitlevel++;
     xml->acc = 2;
     xml->afterburn = true;
@@ -282,7 +278,6 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
     }
     break;
   case FACETARGET:
-    assert (xml->unitlevel>=1);
     xml->unitlevel++;
     xml->acc =3;
     xml->itts=false;
@@ -304,7 +299,6 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
     break;
     
   case CHANGEHEAD:
-    assert (xml->unitlevel>=1);
     xml->unitlevel++;
     xml->acc = 2;
     xml->afterburn = true;
@@ -322,7 +316,6 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
     break;
     /*
       case THREATPOS:
-      assert(xml->unitlevel>=2);
       xml->unitlevel++;
       if((tmp = this->parent->Threat())) {
       xml->vectors.push(tmp->Position());
@@ -335,7 +328,6 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
       }
       break;
       case TARGETPOS:
-      assert(xml->unitlevel>=2);
       xml->unitlevel++;
       if((tmp = this->parent->Target())) {
       xml->vectors.push(tmp->Position());
@@ -345,33 +337,26 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
       break;
     */
   case YOURPOS:
-    assert(xml->unitlevel>=2);
     xml->unitlevel++;
     xml->vectors.push(this->parent->Position());
 	  
     break;
   case THREATWORLD:
-    assert(xml->unitlevel>=2);
     xml->unitlevel++;
     break;
   case TARGETWORLD:
-    assert(xml->unitlevel>=2);
     xml->unitlevel++;
     break;
   case THREATLOCAL:
-    assert(xml->unitlevel>=2);
     xml->unitlevel++;
     break;
   case TARGETLOCAL:
-    assert(xml->unitlevel>=2);
     xml->unitlevel++;
     break;
   case YOURLOCAL:
-    assert(xml->unitlevel>=2);
     xml->unitlevel++;
     break;
   case YOURWORLD:
-    assert(xml->unitlevel>=2);
     xml->unitlevel++;
     break;
 
@@ -386,12 +371,10 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
   case ADD:
   case SUB:
   case NEG:
-    assert(xml->unitlevel>2);
     xml->unitlevel++;
     break;
 
   case FFLOAT:
-    assert(xml->unitlevel>=2);
     xml->unitlevel++;
     xml->floats.push(0);
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -411,7 +394,6 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
   case MATCHLIN:
   case MATCHANG:
   case MATCHVEL:
-    assert (xml->unitlevel>=1);
     xml->unitlevel++;
     xml->acc = 0;
     xml->afterburn = false;
@@ -432,7 +414,6 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
     break;
 
   case EXECUTEFOR:
-    assert (xml->unitlevel==1);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
@@ -461,7 +442,6 @@ void AIScript::endElement(const string &name) {
 
     // Vector 
   case THREATWORLD:
-    assert(xml->unitlevel>=3);
     xml->unitlevel++;
     if((tmp = parent->Threat())) {
       xml->vectors.push(tmp->ToWorldCoordinates (topv()));
@@ -474,7 +454,6 @@ void AIScript::endElement(const string &name) {
     }
     break;
   case THREATLOCAL:
-    assert(xml->unitlevel>=3);
     xml->unitlevel++;
     if((tmp = parent->Threat())) {
       xml->vectors.push(tmp->ToLocalCoordinates(topv()));
@@ -488,7 +467,6 @@ void AIScript::endElement(const string &name) {
     break;
 
   case TARGETWORLD:
-    assert(xml->unitlevel>=3);
     xml->unitlevel++;
     if((tmp = parent->Target())) {
       xml->vectors.push(tmp->ToWorldCoordinates (topv()));
@@ -497,7 +475,6 @@ void AIScript::endElement(const string &name) {
     }
     break;
   case TARGETLOCAL:
-    assert(xml->unitlevel>=3);
     xml->unitlevel++;
     if((tmp = parent->Target())) {
       xml->vectors.push(tmp->ToLocalCoordinates(topv()));
@@ -506,36 +483,30 @@ void AIScript::endElement(const string &name) {
     }
     break;
   case YOURLOCAL:
-    assert(xml->unitlevel>=3);
     xml->unitlevel++;
     xml->vectors.push(this->parent->ToLocalCoordinates(topv()));
     break;
   case YOURWORLD:
-    assert(xml->unitlevel>=3);
     xml->unitlevel++;
     xml->vectors.push(this->parent->ToWorldCoordinates(topv()));
     break;
 
   case NORMALIZE:
-    assert(xml->unitlevel>3);
     xml->unitlevel--;
     topv().Normalize();
     break;
   case SCALE:
-    assert(xml->unitlevel>3);
     xml->unitlevel--;
     topv() *= topf();
     popf();
     break;
   case CROSS:
-    assert(xml->unitlevel>3);
     xml->unitlevel--;
     temp = topv();
     popv();
     topv() = CrossProduct(topv(),temp);
     break;
   case DOT:
-    assert(xml->unitlevel>3);
     xml->unitlevel--;
     xml->floats.push(0);
     temp = topv();
@@ -544,21 +515,18 @@ void AIScript::endElement(const string &name) {
     popv();
     break;
   case MULTF:
-    assert(xml->unitlevel>3);
     xml->unitlevel--;
     temp.i = topf();
     popf();
     topf()*=temp.i;
     break;
   case ADDF:
-    assert(xml->unitlevel>3);
     xml->unitlevel--;
     temp.i = topf();
     popf();
     topf()+=temp.i;
     break;
   case FROMF:
-    assert(xml->unitlevel>3);
     xml->unitlevel--;
     temp.i = topf();
     popf();
@@ -568,7 +536,6 @@ void AIScript::endElement(const string &name) {
     popf();
     break;
   case TOF:  
-    assert(xml->unitlevel>3);
     xml->unitlevel--;
     xml->floats.push(topv().i);
     xml->floats.push(topv().j);
@@ -576,21 +543,18 @@ void AIScript::endElement(const string &name) {
     popv();
     break;
   case ADD:
-    assert(xml->unitlevel>3);
     xml->unitlevel--;
     temp = topv();
     popv();
     topv()+=temp;
     break;
   case SUB:
-    assert(xml->unitlevel>3);
     xml->unitlevel--;
     temp = topv();
     popv();
     topv()=topv()-temp;
     break;
   case NEG:
-    assert(xml->unitlevel>3);
     xml->unitlevel--;
     topv()=-topv();
     break;
@@ -644,8 +608,7 @@ void AIScript::endElement(const string &name) {
     }
     break;
   case DEFAULT:
-    assert(xml->unitlevel==2);
-    xml->unitlevel--;
+    xml->unitlevel-=2;
     xml->defaultvec=topv();
     popv();
     xml->defaultf=topf();
@@ -662,7 +625,6 @@ void AIScript::LoadXML() {
   const int chunk_size = 16384;
   FILE * inFile = fopen (filename, "r+b");
   if(!inFile) {
-    assert(0);
     return;
   }
 
