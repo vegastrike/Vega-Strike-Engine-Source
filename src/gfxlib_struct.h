@@ -279,6 +279,8 @@ public:
     Init(poly,numVertices,NULL,colors, numlists,offsets,Mutable, index);
   }
   ~GFXVertexList();
+  const GFXVertex * GetVertex (int index);
+  const GFXColorVertex * GetColorVertex (int index);
 
   ///Returns the array of vertices to be mutated
   VDAT * BeginMutate (int offset);

@@ -107,6 +107,7 @@ class quadsquare {
   static void SetCurrentTerrain (unsigned int * VertexAllocated, unsigned int * VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unusedvertices, IdentityTransform * transform, std::vector <Texture *> *texturelist );
 	
 private:
+  static void tri (unsigned int Aind, unsigned short Atex, unsigned int Bind, unsigned short Btex, unsigned int Cind, unsigned short Ctex);
   ///Sets the 5 vertices in vertexs array in 3space from a quadcornerdata and return half of the size
   unsigned int SetVertices (GFXVertex * vertexs, const quadcornerdata &pcd);
 	void	EnableEdgeVertex(int index, bool IncrementCount, const quadcornerdata& cd);

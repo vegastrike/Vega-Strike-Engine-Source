@@ -355,6 +355,14 @@ void GFXVertexList::IndVtxCopy (GFXVertexList * thus, GFXVertex *dst, int offset
   }
 }
 
+const GFXVertex * GFXVertexList::GetVertex (int index) {
+  return data.vertices+index;
+}
+const GFXColorVertex * GFXVertexList::GetColorVertex (int index) {
+  return data.colors+index;
+}
+
+
 void GFXVertexList::GetPolys (GFXVertex **vert, int *numpolys, int *numtris) {
   void (*vtxcpy) (GFXVertexList *thus, GFXVertex *dst,int offset, int howmany);
 

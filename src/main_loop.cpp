@@ -89,7 +89,7 @@ public:
 
 const float timek = .005;
 bool _Slew = true;
-
+  int ouch=1;
 namespace CockpitKeys {
 
  void SkipMusicTrack(int,KBSTATE newState) {
@@ -164,10 +164,16 @@ namespace CockpitKeys {
 	       
 	}
 }
+
   void Quit(int,KBSTATE newState) {
+    if (newState==PRESS) {
+      ouch = (!ouch);
+    }
+    /*
 	if(newState==PRESS||newState==DOWN) {
 		exit(0);
 	}
+    */
 }
 bool cockpitfront=true;
   void Inside(int,KBSTATE newState) {

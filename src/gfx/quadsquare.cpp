@@ -30,10 +30,10 @@ Vector IdentityTransform::InvTransform (const Vector &v) {
   return v;
 }
 float IdentityTransform::TransformS (float x) {
-  return x/256;
+  return x/1024;
 }
 float IdentityTransform::TransformT (float y) {
-  return y/256;
+  return y/1024;
 }
 
 unsigned int * quadsquare::VertexAllocated;
@@ -820,12 +820,23 @@ int	quadsquare::Render(const quadcornerdata& cd)
 
   vector <TextureIndex>::iterator i=indices.begin();
   vector <Texture *>::iterator k;
+
   for (k=textures->begin();k!=textures->end();i++,k++) {
     (*k)->MakeActive();
     unsigned int isize = i->q.size();
     totsize+=isize;
     vertices->Draw(GFXTRI,isize, i->q.begin());
+  }
+  vertices->EndDrawState();
+  i=indices.begin();
+  int j=0;
+  for (k=textures->begin();k!=textures->end();i++,j++,k++) {
     if (i->c.size()>2) {
+      (*k)->MakeActive();
+      GFXPushBlendMode();
+      GFXBlendMode (SRCALPHA,INVSRCALPHA);
+      GFXPolygonOffset (0,-j);
+      GFXColorMaterial (AMBIENT|DIFFUSE);
       GFXColorVertex ** cv = (&blendVertices->BeginMutate(0)->colors);
       GFXColorVertex *tmp = *cv;
       *cv = i->c.begin();
@@ -836,14 +847,60 @@ int	quadsquare::Render(const quadcornerdata& cd)
       cv = (&blendVertices->BeginMutate(0)->colors);
       *cv = tmp;
       blendVertices->EndMutate(3);
+      GFXColorMaterial (0);
+      GFXPolygonOffset (0,0);
+      GFXPopBlendMode();
     }
     i->Clear();
   }
-  vertices->EndDrawState();
+
   return totsize;
 }
-
-
+extern int ouch;
+void quadsquare::tri(unsigned int aa,unsigned short ta,unsigned int bb,unsigned short tb,unsigned int cc,unsigned short tc) {
+  if (ta==tb&&tb==tc) {
+    indices[ta].q.push_back (aa);
+    indices[ta].q.push_back (bb);
+    indices[ta].q.push_back (cc);
+  } else {
+    GFXColorVertex cv[3];
+    cv[0].SetVtx(*vertices->GetVertex (aa));
+    cv[1].SetVtx(*vertices->GetVertex (bb));
+    cv[2].SetVtx(*vertices->GetVertex (cc));
+    cv[0].SetColor (GFXColor(1,1,1,1));    cv[1].SetColor (GFXColor(1,1,1,1));    cv[2].SetColor (GFXColor(1,1,1,1));
+    if (ouch) {
+      indices[ta].q.push_back (aa);
+      indices[ta].q.push_back (bb);
+      indices[ta].q.push_back (cc);
+    }
+    if (tb==tc) {
+      cv[0].a = 0;
+      cv[1].a = 1;
+      cv[2].a = 1;
+      indices[tb].c.push_back(cv[0]);
+      indices[tb].c.push_back(cv[1]);
+      indices[tb].c.push_back(cv[2]);
+    }else {
+      if (tb!=ta) {
+	cv[0].a = 0;
+	cv[1].a = 1;
+	cv[2].a = 0;
+	indices[tb].c.push_back(cv[0]);
+	indices[tb].c.push_back(cv[1]);
+	indices[tb].c.push_back(cv[2]);
+      }
+      if (tc!=ta) {
+	cv[0].a = 0;
+	cv[1].a = 0;
+	cv[2].a = 1;
+	indices[tc].c.push_back(cv[0]);
+	indices[tc].c.push_back(cv[1]);
+	indices[tc].c.push_back(cv[2]);
+      }
+    }
+  }
+  
+}
 void	quadsquare::RenderAux(const quadcornerdata& cd,  CLIPSTATE vis)
 // Does the work of rendering this square.  Uses the enabled vertices only.
 // Recurses as necessary.
@@ -903,7 +960,7 @@ void	quadsquare::RenderAux(const quadcornerdata& cd,  CLIPSTATE vis)
 
 	
 // Local macro to make the triangle logic shorter & hopefully clearer.
-#define tri(aa,ta,bb,tb,cc,tc) (indices[ta].q.push_back (aa), indices[ta].q.push_back (bb), indices[ta].q.push_back (cc))
+	//#define tri(aa,ta,bb,tb,cc,tc) (indices[ta].q.push_back (aa), indices[ta].q.push_back (bb), indices[ta].q.push_back (cc))
 #define V0 (Vertex[0].vertindex)
 #define T0 (Vertex[0].Tex)
 #define V1 (Vertex[1].vertindex)
@@ -952,7 +1009,6 @@ void	quadsquare::RenderAux(const quadcornerdata& cd,  CLIPSTATE vis)
 #undef V6
 #undef V7
 #undef V8
-#undef tri
 #undef T1
 #undef T2
 #undef T3
@@ -1043,7 +1099,7 @@ void	quadsquare::SetupCornerData(quadcornerdata* q, const quadcornerdata& cd, in
 }
 void quadsquare::SetCurrentTerrain (unsigned int *VertexAllocated, unsigned int *VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unvert, IdentityTransform * nlt, std::vector <Texture *> *tex ) {
   if (quadsquare::blendVertices==NULL) {
-    GFXVertex tmp[3];
+    GFXColorVertex tmp[3];
     blendVertices = new GFXVertexList (GFXTRI,3,tmp,3,true);
   }
   quadsquare::VertexAllocated = VertexAllocated;
