@@ -15,11 +15,14 @@ SocketSet::SocketSet( bool blockmainthread )
     , _blockmain( blockmainthread )
     , _blockmain_pending( 0 )
 {
+#ifndef USE_NO_THREAD
     _thread_end = false;
+#endif
 }
 
 SocketSet::~SocketSet( )
 {
+#ifndef USE_NO_THREAD
     _thread_mx.lock( );
     _thread_end = true;
     _blockmain  = false; // signalling would be dangerous
@@ -27,6 +30,7 @@ SocketSet::~SocketSet( )
     _thread_cond.wait( _thread_mx );
     _thread_wakeup.closeread();
     _thread_mx.unlock( );
+#endif
 }
 
 void SocketSet::set( VsnetSocketBase* s )
@@ -156,9 +160,11 @@ int SocketSet::private_select( timeval* timeout )
         }
     }
 
+#ifndef USE_NO_THREAD
     private_addset( _thread_wakeup.getread(),
                     read_set_select,
                     max_sock_select );
+#endif
 
     int ret = ::select( max_sock_select,
 	                &read_set_select, &write_set_select, 0, timeout );
@@ -193,11 +199,12 @@ int SocketSet::private_select( timeval* timeout )
 	        }
         }
 
+#ifndef USE_NO_THREAD
         if( FD_ISSET( _thread_wakeup.getread(), &read_set_select ) )
         {
-            char c;
-            _thread_wakeup.read( &c, 1 );
+            private_wakeup( );
         }
+#endif
     }
 
     if( _blockmain )
@@ -217,16 +224,13 @@ void SocketSet::wakeup( )
     private_wakeup( );
 }
 
+#ifdef USE_NO_THREAD
+/// unthreaded case
 void SocketSet::private_wakeup( )
 {
-#ifdef VSNET_DEBUG
-    COUT << "calling wakeup" << endl;
-#endif
-    char c = 'w';
-    _thread_wakeup.write( &c, 1 );
 }
 
-#ifdef USE_NO_THREAD
+/// unthreaded case
 void SocketSet::waste_time( long sec, long usec )
 {
     struct timeval tv;
@@ -235,6 +239,14 @@ void SocketSet::waste_time( long sec, long usec )
     private_select( &tv );
 }
 #else
+/// threaded case
+void SocketSet::private_wakeup( )
+{
+    char c = 'w';
+    _thread_wakeup.write( &c, 1 );
+}
+
+/// threaded case
 void SocketSet::waste_time( long sec, long usec )
 {
     struct timeval tv;
@@ -246,6 +258,7 @@ void SocketSet::waste_time( long sec, long usec )
 
 void SocketSet::run( )
 {
+#ifndef USE_NO_THREAD
     while( !_thread_end )
     {
         private_select( NULL );
@@ -253,6 +266,7 @@ void SocketSet::run( )
     _thread_mx.lock( );
     _thread_cond.signal( );
     _thread_mx.unlock( );
+#endif
 }
 
 void SocketSet::private_test_dump_active_sets( const fd_set& read_set_select,
@@ -277,10 +291,12 @@ void SocketSet::private_test_dump_active_sets( const fd_set& read_set_select,
         }
     }
 
+#ifndef USE_NO_THREAD
     if( FD_ISSET( _thread_wakeup.getread(), &read_set_select ) )
     {
         ostr << _thread_wakeup.getread() << "(w)";
     }
+#endif
 
     ostr << ends;
     COUT << "select saw activity on fds=" << ostr.str() << endl;
@@ -306,7 +322,9 @@ void SocketSet::private_test_dump_request_sets( timeval* timeout )
         }
     }
 
+#ifndef USE_NO_THREAD
     ostr << _thread_wakeup.getread() << "(w)";
+#endif
     if( timeout )
         ostr << " t=" << timeout->tv_sec << ":" << timeout->tv_usec;
     else

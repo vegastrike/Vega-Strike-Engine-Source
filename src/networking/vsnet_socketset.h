@@ -23,6 +23,7 @@
   netUI - Network Interface - written by Stephane Vaxelaire <svax@free.fr>
 */
 
+#include <config.h>
 #include <iostream>
 #include <errno.h>
 #include "vsnet_headers.h"
@@ -42,10 +43,14 @@ class SocketSet : public VSThread
 
     Set    _autoset;
 
+#ifndef USE_NO_THREAD
     VSPipe  _thread_wakeup;
+#endif
     VSMutex _thread_mx;
     VSCond  _thread_cond;
+#ifndef USE_NO_THREAD
     bool    _thread_end;
+#endif
 
     bool    _blockmain;
     size_t  _blockmain_pending;
