@@ -1520,25 +1520,25 @@ void BaseComputer::configureCargoCommitControls(const Cargo& item, TransactionTy
 		NewButton* commitButton = static_cast<NewButton*>( window()->findControlById("Commit") );
 		assert(commitButton != NULL);
 		commitButton->setHidden(false);
-		commitButton->setLabel("Sell 1");
+		commitButton->setLabel(item.mission?"Dump 1":"Sell 1");
 		commitButton->setCommand("SellCargo");
 
 		// "Sell 10" button.
 		NewButton* commit10Button = static_cast<NewButton*>( window()->findControlById("Commit10") );
 		assert(commit10Button != NULL);
 		commit10Button->setHidden(false);
-		commit10Button->setLabel("Sell 10");
+		commit10Button->setLabel(item.mission?"Dump 10":"Sell 10");
 		commit10Button->setCommand("Sell10Cargo");
 
 		// "Sell All" button.
 		NewButton* commitAllButton = static_cast<NewButton*>( window()->findControlById("CommitAll") );
 		assert(commitAllButton != NULL);
 		commitAllButton->setHidden(false);
-		commitAllButton->setLabel("Sell");
+		commitAllButton->setLabel(item.mission?"Dump":"Sell");
 		commitAllButton->setCommand("SellAllCargo");
 
 		// Total price display.
-		const double totalPrice = item.price * item.quantity;
+		const double totalPrice = item.price * item.quantity*(item.mission?0:1);
 		char tempString[2048];
 		sprintf(tempString, "Total: #b#%.2f#-b", totalPrice);
 		StaticDisplay* totalDisplay = static_cast<StaticDisplay*>( window()->findControlById("TotalPrice") );
