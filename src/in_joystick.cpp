@@ -28,6 +28,7 @@
 //#include "dbg.h"
 #include "in_handler.h"
 #include "in_joystick.h"
+#include "config_xml.h"
 
 JoyStick *joystick[MAX_JOYSTICKS]; // until I know where I place it
 
@@ -39,6 +40,11 @@ void InitJoystick(){
   for (int i=0;i<NUMJBUTTONS;i++) {
     for (int j=0;j<MAX_JOYSTICKS;j++) {
       UnbindJoyKey (j,i);
+    }
+  }
+  for(int h=0;h<MAX_HATSWITCHES;h++){
+    for(int v=0;v<MAX_VALUES;v++){
+      UnbindHatswitchKey(h,v);
     }
   }
 #endif

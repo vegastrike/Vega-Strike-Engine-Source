@@ -71,18 +71,18 @@ void FlyByJoystick::Execute() {
     Accel (-joy->joy_z);
 #endif
 
-    if(vs_config->axis_joy[1] != -1 ){
-      Up(- joystick[vs_config->axis_joy[1]]->joy_axis[vs_config->axis_axis[1]] );
+    if(vs_config->axis_joy[AXIS_Y] != -1 ){
+      Up(- joystick[vs_config->axis_joy[AXIS_Y]]->joy_axis[vs_config->axis_axis[AXIS_Y]] );
     }
 
-    if(vs_config->axis_joy[0] != -1 ){
-      Right(- joystick[vs_config->axis_joy[0]]->joy_axis[vs_config->axis_axis[0]] );
+    if(vs_config->axis_joy[AXIS_X] != -1 ){
+      Right(- joystick[vs_config->axis_joy[AXIS_X]]->joy_axis[vs_config->axis_axis[AXIS_X]] );
     }
-    if(vs_config->axis_joy[2] != -1 ){
-      RollRight(- joystick[vs_config->axis_joy[2]]->joy_axis[vs_config->axis_axis[2]] );
+    if(vs_config->axis_joy[AXIS_Z] != -1 ){
+      RollRight(- joystick[vs_config->axis_joy[AXIS_Z]]->joy_axis[vs_config->axis_axis[AXIS_Z]] );
     }
-    if(vs_config->axis_joy[3] != -1 ){
-      Accel(- joystick[vs_config->axis_joy[3]]->joy_axis[vs_config->axis_axis[3]] );
+    if(vs_config->axis_joy[AXIS_THROTTLE] != -1 ){
+      Accel(- joystick[vs_config->axis_joy[AXIS_THROTTLE]]->joy_axis[vs_config->axis_axis[AXIS_THROTTLE]] );
     }
   }
   

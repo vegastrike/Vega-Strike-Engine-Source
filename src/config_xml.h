@@ -56,6 +56,11 @@ class VegaConfig {
 
 #define MAX_AXIS 4
 
+#define AXIS_X 0
+#define AXIS_Y 1
+#define AXIS_Z 2
+#define AXIS_THROTTLE 3
+
   int axis_axis[MAX_AXIS];
   int axis_joy[MAX_AXIS];
 
@@ -64,6 +69,9 @@ class VegaConfig {
 
   float hatswitch[MAX_HATSWITCHES][MAX_VALUES];
   float hatswitch_margin[MAX_HATSWITCHES];
+
+  int hatswitch_axis[MAX_HATSWITCHES];
+  int hatswitch_joystick[MAX_HATSWITCHES];
 
  private:
   string getVariable(easyDomNode *section,string name,string defaultval);

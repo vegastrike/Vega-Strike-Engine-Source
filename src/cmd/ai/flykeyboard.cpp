@@ -85,6 +85,8 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
     desired_ang_velocity=Vector(0,0,0);
 #define SSCK starshipcontrolkeys
 
+  //  printf("flybykey::exec\n");
+
   if (SSCK.dirty) {
     //go with what's last there: no frames since last physics frame
     if (SSCK.uppress<=0&&SSCK.downpress<=0)
@@ -111,10 +113,13 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
       if (SSCK.rollleftpress>0)
 	RollRight(-1);
     }
-    if (SSCK.ABpress>0)
-      Afterburn(1);
+
+    fprintf(stderr,"AB: press %d rel %d\n",SSCK.ABpress,SSCK.ABrelease);
+    if (SSCK.ABpress>=0)
+      Afterburn(0);
     else
-      Afterburn (0);
+      Afterburn (1);
+
     if (SSCK.accelpress>0)
       Accel(1);
     if (SSCK.decelpress>0)
@@ -167,7 +172,8 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
       Accel (-((float)FBWABS(SSCK.decelpress))/(FBWABS(SSCK.decelpress)+SSCK.decelrelease));
     }
     if (SSCK.ABpress||SSCK.ABrelease) {
-      Afterburn ((SSCK.ABpress>SSCK.ABrelease)?1:0);
+      //fprintf(stderr,"AB: press %d rel %d\n",SSCK.ABpress,SSCK.ABrelease);
+      Afterburn ((SSCK.ABpress>=SSCK.ABrelease)?1:0);
     }
   }
   if (SSCK.stoppress) {

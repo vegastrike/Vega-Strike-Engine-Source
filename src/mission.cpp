@@ -169,10 +169,11 @@ void Mission::checkFlightgroup(easyDomNode *node){
     return;
   }
 
-  // now enter the stuff (not yet)
+#if 0
   cout << "flightgroup: " << name << " " << faction << " " << type << " " << ainame << " " << waves << " " << nr_ships << endl;
   cout << "   pos: " << pos[0] << " " << pos[1] << " " << pos[2] << " " << endl;
   cout << "   rot: " << rot[0] << " " << rot[1] << " " << rot[2] << " " << endl;
+#endif
 
   Flightgroup *fg=new Flightgroup();
 

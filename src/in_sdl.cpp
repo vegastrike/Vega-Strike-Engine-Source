@@ -1,10 +1,15 @@
 #include "in_joystick.h"
+#include "vs_globals.h"
+#include "config_xml.h"
 
 
 //static KBHandler keyBindings [SDLK_LAST];
 //KBSTATE keyState [SDLK_LAST];
 KBHandler JoystickBindings [MAX_JOYSTICKS][NUMJBUTTONS];
 KBSTATE JoystickState [MAX_JOYSTICKS][NUMJBUTTONS];
+
+KBHandler HatswitchBindings [MAX_HATSWITCHES][MAX_VALUES];
+KBSTATE HatswitchState [MAX_HATSWITCHES][MAX_VALUES];
 
 void DefaultJoyHandler (int key, KBSTATE newState) {
   //  fprintf (stderr,"STATE: %d", st);
@@ -15,9 +20,22 @@ void UnbindJoyKey (int joystick, int key) {
   JoystickBindings[joystick][key]=DefaultJoyHandler;
   JoystickState[joystick][key]=UP;
 }
+
 void BindJoyKey (int joystick, int key, KBHandler handler) {
   assert (key<NUMJBUTTONS&&joystick<MAX_JOYSTICKS);
   JoystickBindings[joystick][key]=handler;
+  handler (0,RESET);
+}
+
+void UnbindHatswitchKey (int hatswitch, int val_index) {
+  assert (hatswitch<MAX_HATSWITCHES && val_index<MAX_VALUES);
+  HatswitchBindings[hatswitch][val_index]=DefaultJoyHandler;
+  //  JoystickState[joystick][key]=UP;
+}
+
+void BindHatswitchKey (int hatswitch, int val_index, KBHandler handler) {
+  assert (hatswitch<MAX_HATSWITCHES && val_index<MAX_VALUES);
+  HatswitchBindings[hatswitch][val_index]=handler;
   handler (0,RESET);
 }
 
@@ -69,6 +87,7 @@ void ProcessJoystick () {
   for (int i=0;i<MAX_JOYSTICKS;i++) {
     buttons=0;
     joystick[i]->GetJoyStick (x,y,z,buttons);
+
     for (int j=0;j<NUMJBUTTONS;j++) {
       if (i==0&&(buttons&(1<<j))) {
 	//	fprintf (stderr,"Button success %d",j);
@@ -85,6 +104,45 @@ void ProcessJoystick () {
       (*JoystickBindings [i][j])(0,JoystickState[i][j]);
     }
   }
+
+  // do the analogue hatswitches
+
+  for(int h=0;h<MAX_HATSWITCHES;h++){
+    float margin=fabs(vs_config->hatswitch_margin[h]);
+      if(margin<1.0){
+	// we have hatswitch nr. h
+	int hs_axis=vs_config->hatswitch_axis[h];
+	int hs_joy=vs_config->hatswitch_joystick[h];
+
+	float axevalue=joystick[hs_joy]->joy_axis[hs_axis];
+
+	  for(int v=0;v<MAX_VALUES;v++){
+	    float hs_val=vs_config->hatswitch[h][v];
+	    if(fabs(hs_val)<=1.0){
+	      // this is set
+	      KBHandler handler=(*HatswitchBindings[h][v]);
+	      if(hs_val-margin<=axevalue && axevalue<=hs_val+margin){
+		// hatswitch pressed
+		//		printf("hatswitch: %d %d %f %f %f\n",hs_joy,hs_axis,axevalue,margin,hs_val);
+
+		if(HatswitchState[h][v]==UP){
+		  handler(0,PRESS);
+		  HatswitchState[h][v]=DOWN;
+		}
+	      }
+	      else{
+		// not pressed
+		if(HatswitchState[h][v]==DOWN){
+		  handler(0,RELEASE);
+		}
+		HatswitchState[h][v]=UP;
+	      }
+	      handler(0,HatswitchState[h][v]);
+	    }
+	  }
+      }
+  }
+
 #endif
 }
 

@@ -91,5 +91,8 @@ typedef void (*JoyHandler)(KBSTATE,float x, float y, int mod);
 void BindJoyKey (int key, int joystick, KBHandler handler);
 void UnbindJoyKey (int joystick, int key);
 
+void UnbindHatswitchKey (int hatswitch, int val_index);
+void BindHatswitchKey (int hatswitch, int val_index, KBHandler handler);
+
 #endif // _JOYSTICK_H_
 

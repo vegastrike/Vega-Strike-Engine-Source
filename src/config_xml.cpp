@@ -72,6 +72,14 @@ VegaConfig::VegaConfig(char *configfile){
 
   variables=NULL;
 
+  // set hatswitches to off
+  for(int h=0;h<MAX_HATSWITCHES;h++){
+    hatswitch_margin[h]=2.0;
+    for(int v=0;v<MAX_VALUES;v++){
+      hatswitch[h][v]=2.0;
+    }
+  }
+
   for(int i=0;i<=3;i++){
     axis_axis[i]=-1;
     axis_joy[i]=-1;
@@ -369,6 +377,9 @@ void VegaConfig::doAxis(easyDomNode *node){
     float margin=atof(margin_str.c_str());
     hatswitch_margin[nr]=margin;
 
+    hatswitch_axis[nr]=axis_nr;
+    hatswitch_joystick[nr]=joy_nr;
+
     vector<easyDomNode *>::const_iterator siter;
   
     hs_value_index=0;
@@ -456,6 +467,9 @@ void VegaConfig::checkBind(easyDomNode *node){
 
 	int hatswitch_nr=atoi(hat_str.c_str());
 
+	BindHatswitchKey(hatswitch_nr,button_nr,handler);
+	
+	cout << "Bound hatswitch nr " << hatswitch_nr << " button: " << button_nr << " to " << cmdstr << endl;
       }
       else{
 	// joystick button
