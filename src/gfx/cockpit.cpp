@@ -51,11 +51,11 @@ void Cockpit::DrawTargetBox () {
     Loc = target->PositionITTS (un->Position(),speed);
     
     GFXBegin (GFXLINESTRIP);
-    GFXVertexf (Loc+(CamP)*2*un->rSize());
-    GFXVertexf (Loc+(-CamQ)*2*un->rSize());
-    GFXVertexf (Loc+(-CamP)*2*un->rSize());
-    GFXVertexf (Loc+(CamQ)*2*un->rSize());
-    GFXVertexf (Loc+(CamP)*2*un->rSize());
+    GFXVertexf (Loc+(CamP)*un->rSize());
+    GFXVertexf (Loc+(-CamQ)*un->rSize());
+    GFXVertexf (Loc+(-CamP)*un->rSize());
+    GFXVertexf (Loc+(CamQ)*un->rSize());
+    GFXVertexf (Loc+(CamP)*un->rSize());
     GFXEnd();
   }
   GFXEnable (TEXTURE0);
