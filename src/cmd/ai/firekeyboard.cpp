@@ -602,6 +602,34 @@ static Unit * getAtmospheric (Unit * targ) {
 }
 static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsigned char sex) {
   static bool nodockwithclear = XMLSupport::parse_bool (vs_config->getVariable ("physics","dock_with_clear_planets","true"));
+    if (vectorOfKeyboardInput[playa].doc) {
+      if (targ->isUnit()==PLANETPTR) {
+      if (((Planet * )targ)->isAtmospheric()&&nodockwithclear) {
+	targ = getAtmospheric (targ);
+	if (!targ) {
+	  mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");
+	  return;
+	}
+      }
+      }
+      CommunicationMessage c(targ,parent,NULL,0);
+
+      bool hasDock = parent->Dock(targ);
+      if (hasDock) {
+	  c.SetCurrentState (c.fsm->GetDockNode(),NULL,0);
+	  vectorOfKeyboardInput[playa].req=true;
+      }else {
+        if (UnDockNow(parent,targ)) {
+	  c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
+        }else {
+          //docking is unsuccess
+	  c.SetCurrentState (c.fsm->GetFailDockNode(),NULL,0);
+        }
+      }
+      parent->getAIState()->Communicate (c);
+      vectorOfKeyboardInput[playa].doc=false;
+
+    }
     if (vectorOfKeyboardInput[playa].req) {
       if (targ->isUnit()==PLANETPTR) {
 
@@ -619,32 +647,7 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
       targ->getAIState()->Communicate (c);
       vectorOfKeyboardInput[playa].req=false;
     }
-    if (vectorOfKeyboardInput[playa].doc) {
-      if (targ->isUnit()==PLANETPTR) {
-      if (((Planet * )targ)->isAtmospheric()&&nodockwithclear) {
-	targ = getAtmospheric (targ);
-	if (!targ) {
-	  mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");
-	  return;
-	}
-      }
-      }
-      CommunicationMessage c(targ,parent,NULL,0);
 
-      bool hasDock = parent->Dock(targ);
-      if (hasDock) {
-	  c.SetCurrentState (c.fsm->GetDockNode(),NULL,0);
-      }else {
-        if (UnDockNow(parent,targ)) {
-	  c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
-        }else {
-          //docking is unsuccess
-	  c.SetCurrentState (c.fsm->GetFailDockNode(),NULL,0);
-        }
-      }
-      parent->getAIState()->Communicate (c);
-      vectorOfKeyboardInput[playa].doc=false;
-    }
     if (vectorOfKeyboardInput[playa].und) {
       CommunicationMessage c(targ,parent,NULL,0);
       if (UnDockNow(parent,targ)) {
