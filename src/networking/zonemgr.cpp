@@ -1,7 +1,8 @@
 //#include <netinet/in.h>
 //#include "gfxlib.h"
 #include "universe_generic.h"
-#include "universe_util_generic.h"
+#include "universe_util.h"
+//#include "universe_util_generic.h" //Use universe_util_generic.h instead
 #include "star_system_generic.h"
 #include "cmd/unit_generic.h"
 #include "gfx/cockpit_generic.h"

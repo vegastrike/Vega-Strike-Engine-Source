@@ -12,7 +12,8 @@
 #include "vs_path.h"
 #include "save_util.h"
 #include "cmd/unit_util.h"
-#include "universe_util_generic.h"
+#include "universe_util.h"
+//#include "universe_util_generic.h" //Use universe_util.h instead
 
 using namespace GalaxyXML;
 

@@ -24,7 +24,8 @@
 
 #include "cmd/unit_generic.h"
 #include "gfx/cockpit_generic.h"
-#include "universe_util_generic.h"
+#include "universe_util.h"
+//#include "universe_util_generic.h" //Use universe_util_generic.h instead
 #include "cmd/unit_factory.h"
 #include "client.h"
 #include "packet.h"
