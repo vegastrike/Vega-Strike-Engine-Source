@@ -390,7 +390,7 @@ void StarSystem::Draw() {
   fprintf (stderr,"bem");
   fflush (stderr);
 #endif
-  Animation::ProcessDrawQueue();
+
   if ((neb = _Universe->AccessCamera()->GetNebula())) {
     neb->SetFogState();
   }
@@ -412,7 +412,7 @@ void StarSystem::Draw() {
 #endif
   if (_Universe->AccessCamera()->GetNebula()!=NULL)
     GFXFogMode (FOG_OFF);
-
+  Animation::ProcessDrawQueue();
   Halo::ProcessDrawQueue();
   stars->Draw();
 
