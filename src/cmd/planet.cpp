@@ -305,11 +305,20 @@ void Planet::reactToCollision(Unit * un, const Vector & biglocation, const Vecto
     un->SetPlanetOrbitData (terraintrans);
     Matrix top;
     Identity(top);
+    /*
     Vector posRelToTerrain = terraintrans->InvTransform(un->LocalPosition());
     top[12]=un->Position().i- posRelToTerrain.i;
     top[13]=un->Position().j- posRelToTerrain.j;
     top[14]=un->Position().k- posRelToTerrain.k;
+    */
+    Vector P,Q,R;
+    un->GetOrientation (P,Q,R);
+    terraintrans->InvTransformBasis (top,P,Q,R,un->Position());
+    Matrix inv,t;
 
+    InvertMatrix (    inv,top);
+    VectorAndPositionToMatrix (t,P,Q,R,un->Position());
+    MultMatrix (top,t,inv);
 #ifdef PLANETARYTRANSFORM
 
     terraintrans->GrabPerpendicularOrigin(un->Position(),top);
