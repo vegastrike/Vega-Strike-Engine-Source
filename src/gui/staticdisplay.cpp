@@ -92,16 +92,17 @@ bool StaticDisplay::processCommand(const EventCommandId& command, Control* contr
 // Process wheel events for scrolling.
 bool StaticDisplay::processMouseDown(const InputEvent& event) {
 	static int zoominc = XMLSupport::parse_int (vs_config->getVariable("general","wheel_increment_lines","3"));
-	if (event.code == WHEELUP_MOUSE_BUTTON) {
-		if(hitTest(event.loc)) {
-			m_scroller->setScrollPosition(m_scroller->scrollPosition()-zoominc);
-		}
-	} else if (event.code == WHEELDOWN_MOUSE_BUTTON) {
-		if(hitTest(event.loc)) {
-			m_scroller->setScrollPosition(m_scroller->scrollPosition()+zoominc);
+	if (m_scroller) {
+		if (event.code == WHEELUP_MOUSE_BUTTON) {
+			if(hitTest(event.loc)) {
+				m_scroller->setScrollPosition(m_scroller->scrollPosition()-zoominc);
+			}
+		} else if (event.code == WHEELDOWN_MOUSE_BUTTON) {
+			if(hitTest(event.loc)) {
+				m_scroller->setScrollPosition(m_scroller->scrollPosition()+zoominc);
+			}
 		}
 	}
-
 	return Control::processMouseDown(event);
 }
 
