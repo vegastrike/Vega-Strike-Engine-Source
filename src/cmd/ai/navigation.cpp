@@ -235,8 +235,8 @@ FaceTargetITTS::~FaceTargetITTS () {
 
 void FaceTargetITTS::Execute() {
   Unit * target = parent->Target();
-  if (target==NULL&&finish){
-    done = GFXTRUE;
+  if (target==NULL){
+    done = finish;
     return;
   }
   if (speed == float(.00001)) {
@@ -260,8 +260,8 @@ FaceTarget::FaceTarget (bool fini, int accuracy):ChangeHeading(Vector(0,0,1),acc
 
 void FaceTarget::Execute() {
   Unit * target = parent->Target();
-  if (target==NULL&&finish){
-    done = GFXTRUE;
+  if (target==NULL){
+    done = finish;
     return;
   }
   SetDest(target->Position());
