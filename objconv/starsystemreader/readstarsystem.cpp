@@ -57,6 +57,9 @@ public:
 			return name < a.name;
 		return sector<a.sector;
 	}
+	string fullName () {
+		return sector+"/"+name;
+	}
 	void computeProperties() {
 		double rad=16000;
 		double lifeprob= .25;
@@ -286,17 +289,54 @@ void writesystems(FILE * fp, vector<System> s) {
 			fprintf (fp, "\t\t\t<var name=\"%s\" value=\"%s\"/>\n",(*j).first.c_str(),(*j).second.c_str());			
 		}
 		fprintf (fp,"\t\t\t<var name=\"faction\" value=\"confed\"/>\n");
-		if (iter>4 && iter+4<s.size()) {
+/*		if (iter>4 && iter+4<s.size()) {
 			fprintf (fp,"\t\t\t<var name=\"jumps\" value=\"nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s\"/>\n",s[iter-1].name.c_str(),s[iter-2].name.c_str(),s[iter-3].name.c_str(),s[iter-4].name.c_str(),s[iter+1].name.c_str(),s[iter+2].name.c_str(),s[iter+3].name.c_str());
-		}
+			}*/
 		fprintf(fp,"\t\t</sector>\n");
 		iter++;
 	}	
 	fprintf(fp,"\t</sector>\n</systems></galaxy>\n");
 	
 }
+string getSector(const System &s, vec3 min, vec3 max) {
+	return "nowhereland";
+}
+double sqr (double x){
+	return x*x;
+}
 void processsystems (vector <System> & s){
-
+	vec3 min,max;
+	computeminmax(s,min,max);
+	for (unsigned int i=0;i<s.size();++i) {
+		s[i].sector=getSector(s[i],min,max);
+		map <double,string> jumps;
+		for (unsigned int j=0;j<s.size();++j) {
+			if (j!=i){
+				float dissqr = sqr(s[i].xyz.x-s[j].xyz.x)+sqr(s[i].xyz.y-s[j].xyz.y)+sqr(s[i].xyz.z-s[j].xyz.z);
+				int desired_size = rand()%7+1;
+				if (jumps.size()>=desired_size) {
+					if (jumps.upper_bound(dissqr)!=jumps.end()) {
+						jumps[dissqr]=s[j].fullName();
+						map<double,string>::iterator k = jumps.end();
+						k--;
+						jumps.erase(k);//erase last one
+					}
+				}else {
+					jumps[dissqr]=s[j].fullName();
+				}
+			}
+		}
+		string j;
+		if (jumps.size()) {
+			map<double,string>::iterator k= jumps.begin();
+			j=(*k).second;			
+			++k;
+			for (;k!=jumps.end();++k) {
+				j+=string(" ")+(*k).second;
+			}
+		}
+		s[i]["jumps"]=j;
+	}
 }
 int main (int argc, char ** argv) {
 	if (argc<3) {
