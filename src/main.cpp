@@ -76,7 +76,7 @@ int nadanixnuthin() {
 Universe * _Universe;
 // GameUniverse _Universe;
 TextPlane *bs_tp=NULL;
-bool SERVER=0;
+char SERVER=0;
 /* 
  * Function definitions
  */
