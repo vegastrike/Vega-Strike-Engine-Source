@@ -236,14 +236,38 @@ BOOL /*GFXDRVAPI*/ GFXGetMatrix(MATRIXMODE mode, Matrix matrix)
 	return TRUE;
 }
 #include <stdio.h>
-static void gl_Frustum( 
+static void gl_Frustum (float left,float right, float bottom, float top, float nearval,float farval){
+  GFXFrustum (projection,invprojection,left,right,bottom,top,nearval,farval);
+  
+}
+BOOL GFXGetFrustumVars (bool retr, float *l, float *r, float *b, float *t, float *n, float *f) {
+  static float near,far,left,right,bot,top;
+  if (!retr) {
+    near = *n;
+    far = *f;
+    left = *l;
+    right = *r;
+    bot = *b;
+    top = *t;
+  } else {
+    *l = left;
+    *r = right;
+    *b = bot;
+    *t = top;
+    *n = near;
+    *f = far;
+  }
+
+}
+
+
+BOOL GFXFrustum(float * m,float *i, 
                  float left, float right,
 	 	 float bottom, float top,
 		 float nearval, float farval )
 {
+  GFXGetFrustumVars(false,&left,&right,&bottom,&top,&nearval,&farval);
    GLfloat x, y, a, b, c, d;
-   GLfloat *m = projection;
-   GLfloat *i = invprojection;
    x = (((float)2.0)*nearval) / (right-left);
    y = (((float)2.0)*nearval) / (top-bottom);
    a = (right+left) / (right-left);
@@ -263,6 +287,7 @@ static void gl_Frustum(
    M(2,0) = 0.0F;  M(2,1) = 0.0F;  M(2,2) = 0.0F;   M(2,3) =-1.0F;
    M(3,0) = 0.0F;  M(3,1) = 0.0F;  M(3,2) = 1./d;  M(3,3) = c/d;
 #undef M
+   return TRUE;
 }
 
 BOOL /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zfar)
@@ -435,27 +460,34 @@ BOOL /*GFXDRVAPI*/ GFXLookAt(Vector eye, Vector center, Vector up)
 
 	return TRUE;
 }
-float frustum [6][4];
-float GFXSphereInFrustum (const Vector &Cnt, float radius) {
+float frust [6][4];
+float /*GFXDRVAPI*/ GFXSphereInFrustum (const Vector &Cnt, float radius) {
+  return GFXSphereInFrustum (frust,Cnt,radius);
+}
+float /*GFXDRVAPI*/ GFXSphereInFrustum (float f [6][4],const Vector &Cnt, float radius) {
    int p;
    float d;
    for( p = 0; p < 6; p++ )
    {
-      d = frustum[p][0] * Cnt.i + frustum[p][1] * Cnt.j + frustum[p][2] * Cnt.k + frustum[p][3];
+      d = f[p][0] * Cnt.i + f[p][1] * Cnt.j + f[p][2] * Cnt.k + f[p][3];
       if( d <= -radius )
          return 0;
    }
    return d + radius;
 }
 
-BOOL GFXGetFrustum(float f[6][4]) {
-  f = frustum;
+
+BOOL /*GFXDRVAPI*/ GFXGetFrustum(float f[6][4]) {
+  f = frust;
   return TRUE;
 }
-BOOL GFXCalculateFrustum() {
+BOOL /*GFXDRVAPI*/ GFXCalculateFrustum() {
+  return GFXCalculateFrustum (frust,view,projection);
+}
 
-   float   *proj=projection;
-   float   *modl=view;
+BOOL /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], float *modl,float * proj){
+////float   *proj=projection;
+////float   *modl=view;
    float   clip[16];
    float   t;
 

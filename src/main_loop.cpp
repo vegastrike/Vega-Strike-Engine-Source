@@ -320,7 +320,17 @@ StarSystem *star_system = NULL;
 ClickList *shipList =NULL;
 
 void clickhandler (KBSTATE k, int x, int y, int delx, int dely, int mod) {
-  
+  static int oldx=0, oldy=0;
+  if (k==DOWN) {
+    UnitCollection *c = shipList->requestIterator (oldx,oldy,x,y);
+    if (c->createIterator()->current()!=NULL)
+      fprintf (stderr,"Select Box Hit single target");
+    if (c->createIterator()->advance()!=NULL)
+      fprintf (stderr,"Select Box Hit Multiple Targets");
+  } else{
+    oldx= x;
+    oldy = y;
+  }
   if (k==PRESS) {
     fprintf (stderr,"click?");
     UnitCollection * c = shipList->requestIterator (x,y);
@@ -328,6 +338,13 @@ void clickhandler (KBSTATE k, int x, int y, int delx, int dely, int mod) {
       fprintf (stderr,"Hit single target");
     if (c->createIterator()->advance()!=NULL)
       fprintf (stderr,"Hit Multiple Targets");
+    fprintf (stderr,"\n");
+    c=shipList->requestIterator (0,0,x,y);
+    if (c->createIterator()->current()!=NULL)
+      fprintf (stderr,"Hit single Barget");
+    if (c->createIterator()->advance()!=NULL)
+      fprintf (stderr,"Hit Multiple Bargets");
+    
   }
 }
 
@@ -475,6 +492,7 @@ void createObjects() {
   star_system->AddUnit(fighter);
   star_system->AddUnit(carrier);
   shipList = star_system->getClickList();
+  
   BindKey (0,clickhandler);
 }
 

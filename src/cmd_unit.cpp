@@ -338,6 +338,65 @@ int Unit::queryBoundingBox (Matrix t,const Vector &eye, const Vector &pnt, float
 
 }
 
+bool Unit::queryFrustum(float frustum [6][4]) {
+  int i;
+#ifdef VARIABLE_LENGTH_PQR
+  Vector TargetPoint (transformation[0],transformation[1],transformation[2]);
+  float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint));
+#else
+  Vector TargetPoint;
+#endif
+  for (i=0;i<nummesh;i++) {
+        TargetPoint = Transform(transformation,meshdata[i]->Position());
+	if (GFXSphereInFrustum (frustum, 
+				TargetPoint,
+				meshdata[i]->rSize()
+#ifdef VARIABLE_LENGTH_PQR
+				*SizeScaleFactor
+#endif
+				)){
+	  return true;
+	}
+  }	
+  
+  for (i=0;i<numsubunit;i++) {
+    if (queryFrustum(transformation,frustum))
+      return true;
+  }
+  return false;
+}
+
+
+bool Unit::queryFrustum(Matrix t, float frustum [6][4]) {
+
+  Matrix tmpo;
+  MultMatrix (tmpo,t,transformation);
+#ifdef VARIABLE_LENGTH_PQR
+  Vector TargetPoint (tmpo[0],tmpo[1],tmpo[2]);
+  float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint));
+#else
+  Vector TargetPoint;
+#endif
+  int i;
+  for (i=0;i<nummesh;i++) {
+        TargetPoint = Transform(tmpo,meshdata[i]->Position());
+	if (GFXSphereInFrustum (frustum, 
+				TargetPoint,
+				meshdata[i]->rSize()
+#ifdef VARIABLE_LENGTH_PQR
+				*SizeScaleFactor
+#endif
+				)){
+	  return true;
+	}
+  }	
+  
+  for (i=0;i<numsubunit;i++) {
+    if (queryFrustum(tmpo,frustum))
+      return true;
+  }
+  return false;
+}
 
 Vector MouseCoordinate (int x, int y, float zplane) {
 

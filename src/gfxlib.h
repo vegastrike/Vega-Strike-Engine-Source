@@ -74,9 +74,14 @@ float /*GFXDRVAPI*/GFXGetYInvPerspective();
 BOOL /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zfar);
 BOOL /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top, float znear, float zfar);
 BOOL /*GFXDRVAPI*/ GFXLookAt(Vector eye, Vector center, Vector up);
-BOOL GFXGetFrustum (float f[6][4]);
-BOOL GFXCalculateFrustum();
-float GFXSphereInFrustum(const Vector &Center, float Radius);
+BOOL /*GFXDRVAPI*/ GFXGetFrustum (float f[6][4]);
+BOOL /*GFXDRVAPI*/ GFXCalculateFrustum();
+BOOL /*GFXDRVAPI*/ GFXCalculateFrustum(float frustum[6][4],float *modlmatrix, float *projection);
+BOOL /*GFXDRVAPI*/ GFXGetFrustumVars (bool, float *l,float *r, float *b, float *t, float *n, float *f);
+float /*GFXDRVAPI*/ GFXSphereInFrustum(const Vector &Center, float Radius);
+float /*GFXDRVAPI*/ GFXSphereInFrustum(float f[6][4],const Vector &Center, float Radius);
+BOOL /*GFXDRVAPI*/ GFXFrustum (float * mat, float *inv, float left,float right, float bottom, float top, float nearval, float farval);
+
 //Textures
 
 BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette = 0, int texturestage = 0);

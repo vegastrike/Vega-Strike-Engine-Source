@@ -118,8 +118,9 @@ public:
 	bool querySphere (const Vector &pnt, float err);
 	bool querySphere (Matrix,const Vector &pnt, float err);
 	bool queryBoundingBox(const Vector &pnt, float err);
-	bool queryBoundingBox(Matrix,const Vector &, float);
-
+        bool queryBoundingBox(Matrix,const Vector &, float);
+        bool queryFrustum (float frustum[6][4]);
+        bool queryFrustum (Matrix, float [6][4]);
 
   /**Queries the bounding box with a ray.  1 if ray hits in front... -1 if ray
    * hits behind.
