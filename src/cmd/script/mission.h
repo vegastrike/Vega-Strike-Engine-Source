@@ -514,7 +514,7 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
 
   static int total_nr_frames;
 
-  ofstream var_out;
+  //ofstream var_out;
 
   parsemode_type parsemode;
 

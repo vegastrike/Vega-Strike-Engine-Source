@@ -347,16 +347,18 @@ AC_EGREP_CPP(yes,
 ], [is_macosx=yes], [is_macosx=no] )
 AC_MSG_RESULT([${is_macosx}])
 
+
+
 if test "x$is_macosx" = "xyes" ; then
-	CXXFLAGS="$CXXFLAGS -I/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes"
+	CXXFLAGS="$CXXFLAGS -I/Developer/SDKs/MacOSX10.2.8sdk/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes"
 	CPPFLAGS="$CPPFLAGS -Wno-long-double"
     dnl GL_CPPFLAGS="$GL_CPPFLAGS -framework OpenGL"
     dnl GLUT_CPPFLAGS="$GLUT_CPPFLAGS -framework GLUT"
-	VS_LIBS="$VS_LIBS -framework OpenGL -framework GLUT"
-    with_gl_inc=/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes
-    with_gl_libs=/System/Library/Frameworks/OpenGL.framework/Libraries
-    with_al_inc=/Library/Frameworks/OpenAL.framework/Headers
-    with_al_libs=/Library/Frameworks/OpenAL.framework/
+	VS_LIBS="$VS_LIBS -F/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks  -framework OpenGL -framework GLUT"
+    with_gl_inc=/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes
+    with_gl_libs=/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks/OpenGL.framework/Libraries
+    with_al_inc="/Developer/SDKs/MacOSX10.2.8.sdk/Library/Frameworks/OpenAL.framework/Headers -I/sw/include"
+    with_al_libs="/Developer/SDKs/MacOSX10.2.8.sdk/Library/Frameworks/OpenAL.framework/ -L/sw/lib"
     with_expat_libs=/sw/lib
     with_png_libs=/sw/lib
     with_jpeg_libs=/sw/lib
@@ -1137,10 +1139,15 @@ if test "x$sdl_sound" != "xno" ; then
 
     if test "x$is_macosx" = "xyes" ; then
       MACORPCLIBS="$OPENAL_LDOPTS -framework OpenAL"
+      CHECK_FOR_OPENAL_LIB
+    fi
+    if test "x$have_openal_lib" = "xyes" ; then
+      EPEE_DAY="september 30"
     else
       MACORPCLIBS="$OPENAL_LDOPTS -l$OPENAL_LIB_NAME"
+      CHECK_FOR_OPENAL_LIB
     fi
-        CHECK_FOR_OPENAL_LIB
+
     
         if test "x$have_openal_lib" = "xyes" ; then
             LIBS="$saved_LIBS"

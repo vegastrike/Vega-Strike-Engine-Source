@@ -719,9 +719,12 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 		}
 		if( damages & Unit::LIMITS_DAMAGED)
 		{
-			netbuf.addFloat( un->computer.max_pitch);
-			netbuf.addFloat( un->computer.max_yaw);
-			netbuf.addFloat( un->computer.max_roll);
+			netbuf.addFloat( un->computer.max_pitch_down);
+			netbuf.addFloat( un->computer.max_pitch_up);
+			netbuf.addFloat( un->computer.max_yaw_left);
+			netbuf.addFloat( un->computer.max_yaw_right);
+			netbuf.addFloat( un->computer.max_roll_left);
+			netbuf.addFloat( un->computer.max_roll_right);
 			netbuf.addFloat( un->limits.roll);
 			netbuf.addFloat( un->limits.yaw);
 			netbuf.addFloat( un->limits.pitch);

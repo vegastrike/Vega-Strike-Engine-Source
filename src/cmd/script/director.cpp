@@ -119,26 +119,6 @@ void Mission::DirectorEnd(){
   }
   RunDirectorScript ("endgame");
 
-#ifdef WIN32
-  var_out.open("c:\\tmp\\default-player.variables");
-#else
-  struct passwd *pwent;
-  pwent=getpwuid(getuid());
-  //  printf("home save dir: %s\n",pwent->pw_dir);
-
-  string var_file=string(pwent->pw_dir)+string(DELIMSTR)+VSFileSystem::HOMESUBDIR+string(DELIMSTR)+string("default-player.variables");
-  //var_out.open("/tmp/default-player.variables");
-  var_out.open(var_file.c_str());
-#endif
-
-  if(!var_out){
-    cout << "ERROR: could not write variables file" << endl;
-    return;
-  }
-
-  saveVariables(var_out);
-
-  var_out.close();
 
 }
 
