@@ -38,24 +38,30 @@ bool flickerDamage (Unit * un, float hullpercent) {
 	#define damagelevel hullpercent
 		  static float counter=getNewTime();
 		  
-		  static float flickertime = XMLSupport::parse_float (vs_config->getVariable ("graphics","glow-flicker-time","30"));
-		  static float flickerofftime = XMLSupport::parse_float (vs_config->getVariable ("graphics","glow-flicker-off-time","2"));
-		  static float flickeronprob= XMLSupport::parse_float (vs_config->getVariable ("graphics","glow-flicker-off-time",".05"));
+		  static float flickertime = XMLSupport::parse_float (vs_config->getVariable ("graphics","glowflicker","time","30"));
+		  static float flickerofftime = XMLSupport::parse_float (vs_config->getVariable ("graphics","glowflicker","off-time","2"));
+		  static float minflickercycle = XMLSupport::parse_float (vs_config->getVariable ("graphics","glowflicker","min-cycle","2"));		  
+		  static float flickeronprob= XMLSupport::parse_float (vs_config->getVariable ("graphics","glowflicker","num-times-per-second-on","2"));
+		  static float hullfornoflicker= XMLSupport::parse_float (vs_config->getVariable ("graphics","glowflicker","hull-for-total-dark",".04"));
 		  float diff = getNewTime()-counter;
 		  if (diff>flickertime) {
 			  counter=getNewTime();
 			  diff=0;
 		  }
 		  float tmpflicker=flickertime*damagelevel;
-		  if (tmpflicker<5) {
-			  tmpflicker=5;
+		  if (tmpflicker<minflickercycle) {
+			  tmpflicker=minflickercycle;
 		  }
 		  diff = fmod (diff,tmpflicker);
 		  //we know counter is somewhere between 0 and damage level
 		  unsigned int thus = ((int)un)>>2;//cast this to an int for fun!
 		  thus = thus % ((unsigned int)tmpflicker);
-		  if (diff>thus && diff-flickerofftime<thus) {
-			  return rand()>RAND_MAX*flickeronprob;
+		  diff = fmod (diff+thus,tmpflicker);
+		  if (flickerofftime>diff) {
+			  if (damagelevel>hullfornoflicker)
+				  return rand()>RAND_MAX*GetElapsedTime()*flickeronprob;
+			  else
+				  return true;
 		  }
 	  return false;
 	  #undef damagelevel
@@ -418,7 +424,7 @@ void Unit::Init()
   faction =0;
   resolveforces=true;
   colTrees=NULL;
-  invisible=false;
+  invisible=DEFAULTVIS;
   //origin.Set(0,0,0);
   corner_min.Set (FLT_MAX,FLT_MAX,FLT_MAX);
   corner_max.Set (-FLT_MAX,-FLT_MAX,-FLT_MAX);
@@ -956,8 +962,26 @@ un_kiter Unit::viewSubUnits() const{
   return SubUnits.constIterator();
 }
 
-void Unit::SetVisible(bool invis) {
-  invisible=!invis;
+void Unit::SetVisible(bool vis) {
+	if (vis) {
+		invisible&=(~INVISCAMERA);
+	}else {
+		invisible|=INVISCAMERA;
+	}
+}
+void Unit::SetAllVisible(bool vis) {
+	if (vis) {
+		invisible&=(~INVISUNIT);
+	}else {
+		invisible|=INVISUNIT;
+	}
+}
+void Unit::SetGlowVisible(bool vis) {
+	if (vis) {
+		invisible&=(~INVISGLOW);
+	}else {
+		invisible|=INVISGLOW;
+	}
 }
 
 float Unit::GetElasticity() {return .5;}
@@ -2995,7 +3019,7 @@ bool Unit::ForceDock (Unit * utdw, int whichdockport) {
       utdw->image->dockedunits.push_back (new DockedUnits (this,whichdockport));
       if (utdw->image->dockingports[whichdockport].internal) {
 	RemoveFromSystem();	
-       	invisible=true;
+	SetVisible(false);
 	docked|=DOCKED_INSIDE;
       }else {
 	docked|= DOCKED;
@@ -3100,7 +3124,7 @@ bool Unit::UnDock (Unit * utdw) {
     if (utdw->image->dockedunits[i]->uc.GetUnit()==this) {
       utdw->FreeDockingPort (i);
       i--;
-      invisible=false;
+      SetVisible(true);;
       docked&=(~(DOCKED_INSIDE|DOCKED));
       image->DockedTo.SetUnit (NULL);
       Velocity=utdw->Velocity;

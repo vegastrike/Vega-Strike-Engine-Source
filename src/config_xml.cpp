@@ -221,6 +221,7 @@ extern void reset_time_compression(int i, KBSTATE a);
 extern void MapKey(int i, KBSTATE a);
 extern void VolUp(int i, KBSTATE a);
 extern void VolDown(int i, KBSTATE a);
+
   using namespace CockpitKeys;
 
 void GameVegaConfig::initCommandMap(){
@@ -271,7 +272,9 @@ void GameVegaConfig::initCommandMap(){
   command_map["RollRightKey"]=FlyByKeyboard::RollRightKey ;
   command_map["SetVelocityRefKey"]=FlyByKeyboard::SetVelocityRefKey ;
   command_map["SetVelocityNullKey"]=FlyByKeyboard::SetNullVelocityRefKey ;
+  command_map["ToggleGlow"]=FireKeyboard::ToggleGlow;  
   command_map["CommAttackTarget"]=FireKeyboard::AttackTarget;
+  
   command_map["CommHelpMeOutCrit"]=FireKeyboard::HelpMeOutCrit;
   command_map["CommHelpMeOutFaction"]=FireKeyboard::HelpMeOutFaction;
   command_map["JoinFlightgroup"]=FireKeyboard::JoinFg;

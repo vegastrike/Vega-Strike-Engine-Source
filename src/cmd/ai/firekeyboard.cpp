@@ -76,8 +76,8 @@ struct FIREKEYBOARDTYPE {
  KBSTATE targetskey;
  KBSTATE targetukey;
  KBSTATE turretaikey;
-
-  KBSTATE commKeys[NUMCOMMKEYS];
+ KBSTATE toggleglow;
+ KBSTATE commKeys[NUMCOMMKEYS];
  KBSTATE nearturrettargetkey;
  KBSTATE threatturrettargetkey;
  KBSTATE pickturrettargetkey;
@@ -96,7 +96,11 @@ FIREKEYBOARDTYPE &FireKeyboard::f() {
 FIREKEYBOARDTYPE &FireKeyboard::j() {
   return vectorOfKeyboardInput[whichjoystick];
 }
-
+void FireKeyboard::ToggleGlow (int,KBSTATE k) {
+	if (k==PRESS) {
+		g().toggleglow=PRESS;
+	}
+}
 void FireKeyboard::PressComm1Key (int, KBSTATE k) {
   if (k==PRESS) {
     g().commKeys[0]=PRESS;
@@ -1184,6 +1188,12 @@ void FireKeyboard::Execute () {
 			weapsound.loadsound(str);
 		}
 		weapsound.playsound();
+  }
+  if (f().toggleglow == PRESS) {
+	  f().toggleglow=DOWN;
+	 static bool isvis=true;
+	  isvis=!isvis;
+	  parent->SetGlowVisible (isvis);
   }
   if (f().misk==PRESS) {
     f().misk=DOWN;

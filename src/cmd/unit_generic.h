@@ -551,6 +551,9 @@ public:
   void SetPosAndCumPos (const QVector &pos) {SetPosition (pos);cumulative_transformation_matrix.p=pos;cumulative_transformation.position=pos;}
   ///Sets the state of drawing
   void SetVisible(bool isvis);
+  void SetAllVisible(bool isvis);
+  void SetGlowVisible(bool isvis);	
+	
   ///Rotates about the axis
   void Rotate(const Vector &axis);
   /**
