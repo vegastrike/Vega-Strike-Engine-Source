@@ -42,6 +42,8 @@ libgfx_a_SOURCES =	$(libgfxgeneric)\
 	mesh_gfx.cpp	\
 	ani_texture.h	\
 	ani_texture.cpp	\
+	stream_texture.h \
+	stream_texture.cpp \
 	animation.cpp	\
 	animation.h		\
 	aux_logo.cpp	\

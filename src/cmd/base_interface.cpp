@@ -14,6 +14,9 @@
 #include "save_util.h"
 #include "unit_util.h"
 #include "gfx/cockpit.h"
+#ifdef RENDER_FROM_TEXTURE
+#include "gfx/stream_texture.h"
+#endif
 #include "main_loop.h"
 #ifdef BASE_MAKER
  #include <stdio.h>
@@ -702,11 +705,47 @@ void BaseInterface::Room::Link::Click (BaseInterface *base,float x, float y, int
 		}
 	}}
 
+struct BaseColor {
+  unsigned char r,g,b,a;
+};
+static void AnimationDraw() {  
+#ifdef RENDER_FROM_TEXTURE
+  static StreamTexture T(512,256,NEAREST,NULL);
+  BaseColor (* data)[512] = reinterpret_cast<BaseColor(*)[512]>(T.Map());
+  bool counter=false;
+  srand(time(NULL));
+  for (int i=0;i<256;++i) {
+    for (int j=0;j<512;++j) {
+      data[i][j].r=rand()%255;
+      data[i][j].g=rand()%255;
+      data[i][j].b=rand()%255;
+      data[i][j].a=rand()%255;
+    }
+  }
+  T.UnMap();
+  T.MakeActive();
+  GFXEnable(TEXTURE0);
+  GFXDisable(CULLFACE);
+  GFXBegin(GFXQUAD);
+  GFXTexCoord2f(0,0);
+  GFXVertex3f(-1.0,-1.0,0.0);
+  GFXTexCoord2f(1,0);
+  GFXVertex3f(1.0,-1.0,0.0);
+  GFXTexCoord2f(1,1);
+  GFXVertex3f(1.0,1.0,0.0);
+  GFXTexCoord2f(0,1);
+  GFXVertex3f(-1.0,1.0,0.0);
+  GFXEnd();
+#endif
+}
+
 void BaseInterface::Draw () {
 	GFXColor(0,0,0,0);
 	StartGUIFrame(GFXTRUE);
 	Room::BaseTalk::hastalked=false;
 	rooms[curroom]->Draw(this);
+        AnimationDraw();
+
 	float x,y;
 	curtext.GetCharSize(x,y);
 	curtext.SetPos(-.99,-1+(y*1.5));
