@@ -845,6 +845,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	    if (NewPart->nummesh()>0) {
 	      _Universe->AccessCockpit()->credits-=part->price-usedprice;
 	      NewPart->curr_physical_state=un->curr_physical_state;
+	      NewPart->SetPosAndCumPos(UniverseUtil::SafeEntrancePoint(un->Position(),NewPart->rSize()));
 	      NewPart->prev_physical_state=un->prev_physical_state;
 	      _Universe->activeStarSystem()->AddUnit (NewPart);
 	      SwapInNewShipName(_Universe->AccessCockpit(),input_buffer,SwappingShipsIndex);
@@ -852,9 +853,9 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 
 	      SwitchUnits (NULL,NewPart);
 	      un->UnDock (base);
-	      base->RequestClearance(NewPart);
+	      //base->RequestClearance(NewPart);
 	      buyer.SetUnit (NewPart);
-	      NewPart->Dock(base);
+	      //NewPart->Dock(base);
 	      WriteSaveGame (_Universe->AccessCockpit(),true);
 	      NewPart=NULL;
 	      un->Kill();
