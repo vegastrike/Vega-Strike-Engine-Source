@@ -818,8 +818,13 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
     {
     static int wasautopilot=0;
 	int abletoautopilot=0;
+	static bool auto_valid = XMLSupport::parse_bool (vs_config->getVariable ("physics","insystem_jump_or_timeless_auto-pilot","false"));	
     if (target) {
-      abletoautopilot=(target->graphicOptions.InWarp);
+		if (!auto_valid) {
+			abletoautopilot=(target->graphicOptions.InWarp);
+		}else {
+			abletoautopilot=(target->AutoPilotTo(target,false)?1:0);
+		}
     }
 	if (abletoautopilot!=wasautopilot) {
 		if (abletoautopilot==0) {
