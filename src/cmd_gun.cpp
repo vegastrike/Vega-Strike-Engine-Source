@@ -20,7 +20,7 @@
  */
 #include "cmd_gun.h"
 #include "cmd_ai.h"
-
+#include "cmd_order.h"
 Missile::Missile(char *filename):Unit(filename)
 {
 	//FILE *fp = fopen(filename, "r");

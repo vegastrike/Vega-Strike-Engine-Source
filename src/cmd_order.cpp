@@ -19,7 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "cmd_unit.h"
-#include "cmd_ai.h"
+#include "cmd_order.h"
 #include "UnitCollection.h"
 AI * Order::Execute () {
   int completed=0;
@@ -88,16 +88,4 @@ bool Order::AttachOrder (Vector targetv) {
   }
   targetlocation = targetv;
   return true;
-}
-
-/*
-AI::AI(Unit *parent1)
-{
-	parent = parent1;
-}
-*/
-
-AI *AI::Execute()
-{
-	return this;
 }

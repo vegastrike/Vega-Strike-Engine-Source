@@ -3,7 +3,7 @@
 #include "planet.h"
 #include "gfxlib.h"
 #include "gfx_sphere.h"
-
+#include "cmd_ai.h"
 #include "UnitCollection.h"
 
 AI *PlanetaryOrbit::Execute() {

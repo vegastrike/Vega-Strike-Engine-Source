@@ -26,7 +26,7 @@
 #include "cmd_unitenum.h"
 #include "gfx_hud.h"
 #include "gfx_bounding_box.h"
-
+#include "cmd_ai.h"
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
