@@ -360,6 +360,7 @@ void Mesh::ProcessZFarMeshes () {
     i->orig->will_be_drawn &= (~(1<<NUM_ZBUF_SEQ));
   }
   undrawn_meshes[NUM_ZBUF_SEQ].clear();
+  GFXFogMode(FOG_OFF);
   Animation::ProcessFarDrawQueue();
   _Universe->AccessCamera()->UpdateGFX (GFXTRUE, GFXFALSE);
   GFXEnable (DEPTHTEST);
