@@ -216,6 +216,7 @@ void LoadMission (const char * nission_name, const std::string &script, bool loa
 		static std::string mission_name_def=vs_config->getVariable("general","empty_mission","mission/internal.mission");
 		mission_name=mission_name_def;
 	}
+  printf("%s",script.c_str());
   FILE * fp = fopen (mission_name.c_str(),"r");
   if (!fp) {
     return;
