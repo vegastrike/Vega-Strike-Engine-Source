@@ -2,30 +2,48 @@
 #include "firekeyboard.h"
 #include "flybywire.h"
 #include "navigation.h"
+#include "in_joystick.h"
 
 
-
-FireKeyboard::FireKeyboard (): Order (WEAPON){
+FireKeyboard::FireKeyboard (int whichjoystick, const char *): Order (WEAPON){
   gunspeed = gunrange = .0001;
+  BindJoyKey (whichjoystick,0,FireKeyboard::JFireKey);
+  BindJoyKey (whichjoystick,1,FireKeyboard::JMissileKey);
+  //  BindJoyKey (whichjoystick,2,FireKeyboard::UnbindJoyKey);
 
   BindKey(' ',FireKeyboard::FireKey);
   BindKey(';',FireKeyboard::MissileKey);
   BindKey('t',FireKeyboard::TargetKey);
-
+  
 }
 static KBSTATE firekey=UP;
 static KBSTATE targetkey=UP;
 static KBSTATE missilekey = UP;
+static KBSTATE jfirekey=UP;
+static KBSTATE jtargetkey=UP;
+static KBSTATE jmissilekey = UP;
+
 void FireKeyboard::FireKey(int, KBSTATE k) {
   firekey = k;
 }
+void FireKeyboard::JFireKey(KBSTATE k, float, float,int i) {
+  jfirekey = k;
+} 
 void FireKeyboard::TargetKey(int, KBSTATE k) {
   if (targetkey!=PRESS)
     targetkey = k;
 }
+void FireKeyboard::JTargetKey(KBSTATE k, float, float,int i) {
+  if (jtargetkey!=PRESS)
+    jtargetkey = k;
+} 
+
 void FireKeyboard::MissileKey(int, KBSTATE k) {
   missilekey = k;
 }
+void FireKeyboard::JMissileKey(KBSTATE k, float, float,int i) {
+  jmissilekey = k;
+} 
 
 
 void FireKeyboard::ChooseTargets () {

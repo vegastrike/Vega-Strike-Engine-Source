@@ -21,7 +21,13 @@
 
 #ifndef INKB_H
 #define INKB_H
-#define KEYMAP_SIZE 256
+#ifdef HAVE_SDL
+#include <SDL/SDL_keysym.h>
+const int KEYMAP_SIZE =SDLK_LAST;
+#else
+const int KEYMAP_SIZE =256;
+#endif
+
 enum KBSTATE {
 	UP,
 	DOWN,

@@ -336,7 +336,7 @@ void createObjects() {
  
   fighters[0]->EnqueueAI(new AIScript("aitest.xml"));
   fighters[0]->EnqueueAI(new FlyByJoystick (0,"player1.kbconf"));
-  fighters[0]->EnqueueAI(new FireKeyboard ());
+  fighters[0]->EnqueueAI(new FireKeyboard (0,""));
   _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");
   _Universe->AccessCockpit()->SetParent(fighters[0]);
   shipList = _Universe->activeStarSystem()->getClickList();

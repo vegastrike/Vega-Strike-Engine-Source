@@ -16,6 +16,7 @@ vegastrike_SOURCES =				\
 	in_joystick.h				\
 	in_kb.cpp				\
 	in_kb.h					\
+	in_sdl.cpp				\
 	in_mouse.cpp				\
 	in_mouse.h				\
 	in_main.cpp				\

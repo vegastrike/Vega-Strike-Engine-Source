@@ -33,11 +33,13 @@
 #include "vegastrike.h"
 //#include "glob.h"
 //#include "dbg.h"
-#include "in_handler.h"
+#include "in_kb.h"
+#define NUMJBUTTONS 16
 
 class JoyStick;
 
 //typedef void (*JoyHandler) (int);
+
 
 extern void ProcessJoystick();
 extern void InitJoystick();
@@ -67,6 +69,8 @@ class JoyStick {
 
 #if defined(HAVE_SDL)
     SDL_Joystick *joy;
+#else
+    void *otherdata;//bad form to have an ifdef in a struct
 #endif
     int nr_of_axes,nr_of_buttons;
     int hat_margin;
@@ -79,5 +83,10 @@ class JoyStick {
 }
 ;
 
+const int MAX_JOYSTICKS=10;
+extern JoyStick *joystick[MAX_JOYSTICKS];
+typedef void (*JoyHandler)(KBSTATE,float x, float y, int mod);
+void BindJoyKey (int key, int joystick, JoyHandler handler);
+void UnbindJoyKey (int joystick, int key);
 #endif // _JOYSTICK_H_
 

@@ -17,12 +17,14 @@ class FireKeyboard: public Order {
   static void FireKey(int, KBSTATE);
   static void MissileKey(int, KBSTATE);
   static void TargetKey(int, KBSTATE);
-
+  static void JFireKey(KBSTATE,float,float,int);  
+  static void JMissileKey(KBSTATE,float,float,int);  
+  static void JTargetKey(KBSTATE,float,float,int);  
 protected:
   float distance;
   void ChooseTargets();//chooses n targets and puts the best to attack in unit's target container
 public:
-  FireKeyboard ();//weapon prefs?
+  FireKeyboard (int whichjoystick, const char * configfile);//weapon prefs?
   virtual void Execute();
 };
 

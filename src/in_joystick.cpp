@@ -30,12 +30,21 @@
 #include "in_joystick.h"
 
 JoyStick *joystick[MAX_JOYSTICKS]; // until I know where I place it
-
+/*
+<<<<<<< in_joystick.cpp
+=======
 //static KBHandler joyBindings [MAX_BUTTONS];
 KBSTATE buttonState[MAX_BUTTONS];
 
 
+>>>>>>> 1.7
+*/
 void InitJoystick(){
+  for (int i=0;i<NUMJBUTTONS;i++) {
+    for (int j=0;j<MAX_JOYSTICKS;j++) {
+      UnbindJoyKey (j,i);
+    }
+  }
 #ifdef HAVE_SDL
   int num_joysticks=SDL_NumJoysticks() ;
   printf("%i joysticks were found.\n\n", num_joysticks);
@@ -64,7 +73,7 @@ void DeInitJoystick() {
   }
 #endif
 }
-
+/*
 void BindButton(int button,KBHandler handler){
   // have to check if button>allowed
   joyBindings[button]=handler;
@@ -79,9 +88,13 @@ static void DefaultJoyHandler(int button,KBSTATE state){
 void UnbindButton(int button) {
   joyBindings[button] = DefaultJoyHandler;
 }
-
+*/
+#if 0
 void ProcessJoystick(){
-#if 1
+
+  // we don't need code here cause we don't queue events
+
+
     for(int i=0;i<joystick[0]->NumButtons();i++){
 	joyBindings[i](-1,buttonState[i]);
 	buttonState[i]=UP;
@@ -99,9 +112,9 @@ void ProcessJoystick(){
       joystick[i]->GetJoyStick(x,y,buttons);
     }
   }
-#endif
-}
 
+}
+#endif
 JoyStick::JoyStick(int which) {
     deadzone=0.01;
 
