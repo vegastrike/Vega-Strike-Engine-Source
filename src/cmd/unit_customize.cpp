@@ -432,6 +432,11 @@ void StartFrame(void) {
 
 
   GFXHudMode (true);
+  GFXColor4f (1,1,1,1);
+  GFXDisable (DEPTHTEST);
+  GFXDisable (DEPTHWRITE);
+  GFXDisable (LIGHTING);
+
   GFXClear (GFXTRUE);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (TEXTURE1);
