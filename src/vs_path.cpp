@@ -3,7 +3,7 @@
 #include "vs_globals.h"
 #include "xml_support.h"
 #ifdef _WIN32
-
+#include <direct.h>				// definitions of getcwd() and chdir() on win32
 #else
 #include <unistd.h>
 #include <pwd.h>

@@ -28,7 +28,11 @@
 #include <errno.h>
 #include <time.h>
 #include <ctype.h>
+
+#ifndef WIN32
+// this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
 #include <unistd.h>
+#endif
 
 #include <expat.h>
 #include "xml_support.h"

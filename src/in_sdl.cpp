@@ -2,6 +2,7 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 
+#include <assert.h>	/// needed for assert() calls.
 
 //static KBHandler keyBindings [SDLK_LAST];
 //KBSTATE keyState [SDLK_LAST];

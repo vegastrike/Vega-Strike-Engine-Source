@@ -9,6 +9,10 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "vegastrike.h"
+
+#include <assert.h>	/// needed for assert() calls.
+
+
 void StarSystem::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((StarSystem*)userData)->beginElement(name, AttributeList(atts));
 }

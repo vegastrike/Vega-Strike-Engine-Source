@@ -28,6 +28,8 @@
 #include "xml_support.h"
 #include "easydom.h"
 
+#include <assert.h>	/// needed for assert() calls.
+
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;

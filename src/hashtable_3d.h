@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <vector>
 #include <stdio.h>
+#include <assert.h>
 #include "linecollide.h"
 #define COLLIDETABLESIZE sizeof(CTSIZ)
 #define COLLIDETABLEACCURACY sizeof (CTACCURACY)
