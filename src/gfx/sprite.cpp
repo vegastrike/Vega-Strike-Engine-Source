@@ -149,3 +149,4 @@ void Sprite::SetRotation(const float &rot) {
 void Sprite::GetRotation(float &rot) {
   rot = rotation;
 }
+

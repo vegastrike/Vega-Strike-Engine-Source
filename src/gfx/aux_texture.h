@@ -37,6 +37,7 @@ using std::string;	// needed for access to std::string
  *  to prevent the loading of duplicate textures
  */
 struct Texture{
+  void FileNotFound(const string &);//undoes what it did to hash table when file is not located
   ///The file name used to load this texture
   char * texfilename;
   ///the filter mode of this texture
