@@ -39,13 +39,13 @@ static double lasttime;
 static double elapsedtime;
 static double timecompression=1;
 void inc_time_compression (int i, KBSTATE a) {
-  if (a==DOWN) {
-    timecompression+=.01;
+  if (a==PRESS) {
+    timecompression*=1.5;
   }
 }
 void dec_time_compression (int i, KBSTATE a) {
-  if (a==DOWN) {
-    timecompression-=.01;
+  if (a==PRESS) {
+    timecompression/=1.5;
   }
 }
 void reset_time_compression (int i, KBSTATE a) {
