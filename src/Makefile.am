@@ -27,6 +27,7 @@ vegastrike_SOURCES =				\
 	gauss.h					\
 	gfx_transform_vector.cpp		\
 	gfx_transform_vector.h			\
+	gfx_transform_matrix.h			\
 	gfxlib.h				\
 	gfxlib_struct.h				\
 	gl_globals.cpp				\
@@ -54,6 +55,8 @@ vegastrike_SOURCES =				\
 	in_handler.h				\
 	joystick.c				\
 	joystick.h				\
+	lin_time.h				\
+	lin_time.cpp				\
         list.c					\
         list.h					\
 	main.cpp				\
@@ -61,6 +64,8 @@ vegastrike_SOURCES =				\
         nmrcl.h					\
 	pic.c					\
 	pic.h					\
+	physics.h				\
+	physics.cpp				\
 	quadgeom.cpp				\
 	quadgeom.hpp				\
 	screenshot.c				\

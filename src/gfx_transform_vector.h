@@ -1,35 +1,31 @@
-/* 
- * Vega Strike
- * Copyright (C) 2001-2002 Daniel Horn & Chris Fry
- * 
- * http://vegastrike.sourceforge.net/
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
-
 #ifndef _3DMANIP_H_
 #define _3DMANIP_H_
+#include <math.h>
+#define PI 3.14159265358979323846F
+class Vector;
+void Normalize(Vector &);
+float DotProduct(const Vector &,const Vector &);
+
+void CrossProduct(const Vector &, const Vector &, Vector &);
+
+void ScaledCrossProduct(const Vector &, const Vector &, Vector &); 
+
+inline Vector operator* (const Vector &lval, const float obj);
+
+inline Vector operator* (const float obj, const Vector &rval);
+
+inline Vector operator+= (Vector &lval, const Vector &obj);
+
 
 class Vector {
+	private:
 		
 	public:
 		Vector()
 		{
-			this->i = 0;
-			this->j = 0;
-			this->k = 0;
+			i = 0;
+			j = 0;
+			k = 0;
 		}
 		Vector(float i,float j,float k)
 		{
@@ -42,19 +38,26 @@ class Vector {
 		void Roll(float rad);
 		void Pitch(float rad);
 
+		Vector Transform ( const Vector &p, const Vector &q, const Vector &r)
+		{
+			Vector tvect = Vector ( DotProduct(*this, p), DotProduct(*this,q), DotProduct(*this,r));
+			*this = tvect;
+			return *this;
+		}
 			
 		//Vector operator= (const Vector &obj) {i = obj.i; j = obj.j; k = obj.k; return *this;}
-		Vector operator+ (const Vector &obj) {Vector retval(i + obj.i, j + obj.j, k + obj.k); return retval;}
-		Vector operator+= (const Vector &obj) {i += obj.i; j += obj.j; k += obj.k; return *this;}
-		Vector operator- (const Vector &obj) {Vector retval(i - obj.i, j - obj.j, k - obj.k); return retval;}
-		Vector operator* (const float obj) {Vector retval(i * obj, j * obj, k * obj); return retval;}
-                Vector Normalize ();
-		Vector operator- () {Vector retval(-i, -j, -k); return retval;}
-		Vector operator/= (float s) {i/=s; j/=s; k/=s; return *this;}
-                Vector Transform ( const Vector &p, const Vector &q, const Vector &r);	
-		float operator* (const Vector &b) {return (i*b.i+j*b.j+k*b.k);};
+		Vector operator+ (const Vector &obj) const {Vector retval(i + obj.i, j + obj.j, k + obj.k); return retval;}
+		//Vector operator+= (const Vector &obj) {i += obj.i; j += obj.j; k += obj.k; return *this;}
+		Vector operator- (const Vector &obj) const {Vector retval(i - obj.i, j - obj.j, k - obj.k); return retval;}
+		//Vector operator* (const float obj) const {Vector retval(i * obj, j * obj, k * obj); return retval;}
+		Vector Normalize(){::Normalize (*this); return *this;};
+		Vector operator- () const {Vector retval(-i, -j, -k); return retval;}
+
+		Vector Cross(const Vector &v) const {Vector t; CrossProduct(*this, v, t); return t;};
+		
+		float operator* (const Vector &b) const {return (i*b.i+j*b.j+k*b.k);};
 		//Vector operator* (const Vector &b) {return Vector(i*b.i, j*b.j, k*b.k);};
-		float Dot(const Vector &b) {return *this * b;};
+		float Dot(const Vector &b) const {return *this * b;};
 		//float Dot(const Vector &b) {return i*b.i+j*b.j+k*b.k;};
 
 		/*
@@ -62,19 +65,25 @@ class Vector {
 		Vector Transform(const Vector &b) {return *this / b;};
 		*/
 
+		float Magnitude() const {return sqrtf(i*i+j*j+k*k);};
 
-		friend Vector operator+(const Vector &lval, const Vector &rval);
+
+		//friend Vector operator+(const Vector &lval, const Vector &rval);
 		//friend Vector operator+(const Vector &lval, const Vector &rval);
 };
 
-void Normalize(Vector &);
-float DotProduct(const Vector &,const Vector &);
-
+/*
 inline Vector operator+(const Vector &lval, const Vector &rval)
 {
 	Vector retval = lval; 
 	return retval+rval;
 }
+*/
+inline Vector operator* (const Vector &lval, const float obj) {Vector retval(lval.i * obj, lval.j * obj, lval.k * obj); return retval;}
+
+inline Vector operator* (const float obj, const Vector &rval) {Vector retval(rval.i * obj, rval.j * obj, rval.k * obj); return retval;}
+
+inline Vector operator+= (Vector &lval, const Vector &obj) {lval.i += obj.i; lval.j += obj.j; lval.k += obj.k; return lval;}
 
 /*
 inline Vector operator*(const Vector &lval, const float &rval)
@@ -95,9 +104,6 @@ struct Light {
 	Vector Direction;
 };
 */
-void CrossProduct(const Vector &, const Vector &, Vector &);
-
-void ScaledCrossProduct(const Vector &, const Vector &, Vector &); 
 
 inline Vector PolygonNormal(Vector v1, Vector v2, Vector v3)
 {
