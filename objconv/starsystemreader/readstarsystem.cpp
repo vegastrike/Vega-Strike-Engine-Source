@@ -70,8 +70,17 @@ public:
 	bool operator> (const vec3 &oth) const {
 		return x>oth.x&&y>oth.y&&z>oth.z;
 	}
+	bool operator<= (const vec3 &oth) const {
+		return x<=oth.x&&y<=oth.y&&z<=oth.z;
+	}
+	bool operator>= (const vec3 &oth) const {
+		return x>=oth.x&&y>=oth.y&&z>=oth.z;
+	}
 	bool operator== (const vec3 &oth) const {
 		return x==oth.x&&y==oth.y&&z==oth.z;
+	}
+	bool operator!= (const vec3 &oth) const {
+		return x!=oth.x||y!=oth.y||z!=oth.z;
 	}
 };
 
@@ -501,12 +510,12 @@ void stripwhitespace(std::string &str) {
 void computeCoord (vec3 &lo, vec3 &hi, int wid, int hei, int x, int y) {
 	vec3 min (lo);
 	vec3 max (hi);
-	lo.z=min.z;
-	hi.z=max.z;
-	lo.x=(((max.x-min.x)/wid)*x);
-	lo.y=(((max.y-min.y)/hei)*y);
-	hi.x=(((max.x-min.x)/wid)*(x+1));
-	lo.y=(((max.y-min.y)/hei)*(y+1));
+//	lo.z=min.z; // Already equal!
+//	hi.z=max.z;
+	lo.x=(((max.x-min.x)/wid)*x)+min.x;
+	lo.y=(((max.y-min.y)/hei)*y)+min.y;
+	hi.x=(((max.x-min.x)/wid)*(x+1))+min.x;
+	hi.y=(((max.y-min.y)/hei)*(y+1))+min.y;
 }
 
 std::vector<SectorInfo> readSectors(vec3 min, vec3 max) {
@@ -523,7 +532,7 @@ std::vector<SectorInfo> readSectors(vec3 min, vec3 max) {
 			break;
 		}
 		file=file.substr(r>n?r+1:n+1);
-		width=width<vec.back().size()?width:vec.back().size();
+		width=width>vec.back().size()?width:vec.back().size();
 	}
 	for (int i=0;i<vec.size();++i) {
 		for (int j=0;j<vec[i].size();++j) {
@@ -538,12 +547,10 @@ std::vector<SectorInfo> readSectors(vec3 min, vec3 max) {
 }
 
 std::string getSector(const System &s, vec3 min, vec3 max) {
-	return "nowhereland";
-#if ____THIS_IS_GIVING_ERRORS_RIGHT_NOW_____
 	static std::vector<SectorInfo> sectors (readSectors(min,max));
 	for (int i=0;i<sectors.size();i++) {
-		if (s.xyz>sectors[i].minimum()&&s.xyz<sectors[i].maximum()) {
-			return s.name;
+		if (s.xyz>=sectors[i].minimum()&&s.xyz<=sectors[i].maximum()) {
+			return sectors[i].name();
 		}
 	}
 	{
@@ -553,7 +560,6 @@ std::string getSector(const System &s, vec3 min, vec3 max) {
 		fputc('\n',stderr);
 		return error;
 	}
-#endif
 }
 double sqr (double x){
 	return x*x;
