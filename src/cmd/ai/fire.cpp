@@ -64,6 +64,7 @@ bool FireAt::PursueTarget (Unit * un, bool leader) {
 }
 
 bool CanFaceTarget (Unit * su, Unit *targ,const Matrix & matrix) {
+	return true;
 	float limitmin = su->Limits().limitmin;
 	if (limitmin>-.99) {
 		QVector pos = (targ->Position()- su ->Position()).Normalize();
