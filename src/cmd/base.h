@@ -120,7 +120,6 @@ class Base {
 	int unitlevel;
 	std::vector <Room*> rooms;
 	TextPlane othtext;
-	friend Room;
 	friend Room::Talk;
 	friend Room::BaseTalk;
 public:

@@ -17,7 +17,7 @@
 #include <windows.h>
 #endif
 #include "music.h"
-#include "gldrv/inet.h"
+#include "networking/inet.h"
 Music::Music (Unit *parent):random(false), p(parent),song(-1) {
   if (parent) {
     maxhull = parent->GetHull();
@@ -81,7 +81,6 @@ int Music::SelectTracks(int &whichlist) {
     return randInt((playlist[PEACELIST].size()));
   }
   bool perfect=true;
-  float goodness=0;
   un_iter iter = _Universe->activeStarSystem()->getUnitList().createIterator();
   Unit *target;
   while ((target = iter.current())!=NULL) {
@@ -138,7 +137,7 @@ void Music::GotoSong (std::string mus) {
 
 void Music::GotoSong (int whichlist,int whichsong,bool skip) {
 	if (g_game.music_enabled) {
-		if (whichsong!=NOLIST&&whichlist!=NOLIST&&whichlist<playlist.size()&&whichsong<playlist[whichlist].size()) {
+		if (whichsong!=NOLIST&&whichlist!=NOLIST&&whichlist<(int)playlist.size()&&whichsong<(int)playlist[whichlist].size()) {
 			GotoSong(playlist[whichlist][whichsong]);
 		} else {
 			SkipRandList();
@@ -156,7 +155,7 @@ void Music::SkipRandSong(int whichlist) {
 }
 
 void Music::SkipRandList() {
-	for (int i=0;i<playlist.size();i++) {
+	for (unsigned int i=0;i<playlist.size();i++) {
 		if (!playlist[i].empty())
 			GotoSong(i,randInt(playlist[i].size()),false);
 	}
