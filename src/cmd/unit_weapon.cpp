@@ -193,7 +193,7 @@ GameUnit::GameMount::GameMount(const string& filename, short am,short vol){
   }
 }
 
-void GameUnit::TargetTurret (GameUnit * targ) {
+void GameUnit::TargetTurret (Unit * targ) {
 	if (!SubUnits.empty()) {
 		un_iter iter = getSubUnits();
 		Unit * su;

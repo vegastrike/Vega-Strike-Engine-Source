@@ -173,7 +173,7 @@ public:
   void RemoveFromSystem ();
   bool InCorrectStarSystem (StarSystem *active) {return active==activeStarSystem;}
   void Target (Unit * targ);
-  void TargetTurret (GameUnit * targ);
+  void TargetTurret (Unit * targ);
   ///Fires all active guns that are or arent Missiles
   void Fire(bool Missile);
 
