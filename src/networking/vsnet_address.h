@@ -57,10 +57,13 @@ struct AddressIP : public sockaddr_in
     unsigned long inaddr( ) const;
 
     friend std::ostream& operator<<( std::ostream& ostr, const AddressIP& adr );
+	
     friend bool operator==( const AddressIP& l, const AddressIP& r );
     friend bool operator!=( const AddressIP& l, const AddressIP& r );
     friend bool operator<( const AddressIP& l, const AddressIP& r );
 };
-
+bool operator==( const AddressIP& l, const AddressIP& r );
+bool operator!=( const AddressIP& l, const AddressIP& r );
+bool operator<( const AddressIP& l, const AddressIP& r );
 #endif /* VSNET_ADDRESS_H */
 
