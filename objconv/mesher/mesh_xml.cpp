@@ -8,7 +8,10 @@ using std::string;
 #include "xml_support.h"
 #include "hashtable.h"
 using namespace XMLSupport;
-
+//#define fprintf aprintf
+int aprintf(...) {
+   return 0;
+}
 struct GFXVertex {
   float x,y,z; // Location
   float i,j,k; // Normal
