@@ -602,7 +602,7 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
    fprintf (stderr, "Unknown element start tag '%s' detected\n",name.c_str());
     break;
   case XML::MESH:
-	memset(&xml->material, 0, sizeof(xml->material));
+	//memset(&xml->material, 0, sizeof(xml->material));
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
 	  case XML::REVERSE:
