@@ -257,7 +257,7 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   lastchangedtarg=0;
   if (fg) {
     if (!fg->directive.empty()) {
-      if ((*fg->directive.begin())==toupper (*fg->directive.begin())) {
+      if (curtarg!=NULL&&(*fg->directive.begin())==toupper (*fg->directive.begin())) {
 		  return;//not 	allowed to switch targets
       }
     }
