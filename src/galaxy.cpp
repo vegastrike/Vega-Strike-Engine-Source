@@ -203,7 +203,7 @@ vector <char *> ParseDestinations (const string &value) {
   for (j=0;value[j]!=0;){
     for (i=0;value[j]!=' '&&value[j]!='\0';i++,j++) {
     }
-    tmp.push_back(new char [i+1]);
+    tmp.push_back(new char [i+1]);//leak...somewhere!
     for (k=0;k<i;k++) {
       tmp[tmp.size()-1][k]=value[k+j-i];
     }

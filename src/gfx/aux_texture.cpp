@@ -202,7 +202,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
   texture_target =target;
   image_target=imagetarget;
   this->stage = stage;
-  string texfilename = string(FileName);
+  texfilename = string(FileName);
   string tempstr;
   if(checkold(texfilename,false,tempstr)) {
     return;
@@ -264,9 +264,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	//	strcpy(filename, FileName);
 	int bpp;
 	int format;
-	this->texfilename = new char [texfilename.length()+1];
-	strcpy(this->texfilename,texfilename.c_str());
-
+	this->texfilename=texfilename;
 	data = readImage (fp,bpp,format,sizeX,sizeY,palette,NULL/*texTransform*/,true);
 	if (data) {
 	  //FIXME deal with palettes and grayscale with alpha
@@ -422,8 +420,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	int bpp;
 	int format;
 	FILE * fp1=NULL;
-	this->texfilename = new char [texfilename.length()+1];
-	strcpy(this->texfilename,texfilename.c_str());
+	this->texfilename=texfilename;
 	data = readImage (fp,bpp,format,sizeX,sizeY,palette,NULL/*texTransform*/,true);
 	if (data) {
 	  //FIXME deal with palettes and grayscale with alpha
@@ -655,9 +652,8 @@ Texture::~Texture()
 			}
 		  */
 			if (name!=-1) {
-			  texHashTable.Delete (string(texfilename));
+			  texHashTable.Delete (texfilename);
 			  GFXDeleteTexture(name);
-			  delete []texfilename;				
 			}
 
 				//glDeleteTextures(1, &name);

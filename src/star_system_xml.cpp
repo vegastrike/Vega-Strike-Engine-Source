@@ -985,6 +985,7 @@ using namespace StarXML;
       }
     }
     delete []filename;
+    delete []nebfile;
     break;
 	
   default:

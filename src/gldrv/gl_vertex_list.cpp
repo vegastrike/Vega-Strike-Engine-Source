@@ -225,6 +225,8 @@ GFXVertexList::~GFXVertexList() {
     GFXDeleteList (display_list); //delete dis
   if (offsets)
     delete [] offsets;
+  if (mode)
+    delete [] mode;
   if(changed&HAS_COLOR) {
     if (data.colors) {
       free (data.colors);

@@ -39,6 +39,7 @@ Background::Background(const char *file, int numstars, float spread):Enabled (tr
 	  tmpvertex[j].z = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
 	}
 	stars= new GFXVertexList (GFXPOINT,numstars,tmpvertex, numstars, false,0);
+	delete [] tmpvertex;
 	up = left = down = front=right=back=NULL;
 	strcpy(temp, file);
 	static int max_cube_size =XMLSupport::parse_int (vs_config->getVariable("graphics","max_cubemap_size","1024"));

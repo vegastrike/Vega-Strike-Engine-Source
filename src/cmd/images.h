@@ -102,7 +102,7 @@ struct UnitImages {
   ///The explosion starts at null, when activated time explode is incremented and ends at null  
   Animation *explosion; 
   float timeexplode;
-  Box *selectionBox;
+  //  Box *selectionBox;
 
   float *cockpit_damage; //0 is radar, 1 to MAXVDU is vdus and >MAXVDU is gauges
   ///how likely to fool missiles

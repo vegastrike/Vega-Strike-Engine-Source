@@ -63,6 +63,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXPopGlobalEffects() {
       glEnable (GL_LIGHT0+i);
     }
   }
+  delete [] GlobalEffects.top();
   GlobalEffects.pop();
   GFXLightContextAmbient (GlobalEffectsAmbient.top());
   GlobalEffectsAmbient.pop();

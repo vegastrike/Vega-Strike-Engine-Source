@@ -55,12 +55,12 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
   } else {
 
   }
-  oldmesh = AllocNewMeshesEachInSizeofMeshSpace(numspheres);//FIXME::RISKY::MIGHT HAVE DIFFERENT SIZES!! DON"T YOU DARE ADD XTRA VARS TO SphereMesh calsshave to!
+  this->orig= AllocNewMeshesEachInSizeofMeshSpace(numspheres);//FIXME::RISKY::MIGHT HAVE DIFFERENT SIZES!! DON"T YOU DARE ADD XTRA VARS TO SphereMesh calsshave to!
+  oldmesh = this->orig;
   numlods=numspheres;
   
   meshHashTable.Put (hash_name=GetSharedMeshHashName(hash_name,radius,0), oldmesh);
   //  fprintf (stderr,"\nput %s\n",hash_name.c_str());
-  this->orig = oldmesh;
   radialSize = radius;//MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!
   mn = Vector (-radialSize,-radialSize,-radialSize);
   mx = Vector (radialSize,radialSize,radialSize);

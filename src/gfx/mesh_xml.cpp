@@ -1459,6 +1459,7 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
       myind[j]=*k;
     }
     vlist = new GFXVertexList (polytypes, xml->vertices.size(),myvert,o_index,poly_offsets,false,myind);
+    delete [] myvert;
   }else {
     static bool usopttmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","OptimizeVertexArrays","true")));
     static float optvertexlimit= (XMLSupport::parse_float (vs_config->getVariable ("graphics", "OptimizeVertexCondition","1.0")));

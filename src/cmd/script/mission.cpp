@@ -69,9 +69,9 @@ Mission::Mission(const char *configfile, bool loadscripts){
   director=NULL;
   runtime.pymissions=NULL;
   nextpythonmission=NULL;
-  easyDomFactory<missionNode> *domf= new easyDomFactory<missionNode>();
+  easyDomFactory<missionNode> *domf= new easyDomFactory<missionNode>();//such a bloody leak!
 
- top=domf->LoadXML(configfile);
+  top=domf->LoadXML(configfile);
  static bool dontpanic=false;
   if(top==NULL&&!dontpanic){
     cout << "Panic exit - mission file " << configfile << " not found" << endl;

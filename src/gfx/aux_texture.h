@@ -23,13 +23,8 @@
 #include "gfxlib.h"
 #include "gfxlib_struct.h"
 
-#ifdef __cplusplus
 #include <string>
-#else
-#include <string.h>
-#endif
 
-using std::string;	// needed for access to std::string
 
 /**
  *  The texture class defines a method of loading bitmap textures
@@ -37,9 +32,9 @@ using std::string;	// needed for access to std::string
  *  to prevent the loading of duplicate textures
  */
 struct Texture{
-  void FileNotFound(const string &);//undoes what it did to hash table when file is not located
+  void FileNotFound(const std::string &);//undoes what it did to hash table when file is not located
   ///The file name used to load this texture
-  char * texfilename;
+  std::string texfilename;
   ///the filter mode of this texture
   enum FILTER ismipmapped;
   ///the dimensions of this texture
@@ -62,8 +57,8 @@ struct Texture{
   ///The target this will go to (cubemap or otherwise)
   enum TEXTURE_TARGET texture_target; enum TEXTURE_IMAGE_TARGET image_target;
   ///Returns if this texture is actually already loaded
-  GFXBOOL checkold(std::string s, bool shared, string & hashname);
-  void modold(std::string s, bool shared, string & hashname);
+  GFXBOOL checkold(std::string s, bool shared, std::string & hashname);
+  void modold(std::string s, bool shared, std::string & hashname);
   ///Loads the old texture
   void setold();
   ///Inits the class with default values

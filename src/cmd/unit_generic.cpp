@@ -416,7 +416,7 @@ void Unit::Init()
   NetLocalForce=Vector(0,0,0);
 
   selected = false;
-  image->selectionBox = NULL;
+  //  image->selectionBox = NULL;
 
   limits.yaw = 2.55;
   limits.pitch = 2.55;
@@ -662,8 +662,8 @@ void Unit::calculate_extent(bool update_collide_queue) {
     float tmp1 = corner_min.Magnitude();
     float tmp2 = corner_max.Magnitude();
     radial_size = tmp1>tmp2?tmp1:tmp2;
-    if (!SubUnit)
-      image->selectionBox = new Box(corner_min, corner_max);
+    //    if (!SubUnit)
+    //      image->selectionBox = new Box(corner_min, corner_max);
   }
   if (!SubUnit&&update_collide_queue) {
     UpdateCollideQueue();

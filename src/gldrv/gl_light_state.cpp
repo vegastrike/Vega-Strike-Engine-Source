@@ -236,7 +236,7 @@ void gfx_light::TrashFromGLLights () {
 void gfx_light::AddToTable() {
   LineCollideStar tmp;
   bool err;
-  LineCollide * coltarg= new LineCollide (CalculateBounds(err));
+  LineCollide * coltarg= new LineCollide (CalculateBounds(err));//leak??
   if (err)
     return;
   tmp.lc = coltarg;
