@@ -179,7 +179,7 @@ PYTHON_END_CLASS(VS,Cargo)
 #undef EXPORT_UTIL
 #undef voidEXPORT_UTIL
 //End of Macro City 2
-  Class.def(boost::python::operators<boost::python::op_eq | boost::python::op_ne>(), boost::python::right_operand<UnitWrapper>());
+  Class.def(boost::python::operators< (boost::python::op_eq | boost::python::op_ne) >(), boost::python::right_operand<UnitWrapper>());
   Class.def(&UnitWrapper::setNull,"setNull");
   Class.def(&UnitWrapper::isNull,"isNull");
   Class.def(&UnitWrapper::notNull,"__nonzero__");
