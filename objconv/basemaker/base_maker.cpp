@@ -1103,7 +1103,7 @@ bool AddRoomSprite(std::string input, unsigned int room_index, void *dat1, void 
 	std::vector<Base::Room::BaseObj *> * objs=(std::vector<Base::Room::BaseObj *> *)dat1;
 	if (input.empty()) {
 		// add a ship.
-		objs->push_back(new Base::Room::BaseShip(-1,0,0,0,0,-1,0,1,0,QVector((x+tmp_xy.x)/2,(tmp_xy.y+y)/2,(tmp_xy.x-x)<0?(x-tmp_xy.x):(tmp_xy.x-x)),"my_ship"));
+		objs->push_back(new Base::Room::BaseShip(0,.34,.93,-1,0,0,0,.93,-.34,QVector((x+tmp_xy.x)/2,(tmp_xy.y+y)/2,4),"my_ship"));
 		// FIXME: orientation cannot be changed from editor.
 	} else {
 		bool time=false;
@@ -1525,7 +1525,7 @@ bool SetRoomString(std::string input, unsigned int room_index, void *dat1, void 
 	if (input.empty())
 		return false;
 	std::string *deftext=(std::string*)dat1;
-	dat1=deftext;
+	*deftext=input;
 //	if (Base::CurrentBase&&Base::CurrentBase->rooms.size()==0) {
 //		AddRoomSprite(Base::CurrentBase->basefile, &objs, NULL, "background", 0.97, -0.97);
 //	} else {
