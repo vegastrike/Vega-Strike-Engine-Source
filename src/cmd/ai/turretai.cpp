@@ -48,7 +48,10 @@ void TurretAI::Execute () {
       Pos=Pos/mag;
       float dot = R.Dot (Pos.Cast());
       static int neu=FactionUtil::GetFaction("neutral");
-      bool shouldfire = ((mag-targ->rSize()-parent->rSize()<range&&dot>dot_cutoff)&&(GetEffectiveRelationship(targ)<0||targ->getRelation(parent)<0)&&targ->faction!=neu);
+      bool isplayerstarship=_Universe->isPlayerStarship(parent->owner)!=NULL;
+      
+      bool shouldfire = ((mag-targ->rSize()-parent->rSize()<range&&dot>dot_cutoff)&&(isplayerstarship==false||(isplayerstarship&&targ->getRelation(parent->owner/*now that it is a player, we know it's dereferencable*/)<0))&&targ->faction!=neu);
+
       parent->Fire(FireBitmask(parent,shouldfire,rand()<missile_prob*RAND_MAX*SIMULATION_ATOM),true);
       if (!shouldfire)
 	parent->UnFire();
