@@ -36,6 +36,7 @@
 using std::string;
 using std::vector;
 using std::stack;
+using std::ostream;
 
 using XMLSupport::AttributeList;
 

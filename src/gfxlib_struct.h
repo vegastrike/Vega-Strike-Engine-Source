@@ -131,7 +131,8 @@ class GFXLight {
   float attenuate[3];
  public:
   GFXLight() {
-   vect[0]=vect[1]=vect[2]=vect[3]=0;
+    //   vect[0]=vect[1]=vect[2]=vect[3]=0;
+   vect[0]=vect[1]=vect[2]=0;
     attenuate[0]=1;attenuate[1]=attenuate[2]=0;
     diffuse[0]=diffuse[1]=diffuse[2]=0;//openGL defaults
     specular[0]=specular[1]=specular[2]=0;//openGL defaults
@@ -139,7 +140,9 @@ class GFXLight {
     diffuse[3]=specular[3]=ambient[3]=1;
     target =-1;//physical GL light its saved in
   }
-  GFXLight::GFXLight (const bool enabled, const GFXColor &vect, const GFXColor &diffuse= GFXColor (0,0,0,1), const GFXColor &specular=GFXColor (0,0,0,1), const GFXColor &ambient=GFXColor(0,0,0,1), const GFXColor&attenuate=GFXColor(1,0,0));
+
+  GFXLight (const bool enabled, const GFXColor &vect, const GFXColor &diffuse= GFXColor (0,0,0,1), const GFXColor &specular=GFXColor (0,0,0,1), const GFXColor &ambient=GFXColor(0,0,0,1), const GFXColor&attenuate=GFXColor(1,0,0));
+  
   void SetProperties (enum LIGHT_TARGET, const GFXColor & color);
   void disable ();
   void enable ();

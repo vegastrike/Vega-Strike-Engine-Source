@@ -129,6 +129,7 @@ bool Mission::doNot(missionNode *node,int mode){
   else{
     fatalError("no subnode in not");
     assert(0);
+    return false; // we'll never get here
   }
 }
 

@@ -192,7 +192,7 @@ Texture *Universe::getSquadLogo (int faction) {
 }
 
 
-float Universe::GetRelation (int Myfaction, int TheirFaction) {
+float Universe::GetRelation (const int Myfaction, const int TheirFaction) {
   if (Myfaction==TheirFaction)
     return 1;
   assert (factions[Myfaction]->faction[TheirFaction].stats.index == TheirFaction);

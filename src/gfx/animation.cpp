@@ -106,7 +106,7 @@ Animation:: ~Animation ()
   delete [] Decal;
   
 }
-void Animation::SetPosition (float x,float y, float z) {
+void Animation::SetPosition (const float x,const float y, const float z) {
   local_transformation [12] = x;
   local_transformation [13] = y;
   local_transformation [14] = z;

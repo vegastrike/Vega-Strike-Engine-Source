@@ -12,7 +12,6 @@ KBSTATE JoystickState [MAX_JOYSTICKS][NUMJBUTTONS];
 KBHandler HatswitchBindings [MAX_HATSWITCHES][MAX_VALUES];
 KBSTATE HatswitchState [MAX_HATSWITCHES][MAX_VALUES];
 
-#define MAX_DIGITAL_VALUES 9
 
 KBHandler DigHatswitchBindings [MAX_JOYSTICKS][MAX_DIGITAL_HATSWITCHES][MAX_DIGITAL_VALUES];
 KBSTATE DigHatswitchState [MAX_JOYSTICKS][MAX_DIGITAL_HATSWITCHES][MAX_DIGITAL_VALUES];
@@ -46,10 +45,17 @@ void BindHatswitchKey (int hatswitch, int val_index, KBHandler handler) {
 }
 
 void BindDigitalHatswitchKey (int joy_nr,int hatswitch, int dir_index, KBHandler handler) {
-  assert (hatswitch<MAX_HATSWITCHES && dir_index<MAX_VALUES);
+  assert (hatswitch<MAX_DIGITAL_HATSWITCHES && dir_index<MAX_DIGITAL_VALUES);
   DigHatswitchBindings[joy_nr][hatswitch][dir_index]=handler;
   handler (0,RESET);
 }
+
+void UnbindDigitalHatswitchKey (int joy_nr,int hatswitch, int dir_index) {
+  assert (hatswitch<MAX_DIGITAL_HATSWITCHES && dir_index<MAX_DIGITAL_VALUES);
+ DigHatswitchBindings[joy_nr][hatswitch][dir_index]=DefaultJoyHandler;
+  //  JoystickState[joystick][key]=UP;
+}
+
 
 void ProcessJoystick () {
 #ifdef HAVE_SDL
@@ -137,37 +143,6 @@ void ProcessJoystick () {
 	    press=true;
 	  }
 
-
-#if 0
-	  else if(hsw & SDL_HAT_LEFT){
-	    dir_index=VS_HAT_LEFT;
-	  }
-	  else if(hsw & SDL_HAT_RIGHT){
-	    dir_index=VS_HAT_RIGHT;
-	  }
-	  else if(hsw & SDL_HAT_UP){
-	    dir_index=VS_HAT_UP;
-	  }
-	  else if(hsw & SDL_HAT_DOWN){
-	    dir_index=VS_HAT_DOWN;
-	  }
-	  else if(hsw & SDL_HAT_RIGHTUP){
-	    dir_index=VS_HAT_RIGHTUP;
-	  }
-	  else if(hsw & SDL_HAT_RIGHTDOWN){
-	    dir_index=VS_HAT_RIGHTDOWN;
-	  }
-	  else if(hsw & SDL_HAT_LEFTUP){
-	    dir_index=VS_HAT_LEFTUP;
-	  }
-	  else if(hsw & SDL_HAT_LEFTDOWN){
-	    dir_index=VS_HAT_LEFTDOWN;
-	  }
-	  else{
-	    cout << "unknown hatswitch thingy" << endl;
-	    //dir_index=VS_HAT_CENTERED;
-	  }
-#endif
 
 	  if(press==true){
 	    if(DigHatswitchState[i][h][dir_index]==UP){

@@ -446,7 +446,7 @@ public:
   /**
    *Queries bounding box with a point, radius err
    */
-  bool Unit::queryBoundingBox (const Vector &pnt, float err);
+  bool queryBoundingBox (const Vector &pnt, float err);
   /**
    *Queries the bounding box with a ray.  1 if ray hits in front... -1 if ray
    * hits behind.

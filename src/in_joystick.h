@@ -51,6 +51,7 @@ extern void UnbindButton(int button) ;
 const int MAX_JOYSTICKS=10;
 const int MAX_BUTTONS=32;
 const int MAX_DIGITAL_HATSWITCHES=4;
+const int MAX_DIGITAL_VALUES=9;
 
 enum { VS_HAT_CENTERED=0,VS_HAT_LEFT,VS_HAT_RIGHT,VS_HAT_DOWN,VS_HAT_UP,VS_HAT_RIGHTUP,VS_HAT_RIGHTDOWN,VS_HAT_LEFTUP,VS_HAT_LEFTDOWN };
 
@@ -104,6 +105,7 @@ void UnbindHatswitchKey (int hatswitch, int val_index);
 void BindHatswitchKey (int hatswitch, int val_index, KBHandler handler);
 
 void BindDigitalHatswitchKey (int joystick,int hatswitch, int dir_index, KBHandler handler);
+void UnbindDigitalHatswitchKey (int joystick,int hatswitch, int dir_index);
 
 
 #endif // _JOYSTICK_H_

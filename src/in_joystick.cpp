@@ -50,6 +50,15 @@ void InitJoystick(){
       UnbindHatswitchKey(h,v);
     }
   }
+  for(int j=0;j<MAX_JOYSTICKS;j++){
+    for(int h=0;h<MAX_DIGITAL_HATSWITCHES;h++){
+      for(int v=0;v<MAX_DIGITAL_VALUES;v++){
+	UnbindDigitalHatswitchKey(j,h,v);
+      }
+    }
+  }
+
+
 #endif
 
 #ifdef HAVE_SDL

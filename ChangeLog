@@ -1,3 +1,9 @@
+2001-11-26 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* improved digital hatswitch code
+	* fixes for compilation with intel c++
+	
+
 2001-11-22 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* gethColor now correcly uses hexcolor argument
@@ -63,13 +69,9 @@
 	* added TargetNearest and TargetThreat commands
 	* fixed some problems near the end of the range of the zbuffer....
 	* fixed AI to target near starships and to change targets every now and then for inaccessible stuff (eg missiles)
-<<<<<<< ChangeLog
 	* turrets now cloak along with theri parents
+
 	
-=======
-
-
->>>>>>> 1.41
 2001-11-07 Daniel Horn <hellcatv@hotmail.com>
 	
 	* made convex objects be allowed to be farther than zfar away

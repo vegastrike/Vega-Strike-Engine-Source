@@ -527,7 +527,7 @@ bool Mesh::queryBoundingBox (const Vector & eye, const Vector & end, const float
   return false;
   
 }
-bool Mesh::queryBoundingBox (const Vector & start,float err) {
+bool Mesh::queryBoundingBox (const Vector & start,const float err) {
   return start.i>=mn.i-err&&start.j>=mn.j-err&&start.k>=mn.k-err&&
          start.i<=mx.i+err&&start.j<=mx.j+err&&start.k<=mx.k+err;
 }
