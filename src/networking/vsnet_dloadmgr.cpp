@@ -132,13 +132,14 @@ void Manager::addItems( list<Item*> items )
         return;
     }
 
-    for( list<Item*>::iterator it=items.begin(); it!=items.end(); it++ )
+	list<Item*>::iterator it;
+    for( it=items.begin(); it!=items.end(); it++ )
     {
         _pending.push( *it );
     }
     _pending_mx.unlock( );
 
-    for( list<Item*>::iterator it=items.begin(); it!=items.end(); it++ )
+    for( it=items.begin(); it!=items.end(); it++ )
     {
         (*it)->changeState( Queued );
     }
