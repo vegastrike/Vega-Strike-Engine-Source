@@ -154,7 +154,7 @@ static void Inside(int,KBSTATE newState) {
     if (tmp) {
       _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");	    
     }else {
-      _Universe->AccessCockpit()->Init ("");
+      _Universe->AccessCockpit()->Init ("disabled-cockpit.cpt");
     }
     tmp = !tmp;
   }
