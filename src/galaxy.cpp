@@ -77,7 +77,7 @@ string getUniversePath () {
 
 void MyLoadSystem (SystemInfo si) {
 
-  generateStarSystem (getUniversePath(),si.seed,si.sector,si.name,si.filename,si.sunradius,si.compactness,si.numstars,si.numgas,si.numplanets,si.nummoons,si.nebulae,si.asteroids, si.numun1,si.numun2,si.faction,si.jumps,si.names,si.stars,si.planets,si.gasgiants,si.moons,si.smallun,si.nebulaelist,si.asteroidslist,si.backgrounds);
+  generateStarSystem (getUniversePath(),si.seed,si.sector,si.name,si.filename,si.sunradius,si.compactness,si.numstars,si.numgas,si.numplanets,si.nummoons,si.nebulae,si.asteroids, si.numun1,si.numun2,si.faction,si.jumps,si.names,si.stars,si.planets,si.gasgiants,si.moons,si.smallun,si.nebulaelist,si.asteroidslist,si.backgrounds,si.force);
 
 }
 string getVarEitherSectionOrSub (Galaxy *galaxy, string section, string subsection, string variable, string defaultst) {

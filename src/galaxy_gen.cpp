@@ -832,7 +832,7 @@ void readnames (vector <string> &entity, const char * filename) {
 
 }
 
-void generateStarSystem (string datapath, int seed, string sector, string system, string outputfile, float sunradius, float compac,  int numstars, int numgasgiants, int numrockyplanets, int nummoons, bool nebulae, bool asteroids, int numnaturalphenomena, int numstarbases, string factions, const vector <string> &jumplocations, string namelist, string starlist, string planetlist, string gasgiantlist, string moonlist, string smallunitlist, string nebulaelist, string asteroidlist,string backgroundlist) {
+void generateStarSystem (string datapath, int seed, string sector, string system, string outputfile, float sunradius, float compac,  int numstars, int numgasgiants, int numrockyplanets, int nummoons, bool nebulae, bool asteroids, int numnaturalphenomena, int numstarbases, string factions, const vector <string> &jumplocations, string namelist, string starlist, string planetlist, string gasgiantlist, string moonlist, string smallunitlist, string nebulaelist, string asteroidlist,string backgroundlist, bool force) {
   ResetGlobalVariables();
   static float radiusscale= XMLSupport::parse_float (vs_config->getVariable("galaxy","StarRadiusScale","1000"));
   sunradius *=radiusscale;
