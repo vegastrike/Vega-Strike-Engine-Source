@@ -1753,7 +1753,7 @@ float NavigationSystem::CalculatePerspectiveAdjustment(float &zscale, float &zdi
 
 	double real_zoom = 0.0;
 	double real_zoom_flat = 0.0;
-	float _l2 = log(2);
+	float _l2 = log(2.0f);
 	if(system_not_galaxy)
 	{
 		real_zoom = (log(zoom_s)/_l2)*zscale;
