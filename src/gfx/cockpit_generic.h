@@ -6,7 +6,7 @@
 #include "gfx/vec.h"
 using namespace XMLSupport;
 enum VIEWSTYLE {CP_FRONT,  CP_BACK,CP_LEFT, CP_RIGHT, CP_VIEWTARGET, CP_CHASE, CP_PAN,  CP_PANTARGET, CP_TARGET};
-#define MAXVDUS 10
+#define MAXVDUS 12
 class Unit;
 class Camera;
 class Animation;

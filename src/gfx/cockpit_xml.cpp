@@ -96,10 +96,7 @@ namespace CockpitXML {
     EnumMap::Pair ("Speed", UnitImages::KPS),
     EnumMap::Pair ("SetSpeed", UnitImages::SETKPS),
     EnumMap::Pair ("Auto", UnitImages::AUTOPILOT),
-    EnumMap::Pair ("FPS", UnitImages::COCKPIT_FPS),
-    EnumMap::Pair ("LAG", UnitImages::COCKPIT_LAG),
-    EnumMap::Pair ("StarDate", UnitImages::STARDATE),
-    EnumMap::Pair ("CommFreq", UnitImages::COMMFREQ)
+    EnumMap::Pair ("FPS", UnitImages::COCKPIT_FPS)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -131,7 +128,7 @@ namespace CockpitXML {
     EnumMap::Pair ("type", VDUTYPE)
   };
 
-  const EnumMap element_map(element_names, 29);
+  const EnumMap element_map(element_names, 26);
   const EnumMap attribute_map(attribute_names, 27);
 }
 
@@ -220,9 +217,6 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
   case UnitImages::SETKPS:
   case UnitImages::AUTOPILOT:
   case UnitImages::COCKPIT_FPS:
-  case UnitImages::COCKPIT_LAG:
-  case UnitImages::STARDATE:
-  case UnitImages::COMMFREQ:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
       switch (attribute_map.lookup((*iter).name)) {
       case XFILE:
@@ -288,10 +282,11 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
     }
     goto loadsprite;
   case RADAR: newsprite = &Radar;goto loadsprite;
-  case LVDU: vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::MANIFEST|VDU::WEAPON|VDU::DAMAGE|VDU::SHIELD;goto loadsprite;
-  case RVDU: vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::TARGETMANIFEST|VDU::NAV|VDU::TARGET;
+  case LVDU: vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::MANIFEST|VDU::WEAPON|VDU::DAMAGE|VDU::SHIELD;
   	if( Network!=NULL)
-		mymodes|=VDU::NETWORK;
+		mymodes = mymodes | VDU::NETWORK;
+	goto loadsprite;
+  case RVDU: vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::TARGETMANIFEST|VDU::NAV|VDU::TARGET;
   goto loadsprite;
   case AVDU:vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::MSG;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 

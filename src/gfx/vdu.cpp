@@ -822,19 +822,19 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
   	if( Network!=NULL)
 	{
 		char buf[32];
-		string str( "Netlag=");
+		string str( "Netlag: ");
 		memset( buf, 0, 32);
-		sprintf( buf, "%f", Network[0].getLag());
-		str+=string( buf);
-  		tp->Draw(MangleString (str.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
+		sprintf( buf, "%g", Network[0].getLag());
+		str+=string( buf)+"\n";
+  		//tp->Draw(MangleString (str.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
 		memset( buf, 0, 32);
-		sprintf( buf, "%f", Network[0].getCurrentFrequency());
-		str = "Freq="+string( buf)+"/";
+		sprintf( buf, "%g", Network[0].getCurrentFrequency());
+		str += "Freq: "+string( buf)+"/";
 		memset( buf, 0, 32);
-		sprintf( buf, "%f", Network[0].getSelectedFrequency());
-		str += string( buf)+" GHz";
-  		tp->Draw(MangleString (str.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
-		str = "Stardate="+_Universe->current_stardate.GetFullCurrentStarDate();
+		sprintf( buf, "%g", Network[0].getSelectedFrequency());
+		str += string( buf)+" GHz\n";
+  		//tp->Draw(MangleString (str.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
+		str += "SD: "+_Universe->current_stardate.GetFullCurrentStarDate();
   		tp->Draw(MangleString (str.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
 	}
   }

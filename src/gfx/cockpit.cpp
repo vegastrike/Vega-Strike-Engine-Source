@@ -802,16 +802,6 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
     }
 	if( fpsval)
    	 return 1./fpsval;
-  case UnitImages::COCKPIT_LAG:
-    if ( Network != NULL)
-   	 return Network[0].getLag();
-	else
-	 return 0;
-  case UnitImages::STARDATE:
-	return _Universe->current_stardate.GetFloatFromDate();
-  case UnitImages::COMMFREQ:
-    if ( Network != NULL)
-		return Network[0].getCurrentFrequency();
   }
   return 1;
 }
