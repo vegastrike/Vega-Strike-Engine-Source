@@ -35,9 +35,14 @@ const char *datadirs[] =
 #ifdef DATA_DIR
  DATA_DIR,
 #endif
+ "/usr/local/games/vegastrike/data",
  "/usr/local/share/vegastrike/data",
  "/usr/share/vegastrike/data",
  "/opt/share/vegastrike/data",
+ "/usr/local/games/vegastrike/data4.x",
+ "/usr/local/share/vegastrike/data4.x",
+ "/usr/share/vegastrike/data4.x",
+ "/opt/share/vegastrike/data4.x",
 };
 
 
