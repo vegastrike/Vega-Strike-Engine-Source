@@ -21,8 +21,8 @@ extern void GetRidOfConsole ();
 extern void my_sleep (int i);
 #endif
 void LoadMissionDialog (char * Filename,int i);
-void LoadSaveDialog (char *,int);
-void LoadAutoDialog (char *,int);
+void LoadSaveDialog (char *, char *, int);
+void LoadAutoDialog (char *, char *, int);
 #define NUM_TITLES 8
 static const char * titles [NUM_TITLES] = {"Select Mission", "New Game","Load Saved Game","Recover From Autosave","Launch Last Savegame", "Launch No Savegame","Help","Exit Launcher"};
 std::string my_mission ("mission/exploration/explore_universe.mission");
@@ -248,13 +248,13 @@ void hello( GtkWidget *widget, gpointer   data ) {
       LoadMissionDialog("Select Mission",i);
       break;
     case 1:
-      LoadSaveDialog("New Game",i);
+      LoadSaveDialog("New Game","Please type or select the name of the saved game that you wish to create.",i);
       break;
     case 2:
-      LoadSaveDialog("Open Game",i);
+      LoadSaveDialog("Open Game","Please type or select the name of the saved game that you wish to load.",i);
       break;
     case 3:
-      LoadAutoDialog("Open Autosave Game",i);
+      LoadAutoDialog("Open Autosave Game","Please type or select the name of the saved game that you wish to autorecover to.",i);
       break;
     case 4:
       launch_mission();
@@ -328,13 +328,198 @@ int main( int   argc,
     return(0);
 }
 
-void LoadSaveFunction (char *Filename, int i, GtkSignalFunc func,const char * default_thing="") {
+
+#include <wchar.h>
+
+char *makeasc(wchar_t *str) {
+	int i;
+	for (i=0;str[i]!='\0';i+=2) {
+	}
+	int len=i/2;
+	char *newstr=new char [len+2];
+	int j;
+	for (i=0,j=0;str[i]!='\0';i+=2,j++) {
+		newstr[j]=str[i];
+	}
+	newstr[j]='\0';
+	return newstr;
+}
+
+#include "general.h"
+
+void fileop_destroy ( GtkWidget        *w,
+			  GtkFileSelection *fs ) {
+  gtk_widget_destroy(fs->fileop_dialog);
+  fs->fileop_dialog=NULL;
+}
+
+void delfile ( GtkWidget        *w,
+			  GtkFileSelection *fs ) {
+	GtkWidget *i=fs->selection_entry;
+	if (i) {
+		wchar_t *chr=(wchar_t*)GTK_ENTRY(i)->text;
+		char *newstr=makeasc(chr);
+		char *remstr=new char[strlen(newstr)+20];
+		sprintf(remstr,"../serialized_xml/%s/",newstr);
+		glob_t *dirs=FindFiles(remstr,"");
+		for (int i=0;i<dirs->gl_pathc;i++) {
+			remove(dirs->gl_pathv[i]);
+		}
+		rmdir(remstr);
+		remove(newstr);
+		delete []newstr;
+		delete []remstr;
+		gtk_file_selection_set_filename (fs,"");
+		gtk_widget_destroy(GTK_FILE_SELECTION(fs)->fileop_dialog);
+		GTK_FILE_SELECTION(fs)->fileop_dialog=NULL;
+	}
+}
+
+void delfile_conf ( GtkWidget        *w,
+		           GtkFileSelection *fs ) {
+	GtkWidget *i=fs->selection_entry;
+	if (i) {
+	    GtkWidget *window;
+		wchar_t *chr=(wchar_t*)GTK_ENTRY(i)->text;
+		char *newstr=makeasc(chr);
+		char *remstr=new char [strlen(newstr)+20];
+		sprintf(remstr,"Delete Game \"%s\"?",newstr);
+		window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+		gtk_window_set_default_size(GTK_WINDOW(window), 300,0);
+		gtk_window_set_title(GTK_WINDOW(window), "Delete Game");
+		GtkWidget *vbox=gtk_vbox_new(0,10);
+		GtkWidget *cont=gtk_hbox_new(1,5);
+		GtkWidget *ok=gtk_button_new_with_label("Delete");
+		GtkWidget *cancel=gtk_button_new_with_label("Cancel");
+		gtk_signal_connect(GTK_OBJECT(ok), "clicked", GTK_SIGNAL_FUNC(delfile), GTK_OBJECT(fs));
+		gtk_signal_connect(GTK_OBJECT(cancel), "clicked", GTK_SIGNAL_FUNC(fileop_destroy), GTK_OBJECT(fs));
+		gtk_signal_connect(GTK_OBJECT(window), "delete_event", GTK_SIGNAL_FUNC(win_close), NULL);
+		GtkWidget *label = gtk_label_new(remstr);
+//		gtk_container_add (GTK_CONTAINER (window), label);
+		gtk_box_pack_start(GTK_BOX(vbox),label, TRUE, TRUE, 5);
+//		gtk_container_add (GTK_CONTAINER (window), ok);
+//		gtk_container_add (GTK_CONTAINER (window), cancel);
+		gtk_box_pack_start(GTK_BOX(cont),ok, TRUE, TRUE, 5);
+		gtk_box_pack_start(GTK_BOX(cont),cancel, TRUE, TRUE, 5);
+		gtk_box_pack_start(GTK_BOX(vbox),cont, TRUE, TRUE, 5);
+		gtk_container_add (GTK_CONTAINER (window), vbox);
+		gtk_widget_show (label);
+		gtk_widget_show (ok);
+        GTK_WIDGET_SET_FLAGS(ok, GTK_CAN_DEFAULT);
+        GTK_WIDGET_SET_FLAGS(cancel, GTK_CAN_DEFAULT);
+        gtk_widget_grab_default(cancel);
+		gtk_widget_show (cancel);
+		gtk_widget_show (cont);
+		gtk_widget_show (vbox);
+		gtk_widget_show (window);
+		GTK_FILE_SELECTION(fs)->fileop_dialog=window;
+	}
+}
+
+struct dumbstruct {GtkWidget *filesel, *entrywin;};
+
+void fileop_destroy_dumb ( GtkWidget        *w,
+			  dumbstruct *fs ) {
+  if (fs->filesel) {
+    gtk_widget_destroy(GTK_FILE_SELECTION(fs->filesel)->fileop_dialog);
+    GTK_FILE_SELECTION(fs->filesel)->fileop_dialog=NULL;
+  }
+  delete fs;
+}
+
+void renfile ( GtkWidget        *w,
+			  dumbstruct *dmb ) {
+	GtkFileSelection *fs=GTK_FILE_SELECTION(dmb->filesel);
+	GtkWidget *ent=dmb->entrywin;
+	GtkWidget *i=fs->selection_entry;
+	if (i && ent) {
+		wchar_t *chr=(wchar_t*)GTK_ENTRY(i)->text;
+		char *newstr=makeasc(chr);
+		chr=(wchar_t*)GTK_ENTRY(ent)->text;
+		char *newentstr=makeasc(chr);
+		char *remstr=new char[strlen(newstr)+20];
+		char *rementstr=new char[strlen(newentstr)+20];
+		sprintf(remstr,"../serialized_xml/%s/",newstr);
+		sprintf(rementstr,"../serialized_xml/%s/",newentstr);
+		rename(remstr,rementstr);
+		rename(newstr,newentstr);
+		gtk_file_selection_set_filename (fs,"");
+		delete []newstr;
+		delete []remstr;
+		delete []newentstr;
+		delete []rementstr;
+	}
+	fileop_destroy_dumb(w,dmb);
+}
+
+void renfile_conf ( GtkWidget        *w,
+		           GtkFileSelection *fs ) {
+	GtkWidget *i=fs->selection_entry;
+	if (i) {
+	    GtkWidget *window;
+		wchar_t *chr=(wchar_t*)GTK_ENTRY(i)->text;
+		char *newstr=makeasc(chr);
+		char *remstr=new char [strlen(newstr)+20];
+		sprintf(remstr,"Rename Game \"%s\"?",newstr);
+		window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+		gtk_window_set_default_size(GTK_WINDOW(window), 300,0);
+		gtk_window_set_title(GTK_WINDOW(window), "Rename Game");
+		GtkWidget *vbox=gtk_vbox_new(0,10);
+		GtkWidget *cont=gtk_hbox_new(1,5);
+		GtkWidget *ok=gtk_button_new_with_label("Rename");
+		GtkWidget *cancel=gtk_button_new_with_label("Cancel");
+		GtkWidget *entry=gtk_entry_new();
+		dumbstruct *newdum=new dumbstruct ();
+		newdum->filesel=GTK_WIDGET(fs);
+		newdum->entrywin=entry;
+		gtk_signal_connect(GTK_OBJECT(ok), "clicked", GTK_SIGNAL_FUNC(renfile), newdum);
+		gtk_signal_connect(GTK_OBJECT(cancel), "clicked", GTK_SIGNAL_FUNC(fileop_destroy_dumb), newdum);
+		gtk_signal_connect(GTK_OBJECT(window), "delete_event", GTK_SIGNAL_FUNC(win_close), NULL);
+		GtkWidget *label = gtk_label_new(remstr);
+//		gtk_container_add (GTK_CONTAINER (window), label);
+		gtk_box_pack_start(GTK_BOX(vbox),label, TRUE, TRUE, 5);
+		gtk_box_pack_start(GTK_BOX(vbox),entry, TRUE, TRUE, 5);
+//		gtk_container_add (GTK_CONTAINER (window), ok);
+//		gtk_container_add (GTK_CONTAINER (window), cancel);
+		gtk_box_pack_start(GTK_BOX(cont),ok, TRUE, TRUE, 5);
+		gtk_box_pack_start(GTK_BOX(cont),cancel, TRUE, TRUE, 5);
+		gtk_box_pack_start(GTK_BOX(vbox),cont, TRUE, TRUE, 5);
+		gtk_container_add (GTK_CONTAINER (window), vbox);
+		gtk_widget_show (label);
+		gtk_widget_show (ok);
+        GTK_WIDGET_SET_FLAGS(ok, GTK_CAN_DEFAULT);
+        GTK_WIDGET_SET_FLAGS(cancel, GTK_CAN_DEFAULT);
+        gtk_widget_grab_default(cancel);
+		gtk_widget_show (entry);
+		gtk_widget_show (cancel);
+		gtk_widget_show (cont);
+		gtk_widget_show (vbox);
+		gtk_widget_show (window);
+		GTK_FILE_SELECTION(fs)->fileop_dialog=window;
+	}
+}
+
+void LoadSaveFunction (char *Filename, char *otherstr, int i, GtkSignalFunc func,const char * default_thing="") {
      GtkWidget *filew;
     filew = gtk_file_selection_new (Filename);
-    
+	gtk_widget_destroy(GTK_FILE_SELECTION(filew)->button_area);
+	GTK_FILE_SELECTION(filew)->button_area=gtk_hbox_new(FALSE ,0);
+	gtk_widget_show(GTK_FILE_SELECTION(filew)->button_area);
+	GtkWidget *newb=gtk_button_new_with_label("Delete Game");
+//	char *Addon="\nWarning: Do not use the \"Delete File\" button to delete saved games...\nUse the \"Delete Game\" button instead.";
+//	char *otherstr=new char [strlen(othstr)+strlen(Addon)+5];
+//	sprintf(otherstr,"%s%s",othstr,Addon);
+	gtk_widget_show(newb);
+    gtk_container_add(GTK_CONTAINER(GTK_FILE_SELECTION(filew)->button_area),newb);
+    gtk_signal_connect (GTK_OBJECT(newb), "clicked", (GtkSignalFunc) delfile_conf, filew );
+	newb=gtk_button_new_with_label("Rename Game");
+	gtk_widget_show(newb);
+    gtk_container_add(GTK_CONTAINER(GTK_FILE_SELECTION(filew)->button_area),newb);
+    gtk_signal_connect (GTK_OBJECT(newb), "clicked", (GtkSignalFunc) renfile_conf, filew );
     gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (filew)->ok_button),
                         "clicked", (GtkSignalFunc) func, filew );
     GTK_FILE_SELECTION(filew)->help_button=gtk_button_new_with_label ("Help");
+    GTK_WIDGET_SET_FLAGS(GTK_FILE_SELECTION(filew)->help_button, GTK_CAN_DEFAULT);
     gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (filew)->help_button),
                         "clicked", (GtkSignalFunc) help_func, (void*)i );
 
@@ -347,12 +532,17 @@ void LoadSaveFunction (char *Filename, int i, GtkSignalFunc func,const char * de
 //    }else {
       gtk_file_selection_set_filename (GTK_FILE_SELECTION(filew), default_thing);
 //    }
-    GtkWidget *box=gtk_hbox_new (FALSE,0);
+    GtkWidget *lbl=gtk_label_new(otherstr);
+    gtk_container_add(GTK_CONTAINER(GTK_FILE_SELECTION(filew)->action_area),lbl);
+    gtk_widget_show(lbl);
+    GtkWidget *box=gtk_label_new("");
     gtk_container_add (GTK_CONTAINER (GTK_FILE_SELECTION(filew)->button_area),box);
-    gtk_box_pack_end (GTK_BOX (GTK_FILE_SELECTION(filew)->button_area),GTK_FILE_SELECTION (filew)->help_button, TRUE, TRUE, 40);
+    gtk_box_pack_end (GTK_BOX (GTK_FILE_SELECTION(filew)->ok_button->parent),GTK_FILE_SELECTION (filew)->help_button, FALSE, TRUE, 40);
+	gtk_box_pack_end(GTK_BOX(GTK_FILE_SELECTION(filew)->main_vbox),GTK_FILE_SELECTION(filew)->button_area,FALSE,TRUE,0);
     gtk_widget_show(box);
     gtk_widget_show(GTK_FILE_SELECTION(filew)->help_button);
     gtk_widget_show(filew);
+//	delete []otherstr;
 }
 void LoadMissionDialog (char * Filename,int i) {
 #ifdef _WIN32
@@ -364,7 +554,7 @@ void LoadMissionDialog (char * Filename,int i) {
   char mypwd [1000];
   getcwd (mypwd,1000);
   //  fprintf (stderr,mypwd);
-  LoadSaveFunction (Filename,i,(GtkSignalFunc) file_mission_sel,/*my_mission.c_str()*/"exploration/explore_universe.mission"/*(ParentDir()+"/mission").c_str()*/);
+  LoadSaveFunction (Filename,"Select the mission, then run by clicking new or load game.",i,(GtkSignalFunc) file_mission_sel,/*my_mission.c_str()*/"exploration/explore_universe.mission"/*(ParentDir()+"/mission").c_str()*/);
 }
 #define HOMESUBDIR ".vegastrike"
 void changehome() {
@@ -396,13 +586,13 @@ void changehome() {
 }
 
 
-void LoadSaveDialog (char *Filename,int i) {
+void LoadSaveDialog (char *Filename,char *otherstr, int i) {
   changehome();
-  LoadSaveFunction (Filename,i,(GtkSignalFunc) file_ok_sel);
+  LoadSaveFunction (Filename,otherstr,i,(GtkSignalFunc) file_ok_sel);
 }
-void LoadAutoDialog (char *Filename, int i) {
+void LoadAutoDialog (char *Filename,char *otherstr, int i) {
   changehome();
-  LoadSaveFunction (Filename,i,(GtkSignalFunc)file_ok_auto_sel);
+  LoadSaveFunction (Filename,otherstr,i,(GtkSignalFunc)file_ok_auto_sel);
 }
 /* example-end */
 
