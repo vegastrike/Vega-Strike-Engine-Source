@@ -402,10 +402,19 @@ void Stars::Draw() {
   GFXDisable (TEXTURE0);
   GFXDisable (TEXTURE1);
   GFXEnable (DEPTHTEST);
-  if (blend) {
-	GFXBlendMode (ONE,ONE);
-  } else {
-	GFXBlendMode (ONE,ZERO);
+  static bool near_stars_alpha=XMLSupport::parse_bool(vs_config->getVariable("graphics","near_stars_alpha","false"));
+  static float AlphaTestingCutoff =XMLSupport::parse_float(vs_config->getVariable("graphics","stars_alpha_test_cutoff",".8"));
+	
+  if (near_stars_alpha) {
+	  GFXAlphaTest (GREATER,AlphaTestingCutoff);
+	  GFXBlendMode(ONE,ZERO);
+	  GFXEnable(DEPTHWRITE);
+  }else {
+	  if (blend) {
+		  GFXBlendMode (ONE,ONE);
+	  } else {
+		  GFXBlendMode (ONE,ZERO);
+	  }
   }
   int ligh;
   GFXSelectMaterial (0);
@@ -435,6 +444,12 @@ void Stars::Draw() {
     vlist->EndDrawState(stretch,LC);
 
   }
+  if (near_stars_alpha) {
+	  GFXAlphaTest(ALWAYS,0);
+  }else{
+	  GFXEnable(DEPTHWRITE);
+  }
+  GFXBlendMode(ONE,ZERO);
 _Universe->AccessCamera()->UpdateGFX(GFXTRUE,GFXFALSE,GFXFALSE)	  ;
 
   GFXEnable (TEXTURE0);
