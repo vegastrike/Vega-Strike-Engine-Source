@@ -1,4 +1,12 @@
 2001-10-23 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* modified firekeyboard so that two keys can have the same command
+	  (FireKey)
+	* modified flyjoystick to map axis from config file
+	* added variables to test1.mission for later use
+	
+	
+2001-10-23 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* modified main_loop to use xml-missions
 	* modified unit_xml/event_xml to output filenames if not found

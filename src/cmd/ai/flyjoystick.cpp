@@ -3,8 +3,12 @@
 #include "flyjoystick.h"
 #include "firekeyboard.h"
 #include "flykeyboard.h"
+#include "vs_globals.h"
+#include "config_xml.h"
+
 static bool ab;
 static bool shelt;
+
 FlyByJoystick::FlyByJoystick(int whichjoystick, const char * configfile): FlyByKeyboard (configfile), which_joystick(whichjoystick) {
   //remember keybindings from config file?  
   if (whichjoystick>=MAX_JOYSTICKS)
@@ -51,14 +55,30 @@ void FlyByJoystick::JDecelKey (KBSTATE k, float, float, int) {
 
 void FlyByJoystick::Execute() {
   desired_ang_velocity=Vector(0,0,0); 
-  if (joystick[which_joystick]->isAvailable()) {
+  if (1 ){ //joystick[which_joystick]->isAvailable()) {
     JoyStick *joy=joystick[which_joystick];
 
 
     //    joy->GetJoyStick(x,y,z,buttons);//don't want state updates in ai function
+#if 0
     Up(-joy->joy_y);   // pretty easy
     Right(-joy->joy_x);
     Accel (-joy->joy_z);
+#endif
+
+    if(vs_config->axis_joy[1] != -1 ){
+      Up(- joystick[vs_config->axis_joy[1]]->joy_axis[vs_config->axis_axis[1]] );
+    }
+
+    if(vs_config->axis_joy[0] != -1 ){
+      Right(- joystick[vs_config->axis_joy[0]]->joy_axis[vs_config->axis_axis[0]] );
+    }
+    if(vs_config->axis_joy[2] != -1 ){
+      RollRight(- joystick[vs_config->axis_joy[2]]->joy_axis[vs_config->axis_axis[2]] );
+    }
+    if(vs_config->axis_joy[3] != -1 ){
+      Accel(- joystick[vs_config->axis_joy[3]]->joy_axis[vs_config->axis_axis[3]] );
+    }
   }
   
   FlyByKeyboard::Execute(false);

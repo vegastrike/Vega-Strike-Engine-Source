@@ -29,11 +29,15 @@ static KBSTATE jmissilekey = UP;
 static KBSTATE weapk=UP;
 static KBSTATE misk=UP;
 
-void FireKeyboard::FireKey(int, KBSTATE k) {
+void FireKeyboard::FireKey(int key, KBSTATE k) {
+  if(firekey==DOWN && k==UP){
+    return;
+  }
   if (k==UP&&firekey==RELEASE) {
 
   } else {
     firekey = k;
+    //    printf("firekey %d %d\n",k,key);
   }
 }
 void FireKeyboard::JFireKey(KBSTATE k, float, float,int i) {

@@ -92,6 +92,12 @@ void easyDomNode::walk(int level){
 easyDomFactory::easyDomFactory(){
 }
 
+void easyDomFactory::charHandler(void *userData, const XML_Char *s,int len){
+  char buffer[2048];
+  strncpy(buffer,s,len);
+  // printf("XML-text: %s\n",buffer);
+}
+
 void easyDomFactory::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((easyDomFactory*)userData)->beginElement(name, AttributeList(atts));
 }
@@ -160,6 +166,7 @@ easyDomNode *easyDomFactory::LoadXML(const char *filename) {
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &easyDomFactory::beginElement, &easyDomFactory::endElement);
+  XML_SetCharacterDataHandler(parser,&easyDomFactory::charHandler);
   
   do {
     char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);

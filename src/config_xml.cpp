@@ -72,6 +72,11 @@ VegaConfig::VegaConfig(char *configfile){
 
   variables=NULL;
 
+  for(int i=0;i<=3;i++){
+    axis_axis[i]=-1;
+    axis_joy[i]=-1;
+  }
+
   checkConfig(top);
 }
 
@@ -335,7 +340,24 @@ void VegaConfig::doAxis(easyDomNode *node){
   // no checks for correct number yet 
 
   if(name=="x"){
-    
+    axis_axis[0]=axis_nr;
+    axis_joy[0]=joy_nr;
+  }
+  else if(name=="y"){
+    axis_axis[1]=axis_nr;
+    axis_joy[1]=joy_nr;
+  }
+  else if(name=="z"){
+    axis_axis[2]=axis_nr;
+    axis_joy[2]=joy_nr;
+  }
+  else if(name=="throttle"){
+    axis_axis[3]=axis_nr;
+    axis_joy[3]=joy_nr;
+  }
+  else{
+    cout << "unknown axis " << name << endl;
+    return;
   }
 
 }

@@ -150,9 +150,9 @@ void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
     int status;
     
     if(joy_available==false){
-        joy_x= x=0;
-        joy_y=y=0;
-	joy_z=z=0;
+        joy_axis[0]= x=0;
+        joy_axis[1]=y=0;
+	joy_axis[2]=z=0;
         joy_buttons=buttons=0;
         return;
     }
@@ -175,19 +175,19 @@ if (numaxes>2) {
    }
     joy_buttons = buttons;
 
-    joy_x=x=((float)xi/32768.0);
-    joy_y=y=((float)yi/32768.0);
-    joy_z=z=((float)zi/32768.0);
+    joy_axis[0]=x=((float)xi/32768.0);
+    joy_axis[1]=y=((float)yi/32768.0);
+    joy_axis[2]=z=((float)zi/32768.0);
     //    printf("x=%f   y=%f buttons=%d\n",x,y,buttons);
 
     if(fabs(x)<=deadzone){
-        joy_x =x=0;
+        joy_axis[0] =x=0;
     }
     if(fabs(y)<=deadzone){
-        joy_y = y=0;
+        joy_axis[1] = y=0;
     }
     if(fabs(z)<=deadzone){
-        joy_z = z=0;
+        joy_axis[2] = z=0;
     }
 #endif // we have SDL
     

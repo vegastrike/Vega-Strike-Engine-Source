@@ -87,13 +87,13 @@ int Music::SelectTracks(int &whichlist) {
 
   goodness -= playlist[0].size()/8;
   goodness += playlist[0].size()/2;
-  fprintf (stderr,"Choosing Song %f",goodness);
+  //  fprintf (stderr,"Choosing Song %f",goodness);
   int tmp=0;
   if (!playlist[0].empty()) {
     tmp=(rand()%(playlist[0].size()/4));
   }
   goodness+=tmp;
-  fprintf (stderr,"Choosing Song With Randomness %f\n",goodness);
+  //fprintf (stderr,"Choosing Song With Randomness %f\n",goodness);
   if (goodness<0)
     goodness=0;
   if (goodness>=playlist[0].size()) {

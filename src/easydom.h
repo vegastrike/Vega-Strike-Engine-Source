@@ -74,6 +74,7 @@ class easyDomFactory {
 
   easyDomNode *LoadXML(const char*);
 
+  static void charHandler(void *userData, const XML_Char *s, int len);
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
 

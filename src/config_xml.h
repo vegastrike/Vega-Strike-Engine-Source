@@ -54,6 +54,11 @@ class VegaConfig {
   string getVariable(string section,string name,string defaultvalue);
   void bindKeys();
 
+#define MAX_AXIS 4
+
+  int axis_axis[MAX_AXIS];
+  int axis_joy[MAX_AXIS];
+
  private:
   string getVariable(easyDomNode *section,string name,string defaultval);
 
@@ -65,6 +70,7 @@ class VegaConfig {
 
   easyDomNode *variables;
   easyDomNode *bindings;
+
 
   vector<vColor *> colors;
 
