@@ -1,6 +1,12 @@
 //#include <sys/time.h>
+#include <config.h>
 #include <unistd.h>
 #include <math.h>
+
+#ifdef HAVE_ZLIB
+#include <zlib.h>
+#endif
+
 #include "packet.h"
 #include "lin_time.h"
 
@@ -15,11 +21,12 @@ ostream& operator<<( ostream& ostr, PCKTFLAGS f )
     int flags = f;
     if( flags == 0 ) ostr << "NONE"; return ostr;
     if( flags & SENDANDFORGET ) ostr << "SENDANDFORGET ";
-    if( flags & SENT ) ostr << "SENT ";
-    if( flags & RESENT ) ostr << "RESENT ";
-    if( flags & ACKED ) ostr << "ACKED ";
-    if( flags & SENDRELIABLE ) ostr << "SENDRELIABLE ";
-    flags &= ~0x1f;
+    if( flags & SENT          ) ostr << "SENT ";
+    if( flags & RESENT        ) ostr << "RESENT ";
+    if( flags & ACKED         ) ostr << "ACKED ";
+    if( flags & SENDRELIABLE  ) ostr << "SENDRELIABLE ";
+    if( flags & COMPRESSED    ) ostr << "COMPRESSED ";
+    flags &= ~0x101f;
     if( flags != 0 ) ostr << hex << flags;
     return ostr;
 }
@@ -30,46 +37,105 @@ Packet::Packet()
     h.serial      = 0;
     h.timestamp   = 0;
     h.data_length = 0;
+    h.flags       = NONE;
 
-    flags = NONE;
     nbsent = 0;
     destaddr = NULL;
+}
+
+bool Packet::packet_uncompress( PacketMem& outpacket, const unsigned char* src, size_t sz, Header& header )
+{
+    unsigned char* dest;
+    unsigned short ulen_s;
+    unsigned long  ulen_l;
+    int            zlib_errcode;
+
+    src    += header_length;
+    ulen_s = ntohs( *(unsigned short*)src );
+    src    += sizeof(unsigned short);
+    sz     -= sizeof(unsigned short);
+
+    PacketMem mem( ulen_s + header_length );
+
+    dest   = (unsigned char*)mem.getVarBuf();
+    dest   += header_length;
+    ulen_l = ulen_s;
+
+    zlib_errcode = ::uncompress( dest, &ulen_l, src, sz );
+    if( zlib_errcode != Z_OK )
+    {
+	COUT << "Compressed packet not correctly received, "
+	     << "decompression failed" << endl;
+        return false;
+    }
+    else if( ulen_l != ulen_s )
+    {
+	COUT << "Compressed packet not correctly received, "
+	     << "expected len " << ulen_s << ", "
+	     << "received len " << ulen_l << endl;
+        return false;
+    }
+    else
+    {
+	outpacket = mem;
+	header.data_length = ulen_s;
+
+	COUT << "Parsed a compressed packet with"
+	     << " cmd=" << Cmd(header.command) << "(" << (int)header.command << ")"
+	     << " ser=" << header.serial
+	     << " ts=" << header.timestamp
+	     << " len=" << header.data_length
+	     << endl;
+        return true;
+    }
 }
 
 Packet::Packet( const void* buffer, size_t sz )
 {
     if( sz >= header_length )
     {
-        PacketMem mem( buffer, sz );
-        _packet = mem;
+	h.ntoh( buffer );
 
-	assert( ((const char*)buffer)[0] == _packet.getConstBuf()[0] );
-	h.ntoh( _packet.getConstBuf() );
-	assert( ((const char*)buffer)[0] == _packet.getConstBuf()[0] );
         sz -= header_length;
         if( h.data_length > sz )
         {
             COUT << "Packet not correctly received, not enough data for buffer" << endl
-	         << "    should be still " << h.data_length << " but buffer has only " << sz << endl;
+	         << "    should be still " << h.data_length
+                 << " but buffer has only " << sz << endl;
 	    display( __FILE__, __LINE__ );
         }
+	else if( h.flags & COMPRESSED )
+	{
+#ifdef HAVE_ZLIB
+	    if( packet_uncompress( _packet,
+	                           (const unsigned char*)buffer,
+			           h.data_length,
+			           h ) == false )
+	    {
+	        display( __FILE__, __LINE__ );
+	    }
+#else /* HAVE_ZLIB */
+            COUT << "Received compressed packet, but compiled without zlib" << endl;
+	    display( __FILE__, __LINE__ );
+#endif /* HAVE_ZLIB */
+	}
 	else
 	{
+            PacketMem mem( buffer, sz );
+            _packet = mem;
+
 	    COUT << "Parsed a packet with"
 	         << " cmd=" << Cmd(h.command) << "(" << (int)h.command << ")"
 	         << " ser=" << h.serial
 	         << " ts=" << h.timestamp
 	         << " len=" << h.data_length
 	         << endl;
-	    assert( ((const char*)buffer)[0] == _packet.getConstBuf()[0] );
-	    assert( ((unsigned char*)buffer)[0] == h.command );
 	}
     }
     else
     {
         COUT << "Packet not correctly received, not enough data for header" << endl;
     }
-    flags = NONE;
     nbsent = 0;
     destaddr = NULL;
 }
@@ -78,19 +144,35 @@ Packet::Packet( PacketMem& buffer )
 {
     if( buffer.len() >= header_length )
     {
-        _packet = buffer;
-
-	h.ntoh( _packet.getConstBuf() );
+	h.ntoh( buffer.getConstBuf() );
 	size_t sz = buffer.len();
         sz -= header_length;
+
         if( h.data_length > sz )
         {
             COUT << "Packet not correctly received, not enough data for buffer" << endl
 	         << "    should be still " << h.data_length << " but buffer has only " << sz << endl;
 	    display( __FILE__, __LINE__ );
         }
+	else if( h.flags & COMPRESSED )
+	{
+#ifdef HAVE_ZLIB
+	    if( packet_uncompress( _packet,
+	                           (const unsigned char*)buffer.getConstBuf(),
+			           h.data_length,
+			           h ) == false )
+	    {
+	        display( __FILE__, __LINE__ );
+	    }
+#else /* HAVE_ZLIB */
+            COUT << "Received compressed packet, but compiled without zlib" << endl;
+	    display( __FILE__, __LINE__ );
+#endif /* HAVE_ZLIB */
+	}
 	else
 	{
+            _packet = buffer;
+
 	    COUT << "Parsed a packet with"
 	         << " cmd=" << Cmd(h.command) << "(" << (int)h.command << ")"
 	         << " ser=" << h.serial
@@ -103,7 +185,6 @@ Packet::Packet( PacketMem& buffer )
     {
         COUT << "Packet not correctly received, not enough data for header" << endl;
     }
-    flags = NONE;
     nbsent = 0;
     destaddr = NULL;
 }
@@ -125,8 +206,8 @@ void Packet::copyfrom( const Packet& a )
     h.serial      = a.h.serial;
     h.timestamp   = a.h.timestamp;
     h.data_length = a.h.data_length;
+    h.flags       = a.h.flags;
     _packet       = a._packet;
-    flags         = a.flags;
     nbsent        = a.nbsent;
 
     if( a.destaddr ) {
@@ -167,25 +248,31 @@ void    Packet::setNetwork( const AddressIP * dst, SOCKETALT sock)
     this->socket = sock;
 }
 
-int Packet::send( Cmd cmd, ObjSerial nserial, char * buf, unsigned int length, enum PCKTFLAGS prio, const AddressIP* dst, const SOCKETALT& sock, const char* caller_file, int caller_line )
+int Packet::send( Cmd cmd, ObjSerial nserial, char * buf, unsigned int length,
+                  enum PCKTFLAGS prio, const AddressIP* dst,
+		  const SOCKETALT& sock, const char* caller_file,
+		  int caller_line )
 {
     create( cmd, nserial, buf, length, prio, dst, sock, caller_file, caller_line );
     return send( );
 }
 
-void Packet::create( Cmd cmd, ObjSerial nserial, char * buf, unsigned int length, enum PCKTFLAGS prio, const AddressIP* dst, const SOCKETALT& sock, const char* caller_file, int caller_line )
+void Packet::create( Cmd cmd, ObjSerial nserial, char * buf,
+                     unsigned int length, enum PCKTFLAGS prio,
+		     const AddressIP* dst, const SOCKETALT& sock,
+		     const char* caller_file, int caller_line )
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << endl
 	 << "*** from " << caller_file << ":" << caller_line << endl
          << "*** send " << cmd << " ser=" << nserial << ", "
          << length << " bytes to socket " << sock << endl;
 
-    this->flags = prio;
     // Get a timestamp for packet (used for interpolation on client side)
     double curtime = getNewTime();
     microtime = (unsigned int) (floor(curtime*1000));
     h.timestamp = microtime;
-    h.command = cmd;
+    h.command   = cmd;
+    h.flags     = prio;
 
     // buf is an allocated char * containing message
     if( length > MAXBUFFER)
@@ -195,14 +282,65 @@ void Packet::create( Cmd cmd, ObjSerial nserial, char * buf, unsigned int length
         exit(1);
     }
     h.serial = nserial;
-    h.data_length = length;
     
-    _packet = PacketMem( length + header_length );
-    char* c = _packet.getVarBuf( );
-    h.hton( c );
-    memcpy( &c[header_length], buf, length );
-    COUT << "Created a packet of length " << length+header_length << " for sending" << endl;
-    //_packet.dump( cout, 0 );
+#ifdef HAVE_ZLIB
+    bool packet_filled = false;
+
+    if( prio & COMPRESSED )
+    {
+	size_t sz;   // complicated zlib rules for safety reasons
+	sz = length + ( length/10 ) + 15 + header_length;
+
+        _packet = PacketMem( sz );
+
+        char*          c      = _packet.getVarBuf( );
+	unsigned long  clen_l = length;
+	unsigned short ulen_s;
+	unsigned char* dest   = (unsigned char*)&c[header_length+sizeof(unsigned short)];
+        int            zlib_errcode;
+
+	zlib_errcode = ::compress2( dest, &clen_l, (unsigned char*)buf, length, 9 );
+
+	if( zlib_errcode == Z_OK )
+	{
+	    if( clen_l < length + 2 )
+	    {
+	        ulen_s = htons( (unsigned short)length );
+	        memcpy( &c[header_length], &ulen_s, sizeof(unsigned short) );
+
+	        h.data_length = (unsigned short)clen_l + sizeof(unsigned short);
+                h.hton( c );
+
+                COUT << "Created a packet of length "
+	             << h.data_length+header_length << " for sending" << endl;
+                //_packet.dump( cout, 0 );
+	        packet_filled = true;
+	    }
+	    else
+	    {
+	        COUT << "Compressing " << cmd
+		     << " packet refused - bigger than original" << std::endl;
+	    }
+	}
+    }
+
+    if( packet_filled == false )
+    {
+#else /* HAVE_ZLIB */
+	h.flags &= ( ~COMPRESSED );    // make sure that it's never set here
+        h.data_length = length;
+
+        _packet = PacketMem( length + header_length );
+        char* c = _packet.getVarBuf( );
+        h.hton( c );
+        memcpy( &c[header_length], buf, length );
+        COUT << "Created a packet of length "
+	     << length+header_length << " for sending" << endl;
+        //_packet.dump( cout, 0 );
+#endif /* HAVE_ZLIB */
+#ifdef HAVE_ZLIB
+    }
+#endif /* HAVE_ZLIB */
 
     if( destaddr == NULL )
     {
@@ -232,7 +370,7 @@ void    Packet::display( const char* file, int line )
 {
     cout << "*** " <<  file << ":" << line << " " << endl;
     cout << "*** Packet display -- Command : " << Cmd(h.command)
-         << " - Serial : " << h.serial << " - Flags : " << this->flags << endl;
+         << " - Serial : " << h.serial << " - Flags : " << h.flags << endl;
     cout<<"***                   Size   : " << getDataLength() + header_length << endl;
     cout<<"***                   Buffer : " << endl;
     _packet.dump( cout, 4 );
@@ -247,14 +385,15 @@ void    Packet::displayHex()
     cout<<endl;
 }
 
-void Packet::Header::ntoh( const char* buf )
+void Packet::Header::ntoh( const void* buf )
 {
     // TO CHANGE IF ObjSerial IS NOT A SHORT ANYMORE
     const Header* h = (const Header*)buf;
     command         = h->command;
-    serial          = ntohs( h->serial);
-    timestamp       = ntohl( h->timestamp);
-    data_length     = ntohs( h->data_length);
+    serial          = ntohs( h->serial );
+    timestamp       = ntohl( h->timestamp );
+    data_length     = ntohs( h->data_length );
+    flags           = ntohs( h->flags );
 }
 
 void Packet::Header::hton( char* buf )
@@ -262,9 +401,10 @@ void Packet::Header::hton( char* buf )
     // TO CHANGE IF ObjSerial IS NOT A SHORT ANYMORE
     Header* h      = (Header*)buf;
     h->command     = command;
-    h->serial      = htons( serial);
-    h->timestamp   = htonl( timestamp);
-    h->data_length = htons( data_length);
+    h->serial      = htons( serial );
+    h->timestamp   = htonl( timestamp );
+    h->data_length = htons( data_length );
+    h->flags       = htons( flags );
 }
 
 int Packet::send( )

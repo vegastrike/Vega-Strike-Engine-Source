@@ -18,7 +18,16 @@ using namespace std;
 
 // Number of times we resend a "reliable" packet in UDP mode
 #define NUM_RESEND 3
-enum PCKTFLAGS {NONE=0x0,SENDANDFORGET=0x1,SENT=0x2,RESENT=0x4,ACKED=0x8,SENDRELIABLE=0x10};
+enum PCKTFLAGS
+{
+    NONE          = 0,
+    SENDANDFORGET = 0x0001,
+    SENT          = 0x0002,
+    RESENT        = 0x0004,
+    ACKED         = 0x0008,
+    SENDRELIABLE  = 0x0010,
+    COMPRESSED    = 0x1000
+};
 
 ostream& operator<<( ostream& ostr, PCKTFLAGS flags );
 
@@ -33,18 +42,18 @@ class Packet
             unsigned int    timestamp;
             //unsigned int  delay;
             unsigned short  data_length;
+            unsigned short  flags;
 
-           void hton( char* c );
-           void ntoh( const char* c );
+            void hton( char* c );
+            void ntoh( const void* c );
         };
 
-		LOCALCONST_DECL(unsigned short,header_length,sizeof( struct Header))
+        LOCALCONST_DECL(unsigned short,header_length,sizeof( struct Header))
 
         Header          h;
-		PacketMem       _packet;
+        PacketMem       _packet;
         // char   databuffer[MAXBUFFER];
 
-        enum PCKTFLAGS  flags;
         unsigned short  nbsent;
         AddressIP*      destaddr;
         SOCKETALT       socket; // Socket to send on (in TCP mode)
@@ -69,22 +78,30 @@ class Packet
 
         bool operator==( const Packet &p ) const
         {
-	    if( _packet == p._packet ) return true;
+            if( _packet == p._packet ) return true;
             cout<<"Packets are different"<<endl;
             return false;
         }
 
-        int send( Cmd cmd, ObjSerial nserial, char * buf, unsigned int length, enum PCKTFLAGS prio, const AddressIP* dst, const SOCKETALT& sock, const char* caller_file, int caller_line );
+        int send( Cmd cmd, ObjSerial nserial,
+                  char * buf, unsigned int length,
+                  enum PCKTFLAGS prio,
+                  const AddressIP* dst, const SOCKETALT& sock,
+                  const char* caller_file, int caller_line );
 
-        inline void bc_create( Cmd cmd, ObjSerial nserial, char * buf, unsigned int length, enum PCKTFLAGS prio, const AddressIP* dst, const SOCKETALT& sock, const char* caller_file, int caller_line )
-	{
+        inline void bc_create( Cmd cmd, ObjSerial nserial,
+                               char * buf, unsigned int length,
+                               enum PCKTFLAGS prio,
+                               const AddressIP* dst, const SOCKETALT& sock,
+                               const char* caller_file, int caller_line )
+        {
             create( cmd, nserial, buf, length, prio, dst, sock, caller_file, caller_line );
-	}
+        }
 
         inline int bc_send( )
-	{
-	    return send( );
-	}
+        {
+            return send( );
+        }
 
         void    display( const char* file, int line );
         void    displayHex();
@@ -96,12 +113,13 @@ class Packet
             return header_length;
         }
 
-        ObjSerial       getSerial() const    { return h.serial;}
-        unsigned int    getTimestamp() const { return h.timestamp;}
-        Cmd             getCommand() const   { return (Cmd)h.command;}
-        enum PCKTFLAGS  getFlags() const     { return this->flags;}
-        void            setFlags( enum PCKTFLAGS fl) { this->flags = fl;}
-        void            setNetwork( const AddressIP * dst, SOCKETALT sock);
+        inline ObjSerial       getSerial() const    { return h.serial;}
+        inline unsigned int    getTimestamp() const { return h.timestamp;}
+        inline Cmd             getCommand() const   { return (Cmd)h.command;}
+        inline unsigned short  getFlags() const     { return h.flags;}
+        inline void            setFlag ( enum PCKTFLAGS fl ) { h.flags |= fl; }
+        inline void            setFlags( unsigned short fl ) { h.flags = fl; }
+        void                   setNetwork( const AddressIP * dst, SOCKETALT sock);
 
         void            ack( );
 
@@ -111,8 +129,17 @@ class Packet
         void    reset() { h.command = 0;}
 
 private:
-        void    create( Cmd cmd, ObjSerial nserial, char * buf, unsigned int length, enum PCKTFLAGS prio, const AddressIP* dst, const SOCKETALT& sock, const char* caller_file, int caller_line );
+        void    create( Cmd cmd, ObjSerial nserial,
+                        char * buf, unsigned int length,
+                        enum PCKTFLAGS prio,
+                        const AddressIP* dst, const SOCKETALT& sock,
+                        const char* caller_file, int caller_line );
         int     send( );
+
+        static bool packet_uncompress( PacketMem&           dest,
+	                               const unsigned char* src,
+				       size_t               sz,
+				       Header&              header );
 };
 
 #if 0
@@ -128,7 +155,8 @@ class PacketQueue
     public:
         /*** Adds a packet to the list (in order to be sent later) ***/
         void add( Packet p);
-        /*** Sends or resends the packets and removes those that are ACKED or never were ***/
+        /*** Sends or resends the packets and removes those that are
+         *   ACKED or never were ***/
         void send( NetUI * net);
 
         /*** Returns the front element from the list and remove it ***/

@@ -358,6 +358,21 @@ else
 fi
 
 dnl --------------------------------------------------------------------------
+dnl Check for zlib compression library
+dnl --------------------------------------------------------------------------
+
+AC_CHECK_LIB( z, gzopen,
+  [ AC_CHECK_HEADER( zlib.h,
+    [vs_have_zlib=yes],
+    [vs_have_zlib=no])
+  ],[vs_have_zlib=no])
+
+if test "x$vs_have_zlib" = "xyes" ; then
+    AC_DEFINE(HAVE_ZLIB,1,[defined when zlib library and header are available])
+    TR_LIBS="$TR_LIBS -lz"
+fi
+
+dnl --------------------------------------------------------------------------
 dnl Check for GL library
 dnl --------------------------------------------------------------------------
 AC_ARG_WITH(gl-libs,      [  --with-gl-libs=DIR      GL/MesaGL library location])
