@@ -37,7 +37,7 @@
 
 #include "cmd/script/mission.h"
 
-#if defined(WITH_MACOSX_BUNDLE) && !defined(HAVE_SDL)
+#if defined(WITH_MACOSX_BUNDLE)
 #import <sys/param.h>
 #endif
 
@@ -46,14 +46,14 @@ using namespace std;
 extern void CacheJumpStar (bool);
 Universe::Universe(int argc, char** argv, const char * galaxy)
 {
-#if defined(WITH_MACOSX_BUNDLE) && !defined(HAVE_SDL)
+#if defined(WITH_MACOSX_BUNDLE)
     // get the current working directory so when glut trashes it we can restore.
     char pwd[MAXPATHLEN];
     getcwd (pwd,MAXPATHLEN);
 #endif
 	//Select drivers
 	GFXInit(argc,argv);
-#if defined(WITH_MACOSX_BUNDLE) && !defined(HAVE_SDL)
+#if defined(WITH_MACOSX_BUNDLE)
     // Restore it
     chdir(pwd);
 #endif
