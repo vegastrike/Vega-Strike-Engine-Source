@@ -17,6 +17,7 @@ SRCS = 	cmd_beam.cpp				\
 	cmd_aggressive_ai.cpp			\
 	cmd_fireat.cpp				\
 	star_system_xml.cpp			\
+	cmd_ai_event_xml.cpp			\
 	cmd_navigation_orders.cpp		\
 	cmd_collide.cpp				\
 	cmd_faction_xml.cpp			\
@@ -32,7 +33,6 @@ SRCS = 	cmd_beam.cpp				\
 	cmd_unit_xml.cpp  			\
 	cmd_physics.cpp				\
 	cmd_weapon_xml.cpp			\
-	cmd_click_list.cpp			\
 	hashtable.cpp				\
 	in_ai.cpp				\
 	in_kb.cpp				\
@@ -57,8 +57,8 @@ $(MAIN):  $(OBJS)
 	for dir in $(SUBDIRS); do \
                 (cd $$dir &&  $(MAKE) -f Makefile.sml); \
         done
-	-$(CC) $(CFLAGS) $(OBJS) gldrv/libgldrv.a gfx/libgfx.a -o $(MAIN) $(LFLAGS)
-	-$(CC) $(CFLAGS) $(OBJS) gldrv/libgldrv.a gfx/libgfx.a -o $(MAIN) $(LTWOFLAGS)
+	-$(CC) $(CFLAGS) $(OBJS) gldrv/gl_quad_list.o gldrv/libgldrv.a gfx/libgfx.a -o $(MAIN) $(LFLAGS)
+	-$(CC) $(CFLAGS) $(OBJS) gldrv/gl_quad_list.o gldrv/libgldrv.a gfx/libgfx.a -o $(MAIN) $(LTWOFLAGS)
 .cpp.o:
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<
 
