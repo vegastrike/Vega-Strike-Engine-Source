@@ -354,6 +354,8 @@ void Stars::SetBlend(bool blendit, bool fadeit) {
 	fade = true;//fadeit;
 }
 void Stars::Draw() {
+   static bool stars_dont_move = XMLSupport::parse_bool (vs_config->getVariable("graphics","stars_dont_move","false"));
+   if (stars_dont_move)return;
   const QVector cp (_Universe->AccessCamera()->GetPosition());
   UpdatePosition(cp);
   //  GFXLightContextAmbient(GFXColor(0,0,0,1));
@@ -441,7 +443,6 @@ void Stars::ResetPosition (const QVector &cent){
   }
 }
 void Stars::UpdatePosition(const QVector & cp) {
-
   if (fabs(pos[0].i-cp.i)>3*spread||fabs(pos[0].j-cp.j)>3*spread||fabs(pos[0].k-cp.k)>3*spread) {
     ResetPosition(cp);
     return;

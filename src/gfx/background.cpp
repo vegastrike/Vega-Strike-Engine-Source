@@ -244,7 +244,7 @@ void Background::Draw()
   GFXDisable (TEXTURE1);
   GFXDisable(DEPTHWRITE);
   GFXBlendMode(ONE,ONE);
-  static float background_velocity_scale = XMLSupport::parse_float (vs_config->getVariable("graphics","background_velocity_scale","0"));
+  static float background_velocity_scale = XMLSupport::parse_float (vs_config->getVariable("graphics","background_star_streak_velocity_scale","0"));
   stars.BeginDrawState(QVector(0,0,0), _Universe->AccessCamera()->GetVelocity().Scale(background_velocity_scale),_Universe->AccessCamera()->GetAngularVelocity(),true,true);
   stars.Draw();
   stars.EndDrawState();

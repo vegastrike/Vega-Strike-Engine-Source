@@ -258,7 +258,7 @@ void GameUnit<UnitType>::UpdateHudMatrix(int whichcam) {
   CrossProduct(r,q, tmp);
   _Universe->AccessCamera(whichcam)->SetOrientation(tmp,q ,r);
   
-  _Universe->AccessCamera(whichcam)->SetPosition (Transform (ctm,image->CockpitCenter.Cast()),GetVelocity(),GetAngularVelocity());
+  _Universe->AccessCamera(whichcam)->SetPosition (Transform (ctm,image->CockpitCenter.Cast()),GetWarpVelocity(),GetAngularVelocity());
 }
 extern bool flickerDamage (Unit * un, float hullpercent);   
 extern short cloakVal (short cloak, short cloakmin, short cloakrate, bool cloakglass);
