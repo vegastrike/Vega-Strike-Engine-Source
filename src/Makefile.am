@@ -1,8 +1,36 @@
-bin_PROGRAMS = vegastrike
+bin_PROGRAMS = vegastrike vegaserver accountserver
 SUBDIRS = cmd gfx gldrv aldrv python gui networking boost common
-vegastrike_LDADD = cmd/script/libscript.a cmd/libcmd.a cmd/ai/libai.a cmd/script/c_alike/libc_alike.a gfx/libgfx.a gldrv/libgldrv.a aldrv/libaldrv.a python/libpython.a cmd/collide/libcollide.a gui/libgui.a -lutil networking/libnet.a boost/libboost_python.a common/libvscommon.a -lpthread
+vegastrike_LDADD = cmd/script/libscript.a cmd/libcmd.a cmd/ai/libai.a cmd/script/c_alike/libc_alike.a gfx/libgfx.a gldrv/libgldrv.a aldrv/libaldrv.a python/libpython.a cmd/collide/libcollide.a gui/libgui.a -lutil networking/libnet.a boost/libboost_python.a common/libvscommon.a networking/libnetclient.a -lpthread
+vegaserver_LDADD = networking/libnetserver.a
+accountserver_LDADD = networking/libnetserver.a
 INCLUDES = -Iboost/
 #/usr/lib/python2.2/config/libpython2.2.a 
+vegaserver_SOURCES =				\
+	hashtable.h				\
+	hashtable.cpp			\
+	configxml.cpp			\
+	configxml.h			\
+	xml_support.h  			\
+	xml_support.cpp			\
+	easydom.cpp				\
+	easydom.h				\
+	lin_time.cpp			\
+	lin_time.h				\
+	vegaserver.cpp
+
+accountserver_SOURCES =				\
+	hashtable.h				\
+	hashtable.cpp			\
+	configxml.cpp			\
+	configxml.h			\
+	xml_support.h  			\
+	xml_support.cpp			\
+	easydom.cpp				\
+	easydom.h				\
+	lin_time.cpp			\
+	lin_time.h				\
+	accountserver.cpp
+
 vegastrike_SOURCES =				\
 	debug_vs.h				\
 	debug_vs.cpp				\
