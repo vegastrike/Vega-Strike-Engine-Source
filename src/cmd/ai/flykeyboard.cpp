@@ -209,7 +209,6 @@ void FlyByKeyboard::SheltonKey(int, KBSTATE k) {
 }
 void FlyByKeyboard::JumpKey(int, KBSTATE k) {
   switch (k) {
-  case DOWN:
   case PRESS:
     starshipcontrolkeys.jumpkey=true;
     break;

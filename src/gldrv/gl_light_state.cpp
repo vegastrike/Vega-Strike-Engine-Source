@@ -288,7 +288,7 @@ void gfx_light::Disable() {
       }
       GLLights[this->target].options&=(~(OpenGLL::GL_ENABLED||OpenGLL::GLL_ON));
     }
-    if (LocalLight()) {
+    if (LocalLight()&&enabled()) {
       RemoveFromTable();
       if (target>=0)
 	TrashFromGLLights();

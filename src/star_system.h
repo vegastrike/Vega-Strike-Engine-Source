@@ -107,7 +107,7 @@ class StarSystem {
   void AddUnit(Unit *unit);
   ///Removes from draw list
   bool RemoveUnit(Unit *unit);
-  bool JumpTo (Unit * unit, const std::string &system);
+  bool JumpTo (Unit * unit, Planet * jumppoint, const std::string &system);
   ///Draws a frame of action, interpolating between physics frames
   void Draw();
   /// update a simulation atom

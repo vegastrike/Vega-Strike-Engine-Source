@@ -43,13 +43,14 @@ Atmosphere *theAtmosphere;
 static Hashtable<std::string, StarSystem ,char [127]> star_system_table;
 struct unorigdest {
   Unit * un;
+  Planet * jumppoint;
   StarSystem * orig;
   StarSystem * dest;
-  unorigdest (Unit * un, StarSystem * orig, StarSystem * dest):un(un),orig(orig),dest(dest) {}
+  unorigdest (Unit * un, Planet * jumppoint, StarSystem * orig, StarSystem * dest):un(un),jumppoint(jumppoint),orig(orig),dest(dest) {}
 };
 static std::vector <unorigdest> pendingjump;
-void SSTransfer (Unit * un,StarSystem * orig,StarSystem * target){
-  pendingjump.push_back (unorigdest (un,orig,target));
+void SSTransfer (Unit * un,Planet * jumppoint, StarSystem * orig,StarSystem * target){
+  pendingjump.push_back (unorigdest (un,jumppoint,orig,target));
 }
 
 StarSystem::StarSystem(const char * filename, const Vector & centr,const string planetname) : 
@@ -429,23 +430,72 @@ void StarSystem::Update() {
   //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
 }
 extern Unit ** fighters;
+
+inline bool CompareDest (Planet * un, StarSystem * origin) {
+  for (unsigned int i=0;i<un->GetDestinations().size();i++) {
+    if (star_system_table.Get (string(un->GetDestinations()[i]))||star_system_table.Get (string(un->GetDestinations()[i])+string (".system"))) 
+      return true;
+  }
+}
+inline std::vector <Unit *> ComparePrimaries (Unit * primary, StarSystem *origin) {
+  std::vector <Unit *> myvec;
+  if (primary->isUnit()==PLANETPTR) {
+    if (CompareDest ((Planet *) primary, origin))
+      myvec.push_back (primary);
+    Iterator *iter = ((Planet *)primary)->createIterator();
+    Unit * unit;
+    while((unit = iter->current())!=NULL) {
+      if (unit->isUnit()==PLANETPTR)
+	if (CompareDest ((Planet*)unit,origin)) {
+	  myvec.push_back (unit);
+	}
+      iter->advance();
+    }
+    delete iter;
+    
+  }
+  return myvec;
+}
 void StarSystem::ProcessPendingJumps() {
   for (unsigned int kk=0;kk<pendingjump.size();kk++) {
     if (pendingjump[kk].orig->RemoveUnit (pendingjump[kk].un)) {
       pendingjump[kk].un->RemoveFromSystem();
       pendingjump[kk].dest->AddUnit (pendingjump[kk].un);
+      pendingjump[kk].un->Target(NULL);
+      Iterator * iter = pendingjump[kk].orig->drawList->createIterator();
+      Unit * unit;
+      while((unit = iter->current())!=NULL) {
+	if (unit->Target()==pendingjump[kk].un) {
+	  unit->Target (pendingjump[kk].jumppoint);
+	}
+	iter->advance();
+      }
+      delete iter;
       if (pendingjump[kk].un==fighters[0]) {
 	_Universe->activeStarSystem()->SwapOut();
 	_Universe->popActiveStarSystem();
 	_Universe->pushActiveStarSystem(pendingjump[kk].dest);
 	pendingjump[kk].dest->SwapIn();
       }
+      vector <Unit *> possibilities;
+      for (int i=0;i<pendingjump[kk].dest->numprimaries;i++) {
+	vector <Unit *> tmp;
+	tmp = ComparePrimaries (pendingjump[kk].dest->primaries[i],pendingjump[kk].dest);
+	if (!tmp.empty()) {
+	  possibilities.insert (possibilities.end(),tmp.begin(), tmp.end());
+	}
+      }
+      if (!possibilities.empty()) {
+	static int jumpdest=235034;
+	pendingjump[kk].un->SetCurPosition(possibilities[jumpdest%possibilities.size()]->Position());
+	jumpdest+=23231;
+      }
     }
   }
   pendingjump.clear();
 }
 
-bool StarSystem::JumpTo (Unit * un, const std::string &system) {
+bool StarSystem::JumpTo (Unit * un, Planet * jumppoint, const std::string &system) {
 
   StarSystem *ss = star_system_table.Get(system);
 
@@ -466,7 +516,7 @@ bool StarSystem::JumpTo (Unit * un, const std::string &system) {
     }
   }
   if(ss) {
-    SSTransfer (un,this,ss);
+    SSTransfer (un,jumppoint, this,ss);
   } else {
     return false;
   }
