@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "gfxlib.h"
-
+#include "endianness.h"
 extern FILE *fpread;
 
 /*File utility functions*/
@@ -38,10 +38,12 @@ inline void CloseFile()
 inline void ReadInt(int &integer)
 {
 	fread(&integer, sizeof(int), 1, fpread);
+	integer = le32_to_cpu(integer);
 }
 inline void ReadFloat(float &num)
 {
 	fread(&num, sizeof(float), 1, fpread);
+	*((int *)&num) = le32_to_cpu(*((int *)&num));
 }
 
 inline void ReadString(char *string)

@@ -24,17 +24,9 @@
 #include <assert.h>
 #include "gfxlib.h"
 #include <string>
-
+#include "endianness.h"
 #include "hashtable.h"
 using std::string;
-#ifdef macintosh 
-#include <swapbytes.h>
-#define SWAPLONG(x) (bswap_32(x))
-#define SWAPSHORT(x) (bswap_16(x))
-#else
-#define SWAPLONG(x) (x)
-#define SWAPSHORT(x) (x)
-#endif
 
 #ifndef WIN32
 typedef unsigned long DWORD;
@@ -136,8 +128,8 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	//long temp;
 	BITMAPINFOHEADER info;
 	fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
-	sizeX = SWAPLONG(info.biWidth);	
-	sizeY = SWAPLONG(info.biHeight);
+	sizeX = le32_to_cpu(info.biWidth);	
+	sizeY = le32_to_cpu(info.biHeight);
 
 
 	//while(1);
@@ -160,7 +152,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	this->texfilename = new char [texfilename.length()+1];
 	strcpy(this->texfilename,texfilename.c_str());
 
-	if(SWAPSHORT(info.biBitCount) == 24)
+	if(le16_to_cpu(info.biBitCount) == 24)
 	{
 		mode = _24BIT;
 		if(fp2)
@@ -186,7 +178,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 			}
 		}
 	}
-	else if(SWAPSHORT(info.biBitCount) == 8)
+	else if(le16_to_cpu(info.biBitCount) == 8)
 	{
 		mode = _8BIT;
 		data = NULL;
@@ -238,8 +230,8 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	//long temp;
 	BITMAPINFOHEADER info;
 	fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
-	sizeX = SWAPLONG(info.biWidth);
-	sizeY = SWAPLONG(info.biHeight);
+	sizeX = le32_to_cpu(info.biWidth);
+	sizeY = le32_to_cpu(info.biHeight);
 	BITMAPINFOHEADER info1;
 	FILE *fp1 = NULL;
 
@@ -268,13 +260,13 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 			fseek (fp1,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
 			
 			fread (&info1,SIZEOF_BITMAPINFOHEADER,1,fp1);
-			if (sizeX != (unsigned int) SWAPLONG(info1.biWidth)||sizeY!=(unsigned int)SWAPLONG(info1.biHeight))
+			if (sizeX != (unsigned int) le32_to_cpu(info1.biWidth)||sizeY!=(unsigned int)le32_to_cpu(info1.biHeight))
 			{
 				data = NULL;
 				return;
 			}
 			RGBQUAD ptemp1;	
-			if (SWAPSHORT(info1.biBitCount) == 8)
+			if (le16_to_cpu(info1.biBitCount) == 8)
 			{
 				for (int i=0; i<256; i++)
 					fread(&ptemp1, sizeof(RGBQUAD), 1, fp1); //get rid of the palette for a b&w greyscale alphamap
@@ -282,7 +274,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 			}
 		}
 	}
-	if(SWAPSHORT(info.biBitCount) == 24) {
+	if(le16_to_cpu(info.biBitCount) == 24) {
 	  mode = _24BITRGBA;
 	  data = NULL;
 	  data= new unsigned char [4*sizeY*sizeX];
@@ -297,7 +289,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 		    fread (data+k+4*j+itimes4width,sizeof (unsigned char),1,fp);
 		  }
 		  if (FileNameA){
-		    if (SWAPSHORT(info1.biBitCount)==24)
+		    if (le16_to_cpu(info1.biBitCount)==24)
 		      for (int k=2; k>=0;k--) {
 			fread (data+3+4*j+itimes4width,sizeof (unsigned char),1,fp1);
 			//*(data+3+4*j+itimes4width) = 30;
@@ -317,7 +309,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 		}
 	    }
 	}
-	else if(SWAPSHORT(info.biBitCount) == 8) {
+	else if(le16_to_cpu(info.biBitCount) == 8) {
 	  unsigned char index = 0;
 	  mode = _24BITRGBA;
 	  data = NULL;
@@ -352,7 +344,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 		{
 		  int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
 		  for (unsigned int j=0; j<sizeX;j++) {
-		    if (SWAPSHORT(info1.biBitCount)==24)
+		    if (le16_to_cpu(info1.biBitCount)==24)
 		      for (int k=2; k>=0;k--) {
 			fread (data+3+4*j+itimes4width,sizeof (unsigned char),1,fp1);
 		      }
