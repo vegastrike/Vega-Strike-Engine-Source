@@ -6,7 +6,13 @@
 	* modified vegastrike.spec
 	* added vegastrike-data.spec
 	* improved some modules (unit==NULL checks)
-	
+
+2002-03-09 Daniel Horn <hellcatv@hotmail.com>
+	* Begun adding communications to AI
+	* Fixed Segfault in LoadUniverse's call to mission which may create starships without an active starsystem
+	* Added a FSM (Finite State Machine) pointer to each faction-faction relation
+	* Added a drawing text function to the happy splashscreen
+	* Made it so that you can't donwgrade what you don't have
 	
 2002-03-18 Alexander Rawass <alexannika@users.sourceforge.net>
 
