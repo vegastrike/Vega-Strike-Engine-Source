@@ -20,7 +20,7 @@ bool GameUnit::RequestClearance (Unit * dockingunit) {
     return true;
 }
 
-void GameUnit::FreeDockingPort (unsigned int i) {
+void Unit::FreeDockingPort (unsigned int i) {
       if (image->dockedunits.size()==1) {
 	docked&= (~DOCKING_UNITS);
       }

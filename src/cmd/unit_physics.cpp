@@ -489,7 +489,7 @@ void GameUnit::UpdatePhysics (const Transformation &trans, const Matrix &transma
 
       if (mounts[i]->ref.gun) {
 
-	mounts[i]->ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix);
+	mounts[i]->ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix,((mounts[i]->size&weapon_info::AUTOTRACKING)&&(mounts[i]->time_to_lock<=0))?target:NULL ,computer.radar.trackingcone);
 
       }
 

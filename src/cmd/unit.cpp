@@ -619,7 +619,7 @@ void GameUnit::Draw(const Transformation &parent, const Matrix &parentMatrix)
   for (i=0;i<GetNumMounts();i++) {
     if (mounts[i]->type->type==weapon_info::BEAM) {
       if (mounts[i]->ref.gun) {
-	mounts[i]->ref.gun->Draw(*ct,*ctm);
+	mounts[i]->ref.gun->Draw(*ct,*ctm,((mounts[i]->size&weapon_info::AUTOTRACKING)&&mounts[i]->time_to_lock<=0)? Unit::Target():NULL,computer.radar.trackingcone);
       }
     }
   }

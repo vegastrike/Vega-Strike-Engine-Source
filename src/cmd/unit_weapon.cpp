@@ -53,6 +53,9 @@ static void AdjustMatrix (Matrix &mat, Unit * target, float speed, bool lead, fl
     }
   }
 }
+void AdjustMatrixToTrackTarget (Matrix &mat,Unit * target, float speed, bool lead, float cone) {
+  AdjustMatrix (mat,target,speed,lead,cone);
+}
 bool GameUnit::GameMount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & m, const Vector & velocity, Unit * owner, Unit *target, signed char autotrack, float trackingcone) {
   if (time_to_lock>0) {
     target=NULL;

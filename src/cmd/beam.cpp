@@ -178,8 +178,9 @@ void Beam::RecalculateVertices() {
   vlist->EndMutate();
 }
 
+void AdjustMatrixToTrackTarget (Matrix &mat,Unit * target, float speed, bool lead, float cone);
 
-void Beam::Draw (const Transformation &trans, const Matrix &m) {//hope that the correct transformation is on teh stack
+void Beam::Draw (const Transformation &trans, const Matrix &m, Unit * targ, float tracking_cone) {//hope that the correct transformation is on teh stack
   if (curthick==0) 
     return;
   Matrix cumulative_transformation_matrix;
@@ -187,6 +188,7 @@ void Beam::Draw (const Transformation &trans, const Matrix &m) {//hope that the 
   Transformation cumulative_transformation = local_transformation;
   cumulative_transformation.Compose(trans, m);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
+  AdjustMatrixToTrackTarget (cumulative_transformation_matrix,targ,speed,false,tracking_cone);
 #ifdef PERFRAMESOUND
   AUDAdjustSound (sound,cumulative_transformation.position,speed*Vector (cumulative_transformation_matrix[8],cumulative_transformation_matrix[9],cumulative_transformation_matrix[10]));
 #endif
@@ -277,7 +279,7 @@ void Beam::RemoveFromSystem(bool eradicate) {
 #endif
 #endif
 }
-void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m) {
+void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m, Unit * targ, float tracking_cone) {
   curlength += SIMULATION_ATOM*speed;
   if (curlength<0) {
     curlength=0;
@@ -299,6 +301,7 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m) {
   Transformation cumulative_transformation = local_transformation;
   cumulative_transformation.Compose(trans, m);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
+  AdjustMatrixToTrackTarget (cumulative_transformation_matrix,targ,speed,false,tracking_cone);
   //to help check for crashing.
   center = cumulative_transformation.position;
   direction = TransformNormal (cumulative_transformation_matrix,Vector(0,0,1));
