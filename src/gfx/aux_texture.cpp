@@ -197,8 +197,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
     }
   }
   fprintf (stderr,"Loading bmp file %s ",FileName);
-	char t[65536];
-	strcpy(t, FileName);
+	char *t= strdup (FileName);
 	t[strlen(FileName)-3] = 'a';
 	t[strlen(FileName)-2] = 'l';
 	t[strlen(FileName)-1] = 'p';
@@ -218,6 +217,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	if (shared) {
 	  fp = fopen (GetSharedTexturePath (FileName).c_str(),"rb");
 	}
+	free ( t);
 	if (!fp)
 	{
       	  fprintf (stderr, "%s, not found",FileName);
