@@ -93,8 +93,9 @@ void GoToParentDir () {
   std::string par = ParentDir ();
   //  fprintf (stderr,"changing to %s",par.c_str());
   chdir (par.c_str());
-  FILE * fp = fopen ("vegastrike.config","r");
-  if (!fp) {
+  FILE * fp1 = fopen ("../vegastrike.config","r");
+  FILE * fp2 = fopen ("vegastrike.config","r");
+  if ((!fp2)&&fp1) {
 	  chdir ("..");
   }
 }
