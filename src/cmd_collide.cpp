@@ -233,7 +233,7 @@ bool Unit::Collide (Unit * target) {
 
 
 bool Beam::Collide (Unit * target) {
-  fprintf (stderr,"BEAM DELIVERS DAMAGE TO \n");//%s",target->name.c_str());
+
   if (target==owner) 
     return false;
   float distance = target->querySphere (center,direction,0);
