@@ -64,7 +64,7 @@ public:
         void GetView (Matrix &);
         const Vector & GetR () {return R;}
 	void GetPQR (Vector &p1, Vector &q1, Vector &r1);
-	void UpdateGFX(GFXBOOL clip= GFXTRUE, GFXBOOL updateFrustum=GFXTRUE);
+	void UpdateGFX(GFXBOOL clip= GFXTRUE, GFXBOOL updateFrustum=GFXTRUE, GFXBOOL centerCamera = GFXFALSE);
 	void UpdatePlanetGFX();//clip true, frustum true at all times
 	Matrix * GetPlanetGFX();
 	void UpdateGLCenter();

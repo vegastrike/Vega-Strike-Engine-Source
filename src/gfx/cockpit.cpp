@@ -310,7 +310,7 @@ void Cockpit::DrawTargetBox () {
   Vector CamP,CamQ,CamR;
   _Universe->AccessCamera()->GetPQR(CamP,CamQ,CamR);
   //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
-  QVector Loc(target->Position());
+  QVector Loc(target->Position()-un->Position());
   GFXDisable (TEXTURE0);
   GFXDisable (TEXTURE1);
   GFXDisable (DEPTHTEST);
@@ -338,7 +338,7 @@ void Cockpit::DrawTargetBox () {
   if (always_itts || un->GetComputerData().itts) {
     un->getAverageGunSpeed (speed,range);
     float err = (.01*(1-un->CloakVisible()));
-   QVector iLoc = target->PositionITTS (un->Position(),speed)+10*err*QVector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
+   QVector iLoc = target->PositionITTS (un->Position(),speed)-un->Position()+10*err*QVector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
     
     GFXBegin (GFXLINESTRIP);
     if(draw_line_to_itts){
@@ -910,7 +910,7 @@ void Cockpit::Draw() {
   cockpit_time+=GetElapsedTime();
   if (cockpit_time>=10000)
     InitStatic();
-  _Universe->AccessCamera()->UpdateGFX (GFXFALSE,GFXFALSE);
+  _Universe->AccessCamera()->UpdateGFX (GFXFALSE,GFXFALSE,GFXTRUE);
   GFXDisable (TEXTURE1);
   GFXLoadIdentity(MODEL);
   GFXDisable(LIGHTING);

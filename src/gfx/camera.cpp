@@ -54,7 +54,7 @@ void Camera::GetPQR (Vector &p1, Vector &q1, Vector &r1){p1.i = P.i;p1.j = P.j; 
 
 
 
-void Camera::UpdateGFX(GFXBOOL clip, GFXBOOL updateFrustum)
+void Camera::UpdateGFX(GFXBOOL clip, GFXBOOL updateFrustum, GFXBOOL centerCamera)
 {
   const float ZFARCONST= 1000000;
   float xmin, xmax, ymin, ymax;
@@ -80,7 +80,7 @@ void Camera::UpdateGFX(GFXBOOL clip, GFXBOOL updateFrustum)
 		  GFXParallel(g_game.aspect*-zoom,g_game.aspect*zoom,-zoom,zoom,-g_game.zfar*(clip?1:ZFARCONST),g_game.zfar*(clip?1:ZFARCONST));
 		  break;
 		}
-		GFXLookAt (-R, Coord, Q);
+		GFXLookAt (-R, centerCamera?QVector(0,0,0):Coord, Q);
 		if (updateFrustum) GFXCalculateFrustum();
 
 #ifdef PERFRAMESOUND		
