@@ -509,19 +509,9 @@ void Unit::UpdateHudMatrix() {
 }
    
 
-
-void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
-{
+void Unit::SetPlanetHackTransformation (Transformation *&ct,float *&ctm) {
   static Transformation planet_temp_transformation;
   static Matrix planet_temp_matrix;
-
-  cumulative_transformation = linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor);
-  float * ctm;
-  Transformation * ct;
-  cumulative_transformation.Compose(parent, parentMatrix);
-  ctm =cumulative_transformation_matrix;
-  ct = &cumulative_transformation;
-  cumulative_transformation.to_matrix(cumulative_transformation_matrix);
   if (planet) {
     if (planet->trans==_Universe->AccessCamera()->GetPlanetaryTransform()) {
       Matrix tmp;
@@ -530,18 +520,25 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
       planet->trans->InvTransformBasis(tmp,p,q,r,c);
       MultMatrix (planet_temp_matrix,_Universe->AccessCamera()->GetPlanetGFX(),tmp);
       planet_temp_transformation = Transformation::from_matrix (planet_temp_matrix);
-      //planet_temp_transformation = Transformation::from_matrix(planet_temp_matrix);
-      //planet_temp_transformation.Compose (Transformation::from_matrix (_Universe->AccessCamera()->GetPlanetGFX()),_Universe->AccessCamera()->GetPlanetGFX());
-      //planet_temp_transformation.to_matrix(planet_temp_matrix);
       ct = &planet_temp_transformation;
       ctm = planet_temp_matrix;
       ///warning: hack FIXME
       cumulative_transformation=*ct;
       CopyMatrix (cumulative_transformation_matrix,ctm);
     }
-  }
+  }  
+}
+void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
+{
 
-
+  cumulative_transformation = linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor);
+  float * ctm;
+  Transformation * ct;
+  cumulative_transformation.Compose(parent, parentMatrix);
+  ctm =cumulative_transformation_matrix;
+  ct = &cumulative_transformation;
+  cumulative_transformation.to_matrix(cumulative_transformation_matrix);
+  SetPlanetHackTransformation (ct,ctm);
 
 #ifdef PERFRAMESOUND
   AUDAdjustSound (sound.engine,cumulative_transformation.position,Velocity);

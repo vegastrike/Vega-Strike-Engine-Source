@@ -310,6 +310,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
     }
   } 
   curr_physical_state.position += Velocity*SIMULATION_ATOM;
+#ifdef DEPRECATEDPLANETSTUFF
   if (planet) {
     Matrix basis;
     curr_physical_state.to_matrix (cumulative_transformation_matrix);
@@ -318,11 +319,14 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
     planet->trans->InvTransformBasis (cumulative_transformation_matrix,p,q,r,c);
     planet->cps=Transformation::from_matrix (cumulative_transformation_matrix);
   }
+#endif
   cumulative_transformation = curr_physical_state;
   cumulative_transformation.Compose (trans,transmat);
   cumulative_transformation.to_matrix (cumulative_transformation_matrix);
   cumulative_velocity = TransformNormal (transmat,Velocity)+cum_vel;
-  
+  Transformation * ct;
+  float * ctm;
+  SetPlanetHackTransformation (ct,ctm);
   int i;
   if (lastframe) {
     char tmp=0;

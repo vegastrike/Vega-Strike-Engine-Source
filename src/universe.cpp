@@ -27,6 +27,7 @@
 #include "gfx/aux_texture.h"
 #include "profile.h"
 #include "gfx/cockpit.h"
+#include "cmd/weapon_xml.h"
 //#include "mission.h"
 //#include "vs_globals.h"
 
@@ -42,6 +43,7 @@ Universe::Universe(int argc, char** argv)
 
 	hud_camera = Camera();
 	cockpit = new Cockpit ("",NULL);
+	LoadWeapons("weapon_list.xml");
 	LoadFactionXML("factions.xml");	
 }
 void Universe::Init (string systemfile, const Vector & centr,const string planetname) {

@@ -396,6 +396,7 @@ void Cockpit::SetupViewPort (bool clip) {
   _Universe->activeStarSystem()->AccessCamera()->setCockpitOffset (view<CP_CHASE?cockpit_offset:0);
   Unit * un;
   if ((un = parent.GetUnit())) {
+
     if (view!=CP_PAN) {
       un->UpdateHudMatrix();
       if (view==CP_CHASE) {
@@ -420,7 +421,8 @@ void Cockpit::SetupViewPort (bool clip) {
 	}
       }
     }else {
-      _Universe->AccessCamera()->SetPosition (un->Position()-_Universe->AccessCamera()->GetR()*un->rSize()*zoomfactor);
+      Vector unpos = un->GetPlanetOrbit()?un->LocalPosition():un->Position();
+      _Universe->AccessCamera()->SetPosition (unpos-_Universe->AccessCamera()->GetR()*un->rSize()*zoomfactor);
     }
     _Universe->activeStarSystem()->AccessCamera()->UpdateGFX(clip?GFXTRUE:GFXFALSE);
 

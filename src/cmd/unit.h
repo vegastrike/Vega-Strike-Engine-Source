@@ -134,6 +134,7 @@ class Unit {
   void endElement(const std::string &name);
 
  protected:
+  void SetPlanetHackTransformation (Transformation *&ct, float *&ctm);
   UnitSounds * sound;
   ///The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
   Unit *owner;
