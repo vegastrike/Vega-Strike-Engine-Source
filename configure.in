@@ -1095,6 +1095,9 @@ CPPFLAGS="$saved_CPPFLAGS"
 dnl --------------------------------------------------------------------------
 dnl Check for network communication system
 dnl --------------------------------------------------------------------------
+
+dnl CHANGE JVOIP SUPPORT TO EXTERNAL LIB LINK (Compile lib separatly)
+
 TESTNETCOMM_NOSOUND="0"
 TESTNETCOMM_NOWEBCAM="1"
 TESTNETCOMM_JVOIP="0"
@@ -1301,7 +1304,7 @@ CPPFLAGS="$CPPFLAGS $TR_CPPFLAGS $PYTHON_CPPFLAGS $BOOST_CPPFLAGS "
 CFLAGS="$CFLAGS $TR_CFLAGS  -pipe "
 CXXFLAGS="$CXXFLAGS $TR_CXXFLAGS -pipe "
 LIBS="$LIBS $TR_LIBS $PYTHON_LIBS"
-AC_OUTPUT(Makefile src/Makefile src/jvoiplib/Makefile src/jthread/Makefile src/jrtplib/Makefile src/gldrv/Makefile src/aldrv/Makefile src/gfx/Makefile src/gfx/nav/Makefile src/cmd/Makefile src/cmd/ai/Makefile src/cmd/collide/Makefile src/cmd/script/Makefile src/cmd/script/c_alike/Makefile src/cmd/collide/csgeom/Makefile src/python/Makefile launcher/Makefile src/networking/Makefile src/boost/Makefile objconv/Makefile src/gui/Makefile src/common/Makefile src/boost129/Makefile )
+AC_OUTPUT(Makefile src/Makefile src/gldrv/Makefile src/aldrv/Makefile src/gfx/Makefile src/gfx/nav/Makefile src/cmd/Makefile src/cmd/ai/Makefile src/cmd/collide/Makefile src/cmd/script/Makefile src/cmd/script/c_alike/Makefile src/cmd/collide/csgeom/Makefile src/python/Makefile launcher/Makefile src/networking/Makefile src/boost/Makefile objconv/Makefile src/gui/Makefile src/common/Makefile src/boost129/Makefile )
 
 dnl AC_CONFIG_FILES(Makefile src/Makefile src/jthread/Makefile src/jrtplib/Makefile src/gldrv/Makefile src/aldrv/Makefile src/gfx/Makefile src/gfx/nav/Makefile src/cmd/Makefile src/cmd/ai/Makefile src/cmd/collide/Makefile src/cmd/script/Makefile src/cmd/script/c_alike/Makefile src/cmd/collide/csgeom/Makefile src/python/Makefile launcher/Makefile src/networking/Makefile src/boost/Makefile objconv/Makefile src/gui/Makefile src/common/Makefile src/boost129/Makefile)
 dnl AC_OUTPUT
