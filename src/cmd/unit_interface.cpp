@@ -5,15 +5,14 @@
 #include "vs_globals.h"
 #include "in_kb.h"
 #include "main_loop.h"
-#include "images.h"
 #include <algorithm>
 #include "gfx/cockpit.h"
 #include "savegame.h"
 #include "cmd/script/mission.h"
-#include "gfx/hud.h"
-
+#include "unit_interface.h"
 #include "config_xml.h"
 #include "gldrv/winsys.h"
+#include "base.h"
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
@@ -98,119 +97,167 @@ static bool match (vector <string>::const_iterator cat, vector<string>::const_it
     return endcat==(cat+1);
   }
 }
-extern void LoadMission (const char *, bool loadfirst);
-extern void SwitchUnits (Unit * ol, Unit * nw);
-extern Cargo * GetMasterPartList(const char *input_buffer);
-extern Unit&GetUnitMasterPartList();
-class UpgradingInfo {
-  void DoDone();
-public:
-  Mission * briefingMission;//do not dereference! instead scan through activve_missions
-  TextArea *CargoList, *CargoInfo;
-  Button *OK, *COMMIT;
-  UnitContainer base;
-  UnitContainer buyer;
-  //below are state variables while the user is selecting mounts
-  Unit * NewPart;
-  Unit * templ;
-  Cargo part;
-  int selectedmount;
-  int selectedturret;
-  //end it
-  struct LastSelected{int type; float x; float y; int button; int state;bool last;LastSelected() {last=false;}} lastselected;
-  void ProcessMouse(int type, int x, int y, int button, int state);
 
-  vector <Cargo> TempCargo;//used to store cargo list
-  vector <Cargo> * CurrentList;
-  enum SubMode {NORMAL,MOUNT_MODE,SUBUNIT_MODE, CONFIRM_MODE, STOP_MODE}submode;
-  enum BaseMode {BUYMODE,SELLMODE,MISSIONMODE,BRIEFINGMODE,NEWSMODE,SHIPDEALERMODE,UPGRADEMODE,ADDMODE,DOWNGRADEMODE, SAVEMODE, MAXMODE} mode;
-  bool multiplicitive;
-  Button *Modes[MAXMODE];
-  string title;
-  vector <string> curcategory;
-  vector <Cargo>&FilterCargo(Unit *un, const string filterthis, bool inv, bool removezero);
-  vector <Cargo>&GetCargoFor(Unit *un);
-  vector <Cargo>&GetCargoList ();
-  vector <Cargo>&MakeActiveMissionCargo();
-  void StopBriefing();
-  void SetupCargoList() {
-    CurrentList = &GetCargoList();
-    //    std::sort (CurrentList->begin(),CurrentList->end());
-    CargoList->ClearList();
-    if (submode==NORMAL) {
-      if (mode==SAVEMODE) {
-        CargoList->AddTextItem ("Save","Save");
-        CargoList->AddTextItem ("Load","Load");
-      }else
-      if (mode==NEWSMODE) {
-	gameMessage * last;
-	int i=0;
-	vector <std::string> who;
-	who.push_back ("news");
-	while ((last= mission->msgcenter->last(i++,who))!=NULL) {
-	  CargoList->AddTextItem ((tostring(i-1)+" "+last->message).c_str(),last->message.c_str());
+UpgradingInfo::UpgradingInfo(Unit * un, Unit * base, vector<BaseMode> modes):base(base),buyer(un),mode(BUYMODE),title("Buy Cargo") {
+	CargoList = new TextArea(-1, 0.9, 1, 1.7, 1);
+	CargoInfo = new TextArea(0, 0.9, 1, 1.7, 0);
+	availmodes=modes;
+	Modes=new Button * [modes.size()+1];
+	CargoInfo->DoMultiline(1);
+	Cockpit * cp = _Universe->isPlayerStarship(un);
+	briefingMission=NULL;
+	Cockpit * tmpcockpit = _Universe->AccessCockpit();
+	if (cp) {
+	  _Universe->SetActiveCockpit(cp);
+	  WriteSaveGame(cp,true);
 	}
+	NewPart=NULL;//no ship to upgrade
+	templ=NULL;//no template
+	//	CargoList->AddTextItem("a","Just a test item");
+	//	CargoList->AddTextItem("b","And another just to be sure");
+	CargoInfo->AddTextItem("name", "");
+	CargoInfo->AddTextItem("price", "");
+	CargoInfo->AddTextItem("mass", "");
+	CargoInfo->AddTextItem("volume", "");
+	CargoInfo->AddTextItem("description", "");
+	OK = new Button(-0.94, -0.85, 0.15, 0.1, "Done");
+	COMMIT = new Button(-0.75, -0.85, 0.25, 0.1, "Buy");
+	const char  MyButtonModes[][128] = {"BuyMode","SellMode","MissionBBS","Briefing","GNN News", "ShipDealer","UpgradeShip","Unimplemented","Downgrade","Save/Load"};
+	float beginx = -.4;
+	float lastx = beginx;
+	float sizeb;
+	float sizes;
+	if (modes.size()>=4) {
+		if (((((float)modes.size())/2)!=((float)(modes.size()/2)))) {
+			sizes=(1.4/((modes.size()/2)+1))-.02;
+			sizeb=(1.4/(modes.size()/2))-.02;
+		} else {
+			sizes=sizeb=(1.4/(modes.size()/2))-.02;
+		}
+	} else {
+		sizes=sizeb=(1.4/modes.size())-.02;
+	}
+	int i;
+	modes.push_back(SAVEMODE);
+	for (i=0;i<(modes.size());i++) {
+		if (modes[i]!=SAVEMODE) {
+			if (modes[i]!=ADDMODE) {
+/*				if (i<(modes.size()-1)/2) {
+					Modes[i]= new Button (lastx,-.82,size,0.07,MyButtonModes[modes[i]]);
+				}else {
+					Modes[i]= new Button (beginx,-.91,size,0.07,MyButtonModes[modes[i]]);
+					beginx+=sizes+.04;
+				}*/
+				if ((modes.size())<=4) {
+					Modes[i]= new Button (lastx,-0.85,sizes,0.1,MyButtonModes[modes[i]]);
+					lastx+=sizes+.04;
+				} else {
+					if (i<(modes.size()-1)/2) {
+						Modes[i]= new Button (lastx,-.82,sizeb,0.07,MyButtonModes[modes[i]]);
+						lastx+=sizeb+.04;
+					}else {
+						Modes[i]= new Button (beginx,-.91,sizes,0.07,MyButtonModes[modes[i]]);
+						beginx+=sizes+.04;
+					}
+				}
+			}else {
+				Modes[i]=new Button (0,0,0,0,"Unimplemented");
+			}
+		} else {
+			Modes[i]=new Button (.68,.98,.3,.07,MyButtonModes[modes[i]]);
+		}
+	}
+	Modes[i]=0;
+	if (modes.size()) {
+		CargoList->RenderText();
+		CargoInfo->RenderText();	
+		SetMode (modes[0],NORMAL);
+		_Universe->SetActiveCockpit(tmpcockpit);
+	}
+}
+UpgradingInfo::~UpgradingInfo() {
+    if (templ){
+      templ->Kill();
+      templ=NULL;
+    }
+    if (NewPart) {
+      NewPart->Kill();
+      NewPart=NULL;
+    }
+    base.SetUnit(NULL);
+    buyer.SetUnit(NULL);
+    delete CargoList;
+    delete CargoInfo;
+    for (int i=0;Modes[i]!=0;i++) {
+      delete Modes[i];
+    }
+//	delete [] Modes;
+}
+void UpgradingInfo::Render() {
+    //    GFXSubwindow (0,0,g_game.x_resolution,g_game.y_resolution);
+    Unit * un = buyer.GetUnit(); 
+    if (un) {
+      Cockpit * cp = _Universe->isPlayerStarship(un);
+      if (cp)
+	_Universe->SetActiveCockpit(cp);
+    }
+    bool render=true;
 
-      }else {
-	if (!curcategory.empty()) {
-	  if (mode==BUYMODE||mode==SELLMODE||curcategory.size()>1) 
-	    CargoList->AddTextItem ("[Back To Categories]","[Back To Categories]");
-	  for (unsigned int i=0;i<CurrentList->size();i++) {
-	    if (match(curcategory.begin(),curcategory.end(),(*CurrentList)[i].category.begin(),(*CurrentList)[i].category.end(),true)) {
-	      CargoList->AddTextItem ((tostring((int)i)+ string(" ")+(*CurrentList)[i].content).c_str() ,(beautify((*CurrentList)[i].content)+"("+tostring((*CurrentList)[i].quantity)+")").c_str());
-	    }
+    TextPlane * tp=NULL;
+    if (mode==BRIEFINGMODE&&submode==STOP_MODE) {
+      for (unsigned int i=0;i<active_missions.size();i++) {
+	if (active_missions[i]==briefingMission) {
+	  if (briefingMission->BriefingInProgress()) {
+	    render=false;
+
+	    tp = briefingMission->BriefingRender();
+	  }else {
+	    SetMode(BRIEFINGMODE,NORMAL);
 	  }
 	}
-	string curcat=("");
-	CargoList->AddTextItem ("","");
-	for (unsigned int i=0;i<CurrentList->size();i++) {
-	  string curlist  ((*CurrentList)[i].category);
-	  string lev=getLevel (curlist,curcategory.size());
-	  if (match (curcategory.begin(),curcategory.end(),curlist.begin(),curlist.end(),false)&&
-	      (!match (curcategory.begin(),curcategory.end(),curlist.begin(),curlist.end(),true))&&
-	      lev!=curcat) {
-	    CargoList->AddTextItem ((string("x")+lev).c_str(),beautify(lev).c_str());
-	    curcat =lev;
-	  }
-	}
-      }      
-      
-    }else {
-      Unit * un = buyer.GetUnit();
-      int i=0;
-      un_iter ui;
-      if (un) {
-	switch (submode) {
-	case MOUNT_MODE:
-	  for (;i<un->nummounts;i++) {
-	    if (un->mounts[i].status==Unit::Mount::ACTIVE||un->mounts[i].status==Unit::Mount::INACTIVE)
-	      CargoList->AddTextItem ((tostring(i)+un->mounts[i].type->weapon_name).c_str(),un->mounts[i].type->weapon_name.c_str());
-	    else 
-	      CargoList->AddTextItem ((tostring(i)+" [Empty]").c_str(),(std::string("[")+lookupMountSize(un->mounts[i].size)+std::string("]")).c_str());
-	  }
-	  break;
-	case SUBUNIT_MODE:
-	  for (ui=un->getSubUnits();(*ui)!=NULL;++ui,++i) {
-	    CargoList->AddTextItem ((tostring(i)+(*ui)->name).c_str(),(*ui)->name.c_str());
-	  }
-	  break;
-	case CONFIRM_MODE:
-	  CargoList->AddTextItem ("Yes","Yes");
-	  CargoList->AddTextItem ("No","No");
-	  break;
-	}
-      }else {
-	submode=NORMAL;
       }
     }
-  }
-  bool beginswith (const vector <std::string> &cat, const std::string &s) {
-    if (cat.empty()) {
-      return false;
+    StartGUIFrame(mode==BRIEFINGMODE?GFXFALSE:GFXTRUE);
+    if (render) {
+      // Black background
+      ShowColor(-1,-1,2,2, 0,0,0,1);
+      ShowColor(0,0,0,0, 1,1,1,1);
+      char floatprice [100];
+      sprintf(floatprice,"%.2f",_Universe->AccessCockpit()->credits);
+      Unit * baseunit = this->base.GetUnit();
+      string basename;
+      if (baseunit) {
+	basename = "";
+	if (baseunit->isUnit()==PLANETPTR) {
+	  
+	  string temp = ((Planet *)baseunit)->getHumanReadablePlanetType()+" Planet";
+	  basename +=temp;
+	}else {
+	  basename+= baseunit->name;
+	}
+      }
+      ShowText(-0.98, 0.93, 2, 4, (title+basename+string("  Credits: ")+floatprice).c_str(), 0);
+      CargoList->Refresh();
+      CargoInfo->Refresh();
     }
-    return cat.front()==s;
-  }
-  void SetMode (enum BaseMode mod, enum SubMode smod) {
+
+    if (tp) {
+      GFXDisable(TEXTURE0);
+      GFXDisable(TEXTURE1);
+      GFXColor (0,1,1,1);
+      tp->Draw();
+      GFXColor (1,1,1,1);
+      GFXDisable(TEXTURE0);
+      GFXEnable(TEXTURE1);
+    }
+    OK->Refresh();
+    COMMIT->Refresh();
+    for (unsigned int i=0;Modes[i]!=0;i++) {
+      Modes[i]->Refresh();
+    }
+    EndGUIFrame(drawovermouse);
+}
+void UpgradingInfo::SetMode (enum BaseMode mod, enum SubMode smod) {
     bool resetcat=false;
     if (mod!=mode) {
       curcategory.clear();
@@ -302,200 +349,122 @@ public:
     mode = mod;
     submode = smod;
     SetupCargoList();
-  }
-  UpgradingInfo(Unit * un, Unit * base):base(base),buyer(un),mode(BUYMODE),title("Buy Cargo"){
-    
-
-
-    
-	CargoList = new TextArea(-1, 0.9, 1, 1.7, 1);
-	CargoInfo = new TextArea(0, 0.9, 1, 1.7, 0);
-	CargoInfo->DoMultiline(1);
-	Cockpit * cp = _Universe->isPlayerStarship(un);
-	briefingMission=NULL;
-	Cockpit * tmpcockpit = _Universe->AccessCockpit();
-	if (cp) {
-	  _Universe->SetActiveCockpit(cp);
-	  WriteSaveGame(cp,true);
+}
+bool UpgradingInfo::beginswith (const vector <std::string> &cat, const std::string &s) {
+    if (cat.empty()) {
+      return false;
+    }
+    return cat.front()==s;
+}
+void UpgradingInfo::SetupCargoList () {
+    CurrentList = &GetCargoList();
+    //    std::sort (CurrentList->begin(),CurrentList->end());
+    CargoList->ClearList();
+    if (submode==NORMAL) {
+      if (mode==SAVEMODE) {
+        CargoList->AddTextItem ("Save","Save");
+        CargoList->AddTextItem ("Load","Load");
+      }else
+      if (mode==NEWSMODE) {
+	gameMessage * last;
+	int i=0;
+	vector <std::string> who;
+	who.push_back ("news");
+	while ((last= mission->msgcenter->last(i++,who))!=NULL) {
+	  CargoList->AddTextItem ((tostring(i-1)+" "+last->message).c_str(),last->message.c_str());
 	}
-	NewPart=NULL;//no ship to upgrade
-	templ=NULL;//no template
-	//	CargoList->AddTextItem("a","Just a test item");
-	//	CargoList->AddTextItem("b","And another just to be sure");
-	CargoInfo->AddTextItem("name", "");
-	CargoInfo->AddTextItem("price", "");
-	CargoInfo->AddTextItem("mass", "");
-	CargoInfo->AddTextItem("volume", "");
-	CargoInfo->AddTextItem("description", "");
-	OK = new Button(-0.94, -0.85, 0.15, 0.1, "Done");
-	COMMIT = new Button(-0.75, -0.85, 0.25, 0.1, "Buy");
-	const char  MyButtonModes[][128] = {"BuyMode","SellMode","MissionBBS","Briefing","GNN News", "ShipDealer","UpgradeShip","Unimplemented","Downgrade","Save/Load"};
-	float beginx = -.4;
-	float lastx = beginx;
-	float size=.32;
-	for (int i=0;i<MAXMODE;i++) {
-          if (i!=SAVEMODE) {
-          if (i!=ADDMODE) {
-	    if (i<(MAXMODE-1)/2) {
-	      Modes[i]= new Button (lastx,-.82,size,0.07,MyButtonModes[i]);
-	    }else {
-	      Modes[i]= new Button (beginx,-.91,size,0.07,MyButtonModes[i]);
-	      beginx+=size+.04;
+
+      }else {
+	if (!curcategory.empty()) {
+	  if (mode==BUYMODE||mode==SELLMODE||curcategory.size()>1) 
+	    CargoList->AddTextItem ("[Back To Categories]","[Back To Categories]");
+	  for (unsigned int i=0;i<CurrentList->size();i++) {
+	    if (match(curcategory.begin(),curcategory.end(),(*CurrentList)[i].category.begin(),(*CurrentList)[i].category.end(),true)) {
+	      CargoList->AddTextItem ((tostring((int)i)+ string(" ")+(*CurrentList)[i].content).c_str() ,(beautify((*CurrentList)[i].content)+"("+tostring((*CurrentList)[i].quantity)+")").c_str());
 	    }
-	    lastx+=size+.04;
-	  }else {
-	    Modes[i]=new Button (0,0,0,0,"Unimplemented");
-	  }
-          } else {
-            Modes[i]=new Button (.68,.98,.3,.07,MyButtonModes[i]);
-
-          }
-	}
-	CargoList->RenderText();
-	CargoInfo->RenderText();	
-	SetMode (BUYMODE,NORMAL);
-	_Universe->SetActiveCockpit(tmpcockpit);
-  }
-  ~UpgradingInfo() {
-    if (templ){
-      templ->Kill();
-      templ=NULL;
-    }
-    if (NewPart) {
-      NewPart->Kill();
-      NewPart=NULL;
-    }
-    base.SetUnit(NULL);
-    buyer.SetUnit(NULL);
-    delete CargoList;
-    delete CargoInfo;
-    for (int i=0;i<MAXMODE;i++) {
-      delete Modes[i];
-    }
-  }
-  void Render(){
-    //    GFXSubwindow (0,0,g_game.x_resolution,g_game.y_resolution);
-    Unit * un = buyer.GetUnit(); 
-    if (un) {
-      Cockpit * cp = _Universe->isPlayerStarship(un);
-      if (cp)
-	_Universe->SetActiveCockpit(cp);
-    }
-    bool render=true;
-
-    TextPlane * tp=NULL;
-    if (mode==BRIEFINGMODE&&submode==STOP_MODE) {
-      for (unsigned int i=0;i<active_missions.size();i++) {
-	if (active_missions[i]==briefingMission) {
-	  if (briefingMission->BriefingInProgress()) {
-	    render=false;
-
-	    tp = briefingMission->BriefingRender();
-	  }else {
-	    SetMode(BRIEFINGMODE,NORMAL);
 	  }
 	}
-      }
-    }
-    StartGUIFrame(mode==BRIEFINGMODE?GFXFALSE:GFXTRUE);
-    if (render) {
-      // Black background
-      ShowColor(-1,-1,2,2, 0,0,0,1);
-      ShowColor(0,0,0,0, 1,1,1,1);
-      char floatprice [100];
-      sprintf(floatprice,"%.2f",_Universe->AccessCockpit()->credits);
-      Unit * baseunit = this->base.GetUnit();
-      string basename;
-      if (baseunit) {
-	basename = "";
-	if (baseunit->isUnit()==PLANETPTR) {
-	  
-	  string temp = ((Planet *)baseunit)->getHumanReadablePlanetType()+" Planet";
-	  basename +=temp;
-	}else {
-	  basename+= baseunit->name;
+	string curcat=("");
+	CargoList->AddTextItem ("","");
+	for (unsigned int i=0;i<CurrentList->size();i++) {
+	  string curlist  ((*CurrentList)[i].category);
+	  string lev=getLevel (curlist,curcategory.size());
+	  if (match (curcategory.begin(),curcategory.end(),curlist.begin(),curlist.end(),false)&&
+	      (!match (curcategory.begin(),curcategory.end(),curlist.begin(),curlist.end(),true))&&
+	      lev!=curcat) {
+	    CargoList->AddTextItem ((string("x")+lev).c_str(),beautify(lev).c_str());
+	    curcat =lev;
+	  }
 	}
+      }      
+      
+    }else {
+      Unit * un = buyer.GetUnit();
+      int i=0;
+      un_iter ui;
+      if (un) {
+	switch (submode) {
+	case MOUNT_MODE:
+	  for (;i<un->nummounts;i++) {
+	    if (un->mounts[i].status==Unit::Mount::ACTIVE||un->mounts[i].status==Unit::Mount::INACTIVE)
+	      CargoList->AddTextItem ((tostring(i)+un->mounts[i].type->weapon_name).c_str(),un->mounts[i].type->weapon_name.c_str());
+	    else 
+	      CargoList->AddTextItem ((tostring(i)+" [Empty]").c_str(),(std::string("[")+lookupMountSize(un->mounts[i].size)+std::string("]")).c_str());
+	  }
+	  break;
+	case SUBUNIT_MODE:
+	  for (ui=un->getSubUnits();(*ui)!=NULL;++ui,++i) {
+	    CargoList->AddTextItem ((tostring(i)+(*ui)->name).c_str(),(*ui)->name.c_str());
+	  }
+	  break;
+	case CONFIRM_MODE:
+	  CargoList->AddTextItem ("Yes","Yes");
+	  CargoList->AddTextItem ("No","No");
+	  break;
+	}
+      }else {
+	submode=NORMAL;
       }
-      ShowText(-0.98, 0.93, 2, 4, (title+basename+string("  Credits: ")+floatprice).c_str(), 0);
-      CargoList->Refresh();
-      CargoInfo->Refresh();
     }
-
-    if (tp) {
-      GFXDisable(TEXTURE0);
-      GFXDisable(TEXTURE1);
-      GFXColor (0,1,1,1);
-      tp->Draw();
-      GFXColor (1,1,1,1);
-      GFXDisable(TEXTURE0);
-      GFXEnable(TEXTURE1);
-    }
-    OK->Refresh();
-    COMMIT->Refresh();
-    for (unsigned int i=0;i<MAXMODE;i++) {
-      Modes[i]->Refresh();
-    }
-    EndGUIFrame();
   }
-  void SelectLastSelected();
-  void SelectItem (const char * str, int button, int state);
-  void CommitItem (const char * str, int button, int state);
-  //this function is called after the mount is selected and stored in selected mount
-  void CompleteTransactionAfterMountSelect();
-  //this function is called after the turret is selected and stored in selected turret
-  void CompleteTransactionAfterTurretSelect();
-  void CompleteTransactionConfirm();
-};
-vector <UpgradingInfo *>upgr;
-vector <unsigned int> player_upgrading;
+UpgradingInfo *upgr;
+unsigned int player_upgrading;
 
-bool RefreshGUI(void) {
+bool RefreshInterface(void) {
   bool retval=false;
-  for (unsigned int i=0;i<upgr.size();i++) { 
-    if (player_upgrading[i]==_Universe->CurrentCockpit()){
-      retval=true;
-      upgr[i]->Render();
-    }
+  if (player_upgrading==_Universe->CurrentCockpit()){
+    retval=true;
+    upgr->Render();
   }
   return retval;
 }
 
 static void ProcessMouseClick(int button, int state, int x, int y) {
   SetSoftwareMousePosition (x,y);
-  for (unsigned int i=0;i<upgr.size();i++) {
-    int cur = _Universe->CurrentCockpit();
-    _Universe->SetActiveCockpit (_Universe->AccessCockpit(player_upgrading[i]));
-    upgr[i]->ProcessMouse(1, x, y, button, state);
-    _Universe->SetActiveCockpit(_Universe->AccessCockpit(cur));
-  }
-
-
+  int cur = _Universe->CurrentCockpit();
+  _Universe->SetActiveCockpit (_Universe->AccessCockpit(player_upgrading));
+  upgr->ProcessMouse(1, x, y, button, state);
+  _Universe->SetActiveCockpit(_Universe->AccessCockpit(cur));
 }
 
 static void ProcessMouseActive(int x, int y) {
   SetSoftwareMousePosition (x,y);
-  for (unsigned int i=0;i<upgr.size();i++) { 
-    int cur = _Universe->CurrentCockpit();
-    _Universe->SetActiveCockpit (_Universe->AccessCockpit(player_upgrading[i]));
-    upgr[i]->ProcessMouse(2, x, y, 0, 0);
-    _Universe->SetActiveCockpit(_Universe->AccessCockpit(cur));
-  }
-
+  int cur = _Universe->CurrentCockpit();
+  _Universe->SetActiveCockpit (_Universe->AccessCockpit(player_upgrading));
+  upgr->ProcessMouse(2, x, y, 0, 0);
+  _Universe->SetActiveCockpit(_Universe->AccessCockpit(cur));
 }
 
 static void ProcessMousePassive(int x, int y) {
   SetSoftwareMousePosition(x,y);
-  for (unsigned int i=0;i<upgr.size();i++) {
-    int cur = _Universe->CurrentCockpit();
-    _Universe->SetActiveCockpit (_Universe->AccessCockpit(player_upgrading[i]));
-    upgr[i]->ProcessMouse(3, x, y, 0, 0);
-    _Universe->SetActiveCockpit(_Universe->AccessCockpit(cur));
-
-  }
+  int cur = _Universe->CurrentCockpit();
+  _Universe->SetActiveCockpit (_Universe->AccessCockpit(player_upgrading));
+  upgr->ProcessMouse(3, x, y, 0, 0);
+  _Universe->SetActiveCockpit(_Universe->AccessCockpit(cur));
 }
-void Unit::UpgradeInterface(Unit * base) {
-  for (unsigned int i=0;i<upgr.size();i++) {
-    if (upgr[i]->buyer.GetUnit()==this) {
+void UpgradeCompInterface(Unit *un,Unit * base, vector <UpgradingInfo::BaseMode> modes) {
+  if (upgr) {
+    if (upgr->buyer.GetUnit()==un) {
       return;//too rich for my blood...don't let 2 people buy cargo for 1
     }
   }
@@ -504,8 +473,8 @@ void Unit::UpgradeInterface(Unit * base) {
   winsys_set_motion_func(ProcessMouseActive);
   winsys_set_passive_motion_func(ProcessMousePassive);
   //(x, y, width, height, with scrollbar)
-  upgr.push_back( new UpgradingInfo (this,base));
-  player_upgrading.push_back(_Universe->CurrentCockpit());
+  upgr=( new UpgradingInfo (un,base,modes));
+  player_upgrading=(_Universe->CurrentCockpit());
   
 }
 
@@ -631,14 +600,12 @@ void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
 
 }
 void UpgradingInfo::DoDone() {
-			for (unsigned int i=0;i<upgr.size();i++) {
-			  if (upgr[i]==this) {
-			    delete upgr[i];
-			    upgr.erase (upgr.begin()+i);
-			    player_upgrading.erase (player_upgrading.begin()+i);
-			    restore_main_loop();
-			  }
-			}
+	Base::CurrentBase->InitCallbacks();
+	Base::CallComp=false;
+	if (upgr==this) {
+		delete upgr;
+		upgr=NULL;
+	}
 }
 
 void UpgradingInfo::StopBriefing() {
@@ -988,14 +955,17 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 	//if (ours == 0) { ours = CargoInfo->DoMouse(type, cur_x, cur_y, button, state); }
 	if (ours == 0) {
 		ours = OK->DoMouse(type, cur_x, cur_y, button, state);
+		drawovermouse=(ours==1);
 		if (ours == 1 && type == 1) {
 			printf ( "You clicked done\n");
                         DoDone();
+						return;
                 
                 }
 	}	
 	if (ours == 0) {
 		ours = COMMIT->DoMouse(type, cur_x, cur_y, 0/*button*/, state);
+		drawovermouse=(ours==1);
 		if (ours == 1 && type == 1) {
 			buy_name = CargoList->GetSelectedItemName();
 			if (buy_name) {
@@ -1009,10 +979,11 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 			}
 		}
 	}
-	for (int i=0;i<UpgradingInfo::MAXMODE&&ours==0;i++) {
+	for (int i=0;(Modes[i]!=0)&&(ours==0);i++) {
 	  ours = Modes[i]->DoMouse(type,cur_x,cur_y,button,state);
+	  drawovermouse=(ours==1);
 	  if (ours==1&&type==1) {
-	    SetMode ((UpgradingInfo::BaseMode)i,NORMAL);
+	    SetMode ((UpgradingInfo::BaseMode)availmodes[i],NORMAL);
 	  }
 
 	}
