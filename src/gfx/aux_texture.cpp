@@ -168,6 +168,14 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
   texture_target =target;
   image_target=imagetarget;
   this->stage = stage;
+  string texfilename = string(FileName);
+  if(checkold(texfilename,false,texfilename)) {
+    return;
+  } else {
+    if (checkold(texfilename,true,texfilename)) {
+      return;
+    }
+  }
 
 	char t[64];
 	strcpy(t, FileName);
@@ -176,7 +184,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	t[strlen(FileName)-1] = 'p';
 	FILE *fp2 = fopen(t, "rb");
 
-	string texfilename = string(FileName);
+
 	
 	if(fp2) {
 	  //texfilename += string(t);
@@ -186,16 +194,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	FILE *fp = NULL;
 	fp = fopen (FileName, "rb");
 	bool shared = (fp==NULL);
-	if(checkold(texfilename,shared,texfilename)) {
-	  if (fp) {
-	    fclose (fp);
-	  }
-	  if (fp2) {
-	    fclose (fp2);
-	  }
-	  return;
-	}
-	if (!fp) {
+	if (shared) {
 	  fp = fopen (GetSharedTexturePath (FileName).c_str(),"rb");
 	}
 	if (!fp)
@@ -300,16 +299,18 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	texture_target=target;
 	image_target=imagetarget;
 	string texfilename = string(FileNameRGB) + string(FileNameA);
+	if(checkold(texfilename,false,texfilename)) {
+	  return;
+	} else {
+	  if (checkold(texfilename,true,texfilename)) {
+	    return;
+	  }
+	}
 	//this->texfilename = texfilename;
 	//strcpy (filename,texfilename.c_str());
 	FILE *fp = NULL;
 	fp = fopen (FileNameRGB, "rb");
 	bool shared = (fp==NULL);
-	if(checkold(texfilename,shared,texfilename)) {
-	  if (fp)
-	    fclose (fp);
-	  return;
-	}
 	if (shared) {
 	  fp = fopen (GetSharedTexturePath (FileNameRGB).c_str(),"rb");
 	}
