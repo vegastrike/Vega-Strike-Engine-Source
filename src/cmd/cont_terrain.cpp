@@ -39,7 +39,7 @@ ContinuousTerrain::ContinuousTerrain (const char * filename, const Vector & Scal
 	  tmp[k]='\0';
 
 	  vector <bsp_polygon> polies;
-	  md[i].mesh=new Mesh(tmp,1,0,NULL);
+	  md[i].mesh=new Mesh(tmp,Vector(1,1,1),0,NULL);
 	  sscanf (tmp+i+1,"%f,%f",&sizeX,&sizeZ);
 	  md[i].mesh->GetPolys(polies);
 	  sizeX=md[i].mesh->corner_max().i-md[i].mesh->corner_min().i;

@@ -185,7 +185,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
 	SetSoundFile((*iter).value);
 	break;
       case MESH:
-	mesh = new Mesh ((*iter).value.c_str(),1,0,NULL,false);
+	mesh = new Mesh ((*iter).value.c_str(),Vector(1,1,1),0,NULL,false);
 	break;
       case FRONT:
       case BACK:
