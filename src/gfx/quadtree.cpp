@@ -36,6 +36,13 @@ QuadTree::QuadTree ():vertices (GFXTRI,4,InitialVertices,4,true) {
   quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform, &textures);
   root = new quadsquare (&RootCornerData);
   LoadData();
+  root->StaticCullData (RootCornerData,25);
+  /*
+        for (i = 0; i < 10; i++) {
+                root->Update(RootCornerData, (const float*) ViewerLoc, Detail);
+        }
+  */
+
 }
 
 
@@ -45,11 +52,16 @@ QuadTree::~QuadTree () {
   delete nonlinear_transform;
   
 }
-float QuadTree::GetHeight (Vector Location) {
+float QuadTree::GetHeight (Vector Location, Vector & normal) {
   InvTransform (transformation,Location);
   nonlinear_transform->InvTransform (Location);
-  return Location.j-root->GetHeight (RootCornerData,Location.i,Location.k);
+  float tmp =  Location.j-root->GetHeight (RootCornerData,Location.i,Location.k,  normal);
+  nonlinear_transform->Transform (normal);
+  Transform (transformation,normal);
+  normal.Normalize();
+  return tmp;
 }
+
 void QuadTree::Update () {
   //GetViewerPosition
   root->Update (RootCornerData,InvTransform (transformation,_Universe->AccessCamera()->GetPosition()),140);

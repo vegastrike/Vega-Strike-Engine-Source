@@ -230,9 +230,7 @@ int	quadsquare::CountNodes()
  * Returns the height of the heightfield at the specified x,z coordinates.
  * Can be used for collision detection
  */
-float	quadsquare::GetHeight(const quadcornerdata& cd, float x, float z)
-
-{
+float	quadsquare::GetHeight(const quadcornerdata& cd, float x, float z,  Vector & normal) {
 	int	half = 1 << cd.Level;
 
 	float	lx = (x - cd.xorg) / float(half);
@@ -252,7 +250,7 @@ float	quadsquare::GetHeight(const quadcornerdata& cd, float x, float z)
 		// Pass the query down to the child which contains it.
 		quadcornerdata	q;
 		SetupCornerData(&q, cd, index);
-		return Child[index]->GetHeight(q, x, z);
+		return Child[index]->GetHeight(q, x, z, normal);
 	}
 
 	// Bilinear interpolation.
@@ -292,7 +290,7 @@ float	quadsquare::GetHeight(const quadcornerdata& cd, float x, float z)
 		s11 = cd.Verts[3].Y;
 		break;
 	}
-
+	normal = Vector (half,s01-s00,0).Cross (Vector (0,s10-s00,half));
 	return (s00 * (1-lx) + s01 * lx) * (1 - lz) + (s10 * (1-lx) + s11 * lx) * lz;
 }
 

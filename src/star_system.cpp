@@ -151,6 +151,11 @@ void StarSystem::Draw() {
   Unit *unit;
   while((unit = iter->current())!=NULL) {
     unit->Draw();
+    Vector norm;
+    float t;
+    if ((t=qt->GetHeight (unit->Position(),norm))<0) {
+      fprintf (stderr,"Unit %s crashed at height %f <%f,%f,%f>", unit->name.c_str(),t,norm.i,norm.j,norm.k);
+    }
     iter->advance();
   }
   delete iter;

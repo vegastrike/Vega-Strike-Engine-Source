@@ -105,7 +105,7 @@ class quadsquare {
 	void	Update(const quadcornerdata& cd, const Vector &ViewerLocation, float Detail);
 	int	Render(const quadcornerdata& cd);
 
-	float	GetHeight(const quadcornerdata& cd, float x, float z);
+	float	GetHeight(const quadcornerdata& cd, float x, float z, Vector & normal);
 	static Vector MakeLightness (float xslope, float zslope);
   static void SetCurrentTerrain (unsigned int * VertexAllocated, unsigned int * VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unusedvertices, IdentityTransform * transform, std::vector <Texture *> *texturelist );
 	
