@@ -113,16 +113,14 @@ void Font::drawChar(char c) const {
 
 // The width of a character in reference units.
 double Font::charWidth(char c) const {
+  calcMetricsIfNeeded();
   if (useStroke()) {
-    calcMetricsIfNeeded();
-
     if(c == SPACE_CHAR) {
         // Spaces have a special width.
         const double spaceCharWidth =
             glutStrokeWidth(GLUT_STROKE_ROMAN, SPACE_CHAR) + m_spaceCharFixup;
         return(spaceCharWidth + GLUT_WIDTH_HACK);
     }
-
     const double charWidth = glutStrokeWidth(GLUT_STROKE_ROMAN, c);
     return(charWidth + m_extraCharWidth + GLUT_WIDTH_HACK);
   }else {
