@@ -1,5 +1,6 @@
 #include "gfxlib_struct.h"
 #include <stdlib.h>
+#include <string.h>
 GFXLight::GFXLight (const bool enabled, const GFXColor &vect, const GFXColor &diffuse, const GFXColor &specular, const GFXColor &ambient, const GFXColor&attenuate, const GFXColor &direction, float exp, float cutoff) {}
 void GFXVertexList::RefreshDisplayList () {}
 
@@ -21,6 +22,10 @@ GFXVertexList::VDAT * GFXVertexList::Map(bool read, bool write) {
 }
 void GFXVertexList::UnMap() {
 
+}
+
+GFXVertexList::GFXVertexList() {
+  memset(this,0,sizeof(GFXVertexList));
 }
   ///Returns the array of vertices to be mutated
 union GFXVertexList::VDAT * GFXVertexList::BeginMutate (int offset) {
