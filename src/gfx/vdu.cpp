@@ -465,7 +465,9 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
   GFXLoadIdentityView();
 
   char buf[1024];
-  sprintf(buf,"\n%s:%s\n",target->getFgID().c_str(),target->name.c_str());
+  if (target) {
+    sprintf(buf,"\n%s:%s\n",target->getFgID().c_str(),target->name.c_str());
+  }
   tp->Draw(buf);
   // _Universe->AccessCockpit()->RestoreViewPort();
 }

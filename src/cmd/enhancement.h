@@ -10,7 +10,13 @@ class Enhancement : public Unit {
   }
   virtual void reactToCollision (Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist) {
     if (smaller->isUnit()!=ASTEROIDPTR) {
-      smaller->Upgrade (this);
+      double percent;
+      char * tempdata = (char *)malloc (sizeof(this->shield));
+      memcpy (tempdata,&this->shield,sizeof(this->shield));
+      shield.number=2;//don't want them getting our boosted shields!
+      shield.fb[0]=shield.fb[1]=shield.fb[2]=shield.fb[3]=0;
+      smaller->Upgrade (this,0,0,true,true,percent);
+      memcpy (&this->shield,tempdata,sizeof(this->shield));
       string fn (filename);
       string fac(_Universe->GetFaction(faction));
       Kill();

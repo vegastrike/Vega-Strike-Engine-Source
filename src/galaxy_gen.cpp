@@ -378,7 +378,7 @@ vector <string> parseBigUnit (string input) {
 }
 
 
-void WriteUnit(string tag, string name, string filename, Vector r, Vector s, Vector center, string nebfile, string destination, bool faction) {
+void WriteUnit(string tag, string name, string filename, Vector r, Vector s, Vector center, string nebfile, string destination, bool faction, float thisloy=0) {
   Tab();
   fprintf (fp,"<%s name=\"%s\" file=\"%s\" ",tag.c_str(),name.c_str(),filename.c_str());
   if (nebfile.length()>0) {
@@ -388,8 +388,8 @@ void WriteUnit(string tag, string name, string filename, Vector r, Vector s, Vec
   fprintf (fp,"ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",r.i,r.j,r.k,s.i,s.j,s.k);
   fprintf (fp,"x=\"%f\" y=\"%f\" z=\"%f\" ",center.i,center.j,center.k);
   float loy = LengthOfYear(r,s);
-  if (loy) {
-    fprintf (fp,"year= \"%f\" ",loy);
+  if (loy||thisloy) {
+    fprintf (fp,"year= \"%f\" ",thisloy?thisloy:loy);
   }
   if (destination.length()) {
     fprintf (fp, "destination=\"%s\" ",destination.c_str()); 
@@ -503,7 +503,7 @@ void MakeSmallUnit () {
 
 
 
-void MakePlanet(float radius, int entitytype, bool forceRS=false, Vector R=Vector (0,0,0), Vector S=Vector (0,0,0), Vector center=Vector (0,0,0));
+void MakePlanet(float radius, int entitytype, bool forceRS=false, Vector R=Vector (0,0,0), Vector S=Vector (0,0,0), Vector center=Vector (0,0,0), float loy=0);
 void MakeBigUnit (string name=string (""),float orbitalradius=0) {
   vector <string> fullname;
   if (name.length()==0) {
@@ -518,7 +518,7 @@ void MakeBigUnit (string name=string (""),float orbitalradius=0) {
     return;
   Vector r,s;
 
-  
+  float stdloy;
 
   float size;
   string tmp;
@@ -526,35 +526,27 @@ void MakeBigUnit (string name=string (""),float orbitalradius=0) {
   bool first=true;
   Vector center;
   for (unsigned int i=0;i<fullname.size();i++) {
+    if (first) {
+      center=generateAndUpdateRS (r,s,size);
+      stdloy=LengthOfYear (r,s);	
+    }  
     if (1==sscanf (fullname[i].c_str(),"jump%f",&size)) {
-      if (first)
-	center=generateAndUpdateRS (r,s,size);
-      MakePlanet(size,JUMP,true,r,s,center);
+      MakePlanet(size,JUMP,true,r,s,center,stdloy);
     }else if (1==sscanf (fullname[i].c_str(),"planet%f",&size)) {
-      if (first)
-	center=generateAndUpdateRS (r,s,size);
-      MakePlanet(size,PLANET,true,r,s,center);
-    }else if (1==sscanf (fullname[i].c_str(),"moon%f",&size)) {
-      if (first)
-	center=generateAndUpdateRS (r,s,size);
-      MakePlanet (size,MOON,true,r,s,center);
+      MakePlanet(size,PLANET,true,r,s,center,stdloy);
+    }else if (1==sscanf (fullname[i].c_str(),"moon%f",&size)) {      
+      MakePlanet (size,MOON,true,r,s,center,stdloy);
     } else if (1==sscanf (fullname[i].c_str(),"gas%f",&size)) {
-      if (first)
-	center=generateAndUpdateRS (r,s,size);
-      MakePlanet (size,GAS,true,r,s,center);
+      MakePlanet (size,GAS,true,r,s,center,stdloy);
     }else if ((tmp=starin(fullname[i])).length()>0) {
       string S = getRandName (entities[JUMP]);
       if (S.length()>0) {
 	string type = AnalyzeType(tmp,nebfile,size);
-	if (first)
-	  center=generateAndUpdateRS (r,s,size);
-	WriteUnit (type, S,tmp,r,s,center,nebfile,getJumpTo(S),false);
+	WriteUnit (type, S,tmp,r,s,center,nebfile,getJumpTo(S),false,stdloy);
       }
     } else {
       string type = AnalyzeType(fullname[i],nebfile,size);
-      if (first)
-	center=generateAndUpdateRS (r,s,size);
-      WriteUnit(type,fullname[i],fullname[i],r,s,center,nebfile,string(""),i!=0);
+      WriteUnit(type,fullname[i],fullname[i],r,s,center,nebfile,string(""),i!=0,stdloy);
     }
     first=false;
   }
@@ -562,7 +554,7 @@ void MakeBigUnit (string name=string (""),float orbitalradius=0) {
 
 }
 void MakeMoons (float radius, int entitytype, int callingentitytype, bool forceone=false);
-void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, Vector center) {
+void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, Vector center, float thisloy) {
   string s =  getRandName (entities[entitytype]);
   if (s.length()==0)
     return;
@@ -573,17 +565,21 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
   }else {
     center=generateAndUpdateRS (r,SS,radius);
   }
-
-  
+  string thisname;
+  if (entitytype!=JUMP) {
+    thisname=getRandName(names);
+  }
   Tab();
-  fprintf (fp,"<Planet name=\"%s\" file=\"%s\" ",entitytype==JUMP?s.c_str():getRandName(names).c_str(),entitytype==JUMP?"jump.png":s.c_str());
+  fprintf (fp,"<Planet name=\"%s\" file=\"%s\" ",entitytype==JUMP?s.c_str():thisname.c_str(),entitytype==JUMP?"jump.png":s.c_str());
   fprintf (fp,"ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",r.i,r.j,r.k,SS.i,SS.j,SS.k);
   fprintf (fp,"radius=\"%f\" ",radius);
   fprintf (fp,"x=\"%f\" y=\"%f\" z=\"%f\" ",center.i,center.j,center.k);
   float loy = LengthOfYear(r,SS);
-  if (loy) {
-    fprintf (fp,"year= \"%f\" ",loy);
-    loy *=grand();
+  float temprandom=.1*fmod(loy,10);//use this so as not to alter state here
+  if (loy||thisloy) {
+    fprintf (fp,"year= \"%f\" ",thisloy?thisloy:loy);
+    temprandom=grand();
+    loy *=temprandom;
     if (loy) {
       fprintf (fp, "day=\"%f\" ",loy);
     }
@@ -595,6 +591,7 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
   fprintf (fp," >\n");
 
   radii.push_back (entitytype!=GAS?radius:1.4*radius);
+
   if (entitytype==GAS&&grand()<.3&&radius>8000&&radius<10500) {
     WriteUnit ("unit","planetary-ring","planetary-ring",Vector (0,0,0), Vector (0,0,0), Vector (0,0,0), string (""), string (""),false);
   }
@@ -612,7 +609,12 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
     MakeMoons ((entitytype!=JUMP&&entitytype!=MOON)?.2*radius:.5*radius,JUMP,entitytype,entitytype==JUMP||entitytype==MOON);
   }
   radii.pop_back();
+  if (entitytype==PLANET&&temprandom<.1) {
+    Tab();fprintf (fp,"<Planet name=\"%s\" file=\"sol/earthcloudmaptrans.png\" alpha=\"true\" radius=\"%f\" gravity=\"0\" ri=\"0\" rj=\"0\" rk=\"0\" si=\"0\" sj=\"0\" sk=\"0\" />\n",thisname.c_str(),radius*1.12);
+  }
+
   Tab();fprintf (fp,"</Planet>\n"); 
+
   ///writes out some pretty planet tags
 }
 

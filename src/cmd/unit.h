@@ -79,6 +79,9 @@ struct UnitSounds;
 class PlanetaryTransform;
 struct PlanetaryOrbitData;
 class Unit {
+  bool Unit::UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage);
+  bool Unit::UpgradeMounts (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage);
+
   Nebula * nebula;
   PlanetaryOrbitData * planet;
   ///The orbit needs to have access to the velocity directly to disobey physics laws to precalculate orbits
@@ -106,7 +109,7 @@ class Unit {
       float maxrange;
       ///the dot with (0,0,1) indicating the farthest to the side the radar can handle.
       float maxcone;
-      ///the number of normalized pixels off this radar might be (fuzzes between)
+      ///The minimum radius of the target
       float mintargetsize;
       ///does this radar support IFF?
       bool color;
@@ -188,6 +191,8 @@ class Unit {
     ///Where is it
     Transformation LocalPosition;
   public:
+    void SwapMounts (Mount & othermount);
+    double Percentage (const Mount& oldmount) const;
     union REF{
       ///only beams are actually coming out of the gun at all times...bolts, balls, etc aren't
       Beam *gun;
@@ -280,7 +285,7 @@ class Unit {
   ///-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)
   struct UnitJump {
     short energy;
-    char drive;
+    signed char drive;
     unsigned char delay;
     unsigned char damage;
     //negative means fuel
@@ -343,7 +348,7 @@ class Unit {
   bool invisible;
   
   enum {NOT_DOCKED=0x0, DOCKED_INSIDE=0x1, DOCKED=0x2, DOCKING_UNITS=0x4} DOCKENUM;
-  char docked;
+  unsigned char docked;
   ///How many lists are referencing us
   int ucref;
   ///How big is this unit
@@ -373,6 +378,7 @@ class Unit {
   void PerformDockingOperations ();
   void FreeDockingPort(unsigned int whichport);
   void SetRecursiveOwner(Unit *target);
+  bool UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, bool additive, bool forcetransaction, double &percentage);
 public:
   bool RequestClearance (Unit * dockingunit);
   bool Dock (Unit * unitToDockWith);
@@ -387,10 +393,13 @@ public:
   std::string name;
   ///The faction of this unit
   int faction;
-  void Upgrade (Unit * upgrador);
+  bool canUpgrade (Unit * upgrador, int mountoffset,  int subunitoffset, bool additive, bool force,  double & percentage, Unit * templ=NULL);
+  bool Upgrade (Unit * upgrador, int mountoffset,  int subunitoffset, bool additive, bool force,  double & percentage, Unit * templ=NULL);
+  bool canDowngrade (Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage);
+  bool Downgrade (Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage);
 
   Unit();
-  ///Creates aa mesh with meshes as submeshes (number of them) as either as subunit with faction faction)
+  ///Creates aa mesh with meshes as submeshes (number of them) as either as subunit with faction faction
   Unit (Mesh ** meshes  , int num, bool Subunit, int faction);
   ///Creates a mesh from an XML file If it is a customizedUnit, it will check in that directory in teh home dir for the unit
   Unit(const char *filename, bool SubUnit, int faction, std::string customizedUnit=string(""), Flightgroup *flightgroup=NULL,int fg_subnumber=0);
