@@ -11,7 +11,7 @@ vector <Texture *> BeamDecal;
 vector <int> DecalRef;
 vector <vector <DrawContext> > beamdrawqueue;
 extern double interpolation_blend_factor;
-Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own): Primitive(),vlist(NULL), Col(clne.r,clne.g,clne.b,clne.a){
+Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own) :vlist(NULL), Col(clne.r,clne.g,clne.b,clne.a){
   string texname (clne.file);
   Texture * tmpDecal = Texture::Exists(texname);
   if (tmpDecal) {
@@ -38,6 +38,23 @@ Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own):
   }
   Init(trans,clne,own);
 }
+
+void Beam::SetPosition (float x,float y, float z) {
+  local_transformation.position = Vector (x,y,z);
+}
+void Beam::SetPosition (const Vector &k) {
+  local_transformation.position = k;
+}
+void Beam::SetOrientation(const Vector &p, const Vector &q, const Vector &r)
+{	
+  local_transformation.orientation = Quaternion::from_vectors(p,q,r);
+}
+
+Vector &Beam::Position()
+{
+	return local_transformation.position;
+}
+
 
 void Beam::Init (const Transformation & trans, const weapon_info &cln , void * own)  {
   //Matrix m;

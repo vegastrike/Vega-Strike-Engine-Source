@@ -9,6 +9,7 @@ using std::vector;
 
 class Beam: public Primitive {
 private:
+  Transformation local_transformation;
   unsigned int decal;
   GFXVertexList *vlist;
   unsigned int numframes;
@@ -44,6 +45,10 @@ public:
   Beam (const Transformation & trans, const weapon_info & clne, void * own);
   void Init (const Transformation & trans, const weapon_info & clne, void * own);
   ~Beam();
+  Vector &Position();
+  void SetPosition (float, float, float);
+  void SetPosition (const Vector &);
+  void SetOrientation(const Vector &p, const Vector &q, const Vector &r);
   void UpdatePhysics(const Transformation & =identity_transformation, const Matrix = identity_matrix);
   void Draw(const Transformation & =identity_transformation, const float [] = identity_matrix );
   void Destabilize () {impact=UNSTABLE;}

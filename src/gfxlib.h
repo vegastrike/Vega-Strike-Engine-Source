@@ -31,7 +31,7 @@
 #include <GL/glut.h>
 #include <vector>
 #ifndef BOOL
-typedef int BOOL;
+#define BOOL int
 #endif
 #define TRUE 1
 #define FALSE 0
