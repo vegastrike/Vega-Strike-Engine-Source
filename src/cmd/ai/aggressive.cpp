@@ -199,19 +199,19 @@ bool AggressiveAI::ProcessLogicItem (const AIEvents::AIEvresult &item) {
     value = parent->GetComputerData().threatlevel;
     break;
   case FSHIELD:
-    value = parent->FShieldData();
+    value = parent->graphicOptions.InWarp?1:parent->FShieldData();
     break;
   case BSHIELD:
-    value = parent->BShieldData();
+    value = parent->graphicOptions.InWarp?1:parent->BShieldData();
     break;
   case HULL:
     value = parent->GetHull();
     break;
   case LSHIELD:
-    value = parent->LShieldData();
+    value = parent->graphicOptions.InWarp?1:parent->LShieldData();
     break;
   case RSHIELD:
-    value = parent->RShieldData();
+    value = parent->graphicOptions.InWarp?1:parent->RShieldData();
     break;
   case FACING:
     //    return parent->getAIState()->queryType (Order::FACING)==NULL;
