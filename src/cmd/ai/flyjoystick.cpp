@@ -2,17 +2,19 @@
 
 #include "flyjoystick.h"
 
-FlyByJoystick::FlyByJoystick(int whichjoystick, bool kb): which_joystick(whichjoystick), keyboard(kb) {
-  
+FlyByJoystick::FlyByJoystick(int whichjoystick, const char * configfile): FlyByKeyboard (configfile), which_joystick(whichjoystick) {
+  //remember keybindings from config file?  
+  if (whichjoystick>=MAX_JOYSTICKS)
+    whichjoystick=0;
 
 }
 
 void FlyByJoystick::Execute() {
-  if (keyboard)
-    FlyByKeyboard::Execute();
-  //see largely the flybykeyboard execute...except use "joystick[which_joystick]->x
-  //and stuff
-
+  FlyByKeyboard::Execute();
+  if (joystick[which_joystick]->isAvailable()) {
+    //see largely the flybykeyboard execute...except use "joystick[which_joystick]->x
+    //and stuff
+  }
 }
 FlyByJoystick::~FlyByJoystick() {
 

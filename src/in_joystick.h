@@ -37,7 +37,7 @@
 
 extern void ProcessJoystick();
 extern void InitJoystick();
-
+extern void DeInitJoystick();
 class JoyStick {
     public:
     // initializes the joystick
@@ -59,7 +59,7 @@ class JoyStick {
     float  deadzone;
 }
 ;
-extern int num_joystick;
-extern JoyStick **joystick;
+const int MAX_JOYSTICKS=10;
+extern JoyStick *joystick[MAX_JOYSTICKS];
 #endif // _JOYSTICK_H_
 

@@ -31,7 +31,7 @@ struct StarShipControlKeyboard {
 
 
 
-FlyByKeyboard::FlyByKeyboard (): FlyByWire () {
+FlyByKeyboard::FlyByKeyboard (const char * configfile): FlyByWire () {
   //FIXME:: change hard coded keybindings
   if (starshipcontrolkeys.refcount==0) {
     BindKey(';',FlyByKeyboard::StopKey);

@@ -28,31 +28,29 @@
 //#include "dbg.h"
 #include "in_handler.h"
 #include "in_joystick.h"
-int num_joystick;
-JoyStick **joystick; // until I know where I place it
+JoyStick *joystick[MAX_JOYSTICKS]; // until I know where I place it
 
 
 void InitJoystick(){
   int num_joysticks=SDL_NumJoysticks() ;
-  num_joystick=num_joysticks;
-  joystick = new JoyStick *[num_joysticks];
   printf("%i joysticks were found.\n\n", num_joysticks);
   printf("The names of the joysticks are:\n");
-  for(int i=0; i < num_joysticks; i++ )  {
-    printf("    %s\n", SDL_JoystickName(i));
+  for(int i=0; i < MAX_JOYSTICKS; i++ )  {
+    if (i<num_joysticks)
+      printf("    %s\n", SDL_JoystickName(i));
     joystick[i]=new JoyStick(i); // SDL_Init is done in main.cpp
   }
 }
 void DeInitJoystick() {
   int num_joysticks = SDL_NumJoysticks();
-  for (int i=0;i<num_joysticks;i++) {
+  for (int i=0;i<MAX_JOYSTICKS;i++) {
     delete joystick[i];
   }
-  delete [] joystick;
 }
+
 void ProcessJoystick(){
   int num_joysticks=SDL_NumJoysticks() ;
-  for(int i=0; i < num_joysticks; i++ )  {
+  for(int i=0; i < MAX_JOYSTICKS; i++ )  {
     if(joystick[i]->isAvailable()){
       float x,y;
       int buttons;
@@ -61,8 +59,7 @@ void ProcessJoystick(){
   }
 }
 
-JoyStick::JoyStick(int which)
-{
+JoyStick::JoyStick(int which) {
     deadzone=0.01;
 
     joy_available = 0;

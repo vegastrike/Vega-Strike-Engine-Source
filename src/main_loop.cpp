@@ -29,7 +29,7 @@
 #include "cmd/beam.h"
 #include  "gfx/halo.h"
 #include "gfx/matrix.h"
-#include "cmd/ai/flykeyboard.h"
+#include "cmd/ai/flyjoystick.h"
 #include "cmd/ai/firekeyboard.h"
 #include "cmd/ai/script.h"
 #include "gfx/cockpit.h"
@@ -335,7 +335,7 @@ void createObjects() {
       fclose (fp);
  
   fighters[0]->EnqueueAI(new AIScript("aitest.xml"));
-  fighters[0]->EnqueueAI(new FlyByKeyboard ());
+  fighters[0]->EnqueueAI(new FlyByJoystick (0,"player1.kbconf"));
   fighters[0]->EnqueueAI(new FireKeyboard ());
   _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");
   _Universe->AccessCockpit()->SetParent(fighters[0]);

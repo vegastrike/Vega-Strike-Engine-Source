@@ -71,4 +71,6 @@ void InitInput()
 	InitMouse();
 	InitJoystick();
 }
-
+void DeInitInput() {
+  DeInitJoystick();
+}

@@ -58,14 +58,15 @@ void Universe::Init () {
 }
 Universe::~Universe()
 {
-	int i;
-	for (i=0;i<this->factions.size();i++) {
-		delete factions[i];
-	}
-	delete cockpit;
-	delete ForceLogo;
-	delete SquadLogo;
-	GFXShutdown();
+  DeInitInput();
+  unsigned int i;
+  for (i=0;i<this->factions.size();i++) {
+    delete factions[i];
+  }
+  delete cockpit;
+  delete ForceLogo;
+  delete SquadLogo;
+  GFXShutdown();
 	//delete mouse;
 }
 //sets up all the stuff... in this case the ships to be rendered

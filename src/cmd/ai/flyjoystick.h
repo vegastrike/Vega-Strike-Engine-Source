@@ -4,7 +4,7 @@ class FlyByJoystick: public FlyByKeyboard {
   int which_joystick;
   bool keyboard;
  public:
-  FlyByJoystick(int which, bool kb);
+  FlyByJoystick(int which, const char * configfile);
   void Execute();
   virtual ~FlyByJoystick();
 };

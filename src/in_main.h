@@ -25,6 +25,7 @@
 #include "in_handler.h"
 
 void InitInput();
+void DeInitInput();
 void ProcessInput();
 int TermInput();
 void AddListener(InputListener *il);
