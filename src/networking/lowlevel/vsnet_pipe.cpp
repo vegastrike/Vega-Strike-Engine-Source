@@ -2,6 +2,7 @@
 #include <sstream>
 
 #include "vsnet_pipe.h"
+#include "vsnet_oss.h"
 #include "vsnet_socket.h"
 
 #if defined( _WIN32) && !defined(__CYGWIN__)
@@ -26,7 +27,7 @@ VSPipe::VSPipe( )
     retval = ::bind( _pipe[0], (sockaddr *)&addr, sizeof(addr) );
     if( retval == SOCKET_ERROR )
     {
-        close_socket( _pipe[0] );
+        VsnetOSS::close_socket( _pipe[0] );
         _failed = true;
         return;
     }
@@ -35,7 +36,7 @@ VSPipe::VSPipe( )
     retval = ::getsockname( _pipe[0], (sockaddr *)&addr, &addrlen );
     if( retval == SOCKET_ERROR )
     {
-        close_socket( _pipe[0] );
+        VsnetOSS::close_socket( _pipe[0] );
         _failed = true;
         return;
     }
@@ -43,7 +44,7 @@ VSPipe::VSPipe( )
     _pipe[1] = ::socket( PF_INET, SOCK_DGRAM, 0 );
     if( _pipe[1] == INVALID_SOCKET )
     {
-        close_socket( _pipe[1] );
+        VsnetOSS::close_socket( _pipe[1] );
         _failed = true;
         return;
     }
@@ -51,8 +52,8 @@ VSPipe::VSPipe( )
     retval = ::connect( _pipe[1], (sockaddr *)&addr, addrlen );
     if( retval == SOCKET_ERROR )
     {
-        close_socket( _pipe[1] );
-        close_socket( _pipe[0] );
+        VsnetOSS::close_socket( _pipe[1] );
+        VsnetOSS::close_socket( _pipe[0] );
         _failed = true;
         return;
     }
@@ -95,12 +96,12 @@ int VSPipe::read( char* buf, int size )
 
 int VSPipe::closewrite( )
 {
-    return ::close_socket( _pipe[1] );
+    return VsnetOSS::close_socket( _pipe[1] );
 }
 
 int VSPipe::closeread( )
 {
-    return ::close_socket( _pipe[0] );
+    return VsnetOSS::close_socket( _pipe[0] );
 }
 
 int VSPipe::getread( ) const

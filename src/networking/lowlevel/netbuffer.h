@@ -21,7 +21,6 @@ class NetBuffer
 	public :
 		NetBuffer();
 		NetBuffer( int bufsize);
-		NetBuffer( char * buf, int bufsize);
 		NetBuffer( const char * buf, int bufsize);
 		~NetBuffer();
 
@@ -85,12 +84,11 @@ class NetBuffer
 		unsigned int	getUInt32();
 		void			addChar( char c);
 		char			getChar();
-		void			addBuffer( unsigned char * buf, int bufsize);
 		void			addBuffer( const unsigned char * buf, int bufsize);
         unsigned char*  extAddBuffer( int bufsize);
 		unsigned char*  getBuffer( int offt);
 		// Add and get a string with its length before the char * buffer part
-		void			addString( string str);
+		void			addString( const string& str);
 		string			getString();
 
 		GFXMaterial		getGFXMaterial();

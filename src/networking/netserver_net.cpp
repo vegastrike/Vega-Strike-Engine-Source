@@ -88,15 +88,14 @@ void	NetServer::checkTimedoutClients_udp()
 void	NetServer::recvMsg_tcp( ClientPtr clt )
 {
     char	command;
-    AddressIP	ipadr;
-    // int nbpackets = 0;
 
     assert( clt );
 
     SOCKETALT sockclt( clt->sock );
-	PacketMem mem;
 
-    int recvbytes = sockclt.recvbuf( mem, &ipadr );
+    Packet    packet;
+    AddressIP ipadr;
+    int recvbytes = sockclt.recvbuf( &packet, &ipadr );
 
     if( recvbytes < 0 )
     {
@@ -112,19 +111,13 @@ void	NetServer::recvMsg_tcp( ClientPtr clt )
     }
     else
     {
-        Packet packet( mem );
-		packet.setNetwork( &ipadr, sockclt );
 		command = packet.getCommand( );
         if( clt )
+        {
 			this->updateTimestamps( clt, packet);
+        }
 
-#ifdef VSNET_DEBUG
-		COUT << "Created a packet with command " << displayCmd(Cmd(command)) << endl;
-	    mem.dump( cerr, 3 );
-#endif
-
-		// In TCP we always process
-	    this->processPacket( clt, command, ipadr, packet );
+	    this->processPacket( clt, command, ipadr, packet ); // In TCP we always process
     }
 }
 
@@ -132,17 +125,13 @@ void NetServer::recvMsg_udp( )
 {
     SOCKETALT sockclt( udpNetwork->get_fd(), SOCKETALT::UDP, udpNetwork->get_adr(), _sock_set );
     ClientPtr clt;
-    AddressIP ipadr;
 	bool process = true;
 
-	PacketMem mem;
-    int    ret;
-    ret = sockclt.recvbuf( mem, &ipadr );
+    Packet    packet;
+    AddressIP ipadr;
+    int ret = sockclt.recvbuf( &packet, &ipadr );
     if( ret > 0 )
     {
-        Packet packet( mem );
-	    packet.setNetwork( &ipadr, sockclt );
-
         ObjSerial nserial = packet.getSerial(); // Extract the serial from buffer received so we know who it is
         char      command = packet.getCommand();
 

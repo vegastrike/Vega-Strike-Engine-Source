@@ -2,15 +2,8 @@
 #define VSNET_DEBUG_H
 
 #include <config.h>
+#include <pthread.h>
 #include <iostream>
-
-#if !defined( COUT)
-	#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
-	#define COUT std::clog << __FILE__ << ":"
-	#else
-	#define COUT std::clog << __FILE__ << ":" << __LINE__ << " "
-	#endif
-#endif
 
 #ifndef NDEBUG
 #define VSNET_DEBUG
@@ -19,6 +12,30 @@
 #endif
 
 #undef VSNET_DEBUG
+
+#ifdef VSNET_DEBUG
+#endif
+
+#if !defined( COUT)
+	#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
+	    #define COUT std::clog << __FILE__ << ":"
+	#else
+        #ifdef VSNET_DEBUG
+            /** A trick to force an evaluation of gettimeofday during COUT. Useful
+             *  when timing makes trouble.
+             */
+            struct cout_time { };
+
+            static cout_time COUTTIME;
+
+            std::ostream& operator<<( std::ostream& ostr, const cout_time& c );
+
+	        #define COUT std::clog << pthread_self() << " " << COUTTIME << " " << __FILE__ << ":" << __LINE__ << " "
+        #else
+	        #define COUT std::clog << " " << __FILE__ << ":" << __LINE__ << " "
+        #endif
+	#endif
+#endif
 
 #define FIND_WIN_NBIO
 
@@ -39,7 +56,7 @@
   public: \
       void validate( const char* file, int line ) const { \
 	  if( !_valid || _invalid ) { \
-	      fprintf( stderr, "object invalid in %s:%d\n", file, line ); \
+	      fprintf( stderr, "object invalid in %s:%d:%d\n", file, line, pthread_self() ); \
 	  } \
           assert( _valid ); \
           assert( !_invalid ); \

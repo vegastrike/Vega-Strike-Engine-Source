@@ -90,7 +90,10 @@ void	NetServer::addClient( ClientPtr clt)
 		netbuf.addString( savestr);
 		netbuf.addString( xmlstr);
 		// Put the save buffer after the ClientState
-		packet2.bc_create( CMD_ENTERCLIENT, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1311));
+		packet2.bc_create( CMD_ENTERCLIENT, un->GetSerial(),
+                           netbuf.getData(), netbuf.getDataLength(),
+                           SENDRELIABLE,
+                           __FILE__, PSEUDO__LINE__(1311));
 		COUT<<"<<< SEND ENTERCLIENT("<<un->GetSerial()<<") TO OTHER CLIENT IN THE ZONE------------------------------------------"<<endl;
 		zonemgr->broadcast( clt, &packet2 ); // , &NetworkToClient );
 		COUT<<"Serial : "<<un->GetSerial()<<endl;
@@ -124,7 +127,9 @@ void	NetServer::removeClient( ClientPtr clt)
 	// Remove the client from its current starsystem
 	zonemgr->removeClient( clt);
 	// Broadcast to other players
-	packet2.bc_create( CMD_EXITCLIENT, un->GetSerial(), NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1311));
+	packet2.bc_create( CMD_EXITCLIENT, un->GetSerial(),
+                       NULL, 0, SENDRELIABLE,
+                       __FILE__, PSEUDO__LINE__(1311));
 	zonemgr->broadcast( clt, &packet2 );
 }
 

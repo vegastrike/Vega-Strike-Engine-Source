@@ -127,11 +127,6 @@ enum Cmd
     // CMD_ACK          			// A packet to acknoledge the reception of a packet that was previously sent
 };
 
-enum CmdFlags
-{
-    CMD_CAN_COMPRESS = 0x1
-};
-
 std::ostream& operator<<( std::ostream& ostr, Cmd cmd );
 
 const char* displayCmd( Cmd cmd );

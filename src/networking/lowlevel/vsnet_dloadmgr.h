@@ -120,25 +120,60 @@ namespace Server
 class DownloadItem
 {
 public:
-    DownloadItem( SOCKETALT sock, std::string failed_file );
-    DownloadItem( SOCKETALT sock, std::string file, VSFileSystem::VSFile * f, size_t sz );
-    ~DownloadItem( );
+    DownloadItem( SOCKETALT sock, bool error, const std::string& file );
+    virtual ~DownloadItem( );
 
-    SOCKETALT getSock( ) const;
-    bool      error( ) const;
-    string    file( ) const;
+    SOCKETALT   getSock( ) const;
+    bool        error( ) const;
+    std::string file( ) const;
 
-    size_t    offset( ) const;
-    size_t    remainingSize( ) const;
-    void      copyFromFile( unsigned char* buf, size_t sz );
+    virtual size_t    offset( ) const = 0;
+    virtual size_t    remainingSize( ) const = 0;
+    virtual void      copyFromFile( unsigned char* buf, size_t sz ) = 0;
 
 private:
     SOCKETALT         _sock;
     bool              _error;
     const std::string _file;
+
+    DownloadItem( );
+    DownloadItem( const DownloadItem& );
+    DownloadItem& operator=( const DownloadItem& );
+};
+
+class DownloadItemFile : public DownloadItem
+{
+public:
+    DownloadItemFile( SOCKETALT sock, const std::string& failed_file );
+    DownloadItemFile( SOCKETALT sock, const std::string& file,
+                      VSFileSystem::VSFile * f, size_t sz );
+    virtual ~DownloadItemFile( );
+
+    virtual size_t offset( ) const;
+    virtual size_t remainingSize( ) const;
+    virtual void   copyFromFile( unsigned char* buf, size_t sz );
+
+private:
     VSFileSystem::VSFile * _handle;
-    size_t            _size;
-    size_t            _offset;
+    size_t                 _size;
+    size_t                 _offset;
+};
+
+class DownloadItemBuf : public DownloadItem
+{
+public:
+    DownloadItemBuf( SOCKETALT sock, const std::string& file,
+                     const char* buf, size_t sz );
+    virtual ~DownloadItemBuf( );
+
+    virtual size_t offset( ) const;
+    virtual size_t remainingSize( ) const;
+    virtual void   copyFromFile( unsigned char* buf, size_t sz );
+
+private:
+    char*  _buf;
+    size_t _size;
+    size_t _offset;
 };
 
 /** The download manager on the server side works in the networking thread

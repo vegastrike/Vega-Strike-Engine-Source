@@ -87,7 +87,6 @@ class NetServer
 	        bool tcp;
 	        ClientPtr t; // Client connections waiting for login response
 		    AddressIP u; // Client addresses waiting for login response
-			char	  canCompress;
 	    };
 
         queue<WaitListEntry> waitList;
@@ -151,14 +150,6 @@ class NetServer
 		friend class ZoneMgr;
 
 		void			closeAllSockets();				// Disconnect all clients for shutdown
-
-private:
-#ifdef HAVE_ZLIB_H
-        inline bool canCompress() const { return true; }
-#else
-        inline bool canCompress() const { return false; }
-#endif
-
 };
 
 //void	str_cat( char *res, char c, char *s);

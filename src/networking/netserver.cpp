@@ -267,7 +267,6 @@ void	NetServer::start(int argc, char **argv)
 		//this->checkKey( keyset);
 
 		// Check received communications
-		newConnection_tcp( );
 		checkMsg( _sock_set );
 		if( acctserver && acct_con )
 		{
@@ -474,7 +473,7 @@ void	NetServer::checkMsg( SocketSet& sets )
     ostr << "Checking activity on sockets, TCP=";
 	for( LI i=allClients.begin(); i!=allClients.end(); i++)
 	{
-        Client* cl = *i;
+        ClientPtr cl = *i;
         if( cl->isTcp() )
         {
 		    if( cl->sock.isActive( ) )
@@ -492,6 +491,10 @@ void	NetServer::checkMsg( SocketSet& sets )
 	    recvMsg_udp( );
         printit = true;
 	}
+    if( tcpNetwork->isActive( ) )
+    {
+		newConnection_tcp( );
+    }
     ostr << ends;
     if( printit ) COUT << ostr.str() << endl;
 }
@@ -512,6 +515,10 @@ void	NetServer::checkMsg( SocketSet& sets )
 	{
 	    recvMsg_udp( );
 	}
+    if( tcpNetwork->isActive( ) )
+    {
+		newConnection_tcp( );
+    }
 }
 #endif
 
@@ -624,11 +631,6 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 					iptmp = &ipadr;
 					COUT << "Waiting authorization for client IP : " << ipadr << endl;
 				}
-
-			    if( canCompress() && ( flags & CMD_CAN_COMPRESS ) )
-					entry.canCompress = CMD_CAN_COMPRESS;
-				else
-	        		entry.canCompress &= ~CMD_CAN_COMPRESS;
 
 				// Redirect the login request packet to account server
 				COUT << "Redirecting login request to account server on socket " << acct_sock << endl
@@ -814,7 +816,9 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 		/* SHOULD NOT RECEIVE THIS SINCE COMM SESSIONS ARE HANDLED IN A CLIENT-TO-CLIENT WAY
 		case CMD_CAMSHOT :
 		{
-			p2.bc_create( packet.getCommand(), packet.getSerial(), packet.getData(), packet.getDataLength(), SENDANDFORGET, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1281));
+			p2.bc_create( packet.getCommand(), packet.getSerial(),
+                          packet.getData(), packet.getDataLength(), SENDANDFORGET,
+                          __FILE__, PSEUDO__LINE__(1281));
 			// Send to concerned clients
 			zonemgr->broadcast_camshots( clt->game_unit.GetUnit()->activeStarSystem->GetZone(), clt->serial, &p2);
 		}
@@ -828,7 +832,9 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			clt->webcam = netbuf.getChar();
 			clt->portaudio = netbuf.getChar();
 			// Broadcast players with same frequency that there is a new one listening to it
-			p2.bc_create( packet.getCommand(), packet_serial, packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1293));
+			p2.bc_create( packet.getCommand(), packet_serial,
+                          packet.getData(), packet.getDataLength(), SENDRELIABLE,
+                          __FILE__, PSEUDO__LINE__(1293));
 			// Send to concerned clients
 			zonemgr->broadcast( clt->game_unit.GetUnit()->activeStarSystem->GetZone(), packet_serial, &p2);
 		}
@@ -838,7 +844,9 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			clt->comm_freq = -1;
 			// float freq = netbuf.getFloat();
 			// Broadcast players with same frequency that this client is leaving the comm session
-			p2.bc_create( packet.getCommand(), packet_serial, packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1302));
+			p2.bc_create( packet.getCommand(), packet_serial,
+                          packet.getData(), packet.getDataLength(), SENDRELIABLE,
+                          __FILE__, PSEUDO__LINE__(1302));
 			// Send to concerned clients
 			zonemgr->broadcast( clt->game_unit.GetUnit()->activeStarSystem->GetZone(), packet_serial, &p2);
 		}
@@ -846,14 +854,18 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 		case CMD_SOUNDSAMPLE :
 		{
 			// Broadcast sound sample to the clients in the same zone and the have PortAudio support
-			p2.bc_create( packet.getCommand(), packet_serial, packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1341));
+			p2.bc_create( packet.getCommand(), packet_serial,
+                          packet.getData(), packet.getDataLength(), SENDRELIABLE,
+                          __FILE__, PSEUDO__LINE__(1341));
 			zonemgr->broadcastSample( clt->game_unit.GetUnit()->activeStarSystem->GetZone(), packet_serial, &p2, clt->comm_freq);
 
 		}
 		case CMD_TXTMESSAGE :
 		{
 			// Broadcast sound sample to the clients in the same zone and the have PortAudio support
-			p2.bc_create( packet.getCommand(), packet_serial, packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1341));
+			p2.bc_create( packet.getCommand(), packet_serial,
+                          packet.getData(), packet.getDataLength(), SENDRELIABLE,
+                          __FILE__, PSEUDO__LINE__(1341));
 			zonemgr->broadcastText( clt->game_unit.GetUnit()->activeStarSystem->GetZone(), packet_serial, &p2, clt->comm_freq);
 
 		}
@@ -907,7 +919,9 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 void	NetServer::broadcast( NetBuffer & netbuf, unsigned short zone, Cmd command)
 {
 	Packet p;
-	p.bc_create( command, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(902));
+	p.bc_create( command, 0,
+                 netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
+                 __FILE__, PSEUDO__LINE__(902));
 	zonemgr->broadcast( zone, 0, &p);
 }
 

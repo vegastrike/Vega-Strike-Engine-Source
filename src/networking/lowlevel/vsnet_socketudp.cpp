@@ -8,6 +8,7 @@
 #include "vsnet_socketudp.h"
 #include "vsnet_err.h"
 #include "vsnet_debug.h"
+#include "packet.h"
 
 using namespace std;
 
@@ -42,7 +43,27 @@ int VsnetUDPSocket::queueLen( int )
     return 0;
 }
 
-int VsnetUDPSocket::sendbuf( PacketMem& packet, const AddressIP* to, int pcktflags )
+// int VsnetUDPSocket::sendbuf( PacketMem& packet, const AddressIP* to, int pcktflags )
+// {
+//     COUT << "enter " << __PRETTY_FUNCTION__ << endl;
+//     int numsent;
+// 
+//     // In UDP mode, always send on this->sock
+//     const sockaddr_in* dest = to;
+//     if( dest == NULL ) dest = &_remote_ip;
+// 
+//     assert( dest != NULL );
+// 
+//     if( (numsent = sendto( get_fd(), packet.getConstBuf(), packet.len(), 0, (sockaddr*) dest, sizeof(struct sockaddr_in)))<0)
+//     {
+//         COUT << "Error sending: " << vsnetLastError() << endl;
+//         return -1;
+//     }
+//     cout<<"Sent "<<numsent<<" bytes"<<" -> "<<inet_ntoa( dest->sin_addr)<<":"<<ntohs(dest->sin_port)<<endl;
+//     return numsent;
+// }
+
+int VsnetUDPSocket::sendbuf( Packet* packet, const AddressIP* to, int pcktflags )
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << endl;
     int numsent;
@@ -53,7 +74,10 @@ int VsnetUDPSocket::sendbuf( PacketMem& packet, const AddressIP* to, int pcktfla
 
     assert( dest != NULL );
 
-    if( (numsent = sendto( _fd, packet.getConstBuf(), packet.len(), 0, (sockaddr*) dest, sizeof(struct sockaddr_in)))<0)
+    numsent = sendto( get_fd(),
+                      packet->getSendBuffer(), packet->getSendBufferLength(),
+                      0, (sockaddr*) dest, sizeof(struct sockaddr_in));
+    if( numsent < 0 )
     {
         COUT << "Error sending: " << vsnetLastError() << endl;
         return -1;
@@ -62,27 +86,29 @@ int VsnetUDPSocket::sendbuf( PacketMem& packet, const AddressIP* to, int pcktfla
     return numsent;
 }
 
-int VsnetUDPSocket::recvbuf( PacketMem& buffer, AddressIP* from)
+int VsnetUDPSocket::recvbuf( Packet* p, AddressIP* ipadr )
 {
     _cpq_mx.lock( );
     if( _cpq.empty() )
     {
         _cpq_mx.unlock( );
-        _set.rem_pending( _fd );
+        _set.rem_pending( get_fd() );
         return -1;
     }
 
-    buffer = _cpq.front().mem;
-    if( from )
-        *from = _cpq.front().ip;
+    PacketMem buffer = _cpq.front().mem;
     _cpq.pop();
     _cpq_mx.unlock( );
-    return buffer.len();
+    int len = buffer.len();
+    Packet packet( buffer );
+    if(ipadr) *ipadr = _cpq.front().ip;
+    *p = packet;
+    return len;
 }
 
 void VsnetUDPSocket::dump( std::ostream& ostr ) const
 {
-    ostr << "( s=" << _fd << " UDP r=" << _remote_ip << " )";
+    ostr << "( s=" << get_fd() << " UDP r=" << _remote_ip << " )";
 }
 
 bool VsnetUDPSocket::isActive( )
@@ -101,11 +127,11 @@ void VsnetUDPSocket::lower_selected( )
 
     // In UDP mode, always receive data on sock
     len1 = sizeof(sockaddr_in);
-    ret = recvfrom( _fd, _recv_buf, _negotiated_max_size,
+    ret = recvfrom( get_fd(), _recv_buf, _negotiated_max_size,
                     0, (sockaddr*)(sockaddr_in*)&from, &len1 );
     if( ret < 0 )
     {
-        COUT << " fd=" << _fd << " error receiving: "
+        COUT << " fd=" << get_fd() << " error receiving: "
              << vsnetLastError() << endl;
     }
     else if( ret == 0 )
@@ -120,7 +146,7 @@ void VsnetUDPSocket::lower_selected( )
         _cpq_mx.lock( );
         _cpq.push( mem );
         _cpq_mx.unlock( );
-        _set.add_pending( _fd );
+        _set.add_pending( get_fd() );
     }
 }
 

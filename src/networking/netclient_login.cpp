@@ -69,8 +69,7 @@ vector<string>	NetClient::loginLoop( string str_callsign, string str_passwd)
 	NetBuffer netbuf;
 
 	//memset( buffer, 0, tmplen+1);
-	char flags;
-    if( canCompress() ) flags |= CMD_CAN_COMPRESS;
+	char flags = 0;
     netbuf.addChar( flags );
 	netbuf.addString( str_callsign);
 	netbuf.addString( str_passwd);
@@ -86,8 +85,7 @@ vector<string>	NetClient::loginLoop( string str_callsign, string str_passwd)
 	COUT << "Sent login for player <" << str_callsign << ">:<" << str_passwd
 		 << ">" << endl
 	     << "   - buffer length : " << packet2.getDataLength() << endl
-	     << "   - buffer: " << netbuf.getData() << endl
-         << " " << (canCompress() ? "(compress)" : "(no compress)") <<endl;
+	     << "   - buffer: " << netbuf.getData() << endl;
 	// Now the loop
 	int timeout=0, recv=0;
 	// int ret=0;

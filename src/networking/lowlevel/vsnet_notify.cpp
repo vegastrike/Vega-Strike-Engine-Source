@@ -98,6 +98,8 @@ void Item::append( unsigned char* buffer, int bufsize )
 
 void Item::changeState( State s )
 {
+    COUT << __FUNCTION__ << " " << s << " " << _error << endl;
+
     _mx.lock( );
     _state = s;
     VSError e = _error;
@@ -107,6 +109,8 @@ void Item::changeState( State s )
 
 void Item::changeState( State s, VSError e )
 {
+    COUT << __FUNCTION__ << " " << s << " " << e << endl;
+
     _mx.lock( );
     _state = s;
     _error = e;
@@ -223,11 +227,13 @@ NoteFile::~NoteFile( )
  * definition VsnetDownload::Client::Buffer
  *------------------------------------------------------------*/
 
-Buffer::Buffer( SOCKETALT sock, const string& filename, VSFileSystem::VSFileType ft, NotifyPtr notify )
-    : Item( sock, filename, ft, notify )
+Buffer::Buffer( SOCKETALT sock, const string& filename, VSFileSystem::VSFileType ft )
+    : Item( sock, filename, ft, NotifyPtr() )
+    , _me( new NotifyMe )
     , _len( 0 )
     , _offset( 0 )
 {
+    protected_replace_notifier( _me );
 }
 
 Buffer::~Buffer( )

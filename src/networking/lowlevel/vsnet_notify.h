@@ -278,20 +278,41 @@ public:
  * declaration VsnetDownload::Client::Buffer
  *------------------------------------------------------------*/
 
-class Buffer : public Item, public NotifyMe
+class Buffer : public Item
 {
+
     typedef unsigned char uchar;
+    NotifyPtr _me;
+
+    inline const NotifyMe* me() const {
+    	return (NotifyMe*)_me.get();
+    }
 
 public:
     Buffer( SOCKETALT          sock,
             const std::string& filename,
-			VSFileSystem::VSFileType ft,
-            NotifyPtr          notify = NotifyPtr() );
+			VSFileSystem::VSFileType ft );
 
     virtual ~Buffer( );
 
     boost::shared_array<uchar> getBuffer( ) const;
 	int                        getSize() { return this->_len; }
+
+    inline bool done( ) const {
+        return me()->done();
+    }
+
+    inline bool ok( ) const {
+        return me()->ok();
+    }
+
+    inline int total( ) const {
+        return me()->total();
+    }
+
+    inline int offset( ) const {
+        return me()->offset();
+    }
 
 protected:
     virtual void childSetSize( int len );

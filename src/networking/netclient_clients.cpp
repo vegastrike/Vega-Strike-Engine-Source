@@ -118,7 +118,8 @@ void	NetClient::AddClientObject( NetBuffer & netbuf, ObjSerial cltserial)
 void	NetClient::downloadZoneInfo()
 {
 	char tbuf[1024];
-	sscanf( tbuf, "%d", this->zone);
+	sprintf( tbuf, "%d", this->zone);
+    COUT << __PRETTY_FUNCTION__ << " zone: " << tbuf << endl;
 	VsnetDownload::Client::Buffer buf( this->clt_sock, tbuf, VSFileSystem::ZoneBuffer);
 	_downloadManagerClient->addItem( &buf);
 	while( !buf.done())

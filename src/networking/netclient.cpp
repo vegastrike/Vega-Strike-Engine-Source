@@ -202,8 +202,8 @@ bool	NetClient::PacketLoop( Cmd command)
 int		NetClient::checkAcctMsg( )
 {
 	int len=0;
-	AddressIP	ip2;
-	Packet packeta;
+	Packet    packeta;
+    AddressIP ipadr;
 	int ret=0;
 
 	// Watch account server socket
@@ -213,12 +213,9 @@ int		NetClient::checkAcctMsg( )
 		//COUT<<"Net activity !"<<endl;
 		// Receive packet and process according to command
 
-		PacketMem mem;
-		if( (len=acct_sock.recvbuf( mem, &ip2 ))>0 )
+		if( (len=acct_sock.recvbuf( &packeta, &ipadr ))>0 )
 		{
 			ret = 1;
-			Packet p( mem );
-			packeta = p;
 			NetBuffer netbuf( packeta.getData(), packeta.getDataLength());
 			switch( packeta.getCommand())
 			{
@@ -368,8 +365,6 @@ int NetClient::recvMsg( Packet* outpacket )
     ObjSerial	packet_serial=0;
 
     // Receive data
-    AddressIP sender_adr;
-	PacketMem mem;
 	Unit * un = NULL;
 	int mount_num;
 	ObjSerial mis;
@@ -378,7 +373,9 @@ int NetClient::recvMsg( Packet* outpacket )
 		local_serial = this->game_unit.GetUnit()->GetSerial();
 	Cockpit * cp;
 
-    int recvbytes = clt_sock.recvbuf( mem, &sender_adr );
+    Packet    p1;
+    AddressIP ipadr;
+    int recvbytes = clt_sock.recvbuf( &p1, &ipadr );
 
     if( recvbytes <= 0)
     {
@@ -388,9 +385,7 @@ int NetClient::recvMsg( Packet* outpacket )
     }
     else
     {
-        Packet p1( mem );
 		NetBuffer netbuf( p1.getData(), p1.getDataLength());
-	    p1.setNetwork( &sender_adr, clt_sock );
 	    if( outpacket )
 	    {
 	        *outpacket = p1;
@@ -1056,15 +1051,6 @@ void	NetClient::logout()
 	clt_sock.disconnect( "Closing connection to server", false );
 }
 
-
-bool NetClient::canCompress() const
-{
-#ifdef HAVE_ZLIB_H
-    return true;
-#else
-    return false;
-#endif
-}
 
 ClientPtr NetClient::Clients::insert( int x, Client* c )
 {

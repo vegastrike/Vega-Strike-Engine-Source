@@ -206,10 +206,6 @@ class	NetClient
 		void	sendTextMessage( string message);
 		bool	IsNetcommActive() const;
 		bool	IsNetcommSecured() const;
-
-
-    private:
-        bool canCompress() const;
 };
 
 Unit * getNetworkUnit( ObjSerial cserial);

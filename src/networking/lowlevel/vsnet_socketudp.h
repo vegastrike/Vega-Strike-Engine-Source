@@ -4,7 +4,7 @@
 #include "vsnet_headers.h"
 #include <queue>
 
-#include "vsnet_socket.h"
+#include "vsnet_socketbase.h"
 #include "vsnet_thread.h"
 #include "packetmem.h"
 
@@ -24,9 +24,9 @@ public:
     virtual int  queueLen( int pri );
 
     virtual bool isActive( );
-    virtual int  sendbuf( PacketMem& packet, const AddressIP* to, int pcktflags );
-    virtual int  recvbuf( PacketMem& buffer, AddressIP *from );
-    // virtual void ack( );
+    // virtual int  sendbuf( PacketMem& packet, const AddressIP* to, int pcktflags );
+    virtual int  sendbuf( Packet* packet, const AddressIP* to, int pcktflags );
+    virtual int  recvbuf( Packet* p, AddressIP* ipadr );
 
     virtual void lower_selected( );
 

@@ -14,7 +14,7 @@ extern int acct_con;
 void	NetServer::checkAcctMsg( SocketSet& sets )
 {
 	int len=0;
-	AddressIP	ipadr, ip2;
+	AddressIP	ipadr;
 	ClientPtr   clt;
 	unsigned char cmd=0;
 
@@ -25,13 +25,16 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 		//COUT<<"Net activity !"<<endl;
 		// Receive packet and process according to command
 
-		PacketMem mem;
-		if( (len=acct_sock.recvbuf( mem, &ip2 ))>0 )
+		Packet    p;
+        AddressIP act_srv_ipadr;
+		if( (len=acct_sock.recvbuf( &p, &act_srv_ipadr ))>0 )
 		{
-			// Maybe copy that in a "else" condition too if when it fails we have to disconnect a client
+			// Maybe copy that in a "else" condition too if when it fails we
+            // have to disconnect a client
 
 			// Here we get the latest client which asked for a login
-			// Since coms between game servers and account server are TCP the order of request/answers
+			// Since coms between game servers and account server are TCP
+            // the order of request/answers
 			// should be ok and we can use a "queue" for waiting clients
 			if( waitList.size()==0)
 			{
@@ -39,7 +42,7 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 				exit( 1);
 			}
             WaitListEntry entry( waitList.front() );
-			char flags = entry.canCompress;
+			char flags = 0;
 			if( entry.tcp )
 			{
 			    clt = entry.t;
@@ -52,7 +55,6 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 			}
 			waitList.pop();
 
-			Packet p( mem );
 			packeta = p;
 			switch( packeta.getCommand())
 			{

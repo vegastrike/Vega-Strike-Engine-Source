@@ -2,9 +2,11 @@
 
 #include "vsfilesystem.h"
 #include "vs_globals.h"
+#include "networking/lowlevel/vsnet_oss.h"
 #include "networking/lowlevel/vsnet_dloadmgr.h"
 #include "networking/lowlevel/vsnet_notify.h"
 #include "networking/lowlevel/vsnet_cmd.h"
+#include "networking/lowlevel/vsnet_parsecmd.h"
 #include "networking/lowlevel/netbuffer.h"
 #include "networking/lowlevel/packet.h"
 
@@ -90,14 +92,26 @@ void Manager::addItems( list<Item*>& items )
     _pending_mx.lock( );
     for( it=items.begin(); it!=items.end(); it++ )
     {
-        COUT << "adding an item" << endl;
-        _pending.push( *it );
+        Item* item = (*it);
+        if( item->getFilename() != "" )
+        {
+            COUT << "adding item: " << item->getFilename() << endl;
+            _pending.push( item );;
+        }
     }
     _pending_mx.unlock( );
 
     for( it=items.begin(); it!=items.end(); it++ )
     {
-        (*it)->changeState( Queued );
+        Item* item = (*it);
+        if( item->getFilename() == "" )
+        {
+            item->changeState( Completed, FileNotFound );
+        }
+        else
+        {
+            item->changeState( Queued );
+        }
     }
 
     _set.wakeup( );
@@ -249,6 +263,7 @@ void Manager::private_eval_resolve_response( SOCKETALT sock, NetBuffer& respbuff
             reqbuffer.addShort( num );
             for( rli=requestlist.begin(); rli!=requestlist.end(); rli++ )
             {
+                reqbuffer.addChar( (*rli)->getFileType() );
                 reqbuffer.addString( (*rli)->getFilename() );
                 (*rli)->changeState( Requested, Ok );
             }
@@ -417,27 +432,15 @@ namespace Server
  * definition VsnetDownload::Server::DownloadItem
  *------------------------------------------------------------*/
 
-DownloadItem::DownloadItem( SOCKETALT sock, string file )
+DownloadItem::DownloadItem( SOCKETALT sock, bool error, const string& file )
     : _sock( sock )
-    , _error( true )
+    , _error( error )
     , _file( file )
-    , _handle( NULL )
-{
-}
-
-DownloadItem::DownloadItem( SOCKETALT sock, string file, VSFileSystem::VSFile * f, size_t sz )
-    : _sock( sock )
-    , _error( false )
-    , _file( file )
-    , _handle( f )
-    , _size( sz )
-    , _offset( 0 )
 {
 }
 
 DownloadItem::~DownloadItem( )
 {
-    if( _handle ) delete _handle;
 }
 
 SOCKETALT DownloadItem::getSock( ) const
@@ -455,20 +458,86 @@ string DownloadItem::file( ) const
     return _file;
 }
 
-size_t DownloadItem::offset( ) const
+/*------------------------------------------------------------*
+ * definition VsnetDownload::Server::DownloadItemFile
+ *------------------------------------------------------------*/
+
+DownloadItemFile::DownloadItemFile( SOCKETALT sock, const string& file )
+    : DownloadItem( sock, true, file )
+    , _handle( NULL )
+    , _size( 0 )
+    , _offset( 0 )
+{
+}
+
+DownloadItemFile::DownloadItemFile( SOCKETALT sock, const string& file, VSFileSystem::VSFile * f, size_t sz )
+    : DownloadItem( sock, false, file )
+    , _handle( f )
+    , _size( sz )
+    , _offset( 0 )
+{
+}
+
+DownloadItemFile::~DownloadItemFile( )
+{
+    if( _handle ) delete _handle;
+}
+
+size_t DownloadItemFile::offset( ) const
 {
     return _offset;
 }
 
-size_t DownloadItem::remainingSize( ) const
+size_t DownloadItemFile::remainingSize( ) const
 {
     return ( _size - _offset );
 }
 
-void DownloadItem::copyFromFile( unsigned char* buf, size_t sz )
+void DownloadItemFile::copyFromFile( unsigned char* buf, size_t sz )
 {
-    _handle->Read( (char*)buf, sz );
-    _offset += sz;
+    if( _handle )
+    {
+        _handle->Read( (char*)buf, sz );
+        _offset += sz;
+    }
+}
+
+/*------------------------------------------------------------*
+ * definition VsnetDownload::Server::DownloadItemBuf
+ *------------------------------------------------------------*/
+
+DownloadItemBuf::DownloadItemBuf( SOCKETALT sock, const string& file, const char* buf, size_t sz )
+    : DownloadItem( sock, false, file )
+    , _size( sz )
+    , _offset( 0 )
+{
+    _buf = new char[sz];
+    VsnetOSS::memcpy( _buf, buf, sz );
+}
+
+DownloadItemBuf::~DownloadItemBuf( )
+{
+    if( _buf ) delete [] _buf;
+}
+
+size_t DownloadItemBuf::offset( ) const
+{
+    return _offset;
+}
+
+size_t DownloadItemBuf::remainingSize( ) const
+{
+    return ( _size - _offset );
+}
+
+void DownloadItemBuf::copyFromFile( unsigned char* buf, size_t sz )
+{
+    if( remainingSize() < sz ) sz = remainingSize();
+    if( sz > 0 )
+    {
+        VsnetOSS::memcpy( buf, &_buf[_offset], sz );
+        _offset += sz;
+    }
 }
 
 /*------------------------------------------------------------*
@@ -502,25 +571,29 @@ void Manager::addCmdDownload( SOCKETALT sock, NetBuffer& buffer )
 {
     COUT << "Enter " << __PRETTY_FUNCTION__ << endl;
 
-    char c = buffer.getChar( );
+    RecvCmdDownload recv( buffer );
+    Subcommand c = recv.parse( );
+
+    COUT << "   *** " << " cmd " << c << endl;
 
     switch( c )
     {
     case ResolveRequest :
         {
-            short num = buffer.getShort( );
+            Adapter::ResolveRequest* r = recv.asResolveRequest();
+
+            short num = r->num;
 
             NetBuffer respbuffer;
             respbuffer.addChar( ResolveResponse );
             respbuffer.addShort( num );
 
-            while( num > 0 )
+            Adapter::ResolveRequest::iterator iter;
+            for( iter = r->files.begin(); iter!=r->files.end(); iter++ )
             {
-                string file;
-				char ft;
                 bool   ok;
-				ft = buffer.getChar();
-                file = buffer.getString( );
+				char   ft   = iter->ft;
+                string file = iter->file;
 				// If we want to download a memory buffer from server access is considered ok
 				if( ft==VSFileSystem::ZoneBuffer)
 				{
@@ -529,10 +602,11 @@ void Manager::addCmdDownload( SOCKETALT sock, NetBuffer& buffer )
 					ok = true;
 				}
 				else
+                {
                 	ok = private_test_access( file , (VSFileSystem::VSFileType) ft );
+                }
                 respbuffer.addString( file );
                 respbuffer.addChar( ok ? 1 : 0 );
-                num--;
             }
 
             Packet packet;
@@ -545,39 +619,47 @@ void Manager::addCmdDownload( SOCKETALT sock, NetBuffer& buffer )
         break;
     case DownloadRequest :
         {
-            short num = buffer.getShort( );
+            Adapter::DownloadRequest* r = recv.asDownloadRequest();
+            short num = r->num;
+
             if( num > 0 )
             {
-                while( num > 0 )
+                Adapter::DownloadRequest::iterator iter;
+                for( iter = r->files.begin(); iter!=r->files.end(); iter++ )
                 {
-                    DownloadItemPtr di;
-					char            ft = buffer.getChar();
-                    string          file = buffer.getString( );
+					char            ft   = iter->ft;
+                    string          file = iter->file;
                     string          path = file;
+                    DownloadItemPtr di;
 					VSFileSystem::VSFile * f;
 					// If a request for ZoneBuffer we create a VSFile based on a memory buffer
 					if( ft==VSFileSystem::ZoneBuffer)
 					{
 						NetBuffer netbuf;
 						getZoneInfoBuffer( atoi( file.c_str()), netbuf);
-						f = new VSFile( netbuf.getData(), netbuf.getDataLength());
+						// f = new VSFile( netbuf.getData(), netbuf.getDataLength());
+
+                        DownloadItemBuf* buf;
+                        buf = new DownloadItemBuf( sock, file, netbuf.getData(), netbuf.getDataLength() );
+                        di.reset( buf );
 					}
 					else
+                    {
                     	f = private_access( path , (VSFileSystem::VSFileType) ft );
-                    if( f )
-                    {
-                        size_t bytes = f->Size();
-                        di.reset( new DownloadItem( sock, file, f, bytes ) );
-                    }
-                    else
-                    {
-                        // Couldn't open for reading, maybe removed since resolve?
-                        di.reset( new DownloadItem( sock, file ) );
+                        if( f )
+                        {
+                            size_t bytes = f->Size();
+                            di.reset( new DownloadItemFile( sock, file, f, bytes ) );
+                        }
+                        else
+                        {
+                            // Couldn't open for reading, maybe removed since resolve?
+                            di.reset( new DownloadItemFile( sock, file ) );
+                        }
                     }
                     _download_mx.lock( );
                     _download.push( di );
                     _download_mx.unlock( );
-                    num--;
                 }
                 _set.wakeup( );
             }
@@ -880,21 +962,6 @@ const char * getState( State s)
 		CASE( Completed);
 		default:
 			return "Unknown state";
-	}
-}
-
-const char * getError( VSError e)
-{
-	switch( e)
-	{
-		CASE( Ok);
-		CASE( SocketError);
-		CASE( FileNotFound);
-		CASE( LocalPermissionDenied);
-		CASE( RemotePermissionDenied);
-		CASE( DownloadInterrupted);
-		default:
-			return "Unknown error";
 	}
 }
 

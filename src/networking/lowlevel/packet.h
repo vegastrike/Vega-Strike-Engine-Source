@@ -9,6 +9,8 @@
 #include "vsnet_cmd.h"
 #include "vsnet_address.h"
 #include "vsnet_socket.h"
+#include "vsnet_socketflags.h"
+#include "vsnet_debug.h"
 
 using std::cout;
 using std::endl;
@@ -17,6 +19,8 @@ using namespace std;
 
 class Packet
 {
+    DECLARE_VALID
+
         struct Header
         {
             unsigned char   command;
@@ -34,11 +38,6 @@ class Packet
 
         Header          h;
         PacketMem       _packet;
-
-        unsigned short  nbsent;
-        AddressIP*      destaddr;
-        SOCKETALT       socket; // Socket to send on (in TCP mode)
-        unsigned int    oldtimestamp;
 
     public:
 
@@ -66,11 +65,6 @@ class Packet
 
 	/// flags is a bitwise OR of PCKTFLAGS
         int send( Cmd cmd, ObjSerial nserial,
-                  char * buf, unsigned int length,
-                  int flags,
-                  const AddressIP* dst, const SOCKETALT& sock,
-                  const char* caller_file, int caller_line );
-        int send( Cmd cmd, ObjSerial nserial,
                   const char * buf, unsigned int length,
                   int flags,
                   const AddressIP* dst, const SOCKETALT& sock,
@@ -78,17 +72,16 @@ class Packet
 
 	/// flags is a bitwise OR of PCKTFLAGS
         inline void bc_create( Cmd cmd, ObjSerial nserial,
-                               char * buf, unsigned int length,
+                               const char * buf, unsigned int length,
                                int flags,
-                               const AddressIP* dst, const SOCKETALT& sock,
                                const char* caller_file, int caller_line )
         {
-            create( cmd, nserial, buf, length, flags, dst, sock, caller_file, caller_line );
+            create( cmd, nserial, buf, length, flags, caller_file, caller_line );
         }
 
-        inline int bc_send( )
+        inline int bc_send( const AddressIP& dst, const SOCKETALT& sock )
         {
-            return send( );
+            return send( sock, &dst );
         }
 
         void    display( const char* file, int line );
@@ -107,26 +100,19 @@ class Packet
         inline unsigned short  getFlags() const     { return h.flags;}
         inline void            setFlag ( enum PCKTFLAGS fl ) { h.flags |= fl; }
         inline void            setFlags( unsigned short fl ) { h.flags = fl; }
-        void                   setNetwork( const AddressIP * dst, SOCKETALT sock);
 
-        /** Peek into an arriving PacketMem to quick-check the command.
-         */
-        static Cmd getBufCommand( const PacketMem& buf );
-
-        // void            ack( );
-
-        char*       getData();
         const char* getData() const;
+        const char* getSendBuffer() const;
+        int         getSendBufferLength() const;
 
         void    reset() { h.command = 0;}
 
 private:
         void    create( Cmd cmd, ObjSerial nserial,
-                        char * buf, unsigned int length,
+                        const char * buf, unsigned int length,
                         int flags,
-                        const AddressIP* dst, const SOCKETALT& sock,
                         const char* caller_file, int caller_line );
-        int     send( );
+        int     send( SOCKETALT dst_s, const AddressIP* dst_a );
 
         static bool packet_uncompress( PacketMem&           dest,
                                        const unsigned char* src,

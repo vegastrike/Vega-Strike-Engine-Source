@@ -1,6 +1,8 @@
 #include <config.h>
 
 #include "vsnet_serversocket.h"
+#include "vsnet_socket.h"
+#include "vsnet_oss.h"
 #include "vsnet_debug.h"
 #include "vsnet_err.h"
 
@@ -13,20 +15,20 @@ using std::hex;
 
 std::ostream& operator<<( std::ostream& ostr, const ServerSocket& s )
 {
-    ostr << "( s=" << s._fd << " l=" << s._srv_ip << " )";
+    ostr << "( s=" << s.get_fd() << " l=" << s._srv_ip << " )";
     return ostr;
 }
 
 bool operator==( const ServerSocket& l, const ServerSocket& r )
 {
-    return (l._fd == r._fd);
+    return (l.get_fd() == r.get_fd());
 }
 
 void ServerSocket::child_disconnect( const char *s )
 {
-    if( _fd > 0 )
+    if( get_fd() > 0 )
     {
-        close_socket( _fd );
+        VsnetOSS::close_socket( get_fd() );
     }
     COUT << s << " :\tWarning: disconnected" << strerror(errno) << endl;
 }
@@ -36,7 +38,7 @@ void ServerSocketTCP::lower_selected( )
     COUT << endl
          << endl
          << "------------------------------------------" << endl
-         << "ServerSocketTCP for " << _fd << " selected" << endl
+         << "ServerSocketTCP for " << get_fd() << " selected" << endl
          << "------------------------------------------" << endl
          << endl
          << endl;
@@ -48,7 +50,7 @@ void ServerSocketTCP::lower_selected( )
     socklen_t          
 #endif
     len = sizeof( struct sockaddr_in );
-    int sock = ::accept( _fd, (sockaddr *)&remote_ip, &len );
+    int sock = ::accept( get_fd(), (sockaddr *)&remote_ip, &len );
     if( sock > 0 )
     {
         COUT << "accepted new sock " << sock  << endl;
@@ -56,7 +58,7 @@ void ServerSocketTCP::lower_selected( )
         _ac_mx.lock( );
 	    _accepted_connections.push( newsock );
         _ac_mx.unlock( );
-        _set.add_pending( _fd );
+        _set.add_pending( get_fd() );
     }
     else
     {
@@ -90,8 +92,9 @@ SOCKETALT ServerSocketTCP::acceptNewConn( )
     }
     else
     {
+        COUT << "No accepted TCP connection" << endl;
         _ac_mx.unlock( );
-        _set.rem_pending( _fd );
+        _set.rem_pending( get_fd() );
         SOCKETALT ret;
         return ret;
     }
@@ -108,7 +111,7 @@ bool ServerSocketUDP::isActive( )
 
 SOCKETALT ServerSocketUDP::acceptNewConn( )
 {
-    SOCKETALT ret( _fd, SOCKETALT::UDP, _srv_ip, _set );
+    SOCKETALT ret( get_fd(), SOCKETALT::UDP, _srv_ip, _set );
     return ret;
 }
 

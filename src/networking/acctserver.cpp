@@ -108,7 +108,7 @@ void    AccountServer::start()
 
     while( keeprun)
     {
-        //COUT << "Loop" << endl;
+        COUT << "Loop" << endl;
         // Check for incoming connections
 
         _sock_set.wait( );
@@ -121,12 +121,13 @@ void    AccountServer::start()
         }
 
         // Loop for each active client and process request
-        LS i;
+        list<SOCKETALT>::iterator i;
         for( i=Socks.begin(); i!=Socks.end(); i++)
         {
-            if( i->isActive( ) )
+            SOCKETALT alt( *i );
+            if( alt.isActive( ) )
             {
-                this->recvMsg( (*i));
+                this->recvMsg( alt );
             }
         }
 
@@ -146,22 +147,19 @@ void    AccountServer::start()
 void    AccountServer::recvMsg( SOCKETALT sock)
 {
     string callsign, passwd;
-    AddressIP       ipadr;
     int             recvcount=0;
     unsigned char   cmd;
     Account *       elem = NULL;
     int             found=0, connected=0;
 
     // Receive data from sock
-    PacketMem mem;
-    if( (recvcount = sock.recvbuf( mem, &ipadr))>0)
+    Packet    p;
+    AddressIP ipadr;
+    if( (recvcount = sock.recvbuf( &p, &ipadr ))>0)
     {
         cout<<"Socket : "<<endl<<sock<<endl;
-        //Packet p( buffer, recvcount );
-        Packet p( mem);
-
         packet = p;
-        NetBuffer netbuf( p.getData(), p.getDataLength());
+        NetBuffer netbuf( packet.getData(), packet.getDataLength());
         // Check the command of the packet
         cmd = packet.getCommand();
         cout<<"Buffer => "<<p.getData()<<endl;
@@ -552,7 +550,10 @@ void    AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
         netbuf.addString( xmlbuf);
 
         Packet  packet2;
-        if( packet2.send( LOGIN_ACCEPT, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE|COMPRESSED, NULL, sock, __FILE__, __LINE__ ) < 0 )
+        if( packet2.send( LOGIN_ACCEPT, serial,
+                          netbuf.getData(), netbuf.getDataLength(),
+                          SENDRELIABLE|COMPRESSED,
+                          NULL, sock, __FILE__, __LINE__ ) < 0 )
         {
             cout<<"ERROR sending authorization"<<endl;
             exit( 1);
@@ -602,7 +603,8 @@ void    AccountServer::removeDeadSockets()
     VI vi;
     int nbc_disc = 0;
     int nbs_disc = 0;
-    for (LS j=DeadSocks.begin(); j!=DeadSocks.end(); j++)
+    list<SOCKETALT>::iterator j;
+    for (j=DeadSocks.begin(); j!=DeadSocks.end(); j++)
     {
         bool found=false;
         COUT << ">>>>>>> Closing socket number "<<(*j)<<endl;

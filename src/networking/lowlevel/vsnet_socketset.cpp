@@ -3,6 +3,7 @@
 
 #include "vsnet_headers.h"
 #include "vsnet_socket.h"
+#include "vsnet_socketbase.h"
 #include "vsnet_socketset.h"
 #include "vsnet_pipe.h"
 #include "vsnet_debug.h"
@@ -156,7 +157,7 @@ int SocketSet::private_select( timeval* timeout )
     FD_ZERO( &read_set_select );
     FD_ZERO( &write_set_select );
 
-    private_test_dump_request_sets( timeout );
+    // private_test_dump_request_sets( timeout );
 
     for( Set::iterator it = _autoset.begin(); it != _autoset.end(); it++ )
     {
@@ -211,6 +212,17 @@ int SocketSet::private_select( timeval* timeout )
                 if( FD_ISSET(b->get_write_fd(),&write_set_select) )
                     b->lower_sendbuf( );
 	        }
+            else
+            {
+                if( FD_ISSET(b->get_write_fd(),&write_set_select) )
+                {
+#ifdef VSNET_DEBUG
+                    COUT << "saw activity on " << b->get_write_fd()
+                         << " but main file descriptor is " << b->get_fd() << endl;
+#endif
+                    b->lower_clean_sendbuf( );
+                }
+            }
         }
 
 #ifndef USE_NO_THREAD

@@ -22,7 +22,8 @@ namespace VsnetDownload
  *    CMD_DOWNLOAD, object serial 0, COMPRESS|SENDRELIABLE|LOPRI
  *    char                       : subcommand ResolveRequest
  *    int16                      : number of entries
- *    ( int16 stringlen, char* )*: list of filenames
+ *    ( char,                    : list of filetype
+ *      int16 stringlen, char* )*:     and filenames
  *
  *  resolve response
  *    CMD_DOWNLOAD, object serial 0, COMPRESS|SENDRELIABLE|LOPRI

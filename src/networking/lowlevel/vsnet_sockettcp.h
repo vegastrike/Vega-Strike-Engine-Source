@@ -12,7 +12,7 @@
 #include <vector>
 #include <sys/types.h>
 
-#include "vsnet_socket.h"
+#include "vsnet_socketbase.h"
 #include "vsnet_thread.h"
 #include "packetmem.h"
 
@@ -25,6 +25,8 @@ typedef unsigned int u_int32_t;
  
 class VsnetTCPSocket : public VsnetSocket
 {
+    typedef boost::shared_ptr<Packet> PacketPtr;
+
 public:
     VsnetTCPSocket( int sock, const AddressIP& remote_ip, SocketSet& set );
 
@@ -35,9 +37,9 @@ public:
     virtual int  optPayloadSize( ) const;
     virtual int  queueLen( int pri );
 
-    virtual int  sendbuf( PacketMem& packet, const AddressIP* to, int pcktflags );
-    virtual int  recvbuf( PacketMem& buffer, AddressIP *from);
-    // virtual void ack( );
+    // virtual int  sendbuf( PacketMem& packet, const AddressIP* to, int pcktflags );
+    virtual int  sendbuf( Packet* packet, const AddressIP* to, int pcktflags );
+    virtual int  recvbuf( Packet* p, AddressIP* ipadr );
 
     virtual void dump( std::ostream& ostr ) const;
 
@@ -48,6 +50,7 @@ public:
     virtual bool need_test_writable( );
     virtual int  get_write_fd( ) const;
     virtual int  lower_sendbuf( );
+    virtual void lower_clean_sendbuf( );
 
 protected:
     virtual void child_disconnect( const char *s );
@@ -92,7 +95,7 @@ private:
     Blob*                 _incomplete_packet;
 
     /// cpq = completed packet queue
-    std::queue<PacketMem> _cpq;
+    std::queue<PacketPtr> _cpq;
     VSMutex               _cpq_mx;
 
     /** We send sizeof(Header) bytes as a packet length indicator. Unfortunately,
@@ -124,40 +127,31 @@ private:
      *  _sq.off is the number of bytes that have already been sent from
      *  PacketMem _sq_current.front(). _sq_mx protects the queues.
      */
-    typedef std::queue<PacketMem>  SqQueue;
-
-    class SqPair
-    {
-        int     first;
-        SqQueue second;
-
-    public:
-        void push( PacketMem m );
-        void pop( PacketMem& m );
-
-        int length( ) const;
-    };
+    typedef std::queue<PacketPtr>     SqQueue;
+    typedef std::queue<PacketMem>     SqQueueP;
 
     class SqQueues
     {
     public:
         SqQueues( );
 
-        bool empty( ) const;
-        int  getLength( int idx );
-        void push( int idx, PacketMem m );
-        void pop( PacketMem& m );
+        bool      empty( ) const;
+        int       getLength( int idx );
+        void      push( int idx, PacketPtr m );
+        PacketPtr pop( );
 
     private:
-        std::map<int,SqPair> _q;
-        int                  _ct;
+        // int                   _debug_array[4];
+
+        std::map<int,SqQueue> _q;
+        int                   _ct;
 
         SqQueues( const SqQueues& );
         SqQueues& operator=( const SqQueues& );
     };
 
     SqQueues              _sq;
-    SqQueue               _sq_current;
+    SqQueueP              _sq_current;
     size_t                _sq_off;
     VSMutex               _sq_mx;
     int                   _sq_fd;

@@ -21,7 +21,7 @@
 
 #include "vsnet_address.h"
 #include "vsnet_socketset.h"
-#include "vsnet_socket.h"
+#include "vsnet_socketbase.h"
 #include "vsnet_thread.h"
 
 #include <queue>
@@ -86,6 +86,9 @@ public:
 
 	// Accept a new connection
 	virtual SOCKETALT acceptNewConn( );
+
+    // Can't happen
+    virtual void lower_selected( ) { }
 
 private:
 	ServerSocketUDP( );

@@ -1,5 +1,6 @@
 #include <assert.h>
 #include "networking/lowlevel/netbuffer.h"
+#include "networking/lowlevel/vsnet_oss.h"
 #include "networking/const.h"
 #include "posh.h"
 #include "gfxlib_struct.h"
@@ -20,22 +21,19 @@ NetBuffer::NetBuffer( int bufsize)
 			memset( buffer, 0x20, size);
 			this->buffer[size-1] = 0;
 		}
-NetBuffer::NetBuffer( char * buf, int bufsize)
-		{
-			offset = 0;
-			size=bufsize+1;
-			this->buffer = new char[size];
-			memset( buffer, 0x20, size);
-			memcpy( buffer, buf, bufsize);
-			this->buffer[size-1] = 0;
-		}
+
+/** If there is a platform where b in the call VsnetOSS::memcpy(a,b,c) must be char*
+ *  instead of const char* or const void*, that systems header files are
+ *  badly broken. That requirement must be a lie.
+ *  If you have that, implement an ifdef in VsnetOSS::VsnetOSS::memcpy
+ */
 NetBuffer::NetBuffer( const char * buf, int bufsize)
 		{
 			offset = 0;
 			size=bufsize+1;
 			this->buffer = new char[size];
 			memset( buffer, 0x20, size);
-			memcpy( buffer, buf, bufsize);
+			VsnetOSS::memcpy( buffer, buf, bufsize);
 			this->buffer[size-1] = 0;
 		}
 NetBuffer::~NetBuffer()
@@ -58,7 +56,7 @@ void	NetBuffer::resizeBuffer( int newsize)
 			{
 				char * tmp = new char [newsize+1];
 				memset( tmp, 0, newsize+1);
-				memcpy( tmp, buffer, size);
+				VsnetOSS::memcpy( tmp, buffer, size);
 				delete buffer;
 				buffer = tmp;
 				size = newsize+1;
@@ -368,24 +366,24 @@ void	NetBuffer::addChar( char c)
 		{
 			int tmpsize = sizeof( c);
 			resizeBuffer( offset+tmpsize);
-			memcpy( buffer+offset, &c, sizeof( c));
+			VsnetOSS::memcpy( buffer+offset, &c, sizeof( c));
 			offset += tmpsize;
 		}
 char	NetBuffer::getChar()
 		{
 			char c;
 			checkBuffer( sizeof( c), "getChar");
-			memcpy( &c, buffer+offset, sizeof( c));
+			VsnetOSS::memcpy( &c, buffer+offset, sizeof( c));
 			offset+=sizeof(c);
 			return c;
 		}
-void	NetBuffer::addBuffer( unsigned char * buf, int bufsize)
+void	NetBuffer::addBuffer( const unsigned char * buf, int bufsize)
 		{
 			resizeBuffer( offset+bufsize);
-			memcpy( buffer+offset, buf, bufsize);
+			VsnetOSS::memcpy( buffer+offset, buf, bufsize);
 			offset+=bufsize;
 		}
-unsigned char* NetBuffer::extAddBuffer( int bufsize)
+unsigned char* NetBuffer::extAddBuffer( int bufsize )
 		{
 			resizeBuffer( offset+bufsize);
             unsigned char* retval = (unsigned char*)buffer+offset;
@@ -399,20 +397,14 @@ unsigned char *	NetBuffer::getBuffer( int offt)
 			offset += offt;
 			return tmp;
 		}
-void	NetBuffer::addBuffer( const unsigned char * buf, int bufsize)
-		{
-			resizeBuffer( offset+bufsize);
-			memcpy( buffer+offset, buf, bufsize);
-			offset+=bufsize;
-		}
 		// Add and get a string with its length before the char * buffer part
-void	NetBuffer::addString( string str)
+void	NetBuffer::addString( const string& str)
 		{
 			assert( str.length()<0xFFFF);
 			unsigned short length = str.length();
 			this->addShort( length);
 			resizeBuffer( offset+length);
-			memcpy( buffer+offset, str.c_str(), length);
+			VsnetOSS::memcpy( buffer+offset, str.c_str(), length);
 			offset += length;
 		}
 string	NetBuffer::getString()

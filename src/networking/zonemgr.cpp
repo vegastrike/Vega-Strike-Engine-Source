@@ -250,8 +250,7 @@ void ZoneMgr::broadcast( ClientWeakPtr cltw, Packet * pckt )
         {
             COUT << "BROADCASTING " << pckt->getCommand()
                  << " to client n° "<<un2->GetSerial() << endl;
-            pckt->setNetwork( &cpi->cltadr, cpi->sock);
-            pckt->bc_send( );
+            pckt->bc_send( cpi->cltadr, cpi->sock);
         }
     }
 }
@@ -276,8 +275,7 @@ void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt )
 		{
 			COUT<<"Sending update to client n° "<< clt->game_unit.GetUnit()->GetSerial();
 			COUT<<endl;
-			pckt->setNetwork( &clt->cltadr, clt->sock);
-			pckt->bc_send( );
+			pckt->bc_send( clt->cltadr, clt->sock);
 		}
 	}
 }
@@ -298,8 +296,7 @@ void	ZoneMgr::broadcastNoSelf( int zone, ObjSerial serial, Packet * pckt )
 		{
 			COUT<<"Sending update to client n° "<< clt->game_unit.GetUnit()->GetSerial();
 			COUT<<endl;
-			pckt->setNetwork( &clt->cltadr, clt->sock);
-			pckt->bc_send( );
+			pckt->bc_send( clt->cltadr, clt->sock);
 		}
 	}
 }
@@ -328,8 +325,7 @@ void	ZoneMgr::broadcastSample( int zone, ObjSerial serial, Packet * pckt, float 
 		{
 			COUT<<"Sending sound sample to client n° "<<clt->game_unit.GetUnit()->GetSerial();
 			COUT<<endl;
-			pckt->setNetwork( &clt->cltadr, clt->sock);
-			pckt->bc_send( );
+			pckt->bc_send( clt->cltadr, clt->sock);
 		}
 	}
 }
@@ -358,8 +354,7 @@ void	ZoneMgr::broadcastText( int zone, ObjSerial serial, Packet * pckt, float fr
 		{
 			COUT<<"Sending sound sample to client n° "<<clt->game_unit.GetUnit()->GetSerial();
 			COUT<<endl;
-			pckt->setNetwork( &clt->cltadr, clt->sock);
-			pckt->bc_send( );
+			pckt->bc_send( clt->cltadr, clt->sock);
 		}
 	}
 }

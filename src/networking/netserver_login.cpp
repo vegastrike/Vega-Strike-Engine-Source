@@ -99,10 +99,6 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct, ch
 			VSExit(1);
 		}
 	}
-	if( canCompress() && ( flags & CMD_CAN_COMPRESS ) )
-		clt->sock.allowCompress( true);
-	else
-		clt->sock.allowCompress( false);
 
 	memcpy( &clt->cltadr, &ipadr, sizeof( AddressIP));
 	clt->callsign = callsign;

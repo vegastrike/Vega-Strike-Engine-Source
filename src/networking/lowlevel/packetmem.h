@@ -4,7 +4,10 @@
 #include <sys/types.h>
 #include <iostream>
 
+#include "vsnet_debug.h"
 #include "networking/const.h"
+
+#include "boost/shared_array.hpp"
 
 /***********************************************************************
  * PacketMem - declaration
@@ -12,14 +15,17 @@
 
 class PacketMem
 {
+    DECLARE_VALID
+
 public:
     LOCALCONST_DECL(bool,TakeOwnership,1)
     LOCALCONST_DECL(bool,LeaveOwnership,0)
 
 private:
-    char*   _buffer;
+    typedef boost::shared_array<char> ptr;
+
+    ptr     _buffer;
     size_t  _len;
-    size_t* _cnt;      // delete or return to pool when all references are gone
 
 public:
     PacketMem( );
@@ -42,14 +48,6 @@ public:
     char*       getVarBuf( );
     const char* getConstBuf( ) const;
 
-    /** Performs if(len<_len) _len=len;
-     *  Dangerous, use with care.
-     *  This function does not touch the buffer itself, but it fakes a shorter
-     *  buffer than actually present. Existing copies will not share the fake
-     *  length value but new copies will.
-     */
-    void trunc( size_t len );
-    
     /** Dump the content of this buffer onto the given ostream, identing
      *  every line by indent_depth spaces.
      */
@@ -62,30 +60,6 @@ public:
 private:
     void release( );
     void inner_set( void* buffer, size_t size, bool own );
-    void ref( );
-    void unref( );
-};
-
-/***********************************************************************
- * PacketMemShadow - declaration
- ***********************************************************************/
-
-class PacketMemShadow
-{
-    PacketMem _mem;
-    size_t    _idx;    /* 0-based offset */
-    size_t    _len;    /* fake length in bytes */
-public:
-    PacketMemShadow( );
-    PacketMemShadow( const PacketMemShadow& orig );
-    PacketMemShadow( const PacketMem& mem );
-    PacketMemShadow( const PacketMem& mem, size_t idx, size_t len );
-
-    PacketMemShadow& operator=( const PacketMemShadow& orig );
-
-    size_t      len() const;
-    char*       getVarBuf( );
-    const char* getConstBuf( ) const;
 };
 
 #endif
