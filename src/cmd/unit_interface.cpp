@@ -417,8 +417,8 @@ void UpgradingInfo::SetupCargoList () {
 				  if (active_missions.size()>=UniverseUtil::maxMissions()) {
 					  (*CurrentList)[i].color=nomoney;
 				  }
-				  (*CurrentList)[i].cargo.quantity=tmpquan;
 			  }
+			  (*CurrentList)[i].cargo.quantity=tmpquan;
 		  } else {
 			  (*CurrentList)[i].color=nomoney;
 		  }
