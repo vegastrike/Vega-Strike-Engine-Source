@@ -246,6 +246,7 @@ Unit::Unit(const char *filename, bool xml) {
 
 	CloseFile();
 	calculate_extent();
+	UpdateCollideQueue();
 }
 
 Unit::~Unit()

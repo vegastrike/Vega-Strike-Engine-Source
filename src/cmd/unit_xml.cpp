@@ -765,6 +765,7 @@ fclose (inFile);
   }
 
   calculate_extent();
+  UpdateCollideQueue();
   string tmpname (filename);
 
 
