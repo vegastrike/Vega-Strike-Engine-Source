@@ -80,7 +80,7 @@ struct Texture{
   Texture(const char *,const char *, int stage = 0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0);
   ///Creates a texture with only color data as a single bitmap
   Texture(const char * FileName, int stage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D);
-  
+  virtual Texture * Original();
   virtual Texture * Clone ();
   ///Texture copy constructor that increases appropriate refcounts
   //  Texture (Texture *t);
@@ -93,9 +93,9 @@ struct Texture{
   ///Whether or not the color and alpha data already exist
   static Texture * Exists (std::string s, std::string a);
   ///A way to sort the texture by the original address (to make sure like textures stick togehter
-  virtual bool operator < (const Texture &b);
+  bool operator < (Texture &b);
   ///A way to test if the texture is equal to another based on original values
-  virtual bool operator == (const Texture &b);
+  bool operator == (Texture &b);
   ///Binds the texture in the GFX library
   virtual void MakeActive();
   ///If the texture has loaded properly returns true

@@ -267,6 +267,7 @@ void Mesh::Draw(float lod, const Matrix m, float toofar, short cloak, float nebd
   origmesh->draw_queue->push_back(c);
   if(!(origmesh->will_be_drawn&(1<<c.mesh_seq))) {
     origmesh->will_be_drawn |= (1<<c.mesh_seq);
+    //    fprintf (stderr,"origmesh %x",origmesh);
     undrawn_meshes[c.mesh_seq].push_back(OrigMeshContainer(origmesh,toofar));//FIXME will not work if many of hte same mesh are blocking each other
   }
   will_be_drawn |= (1<<c.mesh_seq);
@@ -375,6 +376,8 @@ void Mesh::ProcessZFarMeshes () {
   GFXEnable (DEPTHTEST);
   GFXEnable (DEPTHWRITE);
 }
+
+
 void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
   static GFXColor meshcolor (getMeshColor());
   GFXLightContextAmbient(meshcolor);
@@ -392,9 +395,9 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
     } else {
 
     }
-    //    std::sort(undrawn_meshes[a].begin(),undrawn_meshes[a].end());//sort by texture address
     if (!undrawn_meshes[a].empty()) {
       // shouldn't the sort - if any - be placed here??
+      std::sort(undrawn_meshes[a].begin(),undrawn_meshes[a].end());//sort by texture address
       undrawn_meshes[a].back().orig->vlist->LoadDrawState();
     }
     while(!undrawn_meshes[a].empty()) {

@@ -147,7 +147,7 @@ void LocationSelect:: Draw () {
     Vector tLocation (t[12],t[13],t[14]);
     Vector tP (t[0],t[1],t[2]);//the p vector of the plane being selected on
     Vector tQ (t[4],t[5],t[6]);//the q vector of the plane being selected on
-    Vector tR (t[8],t[9],t[10]);//the q vector of the plane being selected on
+    ///unused    Vector tR (t[8],t[9],t[10]);//the q vector of the plane being selected on
     //fprintf (stderr,"<%f,%f,%f>",t[0],t[1],t[2]);
     //fprintf (stderr,"<%f,%f,%f>",t[4],t[5],t[6]);
     //fprintf (stderr,"<%f,%f,%f>",t[8],t[9],t[10]);

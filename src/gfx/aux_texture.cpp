@@ -100,17 +100,16 @@ Texture * Texture::Exists (string s) {
     tmp = texHashTable.Get (GetSharedTextureHashName (s));
   }
   if (tmp)
-    if (tmp->original)
-      return tmp->original;
+    return tmp->Original();
   return tmp;
 }
 
-bool Texture::operator < (const Texture & b) {
-  return ( this?(&b?((original?original:this)<(b.original?b.original:&b)):false):true);
+bool Texture::operator < (Texture & b) {
+  return Original()<b.Original();
 }
 
-bool Texture::operator == (const Texture & b) {
-  return ( (original?original:this)==(b.original?b.original:&b));
+bool Texture::operator == (Texture & b) {
+  return Original()==b.Original();
 }
 
 GFXBOOL Texture::checkold(string s, bool shared, string & hashname)
@@ -153,9 +152,17 @@ void Texture::setold()
 	original->original = NULL;
 	original->refcount++;
 }
+Texture * Texture::Original() {
+  if (original) {
+    return original->Original();
+  }else {
+    return this;
+  }
+}
+
 Texture *Texture::Clone () {
   Texture * retval = new Texture();
-  Texture * target = original?original:this;
+  Texture * target = Original();
   *retval = *target;
   //  memcpy (this, target, sizeof (Texture));
   if (retval->name!=-1) {

@@ -9,17 +9,6 @@
 static vector <AnimatedTexture *> myvec;
 
 
-bool AnimatedTexture::operator < (const Texture & b) {
-  if (!Decal)
-    return false;
-  return (*Decal[active])<b;
-}
-
-bool AnimatedTexture::operator == (const Texture & b) {
-  if (!Decal)
-    return false;
-  return (*Decal[active])==b;
-}
 
 void AnimatedTexture::MakeActive () {
   if (Decal)
@@ -33,9 +22,10 @@ void AnimatedTexture::UpdateAllPhysics() {
 void AnimatedTexture::UpdateAllFrame() {
   for (unsigned int i=0;i<myvec.size();i++) {
     myvec[i]->cumtime+=GetElapsedTime();
-    if (myvec[i]->timeperframe)
+    if (myvec[i]->timeperframe) {
       myvec[i]->active = ((int)(myvec[i]->cumtime/myvec[i]->timeperframe))%myvec[i]->numframes;
-    
+      myvec[i]->original = myvec[i]->Decal[myvec[i]->active]->Original();
+    }
   }
 }
 bool AnimatedTexture::Done() {
@@ -57,6 +47,10 @@ AnimatedTexture::AnimatedTexture (FILE * fp, int stage, enum FILTER imm){
     Load (fp,stage,imm);
 }
 
+Texture *AnimatedTexture::Original() const{
+  return Decal[active]->Original();
+  
+}
 Texture *AnimatedTexture::Clone () {
   AnimatedTexture * retval = new AnimatedTexture ();
   *retval = *this;
@@ -64,22 +58,24 @@ Texture *AnimatedTexture::Clone () {
   for (int i=0;i<numframes;i++) {
     retval->Decal[i]= Decal[i]->Clone ();
   }
+  retval->original = Original();
   return retval;
 }
 
 AnimatedTexture::~AnimatedTexture () {
   Destroy();
-  data= (unsigned char *)0xBADF00D;
-  palette=NULL;//(unsigned char *)0xBADF00D;
+  data= NULL;
+  palette=NULL;
 }
-AnimatedTexture::AnimatedTexture () {Decal=NULL;}
+AnimatedTexture::AnimatedTexture () {
+  Decal=NULL;
+  original = NULL;
+}
+
 void AnimatedTexture::Destroy() {
   int i;
-  if (data==(unsigned char *)0xBADF00D||palette==(unsigned char *)0xBADF00D) {
-    fprintf (stderr,"Eating Bad food here!");
-  }
   if (Decal) {
-    for (i=0;i<myvec.size();i++) {
+    for (i=0;i<(int)myvec.size();i++) {
       if (myvec[i]==this)
 	myvec.erase (myvec.begin()+i);
     }
@@ -116,4 +112,8 @@ void AnimatedTexture::Load(FILE * fp, int stage, enum FILTER ismipmapped) {
       Decal[i]=new Texture (file,stage,ismipmapped);
     }    
   }
+  if (numframes>=1)
+    original = Decal[0]->Original();
+  else
+    original = NULL;
 }
