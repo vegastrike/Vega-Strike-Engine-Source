@@ -227,15 +227,42 @@ namespace Unit {
 
 }
 
+int globaltab = 0; // go go kludge master!
+int globalfileout=0; //go go gadget kludge!
+int globallasttab=0; //go go uber kludge!
+float globalmassrescale=1; //go go... ok, at this point, it's obvious I'm not trying
+
 void UnitBeginElement(const string &name, const AttributeList &attributes, XML * xml) {
   
   AttributeList::const_iterator iter;
   Unit::Names elem = (Unit::Names)Unit::element_map.lookup(name);
   Unit::Names top;
+  if(globalfileout){
+	if(globaltab>globallasttab){
+	  cout <<">\n";
+	  ++globallasttab;
+	}
+    for (int sc = 0; sc< globaltab;sc++){
+	  cout<<"\t";
+	}
+    ++globaltab;
+	cout << "<"<<name <<" ";
+	
+	for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+	  if((*iter).name =="mass" || (*iter).name=="momentofinertia" || name=="Engine" || name == "Maneuver"){
+		  if((XMLSupport::parse_float (((*iter).value)) * globalmassrescale)>100)
+		    cout<<(*iter).name <<" = \"" << (unsigned long int)((XMLSupport::parse_float (((*iter).value)) * globalmassrescale)) << "\" ";
+		  else
+			cout<<(*iter).name <<" = \"" << ((XMLSupport::parse_float (((*iter).value)) * globalmassrescale)) << "\" ";
+	  } else {
+		cout<<(*iter).name <<" = \"" << (*iter).value << "\" ";
+	  }
+	}
+  }
   switch(elem) {
   case Unit::UNIT:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-      switch(Unit::attribute_map.lookup((*iter).name)) {
+	  switch(Unit::attribute_map.lookup((*iter).name)) {
       case Unit::SCALE:
 	xml->unitscale=XMLSupport::parse_float ((*iter).value);
 	break;
@@ -253,6 +280,17 @@ void UnitBeginElement(const string &name, const AttributeList &attributes, XML *
   }
 }
 void UnitEndElement(const string &name, XML * xml) {
+  --globaltab;
+  if(globalfileout){
+	if(globaltab==globallasttab)
+	  cout <<" >\n";
+	else
+		globallasttab--;
+    for (int sc = 0; sc< globaltab;sc++){
+	  cout<<"\t";
+	}
+    cout <<"</"<<name<<">\n";
+  }
 }
 void beginElement(const string &name, const AttributeList &attributes, XML * xml) {
   
@@ -261,6 +299,7 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
   XML::Names top;
   if(xml->state_stack.size()>0) top = *xml->state_stack.rbegin();
   xml->state_stack.push_back(elem);
+  
   switch(elem) {
 	  case XML::MATERIAL:
   case XML::DIFFUSE:
@@ -278,22 +317,22 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::ANIMATEDTEXTURE:
-	break;
+  		break;
       case XML::REVERSE:
-	break;
+		break;
       case XML::FORCETEXTURE:
-	break;
+		break;
       case XML::TEXTURE:
-	break;
+		break;
       case XML::ALPHAMAP:
-	break;
+		break;
       case XML::SCALE:
-	xml->scale = XMLSupport::parse_float ((*iter).value);
-	break;
+		xml->scale = XMLSupport::parse_float ((*iter).value);
+		break;
       case XML::SHAREVERT:
-	break;
+		break;
       case XML::BLENDMODE:
-	break;
+		break;
       }
     }break;
   case XML::POINTS:
@@ -305,20 +344,20 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::X:
-	xml->vertex.x = XMLSupport::parse_float((*iter).value);
-	break;
-      case XML::Y:
-	xml->vertex.y = XMLSupport::parse_float((*iter).value);
-	break;
+		xml->vertex.x = XMLSupport::parse_float((*iter).value);
+		break;
+	  case XML::Y:
+		xml->vertex.y = XMLSupport::parse_float((*iter).value);
+		break;
      case XML::Z:
-	xml->vertex.z = XMLSupport::parse_float((*iter).value);
-	break;
+		xml->vertex.z = XMLSupport::parse_float((*iter).value);
+		break;
       case XML::S:
-	xml->vertex.s = XMLSupport::parse_float ((*iter).value);
-	break;
+		xml->vertex.s = XMLSupport::parse_float ((*iter).value);
+		break;
       case XML::T:
-	xml->vertex.t = XMLSupport::parse_float ((*iter).value);
-	break;
+		xml->vertex.t = XMLSupport::parse_float ((*iter).value);
+		break;
       }
     }
     break;
@@ -326,17 +365,17 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	fprintf (stderr, "Unknown attribute '%s' encountered in Normal tag\n",(*iter).name.c_str());
-	break;
+		fprintf (stderr, "Unknown attribute '%s' encountered in Normal tag\n",(*iter).name.c_str());
+		break;
       case XML::I:
-	xml->vertex.i = XMLSupport::parse_float((*iter).value);
-	break;
+		xml->vertex.i = XMLSupport::parse_float((*iter).value);
+		break;
       case XML::J:
-	xml->vertex.j = XMLSupport::parse_float((*iter).value);
-	break;
+		xml->vertex.j = XMLSupport::parse_float((*iter).value);
+		break;
       case XML::K:
-	xml->vertex.k = XMLSupport::parse_float((*iter).value);
-	break;
+		xml->vertex.k = XMLSupport::parse_float((*iter).value);
+		break;
       }
     }
     break;
@@ -498,20 +537,27 @@ void UnitLoadXML(const char *filename, XML & xml) {
 }
 
 
+
 int main (int argc, char ** argv) {
   XML blah;
   blah.unitscale=1;
   if (argc<2)
     return 1;
+  if (argc == 4 && !strcmp(argv[2],"MS")){
+	globalfileout=1;
+	globalmassrescale=atof(argv[3]);
+  }
   UnitLoadXML (argv[1],blah);
   fprintf (stderr,"Loading unit scale %f\n",blah.unitscale);
   for (unsigned int i=0;i<blah.meshnames.size();i++) {
     fprintf (stderr,"Loading mesh %s \n",blah.meshnames[i].c_str());
     LoadXML(blah.meshnames[i].c_str(),blah);
   }
-  printf ("3\n%d\n",blah.vertices.size());
-  for (unsigned int vcount = 0; vcount <blah.vertices.size();++vcount){
-	printf("%f %f %f\n",blah.vertices[vcount].x, blah.vertices[vcount].y,blah.vertices[vcount].z);  
+  if(argc==2){
+	printf ("3\n%d\n",blah.vertices.size());
+	  for (unsigned int vcount = 0; vcount <blah.vertices.size();++vcount){
+	    printf("%f %f %f\n",blah.vertices[vcount].x, blah.vertices[vcount].y,blah.vertices[vcount].z);  
+	  }
   }
   return 0;
 }
