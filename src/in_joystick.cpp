@@ -176,7 +176,7 @@ JoyStick::JoyStick(int which): mouse(which==MOUSE_JOYSTICK) {
   if (which!=MOUSE_JOYSTICK)
     deadzone=XMLSupport::parse_float(vs_config->getVariable("joystick","deadband","0.05"));
   else
-    deadzone=0;
+	  deadzone=XMLSupport::parse_float (vs_config->getVariable("joystick","mouse_deadband","0"));
   joy_available = 0;
   joy_x=joy_y=joy_z=0;
   if (which==MOUSE_JOYSTICK) {
