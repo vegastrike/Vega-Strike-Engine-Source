@@ -291,7 +291,26 @@ void Unit::RegenShields () {
 float rand01 () {
 	return ((float)rand()/(float)RAND_MAX);
 }
-
+void Unit::leach (float damShield, float damShieldRecharge, float damEnRecharge) {
+  recharge*=damEnRecharge;
+  shield.recharge*=damShieldRecharge;
+  switch (shield.number) {
+  case 2:
+    shield.fb[2]*=damShield;
+    shield.fb[3]*=damShield;
+    break;
+  case 4:
+    shield.fbrl.frontmax*=damShield;
+    shield.fbrl.backmax*=damShield;
+    shield.fbrl.leftmax*=damShield;
+    shield.fbrl.rightmax*=damShield;
+    break;
+  case 6:
+    shield.fbrltb.fbmax*=damShield;
+    shield.fbrltb.rltbmax*=damShield;
+    break;
+  }
+}
 void Unit::DamageRandSys(float dam, const Vector &vec) {
 	float deg = fabs(180*atan2 (vec.i,vec.k)/M_PI);
 	float randnum=rand01();
@@ -336,8 +355,10 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 			unsigned int whichmount=rand()%nummounts;
 			if (randnum>=.9) {
 				mounts[whichmount].status=Unit::Mount::DESTROYED;
-			} else if (mounts[whichmount].ammo>0) {
-				mounts[whichmount].ammo*=dam;
+			} else if (randnum>=.6) {
+			  image->ecm*=dam;
+			}else if (mounts[whichmount].ammo>0) {
+			  mounts[whichmount].ammo*=dam;
 			}
 		}
 		return;
@@ -436,8 +457,8 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 		} else if (randnum>=.03){
 			this->jump.damage+=100*(1-dam);
 		} else {
-		  if (repair_droid>0) {
-		    repair_droid--;
+		  if (image->repair_droid>0) {
+		    image->repair_droid--;
 		  }
 		}
 		return;

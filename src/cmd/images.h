@@ -59,7 +59,10 @@ struct UnitImages {
   Box *selectionBox;
 
   float *cockpit_damage; //0 is radar, 1 to MAXVDU is vdus and >MAXVDU is gauges
-
+  ///how likely to fool missiles
+  float ecm;
+  ///holds the info for the repair bot type. 0 is no bot;
+  unsigned char repair_droid;
   ///How much energy cloaking takes per frame
   float cloakenergy;
   ///how fast this starship decloaks/close...if negative, decloaking

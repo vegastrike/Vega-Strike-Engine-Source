@@ -8,7 +8,7 @@ void Unit::Repair() {
   //note work slows down under time compression!
   static float repairtime =XMLSupport::parse_float(vs_config->getVariable ("physics","RepairDroidTime","1000"));
   float workunit = SIMULATION_ATOM/(repairtime*getTimeCompression());//a droid completes 1 work unit in repairtime
-  switch (repair_droid) {
+  switch (image->repair_droid) {
   case 6:
     //versatilize Weapons! (invent)
     if (nummounts) {

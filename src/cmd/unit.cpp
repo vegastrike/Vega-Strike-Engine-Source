@@ -147,7 +147,7 @@ void Unit::SetNebula (Nebula * neb) {
 }
 void Unit::Init()
 {
-  repair_droid=0;
+
   xml=NULL;
   docked=NOT_DOCKED;
   SubUnit =0;
@@ -168,6 +168,8 @@ void Unit::Init()
   limits.structurelimits=Vector(0,0,1);
   limits.limitmin=-1;
   cloaking=-1;
+  image->repair_droid=0;
+  image->ecm=0;
   image->cloakglass=false;
   image->cargo_volume=0;
   image->unitwriter=NULL;

@@ -288,8 +288,6 @@ class Unit {
     ///What percentage leaks (divide by 100%)
     char leak; 
   } shield;
-  ///holds the info for the repair bot type. 0 is no bot;
-  unsigned char repair_droid;
   ///regenerates all 2,4, or 6 shields for 1 SIMULATION_ATOM
   void RegenShields();
   ///The structual integ of the current unit
@@ -710,6 +708,9 @@ public:
   void SetTurretAI ();
   ///get the flightgroup description
   Flightgroup *getFlightgroup() const { return flightgroup; };
+  ///reduces shields to X percentage and reduces shield recharge to Y percentage
+  void leach (float XshieldPercent, float YrechargePercent, float ZenergyPercent);
+
   ///get the subnumber
   int getFgSubnumber() const { return flightgroup_subnumber; };
   ///get the full flightgroup ID (i.e 'green-4')

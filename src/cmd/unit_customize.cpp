@@ -285,7 +285,8 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   STDUPGRADE(shield.recharge,up->shield.recharge,templ->shield.recharge,0);
   STDUPGRADE(hull,up->hull,templ->hull,0);
   STDUPGRADE(recharge,up->recharge,templ->recharge,0);
-  STDUPGRADE(repair_droid,up->repair_droid,templ->repair_droid,0);
+  STDUPGRADE(image->repair_droid,up->image->repair_droid,templ->image->repair_droid,0);
+  STDUPGRADE(image->ecm,up->image->ecm,templ->image->ecm,0);
   STDUPGRADE(maxenergy,up->maxenergy,templ->maxenergy,0);
   STDUPGRADE(limits.yaw,up->limits.yaw,templ->limits.yaw,0);
   STDUPGRADE(limits.pitch,up->limits.pitch,templ->limits.pitch,0);
