@@ -24,7 +24,7 @@
 
 #include "gfx_transform_vector.h"
 
-#define SIMULATION_ATOM (1.0/10F)
+#define SIMULATION_ATOM (1.0/10.0)
 
 static const float oocc = (float)0.0000000000000000111265005605; //   1/c^2
 static const float c = (float)299792458.0;
