@@ -40,43 +40,43 @@ FSM::FSM (const char * filename) {
     LoadXML(filename);
   }
 }
-int FSM::GetUnDockNode() {
+int FSM::GetUnDockNode() const{
   return nodes.size()-13;
 }
-int FSM::GetFailDockNode() {
+int FSM::GetFailDockNode()const {
   return nodes.size()-12;
 }
-int FSM::GetDockNode() {
+int FSM::GetDockNode() const{
   return nodes.size()-11;
 }
-int FSM::GetAbleToDockNode() {
+int FSM::GetAbleToDockNode() const{
   return nodes.size()-9;
 }
-int FSM::GetUnAbleToDockNode() {
+int FSM::GetUnAbleToDockNode() const{
   return nodes.size()-10;
 }
-int FSM::GetNoNode() {
+int FSM::GetNoNode() const{
   return nodes.size()-8;
 }
-int FSM::GetYesNode() {
+int FSM::GetYesNode() const{
   return nodes.size()-7;
 }
-int FSM::GetContrabandInitiateNode() {
+int FSM::GetContrabandInitiateNode() const{
   return nodes.size()-6;
 }
-int FSM::GetContrabandUnDetectedNode() {
+int FSM::GetContrabandUnDetectedNode() const{
   return nodes.size()-5;
 }
-int FSM::GetContrabandDetectedNode() {
+int FSM::GetContrabandDetectedNode() const{
   return nodes.size()-4;
 }
-int FSM::GetContrabandWobblyNode() {
+int FSM::GetContrabandWobblyNode() const{
   return nodes.size()-3;
 }
-int FSM::GetRequestLandNode () {
+int FSM::GetRequestLandNode () const{
   return nodes.size()-2;
 }
-int FSM::GetHitNode () {
+int FSM::GetHitNode () const{
   return nodes.size()-1;
 }
 static float sq (float i) {return i*i;}
@@ -95,9 +95,9 @@ void FSM::Node::AddSound (int sounds, unsigned char sex) {
   sound[sex]=sounds;
 }
 
-int FSM::getCommMessageMood (int curstate, float mood, float randomresponse) const{
-  const FSM::Node *n = &nodes[curstate];
-    mood+=-randomresponse+2*randomresponse*((float)rand())/RAND_MAX;
+int FSM::getCommMessageMood (int curstate, float mood, float randomresponse,float relationship) const{
+  const FSM::Node *n = curstate<nodes.size()?(&nodes[curstate]):(&nodes[getDefaultState(relationship)]);
+  mood+=-randomresponse+2*randomresponse*((float)rand())/RAND_MAX;
   
   int choice=0;
 #if 0

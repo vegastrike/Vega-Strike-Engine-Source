@@ -23,21 +23,21 @@ class FSM {
   static void endElement(void *userData, const XML_Char *name);
   std::string GetEdgesString (int curstate);
   float getDeltaRelation (int prevstate, int curstate) const;
-  int getCommMessageMood(int curstate, float mood, float randomresponsefactor) const;
+  int getCommMessageMood(int curstate, float mood, float randomresponsefactor,float relationship) const;
   int getDefaultState (float relationship) const;
-  int GetUnDockNode();
-  int GetFailDockNode();
-  int GetDockNode();
-  int GetAbleToDockNode();
-  int GetUnAbleToDockNode();
-  int GetYesNode ();
-  int GetNoNode();
-  int GetHitNode ();
-  int GetRequestLandNode();
-  int GetContrabandInitiateNode();
-  int GetContrabandUnDetectedNode();
-  int GetContrabandDetectedNode();
-  int GetContrabandWobblyNode();
+  int GetUnDockNode()const ;
+  int GetFailDockNode()const;
+  int GetDockNode()const;
+  int GetAbleToDockNode()const;
+  int GetUnAbleToDockNode()const;
+  int GetYesNode ()const;
+  int GetNoNode()const;
+  int GetHitNode ()const;
+  int GetRequestLandNode()const;
+  int GetContrabandInitiateNode()const;
+  int GetContrabandUnDetectedNode()const;
+  int GetContrabandDetectedNode()const;
+  int GetContrabandWobblyNode()const;
   
 };
 class CommunicationMessage {

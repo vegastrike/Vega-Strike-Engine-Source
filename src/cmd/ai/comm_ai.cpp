@@ -42,10 +42,16 @@ void CommunicatingAI::SetParent (Unit * par) {
 int CommunicatingAI::selectCommunicationMessageMood (CommunicationMessage &c, float mood) {
 
   Unit * targ = c.sender.GetUnit();
+  float relationship=0;
+
   if (targ) {
-    mood+=(1-randomresponse)*GetEffectiveRelationship(targ);
+    relationship= GetEffectiveRelationship(targ);
+    mood+=(1-randomresponse)*relationship;
   }
-  return c.fsm->getCommMessageMood (c.curstate,mood,randomresponse);
+  if (!(c.curstate<c.fsm->GetUnDockNode())) {
+    c.curstate = c.fsm->getDefaultState(relationship);//hijack the current state
+  }
+  return c.fsm->getCommMessageMood (c.curstate,mood,randomresponse,relationship);
 
 }
 using std::pair;
