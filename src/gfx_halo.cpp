@@ -46,13 +46,17 @@ Halo::~Halo () {
   }
 }
 void Halo::Draw (const Transformation &quat, const Matrix m) {
-  Vector pos,p,q,r,offset;
-  _GFX->AccessCamera()->GetPQR(p,q,r);
+  Vector pos,p,q,r, offset;
+
   pos=  position.Transform(m);
+  offset = (_GFX->AccessCamera()->GetPosition()-pos);
+  offset.Normalize();
+  offset*=(sizex>sizey?sizex:sizey);
+  _GFX->AccessCamera()->GetPQR(p,q,r);
   p=p*sizex;
   r =-r;
   q=q*sizey;
-  offset = r*(sizex>sizey?sizex:sizey);
+  //  offset = r*(sizex>sizey?sizex:sizey); //screws up cus of perspective
   GFXVertex tmp[4] = {GFXVertex(pos-p-q+offset,r,0,1),
 		       GFXVertex(pos+p-q+offset,r,1,1),
 		       GFXVertex(pos+p+q+offset,r,1,0),
