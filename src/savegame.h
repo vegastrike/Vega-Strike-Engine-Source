@@ -36,11 +36,11 @@ class SaveGame {
   void ReadNewsData(char * &buf);
   void ReadMissionData (char * &buf);
   void ReadMissionStringData (char * &buf);
-  void ReadSavedPackets (char * &buf);
   MissionStringDat *missionstringdata;
   MissionFloatDat *missiondata;
   std::string playerfaction;
  public:
+
   ~SaveGame();
   void ReloadPickledData();
   std::string GetCallsign() {return callsign;}
@@ -60,6 +60,7 @@ class SaveGame {
   std::string WriteSaveGame (const char * systemname, const class QVector &Pos,float credits, std::vector <std::string> unitname, int player_num, std::string fact="", bool write=true);
   std::string WritePlayerData( const QVector &FP, std::vector<std::string> unitname, const char * systemname, float credits, std::string fact="");
   std::string WriteDynamicUniverse();
+  void ReadSavedPackets (char * &buf);
   ///cast address to long (for 64 bits compatibility)
   void AddUnitToSave (const char * unitname, int type, const char * faction, long address);
   void RemoveUnitFromSave (long address);//cast it to a long
