@@ -140,11 +140,11 @@ void Missile::UpdatePhysics2 (const Transformation &trans, const Transformation 
     }
 	Unit::UpdatePhysics2 (trans, old_physical_state, accel, difficulty,transmat, CumulativeVelocity, ResolveLast, uc);
     this->time-=SIMULATION_ATOM;
-	float checker = targ->querySphere (Position()-(SIMULATION_ATOM*GetVelocity()),Position(),rSize());
     if (NULL!=targ) {
-      if (checker||((Position()-targ->Position()).Magnitude()-targ->rSize()-rSize()<detonation_radius)) {
-		  Discharge();
-		  time=-1;
+		float checker = targ->querySphere (Position()-(SIMULATION_ATOM*GetVelocity()),Position(),rSize());
+		if (checker||((Position()-targ->Position()).Magnitude()-targ->rSize()-rSize()<detonation_radius)) {
+			Discharge();
+			time=-1;
 	//Vector norm;
 	//float dist;
 	/*** WARNING COLLISION STUFF... TO FIX FOR SERVER SIDE SOMEDAY ***
@@ -153,7 +153,7 @@ void Missile::UpdatePhysics2 (const Transformation &trans, const Transformation 
 	  time=-1;
 	}
 	*/
-      }
+		}
     }
     if (time<0) {
       DealDamageToHull (Vector(.1,.1,.1),hull+1);
