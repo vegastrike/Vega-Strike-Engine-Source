@@ -8,7 +8,7 @@
 #include "cmd_order.h"
 
 PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis, const Vector & centre, Unit * targetunit) : Order(MOVEMENT), parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 
-   
+  parent->SetResolveForces(false);
     double delta = x_size.Magnitude() - y_size.Magnitude();
     if(delta == 0) {
       focus = Vector(0,0,0);
@@ -28,7 +28,9 @@ PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const 
       AttachOrder (centre);
     }
 }
-
+PlanetaryOrbit::~PlanetaryOrbit () {
+  parent->SetResolveForces (true);
+}
 void PlanetaryOrbit::Execute() {
   if (done) 
     return;
@@ -79,6 +81,8 @@ void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,f
   delete satiterator;
 }
 
+const float densityOfRock = 1; // 1 cm of durasteel equiv per cubic meter
+
 Planet::Planet()  : Unit(), radius(0.0f), satellites() {
   Init();
   SetAI(new Order()); // no behavior
@@ -93,7 +97,7 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
   name += textname;
   this->radius=radius;
   this->gravity=gravity;
-
+  hull = (4./3)*M_PI*radius*radius*radius*densityOfRock;
   SetAI(new PlanetaryOrbit(this, vely, pos, x, y, orbitcent, parent)); // behavior
 
   meshdata = new Mesh*[2];
@@ -123,7 +127,7 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
 }
 
 Planet::~Planet() { 
-	int i;
+	unsigned int i;
 	if (bspTree)
 	  delete bspTree;
 	for (i=0;i<this->destination.size();i++) {
@@ -172,6 +176,7 @@ void Planet::gravitate(UnitCollection *uc) {
     }*/
 
   // fake gravity
+  /***FIXME 091401 why do we need to traverse satellites??????
   UnitCollection::UnitIterator * iter;
   for (iter = satellites.createIterator();
        iter->current()!=NULL;
@@ -185,5 +190,6 @@ void Planet::gravitate(UnitCollection *uc) {
 	}
   }
   delete iter;
+  **/
   UpdateCollideQueue();
 }

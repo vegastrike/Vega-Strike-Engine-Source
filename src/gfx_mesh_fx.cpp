@@ -103,7 +103,11 @@ void Mesh::UpdateFX() {
 void Mesh::EnableSpecialFX(){
   draw_sequence=MESH_SPECIAL_FX_ONLY;
   setEnvMap(GFXFALSE);
-  orig->envMap = GFXFALSE;
+  if (orig) {
+    orig->draw_sequence=MESH_SPECIAL_FX_ONLY;
+    orig->blendSrc = orig->blendDst= ONE;
+    orig->envMap = GFXFALSE;
+  }
   blendSrc=ONE;
   blendDst=ONE;
 }

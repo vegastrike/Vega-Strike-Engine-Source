@@ -54,19 +54,24 @@ void Unit::calculate_extent() {
   for(a=0; a<nummesh; a++) {
     corner_min = corner_min.Min(meshdata[a]->corner_min());
     corner_max = corner_max.Max(meshdata[a]->corner_max());
-  }
+  }/* have subunits now in table
   for(a=0; a<numsubunit; a++) {
     corner_min = corner_min.Min(subunits[a]->corner_min);
     corner_max = corner_max.Max(subunits[a]->corner_max);
-  }
+    }*/
   selectionBox = new Box(corner_min, corner_max);
   float tmp1 = corner_min.Magnitude();
   float tmp2 = corner_max.Magnitude();
   radial_size = tmp1>tmp2?tmp1:tmp2;
 }
 
+void Unit::SetResolveForces (bool ys) {
+  resolveforces = ys;
+}
+
 void Unit::Init()
 {
+  resolveforces=true;
   CollideInfo.object = NULL;
   CollideInfo.type = LineCollide::UNIT;
   bspTree = NULL;

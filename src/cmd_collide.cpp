@@ -101,6 +101,7 @@ bool Unit::OneWayCollide (Unit * target, Vector & normal, float &dist) {//do eac
 bool Unit::Collide (Unit * target) {
   if (target==this) 
     return false;
+
   //unit v unit? use point sampling?
   //now first make sure they're within bubbles of each other...
   if ((Position()-target->Position()).Magnitude()>radial_size+target->radial_size)

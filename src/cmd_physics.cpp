@@ -213,7 +213,8 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bo
   if (isUnit()==PLANETPTR) {
     ((Planet *)this)->gravitate (uc);
   } else {
-    ResolveForces (trans,transmat);
+    if (resolveforces)
+      ResolveForces (trans,transmat);
   } 
     
   curr_physical_state.position += Velocity*SIMULATION_ATOM;
@@ -232,7 +233,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bo
   }
   bool dead=true;
   for (i=0;i<numsubunit;i++) {
-    subunits[i]->UpdatePhysics(cumulative_transformation,cumulative_transformation_matrix,lastframe,uc);
+    subunits[i]->UpdatePhysics(cumulative_transformation,cumulative_transformation_matrix,lastframe,uc); 
     if (hull<0) {
       UnFire();//don't want to go off shooting while your body's splitting everywhere
       subunits[i]->timeexplode+=.1*SIMULATION_ATOM;//urge slowly on

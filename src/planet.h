@@ -32,9 +32,9 @@ class PlanetaryOrbit : public Order {
  public:
 
   PlanetaryOrbit(Unit *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis, const Vector &Centre, Unit * target=NULL); 
+  ~PlanetaryOrbit();
   void Execute();
 
-  friend class Unit;
 };
 
 class Planet : public Unit {

@@ -177,7 +177,9 @@ friend class PlanetaryOrbit;
   Vector Velocity;
   int slerp_direction;
   enum restr {YRESTR=1, PRESTR=2, RRESTR=4};
+  char resolveforces;
   char yprrestricted;
+
   float ymin, ymax, ycur;
   float pmin, pmax, pcur;
   float rmin, rmax, rcur;
@@ -329,7 +331,7 @@ public:
   float GetMass() const { return mass; }
   float GetElasticity ();
   const Limits &Limits() const { return limits; }
-
+  void SetResolveForces(bool);
   inline bool queryCalculatePhysics() { return calculatePhysics; }
   void ExecuteAI();
 };

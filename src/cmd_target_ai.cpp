@@ -80,10 +80,10 @@ AggressiveAI::AggressiveAI (Unit * target=NULL):FireAt(.2,6)  {
 void AggressiveAI::Execute () {  
   FireAt::Execute();
   if (parent->getAIState()->queryType (FACING)==NULL) {
-    //parent->EnqueueAI (new Orders::FaceTarget (false));
+    parent->EnqueueAI (new Orders::FaceTarget (false));
   }
   if (parent->getAIState()->queryType (MOVEMENT)==NULL) {
-    //parent->EnqueueAI (new Orders::MatchLinearVelocity (Vector (0,0,100),true,false));
+    parent->EnqueueAI (new Orders::MatchLinearVelocity (Vector (0,0,100),true,false));
   }
 
 }
