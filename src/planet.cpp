@@ -5,6 +5,7 @@
 #include "gfx_sphere.h"
 #include "cmd_ai.h"
 #include "UnitCollection.h"
+#include "gfx_bsp.h"
 
 AI *PlanetaryOrbit::Execute() {
   Vector x_offset = cos(theta) * x_size;
@@ -111,13 +112,32 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
   meshdata[0] = new SphereMesh(radius, 16, 16, textname, alpha);
   meshdata[0]->setEnvMap(GFXFALSE);
   nummesh = 1;
-  meshdata[1]=NULL;
-  calculate_extent();
 
+  calculate_extent();
+  /*stupid Sphere BSP when intersection should do
+  string tmpname ("sphere");
+  char temp [64];
+  sprintf (temp, "%f", radius);
+  tmpname +=temp;
+  tmpname +=".bsp";
+  
+  FILE * fp = fopen (tmpname.c_str(), "r+b");
+  if (!fp) {
+    meshdata[1]= new SphereMesh (radius,8,8,textname, alpha);
+    BuildBSPTree (tmpname.c_str(),true,meshdata[1]);
+    delete meshdata[1];
+  } else {
+    fclose (fp);
+  }
+  bspTree = new BSPTree (tmpname.c_str());
+  */
+  meshdata[1]=NULL;
 }
 
 Planet::~Planet() { 
 	int i;
+	if (bspTree)
+	  delete bspTree;
 	for (i=0;i<this->destination.size();i++) {
 		delete [] destination[i];
 	}

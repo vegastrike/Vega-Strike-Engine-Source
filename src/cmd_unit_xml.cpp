@@ -26,6 +26,7 @@ namespace UnitXML {
       SUBUNIT,
       MESHFILE,
       SHIELDMESH,
+      BSPMESH,
       MOUNT,
       MESHLIGHT,
       XFILE,
@@ -88,6 +89,7 @@ namespace UnitXML {
     EnumMap::Pair ("SubUnit", SUBUNIT),
     EnumMap::Pair ("MeshFile", MESHFILE),
     EnumMap::Pair ("ShieldMesh",SHIELDMESH),
+    EnumMap::Pair ("BspMesh",BSPMESH),
     EnumMap::Pair ("Light",MESHLIGHT),
     EnumMap::Pair ("Defense", DEFENSE),
     EnumMap::Pair ("Armor", ARMOR),
@@ -152,7 +154,7 @@ namespace UnitXML {
     EnumMap::Pair ("tightness",SHIELDTIGHT)
 };
 
-  const EnumMap element_map(element_names, 22);
+  const EnumMap element_map(element_names, 23);
   const EnumMap attribute_map(attribute_names, 42);
 }
 
@@ -189,8 +191,8 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 //    cerr << "Unknown element start tag '" << name << "' detected " << endl;
     break;
   case SHIELDMESH:
-	assert (xml->unitlevel==1);
-	xml->unitlevel++;
+    assert (xml->unitlevel==1);
+    xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
@@ -202,9 +204,21 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       }
     }
     break;
+  case BSPMESH:
+    assert (xml->unitlevel==1);
+    xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case XFILE:
+	xml->bspmesh =(new Mesh((*iter).value.c_str(), true));
+	break;
+      }
+    }
+    break;
+
   case MESHFILE:
-	assert (xml->unitlevel==1);
-	xml->unitlevel++;
+    assert (xml->unitlevel==1);
+    xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
@@ -673,6 +687,7 @@ void Unit::LoadXML(const char *filename) {
 
   xml = new XML;
   xml->shieldmesh = NULL;
+  xml->bspmesh = NULL;
   xml->unitlevel=0;
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
@@ -737,7 +752,7 @@ fclose (inFile);
     tmpname += ".bsp";
     FILE * fp = fopen (tmpname.c_str(),"r+b");
     if (!fp) {
-      BuildBSPTree (tmpname.c_str());
+      BuildBSPTree (tmpname.c_str(), false, xml->bspmesh);
     }else {
       fclose (fp);
     }
@@ -746,6 +761,9 @@ fclose (inFile);
       fclose (fp);
       bspTree = new BSPTree (tmpname.c_str());
     }	
+  }
+  if (xml->bspmesh) {
+    delete xml->bspmesh;
   }
   delete xml;
 }

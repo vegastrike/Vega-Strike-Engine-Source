@@ -26,7 +26,7 @@
 #include "gfx_sprite.h"
 #include "lin_time.h"
 #include "gfx_hud.h"
-#include "gfx_bounding_box.h"
+
 #include "cmd_ai.h"
 #include "cmd_order.h"
 #include "gfx_box.h"
@@ -36,9 +36,9 @@
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
-extern Vector mouseline;
-extern vector<Vector> perplines;
-Vector MouseCoordinate (int mouseX, int mouseY);
+
+
+
 
 double interpolation_blend_factor;
 
@@ -295,36 +295,6 @@ Unit::~Unit()
 
 
 
-float Unit::getMinDis (const Vector &pnt) {
-  float minsofar=1e+10;
-  float tmpvar;
-  int i;
-  Vector TargetPoint (cumulative_transformation_matrix[0],cumulative_transformation_matrix[1],cumulative_transformation_matrix[2]);
-
-#ifdef VARIABLE_LENGTH_PQR
-  float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint)); //the scale factor of the current UNIT
-#endif
-  for (i=0;i<nummesh;i++) {
-
-    TargetPoint = Transform(cumulative_transformation_matrix,meshdata[i]->Position())-pnt;
-    tmpvar = sqrtf (TargetPoint.Dot (TargetPoint))-meshdata[i]->rSize()
-#ifdef VARIABLE_LENGTH_PQR
-	*SizeScaleFactor
-#endif
-      ;
-    if (tmpvar<minsofar) {
-      minsofar = tmpvar;
-    }
-  }
-  for (i=0;i<numsubunit;i++) {
-    tmpvar = subunits[i]->getMinDis (pnt);
-    if (tmpvar<minsofar) {
-      minsofar=tmpvar;
-    }			       
-  }
-  return minsofar;
-}
-
 bool Unit::querySphere (const Vector &pnt, float err) {
   int i;
   float * tmpo = cumulative_transformation_matrix;
@@ -358,93 +328,40 @@ bool Unit::querySphere (const Vector &pnt, float err) {
 
 
 // dir must be normalized
-float Unit::querySphere (const Vector &st, const Vector &dir, float err) {
+
+float Unit::querySphere (const Vector &start, const Vector &end) {
   int i;
-  float retval=0;
-  float adjretval=0;
-  float * tmpo = cumulative_transformation_matrix;
-
-  Vector TargetPoint (tmpo[0],tmpo[1],tmpo[2]);
-#ifdef VARIABLE_LENGTH_PQR
-  float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint));//adjust the ship radius by the scale of local coordinates
-#endif
+  float t=0;
+  float tmp;
+  Vector st,dir;
   for (i=0;i<nummesh;i++) {
-    TargetPoint = Transform (tmpo,meshdata[i]->Position());
-    Vector origPoint = TargetPoint;
-
-    perplines.push_back(TargetPoint);
-    //find distance away from the line now :-)
-    //find scale factor of end on start to get line.
-    Vector tst = TargetPoint-st;
-    //Vector tst = TargetPoint;
-    float k = tst.Dot (dir);
-    TargetPoint = tst - k*(dir);
-    /*
-    cerr << origPoint << "-" << st << " = " << tst << " projected length " << k << " along direction " << dir << endl;
-    cerr << "projected line " << st << " - " << st + k*dir << endl;
-    cerr << "length of orthogonal projection " << TargetPoint.Magnitude() << ", " << "radius " << meshdata[i]->rSize() << endl;
-    */
-    perplines.push_back(origPoint-TargetPoint);
-    
-    ///      fprintf (stderr, "i%f,j%f,k%f end %f,%f,%f>, k %f distance %f, rSize %f\n", st.i,st.j,st.k,end.i,end.j,end.k,k,TargetPoint.Dot(TargetPoint), meshdata[i]->rSize());    
-    
-    if (TargetPoint.Dot (TargetPoint)< 
-	err*err+
-	meshdata[i]->rSize()*meshdata[i]->rSize()
-#ifdef VARIABLE_LENGTH_PQR
-	*SizeScaleFactor*SizeScaleFactor
-#endif
-	+
-#ifdef VARIABLE_LENGTH_PQR
-	SizeScaleFactor*
-#endif
-	2*err*meshdata[i]->rSize()
-	)
-      {
-	if (retval==0) {
-	  retval = k;
-	  adjretval=k;
-	  if (adjretval<0) {
-		adjretval+=meshdata[i]->rSize();
-		if (adjretval>0)
-				adjretval=.001;
-		}
-	}else {
-		if (retval>0&&k<retval&&k>-meshdata[i]->rSize()){
-			retval = k;
-			adjretval=k;
-			if (adjretval<0) {
-				adjretval+=meshdata[i]->rSize();
-				if (adjretval>0)
-					adjretval=.001;
-			}
-		}
-		if (retval<0&&k+meshdata[i]->rSize()>retval) {
-			retval = k;
-			adjretval=k+meshdata[i]->rSize();
-			if (adjretval>0)
-				adjretval=.001;//THRESHOLD;
-		}
-	}
+    float a, b,c;
+    st = start - Transform (cumulative_transformation_matrix,meshdata[i]->Position());	
+    dir = end-start;//now start and end are based on mesh's position
+    // v.Dot(v) = r*r; //equation for sphere
+    // (x0 + (x1 - x0) *t) * (x0 + (x1 - x0) *t) = r*r
+    c = st.Dot (st) - meshdata[i]->rSize()*meshdata[i]->rSize();
+    b = 2 * (dir.Dot (st));
+    a = dir.Dot(dir);
+    //b^2-4ac
+    c = b*b - 4*a*c;
+    if (c<0)
+      continue;
+    a *=2;
+    tmp = (-b + sqrtf (c))/a;
+    c = (-b - sqrtf (c))/a;
+    if (tmp>0&&tmp<=1) {
+      return (c>0&&c<tmp) ? c : tmp;
+    } else if (c>0&&c<=1) {
+	return c;
     }
   }
   for (i=0;i<numsubunit;i++) {
-    float tmp = (subunits[i]->querySphere (st,dir,err));
-    if (tmp==0) continue;
-    if (retval==0) {
-      retval = tmp;
-    }else{
-		if (adjretval>0&&tmp<adjretval) {
-			retval = tmp;
-			adjretval=tmp;
-		}
-		if (adjretval<0&&tmp>adjretval) {
-		    retval = tmp;
-			adjretval=tmp;
-		}
+    if ((tmp = subunits[i]->querySphere (start,end))!=0) {
+      return tmp;
     }
   }
-  return adjretval;
+  return 0;
 }
 
 void Unit::Destroy() {
@@ -512,80 +429,44 @@ bool Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist) {
     return false;
   if (!bspTree)
       return true;
-  if (bspTree->intersects (st,err,norm,dist))
-      return true;
+  if (bspTree->intersects (st,err,norm,dist)) {
+    norm = ToWorldCoordinates (norm);
+    return true;
+  }
   return false;
 }
 
 float Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm) {
   int i;
   float tmp;
+
   for (i=0;i<numsubunit;i++) {
     if (tmp = subunits[i]->queryBSP(start,end,norm))
       return tmp;
+  }
+  if (!bspTree) {
+    tmp = querySphere (start,end);
+    norm = (tmp * (start-end));
+    tmp = norm.Magnitude();
+    norm +=start;
+    norm.Normalize();//normal points out from center
+    return tmp;
   }
   Vector st (InvTransform (cumulative_transformation_matrix,start));
   Vector ed (InvTransform (cumulative_transformation_matrix,end));
   bool temp=false;
   for (i=0;i<nummesh&&!temp;i++) {
-    temp |=meshdata[i]->queryBoundingBox (st,ed,0);
+    temp = (1==meshdata[i]->queryBoundingBox (st,ed,0));
   }
   if (!temp)
     return false;
-  if (!bspTree)
-      return true;
-  if (tmp = bspTree->intersects (st,ed,norm))
-      return tmp;
+  if (tmp = bspTree->intersects (st,ed,norm)) {
+    norm = ToWorldCoordinates (norm);
+    return tmp;
+  }
   return 0;
 }
 
-
-bool Unit::queryBoundingBox (const Vector &pnt, float err) {
-  int i;
-  BoundingBox * bbox=NULL;
-  for (i=0;i<nummesh;i++) {
-    bbox = meshdata[i]->getBoundingBox();
-    bbox->Transform (cumulative_transformation_matrix);
-    if (bbox->Within(pnt,err)) {
-      delete bbox;
-      return true;
-    }
-    delete bbox;
-  }
-  for (i=0;i<numsubunit;i++) {
-    if (subunits[i]->queryBoundingBox (pnt,err)) 
-      return true;
-  }
-  return false;
-}
-
-int Unit::queryBoundingBox (const Vector &origin, const Vector &direction, float err) {
-  int i;
-  int retval=0;
-  BoundingBox * bbox=NULL;
-  for (i=0;i<nummesh;i++) {
-    bbox = meshdata[i]->getBoundingBox();
-    bbox->Transform (cumulative_transformation_matrix);
-    switch (bbox->Intersect(origin,direction,err)) {
-    case 1:delete bbox;
-      return 1;
-    case -1:delete bbox;
-      retval =-1;
-      break;
-    case 0: delete bbox;
-      break;
-    }
-  }
-  for (i=0;i<numsubunit;i++) {
-    switch (subunits[i]->queryBoundingBox (origin,direction,err)) {
-    case 1: return 1;
-    case -1: retval= -1;
-      break;
-    case 0: break;
-    }
-  }
-  return retval;
-}
 
 bool Unit::queryFrustum(float frustum [6][4]) {
   int i;
@@ -616,57 +497,6 @@ bool Unit::queryFrustum(float frustum [6][4]) {
 }
 
 
-bool Unit::querySphere (int mouseX, int mouseY, float err, Camera * activeCam) {
-  int i;
-  Matrix vw;
-  _Universe->AccessCamera()->GetView (vw);
-  Vector mousePoint;
-#ifdef VARIABLE_LENGTH_PQR
-  Vector TargetPoint (cumulative_transformation_matrix[0],cumulative_transformation_matrix[1],cumulative_transformation_matrix[2]);
-  float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint));
-#else
-  Vector TargetPoint;
-#endif
-
-  Vector CamP,CamQ,CamR;
-  for (i=0;i<nummesh;i++) {
-    //cerr << "pretransform position: " << meshdata[i]->Position() << endl;
-    TargetPoint = Transform(cumulative_transformation_matrix,meshdata[i]->Position());
-    
-    mousePoint = Transform (vw,TargetPoint);
-    if (mousePoint.k>0) { //z coordinate reversed  -  is in front of camera
-      continue;
-    }
-    mousePoint = MouseCoordinate (mouseX,mouseY);
-    
-    activeCam->GetPQR(CamP,CamQ,CamR);
-    mousePoint = Transform (CamP,CamQ,CamR,mousePoint);	
-    activeCam->GetPosition(CamP);    
-    mousePoint +=CamP; 
-    
-    
-    
-    TargetPoint =TargetPoint-mousePoint;
-    if (TargetPoint.Dot (TargetPoint)< 
-	err*err+
-	meshdata[i]->rSize()*meshdata[i]->rSize()
-#ifdef VARIABLE_LENGTH_PQR
-	*SizeScaleFactor*SizeScaleFactor
-#endif
-	+
-#ifdef VARIABLE_LENGTH_PQR
-	SizeScaleFactor*
-#endif
-	2*err*meshdata[i]->rSize()
-	)
-      return true;
-  }
-  for (i=0;i<numsubunit;i++) {
-    if (subunits[i]->querySphere (mouseX,mouseY,err,activeCam))
-      return true;
-  }
-  return false;
-}
 float Unit::GetElasticity() {return .5;}
 void Unit::UpdateHudMatrix() {
   //FIXME
@@ -742,22 +572,6 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
   }
 }
 
-void Unit::DrawStreak(const Vector &v)
-{
-  /*
-	Vector v1 = v;
-	int steps = (int)v.Magnitude()*10;
-	v1 = v1 * (1.0/steps);
-	Vector opos = local_transformation.position;
-	GFXColor(0.5, 0.5, 0.5, 0.5);
-	for(int a = 0; a < steps; a++) {
-		Draw();
-		local_transformation.position+=v1;
-	}
-	GFXColor(1.0, 1.0, 1.0, 1.0);
-	local_transformation.position = opos;
-  */
-}
 
 void Unit::ProcessDrawQueue() {
   int a;	
@@ -871,16 +685,6 @@ void Unit::Select() {
 void Unit::Deselect() {
   selected = false;
 }
-/*
-ostream &Unit::output(ostream& os) const {
-  return os << name;
-}
-*/
-/*
-ostream &operator<<(ostream &os, const Unit &u) {
-  return u.output(os);
-} 
-*/
 void Unit::RestrictYaw(float min, float max) {
   ymin = min; ymax = max;
 }
@@ -891,22 +695,3 @@ void Unit::RestrictRoll(float min, float max) {
   rmin = min, rmax = max;
 }
 
-/*
-
-void Mesh::XSlide(float factor)
-{
-	pos += p * factor;
-	changed = TRUE;
-}
-void Mesh::YSlide(float factor)
-{
-	pos += q * factor;
-	changed = TRUE;
-}
-void Mesh::ZSlide(float factor)
-{
-	pos += r * factor;
-	changed = TRUE;
-}
-
-*/

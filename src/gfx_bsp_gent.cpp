@@ -21,7 +21,10 @@ struct bsp_polygon {
 #define BACK -1
 #define FRONT +1
 #define INTERSECT 0
-
+#define VPLANE_Z 4
+#define VPLANE_Y 2
+#define VPLANE_X 1
+#define VPLANE_ALL 7
 
 /*
 
@@ -203,35 +206,37 @@ void FreeBSP (bsp_tree ** tree) {
   *tree = NULL;
 }
 
-static bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon>&, vector <bsp_tree>&);
+static bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon>&, vector <bsp_tree>&, char Vplane);
 #ifndef PROPHECY
-void Unit::BuildBSPTree(const char *filename) {
-
+void Unit::BuildBSPTree(const char *filename, bool vplane, Mesh * hull) {
   bsp_tree * bsp=NULL;
   unsigned int i;
   bsp_tree temp_node;
- vector <bsp_polygon> tri;
- vector <bsp_tree> triplane;
- for (i=0;i<nummesh;i++) {
-     meshdata[i]->GetPolys(tri);
- }
- for (i=0;i<tri.size();i++) {
-     if (!Cross (tri[i],temp_node)) {
-	 vector <bsp_polygon>::iterator ee = tri.begin();
-	 ee+=i;
-	 tri.erase(ee);
-	 i--;
-	 continue;
-     }
-     // Calculate 'd'
-     temp_node.d = (float) ((temp_node.a*tri[i].v[0].x)+(temp_node.b*tri[i].v[0].y)+(temp_node.c*tri[i].v[0].z));
-     temp_node.d*=-1.0;
-     triplane.push_back(temp_node);
-     //                bsp=put_plane_in_tree3(bsp,&temp_node,&temp_poly3);
-     
+  vector <bsp_polygon> tri;
+  vector <bsp_tree> triplane;
+  if (hull!=NULL) {
+    hull->GetPolys (tri);
+  } else {
+    for (i=0;i<nummesh;i++) {
+      meshdata[i]->GetPolys(tri);
+    }
+  }	
+  for (i=0;i<tri.size();i++) {
+    if (!Cross (tri[i],temp_node)) {
+      vector <bsp_polygon>::iterator ee = tri.begin();
+      ee+=i;
+      tri.erase(ee);
+      i--;
+      continue;
+    }	
+    // Calculate 'd'
+    temp_node.d = (float) ((temp_node.a*tri[i].v[0].x)+(temp_node.b*tri[i].v[0].y)+(temp_node.c*tri[i].v[0].z));
+    temp_node.d*=-1.0;
+    triplane.push_back(temp_node);
+    //                bsp=put_plane_in_tree3(bsp,&temp_node,&temp_poly3); 
  }
  
- bsp = buildbsp (bsp,tri,triplane);
+ bsp = buildbsp (bsp,tri,triplane, vplane?VPLANE_ALL:0);
  if (bsp) {
    o = fopen (filename, "w+b");
    write_bsp_tree(bsp,0);
@@ -396,7 +401,7 @@ int main(int argc, char * argv) {
      temp_node.d*=-1.0;
      triplane.push_back(temp_node);
  }
- bsp = buildbsp (bsp,tri,triplane);
+ bsp = buildbsp (bsp,tri,triplane, 0);
  if (bsp) {
    o = fopen ("output.bsp", "w+b");
    write_bsp_tree(bsp,0);
@@ -407,8 +412,9 @@ int main(int argc, char * argv) {
 }
 #endif
 static int select_plane (const vector <bsp_polygon> &tri, const vector <bsp_tree> &triplane);
-static bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon> &tri, vector <bsp_tree> &triplane) {
+static bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon> &tri, vector <bsp_tree> &triplane, char vplane) {
   assert (tri.size()==triplane.size());
+  bool VP = vplane!=0;
   if (tri.size()==0) {
     return NULL;
   }
@@ -419,23 +425,38 @@ static bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon> &tri, vector <bsp
   vector <bsp_tree> triplaneright;
   bsp_polygon left_int;
   bsp_polygon right_int;
-  unsigned int select = select_plane (tri, triplane);
-  if (select >=tri.size()) {
+  unsigned int select= tri.size();
+  temp = (bsp_tree *) malloc (sizeof (bsp_tree));
+  if (!(vplane&VPLANE_ALL)) {
+    select = select_plane (tri, triplane);
+    if (select >=tri.size()) {
       fprintf (stderr,"Error Selecting tri for splittage");
       return NULL;
+    }	
+    temp->a=triplane[select].a;
+    temp->b=triplane[select].b;
+    temp->c=triplane[select].c;
+    temp->d=triplane[select].d;
+  } else if (vplane & VPLANE_X) {
+    temp->a=1;
+    temp->b=0;
+    temp->c=0;
+    temp->d=0;
+    vplane &= (~VPLANE_X);
+  }else if (vplane & VPLANE_Y) {
+    temp->a=0;
+    temp->b=1;
+    temp->c=0;
+    temp->d=0;
+    vplane &= (~VPLANE_Y);
+  } else if (vplane & VPLANE_Z) {
+    temp->a=0;
+    temp->b=0;
+    temp->c=1;
+    temp->d=0;
+    vplane &= (~VPLANE_Z);
   }
-  if (triplane[select].b==-1&&triplane[select].d<-93&&triplane[select].d>-94) {
-    fprintf (stderr,"ahh help me");
-  }
-  if (triplane[select].b==1&&triplane[select].d>65&&triplane[select].d<66) {
-    fprintf (stderr,"I gotcha");
-  }
-  temp = (bsp_tree *) malloc (sizeof (bsp_tree));
-  temp->a=triplane[select].a;
-  temp->b=triplane[select].b;
-  temp->c=triplane[select].c;
-  temp->d=triplane[select].d;
-  
+    
   unsigned int i;
   for (i=0;i<tri.size();i++) {
     if (i==select) 
@@ -469,12 +490,22 @@ static bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon> &tri, vector <bsp
 	break;
     }
   }
-  assert (triplane.size()==tri.size()); 
-  tri = vector <bsp_polygon>();
-  triplane=vector<bsp_tree>();
-  temp->left = buildbsp (NULL,trileft,triplaneleft);
-  temp->right= buildbsp (NULL,triright,triplaneright);
-  return temp;
+  if (VP&&(trileft.size()==0||triright.size()==0)) {
+    //if the VPLANE doesn't really split any polygons, why add it to tree.. would cause false hits/misses
+    free (temp);
+    trileft.clear();
+    triright.clear();
+    triplaneleft.clear();
+    triplaneright.clear();
+    return buildbsp (NULL,tri,triplane,vplane);
+ } else {
+    assert (triplane.size()==tri.size()); 
+    tri.clear();
+    triplane.clear();
+    temp->left = buildbsp (NULL,trileft,triplaneleft,vplane);
+    temp->right= buildbsp (NULL,triright,triplaneright,vplane);
+    return temp;
+  }
 }
 
 

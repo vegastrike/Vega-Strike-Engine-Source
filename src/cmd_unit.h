@@ -143,7 +143,7 @@ friend class PlanetaryOrbit;
   //  bool active;
   
   //Vector pp, pq, pr, ppos;
-  void BuildBSPTree (const char *filename);
+  void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL);//if hull==NULL, then use meshdata **
   AI *aistate;
   float accel;
   float recharge;
@@ -231,12 +231,12 @@ public:
   void UpdateHudMatrix();
 
 
-  virtual void DrawStreak(const Vector &v);
   virtual void Draw(const Transformation & quat = identity_transformation, const Matrix m = identity_matrix);
   virtual void ProcessDrawQueue();
-  float getMinDis(const Vector &pnt);
-  bool querySphere (const Vector &pnt, float err);
-  float querySphere (const Vector &st, const Vector &end, float err);
+  float getMinDis(const Vector &pnt);//for clicklist
+  bool querySphere (const Vector &pnt, float err);//for weapons
+  float querySphere (const Vector &start, const Vector & end);//for beams
+  float querySphere (const Vector &st, const Vector &dir, float err);//for click list
   float queryBSP (const Vector &st, const Vector & end, Vector & normal);
   bool queryBSP (const Vector &pnt, float err, Vector & normal, float &dist);
   bool queryFrustum (float frustum[6][4]);
@@ -329,6 +329,7 @@ struct Unit::XML {
   vector<Unit::Mount *> mountz;
   vector<Mesh*> meshes;
   Mesh * shieldmesh;
+  Mesh * bspmesh;
   vector<Unit*> units;
   int unitlevel;
 };

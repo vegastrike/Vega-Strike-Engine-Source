@@ -74,7 +74,7 @@ bool Unit::OneWayCollide (Unit * target, Vector & normal, float &dist) {//do eac
   if (!querySphere(target->Position(),target->rSize()))
     return false;;
   if (queryBSP(target->Position(), target->rSize(), normal,dist)) {
-    normal = ToWorldCoordinates (normal);
+
     return true;
   }
   for (i=0;i<numsubunit;i++) {
@@ -165,15 +165,15 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, co
 }
 
 bool Beam::Collide (Unit * target) {
-
+  float distance;
+  Vector normal;//apply shields
+  Vector end (center+direction*curlength);
   if (target==owner) 
     return false;
-  float distance = target->querySphere (center,direction,0);
-  if (distance<0||distance>curlength+target->rSize()) {
-  }
-  Vector normal;//apply shields
+  
 
-  if (distance = target->queryBSP(center,center+direction*curlength,normal)) { 
+
+  if (distance = target->queryBSP(center,end,normal)) { 
 
     curlength = distance;
     impact|=IMPACT;

@@ -41,6 +41,7 @@ vegastrike_SOURCES =				\
 	cmd_unit.h				\
 	cmd_unit.cpp				\
 	cmd_unit_xml.cpp  			\
+	cmd_unit_click.cpp			\
 	cmd_node.h				\
 	cmd_physics.cpp				\
 	cmd_physics.h				\
