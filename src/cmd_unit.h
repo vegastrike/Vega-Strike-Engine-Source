@@ -87,7 +87,7 @@ protected:
 
   int ucref;
   bool killed;
-  
+  bool invisible;
   //used for physics
   Transformation prev_physical_state;
   Transformation curr_physical_state;
@@ -255,7 +255,7 @@ public:
   prev_physical_state.position = curr_physical_state.position = pos;}
   void SetPosition(float x, float y, float z) {/*prev_physical_state.position = curr_physical_state.position;*/
   prev_physical_state.position = curr_physical_state.position = Vector(x,y,z);}
-
+  void SetCameraToCockpit();
   //  void Destroy(){active = false;};
   /*
   Unit *Update() {

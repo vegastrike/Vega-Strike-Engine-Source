@@ -16,7 +16,7 @@ class MoveTo : public Order {
   bool OptimizeSpeed (float v, float &a);
   bool Done (const Vector &, const Vector &);
 public:
-  MoveTo(const Vector &target, bool aft) : Order(), afterburn(aft)  {
+  MoveTo(const Vector &target, bool aft) : Order(), afterburn(aft),terminating(false)  {
     type = LOCATION;
     targetlocation = target;
     done=false;
@@ -32,7 +32,7 @@ class ChangeHeading : public Order {
   bool Done (const Vector &, const Vector &);
   void TurnToward (float angle, float ang_vel, float &torque);
  public:
-   ChangeHeading(const Vector &final_heading) : Order(), final_heading(final_heading) { type = 1;}
+   ChangeHeading(const Vector &final_heading) : Order(), final_heading(final_heading), terminating(false) { type = 1;}
   void SetDest (const Vector&);
   AI *Execute();
 };

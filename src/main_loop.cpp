@@ -101,7 +101,7 @@ AI *Line::Execute()
 		return this;
 }
 
-const float timek = .01;
+const float timek = .005;
 bool _Slew = true;
 static void Slew (int,KBSTATE newState){
 	
@@ -581,7 +581,9 @@ void destroyObjects() {
 }
 
 void main_loop() {
+  fighters[0]->SetCameraToCockpit();
   _Universe->StartDraw();
+
   GFXBlendMode (ONE,ZERO);
   _Universe->activeStarSystem()->Draw();
     GFXDisable(TEXTURE1);

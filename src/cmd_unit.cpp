@@ -63,6 +63,7 @@ void Unit::calculate_extent() {
 
 void Unit::Init()
 {
+  invisible=false;
   origin= Vector(0,0,0);
   numhalos=0;
   halos=NULL;
@@ -129,6 +130,23 @@ void Unit::Init()
   computer.max_roll=4;
   computer.NavPoint=Vector(0,0,0);
   //  Fire();
+}
+
+void Unit::SetCameraToCockpit() {
+  invisible=true;
+  /*  cumulative_transformation = linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor);
+  cumulative_transformation.Compose(parent, parentMatrix);
+  cumulative_transformation.to_matrix(cumulative_transformation_matrix);
+  _Universe->AccessCamera()->SetOrientation(Vector (cumulative_transformation_matrix[0],
+						    cumulative_transformation_matrix[1],
+						    cumulative_transformation_matrix[2]),
+					    Vector (cumulative_transformation_matrix[4],
+						    cumulative_transformation_matrix[5],
+						    cumulative_transformation_matrix[6]),
+					    Vector (cumulative_transformation_matrix[8],
+						    cumulative_transformation_matrix[9],
+						    cumulative_transformation_matrix[10]));
+						    _Universe->AccessCamera()->SetPosition (cumulative_transformation.position);*/
 }
 void Unit::UnRef() {
   ucref--;
@@ -605,7 +623,6 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
   /*Transformation*/ cumulative_transformation = linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor);
   cumulative_transformation.Compose(parent, parentMatrix);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
-
 #ifdef VARIABLE_LENGTH_PQR
         Vector MeshCenter (cumulative_transformation_matrix[0],cumulative_transformation_matrix[1],cumulative_transformation_matrix[2]); 
         float SizeScaleFactor=sqrtf (MeshCenter.Dot(MeshCenter));
@@ -613,24 +630,37 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
         Vector MeshCenter;
 #endif
   int i;
-  for (i=0;i<nummesh;i++) {
-    float d = GFXSphereInFrustum(Transform (cumulative_transformation_matrix,
-					    meshdata[i]->Position()),
-				 meshdata[i]->rSize()
+  if (!invisible) {
+    for (i=0;i<nummesh;i++) {
+      float d = GFXSphereInFrustum(Transform (cumulative_transformation_matrix,
+					      meshdata[i]->Position()),
+				   meshdata[i]->rSize()
 #ifdef VARIABLE_LENGTH_PQR
-                                      *SizeScaleFactor
+				   *SizeScaleFactor
 #endif 
-				 );
-    if (d) {  //d can be used for level of detail shit
-      meshdata[i]->Draw(cumulative_transformation, cumulative_transformation_matrix);
+				   );
+      if (d) {  //d can be used for level of detail shit
+	meshdata[i]->Draw(cumulative_transformation, cumulative_transformation_matrix);
+      }
     }
-  }
-  
-  for(int subcount = 0; subcount < numsubunit; subcount++) {
-    subunits[subcount]->Draw(cumulative_transformation, cumulative_transformation_matrix);
+    
+    for(int subcount = 0; subcount < numsubunit; subcount++) {
+      subunits[subcount]->Draw(cumulative_transformation, cumulative_transformation_matrix);
     }
-  if(selected) {
-    selectionBox->Draw(cumulative_transformation, cumulative_transformation_matrix);
+    if(selected) {
+      selectionBox->Draw(cumulative_transformation, cumulative_transformation_matrix);
+    }
+  } else {
+    _Universe->AccessCamera()->SetOrientation(Vector (cumulative_transformation_matrix[0],
+						    cumulative_transformation_matrix[1],
+						    cumulative_transformation_matrix[2]),
+					    Vector (cumulative_transformation_matrix[4],
+						    cumulative_transformation_matrix[5],
+						    cumulative_transformation_matrix[6]),
+					    Vector (cumulative_transformation_matrix[8],
+						    cumulative_transformation_matrix[9],
+						    cumulative_transformation_matrix[10]));
+  _Universe->AccessCamera()->SetPosition (cumulative_transformation.position);
   }
   for (i=0;i<nummounts;i++) {
     if (mounts[i].type.type==weapon_info::BEAM) {

@@ -127,15 +127,17 @@ void StarSystem::Draw() {
   //primaries->Draw();
   //    systemInputDFA->Draw(); return;
   currentcamera=0;
-  SetViewport();
+
   Iterator *iter = drawList->createIterator();
   Unit *unit;
-  GFXDisable (LIGHTING);
-  bg->Draw();
   while((unit = iter->current())!=NULL) {
     unit->Draw();
     iter->advance();
   }
+  SetViewport();//camera wielding unit is now drawn
+  GFXDisable (LIGHTING);
+  bg->Draw();
+
   delete iter;
   GFXDisable(LIGHTING);
   Mesh::ProcessUndrawnMeshes();

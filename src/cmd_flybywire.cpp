@@ -67,15 +67,15 @@ void FlyByWire::Stop (float per) {
   SetDesiredVelocity (Vector (0,0,per*parent->GetComputerData().max_speed),true);
 }
 void FlyByWire::Right (float per) {
-  desired_ang_velocity += (per*parent->GetComputerData().max_yaw)*Vector (0,1,0);
+  desired_ang_velocity += (-per*parent->GetComputerData().max_yaw)*Vector (0,1,0);
 }
 
 void FlyByWire::Up (float per) {
-  desired_ang_velocity += (per*parent->GetComputerData().max_pitch)*Vector (1,0,0);
+  desired_ang_velocity += (-per*parent->GetComputerData().max_pitch)*Vector (1,0,0);
 }
 
 void FlyByWire::RollRight (float per) {
-  desired_ang_velocity += (per*parent->GetComputerData().max_roll)*Vector (0,0,1);
+  desired_ang_velocity += (-per*parent->GetComputerData().max_roll)*Vector (0,0,1);
 }
 
 void FlyByWire::Afterburn (float per){

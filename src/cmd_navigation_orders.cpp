@@ -181,7 +181,8 @@ bool ChangeHeading::Done(const Vector & local_heading, const Vector & ang_vel) {
   }else {
     if (terminating&&(
 	fabs(local_heading.i) > 2*TURNTHRESHOLD||//and local heading is close to the front
-	fabs(local_heading.j) > 2*TURNTHRESHOLD)) 
+	fabs(local_heading.j) > 2*TURNTHRESHOLD||
+	local_heading.k<0)) 
       terminating=false;
   }
   return false;
