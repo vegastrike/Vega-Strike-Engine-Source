@@ -865,7 +865,7 @@ int main (int argc, char ** argv)
 	Tab();Tag ("Defense");
 	Tab(2);fprintf (fp,"<Armor front=\"%d\" back=\"%d\" left=\"%d\" right=\"%d\"/>\n", 40,40,40,40);
 	if (Stat.NumShieldFacing==2) {
-	  Tab(2);fprintf (fp,"<Shield front=\"%d\" back=\"%d\" recharge=\"%d\"/>\n", 40,40,3);
+	  Tab(2);fprintf (fp,"<Shields front=\"%d\" back=\"%d\" recharge=\"%d\"/>\n", 40,40,3);
 	}else {
 	  Tab(2);fprintf (fp,"<Shield front=\"%d\" back=\"%d\" left=\"%d\" right=\"%d\" recharge=\"%d\"/>\n", 40,40,40,40,3);
 	}
