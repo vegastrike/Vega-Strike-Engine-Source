@@ -4056,7 +4056,16 @@ public:
 };
 std::map<VCString,VCString> parseTurretSizes () {
 	std::map<VCString,VCString> t;
-	FILE * fp = fopen ("turretsize.txt","r");
+	FILE * fp = fopen ("size.txt","r");
+	if (!fp) {
+		fp = fopen ("units/size.txt","r");
+		if (!fp) {
+			fp = fopen("units/subunits/size.txt","r");
+			if (!fp) {
+				fp = fopen ("subunits/size.txt","r");
+			}
+		}
+	}
 	if (fp) {
 		fseek (fp,0,SEEK_END);
 		int siz = ftell (fp);
