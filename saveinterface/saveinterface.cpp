@@ -171,7 +171,7 @@ void launch_mission () {
     return;
 #endif
   GoToParentDir();
-  int player = my_mission.find ("player");
+  int player = my_mission.rfind ("player");
   if (player>0&&player!=std::string::npos) {
    char  num [4]={'-','m',(*(my_mission.begin()+(player-1))),'\0'};
    printf ("./vegastrike %s %s",num,my_mission.c_str());
