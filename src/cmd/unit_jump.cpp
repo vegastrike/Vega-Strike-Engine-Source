@@ -113,6 +113,18 @@ void GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
 			  Offset*=jumpnode->rSize()*2+rSize()*2;
 			  this->SetPosAndCumPos(jumpnode->Position()+Offset);
           }
+		  Unit * tester;
+		  for (unsigned int jjj=0;jjj<2;++jjj) {
+		  for (un_iter i= _Universe->activeStarSystem()->getUnitList().createIterator();
+			   (tester=*i)!=NULL; ++i){
+
+			  if (tester->isUnit()==UNITPTR && tester!=this){
+			  if ((LocalPosition()-tester->LocalPosition()).Magnitude()<rSize()+tester->rSize()) {
+				  SetCurPosition(LocalPosition()+cumulative_transformation_matrix.getR()*(4*(rSize()+tester->rSize())));
+			  }
+			  }
+		  }
+		  }
           jumpdest+=23231;
       }
       DealPossibleJumpDamage (this);

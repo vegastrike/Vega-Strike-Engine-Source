@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
@@ -11,7 +12,7 @@
 #include "vs_globals.h"
 #include "xml_support.h"
 #include "gfxlib.h"
-
+#include "vs_random.h"
 #ifndef _WIN32
 #include <ctype.h>
 #endif
@@ -19,15 +20,22 @@
 #define M_PI 3.1415926536
 #endif
 using namespace std;
-static unsigned int starsysrandom=time (NULL);
-static void seedrand(int seed) {
-  starsysrandom=seed;
+static VSRandom starsysrandom(time(NULL));
+static void seedrand(unsigned long seed) {
+  starsysrandom=VSRandom(seed);
 } 
+static int stringhash(const std::string &key) {
+	unsigned int k = 0;
+	std::string::const_iterator start = key.begin();
+	for(;start!=key.end(); start++) {
+		k += (k * 128) + *start;
+	}
+	return k;
+}	
 
 static unsigned int ssrand()
 {
-        starsysrandom = ( starsysrandom * 1103515245 + 12345) % ((unsigned long)RAND_MAX + 1);
-        return starsysrandom;
+        return starsysrandom.rand();
 }
 
 
@@ -442,7 +450,7 @@ vector <string> parseBigUnit (string input) {
     }
     if (*ptr=='&') {
       *ptr='\0';
-      *ptr++;
+      ptr++;
     }
     ans.push_back (string(oldptr));
     oldptr=ptr;
@@ -578,8 +586,8 @@ void MakeSmallUnit () {
 
 
 
-void MakePlanet(float radius, int entitytype, bool forceRS=false, Vector R=Vector (0,0,0), Vector S=Vector (0,0,0), Vector center=Vector (0,0,0), float loy=0);
-void MakeBigUnit (string name=string (""),float orbitalradius=0) {
+void MakePlanet(float radius, int entitytype, int callingentitytype,bool forceRS=false, Vector R=Vector (0,0,0), Vector S=Vector (0,0,0), Vector center=Vector (0,0,0), float loy=0);
+void MakeBigUnit (int callingentitytype, string name=string (""),float orbitalradius=0) {
   vector <string> fullname;
   if (name.length()==0) {
     string s= getRandName (units[0]);
@@ -603,35 +611,35 @@ void MakeBigUnit (string name=string (""),float orbitalradius=0) {
     if (1==sscanf (fullname[i].c_str(),"jump%f",&size)) {
       if (!first) {
 	first= true;
-	center=generateAndUpdateRS (r,s,size,true);
+	center=generateAndUpdateRS (r,s,size,callingentitytype!=STAR);
 	stdloy=LengthOfYear (r,s);	
       }
-      MakePlanet(size,JUMP,true,r,s,center,stdloy);
+      MakePlanet(size,JUMP,callingentitytype,true,r,s,center,stdloy);
     }else if (1==sscanf (fullname[i].c_str(),"planet%f",&size)) {
       if (!first) {
 	first= true;
 	center=generateAndUpdateRS (r,s,size,false);
 	stdloy=LengthOfYear (r,s);	
       }
-      MakePlanet(size,PLANET,true,r,s,center,stdloy);
+      MakePlanet(size,PLANET,callingentitytype,true,r,s,center,stdloy);
     }else if (1==sscanf (fullname[i].c_str(),"moon%f",&size)) {      
       if (!first) {
 	first= true;
 	center=generateAndUpdateRS (r,s,size,false);
 	stdloy=LengthOfYear (r,s);	
       }
-      MakePlanet (size,MOON,true,r,s,center,stdloy);
+      MakePlanet (size,MOON,callingentitytype,true,r,s,center,stdloy);
     } else if (1==sscanf (fullname[i].c_str(),"gas%f",&size)) {
       if (!first) {
 	first= true;
 	center=generateAndUpdateRS (r,s,size,false);
 	stdloy=LengthOfYear (r,s);	
       }
-      MakePlanet (size,GAS,true,r,s,center,stdloy);
+      MakePlanet (size,GAS,callingentitytype,true,r,s,center,stdloy);
     }else if ((tmp=starin(fullname[i])).length()>0) {
       if (!first) {
 	first= true;
-	center=generateAndUpdateRS (r,s,size,true);
+	center=generateAndUpdateRS (r,s,size,callingentitytype!=STAR);
 	stdloy=LengthOfYear (r,s);	
       }
       string S = getRandName (entities[JUMP]);
@@ -643,7 +651,7 @@ void MakeBigUnit (string name=string (""),float orbitalradius=0) {
 		string type = AnalyzeType(fullname[i],nebfile,size);
 		if (!first) {
 			first= true;
-			center=generateAndUpdateRS (r,s,size,type=="Unit");
+			center=generateAndUpdateRS (r,s,size,callingentitytype!=STAR?type=="Unit":false);
 			stdloy=LengthOfYear (r,s);	
 		}
 		WriteUnit(type,"",fullname[i],r,s,center,nebfile,string(""),i!=0,stdloy);
@@ -654,7 +662,7 @@ void MakeBigUnit (string name=string (""),float orbitalradius=0) {
 
 }
 void MakeMoons (float radius, int entitytype, int callingentitytype, bool forceone=false);
-void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, Vector center, float thisloy) {
+void MakePlanet(float radius, int entitytype, int callingentitytype, bool forceRS, Vector R, Vector S, Vector center, float thisloy) {
   string s =  getRandName (entities[entitytype]);
   if (s.length()==0)
     return;
@@ -728,8 +736,12 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
     string NAME = thisname+" Atmosphere";
 	{
 	bool doalphaatmosphere = (temprandom<.08||temprandom>.3);
-	if (doalphaatmosphere) 
-		Tab();fprintf (fp,"<Atmosphere file=\"%s\" alpha=\"SRCALPHA INVSRCALPHA\" radius=\"%f\"/>\n",atmosphere.c_str(),radius*1.007);
+	if (doalphaatmosphere) {
+		float fograd=radius*1.007;
+		if (.007*radius>2500.0)
+			fograd=  radius+2500.0;
+		Tab();fprintf (fp,"<Atmosphere file=\"%s\" alpha=\"SRCALPHA INVSRCALPHA\" radius=\"%f\"/>\n",atmosphere.c_str(),fograd);
+	}
 
 	float r=.9,g=.9,b=1,a=1;
 	float dr=.9,dg=.9,db=1,da=1;
@@ -822,7 +834,7 @@ void MakeMoons (float radius, int entitytype, int callingentitytype, bool forceo
     nummoon=1;
   }
   for (unsigned int i=0;i<nummoon;i++) {
-    MakePlanet ((.5+.5*grand())*radius,entitytype);
+    MakePlanet ((.5+.5*grand())*radius,entitytype,callingentitytype);
   }
 }
 void beginStar (float radius, unsigned int which) {
@@ -861,7 +873,7 @@ void beginStar (float radius, unsigned int which) {
   }
   numun[0]-=numu;
   for (int i=0;i<numu;i++) {
-    MakeBigUnit();
+    MakeBigUnit(STAR);
   }
   MakeMoons (100+grand()*300,JUMP,STAR);
   if ((int)which+1>=nument[STAR]) {
@@ -900,7 +912,7 @@ void CreatePrimaries (float starradius) {
     CreateLight(i);
   }
   for (i=0;i<numprimaryunits;i++) {
-    MakeBigUnit();
+    MakeBigUnit(STAR);
   }
   CreateFirstStar(starradius,0);
 
@@ -1046,7 +1058,7 @@ void generateStarSystem (string datapath, int seed, string sector, string system
   if (seed)
     seedrand (seed);
   else
-    seedrand (time(NULL));
+    seedrand (stringhash(sector+system));
   fprintf (stderr,"star %d gas %d plan %d moon %d, natural %d, bases %d",numstars,numgasgiants,numrockyplanets,nummoons,numnaturalphenomena,numstarbases); 
   nument[0]=numstars;
   nument[1]=pushTowardsMean(meangas,numgasgiants);

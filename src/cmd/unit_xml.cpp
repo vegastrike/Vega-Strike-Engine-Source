@@ -1761,7 +1761,8 @@ void Unit::LoadXML(const char *filename, const char * modifications, string * xm
 		inFile = fopen (filename, "r");
 	  if(!inFile) {
 		cout << "Unit file " << filename << " not found" << endl;
-		assert(0);
+		fprintf (stderr,"Assertion failed unit_xml.cpp:1764 Unit %s not found\n",filename);
+		//assert(0);
 		return;
 	  }
   }

@@ -541,7 +541,7 @@ BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
 		rooms.back()->objs.push_back(new Room::BaseShip (-1,0,0,0,0,-1,0,1,0,QVector(0,0,2),"default room"));
 		BaseUtil::Launch(0,"default room",-1,-1,1,2,"ERROR: No rooms specified... - Launch");
 		BaseUtil::Comp(0,"default room",0,-1,1,2,"ERROR: No rooms specified... - Computer",
-				"BUYMODE SELLMODE UPGRADEMODE DOWNGRADEMODE NEWSMODE SHIPMODE MISSIONMODE BRIEFINGMODE");
+				"Cargo Upgrade Info ShipDealer News Missions");
 #endif
 	}
 	GotoLink(0);

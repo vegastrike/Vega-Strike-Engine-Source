@@ -2601,7 +2601,7 @@ static bool matchCargoToWeapon(const std::string& cargoName, const std::string& 
 		}
     }
 
-	return (convertedCargoName == weaponName);
+	return (strtoupper(convertedCargoName) == strtoupper(weaponName));
 }
 
 // Select the mount to use for selling.
@@ -2637,11 +2637,22 @@ void BaseComputer::SellUpgradeOperation::selectMount(void) {
 		if(playerUnit->mounts[i].status==Mount::ACTIVE || playerUnit->mounts[i].status==Mount::INACTIVE) {
 			// Something is mounted here.
 			const std::string unitName = playerUnit->mounts[i].type->weapon_name;
+			const Unit* partUnit = UnitConstCache::getCachedConst(StringIntKey(m_part.content, FactionUtil::GetFaction("upgrades")));
 			sprintf(mountName, "%2d. %s", i+1, unitName.c_str());
-			if(matchCargoToWeapon(m_part.content, unitName)) {
-				selectable = true;
-				selectableCount++;
-				mount = i;
+			if (partUnit) {
+				if (partUnit->GetNumMounts()) {
+					if (partUnit->mounts[0].type==playerUnit->mounts[i].type) {
+						selectable = true;
+						selectableCount++;
+						mount = i;
+					}
+				}
+			}else {
+				if(matchCargoToWeapon(m_part.content, unitName)) {
+					selectable = true;
+					selectableCount++;
+					mount = i;
+				}
 			}
         } else {
 			// Nothing at this mount point.
