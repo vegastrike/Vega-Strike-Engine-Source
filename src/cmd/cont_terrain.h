@@ -13,8 +13,8 @@ class ContinuousTerrain {
   bool *dirty;
   bool checkInvScale(float &pos, float campos, float size);
  public:
-  ContinuousTerrain (char** filenameUL, const int numwidth,  const Vector & Scales, const float mass);
-  void SetTransform (Matrix transformation);
+  ContinuousTerrain (const char* filenameUL, const Vector & Scales=Vector (0,0,0), const float mass=0);
+  void SetTransformation (Matrix transformation);
   /**
    *  Centers terrain around camera
    */

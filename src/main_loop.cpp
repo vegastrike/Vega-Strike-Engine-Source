@@ -334,26 +334,25 @@ void createObjects() {
   myterrain=NULL;
   std::string stdstr= mission->getVariable("terrain","");
   if (stdstr.length()>0) {
-    char *happy[9];
-    happy[0]=strdup ("terrainul.xml");//stdstr.c_str());
-    happy[1]=strdup ("terrainur.xml");//stdstr.c_str());
-    happy[2]=strdup ("terrainll.xml");//stdstr.c_str());
-    happy[3]=strdup ("terrainlr.xml");//stdstr.c_str());
-    happy[4]=strdup ("terrain2.xml");
-    happy[5]=strdup ("terrain2.xml");
-    happy[6]=strdup ("terrain2.xml");
-    happy[7]=strdup ("terrain2.xml");
-    happy[8]=strdup ("terrain2.xml");
-
-    myterrain=new ContinuousTerrain (happy,2/*3Use 3 if you want all 9 datasets*/,TerrainScale,XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","100")));
-			   //Terrain * terr = new Terrain (stdstr.c_str(), TerrainScale,XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","100")), XMLSupport::parse_float (vs_config->getVariable ("terrain", "radius", "10000")));
-          Matrix tmp;
-          Identity (tmp);
-      //    tmp[0]=TerrainScale.i;tmp[5]=TerrainScale.j;tmp[10]=TerrainScale.k;
+    Terrain * terr = new Terrain (stdstr.c_str(), TerrainScale,XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","100")), XMLSupport::parse_float (vs_config->getVariable ("terrain", "radius", "10000")));
+    Matrix tmp;
+    Identity (tmp);
+    tmp[0]=TerrainScale.i;tmp[5]=TerrainScale.j;tmp[10]=TerrainScale.k;
     Vector pos;
     mission->GetOrigin (pos,stdstr);
     tmp[12]=-pos.i;tmp[13]=-pos.j;tmp[14]=-pos.k;
-    myterrain->SetTransform (tmp);
+    terr->SetTransformation (tmp);
+
+  }
+  stdstr= mission->getVariable("continuousterrain","");
+  if (stdstr.length()>0) {
+    myterrain=new ContinuousTerrain (stdstr.c_str(),TerrainScale,XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","100")));
+    Matrix tmp;
+    Identity (tmp);
+    Vector pos;
+    mission->GetOrigin (pos,stdstr);
+    tmp[12]=-pos.i;tmp[13]=-pos.j;tmp[14]=-pos.k;
+    myterrain->SetTransformation (tmp);
   }
   //  qt = new QuadTree("terrain.xml");
   /****** 

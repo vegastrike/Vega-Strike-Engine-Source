@@ -3,61 +3,93 @@
 #include "star_system.h"
 #include "gfx/matrix.h"
 #include "vegastrike.h"
-ContinuousTerrain::ContinuousTerrain (char ** filenames, const int numwidth, const Vector & Scales, const float mass): Scales(Scales), width(numwidth) {
-  numcontterr= numwidth*numwidth;
-  int i;
-  data = new Terrain *[numcontterr];
-  for (i=0;i<width;i++) {
-    for (int j=0;j<width;j++) {
-      updateparity * up = &identityparity;
-      if (i%2&&j%2) {
-	up = &sideupparityodd;
-      } else if (j%2) {
-	up = &sideparityodd;
-      } else if (i%2) {
-	up = &upparityodd;
+ContinuousTerrain::ContinuousTerrain (const char * filename, const Vector & Scales, const float mass) {
+  float tmass;
+  FILE *fp = fopen (filename,"r");
+  if (fp) {
+    fscanf (fp,"%d %f\n<%f %f %f>",&width,&tmass,&this->Scales.i,&this->Scales.j,&this->Scales.k);
+    if (mass)
+      tmass = mass;
+    if (Scales.i&&Scales.j&&Scales.k) {
+      this->Scales.i *= Scales.i;
+      this->Scales.j *= Scales.j;
+      this->Scales.k *= Scales.k;
+    }
+    numcontterr= width*width;
+    data = new Terrain *[numcontterr];
+    std::string *filenames = new std::string[numcontterr];
+    for (int i=0;i<numcontterr;i++) {
+      char tmp[512];
+      fscanf (fp,"%511s",tmp);
+      tmp[511]='\0';
+      filenames[i]=tmp;
+    }
+    fclose (fp);
+    int i;
+    
+    for (i=0;i<width;i++) {
+      for (int j=0;j<width;j++) {
+	updateparity * up = &identityparity;
+	if (i%2&&j%2) {
+	  up = &sideupparityodd;
+	} else if (j%2) {
+	  up = &sideparityodd;
+	} else if (i%2) {
+	  up = &upparityodd;
+	}
+	
+	data[i*width+j] = new Terrain (filenames[i*width+j].c_str(),this->Scales,tmass,0,up);
       }
-      
-      data[i*width+j] = new Terrain (filenames[i*width+j],Scales,mass,0,up);
     }
-  }
-  location = new Vector [numcontterr];
-  dirty = new bool [numcontterr];
-
+    location = new Vector [numcontterr];
+    dirty = new bool [numcontterr];
+    delete [] filenames;
   
-  sizeX = data[0]->getSizeX();  sizeZ = data[0]->getSizeZ();
-  for (i=0;i<numcontterr;i++) {
-    if (sizeX!=data[i]->getSizeX()||sizeZ!=data[i]->getSizeZ()) {
-      fprintf (stderr,"Warning: Sizes of terrain do not match...expect gaps in continuous terrain\n");
+    sizeX = data[0]->getSizeX();  sizeZ = data[0]->getSizeZ();
+    for (i=0;i<numcontterr;i++) {
+      if (sizeX!=data[i]->getSizeX()||sizeZ!=data[i]->getSizeZ()) {
+	fprintf (stderr,"Warning: Sizes of terrain do not match...expect gaps in continuous terrain\n");
+      }
+      data[i]->SetTotalSize (sizeX*width,sizeZ*width);
     }
-    data[i]->SetTotalSize (sizeX*width,sizeZ*width);
-  }
-  for (i=0;i<width;i++) {
-    for (int j=0;j<width;j++) {
-      int nj = j-1<0?width-1:j-1;
-      int ni = i-1<0?width-1:i-1;
-      data[j+width*i]->SetNeighbors (data[(j+1)%width+width*i],
-				     data[j+width*((i+1)%width)],
-				     data[nj+width*i],
-				     data[j+width*ni]);
-      location[j+width*i].Set (0+sizeX*j,0,0-sizeZ*i);
-      data[j+width*i]->StaticCullData (25);
+    for (i=0;i<width;i++) {
+      for (int j=0;j<width;j++) {
+	int nj = j-1<0?width-1:j-1;
+	int ni = i-1<0?width-1:i-1;
+	data[j+width*i]->SetNeighbors (data[(j+1)%width+width*i],
+				       data[j+width*((i+1)%width)],
+				       data[nj+width*i],
+				       data[j+width*ni]);
+	location[j+width*i].Set (0+sizeX*j,0,0-sizeZ*i);
+	data[j+width*i]->StaticCullData (25);
+      }
     }
+    Matrix tmpmat;
+    Identity (tmpmat);
+    SetTransformation (tmpmat);
+    
+  } else {
+    numcontterr=0;
+    width=0;
+    dirty= NULL;
+    location=NULL;
+    data=NULL;
   }
-  Matrix tmpmat;
-  Identity (tmpmat);
-  SetTransform (tmpmat);
+
 }
 
 ContinuousTerrain::~ContinuousTerrain() {
   for (int i=0;i<numcontterr;i++) {
     delete data[i];
   }
-  delete []dirty;
-  delete []location;
-  delete []data;
+  if (dirty)
+    delete []dirty;
+  if (location)
+    delete []location;
+  if (data)
+    delete []data;
 }
-void ContinuousTerrain::SetTransform(Matrix transformation) {
+void ContinuousTerrain::SetTransformation(Matrix transformation) {
   CopyMatrix (this->transformation,transformation);
   ScaleMatrix (this->transformation, Scales);
   for (int i=0;i<numcontterr;i++) {
