@@ -78,10 +78,11 @@ enum tag_type {
   DTAG_VAR_EXPR, DTAG_DEFVAR,
   DTAG_CONST,
   DTAG_ARGUMENTS,
-  DTAG_GLOBALS
+  DTAG_GLOBALS,
+  DTAG_RETURN
 };
 
-enum var_type { VAR_BOOL,VAR_FLOAT,VAR_VECTOR,VAR_OBJECT,VAR_STRING,VAR_VOID };
+enum var_type { VAR_FAILURE,VAR_BOOL,VAR_FLOAT,VAR_VECTOR,VAR_OBJECT,VAR_STRING,VAR_VOID };
 
 enum tester_type { TEST_GT,TEST_LT,TEST_EQ,TEST_GE,TEST_LE };
 
@@ -121,6 +122,8 @@ class scriptContext {
 class contextStack {
  public:
  vector<scriptContext *> contexts;
+ varInst *return_value;
+
 };
 
 /* *********************************************************** */
@@ -145,11 +148,11 @@ class missionNode : public tagDomNode {
     missionNode *while_arg[2]; // while
     int tester; // test
     missionNode *test_arg[2]; // test
-    enum var_type vartype; // defvar
+    enum var_type vartype; // defvar,script
     string initval;
     missionNode *context_block_node; // defvar
     map<string,missionNode *> scripts; // module
-    missionNode *exec_node; // exec
+    missionNode *exec_node; // exec, return
     int nr_arguments; // script
     missionNode *argument_node; //script
   } script;
@@ -196,6 +199,7 @@ class Mission {
   // used only for parsing
   vector<missionNode *> scope_stack;
   missionNode *current_module;
+  missionNode *current_script;
 
   void initTagMap();
   void DirectorStart(missionNode *node);
@@ -221,7 +225,7 @@ void  doModule(missionNode *node,int mode);
   void removeContextStack();
   void addContextStack(missionNode *node);
 
-void  doScript(missionNode *node,int mode,varInstMap *varmap=NULL);
+varInst *  doScript(missionNode *node,int mode,varInstMap *varmap=NULL);
 void  doBlock(missionNode *node,int mode);
 bool  doBooleanVar(missionNode *node,int mode);
 varInst * lookupLocalVariable(missionNode *asknode);
@@ -236,10 +240,10 @@ bool  checkBoolExpr(missionNode *node,int mode);
 bool  doAndOr(missionNode *node,int mode);
 bool  doNot(missionNode *node,int mode);
 bool  doTest(missionNode *node,int mode);
- void doDefVar(missionNode *node,int mode);
+ void doDefVar(missionNode *node,int mode,bool global_var=false);
  void doSetVar(missionNode *node,int mode);
  varInst * doCall(missionNode *node,int mode);
- void doExec(missionNode *node,int mode);
+ varInst* doExec(missionNode *node,int mode);
  varInst *doConst(missionNode *node,int mode);
 
  varInst *checkExpression(missionNode *node,int mode);
@@ -254,6 +258,12 @@ scriptContext *makeContext(missionNode *node);
  float doFMath(missionNode *node,int mode);
 
  void doArguments(missionNode *node,int mode,varInstMap *varmap=NULL);
+ void doReturn(missionNode *node,int mode);
+ void doGlobals(missionNode *node,int mode);
+
+ bool have_return(int mode);
+
+ var_type vartypeFromString(string type);
 
  void fatalError(missionNode *node,int mode,string message);
  void runtimeFatal(string message);
@@ -267,6 +277,7 @@ void printNode(missionNode *node,int mode);
  void printThread(missionThread *thread);
  void printVarmap(const varInstMap & vmap);
  void printVarInst(varInst *vi);
+ void printGlobals(int dbg_level);
 
  string modestring(int mode);
 

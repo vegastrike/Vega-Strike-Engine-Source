@@ -118,6 +118,20 @@ float Mission::checkFloatExpr(missionNode *node,int mode){
 	assert(0);
       }
     }
+    else if(node->tag==DTAG_EXEC){
+      varInst *vi=doExec(node,mode);
+      if(vi==NULL){
+	fatalError(node,mode,"doExec returned NULL");
+	assert(0);
+      }
+      else if(node->script.vartype==VAR_FLOAT){
+	res=vi->float_val;
+      }
+      else{
+	fatalError(node,mode,"expected a float exec, got a different one");
+	assert(0);
+      }
+    }
     else{
       fatalError(node,mode,"no such float expression tag");
       assert(0);
@@ -156,6 +170,34 @@ bool Mission::checkBoolExpr(missionNode *node,int mode){
 	assert(0);
       }
     }
+    else if(node->tag==DTAG_CALL){
+      varInst *vi=doCall(node,mode);
+      if(vi->type==VAR_BOOL){
+	ok=vi->bool_val;
+      }
+      else{
+	fatalError(node,mode,"expected a bool call, got a different one");
+	assert(0);
+      }
+    }
+
+    else if(node->tag==DTAG_EXEC){
+      varInst *vi=doExec(node,mode);
+      if(vi==NULL){
+	fatalError(node,mode,"doExec returned NULL");
+	assert(0);
+ 	// parsing?
+      }
+      else if(node->script.vartype==VAR_BOOL){
+	ok=vi->bool_val;
+      }
+      else{
+	fatalError(node,mode,"expected a bool exec, got a different one");
+	assert(0);
+      }
+    }
+
+
     else{
       fatalError(node,mode,"no such boolean expression tag");
       assert(0);

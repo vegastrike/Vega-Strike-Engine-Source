@@ -63,6 +63,9 @@ void Mission::checkStatement(missionNode *node,int mode){
     else if(node->tag==DTAG_EXEC){
       doExec(node,mode);
     }
+    else if(node->tag==DTAG_RETURN){
+      doReturn(node,mode);
+    }
     else if(node->tag==DTAG_CALL){
       varInst *vi=doCall(node,mode);
       if(vi->type!=VAR_VOID){
@@ -127,18 +130,17 @@ void Mission::doIf(missionNode *node,int mode){
 
 void Mission::doWhile(missionNode *node,int mode){
 
-  if(SCRIPT_PARSE){
-    int i=0;
-   vector<easyDomNode *>::const_iterator siter;
-    for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() && i<2; siter++){
-      missionNode *snode=(missionNode *)*siter;
-      node->script.while_arg[i]=snode;
-    }
+  if(mode==SCRIPT_PARSE){
 
-    if(i<2){
+    int len=node->subnodes.size();
+
+    if(len!=2){
       fatalError(node,mode,"a while-expr needs exact two subnodes");
       assert(0);
     }
+
+    node->script.while_arg[0]=(missionNode *)node->subnodes[0];
+    node->script.while_arg[1]=(missionNode *)node->subnodes[1];
 
     bool res=checkBoolExpr(node->script.while_arg[0],mode);
 
