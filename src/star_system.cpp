@@ -34,6 +34,7 @@
 #include "cmd/script/flightgroup.h"
 #include "load_mission.h"
 #include "gfx/particle.h"
+#include "gfx/warptrail.h"
 extern Music *muzak;
 extern Vector mouseline;
 
@@ -337,6 +338,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
     ((GameUnit<Unit> *)unit)->Draw();
     iter.advance();
   }
+  WarpTrailDraw();
 #ifdef UPDATEDEBUG
   fprintf (stderr,"fog");
   fflush (stderr);

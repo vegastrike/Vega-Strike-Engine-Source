@@ -25,6 +25,7 @@
 #include "cmd/ai/ikarus.h"
 #include "role_bitmask.h"
 #include "unit_const_cache.h"
+#include "gfx/warptrail.h"
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
@@ -1468,6 +1469,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies, int recursive_lev
 	}
       }
     }
+    
     static string insys_jump_ani = vs_config->getVariable ("graphics","insys_jump_animation","warp.ani");
     if (insys_jump_ani.length()) {
       UniverseUtil::playAnimationGrow (insys_jump_ani,RealPosition(this),rSize()*4,.99);
@@ -1478,6 +1480,11 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies, int recursive_lev
       Vector p,q,r;GetOrientation(p,q,r);
       UniverseUtil::playAnimationGrow (insys_jump_ani,sep+v*rSize(),rSize()*8,.97);
       UniverseUtil::playAnimationGrow (insys_jump_ani,sep+2*v*rSize()+r*4*rSize(),rSize()*16,.97);
+    }
+    static bool warptrail = XMLSupport::parse_bool (vs_config->getVariable ("graphics","warp_trail","true"));
+    if (warptrail) {
+      static float warptrailtime = XMLSupport::parse_float (vs_config->getVariable ("graphics","warp_trail_time","20"));
+      AddWarp(this,RealPosition(this),warptrailtime);
     }
     //    sep =UniverseUtil::SafeEntrancePoint (sep);
     SetCurPosition(sep);

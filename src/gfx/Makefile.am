@@ -95,5 +95,7 @@ libgfx_a_SOURCES =	$(libgfxgeneric)\
 	sprite.cpp	\
 	sprite.h	\
 	vdu.cpp		\
+	warptrail.h	\
+	warptrail.cpp	\
 	vdu.h
 
