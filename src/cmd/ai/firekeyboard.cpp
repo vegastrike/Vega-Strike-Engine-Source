@@ -1422,7 +1422,12 @@ void FireKeyboard::Execute () {
       refresh_target=true;
     }
   } else {
-    ChooseTargets(parent,TargAll,false);
+    ChooseTargets(parent,TargThreat,false);
+    if (parent->Target()==NULL)
+      ChooseTargets(parent,TargNear,false);
+    if (parent->Target()==NULL)
+      ChooseTargets(parent,TargAll,false);
+    
     refresh_target=true;
   }
   if (f().shieldpowerstate!=1) {
