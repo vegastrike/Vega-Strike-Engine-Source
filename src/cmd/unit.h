@@ -125,7 +125,7 @@ public:
   void SetPlanetOrbitData (PlanetaryTransform *trans);
   PlanetaryTransform *GetPlanetOrbit () const;
   //bool TransferUnitToSystem (StarSystem *NewSystem);
-  void TransferUnitToSystem (unsigned int whichJumpQueue, class StarSystem *&previouslyActiveStarSystem, bool DoSightAndSound);
+  bool TransferUnitToSystem (unsigned int whichJumpQueue, class StarSystem *&previouslyActiveStarSystem, bool DoSightAndSound);
   ///Begin and continue explosion
   bool Explode(bool draw, float timeit);
 

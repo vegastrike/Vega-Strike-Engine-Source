@@ -37,7 +37,8 @@ inline std::vector <Unit *> ComparePrimaries (Unit * primary, StarSystem *origin
 extern void DealPossibleJumpDamage (Unit *un);
 extern void ActivateAnimation(Unit *);
 template <class UnitType>
-void GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem, bool dosightandsound) {
+bool GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem, bool dosightandsound) {
+  bool ret=false;
   if (pendingjump[kk]->orig==this->activeStarSystem||this->activeStarSystem==NULL) {
 	  if (Unit::TransferUnitToSystem (pendingjump[kk]->dest)) {
 #ifdef JUMP_DEBUG
@@ -46,7 +47,7 @@ void GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
 
       ///eradicating from system, leaving no trace
 	  Unit::TransferUnitToSystem(pendingjump[kk]->dest);
-
+          ret=true;
 
       UnitCollection::UnitIterator iter = pendingjump[kk]->orig->getUnitList().createIterator();
       Unit * unit;
@@ -164,4 +165,5 @@ void GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
   }else {
     VSFileSystem::vs_fprintf (stderr,"Already jumped\n");
   }
+  return ret;
 }

@@ -315,7 +315,7 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
 
   calculate_extent(false);
   if (wormhole) {
-	  static float radscale=XMLSupport::parse_float(vs_config->getVariable("physics","jump_radius_scale",".5"));
+	  static float radscale=XMLSupport::parse_float(vs_config->getVariable("physics","jump_mesh_radius_scale",".5"));
 	  radius*=radscale;
 	  corner_min.i=corner_min.j=corner_min.k=-radius;
 	  corner_max.i=corner_max.j=corner_max.k=radius;

@@ -97,7 +97,6 @@ void Cockpit::Init (const char * file, bool isDisabled) {
 	  return;
   }
   Delete();
-//  string cpdir=vs_config->getVariable("data","cockpits","");
   LoadXML(f);
   f.Close();
 } 

@@ -442,7 +442,7 @@ void AddSounds(Unit * thus, string sounds) {
       thus->sound->hull=AUDCreateSound (vs_config->getVariable ("unitaudio","armor","sfx08.wav"),false);
     }
     if (thus->sound->explode==-1) {
-      thus->sound->explode=AUDCreateSound (vs_config->getVariable ("unitaudio","explode","sfx03.wav"),false);
+      thus->sound->explode=AUDCreateSound (vs_config->getVariable ("unitaudio","explode","explosion.wav"),false);
     }
     if (thus->sound->jump==-1) {
       thus->sound->jump=AUDCreateSound (vs_config->getVariable ("unitaudio","explode","sfx43.wav"),false);

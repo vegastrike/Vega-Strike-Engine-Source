@@ -2176,7 +2176,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
       Vector v(GetVelocity());
       v.Normalize();
       Vector p,q,r;GetOrientation(p,q,r);
-	  static float sec = XMLSupport::parse_float(vs_config->getVariable("graphics","insys_jump_ani_second_ahead","1.5"));
+	  static float sec = XMLSupport::parse_float(vs_config->getVariable("graphics","insys_jump_ani_second_ahead","4"));
       UniverseUtil::playAnimationGrow (insys_jump_ani,sep+GetVelocity()*sec+v*rSize(),rSize()*8,.97);
       UniverseUtil::playAnimationGrow (insys_jump_ani,sep+GetVelocity()*sec+2*v*rSize()+r*4*rSize(),rSize()*16,.97);
     }
@@ -2232,6 +2232,10 @@ void TurnJumpOKLightOn(Unit * un, Cockpit * cp) {
 		}
 	}
 }
+void Unit::DecreaseWarpEnergy(bool insys, float time=1.0f) {
+  static float bleedfactor = XMLSupport::parse_float(vs_config->getVariable("physics","warpbleed","20"));
+  this->warpenergy-=(insys?jump.insysenergy/bleedfactor:jump.energy)*time;
+}
 bool Unit::jumpReactToCollision (Unit * smalle) {
 	static bool ai_jump_cheat=XMLSupport::parse_bool(vs_config->getVariable("AI","jump_without_energy","false"));
   if (!GetDestinations().empty()) {//only allow big with small
@@ -2243,7 +2247,7 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
 			||(ai_jump_cheat&&cp==NULL)
 			   ))
 		  ||image->forcejump){
-		smalle->warpenergy-=smalle->GetJumpStatus().energy;
+            //NOW done in star_system_generic.cpp before TransferUnitToSystem smalle->warpenergy-=smalle->GetJumpStatus().energy;
 		int dest = smalle->GetJumpStatus().drive;
 		if (dest<0)
 			dest=0;
@@ -2407,7 +2411,7 @@ Vector Unit::MaxTorque(const Vector &torque) {
 }
 
 float GetFuelUsage (bool afterburner) {
-//  static float total_accel=XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed",".9"))*XMLSupport::parse_float (vs_config->getVariable("physics","game_accel","1"));
+//  static float total_accel=XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed","1"))*XMLSupport::parse_float (vs_config->getVariable("physics","game_accel","1"));
   static float normalfuelusage = XMLSupport::parse_float (vs_config->getVariable ("physics","FuelUsage","1"));
   static float abfuelusage = XMLSupport::parse_float (vs_config->getVariable ("physics","AfterburnerFuelUsage","4"));
   if (afterburner) 
@@ -2417,7 +2421,7 @@ float GetFuelUsage (bool afterburner) {
 Vector Unit::ClampTorque (const Vector &amt1) {
   Vector Res=amt1;
  
-  static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".9"));
+  static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".4"));
   float fuelclamp=(fuel<=0)?staticfuelclamp:1;
   if (fabs(amt1.i)>fuelclamp*limits.pitch)
     Res.i=copysign(fuelclamp*limits.pitch,amt1.i);
@@ -2450,7 +2454,7 @@ bool Unit::CombatMode() {
   return computer.combat_mode;
 }
 Vector Unit::ClampVelocity (const Vector & velocity, const bool afterburn) {
-  static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".9"));
+  static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".4"));
   static float staticabfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelAfterburn",".1"));
   float fuelclamp=(fuel<=0)?staticfuelclamp:1;
   float abfuelclamp= (fuel<=0||(energy<afterburnenergy*SIMULATION_ATOM))?staticabfuelclamp:1;
@@ -2541,7 +2545,7 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
   }
 
   static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".4"));
-  static float staticabfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelAfterburn","0"));
+  static float staticabfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelAfterburn",".1"));
   float fuelclamp=(fuel<=0)?staticfuelclamp:1;
   float abfuelclamp= (fuel<=0)?staticabfuelclamp:1;
   if (fabs(amt1.i)>fabs(fuelclamp*limits.lateral))
@@ -2606,7 +2610,7 @@ void Unit::RollTorque(float amt) {
   ApplyLocalTorque(amt * Vector(0,0,1));
 }
 float WARPENERGYMULTIPLIER(Unit * un) {
-  static float warpenergymultiplier = XMLSupport::parse_float (vs_config->getVariable ("physics","warp_energy_multiplier",".04"));
+  static float warpenergymultiplier = XMLSupport::parse_float (vs_config->getVariable ("physics","warp_energy_multiplier","0.12"));
   static float playerwarpenergymultiplier = XMLSupport::parse_float (vs_config->getVariable ("physics","warp_energy_player_multiplier",".3"));
   bool player=_Universe->isPlayerStarship(un)!=NULL;
   Flightgroup * fg =un->getFlightgroup();
@@ -2656,7 +2660,7 @@ float currentTotalShieldVal (const Shield & shield) {
 
 float totalShieldEnergyCapacitance (const Shield & shield) {
 	static float shieldenergycap = XMLSupport::parse_float(vs_config->getVariable ("physics","shield_energy_capacitance",".2"));
-    static bool use_max_shield_value = XMLSupport::parse_bool(vs_config->getVariable("physics","use_max_shield_energy_usage","true"));
+    static bool use_max_shield_value = XMLSupport::parse_bool(vs_config->getVariable("physics","use_max_shield_energy_usage","false"));
     return shieldenergycap * use_max_shield_value?totalShieldVal(shield):currentTotalShieldVal(shield);
 }
 float Unit::MaxShieldVal() const{

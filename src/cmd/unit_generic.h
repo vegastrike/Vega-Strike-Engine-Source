@@ -501,7 +501,7 @@ public:
   bool CombatMode();
 // SHOULD TRY TO COME BACK HERE
   virtual bool TransferUnitToSystem (StarSystem *NewSystem);
-  virtual void TransferUnitToSystem (unsigned int whichJumpQueue, class StarSystem *&previouslyActiveStarSystem, bool DoSightAndSound) {}
+  virtual bool TransferUnitToSystem (unsigned int whichJumpQueue, class StarSystem *&previouslyActiveStarSystem, bool DoSightAndSound) {return false;}
   StarSystem * getStarSystem();
     struct UnitJump {
     float warpDriveRating;
@@ -678,6 +678,7 @@ public:
   float EnergyData() const;
   float WarpEnergyData() const;
   float GetWarpEnergy() {return warpenergy;} //short fix
+  void DecreaseWarpEnergy(bool insystem, float time=1.0f);
   bool RefillWarpEnergy();
   ///Should we resolve forces on this unit (is it free to fly or in orbit)
   bool resolveforces;

@@ -4055,7 +4055,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
 	static float game_accel = XMLSupport::parse_float (vs_config->getVariable("physics","game_accel","1"));
 	static float warpenratio = XMLSupport::parse_float (vs_config->getVariable("physics","warp_energy_multiplier","0.12"));
-	static float warpbleed = XMLSupport::parse_float (vs_config->getVariable("physics","warpbleed","1"));
+	static float warpbleed = XMLSupport::parse_float (vs_config->getVariable("physics","warpbleed","20"));
     static float shield_maintenance_cost=XMLSupport::parse_float(vs_config->getVariable("physics","shield_maintenance_charge",".25"));
     static bool shields_require_power=XMLSupport::parse_bool(vs_config->getVariable ("physics","shields_require_passive_recharge_maintenance","true"));
 	static float shieldenergycap = XMLSupport::parse_float(vs_config->getVariable ("physics","shield_energy_capacitance",".2"));

@@ -705,7 +705,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     R = QVector (0,0,1);
     pos = QVector (0,0,0);
     radius=-1;
-    position=parse_float (vs_config->getVariable ("terrain","mass","100"));
+    position=parse_float (vs_config->getVariable ("terrain","mass","1000"));
     gravity=0;
 
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
