@@ -36,12 +36,12 @@ void collideTrees::Dec() {
   }
 }
 
-bool TableLocationChanged (const Vector & Mini,const Vector & minz) { 
+bool TableLocationChanged (const QVector & Mini,const QVector & minz) { 
   return (_Universe->activeStarSystem()->collidetable->c.hash_int (Mini.i)!=_Universe->activeStarSystem()->collidetable->c.hash_int (minz.i) ||
 	  _Universe->activeStarSystem()->collidetable->c.hash_int (Mini.j)!=_Universe->activeStarSystem()->collidetable->c.hash_int (minz.j) ||
 	  _Universe->activeStarSystem()->collidetable->c.hash_int (Mini.k)!=_Universe->activeStarSystem()->collidetable->c.hash_int (minz.k));
 }
-bool TableLocationChanged (const LineCollide &lc, const Vector &minx, const Vector & maxx) {
+bool TableLocationChanged (const LineCollide &lc, const QVector &minx, const QVector & maxx) {
   return TableLocationChanged (lc.Mini,minx) || TableLocationChanged (lc.Maxi,maxx);
 }
 void KillCollideTable (LineCollide * lc,StarSystem * ss) {
@@ -126,8 +126,8 @@ void Unit::UpdateCollideQueue () {
     assert (activeStarSystem==_Universe->activeStarSystem());
   }
   CollideInfo.lastchecked =NULL;//reset who checked it last in case only one thing keeps crashing with it;
-  Vector Puffmin (Position().i-radial_size,Position().j-radial_size,Position().k-radial_size);
-  Vector Puffmax (Position().i+radial_size,Position().j+radial_size,Position().k+radial_size);
+  QVector Puffmin (Position().i-radial_size,Position().j-radial_size,Position().k-radial_size);
+  QVector Puffmax (Position().i+radial_size,Position().j+radial_size,Position().k+radial_size);
   if (CollideInfo.object.u == NULL||TableLocationChanged(CollideInfo,Puffmin,Puffmax)) {//assume not mutable
     if (CollideInfo.object.u!=NULL) {
       KillCollideTable(&CollideInfo,activeStarSystem);
@@ -497,10 +497,10 @@ static bool lcwithin (const LineCollide & lc, const LineCollide&tmp) {
 
 bool Bolt::Collide () {
   UnitCollection *candidates[2];  
-  _Universe->activeStarSystem()->collidetable->c.Get (cur_position.Cast(),candidates);
+  _Universe->activeStarSystem()->collidetable->c.Get (cur_position,candidates);
   LineCollide minimaxi;//might as well have this so we can utilize common function
-  minimaxi.Mini= ( prev_position.Min (cur_position)).Cast();
-  minimaxi.Maxi= ( prev_position.Max (cur_position)).Cast();
+  minimaxi.Mini= ( prev_position.Min (cur_position));
+  minimaxi.Maxi= ( prev_position.Max (cur_position));
   for (unsigned int j=0;j<2;j++) {
     Unit * un;
     for (un_iter i=candidates[j]->createIterator();(un=*i)!=NULL;++i) {

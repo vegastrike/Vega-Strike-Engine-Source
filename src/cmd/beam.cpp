@@ -329,13 +329,13 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m) {
 #endif
       CollideInfo.object.b = this;
       CollideInfo.hhuge=(((CollideInfo.Maxi.i-CollideInfo.Mini.i)/coltableacc)*((CollideInfo.Maxi.j-CollideInfo.Mini.j)/coltableacc)*(CollideInfo.Maxi.k-CollideInfo.Mini.k)/coltableacc>tablehuge);
-      CollideInfo.Mini= tmpMini.Cast();
-      CollideInfo.Maxi= tmpvec.Cast();
+      CollideInfo.Mini= tmpMini;
+      CollideInfo.Maxi= tmpvec;
 #ifdef BEAMCOLQ
       AddCollideQueue (CollideInfo);
     } else {
-      CollideInfo.Mini= tmpMini.Cast();
-      CollideInfo.Maxi= tmpvec.Cast();
+      CollideInfo.Mini= tmpMini;
+      CollideInfo.Maxi= tmpvec;
     }
 #endif
   }
@@ -422,3 +422,4 @@ bool Beam::Collide (Unit * target) {
   
   return false;
 }
+

@@ -30,13 +30,13 @@ template <class CTSIZ, class CTACCURACY, class CTHUGE> class UnitHash3d {
 
   ///hashes 3 values into the appropriate spot in the hash table
 
-  static void hash_vec (float i, float j, float k, int &x, int &y, int &z) {
+  static void hash_vec (double i, double j, double k, int &x, int &y, int &z) {
     x = hash_int(i);
     y = hash_int(j);
     z = hash_int(k);
   }
   ///hashes 3 vals into the appropriate place in hash table
-  static void hash_vec (const Vector & t,int &x, int&y,int&z) {
+  static void hash_vec (const QVector & t,int &x, int&y,int&z) {
     hash_vec(t.i,t.j,t.k,x,y,z);
   }
 public:
@@ -56,7 +56,7 @@ public:
     }
   }
   ///Hashes a single value to a value on the collide table truncated to all 3d constraints.  Consider using a swizzle
-  int hash_int (const float aye) {
+  int hash_int (const double aye) {
     return ((int)(((aye<0)?(aye-COLLIDETABLEACCURACY):aye)/COLLIDETABLEACCURACY))%(COLLIDETABLESIZE/2)+(COLLIDETABLESIZE/2); 
   }
   ///clears entire table
@@ -74,7 +74,7 @@ public:
     }
   }
   ///returns any objects residing in the sector occupied by Exact
-  int Get (const Vector &Exact, UnitCollection  *retval[]) {
+  int Get (const QVector &Exact, UnitCollection  *retval[]) {
     retval[1]=&table[hash_int(Exact.i)][hash_int(Exact.j)][hash_int(Exact.k)];
     //retval+=hugeobjects;
     //blah = blooh;
@@ -91,9 +91,9 @@ public:
     //int minx,miny,minz,maxx,maxy,maxz;
     //    hash_vec(Min,minx,miny,minz);
     //    hash_vec(Max,maxx,maxy,maxz);
-    float maxx= (ceil(target->Maxi.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
-    float maxy= (ceil(target->Maxi.j/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
-    float maxz= (ceil(target->Maxi.k/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
+    double maxx= (ceil(target->Maxi.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
+    double maxy= (ceil(target->Maxi.j/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
+    double maxz= (ceil(target->Maxi.k/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
     int x,y,z;
     if (target->Mini.i==maxx) maxx+=COLLIDETABLEACCURACY/2;
     if (target->Mini.j==maxy) maxy+=COLLIDETABLEACCURACY/2;
@@ -102,11 +102,11 @@ public:
     if (target->hhuge) {
       return sizer;//we can't get _everything
     } 
-    for (float i=target->Mini.i;i<maxx;i+=COLLIDETABLEACCURACY) {
+    for (double i=target->Mini.i;i<maxx;i+=COLLIDETABLEACCURACY) {
       x = hash_int (i);
-      for (float j=target->Mini.j;j<maxy;j+=COLLIDETABLEACCURACY) {   
+      for (double j=target->Mini.j;j<maxy;j+=COLLIDETABLEACCURACY) {   
 	y = hash_int(j);
-	for (float k=target->Mini.k;k<maxz;k+=COLLIDETABLEACCURACY) {
+	for (double k=target->Mini.k;k<maxz;k+=COLLIDETABLEACCURACY) {
 	  z = hash_int(k);
 	  if (!table[x][y][z].empty()) {
 	    retval[sizer] = &table[x][y][z];
@@ -123,29 +123,29 @@ public:
   ///Adds objectToPut into collide table with limits specified by target.
   void Put(LineCollide* target,Unit * objectToPut) {
     int x,y,z;
-    float maxx= (ceil(target->Maxi.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
-    float maxy= (ceil(target->Maxi.j/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
-    float maxz= (ceil(target->Maxi.k/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
+    double maxx= (ceil(target->Maxi.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
+    double maxy= (ceil(target->Maxi.j/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
+    double maxz= (ceil(target->Maxi.k/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
     //for huge calculation...not sure it's necessary
-    float minx= (floor(target->Mini.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
-    float miny= (floor(target->Mini.j/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
-    float minz= (floor(target->Mini.k/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
+    double minx= (floor(target->Mini.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
+    double miny= (floor(target->Mini.j/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
+    double minz= (floor(target->Mini.k/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
     if (target->Mini.i==maxx) 
       maxx+=COLLIDETABLEACCURACY/2;
     if (target->Mini.j==maxy) maxy+=COLLIDETABLEACCURACY/2;
     if (target->Mini.k==maxz) maxz+=COLLIDETABLEACCURACY/2;
-    if (fabs((maxx-minx)*(maxy-miny)*(maxz-minz))>((float)COLLIDETABLEACCURACY)*((float)COLLIDETABLEACCURACY)*((float)COLLIDETABLEACCURACY)*((float)HUGEOBJECT)) {
+    if (fabs((maxx-minx)*(maxy-miny)*(maxz-minz))>((double)COLLIDETABLEACCURACY)*((double)COLLIDETABLEACCURACY)*((double)COLLIDETABLEACCURACY)*((double)HUGEOBJECT)) {
       target->hhuge = true;
       hugeobjects.prepend(objectToPut);
       return;
     }else {
       target->hhuge=false;
     }
-    for (float i=target->Mini.i;i<maxx;i+=COLLIDETABLEACCURACY) {
+    for (double i=target->Mini.i;i<maxx;i+=COLLIDETABLEACCURACY) {
       x = hash_int(i);
-      for (float j=target->Mini.j;j<maxy;j+=COLLIDETABLEACCURACY) {    
+      for (double j=target->Mini.j;j<maxy;j+=COLLIDETABLEACCURACY) {    
 	y = hash_int(j);
-	for (float k=target->Mini.k;k<maxz;k+=COLLIDETABLEACCURACY) {
+	for (double k=target->Mini.k;k<maxz;k+=COLLIDETABLEACCURACY) {
 	  z = hash_int(k);
 	  table[x][y][z].prepend(objectToPut);
 	}
@@ -184,18 +184,18 @@ public:
     //    hash_vec(target->Maxi,maxx,maxy,maxz);
     bool ret=false;
     int x,y,z;
-    float maxx= (ceil(target->Maxi.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
-    float maxy= (ceil(target->Maxi.j/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
-    float maxz= (ceil(target->Maxi.k/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
+    double maxx= (ceil(target->Maxi.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
+    double maxy= (ceil(target->Maxi.j/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
+    double maxz= (ceil(target->Maxi.k/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
     if (target->Mini.i==maxx) maxx+=COLLIDETABLEACCURACY/2;
     if (target->Mini.j==maxy) maxy+=COLLIDETABLEACCURACY/2;
     if (target->Mini.k==maxz) maxz+=COLLIDETABLEACCURACY/2;
     if (!target->hhuge) {
-      for (float i=target->Mini.i;i<maxx;i+=COLLIDETABLEACCURACY) {
+      for (double i=target->Mini.i;i<maxx;i+=COLLIDETABLEACCURACY) {
 	x = hash_int(i);
-	for (float j=target->Mini.j;j<maxy;j+=COLLIDETABLEACCURACY) {    
+	for (double j=target->Mini.j;j<maxy;j+=COLLIDETABLEACCURACY) {    
 	  y = hash_int(j);
-	  for (float k=target->Mini.k;k<maxz;k+=COLLIDETABLEACCURACY) {
+	  for (double k=target->Mini.k;k<maxz;k+=COLLIDETABLEACCURACY) {
 	    z = hash_int(k);
 	    ret |= removeFromVector (table[x][y][z],objectToKill);
 	  }
@@ -225,8 +225,8 @@ class CollideTable {
 };
 
 void AddCollideQueue(LineCollide &,StarSystem * ss);
-bool TableLocationChanged (const Vector &, const Vector &);
-bool TableLocationChanged (const LineCollide &, const Vector &, const Vector &);
+bool TableLocationChanged (const QVector &, const QVector &);
+bool TableLocationChanged (const LineCollide &, const QVector &, const QVector &);
 void KillCollideTable (LineCollide* lc, StarSystem * ss);
 bool EradicateCollideTable (LineCollide* lc, StarSystem * ss);
 
@@ -251,3 +251,4 @@ struct collideTrees {
 
 
 #endif
+
