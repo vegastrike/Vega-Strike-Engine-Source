@@ -7,9 +7,10 @@
 #include <float.h>
 #include <ctype.h>
 #include <algorithm>
-#ifdef _WIN32
+#ifndef _WIN32
 #include <sys/stat.h>
 #endif
+#include <sys/stat.h>
 using std::vector;
 using std::map;
 using std::string;
@@ -51,6 +52,7 @@ public:
 	float distance;
 	float ascension;
 	float declination;
+	vector<string> jumps;
 	vec3 xyz;
 	float luminosity;//in sun
 	int type; // 0 = 1O blue (-2000)  B = 20 blue(2000-4000) // A = 30 Bluish-white (4000-8000) F = 40 White G = 50 (13500-15000) yellow  (15000-43000) K = 60 Orange (36500-80000) M = Red 70 (giant 80,000 dwarf 8,000-13500 )
@@ -222,15 +224,11 @@ vector<System> readfile (const char * name) {
 		return systems;
 	}
 	int len;
-#ifdef _WIN32
 	struct stat st;
 	if (fstat(fileno(fp), &st)==0) {
 		len=st.st_size;
 	} else {
 		// fstat B0rken.
-#else
-	{
-#endif
 		fseek (fp,0,SEEK_END);
 		len = ftell (fp);
 		fseek (fp,0,SEEK_SET);
@@ -303,6 +301,14 @@ void writesystems(FILE * fp, std::vector<System> s) {
 			fprintf (fp, "\t\t\t<var name=\"%s\" value=\"%s\"/>\n",(*j).first.c_str(),(*j).second.c_str());			
 		}
 		fprintf (fp,"\t\t\t<var name=\"faction\" value=\"confed\"/>\n");
+		fprintf (fp,"\t\t\t<var name=\"jumps\" value=\"");
+		if ((*i).jumps.size()) {
+			fprintf(fp,"%s",(*i).jumps[0].c_str());
+			for (unsigned int k=1;k<(*i).jumps.size();++k) {
+				fprintf (fp," %s",(*i).jumps[k].c_str());
+			}
+		}
+		fprintf (fp,"\"/>\n");
 /*		if (iter>4 && iter+4<s.size()) {
 			fprintf (fp,"\t\t\t<var name=\"jumps\" value=\"nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s\"/>\n",s[iter-1].name.c_str(),s[iter-2].name.c_str(),s[iter-3].name.c_str(),s[iter-4].name.c_str(),s[iter+1].name.c_str(),s[iter+2].name.c_str(),s[iter+3].name.c_str());
 			}*/
@@ -346,11 +352,55 @@ void processsystems (std::vector <System> & s){
 			std::map<double,string>::iterator k= jumps.begin();
 			j=(*k).second;			
 			++k;
+			s[i].jumps.push_back(j);
 			for (;k!=jumps.end();++k) {
 				j+=string(" ")+(*k).second;
+				s[i].jumps.push_back((*k).second);
 			}
 		}
-		s[i]["jumps"]=j;
+//		s[i]["jumps"]=j;
+	}
+	for (unsigned int i=0;i<s.size();++i) {
+		if (s[i].habitable){
+			unsigned int jsize = s[i].jumps.size();
+			for (unsigned int k=0;k<jsize;++k) {
+				string outgoing = s[i].jumps[k];
+				int slash = outgoing.find("/");
+				string sys = outgoing.substr(slash);
+				if (sys.length())
+					if (sys[0]=='/')
+						sys = sys.substr(1);
+				outgoing = outgoing.substr(0,slash);
+				for (unsigned int j=0;j<s.size();++j) {
+					if (s[j].name==sys) {
+						if (s[j].sector!=outgoing) {
+							fprintf (stderr,"error %s not in %s but in %s",sys.c_str(),outgoing.c_str(),s[j].sector.c_str());
+						}else {
+							string fullname = s[i].sector+"/"+s[i].name;
+							unsigned int jjsize = s[j].jumps.size();
+							bool found=false;
+							if (!s[j].habitable)
+								fprintf (stderr,"looking for %s in %s",fullname.c_str(),s[j].name.c_str());
+							for (unsigned int l=0;l<jjsize;++l) {
+								if (fullname==s[j].jumps[l]) {
+									found=true;
+									break;
+								}
+							}
+							if (!found){
+								/*
+								if (s[j].jumps.empty())
+									s[j]["jumps"]=fullname;
+								else
+									s[j]["jumps"]=s[j]["jumps"]+" "+fullname;
+								*/
+								s[j].jumps.push_back(fullname);
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 }
 int main (int argc, char ** argv) {
