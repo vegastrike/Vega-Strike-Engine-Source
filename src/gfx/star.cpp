@@ -24,11 +24,13 @@ StarVlist::StarVlist (int num ,float spread) {
 	this->spread=spread;
 	GFXColorVertex * tmpvertex = new GFXColorVertex[num*2];
 	memset (tmpvertex,0,sizeof(GFXVertex)*num*2);
+	static float staroverlap = XMLSupport::parse_float(vs_config->getVariable("graphics","star_overlap","1"));
+	float xyzspread = spread*2*staroverlap;
 	for (int y=0;y<num;++y) {
 		int j= 2*y;
-		tmpvertex[j].x = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
-		tmpvertex[j].y = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
-		tmpvertex[j].z = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
+		tmpvertex[j].x = -.5*xyzspread+rand()*((float)xyzspread/RAND_MAX);
+		tmpvertex[j].y = -.5*xyzspread+rand()*((float)xyzspread/RAND_MAX);
+		tmpvertex[j].z = -.5*xyzspread+rand()*((float)xyzspread/RAND_MAX);
 		tmpvertex[j].r=0;
 		tmpvertex[j].g=0;
 		tmpvertex[j].b=0;
