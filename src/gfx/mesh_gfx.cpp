@@ -553,6 +553,14 @@ void SetupSpecMapSecondPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc,
       GFXTextureEnv(1,GFXMODULATETEXTURE); 
       GFXEnable(TEXTURE1);
     }
+    else {
+      GFXSetSeparateSpecularColor(GFXFALSE);
+      GFXTextureEnv(0,GFXMODULATETEXTURE); 
+      GFXEnable(TEXTURE0);
+      GFXActiveTexture(1);
+      GFXDisable(TEXTURE1);
+
+    }
 }
 void SetupGlowMapFourthPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc, const GFXColor &cloakFX, float polygon_offset) {
 	GFXPushBlendMode();			
@@ -602,6 +610,9 @@ void RestoreSpecMapState(bool envMap, bool write_to_depthmap, float polygonoffse
     if (envMap) {
       GFXActiveTexture(1);
       GFXTextureEnv(1,GFXADDTEXTURE); //restore modulate
+    }else {
+       static bool separatespec = XMLSupport::parse_bool (vs_config->getVariable ("graphics","separatespecularcolor","false"))?GFXTRUE:GFXFALSE;
+       GFXSetSeparateSpecularColor(separatespec);
     }
     if (write_to_depthmap) {
         GFXEnable(DEPTHWRITE);

@@ -258,8 +258,15 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
 	  static int stacks=XMLSupport::parse_int(vs_config->getVariable ("graphics","planet_detail","24"));
 	  atmospheric=!(blendSrc==ONE&&blendDst==ZERO);
 	  meshdata.push_back(new SphereMesh(radius, stacks, stacks, textname, NULL,inside_out,blendSrc,blendDst));
+          
 	  meshdata.back()->setEnvMap(GFXFALSE);
-	  meshdata.back()->SetMaterial (ourmat);
+          if (meshdata.back()->numTextures()>1) {
+             if (meshdata.back()->texture(1)==0) {                
+                meshdata.back()->SetMaterial (ourmat);
+             }
+          }else {
+             meshdata.back()->SetMaterial (ourmat);
+          }             
 	  meshdata.push_back(NULL);
   }
 

@@ -98,7 +98,7 @@ void Item::append( unsigned char* buffer, int bufsize )
 
 void Item::changeState( State s )
 {
-    COUT << __FUNCTION__ << " " << s << " " << _error << endl;
+    COUT << __FUNCTION__ << " " << s << " " << (int)_error << endl;
 
     _mx.lock( );
     _state = s;
@@ -109,7 +109,7 @@ void Item::changeState( State s )
 
 void Item::changeState( State s, VSError e )
 {
-    COUT << __FUNCTION__ << " " << s << " " << e << endl;
+    COUT << __FUNCTION__ << " " << s << " " << (int)e << endl;
 
     _mx.lock( );
     _state = s;
@@ -378,7 +378,7 @@ void Notify_f::addBytes( int sz )
 
 void	VSNotify( VsnetDownload::Client::State s, VSFileSystem::VSError e)
 {
-	cerr << "!!! DOWNLOAD ERROR : State="<< s <<" - Error="<< e <<endl;
+	cerr << "!!! DOWNLOAD ERROR : State="<< s <<" - Error="<< (int)e <<endl;
 }
 
 void	VsnetDownload::Client::VSNotify::setTotalBytes( int sz )
