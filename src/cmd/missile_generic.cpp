@@ -7,6 +7,8 @@
 #include "images.h"
 #include "collection.h"
 #include "star_system_generic.h"
+#include "role_bitmask.h"
+#include "ai/order.h"
 void StarSystem::UpdateMissiles() {  
   if (!dischargedMissiles.empty()) {
     Unit * un;
@@ -106,7 +108,25 @@ void Missile::UpdatePhysics2 (const Transformation &trans, const Transformation 
 	if ((targ=(Unit::Target()))) {
       if (rand()/((float)RAND_MAX)<((float)targ->GetImageInformation().ecm)*SIMULATION_ATOM/32768){
 	Target (this);//go wild
-      }
+      }else{
+		  static unsigned int pointdef = ROLES::getRole("POINTDEF");
+		  un_iter i = targ->getSubUnits();
+		  Unit * su;
+		  for (;(su =*i)!=NULL;++i) {
+			  if (su->combatRole()==pointdef) {
+				  if (su->Target()==NULL) {
+					  if (su->aistate){
+						  float speed,range,mrange;
+						  su->aistate->getAverageGunSpeed(speed,range,mrange);
+						  if ((Position()-su->Position()).MagnitudeSquared()<range*range) {
+							  su->Target(this);
+						  }
+					  }
+				  }
+			  }
+		  }
+		  
+	  }
     }
     if (retarget==-1){
       if (targ) {
