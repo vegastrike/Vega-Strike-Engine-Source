@@ -281,19 +281,33 @@ void Base::endElement(void *userData, const XML_Char *name) {
 	}
 }
 
-void Base::LoadXML(const char * filename) {
+void Base::LoadXML(const char * filename,const char * time_of_day_hint) {
   unitlevel=0;
   const int chunk_size = 16384;
   string full_filename = string("bases/") + filename;
+  string daynight_filename = full_filename + "_"+string(time_of_day_hint);
+  full_filename+=".xbase";
+  daynight_filename+=".xbase";
   cout << "Base::LoadXML " << full_filename << endl;
-  FILE * inFile = fopen (full_filename.c_str(), "r");
+  FILE * inFile = fopen (daynight_filename.c_str(),"r");
+  if (!inFile)
+    inFile = fopen (full_filename.c_str(), "r");
   if(!inFile) {
     Unit *baseun=this->baseun.GetUnit();
     if (baseun) {
-      if (baseun->isUnit()==PLANETPTR)
-        inFile=fopen("bases/planet.xbase","r");
-      else
-        inFile=fopen("bases/unit.xbase","r");
+      if (baseun->isUnit()==PLANETPTR){
+	daynight_filename = string("bases/planet_")+time_of_day_hint+string(".xbase");
+	inFile = fopen (daynight_filename.c_str(),"r");
+	if (!inFile) {
+	  inFile=fopen("bases/planet.xbase","r");
+	}
+      }else{ 
+	daynight_filename = string("bases/unit_")+time_of_day_hint+string(".xbase");
+	inFile = fopen (daynight_filename.c_str(),"r");      
+	if (!inFile) {
+	  inFile=fopen("bases/unit.xbase","r");
+	}
+      }
     }
     if (!inFile) {
       assert(0);

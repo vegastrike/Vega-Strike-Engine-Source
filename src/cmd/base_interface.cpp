@@ -3,6 +3,7 @@
 #include "vs_path.h"
 #include "lin_time.h"
 #include "audiolib.h"
+#include "planet.h"
 #ifdef BASE_MAKER
  #include <stdio.h>
  #ifdef _WIN32
@@ -317,7 +318,7 @@ void Unit::UpgradeInterface(Unit * baseun) {
 	  if (baseun->isUnit()!=PLANETPTR) {
 	    basename = baseun->name;
 	  }
-	  Base *base=new Base ((basename+".xbase").c_str(),baseun,this);
+	  Base *base=new Base (basename.c_str(),baseun,this);
 	  base->InitCallbacks();
 	  SetSoftwareMousePosition(0,0);
 	}
@@ -346,7 +347,39 @@ Base::Room::Talk::Talk () {
 	}
 #endif
 }
+double compute_light_dot (Unit * base,Unit *un) {
+  StarSystem * ss =base->getStarSystem ();
+  double ret=-1;
+  Unit * st;
+  if (ss) {
+    _Universe->pushActiveStarSystem (ss);
+    un_iter ui = ss->getUnitList().createIterator();
+    for (;(st = *ui);++ui) {
+      if (st->isPlanet()) {
+	if (((Planet *)st)->hasLights()) {
+	  QVector v1 = (un->Position()-base->Position()).Normalize();
+	  QVector v2 = (st->Position()-base->Position()).Normalize();
+	  double dot = v1.Dot(v2);
+	  if (dot>ret) {
+	    fprintf (stderr,"dot %lf",dot);
+	    ret=dot;
+	  }
+	}
+      }
+    }
+    _Universe->popActiveStarSystem();
+  }else return 1;
+  return ret;
+}
 
+const char * compute_time_of_day (Unit * base,Unit *un) {
+  float rez= compute_light_dot (base,un);
+  if (rez>.2) 
+    return "day";
+  if (rez <-.1)
+    return "night";
+  return "sunset";
+}
 Base::Base (const char *basefile, Unit *base, Unit*un) {
 	caller=un;
 	curlinkindex=0;
@@ -357,7 +390,7 @@ Base::Base (const char *basefile, Unit *base, Unit*un) {
 	othtext.GetCharSize(x,y);
 	othtext.SetCharSize(x*2,y*2);
 	othtext.SetSize(.75,-.75);
-	LoadXML(basefile);
+	LoadXML(basefile, compute_time_of_day(base,un));
 	if (!rooms.size()) {
 		fprintf(stderr,"\nERROR: there are no rooms...");
 		assert(0);

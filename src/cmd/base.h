@@ -148,7 +148,7 @@ public:
 	static void Base::beginElement(void *userData, const XML_Char *names, const XML_Char **atts);
 	void Base::beginElement(const string &name, const AttributeList attributes);
 	static void Base::endElement(void *userData, const XML_Char *name);
-	void Base::LoadXML(const char * filename);
+	void Base::LoadXML(const char * filename, const char * time_of_day);
 	static void ClickWin (int x, int y, int button, int state);
 	void Click (float x, float y, int button, int state);
 	static void MouseOverWin (int x, int y);
