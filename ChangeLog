@@ -1,3 +1,15 @@
+2001-10-14 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added data/Makefile.am
+	* modified src/Makefile.am to install binary in $(prefix)/games/@PACKAGE@/bin
+	* added objconf/Makefile.am
+	* changed configure.in :
+	  - version set to 0.0.9cvs
+	  - added data and objconv to AC_OUTPUT
+	* changed toplevel Makefile.am to find subdirs data and objconv
+	* added RPM spec file vegastrike.spec
+	
+
 2001-10-11 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* added joystick buttons

@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(src/vegastrike.h)
-AM_INIT_AUTOMAKE(vegastrike, "0.0.9")
+AM_INIT_AUTOMAKE(vegastrike, "0.0.9cvs")
 AM_CONFIG_HEADER(config.h)
 
 dnl Check system type
@@ -498,4 +498,6 @@ CFLAGS="$CFLAGS $TR_CFLAGS"
 CXXFLAGS="$CXXFLAGS $TR_CXXFLAGS"
 LIBS="$LIBS $TR_LIBS"
 
-AC_OUTPUT(Makefile src/Makefile src/gldrv/Makefile src/gfx/Makefile src/cmd/Makefile src/cmd/ai/Makefile)
+AC_OUTPUT(Makefile src/Makefile src/gldrv/Makefile src/gfx/Makefile src/cmd/Makefile src/cmd/ai/Makefile \
+	data/Makefile \
+	objconv/Makefile )

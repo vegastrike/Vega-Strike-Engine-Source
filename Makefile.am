@@ -1,4 +1,4 @@
-SUBDIRS = src
+SUBDIRS = src data objconv
 EXTRA_DIST =						\
 	vegastrike.dsp					\
 	vegastrike.dsw					\
@@ -7,4 +7,7 @@ EXTRA_DIST =						\
 	TODO						\
 	Resources.rc					\
 	resource.h					\
-	ts.ico
+	ts.ico						\
+	ChangeLog					\
+	AUTHORS						\
+	vegastrike.spec
