@@ -130,8 +130,8 @@ void Universe::StartGFX()
 	
 	GFXCreateLightContext(ligh);
 	GFXSetLightContext (ligh);
-	GFXLightContextAmbient (GFXColor (0,0,.2,1));
-	GFXCreateLight (ligh, GFXLight(true,GFXColor (0,0,0),GFXColor (1,0,0),GFXColor(0,0,0)),true);
+	GFXLightContextAmbient (GFXColor (0,0,0,1));
+	GFXCreateLight (ligh, GFXLight(true,GFXColor (0,0,0),GFXColor (01,1,1,1),GFXColor(1,1,1,1), GFXColor (.2,.2,.2,1), GFXColor (1,.002,.0001)),false);
 	GFXEnableLight (ligh);
 	//GFXLoadIdentity(VIEW);
 	//GFXLookAt(Vector(0,0,0), Vector(0,0,1), Vector(0,-1,0)); // optimization: cache this friggin' matrix

@@ -96,12 +96,15 @@ void gfx_light::dopickenables () {
   }
   traverse= newpicked->begin();
   while (traverse!=newpicked->end()) {
-    int gltarg = findLocalClobberable();
-    if (gltarg==-1) {
-      newpicked->erase (traverse,newpicked->end());//erase everything on the picked list. Nothing can fit;
-      break;
+    if ((*_llights)[*traverse].target==-1) {
+	int gltarg = findLocalClobberable();
+	if (gltarg==-1) {
+	    newpicked->erase (traverse,newpicked->end());//erase everything on the picked list. Nothing can fit;
+	    break;
+	}
+	(*_llights)[(*traverse)].ClobberGLLight(gltarg);
     }
-    (*_llights)[(*traverse)].ClobberGLLight(gltarg);
+    traverse++;
   }    
   
   while (!oldpicked->empty()) {

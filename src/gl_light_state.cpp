@@ -55,6 +55,10 @@ bool gfx_light::Create (const GFXLight & temp, bool global) {
     *this = temp;
     if (!global) {
 	options |=GFX_LOCAL_LIGHT;
+	if (enabled()) {
+	    disable();
+	    this->Enable();//upon creation need to call enable script with disabled light
+	}
     } else {
 	options &=(~GFX_LOCAL_LIGHT);
 	foundclobberable = enabled()?findGlobalClobberable ():findLocalClobberable();
