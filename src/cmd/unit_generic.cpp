@@ -1564,7 +1564,8 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
   if (GetNebula()==NULL||(nebshields>0)) {
     percentage = DealDamageToShield (pnt,amt);
   }
-  aistate->ChooseTarget();
+  if (aistate)
+    aistate->ChooseTarget();
   return percentage;
 }
 
