@@ -1047,12 +1047,18 @@ void abletodock(int dock) {
 		break;
 	case 3:{
 		static soundContainer reqsound;
-		if (reqsound.sound==-2) {
-			static string str=vs_config->getVariable("cockpitaudio","docking_complete","docking_complete");
-			reqsound.loadsound(str);
-		}
-		reqsound.playsound();}
-		break;
+                static string otherstr = vs_config->getVariable("audio","automatic_docking_zone","automatic_landing_zone.wav");
+                if (otherstr!=""&&rand()<RAND_MAX/2) {
+                  static int s = AUDCreateSoundWAV(otherstr,false);
+                  AUDPlay(s,QVector(0,0,0),Vector(0,0,0),1);
+                }else {
+                  if (reqsound.sound==-2) {
+                    static string str=vs_config->getVariable("cockpitaudio","docking_complete","docking_complete");
+                    reqsound.loadsound(str);
+                  }
+                  reqsound.playsound();}
+          }
+          break;
 	case 2:{
 		static soundContainer reqsound;
 		if (reqsound.sound==-2) {
