@@ -67,3 +67,34 @@ void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMe
 	}
   }
 }
+std::vector <Animation *>* Order::getCommFaces (unsigned char &sex) {
+  std::vector <Animation *>* ani = NULL;
+  //   return _Universe->GetRandAnimation(parent->faction,sex);
+  for (unsigned int i=0;i<suborders.size();i++) {
+    ani = suborders[i]->getCommFaces(sex);
+    if (ani!=NULL) {
+      return ani;
+    }
+  }
+  return NULL;
+}
+extern float myroundclamp(float i);
+Animation * Order::getCommFace(float mood, unsigned char & sex) {
+  vector <Animation *> *ani = getCommFaces (sex);
+  if (ani==NULL) {
+    ani = _Universe->GetRandAnimation(parent->faction,sex);
+    if (ani==NULL) {
+      return NULL;
+    }
+  }
+  if (ani->size()==0) {
+    return NULL;
+  }
+  mood+=.1;
+  mood*=(ani->size())/.2;
+  unsigned int index=(unsigned int)myroundclamp(floor(mood));
+  if (index>=ani->size()) {
+    index=ani->size()-1;
+  }
+  return (*ani)[index];
+}

@@ -133,6 +133,7 @@ enum callback_module_std_type {
   CMT_STD_Float,
   CMT_STD_setDifficulty,
   CMT_STD_getDifficulty,
+  CMT_STD_playSound,
   CMT_STD_terminateMission
 };
 
@@ -267,6 +268,8 @@ enum callback_module_unit_type {
     CMT_UNIT_scannerNearestFriendDist ,
     CMT_UNIT_scannerNearestShipDist ,
   CMT_UNIT_getFgId ,
+  CMT_UNIT_communicateTo ,
+  CMT_UNIT_commAnimation ,
   CMT_UNIT_toxml 
 };
 

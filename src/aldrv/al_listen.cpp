@@ -96,10 +96,10 @@ void AUDRefreshSounds () {
   } 
   for (int j=soundstodelete.size()-1;j>=0;j--) {//might not get every one every time
     int tmp = soundstodelete[j];
-	std::vector<int>::iterator stdel=soundstodelete.begin();
-    stdel+=j;
-    soundstodelete.erase (stdel);
-    AUDDeleteSound (tmp,false);
+    if (!AUDIsPlaying(tmp)) {
+      soundstodelete.erase (soundstodelete.begin()+j);
+      AUDDeleteSound (tmp,false);
+    }
   }
 #endif
 }

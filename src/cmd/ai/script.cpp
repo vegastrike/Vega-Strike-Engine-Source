@@ -17,8 +17,8 @@ HardCodedMap MakeHardCodedScripts() {
   HardCodedMap tmp;
   typedef pair<string, CCScript *> MyPair;
   tmp.insert (MyPair ("++afterburnerslide.xml",&AfterburnerSlide));
-  tmp.insert (MyPair ("++afterburn-turntowards-itts.xml",&AfterburnTurnTowards));  
-  tmp.insert (MyPair ("++afterburn-turntowards.xml",&AfterburnTurnTowardsITTS));  
+  tmp.insert (MyPair ("++afterburn-turntowards.xml",&AfterburnTurnTowards));  
+  tmp.insert (MyPair ("++afterburn-turntowards-itts.xml",&AfterburnTurnTowardsITTS));  
   tmp.insert (MyPair ("++cloak.xml",&CloakForScript));  
   tmp.insert (MyPair ("++evade.xml",&Evade));    
   tmp.insert (MyPair ("++kickstop.xml",&Kickstop));      
@@ -711,6 +711,7 @@ void AIScript::LoadXML() {
     //    fprintf (stderr,"using hard coded script %s",filename);
     CCScript * myscript = (*iter).second;
     (*myscript)(this, parent);
+    //    fprintf (stderr,"using hard coded script %s for %s\n",filename, parent->name.c_str());
     return;
   }else {
     fprintf (stderr,"using soft coded script %s",filename);

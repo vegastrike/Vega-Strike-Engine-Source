@@ -135,12 +135,10 @@ void TurnAway(AIScript * aisc, Unit * un) {
 }
 void TurnTowards(AIScript * aisc, Unit * un) {
   Vector vec (0,0,10000);
-  Order * ord = new ExecuteFor (new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,false),4);
+  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,false);
   AddOrd (aisc,un,ord);
 
-  //  ord=new ExecuteFor(new CloakFor(1,8),32);
-  //  AddOrd (aisc,un,ord);
-    ord =       new ExecuteFor(new Orders::FaceTarget(0, 3),2);
+  ord = new Orders::FaceTarget(0, 3);
     AddOrd (aisc,un,ord);
 }
 void CloakForScript(AIScript * aisc, Unit * un) {

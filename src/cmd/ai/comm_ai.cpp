@@ -24,6 +24,11 @@ CommunicatingAI::CommunicatingAI (int ttype, int stype,  float rank, float mood,
     this->randomresponse = ang2;
   }
 }
+vector <Animation *> *CommunicatingAI::getCommFaces(unsigned char &sex) {
+  sex = this->sex;
+  return comm_face;
+}
+
 void CommunicatingAI::SetParent (Unit * par) {
   Order::SetParent(par);
   comm_face = _Universe->GetRandAnimation(par->faction,sex);

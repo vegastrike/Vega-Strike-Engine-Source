@@ -122,6 +122,7 @@ if (j<0)
 j=0;
 return j;
 }
+
 void CommunicationMessage::SetAnimation (std::vector <Animation *>*ani,unsigned char sex) {
   this->sex=sex;//for audio
   if (ani){ 

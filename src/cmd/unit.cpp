@@ -453,21 +453,27 @@ Unit::~Unit()
 #endif
   //  fprintf (stderr,"Freeing Unit %s\n",name.c_str());
   if (sound->engine!=-1) {
+    AUDStopPlaying (sound->engine);
     AUDDeleteSound (sound->engine);
   }
   if (sound->explode!=-1) {
+    AUDStopPlaying (sound->explode);
     AUDDeleteSound (sound->explode);
   }
   if (sound->shield!=-1) {
+    AUDStopPlaying (sound->shield);
     AUDDeleteSound (sound->shield);
   }
   if (sound->armor!=-1) {
+    AUDStopPlaying (sound->armor);
     AUDDeleteSound (sound->armor);
   }
   if (sound->hull!=-1) {
+    AUDStopPlaying (sound->hull);
     AUDDeleteSound (sound->hull);
   }
   if (sound->cloak!=-1) {
+    AUDStopPlaying (sound->cloak);
     AUDDeleteSound (sound->cloak);
   }
 #ifdef DESTRUCTDEBUG
@@ -508,6 +514,7 @@ Unit::~Unit()
   fflush (stderr);
 #endif
   for (int beamcount=0;beamcount<nummounts;beamcount++) {
+    AUDStopPlaying(mounts[beamcount].sound);
     AUDDeleteSound(mounts[beamcount].sound);
     if (mounts[beamcount].ref.gun&&mounts[beamcount].type.type==weapon_info::BEAM)
       delete mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
@@ -583,7 +590,11 @@ float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) cons
    } else {
      tmpcos /= dist;
    }
-   dist = (dist-rSize()-targ->rSize())/range;//WARNING POTENTIAL DIV/0
+   float rsize = targ->rSize()+rSize();
+   if ((!targ->GetDestinations().empty()&&jump.drive>=0)||(targ->faction==faction)) {
+     rsize=0;//HACK so missions work well
+   }
+   dist = (dist-rsize)/range;//WARNING POTENTIAL DIV/0
    if (!FINITE(dist)||dist<0) {
      dist=0;
    }

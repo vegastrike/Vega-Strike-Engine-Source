@@ -2,6 +2,8 @@
 #define _COMMUNICATION_H_
 #include "cmd/unit.h"
 class FSM {
+ protected:
+
  public:
   struct Node {
     std::string message;

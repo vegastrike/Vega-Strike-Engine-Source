@@ -1,4 +1,12 @@
 2002-04-20 Daniel Horn <hellcatv@hotmail.com>
+	* Added flyto AI scripts
+	* Added _std.playSound ()
+	* Added _unit.commAnimation() which plays a specified animation.ani file and caches it
+	* Added _unit.communicateTo()  which plays the default animation for that unit at a mood and returns the sex of that unit (so as to play the proper sound)
+	* Fixed hard coded script "turntowards" to work
+	* Changed logic of cosAngleTo so that if jump is on it doesn't report relative distance
+	
+2002-04-20 Daniel Horn <hellcatv@hotmail.com>
 	* Added Secondary Logos as part of the flightgroup class
 	* Added optional arguments to _unit.launch for primary (and possibly secondary) texture
 	* Added point-click to the texturizer

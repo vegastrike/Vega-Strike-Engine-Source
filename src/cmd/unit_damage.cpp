@@ -125,6 +125,7 @@ void Unit::Kill(bool erasefromsave) {
     }
   }
   for (int beamcount=0;beamcount<nummounts;beamcount++) {
+    AUDStopPlaying(mounts[beamcount].sound);
     AUDDeleteSound(mounts[beamcount].sound);
     if (mounts[beamcount].ref.gun&&mounts[beamcount].type.type==weapon_info::BEAM)
       delete mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue

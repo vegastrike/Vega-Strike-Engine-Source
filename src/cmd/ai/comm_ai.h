@@ -18,6 +18,8 @@ class CommunicatingAI:public Order{
   int which_cargo_item;
   relationmap effective_relationship;
   void GetMadAt (Unit * which, int howMad);
+ protected:
+  virtual vector <Animation *> *getCommFaces(unsigned char &sex);
  public:
   virtual float GetEffectiveRelationship (const Unit * target) const;
   Unit * GetRandomUnit (float PlayerProbability, float TargetProbability);

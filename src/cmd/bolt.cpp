@@ -294,6 +294,7 @@ Bolt::~Bolt () {
   }
 #ifdef PERBOLTSOUND
   if (sound!=-1) {
+    AUDStopPlaying(sound);
     AUDDeleteSound (sound);
   }
 #endif

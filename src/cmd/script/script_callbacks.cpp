@@ -36,7 +36,7 @@
 
 #include <expat.h>
 #include "xml_support.h"
-
+#include "audiolib.h"
 #include "vegastrike.h"
 #include "lin_time.h"
 
@@ -162,7 +162,27 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
     else if(method_id==CMT_STD_terminateMission){
       vi=terminateMission(node,mode);
     }
-
+    else if (method_id==CMT_STD_playSound) {
+      std::string soundName= getStringArgument(node,mode,0);     
+      Vector loc;
+      loc.i= getFloatArg(node,mode,1);     
+      loc.j= getFloatArg(node,mode,2);     
+      loc.k= getFloatArg(node,mode,3);     
+      Vector speed(0,0,0);
+      if (node->subnodes.size()>6) {
+	speed.i= getFloatArg(node,mode,4);     
+	speed.j= getFloatArg(node,mode,5);     
+	speed.k= getFloatArg(node,mode,6);           
+      }
+      if (mode==SCRIPT_RUN) {
+	int sound = AUDCreateSoundWAV (soundName,false);
+	AUDAdjustSound (sound,loc,speed);
+	AUDStartPlaying (sound);
+	AUDDeleteSound(sound);//won't actually toast it until it stops
+      }
+      vi = newVarInst (VI_TEMP);
+      vi->type=VAR_VOID;
+    }
   }
   else if(module_id==CMT_OLIST){
     vi=call_olist(node,mode);
@@ -868,6 +888,7 @@ void Mission::initCallbackMaps(){
   module_std_map["Float"]=CMT_STD_Float;
   module_std_map["getDifficulty"]=CMT_STD_getDifficulty;
   module_std_map["setDifficulty"]=CMT_STD_setDifficulty;
+  module_std_map["playSound"]=CMT_STD_playSound;
   module_std_map["terminateMission"]=CMT_STD_terminateMission;
 
   module_order_map["newAggressiveAI"]=CMT_ORDER_newAggressiveAI ;
@@ -988,6 +1009,8 @@ void Mission::initCallbackMaps(){
     module_unit_map["scannerNearestShipDist"]=CMT_UNIT_scannerNearestShipDist ;
     module_unit_map["toxml"]=CMT_UNIT_toxml ;
     module_unit_map["getSaveData"]=CMT_UNIT_getSaveData ;
+    module_unit_map["communicateTo"]=CMT_UNIT_communicateTo ;
+    module_unit_map["commAnimation"]=CMT_UNIT_commAnimation ;
 
 
 

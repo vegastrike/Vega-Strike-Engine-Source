@@ -120,8 +120,9 @@ public:
   string createFullOrderDescription(int level=0);
   void setActionString(string astring) { actionstring=astring; };
   string getActionString() { return actionstring; };
-
+  Animation * getCommFace(float mood, unsigned char & sex);
  protected:
+  virtual std::vector <Animation *>* getCommFaces(unsigned char &sex);
   string  actionstring;
 };
 ///Convenience order factory for "clicking to create an order"

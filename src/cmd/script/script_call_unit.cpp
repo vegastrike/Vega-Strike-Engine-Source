@@ -55,6 +55,8 @@
 #include "cmd/images.h"
 #include "savegame.h"
 #include "cmd/nebula.h"
+#include "hashtable.h"
+#include "gfx/animation.h"
 //#include "vegastrike.h"
 extern vector <char *> ParseDestinations (const string &value);
 /* *********************************************************** */
@@ -1019,6 +1021,43 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->type=VAR_VOID;
       //return viret;
     }
+    else if(method_id==CMT_UNIT_communicateTo){
+      Unit *other_unit=getUnitArg(node,mode,1);
+      float mood =getFloatArg(node,mode,2);
+      unsigned char sex=0;
+      if(mode==SCRIPT_RUN){
+	Cockpit * tmp;
+	if ((tmp=_Universe->isPlayerStarship (my_unit))) {
+	  Animation * ani= other_unit->getAIState()->getCommFace (mood,sex);
+	  if (NULL!=ani) {
+	    tmp->SetCommAnimation (ani);
+	  }
+	}
+      }
+      viret =newVarInst(VI_TEMP);
+      viret->type=VAR_INT;
+      viret->int_val = sex;
+    }
+
+    else if(method_id==CMT_UNIT_commAnimation){
+      string anim =getStringArgument (node,mode,1);
+      if(mode==SCRIPT_RUN){
+	Cockpit * tmp;
+	if ((tmp=_Universe->isPlayerStarship (my_unit))) {
+	  Hashtable <std::string, Animation, char [63]> AniHashTable;
+	  Animation * ani= AniHashTable.Get(anim);
+	  if (NULL==ani) {
+	    ani = new Animation (anim.c_str());
+	    AniHashTable.Put(anim,ani);
+	  }
+	  tmp->SetCommAnimation (ani);
+	}
+      }
+      viret =newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+      //return viret;
+    }
+
     else{
       fatalError(node,mode,"no such method "+node->script.name);
       assert(0);
