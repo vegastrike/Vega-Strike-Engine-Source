@@ -1,6 +1,6 @@
 noinst_LIBRARIES = libscript.a
 SUBDIRS = 
-INCLUDES = -I ../
+INCLUDES = -I../ -I../..
 
 libscript_a_SOURCES =				\
 	mission.cpp				\

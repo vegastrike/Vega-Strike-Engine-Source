@@ -26,7 +26,7 @@
 #include "lin_time.h"
 #include "main_loop.h"
 #include "config_xml.h"
-#include "mission.h"
+#include "cmd/script/mission.h"
 #include "audiolib.h"
 #include "vs_path.h"
 

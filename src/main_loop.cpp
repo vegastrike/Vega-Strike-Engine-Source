@@ -40,7 +40,7 @@
 #include "cmd/music.h"
 #include "audiolib.h"
 #include "vs_path.h"
-#include "mission.h"
+#include "cmd/script/mission.h"
 #include "xml_support.h"
 #include "config_xml.h"
 

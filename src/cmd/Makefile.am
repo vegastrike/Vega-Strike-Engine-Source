@@ -1,5 +1,5 @@
 noinst_LIBRARIES = libcmd.a
-SUBDIRS = ai
+SUBDIRS = ai script
 INCLUDES = -I ../
 
 libcmd_a_SOURCES =				\

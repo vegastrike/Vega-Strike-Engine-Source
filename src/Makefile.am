@@ -3,7 +3,7 @@ bindir = $(prefix)/games/@PACKAGE@/bin
 
 bin_PROGRAMS = vegastrike
 SUBDIRS = cmd gfx gldrv aldrv python
-vegastrike_LDADD = cmd/libcmd.a cmd/ai/libai.a gfx/libgfx.a gldrv/libgldrv.a aldrv/libaldrv.a python/libpython.a
+vegastrike_LDADD = cmd/libcmd.a cmd/ai/libai.a cmd/script/libscript.a gfx/libgfx.a gldrv/libgldrv.a aldrv/libaldrv.a python/libpython.a
 
 vegastrike_SOURCES =				\
 	endianness.h				\
@@ -43,12 +43,6 @@ vegastrike_SOURCES =				\
 	xml_support.cpp				\
 	config_xml.cpp				\
 	config_xml.h				\
-	mission.cpp				\
-	mission.h				\
-	mission_script.cpp			\
-	script_statement.cpp			\
-	script_expression.cpp			\
-	script_callbacks.cpp			\
 	easydom.cpp				\
 	easydom.h				\
 	profile.h 				\
