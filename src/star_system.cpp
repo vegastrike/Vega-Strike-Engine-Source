@@ -207,14 +207,14 @@ void StarSystem::Update() {
       
       Bolt::UpdatePhysics();
       current_stage=PHY_AI;
+      firstframe = false;
       }
       time -= .3333333333*SIMULATION_ATOM;
-      firstframe = true;
+
     }
     UpdateTime();
   }
   interpolation_blend_factor = .333333*((3*time)/SIMULATION_ATOM+current_stage);
-  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
   //clog << "blend factor: " << interpolation_blend_factor << "\n";
 }
 
