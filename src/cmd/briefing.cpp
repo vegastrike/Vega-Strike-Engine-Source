@@ -1,6 +1,7 @@
 #include "briefing.h"
 #include "unit.h"
 #include "gfx/mesh.h"
+#include "script/mission.h"
 Briefing::Ship::Ship (const char * filename, int faction, const Vector & position) {
   Unit * tmp  = new Unit (filename,true,faction);
   meshdata = tmp->StealMeshes();
@@ -131,9 +132,36 @@ void Briefing::Ship::OverrideOrder (const Vector & destination, float time) {
   orders.clear();
   EnqueueOrder (destination,time);
 }
+
 void Briefing::Ship::EnqueueOrder (const Vector & destination, float time) {
   if (time<.00001) {
     time =SIMULATION_ATOM;
   }
   orders.push_back (Order (destination,(destination-Position()).Magnitude()/time));
+}
+bool Mission::BriefingInProgress() {
+  return (briefing!=NULL);
+}
+void Mission::BriefingStart() {
+  briefing = new Briefing();
+  RunDirectorScript ("initbriefing");
+}
+void Mission::BriefingLoop() {
+  if (briefing) {
+    RunDirectorScript ("loopbriefing");
+  }
+  briefing->Update();
+}
+void Mission::BriefingRender() {
+  if (briefing) {
+    briefing->Render();
+  }
+}
+
+void Mission::BriefingEnd() {
+  if (briefing) {
+    RunDirectorScript ("endbriefing");      
+    delete briefing;
+    briefing = NULL;
+  }
 }

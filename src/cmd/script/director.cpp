@@ -162,32 +162,6 @@ void Mission::DirectorLoop(){
   old_string_counter=string_counter;
   RunDirectorScript("gameloop");
 }
-bool Mission::BriefingInProgress() {
-  return (briefing!=NULL);
-}
-void Mission::BriefingStart() {
-  briefing = new Briefing();
-  RunDirectorScript ("initbriefing");
-}
-void Mission::BriefingLoop() {
-  if (briefing) {
-    RunDirectorScript ("loopbriefing");
-  }
-  briefing->Update();
-}
-void Mission::BriefingRender() {
-  if (briefing) {
-    briefing->Render();
-  }
-}
-
-void Mission::BriefingEnd() {
-  if (briefing) {
-    RunDirectorScript ("endbriefing");      
-    delete briefing;
-    briefing = NULL;
-  }
-}
 void Mission::DirectorEnd(){
   if(director==NULL){
     return;
