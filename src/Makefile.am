@@ -89,6 +89,8 @@ libroot =		\
 	cg_global.cpp
 
 librootgeneric =				\
+	stardate.cpp				\
+	stardate.h					\
 	md5.cpp						\
 	md5.h						\
 	star_system_generic.cpp 	\
