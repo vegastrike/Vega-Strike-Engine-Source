@@ -5,7 +5,7 @@ Scale: float
 Reverse: integer
 Forcetexture: integer
 Sharevert: integer
-Polygonoffset:float;
+Polygonoffset:float
 Blendmode:<bsrc:integer,bdest:integer>
 Material<Power:float,Ambient.RGBA:4 floats,Diffuse.RGBA:4 floats,Emissive.RGBA:4 floats,Specular.RGBA:4 floats,Cullface:integer,lighting:integer,reflect:integer,usenormals:integer>
 Detailplane<x:float,y:float,z:float>
@@ -15,10 +15,10 @@ Number of vertices: integer
        <x:float,y:float,z:float,i:float,j:float,k:float,s:float,t:float>
 Number of Lines: integer
        for each line:
-       <flatshade:integer,index:integer[2],s:float[2],t:float[2]>
+       <flatshade:integer,2 <index:integer,s:float,t:float>>
 Number of Triangles: integer
        for each triangle:
-       <flatshade:integer,index:integer[3],s:float[3],t:float[3]>
+       <flatshade:integer,3 <index:integer,s:float,t:float>>
 Number of Quads: integer
        for each Quad:
-       <flatshade:integer,index:integer[4],s:float[4],t:float[4]>
+       <flatshade:integer,4 <index:integer,s:float,t:float>>
