@@ -24,10 +24,10 @@ void GameUnit<UnitType>::Repair() {
 	}
       }
     }
-    if (computer.max_speed<60) 
-      computer.max_speed+=workunit;
-    if (computer.max_ab_speed<160)
-      computer.max_ab_speed+=workunit;
+    if (computer.max_combat_speed<60) 
+      computer.max_combat_speed+=workunit;
+    if (computer.max_combat_ab_speed<160)
+      computer.max_combat_ab_speed+=workunit;
   case 5:
     //increase maxrange
     computer.radar.maxrange+=workunit;

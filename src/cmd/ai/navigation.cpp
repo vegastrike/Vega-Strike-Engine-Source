@@ -92,7 +92,7 @@ void MoveTo::SetDest (const QVector &target) {
 
 bool MoveTo::OptimizeSpeed (float v, float &a) {
   v += (a/parent->GetMass())*SIMULATION_ATOM;
-  float max_speed = ((afterburnAndSwitchbacks&ABURN)?parent->GetComputerData().max_ab_speed:parent->GetComputerData().max_speed);
+  float max_speed = ((afterburnAndSwitchbacks&ABURN)?parent->GetComputerData().max_ab_speed():parent->GetComputerData().max_speed());
   if ((!max_speed)||fabs(v)<=max_speed) {
     return true;
   }

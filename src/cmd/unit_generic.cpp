@@ -541,8 +541,8 @@ void Unit::Init()
   computer.threatlevel=0;
   computer.slide_start=computer.slide_end=0;
   computer.set_speed=0;
-  computer.max_speed=1;
-  computer.max_ab_speed=1;
+  computer.max_combat_speed=1;
+  computer.max_combat_ab_speed=1;
   computer.max_yaw=1;
   computer.max_pitch=1;
   computer.max_roll=1;
@@ -1115,12 +1115,18 @@ Vector Unit::ClampTorque (const Vector &amt1) {
   fuel-=Res.Magnitude()*SIMULATION_ATOM;
   return Res;
 }
+float Unit::Computer::max_speed() const {
+  return max_combat_speed;
+}
+float Unit::Computer::max_ab_speed() const {
+  return max_combat_ab_speed;
+}
 Vector Unit::ClampVelocity (const Vector & velocity, const bool afterburn) {
   static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".9"));
   static float staticabfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelAfterburn",".1"));
   float fuelclamp=(fuel<=0)?staticfuelclamp:1;
   float abfuelclamp= (fuel<=0||(energy<afterburnenergy))?staticabfuelclamp:1;
-  float limit = afterburn?(abfuelclamp*(computer.max_ab_speed-computer.max_speed)+(fuelclamp*computer.max_speed)):fuelclamp*computer.max_speed;
+  float limit = afterburn?(abfuelclamp*(computer.max_ab_speed()-computer.max_speed())+(fuelclamp*computer.max_speed())):fuelclamp*computer.max_speed();
   float tmp = velocity.Magnitude();
   if (tmp>fabs(limit)) {
     return velocity * (limit/tmp);
@@ -1469,7 +1475,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 	if (degrees>=0&&degrees<20) {
 		//DAMAGE COCKPIT
 		if (randnum>=.85) {
-			computer.set_speed=(rand01()*computer.max_speed*(5/3))-(computer.max_speed*(2/3)); //Set the speed to a random speed
+			computer.set_speed=(rand01()*computer.max_speed()*(5/3))-(computer.max_speed()*(2/3)); //Set the speed to a random speed
 		} else if (randnum>=.775) {
 			computer.itts=false; //Set the computer to not have an itts
 		} else if (randnum>=.7) {
@@ -1622,9 +1628,9 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 	if (degrees>=150&&degrees<=180) {
 		//DAMAGE ENGINES
 		if (randnum>=.8) {
-			computer.max_ab_speed*=dam;
+			computer.max_combat_ab_speed*=dam;
 		} else if (randnum>=.6) {
-			computer.max_speed*=dam;
+			computer.max_combat_speed*=dam;
 		} else if (randnum>=.4) {
 			limits.afterburn*=dam;
 		} else if (randnum>=.2) {
@@ -2829,8 +2835,8 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   comparer Comparer;
   percenter Percenter;
 
-  float tmax_speed = up->computer.max_speed;
-  float tmax_ab_speed = up->computer.max_ab_speed;
+  float tmax_speed = up->computer.max_combat_speed;
+  float tmax_ab_speed = up->computer.max_combat_ab_speed;
   float tmax_yaw = up->computer.max_yaw;
   float tmax_pitch = up->computer.max_pitch;
   float tmax_roll = up->computer.max_roll;
@@ -2906,8 +2912,8 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   STDUPGRADE(limits.retro,tlimits_retro,templ->limits.retro,0);
   STDUPGRADE(limits.afterburn,tlimits_afterburn,templ->limits.afterburn,0);
   STDUPGRADE(computer.radar.maxrange,up->computer.radar.maxrange,templ->computer.radar.maxrange,0);
-  STDUPGRADE(computer.max_speed,tmax_speed,templ->computer.max_speed,0);
-  STDUPGRADE(computer.max_ab_speed,tmax_ab_speed,templ->computer.max_ab_speed,0);
+  STDUPGRADE(computer.max_combat_speed,tmax_speed,templ->computer.max_combat_speed,0);
+  STDUPGRADE(computer.max_combat_ab_speed,tmax_ab_speed,templ->computer.max_combat_ab_speed,0);
   STDUPGRADE(computer.max_yaw,tmax_yaw,templ->computer.max_yaw,0);
   STDUPGRADE(computer.max_pitch,tmax_pitch,templ->computer.max_pitch,0);
   STDUPGRADE(computer.max_roll,tmax_roll,templ->computer.max_roll,0);
@@ -3404,8 +3410,8 @@ std::string Unit::cargoSerializer (const XMLType &input, void * mythis) {
 }
 
 float Unit::CourseDeviation (const Vector &OriginalCourse, const Vector &FinalCourse) const{
-  if (ViewComputerData().max_ab_speed>.001)
-    return ((OriginalCourse-(FinalCourse)).Magnitude()/ViewComputerData().max_ab_speed);
+  if (ViewComputerData().max_ab_speed()>.001)
+    return ((OriginalCourse-(FinalCourse)).Magnitude()/ViewComputerData().max_ab_speed());
   else
     return (FinalCourse-OriginalCourse).Magnitude();
 }

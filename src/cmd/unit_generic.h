@@ -348,15 +348,20 @@ public:
     ///The speed the flybywire system attempts to maintain
     float set_speed;
     ///Computers limitation of speed
-    float max_speed; float max_ab_speed;
+    float max_combat_speed; float max_combat_ab_speed;
+    float max_speed () const; float max_ab_speed() const;
     ///Computer's restrictions of YPR to limit space combat maneuvers
     float max_yaw; float max_pitch; float max_roll;
     ///Whether or not an 'lead' indicator appears in front of target
     unsigned char slide_start;
     unsigned char slide_end;
     bool itts;
+    //tells whether the speed is clamped draconian-like or not
+    bool combat_mode;
   };
   Computer computer;
+  void SwitchCombatFlightMode();
+  bool CombatMode();
 // SHOULD TRY TO COME BACK HERE
   virtual bool TransferUnitToSystem (StarSystem *NewSystem);
   virtual void TransferUnitToSystem (unsigned int whichJumpQueue, class StarSystem *&previouslyActiveStarSystem, bool DoSightAndSound) {}

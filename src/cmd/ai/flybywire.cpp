@@ -152,9 +152,9 @@ FlyByWire::FlyByWire (): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false,fa
 
 void FlyByWire::Stop (float per) {
 
-  SetDesiredVelocity (Vector (0,0,per*parent->GetComputerData().max_speed),true);
+  SetDesiredVelocity (Vector (0,0,per*parent->GetComputerData().max_speed()),true);
 
-  parent->GetComputerData().set_speed =per*parent->GetComputerData().max_speed;
+  parent->GetComputerData().set_speed =per*parent->GetComputerData().max_speed();
 
 }
 
@@ -188,7 +188,7 @@ void FlyByWire::Afterburn (float per){
 
   afterburn=(per>.1);
 
-  desired_velocity=Vector (0,0,cpu->set_speed+per*(cpu->max_ab_speed-cpu->set_speed));
+  desired_velocity=Vector (0,0,cpu->set_speed+per*(cpu->max_ab_speed()-cpu->set_speed));
 
 
   if(parent==_Universe->AccessCockpit()->GetParent()){
@@ -212,9 +212,9 @@ void FlyByWire::MatchSpeed (const Vector & vec) {
 
   cpu->set_speed = (vec).Magnitude();
 
-  if (cpu->set_speed>cpu->max_speed)
+  if (cpu->set_speed>cpu->max_speed())
 
-    cpu->set_speed=cpu->max_speed;
+    cpu->set_speed=cpu->max_speed();
 
 }
 
@@ -226,13 +226,13 @@ void FlyByWire::Accel (float per) {
 
   cpu->set_speed+=per*100*SIMULATION_ATOM;
 
-  if (cpu->set_speed>cpu->max_speed)
+  if (cpu->set_speed>cpu->max_speed())
 
-    cpu->set_speed=cpu->max_speed;
+    cpu->set_speed=cpu->max_speed();
 
-  if (cpu->set_speed<-cpu->max_speed*parent->Limits().retro/parent->Limits().forward)
+  if (cpu->set_speed<-cpu->max_speed()*parent->Limits().retro/parent->Limits().forward)
 
-    cpu->set_speed = -cpu->max_speed*parent->Limits().retro/parent->Limits().forward;
+    cpu->set_speed = -cpu->max_speed()*parent->Limits().retro/parent->Limits().forward;
 
   afterburn =false;
 

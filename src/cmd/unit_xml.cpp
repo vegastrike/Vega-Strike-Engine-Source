@@ -1185,12 +1185,12 @@ using namespace GameUnitXML;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case MAXSPEED:
-	computer.max_speed=game_speed*parse_float((*iter).value);
-	ADDELEM(speedStarHandler,XMLType(&computer.max_speed));
+	computer.max_combat_speed=game_speed*parse_float((*iter).value);
+	ADDELEM(speedStarHandler,XMLType(&computer.max_combat_speed));
 	break;
       case AFTERBURNER:
-	computer.max_ab_speed=game_speed*parse_float((*iter).value);
-	ADDELEM(speedStarHandler,XMLType(&computer.max_ab_speed));
+	computer.max_combat_ab_speed=game_speed*parse_float((*iter).value);
+	ADDELEM(speedStarHandler,XMLType(&computer.max_combat_ab_speed));
 	break;
       case YAW:
 	computer.max_yaw=parse_float((*iter).value)*(VS_PI/180);
