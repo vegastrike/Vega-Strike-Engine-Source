@@ -24,7 +24,6 @@
 // For WIN32 debugging.
 #include <crtdbg.h>
 #endif
-
 #include "basecomputer.h"
 
 #include "savegame.h"
@@ -50,6 +49,7 @@
 #include "unit_xml.h"
 #include "gfx/sprite.h"
 #include "gfx/aux_texture.h"
+#include "audiolib.h"
 
 //for directory thing
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -229,7 +229,11 @@ static const ModeInfo modeInfo[] = {
 	ModeInfo ( "Load / Save ", "LoadSave", "LoadSaveMode", "LoadSaveGroup" )
 };
 
-
+ bool BaseComputer::actionDone(const EventCommandId& command, Control* control) {
+	AUDStopAllSounds();
+	window()->close();
+	return true;
+}
 // Dispatch table for commands.
 // Make an entry here for each command you want to handle.
 // WARNING:  The order of this table is important.  There are multiple entries for
@@ -265,6 +269,8 @@ const BaseComputer::WctlTableEntry BaseComputer::WctlCommandTable[] = {
     BaseComputer::WctlTableEntry ( "Load", "", &BaseComputer::actionLoadGame ),
     BaseComputer::WctlTableEntry ( "New", "", &BaseComputer::actionNewGame ),
     BaseComputer::WctlTableEntry ( "Save", "", &BaseComputer::actionSaveGame ),		
+	BaseComputer::WctlTableEntry ( "DoneComputer", "", &BaseComputer::actionDone ),
+
     BaseComputer::WctlTableEntry ( "", "", NULL )
 };
 
@@ -498,7 +504,7 @@ void BaseComputer::constructControls(void) {
     NewButton* done = new NewButton;
     done->setRect( Rect(.74, .71, .22, .1) );
     done->setLabel("Done");
-    done->setCommand("Window::Close");
+    done->setCommand("DoneComputer");
     done->setColor( UnsaturatedColor(doneColor.r,doneColor.g,doneColor.b,.25) );
     done->setTextColor( GUI_OPAQUE_WHITE() );
     done->setDownColor( UnsaturatedColor(doneColor.r,doneColor.g,doneColor.b,.6) );
@@ -5245,7 +5251,7 @@ void BaseComputer::LoadSaveQuitConfirm::init(void) {
 	NewButton* resume = new NewButton;
 	resume->setRect( Rect(-.35, -.20, .30, .12) );
 	resume->setLabel("Cancel");
-	resume->setCommand("Window::Close");
+	resume->setCommand("DoneComputer");
 	resume->setColor( GFXColor(0,1,0,.25) );
 	resume->setTextColor( GUI_OPAQUE_WHITE() );
 	resume->setDownColor( GFXColor(0,1,0,.6) );

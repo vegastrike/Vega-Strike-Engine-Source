@@ -147,6 +147,7 @@ protected:
     bool actionConfirmedQuitGame();
     bool actionQuitGame(const EventCommandId& command, Control* control);
 
+    bool actionDone(const EventCommandId& command, Control* control);
 
     // Show the player's basic information.
     bool showPlayerInfo(const EventCommandId& command, Control* control);

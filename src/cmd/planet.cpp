@@ -485,7 +485,7 @@ void GamePlanet::DrawTerrain() {
 
 
 
-
+extern void abletodock(int dock);
 void GamePlanet::reactToCollision(Unit * un, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist) {
 #ifdef JUMP_DEBUG
   VSFileSystem::vs_fprintf (stderr,"%s reacting to collision with %s drive %d", name.c_str(),un->name.c_str(), un->GetJumpStatus().drive);
@@ -535,7 +535,8 @@ void GamePlanet::reactToCollision(Unit * un, const QVector & biglocation, const 
 			QVector place=UniverseUtil::SafeEntrancePoint(un->Position(),un->rSize()*1.5);
 			un->SetPosAndCumPos(place);
 			if (un->ForceDock(this,whichdockport)>0)
-			      un->UpgradeInterface(this);
+				abletodock(3);
+  		        un->UpgradeInterface(this);
 		}
 	}
   }
