@@ -19,6 +19,8 @@ int	md5Compute( string filename, unsigned char * md5digest)
 	{
 		cout<<"!!! ERROR = couldn't get universe file md5sum (not found or error) !!!"<<endl;
 	}
+	else
+		cout<<"-- MD5 FILE : "<<fulluniv<<" = "<<md5digest<<" --"<<endl;
 
 	return ret;
 }
@@ -32,8 +34,12 @@ int md5CheckFile( string filename, unsigned char * md5digest)
 		cout<<"!!! ERROR = couldn't compute md5 digest on universe file !!!"<<endl;
 	delete local_digest;
 	// If the file does not exist or if md5sum are !=
-	if( ret || memcmp( md5digest, local_digest, MD5_DIGEST_SIZE))
+	if( ret) return 0;
+	if( memcmp( md5digest, local_digest, MD5_DIGEST_SIZE))
+	{
+		cout<<"MD5 does not match : "<<md5digest<<" != "<<local_digest<<endl;
 		return 0;
+	}
 	return 1;
 }
 int	md5SumFile( const char * filename, unsigned char * digest)

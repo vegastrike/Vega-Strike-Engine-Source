@@ -220,7 +220,8 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 
         Packet packet2;
 		unsigned char * mdigest = new unsigned char[MD5_DIGEST_SIZE];
-		string reluniv = "/universe/"+universe_file;
+		static string univ = vs_config->getVariable("data","universe_path","universe");
+		string reluniv = univ+"/"+universe_file;
 		md5Compute( reluniv, mdigest);
 		// Add the galaxy filename with relative path to datadir
 		netbuf.addString( reluniv);
@@ -230,6 +231,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		static string sys = vs_config->getVariable("data","sectors","sectors");
 		string relsys = sys+"/"+cp->savegame->GetStarSystem()+".system";
 		md5Compute( relsys, mdigest);
+		cerr<<"SYSTEM MD5 = "<<mdigest<<endl;
 		netbuf.addString( relsys);
 		netbuf.addBuffer( mdigest, MD5_DIGEST_SIZE);
 		delete mdigest;

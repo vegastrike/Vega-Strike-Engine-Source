@@ -175,6 +175,7 @@ bool	NetClient::PacketLoop( Cmd command)
 		{
 			cout<<"Timed out"<<endl;
 			timeout = true;
+			cleanup();
 		}
 		ret=this->checkMsg( NULL, &packet );
 		if( ret>0)
@@ -512,7 +513,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				string univfile = netbuf.getString();
 				unsigned char * md5_digest = netbuf.getBuffer( MD5_DIGEST_SIZE);
 				// Compare to local md5 and ask for the good file if we don't have it or bad version
-				if( !md5CheckFile( univfile, md5_digest))
+				if( 0 /* !md5CheckFile( univfile, md5_digest) */)
 				{
 					netbuf.addString( univfile);
 					pckt.send( CMD_ASKFILE, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
@@ -528,7 +529,8 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				// Get the initial system file...
 				string sysfile = netbuf.getString();
 				md5_digest = netbuf.getBuffer( MD5_DIGEST_SIZE);
-				if( !md5CheckFile( sysfile, md5_digest))
+				// THINK TO PUT THAT TEST BACK WHEN DOWNLOAD THREAD IS COMPLETE !!!!!!!
+				if( 0 /* !md5CheckFile( sysfile, md5_digest) */)
 				{
 					netbuf.addString( sysfile);
 					pckt.send( CMD_ASKFILE, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
