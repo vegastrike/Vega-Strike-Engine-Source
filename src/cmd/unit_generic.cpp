@@ -1941,10 +1941,11 @@ void Unit::AddVelocity(float difficulty) {
 		   if (planet==this) {
 			   continue;
 		   }
+		 float shiphack=(planet->isUnit()==PLANETPTR)?1:4;
 		 float multipliertemp=1;
 		 float minsizeeffect = (planet->rSize()>smallwarphack)?planet->rSize():smallwarphack;
 		 float effectiverad = minsizeeffect*(1.0f+UniverseUtil::getPlanetRadiusPercent())+rSize();
-		 double dist=(Position()-planet->Position()).Magnitude();
+		 double dist=(Position()-planet->Position()).Magnitude()*shiphack;
 		 if (dist>(effectiverad+warpregion0)){
 			multipliertemp=pow((dist-effectiverad-warpregion0),curvedegree)*upcurvek;
 		 }else{
