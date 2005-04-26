@@ -1,3 +1,12 @@
+Fix station placement:
+In the Cerynea system, the relay station that's orbiting Rocky:Norwich is actually stuck inside it.
+
+A couple more ...
+
+In the Patroclus system, the wormhole to Urania is half inside a planet.
+In the Beta Cassiopia system, the medical station is so near the planet that when you try docking at it, you dock at the planet instead. 
+
+
 Goals for 0.4.3 release:
 * MUST TEST:
 ** Upgrades, especially repair on milspec and known previous troublemakers
