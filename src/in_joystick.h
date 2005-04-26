@@ -34,7 +34,7 @@
 //#include "glob.h"
 //#include "dbg.h"
 #include "in_kb.h"
-#define NUMJBUTTONS 16
+#define NUMJBUTTONS 32
 
 class JoyStick;
 
@@ -45,9 +45,9 @@ extern void ProcessJoystick(int whichjoystick);
 extern void InitJoystick();
 extern void DeInitJoystick();
 
-const int MAX_JOYSTICKS=11;
+const int MAX_JOYSTICKS=16;
 const int MOUSE_JOYSTICK = MAX_JOYSTICKS-1;
-const int MAX_BUTTONS=32;
+const int MAX_BUTTONS=48;
 const int MAX_DIGITAL_HATSWITCHES=4;
 const int MAX_DIGITAL_VALUES=9;
 
