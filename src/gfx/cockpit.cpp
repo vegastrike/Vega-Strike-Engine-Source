@@ -397,7 +397,9 @@ void GameCockpit::DrawTargetBoxes(){
 	if(target->isUnit()==UNITPTR){
 
 	  if (un->Target()==target) {
-	    DrawDockingBoxes(un,target,CamP,CamQ, CamR);
+            static bool draw_dock_box =XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_docking_boxes","true"));
+            if (draw_dock_box) 
+              DrawDockingBoxes(un,target,CamP,CamQ, CamR);
 	    DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),true);
 	  }else {
 	    DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),false);
@@ -450,7 +452,10 @@ void GameCockpit::DrawTargetBox () {
     GFXEnd();
   }
   DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),un->TargetLocked());
-  DrawDockingBoxes(un,target,CamP,CamQ,CamR);
+  static bool draw_dock_box =XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_docking_boxes","true"));
+  if (draw_dock_box) {
+    DrawDockingBoxes(un,target,CamP,CamQ,CamR);
+  }
   if (always_itts || un->GetComputerData().itts) {
 	float mrange;
     un->getAverageGunSpeed (speed,range,mrange);
@@ -474,6 +479,42 @@ void GameCockpit::DrawTargetBox () {
   GFXEnable (DEPTHWRITE);
 
 }
+
+void GameCockpit::DrawCommunicatingBoxes () {
+
+
+  Unit * parun = parent.GetUnit();
+  if (!parun)
+    return;
+  Vector CamP,CamQ,CamR;
+  _Universe->AccessCamera()->GetPQR(CamP,CamQ,CamR);
+  //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
+  for (unsigned int i=0;i<vdu.size();++i) {    
+    Unit*target= vdu[i]->GetCommunicating();   
+    if (target) {
+      static GFXColor black_and_white=DockBoxColor ("communicating"); 
+      QVector Loc(target->Position()-_Universe->AccessCamera()->GetPosition());
+      GFXDisable (TEXTURE0);
+      GFXDisable (TEXTURE1);
+      GFXDisable (DEPTHTEST);
+      GFXDisable (DEPTHWRITE);
+      GFXBlendMode (SRCALPHA,INVSRCALPHA);
+      GFXDisable (LIGHTING);
+      GFXColorf (black_and_white);
+
+      DrawOneTargetBox (Loc, target->rSize()*1.05, CamP, CamQ, CamR,0,1);
+
+      
+      GFXEnable (TEXTURE0);
+      GFXEnable (DEPTHTEST);
+      GFXEnable (DEPTHWRITE);
+     
+    }
+  }
+
+}
+
+
 
 void GameCockpit::DrawTurretTargetBoxes () {
 
@@ -1310,6 +1351,7 @@ void GameCockpit::Draw() {
   if (draw_any_boxes&&screenshotkey==false) {
   DrawTargetBox();
   DrawTurretTargetBoxes();
+  DrawCommunicatingBoxes();
   if(draw_all_boxes){
     DrawTargetBoxes();
   }
@@ -1759,21 +1801,21 @@ void GameCockpit::SetStaticAnimation () {
   static Animation Statuc (comm_static.c_str());
   for (unsigned int i=0;i<vdu.size();i++) {
     if (vdu[i]->getMode()==VDU::COMM) {
-      vdu[i]->SetCommAnimation (&Statuc,true);
+      vdu[i]->SetCommAnimation (&Statuc,NULL,true);
     }
   }
 }
-void GameCockpit::SetCommAnimation (Animation * ani) {
+void GameCockpit::SetCommAnimation (Animation * ani,Unit*un) {
   bool seti=false;
   for (unsigned int i=0;i<vdu.size();i++) {
-    if (vdu[i]->SetCommAnimation (ani,false)) {
+    if (vdu[i]->SetCommAnimation (ani,un,false)) {
       seti=true;
       break;
     }
   }
   if (!seti) {
     for (unsigned int i=0;i<vdu.size();i++) {
-      if (vdu[i]->SetCommAnimation (ani,true)) {
+      if (vdu[i]->SetCommAnimation (ani,un,true)) {
         break;
       }
     }    

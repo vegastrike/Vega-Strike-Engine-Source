@@ -17,6 +17,7 @@ class TextPlane;
 class VDU: public VSSprite {
  private:
   class Animation * comm_ani;
+  UnitContainer communicating;
   class Animation *	webcam;
   VIEWSTYLE viewStyle;
   float * StartArmor;
@@ -75,7 +76,8 @@ public:
   void SwitchMode( Unit * parent);
   void SetViewingStyle (VIEWSTYLE vm);
   void Scroll (int howmuch);
-  bool SetCommAnimation (Animation *ani, bool force);
+  bool SetCommAnimation (Animation *ani, Unit * unit, bool force);
+  Unit* GetCommunicating();
 };
 
 int parse_vdu_type (const char * s);

@@ -682,7 +682,7 @@ void	VDU::DrawScanningMessage()
   //tp->Draw(MangleString ("Scanning target...",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
 }
 
-bool VDU::SetCommAnimation (Animation * ani, bool force) {
+bool VDU::SetCommAnimation (Animation * ani, Unit * un, bool force) {
   if (comm_ani==NULL||force) {
     if (posmodes&COMM) {
       if (ani!=NULL&&comm_ani==NULL)
@@ -693,10 +693,18 @@ bool VDU::SetCommAnimation (Animation * ani, bool force) {
         comm_ani = ani;       
         ani->Reset();
       }
+      communicating.SetUnit(un);
       return true;
     }
   }
   return false;
+}
+Unit *VDU::GetCommunicating() {
+  if (comm_ani) {
+    if (!comm_ani->Done()) 
+      return communicating.GetUnit();
+  }
+  return NULL;
 }
 void VDU::DrawNav (const Vector & nav) {
   Unit * you = _Universe->AccessCockpit()->GetParent();
@@ -729,6 +737,7 @@ void VDU::DrawComm () {
 	  thismode.back()=blah;
 	}
       }
+      communicating.SetUnit(NULL);
       comm_ani=NULL;
     }
     GFXDisable (TEXTURE0);
@@ -1141,9 +1150,10 @@ bool VDU::SetWebcamAnimation ( ) {
   if (comm_ani==NULL) {
     if (posmodes&WEBCAM) {
       comm_ani = new Animation();
-	  thismode.push_back(WEBCAM);
-	  comm_ani->Reset();
-	  return true;
+      communicating.SetUnit(NULL);
+      thismode.push_back(WEBCAM);
+      comm_ani->Reset();
+      return true;
     }
   }
   return false;
@@ -1213,8 +1223,10 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
   tp->SetSize (x+w,y-h-.5*fabs(w/cols));
   targ = parent->GetComputerData().target.GetUnit();
   if (thismode.back()!=COMM&&comm_ani!=NULL) {    
-    if (comm_ani->Done())
+    if (comm_ani->Done()) {
       comm_ani=NULL;
+      communicating.SetUnit(NULL);
+    }
   }
   switch (thismode.back()) {
   case NETWORK:

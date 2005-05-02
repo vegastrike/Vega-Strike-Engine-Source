@@ -106,6 +106,7 @@ private:
   void DrawTargetBoxes ();
   ///draws a target cross around all units targeted by your turrets // ** jay
   void DrawTurretTargetBoxes ();
+  void DrawCommunicatingBoxes ();
   ///Draws all teh blips on the radar.
   void DrawBlips(Unit * un);
   ///Draws all teh blips on the radar in Elite-style
@@ -149,7 +150,7 @@ private:
   static void TurretControl (const KBData&,KBSTATE);
   void SetSoundFile (std::string sound);
   int GetSoundFile () {return soundfile;}
-  void SetCommAnimation (Animation * ani);
+  void SetCommAnimation (Animation * ani, Unit * un);
   void SetStaticAnimation ();
   ///Accesses the current navigationsystem
   NavigationSystem *AccessNavSystem() {return &ThisNav;}

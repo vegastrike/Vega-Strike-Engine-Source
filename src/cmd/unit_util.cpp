@@ -52,7 +52,7 @@ namespace UnitUtil {
 			if (ord) {
 				Animation * ani= ord->getCommFace (mood,sex);
 				if (NULL!=ani) {
-					tmp->SetCommAnimation (ani);
+					tmp->SetCommAnimation (ani,other_unit);
 				}
 			}
 		}
@@ -68,7 +68,7 @@ namespace UnitUtil {
 				ani = new Animation (anim.c_str());
 				AniHashTable.Put(anim,ani);
 			}
-			tmp->SetCommAnimation (ani);
+			tmp->SetCommAnimation (ani,NULL);
 			return true;
 		} else {
 			return false;

@@ -139,7 +139,7 @@ protected:
   static void Respawn (const KBData&,KBSTATE) {}
   static void SwitchControl (const KBData&,KBSTATE) {}
   static void TurretControl (const KBData&,KBSTATE) {}
-  virtual void SetCommAnimation (Animation * ani) {}
+  virtual void SetCommAnimation (Animation * ani, Unit * un) {}
   virtual void SetStaticAnimation () {}
   class SaveGame * savegame;
   ///Accesses the current navigationsystem

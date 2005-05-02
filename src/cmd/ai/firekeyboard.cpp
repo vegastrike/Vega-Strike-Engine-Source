@@ -1259,7 +1259,7 @@ unsigned int FireKeyboard::DoSpeechAndAni(Unit * un, Unit* parent, class Communi
   this->AdjustRelationTo(un,c.getCurrentState()->messagedelta);
   unsigned int retval=DoSpeech (un,parent,*c.getCurrentState());
   if (parent==_Universe->AccessCockpit()->GetParent()) {
-    _Universe->AccessCockpit()->SetCommAnimation (c.ani);
+    _Universe->AccessCockpit()->SetCommAnimation (c.ani,un);
   }
   this->refresh_target=true;
   return retval;
@@ -1282,7 +1282,7 @@ void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
     whichsound=DoSpeech (NULL,NULL,*c.getCurrentState());
     if (parent==_Universe->AccessCockpit()->GetParent()) {
       static Animation Statuc ("static.ani");
-      _Universe->AccessCockpit()->SetCommAnimation (&Statuc);
+      _Universe->AccessCockpit()->SetCommAnimation (&Statuc,NULL);
     }
 
   }

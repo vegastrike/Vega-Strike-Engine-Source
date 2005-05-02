@@ -69,7 +69,6 @@ extern vector <char *> ParseDestinations (const string &value);
 
 extern Unit& GetUnitMasterPartList ();
 extern bool	PlanetHasLights( Unit * un);
-extern void	AddAnimation( Cockpit * cp, std::string anim);
 
 #if 0
 NEVER NEVER NEVER use Unit* to save a unit across frames
@@ -1138,7 +1137,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	  if (ord) {
 	    Animation * ani= ord->getCommFace (mood,sex);
 	    if (NULL!=ani) {
-	      tmp->SetCommAnimation (ani);
+	      tmp->SetCommAnimation (ani,NULL);
 	    }
 	  }
 	}
@@ -1153,7 +1152,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       if(mode==SCRIPT_RUN){
 	Cockpit * tmp;
 	if ((tmp=_Universe->isPlayerStarship (my_unit))) {
-		AddAnimation( tmp, anim);
+
 	}
       }
       viret =newVarInst(VI_TEMP);
