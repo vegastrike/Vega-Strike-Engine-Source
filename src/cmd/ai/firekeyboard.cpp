@@ -1748,6 +1748,14 @@ void FireKeyboard::Execute () {
   }
   for (i=0;i<NUMCOMMKEYS;i++) {
     if (f().commKeys[i]==PRESS) {
+      /*
+      static string comm_switchstr=vs_config->getVariable("cockpitaudio","interface_target","vdu_e");
+      static soundContainer comm_switch;
+
+      if (comm_switch.sound<0)
+        comm_switch.loadsound(comm_switchstr);
+      comm_switch.playsound();
+      */
       f().commKeys[i]=RELEASE;
       Unit * targ=parent->Target();
       if (targ) {

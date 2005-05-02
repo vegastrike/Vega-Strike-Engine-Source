@@ -397,7 +397,16 @@ bool cockpitfront=true;
 	}
 }
   void CommModeVDU(const KBData&,KBSTATE newState){
-    if (newState==PRESS) SwitchVDUTo(VDU::COMM);
+    if (newState==PRESS) {
+      static soundContainer sc;
+      if (sc.sound<0) {
+
+        static string str=vs_config->getVariable("cockpitaudio","comm","vdu_c");
+        sc.loadsound(str);
+      }
+      sc.playsound();
+      SwitchVDUTo(VDU::COMM);
+    }
   }
   void ScanningModeVDU(const KBData&,KBSTATE newState){
     if (newState==PRESS) SwitchVDUTo(VDU::SCANNING);
