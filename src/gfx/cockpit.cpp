@@ -502,7 +502,7 @@ void GameCockpit::DrawCommunicatingBoxes () {
       GFXDisable (LIGHTING);
       GFXColorf (black_and_white);
 
-      DrawOneTargetBox (Loc, target->rSize()*1.05, CamP, CamQ, CamR,0,1);
+      DrawOneTargetBox (Loc, target->rSize()*1.05, CamP, CamQ, CamR,1,1);
 
       
       GFXEnable (TEXTURE0);
