@@ -483,9 +483,6 @@ void GameCockpit::DrawTargetBox () {
 void GameCockpit::DrawCommunicatingBoxes () {
 
 
-  Unit * parun = parent.GetUnit();
-  if (!parun)
-    return;
   Vector CamP,CamQ,CamR;
   _Universe->AccessCamera()->GetPQR(CamP,CamQ,CamR);
   //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
