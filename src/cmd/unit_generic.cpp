@@ -652,7 +652,7 @@ void Unit::Init()
   image->cloakrate=100;
   image->cloakenergy=0;
   image->forcejump=false;
-  sound->engine=-1;  sound->armor=-1;  sound->shield=-1;  sound->hull=-1; sound->explode=-1;
+  sound->engine=-1;  sound->armor=-1;  sound->shield=-1;  sound->hull=-1; sound->explode=-1; sound->cloak=-1; sound->jump=-1;
   image->fireControlFunctionality=1.0f;
   image->fireControlFunctionalityMax=1.0f;
   image->SPECDriveFunctionality=1.0f;
@@ -662,8 +662,6 @@ void Unit::Init()
   image->LifeSupportFunctionality=1.0f;
   image->LifeSupportFunctionalityMax=1.0f;
 
-  sound->cloak=-1;
-  sound->jump=-1;
   image->hudImage=NULL;
   owner = NULL;
   faction =0;

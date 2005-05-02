@@ -434,13 +434,28 @@ string WriteHudDamageFunc (Unit * un) {
 }
 void AddSounds(Unit * thus, string sounds) {
   if (sounds.length()!=0) {
-    thus->sound->shield=AUDCreateSoundWAV(nextElement(sounds),false);
-    thus->sound->armor=AUDCreateSoundWAV(nextElement(sounds),false);
-    thus->sound->hull=AUDCreateSoundWAV(nextElement(sounds),false);
-    thus->sound->jump=AUDCreateSoundWAV(nextElement(sounds),false);
-    thus->sound->explode=AUDCreateSoundWAV(nextElement(sounds),false);
-    thus->sound->cloak=AUDCreateSoundWAV(nextElement(sounds),false);
-    thus->sound->engine=AUDCreateSoundWAV(nextElement(sounds),true);
+    string tmp=nextElement(sounds);
+
+    if (tmp.length())
+      thus->sound->shield=AUDCreateSoundWAV(tmp,false);
+    tmp=nextElement(sounds);
+    if (tmp.length())
+      thus->sound->armor=AUDCreateSoundWAV(tmp,false);
+    tmp=nextElement(sounds);
+    if (tmp.length())
+      thus->sound->hull=AUDCreateSoundWAV(tmp,false);
+    tmp=nextElement(sounds);
+    if (tmp.length())
+      thus->sound->jump=AUDCreateSoundWAV(tmp,false);
+    tmp=nextElement(sounds);
+    if (tmp.length())
+      thus->sound->explode=AUDCreateSoundWAV(tmp,false);
+    tmp=nextElement(sounds);
+    if (tmp.length())
+      thus->sound->cloak=AUDCreateSoundWAV(tmp,false);
+    tmp=nextElement(sounds);
+    if (tmp.length())
+      thus->sound->engine=AUDCreateSoundWAV(tmp,true);
   }
     if (thus->sound->cloak==-1) {
       thus->sound->cloak=AUDCreateSound(vs_config->getVariable ("unitaudio","cloak", "sfx43.wav"),false);
