@@ -121,6 +121,9 @@ GFXColor GameCockpit::unitToColor (Unit *un,Unit *target) {
   static GFXColor navcol=RetrColor("nav",GFXColor(1,1,1,1));
   static GFXColor suncol=RetrColor("star",GFXColor(1,1,1,1));
   static GFXColor missilecol=RetrColor("missile",GFXColor(.25,0,.5,1));
+  static GFXColor cargocol=RetrColor("cargo",GFXColor(.6,.2,0,1));
+  static int cargofac=FactionUtil::GetFaction("upgrades");
+  
   if (target->GetDestinations().size()>0) {
       return jumpcol;
     }
@@ -135,6 +138,8 @@ GFXColor GameCockpit::unitToColor (Unit *un,Unit *target) {
       return planet;
     }else if (target->isUnit()==MISSILEPTR) {
       return missilecol;      
+    }else if (target->faction==cargofac){
+      return cargocol;
     }else if (basecol.r>0&&basecol.g>0&&basecol.b>0&&UnitUtil::getFlightgroupName(target)=="Base") {
       return basecol;
     }else if(target==un->Target()&&draw_all_boxes){//if we only draw target box we cannot tell what faction enemy is!
