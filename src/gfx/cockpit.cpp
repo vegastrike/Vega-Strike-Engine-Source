@@ -37,6 +37,10 @@
 #include "in_kb_data.h"
 extern float rand01();
 #define SWITCH_CONST .9
+static GFXColor RetrColor (const string& name, GFXColor def=GFXColor(1,1,1,1)) {
+  vs_config->getColor(name,&def.r);    
+  return def;
+}
 
 static soundContainer disableautosound;
 static soundContainer enableautosound;
@@ -112,11 +116,28 @@ void GameCockpit::LocalToEliteRadar (const Vector & pos, float &s, float &t,floa
 
 
 GFXColor GameCockpit::unitToColor (Unit *un,Unit *target) {
- 	if(target->isUnit()==PLANETPTR){
-	  // this is a planet
-	  return planet;
-	}
-	else if(target==un->Target()&&draw_all_boxes){//if we only draw target box we cannot tell what faction enemy is!
+  static GFXColor basecol=RetrColor("base",GFXColor(-1,-1,-1,-1));
+  static GFXColor jumpcol=RetrColor("jump",GFXColor(0,1,1,.8));
+  static GFXColor navcol=RetrColor("nav",GFXColor(1,1,1,1));
+  static GFXColor suncol=RetrColor("star",GFXColor(1,1,1,1));
+  static GFXColor missilecol=RetrColor("missile",GFXColor(.25,0,.5,1));
+  if (target->GetDestinations().size()>0) {
+      return jumpcol;
+    }
+    if(target->isUnit()==PLANETPTR){
+      Planet * plan = static_cast<Planet*>(target);
+      if (plan->hasLights()) {
+        return suncol;
+      }
+      if (plan->isAtmospheric()) {
+        return navcol;
+      }
+      return planet;
+    }else if (target->isUnit()==MISSILEPTR) {
+      return missilecol;      
+    }else if (basecol.r>0&&basecol.g>0&&basecol.b>0&&UnitUtil::getFlightgroupName(target)=="Base") {
+      return basecol;
+    }else if(target==un->Target()&&draw_all_boxes){//if we only draw target box we cannot tell what faction enemy is!
 	  // my target
 	  return targeted;
 	}
@@ -135,6 +156,16 @@ GFXColor GameCockpit::unitToColor (Unit *un,Unit *target) {
 }
 
 GFXColor GameCockpit::relationToColor (float relation) {
+  static bool absolute_relation_color=XMLSupport::parse_bool(vs_config->getVariable("graphics","absolute_relation_color","false"));
+  if (absolute_relation_color) {
+    if (relation>0) {
+      return friendly;
+    }
+    if (relation<0) {
+      return enemy;
+    }
+    return neutral;
+  }
  if (relation>0) {
     return GFXColor (relation*friendly.r+(1-relation)*neutral.r,relation*friendly.g+(1-relation)*neutral.g,relation*friendly.b+(1-relation)*neutral.b,relation*friendly.a+(1-relation)*neutral.a);
   } 
