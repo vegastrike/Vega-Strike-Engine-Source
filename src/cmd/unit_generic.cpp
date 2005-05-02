@@ -3852,7 +3852,9 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
 			  static float autoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","autoeject_percent",".5"));
 
 			  if (rand()<(RAND_MAX*autoejectpercent)&&isUnit()==UNITPTR) {
-			EjectCargo ((unsigned int)-1);
+                            static bool player_autoeject=XMLSupport::parse_bool(vs_config->getVariable("physics","player_autoeject","true"));
+                            if (player_autoeject||NULL==_Universe->isPlayerStarship(this))
+                              EjectCargo ((unsigned int)-1);
 			  }
                         }
                         for (unsigned int i=0;i<numCargo();i++) {
@@ -6090,7 +6092,7 @@ void Unit::EjectCargo (unsigned int index) {
       if (!cargo) {
 		  if (tmpcontent=="eject") {
 			  cargo = UnitFactory::createUnit ("eject",false,faction);
-			  int fac = FactionUtil::GetFaction("neutral");
+			  int fac = FactionUtil::GetFaction("upgrades");
 			  cargo->faction=fac;//set it back to neutral so that no one will bother with 'im
 		  }else {
 			  string tmpnam = tmpcontent+".cargo";
