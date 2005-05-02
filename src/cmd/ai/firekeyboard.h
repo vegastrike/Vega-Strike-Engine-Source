@@ -25,6 +25,7 @@ class FireKeyboard: public Order {
   static void HeadlightKey (const KBData&,KBSTATE);
   static void SirenKey (const KBData&,KBSTATE);
 #endif
+  static void SetShieldsOff (const KBData&,KBSTATE);
   static void SetShieldsOneThird (const KBData&,KBSTATE);
   static void SetShieldsTwoThird (const KBData&,KBSTATE);
   static void ToggleGlow (const KBData&,KBSTATE);

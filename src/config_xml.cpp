@@ -574,6 +574,7 @@ CommandMap initGlobalCommandMap() {
   commandMap["MusicVolumeInc"]=incmusicvol;
   commandMap["MusicVolumeDec"]=decmusicvol;
   commandMap["SetShieldsOneThird"]=FireKeyboard::SetShieldsOneThird;
+  commandMap["SetShieldsOff"]=FireKeyboard::SetShieldsOff;
   commandMap["SetShieldsTwoThird"]=FireKeyboard::SetShieldsTwoThird;
   commandMap["SwitchControl"]=GameCockpit::SwitchControl;
   commandMap["Respawn"]=GameCockpit::Respawn;

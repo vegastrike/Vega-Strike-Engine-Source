@@ -5571,12 +5571,18 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
     case 2:
       STDUPGRADE(shield.shield2fb.frontmax,up->shield.shield2fb.frontmax,templ->shield.shield2fb.frontmax,0);
       STDUPGRADE(shield.shield2fb.backmax,up->shield.shield2fb.backmax,templ->shield.shield2fb.backmax,0);
+      STDUPGRADE(shield.shield2fb.front,up->shield.shield2fb.frontmax,templ->shield.shield2fb.frontmax,0);
+      STDUPGRADE(shield.shield2fb.back,up->shield.shield2fb.backmax,templ->shield.shield2fb.backmax,0);
       break;
     case 4:
       STDUPGRADE(shield.shield4fbrl.frontmax,up->shield.shield4fbrl.frontmax,templ->shield.shield4fbrl.frontmax,0);
       STDUPGRADE(shield.shield4fbrl.backmax,up->shield.shield4fbrl.backmax,templ->shield.shield4fbrl.backmax,0);
       STDUPGRADE(shield.shield4fbrl.leftmax,up->shield.shield4fbrl.leftmax,templ->shield.shield4fbrl.leftmax,0);
       STDUPGRADE(shield.shield4fbrl.rightmax,up->shield.shield4fbrl.rightmax,templ->shield.shield4fbrl.rightmax,0);
+      STDUPGRADE(shield.shield4fbrl.front,up->shield.shield4fbrl.frontmax,templ->shield.shield4fbrl.frontmax,0);
+      STDUPGRADE(shield.shield4fbrl.back,up->shield.shield4fbrl.backmax,templ->shield.shield4fbrl.backmax,0);
+      STDUPGRADE(shield.shield4fbrl.left,up->shield.shield4fbrl.leftmax,templ->shield.shield4fbrl.leftmax,0);
+      STDUPGRADE(shield.shield4fbrl.right,up->shield.shield4fbrl.rightmax,templ->shield.shield4fbrl.rightmax,0);
       break;
     case 8:
       STDUPGRADE(shield.shield8.frontrighttopmax,up->shield.shield8.frontrighttopmax,templ->shield.shield8.frontrighttopmax,0);
@@ -5587,6 +5593,14 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
       STDUPGRADE(shield.shield8.backrightbottommax,up->shield.shield8.backrightbottommax,templ->shield.shield8.backrightbottommax,0);
       STDUPGRADE(shield.shield8.frontleftbottommax,up->shield.shield8.frontleftbottommax,templ->shield.shield8.frontleftbottommax,0);
       STDUPGRADE(shield.shield8.backleftbottommax,up->shield.shield8.backleftbottommax,templ->shield.shield8.backleftbottommax,0);
+      STDUPGRADE(shield.shield8.frontrighttop,up->shield.shield8.frontrighttopmax,templ->shield.shield8.frontrighttopmax,0);
+      STDUPGRADE(shield.shield8.backrighttop,up->shield.shield8.backrighttopmax,templ->shield.shield8.backrighttopmax,0);
+      STDUPGRADE(shield.shield8.frontlefttop,up->shield.shield8.frontlefttopmax,templ->shield.shield8.frontlefttopmax,0);
+      STDUPGRADE(shield.shield8.backlefttop,up->shield.shield8.backlefttopmax,templ->shield.shield8.backlefttopmax,0);
+      STDUPGRADE(shield.shield8.frontrightbottom,up->shield.shield8.frontrightbottommax,templ->shield.shield8.frontrightbottommax,0);
+      STDUPGRADE(shield.shield8.backrightbottom,up->shield.shield8.backrightbottommax,templ->shield.shield8.backrightbottommax,0);
+      STDUPGRADE(shield.shield8.frontleftbottom,up->shield.shield8.frontleftbottommax,templ->shield.shield8.frontleftbottommax,0);
+      STDUPGRADE(shield.shield8.backleftbottom,up->shield.shield8.backleftbottommax,templ->shield.shield8.backleftbottommax,0);
       break;           
     }
     if (touchme&&retval==UPGRADEOK){

@@ -125,6 +125,17 @@ void FireKeyboard::SetShieldsOneThird(const KBData&,KBSTATE k) {
   }
 }
 
+
+void FireKeyboard::SetShieldsOff(const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    float pow=0;
+    if (g().shieldpowerstate!=pow)
+      g().shieldpowerstate=pow;
+    else
+      g().shieldpowerstate=1;
+  }
+}
+
 void FireKeyboard::SetShieldsTwoThird(const KBData&,KBSTATE k) {
   if (k==PRESS) {
     float pow=2./3;
