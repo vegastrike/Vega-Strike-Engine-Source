@@ -500,7 +500,7 @@ Metrowerks:
 ** Intel x86 and AMD x86-64
 ** ------------------------------------------------------------------
 */
-#if defined __X86__ || defined __i386__ || defined i386 || defined _M_IX86 || defined __386__ || defined FORCE_DOXYGEN || defined __amd64__ || defined __AMD64__
+#if defined __X86__ || defined __i386__ || defined i386 || defined _M_IX86 || defined __386__ || defined FORCE_DOXYGEN || defined __amd64__ || defined __AMD64__ || defined __x86_64__
 #  define POSH_CPU_X86 /**<if defined, target CPU is Intel 386+ compatible */
 #  if defined __x86_64__ || defined FORCE_DOXYGEN || defined __amd64__ || defined __AMD64__
 #     define POSH_CPU_X86_64 /**<if defined, target CPU is AMD x86-64 */
