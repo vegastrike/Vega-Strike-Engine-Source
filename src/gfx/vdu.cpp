@@ -120,6 +120,32 @@ char tohexdigit(int x) {
   }
 
 }
+GFXColor colLerp(GFXColor a, GFXColor b, float bweight) {
+  float aweight=1-bweight;
+  return GFXColor(a.r*aweight+b.r*bweight,
+                  a.g*aweight+b.g*bweight,
+                  a.b*aweight+b.b*bweight,
+                  a.a*aweight+b.a*bweight);
+}
+struct colorstring{
+  char str[8];
+};
+colorstring  colToString(GFXColor col) {
+  unsigned char r = (unsigned char)(col.r*255);
+  unsigned char g = (unsigned char)(col.g*255);
+  unsigned char b = (unsigned char)(col.b*255);
+  colorstring ret;
+  ret.str[0]='#';
+  ret.str[7]='\0';
+  ret.str[1]=tohexdigit(r/16);
+  ret.str[2]=tohexdigit(r%16);
+  ret.str[3]=tohexdigit(g/16);
+  ret.str[4]=tohexdigit(g%16);
+  ret.str[5]=tohexdigit(b/16);
+  ret.str[6]=tohexdigit(b%16);
+  return ret;
+}
+
 
 
 VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws, short clls, float *ma, float *mh) :VSSprite (file),tp(textp),posmodes(modes), rows(rwws), cols(clls),scrolloffset(0){
@@ -1041,20 +1067,47 @@ pos.i*fabs(w)/parent->rSize()*percent+x;
     pos.j=pos.k*fabs(h)/parent->rSize()*percent+y;
     pos.k=0;
     string ammo =(parent->mounts[i].ammo>=0)?string("(")+tostring(parent->mounts[i].ammo)+string(")"):string("");
+    GFXColor mountcolor(0,1,.2,1);
+    if (parent->mounts[i].functionality==1) {
+      float ref=1;
+      float tref=parent->mounts[i].type->Refire;
+      float cref=0;
+      if (parent->mounts[i].type->type==weapon_info::BEAM) {
+        if (parent->mounts[i].ref.gun) {
+          cref = parent->mounts[i].ref.gun->refireTime();
+        }          
+      }else {
+        cref=  parent->mounts[i].ref.refire;        
+      }
+      if (cref>tref) {
+        ref=1;
+      }else {
+        ref=cref/tref;
+      }
+      mountcolor=colLerp(GFXColor(0,1,1),GFXColor(0,1,.2),ref);      
+    }else {
+      mountcolor=colLerp(GFXColor(1,0,0),GFXColor(0,1,.2),parent->mounts[i].functionality);
+    }
     switch (parent->mounts[i].ammo!=0?parent->mounts[i].status:127) {
     case Mount::ACTIVE:
-      GFXColor4f (0,1,.2,1);
-      if (parent->mounts[i].type->size<weapon_info::LIGHTMISSILE) 
-	buf+=((buf.length()==(unsigned int)len)?string(""):string(","))+((count++%1==0)?"\n":"")+parent->mounts[i].type->weapon_name+ammo;
-      else
-	mbuf+=((mbuf.length()==(unsigned int)mlen)?string(""):string(","))+((mcount++%1==0)?"\n":"")+parent->mounts[i].type->weapon_name+ammo;;
-      break;
-    case Mount::INACTIVE:
-      GFXColor4f (0,.5,0,1);
-      break;
+      GFXColorf (mountcolor);
+      goto drawme;
     case Mount::DESTROYED:
-      GFXColor4f (.2,.2,.2,1);
+      mountcolor=GFXColor(1,0,0,1);
+      GFXColorf (mountcolor);
+    drawme:
+      if (parent->mounts[i].type->size<weapon_info::LIGHTMISSILE) {
+        
+	buf+=((buf.length()==(unsigned int)len)?string(""):string(","))+((count++%1==0)?"\n":"")+string(colToString(mountcolor).str)+parent->mounts[i].type->weapon_name+ammo;
+      }else {
+
+	mbuf+=((mbuf.length()==(unsigned int)mlen)?string(""):string(","))+((mcount++%1==0)?"\n":"")+string(colToString(mountcolor).str)+parent->mounts[i].type->weapon_name+ammo;;
+      }
+    case Mount::INACTIVE:
+      mountcolor=GFXColor(1,1,1,1);
+      GFXColorf (mountcolor);
       break;
+      
     case Mount::UNCHOSEN:
       GFXColor4f (1,1,1,1);
       break;
