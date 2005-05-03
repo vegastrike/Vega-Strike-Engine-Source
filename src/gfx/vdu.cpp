@@ -55,7 +55,7 @@ static string getUnitNameAndFgNoBase (Unit * target) {
                   static bool printshiptype = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","print_ship_type","true"));
 		  static bool confignums=XMLSupport::parse_bool (vs_config->getVariable ("graphics","hud","printFGsubID","false"));
                   string fgname;
-                  if (printfgname)fgname+=fg->name+(confignums?" =":" : ");
+                  if (printfgname)fgname+=fg->name+(printshiptype?(confignums?" =":" : "):"");
                   if (printshiptype)
                     return fgname+reformatName(target->getFullname());
                   return fgname;		  
@@ -923,10 +923,10 @@ void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
     //char hullval[128];
     //sprintf (hullval,"%.3f",parent->GetHull());
     //string retval (fullname+"\nHull: "+hullval+"\n");
-    float cfullpower[4]={1,1,1,1};
-    float cdamaged[4]={1,0,0,1};
-    float chdamaged[4]={1,1,0,1};
-    float cdestroyed[4]={.2,.2,.2,1};
+    static float cfullpower[4]={1,1,1,1};
+    static float cdamaged[4]={1,0,0,1};
+    static float chdamaged[4]={1,1,0,1};
+    static float cdestroyed[4]={.2,.2,.2,1};
     static bool init=false;
     if (!init){
       init=true;
@@ -956,8 +956,11 @@ void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
         std::string trailer;
         if (percent_working<1.0) {
           retval+=colToString(final_color).str;          
-          trailer=fpstring.str;
+
+        }else {
+          retval+=fpstring.str;
         }
+        trailer=fpstring.str;
         retval+=parent->GetManifest (i,parent,parent->GetVelocity());
         static bool print_percent_working=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","print_damage_percent","true"));
         if (print_percent_working)
