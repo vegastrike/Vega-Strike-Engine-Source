@@ -540,14 +540,23 @@ void Cockpit::Update () {
     while ((un=ui.current())) {
       if (un->faction==this->unitfaction) {
 	
-	if ((i++)>=index&&(!_Universe->isPlayerStarship(un))) {
+	if ((i++)>=index&&(!_Universe->isPlayerStarship(un))&&un->name!="eject"&&un->name!="Pilot") {
 	  found=true;
 	  index++;
 	  Unit * k=GetParent(); 
-	  SwitchUnits (k,un);
-	  this->SetParent(un,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
-	  //un->SetAI(new FireKeyboard ())
-	  break;
+          bool proceed=true;
+          if (k) {
+            if (k->name=="eject"||k->name=="Pilot")
+              proceed=false;
+            
+          }
+          if (proceed) {
+            SwitchUnits (k,un);
+            this->SetParent(un,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
+            //un->SetAI(new FireKeyboard ())
+          }
+          break;
+          
 	}
       }
       ++ui;
