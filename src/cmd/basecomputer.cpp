@@ -3970,23 +3970,16 @@ bool BaseComputer::sellShip(const EventCommandId& command, Control* control) {
     }
     return false;
 }
-// Buy ship from the base.
-bool BaseComputer::buyShip(const EventCommandId& command, Control* control) {
-    Unit* playerUnit = m_player.GetUnit();
-    Unit* baseUnit = m_base.GetUnit();
-    Cargo* item = selectedItem();
-    if(!(playerUnit && baseUnit && item)) {
-        return true;
-    }
 
+void buyShip(Unit * baseUnit, Unit * playerUnit, std::string content, bool myfleet, BaseComputer * bcomputer) {
     unsigned int tempInt;           // Not used.
-    Cargo* shipCargo = baseUnit->GetCargo(item->content, tempInt);
+    Cargo* shipCargo = baseUnit->GetCargo(content, tempInt);
     Cargo myFleetShipCargo;
     int swappingShipsIndex = -1;
-    if(item->category.find("My_Fleet") != string::npos) {
+    if(myfleet) {
         // Player owns this starship.
         shipCargo = &myFleetShipCargo;
-        myFleetShipCargo = CreateCargoForOwnerStarshipName(_Universe->AccessCockpit(), item->content, swappingShipsIndex);
+        myFleetShipCargo = CreateCargoForOwnerStarshipName(_Universe->AccessCockpit(), content, swappingShipsIndex);
         if(shipCargo->content.empty()) {
             // Something happened -- can't find ship by name.
             shipCargo = NULL;
@@ -4011,9 +4004,9 @@ bool BaseComputer::buyShip(const EventCommandId& command, Control* control) {
             }
             WriteSaveGame(_Universe->AccessCockpit(), true);//oops saved game last time at wrong place
             UniverseUtil::StopAllSounds();
-            UniverseUtil::playSound("sales/salespitch"+item->content.substr(0,item->content.find("."))+"accept.wav",QVector(0,0,0),Vector(0,0,0));
+            UniverseUtil::playSound("sales/salespitch"+content.substr(0,content.find("."))+"accept.wav",QVector(0,0,0),Vector(0,0,0));
             Unit* newPart = 
-               UnitFactory::createUnit(item->content.c_str(), 
+               UnitFactory::createUnit(content.c_str(), 
                                        false, 
                                        baseUnit->faction, 
                                        newModifications,
@@ -4028,7 +4021,7 @@ bool BaseComputer::buyShip(const EventCommandId& command, Control* control) {
                     newPart->SetPosAndCumPos(UniverseUtil::SafeEntrancePoint(playerUnit->Position(),newPart->rSize()));
                     newPart->prev_physical_state = playerUnit->prev_physical_state;
                     _Universe->activeStarSystem()->AddUnit(newPart);
-                    SwapInNewShipName(_Universe->AccessCockpit(), item->content, swappingShipsIndex);
+                    SwapInNewShipName(_Universe->AccessCockpit(), content, swappingShipsIndex);
                     for (int j=0;j<2;++j) {
                       for (int i=playerUnit->numCargo()-1;i>=0;--i) {
                         Cargo c = playerUnit->GetCargo(i);
@@ -4046,20 +4039,22 @@ bool BaseComputer::buyShip(const EventCommandId& command, Control* control) {
                     }                    
                     WriteSaveGame(_Universe->AccessCockpit(), true);//oops saved game last time at wrong place
 
-                    _Universe->AccessCockpit()->SetParent(newPart, item->content.c_str(), _Universe->AccessCockpit()->GetUnitModifications().c_str(),
+                    _Universe->AccessCockpit()->SetParent(newPart, content.c_str(), _Universe->AccessCockpit()->GetUnitModifications().c_str(),
                         playerUnit->curr_physical_state.position);//absolutely NO NO NO modifications...you got this baby clean off the slate
 
                     // We now put the player in space.
                     SwitchUnits(NULL, newPart);
                     playerUnit->UnDock(baseUnit);
-                    m_player.SetUnit(newPart);
+                    if (bcomputer)
+                      bcomputer->m_player.SetUnit(newPart);
                     WriteSaveGame(_Universe->AccessCockpit(), true);
-					if (baseUnit)
-						newPart->ForceDock(baseUnit,0);
-					CurrentBaseUnitSet(newPart);
-//					if (BaseInterface::CurrentBase)
-//						BaseInterface::CurrentBase->caller.SetUnit(newPart);
-					m_player.SetUnit(newPart);
+                    if (baseUnit)
+                      newPart->ForceDock(baseUnit,0);
+                    CurrentBaseUnitSet(newPart);
+                    //					if (BaseInterface::CurrentBase)
+                    //						BaseInterface::CurrentBase->caller.SetUnit(newPart);
+                    if (bcomputer)
+                      bcomputer->m_player.SetUnit(newPart);
                     static bool persistent_missions_across_ship_switch=XMLSupport::parse_bool(vs_config->getVariable("general","persistent_mission_across_ship_switch","true"));
                     if (persistent_missions_across_ship_switch){
                       for (int i=active_missions.size()-1;i>0;--i){// don't terminate zeroth mission
@@ -4071,10 +4066,11 @@ bool BaseComputer::buyShip(const EventCommandId& command, Control* control) {
                     }
                     newPart=NULL;
                     playerUnit->Kill();
-                    window()->close();
+                    if (bcomputer)
+                      bcomputer->window()->close();
 //                    TerminateCurrentBase();  //BaseInterface::CurrentBase->Terminate();
 					
-                    return true;
+                    return;
                 }
             }
             newPart->Kill();
@@ -4082,6 +4078,19 @@ bool BaseComputer::buyShip(const EventCommandId& command, Control* control) {
         }
     }
 
+
+
+}
+
+// Buy ship from the base.
+bool BaseComputer::buyShip(const EventCommandId& command, Control* control) {
+    Unit* playerUnit = m_player.GetUnit();
+    Unit* baseUnit = m_base.GetUnit();
+    Cargo* item = selectedItem();
+    if(!(playerUnit && baseUnit && item)) {
+        return true;
+    }
+    ::buyShip(baseUnit,playerUnit,item->content,item->category.find("My_Fleet") != string::npos,this);
     return true;
 }
 

@@ -12,8 +12,11 @@ extern void LoadMission (const char *, bool loadfirst);
 extern void SwitchUnits (Unit * ol, Unit * nw);
 extern Cargo * GetMasterPartList(const char *input_buffer);
 extern Unit&GetUnitMasterPartList();
+class UpgradingInfo;
+void BuyShip(Unit*base, Unit*un, std::string name, bool my_fleet=false, UnitContainer * buyer=NULL, UpgradingInfo *baseinfo=NULL);
 class UpgradingInfo {
   void DoDone();
+  friend void BuyShip(Unit*,Unit*,std::string,bool,UnitContainer*,UpgradingInfo*);
 public:
   bool readnews;
   bool drawovermouse;

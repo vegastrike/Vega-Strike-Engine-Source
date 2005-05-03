@@ -36,6 +36,7 @@
 //  News articles.
 //  Mission bulletin board.
 //  Player info.
+
 class BaseComputer : public WindowController
 {
 public:
@@ -269,8 +270,10 @@ protected:
 
     // VARIABLES
     vector<DisplayMode> m_displayModes;     // List of diaplays to provide.
+  public:
     UnitContainer m_player;                 // Ship info, etc.
     UnitContainer m_base;                   // The base we are in.
+  protected:
     DisplayMode m_currentDisplay;           // The current display mode.
     TransactionList m_transList1;           // The commonly-used list/picker.
     TransactionList m_transList2;           // If there are two pickers, the second one.
@@ -287,5 +290,6 @@ protected:
     friend class BuyUpgradeOperation;
     friend class SellUpgradeOperation;
 };
+void buyShip(Unit * base,Unit* player, std::string,bool myfleet, BaseComputer*);
 
 #endif   // __BASECOMPUTER_H__

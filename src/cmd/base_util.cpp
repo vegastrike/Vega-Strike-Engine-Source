@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "base.h"
 #include "base_util.h"
+#include "basecomputer.h"
 namespace BaseUtil {
 	inline BaseInterface::Room *CheckRoom (int room) {
 		if (!BaseInterface::CurrentBase) return 0;
@@ -202,4 +203,9 @@ namespace BaseUtil {
 		if (!BaseInterface::CurrentBase) return -1;
 		return BaseInterface::CurrentBase->rooms.size();
 	}
+        void BuyShip(std::string name, bool my_fleet) {
+          Unit * base = BaseInterface::CurrentBase->baseun.GetUnit();
+          Unit * un=BaseInterface::CurrentBase->caller.GetUnit();
+          ::buyShip(base,un,name,my_fleet,NULL);
+        }
 }

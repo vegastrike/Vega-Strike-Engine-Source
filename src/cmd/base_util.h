@@ -24,4 +24,5 @@ namespace BaseUtil {
 	int GetCurRoom ();
 	void SetCurRoom (int room);
 	int GetNumRoom ();
+	void BuyShip(std::string name, bool my_fleet);
 }

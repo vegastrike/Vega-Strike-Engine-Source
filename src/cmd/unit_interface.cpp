@@ -910,33 +910,12 @@ void SwapInNewShipName(Cockpit * cp,std::string newfilename,int SwappingShipsInd
 	  }
 	  cp->unitfilename.front()= newfilename;
 }
-
-
-void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
-  if (strcmp (inp_buf,"Basic Repair")==0) {
-    string newtitle = BasicRepair( buyer.GetUnit(),title);
-    title=newtitle;
-    SetupCargoList();
-    title=newtitle;
-    return;
-  }
-  Unit * un;
-  Unit * base;
-  unsigned int offset;
-  int quantity=(button==WS_LEFT_BUTTON)?1:(button==WS_MIDDLE_BUTTON?10000:10);
-  int index;
-  char * input_buffer = strdup (inp_buf);
-  sscanf (inp_buf,"%d %s",&index,input_buffer);
-  downgradelimiter=templ=NULL;
-  if (state==0&&(un=buyer.GetUnit())&&(base=this->base.GetUnit())) {
-  
-  switch (mode) {
-  case SHIPDEALERMODE:
-    {
-      Cargo *part = base->GetCargo (string(input_buffer), offset);
+void BuyShip(Unit*  base, Unit * un, std::string input_buffer,bool my_fleet, UnitContainer * buyer, UpgradingInfo * baseinfo) {
+      unsigned int offset;
+      Cargo *part = base->GetCargo (input_buffer, offset);
       Cargo my_fleet_part;
       int SwappingShipsIndex=-1;
-      if (std::find (curcategory.begin(),curcategory.end(),string("My_Fleet"))!=curcategory.end()) {
+      if (my_fleet) {
 	printf ("found my starship");
 	part = &my_fleet_part;
 	my_fleet_part = GetCargoForOwnerStarshipName(_Universe->AccessCockpit(),input_buffer,SwappingShipsIndex);
@@ -962,7 +941,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	  if (SwappingShipsIndex!=-1) {//if we're swapping not buying load the olde one
 	    newmodifications = _Universe->AccessCockpit()->GetUnitModifications();
 	  }
-	  Unit * NewPart = UnitFactory::createUnit (input_buffer,false,base->faction,newmodifications,fg,fgsnumber);
+	  Unit * NewPart = UnitFactory::createUnit (input_buffer.c_str(),false,base->faction,newmodifications,fg,fgsnumber);
 	  NewPart->SetFaction(un->faction);
 	  if (NewPart->name!=string("LOAD_FAILED")) {
 	    if (NewPart->nummesh()>0) {
@@ -973,17 +952,19 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	      NewPart->prev_physical_state=un->prev_physical_state;
 	      _Universe->activeStarSystem()->AddUnit (NewPart);
 	      SwapInNewShipName(_Universe->AccessCockpit(),input_buffer,SwappingShipsIndex);
-	      _Universe->AccessCockpit()->SetParent(NewPart,input_buffer,_Universe->AccessCockpit()->GetUnitModifications().c_str(),un->curr_physical_state.position);//absolutely NO NO NO modifications...you got this baby clean off the slate
+	      _Universe->AccessCockpit()->SetParent(NewPart,input_buffer.c_str(),_Universe->AccessCockpit()->GetUnitModifications().c_str(),un->curr_physical_state.position);//absolutely NO NO NO modifications...you got this baby clean off the slate
 
 	      SwitchUnits (NULL,NewPart);
 	      un->UnDock (base);
 	      //base->RequestClearance(NewPart);
-	      buyer.SetUnit (NewPart);
+              if (buyer)
+                buyer->SetUnit (NewPart);
 	      //NewPart->Dock(base);
 	      WriteSaveGame (_Universe->AccessCockpit(),true);
 	      NewPart=NULL;
 	      un->Kill();
-	      DoDone();
+              if (baseinfo)
+                baseinfo->DoDone();
 	      BaseInterface::CurrentBase->Terminate();
 	      return;
 	    }
@@ -992,6 +973,32 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	  NewPart=NULL;
 	}
       }
+}
+
+
+
+void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
+  if (strcmp (inp_buf,"Basic Repair")==0) {
+    string newtitle = BasicRepair( buyer.GetUnit(),title);
+    title=newtitle;
+    SetupCargoList();
+    title=newtitle;
+    return;
+  }
+  Unit * un;
+  Unit * base;
+  unsigned int offset;
+  int quantity=(button==WS_LEFT_BUTTON)?1:(button==WS_MIDDLE_BUTTON?10000:10);
+  int index;
+  char * input_buffer = strdup (inp_buf);
+  sscanf (inp_buf,"%d %s",&index,input_buffer);
+  downgradelimiter=templ=NULL;
+  if (state==0&&(un=buyer.GetUnit())&&(base=this->base.GetUnit())) {
+  
+  switch (mode) {
+  case SHIPDEALERMODE:
+    {
+      BuyShip(base,un,input_buffer,std::find (curcategory.begin(),curcategory.end(),string("My_Fleet"))!=curcategory.end(),&buyer,this);
     }
     break;
 
@@ -1526,7 +1533,7 @@ Cargo GetCargoForOwnerStarship (Cockpit * cp, int i) {
       }
     }
     if (hike_price) {
-      static float shipping_price = XMLSupport::parse_float (vs_config->getVariable ("physics","shipping_price","6000"));
+      static float shipping_price = XMLSupport::parse_float (vs_config->getVariable ("physics","shipping_price","200000"));
       c.price=shipping_price;
     }
     c.content=cp->unitfilename[i];
