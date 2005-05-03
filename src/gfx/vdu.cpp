@@ -920,9 +920,25 @@ void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
 
     //*******************************************************zade
 
-    char hullval[128];
-    sprintf (hullval,"%.3f",parent->GetHull());
-    string retval (fullname+"\nHull: "+hullval+"\n");
+    //char hullval[128];
+    //sprintf (hullval,"%.3f",parent->GetHull());
+    //string retval (fullname+"\nHull: "+hullval+"\n");
+    float cfullpower[4]={1,1,1,1};
+    float cdamaged[4]={1,0,0,1};
+    float chdamaged[4]={1,1,0,1};
+    float cdestroyed[4]={.2,.2,.2,1};
+    static bool init=false;
+    if (!init){
+      init=true;
+      vs_config->getColor("default","hud_repair_repaired",cfullpower,true);
+      vs_config->getColor("default","hud_repair_half_damaged",chdamaged,true);
+      vs_config->getColor("default","hud_repair_damaged",cdamaged,true);
+      vs_config->getColor("default","hud_repair_destroyed",cdestroyed,true);
+
+    }
+    colorstring fpstring=colToString(GFXColor(cfullpower[0],cfullpower[1],cfullpower[2],cfullpower[3]));
+    string retval("Damage\n");
+    retval+=fpstring.str;
     unsigned int numCargo =parent->numCargo();
     double percent_working = 0.88;
     for (unsigned int i=0;i<numCargo;i++) {
@@ -932,37 +948,21 @@ void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
       if(the_cargo.GetCategory().find("upgrades/")==0){
         percent_working = PercentOperational(parent,the_cargo.content,the_cargo.category);
 	//	retval+=parent->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (int(percent_working*100))+string ("%)" +the_cargo.GetCategory()+"\n");
-        GFXColor final_color ((1.0*percent_working)+(1.0*(1.0-percent_working)),
-                              (1.0*percent_working)+(0.0*(1.0-percent_working)),
-                              (0.0*percent_working)+(0.0*(1.0-percent_working)),
-                              (1.0*percent_working)+(1.0*(1.0-percent_working)));
-        if(percent_working == 0.0){final_color = GFXColor(0.2,0.2,0.2);}	//	dead = grey
+        GFXColor final_color ((chdamaged[0]*percent_working)+(cdamaged[0]*(1.0-percent_working)),
+                              (chdamaged[1]*percent_working)+(cdamaged[1]*(1.0-percent_working)),
+                              (chdamaged[2]*percent_working)+(cdamaged[2]*(1.0-percent_working)),
+                              (chdamaged[3]*percent_working)+(cdamaged[3]*(1.0-percent_working)));
+        if(percent_working == 0.0){final_color = GFXColor(cdestroyed[0],cdestroyed[1],cdestroyed[2],cdestroyed[3]);}	//	dead = grey
         std::string trailer;
         if (percent_working<1.0) {
-          int r = (int)(final_color.r*255);
-          if (r>255)r=255;
-          int rl = r%16;
-          int rh = r/16;
-          
-          int g = (int)(final_color.g*255);
-          if (g>255)g=255;
-          int gl = g%16;
-          int gh = g/16;
-          int b = (int)(final_color.b*255);
-          if (b>255)b=255;
-          int bl = b%16;
-          int bh = b/16;
-          retval+='#';
-          retval+=tohexdigit(rh);
-          retval+=tohexdigit(rl);
-          retval+=tohexdigit(gh);
-          retval+=tohexdigit(gl);
-          retval+=tohexdigit(bh);
-          retval+=tohexdigit(bl);
-          
-          trailer="#FFFFFF";
+          retval+=colToString(final_color).str;          
+          trailer=fpstring.str;
         }
-        retval+=parent->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (int(percent_working*100))+string ("%)")+trailer+std::string("\n");
+        retval+=parent->GetManifest (i,parent,parent->GetVelocity());
+        static bool print_percent_working=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","print_damage_percent","true"));
+        if (print_percent_working)
+          retval+=string (" (")+tostring (int(percent_working*100))+string ("%)");
+        retval+=trailer+std::string("\n");
         
         
       }
