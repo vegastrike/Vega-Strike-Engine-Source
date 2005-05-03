@@ -1,6 +1,7 @@
 #include "cmd/unit_generic.h"
 #include "faction_generic.h"
 #include "gfx/aux_texture.h"
+#include "cmd/unit_util.h"
 #include <assert.h>
 
 using namespace FactionUtil;
@@ -33,11 +34,32 @@ int FactionUtil::GetNumAnimation (int faction) {
 
 std::vector <Animation *>* FactionUtil::GetAnimation (int faction, int n, unsigned char &sex) {
   sex = factions[faction]->comm_face_sex[n];
-  return &factions[faction]->comm_faces[n];
+  return &factions[faction]->comm_faces[n].animations;
 }
-std::vector <Animation *>* FactionUtil::GetRandAnimation(int faction, unsigned char &sex) {
-  if (factions[faction]->comm_faces.size()>0) {
-    return GetAnimation ( faction,rand()%factions[faction]->comm_faces.size(),sex);
+std::vector <Animation *>* FactionUtil::GetRandAnimation(int faction, Unit * un, unsigned char &sex) {
+  bool dockable=UnitUtil::isDockableUnit(un);
+  bool base = UnitUtil::getFlightgroupName(un)=="Base";
+    int siz=factions[faction]->comm_faces.size();
+  if (siz>0) {
+    for (int i=0;i<8+siz;++i) {
+      int ind=i<8?rand()%siz:i-8;
+      Faction::comm_face_t* tmp=&factions[faction]->comm_faces[ind];
+      if (tmp->dockable==Faction::comm_face_t::CEITHER||
+          (tmp->dockable==Faction::comm_face_t::CYES&&dockable)||
+          (tmp->dockable==Faction::comm_face_t::CNO&&!dockable)) {
+        if (tmp->base==Faction::comm_face_t::CEITHER||
+            (tmp->base==Faction::comm_face_t::CYES&&base)||
+            (tmp->base==Faction::comm_face_t::CNO&&!base)) {        
+          return GetAnimation ( faction,ind,sex);
+        }
+      }
+      if (tmp->base==Faction::comm_face_t::CYES&&base) {        
+        return GetAnimation ( faction,ind,sex);//bases may be dockable but we have set dockable_only to no
+      }
+
+    }
+    fprintf (stderr,"Error picking comm animation for %d faction with bas:%d dock:%d\n",faction,(int)base,(int)dockable);
+    return GetAnimation(faction,rand()%siz,sex);
   }else {
     sex=0;
     return NULL;

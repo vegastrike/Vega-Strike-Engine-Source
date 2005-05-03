@@ -8,8 +8,8 @@ Faction::~Faction() {
   }
 }
 
-std::vector <Animation *>* FactionUtil::GetRandAnimation(int faction, unsigned char &sex) { return NULL;}
-Animation * FactionUtil::getRandAnimation (int whichfaction, std::string &which) { return NULL;}
+std::vector <Animation *>* FactionUtil::GetRandAnimation(int faction, Unit *, unsigned char &sex) { return NULL;}
+Animation * FactionUtil::getRandAnimation (int whichfaction,std::string &which) { return NULL;}
 std::vector <Animation *>* FactionUtil::GetAnimation (int faction, int n, unsigned char &sex) { return NULL;}
 
 Animation * FactionUtil::createAnimation( const char * anim) { return NULL;}

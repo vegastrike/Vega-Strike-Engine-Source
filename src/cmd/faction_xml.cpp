@@ -74,6 +74,8 @@ namespace FactionXML {
 	CONTRABAND,
 	EXPLOSION,
 	SEX,
+        BASE_ONLY,
+        DOCKABLE_ONLY,
 	SPARKRED,
 	SPARKGREEN,
 	SPARKBLUE,
@@ -107,12 +109,14 @@ namespace FactionXML {
 	EnumMap::Pair ("relation",RELATION),
 	EnumMap::Pair ("Conversation", CONVERSATION),
 	EnumMap::Pair ("Contraband",CONTRABAND),
-	EnumMap::Pair ("sex",SEX)
+	EnumMap::Pair ("sex",SEX),
+	EnumMap::Pair ("base_only",BASE_ONLY),
+	EnumMap::Pair ("dockable_only",DOCKABLE_ONLY)
 };
 
 
   const EnumMap element_map(element_names, 10);
-  const EnumMap attribute_map(attribute_names, 14);
+  const EnumMap attribute_map(attribute_names, 16);
 
 }
 
@@ -175,13 +179,20 @@ void Faction::beginElement(void *userData, const XML_Char *names, const XML_Char
   case COMM_ANIMATION:
     assert (unitlevel==2);
     unitlevel++;
-    factions.back()->comm_faces.push_back (std::vector<Animation *>());
+    factions.back()->comm_faces.push_back (Faction::comm_face_t());
     factions.back()->comm_face_sex.push_back (0);
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case SEX:
 	factions.back()->comm_face_sex.back() = parse_int ((*iter).value);
 	break;
+      case DOCKABLE_ONLY:
+        factions.back()->comm_faces.back().dockable=parse_bool((*iter).value)?comm_face_t::CYES:comm_face_t::CNO;
+        
+        break;
+      case BASE_ONLY:
+        factions.back()->comm_faces.back().base=parse_bool((*iter).value)?comm_face_t::CYES:comm_face_t::CNO;
+        break;
       }
     }
     break;
@@ -191,7 +202,7 @@ void Faction::beginElement(void *userData, const XML_Char *names, const XML_Char
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case NAME:
-		  factions.back()->comm_faces.back().push_back(FactionUtil::createAnimation ((*iter).value.c_str()));
+		  factions.back()->comm_faces.back().animations.push_back(FactionUtil::createAnimation ((*iter).value.c_str()));
 	break;
       }
     }

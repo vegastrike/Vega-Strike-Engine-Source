@@ -45,7 +45,14 @@ typedef std::map<std::string, float> MapStringFloat;
     Texture * secondaryLogo;
     ///char * of the name
     char * factionname; 
-    std::vector <std::vector <class Animation *> > comm_faces;
+    struct comm_face_t{
+      std::vector <class Animation *> animations;
+      enum CHOICE{CNO,CYES,CEITHER} ;
+      CHOICE dockable;
+      CHOICE base;
+      comm_face_t():dockable(CEITHER),base(CEITHER){}
+    };
+    std::vector <comm_face_t> comm_faces;
     std::vector <class Animation *> explosion;
     std::vector <std::string> explosion_name;
     std::vector <unsigned char> comm_face_sex;
@@ -74,7 +81,7 @@ typedef std::map<std::string, float> MapStringFloat;
 extern  std::vector <Faction *> factions; //the factions
 
 namespace FactionUtil {
-		std::vector <class Animation *>* GetRandAnimation(int faction, unsigned char &sex);
+		std::vector <class Animation *>* GetRandAnimation(int faction, Unit * unit, unsigned char &sex);
 		void SerializeFaction (FILE * file);
 		string SerializeFaction();
 		void LoadSerializedFaction (FILE * file);
