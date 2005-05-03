@@ -611,13 +611,21 @@ void GameCockpit::DrawTurretTargetBoxes () {
 
 void GameCockpit::drawUnToTarget ( Unit * un, Unit* target,float xcent,float ycent, float xsize, float ysize, bool reardar){
   static GFXColor black_and_white=DockBoxColor ("black_and_white"); 
+  static GFXColor communicating=DockBoxColor ("communicating"); 
       Vector localcoord (un->LocalCoordinates(target));
 	  if (reardar)
 		  localcoord.k=-localcoord.k;
 	  float s,t;
       this->LocalToRadar (localcoord,s,t);
-      GFXColor localcol (un->GetComputerData().radar.color?this->unitToColor (un,target):black_and_white);
-      
+      bool ccolor=un->GetComputerData().radar.color;
+      GFXColor localcol (ccolor?this->unitToColor (un,target):black_and_white);
+      if (ccolor) {
+        unsigned int s=vdu.size();
+        for (unsigned int i=0;i<s;++i) {
+          if (vdu[i]->GetCommunicating()==target)
+            localcol=communicating;
+        }
+      }
       GFXColorf (localcol);
       
       float rerror = ((un->GetNebula()!=NULL)?.03:0)+(target->GetNebula()!=NULL?.06:0);

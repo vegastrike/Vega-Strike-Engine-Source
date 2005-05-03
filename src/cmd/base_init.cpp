@@ -66,6 +66,7 @@ PYTHON_BEGIN_MODULE(Base)
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::TextBox, "TextBox");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetTextBoxText, "SetTextBoxText");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::BuyShip,"BuyShip");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SellShip,"SellShip");
 PYTHON_END_MODULE(Base)
 
 void InitBase() {

@@ -185,11 +185,16 @@ protected:
     //  Returns true if the specified item is found.
     bool scrollToItem(Picker* picker, const Cargo& item, bool select, bool skipFirstCategory);
 
+
+public:
     // Update the transaction controls after a transaction.
     void updateTransactionControls(const Cargo& item, bool skipFirstCategory = false);
 
     // Update the controls when the selection for a transaction changes.
     void updateTransactionControlsForSelection(TransactionList* list);
+    // Load the controls for the MISSIONS display.
+    void loadShipDealerControls(void);
+protected:
 
     // Hide the controls that commit transactions.
     void hideCommitControls(void);
@@ -216,8 +221,6 @@ protected:
     // Sell some items from the Cargo list.  Use -1 for quantity to buy all of the item.
     bool sellSelectedCargo(int requestedQuantity);
 
-    // Load the controls for the MISSIONS display.
-    void loadShipDealerControls(void);
 
     // Load the controls for the NEWS display.
     void loadNewsControls(void);
@@ -290,6 +293,7 @@ protected:
     friend class BuyUpgradeOperation;
     friend class SellUpgradeOperation;
 };
-void buyShip(Unit * base,Unit* player, std::string,bool myfleet, BaseComputer*);
+bool buyShip(Unit * base,Unit* player, std::string,bool myfleet, bool force_base_inventory, BaseComputer*);
+bool sellShip(Unit * base,Unit* player, std::string,BaseComputer*);
 
 #endif   // __BASECOMPUTER_H__

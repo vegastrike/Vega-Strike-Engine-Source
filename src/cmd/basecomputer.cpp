@@ -3740,7 +3740,7 @@ Cargo CreateCargoForOwnerStarship(Cockpit* cockpit, int i) {
     }
 
     if(needsTransport) {
-        static const float shipping_price = XMLSupport::parse_float (vs_config->getVariable ("physics","shipping_price","6000"));
+        static const float shipping_price = XMLSupport::parse_float (vs_config->getVariable ("physics","shipping_price","200000"));
         cargo.price = shipping_price;
     }
 
@@ -3939,41 +3939,57 @@ void BaseComputer::loadShipDealerControls(void) {
     // Make the title right.
     recalcTitle();
 }
-bool BaseComputer::sellShip(const EventCommandId& command, Control* control) {
-    Unit* playerUnit = m_player.GetUnit();
+bool sellShip(Unit * baseUnit, Unit * playerUnit, std::string shipname, BaseComputer * bcomputer) {
     Cockpit * cockpit = _Universe->isPlayerStarship(playerUnit);
-    Unit* baseUnit = m_base.GetUnit();
-    Cargo* item = selectedItem();
-    if(!(playerUnit && baseUnit && item && cockpit)) {
-        return true;
-    }
     unsigned int tempInt=1;
-    Cargo* shipCargo = baseUnit->GetCargo(item->content, tempInt);    
+    Cargo* shipCargo = baseUnit->GetCargo(shipname, tempInt);    
     if (shipCargo==NULL) {
-      shipCargo=UniverseUtil::GetMasterPartList()->GetCargo(item->content,tempInt);
+      shipCargo=UniverseUtil::GetMasterPartList()->GetCargo(shipname,tempInt);
     }
     if (shipCargo) {
       //now we can actually do the selling
       for(int i=1; i < cockpit->unitfilename.size(); i+=2) {      
-        if (cockpit->unitfilename[i]==item->content) {
+        if (cockpit->unitfilename[i]==shipname) {
+          float xtra=0;
+          if(cockpit->unitfilename[i+1] == _Universe->activeStarSystem()->getFileName()) {
+            static const float shipping_price = XMLSupport::parse_float (vs_config->getVariable ("physics","sellback_shipping_price","6000"));
+            xtra+=shipping_price;
+          }
           cockpit->unitfilename.erase(cockpit->unitfilename.begin()+i);
           cockpit->unitfilename.erase(cockpit->unitfilename.begin()+i);
           static float shipSellback=XMLSupport::parse_float(vs_config->getVariable("economics","ship_sellback_price",".5"));
           cockpit->credits+=shipSellback*shipCargo->price;// sellback cost
-          cockpit->credits-=item->price;//transportation cost
+          cockpit->credits-=xtra;//transportation cost
           break;
         }
       }
-      loadShipDealerControls();
-      updateTransactionControlsForSelection(NULL);
+      if (bcomputer) {
+        bcomputer->loadShipDealerControls();
+        bcomputer->updateTransactionControlsForSelection(NULL);
+      }
       return true;
     }
     return false;
+
+}
+bool BaseComputer::sellShip(const EventCommandId& command, Control* control) {
+    Unit* playerUnit = m_player.GetUnit();
+    Unit* baseUnit = m_base.GetUnit();
+    Cargo* item = selectedItem();
+    Cockpit * cockpit = _Universe->isPlayerStarship(playerUnit);
+    if(!(playerUnit && baseUnit && item && cockpit)) {
+        return true;
+    }
+    return ::sellShip(baseUnit,playerUnit,item->content,this);
 }
 
-void buyShip(Unit * baseUnit, Unit * playerUnit, std::string content, bool myfleet, BaseComputer * bcomputer) {
+bool buyShip(Unit * baseUnit, Unit * playerUnit, std::string content, bool myfleet, bool force_base_inventory, BaseComputer * bcomputer) {
     unsigned int tempInt;           // Not used.
     Cargo* shipCargo = baseUnit->GetCargo(content, tempInt);
+    if (shipCargo==NULL&&force_base_inventory) {
+      shipCargo=UniverseUtil::GetMasterPartList()->GetCargo(content,tempInt);
+    }
+
     Cargo myFleetShipCargo;
     int swappingShipsIndex = -1;
     if(myfleet) {
@@ -4070,7 +4086,7 @@ void buyShip(Unit * baseUnit, Unit * playerUnit, std::string content, bool myfle
                       bcomputer->window()->close();
 //                    TerminateCurrentBase();  //BaseInterface::CurrentBase->Terminate();
 					
-                    return;
+                    return true;
                 }
             }
             newPart->Kill();
@@ -4078,7 +4094,7 @@ void buyShip(Unit * baseUnit, Unit * playerUnit, std::string content, bool myfle
         }
     }
 
-
+    return false;
 
 }
 
@@ -4090,7 +4106,7 @@ bool BaseComputer::buyShip(const EventCommandId& command, Control* control) {
     if(!(playerUnit && baseUnit && item)) {
         return true;
     }
-    ::buyShip(baseUnit,playerUnit,item->content,item->category.find("My_Fleet") != string::npos,this);
+    ::buyShip(baseUnit,playerUnit,item->content,item->category.find("My_Fleet") != string::npos,false,this);
     return true;
 }
 

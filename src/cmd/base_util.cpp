@@ -203,9 +203,14 @@ namespace BaseUtil {
 		if (!BaseInterface::CurrentBase) return -1;
 		return BaseInterface::CurrentBase->rooms.size();
 	}
-        void BuyShip(std::string name, bool my_fleet) {
+        bool BuyShip(std::string name, bool my_fleet, bool force_base_inventory) {
           Unit * base = BaseInterface::CurrentBase->baseun.GetUnit();
           Unit * un=BaseInterface::CurrentBase->caller.GetUnit();
-          ::buyShip(base,un,name,my_fleet,NULL);
+          return ::buyShip(base,un,name,my_fleet,force_base_inventory,NULL);
+        }
+        bool SellShip(std::string name) {
+          Unit * base = BaseInterface::CurrentBase->baseun.GetUnit();
+          Unit * un=BaseInterface::CurrentBase->caller.GetUnit();
+          return ::sellShip(base,un,name,NULL);
         }
 }
