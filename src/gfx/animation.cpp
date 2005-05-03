@@ -78,7 +78,7 @@ Animation::Animation (const char * FileName, bool Rep,  float priority,enum FILT
   VSFile f;
   VSError err = f.OpenReadOnly( FileName, AnimFile);
   if (err>Ok) {
-    ; // do something 
+    //load success already set false
   } else {
     f.Fscanf ( "%f %f", &width, &height);
     if (width>0) {

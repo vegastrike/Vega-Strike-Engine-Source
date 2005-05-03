@@ -3063,7 +3063,7 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
         phasedamage*= g_game.difficulty;
         amt*=g_game.difficulty;
       }
-      cpt->Shake (amt);
+
     }
   }
   //  #endif
@@ -3103,6 +3103,8 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
 	      GFXColor (.3,.3,.3), GFXColor (0,0,0,1), 
 	      GFXColor (.5,.5,.5),GFXColor (1,0,.01)));*/
       //calculate percentage
+      if (cpt)
+        cpt->Shake (amt,0);
       if (GetNebula()==NULL) 
 		meshdata.back()->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),spercentage>1?1:spercentage,color);
     }
@@ -3112,7 +3114,11 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
 	// ONLY in server or in non-networking
 	// Compute spercentage even in networking because doesn't apply damage on client side
 	//if( Network==NULL || SERVER)
-		ppercentage = DealDamageToHull (pnt, leakamt+amt);
+        float tmp=this->GetHull();
+	ppercentage = DealDamageToHull (pnt, leakamt+amt);
+        if (cpt) 
+          cpt->Shake(amt+leakamt,tmp!=this->GetHull()?2:1);
+        
 	if (ppercentage!=-1) {//returns -1 on death--could delete
 	  for (int i=0;i<nummesh();i++) {
 		if (ppercentage)
@@ -3149,21 +3155,26 @@ void	Unit::ApplyNetDamage( Vector & pnt, Vector & normal, float amt, float pperc
   static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
   Cockpit * cpt;
   if ( (cpt=_Universe->isPlayerStarship(this))!=NULL) {
-    if (color.a!=2)
-      cpt->Shake (amt);
+    
   }
   if( GetNebula()==NULL||nebshields>0)
   {
     if (meshdata.back()&&spercentage>0&&amt==0) {//shields are up
       if (GetNebula()==NULL) 
-		meshdata.back()->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),spercentage,color);
-	}
+        meshdata.back()->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),spercentage,color);
+      if (cpt)
+        cpt->Shake (amt,0);
+    }
   }
   if (shield.leak>0||!meshdata.back()||spercentage==0||amt>0) {
 	if (ppercentage!=-1) {//returns -1 on death--could delete
 	  for (int i=0;i<nummesh();i++) {
-		if (ppercentage)
-			meshdata[i]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector (0,0,0),ppercentage,color);
+            if (ppercentage) {
+              meshdata[i]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector (0,0,0),ppercentage,color);
+              if (cpt)
+                cpt->Shake (amt,2);
+            }
+                
 	  }
 	}
   }

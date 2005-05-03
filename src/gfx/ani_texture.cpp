@@ -76,6 +76,7 @@ void AnimatedTexture::AniInit() {
   name=-1;
   active=0;
   original = NULL;
+  loadSuccess=false;
 }
 //AnimatedTexture::AnimatedTexture (FILE * fp, int stage, enum FILTER imm, bool detailtex){
 //  AniInit();

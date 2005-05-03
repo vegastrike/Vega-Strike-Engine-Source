@@ -54,7 +54,11 @@ private:
   float vdu_time [MAXVDUS];
   ///saved values to compare with current values (might need more for damage)
   std::list <Matrix> headtrans;
+  float shake_time;
+  int shake_type;
+
   std::vector<class Mesh *> mesh;
+
   int soundfile;
   VSSprite *Pit [4];
   VSSprite *Radar[2];
@@ -122,7 +126,7 @@ private:
   static string getsoundending(int which=0);
   static string getsoundfile(string filename);
   void InitStatic ();
-  void Shake (float amt);
+  void Shake (float amt, int level /*0= shield 1=armor 2=hull*/);
   int Autopilot (Unit * target);
  ///Restores the view from the IDentity Matrix needed to draw sprites
   void RestoreViewPort();

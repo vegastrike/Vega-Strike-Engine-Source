@@ -1333,15 +1333,88 @@ int GameCockpit::Autopilot (Unit * target) {
   return retauto;
 }
 extern void reset_time_compression(const KBData&, KBSTATE a);
-void GameCockpit::Shake (float amt) {
+void GameCockpit::Shake (float amt,int dtype) {
   static float shak= XMLSupport::parse_float(vs_config->getVariable("graphics","cockpit_shake","3"));
   static float shak_max= XMLSupport::parse_float(vs_config->getVariable("graphics","cockpit_shake_max","20"));
   shakin+=shak;
   if (shakin>shak_max) {
     shakin=shak_max;
   }
+  this->shake_time=getNewTime();
+  this->shake_type=dtype;
 }
+static void DrawDamageFlash(int dtype) {
+  const int numtypes=3;
+  static string shieldflash=vs_config->getVariable("graphics","shield_flash_animation","");
+  static string armorflash=vs_config->getVariable("graphics","armor_flash_animation","armorflash.ani");
+  static string hullflash=vs_config->getVariable("graphics","armor_flash_animation","hullflash.ani");
+  string flashes[numtypes];flashes[0]=shieldflash;flashes[1]=armorflash;flashes[2]=hullflash;
+  float fallbackcolor[numtypes][4]={{0,1,.5,1},{1,0,.2,.25},{1,0,0,1}};
+  
+  static bool init=false;
+  static Animation* aflashes[numtypes];
+  static bool doflash[numtypes];
+  if (!init) {
+    init=true;
+    for (int i=0;i<numtypes;++i) {
+      doflash[i]=(flashes[i].length()>0);
+      if (doflash[i]) {
+        aflashes[i]=new Animation(flashes[i].c_str(),true,.1,BILINEAR,false,false);
+      }else{
+        aflashes[i]=NULL;
+      }
+    }
+    vs_config->getColor("shield_flash",fallbackcolor[0]);
+    vs_config->getColor("armor_flash",fallbackcolor[1]);
+    vs_config->getColor("hull_flash",fallbackcolor[2]);
+  }
+  if (dtype<numtypes) {
+    int i=dtype;
 
+    if (aflashes[i]) {
+      GFXPushBlendMode();
+      static bool damage_flash_alpha=XMLSupport::parse_bool(vs_config->getVariable("graphics","damage_flash_alpha","true"));
+      if (damage_flash_alpha)
+        GFXBlendMode(SRCALPHA,INVSRCALPHA);
+      else
+        GFXBlendMode(ONE,ZERO);
+      if (aflashes[i]->LoadSuccess()) {
+        aflashes[i]->MakeActive();        
+        GFXColor4f(1,1,1,1);
+        GFXBegin (GFXQUAD);       
+        float width=1,height=1;
+        GFXTexCoord2f (0.00F,1.00F);
+        GFXVertex3f (-width,-height,0.00F);  //lower left
+        GFXTexCoord2f (1.00F,1.00F);
+        GFXVertex3f (width,-height,0.00F);  //upper left
+        GFXTexCoord2f (1.00F,0.00F);
+        GFXVertex3f (width,height,0.00F);  //upper right
+        GFXTexCoord2f (0.00F,0.00F);
+        GFXVertex3f (-width,height,0.00F);  //lower right
+        GFXEnd ();
+        
+      }else{ 
+        GFXColor4f(fallbackcolor[i][0],
+                   fallbackcolor[i][1],
+                   fallbackcolor[i][2],
+                   fallbackcolor[i][3]);
+        GFXDisable(TEXTURE0);
+        GFXBegin(GFXQUAD);
+        GFXVertex3f(-1.0f,-1.0f,0.0f);
+        GFXVertex3f(-1.0f,1.0f,0.0f);
+        GFXVertex3f(1.0f,1.0f,0.0f);
+        GFXVertex3f(1.0f,-1.0f,0.0f);
+        GFXEnd();
+        GFXEnable(TEXTURE0);
+      }
+      GFXPopBlendMode();        
+    }
+
+  }
+  GFXColor4f(1,1,1,1);
+
+
+}
 static void DrawCrosshairs (float x, float y, float wid, float hei, const GFXColor &col) {
 	GFXColorf(col);
 	GFXDisable(TEXTURE0);
@@ -1432,6 +1505,11 @@ void GameCockpit::Draw() {
     }
   }
   GFXHudMode (true);
+  static float damage_flash_length=XMLSupport::parse_float(vs_config->getVariable("graphics","damage_flash_length",".1"));
+  static bool damage_flash_first=XMLSupport::parse_bool(vs_config->getVariable("graphics","flash_behind_hud","true"));
+  if (view<CP_CHASE&&damage_flash_first&&getNewTime()-shake_time<damage_flash_length) {
+    DrawDamageFlash(shake_type);
+  }
   GFXColor4f (1,1,1,1);
   GFXBlendMode (ONE,ONE);
   GFXDisable (DEPTHTEST);
@@ -1638,6 +1716,10 @@ void GameCockpit::Draw() {
     //    DrawGlutMouse(mousex,mousey,&MouseVSSprite);
     //    DrawGlutMouse(mousex,mousey,&MouseVSSprite);
   }
+  if (view<CP_CHASE&&damage_flash_first==false&&getNewTime()-shake_time<damage_flash_length) {
+    DrawDamageFlash(shake_type);
+  }
+
   GFXHudMode (false);
   DrawNavSystem();
 

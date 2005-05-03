@@ -98,7 +98,7 @@ protected:
   void SetView (const enum VIEWSTYLE tmp) {view = tmp;}
   enum VIEWSTYLE GetView () {return view;}
   virtual void InitStatic ();
-  virtual void Shake (float amt) {}
+  virtual void Shake (float amt, int level/*0 = shield, 1 = armor 2 = hull*/) {}
   float godliness;
   virtual int Autopilot (Unit * target);
   void RestoreGodliness();
