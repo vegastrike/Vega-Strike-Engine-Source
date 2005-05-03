@@ -23,7 +23,7 @@ string reformatName (string nam) {
 		nam[0]=toupper(nam[0]);
 	return nam;
 }
-string getUnitNameAndFgNoBase (Unit * target) {
+static string getUnitNameAndFgNoBase (Unit * target) {
   Flightgroup* fg = target->getFlightgroup();
   if (target->isUnit()==PLANETPTR) {
     string hr = ((Planet *)target)->getHumanReadablePlanetType();
@@ -51,25 +51,26 @@ string getUnitNameAndFgNoBase (Unit * target) {
 		  string fgnstring=string(fgnum);
 		  free(fgnum);
 		  fgnum=NULL;
-		  static bool confignums=XMLSupport::parse_bool (vs_config->getVariable ("graphics","printFGsubID","false"));
-		  if(confignums){
-			return fg->name+" ="+fgnstring+"= : "+reformatName(target->getFullname());
-		  } else {
-			return fg->name+" : "+reformatName(target->getFullname());
-		  }
+                  static bool printfgname = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","print_fg_name","true"));
+                  static bool printshiptype = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","print_ship_type","true"));
+		  static bool confignums=XMLSupport::parse_bool (vs_config->getVariable ("graphics","hud","printFGsubID","false"));
+                  string fgname;
+                  if (printfgname)fgname+=fg->name+(confignums?" =":" : ");
+                  if (printshiptype)
+                    return fgname+reformatName(target->getFullname());
+                  return fgname;		  
 	  } else if(fg->name=="Base"){
-		  if(reformatName(target->name)==(reformatName(target->getFullname()))){
-		    return reformatName(target->name);
-		  } else {
-		    return reformatName(target->name)+":"+target->getFullname();
-		  }
+            static bool namecolonname=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","basename:basename","true"));
+            
+            if(namecolonname==false||reformatName(target->name)==(reformatName(target->getFullname()))){
+              return reformatName(target->getFullname());
+            } else {
+              return reformatName(target->name)+":"+target->getFullname();
+            }
 	  }
 	}	 
   }
   
-  if (string("neutral")!=FactionUtil::GetFaction(target->faction)) {
-    return /*string(_Universe->GetFaction(target->faction))+" "+*/reformatName(target->name);
-  }
   return reformatName(target->name);
 }
 
@@ -602,10 +603,12 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   string unitandfg=getUnitNameAndFgNoBase(target).c_str();
   bool inrange=parent->InRange(target,mm,true,false,false);
   if (inrange) {
-	  static int neut= FactionUtil::GetFaction("neutral");
+    static int neut= FactionUtil::GetFaction("neutral");
     static int upgr= FactionUtil::GetFaction("upgrades");
     if (target->faction != neut&&target->faction!=upgr) {
-      unitandfg+=std::string("\n")+FactionUtil::GetFaction(target->faction);
+      static bool printFac = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","print_faction","true"));
+      if (printFac)
+        unitandfg+=std::string("\n")+FactionUtil::GetFaction(target->faction);
     }
     
   }
