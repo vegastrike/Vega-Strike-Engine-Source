@@ -759,7 +759,7 @@ shield.range[1].   rhomax=r90;
   image->forcejump=XMLSupport::parse_bool(row["Wormhole"]);
   jump.energy=stof(row["Outsystem_Jump_Cost"]);
   jump.insysenergy=stof(row["Warp_Usage_Cost"]);
-  afterburnenergy=stof(row["Afterburner_Usage_Cost"]);
+  afterburnenergy=stof(row["Afterburner_Usage_Cost"],32767);
   if (stoi(row["Afterburner_Type"])==1)
     afterburnenergy*=-1;
   limits.yaw=stof(row["Maneuver_Yaw"])*VS_PI/180.;

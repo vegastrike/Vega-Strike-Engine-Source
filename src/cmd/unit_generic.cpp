@@ -5844,7 +5844,7 @@ if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"H
     if (afterburnenergy>up->afterburnenergy&&up->afterburnenergy>0||force_change_on_nothing) {
       numave++;
       if (touchme) afterburnenergy=up->afterburnenergy;
-    }else if (afterburnenergy<=up->afterburnenergy&&afterburnenergy>=0&&up->afterburnenergy>0&&up->afterburnenergy<65535) {
+    }else if (afterburnenergy<=up->afterburnenergy&&afterburnenergy>=0&&up->afterburnenergy>0&&up->afterburnenergy<32767) {
       cancompletefully=false;
     }
     if (jump.drive==-2&&up->jump.drive>=-1||force_change_on_nothing) {
