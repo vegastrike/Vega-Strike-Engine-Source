@@ -4001,6 +4001,13 @@ bool buyShip(Unit * baseUnit, Unit * playerUnit, std::string content, bool myfle
             shipCargo = NULL;
             swappingShipsIndex = -1;
         }
+    }else {
+      Cockpit* cockpit = _Universe->AccessCockpit();
+      for(int i=1; i < cockpit->unitfilename.size(); i+=2) {      
+        if (cockpit->unitfilename[i]==content) {
+          return false;//can't buy a ship you own
+        }
+      }
     }
 
     if(shipCargo) {
