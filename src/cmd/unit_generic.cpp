@@ -5600,7 +5600,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
       STDUPGRADE(shield.shield2fb.frontmax,up->shield.shield2fb.frontmax,templ->shield.shield2fb.frontmax,0);
       STDUPGRADE(shield.shield2fb.backmax,up->shield.shield2fb.backmax,templ->shield.shield2fb.backmax,0);
       if (shield.shield2fb.frontmax!=a) shield.shield2fb.front=shield.shield2fb.frontmax;
-      if (shield.shield2fb.backmax!=b) shield.shield2fb.back==shield.shield2fb.backmax;
+      if (shield.shield2fb.backmax!=b) shield.shield2fb.back=shield.shield2fb.backmax;
       break;
     case 4:
       a=shield.shield4fbrl.frontmax;
