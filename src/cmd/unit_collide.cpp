@@ -185,6 +185,7 @@ static float tmpmax (float a, float b) {
 bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNormal, QVector & smallpos, Vector & smallNormal) {
   if (smaller->colTrees==NULL||this->colTrees==NULL)
     return false;
+  if (hull<0) return false;
   if (smaller->colTrees->usingColTree()==false||this->colTrees->usingColTree()==false)
     return false;
 
@@ -458,6 +459,36 @@ bool Unit::Collide (Unit * target) {
   return true;
 }
 
+
+
+float globQuerySphere (QVector start, QVector end, QVector pos, float radius) {
+  
+    double a, b,c;
+    QVector st = start-pos;
+    QVector dir = end-start;
+    c = st.Dot (st);
+    double temp1 = radius;
+    if (st.MagnitudeSquared()<temp1*temp1)
+      return 1.0e-6;
+    c = c - temp1*temp1;
+    b = 2 * (dir.Dot (st));
+    a = dir.Dot(dir);
+    //b^2-4ac
+    c = b*b - 4*a*c;
+    if (c<0||a==0)
+      return 0;
+    a *=2;
+      
+    float tmp = (-b + sqrt (c))/a;
+    c = (-b - sqrt (c))/a;
+    if (tmp>0&&tmp<=1) {
+      return (c>0&&c<tmp) ? c : tmp;
+    } else if (c>0&&c<=1) {
+	return c;
+    }
+    return 0;
+}
+
  
 Unit * Unit::queryBSP (const QVector &pt, float err, Vector & norm, float &dist, bool ShieldBSP) {
   int i;
@@ -561,11 +592,26 @@ bool testRayVersusBB(Vector Min, Vector Max, const QVector& start, const Vector&
 		}
 	}
 	Coord=Vector(finalCoord[0],finalCoord[1],finalCoord[2]);
-	return true;
+        if (tmax[0]>=0&&tmax[0]<=1&&tmax[1]>=0&&tmax[1]<=1&&tmax[2]>=0&&tmax[2]<=1) {
+          return true;
+        }
+        return false;
+}
+bool testRayInsideBB(const Vector &Min, const Vector &Max, const QVector& start, const Vector& end, Vector& Coord){
+  if (start.i>Min.i&&start.j>Min.j&&start.k>Min.k&&start.i<Max.i&&start.j<Max.j&&start.k<Max.k) {
+    return true;
+  }
+  return testRayVersusBB(Min,Max,start,end,Coord);
 }
 
 Unit * Unit::queryBSP (const QVector &start, const QVector & end, Vector & norm, float &distance, bool ShieldBSP) {
   Unit * tmp;
+  float rad=this->rSize();
+  if (graphicOptions.RecurseIntoSubUnitsOnCollision)    
+    if (!SubUnits.empty()&&NULL!=(tmp=SubUnits.fastIterator().current()))
+      rad+=tmp->rSize();
+  if (!globQuerySphere(start,end,cumulative_transformation_matrix.p,rad))
+    return NULL;
   static bool use_bsp_tree = XMLSupport::parse_bool(vs_config->getVariable("physics","beam_bsp","false"));
   if (graphicOptions.RecurseIntoSubUnitsOnCollision)
   if (!SubUnits.empty()) {
@@ -592,15 +638,21 @@ Unit * Unit::queryBSP (const QVector &start, const QVector & end, Vector & norm,
   }
   //for (;tmpBsp!=NULL;tmpBsp=((ShieldUp(st.Cast())&&(tmpBsp!=((this->colTrees?&this->colTrees->bspTree:&myNull))))?((this->colTrees?&this->colTrees->bspTree:&myNull)):NULL)) {
     distance = querySphereNoRecurse (start,end);
-    if (distance) {
+    if (1) {
       if (!(*tmpBsp)) {
 		  Vector coord;
-		  if(testRayVersusBB(corner_min,corner_max,st,ed,coord)) {
-		    norm = TransformNormal(cumulative_transformation_matrix,coord);
-		    distance=(coord-st).Magnitude();
-	        norm.Normalize();//normal points out from center
-	        return this;
-		  }else return NULL;
+                  int nm=nummesh();
+                  Unit * retval=NULL;
+                  for (unsigned int i=0;i<nm;++i) {
+                    if(testRayVersusBB(meshdata[i]->corner_min(),meshdata[i]->corner_max(),st,ed,coord)) {
+                      norm = TransformNormal(cumulative_transformation_matrix,coord);
+                      distance=(coord-st).Magnitude();
+                      norm.Normalize();//normal points out from center
+                      ed=coord.Cast();
+                      retval=this;
+                    }
+                  }
+                  return retval;
       }
     }else
       return NULL;
@@ -688,11 +740,14 @@ float Unit::querySphereNoRecurse (const QVector & start, const QVector & end, fl
 		break;
     double a, b,c;
     st = start - Transform (cumulative_transformation_matrix,meshdata[i]->Position().Cast());	
+
     dir = end-start;//now start and end are based on mesh's position
     // v.Dot(v) = r*r; //equation for sphere
     // (x0 + (x1 - x0) *t) * (x0 + (x1 - x0) *t) = r*r
     c = st.Dot (st);
-	double temp1 = (min_radius+meshdata[i]->rSize());
+    double temp1 = (min_radius+meshdata[i]->rSize());
+    if (st.MagnitudeSquared()<temp1*temp1)
+      return 1.0e-6;
 	if( min_radius!=-FLT_MAX)
 		c = c - temp1*temp1;
 	else
@@ -719,5 +774,6 @@ float Unit::querySphereNoRecurse (const QVector & start, const QVector & end, fl
 	return c;
     }
   }
+
   return 0;
 }
