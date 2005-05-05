@@ -1357,7 +1357,7 @@ static void DrawDamageFlash(int dtype) {
   static string armorflash=vs_config->getVariable("graphics","armor_flash_animation","armorflash.ani");
   static string hullflash=vs_config->getVariable("graphics","armor_flash_animation","hullflash.ani");
   string flashes[numtypes];flashes[0]=shieldflash;flashes[1]=armorflash;flashes[2]=hullflash;
-  float fallbackcolor[numtypes][4]={{0,1,.5,1},{1,0,.2,.25},{1,0,0,1}};
+  float fallbackcolor[numtypes][4]={{0,1,.5,1},{1,0,.2,.25},{1,0,0,.66}};
   
   static bool init=false;
   static Animation* aflashes[numtypes];
