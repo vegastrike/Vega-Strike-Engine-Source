@@ -3874,7 +3874,9 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
 
 			  if (rand()<(RAND_MAX*autoejectpercent)&&isUnit()==UNITPTR) {
                             static bool player_autoeject=XMLSupport::parse_bool(vs_config->getVariable("physics","player_autoeject","true"));
-                            if (player_autoeject||NULL==_Universe->isPlayerStarship(this))
+                            static int neutralfac=FactionUtil::GetFaction("neutral");
+                            static int upgradesfac=FactionUtil::GetFaction("upgrades");
+                            if (faction!=neutralfac&&faction!=upgradesfac&&(player_autoeject||NULL==_Universe->isPlayerStarship(this)))
                               EjectCargo ((unsigned int)-1);
 			  }
                         }

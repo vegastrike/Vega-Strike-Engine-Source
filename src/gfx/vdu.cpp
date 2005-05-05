@@ -889,21 +889,25 @@ void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
   //tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0,true);  
   char ecmstatus[256];
   ecmstatus[0]='\0';
-  if (parent->GetImageInformation().ecm>0) {
-    GFXColor4f(0,1,0,.5);
-    strcpy (ecmstatus,"ECM Active");
-    
-  }
-  if (((parent->GetImageInformation().ecm<0))) {
-    GFXColor4f(.6,.6,.6,.5);
-    strcpy (ecmstatus,"ECM Inactive");
-  }
-  if (parent->GetImageInformation().ecm>0) {
-    static float s=0;
-    s+=.125*SIMULATION_ATOM;
-    if (s>1)
-      s=0;
-    DrawShield (0, s, s, 0, x, y, w,h,false);
+  static bool print_ecm = XMLSupport::parse_bool(vs_config->getVariable("graphics","print_ecm_status","true"));
+  if (print_ecm) {
+    if (parent->GetImageInformation().ecm>0) {
+      GFXColor4f(0,1,0,.5);
+      strcpy (ecmstatus,"ECM Active");
+      
+    }
+    if (((parent->GetImageInformation().ecm<0))) {
+      GFXColor4f(.6,.6,.6,.5);
+      strcpy (ecmstatus,"ECM Inactive");
+    }
+  
+    if (parent->GetImageInformation().ecm>0) {
+      static float s=0;
+      s+=.125*SIMULATION_ATOM;
+      if (s>1)
+        s=0;
+      DrawShield (0, s, s, 0, x, y, w,h,false);
+    }
   }
   GFXColor4f (1,1,1,1);
   
@@ -937,7 +941,7 @@ void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
 
     }
     colorstring fpstring=colToString(GFXColor(cfullpower[0],cfullpower[1],cfullpower[2],cfullpower[3]));
-    string retval("Damage\n");
+    string retval("Damage Report\n");
     retval+=fpstring.str;
     unsigned int numCargo =parent->numCargo();
     double percent_working = 0.88;
