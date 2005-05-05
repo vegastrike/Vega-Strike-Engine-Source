@@ -182,7 +182,7 @@ bool Unit::Inside (const QVector &target, const float radius, Vector & normal, f
 static float tmpmax (float a, float b) {
   return a>b?a:b;
 }
-bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNormal, QVector & smallpos, Vector & smallNormal) {
+bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNormal, QVector & smallpos, Vector & smallNormal, bool bigasteroid, bool smallasteroid) {
   if (smaller->colTrees==NULL||this->colTrees==NULL)
     return false;
   if (hull<0) return false;
@@ -258,28 +258,30 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
     }
     UnitCollection::UnitIterator i;
     static float rsizelim = XMLSupport::parse_float (vs_config->getVariable ("physics","smallest_subunit_to_collide",".2"));
-    if (bigger->SubUnits.empty()==false&&(bigger->graphicOptions.RecurseIntoSubUnitsOnCollision==true||bigger->isUnit()==ASTEROIDPTR)) {
+    clsptr bigtype=bigasteroid?ASTEROIDPTR:bigger->isUnit();
+    clsptr smalltype=smallasteroid?ASTEROIDPTR:smaller->isUnit();
+    if (bigger->SubUnits.empty()==false&&(bigger->graphicOptions.RecurseIntoSubUnitsOnCollision==true||bigtype==ASTEROIDPTR)) {
       i=bigger->getSubUnits();
       for (Unit * un;(un=i.current())!=NULL;i.advance()) {
-	if ((bigger->isUnit()!=ASTEROIDPTR)&&(un->rSize()/bigger->rSize()<rsizelim)) {
+	if ((bigtype!=ASTEROIDPTR)&&(un->rSize()/bigger->rSize()<rsizelim)) {
 	  break;
 	}else {
 	  //	  printf ("s:%f",un->rSize()/bigger->rSize());
 	}
-	if ((un->InsideCollideTree(smaller,bigpos, bigNormal,smallpos,smallNormal))) {
+	if ((un->InsideCollideTree(smaller,bigpos, bigNormal,smallpos,smallNormal,bigtype==ASTEROIDPTR,smalltype==ASTEROIDPTR))) {
 	  return true;
 	}
       }
     }
-    if (smaller->SubUnits.empty()==false&&(smaller->graphicOptions.RecurseIntoSubUnitsOnCollision==true||smaller->isUnit()==ASTEROIDPTR)) {
+    if (smaller->SubUnits.empty()==false&&(smaller->graphicOptions.RecurseIntoSubUnitsOnCollision==true||smalltype==ASTEROIDPTR)) {
       i=smaller->getSubUnits();
       for (Unit * un;(un=i.current())!=NULL;i.advance()) {
-	if ((smaller->isUnit()!=ASTEROIDPTR)&&(un->rSize()/smaller->rSize()<rsizelim)) {
+	if ((smalltype!=ASTEROIDPTR)&&(un->rSize()/smaller->rSize()<rsizelim)) {
 	  //	  printf ("s:%f",un->rSize()/smaller->rSize());
 	  break;
 
 	}
-	if ((bigger->InsideCollideTree(un,bigpos, bigNormal,smallpos,smallNormal))) {
+	if ((bigger->InsideCollideTree(un,bigpos, bigNormal,smallpos,smallNormal,bigtype==ASTEROIDPTR,smalltype==ASTEROIDPTR))) {
 	  return true;
 	}
       }
@@ -367,7 +369,7 @@ Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, Q
     if (!bigger->SubUnits.empty()) {
       i=bigger->getSubUnits();
       for (Unit * un;(un=i.current())!=NULL;i.advance()) {
-	if ((bigger->isUnit()!=ASTEROIDPTR)&&(un->rSize()/bigger->rSize()<rsizelim)) {
+	if ((bigtype!=ASTEROIDPTR)&&(un->rSize()/bigger->rSize()<rsizelim)) {
 	  break;
 	}else {
 	  //	  printf ("s:%f",un->rSize()/bigger->rSize());
@@ -380,7 +382,7 @@ Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, Q
     if (!smaller->SubUnits.empty()) {
       i=smaller->getSubUnits();
       for (Unit * un;(un=i.current())!=NULL;i.advance()) {
-	if ((smaller->isUnit()!=ASTEROIDPTR)&&(un->rSize()/smaller->rSize()<rsizelim)) {
+	if ((smalltype!=ASTEROIDPTR)&&(un->rSize()/smaller->rSize()<rsizelim)) {
 	  //	  printf ("s:%f",un->rSize()/smaller->rSize());
 	  break;
 
