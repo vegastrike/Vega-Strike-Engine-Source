@@ -5539,7 +5539,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
 string upgrade_name=up->name;
 string upgrade_faction=FactionUtil::GetFactionName(up->faction);
 
-if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Armor_Front_Top_Right")){
+if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Armor_Front_Top_Right")){
   STDUPGRADE(armor.frontrighttop,up->armor.frontrighttop,templ->armor.frontrighttop,0);
   STDUPGRADE(armor.backrighttop,up->armor.backrighttop,templ->armor.backrighttop,0);
   STDUPGRADE(armor.frontlefttop,up->armor.frontlefttop,templ->armor.frontlefttop,0);
@@ -5550,100 +5550,100 @@ if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"A
   STDUPGRADE(armor.backleftbottom,up->armor.backleftbottom,templ->armor.backleftbottom,0);
 }
   float tmp=shield.recharge;
-if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Shield_Recharge")){
+if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Shield_Recharge")){
   STDUPGRADE(shield.recharge,up->shield.recharge,templ->shield.recharge,0);
 }
   bool upgradedrecharge=false;
   if (tmp!=shield.recharge)
     upgradedrecharge=true;
-if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Hull")){
+if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Hull")){
   STDUPGRADE(hull,up->hull,templ->hull,0);
 }
   if (maxhull<hull) {
     if (hull!=0) 
       maxhull=hull;
   }
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Reactor_Recharge")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Reactor_Recharge")){
     STDUPGRADE(recharge,up->recharge,templ->recharge,0);
   }
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Heat_Sink_Rating")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Heat_Sink_Rating")){
     STDUPGRADE(HeatSink,up->HeatSink,templ->HeatSink,0);
   }
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Repair_Droid")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Repair_Droid")){
     STDUPGRADE(image->repair_droid,up->image->repair_droid,templ->image->repair_droid,0);
   }
   static bool unittable=XMLSupport::parse_bool(vs_config->getVariable("physics","UnitTable","false"));
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Hold_Volume")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Hold_Volume")){
     STDUPGRADE(image->CargoVolume,up->image->CargoVolume,templ->image->CargoVolume,0);
   }
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Upgrade_Storage_Volume")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Upgrade_Storage_Volume")){
     STDUPGRADE(image->UpgradeVolume,up->image->UpgradeVolume,templ->image->UpgradeVolume,0);
   }
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Equipment_Space")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Equipment_Space")){
     STDUPGRADE(image->equipment_volume,up->image->equipment_volume,templ->image->equipment_volume,0);
   }
   image->ecm = abs(image->ecm);
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"ECM_Rating")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"ECM_Rating")){
     STDUPGRADE(image->ecm,abs(up->image->ecm),abs(templ->image->ecm),0);
   }
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Primary_Capacitor")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Primary_Capacitor")){
     STDUPGRADE(maxenergy,up->maxenergy,templ->maxenergy,0);
   }
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Warp_Capacitor")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Warp_Capacitor")){
     STDUPGRADE(maxwarpenergy,up->maxwarpenergy,templ->maxwarpenergy,0);
   }
-  // NOT SURE WHAT THIS IS... if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"")){
+  // NOT SURE WHAT THIS IS... if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"")){
     STDUPGRADE(jump.warpDriveRating,up->jump.warpDriveRating,templ->jump.warpDriveRating,0);
   //}
 
 	// Something doesn't quite match up here...
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Maneuver_Yaw")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Maneuver_Yaw")){
     STDUPGRADE(limits.yaw,tlimits_yaw,templ->limits.yaw,0);
   }
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Maneuver_Pitch")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Maneuver_Pitch")){
     STDUPGRADE(limits.pitch,tlimits_pitch,templ->limits.pitch,0);
   }
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Maneuver_Roll")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Maneuver_Roll")){
     STDUPGRADE(limits.roll,tlimits_roll,templ->limits.roll,0);
   }
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Left_Accel")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Left_Accel")){
     STDUPGRADE(limits.lateral,tlimits_lateral,templ->limits.lateral,0);
   }
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Top_Accel")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Top_Accel")){
     STDUPGRADE(limits.vertical,tlimits_vertical,templ->limits.vertical,0);
   }
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Retro_Accel")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Retro_Accel")){
     STDUPGRADE(limits.retro,tlimits_retro,templ->limits.retro,0);
   }
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Forward_Accel")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Forward_Accel")){
     STDUPGRADE(limits.forward,tlimits_forward,templ->limits.forward,0);
   }
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Afterburner_Accel")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Afterburner_Accel")){
     STDUPGRADE(limits.afterburn,tlimits_afterburn,templ->limits.afterburn,0);
   }
   static bool use_template_maxrange= XMLSupport::parse_bool (vs_config->getVariable("physics","use_upgrade_template_maxrange","true"));
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Radar_Range")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Radar_Range")){
     STDUPGRADECLAMP(computer.radar.maxrange,up->computer.radar.maxrange,use_template_maxrange?templ->computer.radar.maxrange:FLT_MAX,0);
   }
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Default_Speed_Governor")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Default_Speed_Governor")){
     STDUPGRADE(computer.max_combat_speed,tmax_speed,templ->computer.max_combat_speed,0);
   }
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Afterburner_Speed_Governor")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Afterburner_Speed_Governor")){
     STDUPGRADE(computer.max_combat_ab_speed,tmax_ab_speed,templ->computer.max_combat_ab_speed,0);
   }
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Yaw_Governor")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Yaw_Governor")){
     STDUPGRADE(computer.max_yaw_right,tmax_yaw_right,templ->computer.max_yaw_right,0);
     STDUPGRADE(computer.max_yaw_left,tmax_yaw_left,templ->computer.max_yaw_left,0);
   }
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Pitch_Governor")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Pitch_Governor")){
     STDUPGRADE(computer.max_pitch_down,tmax_pitch_down,templ->computer.max_pitch_down,0);
     STDUPGRADE(computer.max_pitch_up,tmax_pitch_up,templ->computer.max_pitch_up,0);
   }
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Roll_Speed_Governor")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Roll_Speed_Governor")){
     STDUPGRADE(computer.max_roll_left,tmax_roll_left,templ->computer.max_roll_left,0);
     STDUPGRADE(computer.max_roll_right,tmax_roll_right,templ->computer.max_roll_right,0);
   }
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Fuel_Capacity")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Fuel_Capacity")){
     STDUPGRADE(fuel,up->fuel,templ->fuel,0);
   }
 	//FIXME - do cell lookup later here
@@ -5666,7 +5666,7 @@ if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"H
     }
   }
   bool upgradedshield=false;
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Shield_Front_Top_Right")){  
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Shield_Front_Top_Right")){  
    if (shield.number==up->shield.number) {
     float a,b,c,d;
     float aa,bb,cc,dd;
@@ -5744,10 +5744,10 @@ if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"H
     }    
   }
   
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Radar_Color")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Radar_Color")){
     computer.radar.color=UpgradeBoolval(computer.radar.color,up->computer.radar.color,touchme,downgrade,numave,percentage,force_change_on_nothing);
   }
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"ITTS")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"ITTS")){
     computer.itts=UpgradeBoolval(computer.itts,up->computer.itts,touchme,downgrade,numave,percentage,force_change_on_nothing); 
   }
   ///do the two reversed ones below
@@ -5756,14 +5756,14 @@ if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"H
   double upleak=100-up->shield.leak;
   double templeak=100-(templ!=NULL?templ->shield.leak:0);
   bool ccf = cancompletefully;
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Shield_Leak")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Shield_Leak")){
     STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,100,100,false,shield.leak);
     if (touchme&&myleak<=100&&myleak>=0)shield.leak=100-myleak;
   }
   myleak = 1-computer.radar.maxcone;
   upleak=1-up->computer.radar.maxcone;
   templeak=1-(templ!=NULL?templ->computer.radar.maxcone:-1);
-  if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Max_Cone")){
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Max_Cone")){
     STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,0,0,false,computer.radar.maxcone);
     if (touchme)computer.radar.maxcone=1-myleak;
   }
@@ -5775,7 +5775,7 @@ if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"H
     if (templeak == 1-lc) {
       templeak=2;
     }
-	if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Lock_Cone")){
+	if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Lock_Cone")){
       STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,0,0,false,computer.radar.lockcone);
       if (touchme)computer.radar.lockcone=1-myleak;
 	}
@@ -5788,7 +5788,7 @@ if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"H
     if (templeak==1-tc) {
       templeak=2;
     }
-	if(!csv_cell_null_check||cell_has_recursive_data(upgrade_name,upgrade_faction,"Tracking_Cone")){
+	if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Tracking_Cone")){
       STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,0,0,false,computer.radar.trackingcone);
       if (touchme)computer.radar.trackingcone=1-myleak;    
 	}
