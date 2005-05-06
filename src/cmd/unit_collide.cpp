@@ -262,28 +262,36 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
     clsptr smalltype=smallasteroid?ASTEROIDPTR:smaller->isUnit();
     if (bigger->SubUnits.empty()==false&&(bigger->graphicOptions.RecurseIntoSubUnitsOnCollision==true||bigtype==ASTEROIDPTR)) {
       i=bigger->getSubUnits();
+      float rad=smaller->rSize();
       for (Unit * un;(un=i.current())!=NULL;i.advance()) {
-	if ((bigtype!=ASTEROIDPTR)&&(un->rSize()/bigger->rSize()<rsizelim)) {
+        float subrad=un->rSize();
+	if ((bigtype!=ASTEROIDPTR)&&(subrad/bigger->rSize()<rsizelim)) {
 	  break;
 	}else {
 	  //	  printf ("s:%f",un->rSize()/bigger->rSize());
 	}
-	if ((un->InsideCollideTree(smaller,bigpos, bigNormal,smallpos,smallNormal,bigtype==ASTEROIDPTR,smalltype==ASTEROIDPTR))) {
-	  return true;
-	}
+        if ((un->Position()-smaller->Position()).Magnitude()<=subrad+rad) {
+          if ((un->InsideCollideTree(smaller,bigpos, bigNormal,smallpos,smallNormal,bigtype==ASTEROIDPTR,smalltype==ASTEROIDPTR))) {
+            return true;
+          }
+        }
       }
     }
     if (smaller->SubUnits.empty()==false&&(smaller->graphicOptions.RecurseIntoSubUnitsOnCollision==true||smalltype==ASTEROIDPTR)) {
       i=smaller->getSubUnits();
+      float rad=bigger->rSize();
       for (Unit * un;(un=i.current())!=NULL;i.advance()) {
-	if ((smalltype!=ASTEROIDPTR)&&(un->rSize()/smaller->rSize()<rsizelim)) {
+        float subrad=un->rSize();
+	if ((smalltype!=ASTEROIDPTR)&&(subrad/smaller->rSize()<rsizelim)) {
 	  //	  printf ("s:%f",un->rSize()/smaller->rSize());
 	  break;
 
 	}
-	if ((bigger->InsideCollideTree(un,bigpos, bigNormal,smallpos,smallNormal,bigtype==ASTEROIDPTR,smalltype==ASTEROIDPTR))) {
-	  return true;
-	}
+        if ((un->Position()-bigger->Position()).Magnitude()<=subrad+rad) {
+          if ((bigger->InsideCollideTree(un,bigpos, bigNormal,smallpos,smallNormal,bigtype==ASTEROIDPTR,smalltype==ASTEROIDPTR))) {
+            return true;
+          }
+        }
       }
     }
     //FIXME
