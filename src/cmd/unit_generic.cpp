@@ -2031,6 +2031,8 @@ static QVector AutoSafeEntrancePoint (const QVector start, float rsize,Unit * go
   }
   return def;
 }
+
+float globQueryShell (QVector pos,QVector dir,float rad);
 bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recursive_level) {
 	static bool auto_valid = XMLSupport::parse_bool (vs_config->getVariable ("physics","insystem_jump_or_timeless_auto-pilot","false"));	
 	if(!auto_valid) {
@@ -2121,7 +2123,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
           if ((nedis<trad*autopilot_no_enemies_multiplier||tdis<=trad*autopilot_no_enemies_multiplier)&&un->getRelation(this)<0){
             unsafe =true;
           }
-	  float intersection = un->querySphere (start,end,getAutoRSize (this,un,ignore_friendlies));
+	  float intersection = globQueryShell (start-un->Position(),end-start,getAutoRSize (this,un,ignore_friendlies)+un->rSize());
 	  if (intersection>0) {
             unsafe=true;
 	    end = start+ (end-start)*intersection;
@@ -6384,6 +6386,12 @@ std::string Unit::GetManifest (unsigned int i, Unit * scanningUnit, const Vector
 ///FIXME somehow mangle string
   string mangled = image->cargo[i].content;
   static float scramblingmanifest=XMLSupport::parse_float (vs_config->getVariable ("general","PercentageSpeedChangeToFaultSearch",".5"));
+  bool last=true;
+  for (string::iterator i=mangled.begin();i!=mangled.end();i++) {
+    if (last)
+      (*i)=toupper(*i);
+    last=(*i==' '||*i=='_');
+  }
   if (CourseDeviation (oldspd,GetVelocity())>scramblingmanifest) {
     for (string::iterator i=mangled.begin();i!=mangled.end();i++) {
       (*i)+=(rand()%3-1);

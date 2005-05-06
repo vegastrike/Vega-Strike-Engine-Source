@@ -871,6 +871,7 @@ static void DrawGun (Vector  pos, float w, float h, weapon_info::MOUNT_SIZE sz) 
   
 }
 extern float PercentOperational(Unit*,string,string);
+extern const char * DamagedCategory;
 void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
   float x,y,w,h;
   float th;
@@ -941,7 +942,7 @@ void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
 
     }
     colorstring fpstring=colToString(GFXColor(cfullpower[0],cfullpower[1],cfullpower[2],cfullpower[3]));
-    string retval("Damage Report\n");
+    string retval("#00ff00DAMAGE REPORT\n\n");
     retval+=fpstring.str;
     unsigned int numCargo =parent->numCargo();
     double percent_working = 0.88;
@@ -949,7 +950,8 @@ void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
       
       percent_working = 0.88;// cargo.damage
       Cargo& the_cargo = parent->GetCargo(i);
-      if(the_cargo.GetCategory().find("upgrades/")==0){
+      bool damaged=the_cargo.GetCategory().find(DamagedCategory)==0;
+      if(damaged||(the_cargo.GetCategory().find("upgrades/")==0&&the_cargo.content.find("mult_")!=0&&the_cargo.content.find("add_")!=0)){
         percent_working = PercentOperational(parent,the_cargo.content,the_cargo.category);
 	//	retval+=parent->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (int(percent_working*100))+string ("%)" +the_cargo.GetCategory()+"\n");
         GFXColor final_color ((chdamaged[0]*percent_working)+(cdamaged[0]*(1.0-percent_working)),
@@ -1061,9 +1063,9 @@ void VDU::DrawWeapon (Unit * parent) {
 
   float x,y,w,h;
   const float percent = .6;
-  string buf("#ff0000Guns:#000000");
+  string buf("#00ff00WEAPONS\n#ffffffGuns:#000000");
   int len= buf.length();
-  string mbuf("\n#ff0000Missiles:#000000");
+  string mbuf("\n#ffffffMissiles:#000000");
   int mlen = mbuf.length();
   int count=1;int mcount=1;
   GFXEnable(TEXTURE0);

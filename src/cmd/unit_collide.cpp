@@ -470,16 +470,10 @@ bool Unit::Collide (Unit * target) {
 }
 
 
-
-float globQuerySphere (QVector start, QVector end, QVector pos, float radius) {
-  
-    double a, b,c;
-    QVector st = start-pos;
-    QVector dir = end-start;
-    c = st.Dot (st);
+float globQueryShell (QVector st, QVector dir, float radius) {
     double temp1 = radius;
-    if (st.MagnitudeSquared()<temp1*temp1)
-      return 1.0e-6;
+    double a,b,c;
+    c = st.Dot (st);
     c = c - temp1*temp1;
     b = 2 * (dir.Dot (st));
     a = dir.Dot(dir);
@@ -497,6 +491,14 @@ float globQuerySphere (QVector start, QVector end, QVector pos, float radius) {
 	return c;
     }
     return 0;
+}
+float globQuerySphere (QVector start, QVector end, QVector pos, float radius) {
+  
+    QVector st = start-pos;
+    QVector dir = end-start;
+    if (st.MagnitudeSquared()<radius*radius)
+      return 1.0e-6;
+    return globQueryShell(st,dir,radius);
 }
 
  
@@ -734,7 +736,7 @@ float Unit::querySphere (const QVector &start, const QVector &end, float min_rad
   return querySphereNoRecurse (start,end,min_radius);
 }
 
-
+//does not check inside sphere
 float Unit::querySphereNoRecurse (const QVector & start, const QVector & end, float min_radius) const {
 //	return querySphere(start,a(end-start).Magnitude());
   int i;
@@ -756,8 +758,8 @@ float Unit::querySphereNoRecurse (const QVector & start, const QVector & end, fl
     // (x0 + (x1 - x0) *t) * (x0 + (x1 - x0) *t) = r*r
     c = st.Dot (st);
     double temp1 = (min_radius+meshdata[i]->rSize());
-    if (st.MagnitudeSquared()<temp1*temp1)
-      return 1.0e-6;
+    // if (st.MagnitudeSquared()<temp1*temp1) //UNCOMMENT if you want inside sphere to count...otherwise...
+    //  return 1.0e-6;
 	if( min_radius!=-FLT_MAX)
 		c = c - temp1*temp1;
 	else
