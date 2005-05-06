@@ -1063,7 +1063,7 @@ void VDU::DrawWeapon (Unit * parent) {
 
   float x,y,w,h;
   const float percent = .6;
-  string buf("#00ff00WEAPONS\n#ffffffGuns:#000000");
+  string buf("#00ff00WEAPONS\n\n#ffffffGuns:#000000");
   int len= buf.length();
   string mbuf("\n#ffffffMissiles:#000000");
   int mlen = mbuf.length();

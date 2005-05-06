@@ -337,6 +337,10 @@ bool Beam::Collide (Unit * target) {
 	return false;
       }
   }
+  static bool collidejump = XMLSupport::parse_bool(vs_config->getVariable("physics","JumpWeaponCollision","false"));
+  if (type==PLANETPTR&&(!collidejump)&&!target->GetDestinations().empty()) {
+    return false;
+  }
   
 
   Unit * colidee;
