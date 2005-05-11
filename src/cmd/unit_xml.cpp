@@ -453,7 +453,13 @@ std::vector <Mesh *> MakeMesh(unsigned int mysize) {
 
 void addShieldMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
 {
+  static bool forceit = XMLSupport::parse_bool ( vs_config->getVariable("graphics","forceOneOneShieldBlend","true") );
   xml->shieldmesh = Mesh::LoadMesh(filename,Vector(scale,scale,scale),faction,fg);
+  if (forceit) {
+      xml->shieldmesh->SetBlendMode(ONE,ONE,true);
+      xml->shieldmesh->setEnvMap(false,true);
+      xml->shieldmesh->setLighting(true,true);
+  };
 }
 void addRapidMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
 {

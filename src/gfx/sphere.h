@@ -3,6 +3,7 @@
 
 #include "mesh.h"
 #include "quaternion.h"
+#include <assert.h>
 #ifndef M_PI
 #define M_PI 3.1415926536F
 #endif
@@ -12,7 +13,7 @@ class SphereMesh : public Mesh {
  protected:
   virtual float GetT ( float rho, float rho_min, float rho_max);
   virtual float GetS (float theta,  float theta_min, float theta_max);
-  virtual Mesh * AllocNewMeshesEachInSizeofMeshSpace (int num) {return new SphereMesh[num];}
+  virtual Mesh * AllocNewMeshesEachInSizeofMeshSpace (int num) { assert(sizeof(Mesh)==sizeof(*this)); return new SphereMesh[num];}
   void InitSphere (float radius, int stacks, int slices, const char *texture, const char *alpha=NULL, bool insideout=false, const BLENDFUNC a=ONE, const BLENDFUNC b=ZERO, bool envMap=false, float rho_min=0.0, float rho_max=M_PI, float theta_min=0.0, float theta_max=2*M_PI, FILTER mipmap=MIPMAP, bool reverse_normals=false,bool subclass=false);
  public:
   SphereMesh () :Mesh(){setConvex(true);}
@@ -31,7 +32,7 @@ class CityLights : public SphereMesh {
  protected:
   virtual float GetT ( float rho, float rho_min, float rho_max);
   virtual float GetS (float theta,  float theta_min, float theta_max);
-  virtual Mesh * AllocNewMeshesEachInSizeofMeshSpace (int num ) {return new CityLights[num];}
+  virtual Mesh * AllocNewMeshesEachInSizeofMeshSpace (int num ) { assert(sizeof(Mesh)==sizeof(*this)); return new CityLights[num];}
  public:
   virtual void SelectCullFace (int whichdrawqueue);
   virtual void RestoreCullFace (int whichdrawqueue);

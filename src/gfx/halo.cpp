@@ -36,7 +36,7 @@ Halo::~Halo () {
     halodrawqueue[decal]=NULL;
   }
 }
-float kkkk=3;
+static float kkkk=3;
 void Halo::Draw (const Transformation &quat, const Matrix &m, float alpha) {
   Vector p,q,r;
   QVector pos;

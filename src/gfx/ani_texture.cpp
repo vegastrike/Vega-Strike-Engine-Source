@@ -177,20 +177,17 @@ void AnimatedTexture::Load(VSFileSystem::VSFile & f, int stage, enum FILTER ismi
   cumtime=0;
   Reset();
 
+  bool loadall=!(g_game.use_animations==0||(g_game.use_animations!=0&&g_game.use_textures==0)); //Changed by Klauss
+  if (!loadall) { timeperframe *= numframes; numframes=1; }; //Added by Klauss
+
   active=0;
   Decal = new Texture * [numframes];
   char temp[512]="white.bmp";
   char file[512]="white.bmp";
   char alp[512]="white.bmp";
-  int i=0;
-  bool loadall=true;
-  if (g_game.use_animations==0||(g_game.use_animations!=0&&g_game.use_textures==0)) {
-    
-    loadall=false;
-  }
+  int i=0,j=0;
 
-
-  for (;i<numframes;i++) {
+  for (;i<numframes;i++) if (loadall||(i==numframes/2)) { //if() added by Klauss
     int numgets=0;
     while (numgets<=0&&!f.Eof()) {
 		if (f.ReadLine(temp,511)==Ok) {
@@ -203,13 +200,13 @@ void AnimatedTexture::Load(VSFileSystem::VSFile & f, int stage, enum FILTER ismi
     }
     if (loadall||i==numframes/2) {
       if (numgets==2) {
-	Decal[i]=new Texture (file,alp,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_animations)?GFXTRUE:GFXFALSE,65536,detailtex?GFXTRUE:GFXFALSE);
+	Decal[j++]=new Texture (file,alp,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_animations)?GFXTRUE:GFXFALSE,65536,detailtex?GFXTRUE:GFXFALSE); //j++ was i, changed by Klauss
       }else {
-	Decal[i]=new Texture (file,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,(g_game.use_animations)?GFXTRUE:GFXFALSE,65536,detailtex?GFXTRUE:GFXFALSE);
+	Decal[j++]=new Texture (file,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,(g_game.use_animations)?GFXTRUE:GFXFALSE,65536,detailtex?GFXTRUE:GFXFALSE); //j++ was i, changed by Klauss
       }    
     }
   }
-  if (!loadall) {
+  /*if (!loadall) {
     Texture * dec = Decal[numframes/2];
     timeperframe*=numframes;
     numframes=1;
@@ -218,7 +215,7 @@ void AnimatedTexture::Load(VSFileSystem::VSFile & f, int stage, enum FILTER ismi
     }
     Decal = new Texture * [1];
     Decal[0]=dec;
-  }
+  }*/ //Commented out by Klauss - superseded by new for(;;)
   original = NULL;
   loadSuccess=true;
 }

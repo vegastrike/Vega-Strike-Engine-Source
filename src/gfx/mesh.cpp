@@ -50,6 +50,7 @@
 #endif
 #include <float.h>
 #include <algorithm>
+
 using std::list;
 Hashtable<std::string, Mesh, 127> Mesh::meshHashTable;
 Hashtable<std::string, std::vector<int>, 127> Mesh::animationSequences;
@@ -266,7 +267,7 @@ float Mesh::getCurrentFrame() const {
 float Mesh::getFramesPerSecond() const {
 	return orig?orig->framespersecond:framespersecond;
 }
-Mesh * Mesh::getLOD (float lod) {
+Mesh * Mesh::getLOD (float lod, bool bBypassDamping) {
   if (!orig)
     return this;
   Mesh * retval =&orig[0];
@@ -283,8 +284,16 @@ Mesh * Mesh::getLOD (float lod) {
 	  setCurrentFrame(getCurrentFrame()+adv);
 	  return &orig[(*animFrames)[which%animFrames->size()]%getNumLOD()];
   }else {
+	  int maxlodsize=retval?retval->lodsize:0;
 	  for (int i=1;i<numlods;i++) {
-		  if (lod<orig[i].lodsize) {
+		  int lodoffs=0;
+		  if (!bBypassDamping) {
+		      if (lod<orig[i].lodsize) 
+			  lodoffs = (i<numlods-1)?(orig[i+1].lodsize-orig[i].lodsize)/10:0; else
+			  lodoffs = (i>0)?(orig[i-1].lodsize-orig[i].lodsize)/10:0;
+		  };
+		  if ((lod<(orig[i].lodsize+lodoffs))&&(lod>maxlodsize)) {
+		      maxlodsize = orig[i].lodsize;
 			  retval = &orig[i];
 		  } else {
 			  break;
@@ -296,7 +305,7 @@ Mesh * Mesh::getLOD (float lod) {
 
 
 
-void Mesh::SetBlendMode (BLENDFUNC src, BLENDFUNC dst) {
+void Mesh::SetBlendMode (BLENDFUNC src, BLENDFUNC dst, bool lodcascade) {
   blendSrc = src;
   blendDst = dst;
   draw_sequence=0;
@@ -309,6 +318,11 @@ void Mesh::SetBlendMode (BLENDFUNC src, BLENDFUNC dst) {
     orig->draw_sequence = draw_sequence;
     orig->blendSrc = src;
     orig->blendDst = dst;
+    if (lodcascade) for (int i=1; i<numlods; i++) {
+	orig[i].draw_sequence = draw_sequence;
+	orig[i].blendSrc = src;
+	orig[i].blendDst = dst;
+    };
   }
 }
 enum EX_EXCLUSION {EX_X, EX_Y, EX_Z};

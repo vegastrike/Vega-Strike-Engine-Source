@@ -204,25 +204,33 @@ static void setup_sdl_video_mode()
 
     bpp = gl_options.color_depth;
     
+    int rs,gs,bs,zs; rs=gs=bs=(bpp==16)?5:8;
+    string rgbfmt = vs_config->getVariable("graphics","rgb_pixel_format",((bpp==16)?"555":"888"));
+    zs = XMLSupport::parse_int( vs_config->getVariable("graphics","z_pixel_format","24") );
+    if ((rgbfmt.length()==3)&&isdigit(rgbfmt[0])&&isdigit(rgbfmt[1])&&isdigit(rgbfmt[2])) {
+	rs = rgbfmt[0]-'0';
+	gs = rgbfmt[1]-'0';
+	bs = rgbfmt[2]-'0';
+    };
     int otherbpp;
     int otherattributes;
     if (bpp==16) {
       otherattributes=8;
       otherbpp=32;
-      SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 5 );
-      SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 5 );
-      SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 5 );
-      SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 24 );
+      SDL_GL_SetAttribute( SDL_GL_RED_SIZE, rs );
+      SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, gs );
+      SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, bs );
+      SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, zs );
       SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
     }else {
       otherattributes=5;
       otherbpp=16;
-      SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
-      SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
-      SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
-      SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 24 );
+      SDL_GL_SetAttribute( SDL_GL_RED_SIZE, rs );
+      SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, gs );
+      SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, bs );
+      SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, zs );
       SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );      
-    }
+    };
     width = g_game.x_resolution;
     height =g_game.y_resolution  ;
 

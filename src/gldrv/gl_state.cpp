@@ -293,6 +293,12 @@ void GFXColorMaterial (int LIGHTTARG) {
 
 }
 
+static DEPTHFUNC cur_depth_func = LESS;
+
+enum DEPTHFUNC GFXDepthFunc()
+{
+    return cur_depth_func;
+}
 
 void GFXDepthFunc(enum DEPTHFUNC dfunc)
 {

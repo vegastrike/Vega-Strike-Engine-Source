@@ -341,7 +341,6 @@ void Mesh::ProcessZFarMeshes () {
   GFXEnable(CULLFACE);
   GFXDisable (DEPTHTEST);
   GFXDisable (DEPTHWRITE);
-  ///sort meshes  
   //std::sort<OrigMeshVector::iterator,Meshvs_closer>(undrawn_meshes[NUM_ZBUF_SEQ].begin(),undrawn_meshes[NUM_ZBUF_SEQ].end(),Meshvs_closer());
   for (int k=0;k<NUM_PASSES;++k) {
 	  std::sort(undrawn_meshes[NUM_ZBUF_SEQ][k].begin(),undrawn_meshes[NUM_ZBUF_SEQ][k].end(),Meshvs_closer());
@@ -352,6 +351,7 @@ void Mesh::ProcessZFarMeshes () {
 	  }
 	  undrawn_meshes[NUM_ZBUF_SEQ][k].clear();	  
   }
+
   GFXFogMode(FOG_OFF);
   Animation::ProcessFarDrawQueue(-FLT_MAX);
   _Universe->AccessCamera()->UpdateGFX (GFXTRUE, GFXFALSE);
@@ -570,11 +570,13 @@ void SetupSpecMapSecondPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc,
                                 (envMap&&GFXMultiTexAvailable())?GFXColor (1,1,1,1):GFXColor(0,0,0,0));
     GFXBlendMode (ONE,ONE);
     decal->MakeActive();
-    float a,b;
-    GFXGetPolygonOffset(&a,&b);
-    GFXPolygonOffset (a, b-1-polygon_offset);
+    //float a,b;
+    //GFXGetPolygonOffset(&a,&b);
+    //GFXPolygonOffset (a, b-1-polygon_offset); //Not needed, since we use GL_EQUAL and appeal to invariance
+    GFXDepthFunc(EQUAL); //By Klauss - this, with invariance, assures correct rendering (and avoids z-buffer artifacts at low res)
     GFXDisable(DEPTHWRITE);
     if (envMap){
+      GFXEnable(TEXTURE0);
       GFXActiveTexture(1);
       GFXTextureEnv(1,GFXMODULATETEXTURE); 
       GFXEnable(TEXTURE1);
@@ -630,9 +632,10 @@ void RestoreDamageMapState(bool write_to_depthmap, float polygonoffset) {
 	RestoreGlowMapState(write_to_depthmap,polygonoffset,DAMAGE_PASS);
 }
 void RestoreSpecMapState(bool envMap, bool write_to_depthmap, float polygonoffset) { 
-  float a,b;
-    GFXGetPolygonOffset(&a,&b);
-    GFXPolygonOffset (a, b+1+polygonoffset);
+    //float a,b;
+    //GFXGetPolygonOffset(&a,&b);
+    //GFXPolygonOffset (a, b+1+polygonoffset); //Not needed anymore, since InitSpecMapSecondPass() no longer messes with polygon offsets
+    GFXDepthFunc(LESS); //By Klauss - restore original depth function
     if (envMap) {
       GFXActiveTexture(1);
       GFXTextureEnv(1,GFXADDTEXTURE); //restore modulate
@@ -646,18 +649,26 @@ void RestoreSpecMapState(bool envMap, bool write_to_depthmap, float polygonoffse
 	GFXPopBlendMode(); 	
 }
 void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
+	if (whichpass==1) return; else if (whichpass==-1) whichpass=1;
+
   //  assert(draw_queue->size());
 	if (whichpass>=(int)Decal.size()) {
-		VSFileSystem::vs_fprintf (stderr,"Fatal error: drawing ship that has a nonexistant tex");
+		static bool thiserrdone=false; //Avoid filling up stderr.txt with this thing (it would be output at least once per frame)
+		if (!thiserrdone) VSFileSystem::vs_fprintf (stderr,"Fatal error: drawing ship that has a nonexistant tex");
+		thiserrdone=true;
 		return;
 	}
 	if (Decal[whichpass]==NULL) {
-		VSFileSystem::vs_fprintf (stderr,"Less Fatal error: drawing ship that has a nonexistant tex");
+		static bool thiserrdone=false; //Avoid filling up stderr.txt with this thing (it would be output at least once per frame)
+		if (!thiserrdone) VSFileSystem::vs_fprintf (stderr,"Less Fatal error: drawing ship that has a nonexistant tex");
+		thiserrdone=true;
 		return;
 	}
 
   if (draw_queue->empty()) {
-    VSFileSystem::vs_fprintf (stderr,"cloaking queues issue! Report to hellcatv@hotmail.com\nn%d\n%s",whichdrawqueue,hash_name.c_str());
+    static bool thiserrdone=false; //Avoid filling up stderr.txt with this thing (it would be output at least once per frame)
+    if (!thiserrdone) VSFileSystem::vs_fprintf (stderr,"cloaking queues issue! Report to hellcatv@hotmail.com\nn%d\n%s",whichdrawqueue,hash_name.c_str());
+    thiserrdone=true;
     return;
   }
   bool damagepassabort=false;
@@ -737,6 +748,12 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
   cgGLSetOptimalOptions(cloak_cg->vertexProfile);
 #endif
 
+  const GFXMaterial &mat=GFXGetMaterial(myMatNum);
+  static bool wantsplitpass1 = XMLSupport::parse_bool( vs_config->getVariable("graphics","specmap_with_reflection","false") );
+  bool splitpass1 = wantsplitpass1&&getEnvMap()&&((mat.sa!=0)&&((mat.sr!=0)||(mat.sg!=0)||(mat.sb!=0)));
+
+redraw_withspecmap:
+  last_pass = whichpass+1>=Decal.size(); //Again, for the specmap subpass
   vlist->BeginDrawState();	
 
   switch (whichpass) {
@@ -744,8 +761,7 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
 	  SetupSpecMapFirstPass (Decal,myMatNum,getEnvMap(),polygon_offset,detailTexture,detailPlanes);
 	  break;
   case 1:
-	  
-	  SetupSpecMapSecondPass(Decal[whichpass],myMatNum,blendSrc,getEnvMap(), GFXColor(1,1,1,1),polygon_offset);
+	  SetupSpecMapSecondPass(Decal[whichpass],myMatNum,blendSrc,(splitpass1?false:getEnvMap()), GFXColor(1,1,1,1),polygon_offset);
 	  break;
   case 3:
 	  SetupGlowMapFourthPass (Decal[whichpass],myMatNum,ONE,GFXColor(1,1,1,1),polygon_offset);
@@ -810,9 +826,15 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
 	switch(whichpass) {
 	case 0:
 		RestoreFirstPassState(detailTexture,detailPlanes);
+		if ((Decal.size()>1)&&(Decal[1])) {
+		    assert(!last_pass);
+		    whichpass = 1;
+		    goto redraw_withspecmap;
+		};
 		break;
 	case 1:
-		RestoreSpecMapState(getEnvMap(),write_to_depthmap,polygon_offset);
+		RestoreSpecMapState((splitpass1?false:getEnvMap()),write_to_depthmap,polygon_offset);
+		if (splitpass1) { splitpass1=false; goto redraw_withspecmap; };
 		break;
 	case 3:
 		RestoreGlowMapState(write_to_depthmap,polygon_offset);

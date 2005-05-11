@@ -129,8 +129,8 @@ const EnumMap::Pair MeshXML::attribute_names[] = {
 
 
 
-const EnumMap MeshXML::element_map(MeshXML::element_names, 24);
-const EnumMap MeshXML::attribute_map(MeshXML::attribute_names, 38);
+const EnumMap MeshXML::element_map(MeshXML::element_names, sizeof(MeshXML::element_names)/sizeof(MeshXML::element_names[0]));
+const EnumMap MeshXML::attribute_map(MeshXML::attribute_names, sizeof(MeshXML::attribute_names)/sizeof(MeshXML::attribute_names[0]));
 
 
 
@@ -477,7 +477,7 @@ void Mesh::beginElement(MeshXML * xml, const string &name, const AttributeList &
               if (!ind.empty())
                   texindex=XMLSupport::parse_int(ind);
 			  static bool per_pixel_lighting = XMLSupport::parse_bool (vs_config->getVariable ("graphics","per_pixel_lighting","true"));
-			  if (texindex==0||per_pixel_lighting) {
+			  if ((texindex==0)||per_pixel_lighting) {
               while (xml->decals.size()<=texindex)
                   xml->decals.push_back(MeshXML::ZeTexture());
               switch (whichtype) {
@@ -493,8 +493,8 @@ void Mesh::beginElement(MeshXML * xml, const string &name, const AttributeList &
 			  }
               if (texindex==0) {
                   texture_found = true;                  
-              }
-          }
+              };
+          };
         }
         break;
       }

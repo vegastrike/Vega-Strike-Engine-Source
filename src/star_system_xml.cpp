@@ -73,6 +73,11 @@ namespace StarXML {
     EMGREEN,
     EMBLUE,
     EMALPHA,
+    SRED,
+    SGREEN,
+    SBLUE,
+    SALPHA,
+	SPOWER,
     BACKGROUND,
     STARS,
     STARSPREAD,
@@ -130,7 +135,7 @@ namespace StarXML {
 	SERIAL
   };
 
-  const EnumMap::Pair element_names[23] = {
+  const EnumMap::Pair element_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("Planet", PLANET),
     EnumMap::Pair ("System", SYSTEM),
@@ -155,7 +160,7 @@ namespace StarXML {
     EnumMap::Pair ("Fog",FOG),
     EnumMap::Pair ("FogElement",FOGELEMENT)		
   };
-  const EnumMap::Pair attribute_names[60] = {
+  const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("background", BACKGROUND), 
     EnumMap::Pair ("stars", STARS),
@@ -195,6 +200,11 @@ namespace StarXML {
     EnumMap::Pair ("Green", EMGREEN),
     EnumMap::Pair ("Blue", EMBLUE),
     EnumMap::Pair ("Alfa", EMALPHA),
+    EnumMap::Pair ("SRed", SRED),
+    EnumMap::Pair ("SGreen", SGREEN),
+    EnumMap::Pair ("SBlue", SBLUE),
+    EnumMap::Pair ("SAlfa", SALPHA),
+    EnumMap::Pair ("SPower", SPOWER),
     EnumMap::Pair ("ReflectNoLight",REFLECTNOLIGHT),
     EnumMap::Pair ("faction", FACTION),
     EnumMap::Pair ("Light", LIGHT),
@@ -219,8 +229,8 @@ namespace StarXML {
     
   };
 
-  const EnumMap element_map(element_names, 23);
-  const EnumMap attribute_map(attribute_names, 60);
+  const EnumMap element_map(element_names, sizeof(element_names)/sizeof(element_names[0])); //By Klauss - more flexible this way
+  const EnumMap attribute_map(attribute_names, sizeof(attribute_names)/sizeof(attribute_names[0])); //By Klauss - more flexible this way
 }
 
 using XMLSupport::EnumMap;
@@ -922,6 +932,33 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	break;
       case EMALPHA:
 	ourmat.ea = parse_float((*iter).value);
+	break;
+      case DIRED:
+	ourmat.dr = parse_float((*iter).value);
+	break;
+      case DIGREEN:
+	ourmat.dg = parse_float((*iter).value);
+	break;
+      case DIBLUE:
+	ourmat.db = parse_float((*iter).value);
+	break;
+      case DIALPHA:
+	ourmat.da = parse_float((*iter).value);
+	break;
+      case SRED:
+	ourmat.sr = parse_float((*iter).value);
+	break;
+      case SGREEN:
+	ourmat.sg = parse_float((*iter).value);
+	break;
+      case SBLUE:
+	ourmat.sb = parse_float((*iter).value);
+	break;
+      case SALPHA:
+	ourmat.sa = parse_float((*iter).value);
+	break;
+      case SPOWER:
+	ourmat.power = parse_float((*iter).value);
 	break;
       case REFLECTNOLIGHT:
 	ourmat.sr=ourmat.sg=ourmat.sb=ourmat.dr=ourmat.dg=ourmat.db=

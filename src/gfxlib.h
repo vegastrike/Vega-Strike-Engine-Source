@@ -283,6 +283,12 @@ void /*GFXDRVAPI*/ GFXActiveTexture (const int stage);
 ///Selects which texture coordinates should go with which texture in multitex
 void /*GFXDRVAPI*/ GFXSelectTexcoordSet(const int stage, const int texset);
 
+///Returns the current depth function
+enum DEPTHFUNC /*GFXDRVAPI*/ GFXDepthFunc();
+
+///Sets up depth compare function
+void /*GFXDRVAPI*/ GFXDepthFunc (const enum DEPTHFUNC);
+
 ///Turns on alpha testing mode (or turns if off if DEPTHFUNC is set to ALWAYS
 void /*GFXDRVALP*/ GFXAlphaTest (const enum DEPTHFUNC,const float ref);
 enum GFXTEXTUREWRAPMODES{

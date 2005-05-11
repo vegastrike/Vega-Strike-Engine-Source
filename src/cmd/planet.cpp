@@ -217,6 +217,15 @@ void GamePlanet::AddAtmosphere(const std::string & texture, float radius, BLENDF
   meshdata.pop_back();
   static int stacks=XMLSupport::parse_int(vs_config->getVariable ("graphics","planet_detail","24"));
   meshdata.push_back(new SphereMesh(radius, stacks, stacks, texture.c_str(), NULL,false,blendSrc,blendDst));  
+  if (meshdata.back()) {
+      //By klauss - this needs to be done for most atmospheres
+      GFXMaterial a = {0,0,0,0,
+                       1,1,1,1,
+                       0,0,0,0,
+                       0,0,0,0,
+                       0};
+      meshdata.back()->SetMaterial(a);
+  };
   meshdata.push_back(shield);
 }
 void GamePlanet::AddRing(const std::string &texture,float iradius,float oradius, const QVector &R,const QVector &S,  int slices, int wrapx, int wrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst) {
@@ -303,13 +312,15 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
 	  meshdata.push_back(new SphereMesh(radius, stacks, stacks, textname, NULL,inside_out,blendSrc,blendDst));
           
 	  meshdata.back()->setEnvMap(GFXFALSE);
-          if (meshdata.back()->numTextures()>1) {
+          /*if (meshdata.back()->numTextures()>1) {
              if (meshdata.back()->texture(1)==0) {                
                 meshdata.back()->SetMaterial (ourmat);
              }
           }else {
              meshdata.back()->SetMaterial (ourmat);
-          }             
+          }*/ //By Klauss (Why?)
+
+	  meshdata.back()->SetMaterial(ourmat);
 	  meshdata.push_back(NULL);
   }
 

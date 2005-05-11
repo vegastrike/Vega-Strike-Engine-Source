@@ -182,7 +182,7 @@ protected:
   ///The enabled light effects on this mesh
   vector <MeshFX> LocalFX;
   ///Returing the mesh relevant to "size" pixels LOD of this mesh
-  Mesh *getLOD (float lod);
+  Mesh *getLOD (float lod, bool bBypassDamping=false);
 
 public:
   Mesh();
@@ -219,7 +219,7 @@ public:
   void EnableSpecialFX();
   unsigned int numTextures() {return Decal.size();}
   Texture * texture (int i) {return Decal[i];}
-  void SetBlendMode (BLENDFUNC src, BLENDFUNC dst);
+  void SetBlendMode (BLENDFUNC src, BLENDFUNC dst, bool lodcascade=false);
   ///Gets all polygons in this mesh for BSP computation
   void GetPolys(vector <bsp_polygon> &);
   ///Sets the material of this mesh to mat (affects original as well)
@@ -248,9 +248,9 @@ public:
   void forceCullFace (GFXBOOL newValue) {if (newValue) envMapAndLit = (envMapAndLit|0x4); if (!newValue) envMapAndLit = (envMapAndLit|0x8);}
   GFXBOOL getCullFaceForcedOn() {return ((envMapAndLit&0x4)!=0);}
   GFXBOOL getCullFaceForcedOff() {return ((envMapAndLit&0x8)!=0);}
-  void setEnvMap(GFXBOOL newValue) {envMapAndLit = (newValue?(envMapAndLit|0x1):(envMapAndLit&(~0x1)));}
+  void setEnvMap(GFXBOOL newValue, bool lodcascade=false) {envMapAndLit = (newValue?(envMapAndLit|0x1):(envMapAndLit&(~0x1))); if (lodcascade&&orig) for (int i=0; i<numlods; i++) orig[i].setEnvMap(newValue); }
   GFXBOOL getEnvMap() {return ((envMapAndLit&0x1)!=0);}
-  void setLighting(GFXBOOL newValue){envMapAndLit = (newValue?(envMapAndLit|0x2):(envMapAndLit&(~0x2)));}
+  void setLighting(GFXBOOL newValue, bool lodcascade=false){envMapAndLit = (newValue?(envMapAndLit|0x2):(envMapAndLit&(~0x2))); if (lodcascade&&orig) for (int i=0; i<numlods; i++) orig[i].setLighting(newValue); }
   GFXBOOL getLighting() {return ((envMapAndLit&0x2)!=0);}
   ///Returns bounding box values
   Vector corner_min() { return mn; }  Vector corner_max() { return mx; }

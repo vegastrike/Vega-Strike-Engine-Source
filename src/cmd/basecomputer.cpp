@@ -2311,17 +2311,13 @@ void BaseComputer::loadMasterList(Unit *un, const vector<string>& filtervec, con
   	    bool filter = filtervec.empty();
 	    bool invfilter = true;
 		int vecindex;
-        for (vecindex=0;vecindex<filtervec.size();vecindex++) {
-			if (un->GetCargo(i).category.find(filtervec[vecindex])!=string::npos) {
+        for (vecindex=0;!filter&&(vecindex<filtervec.size());vecindex++) {
+			if (un->GetCargo(i).category.find(filtervec[vecindex])!=string::npos)
 				filter = true;
-				break;
-			}
 		}
-        for (vecindex=0;vecindex<invfiltervec.size();vecindex++) {
-			if (un->GetCargo(i).category.find(invfiltervec[vecindex])!=string::npos) {
+        for (vecindex=0;invfilter&&(vecindex<invfiltervec.size());vecindex++) {
+			if (un->GetCargo(i).category.find(invfiltervec[vecindex])!=string::npos)
 				invfilter = false;
-				break;
-			}
 		}
 		if (filter&&invfilter) {
             if ((!removezero)||un->GetCargo(i).quantity>0) {

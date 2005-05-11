@@ -24,19 +24,13 @@ void Mesh::LoadBinary (const char * filename, int faction) {
   char *TexName=NULL;
   char * TexNameA=NULL;
   int NumPoints;
-  float *x;
-  float *y;
-  float *z;
-  float *i;
-  float *j;
-  float *k;
+  float *vb;
   int NumTris;
   int *Tris;
   int NumQuads;
   int *Quads;
   GFXBOOL AlphaMap = GFXFALSE;
 
-	int jj;
 	VSFile fp;
 	VSError err = fp.OpenReadOnly( filename, MeshFile);
 	if (err>Ok)
@@ -68,15 +62,27 @@ void Mesh::LoadBinary (const char * filename, int faction) {
 		objtex = GFXFALSE;
 	}
 	NumPoints = readi(fp);
-	x = new float [NumPoints];
-	y = new float [NumPoints];
-	z = new float [NumPoints];
-	i = new float [NumPoints];
-	j = new float [NumPoints];
-	k = new float [NumPoints]; 
-	int ii;
+	vb = new float [NumPoints*6];
+	int ii,jj,kk;
 	
-	for (ii=0; ii<NumPoints; ii++)
+#define x(i) vb[i*6  ]
+#define y(i) vb[i*6+1]
+#define z(i) vb[i*6+2]
+#define i(i) vb[i*6+3]
+#define j(i) vb[i*6+4]
+#define k(i) vb[i*6+5]
+
+	readf(fp,vb,NumPoints*6);
+	for (ii=jj=0; jj<NumPoints; ii+=6,jj++) {
+		// x,y,z,i,j,k
+		if (vb[ii  ]>mx.i) mx.i = vb[ii  ]; if (vb[ii  ]<mn.i) mn.i=vb[ii  ];
+		if (vb[ii+1]>mx.j) mx.j = vb[ii+1]; if (vb[ii+1]<mn.j) mn.j=vb[ii+1];
+		if (vb[ii+2]>mx.k) mx.k = vb[ii+2]; if (vb[ii+2]<mn.k) mn.k=vb[ii+2];
+		vb[ii+3]=-vb[ii+3];
+		vb[ii+4]=-vb[ii+4];
+		vb[ii+5]=-vb[ii+5];
+	};
+	/*for (ii=0; ii<NumPoints; ii++)
 	{
 	  
 		x[ii] = readf (fp);
@@ -100,20 +106,22 @@ void Mesh::LoadBinary (const char * filename, int faction) {
 		j[ii] = -readf (fp);
 		k[ii] = -readf (fp);
 		
-	}
+	}*/
 	//below, the square fo teh radial size, because sqrtf will be useless l8r
 	radialSize = .5*(mx-mn).Magnitude();	
 	NumTris = readi (fp);
 	Tris = new int [NumTris*3];
 
-	for (ii=0; ii< NumTris;ii++)
+	readi(fp,Tris,NumTris*3);
+	/*for (ii=0; ii< NumTris;ii++)
 		for (int jj=0; jj<3; jj++)
-			Tris[ii*3+jj] = readi(fp);
+			Tris[ii*3+jj] = readi(fp);*/
 	NumQuads = readi (fp);
 	Quads = new int [NumQuads*4];
-	for (ii=0; ii< NumQuads;ii++)
+	readi(fp,Quads,NumQuads*4);
+	/*for (ii=0; ii< NumQuads;ii++)
 		for (int jj=0; jj<4; jj++)
-			Quads[ii*4+jj] = readi(fp);
+			Quads[ii*4+jj] = readi(fp);*/
 
 	
 	//	int numtrivertex = NumTris*3;
@@ -125,72 +133,85 @@ void Mesh::LoadBinary (const char * filename, int faction) {
 	vertexlist = new GFXVertex [numvertex];
 
 	jj=0;
-	for (ii=0; ii<NumTris; ii++)
+	for (ii=kk=0; ii<NumTris; ii++,kk+=3)
 	{
-		vertexlist[jj].x = x[Tris[ii*3+0]];
-		vertexlist[jj].y = y[Tris[ii*3+0]];
-		vertexlist[jj].z = z[Tris[ii*3+0]];
-		vertexlist[jj].i = i[Tris[ii*3+0]];
-		vertexlist[jj].j = j[Tris[ii*3+0]];
-		vertexlist[jj].k = k[Tris[ii*3+0]];
+		vertexlist[jj].x = x(Tris[kk+0]);
+		vertexlist[jj].y = y(Tris[kk+0]);
+		vertexlist[jj].z = z(Tris[kk+0]);
+		vertexlist[jj].i = i(Tris[kk+0]);
+		vertexlist[jj].j = j(Tris[kk+0]);
+		vertexlist[jj].k = k(Tris[kk+0]);
 		jj++;
-		vertexlist[jj].x = x[Tris[ii*3+1]];
-		vertexlist[jj].y = y[Tris[ii*3+1]];
-		vertexlist[jj].z = z[Tris[ii*3+1]];
-		vertexlist[jj].i = i[Tris[ii*3+1]];
-		vertexlist[jj].j = j[Tris[ii*3+1]];
-		vertexlist[jj].k = k[Tris[ii*3+1]];
+		vertexlist[jj].x = x(Tris[kk+1]);
+		vertexlist[jj].y = y(Tris[kk+1]);
+		vertexlist[jj].z = z(Tris[kk+1]);
+		vertexlist[jj].i = i(Tris[kk+1]);
+		vertexlist[jj].j = j(Tris[kk+1]);
+		vertexlist[jj].k = k(Tris[kk+1]);
 		jj++;
-		vertexlist[jj].x = x[Tris[ii*3+2]];
-		vertexlist[jj].y = y[Tris[ii*3+2]];
-		vertexlist[jj].z = z[Tris[ii*3+2]];
-		vertexlist[jj].i = i[Tris[ii*3+2]];
-		vertexlist[jj].j = j[Tris[ii*3+2]];
-		vertexlist[jj].k = k[Tris[ii*3+2]];
+		vertexlist[jj].x = x(Tris[kk+2]);
+		vertexlist[jj].y = y(Tris[kk+2]);
+		vertexlist[jj].z = z(Tris[kk+2]);
+		vertexlist[jj].i = i(Tris[kk+2]);
+		vertexlist[jj].j = j(Tris[kk+2]);
+		vertexlist[jj].k = k(Tris[kk+2]);
 		jj++;
 	}
 	
-	for (ii=0; ii<NumQuads; ii++)
+	for (ii=kk=0; ii<NumQuads; ii++,kk+=4)
 	{
-		vertexlist[jj].x = x[Quads[ii*4+0]];
-		vertexlist[jj].y = y[Quads[ii*4+0]];
-		vertexlist[jj].z = z[Quads[ii*4+0]];
-		vertexlist[jj].i = i[Quads[ii*4+0]];
-		vertexlist[jj].j = j[Quads[ii*4+0]];
-		vertexlist[jj].k = k[Quads[ii*4+0]];
+		vertexlist[jj].x = x(Quads[kk+0]);
+		vertexlist[jj].y = y(Quads[kk+0]);
+		vertexlist[jj].z = z(Quads[kk+0]);
+		vertexlist[jj].i = i(Quads[kk+0]);
+		vertexlist[jj].j = j(Quads[kk+0]);
+		vertexlist[jj].k = k(Quads[kk+0]);
 		jj++;
-		vertexlist[jj].x = x[Quads[ii*4+1]];
-		vertexlist[jj].y = y[Quads[ii*4+1]];
-		vertexlist[jj].z = z[Quads[ii*4+1]];
-		vertexlist[jj].i = i[Quads[ii*4+1]];
-		vertexlist[jj].j = j[Quads[ii*4+1]];
-		vertexlist[jj].k = k[Quads[ii*4+1]];
+		vertexlist[jj].x = x(Quads[kk+1]);
+		vertexlist[jj].y = y(Quads[kk+1]);
+		vertexlist[jj].z = z(Quads[kk+1]);
+		vertexlist[jj].i = i(Quads[kk+1]);
+		vertexlist[jj].j = j(Quads[kk+1]);
+		vertexlist[jj].k = k(Quads[kk+1]);
 		jj++;
-		vertexlist[jj].x = x[Quads[ii*4+2]];
-		vertexlist[jj].y = y[Quads[ii*4+2]];
-		vertexlist[jj].z = z[Quads[ii*4+2]];
-		vertexlist[jj].i = i[Quads[ii*4+2]];
-		vertexlist[jj].j = j[Quads[ii*4+2]];
-		vertexlist[jj].k = k[Quads[ii*4+2]];
+		vertexlist[jj].x = x(Quads[kk+2]);
+		vertexlist[jj].y = y(Quads[kk+2]);
+		vertexlist[jj].z = z(Quads[kk+2]);
+		vertexlist[jj].i = i(Quads[kk+2]);
+		vertexlist[jj].j = j(Quads[kk+2]);
+		vertexlist[jj].k = k(Quads[kk+2]);
 		jj++;
-		vertexlist[jj].x = x[Quads[ii*4+3]];
-		vertexlist[jj].y = y[Quads[ii*4+3]];
-		vertexlist[jj].z = z[Quads[ii*4+3]];
-		vertexlist[jj].i = i[Quads[ii*4+3]];
-		vertexlist[jj].j = j[Quads[ii*4+3]];
-		vertexlist[jj].k = k[Quads[ii*4+3]];
+		vertexlist[jj].x = x(Quads[kk+3]);
+		vertexlist[jj].y = y(Quads[kk+3]);
+		vertexlist[jj].z = z(Quads[kk+3]);
+		vertexlist[jj].i = i(Quads[kk+3]);
+		vertexlist[jj].j = j(Quads[kk+3]);
+		vertexlist[jj].k = k(Quads[kk+3]);
 		jj++;
-
 	}
+
+#undef x
+#undef y
+#undef z
+#undef i
+#undef j
+#undef k
+	delete[] vb;
 
 	if (objtex)
 	{
-
-		jj=0;
-		int temp = NumTris*3;
+		//int temp = NumTris*3;
 		//float oo256 = .00390625;
 		/*long pos =*/ fp.GetPosition();
-		for (ii=0; ii< temp; ii++)
+		{
+			int temp = (NumTris*3+NumTris*3+NumQuads*4)*2;
+			float *b = new float [temp];
+			readf(fp,b,temp);
+			for (ii=jj=0; ii<temp; ii++,jj+=2) vertexlist[ii].s=b[jj], vertexlist[ii].t=b[jj+1];
+			delete[] b;
+		};
+
+		/*for (ii=0; ii< temp; ii++)
 		{
 			vertexlist[ii].s = readf(fp);//*oo256;  
 			vertexlist[ii].t = readf (fp);//*oo256;
@@ -201,7 +222,7 @@ void Mesh::LoadBinary (const char * filename, int faction) {
 		{
 			vertexlist[ii].s = readf(fp);//*oo256;
 			vertexlist[ii].t = readf(fp);//*oo256;
-		}
+		}*/
 		if (AlphaMap)
 		{
 			TexNameA = new char [TexNameLength +5];

@@ -20,6 +20,8 @@ static GFXColor getSphereColor () {
 }
 
 void SphereMesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
+  if (whichpass==1) return; //Mesh already draws pass 1 in pass 0
+
   static GFXColor spherecol (getSphereColor ());
   if (blendSrc!=ONE||blendDst!=ZERO) {
     GFXPolygonOffset (0,-2);

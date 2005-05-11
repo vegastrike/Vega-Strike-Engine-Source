@@ -6072,7 +6072,7 @@ vector <CargoColor>& Unit::FilterDowngradeList (vector <CargoColor> & mylist, bo
   static float MyPercentMin= ComputeMinDowngradePercent();
 
   for (unsigned int i=0;i<mylist.size();i++) {
-    bool removethis=staticrem;
+    bool removethis=true/*staticrem*/;
     int mode=GetModeFromName(mylist[i].cargo.content.c_str());
     if (mode!=2 || (!downgrade)) {
       const Unit * NewPart =  UnitConstCache::getCachedConst (StringIntKey (mylist[i].cargo.content.c_str(),FactionUtil::GetFaction("upgrades")));
@@ -6137,7 +6137,7 @@ vector <CargoColor>& Unit::FilterDowngradeList (vector <CargoColor> & mylist, bo
       removethis=true;
     }
     if (removethis) {
-      if (downgrade) {
+      if (downgrade&&staticrem) {
         mylist.erase (mylist.begin()+i);	  
         i--;
       } else {
