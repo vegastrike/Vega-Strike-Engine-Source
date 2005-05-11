@@ -89,6 +89,7 @@ const EnumMap::Pair MeshXML::attribute_names[] = {
   EnumMap::Pair("UNKNOWN", MeshXML::UNKNOWN),
   EnumMap::Pair("Scale",MeshXML::SCALE),
   EnumMap::Pair("Blend",MeshXML::BLENDMODE),
+  EnumMap::Pair("alphatest",MeshXML::ALPHATEST),
   EnumMap::Pair("texture", MeshXML::TEXTURE),
   EnumMap::Pair("alphamap", MeshXML::ALPHAMAP),
   EnumMap::Pair("sharevertex", MeshXML::SHAREVERT),
@@ -129,7 +130,7 @@ const EnumMap::Pair MeshXML::attribute_names[] = {
 
 
 const EnumMap MeshXML::element_map(MeshXML::element_names, 24);
-const EnumMap MeshXML::attribute_map(MeshXML::attribute_names, 37);
+const EnumMap MeshXML::attribute_map(MeshXML::attribute_names, 38);
 
 
 
@@ -434,6 +435,16 @@ void Mesh::beginElement(MeshXML * xml, const string &name, const AttributeList &
 	  SetBlendMode (parse_alpha (csrc),parse_alpha (cdst));
 	  free (csrc);
 	  free (cdst);
+	}
+	break;
+      case MeshXML::ALPHATEST:
+	{
+          float tmp=XMLSupport::parse_float((*iter).value);
+          if (tmp>1)
+            xml->mesh->alphatest=255;
+          else if (tmp>0&&tmp<=1)
+            xml->mesh->alphatest=tmp*255.0f;
+          else xml->mesh->alphatest=0;
 	}
 	break;
 	  case MeshXML::DETAILTEXTURE:

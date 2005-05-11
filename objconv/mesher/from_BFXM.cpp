@@ -138,6 +138,11 @@ void BFXMToXmeshOrOBJ(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE 
 		  int32bit lighting=(VSSwapHostIntToLittle(inmemfile[meshbeginword+27].i32val)!=0)?1:0;//lighting
 		  int32bit reflect=(VSSwapHostIntToLittle(inmemfile[meshbeginword+28].i32val)!=0)?1:0;//reflect
 		  int32bit usenormals=(VSSwapHostIntToLittle(inmemfile[meshbeginword+29].i32val)!=0)?1:0;//usenormals
+                  float32bit alphatest=0;
+                  
+                  if (meshheaderlength>30*4){
+                    alphatest=VSSwapHostFloatToLittle(inmemfile[meshbeginword+30].f32val);//Alpha Testing Values
+                  }
 		  //End Header
 		  // Go to Arbitrary Length Attributes section
 		  word32index=meshbeginword+(meshheaderlength/4);
@@ -147,7 +152,7 @@ void BFXMToXmeshOrOBJ(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE 
                   
          
 		  if(isxmesh){
-			fprintf(Outputfile,"<Mesh scale=\"%f\" reverse=\"%d\" forcetexture=\"%d\" sharevert=\"%d\" polygonoffset=\"%f\" blend=\"%s %s\" ",scale,reverse,forcetexture,sharevert,polygonoffset,inverseblend[bsrc%16].c_str(),inverseblend[bdst%16].c_str());
+			fprintf(Outputfile,"<Mesh scale=\"%f\" reverse=\"%d\" forcetexture=\"%d\" sharevert=\"%d\" polygonoffset=\"%f\" blend=\"%s %s\" alphatest=\"%f\" ",scale,reverse,forcetexture,sharevert,polygonoffset,inverseblend[bsrc%16].c_str(),inverseblend[bdst%16].c_str(),alphatest);
 		  }else {
 			fprintf(mtl,"newmtl tex%d_%d\n",recordindex,meshindex);
             fprintf(OutputObj,"usemtl tex%d_%d\n",recordindex,meshindex);

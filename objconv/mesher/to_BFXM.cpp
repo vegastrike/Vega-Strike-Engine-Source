@@ -85,12 +85,13 @@ const EnumMap::Pair XML::attribute_names[] = {
   EnumMap::Pair ("FramesPerSecond",XML::FRAMESPERSECOND),
   EnumMap::Pair ("FrameMeshName",XML::FRAMEMESHNAME),
   EnumMap::Pair ("AnimationName",XML::ANIMATIONNAME),
-  EnumMap::Pair ("AnimationMeshIndex",XML::ANIMATIONMESHINDEX)
+  EnumMap::Pair ("AnimationMeshIndex",XML::ANIMATIONMESHINDEX),
+  EnumMap::Pair("alphatest",XML::ALPHATEST)
 };
 
 
 const EnumMap XML::element_map(XML::element_names, 27);
-const EnumMap XML::attribute_map(XML::attribute_names, 40);
+const EnumMap XML::attribute_map(XML::attribute_names, 41);
 
 
 void CopyNormal (GFXVertex &outp,
@@ -365,6 +366,9 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 	  case XML::SCALE:
 		xml->scale =  XMLSupport::parse_float ((*iter).value);
 		break;
+      case XML::ALPHATEST:
+        xml->alphatest=XMLSupport::parse_float((*iter).value);
+        break;
 	  case XML::SHAREVERT:
 		xml->sharevert = XMLSupport::parse_bool ((*iter).value);
 		break;
@@ -1009,7 +1013,7 @@ int32bit appendmeshfromxml(XML memfile, FILE* Outputfile,bool forcenormals){
   int32bit runningbytenum=0;
   
   //Mesh Header
-  intbuf= VSSwapHostIntToLittle(11*sizeof(int32bit)+19*sizeof(float32bit));
+  intbuf= VSSwapHostIntToLittle(11*sizeof(int32bit)+20*sizeof(float32bit));
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Size of Mesh header in Bytes
   intbuf= VSSwapHostIntToLittle(0);// Temp - rewind and fix.
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Size of this Mesh in Bytes
@@ -1068,12 +1072,19 @@ int32bit appendmeshfromxml(XML memfile, FILE* Outputfile,bool forcenormals){
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//lighting
   intbuf= VSSwapHostIntToLittle(memfile.reflect);
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//reflect
+
+
   //Usenormals default value fix.
   if(forcenormals){
 	  memfile.usenormals=true;
   }
   intbuf= VSSwapHostIntToLittle(memfile.usenormals);
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//usenormals
+
+  //added by hellcatv
+  floatbuf= VSSwapHostFloatToLittle(memfile.alphatest);
+  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//alpha test value
+
   //END HEADER
   //Begin Variable sized Attributes
   int32bit VSAstart=runningbytenum;

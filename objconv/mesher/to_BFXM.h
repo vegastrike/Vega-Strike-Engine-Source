@@ -191,6 +191,7 @@ struct XML {
     SIZE,
     OFFSET,
     ANIMATEDTEXTURE,
+    ALPHATEST,
 	USENORMALS,
     REVERSE,
 	POLYGONOFFSET,
@@ -268,7 +269,7 @@ struct XML {
 	float polygon_offset;
 	int blend_src;
 	int blend_dst;
-
+  float alphatest;
     GFXVertex vertex;
 	textureholder texturetemp;
 	vector<textureholder> textures;
@@ -292,6 +293,7 @@ struct XML {
 	GFXMaterial material;
     float scale;
 	XML(){ //FIXME make defaults appear here.
+          alphatest=0.0f;
 		scale=1.0;
 		sharevert=0;
 		usenormals=1;

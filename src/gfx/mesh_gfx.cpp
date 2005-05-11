@@ -704,6 +704,8 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
   SelectCullFace(whichdrawqueue);
   GFXBlendMode(blendSrc, blendDst);
   GFXEnable(TEXTURE0);
+  if (alphatest)
+    GFXAlphaTest(GEQUAL,alphatest/255.0);
   if(Decal[0])
     Decal[0]->MakeActive();
   GFXSelectTexcoordSet(0, 0);
@@ -802,6 +804,8 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
     }
   }
   vlist->EndDrawState();
+  if (alphatest)
+    GFXAlphaTest(ALWAYS,0);
 
 	switch(whichpass) {
 	case 0:

@@ -233,18 +233,27 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 		  int32bit lighting=VSSwapHostIntToLittle(inmemfile[meshbeginword+27].i32val);//lighting
 		  int32bit reflect=VSSwapHostIntToLittle(inmemfile[meshbeginword+28].i32val);//reflect
 		  int32bit usenormals=VSSwapHostIntToLittle(inmemfile[meshbeginword+29].i32val);//usenormals
+                  float32bit alphatest=0;
+                  if (meshheaderlength>30*4) {
+                    alphatest=VSSwapHostFloatToLittle(inmemfile[meshbeginword+30].f32val);//Alpha Testing Values
+                  }
 		  //End Header
 		  // Go to Arbitrary Length Attributes section
 		  word32index=meshbeginword+(meshheaderlength/4);
 		  int32bit VSAbeginword=word32index;
 		  int32bit LengthOfArbitraryLengthAttributes=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//Length of Arbitrary length attributes section in bytes
 		  word32index+=1;
-		  fprintf(Outputfile,"<Mesh scale=\"%f\" reverse=\"%d\" forcetexture=\"%d\" sharevert=\"%d\" polygonoffset=\"%f\" blendmode=\"%s %s\" ",scale,reverse,forcetexture,sharevert,polygonoffset,inverseblend[bsrc%16].c_str(),inverseblend[bdst%16].c_str());
+		  fprintf(Outputfile,"<Mesh scale=\"%f\" reverse=\"%d\" forcetexture=\"%d\" sharevert=\"%d\" polygonoffset=\"%f\" blendmode=\"%s %s\" alphatest=\"%f\" ",scale,reverse,forcetexture,sharevert,polygonoffset,inverseblend[bsrc%16].c_str(),inverseblend[bdst%16].c_str(),alphatest);
 		  xml.scale=scale*overallscale;
                   xml.lodscale=overallscale;
                   xml.reverse=reverse;
                   xml.force_texture=forcetexture;
                   xml.sharevert=sharevert;
+                  if (alphatest<=1&&alphatest>=0) {
+                    mesh->alphatest=(unsigned char)(alphatest*255.0);
+                  }else if (alphatest>1){
+                    mesh->alphatest=1;
+                  }else mesh->alphatest=0;
                   mesh->polygon_offset=polygonoffset;
                   mesh->SetBlendMode((BLENDFUNC)bsrc,(BLENDFUNC)bdst);
 

@@ -166,7 +166,9 @@ protected:
   GFXBOOL will_be_drawn;  
   ///The blend functions
   bool convex;
+  unsigned char alphatest;
   enum BLENDFUNC blendSrc;  enum BLENDFUNC blendDst;
+
   /// Support for reorganized rendering
   vector<MeshDrawContext> *draw_queue;
   /// How transparent this mesh is (in what order should it be rendered in 

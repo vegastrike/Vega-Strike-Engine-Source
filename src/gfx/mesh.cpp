@@ -70,6 +70,7 @@ void Mesh::InitUnit() {
   polygon_offset=0;
   framespersecond=0;
   numlods=1;
+  alphatest=0;
   lodsize=FLT_MAX;
 	forcelogos = NULL;
 	squadlogos = NULL;

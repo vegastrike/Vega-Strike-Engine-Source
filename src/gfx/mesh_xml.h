@@ -57,11 +57,12 @@ struct MeshXML {
       ANIMATEDTEXTURE,
       USENORMALS,
       REVERSE,
-	  POLYGONOFFSET,
-	  DETAILTEXTURE,
-	  DETAILPLANE,
-	  FRAMESPERSECOND,
-	  STARTFRAME
+      POLYGONOFFSET,
+      DETAILTEXTURE,
+      DETAILPLANE,
+      FRAMESPERSECOND,
+      STARTFRAME,
+      ALPHATEST
     };
     ///Saves which attributes of vertex have been set in XML file
     enum PointState {
