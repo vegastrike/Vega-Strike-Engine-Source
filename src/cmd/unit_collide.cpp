@@ -649,18 +649,28 @@ Unit * Unit::queryBSP (const QVector &start, const QVector & end, Vector & norm,
     }
   }
   //for (;tmpBsp!=NULL;tmpBsp=((ShieldUp(st.Cast())&&(tmpBsp!=((this->colTrees?&this->colTrees->bspTree:&myNull))))?((this->colTrees?&this->colTrees->bspTree:&myNull)):NULL)) {
+  static bool sphere_test=XMLSupport::parse_bool(vs_config->getVariable("physics","sphere_collision","false"));
+  static bool bb_test=XMLSupport::parse_bool(vs_config->getVariable("physics","bounding_box_collision","true"));
+  
     distance = querySphereNoRecurse (start,end);
-    if (1) {
+    if (distance||!sphere_test) {
       if (!(*tmpBsp)) {
 		  Vector coord;
                   int nm=nummesh();
                   Unit * retval=NULL;
                   for (unsigned int i=0;i<nm;++i) {
-                    if(testRayVersusBB(meshdata[i]->corner_min(),meshdata[i]->corner_max(),st,ed,coord)) {
-                      norm = TransformNormal(cumulative_transformation_matrix,coord);
-                      distance=(coord-st).Magnitude();
-                      norm.Normalize();//normal points out from center
-                      ed=coord.Cast();
+                    if(testRayVersusBB(meshdata[i]->corner_min(),meshdata[i]->corner_max(),st,ed,coord)||!bb_test) {
+                      if (bb_test) {
+                        norm = TransformNormal(cumulative_transformation_matrix,coord);
+                        distance=(coord-st).Magnitude();
+                        norm.Normalize();//normal points out from center
+                        ed=coord.Cast();
+                      }else {
+                        norm = (distance * (start-end)).Cast();
+                        distance = norm.Magnitude();
+                        norm= (norm.Cast()+start).Cast();
+                        norm.Normalize();//normal points out from center
+                      }
                       retval=this;
                     }
                   }
