@@ -1,10 +1,9 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
+// Microsoft Visual C++ generated include file.
 // Used by Resources.rc
 //
 #define IDI_ICON1                       101
 #define IDD_START                       102
-#define IDI_ICON3                       105
 #define IDC_CURSOR1                     106
 #define IDI_ICON2                       107
 #define IDD_DIALOG1                     108

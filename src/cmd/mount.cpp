@@ -90,6 +90,8 @@ Mount::Mount(const string& filename, int am, int vol, float xyscale, float zscal
     type = temp;
     status=ACTIVE;
     time_to_lock = temp->LockTime;
+	if (type->type!=weapon_info::BEAM)
+		ref.refire=type->Refire;
   }
 }
 
@@ -140,6 +142,8 @@ void Mount::ReplaceMounts (const Mount * other) {
         this->xyscale=xyscale;
         this->zscale=zscale;
 	ref.gun=NULL;
+	if (type->type!=weapon_info::BEAM)
+		ref.refire=type->Refire;
 	this->ReplaceSound();
 	if (other->ammo==-1)
 		ammo=-1;
@@ -323,7 +327,7 @@ bool Mount::Fire (Unit * owner, bool Missile, bool listen_to_owner) {
 	}
 	return true;
   }else { 
-    if (ref.refire>type->Refire) {
+    if (ref.refire>=type->Refire) {
       ref.refire =0;
       if (ammo>0)
 		  ammo--;

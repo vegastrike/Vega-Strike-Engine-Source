@@ -1,4 +1,4 @@
-//Microsoft Developer Studio generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
 
@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON1               ICON    DISCARDABLE     "icon1.ico"
+IDI_ICON1               ICON                    "icon1.ico"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -36,18 +36,18 @@ IDI_ICON1               ICON    DISCARDABLE     "icon1.ico"
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE DISCARDABLE 
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE DISCARDABLE 
+2 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE DISCARDABLE 
+3 TEXTINCLUDE 
 BEGIN
     "\r\n"
     "\0"
@@ -56,7 +56,6 @@ END
 #endif    // APSTUDIO_INVOKED
 
 
-#ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
 //
 // Version
@@ -79,18 +78,15 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "Vega Strike is the 3D Space Simulator that allows you to trade and bounty hunt in a vast universe. Can you face the dangers and decisions that await...\0"
-            VALUE "CompanyName", "Vega Strike Project\0"
-            VALUE "FileDescription", "Vega Strike Launcher\0"
-            VALUE "FileVersion", "0.4.2\0"
-            VALUE "InternalName", "vegastrike\0"
-            VALUE "LegalCopyright", "© Copyright 1998-2004 Vega Strike Project.  All rights reserved.  See the Licence section of Readme.txt for details.\0"
-            VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "launcher.exe\0"
-            VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "Vega Strike\0"
-            VALUE "ProductVersion", "0.4.2\0"
-            VALUE "SpecialBuild", "\0"
+            VALUE "Comments", "Vega Strike is the 3D Space Simulator that allows you to trade and bounty hunt in a vast universe. Can you face the dangers and decisions that await..."
+            VALUE "CompanyName", "Vega Strike Project"
+            VALUE "FileDescription", "Vega Strike Launcher"
+            VALUE "FileVersion", "0.4.2"
+            VALUE "InternalName", "vegastrike"
+            VALUE "LegalCopyright", "© Copyright 1998-2004 Vega Strike Project.  All rights reserved.  See the Licence section of Readme.txt for details."
+            VALUE "OriginalFilename", "launcher.exe"
+            VALUE "ProductName", "Vega Strike"
+            VALUE "ProductVersion", "0.4.2"
         END
     END
     BLOCK "VarFileInfo"
@@ -98,8 +94,6 @@ BEGIN
         VALUE "Translation", 0x409, 1200
     END
 END
-
-#endif    // !_MAC
 
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////

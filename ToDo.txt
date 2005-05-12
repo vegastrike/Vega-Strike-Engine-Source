@@ -29,6 +29,26 @@ Goals for 0.4.3 release:
 *Map
 **ADD PATCHES!!!
 
+<<<<<<< ToDo.txt
+Boost 1.31:
+Fix zonemgr to comply
+Integrate boost 1.31 code
+
+Warp:
+Rename warp to ... think of something cool
+Warp energy use
+
+Universe/system generation:
+fix systems to have jump points only outside the "slow-zone"
+fix a bit of the system generation code: so we can specify everything in the milky_way.xml
+
+Resource management/organization:
+make un-modded units appear in 1 big table, not dozens of xml files
+
+UI:
+Add cargo pics
+Warp vs. Auto graphic
+=======
 * AI:
 ** Fix AI range trigger happiness
 ** Fix ITTS to use more iterations of Newton's method
@@ -37,7 +57,25 @@ Goals for 0.4.3 release:
 *Ships
 **Add stats for new ships
 
+<<<<<<< ToDo.txt
+<<<<<<< ToDo.txt
+<<<<<<< ToDo.txt
+* Graphics:
+** fix ugly ass damage dots
+>>>>>>> 1.9
+
+Scripting Goals:
+* Flightgroups
+** Flightgroups should have subsets of ships that spawn together
+=======
+>>>>>>> 1.25
+=======
+* Cockpit
+Highlight weapons in range in the gun VDU
+>>>>>>> 1.27
+=======
 *Fix up starting system.
+>>>>>>> 1.29
 
 ----------------------------------------------------------------------------
 

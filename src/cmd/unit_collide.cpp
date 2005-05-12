@@ -649,8 +649,8 @@ Unit * Unit::queryBSP (const QVector &start, const QVector & end, Vector & norm,
     }
   }
   //for (;tmpBsp!=NULL;tmpBsp=((ShieldUp(st.Cast())&&(tmpBsp!=((this->colTrees?&this->colTrees->bspTree:&myNull))))?((this->colTrees?&this->colTrees->bspTree:&myNull)):NULL)) {
-  static bool sphere_test=XMLSupport::parse_bool(vs_config->getVariable("physics","sphere_collision","false"));
-  static bool bb_test=XMLSupport::parse_bool(vs_config->getVariable("physics","bounding_box_collision","true"));
+  static bool sphere_test=XMLSupport::parse_bool(vs_config->getVariable("physics","sphere_collision","true"));
+  static bool bb_test=XMLSupport::parse_bool(vs_config->getVariable("physics","bounding_box_collision","false"));
   
     distance = querySphereNoRecurse (start,end);
     if (distance||!sphere_test) {
