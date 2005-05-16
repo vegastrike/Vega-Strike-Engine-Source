@@ -6229,23 +6229,37 @@ void Unit::EjectCargo (unsigned int index) {
 	  //he's alive!!!!!
 	}
       }
+      float arot=0;
+
       if (!cargo) {
+        static float crot=XMLSupport::parse_float(vs_config->getVariable("graphics","cargo_rotation_speed","60"))*3.1415926536/180;
+        static float erot=XMLSupport::parse_float(vs_config->getVariable("graphics","eject_rotation_speed","0"))*3.1415926536/180;
+        
 		  if (tmpcontent=="eject") {
+
 			  cargo = UnitFactory::createUnit ("eject",false,faction);
 			  int fac = FactionUtil::GetFaction("upgrades");
 			  cargo->faction=fac;//set it back to neutral so that no one will bother with 'im
+                          arot=erot;
 		  }else {
 			  string tmpnam = tmpcontent+".cargo";
 			  cargo = UnitFactory::createUnit (tmpnam.c_str(),false,FactionUtil::GetFaction("upgrades"));
+                          arot=crot;
 		  }
+
       }
+      Vector rotation;(vsrandom.uniformExc(-arot,arot),vsrandom.uniformExc(-arot,arot),vsrandom.uniformExc(-arot,arot));
+
       if (cargo->name=="LOAD_FAILED") {
+        static float grot=XMLSupport::parse_float(vs_config->getVariable("graphics","generic_cargo_rotation_speed","1"))*3.1415926536/180;
 	cargo->Kill();
-	cargo = UnitFactory::createUnit ("generic_cargo",false,FactionUtil::GetFaction("upgrades"));
+	cargo = UnitFactory::createUnit ("generic_cargo",false,FactionUtil::GetFaction("upgrades"));        
+        arot=grot;
       }
       if (cargo->rSize()>=rSize()) {
 	cargo->Kill();
       }else {
+        
         Vector tmpvel=-Velocity;
         if (tmpvel.MagnitudeSquared()<.00001) {
           tmpvel=randVector(-rSize(),rSize()).Cast();
@@ -6256,6 +6270,7 @@ void Unit::EjectCargo (unsigned int index) {
         tmpvel.Normalize();
         
 	cargo->SetPosAndCumPos (Position()+tmpvel*1.5*rSize()+randVector(-.5*rSize(), .5*rSize()));
+        cargo->SetAngularVelocity(rotation);
 	cargo->SetOwner (this);
         static float velmul=XMLSupport::parse_float(vs_config->getVariable("physics","eject_cargo_speed","1"));
 	cargo->SetVelocity(Velocity*velmul+randVector(-.25,.25).Cast());
