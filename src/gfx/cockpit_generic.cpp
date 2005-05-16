@@ -409,7 +409,7 @@ void Cockpit::Update () {
 		savegame->ParseSaveGame(savegamefile,newsystem,newsystem,pos,setplayerXloc,this->credits,unitfilename,k);
                 CopySavedShips(savegame->GetCallsign(),whichcp,unitfilename,true);
 		bool actually_have_save=false;
-                static bool persistent_on_load =XMLSupport::parse_float(vs_config->getVariable("physics","persistent_on_load","true"));
+                static bool persistent_on_load =XMLSupport::parse_bool(vs_config->getVariable("physics","persistent_on_load","true"));
 		if (savegame->GetStarSystem()!="") {
 			actually_have_save=true;
 			newsystem= savegame->GetStarSystem()+".system";
