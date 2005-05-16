@@ -644,6 +644,8 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	}
 	UpdateMissiles();//do explosions
 	current_stage=PHY_TERRAIN;
+        collidetable->Update();
+
       } else if (current_stage==PHY_TERRAIN) {
 #ifdef UPDATEDEBUG
   VSFileSystem::vs_fprintf (stderr,"TerU");
@@ -659,6 +661,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	}
 	_Universe->SetActiveCockpit(i);
 	current_stage=PHY_RESOLV;
+        return;//when cockpit did loading it may mess things up if this was deleted
       } else if (current_stage==PHY_RESOLV) {
 	iter = drawList.createIterator();
 #ifdef UPDATEDEBUG
@@ -685,6 +688,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	}
       }
       UpdateUnitPhysics(firstframe);
+
 #ifdef UPDATEDEBUG
   VSFileSystem::vs_fprintf (stderr,"boltphi");
   fflush (stderr);
@@ -697,14 +701,15 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	firstframe = false;
       }
       time -= (1./PHY_NUM)*SIMULATION_ATOM;
+
     }
+    UnitCollection::FreeUnusedNodes();
+
   }
 #ifdef UPDATEDEBUG
   VSFileSystem::vs_fprintf (stderr,"endupd\n");
   fflush (stderr);
 #endif
-  UnitCollection::FreeUnusedNodes();
-  collidetable->Update();
   SIMULATION_ATOM =  normal_simulation_atom;
   _Universe->popActiveStarSystem();
   //  VSFileSystem::vs_fprintf (stderr,"bf:%lf",interpolation_blend_factor);
@@ -720,7 +725,8 @@ void StarSystem::AddStarsystemToUniverse(const string &mname) {
   star_system_table.Put (mname,this);
 }
 void StarSystem::RemoveStarsystemFromUniverse () {
-  star_system_table.Delete (filename);
+  if (star_system_table.Get(filename))
+    star_system_table.Delete (filename);
 }
 
 StarSystem *GetLoadedStarSystem(const char * system) {

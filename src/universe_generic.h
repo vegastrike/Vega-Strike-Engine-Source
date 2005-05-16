@@ -101,6 +101,8 @@ private:
   void setActiveStarSystem(StarSystem * ss) {active_star_system.back()=ss;}
   void pushActiveStarSystem(StarSystem * ss) {active_star_system.push_back (ss);}
   void popActiveStarSystem() {active_star_system.pop_back();}
+  void clearAllSystems();
+  void deleteClearedSystems();
   //void SetActiveCockpit (int whichcockpit);
   //void SetActiveCockpit (Cockpit * which);
   StarSystem * getActiveStarSystem (unsigned int size) {return active_star_system[size];}

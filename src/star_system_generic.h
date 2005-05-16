@@ -16,6 +16,7 @@ class Unit;
 class Background;
 class Terrain;
 class ContinuousTerrain;
+class Universe;
 //class TextPlane;
 struct AtmosphericFogMesh {
 	std::string meshname;
@@ -97,6 +98,7 @@ class StarSystem {
   //Texture *LightMap[6]; 
   void AddStarsystemToUniverse(const string &filename);
   void RemoveStarsystemFromUniverse();
+  friend Universe;
   int lightcontext;
   std::vector <class MissileEffect *> dischargedMissiles;
   unsigned int zone; //short fix

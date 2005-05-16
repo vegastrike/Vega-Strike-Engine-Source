@@ -409,16 +409,24 @@ void Cockpit::Update () {
 		savegame->ParseSaveGame(savegamefile,newsystem,newsystem,pos,setplayerXloc,this->credits,unitfilename,k);
                 CopySavedShips(savegame->GetCallsign(),whichcp,unitfilename,true);
 		bool actually_have_save=false;
+                static bool persistent_on_load =XMLSupport::parse_float(vs_config->getVariable("physics","persistent_on_load","true"));
 		if (savegame->GetStarSystem()!="") {
 			actually_have_save=true;
 			newsystem= savegame->GetStarSystem()+".system";
 		}else {
 			newsystem = _Universe->activeStarSystem()->getFileName();
 		}
-		StarSystem * ss = _Universe->GenerateStarSystem (newsystem.c_str(),"",Vector(0,0,0));
 		_Universe->getActiveStarSystem(0)->SwapOut();
+                if (!persistent_on_load) {
+                  _Universe->clearAllSystems();
+                }
+		StarSystem * ss = _Universe->GenerateStarSystem (newsystem.c_str(),"",Vector(0,0,0));
+                
 		this->activeStarSystem=ss;
 		_Universe->pushActiveStarSystem(ss);
+                if (!persistent_on_load) {
+                  _Universe->deleteClearedSystems();
+                }
 
 
 		vector <StarSystem *> saved;

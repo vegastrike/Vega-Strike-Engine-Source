@@ -20,7 +20,23 @@
 using namespace GalaxyXML;
 
 extern StarSystem *GetLoadedStarSystem(const char * file);
-
+vector <StarSystem *> deleteQueue;
+void Universe::clearAllSystems() {
+  while (star_system.size()) {
+    deleteQueue.push_back(star_system.back());   
+    star_system.back()->RemoveStarsystemFromUniverse();
+    star_system.pop_back();
+  }
+  active_star_system.clear();
+  script_system=NULL;
+}
+void Universe::deleteClearedSystems() {
+  while (deleteQueue.size()) {
+    delete deleteQueue.back();
+    deleteQueue.pop_back();
+  }
+  deleteQueue.clear();
+}
 Cockpit * Universe::createCockpit( std::string player)
 {
 	Cockpit * cp = new Cockpit ("",NULL,player);
