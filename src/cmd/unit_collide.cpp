@@ -658,22 +658,24 @@ Unit * Unit::queryBSP (const QVector &start, const QVector & end, Vector & norm,
 		  Vector coord;
                   int nm=nummesh();
                   Unit * retval=NULL;
-                  for (unsigned int i=0;i<nm;++i) {
-                    if(testRayVersusBB(meshdata[i]->corner_min(),meshdata[i]->corner_max(),st,ed,coord)||!bb_test) {
-                      if (bb_test) {
+                  if (bb_test) {
+                    for (unsigned int i=0;i<nm;++i) {
+                      if(testRayVersusBB(meshdata[i]->corner_min(),meshdata[i]->corner_max(),st,ed,coord)) {
                         norm = TransformNormal(cumulative_transformation_matrix,coord);
                         distance=(coord-st).Magnitude();
                         norm.Normalize();//normal points out from center
                         ed=coord.Cast();
-                      }else {
-                        norm = (distance * (start-end)).Cast();
-                        distance = norm.Magnitude();
-                        norm= (norm.Cast()+start).Cast();
-                        norm.Normalize();//normal points out from center
+                        retval=this;
                       }
-                      retval=this;
                     }
+                  }else {
+                    norm = (distance * (start-end)).Cast();
+                    distance = norm.Magnitude();
+                    norm= (norm.Cast()+start).Cast();
+                    norm.Normalize();//normal points out from center      
+                    retval=this;
                   }
+                  
                   return retval;
       }
     }else
