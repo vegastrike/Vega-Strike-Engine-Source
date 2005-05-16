@@ -98,7 +98,7 @@ class StarSystem {
   //Texture *LightMap[6]; 
   void AddStarsystemToUniverse(const string &filename);
   void RemoveStarsystemFromUniverse();
-  friend Universe;
+  friend class Universe;
   int lightcontext;
   std::vector <class MissileEffect *> dischargedMissiles;
   unsigned int zone; //short fix
