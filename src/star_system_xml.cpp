@@ -278,6 +278,19 @@ static void GetLights (const vector <GFXLight> &origlights, vector <GFXLightLoca
 }
 extern Unit * getTopLevelOwner();
 extern BLENDFUNC parse_alpha (const char *);
+static void SetSubunitRotation(Unit*un, float difficulty) {
+  UnitCollection::UnitIterator iter = un->getSubUnits();
+  Unit *unit;
+  while((unit = iter.current())!=NULL) {
+    float x=2*difficulty*((float)rand())/RAND_MAX -difficulty;
+    float y=2*difficulty*((float)rand())/RAND_MAX-difficulty;
+    float z=2*difficulty*((float)rand())/RAND_MAX-difficulty;
+    unit->SetAngularVelocity(Vector(x,y,z));
+    SetSubunitRotation(unit,difficulty);
+    iter.advance();
+  }
+  
+}
 void parse_dual_alpha (const char * alpha, BLENDFUNC & blendSrc, BLENDFUNC &blendDst) {
   blendSrc=ONE;
   blendDst=ZERO;
@@ -1077,7 +1090,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	strcpy(nebfile,(*iter).value.c_str());
 	break;
       case DIFFICULTY:
-	scalex = parse_float ((*iter).value);
+	scalex = -parse_float ((*iter).value);
 	break;
       case DESTINATION:
 	dest=ParseDestinations((*iter).value);
@@ -1155,7 +1168,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 		un->SetSerial( serial);
 	  } else if (elem==ASTEROID) {
 	    Flightgroup *fg =getStaticAsteroidFlightgroup (faction);
-	    plan->AddSatellite (un=UnitFactory::createAsteroid (filename,faction,fg,fg->nr_ships-1,scalex));
+	    plan->AddSatellite (un=UnitFactory::createAsteroid (filename,faction,fg,fg->nr_ships-1,scalex<0?-scalex:scalex));
 		un->SetSerial( serial);
 	  } else if (elem==ENHANCEMENT) {
 	    plan->AddSatellite (un=UnitFactory::createEnhancement (filename,faction,string("")));
@@ -1172,6 +1185,9 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	    un->SetTurretAI ();
 	    un->EnqueueAI(new Orders::FireAt (.2,15));
 	  }
+          if (scalex<0&&elem!=ASTEROID) {
+            SetSubunitRotation(un,-scalex);
+          }
 	  un->SetOwner (getTopLevelOwner());//cheating so nothing collides at top lev
 	  un->SetAngularVelocity (ComputeRotVel (rotvel,R,S));
     } else {
@@ -1231,7 +1247,11 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 
 	      xml->moons.back()->SetTurretAI ();
 	      xml->moons.back()->EnqueueAI(new Orders::FireAt (.2,15));
-	    }
+	    }else if (scalex<0&&elem!=ASTEROID) {
+              SetSubunitRotation(xml->moons.back(),-scalex);
+            }
+              
+            
 
       }
     }
