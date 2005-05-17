@@ -6248,13 +6248,21 @@ void Unit::EjectCargo (unsigned int index) {
 		  }
 
       }
-      Vector rotation;(vsrandom.uniformExc(-arot,arot),vsrandom.uniformExc(-arot,arot),vsrandom.uniformExc(-arot,arot));
 
       if (cargo->name=="LOAD_FAILED") {
         static float grot=XMLSupport::parse_float(vs_config->getVariable("graphics","generic_cargo_rotation_speed","1"))*3.1415926536/180;
 	cargo->Kill();
 	cargo = UnitFactory::createUnit ("generic_cargo",false,FactionUtil::GetFaction("upgrades"));        
         arot=grot;
+      }
+      Vector rotation(vsrandom.uniformInc(-arot,arot),vsrandom.uniformInc(-arot,arot),vsrandom.uniformInc(-arot,arot));
+      static bool all_rotate_same=XMLSupport::parse_bool(vs_config->getVariable("graphics","cargo_rotates_at_same_speed","true"));
+      if (all_rotate_same&&arot!=0) {
+        float tmp=rotation.Magnitude();
+        if (tmp>.001) {
+          rotation.Scale(1/tmp);
+          rotation*=arot;
+        }
       }
       if (cargo->rSize()>=rSize()) {
 	cargo->Kill();
