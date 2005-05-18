@@ -25,6 +25,7 @@
 //#include "mesh.h"
 #include "universe_util.h"
 #include "cmd/ai/fire.h"
+#include "background.h"
 //#include "in_mouse.h"
 //#include "gui/glut_support.h"
 //#include "networking/netclient.h"
@@ -416,17 +417,22 @@ void Cockpit::Update () {
 		}else {
 			newsystem = _Universe->activeStarSystem()->getFileName();
 		}
-		_Universe->getActiveStarSystem(0)->SwapOut();
-                if (!persistent_on_load) {
+                Background::BackgroundClone savedtextures={{NULL,NULL,NULL,NULL,NULL,NULL,NULL}};
+                if (persistent_on_load) {
+                  _Universe->getActiveStarSystem(0)->SwapOut();
+
+                }else {
+                  Background *tmp=_Universe->activeStarSystem()->getBackground();
+                  savedtextures=tmp->Cache();
                   _Universe->clearAllSystems();
                 }
 		StarSystem * ss = _Universe->GenerateStarSystem (newsystem.c_str(),"",Vector(0,0,0));
+                if (!persistent_on_load) {
+                  savedtextures.FreeClone();
+                }
                 
 		this->activeStarSystem=ss;
 		_Universe->pushActiveStarSystem(ss);
-                if (!persistent_on_load) {
-                  _Universe->deleteClearedSystems();
-                }
 
 
 		vector <StarSystem *> saved;
@@ -465,6 +471,8 @@ void Cockpit::Update () {
                   DockToSavedBases(whichcp);
                 }
 		_Universe->popActiveStarSystem();
+                if (!persistent_on_load)
+                  _Universe->pushActiveStarSystem(ss);
       }
 	} 
   }

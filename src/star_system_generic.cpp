@@ -427,6 +427,7 @@ void StarSystem::Update( float priority)
 		  fflush (stderr);
 		#endif
 		  Unit::ProcessDeleteQueue();
+                  UnitCollection::FreeUnusedNodes();
 		  current_stage=MISSION_SIMULATION;
       }
 	  else if (current_stage==MISSION_SIMULATION)
@@ -436,6 +437,7 @@ void StarSystem::Update( float priority)
       }
 	  else if (current_stage==PHY_COLLIDE)
 	  {
+                collidetable->Update();
 		#ifdef NO_COLLISION_TIME
 			if (no_collision_time) {
 			  no_collision_time--;//don't resolve physics until 2 seconds
@@ -463,6 +465,7 @@ void StarSystem::Update( float priority)
 	        }
 			UpdateMissiles();//do explosions
 			current_stage=PHY_TERRAIN;
+
       }
 	  else if (current_stage==PHY_TERRAIN)
 	  {
@@ -481,6 +484,8 @@ void StarSystem::Update( float priority)
 		  fflush (stderr);
 		#endif
 		  bolts->UpdatePhysics();
+                  
+
 		/*
 		for (unsigned int i=0;i<active_missions.size();i++) {
 		  active_missions[i]->BriefingUpdate();//waste of farkin time
@@ -496,8 +501,6 @@ void StarSystem::Update( float priority)
   VSFileSystem::vs_fprintf (stderr,"endupd\n");
   fflush (stderr);
 #endif
-  UnitCollection::FreeUnusedNodes();
-  collidetable->Update();
   SIMULATION_ATOM =  normal_simulation_atom;
   _Universe->popActiveStarSystem();
   //  VSFileSystem::vs_fprintf (stderr,"bf:%lf",interpolation_blend_factor);
@@ -652,6 +655,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
   fflush (stderr);
 #endif
 	UpdateTerrain();
+        current_stage=PHY_RESOLV;
 	unsigned int i=_Universe->CurrentCockpit();
 	for (int j=0;j<_Universe->numPlayers();j++) {
 	  if (_Universe->AccessCockpit(j)->activeStarSystem==this) {
@@ -660,8 +664,8 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	  }
 	}
 	_Universe->SetActiveCockpit(i);
-	current_stage=PHY_RESOLV;
-        return;//when cockpit did loading it may mess things up if this was deleted
+        _Universe->popActiveStarSystem();
+        return;
       } else if (current_stage==PHY_RESOLV) {
 	iter = drawList.createIterator();
 #ifdef UPDATEDEBUG
@@ -706,11 +710,13 @@ void StarSystem::Update(float priority , bool executeDirector) {
     UnitCollection::FreeUnusedNodes();
 
   }
+  //WARNING cockpit does not get here...
 #ifdef UPDATEDEBUG
   VSFileSystem::vs_fprintf (stderr,"endupd\n");
   fflush (stderr);
 #endif
   SIMULATION_ATOM =  normal_simulation_atom;
+  //WARNING cockpit does not get here...
   _Universe->popActiveStarSystem();
   //  VSFileSystem::vs_fprintf (stderr,"bf:%lf",interpolation_blend_factor);
 }

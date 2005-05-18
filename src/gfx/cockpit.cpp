@@ -1035,10 +1035,12 @@ void GameCockpit::Delete () {
   }
   viewport_offset=cockpit_offset=0;
   for (i=0;i<4;i++) {
+    /*
     if (Pit[i]) {
       delete Pit[i];
       Pit[i] = NULL;
     }
+    */
   }
   for (i=0;i<UnitImages::NUMGAUGES;i++) {
     if (gauges[i]) {
@@ -1882,6 +1884,14 @@ void SwitchUnits2( Unit *nw)
 
 GameCockpit::~GameCockpit () {
   Delete();
+  int i;
+  for (i=0;i<4;i++) {
+    if (Pit[i]) {
+      delete Pit[i];
+      Pit[i] = NULL;
+    }
+  }
+
   delete savegame;
 }
 int GameCockpit::getVDUMode(int vdunum) {

@@ -21,6 +21,7 @@
 #include "vegastrike.h"
 #include "camera.h"
 #include "aux_texture.h"
+#include "star.h"
 #include "background.h"
 #include "gfxlib.h"
 #include "aux_texture.h"
@@ -107,7 +108,30 @@ Background::~Background()
   if (stars)
     delete stars;
 }
-
+Background::BackgroundClone Background::Cache() {
+  BackgroundClone ret;
+  ret.backups[0]=up?up->Clone():NULL;
+  ret.backups[1]=down?down->Clone():NULL;
+  ret.backups[2]=left?left->Clone():NULL;
+  ret.backups[3]=right?right->Clone():NULL;
+  ret.backups[4]=front?front->Clone():NULL;
+  ret.backups[5]=back?back->Clone():NULL;
+  ret.backups[6]=NULL;
+  if (SphereBackground) {
+    for (int i=0;i<7&&i<SphereBackground->numTextures();++i) {
+      ret.backups[(i+6)%7]=SphereBackground->texture(i)->Clone();
+    }
+  }
+  return ret;
+}
+void Background::BackgroundClone::FreeClone() {
+    for (int i=0;i<7;++i) {
+      if (backups[i]) {
+        delete backups[i];
+        backups[i]=NULL;
+      }
+    }
+}
 void Background::Draw()
 {
   GFXClear (Enabled?GFXFALSE:GFXTRUE);

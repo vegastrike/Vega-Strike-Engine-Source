@@ -33,7 +33,8 @@ libgfxgeneric =  		\
 libgfxserver_a_SOURCES =	$(libgfxgeneric)	\
 	sphere_server.cpp	\
 	vsbox_server.cpp	\
-	mesh_server.cpp
+	mesh_server.cpp	\
+	background_server.cpp
 
 libgfx_a_SOURCES =	$(libgfxgeneric)\
 	vsimage.h		\

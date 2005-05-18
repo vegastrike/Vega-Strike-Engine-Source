@@ -182,6 +182,9 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
   short rows=13;
   short cols=15;
   int default_mode=VDU::TARGET;
+  VSSprite * oldpit=NULL;
+  bool replaced[4]={false,false,false,false};
+  int counter=0;
   switch (elem) {
   case COCKPIT:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
@@ -208,10 +211,16 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
       case XFILE:
         {
           std::string tmp=getRes((*iter).value);
+          oldpit=Pit[0];
           Pit[0]= new VSSprite (tmp.c_str(),cockpit_smooth?BILINEAR:NEAREST);
           if (!Pit[0]->LoadSuccess()){
             delete Pit[0];
             Pit[0]= new VSSprite ((*iter).value.c_str(),cockpit_smooth?BILINEAR:NEAREST);
+          }
+          replaced[0]=true;
+          if (oldpit) {
+
+            delete oldpit;
           }
         }
 	break;
@@ -227,10 +236,16 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
       case RIGHT:
         {
           std::string tmp=getRes((*iter).value);
+          oldpit=Pit[attr-FRONT];
           Pit[attr-FRONT] = new VSSprite (tmp.c_str(),cockpit_smooth?BILINEAR:NEAREST);
           if (!Pit[attr-FRONT]->LoadSuccess()) {
             delete Pit[attr-FRONT];
             Pit[attr-FRONT] = new VSSprite ((*iter).value.c_str(),cockpit_smooth?BILINEAR:NEAREST);
+          }
+          replaced[attr-FRONT]=true;
+          if (oldpit){
+
+            delete oldpit;
           }
         }
 	break;
@@ -239,6 +254,12 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
       } 
     }
     text = new TextPlane ();
+    for (counter=0;counter<4;++counter) {
+      if (!replaced[counter]) {
+        delete Pit[counter];
+        Pit[counter]=false;
+      }
+    }
     break;
   case UnitImages::JUMP:
   case UnitImages::MISSILELOCK:

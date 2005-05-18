@@ -20,9 +20,10 @@
  */
 #ifndef BACKGROUND_H
 #define BACKGROUND_H
-#include "star.h"
+
 class SphereMesh;
 class Texture;
+class StarVlist;
 class Background {
   bool Enabled;
   StarVlist *stars;
@@ -38,6 +39,12 @@ public:
   ~Background();
   void EnableBG (bool);
   void Draw();
+  struct BackgroundClone{
+    Texture * backups[7];
+    void FreeClone();
+  };
+  BackgroundClone Cache();
+  
 };
 
 #endif
