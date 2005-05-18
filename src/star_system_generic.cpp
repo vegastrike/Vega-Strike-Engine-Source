@@ -664,6 +664,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	  }
 	}
 	_Universe->SetActiveCockpit(i);
+        SIMULATION_ATOM =  normal_simulation_atom;
         _Universe->popActiveStarSystem();
         return;
       } else if (current_stage==PHY_RESOLV) {
