@@ -167,12 +167,14 @@ float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
   float rel=un->getRelation(orig);
   if (orig == un->Target())
 	rel-=1.5;
-  if (rel>.1||un->faction==neutral) {
-	  return ignore_friend?-FLT_MAX:friendly_autodist;//min distance apart
-  }else if (rel<-.1) {
+  if (un->faction==neutral) {
+    return neutral_autodist;
+  }else if (rel>.1) {
+    return ignore_friend?-FLT_MAX:friendly_autodist;//min distance apart
+  }else if (rel<0) {
     return hostile_autodist;
   }else {
-	  return ignore_friend?-FLT_MAX:neutral_autodist;
+    return ignore_friend?-FLT_MAX:neutral_autodist;
   }
 }
 
