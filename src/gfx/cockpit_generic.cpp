@@ -541,6 +541,8 @@ bool Cockpit::Update () {
 			newsystem= savegame->GetStarSystem()+".system";
 		}else {
 			newsystem = _Universe->activeStarSystem()->getFileName();
+                        if (newsystem.find(".system")==string::npos)
+                          newsystem+=".system";
 		}
                 Background::BackgroundClone savedtextures={{NULL,NULL,NULL,NULL,NULL,NULL,NULL}};
                 if (persistent_on_load) {
