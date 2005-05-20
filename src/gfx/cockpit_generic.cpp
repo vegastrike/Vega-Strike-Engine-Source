@@ -598,8 +598,9 @@ bool Cockpit::Update () {
 		_Universe->popActiveStarSystem();
                 if (!persistent_on_load) {
                   _Universe->pushActiveStarSystem(ss);
-                  return true;
                 }
+                return true;
+                  
           }
 	} 
   }
