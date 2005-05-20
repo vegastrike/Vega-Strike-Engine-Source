@@ -2160,7 +2160,8 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
       end=endne;
     QVector sep (UniverseUtil::SafeEntrancePoint(end,rSize()));
     if ((sep-end).MagnitudeSquared()>16*rSize()*rSize()) {
-      sep = AutoSafeEntrancePoint (end,(RealPosition(target)-end).Magnitude()-target->rSize(),target);
+      //DOn't understand why rsize is so bigsep = AutoSafeEntrancePoint (end,(RealPosition(target)-end).Magnitude()-target->rSize(),target);
+      sep = AutoSafeEntrancePoint (end,rSize(),target);
     }
     if ((sep-RealPosition(target)).MagnitudeSquared()>(RealPosition(this)-RealPosition(target)).MagnitudeSquared()) {
 		sep= RealPosition(this);

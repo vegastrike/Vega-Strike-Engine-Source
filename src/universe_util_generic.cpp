@@ -466,6 +466,18 @@ namespace UniverseUtil {
 								mission->player_autopilot = Mission::AUTO_NORMAL;
 						}
 				}
+  static bool isAsteroid(std::string name){
+    if (name.length()<8) return false;
+    return (name[0]=='A'||name[0]=='a')&&
+      name[1]=='s'&&
+      name[2]=='t'&&
+      name[3]=='e'&&
+      name[4]=='r'&&
+      name[5]=='o'&&
+      name[6]=='i'&&
+      name[7]=='d'
+      ;
+  }
 				QVector SafeEntrancePoint (QVector pos, float radial_size) {
 						static double def_un_size = XMLSupport::parse_float (vs_config->getVariable ("physics","respawn_unit_size","400"));
 						if (radial_size<0)
@@ -475,7 +487,7 @@ namespace UniverseUtil {
 								Unit * un;
 								bool collision=false;
 								for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();(un=*i)!=NULL;++i) {
-										if (un->isUnit()==ASTEROIDPTR||un->isUnit()==NEBULAPTR) {
+										if (un->isUnit()==ASTEROIDPTR||un->isUnit()==NEBULAPTR||isAsteroid(un->name)) {
 												continue;
 										}
 										double dist = (pos-un->LocalPosition()).Magnitude()-un->rSize()-/*def_un_size-*/radial_size;
@@ -515,7 +527,7 @@ namespace UniverseUtil {
 								bool collision=false;
 								for (un_iter i=sts->getUnitList().createIterator();(un=*i)!=NULL;++i)
 								{
-										if (un->isUnit()==ASTEROIDPTR||un->isUnit()==NEBULAPTR)
+                                                                  if (un->isUnit()==ASTEROIDPTR||un->isUnit()==NEBULAPTR||isAsteroid(un->name))
 										{
 												continue;
 										}
