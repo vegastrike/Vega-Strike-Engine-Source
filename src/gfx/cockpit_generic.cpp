@@ -375,7 +375,7 @@ static float dockingdistance (Unit* port, Unit * un) {
 		return UnitUtil::getDistance(port,un);
 	return mag;
 }
-void Cockpit::Update () {
+bool Cockpit::Update () {
   if (jumpok) {
 		jumpok++;
   }
@@ -384,98 +384,7 @@ void Cockpit::Update () {
   
   UpdAutoPilot();
   Unit * par=GetParent();
-  if (!par) {
-	if (respawnunit.size()>_Universe->CurrentCockpit()){
-	  if (respawnunit[_Universe->CurrentCockpit()]){
-		parentturret.SetUnit(NULL);
-		static float initialzoom = XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
-		zoomfactor=initialzoom;
-		respawnunit[_Universe->CurrentCockpit()]=0;
-		std::string savegamefile =mission->getVariable ("savegame","");
-		int k;
-		for ( k=0;k<_Universe->numPlayers();++k) {
-		  if (_Universe->AccessCockpit(k)==this)
-		  break;
-		}
-		if (k==_Universe->numPlayers()) k=0;
-                if (active_missions.size()>1){
-                  for (int i=active_missions.size()-1;i>0;--i){// don't terminate zeroth mission
-                    if (active_missions[i]->player_num==k)
-                      active_missions[i]->terminateMission();
-                  }
-                }
-                int whichcp=k;
-		string newsystem;QVector pos; bool setplayerXloc;
-                savegame->SetStarSystem("");
-		savegame->ParseSaveGame(savegamefile,newsystem,newsystem,pos,setplayerXloc,this->credits,unitfilename,k);
-                CopySavedShips(savegame->GetCallsign(),whichcp,unitfilename,true);
-		bool actually_have_save=false;
-                static bool persistent_on_load =XMLSupport::parse_bool(vs_config->getVariable("physics","persistent_on_load","true"));
-		if (savegame->GetStarSystem()!="") {
-			actually_have_save=true;
-			newsystem= savegame->GetStarSystem()+".system";
-		}else {
-			newsystem = _Universe->activeStarSystem()->getFileName();
-		}
-                Background::BackgroundClone savedtextures={{NULL,NULL,NULL,NULL,NULL,NULL,NULL}};
-                if (persistent_on_load) {
-                  _Universe->getActiveStarSystem(0)->SwapOut();
 
-                }else {
-                  Background *tmp=_Universe->activeStarSystem()->getBackground();
-                  savedtextures=tmp->Cache();
-                  _Universe->clearAllSystems();
-                }
-		StarSystem * ss = _Universe->GenerateStarSystem (newsystem.c_str(),"",Vector(0,0,0));
-                if (!persistent_on_load) {
-                  savedtextures.FreeClone();
-                }
-                
-		this->activeStarSystem=ss;
-		_Universe->pushActiveStarSystem(ss);
-
-
-		vector <StarSystem *> saved;
-		while (_Universe->getNumActiveStarSystem()) {
-		  saved.push_back (_Universe->activeStarSystem());
-		  _Universe->popActiveStarSystem();
-		}
-		if (!saved.empty()) {
-		  saved.back()=ss;
-		}
-		unsigned int mysize = saved.size();
-		for (unsigned int i=0;i<mysize;i++) {
-		  _Universe->pushActiveStarSystem (saved.back());
-		  saved.pop_back();
-		}
-		ss->SwapIn();
-		int fgsnumber = 0;
-		if (fg) {
-		  fgsnumber=fg->flightgroup_nr++;
-		  fg->nr_ships++;
-		  fg->nr_ships_left++;
-		}
-		Unit * un = UnitFactory::createUnit (GetUnitFileName().c_str(),false,this->unitfaction,unitmodname,fg,fgsnumber);
-		un->SetCurPosition (UniverseUtil::SafeEntrancePoint (savegame->GetPlayerLocation()));
-		ss->AddUnit (un);
-
-		this->SetParent(un,GetUnitFileName().c_str(),unitmodname.c_str(),savegame->GetPlayerLocation());
-		SwitchUnits (NULL,un);
-		this->credits = savegame->GetSavedCredits();
-		DoCockpitKeys();
-		_Universe->popActiveStarSystem();
-		_Universe->pushActiveStarSystem(ss);
-		savegame->ReloadPickledData();
-                savegame->LoadSavedMissions();
-		if (actually_have_save) {
-                  DockToSavedBases(whichcp);
-                }
-		_Universe->popActiveStarSystem();
-                if (!persistent_on_load)
-                  _Universe->pushActiveStarSystem(ss);
-      }
-	} 
-  }
   if (turretcontrol.size()>_Universe->CurrentCockpit())
   if (turretcontrol[_Universe->CurrentCockpit()]) {
     turretcontrol[_Universe->CurrentCockpit()]=0;
@@ -600,7 +509,101 @@ void Cockpit::Update () {
 
   }
   }
+  if (!par) {
+	if (respawnunit.size()>_Universe->CurrentCockpit()){
+	  if (respawnunit[_Universe->CurrentCockpit()]){
+		parentturret.SetUnit(NULL);
+		static float initialzoom = XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
+		zoomfactor=initialzoom;
+		respawnunit[_Universe->CurrentCockpit()]=0;
+		std::string savegamefile =mission->getVariable ("savegame","");
+		int k;
+		for ( k=0;k<_Universe->numPlayers();++k) {
+		  if (_Universe->AccessCockpit(k)==this)
+		  break;
+		}
+		if (k==_Universe->numPlayers()) k=0;
+                if (active_missions.size()>1){
+                  for (int i=active_missions.size()-1;i>0;--i){// don't terminate zeroth mission
+                    if (active_missions[i]->player_num==k)
+                      active_missions[i]->terminateMission();
+                  }
+                }
+                int whichcp=k;
+		string newsystem;QVector pos; bool setplayerXloc;
+                savegame->SetStarSystem("");
+		savegame->ParseSaveGame(savegamefile,newsystem,newsystem,pos,setplayerXloc,this->credits,unitfilename,k);
+                CopySavedShips(savegame->GetCallsign(),whichcp,unitfilename,true);
+		bool actually_have_save=false;
+                static bool persistent_on_load =XMLSupport::parse_bool(vs_config->getVariable("physics","persistent_on_load","true"));
+		if (savegame->GetStarSystem()!="") {
+			actually_have_save=true;
+			newsystem= savegame->GetStarSystem()+".system";
+		}else {
+			newsystem = _Universe->activeStarSystem()->getFileName();
+		}
+                Background::BackgroundClone savedtextures={{NULL,NULL,NULL,NULL,NULL,NULL,NULL}};
+                if (persistent_on_load) {
+                  _Universe->getActiveStarSystem(0)->SwapOut();
 
+                }else {
+                  Background *tmp=_Universe->activeStarSystem()->getBackground();
+                  savedtextures=tmp->Cache();
+                  _Universe->clearAllSystems();
+                }
+		StarSystem * ss = _Universe->GenerateStarSystem (newsystem.c_str(),"",Vector(0,0,0));
+                if (!persistent_on_load) {
+                  savedtextures.FreeClone();
+                }
+                
+		this->activeStarSystem=ss;
+		_Universe->pushActiveStarSystem(ss);
+
+
+		vector <StarSystem *> saved;
+		while (_Universe->getNumActiveStarSystem()) {
+		  saved.push_back (_Universe->activeStarSystem());
+		  _Universe->popActiveStarSystem();
+		}
+		if (!saved.empty()) {
+		  saved.back()=ss;
+		}
+		unsigned int mysize = saved.size();
+		for (unsigned int i=0;i<mysize;i++) {
+		  _Universe->pushActiveStarSystem (saved.back());
+		  saved.pop_back();
+		}
+		ss->SwapIn();
+		int fgsnumber = 0;
+		if (fg) {
+		  fgsnumber=fg->flightgroup_nr++;
+		  fg->nr_ships++;
+		  fg->nr_ships_left++;
+		}
+		Unit * un = UnitFactory::createUnit (GetUnitFileName().c_str(),false,this->unitfaction,unitmodname,fg,fgsnumber);
+		un->SetCurPosition (UniverseUtil::SafeEntrancePoint (savegame->GetPlayerLocation()));
+		ss->AddUnit (un);
+
+		this->SetParent(un,GetUnitFileName().c_str(),unitmodname.c_str(),savegame->GetPlayerLocation());
+		SwitchUnits (NULL,un);
+		this->credits = savegame->GetSavedCredits();
+		DoCockpitKeys();
+		_Universe->popActiveStarSystem();
+		_Universe->pushActiveStarSystem(ss);
+		savegame->ReloadPickledData();
+                savegame->LoadSavedMissions();
+		if (actually_have_save) {
+                  DockToSavedBases(whichcp);
+                }
+		_Universe->popActiveStarSystem();
+                if (!persistent_on_load) {
+                  _Universe->pushActiveStarSystem(ss);
+                  return true;
+                }
+          }
+	} 
+  }
+  return false;
 }
 
 Cockpit::~Cockpit () {

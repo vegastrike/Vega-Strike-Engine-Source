@@ -125,7 +125,7 @@ protected:
   Unit * GetSaveParent ();
   ///Draws Cockpit then restores viewport
   virtual void Draw() {}
-  void Update(); //respawns and the like.
+  bool Update(); //respawns and the like. Returns true if starsystem was reloaded
   virtual void UpdAutoPilot();
   ///Sets up the world for rendering...call before draw
   virtual void SetupViewPort (bool clip=true) {}

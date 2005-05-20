@@ -569,8 +569,10 @@ void StarSystem::Update(float priority , bool executeDirector) {
     while(time/SIMULATION_ATOM >= (1./PHY_NUM)) { // Chew up all SIMULATION_ATOMs that have elapsed since last update
       UnitCollection::UnitIterator iter;
       if (current_stage==PHY_AI) {
-	if (firstframe&&rand()%2) {
-	  if (this==_Universe->getActiveStarSystem(0)) {
+        static int dothis=0;
+        if (this==_Universe->getActiveStarSystem(0)) {
+          if (dothis++%2==0) {
+
 #ifdef UPDATEDEBUG
   VSFileSystem::vs_fprintf (stderr,"Snd");
   fflush (stderr);
@@ -660,13 +662,16 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	for (int j=0;j<_Universe->numPlayers();j++) {
 	  if (_Universe->AccessCockpit(j)->activeStarSystem==this) {
 	    _Universe->SetActiveCockpit(j);
-	    _Universe->AccessCockpit(j)->Update();
+	    if (_Universe->AccessCockpit(j)->Update()) {
+              _Universe->SetActiveCockpit(i);
+              SIMULATION_ATOM =  normal_simulation_atom;
+              _Universe->popActiveStarSystem();
+              return;// in case star system reloads
+            }
 	  }
 	}
 	_Universe->SetActiveCockpit(i);
-        SIMULATION_ATOM =  normal_simulation_atom;
-        _Universe->popActiveStarSystem();
-        return;
+
       } else if (current_stage==PHY_RESOLV) {
 	iter = drawList.createIterator();
 #ifdef UPDATEDEBUG
