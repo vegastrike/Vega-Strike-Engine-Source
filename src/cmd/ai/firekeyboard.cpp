@@ -907,12 +907,16 @@ bool TargAll (Unit *me,Unit *target) {
   static bool can_target_sun=XMLSupport::parse_bool(vs_config->getVariable("graphics","can_target_sun","false"));
 	return (me->InRange(target,true,false)||me->InRange(target,true,true))&&(can_target_sun||!UnitUtil::isSun(target));
 }
-bool TargUn (Unit *me,Unit *target) {
-	return me->InRange(target,true,false)&&(target->isUnit()==UNITPTR||target->isUnit()==ENHANCEMENTPTR);
-}
 bool TargSig (Unit *me,Unit *target) {
 	return me->InRange(target,true,true)&&UnitUtil::isSignificant(target);
 }
+extern Unit*getTopLevelOwner();
+bool TargUn (Unit *me,Unit *target) {
+  static bool can_target_cargo=XMLSupport::parse_bool(vs_config->getVariable("graphics","can_target_cargo","false"));
+  static int up=FactionUtil::GetFaction("upgrades");
+  return me->InRange(target,true,false)&&(target->isUnit()==UNITPTR||target->isUnit()==ENHANCEMENTPTR)&&getTopLevelOwner()!=target->owner&&(can_target_cargo||target->faction!=up);
+}
+
 bool TargFront (Unit *me,Unit *target) {
 	/*
 	float dist;
