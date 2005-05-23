@@ -236,10 +236,10 @@ static void DrawHUDSprite (VDU * thus, VSSprite* s, float per, float &sx, float 
   		mul=middle_point*ul+middle_point_small*lr;
 		bool tmax=1;
   		GFXBegin(GFXQUAD);
-		GFXColorf(getDamageColor(top_view?aup:aleft));
+		GFXColorf(getDamageColor(top_view?adown:aleft));
   		GFXTexCoord2f(0, 0);
   		GFXVertexf(ul);
-		GFXColorf(getDamageColor(aup));		
+		GFXColorf(getDamageColor(top_view?adown:aup));		
   		GFXTexCoord2f(1, 0);
   		GFXVertexf(ur);
 		GFXColorf(getDamageColor(hull,true));		
@@ -260,10 +260,10 @@ static void DrawHUDSprite (VDU * thus, VSSprite* s, float per, float &sx, float 
 		GFXColorf(getDamageColor(hull,true));				
   		GFXTexCoord2f(middle_point, middle_point_small);
   		GFXVertexf(mur);
-		GFXColorf(getDamageColor(top_view?adown:aright));
+		GFXColorf(getDamageColor(top_view?aup:aright));
   		GFXTexCoord2f(1, 1);
   		GFXVertexf(lr);
-		GFXColorf(getDamageColor(adown));		
+		GFXColorf(getDamageColor(top_view?aup:adown));		
   		GFXTexCoord2f(0, 1);
   		GFXVertexf(ll);
 		GFXColorf(getDamageColor(hull,true));				
