@@ -156,6 +156,10 @@ void ExamineWhenTargetKey() {
   if (reallySwitch) {
     int view=0;
     int examine=0;    
+    Unit * un;
+    if ((un=_Universe->AccessCockpit()->GetParent())!=NULL) {
+      un->LockTarget(false);
+    }
     for (;view<2;++view) {
       if (_Universe->AccessCockpit()->getVDUMode(view)==VDU::VIEW)
         break;
@@ -167,6 +171,7 @@ void ExamineWhenTargetKey() {
     if ((examine==2) && (view==2)){
       SwitchVDUTo(VDU::TARGET);
     }
+   
   }
 }
 namespace CockpitKeys {

@@ -4732,7 +4732,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 			text+="#n#"+prefix+statcolor+"ITTS (Intelligent Target Tracking System) support: #-c";
 			if (uc.itts) text+="yes"; else text+="no";
 			text+="#n#"+prefix+statcolor+"AFHH (Advanced Flag & Hostility Heuristics) support: #-c";
-			if (uc.radar.color) text+="yes"; else text+="no";
+			if (uc.radar.iff==0) text+="no"; else if (uc.radar.iff==1) text+="friendly/hostile"; else text+="full";
 		}
 
 		text.append("#n##n##c0:1:.5#"+prefix+"[ENERGY SUBSYSTEM]#n##-c");
@@ -4752,7 +4752,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 					text+="#n#"+prefix+statcolor+"ITTS (Intelligent Target Tracking System) support: #-c";
 					if (uc.itts) text+="yes"; else text+="no";
 					text+="#n#"+prefix+statcolor+"AFHH (Advanced Flag & Hostility Heuristics) support: #-c";
-					if (uc.radar.color) text+="yes"; else text+="no";
+					if (uc.radar.iff==0) text+="no"; else if (uc.radar.iff==1) text+="friendly/hostile"; else text+="full";
 				}
 				break;
 			case 1: // Additive

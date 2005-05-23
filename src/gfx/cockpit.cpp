@@ -41,7 +41,7 @@ static GFXColor RetrColor (const string& name, GFXColor def=GFXColor(1,1,1,1)) {
   vs_config->getColor(name,&def.r);    
   return def;
 }
-
+extern Unit*getTopLevelOwner();
 static soundContainer disableautosound;
 static soundContainer enableautosound;
 
@@ -115,7 +115,7 @@ void GameCockpit::LocalToEliteRadar (const Vector & pos, float &s, float &t,floa
 }
 
 
-GFXColor GameCockpit::unitToColor (Unit *un,Unit *target) {
+GFXColor GameCockpit::unitToColor (Unit *un,Unit *target, char ifflevel) {
   static GFXColor basecol=RetrColor("base",GFXColor(-1,-1,-1,-1));
   static GFXColor jumpcol=RetrColor("jump",GFXColor(0,1,1,.8));
   static GFXColor navcol=RetrColor("nav",GFXColor(1,1,1,1));
@@ -123,10 +123,13 @@ GFXColor GameCockpit::unitToColor (Unit *un,Unit *target) {
   static GFXColor missilecol=RetrColor("missile",GFXColor(.25,0,.5,1));
   static GFXColor cargocol=RetrColor("cargo",GFXColor(.6,.2,0,1));
   static int cargofac=FactionUtil::GetFaction("upgrades");
-  
-  if (target->GetDestinations().size()>0) {
+  static GFXColor black_and_white=RetrColor ("black_and_white",GFXColor(.5,.5,.5));  
+  if (ifflevel==0)
+    return black_and_white;
+  if (target->GetDestinations().size()>0&&ifflevel>1) {
       return jumpcol;
-    }
+  }
+  if (ifflevel>1) {
     if(target->isUnit()==PLANETPTR){
       Planet * plan = static_cast<Planet*>(target);
       if (plan->hasLights()) {
@@ -140,24 +143,24 @@ GFXColor GameCockpit::unitToColor (Unit *un,Unit *target) {
       return missilecol;      
     }else if (target->faction==cargofac){
       return cargocol;
-    }else if (basecol.r>0&&basecol.g>0&&basecol.b>0&&UnitUtil::getFlightgroupName(target)=="Base") {
-      return basecol;
     }else if(target==un->Target()&&draw_all_boxes){//if we only draw target box we cannot tell what faction enemy is!
-	  // my target
-	  return targeted;
-	}
-	else if(target->Target()==un){
-	  // the other ships is targetting me
-	  return targetting;
-	}
-
-	// other spaceships
-	static bool reltocolor=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","DrawTheirRelationColor","true"));
-	if (reltocolor) {
-	  return relationToColor(target->getRelation(un));
-	}else {
-	  return relationToColor(un->getRelation(target));
-	}
+      // my target
+      return targeted;
+    }else if(target->Target()==un){
+      // the other ships is targetting me
+      return targetting;
+    }
+  }
+  if (basecol.r>0&&basecol.g>0&&basecol.b>0&&UnitUtil::getFlightgroupName(target)=="Base"&&ifflevel>0) {
+    return basecol;
+  }
+  // other spaceships
+  static bool reltocolor=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","DrawTheirRelationColor","true"));
+  if (reltocolor) {
+    return relationToColor(target->getRelation(un));
+  }else {
+    return relationToColor(un->getRelation(target));
+  }
 }
 
 GFXColor GameCockpit::relationToColor (float relation) {
@@ -427,7 +430,7 @@ void GameCockpit::DrawTargetBoxes(){
     if(target!=un){
         QVector Loc(target->Position());
 
-	GFXColor drawcolor=unitToColor(un,target);
+	GFXColor drawcolor=unitToColor(un,target,un->GetComputerData().radar.iff);
 	GFXColorf(drawcolor);
 
 	if(target->isUnit()==UNITPTR){
@@ -472,7 +475,7 @@ void GameCockpit::DrawTargetBox () {
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (LIGHTING);
   DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Cast().Dot((un->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition()));
-  GFXColorf (un->GetComputerData().radar.color?unitToColor(un,target):black_and_white);
+  GFXColorf (unitToColor(un,target,un->GetComputerData().radar.iff));
 
   if(draw_line_to_target){
     QVector my_loc(_Universe->AccessCamera()->GetPosition());
@@ -578,7 +581,7 @@ void GameCockpit::DrawTurretTargetBoxes () {
     GFXBlendMode (SRCALPHA,INVSRCALPHA);
     GFXDisable (LIGHTING);
     DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Cast().Dot((un->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition()));
-    GFXColorf (un->GetComputerData().radar.color?unitToColor(un,target):black_and_white);
+    GFXColorf (unitToColor(un,target,un->GetComputerData().radar.iff));
 
     //DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),un->TargetLocked());
 
@@ -617,9 +620,8 @@ void GameCockpit::drawUnToTarget ( Unit * un, Unit* target,float xcent,float yce
 		  localcoord.k=-localcoord.k;
 	  float s,t;
       this->LocalToRadar (localcoord,s,t);
-      bool ccolor=un->GetComputerData().radar.color;
-      GFXColor localcol (ccolor?this->unitToColor (un,target):black_and_white);
-      if (ccolor) {
+      GFXColor localcol (this->unitToColor (un,target,un->GetComputerData().radar.iff));
+      if (1) {
         unsigned int s=vdu.size();
         for (unsigned int i=0;i<s;++i) {
           if (vdu[i]->GetCommunicating()==target)
@@ -691,6 +693,8 @@ void GameCockpit::DrawBlips (Unit * un) {
   }
   GFXPointSize (2);
   GFXBegin(GFXPOINT);
+  static bool draw_significant_blips = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_significant_blips","true"));
+  
   while ((target = iter.current())!=NULL) {
     if (target!=un) {
       double dist;
@@ -701,19 +705,24 @@ void GameCockpit::DrawBlips (Unit * un) {
 	iter.advance();	
 	continue;
       }
-	  if (Radar[0])
-		  drawUnToTarget (un,target,xcent[0],ycent[0],xsize[0],ysize[0],false);
-	  if (Radar[1])
-		  drawUnToTarget (un,target,xcent[1],ycent[1],xsize[1],ysize[1],true);
-	  if (target->isPlanet()==PLANETPTR) {
-		  Unit * sub=NULL;
-		  for (un_iter i=target->getSubUnits();(sub=*i)!=NULL;++i) {
-			  if (Radar[0])
-			  drawUnToTarget(un,sub,xcent[0],ycent[0], xsize[0],ysize[0],false);
-			  if (Radar[1])
-			  drawUnToTarget(un,sub,xcent[1],ycent[1], xsize[1],ysize[1],true);
-		  }
-	  }
+      if (draw_significant_blips==false&&getTopLevelOwner()==target->owner){
+        iter.advance();	
+	continue;      
+      }
+      
+      if (Radar[0])
+        drawUnToTarget (un,target,xcent[0],ycent[0],xsize[0],ysize[0],false);
+      if (Radar[1])
+        drawUnToTarget (un,target,xcent[1],ycent[1],xsize[1],ysize[1],true);
+      if (target->isPlanet()==PLANETPTR) {
+        Unit * sub=NULL;
+        for (un_iter i=target->getSubUnits();(sub=*i)!=NULL;++i) {
+          if (Radar[0])
+            drawUnToTarget(un,sub,xcent[0],ycent[0], xsize[0],ysize[0],false);
+          if (Radar[1])
+            drawUnToTarget(un,sub,xcent[1],ycent[1], xsize[1],ysize[1],true);
+        }
+      }
     }
     iter.advance();
   }
@@ -743,10 +752,10 @@ void GameCockpit::DrawEliteBlips (Unit * un) {
   if (Radar[0]->LoadSuccess()) {
     DrawRadarCircles (xcent,ycent,xsize,ysize,textcol);
   }
+  static bool draw_significant_blips = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_significant_blips","true"));
   while ((target = iter.current())!=NULL) {
     if (target!=un) {
       double mm;
-
       if (!un->InRange (target,mm,(makeBigger==target),true,true)) {
 	if (makeBigger==target) {
 	  un->Target(NULL);
@@ -754,13 +763,18 @@ void GameCockpit::DrawEliteBlips (Unit * un) {
 	iter.advance();	
 	continue;
       }
+      if (draw_significant_blips==false&&getTopLevelOwner()==target->owner){
+	iter.advance();	
+	continue;      
+      }
+
       Vector localcoord (un->LocalCoordinates(target));
 
 	LocalToRadar (localcoord,s,t);
 	LocalToEliteRadar(localcoord,es,et,eh);
 
 
-      GFXColor localcol (radarl->color?unitToColor (un,target):black_and_white);
+      GFXColor localcol (unitToColor (un,target,radarl->iff));
       GFXColorf (localcol);
       int headsize=4;
 #if 1
@@ -2120,7 +2134,7 @@ void GameCockpit::DrawArrowToTarget(Unit *un, Unit *target) {
   p2.k = p1.k = 0;
 
   static GFXColor black_and_white = DockBoxColor("black_and_white");
-  GFXColorf(un->GetComputerData().radar.color ? unitToColor(un, target) : black_and_white);
+  GFXColorf(unitToColor(un, target,un->GetComputerData().radar.iff));
 
   glBegin(GL_LINE_LOOP);
   GFXVertex3f(s, t, 0);

@@ -623,7 +623,7 @@ int NetClient::recvMsg( Packet* outpacket )
 					if( damages & Unit::COMPUTER_DAMAGED)
 					{
 						un->computer.itts = netbuf.getChar();
-						un->computer.radar.color = netbuf.getChar();
+						un->computer.radar.iff = netbuf.getChar();
 						un->limits.retro = netbuf.getFloat();
 						un->computer.radar.maxcone = netbuf.getFloat();
 						un->computer.radar.lockcone = netbuf.getFloat();

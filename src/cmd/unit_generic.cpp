@@ -742,7 +742,7 @@ void Unit::Init()
   computer.radar.trackingcone = minTrackingNum;
   computer.radar.lockcone=lc;
   computer.radar.mintargetsize=0;
-  computer.radar.color=true;
+  computer.radar.iff=0;
 
   flightgroup=NULL;
   flightgroup_subnumber=0;
@@ -3287,7 +3287,9 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 		} else if (randnum>=.775) {
 			computer.itts=false; //Set the computer to not have an itts
 		} else if (randnum>=.7) {
-			computer.radar.color=false; //set the radar to not have color
+                  if (computer.radar.iff>0) {
+                    computer.radar.iff-=1; //set the radar to not have color
+                  }
 		} else if (randnum>=.5) {
 			// THIS IS NOT YET SUPPORTED IN NETWORKING
 			computer.target=NULL; //set the target to NULL
@@ -4030,6 +4032,14 @@ void Unit::TargetTurret (Unit * targ) {
 }
 
 // WARNING : WHEN TURRETS WE MAY NOT WANT TO ASK THE SERVER FOR INFOS ! ONLY FOR LOCAL PLAYERS (_Universe-isStarship())
+void Unit::LockTarget(bool myboo) {
+  computer.radar.locked=myboo;
+
+  if (myboo&&computer.radar.canlock==false&&false==UnitUtil::isSignificant(Target())){
+    computer.radar.locked=false;
+  }
+}
+
 void Unit::Target (Unit *targ) {
   if (targ==this) {
     return;
@@ -5754,10 +5764,13 @@ if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrad
   }
   
   if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Radar_Color")){
-    computer.radar.color=UpgradeBoolval(computer.radar.color,up->computer.radar.color,touchme,downgrade,numave,percentage,force_change_on_nothing);
+    STDUPGRADE(computer.radar.iff,up->computer.radar.iff,templ->computer.radar.iff,0);
   }
   if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"ITTS")){
     computer.itts=UpgradeBoolval(computer.itts,up->computer.itts,touchme,downgrade,numave,percentage,force_change_on_nothing); 
+  }
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Can_Lock")){
+    computer.radar.canlock=UpgradeBoolval(computer.radar.canlock,up->computer.radar.canlock,touchme,downgrade,numave,percentage,force_change_on_nothing); 
   }
   ///do the two reversed ones below
   

@@ -455,12 +455,12 @@ public:
       float trackingcone;
       ///The minimum radius of the target
       float mintargetsize;
-      ///does this radar support IFF?
-      bool color;
+      ///what kind of iff support does it have 0 = none, 1=friend/enemy 2=object type
+      char iff;
       bool locked;
-
+      bool canlock;
       RADARLIM() : maxrange(0), maxcone(0), lockcone(0), trackingcone(0),
-      		mintargetsize(0), color(false), locked(false) { }
+      		mintargetsize(0), iff(0), locked(false), canlock(false) { }
     } radar;
     ///The nav point the unit may be heading for
     Vector NavPoint;
@@ -873,7 +873,7 @@ protected:
 
 public:
   int LockMissile() const;//-1 is no lock necessary 1 is locked
-  void LockTarget(bool myboo){computer.radar.locked=myboo;}
+  void LockTarget(bool myboo);
   bool TargetLocked()const {return computer.radar.locked;}
   float TrackingGuns(bool &missileLock);
   ///Changes currently selected weapon

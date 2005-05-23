@@ -1552,7 +1552,7 @@ using namespace UnitXML;
     }
     image->unitwriter->AddTag ("Radar");    
     ADDELEMNAME("itts",boolStarHandler,XMLType(&computer.itts));    
-   ADDELEMNAME("color",boolStarHandler,XMLType(&computer.radar.color));    
+    ADDELEMNAME("color",charStarHandler,XMLType(&computer.radar.iff));    
     ADDELEMNAME("mintargetsize",charStarHandler,XMLType(&computer.radar.mintargetsize));    
     ADDELEMNAME("range",floatStarHandler,XMLType(&computer.radar.maxrange));    
     ADDELEMNAME("maxcone",floatStarHandler,XMLType(&computer.radar.maxcone));   
@@ -1585,7 +1585,10 @@ using namespace UnitXML;
 	computer.radar.maxrange = parse_float ((*iter).value);
 	break;
       case ISCOLOR:
-	computer.radar.color=parse_bool ((*iter).value);
+	computer.radar.iff=atoi((*iter).value.c_str());
+        if (computer.radar.iff==0) {
+          computer.radar.iff=parse_bool ((*iter).value);
+        }
 	break;
       }
     }

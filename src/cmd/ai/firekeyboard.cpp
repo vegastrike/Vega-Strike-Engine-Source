@@ -1737,7 +1737,7 @@ void FireKeyboard::Execute () {
       f().saveTargetKeys[i]=RELEASE;
       savedTargets[i]=parent->Target();
     }
-    if (f().restoreTargetKeys[i]==PRESS) {
+    if (f().restoreTargetKeys[i]==PRESS&&parent->GetComputerData().radar.canlock) {
       f().restoreTargetKeys[i]=RELEASE;
       Unit * un;
       for (un_iter u=_Universe->activeStarSystem()->getUnitList().createIterator();

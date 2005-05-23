@@ -794,7 +794,12 @@ shield.range[1].   rhomax=r90;
   computer.max_combat_speed=stof(row["Default_Speed_Governor"])*game_speed;
   computer.max_combat_ab_speed=stof(row["Afterburner_Speed_Governor"])*game_speed;
   computer.itts = stob(row["ITTS"],true);
-  computer.radar.color=stob(row["Radar_Color"],true);
+  computer.radar.canlock = stob(row["Can_Lock"],true);
+  {
+    std::string iffval = row["Radar_Color"];
+    int iff=stoi(iffval,0);
+    computer.radar.iff=iff?iff:stob(iffval,false);
+  }
   computer.radar.maxrange=stof(row["Radar_Range"],FLT_MAX);
   computer.radar.maxcone=cos(stof(row["Max_Cone"],180)*VS_PI/180);
   computer.radar.trackingcone=cos(stof(row["Tracking_Cone"],180)*VS_PI/180);
@@ -1211,7 +1216,8 @@ string Unit::WriteUnitString () {
         unit["Default_Speed_Governor"]=tos(computer.max_combat_speed/game_speed);
         unit["Afterburner_Speed_Governor"]=tos(computer.max_combat_ab_speed/game_speed);
         unit["ITTS"]=tos(computer.itts);
-        unit["Radar_Color"]=tos(computer.radar.color);
+        unit["Can_Lock"]=tos(computer.radar.canlock);
+        unit["Radar_Color"]=tos((int)computer.radar.iff);
         unit["Radar_Range"]=tos(computer.radar.maxrange);
         unit["Tracking_Cone"]=tos(acos(computer.radar.trackingcone)*180./VS_PI);
         unit["Max_Cone"]=tos(acos(computer.radar.maxcone)*180./VS_PI);

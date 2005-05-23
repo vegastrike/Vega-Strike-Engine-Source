@@ -667,7 +667,7 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 		if( damages & Unit::COMPUTER_DAMAGED)
 		{
 			netbuf.addChar( un->computer.itts);
-			netbuf.addChar( un->computer.radar.color);
+			netbuf.addChar( un->computer.radar.iff);
 			netbuf.addFloat( un->limits.retro);
 			netbuf.addFloat( un->computer.radar.maxcone);
 			netbuf.addFloat( un->computer.radar.lockcone);
