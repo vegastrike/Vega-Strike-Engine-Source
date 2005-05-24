@@ -698,7 +698,8 @@ void GameCockpit::DrawBlips (Unit * un) {
   while ((target = iter.current())!=NULL) {
     if (target!=un) {
       double dist;
-      if (!un->InRange (target,dist,makeBigger==target,true,true)) {
+      static bool untarget_out_cone=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","untarget_beyond_cone","false"));
+      if (!un->InRange (target,dist,makeBigger==target&&untarget_out_cone,true,true)) {
 	if (makeBigger==target) {
 	  un->Target(NULL);
 	}
@@ -756,7 +757,8 @@ void GameCockpit::DrawEliteBlips (Unit * un) {
   while ((target = iter.current())!=NULL) {
     if (target!=un) {
       double mm;
-      if (!un->InRange (target,mm,(makeBigger==target),true,true)) {
+      static bool untarget_out_cone=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","untarget_beyond_cone","false"));
+      if (!un->InRange (target,mm,makeBigger==target&&untarget_out_cone,true,true)) {
 	if (makeBigger==target) {
 	  un->Target(NULL);
 	}

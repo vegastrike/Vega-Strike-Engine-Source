@@ -908,7 +908,7 @@ bool TargAll (Unit *me,Unit *target) {
 	return (me->InRange(target,true,false)||me->InRange(target,true,true))&&(can_target_sun||!UnitUtil::isSun(target));
 }
 bool TargSig (Unit *me,Unit *target) {
-	return me->InRange(target,true,true)&&UnitUtil::isSignificant(target);
+	return me->InRange(target,false,true)&&UnitUtil::isSignificant(target);
 }
 extern Unit*getTopLevelOwner();
 bool TargUn (Unit *me,Unit *target) {
@@ -1456,7 +1456,7 @@ static void TurretFAW(Unit * parent) {
 }
 static void ForceChangeTarget(Unit*  parent) {
   Unit * curtarg = parent->Target();
-  ChooseTargets(parent,TargThreat,false);
+  ChooseTargets(parent,TargUn,false);
   if (parent->Target()==curtarg)
     ChooseTargets(parent,TargNear,false);
   if (parent->Target()==curtarg)
@@ -1471,11 +1471,17 @@ void FireKeyboard::Execute () {
   ProcessCommunicationMessages(SIMULATION_ATOM,true);
   Unit * targ;
   if ((targ = parent->Target())) {
+    double mm=0.0;
     ShouldFire (targ);
     DoDockingOps(parent,targ,whichplayer,sex);
     if (targ->GetHull()<0) {
       ForceChangeTarget(parent);
       refresh_target=true;
+    }else if (!parent->InRange(targ,mm,true,true,true)) {
+      ChooseTargets(parent,TargUn,false);//only go for other active units in cone
+      if (parent->Target()==NULL) {
+        parent->Target(targ);
+      }
     }
   } else {
     ForceChangeTarget(parent);
@@ -1574,11 +1580,13 @@ void FireKeyboard::Execute () {
     f().targetskey=DOWN;
     ChooseTargets(parent,TargSig,false);
     refresh_target=true;
+    parent->LockTarget(true);
   }
   if (f().targetukey==PRESS) {
     f().targetukey=DOWN;
     ChooseTargets(parent,TargUn,false);
     refresh_target=true;
+
   }
   if(f().picktargetkey==PRESS){
     f().picktargetkey=DOWN;
@@ -1619,6 +1627,7 @@ void FireKeyboard::Execute () {
     f().rtargetskey=DOWN;
     ChooseTargets(parent,TargSig,true);
     refresh_target=true;
+    parent->LockTarget(true);
   }
   if (f().rtargetukey==PRESS) {
     f().rtargetukey=DOWN;
