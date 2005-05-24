@@ -185,8 +185,7 @@ GFXColor GameCockpit::relationToColor (float relation) {
 }
 void GameCockpit::DrawNavigationSymbol (const Vector &Loc, const Vector & P, const Vector & Q, float size) {
   GFXColor4f (1,1,1,1);
-  static bool draw_nav_symbol=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawNavSymbol","false"));
-  if (draw_nav_symbol) {
+  if (1) {
     size = .125*GFXGetZPerspective (size);
     GFXBegin (GFXLINE);
     GFXVertexf(Loc+P*size);
@@ -456,6 +455,7 @@ void GameCockpit::DrawTargetBoxes(){
 void GameCockpit::DrawTargetBox () {
   float speed,range;
   static GFXColor black_and_white=DockBoxColor ("black_and_white"); 
+  static int neutral = FactionUtil::GetFaction("neutral");
   Unit * un = parent.GetUnit();
   if (!un)
     return;
@@ -474,7 +474,9 @@ void GameCockpit::DrawTargetBox () {
   GFXDisable (DEPTHWRITE);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (LIGHTING);
-  DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Cast().Dot((un->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition()));
+  static bool draw_nav_symbol=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawNavSymbol","false"));
+  if (draw_nav_symbol)
+    DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Cast().Dot((un->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition()));
   GFXColorf (unitToColor(un,target,un->GetComputerData().radar.iff));
 
   if(draw_line_to_target){
@@ -490,7 +492,14 @@ void GameCockpit::DrawTargetBox () {
     }
     GFXEnd();
   }
-  DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),un->TargetLocked());
+  float distance = UnitUtil::getDistance(un,target);
+  static bool draw_target_nav_symbol =XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_target_nav_symbol","true"));
+  if (draw_target_nav_symbol&&((target->faction==neutral&&target->isUnit()==UNITPTR)||target->isUnit()==ASTEROIDPTR||(target->isPlanet()&&((Planet*)target)->isAtmospheric())||distance>un->GetComputerData().radar.maxrange)) {
+    static float nav_symbol_size = XMLSupport::parse_float(vs_config->getVariable("graphics","nav_symbol_size",".25"));
+    DrawNavigationSymbol (Loc,CamP,CamQ, Loc.Magnitude()*nav_symbol_size);  
+  }else {
+    DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),un->TargetLocked());
+  }
   static bool draw_dock_box =XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_docking_boxes","true"));
   if (draw_dock_box) {
     DrawDockingBoxes(un,target,CamP,CamQ,CamR);
@@ -580,7 +589,9 @@ void GameCockpit::DrawTurretTargetBoxes () {
     GFXDisable (DEPTHWRITE);
     GFXBlendMode (SRCALPHA,INVSRCALPHA);
     GFXDisable (LIGHTING);
-    DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Cast().Dot((un->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition()));
+    static bool draw_nav_symbol=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawNavSymbol","false"));
+    if (draw_nav_symbol)
+      DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Cast().Dot((un->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition()));
     GFXColorf (unitToColor(un,target,un->GetComputerData().radar.iff));
 
     //DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),un->TargetLocked());
