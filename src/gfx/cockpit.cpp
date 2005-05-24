@@ -717,7 +717,7 @@ void GameCockpit::DrawBlips (Unit * un) {
 	iter.advance();	
 	continue;
       }
-      if (draw_significant_blips==false&&getTopLevelOwner()==target->owner){
+      if (makeBigger!=target&&draw_significant_blips==false&&getTopLevelOwner()==target->owner){
         iter.advance();	
 	continue;      
       }
@@ -1386,7 +1386,7 @@ static void DrawDamageFlash(int dtype) {
   static string armorflash=vs_config->getVariable("graphics","armor_flash_animation","armorflash.ani");
   static string hullflash=vs_config->getVariable("graphics","armor_flash_animation","hullflash.ani");
   string flashes[numtypes];flashes[0]=shieldflash;flashes[1]=armorflash;flashes[2]=hullflash;
-  float fallbackcolor[numtypes][4]={{0,1,.5,1},{1,0,.2,.25},{1,0,0,.66}};
+  float fallbackcolor[numtypes][4]={{0,1,.5,.2},{1,0,.2,.25},{1,0,0,.5}};
   
   static bool init=false;
   static Animation* aflashes[numtypes];

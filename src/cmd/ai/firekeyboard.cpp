@@ -1475,6 +1475,7 @@ void FireKeyboard::Execute () {
     ShouldFire (targ);
     DoDockingOps(parent,targ,whichplayer,sex);
     if (targ->GetHull()<0) {
+      Target(NULL);
       ForceChangeTarget(parent);
       refresh_target=true;
     }else if (!parent->InRange(targ,mm,true,true,true)) {
