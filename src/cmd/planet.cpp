@@ -495,7 +495,7 @@ void GamePlanet::DrawTerrain() {
 
 
 
-
+extern bool CrashForceDock(Unit* thus, Unit* dockingUn, bool force);
 extern void abletodock(int dock);
 void GamePlanet::reactToCollision(Unit * un, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist) {
 #ifdef JUMP_DEBUG
@@ -541,14 +541,7 @@ void GamePlanet::reactToCollision(Unit * un, const QVector & biglocation, const 
     GameUnit<Planet>::reactToCollision (un,biglocation,bignormal,smalllocation,smallnormal,dist);
 	static bool planet_crash_docks = XMLSupport::parse_bool(vs_config->getVariable("physics","planet_collision_docks","true"));
 	if (_Universe->isPlayerStarship(un)&&planet_crash_docks) {
-		int whichdockport=this->CanDockWithMe(un);
-		if (whichdockport!=-1) {
-			QVector place=UniverseUtil::SafeEntrancePoint(un->Position(),un->rSize()*1.5);
-			un->SetPosAndCumPos(place);
-			if (un->ForceDock(this,whichdockport)>0)
-				abletodock(3);
-  		        un->UpgradeInterface(this);
-		}
+          CrashForceDock(this,un,true);
 	}
   }
 

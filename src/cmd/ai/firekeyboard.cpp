@@ -1073,6 +1073,7 @@ void abletodock(int dock) {
 //	char dumb[2]={'\0'};
 //	dumb[0]=(dock+'0');
 //	muzak->GotoSong (string("Dockingsound #")+dumb);
+  static bool play_anim=XMLSupport::parse_bool(vs_config->getVariable("graphics","docking_comm_anim","false"));
 	switch (dock) {
 	case 5:{
 		static soundContainer reqsound;
@@ -1096,12 +1097,24 @@ void abletodock(int dock) {
                 if (otherstr!=""&&rand()<RAND_MAX/2) {
                   static int s = AUDCreateSoundWAV(otherstr,false);
                   AUDPlay(s,QVector(0,0,0),Vector(0,0,0),1);
+                  if (play_anim) {
+                    Unit * un=_Universe->AccessCockpit()->GetParent();
+                    UnitUtil::commAnimation(un,"com_neutral_female_01.ani");
+                  }
                 }else {
                   if (reqsound.sound==-2) {
                     static string str=vs_config->getVariable("cockpitaudio","docking_complete","docking_complete");
                     reqsound.loadsound(str);
                   }
                   reqsound.playsound();}
+                  if (play_anim) {
+                    Unit * un=_Universe->AccessCockpit()->GetParent();
+                    if (rand()%2) {
+                      UnitUtil::commAnimation(un,"com_neutral_male_01.ani");
+                    }else {
+                      UnitUtil::commAnimation(un,"com_neutral_male_02.ani");
+                    }
+                  }
           }
           break;
 	case 2:{
@@ -1585,7 +1598,14 @@ void FireKeyboard::Execute () {
   }
   if (f().targetukey==PRESS) {
     f().targetukey=DOWN;
+    Unit * tmp=parent->Target();
     ChooseTargets(parent,TargUn,false);
+    if (tmp==parent->Target()) {
+      ChooseTargets(parent,TargFront,false);
+      if (tmp==parent->Target()) {
+        ChooseTargets(parent,TargAll,false);
+      }
+    }
     refresh_target=true;
 
   }
@@ -1632,7 +1652,14 @@ void FireKeyboard::Execute () {
   }
   if (f().rtargetukey==PRESS) {
     f().rtargetukey=DOWN;
+    Unit * tmp = parent->Target();
     ChooseTargets(parent,TargUn,true);
+    if (tmp==parent->Target()&&getTopLevelOwner()==tmp->owner) {
+      ChooseTargets(parent,TargFront,false);
+      if (tmp==parent->Target()) {
+        ChooseTargets(parent,TargAll,false);
+      }
+    }
     refresh_target=true;
   }
 

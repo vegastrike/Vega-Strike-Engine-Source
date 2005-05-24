@@ -14,7 +14,7 @@ void deleteVSSprite(VSSprite *file)
 {
 
 }
-
+void abletodock(int){}
 void cache_ani (string s) {}
 void update_ani_cache () {}
 

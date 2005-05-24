@@ -140,7 +140,21 @@ Vector ReflectNormal (const Vector &vel, const Vector & norm ) {
 
 
 #define INVERSEFORCEDISTANCE 5400
-
+extern void abletodock(int dock);
+bool CrashForceDock(Unit * thus, Unit * dockingUn, bool force) {
+  Unit * un=dockingUn;
+  int whichdockport=thus->CanDockWithMe(un,force);
+  if (whichdockport!=-1) {
+    QVector place=UniverseUtil::SafeEntrancePoint(un->Position(),un->rSize()*1.5);
+    un->SetPosAndCumPos(place);
+    if (un->ForceDock(thus,whichdockport)>0) {
+      abletodock(3);
+      un->UpgradeInterface(thus);
+      return true;
+    }
+  }
+  return false;
+}
 void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal,  float dist) {
   clsptr smltyp = smalle->isUnit();
   if (smltyp==ENHANCEMENTPTR||smltyp==MISSILEPTR) {
@@ -149,6 +163,23 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
       return;
     }
   }	       
+  static bool crash_dock_unit=XMLSupport::parse_bool(vs_config->getVariable("physics","unit_collision_docks","true"));
+  if (crash_dock_unit) {
+    Unit * dockingun=smalle;
+    Unit * thus=this;
+    if (_Universe->isPlayerStarship(this)) {
+      thus=smalle;
+      dockingun=this;
+    }
+    if (_Universe->isPlayerStarship(dockingun)){
+      if (UnitUtil::getFlightgroupName(thus)=="Base"){
+        static bool crash_dock_hangar=XMLSupport::parse_bool(vs_config->getVariable("physics","only_hangar_collision_docks","false"));        
+        
+        if (CrashForceDock(thus,smalle,!crash_dock_hangar))
+          return ;
+      }
+    }
+  }
   //don't bounce if you can Juuuuuuuuuuuuuump
   if (!jumpReactToCollision(smalle)) {
 #ifdef NOBOUNCECOLLISION
@@ -4846,7 +4877,7 @@ inline bool insideDock (const DockingPorts &dock, const QVector & pos, float rad
   return false;
 }
 
-int Unit::CanDockWithMe(Unit * un) {
+int Unit::CanDockWithMe(Unit * un, bool force) {
   //  if (_Universe->GetRelation(faction,un->faction)>=0) {//already clearneed
     for (unsigned int i=0;i<image->dockingports.size();i++) {
       if (un->image->dockingports.size()) {
@@ -4861,6 +4892,13 @@ int Unit::CanDockWithMe(Unit * un) {
 	if (insideDock (image->dockingports[i],InvTransform (cumulative_transformation_matrix,un->Position()),un->rSize())) {
 	  return i;
 	}
+      }
+    }
+    if (force) {
+      for (unsigned int i=0;i<image->dockingports.size();i++) {
+        if (!image->dockingports[i].used) {
+          return i;
+        }
       }
     }
     //  }

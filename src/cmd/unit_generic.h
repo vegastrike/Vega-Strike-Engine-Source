@@ -1112,7 +1112,7 @@ public:
   unsigned char docked;
   ///returns -1 if unit cannot dock, otherwise returns which dock it can dock at
   enum DOCKENUM {NOT_DOCKED=0x0, DOCKED_INSIDE=0x1, DOCKED=0x2, DOCKING_UNITS=0x4};
-  int CanDockWithMe (Unit * dockingunit) ;
+  int CanDockWithMe (Unit * dockingunit, bool forcedock=false) ;
   int ForceDock (Unit * utdw, int whichdockport);
   void PerformDockingOperations();
   void FreeDockingPort(unsigned int whichport);
