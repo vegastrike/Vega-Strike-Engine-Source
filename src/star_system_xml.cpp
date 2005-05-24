@@ -132,7 +132,9 @@ namespace StarXML {
 	TAILMODESTART,
 	TAILMODEEND
 	,OPTICALILLUSION,
-	SERIAL
+    SERIAL,
+    VARNAME,
+    VARVALUE
   };
 
   const EnumMap::Pair element_names[] = {
@@ -225,7 +227,9 @@ namespace StarXML {
     EnumMap::Pair ("TailModeStart",TAILMODESTART),
     EnumMap::Pair ("TailModeEnd",TAILMODEEND),
 	EnumMap::Pair ("OpticalIllusion",OPTICALILLUSION),
-    EnumMap::Pair ("serial", SERIAL)
+    EnumMap::Pair ("serial", SERIAL),
+    EnumMap::Pair ("VarName",VARNAME),
+    EnumMap::Pair ("VarValue",VARVALUE)	    
     
   };
 
@@ -242,7 +246,20 @@ extern Flightgroup *getStaticStarFlightgroup (int faction);
 extern Flightgroup *getStaticNebulaFlightgroup (int faction);
 extern Flightgroup *getStaticAsteroidFlightgroup (int faction);
 extern Flightgroup *getStaticUnknownFlightgroup (int faction);
+static bool ConfigAllows(string var, float val) {
+  bool invert=false;
+  if (var.length()==0)
+    return true;
 
+  if (var[0]=='-') {
+    var=var.substr(1);
+    invert=true;
+  }
+  float x = XMLSupport::parse_float(vs_config->getVariable("graphics",var,"0"));
+  if (var.length()==0)
+    return true;
+  return invert?-x>=val:x>=val;
+}
 static Vector ComputeRotVel (float rotvel, const QVector &r, const QVector & s) {
   if ((r.i||r.j||r.k)&&(s.i||s.j||s.k)) {
     QVector retval = r.Cross (s);
@@ -342,6 +359,8 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   std::string myfile;
   vector <GFXLightLocal> curlights;
   xml->cursun.i=0;
+  string varname;
+  float varvalue=0;
   GFXColor tmpcol(0,0,0,1);
   LIGHT_TARGET tmptarg= POSITION;
   xml->cursun.j=0;
@@ -490,12 +509,17 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	    case SK:
 	      S.k=parse_float((*iter).value);
 	      break;
-
+            case VARNAME:
+              varname=(*iter).value;
+              break;
+            case VARVALUE:
+              varvalue=parse_float((*iter).value);
+              break;
 	    default:
 	      break;
 	    }
 	  }
-	  if (p!=NULL) {
+	  if (p!=NULL&&ConfigAllows(varname,varvalue)) {
 	    ((Planet *)p)->AddRing (myfile,iradius,oradius,R,S,numslices,wrapx, wrapy,blendSrc,blendDst);
 	  }
 	}
@@ -522,6 +546,13 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	    case XFILE:
 	      myfile = (*iter).value;
 	      break;
+            case VARNAME:
+              varname=(*iter).value;
+              break;
+            case VARVALUE:
+              varvalue=parse_float((*iter).value);
+              break;
+
 		case DIRECTION:
 			if (!(*iter).value.empty())
 				direction= (*iter).value[0];
@@ -537,7 +568,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	      break;
 	    }
 	  }
-	  if (p!=NULL) {
+	  if (p!=NULL&&ConfigAllows(varname,varvalue)) {
 	    ((Planet *)p)->AddSpaceElevator (myfile,faction,direction);
 	  }
 	}
@@ -568,6 +599,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  xml->fog.back().scale=1.1-.075+.075*xml->fog.size();	  
 	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 	    switch(attribute_map.lookup((*iter).name)) {
+
 		case EMRED:
 			xml->fog.back().er=XMLSupport::parse_float (iter->value);
 			break;
@@ -616,7 +648,8 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 			break;
 		case SCALEATMOS:
 			xml->fog.back().scale=XMLSupport::parse_float (iter->value);
-			break;
+
+
 		default:
 			break;
 		}
@@ -656,11 +689,20 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	    case INSIDEOUT:
 	      inside_out=parse_bool((*iter).value);
 	      break;
+            case VARNAME:
+              varname=(*iter).value;
+              break;
+            case VARVALUE:
+              varvalue=parse_float((*iter).value);
+              break;
+
 	    default:
 	      break;
 	    }
 	  }
-	  ((Planet *)p)->AddCity (myfile,radius,wrapx,wrapy,blendSrc,blendDst,inside_out);
+          if (ConfigAllows(varname,varvalue)) {
+            ((Planet *)p)->AddCity (myfile,radius,wrapx,wrapy,blendSrc,blendDst,inside_out);
+          }
 	}
       break;
     }
@@ -688,11 +730,20 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	    case RADIUS:
 	      radius = parse_float ((*iter).value)*xml->scale;	  
 	      break;
+            case VARNAME:
+              varname=(*iter).value;
+              break;
+            case VARVALUE:
+              varvalue=parse_float((*iter).value);
+              break;
+
 	    default:
 	      break;
 	    }
 	  }
-	  ((Planet *)p)->AddAtmosphere (myfile,radius,blendSrc,blendDst);
+          if (ConfigAllows(varname,varvalue)) {
+            ((Planet *)p)->AddAtmosphere (myfile,radius,blendSrc,blendDst);
+          }
 	}
       break;
     }
@@ -716,17 +767,17 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       params.high_ambient_color[1] = GFXColor(0,0,0);
 
       params.scattering = 5;
-
-      Atmosphere * a =  new Atmosphere(params); 
-      if (xml->unitlevel>2) {
-	assert(xml->moons.size()!=0);
-	Planet * p =xml->moons.back()->GetTopPlanet(xml->unitlevel-1);
-	if (p)
-	  p->setAtmosphere (a);
-	else
-	  VSFileSystem::vs_fprintf (stderr,"atmosphere loose. no planet for it");
-      } 
-      
+      if (ConfigAllows(varname,varvalue)) {
+        Atmosphere * a =  new Atmosphere(params); 
+        if (xml->unitlevel>2) {
+          assert(xml->moons.size()!=0);
+          Planet * p =xml->moons.back()->GetTopPlanet(xml->unitlevel-1);
+          if (p)
+            p->setAtmosphere (a);
+          else
+            VSFileSystem::vs_fprintf (stderr,"atmosphere loose. no planet for it");
+        } 
+      }
     }
     break;
   case TERRAIN:
@@ -1150,9 +1201,17 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  velocity=2*M_PI/(yearscale*parse_float((*iter).value));
 	}
 	break;
+      case VARNAME:
+        varname=(*iter).value;
+        break;
+      case VARVALUE:
+        varvalue=parse_float((*iter).value);
+        break;
+
       }
 
     }  
+    if (ConfigAllows(varname,varvalue)) {
     if (((elem==UNIT||elem==NEBULA||elem==ENHANCEMENT||elem==ASTEROID)||(xml->ct==NULL&&xml->parentterrain==NULL))&&(xml->unitlevel>2)) {
       assert(xml->moons.size()!=0);
 	  Unit * un;
@@ -1254,6 +1313,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
             
 
       }
+    }
     }
     delete []filename;
     delete []nebfile;
