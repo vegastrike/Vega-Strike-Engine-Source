@@ -765,7 +765,7 @@ void GameCockpit::DrawEliteBlips (Unit * un) {
 	iter.advance();	
 	continue;
       }
-      if (draw_significant_blips==false&&getTopLevelOwner()==target->owner){
+      if (makeBigger!=target&&draw_significant_blips==false&&getTopLevelOwner()==target->owner){
 	iter.advance();	
 	continue;      
       }
