@@ -1098,8 +1098,8 @@ void abletodock(int dock) {
                   static int s = AUDCreateSoundWAV(otherstr,false);
                   AUDPlay(s,QVector(0,0,0),Vector(0,0,0),1);
                   if (play_anim) {
-                    Unit * un=_Universe->AccessCockpit()->GetParent();
-                    UnitUtil::commAnimation(un,"com_neutral_female_01.ani");
+                    //Unit * un=_Universe->AccessCockpit()->GetParent();
+                    //UnitUtil::commAnimation(un,"com_neutral_female_01.ani");
                   }
                 }else {
                   if (reqsound.sound==-2) {
@@ -1108,12 +1108,12 @@ void abletodock(int dock) {
                   }
                   reqsound.playsound();}
                   if (play_anim) {
-                    Unit * un=_Universe->AccessCockpit()->GetParent();
-                    if (rand()%2) {
-                      UnitUtil::commAnimation(un,"com_neutral_male_01.ani");
-                    }else {
-                      UnitUtil::commAnimation(un,"com_neutral_male_02.ani");
-                    }
+                    //Unit * un=_Universe->AccessCockpit()->GetParent();
+                    //if (rand()%2) {
+                    //  UnitUtil::commAnimation(un,"com_neutral_male_01.ani");
+                    //}else {
+                    //  UnitUtil::commAnimation(un,"com_neutral_male_02.ani");
+                    //}
                   }
           }
           break;
