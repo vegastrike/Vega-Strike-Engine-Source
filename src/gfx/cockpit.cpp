@@ -494,9 +494,11 @@ void GameCockpit::DrawTargetBox () {
   }
   float distance = UnitUtil::getDistance(un,target);
   static bool draw_target_nav_symbol =XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_target_nav_symbol","true"));
+  bool nav_symbol=false;
   if (draw_target_nav_symbol&&((target->faction==neutral&&target->isUnit()==UNITPTR)||target->isUnit()==ASTEROIDPTR||(target->isPlanet()&&((Planet*)target)->isAtmospheric())||distance>un->GetComputerData().radar.maxrange)) {
     static float nav_symbol_size = XMLSupport::parse_float(vs_config->getVariable("graphics","nav_symbol_size",".25"));
     DrawNavigationSymbol (Loc,CamP,CamQ, Loc.Magnitude()*nav_symbol_size);  
+    nav_symbol=true;
   }else {
     DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),un->TargetLocked());
   }
@@ -504,11 +506,11 @@ void GameCockpit::DrawTargetBox () {
   if (draw_dock_box) {
     DrawDockingBoxes(un,target,CamP,CamQ,CamR);
   }
-  if (always_itts || un->GetComputerData().itts) {
-	float mrange;
+  if ((always_itts || un->GetComputerData().itts)&&!nav_symbol) {
+    float mrange;
     un->getAverageGunSpeed (speed,range,mrange);
     float err = (.01*(1-un->CloakVisible()));
-   QVector iLoc = target->PositionITTS (un->Position(),un->cumulative_velocity,speed,steady_itts)-_Universe->AccessCamera()->GetPosition()+10*err*QVector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
+    QVector iLoc = target->PositionITTS (un->Position(),un->cumulative_velocity,speed,steady_itts)-_Universe->AccessCamera()->GetPosition()+10*err*QVector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
     
     GFXBegin (GFXLINESTRIP);
     if(draw_line_to_itts){
