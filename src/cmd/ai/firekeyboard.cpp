@@ -837,6 +837,7 @@ void FireKeyboard::ChooseRTargets (bool turret,bool significant) {
 }
 
 void FireKeyboard::ChooseTargets (bool turret,bool significant,bool reverse) {
+  parent->LockTarget(false);
   if (reverse) {
     ChooseRTargets(turret,significant);
     return;
@@ -1491,7 +1492,7 @@ void FireKeyboard::Execute () {
       parent->Target(NULL);
       ForceChangeTarget(parent);
       refresh_target=true;
-    }else if (!parent->InRange(targ,mm,true,true,true)) {
+    }else if (false==parent->InRange(targ,mm,true,true,true)&&!parent->TargetLocked()) {
       ChooseTargets(parent,TargUn,false);//only go for other active units in cone
       if (parent->Target()==NULL) {
         parent->Target(targ);
