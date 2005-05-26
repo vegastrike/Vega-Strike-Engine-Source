@@ -966,7 +966,7 @@ bool TargNear (Unit *me,Unit *target) {
 	return (me->getRelation(target)<0||TargThreat(me,target)||target->getRelation(me)<0)&&TargAll(me,target)&&target->isUnit()!=MISSILEPTR&&(can_target_sun||!UnitUtil::isSun(target));
 }
 
-void ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
+bool ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
 	UnitCollection * drawlist = &_Universe->activeStarSystem()->getUnitList();
 	un_iter iter = drawlist->createIterator();
 	vector <Unit *> vec;
@@ -975,6 +975,8 @@ void ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
 		vec.push_back(target);
 		iter.advance();
 	}
+        if (vec.size()==0)
+          return false;
 	if (reverse) {
 		std::reverse (vec.begin(),vec.end());
 	}
@@ -1003,7 +1005,7 @@ void ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
 						foobersound.playsound();
 					}
 				}
-				return;
+				return true;
 			}
 			veciter++;
 		}
@@ -1012,6 +1014,7 @@ void ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
 			break;
 		veciter=vec.begin();
 	}
+        return true;
 }
 
 void ChooseSubTargets(Unit * me) {
@@ -1609,15 +1612,18 @@ void FireKeyboard::Execute () {
   if (f().targetukey==PRESS) {
     f().targetukey=DOWN;
     Unit * tmp=parent->Target();
+    bool sysobj=false;
+    if (tmp)
+      if (tmp->owner==getTopLevelOwner())
+        sysobj=true;
     ChooseTargets(parent,TargUn,false);
-    if (tmp==parent->Target()) {
-      ChooseTargets(parent,TargFront,false);
+    if (tmp==parent->Target()&&sysobj) {
+      ChooseTargets(parent,TargSig,false);
       if (tmp==parent->Target()) {
         ChooseTargets(parent,TargAll,false);
       }
     }
     refresh_target=true;
-
   }
   if(f().picktargetkey==PRESS){
     f().picktargetkey=DOWN;
@@ -1663,11 +1669,15 @@ void FireKeyboard::Execute () {
   if (f().rtargetukey==PRESS) {
     f().rtargetukey=DOWN;
     Unit * tmp = parent->Target();
+    bool sysobj=false;
+    if (tmp)
+      if (tmp->owner==getTopLevelOwner())
+        sysobj=true;
     ChooseTargets(parent,TargUn,true);
-    if (tmp==parent->Target()&&getTopLevelOwner()==tmp->owner) {
-      ChooseTargets(parent,TargFront,false);
+    if (tmp==parent->Target()&&sysobj) {
+      ChooseTargets(parent,TargFront,true);
       if (tmp==parent->Target()) {
-        ChooseTargets(parent,TargAll,false);
+        ChooseTargets(parent,TargAll,true);
       }
     }
     refresh_target=true;
