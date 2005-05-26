@@ -1611,13 +1611,14 @@ void FireKeyboard::Execute () {
   }
   if (f().targetukey==PRESS) {
     f().targetukey=DOWN;
+    static bool smart_targetting=XMLSupport::parse_bool(vs_config->getVariable("graphics","smart_targetting_key","true"));
     Unit * tmp=parent->Target();
     bool sysobj=false;
     if (tmp)
       if (tmp->owner==getTopLevelOwner())
         sysobj=true;
     ChooseTargets(parent,TargUn,false);
-    if (tmp==parent->Target()&&sysobj) {
+    if (tmp==parent->Target()&&sysobj&&smart_targetting) {
       ChooseTargets(parent,TargSig,false);
       if (tmp==parent->Target()) {
         ChooseTargets(parent,TargAll,false);
@@ -1668,13 +1669,14 @@ void FireKeyboard::Execute () {
   }
   if (f().rtargetukey==PRESS) {
     f().rtargetukey=DOWN;
+    static bool smart_targetting=XMLSupport::parse_bool(vs_config->getVariable("graphics","smart_targetting_key","true"));
     Unit * tmp = parent->Target();
     bool sysobj=false;
     if (tmp)
       if (tmp->owner==getTopLevelOwner())
         sysobj=true;
     ChooseTargets(parent,TargUn,true);
-    if (tmp==parent->Target()&&sysobj) {
+    if (tmp==parent->Target()&&sysobj&&smart_targetting) {
       ChooseTargets(parent,TargFront,true);
       if (tmp==parent->Target()) {
         ChooseTargets(parent,TargAll,true);
