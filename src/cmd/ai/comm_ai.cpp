@@ -332,7 +332,7 @@ Unit * CommunicatingAI::GetRandomUnit (float playaprob, float targprob) {
 void CommunicatingAI::RandomInitiateCommunication (float playaprob, float targprob) {
   Unit * target = GetRandomUnit(playaprob,targprob);
   if (target!=NULL) {
-    if (UnitUtil::getUnitSystemFile(target)==UnitUtil::getUnitSystemFile(parent)&&UnitUtil::getFlightgroupName(parent)!="Base"&&!isDockedAtAll(target)) {
+    if (UnitUtil::getUnitSystemFile(target)==UnitUtil::getUnitSystemFile(parent)&&UnitUtil::getFlightgroupName(parent)!="Base"&&!isDockedAtAll(target)&&UnitUtil::getDistance(parent,target)<=target->GetComputerData().maxrange) {//warning--odd hack they can talk to you if you can sense them--it's like SETI@home
       for (std::list<CommunicationMessage *>::iterator i=messagequeue.begin();i!=messagequeue.end();i++) {   
         Unit * un=(*i)->sender.GetUnit();
         if (un==target) {
