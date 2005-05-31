@@ -859,7 +859,7 @@ extern char * GetUnitDir (const char *);
 string BasicRepair (Unit * parent, string title) {
   if (parent) {
     string newtitle;
-    static float repair_price = XMLSupport::parse_float(vs_config->getVariable("physics","repair_price","1000"));
+    static float repair_price = XMLSupport::parse_float(vs_config->getVariable("physics","repair_price","5000"));
     if (UnitUtil::getCredits(parent)>repair_price) {
       if (parent->RepairUpgrade()) {
 	UnitUtil::addCredits (parent,-repair_price);

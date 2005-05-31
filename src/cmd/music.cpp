@@ -221,7 +221,7 @@ int Music::SelectTracks(void) {
   
   return 0;
   int whichlist=0;
-  static float hostile_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","hostile_auto_radius","8000"));
+  static float hostile_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","hostile_auto_radius","1000"));
   Unit * un=_Universe->AccessCockpit()->GetParent();
   if (un==NULL) {
     whichlist=PEACELIST;
