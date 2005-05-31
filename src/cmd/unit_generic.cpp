@@ -3266,7 +3266,12 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
             }else {
               Unit * tmp;
               if ((tmp=findUnitInStarsystem(ownerDoNotDereference))!=NULL) {
-                ScoreKill(NULL,tmp,this);
+                if ((NULL!=(cp=_Universe->isPlayerStarship(tmp->owner)))
+                    &&(cp->GetParent()!=NULL)) {                 
+                  ScoreKill(cp,cp->GetParent(),this);
+                }else {
+                  ScoreKill(NULL,tmp,this);
+                }
               }
             }
           }
