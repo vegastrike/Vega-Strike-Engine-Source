@@ -146,10 +146,11 @@ GFXColor GameCockpit::unitToColor (Unit *un,Unit *target, char ifflevel) {
     }else if(target==un->Target()&&draw_all_boxes){//if we only draw target box we cannot tell what faction enemy is!
       // my target
       return targeted;
-    }else if(target->Target()==un){
-      // the other ships is targetting me
-      return targetting;
     }
+  }
+  if(target->Target()==un){
+    // the other ships is targetting me
+    return targetting;
   }
   if (basecol.r>0&&basecol.g>0&&basecol.b>0&&UnitUtil::getFlightgroupName(target)=="Base"&&ifflevel>0) {
     return basecol;
