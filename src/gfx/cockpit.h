@@ -171,6 +171,6 @@ private:
   virtual bool SetDrawNavSystem(bool);
   virtual bool CanDrawNavSystem();
   virtual bool DrawNavSystem();
-
+  virtual bool CheckCommAnimation(Unit *un);
 };
 #endif

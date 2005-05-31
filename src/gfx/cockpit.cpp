@@ -2158,3 +2158,10 @@ void GameCockpit::DrawArrowToTarget(Unit *un, Unit *target) {
   GFXEnd();
   GFXColor4f (1,1,1,1);
 }
+bool GameCockpit::CheckCommAnimation(Unit*  un) {
+  for (unsigned int i=0;i<vdu.size();++i) {
+    if (vdu[i]->CheckCommAnimation(un))
+      return true;
+  }
+  return false;
+}

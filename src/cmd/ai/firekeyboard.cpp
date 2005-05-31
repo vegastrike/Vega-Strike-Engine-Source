@@ -1310,6 +1310,9 @@ void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
   Unit * un = c.sender.GetUnit();
   unsigned int whichsound=0;
   bool foundValidMessage=false;
+  if (_Universe->AccessCockpit()->CheckCommAnimation(un)) {
+    return;//wait till later
+  }
   if (un) {
     for (list<CommunicationMessage>::iterator i=resp.begin();i!=resp.end();i++) {
       if ((*i).sender.GetUnit()==un) {

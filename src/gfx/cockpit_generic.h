@@ -155,5 +155,6 @@ protected:
   virtual bool SetDrawNavSystem(bool){return false;}
   virtual bool CanDrawNavSystem() {return false;}
   virtual bool DrawNavSystem() {return false;}
+  virtual bool CheckCommAnimation(Unit * un){return false;}
 };
 #endif

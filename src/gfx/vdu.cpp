@@ -1449,3 +1449,11 @@ void VDU::SwitchMode( Unit * parent) {
   }
 }
 
+bool VDU::CheckCommAnimation(Unit* un) {
+  if (comm_ani&&comm_ani->Done()==false) {
+    if (communicating==un||communicating==NULL){
+      return true;
+    }
+  }
+  return false;
+}

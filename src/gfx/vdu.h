@@ -78,6 +78,7 @@ public:
   void Scroll (int howmuch);
   bool SetCommAnimation (Animation *ani, Unit * unit, bool force);
   Unit* GetCommunicating();
+  bool CheckCommAnimation(Unit *un);//returns true if unit is talkin or uninterruptable going on
 };
 
 int parse_vdu_type (const char * s);
