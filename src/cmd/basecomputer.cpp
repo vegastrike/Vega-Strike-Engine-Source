@@ -2645,6 +2645,10 @@ static int	nodirs( const struct dirent * entry)
 	// Have to check if we have the full path or just relative (which would be a problem)
 	struct stat s;
 	std::string tmp=VSFileSystem::homedir+"/save/"+entry->d_name;
+        std::string autosave=_Universe->AccessCockpit()->savegame->GetCallsign()+mission[0].getVariable("savegame","");
+        //printf ("savegame %s matches %s\n",autosave.c_str(), entry->d_name);
+        if (strstr(entry->d_name,autosave.c_str()))
+          return 0;
 	if( stat( tmp.c_str(), &s)<0)
 		return string( entry->d_name)!="." && string( entry->d_name)!="..";
 	if( (s.st_mode & S_IFDIR)==0 && string( entry->d_name)!="." && string( entry->d_name)!="..")

@@ -1242,7 +1242,7 @@ void SuicideKey (const KBData&,KBSTATE k) {
   static int orig=0;
   if (k==PRESS) {
       int newtime=time(NULL);
-      if (newtime-orig>20||orig==0) {
+      if (newtime-orig>8||orig==0) {
           orig=newtime;
           Unit * un=NULL;
           if ((un = _Universe->AccessCockpit()->GetParent())) {
