@@ -1167,7 +1167,6 @@ void GameCockpit::SelectProperCamera () {
 extern vector <int> respawnunit;
 extern vector <int> switchunit;
 extern vector <int> turretcontrol;
-extern vector <int> suicide;
 
 void DoCockpitKeys()
 {
@@ -1240,12 +1239,19 @@ void GameCockpit::SwitchControl (const KBData&,KBSTATE k) {
 
 }
 void SuicideKey (const KBData&,KBSTATE k) {
+  static int orig=0;
   if (k==PRESS) {
-    while (suicide.size()<=_Universe->CurrentCockpit())
-      suicide.push_back(0);
-    suicide[_Universe->CurrentCockpit()]=1;
+      int newtime=time(NULL);
+      if (newtime-orig>20||orig==0) {
+          orig=newtime;
+          Unit * un=NULL;
+          if ((un = _Universe->AccessCockpit()->GetParent())) {
+              float armor[8]; //short fix
+              un->ArmorData(armor);
+              un->DealDamageToHull(Vector(0,0,.1),un->GetHull()*256.+2+2*(armor[1]+armor[2]+armor[3]+armor[4]+armor[5]+armor[6]+armor[7]+armor[0]));
+          }
+      }
   }
-  
 }
 
 class UnivMap {

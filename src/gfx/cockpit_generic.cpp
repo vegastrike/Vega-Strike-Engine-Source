@@ -35,7 +35,7 @@ extern float rand01();
 vector <int> respawnunit;
 vector <int> switchunit;
 vector <int> turretcontrol;
-vector <int> suicide;
+
 
 void Cockpit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Cockpit*)userData)->beginElement(name, AttributeList(atts));
@@ -495,20 +495,8 @@ bool Cockpit::Update () {
     if (un) {
       un->EjectCargo((unsigned int)-1);
     }
-  }else {
-  if (suicide.size()>_Universe->CurrentCockpit()) {
-    if (suicide[_Universe->CurrentCockpit()]) {
-      Unit * un=NULL;
-      if ((un = parent.GetUnit())) {
-	float armor[8]; //short fix
-	un->ArmorData(armor);
-	un->DealDamageToHull(Vector(0,0,.1),un->GetHull()+2+armor[0]);
-      }
-      suicide[_Universe->CurrentCockpit()]=0;
-    }
-
   }
-  }
+ 
   if (!par) {
 	if (respawnunit.size()>_Universe->CurrentCockpit()){
 	  if (respawnunit[_Universe->CurrentCockpit()]){
