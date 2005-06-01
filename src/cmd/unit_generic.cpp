@@ -3872,8 +3872,10 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
                                                 if (!NotActuallyDowngrade) {
                                                   const Unit * downgrade=loadUnitByCache(GetCargo(which).content,FactionUtil::GetFactionIndex("upgrades"));
                                                   if (downgrade) {
-                                                    double percentage=0;
-                                                    this->Downgrade(downgrade,0,0,percentage,NULL);
+                                                    if (0==downgrade->GetNumMounts()&&downgrade->SubUnits.empty()) {
+                                                      double percentage=0;
+                                                      this->Downgrade(downgrade,0,0,percentage,NULL);
+                                                    }
                                                   }
                                                 }
 					}
