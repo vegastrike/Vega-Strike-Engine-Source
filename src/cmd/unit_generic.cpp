@@ -163,7 +163,7 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
       return;
     }
   }	       
-  static bool crash_dock_unit=XMLSupport::parse_bool(vs_config->getVariable("physics","unit_collision_docks","true"));
+  static bool crash_dock_unit=XMLSupport::parse_bool(vs_config->getVariable("physics","unit_collision_docks","false"));
   if (crash_dock_unit) {
     Unit * dockingun=smalle;
     Unit * thus=this;
