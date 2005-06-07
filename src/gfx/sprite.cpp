@@ -61,6 +61,8 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
     f.Fscanf( "%126s %126s", texture, texturea);
     f.Fscanf( "%f %f", &widtho2, &heighto2);
     f.Fscanf( "%f %f", &xcenter, &ycenter);
+    texture[sizeof(texture)-sizeof(*texture)-1]=0;
+    texturea[sizeof(texturea)-sizeof(*texturea)-1]=0;
     
     widtho2/=2;
     heighto2/=-2;
@@ -68,24 +70,7 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
     if (g_game.use_sprites||force==GFXTRUE) {
       int len=strlen(texture);
       if (len>4&&texture[len-1]=='i'&&texture[len-2]=='n'&&texture[len-3]=='a'&&texture[len-4]=='.') {
-        char olddir[1023];
-        char *newtex=NULL;
-        for (int i=len-1;i>0;--i) {
-          if (texture[i]=='/') {
-            newtex=texture+i+1;
-            break;
-          }
-        }
-        if (newtex) {
-          getcwd(olddir,1022);
-          for (int i=len-1;i>0;--i) {
-            if (texture[i]=='/') {
-              texture[i]='\0';
-            }
-          }
-          chdir(texture);
-        }
-        surface=surface = new AnimatedTexture(f,0,texturefilter,GFXFALSE);
+        surface = new AnimatedTexture(f,0,texturefilter,GFXFALSE);
       } else if (texturea[0]=='0') {
         surface = new Texture(texture,0,texturefilter,TEXTURE2D,TEXTURE_2D,GFXTRUE,65536,GFXFALSE);
       } else {

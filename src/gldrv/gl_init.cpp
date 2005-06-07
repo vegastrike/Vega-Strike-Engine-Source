@@ -247,6 +247,7 @@ cloak_cg->cgLoadMedia("programs/cloaking_effect", "vertex.cg");
     g_game.use_logos = XMLSupport::parse_bool (vs_config->getVariable ("graphics","UseLogos","true"));
     g_game.use_sprites = XMLSupport::parse_bool (vs_config->getVariable ("graphics","UseVSSprites","true"));
     g_game.use_animations = XMLSupport::parse_bool (vs_config->getVariable ("graphics","UseAnimations","true"));
+    g_game.use_videos = XMLSupport::parse_bool (vs_config->getVariable ("graphics","UseVideos","true"));
 
 
     /*
@@ -271,6 +272,13 @@ void GFXInit (int argc, char ** argv){
   winsys_init (&argc,argv,"Vega Strike","vega.ico");
     /* Ingore key-repeat messages */
   winsys_enable_key_repeat(false);
+
+    /* Avoid scrambled screen on startup - Twice, for triple buffering */
+    glClear(GL_COLOR_BUFFER_BIT);
+    winsys_swap_buffers();
+    glClear(GL_COLOR_BUFFER_BIT);
+    winsys_swap_buffers();
+
     glViewport (0, 0, g_game.x_resolution,g_game.y_resolution);
     float clearcol[4];
     gl_options.wireframe = XMLSupport::parse_bool (vs_config->getVariable ("graphics","use_wireframe","0"));     
@@ -310,7 +318,6 @@ void GFXInit (int argc, char ** argv){
     glEnable(GL_TEXTURE_2D);		// use two-dimensional texturing
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
 
 #if defined(IRIX)
     glEnable(GL_SHARED_TEXTURE_PALETTE_EXT);

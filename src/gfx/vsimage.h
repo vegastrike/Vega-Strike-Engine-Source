@@ -86,7 +86,7 @@ class VSImage
 		///if we statically allocate it, then gl_texture will kill it when destructor is called...and if we delete this texture we be messed
 		unsigned char *		palette;
 		///The bitmode of this texture
-		enum {_8BIT, _24BIT, _24BITRGBA} mode;
+        enum VSImageMode {_8BIT, _24BIT, _24BITRGBA} mode;
 		///the dimensions of the texture
 		unsigned long		sizeX;
 		unsigned long		sizeY;

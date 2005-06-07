@@ -31,6 +31,7 @@ extern bool run_only_player_starsystem;
 typedef struct {
   char use_textures;
   char use_animations;
+  char use_videos;
   char use_sprites;
   char use_logos;
   char use_ship_textures;

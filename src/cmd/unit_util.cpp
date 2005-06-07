@@ -62,13 +62,13 @@ namespace UnitUtil {
 		if (!my_unit)return false;
 		Cockpit * tmp;
 		if ((tmp=_Universe->isPlayerStarship (my_unit))) {
-			Hashtable <std::string, Animation, 63> AniHashTable;
-			Animation * ani= AniHashTable.Get(anim);
-			if (NULL==ani) {
-				ani = new Animation (anim.c_str());
-				AniHashTable.Put(anim,ani);
+			static Hashtable <std::string, Animation, 63> AniHashTable;
+			Animation * vid= AniHashTable.Get(anim);
+			if (NULL==vid) {
+				vid = new Animation (anim.c_str());
+				AniHashTable.Put(anim,vid);
 			}
-			tmp->SetCommAnimation (ani,NULL);
+			tmp->SetCommAnimation (vid,NULL);
 			return true;
 		} else {
 			return false;

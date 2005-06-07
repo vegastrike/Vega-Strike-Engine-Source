@@ -48,6 +48,10 @@ public:
   int stage;
   ///The original data that would represent this texture
   Texture *original;
+  ///For re-biding
+  bool bound;
+  int boundSizeX,boundSizeY;
+  VSImageMode boundMode;
   ///The number of references on the original data
   int refcount;
   ///The target this will go to (cubemap or otherwise)
@@ -61,21 +65,28 @@ public:
   void setbad( const string & s);
   ///Inits the class with default values
   void InitTexture() {
+    bound = false;
     original = 0;
     refcount = 0;
     name = -1;
+    palette = NULL;
+    data = NULL;
   }
   protected:
   ///Binds this texture to GFX library
   int Bind(int maxdimension,GFXBOOL detailtexture);
+  ///UnBinds from GFX library
+  void UnBind();
   ///Transfers this texture to GFX library
   void Transfer(int maxdimension,GFXBOOL detailtexture);
   public:
   ///Creates a texture with a single bitmap as color data and another grayscale .bmp as alpha data
-  Texture(const char *,const char *, int stage = 0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE);
+  Texture(const char *,const char *, int stage = 0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE,GFXBOOL nocache=false);
   ///Creates a texture with only color data as a single bitmap
-  Texture(const char * FileName, int stage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE);
-  Texture(VSFileSystem::VSFile * f, int stage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE);
+  Texture(const char * FileName, int stage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE,GFXBOOL nocache=false);
+  Texture(VSFileSystem::VSFile * f, int stage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE,GFXBOOL nocache=false);
+  void Load(const char *,const char *, int stage = 0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE,GFXBOOL nocache=false);
+  void Load(const char * FileName, int stage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE,GFXBOOL nocache=false);
   virtual Texture * Original();
   virtual Texture * Clone ();
   ///Texture copy constructor that increases appropriate refcounts

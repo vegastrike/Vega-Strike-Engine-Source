@@ -6479,11 +6479,13 @@ std::string Unit::GetManifest (unsigned int i, Unit * scanningUnit, const Vector
 ///FIXME somehow mangle string
   string mangled = image->cargo[i].content;
   static float scramblingmanifest=XMLSupport::parse_float (vs_config->getVariable ("general","PercentageSpeedChangeToFaultSearch",".5"));
+  { // Keep inside subblock, otherwice MSVC will throw an error while redefining 'i'
   bool last=true;
   for (string::iterator i=mangled.begin();i!=mangled.end();i++) {
     if (last)
       (*i)=toupper(*i);
     last=(*i==' '||*i=='_');
+  }
   }
   if (CourseDeviation (oldspd,GetVelocity())>scramblingmanifest) {
     for (string::iterator i=mangled.begin();i!=mangled.end();i++) {

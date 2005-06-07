@@ -288,6 +288,9 @@ namespace VSFileSystem
 
 			FILE *	GetFP() { return this->fp; } // This is still needed for special cases (when loading PNG files)
 			char *	GetFileBuffer() { return this->pk3_extracted_file; }
+          VSFileType GetType() const {return file_type;}
+          VSFileType GetAltType() const {return alt_type;}
+
 
 			/********************************** OPEN A FILE *********************************/
 			// Open an existing file read only

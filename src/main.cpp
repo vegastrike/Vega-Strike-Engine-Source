@@ -101,6 +101,7 @@ void setup_game_data ( ){ //pass in config file l8r??
   g_game.use_planet_textures =0;
   g_game.use_sprites =1;
   g_game.use_animations =1;
+  g_game.use_videos =1;
   g_game.use_logos =1;
   g_game.music_enabled=1;
   g_game.sound_volume=1;

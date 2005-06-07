@@ -1002,8 +1002,9 @@ void BaseInterface::Draw () {
 	GFXColor(0,0,0,0);
         SetupViewport();
 	StartGUIFrame(GFXTRUE);
-        if (GetElapsedTime()<1)
+    if (GetElapsedTime()<1) {
           AnimatedTexture::UpdateAllFrame();
+    }
 	Room::BaseTalk::hastalked=false;
 	rooms[curroom]->Draw(this);
         AnimationDraw();
