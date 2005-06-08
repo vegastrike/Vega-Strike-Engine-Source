@@ -380,11 +380,12 @@ void GFXInit (int argc, char ** argv){
     GFXCreateLightContext(con);
     //    glutSetCursor(GLUT_CURSOR_NONE);
     /* Avoid scrambled screen on startup - Twice, for triple buffering */
-    glClear(GL_COLOR_BUFFER_BIT);
-    winsys_swap_buffers();
-    glClear(GL_COLOR_BUFFER_BIT);
-    winsys_swap_buffers();
-
+    if (XMLSupport::parse_bool (vs_config->getVariable ("graphics","ClearOnStartup","true"))) {
+      glClear(GL_COLOR_BUFFER_BIT);
+      winsys_swap_buffers();
+      glClear(GL_COLOR_BUFFER_BIT);
+      winsys_swap_buffers();
+    }
     winsys_show_cursor(false);
 }
 
