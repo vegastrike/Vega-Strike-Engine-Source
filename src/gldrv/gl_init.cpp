@@ -273,11 +273,6 @@ void GFXInit (int argc, char ** argv){
     /* Ingore key-repeat messages */
   winsys_enable_key_repeat(false);
 
-    /* Avoid scrambled screen on startup - Twice, for triple buffering */
-    glClear(GL_COLOR_BUFFER_BIT);
-    winsys_swap_buffers();
-    glClear(GL_COLOR_BUFFER_BIT);
-    winsys_swap_buffers();
 
     glViewport (0, 0, g_game.x_resolution,g_game.y_resolution);
     float clearcol[4];
@@ -384,6 +379,12 @@ void GFXInit (int argc, char ** argv){
     int con;
     GFXCreateLightContext(con);
     //    glutSetCursor(GLUT_CURSOR_NONE);
+    /* Avoid scrambled screen on startup - Twice, for triple buffering */
+    glClear(GL_COLOR_BUFFER_BIT);
+    winsys_swap_buffers();
+    glClear(GL_COLOR_BUFFER_BIT);
+    winsys_swap_buffers();
+
     winsys_show_cursor(false);
 }
 
