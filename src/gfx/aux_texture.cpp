@@ -780,6 +780,9 @@ int Texture::Bind(int maxdimension,GFXBOOL detailtexture)
 		GFXCreateTexture(sizeX, sizeY, PALETTE8, &name, (char *)palette, stage,ismipmapped,texture_target);
 		break;
 	}
+    }else {
+      GFXActiveTexture(stage);
+      GFXSelectTexture(name,stage);
     }
     boundSizeX=sizeX;
     boundSizeY=sizeY;
