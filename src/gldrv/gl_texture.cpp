@@ -60,6 +60,7 @@ struct GLTexture{
   GLubyte * palette;
   int width;
   int height;
+  int oldwidth,oldheight;
   int texturestage;
   GLuint name;
   GFXBOOL alive;
@@ -126,6 +127,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
     textures.back().alive=GFXTRUE;
     textures.back().name=-1;
     textures.back().width=textures.back().height=1;
+    textures.back().oldwidth=textures.back().oldheight=1;
   }
 
   GLenum WrapMode;
@@ -169,6 +171,8 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
   glTexParameterf (textures[*handle].targets,GL_TEXTURE_PRIORITY,.5);
   textures[*handle].width = width;
   textures[*handle].height = height;
+  textures[*handle].oldwidth = width;
+  textures[*handle].oldheight = height;
   textures[*handle].palette=NULL;
   if (palette&&textureformat == PALETTE8){
     VSFileSystem::vs_fprintf (stderr," palette ");  
@@ -323,7 +327,8 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
     return GFXFALSE;
   int logsize=1;
   int logwid=1;
-  
+  textures[handle].width=textures[handle].oldwidth;
+  textures[handle].height=textures[handle].oldheight;//reset in case we're re-uploading the tex
   if ((textures[handle].mipmapped&(TRILINEAR|MIPMAP))&&(!isPowerOfTwo (textures[handle].width,logwid)|| !isPowerOfTwo (textures[handle].height,logsize))) {
     static unsigned char NONPOWEROFTWO[1024]={255,127,127,255,
 					    255,255,0,255,
