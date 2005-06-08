@@ -720,7 +720,7 @@ void GameCockpit::DrawBlips (Unit * un) {
 	iter.advance();	
 	continue;
       }
-      if (makeBigger!=target&&draw_significant_blips==false&&getTopLevelOwner()==target->owner){
+      if (makeBigger!=target&&draw_significant_blips==false&&getTopLevelOwner()==target->owner&&UnitUtil::getDistance(un,target)>un->GetComputerData().radar.maxrange){
         iter.advance();	
 	continue;      
       }
