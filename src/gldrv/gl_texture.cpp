@@ -434,7 +434,14 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 	  tbuf[i+3]= textures[handle].palette[4*buffer[j]+3];//used to be 255
 	  j ++;
 	}
-	  GFXTransferTexture(tbuf,handle,RGBA32,imagetarget,maxdimension,detail_texture);
+      int htmp=textures[handle].oldheight;//FIXME hack to prevent palette from smashing a smaller buffer down GL's throat 
+      int wtmp=textures[handle].oldwidth;
+      textures[handle].oldheight=textures[handle].height;
+      textures[handle].oldwidth=textures[handle].width;
+      GFXTransferTexture(tbuf,handle,RGBA32,imagetarget,maxdimension,detail_texture);
+      textures[handle].oldheight=htmp;
+      textures[handle].oldwidth=wtmp;
+
 /* KILL duplicate code!
       if (textures[handle].mipmapped&&gl_options.mipmap>=2)
 		  gluXXXBuild2DMipmaps(image2D, 4, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, tbuf);
