@@ -3740,7 +3740,7 @@ Cargo CreateCargoForOwnerStarship(Cockpit* cockpit, int i) {
     }
 
     if(needsTransport) {
-        static const float shipping_price = XMLSupport::parse_float (vs_config->getVariable ("physics","shipping_price","200000"));
+        static const float shipping_price = XMLSupport::parse_float (vs_config->getVariable ("physics","shipping_price","50000"));
         cargo.price = shipping_price;
     }
 

@@ -1533,7 +1533,7 @@ Cargo GetCargoForOwnerStarship (Cockpit * cp, int i) {
       }
     }
     if (hike_price) {
-      static float shipping_price = XMLSupport::parse_float (vs_config->getVariable ("physics","shipping_price","200000"));
+      static float shipping_price = XMLSupport::parse_float (vs_config->getVariable ("physics","shipping_price","50000"));
       c.price=shipping_price;
     }
     c.content=cp->unitfilename[i];
