@@ -43,7 +43,7 @@ void MissileEffect::ApplyDamage (Unit * smaller) {
       norm.Normalize();
 	  //UniverseUtil::IOmessage(0,"game","all",string("dealt ")+XMLSupport::tostring(damage/rad)+string(" damage from ")+XMLSupport::tostring(orig)+string(" meters ")+XMLSupport::tostring(damage)+string(" damage and "+XMLSupport::tostring(radialmultiplier)+string(" rad mult"))); 
       //divide effects by r^2
-      smaller->ApplyDamage (pos,norm,damage/rad,smaller,GFXColor(1,1,1,1),NULL,phasedamage>0?phasedamage/rad:0);
+      smaller->ApplyDamage (pos,norm,damage/rad,smaller,GFXColor(1,1,1,1),ownerDoNotDereference,phasedamage>0?phasedamage/rad:0);
   }
 }
 
@@ -60,7 +60,7 @@ void StarSystem::AddMissileToQueue(MissileEffect * me) {
 }
 void Missile::Discharge() {
   if (!discharged)
-    _Universe->activeStarSystem()->AddMissileToQueue(new MissileEffect(Position().Cast(),damage,phasedamage,radial_effect,radial_multiplier));
+    _Universe->activeStarSystem()->AddMissileToQueue(new MissileEffect(Position().Cast(),damage,phasedamage,radial_effect,radial_multiplier,owner));
   discharged =true;
 }
 void Missile::Kill (bool erase) {

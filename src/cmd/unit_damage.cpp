@@ -273,7 +273,7 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
     if (this->isUnit()!=MISSILEPTR) {
       static float expdamagecenter=XMLSupport::parse_float(vs_config->getVariable ("physics","explosion_damage_center","1"));
       static float damageedge=XMLSupport::parse_float(vs_config->getVariable ("graphics","explosion_damage_edge",".125"));
-      _Universe->activeStarSystem()->AddMissileToQueue (new MissileEffect (this->Position().Cast(),this->MaxShieldVal(),0,this->ExplosionRadius()*expdamagecenter,this->ExplosionRadius()*expdamagecenter*damageedge));
+      _Universe->activeStarSystem()->AddMissileToQueue (new MissileEffect (this->Position().Cast(),this->MaxShieldVal(),0,this->ExplosionRadius()*expdamagecenter,this->ExplosionRadius()*expdamagecenter*damageedge,NULL));
     }
 	if (!this->isSubUnit()){
 		QVector exploc = this->cumulative_transformation.position;
