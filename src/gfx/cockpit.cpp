@@ -836,6 +836,7 @@ void GameCockpit::DrawEliteBlips (Unit * un) {
 }
 float GameCockpit::LookupTargetStat (int stat, Unit *target) {
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
+  static bool display_in_meters = XMLSupport::parse_bool (vs_config->getVariable("physics","display_in_meters","true"));
   static bool lie=XMLSupport::parse_bool (vs_config->getVariable("physics","game_speed_lying","true"));
   static float fpsval=0;
   const float fpsmax=1;
@@ -936,12 +937,12 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
 	if (lie) 
 		return (target->GetVelocity().Magnitude())/game_speed;
 	else
-		return target->GetVelocity().Magnitude()*3.6;
+		return display_in_meters?(target->GetVelocity().Magnitude()):(target->GetVelocity().Magnitude()*3.6);// JMS 6/28/05 - converted back to raw meters/second
   case UnitImages::SETKPS:
 	if (lie) 
 	    return target->GetComputerData().set_speed/game_speed;
 	else
-		return target->GetComputerData().set_speed*3.6;
+		return display_in_meters?(target->GetComputerData().set_speed):(target->GetComputerData().set_speed*3.6); //JMS 6/28/05 - converted back to raw meters/second
   case UnitImages::AUTOPILOT:
     {
     static int wasautopilot=0;
