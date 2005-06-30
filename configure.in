@@ -387,7 +387,7 @@ FOUND_PYTHON=no
 PYTHON_CXXFLAGS=""
 PYTHON_LIBS=""
 
-PYTHON_binchk="python python2 python2.2 python2.3"
+PYTHON_binchk="python python2 python2.2 python2.3 python2.4"
 for i in ${PYTHON_binchk};
 do
     PYTHON_check=`$i -V 2>/dev/null; echo $?`
