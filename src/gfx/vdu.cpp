@@ -518,6 +518,7 @@ struct retString128{
 };
 
 retString128 PrettyDistanceString(double distance) {
+	// OVERRUN
 	struct retString128 qr;
 	static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
 	static bool lie=XMLSupport::parse_bool (vs_config->getVariable("physics","game_speed_lying","true"));

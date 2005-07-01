@@ -1,12 +1,19 @@
 #include "client.h"
 #include "lowlevel/vsnet_debug.h"
+#include "networking/prediction.h"
 
 void Client::Init()
 {
 	_latest_timestamp = 0;
 	_old_timestamp    = 0;
 	_deltatime        = 0;
+	elapsed_since_packet=0;
 	latest_timeout=0;
+
+// NETFIXME: Cubic Splines appear to be broken...
+	
+//	prediction = new MixedPrediction();
+	prediction = new LinearPrediction();
 	old_timeout=0;
 	ingame = false;
 	webcam = 0;
@@ -15,6 +22,7 @@ void Client::Init()
 	jumpfile="";
     _disconnectReason = "none";
 	comm_freq = 0;
+	last_packet=ClientState();
 }
 
 Client::Client()
@@ -31,6 +39,11 @@ Client::Client( SOCKETALT& s, bool tcp )
 
 Client::~Client()
 {
+	if( prediction)
+    {
+		delete prediction;
+        prediction = NULL;
+    }
 }
 
 void Client::setLatestTimestamp( unsigned int ts )

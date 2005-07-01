@@ -9,11 +9,15 @@ using std::string;
 
 void	SaveNetUtil::GetSaveStrings( ClientPtr clt, string & savestr, string & xmlstr)
 {
+	if (!clt) return;
 	Unit * un = clt->game_unit.GetUnit();
+	if (!un) return;
 	Cockpit * cp = _Universe->isPlayerStarship( un);
-	// Only get the player data, the dynamic universe part is separated
 	const QVector POS( un->curr_physical_state.position);
-	savestr = cp->savegame->WritePlayerData ( POS, cp->unitfilename, cp->savegame->GetStarSystem().c_str(), cp->credits, FactionUtil::GetFactionName( cp->GetParent()->faction));
+	if (cp) {
+		// Only get the player data, the dynamic universe part is separated
+		savestr = cp->savegame->WritePlayerData ( POS, cp->unitfilename, cp->savegame->GetStarSystem().c_str(), cp->credits, FactionUtil::GetFactionName( cp->GetParent()->faction));
+	}
 	xmlstr = un->WriteUnitString();
 }
 
@@ -22,12 +26,16 @@ void	SaveNetUtil::GetSaveStrings( int numplayer, string & savestr, string & xmls
 	Cockpit * cp;
 	Unit * un;
 	cp = _Universe->AccessCockpit( numplayer);
-	un = cp->GetParent();
-	xmlstr = un->WriteUnitString();
-	//savestr = cp->savegame->WriteSaveGame (cp->activeStarSystem->getFileName().c_str(),un->LocalPosition(),cp->credits,cp->unitfilename,0, false);
-	// Only get the player data, the dynamic universe part is separated
-	const QVector POS(un->LocalPosition());
-	savestr = cp->savegame->WritePlayerData ( POS, cp->unitfilename, cp->activeStarSystem->getFileName().c_str(), cp->credits, FactionUtil::GetFactionName( cp->GetParent()->faction));
+	if (cp) {
+		un = cp->GetParent();
+		if (un) {
+			xmlstr = un->WriteUnitString();
+			const QVector POS(un->LocalPosition());
+			//savestr = cp->savegame->WriteSaveGame (cp->activeStarSystem->getFileName().c_str(),un->LocalPosition(),cp->credits,cp->unitfilename,0, false);
+			// Only get the player data, the dynamic universe part is separated
+			savestr = cp->savegame->WritePlayerData ( POS, cp->unitfilename, cp->activeStarSystem->getFileName().c_str(), cp->credits, FactionUtil::GetFactionName( cp->GetParent()->faction));
+		}
+	}
 }
 
 void	SaveNetUtil::GetSaveBuffer( string savestr, string xmlstr, char * buffer)

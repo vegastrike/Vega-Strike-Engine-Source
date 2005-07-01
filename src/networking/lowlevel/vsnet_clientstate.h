@@ -47,12 +47,12 @@ class	ClientState
 		ClientState( ObjSerial serial, Transformation trans, Vector velocity, Vector acc, unsigned int del);
 		ClientState( Unit * un);
 
-		QVector		getPosition() { return this->pos.position;}
-		Quaternion	getOrientation() { return this->pos.orientation;}
-		Vector		getVelocity() { return this->veloc;}
-		Vector		getAcceleration() { return this->accel;}
+		QVector		getPosition() const { return this->pos.position;}
+		Quaternion	getOrientation() const { return this->pos.orientation;}
+		Vector		getVelocity() const { return this->veloc;}
+		Vector		getAcceleration() const { return this->accel;}
 		ObjSerial	getSerial() const { return this->client_serial;}
-		//float		getDelay() { return this->delay;}
+		//float		getDelay() const { return this->delay;}
 		//void		setDelay( float del) { this->delay = del;}
 		void		setSerial( ObjSerial ser) { this->client_serial = ser;}
 		void		setPosition( QVector posit) { this->pos.position = posit;}
@@ -62,7 +62,7 @@ class	ClientState
 
 		void	display( std::ostream& ostr ) const;
 		void	display() const;
-		int		operator==( const ClientState & ctmp);
+		int		operator==( const ClientState & ctmp) const;
 		void	netswap();
 
 		friend	class NetBuffer;

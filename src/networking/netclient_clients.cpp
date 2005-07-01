@@ -71,7 +71,7 @@ void	NetClient::AddClientObject( NetBuffer & netbuf, ObjSerial cltserial)
 		vector<string> savedships;
 		// Parse the save buffer
 		save.ParseSaveGame( "", starsys, "", pos, update, creds, savedships, 0, savestr, false);
-
+		
 		string PLAYER_FACTION_STRING( save.GetPlayerFaction());
 
 		// CREATES THE UNIT... GET SAVE AND XML FROM SERVER
@@ -79,6 +79,10 @@ void	NetClient::AddClientObject( NetBuffer & netbuf, ObjSerial cltserial)
 		// We name the flightgroup with the player name
 		cerr<<"Found saveship[0] = "<<savedships[0]<<endl;
 		cerr<<"NEW PLAYER POSITION : x="<<pos.i<<",y="<<pos.j<<"z="<<pos.k<<endl;
+		
+		cerr<<"SAFE PLATER POSITION: x="<<pos.i<<",y="<<pos.j<<"z="<<pos.k<<endl;
+		
+		
 		Unit * un = UnitFactory::createUnit( savedships[0].c_str(),
 							 false,
 							 FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str()),
@@ -98,10 +102,16 @@ void	NetClient::AddClientObject( NetBuffer & netbuf, ObjSerial cltserial)
 		// Assign new coordinates to client
 		un->SetPosition( save.GetPlayerLocation());
 		un->SetSerial( cltserial);
+		
+		un->curr_physical_state=netbuf.getTransformation();
+		save.SetPlayerLocation(un->curr_physical_state.position);
 
 		_Universe->activeStarSystem()->AddUnit( un);
 		string msg = clt->callsign+" entered the system";
 		UniverseUtil::IOmessage(0,"game","all","#FFFF66"+msg+"#000000");
+		un->BackupState();
+		clt->last_packet=un->old_state;
+		clt->prediction->InitInterpolation(un, un->old_state, 0, this->deltatime);
 	}
 	// If this is a local player (but not the current), we must affect its Unit to Client[sernum]
 	else if( cltserial!=this->game_unit.GetUnit()->GetSerial())
@@ -186,6 +196,13 @@ void	NetClient::removeClient( const Packet* packet )
 
 void	NetClient::sendPosition( const ClientState* cs )
 {
+
+
+
+// NETFIXME: POSUPDATE's need to happen much more often, and should send info more onften about closer units than farther ones.
+
+
+
 	// Serial in ClientState is updated in UpdatePhysics code at ClientState creation (with pos, veloc...)
 	Packet pckt;
 	NetBuffer netbuf;
@@ -207,16 +224,13 @@ void	NetClient::sendPosition( const ClientState* cs )
 
 void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, NetBuffer& netbuf, double delta_t )
 {
-	this->elapsed_since_packet = 0;
-
 	// Computes deltatime only when receiving a snapshot since we interpolate positions between 2 snapshots
 	// We don't want to consider a late snapshot
 	if( latest_timestamp < int_ts)
 	{
         COUT << "   *** SNAPSHOT is not late - evaluating" << endl;
 
-	    this->old_timestamp    = this->latest_timestamp;
-	    this->latest_timestamp = int_ts;
+		this->latest_timestamp = int_ts;
 		this->deltatime        = delta_t;
 
 		// Loop throught received snapshot
@@ -252,7 +266,7 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 			// Test if local player
 			else
             {
-				localplayer = _Universe->isPlayerStarship( Clients.get(sernum)->game_unit.GetUnit());
+				localplayer = _Universe->isPlayerStarship( Clients.get(sernum)->game_unit.GetUnit())?true:false;
             }
 
 			if( cmd == ZoneMgr::FullUpdate )
@@ -267,11 +281,14 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 				cs = netbuf.getClientState();
                 COUT << "   *** cs=" << cs << endl;
 
-				if( (!localplayer) && (clt || un))
+// NETFIXME: Why not set local player? It can't hurt...
+				
+				if( (clt || un) && (!localplayer) )
 				{
 					cs.display();
-					if( clt)
+					if( clt) {
 						un = clt->game_unit.GetUnit();
+					}
 					// Get our "semi-ping" from server
 					// We received delay in ms so we convert it into seconds
 					// Backup old state
@@ -279,10 +296,23 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 					// Update concerned client with predicted position directly in network client list
 					un->curr_physical_state.position = cs.getPosition();
 					un->curr_physical_state.orientation = cs.getOrientation();
-                    assert( prediction );
-					prediction->InitInterpolation( un, this->deltatime);
-					un->curr_physical_state = prediction->Interpolate( un, this->deltatime);
 					un->Velocity = cs.getVelocity();
+
+
+// NETFIXME: Predictions are absolutely borked.  Disabled for now.
+
+					if (clt) {
+						clt->setLatestTimestamp(int_ts);
+						clt->elapsed_since_packet = 0;
+						assert( clt->prediction );
+						clt->prediction->InitInterpolation( un,
+								clt->last_packet,
+								clt->getDeltatime(),
+								this->deltatime);
+						clt->last_packet=cs;
+						un->curr_physical_state = clt->prediction->Interpolate( un, 0);
+					}
+					
 					QVector predpos = un->curr_physical_state.position;
 					cerr<<"Predicted location : x="<<predpos.i<<",y="<<predpos.j<<",z="<<predpos.k<<endl;
 				}
@@ -297,7 +327,7 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
                 COUT << "   *** SubCommand is PosUpdate ser=" << sernum << endl;
 				QVector pos = netbuf.getQVector();
                 COUT << "   *** pos=" << pos.i << "," << pos.j << "," << pos.k << endl;
-				if( (!localplayer) && (clt || un))
+				if( (clt || un) && (!localplayer) )
 				{
 					if( clt)
 						un = clt->game_unit.GetUnit();
@@ -305,10 +335,23 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 					un->BackupState();
 					// Set the new received position in curr_physical_state
 					un->curr_physical_state.position = pos;
-                    assert( prediction );
-					prediction->InitInterpolation( un, this->deltatime);
-					un->curr_physical_state.position = prediction->InterpolatePosition( un, this->deltatime);
-					//predict( sernum);
+
+
+
+// NETFIXME: Predictions are absolutely borked.  Disabled for now.
+
+					if (clt) {
+						clt->setLatestTimestamp(int_ts);
+						clt->elapsed_since_packet = 0;
+						assert( clt->prediction );
+						clt->prediction->InitInterpolation( un,
+								clt->last_packet,
+								clt->getDeltatime(),
+								this->deltatime);
+						clt->last_packet=un->old_state;
+						clt->last_packet.setPosition(pos);
+						un->curr_physical_state.position = clt->prediction->InterpolatePosition( un, 0);
+					}
 				}
 				else if( localplayer)
                 {

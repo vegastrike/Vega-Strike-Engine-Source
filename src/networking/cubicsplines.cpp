@@ -3,7 +3,14 @@
 #include <math.h>
 #include <assert.h>
 #include "cubicsplines.h"
-
+CubicSpline::CubicSpline() {
+#ifdef SPLINE_METHOD2
+	A=B=C=E=F=G=I=J=K=0;
+	D=H=L=1.0;
+#else
+	memset(this,0,sizeof(CubicSpline));
+#endif
+}
 #ifdef SPLINE_METHOD2
 void	CubicSpline::createSpline( QVector P0, QVector P1, QVector P2, QVector P3)
 {
@@ -23,7 +30,7 @@ void	CubicSpline::createSpline( QVector P0, QVector P1, QVector P2, QVector P3)
 	this->L = P0.k;
 }
 
-QVector CubicSpline::computePoint(double t)
+QVector CubicSpline::computePoint(double t) const
 {
 	QVector res( (A*t*t*t + B*t*t + C*t + D), (E*t*t*t + F*t*t + G*t + H), (I*t*t*t + J*t*t + K*t + L));
 	return res;
@@ -234,7 +241,7 @@ CubicSpline::~CubicSpline()
 
 // SplineAffineVector
 //
-QVector CubicSpline::computePoint(double t)
+QVector CubicSpline::computePoint(double t) const
 {
 	return QVector( MATValeurSpline(MatX, t, FNb), MATValeurSpline(MatY, t, FNb), MATValeurSpline(MatZ, t, FNb));
 }

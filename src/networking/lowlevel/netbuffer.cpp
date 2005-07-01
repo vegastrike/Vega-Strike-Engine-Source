@@ -120,7 +120,7 @@ void	NetBuffer::addQVector( QVector v)
 		}
 QVector	NetBuffer::getQVector()
 		{
-			Vector v;
+			QVector v;
 			v.i = this->getDouble();
 			v.j = this->getDouble();
 			v.k = this->getDouble();
@@ -278,26 +278,26 @@ Shield	NetBuffer::getShield()
 }
 void		NetBuffer::addArmor( Armor armor)
 {
-	this->addUInt32 ( armor.frontrighttop);
-	this->addUInt32( armor.backrighttop);
-	this->addUInt32( armor.frontlefttop);
-	this->addUInt32( armor.backlefttop);
-	this->addUInt32 ( armor.frontrightbottom);
-	this->addUInt32( armor.backrightbottom);
-	this->addUInt32( armor.frontleftbottom);
-	this->addUInt32( armor.backleftbottom);
+	this->addFloat ( armor.frontrighttop);
+	this->addFloat( armor.backrighttop);
+	this->addFloat( armor.frontlefttop);
+	this->addFloat( armor.backlefttop);
+	this->addFloat ( armor.frontrightbottom);
+	this->addFloat( armor.backrightbottom);
+	this->addFloat( armor.frontleftbottom);
+	this->addFloat( armor.backleftbottom);
 }
 Armor	NetBuffer::getArmor()
 {
 	Armor armor;
-	armor.frontrighttop = this->getUInt32();
-	armor.backrighttop = this->getUInt32();
-	armor.frontlefttop = this->getUInt32();
-	armor.backlefttop = this->getUInt32();
-	armor.frontrightbottom = this->getUInt32();
-	armor.backrightbottom = this->getUInt32();
-	armor.frontleftbottom = this->getUInt32();
-	armor.backleftbottom = this->getUInt32();
+	armor.frontrighttop = this->getFloat();
+	armor.backrighttop = this->getFloat();
+	armor.frontlefttop = this->getFloat();
+	armor.backlefttop = this->getFloat();
+	armor.frontrightbottom = this->getFloat();
+	armor.backrightbottom = this->getFloat();
+	armor.frontleftbottom = this->getFloat();
+	armor.backleftbottom = this->getFloat();
 
 	return armor;
 }

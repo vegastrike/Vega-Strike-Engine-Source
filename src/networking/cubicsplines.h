@@ -44,12 +44,12 @@ class	CubicSpline
             used beyond this range.<p>
             Note : "nil" single arrays are accepted, in this case the axis is
             disabled and calculus will return 0 (zero) for this component. */
-			CubicSpline() {}
+			CubicSpline() ;
 			~CubicSpline();
 
 			void createSpline( QVector P0, QVector P1, QVector P2, QVector P3);
 			// Calculates affine vector at time t.<p>
-			QVector computePoint(double t);
+			QVector computePoint(double t) const;
 };
 
 #endif /* CUBICSPLINES_H */

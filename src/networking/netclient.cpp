@@ -108,9 +108,7 @@ NetClient::NetClient()
 {
 	deltatime = 0;
     game_unit = NULL;
-    old_timestamp = 0;
-    latest_timestamp = 0;
-	elapsed_since_packet=0;
+	latest_timestamp=0;
     //old_time = 0;
     cur_time = 0;
     enabled = 0;
@@ -121,7 +119,6 @@ NetClient::NetClient()
 	FileUtil::use_crypto = true;
 #endif
 
-	prediction = new MixedPrediction();
     NetComm = NULL;
 
     _downloadManagerClient.reset( new VsnetDownload::Client::Manager( _sock_set ) );
@@ -134,11 +131,6 @@ NetClient::NetClient()
 
 NetClient::~NetClient()
 {
-	if( prediction)
-    {
-		delete prediction;
-        prediction = NULL;
-    }
 	if( NetComm!=NULL)
     {
 		delete NetComm;
@@ -513,7 +505,7 @@ int NetClient::recvMsg( Packet* outpacket )
 				    //this->game_unit.GetUnit()->activeStarSystem->SetZone(netbuf.getShort());
 				    //_Universe->current_stardate.InitTrek( netbuf.getString());
                     //COUT << "Compression: " << ( (flags & CMD_CAN_COMPRESS) ? "yes" : "no" ) << endl;
-					this->game_unit.GetUnit()->SetCurPosition( netbuf.getQVector());
+					this->game_unit.GetUnit()->curr_physical_state = netbuf.getTransformation();
                     //this->getZoneData( &p1 );
                 }
                 break;
@@ -563,7 +555,7 @@ int NetClient::recvMsg( Packet* outpacket )
 			case CMD_UNFIREREQUEST :
 				// WE RECEIVED AN UNFIRE NOTIFICATION SO DEACTIVATE THE WEAPON
 				mount_num = netbuf.getInt32();
-				mis = netbuf.getSerial();
+//				mis = netbuf.getSerial();
 				// Find the unit
 				un = UniverseUtil::GetUnitFromSerial( p1.getSerial());
 				if( un != NULL)
@@ -575,12 +567,9 @@ int NetClient::recvMsg( Packet* outpacket )
 						(*i).status=Mount::INACTIVE;
 					un->mounts[mount_num].processed=Mount::UNFIRED;
 					// Store the missile id in the mount that should fire a missile
-					un->mounts[mount_num].serial=mis;
+					un->mounts[mount_num].serial=0;//mis;
 					// Ask for fire
-					if( mis != 0)
-						un->Fire(ROLES::FIRE_MISSILES|ROLES::EVERYTHING_ELSE,false);
-					else
-						un->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false);
+					un->UnFire();
 				}
 				else
 					COUT<<"!!! Problem -> CANNOT UNFIRE UNIT NOT FOUND !!!"<<endl;
@@ -902,6 +891,23 @@ int NetClient::recvMsg( Packet* outpacket )
 			break;
 			case CMD_POSUPDATE :
 			{
+
+
+
+
+/**************************************************************/
+////////////////////////////////////////////////////////////////
+// NETFIXME: Check for NULL (dead) Unit! ///////////////////////
+////////////////////////////////////////////////////////////////
+/**************************************************************/
+
+
+
+
+
+
+
+				
 				// If a client receives that it means the server want to force the client position to be updated
 				// with server data
 				QVector serverpos = netbuf.getQVector();
@@ -1095,7 +1101,18 @@ bool NetClient::Clients::remove( int x )
 
 Transformation	NetClient::Interpolate( Unit * un, double addtime)
 {
-	elapsed_since_packet += addtime;
-	return prediction->Interpolate( un, this->deltatime+elapsed_since_packet);
+//	return un->curr_physical_state;
+// NETFIXME: Interpolation is kind of borked...?
+	ClientPtr clt=Clients.get(un->GetSerial());
+	clt->elapsed_since_packet += addtime;
+	Transformation trans;
+	if (clt) {
+		trans=clt->prediction->Interpolate( un, clt->elapsed_since_packet);
+		cerr << "  *** INTERPOLATE (" << un->curr_physical_state.position.i << ", " << un->curr_physical_state.position.j << ", " << un->curr_physical_state.position.k << "): addtime=" << addtime << ", elapsed since packet=" << clt->elapsed_since_packet << ", deltatime=" << this->deltatime << "\n        =>        (" << trans.position.i << ", " << trans.position.j << ", " << trans.position.k << ")        Vel =    (" << un->Velocity.i << ", " << un->Velocity.j << ", " << un->Velocity.k << ")" << std::endl;
+	} else {
+		trans=un->curr_physical_state;
+		cerr << "  *** INTERPOLATE (CLIENT==NULL).";
+	}
+	return trans;
 }
 

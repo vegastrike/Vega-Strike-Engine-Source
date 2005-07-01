@@ -77,7 +77,7 @@ void    ClientState::display( std::ostream& ostr ) const
 	     << " - Acceleration="<<accel.i<<","<<accel.j<<","<<accel.k;
 }
 
-int		ClientState::operator==( const ClientState & ctmp)
+int		ClientState::operator==( const ClientState & ctmp) const
 {
 	// Need == operator for Transformation class
 	return (this->client_serial==ctmp.client_serial && this->pos.position==ctmp.pos.position && this->pos.orientation==ctmp.pos.orientation);

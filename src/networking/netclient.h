@@ -88,20 +88,17 @@ class	NetClient
 		// This unit array has to be changed into a map too !!
         // Unit *				Units[MAXOBJECTS];			// Server controlled units in the same zone
 	    // a vector because always accessed by their IDs
-		Prediction *		prediction;
 
 	    NetworkCommunication*	NetComm;
-
-	private:
 
 		int					enabled;		// Bool to say network is enabled
 		// Time used for refresh - not sure still used
 		//int					old_time;
 		double				cur_time;
-		unsigned int		old_timestamp;		// Previous timestamp
-		unsigned int		latest_timestamp;	// Last received timestamp
+//		unsigned int		old_timestamp;          // Previous timestamp
+		unsigned int		latest_timestamp;       // Last received
 		double				deltatime;			// Semi-ping value between this client and server in ms
-		double				elapsed_since_packet;	// Time elapsed since we we received the last SNAPSHOT or PING packet
+//		double				elapsed_since_packet;	// Time elapsed since we we received the last SNAPSHOT or PING packet
 		bool				jumpok;
 		bool				ingame;
 		float				current_freq;

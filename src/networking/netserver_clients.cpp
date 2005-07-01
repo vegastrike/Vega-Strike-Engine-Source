@@ -4,6 +4,7 @@
 #include "universe_util.h"
 #include "universe_generic.h"
 #include "networking/savenet_util.h"
+#include "networking/prediction.h"
 
 extern QVector DockToSavedBases( int n);
 extern StarSystem * GetLoadedStarSystem( const char * system);
@@ -63,8 +64,13 @@ void	NetServer::addClient( ClientPtr clt)
 	un->activeStarSystem = st2;
 	// Cannot use sts pointer since it may be NULL if the system was just created
 	// Try to see if the player is docked on start
-	QVector safevec( DockToSavedBases( player));
-	if( safevec == nullVec)
+
+	
+// NETFIXME: Dock not yet working!
+
+	
+	QVector safevec;//( DockToSavedBases( player));
+	if( true) //safevec == nullVec)
 	{
 		safevec = UniverseUtil::SafeStarSystemEntrancePoint( st2, cp->savegame->GetPlayerLocation(), clt->game_unit.GetUnit()->radial_size);
 		cerr<<"PLAYER NOT DOCKED - STARTING AT POSITION : x="<<safevec.i<<",y="<<safevec.j<<",z="<<safevec.k<<endl;
@@ -89,6 +95,7 @@ void	NetServer::addClient( ClientPtr clt)
 		SaveNetUtil::GetSaveStrings( clt, savestr, xmlstr);
 		netbuf.addString( savestr);
 		netbuf.addString( xmlstr);
+		netbuf.addTransformation( un->curr_physical_state );
 		// Put the save buffer after the ClientState
 		packet2.bc_create( CMD_ENTERCLIENT, un->GetSerial(),
                            netbuf.getData(), netbuf.getDataLength(),
@@ -106,8 +113,11 @@ void	NetServer::addClient( ClientPtr clt)
 	//netbuf.addShort( zoneid);
 	//netbuf.addString( _Universe->current_stardate.GetFullTrekDate());
 	un->BackupState();
+    clt->setLatestTimestamp(packet.getTimestamp( ));
+	clt->last_packet=un->old_state;
+	clt->prediction->InitInterpolation(un, un->old_state, 0, clt->getDeltatime());
 	// Add initial position to make sure the client is starting from where we tell him
-	netbuf.addQVector( safevec);
+	netbuf.addTransformation(un->curr_physical_state);
 	pp.send( CMD_ADDEDYOU, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1325) );
 
 	COUT<<"ADDED client n "<<un->GetSerial()<<" in ZONE "<<clt->game_unit.GetUnit()->activeStarSystem->GetZone()<<" at STARDATE "<<_Universe->current_stardate.GetFullTrekDate()<<endl;
@@ -139,23 +149,37 @@ void	NetServer::removeClient( ClientPtr clt)
 
 void	NetServer::posUpdate( ClientPtr clt)
 {
+
+
+//NETFIXME: do a sanity check on the position.
+
+
+
 	NetBuffer netbuf( packet.getData(), packet.getDataLength());
 	Unit * un = clt->game_unit.GetUnit();
 	ObjSerial clt_serial = netbuf.getSerial();
-
+   clt->setLatestTimestamp(packet.getTimestamp( ));
+    clt->setLatestTimestamp(packet.getTimestamp( ));
+	clt->elapsed_since_packet = 0;
 	if( clt_serial != un->GetSerial())
-	{
-		cerr<<"!!! ERROR : Received an update from a serial that differs with the client we found !!!"<<endl;
-		VSExit(1);
-	}
+		{
+			cerr<<"!!! ERROR : Received an update from a serial that differs with the client we found !!!"<<endl;
+			VSExit(1);
+		}
 	ClientState cs;
 	// Set old position
 	un->BackupState();
 	// Update client position in client list : should be enough like it is below
 	cs = netbuf.getClientState();
+	COUT<<"Received ZoneMgr::PosUpdate from client "<<clt_serial<<"   *** cs="<<cs<< endl;
 	un->curr_physical_state.position = cs.getPosition();
 	un->curr_physical_state.orientation = cs.getOrientation();
 	un->Velocity = cs.getVelocity();
+
+	assert( clt->prediction );
+	clt->prediction->InitInterpolation( un, clt->last_packet, clt->getDeltatime(), clt->getDeltatime());
+//	un->curr_physical_state.position = clt->prediction->InterpolatePosition( un, clt->getDeltatime());
+	clt->last_packet=cs;
 	// deltatime has already been updated when the packet was received
 	Cockpit * cp = _Universe->isPlayerStarship( clt->game_unit.GetUnit());
 	cp->savegame->SetPlayerLocation( un->curr_physical_state.position);
@@ -344,6 +368,7 @@ void  NetServer::getZoneInfo( unsigned short zoneid, NetBuffer & netbuf)
 			netbuf.addString( kp->callsign);
 			netbuf.addString( savestr);
 			netbuf.addString( xmlstr);
+			netbuf.addTransformation(kp->game_unit.GetUnit()->curr_physical_state);
 			nbclients++;
 		}
 	}

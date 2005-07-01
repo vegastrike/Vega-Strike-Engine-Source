@@ -1,9 +1,8 @@
 #include "lerp.h"
 
 
-
-Transformation linear_interpolate(const Transformation &A, const Transformation &B, double blend) {
-  if(blend>1.0) blend = 1.0;
+Transformation linear_interpolate_uncapped(const Transformation &A, const Transformation &B, double blend) {
+  
   Quaternion result;
   if (A.orientation==B.orientation) {
     result = A.orientation;
@@ -38,6 +37,10 @@ Transformation linear_interpolate(const Transformation &A, const Transformation 
   }
   Transformation res(result, (A.position*(1-blend)) + (B.position * blend));
 
-
   return res;
+}
+
+Transformation linear_interpolate(const Transformation &A, const Transformation &B, double blend) {
+  if(blend>1.0) blend = 1.0;
+  return linear_interpolate_uncapped(A,B,blend);
 }

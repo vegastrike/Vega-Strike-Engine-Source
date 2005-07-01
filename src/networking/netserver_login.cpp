@@ -64,11 +64,11 @@ ClientPtr NetServer::getClientFromSerial( ObjSerial serial)
 			found = true;
             break;
         }
-		if (!found)
-		{
-			cerr<<"   WARNING client not found in getClientFromSerial !!!!"<<endl;
-			clt.reset();
-		}
+	}
+	if (!found)
+	{
+		cerr<<"   WARNING client not found in getClientFromSerial !!!!"<<endl;
+		clt.reset();
 	}
 
 	return clt;

@@ -955,7 +955,7 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
               VSFileSystem::current_type.pop_back();
               VSFileSystem::current_subdirectory.pop_back();
               VSFileSystem::current_path.pop_back();
-              if (taberr<=Ok&&taberr!=Unspecified) {
+              if ((taberr<=Ok&&taberr!=Unspecified)||netxml) {
                 delete unitTables.back();
                 unitTables.pop_back();
               }
@@ -2020,17 +2020,28 @@ void Unit::AddVelocity(float difficulty) {
 }
 void Unit::UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc)
 {
+
+
+// NETFIXME: used to check for (!cp):
+//	if( (Network==NULL && !SERVER) || (Network!=NULL && cp && !SERVER) || (SERVER && !cp))
+
+
 	Cockpit * cp = _Universe->isPlayerStarship( this);
   // Only in non-networking OR networking && is a player OR SERVER && not a player
-  if( (Network==NULL && !SERVER) || (Network!=NULL && cp && !SERVER) || (SERVER && !cp))
+  if( (Network==NULL && !SERVER) || (Network!=NULL && cp && !SERVER) || (SERVER))
   {
 	  if(AngularVelocity.i||AngularVelocity.j||AngularVelocity.k) {
 	    Rotate (SIMULATION_ATOM*(AngularVelocity));
 	  }
   }
 
+
+// NETFIXME: used to check for (!cp):
+//	if( SERVER && Network!=NULL && !cp)
+
+
 	// SERVERSIDE ONLY : If it is not a player, it is a unit controlled by server so compute changes
-	if( SERVER && Network!=NULL && !cp)
+	if( SERVER)
 	{
 		AddVelocity(difficulty);
                 
@@ -4786,7 +4797,8 @@ int Unit::ForceDock (Unit * utdw, int whichdockport) {
 	
       utdw->docked|=DOCKING_UNITS;
       utdw->image->dockedunits.push_back (new DockedUnits (this,whichdockport));
-      if (utdw->image->dockingports[whichdockport].internal) {
+	  // NETFIXME: Broken on server.
+      if ((!Network)&&(!SERVER)&&utdw->image->dockingports[whichdockport].internal) {
 	RemoveFromSystem();	
 	SetVisible(false);
 	docked|=DOCKED_INSIDE;

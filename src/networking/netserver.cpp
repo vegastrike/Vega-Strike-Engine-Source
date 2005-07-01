@@ -123,6 +123,8 @@ void	NetServer::startMsg()
 /**** Start the server loop                                ****/
 /**************************************************************/
 
+extern void InitUnitTables(); // universe_generic.cpp
+
 void	NetServer::start(int argc, char **argv)
 {
 	string strperiod, strtimeout, strlogintimeout, stracct, strnetatom;
@@ -147,6 +149,7 @@ void	NetServer::start(int argc, char **argv)
 	strcpy( CONFIGFILE, "vegaserver.config");
 	cout<<"Loading server config...";
 	VSFileSystem::InitPaths( CONFIGFILE);
+	InitUnitTables(); // universe_generic.cpp
 	// Here we say we want to only handle activity in all starsystems
 	run_only_player_starsystem=false;
 	//vs_config = new VegaConfig( SERVERCONFIGFILE);
@@ -280,7 +283,7 @@ void	NetServer::start(int argc, char **argv)
 		if( acctserver && !acct_con && (curtime - reconnect_time)>periodrecon)
 		{
 			NetBuffer netbuf;
-			reconnect_time += periodrecon;
+			reconnect_time = curtime+periodrecon;
 			// We previously lost connection to account server
 			// We try to reconnect
 			acct_sock = NetUITCP::createSocket( srvip, tmpport, _sock_set );
@@ -336,13 +339,27 @@ void	NetServer::start(int argc, char **argv)
 		/****************************** VS STUFF TO DO ************************************/
 		// UPDATE STAR SYSTEM -> TO INTEGRATE WITH NETWORKING
 		// PROCESS JUMPS -> MAKE UNITS CHANGE THEIR STAR SYSTEM
+
+
+
+// NETFIXME: Why was StarSystem->Update() commented out?
+
+
+
+
+		
 		  unsigned int i;
-		  // static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
+		  static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
 		  static unsigned int numrunningsystems = XMLSupport::parse_int (vs_config->getVariable ("physics","NumRunningSystems","4"));
-		  // float systime=nonactivesystemtime;
+		  float systime=nonactivesystemtime;
 		  
 		  for (i=0;i<_Universe->star_system.size()&&i<numrunningsystems;i++) {
-			//_Universe->star_system[i]->Update((i==0)?1:systime/i,true);
+
+
+// NETFIXME: No Director for you!
+
+
+			  _Universe->star_system[i]->Update((i==0)?1:systime/i,false);
 		  }
 		  StarSystem::ProcessPendingJumps();
 		/****************************** VS STUFF TO DO ************************************/
@@ -723,15 +740,40 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 					::iterator i = un->mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
 				for (;i!=un->mounts.end();++i)
 					(*i).status=Mount::INACTIVE;
-				if (mount_num<un->mounts.size()&&mount_num>=0)
+				if (mount_num<un->mounts.size()&&mount_num>=0) {
 					un->mounts[mount_num].status=Mount::ACTIVE;
-				else
+				} else {
 					COUT<<"ERROR --> Received a fire order on an invalid MOUNT: "<<mount_num<<" > "<<(un->mounts.size())<<endl;
+				}
 				// Ask for fire
 				if( mis != 0)
 					un->Fire(ROLES::FIRE_MISSILES|ROLES::EVERYTHING_ELSE,false);
 				else
 					un->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false);
+			}
+		break;
+		case CMD_UNFIREREQUEST :
+			target_serial = netbuf.getSerial();
+			mount_num = netbuf.getInt32();
+			zone = clt->game_unit.GetUnit()->activeStarSystem->GetZone();
+			// Find the unit
+			// Set the concerned mount as ACTIVE and others as INACTIVE
+			un = zonemgr->getUnit( target_serial, zone);
+			if( un==NULL)
+				COUT<<"ERROR --> Received an unfire order for non-existing UNIT"<<endl;
+			else
+			{
+				vector <Mount>
+					::iterator i = un->mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
+				for (;i!=un->mounts.end();++i)
+					(*i).status=Mount::INACTIVE;
+				if (mount_num<un->mounts.size()&&mount_num>=0) {
+					un->mounts[mount_num].status=Mount::ACTIVE;
+				} else {
+					COUT<<"ERROR --> Received an unfire order on an invalid MOUNT: "<<mount_num<<" > "<<(un->mounts.size())<<endl;
+				}
+				// Ask for fire
+				un->UnFire();
 			}
 		break;
 		case CMD_JUMP :

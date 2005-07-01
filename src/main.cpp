@@ -122,6 +122,8 @@ VegaConfig * createVegaConfig( char * file)
 
 extern QVector DockToSavedBases (int playernum);
 extern bool soundServerPipes();
+extern void InitUnitTables(); // universe_generic.cpp
+
 std::string ParseCommandLine(int argc, char ** CmdLine);
 void VSExit( int code)
 {
@@ -739,10 +741,11 @@ const char helpmessage[] =
 " -N -n     Number of players\n"
 " -M -m     Specify a mod to play\n"
 " -P -p     Specify player location\n"
-" -j -j     Start in a specific system\n"
-" -A -A     Normal resolution (800x600)\n"
+" -J -j     Start in a specific system\n"
+" -A -a     Normal resolution (800x600)\n"
 " -H -h     High resolution (1024x768)\n"
 " -V -v     Super high resolution (1280x1024)\n"
+" --net     Networking Enabled (Experimental)\n"
 "\n";
 
 std::string ParseCommandLine(int argc, char ** lpCmdLine) {

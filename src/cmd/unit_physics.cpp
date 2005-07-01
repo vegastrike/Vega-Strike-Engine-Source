@@ -72,19 +72,20 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
   // Here send (new position + direction = curr_physical_state.position and .orientation)
   // + speed to server (which velocity is to consider ?)
   // + maybe Angular velocity to anticipate rotations in the other network clients
-  if( Network!=NULL && Network[0].isTime())
+  if( Network!=NULL)
   {
 	  //cout<<"SEND UPDATE"<<endl;
 	  // Check if this is a player, because in network mode we should only send updates of our moves
 	  player= _Universe->whichPlayerStarship( this);
 	  if( player>=0 /* && this->networked */ )
 	  {
+		if (Network[0].isTime()) {
 		  //cout<<"Player number : "<<player<<endl;
 		  // (NetForce + Transform (ship_matrix,NetLocalForce) )/mass = GLOBAL ACCELERATION
 
 		  //curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
 		  // If we want to inter(extra)polate sent position, DO IT HERE
-		  if( !(old_physical_state.position == this->curr_physical_state.position && old_physical_state.orientation == this->curr_physical_state.orientation))
+		  if( !(old_physical_state.position == this->curr_physical_state.position && old_physical_state.orientation == this->curr_physical_state.orientation) )
 				// We moved so update
 		  {
 				ClientState cstmp( this->serial, this->curr_physical_state, this->Velocity, accel, 0);
@@ -95,6 +96,8 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
 				// Say we are still alive
 				Network[player].sendAlive();
 		  }
+		}
+		this->AddVelocity(difficulty);
 	  }
 	  else
 	  {
@@ -106,7 +109,8 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
 		  else
 		  {
 		  	// Networked unit so interpolate its position
-			this->curr_physical_state = Network[0].Interpolate( this, GetElapsedTime());
+			this->curr_physical_state = Network[0].Interpolate( this, SIMULATION_ATOM);
+ 			this->AddVelocity(difficulty);
 		  }
 	  }
   }

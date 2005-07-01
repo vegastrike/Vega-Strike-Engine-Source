@@ -35,6 +35,7 @@
 
 class Unit;
 class UnitContainer;
+class Prediction;
 
 extern VegaConfig *vs_config;
 
@@ -48,13 +49,14 @@ public:
 	UnitContainer	game_unit;
 	AddressIP		cltadr;
 	//Prediction *	prediction;
-	bool            is_tcp;
+	bool			is_tcp;
 	SOCKETALT		sock;
 	//ObjSerial		serial;
 	// 2 timeout vals to check a timeout for client connections
 	// those vals are server times
-	double		old_timeout;
-	double		latest_timeout;
+	double			old_timeout;
+	double			latest_timeout;
+	double			elapsed_since_packet;
 	//unsigned int	deltatime;
 	string			callsign;
 	string			name;
@@ -68,9 +70,12 @@ public:
 	char			jumpok;
 	string			jumpfile;
 	float			comm_freq;
+	ClientState     last_packet;        // Last FullUpdate packet recieved.
 
-    string          _disconnectReason;
+    string			_disconnectReason;
 
+	Prediction*		prediction;
+	
 	Client();
 	Client( SOCKETALT& s, bool tcp );
 	~Client();
