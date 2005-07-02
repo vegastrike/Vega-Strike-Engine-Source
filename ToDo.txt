@@ -29,6 +29,9 @@ Goals:
 **Delete NEWe joke?
 **put up cosmostation, industrialmixed, space navy, SteelG  for consideration?
 
+*Graphics
+**Decoupling of geometry, materials, textures via indirection.
+
 *Map
 **More UI improvements always welcome
 
