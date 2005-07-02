@@ -1,85 +1,46 @@
-Fix station placement:
-In the Cerynea system, the relay station that's orbiting Rocky:Norwich is actually stuck inside it.
-
-A couple more ...
-
-In the Patroclus system, the wormhole to Urania is half inside a planet.
-In the Beta Cassiopia system, the medical station is so near the planet that when you try docking at it, you dock at the planet instead. 
-
-
-Goals for 0.4.3 release:
-* MUST TEST:
-** Upgrades, especially repair on milspec and known previous troublemakers
-** Fix systems to have jump points only outside the "slow-zone"
-** Fix a bit of the system generation code: so we can specify everything in the milky_way.xml
-** Sparkles (particle system)
-** Distance worth worth warping to playability?
+Goals:
+* DATASET BALANCING:
+** ------Much work to be done-------
 ** check config value for insys warp_energy divisor (may need to make larger if players running out of juice - numbers not currently playbalanced - will fix balancing later - for now, set to higher value and ignore energy issues
 )
 
-*MAKE 0.4.3 Available as a patch.
+*Developer tasks - do profiling to enumerate current performance bottlenecks.
+
+*Run-time changeable configuration option and key-binding infrastructure
+
+*Loci of control
+
+*Release-as-patch-paradigm
+** Integrated update system?
+
+*Systems
+** Fix station, wormhole, planet placement/generation (avoid too close together - make docking points at stations around/on planet) 
+** tweak system scales
+** tweak system names
+** tweak system inhabitations, make more diverse set of planet types
+** Docking at planet vs "landing in BFE" on uninhabited world.
+*Fix up starting system.
 
 *Bases
-**Add new bases
+**Fix FOV dependence for 3d models
+**Remove duplicate tags/ move out of the way of text.
 
 * Music
-**Delete NEWe joke
-**put up cosmostation, industrialmixed, space navy, SteelG  for consideration
+**Delete NEWe joke?
+**put up cosmostation, industrialmixed, space navy, SteelG  for consideration?
 
 *Map
-**ADD PATCHES!!!
+**More UI improvements always welcome
 
-<<<<<<< ToDo.txt
-Boost 1.31:
-Fix zonemgr to comply
-Integrate boost 1.31 code
-
-Warp:
-Rename warp to ... think of something cool
-Warp energy use
-
-Universe/system generation:
-fix systems to have jump points only outside the "slow-zone"
-fix a bit of the system generation code: so we can specify everything in the milky_way.xml
-
-Resource management/organization:
-make un-modded units appear in 1 big table, not dozens of xml files
-
-UI:
-Add cargo pics
-Warp vs. Auto graphic
-=======
-* AI:
-** Fix AI range trigger happiness
-** Fix ITTS to use more iterations of Newton's method
-** Fix SPEC thrashing
-
-*Ships
-**Add stats for new ships
-
-<<<<<<< ToDo.txt
-<<<<<<< ToDo.txt
-<<<<<<< ToDo.txt
-* Graphics:
-** fix ugly ass damage dots
->>>>>>> 1.9
-
-Scripting Goals:
 * Flightgroups
-** Flightgroups should have subsets of ships that spawn together
-=======
->>>>>>> 1.25
-=======
+** Classification (fleet, squadron, flotilla? etc. - something to differentiate between {5 plowshares} and {3 archimedes, 2 Tesla, 8 kahan, 20 schroedinger, 10 goddard, 5 watson} )
+** Flightgroups should have subsets of ships that spawn together (combined arms)
+** make news use new naming scheme
+** Organize news to group stories depending on "local" importance 
+
 * Cockpit
-Highlight weapons in range in the gun VDU
->>>>>>> 1.27
-=======
-*Fix up starting system.
->>>>>>> 1.29
+**Highlight weapons in range in the gun VDU
 
-----------------------------------------------------------------------------
-
-Goals for 'Sometime over the rainbow'
 * File loading: 
 ** Load balance hash-table
 ** Support full expressivity of BFXM animations
@@ -92,16 +53,23 @@ Goals for 'Sometime over the rainbow'
 ** Complete histories.
 
 * UI:
-** Add more cargo pics
 ** Merge BaseComputer modes with NavScreen?
 ** radio chatter from: to:
+** more colors on buy/sell screens
+** HQ font in base screens, even if not in flight
+
+
+* Upgrades
+** user-warehouse for intermediate part storage
+** selection interface for activating/deactivating parts
+** fix displaying of irrelevant stats
+** decouple tags and names, more tag types
 
 * Resource management/organization:
 ** trim redundant thrust animation images
 
 * Universe consistency
 ** make pirates... more pirate-like
-** grappling hooks?
 ** Area effect modeling
 ** Bomb-pumped laser modeling?
 ** faction standing changes -- sanity?
@@ -113,21 +81,7 @@ Goals for 'Sometime over the rainbow'
 ** add another dimension to roles (attack AND defend/predator AND prey roles) instead of forcing both to be the same.
 ** AI spec drive use, escorts...
 
-Scripting Goals:
-* Flightgroups
-** Classification (fleet, squadron, flotilla? etc. - something to differentiate between {5 plowshares} and {3 archimedes, 2 Tesla, 8 kahan, 20 schroedinger, 10 goddard, 5 watson} )
-** Flightgroups should have subsets of ships that spawn together (combined arms)
-** make news use new naming scheme
-** Fix news to report stories depending on import (fleet lead by dodo=wrong)
-	--Is this a problem with news, or the dynamic universe that calls
-	  the news?  If story is reported correctly, there's no problem.
-	  This means that there is actually a fleet led by a dodo, it's
-	  not wrong, just a bad simulation :-) --Dan.a
-	  -- By fix, we mean take advantage of the pending changes to script 
-	     side that will classify flightgroups in a reasonable way - thus, 
-	     if the lead ship is a dodo it shouldn't be a _fleet_
-
-*Clydesdale
+*Clydesdale (other capships too? -related to importing of cargo/missions?)
 http://vegastrike.sourceforge.net/forums/viewtopic.php?t=1467&postdays=0&postorder=asc&start=0
 Apparently upgrade system doesn't quite work right and jump drive doesn't quite install right and cargo sometimes grows without bounds...
 ECM apparently causes some of these problems
@@ -135,13 +89,6 @@ Jump drive goes away after selling it can't buy it back
 
 *Damage
 ** Fix System Damage so it happens with reasonable frequency
-
-* Cockpit
-**Highlight weapons in range in the gun VDU
-
-* News
-** Get formatted date back.
-
 
 Emacs mode info:
 Local Variables:
