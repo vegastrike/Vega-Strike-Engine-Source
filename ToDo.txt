@@ -1,45 +1,89 @@
 Goals:
+*---------------------------------*
+Summer
 * DATASET BALANCING:
 ** ------Much work to be done-------
 ** check config value for insys warp_energy divisor (may need to make larger if players running out of juice - numbers not currently playbalanced - will fix balancing later - for now, set to higher value and ignore energy issues
-)
+** Merge in Privateer vegastrike.config
+*** make pirates... more pirate-like
+*** faction standing changes -- sanity?
+
 
 *Developer tasks - do profiling to enumerate current performance bottlenecks.
-
-*Run-time changeable configuration option and key-binding infrastructure
-
-*Loci of control
-
-*Release-as-patch-paradigm
-** Integrated update system?
 
 *Systems
 ** Fix station, wormhole, planet placement/generation (avoid too close together - make docking points at stations around/on planet) 
 ** tweak system scales
 ** tweak system names
 ** tweak system inhabitations, make more diverse set of planet types
-** Docking at planet vs "landing in BFE" on uninhabited world.
+** Docking at planet (test fixed) vs "landing in BFE" on uninhabited world. 
+** Homeworlds
+***Pick hierarchy of interest
+** Reduce Jump Points per system
+
+*Damage
+** Fix System Damage so it happens with reasonable frequency
+
 *Fix up starting system.
+
+
+*Loci of control
+**Speed Limiters
+**Auto selection of reference frames
+**Enforcement of speed limits
+
+*Factions
+**Neutral standing
+
+
+
+*Graphics
+**New graphics engine (be it ogre or other)
+**Decoupling of geometry, materials, textures via indirection.
 
 *Bases
 **Fix FOV dependence for 3d models
-**Remove duplicate tags/ move out of the way of text.
 
-* Music
-**Delete NEWe joke?
-**put up cosmostation, industrialmixed, space navy, SteelG  for consideration?
-
-*Graphics
-**Decoupling of geometry, materials, textures via indirection.
-
-*Map
-**More UI improvements always welcome
-
+Future
 * Flightgroups
 ** Classification (fleet, squadron, flotilla? etc. - something to differentiate between {5 plowshares} and {3 archimedes, 2 Tesla, 8 kahan, 20 schroedinger, 10 goddard, 5 watson} )
 ** Flightgroups should have subsets of ships that spawn together (combined arms)
 ** make news use new naming scheme
 ** Organize news to group stories depending on "local" importance 
+
+*AI
+** add another dimension to roles (attack AND defend/predator AND prey roles) instead of forcing both to be the same.
+** AI spec drive use, escorts...
+***Check?
+
+*Developer tasks - do profiling to enumerate current performance bottlenecks.
+
+*Release-as-patch-paradigm
+** Integrated update system?
+
+* Upgrades
+** user-warehouse for intermediate part storage
+** selection interface for activating/deactivating parts
+** fix displaying of irrelevant stats
+** decouple tags and names, more tag types
+
+*Debris Fields
+
+
+New Developers
+* Graphical stuff
+** make engine lights proportional to accel, not to speed
+*Run-time changeable configuration option and key-binding infrastructure
+*Remove duplicate tags/ move out of the way of text.
+
+*Map
+**More UI improvements always welcome
+
+
+
+
+
+
 
 * Cockpit
 **Highlight weapons in range in the gun VDU
@@ -47,7 +91,6 @@ Goals:
 * File loading: 
 ** Load balance hash-table
 ** Support full expressivity of BFXM animations
-** Fix excessive seeking in File-System
 ** Install time generation of all BSP files
 ** Per-System (versus strict per need) ship loading optimization
 
@@ -59,30 +102,17 @@ Goals:
 ** Merge BaseComputer modes with NavScreen?
 ** radio chatter from: to:
 ** more colors on buy/sell screens
-** HQ font in base screens, even if not in flight
 
 
-* Upgrades
-** user-warehouse for intermediate part storage
-** selection interface for activating/deactivating parts
-** fix displaying of irrelevant stats
-** decouple tags and names, more tag types
 
 * Resource management/organization:
 ** trim redundant thrust animation images
 
 * Universe consistency
-** make pirates... more pirate-like
 ** Area effect modeling
 ** Bomb-pumped laser modeling?
-** faction standing changes -- sanity?
 
-* Graphical stuff
-** make engine lights proportional to accel, not to speed
 
-*AI
-** add another dimension to roles (attack AND defend/predator AND prey roles) instead of forcing both to be the same.
-** AI spec drive use, escorts...
 
 *Clydesdale (other capships too? -related to importing of cargo/missions?)
 http://vegastrike.sourceforge.net/forums/viewtopic.php?t=1467&postdays=0&postorder=asc&start=0
@@ -90,8 +120,6 @@ Apparently upgrade system doesn't quite work right and jump drive doesn't quite 
 ECM apparently causes some of these problems
 Jump drive goes away after selling it can't buy it back
 
-*Damage
-** Fix System Damage so it happens with reasonable frequency
 
 Emacs mode info:
 Local Variables:
