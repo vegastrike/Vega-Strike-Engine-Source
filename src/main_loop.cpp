@@ -410,22 +410,80 @@ bool cockpitfront=true;
     }
   }
   void ScanningModeVDU(const KBData&,KBSTATE newState){
-    if (newState==PRESS) SwitchVDUTo(VDU::SCANNING);
+    if (newState==PRESS){
+      static soundContainer sc;
+      if (sc.sound<0) {
+      
+        static string str=vs_config->getVariable("cockpitaudio","scanning","vdu_c");
+        sc.loadsound(str);
+      }
+      sc.playsound();      
+      SwitchVDUTo(VDU::SCANNING);
+    }
   }
   void ObjectiveModeVDU(const KBData&,KBSTATE newState){
-    if (newState==PRESS) SwitchVDUTo(VDU::OBJECTIVES);
+    if (newState==PRESS) {
+      static soundContainer sc;
+      if (sc.sound<0) {
+      
+        static string str=vs_config->getVariable("cockpitaudio","scanning","vdu_c");
+        sc.loadsound(str);
+      }
+      sc.playsound();      
+
+      SwitchVDUTo(VDU::OBJECTIVES);
+    }
   }
   void TargetModeVDU(const KBData&,KBSTATE newState){
-    if (newState==PRESS) SwitchVDUTo(VDU::TARGET);
+    if (newState==PRESS) {
+      static soundContainer sc;
+      if (sc.sound<0) {
+      
+        static string str=vs_config->getVariable("cockpitaudio","scanning","vdu_b");
+        sc.loadsound(str);
+      }
+      sc.playsound();      
+
+      SwitchVDUTo(VDU::TARGET);
+    }
   }
   void ViewModeVDU(const KBData&,KBSTATE newState){
-    if (newState==PRESS) SwitchVDUTo(VDU::VIEW);
+    if (newState==PRESS) {
+      static soundContainer sc;
+      if (sc.sound<0) {
+      
+        static string str=vs_config->getVariable("cockpitaudio","scanning","vdu_b");
+        sc.loadsound(str);
+      }
+      sc.playsound();      
+      SwitchVDUTo(VDU::VIEW);
+    }
   }
   void DamageModeVDU(const KBData&,KBSTATE newState){
-    if (newState==PRESS) SwitchVDUTo(VDU::DAMAGE);
+    if (newState==PRESS) {
+      static soundContainer sc;
+      if (sc.sound<0) {
+      
+        static string str=vs_config->getVariable("cockpitaudio","scanning","vdu_a");
+        sc.loadsound(str);
+      }
+      sc.playsound();      
+
+      SwitchVDUTo(VDU::DAMAGE);
+    }
   }
   void ManifestModeVDU(const KBData&,KBSTATE newState){
-    if (newState==PRESS) SwitchVDUTo(VDU::MANIFEST);
+    if (newState==PRESS) {
+      static soundContainer sc;
+      if (sc.sound<0) {
+      
+        static string str=vs_config->getVariable("cockpitaudio","scanning","vdu_a");
+        sc.loadsound(str);
+      }
+      sc.playsound();      
+
+      SwitchVDUTo(VDU::MANIFEST);
+    }
   }
   void GunModeVDU(const KBData&s,KBSTATE newState){
     if (newState==PRESS) SwitchVDUTo(VDU::WEAPON);
