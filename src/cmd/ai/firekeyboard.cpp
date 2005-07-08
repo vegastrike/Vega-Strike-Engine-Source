@@ -1486,7 +1486,7 @@ static void TurretFAW(Unit * parent) {
 static void ForceChangeTarget(Unit*  parent) {
   Unit * curtarg = parent->Target();
   ChooseTargets(parent,TargUn,false);
-  static bool force_change_only_unit=XMLSupport::parse_bool(vs_config->getVariable("graphics","target_if_no_unit","false"));
+  static bool force_change_only_unit=XMLSupport::parse_bool(vs_config->getVariable("graphics","target_null_if_no_unit","false"));
   if (parent->Target()==curtarg){
       if (force_change_only_unit) {
         parent->Target(NULL);
