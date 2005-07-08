@@ -1865,7 +1865,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
     }
     if (mounts[i].type->type==weapon_info::BEAM) {
       if (mounts[i].ref.gun) {
-		  Unit * autotarg = ((mounts[i].size&weapon_info::AUTOTRACKING)&&(mounts[i].time_to_lock<=0))?target:NULL;
+		  Unit * autotarg = ((mounts[i].size&weapon_info::AUTOTRACKING)&&(mounts[i].time_to_lock<=0)&&(player_cockpit==NULL||TargetLocked()))?target:NULL;
 		  float trackingcone = computer.radar.trackingcone;
 		  if (CloseEnoughToAutotrack(this,target,trackingcone)) {
 			  if (autotarg) {
@@ -1886,18 +1886,18 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
       t1.Compose (trans,transmat);
       t1.to_matrix (m1);
       int autotrack=0;
-	  if ((0!=(mounts[i].size&weapon_info::AUTOTRACKING))) {
-		  autotrack = computer.itts?2:1;
+      if ((0!=(mounts[i].size&weapon_info::AUTOTRACKING)&&(player_cockpit==NULL||TargetLocked()))) {
+        autotrack = computer.itts?2:1;
       }
-	  float trackingcone = computer.radar.trackingcone;	  
-	  if (CloseEnoughToAutotrack(this,target,trackingcone)) {
+      float trackingcone = computer.radar.trackingcone;	  
+      if (CloseEnoughToAutotrack(this,target,trackingcone)) {
 		  if (autotrack) {
 			  if (trackingcone>computer.radar.trackingcone) {
 				  trackingcone = computer.radar.trackingcone;
 			  }
 		  }
 		  autotrack=2;
-	  }
+      }
       if (!mounts[i].PhysicsAlignedFire (t1,m1,cumulative_velocity,(!isSubUnit()||owner==NULL)?this:owner,target,autotrack, trackingcone)) {
 		  const weapon_info * typ = mounts[i].type;
 		  energy+=typ->EnergyRate*(typ->type==weapon_info::BEAM?SIMULATION_ATOM:1);
