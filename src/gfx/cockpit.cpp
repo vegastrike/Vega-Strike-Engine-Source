@@ -495,8 +495,9 @@ void GameCockpit::DrawTargetBox () {
   }
   float distance = UnitUtil::getDistance(un,target);
   static bool draw_target_nav_symbol =XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_target_nav_symbol","true"));
+  static bool draw_jump_nav_symbol =XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_jump_target_nav_symbol","true"));
   bool nav_symbol=false;
-  if (draw_target_nav_symbol&&((target->faction==neutral&&target->isUnit()==UNITPTR)||target->isUnit()==ASTEROIDPTR||(target->isPlanet()&&((Planet*)target)->isAtmospheric())||distance>un->GetComputerData().radar.maxrange)) {
+  if (draw_target_nav_symbol&&((target->faction==neutral&&target->isUnit()==UNITPTR)||target->isUnit()==ASTEROIDPTR||(target->isPlanet()&&((Planet*)target)->isAtmospheric()&&(draw_jump_nav_symbol||target->GetDestinations().empty()))||distance>un->GetComputerData().radar.maxrange)) {
     static float nav_symbol_size = XMLSupport::parse_float(vs_config->getVariable("graphics","nav_symbol_size",".25"));
     DrawNavigationSymbol (Loc,CamP,CamQ, Loc.Magnitude()*nav_symbol_size);  
     nav_symbol=true;
