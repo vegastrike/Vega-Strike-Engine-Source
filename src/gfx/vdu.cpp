@@ -602,7 +602,8 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   //sprintf (t,"\n%4.1f %4.1f",target->FShieldData()*100,target->RShieldData()*100);
   double mm=0;
   string unitandfg=getUnitNameAndFgNoBase(target).c_str();
-  bool inrange=parent->InRange(target,mm,!UnitUtil::isSignificant(target),false,false);
+  static bool out_of_cone_information=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","out_of_cone_distance","false"));
+  bool inrange=parent->InRange(target,mm,out_of_cone_information||!UnitUtil::isSignificant(target),false,false);
   if (inrange) {
     static int neut= FactionUtil::GetFaction("neutral");
     static int upgr= FactionUtil::GetFaction("upgrades");
@@ -1022,7 +1023,8 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
     double mm=0;
     std::string blah(getUnitNameAndFgNoBase(target));
     sprintf(buf,"%s\n",blah.c_str());
-    inrange=parent->InRange(target,mm,!UnitUtil::isSignificant(target),false,false);
+    static bool out_of_cone_information=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","out_of_cone_distance","false"));
+    inrange=parent->InRange(target,mm,out_of_cone_information||!UnitUtil::isSignificant(target),false,false);
   }
   tp->Draw(MangleString (buf,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
 
