@@ -690,14 +690,19 @@ void NavigationSystem::DrawMission()
 	string factionname = "factionname";
 	float relation = 0.0;
         static string disallowedFactions=vs_config->getVariable("graphics","unprintable_factions","");
+        int totkills=0;
 	for(;i < numfactions;++i)
 	{
 		factionname = FactionUtil::GetFactionName(i);
-                if (disallowedFactions.find(factionname)!=string::npos) {
-                  continue;                 
-                }
-		if (factionname!="neutral"&&factionname!="privateer"&&factionname!="planets"&&factionname!="upgrades"&&factionname!="unknown") {
-		relation = 	FactionUtil::GetIntRelation(i, ( UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()) )->faction );
+		if (factionname!="neutral"&&factionname!="privateer"&&factionname!="planets"&&factionname!="upgrades") {
+                  if (i<killlist->size()) {
+                    totkills+=(int)(*killlist)[i];
+                  }
+
+                  if (disallowedFactions.find(factionname)!=string::npos) {
+                    continue;                 
+                  }
+                  relation = 	FactionUtil::GetIntRelation(i, ( UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()) )->faction );
 
 		//	draw faction name
 		const float *colors=FactionUtil::GetSparkColor(i);
@@ -705,7 +710,7 @@ void NavigationSystem::DrawMission()
 
 		float relation01 = relation * 0.5 + 0.5;
 		relation = ((relation>1?1:relation)<-1?-1:relation);
-		int percent = relation * 100.0;
+		int percent = (int)(relation * 100.0);
 		string relationtext (XMLSupport::tostring (percent));
 		if (i<killlist->size()) {
 			relationtext+=" | ";
@@ -715,14 +720,14 @@ void NavigationSystem::DrawMission()
 		drawdescription(relationtext, (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor((1.0-relation01),(relation01),(1.0-(2.0*Delta(relation01, 0.5))),1));
 		}
 	}
-	if (i<killlist->size()) {
-		string relationtext("Total Kills: ");
-		relation=1;
+	
+        string relationtext("Total Kills: ");
+        relation=1;
 		
-		relationtext += XMLSupport::tostring ((int)(*killlist)[i]);
-		drawdescription(relationtext, (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),1));
+        relationtext += XMLSupport::tostring (totkills);
+        drawdescription(relationtext, (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),1));
 							
-	}
+	
    
 //	drawdescription(" Terran : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(.3,1,.3,1));
 //	drawdescription(" Rlaan : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(1,.3,.3,1));

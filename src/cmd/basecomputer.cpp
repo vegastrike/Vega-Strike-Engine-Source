@@ -4180,9 +4180,19 @@ bool BaseComputer::showPlayerInfo(const EventCommandId& command, Control* contro
     const int numFactions = FactionUtil::GetNumFactions();
     int i = 0;
     static string disallowedFactions=vs_config->getVariable("graphics","unprintable_factions","");
+    int totkills=0;
     for(; i<numFactions; i++) {
 		Unit *currentplayer=UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer());
 		float relation=0;
+                static int upgrades = FactionUtil::GetFaction("upgrades");
+                static int planets = FactionUtil::GetFaction("planets");
+                static int privateer = FactionUtil::GetFaction("privateer");
+                static int neutral = FactionUtil::GetFaction("neutral");
+                
+                if (i < killList->size()&&i!=upgrades&&i!=planets&&i!=neutral&&i!=privateer) {
+                  totkills+=(int)(*killList)[i];
+                }          
+
                 if (disallowedFactions.find(FactionUtil::GetFactionName(i))!=string::npos) {
                   continue;                 
                 }
@@ -4213,9 +4223,7 @@ bool BaseComputer::showPlayerInfo(const EventCommandId& command, Control* contro
     }
 
     // Total Kills if we have it.
-    if (i < killList->size()) {
-        text += "#n##b#Total Kills: " + XMLSupport::tostring((int)(*killList)[i]) + "#-b#";							
-    }
+    text += "#n##b#Total Kills: " + XMLSupport::tostring(totkills) + "#-b#";							
     // Put this in the description.
     StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("Description") );
     assert(desc != NULL);

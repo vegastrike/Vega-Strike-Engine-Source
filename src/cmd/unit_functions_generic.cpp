@@ -96,6 +96,10 @@ void ScoreKill (Cockpit * cp, Unit * un, Unit * killedUnit) {
         FactionUtil::AdjustIntRelation(i,un->faction,FRIEND_FACTOR*relation,1);
     }
   }
+  static int upgrades = FactionUtil::GetFaction("upgrades");
+  static int planets = FactionUtil::GetFaction("planets");
+
+
   if (cp!=NULL) {
     vector <float> * killlist = &cp->savegame->getMissionData (string("kills"));
     while (killlist->size()<=FactionUtil::GetNumFactions()) {
@@ -105,7 +109,7 @@ void ScoreKill (Cockpit * cp, Unit * un, Unit * killedUnit) {
       (*killlist)[faction]++;
     }
     killlist->back()++;
-  }else if (FactionUtil::GetIntRelation(un->faction,faction)<0) {
+  }else if (FactionUtil::GetIntRelation(un->faction,faction)<0&&faction!=upgrades&&faction!=planets) {
     int whichcp= rand()%_Universe->numPlayers();
     Unit * whichrecv = _Universe->AccessCockpit(whichcp)->GetParent();
     if (whichrecv!=NULL) {
