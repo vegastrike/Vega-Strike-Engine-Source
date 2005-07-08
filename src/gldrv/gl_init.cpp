@@ -111,13 +111,51 @@ typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))();
 #if defined(CG_SUPPORT)
 CG_Cloak *cloak_cg = new CG_Cloak();
 #endif
+/* CENTRY */
+int 
+vsExtensionSupported(const char *extension)
+{
+  static const GLubyte *extensions = NULL;
+  const GLubyte *start;
+  GLubyte *where, *terminator;
 
+  /* Extension names should not have spaces. */
+  where = (GLubyte *) strchr(extension, ' ');
+  if (where || *extension == '\0')
+    return 0;
+
+  if (!extensions) {
+    extensions = glGetString(GL_EXTENSIONS);
+  }
+  /* It takes a bit of care to be fool-proof about parsing the
+     OpenGL extensions string.  Don't be fooled by sub-strings,
+     etc. */
+  start = extensions;
+  for (;;) {
+    /* If your application crashes in the strstr routine below,
+       you are probably calling vsExtensionSupported without
+       having a current window.  Calling glGetString without
+       a current OpenGL context has unpredictable results.
+       Please fix your program. */
+    where = (GLubyte *) strstr((const char *) start, extension);
+    if (!where)
+      break;
+    terminator = where + strlen(extension);
+    if (where == start || *(where - 1) == ' ') {
+      if (*terminator == ' ' || *terminator == '\0') {
+        return 1;
+      }
+    }
+    start = terminator;
+  }
+  return 0;
+}
 void init_opengl_extensions()
 {
 	const unsigned char * extensions = glGetString(GL_EXTENSIONS);
 
 (void) VSFileSystem::vs_fprintf(stderr, "OpenGL Extensions supported: %s\n", extensions);
-    if (glutExtensionSupported( "GL_EXT_compiled_vertex_array")&&XMLSupport::parse_bool (vs_config->getVariable ("graphics","LockVertexArrays","true"))) {
+    if (vsExtensionSupported( "GL_EXT_compiled_vertex_array")&&XMLSupport::parse_bool (vs_config->getVariable ("graphics","LockVertexArrays","true"))) {
 #ifdef __APPLE__
 #ifndef __APPLE_PANTHER_GCC33_CLI__
         glLockArraysEXT_p = &glLockArraysEXT;
@@ -165,7 +203,7 @@ void init_opengl_extensions()
 #endif
 	  
 #ifdef GL_FOG_DISTANCE_MODE_NV
-    if (glutExtensionSupported ("GL_NV_fog_distance")) {
+    if (vsExtensionSupported ("GL_NV_fog_distance")) {
       VSFileSystem::vs_fprintf (stderr,"OpenGL::Accurate Fog Distance supported\n");
       int foglev=XMLSupport::parse_int (vs_config->getVariable ("graphics","fogdetail","0"));
       switch (foglev) {
@@ -186,27 +224,27 @@ void init_opengl_extensions()
     }
 #endif
 
-    if (glutExtensionSupported ("GL_ARB_texture_compression")) {
+    if (vsExtensionSupported ("GL_ARB_texture_compression")) {
       VSFileSystem::vs_fprintf (stderr,"OpenGL::Generic Texture Compression supported\n");
     }else {
       VSFileSystem::vs_fprintf (stderr,"OpenGL::Generic Texture Compression unsupported\n");
       gl_options.compression=0;
     }
-    if (glutExtensionSupported ("GL_EXT_texture_compression_s3tc")) {
+    if (vsExtensionSupported ("GL_EXT_texture_compression_s3tc")) {
       (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::S3TC Texture Compression supported\n");
       //should be true;
     } else {
       gl_options.s3tc=false;;
       (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::S3TC Texture Compression unsupported\n");
     }
-    if (glutExtensionSupported ("GL_ARB_multitexture")||glutExtensionSupported ("GL_EXT_multitexture")) {
+    if (vsExtensionSupported ("GL_ARB_multitexture")||vsExtensionSupported ("GL_EXT_multitexture")) {
       gl_options.Multitexture = 1*gl_options.Multitexture;//might be zero by input
       (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::Multitexture supported\n");
     } else {
       gl_options.Multitexture = 0;
       (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::Multitexture unsupported\n");
     }
-    if ( glutExtensionSupported( "GL_ARB_texture_cube_map" ) || glutExtensionSupported( "GL_EXT_texture_cube_map" ) ) {
+    if ( vsExtensionSupported( "GL_ARB_texture_cube_map" ) || vsExtensionSupported( "GL_EXT_texture_cube_map" ) ) {
       gl_options.cubemap = 1;
       (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::TextureCubeMapExt supported\n");
     } else {
@@ -317,7 +355,7 @@ void GFXInit (int argc, char ** argv){
 #if defined(IRIX)
     glEnable(GL_SHARED_TEXTURE_PALETTE_EXT);
 #endif
-    if (glutExtensionSupported("GL_EXT_color_table")||glutExtensionSupported ("GL_EXT_shared_texture_palette")) {
+    if (vsExtensionSupported("GL_EXT_color_table")||vsExtensionSupported ("GL_EXT_shared_texture_palette")) {
       gl_options.PaletteExt = 1;
       //(void) VSFileSystem::vs_fprintf(stderr, "OpenGL::EXTColorTable supported\n");
     } else {
