@@ -3410,7 +3410,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 		damages &= CARGOFUEL_DAMAGED;
 		return;
 	}
-	if (degrees>=60&&degrees<90) {
+	if ((degrees>=60&&degrees<90)||(degrees>=150&&rand01()<.25))) {
 		//DAMAGE ROLL/YAW/PITCH/THRUST
           float orandnum=rand01()*.5+.5;
           if (randnum>=.9) {
@@ -3501,9 +3501,11 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 		} else if (randnum>=.7) {
 			shield.recharge*=dam;
 		} else if (randnum>=.5) {
-			this->recharge*=dam;
+                  if (dam<.5) dam=.5;
+                  this->recharge*=dam;
 		} else if (randnum>=.3) {
-			this->maxenergy*=dam;
+                  if (dam<.2) dam=.2;
+                  this->maxenergy*=dam;
 		} else if (randnum>=.2) {
 			this->jump.damage+=100*(1-dam);
 		} else {
