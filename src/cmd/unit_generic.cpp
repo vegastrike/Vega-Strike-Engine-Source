@@ -3410,7 +3410,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 		damages &= CARGOFUEL_DAMAGED;
 		return;
 	}
-	if ((degrees>=60&&degrees<90)||(degrees>=150&&rand01()<.25))) {
+	if ((degrees>=60&&degrees<90)||(degrees>=150&&rand01()<.25)) {
 		//DAMAGE ROLL/YAW/PITCH/THRUST
           float orandnum=rand01()*.5+.5;
           if (randnum>=.9) {
