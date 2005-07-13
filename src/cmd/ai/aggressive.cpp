@@ -164,7 +164,7 @@ unsigned int DoSpeech (Unit * un, Unit *player_un, const FSM::Node &node) {
     myname= un->getFullname();
 	Flightgroup * fg=un->getFlightgroup();
 		if (fg&&fg->name!="base"&&fg->name!="Base") {
-			myname = fg->name+" "+XMLSupport::tostring(un->getFgSubnumber())+", "+un->name;
+			myname = fg->name+" "+XMLSupport::tostring(un->getFgSubnumber())+", "+un->getFullname();
 		}else if (myname.length()==0)
 			myname = un->name;
 	if (player_un!=NULL) {
