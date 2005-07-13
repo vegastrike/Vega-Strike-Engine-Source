@@ -161,7 +161,8 @@ unsigned int DoSpeech (Unit * un, Unit *player_un, const FSM::Node &node) {
   string speech=node.GetMessage(dummy);
   string myname ("[Static]");
   if (un!=NULL) {
-    myname= un->getFullname();
+    
+    myname= un->isUnit()==PLANETPTR?un->name:un->getFullname();
 	Flightgroup * fg=un->getFlightgroup();
 		if (fg&&fg->name!="base"&&fg->name!="Base") {
 			myname = fg->name+" "+XMLSupport::tostring(un->getFgSubnumber())+", "+un->getFullname();
