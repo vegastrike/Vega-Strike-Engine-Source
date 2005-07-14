@@ -953,8 +953,16 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
 		if (!auto_valid) {
 			abletoautopilot=(target->graphicOptions.InWarp);
 		}else {
-			abletoautopilot=(target->AutoPilotTo(target,false)?1:0);
+                  abletoautopilot=(target->AutoPilotTo(target,false)?1:0);
+                  static float no_auto_light_below = XMLSupport::parse_float(vs_config->getVariable("physics","no_auto_light_below","2000"));
+                  Unit * targtarg=target->Target();;
+                  if (targtarg)
+                    if ((target->Position()-targtarg->Position()).MagnitudeSquared()<no_auto_light_below*no_auto_light_below) {
+                      abletoautopilot=false;
+                    }
 		}
+
+                
     }
 	if (abletoautopilot!=wasautopilot) {
 		if (abletoautopilot==0) {
