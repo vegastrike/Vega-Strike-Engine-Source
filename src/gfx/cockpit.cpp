@@ -957,7 +957,7 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
                   static float no_auto_light_below = XMLSupport::parse_float(vs_config->getVariable("physics","no_auto_light_below","2000"));
                   Unit * targtarg=target->Target();;
                   if (targtarg)
-                    if ((target->Position()-targtarg->Position()).Magnitude()-targtarg->rSize()-target->rSize()<no_auto_light_below*no_auto_light_below) {
+                    if ((target->Position()-targtarg->Position()).Magnitude()-targtarg->rSize()-target->rSize()<no_auto_light_below) {
                       abletoautopilot=false;
                     }
 		}
