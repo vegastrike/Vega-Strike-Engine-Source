@@ -603,7 +603,7 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   double mm=0;
   string unitandfg=getUnitNameAndFgNoBase(target).c_str();
   static bool out_of_cone_information=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","out_of_cone_distance","false"));
-  bool inrange=parent->InRange(target,mm,out_of_cone_information||!UnitUtil::isSignificant(target),false,false);
+  bool inrange=parent->InRange(target,mm,out_of_cone_information==false&&!UnitUtil::isSignificant(target),false,false);
   if (inrange) {
     static int neut= FactionUtil::GetFaction("neutral");
     static int upgr= FactionUtil::GetFaction("upgrades");
