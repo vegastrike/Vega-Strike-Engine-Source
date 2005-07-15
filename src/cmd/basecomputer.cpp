@@ -2284,6 +2284,11 @@ void BaseComputer::loadCargoControls(void) {
 	vector<string> donttakethis;
 	donttakethis.push_back("missions");
 	donttakethis.push_back("upgrades");
+        static bool starship_purchase=XMLSupport::parse_bool(vs_config->getVariable("physics","starships_as_cargo","true"));
+        if (!starship_purchase) {
+          donttakethis.push_back("starships");
+          donttakethis.push_back("starship");          
+        }
     loadMasterList(m_base.GetUnit(), vector<string>(),donttakethis, true, m_transList1); // Anything but a mission.
     SimplePicker* basePicker = static_cast<SimplePicker*>( window()->findControlById("BaseCargo") );
     assert(basePicker != NULL);
