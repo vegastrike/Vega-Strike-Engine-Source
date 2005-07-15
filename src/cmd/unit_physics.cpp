@@ -180,7 +180,7 @@ void GameUnit<UnitType>::Thrust(const Vector &amt1,bool afterburn){
     Unit * playa = _Universe->AccessCockpit()->GetParent();
     if (playa) {
       Vector diff=this->Position()-playa->Position();
-      if (UnitUtil::getDistance(this,playa)<buzzingdistance) {
+      if (UnitUtil::getDistance(this,playa)<buzzingdistance&&playa->owner!=this&&this->owner!=playa) {
         float ttime=getNewTime();
         if (ttime-lastbuzz>buzzingtime) {
           Vector pvel=playa->GetVelocity();

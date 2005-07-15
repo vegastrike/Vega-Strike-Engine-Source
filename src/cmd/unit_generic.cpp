@@ -4290,7 +4290,9 @@ public:
 				}
 			}
 		}
-		myset.insert(allWeapons);
+                static bool allow_special_with_weapons=XMLSupport::parse_bool(vs_config->getVariable("physics","special_and_normal_gun_combo","true"));
+                if (allow_special_with_weapons)
+                  myset.insert(allWeapons);
 		myset.insert(allWeaponsNoSpecial);
 		for (iter=myset.begin();iter!=myset.end();++iter) {
 			for (WeaponGroup::const_iterator iter2=(*iter).begin();iter2!=(*iter).end();++iter2) {

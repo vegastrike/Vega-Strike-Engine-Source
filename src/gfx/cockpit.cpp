@@ -287,10 +287,14 @@ inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &Ca
     if (lock_percent<0) {
       lock_percent=0;
     }
+    static bool lock_box_red=XMLSupport::parse_bool(vs_config->getVariable("graphics","lock_box_red","false"));
+    if (lock_box_red) {
+      GFXColor4f(1,0,0,1);
+    }
     float max=2.05;
     //    VSFileSystem::Fprintf (stderr,"lock percent %f\n",lock_percent);
     float coord = 1.05+(max-1.05)*lock_percent;//rSize/(1-lock_percent);//this is a number between 1 and 100
-   
+
     double rtot = 1./sqrtf(2);
     float theta = 4*M_PI*lock_percent;
     Vector LockBox (-cos(theta)*rtot,-rtot,sin(theta)*rtot);

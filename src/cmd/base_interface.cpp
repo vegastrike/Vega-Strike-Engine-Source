@@ -569,12 +569,16 @@ void BaseInterface::MouseOver (int xbeforecalc, int ybeforecalc) {
 		link=rooms[curroom]->links[i];
 	}
 	if (link) {
-		curtext.SetText(link->text);
-		curtext.col=GFXColor(1,.666667,0,1);
-		drawlinkcursor=true;
+          float overcolor[4]={1,.666666667,0,1};
+          vs_config->getColor("base_mouse_over",overcolor);
+          curtext.SetText(link->text);
+          curtext.col=GFXColor(overcolor[0],overcolor[1],overcolor[2],overcolor[3]);
+          drawlinkcursor=true;
 	} else {
+          float inactivecolor[4]={0,1,0,1};
+          vs_config->getColor("base_mouse_passive",inactivecolor);
 		curtext.SetText(rooms[curroom]->deftext);
-		curtext.col=GFXColor(0,1,0,1);
+		curtext.col=GFXColor(inactivecolor[0],inactivecolor[1],inactivecolor[2],inactivecolor[3]);
 		drawlinkcursor=false;
 	}
         static bool  draw_always      = XMLSupport::parse_bool(vs_config->getVariable("graphics","base_locationmarker_drawalways","false"));

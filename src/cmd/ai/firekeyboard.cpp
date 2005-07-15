@@ -903,15 +903,18 @@ void FireKeyboard::ChooseTargets (bool turret,bool significant,bool reverse) {
   }
 }
 #endif
+static bool isNotTurretOwner(Unit * parent, Unit * un) {
+  return parent->isSubUnit()==false||un!=parent->owner;
+}
 
 bool TargAll (Unit *me,Unit *target) {
   static bool can_target_sun=XMLSupport::parse_bool(vs_config->getVariable("graphics","can_target_sun","false"));
-	return (me->InRange(target,true,false)||me->InRange(target,true,true))&&(can_target_sun||!UnitUtil::isSun(target));
+	return (me->InRange(target,true,false)||me->InRange(target,true,true))&&(can_target_sun||!UnitUtil::isSun(target))&&isNotTurretOwner(me,target);
 }
 bool TargSig (Unit *me,Unit *target) {
   static bool can_target_asteroid=XMLSupport::parse_bool(vs_config->getVariable("graphics","can_target_asteroid","true"));
   
-  bool ret=me->InRange(target,false,true)&&UnitUtil::isSignificant(target);
+  bool ret=me->InRange(target,false,true)&&UnitUtil::isSignificant(target)&&isNotTurretOwner(me,target);
 
   if (can_target_asteroid==false) {
     if (target->isUnit()==ASTEROIDPTR||target->name.find("Asteroid")==0){
@@ -921,10 +924,11 @@ bool TargSig (Unit *me,Unit *target) {
   return ret;
 }
 extern Unit*getTopLevelOwner();
+
 bool TargUn (Unit *me,Unit *target) {
   static bool can_target_cargo=XMLSupport::parse_bool(vs_config->getVariable("graphics","can_target_cargo","false"));
   static int up=FactionUtil::GetFaction("upgrades");
-  return me->InRange(target,true,false)&&(target->isUnit()==UNITPTR||target->isUnit()==ENHANCEMENTPTR)&&getTopLevelOwner()!=target->owner&&(can_target_cargo||target->faction!=up);
+  return me->InRange(target,true,false)&&(target->isUnit()==UNITPTR||target->isUnit()==ENHANCEMENTPTR)&&getTopLevelOwner()!=target->owner&&(can_target_cargo||target->faction!=up)&&isNotTurretOwner(me,target);
 }
 
 bool TargFront (Unit *me,Unit *target) {
@@ -963,7 +967,7 @@ bool TargThreat (Unit *me,Unit *target) {
 }
 bool TargNear (Unit *me,Unit *target) {
   static bool can_target_sun=XMLSupport::parse_bool(vs_config->getVariable("graphics","can_target_sun","false"));
-	return (me->getRelation(target)<0||TargThreat(me,target)||target->getRelation(me)<0)&&TargAll(me,target)&&target->isUnit()!=MISSILEPTR&&(can_target_sun||!UnitUtil::isSun(target));
+	return (me->getRelation(target)<0||TargThreat(me,target)||target->getRelation(me)<0)&&TargAll(me,target)&&target->isUnit()!=MISSILEPTR&&(can_target_sun||!UnitUtil::isSun(target))&&isNotTurretOwner(me,target);
 }
 
 bool ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {

@@ -1399,14 +1399,17 @@ void BaseComputer::recalcTitle() {
 			baseName = baseUnit->name;
         }
     }
-    baseTitle += emergency_downgrade_mode+baseName;
+    baseTitle += emergency_downgrade_mode;
+    static bool includebasename=XMLSupport::parse_bool(vs_config->getVariable("graphics","include_base_name_on_dock","true"));
+    if (includebasename) {
+    baseTitle+=baseName;
 
 	// Faction name for base.
 	string baseFaction = FactionUtil::GetFactionName(baseUnit->faction);
 	if(!baseFaction.empty()) {
 		baseTitle += " [" + baseFaction + ']';
 	}
-
+    }
     // Set the string in the base title control.
     StaticDisplay* baseTitleDisplay = static_cast<StaticDisplay*>( window()->findControlById("BaseInfoTitle") );
     assert(baseTitleDisplay != NULL);
@@ -2299,7 +2302,21 @@ void BaseComputer::loadCargoControls(void) {
 class CargoColorSort {
 public:
     bool operator () (const CargoColor & a, const CargoColor&b) {
-	return( a.cargo < b.cargo );
+      std::string acategory(a.cargo.category);
+      std::string bcategory(b.cargo.category);
+      std::string::size_type aless=a.cargo.description.find("<");
+      std::string::size_type agreater=a.cargo.description.find(">");
+      std::string::size_type bless=b.cargo.description.find("<");
+      std::string::size_type bgreater=b.cargo.description.find(">");
+      if (aless!=string::npos && agreater!=string::npos) {
+        acategory=a.cargo.description.substr(aless+1,agreater);        
+      }
+      if (bless!=string::npos && bgreater!=string::npos) {
+        bcategory=b.cargo.description.substr(bless+1,bgreater);        
+      }
+      if (acategory==bcategory)
+        return a.cargo<b.cargo;
+      return acategory<bcategory;
     }
 };
 

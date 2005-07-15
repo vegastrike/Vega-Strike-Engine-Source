@@ -1306,8 +1306,10 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 	float yl = (y1+y2)/2.0;
 	a_label.SetPos((xl-offset)-(checkbit(buttonstates,button_number-1)?0.006:0), (yl+0.025));
 	a_label.SetText(label);
-	a_label.Draw();
-
+        static bool nav_button_labels=XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_nav_button_labels","true"));
+        if (nav_button_labels) {
+          a_label.Draw();
+        }
 	//!!! DEPRESS !!!
 	if((inrange == 1)&&(mouse_wentdown[0] == 1))
 	{	
