@@ -338,7 +338,9 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   for (vector <TurretBin>::iterator k =  tbin.begin();k!=tbin.end();++k) {
     k->AssignTargets(my_target,parent->cumulative_transformation_matrix);
   } 
+  parent->LockTarget(false);
   parent->Target (mytarg);
+  parent->LockTarget(true);
   SignalChosenTarget();
 }
 /* Proper choosing of targets
