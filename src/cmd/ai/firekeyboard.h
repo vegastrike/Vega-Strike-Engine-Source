@@ -19,6 +19,7 @@ class FireKeyboard: public Order {
   bool ShouldFire(Unit * targ);
   std::list <CommunicationMessage> resp;
  public:
+  virtual void SetParent(Unit *parent1);
 #ifdef CAR_SIM
   static void BlinkLeftKey (const KBData&,KBSTATE);
   static void BlinkRightKey (const KBData&,KBSTATE);

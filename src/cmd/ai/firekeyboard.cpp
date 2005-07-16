@@ -1504,6 +1504,15 @@ static void ForceChangeTarget(Unit*  parent) {
 
 
 bool isMissile(const weapon_info *);
+
+void FireKeyboard::SetParent (Unit * parent1) {
+  this->Order::SetParent(parent1);
+  static bool allow_special_with_weapons=XMLSupport::parse_bool(vs_config->getVariable("physics","special_and_normal_gun_combo","true"));
+  if (!allow_special_with_weapons) {
+    parent->ToggleWeapon(false,true/*reverse*/);
+    parent->ToggleWeapon(false,false/*reverse*/);
+  }
+}
 void FireKeyboard::Execute () {
 	
   while (vectorOfKeyboardInput.size()<=whichplayer||vectorOfKeyboardInput.size()<=whichjoystick) {

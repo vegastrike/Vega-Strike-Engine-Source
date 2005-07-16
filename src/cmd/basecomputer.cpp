@@ -3369,6 +3369,11 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
           _Universe->AccessCockpit()->credits -= price;
           // Upgrade the ship.
           playerUnit->Upgrade(m_newPart, m_selectedMount, m_selectedTurret, m_addMultMode, true, percent, m_theTemplate);
+          static bool allow_special_with_weapons=XMLSupport::parse_bool(vs_config->getVariable("physics","special_and_normal_gun_combo","true"));
+          if (!allow_special_with_weapons) {
+            playerUnit->ToggleWeapon (false, /*backwards*/true);
+            playerUnit->ToggleWeapon (false, /*backwards*/false);
+          }
           // Remove the item from the base, since we bought it.
           unsigned int index;
           baseUnit->GetCargo(m_part.content, index);
