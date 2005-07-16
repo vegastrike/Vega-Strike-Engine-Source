@@ -536,11 +536,6 @@ void NavigationSystem::Draw()
 
 
 
-	//	Draw the screen basics
-	//	**********************************
-	DrawCursor(mouse_x_current, mouse_y_current, .1, .2, GFXColor(1,1,1,0.5) );
-	//	**********************************
-
 
 
 
@@ -608,6 +603,11 @@ void NavigationSystem::Draw()
 
 
 
+
+	//	Draw the screen basics
+	//	**********************************
+	DrawCursor(mouse_x_current, mouse_y_current, .1, .2, GFXColor(1,1,1,0.5) );
+	//	**********************************
 
 
 

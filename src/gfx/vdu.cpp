@@ -351,7 +351,7 @@ static std::string MangleString (const char * in, float probability) {
   free (tmp);
   return retval;
 }
-static void DrawShield (float fs, float rs, float ls, float bs, float x, float y, float w, float h, bool invert) { //FIXME why is this static?
+static void DrawShield (float fs, float rs, float ls, float bs, float x, float y, float w, float h, bool invert, GFXColor outershield,GFXColor innershield) { //FIXME why is this static?
   GFXBegin (GFXLINE);
   if (invert ) {
     float tmp = fs;
@@ -359,6 +359,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     bs = tmp;
   }
   if (fs>.2) {
+    GFXColorf(innershield);
     GFXVertex3d ((double)x-w/8,y+h/2,0.);
     GFXVertex3d ((double)x-w/3,y+.9*h/2,0.);
     GFXVertex3d ((double)x+w/8,y+h/2,0.);
@@ -367,6 +368,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x-w/8,y+h/2,0.);
   }
   if (fs>.5) {
+    GFXColorf(outershield);
     GFXVertex3d ((double)x-w/8,y+1.1*h/2,0.);
     GFXVertex3d ((double)x+w/8,y+1.1*h/2,0.);
     GFXVertex3d ((double)x-w/8,y+1.1*h/2,0.);
@@ -375,6 +377,8 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x+w/3,y+h/2,0.);
   }
   if (fs>.75) {
+    GFXColorf(outershield);
+
     GFXVertex3d ((double)x-w/8,y+1.2*h/2,0.);
     GFXVertex3d ((double)x+w/8,y+1.2*h/2,0.);
     GFXVertex3d ((double)x-w/8,y+1.2*h/2,0.);
@@ -383,6 +387,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x+w/3,y+1.1*h/2,0.);
   }
   if (rs>.2) {
+    GFXColorf(innershield);
     GFXVertex3d ((double)x+1*w/2,y-h/8,0.);
     GFXVertex3d ((double)x+.9*w/2,y-h/3,0.);
     GFXVertex3d ((double)x+1*w/2,y+h/8,0.);
@@ -391,6 +396,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x+1*w/2,y+h/8,0.);
   }
   if (rs>.5) {
+    GFXColorf(outershield);
     GFXVertex3d ((double)x+1.1*w/2,y-h/8,0.);
     GFXVertex3d ((double)x+1*w/2,y-h/3,0.);
     GFXVertex3d ((double)x+1.1*w/2,y+h/8,0.);
@@ -399,6 +405,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x+1.1*w/2,y+h/8,0.);
   }
   if (rs>.7) {
+    GFXColorf(outershield);
     GFXVertex3d ((double)x+1.2*w/2,y-h/8,0.);
     GFXVertex3d ((double)x+1.1*w/2,y-h/3,0.);
     GFXVertex3d ((double)x+1.2*w/2,y+h/8,0.);
@@ -407,6 +414,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x+1.2*w/2,y+h/8,0.);
   }
   if (ls>.2) {
+    GFXColorf(innershield);
     GFXVertex3d ((double)x-1*w/2,y-h/8,0.);
     GFXVertex3d ((double)x-.9*w/2,y-h/3,0.);
     GFXVertex3d ((double)x-1*w/2,y+h/8,0.);
@@ -415,6 +423,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x-1*w/2,y+h/8,0.);
   }
   if (ls>.5) {
+    GFXColorf(outershield);
     GFXVertex3d ((double)x-1.1*w/2,y-h/8,0.);
     GFXVertex3d ((double)x-1*w/2,y-h/3,0.);
     GFXVertex3d ((double)x-1.1*w/2,y+h/8,0.);
@@ -423,6 +432,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x-1.1*w/2,y+h/8,0.);
   }
   if (ls>.7) {
+    GFXColorf(outershield);
     GFXVertex3d ((double)x-1.2*w/2,y-h/8,0.);
     GFXVertex3d ((double)x-1.1*w/2,y-h/3,0.);
     GFXVertex3d ((double)x-1.2*w/2,y+h/8,0.);
@@ -431,6 +441,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x-1.2*w/2,y+h/8,0.);
   }
   if (bs>.2) {
+    GFXColorf(innershield);
     GFXVertex3d ((double)x-w/8,y-h/2,0.);
     GFXVertex3d ((double)x-w/3,y-.9*h/2,0.);
     GFXVertex3d ((double)x+w/8,y-h/2,0.);
@@ -439,6 +450,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x-w/8,y-h/2,0.);
   }
   if (bs>.5) {
+    GFXColorf(outershield);
     GFXVertex3d ((double)x-w/8,y-1.1*h/2,0.);
     GFXVertex3d ((double)x+w/8,y-1.1*h/2,0.);
     GFXVertex3d ((double)x-w/8,y-1.1*h/2,0.);
@@ -447,6 +459,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x+w/3,y-h/2,0.);
   }
   if (bs>.75) {
+    GFXColorf(outershield);
     GFXVertex3d ((double)x-w/8,y-1.2*h/2,0.);
     GFXVertex3d ((double)x+w/8,y-1.2*h/2,0.);
     GFXVertex3d ((double)x-w/8,y-1.2*h/2,0.);
@@ -465,11 +478,15 @@ static void DrawShieldArmor(Unit * parent, const float StartArmor[8], float x, f
   float bs = parent->BShieldData();
   float armor[8];
   GFXColor4f (.4,.4,1,1);
+  float shieldcolor[4]={.4,.4,1,1};
+  float ishieldcolor[4]={.4,.4,1,1};
+  static bool shieldcolorloaded=(vs_config->getColor("default","outer_shield_color",shieldcolor,true),true);
+  static bool ishieldcolorloaded=(vs_config->getColor("default","inner_shield_color",ishieldcolor,true),true);
   GFXDisable (TEXTURE0);
-  DrawShield (fs,rs,ls,bs,x,y,w,h,invertfrontback);
+  DrawShield (fs,rs,ls,bs,x,y,w,h,invertfrontback,GFXColor(shieldcolor[0],shieldcolor[1],shieldcolor[2],shieldcolor[3]),GFXColor(ishieldcolor[0],ishieldcolor[1],ishieldcolor[2],ishieldcolor[3]));
   parent->ArmorData (armor);
-  GFXColor4f (1,.6,0,1);
-  DrawShield ((armor[0]+armor[2]+armor[4]+armor[6])/(float)(StartArmor[0]+StartArmor[2]+StartArmor[4]+StartArmor[6]),(armor[0]+armor[1]+armor[4]+armor[5])/(float)(StartArmor[0]+StartArmor[1]+StartArmor[4]+StartArmor[5]),(armor[2]+armor[3]+armor[6]+armor[7])/(float)(StartArmor[2]+StartArmor[3]+StartArmor[6]+StartArmor[7]),(armor[1]+armor[3]+armor[5]+armor[7])/(float)(StartArmor[1]+StartArmor[3]+StartArmor[5]+StartArmor[7]),x,y,w/2,h/2, invertfrontback);
+  GFXColor armorcol (1,.6,0,1);
+  DrawShield ((armor[0]+armor[2]+armor[4]+armor[6])/(float)(StartArmor[0]+StartArmor[2]+StartArmor[4]+StartArmor[6]),(armor[0]+armor[1]+armor[4]+armor[5])/(float)(StartArmor[0]+StartArmor[1]+StartArmor[4]+StartArmor[5]),(armor[2]+armor[3]+armor[6]+armor[7])/(float)(StartArmor[2]+StartArmor[3]+StartArmor[6]+StartArmor[7]),(armor[1]+armor[3]+armor[5]+armor[7])/(float)(StartArmor[1]+StartArmor[3]+StartArmor[5]+StartArmor[7]),x,y,w/2,h/2, invertfrontback,armorcol,armorcol);
 }
 void VDU::DrawVDUShield (Unit * parent) {
   float x,y,w,h;
@@ -628,7 +645,15 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   strcat (st,qr.str);
   tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
   GFXColor4f (.4,.4,1,1);
-  DrawShield (fs,rs,ls,bs,x,y,w,h,invert_target_shields);
+  float shieldcolor[4]={.4,.4,1,1};
+  float ishieldcolor[4]={.4,.4,1,1};
+
+  //float shieldcolor[4]={.9882,.7058,0,1};
+  //float ishieldcolor[4]={.9882,.3607,0,1};
+  static bool shieldcolorloaded=(vs_config->getColor("default","outer_shield_color",shieldcolor,true),true);
+  static bool ishieldcolorloaded=(vs_config->getColor("default","inner_shield_color",ishieldcolor,true),true);
+
+  DrawShield (fs,rs,ls,bs,x,y,w,h,invert_target_shields,GFXColor(shieldcolor[0],shieldcolor[1],shieldcolor[2],shieldcolor[3]),GFXColor(ishieldcolor[0],ishieldcolor[1],ishieldcolor[2],ishieldcolor[3]));
   GFXColor4f (1,1,1,1);
   }else {
   tp->Draw (MangleString ("\n[OutOfRange]",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);      
@@ -909,7 +934,7 @@ void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
       s+=.125*SIMULATION_ATOM;
       if (s>1)
         s=0;
-      DrawShield (0, s, s, 0, x, y, w,h,false);
+      DrawShield (0, s, s, 0, x, y, w,h,false,GFXColor(0,1,0),GFXColor(0,.5,0));
     }
   }
   GFXColor4f (1,1,1,1);
@@ -1047,8 +1072,16 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
 		  DrawHUDSprite(this,getSunImage(),1,x,y,w,h,1,1,1,1,1,false,false);
         h=fabs (h*.6);
         w=fabs (w*.6);
+        float shieldcolor[4]={.4,.4,1,1};
+        float ishieldcolor[4]={.4,.4,1,1};
+
+        //float shieldcolor[4]={.9882,.7058,0,1};
+        //float ishieldcolor[4]={.9882,.3607,0,1};
+        static bool shieldcolorloaded=(vs_config->getColor("default","outer_shield_color",shieldcolor,true),true);
+        static bool ishieldcolorloaded=(vs_config->getColor("default","inner_shield_color",ishieldcolor,true),true);
+        
         static bool invert_view_shields = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","invert_view_shields","false"));
-        DrawShield(target->FShieldData(),target->RShieldData(),target->LShieldData(),target->BShieldData(),x,y,w,h,invert_view_shields);
+        DrawShield(target->FShieldData(),target->RShieldData(),target->LShieldData(),target->BShieldData(),x,y,w,h,invert_view_shields,GFXColor(shieldcolor[0],shieldcolor[1],shieldcolor[2],shieldcolor[3]),GFXColor(ishieldcolor[0],ishieldcolor[1],ishieldcolor[2],ishieldcolor[3]));
       }
     }
     GFXColor4f (1,1,1,1);
