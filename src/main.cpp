@@ -382,7 +382,7 @@ void bootstrap_draw (const std::string &message, Animation * newSplashScreen) {
     ani->UpdateAllFrame();
     ani->DrawNow(tmp);
   }
-  static std::string defaultbootmessage=vs_config->getVariable("graphicso","default_boot_message","");
+  static std::string defaultbootmessage=vs_config->getVariable("graphics","default_boot_message","");
   
   bs_tp->Draw (defaultbootmessage.length()>0?defaultbootmessage:message);  
   GFXHudMode (GFXFALSE);

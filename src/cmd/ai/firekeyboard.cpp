@@ -118,6 +118,14 @@ FIREKEYBOARDTYPE &FireKeyboard::j() {
 void FireKeyboard::SetShieldsOneThird(const KBData&,KBSTATE k) {
   if (k==PRESS) {
     float pow=1./3;
+    static soundContainer sc;
+    if (sc.sound<0) {
+      
+      static string str=vs_config->getVariable("cockpitaudio","shield","vdu_d");
+      sc.loadsound(str);
+    }
+    sc.playsound();
+
     if (g().shieldpowerstate!=pow)
       g().shieldpowerstate=pow;
     else
@@ -129,6 +137,14 @@ void FireKeyboard::SetShieldsOneThird(const KBData&,KBSTATE k) {
 void FireKeyboard::SetShieldsOff(const KBData&,KBSTATE k) {
   if (k==PRESS) {
     float pow=0;
+    static soundContainer sc;
+    if (sc.sound<0) {
+      
+      static string str=vs_config->getVariable("cockpitaudio","shield","vdu_d");
+      sc.loadsound(str);
+    }
+    sc.playsound();
+
     if (g().shieldpowerstate!=pow)
       g().shieldpowerstate=pow;
     else
@@ -139,6 +155,14 @@ void FireKeyboard::SetShieldsOff(const KBData&,KBSTATE k) {
 void FireKeyboard::SetShieldsTwoThird(const KBData&,KBSTATE k) {
   if (k==PRESS) {
     float pow=2./3;
+    static soundContainer sc;
+    if (sc.sound<0) {
+      
+      static string str=vs_config->getVariable("cockpitaudio","shield","vdu_d");
+      sc.loadsound(str);
+    }
+    sc.playsound();
+
     if (g().shieldpowerstate!=pow)
       g().shieldpowerstate=pow;
     else

@@ -1842,6 +1842,10 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
              case ACCEPT_MISSION:
                if (item.category.find("Active_Missions")!=string::npos) {
                  commitButton->setLabel("Abort");
+                 static bool allow_abort_mission=XMLSupport::parse_bool(vs_config->getVariable("physics","allow_mission_abort","true"));
+                 if (allow_abort_mission==false) {
+                   commitButton->setHidden(true);
+                 }
                }else {
                  commitButton->setLabel("Accept");
                }

@@ -500,6 +500,7 @@ bool Cockpit::Update () {
   if (!par) {
 	if (respawnunit.size()>_Universe->CurrentCockpit()){
 	  if (respawnunit[_Universe->CurrentCockpit()]){
+
 		parentturret.SetUnit(NULL);
 		static float initialzoom = XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
 		zoomfactor=initialzoom;

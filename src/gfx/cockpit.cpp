@@ -287,10 +287,6 @@ inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &Ca
     if (lock_percent<0) {
       lock_percent=0;
     }
-    static bool lock_box_red=XMLSupport::parse_bool(vs_config->getVariable("graphics","lock_box_red","false"));
-    if (lock_box_red) {
-      GFXColor4f(1,0,0,1);
-    }
     float max=2.05;
     //    VSFileSystem::Fprintf (stderr,"lock percent %f\n",lock_percent);
     float coord = 1.05+(max-1.05)*lock_percent;//rSize/(1-lock_percent);//this is a number between 1 and 100
@@ -1616,7 +1612,7 @@ void GameCockpit::Draw() {
   GFXAlphaTest (ALWAYS,0);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXColor4f(1,1,1,1);
-	bool die=true;
+  bool die=true;
   if ((un = parent.GetUnit())) {
     static bool drawF5VDU (XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_chase_cam","false")));
     static bool drawF6VDU (XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_panning_cam","false")));
@@ -1726,54 +1722,73 @@ void GameCockpit::Draw() {
       DrawArrowToTarget(parent.GetUnit(), parent.GetUnit()->Target());
     }
   }
-
+  if (QuitAllow||getTimeCompression()<.5) {
+    if (QuitAllow){ 
+      if (!die){
+        static VSSprite QuitSprite("quit.spr",BILINEAR,GFXTRUE);
+        
+        GFXEnable(TEXTURE0);
+        QuitSprite.Draw();	  
+      }
+    }else {
+      static VSSprite PauseSprite("pause.spr",BILINEAR,GFXTRUE);          
+      GFXEnable(TEXTURE0);
+      PauseSprite.Draw();	        
+    }
+  }
+  static float dietime = 0;
   if (die) {
-	if (un) {
-		if (un->GetHull()>=0) {
-			die=false;
-		}
-	}
-	if (die) {
-	static float dietime = 0;
-	if (text) {
-		GFXColor4f (1,1,1,1);
-		text->SetSize(1,-1);
-		float x; float y;
-		if (dietime==0) {
-		  if (respawnunit.size()>_Universe->CurrentCockpit()) 
-		    if (respawnunit[_Universe->CurrentCockpit()]==1) {
-		      respawnunit[_Universe->CurrentCockpit()]=0;
-		    }
-			text->GetCharSize (x,y);
-			text->SetCharSize (x*4,y*4);
-			text->SetPos (0-(x*2*14),0-(y*2));
-			char playr[3];
-			playr[0]='p';
-			playr[1]='0'+_Universe->CurrentCockpit();
-			playr[2]='\0';
-			mission->msgcenter->add("game",playr,"#ff5555You Have Died!");
-			mission->msgcenter->add("game",playr,"Press #8080FF;#000000 (semicolon) to respawn");
-			mission->msgcenter->add("game",playr,"Or Press #8080FFEsc#000000 to quit");
-		}
-		GFXColorf (textcol);
-		text->Draw ("#ff5555You Have Died!\n#000000Press #8080FF;#000000 (semicolon) to respawn\nOr Press #8080FFEsc and 'q'#000000 to quit");
-		GFXColor4f (1,1,1,1);
-	}
+    if (un) {
+      if (un->GetHull()>=0) {
+        die=false;
+      }
+    }
+    if (die) {
+      
+      if (text) {
+        GFXColor4f (1,1,1,1);
+        text->SetSize(1,-1);
+        float x; float y;
+        if (dietime==0) {
+          if (respawnunit.size()>_Universe->CurrentCockpit()) 
+            if (respawnunit[_Universe->CurrentCockpit()]==1) {
+              respawnunit[_Universe->CurrentCockpit()]=0;
+            }
+          text->GetCharSize (x,y);
+          text->SetCharSize (x*4,y*4);
+          text->SetPos (0-(x*2*14),0-(y*2));
+          char playr[3];
+          playr[0]='p';
+          playr[1]='0'+_Universe->CurrentCockpit();
+          playr[2]='\0';
+          mission->msgcenter->add("game",playr,"#ff5555You Have Died!");
+          mission->msgcenter->add("game",playr,"Press #8080FF;#000000 (semicolon) to respawn");
+          mission->msgcenter->add("game",playr,"Or Press #8080FFq#000000 to quit");
+          
+
+        }
+        GFXColorf (textcol);
+        text->Draw ("#ff5555You Have Died!\n#000000Press #8080FF;#000000 (semicolon) to respawn\nOr Press #8080FFEsc and 'q'#000000 to quit");
+        GFXColor4f (1,1,1,1);
+
+        
+        static float min_die_time= XMLSupport::parse_float(vs_config->getVariable("graphics","death_scene_time","4"));
+        if (dietime>min_die_time) {
+          static VSSprite DieSprite("died.spr",BILINEAR,GFXTRUE);
+          GFXBlendMode(SRCALPHA,INVSRCALPHA);
+          GFXEnable(TEXTURE0);
+          DieSprite.Draw();                         
+        }
 	dietime +=GetElapsedTime();
 	SetView (CP_PAN);
 	zoomfactor=dietime*10;
-	}
-  }
-  if (QuitAllow||getTimeCompression()<.5) {
-    if (QuitAllow){ 
-	  static VSSprite QuitSprite("quit.spr",BILINEAR,GFXTRUE);
-          
-	  GFXEnable(TEXTURE0);
-	  QuitSprite.Draw();	  
+      }
+      QuitAllow=true;
     }else {
-	  static VSSprite PauseSprite("pause.spr",BILINEAR,GFXTRUE);          
-	  GFXEnable(TEXTURE0);
-	  PauseSprite.Draw();	        
+      if (dietime!=0) {
+        QuitAllow=false;
+      }
+      dietime=0;
     }
   }
   GFXAlphaTest (ALWAYS,0);  

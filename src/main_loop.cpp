@@ -426,7 +426,7 @@ bool cockpitfront=true;
       static soundContainer sc;
       if (sc.sound<0) {
       
-        static string str=vs_config->getVariable("cockpitaudio","scanning","vdu_c");
+        static string str=vs_config->getVariable("cockpitaudio","objective","vdu_c");
         sc.loadsound(str);
       }
       sc.playsound();      
@@ -439,7 +439,7 @@ bool cockpitfront=true;
       static soundContainer sc;
       if (sc.sound<0) {
       
-        static string str=vs_config->getVariable("cockpitaudio","scanning","vdu_b");
+        static string str=vs_config->getVariable("cockpitaudio","examine","vdu_b");
         sc.loadsound(str);
       }
       sc.playsound();      
@@ -452,7 +452,7 @@ bool cockpitfront=true;
       static soundContainer sc;
       if (sc.sound<0) {
       
-        static string str=vs_config->getVariable("cockpitaudio","scanning","vdu_b");
+        static string str=vs_config->getVariable("cockpitaudio","view","vdu_b");
         sc.loadsound(str);
       }
       sc.playsound();      
@@ -464,7 +464,7 @@ bool cockpitfront=true;
       static soundContainer sc;
       if (sc.sound<0) {
       
-        static string str=vs_config->getVariable("cockpitaudio","scanning","vdu_a");
+        static string str=vs_config->getVariable("cockpitaudio","repair","vdu_a");
         sc.loadsound(str);
       }
       sc.playsound();      
@@ -477,7 +477,7 @@ bool cockpitfront=true;
       static soundContainer sc;
       if (sc.sound<0) {
       
-        static string str=vs_config->getVariable("cockpitaudio","scanning","vdu_a");
+        static string str=vs_config->getVariable("cockpitaudio","manifest","vdu_a");
         sc.loadsound(str);
       }
       sc.playsound();      

@@ -570,16 +570,16 @@ void BaseInterface::MouseOver (int xbeforecalc, int ybeforecalc) {
 	}
 	if (link) {
           float overcolor[4]={1,.666666667,0,1};
-          vs_config->getColor("base_mouse_over",overcolor);
+          static bool donecolor=(vs_config->getColor("default","base_mouse_over",overcolor,true),true);
           curtext.SetText(link->text);
           curtext.col=GFXColor(overcolor[0],overcolor[1],overcolor[2],overcolor[3]);
           drawlinkcursor=true;
 	} else {
           float inactivecolor[4]={0,1,0,1};
-          vs_config->getColor("base_mouse_passive",inactivecolor);
-		curtext.SetText(rooms[curroom]->deftext);
-		curtext.col=GFXColor(inactivecolor[0],inactivecolor[1],inactivecolor[2],inactivecolor[3]);
-		drawlinkcursor=false;
+          static bool donecolor=(vs_config->getColor("default","base_mouse_passive",inactivecolor,true),true);
+          curtext.SetText(rooms[curroom]->deftext);
+          curtext.col=GFXColor(inactivecolor[0],inactivecolor[1],inactivecolor[2],inactivecolor[3]);
+          drawlinkcursor=false;
 	}
         static bool  draw_always      = XMLSupport::parse_bool(vs_config->getVariable("graphics","base_locationmarker_drawalways","false"));
         static float defined_distance = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_distance","0.5"));
