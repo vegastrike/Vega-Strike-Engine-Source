@@ -1785,11 +1785,12 @@ void GameCockpit::Draw() {
       }
       QuitAllow=true;
     }else {
-      if (dietime!=0) {
-        QuitAllow=false;
-      }
-      dietime=0;
     }
+  }else{
+    if (dietime!=0) {
+      QuitAllow=false;
+      dietime=0;
+    }    
   }
   GFXAlphaTest (ALWAYS,0);  
   static bool mouseCursor = XMLSupport::parse_bool (vs_config->getVariable ("joystick","mouse_cursor","false"));
