@@ -1761,14 +1761,14 @@ void GameCockpit::Draw() {
           playr[0]='p';
           playr[1]='0'+_Universe->CurrentCockpit();
           playr[2]='\0';
-          mission->msgcenter->add("game",playr,"#ff5555You Have Died!");
-          mission->msgcenter->add("game",playr,"Press #8080FF;#000000 (semicolon) to respawn");
-          mission->msgcenter->add("game",playr,"Or Press #8080FFq#000000 to quit");
           
 
         }
         GFXColorf (textcol);
-        text->Draw ("#ff5555You Have Died!\n#000000Press #8080FF;#000000 (semicolon) to respawn\nOr Press #8080FFEsc and 'q'#000000 to quit");
+        static bool show_died_text=XMLSupport::parse_bool(vs_config->getVariable("graphics","show_respawn_text","false"));
+        if (show_died_text) {
+          text->Draw ("#ff5555You Have Died!\n#000000Press #8080FF;#000000 (semicolon) to respawn\nOr Press #8080FFEsc and 'q'#000000 to quit");
+        }
         GFXColor4f (1,1,1,1);
 
         
