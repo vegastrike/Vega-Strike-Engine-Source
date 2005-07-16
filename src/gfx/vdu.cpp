@@ -478,8 +478,8 @@ static void DrawShieldArmor(Unit * parent, const float StartArmor[8], float x, f
   float bs = parent->BShieldData();
   float armor[8];
   GFXColor4f (.4,.4,1,1);
-  float shieldcolor[4]={.4,.4,1,1};
-  float ishieldcolor[4]={.4,.4,1,1};
+  static float shieldcolor[4]={.4,.4,1,1};
+  static float ishieldcolor[4]={.4,.4,1,1};
   static bool shieldcolorloaded=(vs_config->getColor("default","outer_shield_color",shieldcolor,true),true);
   static bool ishieldcolorloaded=(vs_config->getColor("default","inner_shield_color",ishieldcolor,true),true);
   GFXDisable (TEXTURE0);
@@ -645,8 +645,8 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   strcat (st,qr.str);
   tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
   GFXColor4f (.4,.4,1,1);
-  float shieldcolor[4]={.4,.4,1,1};
-  float ishieldcolor[4]={.4,.4,1,1};
+  static float shieldcolor[4]={.4,.4,1,1};
+  static float ishieldcolor[4]={.4,.4,1,1};
 
   //float shieldcolor[4]={.9882,.7058,0,1};
   //float ishieldcolor[4]={.9882,.3607,0,1};
@@ -1072,8 +1072,8 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
 		  DrawHUDSprite(this,getSunImage(),1,x,y,w,h,1,1,1,1,1,false,false);
         h=fabs (h*.6);
         w=fabs (w*.6);
-        float shieldcolor[4]={.4,.4,1,1};
-        float ishieldcolor[4]={.4,.4,1,1};
+        static float shieldcolor[4]={.4,.4,1,1};
+        static float ishieldcolor[4]={.4,.4,1,1};
 
         //float shieldcolor[4]={.9882,.7058,0,1};
         //float ishieldcolor[4]={.9882,.3607,0,1};
