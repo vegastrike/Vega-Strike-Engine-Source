@@ -1,9 +1,22 @@
 //	This draws the mouse cursor
 //	**********************************
 void NavigationSystem::DrawCursor (float x, float y, float wid, float hei, const GFXColor &col) {
+  float sizex, sizey;
+  static bool modern_nav_cursor=XMLSupport::parse_bool(vs_config->getVariable("graphics","nav","modern_mouse_cursor","true"));
+  if (modern_nav_cursor) {
+    static string mouse_cursor_sprite=vs_config->getVariable("graphics","nav","mouse_cursor_sprite","mouse.spr");
+    static VSSprite MouseVSSprite(mouse_cursor_sprite.c_str(),BILINEAR,GFXTRUE);
+    GFXBlendMode(SRCALPHA,INVSRCALPHA);
+    GFXColorf(GUI_OPAQUE_WHITE());
 
-
-
+    // Draw the cursor sprite.
+    GFXEnable(TEXTURE0);
+    GFXDisable(DEPTHTEST);
+    GFXDisable(TEXTURE1);
+    MouseVSSprite.GetSize(sizex,sizey);
+    MouseVSSprite.SetPosition(x+sizex/2,y+sizey/2);
+    MouseVSSprite.Draw();
+  }else {
 	GFXColorf(col);
 	GFXDisable(TEXTURE0);
 	GFXDisable(LIGHTING);
@@ -22,6 +35,7 @@ void NavigationSystem::DrawCursor (float x, float y, float wid, float hei, const
 		GFXVertex3f((x+wid),float(y-(0.75*hei)),0);
 	GFXEnd();
 	GFXEnable(TEXTURE0);
+  }
 }
 //	**********************************
 
