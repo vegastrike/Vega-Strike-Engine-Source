@@ -201,6 +201,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 
 void Texture::Load(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load, int maxdimension,GFXBOOL detailtexture,GFXBOOL nocache)
 {
+ fprintf (stderr,"TLoading: %s\n",FileName); 
   if (data) free(data);
   if (palette) free(palette);
   data = NULL;
@@ -420,6 +421,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 
 void Texture::Load (const char * FileNameRGB, const char *FileNameA, int stage, enum FILTER  mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval, GFXBOOL force_load, int maxdimension,GFXBOOL detailtexture,GFXBOOL nocache)
 {
+  fprintf (stderr,"TLoading: %s\n",FileNameRGB); 
   if (data) free(data);
   if (palette) free(palette);
   data = NULL;
