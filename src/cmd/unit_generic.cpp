@@ -3866,16 +3866,22 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
 		  if( percent == -1)
 			  return -1;
                   static float damage_factor_for_sound=XMLSupport::parse_float(vs_config->getVariable("audio","damage_factor_for_sound",".001"));
+                  bool did_hull_damage=true;
 		  if (absdamage<*targ) {
                     if ((*targ)*damage_factor_for_sound<=absdamage) {
 			ArmorDamageSound( pnt);
                     }
                     *targ -= apply_float_to_unsigned_int(absdamage);  //short fix
-		  }else {
+                    did_hull_damage=false;
+		  }
+                  static bool system_damage_on_armor=XMLSupport::parse_bool(vs_config->getVariable("physics","system_damage_on_armor","false"));
+                  if (system_damage_on_armor||did_hull_damage) {
+                    if (did_hull_damage) {
 			absdamage -= *targ;
 			damage= damage>=0?absdamage:-absdamage;
 			*targ= 0;
-			if (numCargo()>0) {
+                    }
+                    if (numCargo()>0) {
 				if (DestroySystem(hull,maxhull,numCargo())) {
 					int which = rand()%numCargo();
 					if (GetCargo(which).category.find("upgrades/")==0&& GetCargo(which).category.find(DamagedCategory)!=0 &&GetCargo(which).content.find("add_")!=0&&GetCargo(which).content.find("mult_")!=0) {
@@ -3893,9 +3899,9 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
                                                 }
 					}
 				}
-			}
+                    
 			bool isplayer = _Universe->isPlayerStarship(this);
-			if ((!isplayer)||_Universe->AccessCockpit()->godliness<=0||hull>damage) {//hull > damage is similar to hull>absdamage|| damage<0	
+			if ((!isplayer)||_Universe->AccessCockpit()->godliness<=0||hull>damage||system_damage_on_armor) {//hull > damage is similar to hull>absdamage|| damage<0	
 				static float system_failure=XMLSupport::parse_float(vs_config->getVariable ("physics","indiscriminate_system_destruction",".25"));
 				if ((!isplayer)&&DestroySystem(hull,maxhull,1)) {
 					
@@ -3903,6 +3909,7 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
 				}else if (isplayer&&DestroyPlayerSystem(hull,maxhull,1)) {
 					DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(absdamage/hull)),pnt);
 				}
+                                if (did_hull_damage) {
 			  if (damage>0) {
                             if (hull*damage_factor_for_sound<=damage) {
                               HullDamageSound( pnt);
@@ -3916,6 +3923,7 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
 				  if (shield.recharge<0)
 					  shield.recharge=0;
 			  }
+                                }
 			}else {
 			  _Universe->AccessCockpit()->godliness-=absdamage;
 			  if (DestroyPlayerSystem(hull,maxhull,1)) {
@@ -3959,6 +3967,7 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
 			return -1;
 		#endif
   		  }
+                  }
   }
   /////////////////////////////
   if (!FINITE (percent))
