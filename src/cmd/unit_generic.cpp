@@ -3803,14 +3803,16 @@ const Unit * loadUnitByCache(std::string name,int faction) {
 
 bool DestroySystem (float hull, float maxhull, float numhits) {
 	static float damage_chance=XMLSupport::parse_float(vs_config->getVariable ("physics","damage_chance",".005"));
-	float chance = 1-(damage_chance*(maxhull-hull)/maxhull);
+        static float guaranteed_chance=XMLSupport::parse_float(vs_config->getVariable("physics","definite_damage_chance",".1"));
+	float chance = 1-(damage_chance*(guaranteed_chance+(maxhull-hull)/maxhull));
 	if (numhits>1)
 		chance=pow (chance,numhits);
 	return (rand01()>chance);
 }
 bool DestroyPlayerSystem (float hull, float maxhull, float numhits) {
 	static float damage_chance=XMLSupport::parse_float(vs_config->getVariable ("physics","damage_player_chance",".5"));
-	float chance = 1-(damage_chance*(maxhull-hull)/maxhull);
+        static float guaranteed_chance=XMLSupport::parse_float(vs_config->getVariable("physics","definite_damage_chance",".1"));
+	float chance = 1-(damage_chance*(guaranteed_chance+(maxhull-hull)/maxhull));
 	if (numhits>1)
 		chance=pow (chance,numhits);
 	bool ret = (rand01()>chance);
