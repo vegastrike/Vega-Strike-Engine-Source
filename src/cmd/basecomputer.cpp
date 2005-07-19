@@ -121,6 +121,11 @@ static GFXColor NO_MONEY_COLOR(){
   static GFXColor NO_MONEY_COLOR=getConfigColor("no_money",GFXColor(1,.3,.3,1));
   return  NO_MONEY_COLOR;        // Start out with bogus color.
 }
+static GFXColor ITEM_DESTROYED_COLOR(){
+  static GFXColor NO_MONEY_COLOR=getConfigColor("upgrade_item_destroyed",GFXColor(.2,.2,.2,1));
+  return  NO_MONEY_COLOR;        // Start out with bogus color.
+
+}
 // Color of the text of a category.
 static GFXColor CATEGORY_TEXT_COLOR(){
   static GFXColor CTC=getConfigColor("base_category_color",GFXColor(0,.75,0,1));
@@ -2258,7 +2263,7 @@ void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, 
 				);
 
 			if(percent_working == 1.0){final_color = base_color;}	//	working = normal color
-			if(percent_working == 0.0){final_color = GFXColor(0.2,0.2,0.2);}	//	dead = grey
+			if(percent_working == 0.0){final_color = ITEM_DESTROYED_COLOR();}	//	dead = grey
 		}
 		else
 			final_color = base_color;
