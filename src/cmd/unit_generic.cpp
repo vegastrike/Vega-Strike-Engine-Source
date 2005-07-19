@@ -3366,6 +3366,34 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 		damages &= COMPUTER_DAMAGED;
 		return;
 	}
+        static float thruster_hit_chance=XMLSupport::parse_float(vs_config->getVariable("physics","thruster_hit_chance",".25"));
+	if (rand01()<thruster_hit_chance)) {
+		//DAMAGE ROLL/YAW/PITCH/THRUST
+          float orandnum=rand01()*.75+.25;
+          if (randnum>=.9) {
+            computer.max_pitch_up*=orandnum;
+          } else if (randnum>=.8) {
+            computer.max_yaw_right*=orandnum;
+          } else if (randnum>=.6) {
+            computer.max_yaw_left*=orandnum;
+          } else if (randnum>=.4) {
+            computer.max_pitch_down*=orandnum;
+          } else if (randnum>=.2) {
+            computer.max_roll_right*=orandnum;
+          } else if (randnum>=.18) {
+            computer.max_roll_left*=orandnum;
+          }else if (randnum>=.17) {
+            limits.roll*=dam;
+          } else if (randnum>=.10) {
+            limits.yaw*=dam;
+          } else if (randnum>=.03) {
+            limits.pitch*=dam;
+          } else {
+            limits.lateral*=dam;
+          }
+          damages &= LIMITS_DAMAGED;
+          return;
+	}
 	if (degrees>=20&&degrees<35) {
 		//DAMAGE MOUNT
 		if (randnum>=.65&&randnum<.9) {
@@ -3410,33 +3438,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 		damages &= CARGOFUEL_DAMAGED;
 		return;
 	}
-	if ((degrees>=60&&degrees<90)||(degrees>=150&&rand01()<.25)) {
-		//DAMAGE ROLL/YAW/PITCH/THRUST
-          float orandnum=rand01()*.5+.5;
-          if (randnum>=.9) {
-            computer.max_pitch_up*=orandnum;
-          } else if (randnum>=.8) {
-            computer.max_yaw_right*=orandnum;
-          } else if (randnum>=.7) {
-            computer.max_yaw_left*=orandnum;
-          } else if (randnum>=.6) {
-            computer.max_pitch_down*=orandnum;
-          } else if (randnum>=.57) {
-            computer.max_roll_right*=orandnum;
-          } else if (randnum>=.53) {
-            computer.max_roll_left*=orandnum;
-          }else if (randnum>=.5) {
-            limits.roll*=dam;
-          } else if (randnum>=.3) {
-            limits.yaw*=dam;
-          } else if (randnum>=.1) {
-            limits.pitch*=dam;
-          } else {
-            limits.lateral*=dam;
-          }
-          damages &= LIMITS_DAMAGED;
-          return;
-	}
+
 	if (degrees>=90&&degrees<120) {
 		//DAMAGE Shield
 		//DAMAGE cloak
