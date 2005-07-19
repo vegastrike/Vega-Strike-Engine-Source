@@ -3367,7 +3367,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 		return;
 	}
         static float thruster_hit_chance=XMLSupport::parse_float(vs_config->getVariable("physics","thruster_hit_chance",".25"));
-	if (rand01()<thruster_hit_chance)) {
+	if (rand01()<thruster_hit_chance) {
 		//DAMAGE ROLL/YAW/PITCH/THRUST
           float orandnum=rand01()*.75+.25;
           if (randnum>=.9) {
