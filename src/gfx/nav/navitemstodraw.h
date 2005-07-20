@@ -50,6 +50,9 @@ void NavigationSystem::DrawCursor (float x, float y, float wid, float hei, const
 //	**********************************
 void NavigationSystem::DrawGrid(float &x1, float &x2, float &y1, float &y2, const GFXColor &col)
 {
+  static bool draw_grid =XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_nav_grid","true"));
+  if(!draw_grid)
+    return;
 	GFXColorf(col);
 	GFXDisable(TEXTURE0);
 	GFXDisable(LIGHTING);
