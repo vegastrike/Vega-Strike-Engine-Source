@@ -1674,6 +1674,15 @@ void GameCockpit::Draw() {
                 } else {
                   static string vdustatic=vs_config->getVariable("graphics","vdu_static","static.ani");
                   static Animation vdu_ani(vdustatic.c_str(),true,.1,BILINEAR);
+                  static soundContainer ejectstopsound;
+                  if (ejectstopsound.sound<0) {
+                    static string str=vs_config->getVariable("cockpitaudio","vdu_static","vdu_static");
+                    ejectstopsound.loadsound(str);
+                  }
+                  if (!AUDIsPlaying(ejectstopsound.sound)) {
+                    ejectstopsound.playsound();
+                  }
+
                   GFXEnable(TEXTURE0);
                   vdu_ani.DrawAsVSSprite(vdu[vd]);	
                   
