@@ -13,6 +13,11 @@
 #include "gfx/animation.h"
 #include "gfx/vsimage.h"
 bool VDU::staticable() {
+  unsigned int thismode=getMode();
+  static bool only_scanner_modes_static=XMLSupport::parse_bool(vs_config->getVariable("graphics","only_scanner_modes_static","true"));
+  if (thismode!=COMM&&thismode!=TARGETMANIFEST&&thismode!=TARGET&&thismode!=NAV&&thismode!=VIEW&&thismode!=WEBCAM&&only_scanner_modes_static) {
+    return false;
+  }
   return (posmodes&(posmodes-1))!=0;// check not power of two
 }
 ///ALERT to change must change enum in class
