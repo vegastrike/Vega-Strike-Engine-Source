@@ -883,8 +883,10 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
     if (maxfuel>0) return target->FuelData()/maxfuel;return 0;
   case UnitImages::ENERGY:
     return target->EnergyData();
-  case UnitImages::WARPENERGY:
-    return target->WarpEnergyData();
+  case UnitImages::WARPENERGY:{
+    static bool warpifnojump=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","display_warp_energy_if_no_jump_drive","true"));
+    return (warpifnojump||target->GetJumpStatus().drive!=-2)?target->WarpEnergyData():0;
+  }
   case UnitImages::HULL:
     if (maxhull<target->GetHull()) {
       maxhull = target->GetHull();
@@ -1013,7 +1015,8 @@ void GameCockpit::DrawGauges(Unit * un) {
             gauge_time[i]=-cockpit_time;
           }
         } else {
-          static Animation vdu_ani("static.ani",true,.1,BILINEAR);
+          static string gauge_static = vs_config->getVariable("graphics","gauge_static","static.ani");          
+          static Animation vdu_ani(gauge_static.c_str(),true,.1,BILINEAR);
           vdu_ani.DrawAsVSSprite(gauges[i]);	
         }
       } else {
@@ -1669,7 +1672,8 @@ void GameCockpit::Draw() {
                     vdu_time[vd]=-cockpit_time;
                   }
                 } else {
-                  static Animation vdu_ani("static.ani",true,.1,BILINEAR);
+                  static string vdustatic=vs_config->getVariable("graphics","vdu_static","static.ani");
+                  static Animation vdu_ani(vdustatic.c_str(),true,.1,BILINEAR);
                   GFXEnable(TEXTURE0);
                   vdu_ani.DrawAsVSSprite(vdu[vd]);	
                   

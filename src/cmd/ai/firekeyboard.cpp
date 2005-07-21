@@ -1353,7 +1353,8 @@ void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
   }else {
     whichsound=DoSpeech (NULL,NULL,*c.getCurrentState());
     if (parent==_Universe->AccessCockpit()->GetParent()) {
-      static Animation Statuc ("static.ani");
+      static string comm_static = vs_config->getVariable("graphics","comm_static","static.ani");
+      static Animation Statuc (comm_static.c_str());
       _Universe->AccessCockpit()->SetCommAnimation (&Statuc,NULL);
     }
 
