@@ -1225,9 +1225,9 @@ int VDU::DrawVDUObjective (void * obj, int offset) {
 }
 #endif
 
-void VDU::DrawVDUObjectives (Unit *parent) {
+
+void DrawObjectivesTextPlane(TextPlane *tp, int scrolloffset, Unit *parent) {
   std::string rez("\n");
-  int offset = scrolloffset;
   for (unsigned int i=0;i<active_missions.size();++i){
     if (!active_missions[i]->objectives.empty()) {
 	rez+="#FFFFFF";
@@ -1249,7 +1249,11 @@ void VDU::DrawVDUObjectives (Unit *parent) {
       rez+='\n';
     }
   }
-  tp->Draw(rez,offset);
+  tp->Draw(rez,scrolloffset);
+}
+
+void VDU::DrawVDUObjectives (Unit *parent) {
+	DrawObjectivesTextPlane(tp, scrolloffset, parent);
 }
 
 bool VDU::SetWebcamAnimation ( ) {

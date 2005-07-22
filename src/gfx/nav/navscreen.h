@@ -8,6 +8,7 @@
 #include "gfx/masks.h"
 #include "navcomputer.h"
 #include "navpath.h"
+#include "gfx/hud.h"
 
 #define NAVTOTALMESHCOUNT 8	//	same as the button count, 1 mesh for screen and 1 per button(1+7)
 #define MAXZOOM 10
@@ -186,6 +187,7 @@ float center_x;
 float center_y;
 float center_z;
 
+signed int scrolloffset;
 
 float mouse_x_previous;
 float mouse_y_previous;
@@ -224,6 +226,7 @@ float buttonskipby4_4[4];
 float buttonskipby4_5[4];
 float buttonskipby4_6[4];
 float buttonskipby4_7[4];
+TextPlane screen_objectives;
 float meshcoordinate_x[NAVTOTALMESHCOUNT];
 float meshcoordinate_y[NAVTOTALMESHCOUNT];
 float meshcoordinate_z[NAVTOTALMESHCOUNT];
@@ -302,6 +305,7 @@ void DrawGalaxy();
 void DrawMission();
 void DrawShip();
 void DrawSectorList();
+void DrawObjectives();
 void SetMouseFlipStatus();
 void ScreenToCoord(float &x);
 void IntersectBorder(float & x, float & y, const float & x1, const float & y1) const;
@@ -311,6 +315,10 @@ void SetDraw(bool n);
 void ClearPriorities();
 void updatePath();
 
+void scroll(signed int scrollamt) {
+	scrolloffset+=scrollamt;
+}
+	
 static int mousex;
 static int mousey;
 static int mousestat;

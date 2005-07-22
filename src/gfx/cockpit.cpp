@@ -2021,8 +2021,12 @@ void GameCockpit::ScrollVDU (int vdunum, int howmuch) {
   }
 }
 void GameCockpit::ScrollAllVDU (int howmuch) {
-  for (unsigned int i=0;i<vdu.size();i++) {
-    ScrollVDU (i,howmuch);
+  if (ThisNav.CheckDraw()) {
+	  ThisNav.scroll(howmuch);
+  } else {
+    for (unsigned int i=0;i<vdu.size();i++) {
+      ScrollVDU (i,howmuch);
+    }
   }
 }
 

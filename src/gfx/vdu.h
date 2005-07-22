@@ -9,6 +9,8 @@
 class Unit;
 class TextPlane;
 
+void DrawObjectivesTextPlane(TextPlane *tp, int scrolloffset, Unit * parent);
+
 /**
  * Holds information for dedicated computer output
  * on a fighter craft. Can print out target info, local damage info

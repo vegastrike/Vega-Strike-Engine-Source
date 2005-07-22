@@ -33,7 +33,7 @@
 #include "cmd/unit_util.h"
 #include "math.h"
 #include "save_util.h"
-
+#include "gfx/vdu.h"
 
 
 #include "navscreen.h"
@@ -112,6 +112,8 @@ void NavigationSystem::Setup()
 	rz_s = 0.0;
 	zoom_s = 1.8;
 
+	scrolloffset=0;
+	
 	camera_z = 1.0;	//	updated after a pass
 	center_x = 0.0;	//	updated after a pass
 	center_y = 0.0;	//	updated after a pass
@@ -216,6 +218,7 @@ void NavigationSystem::Setup()
 		screenskipby4[2] = .3;
 		screenskipby4[3] = .7;
 
+
 		buttonskipby4_1[0] = .75;
 		buttonskipby4_1[1] = .95;
 		buttonskipby4_1[2] = .85;
@@ -309,6 +312,10 @@ void NavigationSystem::Setup()
 		buttonskipby4_7[1] = .95;
 		buttonskipby4_7[2] = .25;
 		buttonskipby4_7[3] = .30;
+
+		
+		unsetbit(whattodraw, 4);
+		
 		for (int i=0;i<NAVTOTALMESHCOUNT;i++) {
 			mesh[i]=NULL;
 		}
@@ -452,7 +459,7 @@ void NavigationSystem::Draw()
 	GFXEnable (TEXTURE0);
 	GFXDisable (DEPTHTEST);
 	GFXClear (GFXFALSE);
-
+//	GFXEnable(CLIPMODE)
 	GFXEnable(LIGHTING);
 
 	for(int i = 0; i<NAVTOTALMESHCOUNT; i++)
@@ -494,6 +501,7 @@ void NavigationSystem::Draw()
 
 		Matrix mat (p,q,r,pos);
 		if (mesh[i]) {
+			GFXDisable(CULLFACE);
 			mesh[i]->DrawNow(1,true,mat);
 		}
 	}
@@ -581,7 +589,7 @@ void NavigationSystem::Draw()
 	//	**********************************
 
 
-
+	DrawObjectives();
 
 
 
@@ -997,6 +1005,15 @@ void NavigationSystem::DrawSectorList()
 
 
 
+void NavigationSystem::DrawObjectives()
+{
+	if (checkbit(whattodraw, 4)) {
+		// Draw the objectives screen!
+		DrawObjectivesTextPlane(&screen_objectives, scrolloffset, _Universe->AccessCockpit()->GetParent());
+	}
+}
+
+
 
 
 //	this sets weather to draw the screen or not
@@ -1010,6 +1027,7 @@ void NavigationSystem::SetDraw(bool n)
 	if(n != (draw==1))
 	{
 		ClearPriorities();
+		scrolloffset=0;
 		draw = n?1:0;
 	}
 }

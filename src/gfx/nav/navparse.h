@@ -259,6 +259,21 @@ bool NavigationSystem::ParseFile(string filename)
 
 					mesh[7] = Mesh::LoadMesh(mesh_.c_str(),Vector (scale_,scale_,scale_),0,NULL);
 				}
+				else if(tag == "objectives")
+				{
+					float x_ = atof( (retrievedata(data, "x")).c_str() );
+					float y_ = atof( (retrievedata(data, "y")).c_str() );
+					float dx_ = x_+atof( (retrievedata(data, "dx")).c_str() );
+					float dy_ = y_+atof( (retrievedata(data, "dy")).c_str() );
+					ScreenToCoord(x_);
+					ScreenToCoord(y_);
+					ScreenToCoord(dx_);
+					ScreenToCoord(dy_);
+					
+					screen_objectives.SetPos(x_,dy_);
+					screen_objectives.SetSize(dx_-x_, y_-dy_);
+					dosetbit(whattodraw,4);
+				}
 				else if(tag == "systemiteminfo")
 				{
 					float scale_ = atof( (retrievedata(data, "itemscale")).c_str() );
