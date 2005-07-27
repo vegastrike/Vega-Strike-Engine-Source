@@ -128,6 +128,8 @@ public:
 };
 
 
+// these can be used in the XML scripts if they are allowed to be called
+
 void AfterburnTurnTowards (Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
   bool afterburn = useAfterburner();
@@ -292,6 +294,60 @@ void LoopAroundSlow(Order* aisc, Unit * un) {
 	AddOrd(aisc,un,broll);
 	
 }
+
+void SelfDestruct(Order* aisc, Unit * un) {
+    un->armor.frontrighttop = -1;
+    un->armor.backrighttop = -1;
+    un->armor.frontlefttop = -1;
+    un->armor.backlefttop = -1;
+    un->armor.frontrightbottom = -1;
+    un->armor.backrightbottom = -1;
+    un->armor.frontleftbottom = -1;
+    un->armor.backleftbottom = -1;
+    un->hull = -1; // hull goes to zero but no kill, same for armor. strangely enough, all of them together work.
+
+	un->Split (rand()%3+1);
+
+    // doesn't work either
+	/*
+	    switch (un->shield.number) {
+    case 2:
+      un->shield.shield.shield2fb.front=0; //short fix
+      un->shield.shield2fb.back=0; //short fix
+      break;
+    case 8:  //short fix
+      un->shield.shield8.frontrighttop=0; //short fix
+      un->shield.shield8.backrighttop=0; //short fix
+      un->shield.shield8.frontlefttop=0; //short fix
+      un->shield.shield8.backlefttop=0; //short fix
+      un->shield.shield8.frontrightbottom=0; //short fix
+      un->shield.shield8.backrightbottom=0; //short fix
+	  un->shield.shield8.frontleftbottom=0; //short fix
+      un->shield.shield8.backleftbottom=0; //short fix
+      
+      break;
+    case 4:
+    default:
+      un->shield.shield4fbrl.front =0; //short fix
+      un->shield.shield4fbrl.back =0; //short fix
+      un->shield.shield4fbrl.right =0; //short fix
+      un->shield.shield4fbrl.left =0; //short fix
+    }
+    */
+
+	
+	
+	// un->Kill(); // does not work, crashes
+    // un->Destroy(); // does not work, crashes
+    un->Explode(true, 0); // displays explosion, unit continues
+	un->RemoveFromSystem();  // has no effect
+    // applydamage crashes
+    //	un->ApplyDamage(un->Position(), Vector(0,0,1),10000,un,GFXColor(1,1,1,1),un->owner,0);
+ 
+
+}
+
+
 void AggressiveLoopAroundSlow(Order* aisc, Unit * un) {
 	Order* broll = new Orders::LoopAround(true,false,false,(int)un);
 	AddOrd(aisc,un,broll);
@@ -338,8 +394,31 @@ void KickstopBase(Order * aisc, Unit * un, bool match) {
 void Kickstop(Order * aisc, Unit * un) {
   KickstopBase(aisc,un,false);
 }
+
+void CoastToStop(Order * aisc, Unit * un) {
+  Vector vec (0,0,0);
+  vec=un->GetVelocity();
+
+  vec.i=vec.i*0.1;
+  vec.j=vec.j*0.1;
+  vec.k=vec.k*0.1;
+
+  Order * ord = new ExecuteFor(new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,true),1);  
+  AddOrd (aisc,un,ord);  
+}
+
+
+void DoNothing(Order * aisc, Unit * un) {
+  Vector vec (0,0,0);
+  vec=un->GetVelocity();
+
+
+  Order * ord = new ExecuteFor(new Orders::MatchLinearVelocity(vec,true,false,true),1);  
+  AddOrd (aisc,un,ord);  
+}
+
 void MatchVelocity(Order * aisc, Unit * un) {
-  KickstopBase(aisc,un,false);
+  KickstopBase(aisc,un,true);
 }
 
 static Vector VectorThrustHelper(Order * aisc, Unit * un, bool ab=false) {
@@ -514,6 +593,85 @@ void FlyStraightAfterburner(Order * aisc, Unit * un) {
   ord = new Orders::MatchAngularVelocity(Vector(0,0,0),1,false);
   AddOrd (aisc,un,ord);
 }
+
+
+// spiritplumber was here and added some orders, mostly for carriers and their spawn (eep, can carriers have kids?)
+
+void Takeoff(Order * aisc, Unit * un) {
+
+  Vector vec (0,0,10000);
+static bool firsttime = true;
+Order * ord;
+
+
+if (firsttime)
+ {
+  un->UnFire();
+  ord = new Orders::MatchVelocity(un->ClampVelocity(vec,true),Vector(0,0,0),true,true,false);
+  AddOrd (aisc,un,ord);
+  ord = new Orders::MatchAngularVelocity(Vector(0,0,0),1,false);
+  AddOrd (aisc,un,ord);
+  ord = new ExecuteFor(new Orders::MatchVelocity(un->ClampVelocity(vec,true),Vector(0,0,0),true,true,false),1.5f);
+  AddOrd (aisc,un,ord);
+  ord = new ExecuteFor(new Orders::MatchAngularVelocity(Vector(0,0,0),1,false),1.5f);
+  AddOrd (aisc,un,ord);
+  ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,false);
+  AddOrd (aisc,un,ord);
+  ord =       (new Orders::FaceTargetITTS(0, 3));
+  AddOrd (aisc,un,ord);    
+  un->UnFire();
+  firsttime = false;
+}
+else
+{
+  firsttime = false;
+  ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,false);
+  AddOrd (aisc,un,ord);
+  ord =       (new Orders::FaceTargetITTS(0, 3));
+  AddOrd (aisc,un,ord);    
+}
+//  ord = new ExecuteFor(new Orders::FaceTargetITTS(0, 1), 1.0f);
+  ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,false);
+  AddOrd (aisc,un,ord);
+  ord =       (new Orders::FaceTargetITTS(0, 3));
+  AddOrd (aisc,un,ord);    
+  un->SelectAllWeapon(false);
+  un->Fire((weapon_info::LIGHT || weapon_info::MEDIUM),false);
+  TurnTowards(aisc, un);
+//  un->Fire(weapon_info::MEDIUM,false);
+//  un->Fire(weapon_info::HEAVY,false);
+//  un->Fire(weapon_info::SPECIAL,false);
+//  un->Fire(weapon_info::CAPSHIP-LIGHT,false);  // new interceptors may have special weapons on them
+
+}
+
+void TakeoffEveryZig(Order * aisc, Unit * un) {
+
+  Vector vec (0,0,10000);
+
+  Order * ord;
+  un->UnFire();
+  un->Fire(weapon_info::CAPSHIPHEAVY,false);
+  un->UnFire();
+  ord = new Orders::MatchVelocity(un->ClampVelocity(vec,true),Vector(0,0,0),true,true,false);
+  AddOrd (aisc,un,ord);
+  ord = new Orders::MatchAngularVelocity(Vector(0,0,0),1,false);
+  AddOrd (aisc,un,ord);
+  ord = new ExecuteFor(new Orders::MatchAngularVelocity(Vector(0,0,0),1,false),3.4f);
+  AddOrd (aisc,un,ord);
+  ord = new ExecuteFor(new Orders::MatchVelocity(un->ClampVelocity(vec,true),Vector(0,0,0),true,true,false),0.1f);
+  AddOrd (aisc,un,ord);
+  ord = new ExecuteFor(new Orders::FaceTarget(0, 3), 1.0f);
+  AddOrd (aisc,un,ord);
+  ord = new Orders::MatchVelocity(un->ClampVelocity(vec,true),Vector(0,0,0),true,true,false);
+  AddOrd (aisc,un,ord);
+  ord = new Orders::MatchAngularVelocity(Vector(0,0,0),1,false);
+  AddOrd (aisc,un,ord);
+  un->Fire(weapon_info::CAPSHIPHEAVY,false);  // doesn't have time to happen anyway
+  un->SelectAllWeapon(false);
+}
+
+
 void CloakForScript(Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,false);
@@ -531,16 +689,48 @@ void TurnTowardsITTS(Order * aisc, Unit * un) {
   AddOrd (aisc,un,ord);    
 
 }
+
 void DropCargo(Order*aisc, Unit * un) {
       if (un->numCargo() > 0)
       {
-              int dropcount=(un->numCargo()/10)+1;
+              int dropcount=un->numCargo();
 
               {for(int i=0; i<dropcount; i++)
               {
                       un->EjectCargo(0);  
               }}
               Stop(aisc,un);
+      }
+      else
+      {
+              TurnAway(aisc, un);
+      }
+}
+
+
+void DropHalfCargo(Order*aisc, Unit * un) {
+      if (un->numCargo() > 0)
+      {
+              int dropcount=(un->numCargo()/2)+1;
+
+              {for(int i=0; i<dropcount; i++)
+              {
+                      un->EjectCargo(0);  
+              }}
+              Stop(aisc,un);
+      }
+      else
+      {
+              TurnAway(aisc, un);
+      }
+}
+
+
+void DropOneCargo(Order*aisc, Unit * un) {
+      if (un->numCargo() > 0)
+      {
+                      un->EjectCargo(0);  
+                      Stop(aisc,un);
       }
       else
       {

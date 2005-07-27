@@ -670,6 +670,11 @@ void GameCockpit::drawUnToTarget ( Unit * un, Unit* target,float xcent,float yce
 
 void GameCockpit::Eject() {
   ejecting=true;
+  going_to_dock_screen=false;
+}
+void GameCockpit::EjectDock() {
+  ejecting=true;
+  going_to_dock_screen=true;
 }
 void GameCockpit::DrawBlips (Unit * un) {
 
@@ -726,16 +731,16 @@ void GameCockpit::DrawBlips (Unit * un) {
 	continue;      
       }
       
-      if (Radar[0])
+      if (Radar[0] && target->radial_size > 0)
         drawUnToTarget (un,target,xcent[0],ycent[0],xsize[0],ysize[0],false);
-      if (Radar[1])
+      if (Radar[1] && target->radial_size > 0)
         drawUnToTarget (un,target,xcent[1],ycent[1],xsize[1],ysize[1],true);
-      if (target->isPlanet()==PLANETPTR) {
+      if (target->isPlanet()==PLANETPTR && target->radial_size > 0) {
         Unit * sub=NULL;
         for (un_iter i=target->getSubUnits();(sub=*i)!=NULL;++i) {
-          if (Radar[0])
+          if (Radar[0] && target->radial_size > 0)
             drawUnToTarget(un,sub,xcent[0],ycent[0], xsize[0],ysize[0],false);
-          if (Radar[1])
+          if (Radar[1] && target->radial_size > 0)
             drawUnToTarget(un,sub,xcent[1],ycent[1], xsize[1],ysize[1],true);
         }
       }
@@ -1249,6 +1254,13 @@ void GameCockpit::SwitchControl (const KBData&,KBSTATE k) {
       switchunit.push_back(0);
     switchunit[_Universe->CurrentCockpit()]=1;
   }
+
+}
+void GameCockpit::ForceSwitchControl (const KBData&,KBSTATE k) {
+
+    while (switchunit.size()<=_Universe->CurrentCockpit())
+      switchunit.push_back(0);
+    switchunit[_Universe->CurrentCockpit()]=1;
 
 }
 void SuicideKey (const KBData&,KBSTATE k) {

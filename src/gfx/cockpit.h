@@ -149,8 +149,10 @@ private:
   int getScrollOffset (unsigned int whichtype);
   void SelectProperCamera ();
   void Eject ();
+  void EjectDock ();
   static void Respawn (const KBData&,KBSTATE);
   static void SwitchControl (const KBData&,KBSTATE);
+  static void ForceSwitchControl (const KBData&,KBSTATE);
   static void TurretControl (const KBData&,KBSTATE);
   void SetSoundFile (std::string sound);
   int GetSoundFile () {return soundfile;}

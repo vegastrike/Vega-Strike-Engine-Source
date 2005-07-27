@@ -1325,6 +1325,27 @@ void BaseComputer::resetTransactionLists(void) {
 void BaseComputer::switchToControls(DisplayMode mode) {
     if(m_currentDisplay != mode) {
         assert(m_modeGroups[mode] != NULL);         // We should have controls for this mode.
+	if (mode == CARGO)
+     		window()->setTexture("basecomputer_cargo.png");
+
+        if (mode == MISSIONS)
+     		window()->setTexture("basecomputer_missions.png");
+        
+	if (mode == UPGRADE) 
+                window()->setTexture("basecomputer_upgrade.png");
+
+        if (mode == SHIP_DEALER)
+			window()->setTexture("basecomputer_ship_dealer.png");
+
+        if (mode == NEWS)
+     		window()->setTexture("basecomputer_news.png");
+
+        if (mode == INFO)
+     		window()->setTexture("basecomputer_info.png");
+
+        if (mode == LOADSAVE)
+     		window()->setTexture("basecomputer_loadsave.png");
+
 
         if(m_currentDisplay != NULL_DISPLAY) {
             // Get the old controls out of the window.

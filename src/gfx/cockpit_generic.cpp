@@ -63,6 +63,12 @@ float Unit::computeLockingPercent() {
 }
 void Cockpit::Eject() {
   ejecting=true;
+  going_to_dock_screen=false;
+}
+
+void Cockpit::EjectDock() {
+  ejecting=true;
+  going_to_dock_screen=true;
 }
 
 using namespace VSFileSystem;
@@ -180,6 +186,7 @@ Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name
   //mesh=NULL;
   ejecting=false;
   currentcamera = 0;	
+  going_to_dock_screen=false;
   //Radar=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
   RestoreGodliness();
 
@@ -389,10 +396,31 @@ bool Cockpit::Update () {
   if (turretcontrol[_Universe->CurrentCockpit()]) {
     turretcontrol[_Universe->CurrentCockpit()]=0;
     Unit * par = GetParent();
+// this being here, it will require poking the turret from the undock script
+   if (par->name=="return_to_cockpit")
+  {
+//   	  if (par->owner->isUnit()==UNITPTR ) this->SetParent(par->owner,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());     // this warps back to the parent unit if we're eject-docking. in this position it also causes badness upon loading a game.
+     SwitchUnits(NULL,par->owner);
+	 this->SetParent(par->owner,GetUnitFileName().c_str(),this->unitmodname.c_str(),par->owner->Position());     // this warps back to the parent unit if we're eject-docking. causes badness upon loading a game.
+     par->Kill();
+   }   
+
+
+
+    
     if (par) {
       static int index=0;
       int i=0;bool tmp=false;bool tmpgot=false;
+
+
+	  
+	  
+	  
       if (parentturret.GetUnit()==NULL) {
+
+		  
+		  
+		  
 	tmpgot=true;
 	un_iter ui= par->getSubUnits();
 	Unit * un;
@@ -401,6 +429,9 @@ bool Cockpit::Update () {
 			++ui;
 			continue;
 		}
+
+
+
 
 	  if (i++==index) {
 	    index++;
@@ -450,6 +481,7 @@ bool Cockpit::Update () {
 	}
 	}
   }
+
   if (switchunit.size()>_Universe->CurrentCockpit())
   if (switchunit[_Universe->CurrentCockpit()]) {
     parentturret.SetUnit(NULL);
@@ -465,17 +497,44 @@ bool Cockpit::Update () {
     while ((un=ui.current())) {
       if (un->faction==this->unitfaction) {
 	
-	if ((i++)>=index&&(!_Universe->isPlayerStarship(un))&&un->name!="eject"&&un->name!="Pilot") {
+// this switches units UNLESS we're an ejected pilot. Instead, if we are an ejected
+// pilot, switch only if we're close enough.
+
+// the trigger is to allow switching only between ships that are actually owned by you, this prevents
+// stealing a ship from a hired wingman.
+
+static bool switch_nonowned_units=XMLSupport::parse_bool(vs_config->getVariable("AI","switch_nonowned_units","true"));
+   par = GetParent();
+
+	if ((i++)>=index&&(!_Universe->isPlayerStarship(un))&&(switch_nonowned_units || (un->owner == par->owner) || (un->owner == par))&&un->name!="eject"&&un->name!="Pilot") {
 	  found=true;
 	  index++;
 	  Unit * k=GetParent(); 
           bool proceed=true;
           if (k) {
-            if (k->name=="eject"||k->name=="Pilot")
+            if (k->name=="eject"||k->name=="Pilot" || k->name=="return_to_cockpit")
               proceed=false;
             
           }
-          if (proceed) {
+// we are an ejected pilot, so, if we can get close enough to the related unit, jump into it and remove the seat. This said, always allow
+		  // switching from the "fake" ejection seat (ejectdock).
+          if ( !proceed && (k->Position()-un->Position()).Magnitude() < (un->rSize()+k->rSize()))
+		  {
+
+			 
+            if (!(k->name=="return_to_cockpit"))
+         		    SwitchUnits (k,un);
+// this refers to cockpit
+            if (!(k->name=="return_to_cockpit"))
+                    this->SetParent(un,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
+            if (!(k->name=="return_to_cockpit"))
+				k->Kill();
+
+            //un->SetAI(new FireKeyboard ())
+		  }
+
+          if (proceed) 
+		  {
             SwitchUnits (k,un);
             this->SetParent(un,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
             //un->SetAI(new FireKeyboard ())
@@ -489,11 +548,20 @@ bool Cockpit::Update () {
     if (!found)
       index=0;
   }
+// this causes the physical ejecting. Check going_to_dock_screen in here, also. 
   if (ejecting) {
     ejecting=false;
+//    going_to_dock_screen=true; // NO, clear this only after we've UNDOCKED that way we know we don't have issues.
+
     Unit * un = GetParent();
     if (un) {
+    if (going_to_dock_screen == false)
       un->EjectCargo((unsigned int)-1);
+    if (going_to_dock_screen == true)
+		{
+		un->EjectCargo((unsigned int)-2);
+		going_to_dock_screen = false;
+		}
     }
   }
  

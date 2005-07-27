@@ -33,6 +33,11 @@ static HardCodedMap MakeHardCodedScripts() {
   tmp.insert (MyPair ("fly straight",&FlyStraight));
   tmp.insert (MyPair ("fly straight afterburner",&FlyStraightAfterburner));
   tmp.insert (MyPair ("afterburn fly straight",&FlyStraightAfterburner));
+  tmp.insert (MyPair ("do nothing",&DoNothing));
+  tmp.insert (MyPair ("take off",&Takeoff));
+  tmp.insert (MyPair ("coast to stop",&CoastToStop));
+  tmp.insert (MyPair ("self destruct",&SelfDestruct));
+  tmp.insert (MyPair ("take off every zig",&TakeoffEveryZig));
   tmp.insert (MyPair ("afterburn turn towards",&AfterburnTurnTowards));  
   tmp.insert (MyPair ("afterburn turn towards itts",&AfterburnTurnTowardsITTS));  
   tmp.insert (MyPair ("cloak",&CloakForScript));  
@@ -48,6 +53,8 @@ static HardCodedMap MakeHardCodedScripts() {
   tmp.insert (MyPair ("turn towards",&TurnTowards));      
   tmp.insert (MyPair ("turn towards itts",&TurnTowardsITTS));      
   tmp.insert (MyPair ("drop cargo",&DropCargo));   
+  tmp.insert (MyPair ("drop half cargo",&DropHalfCargo));   
+  tmp.insert (MyPair ("drop one cargo",&DropOneCargo));   
   tmp.insert (MyPair ("roll right",&RollRight));   
   tmp.insert (MyPair ("roll left",&RollLeft));   
   tmp.insert (MyPair ("evade left right",&EvadeLeftRight));   

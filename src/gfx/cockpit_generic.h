@@ -85,6 +85,7 @@ protected:
   virtual void DrawGauges(Unit * un) {}
   float cockpit_time;
   bool ejecting;
+  bool going_to_dock_screen;
  public:
   double TimeOfLastCollision;
   char jumpok;
@@ -136,8 +137,10 @@ protected:
   virtual int getScrollOffset (unsigned int whichtype) { return 1;}
   virtual void SelectProperCamera () {}
   virtual void Eject ();
+  virtual void EjectDock ();
   static void Respawn (const KBData&,KBSTATE) {}
   static void SwitchControl (const KBData&,KBSTATE) {}
+  static void ForceSwitchControl (const KBData&,KBSTATE) {}
   static void TurretControl (const KBData&,KBSTATE) {}
   virtual void SetCommAnimation (Animation * ani, Unit * un) {}
   virtual void SetStaticAnimation () {}

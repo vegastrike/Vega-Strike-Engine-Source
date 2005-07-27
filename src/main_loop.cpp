@@ -300,6 +300,11 @@ bool cockpitfront=true;
 	  string cockpit="disabled-cockpit.cpt";
 	  if (_Universe->AccessCockpit()->GetParent())
 		  cockpit=_Universe->AccessCockpit()->GetParent()->getCockpit();
+
+      if (_Universe->AccessCockpit()->GetParent()->name=="return_to_cockpit")
+		  cockpit=_Universe->AccessCockpit()->GetParent()->owner->getCockpit();
+
+
 	  _Universe->AccessCockpit()->Init (cockpit.c_str(), ((tmp)&&_Universe->AccessCockpit()->GetParent())==false);	    
     tmp=(tmp+1)%2;
   }

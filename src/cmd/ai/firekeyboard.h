@@ -66,6 +66,7 @@ class FireKeyboard: public Order {
   static void RequestClearenceKey(const KBData&,KBSTATE);
   static void UnDockKey(const KBData&,KBSTATE);
   static void EjectKey(const KBData&,KBSTATE);
+  static void EjectDockKey(const KBData&,KBSTATE);
   static void EjectCargoKey(const KBData&,KBSTATE);
   static void EjectNonMissionCargoKey(const KBData&,KBSTATE);
   static void DockKey(const KBData&,KBSTATE);
@@ -106,6 +107,8 @@ class FireKeyboard: public Order {
   static void JoinFg (const KBData&,KBSTATE);
   static void BreakFormation (const KBData&,KBSTATE);
   static void FormUp (const KBData&,KBSTATE);
+  static void DockWithMe (const KBData&,KBSTATE);
+  static void DefendTarget (const KBData&,KBSTATE);
   static void AttackTarget (const KBData&,KBSTATE);
   static void TurretAIOn (const KBData&,KBSTATE);
   static void TurretAIOff (const KBData&,KBSTATE);

@@ -43,6 +43,7 @@
 #include "config.h"
 using namespace Orders;
 extern void DestroyMount(Mount*);
+
 void	Unit::BackupState()
 {
 	this->old_state.setPosition( this->curr_physical_state.position);
@@ -589,7 +590,7 @@ void Unit::ZeroAll( )
     Velocity.k            = 0;
     image                 = NULL;
     Mass                  = 0;
-    shieldtight           = 0;
+    shieldtight           = 0; // this can be used to differentiate whether this is a capship or a fighter?
     fuel                  = 0;
     afterburnenergy       = 0;
     Momentofinertia       = 0;
@@ -623,6 +624,9 @@ void Unit::ZeroAll( )
     faction               = 0;
     flightgroup           = NULL;
     flightgroup_subnumber = 0;
+    tractorable           = true; //added by chuck_starchaser
+    is_ejectdock          = false; //added by spiritplumber
+
 }
 
 void Unit::Init()
@@ -2315,11 +2319,11 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
 	  Cockpit * cp = _Universe->isPlayerStarship(smalle);
 	  TurnJumpOKLightOn(smalle,cp);
 	  //ActivateAnimation(this);
-	  if ((smalle->GetJumpStatus().drive>=0&&
-		   (smalle->warpenergy>=smalle->GetJumpStatus().energy
-			||(ai_jump_cheat&&cp==NULL)
+	  if ((smalle->GetJumpStatus().drive>=0&&                    // we have a drive
+		   (smalle->warpenergy>=smalle->GetJumpStatus().energy   // we have power
+			||(ai_jump_cheat&&cp==NULL)                          // or we're being cheap
 			   ))
-		  ||image->forcejump){
+			   ||image->forcejump){                              // or the jump is being forced?
             //NOW done in star_system_generic.cpp before TransferUnitToSystem smalle->warpenergy-=smalle->GetJumpStatus().energy;
 		int dest = smalle->GetJumpStatus().drive;
 		if (dest<0)
@@ -3941,10 +3945,11 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
                   //VSFileSystem::vs_fprintf (stderr,"errore fatale mit den armorn")
 ;
 		  if (hull <0) {
-			  static float cargoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","eject_cargo_percent",".25"));
+			  static float cargoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","eject_cargo_percent","1"));
                           
 			  static float hulldamtoeject = XMLSupport::parse_float(vs_config->getVariable ("physics","hull_damage_to_eject","100"));
-			if (!isSubUnit()&&hull>-hulldamtoeject) {
+//			if (!isSubUnit()&&hull>-hulldamtoeject) {
+			if (hull>-hulldamtoeject) {
 			  static float autoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","autoeject_percent",".5"));
 
 			  if (rand()<(RAND_MAX*autoejectpercent)&&isUnit()==UNITPTR) {
@@ -4560,6 +4565,7 @@ double Unit::getMinDis (const QVector &pnt) {
 
 // This function should not be used on server side
 extern vector<Vector> perplines;
+extern vector <int> turretcontrol;
 float Unit::querySphereClickList (const QVector &st, const QVector &dir, float err) const{
   int i;
   float retval=0;
@@ -4763,6 +4769,7 @@ static Transformation HoldPositionWithRespectTo (Transformation holder, const Tr
   return holder;
 }
 extern void ExecuteDirector();
+extern void SwitchUnits (Unit *,Unit*);
 
 void Unit::PerformDockingOperations () {
   for (unsigned int i=0;i<image->dockedunits.size();i++) {
@@ -5003,6 +5010,13 @@ bool Unit::UnDock (Unit * utdw) {
         }
       }
       
+	  if (name=="return_to_cockpit" || this->name=="return_to_cockpit")
+	  {
+   			while (turretcontrol.size()<=_Universe->CurrentCockpit())
+            turretcontrol.push_back(0);
+            turretcontrol[_Universe->CurrentCockpit()]=1;
+      }
+	  
       return true;
     }
   }
@@ -6272,13 +6286,30 @@ inline QVector randVector (float min, float max) {
 					uniformrand(min,max),
 					uniformrand(min,max));
 }
-extern void SwitchUnits (Unit *,Unit*);
+//extern unsigned int current_cockpit;
 void Unit::EjectCargo (unsigned int index) {
   Cargo * tmp=NULL;
   Cargo ejectedPilot;
+  Cargo dockedPilot;
   string name;
 
+//  if (index==((unsigned int)-1)) { is ejecting normally
+//  if (index==((unsigned int)-2)) { is ejecting for eject-dock
+
   Cockpit * cp = NULL;
+  if (index==((unsigned int)-2)) {
+    int pilotnum = _Universe->CurrentCockpit();
+    name = "return_to_cockpit"; // this calls the unit's existence, by the way.
+    if (NULL!=(cp = _Universe->isPlayerStarship (this))) {
+      string playernum =string("player")+((pilotnum==0)?string(""):XMLSupport::tostring(pilotnum));
+      //name = vs_config->getVariable(playernum,"callsign","TigerShark");
+    }
+//    dockedPilot.content="eject";
+    dockedPilot.content="return_to_cockpit";   // we will have to check for this on undock to return to the parent unit!
+    dockedPilot.mass=.1;
+    dockedPilot.volume=1;
+    tmp = &dockedPilot;
+  }
   if (index==((unsigned int)-1)) {
     int pilotnum = _Universe->CurrentCockpit();
     name = "Pilot";
@@ -6299,6 +6330,14 @@ void Unit::EjectCargo (unsigned int index) {
     if (tmp->mission)
       tmpcontent="Mission_Cargo";
 
+      const int ulen=strlen("upgrades");
+
+//prevents a number of bad things, incl. impossible speeds and people getting rich on broken stuff
+	  
+	if ((!tmp->mission)&&memcmp (tmp->category.c_str(),"upgrades",ulen)==0) {
+		tmpcontent="Space_Salvage";}
+
+	// this happens if it's a ship
     if (tmp->quantity>0) {
       const int sslen=strlen("starships");
       Unit * cargo = NULL;
@@ -6330,15 +6369,37 @@ void Unit::EjectCargo (unsigned int index) {
         static float erot=XMLSupport::parse_float(vs_config->getVariable("graphics","eject_rotation_speed","0"))*3.1415926536/180;
         
 		  if (tmpcontent=="eject") {
-
 			  cargo = UnitFactory::createUnit ("eject",false,faction);
 			  int fac = FactionUtil::GetFaction("upgrades");
 			  cargo->faction=fac;//set it back to neutral so that no one will bother with 'im
                           arot=erot;
+						  cargo->PrimeOrders();
+                          cargo->SetAI (new Orders::AggressiveAI ("eject.agg.xml")); // generally fraidycat AI
+                          cargo->SetTurretAI();	  
+
+// Meat. Docking should happen here
+
+		  }else if (tmpcontent=="return_to_cockpit") {
+			  cargo = UnitFactory::createUnit ("return_to_cockpit",false,faction);
+			  int fac = FactionUtil::GetFaction("upgrades");
+			  cargo->faction=fac;//set it back to neutral so that no one will bother with 'im
+                          arot=erot;
+						  cargo->PrimeOrders();
+     				  	  Order * ai = cargo->aistate;
+                    	  cargo->aistate = NULL;
+
+//						  cargo->is_ejectdock = true; // ugly, but i hope it doesn't mess anything up. Checked by undocking.
+//						  this->is_ejectdock = false;
+//	                      cargo->PrimeOrders (new Orders::DockingOps (this, ai,actually_dock!=0));
+//                          cargo->SetAI (new Orders::DockingOps (this, ai,actually_dock!=0));
+//						  cargo->SetTurretAI();	  
+
 		  }else {
 			  string tmpnam = tmpcontent+".cargo";
 			  cargo = UnitFactory::createUnit (tmpnam.c_str(),false,FactionUtil::GetFaction("upgrades"));
                           arot=crot;
+						  cargo->PrimeOrders();
+                          cargo->SetAI (new Orders::AggressiveAI ("cargo.agg.xml"));
 		  }
 
       }
@@ -6348,6 +6409,11 @@ void Unit::EjectCargo (unsigned int index) {
 	cargo->Kill();
 	cargo = UnitFactory::createUnit ("generic_cargo",false,FactionUtil::GetFaction("upgrades"));        
         arot=grot;
+          cargo->PrimeOrders();
+// spiritplumber says, this simply makes cargo slow down and stop. Unrealistic? yes, but practical.
+          cargo->SetAI (new Orders::AggressiveAI ("cargo.agg.xml"));
+          cargo->SetTurretAI();	  
+
       }
       Vector rotation(vsrandom.uniformInc(-arot,arot),vsrandom.uniformInc(-arot,arot),vsrandom.uniformInc(-arot,arot));
       static bool all_rotate_same=XMLSupport::parse_bool(vs_config->getVariable("graphics","cargo_rotates_at_same_speed","true"));
@@ -6358,7 +6424,7 @@ void Unit::EjectCargo (unsigned int index) {
           rotation*=arot;
         }
       }
-      if (cargo->rSize()>=rSize()) {
+      if (0 && cargo->rSize()>=rSize()) {
 	cargo->Kill();
       }else {
         
@@ -6389,8 +6455,33 @@ void Unit::EjectCargo (unsigned int index) {
 	  PrimeOrders();
 	  cargo->SetTurretAI();
 	  cargo->faction=faction;
-	  cp->SetParent (cargo,"","",Position());
+	  cp->SetParent (cargo,"","",Position()); // changes control to that cockpit
+      if (tmpcontent=="return_to_cockpit")
+		{
+
+            //SwitchUnits (NULL,this); // make unit a sitting duck in the mean time
+        	PrimeOrders();
+        	this->SetAI (new Orders::AggressiveAI ("cargo.agg.xml"));// make unit a sitting duck in the mean time
+			
+	        this->SetTurretAI();  // but defend yourself
+		    
+   
+
+          
+		  cargo->SetOwner(this);
+		  cargo->Position()=this->Position();
+		  cargo->SetPosAndCumPos(this->Position());
+		  cargo->ForceDock(this, 0); // claims to be docked, stops speed and taking damage etc. but doesn't seem to call the base script
+          abletodock(3);
+          cargo->UpgradeInterface(this); // actually calls the interface, meow. yay!
+//          cargo->Kill();
+          //this->UpgradeInterface(this); // this seriously breaks the game...
+//          DockedScript(cargo,this);      // this just don't work.
+		}
+	  else {
 	  SwitchUnits (NULL,cargo);
+	  
+	  } // switching NULL gives "dead" ai to the unit I ejected from, by the way.
 	}
 	_Universe->activeStarSystem()->AddUnit(cargo);
 	if ((unsigned int) index!=((unsigned int)-1)) {

@@ -902,26 +902,49 @@ void BaseInterface::Terminate() {
   restore_main_loop();
   delete this;
 }
+extern void SwitchUnits(Unit* ol, Unit* nw);
+extern void SwitchUnits2(Unit* nw);
 extern void abletodock(int dock);
+extern vector <int> switchunit;
+extern vector <int> turretcontrol;
 #include "ai/communication.h"
+
 void BaseInterface::Room::Launch::Click (BaseInterface *base,float x, float y, int button, int state) {
+	static int numtimes = 0;
 	if (state==WS_MOUSE_UP) {
 	  Link::Click(base,x,y,button,state);
 	  static bool auto_undock = XMLSupport::parse_bool(vs_config->getVariable("physics","AutomaticUnDock","true"));
-	  if (auto_undock) {
 	  Unit * bas = base->baseun.GetUnit();
 	  Unit * playa = base->caller.GetUnit();
-	  if (playa &&bas) {
+	  if ((auto_undock || (playa->cloakmin < 0)) && (playa && bas)) {
+
 	    playa->UnDock (bas);
 	    CommunicationMessage c(bas,playa,NULL,0);
 	    c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
 		if (playa->getAIState())
 			playa->getAIState()->Communicate (c);
 	    abletodock(5);
+   playa->is_ejectdock = false;
+
+if (playa->name=="return_to_cockpit")
+{
+    playa->is_ejectdock = true;
+    if (playa->faction == playa->faction) 
+		playa->owner = bas;
+}
+
+/*          if (playa->name=="return_to_cockpit")
+		  {
+			  // triggers changing to parent unit.
+			    while (turretcontrol.size()<=_Universe->CurrentCockpit())
+                turretcontrol.push_back(0);
+                turretcontrol[_Universe->CurrentCockpit()]=1;
 	  }
+*/	  
+	  
 	  }
 	  base->Terminate();
-	}
+}
 }
 
 void BaseInterface::Room::Goto::Click (BaseInterface *base,float x, float y, int button, int state) {

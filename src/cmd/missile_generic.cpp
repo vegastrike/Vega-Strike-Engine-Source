@@ -73,6 +73,8 @@ void Missile::reactToCollision (Unit * smaller, const QVector & biglocation, con
     Unit::reactToCollision (smaller,biglocation,bignormal,smalllocation,smallnormal,dist);
   }
   if (smaller->isUnit()!=MISSILEPTR) {//2 missiles in a row can't hit each other
+    this->Velocity = smaller->Velocity;
+    Velocity = smaller->Velocity;
     Discharge();
     if (!killed)
       DealDamageToHull (smalllocation.Cast(),hull+1);//should kill, applying addmissile effect
@@ -169,6 +171,10 @@ void Missile::UpdatePhysics2 (const Transformation &trans, const Transformation 
     if (NULL!=targ) {
 		float checker = targ->querySphere (Position()-(SIMULATION_ATOM*GetVelocity()),Position(),rSize());
 		if ((checker&&detonation_radius>=0)||((Position()-targ->Position()).Magnitude()-targ->rSize()-rSize()<detonation_radius)) {
+// spiritplumber assumes that the missile is hitting a much larger object than itself
+            this->Velocity = targ->Velocity;
+            Velocity = targ->Velocity;
+
 			Discharge();
 			time=-1;
 	//Vector norm;

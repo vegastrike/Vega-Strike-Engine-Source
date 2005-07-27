@@ -1191,6 +1191,14 @@ public:
   bool isFriend(Unit *other){ if(FactionUtil::GetIntRelation(this->faction,other->faction)>0.0){ return true; } return false; };
   bool isNeutral(Unit *other){ if(FactionUtil::GetIntRelation(this->faction,other->faction)==0.0){ return true; } return false; };
   float getRelation(Unit *other);
+
+  bool is_ejectdock;
+
+
+  //can be eaten by tractor or not?  of the thing, added by chuck_starchaser, refined by spiritplumber
+  bool tractorable;
+public:
+  bool isTractorable() const { return tractorable && !docked; }
 };
 
 ///Holds temporary values for inter-function XML communication Saves deprecated restr info

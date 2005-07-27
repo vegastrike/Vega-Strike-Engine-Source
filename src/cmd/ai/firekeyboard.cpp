@@ -37,7 +37,7 @@ struct FIREKEYBOARDTYPE {
   FIREKEYBOARDTYPE() {
     toggleautotracking=togglewarpdrive=toggleglow=toggleanimation=lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = turretoffkey=turretfaw=saveTargetKeys[0]=saveTargetKeys[1]=saveTargetKeys[2]=saveTargetKeys[3]=saveTargetKeys[4]=saveTargetKeys[5]=saveTargetKeys[6]=saveTargetKeys[7]=saveTargetKeys[8]=saveTargetKeys[9]=turretaikey = restoreTargetKeys[0]=restoreTargetKeys[1]=restoreTargetKeys[2]=restoreTargetKeys[3]=restoreTargetKeys[4]=restoreTargetKeys[5]=restoreTargetKeys[6]=restoreTargetKeys[7]=restoreTargetKeys[8]=restoreTargetKeys[9]=turretaikey = UP;
 
-    eject=ejectcargo=ejectnonmissioncargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=rweapk=rmisk=cloakkey=
+    ejectdock=eject=ejectcargo=ejectnonmissioncargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=rweapk=rmisk=cloakkey=
       neartargetkey=targetskey=targetukey=threattargetkey=picktargetkey=subtargetkey=targetkey=
       rneartargetkey=rtargetskey=rtargetukey=rthreattargetkey=rpicktargetkey=rtargetkey=
       nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=enslave=freeslave=UP;
@@ -73,6 +73,7 @@ struct FIREKEYBOARDTYPE {
  KBSTATE rweapk;
  KBSTATE rmisk;
  KBSTATE eject;
+ KBSTATE ejectdock;
  KBSTATE lockkey;
  KBSTATE ejectcargo;
  KBSTATE ejectnonmissioncargo;
@@ -355,18 +356,18 @@ void FireKeyboard::RequestClearenceKey(const KBData&,KBSTATE k) {
 }
 void FireKeyboard::DockKey(const KBData&,KBSTATE k) {
 
-    if (k==PRESS) {
+    if (k==PRESS && (_Universe->AccessCockpit()->GetParent()->isSubUnit() == false)) {
       g().doc=true;      
     }
-    if (k==RELEASE) {
+    if (k==RELEASE && (_Universe->AccessCockpit()->GetParent()->isSubUnit() == false)) {
       g().doc=false;      
     }
 }
 void FireKeyboard::UnDockKey(const KBData&,KBSTATE k) {
-    if (k==PRESS) {
+    if (k==PRESS && (_Universe->AccessCockpit()->GetParent()->isSubUnit() == false)) {
       g().und=true;      
     }
-    if (k==RELEASE) {
+    if (k==RELEASE && (_Universe->AccessCockpit()->GetParent()->isSubUnit() == false)) {
       g().und=false;      
     }
 }
@@ -374,6 +375,14 @@ void FireKeyboard::EjectKey (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     g().eject= k;
   }
+}
+void FireKeyboard::EjectDockKey (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    g().ejectdock= k;
+    g().doc=true;
+  }
+    if (k==RELEASE) 
+      g().doc=false;      
 }
 
 
@@ -653,6 +662,7 @@ void FireKeyboard::AttackTarget (const KBData&,KBSTATE k) {
     LeadMe ("a","Attack my target!");
   }
 }
+
 void FireKeyboard::HelpMeOut (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     LeadMe ("h","Help me out!");
@@ -669,6 +679,16 @@ void FireKeyboard::HelpMeOutCrit (const KBData&,KBSTATE k) {
   }
 }
 
+void FireKeyboard::DockWithMe (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    LeadMe ("g","Get in front of me and prepare to be tractored in.");
+  }
+}
+void FireKeyboard::DefendTarget (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    LeadMe ("p","Defend my target!");
+  }
+}
 void FireKeyboard::FormUp (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     LeadMe ("f","Form on my wing.");
@@ -1527,6 +1547,23 @@ static void ForceChangeTarget(Unit*  parent) {
   }
 }
 
+  int SelectDockPort (Unit * utdw, Unit * parent) {
+    const vector <DockingPorts> * dp = &utdw->DockingPortLocations();
+    float dist = FLT_MAX;
+    int num=-1;
+    for (unsigned int i=0;i<dp->size();++i) {
+      if (!(*dp)[i].used) {
+	Vector rez = Transform (utdw->GetTransformation(),(*dp)[i].pos);
+	float wdist = (rez-parent->Position()).MagnitudeSquared();
+	if (wdist <dist) {
+	  num=i;
+	  dist =wdist;
+	}
+      }
+
+    }
+    return num;
+  }
 
 bool isMissile(const weapon_info *);
 
@@ -1949,12 +1986,27 @@ void FireKeyboard::Execute () {
       f().ejectcargo=DOWN;
     }
   }
+  // i think this ejects the pilot? yep it does
   if (f().eject==PRESS) {
     f().eject=DOWN;
     Cockpit * cp;
     if ((cp=_Universe->isPlayerStarship (parent))) {
       cp->Eject();
     }
+  }
+ 
+  // eject pilot and warp pilot to the docking screen instantly.
+
+  if (f().ejectdock==PRESS) {
+    f().ejectdock=DOWN;
+	Unit * utdw = parent;
+    Cockpit * cp; // check if docking ports exist, no docking ports = no need to ejectdock so don't do anything
+    if ( (SelectDockPort (utdw, parent) > -1 ) && (cp=_Universe->isPlayerStarship (parent))) {
+      cp->EjectDock(); // use specialized ejectdock in the future
+//         DockedScript(parent,utdw);      
+//         parent->Dock(utdw);
+
+	}
   }
   static bool actually_arrest=XMLSupport::parse_bool(vs_config->getVariable("AI","arrest_energy_zero","false"));
   

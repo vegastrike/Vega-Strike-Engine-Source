@@ -635,6 +635,8 @@ CommandMap initGlobalCommandMap() {
   commandMap["CommAttackTarget"]=FireKeyboard::AttackTarget;
   commandMap["CommHelpMeOut"]=FireKeyboard::HelpMeOut;
   commandMap["CommFormUp"]=FireKeyboard::FormUp;
+  commandMap["CommDockWithMe"]=FireKeyboard::DockWithMe;
+  commandMap["CommDefendTarget"]=FireKeyboard::DefendTarget;
 #ifdef CAR_SIM
   commandMap["BlinkLeftKey"]=FireKeyboard::BlinkLeftKey;
   commandMap["BlinkRightKey"]=FireKeyboard::BlinkRightKey;
@@ -682,6 +684,7 @@ CommandMap initGlobalCommandMap() {
   commandMap["EjectCargoKey"]=FireKeyboard::EjectCargoKey ;  
   commandMap["EjectNonMissionCargoKey"]=FireKeyboard::EjectNonMissionCargoKey ;  
   commandMap["EjectKey"]=FireKeyboard::EjectKey ;
+  commandMap["EjectDockKey"]=FireKeyboard::EjectDockKey ;
   commandMap["SuicideKey"]=SuicideKey ;
   commandMap["TurretAIOn"]=FireKeyboard::TurretAIOn ;
   commandMap["TurretAIOff"]=FireKeyboard::TurretAIOff ;

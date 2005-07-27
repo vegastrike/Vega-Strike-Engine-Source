@@ -800,7 +800,7 @@ shield.range[1].   rhomax=r90;
     int iff=stoi(iffval,0);
     computer.radar.iff=iff?iff:stob(iffval,false);
   }
-  computer.radar.maxrange=stof(row["Radar_Range"],FLT_MAX);
+  computer.radar.maxrange=stof(row["Radar_Range"],300000000.0f);// FLT_MAX);
   computer.radar.maxcone=cos(stof(row["Max_Cone"],180)*VS_PI/180);
   computer.radar.trackingcone=cos(stof(row["Tracking_Cone"],180)*VS_PI/180);
   computer.radar.lockcone=cos(stof(row["Lock_Cone"],180)*VS_PI/180);
@@ -949,6 +949,8 @@ shield.range[1].   rhomax=r90;
     }
   }
   CheckAccessory(this);//turns on the ceerazy rotation for any accessories
+	  //reading last field from cvs to find out if unit is 'tractorable' as in can be eaten by trac, chuck_starchaser & spirit
+  tractorable = stob(row["Tractorable"],true);
 }
 CSVRow GetUnitRow(string filename, bool subu, int faction, bool readlast, bool &rread) {
   std::string hashname = filename+"__"+FactionUtil::GetFactionName(faction);
