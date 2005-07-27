@@ -90,7 +90,7 @@ StarSystem::StarSystem() {
   ///adds to jumping table;
   name = NULL;
   //_Universe->pushActiveStarSystem (this);
-  current_stage=PHY_AI;
+  current_stage=MISSION_SIMULATION;
   //systemInputDFA = new InputDFA (this);
   /*
   LoadXML(filename,centr,timeofyear);
@@ -112,7 +112,7 @@ StarSystem::StarSystem(const char * filename, const Vector & centr,const float t
   bolts = new bolt_draw;
   collidetable = new CollideTable(this);
   //  cout << "origin: " << centr.i << " " << centr.j << " " << centr.k << " " << planetname << endl;
-  current_stage=PHY_AI;
+  current_stage=MISSION_SIMULATION;
   //systemInputDFA = new InputDFA (this);
   this->filename = filename;
   LoadXML(filename,centr,timeofyear);
@@ -342,40 +342,23 @@ void CarSimUpdate (Unit *un, float height) {
 
 void StarSystem::UpdateUnitPhysics (bool firstframe) {
   un_iter iter = this->getUnitList().createIterator();
-#ifdef CAR_SIM
-  float unitheight=0;  
-  if (_Universe->AccessCockpit(0)->savegame->getMissionData("unitheight").empty())
-	  _Universe->AccessCockpit(0)->savegame->getMissionData("unitheight").push_back(0);
-																						   unitheight=_Universe->AccessCockpit(0)->savegame->getMissionData("unitheight")[0];
-#endif
   Unit * unit=NULL;
-	while((unit = iter.current())!=NULL) {
-#ifdef OLD_AUTOPILOT
-	if (owner) 
-	  if (owner->getRelation(unit)<0) {
-	    static float neardist =XMLSupport::parse_float(vs_config->getVariable("physics","autodist","4000"));
-	    Vector diff (owner->Position()-unit->Position());
-	    if (diff.Dot(diff)<neardist*neardist) {
-	      if (0&&getTimeCompression!=.0000001) {//if not paused
-		reset_time_compression(std::string(),PRESS);
-	      }
-	    }
-	  }
-#endif
-	  unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits());
-#ifdef CAR_SIM
-	  Cockpit * cp = _Universe->isPlayerStarship(unit);
-	  float tmp=0;
-	  if (cp) {
-		  if (cp->savegame->getMissionData("unitheight").empty())
-			  cp->savegame->getMissionData("unitheight").push_back(0);
-		  tmp= cp->savegame->getMissionData("unitheight")[0];
-	  }
-	  static string s = vs_config->getVariable ("physics","seeker","skart");
-	  CarSimUpdate(unit,unit->name==s?unitheight:tmp);
-#endif
-	  iter.advance();
-	}
+  try {
+    while((unit = iter.current())!=NULL) {
+      unit->ExecuteAI(); 
+      unit->CollideAll();
+      unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits());    
+      iter.advance();
+    }
+  }catch (const boost::python::error_already_set) {
+    if (PyErr_Occurred()) {
+      PyErr_Print();
+      PyErr_Clear();
+      fflush(stderr);         
+      fflush(stdout);
+    }
+    throw;
+  }
 }
 
 extern void	UpdateTerrain();
@@ -403,104 +386,32 @@ void StarSystem::Update( float priority)
 
   if(time/SIMULATION_ATOM>=(1./PHY_NUM))	  
   {
-    while(time/SIMULATION_ATOM >= (1./PHY_NUM))
+    while(time/SIMULATION_ATOM >= (1.))
 	{ // Chew up all SIMULATION_ATOMs that have elapsed since last update
-      UnitCollection::UnitIterator iter;
-      if (current_stage==PHY_AI)
-	  {
-		#ifdef UPDATEDEBUG
-		  VSFileSystem::vs_fprintf (stderr,"AI");
-		  fflush (stderr);
-		#endif
-		  ExecuteUnitAI();
-		current_stage=TERRAIN_BOLT_COLLIDE;
-      }
-	  else if (current_stage==TERRAIN_BOLT_COLLIDE)
-	  {
-		#ifdef UPDATEDEBUG
-		  VSFileSystem::vs_fprintf (stderr,"TerCol");
-		  fflush (stderr);
-		#endif
-			TerrainCollide();
-		#ifdef UPDATEDEBUG
-		  VSFileSystem::vs_fprintf (stderr,"DelQ");
-		  fflush (stderr);
-		#endif
-		  Unit::ProcessDeleteQueue();
-                  UnitCollection::FreeUnusedNodes();
-		  current_stage=MISSION_SIMULATION;
-      }
-	  else if (current_stage==MISSION_SIMULATION)
-	  {
-		// What to do here on server side for missions ????????
-		current_stage=PHY_COLLIDE;
-      }
-	  else if (current_stage==PHY_COLLIDE)
-	  {
-                collidetable->Update();
-		#ifdef NO_COLLISION_TIME
-			if (no_collision_time) {
-			  no_collision_time--;//don't resolve physics until 2 seconds
-			}else 
-		#endif
-			{
-		#ifdef UPDATEDEBUG
-		  VSFileSystem::vs_fprintf (stderr,"neb");
-		  fflush (stderr);
-		#endif
-			  iter = drawList.createIterator();
-			  while((unit = iter.current())!=NULL) {
-				unit->SetNebula(NULL); 
-				iter.advance();
-			  }
-			  iter = drawList.createIterator();
-		#ifdef UPDATEDEBUG
-		  VSFileSystem::vs_fprintf (stderr,"Coll");
-		  fflush (stderr);
-		#endif
-			  while((unit = iter.current())!=NULL) {
-				  unit->CollideAll();
-				  iter.advance();
-			  }
-	        }
-			UpdateMissiles();//do explosions
-			current_stage=PHY_TERRAIN;
-
-      }
-	  else if (current_stage==PHY_TERRAIN)
-	  {
-		    // What to do on server side ????
-			current_stage=PHY_RESOLV;
-      }
-	  else if (current_stage==PHY_RESOLV)
-	  {
-		#ifdef UPDATEDEBUG
-		  VSFileSystem::vs_fprintf (stderr,"muzak");
-		  fflush (stderr);
-		#endif
-		  UpdateUnitPhysics(firstframe);
-		#ifdef UPDATEDEBUG
-		  VSFileSystem::vs_fprintf (stderr,"boltphi");
-		  fflush (stderr);
-		#endif
-		  bolts->UpdatePhysics();
-                  
-
-		/*
-		for (unsigned int i=0;i<active_missions.size();i++) {
-		  active_missions[i]->BriefingUpdate();//waste of farkin time
-		}
-		*/
-		  current_stage=PHY_AI;
-		  firstframe = false;
-      }
-      time -= (1./PHY_NUM)*SIMULATION_ATOM;
-    }
+	  UnitCollection::UnitIterator iter;
+	  TerrainCollide();
+	  Unit::ProcessDeleteQueue();
+          UnitCollection::FreeUnusedNodes();
+	  current_stage=MISSION_SIMULATION;
+          collidetable->Update();
+	    {
+	      iter = drawList.createIterator();
+	      while((unit = iter.current())!=NULL) {
+		unit->SetNebula(NULL); 
+		iter.advance();
+	      }
+	      iter = drawList.createIterator();
+	    }
+	  UpdateMissiles();//do explosions
+	  UpdateUnitPhysics(firstframe);
+	  
+	  bolts->UpdatePhysics();
+	  
+	  firstframe = false;
+	}
+    time -= SIMULATION_ATOM;
   }
-#ifdef UPDATEDEBUG
-  VSFileSystem::vs_fprintf (stderr,"endupd\n");
-  fflush (stderr);
-#endif
+
   SIMULATION_ATOM =  normal_simulation_atom;
   _Universe->popActiveStarSystem();
   //  VSFileSystem::vs_fprintf (stderr,"bf:%lf",interpolation_blend_factor);
@@ -543,10 +454,6 @@ void ExecuteDirector () {
 void StarSystem::Update(float priority , bool executeDirector) {
 
   Unit *unit;
-#ifdef UPDATEDEBUG
-  VSFileSystem::vs_fprintf (stderr,"begin Update");
-  fflush (stderr);
-#endif
   bool firstframe = true;
 
   ///this makes it so systems without players may be simulated less accurately
@@ -568,159 +475,57 @@ void StarSystem::Update(float priority , bool executeDirector) {
   if(time/SIMULATION_ATOM>=(1./PHY_NUM)) {
     while(time/SIMULATION_ATOM >= (1./PHY_NUM)) { // Chew up all SIMULATION_ATOMs that have elapsed since last update
       UnitCollection::UnitIterator iter;
-      if (current_stage==PHY_AI) {
+      if (current_stage==MISSION_SIMULATION) {
+	TerrainCollide();
+	UpdateAnimatedTexture();
+	iter = units.createIterator();
+	Unit::ProcessDeleteQueue();
+	if( (run_only_player_starsystem && _Universe->getActiveStarSystem(0)==this) || !run_only_player_starsystem) {
+	  if (executeDirector) {
+	    ExecuteDirector();
+	  }
+	}
         static int dothis=0;
         if (this==_Universe->getActiveStarSystem(0)) {
           if (dothis++%2==0) {
-
-#ifdef UPDATEDEBUG
-  VSFileSystem::vs_fprintf (stderr,"Snd");
-  fflush (stderr);
-#endif
 	    AUDRefreshSounds();
 	  }
 	}
-#ifdef UPDATEDEBUG
-  VSFileSystem::vs_fprintf (stderr,"AI");
-  fflush (stderr);
-#endif
-  ExecuteUnitAI();
-	current_stage=TERRAIN_BOLT_COLLIDE;
-      } else if (current_stage==TERRAIN_BOLT_COLLIDE) {
-#ifdef UPDATEDEBUG
-  VSFileSystem::vs_fprintf (stderr,"TerCol");
-  fflush (stderr);
-#endif
-	TerrainCollide();
-#ifdef UPDATEDEBUG
-  VSFileSystem::vs_fprintf (stderr,"Ani");
-  fflush (stderr);
-#endif
-	UpdateAnimatedTexture();
-	///Do gravitation!
-	iter = units.createIterator();
-	  while((unit = iter.current())!=NULL) {
-	    //gravitate //FIXME
-	    iter.advance();
-	  }
-	  //FIXME somehow only works if called once per frame
-#ifdef UPDATEDEBUG
-  VSFileSystem::vs_fprintf (stderr,"DelQ");
-  fflush (stderr);
-#endif
-	  Unit::ProcessDeleteQueue();
-	  current_stage=MISSION_SIMULATION;
-      }else if (current_stage==MISSION_SIMULATION) {
-		  // If we run only player starsystem and this is first (only) starsystem or if we run all starsystems
-		if( (run_only_player_starsystem && _Universe->getActiveStarSystem(0)==this) || !run_only_player_starsystem)
-		{
-			if (executeDirector) {
-				ExecuteDirector();
-			}
-		}
-
-		current_stage=PHY_COLLIDE;
-      }else if (current_stage==PHY_COLLIDE) {
-#ifdef NO_COLLISION_TIME
-	if (no_collision_time) {
-	  no_collision_time--;//don't resolve physics until 2 seconds
-	}else 
-#endif
-	  {
-#ifdef UPDATEDEBUG
-  VSFileSystem::vs_fprintf (stderr,"neb");
-  fflush (stderr);
-#endif
-	  iter = drawList.createIterator();
-	  while((unit = iter.current())!=NULL) {
-		unit->SetNebula(NULL); 
-		iter.advance();
-	  }
-	  iter = drawList.createIterator();
-#ifdef UPDATEDEBUG
-  VSFileSystem::vs_fprintf (stderr,"Coll");
-  fflush (stderr);
-#endif
-	  while((unit = iter.current())!=NULL) {
-	    unit->CollideAll();
-	    iter.advance();
-	  }
-
-	}
-	UpdateMissiles();//do explosions
-	current_stage=PHY_TERRAIN;
-        collidetable->Update();
-
-      } else if (current_stage==PHY_TERRAIN) {
-#ifdef UPDATEDEBUG
-  VSFileSystem::vs_fprintf (stderr,"TerU");
-  fflush (stderr);
-#endif
-	UpdateTerrain();
-        current_stage=PHY_RESOLV;
-	unsigned int i=_Universe->CurrentCockpit();
-	for (int j=0;j<_Universe->numPlayers();j++) {
-	  if (_Universe->AccessCockpit(j)->activeStarSystem==this) {
-	    _Universe->SetActiveCockpit(j);
-	    if (_Universe->AccessCockpit(j)->Update()) {
-              _Universe->SetActiveCockpit(i);
-              SIMULATION_ATOM =  normal_simulation_atom;
-              _Universe->popActiveStarSystem();
-              return;// in case star system reloads
-            }
-	  }
-	}
-	_Universe->SetActiveCockpit(i);
-
-      } else if (current_stage==PHY_RESOLV) {
-	iter = drawList.createIterator();
-#ifdef UPDATEDEBUG
-  VSFileSystem::vs_fprintf (stderr,"muzak");
-  fflush (stderr);
-#endif
-	if (this==_Universe->getActiveStarSystem(0))
-		UpdateCameraSnds();
-	TestMusic();
-	NebulaUpdate( this);
-#ifdef UPDATEDEBUG
-  VSFileSystem::vs_fprintf (stderr,"unphi");
-  fflush (stderr);
-#endif
-      Unit * owner = _Universe->AccessCockpit()->GetParent();
-      if (owner) {
-	if (owner->InCorrectStarSystem(this)) {
-	  if (0&&getTimeCompression()>1) {//if not paused
-	    if (!owner->AutoPilotTo (owner,true)) {
-	      
-	      reset_time_compression(KBData(),PRESS);
-	    }
-	  }
-	}
-      }
-      UpdateUnitPhysics(firstframe);
-
-#ifdef UPDATEDEBUG
-  VSFileSystem::vs_fprintf (stderr,"boltphi");
-  fflush (stderr);
-#endif
-	bolts->UpdatePhysics();
 	for (unsigned int i=0;i<active_missions.size();i++) {
 	  active_missions[i]->BriefingUpdate();//waste of farkin time
 	}
-	current_stage=PHY_AI;
+	current_stage=PROCESS_UNIT;
+      }else if (current_stage==PROCESS_UNIT) { 	
+	UpdateUnitPhysics(firstframe);
+	UpdateMissiles();//do explosions
+	collidetable->Update();  
+	if (this==_Universe->getActiveStarSystem(0))
+	  UpdateCameraSnds();
+	TestMusic();     
+	iter = drawList.createIterator();
+	bolts->UpdatePhysics();
+	current_stage=MISSION_SIMULATION;
 	firstframe = false;
       }
       time -= (1./PHY_NUM)*SIMULATION_ATOM;
-
     }
     UnitCollection::FreeUnusedNodes();
-
+    unsigned int i=_Universe->CurrentCockpit();
+    for (int j=0;j<_Universe->numPlayers();j++) {
+      if (_Universe->AccessCockpit(j)->activeStarSystem==this) {
+	_Universe->SetActiveCockpit(j);
+	if (_Universe->AccessCockpit(j)->Update()) {
+	  SIMULATION_ATOM =  normal_simulation_atom;
+	  _Universe->SetActiveCockpit(i);
+	  _Universe->popActiveStarSystem();
+	  return;
+	}
+      }
+    }
+    _Universe->SetActiveCockpit(i);
   }
+  
   //WARNING cockpit does not get here...
-#ifdef UPDATEDEBUG
-  VSFileSystem::vs_fprintf (stderr,"endupd\n");
-  fflush (stderr);
-#endif
   SIMULATION_ATOM =  normal_simulation_atom;
   //WARNING cockpit does not get here...
   _Universe->popActiveStarSystem();

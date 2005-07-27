@@ -71,7 +71,7 @@ class StarSystem {
   virtual ~StarSystem();
  protected:
   ///Physics is divided into 3 stages spread over 3 frames
-  enum PHYSICS_STAGE {PHY_AI,TERRAIN_BOLT_COLLIDE,MISSION_SIMULATION,PHY_COLLIDE, PHY_TERRAIN, PHY_RESOLV,PHY_NUM} current_stage;
+  enum PHYSICS_STAGE {MISSION_SIMULATION,PROCESS_UNIT,PHY_NUM} current_stage;
   
   ///Stars, planets, etc. Orbital mechanics precalculated 
 
