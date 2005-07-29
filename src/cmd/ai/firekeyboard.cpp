@@ -1361,8 +1361,9 @@ void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
   if (_Universe->AccessCockpit()->CheckCommAnimation(un)) {
     return;//wait till later
   }
-  bool reallydospeech=true;
+  bool reallydospeech=false;
   if (un&&un->GetHull()>0) {
+    reallydospeech=true;
     for (list<CommunicationMessage>::iterator i=resp.begin();i!=resp.end();i++) {
       if ((*i).sender.GetUnit()==un) {
 	i = resp.erase (i);
@@ -1372,7 +1373,7 @@ void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
     if (!foundValidMessage)
       whichsound=DoSpeechAndAni(un,parent,c);
   }else if (0) {
-    reallydospeech=false;
+
     //none of this happens
     whichsound=DoSpeech (NULL,NULL,*c.getCurrentState());
     // this is when a unit is already dead
