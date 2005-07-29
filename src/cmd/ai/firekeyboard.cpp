@@ -1361,6 +1361,7 @@ void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
   if (_Universe->AccessCockpit()->CheckCommAnimation(un)) {
     return;//wait till later
   }
+  bool reallydospeech=true;
   if (un&&un->GetHull()>0) {
     for (list<CommunicationMessage>::iterator i=resp.begin();i!=resp.end();i++) {
       if ((*i).sender.GetUnit()==un) {
@@ -1371,6 +1372,7 @@ void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
     if (!foundValidMessage)
       whichsound=DoSpeechAndAni(un,parent,c);
   }else if (0) {
+    reallydospeech=false;
     //none of this happens
     whichsound=DoSpeech (NULL,NULL,*c.getCurrentState());
     // this is when a unit is already dead
@@ -1387,7 +1389,7 @@ void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
   }
   int sound=c.getCurrentState()->GetSound(c.sex,whichsound);
   //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());
-  if (!AUDIsPlaying (sound)) {
+  if (reallydospeech&&!AUDIsPlaying (sound)) {
     AUDPlay(sound,QVector(0,0,0),Vector(0,0,0),1);
   }
 
