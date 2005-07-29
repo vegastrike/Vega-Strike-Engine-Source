@@ -1361,7 +1361,7 @@ void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
   if (_Universe->AccessCockpit()->CheckCommAnimation(un)) {
     return;//wait till later
   }
-  if (un) {
+  if (un&&un->GetHull()>0) {
     for (list<CommunicationMessage>::iterator i=resp.begin();i!=resp.end();i++) {
       if ((*i).sender.GetUnit()==un) {
 	i = resp.erase (i);
@@ -1370,12 +1370,18 @@ void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
     resp.push_back(c);
     if (!foundValidMessage)
       whichsound=DoSpeechAndAni(un,parent,c);
-  }else {
+  }else if (0) {
+    //none of this happens
     whichsound=DoSpeech (NULL,NULL,*c.getCurrentState());
+    // this is when a unit is already dead
     if (parent==_Universe->AccessCockpit()->GetParent()) {
+      // quit it--he's dead all ready
       static string comm_static = vs_config->getVariable("graphics","comm_static","static.ani");
+      // dead dead dead dead
       static Animation Statuc (comm_static.c_str());
+      //yep really dead
       _Universe->AccessCockpit()->SetCommAnimation (&Statuc,NULL);
+      //mmhmm!
     }
 
   }
