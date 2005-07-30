@@ -35,7 +35,7 @@ static void GenUnbindJoyKey (JSSwitches whichswitch, int joystick, int key) {
 
 static void GenBindJoyKey (JSSwitches whichswitch,int joystick, int key, KBHandler handler, const KBData &data) {
   assert (key<NUMJBUTTONS&&joystick<MAX_JOYSTICKS);
-  JoystickBindings[JOYSTICK_SWITCH][joystick][key]=JSHandlerCall(handler,data);
+  JoystickBindings[whichswitch][joystick][key]=JSHandlerCall(handler,data);
   handler (KBData(),RESET);
 }
 
