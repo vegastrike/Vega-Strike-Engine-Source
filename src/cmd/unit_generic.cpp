@@ -1952,6 +1952,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 void Unit::AddVelocity(float difficulty) {
    static float warprampuptime=XMLSupport::parse_float (vs_config->getVariable ("physics","warprampuptime","5")); // for the heck of it.    
    static float warprampdowntime=XMLSupport::parse_float (vs_config->getVariable ("physics","warprampdowntime","0.5"));     
+   static float origFOV=XMLSupport::parse_float (vs_config->getVariable ("graphics","fov","78"));
    Vector v=Velocity;
    if(graphicOptions.WarpRamping){ // Warp Turning on/off
 	  if(graphicOptions.InWarp==1){ // Warp Turning on
@@ -1973,7 +1974,10 @@ void Unit::AddVelocity(float difficulty) {
 	   static double warpcruisemult=XMLSupport::parse_float(vs_config->getVariable("physics","warpcruisemult","5000")); // Mult at 1-2 boundary
 	   static double curvedegree=XMLSupport::parse_float(vs_config->getVariable("physics","warpcurvedegree","1.5")); // degree of curve
        static double upcurvek=warpcruisemult/pow((warpregion1-warpregion0),curvedegree); // coefficient so as to agree with above
+	   static bool WARPFOV=XMLSupport::parse_bool(vs_config->getVariable("physics","warpfov","false")); // Boolean - determines if SPEC alters FOV
+	   static double COMPRESSFRONT =XMLSupport::parse_bool(vs_config->getVariable("physics","compressionatfront","true")); // FOV < at front & > at back; false = FOV < at back & > at front
 	   float minmultiplier=warpMultiplierMax;
+	   
 	   Unit * planet;
 	   for (un_iter iter = _Universe->activeStarSystem()->gravitationalUnits().createIterator();(planet=*iter);++iter) {
 		   if (planet==this) {
@@ -2015,10 +2019,24 @@ void Unit::AddVelocity(float difficulty) {
 	   float vmag=sqrt(v.i*v.i+v.j*v.j+v.k*v.k);
 	   if(vmag>warpMaxEfVel){
 		   v*=warpMaxEfVel/vmag; // HARD LIMIT
+		   minmultiplier*=warpMaxEfVel/vmag;
 	   }
 	   graphicOptions.WarpFieldStrength=minmultiplier;
+	   if(WARPFOV&&_Universe->isPlayerStarship (this)){
+		   if(COMPRESSFRONT){
+		     g_game.fov=origFOV/(6.0/7.0+log(minmultiplier+1.71828183)/7);
+		   }else{
+		     g_game.fov=origFOV*(6.0/7.0+log(minmultiplier+1.71828183)/7);
+			 if(g_game.fov>179.0/g_game.aspect){
+				 g_game.fov=179.0/g_game.aspect;
+			 }
+		   }
+	   }
    } else {
 	   graphicOptions.WarpFieldStrength=1;
+	   if(_Universe->isPlayerStarship(this)){
+		   g_game.fov = origFOV;
+	   }
    }
    curr_physical_state.position = curr_physical_state.position +  (v*SIMULATION_ATOM*difficulty).Cast();
 }
