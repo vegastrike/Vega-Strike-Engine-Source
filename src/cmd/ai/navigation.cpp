@@ -25,7 +25,6 @@ using namespace Orders;
  * t = ( -2v0 (+/-) sqrtf (4*v0^2 - 4*(.5*v0^2 - accel*Length) ) / (2*accel)) 
  * t = -v0/accel (+/-) sqrtf (.5*v0^2 + Length*accel)/accel;
  *
- * 3/2/02  XOXO Equations verified by Debra Cheung 
  * 3/2/02  Patched CalculateBalancedDecel time with the fact that length should be more by a
  * quantity of .5*initialVelocity*SIMULATION_ATOM
  *  
@@ -231,6 +230,7 @@ void ChangeHeading::TurnToward (float atancalc, float ang_veli, float &torquei) 
   if (t>THRESHOLD) {
     if (t<SIMULATION_ATOM) {
       torquei *= ((t/SIMULATION_ATOM)-((SIMULATION_ATOM-t)/SIMULATION_ATOM));
+      torquei=0;//this is just a test --hellcatv
     }
   } else {
     torquei = -parent->GetMoment()*ang_veli/SIMULATION_ATOM;//clamping should take care of it
