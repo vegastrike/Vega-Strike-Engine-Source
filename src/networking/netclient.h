@@ -26,7 +26,7 @@
 #include <string>
 #include <vector>
 
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include "savegame.h"
 #include "networking/const.h"
 #include "networking/lowlevel/vsnet_socket.h"
