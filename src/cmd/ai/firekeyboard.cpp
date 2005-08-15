@@ -1353,6 +1353,14 @@ unsigned int FireKeyboard::DoSpeechAndAni(Unit * un, Unit* parent, class Communi
   this->refresh_target=true;
   return retval;
 }
+static void MyFunction(){ 
+      // quit it--he's dead all ready
+      static string comm_static = vs_config->getVariable("graphics","comm_static","static.ani");
+      // dead dead dead dead
+      static Animation Statuc (comm_static.c_str());
+      //yep really dead
+      _Universe->AccessCockpit()->SetCommAnimation (&Statuc,NULL);
+}
 void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
 
   Unit * un = c.sender.GetUnit();
@@ -1378,13 +1386,8 @@ void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
     whichsound=DoSpeech (NULL,NULL,*c.getCurrentState());
     // this is when a unit is already dead
     if (parent==_Universe->AccessCockpit()->GetParent()) {
-      // quit it--he's dead all ready
-      static string comm_static = vs_config->getVariable("graphics","comm_static","static.ani");
-      // dead dead dead dead
-      static Animation Statuc (comm_static.c_str());
-      //yep really dead
-      _Universe->AccessCockpit()->SetCommAnimation (&Statuc,NULL);
-      //mmhmm!
+      MyFunction();
+      //mmhmm! Gcc-4.1 hack -- otherwise linker failure
     }
 
   }
