@@ -15,7 +15,7 @@ using namespace Orders;
 /**
  * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
  * vslowdown - decel * t = 0               t = vslowdown/decel
- * finalx = -.5 decel ( v/decel)^2 + v^2 / decel + slowdownx = 1.5 * v^2 / decel + slowdownx 
+ * finalx = -.5 decel ( v/decel)^2 + v^2 / decel + slowdownx = .5 * v^2 / decel + slowdownx 
  * slowdownx =  .5 accel * t^2 + v0 * t + initx
  * finalx = (.5*(accel * t + v0)^2)/decel + .5 accel * t^2 + v0*t + initx      ;       Length = finalx-initx
  * Length = (.5*accel^2*t^2+accel*t*v0+ .5 *v0^2)/decel + .5 accel * t^2 + v0*t
@@ -25,6 +25,9 @@ using namespace Orders;
  * t = ( -2v0 (+/-) sqrtf (4*v0^2 - 4*(.5*v0^2 - accel*Length) ) / (2*accel)) 
  * t = -v0/accel (+/-) sqrtf (.5*v0^2 + Length*accel)/accel;
  *
+ * 8/15/05 Patched Calulate BalancedDecel time: our previous quantization factor ignored the quantization during ACCEL phase and also ignored the fact that we overestimated the integral rather than underestimated
+ *         new quantization factor is .5*accel*SIMULATION_ATOM*SIMULATION_ATOM-.5*initialVelocity*SIMULATION_ATOM
+ *            also this threshold idea is silly--accelerate if t>SIM_ATOM decel if t<0  still havent fixed t between 0 and SIM_ATOM...have decent approx for now.
  * 3/2/02  Patched CalculateBalancedDecel time with the fact that length should be more by a
  * quantity of .5*initialVelocity*SIMULATION_ATOM
  *  
@@ -40,7 +43,7 @@ static float CalculateBalancedDecelTime (float l, float v, float &F, float mass)
     v=-v;
     F=-F;
   }
-  double temp = .5*v*v+(l+v*SIMULATION_ATOM*(.5))*accel;
+  double temp = .5*v*v+(l-v*SIMULATION_ATOM*(.5)+.5*SIMULATION_ATOM*SIMULATION_ATOM*accel)*accel;
   if( temp < 0)
 	temp = 0;
   return (-v+sqrtf(temp))/accel;
@@ -227,14 +230,18 @@ void ChangeHeading::TurnToward (float atancalc, float ang_veli, float &torquei) 
     torquei = fabs(torquei);//copy sign again
     t = CalculateBalancedDecelTime (atancalc>0?atancalc-2*PI:atancalc+2*PI,ang_veli, torquei, parent->GetMoment());
   }
-  if (t>THRESHOLD) {
+  if (t>0) {
     if (t<SIMULATION_ATOM) {
       torquei *= ((t/SIMULATION_ATOM)-((SIMULATION_ATOM-t)/SIMULATION_ATOM));
-      torquei=0;//this is just a test --hellcatv
+      //torquei=0;//this is just a test --hellcatv
     }
   } else {
     torquei = -parent->GetMoment()*ang_veli/SIMULATION_ATOM;//clamping should take care of it
   }
+/* // Print out the variables for debugging.
+  char msg[200];
+  sprintf(msg, " t=%f, torquei=%f ",t,torquei);
+  mission->msgcenter->add("game","all",msg, 0); */
 }
 void ChangeHeading::SetDest (const QVector &target) {
   final_heading = target;
@@ -301,7 +308,7 @@ void ChangeHeading::Execute() {
   terminatingY += yswitch;
   last_velocity = local_velocity;
 
-  if (done||(xswitch&&yswitch)) {
+  if (done/*||(xswitch&&yswitch)*/) {
     
     return ;
   }
