@@ -25,7 +25,7 @@
 #include <crtdbg.h>
 #endif
 
-#include "navcomputer.h"
+#include "navscreen.h"
 #include "navpath.h"
 #include "in_kb.h"
 #include "in_kb_data.h"
