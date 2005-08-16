@@ -225,6 +225,18 @@ bool ChangeHeading::OptimizeAngSpeed (float optimal_speed_pos, float optimal_spe
  * works for both pitch and yaw axis if you pass in the -ang_vel.j for the y
  */
 void ChangeHeading::TurnToward (float atancalc, float ang_veli, float &torquei) {
+  //We need to end up at destination with positive velocity, but no more than we can decelerate from in a single SIMULATION_ATOM
+  
+  if (1){
+	float mass=parent->GetMoment();
+    float max_arrival_speed=torquei*SIMULATION_ATOM/mass;
+	float accel_needed=(atancalc/SIMULATION_ATOM-ang_veli)/SIMULATION_ATOM;
+	float arrival_velocity=accel_needed*SIMULATION_ATOM+ang_veli;
+	if (fabs(arrival_velocity)<=max_arrival_speed&&fabs(accel_needed)<torquei/mass) {
+		torquei=accel_needed*mass;
+		return;
+	}
+  }
   float t = CalculateBalancedDecelTime (atancalc, ang_veli, torquei, parent->GetMoment());//calculate when we should decel
   if (t<0) {//if it can't make it: try the other way
     torquei = fabs(torquei);//copy sign again
@@ -330,8 +342,7 @@ void ChangeHeading::Execute() {
                      turningspeed*parent->GetComputerData().max_pitch_up,
                      local_velocity.i,
                      torque.i);
-    
-    TurnToward (atan2 (local_heading.i, local_heading.k), -local_velocity.j, torque.j);
+	TurnToward (atan2 (local_heading.i, local_heading.k), -local_velocity.j, torque.j);
     torque.j=-torque.j;
     OptimizeAngSpeed(turningspeed*parent->GetComputerData().max_yaw_left,
                      turningspeed*parent->GetComputerData().max_yaw_right,
