@@ -363,10 +363,8 @@ void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
        joy_buttons|=(1<<i);
       }
    }
-   if(debug_digital_hatswitch){
-       for(int h=0;h<nr_of_hats;h++){
-           digital_hat[h]=SDL_JoystickGetHat(joy,h);
-       }
+   for(int h=0;h<nr_of_hats;h++){
+       digital_hat[h]=SDL_JoystickGetHat(joy,h);
    }
    for(a=0;a<MAX_AXES;a++)
        joy_axis[a]=((float)axi[a]/32768.0);
