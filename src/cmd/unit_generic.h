@@ -572,6 +572,8 @@ public:
   bool AutoPilotTo(Unit * un, bool automaticenergyrealloc,int recursive_level=2);
   ///The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
   Unit *owner;
+  ///The number of frames ahead this was put in the simulation queue
+  unsigned int sim_atom_multiplier;
   ///The previous state in last physics frame to interpolate within
   Transformation prev_physical_state;
   ///The state of the current physics frame to interpolate within

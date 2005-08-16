@@ -101,9 +101,11 @@ StarSystem::StarSystem() {
   time = 0;
   //_Universe->popActiveStarSystem ();
   zone = 0;
+  this->current_sim_location=0;
 }
 StarSystem::StarSystem(const char * filename, const Vector & centr,const float timeofyear) {
   no_collision_time=0;//(int)(1+2.000/SIMULATION_ATOM);
+  this->current_sim_location=0;
   ///adds to jumping table;
   name = NULL;
   zone = 0;
@@ -271,6 +273,7 @@ string StarSystem::getName () {
 void StarSystem::AddUnit(Unit *unit) {
   units.prepend(unit);
   drawList.prepend(unit);
+  this->physics_buffer[this->current_sim_location].prepend(unit);
 }
 
 bool StarSystem::RemoveUnit(Unit *un) {
@@ -300,6 +303,23 @@ bool StarSystem::RemoveUnit(Unit *un) {
       }
     }
   }
+	if (removed) {
+		for (int i=0;i<=SIM_QUEUE_SIZE;++i) {
+			UnitCollection::UnitIterator iter = this->physics_buffer[i].createIterator();
+			Unit *unit;
+			while((unit = iter.current())!=NULL) {
+				if (unit==un) {
+					iter.remove();
+					removed =true;
+					i=SIM_QUEUE_SIZE+1;//terminate outer loop
+					break;
+				}else {
+					iter.advance();
+				}
+			}
+		}
+	}
+ 
   return removed;
 }
 
@@ -341,23 +361,47 @@ void CarSimUpdate (Unit *un, float height) {
 
 
 void StarSystem::UpdateUnitPhysics (bool firstframe) {
-  un_iter iter = this->getUnitList().createIterator();
-  Unit * unit=NULL;
-  try {
+  static   bool phytoggle=true;
+  if (phytoggle) {
+    un_iter iter = this->physics_buffer[current_sim_location].createIterator();
+    
+    Unit * unit=NULL;
+    try {
+      while((unit = iter.current())!=NULL) {
+	int priority=1;
+	int newloc=(current_sim_location+priority)%SIM_QUEUE_SIZE;
+	float backup=SIMULATION_ATOM;
+	SIMULATION_ATOM*=priority;
+	unit->sim_atom_multiplier=priority;
+	unit->ExecuteAI(); 
+	unit->CollideAll();
+      unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits());    
+      if (newloc==current_sim_location) {
+	iter.advance();
+      }else{ 
+	iter.moveBefore(this->physics_buffer[newloc]);
+      }
+      SIMULATION_ATOM=backup;
+      }
+    }catch (const boost::python::error_already_set) {
+      if (PyErr_Occurred()) {
+	PyErr_Print();
+	PyErr_Clear();
+	fflush(stderr);         
+	fflush(stdout);
+    }
+      throw;
+    }
+    current_sim_location=(current_sim_location+1)%SIM_QUEUE_SIZE;
+  }else {
+    un_iter iter = this->getUnitList().createIterator();
+    Unit * unit=NULL;
     while((unit = iter.current())!=NULL) {
       unit->ExecuteAI(); 
       unit->CollideAll();
       unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits());    
       iter.advance();
     }
-  }catch (const boost::python::error_already_set) {
-    if (PyErr_Occurred()) {
-      PyErr_Print();
-      PyErr_Clear();
-      fflush(stderr);         
-      fflush(stdout);
-    }
-    throw;
   }
 }
 
@@ -371,13 +415,10 @@ extern void TestMusic();
 extern void reset_time_compression (const KBData&,KBSTATE);
 
 extern float getTimeCompression();
+//server
 void StarSystem::Update( float priority)
 {
 	Unit * unit;
-#ifdef UPDATEDEBUG
-  VSFileSystem::vs_fprintf (stderr,"begin Update");
-  fflush (stderr);
-#endif
   bool firstframe = true;
 // No time compression here
   float normal_simulation_atom = SIMULATION_ATOM;
@@ -391,10 +432,10 @@ void StarSystem::Update( float priority)
 	  UnitCollection::UnitIterator iter;
 	  TerrainCollide();
 	  Unit::ProcessDeleteQueue();
-          UnitCollection::FreeUnusedNodes();
+      UnitCollection::FreeUnusedNodes();
 	  current_stage=MISSION_SIMULATION;
-          collidetable->Update();
-	    {
+      collidetable->Update();
+	{
 	      iter = drawList.createIterator();
 	      while((unit = iter.current())!=NULL) {
 		unit->SetNebula(NULL); 
@@ -451,6 +492,7 @@ void ExecuteDirector () {
         }}
 
 }
+//client
 void StarSystem::Update(float priority , bool executeDirector) {
 
   Unit *unit;

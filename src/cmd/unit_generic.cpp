@@ -631,6 +631,7 @@ void Unit::ZeroAll( )
 
 void Unit::Init()
 {
+  sim_atom_multiplier=1;
   /*
   static std::map <Unit *, bool> m;
   if (m[this]) {

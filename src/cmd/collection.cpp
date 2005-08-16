@@ -59,6 +59,15 @@ void UnitCollection::FreeUnusedNodes () {
     dogpile->pop_back ();
   }
 }
+void UnitCollection::UnitIterator::moveBefore(UnitCollection&otherList) {
+  if (pos->next->unit) {
+    UnitListNode * tmp=pos->next->next;
+    otherList.prepend(pos->next);
+    pos->next=tmp;
+  }else {
+    assert(0);
+  }
+}
 void UnitCollection::prepend(UnitIterator *iter) {
   UnitListNode *n = &u;
   Unit * tmp;

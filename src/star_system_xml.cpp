@@ -1440,13 +1440,12 @@ using namespace StarXML;
       iter = ((Planet*)xml->moons[i])->createIterator();
       Unit * un;
       while ((un = iter->current())) {
-	drawList.prepend(un);
-        units.prepend(un);
+	AddUnit(un);
 	iter->advance();
       }
       delete iter;
     } else {
-      drawList.prepend (xml->moons[i]);
+      AddUnit (xml->moons[i]);
     }
   }
   

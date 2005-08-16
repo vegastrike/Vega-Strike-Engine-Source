@@ -70,6 +70,7 @@ class UnitCollection {
     bool notDone() {return current()!=NULL;}
     ///removes something after pos.  eg the first valid unit. or current()
     void remove();
+    void moveBefore(UnitCollection& otherList);
     ///inserts in front of current
     void preinsert(Unit *unit){pos->next = new UnitListNode(unit, pos->next);}
     /// inserts after current
@@ -168,6 +169,7 @@ class UnitCollection {
     prepend (un);
   }
   void prepend(Unit *unit) {u.next= new UnitListNode (unit,u.next);}
+  void prepend(UnitListNode *unitlistnode) {unitlistnode->next=u.next;u.next= unitlistnode;}
   void prepend(UnitIterator *iter);
   void append(Unit *unit);
   void append(UnitIterator *iter);

@@ -39,6 +39,7 @@ using XMLSupport::AttributeList;
  * Scene management for a star system
  * Per-Frame Drawing & Physics simulation
  **/
+const int SIM_QUEUE_SIZE=128;
 class StarSystem {
   protected:
   ///Starsystem XML Struct For use with XML loading
@@ -80,6 +81,8 @@ class StarSystem {
   std::vector <ContinuousTerrain *>contterrains;
   /// Everything to be drawn. Folded missiles in here oneday
   UnitCollection drawList; 
+  UnitCollection physics_buffer[SIM_QUEUE_SIZE+1];
+  unsigned int current_sim_location;
   /// Objects subject to global gravitron physics (disabled)   
   UnitCollection units;    
   unsigned char no_collision_time;
