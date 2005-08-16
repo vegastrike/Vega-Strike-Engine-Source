@@ -259,7 +259,6 @@ namespace VSFileSystem
 
 			// PK3 stuff
 			CPK3 *			pk3_file;
-			char *			pk3_extracted_file;
 			int				file_index;
 			int				offset;
 
@@ -291,7 +290,7 @@ namespace VSFileSystem
           VSFileType GetType() const {return file_type;}
           VSFileType GetAltType() const {return alt_type;}
 
-
+			char *			pk3_extracted_file;
 			/********************************** OPEN A FILE *********************************/
 			// Open an existing file read only
 			VSError	OpenReadOnly( const char * filename, VSFileType type=UnknownFile);
