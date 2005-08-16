@@ -154,6 +154,9 @@ void GameVegaConfig::initKeyMap(){
   key_map["function-10"]=WSK_F10;
   key_map["function-11"]=WSK_F11;
   key_map["function-12"]=WSK_F12;
+  key_map["function-13"]=WSK_F13;
+  key_map["function-14"]=WSK_F14;
+  key_map["function-15"]=WSK_F15;
   key_map["keypad-insert"]=WSK_KP0;
   key_map["keypad-0"]=WSK_KP0;
   key_map["keypad-1"]=WSK_KP1;
@@ -210,7 +213,7 @@ void GameVegaConfig::initKeyMap(){
   key_map["tab"]='\t';
   key_map["esc"]=27;
   key_map["break"]=WSK_BREAK;
-  key_map["pause"]=WSK_BREAK;
+  key_map["pause"]=WSK_PAUSE;
 
 }
 

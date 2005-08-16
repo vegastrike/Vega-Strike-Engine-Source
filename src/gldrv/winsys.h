@@ -116,6 +116,7 @@ typedef enum {
     WSK_RMETA = SDLK_RMETA,
     WSK_LMETA = SDLK_LMETA,
     WSK_BREAK = SDLK_BREAK,
+	WSK_PAUSE = SDLK_PAUSE,
     WSK_LAST=SDLK_LAST
 
 } winsys_keysym_t;
@@ -227,7 +228,8 @@ typedef enum {
     WSK_RMETA = 0,
     WSK_LMETA = 0,
     WSK_BREAK = 0,
-    WSK_LAST = UCHAR_MAX /* GLUT doesn't define a max key, but this is more
+ 	WSK_PAUSE = 0,
+   WSK_LAST = UCHAR_MAX /* GLUT doesn't define a max key, but this is more
 			    than enough as of version 3.7 */
 } winsys_keysym_t;
 typedef enum {
