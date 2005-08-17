@@ -1,3 +1,5 @@
+
+
 #include <assert.h>
 #include "star_system.h"
 #include "cmd/planet.h"
@@ -273,22 +275,22 @@ void GameStarSystem::SwapOut () {
   }
 
 }
-
+static double calc_blend_factor(double frac, int priority, int when_it_will_be_simulated, int cur_simulation_frame) {
+  if (cur_simulation_frame>when_it_will_be_simulated) {
+    when_it_will_be_simulated+=SIM_QUEUE_SIZE;
+  }
+  double distance = when_it_will_be_simulated-cur_simulation_frame;//number between for next SIM_FRAME and SIM_QUEUE_SIZE-1
+  double when_it_was_simulated=when_it_will_be_simulated-(double)priority;
+  double fraction_of_physics_frame=(cur_simulation_frame-when_it_was_simulated+frac-1)/priority;
+  return when_it_will_be_simulated==SIM_QUEUE_SIZE?1:fraction_of_physics_frame;
+}
 extern double interpolation_blend_factor;
 //#define UPDATEDEBUG  //for hard to track down bugs
 void GameStarSystem::Draw(bool DrawCockpit) {
   GFXEnable (DEPTHTEST);
   GFXEnable (DEPTHWRITE);
 
-#ifdef UPDATEDEBUG
-  VSFileSystem::Fprintf (stderr,"begin Draw");
-  fflush (stderr);
-#endif
-  interpolation_blend_factor = (1./PHY_NUM)*((PHY_NUM*time)/SIMULATION_ATOM+current_stage);
-#ifdef UPDATEDEBUG
-  VSFileSystem::Fprintf (stderr,"ani");
-  fflush (stderr);
-#endif
+  double saved_interpolation_blend_factor=interpolation_blend_factor = (1./PHY_NUM)*((PHY_NUM*time)/SIMULATION_ATOM+current_stage);
   GFXColor4f(1,1,1,1);
   if (DrawCockpit) {
     AnimatedTexture::UpdateAllFrame();
@@ -298,26 +300,12 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   }
 
   GFXDisable (LIGHTING);
-#ifdef UPDATEDEBUG
-  VSFileSystem::Fprintf (stderr,"bg");
-  fflush (stderr);
-#endif
   bg->Draw();
 
-  UnitCollection::UnitIterator iter = drawList.createIterator();
-  Unit *unit;
   //  VSFileSystem::Fprintf (stderr,"|t%f i%lf|",GetElapsedTime(),interpolation_blend_factor);
-#ifdef UPDATEDEBUG
-  VSFileSystem::Fprintf (stderr,"cp");
-  fflush (stderr);
-#endif
   Unit * par;
   bool alreadysetviewport=false;
   if ((par=_Universe->AccessCockpit()->GetParent())==NULL) {
-#ifdef UPDATEDEBUG
-  VSFileSystem::Fprintf (stderr,"cpu");
-  fflush (stderr);
-#endif
     _Universe->AccessCamera()->UpdateGFX (GFXTRUE);
   }else {
     if (!par->isSubUnit()) {
@@ -332,28 +320,21 @@ void GameStarSystem::Draw(bool DrawCockpit) {
     }
 
   }
-#ifdef UPDATEDEBUG
-  VSFileSystem::Fprintf (stderr,">un<");
-  fflush (stderr);
-#endif
 
-
-  while((unit = iter.current())!=NULL) {
-    ((GameUnit<Unit> *)unit)->Draw();
-    iter.advance();
+  Unit *unit;
+  for (unsigned int sim_counter=0;sim_counter<=SIM_QUEUE_SIZE;++sim_counter) {
+    UnitCollection::UnitIterator iter = physics_buffer[sim_counter].createIterator();    
+    while((unit = iter.current())!=NULL) {
+      interpolation_blend_factor=calc_blend_factor(interpolation_blend_factor,unit->sim_atom_multiplier,sim_counter,current_sim_location);
+      ((GameUnit<Unit> *)unit)->Draw();
+      interpolation_blend_factor=saved_interpolation_blend_factor;
+      iter.advance();
+    }
   }
   WarpTrailDraw();
-#ifdef UPDATEDEBUG
-  VSFileSystem::Fprintf (stderr,"fog");
-  fflush (stderr);
-#endif
 
   GFXFogMode (FOG_OFF);
 
-#ifdef UPDATEDEBUG
-  VSFileSystem::Fprintf (stderr,"vp");
-  fflush (stderr);
-#endif
 
   static bool always_make_smooth=XMLSupport::parse_bool(vs_config->getVariable("graphics","always_make_smooth_cam","false"));
   bool whichview=  _Universe->AccessCockpit()->GetView()==CP_CHASE;//||_Universe->AccessCockpit()->GetView()==CP_VIEWTARGET;
@@ -362,10 +343,6 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   //  SetViewport();//camera wielding unit is now drawn  Note: Background is one frame behind...big fat hairy deal
   GFXColor tmpcol (0,0,0,1);
   GFXGetLightContextAmbient(tmpcol);
-#ifdef UPDATEDEBUG
-  VSFileSystem::Fprintf (stderr,"farmsh");
-  fflush (stderr);
-#endif
   static bool DrawNearStarsLast =XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_near_stars_in_front_of_planets","false"));
   if (!DrawNearStarsLast) {
 	  stars->Draw();
@@ -375,19 +352,11 @@ void GameStarSystem::Draw(bool DrawCockpit) {
 	  stars->Draw();
   }
   
-#ifdef UPDATEDEBUG
-  VSFileSystem::Fprintf (stderr,"terr");
-  fflush (stderr);
-#endif
   GFXEnable (DEPTHTEST);
   GFXEnable (DEPTHWRITE);
   //need to wait for lights to finish
   GamePlanet::ProcessTerrains();
   Terrain::RenderAll();
-#ifdef UPDATEDEBUG
-  VSFileSystem::Fprintf (stderr,"nearmsh");
-  fflush (stderr);
-#endif
   Mesh::ProcessUndrawnMeshes(true);
   Nebula * neb;
 
@@ -404,37 +373,17 @@ void GameStarSystem::Draw(bool DrawCockpit) {
 
 
   GFXLightContextAmbient(tmpcol);
-#ifdef UPDATEDEBUG
-  VSFileSystem::Fprintf (stderr,"halo");
-  fflush (stderr);
-#endif
 
 
   
-#ifdef UPDATEDEBUG
-  VSFileSystem::Fprintf (stderr,"bem");
-  fflush (stderr);
-#endif
 
   if ((neb = _Universe->AccessCamera()->GetNebula())) {
     neb->SetFogState();
   }
   Beam::ProcessDrawQueue();
-#ifdef UPDATEDEBUG
-  VSFileSystem::Fprintf (stderr,"anidq");
-  fflush (stderr);
-#endif
 
-#ifdef UPDATEDEBUG
-  VSFileSystem::Fprintf (stderr,"bolt");
-  fflush (stderr);
-#endif
   Bolt::Draw();
 
-#ifdef UPDATEDEBUG
-  VSFileSystem::Fprintf (stderr,"star");
-  fflush (stderr);
-#endif
   //  if (_Universe->AccessCamera()->GetNebula()!=NULL)
   GFXFogMode (FOG_OFF);
   Animation::ProcessDrawQueue();
@@ -443,10 +392,6 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   GameStarSystem::DrawJumpStars();
   ConditionalCursorDraw(false);
   //  static bool doInputDFA = XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
-#ifdef UPDATEDEBUG
-  VSFileSystem::Fprintf (stderr,"cpDraw");
-  fflush (stderr);
-#endif
   if (DrawCockpit) {
     _Universe->AccessCockpit()->Draw();
     //    if (doInputDFA) {
@@ -455,10 +400,6 @@ void GameStarSystem::Draw(bool DrawCockpit) {
     //      GFXHudMode (false);
     //    }
   }
-#ifdef UPDATEDEBUG
-  VSFileSystem::Fprintf (stderr,"end Draw\n");
-  fflush (stderr);
-#endif
 }
 extern void update_ani_cache();
 void	UpdateAnimatedTexture()

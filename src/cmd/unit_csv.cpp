@@ -586,6 +586,7 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   Momentofinertia=stof(row["Moment_Of_Inertia"],1.0);
   fuel=stof(row["Fuel_Capacity"]);
   hull=maxhull = stof(row["Hull"]);
+  specInterdiction=stof(row["Spec_Interdiction"]);
   armor.frontlefttop=stof(row["Armor_Front_Top_Left"]);
   armor.frontrighttop=stof(row["Armor_Front_Top_Right"]);
   armor.backlefttop=stof(row["Armor_Back_Top_Left"]);
@@ -1143,6 +1144,7 @@ string Unit::WriteUnitString () {
         unit["Moment_Of_Inertia"]=tos(Momentofinertia);
         unit["Fuel_Capacity"]=tos(fuel);
         unit["Hull"]=tos(hull);
+        unit["Spec_Interdiction"]=tos(fabs(specInterdiction));
         unit["Armor_Front_Top_Left"]=tos(armor.frontlefttop);
         unit["Armor_Front_Top_Right"]=tos(armor.frontrighttop);
         unit["Armor_Back_Top_Left"]=tos(armor.backlefttop);

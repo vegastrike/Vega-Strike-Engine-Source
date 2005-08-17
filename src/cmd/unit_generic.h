@@ -598,6 +598,8 @@ public:
   UnitImages *image;
   ///mass of this unit (may change with cargo)
   float Mass;
+  ///positive for the multiplier applied to nearby spec starships (1 = planetary/inert effects) 0 is default (no effect), -X means 0 but able to be enabled
+  float specInterdiction;
   float HeatSink;
 protected:
   ///are shields tight to the hull.  zero means bubble

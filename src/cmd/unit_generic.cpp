@@ -631,6 +631,7 @@ void Unit::ZeroAll( )
 
 void Unit::Init()
 {
+  specInterdiction=0;
   sim_atom_multiplier=1;
   /*
   static std::map <Unit *, bool> m;
@@ -5665,7 +5666,33 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
 // set up vars for "LookupUnitStat" to check for empty cells
 string upgrade_name=up->name;
 string upgrade_faction=FactionUtil::GetFactionName(up->faction);
-
+if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Spec_Interdiction")) {
+  bool neg = specInterdiction<0;
+  bool interdictionUnits=specInterdiction!=0;
+  specInterdiction=fabs(specInterdiction);
+  STDUPGRADE(specInterdiction,up->specInterdiction,templ->specInterdiction,0);
+  if (neg) {
+    specInterdiction=-specInterdiction;
+  }
+  if (interdictionUnits!=(specInterdiction!=0)) {
+    StarSystem *ss = activeStarSystem;
+    if (_Universe->getNumActiveStarSystem()&&!ss) ss=_Universe->activeStarSystem();
+    if (ss){
+      Unit * un;
+      for (un_iter i = ss->gravitationalUnits().createIterator();
+           (un=*i)!=NULL;) {
+        if (un==this)
+          i.remove();          
+        else 
+          i.advance();
+      }
+      if (!interdictionUnits) {
+        // will interdict
+        ss->gravitationalUnits().prepend(this);
+      }
+    }
+  }
+}
 if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Armor_Front_Top_Right")){
   STDUPGRADE(armor.frontrighttop,up->armor.frontrighttop,templ->armor.frontrighttop,0);
   STDUPGRADE(armor.backrighttop,up->armor.backrighttop,templ->armor.backrighttop,0);

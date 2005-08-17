@@ -271,20 +271,34 @@ string StarSystem::getName () {
 
 
 void StarSystem::AddUnit(Unit *unit) {
-  units.prepend(unit);
+  if (unit->specInterdiction!=0||unit->isPlanet()||unit->isJumppoint()||unit->isUnit()==ASTEROIDPTR) {
+    Unit * un;
+    bool found=false;
+    for (un_iter i=gravitationalUnits().createIterator();
+         (un=*i)!=NULL;
+         ++i) {
+      if (un==unit){
+        found=true;
+        break;
+      }
+    }
+    if (!found) {
+      gravitationalUnits().prepend(unit);
+    }
+  }
   drawList.prepend(unit);
   this->physics_buffer[this->current_sim_location].prepend(unit);
 }
 
 bool StarSystem::RemoveUnit(Unit *un) {
   bool removed2=false;
-  UnitCollection::UnitIterator iter = units.createIterator();
+  UnitCollection::UnitIterator iter = gravitationalUnits().createIterator();
   Unit *unit;
   while((unit = iter.current())!=NULL) {
     if (unit==un) {
       iter.remove();
       removed2 =true;
-      break;
+      //break;//just in case
     } else {
       iter.advance();
     }
@@ -516,11 +530,11 @@ void StarSystem::Update(float priority , bool executeDirector) {
     }
   if(time/SIMULATION_ATOM>=(1./PHY_NUM)) {
     while(time/SIMULATION_ATOM >= (1./PHY_NUM)) { // Chew up all SIMULATION_ATOMs that have elapsed since last update
-      UnitCollection::UnitIterator iter;
+      //UnitCollection::UnitIterator iter;
       if (current_stage==MISSION_SIMULATION) {
 	TerrainCollide();
 	UpdateAnimatedTexture();
-	iter = units.createIterator();
+        //	iter = units.createIterator();
 	Unit::ProcessDeleteQueue();
 	if( (run_only_player_starsystem && _Universe->getActiveStarSystem(0)==this) || !run_only_player_starsystem) {
 	  if (executeDirector) {
@@ -544,7 +558,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	if (this==_Universe->getActiveStarSystem(0))
 	  UpdateCameraSnds();
 	TestMusic();     
-	iter = drawList.createIterator();
+	//iter = drawList.createIterator();
 	bolts->UpdatePhysics();
 	current_stage=MISSION_SIMULATION;
 	firstframe = false;

@@ -81,10 +81,10 @@ class StarSystem {
   std::vector <ContinuousTerrain *>contterrains;
   /// Everything to be drawn. Folded missiles in here oneday
   UnitCollection drawList; 
+  UnitCollection GravitationalUnits;
   UnitCollection physics_buffer[SIM_QUEUE_SIZE+1];
   unsigned int current_sim_location;
   /// Objects subject to global gravitron physics (disabled)   
-  UnitCollection units;    
   unsigned char no_collision_time;
   ///system name             
   char * name; 
@@ -139,7 +139,7 @@ class StarSystem {
   string getName();
   ///Loads the star system from an XML file
   UnitCollection& getUnitList() {return drawList;}
-  UnitCollection& gravitationalUnits() {return units;}
+  UnitCollection& gravitationalUnits() {return GravitationalUnits;}
   /// returns xy sorted bounding spheres of all units in current view
   ///Adds to draw list
   void AddUnit(Unit *unit);
