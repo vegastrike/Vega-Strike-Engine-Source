@@ -22,8 +22,10 @@ namespace UnitUtil {
 		const int HIGH_PRIORITY=2;
 		const int MEDIUM_PRIORITY=3;
 		const int LOW_PRIORITY=4;
-		const int NO_ENEMIES=SIM_QUEUE_SIZE/2+1;
-		const int NOT_VISIBLE_COMBAT=7;
+		const int NO_ENEMIES=SIM_QUEUE_SIZE-1;
+		const int NOT_VISIBLE_COMBAT_HIGH=7;
+		const int NOT_VISIBLE_COMBAT_MEDIUM=13;
+		const int NOT_VISIBLE_COMBAT_LOW=SIM_QUEUE_SIZE/2+1;
 
 		Cockpit* cockpit=_Universe->AccessCockpit();
 		Unit * parent=cockpit->GetParent();
@@ -59,8 +61,16 @@ namespace UnitUtil {
 			return MEDIUM_PRIORITY;
 		if (dist<missile_range)
 			return LOW_PRIORITY;
-		if (targ)
-			return NOT_VISIBLE_COMBAT;
+		if (targ){
+			float speed;
+			un->getAverageGunSpeed(speed,gun_range,missile_range);
+			double distance=UnitUtil::getDistance(un,targ);
+			if (distance<=gun_range)
+				return NOT_VISIBLE_COMBAT_HIGH;
+			if (distance<missile_range)
+				return NOT_VISIBLE_COMBAT_MEDIUM;
+			return NOT_VISIBLE_COMBAT_LOW;
+		}
 		return NO_ENEMIES;
 	}
 
