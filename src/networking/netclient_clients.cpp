@@ -215,7 +215,7 @@ void	NetClient::sendPosition( const ClientState* cs )
 	pckt.send( CMD_POSUPDATE, this->game_unit.GetUnit()->GetSerial(),
                netbuf.getData(), netbuf.getDataLength(),
                SENDANDFORGET, NULL, this->clt_sock,
-               __FILE__, PSEUDO__LINE__(1197) );
+               __FILE__, PSEUDO__LINE__(218) );
 }
 
 /**************************************************************/
@@ -308,7 +308,7 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 						clt->prediction->InitInterpolation( un,
 								clt->last_packet,
 								clt->getDeltatime(),
-								this->deltatime);
+								clt->getNextDeltatime());
 						clt->last_packet=cs;
 						un->curr_physical_state = clt->prediction->Interpolate( un, 0);
 					}
@@ -347,7 +347,7 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 						clt->prediction->InitInterpolation( un,
 								clt->last_packet,
 								clt->getDeltatime(),
-								this->deltatime);
+								clt->getNextDeltatime());
 						clt->last_packet=un->old_state;
 						clt->last_packet.setPosition(pos);
 						un->curr_physical_state.position = clt->prediction->InterpolatePosition( un, 0);
@@ -389,7 +389,7 @@ void	NetClient::inGame()
 	packet2.send( CMD_ADDCLIENT, this->serial,
                   netbuf.getData(), netbuf.getDataLength(),
                   SENDRELIABLE, NULL, this->clt_sock,
-                  __FILE__, PSEUDO__LINE__(1307) );
+                  __FILE__, PSEUDO__LINE__(392) );
 	this->game_unit.GetUnit()->SetSerial( this->serial);
 	COUT << "Sending ingame with serial n°" << this->serial << endl;
 	this->ingame = true;
@@ -411,7 +411,7 @@ void NetClient::sendAlive()
         p.send( CMD_PING, this->game_unit.GetUnit()->GetSerial(),
                 (char *)NULL, 0,
                 SENDANDFORGET, NULL, this->clt_sock,
-                __FILE__, PSEUDO__LINE__(305) );
+                __FILE__, PSEUDO__LINE__(414) );
     //}
 }
 

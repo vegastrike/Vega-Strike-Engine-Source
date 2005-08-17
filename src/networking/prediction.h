@@ -38,7 +38,7 @@ class NullPrediction : public Prediction
 		virtual Quaternion		InterpolateOrientation( Unit * un, double deltatime) const;
 };
 
-class LinearPrediction : public Prediction
+class LinearPrediction : virtual public Prediction
 {
 	public:
 		virtual QVector			InterpolatePosition( Unit * un, double deltatime) const;
@@ -46,7 +46,7 @@ class LinearPrediction : public Prediction
 		virtual Transformation	Interpolate( Unit * un, double deltatime) const;
 };
 
-class CubicSplinePrediction : public Prediction
+class CubicSplinePrediction : virtual public Prediction
 {
 	private:
 		CubicSpline interpolation_spline;

@@ -136,12 +136,15 @@ void	NetServer::save()
 		// Write the save and xml unit
 		//FileUtil::WriteSaveFiles( savestr, xmlstr, VSFileSystem::datadir+"/serversaves", cp->savegame->GetCallsign());
 		// SEND THE BUFFERS TO ACCOUNT SERVER
-		if( acctserver && acct_con)
+		if( cp && acctserver && acct_con)
 		{
+			Unit *un=cp->GetParent();
 			netbuf.Reset();
 			bool found = false;
 			// Loop through clients to find the one corresponding to the unit (we need its serial)
-			ClientPtr clt = getClientFromSerial( cp->GetParent()->GetSerial());
+			ClientPtr clt;
+			if (un)
+				clt=getClientFromSerial( un->GetSerial());
 			if( !clt )
 			{
 				cerr<<"Error client not found in save process !!!!"<<endl;

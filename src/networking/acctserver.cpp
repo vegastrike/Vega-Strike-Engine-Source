@@ -424,7 +424,7 @@ void    AccountServer::recvMsg( SOCKETALT sock)
             break;
             case CMD_SAVEACCOUNTS :
                 cout<<">>> SAVING ACCOUNT N° "<<packet.getSerial()<<"-----------------------------"<<endl;
-                this->writeSave( packet.getData());
+                this->writeSave( packet.getData(), packet.getDataLength());
                 cout<<"<<< ACCOUNT SAVED --------------------------------------"<<endl;
             break;
             default:
@@ -641,9 +641,10 @@ void    AccountServer::removeDeadSockets()
     DeadSocks.clear();
 }
 
-void    AccountServer::writeSave( const char * buffer)
+void    AccountServer::writeSave( const char * buffer, unsigned int length)
 {
-    vector<string> saves = FileUtil::GetSaveFromBuffer( buffer);
+	NetBuffer netbuf( buffer, length );
+    vector<string> saves = FileUtil::GetSaveFromBuffer( netbuf );
     string xmlstr = saves[0];
     string savestr = saves[1];
 

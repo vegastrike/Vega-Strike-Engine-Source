@@ -85,17 +85,18 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
 
 		  //curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
 		  // If we want to inter(extra)polate sent position, DO IT HERE
-		  if( !(old_physical_state.position == this->curr_physical_state.position && old_physical_state.orientation == this->curr_physical_state.orientation) )
+//		  if( !(old_physical_state.position == this->curr_physical_state.position && old_physical_state.orientation == this->curr_physical_state.orientation) )
 				// We moved so update
 		  {
+			  /* If you're going to send an alive message, you might as well send your position while you're at it. */
 				ClientState cstmp( this->serial, this->curr_physical_state, this->Velocity, accel, 0);
 				Network[player].sendPosition( &cstmp);
 		  }
-		  else
-		  {
-				// Say we are still alive
-				Network[player].sendAlive();
-		  }
+//		  else
+//		  {
+//				// Say we are still alive
+//				Network[player].sendAlive();
+//		  }
 		}
 		this->AddVelocity(difficulty);
 	  }

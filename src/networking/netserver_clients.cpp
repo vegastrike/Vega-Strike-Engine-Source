@@ -115,7 +115,7 @@ void	NetServer::addClient( ClientPtr clt)
 	un->BackupState();
     clt->setLatestTimestamp(packet.getTimestamp( ));
 	clt->last_packet=un->old_state;
-	clt->prediction->InitInterpolation(un, un->old_state, 0, clt->getDeltatime());
+	clt->prediction->InitInterpolation(un, un->old_state, 0, clt->getNextDeltatime());
 	// Add initial position to make sure the client is starting from where we tell him
 	netbuf.addTransformation(un->curr_physical_state);
 	pp.send( CMD_ADDEDYOU, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1325) );
@@ -158,13 +158,13 @@ void	NetServer::posUpdate( ClientPtr clt)
 	NetBuffer netbuf( packet.getData(), packet.getDataLength());
 	Unit * un = clt->game_unit.GetUnit();
 	ObjSerial clt_serial = netbuf.getSerial();
-   clt->setLatestTimestamp(packet.getTimestamp( ));
+//   clt->setLatestTimestamp(packet.getTimestamp( ));
     clt->setLatestTimestamp(packet.getTimestamp( ));
 	clt->elapsed_since_packet = 0;
 	if( clt_serial != un->GetSerial())
 		{
 			cerr<<"!!! ERROR : Received an update from a serial that differs with the client we found !!!"<<endl;
-			VSExit(1);
+//			VSExit(1);
 		}
 	ClientState cs;
 	// Set old position
@@ -177,8 +177,8 @@ void	NetServer::posUpdate( ClientPtr clt)
 	un->Velocity = cs.getVelocity();
 
 	assert( clt->prediction );
-	clt->prediction->InitInterpolation( un, clt->last_packet, clt->getDeltatime(), clt->getDeltatime());
-//	un->curr_physical_state.position = clt->prediction->InterpolatePosition( un, clt->getDeltatime());
+	clt->prediction->InitInterpolation( un, clt->last_packet, clt->getDeltatime(), clt->getNextDeltatime());
+//	un->curr_physical_state.position = clt->prediction->InterpolatePosition( un, 0);
 	clt->last_packet=cs;
 	// deltatime has already been updated when the packet was received
 	Cockpit * cp = _Universe->isPlayerStarship( clt->game_unit.GetUnit());

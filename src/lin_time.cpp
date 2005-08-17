@@ -51,6 +51,14 @@ double getNewTime() {
 #endif
 }
 
+void setNewTime(double newnewtime) {
+#ifdef _WIN32
+	dblnewtime=newnewtime+firsttime;
+#else
+	newtime=newnewtime+firsttime;
+#endif
+}
+
 class NetClient;
 int timecount;
 

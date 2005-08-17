@@ -23,7 +23,7 @@
 #include <string>
 using std::string;
 #include "networking/acctserver.h"
-
+#include "lin_time.h"
 
 void	VSExit( int code)
 { exit( code); }
@@ -42,6 +42,8 @@ NetClient * Network;
 
 int main( int argc, char **argv)
 {
+	InitTime();
+	setNewTime(time(NULL));
 	AccountServer *Server = new AccountServer;
 
 	Server->start();

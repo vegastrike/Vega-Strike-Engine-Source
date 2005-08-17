@@ -55,7 +55,7 @@ class AccountServer
 		void		sendAlreadyConnected(  SOCKETALT sock, Account * acct);
 		void		sendServerData(  SOCKETALT sock, Account * acct);
 
-		void		writeSave( const char * buffer);
+	void		writeSave( const char * buffer, unsigned int bufferlen);
 		void		removeDeadSockets();
 };
 

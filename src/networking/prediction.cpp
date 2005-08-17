@@ -49,11 +49,12 @@ void		Prediction::InitInterpolation( Unit * un, const ClientState &last_packet_s
 	// A1 = old_position + old_velocity * 1 sec
 	A1 = A0 + VA;
 	// A3 is computed from position B and velocity VB
-	// A3 = new_position + new_velocity * packet_delay + new_acceleration/2 * packet_delay^2
-	A3 = B + VB*delay + AB*delay*delay*0.5;
+	// A3 = new_position + new_velocity
+	A2 = B + VB*delay + AB*delay*delay*0.5;
 	// A2 is the predicted position
-	// A2 = new_position + new_velocity * (packet_delay - 1 sec) + new_acceleration * (packet_delay - 1 sec)^2
-	A2 = A3 - (VB + AB*delay);
+	// A2 = new_position + new_velocity 
+	A3 = A2 + (VB + AB*delay);
+	/////////// NETFIXME: Formerly, A3 = final position and A2 = A3-1 velocity unit.
 }
 
 Transformation Prediction::Interpolate( Unit * un, double deltatime) const
@@ -71,12 +72,12 @@ void		NullPrediction::InitInterpolation( Unit * un, const ClientState &last_pack
 
 QVector		NullPrediction::InterpolatePosition( Unit * un, double deltatime) const
 {
-	return un->curr_physical_state.position;
+	return A2+ VB*deltatime;
 }
 
 Quaternion	NullPrediction::InterpolateOrientation( Unit * un, double deltatime) const
 {
-	return un->curr_physical_state.orientation;
+	return OB; //un->curr_physical_state.orientation;
 }
 
 /*************************************************************************************/
@@ -95,11 +96,12 @@ Quaternion	LinearPrediction::InterpolateOrientation( Unit * un, double deltatime
 
 Transformation LinearPrediction::Interpolate( Unit * un, double deltatime) const
 {
-	const Transformation old_pos( OA, A0);//un->curr_physical_state);
-	const Transformation new_pos( OB, A2);
 	if (deltatime>this->deltatime||this->deltatime==0) {
-		return un->curr_physical_state;
+		double delay=deltatime-this->deltatime;
+		return Transformation(OB, A2+ VB*delay);
 	} else {
+		const Transformation old_pos( OA, A0);//un->curr_physical_state);
+		const Transformation new_pos( OB, A2);
 		return (linear_interpolate_uncapped(  old_pos, new_pos, deltatime/this->deltatime));
 	}
 }
@@ -119,16 +121,17 @@ void		CubicSplinePrediction::InitInterpolation( Unit * un, const ClientState &la
 // Do at least linear interpolation since we inherit from LinearPrediction
 Quaternion	CubicSplinePrediction::InterpolateOrientation( Unit * un, double deltatime) const
 {
-	return un->curr_physical_state.orientation;
+	return OB; //un->curr_physical_state.orientation;
 }
 
 QVector		CubicSplinePrediction::InterpolatePosition( Unit * un, double deltatime) const
 {
 	// There should be another function called when received a new position update and creating the spline
-	if (this->deltatime==0) {
-		return un->curr_physical_state.position;
+	if (this->deltatime==0||deltatime>this->deltatime) {
+		double delay=deltatime-this->deltatime;
+		return A2+ VB*delay;
 	} else {
-		return QVector ( interpolation_spline.computePoint( deltatime/this->deltatime));
+		return QVector ( interpolation_spline.computePoint( deltatime/this->deltatime)); 
 	}
 }
 

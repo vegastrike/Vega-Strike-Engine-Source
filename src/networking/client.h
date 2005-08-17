@@ -84,6 +84,7 @@ public:
     void         clearLatestTimestamp( );
     unsigned int getLatestTimestamp( ) const;
     double       getDeltatime( ) const;
+	double       getNextDeltatime( ) const;
 
 	inline bool isTcp( ) const { return is_tcp; }
 	inline bool isUdp( ) const { return !is_tcp; }
@@ -95,6 +96,7 @@ private:
 	unsigned int	_old_timestamp;
 	unsigned int	_latest_timestamp;
 	double			_deltatime;
+	double			_next_deltatime;
 
 private:
 	Client( const Client& );

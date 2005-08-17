@@ -541,6 +541,7 @@ void bootstrap_main_loop () {
 		// Initiate the network if in networking play mode for each local player
 		if( srvip != "")
 		{
+			setNewTime(time(NULL)); // FIXME: Try to read this from server instead.
 			string srvport = vs_config->getVariable("network","server_port", "6777");
 			// Get the number of local players
 			Network = new NetClient[numplayers];

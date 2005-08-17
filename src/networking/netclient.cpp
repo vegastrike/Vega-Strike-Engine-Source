@@ -110,7 +110,7 @@ NetClient::NetClient()
     game_unit = NULL;
 	latest_timestamp=0;
     //old_time = 0;
-    cur_time = 0;
+    cur_time = getNewTime();
     enabled = 0;
     nbclients = 0;
 	jumpok = false;
@@ -314,11 +314,10 @@ void	NetClient::checkKey()
 int		NetClient::isTime()
 {
 	int ret=0;
-	cur_time += GetElapsedTime();
 	//COUT<<"cur_time="<<cur_time<<" - elapsed="<<GetElapsedTime()<<endl;
-	if( cur_time > NETWORK_ATOM)
+	if( (getNewTime()-cur_time) > NETWORK_ATOM)
 	{
-		cur_time = 0;
+		cur_time = getNewTime();
 		ret = 1;
 	}
 	return ret;
@@ -1101,17 +1100,18 @@ bool NetClient::Clients::remove( int x )
 
 Transformation	NetClient::Interpolate( Unit * un, double addtime)
 {
+	if (!un) return Transformation();
 //	return un->curr_physical_state;
 // NETFIXME: Interpolation is kind of borked...?
 	ClientPtr clt=Clients.get(un->GetSerial());
-	clt->elapsed_since_packet += addtime;
 	Transformation trans;
 	if (clt) {
+		clt->elapsed_since_packet += addtime;
 		trans=clt->prediction->Interpolate( un, clt->elapsed_since_packet);
-		cerr << "  *** INTERPOLATE (" << un->curr_physical_state.position.i << ", " << un->curr_physical_state.position.j << ", " << un->curr_physical_state.position.k << "): addtime=" << addtime << ", elapsed since packet=" << clt->elapsed_since_packet << ", deltatime=" << this->deltatime << "\n        =>        (" << trans.position.i << ", " << trans.position.j << ", " << trans.position.k << ")        Vel =    (" << un->Velocity.i << ", " << un->Velocity.j << ", " << un->Velocity.k << ")" << std::endl;
+		cerr << "  *** INTERPOLATE (" << un->curr_physical_state.position.i << ", " << un->curr_physical_state.position.j << ", " << un->curr_physical_state.position.k << "): next deltatime=" << clt->getNextDeltatime() << ", deltatime=" << clt->getDeltatime() << ", this-deltatime=" << this->deltatime << ", elapsed since packet=" << clt->elapsed_since_packet << "\n        =>        (" << trans.position.i << ", " << trans.position.j << ", " << trans.position.k << ")        Vel =    (" << un->Velocity.i << ", " << un->Velocity.j << ", " << un->Velocity.k << ")" << std::endl;
 	} else {
 		trans=un->curr_physical_state;
-		cerr << "  *** INTERPOLATE (CLIENT==NULL).";
+		cerr << "  *** INTERPOLATE (CLIENT==NULL).  Unit fullname=" << un->getFullname() << ";  name=" << un->name;
 	}
 	return trans;
 }

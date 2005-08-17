@@ -19,6 +19,7 @@ namespace UnitUtil {
 	bool setFlightgroupLeader (Unit *my_unit, Unit *un);
 	string getFgDirective(Unit *my_unit);
 	bool setFgDirective(Unit *my_unit,string inp);
+	int getPhysicsPriority(Unit * un);
 	int getFgSubnumber(Unit *my_unit);
 	int removeCargo(Unit *my_unit,string s, int quantity, bool erasezero);
         bool repair (Unit * my_unit);

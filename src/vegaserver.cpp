@@ -24,6 +24,7 @@
 #include "networking/netserver.h"
 #include "cmd/script/mission.h"
 #include "force_feedback.h"
+#include "lin_time.h"
 
 char SERVER = 1;
 Universe * _Universe;
@@ -37,6 +38,7 @@ void	VSExit( int code)
 
 int main( int argc, char **argv)
 {
+	setNewTime(time(NULL));
 	VSServer = new NetServer;
 	// Fake forcefeedback
     forcefeedback=new ForceFeedback();

@@ -165,15 +165,15 @@ void	NetServer::start(int argc, char **argv)
 	logintimeout = atoi( strlogintimeout.c_str());
 
 	strnetatom = vs_config->getVariable( "network", "network_atom", "0.2");
-	NETWORK_ATOM = (double) atoi( strnetatom.c_str());
+	NETWORK_ATOM = (double) atof( strnetatom.c_str());
 	strnetatom = vs_config->getVariable( "network", "damage_atom", "1");
-	DAMAGE_ATOM = (double) atoi( strnetatom.c_str());
+	DAMAGE_ATOM = (double) atof( strnetatom.c_str());
 	strnetatom = vs_config->getVariable( "network", "planet_atom", "10");
-	PLANET_ATOM = (double) atoi( strnetatom.c_str());
+	PLANET_ATOM = (double) atof( strnetatom.c_str());
 
 	InitTime();
 	UpdateTime();
-	savetime = 0;
+	savetime = getNewTime();
 	reconnect_time = getNewTime()+periodrecon;
 
 	string tmp;
@@ -325,7 +325,7 @@ void	NetServer::start(int argc, char **argv)
 		LI j;
 		for ( j=discList.begin(); j!=discList.end(); j++)
 		{
-			disconnect( (*j), __FILE__, PSEUDO__LINE__(543) );
+			disconnect( (*j), __FILE__, PSEUDO__LINE__(328) );
 		}
 		discList.clear();
 
@@ -364,43 +364,39 @@ void	NetServer::start(int argc, char **argv)
 		  StarSystem::ProcessPendingJumps();
 		/****************************** VS STUFF TO DO ************************************/
 
-		snaptime += GetElapsedTime();
-		planettime += GetElapsedTime();
-		if( snapchanged && snaptime>NETWORK_ATOM)
+		  if( snapchanged && (curtime - snaptime)>NETWORK_ATOM)
 		{
 			//COUT<<"SENDING SNAPSHOT ----------"<<end;
 			// If planet time we send planet and nebula info
-			if( planettime>PLANET_ATOM)
+			if( (curtime - planettime)>PLANET_ATOM)
 			{
 				zonemgr->broadcastSnapshots( true);
-				planettime = 0;
+				planettime = curtime;
 			}
 			// Otherwise we just send ships/bases... info
 			else
 				zonemgr->broadcastSnapshots( false);
 			snapchanged = 0;
-			snaptime = 0;
+			snaptime = curtime;
 		}
 #ifndef NET_SHIELD_SYSTEM_1
-		damagetime += GetElapsedTime();
 		// Time to send shield and damage info
-		if( damagetime>DAMAGE_ATOM)
+		  if( (curtime - damagetime)>DAMAGE_ATOM)
 		{
 			zonemgr->broadcastDamage();
-			damagetime = 0;
+			damagetime = curtime;
 		}
 #endif
 
 		// Check for automatic server status save time (in seconds)
 		//curtime = getNewTime();
-		savetime += GetElapsedTime();
 		//if( curtime - savetime > period*60)
-		if( savetime>SAVE_ATOM)
+		  if( (curtime - savetime)>SAVE_ATOM)
 		{
 			// Not implemented
 			cout<<">>> Saving server status... ";
 			this->save();
-			savetime = 0;
+			savetime = curtime;
 			cout<<"done."<<endl;
 		}
 
@@ -582,7 +578,7 @@ bool	NetServer::updateTimestamps( ClientPtr cltp, Packet & p )
 
 			// Packet is not late so we update timestamps only when receving a CMD_SNAPSHOT
 			// because we predict and interpolate based on the elapsed time between 2 SNAPSHOTS or PING
-			if( p.getCommand()==CMD_SNAPSHOT || p.getCommand()==CMD_PING)
+			if( p.getCommand()==CMD_SNAPSHOT || p.getCommand()==CMD_POSUPDATE || p.getCommand()==CMD_PING)
 			{
 				// Set old_timestamp to the old latest_timestamp and the latest_timestamp to the received one
 				clt->setLatestTimestamp( int_ts );

@@ -10,9 +10,60 @@
 #include "cmd/planet_generic.h"
 #include "faction_generic.h"
 #include "cmd/ai/fire.h"
+#include "gfx/cockpit.h"
 using std::string;
 extern Unit * getTopLevelOwner();
 namespace UnitUtil {
+	int getPhysicsPriority (Unit*  un) {
+		float rad= un->rSize();
+		clsptr untype=un->isUnit();
+		if (_Universe->isPlayerStarship(un)||untype==MISSILEPTR)
+			return 1;
+		const int HIGH_PRIORITY=2;
+		const int MEDIUM_PRIORITY=3;
+		const int LOW_PRIORITY=4;
+		const int NO_ENEMIES=SIM_QUEUE_SIZE/2+1;
+		const int NOT_VISIBLE_COMBAT=7;
+
+		Cockpit* cockpit=_Universe->AccessCockpit();
+		Unit * parent=cockpit->GetParent();
+		Camera * cam = cockpit->AccessCamera();
+		QVector campos = cam->GetPosition();
+		double dist =(campos-un->Position()).Magnitude()-rad;
+		float gun_range=0;
+		float missile_range=0;
+		if (parent) {
+			float dist1=UnitUtil::getDistance(parent,un);
+			if (dist1<dist) {
+				dist=dist1;
+			}
+			if (parent->Target()==un)
+				return 1;
+			float speed=0;
+			parent->getAverageGunSpeed(speed,gun_range,missile_range);
+		}
+		Unit * targ = un->Target();
+		if (_Universe->isPlayerStarship(targ)) {
+			return HIGH_PRIORITY;
+		}
+		string obj = UnitUtil::getFgDirective(un);
+		if (!(obj.length()==0||(obj.length()>=1&&obj[0]=='b'))) {
+			return MEDIUM_PRIORITY;
+		}
+		static int cargofac=FactionUtil::GetFaction("upgrades");
+		static int neutral=FactionUtil::GetFaction("neutral");
+		if (un->owner==getTopLevelOwner()||un->faction==cargofac||un->faction==neutral) {
+			return SIM_QUEUE_SIZE;
+		}
+		if (dist<gun_range)
+			return MEDIUM_PRIORITY;
+		if (dist<missile_range)
+			return LOW_PRIORITY;
+		if (targ)
+			return NOT_VISIBLE_COMBAT;
+		return NO_ENEMIES;
+	}
+
 	void orbit (Unit * my_unit, Unit * orbitee, float speed, QVector R, QVector S, QVector center) {
 		if (my_unit) {
 			my_unit->PrimeOrders (new PlanetaryOrbit (my_unit,speed/(3.1415926536*(S.Magnitude()+R.Magnitude())),0,R,S,center,orbitee));

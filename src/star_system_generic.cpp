@@ -34,7 +34,9 @@
 //#include "gfx/particle.h"
 //extern Music *muzak;
 //extern Vector mouseline;
+#include "cmd/unit_util.h"
 #include "cmd/unit_collide.h"
+#include "vs_random.h"
 #include "savegame.h"
 #include "networking/netclient.h"
 #include "in_kb_data.h"
@@ -287,7 +289,9 @@ void StarSystem::AddUnit(Unit *unit) {
     }
   }
   drawList.prepend(unit);
-  this->physics_buffer[this->current_sim_location].prepend(unit);
+  unsigned int priority=UnitUtil::getPhysicsPriority(unit);
+  unsigned int tmp=((unsigned int)vsrandom.genrand_int32())%priority;
+  this->physics_buffer[(this->current_sim_location+tmp)%SIM_QUEUE_SIZE].prepend(unit);
 }
 
 bool StarSystem::RemoveUnit(Unit *un) {
@@ -373,7 +377,6 @@ void CarSimUpdate (Unit *un, float height) {
 
 }
 
-
 void StarSystem::UpdateUnitPhysics (bool firstframe) {
   static   bool phytoggle=true;
   if (phytoggle) {
@@ -382,7 +385,7 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
     Unit * unit=NULL;
     try {
       while((unit = iter.current())!=NULL) {
-	int priority=1;
+    int priority=UnitUtil::getPhysicsPriority(unit);
 	int newloc=(current_sim_location+priority)%SIM_QUEUE_SIZE;
 	float backup=SIMULATION_ATOM;
 	SIMULATION_ATOM*=priority;

@@ -3,6 +3,7 @@
 #include "fileutil.h"
 #include "vs_globals.h"
 #include "vsfilesystem.h"
+#include "networking/lowlevel/netbuffer.h"
 
 //#ifdef _WIN32
 //#include <winsock.h> // for ntohl
@@ -51,26 +52,12 @@ void	FileUtil::WriteSaveFiles( string savestr, string xmlstr, string name)
 	f.Close();
 }
 
-vector<string>	FileUtil::GetSaveFromBuffer( const char * buffer)
+vector<string>	FileUtil::GetSaveFromBuffer( NetBuffer &buffer)
 {
 	vector<string> saves;
 	// Extract the length of save file
-	unsigned int save_size = ntohl( *( (unsigned int *)(buffer)));
-	cout<<"\tSave size = "<<save_size<<endl;
-	// Extract the length of xml file
-	unsigned int xml_size = ntohl( *( (unsigned int *)(buffer + sizeof( unsigned int) + save_size)));
-	cout<<"\tXML size = "<<xml_size<<endl;
-
-	int buflen = 2*sizeof( unsigned int)+save_size+xml_size;
-	char * savebuf = new char[buflen+1];
-	memcpy( savebuf, buffer, buflen);
-	savebuf[buflen] = 0;
-	savebuf[sizeof( unsigned int)+save_size]=0;
-	savebuf[2*sizeof( unsigned int)+xml_size+save_size]=0;
-	// First element is XML Unit and second element is player save
-	saves.push_back( string( savebuf+2*sizeof( unsigned int)+save_size));
-	saves.push_back( string( savebuf+sizeof( unsigned int)));
-	delete savebuf;
+	saves.push_back( buffer.getString() );
+	saves.push_back( buffer.getString() );
 
 	return saves;
 }

@@ -18,7 +18,7 @@ using namespace CryptoPP;
 namespace FileUtil
 {
 	// Returns 2 strings -> vector[0] = xml unit, vector[1] = player save
-	vector<string>	GetSaveFromBuffer( const char * buffer);
+	vector<string>	GetSaveFromBuffer( NetBuffer & buffer);
 	void			WriteSaveFiles( string savestr, string xmlstr, string name);
 
 	extern bool				use_crypto;

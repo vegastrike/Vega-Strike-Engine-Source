@@ -288,7 +288,7 @@ SOCKETALT	NetClient::init( const char* addr, unsigned short port )
 	if( strnetatom=="")
 		NETWORK_ATOM = 0.2;
 	else
-		NETWORK_ATOM = (double) atoi( strnetatom.c_str());
+		NETWORK_ATOM = (double) atof( strnetatom.c_str());
 
 	string nettransport;
 	nettransport = vs_config->getVariable( "network", "transport", "udp" );
