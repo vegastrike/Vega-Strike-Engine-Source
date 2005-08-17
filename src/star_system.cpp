@@ -276,13 +276,18 @@ void GameStarSystem::SwapOut () {
 
 }
 static double calc_blend_factor(double frac, int priority, int when_it_will_be_simulated, int cur_simulation_frame) {
+	bool is_at_end=when_it_will_be_simulated==SIM_QUEUE_SIZE;
   if (cur_simulation_frame>when_it_will_be_simulated) {
     when_it_will_be_simulated+=SIM_QUEUE_SIZE;
   }
   double distance = when_it_will_be_simulated-cur_simulation_frame;//number between for next SIM_FRAME and SIM_QUEUE_SIZE-1
   double when_it_was_simulated=when_it_will_be_simulated-(double)priority;
   double fraction_of_physics_frame=(cur_simulation_frame-when_it_was_simulated+frac-1)/priority;
-  return when_it_will_be_simulated==SIM_QUEUE_SIZE?1:fraction_of_physics_frame;
+  if (is_at_end) {
+	  return 1;
+  }else {
+	  return fraction_of_physics_frame;
+  }
 }
 extern double interpolation_blend_factor;
 //#define UPDATEDEBUG  //for hard to track down bugs
@@ -326,6 +331,9 @@ void GameStarSystem::Draw(bool DrawCockpit) {
     UnitCollection::UnitIterator iter = physics_buffer[sim_counter].createIterator();    
     while((unit = iter.current())!=NULL) {
       interpolation_blend_factor=calc_blend_factor(interpolation_blend_factor,unit->sim_atom_multiplier,sim_counter,current_sim_location);
+	  //if (par&&par->Target()==unit) {
+		  //printf ("i:%f s:%f m:%d c:%d l:%d\n",interpolation_blend_factor,saved_interpolation_blend_factor,unit->sim_atom_multiplier,sim_counter,current_sim_location);
+	  //}
       ((GameUnit<Unit> *)unit)->Draw();
       interpolation_blend_factor=saved_interpolation_blend_factor;
       iter.advance();
