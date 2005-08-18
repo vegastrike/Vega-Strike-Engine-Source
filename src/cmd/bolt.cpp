@@ -29,13 +29,13 @@ bolt_draw::~bolt_draw () {
     delete animations[i];
   }
   for (i=0;i<balls.size();i++) {
-    for (unsigned int j=0;j<balls[i].size();j++) {
-      delete balls[i][j];
+    for (int j=balls[i].size()-1;j>=0;j--) {
+      balls[i][j].Destroy(j);
     }
   }
   for (i=0;i<bolts.size();i++) {
-    for (unsigned int j=0;j<bolts[i].size();j++) {
-      delete bolts[i][j];
+    for (unsigned int j=bolts[i].size()-1;j>=0;j--) {
+      bolts[i][j].Destroy(j);
     }
   }
   delete boltdecals;
@@ -68,60 +68,44 @@ inline void BlendTrans (Matrix & drawmat, const QVector & cur_position, const QV
     drawmat.p = prev_position.Scale(1-interpolation_blend_factor) + cur_position.Scale(interpolation_blend_factor);    
 }
 
-Bolt::Bolt (const weapon_info & typ, const Matrix &orientationpos,  const Vector & shipspeed, Unit * owner): col (typ.r,typ.g,typ.b,typ.a), cur_position (orientationpos.p), ShipSpeed (shipspeed) {
+Bolt::Bolt (const weapon_info * typ, const Matrix &orientationpos,  const Vector & shipspeed, Unit * owner):  cur_position (orientationpos.p), ShipSpeed (shipspeed) {
   VSCONSTRUCT2('t')
   bolt_draw *q= _Universe->activeStarSystem()->bolts;
   prev_position= cur_position;
   this->owner = owner;
-  type = typ.type;
-  damage = typ.Damage+typ.PhaseDamage;
-  if (damage) 
-    percentphase=(unsigned char) (255.*typ.PhaseDamage/damage);
-  else
-    percentphase=0;
-  longrange = typ.Longrange;
-  radius = typ.Radius;
-  speed = typ.Speed/(type==weapon_info::BOLT?typ.Length:typ.Radius);//will scale it by length long!
-  range = typ.Range/(type==weapon_info::BOLT?typ.Length:typ.Radius);
+  this->type = typ;
   curdist = 0;
   CopyMatrix (drawmat,orientationpos);
   
-  if (type==weapon_info::BOLT) {
-    ScaleMatrix (drawmat,Vector (typ.Radius,typ.Radius,typ.Length));
-    //    if (q->boltmesh==NULL) {
-    //      CreateBoltMesh();
-    //    }
-    decal = q->boltdecals->AddTexture (typ.file.c_str(),MIPMAP);
+  if (typ->type==weapon_info::BOLT) {
+    ScaleMatrix (drawmat,Vector (typ->Radius,typ->Radius,typ->Length));
+    decal = q->boltdecals->AddTexture (typ->file.c_str(),MIPMAP);
     if (decal>=(int)q->bolts.size()) {
-      q->bolts.push_back (vector <Bolt *>());
-      int blargh = q->boltdecals->AddTexture (typ.file.c_str(),MIPMAP);
+      q->bolts.push_back (vector <Bolt>());
+      int blargh = q->boltdecals->AddTexture (typ->file.c_str(),MIPMAP);
       if (blargh>=(int)q->bolts.size()) {
-	q->bolts.push_back (vector <Bolt *>());	
+	q->bolts.push_back (vector <Bolt>());	
       }
       q->cachedecals.push_back (blargh);
     }
-    q->bolts[decal].push_back (this);
+    q->bolts[decal].push_back (*this);
   } else {
-    ScaleMatrix (drawmat,Vector (typ.Radius,typ.Radius,typ.Radius));
+    ScaleMatrix (drawmat,Vector (typ->Radius,typ->Radius,typ->Radius));
     decal=-1;
     for (unsigned int i=0;i<q->animationname.size();i++) {
-      if (typ.file==q->animationname[i]) {
+      if (typ->file==q->animationname[i]) {
 	decal=i;
       }
     }
     if (decal==-1) {
       decal = q->animations.size();
-      q->animationname.push_back (typ.file);
-      q->animations.push_back (new Animation (typ.file.c_str(), true,.1,MIPMAP,false));//balls have their own orientation
+      q->animationname.push_back (typ->file);
+      q->animations.push_back (new Animation (typ->file.c_str(), true,.1,MIPMAP,false));//balls have their own orientation
       q->animations.back()->SetPosition (cur_position);
-      q->balls.push_back (vector <Bolt *> ());
+      q->balls.push_back (vector <Bolt> ());
     }
-    q->balls[decal].push_back (this);
+    q->balls[decal].push_back (*this);
   }
-#ifdef PERBOLTSOUND
-  sound = AUDCreateSound (typ.sound,false);
-  AUDAdjustSound (sound,cur_position,shipspeed+drawmat.getR().Scale(speed));
-#endif
 }
 
 void Bolt::Draw () {
@@ -141,8 +125,8 @@ void Bolt::Draw () {
   GFXDisable(TEXTURE1);
   GFXEnable (TEXTURE0);
   GFXAlphaTest (GREATER,.1);
-  vector <vector <Bolt *> >::iterator i;
-  vector <Bolt *>::iterator j;
+  vector <vector <Bolt> >::iterator i;
+  vector <Bolt>::iterator j;
   vector <Animation *>::iterator k = q->animations.begin();
   for (i=q->balls.begin();i!=q->balls.end();i++,k++) {
     Animation * cur= *k;
@@ -150,24 +134,20 @@ void Bolt::Draw () {
     //FIXME::MuST USE DRAWNOTRANSFORMNOW cur->CalculateOrientation (result);
     for (j=i->begin();j!=i->end();j++) {//don't update time more than once
       Vector p,q,r;
+      Bolt * bolt=&*j;
+      const weapon_info * type = bolt->type;
       _Universe->AccessCamera()->GetOrientation(p,q,r);
-      BlendTrans ((*j)->drawmat,(*j)->cur_position,(*j)->prev_position);
+      BlendTrans (bolt->drawmat,bolt->cur_position,bolt->prev_position);
       Matrix tmp;
-      VectorAndPositionToMatrix(tmp,p,q,r,(*j)->drawmat.p);
+      VectorAndPositionToMatrix(tmp,p,q,r,bolt->drawmat.p);
       //result[12]=(*j)->drawmat[12];
       //result[13]=(*j)->drawmat[13];
       //result[13]=(*j)->drawmat[14];
       //            cur->SetPosition (result[12],result[13],result[14]);
-      cur->SetDimensions ((*j)->radius,(*j)->radius);
+      cur->SetDimensions (bolt->type->Radius,bolt->type->Radius);
       //      cur->DrawNow(result);
       GFXLoadMatrixModel (tmp );
-#ifdef PERBOLTSOUND
-#ifdef PERFRAMESOUND
-      if ((*j)->sound!=-1)
-	AUDAdjustSound ((*j)->sound,Vector ((*j)->drawmat[12],(*j)->drawmat[13],(*j)->drawmat[14]),(*j)->ShipSpeed+(*j)->speed*Vector ((*j)->drawmat[8],(*j)->drawmat[9],(*j)->drawmat[10]));
-#endif
-#endif
-      GFXColorf ((*j)->col);
+      GFXColor4f (type->r,type->g,type->b,type->a);
       cur->DrawNoTransform(false,true);
     }
     //    cur->UpdateTime (GetElapsedTime());//update the time of the animation;
@@ -179,23 +159,26 @@ void Bolt::Draw () {
   }else {
     GFXBlendMode (ONE,ZERO);
   }
-  if (q->boltmesh) {
-    q->boltmesh->LoadDrawState();
-    q->boltmesh->BeginDrawState();
+  GFXVertexList * qmesh=q->boltmesh;
+  if (qmesh) {
+
+    qmesh->LoadDrawState();
+    qmesh->BeginDrawState();
     int decal=0;
     for (i=q->bolts.begin();i!=q->bolts.end();decal++,i++) {
       Texture * dec = q->boltdecals->GetTexture(decal);
       if (dec) {
 	dec->MakeActive();
 	for (j=i->begin();j!=i->end();j++) {
-	  BlendTrans ((*j)->drawmat,(*j)->cur_position,(*j)->prev_position);
-	  GFXLoadMatrixModel ((*j)->drawmat);
-	  GFXColorf ((*j)->col);
-	  q->boltmesh->Draw();
+	  BlendTrans ((*j).drawmat,(*j).cur_position,(*j).prev_position);
+	  GFXLoadMatrixModel ((*j).drawmat);
+          const weapon_info * wt=(*j).type;
+	  GFXColor4f (wt->r,wt->g,wt->b,wt->a);
+	  qmesh->Draw();
 	}
       }
     }
-    q->boltmesh->EndDrawState();
+    qmesh->EndDrawState();
   }
   GFXEnable  (LIGHTING);
   GFXEnable  (CULLFACE);
@@ -205,44 +188,17 @@ void Bolt::Draw () {
   GFXEnable (TEXTURE0);
   GFXColor4f(1,1,1,1);
 }
+extern void BoltDestroyGeneric(Bolt * whichbolt, int index, int decal, bool isBall);
 
-Bolt::~Bolt () {
+void Bolt::Destroy (int index) {
   VSDESTRUCT2
   bolt_draw *q = _Universe->activeStarSystem()->bolts;
-  vector <vector <Bolt *> > *target;
-  if (type==weapon_info::BOLT) { 
-    target = &q->bolts;
+  bool isBall=true;
+  if (type->type==weapon_info::BOLT) { 
     q->boltdecals->DelTexture (decal);
+    isBall=false;
   } else {
-    target = &q->balls;
-  }
-  vector <Bolt *>::iterator tmp= std::find ((*target)[decal].begin(),(*target)[decal].end(),this); 
-  if (tmp!=(*target)[decal].end()) {
-    (*target)[decal].erase(tmp);
-  } else {
-    //might as well look for potential faults! Doesn't cost us time
-    VSFileSystem::vs_fprintf (stderr,"Bolt Fault! Not found in draw queue! Attempting to recover\n");
-    for (vector <vector <Bolt *> > *srch = &q->bolts;srch!=NULL;srch=&q->balls) {
-      for (unsigned int mdecal=0;mdecal<(*srch).size();mdecal++) {
-	vector <Bolt *>::iterator mtmp= (*srch)[mdecal].begin();
-	while (mtmp!=(*srch)[mdecal].end()) {
-	  std::find ((*srch)[mdecal].begin(),(*srch)[mdecal].end(),this);       
-	  if (mtmp!=(*srch)[mdecal].end()) {
-	    (*srch)[mdecal].erase (mtmp);
-	    VSFileSystem::vs_fprintf (stderr,"Bolt Fault Recovered\n");
-	  }
-	}
-      }
-      if (srch==&q->balls) {
-	break;
-      }
-    }
 
   }
-#ifdef PERBOLTSOUND
-  if (sound!=-1) {
-    AUDStopPlaying(sound);
-    AUDDeleteSound (sound);
-  }
-#endif
+  BoltDestroyGeneric(this, index,decal,isBall);
 }

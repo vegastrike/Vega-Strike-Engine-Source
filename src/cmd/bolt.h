@@ -9,24 +9,30 @@
 class Animation;
 class Unit;
 class Bolt {
-  GFXColor col;
+private:
+  const weapon_info* type;//beam or bolt;
   Matrix drawmat;
   QVector cur_position;
-  QVector prev_position;//beams don't change heading.
-  weapon_info::WEAPON_TYPE type;//beam or bolt;
-  unsigned char percentphase;//0 is 0% is phased damage, 255 is 100%
-  int decal;//which image it uses
-  Unit *owner;
-  float damage, curdist,longrange;
-  float speed, range,radius;
   Vector ShipSpeed;
+  QVector prev_position;//beams don't change heading.
+  Unit *owner;
+  float curdist;
+  int decal;//which image it uses
   bool Collide (Unit * target);
  public:
-  Bolt(const weapon_info &type, const Matrix &orientationpos, const Vector & ShipSpeed, Unit *owner);//makes a bolt
-  ~Bolt();
+  bool operator == (const Bolt & b) const{
+    
+    return owner==b.owner
+      &&curdist==b.curdist
+      &&cur_position==b.cur_position
+      &&prev_position==b.prev_position;
+  }
+  Bolt(const weapon_info *type, const Matrix &orientationpos, const Vector & ShipSpeed, Unit *owner);//makes a bolt
+  void Destroy(int index);
   static void Draw();
-  bool Update();///www.cachunkcachunk.com
-  bool Collide();
+  bool Update(int index);
+  bool Collide(int index);
+  void noop()const{}
 };
 class bolt_draw {
 public:
@@ -34,8 +40,8 @@ public:
   static GFXVertexList * boltmesh;
   vector <string> animationname;
   vector <Animation *> animations;
-  vector <vector <Bolt *> > bolts;
-  vector <vector <Bolt *> > balls;
+  vector <vector <Bolt> > bolts;
+  vector <vector <Bolt> > balls;
   vector <int> cachedecals;
   bolt_draw();
   ~bolt_draw();

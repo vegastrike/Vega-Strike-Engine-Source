@@ -1375,7 +1375,7 @@ float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) cons
    if (tmpcos>0) {
       tmpcos = dist*dist - tmpcos*tmpcos;
 	  if( tmpcos >0)
-    	  tmpcos = targ->rSize()/sqrt( tmpcos);//one over distance perpendicular away from straight ahead times the size...high is good WARNING POTENTIAL DIV/0
+    	  tmpcos = targ->rSize()/sqrtf( tmpcos);//one over distance perpendicular away from straight ahead times the size...high is good WARNING POTENTIAL DIV/0
 	  else
 		  tmpcos = 1;
    } else {
@@ -1389,7 +1389,15 @@ float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) cons
    if (!FINITE(dist)||dist<0) {
      dist=0;
    }
-   return tmpcos;
+   float tmpsin=sqrtf(1-tmpcos*tmpcos);
+   float turnangle = SIMULATION_ATOM*(SIMULATION_ATOM*.5*(limits.yaw+limits.pitch)+sqrtf(AngularVelocity.i*AngularVelocity.i+AngularVelocity.j*AngularVelocity.j));
+   float osin=sin(turnangle);
+   float ocos=cos(turnangle);
+   float cos1=ocos*tmpcos-tmpsin*osin;
+   float cos2=ocos*tmpcos+tmpsin*osin;// sin could be opposite
+   float ret=tmpmax(cos1,cos2);
+   
+   return tmpmax(tmpcos,ret);
 }
 
 float Unit::cosAngleFromMountTo (Unit * targ, float & dist) const{

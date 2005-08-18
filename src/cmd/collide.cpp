@@ -120,7 +120,7 @@ bool usehuge_table() {
   seed = (seed * A + C) % M;
   return seed<(M/100);
 }
-bool Bolt::Collide () {
+bool Bolt::Collide (int index) {
   UnitCollection *candidates[2];  
   bool use_huge_list=usehuge_table();
   _Universe->activeStarSystem()->collidetable->c.Get (cur_position,candidates,use_huge_list);
@@ -136,7 +136,7 @@ bool Bolt::Collide () {
 	  if (j==0&&use_huge_list) {
 	    _Universe->activeStarSystem()->collidetable->c.AddHugeToActive(un);
 	  }
-	  delete this;
+	  Destroy(index);
 	  return true;
 	}
 	

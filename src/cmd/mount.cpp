@@ -222,10 +222,10 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 					ref.gun->Init(Transformation(orient,pos.Cast()),*type,owner);
 			  break;
 			case weapon_info::BOLT:
-			  new Bolt (*type, mat, velocity, owner);//FIXME turrets! Velocity      
+			  Bolt (type, mat, velocity, owner).noop();//FIXME turrets! Velocity      
 			  break;
 			case weapon_info::BALL:
-			  new Bolt (*type,mat, velocity,  owner);//FIXME:turrets won't work      
+			  Bolt (type,mat, velocity,  owner).noop();//FIXME:turrets won't work      
 			  break;
 			case weapon_info::PROJECTILE:
 			{

@@ -16,13 +16,13 @@ bolt_draw::~bolt_draw () {
 
   unsigned int i;
   for (i=0;i<balls.size();i++) {
-    for (unsigned int j=0;j<balls[i].size();j++) {
-      delete balls[i][j];
+    for (int j=balls[i].size()-1;j>=0;j--) {
+      balls[i][j].Destroy(j);
     }
   }
   for (i=0;i<bolts.size();i++) {
-    for (unsigned int j=0;j<bolts[i].size();j++) {
-      delete bolts[i][j];
+    for (int j=balls[i].size()-1;j>=0;j--) {
+      bolts[i][j].Destroy(j);
     }
   }
 }
@@ -47,27 +47,18 @@ bolt_draw::bolt_draw () {
   }
 }
 
-Bolt::Bolt (const weapon_info & typ, const Matrix &orientationpos,  const Vector & shipspeed, Unit * owner): col (typ.r,typ.g,typ.b,typ.a), cur_position (orientationpos.p), ShipSpeed (shipspeed) {
+Bolt::Bolt (const weapon_info * typ, const Matrix &orientationpos,  const Vector & shipspeed, Unit * owner):cur_position (orientationpos.p), ShipSpeed (shipspeed) {
   VSCONSTRUCT2('t')
   bolt_draw *q= _Universe->activeStarSystem()->bolts;
   prev_position= cur_position;
   this->owner = owner;
   this->decal = 0;
-  type = typ.type;
-  damage = typ.Damage+typ.PhaseDamage;
-  if (damage) 
-    percentphase=(unsigned char) (255.*typ.PhaseDamage/damage);
-  else
-    percentphase=0;
-  longrange = typ.Longrange;
-  radius = typ.Radius;
-  speed = typ.Speed/(type==weapon_info::BOLT?typ.Length:typ.Radius);//will scale it by length long!
-  range = typ.Range/(type==weapon_info::BOLT?typ.Length:typ.Radius);
+  this->type = typ;
   curdist = 0;
   CopyMatrix (drawmat,orientationpos);
   
-  if (type==weapon_info::BOLT) {
-    ScaleMatrix (drawmat,Vector (typ.Radius,typ.Radius,typ.Length));
+  if (type->type==weapon_info::BOLT) {
+    ScaleMatrix (drawmat,Vector (typ->Radius,typ->Radius,typ->Length));
     //    if (q->boltmesh==NULL) {
     //      CreateBoltMesh();
     //    }
@@ -84,7 +75,7 @@ Bolt::Bolt (const weapon_info & typ, const Matrix &orientationpos,  const Vector
     q->bolts[decal].push_back (this);
 	*/
   } else {
-    ScaleMatrix (drawmat,Vector (typ.Radius,typ.Radius,typ.Radius));
+    ScaleMatrix (drawmat,Vector (typ->Radius,typ->Radius,typ->Radius));
 	/*
     decal=-1;
     for (unsigned int i=0;i<q->animationname.size();i++) {
@@ -106,37 +97,7 @@ Bolt::Bolt (const weapon_info & typ, const Matrix &orientationpos,  const Vector
 
 void Bolt::Draw () {
 }
-Bolt::~Bolt () {
-  VSDESTRUCT2
-  bolt_draw *q = _Universe->activeStarSystem()->bolts;
-  vector <vector <Bolt *> > *target;
-  if (type==weapon_info::BOLT) { 
-    target = &q->bolts;
-    //q->boltdecals->DelTexture (decal);
-  } else {
-    target = &q->balls;
-  }
-  vector <Bolt *>::iterator tmp= std::find ((*target)[decal].begin(),(*target)[decal].end(),this); 
-  if (tmp!=(*target)[decal].end()) {
-    (*target)[decal].erase(tmp);
-  } else {
-    //might as well look for potential faults! Doesn't cost us time
-    VSFileSystem::vs_fprintf (stderr,"Bolt Fault! Not found in draw queue! Attempting to recover\n");
-    for (vector <vector <Bolt *> > *srch = &q->bolts;srch!=NULL;srch=&q->balls) {
-      for (unsigned int mdecal=0;mdecal<(*srch).size();mdecal++) {
-	vector <Bolt *>::iterator mtmp= (*srch)[mdecal].begin();
-	while (mtmp!=(*srch)[mdecal].end()) {
-	  std::find ((*srch)[mdecal].begin(),(*srch)[mdecal].end(),this);       
-	  if (mtmp!=(*srch)[mdecal].end()) {
-	    (*srch)[mdecal].erase (mtmp);
-	    VSFileSystem::vs_fprintf (stderr,"Bolt Fault Recovered\n");
-	  }
-	}
-      }
-      if (srch==&q->balls) {
-	break;
-      }
-    }
-
-  }
+extern void BoltDestroyGeneric(Bolt * whichbolt, int index, int decal, bool isBall);
+void Bolt::Destroy(int index) {
+  BoltDestroyGeneric(this,index,decal,type->type!=weapon_info::BOLT);
 }
