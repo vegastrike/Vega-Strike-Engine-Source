@@ -308,7 +308,7 @@ bool StarSystem::RemoveUnit(Unit *un) {
     }
   }
   bool removed =false;
-  if (removed2) {
+  if (1) {
     UnitCollection::UnitIterator iter = drawList.createIterator();
     Unit *unit;
     while((unit = iter.current())!=NULL) {
