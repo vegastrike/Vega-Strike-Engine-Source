@@ -52,13 +52,13 @@ namespace UnitUtil {
 		if (!(obj.length()==0||(obj.length()>=1&&obj[0]=='b'))) {
 			return MEDIUM_PRIORITY;
 		}
+		if (dist<gun_range)
+			return MEDIUM_PRIORITY;
 		static int cargofac=FactionUtil::GetFaction("upgrades");
 		static int neutral=FactionUtil::GetFaction("neutral");
 		if (un->owner==getTopLevelOwner()||un->faction==cargofac||un->faction==neutral) {
 			return SIM_QUEUE_SIZE;
 		}
-		if (dist<gun_range)
-			return MEDIUM_PRIORITY;
 		if (dist<missile_range)
 			return LOW_PRIORITY;
 		if (targ){
