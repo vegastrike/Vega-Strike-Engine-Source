@@ -72,7 +72,7 @@ Future
 
 New Developers
 * Graphical stuff
-** make engine lights proportional to accel, not to speed
+** make engine lights proportional to accel, not to speed - in the works
 *Run-time changeable configuration option and key-binding infrastructure
 *Remove duplicate tags/ move out of the way of text.
 
@@ -88,7 +88,7 @@ New Developers
 * Cockpit
 **Highlight weapons in range in the gun VDU
 
-* File loading: 
+* File loading:
 ** Load balance hash-table
 ** Support full expressivity of BFXM animations
 ** Install time generation of all BSP files
