@@ -407,9 +407,9 @@ void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
   static float missiledelay =XMLSupport::parse_float(vs_config->getVariable("AI","MissileGunDelay","4"));
   static float missiledelayprob =XMLSupport::parse_float(vs_config->getVariable("AI","MissileGunDelayProbability",".25"));
   bool fire_missile=lockmissile&&rand()<RAND_MAX*missileprobability*SIMULATION_ATOM;
-
+  delay+=SIMULATION_ATOM;
   if (shouldfire&&delay<rxntime) {
-    delay+=SIMULATION_ATOM;
+
     return;
   }else if (!shouldfire) {
     delay=0;
