@@ -28,7 +28,7 @@ double GetElapsedTime();
 void UpdateTime();
 void micro_sleep( unsigned int n);
 double getNewTime();
-double setNewTime(double newnewtime);
+void setNewTime(double newnewtime);
 
 extern float getTimeCompression();
 extern void setTimeCompression(float tc);
