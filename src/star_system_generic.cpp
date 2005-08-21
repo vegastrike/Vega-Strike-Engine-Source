@@ -391,6 +391,7 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
 	SIMULATION_ATOM*=priority;
 	unit->sim_atom_multiplier=priority;
 	unit->ExecuteAI(); 
+        unit->ResetThreatLevel();
 	unit->CollideAll();
       unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits());    
       if (newloc==current_sim_location) {

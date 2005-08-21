@@ -250,7 +250,7 @@ void Universe::Generate2( StarSystem * ss)
   LoadStarSystem (ss);
 
   pushActiveStarSystem(ss);
-  for (int tume=0;tume<=6;++tume) {
+  for (int tume=0;tume<=6*SIM_QUEUE_SIZE+1;++tume) {
     ss->ExecuteUnitAI();
     ss->UpdateUnitPhysics(true);    
   }
