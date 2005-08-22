@@ -162,8 +162,17 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
 
 template <class UnitType>
 void GameUnit<UnitType>::Thrust(const Vector &amt1,bool afterburn){
+  
+  if (this->afterburntype == 0)
   afterburn=afterburn&&this->energy>this->afterburnenergy*SIMULATION_ATOM;
+  if (this->afterburntype == 1)
+	  afterburn=afterburn&&this->fuel>0;
+  if (this->afterburntype == 2)
+	  afterburn=afterburn&&this->warpenergy>0;
+
   Unit::Thrust( amt1, afterburn);
+
+
   static bool must_afterburn_to_buzz=XMLSupport::parse_bool(vs_config->getVariable("audio","buzzing_needs_afterburner","false"));
   if (_Universe->isPlayerStarship(this)!=NULL) {
     static int playerengine = AUDCreateSound (vs_config->getVariable ("unitaudio","player_afterburner","sfx10.wav"),true);

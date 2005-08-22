@@ -411,6 +411,10 @@ Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, Q
 bool Unit::Collide (Unit * target) {
   clsptr targetisUnit=target->isUnit();
   clsptr thisisUnit=this->isUnit();
+  static float NEBULA_SPACE_DRAG=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_space_drag","0.01"));
+  if ((targetisUnit==NEBULAPTR) && ((Position()-target->Position()).Magnitude() < radial_size+target->radial_size))
+	  this->Velocity = this->Velocity * (1 - NEBULA_SPACE_DRAG); // why? why not?
+//  if (target==this||((targetisUnit!=NEBULAPTR&&thisisUnit!=NEBULAPTR)&&(owner==target||target->owner==this||(owner!=NULL&&target->owner==owner))))
   if (target==this||((targetisUnit!=NEBULAPTR&&thisisUnit!=NEBULAPTR)&&(owner==target||target->owner==this||(owner!=NULL&&target->owner==owner))))
     return false;
   if (targetisUnit==ASTEROIDPTR&&thisisUnit==ASTEROIDPTR)

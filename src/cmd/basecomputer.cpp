@@ -121,11 +121,6 @@ static GFXColor NO_MONEY_COLOR(){
   static GFXColor NO_MONEY_COLOR=getConfigColor("no_money",GFXColor(1,.3,.3,1));
   return  NO_MONEY_COLOR;        // Start out with bogus color.
 }
-static GFXColor ITEM_DESTROYED_COLOR(){
-  static GFXColor NO_MONEY_COLOR=getConfigColor("upgrade_item_destroyed",GFXColor(.2,.2,.2,1));
-  return  NO_MONEY_COLOR;        // Start out with bogus color.
-
-}
 // Color of the text of a category.
 static GFXColor CATEGORY_TEXT_COLOR(){
   static GFXColor CTC=getConfigColor("base_category_color",GFXColor(0,.75,0,1));
@@ -264,6 +259,7 @@ const BaseComputer::WctlTableEntry BaseComputer::WctlCommandTable[] = {
     BaseComputer::WctlTableEntry ( "BuyUpgrade", "", &BaseComputer::buyUpgrade ),
     BaseComputer::WctlTableEntry ( "SellUpgrade", "", &BaseComputer::sellUpgrade ),
     BaseComputer::WctlTableEntry ( "FixUpgrade", "", &BaseComputer::fixUpgrade ),
+
     BaseComputer::WctlTableEntry ( "BuyShip", "", &BaseComputer::buyShip ),
     BaseComputer::WctlTableEntry ( "SellShip", "", &BaseComputer::sellShip ),
     BaseComputer::WctlTableEntry ( "AcceptMission", "", &BaseComputer::acceptMission ),
@@ -391,7 +387,7 @@ float PercentOperational (Unit * un, std::string name, std::string category="upg
     if (un->canUpgrade(upgrade,-1,-1,0,true,percent,makeTemplateUpgrade(un->name,un->faction),false)) {
       if (percent)
         return percent;
-      else return .5;
+      else return .5;//FIXME does not interact well with radar type
     }else if (percent>0) return percent;
   }
   return 1.0;
@@ -2253,48 +2249,89 @@ void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, 
 		  }
 	
 
+
 //*******************************************************************************
+
         // Clear color means use the text color in the picker.
 		GFXColor base_color = (transOK? (item.mission?MISSION_COLOR():GUI_CLEAR) : NO_MONEY_COLOR());
+
 		GFXColor final_color;
 
+
+
 		if(transType == SELL_UPGRADE&&m_player.GetUnit())
+
 		{
+
 			//Adjust the base color if the item is 'damaged'
+
 			double percent_working = PercentOperational(m_player.GetUnit(),item.content,item.category);;
 
+
 			//Unit* playerUnit = m_player.GetUnit();
+
 			//Unit* upgradeUnit = getUnitFromUpgradeName(originalName, playerUnit->faction);
+
 			//playerUnit->canUpgrade(upgradeUnit,0,0,0,false,percent_working,NULL,false);
+
+
 
 			//UnitConstCache::getCachedConst(StringIntKey(itemName, FactionUtil::GetFaction("upgrades")))
 
+
+
 			//Unit* playerUnit = m_parent.m_player.GetUnit();
+
 			//if(!playerUnit) {percent_working = 1.0;}
+
 			//else
+
 			//{
+
 			//	playerUnit->canUpgrade(m_newPart, m_selectedMount, m_selectedTurret, m_addMultMode, false, percent_working, m_theTemplate);
+
 			//}
 
+
+
 			final_color = GFXColor(
+
 				(1.0*percent_working)+(1.0*(1.0-percent_working)),
+
 				(1.0*percent_working)+(0.0*(1.0-percent_working)),
+
 				(0.0*percent_working)+(0.0*(1.0-percent_working)),
+
 				(1.0*percent_working)+(1.0*(1.0-percent_working))
+
 				);
 
+
+
 			if(percent_working == 1.0){final_color = base_color;}	//	working = normal color
-			if(percent_working == 0.0){final_color = ITEM_DESTROYED_COLOR();}	//	dead = grey
+
+			if(percent_working == 0.0){final_color = GFXColor(0.2,0.2,0.2);}	//	dead = grey
+
 		}
+
 		else
+
 			final_color = base_color;
 
+
+
         //SimplePickerCell cell(itemName, item.content, (transOK? (item.mission?MISSION_COLOR():GUI_CLEAR) : NO_MONEY_COLOR()), i);
+
         SimplePickerCell *cell = new SimplePickerCell(itemName, item.content, final_color, i);
 
+
+
 	//	cell.textColor(
+
 	//		GFXColor(1,0,0)
+
 //*******************************************************************************
+
         // Add the cell.
         if(parentCell) {
             parentCell->addChild(cell);
@@ -2306,19 +2343,28 @@ void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, 
 
 
 // Load the controls for the CARGO display.
+
+extern   int SelectDockPort (Unit * utdw, Unit * parent);
+
 void BaseComputer::loadCargoControls(void) {
     // Make sure there's nothing in the transaction lists.
     resetTransactionLists();
-
-    // Set up the base dealer's transaction list.
+    static bool requireportforlaunch = XMLSupport::parse_bool(vs_config->getVariable ("physics","cargo_wingmen_only_with_dockport","false"));
+    static bool portallowsupgrades = XMLSupport::parse_bool(vs_config->getVariable ("physics","dockport_allows_ugrade_storage","false"));
+    // Set up the base dealer's transaction list. Note that you need a docking port to buy starships!
 	vector<string> donttakethis;
 	donttakethis.push_back("missions");
+
+// if no docking port OR no permission, no upgrades   
+	if ((SelectDockPort (m_player.GetUnit(), m_player.GetUnit()) < 0 ) || (!portallowsupgrades))
 	donttakethis.push_back("upgrades");
-        static bool starship_purchase=XMLSupport::parse_bool(vs_config->getVariable("physics","starships_as_cargo","true"));
-        if (!starship_purchase) {
+
+// if no docking port AND no permission, no ships (different from above for VS compatibility)
+    if ((SelectDockPort (m_player.GetUnit(), m_player.GetUnit()) < 0 ) && (requireportforlaunch))
           donttakethis.push_back("starships");
-          donttakethis.push_back("starship");          
-        }
+
+
+    
     loadMasterList(m_base.GetUnit(), vector<string>(),donttakethis, true, m_transList1); // Anything but a mission.
     SimplePicker* basePicker = static_cast<SimplePicker*>( window()->findControlById("BaseCargo") );
     assert(basePicker != NULL);
@@ -4170,7 +4216,7 @@ bool BaseComputer::buyShip(const EventCommandId& command, Control* control) {
     if(!(playerUnit && baseUnit && item)) {
         return true;
     }
-    ::buyShip(baseUnit,playerUnit,item->content,item->category.find("My_Fleet") != string::npos,false,this);
+    ::buyShip(baseUnit,playerUnit,item->content,item->category.find("My_Fleet") != string::npos,true,this); // last was false BUCO
     return true;
 }
 
@@ -5392,6 +5438,12 @@ bool BaseComputer::actionQuitGame(const EventCommandId& command, Control* contro
 
 bool BaseComputer::actionConfirmedSaveGame() {
 	Unit* player = m_player.GetUnit();
+    if (player->name == "return_to_cockpit")
+	{
+	showAlert ("Return to a base to save.");
+    return false; // should be false, but causes badness.
+		//		player = m_base.GetUnit(); // messes tuff up, besides, not having this appears to be good.
+	}
 	StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("InputText") );
 	bool ok=true;
 	if (desc) {	   

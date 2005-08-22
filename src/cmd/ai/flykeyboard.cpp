@@ -532,6 +532,7 @@ void FlyByKeyboard::SheltonKey(const KBData&,KBSTATE k) {
 void FlyByKeyboard::JumpKey(const KBData&,KBSTATE k) {
   switch (k) {
   case PRESS:
+     if (_Universe->AccessCockpit()->GetParent()->isSubUnit() == false)
     g().jumpkey=true;
     break;
   case UP:

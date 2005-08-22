@@ -85,8 +85,11 @@ float CommunicatingAI::getAnger(const Unit * target)const {
     rel = (*i).second;
   }
   static int pirates=FactionUtil::GetFactionIndex("pirates");
+  static int pirates2=FactionUtil::GetFactionIndex("kilrathi_pirates");
+  static int pirates3=FactionUtil::GetFactionIndex("aera_pirates");
+  static int pirates4=FactionUtil::GetFactionIndex("rlaan_pirates");
   if (_Universe->isPlayerStarship(target)){
-    if (parent->faction==pirates) {
+    if (parent->faction==pirates || parent->faction == pirates2 || parent->faction == pirates3 || parent->faction == pirates4) {
       static unsigned int cachedCargoNum=0;
       static bool good=true;
       if (cachedCargoNum!=target->numCargo()) {

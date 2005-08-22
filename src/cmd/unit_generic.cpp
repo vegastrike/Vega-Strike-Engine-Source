@@ -26,6 +26,7 @@
 #include "gfx/vsbox.h"
 #include <algorithm>
 #include "cmd/ai/ikarus.h"
+#include "cmd/music.h"
 #include "role_bitmask.h"
 #include "unit_const_cache.h"
 #include "gfx/warptrail.h"
@@ -593,6 +594,7 @@ void Unit::ZeroAll( )
     shieldtight           = 0; // this can be used to differentiate whether this is a capship or a fighter?
     fuel                  = 0;
     afterburnenergy       = 0;
+    afterburntype         = 0;
     Momentofinertia       = 0;
     // limits has a constructor
     cloaking              = 0;
@@ -625,8 +627,6 @@ void Unit::ZeroAll( )
     flightgroup           = NULL;
     flightgroup_subnumber = 0;
     tractorable           = true; //added by chuck_starchaser
-    is_ejectdock          = false; //added by spiritplumber
-
 }
 
 void Unit::Init()
@@ -708,8 +708,9 @@ void Unit::Init()
   //origin.Set(0,0,0);
   corner_min.Set (FLT_MAX,FLT_MAX,FLT_MAX);
   corner_max.Set (-FLT_MAX,-FLT_MAX,-FLT_MAX);
-  
-  shieldtight=0;//sphere mesh by default
+  // BUCO! Must add shield tightness back into units.csv for great justice.
+  static float default_shield_tightness = XMLSupport::parse_float (vs_config->getVariable ("physics","default_shield_tightness","0"));
+  shieldtight=default_shield_tightness;// was 0 //sphere mesh by default, but let's decide on it
   energy=maxenergy=1;
   warpenergy=0;
   maxwarpenergy=0;
@@ -995,6 +996,15 @@ vector <Mesh *> Unit::StealMeshes() {
 static float tmpmax (float a , float b) {
 	return a>b?a:b;
 }
+bool CheckAccessory (Unit * tur) {
+  bool accessory = tur->name.find ("accessory")!=string::npos;
+  if (accessory) {
+    tur->SetAngularVelocity(tur->DownCoordinateLevel(Vector (tur->GetComputerData().max_pitch_up,
+							   tur->GetComputerData().max_yaw_right,
+							   tur->GetComputerData().max_roll_right)));
+  }
+  return accessory;
+}
 void Unit::calculate_extent(bool update_collide_queue) {  
   int a;
   corner_min=Vector (FLT_MAX,FLT_MAX,FLT_MAX);
@@ -1023,7 +1033,7 @@ void Unit::calculate_extent(bool update_collide_queue) {
     //    if (!SubUnit)
     //      image->selectionBox = new Box(corner_min, corner_max);
   }
-  if (!isSubUnit()&&update_collide_queue) {
+  if (!isSubUnit()&&update_collide_queue&& (maxhull > 0)) {
     UpdateCollideQueue();
   }
   if (isUnit()==PLANETPTR) {
@@ -1214,15 +1224,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
     }
 
 }
-bool CheckAccessory (Unit * tur) {
-  bool accessory = tur->name.find ("accessory")!=string::npos;
-  if (accessory) {
-    tur->SetAngularVelocity(tur->DownCoordinateLevel(Vector (tur->GetComputerData().max_pitch_up,
-							   tur->GetComputerData().max_yaw_right,
-							   tur->GetComputerData().max_roll_right)));
-  }
-  return accessory;
-}
+
 
 const string Unit::getFgID()  {
     if(flightgroup!=NULL){
@@ -1385,6 +1387,7 @@ float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) cons
    if ((!targ->GetDestinations().empty()&&jump.drive>=0)||(targ->faction==faction)) {
      rsize=0;//HACK so missions work well
    }
+   if (range != 0)
    dist = (dist-rsize)/range;//WARNING POTENTIAL DIV/0
    if (!FINITE(dist)||dist<0) {
      dist=0;
@@ -1570,6 +1573,17 @@ void Unit::PrimeOrders () {
   aistate->SetParent (this);
 }
 
+void Unit::PrimeOrdersLaunched() {
+  if (aistate) {
+    aistate->Destroy();
+    aistate=NULL;
+  }
+//  aistate = new Orders::AggressiveAI ("interceptor.agg.xml"); // new Order; //get 'er ready for enqueueing
+  Vector vec (0,0,10000);
+  aistate = new ExecuteFor(new Orders::MatchVelocity(this->ClampVelocity(vec,true),Vector(0,0,0),true,true,false),4.0f);
+  aistate->SetParent (this);
+}
+
 void Unit::SetAI(Order *newAI)
 {
   newAI->SetParent(this);
@@ -1729,13 +1743,22 @@ void Unit::DisableTurretAI () {
 /***********************************************************************************/
 /**** UNIT_PHYSICS STUFF                                                           */
 /***********************************************************************************/
+extern Music *muzak;
 
 extern signed char  ComputeAutoGuarantee ( Unit * un);
 extern float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false);
 extern void SetShieldZero(Unit*);
 void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
   static float VELOCITY_MAX=XMLSupport::parse_float(vs_config->getVariable ("physics","velocity_max","10000"));
+  static float SPACE_DRAG=XMLSupport::parse_float(vs_config->getVariable ("physics","unit_space_drag","0.000000"));
+  static float EXTRA_CARGO_SPACE_DRAG=XMLSupport::parse_float(vs_config->getVariable ("physics","extra_space_drag_for_cargo","0.005"));
+  if (maxhull < 0)
+  {
+	 if (this->owner)
+    	  this->Velocity = this->owner->Velocity;
 
+     this->Explode(true, 0);
+  }
 	Transformation old_physical_state = curr_physical_state;
   if (docked&DOCKING_UNITS) {
     PerformDockingOperations();
@@ -1810,7 +1833,22 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   float difficulty;
   Cockpit * player_cockpit=GetVelocityDifficultyMult (difficulty);
 
+//  hopefully we do not need it?
+//  static bool WCfuelhack = XMLSupport::parse_bool(vs_config->getVariable("physics","fuel_equals_warp","false"));
+//  if (WCfuelhack)
+//	  this->warpenergy = this->fuel;
+
+
   this->UpdatePhysics2( trans, old_physical_state, net_accel, difficulty, transmat, cum_vel, lastframe, uc);
+
+  if (EXTRA_CARGO_SPACE_DRAG > 0)
+  {
+	  if ((this->faction == FactionUtil::GetFaction("upgrades")) || (this->name=="eject") || (this->name=="Pilot"))
+         Velocity = Velocity * (1 - EXTRA_CARGO_SPACE_DRAG);
+  }
+
+  if (SPACE_DRAG > 0)
+      Velocity = Velocity * (1 - SPACE_DRAG);
 
   float dist_sqr_to_target=FLT_MAX;
   Unit * target = Unit::Target();
@@ -1825,11 +1863,13 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
       }
     }
   }
-  static string LockingSoundName = vs_config->getVariable ("unitaudio","locking","locking.wav");
-  static int LockingSound = AUDCreateSoundWAV (LockingSoundName,true);
-
   bool locking=false;
   bool touched=false;
+  static string LockingSoundName = vs_config->getVariable ("unitaudio","locking","locking.wav");
+  static string LockingSoundTorpName = vs_config->getVariable ("unitaudio","locking_torp","locking.wav"); //enables spiffy wc2 torpedo music, default to normal though
+  static int LockingSound = AUDCreateSoundWAV (LockingSoundName,true);
+  static int LockingSoundTorp = AUDCreateSoundWAV (LockingSoundTorpName,true);
+//	AUDPlay(soundfileint,QVector(0,0,0),Vector(0,0,0),1);
 
   for (int i=0;(int)i<GetNumMounts();i++) {
 //    if (increase_locking&&cloaking<0) {
@@ -1847,23 +1887,38 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 			mounts[i].time_to_lock=-1;
 		  }
 		}else {
+  int LockingPlay = LockingSound;
+
+  static bool LockTrumpsMusic =XMLSupport::parse_bool(vs_config->getVariable("unitaudio","locking_trumps_music","false")); //enables spiffy wc2 torpedo music, default to normal though
+  static bool TorpLockTrumpsMusic =XMLSupport::parse_bool(vs_config->getVariable("unitaudio","locking_torp_trumps_music","false")); //enables spiffy wc2 torpedo music, default to normal though
 
 		  if (mounts[i].type->LockTime>0) {
 			static string LockedSoundName= vs_config->getVariable ("unitaudio","locked","locked.wav");
 			static int LockedSound = AUDCreateSoundWAV (LockedSoundName,false);
 
+            if (mounts[i].type->size==weapon_info::SPECIALMISSILE)
+				LockingPlay = LockingSoundTorp;
+			else
+				LockingPlay = LockingSound;
+
 			if (mounts[i].time_to_lock>-SIMULATION_ATOM&&mounts[i].time_to_lock<=0) {
 			  if (!AUDIsPlaying(LockedSound)) {
+            muzak->Mute(false);
 			AUDStartPlaying(LockedSound);
 			AUDStopPlaying(LockingSound);	      
+			AUDStopPlaying(LockingSoundTorp);	      
 			  }
 			  AUDAdjustSound (LockedSound,Position(),GetVelocity()); 
 			}else if (mounts[i].time_to_lock>0)  {
 			  locking=true;
-			  if (!AUDIsPlaying(LockingSound)) {
-			AUDStartPlaying(LockingSound);	      
+			  if (!AUDIsPlaying(LockingPlay)) {
+			  if (LockingPlay == LockingSoundTorp)
+				  muzak->Mute(TorpLockTrumpsMusic);
+              else
+       			  muzak->Mute(LockTrumpsMusic);
+		      AUDStartPlaying(LockingPlay);	      
 			  }
-			  AUDAdjustSound (LockingSound,Position(),GetVelocity());
+			  AUDAdjustSound (LockingPlay,Position(),GetVelocity());
 			}
 		  }
 		}
@@ -1929,8 +1984,13 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   }
   if (locking==false&&touched==true) {
     if (AUDIsPlaying(LockingSound)) {
+            muzak->Mute(false);
       AUDStopPlaying(LockingSound);	
     }      
+    if (AUDIsPlaying(LockingSoundTorp)) {
+            muzak->Mute(false);
+      AUDStopPlaying(LockingSoundTorp);	
+    }     
   }
   bool dead=true;
 
@@ -1958,6 +2018,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   if ((!isSubUnit())&&(!killed)&&(!(docked&DOCKED_INSIDE))) {
     UpdateCollideQueue();
   }
+
 }
 void Unit::AddVelocity(float difficulty) {
    static float warprampuptime=XMLSupport::parse_float (vs_config->getVariable ("physics","warprampuptime","5")); // for the heck of it.    
@@ -2339,7 +2400,25 @@ void TurnJumpOKLightOn(Unit * un, Cockpit * cp) {
 }
 void Unit::DecreaseWarpEnergy(bool insys, float time) {
   static float bleedfactor = XMLSupport::parse_float(vs_config->getVariable("physics","warpbleed","20"));
+  static bool WCfuelhack = XMLSupport::parse_bool(vs_config->getVariable("physics","fuel_equals_warp","false"));
+  if (WCfuelhack)
+	  this->warpenergy = this->fuel;
   this->warpenergy-=(insys?jump.insysenergy/bleedfactor:jump.energy)*time;
+  if (this->warpenergy < 0)
+	  this->warpenergy = 0;
+
+  if (WCfuelhack)
+	  this->fuel = this->warpenergy;
+}
+void Unit::IncreaseWarpEnergy(bool insys, float time) {
+  static bool WCfuelhack = XMLSupport::parse_bool(vs_config->getVariable("physics","fuel_equals_warp","false"));
+  if (WCfuelhack)
+	  this->warpenergy = this->fuel;
+  this->warpenergy+=(insys?jump.insysenergy:jump.energy)*time;
+  if (this->warpenergy > this->maxwarpenergy)
+	  this->warpenergy = this->maxwarpenergy;
+  if (WCfuelhack)
+	  this->fuel = this->warpenergy;
 }
 bool Unit::jumpReactToCollision (Unit * smalle) {
 	static bool ai_jump_cheat=XMLSupport::parse_bool(vs_config->getVariable("AI","jump_without_energy","false"));
@@ -2525,6 +2604,9 @@ float GetFuelUsage (bool afterburner) {
 }
 Vector Unit::ClampTorque (const Vector &amt1) {
   Vector Res=amt1;
+  static bool WCfuelhack = XMLSupport::parse_bool(vs_config->getVariable("physics","fuel_equals_warp","false"));
+  if (WCfuelhack)
+	  fuel = warpenergy;
  
   static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".4"));
   float fuelclamp=(fuel<=0)?staticfuelclamp:1;
@@ -2534,11 +2616,22 @@ Vector Unit::ClampTorque (const Vector &amt1) {
     Res.j=copysign(fuelclamp*limits.yaw,amt1.j);
   if (fabs(amt1.k)>fuelclamp*limits.roll)
     Res.k=copysign(fuelclamp*limits.roll,amt1.k);
+
   //static float fuelenergytomassconversionconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","FuelEnergyDensity","343596000000000.0")); // note that we have KiloJoules, so it's to the 14th
   static float Deuteriumconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Deuterium","1"));
   static float Antimatterconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Antimatter","250"));
   static float Lithium6constant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Lithium",".6"));
   fuel-=GetFuelUsage(false)*SIMULATION_ATOM*Res.Magnitude()*.00000004/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
+
+  if (fuel < 0)
+	  fuel = 0;
+
+  if (warpenergy < 0)
+	  warpenergy = 0;
+
+  if (WCfuelhack)
+	  warpenergy = fuel;
+
   return Res;
 }
 float Unit::Computer::max_speed() const {
@@ -2641,16 +2734,37 @@ Vector Unit::ClampThrust(const Vector &amt1){
 //CMD_FLYBYWIRE depends on new version of Clampthrust... don't change without resolving it
 
 Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
-  Vector Res=amt1;
-  if (energy<afterburnenergy*SIMULATION_ATOM) {
-    afterburn=false;
-  }
-  if (afterburn) {
-		energy -= afterburnenergy*SIMULATION_ATOM;
-  }
-
+  static bool WCfuelhack = XMLSupport::parse_bool(vs_config->getVariable("physics","fuel_equals_warp","false"));
   static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".4"));
   static float staticabfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelAfterburn",".1"));
+
+  if (WCfuelhack){
+//	  fuel = fuel <? warpenergy;
+//	  warpenergy = fuel <? warpenergy;
+	  if(fuel > warpenergy)
+	     fuel = warpenergy;
+	  if(fuel < warpenergy)
+	     warpenergy = fuel;
+  }
+  
+  float instantenergy = afterburnenergy*SIMULATION_ATOM;
+  if ((afterburntype == 0) && energy<instantenergy) {
+    afterburn=false;
+  }
+  if ((afterburntype == 1) && fuel<0) {
+	  fuel = 0;
+    afterburn=false;
+  }
+  if ((afterburntype == 2) && warpenergy<0) {
+	  warpenergy = 0;
+    afterburn=false;
+  }
+
+
+
+  Vector Res=amt1;
+
+  
   float fuelclamp=(fuel<=0)?staticfuelclamp:1;
   float abfuelclamp= (fuel<=0)?staticabfuelclamp:1;
   if (fabs(amt1.i)>fabs(fuelclamp*limits.lateral))
@@ -2666,11 +2780,31 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
     Res.k=ablimit;
   if (amt1.k<-limits.retro)
     Res.k =-limits.retro;
+
   //energy = 1/2t^2*Force^2/mass
   static float Deuteriumconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Deuterium","1"));
   static float Antimatterconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Antimatter","250"));
   static float Lithium6constant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Lithium",".6"));
+
+	  if (afterburntype == 2) // fuel-burning afterburner
+		  warpenergy-=GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*.00000004/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
+	  if (afterburntype == 1) // fuel-burning afterburner
   fuel-=GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*.00000004/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
+	  if (afterburntype == 0) // fuel-burning afterburner
+	      fuel-=GetFuelUsage(false)*SIMULATION_ATOM*Res.Magnitude()*.00000004/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
+
+  if ((afterburn) && (afterburntype == 0)) {
+		energy -= instantenergy;
+  }
+
+  if (WCfuelhack){
+	  if(fuel > warpenergy)
+	     fuel = warpenergy;
+	  if(fuel < warpenergy)
+	     warpenergy = fuel;
+  }
+
+  
   return Res;
 }
 
@@ -3090,6 +3224,15 @@ void Unit::SetOrientation (QVector q, QVector r) {
   CrossProduct (r,p,q);
   curr_physical_state.orientation = Quaternion::from_vectors (p.Cast(),q.Cast(),r.Cast());
 }
+void Unit::SetOrientation (QVector p, QVector q, QVector r) {
+  q.Normalize();
+  r.Normalize();
+  p.Normalize();
+//  QVector p;
+//  CrossProduct (q,r,p);
+//  CrossProduct (r,p,q);
+  curr_physical_state.orientation = Quaternion::from_vectors (p.Cast(),q.Cast(),r.Cast());
+}
 void Unit::SetOrientation(Quaternion Q) {
   curr_physical_state.orientation=Q;
 }
@@ -3152,7 +3295,7 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
   float absamt= amt>=0?amt:-amt;  
   float ppercentage=0;
   // We also do the following lock on client side in order not to display shield hits 
-    static bool nodockdamage = XMLSupport::parse_float (vs_config->getVariable("physics","no_damage_to_docked_ships","false"));
+    static bool nodockdamage = XMLSupport::parse_float (vs_config->getVariable("physics","no_damage_to_docked_ships","true"));
     if (nodockdamage) {
       if (DockedOrDocking()&(DOCKED_INSIDE|DOCKED)) {
 	    return -1;
@@ -3708,14 +3851,21 @@ void Unit::ArmorData (float armor[8]) const{  //short fix
   armor[7]=this->armor.backleftbottom;
 }
 
+float Unit::WarpCapData () const{
+  return maxwarpenergy;
+}
+
 float Unit::FuelData () const{
   return fuel;
 }
 float Unit::WarpEnergyData() const {
   if (maxwarpenergy>0)
     return ((float)warpenergy)/((float)maxwarpenergy);
-  else
+  if (jump.energy>0)
+  {
     return ((float)warpenergy)/((float)jump.energy);
+  }
+  return (float(0));
 }
 float Unit::EnergyData() const{
   static bool max_shield_lowers_capacitance=XMLSupport::parse_bool(vs_config->getVariable("physics","max_shield_lowers_capacitance","false"));
@@ -4300,6 +4450,8 @@ public:
                   }
                   return;
 		}
+        WeaponGroup lightMissiles;
+		WeaponGroup heavyMissiles;
 		WeaponGroup allWeapons;
 		WeaponGroup allWeaponsNoSpecial;
 		WeaponGroupSet myset;
@@ -4832,11 +4984,19 @@ void Unit::PerformDockingOperations () {
 }
 std::set <Unit *> arrested_list_do_not_dereference;
 bool Unit::RefillWarpEnergy() {
+  static bool WCfuelhack = XMLSupport::parse_bool(vs_config->getVariable("physics","fuel_equals_warp","false"));
+  if (WCfuelhack)
+	  this->warpenergy = this->fuel;
   float tmp=this->maxwarpenergy;
   if (tmp<this->jump.energy)
     tmp=this->jump.energy;
   if (tmp>this->warpenergy){
     this->warpenergy=tmp;
+
+  if (WCfuelhack)
+	  this->fuel = this->warpenergy;
+
+    
     return true;
   }
   return false;
@@ -4866,12 +5026,29 @@ int Unit::ForceDock (Unit * utdw, int whichdockport) {
       }
       UpdateMasterPartList(UniverseUtil::GetMasterPartList());
       int cockpit=UnitUtil::isPlayerStarship(this);
-      if (this->RefillWarpEnergy()){
+
+      static float MinimumCapacityToRefuelOnLand = XMLSupport::parse_float (vs_config->getVariable ("physics","MinimumWarpCapToRefuelDockeesAutomatically","0"));
+	  float capdata = utdw->WarpCapData();
+	  if ((capdata >= MinimumCapacityToRefuelOnLand) && (this->RefillWarpEnergy())){
         if (cockpit>=0&&cockpit<_Universe->numPlayers()) {
           static float docking_fee = XMLSupport::parse_float (vs_config->getVariable("general","fuel_docking_fee","0"));
           _Universe->AccessCockpit(cockpit)->credits-=docking_fee;
         }
       }
+	  if ((capdata < MinimumCapacityToRefuelOnLand) && (this->faction == utdw->faction )){
+		  if (utdw->WarpEnergyData() > this->WarpEnergyData() && utdw->WarpEnergyData() > this->jump.energy)
+		  {
+			  this->IncreaseWarpEnergy(false,this->jump.energy);
+			  utdw->DecreaseWarpEnergy(false,this->jump.energy);
+		  }
+		  if (utdw->WarpEnergyData() < this->WarpEnergyData() && this->WarpEnergyData() > utdw->jump.energy)
+		  {
+  			  utdw->IncreaseWarpEnergy(false,utdw->jump.energy);
+			  this->DecreaseWarpEnergy(false,utdw->jump.energy);
+		  }
+
+	  }
+      
       if (cockpit>=0&&cockpit<_Universe->numPlayers()) {
         static float docking_fee = XMLSupport::parse_float (vs_config->getVariable("general","docking_fee","0"));
         if (_Universe->AccessCockpit(cockpit)->credits>=docking_fee) {
@@ -4920,6 +5097,7 @@ else
 }
 return 0;
 }
+
 
 inline bool insideDock (const DockingPorts &dock, const QVector & pos, float radius) {
   if (dock.used)
@@ -4998,8 +5176,32 @@ bool Unit::isDocked (Unit* d) {
   return false;
 }
 
+extern vector <int> switchunit;
+extern vector <int> turretcontrol;
+
 bool Unit::UnDock (Unit * utdw) {
   unsigned int i=0;
+
+//   this->is_ejectdock = false;
+//   is_ejectdock = false;
+
+if (this->name=="return_to_cockpit")
+{
+//    this->is_ejectdock = true;
+    if (this->faction == utdw->faction) 
+		this->owner = utdw;
+	else
+		this->owner = this;
+}
+
+if (name=="return_to_cockpit")
+{
+//    is_ejectdock = true;
+    if (faction == utdw->faction) 
+		owner = utdw;
+}
+
+
 
   cerr<<"Asking to undock"<<endl;
   if( Network!=NULL && !SERVER)
@@ -5288,7 +5490,7 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
     if (up->mounts[i].status==Mount::ACTIVE||up->mounts[i].status==Mount::INACTIVE) {//only mess with this if the upgrador has active mounts
       int jmod=j%GetNumMounts();//make sure since we're offsetting the starting we don't overrun the mounts
       if (!downgrade) {//if we wish to add guns instead of remove
-	if (up->mounts[i].type->weapon_name!="MOUNT_UPGRADE") {
+		  if (up->mounts[i].type->weapon_name.find("_UPGRADE") == string::npos) {
 
 
 	  if (up->mounts[i].type->size==(up->mounts[i].type->size&mounts[jmod].size)) {//only look at this mount if it can fit in the rack
@@ -5975,13 +6177,21 @@ if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrad
 	  AddToDowngradeMap (up->name,up->cloaking,((char *)&this->cloaking)-((char *)this),tempdownmap);	  
     }
   
+  // NOTE: Afterburner type 2 (jmp) 
+  // NOTE: Afterburner type 1 (gas) 
+  // NOTE: Afterburner type 0 (pwr) 
+
     if (afterburnenergy<32767&&afterburnenergy<=up->afterburnenergy&&up->afterburnenergy!=0) {
       if (touchme) afterburnenergy=32767;
+      if (touchme) afterburntype=0;
       numave++;
       percentage++;
 	  AddToDowngradeMap (up->name,65536-((int)up->afterburnenergy),((char *)&this->afterburnenergy)-((char *)this),tempdownmap);	  	  
+ 	  AddToDowngradeMap (up->name,up->afterburntype,((char *)&this->afterburntype)-((char *)this),tempdownmap);	  
     }
   
+
+  // we are upgrading!
   }else {
     if (touchme) {
       for (unsigned int i=0;i<up->image->cargo.size();i++) {
@@ -5992,14 +6202,6 @@ if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrad
       }
 
     }
-    /*    if (image->cargo_volume<up->image->cargo_volume) {
-      
-      if (templ!=NULL?up->image->cargo_volume+image->cargo_volume<templ->image->cargo_volume:true) {
-	if (touchme)image->cargo_volume+=up->image->cargo_volume;
-	numave++;
-	percentage++;
-      }
-      }*/
     if ((cloaking==-1&&up->cloaking!=-1)||force_change_on_nothing) {
       if (touchme) {cloaking=up->cloaking;cloakmin=up->cloakmin;image->cloakrate=up->image->cloakrate; image->cloakglass=up->image->cloakglass;image->cloakenergy=up->image->cloakenergy;}
       numave++;
@@ -6008,12 +6210,20 @@ if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrad
       cancompletefully=false;
     }
     
-    if (afterburnenergy>up->afterburnenergy&&up->afterburnenergy>0||force_change_on_nothing) {
+  // NOTE: Afterburner type 2 (jmp) 
+  // NOTE: Afterburner type 1 (gas) 
+  // NOTE: Afterburner type 0 (pwr) 
+
+    if (afterburnenergy>=up->afterburnenergy&&up->afterburnenergy>0||force_change_on_nothing) {
       numave++;
       if (touchme) afterburnenergy=up->afterburnenergy;
+      if (touchme) afterburntype=up->afterburntype;
+
     }else if (afterburnenergy<=up->afterburnenergy&&afterburnenergy>=0&&up->afterburnenergy>0&&up->afterburnenergy<32767) {
       cancompletefully=false;
     }
+
+
     if (jump.drive==-2&&up->jump.drive>=-1||force_change_on_nothing) {
       if (touchme) {jump.drive = up->jump.drive;jump.damage=0;}
       numave++;
@@ -6340,6 +6550,20 @@ inline QVector randVector (float min, float max) {
 					uniformrand(min,max),
 					uniformrand(min,max));
 }
+static void TurretFAP(Unit * parent) {
+   UnitCollection::UnitIterator iter = parent->getSubUnits();
+   Unit * un;
+   while (NULL!=(un=iter.current())) {
+     if (!CheckAccessory(un)) {
+       un->EnqueueAIFirst (new Orders::FireAt(.2,15));
+       un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
+     }
+     TurretFAP(un);
+     iter.advance();
+   }
+   
+}
+extern int SelectDockPort(Unit *, Unit*parent);
 //extern unsigned int current_cockpit;
 void Unit::EjectCargo (unsigned int index) {
   Cargo * tmp=NULL;
@@ -6427,8 +6651,8 @@ void Unit::EjectCargo (unsigned int index) {
 			  int fac = FactionUtil::GetFaction("upgrades");
 			  cargo->faction=fac;//set it back to neutral so that no one will bother with 'im
                           arot=erot;
-						  cargo->PrimeOrders();
-                          cargo->SetAI (new Orders::AggressiveAI ("eject.agg.xml")); // generally fraidycat AI
+                          cargo->PrimeOrders();
+                          cargo->SetAI (new AIScript ("eject.xai")); // generally fraidycat AI
                           cargo->SetTurretAI();	  
 
 // Meat. Docking should happen here
@@ -6436,10 +6660,10 @@ void Unit::EjectCargo (unsigned int index) {
 		  }else if (tmpcontent=="return_to_cockpit") {
 			  cargo = UnitFactory::createUnit ("return_to_cockpit",false,faction);
 			  int fac = FactionUtil::GetFaction("upgrades");
-			  cargo->faction=fac;//set it back to neutral so that no one will bother with 'im
+			  cargo->faction=this->faction;
                           arot=erot;
-						  cargo->PrimeOrders();
-     				  	  Order * ai = cargo->aistate;
+                          cargo->PrimeOrders();
+                          Order * ai = cargo->aistate;
                     	  cargo->aistate = NULL;
 
 //						  cargo->is_ejectdock = true; // ugly, but i hope it doesn't mess anything up. Checked by undocking.
@@ -6452,8 +6676,8 @@ void Unit::EjectCargo (unsigned int index) {
 			  string tmpnam = tmpcontent+".cargo";
 			  cargo = UnitFactory::createUnit (tmpnam.c_str(),false,FactionUtil::GetFaction("upgrades"));
                           arot=crot;
-						  cargo->PrimeOrders();
-                          cargo->SetAI (new Orders::AggressiveAI ("cargo.agg.xml"));
+                          //cargo->PrimeOrders();
+                          //cargo->SetAI (new Orders::AggressiveAI ("cargo.agg.xml"));
 		  }
 
       }
@@ -6463,10 +6687,6 @@ void Unit::EjectCargo (unsigned int index) {
 	cargo->Kill();
 	cargo = UnitFactory::createUnit ("generic_cargo",false,FactionUtil::GetFaction("upgrades"));        
         arot=grot;
-          cargo->PrimeOrders();
-// spiritplumber says, this simply makes cargo slow down and stop. Unrealistic? yes, but practical.
-          cargo->SetAI (new Orders::AggressiveAI ("cargo.agg.xml"));
-          cargo->SetTurretAI();	  
 
       }
       Vector rotation(vsrandom.uniformInc(-arot,arot),vsrandom.uniformInc(-arot,arot),vsrandom.uniformInc(-arot,arot));
@@ -6491,10 +6711,28 @@ void Unit::EjectCargo (unsigned int index) {
         }
         tmpvel.Normalize();
         
+
+		if ((SelectDockPort (this, this) > -1 )) 
+// it's a starship, AND we have a docking port to launch it from (cargo mines count)
+			{
+	    //cargo->SetPosAndCumPos (Position()+DockingPortLocations()[1].pos.Cast());
+
+        const QVector loc (Transform (this->GetTransformation(),this->DockingPortLocations()[0].pos.Cast()));
+        cargo->SetPosAndCumPos (loc);
+        Vector p,q,r;
+        this->GetOrientation(p,q,r);
+		cargo->SetOrientation (p,q,r);
+    	cargo->SetOwner (this);
+
+//		cargo->SetAngularVelocity(); // how do we make this aim in the same direction? ideall
+            }        
+        else		
+		{
 	cargo->SetPosAndCumPos (Position()+tmpvel*1.5*rSize()+randVector(-.5*rSize(), .5*rSize()));
         cargo->SetAngularVelocity(rotation);
-	cargo->SetOwner (this);
+		}
         static float velmul=XMLSupport::parse_float(vs_config->getVariable("physics","eject_cargo_speed","1"));
+   	cargo->SetOwner (this);
 	cargo->SetVelocity(Velocity*velmul+randVector(-.25,.25).Cast());
 	cargo->Mass = tmp->mass;
 	if (name.length()>0) {
@@ -6512,12 +6750,15 @@ void Unit::EjectCargo (unsigned int index) {
 	  cp->SetParent (cargo,"","",Position()); // changes control to that cockpit
       if (tmpcontent=="return_to_cockpit")
 		{
+                    static bool simulate_while_at_base=XMLSupport::parse_bool(vs_config->getVariable("physics","simulate_while_docked","false"));
+                    if ((simulate_while_at_base)||(_Universe->numPlayers()>1))
+                        TurretFAP(this);
 
-            //SwitchUnits (NULL,this); // make unit a sitting duck in the mean time
-        	PrimeOrders();
-        	this->SetAI (new Orders::AggressiveAI ("cargo.agg.xml"));// make unit a sitting duck in the mean time
+                    SwitchUnits (NULL,this); // make unit a sitting duck in the mean time
+                    PrimeOrders();
+                    //this->SetAI (new Orders::AggressiveAI ("cargo.agg.xml"));// make unit a sitting duck in the mean time
 			
-	        this->SetTurretAI();  // but defend yourself
+                    //this->SetTurretAI();  // but defend yourself
 		    
    
 
@@ -6531,14 +6772,16 @@ void Unit::EjectCargo (unsigned int index) {
 //          cargo->Kill();
           //this->UpgradeInterface(this); // this seriously breaks the game...
 //          DockedScript(cargo,this);      // this just don't work.
-		}
-	  else {
-	  SwitchUnits (NULL,cargo);
-	  
-	  } // switching NULL gives "dead" ai to the unit I ejected from, by the way.
+          if ((simulate_while_at_base)||(_Universe->numPlayers()>1))
+              TurretFAP(this);
+          
+		} else {
+                    SwitchUnits (NULL,cargo);
+                    
+                } // switching NULL gives "dead" ai to the unit I ejected from, by the way.
 	}
 	_Universe->activeStarSystem()->AddUnit(cargo);
-	if ((unsigned int) index!=((unsigned int)-1)) {
+	if ((unsigned int) index!=((unsigned int)-1)&&(unsigned int)index!=((unsigned int)-2)) {
 	  if (index<image->cargo.size()) {
 	    RemoveCargo (index,1,true);
 	  }

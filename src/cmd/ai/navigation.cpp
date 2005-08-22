@@ -527,3 +527,40 @@ void FormUp::Execute() {
 }
 
 FormUp::~FormUp() {}
+
+
+void FormUpToOwner::SetParent(Unit * un) {
+  Unit * ownerDoNotDereference=NULL;
+  Unit * temp;
+  for (un_iter i= _Universe->activeStarSystem()->getUnitList().createIterator();
+       (temp=*i)!=NULL;
+       ++i) {
+    if (temp==un->owner){
+       ownerDoNotDereference=temp;
+       break;
+    }
+  }
+  if (ownerDoNotDereference != NULL) {
+    AttachSelfOrder (ownerDoNotDereference);
+  }
+  MoveTo::SetParent(un);
+}
+
+FormUpToOwner::FormUpToOwner (const QVector & pos):MoveTo (QVector(0,0,0),false,1000,false), Pos(pos) { 
+  subtype |= SSELF;
+}
+void FormUpToOwner::SetPos (const QVector &v) {
+  Pos=v;
+}
+void FormUpToOwner::Execute() {
+  Unit * targ = group.GetUnit();
+  if (targ) {
+    MoveTo::SetDest (Transform (targ->GetTransformation(),Pos));
+    static bool can_warp_to=XMLSupport::parse_bool(vs_config->getVariable("AI","warp_to_wingmen","true"));   
+    if (rand()%64==0&&(can_warp_to||_Universe->AccessCockpit()->autoInProgress()))
+      WarpToP(parent,targ,true);
+  }
+  MoveTo::Execute();
+}
+
+FormUpToOwner::~FormUpToOwner() {}

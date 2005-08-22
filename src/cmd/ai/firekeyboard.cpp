@@ -343,6 +343,13 @@ void FireKeyboard::RestoreTarget10Key (const KBData&,KBSTATE k) {
   }
 }
 
+extern void LeadMe (Unit * un, string directive, string speech);
+
+static void LeadMe (string directive, string speech) {
+  Unit * un= _Universe->AccessCockpit()->GetParent();
+  LeadMe (un,directive,speech);
+  
+}
 
 
 void FireKeyboard::RequestClearenceKey(const KBData&,KBSTATE k) {
@@ -599,13 +606,7 @@ void FireKeyboard::HeadlightKey(const KBData&,KBSTATE k) {
 }
 #endif
 extern unsigned int DoSpeech (Unit * un, Unit *player_un, const FSM::Node &convNode);
-extern void LeadMe (Unit * un, string directive, string speech);
-
-static void LeadMe (string directive, string speech) {
-  Unit * un= _Universe->AccessCockpit()->GetParent();
-  LeadMe (un,directive,speech);
   
-}
 extern Unit * GetThreat (Unit * par, Unit * leader);
 void HelpOut (bool crit, std::string conv) {
   Unit * un = _Universe->AccessCockpit()->GetParent();
@@ -1531,7 +1532,7 @@ static void PowerDownShield(Shield *shield, float howmuch){
 
 }
 extern bool CheckAccessory(Unit*);
-static void TurretFAW(Unit * parent) {
+void TurretFAW(Unit * parent) {
   UnitCollection::UnitIterator iter = parent->getSubUnits();
   Unit * un;
   while (NULL!=(un=iter.current())) {

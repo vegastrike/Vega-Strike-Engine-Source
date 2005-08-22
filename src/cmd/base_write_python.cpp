@@ -48,6 +48,11 @@ void BaseInterface::Room::Launch::EndXML (FILE *fp) {
 	Link::EndXML(fp);
 	VSFileSystem::vs_fprintf(fp,")\n");
 }
+void BaseInterface::Room::Eject::EndXML (FILE *fp) {
+	VSFileSystem::vs_fprintf(fp,"Base.Eject (");
+	Link::EndXML(fp);
+	VSFileSystem::vs_fprintf(fp,")\n");
+}
 
 void BaseInterface::Room::Comp::EndXML (FILE *fp) {
 	VSFileSystem::vs_fprintf(fp,"Base.Comp (");

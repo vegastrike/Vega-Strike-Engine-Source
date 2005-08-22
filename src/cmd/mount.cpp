@@ -239,7 +239,46 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 							temp->GetComputerData().max_combat_ab_speed= type->Speed+velocity.Magnitude();
 						}
 					}else {
-						temp = UnitFactory::createUnit(type->file.c_str(),false,owner->faction);
+//						temp = UnitFactory::createUnit(type->file.c_str(),false,owner->faction);
+                                          
+	  Flightgroup * fg = owner->getFlightgroup();
+	  if (fg->name == "base" || fg->name == "Base")
+	  {
+//		  fg = new Flightgroup;
+//	      fg->leader.SetUnit(owner);
+     	  fg->directive="b";
+          fg->name = "Insys_Patrol";   // this fixes base-spawned fighters becoming navpoints, which happens sometimes
+	  }
+
+	  int fgsnumber=0;
+	  if (fg!=NULL) {
+	    fgsnumber=fg->nr_ships;
+	    fg->nr_ships++;
+	    fg->nr_ships_left++;
+	  }
+
+
+//      fg->name += "_Patrol";
+
+
+
+	  temp = UnitFactory::createUnit (type->file.c_str(),false,owner->faction,"",fg,fgsnumber);
+// this stuff happens farther down, no panic
+//	  temp->PrimeOrdersLaunched();
+//	  temp->SetTurretAI();
+//	  temp->EnqueueAI (new Orders::AggressiveAI ("interceptor.agg.xml"));
+//	  temp->Tar=owner->Target;
+	  //he's alive!!!!!
+					
+					
+
+
+					
+					
+					
+					
+					
+					
 					}
                                         Vector adder=Vector(mat.r[6],mat.r[7],mat.r[8])*type->Speed;
 					temp->SetVelocity(owner->GetVelocity()+adder);

@@ -433,6 +433,9 @@ bool Cockpit::Update () {
 
 
 
+
+
+
 	  if (i++==index) {
 	    index++;
 	    if (un->name.find ("accessory")==string::npos) {
@@ -490,6 +493,8 @@ bool Cockpit::Update () {
     zoomfactor=initialzoom;
     static int index=0;
     switchunit[_Universe->CurrentCockpit()]=0;
+    par = GetParent();
+    static bool switch_nonowned_units=XMLSupport::parse_bool(vs_config->getVariable("AI","switch_nonowned_units","true"));
     un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();
     Unit * un;
     bool found=false;
@@ -503,10 +508,10 @@ bool Cockpit::Update () {
 // the trigger is to allow switching only between ships that are actually owned by you, this prevents
 // stealing a ship from a hired wingman.
 
-static bool switch_nonowned_units=XMLSupport::parse_bool(vs_config->getVariable("AI","switch_nonowned_units","true"));
-   par = GetParent();
 
-	if ((i++)>=index&&(!_Universe->isPlayerStarship(un))&&(switch_nonowned_units || (un->owner == par->owner) || (un->owner == par))&&un->name!="eject"&&un->name!="Pilot") {
+
+
+	if ((i++)>=index&&(!_Universe->isPlayerStarship(un))&&(switch_nonowned_units || (un->owner == par->owner) || (un->owner == par))&&un->name!="eject"&&un->name!="Pilot" && (un->isUnit()!=MISSILEPTR)) {
 	  found=true;
 	  index++;
 	  Unit * k=GetParent(); 
@@ -518,26 +523,35 @@ static bool switch_nonowned_units=XMLSupport::parse_bool(vs_config->getVariable(
           }
 // we are an ejected pilot, so, if we can get close enough to the related unit, jump into it and remove the seat. This said, always allow
 		  // switching from the "fake" ejection seat (ejectdock).
-          if ( !proceed && (k->Position()-un->Position()).Magnitude() < (un->rSize()+k->rSize()))
-		  {
-
-			 
-            if (!(k->name=="return_to_cockpit"))
-         		    SwitchUnits (k,un);
-// this refers to cockpit
-            if (!(k->name=="return_to_cockpit"))
-                    this->SetParent(un,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
-            if (!(k->name=="return_to_cockpit"))
-				k->Kill();
-
-            //un->SetAI(new FireKeyboard ())
-		  }
-
-          if (proceed) 
-		  {
-            SwitchUnits (k,un);
-            this->SetParent(un,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
-            //un->SetAI(new FireKeyboard ())
+          if ( !proceed && (k->Position()-un->Position()).Magnitude() < (un->rSize()+5*k->rSize())) {
+              
+              if (!(k->name=="return_to_cockpit"))
+                  SwitchUnits (k,un);
+              // this refers to cockpit
+              if (!(k->name=="return_to_cockpit"))
+                  this->SetParent(un,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
+              if (!(k->name=="return_to_cockpit"))
+                  k->Kill();
+              //un->SetAI(new FireKeyboard ())
+          }
+          
+          if (proceed) {
+              k->PrimeOrdersLaunched();
+              k->SetAI (new Orders::AggressiveAI ("interceptor.agg.xml"));
+              k->SetTurretAI();	  
+              
+              
+              Flightgroup * fg = k->getFlightgroup();
+              if (fg!=NULL) {
+                  
+                  un->SetFg (fg,fg->nr_ships++);
+                  fg->nr_ships_left++;
+                  fg->leader.SetUnit(un);
+                  fg->directive="b";
+              }
+              SwitchUnits (k,un);
+              this->SetParent(un,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
+              //un->SetAI(new FireKeyboard ())
           }
           break;
           

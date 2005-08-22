@@ -736,18 +736,24 @@ void winsys_init( int *argc, char **argv, char *window_title,
     glutInit( argc, argv );
     static bool get_stencil=XMLSupport::parse_bool (vs_config->getVariable ("graphics","glut_stencil","true"));
     if (get_stencil) {
-      if (!(glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE | GLUT_STENCIL )
+#ifdef __APPLE__
+      if (!(
+#endif
+            glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE | GLUT_STENCIL )
 #ifdef __APPLE__
             ,1
 #endif
 
-            )) {
+#ifdef __APPLE__            )) {
         glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE );
       }
+#endif
+      ;
+
     }else {
       glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE );
     }
- 
+
     char str [1024];
     sprintf (str, "%dx%d:%d@60",g_game.x_resolution,g_game.y_resolution,gl_options.color_depth); 
     glutGameModeString(str);

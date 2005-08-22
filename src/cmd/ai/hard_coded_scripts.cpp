@@ -78,6 +78,9 @@ void FireAt::Cloak(bool enable,float seconds) {
 void FireAt::FormUp(QVector pos) {
 	lastOrder  = new Orders::FormUp(pos);
 }
+void FireAt::FormUpToOwner(QVector pos) {
+	lastOrder  = new Orders::FormUpToOwner(pos);
+}
 void FireAt::FaceDirection (float distToMatchFacing, bool finish) {
 	lastOrder  = new Orders::FaceDirection (distToMatchFacing, finish, 3);
 }
@@ -127,6 +130,8 @@ public:
   }
 };
 
+
+// these can be used in the XML scripts if they are allowed to be called
 
 // these can be used in the XML scripts if they are allowed to be called
 

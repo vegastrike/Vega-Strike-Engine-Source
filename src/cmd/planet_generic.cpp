@@ -291,8 +291,8 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
   inside =false;
   curr_physical_state.position = prev_physical_state.position=cumulative_transformation.position=orbitcent+x;
   Init();
-  static int neutralfaction=FactionUtil::GetFaction("neutral");
-  this->faction = neutralfaction;
+  //static int neutralfaction=FactionUtil::GetFaction("neutral");
+  //this->faction = neutralfaction;
   killed=false;
   bool destempty=dest.empty();
   while (!dest.empty()) {
@@ -336,6 +336,7 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
   }
   Unit * un = UnitFactory::createUnit (tempname.c_str(),true,tmpfac);
  
+  static bool smartplanets = XMLSupport::parse_bool (vs_config->getVariable ("physics","planets_can_have_subunits","false"));
 
   if (un->name!=string("LOAD_FAILED")) {
     image->cargo=un->GetImageInformation().cargo;
@@ -344,8 +345,26 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
     VSSprite * tmp =image->hudImage;
     image->hudImage=un->GetImageInformation().hudImage;
     un->GetImageInformation().hudImage=tmp;
+    maxwarpenergy = un->WarpCapData();
+    if (smartplanets) {
+        SubUnits.prepend (un);
+        un->SetRecursiveOwner (this);
+        this->SetTurretAI ();
+        un->SetTurretAI (); // allows adding planetary defenses, also allows launching fighters from planets, interestingly
+        un->name="Defense_grid";
+    }
+    static bool neutralplanets = XMLSupport::parse_bool(vs_config->getVariable ("physics","planets_always_neutral","true"));
+    if (neutralplanets) {
+        static int neutralfaction=FactionUtil::GetFaction("neutral");
+        this->faction = neutralfaction;
+    }
+    else {
+        this->faction = faction;
+    }    
   }
-  un->Kill();
+  if (un->name==string("LOAD_FAILED")||(!smartplanets)) {
+      un->Kill();
+  }
 }
 
 Planet::Planet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename, vector<char *> dest, const QVector &orbitcent, Unit * parent, int faction,string fullname, bool inside_out, unsigned int lights_num)

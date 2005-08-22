@@ -33,6 +33,7 @@ class Music {
   int loopsleft;  
   int Addlist (std::string listfile);
   void ChangeVolume(float inc=0);
+  void Mute (bool muteornot = false);
   void GotoSong (int whichlist,int whichsong,bool skip);
   void GotoSong (std::string mus);
   void SkipRandSong(int whichlist);

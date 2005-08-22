@@ -147,6 +147,7 @@ PYTHON_BEGIN_INHERIT_CLASS(VS,PythonAIFireAt ,FireAt,"PythonAI")
   PYTHON_DEFINE_METHOD(Class,&FireAt::MatchVelocity,"MatchVelocity");
   PYTHON_DEFINE_METHOD(Class,&FireAt::Cloak,"Cloak");
   PYTHON_DEFINE_METHOD(Class,&FireAt::FormUp,"FormUp");
+  PYTHON_DEFINE_METHOD(Class,&FireAt::FormUpToOwner,"FormUpToOwner");
   PYTHON_DEFINE_METHOD(Class,&FireAt::FaceDirection,"FaceDirection");
   PYTHON_DEFINE_METHOD(Class,&FireAt::XMLScript,"XMLScript");
   PYTHON_DEFINE_METHOD(Class,&FireAt::LastPythonScript,"LastPythonScript");

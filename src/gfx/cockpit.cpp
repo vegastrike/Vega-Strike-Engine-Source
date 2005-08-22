@@ -187,6 +187,8 @@ GFXColor GameCockpit::relationToColor (float relation) {
 void GameCockpit::DrawNavigationSymbol (const Vector &Loc, const Vector & P, const Vector & Q, float size) {
   GFXColor4f (1,1,1,1);
   if (1) {
+    static float crossthick = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","NavCrossLineThickness","1"));; // 1.05;
+    glLineWidth ((int)crossthick);
     size = .125*GFXGetZPerspective (size);
     GFXBegin (GFXLINE);
     GFXVertexf(Loc+P*size);
@@ -211,6 +213,7 @@ void GameCockpit::DrawNavigationSymbol (const Vector &Loc, const Vector & P, con
     GFXVertexf(Loc-.9*Q*size-.125*P*size);
     
     GFXEnd();
+    glLineWidth (1);
   }
 }
 
@@ -218,6 +221,13 @@ float GameCockpit::computeLockingSymbol(Unit * par) {
   return par->computeLockingPercent();
 }
 inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &CamP, const Vector & CamQ, const Vector & CamR, float lock_percent, bool ComputerLockon, bool Diamond=false) {
+
+// if set unconditionally like so, it works	  rSize = rSize * 0.1; // test
+
+//	if (Diamond)
+//		rSize=rSize*0.1;
+    static float boxthick = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","BoxLineThickness","1"));; // 1.05;
+    glLineWidth ((int)boxthick);
 
   static float rat = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","min_target_box_size",".01"));
   float len = (Loc).Magnitude();
@@ -287,22 +297,35 @@ inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &Ca
     if (lock_percent<0) {
       lock_percent=0;
     }
-    float max=2.05;
-    //    VSFileSystem::Fprintf (stderr,"lock percent %f\n",lock_percent);
-    float coord = 1.05+(max-1.05)*lock_percent;//rSize/(1-lock_percent);//this is a number between 1 and 100
 
+//  eallySwitch=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","switchToTargetModeOnKey","true"));
+    static float absmin = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","min_lock_box_size",".001"));
+    static float endreticle = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","MinMissileDiamondSize","1.05"));; // 1.05;
+    static float startreticle = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","MaxMissileDiamondSize","2.05"));; // 1.05;
+    static float bracketsize = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","RotatingBracketSize","0.58"));; // 1.05;
+    static float thetaspeed = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","DiamondRotationSpeed","1"));; // 1.05;
+	float max=startreticle + endreticle;
+    //    VSFileSystem::Fprintf (stderr,"lock percent %f\n",lock_percent);
+    float coord = endreticle+(startreticle-endreticle)*lock_percent;//rSize/(1-lock_percent);//this is a number between 1 and 100
     double rtot = 1./sqrtf(2);
-    float theta = 4*M_PI*lock_percent;
+
+	// this causes the rotation!
+    float theta = 4*M_PI*lock_percent*thetaspeed;
     Vector LockBox (-cos(theta)*rtot,-rtot,sin(theta)*rtot);
-    //    glLineWidth (4);
+ //   Vector LockBox (0*rtot,-rtot,1*rtot);
+
+    static float diamondthick = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","DiamondLineThickness","1"));; // 1.05;
+    glLineWidth ((int)diamondthick);
     Vector TLockBox (rtot*LockBox.i+rtot*LockBox.j,rtot*LockBox.j-rtot*LockBox.i,LockBox.k);
     Vector SLockBox (TLockBox.j,TLockBox.i,TLockBox.k);
     QVector Origin = (CamP+CamQ).Cast()*(rSize*coord);
     TLockBox = (TLockBox.i*CamP+TLockBox.j*CamQ+TLockBox.k*CamR);
     SLockBox = (SLockBox.i*CamP+SLockBox.j*CamQ+SLockBox.k*CamR);
-    double r1Size = rSize*.58;
+    double r1Size = rSize*bracketsize;
+	if (r1Size < absmin)
+		r1Size = absmin;
     GFXBegin (GFXLINESTRIP);
-    max*=rSize*.75;
+    max*=rSize*.75*endreticle;
     if (lock_percent==0) {
       GFXVertexf (Loc+CamQ.Cast()*max*1.5);
       GFXVertexf (Loc+CamQ.Cast()*max);
@@ -439,9 +462,9 @@ void GameCockpit::DrawTargetBoxes(){
             static bool draw_dock_box =XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_docking_boxes","true"));
             if (draw_dock_box) 
               DrawDockingBoxes(un,target,CamP,CamQ, CamR);
-	    DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),true);
+		DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),true); // changing size here doesn't seem to do anything
 	  }else {
-	    DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),false);
+	    DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),false);// changing size here doesn't seem to do anything
 	  }
 	}
     }

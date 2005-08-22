@@ -138,6 +138,16 @@ public:
    virtual string getOrderDescription () {return "formup";}
    virtual ~FormUp();
  };
+ class FormUpToOwner : public MoveTo {
+   QVector Pos;
+ public:
+   FormUpToOwner(const QVector &Position);
+   void SetPos (const QVector &);
+  virtual void SetParent (Unit * parent1);
+   virtual void Execute();
+   virtual string getOrderDescription () {return "formuptoowner";}
+   virtual ~FormUpToOwner();
+ };
  class FaceDirection: public ChangeHeading {
   bool finish;
   float dist;

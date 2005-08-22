@@ -147,12 +147,15 @@ namespace Orders {
     float rad = utdw->DockingPortLocations()[port].radius+parent->rSize();
     float diss =(parent->Position()-loc).MagnitudeSquared()-.1;
     bool isplanet=utdw->isUnit()==PLANETPTR;
+    static float MinimumCapacityToRefuelOnLand = XMLSupport::parse_float (vs_config->getVariable ("physics","MinimumWarpCapToRefuelDockeesAutomatically","0"));
     if (diss<=(isplanet?rad*rad:parent->rSize()*parent->rSize())) {
       DockedScript(parent,utdw);      
       if (physicallyDock)
         return parent->Dock(utdw);
       else{
-        parent->RefillWarpEnergy();
+		   float maxWillingToRefill = utdw->WarpCapData();
+           if (maxWillingToRefill >= MinimumCapacityToRefuelOnLand)
+		       parent->RefillWarpEnergy(); // BUCO! This needs its own units.csv column to see how much we refill!
         return true;
       }
     }else {
@@ -161,9 +164,12 @@ namespace Orders {
 	static float tmp=XMLSupport::parse_float (vs_config->getVariable ("physics","docking_time","10"));
 	if (timer>=1.5*tmp) {
           if (physicallyDock)
+//          DockedScript(parent,utdw);      
             return parent->Dock(utdw);
           else {
-            parent->RefillWarpEnergy();
+		   float maxWillingToRefill = utdw->WarpCapData();
+           if (maxWillingToRefill >= MinimumCapacityToRefuelOnLand)
+		       parent->RefillWarpEnergy(); // BUCO! This needs its own units.csv column to see how much we refill!
             return true;
           }
 	}

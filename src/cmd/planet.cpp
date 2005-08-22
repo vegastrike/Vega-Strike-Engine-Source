@@ -336,25 +336,6 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
 	  }
 	  
   }  
-  /*stupid Sphere BSP when intersection should do
-  string tmpname ("sphere");
-  char temp [64];
-  sprintf (temp, "%f", radius);
-  tmpname +=temp;
-  tmpname +=".bsp";
-  
-  VSFile f;
-  VSError err = f.OpenReadOnly( tmpname, BSPFile);
-  if (err>Ok) {
-  */
-
-
-    /*
-      } else {
-      f.Close();
-      }
-      bspTree = new BSPTree (tmpname.c_str());
-  */
 
   if (ligh.size()>0) {
 	static float bodyradius = XMLSupport::parse_float(vs_config->getVariable ("graphics","star_body_radius",".33"));

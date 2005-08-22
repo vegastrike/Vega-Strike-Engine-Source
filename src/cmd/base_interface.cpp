@@ -818,6 +818,7 @@ BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
 	//	othtext.SetSize(2-(x*4),-.75);
 	othtext.SetSize(1-.01,-.75);
 
+
         std::string fac=FactionUtil::GetFaction(base->faction);
         if (fac=="neutral")
           fac  = UniverseUtil::GetGalaxyFaction(UnitUtil::getUnitSystemFile(base));
@@ -830,6 +831,8 @@ BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
 			saveStringList(UnitUtil::isPlayerStarship(un),mission_key,vec);
 		}
 	}
+
+	
 	if (!rooms.size()) {
 		VSFileSystem::vs_fprintf(stderr,"ERROR: there are no rooms in basefile \"%s%s%s\" ...\n",basefile,compute_time_of_day(base,un),BASE_EXTENSION);
 		rooms.push_back(new Room ());
@@ -916,36 +919,93 @@ void BaseInterface::Room::Launch::Click (BaseInterface *base,float x, float y, i
 	  static bool auto_undock = XMLSupport::parse_bool(vs_config->getVariable("physics","AutomaticUnDock","true"));
 	  Unit * bas = base->baseun.GetUnit();
 	  Unit * playa = base->caller.GetUnit();
-	  if ((auto_undock || (playa->cloakmin < 0)) && (playa && bas)) {
-
-	    playa->UnDock (bas);
-	    CommunicationMessage c(bas,playa,NULL,0);
-	    c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
-		if (playa->getAIState())
-			playa->getAIState()->Communicate (c);
-	    abletodock(5);
-   playa->is_ejectdock = false;
-
-if (playa->name=="return_to_cockpit")
-{
-    playa->is_ejectdock = true;
-    if (playa->faction == playa->faction) 
-		playa->owner = bas;
-}
-
-/*          if (playa->name=="return_to_cockpit")
-		  {
+          if (playa&&bas) {
+              if (((playa->name=="eject") || (playa->name == "ejecting") || (playa->name == "pilot") || (playa->name == "Pilot") || (playa->name == "Eject")) && (bas->faction==playa->faction)) {
+                  playa->name = "return_to_cockpit";
+              }
+          }
+	  if ((playa && bas)&&(auto_undock || (playa->name=="return_to_cockpit"))) {
+              playa->UnDock (bas);
+              CommunicationMessage c(bas,playa,NULL,0);
+              c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
+              if (playa->getAIState())
+                  playa->getAIState()->Communicate (c);
+              abletodock(5);
+              
+              if (playa->name=="return_to_cockpit") {
+                  if (playa->faction == playa->faction) 
+                      playa->owner = bas;
+              }
+              
+              /*          if (playa->name=="return_to_cockpit")
+                          {
 			  // triggers changing to parent unit.
-			    while (turretcontrol.size()<=_Universe->CurrentCockpit())
-                turretcontrol.push_back(0);
-                turretcontrol[_Universe->CurrentCockpit()]=1;
-	  }
-*/	  
-	  
+                          while (turretcontrol.size()<=_Universe->CurrentCockpit())
+                          turretcontrol.push_back(0);
+                          turretcontrol[_Universe->CurrentCockpit()]=1;
+                          }
+              */	  
+              
 	  }
 	  base->Terminate();
+        }
 }
+inline float aynrand (float min, float max) {
+    return ((float)(rand ())/RAND_MAX)*(max-min)+min;
 }
+
+inline QVector randyVector (float min, float max) {
+    return QVector (aynrand(min,max),
+                    aynrand(min,max),
+                    aynrand(min,max));
+}
+ void BaseInterface::Room::Eject::Click (BaseInterface *base,float x, float y, int button, int state) {
+ 	static int numtimes = 0;
+ 	if (state==WS_MOUSE_UP) {
+ 	  Link::Click(base,x,y,button,state);
+ 	  static bool auto_undock = XMLSupport::parse_bool(vs_config->getVariable("physics","AutomaticUnDock","true"));
+ 	  Unit * bas = base->baseun.GetUnit();
+ 	  Unit * playa = base->caller.GetUnit();
+ 	  if (playa && bas) {
+ 
+ 
+         if (playa->name=="return_to_cockpit")
+ 		{
+ 			playa->name = "ejecting";
+             Vector tmpvel=bas->Velocity * -1;
+             if (tmpvel.MagnitudeSquared()<.00001) {
+                tmpvel=randyVector(-(bas->rSize()),bas->rSize()).Cast();
+                if (tmpvel.MagnitudeSquared()<.00001) {
+             tmpvel=Vector(1,1,1);
+ 			   }
+ 			}
+             tmpvel.Normalize();
+          	playa->SetPosAndCumPos (bas->Position()+tmpvel*1.5*bas->rSize()+randyVector(-.5*bas->rSize(), .5*bas->rSize()));
+             playa->SetAngularVelocity(bas->AngularVelocity);
+ 	        playa->SetOwner(bas);
+             static float velmul=XMLSupport::parse_float(vs_config->getVariable("physics","eject_cargo_speed","1"));
+          	playa->SetVelocity(bas->Velocity*velmul+randyVector(-.25,.25).Cast());
+ //            SwitchUnit(bas,playa);
+ 		}
+ 
+ 		    playa->UnDock (bas);
+ 	        CommunicationMessage c(bas,playa,NULL,0);
+ 	        c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
+ 		    if (playa->getAIState())
+ 			    playa->getAIState()->Communicate (c);
+ 	        abletodock(5);
+     		playa->EjectCargo((unsigned int)-1);
+ 
+ 		    if ((playa->name == "return_to_cockpit") || (playa->name == "ejecting") || (playa->name == "eject") ||(playa->name == "Eject") ||(playa->name == "Pilot") || (playa->name == "pilot"))
+ 		  {
+ 	       playa->Kill();
+ 		  }
+ 	  
+ 	  
+ 	  }
+ 	  base->Terminate();
+ 	}
+ }
 
 void BaseInterface::Room::Goto::Click (BaseInterface *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {
@@ -953,6 +1013,8 @@ void BaseInterface::Room::Goto::Click (BaseInterface *base,float x, float y, int
 		base->GotoLink(index);
 	}
 }
+
+
 
 void BaseInterface::Room::Talk::Click (BaseInterface *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {

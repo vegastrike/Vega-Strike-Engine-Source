@@ -48,6 +48,7 @@ public:
   void MatchVelocity(bool terminate, Vector vec, Vector angvel, bool afterburn, bool local);
   void Cloak(bool enable,float seconds);
   void FormUp(QVector pos);
+  void FormUpToOwner(QVector pos);
   void FaceDirection (float distToMatchFacing, bool finish);
   void XMLScript (string script);
   void LastPythonScript();

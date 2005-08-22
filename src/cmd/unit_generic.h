@@ -607,6 +607,7 @@ protected:
   ///fuel of this unit
   float fuel;
   float afterburnenergy;  //short fix
+  int   afterburntype; // 0--energy, 1--fuel
   ///-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)
  ///Moment of intertia of this unit
   float Momentofinertia;
@@ -672,6 +673,7 @@ public:
   float AfterburnData() const{ return afterburnenergy;} //short fix
   void			 SetAfterBurn( float aft) { afterburnenergy = aft;} //short fix
   float FuelData() const;
+  float WarpCapData() const;
   void  SetFuel( float f) { fuel = f;}
   ///Returns the current ammt of energy left
   float EnergyRechargeData() const{return recharge;}
@@ -683,6 +685,7 @@ public:
   float WarpEnergyData() const;
   float GetWarpEnergy() {return warpenergy;} //short fix
   void DecreaseWarpEnergy(bool insystem, float time=1.0f);
+  void IncreaseWarpEnergy(bool insystem, float time=1.0f);
   bool RefillWarpEnergy();
   ///Should we resolve forces on this unit (is it free to fly or in orbit)
   bool resolveforces;
@@ -781,6 +784,7 @@ public:
   virtual Vector ResolveForces (const Transformation &, const Matrix&);
   ///Returns the pqr oritnattion of the unit in world space
   void SetOrientation (QVector q, QVector r);
+  void SetOrientation (QVector p, QVector q, QVector r);
   void SetOrientation (Quaternion Q);
   void GetOrientation(Vector &p, Vector &q, Vector &r) const {
     Matrix m;
@@ -1009,6 +1013,7 @@ public:
   ///Sets up a null queue for orders
 // Uses AI so only in NetUnit and Unit classes
   void PrimeOrders();
+  void PrimeOrdersLaunched();
   void PrimeOrders(Order * newAI);
   ///Sets the AI to be a specific order
   void SetAI(Order *newAI);
@@ -1195,10 +1200,6 @@ public:
   bool isFriend(Unit *other){ if(FactionUtil::GetIntRelation(this->faction,other->faction)>0.0){ return true; } return false; };
   bool isNeutral(Unit *other){ if(FactionUtil::GetIntRelation(this->faction,other->faction)==0.0){ return true; } return false; };
   float getRelation(Unit *other);
-
-  bool is_ejectdock;
-
-
   //can be eaten by tractor or not?  of the thing, added by chuck_starchaser, refined by spiritplumber
   bool tractorable;
 public:

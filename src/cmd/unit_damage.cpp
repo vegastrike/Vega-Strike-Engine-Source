@@ -116,6 +116,7 @@ void GameUnit<UnitType>::Split (int level) {
     }
     this->SubUnits.prepend(splitsub = UnitFactory::createUnit (tempmeshes,true,this->faction));
     splitsub->hull = 1000;
+    splitsub->name="debris";
     splitsub->Mass = debrismassmult*splitsub->Mass/level;
     splitsub->image->timeexplode=.1;
     if (splitsub->meshdata[0]) {
@@ -311,29 +312,31 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
 		}
 	      }
 	    }
+
 		  if (un ) {
-			static float badrel=XMLSupport::parse_float(vs_config->getVariable("sound","loss_relationship","-.1"));
-			static float goodrel=XMLSupport::parse_float(vs_config->getVariable("sound","victory_relationship",".5"));
-			static float timelapse=XMLSupport::parse_float(vs_config->getVariable("sound","time_between_music","180"));
-			float rel=un->getRelation(this);
-			if (!BaseInterface::CurrentBase) {
-				static float lasttime = 0;
-				float newtime=getNewTime();
-				if (newtime-lasttime>timelapse||_Universe->isPlayerStarship(this)) {
-					if (rel>goodrel) {
-						lasttime=newtime;
-						muzak->SkipRandSong(Music::LOSSLIST);
-					} else if (rel < badrel) {
-						lasttime=newtime;
-						muzak->SkipRandSong(Music::VICTORYLIST);
-					}
-				}
-			}  
-		  } else {
-			//muzak->SkipRandSong(Music::LOSSLIST);
-		  }
-	  }
-	}
+                    static int upgradesfaction=FactionUtil::GetFaction("upgrades");
+                    static float badrel=XMLSupport::parse_float(vs_config->getVariable("sound","loss_relationship","-.1"));
+                    static float goodrel=XMLSupport::parse_float(vs_config->getVariable("sound","victory_relationship",".5"));
+                    static float timelapse=XMLSupport::parse_float(vs_config->getVariable("sound","time_between_music","180"));
+                    float rel=un->getRelation(this);
+                    if (!BaseInterface::CurrentBase) {
+                      static float lasttime = 0;
+                      float newtime=getNewTime();
+                      if (newtime-lasttime>timelapse||_Universe->isPlayerStarship(this)&&this->isUnit()!=MISSILEPTR /* && this->maxhull > 0*/ && this->faction != upgradesfaction) { // no victory music for missiles or spawned explosions) {
+                        if (rel>goodrel) {
+                          lasttime=newtime;
+                          muzak->SkipRandSong(Music::LOSSLIST);
+                        } else if (rel < badrel) {
+                          lasttime=newtime;
+                          muzak->SkipRandSong(Music::VICTORYLIST);
+                        }
+                      }
+                    }  
+                  } else {
+                    //muzak->SkipRandSong(Music::LOSSLIST);
+                  }
+          }
+        }
   }
   static float timebeforeexplodedone = XMLSupport::parse_float (vs_config->getVariable ("physics","debris_time","500"));
   bool timealldone =(this->image->timeexplode>timebeforeexplodedone||this->isUnit()==MISSILEPTR||_Universe->AccessCockpit()->GetParent()==this||this->SubUnits.empty());
@@ -361,9 +364,26 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
     while ((su=ui.current())) {
       bool temp = su->Explode(drawit,timeit);
       if (su->GetImageInformation().explosion)
-	alldone |=temp;
+alldone |=temp;
       ui.advance();
     }
   }
+ 
+  
+      static float phatloot=XMLSupport::parse_float(vs_config->getVariable("physics","eject_cargo_on_blowup","0"));
+      
+	  if ((phatloot != 0) &&(this->numCargo() > 0))
+      {
+                      this->EjectCargo(0);  
+
+           int dropcount=(this->numCargo() / phatloot);
+           for(int i=0; i<dropcount; i++)
+              {
+                      this->EjectCargo(0);  
+              }
+	  }
+      
+
   return alldone||(!timealldone);
+
 }

@@ -303,9 +303,15 @@ static void AddSubUnits (Unit *thus, Unit::XML &xml, std::string subunits, int f
       xml.units.back()->image->unitwriter->setName (filename);
     }
     CheckAccessory(xml.units.back());//turns on the ceerazy rotation for the turr          
-  }
+  }//tirabuco
   for(unsigned int a=0; a<xml.units.size(); a++) {
-    thus->SubUnits.prepend(xml.units[a]);
+      bool randomspawn = xml.units[a]->name.find ("randomspawn")!=string::npos;
+      float chancetospawn = xml.units[a]->WarpCapData();
+      if (  (!randomspawn) || (randomspawn && (chancetospawn > (rand()%100)))) {
+          thus->SubUnits.prepend(xml.units[a]);
+      }else {
+          xml.units[a]->Kill();
+      }
   }
 }
 
@@ -761,9 +767,22 @@ shield.range[1].   rhomax=r90;
   graphicOptions.RecurseIntoSubUnitsOnCollision=stob(row["Collide_Subunits"],graphicOptions.RecurseIntoSubUnitsOnCollision?true:false)?1:0;
   jump.energy=stof(row["Outsystem_Jump_Cost"]);
   jump.insysenergy=stof(row["Warp_Usage_Cost"]);
+
+static bool WCfuelhack = XMLSupport::parse_bool(vs_config->getVariable("physics","fuel_equals_warp","false"));
+
+  if (WCfuelhack)
+  {
+	  fuel=warpenergy+jump.energy*0.1; // this is required to make sure we don't trigger the "globally out of fuel" if we use up all warp charges -- save some afterburner for later!!!
+	  warpenergy=fuel;
+  }
+
+
   afterburnenergy=stof(row["Afterburner_Usage_Cost"],32767);
-  if (stoi(row["Afterburner_Type"])==1)
-    afterburnenergy*=-1;
+//type 1 is "use fuel", type 0 is "use reactor energy", type 2 hopefully will be "use jump fuel"
+
+  afterburntype = stoi(row["Afterburner_Type"]);
+
+
   limits.yaw=stof(row["Maneuver_Yaw"])*VS_PI/180.;
   limits.pitch=stof(row["Maneuver_Pitch"])*VS_PI/180.;
   limits.roll=stof(row["Maneuver_Roll"])*VS_PI/180.;
@@ -1199,8 +1218,8 @@ string Unit::WriteUnitString () {
         unit["Wormhole"]=tos(image->forcejump!=0);
         unit["Outsystem_Jump_Cost"]=tos(jump.energy);
         unit["Warp_Usage_Cost"]=tos(jump.insysenergy);
-        unit["Afterburner_Usage_Cost"]=tos(afterburnenergy>0?afterburnenergy:-afterburnenergy);
-        unit["Afterburner_Type"]=tos(afterburnenergy>=0?0:1);
+        unit["Afterburner_Usage_Cost"]=tos(afterburnenergy);
+        unit["Afterburner_Type"]=tos(afterburntype);
         unit["Maneuver_Yaw"]=tos(limits.yaw*180/(VS_PI));
         unit["Maneuver_Pitch"]=tos(limits.pitch*180/(VS_PI));
         unit["Maneuver_Roll"]=tos(limits.roll*180/(VS_PI));

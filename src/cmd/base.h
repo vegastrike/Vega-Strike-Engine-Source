@@ -61,6 +61,15 @@ public:
 			virtual void EndXML(FILE *fp);
 #endif
 		};
+		class Eject : public Link {
+		public:
+			virtual void Click (::BaseInterface* base,float x, float y, int button, int state);
+			virtual ~Eject () {}
+			explicit Eject (std::string ind, std::string pythonfile) : Link(ind,pythonfile) {}
+#ifdef BASE_MAKER
+			virtual void EndXML(FILE *fp);
+#endif
+		};
 		class Talk : public Link {
 		public:
 			//At the moment, the BaseInterface::Room::Talk class is unused... but I may find a use for it later...

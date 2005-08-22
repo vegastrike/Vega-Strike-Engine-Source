@@ -292,6 +292,7 @@ bool cockpitfront=true;
     }
   static int tmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","cockpit","true"))?1:0);
   static bool switch_to_disabled=XMLSupport::parse_bool(vs_config->getVariable("graphics","disabled_cockpit_allowed","true"));
+
   if(newState==PRESS&&(_Universe->AccessCockpit()->GetView()==CP_FRONT)&&switch_to_disabled&&switch_to_disabled) {
       YawLeft (KBData(),RELEASE);
       YawRight (KBData(),RELEASE);

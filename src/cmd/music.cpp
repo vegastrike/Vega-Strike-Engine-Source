@@ -161,6 +161,43 @@ void Music::ChangeVolume (float inc) {
         }
 }
 
+void Music::Mute (bool muteornot) {
+	static float previousvol;
+	static bool muted = false;
+	float inc;
+
+	if ((muteornot && muted) || (!muteornot && !muted))
+		return;
+
+	if (muteornot && !muted)
+	{
+		previousvol = this->vol;
+		inc = (this->vol) * -1;
+		muted = true;
+	}
+
+	if (!muteornot && muted)
+	{
+		inc = previousvol;
+		muted = false;
+	}
+
+
+	this->vol+=inc;
+	if (this->vol>1) {
+		this->vol=1;
+	} else if (this->vol<0) {
+		this->vol=0;
+	}
+	char tempbuf [100];
+	sprintf(tempbuf,"v%f\n",this->vol);
+        if (soundServerPipes()) {
+            fNET_Write(socketw,strlen(tempbuf),tempbuf);
+        }else {
+            INET_Write(socketw,strlen(tempbuf),tempbuf);
+        }
+}
+
 bool Music::LoadMusic (const char *file) {
 	using namespace VSFileSystem;
 	// Loads a playlist so try to open a file in datadir or homedir
