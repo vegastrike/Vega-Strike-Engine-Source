@@ -376,7 +376,7 @@ alldone |=temp;
       {
                       this->EjectCargo(0);  
 
-           int dropcount=(this->numCargo() / phatloot);
+           int dropcount=(int)floor(this->numCargo() / phatloot);
            for(int i=0; i<dropcount; i++)
               {
                       this->EjectCargo(0);  
