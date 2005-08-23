@@ -1201,9 +1201,9 @@ public:
   bool isNeutral(Unit *other){ if(FactionUtil::GetIntRelation(this->faction,other->faction)==0.0){ return true; } return false; };
   float getRelation(Unit *other);
   //can be eaten by tractor or not?  of the thing, added by chuck_starchaser, refined by spiritplumber
-  bool tractorable;
+  //  bool tractorable; // just lookup in the unit type
 public:
-  bool isTractorable() const { return tractorable && !docked; }
+  bool isTractorable() const;
 };
 
 ///Holds temporary values for inter-function XML communication Saves deprecated restr info

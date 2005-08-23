@@ -44,7 +44,14 @@
 #include "config.h"
 using namespace Orders;
 extern void DestroyMount(Mount*);
-
+bool Unit::isTractorable() const{  
+    if (docked)return false;
+    
+    string stat=UniverseUtil::LookupUnitStat(this->name,
+                                 FactionUtil::GetFactionName(faction),
+                                 "Tractorable");
+    return XMLSupport::parse_bool(stat);
+}
 void	Unit::BackupState()
 {
 	this->old_state.setPosition( this->curr_physical_state.position);
@@ -626,7 +633,7 @@ void Unit::ZeroAll( )
     faction               = 0;
     flightgroup           = NULL;
     flightgroup_subnumber = 0;
-    tractorable           = true; //added by chuck_starchaser
+
 }
 
 void Unit::Init()

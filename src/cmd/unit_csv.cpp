@@ -969,8 +969,9 @@ static bool WCfuelhack = XMLSupport::parse_bool(vs_config->getVariable("physics"
     }
   }
   CheckAccessory(this);//turns on the ceerazy rotation for any accessories
-	  //reading last field from cvs to find out if unit is 'tractorable' as in can be eaten by trac, chuck_starchaser & spirit
-  tractorable = stob(row["Tractorable"],true);
+  //reading last field from cvs to find out if unit is 'tractorable' as in can be eaten by trac, chuck_starchaser & spirit
+  // hellcatv -- just lookit up in the global table... it's not needed very often.
+  //  tractorable = stob(row["Tractorable"],true);
 }
 CSVRow GetUnitRow(string filename, bool subu, int faction, bool readlast, bool &rread) {
   std::string hashname = filename+"__"+FactionUtil::GetFactionName(faction);
