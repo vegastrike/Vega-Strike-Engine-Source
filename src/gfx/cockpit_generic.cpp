@@ -523,7 +523,7 @@ bool Cockpit::Update () {
           }
 // we are an ejected pilot, so, if we can get close enough to the related unit, jump into it and remove the seat. This said, always allow
 		  // switching from the "fake" ejection seat (ejectdock).
-          if ( !proceed && (k->Position()-un->Position()).Magnitude() < (un->rSize()+5*k->rSize())) {
+          if ( !proceed && k&& (k->Position()-un->Position()).Magnitude() < (un->rSize()+5*k->rSize())) {
               
               if (!(k->name=="return_to_cockpit"))
                   SwitchUnits (k,un);
@@ -535,7 +535,7 @@ bool Cockpit::Update () {
               //un->SetAI(new FireKeyboard ())
           }
           
-          if (proceed) {
+          if (proceed&&k) {
               k->PrimeOrdersLaunched();
               k->SetAI (new Orders::AggressiveAI ("interceptor.agg.xml"));
               k->SetTurretAI();	  
