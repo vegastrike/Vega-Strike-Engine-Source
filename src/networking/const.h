@@ -52,7 +52,9 @@ extern double DAMAGE_ATOM;
 
 #if defined(_WIN32) && !defined(__CYGWIN__) || defined(__APPLE__)
 	//#warning "Win32 platform"
-	#define in_addr_t unsigned long
+	#if !defined(__APPLE__)
+		#define in_addr_t unsigned long
+	#endif
 	#define socklen_t int
 #else
 	//#warning "GCC platform"
