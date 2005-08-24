@@ -376,7 +376,10 @@ void winsys_show_cursor( bool visible )
   \author  jfpatry
   \date    Created:  2000-10-19
   \date    Modified: 2000-10-19
+  \date    Modified: 2005-8-16 - Rogue
 */
+bool keypress(int code, bool isdown, int cooked);
+
 void winsys_process_events()
 {
     SDL_Event event; 
@@ -391,6 +394,7 @@ void winsys_process_events()
 	    
 	    switch ( event.type ) {
 	    case SDL_KEYDOWN:
+		if(!keypress(event.key.keysym.sym, event.key.state==SDL_PRESSED, event.key.keysym.unicode))
 		if ( keyboard_func ) {
 		    SDL_GetMouseState( &x, &y );
 		    key = event.key.keysym.sym; 
@@ -402,6 +406,7 @@ void winsys_process_events()
 		break;
 
 	    case SDL_KEYUP:
+		if(!keypress(event.key.keysym.sym, event.key.state==SDL_PRESSED, event.key.keysym.unicode))
 		if ( keyboard_func ) {
 		    SDL_GetMouseState( &x, &y );
 		    key = event.key.keysym.sym; 
@@ -510,6 +515,68 @@ void winsys_exit( int code )
     }
     
     exit( code );
+}
+
+/*---------------------------------------------------------------------------*/
+/*!
+  New input wrapper for new Command Processor SDL version
+  \author  Rogue
+  \date    Created:  2005-8-16
+*/
+bool keypress(int code, bool isDown, int cooked) {
+	commandI *interp = &CommandInterpretor; 	//just because interp is shorter than the entire thing
+	{
+	//try enabling the console
+		char add[] = { code, 0};
+		std::ostringstream l;
+		l << add;
+		std::string add2; add2.append(l.str());
+		//Temporary - Needs to be mapped in a config file for non-english keyboards
+		//that don't do ` right (So I hear)
+		if(!interp->console && add2.compare("`") == 0) {
+			interp->console = true;
+			SDL_EnableUNICODE(true);
+			return true;
+		}
+	}
+	if(interp->console) {
+		if(code==SDLK_ESCAPE) {
+			interp->console = false;
+
+//			SDL_EnableUNICODE(false);
+			return true;
+		};
+		if(code==SDLK_RETURN && isDown) {
+			std::string commandBuf = interp->getcurcommand(); 
+			interp->execute(&commandBuf, isDown, 0); //execute console on enter
+			//don't return so the return get's processed by
+			//interp->ConsoleKeyboardI, so it can clear the
+			//command buffer
+		}
+		interp->ConsoleKeyboardI(code, isDown, cooked); 
+		return true;
+	}
+/* Proposed (Would need a couple commands inserted into the command processor
+	// one to read a keymap file and one to re-map a single key
+	// (and the keymap file would have to be read at startup)
+	// struct keym { int code; char * name; char * action; }; or so
+	std::vector<KeyMapObject>::iterator iter = keyMapVector.begin();
+        while(iter < keyMapVector.end()) {
+            keym *tester = &(*(iter));
+            if(tester->code == code){
+            // lookup in keymap and execute
+            if(tester->action)
+                    execCommand(tester->action, isdown);
+                return true; 
+            }
+            iter++;
+        }
+    }
+
+
+
+*/
+	return false;
 }
 
 #else

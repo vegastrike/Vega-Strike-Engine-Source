@@ -268,17 +268,19 @@ void beginElement(const string &name, const XML_Char **atts ){
 
   doTextBuffer();
   domNodeType *parent;
+  bool hasParent = false;
   if(nodestack.empty()){
     parent=NULL;
   }
   else{
+    hasParent = true;
     parent=nodestack.top();
   }
 
   domNodeType *thisnode=new domNodeType();
   thisnode->set(parent,name,atts);
 
-  if(parent==NULL){
+  if(!hasParent){
     topnode=thisnode;
   }
   else{

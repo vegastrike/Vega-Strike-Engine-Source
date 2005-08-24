@@ -54,6 +54,10 @@ networking/lowlevel/libnetlowlevel.a \
 
 
 libroot =		\
+	command.h 			\
+	command.cpp 			\
+	rendertext.h			\
+	rendertext.cpp			\
 	debug_vs.h				\
 	debug_vs.cpp			\
 	gfxlib.h				\

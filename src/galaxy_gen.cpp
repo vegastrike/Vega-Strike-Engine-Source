@@ -114,6 +114,9 @@ public:
   float s;
   float t;
   Vector () {i=j=k=0;}
+  Vector(const Vector &in) {
+   i=in.i; j=in.j; k=in.k; s=in.s; t=in.t;
+  }
   Vector (float x, float y, float z) {
     i=x;
     j=y;

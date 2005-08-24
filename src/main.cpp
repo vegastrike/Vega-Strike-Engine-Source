@@ -67,6 +67,7 @@
 #include "cg_global.h"
 #endif
 
+commandI CommandInterpretor;
 
 int nadanixnuthin() {
   float a=0;

@@ -4,6 +4,8 @@
 #include <vector>
 
 #include "universe_generic.h"
+#include "command.h"
+extern commandI CommandInterpretor;
 extern Universe * _Universe;
 /*
 #ifdef _SERVER
