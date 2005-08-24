@@ -74,7 +74,7 @@ private:
   bool	isServer() { return is_server;}
   Cockpit * isPlayerStarship (const Unit* fighter);
   Cockpit * isPlayerStarshipVoid (const void* pointercompare) {
-    this->isPlayerStarship((Unit*)pointercompare);
+      return this->isPlayerStarship((Unit*)pointercompare);
   }
   int whichPlayerStarship (const Unit* fighter);
   Cockpit *AccessCockpit() {return cockpit[current_cockpit];}
