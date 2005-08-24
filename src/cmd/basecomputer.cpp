@@ -5438,10 +5438,10 @@ bool BaseComputer::actionQuitGame(const EventCommandId& command, Control* contro
 
 bool BaseComputer::actionConfirmedSaveGame() {
 	Unit* player = m_player.GetUnit();
-    if (player->name == "return_to_cockpit")
+    if (player&&player->name == "return_to_cockpit")
 	{
-	showAlert ("Return to a base to save.");
-    return false; // should be false, but causes badness.
+          showAlert ("Return to a base to save.");
+          return false; // should be false, but causes badness.
 		//		player = m_base.GetUnit(); // messes tuff up, besides, not having this appears to be good.
 	}
 	StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("InputText") );

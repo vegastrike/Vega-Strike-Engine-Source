@@ -1761,10 +1761,10 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   static float EXTRA_CARGO_SPACE_DRAG=XMLSupport::parse_float(vs_config->getVariable ("physics","extra_space_drag_for_cargo","0.005"));
   if (maxhull < 0)
   {
-	 if (this->owner)
-    	  this->Velocity = this->owner->Velocity;
-
-     this->Explode(true, 0);
+    //if (this->owner)
+    //this->Velocity = this->owner->Velocity; NOT ALLOWED TO DEREFERENCE OWNER
+    
+    this->Explode(true, 0);
   }
 	Transformation old_physical_state = curr_physical_state;
   if (docked&DOCKING_UNITS) {
@@ -5192,22 +5192,15 @@ bool Unit::UnDock (Unit * utdw) {
 //   this->is_ejectdock = false;
 //   is_ejectdock = false;
 
-if (this->name=="return_to_cockpit")
-{
-//    this->is_ejectdock = true;
+  if (this->name=="return_to_cockpit") {
+    //    this->is_ejectdock = true;
     if (this->faction == utdw->faction) 
-		this->owner = utdw;
-	else
-		this->owner = this;
-}
+      this->owner = utdw;
+    else
+      this->owner = NULL;
+  }
 
-if (name=="return_to_cockpit")
-{
-//    is_ejectdock = true;
-    if (faction == utdw->faction) 
-		owner = utdw;
-}
-
+  
 
 
   cerr<<"Asking to undock"<<endl;
@@ -5247,13 +5240,13 @@ if (name=="return_to_cockpit")
         }
       }
       
-	  if (name=="return_to_cockpit" || this->name=="return_to_cockpit")
-	  {
-   			while (turretcontrol.size()<=_Universe->CurrentCockpit())
-            turretcontrol.push_back(0);
-            turretcontrol[_Universe->CurrentCockpit()]=1;
+      if (name=="return_to_cockpit" || this->name=="return_to_cockpit")
+      {
+        while (turretcontrol.size()<=_Universe->CurrentCockpit())
+          turretcontrol.push_back(0);
+        turretcontrol[_Universe->CurrentCockpit()]=1;
       }
-	  
+      
       return true;
     }
   }

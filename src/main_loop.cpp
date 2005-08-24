@@ -283,7 +283,7 @@ namespace CockpitKeys {
 	}
 
   }
-
+extern Unit * findUnitInStarsystem(Unit * unitDoNotDereference);
 bool cockpitfront=true;
   void Inside(const KBData&,KBSTATE newState) {
     {
@@ -294,19 +294,21 @@ bool cockpitfront=true;
   static bool switch_to_disabled=XMLSupport::parse_bool(vs_config->getVariable("graphics","disabled_cockpit_allowed","true"));
 
   if(newState==PRESS&&(_Universe->AccessCockpit()->GetView()==CP_FRONT)&&switch_to_disabled&&switch_to_disabled) {
-      YawLeft (KBData(),RELEASE);
-      YawRight (KBData(),RELEASE);
-      PitchUp(KBData(),RELEASE);
-      PitchDown (KBData(),RELEASE);
-	  string cockpit="disabled-cockpit.cpt";
-	  if (_Universe->AccessCockpit()->GetParent())
-		  cockpit=_Universe->AccessCockpit()->GetParent()->getCockpit();
-
-      if (_Universe->AccessCockpit()->GetParent()->name=="return_to_cockpit")
-		  cockpit=_Universe->AccessCockpit()->GetParent()->owner->getCockpit();
-
-
-	  _Universe->AccessCockpit()->Init (cockpit.c_str(), ((tmp)&&_Universe->AccessCockpit()->GetParent())==false);	    
+    YawLeft (KBData(),RELEASE);
+    YawRight (KBData(),RELEASE);
+    PitchUp(KBData(),RELEASE);
+    PitchDown (KBData(),RELEASE);
+    string cockpit="disabled-cockpit.cpt";
+    if (_Universe->AccessCockpit()->GetParent()) {
+      cockpit=_Universe->AccessCockpit()->GetParent()->getCockpit();
+      if (_Universe->AccessCockpit()->GetParent()->name=="return_to_cockpit") {
+        Unit * tmp = findUnitInStarsystem(_Universe->AccessCockpit()->GetParent()->owner);
+        if (tmp)
+          cockpit=tmp->getCockpit();
+      }
+    }
+    
+    _Universe->AccessCockpit()->Init (cockpit.c_str(), ((tmp)&&_Universe->AccessCockpit()->GetParent())==false);	    
     tmp=(tmp+1)%2;
   }
   if(newState==PRESS||newState==DOWN) {
