@@ -471,6 +471,7 @@ coms commandI::findCommand(const char *comm, int &sock_in) {
 	
 // }}}
 // No command was found, so we find and return the dummy command {{{
+	{
 	std::vector<coms>::iterator iter = rcCMD->rc.begin();
 	bool breaker = true;
 	for(;breaker == true;) {
@@ -480,6 +481,7 @@ coms commandI::findCommand(const char *comm, int &sock_in) {
 	}
 	coms testCom( (*(iter)) ); //we should never get here
 	return testCom; //or here, it exists on the first else above
+	}
 // }}}
 };
 /// }}}
@@ -649,7 +651,7 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 
 	}
 	if(args == 0) args = 1; //hack fix.
-	char *w[args];
+	vector<char*>w(args);
 	size_t vargs = 0;
 	ylast = 0;
 	breaker = false;
@@ -744,7 +746,7 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
                                 theCommand.functor->Call(w[1]);
 			break;
                 case ARG_1CSTRARRAY:
-                                theCommand.functor->Call(w);
+                                theCommand.functor->Call(&w[0]);
                         break;
                 case ARG_2CSTR:
                                 theCommand.functor->Call(w[1], w[2]);

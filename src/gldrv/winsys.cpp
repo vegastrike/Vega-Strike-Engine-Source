@@ -528,12 +528,9 @@ bool keypress(int code, bool isDown, int cooked) {
 	{
 	//try enabling the console
 		char add[] = { code, 0};
-		std::ostringstream l;
-		l << add;
-		std::string add2; add2.append(l.str());
 		//Temporary - Needs to be mapped in a config file for non-english keyboards
 		//that don't do ` right (So I hear)
-		if(!interp->console && add2.compare("`") == 0) {
+		if(!interp->console && strcmp(add,"`") == 0) {
 			interp->console = true;
 			SDL_EnableUNICODE(true);
 			return true;

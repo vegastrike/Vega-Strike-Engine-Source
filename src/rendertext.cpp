@@ -1,7 +1,9 @@
 // rendertext.cpp: based on Don's gl_text.cpp
 // Based on Aardarples rendertext and menus.. Memleak somewhere
 #include "command.h"
+#ifdef HAVE_CONFIG_H
 #include "../config.h"
+#endif
 #include "vegastrike.h"
 #include "cg_global.h"
 #include "SDL/SDL.h"
@@ -81,12 +83,12 @@ void RText::renderconsole()// render buffer
 //	int length = 0;
 //	for(std::vector<cline>::iterator iter = conlines.begin();
 //	iter < conlines.end(); iter++) length++;
-    for(std::vector<cline>::iterator iter = conlines.begin(); iter < conlines.end(); iter++)  {
+	{for(std::vector<cline>::iterator iter = conlines.begin(); iter < conlines.end(); iter++)  {
 	if(nd < ndraw) 
 		refs.push_back((*(iter)).cref);
 	else iter = conlines.end();
 	nd++;
-    }
+	}}
     size_t j = 0;
     float x = -1;
     float y = -0.5;
@@ -131,9 +133,9 @@ void RText::conline(std::string &sf, bool highlight)        // add a line to the
 
 void RText::conoutf(std::string &s, int a, int b, int c)
 {
-	for(int x = WORDWRAP; x < s.size(); x = x+WORDWRAP) {
+	{for(int x = WORDWRAP; x < s.size(); x = x+WORDWRAP) {
 		s.insert(x, "\n");
-	}
+	}}
 
 	size_t x = s.find("\n");
 	if(x < std::string::npos) {
