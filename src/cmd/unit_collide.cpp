@@ -710,7 +710,7 @@ bool Unit::querySphere (const QVector &pnt, float err) const{
   double SizeScaleFactor = sqrt(TargetPoint.Dot(TargetPoint));//adjust the ship radius by the scale of local coordinates
 #endif
   for (i=0;i<nummesh();i++) {
-    TargetPoint = (Transform (*tmpo,meshdata[i]->Position()).Cast()-pnt).Cast();
+    TargetPoint = (Transform (*tmpo,meshdata[i]->Position().Cast())-pnt).Cast();
     if (TargetPoint.Dot (TargetPoint)< 
 	err*err+
 	meshdata[i]->rSize()*meshdata[i]->rSize()
