@@ -170,6 +170,7 @@ void ExamineWhenTargetKey() {
    
   }
 }
+extern Unit * findUnitInStarsystem(Unit * unitDoNotDereference);
 namespace CockpitKeys {
   
   void QuitNow () {
@@ -283,7 +284,7 @@ namespace CockpitKeys {
 	}
 
   }
-extern Unit * findUnitInStarsystem(Unit * unitDoNotDereference);
+
 bool cockpitfront=true;
   void Inside(const KBData&,KBSTATE newState) {
     {
