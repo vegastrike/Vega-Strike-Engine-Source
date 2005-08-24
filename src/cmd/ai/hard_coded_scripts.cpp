@@ -1,3 +1,4 @@
+#include "python/python_class.h"
 #include "script.h"
 #include "cmd/unit_generic.h"
 #include "hard_coded_scripts.h"
@@ -6,7 +7,6 @@
 #include "tactics.h"
 #include "fire.h"
 #include "order.h"
-#include "python/python_class.h"
 #include "vs_random.h"
 using Orders::FireAt;
 

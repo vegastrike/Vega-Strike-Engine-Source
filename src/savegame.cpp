@@ -1,3 +1,4 @@
+#include <Python.h>
 #include "cmd/unit_generic.h"
 #include "hashtable.h"
 #include <float.h>
@@ -13,7 +14,6 @@
 #include "gfx/cockpit_generic.h"
 #include "networking/const.h"
 #include "vsfilesystem.h"
-#include <Python.h>
 using namespace std;
 using namespace VSFileSystem;
 std::string CurrentSaveGameName="";

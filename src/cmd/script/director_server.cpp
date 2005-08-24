@@ -22,6 +22,15 @@
 /*
   xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
 */
+#ifdef HAVE_PYTHON
+#include <Python.h>
+#endif
+#include "python/python_class.h"
+#ifndef USE_BOOST_128
+#include <boost/python/class.hpp>
+#else
+#include <boost/python/detail/extension_class.hpp>
+#endif
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -32,15 +41,6 @@
 #include <pwd.h>
 #endif
 
-#ifdef HAVE_PYTHON
-#include "Python.h"
-#endif
-#include "python/python_class.h"
-#ifndef USE_BOOST_128
-#include <boost/python/class.hpp>
-#else
-#include <boost/python/detail/extension_class.hpp>
-#endif
 
 #include "cmd/unit_generic.h"
 #include "mission.h"

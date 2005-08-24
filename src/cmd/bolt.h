@@ -15,7 +15,7 @@ private:
   QVector cur_position;
   Vector ShipSpeed;
   QVector prev_position;//beams don't change heading.
-  Unit *owner;
+  void *owner;
   float curdist;
   int decal;//which image it uses
   bool Collide (Unit * target);
@@ -27,7 +27,7 @@ private:
       &&cur_position==b.cur_position
       &&prev_position==b.prev_position;
   }
-  Bolt(const weapon_info *type, const Matrix &orientationpos, const Vector & ShipSpeed, Unit *owner);//makes a bolt
+  Bolt(const weapon_info *type, const Matrix &orientationpos, const Vector & ShipSpeed, void *owner);//makes a bolt
   void Destroy(int index);
   static void Draw();
   bool Update(int index);

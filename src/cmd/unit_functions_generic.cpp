@@ -50,6 +50,23 @@ const Unit* getUnitFromUpgradeName(const string& upgradeName, int myUnitFaction 
 
 }
 
+  int SelectDockPort (Unit * utdw, Unit * parent) {
+    const vector <DockingPorts> * dp = &utdw->DockingPortLocations();
+    float dist = FLT_MAX;
+    int num=-1;
+    for (unsigned int i=0;i<dp->size();++i) {
+      if (!(*dp)[i].used) {
+	Vector rez = Transform (utdw->GetTransformation(),(*dp)[i].pos);
+	float wdist = (rez-parent->Position()).MagnitudeSquared();
+	if (wdist <dist) {
+	  num=i;
+	  dist =wdist;
+	}
+      }
+
+    }
+    return num;
+  }
 // From unit_customize.cpp
 Unit * CreateGameTurret (std::string tur,int faction) {
   return UnitFactory::createUnit (tur.c_str(),true,faction);

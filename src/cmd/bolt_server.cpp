@@ -47,7 +47,7 @@ bolt_draw::bolt_draw () {
   }
 }
 
-Bolt::Bolt (const weapon_info * typ, const Matrix &orientationpos,  const Vector & shipspeed, Unit * owner):cur_position (orientationpos.p), ShipSpeed (shipspeed) {
+Bolt::Bolt (const weapon_info * typ, const Matrix &orientationpos,  const Vector & shipspeed, void * owner):cur_position (orientationpos.p), ShipSpeed (shipspeed) {
   VSCONSTRUCT2('t')
   bolt_draw *q= _Universe->activeStarSystem()->bolts;
   prev_position= cur_position;

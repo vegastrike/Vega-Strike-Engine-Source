@@ -152,8 +152,8 @@ class Mount {
      */ 
 	// Uses Sound Forcefeedback and other stuff
 	void PhysicsAlignedUnfire();
-	bool PhysicsAlignedFire (const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, Unit *owner,  Unit *target, signed char autotrack, float trackingcone, int mount_num=0);
-	bool Fire (Unit *owner, bool Missile=false, bool collide_only_with_target=false);
+	bool PhysicsAlignedFire (Unit * caller,const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, void *owner,  Unit *target, signed char autotrack, float trackingcone);
+	bool Fire (void *owner, bool Missile=false, bool collide_only_with_target=false);
 };
 
 
@@ -571,7 +571,7 @@ public:
   virtual void SetPlanetHackTransformation (Transformation *&ct,Matrix *&ctm) {}
   bool AutoPilotTo(Unit * un, bool automaticenergyrealloc,int recursive_level=2);
   ///The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
-  Unit *owner;
+  void *owner;//void ensures this won't be dereferenced on accident
   ///The number of frames ahead this was put in the simulation queue
   unsigned int sim_atom_multiplier;
   ///The previous state in last physics frame to interpolate within
@@ -736,7 +736,7 @@ public:
   //Applies damage from network data
   void	ApplyNetDamage( Vector & pnt, Vector & normal, float amt, float ppercentage, float spercentage, GFXColor & color);
   ///Applies damage to the pre-transformed area of the ship
-  void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &,  Unit *ownerDoNotDereference, float phasedamage=0 );
+  void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &,  void *ownerDoNotDereference, float phasedamage=0 );
   ///Deals remaining damage to the hull at point and applies lighting effects
   float DealDamageToHullReturnArmor (const Vector &pnt, float Damage, float * &targ);//short fix
   virtual void ArmorDamageSound( const Vector &pnt) {};
@@ -1203,9 +1203,10 @@ public:
   //can be eaten by tractor or not?  of the thing, added by chuck_starchaser, refined by spiritplumber
   //  bool tractorable; // just lookup in the unit type
 public:
+  void TurretFAW();
   bool isTractorable() const;
 };
-
+Unit * findUnitInStarsystem (void * unitDoNotDereference);
 ///Holds temporary values for inter-function XML communication Saves deprecated restr info
 struct Unit::XML {
   float randomstartframe;
@@ -1258,6 +1259,7 @@ inline Unit * UnitContainer::GetUnit() {
 
   return unit;
 }
+
 
 
 #endif

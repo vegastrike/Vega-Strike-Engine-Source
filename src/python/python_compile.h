@@ -1,7 +1,7 @@
 #ifndef _PYTHON_COMPILE_H_
 #define _PYTHON_COMPILE_H_
-#include "hashtable.h"
 #include <Python.h>
+#include "hashtable.h"
 #include <string>
 #include <compile.h>
 extern Hashtable < std::string, PyCodeObject, 1023> compiled_python;

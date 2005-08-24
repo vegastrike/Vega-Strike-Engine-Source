@@ -8,10 +8,10 @@ class MissileEffect {
   float phasedamage;
   float radius;
   float radialmultiplier;
-  Unit * ownerDoNotDereference;
+  void * ownerDoNotDereference;
  public:
   void ApplyDamage (Unit *);
-  MissileEffect (const Vector & pos, float dam, float pdam, float radius, float radmult, Unit * owner):pos(pos) {
+  MissileEffect (const Vector & pos, float dam, float pdam, float radius, float radmult, void * owner):pos(pos) {
     damage=dam;phasedamage=pdam;
     this->radius=radius;
     radialmultiplier=radmult;

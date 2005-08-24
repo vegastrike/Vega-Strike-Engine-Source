@@ -3,7 +3,7 @@ namespace Orders {
 
 class DockingOps : public MoveTo {
   UnitContainer docking;
-  Unit * formerOwnerDoNotDereference;
+  void * formerOwnerDoNotDereference;
   enum {GETCLEARENCE,DOCKING,DOCKED,UNDOCKING} state;
   Order * oldstate;
   float timer;

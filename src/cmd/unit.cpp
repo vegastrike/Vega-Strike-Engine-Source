@@ -46,7 +46,6 @@
 #include "collide/rapcol.h"
 #include "savegame.h"
 #include "xml_serializer.h"
-#include "python/python_class.h"
 #include "cmd/ai/missionscript.h"
 #include "gfx/particle.h"
 #include "cmd/ai/aggressive.h"
@@ -66,7 +65,7 @@
 
 //#define DESTRUCTDEBUG
 #include "beam.h"
-#include "python/init.h"
+
 #include "unit_const_cache.h"
 extern double interpolation_blend_factor;
 

@@ -68,7 +68,7 @@ inline void BlendTrans (Matrix & drawmat, const QVector & cur_position, const QV
     drawmat.p = prev_position.Scale(1-interpolation_blend_factor) + cur_position.Scale(interpolation_blend_factor);    
 }
 
-Bolt::Bolt (const weapon_info * typ, const Matrix &orientationpos,  const Vector & shipspeed, Unit * owner):  cur_position (orientationpos.p), ShipSpeed (shipspeed) {
+Bolt::Bolt (const weapon_info * typ, const Matrix &orientationpos,  const Vector & shipspeed, void * owner):  cur_position (orientationpos.p), ShipSpeed (shipspeed) {
   VSCONSTRUCT2('t')
   bolt_draw *q= _Universe->activeStarSystem()->bolts;
   prev_position= cur_position;

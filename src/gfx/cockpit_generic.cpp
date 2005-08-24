@@ -401,19 +401,15 @@ bool Cockpit::Update () {
         if (par->name=="return_to_cockpit") {
           //   	  if (par->owner->isUnit()==UNITPTR ) this->SetParent(par->owner,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());     // this warps back to the parent unit if we're eject-docking. in this position it also causes badness upon loading a game.
           
-          Unit * temp;
-          for (un_iter i= _Universe->activeStarSystem()->getUnitList().createIterator();
-               (temp=*i)!=NULL;
-               ++i) {
-            if (temp==par->owner) {
-              SwitchUnits(NULL,par->owner);
-              this->SetParent(par->owner,GetUnitFileName().c_str(),this->unitmodname.c_str(),par->owner->Position());     // this warps back to the parent unit if we're eject-docking. causes badness upon loading a game.
-              break;
-            }
+          Unit * temp=findUnitInStarsystem (par->owner);
+          if (temp) {
+              SwitchUnits(NULL,temp);
+              this->SetParent(temp,GetUnitFileName().c_str(),this->unitmodname.c_str(),temp->Position());     // this warps back to the parent unit if we're eject-docking. causes badness upon loading a game.
           }
+          
           par->Kill();
         }
-      } 
+      }
 
       
       

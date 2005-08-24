@@ -22,13 +22,13 @@
 /*
   xml Mission written by Alexander Rawass <alexannika@users.sourceforge.net>
 */
+#include <Python.h>
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
 #include <time.h>
 #include <ctype.h>
-#include <Python.h>
 #ifndef WIN32
 // this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
 #include <unistd.h>

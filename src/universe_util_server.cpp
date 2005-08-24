@@ -32,6 +32,7 @@ namespace UniverseUtil {
 	}
         void musicLoopList (int numloops) {
         }
+        void musicMute(bool stopSound){}
 	void playSound(string soundName, QVector loc, Vector speed) {
 	}
         void cacheAnimation(string aniName) {

@@ -1,6 +1,6 @@
+#include <Python.h>
 #include <math.h>
 #include "pythonmission.h"
-#include <Python.h>
 #include "python/python_compile.h"
 #include <string>
 #include "pythonmission.h"

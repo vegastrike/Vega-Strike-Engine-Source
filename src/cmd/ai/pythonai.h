@@ -1,6 +1,6 @@
+#include <Python.h>
 #include "fire.h"
 #include <assert.h>
-#include <Python.h>
 
 
 using Orders::FireAt;

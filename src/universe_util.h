@@ -83,6 +83,7 @@ public:
 	int GetNumAdjacentSystems (string sysname);
 ///this gets the current time in seconds
 	float GetGameTime ();
+	void musicMute (bool stopit);
 ///this sets the time compresison value to zero
 	void SetTimeCompression ();
 ///this adds a playlist to the music and may be triggered with an int

@@ -16,7 +16,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-
+#include <Python.h>
+#include "python/init.h"
 #include "config.h"
 #if defined(HAVE_SDL)
 #include <SDL/SDL.h>
@@ -42,7 +43,6 @@
 #include "gfx/animation.h"
 #include "cmd/unit.h"
 #include "gfx/cockpit.h"
-#include "python/init.h"
 #include "savegame.h"
 #include "force_feedback.h"
 #include "gfx/hud.h"

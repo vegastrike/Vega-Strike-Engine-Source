@@ -1,10 +1,11 @@
+#include "python/python_compile.h"
 #include "docking.h"
 #include "xml_support.h"
 #include "config_xml.h"
 #include "cmd/unit_generic.h"
 #include "warpto.h"
 #include "universe_util.h"
-#include "python/python_compile.h"
+
 static void DockedScript(Unit * docker, Unit * base) {
   static string script = vs_config->getVariable("AI","DockedToScript","");
   if (script.length()>0) {
@@ -80,7 +81,7 @@ namespace Orders {
 	oldstate->Destroy();
       oldstate=NULL;
       if (formerOwnerDoNotDereference) {
-	parent->SetOwner(formerOwnerDoNotDereference);
+	parent->SetOwner((Unit*)formerOwnerDoNotDereference);//set owner will not deref
 	formerOwnerDoNotDereference=NULL;
       }
 
@@ -91,7 +92,7 @@ namespace Orders {
     if (parent) {
       parent->aistate = oldstate;//that's me!
       if (formerOwnerDoNotDereference) {
-	parent->SetOwner(formerOwnerDoNotDereference);
+	parent->SetOwner((Unit*)formerOwnerDoNotDereference);
 	formerOwnerDoNotDereference=NULL;
       }
       oldstate=NULL;

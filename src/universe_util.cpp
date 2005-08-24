@@ -40,6 +40,7 @@ namespace UniverseUtil {
 	void musicSkip() {
 		 muzak->Skip();
 	}
+        void musicMute(bool stopSound){muzak->Mute(stopSound);}
 	void musicPlaySong(string str) {
 		muzak->GotoSong(str);
 	}

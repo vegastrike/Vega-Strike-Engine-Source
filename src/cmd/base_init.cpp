@@ -1,5 +1,5 @@
-#include <math.h>
 #include <Python.h>
+#include <math.h>
 #include "python/python_class.h"
 #include "base.h"
 #include "base_util.h"

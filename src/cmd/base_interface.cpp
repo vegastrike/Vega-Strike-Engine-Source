@@ -1,3 +1,4 @@
+#include <Python.h>
 #include "base.h"
 #include "gldrv/winsys.h"
 #include "vsfilesystem.h"
@@ -7,7 +8,6 @@
 #include "gfx/cockpit_generic.h"
 #include "python/init.h"
 #include "planet_generic.h"
-#include <Python.h>
 #include <algorithm>
 #include "base_util.h"
 #include "config_xml.h"

@@ -192,7 +192,7 @@ double Mount::Percentage (const Mount *newammo) const{
 	  }
 }
 //bool returns whether to refund the cost of firing
-bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & m, const Vector & velocity, Unit * owner, Unit *target, signed char autotrack, float trackingcone, int mount_num) {
+bool Mount::PhysicsAlignedFire(Unit * caller, const Transformation &Cumulative, const Matrix & m, const Vector & velocity, void * owner, Unit *target, signed char autotrack, float trackingcone) {
 	using namespace VSFileSystem;
   if (time_to_lock>0) {
     target=NULL;
@@ -232,20 +232,20 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 				static bool match_speed_with_target = XMLSupport::parse_float (vs_config->getVariable("physics","match_speed_with_target","true"));
 				string skript =/*string("ai/script/")+*/type->file+string(".xai");
 				VSError err = LookForFile( skript, AiFile);
-					if (err<=Ok) {
-						temp = UnitFactory::createMissile (type->file.c_str(),owner->faction,"",type->Damage,type->PhaseDamage,type->Range/type->Speed,type->Radius,type->RadialSpeed,type->PulseSpeed/*detonation_radius*/);
-						if (!match_speed_with_target) {
-							temp->GetComputerData().max_combat_speed= type->Speed+velocity.Magnitude();
-							temp->GetComputerData().max_combat_ab_speed= type->Speed+velocity.Magnitude();
-						}
-					}else {
+                                if (err<=Ok) {
+                                  temp = UnitFactory::createMissile (type->file.c_str(),caller->faction,"",type->Damage,type->PhaseDamage,type->Range/type->Speed,type->Radius,type->RadialSpeed,type->PulseSpeed/*detonation_radius*/);
+                                  if (!match_speed_with_target) {
+                                    temp->GetComputerData().max_combat_speed= type->Speed+velocity.Magnitude();
+                                    temp->GetComputerData().max_combat_ab_speed= type->Speed+velocity.Magnitude();
+                                  }
+                                }else {
 //						temp = UnitFactory::createUnit(type->file.c_str(),false,owner->faction);
                                           
-	  Flightgroup * fg = owner->getFlightgroup();
+	  Flightgroup * fg = caller->getFlightgroup();
 	  if (fg->name == "base" || fg->name == "Base")
 	  {
 //		  fg = new Flightgroup;
-//	      fg->leader.SetUnit(owner);
+//	      fg->leader.SetUnit(caller);
      	  fg->directive="b";
           fg->name = "Insys_Patrol";   // this fixes base-spawned fighters becoming navpoints, which happens sometimes
 	  }
@@ -262,12 +262,12 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 
 
 
-	  temp = UnitFactory::createUnit (type->file.c_str(),false,owner->faction,"",fg,fgsnumber);
+	  temp = UnitFactory::createUnit (type->file.c_str(),false,caller->faction,"",fg,fgsnumber);
 // this stuff happens farther down, no panic
 //	  temp->PrimeOrdersLaunched();
 //	  temp->SetTurretAI();
 //	  temp->EnqueueAI (new Orders::AggressiveAI ("interceptor.agg.xml"));
-//	  temp->Tar=owner->Target;
+//	  temp->Tar=caller->Target;
 	  //he's alive!!!!!
 					
 					
@@ -281,7 +281,7 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 					
 					}
                                         Vector adder=Vector(mat.r[6],mat.r[7],mat.r[8])*type->Speed;
-					temp->SetVelocity(owner->GetVelocity()+adder);
+					temp->SetVelocity(caller->GetVelocity()+adder);
 					
 			  // Affect the stored mount serial to the new missile
 			  temp->SetSerial( this->serial);
@@ -304,7 +304,7 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 					temp->EnqueueAI (new Orders::MatchLinearVelocity(Vector (0,0,100000),true,false));
 					temp->EnqueueAI (new Orders::FireAllYouGot);
 			  }
-			  temp->SetOwner (owner);
+			  temp->SetOwner ((Unit*)owner);
 			  temp->Velocity = velocity+adder;
 			  temp->curr_physical_state = temp->prev_physical_state= temp->cumulative_transformation = tmp;
 			  CopyMatrix (temp->cumulative_transformation_matrix,m);
@@ -317,7 +317,7 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
     static bool ai_use_separate_sound=XMLSupport::parse_bool (vs_config->getVariable ("audio","ai_high_quality_weapon","false"));
 	static bool ai_sound=XMLSupport::parse_bool (vs_config->getVariable ("audio","ai_sound","true"));
 	Cockpit * cp;
-	bool ips = ((cp=_Universe->isPlayerStarship(owner))!=NULL);
+	bool ips = ((cp=_Universe->isPlayerStarshipVoid(owner))!=NULL);
     if ((((!use_separate_sound)||type->type==weapon_info::BEAM)||((!ai_use_separate_sound)&&!ips))&&(isMissile(type)==false)) {
 		if (ai_sound||(ips&&type->type==weapon_info::BEAM)) {
 			if (!AUDIsPlaying (sound)) {
@@ -345,7 +345,7 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
   return true;
 }
 
-bool Mount::Fire (Unit * owner, bool Missile, bool listen_to_owner) {
+bool Mount::Fire (void * owner, bool Missile, bool listen_to_owner) {
   if (ammo==0) {
     processed=UNFIRED;
   }

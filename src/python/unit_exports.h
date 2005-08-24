@@ -1,10 +1,10 @@
+#include "python_class.h"
 
 #include "cmd/container.h"
 #include <string>
 #include "init.h"
 #include "gfx/vec.h"
 #include "cmd/unit_generic.h"
-#include "python_class.h"
 #ifndef USE_BOOST_128
 #include <boost/python.hpp>
 #else

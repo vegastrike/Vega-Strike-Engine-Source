@@ -22,7 +22,7 @@
 /*
   xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
 */
-
+#include "python/python_class.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
@@ -61,7 +61,6 @@
 #endif
 #include "flightgroup.h"
 #include "gldrv/winsys.h"
-#include "python/python_class.h"
 #ifndef USE_BOOST_128
 #include <boost/python/class.hpp>
 #else

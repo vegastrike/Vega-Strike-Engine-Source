@@ -1,8 +1,9 @@
+#include "python/python_compile.h"
+#include <list>
+#include <vector>
 #include "aggressive.h"
 #include "event_xml.h"
 #include "script.h"
-#include <list>
-#include <vector>
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "xml_support.h"
@@ -21,7 +22,6 @@
 #include "cmd/csv.h"
 #include "universe_util.h"
 #include "vs_random.h"
-#include "python/python_compile.h"
 using namespace Orders;
 using std::map;
 const EnumMap::Pair element_names[] = {
@@ -582,7 +582,7 @@ Unit * GetThreat (Unit * parent, Unit * leader) {
 	  }
 	  return th;
 }
-extern void TurretFAW(Unit * parent);
+
 extern Cargo * GetMasterPartList (const char *);
 
 bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
@@ -925,15 +925,16 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
           // if i am a cargo wingman and so is the player, get into a dockable position with the leader          
 		  else if (parent->owner == leader->owner)
 		  {
-//	      float left= fgnum%2?1:-1;		  
-	      float qdist=(parent->rSize()+parent->owner->rSize());
-		  Order * ord = new Orders::MoveTo(parent->owner->Position()+Vector(0.5*Xpos*psize,0.5*Ypos*psize,0.5*qdist), true, 4);
-   		  ord->SetParent (parent);
-	      ReplaceOrder (ord);
-		  // facing it
-		  ord = new Orders::FaceDirection(-qdist*turn_leader);
-	      ord->SetParent (parent);
-	      ReplaceOrder (ord);
+                    Unit * myowner= findUnitInStarsystem(parent->owner);
+                    //	      float left= fgnum%2?1:-1;		  
+                    float qdist=(parent->rSize()+myowner->rSize());
+                    Order * ord = new Orders::MoveTo(myowner->Position()+Vector(0.5*Xpos*psize,0.5*Ypos*psize,0.5*qdist), true, 4);
+                    ord->SetParent (parent);
+                    ReplaceOrder (ord);
+                    // facing it
+                    ord = new Orders::FaceDirection(-qdist*turn_leader);
+                    ord->SetParent (parent);
+                    ReplaceOrder (ord);
 		  }
 
           // if i am the capship, go into defensive mode
@@ -941,7 +942,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 		  {
 //		  // parent->Target(parent);
 		  parent->SetTurretAI();
-		  TurretFAW(parent);
+		  parent->TurretFAW();
 		  Order * ord = new Orders::MatchLinearVelocity(parent->ClampVelocity(Vector(0,0,0),true),true,false,true);
    		  ord->SetParent (parent);
 	      ReplaceOrder (ord);
@@ -1123,7 +1124,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 		  {
 		  // parent->Target(parent);
 		  parent->SetTurretAI();
-		  TurretFAW(parent);
+		  parent->TurretFAW();
 //          MatchVelocity(parent->ClampVelocity(vec,true),Vector(0,0,0),true,true,false)
 //		  Order * ord = new Orders::FormUp(QVector(position*parent->radial_size,0,fabs(dist)));
 		  Order * ord = new Orders::MatchLinearVelocity(parent->ClampVelocity(Vector(0,0,0),true),true,false,true);
@@ -1193,7 +1194,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 		  {
 		  // parent->Target(parent);
 		  parent->SetTurretAI();
-		  TurretFAW(parent);
+		  parent->TurretFAW();
 //          MatchVelocity(parent->ClampVelocity(vec,true),Vector(0,0,0),true,true,false)
 //		  Order * ord = new Orders::FormUp(QVector(position*parent->radial_size,0,fabs(dist)));
 		  Order * ord = new Orders::MatchLinearVelocity(parent->ClampVelocity(Vector(0,0,0),true),true,false,true);

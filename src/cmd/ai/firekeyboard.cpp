@@ -1,3 +1,4 @@
+#include <Python.h>
 #include <set>
 #include "firekeyboard.h"
 #include "flybywire.h"
@@ -1532,19 +1533,6 @@ static void PowerDownShield(Shield *shield, float howmuch){
 
 }
 extern bool CheckAccessory(Unit*);
-void TurretFAW(Unit * parent) {
-  UnitCollection::UnitIterator iter = parent->getSubUnits();
-  Unit * un;
-  while (NULL!=(un=iter.current())) {
-    if (!CheckAccessory(un)) {
-      un->EnqueueAIFirst (new Orders::FireAt(.2,15));
-      un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
-    }
-    TurretFAW(un);
-    iter.advance();
-  }
-  
-}
 static void ForceChangeTarget(Unit*  parent) {
   Unit * curtarg = parent->Target();
   ChooseTargets(parent,TargUn,false);
@@ -1559,24 +1547,7 @@ static void ForceChangeTarget(Unit*  parent) {
       }
   }
 }
-
-  int SelectDockPort (Unit * utdw, Unit * parent) {
-    const vector <DockingPorts> * dp = &utdw->DockingPortLocations();
-    float dist = FLT_MAX;
-    int num=-1;
-    for (unsigned int i=0;i<dp->size();++i) {
-      if (!(*dp)[i].used) {
-	Vector rez = Transform (utdw->GetTransformation(),(*dp)[i].pos);
-	float wdist = (rez-parent->Position()).MagnitudeSquared();
-	if (wdist <dist) {
-	  num=i;
-	  dist =wdist;
-	}
-      }
-
-    }
-    return num;
-  }
+int SelectDockPort (Unit * utdw, Unit * parent);
 
 bool isMissile(const weapon_info *);
 
@@ -1794,8 +1765,8 @@ void FireKeyboard::Execute () {
       f().turretoffkey = DOWN;
   }
   if(f().turretfaw==PRESS) {
-    TurretFAW(parent);
-      f().turretfaw = DOWN;
+    parent->TurretFAW();
+    f().turretfaw = DOWN;
   }
   
   if (f().turretaikey==RELEASE) {

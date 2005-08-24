@@ -1,13 +1,13 @@
+#ifdef HAVE_PYTHON
+
+#include <Python.h>
+
+#endif
 #include "cmd/unit_generic.h"
 #include "cmd/ai/order.h"
 
 #include "configxml.h"
 #include "gfx/cockpit_generic.h"
-#ifdef HAVE_PYTHON
-
-#include "Python.h"
-
-#endif
 
 #include "python/python_class.h"
 

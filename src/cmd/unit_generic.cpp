@@ -1,4 +1,4 @@
-
+#include "python/python_class.h"
 #include <set>
 #include "configxml.h"
 #include "audiolib.h"
@@ -20,7 +20,6 @@
 #include "cmd/ai/missionscript.h"
 #include "cmd/ai/flybywire.h"
 #include "cmd/ai/aggressive.h"
-#include "python/python_class.h"
 #include "cmd/unit_factory.h"
 #include "gfx/cockpit_generic.h"
 #include "gfx/vsbox.h"
@@ -1750,7 +1749,6 @@ void Unit::DisableTurretAI () {
 /***********************************************************************************/
 /**** UNIT_PHYSICS STUFF                                                           */
 /***********************************************************************************/
-extern Music *muzak;
 
 extern signed char  ComputeAutoGuarantee ( Unit * un);
 extern float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false);
@@ -1910,20 +1908,20 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 
 			if (mounts[i].time_to_lock>-SIMULATION_ATOM&&mounts[i].time_to_lock<=0) {
 			  if (!AUDIsPlaying(LockedSound)) {
-            muzak->Mute(false);
-			AUDStartPlaying(LockedSound);
-			AUDStopPlaying(LockingSound);	      
-			AUDStopPlaying(LockingSoundTorp);	      
+                            UniverseUtil::musicMute(false);
+                            AUDStartPlaying(LockedSound);
+                            AUDStopPlaying(LockingSound);	      
+                            AUDStopPlaying(LockingSoundTorp);	      
 			  }
 			  AUDAdjustSound (LockedSound,Position(),GetVelocity()); 
 			}else if (mounts[i].time_to_lock>0)  {
 			  locking=true;
 			  if (!AUDIsPlaying(LockingPlay)) {
 			  if (LockingPlay == LockingSoundTorp)
-				  muzak->Mute(TorpLockTrumpsMusic);
-              else
-       			  muzak->Mute(LockTrumpsMusic);
-		      AUDStartPlaying(LockingPlay);	      
+                            UniverseUtil::musicMute(TorpLockTrumpsMusic);
+                          else
+                            UniverseUtil::musicMute(LockTrumpsMusic);
+                          AUDStartPlaying(LockingPlay);	      
 			  }
 			  AUDAdjustSound (LockingPlay,Position(),GetVelocity());
 			}
@@ -1974,7 +1972,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 		  }
 		  autotrack=2;
       }
-      if (!mounts[i].PhysicsAlignedFire (t1,m1,cumulative_velocity,(!isSubUnit()||owner==NULL)?this:owner,target,autotrack, trackingcone)) {
+      if (!mounts[i].PhysicsAlignedFire (this,t1,m1,cumulative_velocity,(!isSubUnit()||owner==NULL)?this:owner,target,autotrack, trackingcone)) {
 		  const weapon_info * typ = mounts[i].type;
 		  energy+=typ->EnergyRate*(typ->type==weapon_info::BEAM?SIMULATION_ATOM:1);
 		  if (mounts[i].ammo>=0)
@@ -1991,11 +1989,11 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   }
   if (locking==false&&touched==true) {
     if (AUDIsPlaying(LockingSound)) {
-            muzak->Mute(false);
+      UniverseUtil::musicMute(false);
       AUDStopPlaying(LockingSound);	
     }      
     if (AUDIsPlaying(LockingSoundTorp)) {
-            muzak->Mute(false);
+      UniverseUtil::musicMute(false);
       AUDStopPlaying(LockingSoundTorp);	
     }     
   }
@@ -3411,7 +3409,7 @@ void	Unit::ApplyNetDamage( Vector & pnt, Vector & normal, float amt, float pperc
 	}
   }
 }
-Unit * findUnitInStarsystem (Unit * unitDoNotDereference) {
+Unit * findUnitInStarsystem (void * unitDoNotDereference) {
   Unit * un;
   for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();
        (un=*i)!=NULL;
@@ -3421,11 +3419,11 @@ Unit * findUnitInStarsystem (Unit * unitDoNotDereference) {
   }
   return NULL;
 }
-extern void ScoreKill (Cockpit * cp, Unit * un, Unit * killedUnit);
+extern void ScoreKill (Cockpit * cp, Unit * killer, Unit * killedUnit);
 // Changed order of things -> Vectors and ApplyLocalDamage are computed before Cockpit thing now
 void AllUnitsCloseAndEngage(Unit*,int faction);
-void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit, const GFXColor & color, Unit * ownerDoNotDereference, float phasedamage) {
-  Cockpit * cp = _Universe->isPlayerStarship (ownerDoNotDereference);
+void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit, const GFXColor & color, void * ownerDoNotDereference, float phasedamage) {
+  Cockpit * cp = _Universe->isPlayerStarshipVoid (ownerDoNotDereference);
   float hullpercent=GetHullPercent();
   // Only on client side
   bool mykilled = hull<0;
@@ -3444,22 +3442,22 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
     int howmany= armor_damage?MadnessForHullDamage:MadnessForShieldDamage;
     for (int i=0;i<howmany;++i) {
       //now we can dereference it because we checked it against the parent
-      CommunicationMessage c(ownerDoNotDereference,this,NULL,0);
+      CommunicationMessage c((Unit*)ownerDoNotDereference,this,NULL,0);
       c.SetCurrentState(c.fsm->GetHitNode(),NULL,0);
       if (this->getAIState()) this->getAIState()->Communicate (c);      
     }
-    Threaten (ownerDoNotDereference,10);//the dark danger is real!
+    Threaten ((Unit*)ownerDoNotDereference,10);//the dark danger is real!
   }
 
   if (hull<0) {
 	  ClearMounts();
 	  if (!mykilled) {
             if (cp) {
-              ScoreKill (cp,ownerDoNotDereference,this);
+              ScoreKill (cp,(Unit*)ownerDoNotDereference,this);
             }else {
               Unit * tmp;
               if ((tmp=findUnitInStarsystem(ownerDoNotDereference))!=NULL) {
-                if ((NULL!=(cp=_Universe->isPlayerStarship(tmp->owner)))
+                if ((NULL!=(cp=_Universe->isPlayerStarshipVoid(tmp->owner)))
                     &&(cp->GetParent()!=NULL)) {                 
                   ScoreKill(cp,cp->GetParent(),this);
                 }else {
@@ -3470,10 +3468,12 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
           }
   }else if (hullpercent>=hull_percent_for_comm&&((float)GetHullPercent())<hull_percent_for_comm&&(cp||_Universe->isPlayerStarship(this))) {
     Unit * computerai=this;
-    Unit * player = ownerDoNotDereference;//dangerous, but overwritten if cp==NULL
+    Unit * player=NULL;
     if (!cp) {
       computerai=findUnitInStarsystem(ownerDoNotDereference);
       player = this;
+    }else {
+      player = (Unit*)ownerDoNotDereference;//dangerous, but overwritten if cp==NULL
     }
     if (computerai&&player&&computerai->getAIState()&&player->getAIState()&&computerai->isUnit()==UNITPTR&&player->isUnit()==UNITPTR) {
 		
@@ -6550,19 +6550,20 @@ inline QVector randVector (float min, float max) {
 					uniformrand(min,max),
 					uniformrand(min,max));
 }
-static void TurretFAP(Unit * parent) {
-   UnitCollection::UnitIterator iter = parent->getSubUnits();
-   Unit * un;
-   while (NULL!=(un=iter.current())) {
-     if (!CheckAccessory(un)) {
-       un->EnqueueAIFirst (new Orders::FireAt(.2,15));
-       un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
-     }
-     TurretFAP(un);
-     iter.advance();
-   }
-   
+void Unit::TurretFAW() {
+  UnitCollection::UnitIterator iter = this->getSubUnits();
+  Unit * un;
+  while (NULL!=(un=iter.current())) {
+    if (!CheckAccessory(un)) {
+      un->EnqueueAIFirst (new Orders::FireAt(.2,15));
+      un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
+    }
+    un->TurretFAW();
+    iter.advance();
+  }
+  
 }
+
 extern int SelectDockPort(Unit *, Unit*parent);
 //extern unsigned int current_cockpit;
 void Unit::EjectCargo (unsigned int index) {
@@ -6752,7 +6753,7 @@ void Unit::EjectCargo (unsigned int index) {
 		{
                     static bool simulate_while_at_base=XMLSupport::parse_bool(vs_config->getVariable("physics","simulate_while_docked","false"));
                     if ((simulate_while_at_base)||(_Universe->numPlayers()>1))
-                        TurretFAP(this);
+                        this->TurretFAW();
 
                     SwitchUnits (NULL,this); // make unit a sitting duck in the mean time
                     PrimeOrders();
@@ -6773,7 +6774,7 @@ void Unit::EjectCargo (unsigned int index) {
           //this->UpgradeInterface(this); // this seriously breaks the game...
 //          DockedScript(cargo,this);      // this just don't work.
           if ((simulate_while_at_base)||(_Universe->numPlayers()>1))
-              TurretFAP(this);
+              this->TurretFAW();
           
 		} else {
                     SwitchUnits (NULL,cargo);

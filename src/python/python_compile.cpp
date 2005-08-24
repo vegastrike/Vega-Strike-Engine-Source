@@ -1,7 +1,7 @@
-#include "cmd/unit_generic.h"
 #include "python_compile.h"
 #include <compile.h>
 #include <eval.h>
+#include "cmd/unit_generic.h"
 #include "configxml.h"
 #include "vs_globals.h"
 #include "vsfilesystem.h"

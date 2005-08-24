@@ -1,12 +1,12 @@
 
 #ifdef HAVE_PYTHON
-#include <stdio.h>
-#include <math.h>
 #include <Python.h>
 #include <pyerrors.h>
 #include <pythonrun.h>
 #include <compile.h>
 #include <eval.h>
+#include <stdio.h>
+#include <math.h>
 #ifndef USE_BOOST_128
 #if defined (_MSC_VER) && _MSC_VER<=1200
 #define Vector Vactor

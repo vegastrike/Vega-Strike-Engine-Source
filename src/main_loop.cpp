@@ -170,7 +170,7 @@ void ExamineWhenTargetKey() {
    
   }
 }
-extern Unit * findUnitInStarsystem(Unit * unitDoNotDereference);
+//extern Unit * findUnitInStarsystem(Unit * unitDoNotDereference);
 namespace CockpitKeys {
   
   void QuitNow () {

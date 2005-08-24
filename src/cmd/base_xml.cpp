@@ -1,7 +1,7 @@
+#include <Python.h>
 #include <vector>
 #include <string>
 #include <math.h>
-#include <Python.h>
 #include "python/python_class.h"
 #include "base.h"
 #include "base_util.h"
