@@ -88,10 +88,15 @@ using namespace std;
 Cockpit * Universe::isPlayerStarship(const Unit * doNotDereference) {
   if (!doNotDereference)
     return NULL;
-  for (unsigned int i=0;i<cockpit.size();i++) {
-    if (doNotDereference==cockpit[i]->GetParent())
-      return cockpit[i];
-  }
+	for(std::vector<Cockpit *>::iterator iter = cockpit.begin(); iter < cockpit.end(); iter++) {
+		if(doNotDereference==(*(iter))->GetParent()) {
+			return (*(iter));	
+		}
+	}
+//  for (unsigned int i=0;i<cockpit.size();i++) {
+//    if (doNotDereference==cockpit[i]->GetParent())
+//      return cockpit[i];
+//  }
   return NULL;
 }
 int Universe::whichPlayerStarship(const Unit * doNotDereference) {

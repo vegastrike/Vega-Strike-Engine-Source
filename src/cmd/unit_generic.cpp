@@ -3442,18 +3442,18 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
     int howmany= armor_damage?MadnessForHullDamage:MadnessForShieldDamage;
     for (int i=0;i<howmany;++i) {
       //now we can dereference it because we checked it against the parent
-      CommunicationMessage c((Unit*)ownerDoNotDereference,this,NULL,0);
+      CommunicationMessage c(reinterpret_cast<Unit *>(ownerDoNotDereference),this,NULL,0);
       c.SetCurrentState(c.fsm->GetHitNode(),NULL,0);
       if (this->getAIState()) this->getAIState()->Communicate (c);      
     }
-    Threaten ((Unit*)ownerDoNotDereference,10);//the dark danger is real!
+    Threaten (reinterpret_cast<Unit*>(ownerDoNotDereference),10);//the dark danger is real!
   }
 
   if (hull<0) {
 	  ClearMounts();
 	  if (!mykilled) {
             if (cp) {
-              ScoreKill (cp,(Unit*)ownerDoNotDereference,this);
+              ScoreKill (cp,reinterpret_cast<Unit *>(ownerDoNotDereference),this);
             }else {
               Unit * tmp;
               if ((tmp=findUnitInStarsystem(ownerDoNotDereference))!=NULL) {
@@ -3473,7 +3473,7 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
       computerai=findUnitInStarsystem(ownerDoNotDereference);
       player = this;
     }else {
-      player = (Unit*)ownerDoNotDereference;//dangerous, but overwritten if cp==NULL
+      player = reinterpret_cast<Unit*>(ownerDoNotDereference);//dangerous, but overwritten if cp==NULL
     }
     if (computerai&&player&&computerai->getAIState()&&player->getAIState()&&computerai->isUnit()==UNITPTR&&player->isUnit()==UNITPTR) {
 		

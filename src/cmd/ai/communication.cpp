@@ -228,9 +228,11 @@ float FSM::getDeltaRelation (int prevstate, int current_state) const{
 }
 
 void CommunicationMessage::Init (Unit * send, Unit * recv) {
+  if(send == NULL) return;
   fsm = FactionUtil::GetConversation (send->faction,recv->faction);
   sender.SetUnit (send);
   this->prevstate=this->curstate = fsm->getDefaultState(send->getRelation(recv));
+
 }
 float myround (float i) {
 	float j= floor(i);
