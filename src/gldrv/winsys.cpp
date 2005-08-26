@@ -808,7 +808,8 @@ void winsys_init( int *argc, char **argv, char *window_title,
             ,1
 #endif
 
-#ifdef __APPLE__            )) {
+#ifdef __APPLE__
+            )) {
         glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE );
       }
 #endif

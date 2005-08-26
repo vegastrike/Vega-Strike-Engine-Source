@@ -185,7 +185,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
   return GFXTRUE;
 }
 void /*GFXDRVAPI*/ GFXPrioritizeTexture (unsigned int handle, float priority) {
-  glPrioritizeTextures (1,&handle,&priority); 
+  #if !defined(__APPLE__)
+    glPrioritizeTextures (1,&handle,&priority); 
+  #endif
 }
 void /*GFXDRVAPI*/ GFXAttachPalette (unsigned char *palette, int handle)
 {
