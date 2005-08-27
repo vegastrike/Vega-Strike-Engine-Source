@@ -3,6 +3,7 @@
 #include <Python.h>
 #include <pyerrors.h>
 #include <pythonrun.h>
+#include "vs_random.h"
 #include "python/python_class.h"
 /* *******************************************************************
 Example Commands: 
@@ -259,8 +260,7 @@ void commandI::prompt() {
 void commandI::dummy(std::vector<std::string *> *d) {
     // {{{
 	std::string outs;
-	outs.clear();
-	int rand = std::rand();
+	int rand = vsrandom.genrand_int32();
 	if(rand % 2 == 0) {
 		outs.append("Wtf?\n\r");
 	} else
@@ -361,13 +361,12 @@ coms commandI::findCommand(const char *comm, int &sock_in) {
 	//but for some fucking reason it is sometimes..
 	std::string name;
 	name.append(in_s.str());
-
-    std::string temp;
+	size_t x;
 
 // remove \n and \r's (4 possible network input) {{{
-	for(size_t x = name.find(" "); x != std::string::npos; x = name.find(" ", x+1)) name.replace(x, sizeof((int)"\n"), "");
-	for(size_t x = name.find("\n"); x != std::string::npos; x = name.find("\n", x+1)) name.replace(x, sizeof((int)"\n"), "");
-        for(size_t x = name.find("\r"); x != std::string::npos; x = name.find("\r", x+1)) name.replace(x, sizeof((int)"\r"), "");
+	for(x = name.find(" "); x != std::string::npos; x = name.find(" ", x+1)) name.replace(x, sizeof((int)"\n"), "");
+	for(x = name.find("\n"); x != std::string::npos; x = name.find("\n", x+1)) name.replace(x, sizeof((int)"\n"), "");
+	for(x = name.find("\r"); x != std::string::npos; x = name.find("\r", x+1)) name.replace(x, sizeof((int)"\r"), "");
 // }}}
 //if the input is less than one return prompt function{{{
 	if(name.size() < 1) {
@@ -391,7 +390,7 @@ coms commandI::findCommand(const char *comm, int &sock_in) {
 	//set the test variable to the iterator of something in the command vector
 		coms testCom((*(iter)));
 		//clear the temporary buffer used for holding the name of this command
-		temp.clear();
+		std::string temp;
 		//define a string to possibly print something to the user
 		std::string printer;
 		//if the length of the commands name is larger than what was entered {{{
@@ -543,7 +542,7 @@ bool commandI::execute(std::string *incommand, bool isDown, int sock_in)
 			if(l.size() > 0) name_out = (char *)l.c_str();
 			if(callMenu(name_out, (char *)y.c_str(), t) ) return false;
 
-			incommand->clear();
+			incommand->erase();
 			incommand->append(t); //t may have changed if we got this far
 
 
@@ -561,7 +560,7 @@ bool commandI::execute(std::string *incommand, bool isDown, int sock_in)
 //sock_in was used for passing commands around for an HTTP server
 
 bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
-	size_t ls;
+	size_t ls, y;
 	bool breaker = false;
 //************
 	while(breaker == false) {
@@ -573,10 +572,10 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 		}
 	}
 	size_t ylast = 0;
-	for(size_t y = incommand->find("\r\n"); y != std::string::npos; y = incommand->find("\r\n", y+1)) {
+	for(y = incommand->find("\r\n"); y != std::string::npos; y = incommand->find("\r\n", y+1)) {
                 incommand->replace(y, 2, " ");
         }
-	for(size_t y = incommand->find("  "); y != std::string::npos; y = incommand->find("  ", y+1)) {
+	for(y = incommand->find("  "); y != std::string::npos; y = incommand->find("  ", y+1)) {
 		incommand->replace(y, 1, "");
 	}
 	size_t args = 0;
@@ -626,9 +625,10 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 	std::vector<std::string*> stringvec;
 	ylast = 0;
 	size_t xasd = 0;
+
 	//count arguments and create stringvec{{{
-	for(size_t iter= 0; iter < newincommand.size();iter++) {
-		if(newincommand[iter]==32) {
+	for(size_t striter= 0; striter < newincommand.size();striter++) {
+		if(newincommand[striter]==32) {
 //			w[args] = incommand->substr(ylast, x-ylast);
 //			ylast = x;
 			std::string *xs = new std::string();
@@ -719,7 +719,7 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 //the local stack returns, wreplace will get deleted, effecively freeing
 //what w[x] pointed to, after this function is finished calling
 //whatever function is being held in the functor.
-	lastcommand.clear();lastcommand.append(newincommand);
+	lastcommand.erase();lastcommand.append(newincommand);
 //	if(webb && !theCommand->functor->attribs.webbcmd ) {
 		bool printit = false;
 		if(menumode) {
@@ -913,7 +913,7 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 				funcn.append(menu_in->iselected->func2call);
 				std::string dreplace;
 				dreplace.append(d);
-				d.clear();
+				d.erase();
 				d.append(funcn);
 				d.append(" ");
 				d.append(arg);
@@ -976,7 +976,7 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 					arg.append(menu_in->iselected->action);
 					std::string funcn;
 					funcn.append(menu_in->iselected->func2call);
-					d.clear();
+					d.erase();
 					d.append(funcn);
 					d.append(" ");
 					d.append(arg);
@@ -994,7 +994,7 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 					}
 					d.append(menu_in->iselected->menubuf);
 					d.append(" ");
-					menu_in->iselected->menubuf.clear();
+					menu_in->iselected->menubuf.erase();
 									
 					if(funcn.compare("setMenu") == 0) {
 						std::string buf;
@@ -1098,7 +1098,7 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 					funcn.append(menu_in->iselected->func2call);
 					std::string dreplace;
 					dreplace.append(d);
-					d.clear();
+					d.erase();
 					d.append(funcn);
 					d.append(" ");
 					d.append(arg);

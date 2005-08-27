@@ -234,7 +234,7 @@ void RText::ConsoleKeyboardI(int code, bool isdown, int cooked)
 //print what was typed
 					conoutf(commandbuf);
 //clear the buffer
-					commandbuf.clear();
+					commandbuf.erase();
 				}
 				break;
 			default:
