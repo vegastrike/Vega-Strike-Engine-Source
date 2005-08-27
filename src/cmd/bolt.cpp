@@ -34,7 +34,7 @@ bolt_draw::~bolt_draw () {
     }
   }
   for (i=0;i<bolts.size();i++) {
-    for (unsigned int j=bolts[i].size()-1;j>=0;j--) {
+    for (int j=bolts[i].size()-1;j>=0;j--) {
       bolts[i][j].Destroy(j);
     }
   }
