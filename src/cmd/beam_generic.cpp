@@ -456,9 +456,9 @@ if (beam_or_scoop)
 
 		
 		float adjacencyradius;
-	    if (target->radial_size < un->radial_size)
+	    if (target->radial_size <= un->radial_size)
 			  adjacencyradius = 4 * (target->radial_size) + 1.1 * (un->radial_size);		
-	    if (target->radial_size > un->radial_size)
+		else
 			  adjacencyradius = 1.1 * (target->radial_size) + 1.8 * (un->radial_size);
 //
 		
