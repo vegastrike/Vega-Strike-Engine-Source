@@ -19,8 +19,7 @@
 //their LoadWav is b0rken seriously!!!!!!
 
 bool MacFixedLoadWAVFile(char * buf, ALenum *format,ALvoid **data,ALsizei *size,ALsizei *freq){
-    ALboolean bleh=false;
-    alutLoadWAVMemory((ALbyte*)buf,format,data,size,freq,&bleh);
+    alutLoadWAVMemory((ALbyte*)buf,format,data,size,freq);
     //THIS IS NOW A VECTOR, no freeing    free(buf);
     return true;
 }
