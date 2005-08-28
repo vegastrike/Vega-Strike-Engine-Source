@@ -180,7 +180,7 @@ unsigned int DoSpeech (Unit * un, Unit *player_un, const FSM::Node &node) {
   mission->msgcenter->add (myname,"all",GetRelationshipColor(node.messagedelta*10)+speech+"#000000"); //multiply by 2 so colors are easier to tell
   return dummy;
 }
-void LeadMe (Unit * un, string directive, string speech) { 
+void LeadMe (Unit * un, string directive, string speech, bool changetarget) { 
   if (un!=NULL) {
     for (int i=0;i<_Universe->numPlayers();i++) {
       Unit * pun =_Universe->AccessCockpit(i)->GetParent();
@@ -198,6 +198,10 @@ void LeadMe (Unit * un, string directive, string speech) {
 		  }
       }
       fg->directive = directive;
+      if (changetarget)
+		  fg->target.SetUnit (un->Target());
+      if ((directive == ""))
+		  fg->target.SetUnit (NULL);
     }
   }
 }
@@ -620,19 +624,21 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
       }
     }
     if (obedient) {
-      if (fg->directive.find("a")!=string::npos||fg->directive.find("A")!=string::npos) {
-	Unit * targ = fg->leader.GetUnit();
-	targ = targ!=NULL?targ->Target():NULL;
-	if (targ && (targ->faction != parent->faction)) {
+      if (fg->directive.find("k")!=string::npos||fg->directive.find("K")!=string::npos) {
+	bool callme = false;
+    Unit * targ = fg->target.GetUnit();
+//	targ = targ!=NULL?targ->Target():NULL;
+	if (targ) {
 	  if (targ->InCorrectStarSystem(_Universe->activeStarSystem())) {
 	    CommunicationMessage c(parent,leader,NULL,0);
             c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
 	    if (parent->InRange (targ,true,false)) {
  
-              // if I am the capship, go into defensive mode.
+              // if I am the capship, face target but don't move towards it
               if (parent == leader->owner) {
                 // get in front of me
-                
+                if (targ != parent->Target())
+					callme = true;
                 parent->Target(targ);
                 parent->SetTurretAI();
                 parent->TargetTurret(targ);
@@ -649,9 +655,12 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
                     ord->SetParent (parent);
                     ReplaceOrder (ord);
  		  }
-              } else {
+              } 
+			   // if it's other ships -- don't need turret targeting, i think, turrets should cover their own ships
+              else {
+                ChooseTargets(1,true);
                 parent->Target (targ);
-                parent->TargetTurret(targ);
+//                parent->TargetTurret(targ);
                 c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
                 // attack my CURRENT target, don't keep doing it, or we risk attacking friendlies by mistake
                 //		  fg->directive = "";
@@ -659,7 +668,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
             }else {
               c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);             
             }
-            if (fg->directive!=last_directive) {
+            if (fg->directive!=last_directive || callme) {
               Order * lo = leader->getAIState();
               if (lo)
                 lo->Communicate(c);
@@ -720,6 +729,52 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	    suborders[i]->AttachSelfOrder (leader);
 	  }
 	}
+      } if (fg->directive.find("a")!=string::npos||fg->directive.find("A")!=string::npos) {
+	Unit * targ = fg->leader.GetUnit();
+	targ = targ!=NULL?targ->Target():NULL;
+	if (targ && (targ->faction != parent->faction)) {
+	  if (targ->InCorrectStarSystem(_Universe->activeStarSystem())) {
+	    CommunicationMessage c(parent,leader,NULL,0);
+            c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
+	    if (parent->InRange (targ,true,false)) {
+ 
+              // if I am the capship, go into defensive mode.
+              if (parent == leader->owner) {
+                // get in front of me
+                
+                parent->Target(targ);
+                parent->SetTurretAI();
+                parent->TargetTurret(targ);
+                c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
+                //          MatchVelocity(parent->ClampVelocity(vec,true),Vector(0,0,0),true,true,false)
+                //		  Order * ord = new Orders::FormUp(QVector(position*parent->radial_size,0,fabs(dist)));
+                Order * ord = new Orders::MatchLinearVelocity(parent->ClampVelocity(Vector(0,0,0),true),true,false,true);
+                ord->SetParent (parent);
+                ReplaceOrder (ord);
+                // facing forward
+                if (parent->Target() != NULL)
+ 		  {
+                    ord = new Orders::FaceTarget (false,3);
+                    ord->SetParent (parent);
+                    ReplaceOrder (ord);
+ 		  }
+              } else {
+                parent->Target (targ);
+                parent->TargetTurret(targ);
+                c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
+                // attack my CURRENT target, don't keep doing it, or we risk attacking friendlies by mistake
+                //		  fg->directive = "";
+              }
+            }else {
+              c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);             
+            }
+            if (fg->directive!=last_directive) {
+              Order * lo = leader->getAIState();
+              if (lo)
+                lo->Communicate(c);
+            }
+	  }
+	}
       }else if (fg->directive.find("g")!=string::npos||fg->directive.find("G")!=string::npos) { 
 	if (leader!=NULL) {
 	  if (leader->InCorrectStarSystem(_Universe->activeStarSystem())) {
@@ -760,214 +815,19 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 			  fgnum+=tempnum;
 			  
 		  }
-
-/*
-// this does the job for real! "parent" is executor, "leader" is commander
-
-// moves where you want it to
-// moves flat out in front of parent unit (to allow for tractoring)
-		  Order * ord = new Orders::FormUp(QVector(position*parent->radial_size,0,fabs(dist)));
-	      ord->SetParent (parent);
-	      ReplaceOrder (ord);
-// faces same direction as leader
-//		  ord = new Orders::FaceDirection(dist*turn_leader);
-// faces opposite direction as leader, as in, stare at me in the face please
-		  ord = new Orders::FaceDirection(-dist*turn_leader);
-	      ord->SetParent (parent);
-	      ReplaceOrder (ord);
-*/          
-
-		  int alternate = fgnum%2?1:-1;
-		  int psize = parent->radial_size;
-		  int Ypos = 0;
-		  int Xpos = 0;
-		  int position = floor((fgnum%3) * 0.5 * alternate);
-// nice square formation, how many of these are you going to have anyway? Max 9, then go back. Should be enough.
-		  switch (fgnum%9) {
-		  case 0: Xpos = 0; Ypos = 0; break;
-		  case 1: Xpos = -1; Ypos = 0; break;
-		  case 2: Xpos = 1; Ypos = 0; break;
-		  case 3: Xpos = 0; Ypos = -1; break;
-		  case 4: Xpos = -1; Ypos = -1; break;
-		  case 5: Xpos = 1; Ypos = -1; break;
-		  case 6: Xpos = 0; Ypos = 1; break;
-		  case 7: Xpos = -1; Ypos = 1; break;
-		  case 8: Xpos = 1; Ypos = 1; break;
-          default: Xpos = 0; Ypos = 0;
-		  }
-
-		  double dist=(leader->radial_size+parent->radial_size);
-	      double formdist=esc_percent*(1+fgnum*2)*alternate*(parent->rSize()+leader->rSize());
-
-		  
-		  // if i am a cargo wingman, get into a dockable position
-          if (parent->owner == leader)
-		  {
-		  // get in front of me
-//		  Order * ord = new Orders::FormUp(QVector(position*parent->radial_size,0,fabs(dist)));
-		  Order * ord = new Orders::FormUp(QVector(1.1*Xpos*psize,1.1*Ypos*psize,fabs(dist)));
-   		  ord->SetParent (parent);
-	      ReplaceOrder (ord);
-
-		  // facing me
-		  ord = new Orders::FaceDirection(-dist*turn_leader);
-	      ord->SetParent (parent);
-	      ReplaceOrder (ord);
-		  }
-
-		  else
-          // if i'm not a cargo wingman, just form up somewhat loosely.
-		  {
-	      Order * ord = new Orders::FormUp(QVector(formdist,0,-fabs(formdist)));
+	      float left= fgnum%2?1:-1;		  
+              static float form_percent= XMLSupport::parse_float(vs_config->getVariable ("AI",
+                                                                                         "Targetting",
+                                                                                         "EscortDistanceLeader",
+                                                                                         "10.0"));
+	      double dist=(1+fgnum/2)*left*(parent->rSize()*esc_percent+leader->rSize()*form_percent);
+	      Order * ord = new Orders::FormUp(QVector(dist,0,-fabs(dist)));
 	      ord->SetParent (parent);
 	      ReplaceOrder (ord);
 	      ord = new Orders::FaceDirection(dist*turn_leader);
 	      ord->SetParent (parent);
 	      ReplaceOrder (ord);
           }
-          
-
-
-		}
-	  } else {
-	    last_time_insys=false;
-	  }
-	  for (unsigned int i=0;i<suborders.size();i++) {
-	    suborders[i]->AttachSelfOrder (leader);
-	  }
-	}
-      }else if (fg->directive.find("g")!=string::npos||fg->directive.find("G")!=string::npos) { 
-	if (leader!=NULL) {
-	  if (leader->InCorrectStarSystem(_Universe->activeStarSystem())) {
-	    retval=true;
-	    if (fg->directive!=last_directive||(!last_time_insys)) {
-	      last_time_insys=true;
-	      CommunicationMessage c(parent,leader,NULL,0);
-// this order is only valid for cargo wingmen, other wingmen will not comply
-          c.SetCurrentState (c.fsm->GetYesNode(),NULL,0); 
-		  Order * o = leader->getAIState();
-		  if (o)
-			  o->Communicate(c);
-	      static float esc_percent= XMLSupport::parse_float(vs_config->getVariable ("AI",
-											"Targetting",
-											"EscortDistance",
-											"10.0"));
-	      static float turn_leader= XMLSupport::parse_float(vs_config->getVariable ("AI",
-											"Targetting",
-											"TurnLeaderDist",
-											"5.0"));
-	      int fgnum = parent->getFgSubnumber();
-		  if (parent->getFlightgroup()) {
-			  int tempnum=0;
-			  string nam = parent->getFlightgroup()->name;
-			  int i=nam.length()-1;
-			  for (;i>=0;--i) {
-				  char digit = nam[i];
-				  if (digit>='0'&&digit<='9') {
-					  tempnum*=10;
-					  tempnum+=digit-'0';
-				  }else
-					  break;				  
-			  }
-			  fgnum+=tempnum;
-			  
-		  }
-
-/*
-// this does the job for real! "parent" is executor, "leader" is commander
-
-// moves where you want it to
-// moves flat out in front of parent unit (to allow for tractoring)
-		  Order * ord = new Orders::FormUp(QVector(position*parent->radial_size,0,fabs(dist)));
-	      ord->SetParent (parent);
-	      ReplaceOrder (ord);
-// faces same direction as leader
-//		  ord = new Orders::FaceDirection(dist*turn_leader);
-// faces opposite direction as leader, as in, stare at me in the face please
-		  ord = new Orders::FaceDirection(-dist*turn_leader);
-	      ord->SetParent (parent);
-	      ReplaceOrder (ord);
-*/          
-
-		  int alternate = fgnum%2?1:-1;
-		  int psize = parent->radial_size;
-		  int Ypos = 0;
-		  int Xpos = 0;
-		  int position = floor((fgnum%3) * 0.5 * alternate);
-// nice square formation, how many of these are you going to have anyway? Max 9, then go back. Should be enough.
-		  switch (fgnum%9) {
-		  case 0: Xpos = 0; Ypos = 0; break;
-		  case 1: Xpos = -1; Ypos = 0; break;
-		  case 2: Xpos = 1; Ypos = 0; break;
-		  case 3: Xpos = 0; Ypos = -1; break;
-		  case 4: Xpos = -1; Ypos = -1; break;
-		  case 5: Xpos = 1; Ypos = -1; break;
-		  case 6: Xpos = 0; Ypos = 1; break;
-		  case 7: Xpos = -1; Ypos = 1; break;
-		  case 8: Xpos = 1; Ypos = 1; break;
-          default: Xpos = 0; Ypos = 0;
-		  }
-
-		  float dist=(leader->radial_size+parent->radial_size);
-	      float formdist=esc_percent*(1+fgnum*2)*alternate*(dist);
-
-		  // if i am a cargo wingman, get into a dockable position
-          if ((parent->owner == leader) || (leader->name == "eject"))
-		  {
-		  Order * ord = new Orders::FormUp(QVector(1.1*Xpos*psize,1.1*Ypos*psize,fabs(dist)));
-   		  ord->SetParent (parent);
-	      ReplaceOrder (ord);
-		  // facing me
-		  ord = new Orders::FaceDirection(-dist*turn_leader);
-	      ord->SetParent (parent);
-	      ReplaceOrder (ord);
-		  }
-          // if i am a cargo wingman and so is the player, get into a dockable position with the leader          
-		  else if (parent->owner == leader->owner)
-		  {
-                    Unit * myowner= findUnitInStarsystem(parent->owner);
-                    //	      float left= fgnum%2?1:-1;		  
-                    float qdist=(parent->rSize()+myowner->rSize());
-                    Order * ord = new Orders::MoveTo(myowner->Position()+Vector(0.5*Xpos*psize,0.5*Ypos*psize,0.5*qdist), true, 4);
-                    ord->SetParent (parent);
-                    ReplaceOrder (ord);
-                    // facing it
-                    ord = new Orders::FaceDirection(-qdist*turn_leader);
-                    ord->SetParent (parent);
-                    ReplaceOrder (ord);
-		  }
-
-          // if i am the capship, go into defensive mode
-		  else if (parent == leader->owner)
-		  {
-//		  // parent->Target(parent);
-		  parent->SetTurretAI();
-		  parent->TurretFAW();
-		  Order * ord = new Orders::MatchLinearVelocity(parent->ClampVelocity(Vector(0,0,0),true),true,false,true);
-   		  ord->SetParent (parent);
-	      ReplaceOrder (ord);
-		  if (parent->Target() != NULL)
-    		  ord = new Orders::FaceTarget (false,3);
-		  else
-	    	  ord = new Orders::FaceDirection(-dist*turn_leader);
-	      ord->SetParent (parent);
-	      ReplaceOrder (ord);
-		  }
-		  else
-          // if i'm not a cargo wingman, just form up somewhat loosely.
-		  {
-          parent->owner = parent;
-		  Order * ord = new Orders::FormUp(QVector(5*Xpos*psize,5*Ypos*psize,-fabs(formdist)+Ypos*psize+Xpos*psize));
-	      ord->SetParent (parent);
-	      ReplaceOrder (ord);
-	      ord = new Orders::FaceDirection(dist*turn_leader);
-	      ord->SetParent (parent);
-	      ReplaceOrder (ord);
-		  }
-          
-
-
-		}
 	  } else {
 	    last_time_insys=false;
 	  }
@@ -1156,12 +1016,12 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	}
       }else if (fg->directive.find("p")!=string::npos||fg->directive.find("P")!=string::npos) {
 	//	VSFileSystem::vs_fprintf (stderr,"he wnats to help out");
+	bool callme = false;
 	if (fg->directive!=last_directive&&leader) {
 	  if (leader->InCorrectStarSystem(_Universe->activeStarSystem())) {
 	    //VSFileSystem::vs_fprintf (stderr,"%s he wnats to help out and hasn't died\n", parent->name.c_str());
 	    Unit * th=NULL;
-    	Unit * targ = fg->leader.GetUnit();
-	    targ = targ!=NULL?targ->Target():NULL;
+    	Unit * targ = fg->target.GetUnit();;
 	    if (targ && (th=targ->Threat())) {
 	      //VSFileSystem::vs_fprintf (stderr,"he wnats to help out and he has a threat\n");
 
@@ -1187,6 +1047,8 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	      if (th) {
 		if (parent->InRange (th,true,false)) {
 		  c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
+          if (th!= parent->Target())
+				callme = true;
 		  parent->Target (th);
 		  parent->TargetTurret (th);
 // if I am the capship, go into defensive mode.
@@ -1217,7 +1079,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 		c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
 	      }
 		  Order * loo = leader->getAIState();
-		  if (loo)
+		  if (loo || callme)
 			  loo->Communicate(c);
 	    }
 	  }
@@ -1281,7 +1143,7 @@ static bool overridable (const std::string &s) {
     return true;
   return (*s.begin())!=toupper(*s.begin());
 }
-extern void LeadMe (Unit * un, string directive, string speech);
+extern void LeadMe (Unit * un, string directive, string speech, bool changetarget);
 void AggressiveAI::ReCommandWing(Flightgroup * fg) {
   static float time_to_recommand_wing = XMLSupport::parse_float(vs_config->getVariable ("AI",
 											"Targetting",
@@ -1294,12 +1156,12 @@ void AggressiveAI::ReCommandWing(Flightgroup * fg) {
 	  if (float(rand())/RAND_MAX<SIMULATION_ATOM/time_to_recommand_wing) {
 	    if (parent->Threat()&&(parent->FShieldData()<.2||parent->RShieldData()<.2)){
 	      fg->directive = string("h");
-	      LeadMe (parent,"h","I need help here!");
+	      LeadMe (parent,"h","I need help here!", false);
 	      VSFileSystem::vs_fprintf (stderr,"he needs help %s",parent->name.c_str());
 	    }else {
 	      if (lead->getFgSubnumber()>=parent->getFgSubnumber()) {	
 		fg->directive = string("b");
-		LeadMe (parent,"b","I'm taking over this wing. Break and attack");
+		LeadMe (parent,"b","I'm taking over this wing. Break and attack", false);
 	      }
 	    }
 	  }

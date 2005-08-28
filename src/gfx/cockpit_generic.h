@@ -77,6 +77,8 @@ protected:
   virtual void DrawTargetBoxes () {}
   ///draws a target cross around all units targeted by your turrets // ** jay
   virtual void DrawTurretTargetBoxes () {}
+  ///Shows the flightgroup's target, if any.
+  virtual void DrawTacticalTargetBox () {}
   ///Draws all teh blips on the radar.
   virtual void DrawBlips(Unit * un) {}
   ///Draws all teh blips on the radar in Elite-style

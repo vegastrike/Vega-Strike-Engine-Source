@@ -304,6 +304,7 @@ inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &Ca
     static float startreticle = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","MaxMissileDiamondSize","2.05"));; // 1.05;
     static float bracketsize = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","RotatingBracketSize","0.58"));; // 1.05;
     static float thetaspeed = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","DiamondRotationSpeed","1"));; // 1.05;
+    static float lockline = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","LockConfirmLineLength","1.5"));; // 1.05;
 	float max=startreticle + endreticle;
     //    VSFileSystem::Fprintf (stderr,"lock percent %f\n",lock_percent);
     float coord = endreticle+(startreticle-endreticle)*lock_percent;//rSize/(1-lock_percent);//this is a number between 1 and 100
@@ -327,7 +328,7 @@ inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &Ca
     GFXBegin (GFXLINESTRIP);
     max*=rSize*.75*endreticle;
     if (lock_percent==0) {
-      GFXVertexf (Loc+CamQ.Cast()*max*1.5);
+      GFXVertexf (Loc+CamQ.Cast()*max*lockline);
       GFXVertexf (Loc+CamQ.Cast()*max);
     }
 
@@ -336,7 +337,7 @@ inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &Ca
     GFXVertexf (Loc+Origin+(SLockBox.Cast()*r1Size));
     if (lock_percent==0) {
       GFXVertexf (Loc+CamP.Cast()*max);
-      GFXVertexf (Loc+CamP.Cast()*max*1.5);
+      GFXVertexf (Loc+CamP.Cast()*max*lockline);
       GFXEnd();
       GFXBegin(GFXLINESTRIP);
       GFXVertexf (Loc-CamP.Cast()*max);
@@ -351,7 +352,7 @@ inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &Ca
     Origin=(CamP-CamQ).Cast()*(rSize*coord);
     if (lock_percent==0) {
       GFXVertexf (Loc-CamQ.Cast()*max);
-      GFXVertexf (Loc-CamQ.Cast()*max*1.5);
+      GFXVertexf (Loc-CamQ.Cast()*max*lockline);
       GFXVertexf (Loc-CamQ.Cast()*max);
     }else {
       GFXEnd();
@@ -365,7 +366,7 @@ inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &Ca
       GFXVertexf (Loc+CamP.Cast()*max);
       GFXEnd();
       GFXBegin(GFXLINESTRIP);
-      GFXVertexf (Loc-CamP.Cast()*max*1.5);
+      GFXVertexf (Loc-CamP.Cast()*max*lockline);
       GFXVertexf (Loc-CamP.Cast()*max);
     }else {
       GFXEnd();
@@ -645,6 +646,63 @@ void GameCockpit::DrawTurretTargetBoxes () {
     GFXEnable (DEPTHWRITE);
 
     iter.advance();
+  }
+
+}
+
+
+void GameCockpit::DrawTacticalTargetBox () {
+  static bool drawtactarg=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","DrawTacticalTarget","false"));
+  if (!drawtactarg)
+    return;
+  static GFXColor black_and_white=DockBoxColor ("black_and_white");
+  Unit * parun = parent.GetUnit();
+  if (!parun)
+    return;
+
+  Unit *target = parun->getFlightgroup()->target.GetUnit();
+    if (target){
+	Vector CamP,CamQ,CamR;
+    _Universe->AccessCamera()->GetPQR(CamP,CamQ,CamR);
+    //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
+    QVector Loc(target->Position()-_Universe->AccessCamera()->GetPosition());
+    GFXDisable (TEXTURE0);
+    GFXDisable (TEXTURE1);
+    GFXDisable (DEPTHTEST);
+    GFXDisable (DEPTHWRITE);
+    GFXBlendMode (SRCALPHA,INVSRCALPHA);
+    GFXDisable (LIGHTING);
+    static float thethick=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","TacTargetThickness","1.0"));
+    static float fudge=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","TacTargetLength","0.1"));
+    static float foci=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","TacTargetFoci","0.5"));
+    glLineWidth ((int)thethick); // temp
+    GFXColorf (unitToColor(parun,target,parun->GetComputerData().radar.iff));
+
+    //DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),un->TargetLocked());
+
+	// ** jay
+	float rSize = target->rSize();
+
+	GFXBegin(GFXLINE);
+	GFXVertexf (Loc+((-CamP).Cast()+(-CamQ).Cast())*rSize*(foci+fudge));
+    GFXVertexf (Loc+((-CamP).Cast()+(-CamQ).Cast())*rSize*(foci-fudge));
+
+	GFXVertexf (Loc+((-CamP).Cast()+(CamQ).Cast())*rSize*(foci+fudge));
+    GFXVertexf (Loc+((-CamP).Cast()+(CamQ).Cast())*rSize*(foci-fudge));
+
+	GFXVertexf (Loc+((CamP).Cast()+(-CamQ).Cast())*rSize*(foci+fudge));
+    GFXVertexf (Loc+((CamP).Cast()+(-CamQ).Cast())*rSize*(foci-fudge));
+
+	GFXVertexf (Loc+((CamP).Cast()+(CamQ).Cast())*rSize*(foci+fudge));
+    GFXVertexf (Loc+((CamP).Cast()+(CamQ).Cast())*rSize*(foci-fudge));
+	GFXEnd();
+
+
+    GFXEnable (TEXTURE0);
+    GFXEnable (DEPTHTEST);
+    GFXEnable (DEPTHWRITE);
+    glLineWidth ((int)1); // temp
+
   }
 
 }
@@ -1551,6 +1609,7 @@ void GameCockpit::Draw() {
   if (draw_any_boxes&&screenshotkey==false) {
   DrawTargetBox();
   DrawTurretTargetBoxes();
+  DrawTacticalTargetBox();
   DrawCommunicatingBoxes();
   if(draw_all_boxes){
     DrawTargetBoxes();

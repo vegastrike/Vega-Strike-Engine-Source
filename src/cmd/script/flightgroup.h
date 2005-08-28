@@ -13,6 +13,7 @@ private:
   std::string squadLogoStr;
 public:
   UnitContainer leader;//I'm on the leader
+  UnitContainer target;//this is my target, what i'm doing with it depends on things
   int leader_decision;//-1 if decision is made
   Texture * squadLogo;//null if not there
   std::string directive;//"a" for attack target "b" for attack at will "h" for help out "f" for form up.... missions can get this..and set this
@@ -73,6 +74,8 @@ public:
 		this->nr_waves_left=num_waves-1;
 		mission->AddFlightgroup (this);
 	  }
+      this->target=NULL;
+      this->leader=NULL;
 	  this->ainame=order;
 	  this->type = type;
 	  this->nr_ships+=num_ships;

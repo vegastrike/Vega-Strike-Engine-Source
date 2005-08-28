@@ -501,12 +501,13 @@ bool Cockpit::Update () {
     switchunit[_Universe->CurrentCockpit()]=0;
     par = GetParent();
     static bool switch_nonowned_units=XMLSupport::parse_bool(vs_config->getVariable("AI","switch_nonowned_units","true"));
+    static bool switch_to_fac=XMLSupport::parse_bool(vs_config->getVariable("AI","switch_to_whole_faction","true"));
     un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();
     Unit * un;
     bool found=false;
     int i=0;
     while ((un=ui.current())) {
-      if (un->faction==this->unitfaction) {
+      if ( (switch_to_fac && un->faction==par->faction) || (par->getFlightgroup() == un->getFlightgroup()) ) {
 	
 // this switches units UNLESS we're an ejected pilot. Instead, if we are an ejected
 // pilot, switch only if we're close enough.
@@ -541,20 +542,20 @@ bool Cockpit::Update () {
               //un->SetAI(new FireKeyboard ())
           }
           
-          if (proceed&&k) {
-              k->PrimeOrdersLaunched();
-              k->SetAI (new Orders::AggressiveAI ("interceptor.agg.xml"));
-              k->SetTurretAI();	  
+          if (proceed) {
+            //              k->PrimeOrdersLaunched();
+//              k->SetAI (new Orders::AggressiveAI ("interceptor.agg.xml"));
+//              k->SetTurretAI();	  
               
               
-              Flightgroup * fg = k->getFlightgroup();
-              if (fg!=NULL) {
-                  
-                  un->SetFg (fg,fg->nr_ships++);
-                  fg->nr_ships_left++;
-                  fg->leader.SetUnit(un);
-                  fg->directive="b";
-              }
+//              Flightgroup * fg = k->getFlightgroup();
+//              if (fg!=NULL) {
+//                  
+//                  un->SetFg (fg,fg->nr_ships++);
+//                  fg->nr_ships_left++;
+//                  fg->leader.SetUnit(un);
+//                  fg->directive="b";
+//              }
               SwitchUnits (k,un);
               this->SetParent(un,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
               //un->SetAI(new FireKeyboard ())

@@ -344,11 +344,11 @@ void FireKeyboard::RestoreTarget10Key (const KBData&,KBSTATE k) {
   }
 }
 
-extern void LeadMe (Unit * un, string directive, string speech);
+extern void LeadMe (Unit * un, string directive, string speech, bool changetarget);
 
-static void LeadMe (string directive, string speech) {
+static void LeadMe (string directive, string speech, bool changetarget) {
   Unit * un= _Universe->AccessCockpit()->GetParent();
-  LeadMe (un,directive,speech);
+  LeadMe (un,directive,speech, changetarget);
   
 }
 
@@ -381,6 +381,8 @@ void FireKeyboard::UnDockKey(const KBData&,KBSTATE k) {
 }
 void FireKeyboard::EjectKey (const KBData&,KBSTATE k) {
   if (k==PRESS) {
+    LeadMe ("","I am ejecting! Record the current location of my ship.", false); // used to clear group target
+    LeadMe ("e","Then get over here and pick me up!", false);
     g().eject= k;
   }
 }
@@ -661,13 +663,13 @@ void FireKeyboard::JoinFg (const KBData&,KBSTATE k) {
 
 void FireKeyboard::AttackTarget (const KBData&,KBSTATE k) {
   if (k==PRESS) {
-    LeadMe ("a","Attack my target!");
+    LeadMe ("k","Attack my target!", true);
   }
 }
 
 void FireKeyboard::HelpMeOut (const KBData&,KBSTATE k) {
   if (k==PRESS) {
-    LeadMe ("h","Help me out!");
+    LeadMe ("h","Help me out!", false);
   }
 }
 void FireKeyboard::HelpMeOutFaction (const KBData&,KBSTATE k) {
@@ -683,22 +685,23 @@ void FireKeyboard::HelpMeOutCrit (const KBData&,KBSTATE k) {
 
 void FireKeyboard::DockWithMe (const KBData&,KBSTATE k) {
   if (k==PRESS) {
-    LeadMe ("g","Get in front of me and prepare to be tractored in.");
+    LeadMe ("g","Get in front of me and prepare to be tractored in.", false);
   }
 }
 void FireKeyboard::DefendTarget (const KBData&,KBSTATE k) {
   if (k==PRESS) {
-    LeadMe ("p","Defend my target!");
+    LeadMe ("p","Defend my target!", true);
   }
 }
 void FireKeyboard::FormUp (const KBData&,KBSTATE k) {
   if (k==PRESS) {
-    LeadMe ("f","Form on my wing.");
+    LeadMe ("f","Form on my wing.", false);
   }
 }
 void FireKeyboard::BreakFormation(const KBData&,KBSTATE k) {
   if (k==PRESS) {
-    LeadMe ("b","Break formation and open fire!");
+    LeadMe ("","Break formation!", false); // used to clear group target
+    LeadMe ("b","Pick a target and open fire!", false);
   }
 }
 
