@@ -42,7 +42,7 @@ void ServerSocketTCP::lower_selected( )
          << endl;
 
     struct sockaddr_in remote_ip;
-#if defined (__APPLE__) || defined (_WIN32) 
+#if defined (_WIN32) || defined(MAC_OS_X_VERSION_10_3) || defined(MAC_OS_X_VERSION_10_2) || defined(MAC_OS_X_VERSION_10_1) 
     int
 #else
     socklen_t          

@@ -50,11 +50,9 @@ typedef unsigned int InstSerial;
 extern double NETWORK_ATOM;
 extern double DAMAGE_ATOM;
 
-#if defined(_WIN32) && !defined(__CYGWIN__) || defined(__APPLE__)
+#if defined(_WIN32) && !defined(__CYGWIN__) || defined(MAC_OS_X_VERSION_10_3) || defined(MAC_OS_X_VERSION_10_2) || defined(MAC_OS_X_VERSION_10_1)
 	//#warning "Win32 platform"
-	#if !defined(__APPLE__)
-		#define in_addr_t unsigned long
-	#endif
+	#define in_addr_t unsigned long
 	#define socklen_t int
 #else
 	//#warning "GCC platform"

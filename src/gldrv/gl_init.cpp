@@ -80,7 +80,7 @@
 #include "cg_global.h"
 #endif
 
-#ifndef __APPLE_PANTHER_GCC33_CLI__
+#if !defined(MAC_OS_X_VERSION_10_3) && !defined(MAC_OS_X_VERSION_10_2) && !defined(MAC_OS_X_VERSION_10_1)
 
 PFNGLBINDBUFFERARBPROC glBindBufferARB_p=0;
 PFNGLGENBUFFERSARBPROC glGenBuffersARB_p=0;

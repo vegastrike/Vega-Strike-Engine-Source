@@ -119,7 +119,7 @@ int INET_listen (unsigned short port, const char * hostname) {
   int listenqueue=5;
   int hServerSocket; // so signal can be caught;
   struct sockaddr_in Address; //Internet socket address stuct
-#if defined (_WIN32) || defined (__APPLE__) || defined(__CYGWIN__)
+#if defined (_WIN32) || defined(__CYGWIN__) || defined(MAC_OS_X_VERSION_10_3) || defined(MAC_OS_X_VERSION_10_2) || defined(MAC_OS_X_VERSION_10_1)
   int
 #else
   socklen_t
@@ -157,7 +157,7 @@ int INET_listen (unsigned short port, const char * hostname) {
 }
 int INET_Accept (int hServerSocket) {
   sockaddr_in Address;
-#if defined (_WIN32) || defined (__APPLE__) || defined (__CYGWIN__)
+#if defined (_WIN32) || defined (__CYGWIN__) || defined(MAC_OS_X_VERSION_10_3) || defined(MAC_OS_X_VERSION_10_2) || defined(MAC_OS_X_VERSION_10_1)
   int 
 #else
     socklen_t
