@@ -13,7 +13,7 @@
 	#include <netinet/in.h>
 	#include <arpa/inet.h>
 	#include <unistd.h>
-	#define SOCKET_ERROR -1
+    #define SOCKET_ERROR -1
 #endif
 #ifdef __APPLE__
 #include <sys/types.h>

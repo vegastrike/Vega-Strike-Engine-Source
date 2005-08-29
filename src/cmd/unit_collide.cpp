@@ -757,19 +757,36 @@ float Unit::querySphereNoRecurse (const QVector & start, const QVector & end, fl
 //	return querySphere(start,a(end-start).Magnitude());
   int i;
   double tmp;
-  QVector st,dir;
+  //QVector dir=(end-start).Normalize();
   //if( min_radius<0.00001)
   // min_radius = 0;
+  /*double bestd = -FLT_MAX;
+  double beammsqr = (end-start).MagnitudeSquared();*/
   for (i=0;i<nummesh();i++) {
+    /*double rssqr = meshdata[i]->rSize(); rssqr *= rssqr;
+    QVector mp = Transform (cumulative_transformation_matrix,meshdata[i]->Position().Cast());
+    double bdist = ((mp-start)*dir);
+    QVector cp = start+bdist*dir;
+    if (  (bdist*bdist > beammsqr)
+        ||((mp-cp).MagnitudeSquared() > rssqr)  )
+        continue;
+
+    double bias = sqrt(1 - (mp-cp).MagnitudeSquared() / rssqr) * rssqr;
+    double bp0 = bdist-bias;
+    double bp1 = bdist+bias;
+    if ((bp1>=0)&&(bp1<=beammsqr)&&(bp1>bestd))
+        bestd = bp1; else if ((bp0>=0)&&(bp0>bestd))
+        bestd = bp0;*/
+
 	if ((meshdata[i]->Position().Magnitude()>this->rSize())||(meshdata[i]->rSize()>30+this->rSize())) {
 		continue;
 	}
 	if (isUnit()==PLANETPTR&&i>0)
 		break;
     double a, b,c;
-    st = start - Transform (cumulative_transformation_matrix,meshdata[i]->Position().Cast());	
+    QVector st = start - Transform (cumulative_transformation_matrix,meshdata[i]->Position().Cast());	
 
-    dir = end-start;//now start and end are based on mesh's position
+    QVector dir = end-start;//now start and end are based on mesh's position
     // v.Dot(v) = r*r; //equation for sphere
     // (x0 + (x1 - x0) *t) * (x0 + (x1 - x0) *t) = r*r
     c = st.Dot (st);
@@ -804,4 +821,5 @@ float Unit::querySphereNoRecurse (const QVector & start, const QVector & end, fl
   }
 
   return 0;
+  //return (bestd==-FLT_MAX)?0:(bestd/sqrt(beammsqr));
 }

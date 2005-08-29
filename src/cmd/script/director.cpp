@@ -22,6 +22,7 @@
 /*
   xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
 */
+
 #include "python/python_class.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -135,8 +136,12 @@ void Mission::DirectorShipDestroyed(Unit *unit){
   
   fg->nr_ships_left-=1;
 
-  char buf[200];
-  sprintf(buf,"Ship destroyed: %s:%s:%s-%d",fg->faction.c_str(),fg->type.c_str(),fg->name.c_str(),unit->getFgSubnumber());
+  char buf[512];
+  if ((fg->faction.length()+fg->type.length()+fg->name.length()+12+30)<sizeof(buf)) {
+    sprintf(buf,"Ship destroyed: %s:%s:%s-%d",fg->faction.c_str(),fg->type.c_str(),fg->name.c_str(),unit->getFgSubnumber());
+  } else {
+    sprintf(buf,"Ship destroyed: (ERROR)-%d",unit->getFgSubnumber());
+  }
   
   
   msgcenter->add("game","all",buf);

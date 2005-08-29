@@ -28,21 +28,20 @@
 #include "gl_light.h"
 #include "config_xml.h"
 #include "winsys.h"
-extern GFXBOOL bTex0;
-extern GFXBOOL bTex1;
 
 bool GFXMultiTexAvailable() {
     return gl_options.Multitexture!=0;
 }
 void GFXCircle (float x, float y, float wid, float hei) {
-	static float aaccuracy=XMLSupport::parse_float(vs_config->getVariable("graphics","circle_accuracy","100"));
-	int accuracy = aaccuracy*(wid>hei?wid:hei);
-	if (accuracy<8)
-		accuracy=8;
+	static float aaccuracy=XMLSupport::parse_float(vs_config->getVariable("graphics","circle_accuracy","0.1"));
+    float segmag = (Vector(wid*g_game.x_resolution,0,0)-Vector(wid*g_game.x_resolution*cos(2.*M_PI/360.0),hei*g_game.y_resolution*sin(2.*M_PI/360.0),0)).Magnitude();
+	int accuracy = 360.0f*aaccuracy*min(1.0f,segmag);
+	if (accuracy<4) accuracy=4;
 	//	const int accuracy=((wid*g_game.x_resolution)+(hei*g_game.y_resolution))*M_PI;
 	GFXBegin (GFXLINESTRIP);
+    float iaccuracy=1.0f/accuracy;
 	for (int i=0;i<=accuracy;i++) {
-		GFXVertex3f (x+wid*cos (i*2.*M_PI/accuracy),y+hei*sin (i*2.*M_PI/accuracy),0);
+		GFXVertex3f (x+wid*cos (i*2.*M_PI*iaccuracy),y+hei*sin (i*2.*M_PI*iaccuracy),0);
 	}
 	GFXEnd ();
 
@@ -61,9 +60,11 @@ void /*GFXDRVAPI*/ GFXEndScene()
 	
 }
 
-void /*GFXDRVAPI*/ GFXClear(const GFXBOOL colorbuffer)
+void /*GFXDRVAPI*/ GFXClear(const GFXBOOL colorbuffer, const GFXBOOL depthbuffer, const GFXBOOL stencilbuffer)
 {
-	glClear((colorbuffer?GL_COLOR_BUFFER_BIT:0) | GL_DEPTH_BUFFER_BIT);
+	glClear((colorbuffer?GL_COLOR_BUFFER_BIT:0) | 
+            (depthbuffer?GL_DEPTH_BUFFER_BIT:0) | 
+            (stencilbuffer?GL_STENCIL_BUFFER_BIT:0));
 }
 
 GFXBOOL /*GFXDRVAPI*/ GFXCapture(char *filename)
@@ -91,6 +92,9 @@ void /*GFXDRVAPI*/ GFXPolygonOffset (float factor, float units) {
 }
 void GFXPointSize (const float size) {
   glPointSize (size);
+}
+void GFXLineWidth(const float size) {
+  glLineWidth (size);
 }
 void /*GFXDRVAPI*/ GFXBegin(const enum POLYTYPE ptype)
 {
@@ -131,6 +135,11 @@ void /*GFXDRVAPI*/ GFXBegin(const enum POLYTYPE ptype)
 }
 void /*GFXDRVAPI*/ GFXColorf (const GFXColor & col) {
   glColor4fv (&col.r);
+}
+GFXColor GFXColorf() {
+    float col[4];
+    glGetFloatv(GL_CURRENT_COLOR,col); // It's best this way, we don't use it much, anyway.
+    return GFXColor(col[0],col[1],col[2],col[3]);
 }
 #if 0
 //HELL slow on the TNT...we can't have it

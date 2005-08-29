@@ -40,7 +40,28 @@
 #define GL_CONSTANT_COLOR 0x8001
 #endif
 
-GFXBOOL bTex[8] = {GFXTRUE,GFXTRUE,GFXTRUE,GFXTRUE};
+GLenum bTex[32] = {
+    0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,
+};
+
+GLenum GetGLTextureTarget(enum TEXTURE_TARGET texture_target) {
+  GLenum tt;
+  switch (texture_target) {
+  case TEXTURE1D: tt=GL_TEXTURE_1D; break;
+  case TEXTURE2D: tt=GL_TEXTURE_2D; break;
+#ifdef GL_EXT_texture3D
+  case TEXTURE3D: tt=GL_TEXTURE_3D; break;
+#endif
+#ifdef NV_CUBE_MAP
+  case CUBEMAP:   tt=GL_TEXTURE_CUBE_MAP_EXT; break;
+#endif
+  default:        assert(false);
+  }
+  return tt;
+}
 
 int activeTextureStage=-1;
 extern GFXBOOL GFXLIGHTING;
@@ -62,37 +83,73 @@ void /*GFXDRVAPI*/ GFXEnable (const STATE state)
 	  glDepthMask(1);
 	  break;
 	case TEXTURE0:
-	  bTex[0] = GFXTRUE;
-	  GFXActiveTexture(0);	
-	  glEnable (GL_TEXTURE_2D);		
+      /*if (bTex[0] != GL_TEXTURE_2D) {
+	      GFXActiveTexture(0);	
+          if (bTex[0]) glDisable(bTex[0]);
+	      glEnable (bTex[0]=GL_TEXTURE_2D);		
+      }*/
+      //NOTE: The above code should be used, but since not all parts of VS use the GFX,
+      //   we will use GFXEnable() / GFXDisable() as syncrhonization methods (they will
+      //   assure correct settings of texture units 1 & 2, used during GUI rendering.
+      GFXActiveTexture(0);	
+#ifdef NV_CUBE_MAP
+      glDisable(GL_TEXTURE_CUBE_MAP_EXT);
+#endif
+      glEnable (bTex[0]=GL_TEXTURE_2D);		
 	  break;
 	case TEXTURE1:
-	  if (gl_options.Multitexture) {
-		bTex[1] = GFXTRUE;
+	  /*if (gl_options.Multitexture) {
 		GFXActiveTexture (1);
 #ifdef NV_CUBE_MAP
-		glEnable (GL_TEXTURE_CUBE_MAP_EXT);
+        if (bTex[1] != GL_TEXTURE_CUBE_MAP_EXT) {
+            if (bTex[1]) glDisable(bTex[1]);
+		    glEnable (bTex[1]=GL_TEXTURE_CUBE_MAP_EXT);
+        }
 #else
-		glEnable (GL_TEXTURE_2D);		
+        if (bTex[1] != GL_TEXTURE_2D) {
+            if (bTex[1]) glDisable(bTex[1]);
+		    glEnable (bTex[1]=GL_TEXTURE_2D);		
+        }
 #endif
-	  }
+	  }*/
+      //NOTE: The above code should be used, but since not all parts of VS use the GFX,
+      //   we will use GFXEnable() / GFXDisable() as syncrhonization methods (they will
+      //   assure correct settings of texture units 1 & 2, both in the GL and their proxy
+      //   states in the GFX. Those two units are used during GUI rendering bypassing the GFX.
+	  if (gl_options.Multitexture) {
+          GFXActiveTexture (1);
+#ifdef NV_CUBE_MAP
+          glDisable(GL_TEXTURE_2D);
+          glEnable (bTex[1]=GL_TEXTURE_CUBE_MAP_EXT);
+#else
+          glEnable (bTex[1]=GL_TEXTURE_2D);
+#endif
+      }
 	  break;
 	case CULLFACE:
 	  glEnable(GL_CULL_FACE);
 	  break;
 	case SMOOTH:
 		glEnable (GL_LINE_SMOOTH);
+        glEnable (GL_POINT_SMOOTH);
 		break;
+    case STENCIL:
+        glEnable(GL_STENCIL);
+        break;
 	}
 }
-void GFXToggleTexture(bool enable,int whichstage) {
-	if (gl_options.Multitexture||whichstage==0) {
-		bTex[whichstage] = enable;
-		GFXActiveTexture (whichstage);
-		if (enable)
-			glEnable (GL_TEXTURE_2D);
-		else
-			glDisable(GL_TEXTURE_2D);
+void GFXToggleTexture(bool enable,int whichstage,enum TEXTURE_TARGET target) {
+	if ((whichstage<gl_options.Multitexture)||(whichstage==0)) {
+        GLenum tt=GetGLTextureTarget(target);
+        GLenum btt=(enable?tt:0);
+        if (bTex[whichstage] != btt) {
+		    GFXActiveTexture (whichstage);
+            if (bTex[whichstage])
+                glDisable(bTex[whichstage]);
+		    if (enable)
+			    glEnable (bTex[whichstage]=tt); else
+                bTex[whichstage] = 0;
+        }
 	}
 }
 void /*GFXDRVAPI*/ GFXDisable (const STATE state)
@@ -111,57 +168,82 @@ void /*GFXDRVAPI*/ GFXDisable (const STATE state)
 	  glDepthMask(0);
 	  break;
 	case TEXTURE0:
-	  bTex[0] = GFXFALSE;
-	  GFXActiveTexture(0);	
-	  glDisable (GL_TEXTURE_2D);		
+      /*if (bTex[0]) {
+	      GFXActiveTexture(0);	
+	      glDisable (bTex[0]);
+	      bTex[0] = 0;
+      }*/
+      //NOTE: The above code should be used, but since not all parts of VS use the GFX,
+      //   we will use GFXEnable() / GFXDisable() as syncrhonization methods (they will
+      //   assure correct settings of texture units 1 & 2, both in the GL and their proxy
+      //   states in the GFX. Those two units are used during GUI rendering bypassing the GFX.
+      GFXActiveTexture(0);	
+#ifdef NV_CUBE_MAP
+      glDisable(GL_TEXTURE_CUBE_MAP_EXT);
+#endif
+      glDisable(GL_TEXTURE_2D);
+      bTex[0] = 0;
 	  break;
 	case TEXTURE1:
-	  if (gl_options.Multitexture) {
-		bTex[1] = GFXTRUE;
-		GFXActiveTexture (1);
+      /*if (bTex[1]&&gl_options.Multitexture) {
+          GFXActiveTexture(1);
+          glDisable(bTex[1]);
+          bTex[1] = 0;
+      }*/
+      //NOTE: The above code should be used, but since not all parts of VS use the GFX,
+      //   we will use GFXEnable() / GFXDisable() as syncrhonization methods (they will
+      //   assure correct settings of texture units 1 & 2, both in the GL and their proxy
+      //   states in the GFX. Those two units are used during GUI rendering bypassing the GFX.
+      GFXActiveTexture(1);	
 #ifdef NV_CUBE_MAP
-		glDisable (GL_TEXTURE_CUBE_MAP_EXT);
-#else
-		glDisable (GL_TEXTURE_2D);		
+      glDisable(GL_TEXTURE_CUBE_MAP_EXT);
 #endif
-		//		GFXActiveTexture(GL_TEXTURE0_ARB);
-	  }
+      glDisable(GL_TEXTURE_2D);
+      bTex[1] = 0;
 	  break;
 	case CULLFACE:
 	  glDisable(GL_CULL_FACE);
 	  break;
 	case SMOOTH:
 		glDisable (GL_LINE_SMOOTH);
+        glDisable (GL_POINT_SMOOTH);
 		break;
+    case STENCIL:
+        glDisable(GL_STENCIL);
+        break;
 
 	}
 
 }
 
-void GFXTextureAddressMode(const ADDRESSMODE mode)
+#ifndef GL_CLAMP_TO_EDGE_EXT
+#define GL_CLAMP_TO_EDGE_EXT              0x812F
+#endif
+#ifndef GL_CLAMP_TO_BORDER_ARB
+#define GL_CLAMP_TO_BORDER_ARB            0x812D
+#endif
+
+void GFXTextureAddressMode(const ADDRESSMODE mode, enum TEXTURE_TARGET target)
 {
+    GLenum tt=GetGLTextureTarget(target);
 	float BColor [4] = {0,0,0,0};//set border color to clear... dunno if we wanna change?
-	switch(mode)
-	{
-	case WRAP:
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);		
-		break;
-	case CLAMP:
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);		
-
-		break;
-
-	case BORDER:
-		
-		glTexParameterfv(GL_TEXTURE_2D,GL_TEXTURE_BORDER_COLOR, BColor);
-		break;
-	case MIRROR:
-		//nope not goin here I hope nVidia extension?
-	default:
-		return ; // won't work
+    GLenum wm1,wm2;
+	switch(mode) {
+    case DEFAULT_ADDRESS_MODE:
+	case WRAP:   wm1 = GL_REPEAT; wm2 = 0; break;
+	case BORDER: wm1 = GL_CLAMP; wm2 = GL_CLAMP_TO_BORDER_ARB; glTexParameterfv(GL_TEXTURE_2D,GL_TEXTURE_BORDER_COLOR, BColor); //nobreak
+    case CLAMP:  wm1 = GL_CLAMP; wm2 = GL_CLAMP_TO_EDGE_EXT; break;
+	case MIRROR: //nope not goin here I hope nVidia extension?
+	default:     return; // won't work
 	}
+	glTexParameteri(tt, GL_TEXTURE_WRAP_S, wm1);
+	if (target!=TEXTURE1D) glTexParameteri(tt, GL_TEXTURE_WRAP_T, wm1);
+    if (target==TEXTURE3D) glTexParameteri(tt, GL_TEXTURE_WRAP_R, wm1);
+    if (wm2) {
+	    glTexParameteri(tt, GL_TEXTURE_WRAP_S, wm2);
+	    if (target!=TEXTURE1D) glTexParameteri(tt, GL_TEXTURE_WRAP_T, wm2);
+        if (target==TEXTURE3D) glTexParameteri(tt, GL_TEXTURE_WRAP_R, wm2);
+    }
 }
 
 struct BlendMode {
@@ -170,6 +252,12 @@ struct BlendMode {
 } currBlendMode;
 
 stack<BlendMode> blendstack;
+
+void /*GFXDRVAPI*/ GFXGetBlendMode(enum BLENDFUNC &src, enum BLENDFUNC &dst)
+{
+	src = currBlendMode.sfactor;
+	dst = currBlendMode.dfactor;
+}
 
 void GFXBlendMode(const enum BLENDFUNC src, const enum BLENDFUNC dst)
 {
@@ -302,26 +390,114 @@ enum DEPTHFUNC GFXDepthFunc()
 
 void GFXDepthFunc(enum DEPTHFUNC dfunc)
 {
-	switch (dfunc)
-	{
-	case NEVER:		glDepthFunc (GL_NEVER);
-		break;
-	case LESS:		glDepthFunc (GL_LESS);
-		break;
-	case EQUAL:		glDepthFunc (GL_EQUAL);
-		break;
-	case LEQUAL:	glDepthFunc (GL_LEQUAL);
-		break;
+    GLenum func;
+	switch (dfunc) {
+	case NEVER:	  func=GL_NEVER; break;
+    case LESS:    func=GL_LESS; break;
+    case EQUAL:   func=GL_EQUAL; break;
+    case LEQUAL:  func=GL_LEQUAL; break;
+    case GREATER: func=GL_GREATER; break;
+    case NEQUAL:  func=GL_NOTEQUAL; break;
+    case GEQUAL:  func=GL_GEQUAL; break;
+    case ALWAYS:  func=GL_ALWAYS; break;
+    default:      func=GL_NEVER; break;
+    };
+    glDepthFunc(func);
+    cur_depth_func = dfunc;
+}
 
-	case GREATER:	glDepthFunc (GL_GREATER);
-		break;
-	case NEQUAL:	glDepthFunc (GL_NOTEQUAL);
-		break;
-	case GEQUAL:	glDepthFunc (GL_GEQUAL);
-		break;
-	case ALWAYS:	glDepthFunc (GL_ALWAYS); 
-		break;
-	};
+static DEPTHFUNC cur_stencil_func = ALWAYS;
+static int cur_stencil_func_ref = 0;
+static unsigned int cur_stencil_func_mask = ~0;
+static unsigned int cur_stencil_mask = ~0;
+static STENCILOP cur_stencil_op_f=KEEP;
+static STENCILOP cur_stencil_op_zf=KEEP;
+static STENCILOP cur_stencil_op_zp=KEEP;
+
+enum DEPTHFUNC GFXStencilFunc() 
+{
+    return cur_stencil_func;
+}
+
+void GFXStencilFunc(enum DEPTHFUNC *pFunc, int *pRef, int *pMask) 
+{
+    if (pFunc) *pFunc = cur_stencil_func;
+    if (pRef)  *pRef  = cur_stencil_func_ref;
+    if (pMask) *pMask = cur_stencil_func_mask;
+}
+
+void GFXStencilFunc(enum DEPTHFUNC sfunc, int ref, unsigned int mask)
+{
+    GLenum func;
+	switch (sfunc) {
+	case NEVER:	  func=GL_NEVER; break;
+    case LESS:    func=GL_LESS; break;
+    case EQUAL:   func=GL_EQUAL; break;
+    case LEQUAL:  func=GL_LEQUAL; break;
+    case GREATER: func=GL_GREATER; break;
+    case NEQUAL:  func=GL_NOTEQUAL; break;
+    case GEQUAL:  func=GL_GEQUAL; break;
+    case ALWAYS:  func=GL_ALWAYS; break;
+    default:      func=GL_NEVER; break;
+    };
+    glStencilFunc(func,(GLint)ref,(GLuint)mask);
+    cur_stencil_func = sfunc;
+    cur_stencil_func_ref = ref;
+    cur_stencil_func_mask = mask;
+}
+
+void GFXStencilOp(enum STENCILOP *pFail, enum STENCILOP *pZfail, enum STENCILOP *pZpass)
+{
+    if (pFail) *pFail = cur_stencil_op_f;
+    if (pZfail) *pZfail = cur_stencil_op_zf;
+    if (pZpass) *pZpass = cur_stencil_op_zp;
+}
+
+void GFXStencilOp(enum STENCILOP fail, enum STENCILOP zfail, enum STENCILOP zpass)
+{
+    GLenum ffunc,zffunc,zpfunc;
+	switch (fail) {
+	case KEEP:	  ffunc=GL_KEEP; break;
+    case CLEAR:   ffunc=GL_ZERO; break;
+    case REPLACE: ffunc=GL_REPLACE; break;
+    case INCR:    ffunc=GL_INCR; break;
+    case DECR:    ffunc=GL_DECR; break;
+    case INVERT:  ffunc=GL_INVERT; break;
+    default:      ffunc=GL_KEEP; break;
+    };
+	switch (zfail) {
+	case KEEP:	  zffunc=GL_KEEP; break;
+    case CLEAR:   zffunc=GL_ZERO; break;
+    case REPLACE: zffunc=GL_REPLACE; break;
+    case INCR:    zffunc=GL_INCR; break;
+    case DECR:    zffunc=GL_DECR; break;
+    case INVERT:  zffunc=GL_INVERT; break;
+    default:      zffunc=GL_KEEP; break;
+    };
+	switch (zpass) {
+	case KEEP:	  zpfunc=GL_KEEP; break;
+    case CLEAR:   zpfunc=GL_ZERO; break;
+    case REPLACE: zpfunc=GL_REPLACE; break;
+    case INCR:    zpfunc=GL_INCR; break;
+    case DECR:    zpfunc=GL_DECR; break;
+    case INVERT:  zpfunc=GL_INVERT; break;
+    default:      zpfunc=GL_KEEP; break;
+    };
+    glStencilOp(ffunc,zffunc,zpfunc);
+    cur_stencil_op_f = fail;
+    cur_stencil_op_zf = zfail;
+    cur_stencil_op_zp = zpass;
+}
+
+unsigned int GFXStencilMask()
+{
+    return cur_stencil_mask;
+}
+
+void GFXStencilMask(unsigned int mask)
+{
+    glStencilMask((GLuint)mask);
+    cur_stencil_mask = mask;
 }
 
 void /*GFXDRVAPI*/ GFXSelectTexcoordSet(const int stage, const int texset)

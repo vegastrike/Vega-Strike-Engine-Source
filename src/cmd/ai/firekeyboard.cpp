@@ -1,4 +1,3 @@
-#include <Python.h>
 #include <set>
 #include "firekeyboard.h"
 #include "flybywire.h"
@@ -30,7 +29,8 @@ FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick
   this->whichplayer=whichplayer;
   gunspeed = gunrange = .0001;
   refresh_target=true;
-  sex = XMLSupport::parse_int( vs_config->getVariable ("player","sex","0"));
+  static def_sex = XMLSupport::parse_int( vs_config->getVariable ("player","sex","0"));
+  sex = def_sex;
 }
 const unsigned int NUMCOMMKEYS=10;
 
@@ -344,14 +344,14 @@ void FireKeyboard::RestoreTarget10Key (const KBData&,KBSTATE k) {
   }
 }
 
+
 extern void LeadMe (Unit * un, string directive, string speech, bool changetarget);
 
 static void LeadMe (string directive, string speech, bool changetarget) {
-  Unit * un= _Universe->AccessCockpit()->GetParent();
-  LeadMe (un,directive,speech, changetarget);
-  
-}
 
+  Unit * un= _Universe->AccessCockpit()->GetParent();
+  if (un) LeadMe (un,directive,speech,changetarget);
+}
 
 void FireKeyboard::RequestClearenceKey(const KBData&,KBSTATE k) {
 
@@ -363,26 +363,29 @@ void FireKeyboard::RequestClearenceKey(const KBData&,KBSTATE k) {
     }
 }
 void FireKeyboard::DockKey(const KBData&,KBSTATE k) {
-
-    if (k==PRESS && (_Universe->AccessCockpit()->GetParent()->isSubUnit() == false)) {
+    Unit *u = _Universe->AccessCockpit()->GetParent();
+    if (k==PRESS && u && (u->isSubUnit() == false)) {
       g().doc=true;      
     }
-    if (k==RELEASE && (_Universe->AccessCockpit()->GetParent()->isSubUnit() == false)) {
+    if (k==RELEASE && u && (u->isSubUnit() == false)) {
       g().doc=false;      
     }
 }
 void FireKeyboard::UnDockKey(const KBData&,KBSTATE k) {
-    if (k==PRESS && (_Universe->AccessCockpit()->GetParent()->isSubUnit() == false)) {
+    Unit *u = _Universe->AccessCockpit()->GetParent();
+    if (k==PRESS && u && (u->isSubUnit() == false)) {
       g().und=true;      
     }
-    if (k==RELEASE && (_Universe->AccessCockpit()->GetParent()->isSubUnit() == false)) {
+    if (k==RELEASE && u && (u->isSubUnit() == false)) {
       g().und=false;      
     }
 }
 void FireKeyboard::EjectKey (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     LeadMe ("","I am ejecting! Record the current location of my ship.", false); // used to clear group target
+
     LeadMe ("e","Then get over here and pick me up!", false);
+
     g().eject= k;
   }
 }
@@ -609,7 +612,6 @@ void FireKeyboard::HeadlightKey(const KBData&,KBSTATE k) {
 }
 #endif
 extern unsigned int DoSpeech (Unit * un, Unit *player_un, const FSM::Node &convNode);
-  
 extern Unit * GetThreat (Unit * par, Unit * leader);
 void HelpOut (bool crit, std::string conv) {
   Unit * un = _Universe->AccessCockpit()->GetParent();
@@ -641,21 +643,20 @@ void FireKeyboard::JoinFg (const KBData&,KBSTATE k) {
     if (un) {
       Unit * targ = un->Target();
       if (targ) {
-	if (targ->faction==un->faction) {
-	  Flightgroup * fg = targ->getFlightgroup();
-	  if (fg) {
-	    if (fg!=un->getFlightgroup()) {
-	      if (un->getFlightgroup()) {
-		un->getFlightgroup()->Decrement(un);
+	    if (targ->faction==un->faction) {
+	      Flightgroup * fg = targ->getFlightgroup();
+	      if (fg) {
+	        if (fg!=un->getFlightgroup()) {
+	          if (un->getFlightgroup()) {
+		    un->getFlightgroup()->Decrement(un);
+	          }
+	          fg->nr_ships_left++;
+	          fg->nr_ships++;
+	          un->SetFg(fg,fg->nr_ships_left-1);
+	        }
 	      }
-	      fg->nr_ships_left++;
-	      fg->nr_ships++;
-	      un->SetFg(fg,fg->nr_ships_left-1);
 	    }
-	  }
-	}
       }
-
     }
   }
 
@@ -664,12 +665,14 @@ void FireKeyboard::JoinFg (const KBData&,KBSTATE k) {
 void FireKeyboard::AttackTarget (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     LeadMe ("k","Attack my target!", true);
+
   }
 }
 
 void FireKeyboard::HelpMeOut (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     LeadMe ("h","Help me out!", false);
+
   }
 }
 void FireKeyboard::HelpMeOutFaction (const KBData&,KBSTATE k) {
@@ -686,22 +689,27 @@ void FireKeyboard::HelpMeOutCrit (const KBData&,KBSTATE k) {
 void FireKeyboard::DockWithMe (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     LeadMe ("g","Get in front of me and prepare to be tractored in.", false);
+
   }
 }
 void FireKeyboard::DefendTarget (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     LeadMe ("p","Defend my target!", true);
+
   }
 }
 void FireKeyboard::FormUp (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     LeadMe ("f","Form on my wing.", false);
+
   }
 }
 void FireKeyboard::BreakFormation(const KBData&,KBSTATE k) {
   if (k==PRESS) {
     LeadMe ("","Break formation!", false); // used to clear group target
+
     LeadMe ("b","Pick a target and open fire!", false);
+
   }
 }
 
@@ -1133,7 +1141,6 @@ static bool UnDockNow (Unit* me, Unit * targ) {
   return ret;
 }
 //#include <cmd/music.h>
-//extern Music *muzak;
 void Enslave (Unit*, bool);
 void abletodock(int dock) {
 //	char dumb[2]={'\0'};
@@ -1550,6 +1557,7 @@ static void ForceChangeTarget(Unit*  parent) {
       }
   }
 }
+
 int SelectDockPort (Unit * utdw, Unit * parent);
 
 bool isMissile(const weapon_info *);
@@ -1768,8 +1776,8 @@ void FireKeyboard::Execute () {
       f().turretoffkey = DOWN;
   }
   if(f().turretfaw==PRESS) {
-    parent->TurretFAW();
-    f().turretfaw = DOWN;
+      parent->TurretFAW();
+      f().turretfaw = DOWN;
   }
   
   if (f().turretaikey==RELEASE) {

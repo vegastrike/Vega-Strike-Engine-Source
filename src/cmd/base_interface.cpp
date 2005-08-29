@@ -7,6 +7,7 @@
 #include "gfx/camera.h"
 #include "gfx/cockpit_generic.h"
 #include "python/init.h"
+#include "python/python_compile.h"
 #include "planet_generic.h"
 #include <algorithm>
 #include "base_util.h"
@@ -309,7 +310,7 @@ void RunPython(const char *filnam) {
 			PyRun_SimpleString(const_cast<char*>(filnam));
 			::Python::reseterrors();
 		}else {
-			FILE *fp=VSFileSystem::vs_open(filnam,"r");
+			/*FILE *fp=VSFileSystem::vs_open(filnam,"r");
 			if (fp) {
 				int length=strlen(filnam);
 				char *newfile=new char[length+1];
@@ -322,7 +323,8 @@ void RunPython(const char *filnam) {
 				processDelayedMissions();
 			} else {
 				fprintf(stderr,"Warning:python link file '%s' not found\n",filnam);
-			}
+			}*/
+            CompileRunPython(filnam);
 		}
 	}
 }
@@ -420,7 +422,7 @@ bool RefreshGUI(void) {
 
 void base_main_loop() {
 	UpdateTime();
-	muzak->Listen();
+    Music::MuzakCycle();
 	GFXBeginScene();
 	if (createdbase) {
 
@@ -818,7 +820,6 @@ BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
 	//	othtext.SetSize(2-(x*4),-.75);
 	othtext.SetSize(1-.01,-.75);
 
-
         std::string fac=FactionUtil::GetFaction(base->faction);
         if (fac=="neutral")
           fac  = UniverseUtil::GetGalaxyFaction(UnitUtil::getUnitSystemFile(base));
@@ -831,8 +832,6 @@ BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
 			saveStringList(UnitUtil::isPlayerStarship(un),mission_key,vec);
 		}
 	}
-
-	
 	if (!rooms.size()) {
 		VSFileSystem::vs_fprintf(stderr,"ERROR: there are no rooms in basefile \"%s%s%s\" ...\n",basefile,compute_time_of_day(base,un),BASE_EXTENSION);
 		rooms.push_back(new Room ());
@@ -1013,8 +1012,6 @@ void BaseInterface::Room::Goto::Click (BaseInterface *base,float x, float y, int
 	}
 }
 
-
-
 void BaseInterface::Room::Talk::Click (BaseInterface *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {
 		Link::Click(base,x,y,button,state);
@@ -1064,15 +1061,17 @@ static void AnimationDraw() {
   srand(time(NULL));
   for (int i=0;i<256;++i) {
     for (int j=0;j<512;++j) {
-      data[i][j].r=rand()%255;
-      data[i][j].g=rand()%255;
-      data[i][j].b=rand()%255;
-      data[i][j].a=rand()%255;
+      data[i][j].r=rand()&0xff;
+      data[i][j].g=rand()&0xff;
+      data[i][j].b=rand()&0xff;
+      data[i][j].a=rand()&0xff;
     }
   }
   T.UnMap();
   T.MakeActive();
+  GFXTextureEnv(0,GFXREPLACETEXTURE);
   GFXEnable(TEXTURE0);
+  GFXDisable(TEXTURE1);
   GFXDisable(CULLFACE);
   GFXBegin(GFXQUAD);
   GFXTexCoord2f(0,0);

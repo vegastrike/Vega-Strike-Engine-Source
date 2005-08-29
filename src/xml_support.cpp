@@ -76,4 +76,38 @@ namespace XMLSupport {
   int parse_int(const string &str) {
     return atoi (str.c_str());
   }
+  string::size_type parse_option_find(const string &str, const string &opt, const string &sep, const string &vsep) {
+    bool ini=true;
+    string::size_type pos=0;
+    string::size_type optlen=opt.length();
+    string::size_type strlen=str.length();
+    string allsep=sep+vsep;
+    if ((optlen==0)||(strlen==0)) 
+        return string::npos;
+    bool found=false;
+    while (!found&&(pos!=string::npos)&&((pos=str.find(opt,pos+(ini?0:1)))!=string::npos)) {
+        ini=false;
+        found = (  ((pos==0)||(sep.find(str[pos-1])!=string::npos))
+                 &&((pos+optlen>=strlen)||(allsep.find(str[pos+optlen])!=string::npos))  );
+        if (!found) pos=str.find_first_of(sep,pos+optlen); //quick advancement
+    }
+    return found?pos:string::npos;
+  }
+  bool parse_option_ispresent(const string &str, const string &opt, const string &sep, const string &vsep) {
+    return parse_option_find(str,opt,sep,vsep)!=string::npos;
+  }
+  string parse_option_value(const string &str, const string &opt, const string &defvalue, const string &sep, const string &vsep) {
+    string::size_type pos=parse_option_find(str,opt,sep,vsep);
+    string::size_type vpos=str.find_first_of(vsep,pos+opt.length());
+    string value;
+    if (pos!=string::npos && vpos!=string::npos) {
+        string::size_type vend=str.find_first_of(sep,vpos+1);
+        value = str.substr(vpos+1,((vend!=string::npos)?vend-vpos-1:string::npos));
+    } else if (pos!=string::npos) {
+        value = "true";
+    } else {
+        value = defvalue;
+    }
+    return value;
+  }
 }

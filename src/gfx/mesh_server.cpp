@@ -56,7 +56,7 @@ Logo * createLogo(int numberlogos,Vector* center, Vector* normal, float* sizes, 
 	return NULL;
 }
 
-extern Hashtable<std::string, std::vector <Mesh*>, 127> bfxmHashTable;
+extern Hashtable<std::string, std::vector <Mesh*>, MESH_HASTHABLE_SIZE> bfxmHashTable;
 Mesh::~Mesh()
 {
 	if(!orig||orig==this)

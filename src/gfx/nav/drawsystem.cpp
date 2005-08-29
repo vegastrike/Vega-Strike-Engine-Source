@@ -258,9 +258,7 @@ void NavigationSystem::DrawSystem()
 		ReplaceAxes(pos);
 			
 		float the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp;
-
 		TranslateCoordinates(pos, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance, the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp, 1);
-
 
 		//IGNORE OFF SCREEN
 		//**********************************

@@ -69,7 +69,7 @@ void GameUnit<UnitType>::Split (int level) {
     std::string scalestr=UniverseUtil::LookupUnitStat(this->name,fac,"Unit_Scale");
     int scale=atoi(scalestr.c_str());
     if (scale==0) scale=1;
-    meshsizes=AddMeshes(nw,randomstartframe,randomstartseconds,scale,chunkname,this->faction,this->getFlightgroup());
+    AddMeshes(nw,randomstartframe,randomstartseconds,scale,chunkname,this->faction,this->getFlightgroup(),&meshsizes);
     VSFileSystem::current_type.pop_back();
     VSFileSystem::current_subdirectory.pop_back();    
     VSFileSystem::current_path.pop_back();
@@ -99,6 +99,7 @@ void GameUnit<UnitType>::Split (int level) {
       }
       old = nw;
     }
+    meshsizes.reserve(old.size());
     for (size_t i=0;i<old.size();++i){
       meshsizes.push_back(1);
     }
@@ -108,15 +109,17 @@ void GameUnit<UnitType>::Split (int level) {
     delete shield;
   nm = old.size()-1;
   unsigned int k=0;
+  std::vector<Mesh *> tempmeshes;
   for (i=0;i<meshsizes.size();i++) {
     Unit * splitsub;
-    std::vector<Mesh *> tempmeshes;
+    tempmeshes.clear();
+    tempmeshes.reserve(meshsizes[i]);
     for (unsigned int j=0;j<meshsizes[i]&&k<old.size();++j,++k){
       tempmeshes.push_back (old[k]);
     }
     this->SubUnits.prepend(splitsub = UnitFactory::createUnit (tempmeshes,true,this->faction));
     splitsub->hull = 1000;
-    splitsub->name="debris";
+    splitsub->name = "debris";
     splitsub->Mass = debrismassmult*splitsub->Mass/level;
     splitsub->image->timeexplode=.1;
     if (splitsub->meshdata[0]) {
@@ -137,8 +140,6 @@ void GameUnit<UnitType>::Split (int level) {
   this->meshdata.push_back(NULL);//the shield
   this->Mass*=debrismassmult;
 }
-
-extern Music *muzak;
 
 extern float rand01 ();
 
@@ -260,7 +261,7 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
 
     string bleh=this->image->explosion_type;
     if (bleh.empty()) {
-      FactionUtil::getRandAnimation(this->faction,bleh);
+      FactionUtil::GetRandExplosionAnimation(this->faction,bleh);
     }
     if (bleh.empty()) {
       static Animation cache(expani.c_str(),false,.1,BILINEAR,false);
@@ -312,31 +313,30 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
 		}
 	      }
 	    }
-
 		  if (un ) {
-                    static int upgradesfaction=FactionUtil::GetFaction("upgrades");
-                    static float badrel=XMLSupport::parse_float(vs_config->getVariable("sound","loss_relationship","-.1"));
-                    static float goodrel=XMLSupport::parse_float(vs_config->getVariable("sound","victory_relationship",".5"));
-                    static float timelapse=XMLSupport::parse_float(vs_config->getVariable("sound","time_between_music","180"));
-                    float rel=un->getRelation(this);
-                    if (!BaseInterface::CurrentBase) {
-                      static float lasttime = 0;
-                      float newtime=getNewTime();
-                      if (newtime-lasttime>timelapse||_Universe->isPlayerStarship(this)&&this->isUnit()!=MISSILEPTR /* && this->maxhull > 0*/ && this->faction != upgradesfaction) { // no victory music for missiles or spawned explosions) {
-                        if (rel>goodrel) {
-                          lasttime=newtime;
-                          muzak->SkipRandSong(Music::LOSSLIST);
-                        } else if (rel < badrel) {
-                          lasttime=newtime;
-                          muzak->SkipRandSong(Music::VICTORYLIST);
-                        }
-                      }
-                    }  
-                  } else {
-                    //muzak->SkipRandSong(Music::LOSSLIST);
-                  }
-          }
-        }
+            static int upgradesfaction=FactionUtil::GetFaction("upgrades");
+			static float badrel=XMLSupport::parse_float(vs_config->getVariable("sound","loss_relationship","-.1"));
+			static float goodrel=XMLSupport::parse_float(vs_config->getVariable("sound","victory_relationship",".5"));
+			static float timelapse=XMLSupport::parse_float(vs_config->getVariable("sound","time_between_music","180"));
+			float rel=un->getRelation(this);
+			if (!BaseInterface::CurrentBase) {
+				static float lasttime = 0;
+				float newtime=getNewTime();
+                if (newtime-lasttime>timelapse||_Universe->isPlayerStarship(this)&&this->isUnit()!=MISSILEPTR&&this->faction!=upgradesfaction) { //No victory for missiles or spawned explosions
+					if (rel>goodrel) {
+						lasttime=newtime;
+						muzak->SkipRandSong(Music::LOSSLIST);
+					} else if (rel < badrel) {
+						lasttime=newtime;
+						muzak->SkipRandSong(Music::VICTORYLIST);
+					}
+				}
+			}  
+		  } else {
+			//muzak->SkipRandSong(Music::LOSSLIST);
+		  }
+	  }
+	}
   }
   static float timebeforeexplodedone = XMLSupport::parse_float (vs_config->getVariable ("physics","debris_time","500"));
   bool timealldone =(this->image->timeexplode>timebeforeexplodedone||this->isUnit()==MISSILEPTR||_Universe->AccessCockpit()->GetParent()==this||this->SubUnits.empty());
@@ -364,26 +364,18 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
     while ((su=ui.current())) {
       bool temp = su->Explode(drawit,timeit);
       if (su->GetImageInformation().explosion)
-alldone |=temp;
+	alldone |=temp;
       ui.advance();
     }
   }
- 
-  
-      static float phatloot=XMLSupport::parse_float(vs_config->getVariable("physics","eject_cargo_on_blowup","0"));
-      
-	  if ((phatloot != 0) &&(this->numCargo() > 0))
-      {
-                      this->EjectCargo(0);  
 
-           int dropcount=(int)floor(this->numCargo() / phatloot);
-           for(int i=0; i<dropcount; i++)
-              {
-                      this->EjectCargo(0);  
-              }
-	  }
-      
+  static float phatloot = XMLSupport::parse_float(vs_config->getVariable("physics","eject_cargo_on_blowup","0"));
+  if ((phatloot>0)&&(this->numCargo()>0)) {
+      int dropcount=(int)floor(this->numCargo()/phatloot)+1;
+      if (dropcount>this->numCargo()) dropcount = this->numCargo();
+      for (int i=0; i<dropcount; i++) 
+          this->EjectCargo(this->numCargo()-1); //Ejecting the last one is somewhat faster
+  }
 
   return alldone||(!timealldone);
-
 }

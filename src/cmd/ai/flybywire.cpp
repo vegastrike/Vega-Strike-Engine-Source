@@ -166,9 +166,15 @@ static bool getControlType() {
   return control;
 }
 FlyByWire::FlyByWire (): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false,false), sheltonslide(false),controltype(!getControlType()){
-  DesiredThrust= Vector(0,0,0);
+  DesiredShiftVelocity= Vector(0,0,0);
+  DirectThrust = Vector(0,0,0);
   stolen_setspeed=false;
   stolen_setspeed_value=0;
+
+  static static_inertial_flight_model=XMLSupport::parse_bool( vs_config->getVariable("flight","inertial::initial","false") );
+  static static_inertial_flight_enable=XMLSupport::parse_bool( vs_config->getVariable("flight","inertial::enable","true") );
+  inertial_flight_model = static_inertial_flight_model;
+  inertial_flight_enable = static_inertial_flight_enable;
 }
 
 void FlyByWire::Stop (float per) {
@@ -209,7 +215,11 @@ void FlyByWire::Afterburn (float per){
 
   afterburn=(per>.1);
 
-  desired_velocity=Vector (0,0,cpu->set_speed+per*(cpu->max_ab_speed()-cpu->set_speed));
+  if (!sheltonslide&&!inertial_flight_model) {
+    desired_velocity=Vector (0,0,cpu->set_speed+per*(cpu->max_ab_speed()-cpu->set_speed));
+  } else if (inertial_flight_model) {
+    DirectThrust += Vector(0,0,parent->Limits().afterburn*per);
+  }
 
 
   if(parent==_Universe->AccessCockpit()->GetParent()){
@@ -264,27 +274,55 @@ void FlyByWire::Accel (float per) {
 
 #define FBWABS(m) (m>=0?m:-m)
 void FlyByWire::ThrustRight (float percent) {
-  DesiredThrust.i = parent->Limits().lateral * percent;
+  DesiredShiftVelocity.i = parent->GetComputerData().max_speed() * percent;
 }
 void FlyByWire::ThrustUp (float percent) {
-  DesiredThrust.j = parent->Limits().vertical * percent;
+  DesiredShiftVelocity.j = parent->GetComputerData().max_speed() * percent;
 }
 void FlyByWire::ThrustFront (float percent) {
+  DesiredShiftVelocity.k = parent->GetComputerData().max_speed() * percent;
+}
+void FlyByWire::DirectThrustRight (float percent) {
+  DirectThrust.i = parent->Limits().lateral * percent;
+}
+void FlyByWire::DirectThrustUp (float percent) {
+  DirectThrust.j = parent->Limits().vertical * percent;
+}
+void FlyByWire::DirectThrustFront (float percent) {
   if (percent>0) {
-    DesiredThrust.k = parent->Limits().forward * percent;
+    DirectThrust.k = parent->Limits().forward * percent;
   }else {
-    DesiredThrust.k = parent->Limits().retro *percent;
+    DirectThrust.k = parent->Limits().retro *percent;
   }
 }
 void FlyByWire::Execute () {
   bool desireThrust=false;
   Vector des_vel_bak (desired_velocity);
-  if (DesiredThrust.i||DesiredThrust.j||DesiredThrust.k) {
-    desired_velocity = parent->UpCoordinateLevel(parent->GetVelocity())+(SIMULATION_ATOM*DesiredThrust);
+  if (!inertial_flight_model) {
+      // Must translate the thrust values to velocities, which is somewhat cumbersome.
+      Vector Limit(
+          parent->Limits().lateral,parent->Limits().vertical,
+          ((DirectThrust.k>0)?parent->Limits().forward:parent->Limits().retro)
+          );
+      if (Limit.i<=1) Limit.i=1;
+      if (Limit.j<=1) Limit.j=1;
+      if (Limit.k<=1) Limit.k=1;
+      Vector DesiredDrift(
+          DirectThrust.i/Limit.i,
+          DirectThrust.j/Limit.j,
+          DirectThrust.k/Limit.k
+          );
+      // Now, scale so that maximum shift velocity is max_speed
+      DesiredDrift *= parent->GetComputerData().max_speed();
+      // And apply
+      DesiredShiftVelocity += DesiredDrift;
+  }
+  if (DesiredShiftVelocity.i||DesiredShiftVelocity.j||DesiredShiftVelocity.k) {
     if (!stolen_setspeed) {
       stolen_setspeed=true;
       stolen_setspeed_value= parent->GetComputerData().set_speed;
     }
+    desired_velocity = Vector(0,0,stolen_setspeed_value) + DesiredShiftVelocity;
     parent->GetComputerData().set_speed = desired_velocity.Magnitude();
 
     desireThrust=true;
@@ -302,12 +340,15 @@ void FlyByWire::Execute () {
   }
   static double collidepanic = XMLSupport::parse_float (vs_config->getVariable("physics","collision_inertial_time","1.25"));
   Cockpit * tempcp = _Universe->isPlayerStarship (parent);
-  if (((sheltonslide||!controltype)&&(!desireThrust))||(tempcp&&((getNewTime()-tempcp->TimeOfLastCollision)<collidepanic))) {
-    MatchAngularVelocity::Execute();//only match turning, keep velocity same
+  if (((sheltonslide||inertial_flight_model||!controltype)&&(!desireThrust))||(tempcp&&((getNewTime()-tempcp->TimeOfLastCollision)<collidepanic))) {
+    MatchAngularVelocity::Execute(); //only match turning
+    if (inertial_flight_model)
+        parent->Thrust(DirectThrust,afterburn);
   }else {
     MatchVelocity::Execute();
   }
-  DesiredThrust.Set(0,0,0);
+  DesiredShiftVelocity.Set(0,0,0);
+  DirectThrust.Set(0,0,0);
   desired_velocity=des_vel_bak;
 } 
 
@@ -318,4 +359,18 @@ FlyByWire::~FlyByWire () {
   VSFileSystem::vs_fprintf (stderr,"fbw%x",this);
   fflush (stderr);
 #endif
+}
+
+
+void FlyByWire::InertialFlight (bool onoff) {
+    inertial_flight_model = onoff;
+}
+
+bool FlyByWire::InertialFlight () const {
+    return inertial_flight_model;
+}
+
+
+bool FlyByWire::InertialFlightEnable () const {
+    return inertial_flight_enable;
 }

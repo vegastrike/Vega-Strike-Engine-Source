@@ -6,22 +6,36 @@ namespace VSFileSystem
 {
 	class VSFile;
 }
-std::vector <std::string> readCSV(std::string line, std::string delim=",");
-std::string writeCSV(const std::vector<std::string> &key, const std::vector<std::string> &table);
+//std::vector <std::string> readCSV(std::string line, std::string delim=",;");
+std::vector <std::string> readCSV(std::string line, std::string delim=",;");
+std::string writeCSV(const std::vector<std::string> &key, const std::vector<std::string> &table, std::string delim=",;");
 class CSVTable {
-  
- private:
-   void Init (std::string data);
- public:
-  std::string rootdir;
-   std::map<std::string,int> columns;
-   std::map<std::string,int> rows;
-   std::vector<std::string> key;
-   std::vector<std::string > table;
-   CSVTable(std::string name,std::string saveroot);
-   bool RowExists(std::string name, unsigned int&where);
-  CSVTable(VSFileSystem::VSFile &f,  std::string saveroot);
-   
+ 
+private:
+    void Init (std::string data);
+public:
+    std::string rootdir;
+    std::map<std::string,int> columns;
+    std::map<std::string,int> rows;
+    std::vector<std::string> key;
+    std::vector<std::string> table;
+
+    CSVTable(std::string name,std::string saveroot);
+    CSVTable(VSFileSystem::VSFile &f,  std::string saveroot);
+
+    bool RowExists(std::string name, unsigned int&where);
+    bool ColumnExists(std::string name, unsigned int&where);
+
+public:
+    //Optimizer toolbox
+    enum optimizer_enum { optimizer_undefined=~0UL };
+    void SetupOptimizer(std::vector<std::string> keys, unsigned int type);
+
+    //Opaque Optimizers - use the optimizer toolbox to set them up
+    bool optimizer_setup;
+    unsigned int optimizer_type;
+    std::vector<std::string> optimizer_keys;
+    std::vector<unsigned int> optimizer_indexes;
 };
 
 class CSVRow {
@@ -41,6 +55,7 @@ public:
   bool success()const {
     return parent!=NULL;
   }
+  CSVTable* getParent() { return parent; };
 };
 
 extern std::vector<CSVTable*> unitTables;

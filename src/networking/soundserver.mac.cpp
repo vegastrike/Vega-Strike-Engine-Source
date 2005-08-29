@@ -83,7 +83,7 @@ struct Music {
 };
 #endif
 int fadeout=0, fadein=0;
-float volume=0;
+float volume=0,soft_volume=0;
 int bits=0,done=0;
 
 
@@ -100,6 +100,17 @@ bool watch_for_sende (pid_t p) {
         return true;
     }
     return false;
+}
+
+std::string my_getstring(int socket){
+    std::string str;
+    int arg;
+    do {
+        arg=INET_fgetc(socket);
+        if ((arg!='\r')&&(arg!='\n')&&(arg!='\0')) 
+            str += (char)arg;
+    } while ((arg!='\n')&&(arg!='\0'));
+    return str;
 }
 
 void ForkedProcess (const char * file, float fade, int fd) {
@@ -194,13 +205,7 @@ int main(int argc, char **argv)
                 case 'P':
                 {
                     arg=INET_fgetc(mysocket);
-                    while (arg!='\0'&&arg!='\n') {
-                        if (arg!='\r') {
-                            ministr[0]=arg;
-                            str+=ministr;
-                        }
-                        arg=INET_fgetc(mysocket);
-                    }
+                    str=my_getstring(mysocket);
                     printf("%s",str.c_str());
                     if (str!=curmus) {
                         FinishOlde (open_file);
@@ -215,13 +220,7 @@ int main(int argc, char **argv)
                 case 'I':
                 {
                     arg=INET_fgetc(mysocket);
-                    while (arg!='\0'&&arg!='\n') {
-                        if (arg!='\r') {
-                            ministr[0]=arg;
-                            str+=ministr;
-                        }
-                        arg=INET_fgetc(mysocket);
-                    }
+                    str=my_getstring(mysocket);
                     printf("%s",str.c_str());
                     fadein=atoi(str.c_str());
                     printf("\n[SETTING FADEIN TO %d]\n",fadein);
@@ -231,13 +230,7 @@ int main(int argc, char **argv)
                 case 'O':
                 {
                     arg=INET_fgetc(mysocket);
-                    while (arg!='\0'&&arg!='\n') {
-                        if (arg!='\r') {
-                            ministr[0]=arg;
-                            str+=ministr;
-                        }
-                        arg=INET_fgetc(mysocket);
-                    }
+                    str=my_getstring(mysocket);
                     printf("%s",str.c_str());
                     fadeout=atoi(str.c_str());
                     printf("\n[SETTING FADEOUT TO %d]\n",fadeout);
@@ -246,19 +239,36 @@ int main(int argc, char **argv)
                 case 'v':
                 case 'V':
                 {
-                    arg=INET_fgetc(mysocket);
-                    while (arg!='\0'&&arg!='\n') {
-                        if (arg!='\r') {
-                            ministr[0]=arg;
-                            str+=ministr;
-                        }
-                        arg=INET_fgetc(mysocket);
+                    int vtype=INET_fgetc(mysocket);
+                    str = my_getstring(mysocket);
+				    printf("%s",str.c_str());
+                    switch (vtype) {
+                    case 'h':
+                    case 'H': 
+                        volume=(float)atof(str.c_str()); 
+                        break;
+                    case 's':
+                    case 'S': 
+                        soft_volume=(float)atof(str.c_str());
+                        str = my_getstring(mysocket);
+                        printf("%s",str.c_str());
+                        break;
                     }
-                    printf("%s",str.c_str());
-                    volume=atof(str.c_str());
-                    printf("\n[SETTING VOLUME TO %f]\n",volume);
+                    printf("\n[SETTING VOLUME TO %f]\n",volume*soft_volume);
                     //music.SetVolume(volume);
                 }
+                    break;
+                case 's':
+                case 'S':
+				    printf("\n[STOPPING ALL MUSIC]\n");
+				    curmus="";
+                    FinishOlde();
+                    break;
+                case 'h':
+                case 'H':
+                    //Softvolume not yet supported - ignore it
+                    INET_fgetc(mysocket);
+                    INET_fgetc(mysocket);
                     break;
                 case 't':
                 case 'T':

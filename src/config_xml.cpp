@@ -770,5 +770,18 @@ CommandMap initGlobalCommandMap() {
  commandMap["Cockpit::SkipMusicTrack"]=CockpitKeys::SkipMusicTrack;
 
  commandMap["Cockpit::Quit"]=CockpitKeys::Quit;
+
+ commandMap["Joystick::Mode::InertialXY"]      =FlyByKeyboard::JoyInertialXYPulsorKey;
+ commandMap["Joystick::Mode::InertialXYToggle"]=FlyByKeyboard::JoyInertialXYToggleKey;
+ commandMap["Joystick::Mode::InertialXZ"]      =FlyByKeyboard::JoyInertialXYPulsorKey;
+ commandMap["Joystick::Mode::InertialXZToggle"]=FlyByKeyboard::JoyInertialXYToggleKey;
+ commandMap["Joystick::Mode::Roll"]            =FlyByKeyboard::JoyRollPulsorKey;
+ commandMap["Joystick::Mode::RollToggle"]      =FlyByKeyboard::JoyRollToggleKey;
+ commandMap["Joystick::Mode::Bank"]            =FlyByKeyboard::JoyBankPulsorKey;
+ commandMap["Joystick::Mode::BankToggle"]      =FlyByKeyboard::JoyBankToggleKey;
+
+ commandMap["Flight::Mode::InertialPulsor"]=FlyByKeyboard::InertialPulsorKey;
+ commandMap["Flight::Mode::InertialToggle"]=FlyByKeyboard::InertialToggleKey;
+
  return commandMap;
 }

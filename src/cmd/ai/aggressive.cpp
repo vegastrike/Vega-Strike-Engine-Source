@@ -221,7 +221,7 @@ AggressiveAI::AggressiveAI (const char * filename, Unit * target):FireAt(), logi
   logiccurtime=logic->maxtime;//set it to the time allotted
   obedient = true;
   if (aggressivity==2.01) {
-    float defagg = XMLSupport::parse_float (vs_config->getVariable ("unit","aggressivity","2"));
+    static float defagg = XMLSupport::parse_float (vs_config->getVariable ("unit","aggressivity","2"));
     aggressivity = defagg;
   }
   if (target !=NULL) {

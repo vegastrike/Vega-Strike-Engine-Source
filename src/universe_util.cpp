@@ -31,26 +31,31 @@ using std::string;
 namespace UniverseUtil {
 
 	void playVictoryTune () {
-	  static string newssong=vs_config->getVariable("audio","missionvictorysong","../music/victory.ogg");
-	  muzak->GotoSong(newssong);
+        static string newssong=vs_config->getVariable("audio","missionvictorysong","../music/victory.ogg");
+        muzak->GotoSong(newssong);
 	}
 	int musicAddList(string str) {
-		return muzak->Addlist(str.c_str());
+        return muzak->Addlist(str.c_str());
 	}
-	void musicSkip() {
-		 muzak->Skip();
+	void musicLayerSkip(int layer) {
+        muzak->Skip(layer);
 	}
-        void musicMute(bool stopSound){muzak->Mute(stopSound);}
-	void musicPlaySong(string str) {
-		muzak->GotoSong(str);
+    void musicLayerStop(int layer) {
+        muzak->Stop(layer);
+    }
+	void musicLayerPlaySong(string str,int layer) {
+		muzak->GotoSong(str,layer);
 	}
-	void musicPlayList(int which) {
+	void musicLayerPlayList(int which,int layer) {
 		if (which!=-1)
-			muzak->SkipRandSong(which);
-	}
-        void musicLoopList (int numloops) {
-                muzak->loopsleft=numloops;
-        }
+			muzak->SkipRandSong(which,layer);
+    }
+    void musicLayerLoopList (int numloops,int layer) {
+        muzak->SetLoops(numloops,layer);
+    }
+    void musicMute (bool stopSound) {
+        muzak->Mute(stopSound);
+    }
 	void playSound(string soundName, QVector loc, Vector speed) {
 		int sound = AUDCreateSoundWAV (soundName,false);
 		AUDAdjustSound (sound,loc,speed);

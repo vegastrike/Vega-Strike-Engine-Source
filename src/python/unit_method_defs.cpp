@@ -1,4 +1,5 @@
 #if _MSC_VER <=1200
+#include "python_class.h"
 #ifndef USE_BOOST_128
 #include <boost/python.hpp>
 #else
@@ -10,7 +11,6 @@
 #include "init.h"
 #include "gfx/vec.h"
 #include "cmd/unit_generic.h"
-#include "python_class.h"
 #include "universe_util.h"
 #include "cmd/unit_util.h"
 #include "faction_generic.h"

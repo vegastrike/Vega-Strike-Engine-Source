@@ -45,8 +45,10 @@ struct OrigMeshLoader{
 //#define DLIST
 
 #ifdef DLIST
-#define DLISTBEGINSTATE(stat) if(laststate!=stat) {if (laststate!=GL_COMPILE) glEnd();glBegin(stat);laststate=stat;}
-#define DLISTENDSTATE(stat) if (laststate!=GL_COMPILE) {glEnd();laststate=GL_COMPILE;}
+#define GL_TRIANGLE 0
+#define GL_QUAD 0
+#define DLISTBEGINSTATE(stat) if(stat&&(laststate!=stat)) {if (laststate!=GL_COMPILE) glEnd();glBegin(stat);laststate=stat;}
+#define DLISTENDSTATE(stat) if (stat&&(laststate!=GL_COMPILE)) {glEnd();laststate=GL_COMPILE;}
 #define DLISTDOVERTEX(num) glTexCoord2f(vtx.s,vtx.t);glNormal3f(vtx.i,vtx.j,vtx.k);glVertex3f(vtx.x*xml.scale.i,vtx.y*xml.scale.j,vtx.z*xml.scale.k);
 #else
 #define DLISTBEGINSTATE(stat)
@@ -56,8 +58,10 @@ struct OrigMeshLoader{
 
 //sets up the appropriate lists for the below functions to utilize
 #define BEGIN_GL_LINES(expectitems)          xml.active_list=&xml.lines; xml.active_ind= &xml.lineind; xml.num_vertices=2; xml.active_list->reserve(2*expectitems); xml.active_ind->reserve(2*expectitems);
-#define BEGIN_GL_TRIANGLES(expectitems)      xml.active_list=&xml.tris; xml.active_ind= &xml.triind; xml.num_vertices=3; xml.trishade.push_back(flatshade); xml.active_list->reserve(3*expectitems); xml.active_ind->reserve(3*expectitems);
-#define BEGIN_GL_QUADS(expectitems)          xml.active_list=&xml.quads; xml.active_ind= &xml.quadind; xml.num_vertices=4; xml.quadshade.push_back(flatshade); xml.active_list->reserve(4*expectitems); xml.active_ind->reserve(4*expectitems);
+#define BEGIN_GL_TRIANGLES(expectitems)      xml.active_list=&xml.tris; xml.active_ind= &xml.triind; xml.num_vertices=3; xml.active_list->reserve(3*expectitems); xml.active_ind->reserve(3*expectitems);
+#define BEGIN_GL_TRIANGLE(expectitems)       xml.trishade.push_back(flatshade);
+#define BEGIN_GL_QUADS(expectitems)          xml.active_list=&xml.quads; xml.active_ind= &xml.quadind; xml.num_vertices=4; xml.active_list->reserve(4*expectitems); xml.active_ind->reserve(4*expectitems);
+#define BEGIN_GL_QUAD(expectitems)           xml.quadshade.push_back(flatshade);
 #define BEGIN_GL_TRIANGLE_FAN(expectitems)   xml.trifans.push_back(std::vector<GFXVertex>()); xml.active_list=&xml.trifans.back(); xml.tfancnt = xml.trifanind.size(); xml.active_ind=&xml.trifanind; xml.active_list->reserve(expectitems); xml.active_ind->reserve(expectitems);
 #define BEGIN_GL_QUAD_STRIP(expectitems)     xml.num_vertices=4; xml.quadstrips.push_back (vector<GFXVertex>()); xml.active_list = &xml.quadstrips.back(); xml.qstrcnt = xml.quadstripind.size(); xml.active_ind = &xml.quadstripind; xml.active_list->reserve(expectitems); xml.active_ind->reserve(expectitems);
 #define BEGIN_GL_TRIANGLE_STRIP(expectitems) xml.num_vertices=3; xml.tristrips.push_back(vector<GFXVertex>()); xml.tstrcnt = xml.tristripind.size(); xml.active_ind = &xml.tristripind; xml.active_list->reserve(expectitems); xml.active_ind->reserve(expectitems);
@@ -66,7 +70,9 @@ struct OrigMeshLoader{
 
 #define END_GL_LINES 
 #define END_GL_TRIANGLES 
+#define END_GL_TRIANGLE
 #define END_GL_QUADS 
+#define END_GL_QUAD 
 #define END_GL_TRIANGLE_FAN     {xml.nrmltrifan.reserve(xml.trifanind.size()*3); for (unsigned int i=xml.tfancnt+2;i<xml.trifanind.size();i++) { \
       xml.nrmltrifan.push_back (xml.trifanind[xml.tfancnt]); \
       xml.nrmltrifan.push_back (xml.trifanind[i-1]); \
@@ -164,6 +170,7 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 	  char8bit c8val[4];
   } * inmemfile;
 #ifdef STANDALONE
+  printf("Loading Mesh File: %s\n",Inputfile.GetFilename().c_str());
   fseek(Inputfile,4+sizeof(int32bit),SEEK_SET);
   fread(&intbuf,sizeof(int32bit),1,Inputfile);//Length of Inputfile
   int32bit Inputlength=VSSwapHostIntToLittle(intbuf);
@@ -209,7 +216,7 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 	  //For each mesh
 	  for(int32bit meshindex=0;meshindex<nummeshes;meshindex++){
 		  Mesh * mesh = &meshes.back().m[meshindex];
-                  mesh->draw_queue = new vector<MeshDrawContext>;
+                  mesh->draw_queue = new vector<MeshDrawContext>[NUM_ZBUF_SEQ+1];
                   MeshXML xml;
                   xml.fg = fg;
                   xml.faction=fac;
@@ -469,16 +476,8 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 		  for(int32bit anim=0;anim<numanimdefs;anim++){
 			int32bit animnamelen=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//length of name
 			word32index+=1;
-			string animname="";
-			int32bit namebound=(animnamelen+3)/4;
-			for(stringindex=0;stringindex<namebound;stringindex++){
-			  for(int32bit bytenum=0;bytenum<4;bytenum++){ // Extract chars
-				if(inmemfile[word32index].c8val[bytenum]){ //If not padding
-			      animname+=inmemfile[word32index].c8val[bytenum]; //Append char to end of string
-				}
-			  }
-			  word32index+=1;
-			}
+            string animname;
+            READSTRING(inmemfile,word32index,animnamelen,animname);
 			float32bit FPS=VSSwapHostFloatToLittle(inmemfile[word32index].f32val);//FPS
 			bxmfprintf(Outputfile,"<AnimationDefinition AnimationName=\"%s\" FPS=\"%f\">\n",animname.c_str(),FPS);
 
@@ -515,8 +514,8 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
                           i=x;j=y;k=z;
                           float ms=i*i+j*j+k*k;
                           if (ms>.000001) {
-                            float m = sqrt(ms);
-                            i/=m;j/=m;k/=m;
+                            float m = 1.0f/sqrt(ms);
+                            i*=m;j*=m;k*=m;
                           }else {
                             i=0;j=0;k=1;
                           }
@@ -525,22 +524,23 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 			float32bit t=VSSwapHostFloatToLittle(inmemfile[word32index+7].f32val);//t
 		    word32index+=NUMFIELDSPERVERTEX;
 			bxmfprintf(Outputfile,"<Point>\n\t<Location x=\"%f\" y=\"%f\" z=\"%f\" s=\"%f\" t=\"%f\"/>\n\t<Normal i=\"%f\" j=\"%f\" k=\"%f\"/>\n</Point>\n",x,y,z,s,t,i,j,k);
-                        xml.vertices.push_back(GFXVertex(Vector(x,y,z),Vector(i,j,k),s,t));
-                        // NOTE: postprocessing takes care of scale |-
-                        xml.vertexcount.push_back(0);
+            xml.vertices.push_back(GFXVertex(Vector(x,y,z),Vector(i,j,k),s,t));
+            // NOTE: postprocessing takes care of scale |-
+            xml.vertexcount.push_back(0);
 		  }
 		  bxmfprintf(Outputfile,"</Points>\n");
 		  //End Vertices
 		  //Lines
-                  GFXVertex vtx;
+          GFXVertex vtx;
 #ifdef DLIST
-                  static GLenum laststate=GL_COMPILE;
-                  mesh->vlist=glGenLists(1);
-                  glNewList(mesh->vlist,GL_COMPILE);
+          static GLenum laststate=GL_COMPILE;
+          mesh->vlist=glGenLists(1);
+          glNewList(mesh->vlist,GL_COMPILE);
 #endif
 		  bxmfprintf(Outputfile,"<Polygons>\n");
 		  int32bit numlines=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
 		  word32index+=1;
+          BEGINSTATE(GL_LINES,numlines);
 		  for(int32bit rvert=0;rvert<numlines;rvert++){
 			int32bit flatshade=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//flatshade
 			word32index+=NUMFIELDSPERPOLYGONSTRUCTURE;
@@ -553,16 +553,16 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 			float32bit t2=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//t
 			word32index+=NUMFIELDSPERREFERENCEDVERTEX;
 			bxmfprintf(Outputfile,"\t<Line flatshade=\"%d\">\n\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n\t</Line>\n",flatshade,ind1,s1,t1,ind2,s2,t2);
-                        BEGINSTATE(GL_LINES,numlines);
-                        DOVERTEX(1);
-                        DOVERTEX(2);
 
-                        
+            DOVERTEX(1);
+            DOVERTEX(2);                        
 		  }
+          ENDSTATE(GL_LINES);
 		  //End Lines
 		  //Triangles
 		  int32bit numtris=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
 		  word32index+=1;
+          BEGINSTATE(GL_TRIANGLES,numtris);
 		  for(int32bit rtvert=0;rtvert<numtris;rtvert++){
 			int32bit flatshade=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//flatshade
 			word32index+=NUMFIELDSPERPOLYGONSTRUCTURE;
@@ -579,16 +579,19 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 			float32bit t3=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//t
 			word32index+=NUMFIELDSPERREFERENCEDVERTEX;
 			bxmfprintf(Outputfile,"\t<Tri flatshade=\"%d\">\n\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n\t</Tri>\n",flatshade,ind1,s1,t1,ind2,s2,t2,ind3,s3,t3);
-                        BEGINSTATE(GL_TRIANGLES,numtris);
-                        DOVERTEX(1);
-                        DOVERTEX(2);
-                        DOVERTEX(3);
 
+            BEGINSTATE(GL_TRIANGLE,3);
+            DOVERTEX(1);
+            DOVERTEX(2);
+            DOVERTEX(3);
+            ENDSTATE(GL_TRIANGLE);
 		  }
+          ENDSTATE(GL_TRIANGLES);
 		  //End Triangles
 		  //Quads
 		  int32bit numquads=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
 		  word32index+=1;
+          BEGINSTATE(GL_QUADS,numquads);
 		  for(int32bit rqvert=0;rqvert<numquads;rqvert++){
 			int32bit flatshade=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//flatshade
 			word32index+=NUMFIELDSPERPOLYGONSTRUCTURE;
@@ -609,13 +612,15 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 			float32bit t4=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//t
 			word32index+=NUMFIELDSPERREFERENCEDVERTEX;
 			bxmfprintf(Outputfile,"\t<Quad flatshade=\"%d\">\n\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n\t</Quad>\n",flatshade,ind1,s1,t1,ind2,s2,t2,ind3,s3,t3,ind4,s4,t4);
-                        BEGINSTATE(GL_QUADS,numquads);
-                        DOVERTEX(1);
-                        DOVERTEX(2);
-                        DOVERTEX(3);
-                        DOVERTEX(4);
 
+            BEGINSTATE(GL_QUAD,4);
+            DOVERTEX(1);
+            DOVERTEX(2);
+            DOVERTEX(3);
+            DOVERTEX(4);
+            ENDSTATE(GL_QUAD);
 		  }
+          ENDSTATE(GL_QUADS);
 		  //End Quads
 		  //Linestrips
 		  int32bit numlinestrips=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
@@ -624,7 +629,8 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 			int32bit numstripelements=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
 			int32bit flatshade=VSSwapHostIntToLittle(inmemfile[word32index+1].i32val);//flatshade
 			bxmfprintf(Outputfile,"\t<Linestrip flatshade=\"%d\">\n",flatshade);
-                        BEGINSTATE(GL_LINE_STRIP,numstripelements);
+
+            BEGINSTATE(GL_LINE_STRIP,numstripelements);
 			word32index+=1+NUMFIELDSPERPOLYGONSTRUCTURE;
 			for(int32bit elem=0;elem<numstripelements;elem++){
 			  int32bit ind1=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 1
@@ -632,10 +638,10 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 			  float32bit t1=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//t
 		      word32index+=NUMFIELDSPERREFERENCEDVERTEX;
 			  bxmfprintf(Outputfile,"\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n",ind1,s1,t1);
-                          DOVERTEX(1)
+              DOVERTEX(1)
 			}
 			bxmfprintf(Outputfile,"\t</Linestrip>");
-                        ENDSTATE(GL_LINE_STRIP);
+            ENDSTATE(GL_LINE_STRIP);
 		  }
 		  //End Linestrips
 		  //Tristrips
@@ -645,7 +651,7 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 			int32bit numstripelements=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
 			int32bit flatshade=VSSwapHostIntToLittle(inmemfile[word32index+1].i32val);//flatshade
 			bxmfprintf(Outputfile,"\t<Tristrip flatshade=\"%d\">\n",flatshade);
-                        BEGINSTATE(GL_TRIANGLE_STRIP,numstripelements);
+            BEGINSTATE(GL_TRIANGLE_STRIP,numstripelements);
 			word32index+=1+NUMFIELDSPERPOLYGONSTRUCTURE;
 			for(int32bit elem=0;elem<numstripelements;elem++){
 			  int32bit ind1=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 1
@@ -653,10 +659,10 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 			  float32bit t1=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//t
 		      word32index+=NUMFIELDSPERREFERENCEDVERTEX;
 			  bxmfprintf(Outputfile,"\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n",ind1,s1,t1);
-                          DOVERTEX(1)
+              DOVERTEX(1)
 			}
 			bxmfprintf(Outputfile,"\t</Tristrip>");
-                        ENDSTATE(GL_TRIANGLE_STRIP);
+            ENDSTATE(GL_TRIANGLE_STRIP);
 		  }
 		  //End Tristrips
 		  //Trifans
@@ -666,7 +672,7 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 			int32bit numstripelements=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
 			int32bit flatshade=VSSwapHostIntToLittle(inmemfile[word32index+1].i32val);//flatshade
 			bxmfprintf(Outputfile,"\t<Trifan flatshade=\"%d\">\n",flatshade);
-                        BEGINSTATE(GL_TRIANGLE_FAN,numstripelements);
+            BEGINSTATE(GL_TRIANGLE_FAN,numstripelements);
 			word32index+=1+NUMFIELDSPERPOLYGONSTRUCTURE;
 			for(int32bit elem=0;elem<numstripelements;elem++){
 			  int32bit ind1=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 1
@@ -674,10 +680,10 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 			  float32bit t1=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//t
 		      word32index+=NUMFIELDSPERREFERENCEDVERTEX;
 			  bxmfprintf(Outputfile,"\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n",ind1,s1,t1);
-                          DOVERTEX(1)
+              DOVERTEX(1)
 			}
 			bxmfprintf(Outputfile,"\t</Trifan>");
-                        ENDSTATE(GL_TRIANGLE_FAN);
+            ENDSTATE(GL_TRIANGLE_FAN);
 		  }
 		  //End Trifans
 		  //Quadstrips
@@ -687,7 +693,7 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 			int32bit numstripelements=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
 			int32bit flatshade=VSSwapHostIntToLittle(inmemfile[word32index+1].i32val);//flatshade
 			bxmfprintf(Outputfile,"\t<Quadstrip flatshade=\"%d\">\n",flatshade);
-                        BEGINSTATE(GL_QUAD_STRIP,numstripelements);
+            BEGINSTATE(GL_QUAD_STRIP,numstripelements);
 			word32index+=1+NUMFIELDSPERPOLYGONSTRUCTURE;
 			for(int32bit elem=0;elem<numstripelements;elem++){
 			  int32bit ind1=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 1
@@ -695,15 +701,15 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 			  float32bit t1=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//t
 		      word32index+=NUMFIELDSPERREFERENCEDVERTEX;
 			  bxmfprintf(Outputfile,"\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n",ind1,s1,t1);
-                          DOVERTEX(1)
+              DOVERTEX(1)
 			}
 			bxmfprintf(Outputfile,"\t</Quadstrip>");
-                        ENDSTATE(GL_QUAD_STRIP);
+            ENDSTATE(GL_QUAD_STRIP);
 		  }
 		  //End Quadstrips
-                  ENDSTATE(GL_COMPILE);
+          ENDSTATE(GL_COMPILE);
 #ifdef DLIST
-                  glEndList();
+          glEndList();
 #endif
 		  if (reverse) {
 		      //Reverse all vectors
@@ -724,7 +730,7 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 		  //End Geometry
 		  //go to next mesh
 		  bxmfprintf(Outputfile,"</Mesh>\n");
-                  mesh->PostProcessLoading(&xml,overrideTextures);
+          mesh->PostProcessLoading(&xml,overrideTextures);
 		  word32index=meshbeginword+(meshlength/4);
 	  }
 	  //go to next record

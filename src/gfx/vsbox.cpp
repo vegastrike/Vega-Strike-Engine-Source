@@ -72,12 +72,12 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
   meshHashTable.Put(hash_key, this);
   orig = this;
   refcount++;
-  draw_queue = new vector<MeshDrawContext>;
+  draw_queue = new vector<MeshDrawContext>[NUM_ZBUF_SEQ+1];
 #undef VERTEX
 }
 
 void Box::ProcessDrawQueue(int) {
-  if(!draw_queue->size()) return;
+  if(!draw_queue[0].size()) return;
   GFXBlendMode(SRCALPHA,INVSRCALPHA);
   GFXColor(0.0,.90,.3,.4);
   GFXDisable(LIGHTING);
@@ -87,11 +87,11 @@ void Box::ProcessDrawQueue(int) {
   GFXDisable (CULLFACE);
   //GFXBlendMode(ONE, ONE);
 
-  while(draw_queue->size()) {
+  while(draw_queue[0].size()) {
 
 
-    GFXLoadMatrixModel( draw_queue->back().mat);
-    draw_queue->pop_back();
+    GFXLoadMatrixModel( draw_queue[0].back().mat);
+    draw_queue[0].pop_back();
 
   GFXBegin(GFXQUAD);
   GFXColor4f(0.0,1.0,0.0,0.2);

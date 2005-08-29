@@ -216,9 +216,9 @@ static void UpdateTimeCompressionSounds() {
 		static soundArray burst_snds;
 		static soundArray end_snds;
 		if (inittimecompresssounds==false) {
-			string addonloop=vs_config->getVariable("cockpitaudio","compress_loop","compress?_loop");
-			string addonburst=vs_config->getVariable("cockpitaudio","compress_change","compress?_burst");
-			string addonend=vs_config->getVariable("cockpitaudio","compress_stop","compress_end");
+			static string addonloop=vs_config->getVariable("cockpitaudio","compress_loop","compress_loop");
+			static string addonburst=vs_config->getVariable("cockpitaudio","compress_change","compress_burst");
+			static string addonend=vs_config->getVariable("cockpitaudio","compress_stop","compress_end");
 			loadsounds(addonloop,numsnd,loop_snds,true);
 			loadsounds(addonend,numsnd,end_snds);
 			loadsounds(addonburst,numsnd,burst_snds);

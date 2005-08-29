@@ -29,6 +29,7 @@
 #include "gfxlib.h"
 #include "vegastrike.h"
 #include "vs_globals.h"
+#include "../gldrv/gl_globals.h"
 #include <assert.h>
 #include <math.h>
 #ifdef _WIN32
@@ -63,7 +64,7 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
     f.Fscanf( "%f %f", &xcenter, &ycenter);
     texture[sizeof(texture)-sizeof(*texture)-1]=0;
     texturea[sizeof(texturea)-sizeof(*texturea)-1]=0;
-    
+
     widtho2/=2;
     heighto2/=-2;
     surface=NULL;
@@ -113,6 +114,12 @@ void VSSprite::SetST (const float s, const float t) {
   maxs = s;
   maxt = t;
 }
+
+void VSSprite::SetTime(double newtime) {
+  if (surface)
+      surface->setTime(newtime);
+}
+
 void VSSprite::DrawHere (Vector &ll, Vector &lr, Vector &ur, Vector &ul) {
     if (rotation) {
       const float cw = widtho2*cos(rotation);
@@ -135,24 +142,42 @@ void VSSprite::DrawHere (Vector &ll, Vector &lr, Vector &ur, Vector &ul) {
 void VSSprite::Draw()
 {
   if (surface){//don't do anything if no surface
-    surface->MakeActive();
-    GFXTextureWrap(0,GFXCLAMPTEXTURE);
+    int lyr;
+    int numlayers=surface->numLayers();
+    bool multitex=(numlayers>1);
+    int numpasses=surface->numPasses();
+    float ms=surface->mintcoord.i,Ms=surface->maxtcoord.i;
+    float mt=surface->mintcoord.j,Mt=surface->maxtcoord.j;
+    ms=(Ms-ms)*maxs+ms;
+    mt=(Mt-mt)*maxt+mt;
 
     GFXDisable (CULLFACE);
-    GFXBegin(GFXQUAD);
     Vector ll,lr,ur,ul;
     DrawHere (ll,lr,ur,ul);
-    GFXTexCoord2f(maxs, 1);
-    GFXVertexf(ll);
-    GFXTexCoord2f(1, 1);
-    GFXVertexf(lr);
-    GFXTexCoord2f(1, maxt);
-    GFXVertexf(ur);
-    GFXTexCoord2f(maxs, maxt);
-    GFXVertexf(ul);
-    GFXEnd();
+    BLENDFUNC src,dst;
+    GFXGetBlendMode(src,dst);
+    for (lyr=0; (lyr<gl_options.Multitexture)||(lyr<numlayers); lyr++) {
+        GFXToggleTexture((lyr<numlayers),lyr);
+        if (lyr<numlayers) GFXTextureCoordGenMode(lyr,NO_GEN,NULL,NULL);
+    }
+    for (int pass=0; pass<numpasses; pass++) if (surface->SetupPass(pass,0,src,dst)) {
+        surface->MakeActive(0,pass);
+        GFXTextureEnv(0,GFXMODULATETEXTURE);
+        GFXBegin(GFXQUAD);
+        if (!multitex) GFXTexCoord2f (ms,Mt); else GFXTexCoord4f (ms,Mt,ms,Mt);
+        GFXVertexf(ll);
+        if (!multitex) GFXTexCoord2f (Ms,Mt); else GFXTexCoord4f (Ms,Mt,Ms,Mt);
+        GFXVertexf(lr);
+        if (!multitex) GFXTexCoord2f (Ms,mt); else GFXTexCoord4f (Ms,mt,Ms,mt);
+        GFXVertexf(ur);
+        if (!multitex) GFXTexCoord2f (ms,mt); else GFXTexCoord4f (ms,mt,ms,mt);
+        GFXVertexf(ul);
+        GFXEnd();
+    }
+    surface->SetupPass(-1,0,src,dst);
+    for (lyr=0; lyr<numlayers; lyr++) 
+        GFXToggleTexture(false,lyr);
 
-    GFXTextureWrap(0,GFXREPEATTEXTURE);
     GFXEnable (CULLFACE);
   }
 }

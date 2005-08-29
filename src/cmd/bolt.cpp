@@ -154,6 +154,7 @@ void Bolt::Draw () {
   }
   GFXAlphaTest (ALWAYS,0);
   GFXDisable(DEPTHWRITE);
+  GFXDisable(TEXTURE1);
   if (blendbeams==true) {
     GFXBlendMode (ONE,ONE);
   }else {
@@ -161,21 +162,21 @@ void Bolt::Draw () {
   }
   GFXVertexList * qmesh=q->boltmesh;
   if (qmesh) {
-
     qmesh->LoadDrawState();
     qmesh->BeginDrawState();
     int decal=0;
     for (i=q->bolts.begin();i!=q->bolts.end();decal++,i++) {
       Texture * dec = q->boltdecals->GetTexture(decal);
       if (dec) {
-	dec->MakeActive();
-	for (j=i->begin();j!=i->end();j++) {
-	  BlendTrans ((*j).drawmat,(*j).cur_position,(*j).prev_position);
-	  GFXLoadMatrixModel ((*j).drawmat);
-          const weapon_info * wt=(*j).type;
-	  GFXColor4f (wt->r,wt->g,wt->b,wt->a);
-	  qmesh->Draw();
-	}
+	    dec->MakeActive();
+        GFXToggleTexture(true,0);
+	    for (j=i->begin();j!=i->end();j++) {
+	      BlendTrans ((*j).drawmat,(*j).cur_position,(*j).prev_position);
+	      GFXLoadMatrixModel ((*j).drawmat);
+              const weapon_info * wt=(*j).type;
+	      GFXColor4f (wt->r,wt->g,wt->b,wt->a);
+	      qmesh->Draw();
+	    }
       }
     }
     qmesh->EndDrawState();

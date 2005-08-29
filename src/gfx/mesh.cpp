@@ -51,9 +51,12 @@
 #include <float.h>
 #include <algorithm>
 
+#define LOD_HYSTHERESIS_DIVIDER 20
+#define LOD_HYSTHERESIS_MAXENLARGEMENT_FACTOR 1.1
+
 using std::list;
-Hashtable<std::string, Mesh, 127> Mesh::meshHashTable;
-Hashtable<std::string, std::vector<int>, 127> Mesh::animationSequences;
+Hashtable<std::string, Mesh, 503> Mesh::meshHashTable;
+Hashtable<std::string, std::vector<int>, 503> Mesh::animationSequences;
 Vector mouseline;
 int Mesh::getNumAnimationFrames(string which)const {
    if (which.empty()) {
@@ -130,7 +133,7 @@ bool Mesh::LoadExistant (const string filehash, const Vector& scale, int faction
   return false;
 }
 
-extern Hashtable<std::string, std::vector <Mesh*>, 127> bfxmHashTable;
+extern Hashtable<std::string, std::vector <Mesh*>, MESH_HASTHABLE_SIZE> bfxmHashTable;
 Mesh::Mesh (const Mesh & m) {
   fprintf (stderr,"UNTESTED MESH COPY CONSTRUCTOR");
   this->orig=NULL;
@@ -161,7 +164,7 @@ void Mesh::setConvex(bool b) {
 	}
 }
 using namespace VSFileSystem;
-extern Hashtable<std::string, std::vector <Mesh*>, 127> bfxmHashTable;
+extern Hashtable<std::string, std::vector <Mesh*>, MESH_HASTHABLE_SIZE> bfxmHashTable;
 Mesh::Mesh(std::string filename,const Vector & scale, int faction, Flightgroup *fg, bool orig):hash_name(filename)
 {
   this->convex=false;
@@ -231,7 +234,7 @@ Mesh::Mesh(const char * filename,const Vector & scale, int faction, Flightgroup 
     }
     if( err<=Ok)
       f.Close();
-    draw_queue = new vector<MeshDrawContext>;
+    draw_queue = new vector<MeshDrawContext>[NUM_ZBUF_SEQ+1];
     if (!orig) {
       hash_name =shared?VSFileSystem::GetSharedMeshHashName (filename,scale,faction):VSFileSystem::GetHashName(filename,scale,faction);
       meshHashTable.Put(hash_name, oldmesh);
@@ -289,14 +292,16 @@ Mesh * Mesh::getLOD (float lod, bool bBypassDamping) {
 		  int lodoffs=0;
 		  if (!bBypassDamping) {
 		      if (lod<orig[i].lodsize) 
-			  lodoffs = (i<numlods-1)?(orig[i+1].lodsize-orig[i].lodsize)/10:0; else
-			  lodoffs = (i>0)?(orig[i-1].lodsize-orig[i].lodsize)/10:0;
+			  lodoffs = (i<numlods-1)?(orig[i+1].lodsize-orig[i].lodsize)/LOD_HYSTHERESIS_DIVIDER:0; else
+			  lodoffs = (i>0)?(orig[i-1].lodsize-orig[i].lodsize)/LOD_HYSTHERESIS_DIVIDER:0;
+              int maxenlargement = (int)(orig[i].lodsize*LOD_HYSTHERESIS_MAXENLARGEMENT_FACTOR)-orig[i].lodsize;
+              if ((lodoffs>0)&&(lodoffs>maxenlargement)) lodoffs=maxenlargement; //Avoid excessive enlargement of low-detail LOD levels, when LOD levels are far apart.
 		  };
 		  if ((lod<(orig[i].lodsize+lodoffs))&&(lod>maxlodsize)) {
 		      maxlodsize = orig[i].lodsize;
-			  retval = &orig[i];
+		      retval = &orig[i];
 		  } else {
-			  break;
+		      break;
 		  }
 	  }
   }

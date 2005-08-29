@@ -154,7 +154,8 @@ void NavigationSystem::Setup()
 	mouse_x_previous = (-1+float(mousex)/(.5*g_game.x_resolution));
 	mouse_y_previous = (1+float(-1*mousey)/(.5*g_game.y_resolution));
 
-	systemIter.init(UniverseUtil::getSystemFile(), XMLSupport::parse_int(vs_config->getVariable ("graphics","max_map_nodes","256000")));
+    static int max_map_nodes = XMLSupport::parse_int(vs_config->getVariable ("graphics","max_map_nodes","256000"));
+	systemIter.init(UniverseUtil::getSystemFile(), max_map_nodes);
 	sectorIter.init(systemIter);
 	systemselectionindex=0;
 	sectorselectionindex=0;
@@ -163,8 +164,9 @@ void NavigationSystem::Setup()
 	setFocusedSystemIndex(0);
 
 
+    static int time_to_helpscreen = XMLSupport::parse_int(vs_config->getVariable("general","times_to_show_help_screen","3"));
 	buttonstates = 0;
-	if (getSaveData(0,"436457r1K3574r7uP71m35",0)<=1+XMLSupport::parse_int(vs_config->getVariable("general","times_to_show_help_screen","3"))) {
+	if (getSaveData(0,"436457r1K3574r7uP71m35",0)<=1+time_to_helpscreen) {
 		whattodraw=0;
 	} else {
 		whattodraw = (1|2);

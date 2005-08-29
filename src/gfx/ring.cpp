@@ -27,11 +27,13 @@ void RingMesh::InitRing(float iradius, float oradius, int slices, const char *te
   meshHashTable.Put (hash_name=VSFileSystem::GetSharedMeshHashName(hash_name,Vector(iradius,iradius,iradius),0), oldmesh);
   this->orig = oldmesh;
   radialSize = oradius;//MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!
-  mn = Vector (radialSize,radialSize,radialSize);
-  mx = Vector (-radialSize,-radialSize,-radialSize);
+  //mn = Vector (radialSize,radialSize,radialSize);
+  //mx = Vector (-radialSize,-radialSize,-radialSize);
+  mn = Vector (0,0,0);
+  mx = Vector (0,0,0);
   vector <MeshDrawContext> *odq=NULL;
   for (int l=0;l<numspheres;l++) {
-    draw_queue = new vector<MeshDrawContext>;
+    draw_queue = new vector<MeshDrawContext>[NUM_ZBUF_SEQ+1];
     if (!odq)
       odq = draw_queue;
     if (slices>12) {
@@ -76,7 +78,7 @@ void RingMesh::InitRing(float iradius, float oradius, int slices, const char *te
 	  mn=vertexlist[j*2+fir].GetVertex().Min(mn);
 	  mx=vertexlist[j*2+fir].GetVertex().Max(mx);
 
-	  vertexlist[j*2+sec].i = unitpos.i ;
+	  vertexlist[j*2+sec].i = unitpos.i;
 	  vertexlist[j*2+sec].k = unitpos.j;
 	  vertexlist[j*2+sec].j = unitpos.k;
 	  vertexlist[j*2+sec].s = wrapx*theta/(2*M_PI);
@@ -84,11 +86,13 @@ void RingMesh::InitRing(float iradius, float oradius, int slices, const char *te
 	  vertexlist[j*2+sec].x = unitpos.i * oradius;
 	  vertexlist[j*2+sec].z = unitpos.j * oradius;
 	  vertexlist[j*2+sec].y = unitpos.k * oradius;
+	  mn=vertexlist[j*2+sec].GetVertex().Min(mn);
+	  mx=vertexlist[j*2+sec].GetVertex().Max(mx);
 	}
        	modes[i]=GFXQUADSTRIP;
 	QSOffsets[i]= (slices+1)*2;
       }
-      radialSize = .5*(mx-mn).Magnitude();//+.5*oradius;
+      //radialSize = .5*(mx-mn).Magnitude();//+.5*oradius;
       local_pos = (mx + mn) *.5;
       //      local_pos.Set(0,0,0);
       vlist = new GFXVertexList(modes,numvertex, vertexlist, numQuadstrips ,QSOffsets);
@@ -135,5 +139,5 @@ void RingMesh::InitRing(float iradius, float oradius, int slices, const char *te
   draw_queue = odq;
 }
 float RingMesh::clipRadialSize() {
-  return mx.Magnitude()*.33+rSize();
+  return /*mx.Magnitude()*.33+*/rSize();
 }

@@ -340,10 +340,13 @@ void Mission::UnPickle (string pickled) {
 void Mission::DirectorStart(missionNode *node){
   cout << "DIRECTOR START" << endl;
 
-  debuglevel=atoi(vs_config->getVariable("interpreter","debuglevel","0").c_str());
-  start_game=XMLSupport::parse_bool(vs_config->getVariable("interpreter","startgame","true"));
+  static int st_debuglevel=atoi(vs_config->getVariable("interpreter","debuglevel","0").c_str());
+  static bool st_start_game=XMLSupport::parse_bool(vs_config->getVariable("interpreter","startgame","true"));
+  static bool st_do_trace=XMLSupport::parse_bool(vs_config->getVariable("interpreter","trace","false"));
 
-  do_trace=XMLSupport::parse_bool(vs_config->getVariable("interpreter","trace","false"));
+  debuglevel=st_debuglevel;
+  start_game=st_start_game;
+  do_trace=st_do_trace;
 
   vi_counter=0;
   old_vi_counter=0;

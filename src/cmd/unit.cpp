@@ -46,6 +46,7 @@
 #include "collide/rapcol.h"
 #include "savegame.h"
 #include "xml_serializer.h"
+#include "python/python_class.h"
 #include "cmd/ai/missionscript.h"
 #include "gfx/particle.h"
 #include "cmd/ai/aggressive.h"
@@ -65,9 +66,10 @@
 
 //#define DESTRUCTDEBUG
 #include "beam.h"
-
+#include "python/init.h"
 #include "unit_const_cache.h"
 extern double interpolation_blend_factor;
+extern bool cam_setup_phase;
 
 /**** MOVED FROM BASE_INTERFACE.CPP ****/
 extern string getCargoUnitName (const char *name);
@@ -227,7 +229,7 @@ void GameUnit<UnitType>::UpdateHudMatrix(int whichcam) {
   CrossProduct(r,q, tmp);
   _Universe->AccessCamera(whichcam)->SetOrientation(tmp,q ,r);
   
-  _Universe->AccessCamera(whichcam)->SetPosition (Transform (ctm,this->image->CockpitCenter.Cast()),this->GetWarpVelocity(),this->GetAngularVelocity());
+  _Universe->AccessCamera(whichcam)->SetPosition (Transform (ctm,this->image->CockpitCenter.Cast()),this->GetWarpVelocity(),this->GetAngularVelocity(),this->GetAcceleration());
 }
 extern bool flickerDamage (Unit * un, float hullpercent);   
 extern int cloakVal (int cloakint, int cloakminint, int cloakrateint, bool cloakglass); //short fix?
@@ -284,9 +286,10 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
     float cmas=this->computer.max_ab_speed()*this->computer.max_ab_speed();
     if (cmas==0)
       cmas =1;
-    if (enginescale>cmas)
+    /*if (enginescale>cmas)
       enginescale=cmas;
-    Vector Scale (1,1,enginescale/(cmas));
+    Vector Scale (1,1,enginescale/(cmas));*/
+    Vector Scale (1,1,1); //Now HaloSystem should handle it
 #endif
   int nummounts= this->GetNumMounts();
   for (i=0;(int)i<nummounts;i++) {
@@ -304,11 +307,11 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
              Matrix ct;
              MultMatrix(ct,mat,mountmat);
              ScaleMatrix(ct,Vector(mahnt->xyscale,mahnt->xyscale,mahnt->zscale));
-             gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));		  
+             gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun,SIMULATION_ATOM*sim_atom_multiplier));
              gun->DrawNow(lod,0,ct,1,cloak);//cloakign and nebula
              if (mahnt->type->gun1){
                gun = mahnt->type->gun1;
-               gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));		  
+               gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun,SIMULATION_ATOM*sim_atom_multiplier));
 
                gun->DrawNow(lod,0,ct,1,cloak);//cloakign and nebula			  
              }
@@ -317,12 +320,21 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
 	 }
     }
   }
-  if (halos.ShouldDraw (enginescale)) 
-    halos.Draw(mat,Scale,cloak,0, this->GetHullPercent(),this->GetVelocity(),this->faction);
+  Vector accel = this->GetAcceleration();
+  float maxaccel = this->GetMaxAccelerationInDirectionOf(mat.getR(),true);
+  Vector velocity = this->GetVelocity();
+  if (halos.ShouldDraw (mat,velocity,accel,maxaccel,cmas)) 
+    halos.Draw(mat,Scale,cloak,0, this->GetHullPercent(),velocity,accel,maxaccel,cmas,this->faction);
 }
 template <class UnitType>
 void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parentMatrix)
 {
+  //Quick shortcut for camera setup phase 
+  bool myparent = (this==_Universe->AccessCockpit()->GetParent());
+  bool ormygrampa = myparent||(_Universe->AccessCockpit()->GetParent()&&(this==_Universe->AccessCockpit()->GetParent()->owner));
+  bool topparent = _Universe->AccessCockpit()->GetParent()&&(_Universe->AccessCockpit()->GetParent()->owner == NULL);
+  if (cam_setup_phase&&!ormygrampa&&(topparent||SubUnits.empty()))
+      return;
 
   this->cumulative_transformation = linear_interpolate(this->prev_physical_state, this->curr_physical_state, interpolation_blend_factor);
   Matrix *ctm;
@@ -343,9 +355,9 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 	  VectorAndPositionToMatrix(invview,p*magp,q*magq,r*magr,ctm->p);
 //	  _Universe->AccessCamera()->GetView(invview);
 
-	  ctm = &invview;	  
+	  ctm = &invview;
   }
-  SetPlanetHackTransformation (ct,ctm);
+  if (this->planet) SetPlanetHackTransformation (ct,ctm);
 
 #ifdef PERFRAMESOUND
   AUDAdjustSound (sound.engine,cumulative_transformation.position,GetVelocity());
@@ -357,7 +369,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
   }
   
   unsigned int i;
-  if (this->hull <0) {
+  if ((this->hull <0)&&(!cam_setup_phase)) {
     Explode(true, GetElapsedTime());
   }
   float damagelevel=this->hull/this->maxhull;
@@ -365,79 +377,80 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
   chardamage=255-chardamage;
   bool On_Screen=false;
   float minmeshradius = (_Universe->AccessCamera()->GetVelocity().Magnitude()+this->Velocity.Magnitude())*SIMULATION_ATOM;
-  bool myparent = (this==_Universe->AccessCockpit()->GetParent());
   float numKeyFrames = this->graphicOptions.NumAnimationPoints;
   if ((!(this->invisible&UnitType::INVISUNIT))&&((!(this->invisible&UnitType::INVISCAMERA))||(!myparent))) {
-    for (i=0;i<this->meshdata.size();i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
-      if (this->meshdata[i]==NULL) 
-		continue;
-	  if ((int)i==this->nummesh()&&(this->meshdata[i]->numFX()==0||this->hull<0)) 
-		continue;
-	  if (this->meshdata[i]->getBlendDst()==ONE) {
-		  if ((this->invisible&UnitType::INVISGLOW)!=0)
-			  continue;
-
-		  if (damagelevel<.9)
-			  if (flickerDamage (this,damagelevel))
-				  continue;
-	  }
-	  QVector TransformedPosition = Transform (*ctm,
-					      this->meshdata[i]->Position().Cast());
+      if (!cam_setup_phase) {
+          for (i=0;i<this->meshdata.size();i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
+              if (this->meshdata[i]==NULL) 
+                  continue;
+              if ((int)i==this->nummesh()&&(this->meshdata[i]->numFX()==0||this->hull<0)) 
+                  continue;
+              if (this->meshdata[i]->getBlendDst()==ONE) {
+                  if ((this->invisible&UnitType::INVISGLOW)!=0)
+                      continue;
+                  
+                  if (damagelevel<.9)
+                      if (flickerDamage (this,damagelevel))
+                          continue;
+              }
+              QVector TransformedPosition = Transform (*ctm,
+                  this->meshdata[i]->Position().Cast());
 #if 0
-      //This is a test of the box in frustum setup to be used with terrain
-      GFXBoxInFrustumModel (ctm);
-      int tmp = GFXBoxInFrustum (meshdata[i]->corner_min(),meshdata[i]->corner_max());
-      if ((d==0)!=(tmp==0)) {
-	VSFileSystem::vs_fprintf (stderr,"Mismatch for %s with Box being %d", name.c_str(),tmp);
-      }
+              //This is a test of the box in frustum setup to be used with terrain
+              GFXBoxInFrustumModel (ctm);
+              int tmp = GFXBoxInFrustum (meshdata[i]->corner_min(),meshdata[i]->corner_max());
+              if ((d==0)!=(tmp==0)) {
+                  VSFileSystem::vs_fprintf (stderr,"Mismatch for %s with Box being %d", name.c_str(),tmp);
+              }
 #endif
-
-      //      VSFileSystem::vs_fprintf (stderr,"%s %d ",name.c_str(),i);
-      double d = GFXSphereInFrustum(TransformedPosition,
-				   minmeshradius+this->meshdata[i]->clipRadialSize()
+              
+              //      VSFileSystem::vs_fprintf (stderr,"%s %d ",name.c_str(),i);
+              double d = GFXSphereInFrustum(TransformedPosition,
+                  minmeshradius+this->meshdata[i]->clipRadialSize()
 #ifdef VARIABLE_LENGTH_PQR
-				   *SizeScaleFactor
+                  *SizeScaleFactor
 #endif 
-				   );
-      double lod;
-      //      VSFileSystem::vs_fprintf (stderr,"\n");
-      if (d) {  //d can be used for level of detail shit
-	d = (TransformedPosition-_Universe->AccessCamera()->GetPosition()).Magnitude();
-	if ((lod =g_game.detaillevel*g_game.x_resolution*2*this->meshdata[i]->rSize()/GFXGetZPerspective((d-this->meshdata[i]->rSize()<g_game.znear)?g_game.znear:d-this->meshdata[i]->rSize()))>=g_game.detaillevel) {//if the radius is at least half a pixel (detaillevel is the scalar... so you gotta make sure it's above that
-		float currentFrame = this->meshdata[i]->getCurrentFrame();
-		this->meshdata[i]->Draw(lod,this->WarpMatrix(*ctm),d,i==this->meshdata.size()-1?-1:cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,chardamage);//cloakign and nebula		
-		On_Screen=true;
-                unsigned int numAnimFrames=0;
-		if (this->meshdata[i]->getFramesPerSecond()&&
-                    (numAnimFrames=this->meshdata[i]->getNumAnimationFrames(""))) {
-			float currentprogress=floor(this->meshdata[i]->getCurrentFrame()*numKeyFrames/numAnimFrames);
-			if (numKeyFrames&&
-				floor(currentFrame*numKeyFrames/numAnimFrames)   !=
-				currentprogress) {
-				this->graphicOptions.Animating=0;
-				this->meshdata[i]->setCurrentFrame(.1+currentprogress*numAnimFrames/numKeyFrames);
-			}else if (!this->graphicOptions.Animating) {
-				this->meshdata[i]->setCurrentFrame(currentFrame);//dont' budge
-			}
-		}		
-	} else {
-
-	}
+                  );
+              double lod;
+              //      VSFileSystem::vs_fprintf (stderr,"\n");
+              if (d) {  //d can be used for level of detail shit
+                  d = (TransformedPosition-_Universe->AccessCamera()->GetPosition()).Magnitude();
+                  if ((lod =g_game.detaillevel*g_game.x_resolution*2*this->meshdata[i]->rSize()/GFXGetZPerspective((d-this->meshdata[i]->rSize()<g_game.znear)?g_game.znear:d-this->meshdata[i]->rSize()))>=g_game.detaillevel) {//if the radius is at least half a pixel (detaillevel is the scalar... so you gotta make sure it's above that
+                      float currentFrame = this->meshdata[i]->getCurrentFrame();
+                      this->meshdata[i]->Draw(lod,this->WarpMatrix(*ctm),d,i==this->meshdata.size()-1?-1:cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,chardamage);//cloakign and nebula		
+                      On_Screen=true;
+                      unsigned int numAnimFrames=0;
+                      if (this->meshdata[i]->getFramesPerSecond()&&
+                          (numAnimFrames=this->meshdata[i]->getNumAnimationFrames(""))) {
+                          float currentprogress=floor(this->meshdata[i]->getCurrentFrame()*numKeyFrames/numAnimFrames);
+                          if (numKeyFrames&&
+                              floor(currentFrame*numKeyFrames/numAnimFrames)   !=
+                              currentprogress) {
+                              this->graphicOptions.Animating=0;
+                              this->meshdata[i]->setCurrentFrame(.1+currentprogress*numAnimFrames/numKeyFrames);
+                          }else if (!this->graphicOptions.Animating) {
+                              this->meshdata[i]->setCurrentFrame(currentFrame);//dont' budge
+                          }
+                      }		
+                  } else {
+                      
+                  }
+              }
+          }
       }
-    }
-    
-    un_fiter iter =this->SubUnits.fastIterator();
-    Unit * un;
-    while ((un = iter.current())) {
-      (un)->Draw (*ct,*ctm);
-      iter.advance();
-    }
+      
+      un_fiter iter =this->SubUnits.fastIterator();
+      Unit * un;
+      while ((un = iter.current())) {
+          (un)->Draw (*ct,*ctm);
+          iter.advance();
+      }
   
-    if(this->selected) {
-      //      static bool doInputDFA=XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
-      //      if (doInputDFA)
-      //	image->selectionBox->Draw(g_game.x_resolution,*ctm);
-    }
+      if(this->selected) {
+          //      static bool doInputDFA=XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
+          //      if (doInputDFA)
+          //	image->selectionBox->Draw(g_game.x_resolution,*ctm);
+      }
   } else {
 	  _Universe->AccessCockpit()->SetupViewPort();///this is the final, smoothly calculated cam
     //        UpdateHudMatrix();
@@ -457,6 +470,9 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
     delete tmpiter;
     **/
   }
+
+  if (cam_setup_phase) return;
+
   int nummounts= this->GetNumMounts();
   for (i=0;(int)i<nummounts;i++) {
     static bool draw_mounts = XMLSupport::parse_bool (vs_config->getVariable ("graphics","draw_weapons","false"));
@@ -474,11 +490,11 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
                   float d = (mat.p-_Universe->AccessCamera()->GetPosition()).Magnitude();
                   float lod =g_game.detaillevel*g_game.x_resolution*2*gun->rSize()/GFXGetZPerspective((d-gun->rSize()<g_game.znear)?g_game.znear:d-gun->rSize());
 		  ScaleMatrix(mat,Vector(mahnt->xyscale,mahnt->xyscale,mahnt->zscale));
-		  gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));		  
+		  gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun,SIMULATION_ATOM*sim_atom_multiplier));
 		  gun->Draw(lod,mat,1,cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,chardamage,true);//cloakign and nebula
 		  if (mahnt->type->gun1){
 			  gun = mahnt->type->gun1;
-			  gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));		  
+			  gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun,SIMULATION_ATOM*sim_atom_multiplier));
 			  gun->Draw(lod,mat,1,cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,chardamage,true);//cloakign and nebula			  
 		  }
       }
@@ -494,20 +510,28 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
   if (cloak>=0) {
     haloalpha=((float)cloak)/2147483647;
   }
-  if (On_Screen) {
-    float enginescale = this->GetVelocity().MagnitudeSquared();
+  if (On_Screen&&(halos.NumHalos()>0)) {
+    Vector accel = this->GetAcceleration();
+    float maxaccel = this->GetMaxAccelerationInDirectionOf(this->WarpMatrix(*ctm).getR(),true);
+    Vector velocity = this->GetVelocity();
+    //float enginescale = this->GetVelocity().MagnitudeSquared();
 #ifdef CAR_SIM
     Vector Scale (1,image->ecm,computer.set_speed);
 #else
     float cmas=this->computer.max_ab_speed()*this->computer.max_ab_speed();
     if (cmas==0)
       cmas =1;
-    if (enginescale>cmas)
+    /*if (enginescale>cmas)
       enginescale=cmas;
-    Vector Scale (1,1,enginescale/(cmas));
+    Vector Scale (1,1,enginescale/(cmas));*/
+    Vector Scale (1,1,1);// Now, HaloSystem handles that
 #endif
-    if (halos.ShouldDraw (enginescale)) 
-      halos.Draw(this->WarpMatrix(*ctm),Scale,cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,this->GetHull()>0?damagelevel:1.0,this->GetVelocity(),this->faction);
+    //WARNING: cmas is not a valid maximum speed for the upcoming multi-direction thrusters, 
+    //  nor is maxaccel. Instead, each halo should have its own limits specified in units.csv
+    if (halos.ShouldDraw(this->WarpMatrix(*ctm),velocity,accel,maxaccel,cmas)) 
+      halos.Draw(this->WarpMatrix(*ctm),Scale,cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,this->GetHull()>0?damagelevel:1.0,velocity,accel,maxaccel,cmas,this->faction);
+  }
+  if (On_Screen&&!graphicOptions.NoDamageParticles) {
 	int numm = this->nummesh();
 	if (damagelevel<.99&&numm>0&&this->GetHull()>0) {
 		unsigned int switcher=(damagelevel>.8)?1:

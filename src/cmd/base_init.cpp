@@ -1,5 +1,5 @@
-#include <Python.h>
 #include <math.h>
+#include <Python.h>
 #include "python/python_class.h"
 #include "base.h"
 #include "base_util.h"
@@ -50,7 +50,6 @@ PYTHON_BEGIN_MODULE(Base)
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::CompPython,"CompPython");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Launch,"Launch");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::LaunchPython,"LaunchPython");
-	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::EjectPython,"EjectPython");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Link,"Link");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::LinkPython,"LinkPython");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Python,"Python");

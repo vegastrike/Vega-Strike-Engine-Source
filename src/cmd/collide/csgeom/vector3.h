@@ -103,11 +103,11 @@ public:
 
   /// Multiply a vector and a scalar int.
   inline friend csVector3 operator* (const csVector3& v, int f)
-  { return v * (float)f; }
+  { return csVector3(v.x*f, v.y*f, v.z*f); }
 
   /// Multiply a vector and a scalar int.
   inline friend csVector3 operator* (int f, const csVector3& v)
-  { return v * (float)f; }
+  { return csVector3(v.x*f, v.y*f, v.z*f); }
 
   /// Divide a vector by a scalar.
   inline friend csVector3 operator/ (const csVector3& v, float f)
@@ -116,7 +116,7 @@ public:
 
   /// Divide a vector by a scalar int.
   inline friend csVector3 operator/ (const csVector3& v, int f)
-  { return v / (float)f; }
+  { float F = 1.0f/f; return csVector3(v.x*F, v.y*F, v.z*F); }
 
   /// Check if two vectors are equal.
   inline friend bool operator== (const csVector3& v1, const csVector3& v2)
@@ -128,11 +128,11 @@ public:
 
   /// Project one vector onto another.
   inline friend csVector3 operator>> (const csVector3& v1, const csVector3& v2)
-  { return v2*(v1*v2)/(v2*v2); }
+  { return ((v1*v2)*v2)/(v2*v2); }
 
   /// Project one vector onto another.
   inline friend csVector3 operator<< (const csVector3& v1, const csVector3& v2)
-  { return v1*(v1*v2)/(v1*v1); }
+  { return ((v1*v2)*v1)/(v1*v1); }
 
   /// Test if each component of a vector is less than a small epsilon value.
   inline friend bool operator< (const csVector3& v, float f)

@@ -148,8 +148,8 @@ void Logo::ProcessDrawQueue() {
   if (!g_game.use_logos||draw_queue->empty()) {
     return;
   }
-  static float offs = XMLSupport::parse_float (vs_config->getVariable ("graphics","LogoOffset","-4")); 
-  static float scl = XMLSupport::parse_float(vs_config->getVariable ("graphics","LogoOffsetScale","-30.8"));
+  static float offs = XMLSupport::parse_float (vs_config->getVariable ("graphics","LogoOffset","-1")); 
+  static float scl = XMLSupport::parse_float(vs_config->getVariable ("graphics","LogoOffsetScale","-4.0"));
 
 	GFXEnable(TEXTURE0);
 	GFXEnable(TEXTURE1);

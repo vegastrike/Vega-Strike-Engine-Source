@@ -87,10 +87,13 @@ class MatchVelocity : public MatchAngularVelocity {
  */
 class FlyByWire : public Orders::MatchVelocity {
  protected:
-  Vector DesiredThrust;
+  Vector DesiredShiftVelocity;
+  Vector DirectThrust;
   ///If shelton slide, do not have the computer match linear
   bool sheltonslide;
   bool controltype;//false for car
+  bool inertial_flight_model; //true doesn't match speed vector, but allows manual thrust.
+  bool inertial_flight_enable;//overrides inertial_flight_model if false - useful for AI, you know.
   bool stolen_setspeed;
   float stolen_setspeed_value;
  public:
@@ -103,7 +106,13 @@ class FlyByWire : public Orders::MatchVelocity {
   void ThrustRight (float percent);
   void ThrustUp (float percent);
   void ThrustFront(float percent);
+  void DirectThrustRight (float percent); //Not disabled by shelton slide
+  void DirectThrustUp (float percent);    //Not disabled by shelton slide
+  void DirectThrustFront(float percent);  //Not disabled by shelton slide
   void SheltonSlide (bool onoff);
+  void InertialFlight (bool onoff);
+  bool InertialFlight () const;
+  bool InertialFlightEnable () const;
   ///Stops... sets desired velocity to 0
   void Stop (float percentage);
   ///pass in the percentage of the turn they were turnin right.  -%age indicates left

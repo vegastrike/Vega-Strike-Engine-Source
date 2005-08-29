@@ -166,7 +166,12 @@ bool Cockpit::unitInAutoRegion(Unit * un) {
     return false;
   }
 }
-Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name): view(CP_FRONT),parent (parent), cockpit_offset(0), viewport_offset(0), zoomfactor (XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"))),savegame (new SaveGame(pilot_name)) {
+static float getInitialZoomFactor()
+{
+    static float inizoom = XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
+    return inizoom;
+}
+Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name): view(CP_FRONT),parent (parent), cockpit_offset(0), viewport_offset(0), zoomfactor (getInitialZoomFactor()),savegame (new SaveGame(pilot_name)) {
   //  static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
   //int i;
   fg=NULL;
@@ -393,9 +398,9 @@ bool Cockpit::Update () {
   Unit * par=GetParent();
 
   if (turretcontrol.size()>_Universe->CurrentCockpit())
-    if (turretcontrol[_Universe->CurrentCockpit()]) {
-      turretcontrol[_Universe->CurrentCockpit()]=0;
-      Unit * par = GetParent();
+  if (turretcontrol[_Universe->CurrentCockpit()]) {
+    turretcontrol[_Universe->CurrentCockpit()]=0;
+    Unit * par = GetParent();
       // this being here, it will require poking the turret from the undock script
       if (par) {
         if (par->name=="return_to_cockpit") {
@@ -411,18 +416,18 @@ bool Cockpit::Update () {
         }
       }
 
-      
-      
-      
-      if (par) {
-        static int index=0;
-        int i=0;bool tmp=false;bool tmpgot=false;
-        
-        
-        
-        
-        
-        if (parentturret.GetUnit()==NULL) {
+
+
+    
+    if (par) {
+      static int index=0;
+      int i=0;bool tmp=false;bool tmpgot=false;
+
+
+	  
+	  
+	  
+      if (parentturret.GetUnit()==NULL) {
 
 		  
 		  
@@ -431,13 +436,10 @@ bool Cockpit::Update () {
 	un_iter ui= par->getSubUnits();
 	Unit * un;
 	while ((un=ui.current())) {
-          if (_Universe->isPlayerStarship(un)){
-            ++ui;
-            continue;
-          }
-
-
-
+		if (_Universe->isPlayerStarship(un)){
+			++ui;
+			continue;
+		}
 
 
 

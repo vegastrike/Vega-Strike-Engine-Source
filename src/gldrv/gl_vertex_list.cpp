@@ -101,11 +101,15 @@ void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex 
   changed = HAS_COLOR*((colors!=NULL)?1:0);
   if (numlists>0) {
     mode = new POLYTYPE [numlists];
+    unique_mode=true;
+    POLYTYPE umode=*poly;
     for (int pol=0;pol<numlists;pol++) {
       mode[pol]=poly[pol];//PolyLookup (poly[pol]);
+      if (unique_mode&&(poly[pol]!=umode)) unique_mode=false;
     }
   }else {
     mode=NULL;
+    unique_mode=false;
   }
   this->numlists = numlists;
   this->numVertices = numVertices;

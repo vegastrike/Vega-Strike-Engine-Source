@@ -32,15 +32,16 @@
 #include "xml_support.h"
 #include "sprite.h"
 #include <algorithm>
+#include "../gldrv/gl_globals.h"
 using std::vector;
 using std::stack;
 static vector<Animation *> far_animationdrawqueue;
 static vector
 <Animation *> animationdrawqueue;
-const unsigned char ani_up=1;
-const unsigned char ani_close=2;
-const unsigned char ani_alpha=4;
-const unsigned char ani_repeat=8;
+static const unsigned char ani_up           =0x01;
+static const unsigned char ani_close        =0x02;
+static const unsigned char ani_alpha        =0x04;
+static const unsigned char ani_repeat       =0x08;
 Animation::Animation ()
 {
   VSCONSTRUCT2('a')
@@ -75,6 +76,8 @@ Animation::Animation (const char * FileName, bool Rep,  float priority,enum FILT
   if (appear_near_by_radius) {
     options|=ani_close;
   }
+  SetLoop(Rep); //setup AnimatedTexture's loop flag - NOTE: Load() will leave it like this unless a force(No)Loop option is present
+  SetLoopInterp(Rep); //Default interpolation method == looping method
   VSFile f;
   VSError err = f.OpenReadOnly( FileName, AnimFile);
   if (err>Ok) {
@@ -156,7 +159,8 @@ void Animation::ProcessDrawQueue (std::vector <Animation *> &animationdrawqueue,
       alphamaps = (animationdrawqueue[i]->options&ani_alpha);
       GFXBlendMode ((alphamaps!=0)?SRCALPHA:ONE,(alphamaps!=0)?INVSRCALPHA:ONE);
     }
-	if ((animationdrawqueue[i]->Position()-_Universe->AccessCamera()->GetPosition()).Magnitude()-animationdrawqueue[i]->height>limit) {
+    QVector campos=_Universe->AccessCamera()->GetPosition();
+	if ((animationdrawqueue[i]->Position()-campos).Magnitude()-animationdrawqueue[i]->height>limit) {
   	  GFXFogMode(FOG_OFF);
   	  animationdrawqueue[i]->CalculateOrientation(result);
       animationdrawqueue[i]->DrawNow(result);
@@ -198,18 +202,35 @@ void Animation::DrawNow(const Matrix &final_orientation) {
     
   }else if (!Done()||(options&ani_repeat)) {
     GFXLoadMatrixModel (final_orientation);
-    MakeActive();
-    GFXBegin (GFXQUAD);
-    GFXTexCoord2f (0.00F,1.00F);
-    GFXVertex3f (-width,-height,0.00F);  //lower left
-    GFXTexCoord2f (1.00F,1.00F);
-    GFXVertex3f (width,-height,0.00F);  //upper left
-    GFXTexCoord2f (1.00F,0.00F);
-    GFXVertex3f (width,height,0.00F);  //upper right
-    GFXTexCoord2f (0.00F,0.00F);
-    GFXVertex3f (-width,height,0.00F);  //lower right
-    GFXEnd ();
-   
+    int lyr;
+    int numlayers=numLayers();
+    bool multitex=(numlayers>1);
+    int numpasses=numPasses();
+    float ms=mintcoord.i,Ms=maxtcoord.i;
+    float mt=mintcoord.j,Mt=maxtcoord.j;
+    BLENDFUNC src,dst;
+    GFXGetBlendMode(src,dst);
+    for (lyr=0; (lyr<gl_options.Multitexture)||(lyr<numlayers); lyr++) {
+        GFXToggleTexture((lyr<numlayers),lyr);
+        if (lyr<numlayers) GFXTextureCoordGenMode(lyr,NO_GEN,NULL,NULL);
+    }
+    for (int pass=0; pass<numpasses; pass++) if (SetupPass(pass,0,src,dst)) {
+        MakeActive(0,pass);
+        GFXTextureEnv(0,GFXMODULATETEXTURE);
+        GFXBegin (GFXQUAD);
+        if (!multitex) GFXTexCoord2f (ms,Mt); else GFXTexCoord4f (ms,Mt,ms,Mt);
+        GFXVertex3f (-width,-height,0.0f);  //lower left
+        if (!multitex) GFXTexCoord2f (Ms,Mt); else GFXTexCoord4f (Ms,Mt,Ms,Mt);
+        GFXVertex3f (width,-height,0.0f);  //upper left
+        if (!multitex) GFXTexCoord2f (Ms,mt); else GFXTexCoord4f (Ms,mt,Ms,mt);
+        GFXVertex3f (width,height,0.0f);  //upper right
+        if (!multitex) GFXTexCoord2f (ms,mt); else GFXTexCoord4f (ms,mt,ms,mt);
+        GFXVertex3f (-width,height,0.0f);  //lower right
+        GFXEnd ();
+    }
+    for (lyr=0; lyr<numlayers; lyr++) 
+        GFXToggleTexture(false,lyr);
+    SetupPass(-1,0,src,dst);
   }
 }
 void Animation::DrawAsVSSprite (VSSprite * spr) {
@@ -223,30 +244,54 @@ void Animation::DrawAsVSSprite (VSSprite * spr) {
       GFXBlendMode (SRCALPHA,INVSRCALPHA);
     else
       GFXBlendMode (ONE, ZERO);
-    MakeActive();
+    int lyr;
+    int numlayers=numLayers();
+    bool multitex=(numlayers>1);
+    int numpasses=numPasses();
+    float ms=mintcoord.i,Ms=maxtcoord.i;
+    float mt=mintcoord.j,Mt=maxtcoord.j;
     GFXDisable(CULLFACE);
-    GFXBegin(GFXQUAD);
     Vector ll,lr,ur,ul;
     spr->DrawHere(ll,lr,ur,ul);
-    GFXTexCoord2f(0, 1);
-    GFXVertexf(ll);
-    GFXTexCoord2f(1, 1);
-    GFXVertexf(lr);
-    GFXTexCoord2f(1, 0);
-    GFXVertexf(ur);
-    GFXTexCoord2f(0, 0);
-    GFXVertexf(ul);
-    GFXEnd();
+    BLENDFUNC src,dst;
+    GFXGetBlendMode(src,dst);
+    for (lyr=0; (lyr<gl_options.Multitexture)||(lyr<numlayers); lyr++) {
+        GFXToggleTexture((lyr<numlayers),lyr);
+        if (lyr<numlayers) GFXTextureCoordGenMode(lyr,NO_GEN,NULL,NULL);
+    }
+    for (int pass=0; pass<numpasses; pass++) if (SetupPass(pass,0,src,dst)) {
+        MakeActive(0,pass);
+        GFXTextureEnv(0,GFXMODULATETEXTURE);
+        GFXBegin(GFXQUAD);
+        if (!multitex) GFXTexCoord2f (ms,Mt); else GFXTexCoord4f (ms,Mt,ms,Mt);
+        GFXVertexf(ll);
+        if (!multitex) GFXTexCoord2f (Ms,Mt); else GFXTexCoord4f (Ms,Mt,Ms,Mt);
+        GFXVertexf(lr);
+        if (!multitex) GFXTexCoord2f (Ms,mt); else GFXTexCoord4f (Ms,mt,Ms,mt);
+        GFXVertexf(ur);
+        if (!multitex) GFXTexCoord2f (ms,mt); else GFXTexCoord4f (ms,mt,ms,mt);
+        GFXVertexf(ul);
+        GFXEnd();
+    }
+    SetupPass(-1,0,src,dst);
+    for (lyr=0; lyr<numlayers; lyr++) 
+        GFXToggleTexture(false,lyr);
     GFXEnable(CULLFACE);
     GFXPopBlendMode();
   }
 }
 void Animation::DrawNoTransform(bool cross, bool blendoption) {
+  bool doitagain=false;
   if (g_game.use_animations==0&&g_game.use_textures==0) {
     
   }else
   if (!Done()||(options&ani_repeat)) {
-    MakeActive();
+    int lyr;
+    int numlayers=numLayers();
+    bool multitex=(numlayers>1);
+    int numpasses=numPasses();
+    float ms=mintcoord.i,Ms=maxtcoord.i;
+    float mt=mintcoord.j,Mt=maxtcoord.j;
     if (blendoption){
       if (options&ani_alpha) {
         GFXEnable(DEPTHWRITE);
@@ -255,34 +300,47 @@ void Animation::DrawNoTransform(bool cross, bool blendoption) {
         GFXBlendMode(ONE,ONE);
       }
     }
-    GFXBegin (GFXQUAD);
-    GFXTexCoord2f (0.00F,1.00F);
-    GFXVertex3f (-width,-height,0.00F);  //lower left
-    GFXTexCoord2f (1.00F,1.00F);
-    GFXVertex3f (width,-height,0.00F);  //upper left
-    GFXTexCoord2f (1.00F,0.00F);
-    GFXVertex3f (width,height,0.00F);  //upper right
-    GFXTexCoord2f (0.00F,0.00F);
-    GFXVertex3f (-width,height,0.00F);  //lower right
-    if (cross) {
-    GFXTexCoord2f (0.00F,1.00F);
-    GFXVertex3f (-width,0.00F,-height);  //lower left
-    GFXTexCoord2f (1.00F,1.00F);
-    GFXVertex3f (width,0,-height);  //upper left
-    GFXTexCoord2f (1.00F,0.00F);
-    GFXVertex3f (width,0,height);  //upper right
-    GFXTexCoord2f (0.00F,0.00F);
-    GFXVertex3f (-width,0,height);  //lower right
-    GFXTexCoord2f (0.00F,1.00F);    
-    GFXVertex3f (0,-height,-height);  //lower left
-    GFXTexCoord2f (1.00F,1.00F);
-    GFXVertex3f (0,height,-height);  //upper left
-    GFXTexCoord2f (1.00F,0.00F);
-    GFXVertex3f (0,height,height);  //upper right
-    GFXTexCoord2f (0.00F,0.00F);
-    GFXVertex3f (0,-height,height);  //lower right
+    BLENDFUNC src,dst;
+    GFXGetBlendMode(src,dst);
+    for (lyr=0; (lyr<gl_options.Multitexture)||(lyr<numlayers); lyr++) {
+        GFXToggleTexture((lyr<numlayers),lyr);
+        if (lyr<numlayers) GFXTextureCoordGenMode(lyr,NO_GEN,NULL,NULL);
     }
-    GFXEnd ();
+    for (int pass=0; pass<numpasses; pass++) if (SetupPass(pass,0,src,dst)) {
+        MakeActive(0,pass);
+        GFXTextureEnv(0,GFXMODULATETEXTURE);
+        GFXBegin (GFXQUAD);
+        if (!multitex) GFXTexCoord2f (ms,Mt); else GFXTexCoord4f (ms,Mt,ms,Mt);
+        GFXVertex3f (-width,-height,0.0f);  //lower left
+        if (!multitex) GFXTexCoord2f (Ms,Mt); else GFXTexCoord4f (Ms,Mt,Ms,Mt);
+        GFXVertex3f (width,-height,0.0f);  //upper left
+        if (!multitex) GFXTexCoord2f (Ms,mt); else GFXTexCoord4f (Ms,mt,Ms,mt);
+        GFXVertex3f (width,height,0.0f);  //upper right
+        if (!multitex) GFXTexCoord2f (ms,mt); else GFXTexCoord4f (ms,mt,ms,mt);
+        GFXVertex3f (-width,height,0.0f);  //lower right
+        if (cross) {
+        if (!multitex) GFXTexCoord2f (ms,Mt); else GFXTexCoord4f (ms,Mt,ms,Mt);
+        GFXVertex3f (-width,0.0f,-height);  //lower left
+        if (!multitex) GFXTexCoord2f (Ms,Mt); else GFXTexCoord4f (Ms,Mt,Ms,Mt);
+        GFXVertex3f (width,0.0f,-height);  //upper left
+        if (!multitex) GFXTexCoord2f (Ms,mt); else GFXTexCoord4f (Ms,mt,Ms,mt);
+        GFXVertex3f (width,0.0f,height);  //upper right
+        if (!multitex) GFXTexCoord2f (ms,mt); else GFXTexCoord4f (ms,mt,ms,mt);
+        GFXVertex3f (-width,0.0f,height);  //lower right
+        if (!multitex) GFXTexCoord2f (ms,Mt); else GFXTexCoord4f (ms,Mt,ms,Mt);
+        GFXVertex3f (0.0f,-height,-height);  //lower left
+        if (!multitex) GFXTexCoord2f (Ms,Mt); else GFXTexCoord4f (Ms,Mt,Ms,Mt);
+        GFXVertex3f (0.0f,height,-height);  //upper left
+        if (!multitex) GFXTexCoord2f (Ms,mt); else GFXTexCoord4f (Ms,mt,Ms,mt);
+        GFXVertex3f (0.0f,height,height);  //upper right
+        if (!multitex) GFXTexCoord2f (ms,mt); else GFXTexCoord4f (ms,mt,ms,mt);
+        GFXVertex3f (0.0f,-height,height);  //lower right
+        }
+        GFXEnd ();
+    }
+    SetupPass(-1,0,src,dst);
+    for (lyr=0; lyr<numlayers; lyr++) 
+        GFXToggleTexture(false,lyr);
     if (blendoption) {
       if (options&ani_alpha) {
         GFXDisable(DEPTHWRITE);
@@ -293,10 +351,20 @@ void Animation::DrawNoTransform(bool cross, bool blendoption) {
 }
 void Animation:: Draw() {
   if (g_game.use_animations!=0||g_game.use_textures!=0) {
+    Vector camp,camq,camr;
+    QVector pos (Position());
+    float hei=height;
+    float wid=width;
     static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable ("graphics","HaloOffset",".1"));
+
+    /*
+    // Why do all this if we can use ::CalculateOrientation?
     QVector R (_Universe->AccessCamera()->GetR().i,_Universe->AccessCamera()->GetR().j,_Universe->AccessCamera()->GetR().k);
     static float too_far_dist = XMLSupport::parse_float (vs_config->getVariable ("graphics","anim_far_percent",".8"));
-    if ((R.Dot (Position()-_Universe->AccessCamera()->GetPosition())-HaloOffset*(height>width?height:width))<too_far_dist*g_game.zfar   ) {
+    if ((R.Dot (Position()-_Universe->AccessCamera()->GetPosition())+HaloOffset*(height>width?height:width))<too_far_dist*g_game.zfar   ) {
+    */
+
+    if (::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?HaloOffset:0,false)) {
       animationdrawqueue.push_back (this);
     }else {
       far_animationdrawqueue.push_back(this);

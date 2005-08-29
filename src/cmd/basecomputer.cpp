@@ -118,8 +118,12 @@ static const char CATEGORY_TAG = (-1);
 // Color of an item that there isn't enough money to buy.
 // We read this out of the config file (or use a default).
 static GFXColor NO_MONEY_COLOR(){
-  static GFXColor NO_MONEY_COLOR=getConfigColor("no_money",GFXColor(1,.3,.3,1));
-  return  NO_MONEY_COLOR;        // Start out with bogus color.
+  static GFXColor NMC=getConfigColor("no_money",GFXColor(1,.3,.3,1));
+  return  NMC;        // Start out with bogus color.
+}
+static GFXColor ITEM_DESTROYED_COLOR(){
+  static GFXColor IDC=getConfigColor("upgrade_item_destroyed",GFXColor(0.2,0.2,0.2,1));
+  return IDC;
 }
 // Color of the text of a category.
 static GFXColor CATEGORY_TEXT_COLOR(){
@@ -173,8 +177,6 @@ extern const Unit* makeFinalBlankUpgrade(string name, int faction);
 extern int GetModeFromName(const char *);  // 1=add, 2=mult, 0=neither.
 extern Cargo* GetMasterPartList(const char *input_buffer);
 extern Unit& GetUnitMasterPartList();
-extern void ClearDowngradeMap();
-extern std::set<std::string> GetListOfDowngrades();
 static const string LOAD_FAILED = "LOAD_FAILED";
 
 // Some ship dealer declarations.
@@ -2310,7 +2312,7 @@ void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, 
 
 			if(percent_working == 1.0){final_color = base_color;}	//	working = normal color
 
-			if(percent_working == 0.0){final_color = GFXColor(0.2,0.2,0.2);}	//	dead = grey
+			if(percent_working == 0.0){final_color = ITEM_DESTROYED_COLOR();}	//	dead = grey
 
 		}
 
@@ -4441,7 +4443,8 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	string prefix="";
 	for (int i=0;i<subunitlevel;i++) prefix+="   ";
 	//get conversion factor for damage -> MJ; note that shield and reactor stats use a different constant.
-	float VSDM = XMLSupport::parse_float (vs_config->getVariable ("physics","kilojoules_per_unit_damage","5400"))/1000.0;
+    static float kj_per_unit_damage = XMLSupport::parse_float (vs_config->getVariable ("physics","kilojoules_per_unit_damage","5400"));
+	float VSDM = kj_per_unit_damage/1000.0;
 	float RSconverter = 100; // 100MJ per reactor or shield recharge energy unit
 	float totalWeaponEnergyUsage=0;
 	float totalWeaponDamage=0;

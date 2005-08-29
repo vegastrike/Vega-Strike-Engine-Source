@@ -34,39 +34,43 @@ extern void pushMesh( std::vector<Mesh*> &mesh, float &randomstartframe, float &
 void addShieldMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg);
 void addRapidMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg);
 void addBSPMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg);
+
 static vector<string> parseSemicolon(string inp) {
   vector<string> ret;
   string::size_type where;
-  while((where=inp.find(";"))!=string::npos) {
-    ret.push_back(inp.substr(0,where));
-    inp=inp.substr(where+1);
+  string::size_type ofs=0;
+  while((where=inp.find(';',ofs))!=string::npos) {
+    ret.push_back(inp.substr(ofs,where-ofs));
+    ofs = where+1;
   }
-  ret.push_back(inp);
+  ret.push_back(inp.substr(ofs));
   return ret;
 }
 static vector<vector<string> > parseBracketSemicolon(string inp) {
-  vector<vector<string> >ret;  
-  string::size_type where;
-  while ((where=inp.find("{"))!=string::npos) {
-    inp=inp.substr(where+1);
-    where=inp.find("}");
-    string tmp=inp.substr(0,where);
-    inp=inp.substr(where+1);
-    ret.push_back(parseSemicolon(inp));
+  vector<vector<string> > ret;  
+  string::size_type where,when;
+  string::size_type ofs=0;
+  while ((where=inp.find('{',ofs))!=string::npos) {
+    if ((when=inp.find('}',where+1))!=string::npos) {
+      ret.push_back(parseSemicolon(inp.substr(where+1,when-where-1)));
+      ofs = when+1;
+    } else ofs=string::npos;
   }
   return ret;
 }
 
 static void UpgradeUnit (Unit * un, std::string upgrades) {
   string::size_type when;
-  while ((when=upgrades.find("{"))!=string::npos) {
-    upgrades=upgrades.substr(when+1);
-    string::size_type where = upgrades.find("}");
+  string::size_type ofs=0;
+  while ((when=upgrades.find('{',ofs))!=string::npos) {
+    string::size_type where = upgrades.find('}',when+1);
+    string upgrade = upgrades.substr(when+1,((where==string::npos) ? string::npos : where-when-1));
+    ofs = ((where==string::npos) ? string::npos : where+1);
+
     unsigned int mountoffset=0;
     unsigned int subunitoffset=0;
-    string upgrade = upgrades.substr(0,where);
-    string::size_type where1 = upgrade.find(";");
-    string::size_type where2 = upgrade.rfind(";");
+    string::size_type where1 = upgrade.find(';');
+    string::size_type where2 = upgrade.rfind(';');
     if (where1!=string::npos) {
       mountoffset=XMLSupport::parse_int(upgrade.substr(where1+1,where2!=where1?where2:upgrade.length()));      
       if (where2!=where1&&where2!=string::npos) {
@@ -90,21 +94,28 @@ static void UpgradeUnit (Unit * un, std::string upgrades) {
 }
 
 
-vector<unsigned int> AddMeshes(std::vector<Mesh*>&xmeshes, float&randomstartframe, float&randomstartseconds, float unitscale, std::string meshes,int faction,Flightgroup *fg){
-  string::size_type where,wheresf,wherest;
-  vector <unsigned int> counts;
-  while ((where=meshes.find("{"))!=string::npos) {
-    meshes=meshes.substr(where+1);
-    where=meshes.find("}");//matching closing brace
-    string mesh = meshes.substr(0,where);
+void AddMeshes(std::vector<Mesh*>&xmeshes, float&randomstartframe, float&randomstartseconds, float unitscale, std::string meshes,int faction,Flightgroup *fg,vector<unsigned int> *counts){
+  string::size_type where,when,wheresf,wherest,ofs=0;
+  if (counts) counts->clear();
+  {   
+      int nelem=0;
+      while ((ofs=meshes.find('{',ofs))!=string::npos) nelem++,ofs++;
+      if (counts) counts->reserve(nelem);
+      xmeshes.reserve(nelem);
+      ofs=0;
+  }
+  while ((where=meshes.find('{',ofs))!=string::npos) {
+    when=meshes.find('}',where+1);//matching closing brace
+    string mesh = meshes.substr(where+1,((when==string::npos) ? string::npos : when-where-1));
+    ofs = ((when==string::npos) ? string::npos : when+1);
     
-    wheresf = mesh.find(";");
+    wheresf = mesh.find(';');
     string startf = "0";
     string startt="0";
     if (wheresf!=string::npos) {
       startf=mesh.substr(wheresf+1);
       mesh = mesh.substr(0,wheresf); 
-      wherest = startf.find(";");
+      wherest = startf.find(';');
       if (wherest!=string::npos) {
         startt=startf.substr(wherest+1);
         startf=startf.substr(0,wherest);
@@ -114,19 +125,18 @@ vector<unsigned int> AddMeshes(std::vector<Mesh*>&xmeshes, float&randomstartfram
     float starttime = startt=="RANDOM"?-1.0f:atof(startt.c_str());
     unsigned int s=xmeshes.size();
     pushMesh(xmeshes,randomstartframe,randomstartseconds,mesh.c_str(),unitscale,faction,fg,startframe,starttime);
-	counts.push_back(xmeshes.size()-s);
+	if (counts) counts->push_back(xmeshes.size()-s);
   }
-  return counts;
 }
 static string nextElement (string&inp) {
-  string::size_type where=inp.find(";");
+  string::size_type where=inp.find(';');
   if (where!=string::npos) {
     string ret=inp.substr(0,where);
     inp=inp.substr(where+1);
     return ret;
   }
   string ret=inp;
-  inp="";
+  inp.erase();
   return ret;
 }
 
@@ -154,12 +164,18 @@ static Mount * createMount(const std::string& name, int ammo, int volume, float 
 }
 
 static void AddMounts(Unit * thus, Unit::XML &xml, std::string mounts) {
-  string::size_type where;
-  while ((where=mounts.find("{"))!=string::npos) {
-    mounts=mounts.substr(where+1);    
-    if ((where=mounts.find("}"))!=string::npos) {
-      string mount=mounts.substr(0,where);      
-      mounts=mounts.substr(where+1);      
+  string::size_type where,when,ofs=0;
+  {   
+      int nmountz=0;
+      while ((ofs=mounts.find('{',ofs))!=string::npos) nmountz++,ofs++;
+      xml.mountz.reserve(nmountz);
+      ofs=0;
+  }
+  while ((where=mounts.find('{',ofs))!=string::npos) {
+    if ((when=mounts.find('}',where+1))!=string::npos) {
+      string mount=mounts.substr(where+1,when-where-1);      
+      ofs = when+1;
+
       QVector P;
       QVector Q = QVector (0,1,0);
       QVector R = QVector (0,0,1);
@@ -206,7 +222,7 @@ static void AddMounts(Unit * thus, Unit::XML &xml, std::string mounts) {
       }else {
         xml.mountz[indx]->size = xml.mountz[indx]->type->size;
       }
-    }
+    } else ofs=string::npos;
   }
   if (xml.mountz.size())
   {
@@ -250,13 +266,19 @@ struct SubUnitStruct{
   }
 };
 static vector<SubUnitStruct> GetSubUnits(std::string subunits) {
- string::size_type where;
- vector<SubUnitStruct> ret;
-  while ((where=subunits.find("{"))!=string::npos) {
-    subunits=subunits.substr(where+1);    
-    if ((where=subunits.find("}"))!=string::npos) {
-      string subunit=subunits.substr(0,where);      
-      subunits=subunits.substr(where+1);      
+  string::size_type where,when,ofs=0;
+  vector<SubUnitStruct> ret;
+  {   
+      int nelem=0;
+      while ((ofs=subunits.find('{',ofs))!=string::npos) nelem++,ofs++;
+      ret.reserve(nelem);
+      ofs=0;
+  }
+  while ((where=subunits.find('{',ofs))!=string::npos) {
+    if ((when=subunits.find('}',ofs))!=string::npos) {
+      string subunit=subunits.substr(where+1,when-where-1);      
+      ofs = when+1;
+
       string filename=nextElement(subunit);
       QVector pos,Q,R;
       pos.i=stof(nextElement(subunit));
@@ -270,12 +292,13 @@ static vector<SubUnitStruct> GetSubUnits(std::string subunits) {
       Q.k=stof(nextElement(subunit));
       double restricted=cos(stof(nextElement(subunit),-1)*VS_PI/180.0);
       ret.push_back(SubUnitStruct(filename,pos,Q,R,restricted));
-    }
+    } else ofs = string::npos;
   }
   return ret;
 }
 static void AddSubUnits (Unit *thus, Unit::XML &xml, std::string subunits, int faction, std::string modification) {
   vector<SubUnitStruct> su=GetSubUnits(subunits);
+  xml.units.reserve(subunits.size()+xml.units.size());
   for (vector<SubUnitStruct>::iterator i=su.begin();i!=su.end();++i) {
     string filename=(*i).filename;
     QVector pos=(*i).pos;
@@ -289,7 +312,8 @@ static void AddSubUnits (Unit *thus, Unit::XML &xml, std::string subunits, int f
       xml.units.back()->limits.roll=0;
       xml.units.back()->limits.lateral = xml.units.back()->limits.retro = xml.units.back()->limits.forward = xml.units.back()->limits.afterburn=0.0;        
     }
-    xml.units.back()->SetRecursiveOwner (thus);
+    if (!thus->isSubUnit()) //Useless to set recursive owner in subunits - as parent will do the same
+        xml.units.back()->SetRecursiveOwner (thus);
     xml.units.back()->SetOrientation (Q,R);
     R.Normalize();
     xml.units.back()->prev_physical_state = xml.units.back()->curr_physical_state;
@@ -303,26 +327,32 @@ static void AddSubUnits (Unit *thus, Unit::XML &xml, std::string subunits, int f
       xml.units.back()->image->unitwriter->setName (filename);
     }
     CheckAccessory(xml.units.back());//turns on the ceerazy rotation for the turr          
-  }//tirabuco
-  for(unsigned int a=0; a<xml.units.size(); a++) {
-      bool randomspawn = xml.units[a]->name.find ("randomspawn")!=string::npos;
-      float chancetospawn = xml.units[a]->WarpCapData();
-      if (  (!randomspawn) || (randomspawn && (chancetospawn > (rand()%100)))) {
-          thus->SubUnits.prepend(xml.units[a]);
-      }else {
-          xml.units[a]->Kill();
-      }
+  }
+  for(int a=xml.units.size()-1; a>=0; a--) {
+      bool randomspawn = xml.units[a]->name.find("randomspawn")!=string::npos;
+      if (randomspawn) {
+          int chancetospawn = xml.units[a]->WarpCapData();
+          if (chancetospawn > rand()%100)
+              thus->SubUnits.prepend(xml.units[a]); else
+              xml.units[a]->Kill();
+      } else thus->SubUnits.prepend(xml.units[a]);
   }
 }
 
 void AddDocks (Unit* thus, Unit::XML &xml, string docks) {
-  string::size_type where;
-  while ((where=docks.find("{"))!=string::npos) {
-    docks=docks.substr(where+1);    
-    if ((where=docks.find("}"))!=string::npos) {
-      string dock=docks.substr(0,where);      
+  string::size_type where,when;
+  string::size_type ofs=0;
+  {   
+      int nelem=0;
+      while ((ofs=docks.find('{',ofs))!=string::npos) nelem++,ofs++;
+      thus->image->dockingports.reserve(nelem+thus->image->dockingports.size());
+      ofs=0;
+  }
+  while ((where=docks.find('{',ofs))!=string::npos) {
+    if ((when=docks.find('}',where+1))!=string::npos) {
+      string dock = docks.substr(where+1,when-where-1);
+      ofs = when+1;
 
-      docks=docks.substr(where+1);      
       QVector pos=QVector(0,0,0);
       bool internal=XMLSupport::parse_bool(nextElement(dock));
       pos.i=stof(nextElement(dock));
@@ -331,17 +361,17 @@ void AddDocks (Unit* thus, Unit::XML &xml, string docks) {
       double size=stof(nextElement(dock));
       double minsize=stof(nextElement(dock));
       thus->image->dockingports.push_back (DockingPorts(pos.Cast()*xml.unitscale,size*xml.unitscale,minsize*xml.unitscale,internal));      
-    }
+    } else ofs=string::npos;
   }
 }
 void AddLights (Unit * thus, Unit::XML &xml, string lights) {
-  string::size_type where;
-  while ((where=lights.find("{"))!=string::npos) {
-    lights= lights.substr(where+1);
-    where=lights.find("}");
-    if (where!=string::npos) {
-      string light = lights.substr(0,where);
-      lights=lights.substr(where+1);
+  string::size_type where,when;
+  string::size_type ofs=0;
+  while ((where=lights.find('{',ofs))!=string::npos) {
+    if ((when=lights.find('}',where+1))!=string::npos) {
+      string light = lights.substr(where+1,when-where-1);
+      ofs = when+1;
+
       string filename = nextElement(light);
       QVector pos,scale;
       GFXColor halocolor;
@@ -356,36 +386,46 @@ void AddLights (Unit * thus, Unit::XML &xml, string lights) {
       halocolor.a=stof(nextElement(light),1);
       double act_speed=stof(nextElement(light));
       thus->addHalo(filename.c_str(),pos*xml.unitscale,scale.Cast(),halocolor,"",act_speed);
-    }
+    } else ofs=string::npos;
   }
 }
 
 static void ImportCargo(Unit * thus,string imports) {
-  string::size_type where;
-  while ((where=imports.find("{"))!=string::npos) {
-    imports= imports.substr(where+1);
-    where=imports.find("}");
-    if (where!=string::npos) {
-      string imp = imports.substr(0,where);
-      imports=imports.substr(where+1);
+  string::size_type where,when,ofs=0;
+  {   
+      int nelem=0;
+      while ((ofs=imports.find('{',ofs))!=string::npos) nelem++,ofs++;
+      thus->image->cargo.reserve(nelem+thus->image->cargo.size());
+      ofs=0;
+  }
+  while ((where=imports.find('{',ofs))!=string::npos) {
+    if ((when=imports.find('}',where+1))!=string::npos) {
+      string imp = imports.substr(where+1,when-where-1);
+      ofs = when+1;
+
       string filename = nextElement(imp);
       double price = stof(nextElement(imp),1);
       double pricestddev = stof(nextElement(imp));
       double quant = stof(nextElement(imp),1);
       double quantstddev = stof(nextElement(imp));
       thus->ImportPartList(filename,price,pricestddev,quant,quantstddev);
-    }
+    } else ofs=string::npos;
   }
 }
 static void AddCarg (Unit *thus, string cargos) {
- string::size_type where;
-  while ((where=cargos.find("{"))!=string::npos) {
-    cargos= cargos.substr(where+1);
-    where=cargos.find("}");
-    if (where!=string::npos) {
+  string::size_type where,when,ofs=0;
+  {   
+      int nelem=0;
+      while ((ofs=cargos.find('{',ofs))!=string::npos) nelem++,ofs++;
+      thus->image->cargo.reserve(nelem+thus->image->cargo.size());
+      ofs=0;
+  }
+  while ((where=cargos.find('{',ofs))!=string::npos) {
+    if ((when=cargos.find('}',where+1))!=string::npos) {
       Cargo carg;
-      string cargo = cargos.substr(0,where);
-      cargos=cargos.substr(where+1);
+      string cargo = cargos.substr(where+1,when-where-1);
+      ofs = when+1;
+
       carg.content = nextElement(cargo);      
       carg.category = nextElement(cargo);      
       carg.price = stof(nextElement(cargo));
@@ -405,7 +445,7 @@ static void AddCarg (Unit *thus, string cargos) {
         carg.mission=XMLSupport::parse_bool(mis);
       }
       thus->AddCargo(carg,false);
-    }
+    } else ofs = string::npos;
   }
 }
 void HudDamage(float * dam, string damages) {
@@ -464,25 +504,32 @@ void AddSounds(Unit * thus, string sounds) {
       thus->sound->engine=AUDCreateSoundWAV(tmp,true);
   }
     if (thus->sound->cloak==-1) {
-      thus->sound->cloak=AUDCreateSound(vs_config->getVariable ("unitaudio","cloak", "sfx43.wav"),false);
+        static std::string ssound=vs_config->getVariable ("unitaudio","cloak", "sfx43.wav");
+        thus->sound->cloak=AUDCreateSound(ssound,false);
     }
     if (thus->sound->engine==-1) {
-      thus->sound->engine=AUDCreateSound (vs_config->getVariable ("unitaudio","afterburner","sfx10.wav"),false);
+        static std::string ssound=vs_config->getVariable ("unitaudio","afterburner","sfx10.wav");
+        thus->sound->engine=AUDCreateSound(ssound,false);
     }
     if (thus->sound->shield==-1) {
-      thus->sound->shield=AUDCreateSound (vs_config->getVariable ("unitaudio","shield","sfx09.wav"),false);
+        static std::string ssound=vs_config->getVariable ("unitaudio","shield","sfx09.wav");
+        thus->sound->shield=AUDCreateSound (ssound,false);
     }
     if (thus->sound->armor==-1) {
-      thus->sound->armor=AUDCreateSound (vs_config->getVariable ("unitaudio","armor","sfx08.wav"),false);
+        static std::string ssound=vs_config->getVariable ("unitaudio","armor","sfx08.wav");
+        thus->sound->armor=AUDCreateSound (ssound,false);
     }
     if (thus->sound->hull==-1) {
-      thus->sound->hull=AUDCreateSound (vs_config->getVariable ("unitaudio","armor","sfx08.wav"),false);
+        static std::string ssound=vs_config->getVariable ("unitaudio","armor","sfx08.wav");
+        thus->sound->hull=AUDCreateSound (ssound,false);
     }
     if (thus->sound->explode==-1) {
-      thus->sound->explode=AUDCreateSound (vs_config->getVariable ("unitaudio","explode","explosion.wav"),false);
+        static std::string ssound=vs_config->getVariable ("unitaudio","explode","explosion.wav");
+        thus->sound->explode=AUDCreateSound (ssound,false);
     }
     if (thus->sound->jump==-1) {
-      thus->sound->jump=AUDCreateSound (vs_config->getVariable ("unitaudio","explode","sfx43.wav"),false);
+        static std::string ssound=vs_config->getVariable ("unitaudio","explode","sfx43.wav");
+        thus->sound->jump=AUDCreateSound (ssound,false);
     }
 }
 void LoadCockpit(Unit * thus, string cockpit) {
@@ -526,7 +573,15 @@ float getFuelConversion(){
   return fuel_conversion;
 }
 
-void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
+#define LOADROW_OPTIMIZER 0x348299ab
+#define OPTIMIZER_INDEX(Variable) OPTIDX_##Variable
+#define INIT_OPTIMIZER(keys,Variable) OPTIMIZER_INDEX(Variable) = (keys.push_back(#Variable),(keys.size()-1))
+#define DEF_OPTIMIZER(Variable) static unsigned int OPTIMIZER_INDEX(Variable) = CSVTable::optimizer_undefined;
+#define OPTIM_GET(row,table,variable) (use_optimizer?(((OPTIMIZER_INDEX(variable)==CSVTable::optimizer_undefined) || (table->optimizer_indexes[OPTIMIZER_INDEX(variable)]==CSVTable::optimizer_undefined))?std::string(""):row[table->optimizer_indexes[OPTIMIZER_INDEX(variable)]]):row[#variable])
+
+void Unit::LoadRow(CSVRow &row, string modification, string * netxml) {
+  CSVTable *table = row.getParent();
+
   Unit::XML xml;
   xml.unitModifications=modification.c_str();
   xml.randomstartframe=((float)rand())/RAND_MAX;
@@ -544,14 +599,250 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   
   string tmpstr;
   csvRow = row[0];
-  //
-  
+
+  DEF_OPTIMIZER(Name);
+  DEF_OPTIMIZER(Hud_image);
+  DEF_OPTIMIZER(Combat_Role);
+  DEF_OPTIMIZER(Num_Animation_Stages);
+  DEF_OPTIMIZER(Unit_Scale);
+  DEF_OPTIMIZER(Mesh);
+  DEF_OPTIMIZER(Dock);
+  DEF_OPTIMIZER(Sub_Units);
+  DEF_OPTIMIZER(Mounts);
+  DEF_OPTIMIZER(Hold_Volume);
+  DEF_OPTIMIZER(Upgrade_Storage_Volume);
+  DEF_OPTIMIZER(Equipment_Space);
+  DEF_OPTIMIZER(Cargo_Import);
+  DEF_OPTIMIZER(Cargo);
+  DEF_OPTIMIZER(Sounds);
+  DEF_OPTIMIZER(Cockpit);
+  DEF_OPTIMIZER(CockpitX);
+  DEF_OPTIMIZER(CockpitY);
+  DEF_OPTIMIZER(CockpitZ);
+  DEF_OPTIMIZER(Mass);
+  DEF_OPTIMIZER(Moment_Of_Inertia);
+  DEF_OPTIMIZER(Fuel_Capacity);
+  DEF_OPTIMIZER(Hull);
+  DEF_OPTIMIZER(Armor_Front_Top_Left);
+  DEF_OPTIMIZER(Armor_Front_Top_Right);
+  DEF_OPTIMIZER(Armor_Back_Top_Left);
+  DEF_OPTIMIZER(Armor_Back_Top_Right);
+  DEF_OPTIMIZER(Armor_Front_Bottom_Left);
+  DEF_OPTIMIZER(Armor_Front_Bottom_Right);
+  DEF_OPTIMIZER(Armor_Back_Bottom_Left);
+  DEF_OPTIMIZER(Armor_Back_Bottom_Right);
+  DEF_OPTIMIZER(Description);
+  DEF_OPTIMIZER(Shield_Front_Top_Left);
+  DEF_OPTIMIZER(Shield_Front_Top_Right);
+  DEF_OPTIMIZER(Shield_Back_Top_Left);
+  DEF_OPTIMIZER(Shield_Back_Top_Right);
+  DEF_OPTIMIZER(Shield_Front_Bottom_Left);
+  DEF_OPTIMIZER(Shield_Front_Bottom_Right);
+  DEF_OPTIMIZER(Shield_Back_Bottom_Left);
+  DEF_OPTIMIZER(Shield_Back_Bottom_Right);
+  DEF_OPTIMIZER(Shield_Leak);
+  DEF_OPTIMIZER(Shield_Recharge);
+  DEF_OPTIMIZER(Shield_Efficiency);
+  DEF_OPTIMIZER(Warp_Capacitor);
+  DEF_OPTIMIZER(Primary_Capacitor);
+  DEF_OPTIMIZER(Reactor_Recharge);
+  DEF_OPTIMIZER(Jump_Drive_Present);
+  DEF_OPTIMIZER(Jump_Drive_Delay);
+  DEF_OPTIMIZER(Wormhole);
+  DEF_OPTIMIZER(Collide_Subunits);
+  DEF_OPTIMIZER(Outsystem_Jump_Cost);
+  DEF_OPTIMIZER(Warp_Usage_Cost);
+  DEF_OPTIMIZER(Afterburner_Usage_Cost);
+  DEF_OPTIMIZER(Afterburner_Type);
+  DEF_OPTIMIZER(Maneuver_Yaw);
+  DEF_OPTIMIZER(Maneuver_Pitch);
+  DEF_OPTIMIZER(Maneuver_Roll);
+  DEF_OPTIMIZER(Yaw_Governor);
+  DEF_OPTIMIZER(Yaw_Governor_Right);
+  DEF_OPTIMIZER(Yaw_Governor_Left);
+  DEF_OPTIMIZER(Pitch_Governor);
+  DEF_OPTIMIZER(Pitch_Governor_Up);
+  DEF_OPTIMIZER(Pitch_Governor_Down);
+  DEF_OPTIMIZER(Roll_Governor);
+  DEF_OPTIMIZER(Roll_Governor_Right);
+  DEF_OPTIMIZER(Roll_Governor_Left);
+  DEF_OPTIMIZER(Afterburner_Accel);
+  DEF_OPTIMIZER(Forward_Accel);
+  DEF_OPTIMIZER(Retro_Accel);
+  DEF_OPTIMIZER(Left_Accel);
+  DEF_OPTIMIZER(Right_Accel);
+  DEF_OPTIMIZER(Top_Accel);
+  DEF_OPTIMIZER(Bottom_Accel);
+  DEF_OPTIMIZER(Default_Speed_Governor);
+  DEF_OPTIMIZER(Afterburner_Speed_Governor);
+  DEF_OPTIMIZER(ITTS);
+  DEF_OPTIMIZER(Can_Lock);
+  DEF_OPTIMIZER(Radar_Color);
+  DEF_OPTIMIZER(Radar_Range);
+  DEF_OPTIMIZER(Max_Cone);
+  DEF_OPTIMIZER(Tracking_Cone);
+  DEF_OPTIMIZER(Lock_Cone);
+  DEF_OPTIMIZER(Cloak_Min);
+  DEF_OPTIMIZER(Cloak_Glass);
+  DEF_OPTIMIZER(Can_Cloak);
+  DEF_OPTIMIZER(Cloak_Rate);
+  DEF_OPTIMIZER(Cloak_Energy);
+  DEF_OPTIMIZER(Repair_Droid);
+  DEF_OPTIMIZER(ECM_Rating);
+  DEF_OPTIMIZER(Heat_Sink_Rating);
+  DEF_OPTIMIZER(Hud_Functionality);
+  DEF_OPTIMIZER(Max_Hud_Functionality);
+  DEF_OPTIMIZER(Lifesupport_Functionality);
+  DEF_OPTIMIZER(Max_Lifesupport_Functionality);
+  DEF_OPTIMIZER(Comm_Functionality);
+  DEF_OPTIMIZER(Max_Comm_Functionality);
+  DEF_OPTIMIZER(FireControl_Functionality);
+  DEF_OPTIMIZER(Max_FireControl_Functionality);
+  DEF_OPTIMIZER(SPECDrive_Functionality);
+  DEF_OPTIMIZER(Max_SPECDrive_Functionality);
+  DEF_OPTIMIZER(Slide_Start);
+  DEF_OPTIMIZER(Slide_End);
+  DEF_OPTIMIZER(Upgrades);
+  DEF_OPTIMIZER(Tractorability);
+  DEF_OPTIMIZER(Explosion);
+  DEF_OPTIMIZER(Light);
+  DEF_OPTIMIZER(Shield_Mesh);
+  DEF_OPTIMIZER(BSP_Mesh);
+  DEF_OPTIMIZER(Rapid_Mesh);
+  DEF_OPTIMIZER(Use_BSP);
+  DEF_OPTIMIZER(Use_Rapid);
+  DEF_OPTIMIZER(NoDamageParticles);
+  DEF_OPTIMIZER(Spec_Interdiction);
+
+  if (table&&!table->optimizer_setup) {
+      static std::vector<std::string> keys;
+      static bool optimizer_keys_init=false;
+      if (!optimizer_keys_init) {
+          optimizer_keys_init=true;
+          printf("Initializing optimizer\n");
+          INIT_OPTIMIZER(keys,Name);
+          INIT_OPTIMIZER(keys,Hud_image);
+          INIT_OPTIMIZER(keys,Combat_Role);
+          INIT_OPTIMIZER(keys,Num_Animation_Stages);
+          INIT_OPTIMIZER(keys,Unit_Scale);
+          INIT_OPTIMIZER(keys,Mesh);
+          INIT_OPTIMIZER(keys,Dock);
+          INIT_OPTIMIZER(keys,Sub_Units);
+          INIT_OPTIMIZER(keys,Mounts);
+          INIT_OPTIMIZER(keys,Hold_Volume);
+          INIT_OPTIMIZER(keys,Upgrade_Storage_Volume);
+          INIT_OPTIMIZER(keys,Equipment_Space);
+          INIT_OPTIMIZER(keys,Cargo_Import);
+          INIT_OPTIMIZER(keys,Cargo);
+          INIT_OPTIMIZER(keys,Sounds);
+          INIT_OPTIMIZER(keys,Cockpit);
+          INIT_OPTIMIZER(keys,CockpitX);
+          INIT_OPTIMIZER(keys,CockpitY);
+          INIT_OPTIMIZER(keys,CockpitZ);
+          INIT_OPTIMIZER(keys,Mass);
+          INIT_OPTIMIZER(keys,Moment_Of_Inertia);
+          INIT_OPTIMIZER(keys,Fuel_Capacity);
+          INIT_OPTIMIZER(keys,Hull);
+          INIT_OPTIMIZER(keys,Armor_Front_Top_Left);
+          INIT_OPTIMIZER(keys,Armor_Front_Top_Right);
+          INIT_OPTIMIZER(keys,Armor_Back_Top_Left);
+          INIT_OPTIMIZER(keys,Armor_Back_Top_Right);
+          INIT_OPTIMIZER(keys,Armor_Front_Bottom_Left);
+          INIT_OPTIMIZER(keys,Armor_Front_Bottom_Right);
+          INIT_OPTIMIZER(keys,Armor_Back_Bottom_Left);
+          INIT_OPTIMIZER(keys,Armor_Back_Bottom_Right);
+          INIT_OPTIMIZER(keys,Description);
+          INIT_OPTIMIZER(keys,Shield_Front_Top_Left);
+          INIT_OPTIMIZER(keys,Shield_Front_Top_Right);
+          INIT_OPTIMIZER(keys,Shield_Back_Top_Left);
+          INIT_OPTIMIZER(keys,Shield_Back_Top_Right);
+          INIT_OPTIMIZER(keys,Shield_Front_Bottom_Left);
+          INIT_OPTIMIZER(keys,Shield_Front_Bottom_Right);
+          INIT_OPTIMIZER(keys,Shield_Back_Bottom_Left);
+          INIT_OPTIMIZER(keys,Shield_Back_Bottom_Right);
+          INIT_OPTIMIZER(keys,Shield_Leak);
+          INIT_OPTIMIZER(keys,Shield_Recharge);
+          INIT_OPTIMIZER(keys,Shield_Efficiency);
+          INIT_OPTIMIZER(keys,Warp_Capacitor);
+          INIT_OPTIMIZER(keys,Primary_Capacitor);
+          INIT_OPTIMIZER(keys,Reactor_Recharge);
+          INIT_OPTIMIZER(keys,Jump_Drive_Present);
+          INIT_OPTIMIZER(keys,Jump_Drive_Delay);
+          INIT_OPTIMIZER(keys,Wormhole);
+          INIT_OPTIMIZER(keys,Collide_Subunits);
+          INIT_OPTIMIZER(keys,Outsystem_Jump_Cost);
+          INIT_OPTIMIZER(keys,Warp_Usage_Cost);
+          INIT_OPTIMIZER(keys,Afterburner_Usage_Cost);
+          INIT_OPTIMIZER(keys,Afterburner_Type);
+          INIT_OPTIMIZER(keys,Maneuver_Yaw);
+          INIT_OPTIMIZER(keys,Maneuver_Pitch);
+          INIT_OPTIMIZER(keys,Maneuver_Roll);
+          INIT_OPTIMIZER(keys,Yaw_Governor);
+          INIT_OPTIMIZER(keys,Yaw_Governor_Right);
+          INIT_OPTIMIZER(keys,Yaw_Governor_Left);
+          INIT_OPTIMIZER(keys,Pitch_Governor);
+          INIT_OPTIMIZER(keys,Pitch_Governor_Up);
+          INIT_OPTIMIZER(keys,Pitch_Governor_Down);
+          INIT_OPTIMIZER(keys,Roll_Governor);
+          INIT_OPTIMIZER(keys,Roll_Governor_Right);
+          INIT_OPTIMIZER(keys,Roll_Governor_Left);
+          INIT_OPTIMIZER(keys,Afterburner_Accel);
+          INIT_OPTIMIZER(keys,Forward_Accel);
+          INIT_OPTIMIZER(keys,Retro_Accel);
+          INIT_OPTIMIZER(keys,Left_Accel);
+          INIT_OPTIMIZER(keys,Right_Accel);
+          INIT_OPTIMIZER(keys,Top_Accel);
+          INIT_OPTIMIZER(keys,Bottom_Accel);
+          INIT_OPTIMIZER(keys,Default_Speed_Governor);
+          INIT_OPTIMIZER(keys,Afterburner_Speed_Governor);
+          INIT_OPTIMIZER(keys,ITTS);
+          INIT_OPTIMIZER(keys,Can_Lock);
+          INIT_OPTIMIZER(keys,Radar_Color);
+          INIT_OPTIMIZER(keys,Radar_Range);
+          INIT_OPTIMIZER(keys,Max_Cone);
+          INIT_OPTIMIZER(keys,Tracking_Cone);
+          INIT_OPTIMIZER(keys,Lock_Cone);
+          INIT_OPTIMIZER(keys,Cloak_Min);
+          INIT_OPTIMIZER(keys,Cloak_Glass);
+          INIT_OPTIMIZER(keys,Can_Cloak);
+          INIT_OPTIMIZER(keys,Cloak_Rate);
+          INIT_OPTIMIZER(keys,Cloak_Energy);
+          INIT_OPTIMIZER(keys,Repair_Droid);
+          INIT_OPTIMIZER(keys,ECM_Rating);
+          INIT_OPTIMIZER(keys,Heat_Sink_Rating);
+          INIT_OPTIMIZER(keys,Hud_Functionality);
+          INIT_OPTIMIZER(keys,Max_Hud_Functionality);
+          INIT_OPTIMIZER(keys,Lifesupport_Functionality);
+          INIT_OPTIMIZER(keys,Max_Lifesupport_Functionality);
+          INIT_OPTIMIZER(keys,Comm_Functionality);
+          INIT_OPTIMIZER(keys,Max_Comm_Functionality);
+          INIT_OPTIMIZER(keys,FireControl_Functionality);
+          INIT_OPTIMIZER(keys,Max_FireControl_Functionality);
+          INIT_OPTIMIZER(keys,SPECDrive_Functionality);
+          INIT_OPTIMIZER(keys,Max_SPECDrive_Functionality);
+          INIT_OPTIMIZER(keys,Slide_Start);
+          INIT_OPTIMIZER(keys,Slide_End);
+          INIT_OPTIMIZER(keys,Upgrades);
+          INIT_OPTIMIZER(keys,Tractorability);
+          INIT_OPTIMIZER(keys,Explosion);
+          INIT_OPTIMIZER(keys,Light);
+          INIT_OPTIMIZER(keys,Shield_Mesh);
+          INIT_OPTIMIZER(keys,BSP_Mesh);
+          INIT_OPTIMIZER(keys,Rapid_Mesh);
+          INIT_OPTIMIZER(keys,Use_BSP);
+          INIT_OPTIMIZER(keys,Use_Rapid);
+          INIT_OPTIMIZER(keys,NoDamageParticles);
+          INIT_OPTIMIZER(keys,Spec_Interdiction);
+      }
+      table->SetupOptimizer(keys,LOADROW_OPTIMIZER);
+  }
+  bool use_optimizer=(table&&table->optimizer_setup&&table->optimizer_type==LOADROW_OPTIMIZER);
 
   //begin the geometry (and things that depend on stats)
 
-  fullname=row["Name"];
-  //image->description=row["Description"];
-  if ((tmpstr=row["Hud_image"]).length()!=0) {
+  fullname=OPTIM_GET(row,table,Name);
+  //image->description=OPTIM_GET(row,table,Description);
+  if ((tmpstr=OPTIM_GET(row,table,Hud_image)).length()!=0) {
     std::string fac =FactionUtil::GetFaction(faction);
     fac+="_";
     fac+=tmpstr;
@@ -561,46 +852,53 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
       image->hudImage = createVSSprite(tmpstr.c_str());
     }
   }  
-  combat_role=ROLES::getRole(row["Combat_Role"]);
-  graphicOptions.NumAnimationPoints=stoi(row["Num_Animation_Stages"],0);
+
+  combat_role=ROLES::getRole(OPTIM_GET(row,table,Combat_Role));
+  graphicOptions.NumAnimationPoints=stoi(OPTIM_GET(row,table,Num_Animation_Stages),0);
+  graphicOptions.NoDamageParticles=stoi(OPTIM_GET(row,table,NoDamageParticles),0);
   if (graphicOptions.NumAnimationPoints>0)
     graphicOptions.Animating=0;
-  xml.unitscale = stof(row["Unit_Scale"],1);
+  xml.unitscale = stof(OPTIM_GET(row,table,Unit_Scale),1);
   if (!xml.unitscale) xml.unitscale=1;
   image->unitscale=xml.unitscale;
-  AddMeshes(xml.meshes,xml.randomstartframe,xml.randomstartseconds,xml.unitscale,row["Mesh"],faction,getFlightgroup());
-  AddDocks(this,xml,row["Dock"]);
-  AddSubUnits(this,xml,row["Sub_Units"],faction,modification);
+
+  AddMeshes(xml.meshes,xml.randomstartframe,xml.randomstartseconds,xml.unitscale,OPTIM_GET(row,table,Mesh),faction,getFlightgroup());
+
+  AddDocks(this,xml,OPTIM_GET(row,table,Dock));
+  AddSubUnits(this,xml,OPTIM_GET(row,table,Sub_Units),faction,modification);
+
   meshdata= xml.meshes;
   meshdata.push_back(NULL);
   corner_min = Vector(FLT_MAX, FLT_MAX, FLT_MAX);
   corner_max = Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX);
   calculate_extent(false);
-  AddMounts(this,xml,row["Mounts"]);
-  this->image->CargoVolume=stof(row["Hold_Volume"]);
-  this->image->UpgradeVolume=stof(row["Upgrade_Storage_Volume"]);
-  this->image->equipment_volume=stof(row["Equipment_Space"]);
-  ImportCargo(this,row["Cargo_Import"]);//if this changes change planet_generic.cpp
-  AddCarg(this,row["Cargo"]);
-  AddSounds(this,row["Sounds"]);
-  
-  LoadCockpit(this,row["Cockpit"]);
-  image->CockpitCenter.i=stof(row["CockpitX"])*xml.unitscale;
-  image->CockpitCenter.j=stof(row["CockpitY"])*xml.unitscale;
-  image->CockpitCenter.k=stof(row["CockpitZ"])*xml.unitscale;
-  Mass=stof(row["Mass"],1.0);
-  Momentofinertia=stof(row["Moment_Of_Inertia"],1.0);
-  fuel=stof(row["Fuel_Capacity"]);
-  hull=maxhull = stof(row["Hull"]);
-  specInterdiction=stof(row["Spec_Interdiction"]);
-  armor.frontlefttop=stof(row["Armor_Front_Top_Left"]);
-  armor.frontrighttop=stof(row["Armor_Front_Top_Right"]);
-  armor.backlefttop=stof(row["Armor_Back_Top_Left"]);
-  armor.backrighttop=stof(row["Armor_Back_Top_Right"]);
-  armor.frontleftbottom=stof(row["Armor_Front_Bottom_Left"]);
-  armor.frontrightbottom=stof(row["Armor_Front_Bottom_Right"]);
-  armor.backleftbottom=stof(row["Armor_Back_Bottom_Left"]);
-  armor.backrightbottom=stof(row["Armor_Back_Bottom_Right"]);
+  AddMounts(this,xml,OPTIM_GET(row,table,Mounts));
+  this->image->CargoVolume=stof(OPTIM_GET(row,table,Hold_Volume));
+  this->image->UpgradeVolume=stof(OPTIM_GET(row,table,Upgrade_Storage_Volume));
+  this->image->equipment_volume=stof(OPTIM_GET(row,table,Equipment_Space));
+  ImportCargo(this,OPTIM_GET(row,table,Cargo_Import));//if this changes change planet_generic.cpp
+  AddCarg(this,OPTIM_GET(row,table,Cargo));
+
+  AddSounds(this,OPTIM_GET(row,table,Sounds));
+
+  LoadCockpit(this,OPTIM_GET(row,table,Cockpit));
+  image->CockpitCenter.i=stof(OPTIM_GET(row,table,CockpitX))*xml.unitscale;
+  image->CockpitCenter.j=stof(OPTIM_GET(row,table,CockpitY))*xml.unitscale;
+  image->CockpitCenter.k=stof(OPTIM_GET(row,table,CockpitZ))*xml.unitscale;
+  Mass=stof(OPTIM_GET(row,table,Mass),1.0);
+  Momentofinertia=stof(OPTIM_GET(row,table,Moment_Of_Inertia),1.0);
+  fuel=stof(OPTIM_GET(row,table,Fuel_Capacity));
+  hull=maxhull = stof(OPTIM_GET(row,table,Hull));
+  specInterdiction=stof(OPTIM_GET(row,table,Spec_Interdiction));
+  armor.frontlefttop=stof(OPTIM_GET(row,table,Armor_Front_Top_Left));
+  armor.frontrighttop=stof(OPTIM_GET(row,table,Armor_Front_Top_Right));
+  armor.backlefttop=stof(OPTIM_GET(row,table,Armor_Back_Top_Left));
+  armor.backrighttop=stof(OPTIM_GET(row,table,Armor_Back_Top_Right));
+  armor.frontleftbottom=stof(OPTIM_GET(row,table,Armor_Front_Bottom_Left));
+  armor.frontrightbottom=stof(OPTIM_GET(row,table,Armor_Front_Bottom_Right));
+  armor.backleftbottom=stof(OPTIM_GET(row,table,Armor_Back_Bottom_Left));
+  armor.backrightbottom=stof(OPTIM_GET(row,table,Armor_Back_Bottom_Right));
+
   int shieldcount=0;
   Shield two;
   Shield four;
@@ -608,22 +906,22 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   memset(&two,0,sizeof(Shield));
   memset(&four,0,sizeof(Shield));
   memset(&eight,0,sizeof(Shield));
-  shieldcount+=AssignIf(row["Shield_Front_Top_Right"],
+  shieldcount+=AssignIf(OPTIM_GET(row,table,Shield_Front_Top_Right),
                         two.shield2fb.front,four.shield4fbrl.front,eight.shield8.frontrighttop);
-  shieldcount+=AssignIf(row["Shield_Front_Top_Left"],
+  shieldcount+=AssignIf(OPTIM_GET(row,table,Shield_Front_Top_Left),
                         two.shield2fb.front,four.shield4fbrl.front,eight.shield8.frontlefttop);
-  shieldcount+=AssignIf(row["Shield_Back_Top_Left"],
+  shieldcount+=AssignIf(OPTIM_GET(row,table,Shield_Back_Top_Left),
                         two.shield2fb.back,four.shield4fbrl.back,eight.shield8.backlefttop);
-  shieldcount+=AssignIf(row["Shield_Back_Top_Right"],
+  shieldcount+=AssignIf(OPTIM_GET(row,table,Shield_Back_Top_Right),
                         two.shield2fb.back,four.shield4fbrl.back,eight.shield8.backrighttop);
 
-  shieldcount+=AssignIf(row["Shield_Front_Bottom_Left"],
+  shieldcount+=AssignIf(OPTIM_GET(row,table,Shield_Front_Bottom_Left),
                         two.shield2fb.front,four.shield4fbrl.left,eight.shield8.frontleftbottom);
-  shieldcount+=AssignIf(row["Shield_Front_Bottom_Right"],
+  shieldcount+=AssignIf(OPTIM_GET(row,table,Shield_Front_Bottom_Right),
                         two.shield2fb.front,four.shield4fbrl.right,eight.shield8.frontrightbottom);
-  shieldcount+=AssignIf(row["Shield_Back_Bottom_Left"],
+  shieldcount+=AssignIf(OPTIM_GET(row,table,Shield_Back_Bottom_Left),
                         two.shield2fb.back,four.shield4fbrl.left,eight.shield8.backleftbottom);
-  shieldcount+=AssignIf(row["Shield_Back_Bottom_Right"],
+  shieldcount+=AssignIf(OPTIM_GET(row,table,Shield_Back_Bottom_Right),
                         two.shield2fb.back,four.shield4fbrl.right,eight.shield8.backrightbottom);
 
   two.shield2fb.frontmax=two.shield2fb.front;
@@ -755,78 +1053,67 @@ shield.range[1].   rhomax=r90;
     AssignIfDeg(row[shieldname+"_Min_Rho"],shield.range[iter].rhomin);
     AssignIfDeg(row[shieldname+"_Max_Rho"],shield.range[iter].rhomax);
   }
-  shield.leak = (char)(stof(row["Shield_Leak"])*100.0);
-  shield.recharge=stof(row["Shield_Recharge"]);
-  shield.efficiency=stof(row["Shield_Efficiency"],1.0);
-  maxwarpenergy=warpenergy=stof(row["Warp_Capacitor"]);
-  maxenergy=energy=stof(row["Primary_Capacitor"]);
-  recharge=stof(row["Reactor_Recharge"]);
-  jump.drive=XMLSupport::parse_bool(row["Jump_Drive_Present"])?-1:-2;
-  jump.delay = stoi(row["Jump_Drive_Delay"]);
-  image->forcejump=XMLSupport::parse_bool(row["Wormhole"]);
-  graphicOptions.RecurseIntoSubUnitsOnCollision=stob(row["Collide_Subunits"],graphicOptions.RecurseIntoSubUnitsOnCollision?true:false)?1:0;
-  jump.energy=stof(row["Outsystem_Jump_Cost"]);
-  jump.insysenergy=stof(row["Warp_Usage_Cost"]);
+  shield.leak = (char)(stof(OPTIM_GET(row,table,Shield_Leak))*100.0);
+  shield.recharge=stof(OPTIM_GET(row,table,Shield_Recharge));
+  shield.efficiency=stof(OPTIM_GET(row,table,Shield_Efficiency),1.0);
 
-static bool WCfuelhack = XMLSupport::parse_bool(vs_config->getVariable("physics","fuel_equals_warp","false"));
-
-  if (WCfuelhack)
-  {
-	  fuel=warpenergy+jump.energy*0.1; // this is required to make sure we don't trigger the "globally out of fuel" if we use up all warp charges -- save some afterburner for later!!!
-	  warpenergy=fuel;
-  }
-
-
-  afterburnenergy=stof(row["Afterburner_Usage_Cost"],32767);
-//type 1 is "use fuel", type 0 is "use reactor energy", type 2 hopefully will be "use jump fuel"
-
-  afterburntype = stoi(row["Afterburner_Type"]);
-
-
-  limits.yaw=stof(row["Maneuver_Yaw"])*VS_PI/180.;
-  limits.pitch=stof(row["Maneuver_Pitch"])*VS_PI/180.;
-  limits.roll=stof(row["Maneuver_Roll"])*VS_PI/180.;
+  static bool  WCfuelhack=XMLSupport::parse_bool (vs_config->getVariable("physics","fuel_equals_warp","false"));
+  maxwarpenergy=warpenergy=stof(OPTIM_GET(row,table,Warp_Capacitor));
+  maxenergy=energy=stof(OPTIM_GET(row,table,Primary_Capacitor));
+  recharge=stof(OPTIM_GET(row,table,Reactor_Recharge));
+  jump.drive=XMLSupport::parse_bool(OPTIM_GET(row,table,Jump_Drive_Present))?-1:-2;
+  jump.delay = stoi(OPTIM_GET(row,table,Jump_Drive_Delay));
+  image->forcejump=XMLSupport::parse_bool(OPTIM_GET(row,table,Wormhole));
+  graphicOptions.RecurseIntoSubUnitsOnCollision=stob(OPTIM_GET(row,table,Collide_Subunits),graphicOptions.RecurseIntoSubUnitsOnCollision?true:false)?1:0;
+  jump.energy=stof(OPTIM_GET(row,table,Outsystem_Jump_Cost));
+  jump.insysenergy=stof(OPTIM_GET(row,table,Warp_Usage_Cost));
+  if (WCfuelhack) fuel=warpenergy=warpenergy+jump.energy*0.1f; //this is required to make sure we don't trigger the "globally out of fuel" if we use all warp charges -- save some afterburner for later!!!
+  afterburnenergy=stof(OPTIM_GET(row,table,Afterburner_Usage_Cost),32767);
+  afterburntype = stoi(OPTIM_GET(row,table,Afterburner_Type)); //type 1 == "use fuel", type 0 == "use reactor energy", type 2 ==(hopefully) "use jump fuel"
+  limits.yaw=stof(OPTIM_GET(row,table,Maneuver_Yaw))*VS_PI/180.;
+  limits.pitch=stof(OPTIM_GET(row,table,Maneuver_Pitch))*VS_PI/180.;
+  limits.roll=stof(OPTIM_GET(row,table,Maneuver_Roll))*VS_PI/180.;
   {
     std::string t,tn,tp;
-    t=row["Yaw_Governor"];
-    tn=row["Yaw_Governor_Right"];
-    tp=row["Yaw_Governor_Left"];
+    t=OPTIM_GET(row,table,Yaw_Governor);
+    tn=OPTIM_GET(row,table,Yaw_Governor_Right);
+    tp=OPTIM_GET(row,table,Yaw_Governor_Left);
     computer.max_yaw_right=stof(tn.length()>0?tn:t)*VS_PI/180.;
     computer.max_yaw_left=stof(tp.length()>0?tp:t)*VS_PI/180.;
-    t=row["Pitch_Governor"];
-    tn=row["Pitch_Governor_Up"];
-    tp=row["Pitgh_Governor_Down"];
+    t=OPTIM_GET(row,table,Pitch_Governor);
+    tn=OPTIM_GET(row,table,Pitch_Governor_Up);
+    tp=OPTIM_GET(row,table,Pitch_Governor_Down);
     computer.max_pitch_up=stof(tn.length()>0?tn:t)*VS_PI/180.;
     computer.max_pitch_down=stof(tp.length()>0?tp:t)*VS_PI/180.;
-    t=row["Roll_Governor"];
-    tn=row["Roll_Governor_Right"];
-    tp=row["Roll_Governor_Left"];
+    t=OPTIM_GET(row,table,Roll_Governor);
+    tn=OPTIM_GET(row,table,Roll_Governor_Right);
+    tp=OPTIM_GET(row,table,Roll_Governor_Left);
     computer.max_roll_right=stof(tn.length()>0?tn:t)*VS_PI/180.;
     computer.max_roll_left=stof(tp.length()>0?tp:t)*VS_PI/180.;
   }
   static float game_accel=XMLSupport::parse_float(vs_config->getVariable("physics","game_accel","1"));
   static float game_speed=XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
-  limits.afterburn = stof(row["Afterburner_Accel"])*game_accel*game_speed;
-  limits.forward = stof(row["Forward_Accel"])*game_accel*game_speed;
-  limits.retro = stof(row["Retro_Accel"])*game_accel*game_speed;
-  limits.lateral = .5*(stof(row["Left_Accel"])+stof(row["Right_Accel"]))*game_accel*game_speed;
-  limits.vertical = .5*(stof(row["Top_Accel"])+stof(row["Bottom_Accel"]))*game_accel*game_speed;
-  computer.max_combat_speed=stof(row["Default_Speed_Governor"])*game_speed;
-  computer.max_combat_ab_speed=stof(row["Afterburner_Speed_Governor"])*game_speed;
-  computer.itts = stob(row["ITTS"],true);
-  computer.radar.canlock = stob(row["Can_Lock"],true);
+  limits.afterburn = stof(OPTIM_GET(row,table,Afterburner_Accel))*game_accel*game_speed;
+  limits.forward = stof(OPTIM_GET(row,table,Forward_Accel))*game_accel*game_speed;
+  limits.retro = stof(OPTIM_GET(row,table,Retro_Accel))*game_accel*game_speed;
+  limits.lateral = .5*(stof(OPTIM_GET(row,table,Left_Accel))+stof(OPTIM_GET(row,table,Right_Accel)))*game_accel*game_speed;
+  limits.vertical = .5*(stof(OPTIM_GET(row,table,Top_Accel))+stof(OPTIM_GET(row,table,Bottom_Accel)))*game_accel*game_speed;
+  computer.max_combat_speed=stof(OPTIM_GET(row,table,Default_Speed_Governor))*game_speed;
+  computer.max_combat_ab_speed=stof(OPTIM_GET(row,table,Afterburner_Speed_Governor))*game_speed;
+  computer.itts = stob(OPTIM_GET(row,table,ITTS),true);
+  computer.radar.canlock = stob(OPTIM_GET(row,table,Can_Lock),true);
   {
-    std::string iffval = row["Radar_Color"];
+    std::string iffval = OPTIM_GET(row,table,Radar_Color);
     int iff=stoi(iffval,0);
     computer.radar.iff=iff?iff:stob(iffval,false);
   }
-  computer.radar.maxrange=stof(row["Radar_Range"],300000000.0f);// FLT_MAX);
-  computer.radar.maxcone=cos(stof(row["Max_Cone"],180)*VS_PI/180);
-  computer.radar.trackingcone=cos(stof(row["Tracking_Cone"],180)*VS_PI/180);
-  computer.radar.lockcone=cos(stof(row["Lock_Cone"],180)*VS_PI/180);
-  cloakmin=(int)(stof(row["Cloak_Min"])*2147483136);
+  computer.radar.maxrange=stof(OPTIM_GET(row,table,Radar_Range),FLT_MAX);
+  computer.radar.maxcone=cos(stof(OPTIM_GET(row,table,Max_Cone),180)*VS_PI/180);
+  computer.radar.trackingcone=cos(stof(OPTIM_GET(row,table,Tracking_Cone),180)*VS_PI/180);
+  computer.radar.lockcone=cos(stof(OPTIM_GET(row,table,Lock_Cone),180)*VS_PI/180);
+  cloakmin=(int)(stof(OPTIM_GET(row,table,Cloak_Min))*2147483136);
   if (cloakmin<0) cloakmin=0;
-  image->cloakglass=XMLSupport::parse_bool(row["Cloak_Glass"]);
+  image->cloakglass=XMLSupport::parse_bool(OPTIM_GET(row,table,Cloak_Glass));
   if ((cloakmin&0x1)&&!image->cloakglass) {
     cloakmin-=1;
   }
@@ -835,51 +1122,67 @@ static bool WCfuelhack = XMLSupport::parse_bool(vs_config->getVariable("physics"
   }
 
 
-  if (!XMLSupport::parse_bool(row["Can_Cloak"]))
+  if (!XMLSupport::parse_bool(OPTIM_GET(row,table,Can_Cloak)))
     cloaking=-1;
   else
     cloaking = (int)(-2147483647)-1;
-  image->cloakrate = (int)(2147483136.*stof(row["Cloak_Rate"])); //short fix  
-  image->cloakenergy=stof(row["Cloak_Energy"]);
-  image->repair_droid=stoi(row["Repair_Droid"]);
-  image->ecm = stoi(row["ECM_Rating"]);
+  image->cloakrate = (int)(2147483136.*stof(OPTIM_GET(row,table,Cloak_Rate))); //short fix  
+  image->cloakenergy=stof(OPTIM_GET(row,table,Cloak_Energy));
+  image->repair_droid=stoi(OPTIM_GET(row,table,Repair_Droid));
+  image->ecm = stoi(OPTIM_GET(row,table,ECM_Rating));
 
-  this->HeatSink = stof(row["Heat_Sink_Rating"]);
+  this->HeatSink = stof(OPTIM_GET(row,table,Heat_Sink_Rating));
   if (image->ecm<0) image->ecm*=-1;
   if (image->cockpit_damage){
-    HudDamage(image->cockpit_damage,row["Hud_Functionality"]);
-    HudDamage(image->cockpit_damage+1+MAXVDUS+UnitImages::NUMGAUGES,row["Max_Hud_Functionality"]);
+    HudDamage(image->cockpit_damage,OPTIM_GET(row,table,Hud_Functionality));
+    HudDamage(image->cockpit_damage+1+MAXVDUS+UnitImages::NUMGAUGES,OPTIM_GET(row,table,Max_Hud_Functionality));
   }
-  image->LifeSupportFunctionality=stof(row["Lifesupport_Functionality"]);
-  image->LifeSupportFunctionalityMax=stof(row["Max_Lifesupport_Functionality"]);
-  image->CommFunctionality=stof(row["Comm_Functionality"]);
-  image->CommFunctionalityMax=stof(row["Max_Comm_Functionality"]);
-  image->fireControlFunctionality=stof(row["FireControl_Functionality"]);
-  image->fireControlFunctionalityMax=stof(row["Max_FireControl_Functionality"]);
-  image->SPECDriveFunctionality=stof(row["SPECDrive_Functionality"]);
-  image->SPECDriveFunctionalityMax=stof(row["Max_SPECDrive_Functionality"]);
-  computer.slide_start=stoi(row["Slide_Start"]);
-  computer.slide_end=stoi(row["Slide_End"]);
-  UpgradeUnit(this,row["Upgrades"]);
+  image->LifeSupportFunctionality=stof(OPTIM_GET(row,table,Lifesupport_Functionality));
+  image->LifeSupportFunctionalityMax=stof(OPTIM_GET(row,table,Max_Lifesupport_Functionality));
+  image->CommFunctionality=stof(OPTIM_GET(row,table,Comm_Functionality));
+  image->CommFunctionalityMax=stof(OPTIM_GET(row,table,Max_Comm_Functionality));
+  image->fireControlFunctionality=stof(OPTIM_GET(row,table,FireControl_Functionality));
+  image->fireControlFunctionalityMax=stof(OPTIM_GET(row,table,Max_FireControl_Functionality));
+  image->SPECDriveFunctionality=stof(OPTIM_GET(row,table,SPECDrive_Functionality));
+  image->SPECDriveFunctionalityMax=stof(OPTIM_GET(row,table,Max_SPECDrive_Functionality));
+  computer.slide_start=stoi(OPTIM_GET(row,table,Slide_Start));
+  computer.slide_end=stoi(OPTIM_GET(row,table,Slide_End));
+
+  UpgradeUnit(this,OPTIM_GET(row,table,Upgrades));
+
+  {
+    std::string tractorability = OPTIM_GET(row,table,Tractorability);
+    unsigned char tflags;
+    if (!tractorability.empty()) {
+        tflags = tractorImmune;
+        if (tractorability.find_first_of("pP")!=string::npos)
+            tflags |= tractorPush;
+        if (tractorability.find_first_of("iI")!=string::npos)
+            tflags |= tractorIn;
+    } else tflags = tractorPush;
+    setTractorability((enum tractorHow)tflags);
+  }
   
-  this->image->explosion_type = row["Explosion"];
+  this->image->explosion_type = OPTIM_GET(row,table,Explosion);
   if (image->explosion_type.length())
     cache_ani (image->explosion_type);
-  AddLights(this,xml,row["Light"]);
+  AddLights(this,xml,OPTIM_GET(row,table,Light));
 
-  xml.shieldmesh_str = row["Shield_Mesh"];
+  xml.shieldmesh_str = OPTIM_GET(row,table,Shield_Mesh);
   if (xml.shieldmesh_str.length()){
     addShieldMesh(&xml,xml.shieldmesh_str.c_str(),xml.unitscale,faction,getFlightgroup());
     meshdata.back()=xml.shieldmesh;
   }else {
     static int shieldstacks = XMLSupport::parse_int (vs_config->getVariable ("graphics","shield_detail","16"));
-    meshdata.back()= new SphereMesh (rSize(),shieldstacks,shieldstacks,vs_config->getVariable("graphics","shield_texture","shield.bmp").c_str(), NULL, false,ONE, ONE);
+    static std::string shieldtex = vs_config->getVariable("graphics","shield_texture","shield.bmp");
+    meshdata.back()= new SphereMesh (rSize(),shieldstacks,shieldstacks,shieldtex.c_str(), NULL, false,ONE, ONE);
   }
   meshdata.back()->EnableSpecialFX();
+
   //Begin the Pow-w-w-war Zone Collide Tree Generation
   {
-    xml.bspmesh_str = row["BSP_Mesh"];
-    xml.rapidmesh_str = row["Rapid_Mesh"];
+    xml.bspmesh_str = OPTIM_GET(row,table,BSP_Mesh);
+    xml.rapidmesh_str = OPTIM_GET(row,table,Rapid_Mesh);
     vector<bsp_polygon> polies;
     std::string collideTreeHash = VSFileSystem::GetHashName(string(modification)+"#"+row[0]);
     this->colTrees = collideTrees::Get(collideTreeHash);
@@ -895,10 +1198,10 @@ static bool WCfuelhack = XMLSupport::parse_bool(vs_config->getVariable("physics"
       string val;
       xml.hasBSP=1;
       xml.hasColTree=1;
-      if ((val=row["Use_BSP"]).length()) {
+      if ((val=OPTIM_GET(row,table,Use_BSP)).length()) {
         xml.hasBSP = XMLSupport::parse_bool(val);
       }
-      if ((val=row["Use_Rapid"]).length()) {
+      if ((val=OPTIM_GET(row,table,Use_Rapid)).length()) {
         xml.hasColTree= XMLSupport::parse_bool(val);
       }
       if (xml.shieldmesh) {
@@ -968,11 +1271,10 @@ static bool WCfuelhack = XMLSupport::parse_bool(vs_config->getVariable("physics"
       }
     }
   }
+
   CheckAccessory(this);//turns on the ceerazy rotation for any accessories
-  //reading last field from cvs to find out if unit is 'tractorable' as in can be eaten by trac, chuck_starchaser & spirit
-  // hellcatv -- just lookit up in the global table... it's not needed very often.
-  //  tractorable = stob(row["Tractorable"],true);
 }
+
 CSVRow GetUnitRow(string filename, bool subu, int faction, bool readlast, bool &rread) {
   std::string hashname = filename+"__"+FactionUtil::GetFactionName(faction);
   for (int i=((int)unitTables.size())-(readlast?1:2);i>=0;--i) {
@@ -1269,6 +1571,13 @@ string Unit::WriteUnitString () {
         unit["Slide_Start"]=tos(computer.slide_start);
         unit["Slide_End"]=tos(computer.slide_end);
         unit["Cargo_Import"]=unit["Upgrades"]="";//make sure those are empty        
+        {
+            std::string trac;
+            if (isTractorable(tractorPush)) trac += "p";
+            if (isTractorable(tractorIn)) trac += "i";
+            if (trac.empty()) trac = "-";
+            unit["Tractorability"] = trac;
+        }
         vector<string>keys,values;
         keys.push_back("Key");
         values.push_back(csvRow);//key has to come first

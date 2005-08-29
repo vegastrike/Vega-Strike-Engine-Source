@@ -60,6 +60,8 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
   Col.a=cln.a;
   impact= ALIVE;
   owner = own;
+  owner_rsize = ((Unit*)own)->rSize();
+  owner_faction = ((Unit*)own)->faction;
   numframes=0;
 
   lastlength=0;
@@ -321,15 +323,15 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m, Unit * ta
   }
   //Check if collide...that'll change max beam length REAL quick
 }
-
-
 extern Cargo * GetMasterPartList (const char *);
 bool Beam::Collide (Unit * target) {
   if (this==NULL||target==NULL){
     VSFileSystem::vs_fprintf (stderr,"Recovering from nonfatal beam error when beam inactive\n");
     return false;
   }
-
+  float distance;
+  Vector normal;//apply shields
+  QVector end (center+direction.Cast().Scale(curlength));
   enum clsptr type = target->isUnit();
   if (target==owner||type==NEBULAPTR||type==ASTEROIDPTR) {
     static bool collideroids = XMLSupport::parse_bool(vs_config->getVariable("physics","AsteroidWeaponCollision","false"));
@@ -341,10 +343,39 @@ bool Beam::Collide (Unit * target) {
   if (type==PLANETPTR&&(!collidejump)&&!target->GetDestinations().empty()) {
     return false;
   }
-  
-  float distance;
-  Vector normal;
-    QVector end (center+direction.Cast().Scale(curlength+target->rSize()));
+
+  //A bunch of needed config variables - its best to have them here, so that they're loaded the
+  //very first time Collide() is called. That way, we avoid hiccups.
+  static float nbig = XMLSupport::parse_float(vs_config->getVariable("physics","percent_to_tractor",".1"));
+  static int upgradesfaction=FactionUtil::GetFaction("upgrades");
+  static int cargofaction=FactionUtil::GetFaction("cargo");
+
+  static bool c_fp = XMLSupport::parse_bool(vs_config->getVariable("physics","tractor.cargo.force_push","true"));
+  static bool c_fi = XMLSupport::parse_bool(vs_config->getVariable("physics","tractor.cargo.force_in","true"));
+  static bool u_fp = XMLSupport::parse_bool(vs_config->getVariable("physics","tractor.upgrade.force_push","true"));
+  static bool u_fi = XMLSupport::parse_bool(vs_config->getVariable("physics","tractor.upgrade.force_in","true"));
+  static bool f_fp = XMLSupport::parse_bool(vs_config->getVariable("physics","tractor.faction.force_push","true"));
+  static bool f_fi = XMLSupport::parse_bool(vs_config->getVariable("physics","tractor.faction.force_in","true"));
+  static bool o_fp = XMLSupport::parse_bool(vs_config->getVariable("physics","tractor.others.force_push","false"));
+  static bool o_fi = XMLSupport::parse_bool(vs_config->getVariable("physics","tractor.others.force_in","false"));
+
+  static float c_lighting = XMLSupport::parse_float(vs_config->getVariable("physics","tractor.cargo.light_shields_on_push","1"));
+  static float u_lighting = XMLSupport::parse_float(vs_config->getVariable("physics","tractor.upgrade.light_shields_on_push","1"));
+  static float f_lighting = XMLSupport::parse_float(vs_config->getVariable("physics","tractor.faction.light_shields_on_push","1"));
+  static float o_lighting = XMLSupport::parse_float(vs_config->getVariable("physics","tractor.others.light_shields_on_push","1"));
+
+  static float c_ors_m = XMLSupport::parse_float(vs_config->getVariable("physics","tractor.cargo.distance_own_rsize","1.5"));
+  static float c_trs_m = XMLSupport::parse_float(vs_config->getVariable("physics","tractor.cargo.distance_tgt_rsize","1.1"));
+  static float c_o     = XMLSupport::parse_float(vs_config->getVariable("physics","tractor.cargo.distance","0"));
+  static float u_ors_m = XMLSupport::parse_float(vs_config->getVariable("physics","tractor.ugprade.distance_own_rsize","1.5"));
+  static float u_trs_m = XMLSupport::parse_float(vs_config->getVariable("physics","tractor.upgrade.distance_tgt_rsize","1.1"));
+  static float u_o     = XMLSupport::parse_float(vs_config->getVariable("physics","tractor.upgrade.distance","0"));
+  static float f_ors_m = XMLSupport::parse_float(vs_config->getVariable("physics","tractor.faction.distance_own_rsize","2.2"));
+  static float f_trs_m = XMLSupport::parse_float(vs_config->getVariable("physics","tractor.faction.distance_tgt_rsize","2.2"));
+  static float f_o     = XMLSupport::parse_float(vs_config->getVariable("physics","tractor.faction.distance","0"));
+  static float o_ors_m = XMLSupport::parse_float(vs_config->getVariable("physics","tractor.others.distance_own_rsize","1.1"));
+  static float o_trs_m = XMLSupport::parse_float(vs_config->getVariable("physics","tractor.others.distance_tgt_rsize","1.1"));
+  static float o_o     = XMLSupport::parse_float(vs_config->getVariable("physics","tractor.others.distance","0"));
 
   Unit * colidee;
   if ((colidee = target->queryBSP(center,end,normal,distance))) { 
@@ -356,140 +387,66 @@ bool Beam::Collide (Unit * target) {
     impact|=IMPACT;
     
     GFXColor coltmp (Col);
-    float tmp=(curlength/range); 
+    /*
+    coltmp.r+=.5;
+    coltmp.g+=.5;
+    coltmp.b+=.5;
+    if (coltmp.r>1)coltmp.r=1;
+    if (coltmp.g>1)coltmp.g=1;
+    if (coltmp.b>1)coltmp.b=1;
+    */
+
+    float tmp=(curlength/range);
     float appldam = (damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty);
     float phasdam = (phasedamage*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty);
 
     if ((appldam<0&&phasdam>0)||(appldam>0&&phasdam<0)) {
-      //tractor beam!
-		// repulsor is POSITIVE appldam
-// applyforce moved to AFTER we check for cargo grab -- spirit
-	    //      target->ApplyForce (direction*appldam);
-      if ((center - target->Position()).Magnitude() < 2*target->rSize()+range) {
+      bool fp = o_fp, fi = o_fi;
+      if (target->faction == owner_faction)
+          fp = f_fp, fi = f_fi; else if (target->faction == upgradesfaction)
+          fp = u_fp, fi = u_fi; else if (target->faction == cargofaction)
+          fp = c_fp, fi = c_fi;
 
-	un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();
-	Unit *un;
-	for (;(un=*ui)!=NULL;++ui) {
-	  if (((void *)un)==owner) {
-	    static float nbig = XMLSupport::parse_float(vs_config->getVariable("physics","percent_to_tractor",".1"));
-            static int upgradesfaction=FactionUtil::GetFaction("upgrades");
-//		spiritplumber says: this checks for cargo while we are at it
-            static int cargofaction=FactionUtil::GetFaction("cargo");
-//      if( !target->isTractorable() ) return false; //added by chuck_starchaser
+      //tractor/repulsor beam!
+      if (fp||target->isTractorable(Unit::tractorPush)) {
+        float lighting=o_lighting;
+        if (target->faction == owner_faction)
+            lighting = f_lighting; else if (target->faction == upgradesfaction)
+            lighting = u_lighting; else if (target->faction == cargofaction)
+            lighting = c_lighting;
+        target->ApplyForce (direction*appldam*min(1,target->GetMass())); //Modulate force on little mass objects, so they don't slingshot right passt you - should use relative aproach velocity, but it's just a quick fix for spirit, I'll do better soon - Klauss
+      }
 
-//		spiritplumber says: this checks tractorability only for the "eat" function
-//      it also prevents the player to be eaten.
-//      in the future, player will be eaten only if being tractored by a unit from a hostile faction.
-//      in the future it also only tractors when the cargo is reasonably close.
-//      
-//      RULES FOR THE FUTURE:
-//      
-//      A ship can be tractored if:
-//      
-//      its AI says inert, asteroid, or cargo
-//      OR it's tagged as tractorable
-//      AND size difference is logical
-//      if it's a player, decide enslave vs, nothingbased on faction ratings
+      float ors_m=o_ors_m,trs_m=o_trs_m,ofs=o_o;
+      if (target->faction == owner_faction)
+          ors_m = f_ors_m, trs_m = f_trs_m, ofs = f_o; else if (target->faction == upgradesfaction)
+          ors_m = u_ors_m, trs_m = u_trs_m, ofs = u_o; else if (target->faction == cargofaction)
+          ors_m = c_ors_m, trs_m = c_trs_m, ofs = c_o;
 
-//  usable distance related code			
-//	Vector PosDifference=targ->Position().Cast()-parent->Position().Cast();
-//	float pdmag = PosDifference.Magnitude();
-//
-
-//   ( (targ->Position().Cast()-parent->Position().Cast()) < (10*nbig*target->rSize) )
-
-//  Would be cool: Add a "temporary" (until next docking) cargo, hired pilots, and only give AI to  tractored
-//  and ejected ships if you have one of thsoe in the hold (then obviously remove it). Restore one in the hold
-//  if you tractor in a ship of your own faction.
-//
-//  Woudl also be cool: Remove 
-//  note that here non-tractorable is a veto!
-
-// spiritplumber FIXED: Repulsor beam no longer tractors cargo
-
-
-// tractor: we have a problem since the targeted object may well skip the hot (eat) zone.
-
-// prevents tractor-generated speed to go to insane values, esp. cargo and upgrades (paranoia)
-// note to self: these valuse (1, +/-150, 2, 1.05) should go in vs.config or somewhere else sane
-		float tractorforcecap = XMLSupport::parse_float(vs_config->getVariable ("physics","tractor_force_to_mass_cap","1000"));
-
-		if (target->Mass < 0.5) { target->Mass = 0.5; }
-
-
-		if (appldam < (target->Mass * -tractorforcecap)) { appldam = target->Mass * -tractorforcecap;}
-		if (appldam > (target->Mass * tractorforcecap)) { appldam = target->Mass * tractorforcecap;}
-
-/*if (!beam_or_scoop)
-{
-		if (appldam < (target->Mass * -300)) { appldam = target->Mass * -300;}
-		if (appldam > (target->Mass * 300)) { appldam = target->Mass * 300;}
-}
-
-if (beam_or_scoop)
-{
-		if (appldam < (target->Mass * -150)) { appldam = target->Mass * -150;}
-		if (appldam > (target->Mass * 150)) { appldam = target->Mass * 150;}
-}
-*/
-//move to physics?
-// PROBLEM: This doesn't work with autotracking beams
-// collision DOES work though, just not the force vector -- instead, force is applied to a target in front of my ship, as if there was no autotracking. The beam is drawn correctly.
-        Vector fdirection = (target->Position() - center ).Normalize();
-		target->ApplyForce (fdirection*appldam);
-
-        if(un->isSubUnit())
-			nbig=nbig*10000; // subunits check against parent unit size
-
-//        if(un->owner->isSubUnit())
-//			nbig=nbig*un->owner->owner->rSize()/un->owner->rSize(); // subunits check against parent unit size
-/*
-		// flash shields while causing a tiny amount of damage. ideally this would just be grafix (figure it out)
-        if (un->rSize()*nbig>target->rSize() && target->hull > 0.1 )
-		{
-		
- 		target->ApplyDamage (center.Cast()+direction*curlength,normal,0.001,colidee,coltmp,(Unit *)target,0);
-        }
-		
-*/
-// prevent death by eating, although it's possible to be caught in a beam and forced to dock
-
-		
-		float adjacencyradius;
-	    if (target->radial_size <= un->radial_size)
-			  adjacencyradius = 4 * (target->radial_size) + 1.1 * (un->radial_size);		
-		else
-			  adjacencyradius = 1.1 * (target->radial_size) + 1.8 * (un->radial_size);
-//
-		
-	    if (target->faction==un->faction)
-			  adjacencyradius *= 1.5;
-
-		if (curlength > fabs((target->Position() - center).Magnitude()))
-		    curlength = fabs((target->Position() - center).Magnitude());
-
-//	    if ( target->isTractorable() && (appldam < 0 ) && (target->faction==un->facton || target->faction==cargofaction || target->faction==upgradesfaction) && (un->rSize()*nbig>target->rSize()) ) {
-	    if ( (appldam < 0 ) && !(_Universe->isPlayerStarship(target)) && (target->faction==un->faction||target->faction==upgradesfaction||un->rSize()*nbig>target->rSize()) && (curlength < adjacencyradius) ) {
-//	    if ( (appldam < 0 ) && !(_Universe->isPlayerStarship(target)) && (target->faction==un->faction||target->faction==upgradesfaction||un->rSize()*nbig>target->rSize())) {
-
-	      //we have our man!
-	      //lets add our cargo to him
-	      Cargo *c = GetMasterPartList (target->name.c_str());
-	      Cargo tmp;
+      if ((fi||target->isTractorable(Unit::tractorIn))&&((center-target->Position()).Magnitude()<(ors_m*owner_rsize+trs_m*target->rSize()+ofs))) {
+	    un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();
+	    Unit *un;
+	    for (;(un=*ui)!=NULL;++ui) {
+	      if (((void *)un)==owner) {
+	        if (target->faction==upgradesfaction||owner_rsize*nbig>target->rSize()) {
+	          //we have our man!
+	          //lets add our cargo to him
+	          Cargo *c = GetMasterPartList (target->name.c_str());
+	          Cargo tmp;
               bool isnotcargo = (c==NULL);
               if (!isnotcargo) {
                 if (c->category.find("upgrades")==0)
                   isnotcargo=true;// add upgrades as space junk
               }
-	      if (isnotcargo) {
-		c=&tmp;
-		tmp.content="Space_Salvage";
-		tmp.category="Uncategorized_Cargo";
+	          if (isnotcargo) {
+		        c=&tmp;
+		        tmp.content="Space_Salvage";
+		        tmp.category="Uncategorized_Cargo";
                 static float spacejunk=parse_float (vs_config->getVariable ("cargo","space_junk_price","10"));
-		tmp.price=spacejunk;
-		tmp.quantity=1;
-		tmp.mass=.001;
-		tmp.volume=1;
+		        tmp.price=spacejunk;
+		        tmp.quantity=1;
+		        tmp.mass=.001;
+		        tmp.volume=1;
                 if (target->faction!=upgradesfaction) {
                   tmp.content= target->name;
                   tmp.category="starships";
@@ -501,27 +458,23 @@ if (beam_or_scoop)
                   tmp.mass=starshipmass;
                   tmp.volume=starshipvolume;
                 }
-	      }
-	      if (c!=NULL) {
-		Cargo adder = *c;
-		adder.quantity=1;
-		if (un->CanAddCargo(adder)) {
-		  un->AddCargo(adder);
+              }
+	          if (c!=NULL) {
+		        Cargo adder = *c;
+		        adder.quantity=1;
+		        if (un->CanAddCargo(adder)) {
+		          un->AddCargo(adder);
                   if (_Universe->isPlayerStarship(un)) {
                     static int tractor_onboard = AUDCreateSoundWAV(vs_config->getVariable("unitaudio","player_tractor_cargo","tractor_onboard.wav"));
                     AUDPlay(tractor_onboard,QVector(0,0,0),Vector(0,0,0),1);
                   }
-		  target->Kill();
-		  return false;
-		}
+		          target->Kill();
+                }
+	          }
+	        }
 	      }
 	    }
-	  }
-	}
       }
-
-return true;
-
     }else {
 //      if (appldam>0==phasdam>0||applydam==0||phasedam==0) {
 	target->ApplyDamage (center.Cast()+direction*curlength,normal,appldam,colidee,coltmp,(Unit *)owner,phasdam);

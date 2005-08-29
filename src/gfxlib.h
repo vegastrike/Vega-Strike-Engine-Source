@@ -43,7 +43,6 @@ class Matrix;
 using std::vector;
 
 #include "gfx/vec.h"
-
 #include "gfxlib_struct.h"
 
 //Init functions
@@ -64,8 +63,7 @@ void /*GFXDRVAPI*/ GFXBeginScene();
 ///Flushes and Swaps buffers
 void /*GFXDRVAPI*/ GFXEndScene();
 ///Clears the Z buffer. Also clears color buffer if GFXTRUE passed in
-void /*GFXDRVAPI*/ GFXClear(const GFXBOOL ColorBuffer);
-
+void /*GFXDRVAPI*/ GFXClear(const GFXBOOL colorbuffer, const GFXBOOL depthbuffer=GFXTRUE, const GFXBOOL stencilbuffer=GFXTRUE);
 
 ///creates a light context (relevant to a star system) to add lights to
 void /*GFXDRVAPI*/ GFXCreateLightContext(int &con_number);
@@ -225,7 +223,7 @@ void /*GFXDRVAPI*/ GFXFrustum (float *mat, float *inv, float left,float right, f
  * trilinear troubles, and it might be a memory constraint)
  * Texture target defines the type of texture it is for eventual cube mapping
  */
-GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT externaltextureformat, int *handle, char *palette = 0, int texturestage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET texture_target = TEXTURE2D);
+GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT externaltextureformat, int *handle, char *palette = 0, int texturestage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET texture_target = TEXTURE2D, enum ADDRESSMODE address_mode = DEFAULT_ADDRESS_MODE);
 
 ///Sets the priority of the texture for memory management.
 void /*GFXDRVAPI*/ GFXPrioritizeTexture (unsigned int handle, float priority);
@@ -259,17 +257,23 @@ GFXBOOL /*GFXDRVAPI*/ GFXCapture(char *filename);
 //State
 ///Enables and disables given state
 void /*GFXDRVAPI*/ GFXEnable(const enum STATE); void /*GFXDRVAPI*/ GFXDisable(const enum STATE);
-void /*GFXDRVAPI*/ GFXToggleTexture(bool enable,int whichstage);
+void /*GFXDRVAPI*/ GFXToggleTexture(bool enable,int whichstage,enum TEXTURE_TARGET target = TEXTURE2D);
 ///Sets texture to clamp or wrap texture coordinates
-void /*GFXDRVAPI*/ GFXTextureAddressMode(const ADDRESSMODE);
+void /*GFXDRVAPI*/ GFXTextureAddressMode(const ADDRESSMODE mode, enum TEXTURE_TARGET target = TEXTURE2D);
 
 ///Sets the current blend mode to src,dst
 void /*GFXDRVAPI*/ GFXBlendMode(const enum BLENDFUNC src, const enum BLENDFUNC dst);
+
+///Gets the current blend mode to src,dst
+void /*GFXDRVAPI*/ GFXGetBlendMode(enum BLENDFUNC &src, enum BLENDFUNC &dst);
 
 void /*GFXDRVAPI*/ GFXColorMaterial (int LIGHTTARG);
 
 ///Sets the size in pixels of a GFXPOINT
 void /*GFXDRVAPI*/ GFXPointSize (const float size);
+
+///Sets the line width in pixels of a GFXLINE
+void /*GFXDRVAPI*/ GFXLineWidth(const float size);
 
 ///Pushes and saves current blend mode
 void /*GFXDRVAPI*/ GFXPushBlendMode();
@@ -289,21 +293,45 @@ enum DEPTHFUNC /*GFXDRVAPI*/ GFXDepthFunc();
 ///Sets up depth compare function
 void /*GFXDRVAPI*/ GFXDepthFunc (const enum DEPTHFUNC);
 
+///Returns the current stencil test function
+enum DEPTHFUNC /*GFXDRVAPI*/ GFXStencilFunc();
+
+///Gets details about the current stancil compare function - Specify NULL for unwanted fields.
+void /*GFXDRVAPI*/ GFXStencilFunc(enum DEPTHFUNC *pFunc, int *pRef, int *pMask);
+
+///Sets up a stencil compare function
+void /*GFXDRVAPI*/ GFXStencilFunc(enum DEPTHFUNC sfunc, int ref, unsigned int mask);
+
+///Gets the current stencil write operations - Specify NULL for unwanted fields
+void /*GFXDRVAPI*/ GFXStencilOp(enum STENCILOP *pFail, enum STENCILOP *pZfail, enum STENCILOP *pZpass);
+
+///Sets up the stencil write operations
+void /*GFXDRVAPI*/ GFXStencilOp(enum STENCILOP fail, enum STENCILOP zfail, enum STENCILOP zpass);
+
+///Returns the current stencil write mask
+unsigned int /*GFXDRVAPI*/ GFXStencilMask();
+
+///Sets the stencil write mask
+void /*GFXDRVAPI*/ GFXStencilMask(unsigned int mask);
+
+
 ///Turns on alpha testing mode (or turns if off if DEPTHFUNC is set to ALWAYS
 void /*GFXDRVALP*/ GFXAlphaTest (const enum DEPTHFUNC,const float ref);
 enum GFXTEXTUREWRAPMODES{
   GFXREPEATTEXTURE,
-  GFXCLAMPTEXTURE //clamp to edge, not to border
+  GFXCLAMPTEXTURE, //clamp to edge, not to border
+  GFXBORDERTEXTURE //clamp to border, not to edge
 };
 enum GFXTEXTUREENVMODES{
 	GFXREPLACETEXTURE,
 	GFXADDTEXTURE,
 	GFXMODULATETEXTURE,
 	GFXADDSIGNEDTEXTURE,
-	GFXINTERPOLATETEXTURE
+	GFXCOMPOSITETEXTURE,
+    GFXINTERPOLATETEXTURE
 };
-void GFXTextureWrap(int stage, GFXTEXTUREWRAPMODES mode);
-void GFXTextureEnv(int stage,GFXTEXTUREENVMODES mode);
+void GFXTextureWrap(int stage, GFXTEXTUREWRAPMODES mode, enum TEXTURE_TARGET target=TEXTURE2D);
+void GFXTextureEnv(int stage,GFXTEXTUREENVMODES mode,float arg2=0);
 bool GFXMultiTexAvailable();
 ///Sets Depth Offset for polgyons
 void /*GFXDRVAPI*/ GFXPolygonOffset (float factor, float units);
@@ -317,6 +345,8 @@ void /*GFXDRVAPI*/ GFXColorf (const GFXColor & col);
 void /*GFXDRVAPI*/ GFXBlendColor (const GFXColor &col);
 ///Specifies a color for henceforth drawn vertices to share
 void /*GFXDRVAPI*/ GFXColor4f(const float r, const float g, const float b, const float a = 1.0);
+///Gets the current color
+GFXColor /*GFXDRVAPI*/ GFXColorf ();
 
 ///Specifies a pair of texture coordinates for given vertex
 void /*GFXDRVAPI*/ GFXTexCoord2f(const float s, const float t);
@@ -371,7 +401,7 @@ enum GFXTEXTURECOORDMODE{
 	SPHERE_MAP_GEN,
 	CUBE_MAP_GEN
 };
-void GFXTextureCoordGenMode(GFXTEXTURECOORDMODE tex, const float params[4],const float paramt[4]);
+void GFXTextureCoordGenMode(int stage, GFXTEXTURECOORDMODE tex, const float params[4],const float paramt[4]);
 
 #endif
 

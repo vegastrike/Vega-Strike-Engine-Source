@@ -330,10 +330,17 @@ static void SetupGLLightGlobals () {
 	GLLights[i].index=-1;
       }
     }
-    GFXSetCutoff( XMLSupport::parse_float (vs_config->getVariable ("graphics","lightcutoff",".06")));
-    GFXSetOptimalIntensity(XMLSupport::parse_float (vs_config->getVariable ("graphics","lightoptimalintensity",".06")),XMLSupport::parse_float (vs_config->getVariable ("graphics","lightsaturation",".95")));    
-    GFXSetOptimalNumLights(XMLSupport::parse_int (vs_config->getVariable ("graphics","numlights","4"))); 
-    GFXSetSeparateSpecularColor (XMLSupport::parse_bool (vs_config->getVariable ("graphics","separatespecularcolor","false"))?GFXTRUE:GFXFALSE); 
+
+    static float lightcutoff = XMLSupport::parse_float (vs_config->getVariable ("graphics","lightcutoff",".06"));
+    static float lightoptimalintensity = XMLSupport::parse_float (vs_config->getVariable ("graphics","lightoptimalintensity",".06"));
+    static float lightsaturation = XMLSupport::parse_float (vs_config->getVariable ("graphics","lightsaturation",".95"));
+    static int numlights = XMLSupport::parse_int (vs_config->getVariable ("graphics","numlights","4"));
+    static bool separatespecularcolor = XMLSupport::parse_bool (vs_config->getVariable ("graphics","separatespecularcolor","false"));
+
+    GFXSetCutoff(lightcutoff);
+    GFXSetOptimalIntensity(lightoptimalintensity,lightsaturation);    
+    GFXSetOptimalNumLights(numlights); 
+    GFXSetSeparateSpecularColor (separatespecularcolor?GFXTRUE:GFXFALSE); 
     
 }
 

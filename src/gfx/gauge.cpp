@@ -27,6 +27,7 @@ void Gauge::GetSize (float &x, float &y) {
 
 
 void Gauge::Draw (float percentage) {
+  if (percentage<0) percentage=0; else if (percentage>1) percentage=1;
   float sx,sy,px,py;
   VSSprite::GetSize (sx,sy);
   VSSprite::GetPosition(px,py);
@@ -42,6 +43,9 @@ void Gauge::Draw (float percentage) {
     SetST (0,(1-percentage));
     VSSprite::SetSize (sx,sy*percentage);
     VSSprite::SetPosition (px,py+sy*(1-percentage)*.5);
+    break;
+  case GAUGE_TIME:
+    VSSprite::SetTime(percentage);
     break;
   }
   VSSprite::Draw();

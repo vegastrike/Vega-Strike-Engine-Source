@@ -16,8 +16,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+
 #include <Python.h>
-#include "python/init.h"
 #include "config.h"
 #if defined(HAVE_SDL)
 #include <SDL/SDL.h>
@@ -43,6 +43,7 @@
 #include "gfx/animation.h"
 #include "cmd/unit.h"
 #include "gfx/cockpit.h"
+#include "python/init.h"
 #include "savegame.h"
 #include "force_feedback.h"
 #include "gfx/hud.h"
@@ -123,15 +124,10 @@ VegaConfig * createVegaConfig( char * file)
 
 extern QVector DockToSavedBases (int playernum);
 extern bool soundServerPipes();
-extern void InitUnitTables(); // universe_generic.cpp
-
 std::string ParseCommandLine(int argc, char ** CmdLine);
 void VSExit( int code)
 {
-   if (muzak) {
-      delete muzak;
-      muzak=NULL;
-    }
+    Music::CleanupMuzak();
 	winsys_exit(code);
 }
 
@@ -170,10 +166,7 @@ void cleanup(void)
     if (cloak_cg->shaderContext)  cgDestroyContext(cloak_cg->shaderContext);
 #endif
 
-  if (muzak) {
-    delete muzak;
-    muzak=NULL;
-  }
+  Music::CleanupMuzak();
   winsys_shutdown();
   //    write_config_file();
   AUDDestroy();
@@ -263,24 +256,6 @@ int main( int argc, char *argv[] )
     //can use the vegastrike config variable to read in the default mission
 
   g_game.music_enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","Music","true"));
-#if !defined( _WIN32)
-  if (g_game.music_enabled&&!soundServerPipes()) {
-    int pid=fork();
-    if (!pid) {
-	  string soundserver_path = VSFileSystem::datadir+"/bin/soundserver";
-      pid=execlp(soundserver_path.c_str() , soundserver_path.c_str(),NULL);
-      soundserver_path = VSFileSystem::datadir+"/soundserver";
-      pid=execlp(soundserver_path.c_str() , soundserver_path.c_str(),NULL);
-      g_game.music_enabled=false;
-      VSFileSystem::vs_fprintf(stderr,"Unable to spawn music player server\n");
-      exit (0);
-    } else {
-      if (pid==-1) {
-	g_game.music_enabled=false;
-      }
-    }
-  }
-#endif
     if (mission_name[0]=='\0')
 	{
       strcpy(mission_name,vs_config->getVariable ("general","default_mission","test/test1.mission").c_str());
@@ -311,6 +286,7 @@ int main( int argc, char *argv[] )
 
     AUDInit();
     AUDListenerGain (XMLSupport::parse_float(vs_config->getVariable ("audio","sound_gain",".5")));   
+    Music::InitMuzak();
     /* Set up a function to clean up when program exits */
     winsys_atexit( cleanup );
     /*
@@ -380,12 +356,14 @@ void bootstrap_draw (const std::string &message, Animation * newSplashScreen) {
   GFXLoadMatrixModel (tmp);
   GFXHudMode (GFXTRUE);
   if (ani) {
-    ani->UpdateAllFrame();
+    if (GetElapsedTime()<10) ani->UpdateAllFrame();
     ani->DrawNow(tmp);
   }
+
   static std::string defaultbootmessage=vs_config->getVariable("graphics","default_boot_message","");
-  
-  bs_tp->Draw (defaultbootmessage.length()>0?defaultbootmessage:message);  
+  static std::string initialbootmessage=vs_config->getVariable("graphics","initial_boot_message","Loading...");
+  bs_tp->Draw (defaultbootmessage.length()>0?defaultbootmessage:message.length()>0?message:initialbootmessage);
+
   GFXHudMode (GFXFALSE);
   GFXEndScene();
 
@@ -433,15 +411,19 @@ vector<string> parse_space_string(std::string s) {
 void bootstrap_first_loop() {
   static int i=0;
   static std::string ss=vs_config->getVariable ("graphics","splash_screen","vega_splash.ani");
+  static std::string sas=vs_config->getVariable ("graphics","splash_audio","");
   if (i==0) {
 	vector<string> s = parse_space_string(ss);
-    SplashScreen = new Animation (s[time(NULL)%s.size()].c_str(),0);
+    vector<string> sa = parse_space_string(sas);
+    int snum=time(NULL)%s.size();
+    SplashScreen = new Animation (s[snum].c_str(),0);
+    if (sa.size()) muzak->GotoSong(sa[snum%sa.size()]);
     bs_tp=new TextPlane();
   }
   bootstrap_draw ("Vegastrike Loading...",SplashScreen);
   
   if (i++>4) {
-    _Universe->Loop(bootstrap_main_loop);
+    if (_Universe) _Universe->Loop(bootstrap_main_loop);
   }
 }
 void SetStartupView(Cockpit * cp) {
@@ -467,6 +449,7 @@ void bootstrap_main_loop () {
     bootstrap_draw ("Vegastrike Loading...",SplashScreen);
     if (g_game.music_enabled&&!soundServerPipes()) {
 #if defined( _WIN32) && !defined( __CYGWIN__)
+        /*
       string ss_path = VSFileSystem::datadir+"/soundserver.exe";
       int pid=spawnl(P_NOWAIT,ss_path.c_str(),ss_path.c_str(),NULL);
       if (pid==-1) {
@@ -478,6 +461,7 @@ void bootstrap_main_loop () {
 			VSFileSystem::vs_fprintf(stderr,"Unable to spawn music player server Error (%d)\n",pid);
 		}
       }
+      */
 #endif
     }
     QVector pos;
@@ -542,7 +526,7 @@ void bootstrap_main_loop () {
 		// Initiate the network if in networking play mode for each local player
 		if( srvip != "")
 		{
-			setNewTime(time(NULL)); // FIXME: Try to read this from server instead.
+            setNewTime(time(NULL)); //FIXME: Try to read this from server instead.
 			string srvport = vs_config->getVariable("network","server_port", "6777");
 			// Get the number of local players
 			Network = new NetClient[numplayers];

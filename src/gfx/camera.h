@@ -34,11 +34,13 @@ class Camera{
 	QVector Coord;
 	Vector velocity;
 	Vector angular_velocity;
+    Vector accel;
 	Matrix planetview;
 	GFXBOOL changed;
 	QVector lastpos;
 	float x, y, xsize, ysize;
 	float zoom;
+    float fov;
 	float cockpit_offset;
         UnitContainer nebula;
 public:
@@ -52,6 +54,16 @@ public:
 private:
 	ProjectionType projectionType;
 	PlanetaryTransform * planet;
+
+private:
+    // Last GFX Update, for partial updates
+    struct LastGFXUpdateStruct {
+        GFXBOOL clip;
+        GFXBOOL updateFrustum;
+        GFXBOOL centerCamera;
+        GFXBOOL overrideZFrustum;
+        float overrideZNear, overrideZFar;
+    } lastGFXUpdate;
 
 public:
 	void LookDirection(const Vector &forevec, const Vector &up);
@@ -67,24 +79,30 @@ public:
         void GetView (Matrix &);
         const Vector & GetR () {return R;}
 	void GetPQR (Vector &p1, Vector &q1, Vector &r1);
-	void UpdateGFX(GFXBOOL clip= GFXTRUE, GFXBOOL updateFrustum=GFXTRUE, GFXBOOL centerCamera = GFXFALSE);
+	void UpdateGFX(GFXBOOL clip, GFXBOOL updateFrustum, GFXBOOL centerCamera, GFXBOOL overrideZFrustum, float overrideZNear, float overrideZFar);
+    void UpdateGFX(GFXBOOL clip = GFXTRUE, GFXBOOL updateFrustum=GFXTRUE, GFXBOOL centerCamera = GFXFALSE) { UpdateGFX(clip,updateFrustum,centerCamera,lastGFXUpdate.overrideZFrustum,lastGFXUpdate.overrideZNear,lastGFXUpdate.overrideZFar); };
+    void UpdateGFXFrustum(GFXBOOL overrideZFrustum, float overrideZNear, float overrideZFar) { UpdateGFX(lastGFXUpdate.clip,lastGFXUpdate.updateFrustum,lastGFXUpdate.centerCamera,overrideZFrustum,overrideZNear,overrideZFar); };
 	void UpdatePlanetGFX();//clip true, frustum true at all times
 	Matrix * GetPlanetGFX();
 	void UpdateGLCenter();
 
-	void SetPosition(const QVector &origin, const Vector & velocity, const Vector & angular_velocity);
+	void SetPosition(const QVector &origin, const Vector & velocity, const Vector & angular_velocity, const Vector & acceleration);
 	void GetPosition(QVector &vect) {vect=Coord;}
-	Vector GetAngularVelocity()const;
-	Vector GetVelocity ()const;
+	Vector GetAngularVelocity() const;
+	Vector GetVelocity() const;
+    Vector GetAcceleration() const { return accel; };
 	void GetOrientation(Vector &p, Vector &q, Vector &r) {p=P;q=Q;r=R;}
 	const QVector &GetPosition() { return Coord;}
 
+    float GetZDist(const Vector &v) const { return ::DotProduct(QVector(v)-Coord,QVector(R));};
 
 	void SetOrientation(const Vector &p, const Vector &q, const Vector &r);
 	void SetSubwindow(float x, float y, float xsize, float ysize);
 	void SetProjectionType(ProjectionType t);
 	void SetZoom(float z);
 	float GetZoom();
+    void SetFov(float f);
+    float GetFov();
 	void Yaw(float rad);
 	void Pitch(float rad);
 	void Roll(float rad);

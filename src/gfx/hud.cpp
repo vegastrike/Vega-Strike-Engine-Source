@@ -90,7 +90,7 @@ static char * CreateLists() {
   static char lists[256]={0};
   void * fnt = getFont();
   static bool use_bit = XMLSupport::parse_bool(vs_config->getVariable ("graphics","high_quality_font","false"));
-  bool use_display_lists = XMLSupport::parse_bool (vs_config->getVariable ("graphics","text_display_lists","true"));
+  static bool use_display_lists = XMLSupport::parse_bool (vs_config->getVariable ("graphics","text_display_lists","true"));
   if (use_display_lists) {
     for (unsigned char i=32;i<128;i++){
       lists[i]= GFXCreateList();

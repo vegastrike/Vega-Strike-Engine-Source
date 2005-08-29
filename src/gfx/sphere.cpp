@@ -19,17 +19,25 @@ static GFXColor getSphereColor () {
   return tmp;
 }
 
+#ifdef PARTITIONED_Z_BUFFER
+void SphereMesh::ProcessDrawQueue(int whichpass,int whichdrawqueue,float zmin,float zmax) {
+#else
 void SphereMesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
+#endif
   if (whichpass==1) return; //Mesh already draws pass 1 in pass 0
 
   static GFXColor spherecol (getSphereColor ());
   if (blendSrc!=ONE||blendDst!=ZERO) {
-    GFXPolygonOffset (0,-2);
+    GFXPolygonOffset (0,-1);
   }
   GFXColor tmpcol (0,0,0,1);
   GFXGetLightContextAmbient(tmpcol);
   GFXLightContextAmbient(spherecol);
+#ifdef PARTITIONED_Z_BUFFER
+  Mesh::ProcessDrawQueue (whichpass,whichdrawqueue,zmin,zmax);
+#else
   Mesh::ProcessDrawQueue (whichpass,whichdrawqueue);
+#endif
   GFXLightContextAmbient(tmpcol);
   GFXPolygonOffset (0,0);
     
@@ -39,13 +47,21 @@ void CityLights::SelectCullFace (int whichdrawqueue) {
   GFXEnable(CULLFACE);
 }
 
+#ifdef PARTITIONED_Z_BUFFER
+void CityLights::ProcessDrawQueue(int whichpass,int whichdrawqueue,float zmin,float zmax) {
+#else
 void CityLights::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
-  GFXPolygonOffset (0,-3);
+#endif
+  GFXPolygonOffset (0,-1);
   const GFXColor citycol (1,1,1,1);
   GFXColor tmpcol (0,0,0,1);
   GFXGetLightContextAmbient(tmpcol);
   GFXLightContextAmbient(citycol);
+#ifdef PARTITIONED_Z_BUFFER
+  Mesh::ProcessDrawQueue (whichpass,whichdrawqueue,zmin,zmax);
+#else
   Mesh::ProcessDrawQueue (whichpass,whichdrawqueue);
+#endif
   GFXLightContextAmbient(tmpcol);
   GFXPolygonOffset (0,0);
 }

@@ -22,7 +22,8 @@ namespace UnitUtil {
 		const int HIGH_PRIORITY=2;
 		const int MEDIUM_PRIORITY=3;
 		const int LOW_PRIORITY=4;
-		const int NO_ENEMIES=SIM_QUEUE_SIZE-1;
+        const int LOWEST_PRIORITY=SIM_QUEUE_SIZE;
+		const int NO_ENEMIES=SIM_QUEUE_SIZE;
 		const int NOT_VISIBLE_COMBAT_HIGH=7;
 		const int NOT_VISIBLE_COMBAT_MEDIUM=13;
 		const int NOT_VISIBLE_COMBAT_LOW=SIM_QUEUE_SIZE/2+1;
@@ -31,6 +32,9 @@ namespace UnitUtil {
 		Unit * parent=cockpit->GetParent();
 		Camera * cam = cockpit->AccessCamera();
 		QVector campos = cam->GetPosition();
+        float tooclose = 
+              2*(un->radial_size+(parent?parent->radial_size:0)) 
+            + (cam->GetVelocity() - un->GetVelocity()).Magnitude();
 		double dist =(campos-un->Position()).Magnitude()-rad;
 		float gun_range=0;
 		float missile_range=0;
@@ -44,6 +48,14 @@ namespace UnitUtil {
 			float speed=0;
 			parent->getAverageGunSpeed(speed,gun_range,missile_range);
 		}
+		static int cargofac=FactionUtil::GetFaction("cargo");
+		static int upfac=FactionUtil::GetFaction("upgrades");
+		static int neutral=FactionUtil::GetFaction("neutral");
+		if (un->owner==getTopLevelOwner()||un->faction==cargofac||un->faction==upfac||un->faction==neutral) {
+            if (dist<tooclose)
+                return LOW_PRIORITY; else
+			    return LOWEST_PRIORITY;
+		}
 		Unit * targ = un->Target();
 		if (_Universe->isPlayerStarship(targ)) {
 			return HIGH_PRIORITY;
@@ -54,11 +66,6 @@ namespace UnitUtil {
 		}
 		if (dist<gun_range)
 			return MEDIUM_PRIORITY;
-		static int cargofac=FactionUtil::GetFaction("upgrades");
-		static int neutral=FactionUtil::GetFaction("neutral");
-		if (un->owner==getTopLevelOwner()||un->faction==cargofac||un->faction==neutral) {
-			return SIM_QUEUE_SIZE;
-		}
 		if (dist<missile_range)
 			return LOW_PRIORITY;
 		if (targ){

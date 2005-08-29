@@ -357,14 +357,25 @@ static std::string MangleString (const char * in, float probability) {
   return retval;
 }
 static void DrawShield (float fs, float rs, float ls, float bs, float x, float y, float w, float h, bool invert, GFXColor outershield,GFXColor innershield) { //FIXME why is this static?
+  GFXEnable(SMOOTH);
+  GFXPushBlendMode();
+  GFXBlendMode(SRCALPHA,INVSRCALPHA);
   GFXBegin (GFXLINE);
   if (invert ) {
     float tmp = fs;
     fs = bs;
     bs = tmp;
   }
-  if (fs>.2) {
-    GFXColorf(innershield);
+
+  GFXColor shcolor[3]={innershield,innershield*0.5+outershield*0.5,outershield};
+  float shthresh[3]={0.2f,0.5f,0.75f};
+  float shtrans[3]={1.0f,1.0f,1.0f};
+  shcolor[0].a *= max(0.0f,min(1.0f,(fs-shthresh[0])/(shthresh[1]-shthresh[0])*shtrans[0]));
+  shcolor[1].a *= max(0.0f,min(1.0f,(fs-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1]));
+  shcolor[2].a *= max(0.0f,min(1.0f,(fs-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));
+
+  if (fs>shthresh[0]) {
+    GFXColorf(shcolor[0]);
     GFXVertex3d ((double)x-w/8,y+h/2,0.);
     GFXVertex3d ((double)x-w/3,y+.9*h/2,0.);
     GFXVertex3d ((double)x+w/8,y+h/2,0.);
@@ -372,8 +383,8 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x+w/8,y+h/2,0.);
     GFXVertex3d ((double)x-w/8,y+h/2,0.);
   }
-  if (fs>.5) {
-    GFXColorf(outershield);
+  if (fs>shthresh[1]) {
+    GFXColorf(shcolor[1]);
     GFXVertex3d ((double)x-w/8,y+1.1*h/2,0.);
     GFXVertex3d ((double)x+w/8,y+1.1*h/2,0.);
     GFXVertex3d ((double)x-w/8,y+1.1*h/2,0.);
@@ -381,9 +392,8 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x+w/8,y+1.1*h/2,0.);
     GFXVertex3d ((double)x+w/3,y+h/2,0.);
   }
-  if (fs>.75) {
-    GFXColorf(outershield);
-
+  if (fs>shthresh[2]) {
+    GFXColorf(shcolor[2]);
     GFXVertex3d ((double)x-w/8,y+1.2*h/2,0.);
     GFXVertex3d ((double)x+w/8,y+1.2*h/2,0.);
     GFXVertex3d ((double)x-w/8,y+1.2*h/2,0.);
@@ -391,8 +401,8 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x+w/8,y+1.2*h/2,0.);
     GFXVertex3d ((double)x+w/3,y+1.1*h/2,0.);
   }
-  if (rs>.2) {
-    GFXColorf(innershield);
+  if (rs>shthresh[0]) {
+    GFXColorf(shcolor[0]);
     GFXVertex3d ((double)x+1*w/2,y-h/8,0.);
     GFXVertex3d ((double)x+.9*w/2,y-h/3,0.);
     GFXVertex3d ((double)x+1*w/2,y+h/8,0.);
@@ -400,8 +410,8 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x+.9*w/2,y+h/3,0.);
     GFXVertex3d ((double)x+1*w/2,y+h/8,0.);
   }
-  if (rs>.5) {
-    GFXColorf(outershield);
+  if (rs>shthresh[1]) {
+    GFXColorf(shcolor[1]);
     GFXVertex3d ((double)x+1.1*w/2,y-h/8,0.);
     GFXVertex3d ((double)x+1*w/2,y-h/3,0.);
     GFXVertex3d ((double)x+1.1*w/2,y+h/8,0.);
@@ -409,8 +419,8 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x+1*w/2,y+h/3,0.);
     GFXVertex3d ((double)x+1.1*w/2,y+h/8,0.);
   }
-  if (rs>.7) {
-    GFXColorf(outershield);
+  if (rs>shthresh[2]) {
+    GFXColorf(shcolor[2]);
     GFXVertex3d ((double)x+1.2*w/2,y-h/8,0.);
     GFXVertex3d ((double)x+1.1*w/2,y-h/3,0.);
     GFXVertex3d ((double)x+1.2*w/2,y+h/8,0.);
@@ -418,8 +428,8 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x+1.1*w/2,y+h/3,0.);
     GFXVertex3d ((double)x+1.2*w/2,y+h/8,0.);
   }
-  if (ls>.2) {
-    GFXColorf(innershield);
+  if (ls>shthresh[0]) {
+    GFXColorf(shcolor[0]);
     GFXVertex3d ((double)x-1*w/2,y-h/8,0.);
     GFXVertex3d ((double)x-.9*w/2,y-h/3,0.);
     GFXVertex3d ((double)x-1*w/2,y+h/8,0.);
@@ -427,8 +437,8 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x-.9*w/2,y+h/3,0.);
     GFXVertex3d ((double)x-1*w/2,y+h/8,0.);
   }
-  if (ls>.5) {
-    GFXColorf(outershield);
+  if (ls>shthresh[1]) {
+    GFXColorf(shcolor[1]);
     GFXVertex3d ((double)x-1.1*w/2,y-h/8,0.);
     GFXVertex3d ((double)x-1*w/2,y-h/3,0.);
     GFXVertex3d ((double)x-1.1*w/2,y+h/8,0.);
@@ -436,8 +446,8 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x-1*w/2,y+h/3,0.);
     GFXVertex3d ((double)x-1.1*w/2,y+h/8,0.);
   }
-  if (ls>.7) {
-    GFXColorf(outershield);
+  if (ls>shthresh[2]) {
+    GFXColorf(shcolor[2]);
     GFXVertex3d ((double)x-1.2*w/2,y-h/8,0.);
     GFXVertex3d ((double)x-1.1*w/2,y-h/3,0.);
     GFXVertex3d ((double)x-1.2*w/2,y+h/8,0.);
@@ -445,8 +455,8 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x-1.1*w/2,y+h/3,0.);
     GFXVertex3d ((double)x-1.2*w/2,y+h/8,0.);
   }
-  if (bs>.2) {
-    GFXColorf(innershield);
+  if (bs>shthresh[0]) {
+    GFXColorf(shcolor[0]);
     GFXVertex3d ((double)x-w/8,y-h/2,0.);
     GFXVertex3d ((double)x-w/3,y-.9*h/2,0.);
     GFXVertex3d ((double)x+w/8,y-h/2,0.);
@@ -454,8 +464,8 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x+w/8,y-h/2,0.);
     GFXVertex3d ((double)x-w/8,y-h/2,0.);
   }
-  if (bs>.5) {
-    GFXColorf(outershield);
+  if (bs>shthresh[1]) {
+    GFXColorf(shcolor[1]);
     GFXVertex3d ((double)x-w/8,y-1.1*h/2,0.);
     GFXVertex3d ((double)x+w/8,y-1.1*h/2,0.);
     GFXVertex3d ((double)x-w/8,y-1.1*h/2,0.);
@@ -463,8 +473,8 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x+w/8,y-1.1*h/2,0.);
     GFXVertex3d ((double)x+w/3,y-h/2,0.);
   }
-  if (bs>.75) {
-    GFXColorf(outershield);
+  if (bs>shthresh[2]) {
+    GFXColorf(shcolor[2]);
     GFXVertex3d ((double)x-w/8,y-1.2*h/2,0.);
     GFXVertex3d ((double)x+w/8,y-1.2*h/2,0.);
     GFXVertex3d ((double)x-w/8,y-1.2*h/2,0.);
@@ -474,7 +484,8 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
   }
 
   GFXEnd();
-
+  GFXDisable(SMOOTH);
+  GFXPopBlendMode();
 }
 static void DrawShieldArmor(Unit * parent, const float StartArmor[8], float x, float y, float w, float h,bool invertfrontback) {
   float fs = parent->FShieldData();
@@ -787,10 +798,12 @@ void VDU::DrawComm () {
     GFXEnable (TEXTURE0);
     GFXDisable(LIGHTING);
 
+    static bool switch_back_from_comms = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","switch_back_from_comms","true"));
+
     comm_ani->DrawAsVSSprite(this);
     if (comm_ani->Done()) {
       if (thismode.size()>1) {
-	if (XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","switch_back_from_comms","true"))) {
+	if (switch_back_from_comms) {
 	  thismode.pop_back();
 	} else {
 	  unsigned int blah = thismode.back();

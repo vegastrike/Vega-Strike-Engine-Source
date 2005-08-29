@@ -150,10 +150,6 @@ extern GLenum GFXStage1;
 #ifdef STATS_QUEUE
 extern queue<GFXStats> statsqueue;
 #endif
-extern int Stage0Texture;
-extern int Stage0TextureName;
-extern int Stage1Texture;
-extern int Stage1TextureName;
 typedef struct {
   int fullscreen;
   int Multitexture;
@@ -167,6 +163,8 @@ typedef struct {
   char smooth_shade;
   int max_texture_dimension;
   bool s3tc;
+  bool ext_clamp_to_edge;
+  bool ext_clamp_to_border;
 } gl_options_t;
 extern gl_options_t gl_options;
 

@@ -24,6 +24,7 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include <assert.h>
+#include <sstream>
 // #include <sys/signal.h>
 /* Windowing System Abstraction Layer */
 /* Abstracts creation of windows, handling of events, etc. */

@@ -16,7 +16,7 @@
 //#include "gfx/star.h"
 #include "cmd/bolt.h"
 #include <expat.h>
-//#include "cmd/music.h"
+#include "cmd/music.h"
 #include "configxml.h"
 #include "vs_globals.h"
 //#include "cmd/cont_terrain.h"
@@ -32,7 +32,6 @@
 #include "load_mission.h"
 #include "lin_time.h"
 //#include "gfx/particle.h"
-//extern Music *muzak;
 //extern Vector mouseline;
 #include "cmd/unit_util.h"
 #include "cmd/unit_collide.h"
@@ -428,7 +427,6 @@ extern void	TerrainCollide();
 extern void UpdateAnimatedTexture();
 extern void UpdateCameraSnds();
 extern void NebulaUpdate( StarSystem * ss);
-extern void TestMusic();
 
 extern void reset_time_compression (const KBData&,KBSTATE);
 
@@ -561,7 +559,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	collidetable->Update();  
 	if (this==_Universe->getActiveStarSystem(0))
 	  UpdateCameraSnds();
-	TestMusic();     
+    Music::MuzakCycle();
 	//iter = drawList.createIterator();
 	bolts->UpdatePhysics();
 	current_stage=MISSION_SIMULATION;

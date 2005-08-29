@@ -30,8 +30,10 @@
 #include <string>
 #include "xml_support.h"
 #include "easydom.h"
+#include <map>
 
 using std::string;
+using std::map;
 
 using XMLSupport::AttributeList;
 
@@ -95,6 +97,9 @@ class VegaConfig {
   configNode *bindings;
   configNode *colors;
 
+  map<string,string> map_variables;
+  map<string,vColor> map_colors;
+
   int hs_value_index;
 
   //  vector<vColor *> colors;
@@ -103,10 +108,10 @@ class VegaConfig {
   void doVariables(configNode *node);
   void checkSection(configNode *node,enum section_t section_type);
   void checkVar(configNode *node);
-  void doSection(configNode *node,enum section_t section_type);
-  void doVar(configNode *node);
+  void doSection(string prefix, configNode *node,enum section_t section_type);
+  void doVar(string prefix, configNode *node);
   void doColors(configNode *node);
-  bool checkColor(configNode *node);
+  bool checkColor(string prefix, configNode *node);
 
   virtual void doBindings(configNode *node) {}
   virtual void checkBind(configNode *node) {}

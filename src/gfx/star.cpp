@@ -160,6 +160,8 @@ static GFXColorVertex * AllocVerticesForSystem(std::string our_system_name, floa
 	Vector starmax(0,0,0);
 	float minlumin=1;
 	float maxlumin=1;
+	float maxdistance = -1;
+	float mindistance = -1;
 	if (our_system_name.size()>0) {
 		sscanf (_Universe->getGalaxyProperty(our_system_name,"xyz").c_str(),
 				"%f %f %f",
@@ -185,6 +187,9 @@ static GFXColorVertex * AllocVerticesForSystem(std::string our_system_name, floa
 					starmax.j=yy;
 				if (zz>starmax.k)
 					starmax.k=zz;
+                float magsqr=xx*xx+yy*yy+zz*zz;
+                if ((maxdistance<0)||(maxdistance<magsqr)) maxdistance=magsqr;
+                if ((mindistance<0)||(mindistance>magsqr)) mindistance=magsqr;
 				float lumin;
 				if (1==sscanf((*i.Get())["luminosity"].c_str(),"%f",&lumin)) {
 					if (lumin>maxlumin) {
@@ -197,10 +202,10 @@ static GFXColorVertex * AllocVerticesForSystem(std::string our_system_name, floa
 			}
 		}
 	}
-	float maxdistance = starmax.Magnitude();
-	float mindistance = starmin.Magnitude();
-	if (maxdistance<mindistance)
-		maxdistance=mindistance;
+    if (maxdistance<0) maxdistance=0;
+    if (mindistance<0) mindistance=0;
+    maxdistance = sqrt(maxdistance);
+    mindistance = sqrt(mindistance);
 	VSFileSystem::vs_fprintf (stderr,"Min (%f, %f, %f) Max(%f, %f, %f) MinLumin %f, MaxLumin %f",
 			 starmin.i,starmin.j,starmin.k,starmax.i,starmax.j,starmax.k,minlumin,maxlumin);
 
@@ -287,9 +292,7 @@ PointStarVlist::PointStarVlist (int num ,float spread,const std::string &sysnam)
 	//if(StarStreaks) {
         vlist= new GFXVertexList (GFXLINE,num,tmpvertex, num, true,0);
 	//}else {
-		for (int i=0;i<num/2;++i) {
-			tmpvertex[i]=tmpvertex[i*2+1];
-		}
+		for (int i=0,j=1;i<num/2;++i,j+=2) tmpvertex[i]=tmpvertex[j];
 		nonstretchvlist= new GFXVertexList (GFXPOINT,num/2,tmpvertex, num/2, false,0);
 	//}
 	delete []tmpvertex;
@@ -318,6 +321,7 @@ bool PointStarVlist::BeginDrawState (const QVector &center, const Vector & veloc
 		if (vel.MagnitudeSquared()>=minstreak*minstreak) {
 			ret=true;
                         float speed = vel.Magnitude();
+                        if (speed<minstreak) speed=minstreak;
                         static float streakcap  = XMLSupport::parse_float (vs_config->getVariable ("graphics","velocity_star_streak_max","100"));
                         if (speed>streakcap) {
                           vel.Normalize();

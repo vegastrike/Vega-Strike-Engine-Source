@@ -65,13 +65,10 @@ enum Cmd
 									// On server side : sending minimal info
                                     // (just position) in case the ship is far from
 									// the one we send other ships' data to
-	                                // Functions as a CMD_PING but also sends position.
-	                                // Sends 64 more bytes of info than ping.
     CMD_UPDATECLT    ,
     CMD_PING         ,		// A packet sending a ping-like command just to
                                     // tell to the server
 									// that the client is still alive
-	                                // Use CMD_POSUPDATE instead.
     CMD_SNAPSHOT     ,		// A packet with all the necessary ships' data
                                     // in order to update
 

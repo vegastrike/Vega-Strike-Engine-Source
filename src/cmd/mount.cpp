@@ -41,11 +41,11 @@ void DestroyMount (Mount * mount) {
   mount->status=Mount::DESTROYED;
 
 }
-float Mount::ComputeAnimatedFrame(Mesh * gun) {
+float Mount::ComputeAnimatedFrame(Mesh * gun, double sim_atom) {
 	if (type->type==weapon_info::BEAM) {
 		if (ref.gun) {
 			if (ref.gun->Ready() ) {
-				return getNewTime()+type->Refire-ref.gun->refireTime()-interpolation_blend_factor*SIMULATION_ATOM;
+				return getNewTime()+type->Refire-ref.gun->refireTime()-interpolation_blend_factor*sim_atom;
 			}else {
 				return getNewTime()*gun->getFramesPerSecond();				
 			}
@@ -56,7 +56,7 @@ float Mount::ComputeAnimatedFrame(Mesh * gun) {
 		if (ref.refire<type->Refire) {
 			return getNewTime()*gun->getFramesPerSecond();
 		}else {
-			return getNewTime()+type->Refire-ref.refire-interpolation_blend_factor*SIMULATION_ATOM;
+			return getNewTime()+type->Refire-ref.refire-interpolation_blend_factor*sim_atom;
 		}
 	}
 }

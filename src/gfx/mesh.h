@@ -42,6 +42,9 @@ class GFXVertexList;
 class GFXQuadstrip;
 struct GFXMaterial;
 class BoundingBox;
+
+#define MESH_HASTHABLE_SIZE 503
+
 ///Struct vertex format returned by GetPolys
 ///Struct polygon format returned by GetPolys
 struct bsp_polygon {
@@ -74,6 +77,9 @@ public:
 struct MeshDrawContext {
   ///The matrix in world space
   Matrix mat;
+#ifdef PARTITIONED_Z_BUFFER
+  float zmin,zmax;
+#endif
   ///The special FX vector pointing to all active special FX
   vector <MeshFX> *SpecialFX;
   GFXColor CloakFX;
@@ -81,7 +87,11 @@ struct MeshDrawContext {
   char cloaked;
   char mesh_seq;
   unsigned char damage;//0 is perfect 255 is dead
-  MeshDrawContext(const Matrix & m):mat(m),CloakFX(1,1,1,1),cloaked(NONE),damage(0) { }
+  MeshDrawContext(const Matrix & m):mat(m),CloakFX(1,1,1,1),cloaked(NONE),damage(0)
+#ifdef PARTITIONED_Z_BUFFER
+      ,zmin(0),zmax(0) 
+#endif
+  { }
 };
 using XMLSupport::EnumMap;
 using XMLSupport::AttributeList;
@@ -133,8 +143,8 @@ protected:
   ///the position of the center of this mesh for collision detection
   Vector local_pos; 
   ///The hash table of all meshes
-  static Hashtable<std::string, Mesh, 127> meshHashTable;
-  static Hashtable<std::string, std::vector<int>,127> animationSequences;
+  static Hashtable<std::string, Mesh, MESH_HASTHABLE_SIZE> meshHashTable;
+  static Hashtable<std::string, std::vector<int>,MESH_HASTHABLE_SIZE> animationSequences;
   ///The refcount:: how many meshes are referencing the appropriate original
   int refcount;
   ///bounding box
@@ -179,6 +189,9 @@ protected:
   void InitUnit();
   ///Needs to have access to our class
   friend class OrigMeshContainer;
+#ifdef PARTITIONED_Z_BUFFER
+  friend class Meshvs_decalsort;
+#endif
   ///The enabled light effects on this mesh
   vector <MeshFX> LocalFX;
   ///Returing the mesh relevant to "size" pixels LOD of this mesh
@@ -236,8 +249,13 @@ public:
   void Draw(float lod, const Matrix &m = identity_matrix, float toofar=1, int cloak=-1, float nebdist=0, unsigned char damage=0,bool renormalize_normals=false); //short fix
   ///Draws lod pixels wide, mesh at Transformation NOW. If centered, then will center on camera and disable cull
   void DrawNow(float lod, bool centered, const Matrix &m= identity_matrix, int cloak=-1,float nebdist=0); //short fix
+#ifdef PARTITIONED_Z_BUFFER
+  ///Will draw all undrawn meshes of this type
+  virtual void ProcessDrawQueue(int whichpass, int whichdrawqueue, float zmin, float zmax);
+#else
   ///Will draw all undrawn meshes of this type
   virtual void ProcessDrawQueue(int whichpass, int whichdrawqueue);
+#endif
   ///Will draw all undrawn far meshes beyond the range of zbuffer (better be convex).
   virtual void SelectCullFace (int whichdrawqueue);
   virtual void RestoreCullFace (int whichdrawqueue);

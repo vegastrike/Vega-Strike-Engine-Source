@@ -51,6 +51,8 @@ void UncheckUnit (class Unit * un);
 #include "networking/lowlevel/vsnet_clientstate.h"
 #include "gfx/cockpit_generic.h"
 #include "vsfilesystem.h"
+#include <set>
+#include <string>
 using std::string;
 
 extern char * GetUnitDir (const char * filename);
@@ -105,7 +107,7 @@ class Mount {
 	// Serial used to store missiles serial id before they are really created
 	ObjSerial serial;
 	float xyscale;float zscale;//for guns!
-	float ComputeAnimatedFrame(Mesh * gun);
+	float ComputeAnimatedFrame(Mesh * gun, double sim_atom);
     void SwapMounts (Mount * other);
     void ReplaceMounts (const Mount * other);
 	double Percentage (const Mount *newammo) const;
@@ -252,7 +254,7 @@ public:
        Flightgroup *flightgroup=NULL,
        int         fg_subnumber=0, string * netxml=NULL);
   friend class UnitFactory;
-  void LoadRow(class CSVRow &row, std::string unitMod, string*netxml=NULL);
+  void LoadRow(class CSVRow &row, std::string unitMod, string*netxml=NULL); //table can be NULL, but setting it appropriately may increase performance
 public:    
   virtual ~Unit();
 
@@ -312,18 +314,19 @@ public:
 	  unsigned InWarp:1;
 	  unsigned WarpRamping:1;
 	  unsigned unused1:1;
+      unsigned NoDamageParticles:1;
 	  float WarpFieldStrength;
 	  float RampCounter;
 	  unsigned char NumAnimationPoints;
 	  graphic_options() {
-		  FaceCamera=Animating=missilelock=InWarp=unused1=WarpRamping=0;
+		  FaceCamera=Animating=missilelock=InWarp=unused1=WarpRamping=NoDamageParticles=0;
 		  NumAnimationPoints=0;
 		  RampCounter=0;
 	  }
   }graphicOptions;
   bool isSubUnit() {return graphicOptions.SubUnit?true:false;}
   void setFaceCamera(){graphicOptions.FaceCamera=1;}
-  bool UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage, const Unit * downgrade_min, bool force_change_on_nothing);
+  bool UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage, const Unit * downgrade_min, bool force_change_on_nothing,bool gen_downgrade_list);
   void ImportPartList (const std::string& category, float price, float pricedev,  float quantity, float quantdev);
   unsigned char RecomputeRole();//changes own role
   int GetNumMounts ()const  {return mounts.size();}
@@ -332,14 +335,14 @@ public:
 // Uses base stuff -> only in Unit
   virtual void UpgradeInterface (Unit * base) {}
 
-  bool canUpgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, const Unit * templ=NULL, bool force_change_on_nothing=false);
-  bool Upgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, const Unit * templ=NULL, bool force_change_on_nothing=false);
+  bool canUpgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, const Unit * templ=NULL, bool force_change_on_nothing=false, bool gen_downgrade_list=true);
+  bool Upgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, const Unit * templ=NULL, bool force_change_on_nothing=false, bool gen_downgrade_list=true);
   int RepairCost();//returns how many things need to be repaired--if nothing is damaged it will return 1 for labor.  doesn't assume any given cost on such thigns.
   int RepairUpgrade();//returns how many things were repaired
   bool ReduceToTemplate();
   virtual double Upgrade (const std::string &file,int mountoffset, int subunitoffset, bool force, bool loop_through_mounts) { return 1;}
-  bool canDowngrade (const Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage, const Unit * downgradelimit);
-  bool Downgrade (const Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage, const Unit * downgradelimit);
+  bool canDowngrade (const Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage, const Unit * downgradelimit, bool gen_downgrade_list=true);
+  bool Downgrade (const Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage, const Unit * downgradelimit, bool gen_downgrade_list=true);
 
 /***************************************************************************************/
 /**** GFX/PLANET STUFF                                                              ****/
@@ -571,7 +574,7 @@ public:
   virtual void SetPlanetHackTransformation (Transformation *&ct,Matrix *&ctm) {}
   bool AutoPilotTo(Unit * un, bool automaticenergyrealloc,int recursive_level=2);
   ///The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
-  void *owner;//void ensures this won't be dereferenced on accident
+  void *owner; //void ensures that it won't be referenced by accident
   ///The number of frames ahead this was put in the simulation queue
   unsigned int sim_atom_multiplier;
   ///The previous state in last physics frame to interpolate within
@@ -596,10 +599,10 @@ public:
   ///the current velocities in LOCAL space (not world space)
   Vector AngularVelocity;  Vector Velocity;  ///The image that will appear on those screens of units targetting this unit
   UnitImages *image;
-  ///mass of this unit (may change with cargo)
-  float Mass;
   ///positive for the multiplier applied to nearby spec starships (1 = planetary/inert effects) 0 is default (no effect), -X means 0 but able to be enabled
   float specInterdiction;
+  ///mass of this unit (may change with cargo)
+  float Mass;
   float HeatSink;
 protected:
   ///are shields tight to the hull.  zero means bubble
@@ -611,6 +614,7 @@ protected:
   ///-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)
  ///Moment of intertia of this unit
   float Momentofinertia;
+  Vector SavedAccel;
 
 public:
   struct Limits {
@@ -737,6 +741,8 @@ public:
   void	ApplyNetDamage( Vector & pnt, Vector & normal, float amt, float ppercentage, float spercentage, GFXColor & color);
   ///Applies damage to the pre-transformed area of the ship
   void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &,  void *ownerDoNotDereference, float phasedamage=0 );
+  ///Lights the shields, without applying damage or making the AI mad - useful for special effects
+  void LightShields(const Vector & pnt, const Vector & normal, float amt, const GFXColor &color);
   ///Deals remaining damage to the hull at point and applies lighting effects
   float DealDamageToHullReturnArmor (const Vector &pnt, float Damage, float * &targ);//short fix
   virtual void ArmorDamageSound( const Vector &pnt) {};
@@ -784,8 +790,8 @@ public:
   virtual Vector ResolveForces (const Transformation &, const Matrix&);
   ///Returns the pqr oritnattion of the unit in world space
   void SetOrientation (QVector q, QVector r);
-  void SetOrientation (QVector p, QVector q, QVector r);
   void SetOrientation (Quaternion Q);
+  void SetOrientation (QVector p, QVector q, QVector r);
   void GetOrientation(Vector &p, Vector &q, Vector &r) const {
     Matrix m;
     curr_physical_state.to_matrix(m);
@@ -793,7 +799,7 @@ public:
     q=m.getQ();
     r=m.getR();
   }
-  Vector GetAcceleration() {
+  Vector GetNetAcceleration() {
     Vector p, q, r;
     GetOrientation(p,q,r);
 	Vector res(NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r );
@@ -803,7 +809,20 @@ public:
     res=res/GetMass();
 
   	return res;
-  } //acceleration
+  } //acceleration, retrieved from NetForce - not stable (partial during simulation), use GetAcceleration()
+  Vector GetAcceleration() const {
+    return SavedAccel;
+  } //acceleration, stable over the simulation
+  float GetMaxAccelerationInDirectionOf(const Vector & ref, bool afterburn) const {
+    Vector p,q,r;
+    GetOrientation(p,q,r);
+    Vector lref(ref*p,ref*q,ref*r);
+    float tp=(lref.i==0)?0:abs(Limits().lateral/lref.i);
+    float tq=(lref.j==0)?0:abs(Limits().vertical/lref.j);
+    float tr=(lref.k==0)?0:abs(((lref.k>0)?Limits().forward:Limits().retro)/lref.k);
+    float tm=min(tp,min(tr,tq));
+    return lref.Magnitude()*tm/GetMass();
+  }
   ///Transforms a orientation vector Up a coordinate level. Does not take position into account
   Vector UpCoordinateLevel(const Vector &v) const;
   ///Transforms a orientation vector Down a coordinate level. Does not take position into account
@@ -985,6 +1004,7 @@ public:
   int RemoveCargo (unsigned int i, int quantity, bool eraseZero=true);
   float PriceCargo (const std::string &s);
   Cargo & GetCargo (unsigned int i);
+  const Cargo & GetCargo (unsigned int i) const;
   void GetCargoCat (const std::string &category, vector <Cargo> &cat);
   ///below function returns NULL if not found
   Cargo * GetCargo (const std::string &s, unsigned int &i);
@@ -1167,6 +1187,14 @@ public:
 /**** MISC STUFF                                                                    ****/
 /***************************************************************************************/
 
+public:
+  enum tractorHow { tractorImmune=0, tractorPush=1, tractorIn=2, tractorBoth=3 };
+  bool isTractorable(enum tractorHow how=tractorBoth) const;
+  void setTractorability(enum tractorHow how);
+  enum tractorHow getTractorability() const;
+private:
+  unsigned char tractorability_flags;
+
 protected:
   ///if the unit is a planet, this contains the long-name 'mars-station'
   string fullname;
@@ -1191,22 +1219,22 @@ public:
   UnitImages &GetImageInformation();
 
   /// sets the full name/fgid for planets
-  bool isStarShip(){ if(isUnit()==UNITPTR){ return true;} return false; };
-  bool isPlanet(){ if(isUnit()==PLANETPTR){ return true;} return false; };
-  bool isJumppoint(){ if(GetDestinations().size()!=0){ return true; } return false; }
+  bool isStarShip() const { return (isUnit()==UNITPTR); };
+  bool isPlanet() const { return (isUnit()==PLANETPTR); };
+  bool isJumppoint() const { return (GetDestinations().size()!=0); }
 
 // Uses Universe stuff -> maybe only needed in Unit class
-  bool isEnemy(Unit *other){ if(FactionUtil::GetIntRelation(this->faction,other->faction)<0.0){ return true; } return false; };
-  bool isFriend(Unit *other){ if(FactionUtil::GetIntRelation(this->faction,other->faction)>0.0){ return true; } return false; };
-  bool isNeutral(Unit *other){ if(FactionUtil::GetIntRelation(this->faction,other->faction)==0.0){ return true; } return false; };
-  float getRelation(Unit *other);
-  //can be eaten by tractor or not?  of the thing, added by chuck_starchaser, refined by spiritplumber
-  //  bool tractorable; // just lookup in the unit type
-public:
+  bool isEnemy(Unit *other) const { return (FactionUtil::GetIntRelation(this->faction,other->faction)<0.0); };
+  bool isFriend(Unit *other) const { return (FactionUtil::GetIntRelation(this->faction,other->faction)>0.0); };
+  bool isNeutral(Unit *other) const { return (FactionUtil::GetIntRelation(this->faction,other->faction)==0.0); };
+  float getRelation(Unit *other) const;
+  bool is_ejectdock;
+
   void TurretFAW();
-  bool isTractorable() const;
 };
-Unit * findUnitInStarsystem (void * unitDoNotDereference);
+
+Unit * findUnitInStarsystem(void * unitDoNotDereference);
+
 ///Holds temporary values for inter-function XML communication Saves deprecated restr info
 struct Unit::XML {
   float randomstartframe;
@@ -1260,6 +1288,9 @@ inline Unit * UnitContainer::GetUnit() {
   return unit;
 }
 
+
+extern std::set <std::string> GetListOfDowngrades();
+extern void ClearDowngradeMap();
 
 
 #endif

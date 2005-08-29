@@ -65,6 +65,13 @@ void modifyDeadZone(JoyStick * j) {
         }
     }
 }
+void modifyExponent(JoyStick * j) {
+    static float joy_exp = XMLSupport::parse_float(vs_config->getVariable ("joystick","joystick_exponent","1.0"));
+    if ((joy_exp != 1.0)&&(joy_exp > 0)) {
+        for(int a=0;a<j->nr_of_axes;a++) 
+            j->joy_axis[a]=((j->joy_axis[a]<0)?-pow(-j->joy_axis[a],joy_exp):pow(j->joy_axis[a],joy_exp));
+    }
+}
 static bool JoyStickToggle=true;
 void JoyStickToggleDisable() {
   JoyStickToggle=false;
@@ -99,6 +106,7 @@ void myGlutJoystickCallback (unsigned int buttonmask, int x, int y, int z) {
               if (z>maxz) maxz=z;
 	      joystick[0]->joy_axis[2]=((float)z-(((float)(maxz+minz))/2.0))/(((float)(maxz-minz))/2.0);
       modifyDeadZone(joystick[0]);
+      modifyExponent(joystick[0]);
     }
 }
 
@@ -146,9 +154,8 @@ void InitJoystick(){
   printf("The names of the joysticks are:\n");
 #else
   //use glut
-  if (glutDeviceGet(GLUT_HAS_JOYSTICK)||XMLSupport::parse_bool(vs_config->getVariable("joystick",
-										      "force_use_of_joystick",
-										      "false"))) {
+  static bool force_use_of_joystick = XMLSupport::parse_bool(vs_config->getVariable("joystick","force_use_of_joystick","false"));
+  if (glutDeviceGet(GLUT_HAS_JOYSTICK)||force_use_of_joystick) {
           printf ("setting joystick functionality:: joystick online");
           glutJoystickFunc (myGlutJoystickCallback,JoystickPollingRate());
           num_joysticks=1;
@@ -192,12 +199,15 @@ JoyStick::JoyStick(int which): mouse(which==MOUSE_JOYSTICK) {
   }
   joy_buttons=0;
 
+  static bool def_debug_digital_hatswitch=XMLSupport::parse_bool(vs_config->getVariable("joystick","debug_digital_hatswitch","false"));
+  static float def_joy_deadzone=XMLSupport::parse_float(vs_config->getVariable("joystick","deadband","0.05"));
+  static float def_mouse_deadzone=XMLSupport::parse_float (vs_config->getVariable("joystick","mouse_deadband","0"));
+
   player=which;//by default bind players to whichever joystick it is
-  debug_digital_hatswitch=XMLSupport::parse_bool(vs_config->getVariable("joystick","debug_digital_hatswitch","false"));
+  debug_digital_hatswitch=def_debug_digital_hatswitch;
   if (which!=MOUSE_JOYSTICK)
-    deadzone=XMLSupport::parse_float(vs_config->getVariable("joystick","deadband","0.05"));
-  else
-	  deadzone=XMLSupport::parse_float (vs_config->getVariable("joystick","mouse_deadband","0"));
+      deadzone=def_joy_deadzone; else
+	  deadzone=def_mouse_deadzone;
   joy_available = 0;
   joy_x=joy_y=joy_z=0;
   if (which==MOUSE_JOYSTICK) {
@@ -263,7 +273,7 @@ void JoyStick::GetMouse (float &x, float &y, float &z, int &buttons) {
   static int savey = g_game.x_resolution/2;
   static bool warp_pointer = XMLSupport::parse_bool(vs_config->getVariable ("joystick","warp_mouse","false"));
   int def_mouse_sens = 1;
- static float mouse_sensitivity = XMLSupport::parse_float(vs_config->getVariable ("joystick","mouse_sensitivity","50"));
+  static float mouse_sensitivity = XMLSupport::parse_float(vs_config->getVariable ("joystick","mouse_sensitivity","50"));
   static float mouse_exp = XMLSupport::parse_float(vs_config->getVariable ("joystick","mouse_exponent","3"));
   int _dx, _dy;
   float fdx,fdy;
@@ -363,12 +373,15 @@ void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
        joy_buttons|=(1<<i);
       }
    }
-   for(int h=0;h<nr_of_hats;h++){
-       digital_hat[h]=SDL_JoystickGetHat(joy,h);
+   if(debug_digital_hatswitch){
+       for(int h=0;h<nr_of_hats;h++){
+           digital_hat[h]=SDL_JoystickGetHat(joy,h);
+       }
    }
    for(a=0;a<MAX_AXES;a++)
        joy_axis[a]=((float)axi[a]/32768.0);
    modifyDeadZone(this);
+   modifyExponent(this);
 #else //we have glut
     if (JoystickPollingRate()<=0) {
         glutForceJoystickFunc();

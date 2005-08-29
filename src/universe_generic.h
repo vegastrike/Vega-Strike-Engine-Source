@@ -34,7 +34,7 @@ class Camera;
 class Unit;
 
 /**
- * Class Universe Deals with universal constants. It is a global, 
+ * Class Universe Deals with universal constants. It is a global,
  * accessed from anywhere as _Universe-> Universe may be queried for 
  * Relationships, the current star system rendering is taking place in
  * etc.  It acts as a wrapper to the active Star System.
@@ -74,9 +74,9 @@ private:
   bool	isServer() { return is_server;}
   Cockpit * isPlayerStarship (const Unit* fighter);
   Cockpit * isPlayerStarshipVoid (const void* pointercompare) {
-	void *newp = const_cast<void *>(pointercompare);
-    return this->isPlayerStarship(reinterpret_cast<Unit*>(newp));
-//      return this->isPlayerStarship((Unit*)pointercompare);
+//	void *newp = const_cast<void *>(pointercompare);
+//    return this->isPlayerStarship(reinterpret_cast<Unit*>(newp));
+      return isPlayerStarship( (const Unit*) pointercompare );
   }
   int whichPlayerStarship (const Unit* fighter);
   Cockpit *AccessCockpit() {return cockpit[current_cockpit];}

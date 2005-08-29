@@ -111,6 +111,7 @@ struct GFXColor
     this->b = VSSwapHostFloatToLittle( this->b);
     this->a = VSSwapHostFloatToLittle( this->a);
   }
+
 };
 
 inline	GFXColor operator*(float s, const GFXColor&c) {
@@ -300,6 +301,7 @@ protected:
   } index;
   ///Array of modes that vertices will be drawn with
   enum POLYTYPE *mode;
+  bool unique_mode; //See Draw()
   ///Display list number if list is indeed active. 0 otherwise
   int display_list;//doubles as vbo_elements
   int vbo_data;
@@ -421,20 +423,24 @@ struct GFXMaterial
   /// specular power
 	float power; 
 };
-//Textures may only be cube maps or Texture2d
+//Textures may only be cube maps, Texture1d, Texture2d or Texture3d
 enum TEXTURE_TARGET {
+  TEXTURE1D,
   TEXTURE2D,
+  TEXTURE3D,
   CUBEMAP
 };
-///Textures may only be cube maps or Texture2d
+///Textures may only be cube maps, Texture1d, Texture2d or Texture3d
 enum TEXTURE_IMAGE_TARGET {
+  TEXTURE_1D,
   TEXTURE_2D,
+  TEXTURE_3D,
   CUBEMAP_POSITIVE_X,
   CUBEMAP_NEGATIVE_X,
   CUBEMAP_POSITIVE_Y,
   CUBEMAP_NEGATIVE_Y,
   CUBEMAP_POSITIVE_Z,
-  CUBEMAP_NEGATIVE_Z,
+  CUBEMAP_NEGATIVE_Z
 };
 
 /**
@@ -469,7 +475,8 @@ enum STATE {
 	TEXTURE0,
 	TEXTURE1,
 	CULLFACE,
-	SMOOTH
+	SMOOTH,
+    STENCIL
 };
 
 enum CLIPSTATE {
@@ -486,7 +493,8 @@ enum ADDRESSMODE{
 	WRAP,
 	MIRROR,
 	CLAMP,
-	BORDER
+	BORDER,
+    DEFAULT_ADDRESS_MODE
 };
 
 enum FOGMODE {
@@ -532,6 +540,13 @@ enum FILTER {
  */
 enum DEPTHFUNC{
 	NEVER,LESS,EQUAL, LEQUAL, GREATER, NEQUAL, GEQUAL, ALWAYS
+};
+
+/**
+ * Used for stencil writes
+ */
+enum STENCILOP{
+	KEEP,CLEAR,REPLACE,INCR,DECR,INVERT
 };
 
 

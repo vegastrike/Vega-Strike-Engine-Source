@@ -35,6 +35,8 @@ namespace XMLSupport {
   string replace_space(const string &str);
   int parse_int(const string &str);
   bool parse_bool (const string &str);
+  bool parse_option_ispresent(const string &str, const string &opt, const string &sep=",\r\n", const string &vsep="=");
+  string parse_option_value(const string &str, const string &opt, const string &defvalue, const string &sep=",\r\n", const string &vsep="=");
 
   class EnumMap {
 

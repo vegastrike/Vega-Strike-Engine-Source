@@ -37,6 +37,16 @@ struct StarShipControlKeyboard {
   int rollrightrelease;
   int rollleftpress;
   int rollleftrelease;
+  int joyinertialxypress;
+  int joyinertialxyrelease;
+  int joyinertialxzpress;
+  int joyinertialxzrelease;
+  int joyrollpress;
+  int joyrollrelease;
+  int joybankpress;
+  int joybankrelease;
+  int inertialflightpress;
+  int inertialflightrelease;
   bool stoppress;
   bool startpress;
   bool dirty;//it wasn't updated...
@@ -51,7 +61,24 @@ struct StarShipControlKeyboard {
   bool switchsecured;
   bool freq_increase;
   bool freq_decrease;
-  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=switch_combat_mode=terminateauto=setunvel=switchmode=setnulvel=realauto=matchspeed=ASAP=false;axial=vertical=horizontal=0;commchanged=startcomm=false;switchwebcam=false;switchsecured=false;freq_increase=false;freq_decrease=false;}
+  bool switchinertialflight;
+  bool switchjoyinertialxy;
+  bool switchjoyinertialxz;
+  bool switchjoyroll;
+  bool switchjoybank;
+  void UnDirty() {
+      sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=
+          leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=
+          accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=
+          rollleftpress=rollleftrelease=joyinertialxypress=joyinertialxyrelease=
+          joyinertialxzpress=joyinertialxzrelease=joyrollpress=joyrollrelease=
+          joybankpress=joybankrelease=inertialflightpress=inertialflightrelease=0;
+      jumpkey=startpress=stoppress=autopilot=dirty=switch_combat_mode=terminateauto=
+          setunvel=switchmode=setnulvel=realauto=matchspeed=ASAP=switchinertialflight=
+          commchanged=startcomm=switchwebcam=switchsecured=freq_increase=freq_decrease=
+          switchjoyinertialxy=switchjoyinertialxz=switchjoyroll=switchjoybank=false;
+      axial=vertical=horizontal=0;
+  }
   StarShipControlKeyboard() {UnDirty();}
 };
 static vector <StarShipControlKeyboard> starshipcontrolkeys;
@@ -71,6 +98,18 @@ FlyByKeyboard::FlyByKeyboard (unsigned int whichplayer): FlyByWire (),axis_key(0
   }
   autopilot=NULL;
   inauto=false;
+
+  //Initial Joystick Mode
+  //  NOTE: Perhaps it should be handled by FlyByJoystick, but it was cumbersome to do that
+  //    since it handled mainly keystrokes - Any ideas?
+  static string initialJoyMode = vs_config->getVariable ("joystick","initial_mode","normal" );
+  joy_mode = 0;
+  if (initialJoyMode=="inertialxy")
+      joy_mode = joyModeInertialXY; else if (initialJoyMode=="inertialxz")
+      joy_mode = joyModeInertialXZ; else if (initialJoyMode=="roll")
+      joy_mode = joyModeRoll; else if (initialJoyMode=="bank")
+      joy_mode = joyModeBank;
+
 }
 float FlyByKeyboard::clamp_axis (float v) {
   static int axis_scale =XMLSupport::parse_int (vs_config->getVariable ("physics","slide_start","3"));
@@ -235,7 +274,7 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
 
 
   //  printf("flybykey::exec\n");
-
+  static bool initial_inertial_mode = XMLSupport::parse_bool( vs_config->getVariable("flight","inertial::initial","false") );
   if (SSCK.dirty) {
     //go with what's last there: no frames since last physics frame
     if (SSCK.uppress<=0&&SSCK.downpress<=0)
@@ -268,6 +307,17 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
       Afterburn(1);
     else
       Afterburn (0);
+
+    if (SSCK.joyinertialxypress>0)
+        joy_mode |= joyModeInertialXY;
+    if (SSCK.joyinertialxzpress>0)
+        joy_mode |= joyModeInertialXZ;
+    if (SSCK.joyrollpress>0)
+        joy_mode |= joyModeRoll;
+    if (SSCK.joybankpress>0)
+        joy_mode |= joyModeBank;
+    if (SSCK.inertialflightpress>0)
+        InertialFlight(!initial_inertial_mode);
 
     if (SSCK.accelpress>0)
       Accel(1);
@@ -324,6 +374,31 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
       //VSFileSystem::vs_fprintf(stderr,"AB: press %d rel %d\n",SSCK.ABpress,SSCK.ABrelease);
       Afterburn ((SSCK.ABpress>=1)?1:0);
     }
+    if (SSCK.joyinertialxypress||SSCK.joyinertialxyrelease) {
+        if (SSCK.joyinertialxypress>0)
+            joy_mode |= joyModeInertialXY; else
+            joy_mode &= ~joyModeInertialXY;
+    }
+    if (SSCK.joyinertialxzpress||SSCK.joyinertialxzrelease) {
+        if (SSCK.joyinertialxzpress>0)
+            joy_mode |= joyModeInertialXZ; else
+            joy_mode &= ~joyModeInertialXZ;
+    }
+    if (SSCK.joyrollpress||SSCK.joyrollrelease) {
+        if (SSCK.joyrollpress>0)
+            joy_mode |= joyModeRoll; else
+            joy_mode &= ~joyModeRoll;
+    }
+    if (SSCK.joybankpress||SSCK.joybankrelease) {
+        if (SSCK.joybankpress>0)
+            joy_mode |= joyModeBank; else
+            joy_mode &= ~joyModeBank;
+    }
+    if (SSCK.inertialflightpress||SSCK.inertialflightrelease) {
+        if (SSCK.inertialflightpress>0)
+            InertialFlight(!initial_inertial_mode); else
+            InertialFlight(initial_inertial_mode);
+    }
   }
   if (SSCK.stoppress) {
     Stop(0);
@@ -336,16 +411,36 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
   } else {
     SheltonSlide(false);
   }
+  if (SSCK.switchinertialflight) {
+    InertialFlight(!InertialFlight());
+    SSCK.switchinertialflight = false;
+  }
+  if (SSCK.switchjoyinertialxy) {
+    joy_mode ^= joyModeInertialXY;
+    SSCK.switchjoyinertialxy = false;
+  }
+  if (SSCK.switchjoyinertialxz) {
+    joy_mode ^= joyModeInertialXZ;
+    SSCK.switchjoyinertialxz = false;
+  }
+  if (SSCK.switchjoyroll) {
+    joy_mode ^= joyModeRoll;
+    SSCK.switchjoyroll = false;
+  }
+  if (SSCK.switchjoybank) {
+    joy_mode ^= joyModeBank;
+    SSCK.switchjoybank = false;
+  }
   if (SSCK.switchmode) {
     FlyByWire::SwitchFlightMode();
   }
   if (SSCK.vertical) {
-    FlyByWire::ThrustUp (SSCK.vertical);
+    FlyByWire::DirectThrustUp (SSCK.vertical);
   }
   if (SSCK.horizontal)
-    FlyByWire::ThrustRight(SSCK.horizontal);
+    FlyByWire::DirectThrustRight(SSCK.horizontal);
   if (SSCK.axial)
-    FlyByWire::ThrustFront(SSCK.axial);
+    FlyByWire::DirectThrustFront(SSCK.axial);
   if (SSCK.autopilot&&!autopilot) {
     autopilot = new Orders::FaceTarget (false,1);
     autopilot->SetParent (parent);
@@ -529,11 +624,96 @@ void FlyByKeyboard::SheltonKey(const KBData&,KBSTATE k) {
   default:break;
   }
 }
+
+void FlyByKeyboard::InertialToggleKey(const KBData&,KBSTATE k) {
+  if (g().dirty) g().UnDirty();
+  switch (k) {
+  case PRESS: g().switchinertialflight=true; break;
+  default:break;
+  }
+}
+
+void FlyByKeyboard::InertialPulsorKey(const KBData&,KBSTATE k) {
+  if (g().dirty) g().UnDirty();
+  switch (k) {
+  case UP:  g().inertialflightrelease=FBWABS(g().inertialflightrelease)+1; break;
+  case DOWN:g().inertialflightpress=FBWABS(g().inertialflightpress)+1; break;
+  default:break;
+  }
+}
+
+void FlyByKeyboard::JoyInertialXYToggleKey(const KBData&,KBSTATE k) {
+  if (g().dirty) g().UnDirty();
+  switch (k) {
+  case PRESS: g().switchjoyinertialxy=true; break;
+  default:break;
+  }
+}
+
+void FlyByKeyboard::JoyInertialXZToggleKey(const KBData&,KBSTATE k) {
+  if (g().dirty) g().UnDirty();
+  switch (k) {
+  case PRESS: g().switchjoyinertialxz=true; break;
+  default:break;
+  }
+}
+
+void FlyByKeyboard::JoyRollToggleKey(const KBData&,KBSTATE k) {
+  if (g().dirty) g().UnDirty();
+  switch (k) {
+  case PRESS: g().switchjoyroll=true; break;
+  default:break;
+  }
+}
+
+void FlyByKeyboard::JoyBankToggleKey(const KBData&,KBSTATE k) {
+  if (g().dirty) g().UnDirty();
+  switch (k) {
+  case PRESS: g().switchjoybank=true; break;
+  default:break;
+  }
+}
+
+void FlyByKeyboard::JoyInertialXYPulsorKey(const KBData&,KBSTATE k) {
+  if (g().dirty) g().UnDirty();
+  switch (k) {
+  case UP:  g().joyinertialxyrelease=FBWABS(g().joyinertialxyrelease)+1; break;
+  case DOWN:g().joyinertialxypress=FBWABS(g().joyinertialxypress)+1; break;
+  default:break;
+  }
+}
+
+void FlyByKeyboard::JoyInertialXZPulsorKey(const KBData&,KBSTATE k) {
+  if (g().dirty) g().UnDirty();
+  switch (k) {
+  case UP:  g().joyinertialxzrelease=FBWABS(g().joyinertialxzrelease)+1; break;
+  case DOWN:g().joyinertialxzpress=FBWABS(g().joyinertialxzpress)+1; break;
+  default:break;
+  }
+}
+
+void FlyByKeyboard::JoyRollPulsorKey(const KBData&,KBSTATE k) {
+  if (g().dirty) g().UnDirty();
+  switch (k) {
+  case UP:  g().joyrollrelease=FBWABS(g().joyrollrelease)+1; break;
+  case DOWN:g().joyrollpress=FBWABS(g().joyrollpress)+1; break;
+  default:break;
+  }
+}
+
+void FlyByKeyboard::JoyBankPulsorKey(const KBData&,KBSTATE k) {
+  if (g().dirty) g().UnDirty();
+  switch (k) {
+  case UP:  g().joybankrelease=FBWABS(g().joybankrelease)+1; break;
+  case DOWN:g().joybankpress=FBWABS(g().joybankpress)+1; break;
+  default:break;
+  }
+}
+
 void FlyByKeyboard::JumpKey(const KBData&,KBSTATE k) {
   switch (k) {
   case PRESS:
-     if (_Universe->AccessCockpit()->GetParent()->isSubUnit() == false)
-    g().jumpkey=true;
+    g().jumpkey = (_Universe->AccessCockpit()->GetParent() && !_Universe->AccessCockpit()->GetParent()->isSubUnit());
     break;
   case UP:
   case RELEASE:
@@ -561,7 +741,7 @@ void FlyByKeyboard::UpKey(const KBData&,KBSTATE k) {
 void FlyByKeyboard::KThrustRight (const KBData&,KBSTATE k) {
   if (g().dirty)g().UnDirty();
   switch (k) {
-  case DOWN:g().horizontal+=1;
+  case DOWN:g().horizontal-=1;
     break;
   case UP:
   case PRESS:
@@ -573,7 +753,7 @@ void FlyByKeyboard::KThrustRight (const KBData&,KBSTATE k) {
 void FlyByKeyboard::KThrustLeft (const KBData&,KBSTATE k) {
   if (g().dirty)g().UnDirty();
   switch (k) {
-  case DOWN:g().horizontal-=1;
+  case DOWN:g().horizontal+=1;
     break;
   case UP:
   case PRESS:

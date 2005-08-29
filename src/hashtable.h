@@ -27,6 +27,10 @@
 #include <vector>
 #include <algorithm>
 
+#define HASH_INTSIZE (sizeof(int)*8)
+#define HASH_SALT_0 0x7EF92C3B
+#define HASH_SALT_1 0x9B
+
 //const int hashsize = 1001;
 using namespace std;
 //Hashtable doesn't grow
@@ -53,9 +57,11 @@ template<class KEY, class VALUE, int SIZ> class Hashtable {
 	}
 	static int hash(const std::string &key) {
 		unsigned int k = 0;
-		typename std::string::const_iterator start = key.begin();
-		for(;start!=key.end(); start++) {
-			k += (k * 128) + *start;
+		for(typename std::string::const_iterator start = key.begin(); start!=key.end(); start++) {
+            k ^= (*start&HASH_SALT_1);
+            k ^= HASH_SALT_0;
+            k  = (((k>>4)&0xF)|(k<<(HASH_INTSIZE-4)));
+            k ^= *start;
 		}
 		k %= SIZ;
 		return k;

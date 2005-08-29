@@ -37,6 +37,8 @@
 #include "in_kb_data.h"
 extern float rand01();
 #define SWITCH_CONST .9
+#define VERYNEAR_CONST 0.004f /* The smaller VERYNEAR_CONST is, the worse Z-Buffer precision will be. So keep this above 0.004) */
+#define COCKPITZ_HEADROOM 1.005f /*so that znear/zfar are not too close to max/min values, and account for off-center cockpits */
 static GFXColor RetrColor (const string& name, GFXColor def=GFXColor(1,1,1,1)) {
   vs_config->getColor(name,&def.r);    
   return def;
@@ -44,6 +46,8 @@ static GFXColor RetrColor (const string& name, GFXColor def=GFXColor(1,1,1,1)) {
 extern Unit*getTopLevelOwner();
 static soundContainer disableautosound;
 static soundContainer enableautosound;
+
+#define sqr(x) (x*x)
 
 void soundContainer::loadsound (string soundfile,bool looping) {
 	if (this->sound==-2&&soundfile.size()) {
@@ -187,9 +191,11 @@ GFXColor GameCockpit::relationToColor (float relation) {
 void GameCockpit::DrawNavigationSymbol (const Vector &Loc, const Vector & P, const Vector & Q, float size) {
   GFXColor4f (1,1,1,1);
   if (1) {
-    static float crossthick = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","NavCrossLineThickness","1"));; // 1.05;
-    glLineWidth ((int)crossthick);
+    static float crossthick = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","NavCrossLineThickness","1")); //1.05;
+    GFXLineWidth(crossthick);
     size = .125*GFXGetZPerspective (size);
+    GFXBlendMode (SRCALPHA,INVSRCALPHA);
+    GFXEnable (SMOOTH);
     GFXBegin (GFXLINE);
     GFXVertexf(Loc+P*size);
     GFXVertexf(Loc+.125*P*size);
@@ -211,9 +217,9 @@ void GameCockpit::DrawNavigationSymbol (const Vector &Loc, const Vector & P, con
     GFXVertexf(Loc+.9*Q*size-.125*P*size);
     GFXVertexf(Loc-.9*Q*size+.125*P*size);
     GFXVertexf(Loc-.9*Q*size-.125*P*size);
-    
     GFXEnd();
-    glLineWidth (1);
+    GFXDisable(SMOOTH);
+    GFXLineWidth(1);
   }
 }
 
@@ -221,19 +227,15 @@ float GameCockpit::computeLockingSymbol(Unit * par) {
   return par->computeLockingPercent();
 }
 inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &CamP, const Vector & CamQ, const Vector & CamR, float lock_percent, bool ComputerLockon, bool Diamond=false) {
-
-// if set unconditionally like so, it works	  rSize = rSize * 0.1; // test
-
-//	if (Diamond)
-//		rSize=rSize*0.1;
-    static float boxthick = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","BoxLineThickness","1"));; // 1.05;
-    glLineWidth ((int)boxthick);
-
+  static float boxthick = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","BoxLineThickness","1"));
   static float rat = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","min_target_box_size",".01"));
   float len = (Loc).Magnitude();
   float curratio = rSize/len;
   if (curratio<rat) 
     rSize = len*rat;
+  GFXLineWidth(boxthick);
+  GFXEnable(SMOOTH);
+  GFXBlendMode(SRCALPHA,INVSRCALPHA);
   if (Diamond) {
     float ModrSize=rSize/1.41;
     GFXBegin (GFXLINESTRIP); 
@@ -248,7 +250,7 @@ inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &Ca
     GFXVertexf (Loc+(.75*CamP+CamQ).Cast()*ModrSize);
     GFXEnd();    
   }else if (ComputerLockon) {
-    GFXBegin (GFXLINESTRIP); 
+    GFXBegin (GFXLINESTRIP);
     GFXVertexf (Loc+(CamP+CamQ).Cast()*rSize);
     GFXVertexf (Loc+(CamP-CamQ).Cast()*rSize);
     GFXVertexf (Loc+(-CamP-CamQ).Cast()*rSize);
@@ -297,7 +299,6 @@ inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &Ca
     if (lock_percent<0) {
       lock_percent=0;
     }
-
 //  eallySwitch=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","switchToTargetModeOnKey","true"));
     static float absmin = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","min_lock_box_size",".001"));
     static float endreticle = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","MinMissileDiamondSize","1.05"));; // 1.05;
@@ -305,6 +306,7 @@ inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &Ca
     static float bracketsize = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","RotatingBracketSize","0.58"));; // 1.05;
     static float thetaspeed = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","DiamondRotationSpeed","1"));; // 1.05;
     static float lockline = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","LockConfirmLineLength","1.5"));; // 1.05;
+
 	float max=startreticle + endreticle;
     //    VSFileSystem::Fprintf (stderr,"lock percent %f\n",lock_percent);
     float coord = endreticle+(startreticle-endreticle)*lock_percent;//rSize/(1-lock_percent);//this is a number between 1 and 100
@@ -316,7 +318,7 @@ inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &Ca
  //   Vector LockBox (0*rtot,-rtot,1*rtot);
 
     static float diamondthick = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","DiamondLineThickness","1"));; // 1.05;
-    glLineWidth ((int)diamondthick);
+    GFXLineWidth(diamondthick);
     Vector TLockBox (rtot*LockBox.i+rtot*LockBox.j,rtot*LockBox.j-rtot*LockBox.i,LockBox.k);
     Vector SLockBox (TLockBox.j,TLockBox.i,TLockBox.k);
     QVector Origin = (CamP+CamQ).Cast()*(rSize*coord);
@@ -329,6 +331,7 @@ inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &Ca
     max*=rSize*.75*endreticle;
     if (lock_percent==0) {
       GFXVertexf (Loc+CamQ.Cast()*max*lockline);
+
       GFXVertexf (Loc+CamQ.Cast()*max);
     }
 
@@ -338,6 +341,7 @@ inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &Ca
     if (lock_percent==0) {
       GFXVertexf (Loc+CamP.Cast()*max);
       GFXVertexf (Loc+CamP.Cast()*max*lockline);
+
       GFXEnd();
       GFXBegin(GFXLINESTRIP);
       GFXVertexf (Loc-CamP.Cast()*max);
@@ -353,6 +357,7 @@ inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &Ca
     if (lock_percent==0) {
       GFXVertexf (Loc-CamQ.Cast()*max);
       GFXVertexf (Loc-CamQ.Cast()*max*lockline);
+
       GFXVertexf (Loc-CamQ.Cast()*max);
     }else {
       GFXEnd();
@@ -367,6 +372,7 @@ inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &Ca
       GFXEnd();
       GFXBegin(GFXLINESTRIP);
       GFXVertexf (Loc-CamP.Cast()*max*lockline);
+
       GFXVertexf (Loc-CamP.Cast()*max);
     }else {
       GFXEnd();
@@ -381,14 +387,14 @@ inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &Ca
       GFXVertexf (Loc+CamQ.Cast()*max);
     }
     GFXEnd();
-    glLineWidth (1);
   }
-
+  GFXLineWidth(1);
+  GFXDisable(SMOOTH);
 }
 
 static GFXColor DockBoxColor (const string& name) {
   GFXColor dockbox;
-  vs_config->getColor(name,&dockbox.r);    
+  vs_config->getColor(name,&dockbox.r);
   return dockbox;
 }
 inline void DrawDockingBoxes(Unit * un,Unit *target, const Vector & CamP, const Vector & CamQ, const Vector & CamR) {
@@ -463,9 +469,9 @@ void GameCockpit::DrawTargetBoxes(){
             static bool draw_dock_box =XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_docking_boxes","true"));
             if (draw_dock_box) 
               DrawDockingBoxes(un,target,CamP,CamQ, CamR);
-		DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),true); // changing size here doesn't seem to do anything
+	    DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),true);
 	  }else {
-	    DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),false);// changing size here doesn't seem to do anything
+	    DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),false);
 	  }
 	}
     }
@@ -505,6 +511,8 @@ void GameCockpit::DrawTargetBox () {
   GFXColorf (unitToColor(un,target,un->GetComputerData().radar.iff));
 
   if(draw_line_to_target){
+    GFXBlendMode (SRCALPHA,INVSRCALPHA);
+    GFXEnable (SMOOTH);
     QVector my_loc(_Universe->AccessCamera()->GetPosition());
     GFXBegin(GFXLINESTRIP);
     GFXVertexf(my_loc);
@@ -516,6 +524,7 @@ void GameCockpit::DrawTargetBox () {
       GFXVertexf(ttLoc);
     }
     GFXEnd();
+    GFXDisable (SMOOTH);
   }
   float distance = UnitUtil::getDistance(un,target);
   static bool draw_target_nav_symbol =XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_target_nav_symbol","true"));
@@ -538,6 +547,8 @@ void GameCockpit::DrawTargetBox () {
     float err = (.01*(1-un->CloakVisible()));
     QVector iLoc = target->PositionITTS (un->Position(),un->cumulative_velocity,speed,steady_itts)-_Universe->AccessCamera()->GetPosition()+10*err*QVector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
     
+    GFXEnable (SMOOTH);
+    GFXBlendMode (SRCALPHA,INVSRCALPHA);
     GFXBegin (GFXLINESTRIP);
     if(draw_line_to_itts){
       GFXVertexf(Loc);
@@ -549,6 +560,7 @@ void GameCockpit::DrawTargetBox () {
     GFXVertexf (iLoc+(CamQ.Cast())*.25*un->rSize());
     GFXVertexf (iLoc+(CamP.Cast())*.25*un->rSize());
     GFXEnd();
+    GFXDisable (SMOOTH);
   }
   GFXEnable (TEXTURE0);
   GFXEnable (DEPTHTEST);
@@ -562,7 +574,7 @@ void GameCockpit::DrawCommunicatingBoxes () {
   Vector CamP,CamQ,CamR;
   _Universe->AccessCamera()->GetPQR(CamP,CamQ,CamR);
   //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
-  for (unsigned int i=0;i<vdu.size();++i) {    
+  for (unsigned int i=0;i<vdu.size();++i) {
     Unit*target= vdu[i]->GetCommunicating();   
     if (target) {
       static GFXColor black_and_white=DockBoxColor ("communicating"); 
@@ -597,26 +609,33 @@ void GameCockpit::DrawTurretTargetBoxes () {
     return;
   UnitCollection::UnitIterator iter = parun->getSubUnits();
   Unit * un;
+
+  GFXDisable (TEXTURE0);
+  GFXDisable (TEXTURE1);
+  GFXDisable (DEPTHTEST);
+  GFXDisable (DEPTHWRITE);
+  GFXDisable (LIGHTING);
+
+  //This avoids rendering the same target box more than once
+  std::set<void*> drawn_targets;
+
   while (NULL!=(un=iter.current())) {
 	if (!un)
       return;
 	if (un->GetNebula()!=NULL)
 	  return;
     Unit *target = un->Target();
-    if (!target){
+    void *vtgt=(void*)target;
+    if (!target||(drawn_targets.count(vtgt)>0)){
       iter.advance();
       continue;
     }
+    drawn_targets.insert(vtgt);
+
 	Vector CamP,CamQ,CamR;
     _Universe->AccessCamera()->GetPQR(CamP,CamQ,CamR);
     //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
     QVector Loc(target->Position()-_Universe->AccessCamera()->GetPosition());
-    GFXDisable (TEXTURE0);
-    GFXDisable (TEXTURE1);
-    GFXDisable (DEPTHTEST);
-    GFXDisable (DEPTHWRITE);
-    GFXBlendMode (SRCALPHA,INVSRCALPHA);
-    GFXDisable (LIGHTING);
     static bool draw_nav_symbol=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawNavSymbol","false"));
     if (draw_nav_symbol)
       DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Cast().Dot((un->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition()));
@@ -626,6 +645,10 @@ void GameCockpit::DrawTurretTargetBoxes () {
 
 	// ** jay
 	float rSize = target->rSize();
+
+    float drift=rand()/(float)RAND_MAX;
+    GFXEnable(SMOOTH);
+    GFXBlendMode (SRCALPHA,INVSRCALPHA);
 	GFXBegin(GFXLINE);
 	GFXVertexf (Loc+(CamP).Cast()*rSize*1.3);
     GFXVertexf (Loc+(CamP).Cast()*rSize*.8);
@@ -639,73 +662,129 @@ void GameCockpit::DrawTurretTargetBoxes () {
 	GFXVertexf (Loc+(-CamQ).Cast()*rSize*1.3);
     GFXVertexf (Loc+(-CamQ).Cast()*rSize*.8);
 	GFXEnd();
-
-
-    GFXEnable (TEXTURE0);
-    GFXEnable (DEPTHTEST);
-    GFXEnable (DEPTHWRITE);
+    GFXDisable(SMOOTH);
 
     iter.advance();
   }
 
+  GFXEnable (TEXTURE0);
+  GFXEnable (DEPTHTEST);
+  GFXEnable (DEPTHWRITE);
 }
 
 
 void GameCockpit::DrawTacticalTargetBox () {
+
   static bool drawtactarg=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","DrawTacticalTarget","false"));
+
   if (!drawtactarg)
-    return;
-  static GFXColor black_and_white=DockBoxColor ("black_and_white");
-  Unit * parun = parent.GetUnit();
-  if (!parun)
+
     return;
 
+  static GFXColor black_and_white=DockBoxColor ("black_and_white");
+
+  Unit * parun = parent.GetUnit();
+
+  if (!parun)
+
+    return;
+
+
+
   Unit *target = parun->getFlightgroup()->target.GetUnit();
+
     if (target){
+
 	Vector CamP,CamQ,CamR;
+
     _Universe->AccessCamera()->GetPQR(CamP,CamQ,CamR);
+
     //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
+
     QVector Loc(target->Position()-_Universe->AccessCamera()->GetPosition());
+
     GFXDisable (TEXTURE0);
+
     GFXDisable (TEXTURE1);
+
     GFXDisable (DEPTHTEST);
+
     GFXDisable (DEPTHWRITE);
+
     GFXBlendMode (SRCALPHA,INVSRCALPHA);
+
     GFXDisable (LIGHTING);
+
     static float thethick=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","TacTargetThickness","1.0"));
+
     static float fudge=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","TacTargetLength","0.1"));
+
     static float foci=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","TacTargetFoci","0.5"));
+
     glLineWidth ((int)thethick); // temp
+
     GFXColorf (unitToColor(parun,target,parun->GetComputerData().radar.iff));
+
+
 
     //DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),un->TargetLocked());
 
+
+
 	// ** jay
+
 	float rSize = target->rSize();
 
+
+
 	GFXBegin(GFXLINE);
+
 	GFXVertexf (Loc+((-CamP).Cast()+(-CamQ).Cast())*rSize*(foci+fudge));
+
     GFXVertexf (Loc+((-CamP).Cast()+(-CamQ).Cast())*rSize*(foci-fudge));
 
+
+
 	GFXVertexf (Loc+((-CamP).Cast()+(CamQ).Cast())*rSize*(foci+fudge));
+
     GFXVertexf (Loc+((-CamP).Cast()+(CamQ).Cast())*rSize*(foci-fudge));
 
+
+
 	GFXVertexf (Loc+((CamP).Cast()+(-CamQ).Cast())*rSize*(foci+fudge));
+
     GFXVertexf (Loc+((CamP).Cast()+(-CamQ).Cast())*rSize*(foci-fudge));
 
+
+
 	GFXVertexf (Loc+((CamP).Cast()+(CamQ).Cast())*rSize*(foci+fudge));
+
     GFXVertexf (Loc+((CamP).Cast()+(CamQ).Cast())*rSize*(foci-fudge));
+
 	GFXEnd();
 
 
+
+
+
     GFXEnable (TEXTURE0);
+
     GFXEnable (DEPTHTEST);
+
     GFXEnable (DEPTHWRITE);
+
     glLineWidth ((int)1); // temp
+
+
 
   }
 
+
+
 }
+
+
+
 
 
 void GameCockpit::drawUnToTarget ( Unit * un, Unit* target,float xcent,float ycent, float xsize, float ysize, bool reardar){
@@ -851,6 +930,7 @@ void GameCockpit::DrawEliteBlips (Unit * un) {
   Radar[0]->GetPosition (xcent,ycent);
   GFXDisable (TEXTURE0);
   GFXDisable (LIGHTING);
+  GFXEnable  (SMOOTH);
   if (Radar[0]->LoadSuccess()) {
     DrawRadarCircles (xcent,ycent,xsize,ysize,textcol);
   }
@@ -917,6 +997,7 @@ void GameCockpit::DrawEliteBlips (Unit * un) {
     }
     iter.advance();
   }
+  GFXDisable (SMOOTH);
   GFXPointSize (1);
   GFXColor4f (1,1,1,1);
   GFXEnable (TEXTURE0);
@@ -961,7 +1042,7 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
 		return .25*(armordat[1]+armordat[3]+armordat[5]+armordat[7]);
 	case UnitImages::ARMORF:
 	default:
-		return .25*(armordat[0]+armordat[2]+armordat[4]+armordat[6]);		
+		return .25*(armordat[0]+armordat[2]+armordat[4]+armordat[6]);
 	}
   case UnitImages::FUEL:
 	if (target->FuelData()>maxfuel)
@@ -1003,14 +1084,22 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
     return go;
 	}
   case UnitImages::LOCK:
-    if  ((tmpunit = target->GetComputerData().threat.GetUnit())) {
-      return (tmpunit->cosAngleTo (target,*&armordat[0],FLT_MAX,FLT_MAX)>.95);
+    {
+        static float locklight_time = XMLSupport::parse_float( vs_config->getVariable("graphics","locklight_time","1") );
+        bool res=false;
+        if  ((tmpunit = target->GetComputerData().threat.GetUnit())) {
+            res = tmpunit->cosAngleTo (target,*&armordat[0],FLT_MAX,FLT_MAX)>.95;
+            if (res) last_locktime = UniverseUtil::GetGameTime();
+        }
+        return (res||((UniverseUtil::GetGameTime()-last_locktime) < locklight_time))?1.0f:0.0f;
     }
-    return 0;
   case UnitImages::MISSILELOCK:
-	  if (target->graphicOptions.missilelock)
-		  return 1;
-	  return 0;
+    {
+        static float locklight_time = XMLSupport::parse_float( vs_config->getVariable("graphics","locklight_time","1") );
+        bool res = target->graphicOptions.missilelock;
+        if (res) last_mlocktime = UniverseUtil::GetGameTime();
+        return (res||((UniverseUtil::GetGameTime()-last_mlocktime) < locklight_time))?1.0f:0.0f;
+    }
   case UnitImages::COLLISION:{
 	  static double collidepanic = XMLSupport::parse_float (vs_config->getVariable("physics","collision_inertial_time","1.25"));
 	  return (getNewTime()-TimeOfLastCollision)<collidepanic;
@@ -1019,7 +1108,7 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
   case UnitImages::ECM:
 	  return target->GetImageInformation().ecm>0?1:0;
   case UnitImages::WARPFIELDSTRENGTH:
-          return target->graphicOptions.WarpFieldStrength;
+      return target->graphicOptions.WarpFieldStrength;
   case UnitImages::JUMP:
 	  return jumpok?1:0;
   case UnitImages::KPS:
@@ -1226,21 +1315,32 @@ GameCockpit::GameCockpit (const char * file, Unit * parent,const std::string &pi
   }
   Radar[0]=Radar[1]=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
 
-  draw_all_boxes=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawAllTargetBoxes","false"));
-  draw_line_to_target=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawLineToTarget","false"));
-  draw_line_to_targets_target=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawLineToTargetsTarget","false"));
-  draw_line_to_itts=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawLineToITTS","false"));
-  always_itts=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawAlwaysITTS","false"));
-  steady_itts=XMLSupport::parse_bool(vs_config->getVariable ("physics","steady_itts","false"));
-  radar_type=vs_config->getVariable("graphics","hud","radarType","WC");
+  static bool st_draw_all_boxes=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawAllTargetBoxes","false"));
+  static bool st_draw_line_to_target=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawLineToTarget","false"));
+  static bool st_draw_line_to_targets_target=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawLineToTargetsTarget","false"));
+  static bool st_draw_line_to_itts=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawLineToITTS","false"));
+  static bool st_always_itts=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawAlwaysITTS","false"));
+  static bool st_steady_itts=XMLSupport::parse_bool(vs_config->getVariable ("physics","steady_itts","false"));
+  static std::string st_radar_type=vs_config->getVariable("graphics","hud","radarType","WC");
+
+  draw_all_boxes=st_draw_all_boxes;
+  draw_line_to_target=st_draw_line_to_target;
+  draw_line_to_targets_target=st_draw_line_to_targets_target;
+  draw_line_to_itts=st_draw_line_to_itts;
+  always_itts=st_always_itts;
+  steady_itts=st_steady_itts;
+  radar_type=st_radar_type;
 
   // Compute the screen limits. Used to display the arrow pointing to the selected target.
-  projection_limit_y = XMLSupport::parse_float(vs_config->getVariable("graphics","fov","78"));
+  static float st_projection_limit_y = XMLSupport::parse_float(vs_config->getVariable("graphics","fov","78"));
+  projection_limit_y = st_projection_limit_y;
   // The angle betwwen the center of the screen and the border is half the fov.
   projection_limit_y = tan(projection_limit_y * M_PI / (180*2));
   projection_limit_x = projection_limit_y * g_game.aspect;
   // Precompute this division... performance.
   inv_screen_aspect_ratio = 1 / g_game.aspect;
+
+  oaccel=Vector(0,0,0);
 
   friendly=GFXColor(-1,-1,-1,-1);
   enemy=GFXColor(-1,-1,-1,-1);
@@ -1594,68 +1694,128 @@ static void DrawCrosshairs (float x, float y, float wid, float hei, const GFXCol
 }
 extern bool QuitAllow;
 extern bool screenshotkey;
-void GameCockpit::Draw() { 
+void GameCockpit::Draw() {
   cockpit_time+=GetElapsedTime();
   if (cockpit_time>=100000)
     InitStatic();
-  _Universe->AccessCamera()->UpdateGFX (GFXFALSE,GFXFALSE,GFXTRUE);
-  GFXDisable (TEXTURE1);
+  _Universe->AccessCamera()->UpdateGFX (GFXFALSE,GFXFALSE,GFXTRUE); //Preliminary frustum
+  GFXDisable(TEXTURE0);
+  GFXDisable(TEXTURE1);
   GFXLoadIdentity(MODEL);
   GFXDisable(LIGHTING);
-  GFXDisable (DEPTHTEST);
-  GFXDisable (DEPTHWRITE);
+  GFXDisable(DEPTHTEST);
+  GFXDisable(DEPTHWRITE);
   GFXColor4f(1,1,1,1);
   static bool draw_any_boxes = XMLSupport::parse_bool (vs_config->getVariable("graphics","hud","DrawTargettingBoxes","true"));
   if (draw_any_boxes&&screenshotkey==false) {
-  DrawTargetBox();
-  DrawTurretTargetBoxes();
-  DrawTacticalTargetBox();
-  DrawCommunicatingBoxes();
-  if(draw_all_boxes){
-    DrawTargetBoxes();
-  }
+      DrawTargetBox();
+      DrawTurretTargetBoxes();
+	  DrawTacticalTargetBox();
+      DrawCommunicatingBoxes();
+      if(draw_all_boxes){
+        DrawTargetBoxes();
+      }
   }
   if (view<CP_CHASE) {
     if (mesh.size()){
       Unit * par=GetParent();
       if (par) {
-	//	Matrix mat;
-      
-	GFXLoadIdentity(MODEL);
+	    //cockpit is unaffected by FOV WARP-Link
+        float oldfov=AccessCamera()->GetFov();
+        AccessCamera()->SetFov(g_game.fov);
 
-	GFXEnable (DEPTHTEST);
-	GFXEnable(DEPTHWRITE);
-	GFXEnable (TEXTURE0);
-	GFXEnable (LIGHTING);
-	Vector P,Q,R;
-	AccessCamera(CP_FRONT)->GetPQR (P,Q,R);
+	    GFXLoadIdentity(MODEL);
 
-	headtrans.push_back (Matrix());
-	VectorAndPositionToMatrix(headtrans.back(),P,Q,R,QVector(0,0,0));
-	static float theta=0;
-	static float shake_speed = XMLSupport::parse_float(vs_config->getVariable ("graphics","shake_speed","50"));
-	theta+=shake_speed*GetElapsedTime();
-	static float shake_reduction = XMLSupport::parse_float(vs_config->getVariable ("graphics","shake_reduction","8"));
+        size_t i,j;
+        float cockpitradial=1; //LET IT NOT BE ZERO!
+        for (i=0; i<mesh.size();++i) 
+            if (mesh[i]->rSize()>cockpitradial) 
+                cockpitradial=mesh[i]->rSize();
+        cockpitradial *= COCKPITZ_HEADROOM;
 
-	headtrans.front().p.i=shakin*cos(theta);//AccessCamera()->GetPosition().i+shakin*cos(theta);
-	headtrans.front().p.j=shakin*cos(1.2*theta);//AccessCamera()->GetPosition().j+shakin*cos(theta);
-	headtrans.front().p.k=0;//AccessCamera()->GetPosition().k;
-	if (shakin>0) {
-	  shakin-=GetElapsedTime()*shake_reduction;
-	  if (shakin<=0) {
-	    shakin=0;
-	  }
-	}
-        GFXClear(GFXFALSE);//only clear Z
+	    GFXEnable (DEPTHTEST);
+	    GFXEnable(DEPTHWRITE);
+	    GFXEnable (TEXTURE0);
+	    GFXEnable (LIGHTING);
+	    Vector P,Q,R;
+	    AccessCamera(CP_FRONT)->GetPQR (P,Q,R);
 
-        for (size_t i=0;i<mesh.size();++i) {
-          mesh[i]->DrawNow(1,true,headtrans.front());
-        }
-	headtrans.pop_front();
-	GFXDisable (LIGHTING);
-	GFXDisable( TEXTURE0);
+        headtrans.clear();
+
+	    headtrans.push_back (Matrix());
+	    VectorAndPositionToMatrix(headtrans.back(),P,Q,R,QVector(0,0,0));
+	    static float theta=0,wtheta=0;
+	    static float shake_speed = XMLSupport::parse_float(vs_config->getVariable ("graphics","shake_speed","50"));
+	    static float shake_reduction = XMLSupport::parse_float(vs_config->getVariable ("graphics","shake_reduction","8"));
+        static float shake_limit = XMLSupport::parse_float(vs_config->getVariable ("graphics","shake_limit","25"));
+        static float shake_mag   = XMLSupport::parse_float(vs_config->getVariable ("graphics","shake_magnitude","0.3"));
+        static float drift_limit = XMLSupport::parse_float(vs_config->getVariable ("graphics","cockpit_drift_limit","1.00"));
+        static float drift_amount= XMLSupport::parse_float(vs_config->getVariable ("graphics","cockpit_drift_amount","0.15"));
+        static float drift_ref_accel = XMLSupport::parse_float(vs_config->getVariable ("graphics","cockpit_drift_ref_accel","100"));
+
+        static float warp_shake_mag = XMLSupport::parse_float(vs_config->getVariable ("graphics","warp_shake_magnitude","0.125"));
+        static float warp_shake_speed = XMLSupport::parse_float(vs_config->getVariable ("graphics","warp_shake_speed","70"));
+        static float warp_shake_ref = XMLSupport::parse_float(vs_config->getVariable ("graphics","warp_shake_ref","2000"));
+
+        if (warp_shake_ref<=0) warp_shake_ref=1;
+	    theta+=shake_speed*GetElapsedTime()*sqrt(abs(shakin))/10; //For small shakes, slower shakes
+        wtheta+=warp_shake_speed*GetElapsedTime(); //SPEC-related shaking
+
+        float self_kps = ((GetParent()!=NULL)?LookupTargetStat(UnitImages::KPS,GetParent()):0);
+        float self_setkps = max(1.0f,((GetParent()!=NULL)?LookupTargetStat(UnitImages::SETKPS,GetParent()):0));
+        float warp_strength = max(0.0f,min(max(0.0f,min(1.0f,self_kps/self_setkps)),((GetParent()!=NULL)?LookupTargetStat(UnitImages::WARPFIELDSTRENGTH,GetParent()):0.0f) / warp_shake_ref));
+
+        if (shakin>shake_limit) shakin=shake_limit;
+	    headtrans.front().p.i=shake_mag*shakin*cos(theta)*cockpitradial/100;//AccessCamera()->GetPosition().i+shakin*cos(theta);
+	    headtrans.front().p.j=shake_mag*shakin*cos(1.3731*theta)*cockpitradial/100;//AccessCamera()->GetPosition().j+shakin*cos(theta);
+	    headtrans.front().p.k=0;//AccessCamera()->GetPosition().k;
+	    headtrans.front().p.i+=warp_shake_mag*cos(wtheta)*sqr(warp_strength)*cockpitradial/100;//AccessCamera()->GetPosition().i+shakin*cos(theta);
+	    headtrans.front().p.j+=warp_shake_mag*cos(1.165864*wtheta)*sqr(warp_strength)*cockpitradial/100;//AccessCamera()->GetPosition().j+shakin*cos(theta);
+	    if (shakin>0) {
+	      shakin-=GetElapsedTime()*shake_reduction*(shakin/5); //Fast convergence to 5% shaking, slow stabilization
+	      if (shakin<=0) {
+	        shakin=0;
+	      }
+	    }
+
+        //Now, compute head drift
+        Vector caccel = AccessCamera(CP_FRONT)->GetAcceleration();
+        float mag=caccel.Magnitude();
+        float ref=drift_ref_accel*drift_ref_accel;
+        if ((mag>0)&&(ref>0)) caccel *= - (drift_amount*min(drift_limit,(float)(mag*mag/ref)))/mag; else caccel=Vector(0,0,0);
+        float driftphase = pow(0.25,GetElapsedTime());
+        oaccel = (1-driftphase)*caccel+driftphase*oaccel;
+        headtrans.front().p += -cockpitradial*oaccel;
+        float driftmag = cockpitradial*oaccel.Magnitude();
+
+        //if (COCKPITZ_PARTITIONS>1) GFXClear(GFXFALSE,GFXFALSE,GFXTRUE);//only clear stencil buffer
+        static int COCKPITZ_PARTITIONS = XMLSupport::parse_int(vs_config->getVariable ("graphics","cockpit_z_partitions","1")); //Should not be needed if VERYNEAR_CONST is propperly set, but would be useful with stenciled inverse order rendering.
+        float zrange=cockpitradial*(1-VERYNEAR_CONST)+driftmag;
+        float zfloor=cockpitradial*VERYNEAR_CONST;
+        for (j=COCKPITZ_PARTITIONS-1; j<COCKPITZ_PARTITIONS; j--) {
+            AccessCamera()->UpdateGFX(GFXTRUE,GFXTRUE,GFXTRUE,GFXTRUE,zfloor+zrange*j/COCKPITZ_PARTITIONS,zfloor+zrange*(j+1)/COCKPITZ_PARTITIONS); //cockpit-specific frustrum (with clipping, with frustrum update)
+            GFXClear(GFXFALSE,GFXTRUE,GFXFALSE);//only clear Z
+            /*if (COCKPITZ_PARTITIONS>1) {
+                //Setup stencil
+                GFXStencilOp(KEEP,KEEP,REPLACE);
+                GFXStencilFunc(LEQUAL,COCKPITZ_PARTITIONS-j,~0);
+                GFXStencilMask(~0);
+                GFXEnable(STENCIL);
+            };*/
+            _Universe->activateLightMap();
+            for (i=0;i<mesh.size();++i) 
+                mesh[i]->DrawNow(1,true,headtrans.front());
+        };
+	    headtrans.pop_front();
+        //if (COCKPITZ_PARTITIONS>1) GFXDisable(STENCIL);
+	    GFXDisable(LIGHTING);
+	    GFXDisable(TEXTURE0);
+        GFXDisable(TEXTURE1);
+        AccessCamera()->SetFov(oldfov);
       }
     }
+
+    _Universe->AccessCamera()->UpdateGFX(GFXFALSE,GFXFALSE,GFXTRUE,GFXFALSE,0,1000000); //Restore normal frustrum
   }
   GFXHudMode (true);
   static float damage_flash_length=XMLSupport::parse_float(vs_config->getVariable("graphics","damage_flash_length",".1"));
@@ -1709,7 +1869,7 @@ void GameCockpit::Draw() {
   GFXAlphaTest (ALWAYS,0);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXColor4f(1,1,1,1);
-  bool die=true;
+	bool die=true;
   if ((un = parent.GetUnit())) {
     static bool drawF5VDU (XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_chase_cam","false")));
     static bool drawF6VDU (XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_panning_cam","false")));
@@ -1899,10 +2059,10 @@ void GameCockpit::Draw() {
       dietime=0;
     }    
   }
- if(CommandInterpretor.console){
-	GFXColorf(textcol);
-	CommandInterpretor.renderconsole();
- }
+  if(CommandInterpretor.console){
+    GFXColorf(textcol);
+    CommandInterpretor.renderconsole();
+  }
   GFXAlphaTest (ALWAYS,0);  
   static bool mouseCursor = XMLSupport::parse_bool (vs_config->getVariable ("joystick","mouse_cursor","false"));
   if (mouseCursor&&screenshotkey==false) {  
@@ -1930,6 +2090,7 @@ void GameCockpit::Draw() {
 
   GFXEnable (DEPTHWRITE);
   GFXEnable (DEPTHTEST);
+  GFXEnable (TEXTURE0);
 }
 int GameCockpit::getScrollOffset (unsigned int whichtype) {
   for (unsigned int i=0;i<vdu.size();i++) {
@@ -2058,7 +2219,7 @@ void SwitchUnits2( Unit *nw)
 	
     static bool LoadNewCockpit = XMLSupport::parse_bool (vs_config->getVariable("graphics","UnitSwitchCockpitChange","false"));
     static bool DisCockpit = XMLSupport::parse_bool (vs_config->getVariable("graphics","SwitchCockpitToDefaultOnUnitSwitch","false"));
-	
+
     if (nw->getCockpit().length()>0 || DisCockpit) {
       _Universe->AccessCockpit()->Init (nw->getCockpit().c_str(), LoadNewCockpit==false);
     }
@@ -2159,14 +2320,14 @@ void GameCockpit::RestoreViewPort() {
 
 static void ShoveCamBehindUnit (int cam, Unit * un, float zoomfactor) {
   QVector unpos = un->GetPlanetOrbit()?un->LocalPosition():un->Position();
-  _Universe->AccessCamera(cam)->SetPosition(unpos-_Universe->AccessCamera()->GetR().Cast()*(un->rSize()+g_game.znear*2)*zoomfactor,un->GetWarpVelocity(),un->GetAngularVelocity());
+  _Universe->AccessCamera(cam)->SetPosition(unpos-_Universe->AccessCamera()->GetR().Cast()*(un->rSize()+g_game.znear*2)*zoomfactor,un->GetWarpVelocity(),un->GetAngularVelocity(),un->GetAcceleration());
 }
 static void ShoveCamBelowUnit (int cam, Unit * un, float zoomfactor) {
   QVector unpos = un->GetPlanetOrbit()?un->LocalPosition():un->Position();
   Vector p,q,r;
   _Universe->AccessCamera(cam)->GetOrientation(p,q,r);
   static float ammttoshovecam = XMLSupport::parse_float(vs_config->getVariable("graphics","shove_camera_down",".3"));
-  _Universe->AccessCamera(cam)->SetPosition(unpos-(r-ammttoshovecam*q).Cast()*(un->rSize()+g_game.znear*2)*zoomfactor,un->GetWarpVelocity(),un->GetAngularVelocity());
+  _Universe->AccessCamera(cam)->SetPosition(unpos-(r-ammttoshovecam*q).Cast()*(un->rSize()+g_game.znear*2)*zoomfactor,un->GetWarpVelocity(),un->GetAngularVelocity(),un->GetAcceleration());
 }
 void GameCockpit::SetupViewPort (bool clip) {
   _Universe->AccessCamera()->RestoreViewPort (0,(view==CP_FRONT?viewport_offset:0));
@@ -2230,6 +2391,69 @@ void GameCockpit::SetupViewPort (bool clip) {
     ShoveCamBehindUnit (CP_PAN,un,zoomfactor);
     un->SetVisible(view>=CP_CHASE);
 
+    // WARP-FOV link
+    {
+        static float stable_lowarpref   = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.stable.loref","1") );
+        static float stable_hiwarpref   = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.stable.hiref","100000") );
+        static float stable_refexp      = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.stable.exp","0.5") );
+        static float stable_offset_f    = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.stable.offset.front","0") );
+        static float stable_offset_b    = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.stable.offset.back","0") );
+        static float stable_offset_p    = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.stable.offset.perpendicular","0") );
+        static float stable_multiplier_f= XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.stable.multiplier.front","0.85") );
+        static float stable_multiplier_b= XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.stable.multiplier.back","1.5") );
+        static float stable_multiplier_p= XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.stable.multiplier.perpendicular","1.25") );
+
+        static float shake_lowarpref    = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.shake.loref","10000") );
+        static float shake_hiwarpref    = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.shake.hiref","200000") );
+        static float shake_refexp       = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.shake.exp","1.5") );
+        static float shake_speed        = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.shake.speed","10") );
+        static float shake_offset_f     = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.shake.offset.front","0") );
+        static float shake_offset_b     = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.shake.offset.back","0") );
+        static float shake_offset_p     = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.shake.offset.perpendicular","0") );
+        static float shake_multiplier_f = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.shake.multiplier.front","0") );
+        static float shake_multiplier_b = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.shake.multiplier.back","0") );
+        static float shake_multiplier_p = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.shake.multiplier.perpendicular","0") );
+
+        static float theta=0;
+        theta+=shake_speed*GetElapsedTime();
+
+        if (stable_lowarpref==stable_hiwarpref) stable_hiwarpref = stable_lowarpref+1;
+        if (shake_lowarpref ==shake_hiwarpref ) shake_hiwarpref  = shake_lowarpref+1;
+
+        float warpfieldstrength=LookupTargetStat(UnitImages::WARPFIELDSTRENGTH,un);
+        float setkps=LookupTargetStat(UnitImages::SETKPS,un);
+        float kps=LookupTargetStat(UnitImages::KPS,un);
+        float st_warpfieldstrength=pow((max(stable_lowarpref,min(stable_hiwarpref,warpfieldstrength))-stable_lowarpref)/(stable_hiwarpref-stable_lowarpref),stable_refexp);
+        float sh_warpfieldstrength=pow((max(shake_lowarpref,min(shake_hiwarpref,warpfieldstrength))-shake_lowarpref)/(shake_hiwarpref-shake_lowarpref),shake_refexp);
+        float costheta = cos(theta);
+        if (setkps<=1) setkps=1;
+        if (kps>setkps) kps=setkps;
+        for (int i=0; i<NUM_CAM; i++) {
+            float unv = un->GetVelocity().Magnitude();
+            float camv = _Universe->AccessCamera(i)->GetR().Magnitude();
+            if (unv<=1) unv=1;
+            if (camv<=1) camv=1;
+            float cosangle = (un->GetVelocity() * _Universe->AccessCamera(i)->GetR()) / (unv*camv) * (kps/setkps);
+            float st_offs,sh_offs,st_mult,sh_mult;
+            if (cosangle>0) {
+                st_offs = stable_offset_f*cosangle + stable_offset_p*(1-cosangle);
+                sh_offs = shake_offset_f *cosangle + shake_offset_p *(1-cosangle);
+                st_mult = stable_multiplier_f*cosangle + stable_multiplier_p*(1-cosangle);
+                sh_mult = shake_multiplier_f *cosangle + shake_multiplier_p *(1-cosangle);
+            } else {
+                st_offs = stable_offset_b*-cosangle+ stable_offset_p*(1+cosangle);
+                sh_offs = shake_offset_b *-cosangle+ shake_offset_p *(1+cosangle);
+                st_mult = stable_multiplier_b*-cosangle + stable_multiplier_p*(1+cosangle);
+                sh_mult = shake_multiplier_b *-cosangle + shake_multiplier_p *(1+cosangle);
+            }
+            st_offs *= st_warpfieldstrength;
+            sh_offs *= sh_warpfieldstrength*costheta;
+            st_mult = (1-st_warpfieldstrength)+st_mult*st_warpfieldstrength;
+            sh_mult *= sh_warpfieldstrength*costheta;
+
+            _Universe->AccessCamera(i)->SetFov(g_game.fov*(st_mult+sh_mult)+st_offs+sh_offs);
+        }
+    }
   }
   _Universe->AccessCamera()->UpdateGFX(clip?GFXTRUE:GFXFALSE);
     
@@ -2320,6 +2544,10 @@ void GameCockpit::DrawArrowToTarget(Unit *un, Unit *target) {
 
   static GFXColor black_and_white = DockBoxColor("black_and_white");
   GFXColorf(unitToColor(un, target,un->GetComputerData().radar.iff));
+  GFXEnable(SMOOTH);
+  GFXDisable(TEXTURE0);
+  GFXDisable(TEXTURE1);
+  GFXBlendMode(SRCALPHA,INVSRCALPHA);
 
   glBegin(GL_LINE_LOOP);
   GFXVertex3f(s, t, 0);
@@ -2327,6 +2555,8 @@ void GameCockpit::DrawArrowToTarget(Unit *un, Unit *target) {
   GFXVertexf(p2);
   GFXEnd();
   GFXColor4f (1,1,1,1);
+
+  GFXDisable(SMOOTH);
 }
 bool GameCockpit::CheckCommAnimation(Unit*  un) {
   for (unsigned int i=0;i<vdu.size();++i) {

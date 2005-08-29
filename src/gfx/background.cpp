@@ -27,6 +27,7 @@
 #include "aux_texture.h"
 #include "sphere.h"
 #include "vs_globals.h"
+#include "../gldrv/gl_globals.h"
 #include "config_xml.h"
 #include <float.h>
 	const float size = 100;
@@ -152,8 +153,7 @@ void Background::Draw()
       //GFXLoadIdentity(MODEL);
 	  //	  GFXTranslate (MODEL,_Universe->AccessCamera()->GetPosition()); 
 
-      GFXTextureAddressMode(CLAMP);
-      GFXTextureWrap(0,GFXCLAMPTEXTURE);
+      //GFXTextureWrap(0,GFXCLAMPTEXTURE);
       //glMatrixMode(GL_MODELVIEW);
       
       GFXSelectTexcoordSet(0, 0);
@@ -165,108 +165,118 @@ void Background::Draw()
       ********************************/
       //_Universe->AccessCamera()->UpdateGLCenter();
       
-      
-      /*up*/
-      GFXColor4f(1.00F, 1.00F, 1.00F, 1.00F);
-      
-      up->MakeActive();
-      GFXBegin(GFXQUAD);
-      GFXTexCoord2f(0.998F, 0.002F);
-      GFXVertex3f(-size, size, size);
-      
-      GFXTexCoord2f(0.002F, 0.002F);
-      GFXVertex3f(-size, size, -size);
-      
-      GFXTexCoord2f(0.002F, 0.998F);
-      GFXVertex3f(size, size, -size);
-      
-      GFXTexCoord2f(0.998F, 0.998F);
-      GFXVertex3f(size, size, size);
-      GFXEnd();
-      
-      /*Left*/
-      left->MakeActive();
-      GFXBegin(GFXQUAD);
-      GFXTexCoord2f(0.998F, 0.002F);
-      GFXVertex3f(-size, size, -size);
-      
-      GFXTexCoord2f(0.002F, 0.002F);
-      GFXVertex3f(-size, size, size);
-      
-      GFXTexCoord2f(0.002F, 0.998F);
-      GFXVertex3f(-size, -size, size);
-      
-      GFXTexCoord2f(0.998F, 0.998F);
-      GFXVertex3f(-size, -size, -size);
-      GFXEnd();
-      
-      ///*Front
-      front->MakeActive();
-      GFXBegin(GFXQUAD);
-      GFXTexCoord2f(0.998F, 0.002F);
-      GFXVertex3f(-size, size, size);
-      
-      GFXTexCoord2f(0.002F, 0.002F);
-      GFXVertex3f(size, size, size);
-      
-      GFXTexCoord2f(0.002F, 0.998F);
-      GFXVertex3f(size, -size, size);
-      
-      GFXTexCoord2f(0.998F, 0.998F);
-      GFXVertex3f(-size, -size, size);
-      
-      GFXEnd();
-	
-    ///*Right
-      right->MakeActive();
-      GFXBegin(GFXQUAD);
-      GFXTexCoord2f(0.998F, 0.002F);
-      GFXVertex3f(size, size, size);
-      
-      GFXTexCoord2f(0.002F, 0.002F);
-      GFXVertex3f(size, size, -size);
-      
-      GFXTexCoord2f(0.002F, 0.998F);
-      GFXVertex3f(size, -size, -size);
-      
-      GFXTexCoord2f(0.998F, 0.998F);
-      GFXVertex3f(size, -size, size);
-      GFXEnd();
-	
-      ///*Back
-      back->MakeActive();
-      GFXBegin(GFXQUAD);
-      GFXTexCoord2f(0.998F, 0.002F);
-      GFXVertex3f(size, size, -size);
-      
-      GFXTexCoord2f(0.002F, 0.002F);
-      GFXVertex3f(-size, size, -size);
-      
-      GFXTexCoord2f(0.002F, 0.998F);
-      GFXVertex3f(-size, -size, -size);
-      
-      GFXTexCoord2f(0.998F, 0.998F);
-      GFXVertex3f(size, -size, -size);
-      
-      GFXEnd();
-      
-      //	/*down
-      down->MakeActive();
-      GFXBegin(GFXQUAD);
-      GFXTexCoord2f(0.002F, 0.998F);
-      GFXVertex3f(-size, -size, size);
-      
-      GFXTexCoord2f(0.998F, 0.998F);
-      GFXVertex3f(size, -size, size);
-      
-      GFXTexCoord2f(0.998F, 0.002F);
-      GFXVertex3f(size, -size, -size);
-      
-      GFXTexCoord2f(0.002F, 0.002F);
-      GFXVertex3f(-size, -size, -size);
-      
-      GFXEnd();//*/
-      GFXTextureWrap(0,GFXREPEATTEXTURE);
+      static struct skybox_rendering_record {
+          Texture *tex;
+          float vertices[4][3]; //will be *= size
+          unsigned char tcoord[4][4]; //S-T-S-T: 0 >= min, 1 => max
+      } skybox_rendering_sequence[6] = {
+          {   // up
+              NULL,
+              { {-1,+1,+1},{-1,+1,-1},{+1,+1,-1},{+1,+1,+1} },
+              { {1,0,1,0},{0,0,0,0},{0,1,0,1},{1,1,1,1} }
+          },
+          {   // left
+              NULL,
+              { {-1,+1,-1},{-1,+1,+1},{-1,-1,+1},{-1,-1,-1} },
+              { {1,0,1,0},{0,0,0,0},{0,1,0,1},{1,1,1,1} }
+          },
+          {   // front
+              NULL,
+              { {-1,+1,+1},{+1,+1,+1},{+1,-1,+1},{-1,-1,+1} },
+              { {1,0,1,0},{0,0,0,0},{0,1,0,1},{1,1,1,1} }
+          },
+          {   // right
+              NULL,
+              { {+1,+1,+1},{+1,+1,-1},{+1,-1,-1},{+1,-1,+1} },
+              { {1,0,1,0},{0,0,0,0},{0,1,0,1},{1,1,1,1} }
+          },
+          {   // back
+              NULL,
+              { {+1,+1,-1},{-1,+1,-1},{-1,-1,-1},{+1,-1,-1} },
+              { {1,0,1,0},{0,0,0,0},{0,1,0,1},{1,1,1,1} }
+          },
+          {   // down
+              NULL,
+              { {-1,-1,+1},{+1,-1,+1},{+1,-1,-1},{-1,-1,-1} },
+              { {0,1,0,1},{1,1,1,1},{1,0,1,0},{0,0,0,0} }
+          }
+      };
+      skybox_rendering_sequence[0].tex = up;
+      skybox_rendering_sequence[1].tex = left;
+      skybox_rendering_sequence[2].tex = front;
+      skybox_rendering_sequence[3].tex = right;
+      skybox_rendering_sequence[4].tex = back;
+      skybox_rendering_sequence[5].tex = down;
+
+      for (int skr=0; skr<sizeof(skybox_rendering_sequence)/sizeof(skybox_rendering_sequence[0]); skr++) {
+          Texture *tex=skybox_rendering_sequence[skr].tex;
+          int lyr;
+          int numlayers=tex->numLayers();
+          bool multitex=(numlayers>1);
+          int numpasses=tex->numPasses();
+          float ms=tex->mintcoord.i,Ms=tex->maxtcoord.i;
+          float mt=tex->mintcoord.j,Mt=tex->maxtcoord.j;
+          if (!gl_options.ext_clamp_to_edge) {
+              ms += 1.0/tex->boundSizeX; Ms -= 1.0/tex->boundSizeX;
+              mt += 1.0/tex->boundSizeY; Mt -= 1.0/tex->boundSizeY;
+          }
+          float stca[]={ms,Ms},ttca[]={mt,Mt};
+
+          GFXColor4f(1.00F, 1.00F, 1.00F, 1.00F);
+          for (lyr=0; (lyr<gl_options.Multitexture)||(lyr<numlayers); lyr++) {
+              GFXToggleTexture((lyr<numlayers),lyr);
+              if (lyr<numlayers) GFXTextureCoordGenMode(lyr,NO_GEN,NULL,NULL);
+          }
+          for (int pass=0; pass<numpasses; pass++) if (tex->SetupPass(pass,0,ONE,ZERO)) {
+              tex->MakeActive(0,pass);
+              GFXActiveTexture(0);
+              GFXTextureAddressMode(CLAMP);
+              GFXTextureEnv(0,GFXMODULATETEXTURE);
+
+              float s1,t1,s2,t2;
+
+              GFXBegin(GFXQUAD);
+              s1 = stca[skybox_rendering_sequence[skr].tcoord[0][0]&1];
+              t1 = ttca[skybox_rendering_sequence[skr].tcoord[0][1]&1];
+              s2 = stca[skybox_rendering_sequence[skr].tcoord[0][2]&1];
+              t2 = ttca[skybox_rendering_sequence[skr].tcoord[0][3]&1];
+              if (!multitex) GFXTexCoord2f(s1, t1); else GFXTexCoord4f(s1, t1, s2, t2);
+              GFXVertex3f(skybox_rendering_sequence[skr].vertices[0][0]*size,
+                          skybox_rendering_sequence[skr].vertices[0][1]*size,
+                          skybox_rendering_sequence[skr].vertices[0][2]*size);
+              s1 = stca[skybox_rendering_sequence[skr].tcoord[1][0]&1];
+              t1 = ttca[skybox_rendering_sequence[skr].tcoord[1][1]&1];
+              s2 = stca[skybox_rendering_sequence[skr].tcoord[1][2]&1];
+              t2 = ttca[skybox_rendering_sequence[skr].tcoord[1][3]&1];
+              if (!multitex) GFXTexCoord2f(s1, t1); else GFXTexCoord4f(s1, t1, s2, t2);
+              GFXVertex3f(skybox_rendering_sequence[skr].vertices[1][0]*size,
+                          skybox_rendering_sequence[skr].vertices[1][1]*size,
+                          skybox_rendering_sequence[skr].vertices[1][2]*size);
+              s1 = stca[skybox_rendering_sequence[skr].tcoord[2][0]&1];
+              t1 = ttca[skybox_rendering_sequence[skr].tcoord[2][1]&1];
+              s2 = stca[skybox_rendering_sequence[skr].tcoord[2][2]&1];
+              t2 = ttca[skybox_rendering_sequence[skr].tcoord[2][3]&1];
+              if (!multitex) GFXTexCoord2f(s1, t1); else GFXTexCoord4f(s1, t1, s2, t2);
+              GFXVertex3f(skybox_rendering_sequence[skr].vertices[2][0]*size,
+                          skybox_rendering_sequence[skr].vertices[2][1]*size,
+                          skybox_rendering_sequence[skr].vertices[2][2]*size);
+              s1 = stca[skybox_rendering_sequence[skr].tcoord[3][0]&1];
+              t1 = ttca[skybox_rendering_sequence[skr].tcoord[3][1]&1];
+              s2 = stca[skybox_rendering_sequence[skr].tcoord[3][2]&1];
+              t2 = ttca[skybox_rendering_sequence[skr].tcoord[3][3]&1];
+              if (!multitex) GFXTexCoord2f(s1, t1); else GFXTexCoord4f(s1, t1, s2, t2);      
+              GFXVertex3f(skybox_rendering_sequence[skr].vertices[3][0]*size,
+                          skybox_rendering_sequence[skr].vertices[3][1]*size,
+                          skybox_rendering_sequence[skr].vertices[3][2]*size);
+              GFXEnd();
+          }
+          for (lyr=0; lyr<numlayers; lyr++) 
+              GFXToggleTexture(false,lyr);
+          tex->SetupPass(-1,0,ONE,ZERO);
+      }
+
+      GFXActiveTexture(0);
+      GFXTextureAddressMode(WRAP);
       GFXCenterCamera(false);
     }
   }

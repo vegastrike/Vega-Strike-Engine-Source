@@ -259,6 +259,7 @@ namespace VSFileSystem
 
 			// PK3 stuff
 			CPK3 *			pk3_file;
+			char *			pk3_extracted_file;
 			int				file_index;
 			int				offset;
 
@@ -278,6 +279,9 @@ namespace VSFileSystem
 			long			size;
 			bool			valid;
 
+        public:
+            char * get_pk3_data() { return pk3_extracted_file; };
+
 		public:
 			VSFile();
 			VSFile( const char * buffer, long size, VSFileType type=ZoneBuffer, VSFileMode=ReadOnly);
@@ -287,10 +291,7 @@ namespace VSFileSystem
 
 			FILE *	GetFP() { return this->fp; } // This is still needed for special cases (when loading PNG files)
 			char *	GetFileBuffer() { return this->pk3_extracted_file; }
-          VSFileType GetType() const {return file_type;}
-          VSFileType GetAltType() const {return alt_type;}
 
-			char *			pk3_extracted_file;
 			/********************************** OPEN A FILE *********************************/
 			// Open an existing file read only
 			VSError	OpenReadOnly( const char * filename, VSFileType type=UnknownFile);
@@ -521,9 +522,12 @@ namespace VSFileSystem
 			void	SetRoot( string root);
 
 			string	GetFullPath();
+            string  GetAbsPath();
 
 			void	SetType( VSFileType type);
 			void	SetAltType( VSFileType type);
+            VSFileType GetType() const { return file_type; };
+            VSFileType GetAltType() const { return alt_type; };
 
 			void	SetIndex( int index);
 			void	SetVolume( VSVolumeType big);

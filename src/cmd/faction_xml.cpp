@@ -21,7 +21,7 @@ using XMLSupport::AttributeList;
 using std::map;
 
 static FSM * getFSM (const std::string & value) {
-  static Hashtable <std::string, FSM, 16> fsms;
+  static Hashtable <std::string, FSM, 17> fsms;
   FSM * fsm = fsms.Get (value);
   if (fsm) {
     return fsm;

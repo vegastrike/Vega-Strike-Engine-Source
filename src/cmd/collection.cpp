@@ -131,7 +131,9 @@ void UnitCollection::ConstIterator::GetNextValidUnit () {
 }
 
 const UnitCollection &UnitCollection::operator = (const UnitCollection & uc){
+#ifdef _DEBUG
   printf ("warning could cause problems with concurrent lists. Make sure no one is traversing gotten list");
+#endif
   destr();
   init();
   un_iter ui = createIterator();

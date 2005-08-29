@@ -1,4 +1,5 @@
 #include "gfxlib_struct.h"
+#include "gfxlib.h"
 #include "gldrv/gl_globals.h"
 #include <stdio.h>
 #include "xml_support.h"
@@ -30,6 +31,9 @@ static void BindInd(unsigned int element_data) {
 }
 void GFXVertexList::RefreshDisplayList () {
   static bool use_vbo=XMLSupport::parse_bool(vs_config->getVariable("graphics","vbo","false"));
+  static bool smooth_lines = XMLSupport::parse_bool( vs_config->getVariable("graphics/mesh","smooth_lines","true") );
+  static bool smooth_points= XMLSupport::parse_bool( vs_config->getVariable("graphics/mesh","smooth_points","true") ); 
+
   if (use_vbo&&!vbo_data) {
     if (glGenBuffersARB_p==0||glBindBufferARB_p==0||glBufferDataARB_p==0||glMapBufferARB_p==0||glUnmapBufferARB_p==0) {
       use_vbo=0;
@@ -71,19 +75,21 @@ void GFXVertexList::RefreshDisplayList () {
     for (int i=0;i<numlists;i++) {
       glBegin(PolyLookup(mode[i]));
       if (changed&HAS_INDEX) {
-	for(a=0; a<offsets[i]; a++) {
-	  glTexCoord2fv(&data.colors[GetIndex(offset+a)].s);
-	  glColor3fv (&data.colors[GetIndex(offset+a)].r);
-	  glNormal3fv(&data.colors[GetIndex(offset+a)].i);
-	  glVertex3fv(&data.colors[GetIndex(offset+a)].x);	
-	}
+	    for(a=0; a<offsets[i]; a++) {
+          const GFXColorVertex& vtx=data.colors[GetIndex(offset+a)];
+          GFXTexCoord4f(vtx.s,vtx.t,vtx.s,vtx.t);
+	      glColor4fv (&vtx.r);
+	      glNormal3fv(&vtx.i);
+	      glVertex3fv(&vtx.x);	
+	    }
       }else {
-	for(a=0; a<offsets[i]; a++) {
-	  glTexCoord2fv(&data.colors[offset+a].s);
-	  glColor3fv (&data.colors[offset+a].r);
-	  glNormal3fv(&data.colors[offset+a].i);
-	  glVertex3fv(&data.colors[offset+a].x);
-	}
+	    for(a=0; a<offsets[i]; a++) {
+          const GFXColorVertex& vtx=data.colors[offset+a];
+          GFXTexCoord4f(vtx.s,vtx.t,vtx.s,vtx.t);
+	      glColor4fv (&vtx.r);
+	      glNormal3fv(&vtx.i);
+	      glVertex3fv(&vtx.x);
+	    }
       }
       offset +=offsets[i];
       glEnd();
@@ -92,17 +98,19 @@ void GFXVertexList::RefreshDisplayList () {
     for (int i=0;i<numlists;i++) {
       glBegin(PolyLookup(mode[i]));
       if (changed&HAS_INDEX) {
-	for(a=0; a<offsets[i]; a++) {
-	  glNormal3fv(&data.vertices[GetIndex(offset+a)].i);
-	  glTexCoord2fv(&data.vertices[GetIndex(offset+a)].s);
-	  glVertex3fv(&data.vertices[GetIndex(offset+a)].x);
-	}
+	    for(a=0; a<offsets[i]; a++) {
+          const GFXVertex& vtx=data.vertices[GetIndex(offset+a)];
+	      glNormal3fv(&vtx.i);
+          GFXTexCoord4f(vtx.s,vtx.t,vtx.s,vtx.t);
+	      glVertex3fv(&vtx.x);
+	    }
       }else {
-	for(a=0; a<offsets[i]; a++) {
-	  glNormal3fv(&data.vertices[offset+a].i);
-	  glTexCoord2fv(&data.vertices[offset+a].s);
-	  glVertex3fv(&data.vertices[offset+a].x);
-	}
+	    for(a=0; a<offsets[i]; a++) {
+          const GFXVertex& vtx=data.vertices[offset+a];
+	      glNormal3fv(&vtx.i);
+          GFXTexCoord4f(vtx.s,vtx.t,vtx.s,vtx.t);
+	      glVertex3fv(&vtx.x);
+	    }
       }
       offset +=offsets[i];
       glEnd();
@@ -120,21 +128,43 @@ void GFXVertexList::BeginDrawState(GFXBOOL lock) {
     if (changed&HAS_INDEX)
       BindInd(display_list);
     if (changed&HAS_COLOR) {
+      glClientActiveTextureARB_p(GL_TEXTURE0);
       glInterleavedArrays (GL_T2F_C4F_N3F_V3F,sizeof(GFXColorVertex),0);
+      if (gl_options.Multitexture) {
+          glClientActiveTextureARB_p(GL_TEXTURE1);
+          glTexCoordPointer(2,GL_FLOAT,sizeof(GFXColorVertex),&data.colors[0].s);
+          glClientActiveTextureARB_p(GL_TEXTURE0);
+      }
     } else {
+      glClientActiveTextureARB_p(GL_TEXTURE0);
       glInterleavedArrays (GL_T2F_N3F_V3F,sizeof(GFXVertex),0);
+      if (gl_options.Multitexture) {
+          glClientActiveTextureARB_p(GL_TEXTURE1);
+          glTexCoordPointer(2,GL_FLOAT,sizeof(GFXVertex),&data.vertices[0].s);
+          glClientActiveTextureARB_p(GL_TEXTURE0);
+      }
     }
   }else if(display_list!=0) {
     
   } else 
     {      
       if (changed&HAS_COLOR) {
-	glInterleavedArrays (GL_T2F_C4F_N3F_V3F,sizeof(GFXColorVertex),&data.colors[0]);
+          glClientActiveTextureARB_p(GL_TEXTURE0);
+          glInterleavedArrays (GL_T2F_C4F_N3F_V3F,sizeof(GFXColorVertex),&data.colors[0]);
+          if (gl_options.Multitexture) {
+              glClientActiveTextureARB_p(GL_TEXTURE1);
+              glTexCoordPointer(2,GL_FLOAT,sizeof(GFXColorVertex),&data.colors[0].s);
+              glClientActiveTextureARB_p(GL_TEXTURE0);
+          }
       } else {
-
-	glInterleavedArrays (GL_T2F_N3F_V3F,sizeof(GFXVertex),&data.vertices[0]);
-        
-        if (gl_error=glGetError()) printf ("VBO19 Error %d\n",gl_error);
+          glClientActiveTextureARB_p(GL_TEXTURE0);
+          glInterleavedArrays (GL_T2F_N3F_V3F,sizeof(GFXVertex),&data.vertices[0]);
+          if (gl_options.Multitexture) {
+              glClientActiveTextureARB_p(GL_TEXTURE1);
+              glTexCoordPointer(2,GL_FLOAT,sizeof(GFXVertex),&data.vertices[0].s);
+              glClientActiveTextureARB_p(GL_TEXTURE0);
+          }
+          if (gl_error=glGetError()) printf ("VBO19 Error %d\n",gl_error);
       }
       if (lock&&glLockArraysEXT_p)
 	(*glLockArraysEXT_p) (0,numVertices);
@@ -199,8 +229,38 @@ void GFXVertexList::Draw()
 }
 extern void GFXCallList(int list);
 void GFXVertexList::Draw (enum POLYTYPE *mode,const INDEX index, const int numlists, const int *offsets) {
+  static bool smooth_lines = XMLSupport::parse_bool( vs_config->getVariable("graphics","smooth_lines","true") );
+  static bool smooth_points= XMLSupport::parse_bool( vs_config->getVariable("graphics","smooth_points","false") );  //Hardware support for this seems... sketchy
+
   if(vbo_data==0&&display_list!=0) {
-    GFXCallList(display_list);
+      //Big issue: display lists cannot discriminate between lines/points/triangles,
+      //    so, for now, we'll limit smoothing to single-mode GFXVertexLists, which, by the way,
+      //    are the only ones being used, AFAIK.
+      bool blendchange=false;
+      if (unique_mode&&(numlists>0)) switch (*mode) {
+      case GFXLINE:
+      case GFXLINESTRIP:
+      case GFXPOLY:
+      case GFXPOINT:
+          if (((*mode==GFXPOINT)&&smooth_points)||((*mode!=GFXPOINT)&&smooth_lines)) {
+              BLENDFUNC src,dst;
+              GFXGetBlendMode(src,dst);
+              if ((dst!=ZERO)&&((src==ONE)||(src==SRCALPHA))) {
+                  GFXPushBlendMode();
+                  GFXBlendMode(SRCALPHA,dst);
+                  GFXEnable(SMOOTH);
+                  blendchange=true;
+              }
+          }
+          break;
+      }
+      
+      GFXCallList(display_list);
+
+      if (blendchange) {
+          GFXPopBlendMode();
+          GFXDisable(SMOOTH);
+      }
   } else {
       int totoffset=0;
       if (changed&HAS_INDEX) {
@@ -225,10 +285,34 @@ void GFXVertexList::Draw (enum POLYTYPE *mode,const INDEX index, const int numli
           }
         }
       } else {
-	for (int i=0;i<numlists;i++) {
-	  glDrawArrays(PolyLookup(mode[i]), totoffset, offsets[i]);
-	  totoffset += offsets[i];
-	}
+	    for (int i=0;i<numlists;i++) {
+          bool blendchange=false;
+          switch (mode[i]) {
+          case GFXLINE:
+          case GFXLINESTRIP:
+          case GFXPOLY:
+          case GFXPOINT:
+              if (((mode[i]==GFXPOINT)&&smooth_points)||((mode[i]!=GFXPOINT)&&smooth_lines)) {
+                  BLENDFUNC src,dst;
+                  GFXGetBlendMode(src,dst);
+                  if ((dst!=ZERO)&&((src==ONE)||(src==SRCALPHA))) {
+                      GFXPushBlendMode();
+                      GFXBlendMode(SRCALPHA,dst);
+                      GFXEnable(SMOOTH);
+                      blendchange=true;
+                  }
+              }
+              break;
+          }
+
+	      glDrawArrays(PolyLookup(mode[i]), totoffset, offsets[i]);
+	      totoffset += offsets[i];
+
+          if (blendchange) {
+              GFXPopBlendMode();
+              GFXDisable(SMOOTH);
+          }
+	    }
       }
   }
 }

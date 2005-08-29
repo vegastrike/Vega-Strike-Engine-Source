@@ -231,7 +231,7 @@ void PaintText::drawLines(int start, int count) const {
     }
 
     // Initialize the graphics state.
-    glDisable(GL_TEXTURE_2D);
+    GFXToggleTexture(false,0);
     glEnable(GL_LINE_SMOOTH);
     GFXPushBlendMode();
     GFXBlendMode(SRCALPHA,INVSRCALPHA);
@@ -281,7 +281,7 @@ void PaintText::drawLines(int start, int count) const {
     GFXPopBlendMode();
     glDisable(GL_LINE_SMOOTH);
     glPopMatrix();
-    glEnable(GL_TEXTURE_2D);
+    GFXToggleTexture(true,0);
 }
 
 // Get a floating-point argument for a PaintText format command.

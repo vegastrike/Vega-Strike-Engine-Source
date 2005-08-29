@@ -50,36 +50,58 @@ Camera::Camera(ProjectionType proj) : projectionType(proj), myPhysics(0.1,0.075,
 	x = y = 0;
 	xsize = ysize = 1.0;
 	zoom = 1.0;
+    fov = g_game.fov;
+
+    lastGFXUpdate.clip = GFXTRUE;
+    lastGFXUpdate.updateFrustum = GFXTRUE;
+    lastGFXUpdate.centerCamera = GFXFALSE;
+    lastGFXUpdate.overrideZFrustum = GFXFALSE;
+    lastGFXUpdate.overrideZNear = 0;
+    lastGFXUpdate.overrideZFar = 1000000;
 }
 
 void Camera::GetPQR (Vector &p1, Vector &q1, Vector &r1){p1.i = P.i;p1.j = P.j; p1.k = P.k;q1.i = Q.i;q1.j = Q.j; q1.k = Q.k;r1.i = R.i;r1.j = R.j; r1.k = R.k;}
 
 
 
-void Camera::UpdateGFX(GFXBOOL clip, GFXBOOL updateFrustum, GFXBOOL centerCamera)
+void Camera::UpdateGFX(GFXBOOL clip, GFXBOOL updateFrustum, GFXBOOL centerCamera, GFXBOOL overrideZFrustum, float overrideZNear, float overrideZFar)
 {
+  lastGFXUpdate.clip = clip;
+  lastGFXUpdate.updateFrustum = updateFrustum;
+  lastGFXUpdate.centerCamera = centerCamera;
+  lastGFXUpdate.overrideZFrustum = overrideZFrustum;
+  lastGFXUpdate.overrideZNear = overrideZNear;
+  lastGFXUpdate.overrideZFar = overrideZFar;
+
   const float ZFARCONST= 1000000;
-  float xmin, xmax, ymin, ymax;
+  float xmin, xmax, ymin, ymax, znear, zfar;
 	if(1||changed)
 	{
 
 		myPhysics.Update();
 		GFXLoadIdentity(PROJECTION);
+
 		//FIXMEGFXLoadIdentity(VIEW);
 		switch(projectionType) {
 		case Camera::PERSPECTIVE:
-		  GFXPerspective (zoom*g_game.fov,g_game.aspect,g_game.znear,g_game.zfar*(clip?1:ZFARCONST),cockpit_offset); //set perspective to 78 degree FOV
+          znear = (overrideZFrustum?overrideZNear: g_game.znear);
+          zfar  = (overrideZFrustum?overrideZFar : g_game.zfar*(clip?1:ZFARCONST));
+
+		  GFXPerspective (zoom*fov,g_game.aspect,znear,zfar,cockpit_offset); //set perspective to 78 degree FOV
 		  break;
 		case Camera::PARALLEL:
-		  ymax = g_game.znear * tanf( zoom*g_game.fov * PI / ((float)360.0) ); 
+		  ymax = g_game.znear * tanf( zoom*fov * PI / ((float)360.0) ); 
 		  
 		  ymin = -ymax; //-4.7046
 		  
 		  xmin = ymin * g_game.aspect;//-6.2571
 		  xmax = ymax * g_game.aspect;//6.2571
-		  
+          
+          znear = (overrideZFrustum?overrideZNear:-g_game.zfar*(clip?1:ZFARCONST));
+          zfar  = (overrideZFrustum?overrideZFar : g_game.zfar*(clip?1:ZFARCONST));
+          
 		  //GFXParallel(xmin,xmax,ymin,ymax,-znear,zfar);
-		  GFXParallel(g_game.aspect*-zoom,g_game.aspect*zoom,-zoom,zoom,-g_game.zfar*(clip?1:ZFARCONST),g_game.zfar*(clip?1:ZFARCONST));
+		  GFXParallel(g_game.aspect*-zoom,g_game.aspect*zoom,-zoom,zoom,znear,zfar);
 		  break;
 		}
 		GFXLookAt (-R, centerCamera?QVector(0,0,0):Coord, Q);
@@ -173,10 +195,10 @@ void Camera::UpdateGLCenter()
 		//updating the center should always use a perspective
 		switch(Camera::PERSPECTIVE) {
 		case Camera::PERSPECTIVE:
-		  GFXPerspective (zoom*g_game.fov,g_game.aspect,g_game.znear,g_game.zfar,cockpit_offset); //set perspective to 78 degree FOV
+		  GFXPerspective (zoom*fov,g_game.aspect,g_game.znear,g_game.zfar,cockpit_offset); //set perspective to 78 degree FOV
 		  break;
 		case Camera::PARALLEL:
-		  ymax = g_game.znear * tanf( zoom*g_game.fov * PI / ((float)360.0) ); //78.0 --> 4.7046
+		  ymax = g_game.znear * tanf( zoom*fov * PI / ((float)360.0) ); //78.0 --> 4.7046
 		  
 		  ymin = -ymax; //-4.7046
 		  
@@ -195,11 +217,12 @@ void Camera::UpdateGLCenter()
 	//glMultMatrixf(view);
 }
 
-void Camera::SetPosition(const QVector &origin, const Vector & vel,const Vector & angvel)
+void Camera::SetPosition(const QVector &origin, const Vector & vel,const Vector & angvel, const Vector & acceleration)
 {
   if (FINITE (origin.i)&&FINITE(origin.j)&&FINITE (origin.k)) {
 	velocity = vel;
 	angular_velocity = angvel;
+    accel = acceleration;
 	Coord = origin;
 	changed= GFXTRUE;
   }else {
@@ -255,6 +278,16 @@ float Camera::GetZoom() {
   return zoom;
 }
 
+void Camera::SetFov(float f)
+{
+    fov = f;
+}
+
+float Camera::GetFov()
+{
+    return fov;
+}
+
 void Camera::Yaw(float rad)
 {
 	::Yaw(rad,P,Q,R);
@@ -285,3 +318,4 @@ void Camera::ZSlide(float factor)
 	Coord += (R * factor).Cast();
 	changed = GFXTRUE;
 }
+

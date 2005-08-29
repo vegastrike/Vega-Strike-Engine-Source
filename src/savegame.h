@@ -31,7 +31,7 @@ class SaveGame {
   std::string originalsystem;
   std::string callsign;
   std::string WriteMissionData();
-  void WriteMissionStringData(std::vector <char> &output);
+  void WriteMissionStringData(std::vector<char> &ret);
   std::string WriteNewsData ();
   void ReadStardate(char * &buf);
   void ReadNewsData(char * &buf);

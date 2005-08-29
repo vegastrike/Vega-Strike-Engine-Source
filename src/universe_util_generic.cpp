@@ -74,6 +74,7 @@ namespace UniverseUtil {
 			QVector pos, 
 			string squadlogo, 
 			string destinations){
+
 		int clstype=UNITPTR;
 		if (unittype_string=="planet") {
 			clstype =PLANETPTR;			
@@ -89,11 +90,10 @@ namespace UniverseUtil {
 		cf.waves=nr_of_waves;
 		cf.nr_ships=nr_of_ships;
 		cf.fg->pos=pos;
-		for(int i=0;i<3;i++){
-			cf.rot[i]=0.0;
-		}
+        cf.rot[0]=cf.rot[1]=cf.rot[2]=0.0f;
 		Unit *tmp= mission->call_unit_launch(&cf,clstype,destinations);
 		mission->number_of_ships+=nr_of_ships;
+
 		return tmp;
 	}
 	Cargo getRandCargo(int quantity, string category) {
@@ -246,6 +246,12 @@ namespace UniverseUtil {
 				break;
 		}
 		return un;
+	}
+    Unit *getUnitByName(std::string name) {
+		un_iter iter=activeSys->getUnitList().createIterator();
+        while (iter.notDone() && UnitUtil::getName(iter.current()) != name)
+            iter.advance();
+        return iter.notDone()?iter.current():NULL;
 	}
         int getNumUnits() {
 	  int count=0;

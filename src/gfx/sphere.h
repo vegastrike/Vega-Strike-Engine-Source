@@ -22,7 +22,11 @@ class SphereMesh : public Mesh {
     InitSphere (radius,stacks,slices,texture,alpha,insideout,a,b,envMap,rho_min,rho_max,theta_min,theta_max,mipmap,reverse_normals);
   }
   void Draw(float lod, bool centered =false, const Matrix &m=identity_matrix);
+#ifdef PARTITIONED_Z_BUFFER
+  virtual void ProcessDrawQueue(int whichpass,int which,float zmin,float zmax);
+#else
   virtual void ProcessDrawQueue(int whichpass,int which);
+#endif
 };
 class CityLights : public SphereMesh {
   //no local vars allowed
@@ -39,7 +43,11 @@ class CityLights : public SphereMesh {
 
   CityLights () : SphereMesh () {}
   CityLights (float radius, int stacks, int slices, const char *texture, int texturewrapx, int texturewrapy, bool insideout=false, const BLENDFUNC a=ONE, const BLENDFUNC b=ZERO, bool envMap=false, float rho_min=0.0, float rho_max=M_PI, float theta_min=0.0, float theta_max=2*M_PI, bool inside_out=true);
+#ifdef PARTITIONED_Z_BUFFER
+  virtual void ProcessDrawQueue(int whichpass,int which,float zmin,float zmax);
+#else
   virtual void ProcessDrawQueue(int whichpass,int which);
+#endif
 
 };
 #endif

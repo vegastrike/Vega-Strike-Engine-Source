@@ -150,8 +150,8 @@ void Mesh::Fork (Mesh *&x, Mesh *&y, float a, float b, float c, float d) {
 
   y->orig= new Mesh[1];
   y->forceCullFace(GFXFALSE);
-  x->draw_queue = new vector<MeshDrawContext>;
-  y->draw_queue = new vector<MeshDrawContext>;
+  x->draw_queue = new vector<MeshDrawContext>[NUM_ZBUF_SEQ+1];
+  y->draw_queue = new vector<MeshDrawContext>[NUM_ZBUF_SEQ+1];
   *y->orig = *y;
   *x->orig = *x;
   x->orig->refcount=1;

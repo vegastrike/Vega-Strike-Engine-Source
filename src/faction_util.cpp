@@ -36,7 +36,7 @@ std::vector <Animation *>* FactionUtil::GetAnimation (int faction, int n, unsign
   sex = factions[faction]->comm_face_sex[n];
   return &factions[faction]->comm_faces[n].animations;
 }
-std::vector <Animation *>* FactionUtil::GetRandAnimation(int faction, Unit * un, unsigned char &sex) {
+std::vector <Animation *>* FactionUtil::GetRandCommAnimation(int faction, Unit * un, unsigned char &sex) {
   bool dockable=UnitUtil::isDockableUnit(un);
   bool base = UnitUtil::getFlightgroupName(un)=="Base";
     int siz=factions[faction]->comm_faces.size();
@@ -65,7 +65,7 @@ std::vector <Animation *>* FactionUtil::GetRandAnimation(int faction, Unit * un,
     return NULL;
   }
 }
-Animation * FactionUtil::getRandAnimation (int whichfaction, std::string &which) {
+Animation * FactionUtil::GetRandExplosionAnimation (int whichfaction, std::string &which) {
   if (whichfaction<(int)factions.size()) {
     if (factions[whichfaction]->explosion_name.size()) {
       int whichexp = rand()%factions[whichfaction]->explosion_name.size();

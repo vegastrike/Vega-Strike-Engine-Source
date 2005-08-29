@@ -1,5 +1,3 @@
-
-
 #include <assert.h>
 #include "star_system.h"
 #include "cmd/planet.h"
@@ -39,7 +37,7 @@
 #include "gfx/lerp.h"
 #include "gfx/warptrail.h"
 #include "gfx/env_map_gent.h"
-extern Music *muzak;
+extern int muzak_count;
 extern Vector mouseline;
 #include "vsfilesystem.h"
 //static SphereMesh *foo;
@@ -163,9 +161,17 @@ void GameStarSystem::activateLightMap() {
   LightMap[3]->MakeActive();
   LightMap[4]->MakeActive();
   LightMap[5]->MakeActive();
-
 #else
-    LightMap[0]->MakeActive();
+  LightMap[0]->MakeActive();
+#endif
+  GFXTextureEnv(1,GFXADDTEXTURE);
+#ifdef NV_CUBE_MAP
+  GFXToggleTexture(true,1,CUBEMAP);
+  GFXTextureCoordGenMode(1,CUBE_MAP_GEN,NULL,NULL);
+#else
+  const float tempo[4]={1,0,0,0};
+  GFXToggleTexture(true,1,TEXTURE2D);
+  GFXTextureCoordGenMode(1,SPHERE_MAP_GEN,tempo,tempo);
 #endif
   GFXActiveTexture (0);
 }
@@ -275,6 +281,7 @@ void GameStarSystem::SwapOut () {
   }
 
 }
+
 static double calc_blend_factor(double frac, int priority, int when_it_will_be_simulated, int cur_simulation_frame) {
 	bool is_at_end=when_it_will_be_simulated==SIM_QUEUE_SIZE;
   if (cur_simulation_frame>when_it_will_be_simulated) {
@@ -290,6 +297,7 @@ static double calc_blend_factor(double frac, int priority, int when_it_will_be_s
   }
 }
 extern double interpolation_blend_factor;
+extern bool cam_setup_phase;
 //#define UPDATEDEBUG  //for hard to track down bugs
 void GameStarSystem::Draw(bool DrawCockpit) {
   GFXEnable (DEPTHTEST);
@@ -304,10 +312,6 @@ void GameStarSystem::Draw(bool DrawCockpit) {
     contterrains[i]->AdjustTerrain(this);
   }
 
-  GFXDisable (LIGHTING);
-  bg->Draw();
-
-  //  VSFileSystem::Fprintf (stderr,"|t%f i%lf|",GetElapsedTime(),interpolation_blend_factor);
   Unit * par;
   bool alreadysetviewport=false;
   if ((par=_Universe->AccessCockpit()->GetParent())==NULL) {
@@ -326,8 +330,41 @@ void GameStarSystem::Draw(bool DrawCockpit) {
 
   }
 
-  Unit *unit;
+  static bool always_make_smooth=XMLSupport::parse_bool(vs_config->getVariable("graphics","always_make_smooth_cam","false"));
+  //bool whichview=  _Universe->AccessCockpit()->GetView()==CP_CHASE;//||_Universe->AccessCockpit()->GetView()==CP_VIEWTARGET;
+  /*if (!whichview) */{
+      // Note: If subunits had parents, I could just get the camera´s parent and traverse
+      //   the hierachy upwards to the root. Sadly, they don't. Perhaps we should
+      //   consider adding them. They could be used to fix lots of bugs.
+      //       Then again, if the camera setup needs other objects to be updated as well,
+      //   as in a supposed follow-target mode, we'll need to update those objects as well...
+      //       Perhaps, much better would be to propperly separate this in two phases:
+      //         a) frame interpolation (currently the cam_setup_phase)
+      //         b) actual drawing (currently duplicating a's work)
+      //       With camera setup ocurring between a) and b)
+      cam_setup_phase=true;
+
+      for (unsigned int sim_counter=0;sim_counter<=SIM_QUEUE_SIZE;++sim_counter) {
+        Unit *unit;
+        UnitCollection::UnitIterator iter = physics_buffer[sim_counter].createIterator();    
+        while((unit = iter.current())!=NULL) {
+          interpolation_blend_factor=calc_blend_factor(interpolation_blend_factor,unit->sim_atom_multiplier,sim_counter,current_sim_location);
+          ((GameUnit<Unit> *)unit)->Draw();
+          interpolation_blend_factor=saved_interpolation_blend_factor;
+          iter.advance();
+        }
+      }
+
+      _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
+
+      cam_setup_phase=false;
+  }
+
+  GFXDisable (LIGHTING);
+  bg->Draw();
+
   for (unsigned int sim_counter=0;sim_counter<=SIM_QUEUE_SIZE;++sim_counter) {
+    Unit *unit;
     UnitCollection::UnitIterator iter = physics_buffer[sim_counter].createIterator();    
     while((unit = iter.current())!=NULL) {
       interpolation_blend_factor=calc_blend_factor(interpolation_blend_factor,unit->sim_atom_multiplier,sim_counter,current_sim_location);
@@ -339,26 +376,18 @@ void GameStarSystem::Draw(bool DrawCockpit) {
       iter.advance();
     }
   }
+
   WarpTrailDraw();
 
   GFXFogMode (FOG_OFF);
 
-
-  static bool always_make_smooth=XMLSupport::parse_bool(vs_config->getVariable("graphics","always_make_smooth_cam","false"));
-  bool whichview=  _Universe->AccessCockpit()->GetView()==CP_CHASE;//||_Universe->AccessCockpit()->GetView()==CP_VIEWTARGET;
-  if (always_make_smooth||whichview||!alreadysetviewport)
-    _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
-  //  SetViewport();//camera wielding unit is now drawn  Note: Background is one frame behind...big fat hairy deal
   GFXColor tmpcol (0,0,0,1);
   GFXGetLightContextAmbient(tmpcol);
+
   static bool DrawNearStarsLast =XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_near_stars_in_front_of_planets","false"));
-  if (!DrawNearStarsLast) {
-	  stars->Draw();
-  }
+  if (!DrawNearStarsLast) stars->Draw();
   Mesh::ProcessZFarMeshes();
-  if (DrawNearStarsLast) {
-	  stars->Draw();
-  }
+  if (DrawNearStarsLast) stars->Draw();
   
   GFXEnable (DEPTHTEST);
   GFXEnable (DEPTHWRITE);
@@ -369,27 +398,16 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   Nebula * neb;
 
   Matrix ident;
-
   Identity(ident);
 
   //Atmosphere::ProcessDrawQueue();
-
-
-
   GFXPopGlobalEffects();
-
-
-
   GFXLightContextAmbient(tmpcol);
-
-
-  
 
   if ((neb = _Universe->AccessCamera()->GetNebula())) {
     neb->SetFogState();
   }
   Beam::ProcessDrawQueue();
-
   Bolt::Draw();
 
   //  if (_Universe->AccessCamera()->GetNebula()!=NULL)
@@ -429,13 +447,6 @@ void	NebulaUpdate( StarSystem * ss)
 	  }
 	}
 }
-extern Music *muzak;
-void	TestMusic()
-{
-	if (muzak)
-		  muzak->Listen();
-}
-
 
 void	GameStarSystem::createBackground( StarSystem::StarXML * xml)
 {
@@ -461,9 +472,11 @@ void	GameStarSystem::createBackground( StarSystem::StarXML * xml)
   LightMap[0] = new Texture(bgfile.c_str(), 1,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE);
   
 #endif
+
+  static bool starblend = XMLSupport::parse_bool(vs_config->getVariable ("graphics","starblend","true"));
+
   bg = new Background(xml->backgroundname.c_str(),xml->numstars,g_game.zfar*.9,filename);
   stars = new Stars (xml->numnearstars, xml->starsp);
-  stars->SetBlend (XMLSupport::parse_bool(vs_config->getVariable ("graphics","starblend","true")),  
-		   XMLSupport::parse_bool(vs_config->getVariable ("graphics","starblend","true")));
+  stars->SetBlend (starblend, starblend); 
 }
 

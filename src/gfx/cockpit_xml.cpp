@@ -69,7 +69,8 @@ namespace CockpitXML {
       G_UP,
       G_DOWN,
       G_LEFT,
-      G_RIGHT
+      G_RIGHT,
+      G_TIME,
     };
 
   const EnumMap::Pair element_names[] = {
@@ -128,6 +129,7 @@ namespace CockpitXML {
     EnumMap::Pair ("GaugeDown",G_DOWN),
     EnumMap::Pair ("GaugeLeft",G_LEFT),
     EnumMap::Pair ("GaugeRight",G_RIGHT),
+    EnumMap::Pair ("GaugeTime",G_TIME),
     EnumMap::Pair ("TextRows", ROWS),
     EnumMap::Pair ("TextCols", COLS),
     EnumMap::Pair ("r", RED),
@@ -136,8 +138,8 @@ namespace CockpitXML {
     EnumMap::Pair ("type", VDUTYPE)
   };
 
-  const EnumMap element_map(element_names, 32);
-  const EnumMap attribute_map(attribute_names, 27);
+  const EnumMap element_map(element_names, sizeof(element_names)/sizeof(element_names[0]));
+  const EnumMap attribute_map(attribute_names, sizeof(attribute_names)/sizeof(attribute_names[0]));
 }
 
 using XMLSupport::EnumMap;
@@ -324,6 +326,9 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
 	break;
       case G_RIGHT:
 	tmpdir = Gauge::GAUGE_RIGHT;
+    break;
+      case G_TIME:
+    tmpdir = Gauge::GAUGE_TIME;
 	break;
       }
     }

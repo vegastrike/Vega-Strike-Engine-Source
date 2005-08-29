@@ -22,6 +22,7 @@ class HaloSystem {
 #endif
   Mesh * mesh;
   float activation;
+  float oscale;
  public:
   HaloSystem ();
   ~HaloSystem();
@@ -31,12 +32,13 @@ class HaloSystem {
   unsigned int numhalo () {
     return halo.size();
   }
-  unsigned int  AddHalo (const char * filename, const QVector &loc, const Vector &size, const GFXColor & col, std::string halo_type/*when it grows*/, float activation_speed);
-  bool ShouldDraw (float speedsquared);
-  void Draw (const Matrix & trans, const Vector & scale, int halo_alpha, float nebdist, float hullpercentage, const Vector & velocity, int faction);//draws smoke and damage fx
+  unsigned int  AddHalo (const char * filename, const QVector &loc, const Vector &size, const GFXColor & col, std::string halo_type/*when it grows*/, float activation_accel);
+  bool ShouldDraw (const Matrix & trans, const Vector & velocity, const Vector & accel, float maxaccel, float maxvelocity);
+  void Draw (const Matrix & trans, const Vector & scale, int halo_alpha, float nebdist, float hullpercentage, const Vector & velocity, const Vector & accel, float maxaccel, float maxvelocity, int faction);//draws smoke and damage fx
   //  unsigned int size(); {return halo.size();}
   void SetPosition (unsigned int which, const QVector &loc);
   void SetSize (unsigned int which, const Vector &scale);
+  int NumHalos() const { return halo.size(); };
 };
 #endif
 

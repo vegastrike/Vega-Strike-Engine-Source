@@ -386,7 +386,7 @@ coms commandI::findCommand(const char *comm, int &sock_in) {
 		std::transform(name.begin(), name.end(), name.begin(),static_cast < int(*)(int) > (tolower));
 // }}}
 // Start testing command names against the command entered {{{
-	for(std::vector<coms>::iterator iter = rcCMD->rc.begin();iter < rcCMD->rc.end(); iter++) {
+	for(iter = rcCMD->rc.begin();iter < rcCMD->rc.end(); iter++) {
 	//set the test variable to the iterator of something in the command vector
 		coms testCom((*(iter)));
 		//clear the temporary buffer used for holding the name of this command
@@ -638,7 +638,7 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 			args++;
 		}
 		xasd++;
-	}
+    } }
 	// }}}
 	{
 	std::vector<std::string *>::iterator iter = stringvec.end();
@@ -656,11 +656,11 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 	ylast = 0;
 	breaker = false;
 	//put together a c style charactor array: char w[length] (1CSTRARRAY) {{{
-	for(std::vector<std::string *>::iterator iter = stringvec.begin(); iter < stringvec.end() ;iter++) {
+    { for(std::vector<std::string *>::iterator iter = stringvec.begin(); iter < stringvec.end() ;iter++) {
 		w[vargs] = "";
 		w[vargs] = (char *)(*(iter))->c_str();//(char *)(*(iter)).c_str();
 		vargs++;
-	}
+    } }
 	// }}}
 	ylast = 0;
 	if(vargs == 0) 
@@ -785,6 +785,8 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
     } catch(const char *in) { //catch findCommand error
         std::cout << in;
     }
+
+    delete[] w;
 
 	//some cleanup {{{
 	std::vector<std::string *>::iterator itera = stringvec.begin();

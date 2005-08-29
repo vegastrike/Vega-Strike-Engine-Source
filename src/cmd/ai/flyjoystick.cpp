@@ -87,7 +87,10 @@ void FlyByJoystick::Execute() {
 		  if (axis_value>1)
 			  axis_value=1;
 	  }
-      Up( axis_value);
+      if ((joy_mode==joyModeNormal)||(joy_mode&(joyModeRoll|joyModeBank)))
+        Up(axis_value); else if (joy_mode&joyModeInertialXY)
+        DirectThrustUp(axis_value); else if (joy_mode&joyModeInertialXZ)
+        DirectThrustFront(-axis_value); 
       }
     }
 
@@ -108,7 +111,11 @@ void FlyByJoystick::Execute() {
 		  if (axis_value>1)
 			  axis_value=1;
 	  }
-      Right( axis_value);
+      if (joy_mode==joyModeNormal)
+        Right(axis_value); else if (joy_mode&joyModeRoll)
+        RollRight(-axis_value); else if (joy_mode&(joyModeInertialXY|joyModeInertialXZ))
+        DirectThrustRight(axis_value); else if (joy_mode&joyModeBank)
+        Right(axis_value),RollRight(-axis_value);
       }
     }
 
@@ -129,7 +136,11 @@ void FlyByJoystick::Execute() {
 		  if (axis_value>1)
 			  axis_value=1;
 	  }
-      RollRight( axis_value );
+      if ((joy_mode==joyModeNormal)||(joy_mode&joyModeBank))
+        RollRight(axis_value); else if (joy_mode&joyModeRoll)
+        Right(axis_value); else if (joy_mode&joyModeInertialXY)
+        DirectThrustFront(axis_value); else if (joy_mode&joyModeInertialXZ)
+        DirectThrustUp(axis_value);
       }
     }
 

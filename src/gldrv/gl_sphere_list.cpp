@@ -74,7 +74,7 @@ GFXSphereVertexList::GFXSphereVertexList(float radius, int detail, bool Insideou
     float rho_min=0;
     float theta_min=0.0;
     float theta_max=2*3.1415926536;
-    float rho, drho, theta, dtheta;
+    float drho, dtheta;
     float x, y, z;
     float s, t, ds, dt;
     int i, j, imin, imax;
@@ -107,17 +107,24 @@ GFXSphereVertexList::GFXSphereVertexList(float radius, int detail, bool Insideou
 	   Vector(0,0,-1),
 	   Vector(0,1,0));//that's the way prop*///taken care of in loading
       
+      float rhol[2];
+      float thetal[2];
+#define g_rho(i) rhol[i&1]
+#define g_theta(i) thetal[i&1]
       
+      g_rho(0) = rho_min;
       for (i = imin; i < imax; i++) {
 	GFXVertex *vertexlist = vl + (i * (slices+1)*2);
-	rho = i * drho + rho_min;
+    g_rho(i+1) = (i+1)*drho + rho_min;
 	
 	s = 0.0;
+    g_theta(0) = 0;
 	for (j = 0; j <= slices; j++) {
-	  theta = j*dtheta;//(j == slices) ? theta_min * 2 * M_PI : j * dtheta;
-	  x = -sin(theta) * sin(rho);
-	  y = cos(theta) * sin(rho);
-	  z = nsign * cos(rho);
+      g_theta(j+1) = (j+1)*dtheta;
+
+      x = -sin(g_theta(j)) * sin(g_rho(i));
+	  y = cos(g_theta(j)) * sin(g_rho(i));
+	  z = nsign * cos(g_rho(i));
 	
 	  vertexlist[j*2+fir].i = x *normalscale;
 	  vertexlist[j*2+fir].k = -y*normalscale;
@@ -125,22 +132,22 @@ GFXSphereVertexList::GFXSphereVertexList(float radius, int detail, bool Insideou
 #define GetS(theta,theta_min,theta_max) (1-(theta-theta_min)/ (theta_max-theta_min))
 #define GetT(rho,rho_min,rho_max) (1-(rho-rho_min)/ (rho_max-rho_min))  
 
-	  vertexlist[j*2+fir].s = GetS(theta,theta_min,theta_max);//1-s;//insideout?1-s:s;
-	  vertexlist[j*2+fir].t = GetT(rho,rho_min,rho_max);//t;
+	  vertexlist[j*2+fir].s = GetS(g_theta(j),theta_min,theta_max);//1-s;//insideout?1-s:s;
+	  vertexlist[j*2+fir].t = GetT(g_rho(i),rho_min,rho_max);//t;
 	  vertexlist[j*2+fir].x = x * radius;
 	  vertexlist[j*2+fir].z = -y * radius;
 	  vertexlist[j*2+fir].y = z * radius;
 
 
-	  x = -sin(theta) * sin(rho + drho);
-	  y = cos(theta) * sin(rho + drho);
-	  z = nsign * cos(rho + drho);
+	  x = -sin(g_theta(j)) * sin(g_rho(i+1));
+	  y = cos(g_theta(j)) * sin(g_rho(i+1));
+	  z = nsign * cos(g_rho(i+1));
 
 	  vertexlist[j*2+sec].i = x *normalscale;
 	  vertexlist[j*2+sec].k = -y*normalscale;
 	  vertexlist[j*2+sec].j = z*normalscale;//double negative 
-	  vertexlist[j*2+sec].s = GetS (theta,theta_min,theta_max);//1-s;//insideout?1-s:s;
-	  vertexlist[j*2+sec].t = GetT(rho+drho,rho_min,rho_max);//t - dt;
+	  vertexlist[j*2+sec].s = GetS (g_theta(j),theta_min,theta_max);//1-s;//insideout?1-s:s;
+	  vertexlist[j*2+sec].t = GetT(g_rho(i+1),rho_min,rho_max);//t - dt;
 	  vertexlist[j*2+sec].x = x * radius;
 	  vertexlist[j*2+sec].z = -y * radius;
 	  vertexlist[j*2+sec].y = z * radius;
@@ -152,6 +159,10 @@ GFXSphereVertexList::GFXSphereVertexList(float radius, int detail, bool Insideou
 	QSOffsets[i]= (slices+1)*2;
 	modes[i]=GFXQUADSTRIP;
       }      
+
+#undef g_rho
+#undef g_theta
+
       vlists[which][detail] = new GFXVertexList(modes,numvertex, vertexlist, numQuadstrips ,QSOffsets);
   }
   sphere = vlists[which][detail];

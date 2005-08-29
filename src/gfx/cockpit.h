@@ -56,6 +56,10 @@ private:
   std::list <Matrix> headtrans;
   float shake_time;
   int shake_type;
+  Vector oaccel;
+
+  float last_locktime;
+  float last_mlocktime;
 
   std::vector<class Mesh *> mesh;
 

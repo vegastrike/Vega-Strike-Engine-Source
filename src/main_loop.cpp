@@ -57,8 +57,6 @@
 #include "in_kb_data.h"
 using namespace std;
 
- Music * muzak=NULL;
-
 #define KEYDOWN(name,key) (name[key] & 0x80)
 
 Unit **fighters;
@@ -170,7 +168,6 @@ void ExamineWhenTargetKey() {
    
   }
 }
-//extern Unit * findUnitInStarsystem(Unit * unitDoNotDereference);
 namespace CockpitKeys {
   
   void QuitNow () {
@@ -293,23 +290,24 @@ bool cockpitfront=true;
     }
   static int tmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","cockpit","true"))?1:0);
   static bool switch_to_disabled=XMLSupport::parse_bool(vs_config->getVariable("graphics","disabled_cockpit_allowed","true"));
-
   if(newState==PRESS&&(_Universe->AccessCockpit()->GetView()==CP_FRONT)&&switch_to_disabled&&switch_to_disabled) {
-    YawLeft (KBData(),RELEASE);
-    YawRight (KBData(),RELEASE);
-    PitchUp(KBData(),RELEASE);
-    PitchDown (KBData(),RELEASE);
-    string cockpit="disabled-cockpit.cpt";
-    if (_Universe->AccessCockpit()->GetParent()) {
-      cockpit=_Universe->AccessCockpit()->GetParent()->getCockpit();
-      if (_Universe->AccessCockpit()->GetParent()->name=="return_to_cockpit") {
-        Unit * tmp = findUnitInStarsystem(_Universe->AccessCockpit()->GetParent()->owner);
-        if (tmp)
-          cockpit=tmp->getCockpit();
-      }
-    }
-    
-    _Universe->AccessCockpit()->Init (cockpit.c_str(), ((tmp)&&_Universe->AccessCockpit()->GetParent())==false);	    
+      YawLeft (KBData(),RELEASE);
+      YawRight (KBData(),RELEASE);
+      PitchUp(KBData(),RELEASE);
+      PitchDown (KBData(),RELEASE);
+	  string cockpit="disabled-cockpit.cpt";
+	  if (_Universe->AccessCockpit()->GetParent())
+		  cockpit=_Universe->AccessCockpit()->GetParent()->getCockpit();
+
+      Unit *u;
+      if (  (_Universe->AccessCockpit()->GetParent()!=NULL)
+          &&(_Universe->AccessCockpit()->GetParent()->name=="return_to_cockpit")
+          &&(_Universe->AccessCockpit()->GetParent()->owner!=NULL)
+          &&(u=findUnitInStarsystem(_Universe->AccessCockpit()->GetParent()->owner))  )
+		  cockpit=u->getCockpit();
+
+
+	  _Universe->AccessCockpit()->Init (cockpit.c_str(), ((tmp)&&_Universe->AccessCockpit()->GetParent())==false);	    
     tmp=(tmp+1)%2;
   }
   if(newState==PRESS||newState==DOWN) {
@@ -652,12 +650,14 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
   //  GFXFogMode (FOG_OFF);
 
 
-  Vector TerrainScale (XMLSupport::parse_float (vs_config->getVariable ("terrain","xscale","1")),XMLSupport::parse_float (vs_config->getVariable ("terrain","yscale","1")),XMLSupport::parse_float (vs_config->getVariable ("terrain","zscale","1")));
+  static Vector TerrainScale (XMLSupport::parse_float (vs_config->getVariable ("terrain","xscale","1")),XMLSupport::parse_float (vs_config->getVariable ("terrain","yscale","1")),XMLSupport::parse_float (vs_config->getVariable ("terrain","zscale","1")));
+  static float TerrainMass = XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","100"));
+  static float TerrainRadius = XMLSupport::parse_float (vs_config->getVariable ("terrain", "radius", "10000"));
 
   myterrain=NULL;
   std::string stdstr= mission->getVariable("terrain","");
   if (stdstr.length()>0) {
-    Terrain * terr = new Terrain (stdstr.c_str(), TerrainScale,XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","100")), XMLSupport::parse_float (vs_config->getVariable ("terrain", "radius", "10000")));
+    Terrain * terr = new Terrain (stdstr.c_str(), TerrainScale, TerrainMass, TerrainRadius);
     Matrix tmp;
     ScaleMatrix (tmp,TerrainScale);
     //    tmp.r[0]=TerrainScale.i;tmp[5]=TerrainScale.j;tmp[10]=TerrainScale.k;
@@ -669,7 +669,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
   }
   stdstr= mission->getVariable("continuousterrain","");
   if (stdstr.length()>0) {
-    myterrain=new ContinuousTerrain (stdstr.c_str(),TerrainScale,XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","100")));
+    myterrain=new ContinuousTerrain (stdstr.c_str(),TerrainScale,TerrainMass);
     Matrix tmp;
     Identity (tmp);
     QVector pos;
@@ -872,8 +872,10 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 
 
   delete [] tmptarget;
-  muzak = new Music (fighters[0]);
-  muzak->Skip();
+  //muzak = new Music (fighters[0]);
+  //muzak->Skip();
+  for (int m_i=0; m_i<muzak_count; m_i++)
+    muzak[m_i].SetParent(fighters[0]);
   FactionUtil::LoadFactionPlaylists();
   AUDListenerSize (fighters[0]->rSize()*4);
   for (unsigned int cnum=0;cnum<fighter0indices.size();cnum++) {

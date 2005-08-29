@@ -642,7 +642,7 @@ namespace VSFileSystem
 
 		// Now check if there is a data directory specified in it
 		// NOTE : THIS IS NOT A GOOD IDEA TO HAVE A DATADIR SPECIFIED IN THE CONFIG FILE
-		string data_path( vs_config->getVariable( "data", "datadir", ""));
+		static string data_path( vs_config->getVariable( "data", "datadir", ""));
 		if( data_path != "")
 		{
 			// We found a path to data in config file
@@ -2015,12 +2015,19 @@ namespace VSFileSystem
 
 	string	VSFile::GetFullPath()
 	{
-		string tmp=(this->rootname+"/"+this->directoryname+"/"+this->subdirectoryname+"/"+this->filename);
-                string::size_type where;
-                while ((where=tmp.find("//"))!=string::npos) {
-                  tmp = tmp.substr(0,where)+tmp.substr(where+1);
-                }
-                return tmp;
+        string tmp=this->rootname;
+        tmp += (((tmp[tmp.length()-1]=='/')||(tmp[tmp.length()-1]=='/'))?"":"/")+this->directoryname;
+        tmp += (((tmp[tmp.length()-1]=='/')||(tmp[tmp.length()-1]=='/'))?"":"/")+this->subdirectoryname;
+        tmp += (((tmp[tmp.length()-1]=='/')||(tmp[tmp.length()-1]=='/'))?"":"/")+this->filename;
+        return tmp;
+	}
+
+   	string	VSFile::GetAbsPath()
+	{
+        string tmp=this->directoryname;
+        tmp += (((tmp[tmp.length()-1]=='/')||(tmp[tmp.length()-1]=='/'))?"":"/")+this->subdirectoryname;
+        tmp += (((tmp[tmp.length()-1]=='/')||(tmp[tmp.length()-1]=='/'))?"":"/")+this->filename;
+        return tmp;
 	}
 
 	void	VSFile::SetType( VSFileType type)

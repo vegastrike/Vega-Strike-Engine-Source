@@ -114,9 +114,8 @@ public:
   float s;
   float t;
   Vector () {i=j=k=0;}
-  Vector(const Vector &in) {
-	memcpy(this, &in, sizeof(Vector));
-//	i = in.i; j = in.j; k=in.k; s=in.s; t=in.t;
+  Vector (const vector &in) {
+    memcpy(this,&in,sizeof(*this));
   }
   Vector (float x, float y, float z) {
     i=x;
@@ -850,7 +849,8 @@ void MakePlanet(float radius, int entitytype, string texturename, int texturenum
       int wrapx=1;
       int wrapy=1;
       if (ringname.empty()) {
-	ringname = vs_config->getVariable ("galaxy","DefaultRingTexture","planets/ring.pngwrapx36wrapy2");
+          static std::string defringname = vs_config->getVariable ("galaxy","DefaultRingTexture","planets/ring.pngwrapx36wrapy2");
+          ringname = defringname;
       }
       ringname = GetWrapXY(ringname,wrapx,wrapy);
       if (ringrand<(1-dualringprob)) {

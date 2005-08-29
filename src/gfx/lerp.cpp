@@ -39,8 +39,3 @@ Transformation linear_interpolate_uncapped(const Transformation &A, const Transf
 
   return res;
 }
-
-Transformation linear_interpolate(const Transformation &A, const Transformation &B, double blend) {
-  if(blend>1.0) blend = 1.0;
-  return linear_interpolate_uncapped(A,B,blend);
-}

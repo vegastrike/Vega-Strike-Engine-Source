@@ -20,14 +20,11 @@
 #include "configxml.h"
 #include "unit_util.h"
 #include "load_mission.h"
-extern Music *muzak;
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
 extern int GetModeFromName (const char *);
 extern void ModifyMouseSensitivity(int&,int&);
-extern std::set <std::string> GetListOfDowngrades();
-extern void ClearDowngradeMap();
 extern unsigned int getSaveStringLength (int whichcp, string key);
 extern unsigned int eraseSaveString (int whichcp, string key, unsigned int num);
 extern std::string getSaveString (int whichcp, string key, unsigned int num);

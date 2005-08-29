@@ -234,12 +234,18 @@ void init_opengl_extensions()
       (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::S3TC Texture Compression supported\n");
       //should be true;
     } else {
-      gl_options.s3tc=false;;
+      gl_options.s3tc=false;
       (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::S3TC Texture Compression unsupported\n");
     }
     if (vsExtensionSupported ("GL_ARB_multitexture")||vsExtensionSupported ("GL_EXT_multitexture")) {
-      gl_options.Multitexture = 1*gl_options.Multitexture;//might be zero by input
-      (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::Multitexture supported\n");
+      GLint multitex=gl_options.Multitexture;
+      glGetIntegerv(GL_MAX_TEXTURE_UNITS,&multitex);
+      if (multitex>1)
+          gl_options.Multitexture = multitex; else
+          gl_options.Multitexture = 0;
+      //gl_options.Multitexture = 1*gl_options.Multitexture;//might be zero by input
+      if (gl_options.Multitexture)
+          (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::Multitexture supported (%d units)\n", gl_options.Multitexture);
     } else {
       gl_options.Multitexture = 0;
       (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::Multitexture unsupported\n");
@@ -250,6 +256,20 @@ void init_opengl_extensions()
     } else {
       gl_options.cubemap = 0;
       (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::TextureCubeMapExt unsupported\n"); 
+    }
+    if (vsExtensionSupported ("GL_EXT_texture_edge_clamp")||vsExtensionSupported ("GL_SGIS_texture_edge_clamp")) {
+      (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::S3TC Texture Clamp-to-Edge supported\n");
+      //should be true;
+    } else {
+      gl_options.ext_clamp_to_edge=false;
+      (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::S3TC Texture Clamp-to-Edge unsupported\n");
+    }
+    if (vsExtensionSupported ("GL_ARB_texture_border_clamp")||vsExtensionSupported ("GL_SGIS_texture_border_clamp")) {
+      (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::S3TC Texture Clamp-to-Border supported\n");
+      //should be true;
+    } else {
+      gl_options.ext_clamp_to_border=false;
+      (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::S3TC Texture Clamp-to-Border unsupported\n");
     }
 
 #if defined(CG_SUPPORT)
@@ -311,7 +331,6 @@ void GFXInit (int argc, char ** argv){
     /* Ingore key-repeat messages */
   winsys_enable_key_repeat(false);
 
-
     glViewport (0, 0, g_game.x_resolution,g_game.y_resolution);
     float clearcol[4];
     gl_options.wireframe = XMLSupport::parse_bool (vs_config->getVariable ("graphics","use_wireframe","0"));     
@@ -322,6 +341,8 @@ void GFXInit (int argc, char ** argv){
     gl_options.Multitexture = XMLSupport::parse_bool (vs_config->getVariable ("graphics","reflection","true"));
     gl_options.display_lists = XMLSupport::parse_bool (vs_config->getVariable ("graphics","displaylists","false"));
     gl_options.s3tc = XMLSupport::parse_bool (vs_config->getVariable ("graphics","s3tc","true"));
+    gl_options.ext_clamp_to_edge = XMLSupport::parse_bool (vs_config->getVariable ("graphics","ext_clamp_to_edge","true"));
+    gl_options.ext_clamp_to_border = XMLSupport::parse_bool (vs_config->getVariable ("graphics","ext_clamp_to_border","true"));
 
     vs_config->getColor ("space_background",clearcol);
     glClearColor (clearcol[0],clearcol[1],clearcol[2],clearcol[3]);
@@ -382,17 +403,12 @@ void GFXInit (int argc, char ** argv){
 			// Spherical texture coordinate generation
 			if (i==1) {			
 #ifdef NV_CUBE_MAP
-				glEnable(GL_TEXTURE_CUBE_MAP_EXT);
-				glTexGeni(GL_S,GL_TEXTURE_GEN_MODE,GL_REFLECTION_MAP_NV);
-				glTexGeni(GL_T,GL_TEXTURE_GEN_MODE,GL_REFLECTION_MAP_NV);
-				glTexGeni(GL_R,GL_TEXTURE_GEN_MODE,GL_REFLECTION_MAP_NV);
-				glEnable(GL_TEXTURE_GEN_S);
-				glEnable(GL_TEXTURE_GEN_T);
-				glEnable(GL_TEXTURE_GEN_R);
+                GFXToggleTexture(true,1,CUBEMAP);
+                GFXTextureCoordGenMode(1,CUBE_MAP_GEN,NULL,NULL);
 #else
 				const float tempo[4]={1,0,0,0};
-				GFXTextureCoordGenMode(SPHERE_MAP_GEN,tempo,tempo);
-				glEnable(GL_TEXTURE_2D);
+                GFXToggleTexture(true,1,TEXTURE2D);
+				GFXTextureCoordGenMode(1,SPHERE_MAP_GEN,tempo,tempo);
 #endif
 			}
 		}
@@ -417,6 +433,7 @@ void GFXInit (int argc, char ** argv){
     int con;
     GFXCreateLightContext(con);
     //    glutSetCursor(GLUT_CURSOR_NONE);
+
     /* Avoid scrambled screen on startup - Twice, for triple buffering */
     if (XMLSupport::parse_bool (vs_config->getVariable ("graphics","ClearOnStartup","true"))) {
       glClear(GL_COLOR_BUFFER_BIT);
@@ -424,6 +441,7 @@ void GFXInit (int argc, char ** argv){
       glClear(GL_COLOR_BUFFER_BIT);
       winsys_swap_buffers();
     }
+
     winsys_show_cursor(false);
 }
 

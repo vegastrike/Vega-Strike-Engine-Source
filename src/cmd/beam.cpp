@@ -82,7 +82,9 @@ void Beam::ProcessDrawQueue() {
   for (unsigned int decal = 0;decal < beamdrawqueue.size();decal++) {	
     Texture * tex = beamdecals.GetTexture(decal);
     if (tex) {
-      tex->MakeActive();
+      tex->MakeActive(0);
+      GFXTextureEnv(0,GFXMODULATETEXTURE);
+      GFXToggleTexture(true,0);
       if (beamdrawqueue[decal].size()) {
 	beamdrawqueue[decal].back().vlist->LoadDrawState();//loads clarity+color
 	while (beamdrawqueue[decal].size()) {

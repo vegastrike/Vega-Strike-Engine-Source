@@ -38,7 +38,7 @@ vector <Animation *> *CommunicatingAI::getCommFaces(unsigned char &sex) {
 
 void CommunicatingAI::SetParent (Unit * par) {
   Order::SetParent(par);
-  comm_face = FactionUtil::GetRandAnimation(par->faction,par,sex);
+  comm_face = FactionUtil::GetRandCommAnimation(par->faction,par,sex);
 }
 bool MatchingMood(const CommunicationMessage& c,float mood, float randomresponse, float relationship) {
 
@@ -84,12 +84,8 @@ float CommunicatingAI::getAnger(const Unit * target)const {
   if (i!=effective_relationship.end()) {
     rel = (*i).second;
   }
-  static int pirates=FactionUtil::GetFactionIndex("pirates");
-  static int pirates2=FactionUtil::GetFactionIndex("kilrathi_pirates");
-  static int pirates3=FactionUtil::GetFactionIndex("aera_pirates");
-  static int pirates4=FactionUtil::GetFactionIndex("rlaan_pirates");
   if (_Universe->isPlayerStarship(target)){
-    if (parent->faction==pirates || parent->faction == pirates2 || parent->faction == pirates3 || parent->faction == pirates4) {
+    if (FactionUtil::GetFactionName(parent->faction).find("pirates")!=std::string::npos) {
       static unsigned int cachedCargoNum=0;
       static bool good=true;
       if (cachedCargoNum!=target->numCargo()) {

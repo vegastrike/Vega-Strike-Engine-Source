@@ -213,14 +213,14 @@ void ForceFeedback::stopEffect(unsigned int eff_nr){
 
 
 void ForceFeedback::init(){
-  have_ff=XMLSupport::parse_bool(vs_config->getVariable("joystick","force_feedback","false"));
+  static have_ff=XMLSupport::parse_bool(vs_config->getVariable("joystick","force_feedback","false"));
 
   if(!have_ff){
     printf("force feedback disabled in config file\n");
     return;
   }
 
-  device_nr=atoi(vs_config->getVariable("joystick","ff_device","0").c_str());
+  static device_nr=atoi(vs_config->getVariable("joystick","ff_device","0").c_str());
 
   char devname[200];
   sprintf(devname,"/dev/input/event%d",device_nr);

@@ -18,6 +18,13 @@
 #include "car_assist.h"
 #include "cmd/collide/rapcol.h"
 #include "cmd/unit_collide.h"
+
+#define HALO_SMOOTHING_UP_FACTOR 0.02
+#define HALO_SMOOTHING_DOWN_FACTOR 0.01
+#define HALO_STEERING_UP_FACTOR 0.00
+#define HALO_STEERING_DOWN_FACTOR 0.01
+#define HALO_STABILIZATION_RANGE 0.25
+
 static float ffmax(float a, float b) {
   return a>b?a:b;
 }
@@ -107,14 +114,15 @@ HaloSystem::HaloSystem() {
   VSCONSTRUCT2('h')
   mesh=NULL;
   activation=0;
+  oscale=0;
 }
 
 MyIndHalo::MyIndHalo(const QVector & loc, const Vector & size) {
     this->loc = loc;
-    this->size=size;
+    this->size = size;
 }
 
-unsigned int HaloSystem::AddHalo (const char * filename, const QVector & loc, const Vector &size, const GFXColor & col, std::string type, float activation_speed) {
+unsigned int HaloSystem::AddHalo (const char * filename, const QVector & loc, const Vector &size, const GFXColor & col, std::string type, float activation_accel) {
 #ifdef CAR_SIM
   ani.push_back (new Animation ("flare6.ani",1,.1,MIPMAP,true,true,col));
   ani.back()->SetDimensions (size.i,size.j);
@@ -123,13 +131,13 @@ unsigned int HaloSystem::AddHalo (const char * filename, const QVector & loc, co
 #endif
   if (mesh==NULL) {
 	  mesh = Mesh::LoadMesh ((string (filename)).c_str(), Vector(1,1,1),FactionUtil::GetFaction("neutral"),NULL);
-    float gs =XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
-    activation=activation_speed*activation_speed*gs*gs;
+    static float gs =XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
+    activation=activation_accel*gs;
   }
   static float engine_scale = XMLSupport::parse_float (vs_config->getVariable ("graphics","engine_radii_scale",".4"));
   static float engine_length = XMLSupport::parse_float (vs_config->getVariable ("graphics","engine_length_scale","1.25"));
 
-  halo.push_back (MyIndHalo (loc, Vector (size.i*engine_scale,size.j*engine_scale,size.k)));
+  halo.push_back (MyIndHalo (loc, Vector (size.i*engine_scale,size.j*engine_scale,size.k*engine_length)));
   return halo.size()-1;
 }
 using std::vector;
@@ -146,10 +154,34 @@ void HaloSystem::SetPosition (unsigned int which, const QVector &loc) {
 #endif
 
 }
-bool HaloSystem::ShouldDraw (float speedsquared) {
-  return speedsquared>activation;
+
+static float HaloAccelSmooth(float linaccel, float olinaccel, float maxlinaccel) {
+    linaccel = max(0,min(maxlinaccel,linaccel)); //Clamp input, somehow, sometimes it's not clamped
+    float phase = pow(((linaccel>olinaccel)?HALO_SMOOTHING_UP_FACTOR:HALO_SMOOTHING_DOWN_FACTOR),GetElapsedTime());
+    float olinaccel2;
+    if (linaccel>olinaccel)
+        olinaccel2 = min(linaccel,olinaccel+maxlinaccel*HALO_STEERING_UP_FACTOR); else
+        olinaccel2 = max(linaccel,olinaccel-maxlinaccel*HALO_STEERING_DOWN_FACTOR);
+    linaccel=(1-phase)*linaccel+phase*olinaccel2;
+    linaccel=max(0,min(maxlinaccel,linaccel));
+    return linaccel;
 }
-void HaloSystem::Draw(const Matrix & trans, const Vector &scale, int halo_alpha, float nebdist, float hullpercent, const Vector & velocity, int faction) {
+
+bool HaloSystem::ShouldDraw (const Matrix & trans, const Vector & velocity, const Vector & accel, float maxaccel, float maxvelocity) {
+    static bool halos_by_velocity = XMLSupport::parse_bool( vs_config->getVariable("graphics","halos_by_velocity","false") );
+
+    Vector thrustvector=trans.getR().Normalize();
+    if (halos_by_velocity) {
+        float linvel=velocity.Dot(thrustvector);
+        return (linvel>activation);
+    } else {
+        if (maxaccel<=0) maxaccel=1;
+        if (maxvelocity<=0) maxvelocity=1;
+        float linaccel=HaloAccelSmooth(accel.Dot(thrustvector)/maxaccel,oscale,1.0f);
+        return (linaccel>activation*maxaccel);
+    }
+}
+void HaloSystem::Draw(const Matrix & trans, const Vector &scale, int halo_alpha, float nebdist, float hullpercent, const Vector & velocity, const Vector & accel, float maxaccel, float maxvelocity, int faction) {
 #ifdef CAR_SIM
     for (unsigned int i=0;i<ani.size();++i) {
       int bitwise = scale.j;
@@ -202,17 +234,32 @@ void HaloSystem::Draw(const Matrix & trans, const Vector &scale, int halo_alpha,
     }
     
   }
-  if (scale.k>0) {
+
+  static bool halos_by_velocity = XMLSupport::parse_bool( vs_config->getVariable("graphics","halos_by_velocity","false") );
+
+  Vector thrustvector=trans.getR().Normalize();
+  if (maxaccel<=0) maxaccel=1;
+  if (maxvelocity<=0) maxvelocity=1;
+  float value,maxvalue,minvalue;
+  if (halos_by_velocity) {
+      value = velocity.Dot(thrustvector);
+      maxvalue = maxvelocity;
+      minvalue = activation;
+  } else {
+      oscale = HaloAccelSmooth(accel.Dot(thrustvector)/maxaccel,oscale,1.0f);
+      value = oscale;
+      maxvalue = 1.0f;
+      minvalue = activation/maxaccel;
+  }
+  if ((value>minvalue)&&(scale.k>0)) {
     vector<MyIndHalo>::iterator i = halo.begin();
     for (;i!=halo.end();++i) {
-      
-      Matrix m = trans;
-      ScaleMatrix (m,Vector (scale.i*i->size.i,scale.j*i->size.j,scale.k*i->size.k));
-      m.p = Transform (trans,i->loc);
-      mesh->Draw(50000000000000.0,m,1,halo_alpha,nebdist);    
-      if (hullpercent<.99) {
-	DoParticles(m.p,hullpercent,velocity,mesh->rSize()*scale.i,mesh->rSize()*scale.i,faction);
-      }
+        Matrix m = trans;
+        ScaleMatrix (m,Vector (scale.i*i->size.i,scale.j*i->size.j,scale.k*i->size.k*value/maxvalue));
+        m.p = Transform (trans,i->loc);
+        mesh->Draw(50000000000000.0,m,1,halo_alpha,nebdist);   
+        if (hullpercent<.99)
+            DoParticles(m.p,hullpercent,velocity,mesh->rSize()*scale.i,mesh->rSize()*scale.i,faction);
     }
   }
 #endif

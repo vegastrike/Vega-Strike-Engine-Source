@@ -13,6 +13,15 @@ class FlyByKeyboard: public FlyByWire {
   Vector axis_key;
   unsigned int last_jumped;
  protected:
+  enum joy_mode_enum {
+      joyModeNormal=0,
+      joyModeInertialXY=1,
+      joyModeInertialXZ=2,
+      joyModeRoll=4,
+      joyModeBank=8
+  };
+  char joy_mode; // do not mix different modes
+ protected:
   void KeyboardUp (float val);
   void KeyboardRight (float val);
   void KeyboardRollRight (float val);
@@ -32,6 +41,16 @@ class FlyByKeyboard: public FlyByWire {
   static void KThrustFront (const KBData&,KBSTATE);
   static void KThrustBack (const KBData&,KBSTATE);
   static void SheltonKey (const KBData&,KBSTATE);
+  static void InertialToggleKey (const KBData&,KBSTATE);
+  static void InertialPulsorKey (const KBData&,KBSTATE);
+  static void JoyInertialXYPulsorKey (const KBData&,KBSTATE);
+  static void JoyInertialXZPulsorKey (const KBData&,KBSTATE);
+  static void JoyInertialXYToggleKey (const KBData&,KBSTATE);
+  static void JoyInertialXZToggleKey (const KBData&,KBSTATE);
+  static void JoyRollPulsorKey (const KBData&,KBSTATE);
+  static void JoyRollToggleKey (const KBData&,KBSTATE);
+  static void JoyBankPulsorKey (const KBData&,KBSTATE);
+  static void JoyBankToggleKey (const KBData&,KBSTATE);
   static void StartKey (const KBData&,KBSTATE);
   static void StopKey (const KBData&,KBSTATE);
   static void UpKey(const KBData&,KBSTATE);

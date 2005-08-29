@@ -58,7 +58,8 @@ unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile
   return i;
 }
 static unsigned int AddJumpAnimation (const QVector & pos, const float size, bool mvolatile=false) {
-  return AddAnimation (pos,size,mvolatile,vs_config->getVariable("graphics","jumpgate","warp.ani"),.95);
+    static std::string jumpgate = vs_config->getVariable("graphics","jumpgate","warp.ani");
+    return AddAnimation (pos,size,mvolatile,jumpgate,.95);
 }
 
 void GameStarSystem::VolitalizeJumpAnimation (const int ani) {

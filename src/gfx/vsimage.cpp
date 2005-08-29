@@ -85,6 +85,8 @@ VSImage::~VSImage()
 
 unsigned char *	VSImage::ReadImage( VSFile * f, textureTransform * t, bool strip, VSFile * f2)
 {
+    try {
+
 	this->Init( f, t, strip, f2);
 
 	unsigned char * ret = NULL;
@@ -107,6 +109,12 @@ unsigned char *	VSImage::ReadImage( VSFile * f, textureTransform * t, bool strip
 			VSExit(1);
 	}
 	return ret;
+
+    } catch(...) {
+        // ReadXXX() already handles exceptions. But, if any exception remains unhandled,
+        // this handler will perform a dirty abortion (reclaims no memory, but doesn't crash at least)
+        return NULL;
+    }
 }
 
 VSError	VSImage::CheckPNGSignature( VSFile * file)
@@ -220,10 +228,14 @@ png_cexcept_error(png_structp png_ptr, png_const_charp msg)
 
 unsigned char *	VSImage::ReadPNG()
 {
+	png_bytepp row_pointers=NULL;
+    unsigned char * image=NULL;
+
+    try {
+
 	TPngFileBuffer	PngFileBuffer = {NULL,0};
 	palette = NULL;
 	png_structp png_ptr;
-	png_bytepp row_pointers;
 	png_infop info_ptr;
 	int  interlace_type;
 
@@ -237,7 +249,7 @@ unsigned char *	VSImage::ReadPNG()
 	// Only when reading from a buffer otherwise CheckPNGSignature already did the work
 	if( img_file->UseVolume())
 	{
-		PngFileBuffer.Buffer = img_file->pk3_extracted_file;
+		PngFileBuffer.Buffer = img_file->get_pk3_data();
 		PngFileBuffer.Pos = 8;
 	}
 
@@ -316,7 +328,7 @@ unsigned char *	VSImage::ReadPNG()
 #ifdef VSIMAGE_DEBUG
 	cerr<<"3. Allocating image buffer of size="<<(stride*sizeX*sizeY)<<endl;
 #endif
-	unsigned char * image = (unsigned char *) malloc (stride*this->sizeX*this->sizeY);
+	image = (unsigned char *) malloc (stride*this->sizeX*this->sizeY);
 	for (unsigned int i=0;i<this->sizeY;i++)
 	{
 		row_pointers[i] = &image[i*stride*this->sizeX];
@@ -328,15 +340,15 @@ unsigned char *	VSImage::ReadPNG()
 		cerr<<"4. Doing a tranformation"<<endl;
 #endif
 		result = (*tt) (this->img_depth,this->img_color_type,this->sizeX,this->sizeY,row_pointers);
-		free (image);
+		free (image); image=NULL;
 	}
 	else
 	{
 		result = image;
 	}
-	free (row_pointers);
+	free (row_pointers); row_pointers=NULL;
 	png_read_end(png_ptr, info_ptr);
-	png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+	png_destroy_read_struct(&png_ptr, &info_ptr, NULL); png_ptr=NULL; info_ptr=NULL;
 #ifdef VSIMAGE_DEBUG
 	   VSFileSystem::vs_fprintf (stderr,"Decompressing Done.\n");
 #endif
@@ -344,6 +356,12 @@ unsigned char *	VSImage::ReadPNG()
 	if( result)
 		this->AllocatePalette();
 	return result;
+
+    } catch(...) {
+        if (image) free(image); image=NULL;
+        if (row_pointers) free(row_pointers); row_pointers=NULL;
+        return NULL;
+    }
 }
 
 struct my_error_mgr
@@ -367,11 +385,15 @@ METHODDEF(void) my_error_exit(j_common_ptr cinfo)
 
 unsigned char *	VSImage::ReadJPEG()
 {
+    unsigned char * image=NULL;
+    JSAMPARRAY row_pointers=NULL;// Output row buffer
+
+    try {
+
 	this->img_depth = 8;
 	jpeg_decompress_struct cinfo;
 
 	my_error_mgr jerr;
-	JSAMPARRAY row_pointers=NULL;// Output row buffer
 
 	cinfo.err = jpeg_std_error(&jerr.pub);
 	jerr.pub.error_exit = my_error_exit;
@@ -417,7 +439,7 @@ unsigned char *	VSImage::ReadJPEG()
 	int numchan =cinfo.output_components;
 
 	unsigned long stride = numchan*sizeof (unsigned char)*this->img_depth/8;
-	unsigned char * image = (unsigned char *) malloc (stride*cinfo.image_width*cinfo.image_height);
+	image = (unsigned char *) malloc (stride*cinfo.image_width*cinfo.image_height);
 
 	for (unsigned int i=0;i<cinfo.image_height;i++)
 	{
@@ -435,17 +457,28 @@ unsigned char *	VSImage::ReadJPEG()
 	unsigned char * result=image;
 	if (tt) {
 		result = (*tt) (this->img_depth,this->img_color_type,this->sizeX,this->sizeY,row_pointers);
-		free (image);
+		free (image); image=NULL;
 	}
-	free (row_pointers);
+	free (row_pointers); row_pointers=NULL;
 	if( result)
 		this->AllocatePalette();
 	return result;
+
+    } catch(...) {
+        if (image) free(image); image=NULL;
+        if (row_pointers) free(row_pointers); row_pointers=NULL;
+        return NULL;
+    }
 }
 
 unsigned char *	VSImage::ReadBMP()
 {
-  	unsigned char *data;
+  	unsigned char *data = NULL;
+    unsigned char *cdata= NULL;
+    unsigned char *adata= NULL;
+
+    try {
+
 	if( CheckBMPSignature( img_file)!=Ok)
 	{
 		cerr<<"VSImage ERROR : BMP signature check failed : this should not happen !!!"<<endl;
@@ -480,28 +513,50 @@ unsigned char *	VSImage::ReadBMP()
 	*/
 	if(le16_to_cpu(info.biBitCount) == 24)
 	{
-		mode = _24BITRGBA;
+		mode = _24BIT; //Someone said _24BIT isn't supported by most cards, but PNG and JPEG use it widely without problems, so it must be untrue...
 		if(img_file2 && img_file2->Valid())
 			mode = _24BITRGBA;
-		data = NULL;
-		data= (unsigned char *)malloc (sizeof(unsigned char)*4*this->sizeY*this->sizeX); // all bitmap data needs to be 32 bits
-		if (!data)
-			return NULL;
-		for (int i=sizeY-1; i>=0;i--)
-		{
-			int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
-			for (unsigned int j=0; j<sizeX;j++)
-			{
-				if(img_file2 && img_file2->Valid())
-					img_file2->Read(data+3, sizeof(unsigned char));
-				else
-					*(data+3) = 0xff; // default alpha = 1
-				for (int k=2; k>=0;k--)
-				{
-					img_file->Read (data+k+4*j+itimes4width,sizeof (unsigned char));
-				}
-			}
-		}
+        int ncomp = ((mode==_24BIT)?3:4);
+        int cstride = ((sizeof(unsigned char)*3*this->sizeX)+3)&~3; //BMP rows must be aligned to 32 bits
+        int astride = ((sizeof(unsigned char)*this->sizeX)+3)&~3; //BMP rows must be aligned to 32 bits
+        int stride  = (sizeof(unsigned char)*ncomp*this->sizeX);
+	    data = (unsigned char *)malloc (stride*this->sizeY);
+		if (data==NULL) return NULL;
+        if (mode!=_24BIT) {
+            cdata=(unsigned char *)malloc (cstride);
+            adata=(unsigned char *)malloc (astride);
+            if ((cdata==NULL)||(adata==NULL)) throw("memory");
+            unsigned char *row = data+(this->sizeY-1)*stride;
+            for (unsigned int i=0; i<this->sizeY; i++,row-=stride) {
+                img_file->Read(cdata,cstride);
+                img_file2->Read(adata,astride);
+                unsigned char *cpix=cdata,*apix=adata,*pix=row;
+                for (unsigned int j=0; j<this->sizeX; j++,cpix+=3,apix++,pix+=4) {
+                    pix[0] = cpix[2];
+                    pix[1] = cpix[1];
+                    pix[2] = cpix[0];
+                    pix[3] = apix[0];
+                };
+            };
+            free(cdata); cdata=NULL;
+            free(adata); adata=NULL;
+        } else {
+            unsigned char *row = data+(this->sizeY-1)*stride;
+            unsigned long dummy;
+            for (unsigned int i=0; i<this->sizeY; i++,row-=stride) {
+                img_file->Read(row,stride);
+                if (cstride>stride) {
+                    assert(cstride-stride < sizeof(dummy));
+                    img_file->Read(&dummy,cstride-stride);
+                };
+                unsigned char *pix=row;
+                for (unsigned int j=0; j<this->sizeX; j++,pix+=3) {
+                    unsigned char apix=pix[0];
+                    pix[0] = pix[2];
+                    pix[2] = apix;
+                };
+            };
+        };
 	}
 	else if(le16_to_cpu(info.biBitCount) == 8)
 	{
@@ -531,6 +586,13 @@ unsigned char *	VSImage::ReadBMP()
 		}
 	}
 	return data;
+
+    } catch(...) {
+        if (cdata)free(cdata);cdata=NULL;
+        if (adata)free(adata);adata=NULL;
+        if (data) free(data); data=NULL;
+        return NULL;
+    };
 }
 
 void	VSImage::AllocatePalette()

@@ -3,6 +3,7 @@
 #include "cmd/collection.h"
 #include "gfx/vec.h"
 #include "networking/const.h"
+#include "cmd/unit_util.h"
 
 #include <string>
 #include <vector>
@@ -22,6 +23,15 @@ public:
 	PythonUnitIter (const UnitCollection::UnitIterator &t):UnitIterator(t){}
 	Unit *  current();
 	void advance () {UnitIterator::advance();}
+    void advanceSignificant() { advance(); while (!isDone()&&!UnitUtil::isSignificant(current())) advance(); }
+    void advanceInsignificant() { advance(); while (!isDone()&&UnitUtil::isSignificant(current())) advance(); }
+    void advancePlanet() { advance(); while (!isDone()&&!current()->isPlanet()) advance(); }
+    void advanceJumppoint() { advance(); while (!isDone()&&!current()->isJumppoint()) advance(); }
+    void advanceN(int n) { while (!isDone()&&(n>0)) advance(), n--; }
+    void advanceNSignificant(int n) { if (!isDone()&&!UnitUtil::isSignificant(current())) advanceSignificant(); while (!isDone()&&(n>0)) advanceSignificant(), n--; }
+    void advanceNInsignificant(int n) { if (!isDone()&&UnitUtil::isSignificant(current())) advanceInsignificant(); while (!isDone()&&(n>0)) advanceInsignificant(), n--; }
+    void advanceNPlanet(int n) { if (!isDone()&&!current()->isPlanet()) advancePlanet(); while (!isDone()&&(n>0)) advancePlanet(), n--; }
+    void advanceNJumppoint(int n) { if (!isDone()&&!current()->isJumppoint()) advanceJumppoint(); while (!isDone()&&(n>0)) advanceJumppoint(), n--; }
 	Unit * next () {advance();return current();}
 	void preinsert (Unit * unit) {UnitIterator::preinsert(unit);}
 	bool isDone(){return UnitIterator::isDone();}
@@ -48,6 +58,8 @@ public:
 	PythonUnitIter getUnitList();
 ///This function gets a unit given a number (how many iterations to go down in the iterator)
 	Unit *getUnit(int index);
+///This function gets a unit given a name 
+    Unit *getUnitByName(std::string name);
 	Unit *getScratchUnit();
 	void setScratchUnit(Unit *);
 	void precacheUnit(std::string name, std::string faction);
@@ -83,19 +95,33 @@ public:
 	int GetNumAdjacentSystems (string sysname);
 ///this gets the current time in seconds
 	float GetGameTime ();
-	void musicMute (bool stopit);
 ///this sets the time compresison value to zero
 	void SetTimeCompression ();
 ///this adds a playlist to the music and may be triggered with an int
 	int musicAddList(string str);
-///this plays a specific song
-	void musicPlaySong(string str);
+///this plays a specific song, at a specific layer
+	void musicLayerPlaySong(string str,int layer);
+///this plays msuci from a given list, at a specific layer (where the int is what was returned by musicAddList)
+	void musicLayerPlayList(int which,int layer);
+///this plays msuci from a given list, at a specific layer (where the int is what was returned by musicAddList)
+	void musicLayerLoopList(int numloops,int layer);
+///this skips the current music track, at a specific layer (and goes to the next in the currently playing list)
+	void musicLayerSkip(int layer);
+///this stops the music currently playing at a specific layer - with a nice fadeout
+    void musicLayerStop(int layer);
+///this mutes sound - or unmutes it
+    void musicMute(bool stopSound);
+///this plays a specific song, through the crossfader construct
+    inline void musicPlaySong(string str) { musicLayerPlaySong(str,-1); };
 ///this plays msuci from a given list (where the int is what was returned by musicAddList)
-	void musicPlayList(int which);
+    inline void musicPlayList(int which) { musicLayerPlayList(which,-1); };
 ///this plays msuci from a given list (where the int is what was returned by musicAddList)
-	void musicLoopList(int numloops);
+    inline void musicLoopList(int numloops) { musicLayerLoopList(numloops,-1); };
+///this skips the current music track (and goes to the next in the currently playing list)
+    inline void musicSkip() { musicLayerSkip(-1); };
+///this stops the music currently playing - with a nice fadeout
+    inline void musicStop() { musicLayerStop(-1); };
 ///this gets the difficutly of the game... ranges between 0 and 1... many missions depend on it never going past .99 unless it's always at one.
-	void musicSkip();
 	float GetDifficulty ();
 ///this sets the difficulty
 	void SetDifficulty (float diff);

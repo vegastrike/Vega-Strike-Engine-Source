@@ -1215,25 +1215,32 @@ using namespace UnitXML;
       }
     }
     if (sound->cloak==-1) {
-      sound->cloak=AUDCreateSound(vs_config->getVariable ("unitaudio","cloak", "sfx43.wav"),false);
+        static std::string ssound=vs_config->getVariable ("unitaudio","cloak", "sfx43.wav");
+        sound->cloak=AUDCreateSound(ssound,false);
     }
     if (sound->engine==-1) {
-      sound->engine=AUDCreateSound (vs_config->getVariable ("unitaudio","afterburner","sfx10.wav"),true);
+        static std::string ssound=vs_config->getVariable ("unitaudio","afterburner","sfx10.wav");
+        sound->engine=AUDCreateSound(ssound,false);
     }
     if (sound->shield==-1) {
-      sound->shield=AUDCreateSound (vs_config->getVariable ("unitaudio","shield","sfx09.wav"),false);
+        static std::string ssound=vs_config->getVariable ("unitaudio","shield","sfx09.wav");
+        sound->shield=AUDCreateSound(ssound,false);
     }
     if (sound->armor==-1) {
-      sound->armor=AUDCreateSound (vs_config->getVariable ("unitaudio","armor","sfx08.wav"),false);
+        static std::string ssound=vs_config->getVariable ("unitaudio","armor","sfx08.wav");
+        sound->armor=AUDCreateSound(ssound,false);
     }
     if (sound->hull==-1) {
-      sound->hull=AUDCreateSound (vs_config->getVariable ("unitaudio","armor","sfx08.wav"),false);
+        static std::string ssound=vs_config->getVariable ("unitaudio","armor","sfx08.wav");
+        sound->hull=AUDCreateSound(ssound,false);
     }
     if (sound->explode==-1) {
-      sound->explode=AUDCreateSound (vs_config->getVariable ("unitaudio","explode","explosion.wav"),false);
+        static std::string ssound=vs_config->getVariable ("unitaudio","explode","explosion.wav");
+        sound->explode=AUDCreateSound(ssound,false);
     }
     if (sound->jump==-1) {
-      sound->jump=AUDCreateSound (vs_config->getVariable ("unitaudio","explode","sfx43.wav"),false);
+        static std::string ssound=vs_config->getVariable ("unitaudio","explode","sfx43.wav");
+        sound->jump=AUDCreateSound(ssound,false);
     }      
     break;    
   case CLOAK:
@@ -2108,7 +2115,8 @@ void Unit::LoadXML(VSFileSystem::VSFile & f, const char * modifications, string 
 	colShield=NULL;
     }
     static int shieldstacks = XMLSupport::parse_int (vs_config->getVariable ("graphics","shield_detail","16"));
-    meshdata.back()= new SphereMesh (rSize(),shieldstacks,shieldstacks,vs_config->getVariable("graphics","shield_texture","shield.bmp").c_str(), NULL, false,ONE, ONE);
+    static std::string shieldtex = vs_config->getVariable("graphics","shield_texture","shield.bmp");
+    meshdata.back()= new SphereMesh (rSize(),shieldstacks,shieldstacks,shieldtex.c_str(), NULL, false,ONE, ONE);
     tmp=meshdata.back();
     bspShield=NULL;
     colShield=NULL;

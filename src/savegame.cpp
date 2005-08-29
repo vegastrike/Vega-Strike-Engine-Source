@@ -393,7 +393,7 @@ void SaveGame::ReadNewsData (char * &buf) {
   }
 }
 void SaveGame::AddUnitToSave (const char * filename, int type, const char * faction, long address) {
-  string s = vs_config->getVariable ("physics","Drone","drone");
+  static string s = vs_config->getVariable ("physics","Drone","drone");
   if (0==strcmp (s.c_str(),filename)/*||type==ENHANCEMENTPTR*/) {
     RemoveUnitFromSave (address);
     //    savedunits->Put (address,new SavedUnits (filename,type,faction));//not no more
@@ -484,13 +484,10 @@ string AnyStringScanInString (char * &buf) {
   }
   if (*buf)
     buf++;
-  char duo[2]={0,0};
   string ret;
-  for (unsigned int i=0;i<size&&(*buf);++i) {
-    duo[0]=*buf;
-    ret+=duo;
-    buf++;
-  }
+  ret.resize(size);
+  unsigned int i=0;
+  while (i<size&&*buf) ret[i++]=*(buf++);
   return ret;
 }
 string AnyStringWriteString (string input) {
@@ -521,7 +518,7 @@ void SaveGame::ReadMissionStringData (char * &buf) {
 
 
 
-void PushBackFloat(float f, vector <char> &ret) {
+static inline void PushBackFloat(float f, vector <char> &ret) {
 	char c[128];
     sprintf(c,"%f",f);
 	char * k=&c[0];
@@ -529,42 +526,33 @@ void PushBackFloat(float f, vector <char> &ret) {
 		ret.push_back(*k);
 	}
 }
-void PushBackUInt(unsigned int i, vector<char> & ret) {
-	if (!i)
+static inline void PushBackUInt(unsigned int i, vector<char> & ret) {
+    char tmp[32];
+    if (!i) {
 		ret.push_back('0');
-	else {
-		unsigned int start=ret.size();
-		while(i){
-			ret.push_back(i%10+'0');
-			i/=10;
-		}
-		unsigned int fin = ret.size();
-		unsigned int jend = (fin-start)/2;
-		for (unsigned int j=0;j<jend;++j) {
-			char tmp = ret[j+start];
-			ret[j+start]=ret[fin-j-1];
-			ret[fin-j-1]=tmp;
-		}
+    } else {
+        unsigned int p=0,q=ret.size();
+        while(i) { tmp[p++]=(i%10+'0'); i/=10; }
+        ret.resize(q+p);
+        while(p) ret[q++]=tmp[--p];
 	}
 }
-void PushBackInt(int i, vector<char> &ret) {
+static inline void PushBackInt(int i, vector<char> &ret) {
 	if (i<0)
 		ret.push_back('-');
 	PushBackUInt(i<0?-i:1,ret);
 }
-void PushBackChars(const char * c,vector<char> & ret) {
-	while (*c) {
-		ret.push_back(*c);
-		++c;
-	}
+static inline void PushBackChars(const char * c,vector<char> & ret) {
+    int ini=ret.size();
+    ret.resize(ret.size()+strlen(c));
+    while (*c) ret[ini++]=*(c++);
 }
-void PushBackString (string input,vector<char> &ret) {
+static inline void PushBackString (string input,vector<char> &ret) {
 	PushBackUInt(input.length(),ret);
 	PushBackChars(" ",ret);
 	PushBackChars(input.c_str(),ret);
 }
-
-void SaveGame::WriteMissionStringData (vector <char> & ret) {
+void SaveGame::WriteMissionStringData (std::vector <char> & ret) {
   RemoveEmpty<MissionStringDat::MSD> (missionstringdata->m);
   PushBackUInt(missionstringdata->m.size(),ret);
   for( MissionStringDat::MSD::iterator i=missionstringdata->m.begin();i!=missionstringdata->m.end();i++) {
@@ -578,6 +566,32 @@ void SaveGame::WriteMissionStringData (vector <char> & ret) {
     }
   }
 }
+/*static inline void SerializeString(std::string str, std::string &outstr) {
+    char tmp[32];
+    sprintf(tmp,"%u ",str.length());
+    outstr += tmp;
+    outstr += str;
+}
+
+std::string SaveGame::WriteMissionStringData () {
+  char tmp[32];
+  string ret;
+
+  RemoveEmpty<MissionStringDat::MSD> (missionstringdata->m);
+  sprintf(tmp,"%u",missionstringdata->m.size());
+  ret = tmp;
+  for( MissionStringDat::MSD::iterator i=missionstringdata->m.begin();i!=missionstringdata->m.end();i++) {
+    unsigned int siz = (*i).second.size();
+    ret += "\n";
+    SerializeString((*i).first,ret);
+    sprintf(tmp,"%u ",siz);
+    ret += tmp;
+    for (unsigned int j=0;j<siz;j++)
+        SerializeString((*i).second[j],ret);
+  }
+
+  return ret;
+}*/
 
 void SaveGame::ReadStardate( char * &buf)
 {
@@ -699,8 +713,9 @@ string SaveGame::WriteDynamicUniverse()
     memset( tmp, 0, MB);
     sprintf (tmp,"\n%d %s %s",0,"missionstring","data ");
     dyn_univ += string( tmp);
+	//dyn_univ += WriteMissionStringData();
 	vector <char> missionstringdata1;
-	WriteMissionStringData(missionstringdata1);
+    WriteMissionStringData(missionstringdata1);
     dyn_univ +=string(&missionstringdata1[0],missionstringdata1.size());
 		
     if (!STATIC_VARS_DESTROYED)

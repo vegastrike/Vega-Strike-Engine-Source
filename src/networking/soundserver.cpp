@@ -43,16 +43,32 @@ typedef int Mix_Music;
 #include <fcntl.h>
 #include <sys/file.h>
 #endif
+#include "softvolume.h"
 int fadeout=0, fadein=0;
+Mix_SoftVolume_Shape fadeshape=MIX_SV_SHAPE_EASED;
 float volume=0;
+float soft_volume=1;
 int bits=0,done=0;
 static bool fnet=false;
 int my_getchar(int socket){
-  if (fnet) {
-    return fNET_fgetc(socket);
-  }else {
-    return INET_fgetc(socket);
-  }
+    if (fnet)
+        return fNET_fgetc(socket); else
+        return INET_fgetc(socket);
+}
+std::string my_getstring(int socket){
+    std::string str;
+    int arg;
+    do {
+        arg=my_getchar(socket);
+        if ((arg!='\r')&&(arg!='\n')&&(arg!='\0')) 
+            str += (char)arg;
+    } while ((arg!='\n')&&(arg!='\0'));
+    return str;
+}
+bool my_bytestoread(int socket){
+    if (fnet)
+        return fNET_BytesToRead(socket); else
+        return INET_BytesToRead(socket);
 }
 #if defined(_WIN32)&&defined(_WINDOWS)
 FILE *mystdout=stdout;
@@ -236,6 +252,11 @@ std::vector<std::string> split(std::string tmpstr,std::string splitter) {
     }
 */
 
+int mysocket = -1;
+int mysocket_write=-1;
+#if SONG_MUTEX
+Mix_Music *music=NULL;
+#endif
 
 #ifdef _WIN32
 #undef main
@@ -268,32 +289,47 @@ Mix_Music * PlayMusic (std::string file, Mix_Music *oldmusic) {
         file = tmp;
   }
 #ifdef HAVE_SDL
-	Mix_Music *music=Mix_LoadMUS(file.c_str());
-	if(music==NULL){
-	  changehome (true,false);
+    Mix_Music *music=NULL;
+    if (!file.empty()) {
 	  music=Mix_LoadMUS(file.c_str());
-	  changehome (false);
 	  if(music==NULL){
-	    changehome (true,true);
+	    changehome (true,false);
 	    music=Mix_LoadMUS(file.c_str());
-	    changehome(false);
-	    if (music==NULL) {
-	      return oldmusic;
-	    }
+	    changehome (false);
+	    if(music==NULL){
+	      changehome (true,true);
+	      music=Mix_LoadMUS(file.c_str());
+	      changehome(false);
+	      if (music==NULL) {
+	        return oldmusic;
+	      }
+        }
 	  }
-	}
+    }
 	sende=false;
-	if (Mix_HaltMusic()) {
-	}
-	while(Mix_PlayingMusic()) {
-		SDL_Delay(100);
-	}
+    if (oldmusic&&Mix_PlayingMusic()) {
+        Mix_SoftVolume_Change(MIX_CHANNEL_POST,0,(double)fadeout,fadeshape);
+        Mix_SoftVolume_AutoStopMusic(MIX_CHANNEL_POST,1);
+        if (music==NULL) return NULL;
+        //while(!my_bytestoread(mysocket)&&Mix_SoftVolume_GetCurrentVolume(MIX_CHANNEL_POST)>0) SDL_Delay(100);
+    }
+	Mix_HaltMusic();
+	while(Mix_PlayingMusic()) SDL_Delay(100);
 	if (oldmusic) {
 		Mix_FreeMusic(oldmusic);
 		oldmusic=NULL;
 	}
+
+    if (music==NULL) {
+        //No music, so stop softvolume processing
+        Mix_SoftVolume_Force(MIX_CHANNEL_POST,1);
+        return NULL;
+    }
+
 	sende=true;
-        int loops=numloops(file);
+    int loops=numloops(file);
+    Mix_SoftVolume_Force(MIX_CHANNEL_POST,0);
+    Mix_SoftVolume_Change(MIX_CHANNEL_POST,soft_volume,(double)fadein,fadeshape);
 	if(Mix_PlayMusic(music, loops)==-1) {
 	  fprintf(STD_OUT, "Mix_FadeInMusic: %s %d\n", Mix_GetError());
 	  return NULL;
@@ -309,11 +345,6 @@ Mix_Music * PlayMusic (std::string file, Mix_Music *oldmusic) {
 	return NULL;
 #endif
 }
-int mysocket = -1;
-int mysocket_write=-1;
-#if SONG_MUTEX
-Mix_Music *music=NULL;
-#endif
 void music_finished () {
 	if (sende) {
 		char data='e';
@@ -504,14 +535,7 @@ int main(int argc, char **argv) {
 		case 'p':
 		case 'P':
 			{
-				arg=my_getchar(mysocket);
-				while (arg!='\0'&&arg!='\n') {
-					if (arg!='\r') {
-						ministr[0]=arg;
-						str+=ministr;
-					}
-					arg=my_getchar(mysocket);
-				}
+                str = my_getstring(mysocket);
 				fprintf(STD_OUT, "%s",str.c_str());
 				fflush(STD_OUT);
 				if ((str!=curmus)
@@ -552,14 +576,7 @@ int main(int argc, char **argv) {
 		case 'i':
 		case 'I':
 			{
-				arg=my_getchar(mysocket);
-				while (arg!='\0'&&arg!='\n') {
-					if (arg!='\r') {
-						ministr[0]=arg;
-						str+=ministr;
-					}
-					arg=my_getchar(mysocket);
-				}
+                str = my_getstring(mysocket);
 				fprintf(STD_OUT, "%s",str.c_str());
 				fadein=atoi(str.c_str());
 				fprintf(STD_OUT, "\n[SETTING FADEIN TO %d]\n",fadein);
@@ -569,14 +586,7 @@ int main(int argc, char **argv) {
 		case 'o':
 		case 'O':
 			{
-				arg=my_getchar(mysocket);
-				while (arg!='\0'&&arg!='\n') {
-					if (arg!='\r') {
-						ministr[0]=arg;
-						str+=ministr;
-					}
-					arg=INET_fgetc(mysocket);
-				}
+                str = my_getstring(mysocket);
 				fprintf(STD_OUT, "%s",str.c_str());
 				fadeout=atoi(str.c_str());
 				fprintf(STD_OUT, "\n[SETTING FADEOUT TO %d]\n",fadeout);
@@ -586,16 +596,22 @@ int main(int argc, char **argv) {
 		case 'v':
 		case 'V':
 			{
-				arg=my_getchar(mysocket);
-				while (arg!='\0'&&arg!='\n') {
-					if (arg!='\r') {
-						ministr[0]=arg;
-						str+=ministr;
-					}
-					arg=my_getchar(mysocket);
-				}
+                int vtype=my_getchar(mysocket);
+                str = my_getstring(mysocket);
 				fprintf(STD_OUT, "%s",str.c_str());
-				volume=(float)atof(str.c_str());
+                switch (vtype) {
+                case 'h':
+                case 'H': 
+                    volume=(float)atof(str.c_str()); 
+                    break;
+                case 's':
+                case 'S': 
+                    soft_volume=(float)atof(str.c_str());
+                    str = my_getstring(mysocket);
+                    fprintf(STD_OUT, "%s",str.c_str());
+                    Mix_SoftVolume_Change(MIX_CHANNEL_POST,soft_volume,atof(str.c_str()),fadeshape);
+                    break;
+                }
 				fprintf(STD_OUT, "\n[SETTING VOLUME TO %f]\n",volume);
 				fflush(STD_OUT);
 #ifdef HAVE_SDL
@@ -604,6 +620,44 @@ int main(int argc, char **argv) {
 #endif
 			}
 			break;
+        case 's':
+        case 'S':
+            {
+				fprintf(STD_OUT, "\n[STOPPING ALL MUSIC - %d FADEOUT]\n",fadeout);
+				curmus="";
+                music=PlayMusic("",music);
+            }
+            break;
+        case 'h':
+        case 'H':
+            {
+                const char* shname="UNRECOGNIZED";
+                int arg0, arg1;
+                arg0=my_getchar(mysocket);
+                arg1=my_getchar(mysocket);
+                switch (arg0) {
+                case 'l':
+                case 'L': 
+                    switch (arg1) {
+                    case 'l': 
+                    case 'L': fadeshape=MIX_SV_SHAPE_LINEAR; shname="LINEAR"; break;
+                    case 'e':
+                    case 'E': fadeshape=MIX_SV_SHAPE_EXP; shname="LINEAR EASED"; break;
+                    }
+                    break;
+                case 'e':
+                case 'E': 
+                    switch (arg1) {
+                    case 'l': 
+                    case 'L': fadeshape=MIX_SV_SHAPE_EASED; shname="EXPONENTIAL"; break;
+                    case 'e':
+                    case 'E': fadeshape=MIX_SV_SHAPE_EASED_EXP; shname="EXPONENTIAL EASED"; break;
+                    }
+                    break;
+                }
+                fprintf(STD_OUT, "\n[SOFTVOLUME SHAPE: %s]\n",shname);
+            }
+            break;
 		case 't':
 		case 'T':
 		case '\0':

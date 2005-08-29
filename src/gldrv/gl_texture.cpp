@@ -38,6 +38,8 @@
 //#define  MAX_TEXTURES 16384
 static GLint MAX_TEXTURE_SIZE=256;
 
+extern GLenum GetGLTextureTarget(enum TEXTURE_TARGET texture_target);
+
 GLenum GetUncompressedTextureFormat (TEXTUREFORMAT textureformat) {
   switch (textureformat) {
   case RGB24:
@@ -60,7 +62,8 @@ struct GLTexture{
   GLubyte * palette;
   int width;
   int height;
-  int oldwidth,oldheight;
+  int iwidth; // Interface width
+  int iheight;// Interface height
   int texturestage;
   GLuint name;
   GFXBOOL alive;
@@ -72,7 +75,12 @@ struct GLTexture{
 //static GLEnum * targets=NULL;
 
 static vector <GLTexture> textures;
-static int activetexture[8]={-1,-1,-1,-1,-1,-1,-1,-1};
+static int activetexture[32]={
+    -1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1
+};
 
 static void ConvertPalette(unsigned char *dest, unsigned char *src)
 {
@@ -97,7 +105,7 @@ bool isPowerOfTwo (int num, int &which) {
   return true;
 }
 
-GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette , int texturestage, enum FILTER mipmap, enum TEXTURE_TARGET texture_target)
+GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette , int texturestage, enum FILTER mipmap, enum TEXTURE_TARGET texture_target, enum ADDRESSMODE address_mode)
 {
   int dummy=0;
   if ((mipmap&(MIPMAP|TRILINEAR))&&!isPowerOfTwo (width,dummy)) {
@@ -126,19 +134,25 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
     textures.back().palette=NULL;
     textures.back().alive=GFXTRUE;
     textures.back().name=-1;
-    textures.back().width=textures.back().height=1;
-    textures.back().oldwidth=textures.back().oldheight=1;
+    textures.back().width=textures.back().height=textures.back().iwidth=textures.back().iheight=1;
   }
 
-  GLenum WrapMode;
+  if (address_mode==DEFAULT_ADDRESS_MODE) switch (texture_target) {
+  case TEXTURE1D:
+  case TEXTURE2D: 
+#ifdef GL_EXT_texture3D
+  case TEXTURE3D: address_mode = WRAP; break;
+#endif
+  case CUBEMAP:   address_mode = CLAMP; break;
+  default:        address_mode = WRAP; break;
+  }
   switch (texture_target) {
-  case TEXTURE2D: textures [*handle].targets=GL_TEXTURE_2D;
-    WrapMode = GL_REPEAT;
-    break;
-  case CUBEMAP: textures [*handle].targets=GL_TEXTURE_CUBE_MAP_EXT;
-    WrapMode = GL_CLAMP;
-    VSFileSystem::vs_fprintf (stderr, "stage %d, wid %d, hei %d",texturestage,width,height);
-    break;
+  case TEXTURE1D: textures [*handle].targets=GL_TEXTURE_1D; break;
+  case TEXTURE2D: textures [*handle].targets=GL_TEXTURE_2D; break;
+#ifdef GL_EXT_texture3D
+  case TEXTURE3D: textures [*handle].targets=GL_TEXTURE_3D; break;
+#endif
+  case CUBEMAP: textures [*handle].targets=GL_TEXTURE_CUBE_MAP_EXT; break;
   }
   VSFileSystem::vs_fprintf (stderr,"y");  
   textures[*handle].name = *handle+1; //for those libs with stubbed out handle gen't
@@ -150,8 +164,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
   glGenTextures (1,&textures[*handle].name);
   glBindTexture (textures[*handle].targets,textures[*handle].name);
   activetexture[texturestage]=*handle;
-  glTexParameteri(textures[*handle].targets, GL_TEXTURE_WRAP_S, WrapMode);
-  glTexParameteri(textures[*handle].targets, GL_TEXTURE_WRAP_T, WrapMode);
+  GFXTextureAddressMode(address_mode,texture_target);
   if (textures[*handle].mipmapped&(TRILINEAR|MIPMAP)&&gl_options.mipmap>=2) {
     glTexParameteri (textures[*handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     if (textures[*handle].mipmapped&TRILINEAR&&gl_options.mipmap>=3) {
@@ -171,8 +184,8 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
   glTexParameterf (textures[*handle].targets,GL_TEXTURE_PRIORITY,.5);
   textures[*handle].width = width;
   textures[*handle].height = height;
-  textures[*handle].oldwidth = width;
-  textures[*handle].oldheight = height;
+  textures[*handle].iwidth = width;
+  textures[*handle].iheight = height;
   textures[*handle].palette=NULL;
   if (palette&&textureformat == PALETTE8){
     VSFileSystem::vs_fprintf (stderr," palette ");  
@@ -195,17 +208,109 @@ void /*GFXDRVAPI*/ GFXAttachPalette (unsigned char *palette, int handle)
   //memcpy (textures[handle].palette,palette,768);
 }
 static void DownSampleTexture (unsigned char **newbuf,const unsigned char * oldbuf, int &height, int &width, int pixsize, int handle, int maxheight,int maxwidth,float newfade) {
-  int i,j,k,l,m;
+  assert(pixsize<=4);
+
+  int i,j,k,l,m,n,o,p;
   if (MAX_TEXTURE_SIZE<maxwidth)
     maxwidth=MAX_TEXTURE_SIZE;
   if (MAX_TEXTURE_SIZE<maxheight)
     maxheight=MAX_TEXTURE_SIZE;
-  float *temp = (float *)malloc (pixsize*sizeof(float));
   int newwidth = width>maxwidth?maxwidth:width;
   int scalewidth = width/newwidth;
   int newheight = height>maxheight?maxheight:height;
   int scaleheight = height/newheight;
-  *newbuf = (unsigned char*)malloc (newwidth*newheight*pixsize*sizeof(unsigned char));
+  int inewfade = (int)(newfade*0x100);
+
+  // Proposed downsampling code -- end
+  if ((scalewidth!=2)||(scaleheight!=2)||(inewfade != 0x100)) {
+      // Generic, area average downsampling (optimized)
+      //    Principle: The main optimizations/features
+      //        a) integer arithmetic, with propper scaling for propper saturation
+      //        b) unrolled loops (more parallelism, if the optimizer supports it)
+      //        c) improved locality due to 32-pixel chunking
+      int wmask = scalewidth-1;
+      int hmask = scaleheight-1;
+      int tshift= 0;
+      int ostride = newwidth*pixsize;
+      int istride = width*pixsize;
+      int rowstride = scaleheight*istride;
+      int chunkstride = 32*pixsize;
+      int ichunkstride = scalewidth*chunkstride;
+      int wshift = 0;
+      int hshift = 0;
+      int amask=wmask; while (amask) amask>>=1,tshift++,wshift++;
+          amask=hmask; while (amask) amask>>=1,tshift++,hshift++;
+      int tmask = (1<<tshift)-1;
+      *newbuf = (unsigned char*)malloc(newheight*newwidth*pixsize*sizeof(unsigned char));
+      unsigned int temp[32*4];
+      unsigned char *orow = (*newbuf);
+      const unsigned char *irow = oldbuf;
+      for (i=0;i<newheight;i++,orow+=ostride,irow+=rowstride) {
+          const unsigned char *crow = irow;
+          unsigned char *orow2= orow;
+          for (j=0; j<newwidth; j+=32,crow+=ichunkstride,orow2+=chunkstride) {
+              const unsigned char *crow2 = crow;
+              for (k=0; k<chunkstride; k++) temp[k]=0;
+              for (m=0; m<scaleheight; m++,crow2+=istride)
+                  for (k=n=l=0; (k<chunkstride) && (j+l<newwidth); k+=pixsize,l++) 
+                      for (o=0; o<scalewidth; o++)
+                                         (temp[k+0]+=crow2[n++]),
+                          (pixsize>1) && (temp[k+1]+=crow2[n++]),
+                          (pixsize>2) && (temp[k+2]+=crow2[n++]),
+                          (pixsize>3) && (temp[k+3]+=crow2[n++]); //Unrolled loop
+
+              for (k=l=0; (k<chunkstride)&&(j+l<newwidth); k+=pixsize,l++) 
+                                 (orow2[k+0]=(unsigned char)((((temp[k+0]+tmask)>>tshift)*inewfade + 0x80*(0x100-inewfade))>>8)),
+                  (pixsize>1) && (orow2[k+1]=(unsigned char)((((temp[k+1]+tmask)>>tshift)*inewfade + 0x80*(0x100-inewfade))>>8)),
+                  (pixsize>2) && (orow2[k+2]=(unsigned char)((((temp[k+2]+tmask)>>tshift)*inewfade + 0x80*(0x100-inewfade))>>8)),
+                  (pixsize>3) && (orow2[k+3]=(unsigned char)((((temp[k+3]+tmask)>>tshift)*inewfade + 0x80*(0x100-inewfade))>>8)); //Unrolled loop
+          }
+      }
+  } else {
+      // Specific purpose downsampler: 2x2 averaging
+      //    a) Very little overhead
+      //    b) Very common case (mipmap generation)
+      *newbuf = (unsigned char*)malloc(newheight*newwidth*pixsize*sizeof(unsigned char));
+      unsigned char *orow = (*newbuf);
+      int ostride = newwidth*pixsize;
+      int istride = width*pixsize;
+      const unsigned char *irow[2] = {oldbuf,oldbuf+istride};
+      unsigned int temp[4];
+      for (i=0; i<newheight; i++,irow[0]+=2*istride,irow[1]+=2*istride,orow+=ostride) {
+          for (j=k=0; j<newwidth; j++,k+=pixsize) {
+                             (temp[0] =irow[0][(k<<1)+0]),
+              (pixsize>1) && (temp[1] =irow[0][(k<<1)+1]),
+              (pixsize>2) && (temp[2] =irow[0][(k<<1)+2]),
+              (pixsize>3) && (temp[3] =irow[0][(k<<1)+3]); //Unrolled loop
+
+                             (temp[0]+=irow[0][(k<<1)+pixsize+0]),
+              (pixsize>1) && (temp[1]+=irow[0][(k<<1)+pixsize+1]),
+              (pixsize>2) && (temp[2]+=irow[0][(k<<1)+pixsize+2]),
+              (pixsize>3) && (temp[3]+=irow[0][(k<<1)+pixsize+3]); //Unrolled loop
+
+                             (temp[0]+=irow[1][(k<<1)+0]),
+              (pixsize>1) && (temp[1]+=irow[1][(k<<1)+1]),
+              (pixsize>2) && (temp[2]+=irow[1][(k<<1)+2]),
+              (pixsize>3) && (temp[3]+=irow[1][(k<<1)+3]); //Unrolled loop
+
+                             (temp[0]+=irow[1][(k<<1)+pixsize+0]),
+              (pixsize>1) && (temp[1]+=irow[1][(k<<1)+pixsize+1]),
+              (pixsize>2) && (temp[2]+=irow[1][(k<<1)+pixsize+2]),
+              (pixsize>3) && (temp[3]+=irow[1][(k<<1)+pixsize+3]); //Unrolled loop
+
+                             (orow[k+0]=(unsigned char)((temp[0]+3)>>2)),
+              (pixsize>1) && (orow[k+1]=(unsigned char)((temp[1]+3)>>2)),
+              (pixsize>2) && (orow[k+2]=(unsigned char)((temp[2]+3)>>2)),
+              (pixsize>3) && (orow[k+3]=(unsigned char)((temp[3]+3)>>2)); //Unrolled loop
+          }
+      }
+  };
+  // Proposed downsampling code -- begin
+  
+  /*
+  // Original downsampling code -- begin
+  *newbuf = (unsigned char*)malloc(newheight*newwidth*pixsize*sizeof(unsigned char));
+  float *temp = (float *)malloc (pixsize*sizeof(float));
   for (i=0;i<newheight;i++) {
     for (j=0;j<newwidth;j++) {
       for (m=0;m<pixsize;m++) {
@@ -237,6 +342,9 @@ static void DownSampleTexture (unsigned char **newbuf,const unsigned char * oldb
     }
   }
   free (temp);
+  //Original downsampling code -- end
+  */
+
   width = newwidth;
   height= newheight;
 } 
@@ -329,8 +437,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
     return GFXFALSE;
   int logsize=1;
   int logwid=1;
-  textures[handle].width=textures[handle].oldwidth;
-  textures[handle].height=textures[handle].oldheight;//reset in case we're re-uploading the tex
+  
   if ((textures[handle].mipmapped&(TRILINEAR|MIPMAP))&&(!isPowerOfTwo (textures[handle].width,logwid)|| !isPowerOfTwo (textures[handle].height,logsize))) {
     static unsigned char NONPOWEROFTWO[1024]={255,127,127,255,
 					    255,255,0,255,
@@ -350,9 +457,17 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
   GLenum internalformat;
   GLenum image2D=GetImageTarget (imagetarget);
   glBindTexture(textures[handle].targets, textures[handle].name);
-  if (textures[handle].width>maxdimension||textures[handle].height>maxdimension||textures[handle].width>MAX_TEXTURE_SIZE||textures[handle].height>MAX_TEXTURE_SIZE) {
-    DownSampleTexture (&tempbuf,buffer,textures[handle].height,textures[handle].width,(internformat==PALETTE8?1:(internformat==RGBA32?4:3))* sizeof(unsigned char ), handle,maxdimension,maxdimension,1);
-    buffer = tempbuf;
+  if (textures[handle].iwidth>maxdimension||textures[handle].iheight>maxdimension||textures[handle].iwidth>MAX_TEXTURE_SIZE||textures[handle].iheight>MAX_TEXTURE_SIZE) {
+#if !defined(GL_COLOR_INDEX8_EXT)
+      if (internformat != PALETTE8) {
+#else
+      if ((internformat != PALETTE8)||gl_options.PaletteExt) {
+#endif
+          textures[handle].height = textures[handle].iheight;
+          textures[handle].width  = textures[handle].iwidth;
+          DownSampleTexture (&tempbuf,buffer,textures[handle].height,textures[handle].width,(internformat==PALETTE8?1:(internformat==RGBA32?4:3))* sizeof(unsigned char ), handle,maxdimension,maxdimension,1);
+          buffer = tempbuf;
+      }
   }
   if (internformat!=PALETTE8) {
     internalformat = GetTextureFormat (internformat);
@@ -373,9 +488,10 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 		static int fullout = XMLSupport::parse_int(vs_config->getVariable("graphics","detail_texture_full_color","1"))-1;
 		float numdivisors = logsize>fullout+blankout?(1./(logsize-fullout-blankout)):1;
 		float detailscale=1;
-                glTexImage2D(image2D,count,internalformat,width,height,0,textures[handle].textureformat,GL_UNSIGNED_BYTE,buffer);
-                
-		while(1){
+
+        glTexImage2D(image2D,count,internalformat,width,height,0,textures[handle].textureformat,GL_UNSIGNED_BYTE,buffer);
+        
+        while(1){
 			if (width==1&&height==1)
 				break;
 			int newwidth = width>2?width/2:1;
@@ -383,8 +499,8 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 			count++;
 			unsigned char * tbuf = NULL;
 			DownSampleTexture(&tbuf,tempbuf?tempbuf:buffer,height,width,(internformat==PALETTE8?1:(internformat==RGBA32?4:3))* sizeof(unsigned char ),handle,newheight,newwidth,detail_texture?detailscale:1);
-                        if (tempbuf) free(tempbuf);
-                        tempbuf = tbuf;
+            if (tempbuf) free(tempbuf);
+            tempbuf = tbuf;
 			if (count>fullout) {
 				detailscale-=numdivisors;
 			}
@@ -392,8 +508,8 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 				detailscale=0;
 			glTexImage2D(image2D,count,internalformat,width,height,0,textures[handle].textureformat,GL_UNSIGNED_BYTE,tempbuf);
 		}
-                if (tempbuf) free(tempbuf);
-                tempbuf=NULL;
+        if (tempbuf) free(tempbuf);
+        tempbuf=NULL;
     }else {
       glTexImage2D(image2D, 0, internalformat, textures[handle].width, textures[handle].height, 0, textures[handle].textureformat, GL_UNSIGNED_BYTE, buffer);
 	}
@@ -424,7 +540,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
     } else
 #endif
     {
-      int nsize = 4*textures[handle].height*textures[handle].width;
+      int nsize = 4*textures[handle].iheight*textures[handle].iwidth;
       unsigned char * tbuf =(unsigned char *) malloc (sizeof(unsigned char)*nsize);
       //      textures[handle].texture = tbuf;
       int j =0;
@@ -436,14 +552,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 	  tbuf[i+3]= textures[handle].palette[4*buffer[j]+3];//used to be 255
 	  j ++;
 	}
-      int htmp=textures[handle].oldheight;//FIXME hack to prevent palette from smashing a smaller buffer down GL's throat 
-      int wtmp=textures[handle].oldwidth;
-      textures[handle].oldheight=textures[handle].height;
-      textures[handle].oldwidth=textures[handle].width;
-      GFXTransferTexture(tbuf,handle,RGBA32,imagetarget,maxdimension,detail_texture);
-      textures[handle].oldheight=htmp;
-      textures[handle].oldwidth=wtmp;
-
+	  GFXTransferTexture(tbuf,handle,RGBA32,imagetarget,maxdimension,detail_texture);
 /* KILL duplicate code!
       if (textures[handle].mipmapped&&gl_options.mipmap>=2)
 		  gluXXXBuild2DMipmaps(image2D, 4, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, tbuf);
@@ -476,7 +585,7 @@ void /*GFXDRVAPI*/ GFXDeleteTexture (int handle) {
 void GFXInitTextureManager() {
   for (int handle=0;handle<textures.size();handle++) {
     textures[handle].palette=NULL;
-    textures[handle].width=textures[handle].height=0;
+    textures[handle].width=textures[handle].height=textures[handle].iwidth=textures[handle].iheight=0;
     textures[handle].texturestage=0;
     textures[handle].name=0;
     textures[handle].alive=0;
@@ -492,10 +601,8 @@ void GFXDestroyAllTextures () {
   }
 }
 
-void GFXTextureCoordGenMode(GFXTEXTURECOORDMODE tex, const float params[4],const float paramt[4]) {
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
+void GFXTextureCoordGenMode(int stage, GFXTEXTURECOORDMODE tex, const float params[4],const float paramt[4]) {
+    GFXActiveTexture(stage);
 	switch (tex) {
 	case NO_GEN:
 		glDisable(GL_TEXTURE_GEN_S);
@@ -509,6 +616,7 @@ void GFXTextureCoordGenMode(GFXTEXTURECOORDMODE tex, const float params[4],const
 		glTexGenfv(GL_T,GL_EYE_PLANE,paramt);
 		glEnable(GL_TEXTURE_GEN_S);
 		glEnable(GL_TEXTURE_GEN_T);
+        glDisable(GL_TEXTURE_GEN_R);
 		break;
 	case OBJECT_LINEAR_GEN:
 		glTexGeni(GL_S,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);
@@ -517,45 +625,41 @@ void GFXTextureCoordGenMode(GFXTEXTURECOORDMODE tex, const float params[4],const
 		glTexGenfv(GL_T,GL_OBJECT_PLANE,paramt);
 		glEnable(GL_TEXTURE_GEN_S);
 		glEnable(GL_TEXTURE_GEN_T);
+        glDisable(GL_TEXTURE_GEN_R);
 		break;		
 	case SPHERE_MAP_GEN:
 		glTexGeni(GL_S,GL_TEXTURE_GEN_MODE,GL_SPHERE_MAP);
 		glTexGeni(GL_T,GL_TEXTURE_GEN_MODE,GL_SPHERE_MAP);
 		glEnable(GL_TEXTURE_GEN_S);
 		glEnable(GL_TEXTURE_GEN_T);
+        glDisable(GL_TEXTURE_GEN_R);
 		break;
 	case CUBE_MAP_GEN:
+#ifdef NV_CUBE_MAP
+        glTexGeni(GL_S,GL_TEXTURE_GEN_MODE,GL_REFLECTION_MAP_NV);
+        glTexGeni(GL_T,GL_TEXTURE_GEN_MODE,GL_REFLECTION_MAP_NV);
+        glTexGeni(GL_R,GL_TEXTURE_GEN_MODE,GL_REFLECTION_MAP_NV);
+        glEnable(GL_TEXTURE_GEN_S);
+        glEnable(GL_TEXTURE_GEN_T);
+        glEnable(GL_TEXTURE_GEN_R);
+#else
 		assert(0);
+#endif
 		break;
 	}
 }
 void /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 {
-  //FIXME? is this legit?
-  if (activetexture[stage]==handle) {
-    GFXActiveTexture(stage);
-    return ;
-  } else
-    activetexture[stage] = handle;
-  if (gl_options.Multitexture) {
-    GFXActiveTexture(stage);
-    glBindTexture(textures[handle].targets, textures[handle].name);
-  } else {
-    Stage0Texture = GFXTRUE;
-    if (stage) {
-      Stage1Texture = GFXTRUE;
-      Stage1TextureName = textures[handle].name;
-    } else {
-      Stage1Texture = GFXFALSE;
-      glEnable (textures[handle].targets);
-      glBindTexture(textures[handle].targets, textures[handle].name);
-      Stage0TextureName = textures[handle].name;
-    }
+  if (activetexture[stage]!=handle) {
+      GFXActiveTexture(stage);
+      activetexture[stage] = handle;
+      if (gl_options.Multitexture||(stage==0))
+        glBindTexture(textures[handle].targets, textures[handle].name);
   }
 }
 
 
-void GFXTextureEnv (int stage, GFXTEXTUREENVMODES mode) {
+void GFXTextureEnv (int stage, GFXTEXTUREENVMODES mode, float arg2) {
 	if (stage>=1&&!GFXMultiTexAvailable()) {
 		return;
 	}
@@ -574,15 +678,46 @@ void GFXTextureEnv (int stage, GFXTEXTUREENVMODES mode) {
 		glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,type);
 		break;
 	case GFXINTERPOLATETEXTURE:
-		type = GL_INTERPOLATE_ARB;
-		goto COMBINERS;
-	case GFXADDSIGNEDTEXTURE:
-		type = GL_ADD_SIGNED_ARB;		
-	  COMBINERS:
 		glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_COMBINE_ARB);
 		glTexEnvi(GL_TEXTURE_ENV,GL_SOURCE0_RGB_ARB,GL_PREVIOUS_ARB);
+        glTexEnvi(GL_TEXTURE_ENV,GL_OPERAND0_RGB_ARB,GL_SRC_COLOR);
+		glTexEnvi(GL_TEXTURE_ENV,GL_SOURCE0_ALPHA_ARB,GL_PREVIOUS_ARB);
+        glTexEnvi(GL_TEXTURE_ENV,GL_OPERAND0_ALPHA_ARB,GL_SRC_ALPHA);
 		glTexEnvi(GL_TEXTURE_ENV,GL_SOURCE1_RGB_ARB,GL_TEXTURE);
-		glTexEnvi(GL_TEXTURE_ENV,GL_COMBINE_RGB_ARB,type);
+        glTexEnvi(GL_TEXTURE_ENV,GL_OPERAND1_RGB_ARB,GL_SRC_COLOR);
+		glTexEnvi(GL_TEXTURE_ENV,GL_SOURCE1_ALPHA_ARB,GL_TEXTURE);
+        glTexEnvi(GL_TEXTURE_ENV,GL_OPERAND1_ALPHA_ARB,GL_SRC_ALPHA);
+		glTexEnvi(GL_TEXTURE_ENV,GL_SOURCE2_RGB_ARB,GL_CONSTANT);
+        glTexEnvi(GL_TEXTURE_ENV,GL_OPERAND2_RGB_ARB,GL_SRC_ALPHA);
+		glTexEnvi(GL_TEXTURE_ENV,GL_SOURCE2_ALPHA_ARB,GL_CONSTANT);
+        glTexEnvi(GL_TEXTURE_ENV,GL_OPERAND2_ALPHA_ARB,GL_SRC_ALPHA);
+        {   GLfloat arg2v[4]={0,0,0,1.0-arg2};
+            glTexEnvfv(GL_TEXTURE_ENV,GL_TEXTURE_ENV_COLOR,arg2v);   }
+		glTexEnvi(GL_TEXTURE_ENV,GL_COMBINE_RGB_ARB,GL_INTERPOLATE_ARB);
+		glTexEnvi(GL_TEXTURE_ENV,GL_COMBINE_ALPHA_ARB,GL_INTERPOLATE_ARB);
+        break;
+	case GFXCOMPOSITETEXTURE:
+		glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_COMBINE_ARB);
+		glTexEnvi(GL_TEXTURE_ENV,GL_SOURCE0_RGB_ARB,GL_PREVIOUS_ARB);
+        glTexEnvi(GL_TEXTURE_ENV,GL_OPERAND0_RGB_ARB,GL_SRC_COLOR);
+		glTexEnvi(GL_TEXTURE_ENV,GL_SOURCE0_ALPHA_ARB,GL_CONSTANT);
+        glTexEnvi(GL_TEXTURE_ENV,GL_OPERAND0_ALPHA_ARB,GL_SRC_ALPHA);
+		glTexEnvi(GL_TEXTURE_ENV,GL_SOURCE1_RGB_ARB,GL_TEXTURE);
+        glTexEnvi(GL_TEXTURE_ENV,GL_OPERAND1_RGB_ARB,GL_SRC_COLOR);
+		glTexEnvi(GL_TEXTURE_ENV,GL_SOURCE2_RGB_ARB,GL_TEXTURE);
+        glTexEnvi(GL_TEXTURE_ENV,GL_OPERAND2_RGB_ARB,GL_ONE_MINUS_SRC_ALPHA);
+        {   GLfloat arg2v[4]={0,0,0,arg2};
+            glTexEnvfv(GL_TEXTURE_ENV,GL_TEXTURE_ENV_COLOR,arg2v);   }
+		glTexEnvi(GL_TEXTURE_ENV,GL_COMBINE_RGB_ARB,GL_INTERPOLATE_ARB);
+		glTexEnvi(GL_TEXTURE_ENV,GL_COMBINE_ALPHA_ARB,GL_REPLACE);
+        break;
+	case GFXADDSIGNEDTEXTURE:
+		glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_COMBINE_ARB);
+		glTexEnvi(GL_TEXTURE_ENV,GL_SOURCE0_RGB_ARB,GL_PREVIOUS_ARB);
+        glTexEnvi(GL_TEXTURE_ENV,GL_OPERAND0_RGB_ARB,GL_SRC_COLOR);
+		glTexEnvi(GL_TEXTURE_ENV,GL_SOURCE1_RGB_ARB,GL_TEXTURE);
+        glTexEnvi(GL_TEXTURE_ENV,GL_OPERAND1_RGB_ARB,GL_SRC_COLOR);
+		glTexEnvi(GL_TEXTURE_ENV,GL_COMBINE_RGB_ARB,GL_ADD_SIGNED_ARB);
 		break;
 	}
 }
@@ -591,19 +726,26 @@ void GFXTextureEnv (int stage, GFXTEXTUREENVMODES mode) {
 #ifndef GL_CLAMP_TO_EDGE_EXT
 #define GL_CLAMP_TO_EDGE_EXT              0x812F
 #endif
+#ifndef GL_CLAMP_TO_BORDER_ARB
+#define GL_CLAMP_TO_BORDER_ARB            0x812D
+#endif
 
-void GFXTextureWrap(int stage, GFXTEXTUREWRAPMODES mode) {
+void GFXTextureWrap(int stage, GFXTEXTUREWRAPMODES mode, enum TEXTURE_TARGET target) {
   GFXActiveTexture(stage);
-  GLenum e=GL_REPEAT;
+  GLenum tt=GetGLTextureTarget(target);
+  GLenum e1=GL_REPEAT;
+  GLenum e2=0;
   switch (mode) {
-  case GFXCLAMPTEXTURE:
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    e=GL_CLAMP_TO_EDGE_EXT;
-    break;
-  default:
-    break;
+  case GFXCLAMPTEXTURE: e1=GL_CLAMP; e2=GL_CLAMP_TO_EDGE_EXT; break;
+  case GFXREPEATTEXTURE:e1=GL_REPEAT;e2=0; break;
+  case GFXBORDERTEXTURE:e1=GL_CLAMP; e2=GL_CLAMP_TO_BORDER_ARB; break;
   }
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, e);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, e); 
+  glTexParameteri(tt, GL_TEXTURE_WRAP_S, e1);
+  if (target != TEXTURE1D) glTexParameteri(tt, GL_TEXTURE_WRAP_T, e1); 
+  if (target == TEXTURE3D) glTexParameteri(tt, GL_TEXTURE_WRAP_R, e1); 
+  if (e2) {
+      glTexParameteri(tt, GL_TEXTURE_WRAP_S, e2);
+      if (target != TEXTURE1D) glTexParameteri(tt, GL_TEXTURE_WRAP_T, e2); 
+      if (target == TEXTURE3D) glTexParameteri(tt, GL_TEXTURE_WRAP_R, e2); 
+  }
 }
