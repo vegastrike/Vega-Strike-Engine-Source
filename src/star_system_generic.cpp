@@ -559,7 +559,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	collidetable->Update();  
 	if (this==_Universe->getActiveStarSystem(0))
 	  UpdateCameraSnds();
-    Music::MuzakCycle();
+
 	//iter = drawList.createIterator();
 	bolts->UpdatePhysics();
 	current_stage=MISSION_SIMULATION;

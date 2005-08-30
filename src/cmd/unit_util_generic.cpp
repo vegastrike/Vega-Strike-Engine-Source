@@ -22,7 +22,7 @@ namespace UnitUtil {
 		const int HIGH_PRIORITY=2;
 		const int MEDIUM_PRIORITY=3;
 		const int LOW_PRIORITY=4;
-        const int LOWEST_PRIORITY=SIM_QUEUE_SIZE;
+                const int LOWEST_PRIORITY=SIM_QUEUE_SIZE;
 		const int NO_ENEMIES=SIM_QUEUE_SIZE;
 		const int NOT_VISIBLE_COMBAT_HIGH=7;
 		const int NOT_VISIBLE_COMBAT_MEDIUM=13;
@@ -52,9 +52,9 @@ namespace UnitUtil {
 		static int upfac=FactionUtil::GetFaction("upgrades");
 		static int neutral=FactionUtil::GetFaction("neutral");
 		if (un->owner==getTopLevelOwner()||un->faction==cargofac||un->faction==upfac||un->faction==neutral) {
-            if (dist<tooclose)
-                return LOW_PRIORITY; else
-			    return LOWEST_PRIORITY;
+                  if (dist<tooclose)
+                    return LOW_PRIORITY; else
+                      return LOWEST_PRIORITY;
 		}
 		Unit * targ = un->Target();
 		if (_Universe->isPlayerStarship(targ)) {

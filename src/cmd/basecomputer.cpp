@@ -353,47 +353,8 @@ static std::string &tolower(std::string &loweritem) {
 }
 
 // Takes in a category of an upgrade or cargo and returns true if it is any type of mountable weapon.
-static bool isWeapon (std::string name) {
-	if (name.find("Weapon")!=std::string::npos) {
-		return true;
-	}
-	if (name.find("SubUnit")!=std::string::npos) {
-		return true;
-	}
-	if (name.find("Ammunition")!=std::string::npos) {
-		return true;
-	}
-	return false;
-}
-float PercentOperational (Unit * un, std::string name, std::string category="upgrades/") {
-  if (category.find(DamagedCategory)==0) {
-    return 0.0f;
-  }else if (isWeapon(category)) {
-    const Unit * upgrade=getUnitFromUpgradeName(name,un->faction); 
-    if (upgrade->GetNumMounts()) {
-      const Mount * mnt = &upgrade->mounts[0];
-      unsigned int nummounts=un->GetNumMounts();
-      for (unsigned int i=0;i<nummounts;++i) {
-        if (mnt->type->weapon_name==un->mounts[i].type->weapon_name) {
-          if (un->mounts[i].status==Mount::DESTROYED)
-            return 0.0;
-          if (un->mounts[i].functionality<1.0f){
-            return un->mounts[i].functionality;
-          }
-        }
-      }
-    }
-  }else if (name.find("add_")!=0&&name.find("mult_")!=0) {
-    const Unit * upgrade=getUnitFromUpgradeName(name,un->faction);    
-    double percent=0;
-    if (un->canUpgrade(upgrade,-1,-1,0,true,percent,makeTemplateUpgrade(un->name,un->faction),false)) {
-      if (percent)
-        return percent;
-      else return .5;//FIXME does not interact well with radar type
-    }else if (percent>0) return percent;
-  }
-  return 1.0;
-}
+extern bool isWeapon (std::string name);
+extern float PercentOperational(Unit*,string,string category="upgrades/");
 
 // CONSTRUCTOR.
 BaseComputer::BaseComputer(Unit* player, Unit* base, const std::vector<DisplayMode>& modes)

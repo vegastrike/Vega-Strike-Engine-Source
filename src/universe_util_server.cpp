@@ -24,13 +24,13 @@ namespace UniverseUtil {
 	int musicAddList(string str) {
 		return 0;
 	}
-	void musicPlaySong(string str) {
+	void musicLayerPlaySong(string str,int layer) {
 	}
        	void addParticle (QVector loc, Vector velocity, Vector color, float size)
 	{}
-	void musicPlayList(int which) {
+	void musicLayerPlayList(int which, int layer) {
 	}
-        void musicLoopList (int numloops) {
+        void musicLayerLoopList (int numloops, int layer) {
         }
         void musicMute(bool stopSound){}
 	void playSound(string soundName, QVector loc, Vector speed) {
@@ -44,7 +44,8 @@ namespace UniverseUtil {
         unsigned int getCurrentPlayer() {
 		return 0;
         }
-	void musicSkip() {}
+	void musicLayerSkip(int layer) {}
+	void musicLayerStop(int layer) {}
 	void StopAllSounds(void) {
         }
 

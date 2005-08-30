@@ -118,13 +118,7 @@ void Camera::UpdateGFX(GFXBOOL clip, GFXBOOL updateFrustum, GFXBOOL centerCamera
 #endif
 	}
 }
-Vector Camera::GetVelocity()const {
-//	return ((Coord-lastpos)*(1./SIMULATION_ATOM)).Cast();
-	return velocity;
-}
-Vector Camera::GetAngularVelocity()const {
-	return angular_velocity;
-}
+
 void Camera::UpdateCameraSounds() {
 #ifndef PERFRAMESOUND
   AUDListener (Coord,GetVelocity());

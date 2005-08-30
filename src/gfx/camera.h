@@ -88,9 +88,9 @@ public:
 
 	void SetPosition(const QVector &origin, const Vector & velocity, const Vector & angular_velocity, const Vector & acceleration);
 	void GetPosition(QVector &vect) {vect=Coord;}
-	Vector GetAngularVelocity() const;
-	Vector GetVelocity() const;
-    Vector GetAcceleration() const { return accel; };
+	Vector GetAngularVelocity() const{return angular_velocity;}
+	Vector GetVelocity() const{return velocity;}
+    Vector GetAcceleration() const { return accel; }
 	void GetOrientation(Vector &p, Vector &q, Vector &r) {p=P;q=Q;r=R;}
 	const QVector &GetPosition() { return Coord;}
 
