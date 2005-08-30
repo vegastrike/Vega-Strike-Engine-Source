@@ -114,7 +114,7 @@ public:
   float s;
   float t;
   Vector () {i=j=k=0;}
-  Vector (const vector &in) {
+  template <class vec> Vector (const vec &in) {
     memcpy(this,&in,sizeof(*this));
   }
   Vector (float x, float y, float z) {

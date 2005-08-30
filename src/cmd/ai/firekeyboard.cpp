@@ -29,7 +29,7 @@ FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick
   this->whichplayer=whichplayer;
   gunspeed = gunrange = .0001;
   refresh_target=true;
-  static def_sex = XMLSupport::parse_int( vs_config->getVariable ("player","sex","0"));
+  static bool def_sex = XMLSupport::parse_int( vs_config->getVariable ("player","sex","0"));
   sex = def_sex;
 }
 const unsigned int NUMCOMMKEYS=10;

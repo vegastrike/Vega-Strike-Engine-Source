@@ -10,6 +10,9 @@ using std::vector;
 //static DecalQueue beamdecals;
 extern double interpolation_blend_factor;
 extern bool AdjustMatrix(Matrix &mat,const Vector &velocity, Unit * target, float speed, bool lead, float cone);
+static float mymin(float a, float b) {
+  return a<b?a:b;
+}
 float Beam::refireTime() {
 	return refiretime;
 }
@@ -414,7 +417,7 @@ bool Beam::Collide (Unit * target) {
             lighting = f_lighting; else if (target->faction == upgradesfaction)
             lighting = u_lighting; else if (target->faction == cargofaction)
             lighting = c_lighting;
-        target->ApplyForce (direction*appldam*min(1,target->GetMass())); //Modulate force on little mass objects, so they don't slingshot right passt you - should use relative aproach velocity, but it's just a quick fix for spirit, I'll do better soon - Klauss
+        target->ApplyForce (direction*appldam*mymin(1,target->GetMass())); //Modulate force on little mass objects, so they don't slingshot right passt you - should use relative aproach velocity, but it's just a quick fix for spirit, I'll do better soon - Klauss
       }
 
       float ors_m=o_ors_m,trs_m=o_trs_m,ofs=o_o;

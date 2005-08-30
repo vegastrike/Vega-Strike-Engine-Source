@@ -171,8 +171,8 @@ FlyByWire::FlyByWire (): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false,fa
   stolen_setspeed=false;
   stolen_setspeed_value=0;
 
-  static static_inertial_flight_model=XMLSupport::parse_bool( vs_config->getVariable("flight","inertial::initial","false") );
-  static static_inertial_flight_enable=XMLSupport::parse_bool( vs_config->getVariable("flight","inertial::enable","true") );
+  static bool static_inertial_flight_model=XMLSupport::parse_bool( vs_config->getVariable("flight","inertial::initial","false") );
+  static bool static_inertial_flight_enable=XMLSupport::parse_bool( vs_config->getVariable("flight","inertial::enable","true") );
   inertial_flight_model = static_inertial_flight_model;
   inertial_flight_enable = static_inertial_flight_enable;
 }

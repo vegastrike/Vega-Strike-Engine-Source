@@ -154,16 +154,21 @@ void HaloSystem::SetPosition (unsigned int which, const QVector &loc) {
 #endif
 
 }
-
+static float mymin(float a, float b) {
+  return a>b?b:a;
+}
+static float mymax(float a, float b) {
+  return a>b?a:b;
+}
 static float HaloAccelSmooth(float linaccel, float olinaccel, float maxlinaccel) {
-    linaccel = max(0,min(maxlinaccel,linaccel)); //Clamp input, somehow, sometimes it's not clamped
+    linaccel = mymax(0,mymin(maxlinaccel,linaccel)); //Clamp input, somehow, sometimes it's not clamped
     float phase = pow(((linaccel>olinaccel)?HALO_SMOOTHING_UP_FACTOR:HALO_SMOOTHING_DOWN_FACTOR),GetElapsedTime());
     float olinaccel2;
     if (linaccel>olinaccel)
-        olinaccel2 = min(linaccel,olinaccel+maxlinaccel*HALO_STEERING_UP_FACTOR); else
-        olinaccel2 = max(linaccel,olinaccel-maxlinaccel*HALO_STEERING_DOWN_FACTOR);
+        olinaccel2 = mymin(linaccel,olinaccel+maxlinaccel*HALO_STEERING_UP_FACTOR); else
+        olinaccel2 = mymax(linaccel,olinaccel-maxlinaccel*HALO_STEERING_DOWN_FACTOR);
     linaccel=(1-phase)*linaccel+phase*olinaccel2;
-    linaccel=max(0,min(maxlinaccel,linaccel));
+    linaccel=mymax(0,mymin(maxlinaccel,linaccel));
     return linaccel;
 }
 

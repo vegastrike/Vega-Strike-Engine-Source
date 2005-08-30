@@ -450,7 +450,7 @@ const GFXMaterial &Mesh::GetMaterial () {
    return GFXGetMaterial (myMatNum);
 }
 
-template<typename T> inline rangesOverlap(T min1, T max1, T min2, T max2) {  
+template<typename T> inline bool rangesOverlap(T min1, T max1, T min2, T max2) {  
     return !(  ((min1<min2)==(max1<min2))
              &&((min1<max2)==(max1<max2))
              &&((min1<min2)==(min1<max2))  );
