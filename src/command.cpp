@@ -5,6 +5,11 @@
 #include <pythonrun.h>
 #include "vs_random.h"
 #include "python/python_class.h"
+// Introduction Comments {{{
+// The {{{ and }}} symbols are VIM Fold Markers.
+// They FOLD up the page so a user only needs to see a general outline of the entire huge file
+// and be able to quickly get to exactly what part they need.
+// It helps when a 300 line function is wrapped up to a one line comment
 /* *******************************************************************
 Example Commands: 
 class WalkControls {
@@ -104,6 +109,19 @@ class WalkControls {
 	
 
 ******************************************************************* */
+/* ********************
+Finally the last comments for way up here
+BUG WARNING WITH 1STRARRAY
+Do NOT try to modify anything in your 1STRARRAY argument!
+if you have
+void myClass::myFunction(char *array_in[]) {...}
+do NOT modify array_in, you can COPY it to an std::string or to
+a different charactor pointer then modify that.
+The reason for this, the array passed to your function, is actually built inside
+an std::vector<std::string *>, and is a CONST pointer to the data inside the vector 
+********************* */
+// }}}
+
 //Coms object {{{
 coms::coms(TFunctor *t_in) {functor = t_in;};
 coms::coms(coms *oldCom) {
@@ -129,28 +147,22 @@ class HoldCommands {
 		friend class commandI; 
 		std::vector<coms> rc; //real commands vector
 }; 
-//static HoldCommands rcCMD __attribute__ ((init_priority (543)));
 HoldCommands *rcCMD = 0x0;
 bool rcCMDEXISTS = false; //initialize to false
-//We need the init_priority to be higher than default (default is 65535 or something
-//so we can be assured the vector rc will exist before any commands
-//are added to it, even if those commands are created before the
-//command interpretor (If say they're created on global scope.)
-//If a command is created on the global scope, it may not initialize
-//properly unless some special care is taken to trick the compiler into thinking
-//the object is used (If the compiler thinks it's unused, it may not bother
-//to even initialize it). Probobly making a static object out of the class
-
+// We use a pointer so we can initialize it in addCommand, which can, and does 
+// run before the command interpretor constructor, and before all local variables
+// on the command interpretor itself might be initialized.
+// This object could and probobly should be used for menu's as well, IF 
+// anybody ever uses the menusystem 
 // }}}
 
 // {{{ command interpretor constructor
 commandI::commandI() {
-//ALL commands must be first defined as a VIRTUAL function in object.h
-//Your command must overload the virtual function, you get to name it.
 	std::cout << "Command Interpretor Created\n\r";
 	// {{{ add some base commands 
+
 	Functor<commandI> *dprompt = new Functor<commandI>(this, &commandI::prompt);
-         //fill with dummy function.
+    //fill with dummy function.
 	dprompt->attribs.hidden = true;
 	addCommand(dprompt, "prompt", ARG_NONE);
 
@@ -171,39 +183,6 @@ commandI::commandI() {
 	// }}}
 };
 // }}}
-// {{{ command interpretor constructor
-/*
-commandI::commandI(mud *world_in, object *player_in) {
-//ALL commands must be first defined as a VIRTUAL function in object.h
-//Your command must overload the virtual function, you get to name it.
-    World = world_in;
-	player = player_in;
-    // {{{ add some base commands
-    Functor<commandI> *dprompt = new Functor<commandI>(this, &commandI::prompt);
-         //fill with dummy function.
-    dprompt->attribs.hidden = true;
-    addCommand(dprompt, "prompt", ARG_NONE);
-
-        Functor<commandI> *newFunct = new Functor<commandI>(this, &commandI::dummy);
-         //fill with dummy function
-        newFunct->attribs.hidden = true;
-        addCommand(newFunct, "dummy", ARG_1STRVEC);
-        //add it right at creation to ensure it's at 0
-
-    Functor<commandI> *dcommands = new Functor<commandI>(this, &commandI::pcommands);
-    addCommand(dcommands, "commands", ARG_NONE);
-
-    Functor<commandI> *dhelp = new Functor<commandI>(this, &commandI::help);
-    addCommand(dhelp, "help", ARG_1CSTR);
-    // }}}
-    // set some local object variables {{{
-    menumode = false;
-    immortal = false;
-    // }}}
-};
-*/
-// }}}
-
 // {{{ command interpretor destructor 
 commandI::~commandI() {
 		{
@@ -241,7 +220,7 @@ menu::~menu() {
 // {{{ UNFINISHED HELP COMMAND
 void commandI::help(char *) {
         std::string buf;
-        buf.append("<NORM>Sorry, there is no help system yet\n\r ");
+        buf.append("Sorry, there is no help system yet\n\r ");
 	buf.append("But most commands are self supporting, just type them to see what they do.\n\r");
 //        World->print1(this, &buf);
 
@@ -253,7 +232,6 @@ void commandI::prompt() {
 	l.append("Wooooooooooo\n");
 	conoutf(l);
 //	std::cout << "Prompt called :)\n";
-
 };
 // }}}
 // {{{ dummy function
@@ -319,9 +297,8 @@ void commandI::pcommands() {
 // {{{ addCommand - Add a command to the interpreter
 void commandI::addCommand(TFunctor *com, char *name, int args){
 		std::cout << "Adding command: " << name << std::endl;
-		coms newOne(com); 
-	//use new() to make sure it doesn't get deleted when addCommad
-	//returns.
+		coms newOne = new coms(com); 
+	// See the very bottom of this file for comments about possible optimization
         newOne.Name.append(name);
         newOne.argtype = args;
 	//push the new command back the vector.
@@ -485,20 +462,15 @@ coms commandI::findCommand(const char *comm, int &sock_in) {
 // }}}
 };
 /// }}}
-// {{{ external function, should NEVER be used! UNSAFE!!!!!
-//strips up command, extracts the first word and runs
-//findCommand on it,
-//then tries to execute the member function.
-//If one is not found, it will call commandI::dummy() .
-char *newstring(char *s, int l);
-// }}}
 
 // {{{ main execute function
 
 bool commandI::execute(std::string *incommand, bool isDown, int sock_in)
 {
 //	std::string wreplace;
-	//use the menusystem ONLY if the sock_in is the same as socket{{{
+	// use the menusystem ONLY if the sock_in is the same as socket{{{
+	// All talk about sockets is due to the  the command processor
+	// being used in the heart of a (soon to be GPL) http/1.1 webserver
 	{
 		if(menumode ) {
 			std::string l;
@@ -610,9 +582,6 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
     }
     // }}}
     // {{{ / to gossip
-    //ok special case before we find the command, if the first arguement
-    //in svec starts with ', we must seperate the first argument
-    //and replace ' with say.
     {
         size_t x = newincommand.find("/");
         if(x == 0) {
@@ -724,19 +693,27 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
         lastcommand.erase();lastcommand.append(newincommand);
         //	if(webb && !theCommand->functor->attribs.webbcmd ) {
 		bool printit = false;
+
+
+// Print back what the user typed.. {{{
+// .. Sometimes people believe they typed python print "hello world\n"
+// (and saw what they typed when they typed it)
+// but may have actually typed oython print "hello world\n"
+// and don't want to admit it, so they blame the system.
+// So the system must sometimes politely tell the user what they typed
 		if(menumode) {
             //			if(menu_in->selected) {
             //				if(menu_in->iselected->inputbit || menu_in->iselected->inputbit2) printit = true;
             //			}
-		} else printit = true;
+		} else if(console) printit = true;
 		if(printit) {
 			std::string webout;
 			webout.append(incommand->c_str());
 			webout.append("\n\r");
             //			World->print1(this, &webout);
 		}
-        
-        //	}
+// }}}
+
         try {
             switch(theCommand.argtype) {
             case ARG_1INT:
@@ -758,11 +735,9 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
                     theCommand.functor->Call((bool *)isDown);
                     break; //oops
             case ARG_1STR: 
-                //			std::string sptr;
                 theCommand.functor->Call(newincommand);
                 break;
             case ARG_1STRSPEC:
-//                      std::string sptr;
                 theCommand.functor->Call(newincommand, sock_in);
                 break;
 		case ARG_1STRVEC:
@@ -775,8 +750,7 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
                 std::string err1;
                 err1.append("\n\rError, unsupported argument type!\n\r");
                 err1.append("Try using 1CSTRARRAY or 1STR!\n\r");
-                //			World->print1(this, &err1);
-                //                                theCommand->functor->Call(wreplace);
+				conoutf(err1);
                 break;
             }
         } catch (std::exception e) {
@@ -807,15 +781,36 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 // }}}
 
 // {{{ menusystem 
+/* ***************************************
+An example of how the menusystem is used: 
+(the very first menu when a player logs onto the ANT-Engine http://daggerfall.dynu.com:5555/player1/index.html OR telnet://daggerfall.dynu.com:5555 )
+
+    {
+    menu *m = new menu("newuser", "Welcome to the <GREEN>ANT<NORM> engine", "\r\n");
+    m->autoselect = true; //automatically select a menuitem, MUST BE SET
+    m->noescape = true; //no escaping this menu except by forcing it
+    addMenu(m); //add the menu to the command processor
+    mItem *mi = new mItem; //make a new menuitem 
+    mi->Name.append(" "); //argument to access menu  //must have a name
+    mi->action.append("UNAME "); //adds this to the function 2 call as the argument
+    mi->action.append(seccode); //add the security code.
+    mi->display.append(" "); // menu's display name
+    mi->func2call.append("loginfunc"); //function 2 call
+    mi->inputbit = true; // set single-line input mode
+    mi->selectstring.append("Enter a username"); //string to display when this menuitem is selected
+    addMenuItem(mi);// add the menuitem to the command processor, by default
+					// added to the last menu added, can be overredden by passing
+					// a menu * pointer as the second argument, eg:
+					// addMenuItem(mi, m);
+    m->aselect = mi; //this is the menu item to automatically select
+    }
+
+*************************************** */
 //add a menu {{{
 bool commandI::addMenu(menu *menu_in) {
-    
-//	menu *m = new menu;
-//	m->Name.append(name);
-//	m->escape.append(escape_in);
 	menus.push_back(menu_in);
 	lastmenuadded = menu_in;
-return true;
+	return true;
 };
 // }}}
 // {{{ display menu function
@@ -1204,105 +1199,7 @@ void commandI::breakmenu() {
 };
 // }}}
 
-
-
-
-
-
-
-// bad old method of allocating newstrings, shouldn't be used {{{
-char *newstring(char *s, int l) {
-	char *b = (char *)malloc(l+1);
-	strncpy(b, s, l);
-	b[l] = 0;
-	return b;
-}
-
-// }}}
-// {{{ path stuff from CUBE engine, shouldn't be used 
-//char *path(char *s)
-//{
-//    for(char *t = s; (t = strpbrk(t, "/\\")); *t++ = PATHDIV);
-//    return s;
-//};
-// }}}
-// cube engines parseword, included for informational purposes only, shouldn't be used {{{
-char* commandI::parseword(char *&p)// parse single argument, including expressions
-{
-        p += strspn(p, " \t\r");
-        if(p[0]=='/' && p[1]=='/') p += strcspn(p, "\n\0");
-        if(*p=='\"')
-                {
-                p++;
-                char *word = p;
-                p += strcspn(p, "\"\r\n\0");
-                char *s = newstring(word, p-word);
-                if(*p=='\"') p++;
-                return s;
-                };
-//                      if(*p=='(') return parseexp(p, ')');
-//                      if(*p=='[') return parseexp(p, ']');
-        char *word = p;
-        p += strcspn(p, "; \t\r\n\0");
-        if(p-word==0) return NULL;
-        return newstring(word, p-word);
-};
-// }}}
-// This was an attempt at something stupid, DONT use this! {{{
-bool commandI::execCommand(char *buf, bool isDown)
-{
-//        char *temp;
-  //      if(!buf) return false;
-//        std::string *executestring = new std::string();
-//        while(1) {
-//                temp = seperate_c_string(&buf, "\n");
-//                if(!temp)
-//                        break;
-//                executestring->erase();
-//                executestring->append(temp);
-//                //strip out everything after //
-//                std::string::size_type comment = executestring->find("//", 0);
-//                if(comment != std::string::npos) {
-//                        executestring->erase(comment, executestring->size()-comment);
-//                };
-//                if(executestring->substr(0,1) != "#")
-//                        execute(executestring, isDown);
-//		
-//        };
-//	delete executestring; //deleted  by command interpreter.
-//	free(buf);
-        return true;
-};
-//supporting function
-bool commandI::execCommand(std::string *string, bool isDown)
-{
-//        if(execCommand((char *)string->c_str(), isDown))
-//                 return true;
-        return false;
-}
-// }}}
-// {{{ don't use this. 
-bool commandI::execfile(char *cfgfile)
-{
-//        char s[260];
-  //      strncpy(s, cfgfile, 260);
-//        char *buf = loadfile(path(s), NULL);
-//        //char *temp;
-//        if(!buf) return false;
-//        if(execCommand(buf, true) ) {
-//		free(buf); return true;
-//	}
-//	free(buf);
-        return false;
-};
-// }}}
-// don't use any of this old stuff{{{
-void commandI::exec(char *cfgfile)
-{
-//    if(!execfile(cfgfile)) std::cout <<"could not read " << cfgfile <<std::endl;
-};
-// }}}
-//unused commandI::display. Needs to be defined to return something... 
+// commandI::display, find and display an existing value for an item on the menusystem {{{
 std::string commandI::display(std::string &in) {
 //this is used to build strings containing values related to the string in
 //For an Online Content Creation Menusystem
@@ -1310,11 +1207,15 @@ std::string commandI::display(std::string &in) {
 //        SHIPE_DESC
 //        then it would build a string based on the the current ship or editing
 //		if(in.compare("ship_desc") == 0){  return editing_ship->description; };
-std::string f;
-f.append("FAKE");
-return f;
+	std::string f;
+	f.append("FAKE");
+	return f;
 }
+// }}}
 
+
+
+//This whole python object could be moved to it's own cpp file and expanded to make a nice big python command that does stuff like... take multiple lines of input before executing, edit existing input (emacs/vim/notepad like or something)
 extern commandI CommandInterpretor;
 // {{{ Python object
 RegisterPythonWithCommandInterp::RegisterPythonWithCommandInterp() {
@@ -1338,7 +1239,36 @@ void RegisterPythonWithCommandInterp::runPy(std::string &argsin) {
 }
 
 // }}};
-// 
+
+
+/* ***************************************************************
+ Possible Optimizations:
+
+	Optimizations discussed here arn't the tiny little save 2 or 3 cpu ops by reforming a for loop.
+	These optimizations may make an impact on very very slow machines, or
+	when ram is limited for copying objects, or when certain copies or types
+	arn't ever needed.
+
+	Possible optimization for findCommand (small optimization, less game-time copying overhead (after boot, while playing))
+		copy a coms object when adding a command to the real command vector, (as it is now in addCommand)
+		
+		return a reference to the coms object from findCommand, to avoid
+		copying every time a key is pressed or a command is entered.
+		(change      coms findCommand   to    coms *findCommand)
+		
+
+
+
+	 Possible optimization for the main execute function ( medium optimization, less unneeded allocated variables in the execute function when not needed)
+		Move findCommand higher up, before the string vector and 1str array are
+		built, and build those depending on the argument type, to avoid
+		excessive string copying when it's not needed, such as when not in
+		console mode but in game mode, when 1 bool is enough to tell
+		the function being called wether the key is pressed or not.
+	- This might make it a little more difficult to read the execute function
+
+
+*************************************************************** */
 /*
  * Local variables:
  * tab-width: 4

@@ -87,8 +87,6 @@ class commandI : public RText {
                         //to encapsulated COM objects. (see top of this file)
 		RegisterPythonWithCommandInterp fuckingsonofatwotimingwhoringlioness;
 		coms findCommand(const char *comm, int &sock_in);
-                char *parseword(char *&p);// parse single argument, including expressions
-                bool execfile(char *cfgfile); //loads files
 //		mud *World; //to print to the charactor - server object
 		menu *lastmenuadded;
 		std::vector<menu *> menus;
@@ -126,10 +124,7 @@ class commandI : public RText {
                 //is false. Everything else is only called when isDown is true.
                 //Cube string stuff
                 //splits up input by line using strsep() (renamed for microsoft windows compatibility)
-                bool execCommand(char *buf, bool isDown);
                 bool execCommand(std::string *string, bool isDown);
-                //load script files with exec (for logging on error)
-                void exec(char *cfgfile); //loads a file(with logging)
 		bool addMenu(menu *menu2add);
 		bool addMenuItem(mItem *mitem2add, menu * = NULL);
 		//the args added at addMenu are appended when the
