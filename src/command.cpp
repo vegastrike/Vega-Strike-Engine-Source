@@ -386,6 +386,7 @@ coms commandI::findCommand(const char *comm, int &sock_in) {
 		std::transform(name.begin(), name.end(), name.begin(),static_cast < int(*)(int) > (tolower));
 // }}}
 // Start testing command names against the command entered {{{
+	std::vector<coms>::iterator iter;
 	for(iter = rcCMD->rc.begin();iter < rcCMD->rc.end(); iter++) {
 	//set the test variable to the iterator of something in the command vector
 		coms testCom((*(iter)));
@@ -562,7 +563,7 @@ bool commandI::execute(std::string *incommand, bool isDown, int sock_in)
 bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 	size_t ls, y;
 	bool breaker = false;
-//************
+    //************
 	while(breaker == false) {
 		ls = incommand->find(" ");
 		if(ls > 2 || incommand->size() > 1 || ls == std::string::npos) {
@@ -573,65 +574,65 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 	}
 	size_t ylast = 0;
 	for(y = incommand->find("\r\n"); y != std::string::npos; y = incommand->find("\r\n", y+1)) {
-                incommand->replace(y, 2, " ");
-        }
+        incommand->replace(y, 2, " ");
+    }
 	for(y = incommand->find("  "); y != std::string::npos; y = incommand->find("  ", y+1)) {
 		incommand->replace(y, 1, "");
 	}
 	size_t args = 0;
 	breaker = false; //reset our exit bool
-
+    
 	//now make what 1CSTRARRAY relies on
 	std::string newincommand;
 	//append incommand
 	newincommand.append((*(incommand)));
-        // {{{ ' to say
-        //ok special case before we find the command, if the first arguement
-        //in svec starts with ', we must seperate the first argument
-        //and replace ' with say.
-        {
-                size_t x = newincommand.find("'");
-                if(x == 0) {
+    // {{{ ' to say
+    //ok special case before we find the command, if the first arguement
+    //in svec starts with ', we must seperate the first argument
+    //and replace ' with say.
+    {
+        size_t x = newincommand.find("'");
+        if(x == 0) {
 			newincommand.replace(0, 1, "say ");
-                }
+        }
 		// }}}
 		// {{{ ! to the last command typed
-				x = newincommand.find("!");
-				if(x == 0) {
-					newincommand.replace(0, 1, lastcommand);
-				}
+        x = newincommand.find("!");
+        if(x == 0) {
+            newincommand.replace(0, 1, lastcommand);
+        }
 		// }}}
 		// {{{ : to python
-                x = newincommand.find(":");
-                if(x == 0) {
-                    newincommand.replace(0, 1, "python ");
-                }
+        x = newincommand.find(":");
+        if(x == 0) {
+            newincommand.replace(0, 1, "python ");
         }
-        // }}}
-        // {{{ / to gossip
-        //ok special case before we find the command, if the first arguement
-        //in svec starts with ', we must seperate the first argument
-        //and replace ' with say.
-        {
-                size_t x = newincommand.find("/");
-                if(x == 0) {
-                        newincommand.replace(0, 1, "gossip ");
-                }
-
+    }
+    // }}}
+    // {{{ / to gossip
+    //ok special case before we find the command, if the first arguement
+    //in svec starts with ', we must seperate the first argument
+    //and replace ' with say.
+    {
+        size_t x = newincommand.find("/");
+        if(x == 0) {
+            newincommand.replace(0, 1, "gossip ");
         }
-        // }}}
+        
+    }
+    // }}}
 	//make sure there's always at least 1 space at the end.
 	newincommand.append(" ");
 	std::vector<std::string*> stringvec;
 	ylast = 0;
 	size_t xasd = 0;
-
-	//count arguments and create stringvec{{{
-	for(size_t striter= 0; striter < newincommand.size();striter++) {
-		if(newincommand[striter]==32) {
-//			w[args] = incommand->substr(ylast, x-ylast);
-//			ylast = x;
-			std::string *xs = new std::string();
+        
+    //count arguments and create stringvec{{{
+    {for(size_t striter= 0; striter < newincommand.size();striter++) {
+        if(newincommand[striter]==32) {
+            //			w[args] = incommand->substr(ylast, x-ylast);
+            //			ylast = x;
+            std::string *xs = new std::string();
 			xs->append(newincommand.substr(ylast, xasd-ylast));
 			ylast = xasd;
 			stringvec.push_back(xs);
@@ -641,14 +642,14 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
     } }
 	// }}}
 	{
-	std::vector<std::string *>::iterator iter = stringvec.end();
-	iter--;
-	if((*(iter))->compare(" ") == 0) {
-		std::string *xs = (*(iter));
-		delete xs;
-		stringvec.erase(iter);
-	}
-
+        std::vector<std::string *>::iterator iter = stringvec.end();
+        iter--;
+        if((*(iter))->compare(" ") == 0) {
+            std::string *xs = (*(iter));
+            delete xs;
+            stringvec.erase(iter);
+        }
+        
 	}
 	if(args == 0) args = 1; //hack fix.
 	vector<char*>w(args);
@@ -657,20 +658,21 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 	breaker = false;
 	//put together a c style charactor array: char w[length] (1CSTRARRAY) {{{
     { for(std::vector<std::string *>::iterator iter = stringvec.begin(); iter < stringvec.end() ;iter++) {
-		w[vargs] = "";
-		w[vargs] = (char *)(*(iter))->c_str();//(char *)(*(iter)).c_str();
-		vargs++;
-    } }
+            w[vargs] = "";
+            w[vargs] = (char *)(*(iter))->c_str();//(char *)(*(iter)).c_str();
+            vargs++;
+        } 
+    }
 	// }}}
 	ylast = 0;
 	if(vargs == 0) 
 		w[0] = (char *)incommand->c_str();
-	w[args] = "";	
-//	wreplace.append(incommand->c_str());
-
-//now this stuff is kind of confusing.
-//******************Find the command.
-//	if(tryExit(&stringvec)) { Exits were a virtual function that tested against
+	w.push_back("");	
+    //	wreplace.append(incommand->c_str());
+    
+    //now this stuff is kind of confusing.
+    //******************Find the command.
+    //	if(tryExit(&stringvec)) { Exits were a virtual function that tested against
 		// a vector of objects in a different game
 //		std::vector<std::string *>::iterator itera = stringvec.begin();
 //		while(stringvec.size() > 0 ) {
@@ -682,24 +684,24 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 //		return true; 
 //	};
 
-
+    
 	try {
 		coms theCommand = findCommand(w[0], sock_in);
-
+        
 //Now, we try to replace what was typed with the name returned.
 //to autocomplete words (EX: translate gos into gossip so the gossip
 //command only has to find it's access name and not all possible
 //methods of accessing it.)
-	size_t x = newincommand.find_first_of(w[0]);
-	if(x != std::string::npos) {
-	newincommand.replace(x, strlen(w[0]), theCommand.Name); 
-//	free(w[0]);
-//	memset(w[0], 0, sizeof(w[0]));
-//	strncpy(w[0], theCommand->Name.c_str(), theCommand->Name.size());
-	w[0] = (char *)theCommand.Name.c_str();
-	}
-	std::string sendstring;
-// {{{ try to execute it now	
+        size_t x = newincommand.find_first_of(w[0]);
+        if(x != std::string::npos) {
+            newincommand.replace(x, strlen(w[0]), theCommand.Name); 
+            //	free(w[0]);
+            //	memset(w[0], 0, sizeof(w[0]));
+            //	strncpy(w[0], theCommand->Name.c_str(), theCommand->Name.size());
+            w[0] = (char *)theCommand.Name.c_str();
+        }
+        std::string sendstring;
+        // {{{ try to execute it now	
 //*********************Switch based on the enumerated argument types
 //the two that will likely be used the most are:
 //1CSTRARRAY (becuase aruments in it are split up as: w[0] = command used
@@ -719,75 +721,77 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 //the local stack returns, wreplace will get deleted, effecively freeing
 //what w[x] pointed to, after this function is finished calling
 //whatever function is being held in the functor.
-	lastcommand.erase();lastcommand.append(newincommand);
-//	if(webb && !theCommand->functor->attribs.webbcmd ) {
+        lastcommand.erase();lastcommand.append(newincommand);
+        //	if(webb && !theCommand->functor->attribs.webbcmd ) {
 		bool printit = false;
 		if(menumode) {
-//			if(menu_in->selected) {
-//				if(menu_in->iselected->inputbit || menu_in->iselected->inputbit2) printit = true;
-//			}
+            //			if(menu_in->selected) {
+            //				if(menu_in->iselected->inputbit || menu_in->iselected->inputbit2) printit = true;
+            //			}
 		} else printit = true;
 		if(printit) {
 			std::string webout;
 			webout.append(incommand->c_str());
 			webout.append("\n\r");
-//			World->print1(this, &webout);
+            //			World->print1(this, &webout);
 		}
-//	}
-	try {
-        switch(theCommand.argtype) {
-                case ARG_1INT:
-                                theCommand.functor->Call(atoi((const char *)newincommand.at(1)));
+        
+        //	}
+        try {
+            switch(theCommand.argtype) {
+            case ARG_1INT:
+                theCommand.functor->Call(atoi((const char *)newincommand.at(1)));
+                break;
+            case ARG_NONE:
+                theCommand.functor->Call();
+                break; //this
+            case ARG_1CSTR:
+                theCommand.functor->Call(w[1]);
+                break;
+            case ARG_1CSTRARRAY:
+                theCommand.functor->Call(&w[0]);
                         break;
-                case ARG_NONE:
-                                theCommand.functor->Call();
-                        break; //this
-                case ARG_1CSTR:
-                                theCommand.functor->Call(w[1]);
-			break;
-                case ARG_1CSTRARRAY:
-                                theCommand.functor->Call(&w[0]);
-                        break;
-                case ARG_2CSTR:
-                                theCommand.functor->Call(w[1], w[2]);
-                        break;
+            case ARG_2CSTR:
+                theCommand.functor->Call(w[1], w[2]);
+                break;
                 case ARG_1BOOL:
-                        theCommand.functor->Call((bool *)isDown);
-                        break; //oops
-                case ARG_1STR: 
-//			std::string sptr;
-                        theCommand.functor->Call(newincommand);
-			break;
-                case ARG_1STRSPEC:
+                    theCommand.functor->Call((bool *)isDown);
+                    break; //oops
+            case ARG_1STR: 
+                //			std::string sptr;
+                theCommand.functor->Call(newincommand);
+                break;
+            case ARG_1STRSPEC:
 //                      std::string sptr;
-                        theCommand.functor->Call(newincommand, sock_in);
-                        break;
+                theCommand.functor->Call(newincommand, sock_in);
+                break;
 		case ARG_1STRVEC:
 			theCommand.functor->Call(&stringvec);
 			break;
-                case ARG_1STRVECSPEC:
-                        theCommand.functor->Call(&stringvec, sock_in);
-                        break;
-                default:
-			std::string err1;
-			err1.append("\n\rError, unsupported argument type!\n\r");
-			err1.append("Try using 1CSTRARRAY or 1STR!\n\r");
-//			World->print1(this, &err1);
-//                                theCommand->functor->Call(wreplace);
-                        break;
+            case ARG_1STRVECSPEC:
+                theCommand.functor->Call(&stringvec, sock_in);
+                break;
+            default:
+                std::string err1;
+                err1.append("\n\rError, unsupported argument type!\n\r");
+                err1.append("Try using 1CSTRARRAY or 1STR!\n\r");
+                //			World->print1(this, &err1);
+                //                                theCommand->functor->Call(wreplace);
+                break;
+            }
+        } catch (std::exception e) {
+            std::cout << "Command proccessor: Exception occurered: " << e.what() << std::endl;
+        } catch (...) {
+            std::cout << "Command processor: exception occurered: Unknown, most likely cause: Wrong Arg_type arguement sent with addCommand.\n\r";
         }
-	} catch (std::exception e) {
-		std::cout << "Command proccessor: Exception occurered: " << e.what() << std::endl;
-	} catch (...) {
-		std::cout << "Command processor: exception occurered: Unknown, most likely cause: Wrong Arg_type arguement sent with addCommand.\n\r";
-	}
-	 // }}}
+        
+    // }}}
     } catch(const char *in) { //catch findCommand error
         std::cout << in;
     }
-
-    delete[] w;
-
+    
+    //    delete[] w;
+    
 	//some cleanup {{{
 	std::vector<std::string *>::iterator itera = stringvec.begin();
 	while(stringvec.size() > 0 ) {
@@ -797,14 +801,15 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 		itera=stringvec.begin();
 	}
 	// }}}
-        return true;
-};
+    return true;
+}	
+
 // }}}
 
 // {{{ menusystem 
 //add a menu {{{
 bool commandI::addMenu(menu *menu_in) {
-	
+    
 //	menu *m = new menu;
 //	m->Name.append(name);
 //	m->escape.append(escape_in);
