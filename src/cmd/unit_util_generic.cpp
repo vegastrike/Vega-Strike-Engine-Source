@@ -11,9 +11,16 @@
 #include "faction_generic.h"
 #include "cmd/ai/fire.h"
 #include "gfx/cockpit.h"
+#include "role_bitmask.h"
 using std::string;
 extern Unit * getTopLevelOwner();
 namespace UnitUtil {
+	bool isCapitalShip(Unit *my_unit){
+		if (!my_unit)return false;
+		bool res=false;
+                static unsigned int capitaltypes=ROLES::getCapitalRoles();
+                return ((1<<(unsigned int)my_unit->combatRole())&capitaltypes)!=0;
+	}
 	int getPhysicsPriority (Unit*  un) {
 		float rad= un->rSize();
 		clsptr untype=un->isUnit();
