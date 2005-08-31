@@ -688,7 +688,8 @@ void GameCockpit::DrawTacticalTargetBox () {
   if (!parun)
 
     return;
-
+  if (parun->getFlightgroup()==NULL)
+    return;
 
 
   Unit *target = parun->getFlightgroup()->target.GetUnit();
