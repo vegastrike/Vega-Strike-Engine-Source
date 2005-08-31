@@ -1,4 +1,8 @@
 #include "endianness.h"
+/*
+
+// Now they're inlined in endianness.h
+
 union LILdubl {
   double d;
   unsigned int i[2];
@@ -30,3 +34,4 @@ double DONTUSE__NXSwapBigDoubleToLittleEndian(double x){
   l.i[1]=tmp;
   return l.d;
 }
+*/

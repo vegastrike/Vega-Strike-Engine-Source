@@ -3,8 +3,14 @@
 #include <Python.h>
 #include <pyerrors.h>
 #include <pythonrun.h>
+
 #include "vs_random.h"
 #include "python/python_class.h"
+
+#ifdef HAVE_SDL
+#   include <SDL/SDL.h>
+#endif
+
 // Introduction Comments {{{
 // The {{{ and }}} symbols are VIM Fold Markers.
 // They FOLD up the page so a user only needs to see a general outline of the entire huge file
@@ -118,7 +124,7 @@ void myClass::myFunction(char *array_in[]) {...}
 do NOT modify array_in, you can COPY it to an std::string or to
 a different charactor pointer then modify that.
 The reason for this, the array passed to your function, is actually built inside
-an std::vector<std::string *>, and is a CONST pointer to the data inside the vector 
+an std::vector<std::string *>, and is a CONST pointer to the data inside the vector
 ********************* */
 // }}}
 
@@ -591,23 +597,14 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
     }
     // }}}
 	//make sure there's always at least 1 space at the end.
-	newincommand.append(" ");
 	std::vector<std::string*> stringvec;
 	ylast = 0;
 	size_t xasd = 0;
         
     //count arguments and create stringvec{{{
-    {for(size_t striter= 0; striter < newincommand.size();striter++) {
-        if(newincommand[striter]==32) {
-            //			w[args] = incommand->substr(ylast, x-ylast);
-            //			ylast = x;
-            std::string *xs = new std::string();
-			xs->append(newincommand.substr(ylast, xasd-ylast));
-			ylast = xasd;
-			stringvec.push_back(xs);
-			args++;
-		}
-		xasd++;
+    {for(string::size_type st=0,en=0; (en=newincommand.find(' ',st),(st!=string::npos)); st=(en!=string::npos)?en+1:string::npos) {
+        stringvec.push_back(new std::string(newincommand.substr(st,en)));
+        args++;
     } }
 	// }}}
 	{
@@ -955,7 +952,7 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 						itera=d_out.begin();
 					}
 					return true;
-				} 
+				}
 			// }}}
 			//autoreprint {{{
 				if(menu_in->iselected->autoreprint == true) {
@@ -1278,3 +1275,17 @@ void RegisterPythonWithCommandInterp::runPy(std::string &argsin) {
  * vim<600: sw=4 ts=4
  */
 
+namespace ConsoleKeys {
+
+    void BringConsole(const KBData&,KBSTATE newState)
+    {
+        //this way, keyboard state stays synchronized
+        if(newState==RELEASE){
+            CommandInterpretor.console = true;
+#if HAVE_SDL
+            SDL_EnableUNICODE(true);
+#endif
+        }
+    }
+
+}

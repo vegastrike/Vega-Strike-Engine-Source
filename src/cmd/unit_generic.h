@@ -107,7 +107,7 @@ class Mount {
 	// Serial used to store missiles serial id before they are really created
 	ObjSerial serial;
 	float xyscale;float zscale;//for guns!
-	float ComputeAnimatedFrame(Mesh * gun, double sim_atom);
+	float ComputeAnimatedFrame(Mesh * gun);
     void SwapMounts (Mount * other);
     void ReplaceMounts (const Mount * other);
 	double Percentage (const Mount *newammo) const;
@@ -817,9 +817,9 @@ public:
     Vector p,q,r;
     GetOrientation(p,q,r);
     Vector lref(ref*p,ref*q,ref*r);
-    float tp=(lref.i==0)?0:abs(Limits().lateral/lref.i);
-    float tq=(lref.j==0)?0:abs(Limits().vertical/lref.j);
-    float tr=(lref.k==0)?0:abs(((lref.k>0)?Limits().forward:Limits().retro)/lref.k);
+    float tp=(lref.i==0)?0:fabs(Limits().lateral/lref.i);
+    float tq=(lref.j==0)?0:fabs(Limits().vertical/lref.j);
+    float tr=(lref.k==0)?0:fabs(((lref.k>0)?Limits().forward:Limits().retro)/lref.k);
     float tm=min(tp,min(tr,tq));
     return lref.Magnitude()*tm/GetMass();
   }

@@ -307,11 +307,11 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
              Matrix ct;
              MultMatrix(ct,mat,mountmat);
              ScaleMatrix(ct,Vector(mahnt->xyscale,mahnt->xyscale,mahnt->zscale));
-             gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun,SIMULATION_ATOM*sim_atom_multiplier));
+             gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));
              gun->DrawNow(lod,0,ct,1,cloak);//cloakign and nebula
              if (mahnt->type->gun1){
                gun = mahnt->type->gun1;
-               gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun,SIMULATION_ATOM*sim_atom_multiplier));
+               gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));
 
                gun->DrawNow(lod,0,ct,1,cloak);//cloakign and nebula			  
              }
@@ -490,11 +490,11 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
                   float d = (mat.p-_Universe->AccessCamera()->GetPosition()).Magnitude();
                   float lod =g_game.detaillevel*g_game.x_resolution*2*gun->rSize()/GFXGetZPerspective((d-gun->rSize()<g_game.znear)?g_game.znear:d-gun->rSize());
 		  ScaleMatrix(mat,Vector(mahnt->xyscale,mahnt->xyscale,mahnt->zscale));
-		  gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun,SIMULATION_ATOM*sim_atom_multiplier));
+		  gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));
 		  gun->Draw(lod,mat,1,cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,chardamage,true);//cloakign and nebula
 		  if (mahnt->type->gun1){
 			  gun = mahnt->type->gun1;
-			  gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun,SIMULATION_ATOM*sim_atom_multiplier));
+			  gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));
 			  gun->Draw(lod,mat,1,cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,chardamage,true);//cloakign and nebula			  
 		  }
       }

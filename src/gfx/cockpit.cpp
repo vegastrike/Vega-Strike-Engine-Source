@@ -1331,6 +1331,7 @@ GameCockpit::GameCockpit (const char * file, Unit * parent,const std::string &pi
   always_itts=st_always_itts;
   steady_itts=st_steady_itts;
   radar_type=st_radar_type;
+  last_locktime = last_mlocktime = -FLT_MAX;
 
   // Compute the screen limits. Used to display the arrow pointing to the selected target.
   static float st_projection_limit_y = XMLSupport::parse_float(vs_config->getVariable("graphics","fov","78"));

@@ -526,17 +526,6 @@ void winsys_exit( int code )
 */
 bool keypress(int code, bool isDown, int cooked) {
 	commandI *interp = &CommandInterpretor; 	//just because interp is shorter than the entire thing
-	{
-	//try enabling the console
-		char add[] = { code, 0};
-		//Temporary - Needs to be mapped in a config file for non-english keyboards
-		//that don't do ` right (So I hear)
-		if(!interp->console && strcmp(add,"`") == 0) {
-			interp->console = true;
-			SDL_EnableUNICODE(true);
-			return true;
-		}
-	}
 	if(interp->console) {
 		if(code==SDLK_ESCAPE) {
 			interp->console = false;

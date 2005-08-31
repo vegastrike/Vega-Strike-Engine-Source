@@ -1,4 +1,4 @@
-/* 
+/*
  * Vega Strike
  * Copyright (C) 2001-2002 Daniel Horn
  * 
@@ -54,6 +54,7 @@
 #include "save_util.h"
 #include "gfx/masks.h"
 #include "cmd/music.h"
+//#include "ship_commands.h"
 
 #include <time.h>
 #ifndef _WIN32
@@ -298,10 +299,18 @@ int main( int argc, char *argv[] )
 
 #endif
     */
+
+    //Register commands
+    //InitShipCommands();
+
     _Universe= new GameUniverse(argc,argv,vs_config->getVariable ("general","galaxy","milky_way.xml").c_str());
 	//_Universe.Init(argc, argv, vs_config->getVariable ("general","galaxy","milky_way.xml").c_str());
     //    winsys_set_keyboard_func(nothinghappens);
     _Universe->Loop(bootstrap_first_loop);
+
+    //Unregister commands - and cleanup memory
+    //UninitShipCommands();
+
     return 0;
 }
   static Animation * SplashScreen = NULL;

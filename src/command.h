@@ -5,6 +5,7 @@
 #include <vector>
 #include "functors.h"
 #include "rendertext.h" //menusystem
+#include "in.h"
 //
 //#include "areas.h" //must be at the bottom
 
@@ -138,5 +139,10 @@ class commandI : public RText {
 
 enum { ARG_1INT, ARG_NONE, ARG_1STR, ARG_2STR, ARG_1CSTR, ARG_2CSTR, ARG_1CSTRARRAY, ARG_1BOOL, ARG_1STRVEC, ARG_1STRVECSPEC, ARG_1STRSPEC };
 
+namespace ConsoleKeys {
+
+    extern void BringConsole(const KBData&, KBSTATE a);
+ 
+}
 //#include "areas.h"
 #endif

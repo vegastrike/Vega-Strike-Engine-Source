@@ -347,12 +347,15 @@ void GameStarSystem::Draw(bool DrawCockpit) {
       for (unsigned int sim_counter=0;sim_counter<=SIM_QUEUE_SIZE;++sim_counter) {
         Unit *unit;
         UnitCollection::UnitIterator iter = physics_buffer[sim_counter].createIterator();    
+        float backup=SIMULATION_ATOM;
         while((unit = iter.current())!=NULL) {
           interpolation_blend_factor=calc_blend_factor(interpolation_blend_factor,unit->sim_atom_multiplier,sim_counter,current_sim_location);
+          SIMULATION_ATOM = backup*unit->sim_atom_multiplier;
           ((GameUnit<Unit> *)unit)->Draw();
           interpolation_blend_factor=saved_interpolation_blend_factor;
           iter.advance();
         }
+        SIMULATION_ATOM=backup;
       }
 
       _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
@@ -366,15 +369,18 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   for (unsigned int sim_counter=0;sim_counter<=SIM_QUEUE_SIZE;++sim_counter) {
     Unit *unit;
     UnitCollection::UnitIterator iter = physics_buffer[sim_counter].createIterator();    
+    float backup=SIMULATION_ATOM;
     while((unit = iter.current())!=NULL) {
       interpolation_blend_factor=calc_blend_factor(interpolation_blend_factor,unit->sim_atom_multiplier,sim_counter,current_sim_location);
 	  //if (par&&par->Target()==unit) {
 		  //printf ("i:%f s:%f m:%d c:%d l:%d\n",interpolation_blend_factor,saved_interpolation_blend_factor,unit->sim_atom_multiplier,sim_counter,current_sim_location);
 	  //}
+      SIMULATION_ATOM = backup*unit->sim_atom_multiplier;
       ((GameUnit<Unit> *)unit)->Draw();
       interpolation_blend_factor=saved_interpolation_blend_factor;
       iter.advance();
     }
+    SIMULATION_ATOM=backup;
   }
 
   WarpTrailDraw();

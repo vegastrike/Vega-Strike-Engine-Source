@@ -783,5 +783,7 @@ CommandMap initGlobalCommandMap() {
  commandMap["Flight::Mode::InertialPulsor"]=FlyByKeyboard::InertialPulsorKey;
  commandMap["Flight::Mode::InertialToggle"]=FlyByKeyboard::InertialToggleKey;
 
+ commandMap["ConsoleKeys::BringConsole"]=ConsoleKeys::BringConsole;
+
  return commandMap;
 }

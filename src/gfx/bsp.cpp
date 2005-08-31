@@ -211,21 +211,19 @@ BSPTree::BSPTree(const char *filename) {
   VSError err = fp.OpenReadOnly( filename, BSPFile);
   int size = fp.Size();
   int numRecords = size / (sizeof(float)*4+2);
+  char *auxbuf = new char[size];
   BSPDiskNode *nodes = new BSPDiskNode[numRecords];
-  for(int a=0; a<numRecords; a++) {
-    nodes[a].x= readf (fp);
-    nodes[a].y= readf (fp);
-    nodes[a].z= readf (fp);
-    nodes[a].d= readf (fp);
+  fp.Read(auxbuf,size);
+  for(int a=0,ip=0; a<numRecords; a++) {
+    nodes[a].x = VSSwapHostFloatToLittle(auxbuf[ip]); ip += sizeof(float);
+    nodes[a].y = VSSwapHostFloatToLittle(auxbuf[ip]); ip += sizeof(float);
+    nodes[a].z = VSSwapHostFloatToLittle(auxbuf[ip]); ip += sizeof(float);
+    nodes[a].d = VSSwapHostFloatToLittle(auxbuf[ip]); ip += sizeof(float);
     nodes[a].isVirtual = false;
-    char byte;
-    byte = readc (fp);
-    if(byte) nodes[a].hasFront = true;
-    else nodes[a].hasFront = false;
-    byte = readc (fp);
-    if(byte) nodes[a].hasBack = true;
-    else nodes[a].hasBack = false;
+    nodes[a].hasFront = (auxbuf[ip]!=0); ip += sizeof(char);
+    nodes[a].hasBack = (auxbuf[ip]!=0); ip += sizeof(char);
   }
+  delete [] auxbuf;
   BSPDiskNodeArray tmpnode (nodes,numRecords);
   root = new BSPNode(tmpnode);
   delete [] nodes;

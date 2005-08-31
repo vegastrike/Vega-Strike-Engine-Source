@@ -50,7 +50,8 @@ void RText::draw_text(std::string &str, float left, float top, int gl_num)
     int i;
     std::string::iterator iter = str.begin();
     GFXColor foreground(1, 1, 1, 1);
-    TextPlane newTextPlane(foreground);
+    GFXColor background(0.05f, 0.05f, 0.2f, 0.5f);
+    TextPlane newTextPlane(foreground,background);
     newTextPlane.SetPos(x, y);
     newTextPlane.SetCharSize(.8, .12);
     newTextPlane.Draw(str);

@@ -726,7 +726,7 @@ bool SetupSpecMapFirstPass (vector <Texture *> &decal, unsigned int mat, bool en
 				const float paramt[4]={detailPlanes[i].i,detailPlanes[i].j,detailPlanes[i].k,0};
 				GFXTextureCoordGenMode(stage,OBJECT_LINEAR_GEN,params,paramt);
 				detailTexture->MakeActive(stage);
-				GFXTextureEnv(stage,GFXADDSIGNEDTEXTURE);
+				GFXTextureEnv(stage,GFXDETAILTEXTURE);
 				GFXToggleTexture(true,stage);
 			}
 	}
