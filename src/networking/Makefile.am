@@ -15,7 +15,7 @@ soundserver_LDADD = -L/usr/local/lib $(SDL_LIBS) $(SDL_MIXER_LIBS)
 
 SUBDIRS = lowlevel
 
-soundserver_SOURCES = inet.cpp inet_file.cpp inet_file.h inet.h soundserver.cpp
+soundserver_SOURCES = inet.cpp inet_file.cpp inet_file.h inet.h soundserver.cpp softvolume.cpp softvolume.h
 
 libacctserver = \
 	client.cpp		\
