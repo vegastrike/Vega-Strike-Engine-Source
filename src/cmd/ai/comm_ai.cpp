@@ -117,7 +117,7 @@ float CommunicatingAI::getAnger(const Unit * target)const {
 float CommunicatingAI::GetEffectiveRelationship (const Unit * target)const {
   return Order::GetEffectiveRelationship (target)+getAnger(target);
 }
-static void GetMadAt(Unit* un, Unit * parent, int numhits=0) {
+void GetMadAt(Unit* un, Unit * parent, int numhits=0) {
   if (numhits==0) {
     static float snumhits = XMLSupport::parse_float(vs_config->getVariable("AI","ContrabandMadness","5"));
     numhits =snumhits;

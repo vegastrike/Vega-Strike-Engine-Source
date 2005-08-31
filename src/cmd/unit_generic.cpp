@@ -702,6 +702,8 @@ void Unit::Init()
   image->LifeSupportFunctionalityMax=1.0f;
 
   image->hudImage=NULL;
+
+// Freedom for the masses!!!!  //you'll have to justify why setting to this is better.
   owner = NULL;
   faction =0;
   resolveforces=true;
@@ -2722,7 +2724,7 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
   
   float instantenergy = afterburnenergy*SIMULATION_ATOM;
   if ((afterburntype == 0) && energy<instantenergy) {
-    afterburn=false;
+	  afterburn=false;
   }
   if ((afterburntype == 1) && fuel<0) {
 	  fuel = 0;
@@ -6561,7 +6563,7 @@ void Unit::EjectCargo (unsigned int index) {
   Cargo ejectedPilot;
   Cargo dockedPilot;
   string name;
-
+  bool isplayer = false;
 //  if (index==((unsigned int)-1)) { is ejecting normally
 //  if (index==((unsigned int)-2)) { is ejecting for eject-dock
 
@@ -6570,6 +6572,7 @@ void Unit::EjectCargo (unsigned int index) {
     int pilotnum = _Universe->CurrentCockpit();
     name = "return_to_cockpit"; // this calls the unit's existence, by the way.
     if (NULL!=(cp = _Universe->isPlayerStarship (this))) {
+      isplayer = true;
       string playernum =string("player")+((pilotnum==0)?string(""):XMLSupport::tostring(pilotnum));
       //name = vs_config->getVariable(playernum,"callsign","TigerShark");
     }
@@ -6585,6 +6588,7 @@ void Unit::EjectCargo (unsigned int index) {
     if (NULL!=(cp = _Universe->isPlayerStarship (this))) {
       string playernum =string("player")+((pilotnum==0)?string(""):XMLSupport::tostring(pilotnum));
       //name = vs_config->getVariable(playernum,"callsign","TigerShark");
+      isplayer = true;
     }
     ejectedPilot.content="eject";
     ejectedPilot.mass=.1;
@@ -6637,40 +6641,78 @@ void Unit::EjectCargo (unsigned int index) {
         static float crot=XMLSupport::parse_float(vs_config->getVariable("graphics","cargo_rotation_speed","60"))*3.1415926536/180;
         static float erot=XMLSupport::parse_float(vs_config->getVariable("graphics","eject_rotation_speed","0"))*3.1415926536/180;
         
-		  if (tmpcontent=="eject") {
-			  cargo = UnitFactory::createUnit ("eject",false,faction);
-			  int fac = FactionUtil::GetFaction("upgrades");
-			  cargo->faction=fac;//set it back to neutral so that no one will bother with 'im
-                          arot=erot;
-                          cargo->PrimeOrders();
-                          cargo->SetAI (new AIScript ("eject.xai")); // generally fraidycat AI
-                          cargo->SetTurretAI();	  
+        if (tmpcontent=="eject") {
+          if (isplayer)
+          {
+            //     			  cargo->faction = this->faction;
+            Flightgroup * fg = this->getFlightgroup();
+            int fgsnumber=0;
+            if (fg!=NULL) {
+              fgsnumber=fg->nr_ships;
+              fg->nr_ships++;
+              fg->nr_ships_left++;
+            }
+            cargo = UnitFactory::createUnit ("eject",false,faction,"",fg,fgsnumber);
+          }
+          else
+          {
+            int fac = FactionUtil::GetFaction("upgrades");
+            cargo = UnitFactory::createUnit ("eject",false,fac);
+          }
+          if (owner)
+            cargo->owner = owner;
+          else
+            cargo->owner = this;
 
-// Meat. Docking should happen here
-
-		  }else if (tmpcontent=="return_to_cockpit") {
-			  cargo = UnitFactory::createUnit ("return_to_cockpit",false,faction);
-			  int fac = FactionUtil::GetFaction("upgrades");
-			  cargo->faction=this->faction;
-                          arot=erot;
-                          cargo->PrimeOrders();
-                          Order * ai = cargo->aistate;
-                    	  cargo->aistate = NULL;
-
-//						  cargo->is_ejectdock = true; // ugly, but i hope it doesn't mess anything up. Checked by undocking.
-//						  this->is_ejectdock = false;
-//	                      cargo->PrimeOrders (new Orders::DockingOps (this, ai,actually_dock!=0));
-//                          cargo->SetAI (new Orders::DockingOps (this, ai,actually_dock!=0));
-//						  cargo->SetTurretAI();	  
-
-		  }else {
-			  string tmpnam = tmpcontent+".cargo";
-			  cargo = UnitFactory::createUnit (tmpnam.c_str(),false,FactionUtil::GetFaction("upgrades"));
-                          arot=crot;
-                          //cargo->PrimeOrders();
-                          //cargo->SetAI (new Orders::AggressiveAI ("cargo.agg.xml"));
-		  }
-
+          arot=erot;
+          cargo->PrimeOrders();
+          cargo->SetAI (new Orders::AggressiveAI ("default.agg.xml")); // generally fraidycat AI
+          //                          cargo->SetTurretAI();	  
+          
+          // Meat. Docking should happen here
+          
+        }else if (tmpcontent=="return_to_cockpit") {
+          if (isplayer)
+          {
+            //     			  cargo->faction = this->faction;
+            Flightgroup * fg = this->getFlightgroup();
+            int fgsnumber=0;
+            if (fg!=NULL) {
+              fgsnumber=fg->nr_ships;
+              fg->nr_ships++;
+              fg->nr_ships_left++;
+            }
+            cargo = UnitFactory::createUnit ("return_to_cockpit",false,faction,"",fg,fgsnumber);
+            if (owner)
+              cargo->owner = owner;
+            else
+              cargo->owner = this;
+          }
+          else
+          {
+            int fac = FactionUtil::GetFaction("upgrades");
+            cargo = UnitFactory::createUnit ("eject",false,fac);
+          }
+          
+          arot=erot;
+          cargo->PrimeOrders();
+          Order * ai = cargo->aistate;
+          cargo->aistate = NULL;
+          
+          //						  cargo->is_ejectdock = true; // ugly, but i hope it doesn't mess anything up. Checked by undocking.
+          //						  this->is_ejectdock = false;
+          //	                      cargo->PrimeOrders (new Orders::DockingOps (this, ai,actually_dock!=0));
+          //                          cargo->SetAI (new Orders::DockingOps (this, ai,actually_dock!=0));
+          //						  cargo->SetTurretAI();	  
+          
+        }else {
+          string tmpnam = tmpcontent+".cargo";
+          cargo = UnitFactory::createUnit (tmpnam.c_str(),false,FactionUtil::GetFaction("upgrades"));
+          arot=crot;
+          //cargo->PrimeOrders();
+          //cargo->SetAI (new Orders::AggressiveAI ("cargo.agg.xml"));
+        }
+        
       }
 
       if (cargo->name=="LOAD_FAILED") {
@@ -6713,7 +6755,10 @@ void Unit::EjectCargo (unsigned int index) {
         Vector p,q,r;
         this->GetOrientation(p,q,r);
 		cargo->SetOrientation (p,q,r);
-    	cargo->SetOwner (this);
+        if (owner)
+                     cargo->owner = owner;
+        else
+					 cargo->owner = this;
 
 //		cargo->SetAngularVelocity(); // how do we make this aim in the same direction? ideall
             }        
@@ -6746,6 +6791,10 @@ void Unit::EjectCargo (unsigned int index) {
                         this->TurretFAW();
 
                     SwitchUnits (NULL,this); // make unit a sitting duck in the mean time
+                  if (owner)
+                     cargo->owner = owner;
+				  else
+					 cargo->owner = this;
                     PrimeOrders();
                     //this->SetAI (new Orders::AggressiveAI ("cargo.agg.xml"));// make unit a sitting duck in the mean time
 			
@@ -6768,6 +6817,10 @@ void Unit::EjectCargo (unsigned int index) {
           
 		} else {
                     SwitchUnits (NULL,cargo);
+                  if (owner)
+                     cargo->owner = owner;
+				  else
+					 cargo->owner = this;
                     
                 } // switching NULL gives "dead" ai to the unit I ejected from, by the way.
 	}

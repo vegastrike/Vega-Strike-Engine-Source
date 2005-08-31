@@ -1985,7 +1985,7 @@ void FireKeyboard::Execute () {
   if (f().eject==PRESS) {
     f().eject=DOWN;
     Cockpit * cp;
-    if ((cp=_Universe->isPlayerStarship (parent))) {
+    if ((parent->name != "eject") && (parent->name != "pilot") && (cp=_Universe->isPlayerStarship (parent))) {
       cp->Eject();
     }
   }

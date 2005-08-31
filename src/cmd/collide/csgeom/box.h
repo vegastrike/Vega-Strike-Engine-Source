@@ -171,7 +171,7 @@ public:
   /**
    * Get the center of this box.
    */
-  csVector3 GetCenter () const { return (minbox+maxbox)/2; }
+  csVector3 GetCenter () const { return csVector3((minbox.x+maxbox.x)/2, (minbox.y+maxbox.y)/2, (minbox.z+maxbox.z)/2); }
 
   /**
    * Set the center of this box. This will not change the size

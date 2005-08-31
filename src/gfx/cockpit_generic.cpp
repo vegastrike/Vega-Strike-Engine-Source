@@ -473,7 +473,6 @@ bool Cockpit::Update () {
     }
   }
   static bool autoclear=XMLSupport::parse_bool(vs_config->getVariable("AI","autodock","false"));
-  par=GetParent();
   if (autoclear&&par) {
     Unit *targ=par->Target();
 	if (targ) {
@@ -501,15 +500,19 @@ bool Cockpit::Update () {
     zoomfactor=initialzoom;
     static int index=0;
     switchunit[_Universe->CurrentCockpit()]=0;
-    par = GetParent();
     static bool switch_nonowned_units=XMLSupport::parse_bool(vs_config->getVariable("AI","switch_nonowned_units","true"));
-    static bool switch_to_fac=XMLSupport::parse_bool(vs_config->getVariable("AI","switch_to_whole_faction","true"));
+//    switch_nonowned_units = true;
+	//    static bool switch_to_fac=XMLSupport::parse_bool(vs_config->getVariable("AI","switch_to_whole_faction","true"));
+
     un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();
     Unit * un;
     bool found=false;
     int i=0;
-    while ((un=ui.current())) {
-      if ( (switch_to_fac && un->faction==par->faction) || (par->getFlightgroup() == un->getFlightgroup()) ) {
+
+
+	while ((un=ui.current())) {
+      if (un->faction==this->unitfaction) {
+
 	
 // this switches units UNLESS we're an ejected pilot. Instead, if we are an ejected
 // pilot, switch only if we're close enough.
@@ -520,7 +523,7 @@ bool Cockpit::Update () {
 
 
 
-	if ((i++)>=index&&(!_Universe->isPlayerStarship(un))&&(switch_nonowned_units || (un->owner == par->owner) || (un->owner == par))&&un->name!="eject"&&un->name!="Pilot" && (un->isUnit()!=MISSILEPTR)) {
+	if ( ((par != NULL) && (i++)>=index) && (!_Universe->isPlayerStarship(un)) && (switch_nonowned_units || (un->owner == par->owner) || (un == par->owner ) || (un->owner == par)) && (un->name!="eject") && (un->name!="Pilot") && (un->isUnit()!=MISSILEPTR)) {
 	  found=true;
 	  index++;
 	  Unit * k=GetParent(); 
@@ -540,7 +543,7 @@ bool Cockpit::Update () {
               if (!(k->name=="return_to_cockpit"))
                   this->SetParent(un,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
               if (!(k->name=="return_to_cockpit"))
-                  k->Kill();
+					  k->Kill();
               //un->SetAI(new FireKeyboard ())
           }
           

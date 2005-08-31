@@ -891,17 +891,17 @@ void GameCockpit::DrawBlips (Unit * un) {
         iter.advance();	
 	continue;      
       }
-      
-      if (Radar[0] && target->radial_size > 0)
+      static float minblipsize=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","min_radarblip_size","0"));
+      if (Radar[0] && target->radial_size > minblipsize)
         drawUnToTarget (un,target,xcent[0],ycent[0],xsize[0],ysize[0],false);
-      if (Radar[1] && target->radial_size > 0)
+      if (Radar[1] && target->radial_size > minblipsize)
         drawUnToTarget (un,target,xcent[1],ycent[1],xsize[1],ysize[1],true);
       if (target->isPlanet()==PLANETPTR && target->radial_size > 0) {
         Unit * sub=NULL;
         for (un_iter i=target->getSubUnits();(sub=*i)!=NULL;++i) {
-          if (Radar[0] && target->radial_size > 0)
+          if (Radar[0] && target->radial_size > minblipsize)
             drawUnToTarget(un,sub,xcent[0],ycent[0], xsize[0],ysize[0],false);
-          if (Radar[1] && target->radial_size > 0)
+          if (Radar[1] && target->radial_size > minblipsize)
             drawUnToTarget(un,sub,xcent[1],ycent[1], xsize[1],ysize[1],true);
         }
       }
