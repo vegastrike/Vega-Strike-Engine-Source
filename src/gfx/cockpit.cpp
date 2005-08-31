@@ -1760,7 +1760,7 @@ void GameCockpit::Draw() {
         static float warp_shake_ref = XMLSupport::parse_float(vs_config->getVariable ("graphics","warp_shake_ref","2000"));
 
         if (warp_shake_ref<=0) warp_shake_ref=1;
-	    theta+=shake_speed*GetElapsedTime()*sqrt(abs(shakin))/10; //For small shakes, slower shakes
+	    theta+=shake_speed*GetElapsedTime()*sqrt(fabs(shakin))/10; //For small shakes, slower shakes
         wtheta+=warp_shake_speed*GetElapsedTime(); //SPEC-related shaking
 
         float self_kps = ((GetParent()!=NULL)?LookupTargetStat(UnitImages::KPS,GetParent()):0);

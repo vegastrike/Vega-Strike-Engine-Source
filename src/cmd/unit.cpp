@@ -333,7 +333,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
   bool myparent = (this==_Universe->AccessCockpit()->GetParent());
   bool ormygrampa = myparent||(_Universe->AccessCockpit()->GetParent()&&(this==_Universe->AccessCockpit()->GetParent()->owner));
   bool topparent = _Universe->AccessCockpit()->GetParent()&&(_Universe->AccessCockpit()->GetParent()->owner == NULL);
-  if (cam_setup_phase&&!ormygrampa&&(topparent||SubUnits.empty()))
+  if (cam_setup_phase&&!ormygrampa&&(topparent||UnitType::SubUnits.empty()))
       return;
 
   this->cumulative_transformation = linear_interpolate(this->prev_physical_state, this->curr_physical_state, interpolation_blend_factor);
@@ -531,7 +531,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
     if (halos.ShouldDraw(this->WarpMatrix(*ctm),velocity,accel,maxaccel,cmas)) 
       halos.Draw(this->WarpMatrix(*ctm),Scale,cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,this->GetHull()>0?damagelevel:1.0,velocity,accel,maxaccel,cmas,this->faction);
   }
-  if (On_Screen&&!graphicOptions.NoDamageParticles) {
+  if (On_Screen&&!UnitType::graphicOptions.NoDamageParticles) {
 	int numm = this->nummesh();
 	if (damagelevel<.99&&numm>0&&this->GetHull()>0) {
 		unsigned int switcher=(damagelevel>.8)?1:
