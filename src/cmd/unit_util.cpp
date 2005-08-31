@@ -7,6 +7,7 @@
 #include "unit_util.h"
 #include "config_xml.h"
 #include "vs_globals.h"
+#include "role_bitmask.h"
 using std::string;
 namespace UnitUtil {
 	void switchFg(Unit *my_unit,string arg){
@@ -42,6 +43,12 @@ namespace UnitUtil {
 		string s=getFlightgroupName(my_unit);
 		res=(typ==PLANETPTR||typ==ASTEROIDPTR||typ==NEBULAPTR||s=="Base");
 		return res&&!isSun(my_unit);
+	}
+	bool isCapitalShip(Unit *my_unit){
+		if (!my_unit)return false;
+		bool res=false;
+                static unsigned int capitaltypes=ROLES::getCapitalRoles();
+                return ((1<<(unsigned int)my_unit->combatRole())&capitaltypes)!=0;
 	}
 	int communicateTo(Unit *my_unit,Unit *other_unit,float mood){
 		if (!my_unit)return 0;

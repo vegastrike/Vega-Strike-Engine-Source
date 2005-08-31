@@ -1,6 +1,8 @@
 #include "role_bitmask.h"
 #include "xml_support.h"
 #include <map>
+#include "vs_globals.h"
+#include "config_xml.h"
 #include "vsfilesystem.h"
 #include "csv.h"
 using std::map;
@@ -168,5 +170,27 @@ namespace ROLES {
 				s = s.substr (loc+1);
 		}while (loc!=string::npos);
 		return ans;
+	}
+	unsigned int getCapitalRoles () {
+          static string defaultcapshipvalues=vs_config->getVariable("data","capship_roles","ESCORTCAP CAPITAL CARRIER BASE TROOP");
+          unsigned int retval=0;
+          string inp=defaultcapshipvalues;
+          string::size_type where;
+          while((where=inp.find(" "))!=string::npos) {                     
+            string tmp=inp.substr(0,where);
+            unsigned char logrole=getRole(tmp);
+            if (tmp==getRole(logrole)) {
+              retval|=(1<<logrole);
+            }
+            inp=inp.substr(where+1);
+          }
+          if (inp.length()) {
+            unsigned char logrole=getRole(inp);
+            string tmp=getRole(logrole);
+            if (tmp==inp) {
+              retval|=(1<<logrole);
+            }
+          }
+          return retval;
 	}
 }
