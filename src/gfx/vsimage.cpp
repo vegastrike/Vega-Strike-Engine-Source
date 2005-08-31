@@ -414,7 +414,7 @@ unsigned char *	VSImage::ReadJPEG()
 	if( !img_file->UseVolume())
 		jpeg_stdio_src((j_decompress_ptr)&cinfo, img_file->GetFP());
 	else
-		jpeg_memory_src(&cinfo, (unsigned char *)img_file->pk3_extracted_file, img_file->Size());
+		jpeg_memory_src(&cinfo, (unsigned char *)img_file->get_pk3_data(), img_file->Size());
 
 	(void) jpeg_read_header(&cinfo, TRUE);
 	this->sizeX = cinfo.image_width;
