@@ -160,7 +160,7 @@ void init_opengl_extensions()
 #ifndef __APPLE_PANTHER_GCC33_CLI__
         glLockArraysEXT_p = &glLockArraysEXT;
         glUnlockArraysEXT_p = &glUnlockArraysEXT;
-#endif /* __APPLE_PANTHER_GCC33_CLI__ */
+#endif /*__APPLE_PANTHER_GCC33_CLI__*/
 #else
 	glLockArraysEXT_p = (PFNGLLOCKARRAYSEXTPROC) 
 	    GET_GL_PROC( (GET_GL_PTR_TYP) "glLockArraysEXT" );
@@ -173,7 +173,7 @@ void init_opengl_extensions()
 #ifndef __APPLE_PANTHER_GCC33_CLI__
 		glLockArraysEXT_p = NULL;
 		glUnlockArraysEXT_p = NULL;
-#endif /* __APPLE_PANTHER_GCC33_CLI__ */
+#endif /*__APPLE_PANTHER_GCC33_CLI__*/
 #endif
 		(void) VSFileSystem::vs_fprintf(stderr, "OpenGL::GL_EXT_compiled_vertex_array unsupported\n");
     }
@@ -183,23 +183,25 @@ void init_opengl_extensions()
 	glMultiTexCoord2fARB_p = &glMultiTexCoord2fARB;
 	glClientActiveTextureARB_p = &glClientActiveTextureARB;
 	glActiveTextureARB_p = &glActiveTextureARB;		
-#endif /* __APPLE_PANTHER_GCC33_CLI__ */
+#endif /*__APPLE_PANTHER_GCC33_CLI__*/
 #else
-        glBindBufferARB_p=(PFNGLBINDBUFFERARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glBindBuffer");	;
-        glGenBuffersARB_p=(PFNGLGENBUFFERSARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glGenBuffers");	;
-        glDeleteBuffersARB_p=(PFNGLDELETEBUFFERSARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glDeleteBuffers");	;
-        glBufferDataARB_p=(PFNGLBUFFERDATAARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glBufferData");	;
-        glMapBufferARB_p=(PFNGLMAPBUFFERARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glMapBuffer");	;
-        glUnmapBufferARB_p=(PFNGLUNMAPBUFFERARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUnmapBuffer");	
+    glBindBufferARB_p=(PFNGLBINDBUFFERARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glBindBuffer");	;
+    glGenBuffersARB_p=(PFNGLGENBUFFERSARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glGenBuffers");	;
+    glDeleteBuffersARB_p=(PFNGLDELETEBUFFERSARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glDeleteBuffers");	;
+    glBufferDataARB_p=(PFNGLBUFFERDATAARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glBufferData");	;
+    glMapBufferARB_p=(PFNGLMAPBUFFERARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glMapBuffer");	;
+    glUnmapBufferARB_p=(PFNGLUNMAPBUFFERARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUnmapBuffer");	
+
     glColorTable_p = (PFNGLCOLORTABLEEXTPROC ) GET_GL_PROC((GET_GL_PTR_TYP)"glColorTableEXT");
     glMultiTexCoord2fARB_p = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fARB");
     glClientActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureARB");
     glActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureARB");
-    if (!glMultiTexCoord2fARB_p) {
-      glMultiTexCoord2fARB_p = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fEXT");
-      glClientActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureEXT");
-      glActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureEXT");
-	}
+    if(!glMultiTexCoord2fARB_p) 
+        glMultiTexCoord2fARB_p = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fEXT");
+    if(!glClientActiveTextureARB_p)
+        glClientActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureEXT");
+    if(!glActiveTextureARB_p)
+        glActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureEXT");
 #endif
 	  
 #ifdef GL_FOG_DISTANCE_MODE_NV
@@ -237,7 +239,8 @@ void init_opengl_extensions()
       gl_options.s3tc=false;
       (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::S3TC Texture Compression unsupported\n");
     }
-    if (vsExtensionSupported ("GL_ARB_multitexture")||vsExtensionSupported ("GL_EXT_multitexture")) {
+    if (  (glMultiTexCoord2fARB_p&&glClientActiveTextureARB_p&&glActiveTextureARB_p)
+        &&(vsExtensionSupported ("GL_ARB_multitexture")||vsExtensionSupported ("GL_EXT_multitexture"))  ) {
       GLint multitex=gl_options.Multitexture;
       glGetIntegerv(GL_MAX_TEXTURE_UNITS,&multitex);
       if (multitex>1)

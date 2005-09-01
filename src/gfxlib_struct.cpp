@@ -128,7 +128,8 @@ void GFXVertexList::BeginDrawState(GFXBOOL lock) {
     if (changed&HAS_INDEX)
       BindInd(display_list);
     if (changed&HAS_COLOR) {
-      glClientActiveTextureARB_p(GL_TEXTURE0);
+      if (gl_options.Multitexture)
+          glClientActiveTextureARB_p(GL_TEXTURE0);
       glInterleavedArrays (GL_T2F_C4F_N3F_V3F,sizeof(GFXColorVertex),0);
       if (gl_options.Multitexture) {
           glClientActiveTextureARB_p(GL_TEXTURE1);
@@ -136,7 +137,8 @@ void GFXVertexList::BeginDrawState(GFXBOOL lock) {
           glClientActiveTextureARB_p(GL_TEXTURE0);
       }
     } else {
-      glClientActiveTextureARB_p(GL_TEXTURE0);
+      if (gl_options.Multitexture)
+          glClientActiveTextureARB_p(GL_TEXTURE0);
       glInterleavedArrays (GL_T2F_N3F_V3F,sizeof(GFXVertex),0);
       if (gl_options.Multitexture) {
           glClientActiveTextureARB_p(GL_TEXTURE1);
@@ -149,7 +151,8 @@ void GFXVertexList::BeginDrawState(GFXBOOL lock) {
   } else 
     {      
       if (changed&HAS_COLOR) {
-          glClientActiveTextureARB_p(GL_TEXTURE0);
+          if (gl_options.Multitexture)
+              glClientActiveTextureARB_p(GL_TEXTURE0);
           glInterleavedArrays (GL_T2F_C4F_N3F_V3F,sizeof(GFXColorVertex),&data.colors[0]);
           if (gl_options.Multitexture) {
               glClientActiveTextureARB_p(GL_TEXTURE1);
@@ -157,7 +160,8 @@ void GFXVertexList::BeginDrawState(GFXBOOL lock) {
               glClientActiveTextureARB_p(GL_TEXTURE0);
           }
       } else {
-          glClientActiveTextureARB_p(GL_TEXTURE0);
+          if (gl_options.Multitexture)
+              glClientActiveTextureARB_p(GL_TEXTURE0);
           glInterleavedArrays (GL_T2F_N3F_V3F,sizeof(GFXVertex),&data.vertices[0]);
           if (gl_options.Multitexture) {
               glClientActiveTextureARB_p(GL_TEXTURE1);

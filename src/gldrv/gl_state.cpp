@@ -1,4 +1,4 @@
-/* 
+/*
  * Vega Strike
  * Copyright (C) 2001-2002 Alan Shieh
  * 
@@ -514,7 +514,7 @@ void /*GFXDRVAPI*/ GFXSelectTexcoordSet(const int stage, const int texset)
 
 void GFXActiveTexture (const int stage) {
 #if !defined(IRIX)
-  if (gl_options.Multitexture&&stage!=activeTextureStage) {
+  if (gl_options.Multitexture&&stage!=activeTextureStage&&glActiveTextureARB_p) {
     glActiveTextureARB_p(GL_TEXTURE0_ARB+stage);
     activeTextureStage=stage;
   }
