@@ -327,25 +327,26 @@ void commandI::addCommand(TFunctor *com, char *name, int args){
 // }}}
 // {{{ Remove a command remCommand(char *name)
 void commandI::remCommand(char *name){ 
-	std::cout << "Removing: " << name << std::endl;
 	if(rcCMD->rc.size() < 1) return;
 	for(std::vector<coms>::iterator iter = rcCMD->rc.end(); iter >= rcCMD->rc.begin();) { 
 		iter--;
 		if(iter < rcCMD->rc.begin()) { return; }; 
 		if((*(iter)).Name.compare(name) == 0) {
+			std::cout << "Removing: " << name << std::endl
 			delete (*(iter)).functor;
 			rcCMD->rc.erase(iter);
 			return;
 		}
 	}
+	std::cout << "Error, command " << name << " not removed, try using the TFunctor *com version instead. Also, this is case sensitive ;)\n";
 }
 void  commandI::remCommand(TFunctor *com) {
-	    std::cout << "Removing: " << name << std::endl;
     if(rcCMD->rc.size() < 1) return;
     for(std::vector<coms>::iterator iter = rcCMD->rc.end(); iter >= rcCMD->rc.begin();) { 
         iter--;
         if(iter < rcCMD->rc.begin()) { return; };
         if((*(iter)).functor == com) {
+			std::cout << "Removing: " << (*(iter)).name << std::endl;
             delete (*(iter)).functor;
             rcCMD->rc.erase(iter);
             return;
