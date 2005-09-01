@@ -332,7 +332,7 @@ void commandI::remCommand(char *name){
 		iter--;
 		if(iter < rcCMD->rc.begin()) { return; }; 
 		if((*(iter)).Name.compare(name) == 0) {
-			std::cout << "Removing: " << name << std::endl
+			std::cout << "Removing: " << name << std::endl;
 			delete (*(iter)).functor;
 			rcCMD->rc.erase(iter);
 			return;
@@ -346,7 +346,7 @@ void  commandI::remCommand(TFunctor *com) {
         iter--;
         if(iter < rcCMD->rc.begin()) { return; };
         if((*(iter)).functor == com) {
-			std::cout << "Removing: " << (*(iter)).name << std::endl;
+			std::cout << "Removing: " << (*(iter)).Name << std::endl;
             delete (*(iter)).functor;
             rcCMD->rc.erase(iter);
             return;
