@@ -62,7 +62,8 @@ class WalkControls {
 		void Jump(bool KeyIsDown);
 		void setGravity(int &amount);
 }
-
+Then to get the commands to initiate, simply:
+static WalkControls done; // and when the program starts, this variable will be made.
 ******************************************************************* */
 
 /* *******************************************************************
@@ -123,6 +124,30 @@ class WalkControls {
 	
 
 ******************************************************************* */
+/* *******************************************************************
+PolyMorphic Behaviors:
+If you have the command "left" on the object "flight-mode" 
+the flight-mode object may always be in memory, but imagine you want to land
+on a planet, where the command "left" might need to toggle a different vector
+ to get it to perform different physics equations.
+You could create a new object: (psuedo)
+	class walkOnPlanet {
+		Functor<WOP> *leftCommand;
+		walkOnPlanet() { 
+			Functor<WOP> *leftCommand = new Functor<WOP>(This, &walkOnPlanet::left);
+			addCommand(leftCommand, "left", 1BOOL); //adding the second left command will automagically override the first
+	}
+	~walkOnPlanet() {
+		remCommand(leftCommand); //by passing it by pointer we can be assured the right one will be removed, in case commands are added/removed out of order
+	}
+	void left(bool isDown) {
+		perform different ops
+	}
+
+Then 
+
+******************************************************************* */
+
 /* ********************
 Finally the last comments for way up here
 BUG WARNING WITH 1STRARRAY
@@ -322,15 +347,14 @@ void commandI::addCommand(TFunctor *com, char *name, int args){
 			}
 			rcCMD = new HoldCommands(); 
 			rcCMDEXISTS = true; }; 
-        rcCMD->rc.push_back(newOne);
+			rcCMD->rc.insert(rcCMD->rc.begin(), newOne);
+//        rcCMD->rc.push_back(newOne);
 };
 // }}}
 // {{{ Remove a command remCommand(char *name)
 void commandI::remCommand(char *name){ 
 	if(rcCMD->rc.size() < 1) return;
-	for(std::vector<coms>::iterator iter = rcCMD->rc.end(); iter >= rcCMD->rc.begin();) { 
-		iter--;
-		if(iter < rcCMD->rc.begin()) { return; }; 
+	for(std::vector<coms>::iterator iter = rcCMD->rc.begin(); iter < rcCMD->rc.end();iter++) { 
 		if((*(iter)).Name.compare(name) == 0) {
 			std::cout << "Removing: " << name << std::endl;
 			delete (*(iter)).functor;
@@ -342,9 +366,7 @@ void commandI::remCommand(char *name){
 }
 void  commandI::remCommand(TFunctor *com) {
     if(rcCMD->rc.size() < 1) return;
-    for(std::vector<coms>::iterator iter = rcCMD->rc.end(); iter >= rcCMD->rc.begin();) { 
-        iter--;
-        if(iter < rcCMD->rc.begin()) { return; };
+    for(std::vector<coms>::iterator iter = rcCMD->rc.begin(); iter < rcCMD->rc.end();iter++) { 
         if((*(iter)).functor == com) {
 			std::cout << "Removing: " << (*(iter)).Name << std::endl;
             delete (*(iter)).functor;
@@ -352,7 +374,7 @@ void  commandI::remCommand(TFunctor *com) {
             return;
         }
     }
-
+	std::cout << "Error, couldn't find the command that owns the memory area: " << com << std::endl;
 }
 // }}}
 // {{{ Find a command in the command interpretor 
