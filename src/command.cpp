@@ -23,6 +23,14 @@ class WalkControls {
 		WalkControls() { 
  // ****************************** 1
 			Functor<WalkControls> *ctalk = new Functor<WalkControls>(this, &WalkControls::talk);
+// Please notice the NEW, do _not_ delete this. It will be deleted for
+// you when remCommand is run, or when the command processor destructor
+// is called :)
+
+
+
+
+
 			CommandInterpretor.addCommand(ctalk, "say", ARG_1STR); //1 c++ string argument,
 			// CommandInterpretor is a global (defined in vs_globals.h or 
 			// vegastrike.h (don't remember which) and created in main.cpp
@@ -330,6 +338,20 @@ void commandI::remCommand(char *name){
 			return;
 		}
 	}
+}
+void  commandI::remCommand(TFunctor *com) {
+	    std::cout << "Removing: " << name << std::endl;
+    if(rcCMD->rc.size() < 1) return;
+    for(std::vector<coms>::iterator iter = rcCMD->rc.end(); iter >= rcCMD->rc.begin();) { 
+        iter--;
+        if(iter < rcCMD->rc.begin()) { return; };
+        if((*(iter)).functor == com) {
+            delete (*(iter)).functor;
+            rcCMD->rc.erase(iter);
+            return;
+        }
+    }
+
 }
 // }}}
 // {{{ Find a command in the command interpretor 
@@ -1266,14 +1288,6 @@ void RegisterPythonWithCommandInterp::runPy(std::string &argsin) {
 
 
 *************************************************************** */
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */
 
 namespace ConsoleKeys {
 
@@ -1289,3 +1303,12 @@ namespace ConsoleKeys {
     }
 
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

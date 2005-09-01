@@ -111,8 +111,7 @@ class commandI : public RText {
 		void help(char *d); //help command, should read a help file
                 void addCommand(TFunctor *com, char *name, int args); //add a downcasted Functor
 		void remCommand(char *name);
-		
-
+		void remCommand(TFunctor *com); //use this now if possible		
                 void dummy(std::vector<std::string *> *d);// {return;}; //first thing to be added to the vecto
 		void prompt();
 		void pcommands();//lists all the commands to the socket
