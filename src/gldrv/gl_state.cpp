@@ -84,18 +84,18 @@ void /*GFXDRVAPI*/ GFXEnable (const STATE state)
 	  break;
 	case TEXTURE0:
       /*if (bTex[0] != GL_TEXTURE_2D) {
-	      GFXActiveTexture(0);	
+	      GFXActiveTexture(0);
           if (bTex[0]) glDisable(bTex[0]);
-	      glEnable (bTex[0]=GL_TEXTURE_2D);		
+	      glEnable (bTex[0]=GL_TEXTURE_2D);
       }*/
       //NOTE: The above code should be used, but since not all parts of VS use the GFX,
       //   we will use GFXEnable() / GFXDisable() as syncrhonization methods (they will
       //   assure correct settings of texture units 1 & 2, used during GUI rendering.
-      GFXActiveTexture(0);	
+      GFXActiveTexture(0);
 #ifdef NV_CUBE_MAP
       glDisable(GL_TEXTURE_CUBE_MAP_EXT);
 #endif
-      glEnable (bTex[0]=GL_TEXTURE_2D);		
+      glEnable (bTex[0]=GL_TEXTURE_2D);
 	  break;
 	case TEXTURE1:
 	  /*if (gl_options.Multitexture) {
@@ -108,7 +108,7 @@ void /*GFXDRVAPI*/ GFXEnable (const STATE state)
 #else
         if (bTex[1] != GL_TEXTURE_2D) {
             if (bTex[1]) glDisable(bTex[1]);
-		    glEnable (bTex[1]=GL_TEXTURE_2D);		
+		    glEnable (bTex[1]=GL_TEXTURE_2D);
         }
 #endif
 	  }*/
@@ -177,7 +177,7 @@ void /*GFXDRVAPI*/ GFXDisable (const STATE state)
       //   we will use GFXEnable() / GFXDisable() as syncrhonization methods (they will
       //   assure correct settings of texture units 1 & 2, both in the GL and their proxy
       //   states in the GFX. Those two units are used during GUI rendering bypassing the GFX.
-      GFXActiveTexture(0);	
+      GFXActiveTexture(0);
 #ifdef NV_CUBE_MAP
       glDisable(GL_TEXTURE_CUBE_MAP_EXT);
 #endif
@@ -194,12 +194,14 @@ void /*GFXDRVAPI*/ GFXDisable (const STATE state)
       //   we will use GFXEnable() / GFXDisable() as syncrhonization methods (they will
       //   assure correct settings of texture units 1 & 2, both in the GL and their proxy
       //   states in the GFX. Those two units are used during GUI rendering bypassing the GFX.
-      GFXActiveTexture(1);	
+      if (gl_options.Multitexture) {
+        GFXActiveTexture(1);
 #ifdef NV_CUBE_MAP
-      glDisable(GL_TEXTURE_CUBE_MAP_EXT);
+        glDisable(GL_TEXTURE_CUBE_MAP_EXT);
 #endif
-      glDisable(GL_TEXTURE_2D);
-      bTex[1] = 0;
+        glDisable(GL_TEXTURE_2D);
+        bTex[1] = 0;
+      }
 	  break;
 	case CULLFACE:
 	  glDisable(GL_CULL_FACE);
@@ -579,10 +581,10 @@ GFXBOOL GFXSetTexFunc(int stage, int texset)
 	    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
 	  }
 	  GFXActiveTexture(stage);
-		
-	}	
+
+	}
 	else return GFXFALSE;
-	
+
 	return GFXTRUE;
 }
 
