@@ -9,17 +9,14 @@ static inline float fmax(float a, float b) { return (a>b)?a:b; };
 
 class ShipCommands {
 	public:
-		ShipCommands() { 
-			csetkps = new Functor<ShipCommands>(this, &ShipCommands::setkps);
+		ShipCommands() {
+			Functor<ShipCommands> *csetkps = new Functor<ShipCommands>(this, &ShipCommands::setkps);
 			CommandInterpretor.addCommand(csetkps, "setspeed", ARG_1CSTR); //1 c++ string argument,
 		}
         ~ShipCommands() {
-            CommandInterpretor.remCommand("setspeed"); if (csetkps) delete csetkps, csetkps=NULL;
+            CommandInterpretor.remCommand("setspeed");
         }
 		void setkps(char *in);
-
-    private:
-        Functor<ShipCommands> *csetkps;
 };
 
 
