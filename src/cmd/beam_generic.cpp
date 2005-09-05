@@ -27,7 +27,7 @@ void ScaleByAlpha (GFXColorVertex &vert, float alpha) {
 	if (alpha<1) {
 		vert.r*=alpha;
 		vert.g*=alpha;
-		vert.b*=alpha;		
+		vert.b*=alpha;
 	}
 }
 void SetColorToVertex (GFXColorVertex &vert,const GFXColor &col=GFXColor(0,0,0,0)) {
@@ -36,6 +36,9 @@ void SetColorToVertex (GFXColorVertex &vert,const GFXColor &col=GFXColor(0,0,0,0
 	vert.b=col.b;
 	vert.a=col.a;
 }
+
+extern Unit* getTopLevelOwner();
+
 void Beam::Init (const Transformation & trans, const weapon_info &cln , void * own)  {
   //Matrix m;
   CollideInfo.object.b = NULL;
@@ -43,7 +46,7 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
   if (vlist)
     delete vlist;
   local_transformation = trans;//location on ship
-  //  cumalative_transformation =trans; 
+  //  cumalative_transformation =trans;
   //  trans.to_matrix (cumalative_transformation_matrix);
   speed = cln.Speed;
   texturespeed = cln.PulseSpeed;
@@ -63,8 +66,13 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
   Col.a=cln.a;
   impact= ALIVE;
   owner = own;
-  owner_rsize = ((Unit*)own)->rSize();
-  owner_faction = ((Unit*)own)->faction;
+  if (owner != getTopLevelOwner()) {
+	  owner_rsize = ((Unit*)own)->rSize();
+	  owner_faction = ((Unit*)own)->faction;
+  } else {
+      owner_rsize = sqrt(FLT_MAX);
+      owner_faction = FactionUtil::GetFaction("neutral");
+  }
   numframes=0;
 
   lastlength=0;
@@ -75,11 +83,11 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
   memset(beam,0,sizeof(GFXColorVertex)*32);
   GFXColorVertex * calah=beam;
   SetColorToVertex(calah[0]);
-  SetColorToVertex(calah[1]);  
+  SetColorToVertex(calah[1]);
   SetColorToVertex(calah[2],Col);
   SetColorToVertex(calah[3],Col);
   SetColorToVertex(calah[4],Col);
-  SetColorToVertex(calah[5],Col);    
+  SetColorToVertex(calah[5],Col);
   SetColorToVertex(calah[6]);
   SetColorToVertex(calah[7]);
   SetColorToVertex(calah[8]);
@@ -97,18 +105,18 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
   SetColorToVertex(calah[20]);
   SetColorToVertex(calah[21]);
   SetColorToVertex(calah[22]);
-  SetColorToVertex(calah[23],Col);  
+  SetColorToVertex(calah[23],Col);
   ScaleByAlpha (calah[2],Col.a);
   ScaleByAlpha (calah[3],Col.a);
   ScaleByAlpha (calah[4],Col.a);
   ScaleByAlpha (calah[5],Col.a);
   ScaleByAlpha (calah[11],Col.a);
-  ScaleByAlpha (calah[15],Col.a);		
+  ScaleByAlpha (calah[15],Col.a);
   ScaleByAlpha (calah[19],Col.a);
-  ScaleByAlpha (calah[23],Col.a);		
+  ScaleByAlpha (calah[23],Col.a);
   //since mode is ONE,ONE
   memcpy (&calah[24],&calah[0],sizeof(GFXColorVertex)*24);
-  
+
   vlist = new GFXVertexList (GFXQUAD,48,calah,48,true);//mutable color contained list
 #ifdef PERBOLTSOUND
   AUDStartPlaying (sound);
