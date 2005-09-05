@@ -108,7 +108,7 @@ class commandI : public RText {
                 //creates a coms object, adds it to the command vector
                 //if args is not supplied it assumes your function
                 //has no arguements (not even a void)
-		void help(char *d); //help command, should read a help file
+		void help(std::string &d); //help command, should read a help file
                 void addCommand(TFunctor *com, char *name, int args); //add a downcasted Functor
 		void remCommand(char *name);
 		void remCommand(TFunctor *com); //use this now if possible		
@@ -133,7 +133,9 @@ class commandI : public RText {
 		std::string setMenu(char *name); //force a menu set.
 		std::string displaymenu(); //utility to display the current menu
 		void breakmenu(); //utility to force a break from all menus
-		virtual std::string display(std::string &s); //display info, defined in mob.cpp
+		virtual std::string display(std::string &s); // build parts
+		//of the menu, eg, if(s.compare("SHIPNAME") == 0 )return editingship->Name;
+		
 };
 
 enum { ARG_1INT, ARG_NONE, ARG_1STR, ARG_2STR, ARG_1CSTR, ARG_2CSTR, ARG_1CSTRARRAY, ARG_1BOOL, ARG_1STRVEC, ARG_1STRVECSPEC, ARG_1STRSPEC };

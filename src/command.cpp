@@ -213,7 +213,7 @@ commandI::commandI() {
 	addCommand(dcommands, "commands", ARG_NONE);
 
 	Functor<commandI> *dhelp = new Functor<commandI>(this, &commandI::help);
-	addCommand(dhelp, "help", ARG_1CSTR);
+	addCommand(dhelp, "help", ARG_1STR);
 	// }}}
 	// set some local object variables {{{
 	menumode = false;
@@ -257,7 +257,7 @@ menu::~menu() {
 // }}}
 
 // {{{ UNFINISHED HELP COMMAND
-void commandI::help(char *) {
+void commandI::help(std::string &helponthis) {
         std::string buf;
         buf.append("Sorry, there is no help system yet\n\r ");
 	buf.append("But most commands are self supporting, just type them to see what they do.\n\r");
@@ -584,158 +584,18 @@ bool commandI::execute(std::string *incommand, bool isDown, int sock_in)
 //sock_in was used for passing commands around for an HTTP server
 
 bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
-	size_t ls, y;
+	size_t ls, y; //, args = 0;
 	bool breaker = false;
-    //************
+    //************ try to replace erase leading space if there is one
+	//eg, someone types: " do_something" instead of "do_something"
 	while(breaker == false) {
 		ls = incommand->find(" ");
-		if(ls > 2 || incommand->size() > 1 || ls == std::string::npos) {
+		if(ls > 2 || incommand->size() < 2 || ls == std::string::npos) {
 			breaker = true;
 		} else {
 			incommand->erase(ls, 1);
 		}
 	}
-	size_t ylast = 0;
-	for(y = incommand->find("\r\n"); y != std::string::npos; y = incommand->find("\r\n", y+1)) {
-        incommand->replace(y, 2, " ");
-    }
-	for(y = incommand->find("  "); y != std::string::npos; y = incommand->find("  ", y+1)) {
-		incommand->replace(y, 1, "");
-	}
-	size_t args = 0;
-	breaker = false; //reset our exit bool
-    
-	//now make what 1CSTRARRAY relies on
-	std::string newincommand;
-	//append incommand
-	newincommand.append((*(incommand)));
-    // {{{ ' to say
-    //ok special case before we find the command, if the first arguement
-    //in svec starts with ', we must seperate the first argument
-    //and replace ' with say.
-    {
-        size_t x = newincommand.find("'");
-        if(x == 0) {
-			newincommand.replace(0, 1, "say ");
-        }
-		// }}}
-		// {{{ ! to the last command typed
-        x = newincommand.find("!");
-        if(x == 0) {
-            newincommand.replace(0, 1, lastcommand);
-        }
-		// }}}
-		// {{{ : to python
-        x = newincommand.find(":");
-        if(x == 0) {
-            newincommand.replace(0, 1, "python ");
-        }
-    }
-    // }}}
-    // {{{ / to gossip
-    {
-        size_t x = newincommand.find("/");
-        if(x == 0) {
-            newincommand.replace(0, 1, "gossip ");
-        }
-        
-    }
-    // }}}
-	//make sure there's always at least 1 space at the end.
-	std::vector<std::string*> stringvec;
-	ylast = 0;
-	size_t xasd = 0;
-        
-    //count arguments and create stringvec{{{
-    {for(string::size_type st=0,en=0; (en=newincommand.find(' ',st),(st!=string::npos)); st=(en!=string::npos)?en+1:string::npos) {
-        stringvec.push_back(new std::string(newincommand.substr(st,en)));
-        args++;
-    } }
-	// }}}
-	{
-        std::vector<std::string *>::iterator iter = stringvec.end();
-        iter--;
-        if((*(iter))->compare(" ") == 0) {
-            std::string *xs = (*(iter));
-            delete xs;
-            stringvec.erase(iter);
-        }
-        
-	}
-	if(args == 0) args = 1; //hack fix.
-	vector<char*>w(args);
-	size_t vargs = 0;
-	ylast = 0;
-	breaker = false;
-	//put together a c style charactor array: char w[length] (1CSTRARRAY) {{{
-    { for(std::vector<std::string *>::iterator iter = stringvec.begin(); iter < stringvec.end() ;iter++) {
-            w[vargs] = "";
-            w[vargs] = (char *)(*(iter))->c_str();//(char *)(*(iter)).c_str();
-            vargs++;
-        } 
-    }
-	// }}}
-	ylast = 0;
-	if(vargs == 0) 
-		w[0] = (char *)incommand->c_str();
-	w.push_back("");	
-    //	wreplace.append(incommand->c_str());
-    
-    //now this stuff is kind of confusing.
-    //******************Find the command.
-    //	if(tryExit(&stringvec)) { Exits were a virtual function that tested against
-		// a vector of objects in a different game
-//		std::vector<std::string *>::iterator itera = stringvec.begin();
-//		while(stringvec.size() > 0 ) {
-//			std::string *s = (*(itera));
-//			delete s;
-//			stringvec.erase(itera);
-//			itera=stringvec.begin();
-//		}
-//		return true; 
-//	};
-
-    
-	try {
-		coms theCommand = findCommand(w[0], sock_in);
-        
-//Now, we try to replace what was typed with the name returned.
-//to autocomplete words (EX: translate gos into gossip so the gossip
-//command only has to find it's access name and not all possible
-//methods of accessing it.)
-        size_t x = newincommand.find_first_of(w[0]);
-        if(x != std::string::npos) {
-            newincommand.replace(x, strlen(w[0]), theCommand.Name); 
-            //	free(w[0]);
-            //	memset(w[0], 0, sizeof(w[0]));
-            //	strncpy(w[0], theCommand->Name.c_str(), theCommand->Name.size());
-            w[0] = (char *)theCommand.Name.c_str();
-        }
-        std::string sendstring;
-        // {{{ try to execute it now	
-//*********************Switch based on the enumerated argument types
-//the two that will likely be used the most are:
-//1CSTRARRAY (becuase aruments in it are split up as: w[0] = command used
-//w[1] = arguement 1, w[2] = argument 2, etc. etc. which makes it VERY
-//easy to turn each argument into it's own string to be manipulated
-//and 1STR (which returns everything in a regular c++ string, without
-//any \r\n's, without multiple spaces.) which makes it easy
-//to do general formatting on the string (though not as easy to 
-//extract the seperate arguments, which is why CSTRARRAY is available
-//as well.
-// the default case should NEVER be called, and if it is it won't 
-// call the functor assosiated with it(as this would be unsafe.)
-//all argument memory is actually held on the localstack
-//which is a copy of incommand, the variable: char *w[] uses
-//pointers to charactors inside wreplace (a c++ string held on the local stack)
-//and thus arn't copied, and don't need to be freed, because when 
-//the local stack returns, wreplace will get deleted, effecively freeing
-//what w[x] pointed to, after this function is finished calling
-//whatever function is being held in the functor.
-        lastcommand.erase();lastcommand.append(newincommand);
-        //	if(webb && !theCommand->functor->attribs.webbcmd ) {
-		bool printit = false;
-
 
 // Print back what the user typed.. {{{
 // .. Sometimes people believe they typed python print "hello world\n"
@@ -743,81 +603,205 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 // but may have actually typed oython print "hello world\n"
 // and don't want to admit it, so they blame the system.
 // So the system must sometimes politely tell the user what they typed
-		if(menumode) {
-            //			if(menu_in->selected) {
-            //				if(menu_in->iselected->inputbit || menu_in->iselected->inputbit2) printit = true;
-            //			}
-		} else if(console) printit = true;
-		if(printit) {
-			std::string webout;
-			webout.append(incommand->c_str());
-			webout.append("\n\r");
-            //			World->print1(this, &webout);
+		{
+			bool printit = false;
+			if(menumode) {
+//				if(menu_in->selected) {
+//					if(menu_in->iselected->inputbit || menu_in->iselected->inputbit2) printit = true;
+//				}
+			} else if(console) printit = true;
+			if(printit) {
+				std::string webout;
+				webout.append(incommand->c_str());
+				webout.append("\n\r");
+				conoutf(webout);
+			}
 		}
 // }}}
+	//replace \r\n with a space {{{
 
-        try {
-            switch(theCommand.argtype) {
-            case ARG_1INT:
-                theCommand.functor->Call(atoi((const char *)newincommand.at(1)));
-                break;
-            case ARG_NONE:
-                theCommand.functor->Call();
-                break; //this
-            case ARG_1CSTR:
-                theCommand.functor->Call(w[1]);
-                break;
-            case ARG_1CSTRARRAY:
-                theCommand.functor->Call(&w[0]);
-                        break;
-            case ARG_2CSTR:
-                theCommand.functor->Call(w[1], w[2]);
-                break;
-                case ARG_1BOOL:
-                    theCommand.functor->Call((bool *)isDown);
-                    break; //oops
-            case ARG_1STR: 
-                theCommand.functor->Call(newincommand);
-                break;
-            case ARG_1STRSPEC:
-                theCommand.functor->Call(newincommand, sock_in);
-                break;
-		case ARG_1STRVEC:
-			theCommand.functor->Call(&stringvec);
-			break;
-            case ARG_1STRVECSPEC:
-                theCommand.functor->Call(&stringvec, sock_in);
-                break;
-            default:
-                std::string err1;
-                err1.append("\n\rError, unsupported argument type!\n\r");
-                err1.append("Try using 1CSTRARRAY or 1STR!\n\r");
-				conoutf(err1);
-                break;
-            }
-        } catch (std::exception e) {
-            std::cout << "Command proccessor: Exception occurered: " << e.what() << std::endl;
-        } catch (...) {
-            std::cout << "Command processor: exception occurered: Unknown, most likely cause: Wrong Arg_type arguement sent with addCommand.\n\r";
-        }
-        
-    // }}}
-    } catch(const char *in) { //catch findCommand error
-        std::cout << in;
+	for(y = incommand->find("\r\n"); y != std::string::npos; y = incommand->find("\r\n", y+1)) {
+        incommand->replace(y, 2, " ");
     }
-    
-    //    delete[] w;
-    
-	//some cleanup {{{
-	std::vector<std::string *>::iterator itera = stringvec.begin();
-	while(stringvec.size() > 0 ) {
-		std::string *s = (*(itera));
-		delete s;
-		stringvec.erase(itera);
-		itera=stringvec.begin();
+	// }}}
+	// remove multiple spaces {{{
+	for(y = incommand->find("  "); y != std::string::npos; y = incommand->find("  ", y+1)) {
+		incommand->replace(y, 1, "");
 	}
 	// }}}
-    return true;
+    // {{{ ' to say
+
+    {
+        size_t x = incommand->find("'");
+        if(x == 0) {
+            incommand->replace(0, 1, "say ");
+        }
+        // }}}
+        // {{{ ! to the last command typed
+        x = incommand->find("!");
+        if(x == 0) {
+            incommand->replace(0, 1, lastcommand);
+        }
+        // }}}
+        // {{{ : to python
+        x = incommand->find(":");
+        if(x == 0) {
+            incommand->replace(0, 1, "python ");
+        }
+    }
+    // }}}
+    // {{{ / to gossip
+    {
+        size_t x = incommand->find("/");
+        if(x == 0) {
+            incommand->replace(0, 1, "gossip ");
+        }
+
+    }
+    // }}}
+
+	breaker = false; //reset our exit bool 
+    
+	//done with formatting
+	//now make what our std::vector<std::string> {{{
+	std::vector<std::string> strvec; //to replace newincommand
+								// to reduce data replication by one;
+    {
+		for(string::size_type st=0,en=0; (en=incommand->find(' ',st),(st!=string::npos)); st=(en!=string::npos)?en+1:string::npos)
+		{
+	        strvec.push_back(incommand->substr(st,en));
+//	        args++;
+	   	} 
+	}
+    // }}}
+    {
+		// if the last argument is a space, erase it. {{{
+        std::vector<std::string>::iterator iter = strvec.end();
+        iter--;
+        if((*(iter)).compare(" ") == 0) {
+            strvec.erase(iter);
+        }
+		// }}}
+    }
+	try {
+	coms theCommand = findCommand((char *)strvec[0].c_str(), sock_in);
+	
+
+//	if(args == 0) args = 1; //hack fix. 
+//	else args += 1; 
+//
+//Now, we try to replace what was typed with the name returned by findCommand {{{
+//to autocomplete words (EX: translate gos into gossip so the gossip
+//command only has to find it's access name and not all possible
+//methods of accessing it.)
+		size_t x = incommand->find_first_of(strvec[0]);
+		if(x != std::string::npos) {
+			incommand->replace(x, strvec[0].size(), theCommand.Name); 
+			strvec[0] = theCommand.Name;
+		}
+// }}}
+        // {{{ try to execute it now - Switch based on the enumerated argument types
+		lastcommand.erase();lastcommand.append(*incommand); //set the
+		//last command entered.. Maybe this should only be set IF 
+		//the callback works, and is not dummy(). (Use ! to trigger)
+		try {
+			//maybe if/else if would be more efficient, if this ever
+			//gets really large.
+			switch(theCommand.argtype) {
+			case ARG_1INT:
+				theCommand.functor->Call(atoi(strvec.at(1).c_str()));
+				break;
+			case ARG_NONE:
+				theCommand.functor->Call();
+				break; 
+			case ARG_1CSTR:
+				theCommand.functor->Call(strvec.at(1).c_str());
+				break;
+			case ARG_1CSTRARRAY: 
+				{
+					vector<const char*>w; 
+					size_t vargs = 0;
+					//put together a c style charactor array: char w[length] (1CSTRARRAY) {{{
+				{ 
+						for(std::string::size_type x = 0; x < strvec.size(); x++)
+						{
+	//						w[vargs] = "";
+							w.push_back(strvec.at(x).c_str());
+							vargs++;
+						}
+				}
+		// }}}
+					if(vargs == 0)
+						w[0] = incommand->c_str();
+					w.push_back("");
+					theCommand.functor->Call(&w[0]);
+					break;
+				}
+			case ARG_2CSTR:
+				theCommand.functor->Call(strvec.at(1).c_str(),strvec.at(2).c_str());
+				break;
+			case ARG_1BOOL:
+				theCommand.functor->Call((bool *)isDown);
+				break; 
+			case ARG_1STR: 
+				{
+					theCommand.functor->Call(*incommand);
+					break;
+				}
+			case ARG_1STRSPEC:
+				theCommand.functor->Call(*incommand, sock_in);
+				break;
+			case ARG_1STRVEC: 
+				{
+					std::vector<std::string *> stringvec;
+					{
+						for(std::string::size_type x = 0; x < strvec.size(); x++) 
+						{
+							stringvec.push_back(&strvec.at(x));
+						}
+					}
+					theCommand.functor->Call(&stringvec);
+					break;
+				}
+			case ARG_1STRVECSPEC:
+				{
+					std::vector<std::string *> stringvec;
+					{
+						for(std::string::size_type x = 0; x < strvec.size(); x++) 
+						{
+							stringvec.push_back(&strvec.at(x));
+						} 
+					}
+					theCommand.functor->Call(&stringvec, sock_in);
+					break;
+				}
+			default:
+				std::string err1;
+				err1.append("\n\rError, unsupported argument type!\n\r");
+				err1.append("Try using 1CSTRARRAY or 1STR!\n\r");
+				conoutf(err1);
+				break;
+			}
+		//try to catch any errors that occured while executing
+		} catch (std::exception e) {
+			std::string l; 
+			l.append("Command processor: Exception occured: ");
+			l.append(e.what());
+			l.append("\n\r");
+			std::cout << l;
+			conoutf(l);
+		} catch (...) {
+			std::string y;
+			y.append("Command processor: exception occurered: Unknown, most likely cause: Wrong Arg_type arguement sent with addCommand.\n\r");
+			std::cout << y;
+			conoutf(y);
+		}
+        
+    // }}}
+	} catch(const char *in) { //catch findCommand error
+		std::cout << in;
+	}
+	return true;
 }	
 
 // }}}

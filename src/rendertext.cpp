@@ -1,5 +1,5 @@
 // rendertext.cpp: based on Don's gl_text.cpp
-// Based on Aardarples rendertext and menus.. Memleak somewhere
+// Based on Aardarples rendertext 
 #include "command.h"
 #ifdef HAVE_CONFIG_H
 #include "../config.h"
@@ -106,8 +106,15 @@ void RText::renderconsole()// render buffer
     };
     y = 1;
     std::ostringstream drawCommand;
-    drawCommand << workIt << "#000066> " << "#FF1100" << getcurcommand() << "#00000";
-    std::string Acdraw;
+	std::string shorter;
+	shorter.append(getcurcommand() );
+	while (shorter.size() > 80) { 
+		shorter.erase(shorter.begin()); 
+	} //erase the front of the current command while it's larger than 80
+	// charactors, as to not draw off the screen
+    drawCommand << workIt << "#000066> " << "#FF1100" << shorter << "#00000";
+    std::string Acdraw; //passing .str() straight to draw_text produces an 
+		//error with gcc 4, because it's constant I believe
     Acdraw.append(drawCommand.str());
     draw_text(Acdraw, x, y, 2);
 
@@ -232,8 +239,7 @@ void RText::ConsoleKeyboardI(int code, bool isdown, int cooked)
 				//in localPlayer.cpp just before this is called
 				};
 				if(commandbuf.size() > 0) {
-//print what was typed
-					conoutf(commandbuf);
+//print what was typed - Now done in the command processor
 //clear the buffer
 					commandbuf.erase();
 				}
