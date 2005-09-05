@@ -35,7 +35,7 @@ static void GenUnbindJoyKey (JSSwitches whichswitch, int joystick, int key) {
 
 static void GenBindJoyKey (JSSwitches whichswitch,int joystick, int key, KBHandler handler, const KBData &data) {
   assert (key<NUMJBUTTONS&&joystick<MAX_JOYSTICKS);
-  JoystickBindings[JOYSTICK_SWITCH][joystick][key]=JSHandlerCall(handler,data);
+  JoystickBindings[whichswitch][joystick][key]=JSHandlerCall(handler,data);
   handler (KBData(),RESET);
 }
 
@@ -78,7 +78,6 @@ void ProcessJoystick (int whichplayer) {
     if(joystick[i]->isAvailable()){
       joystick[i]->GetJoyStick (x,y,z,buttons);
 
-      if(joystick[i]->debug_digital_hatswitch){
       for(int h=0;h<joystick[i]->nr_of_hats;h++){
 #ifdef HAVE_SDL
 	Uint8 
@@ -86,16 +85,20 @@ void ProcessJoystick (int whichplayer) {
 	  unsigned char
 #endif
 	  hsw=joystick[i]->digital_hat[h];
+      if(joystick[i]->debug_digital_hatswitch){
 	char buf[100];
 	sprintf(buf,"hsw: %d",hsw);
 	cout << buf << endl;
-
+	  }
 	for(int dir_index=0;dir_index<MAX_DIGITAL_VALUES;dir_index++){
 	  bool press=false;
 #ifdef HAVE_SDL
 #ifndef NO_SDL_JOYSTICK
-	  if(dir_index==VS_HAT_CENTERED && (hsw & SDL_HAT_CENTERED)){
-	    cout << "center" << endl;
+	  // CENTERED is an exact position.
+	  if(dir_index==VS_HAT_CENTERED && (hsw == SDL_HAT_CENTERED)){
+	    if(joystick[i]->debug_digital_hatswitch){
+	      cout << "center" << endl;
+	    }
 	    press=true;
 	  }
 	  if(dir_index==VS_HAT_LEFT && (hsw & SDL_HAT_LEFT)){
@@ -144,7 +147,6 @@ void ProcessJoystick (int whichplayer) {
 	  }
 	  (*handler->function) (handler->data,*state);
 	}
-      }
       } // digital_hatswitch
       
       for (int j=0;j<NUMJBUTTONS;j++) {
