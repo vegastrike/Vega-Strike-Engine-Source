@@ -80,7 +80,7 @@ bool Bolt::Collide (Unit * target) {
                            this->type->Damage* ((1-distance)+distance*this->type->Longrange),
                            affectedSubUnit,
                            coltmp,
-                           (Unit*)owner, 
+                           owner, 
                            this->type->PhaseDamage* ((1-distance)+distance*this->type->Longrange));
 	  //}else if (damage<0) {
       //target->leach (1,phasdam<0?-phasdam:1,appldam<0?-appldam:1);      

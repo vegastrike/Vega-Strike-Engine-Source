@@ -39,7 +39,7 @@ void SetColorToVertex (GFXColorVertex &vert,const GFXColor &col=GFXColor(0,0,0,0
 
 extern Unit* getTopLevelOwner();
 
-void Beam::Init (const Transformation & trans, const weapon_info &cln , void * own)  {
+void Beam::Init (const Transformation & trans, const weapon_info &cln , void * own, Unit * firer)  {
   //Matrix m;
   CollideInfo.object.b = NULL;
   CollideInfo.type = LineCollide::BEAM;
@@ -66,13 +66,8 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
   Col.a=cln.a;
   impact= ALIVE;
   owner = own;
-  if (owner != getTopLevelOwner()) {
-	  owner_rsize = ((Unit*)own)->rSize();
-	  owner_faction = ((Unit*)own)->faction;
-  } else {
-      owner_rsize = sqrt(FLT_MAX);
-      owner_faction = FactionUtil::GetFaction("neutral");
-  }
+  owner_rsize = firer->rSize();
+  owner_faction = firer->faction;
   numframes=0;
 
   lastlength=0;
@@ -488,7 +483,7 @@ bool Beam::Collide (Unit * target) {
       }
     }else {
 //      if (appldam>0==phasdam>0||applydam==0||phasedam==0) {
-	target->ApplyDamage (center.Cast()+direction*curlength,normal,appldam,colidee,coltmp,(Unit *)owner,phasdam);
+	target->ApplyDamage (center.Cast()+direction*curlength,normal,appldam,colidee,coltmp,owner,phasdam);
 	//}else if (damagerate<0||phasedamage<0) {
 	  //target->leach (1,phasedamage<0?-phasedamage*SIMULATION_ATOM:1,damagerate<0?-damagerate*SIMULATION_ATOM:1);
       //}

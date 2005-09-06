@@ -1187,7 +1187,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
 						if( Network==NULL || SERVER || (*i).processed==Mount::ACCEPTED)
 						{
 							// If we are on server or if the weapon has been accepted for fire we fire
-							if ((*i).Fire(owner==NULL?this:owner,mis,listen_to_owner)) {
+							if ((*i).Fire(this,owner==NULL?this:owner,mis,listen_to_owner)) {
 								ObjSerial serid;
 								if( missile_and_want_to_fire_missiles)
 								{

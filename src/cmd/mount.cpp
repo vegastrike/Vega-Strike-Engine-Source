@@ -221,7 +221,7 @@ bool Mount::PhysicsAlignedFire(Unit * caller, const Transformation &Cumulative, 
 			switch (type->type) {
 			case weapon_info::BEAM:
 				if (ref.gun)
-					ref.gun->Init(Transformation(orient,pos.Cast()),*type,owner);
+					ref.gun->Init(Transformation(orient,pos.Cast()),*type,owner,caller);
 			  break;
 			case weapon_info::BOLT:
 			  Bolt (type, mat, velocity, owner).noop();//FIXME turrets! Velocity      
@@ -394,7 +394,7 @@ bool Mount::PhysicsAlignedFire(Unit * caller, const Transformation &Cumulative, 
   return true;
 }
 
-bool Mount::Fire (void * owner, bool Missile, bool listen_to_owner) {
+bool Mount::Fire (Unit * firer, void * owner, bool Missile, bool listen_to_owner) {
   if (ammo==0) {
     processed=UNFIRED;
   }
@@ -406,7 +406,7 @@ bool Mount::Fire (void * owner, bool Missile, bool listen_to_owner) {
 	  if (!fireit)
 		  fireit = ref.gun->Ready();
 	  else
-		  ref.gun = new Beam (Transformation(orient,pos.Cast()),*type,owner,sound);
+		  ref.gun = new Beam (Transformation(orient,pos.Cast()),*type,owner,firer,sound);
 	if (fireit) {
 		if (ammo>0&&reduce_beam_ammo)
 			ammo--;//ditto about beams ahving ammo		

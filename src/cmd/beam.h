@@ -54,8 +54,8 @@ private:
   void CollideHuge(const LineCollide &, Unit * targetToCollideWith);
 public:
   void ListenToOwner(bool listen){listen_to_owner=listen;}
-  Beam (const Transformation & trans, const weapon_info & clne, void * own, int sound);
-  void Init (const Transformation & trans, const weapon_info & clne, void * own);
+  Beam (const Transformation & trans, const weapon_info & clne, void * own, Unit * firer, int sound);
+  void Init (const Transformation & trans, const weapon_info & clne, void * own, Unit * firer);
   ~Beam();
   void RemoveFromSystem(bool eradicate);
   float refireTime();

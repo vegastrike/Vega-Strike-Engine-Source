@@ -155,7 +155,7 @@ class Mount {
 	// Uses Sound Forcefeedback and other stuff
 	void PhysicsAlignedUnfire();
 	bool PhysicsAlignedFire (Unit * caller,const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, void *owner,  Unit *target, signed char autotrack, float trackingcone);
-	bool Fire (void *owner, bool Missile=false, bool collide_only_with_target=false);
+	bool Fire (Unit * firer,void *owner, bool Missile=false, bool collide_only_with_target=false);
 };
 
 

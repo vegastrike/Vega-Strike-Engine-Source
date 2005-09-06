@@ -12,7 +12,7 @@ using std::vector;
 static DecalQueue beamdecals;
 static vector <vector <DrawContext> > beamdrawqueue;
 
-Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own, int sound) :vlist(NULL), Col(clne.r,clne.g,clne.b,clne.a){
+Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own, Unit * firer, int sound) :vlist(NULL), Col(clne.r,clne.g,clne.b,clne.a){
   VSCONSTRUCT2('B')
     listen_to_owner=false;//warning this line of code is also present in beam_server.cpp change one, change ALL
 #ifdef PERBOLTSOUND
@@ -24,7 +24,7 @@ Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own, 
   if (decal>=beamdrawqueue.size()) {
     beamdrawqueue.push_back (vector<DrawContext>());
   }
-  Init(trans,clne,own);
+  Init(trans,clne,own,firer);
   impact=UNSTABLE;
 }
 
