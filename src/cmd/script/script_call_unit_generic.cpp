@@ -290,12 +290,12 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 		Unit *mpl = &GetUnitMasterPartList();
 		unsigned int max=mpl->numCargo();
 		if (!category.empty()) {
-		  vector <Cargo> cat;
-		  mpl->GetCargoCat (category,cat);
-		  if (!cat.empty()) {
-		    unsigned int i;
-		    ret = mpl->GetCargo(cat[rand()%cat.size()].content,i);
-		  }
+                  size_t Begin,End;
+                  mpl->GetSortedCargoCat (category,Begin,End);
+                  if (Begin<End) {
+                    unsigned int i=Begin+(rand()%(End-Begin));              
+                    ret = &mpl->GetCargo(i);
+                  }
                 }else {
 		  if (mpl->numCargo()) {
 		    for (unsigned int i=0;i<500;i++) {

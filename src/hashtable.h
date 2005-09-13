@@ -55,6 +55,17 @@ template<class KEY, class VALUE, int SIZ> class Hashtable {
 		k%=SIZ;
 		return k;
 	}
+        static int hash(const char *key) {
+          unsigned int k = 0;
+          for(const char * start = key; *start!='\0'; start++) {
+            k ^= (*start&HASH_SALT_1);
+            k ^= HASH_SALT_0;
+            k  = (((k>>4)&0xF)|(k<<(HASH_INTSIZE-4)));
+            k ^= *start;
+          }
+          k %= SIZ;
+          return k;
+	}
 	static int hash(const std::string &key) {
 		unsigned int k = 0;
 		for(typename std::string::const_iterator start = key.begin(); start!=key.end(); start++) {

@@ -22,8 +22,14 @@ int FactionUtil::GetFaction (const char * factionname) {
 #ifdef _WIN32
   #define strcasecmp stricmp
 #endif
+  static Hashtable<const char*,int,47> factioncache;
+  int * retval=factioncache.Get(factionname);
+  if (retval) return *retval;
  for (unsigned int i=0;i<factions.size();i++) {
     if (strcasecmp (factionname, factions[i]->factionname)==0) {
+      int * tmp=new int;
+      *tmp=i;
+      factioncache.Put(factionname,tmp);
       return i;
     }
   }
@@ -40,7 +46,15 @@ Unit* FactionUtil::GetContraband(int faction){
 * -1 is mad. <0 will attack
 */
 int FactionUtil::GetFactionIndex(string name) {
-	return GetFaction(name.c_str());
+  static Hashtable<string,int,47> factioncache;
+  int * tmp=factioncache.Get(name);
+  if (tmp) 
+    return *tmp;
+  int i=GetFaction(name.c_str());
+  tmp=new int;
+  *tmp=i;
+  factioncache.Put(name,tmp);
+  return i;
 }
 float FactionUtil::GetIntRelation (const int myfaction, const int theirfaction){
 	return factions[myfaction]->faction[theirfaction].relationship;

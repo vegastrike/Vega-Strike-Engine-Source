@@ -24,8 +24,12 @@ Unit* UnitFactory::getMasterPartList( )
 
     if( _masterPartList == NULL )
     {
-                _masterPartList = Unit::makeMasterPartList();
-        
+      static bool making=true;
+      if (making) {
+        making=false;
+        _masterPartList = Unit::makeMasterPartList();
+        making=true;
+      }        
     }
     return _masterPartList;
 }

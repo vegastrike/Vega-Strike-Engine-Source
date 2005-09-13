@@ -23,7 +23,7 @@
 
 #ifndef _UNIT_H_
 #define _UNIT_H_
-#define CONTAINER_DEBUG
+//#define CONTAINER_DEBUG
 #ifdef CONTAINER_DEBUG
 #include "hashtable.h"
 class Unit;
@@ -1005,7 +1005,7 @@ public:
   float PriceCargo (const std::string &s);
   Cargo & GetCargo (unsigned int i);
   const Cargo & GetCargo (unsigned int i) const;
-  void GetCargoCat (const std::string &category, vector <Cargo> &cat);
+  void GetSortedCargoCat (const std::string &category, size_t &catbegin, size_t &catend);
   ///below function returns NULL if not found
   Cargo * GetCargo (const std::string &s, unsigned int &i);
   unsigned int numCargo ()const;

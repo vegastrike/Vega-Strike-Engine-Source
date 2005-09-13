@@ -6917,17 +6917,81 @@ Cargo& Unit::GetCargo (unsigned int i) {
 const Cargo& Unit::GetCargo (unsigned int i) const {
   return image->cargo[i];
 }
-
-void Unit::GetCargoCat (const std::string &cat, vector <Cargo> &cats) {
-  unsigned int max = numCargo();
-  for (unsigned int i=0;i<max;i++) {
-    if (GetCargo(i).category.find(cat)==0) {
-      cats.push_back (GetCargo(i));
+class CatCompare{
+public:
+  bool operator ()(const Cargo &a,const Cargo& b) {
+    std::string::const_iterator aiter=a.category.begin();
+    std::string::const_iterator aend=a.category.end();
+    std::string::const_iterator biter=b.category.begin();
+    std::string::const_iterator bend=b.category.end();
+    for (;aiter!=aend&&biter!=bend;++aiter,++biter) {
+      char achar=*aiter;
+      char bchar=*biter;
+      if (achar<bchar)
+        return true;
+      if (achar>bchar)
+        return false;
     }
+    //    return a.category<b.category;  
+    return false;
   }
-}
 
+};
+void Unit::GetSortedCargoCat (const std::string &cat, size_t &begin, size_t &end) {
+  vector<Cargo>::iterator Begin=image->cargo.begin();
+  vector<Cargo>::iterator End=image->cargo.end();
+  vector<Cargo>::iterator lbound=image->cargo.end();
+  vector<Cargo>::iterator ubound=image->cargo.end();
+
+  Cargo beginningtype;
+  beginningtype.category=cat;
+  CatCompare Comp;
+  lbound=std::lower_bound(Begin,End,beginningtype,Comp);
+  beginningtype.content="zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz";
+  ubound=std::upper_bound(Begin,End,beginningtype,Comp);
+  begin=lbound-Begin;
+  end=ubound-Begin;
+
+}
+Unit& GetUnitMasterPartList () {
+  return *UnitFactory::getMasterPartList( );
+}
+bool myless(const Cargo & a, const Cargo& b) {
+  return a<b;
+}
 Cargo* Unit::GetCargo (const std::string &s, unsigned int &i) {
+  static Hashtable<string,unsigned int,2047> index_cache_table;
+  Unit * mpl=UnitFactory::getMasterPartList();
+  if (this==mpl) {
+    unsigned int *ind=index_cache_table.Get(s);
+    if (ind) {
+      if (*ind<image->cargo.size()) {
+        Cargo * guess=&image->cargo[*ind];
+        if (guess->content==s) {
+          i=*ind;
+          return guess;
+        }
+      }
+    }
+    Cargo searchfor;
+    searchfor.content=s;
+    vector<Cargo>::iterator tmp=lower_bound(image->cargo.begin(),image->cargo.end(),searchfor,myless);
+    if (tmp==image->cargo.end())
+      return NULL;
+    if ((*tmp).content==searchfor.content) {
+      i= (tmp-image->cargo.begin());
+      if (this==mpl) {
+        unsigned int * tmp=new unsigned int;
+        *tmp =i;
+        if (index_cache_table.Get(s)){
+          index_cache_table.Delete(s);
+        }
+        index_cache_table.Put(s,tmp);//memory leak--should not be reached though, ever
+      }
+      return &(*tmp);
+    }
+    return NULL;
+  }
   Cargo searchfor;
   searchfor.content=s;
   vector<Cargo>::iterator tmp =(std::find(image->cargo.begin(),image->cargo.end(),searchfor));
@@ -6935,6 +6999,7 @@ Cargo* Unit::GetCargo (const std::string &s, unsigned int &i) {
     return NULL;
   i= (tmp-image->cargo.begin());
   return &(*tmp);
+
 }
 
 unsigned int Unit::numCargo ()const {
@@ -7016,9 +7081,6 @@ bool Unit::BuyCargo (const std::string &cargo,unsigned int quantity, Unit * sell
   return false;
 }
 
-Unit& GetUnitMasterPartList () {
-  return *UnitFactory::getMasterPartList( );
-}
 
 Cargo * GetMasterPartList(const char *input_buffer){
   unsigned int i;

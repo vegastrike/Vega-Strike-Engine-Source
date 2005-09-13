@@ -118,7 +118,7 @@ namespace UnitUtil {
     }
 	void setFactionName (Unit *my_unit,string factionname) {
 		if (!my_unit)return;
-		my_unit->SetFaction(FactionUtil::GetFaction(factionname.c_str()));
+		my_unit->SetFaction(FactionUtil::GetFactionIndex(factionname));
     }
 	string getName(Unit *my_unit){
 		if (!my_unit)return "";

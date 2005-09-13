@@ -22,7 +22,8 @@
 #include "cmd/unit_util.h"
 #include "networking/netserver.h"
 #include "cmd/csv.h"
-
+#include "linecollide.h"
+#include "cmd/unit_collide.h"
 //extern class Music *muzak;
 //extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );
 extern Unit&GetUnitMasterPartList();
@@ -101,11 +102,11 @@ namespace UniverseUtil {
 	  Unit *mpl = &GetUnitMasterPartList();
 	  unsigned int max=mpl->numCargo();
 	  if (!category.empty()) {
-	    vector <Cargo> cat;
-	    mpl->GetCargoCat (category,cat);
-	    if (!cat.empty()) {
-	      unsigned int i;
-	      ret = mpl->GetCargo(cat[rand()%cat.size()].content,i);
+            size_t Begin,End;
+	    mpl->GetSortedCargoCat (category,Begin,End);
+	    if (Begin<End) {
+	      unsigned int i=Begin+(rand()%(End-Begin));              
+	      ret = &mpl->GetCargo(i);
 	    }
 	  }else {
 	    if (mpl->numCargo()) {
@@ -262,39 +263,6 @@ namespace UniverseUtil {
 	  }
 	  return count;
 	}
-	/*
-	Cargo getRandCargo(int quantity, string category) {
-	  Cargo *ret=NULL;
-	  Unit *mpl = &GetUnitMasterPartList();
-	  unsigned int max=mpl->numCargo();
-	  if (!category.empty()) {
-	    vector <Cargo> cat;
-	    mpl->GetCargoCat (category,cat);
-	    if (!cat.empty()) {
-	      unsigned int i;
-	      ret = mpl->GetCargo(cat[rand()%cat.size()].content,i);
-	    }
-	  }else {
-	    if (mpl->numCargo()) {
-	      for (unsigned int i=0;i<500;i++) {
-		ret = &mpl->GetCargo(rand()%max);  
-		if (ret->content.find("mission")==string::npos) {
-		  break;
-		}
-	      }
-	    }		  
-	  }
-	  if (ret) {
-		Cargo tempret = *ret;
-		tempret.quantity=quantity;
-	    return tempret;//uses copy
-	  }else {
-	    Cargo newret;
-	    newret.quantity=0;
-	    return newret;
-	  }
-	}
-	*/
 	//NOTEXPORTEDYET
 	/*
 	float GetGameTime () {
@@ -484,15 +452,21 @@ namespace UniverseUtil {
       name[7]=='d'
       ;
   }
-				QVector SafeEntrancePoint (QVector pos, float radial_size) {
+				QVector SafeStarSystemEntrancePoint (StarSystem* sts,QVector pos, float radial_size) {
+                                  
 						static double def_un_size = XMLSupport::parse_float (vs_config->getVariable ("physics","respawn_unit_size","400"));
 						if (radial_size<0)
 								radial_size = def_un_size;
-
+                                                
+                                                LineCollide obtain(NULL,LineCollide::UNIT,pos-QVector(radial_size,radial_size,radial_size),pos+QVector(radial_size,radial_size,radial_size));
+                                                UnitCollection * colQ [tablehuge+1];   
+                                                int sizecolq = sts->collidetable->c.Get (&obtain,colQ,true);
+                                  
 						for (unsigned int k=0;k<10;k++) {
 								Unit * un;
 								bool collision=false;
-								for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();(un=*i)!=NULL;++i) {
+                                                                for (int jjj=0;jjj<sizecolq;jjj++) {
+                                                                  for (un_iter i=colQ[jjj]->createIterator();(un=*i)!=NULL;++i) {
 										if (un->isUnit()==ASTEROIDPTR||un->isUnit()==NEBULAPTR||isAsteroid(un->name)) {
 												continue;
 										}
@@ -516,54 +490,17 @@ namespace UniverseUtil {
 												}
 
 										}
-								}
-								if (collision==false)
-										break;
+                                                                  }
+                                                                  if (collision==false)
+                                                                    break;
+                                                                }
+                                                
 						}
 						return pos;
 				}
-				QVector SafeStarSystemEntrancePoint (StarSystem * sts, QVector pos, float radial_size) {
-						static double def_un_size = XMLSupport::parse_float (vs_config->getVariable ("physics","respawn_unit_size","400"));
-						if (radial_size<0)
-								radial_size = def_un_size;
+				QVector SafeEntrancePoint (QVector pos, float radial_size) {
+                                  return SafeStarSystemEntrancePoint(_Universe->activeStarSystem(),pos,radial_size);
 
-						for (unsigned int k=0;k<10;k++)
-						{
-								Unit * un;
-								bool collision=false;
-								for (un_iter i=sts->getUnitList().createIterator();(un=*i)!=NULL;++i)
-								{
-                                                                  if (un->isUnit()==ASTEROIDPTR||un->isUnit()==NEBULAPTR||isAsteroid(un->name))
-										{
-												continue;
-										}
-										double dist = (pos-un->LocalPosition()).Magnitude()-un->rSize()-/*def_un_size-*/radial_size;
-										if (dist<0)
-										{
-												QVector delta  = pos-un->LocalPosition();
-												double mag = delta.Magnitude();
-												if (mag>.01)
-												{
-														delta=delta/mag;
-												}else {
-														delta.Set(0,0,1);
-												}
-												delta = delta.Scale ( dist+un->rSize()+radial_size);
-												if (k<5) {
-														pos = pos+delta;
-														collision=true;
-												}else {
-														QVector r(.5,.5,.5);
-														pos+=(radial_size+un->rSize())*r;
-														collision=true;
-												}
-
-										}
-								}
-								if (collision==false)
-										break;
-						}
-						return pos;
 				}
 				Unit* launch (string name_string,string type_string,string faction_string,string unittype, string ai_string,int nr_of_ships,int nr_of_waves, QVector pos, string sqadlogo){
 						return launchJumppoint(name_string,faction_string,type_string,unittype,ai_string,nr_of_ships,nr_of_waves,pos,sqadlogo,"");
