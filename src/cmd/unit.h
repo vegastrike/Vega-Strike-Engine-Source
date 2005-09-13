@@ -20,7 +20,7 @@
  */
 #ifndef _GAMEUNIT_H_
 #define _GAMEUNIT_H_
-#define CONTAINER_DEBUG
+//#define CONTAINER_DEBUG
 struct GFXColor;
 
 #include "gfx/matrix.h"
