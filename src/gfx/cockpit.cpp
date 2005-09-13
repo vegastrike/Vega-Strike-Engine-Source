@@ -301,13 +301,14 @@ inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &Ca
     }
 //  eallySwitch=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","switchToTargetModeOnKey","true"));
     static float absmin = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","min_lock_box_size",".001"));
-    static float endreticle = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","MinMissileDiamondSize","1.05"));; // 1.05;
-    static float startreticle = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","MaxMissileDiamondSize","2.05"));; // 1.05;
+    static float endreticle = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","MinMissileBracketSize","1.05"));; // 1.05;
+    static float startreticle = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","MaxMissileBracketSize","2.05"));; // 2.05;
+    static float diamondsize = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","DiamondSize","2.05"));; // 1.05;
     static float bracketsize = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","RotatingBracketSize","0.58"));; // 1.05;
     static float thetaspeed = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","DiamondRotationSpeed","1"));; // 1.05;
     static float lockline = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","LockConfirmLineLength","1.5"));; // 1.05;
 
-	float max=startreticle + endreticle;
+    float max=diamondsize; 
     //    VSFileSystem::Fprintf (stderr,"lock percent %f\n",lock_percent);
     float coord = endreticle+(startreticle-endreticle)*lock_percent;//rSize/(1-lock_percent);//this is a number between 1 and 100
     double rtot = 1./sqrtf(2);
