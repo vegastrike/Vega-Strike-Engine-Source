@@ -488,7 +488,8 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 		static int fullout = XMLSupport::parse_int(vs_config->getVariable("graphics","detail_texture_full_color","1"))-1;
 		float numdivisors = logsize>fullout+blankout?(1./(logsize-fullout-blankout)):1;
 		float detailscale=1;
-
+                gluBuild2DMipmaps(image2D, internalformat, textures[handle].width, textures[handle].height, textures[handle].textureformat, GL_UNSIGNED_BYTE, buffer);
+                /*
         glTexImage2D(image2D,count,internalformat,width,height,0,textures[handle].textureformat,GL_UNSIGNED_BYTE,buffer);
         
         while(1){
@@ -508,6 +509,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 				detailscale=0;
 			glTexImage2D(image2D,count,internalformat,width,height,0,textures[handle].textureformat,GL_UNSIGNED_BYTE,tempbuf);
 		}
+                */
         if (tempbuf) free(tempbuf);
         tempbuf=NULL;
     }else {
