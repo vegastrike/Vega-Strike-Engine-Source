@@ -19,8 +19,17 @@
 #include <stdio.h>
 #include "al_globals.h"
 #include <vector>
+
+#ifndef ALchar
+#define ALGETPROCADDRESS_NEEDS_CAST
+#endif
+
 static void fixup_function_pointers(void) {
-  alutLoadMP3p = (mp3Loader *) alGetProcAddress((ALubyte *)"alutLoadMP3_LOKI");
+#ifdef ALGETPROCADDRESS_NEEDS_CAST
+  alutLoadMP3p = (mp3Loader *) alGetProcAddress(const_cast<ALubyte*>(reinterpret_cast<const ALubyte *>("alutLoadMP3_LOKI")));
+#else
+  alutLoadMP3p = (mp3Loader *) alGetProcAddress("alutLoadMP3_LOKI");
+#endif
   if(alutLoadMP3p == NULL) {
     VSFileSystem::vs_fprintf(stderr, "Could not GetProc %s\n","alutLoadMP3_LOKI");
   }
