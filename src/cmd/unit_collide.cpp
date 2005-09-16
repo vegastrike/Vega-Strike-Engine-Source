@@ -166,6 +166,8 @@ bool Unit::Inside (const QVector &target, const float radius, Vector & normal, f
   if (!querySphere(target,radius)) {
     return false;;
   }
+  normal=(target-Position()).Cast();
+  ::Normalize(normal);
   /* seems redudnant
   for (i=0;i<numsubunit;i++) {
     if (subunits[i]->Inside(target,radius,normal,dist)) {
@@ -451,11 +453,6 @@ bool Unit::Collide (Unit * target) {
     } else return false;
   } else {
     if (bigger->Inside(smaller->Position(),smaller->rSize(),normal,dist)) {
-      if (normal.i==-1&&normal.j==-1) {
-	normal = (smaller->Position()-bigger->Position()).Cast();
-	if (normal.i||normal.j||normal.k)
-	  normal.Normalize();
-      }
       if (!bigger->isDocked(smaller)&&!smaller->isDocked(bigger)) {
 	bigger->reactToCollision (smaller,bigger->Position(), normal,smaller->Position(), -normal, dist);
       }else return false;

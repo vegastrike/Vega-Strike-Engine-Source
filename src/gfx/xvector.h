@@ -110,7 +110,7 @@ inline XVector operator*= (XVector &lval, const QFLOAT &obj) {lval.i *= obj; lva
 inline void Normalize(XVector &r)
 {
 	QFLOAT size = XSQRT(r.i*r.i+r.j*r.j+r.k*r.k);
-	if( size>0.00001)
+	if( size>0.000001)
 	{
 		r.i /= size;
 		r.j /= size;
