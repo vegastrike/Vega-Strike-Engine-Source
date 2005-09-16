@@ -21,15 +21,13 @@
 #include <vector>
 
 #ifndef ALchar
-#define ALGETPROCADDRESS_NEEDS_CAST
+#define AL_GET_PROC(name) (alGetProcAddress(const_cast<ALubyte*>(reinterpret_cast<const ALubyte *>(name))))
+#else
+#define AL_GET_PROC(name) (alGetProcAddress(name))
 #endif
 
 static void fixup_function_pointers(void) {
-#ifdef ALGETPROCADDRESS_NEEDS_CAST
-  alutLoadMP3p = (mp3Loader *) alGetProcAddress(const_cast<ALubyte*>(reinterpret_cast<const ALubyte *>("alutLoadMP3_LOKI")));
-#else
-  alutLoadMP3p = (mp3Loader *) alGetProcAddress("alutLoadMP3_LOKI");
-#endif
+  alutLoadMP3p = (mp3Loader *) AL_GET_PROC("alutLoadMP3_LOKI");
   if(alutLoadMP3p == NULL) {
     VSFileSystem::vs_fprintf(stderr, "Could not GetProc %s\n","alutLoadMP3_LOKI");
   }
