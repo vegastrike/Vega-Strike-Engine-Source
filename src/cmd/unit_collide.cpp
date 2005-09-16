@@ -537,7 +537,9 @@ Unit * Unit::queryBSP (const QVector &pt, float err, Vector & norm, float &dist,
     return this;
   }
   if ((*tmpBsp)->intersects (st.Cast(),err,norm,dist)) {
+    
     norm = ToWorldCoordinates (norm);
+    norm.Normalize();
     return this;
   }
   return NULL;
