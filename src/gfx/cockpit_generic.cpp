@@ -523,7 +523,7 @@ bool Cockpit::Update () {
 
 
 
-	if ( ((par != NULL) && (i++)>=index) && (!_Universe->isPlayerStarship(un)) && (switch_nonowned_units || (un->owner == par->owner) || (un == par->owner ) || (un->owner == par)) && (un->name!="eject") && (un->name!="Pilot") && (un->isUnit()!=MISSILEPTR)) {
+	if ( (((par != NULL) && (i++)>=index)||par==NULL) && (!_Universe->isPlayerStarship(un)) && (switch_nonowned_units || (par!=NULL &&un->owner == par->owner) || (par!=NULL&&un == par->owner ) || (par!=NULL&&un->owner == par)|| (par==NULL&&un->owner)) && (un->name!="eject") && (un->name!="Pilot") && (un->isUnit()!=MISSILEPTR)) {
 	  found=true;
 	  index++;
 	  Unit * k=GetParent(); 
