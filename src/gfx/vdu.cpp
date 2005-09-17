@@ -370,9 +370,11 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
   GFXColor shcolor[3]={innershield,middleshield,outershield};
   float shthresh[3]={0.2f,0.5f,0.75f};
   float shtrans[3]={1.0f,1.0f,1.0f};
-  shcolor[0].a *= max(0.0f,min(1.0f,(fs-shthresh[0])/(shthresh[1]-shthresh[0])*shtrans[0]));
-  shcolor[1].a *= max(0.0f,min(1.0f,(fs-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1]));
-  shcolor[2].a *= max(0.0f,min(1.0f,(fs-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));
+
+  // This is broken.  It adjusts the color used for the display of *all four quadrants* based on how much of the front shield is left.  IE: if you take out the front shield, the display will (falsely) show that the sides and back are gone too
+  //shcolor[0].a *= max(0.0f,min(1.0f,(fs-shthresh[0])/(shthresh[1]-shthresh[0])*shtrans[0]));
+  //shcolor[1].a *= max(0.0f,min(1.0f,(fs-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1]));
+  //shcolor[2].a *= max(0.0f,min(1.0f,(fs-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));
 
   if (fs>shthresh[0]) {
     GFXColorf(shcolor[0]);
