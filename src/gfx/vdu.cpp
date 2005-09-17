@@ -367,17 +367,27 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     bs = tmp;
   }
 
-  GFXColor shcolor[3]={innershield,middleshield,outershield};
-  float shthresh[3]={0.2f,0.5f,0.75f};
+  GFXColor shcolor[4][3]={{innershield,middleshield,outershield},{innershield,middleshield,outershield},{innershield,middleshield,outershield},{innershield,middleshield,outershield}};
+  float shthresh[3]={0.0f,0.33f,0.66f}; // if we are going to use fade with three lines, need to divide in 3, not 4
   float shtrans[3]={1.0f,1.0f,1.0f};
 
-  // This is broken.  It adjusts the color used for the display of *all four quadrants* based on how much of the front shield is left.  IE: if you take out the front shield, the display will (falsely) show that the sides and back are gone too
-  //shcolor[0].a *= max(0.0f,min(1.0f,(fs-shthresh[0])/(shthresh[1]-shthresh[0])*shtrans[0]));
-  //shcolor[1].a *= max(0.0f,min(1.0f,(fs-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1]));
-  //shcolor[2].a *= max(0.0f,min(1.0f,(fs-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));
+  // This was broken.  It adjusted the color used for the display of *all four quadrants* based on how much of the front shield is left.  IE: if you took out the front shield, the display would (falsely) show that the sides and back were gone too
+  // now shield color is a multidimensional array, for the three bars, and the four sides, all of which can have different values, and thus need to be able to have different colors
+  shcolor[0][0].a *= max(0.0f,min(1.0f,(fs-shthresh[0])/(shthresh[1]-shthresh[0])*shtrans[0]));
+  shcolor[0][1].a *= max(0.0f,min(1.0f,(fs-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1]));
+  shcolor[0][2].a *= max(0.0f,min(1.0f,(fs-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));  
+  shcolor[1][0].a *= max(0.0f,min(1.0f,(rs-shthresh[0])/(shthresh[1]-shthresh[0])*shtrans[0]));
+  shcolor[1][1].a *= max(0.0f,min(1.0f,(rs-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1]));
+  shcolor[1][2].a *= max(0.0f,min(1.0f,(rs-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));  
+  shcolor[2][0].a *= max(0.0f,min(1.0f,(ls-shthresh[0])/(shthresh[1]-shthresh[0])*shtrans[0]));
+  shcolor[2][1].a *= max(0.0f,min(1.0f,(ls-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1]));
+  shcolor[2][2].a *= max(0.0f,min(1.0f,(ls-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));  
+  shcolor[3][0].a *= max(0.0f,min(1.0f,(bs-shthresh[0])/(shthresh[1]-shthresh[0])*shtrans[0]));
+  shcolor[3][1].a *= max(0.0f,min(1.0f,(bs-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1]));
+  shcolor[3][2].a *= max(0.0f,min(1.0f,(bs-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));  
 
   if (fs>shthresh[0]) {
-    GFXColorf(shcolor[0]);
+    GFXColorf(shcolor[0][0]);
     GFXVertex3d ((double)x-w/8,y+h/2,0.);
     GFXVertex3d ((double)x-w/3,y+.9*h/2,0.);
     GFXVertex3d ((double)x+w/8,y+h/2,0.);
@@ -386,7 +396,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x-w/8,y+h/2,0.);
   }
   if (fs>shthresh[1]) {
-    GFXColorf(shcolor[1]);
+    GFXColorf(shcolor[0][1]);
     GFXVertex3d ((double)x-w/8,y+1.1*h/2,0.);
     GFXVertex3d ((double)x+w/8,y+1.1*h/2,0.);
     GFXVertex3d ((double)x-w/8,y+1.1*h/2,0.);
@@ -395,7 +405,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x+w/3,y+h/2,0.);
   }
   if (fs>shthresh[2]) {
-    GFXColorf(shcolor[2]);
+    GFXColorf(shcolor[0][2]);
     GFXVertex3d ((double)x-w/8,y+1.2*h/2,0.);
     GFXVertex3d ((double)x+w/8,y+1.2*h/2,0.);
     GFXVertex3d ((double)x-w/8,y+1.2*h/2,0.);
@@ -404,7 +414,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x+w/3,y+1.1*h/2,0.);
   }
   if (rs>shthresh[0]) {
-    GFXColorf(shcolor[0]);
+    GFXColorf(shcolor[1][0]);
     GFXVertex3d ((double)x+1*w/2,y-h/8,0.);
     GFXVertex3d ((double)x+.9*w/2,y-h/3,0.);
     GFXVertex3d ((double)x+1*w/2,y+h/8,0.);
@@ -413,7 +423,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x+1*w/2,y+h/8,0.);
   }
   if (rs>shthresh[1]) {
-    GFXColorf(shcolor[1]);
+    GFXColorf(shcolor[1][1]);
     GFXVertex3d ((double)x+1.1*w/2,y-h/8,0.);
     GFXVertex3d ((double)x+1*w/2,y-h/3,0.);
     GFXVertex3d ((double)x+1.1*w/2,y+h/8,0.);
@@ -422,7 +432,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x+1.1*w/2,y+h/8,0.);
   }
   if (rs>shthresh[2]) {
-    GFXColorf(shcolor[2]);
+    GFXColorf(shcolor[1][2]);
     GFXVertex3d ((double)x+1.2*w/2,y-h/8,0.);
     GFXVertex3d ((double)x+1.1*w/2,y-h/3,0.);
     GFXVertex3d ((double)x+1.2*w/2,y+h/8,0.);
@@ -431,7 +441,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x+1.2*w/2,y+h/8,0.);
   }
   if (ls>shthresh[0]) {
-    GFXColorf(shcolor[0]);
+    GFXColorf(shcolor[2][0]);
     GFXVertex3d ((double)x-1*w/2,y-h/8,0.);
     GFXVertex3d ((double)x-.9*w/2,y-h/3,0.);
     GFXVertex3d ((double)x-1*w/2,y+h/8,0.);
@@ -440,7 +450,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x-1*w/2,y+h/8,0.);
   }
   if (ls>shthresh[1]) {
-    GFXColorf(shcolor[1]);
+    GFXColorf(shcolor[2][1]);
     GFXVertex3d ((double)x-1.1*w/2,y-h/8,0.);
     GFXVertex3d ((double)x-1*w/2,y-h/3,0.);
     GFXVertex3d ((double)x-1.1*w/2,y+h/8,0.);
@@ -449,7 +459,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x-1.1*w/2,y+h/8,0.);
   }
   if (ls>shthresh[2]) {
-    GFXColorf(shcolor[2]);
+    GFXColorf(shcolor[2][2]);
     GFXVertex3d ((double)x-1.2*w/2,y-h/8,0.);
     GFXVertex3d ((double)x-1.1*w/2,y-h/3,0.);
     GFXVertex3d ((double)x-1.2*w/2,y+h/8,0.);
@@ -458,7 +468,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x-1.2*w/2,y+h/8,0.);
   }
   if (bs>shthresh[0]) {
-    GFXColorf(shcolor[0]);
+    GFXColorf(shcolor[3][0]);
     GFXVertex3d ((double)x-w/8,y-h/2,0.);
     GFXVertex3d ((double)x-w/3,y-.9*h/2,0.);
     GFXVertex3d ((double)x+w/8,y-h/2,0.);
@@ -467,7 +477,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x-w/8,y-h/2,0.);
   }
   if (bs>shthresh[1]) {
-    GFXColorf(shcolor[1]);
+    GFXColorf(shcolor[3][1]);
     GFXVertex3d ((double)x-w/8,y-1.1*h/2,0.);
     GFXVertex3d ((double)x+w/8,y-1.1*h/2,0.);
     GFXVertex3d ((double)x-w/8,y-1.1*h/2,0.);
@@ -476,7 +486,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     GFXVertex3d ((double)x+w/3,y-h/2,0.);
   }
   if (bs>shthresh[2]) {
-    GFXColorf(shcolor[2]);
+    GFXColorf(shcolor[3][2]);
     GFXVertex3d ((double)x-w/8,y-1.2*h/2,0.);
     GFXVertex3d ((double)x+w/8,y-1.2*h/2,0.);
     GFXVertex3d ((double)x-w/8,y-1.2*h/2,0.);
