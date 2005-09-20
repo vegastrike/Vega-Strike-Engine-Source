@@ -112,7 +112,7 @@ struct GFXStats{
 #define GL_MAX_CUBE_MAP_TEXTURE_SIZE_EXT  0x851C
 #endif
 
-#if defined(MAC_OS_X_VERSION_10_3) || defined(MAC_OS_X_VERSION_10_2) || defined(MAC_OS_X_VERSION_10_1)
+#if defined(__APPLE__)
 #define glMultiTexCoord2fARB_p glMultiTexCoord2fARB
 #define glClientActiveTextureARB_p glClientActiveTextureARB
 #define glActiveTextureARB_p glActiveTextureARB
