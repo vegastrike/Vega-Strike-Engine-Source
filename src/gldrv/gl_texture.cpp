@@ -105,6 +105,214 @@ bool isPowerOfTwo (int num, int &which) {
   return true;
 }
 
+static GLint round2(GLint n)
+{
+   GLint m;
+
+   for (m = 1; m < n; m *= 2);
+
+   /* m>=n */
+   if (m - n <= n - m / 2) {
+      return m;
+   }
+   else {
+      return m / 2;
+   }
+}
+
+static GLint bytes_per_pixel(GLenum format, GLenum type)
+{
+   GLint n, m;
+
+   switch (format) {
+   case GL_COLOR_INDEX:
+   case GL_STENCIL_INDEX:
+   case GL_DEPTH_COMPONENT:
+   case GL_RED:
+   case GL_GREEN:
+   case GL_BLUE:
+   case GL_ALPHA:
+   case GL_LUMINANCE:
+      n = 1;
+      break;
+   case GL_LUMINANCE_ALPHA:
+      n = 2;
+      break;
+   case GL_RGB:
+   case GL_BGR:
+      n = 3;
+      break;
+   case GL_RGBA:
+   case GL_BGRA:
+#ifdef GL_EXT_abgr
+   case GL_ABGR_EXT:
+#endif
+      n = 4;
+      break;
+   default:
+      n = 0;
+   }
+
+   switch (type) {
+   case GL_UNSIGNED_BYTE:
+      m = sizeof(GLubyte);
+      break;
+   case GL_BYTE:
+      m = sizeof(GLbyte);
+      break;
+   case GL_BITMAP:
+      m = 1;
+      break;
+   case GL_UNSIGNED_SHORT:
+      m = sizeof(GLushort);
+      break;
+   case GL_SHORT:
+      m = sizeof(GLshort);
+      break;
+   case GL_UNSIGNED_INT:
+      m = sizeof(GLuint);
+      break;
+   case GL_INT:
+      m = sizeof(GLint);
+      break;
+   case GL_FLOAT:
+      m = sizeof(GLfloat);
+      break;
+   default:
+      m = 0;
+   }
+
+   return n * m;
+}
+
+static GLint appleBuild2DMipmaps(GLenum target, GLint components,
+		  GLsizei width, GLsizei height, GLenum format,
+		  GLenum type, const void *data)
+{
+   GLint w, h, maxsize;
+   void *image, *newimage;
+   GLint neww, newh, level, bpp;
+   int error;
+   GLboolean done;
+   GLint retval = 0;
+   GLint unpackrowlength, unpackalignment, unpackskiprows, unpackskippixels;
+   GLint packrowlength, packalignment, packskiprows, packskippixels;
+
+   if (width < 1 || height < 1)
+      return GLU_INVALID_VALUE;
+
+   glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxsize);
+
+   w = round2(width);
+   if (w > maxsize) {
+      w = maxsize;
+   }
+   h = round2(height);
+   if (h > maxsize) {
+      h = maxsize;
+   }
+
+   bpp = bytes_per_pixel(format, type);
+   if (bpp == 0) {
+      /* probably a bad format or type enum */
+      return GLU_INVALID_ENUM;
+   }
+
+   /* Get current glPixelStore values */
+   glGetIntegerv(GL_UNPACK_ROW_LENGTH, &unpackrowlength);
+   glGetIntegerv(GL_UNPACK_ALIGNMENT, &unpackalignment);
+   glGetIntegerv(GL_UNPACK_SKIP_ROWS, &unpackskiprows);
+   glGetIntegerv(GL_UNPACK_SKIP_PIXELS, &unpackskippixels);
+   glGetIntegerv(GL_PACK_ROW_LENGTH, &packrowlength);
+   glGetIntegerv(GL_PACK_ALIGNMENT, &packalignment);
+   glGetIntegerv(GL_PACK_SKIP_ROWS, &packskiprows);
+   glGetIntegerv(GL_PACK_SKIP_PIXELS, &packskippixels);
+
+   /* set pixel packing */
+   glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+   glPixelStorei(GL_PACK_ALIGNMENT, 1);
+   glPixelStorei(GL_PACK_SKIP_ROWS, 0);
+   glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
+
+   done = GL_FALSE;
+
+   if (w != width || h != height) {
+      /* must rescale image to get "top" mipmap texture image */
+      image = malloc((w + 4) * h * bpp);
+      if (!image) {
+	 return GLU_OUT_OF_MEMORY;
+      }
+      error = gluScaleImage(format, width, height, type, data,
+			    w, h, type, image);
+      if (error) {
+	 retval = error;
+	 done = GL_TRUE;
+      }
+   }
+   else {
+      image = (void *) data;
+   }
+
+   level = 0;
+   while (!done) {
+      if (image != data) {
+	 /* set pixel unpacking */
+	 glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+	 glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	 glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+	 glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+      }
+
+      glTexImage2D(target, level, components, w, h, 0, format, type, image);
+
+      if (w == 1 && h == 1)
+	 break;
+
+      neww = (w < 2) ? 1 : w / 2;
+      newh = (h < 2) ? 1 : h / 2;
+      newimage = malloc((neww + 4) * newh * bpp);
+      if (!newimage) {
+	 return GLU_OUT_OF_MEMORY;
+      }
+
+      error = gluScaleImage(format, w, h, type, image,
+			    neww, newh, type, newimage);
+      if (error) {
+	 retval = error;
+	 done = GL_TRUE;
+      }
+
+      if (image != data) {
+	 free(image);
+      }
+      image = newimage;
+
+      w = neww;
+      h = newh;
+      level++;
+   }
+
+   if (image != data) {
+      free(image);
+   }
+
+   /* Restore original glPixelStore state */
+   glPixelStorei(GL_UNPACK_ROW_LENGTH, unpackrowlength);
+   glPixelStorei(GL_UNPACK_ALIGNMENT, unpackalignment);
+   glPixelStorei(GL_UNPACK_SKIP_ROWS, unpackskiprows);
+   glPixelStorei(GL_UNPACK_SKIP_PIXELS, unpackskippixels);
+   glPixelStorei(GL_PACK_ROW_LENGTH, packrowlength);
+   glPixelStorei(GL_PACK_ALIGNMENT, packalignment);
+   glPixelStorei(GL_PACK_SKIP_ROWS, packskiprows);
+   glPixelStorei(GL_PACK_SKIP_PIXELS, packskippixels);
+
+   return retval;
+}
+
+#ifdef __APPLE__
+  #define gluBuild2DMipmaps appleBuild2DMipmaps
+#endif
+
 GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette , int texturestage, enum FILTER mipmap, enum TEXTURE_TARGET texture_target, enum ADDRESSMODE address_mode)
 {
   int dummy=0;
