@@ -21,6 +21,15 @@ namespace UnitUtil {
                 static unsigned int capitaltypes=ROLES::getCapitalRoles();
                 return ((1<<(unsigned int)my_unit->combatRole())&capitaltypes)!=0;
 	}
+        static int jitter(int input) {
+          if (input<=2) return input;
+          int half=input/2;
+          int amt=rand()%(half*2);
+          int output=input-half+amt;
+          if (output>SIM_QUEUE_SIZE)
+            return SIM_QUEUE_SIZE;
+          return output;
+        }
 	int getPhysicsPriority (Unit*  un) {
 		float rad= un->rSize();
 		clsptr untype=un->isUnit();
@@ -60,30 +69,30 @@ namespace UnitUtil {
 		static int neutral=FactionUtil::GetFaction("neutral");
 		if (un->owner==getTopLevelOwner()||un->faction==cargofac||un->faction==upfac||un->faction==neutral) {
                   if (dist<tooclose)
-                    return LOW_PRIORITY; else
-                      return LOWEST_PRIORITY;
+                    return jitter(LOW_PRIORITY); else
+                      return jitter(LOWEST_PRIORITY);
 		}
 		Unit * targ = un->Target();
 		if (_Universe->isPlayerStarship(targ)) {
-			return HIGH_PRIORITY;
+			return jitter(HIGH_PRIORITY);
 		}
 		string obj = UnitUtil::getFgDirective(un);
 		if (!(obj.length()==0||(obj.length()>=1&&obj[0]=='b'))) {
-			return MEDIUM_PRIORITY;
+			return jitter(MEDIUM_PRIORITY);
 		}
 		if (dist<gun_range)
-			return MEDIUM_PRIORITY;
+			return jitter(MEDIUM_PRIORITY);
 		if (dist<missile_range)
-			return LOW_PRIORITY;
+			return jitter(LOW_PRIORITY);
 		if (targ){
 			float speed;
 			un->getAverageGunSpeed(speed,gun_range,missile_range);
 			double distance=UnitUtil::getDistance(un,targ);
 			if (distance<=gun_range)
-				return NOT_VISIBLE_COMBAT_HIGH;
+				return jitter(NOT_VISIBLE_COMBAT_HIGH);
 			if (distance<missile_range)
-				return NOT_VISIBLE_COMBAT_MEDIUM;
-			return NOT_VISIBLE_COMBAT_LOW;
+				return jitter(NOT_VISIBLE_COMBAT_MEDIUM);
+			return jitter(NOT_VISIBLE_COMBAT_LOW);
 		}
 		return NO_ENEMIES;
 	}
