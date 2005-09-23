@@ -20,6 +20,7 @@
 #include "lin_time.h"
 #include "load_mission.h"
 #include "universe_util.h"
+#include "gui/guidefs.h"
 #ifdef RENDER_FROM_TEXTURE
 #include "gfx/stream_texture.h"
 #endif
@@ -802,7 +803,7 @@ const char * compute_time_of_day (Unit * base,Unit *un) {
 
 extern void ExecuteDirector();
 BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
-		: curtext(GFXColor(0,1,0,1),GFXColor(0,0,0,1)) , othtext(GFXColor(1,1,.5,1),GFXColor(0,0,0,1)) {
+		: curtext(GFXColor(0,1,0,1),GFXColor(0,0,0,1)) , othtext(getConfigColor("Fixer_Text_Color_Foreground",GFXColor(1,1,.5,1)),getConfigColor("FixerTextColor_Background",GFXColor(0,0,0,1))) {
 	CurrentBase=this;
 	CallComp=false;
         createdbase=true;
