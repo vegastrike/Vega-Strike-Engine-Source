@@ -1066,6 +1066,7 @@ public:
 public:
   ///The information about the minimum and maximum ranges of this unit. Collide Tables point to this bit of information.
   LineCollide CollideInfo;
+  CollideMap::iterator location;
   struct collideTrees * colTrees;
   ///Sets the parent to be this unit. Unit never dereferenced for this operation
   void SetCollisionParent (Unit *name);

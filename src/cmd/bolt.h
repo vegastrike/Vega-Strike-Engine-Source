@@ -18,8 +18,11 @@ private:
   void *owner;
   float curdist;
   int decal;//which image it uses
-  bool Collide (Unit * target);
+  CollideMap::iterator location;
  public:
+
+  bool Collide (Unit * target);
+  static bool CollideAnon (Collidable::CollideRef bolt_name, Unit* target);
   bool operator == (const Bolt & b) const{
     
     return owner==b.owner
@@ -32,6 +35,7 @@ private:
   static void Draw();
   bool Update(int index);
   bool Collide(int index);
+
   void noop()const{}
 };
 class bolt_draw {

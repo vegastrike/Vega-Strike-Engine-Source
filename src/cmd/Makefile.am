@@ -3,6 +3,7 @@ noinst_LIBRARIES = libcmd.a libcmdserver.a
 SUBDIRS = ai script collide
 
 libcmdgeneric =			\
+	collide_map.cpp	\
 	unit_bsp.cpp	\
 	csv.cpp		\
 	csv.h		\
