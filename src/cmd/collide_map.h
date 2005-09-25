@@ -32,5 +32,5 @@ class CollideMap:public KeyMutableSet<Collidable> {
 //Check collisions takes an item to check collisions with, and returns whether that item collided with a Unit only
   bool CheckCollisions(Bolt * bol, const Collidable & updated);
   bool CheckCollisions(Unit * un, const Collidable & updated);//will be handed off to a templated function
-}
+};
 extern CollideMap null_collide_map;
