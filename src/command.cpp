@@ -261,7 +261,7 @@ void commandI::help(std::string &helponthis) {
         std::string buf;
         buf.append("Sorry, there is no help system yet\n\r ");
 	buf.append("But most commands are self supporting, just type them to see what they do.\n\r");
-//        World->print1(this, &buf);
+//        conoutf(this, &buf);
 
 };
 // }}}
@@ -328,7 +328,7 @@ void commandI::pcommands() {
 	std::string cmd2;
 	cmd2.append(cmd.str());
 	conoutf(cmd2);
-//	World->print1(this, &cmd2);
+//	conoutf(this, &cmd2);
 	//use print1 for color formatting.
 
 }
@@ -565,12 +565,8 @@ bool commandI::execute(std::string *incommand, bool isDown, int sock_in)
 			char *name_out = NULL;
 			if(l.size() > 0) name_out = (char *)l.c_str();
 			if(callMenu(name_out, (char *)y.c_str(), t) ) return false;
-
 			incommand->erase();
 			incommand->append(t); //t may have changed if we got this far
-
-
-			
 		}
 
 	}
@@ -843,13 +839,13 @@ bool commandI::addMenu(menu *menu_in) {
 std::string commandI::displaymenu() {
     if(menumode) {
         std::ostringstream ps;
-		ps << menu_in->Display << "\n\r";
+		ps << menu_in->Display << "\n";
         for(std::vector<mItem *>::iterator iter = menu_in->items.begin();
             iter < menu_in->items.end(); iter++) {
             ps << (*(iter))->Name << " " << (*(iter))->display;
 			if((*(iter))->predisplay.size() > 0)
 					 ps << " " << display((*(iter))->predisplay);
-			ps << "\n\r";
+			ps << "\n";
         }
         std::string buf;
         buf.append(ps.str());
@@ -867,15 +863,15 @@ std::string commandI::displaymenu() {
 		            buf.append("enter");
 		        else
 		            buf.append(menu_in->escape);
-		        buf.append(" to quit: " );
+		        buf.append(" to quit: \n" );
 			} else {
-				buf.append("Enter your selection: ");
+				buf.append("Enter your selection: \n");
 			}
 		}
 //		if(webb) buf.append("\n\r");
 		return buf;
-//        World->print1(this, &buf);
-    }
+//		conoutf(buf);
+	}
 	std::string buf;
 	buf.append("Error, not in menumode!");
 	return buf;
@@ -951,7 +947,7 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 				if(funcn.compare("setMenu") == 0) {
 					std::string l;
 					l.append(setMenu((char *)arg.c_str()));
-//					World->print1(this, &l);
+					conoutf(l);
 					return true;
 				}
 			// }}}
@@ -988,7 +984,7 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 						fexecute(&d, true, 0);
 						std::string x;
 						x.append(displaymenu());
-//						World->print1(this,  &x);
+						conoutf(x);
 						return true;
 				}
 		// }}}
@@ -1027,7 +1023,7 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 					if(funcn.compare("setMenu") == 0) {
 						std::string buf;
 						buf.append(setMenu((char *)arg.c_str()));
-//						World->print1(this, &buf);
+						conoutf(buf);
 						return true;
 	                }
 					if(funcn.compare("loginfunc") == 0) {
@@ -1060,7 +1056,7 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 						fexecute(&d, true, 0);
                         std::string x;
                         x.append(displaymenu());
-//                        World->print1(this, &x);
+                        conoutf(x);
 						return true;
                     }
 
@@ -1074,7 +1070,7 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 //						buf.append(d);
 //						size_t x = buf.find("\r\n");
 //						buf.replace(x, 2, "\n\r");
-//						World->print1(this, &buf);
+//						conoutf(this, &buf);
 //					}
 				}
 				// }}}
@@ -1106,13 +1102,13 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 						buf.append(" to confirm: " );
 //						if(webb) buf.append("\n\r");
 
-//						World->print1(this, &buf);
+						conoutf(buf);
 					} else if(menu_in->iselected->inputbit) {
  						std::string buf;
 						buf.append(menu_in->iselected->selectstring);
 						buf.append(": ");
 //						if(webb) buf.append("\n\r");
-//						World->print1(this, &buf);
+						conoutf(buf);
 					}
 				}
 			}
@@ -1135,7 +1131,7 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 	                if(funcn.compare("setMenu") == 0) {
 	                    std::string l;
 	                    l.append(setMenu((char *)arg.c_str()));
-//	                    World->print1(this, &l);
+	                    conoutf(l);
 	                    return true;
 	                }
 	                if(funcn.compare("loginfunc") == 0) {
@@ -1183,7 +1179,7 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 	//we're in a menu but don't have anything selected {{{
 		std::string y;
 		y.append(displaymenu());
-//		World->print1(this, &y);
+		conoutf(y);
 		return true;
 	}
 	// }}}
@@ -1234,7 +1230,8 @@ std::string commandI::display(std::string &in) {
 //        then it would build a string based on the the current ship or editing
 //		if(in.compare("ship_desc") == 0){  return editing_ship->description; };
 	std::string f;
-	f.append("FAKE");
+	f.append("Bad commandI::Display value (predisplay value on menuitems) \n");
+	f.append(in);
 	return f;
 }
 // }}}
@@ -1311,6 +1308,9 @@ namespace ConsoleKeys {
 
 }
 
+
+
+// footer, leave at bottom
 /*
  * Local variables:
  * tab-width: 4

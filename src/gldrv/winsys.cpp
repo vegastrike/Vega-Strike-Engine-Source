@@ -534,7 +534,8 @@ bool keypress(int code, bool isDown, int cooked) {
 			return true;
 		};
 		if(code==SDLK_RETURN && isDown) {
-			std::string commandBuf = interp->getcurcommand(); 
+			std::string commandBuf = interp->getcurcommand();
+			commandBuf.append("\r\n"); 
 			interp->execute(&commandBuf, isDown, 0); //execute console on enter
 			//don't return so the return get's processed by
 			//interp->ConsoleKeyboardI, so it can clear the
