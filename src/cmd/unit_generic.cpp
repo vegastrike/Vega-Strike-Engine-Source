@@ -6975,7 +6975,7 @@ Cargo* Unit::GetCargo (const std::string &s, unsigned int &i) {
     }
     Cargo searchfor;
     searchfor.content=s;
-    vector<Cargo>::iterator tmp=lower_bound(image->cargo.begin(),image->cargo.end(),searchfor,myless);
+    vector<Cargo>::iterator tmp=std::find(image->cargo.begin(),image->cargo.end(),searchfor);
     if (tmp==image->cargo.end())
       return NULL;
     if ((*tmp).content==searchfor.content) {
