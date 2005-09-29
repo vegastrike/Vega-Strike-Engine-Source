@@ -162,13 +162,19 @@ void Beam::CollideHuge (const LineCollide & lc, Unit * targetToCollideWith, Unit
   if (newUnitCollisions) {
     QVector x0=center;
     QVector v=direction*curlength;
-    if (curlength) {
+    if (superunit->location==null_collide_map.begin()&&curlength) {
+      if (targetToCollideWith){
+        this->Collide(targetToCollideWith,firer,superunit);
+      }
+    }else if (curlength) {
       double t = v.Dot(x0)/v.Dot(v);//find where derivative of radius is zero
       float r0= x0.MagnitudeSquared();
       float r1 = (x0+v.Scale((t<0||t>1)?1.0f:t)).MagnitudeSquared();
       float r2 = (x0+v.Scale(1.0f)).MagnitudeSquared();
       float minsqr=r0<r1?(r0<r2?r0:r2):r1;
       float maxsqr=r0<r1?(r1<r2?r2:r1):r0;
+      bool targcheck=false;
+    
       maxsqr+=(maxsqr-(*superunit->location)->GetMagnitudeSquared())+2*curlength*curlength;//double damage, yo
       minsqr+=(minsqr-(*superunit->location)->GetMagnitudeSquared())-2*curlength*curlength;
       // (a+2*b)^2-(a+b)^2 = 3b^2+2ab = 2b^2+(a+b)^2-a^2
@@ -188,7 +194,9 @@ void Beam::CollideHuge (const LineCollide & lc, Unit * targetToCollideWith, Unit
           }
           if ((*curcheck)->radius>0) {
             if (beamCheckCollision(center,curlength,(**curcheck))) {
-              this->Collide((**curcheck).ref.unit,firer,superunit);
+              Unit * tmp=(**curcheck).ref.unit;
+              this->Collide(tmp,firer,superunit);
+              targcheck=(targcheck||tmp==targetToCollideWith);
             }
           }
           if (breakit)
@@ -205,10 +213,15 @@ void Beam::CollideHuge (const LineCollide & lc, Unit * targetToCollideWith, Unit
             Unit *un=(*tmore)->ref.unit;
             if (beamCheckCollision(center,curlength,**tmore++)) {
               this->Collide(un,firer,superunit);
+              targcheck=(targcheck||un==targetToCollideWith);
             }
           }else ++tmore;
         }        
       }
+      if (targetToCollideWith&&!targcheck){
+        this->Collide(targetToCollideWith,firer,superunit);
+      }
+    
     }
   }else {
   UnitCollection *colQ [tablehuge+1];
