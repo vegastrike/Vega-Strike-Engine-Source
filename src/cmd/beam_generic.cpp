@@ -429,7 +429,7 @@ bool Beam::Collide (Unit * target, Unit * firer, Unit * superunit) {
       float owner_rsize=superunit->rSize();
       if ((fi||target->isTractorable(Unit::tractorIn))&&((center-target->Position()).Magnitude()<(ors_m*owner_rsize+trs_m*target->rSize()+ofs))) {
 	    un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();
-	    Unit *un;
+	    Unit *un=superunit;
 	    {
 	      {
 
