@@ -53,6 +53,7 @@ void UncheckUnit (class Unit * un);
 #include "vsfilesystem.h"
 #include <set>
 #include <string>
+#include "collide_map.h"
 using std::string;
 
 extern char * GetUnitDir (const char * filename);
@@ -783,7 +784,7 @@ public:
   void Repair();
   ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
 // Not needed here, so only in NetUnit and Unit classes
-  void UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
+  void UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc, Unit * superunit);
   void AddVelocity(float difficulty);
   virtual void UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
   ///Resolves forces of given unit on a physics frame
@@ -1066,6 +1067,7 @@ public:
 public:
   ///The information about the minimum and maximum ranges of this unit. Collide Tables point to this bit of information.
   LineCollide CollideInfo;
+  CollideMap::iterator location;
   struct collideTrees * colTrees;
   ///Sets the parent to be this unit. Unit never dereferenced for this operation
   void SetCollisionParent (Unit *name);

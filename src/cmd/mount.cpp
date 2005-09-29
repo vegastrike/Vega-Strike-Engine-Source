@@ -221,7 +221,7 @@ bool Mount::PhysicsAlignedFire(Unit * caller, const Transformation &Cumulative, 
 			switch (type->type) {
 			case weapon_info::BEAM:
 				if (ref.gun)
-					ref.gun->Init(Transformation(orient,pos.Cast()),*type,owner,caller);
+					ref.gun->Init(Transformation(orient,pos.Cast()),*type,owner);
 			  break;
 			case weapon_info::BOLT:
 			  Bolt (type, mat, velocity, owner).noop();//FIXME turrets! Velocity      

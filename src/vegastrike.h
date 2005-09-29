@@ -63,7 +63,7 @@ extern float simulation_atom_var;
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include "command.h"
+//#include "command.h"
 #endif /* defined( WIN32 ) || defined( __CYGWIN__ ) */
 
 #if defined(__APPLE__) || defined(MACOSX)

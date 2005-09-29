@@ -15,7 +15,9 @@
 #include "vs_globals.h"
 #include "configxml.h"
 #include "collide.h"
-
+static bool operator == (const Collidable &a,const Collidable &b) {
+  return memcmp(&a,&b,sizeof(Collidable))==0;
+} 
 void Unit::RemoveFromSystem() {
 #define UNSAFE_COLLIDE_RELEASE
 #if (defined SAFE_COLLIDE_DEBUG) || (defined  UNSAFE_COLLIDE_RELEASE) 
@@ -24,7 +26,71 @@ void Unit::RemoveFromSystem() {
     CollideInfo.object.u = NULL;
   }
 #endif
+  /*
+  Collidable test1(0,0,QVector(0,0,0)),test2(0,0,QVector(0,0,0));
+  QVector tpos;
+  tpos.i=100;
+  tpos.j=1000;
+  tpos.k=1327.405240803957;
+  test1.SetPosition(tpos);
+  test1.radius=13.5689259;
+  test1.ref.bolt_index=189160920;
+  test2=test1;
+  double a=(test1).GetPosition().MagnitudeSquared();
+  double b=(test2).GetPosition().MagnitudeSquared();
+  
+  printf ("(%f %f %f) and (%f %f %f) %f < %f %d %d!!!",
+          (test1).GetPosition().i,
+          (test1).GetPosition().j,
+          (test1).GetPosition().k,
+          (test2).GetPosition().i,
+          (test2).GetPosition().j,
+          (test2).GetPosition().k,
+          (test1).GetPosition().MagnitudeSquared(),
+          (test2).GetPosition().MagnitudeSquared(),
+          (test1).GetPosition().MagnitudeSquared()<(test2).GetPosition().MagnitudeSquared(),
+          a<b);
+  */
+  
+  if (this->location!=null_collide_map.begin()) {
+    if (activeStarSystem==NULL) {
+      printf ("NONFATAL NULL activeStarSystem detected...please fix\n");
+      activeStarSystem=_Universe->activeStarSystem();
+    }
+    if (activeStarSystem->collidemap->find(*this->location)==activeStarSystem->collidemap->end()){
+      CollideMap::iterator i;
+      CollideMap::iterator j=activeStarSystem->collidemap->begin();
 
+      bool found=false;
+      for (i=activeStarSystem->collidemap->begin();
+           i!=activeStarSystem->collidemap->end();++i) {
+        if (i==this->location) {
+          printf ("hussah %d\n",*i==*this->location);
+          found=true;
+        }
+        if(**i<**j) {
+          printf ("(%f %f %f) and (%f %f %f) %f < %f %d!!!",
+                 (**i).GetPosition().i,
+                 (**i).GetPosition().j,
+                 (**i).GetPosition().k,
+                 (**j).GetPosition().i,
+                 (**j).GetPosition().j,
+                 (**j).GetPosition().k,
+                 (**i).GetPosition().MagnitudeSquared(),
+                 (**j).GetPosition().MagnitudeSquared(),
+                  (**i).GetPosition().MagnitudeSquared()<
+                  (**j).GetPosition().MagnitudeSquared());
+
+        }
+        j=i;
+      }
+      printf ("fin %d %d ",*(int*)&i,found);
+      activeStarSystem->collidemap->checkSet();
+      assert(0);
+    }
+    activeStarSystem->collidemap->erase(this->location);
+    this->location=null_collide_map.begin();
+  }
 #ifndef UNSAFE_COLLIDE_RELEASE
 #ifdef SAFE_COLLIDE_DEBUG
     if (
@@ -77,7 +143,7 @@ void Unit::UpdateCollideQueue () {
     CollideInfo.Mini= Puffmin;
     CollideInfo.Maxi=Puffmax;
 	CollideInfo.type=LineCollide::UNIT;
-    AddCollideQueue (CollideInfo,activeStarSystem);
+    AddCollideQueue (CollideInfo,_Universe->activeStarSystem());
   } else {
     CollideInfo.Mini= Puffmin;
     CollideInfo.Maxi=Puffmax;
@@ -86,44 +152,49 @@ void Unit::UpdateCollideQueue () {
 extern bool usehuge_table();
 void Unit::CollideAll() {
   static bool noUnitCollisions=XMLSupport::parse_bool(vs_config->getVariable("physics","no_unit_collisions","false"));
+
   if (isSubUnit()||killed||noUnitCollisions)
     return;
-
-  UnitCollection * colQ [tablehuge+1];
-  bool usehuge = usehuge_table()||GetJumpStatus().drive>=0;
-  int sizecolq = _Universe->activeStarSystem()->collidetable->c.Get (&CollideInfo,colQ,usehuge);
-  if (CollideInfo.hhuge&&GetJumpStatus().drive>=0) {
-    _Universe->activeStarSystem()->collidetable->c.AddHugeToActive(this);
-  }
-
-  int j = 0;
-  for (;j<sizecolq;j++) {
-    Unit *un;
-    for (un_iter i=colQ[j]->createIterator();(un=(*i))!=NULL;++i) {//warning CANNOT use iterator (except for this sort of collide queue now that I fixed the list
-      //UNITS MAY BE DELETED FROM THE CURRENT POINTED TO colQ IN THE PROCESS OF THEIR REMOVAL!!!!       //BUG TERMINATED!
-      LineCollide * tmp = &(un)->CollideInfo;
-      if (tmp->lastchecked==this)
-	continue;//ignore duplicates
-      tmp->lastchecked = this;//now we're the last checked.
-
-	  if ((!Unit::CollideInfo.hhuge||(CollideInfo.hhuge&&tmp->type==LineCollide::UNIT))&&((tmp->object.u>this||GetJumpStatus().drive>=0||un->GetJumpStatus().drive>=0||(!CollideInfo.hhuge&&j==0))))//the first stuffs are in the huge array
-	if (Position().i+radial_size>tmp->Mini.i&&
-	    Position().i-radial_size<tmp->Maxi.i&&
-	    Position().j+radial_size>tmp->Mini.j&&
-	    Position().j-radial_size<tmp->Maxi.j&&
-	    Position().k+radial_size>tmp->Mini.k&&
-	    Position().k-radial_size<tmp->Maxi.k) {
-	  if (un->Collide(this)) {
-	    if (j==0&&usehuge) {
-	      _Universe->activeStarSystem()->collidetable->c.AddHugeToActive(un);
-	    }
-	  }
-	}
+  static bool newUnitCollisions=XMLSupport::parse_bool(vs_config->getVariable("physics","new_collisions","true"));  
+  if (newUnitCollisions) {
+    this->getStarSystem()->collidemap->CheckCollisions(this,Collidable(this));
+  }else{
+    UnitCollection * colQ [tablehuge+1];
+    bool usehuge = usehuge_table()||GetJumpStatus().drive>=0;
+    int sizecolq = _Universe->activeStarSystem()->collidetable->c.Get (&CollideInfo,colQ,usehuge);
+    if (CollideInfo.hhuge&&GetJumpStatus().drive>=0) {
+      _Universe->activeStarSystem()->collidetable->c.AddHugeToActive(this);
+    }
     
+    int j = 0;
+    for (;j<sizecolq;j++) {
+      Unit *un;
+      for (un_iter i=colQ[j]->createIterator();(un=(*i))!=NULL;++i) {//warning CANNOT use iterator (except for this sort of collide queue now that I fixed the list
+      //UNITS MAY BE DELETED FROM THE CURRENT POINTED TO colQ IN THE PROCESS OF THEIR REMOVAL!!!!       //BUG TERMINATED!
+        LineCollide * tmp = &(un)->CollideInfo;
+        if (tmp->lastchecked==this)
+          continue;//ignore duplicates
+        tmp->lastchecked = this;//now we're the last checked.
+        
+        if ((!Unit::CollideInfo.hhuge||(CollideInfo.hhuge&&tmp->type==LineCollide::UNIT))&&((tmp->object.u>this||GetJumpStatus().drive>=0||un->GetJumpStatus().drive>=0||(!CollideInfo.hhuge&&j==0))))//the first stuffs are in the huge array
+          if (Position().i+radial_size>tmp->Mini.i&&
+              Position().i-radial_size<tmp->Maxi.i&&
+              Position().j+radial_size>tmp->Mini.j&&
+              Position().j-radial_size<tmp->Maxi.j&&
+              Position().k+radial_size>tmp->Mini.k&&
+              Position().k-radial_size<tmp->Maxi.k) {
+            if (un->Collide(this)) {
+              if (j==0&&usehuge) {
+                _Universe->activeStarSystem()->collidetable->c.AddHugeToActive(un);
+              }
+            }
+          }
+        
+      }
     }
   }
 }
-
+  
 Vector Vabs (const Vector &in) {
 	return Vector (in.i>=0?in.i:-in.i,
 				   in.j>=0?in.j:-in.j,

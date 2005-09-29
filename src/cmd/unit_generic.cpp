@@ -631,6 +631,7 @@ void Unit::ZeroAll( )
 
 void Unit::Init()
 {
+  location=null_collide_map.begin();
   specInterdiction=0;
   sim_atom_multiplier=1;
   /*
@@ -1754,7 +1755,7 @@ void Unit::DisableTurretAI () {
 extern signed char  ComputeAutoGuarantee ( Unit * un);
 extern float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false);
 extern void SetShieldZero(Unit*);
-void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
+void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc, Unit * superunit) {
   static float VELOCITY_MAX=XMLSupport::parse_float(vs_config->getVariable ("physics","velocity_max","10000"));
   static float SPACE_DRAG=XMLSupport::parse_float(vs_config->getVariable ("physics","unit_space_drag","0.000000"));
   static float EXTRA_CARGO_SPACE_DRAG=XMLSupport::parse_float(vs_config->getVariable ("physics","extra_space_drag_for_cargo","0.005"));
@@ -1941,7 +1942,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 			  }
 			  autotarg = target;
 		  }
-		  mounts[i].ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix,autotarg,trackingcone, target,(HeatSink?HeatSink:1.0f)*mounts[i].functionality);
+		  mounts[i].ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix,autotarg,trackingcone, target,(HeatSink?HeatSink:1.0f)*mounts[i].functionality,this,superunit);
       }
     } else {
       mounts[i].ref.refire+=SIMULATION_ATOM*(HeatSink?HeatSink:1.0f)*mounts[i].functionality;
@@ -1996,7 +1997,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
     Unit * su;
     UnitCollection::UnitIterator iter=getSubUnits();
     while ((su=iter.current())) {
-      su->UpdatePhysics(cumulative_transformation,cumulative_transformation_matrix,cumulative_velocity,lastframe,uc); 
+      su->UpdatePhysics(cumulative_transformation,cumulative_transformation_matrix,cumulative_velocity,lastframe,uc,superunit); 
       su->cloaking = (unsigned int) cloaking; //short fix
       if (hull<0) {
 	su->Target(NULL);

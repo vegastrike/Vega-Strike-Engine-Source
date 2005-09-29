@@ -24,7 +24,7 @@ Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own, 
   if (decal>=beamdrawqueue.size()) {
     beamdrawqueue.push_back (vector<DrawContext>());
   }
-  Init(trans,clne,own,firer);
+  Init(trans,clne,own);
   impact=UNSTABLE;
 }
 

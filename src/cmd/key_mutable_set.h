@@ -1,3 +1,5 @@
+#ifndef _KEY_MUTABLE_SET_H_
+#define _KEY_MUTABLE_SET_H_
 #include <set>
 #include <assert.h>
 template <class T> class MutableShell {
@@ -33,7 +35,7 @@ public:
 	 */
 	void changeKey (typename SUPER::iterator &iter, const T & newKey, typename SUPER::iterator &templess, typename SUPER::iterator &rettempmore) {
 		MutableShell<T> newKeyShell(newKey);
-		templess=tempmore=iter;
+		templess=rettempmore=iter;
 		++rettempmore;
                 typename SUPER::iterator tempmore=rettempmore;
                 if (tempmore==this->end())
@@ -50,7 +52,7 @@ public:
 		}else {
                   (*iter).get()=newKey;
 		}
-		return iter;
+		//return iter;
 	}
 
 	typename SUPER::iterator changeKey (typename SUPER::iterator iter, const T & newKey) {
@@ -59,3 +61,4 @@ public:
                 return iter;
 	}
 };
+#endif

@@ -13,7 +13,7 @@ using std::vector;
 using std::string;
 
 extern double interpolation_blend_factor;
-
+ 
 bool Bolt::Update (int index) {
   const weapon_info *type=this->type;
   float speed=type->Speed;
@@ -24,6 +24,9 @@ bool Bolt::Update (int index) {
     this->Destroy(index);//risky
     return false;
   }
+  Collidable updated(**location);
+  updated.SetPosition(.5*(prev_position+cur_position));
+  _Universe->activeStarSystem()->collidemap->changeKey(location,updated);
   return true;
 }
 
@@ -32,6 +35,7 @@ void bolt_draw::UpdatePhysics () {
   for (int l=0;l<2;l++) {    
     for (vector <vector <Bolt> >::iterator i= tmp->begin();i!=tmp->end();i++) {
       for (int j=0;j<i->size();j++) {
+        int size=i->size();
         Bolt * b=&((*i)[j]);
 	///warning these require active star system to be set appropriately
 	if (!b->Update(j)) {
@@ -89,7 +93,33 @@ bool Bolt::Collide (Unit * target) {
   }
   return false;
 }
+size_t nondecal_index(Collidable::CollideRef b) {
+  return b.bolt_index>>8;
+}
+Bolt * Bolt::BoltFromIndex(StarSystem * ss, Collidable::CollideRef b) {
+  size_t ind =nondecal_index(b);
+  if (b.bolt_index&128) {
+    return &ss->bolts->balls[b.bolt_index&0x7f][ind];
+  }else{
+    return &ss->bolts->bolts[b.bolt_index&0x7f][ind];
+  }
 
+}
+bool Bolt::CollideAnon(Collidable::CollideRef b, Unit *un) {
+  Bolt * tmp=BoltFromIndex(_Universe->activeStarSystem(),b);
+  if (tmp->Collide(un)) {
+    tmp->Destroy(nondecal_index(b));
+  }
+}
+union Collidable::CollideRef;
+Collidable::CollideRef Bolt::BoltIndex(int index, int decal, bool isBall) {
+  Collidable::CollideRef temp;
+  temp.bolt_index=index;
+  temp.bolt_index<<=8;
+  temp.bolt_index|=decal;
+  temp.bolt_index|=isBall?128:0;
+  return temp;  
+}
 
 void BoltDestroyGeneric (Bolt * whichbolt, int index, int decal, bool isBall) {
   VSDESTRUCT2
@@ -101,12 +131,19 @@ void BoltDestroyGeneric (Bolt * whichbolt, int index, int decal, bool isBall) {
     target = &q->balls;
   }
   vector<Bolt> * vec=&(*target)[decal];
-
+  int fsize=vec->size();
   if (&(*vec)[index]==whichbolt) {
-    (*vec)[index]=vec->back();//just a memcopy, yo
+    int tsize=vec->size();
+    (*vec->back().location)->ref=(*(*vec)[index].location)->ref;
+    assert (index<tsize);
+    _Universe->activeStarSystem()->collidemap->erase((*vec)[index].location);
+    (*vec)[index]=vec->back();//just a memcopy, yo    
     vec->pop_back();//pop that back up
   }else {
-    VSFileSystem::vs_fprintf (stderr,"Bolt Fault Nouveau! Not found in draw queue! Attempting to recover\n");
+    VSFileSystem::vs_fprintf (stderr,"Bolt Fault Nouveau! Not found in draw queue! No Chance to recover\n");
+    fflush(stderr);
+    assert(0);
+    /*
     vector <Bolt>::iterator tmp= std::find ((*target)[decal].begin(),(*target)[decal].end(),*whichbolt); 
     if (tmp!=(*target)[decal].end()) {
       (*target)[decal].erase(tmp);
@@ -129,5 +166,6 @@ void BoltDestroyGeneric (Bolt * whichbolt, int index, int decal, bool isBall) {
         }
       }     
     }
+    */
   }
 }

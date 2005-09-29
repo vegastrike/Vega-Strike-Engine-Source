@@ -5,9 +5,10 @@
 #include "weapon_xml.h"
 #include "gfx/matrix.h"
 #include "gfx/quaternion.h"
-
+#include "collide_map.h"
 class Animation;
 class Unit;
+class StarSystem;
 class Bolt {
 private:
   const weapon_info* type;//beam or bolt;
@@ -18,8 +19,13 @@ private:
   void *owner;
   float curdist;
   int decal;//which image it uses
-  bool Collide (Unit * target);
  public:
+  CollideMap::iterator location;
+
+  bool Collide (Unit * target);
+  static bool CollideAnon (Collidable::CollideRef bolt_name, Unit* target);
+  static Bolt * BoltFromIndex(StarSystem* ss,Collidable::CollideRef bolt_name);
+  static Collidable::CollideRef BoltIndex(int index, int decal, bool isBall);
   bool operator == (const Bolt & b) const{
     
     return owner==b.owner
@@ -32,6 +38,7 @@ private:
   static void Draw();
   bool Update(int index);
   bool Collide(int index);
+
   void noop()const{}
 };
 class bolt_draw {

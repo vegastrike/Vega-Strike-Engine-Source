@@ -121,32 +121,96 @@ bool usehuge_table() {
   return seed<(M/100);
 }
 bool Bolt::Collide (int index) {
-  UnitCollection *candidates[2];  
-  bool use_huge_list=usehuge_table();
-  _Universe->activeStarSystem()->collidetable->c.Get (cur_position,candidates,use_huge_list);
-  LineCollide minimaxi;//might as well have this so we can utilize common function
-  minimaxi.Mini= ( prev_position.Min (cur_position));
-  minimaxi.Maxi= ( prev_position.Max (cur_position));
-  for (unsigned int j=0;j<2;j++) {
-    Unit * un;
-    for (un_iter i=candidates[j]->createIterator();(un=*i)!=NULL;++i) {
-      
-      if (lcwithin (minimaxi,(un)->GetCollideInfo ())) {
-	if (this->Collide (un)) {
-	  if (j==0&&use_huge_list) {
-	    _Universe->activeStarSystem()->collidetable->c.AddHugeToActive(un);
-	  }
-	  Destroy(index);
-	  return true;
-	}
-	
+  static bool New_Collide_System=XMLSupport::parse_bool(vs_config->getVariable("physics","new_collisions","true"));
+  if (New_Collide_System) {
+    Collidable updated(**location);
+    updated.SetPosition(.5*(prev_position+cur_position));
+    return _Universe->activeStarSystem()->collidemap->CheckCollisions(this,updated);
+  }else {
+
+    UnitCollection *candidates[2];  
+    bool use_huge_list=usehuge_table();
+    _Universe->activeStarSystem()->collidetable->c.Get (cur_position,candidates,use_huge_list);
+    LineCollide minimaxi;//might as well have this so we can utilize common function
+    minimaxi.Mini= ( prev_position.Min (cur_position));
+    minimaxi.Maxi= ( prev_position.Max (cur_position));
+    for (unsigned int j=0;j<2;j++) {
+      Unit * un;
+      for (un_iter i=candidates[j]->createIterator();(un=*i)!=NULL;++i) {
+        
+        if (lcwithin (minimaxi,(un)->GetCollideInfo ())) {
+          if (this->Collide (un)) {
+            if (j==0&&use_huge_list) {
+              _Universe->activeStarSystem()->collidetable->c.AddHugeToActive(un);
+            }
+            Destroy(index);
+            return true;
+          }
+          
+        }
       }
     }
   }
   return false;
 }
-
-void Beam::CollideHuge (const LineCollide & lc, Unit * targetToCollideWith) {
+static bool beamCheckCollision (QVector pos, float len, const Collidable & un) {
+  
+  return (un.GetPosition()-pos).MagnitudeSquared()<=len*len+2*len*un.radius+un.radius*un.radius;
+}
+void Beam::CollideHuge (const LineCollide & lc, Unit * targetToCollideWith, Unit * firer, Unit * superunit) {
+  static bool newUnitCollisions=XMLSupport::parse_bool(vs_config->getVariable("physics","new_collisions","true"));  
+  if (newUnitCollisions) {
+    QVector x0=center;
+    QVector v=direction*curlength;
+    if (curlength) {
+      double t = v.Dot(x0)/v.Dot(v);//find where derivative of radius is zero
+      float r0= x0.MagnitudeSquared();
+      float r1 = (x0+v.Scale((t<0||t>1)?1.0f:t)).MagnitudeSquared();
+      float r2 = (x0+v.Scale(1.0f)).MagnitudeSquared();
+      float minsqr=r0<r1?(r0<r2?r0:r2):r1;
+      float maxsqr=r0<r1?(r1<r2?r2:r1):r0;
+      maxsqr+=(maxsqr-(*superunit->location)->GetMagnitudeSquared())+2*curlength*curlength;//double damage, yo
+      minsqr+=(minsqr-(*superunit->location)->GetMagnitudeSquared())-2*curlength*curlength;
+      // (a+2*b)^2-(a+b)^2 = 3b^2+2ab = 2b^2+(a+b)^2-a^2
+      CollideMap * cm=_Universe->activeStarSystem()->collidemap;
+      if (superunit->location!=cm->begin()&&
+          minsqr<(*superunit->location)->GetMagnitudeSquared()){
+        //less traversal
+        CollideMap::iterator tless=superunit->location;
+        --tless;
+        while((*tless)->GetMagnitudeSquared()>=minsqr) {
+          CollideMap::iterator curcheck=tless;          
+          bool breakit=false;
+          if (tless!=cm->begin()) {
+            --tless;            
+          }else {
+            breakit=true;
+          }
+          if ((*curcheck)->radius>0) {
+            if (beamCheckCollision(center,curlength,(**curcheck))) {
+              this->Collide((**curcheck).ref.unit,firer,superunit);
+            }
+          }
+          if (breakit)
+            break;
+          
+        }
+      }
+      if (maxsqr>(*superunit->location)->GetMagnitudeSquared()) {
+        //greater traversal
+        CollideMap::iterator tmore=superunit->location;
+        ++tmore;
+        while (tmore!=cm->end()&&(*tmore)->GetMagnitudeSquared()<=maxsqr){        
+          if ((*tmore)->radius>0) {
+            Unit *un=(*tmore)->ref.unit;
+            if (beamCheckCollision(center,curlength,**tmore++)) {
+              this->Collide(un,firer,superunit);
+            }
+          }else ++tmore;
+        }        
+      }
+    }
+  }else {
   UnitCollection *colQ [tablehuge+1];
   bool use_huge_list = usehuge_table();
   if (!lc.hhuge) {
@@ -156,7 +220,7 @@ void Beam::CollideHuge (const LineCollide & lc, Unit * targetToCollideWith) {
       for (un_iter i=colQ[j]->createIterator();(un=(*i))!=NULL;++i) {
 
 	if (lcwithin(lc,(un)->GetCollideInfo())) {
-	  if (this->Collide (un)) {
+	  if (this->Collide (un,firer,superunit)) {
 	    if (j==0&&use_huge_list) {
 	      _Universe->activeStarSystem()->collidetable->c.AddHugeToActive(un);
 	    }
@@ -166,19 +230,20 @@ void Beam::CollideHuge (const LineCollide & lc, Unit * targetToCollideWith) {
     }
   }else {
     if (targetToCollideWith&&(!use_huge_list)) {
-      this->Collide(targetToCollideWith);
+      this->Collide(targetToCollideWith,firer,superunit);
     }else {
       un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
       Unit *un;
       for (;(un=*i)!=NULL;++i) {
 	if (lcwithin (lc,(un)->GetCollideInfo())) {
-	  this->Collide(un);
+	  this->Collide(un,firer,superunit);
 	  if ((un!=targetToCollideWith)&&targetToCollideWith!=NULL) {
 	    ListenToOwner(false);
 	  }
 	}
       }
     }
+  }
   }
 
 }

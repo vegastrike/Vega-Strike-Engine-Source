@@ -39,7 +39,7 @@ void SetColorToVertex (GFXColorVertex &vert,const GFXColor &col=GFXColor(0,0,0,0
 
 extern Unit* getTopLevelOwner();
 
-void Beam::Init (const Transformation & trans, const weapon_info &cln , void * own, Unit * firer)  {
+void Beam::Init (const Transformation & trans, const weapon_info &cln , void * own)  {
   //Matrix m;
   CollideInfo.object.b = NULL;
   CollideInfo.type = LineCollide::BEAM;
@@ -66,8 +66,6 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
   Col.a=cln.a;
   impact= ALIVE;
   owner = own;
-  owner_rsize = firer->rSize();
-  owner_faction = firer->faction;
   numframes=0;
 
   lastlength=0;
@@ -255,7 +253,7 @@ void Beam::RemoveFromSystem(bool eradicate) {
 #endif
 #endif
 }
-void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m, Unit * targ, float tracking_cone, Unit * targetToCollideWith, float HeatSink) {
+void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m, Unit * targ, float tracking_cone, Unit * targetToCollideWith, float HeatSink, Unit * firer, Unit * superunit) {
   curlength += SIMULATION_ATOM*speed;
   if (curlength<0) {
     curlength=0;
@@ -298,7 +296,7 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m, Unit * ta
 #endif    
   } else {
 
-    CollideHuge(CollideInfo,listen_to_owner?targetToCollideWith:NULL);
+    CollideHuge(CollideInfo,listen_to_owner?targetToCollideWith:NULL,firer,superunit);
     
     if (!(curlength<range&&curlength>0)) {//if curlength just happens to be nan
       if (curlength>range)
@@ -330,7 +328,7 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m, Unit * ta
   //Check if collide...that'll change max beam length REAL quick
 }
 extern Cargo * GetMasterPartList (const char *);
-bool Beam::Collide (Unit * target) {
+bool Beam::Collide (Unit * target, Unit * firer, Unit * superunit) {
   if (this==NULL||target==NULL){
     VSFileSystem::vs_fprintf (stderr,"Recovering from nonfatal beam error when beam inactive\n");
     return false;
@@ -408,7 +406,7 @@ bool Beam::Collide (Unit * target) {
 
     if ((appldam<0&&phasdam>0)||(appldam>0&&phasdam<0)) {
       bool fp = o_fp, fi = o_fi;
-      if (target->faction == owner_faction)
+      if (target->faction == superunit->faction)
           fp = f_fp, fi = f_fi; else if (target->faction == upgradesfaction)
           fp = u_fp, fi = u_fi; else if (target->faction == cargofaction)
           fp = c_fp, fi = c_fi;
@@ -416,7 +414,7 @@ bool Beam::Collide (Unit * target) {
       //tractor/repulsor beam!
       if (fp||target->isTractorable(Unit::tractorPush)) {
         float lighting=o_lighting;
-        if (target->faction == owner_faction)
+        if (target->faction == superunit->faction)
             lighting = f_lighting; else if (target->faction == upgradesfaction)
             lighting = u_lighting; else if (target->faction == cargofaction)
             lighting = c_lighting;
@@ -424,16 +422,17 @@ bool Beam::Collide (Unit * target) {
       }
 
       float ors_m=o_ors_m,trs_m=o_trs_m,ofs=o_o;
-      if (target->faction == owner_faction)
+      if (target->faction == superunit->faction)
           ors_m = f_ors_m, trs_m = f_trs_m, ofs = f_o; else if (target->faction == upgradesfaction)
           ors_m = u_ors_m, trs_m = u_trs_m, ofs = u_o; else if (target->faction == cargofaction)
           ors_m = c_ors_m, trs_m = c_trs_m, ofs = c_o;
-
+      float owner_rsize=superunit->rSize();
       if ((fi||target->isTractorable(Unit::tractorIn))&&((center-target->Position()).Magnitude()<(ors_m*owner_rsize+trs_m*target->rSize()+ofs))) {
 	    un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();
 	    Unit *un;
-	    for (;(un=*ui)!=NULL;++ui) {
-	      if (((void *)un)==owner) {
+	    {
+	      {
+
 	        if (target->faction==upgradesfaction||owner_rsize*nbig>target->rSize()) {
 	          //we have our man!
 	          //lets add our cargo to him

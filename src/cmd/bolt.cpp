@@ -76,7 +76,7 @@ Bolt::Bolt (const weapon_info * typ, const Matrix &orientationpos,  const Vector
   this->type = typ;
   curdist = 0;
   CopyMatrix (drawmat,orientationpos);
-  
+  Vector vel=shipspeed+orientationpos.getR()*typ->Speed;
   if (typ->type==weapon_info::BOLT) {
     ScaleMatrix (drawmat,Vector (typ->Radius,typ->Radius,typ->Length));
     decal = q->boltdecals->AddTexture (typ->file.c_str(),MIPMAP);
@@ -88,6 +88,7 @@ Bolt::Bolt (const weapon_info * typ, const Matrix &orientationpos,  const Vector
       }
       q->cachedecals.push_back (blargh);
     }
+    this->location=_Universe->activeStarSystem()->collidemap->insert(Collidable(Bolt::BoltIndex(q->bolts[decal].size(),decal,false).bolt_index,(shipspeed+orientationpos.getR()*typ->Speed).Magnitude()*.5,cur_position+vel*SIMULATION_ATOM*.5));
     q->bolts[decal].push_back (*this);
   } else {
     ScaleMatrix (drawmat,Vector (typ->Radius,typ->Radius,typ->Radius));
@@ -104,6 +105,7 @@ Bolt::Bolt (const weapon_info * typ, const Matrix &orientationpos,  const Vector
       q->animations.back()->SetPosition (cur_position);
       q->balls.push_back (vector <Bolt> ());
     }
+    this->location=_Universe->activeStarSystem()->collidemap->insert(Collidable(Bolt::BoltIndex(q->balls[decal].size(),decal,true).bolt_index,(shipspeed+orientationpos.getR()*typ->Speed).Magnitude()*.5,cur_position+vel*SIMULATION_ATOM*.5));
     q->balls[decal].push_back (*this);
   }
 }
@@ -189,8 +191,8 @@ void Bolt::Draw () {
   GFXEnable (TEXTURE0);
   GFXColor4f(1,1,1,1);
 }
-extern void BoltDestroyGeneric(Bolt * whichbolt, int index, int decal, bool isBall);
 
+extern void BoltDestroyGeneric(Bolt * whichbolt, int index, int decal, bool isBall);
 void Bolt::Destroy (int index) {
   VSDESTRUCT2
   bolt_draw *q = _Universe->activeStarSystem()->bolts;

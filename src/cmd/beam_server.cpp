@@ -9,7 +9,7 @@ Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own, 
   VSCONSTRUCT2('B')
     listen_to_owner=false;//warning this line of code is also present in beam.cpp change one, change ALL
 
-  Init(trans,clne,own,self);
+  Init(trans,clne,own);
   impact=UNSTABLE;
 }
 

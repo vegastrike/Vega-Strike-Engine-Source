@@ -17,6 +17,7 @@ class Background;
 class Terrain;
 class ContinuousTerrain;
 class Universe;
+class CollideMap;
 //class TextPlane;
 struct AtmosphericFogMesh {
 	std::string meshname;
@@ -132,6 +133,7 @@ class StarSystem {
 
   void ExecuteUnitAI();
   class CollideTable *collidetable;
+  CollideMap *collidemap;
   class bolt_draw *bolts;
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);

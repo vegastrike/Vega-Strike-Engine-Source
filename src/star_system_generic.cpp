@@ -87,6 +87,7 @@ StarSystem::StarSystem() {
   stars = NULL;
   bolts = NULL;
   collidetable = NULL;
+  collidemap=new CollideMap;
   no_collision_time=0;//(int)(1+2.000/SIMULATION_ATOM);
   ///adds to jumping table;
   name = NULL;
@@ -106,6 +107,7 @@ StarSystem::StarSystem() {
 }
 StarSystem::StarSystem(const char * filename, const Vector & centr,const float timeofyear) {
   no_collision_time=0;//(int)(1+2.000/SIMULATION_ATOM);
+  collidemap=new CollideMap;
   this->current_sim_location=0;
   ///adds to jumping table;
   name = NULL;
@@ -201,6 +203,7 @@ StarSystem::~StarSystem() {
   _Universe->popActiveStarSystem();
   _Universe->activeStarSystem()->SwapIn();  
   RemoveStarsystemFromUniverse();
+  delete collidemap;
   
 }
 
@@ -294,6 +297,11 @@ void StarSystem::AddUnit(Unit *unit) {
 }
 
 bool StarSystem::RemoveUnit(Unit *un) {
+  if (un->location!=null_collide_map.begin()) {
+    assert (collidemap->find(*un->location)!=collidemap->end());
+    collidemap->erase(un->location);
+    un->location=null_collide_map.begin();
+  }
   bool removed2=false;
   UnitCollection::UnitIterator iter = gravitationalUnits().createIterator();
   Unit *unit;
@@ -392,7 +400,7 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
 	unit->ExecuteAI(); 
         unit->ResetThreatLevel();
 	unit->CollideAll();
-      unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits());    
+      unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits(),unit);    
       if (newloc==current_sim_location) {
 	iter.advance();
       }else{ 
@@ -416,7 +424,7 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
     while((unit = iter.current())!=NULL) {
       unit->ExecuteAI(); 
       unit->CollideAll();
-      unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits());    
+      unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits(),unit);    
       iter.advance();
     }
   }
