@@ -2044,15 +2044,66 @@ void Unit::AddVelocity(float difficulty) {
        static double upcurvek=warpcruisemult/pow((warpregion1-warpregion0),curvedegree); // coefficient so as to agree with above
 	   float minmultiplier=warpMultiplierMax;
 	   Unit * planet;
-	   for (un_iter iter = _Universe->activeStarSystem()->gravitationalUnits().createIterator();(planet=*iter);++iter) {
-		   if (planet==this) {
-			   continue;
-		   }
-		 float shiphack=(planet->isUnit()==PLANETPTR)?1:4;
+           Unit * testthis=NULL;
+           QVector thispos=this->Position();
+           if (this->location!=null_collide_map.begin()) {
+             CollideMap::iterator tless=this->location;
+             CollideMap::iterator tmore=this->location;
+             float startkey=sqrt((*this->location)->GetMagnitudeSquared());
+             ++tmore;
+             float rad=FLT_MAX;
+             CollideMap *cm=_Universe->activeStarSystem()->collidemap;             
+             if (tless!=cm->begin()) {
+               if ((**cm->begin()).radius>0) { 
+                 testthis=(**cm->begin()).ref.unit;
+                 rad=(thispos-testthis->Position()).Magnitude()-testthis->rSize();
+               }
+               --tless;
+             }
+             bool workA=true;
+             bool workB=true;
+
+             while(workA||workB){
+               if (workA
+                   &&tless!=cm->begin()
+                   &&(startkey-rad)*(startkey-rad)<(*tless)->GetMagnitudeSquared()) {
+                 
+                 if ((*tless)->radius>0) {
+                   float trad = ((*tless)->GetPosition()-thispos).Magnitude()-(*tless)->radius;
+                   if (trad<rad) {
+                     rad=trad;
+                     testthis = (*tless)->ref.unit;
+                   }
+                 }
+                 tless--;
+               }else workA=false;
+               if (workB
+                   &&tmore!=cm->end()
+                   &&(startkey+rad)*(startkey+rad)>(*tmore)->GetMagnitudeSquared()) {
+                 if ((*tmore)->radius>0) {
+                   float trad = ((*tmore)->GetPosition()-thispos).Magnitude()-(*tmore)->radius;
+                   if (trad<rad) {
+                     rad=trad;
+                     testthis=(*tmore)->ref.unit;
+                   }
+                 }
+                 tmore++;
+               }else workB=false;
+             }
+           }
+	   for (un_iter iter = _Universe->activeStarSystem()->gravitationalUnits().createIterator();(planet=*iter)||testthis;++iter) {
+		 if (planet==NULL) {
+                   planet=testthis;
+                   testthis=NULL;
+		 }
+                 if (planet==this) {
+                     continue;
+                 }
+		 float shiphack=(planet->isUnit()==PLANETPTR)?.25:(testthis?(planet->specInterdiction?1./specInterdiction:1):1);
 		 float multipliertemp=1;
 		 float minsizeeffect = (planet->rSize()>smallwarphack)?planet->rSize():smallwarphack;
 		 float effectiverad = minsizeeffect*(1.0f+UniverseUtil::getPlanetRadiusPercent())+rSize();
-		 double dist=(Position()-planet->Position()).Magnitude()*shiphack;
+		 double dist=(Position()-planet->Position()).Magnitude()*shiphack*4;
 		 if (dist>(effectiverad+warpregion0)){
 			multipliertemp=pow((dist-effectiverad-warpregion0),curvedegree)*upcurvek;
 		 }else{
@@ -2060,6 +2111,8 @@ void Unit::AddVelocity(float difficulty) {
 			minmultiplier=1;
 		 }
 		 minmultiplier=(multipliertemp<minmultiplier)?multipliertemp:minmultiplier;
+                 if (!testthis)
+                   break;//don't want the ++
 	   }
 	   float rampmult=1;
 	   if(graphicOptions.RampCounter!=0){
