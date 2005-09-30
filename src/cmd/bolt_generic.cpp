@@ -109,7 +109,9 @@ bool Bolt::CollideAnon(Collidable::CollideRef b, Unit *un) {
   Bolt * tmp=BoltFromIndex(_Universe->activeStarSystem(),b);
   if (tmp->Collide(un)) {
     tmp->Destroy(nondecal_index(b));
+    return true;
   }
+  return false;
 }
 union Collidable::CollideRef;
 Collidable::CollideRef Bolt::BoltIndex(int index, int decal, bool isBall) {
