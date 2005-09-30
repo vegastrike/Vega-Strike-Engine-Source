@@ -22,6 +22,9 @@ public:
     //in case we want to drop in an xtra radius parameter when we get performance testing    
     this->position=bpos;
     key=bpos.MagnitudeSquared();
+    if (isnan(key)) {
+      key=0;//hack for now
+    }
   }
   float GetMagnitudeSquared()const {return key;}
   bool operator <(const Collidable &other) const {
