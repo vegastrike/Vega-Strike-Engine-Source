@@ -577,7 +577,7 @@ float getFuelConversion(){
 #define OPTIMIZER_INDEX(Variable) OPTIDX_##Variable
 #define INIT_OPTIMIZER(keys,Variable) OPTIMIZER_INDEX(Variable) = (keys.push_back(#Variable),(keys.size()-1))
 #define DEF_OPTIMIZER(Variable) static unsigned int OPTIMIZER_INDEX(Variable) = CSVTable::optimizer_undefined;
-#define OPTIM_GET(row,table,variable) (use_optimizer?(((OPTIMIZER_INDEX(variable)==CSVTable::optimizer_undefined) || (table->optimizer_indexes[OPTIMIZER_INDEX(variable)]==CSVTable::optimizer_undefined))?std::string(""):row[table->optimizer_indexes[OPTIMIZER_INDEX(variable)]]):row[#variable])
+#define OPTIM_GET(row,table,variable) (use_optimizer?(((OPTIMIZER_INDEX(variable)==CSVTable::optimizer_undefined) || (table->optimizer_indexes[OPTIMIZER_INDEX(variable)]==CSVTable::optimizer_undefined))?std::string(""):(table->optimizer_indexes[OPTIMIZER_INDEX(variable)]<row.size()?row[table->optimizer_indexes[OPTIMIZER_INDEX(variable)]]:row[#variable])):row[#variable])
 
 void Unit::LoadRow(CSVRow &row, string modification, string * netxml) {
   CSVTable *table = row.getParent();
@@ -610,6 +610,7 @@ void Unit::LoadRow(CSVRow &row, string modification, string * netxml) {
   DEF_OPTIMIZER(Sub_Units);
   DEF_OPTIMIZER(Mounts);
   DEF_OPTIMIZER(Hold_Volume);
+  DEF_OPTIMIZER(Hidden_Hold_Volume);
   DEF_OPTIMIZER(Upgrade_Storage_Volume);
   DEF_OPTIMIZER(Equipment_Space);
   DEF_OPTIMIZER(Cargo_Import);
@@ -730,6 +731,7 @@ void Unit::LoadRow(CSVRow &row, string modification, string * netxml) {
           INIT_OPTIMIZER(keys,Sub_Units);
           INIT_OPTIMIZER(keys,Mounts);
           INIT_OPTIMIZER(keys,Hold_Volume);
+          INIT_OPTIMIZER(keys,Hidden_Hold_Volume);
           INIT_OPTIMIZER(keys,Upgrade_Storage_Volume);
           INIT_OPTIMIZER(keys,Equipment_Space);
           INIT_OPTIMIZER(keys,Cargo_Import);
@@ -874,6 +876,7 @@ void Unit::LoadRow(CSVRow &row, string modification, string * netxml) {
   calculate_extent(false);
   AddMounts(this,xml,OPTIM_GET(row,table,Mounts));
   this->image->CargoVolume=stof(OPTIM_GET(row,table,Hold_Volume));
+  this->image->HiddenCargoVolume=stof(OPTIM_GET(row,table,Hidden_Hold_Volume));
   this->image->UpgradeVolume=stof(OPTIM_GET(row,table,Upgrade_Storage_Volume));
   this->image->equipment_volume=stof(OPTIM_GET(row,table,Equipment_Space));
   ImportCargo(this,OPTIM_GET(row,table,Cargo_Import));//if this changes change planet_generic.cpp
@@ -1371,6 +1374,7 @@ string Unit::WriteUnitString () {
         // mutable things
         unit["Equipment_Space"]=XMLSupport::tostring(image->equipment_volume);
         unit["Hold_Volume"]=XMLSupport::tostring(image->CargoVolume);
+        unit["Hidden_Hold_Volume"]=XMLSupport::tostring(image->HiddenCargoVolume);
         unit["Upgrade_Storage_Volume"]=XMLSupport::tostring(image->UpgradeVolume);
         string mountstr;
         double unitScale=  stof(unit["Unit_Scale"],1);

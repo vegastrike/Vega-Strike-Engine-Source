@@ -689,6 +689,7 @@ void Unit::Init()
   image->unitwriter=NULL;
   cloakmin=image->cloakglass?1:0;
   image->equipment_volume=0;
+  image->HiddenCargoVolume=0;
   image->cloakrate=100;
   image->cloakenergy=0;
   image->forcejump=false;
@@ -5992,6 +5993,9 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   }
   if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Equipment_Space")){
     STDUPGRADE(image->equipment_volume,up->image->equipment_volume,templ->image->equipment_volume,0);
+  }
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Hidden_Cargo_Volume")){
+    STDUPGRADE(image->HiddenCargoVolume,up->image->HiddenCargoVolume,templ->image->HiddenCargoVolume,0);
   }
   image->ecm = abs(image->ecm);
   if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"ECM_Rating")){

@@ -190,25 +190,26 @@ void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected) {
 void CommunicatingAI::GetMadAt (Unit * un, int numHitsPerContrabandFail) {
   ::GetMadAt(un,parent,numHitsPerContrabandFail);
 }
-
-static bool InList (std::string item, Unit * un) {
+static int InList (std::string item, Unit * un) {
+  float numcontr = 0;
   if (un) {
   for (unsigned int i=0;i<un->numCargo();i++) {
     if (item==un->GetCargo(i).content) {
       if (un->GetCargo(i).quantity>0)
-	return true;
+	     numcontr++;
     }
   }
   }
-  return false;
+  return numcontr;
 }
+
 void CommunicatingAI::UpdateContrabandSearch () {
 	Unit * u = contraband_searchee.GetUnit();
-	if (u) {
+	if (u && (u->faction != parent->faction)) { // don't scan your buddies
 		if (which_cargo_item<(int)u->numCargo()) {
 			if (u->GetCargo(which_cargo_item).quantity>0) {
 				std::string item = u->GetManifest (which_cargo_item++,parent,SpeedAndCourse);
-				
+				static bool use_hidden_cargo_space=XMLSupport::parse_bool (vs_config->getVariable ("physics","use_hidden_cargo_space","true"));
 				static float speed_course_change = XMLSupport::parse_float (vs_config->getVariable ("AI","PercentageSpeedChangeToStopSearch","1"));
 				if (u->CourseDeviation(SpeedAndCourse,u->GetVelocity())>speed_course_change) {
 					CommunicationMessage c(parent,u,comm_face,sex);
@@ -219,8 +220,11 @@ void CommunicatingAI::UpdateContrabandSearch () {
 					GetMadAt(u,1);
 					SpeedAndCourse=u->GetVelocity();
 				}
-				if (InList (item,FactionUtil::GetContraband(parent->faction))) {
-					TerminateContrabandSearch(true);
+				    float HiddenTotal = use_hidden_cargo_space?(u->getHiddenCargoVolume()):(0);
+					//float HiddenUsed = u->getHiddenCargoVolume();
+
+                                    if (InList (item,FactionUtil::GetContraband(parent->faction)) > HiddenTotal) { // inlist now returns an integer so that we can do this at all...
+                                      TerminateContrabandSearch(true); // BUCO this is where we want to check against free hidden cargo space.
 				}
 			}
 		}else {

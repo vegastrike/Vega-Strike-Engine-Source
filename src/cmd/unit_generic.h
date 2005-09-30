@@ -1021,6 +1021,7 @@ public:
   float getCargoVolume(void) const;
   float getEmptyUpgradeVolume(void) const;
   float getUpgradeVolume(void) const;
+  float getHiddenCargoVolume(void) const;
 
 /***************************************************************************************/
 /**** AI STUFF                                                                      ****/
