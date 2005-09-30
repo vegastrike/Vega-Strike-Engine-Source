@@ -6922,7 +6922,9 @@ void Unit::AddCargo (const Cargo &carg, bool sort) {
 bool cargoIsUpgrade(const Cargo& c) {
   return c.category.find("upgrades")==0;
 }
-
+float Unit::getHiddenCargoVolume()const {
+  return image->HiddenCargoVolume;
+}
 bool Unit::CanAddCargo (const Cargo &carg)const {
   bool upgradep=cargoIsUpgrade(carg);
   float total_volume=carg.quantity*carg.volume + (upgradep?getUpgradeVolume():getCargoVolume());
