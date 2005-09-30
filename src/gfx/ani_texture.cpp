@@ -101,6 +101,7 @@ bool AnimatedTexture::SetupPass(int pass, int stage, const enum BLENDFUNC src, c
         // Hey! Nothing to do! Yippie!
         return true;
     }
+    return true;//not sure what it's used for
 }
 void AnimatedTexture::UpdateAllPhysics() {
     for (set<AnimatedTexture *>::iterator iter=anis.begin(); iter!=anis.end(); iter++)
