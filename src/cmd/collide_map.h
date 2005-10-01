@@ -22,7 +22,7 @@ public:
     //in case we want to drop in an xtra radius parameter when we get performance testing    
     this->position=bpos;
     key=bpos.MagnitudeSquared();
-    if (isnan(key)) {
+    if (ISNAN(key)) {
       key=0;//hack for now
     }
   }

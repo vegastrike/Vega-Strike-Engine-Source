@@ -93,9 +93,11 @@ extern float simulation_atom_var;
 #include <math.h>
 #endif
 #if  defined(HAVE_FINITE) || defined(BSD)
-#   define FINITE(x) (finite(x))
+#define FINITE(x) (finite(x))
+#define ISNAN(x) (isnan(x))
 #else
-#	define FINITE(x) (_finite(x))
+#define FINITE(x) (_finite(x))
+#define ISNAN(x) (_isnan(x))
 #endif
 
 

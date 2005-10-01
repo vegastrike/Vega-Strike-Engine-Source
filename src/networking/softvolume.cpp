@@ -31,9 +31,9 @@ typedef int Mix_Music;
 #define DB_INF -144.0
 
 #if defined(_WIN32)&&defined(_WINDOWS)
-FILE *mystdout=stdout;
-#define STD_ERR mystdout
-#define STD_OUT mystdout
+FILE *anotherstdout=stdout;
+#define STD_ERR anotherstdout
+#define STD_OUT anotherstdout
 #else
 #define STD_ERR stderr
 #define STD_OUT stdout
