@@ -148,6 +148,24 @@ Then
 
 ******************************************************************* */
 
+/* A quick comment on Multiple Arguments 
+	Imagine you have:
+	void MyClass::myFunction(const char *arg1, const char *arg2) 
+	If you set it to 2CSTR it will work, it also combines everything in a "" to a single arg.
+	
+	(In fact argument type does this.)
+
+	In other words, if you do:
+	myFunction "a four word name" "some arguments"
+	it will send "a four word name" as arg1,
+	and "some arguments" as arg2 (With the quotes edited out.)
+	
+	Everything except 1STR (C++ style std::string &in) behaves as so.
+	1STR should still contain the quotes if they are needed. Just something to think about.
+
+	
+*/
+
 /* ********************
 Finally the last comments for way up here
 BUG WARNING WITH 1STRARRAY
@@ -663,11 +681,33 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 	std::vector<std::string> strvec; //to replace newincommand
 								// to reduce data replication by one;
     {
-		for(string::size_type st=0,en=0; (en=incommand->find(' ',st),(st!=string::npos)); st=(en!=string::npos)?en+1:string::npos)
-		{
-	        strvec.push_back(incommand->substr(st,en));
-//	        args++;
-	   	} 
+	std::string::const_iterator scroller = incommand->begin();
+	size_t last = 0, next = 0;
+	bool quote = false;
+	next=incommand->find(" ");
+	for(next = incommand->find("\"\"", 0); (next=incommand->find("\"\"",last),(last!=std::string::npos)); last=(next!=std::string::npos)?next+1:std::string::npos) {
+		if(next < std::string::npos)
+			incommand->replace(next, 2, "\" \""); //replace "" with " "
+	}
+	std::string starter("");
+	strvec.push_back(starter);
+	for(scroller = incommand->begin(); scroller < incommand->end(); scroller++)
+	{
+		if(*scroller=='\"') {
+			if(quote) {
+			quote = false;
+			} else {
+			quote = true;
+			}
+			continue;
+		}
+		if(*scroller==' ' && !quote) {
+			strvec.push_back(starter);
+		continue;
+		}
+		strvec[strvec.size()-1] += *scroller;
+	}
+
 	}
     // }}}
     {
@@ -705,13 +745,17 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 			//gets really large.
 			switch(theCommand.argtype) {
 			case ARG_1INT:
-				theCommand.functor->Call(atoi(strvec.at(1).c_str()));
+				if(strvec.size() > 1)
+					theCommand.functor->Call(atoi(strvec.at(1).c_str()));
+				else theCommand.functor->Call(0);
 				break;
 			case ARG_NONE:
 				theCommand.functor->Call();
 				break; 
 			case ARG_1CSTR:
-				theCommand.functor->Call(strvec.at(1).c_str());
+				if(strvec.size() > 1)
+					theCommand.functor->Call(strvec.at(1).c_str());
+				else theCommand.functor->Call((const char *)NULL);
 				break;
 			case ARG_1CSTRARRAY: 
 				{
@@ -734,7 +778,13 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 					break;
 				}
 			case ARG_2CSTR:
-				theCommand.functor->Call(strvec.at(1).c_str(),strvec.at(2).c_str());
+				if(strvec.size() > 2)
+					theCommand.functor->Call(strvec.at(1).c_str(),strvec.at(2).c_str());
+				else {
+					if(strvec.size() == 2) theCommand.functor->Call(strvec.at(1).c_str(), (const char *)NULL);
+					else theCommand.functor->Call((const char *)NULL, (const char *)NULL);
+				}
+
 				break;
 			case ARG_1BOOL:
 				theCommand.functor->Call((bool *)isDown);
