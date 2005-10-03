@@ -802,11 +802,6 @@ void Unit::Init()
       image->cockpit_damage[damageiterator]=1;
     }
   }
-  CollideInfo.object.u = NULL;
-  CollideInfo.type = LineCollide::UNIT;
-  CollideInfo.Mini.Set (0,0,0);
-  CollideInfo.Maxi.Set (0,0,0);
-
   /*
   yprrestricted=0;
   ymin = pmin = rmin = -PI;

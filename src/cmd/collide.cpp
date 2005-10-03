@@ -127,7 +127,7 @@ bool Bolt::Collide (int index) {
     updated.SetPosition(.5*(prev_position+cur_position));
     return _Universe->activeStarSystem()->collidemap->CheckCollisions(this,updated);
   }else {
-
+#ifdef OLD_COLLIDE_SYSTEM
     UnitCollection *candidates[2];  
     bool use_huge_list=usehuge_table();
     _Universe->activeStarSystem()->collidetable->c.Get (cur_position,candidates,use_huge_list);
@@ -149,7 +149,9 @@ bool Bolt::Collide (int index) {
           
         }
       }
+
     }
+#endif
   }
   return false;
 }
@@ -224,6 +226,7 @@ void Beam::CollideHuge (const LineCollide & lc, Unit * targetToCollideWith, Unit
     
     }
   }else {
+#ifdef OLD_COLLIDE_SYSTEM
   UnitCollection *colQ [tablehuge+1];
   bool use_huge_list = usehuge_table();
   if (!lc.hhuge) {
@@ -257,6 +260,7 @@ void Beam::CollideHuge (const LineCollide & lc, Unit * targetToCollideWith, Unit
       }
     }
   }
+#endif
   }
 
 }

@@ -39,7 +39,6 @@ void UncheckUnit (class Unit * un);
 #include "gfx/quaternion.h"
 #include "gfxlib_struct.h"
 #include "weapon_xml.h"
-#include "linecollide.h"
 //#include "gfx/vdu.h"
 #include "xml_support.h"
 #include "container.h"
@@ -1067,7 +1066,6 @@ public:
 
 public:
   ///The information about the minimum and maximum ranges of this unit. Collide Tables point to this bit of information.
-  LineCollide CollideInfo;
   CollideMap::iterator location;
   struct collideTrees * colTrees;
   ///Sets the parent to be this unit. Unit never dereferenced for this operation
@@ -1094,7 +1092,6 @@ void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL); /
 // Uses collide and Universe stuff -> put in NetUnit
   void UpdateCollideQueue();
 // Uses LineCollide stuff so only in NetUnit and Unit
-  const LineCollide &GetCollideInfo () {return CollideInfo;}
 // Uses collision stuff so only in NetUnit and Unit classes
   bool querySphere (const QVector &pnt, float err)const;
   ///queries the sphere for beams (world space start,end)  size is added to by my_unit_radius

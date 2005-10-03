@@ -18,7 +18,9 @@
 static bool operator == (const Collidable &a,const Collidable &b) {
   return memcmp(&a,&b,sizeof(Collidable))==0;
 } 
+
 void Unit::RemoveFromSystem() {
+#ifdef OLD_COLLIDE_SYSTEM
 #define UNSAFE_COLLIDE_RELEASE
 #if (defined SAFE_COLLIDE_DEBUG) || (defined  UNSAFE_COLLIDE_RELEASE) 
   if (CollideInfo.object.u!=NULL) {
@@ -26,71 +28,51 @@ void Unit::RemoveFromSystem() {
     CollideInfo.object.u = NULL;
   }
 #endif
-  /*
-  Collidable test1(0,0,QVector(0,0,0)),test2(0,0,QVector(0,0,0));
-  QVector tpos;
-  tpos.i=100;
-  tpos.j=1000;
-  tpos.k=1327.405240803957;
-  test1.SetPosition(tpos);
-  test1.radius=13.5689259;
-  test1.ref.bolt_index=189160920;
-  test2=test1;
-  double a=(test1).GetPosition().MagnitudeSquared();
-  double b=(test2).GetPosition().MagnitudeSquared();
-  
-  printf ("(%f %f %f) and (%f %f %f) %f < %f %d %d!!!",
-          (test1).GetPosition().i,
-          (test1).GetPosition().j,
-          (test1).GetPosition().k,
-          (test2).GetPosition().i,
-          (test2).GetPosition().j,
-          (test2).GetPosition().k,
-          (test1).GetPosition().MagnitudeSquared(),
-          (test2).GetPosition().MagnitudeSquared(),
-          (test1).GetPosition().MagnitudeSquared()<(test2).GetPosition().MagnitudeSquared(),
-          a<b);
-  */
+#endif
   
   if (this->location!=null_collide_map.begin()) {
     if (activeStarSystem==NULL) {
       printf ("NONFATAL NULL activeStarSystem detected...please fix\n");
       activeStarSystem=_Universe->activeStarSystem();
     }
-    if (activeStarSystem->collidemap->find(*this->location)==activeStarSystem->collidemap->end()){
-      CollideMap::iterator i;
-      CollideMap::iterator j=activeStarSystem->collidemap->begin();
-
-      bool found=false;
-      for (i=activeStarSystem->collidemap->begin();
-           i!=activeStarSystem->collidemap->end();++i) {
-        if (i==this->location) {
-          printf ("hussah %d\n",*i==*this->location);
-          found=true;
-        }
-        if(**i<**j) {
+    static bool collidemap_sanity_check = XMLSupport::parse_bool(vs_config->getVariable("physics","collidemap_sanity_check","false"));
+    if (collidemap_sanity_check) {
+      if (activeStarSystem->collidemap->find(*this->location)==activeStarSystem->collidemap->end()){
+        CollideMap::iterator i;
+        CollideMap::iterator j=activeStarSystem->collidemap->begin();
+        
+        bool found=false;
+        for (i=activeStarSystem->collidemap->begin();
+             i!=activeStarSystem->collidemap->end();++i) {
+          if (i==this->location) {
+            printf ("hussah %d\n",*i==*this->location);
+            found=true;
+          }
+          if(**i<**j) {
           printf ("(%f %f %f) and (%f %f %f) %f < %f %d!!!",
-                 (**i).GetPosition().i,
-                 (**i).GetPosition().j,
-                 (**i).GetPosition().k,
-                 (**j).GetPosition().i,
-                 (**j).GetPosition().j,
-                 (**j).GetPosition().k,
-                 (**i).GetPosition().MagnitudeSquared(),
-                 (**j).GetPosition().MagnitudeSquared(),
+                  (**i).GetPosition().i,
+                  (**i).GetPosition().j,
+                  (**i).GetPosition().k,
+                  (**j).GetPosition().i,
+                  (**j).GetPosition().j,
+                  (**j).GetPosition().k,
+                  (**i).GetPosition().MagnitudeSquared(),
+                  (**j).GetPosition().MagnitudeSquared(),
                   (**i).GetPosition().MagnitudeSquared()<
                   (**j).GetPosition().MagnitudeSquared());
-
+          
+          }
+          j=i;
         }
-        j=i;
+        printf ("fin %d %d ",*(int*)&i,found);
+        activeStarSystem->collidemap->checkSet();
+        assert(0);
       }
-      printf ("fin %d %d ",*(int*)&i,found);
-      activeStarSystem->collidemap->checkSet();
-      assert(0);
     }
     activeStarSystem->collidemap->erase(this->location);
     this->location=null_collide_map.begin();
   }
+#ifdef OLD_COLLIDE_SYSTEM
 #ifndef UNSAFE_COLLIDE_RELEASE
 #ifdef SAFE_COLLIDE_DEBUG
     if (
@@ -115,6 +97,7 @@ void Unit::RemoveFromSystem() {
     }
 #endif
   CollideInfo.object.u=NULL;
+#endif
   int j;
   for (j=0;j<GetNumMounts();j++) {
     if (mounts[j].type->type==weapon_info::BEAM) {
@@ -132,6 +115,7 @@ void Unit::UpdateCollideQueue () {
   } else {
     assert (activeStarSystem==_Universe->activeStarSystem());
   }
+#ifdef OLD_COLLIDE_SYSTEM
   CollideInfo.lastchecked =NULL;//reset who checked it last in case only one thing keeps crashing with it;
   QVector Puffmin (Position().i-radial_size,Position().j-radial_size,Position().k-radial_size);
   QVector Puffmax (Position().i+radial_size,Position().j+radial_size,Position().k+radial_size);
@@ -148,6 +132,8 @@ void Unit::UpdateCollideQueue () {
     CollideInfo.Mini= Puffmin;
     CollideInfo.Maxi=Puffmax;
   }
+#endif
+  
 }
 extern bool usehuge_table();
 void Unit::CollideAll() {
@@ -159,6 +145,7 @@ void Unit::CollideAll() {
   if (newUnitCollisions) {
     this->getStarSystem()->collidemap->CheckCollisions(this,Collidable(this));
   }else{
+#ifdef OLD_COLLIDE_SYSTEM
     UnitCollection * colQ [tablehuge+1];
     bool usehuge = usehuge_table()||GetJumpStatus().drive>=0;
     int sizecolq = _Universe->activeStarSystem()->collidetable->c.Get (&CollideInfo,colQ,usehuge);
@@ -192,6 +179,7 @@ void Unit::CollideAll() {
         
       }
     }
+#endif
   }
 }
   
