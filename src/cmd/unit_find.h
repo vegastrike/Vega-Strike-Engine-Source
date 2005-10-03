@@ -1,3 +1,6 @@
+#ifndef _UNIT_FIND_H_
+#define _UNIT_FIND_H_
+
 template <class Locator> void findObjects (StarSystem * ss,CollideMap::iterator location, Locator *check) {
     if (location!=null_collide_map.begin()) {
       QVector thispos = (**location).GetPosition();
@@ -102,3 +105,39 @@ public:
     return retval;
   }
 };
+
+template <class T>
+class UnitWithinRangeLocator {
+public:
+	T action;
+	float startkey;
+	float radius;
+	float maxUnitRadius;
+	UnitWithinRangeLocator( float radius, float maxUnitRadius)
+			: startkey(0), radius(radius), maxUnitRadius(maxUnitRadius) {
+	}
+
+	bool UnitsOnly() {return true;}
+	bool BoltsOrUnits() {return false;}
+	bool NeedDistance() {return true;}
+	
+	void init (CollideMap * cm, CollideMap::iterator parent) {
+		startkey=sqrt((*parent)->GetMagnitudeSquared());
+	}
+	bool cullless (CollideMap::iterator tless) {
+		return (startkey-radius-maxUnitRadius)*(startkey-radius-maxUnitRadius)>(*tless)->GetMagnitudeSquared();
+	}
+	bool cullmore (CollideMap::iterator tmore) {
+		return (startkey+radius+maxUnitRadius)*(startkey+radius+maxUnitRadius)<(*tmore)->GetMagnitudeSquared();
+	}
+
+	bool acquire(float dist, CollideMap::iterator i) {
+		if (dist<radius) {
+			// Inside radius...
+			action.acquire((*i)->ref.unit, dist);
+		}
+		return true;
+	}
+};
+
+#endif

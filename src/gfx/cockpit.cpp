@@ -11,6 +11,7 @@
 #include "cmd/iterator.h"
 #include "cmd/collection.h"
 #include "cmd/unit_util.h"
+#include "cmd/unit_find.h" // for radar iteration.
 #include "hud.h"
 #include "vdu.h"
 #include "lin_time.h"//for fps
@@ -838,77 +839,96 @@ void GameCockpit::EjectDock() {
   ejecting=true;
   going_to_dock_screen=true;
 }
+
+class DrawUnitBlip {
+	Unit *un;
+	Unit * makeBigger;
+	GameCockpit *parent;
+	float *xsize;
+	float *ysize;
+	float *xcent;
+	float *ycent;
+	bool *reardar;
+	int numradar;
+public:
+	DrawUnitBlip() {}
+	void init (Unit *un, GameCockpit *parent,
+			   int numradar, float *xsize, float *ysize, float *xcent, float *ycent, bool *reardar) {
+		this->un=un;
+		this->parent=parent;
+		this->makeBigger=un->Target();
+		this->numradar=numradar;
+		this->xsize=xsize;
+		this->ysize=ysize;
+		this->xcent=xcent;
+		this->ycent=ycent;
+		this->reardar=reardar;
+	}
+	void acquire(Unit *target, float distance) {
+		if (target!=un) {
+			double dist;
+			int rad;
+			static bool draw_significant_blips = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_significant_blips","true"));
+			static bool untarget_out_cone=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","untarget_beyond_cone","false"));
+			if (!un->InRange (target,dist,makeBigger==target&&untarget_out_cone,true,true)) {
+				if (makeBigger==target) {
+					un->Target(NULL);
+				}
+				return;
+			}
+			if (makeBigger!=target&&draw_significant_blips==false&&getTopLevelOwner()==target->owner&&distance>un->GetComputerData().radar.maxrange){
+				return;
+			}
+			static float minblipsize=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","min_radarblip_size","0"));
+			if (target->radial_size > minblipsize) {
+				for (rad=0;rad<numradar;++rad) {
+					parent->drawUnToTarget (un,target,xcent[rad],ycent[rad],xsize[rad],ysize[rad],reardar[rad]);
+				}
+			}
+			if (target->isPlanet()==PLANETPTR && target->radial_size > 0) {
+				Unit * sub=NULL;
+				for (un_iter i=target->getSubUnits();(sub=*i)!=NULL;++i) {
+					if (target->radial_size > minblipsize) {
+						for (rad=0;rad<numradar;++rad) {
+							parent->drawUnToTarget(un,sub,xcent[rad],ycent[rad], xsize[rad],ysize[rad],reardar[rad]);
+						}
+					}
+				}
+			}
+		}
+	}
+};
+
 void GameCockpit::DrawBlips (Unit * un) {
 
-
-  Unit::Computer::RADARLIM * radarl = &un->GetComputerData().radar;
-
-  UnitCollection * drawlist = &_Universe->activeStarSystem()->getUnitList();
-  un_iter iter = drawlist->createIterator();
-
   Unit * target;
-  Unit * makeBigger = un->Target();
   float s,t;
   
   float xsize[2],ysize[2],xcent[2],ycent[2];
-  if (Radar[0]) {
-	  Radar[0]->GetSize (xsize[0],ysize[0]);
-	 xsize[0] = fabs (xsize[0]);
-	 ysize[0] = fabs (ysize[0]);
-	Radar[0]->GetPosition (xcent[0],ycent[0]);
-  }
-  if (Radar[1]) {
-	Radar[1]->GetSize (xsize[1],ysize[1]);
-	xsize[1] = fabs (xsize[1]);
-	ysize[1] = fabs (ysize[1]);
-	Radar[1]->GetPosition (xcent[1],ycent[1]);
-  }
+  bool reardar[2];
+  int numradar=0;
   GFXDisable (TEXTURE0);
   GFXDisable (LIGHTING);
-  if (Radar[0]) 
-  if ((!g_game.use_sprites)||Radar[0]->LoadSuccess()) {
-    DrawRadarCircles (xcent[0],ycent[0],xsize[0],ysize[0],textcol);
-  }
-  if (Radar[1])
-  if ((!g_game.use_sprites)||Radar[1]->LoadSuccess()) {
-    DrawRadarCircles (xcent[1],ycent[1],xsize[1],ysize[1],textcol);
+  for (int i=0;i<2;++i) {
+	  if (Radar[numradar]) {
+		  Radar[numradar]->GetSize (xsize[numradar],ysize[numradar]);
+		  xsize[numradar] = fabs (xsize[numradar]);
+		  ysize[numradar] = fabs (ysize[numradar]);
+		  Radar[numradar]->GetPosition (xcent[numradar],ycent[numradar]);
+		  if ((!g_game.use_sprites)||Radar[numradar]->LoadSuccess()) {
+			  DrawRadarCircles (xcent[numradar],ycent[numradar],xsize[numradar],ysize[numradar],textcol);
+		  }
+		  reardar[numradar]=i?true:false;
+		  numradar++;
+	  }
   }
   GFXPointSize (2);
   GFXBegin(GFXPOINT);
-  static bool draw_significant_blips = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_significant_blips","true"));
-  
-  while ((target = iter.current())!=NULL) {
-    if (target!=un) {
-      double dist;
-      static bool untarget_out_cone=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","untarget_beyond_cone","false"));
-      if (!un->InRange (target,dist,makeBigger==target&&untarget_out_cone,true,true)) {
-	if (makeBigger==target) {
-	  un->Target(NULL);
-	}
-	iter.advance();	
-	continue;
-      }
-      if (makeBigger!=target&&draw_significant_blips==false&&getTopLevelOwner()==target->owner&&UnitUtil::getDistance(un,target)>un->GetComputerData().radar.maxrange){
-        iter.advance();	
-	continue;      
-      }
-      static float minblipsize=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","min_radarblip_size","0"));
-      if (Radar[0] && target->radial_size > minblipsize)
-        drawUnToTarget (un,target,xcent[0],ycent[0],xsize[0],ysize[0],false);
-      if (Radar[1] && target->radial_size > minblipsize)
-        drawUnToTarget (un,target,xcent[1],ycent[1],xsize[1],ysize[1],true);
-      if (target->isPlanet()==PLANETPTR && target->radial_size > 0) {
-        Unit * sub=NULL;
-        for (un_iter i=target->getSubUnits();(sub=*i)!=NULL;++i) {
-          if (Radar[0] && target->radial_size > minblipsize)
-            drawUnToTarget(un,sub,xcent[0],ycent[0], xsize[0],ysize[0],false);
-          if (Radar[1] && target->radial_size > minblipsize)
-            drawUnToTarget(un,sub,xcent[1],ycent[1], xsize[1],ysize[1],true);
-        }
-      }
-    }
-    iter.advance();
-  }
+  static float unitRad = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","radar_search_extra_radius","1000"));
+
+  UnitWithinRangeLocator<DrawUnitBlip> unitLocator(un->GetComputerData().radar.maxrange, unitRad);
+  unitLocator.action.init(un, this, numradar, xsize, ysize, xcent, ycent, reardar);
+  findObjects(_Universe->activeStarSystem(), un->location, &unitLocator);
   GFXEnd();
   GFXPointSize (1);
   GFXColor4f (1,1,1,1);
