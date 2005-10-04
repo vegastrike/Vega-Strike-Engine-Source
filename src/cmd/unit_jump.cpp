@@ -113,6 +113,9 @@ bool GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
 							  jumpnode->Position().k<0?1:-1);
 			  Offset*=jumpnode->rSize()*2+this->rSize()*2;
 			  this->SetPosAndCumPos(jumpnode->Position()+Offset);
+                          if (jumpnode->location!=null_collide_map.begin()) {
+                            this->UpdateCollideQueue(pendingjump[kk]->dest,jumpnode->location);
+                          }
           }
 		  Unit * tester;
 		  for (unsigned int jjj=0;jjj<2;++jjj) {
@@ -122,6 +125,7 @@ bool GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
 			  if (tester->isUnit()==UNITPTR && tester!=this){
 			  if ((this->LocalPosition()-tester->LocalPosition()).Magnitude()<this->rSize()+tester->rSize()) {
 				  SetCurPosition(this->LocalPosition()+this->cumulative_transformation_matrix.getR()*(4*(this->rSize()+tester->rSize())));
+                                  
 			  }
 			  }
 		  }

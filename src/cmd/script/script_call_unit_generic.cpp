@@ -1194,6 +1194,10 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
    //   printf("faction nr: %d %s\n",faction_nr,fg->faction.c_str());
    Unit **units= new Unit *[fg->nr_ships];
    int u;
+   Unit * par=_Universe->AccessCockpit()->GetParent();
+   CollideMap::iterator hint=_Universe->scriptStarSystem()->collidemap->begin();
+   if (par&&par->location!=null_collide_map.begin()&&par->activeStarSystem==_Universe->scriptStarSystem())
+     hint=par->location;
    for(u=0;u<fg->nr_ships;u++){
      Unit * my_unit;
      if (type==PLANETPTR) {
@@ -1283,6 +1287,9 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
      //     cout << fg->name << endl;
 
      _Universe->scriptStarSystem()->AddUnit(my_unit);
+     my_unit->UpdateCollideQueue(     _Universe->scriptStarSystem(),hint);
+     if (my_unit->location!=null_collide_map.begin())
+       hint=my_unit->location;
 
      //findNextEnemyTarget(my_unit);
      my_unit->Target(NULL);

@@ -26,7 +26,7 @@ bool Bolt::Update (int index) {
   }
   Collidable updated(**location);
   updated.SetPosition(.5*(prev_position+cur_position));
-  _Universe->activeStarSystem()->collidemap->changeKey(location,updated);
+  //location=_Universe->activeStarSystem()->collidemap->changeKey(location,updated);
   return true;
 }
 
