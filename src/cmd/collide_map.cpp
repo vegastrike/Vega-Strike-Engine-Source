@@ -8,7 +8,6 @@ Collidable::Collidable(Unit *un):radius(un->rSize()){
   ref.unit=un;  
 }
 extern size_t nondecal_index(Collidable::CollideRef b);
-
 template <class T> class CollideChecker
 {public:static bool CheckCollisions(CollideMap* cm, T* un, const Collidable& collider){
   CollideMap::iterator tless,tmore;
@@ -18,37 +17,51 @@ template <class T> class CollideChecker
   float minlook=sortedloc-2.0625*fabs(rad);
   float maxsqr=maxlook*maxlook;
   float minsqr=minlook*minlook;
-  if (!isNew(cm,un)) {
+  bool isnew =isNew(cm,un);
+  if (isnew==false && doUpdateKey(un)) {
     cm->changeKey(un->location,collider,tless,tmore);
+  }else {
+    tless=tmore=un->location;
+    if (tless!=cm->begin())
+      --tless;
+    ++tmore;
   }
-  bool isnew=isNew(cm,un);
-  if (isnew==false&&doUpdateKey(un)) {
-    un->location=cm->changeKey(un->location,collider);
-  }
-  // CheckCollision can destroy iterators, so we must make sure tless decremented before
-  // checkcollision can destroy it.
   if (un->location!=cm->begin()) {
-    tless = un->location; tless--
-    bool endit = false;
-    while(endit && (*tless)->GetMagnitudeSquared()>=minsqr) {
+    while((*tless)->GetMagnitudeSquared()>=minsqr) {
       bool boltSpecimen=(*tless)->radius<0;
-      endit=tless==cm->begin();
       Collidable::CollideRef ref=(*tless)->ref;
-      if (boltSpecimen) {
-        if (CheckCollision(un,collider,ref,**tless--)) {
-          if (endAfterCollide(un))
-            return true;        
-        }
+      if (tless==cm->begin()) {
+        if (boltSpecimen) {
+          if (CheckCollision(un,collider,ref,**tless)){
+            if (endAfterCollide(un)) {
+              return true;       
+            }else break;
+          }else break;
+          
+        }else {
+          if (CheckCollision(un,collider,ref.unit,**tless)){
+            if (endAfterCollide(un)){
+              return true;
+            }else break;
+          }else break;
+        }        
       }else {
-        if (CheckCollision(un,collider,ref.unit,**tless--)){
-          if (endAfterCollide(un)) 
-            return true;      
+        if (boltSpecimen) {
+          if (CheckCollision(un,collider,ref,**tless--)) {
+            if (endAfterCollide(un))
+              return true;        
+          }
+        }else {
+          if (CheckCollision(un,collider,ref.unit,**tless--)){
+            if (endAfterCollide(un)) 
+              return true;      
+          }
         }
-      }   
+      }
+    
+     
     }
   } 
-  tmore=un->location;
-  tmore++;
   while (tmore!=cm->end()&&(*tmore)->GetMagnitudeSquared()<=maxsqr){
     bool boltSpecimen=(*tmore)->radius<0;
     Collidable::CollideRef ref=(*tmore)->ref;
@@ -62,6 +75,7 @@ template <class T> class CollideChecker
           return true;      
     }
   }
+  
   return false;
 }
   static bool doUpdateKey(Bolt * b) {
