@@ -457,16 +457,13 @@ namespace UniverseUtil {
 						static double def_un_size = XMLSupport::parse_float (vs_config->getVariable ("physics","respawn_unit_size","400"));
 						if (radial_size<0)
 								radial_size = def_un_size;
-                                                
-                                                LineCollide obtain(NULL,LineCollide::UNIT,pos-QVector(radial_size,radial_size,radial_size),pos+QVector(radial_size,radial_size,radial_size));
-                                                UnitCollection * colQ [tablehuge+1];   
-                                                int sizecolq = sts->collidetable->c.Get (&obtain,colQ,true);
+
                                   
 						for (unsigned int k=0;k<10;k++) {
 								Unit * un;
 								bool collision=false;
-                                                                for (int jjj=0;jjj<sizecolq;jjj++) {
-                                                                  for (un_iter i=colQ[jjj]->createIterator();(un=*i)!=NULL;++i) {
+                                                                {//fixme, make me faster, use collide map
+                                                                  for (un_iter i=sts->getUnitList().createIterator();(un=*i)!=NULL;++i) {
 										if (un->isUnit()==ASTEROIDPTR||un->isUnit()==NEBULAPTR||isAsteroid(un->name)) {
 												continue;
 										}
