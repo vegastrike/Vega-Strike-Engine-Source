@@ -18,9 +18,10 @@ template <class T> class CollideChecker
   float minlook=sortedloc-2.0625*fabs(rad);
   float maxsqr=maxlook*maxlook;
   float minsqr=minlook*minlook;
-  if (!isNew(cm,un)) {
-    cm->changeKey(un->location,collider,tless,tmore);
-  
+  bool isnew=isNew(cm,un);
+  if (isnew==false&&doUpdateKey(un)) {
+    un->location=cm->changeKey(un->location,collider);
+  }
   if (un->location!=cm->begin()) {
     tless = un->location;
     while(tless!=cm->begin() && (*--tless)->GetMagnitudeSquared()>=minsqr) {
@@ -56,6 +57,12 @@ template <class T> class CollideChecker
   }
   return false;
 }
+  static bool doUpdateKey(Bolt * b) {
+    return true;
+  }
+  static bool doUpdateKey (Unit *un) {
+    return false;
+  }
   static bool endAfterCollide(Bolt * b) {
     return true;
   }

@@ -2101,6 +2101,10 @@ void Unit::AddVelocity(float difficulty) {
 	   graphicOptions.WarpFieldStrength=1;
    }
    curr_physical_state.position = curr_physical_state.position +  (v*SIMULATION_ATOM*difficulty).Cast();
+   if (location!=null_collide_map.begin()&&activeStarSystem){
+     location=activeStarSystem->collidemap->changeKey(location,Collidable(this));// do we need this?
+     //I guess you have to, to be robust
+   }
 }
 void Unit::UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc)
 {
