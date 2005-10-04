@@ -66,9 +66,11 @@ template <class T> class CollideChecker
     Collidable::CollideRef ref=(*tmore)->ref;
     if (boltSpecimen) {
       if (CheckCollision(un,collider,ref,**tmore++))
-        return true;      
+        if (endAfterCollide(un))
+          return true;      
     }else {
       if (CheckCollision(un,collider,ref.unit,**tmore++))
+        if (endAfterCollide(un))
           return true;      
     }
   }
