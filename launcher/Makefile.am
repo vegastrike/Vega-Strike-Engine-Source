@@ -1,8 +1,8 @@
 INCLUDES = -I$(top_srcdir) \
 	   `gtk-config --cflags`
 
-GCF = 
-LIBS  =`gtk-config --libs`
+GCF =
+AM_LDFLAGS  =`gtk-config --libs`
 
 bin_PROGRAMS=vslauncher
 commonLIB = ../src/common/libvscommon.a

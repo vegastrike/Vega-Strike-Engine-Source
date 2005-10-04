@@ -1,3 +1,4 @@
+ACLOCAL_AMFLAGS = -I m4scripts
 SUBDIRS = src objconv launcher tools
 
 EXTRA_DIST =						\

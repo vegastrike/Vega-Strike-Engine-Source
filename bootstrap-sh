@@ -1,0 +1,6 @@
+# This is a very simple script to automatically set up the configure script.
+aclocal -I m4scripts
+autoheader
+autoconf
+automake -ac
+

@@ -40,7 +40,11 @@ public:
     this->SetPosition(p);
   }
 };
+#ifdef VS_ENABLE_COLLIDE_KEY
+class CollideMap:public KeyMutableSet<Collidable> {
+#else
 class CollideMap:public ListMutableSet<Collidable> {
+#endif
 public:
 //Check collisions takes an item to check collisions with, and returns whether that item collided with a Unit only
   bool CheckCollisions(Bolt * bol, const Collidable & updated);
