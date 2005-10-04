@@ -18,22 +18,29 @@ template <class T> class CollideChecker
   float minlook=sortedloc-2.0625*fabs(rad);
   float maxsqr=maxlook*maxlook;
   float minsqr=minlook*minlook;
+  if (!isNew(cm,un)) {
+    cm->changeKey(un->location,collider,tless,tmore);
+  }
   bool isnew=isNew(cm,un);
   if (isnew==false&&doUpdateKey(un)) {
     un->location=cm->changeKey(un->location,collider);
   }
+  // CheckCollision can destroy iterators, so we must make sure tless decremented before
+  // checkcollision can destroy it.
   if (un->location!=cm->begin()) {
-    tless = un->location;
-    while(tless!=cm->begin() && (*--tless)->GetMagnitudeSquared()>=minsqr) {
+    tless = un->location; tless--
+    bool endit = false;
+    while(endit && (*tless)->GetMagnitudeSquared()>=minsqr) {
       bool boltSpecimen=(*tless)->radius<0;
+      endit=tless==cm->begin();
       Collidable::CollideRef ref=(*tless)->ref;
       if (boltSpecimen) {
-        if (CheckCollision(un,collider,ref,**tless)) {
+        if (CheckCollision(un,collider,ref,**tless--)) {
           if (endAfterCollide(un))
             return true;        
         }
       }else {
-        if (CheckCollision(un,collider,ref.unit,**tless)){
+        if (CheckCollision(un,collider,ref.unit,**tless--)){
           if (endAfterCollide(un)) 
             return true;      
         }
