@@ -298,7 +298,7 @@ void StarSystem::AddUnit(Unit *unit) {
 
 bool StarSystem::RemoveUnit(Unit *un) {
   if (un->location!=null_collide_map.begin()) {
-    assert (collidemap->find(*un->location)!=collidemap->end());
+    //    assert (collidemap->find(*un->location)!=collidemap->end());
     collidemap->erase(un->location);
     un->location=null_collide_map.begin();
   }
@@ -400,7 +400,8 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
 	unit->ExecuteAI(); 
         unit->ResetThreatLevel();
 	unit->CollideAll();
-      unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits(),unit);    
+        unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits(),unit);    
+        collidemap->checkSet();
       if (newloc==current_sim_location) {
 	iter.advance();
       }else{ 

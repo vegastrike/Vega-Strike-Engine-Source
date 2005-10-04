@@ -599,5 +599,5 @@ void GamePlanet::Kill(bool erasefromsave) {
 void GamePlanet::gravitate(UnitCollection *uc) {
   // Should put computation only in Planet and GFX/SFX only here if needed
   Planet::gravitate( uc);
-  UpdateCollideQueue();
+  
 }

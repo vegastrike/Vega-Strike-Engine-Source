@@ -1039,7 +1039,7 @@ void Unit::calculate_extent(bool update_collide_queue) {
     //      image->selectionBox = new Box(corner_min, corner_max);
   }
   if (!isSubUnit()&&update_collide_queue&&(maxhull>0)) {
-    UpdateCollideQueue();
+    //only do it in Unit::CollideAll UpdateCollideQueue();
   }
   if (isUnit()==PLANETPTR) {
     radial_size = tmpmax(tmpmax(corner_max.i,corner_max.j),corner_max.k) ;
@@ -1868,7 +1868,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 
   bool locking=false;
   bool touched=false;
-
+  CollideMap::iterator hint=superunit->location!=null_collide_map.begin()?superunit->location:_Universe->activeStarSystem()->collidemap->begin();
   for (int i=0;(int)i<GetNumMounts();i++) {
 //    if (increase_locking&&cloaking<0) {
 //      mounts[i].time_to_lock-=SIMULATION_ATOM;
@@ -1963,7 +1963,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 		  }
 		  autotrack=2;
       }
-      if (!mounts[i].PhysicsAlignedFire (this,t1,m1,cumulative_velocity,(!isSubUnit()||owner==NULL)?this:owner,target,autotrack, trackingcone)) {
+      if (!mounts[i].PhysicsAlignedFire (this,t1,m1,cumulative_velocity,(!isSubUnit()||owner==NULL)?this:owner,target,autotrack, trackingcone,hint)) {
 		  const weapon_info * typ = mounts[i].type;
 		  energy+=typ->EnergyRate*(typ->type==weapon_info::BEAM?SIMULATION_ATOM:1);
 		  if (mounts[i].ammo>=0)
@@ -2012,7 +2012,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
       Kill();
   }
   if ((!isSubUnit())&&(!killed)&&(!(docked&DOCKED_INSIDE))) {
-    UpdateCollideQueue();
+    //only do it in Unit::CollideAll UpdateCollideQueue();
   }
 }
 

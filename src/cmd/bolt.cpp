@@ -68,7 +68,7 @@ inline void BlendTrans (Matrix & drawmat, const QVector & cur_position, const QV
     drawmat.p = prev_position.Scale(1-interpolation_blend_factor) + cur_position.Scale(interpolation_blend_factor);    
 }
 
-Bolt::Bolt (const weapon_info * typ, const Matrix &orientationpos,  const Vector & shipspeed, void * owner):  cur_position (orientationpos.p), ShipSpeed (shipspeed) {
+Bolt::Bolt (const weapon_info * typ, const Matrix &orientationpos,  const Vector & shipspeed, void * owner, CollideMap::iterator hint):  cur_position (orientationpos.p), ShipSpeed (shipspeed) {
   VSCONSTRUCT2('t')
   bolt_draw *q= _Universe->activeStarSystem()->bolts;
   prev_position= cur_position;
@@ -88,7 +88,7 @@ Bolt::Bolt (const weapon_info * typ, const Matrix &orientationpos,  const Vector
       }
       q->cachedecals.push_back (blargh);
     }
-    this->location=_Universe->activeStarSystem()->collidemap->insert(Collidable(Bolt::BoltIndex(q->bolts[decal].size(),decal,false).bolt_index,(shipspeed+orientationpos.getR()*typ->Speed).Magnitude()*.5,cur_position+vel*SIMULATION_ATOM*.5));
+    this->location=_Universe->activeStarSystem()->collidemap->insert(Collidable(Bolt::BoltIndex(q->bolts[decal].size(),decal,false).bolt_index,(shipspeed+orientationpos.getR()*typ->Speed).Magnitude()*.5,cur_position+vel*SIMULATION_ATOM*.5),hint);
     q->bolts[decal].push_back (*this);
   } else {
     ScaleMatrix (drawmat,Vector (typ->Radius,typ->Radius,typ->Radius));
@@ -105,7 +105,7 @@ Bolt::Bolt (const weapon_info * typ, const Matrix &orientationpos,  const Vector
       q->animations.back()->SetPosition (cur_position);
       q->balls.push_back (vector <Bolt> ());
     }
-    this->location=_Universe->activeStarSystem()->collidemap->insert(Collidable(Bolt::BoltIndex(q->balls[decal].size(),decal,true).bolt_index,(shipspeed+orientationpos.getR()*typ->Speed).Magnitude()*.5,cur_position+vel*SIMULATION_ATOM*.5));
+    this->location=_Universe->activeStarSystem()->collidemap->insert(Collidable(Bolt::BoltIndex(q->balls[decal].size(),decal,true).bolt_index,(shipspeed+orientationpos.getR()*typ->Speed).Magnitude()*.5,cur_position+vel*SIMULATION_ATOM*.5),hint);
     q->balls[decal].push_back (*this);
   }
 }

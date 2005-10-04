@@ -194,7 +194,7 @@ double Mount::Percentage (const Mount *newammo) const{
 extern void GetMadAt(Unit* un, Unit * parent, int numhits=0);
 
 //bool returns whether to refund the cost of firing
-bool Mount::PhysicsAlignedFire(Unit * caller, const Transformation &Cumulative, const Matrix & m, const Vector & velocity, void * owner, Unit *target, signed char autotrack, float trackingcone) {
+bool Mount::PhysicsAlignedFire(Unit * caller, const Transformation &Cumulative, const Matrix & m, const Vector & velocity, void * owner, Unit *target, signed char autotrack, float trackingcone,CollideMap::iterator &hint) {
 	using namespace VSFileSystem;
   if (time_to_lock>0) {
     target=NULL;
@@ -224,10 +224,10 @@ bool Mount::PhysicsAlignedFire(Unit * caller, const Transformation &Cumulative, 
 					ref.gun->Init(Transformation(orient,pos.Cast()),*type,owner);
 			  break;
 			case weapon_info::BOLT:
-			  Bolt (type, mat, velocity, owner).noop();//FIXME turrets! Velocity      
+			  hint=Bolt (type, mat, velocity, owner,hint).location;//FIXME turrets! Velocity      
 			  break;
 			case weapon_info::BALL:
-			  Bolt (type,mat, velocity,  owner).noop();//FIXME:turrets won't work      
+			  hint=Bolt (type,mat, velocity,  owner,hint).location;//FIXME:turrets won't work      
 			  break;
 			case weapon_info::PROJECTILE:
 			{
@@ -358,6 +358,7 @@ bool Mount::PhysicsAlignedFire(Unit * caller, const Transformation &Cumulative, 
 			  temp->curr_physical_state = temp->prev_physical_state= temp->cumulative_transformation = tmp;
 			  CopyMatrix (temp->cumulative_transformation_matrix,m);
 			  _Universe->activeStarSystem()->AddUnit(temp);
+                          temp->UpdateCollideQueue(_Universe->activeStarSystem(),hint);
 			}
 			break;
 			}

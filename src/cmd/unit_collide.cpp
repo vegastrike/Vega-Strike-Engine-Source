@@ -37,7 +37,7 @@ void Unit::RemoveFromSystem() {
     }
     static bool collidemap_sanity_check = XMLSupport::parse_bool(vs_config->getVariable("physics","collidemap_sanity_check","false"));
     if (collidemap_sanity_check) {
-      if (activeStarSystem->collidemap->find(*this->location)==activeStarSystem->collidemap->end()){
+      if (0) {//activeStarSystem->collidemap->find(*this->location)==activeStarSystem->collidemap->end()){
         CollideMap::iterator i;
         CollideMap::iterator j=activeStarSystem->collidemap->begin();
         
@@ -109,30 +109,16 @@ void Unit::RemoveFromSystem() {
   activeStarSystem=NULL;
 }
 
-void Unit::UpdateCollideQueue () {
+void Unit::UpdateCollideQueue (StarSystem * ss, CollideMap::iterator hint) {
   if (activeStarSystem==NULL) {
-    activeStarSystem = _Universe->activeStarSystem();
+    activeStarSystem = ss;
+    
   } else {
-    assert (activeStarSystem==_Universe->activeStarSystem());
+    assert (activeStarSystem==ss);
   }
-#ifdef OLD_COLLIDE_SYSTEM
-  CollideInfo.lastchecked =NULL;//reset who checked it last in case only one thing keeps crashing with it;
-  QVector Puffmin (Position().i-radial_size,Position().j-radial_size,Position().k-radial_size);
-  QVector Puffmax (Position().i+radial_size,Position().j+radial_size,Position().k+radial_size);
-  if (CollideInfo.object.u == NULL||TableLocationChanged(CollideInfo,Puffmin,Puffmax)) {//assume not mutable
-    if (CollideInfo.object.u!=NULL) {
-      KillCollideTable(&CollideInfo,activeStarSystem);
-    }
-    CollideInfo.object.u = this;
-    CollideInfo.Mini= Puffmin;
-    CollideInfo.Maxi=Puffmax;
-	CollideInfo.type=LineCollide::UNIT;
-    AddCollideQueue (CollideInfo,_Universe->activeStarSystem());
-  } else {
-    CollideInfo.Mini= Puffmin;
-    CollideInfo.Maxi=Puffmax;
+  if (location==null_collide_map.begin()) {
+    location=ss->collidemap->insert(Collidable(this),hint);
   }
-#endif
   
 }
 extern bool usehuge_table();

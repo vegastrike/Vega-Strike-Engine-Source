@@ -33,7 +33,7 @@ private:
       &&cur_position==b.cur_position
       &&prev_position==b.prev_position;
   }
-  Bolt(const weapon_info *type, const Matrix &orientationpos, const Vector & ShipSpeed, void *owner);//makes a bolt
+  Bolt(const weapon_info *type, const Matrix &orientationpos, const Vector & ShipSpeed, void *owner, CollideMap::iterator hint);//makes a bolt
   void Destroy(int index);
   static void Draw();
   bool Update(int index);

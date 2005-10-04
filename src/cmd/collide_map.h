@@ -26,6 +26,9 @@ public:
       key=0;//hack for now
     }
   }
+  Collidable &operator* () {return *this;}
+  Collidable *operator-> () {return this;}
+
   float GetMagnitudeSquared()const {return key;}
   bool operator <(const Collidable &other) const {
     return key<other.key;
@@ -37,7 +40,7 @@ public:
     this->SetPosition(p);
   }
 };
-class CollideMap:public KeyMutableSet<Collidable> {
+class CollideMap:public ListMutableSet<Collidable> {
 public:
 //Check collisions takes an item to check collisions with, and returns whether that item collided with a Unit only
   bool CheckCollisions(Bolt * bol, const Collidable & updated);

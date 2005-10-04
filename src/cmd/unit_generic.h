@@ -154,7 +154,7 @@ class Mount {
      */ 
 	// Uses Sound Forcefeedback and other stuff
 	void PhysicsAlignedUnfire();
-	bool PhysicsAlignedFire (Unit * caller,const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, void *owner,  Unit *target, signed char autotrack, float trackingcone);
+	bool PhysicsAlignedFire (Unit * caller,const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, void *owner,  Unit *target, signed char autotrack, float trackingcone, CollideMap::iterator &hint);
 	bool Fire (Unit * firer,void *owner, bool Missile=false, bool collide_only_with_target=false);
 };
 
@@ -1090,7 +1090,7 @@ void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL); /
 // Uses mesh stuff (only rSize()) : I have to find something to do
   bool Inside (const QVector &position, const float radius, Vector & normal, float &dist);
 // Uses collide and Universe stuff -> put in NetUnit
-  void UpdateCollideQueue();
+  void UpdateCollideQueue(StarSystem * ss, CollideMap::iterator hint);
 // Uses LineCollide stuff so only in NetUnit and Unit
 // Uses collision stuff so only in NetUnit and Unit classes
   bool querySphere (const QVector &pnt, float err)const;
