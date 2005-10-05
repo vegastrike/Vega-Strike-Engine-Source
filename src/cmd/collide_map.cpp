@@ -4,6 +4,7 @@
 CollideMap null_collide_map;
 
 Collidable::Collidable(Unit *un):radius(un->rSize()){
+  assert(!un->isSubUnit());
   this->SetPosition(un->LocalPosition());
   ref.unit=un;  
 }
@@ -93,6 +94,7 @@ template <class T> class CollideChecker
     return false;
   }
   static bool isNew(CollideMap * cm, Unit * b) {
+    assert(!b->isSubUnit());
     if (b->location==null_collide_map.begin()) {
       b->location=cm->insert(Collidable(b));
       return true;

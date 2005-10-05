@@ -117,7 +117,11 @@ void Unit::UpdateCollideQueue (StarSystem * ss, CollideMap::iterator hint) {
     assert (activeStarSystem==ss);
   }
   if (location==null_collide_map.begin()) {
-    location=ss->collidemap->insert(Collidable(this),hint);
+    assert (!isSubUnit());
+    if (!isSubUnit()) {
+      location=ss->collidemap->insert(Collidable(this),hint);
+    }
+    
   }
   
 }
