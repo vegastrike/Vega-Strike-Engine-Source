@@ -768,7 +768,7 @@ void FireKeyboard::MisSelKey(const KBData&,KBSTATE k) {
 } 
 
 void FireKeyboard::MissileKey(const KBData&,KBSTATE k) {
-  if (g().missilekey!=PRESS)
+  if (k==PRESS)
    g().missilekey = k;
 }
 #if 0
@@ -1605,9 +1605,8 @@ void FireKeyboard::Execute () {
       parent->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false);
     }
   }
-  if (f().missilekey==DOWN||f().missilekey==PRESS||j().jmissilekey==PRESS||j().jmissilekey==DOWN) {
+  if (f().missilekey==PRESS||j().jmissilekey==PRESS) {
     if (!_Universe->AccessCockpit()->CanDrawNavSystem())
-      //      UnitUtil::performDockingOperations(parent,parent->Target());
       parent->Fire(ROLES::FIRE_MISSILES|ROLES::EVERYTHING_ELSE,false);
     if (f().missilekey==PRESS)
       f().missilekey = DOWN;
