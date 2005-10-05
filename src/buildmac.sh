@@ -3,7 +3,7 @@ g++ -o replace ../objconv/replace.cpp
 #sed -e 's/__ZNSs6assignEPKcm/__ZNSs6assi7nEPKcm/g' cmd/libcmd.a >cmd/libcmd.bak#mv cmd/ai/libai.bak cmd/ai/libai.a
 #mv cmd/libcmd.bak cmd/libcmd.a
 ./replace __ZNSs6assignEPKcm __ZNSs6assi6nEPKcm cmd/ai/libai.a cmd/ai/libai.a
-./replace __ZNSs6assignEPKcm __ZNSs6assi7nEPKcm cmd/libcmd.a cmd/libcmd.a
+#./replace __ZNSs6assignEPKcm __ZNSs6assi7nEPKcm cmd/libcmd.a cmd/libcmd.a
 ./replace _png_get_uint_31 _png_get_uiNt_31 /Users/daniel/Install/libpng/libpng.a /Users/daniel/Install/libpng/libpng.a 
 if grep inflate /Users/daniel/Install/libpng/libpng.a ; then
   nm /Users/daniel/install/zlib/libz.a | grep \[TS\]\  | grep flate | cut -c12- | xargs python replaceall.py /Users/daniel/Install/libpng/libpng.a 
@@ -17,7 +17,11 @@ ranlib cmd/libcmd.a >&/dev/null
 export MACOSX_DEPLOYMENT_TARGET=10.1
 export NEXT_ROOT=/Developer/SDKs/MacOSX10.1.5.sdk/
 gcc -Xlinker -Y -Xlinker 16384 -Xlinker -force_flat_namespace  -Xlinker -multiply_defined -Xlinker warning  -o vegastrike debug_vs.o			\
-	gfxlib_struct.o		\
+	ship_commands.o \
+	command.o \
+        macquartz.cpp \
+	rendertext.o \
+        gfxlib_struct.o		\
 	in_joystick.o			\
 	force_feedback.o		\
 	faction_util.o		\
