@@ -1,4 +1,3 @@
-
 bindir = $(prefix)/games/vegastrike/data
 
 bin_PROGRAMS = select

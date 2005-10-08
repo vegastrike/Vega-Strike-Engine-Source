@@ -1,4 +1,4 @@
-AC_INIT(vegastrike, 0.4.0)
+AC_INIT(vegastrike, 0.4.3)
 AC_CONFIG_SRCDIR(src/vegastrike.h)
 AC_PREREQ(2.53)
 
@@ -19,7 +19,7 @@ VS_CHECK_OS
 
 
 dnl Initialize AutoMake and AutoHeader systems
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([1.6])
 AM_CONFIG_HEADER(config.h)
 
 
@@ -717,8 +717,19 @@ VS_WITH_NET_THREADS
 VS_WITH_COLLIDE_MAP
 
 
-AM_PATH_GTK([1.2.0], [HAVE_GTK=1], [AC_MSG_FAILURE([GTK Not Found.  Can not continue])])
-
+CHECK_GTK=1
+HAVE_GTK=no
+AC_ARG_ENABLE(nogtk, AC_HELP_STRING([--enable-nogtk], [Disable building of
+vslauncher (disable GTK)]), [CHECK_GTK=0])
+if (test x$CHECK_GTK = x1); then
+AM_PATH_GTK([1.2.0], [HAVE_GTK=yes], [HAVE_GTK=no])
+fi
+AM_CONDITIONAL([VS_MAKE_LAUNCHER], [test x$HAVE_GTK = xyes]) 
+if test x$HAVE_GTK = xno; then
+  if test x$CHECK_GTK = x1; then
+    AC_MSG_WARN([[GTK Was not found.  VSLAUNCHER will not be built.]])
+  fi
+fi
 
 CPPFLAGS="${CPPFLAGS} ${VS_CPPFLAGS} ${PYTHON_CPPFLAGS} ${BOOST_CPPFLAGS} ${CG_CPPFLAGS}"' -I$(top_srcdir)/src '
 CXXFLAGS="${CXXFLAGS} ${VS_CXXFLAGS} ${PTHREAD_CXXFLAGS} -pipe"
@@ -727,7 +738,6 @@ LIBS="${LIBS} ${VS_LIBS} ${PYTHON_LIBS} ${PTHREAD_LIBS} ${CG_LIBS}"
 
 
 AC_CONFIG_FILES(Makefile
-                 common/Makefile
                  launcher/Makefile
                  mission/Makefile
                  objconv/Makefile
@@ -735,8 +745,6 @@ AC_CONFIG_FILES(Makefile
                  src/aldrv/Makefile
                  src/boost/Makefile
                  src/boost129/Makefile
-                 src/boost129/converter/Makefile
-                 src/boost129/object/Makefile
                  src/cmd/Makefile
                  src/cmd/ai/Makefile
                  src/cmd/collide/Makefile

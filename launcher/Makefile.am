@@ -4,7 +4,9 @@ INCLUDES = -I$(top_srcdir) \
 GCF =
 AM_LDFLAGS  =`gtk-config --libs`
 
-bin_PROGRAMS=vslauncher
 commonLIB = ../src/common/libvscommon.a
-vslauncher_LDADD = ${commonLIB}
-vslauncher_SOURCES= saveinterface.cpp general.cpp
+if VS_MAKE_LAUNCHER
+  bin_PROGRAMS=vslauncher
+  vslauncher_LDADD = ${commonLIB}
+  vslauncher_SOURCES= saveinterface.cpp general.cpp
+endif

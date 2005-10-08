@@ -1,5 +1,9 @@
 #ifndef _PYTHON_COMPILE_H_
 #define _PYTHON_COMPILE_H_
+//Resets variable for use by python config.h
+#ifdef _POSIX_C_SOURCE
+#undef _POSIX_C_SOURCE
+#endif
 #include <Python.h>
 #include "hashtable.h"
 #include <string>

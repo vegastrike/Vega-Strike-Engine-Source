@@ -51,7 +51,7 @@ class UnitCollection {
     ///the position in the list
     UnitListNode *pos;
     ///Finds the next unit (or NULL) that isn't Killed()
-    inline void GetNextValidUnit();
+    void GetNextValidUnit();
   public:
     UnitIterator() :pos(NULL) { }
     ///Creates this unit iterator
