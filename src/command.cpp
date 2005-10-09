@@ -16,7 +16,16 @@
 // They FOLD up the page so a user only needs to see a general outline of the entire huge file
 // and be able to quickly get to exactly what part they need.
 // It helps when a 300 line function is wrapped up to a one line comment
+/*
+Index:
+   Section 1: Example Commands
+   Section 2: Adding new callback types
+   Section 3: Polymorphic Behaviors
+   Section 4: Multiple Arguement behaviors
+   Section 5: Multiple Command Processors
+*/
 /* *******************************************************************
+(******** 1 *******)
 Example Commands: 
 class WalkControls {
 	public:
@@ -63,10 +72,28 @@ class WalkControls {
 		void setGravity(int &amount);
 }
 Then to get the commands to initiate, simply:
-static WalkControls done; // and when the program starts, this variable will be made.
+WalkControls done; // and when the program starts, this variable will be made.
+(that *should* be enough, in concept, but usually getting it to actually work when working with multiple files can be a little more complex.
+ You may have to call something on the "WalkControls" variable "done"
+ from somewhere in the program flow that only runs once. 
+ Or use the pointer method:
+WalkControls *done = 0x0;
+and somewhere that's called multiple times (but not in the main loop)
+(above the function declaration:
+class WalkControls;
+extern WalkControls *done;
+void myFunction(args..) {
+	if(done == 0x0) done = new WalkControls();
+
+	doMyfunction...
+	return;
+}
+but then it's up to you to do cleanup.
+)
 ******************************************************************* */
 
 /* *******************************************************************
+(******* 2 ******)
 	Steps to adding a different argument types
 	Usually:
 	std::string &entirecommandtyped (1STR)
@@ -125,6 +152,7 @@ static WalkControls done; // and when the program starts, this variable will be 
 
 ******************************************************************* */
 /* *******************************************************************
+(****** 3 ******)
 PolyMorphic Behaviors:
 If you have the command "left" on the object "flight-mode" 
 the flight-mode object may always be in memory, but imagine you want to land
@@ -148,7 +176,9 @@ Then
 
 ******************************************************************* */
 
-/* A quick comment on Multiple Arguments 
+/*
+(***** 4 *****)
+ A quick comment on Multiple Arguments 
 	Imagine you have:
 	void MyClass::myFunction(const char *arg1, const char *arg2) 
 	If you set it to 2CSTR it will work, it also combines everything in a "" to a single arg.
@@ -165,17 +195,87 @@ Then
 
 	
 */
-
 /* ********************
-Finally the last comments for way up here
-BUG WARNING WITH 1STRARRAY
-Do NOT try to modify anything in your 1STRARRAY argument!
-if you have
-void myClass::myFunction(char *array_in[]) {...}
-do NOT modify array_in, you can COPY it to an std::string or to
-a different charactor pointer then modify that.
-The reason for this, the array passed to your function, is actually built inside
-an std::vector<std::string *>, and is a CONST pointer to the data inside the vector
+(****** 5 ******)
+  Multiple Command Processors:
+	Creating a custom command processor to do job X.
+	Example abstract usage: Imbedded HTTP servers, objects which can be placed in game that can execute their own commands (then "taken-over" or "possessed", or given somehow to the player to be used)
+	
+	Example with psuedo:
+	class HTTPserver : public commandI {
+		class clients {
+			friend class HTTPserver;
+			friend class std::vector<clients>;
+			clients(int &sock, char *addy) {
+				socket = sock;
+				ipaddress.append(addy);
+			};
+			clients(const clients &in) {
+				socket = in.socket;
+				ipaddress.append(in.ipaddress);
+			}
+			int socket;
+			std::string ipaddress;
+		};
+		class Packet {
+			public:
+				int socket;
+				char *data;
+		};
+		public:
+		HTTPserver(char *port) : commandI() {
+			setupserveronport(atoi(port));
+			Functor<HTTPserver> *get = new Functor<HTTPserver>(this, &HTTPserver::GET);
+			commandI::addCommand(get, "GET", ARG_1STRSPEC);
+			
+			Functor<HTTPserver> *post = new Functor<HTTPserver(this, &HTTPserver::POST);
+			commandI::addCommand(post, "POST", ARG_1STRSPEC);
+
+
+			fork() {
+				while(SOMEBREAKVARIABLE)
+				runserver();
+			}
+		}
+		std::vector<clients> myclients;
+		runServer() {
+			bool incfound = socketlayor->listen4new();
+			if(incfound) {
+				while(clients newclient(socketlayor->getANewOne() ) != NULL) 
+				{
+					myclients.push_back(newclient);
+				}
+			}
+			Packet *incomingpacket = socketlayor->listen();
+			if(incomingpacket != NULL) {
+				std::string ConvertDataToString(incomingpacket->data);
+				std::string buffer;
+				for(unsigned int counter = 0; counter < CDTS.size(); counter++) 
+				{
+					if(CDTS[counter] == '\n') {
+						commandI::execute(buffer, true, socket);
+						buffer.erase();
+					} else {
+						buffer += CDTS[counter];
+					}
+				} if(buffer.size() > 0) { //POSTS don't end post data with anything, so if we want to process it, we do it now. Headers all terminate with \r\n.
+					commandI::execute(buffer, true, socket);
+				}
+			
+				delete incomingpacket;
+			}
+		}
+		void GET(std::string &page, int socket) {
+			securityformat(page);
+			std::string getPage = Utilities.loadFile(page);
+			std::string buildHeader(page, getPage.size(), option1, option2, etc);
+			socketlayor->send(buildheader, socket);
+			socketlayor->send(getPage, socket);
+		}
+		void POST(std::string &page, int socket) {
+			setMode(POST) ;// do whatever we want posts to do on the server
+		}
+	}
 ********************* */
 // }}}
 
@@ -198,19 +298,106 @@ coms::~coms() {
 };
 // }}}
 
-// {{{ Set up the command vector
-class HoldCommands {
-	private:
+class HoldCommands { //  Hold the commands here{{{ 
+/*
+// Large comment about why and what {{{
+what:
+It creates "procs" objects which hold a pointer to a memory address(of the command processor) and the list of commands
+that processor has. It holds this list of "procs" in a global variable, which has a single bool to notify command
+interpretors when it needs to be created (So if there are 0 command interpretors in memory while the program is running,
+HoldCommands won't take up any space as a running object)
+
+It contains 3 utility functions which take the "this" pointer
+addCMD: adds a command and takes a this pointer, if the command processor is not found in HoldCommands vector, it 
+		creates a new one, adds the command to the new one. Otherwise it adds it to the proper one. 
+popProc: Pop a processor off the list (Not the usual pop_back type, it actually calls std::vector::erase(iterator))
+getProc: returns the procs object owned by the command interpretor calling it
+
+why:
+	To support multiple command processors, while still allowing commands to be added to a _Global_ command processor or two
+	before they have allocated their internal variables and run their constructors. (If you add something to a vector
+	on a global object before the object has initialized, that thing will get lost.)
+	class B;
+	extern B globalB;
+	class A {
+		public:
+		A() { cout << "A created\n"; globalB.list.push_back(1); };
+	}
+	class B {
+		public:
+		B() { cout << "B created\n"; };
+		vector<int> list;
+	}
+	A anA(); //A is defined BEFORE B. Very important
+	B globalB();
+	int main() {
+		cout << globalB.list.size(); // gives me zero. Should be one.
+	}
+	(Normally, this wouldn't happen, IF we were working with just one file.
+	But because we are working with multiple files that can be compiled in pretty much any order
+	we have limited control of what order our globals are declared in. So we take advantage of the fact we can
+	still run functions on a global object before it's initialized, and initialize what we need by hand at the
+	exact time it's needed, which would be at any commandI::addCommand call, at any time.)
+// }}} I love folds so I can see only what I need ;) (ViM)
+*/
 		friend class commandI; 
-		std::vector<coms> rc; //real commands vector
+		bool finishmeoff; 
+		class procs {
+			public:
+			procs(commandI *processor, coms *initcmd) {
+				proc = processor;
+				rc.push_back(initcmd);
+			}
+			procs(const procs &in) {
+				procs *blah = const_cast<procs *>(&in);
+				proc = blah->proc;
+				for(std::vector<coms>::iterator iter = blah->rc.begin(); iter < blah->rc.end(); iter++) rc.push_back((*(iter)));
+			}
+			~procs() {
+				while(rc.size() > 0) rc.pop_back();
+			}
+			commandI *proc;
+			std::vector<coms> rc;
+		};
+		HoldCommands() {
+			finishmeoff = false;
+		}
+		std::vector<procs> cmds; //for multiple command processors.
+		void addCMD(coms &commandin, commandI *proc2use) {
+			bool found = false;
+			for(std::vector<procs>::iterator iter = cmds.begin(); iter < cmds.end(); iter++) {
+				if((*(iter)).proc == proc2use) {
+					found = true;
+					(*(iter)).rc.insert((*(iter)).rc.begin(), commandin);
+					iter = cmds.end();
+				}
+			}
+			if(!found) {
+				procs newproc(&(*proc2use), &commandin);
+				cmds.push_back(newproc);
+			}
+		}
+		void popProc(commandI *proc2use) {
+			for(std::vector<procs>::iterator iter = cmds.begin(); iter < cmds.end(); iter++ )
+			{
+				if(proc2use == (*(iter)).proc) {
+					cmds.erase(iter);
+				};
+			};
+			if(cmds.size() == 0) finishmeoff = true;
+		}
+		procs *getProc(commandI *in) {
+			for(std::vector<procs>::iterator iter = cmds.begin(); iter < cmds.end(); iter++) {
+				if(in == (*(iter)).proc) return (&(*(iter)));
+			}
+		}
 }; 
 HoldCommands *rcCMD = 0x0;
 bool rcCMDEXISTS = false; //initialize to false
 // We use a pointer so we can initialize it in addCommand, which can, and does 
 // run before the command interpretor constructor, and before all local variables
 // on the command interpretor itself might be initialized.
-// This object could and probobly should be used for menu's as well, IF 
-// anybody ever uses the menusystem 
+
 // }}}
 
 // {{{ command interpretor constructor
@@ -243,12 +430,13 @@ commandI::commandI() {
 // {{{ command interpretor destructor 
 commandI::~commandI() {
 		{
-	        std::vector<coms>::iterator iter = rcCMD->rc.begin();// = rcCMD->rc.end();
-	        while(rcCMD->rc.size() > 0) {
+			HoldCommands::procs *findme = rcCMD->getProc(this);
+	        std::vector<coms>::iterator iter = findme->rc.begin();// = rcCMD->rc.end();
+	        while(findme->rc.size() > 0) {
 					TFunctor *f = ((*(iter)).functor);
 					delete f;
-        	        rcCMD->rc.erase(iter);
-					iter = rcCMD->rc.begin();
+        	        findme->rc.erase(iter);
+					iter = findme->rc.begin();
 	       	 };
 		}
 		{
@@ -260,7 +448,13 @@ commandI::~commandI() {
 				menus.erase(iter);
 			};
 		}
-		if(rcCMDEXISTS) delete rcCMD;
+		if(rcCMDEXISTS) {
+			rcCMD->popProc(this);
+			if(rcCMD->finishmeoff) { 
+				rcCMDEXISTS = false;
+				delete rcCMD;
+			}
+		}
 };
 // }}}
 // {{{ Menu object destructor
@@ -312,7 +506,8 @@ void commandI::pcommands() {
 	cmd << "\n\rCommands available:\n\r";
 	std::vector<coms>::iterator iter;
 //	if(webb) cmd << "<PRE>";
-	for(iter = rcCMD->rc.begin(); iter < rcCMD->rc.end(); iter++) {
+	HoldCommands::procs *commands = rcCMD->getProc(this);
+	for(iter = commands->rc.begin(); iter < commands->rc.end(); iter++) {
 		if(!(*(iter)).functor->attribs.hidden && !(*(iter)).functor->attribs.webbcmd) {
 			if((*(iter)).functor->attribs.immcmd == true) {
 				if(immortal) {
@@ -353,42 +548,45 @@ void commandI::pcommands() {
 // }}}
 // {{{ addCommand - Add a command to the interpreter
 void commandI::addCommand(TFunctor *com, char *name, int args){
-		std::cout << "Adding command: " << name << std::endl;
-		coms newOne = new coms(com); 
+	std::cout << "Adding command: " << name << std::endl;
+	coms newOne = new coms(com); 
 	// See the very bottom of this file for comments about possible optimization
-        newOne.Name.append(name);
-        newOne.argtype = args;
+	newOne.Name.append(name);
+	newOne.argtype = args;
 	//push the new command back the vector.
-		if(!rcCMDEXISTS) {
-			if(rcCMD != 0x0) {
-				std::cout << "Apparently rcCMD is not 0x0.. \n";
-			}
-			rcCMD = new HoldCommands(); 
-			rcCMDEXISTS = true; }; 
-			rcCMD->rc.insert(rcCMD->rc.begin(), newOne);
+	if(!rcCMDEXISTS) {
+		if(rcCMD != 0x0) {
+			std::cout << "Apparently rcCMD is not 0x0.. \n";
+		}
+		rcCMD = new HoldCommands(); 
+		rcCMDEXISTS = true; 
+	}; 
+	rcCMD->addCMD(newOne, this);
 //        rcCMD->rc.push_back(newOne);
 };
 // }}}
 // {{{ Remove a command remCommand(char *name)
 void commandI::remCommand(char *name){ 
-	if(rcCMD->rc.size() < 1) return;
-	for(std::vector<coms>::iterator iter = rcCMD->rc.begin(); iter < rcCMD->rc.end();iter++) { 
+	HoldCommands::procs *findme = rcCMD->getProc(this);
+	if(findme->rc.size() < 1) return;
+	for(std::vector<coms>::iterator iter = findme->rc.begin(); iter < findme->rc.end();iter++) { 
 		if((*(iter)).Name.compare(name) == 0) {
 			std::cout << "Removing: " << name << std::endl;
 			delete (*(iter)).functor;
-			rcCMD->rc.erase(iter);
+			findme->rc.erase(iter);
 			return;
 		}
 	}
 	std::cout << "Error, command " << name << " not removed, try using the TFunctor *com version instead. Also, this is case sensitive ;)\n";
 }
 void  commandI::remCommand(TFunctor *com) {
-    if(rcCMD->rc.size() < 1) return;
-    for(std::vector<coms>::iterator iter = rcCMD->rc.begin(); iter < rcCMD->rc.end();iter++) { 
+	HoldCommands::procs *findme = rcCMD->getProc(this);
+    if(findme->rc.size() < 1) return;
+    for(std::vector<coms>::iterator iter = findme->rc.begin(); iter < findme->rc.end();iter++) { 
         if((*(iter)).functor == com) {
 			std::cout << "Removing: " << (*(iter)).Name << std::endl;
             delete (*(iter)).functor;
-            rcCMD->rc.erase(iter);
+            findme->rc.erase(iter);
             return;
         }
     }
@@ -397,7 +595,8 @@ void  commandI::remCommand(TFunctor *com) {
 // }}}
 // {{{ Find a command in the command interpretor 
 coms commandI::findCommand(const char *comm, int &sock_in) {
-	if(rcCMD->rc.size() < 1) throw "Error, commands vector empty, this shouldn't happen!\n";
+	HoldCommands::procs *findme = rcCMD->getProc(this);
+	if(findme->rc.size() < 1) throw "Error, commands vector empty, this shouldn't happen!\n";
 
 	std::ostringstream in_s;
 
@@ -416,10 +615,10 @@ coms commandI::findCommand(const char *comm, int &sock_in) {
 // }}}
 //if the input is less than one return prompt function{{{
 	if(name.size() < 1) {
-		std::vector<coms>::iterator iter = rcCMD->rc.begin();
+		std::vector<coms>::iterator iter = findme->rc.begin();
 	    bool breaker = true;
 	    while(breaker == true) {
-	        if(iter >= rcCMD->rc.end()) {iter--; breaker = false;continue;}
+	        if(iter >= findme->rc.end()) {iter--; breaker = false;continue;}
     	    else if((*(iter)).Name.compare("prompt") == 0) { return (*(iter));}
 			else iter++;
 		}
@@ -433,7 +632,7 @@ coms commandI::findCommand(const char *comm, int &sock_in) {
 // }}}
 // Start testing command names against the command entered {{{
 	std::vector<coms>::iterator iter;
-	for(iter = rcCMD->rc.begin();iter < rcCMD->rc.end(); iter++) {
+	for(iter = findme->rc.begin();iter < findme->rc.end(); iter++) {
 	//set the test variable to the iterator of something in the command vector
 		coms testCom((*(iter)));
 		//clear the temporary buffer used for holding the name of this command
@@ -462,7 +661,7 @@ coms commandI::findCommand(const char *comm, int &sock_in) {
 						//this allows commands to have immortal/mortal versions
 						//that call different functions.
 						returnit = false;
-//						iter = rcCMD->rc.begin();
+//						iter = findme->rc.begin();
 //						iter++;
 //						testCom = (*(iter));
 						
@@ -518,10 +717,10 @@ coms commandI::findCommand(const char *comm, int &sock_in) {
 // }}}
 // No command was found, so we find and return the dummy command {{{
 	{
-	std::vector<coms>::iterator iter = rcCMD->rc.begin();
+	std::vector<coms>::iterator iter = findme->rc.begin();
 	bool breaker = true;
 	for(;breaker == true;) {
-		if(iter >= rcCMD->rc.end()) { iter--;breaker = false; break;}
+		if(iter >= findme->rc.end()) { iter--;breaker = false; break;}
 		else if((*(iter)).Name.compare("dummy") == 0) { return (*(iter)); } //here
 		else iter++;
 	}
@@ -1304,6 +1503,11 @@ void RegisterPythonWithCommandInterp::runPy(std::string &argsin) {
 	//and the first space
 	if(x == 0)
 		pyRunString.replace(x, 7, ""); //replace here
+	x = pyRunString.find("<BR>"); //newlines are converted to these in the menusystem. Can be changed if needed.
+	while(x != std::string::npos) {
+		pyRunString.replace(x, 4, "\r\n");
+		x = pyRunString.find("<BR>");
+	}
 //this method was copied from somewhere else in the vegastrike source
 	char *temppython = strdup(pyRunString.c_str()); //copy to a char *
 	PyRun_SimpleString(temppython); //run it
