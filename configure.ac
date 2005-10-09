@@ -334,7 +334,11 @@ dnl --------------------------------------------------------------------------
 dnl Make sure that the scripts in m4scripts are available
 dnl --------------------------------------------------------------------------
 m4_ifdef([VS_CHECK_CRYPTO], [], [AC_FATAL([MISSING script(s) from m4scripts directory.
-An easy way to get these scripts is to use ./bootstrap-sh to create configure.])])  
+An easy way to get these scripts is to use ./bootstrap-sh to create configure.
+If you get the message and are running bootstrap-sh, that probably means that 
+the m4scripts directory does not exist.  If you are using CVS to get 
+vegastrike, change to vegastrike directory, type 'cvs update -P -d' and this 
+directory should be created.])])  
 m4_pattern_forbid([VS_CHECK_CRYPTO])
 
 

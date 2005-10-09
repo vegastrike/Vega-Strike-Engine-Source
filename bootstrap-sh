@@ -1,6 +1,8 @@
 # This is a very simple script to automatically set up the configure script.
-aclocal -I m4scripts
-autoheader
-autoconf
-automake -ac
-
+if (aclocal -I m4scripts --force) then
+  autoheader -f && autoconf -f && automake -acf
+else
+  echo m4scripts directory appears to be missing.
+  echo try running cvs update -P -d
+  echo in the directory that bootstrap-sh is in.
+fi
