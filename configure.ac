@@ -330,6 +330,14 @@ AC_ARG_ENABLE(car, AC_HELP_STRING([--enable-car], [Produce an executable for car
 VS_CHECK_GL
 
 
+dnl --------------------------------------------------------------------------
+dnl Make sure that the scripts in m4scripts are available
+dnl --------------------------------------------------------------------------
+m4_ifdef([VS_CHECK_CRYPTO], [], [AC_FATAL([MISSING script(s) from m4scripts directory.
+An easy way to get these scripts is to use ./bootstrap-sh to create configure.])])  
+m4_pattern_forbid([VS_CHECK_CRYPTO])
+
+
 
 
 dnl --------------------------------------------------------------------------
