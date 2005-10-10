@@ -267,12 +267,12 @@ public:
 };
 }
 void LoopAround(Order* aisc, Unit * un) {
-	Order* broll = new Orders::LoopAround(false,true,false,(int)un);
+	Order* broll = new Orders::LoopAround(false,true,false,(int)(size_t)un);
 	AddOrd(aisc,un,broll);
 	
 }
 void AggressiveLoopAround(Order* aisc, Unit * un) {
-	Order* broll = new Orders::LoopAround(true,true,false,(int)un);
+	Order* broll = new Orders::LoopAround(true,true,false,(int)(size_t)un);
 	AddOrd(aisc,un,broll);
 	
 }
@@ -285,17 +285,17 @@ void RollRight(Order *aisc, Unit* un) {
     AddOrd(un->aistate,un,new ExecuteFor(new Orders::MatchRoll(-un->GetComputerData().max_roll_left,false),1.0f));
 }
 void LoopAroundFast(Order* aisc, Unit * un) {
-	Order* broll = new Orders::LoopAround(false,true,true,(int)un);
+	Order* broll = new Orders::LoopAround(false,true,true,(int)(size_t)un);
 	AddOrd(aisc,un,broll);
 	
 }
 void AggressiveLoopAroundFast(Order* aisc, Unit * un) {
-	Order* broll = new Orders::LoopAround(true,true,true,(int)un);
+	Order* broll = new Orders::LoopAround(true,true,true,(int)(size_t)un);
 	AddOrd(aisc,un,broll);
 	
 }
 void LoopAroundSlow(Order* aisc, Unit * un) {
-	Order* broll = new Orders::LoopAround(false,false,false,(int)un);
+	Order* broll = new Orders::LoopAround(false,false,false,(int)(size_t)un);
 	AddOrd(aisc,un,broll);
 	
 }
@@ -354,7 +354,7 @@ void SelfDestruct(Order* aisc, Unit * un) {
 
 
 void AggressiveLoopAroundSlow(Order* aisc, Unit * un) {
-	Order* broll = new Orders::LoopAround(true,false,false,(int)un);
+	Order* broll = new Orders::LoopAround(true,false,false,(int)(size_t)un);
 	AddOrd(aisc,un,broll);
 	
 }
