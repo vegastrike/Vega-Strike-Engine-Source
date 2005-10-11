@@ -105,7 +105,7 @@ int main (int argc, char** argv) {
      string tmp = argv[1];
      int where=where=tmp.find_last_of(".");
      tmp = tmp.substr(0,where);
-     string mtl = tmp+".mtl";
+     string mtl = ObjGetMtl(Inputfile,argv[2]);
      FILE * InputMtl = fopen (mtl.c_str(),"r");
      ObjToBFXM(Inputfile, InputMtl,Outputfile,forcenormals);
   } else if(createOBJfromBFXM){

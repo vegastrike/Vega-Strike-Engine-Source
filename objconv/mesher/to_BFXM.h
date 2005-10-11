@@ -48,7 +48,16 @@ struct line{
 	int indexref[2]; //Index into Points
 	float s[2]; //U
 	float t[2]; //V
-   line() {flatshade=0;}
+    line() { flatshade=0; }
+    line(int i1, int i2, float s1, float t1, float s2, float t2, bool fs=0) { 
+        indexref[0]=i1;
+        indexref[1]=i2;
+        s[0]=s1;
+        s[1]=s2;
+        t[0]=t1;
+        t[1]=t2;
+        flatshade=fs;
+    }
 };
 
 struct triangle{
@@ -56,7 +65,20 @@ struct triangle{
 	int indexref[3]; //Index into Points
 	float s[3]; //U
 	float t[3]; //V
-   triangle(){flatshade=0;}
+    triangle() { flatshade=0; }
+    triangle(int i1, int i2, int i3, float s1, float t1, float s2, float t2, float s3, float t3, bool fs=0) { 
+        indexref[0]=i1;
+        indexref[1]=i2;
+        indexref[2]=i3;
+        s[0]=s1;
+        s[1]=s2;
+        s[2]=s3;
+        t[0]=t1;
+        t[1]=t2;
+        t[2]=t3;
+        flatshade=fs;
+    }
+
 };
 
 struct quad{
@@ -64,7 +86,22 @@ struct quad{
 	int indexref[4]; //Index into Points
 	float s[4]; //U
 	float t[4]; //V
-   quad(){flatshade=0;}
+    quad() { flatshade=0; }
+    quad(int i1, int i2, int i3, int i4, float s1, float t1, float s2, float t2, float s3, float t3, float s4, float t4, bool fs=0) { 
+        indexref[0]=i1;
+        indexref[1]=i2;
+        indexref[2]=i3;
+        indexref[3]=i4;
+        s[0]=s1;
+        s[1]=s2;
+        s[2]=s3;
+        s[3]=s4;
+        t[0]=t1;
+        t[1]=t2;
+        t[2]=t3;
+        t[3]=t4;
+        flatshade=fs;
+    }
 };
 
 struct stripelement{
@@ -115,9 +152,8 @@ struct textureholder{ // Holds 1 texture entry
 	int type;
 	int index;
 	vector<unsigned char> name;
-	textureholder(){
-	  name= vector<unsigned char>();
-	}
+    textureholder() : index(0),type(TEXTURE) { };
+    textureholder(int _index) : index(_index),type(TEXTURE) {};
 };
 
 
