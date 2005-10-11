@@ -258,6 +258,8 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m, Unit * ta
   if (curlength<0) {
     curlength=0;
   }
+  if (curlength>range)
+    curlength=range;
   if (curthick ==0) {
     //#ifdef PERBOLTSOUND
     //#endif
