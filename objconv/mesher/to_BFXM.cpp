@@ -1119,9 +1119,14 @@ int32bit appendmeshfromxml(XML memfile, FILE* Outputfile,bool forcenormals){
   }
   //Textures
   {
-  intbuf= VSSwapHostIntToLittle(memfile.textures.size());
+  int32bit texnum;
+  intbuf= 0;
+  for(texnum=0;texnum<memfile.textures.size();texnum++) 
+      if(memfile.textures[texnum].type != UNKNOWN)
+          intbuf++;
+  intbuf= VSSwapHostIntToLittle(intbuf);
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of textures
-  for(int32bit texnum=0;texnum<memfile.textures.size();texnum++){
+  for(texnum=0;texnum<memfile.textures.size();texnum++) if(memfile.textures[texnum].type != UNKNOWN) {
 	intbuf= VSSwapHostIntToLittle(memfile.textures[texnum].type);
 	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//texture # texnum: type
 	intbuf= VSSwapHostIntToLittle(memfile.textures[texnum].index);

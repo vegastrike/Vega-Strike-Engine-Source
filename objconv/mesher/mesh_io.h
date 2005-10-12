@@ -27,6 +27,7 @@ struct Mesh_vec3f {
 enum textype{
 	ALPHAMAP,
 	ANIMATION,
-	TEXTURE
+	TEXTURE,
+    UNKNOWN
 };
 

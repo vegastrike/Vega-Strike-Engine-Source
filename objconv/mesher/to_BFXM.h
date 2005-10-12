@@ -152,8 +152,8 @@ struct textureholder{ // Holds 1 texture entry
 	int type;
 	int index;
 	vector<unsigned char> name;
-    textureholder() : index(0),type(TEXTURE) { };
-    textureholder(int _index) : index(_index),type(TEXTURE) {};
+    textureholder() : index(0),type(UNKNOWN) { };
+    textureholder(int _index) : index(_index),type(UNKNOWN) {};
 };
 
 
