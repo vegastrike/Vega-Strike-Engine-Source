@@ -2979,10 +2979,10 @@ void Unit::RegenShields () {
   if ((image->ecm>0)) {
     static float ecmadj = XMLSupport::parse_float(vs_config->getVariable ("physics","ecm_energy_cost",".05"));
     float sim_atom_ecm = ecmadj * image->ecm*SIMULATION_ATOM;
-    if (energy-10>sim_atom_ecm) {
+    if (energy>sim_atom_ecm) {
       energy-=sim_atom_ecm;
     }else {
-      energy=energy<10?10:energy;
+      energy=0;
     }
   }
   if (GetNebula()!=NULL) {
