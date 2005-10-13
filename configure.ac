@@ -2,6 +2,10 @@ AC_INIT(vegastrike, 0.4.3)
 AC_CONFIG_SRCDIR(src/vegastrike.h)
 AC_PREREQ(2.53)
 
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_RANLIB
+
 AC_LANG(C++)
 
 AC_PROG_AWK
@@ -70,9 +74,6 @@ case $target in
     ;;
 esac
 
-AC_PROG_INSTALL
-AC_PROG_LN_S
-AC_PROG_RANLIB
 
 dnl Checks for header files.
 dnl AC_HEADER_STDC
@@ -692,7 +693,6 @@ fi
 
 dnl Specify data directory
 AC_ARG_WITH(data-dir, AC_HELP_STRING([--with-data-dir=PATH], [Default vegastrike data directory]),VS_CPPFLAGS="${VS_CPPFLAGS} -DDATA_DIR=\\\"$withval\\\"")
-
 
 AC_SUBST(VS_CPPFLAGS)
 AC_SUBST(VS_CXXFLAGS)

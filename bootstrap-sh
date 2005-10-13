@@ -1,8 +1,77 @@
-# This is a very simple script to automatically set up the configure script.
-if (aclocal -I m4scripts --force) then
+# This scripts prepares the configure script for execution.
+# Prior to building configure, it makes sure that at least
+# the basic autotools are there and are an acceptable version.
+
+# This is a part of the VegaStrike build system.
+# This file is released under the GNU Public license.  A
+# copy of this license should be available in the same
+# directory as this file.
+
+echo VegaStrike Configuration Preparation Tool
+echo Maintained by Brian A. Lloyd 
+echo '(balloyd1@users.sourceforge.net)'
+echo Please send bug reports or comments about this script
+echo to the email above or else visit
+echo vegastrike.sourceforge.net for help in using this script
+
+checkversion()
+{
+  ver_ok=NO
+  read t1 t2 t3 t4;
+  if (test x$t4 "<" x$ver_needed) then
+    ver_ok=NO
+  else
+    ver_ok=OK
+  fi
+  while read; do
+    true;
+  done
+  if (test x$ver_ok = xOK) then
+    return 0;
+  else
+    return 1;
+  fi
+}
+
+
+
+vers_ok=OK
+ver_needed=1.6.0
+
+aclocal --version|checkversion
+if (test $? -ne 0) then
+  echo "aclocal is not new enough.  Please upgrade to at least version $ver_needed"
+  vers_ok=NO
+fi
+
+automake --version|checkversion
+if (test $? -ne 0) then
+  echo "automake is not new enough.  Please upgrade to at least version $ver_needed"
+  vers_ok=NO
+fi
+
+ver_needed=2.53
+autoheader --version|checkversion
+if (test $? -ne 0) then
+  echo "autoheader is not new enough.  Please upgrade to at least version $ver_needed"
+  vers_ok=NO
+fi
+
+
+autoconf --version|checkversion
+if (test $? -ne 0) then
+  echo "autoconf is not new enough.  Please upgrade to at least version $ver_needed"
+  vers_ok=NO
+fi
+
+if (test x$vers_ok = xOK) then
+{
+if (aclocal -I m4scripts) then
   autoheader -f && autoconf -f && automake -acf
 else
   echo m4scripts directory appears to be missing.
   echo try running cvs update -P -d
   echo in the directory that bootstrap-sh is in.
+fi
+}
 fi
