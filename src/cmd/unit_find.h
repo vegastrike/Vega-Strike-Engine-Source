@@ -1,6 +1,6 @@
 #ifndef _UNIT_FIND_H_
 #define _UNIT_FIND_H_
-
+#include "unit_util.h"
 template <class Locator> void findObjects (StarSystem * ss,CollideMap::iterator location, Locator *check) {
     if (location!=null_collide_map.begin()) {
       QVector thispos = (**location).GetPosition();
@@ -105,7 +105,20 @@ public:
     return retval;
   }
 };
-
+class NearestNavLocator:public NearestUnitLocator{
+public:
+  bool BoltsOrUnits() {
+    return false;
+  }
+  bool UnitsOnly() {
+    return true;
+  }
+  bool acquire(float distance, CollideMap::iterator i) {
+    if (UnitUtil::isSignificant((*i)->ref.unit))
+      return NearestUnitLocator::acquire(distance,i); 
+    return true;
+  }
+};
 template <class T>
 class UnitWithinRangeLocator {
 public:

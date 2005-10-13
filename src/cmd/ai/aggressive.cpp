@@ -22,6 +22,7 @@
 #include "universe_util.h"
 #include "vs_random.h"
 #include "python/python_compile.h"
+#include "cmd/unit_find.h"
 using namespace Orders;
 using std::map;
 const EnumMap::Pair element_names[] = {
@@ -1214,17 +1215,25 @@ static Unit * ChooseNavPoint(Unit * parent) {
       return ret;
     }
   }
-  Unit* un;
-  vector <Unit*> navs;
-  for (un_iter i= _Universe->activeStarSystem()->getUnitList().createIterator();
-       (un=*i)!=NULL;
-       ++i) {
-    if (UnitUtil::isSignificant(un)) {
-      if (parent->getRelation(un)>=-.05) {
-        navs.push_back(un);
+  static vector<UnitContainer> navs;
+  static StarSystem * lastss;
+  static double ttime= 0;
+  if (fabs(getNewTime()-ttime)>.000001||lastss!=_Universe->activeStarSystem()) {
+    Unit* un;
+    navs.clear();
+    for (un_iter i= _Universe->activeStarSystem()->getUnitList().createIterator();
+         (un=*i)!=NULL;
+         ++i) {
+      if (UnitUtil::isSignificant(un)) {
+        if (parent->getRelation(un)>=-.05) {
+          navs.push_back(UnitContainer(un));
+        }
       }
-    }
-  } 
+    } 
+    ttime=getNewTime();
+    lastss=_Universe->activeStarSystem();
+    
+  }
   if (navs.size()>0) {
     int k = (int)(getNewTime()/120);// two minutes
     string key = UnitUtil::getFlightgroupName(parent);
@@ -1233,7 +1242,7 @@ static Unit * ChooseNavPoint(Unit * parent) {
       k += (k * 128) + *start;
     }
     VSRandom choosePlace(k);
-    return navs[choosePlace.genrand_int32()%navs.size()];
+    navs[choosePlace.genrand_int32()%navs.size()].GetUnit();
   }
   return NULL;
 }
@@ -1242,6 +1251,9 @@ static Unit * ChooseNearNavPoint(Unit * parent,QVector location, float locradius
   Unit * candidate=NULL;
   float dist = FLT_MAX;
   Unit * un;
+  NearestNavLocator nnl;
+  findObjects(_Universe->activeStarSystem(),parent->location,&nnl);
+  return nnl.retval.unit;
   for (un_iter i= _Universe->activeStarSystem()->getUnitList().createIterator();
        (un=*i)!=NULL;
        ++i) {

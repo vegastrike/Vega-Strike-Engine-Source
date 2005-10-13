@@ -857,18 +857,6 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
    squadnum++;
   } // end of for flightgroups
   
-  for (int rr=0;rr<a;rr++)
-  {
-    for (int k=0;k<a-1;k++)
-	{
-      int j=rand()%a;
-      if (FactionUtil::GetIntRelation(tmptarget[rr],tmptarget[j])<0)
-	  {
-	    //fighters[rr]->Target (fighters[j]);
-		  break;
-      }
-    }
-  }//now it just sets their faction :-D
 
 
   delete [] tmptarget;
