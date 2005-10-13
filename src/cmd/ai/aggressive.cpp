@@ -1242,7 +1242,7 @@ static Unit * ChooseNavPoint(Unit * parent) {
       k += (k * 128) + *start;
     }
     VSRandom choosePlace(k);
-    navs[choosePlace.genrand_int32()%navs.size()].GetUnit();
+    return navs[choosePlace.genrand_int32()%navs.size()].GetUnit();
   }
   return NULL;
 }
