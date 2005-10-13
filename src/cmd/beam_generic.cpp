@@ -300,7 +300,7 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m, Unit * ta
 
     CollideHuge(CollideInfo,listen_to_owner?targetToCollideWith:NULL,firer,superunit);
     
-    if (!(curlength<range&&curlength>0)) {//if curlength just happens to be nan
+    if (!(curlength<=range&&curlength>0)) {//if curlength just happens to be nan
       if (curlength>range)
 	curlength=range;
       else
