@@ -401,7 +401,6 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
         unit->ResetThreatLevel();
         unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits(),unit);    
 	unit->CollideAll();
-        collidemap->checkSet();
       if (newloc==current_sim_location) {
 	iter.advance();
       }else{ 
