@@ -67,7 +67,9 @@ void    ClientState::display() const
     display( cerr );
     cerr << endl;
 }
-
+bool operator == (const Quaternion& a, const Quaternion &b) {
+  return a.v==b.v&&a.s==b.s;
+}
 void    ClientState::display( std::ostream& ostr ) const
 {
 	ostr << "SERIAL=" <<this->client_serial

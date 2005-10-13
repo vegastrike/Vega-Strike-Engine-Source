@@ -4,7 +4,7 @@
 Transformation linear_interpolate_uncapped(const Transformation &A, const Transformation &B, double blend) {
   
   Quaternion result;
-  if (A.orientation==B.orientation) {
+  if (0/*A.orientation==B.orientation*/) {
     result = A.orientation;
   }else {
     Quaternion a = A.orientation;

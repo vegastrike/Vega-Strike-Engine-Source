@@ -864,7 +864,7 @@ public:
 		this->ycent=ycent;
 		this->reardar=reardar;
 	}
-	void acquire(Unit *target, float distance) {
+	bool acquire(Unit *target, float distance) {
 		if (target!=un) {
 			double dist;
 			int rad;
@@ -874,10 +874,10 @@ public:
 				if (makeBigger==target) {
 					un->Target(NULL);
 				}
-				return;
+				return true;
 			}
 			if (makeBigger!=target&&draw_significant_blips==false&&getTopLevelOwner()==target->owner&&distance>un->GetComputerData().radar.maxrange){
-				return;
+				return true;
 			}
 			static float minblipsize=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","min_radarblip_size","0"));
 			if (target->radial_size > minblipsize) {
@@ -896,6 +896,7 @@ public:
 				}
 			}
 		}
+                return true;
 	}
 };
 
@@ -929,6 +930,13 @@ void GameCockpit::DrawBlips (Unit * un) {
   UnitWithinRangeLocator<DrawUnitBlip> unitLocator(un->GetComputerData().radar.maxrange, unitRad);
   unitLocator.action.init(un, this, numradar, xsize, ysize, xcent, ycent, reardar);
   findObjects(_Universe->activeStarSystem(), un->location, &unitLocator);
+  static bool allGravUnits=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_gravitational_objects","true"));
+  if (allGravUnits){
+    Unit *u;
+    for (un_iter i=_Universe->activeStarSystem()->gravitationalUnits().createIterator();(u=*i)!=NULL;++i){
+      unitLocator.action.acquire(un,UnitUtil::getDistance(un,u));      
+    }
+  }
   GFXEnd();
   GFXPointSize (1);
   GFXColor4f (1,1,1,1);

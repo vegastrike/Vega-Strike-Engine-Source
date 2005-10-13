@@ -10,6 +10,7 @@
 #include "cmd/ai/communication.h"
 #include "universe_util.h"
 #include <algorithm>
+#include "cmd/unit_find.h"
 static bool NoDockWithClear() {
 	static bool nodockwithclear = XMLSupport::parse_bool (vs_config->getVariable ("physics","dock_with_clear_planets","true"));
 	return nodockwithclear;
@@ -111,47 +112,7 @@ FireAt::FireAt (): CommunicatingAI (WEAPON,STARGET) {
   static float aggr = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","Aggressivity","15"));
   ReInit (reaction,aggr);
 }
-float Priority (Unit * me, Unit * targ, float gunrange,float rangetotarget, float relationship) {
-  if(relationship>=0)
-    return -1;
-  if (targ->GetHull()<0)
-    return -1;
-  char rolepriority = (31-ROLES::getPriority (me->combatRole())[targ->combatRole()]);//number btw 0 and 31 higher better
-  if(rolepriority<=0)
-    return -1;
-  if(rangetotarget <1 && rangetotarget >-1000){
-	rangetotarget=1;
-  } else {
-	  rangetotarget=fabs(rangetotarget);
-  }
-  if(rangetotarget<.5*gunrange)
-    rangetotarget=.5*gunrange;
-  if(gunrange <=0){
-	  static float mountless_gunrange = XMLSupport::parse_float (vs_config->getVariable("AI","Targetting","MountlessGunRange","300000000"));
-	  gunrange= mountless_gunrange;
-	  //rangetotarget;
-  }//probably a mountless capship. 50000 is chosen arbitrarily
-  float inertial_priority=0;
-  {
-    static float mass_inertial_priority_cutoff =XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","MassInertialPriorityCutoff","5000"));
-    if (me->GetMass()>mass_inertial_priority_cutoff) {
-      static float mass_inertial_priority_scale =XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","MassInertialPriorityScale",".0000001"));
-      Vector normv (me->GetVelocity());
-      float Speed = me->GetVelocity().Magnitude();
-      normv*=1/Speed;
-      Vector ourToThem = targ->Position()-me->Position();
-      ourToThem.Normalize();
-      inertial_priority = mass_inertial_priority_scale*(.5 + .5 * (normv.Dot(ourToThem)))*me->GetMass()*Speed;
-    }
-    
-  }
-  static float threat_weight = XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","ThreatWeight",".5"));
-  float threat_priority = (me->Threat()==targ)?threat_weight:0;
-  threat_priority+= (targ->Target()==me)?threat_weight:0;
-  float role_priority01 = ((float)rolepriority)/31.;
-  float range_priority01 =.5*gunrange/rangetotarget;//number between 0 and 1 for most ships 1 is best
-  return range_priority01*role_priority01+inertial_priority+threat_priority;
-}
+
 void FireAt::SignalChosenTarget () {
 }
 //temporary way of choosing
@@ -259,6 +220,129 @@ void AssignTBin (Unit * su, vector <TurretBin> & tbin) {
     }
     tbin[bnum].turret.push_back (RangeSortedTurrets (su,grange));
 }
+float Priority (Unit * me, Unit * targ, float gunrange,float rangetotarget, float relationship, char *rolepriority) {
+  if(relationship>=0)
+    return -1;
+  if (targ->GetHull()<0)
+    return -1;
+  *rolepriority = ROLES::getPriority (me->combatRole())[targ->combatRole()];//number btw 0 and 31 higher better
+  char invrolepriority=31-*rolepriority;
+  if(invrolepriority<=0)
+    return -1;
+  if(rangetotarget <1 && rangetotarget >-1000){
+	rangetotarget=1;
+  } else {
+	  rangetotarget=fabs(rangetotarget);
+  }
+  if(rangetotarget<.5*gunrange)
+    rangetotarget=.5*gunrange;
+  if(gunrange <=0){
+	  static float mountless_gunrange = XMLSupport::parse_float (vs_config->getVariable("AI","Targetting","MountlessGunRange","300000000"));
+	  gunrange= mountless_gunrange;
+	  //rangetotarget;
+  }//probably a mountless capship. 50000 is chosen arbitrarily
+  float inertial_priority=0;
+  {
+    static float mass_inertial_priority_cutoff =XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","MassInertialPriorityCutoff","5000"));
+    if (me->GetMass()>mass_inertial_priority_cutoff) {
+      static float mass_inertial_priority_scale =XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","MassInertialPriorityScale",".0000001"));
+      Vector normv (me->GetVelocity());
+      float Speed = me->GetVelocity().Magnitude();
+      normv*=1/Speed;
+      Vector ourToThem = targ->Position()-me->Position();
+      ourToThem.Normalize();
+      inertial_priority = mass_inertial_priority_scale*(.5 + .5 * (normv.Dot(ourToThem)))*me->GetMass()*Speed;
+    }
+    
+  }
+  static float threat_weight = XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","ThreatWeight",".5"));
+  float threat_priority = (me->Threat()==targ)?threat_weight:0;
+  threat_priority+= (targ->Target()==me)?threat_weight:0;
+  float role_priority01 = ((float)*rolepriority)/31.;
+  float range_priority01 =.5*gunrange/rangetotarget;//number between 0 and 1 for most ships 1 is best
+  return range_priority01*role_priority01+inertial_priority+threat_priority;
+}
+float Priority (Unit * me, Unit * targ, float gunrange,float rangetotarget, float relationship) {
+  char rolepriority=0;
+  return Priority(me,targ,gunrange,rangetotarget,relationship,&rolepriority);
+}
+template <class T, size_t n> class StaticTuple{
+public:
+  T vec[n];  
+  size_t size(){
+    return n;
+  }
+  T& operator[](size_t index) {return vec[index];}
+  const T&operator[](size_t index)const{return vec[index];}
+};
+template <size_t numTuple> class ChooseTargetClass{
+  Unit * parent;
+  vector<TurretBin>*tbin;
+  StaticTuple<float,numTuple> maxinnerrange;
+  float priority;
+  char rolepriority;
+  char maxrolepriority;
+  bool reached;
+  FireAt* fireat;
+  float gunrange;
+public:
+  Unit * mytarg;
+  ChooseTargetClass(){}
+  void init (FireAt* fireat, Unit*un, float gunrange, vector<TurretBin>*tbin, const StaticTuple<float,numTuple> &innermaxrange, char maxrolepriority) {
+    this->fireat=fireat;
+    this->tbin=tbin;
+    this->parent=un;
+    mytarg=NULL;
+    this->maxinnerrange=innermaxrange;
+    this->maxrolepriority=maxrolepriority;// max priority that will allow gun range to be ok
+    reached=false;
+    this->priority=-1;
+    this->rolepriority=31;
+    this->gunrange=gunrange;
+  }
+  bool acquire(Unit*un, float distance) {
+    
+    if (distance>maxinnerrange[0]&&!reached) {
+      reached=true;          
+      if (mytarg&&rolepriority<maxrolepriority) {
+        return false;
+      }else {
+        for (size_t i=1;i<numTuple;++i) {
+          if (distance<maxinnerrange[i]){
+            maxinnerrange[0]=maxinnerrange[i];
+            reached=false;
+          }
+        }
+      }
+    }
+    
+    if (un->CloakVisible()>.8) {
+      float rangetotarget = distance;
+      float relationship = fireat->GetEffectiveRelationship (un);
+      char rp=31;
+      float tmp=Priority (parent,un, gunrange,rangetotarget, relationship,&rp);
+      if (tmp>priority) {
+        mytarg = un;
+        priority=tmp;
+        rolepriority=rp;
+      }
+      for (vector <TurretBin>::iterator k=tbin->begin();k!=tbin->end();++k) {
+	if (rangetotarget>k->maxrange) {
+	  break;
+	}
+	const char tprior=ROLES::getPriority (k->turret[0].tur->combatRole())[un->combatRole()];
+	if (relationship<0) {
+	  if (tprior<16){
+	    k->listOfTargets[0].push_back (TargetAndRange (un,rangetotarget,relationship));
+	  }else if (tprior<31){
+	    k->listOfTargets[1].push_back (TargetAndRange (un,rangetotarget,relationship));
+	  }
+	}
+      }
+    }
+    return true;
+  }
+};
 void FireAt::ChooseTargets (int numtargs, bool force) {
   static float mintimetoswitch = XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","MinTimeToSwitchTargets","3"));
   if (lastchangedtarg+mintimetoswitch>0) 
@@ -277,8 +361,8 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
       }
     }
   }
+  
 
-  UnitCollection::UnitIterator iter (_Universe->activeStarSystem()->getUnitList().createIterator());
   Unit * un=NULL;
   vector <TurretBin> tbin;;
   
@@ -303,33 +387,19 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
 	  
   }
   std::sort (tbin.begin(),tbin.end());
-  while ((un = iter.current())) {
-    if (un->CloakVisible()>.8) {
-      float rangetotarget = UnitUtil::getDistance (parent,un);
-      float relationship = GetEffectiveRelationship (un);
-      float tmp=Priority (parent,un, gunrange,rangetotarget, relationship);
-      if (tmp>priority) {
-		  mytarg = un;
-		  priority=tmp;
-      }
-      for (vector <TurretBin>::iterator k=tbin.begin();k!=tbin.end();++k) {
-	if (rangetotarget>k->maxrange) {
-	  break;
-	}
-	const char tprior=ROLES::getPriority (k->turret[0].tur->combatRole())[un->combatRole()];
-	if (relationship<0) {
-	  if (tprior<16){
-	    k->listOfTargets[0].push_back (TargetAndRange (un,rangetotarget,relationship));
-	  }else if (tprior<31){
-	    k->listOfTargets[1].push_back (TargetAndRange (un,rangetotarget,relationship));
-	  }
-	}
-      }
-    }
-    iter.advance();
-  }
   float efrel = 0;
   float mytargrange = FLT_MAX;
+  static float unitRad = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","ai_search_extra_radius","1000"));
+  static char maxrolepriority = XMLSupport::parse_int(vs_config->getVariable("graphics","hud","ai_search_max_role_priority","16"));
+  UnitWithinRangeLocator<ChooseTargetClass<2> > unitLocator(parent->GetComputerData().radar.maxrange,unitRad);
+  StaticTuple<float,2> maxranges;
+  maxranges[0]=gunrange;
+  maxranges[1]=missilerange;
+  if (tbin.size())
+    maxranges[0]=(tbin[0].maxrange>gunrange?tbin[0].maxrange:gunrange);
+  unitLocator.action.init(this,parent,gunrange,&tbin,maxranges,maxrolepriority);
+  findObjects(_Universe->activeStarSystem(),parent->location,&unitLocator);
+  mytarg=unitLocator.action.mytarg;
   if (mytarg) {
     efrel=GetEffectiveRelationship (mytarg);
     mytargrange = UnitUtil::getDistance (parent,mytarg);

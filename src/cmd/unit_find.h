@@ -134,10 +134,11 @@ public:
 	bool acquire(float dist, CollideMap::iterator i) {
 		if (dist<radius) {
 			// Inside radius...
-			action.acquire((*i)->ref.unit, dist);
+			return action.acquire((*i)->ref.unit, dist);
 		}
 		return true;
 	}
 };
+
 
 #endif
