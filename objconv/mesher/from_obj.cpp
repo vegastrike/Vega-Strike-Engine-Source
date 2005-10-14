@@ -266,6 +266,8 @@ string ObjGetMtl (FILE* obj, string objpath) {
     return ret;
 }
 
+extern bool flips,flipt;
+
 void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile,bool forcenormals) {
    fseek (obj,0,SEEK_END);
    int osize=ftell(obj);
@@ -442,7 +444,7 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile,bool forcenormals) {
       if (2==sscanf(buf,"vt %f %f\n",&v.s,&v.t)) {
         //tex.push_back(pair<float,float>(v.s,v.t)); 
         //Sharing is loussy in .obj files... so lets merge a little
-        TEX t(v.s,1.0f-v.t);
+        TEX t((flips?1.0f-v.s:v.s),(flipt?v.t:1.0f-v.t));
         map<TEX,int>::iterator mi = txcmap.find(t);
         if (mi==txcmap.end()) {
             txcmap_ii.push_back(txclist.size());

@@ -1,6 +1,7 @@
 #include "mesh_io.h"
 #include "from_BFXM.h"
 extern float transx,transy,transz;
+extern bool flips,flipt;
 string inverseblend[16]={"ZERO","ZERO","ONE","SRCCOLOR","INVSRCCOLOR","SRCALPHA","INVSRCALPHA",
 "DESTALPHA","INVDESTALPHA","DESTCOLOR","INVDESTCOLOR","SRCALPHASAT","CONSTALPHA","INVCONSTALPHA",
 "CONSTCOLOR","INVCONSTCOLOR"};
@@ -393,7 +394,7 @@ void BFXMToXmeshOrOBJ(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE 
 			}
                         if (sharevert) {
 							if(!isxmesh){
-								fprintf (OutputObj,"vt %f %f\n",s,1.0f-t);
+                                fprintf (OutputObj,"vt %f %f\n",(flips?1.0f-s:s),(flipt?t:1.0f-t));
 							}
                           texcount+=1;
                         }
@@ -428,8 +429,8 @@ void BFXMToXmeshOrOBJ(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE 
                         int texind2 = ind2+texoffset;
                         if (!sharevert) {
 							if(!isxmesh){
-								fprintf (OutputObj,"vt %f %f\n",s1,1.0f-t1);
-								fprintf (OutputObj,"vt %f %f\n",s2,1.0f-t2);
+								fprintf (OutputObj,"vt %f %f\n",(flips?1.0f-s1:s1),(flipt?t1:1.0f-t1));
+								fprintf (OutputObj,"vt %f %f\n",(flips?1.0f-s2:s2),(flipt?t2:1.0f-t2));
 							}
                           texcount+=2;
                           texind1=texcount-2;
@@ -469,9 +470,9 @@ void BFXMToXmeshOrOBJ(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE 
                         int texind3 = ind3+texoffset;
                         if (!sharevert) {
 							if(!isxmesh){
-                          fprintf (OutputObj,"vt %f %f\n",s1,1.0f-t1);
-                          fprintf (OutputObj,"vt %f %f\n",s2,1.0f-t2);
-                          fprintf (OutputObj,"vt %f %f\n",s3,1.0f-t3);
+                          fprintf (OutputObj,"vt %f %f\n",(flips?1.0f-s1:s1),(flipt?t1:1.0f-t1));
+                          fprintf (OutputObj,"vt %f %f\n",(flips?1.0f-s2:s2),(flipt?t2:1.0f-t2));
+                          fprintf (OutputObj,"vt %f %f\n",(flips?1.0f-s3:s3),(flipt?t3:1.0f-t3));
 							}
                           texcount+=3;
                           texind1=texcount-3;
@@ -517,10 +518,10 @@ void BFXMToXmeshOrOBJ(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE 
                         int texind4 = ind4+texoffset;
                         if (!sharevert) {
 							if(!isxmesh){
-                          fprintf (OutputObj,"vt %f %f\n",s1,1.0f-t1);
-                          fprintf (OutputObj,"vt %f %f\n",s2,1.0f-t2);
-                          fprintf (OutputObj,"vt %f %f\n",s3,1.0f-t3);
-                          fprintf (OutputObj,"vt %f %f\n",s4,1.0f-t4);
+                          fprintf (OutputObj,"vt %f %f\n",(flips?1.0f-s1:s1),(flipt?t1:1.0f-t1));
+                          fprintf (OutputObj,"vt %f %f\n",(flips?1.0f-s2:s2),(flipt?t2:1.0f-t2));
+                          fprintf (OutputObj,"vt %f %f\n",(flips?1.0f-s3:s3),(flipt?t3:1.0f-t3));
+                          fprintf (OutputObj,"vt %f %f\n",(flips?1.0f-s4:s4),(flipt?t4:1.0f-t4));
 							}
                           texcount+=4;
                           texind1=texcount-4;
@@ -586,7 +587,7 @@ void BFXMToXmeshOrOBJ(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE 
                           int nind=ind+normoffset;
                           if (!sharevert) {
 							  if(!isxmesh){
-								  fprintf (OutputObj,"vt %f %f\n",s,1.0f-t);
+								  fprintf (OutputObj,"vt %f %f\n",(flips?1.0f-s:s),(flipt?t:1.0f-t));
 							  }
                             tco=texcount;
                             texcount+=1;
@@ -638,7 +639,7 @@ void BFXMToXmeshOrOBJ(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE 
                           int vind = ind+indoffset;
                           if (!sharevert) {
 							  if(!isxmesh){
-								  fprintf (OutputObj,"vt %f %f\n",s,1.0f-t);
+								  fprintf (OutputObj,"vt %f %f\n",(flips?1.0f-s:s),(flipt?t:1.0f-t));
 							  }
                             tco=texcount;
                             texcount+=1;
@@ -685,7 +686,7 @@ void BFXMToXmeshOrOBJ(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE 
                           int vind = ind+indoffset;                          
                           if (!sharevert) {
 							  if(!isxmesh){
-								  fprintf (OutputObj,"vt %f %f\n",s,1.0f-t);
+								  fprintf (OutputObj,"vt %f %f\n",(flips?1.0f-s:s),(flipt?t:1.0f-t));
 							  }
                             tco=texcount;
                             texcount+=1;

@@ -6,6 +6,8 @@ void usage(){
 }
 bool flip=false;
 bool flop=false;
+bool flips=false;
+bool flipt=false;
 float transx=0;
 float transy=0;
 float transz=0;
@@ -22,6 +24,14 @@ int main (int argc, char** argv) {
     if (strcmp(argv[i],"-flop")==0) {
       match=true;
       flop=true;
+    }
+    if (strcmp(argv[i],"-flips")==0) {
+      match=true;
+      flips=true;
+    }
+    if (strcmp(argv[i],"-flipt")==0) {
+      match=true;
+      flipt=true;
     }
     if (strcmp(argv[i],"-forceflatshade")==0) {
       match=true;
