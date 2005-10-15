@@ -28,6 +28,10 @@ using std::string;
 void	VSExit( int code)
 { exit( code); }
 
+class VegaConfig * createVegaConfig(char *) {
+	return (class VegaConfig*)NULL;
+}
+
 string getStarSystemSector (string in) { return string( ""); }
 
 string GetUnitDir( string filename)
