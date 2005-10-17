@@ -54,13 +54,15 @@ static string getUnitNameAndFgNoBase (Unit * target) {
 			offset++;
           }
 		  string fgnstring=string(fgnum);
+                  fgnstring+="=";
+                  fgnstring=fgnstring+" =";
 		  free(fgnum);
 		  fgnum=NULL;
                   static bool printfgname = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","print_fg_name","true"));
                   static bool printshiptype = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","print_ship_type","true"));
 		  static bool confignums=XMLSupport::parse_bool (vs_config->getVariable ("graphics","hud","printFGsubID","false"));
                   string fgname;
-                  if (printfgname)fgname+=fg->name+(printshiptype?(confignums?" =":" : "):"");
+                  if (printfgname)fgname+=fg->name+(printshiptype?(confignums?fgnstring.c_str():" : "):"");
                   if (printshiptype)
                     return fgname+reformatName(target->getFullname());
                   return fgname;		  

@@ -137,7 +137,6 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
 
   Transformation * ct;
   Matrix * ctm=NULL;
-  SetPlanetHackTransformation (ct,ctm);
   unsigned int i;
   if (lastframe) {
     char tmp=0;

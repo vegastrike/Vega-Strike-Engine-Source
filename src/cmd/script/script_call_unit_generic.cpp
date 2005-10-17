@@ -848,7 +848,8 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     }
     else if(method_id==CMT_UNIT_scanSystem){
       if(mode==SCRIPT_RUN){
-	my_unit->scanSystem();
+	//my_unit->scanSystem();
+        assert(0);
       }
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
@@ -856,7 +857,8 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     else if(method_id==CMT_UNIT_scannerNearestEnemy){
       Unit *ret_unit=NULL;
       if(mode==SCRIPT_RUN){
-	ret_unit=my_unit->getScanner()->nearest_enemy;
+	//ret_unit=my_unit->getScanner()->nearest_enemy;
+        assert(0);
       }
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_OBJECT;
@@ -866,7 +868,8 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     else if(method_id==CMT_UNIT_scannerNearestFriend){
       Unit *ret_unit=NULL;
       if(mode==SCRIPT_RUN){
-	ret_unit=my_unit->getScanner()->nearest_friend;
+	//ret_unit=my_unit->getScanner()->nearest_friend;
+        assert(0);
       }
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_OBJECT;
@@ -876,7 +879,8 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     else if(method_id==CMT_UNIT_scannerNearestShip){
       Unit *ret_unit=NULL;
       if(mode==SCRIPT_RUN){
-	ret_unit=my_unit->getScanner()->nearest_ship;
+	//ret_unit=my_unit->getScanner()->nearest_ship;
+        assert(0);
       }
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_OBJECT;
@@ -886,7 +890,8 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     else if(method_id==CMT_UNIT_scannerLeader){
       Unit *ret_unit=NULL;
       if(mode==SCRIPT_RUN){
-	ret_unit=my_unit->getScanner()->leader;
+	//ret_unit=my_unit->getScanner()->leader;
+        assert(0);
       }
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_OBJECT;
@@ -896,7 +901,8 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     else if(method_id==CMT_UNIT_scannerNearestEnemyDist){
       float ret=9999999.0;
       if(mode==SCRIPT_RUN){
-	ret=my_unit->getScanner()->nearest_enemy_dist;
+	//ret=my_unit->getScanner()->nearest_enemy_dist;
+        assert(0);
       }
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_FLOAT;
@@ -905,7 +911,8 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     else if(method_id==CMT_UNIT_scannerNearestFriendDist){
       float ret=9999999.0;
       if(mode==SCRIPT_RUN){
-	ret=my_unit->getScanner()->nearest_friend_dist;
+	//ret=my_unit->getScanner()->nearest_friend_dist;
+        assert(0);
       }
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_FLOAT;
@@ -914,7 +921,8 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     else if(method_id==CMT_UNIT_scannerNearestShipDist){
       float ret=9999999.0;
       if(mode==SCRIPT_RUN){
-	ret=my_unit->getScanner()->nearest_ship_dist;
+	//ret=my_unit->getScanner()->nearest_ship_dist;
+        assert(0);
       }
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_FLOAT;
@@ -1229,11 +1237,11 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
        free (nam);
        free (citylights);
      }else if (type==NEBULAPTR) {
-       my_unit=UnitFactory::createNebula (fg->fg->type.c_str(),false,faction_nr,fg->fg,u, true);
+       my_unit=UnitFactory::createNebula (fg->fg->type.c_str(),false,faction_nr,fg->fg,u+fg->fg->nr_ships-fg->nr_ships, true);
      } else if (type==ASTEROIDPTR) {
-       my_unit=UnitFactory::createAsteroid(fg->fg->type.c_str(),faction_nr,fg->fg,u);
+       my_unit=UnitFactory::createAsteroid(fg->fg->type.c_str(),faction_nr,fg->fg,u+fg->fg->nr_ships-fg->nr_ships);
      }else {
-       my_unit=UnitFactory::createUnit(fg->fg->type.c_str(),false,faction_nr,string(""),fg->fg,u);
+       my_unit=UnitFactory::createUnit(fg->fg->type.c_str(),false,faction_nr,string(""),fg->fg,u+fg->fg->nr_ships-fg->nr_ships);
      }
      units[u]=my_unit;
    }
@@ -1254,34 +1262,6 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
        my_unit->PrimeOrders();
      }else {
      my_unit->LoadAIScript (fg->fg->ainame);
-#if 0
-     if(fg->fg->ainame[0]!='_'){
-       string ai_agg=fg->fg->ainame+".agg.xml";
-       string ai_int=fg->fg->ainame+".int.xml";
-
-       char ai_agg_c[1024];
-       char ai_int_c[1024];
-       strncpy(ai_agg_c,ai_agg.c_str(),1023);
-       strncpy(ai_int_c,ai_int.c_str(),1023);
-       ai_agg_c[1023]=0;
-       ai_int_c[1023]=0;
-       //      printf("1 - %s  2 - %s\n",ai_agg_c,ai_int_c);
-
-       my_unit->EnqueueAI( new Orders::AggressiveAI (ai_agg_c, ai_int_c));
-     }
-     else{
-	      string modulename=fg->fg->ainame.substr(1);
-
-	      if(fg->fg->orderlist==NULL){
-		my_unit->EnqueueAI( new AImissionScript(modulename));
-	      }
-	      else{
-		my_unit->EnqueueAI( new AIOrderList(fg->fg->orderlist));
-		printf("LAUNCHING a new orderlist ai\n");
-	      }
-	      //fighters[a]->SetAI( new AImissionScript(modulename));
-     }
-#endif
      my_unit->SetTurretAI ();
      }
      //     cout << fg->name << endl;

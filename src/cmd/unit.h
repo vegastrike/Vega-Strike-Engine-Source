@@ -164,7 +164,6 @@ public:
 /**** PHYSICS STUFF                                                                    */
 /***************************************************************************************/
 
-  void SetPlanetHackTransformation (Transformation *&ct,Matrix *&ctm);
   //bool AutoPilotTo(Unit * un, bool ignore_friendlies=false);
 
   ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame

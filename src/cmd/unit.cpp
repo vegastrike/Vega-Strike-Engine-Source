@@ -88,27 +88,6 @@ void GameUnit<UnitType>::UpgradeInterface(Unit * baseun) {
 //	  SetSoftwareMousePosition(0,0);
 }
 
-template <class UnitType>
-void GameUnit<UnitType>::SetPlanetHackTransformation (Transformation *&ct,Matrix *&ctm) {
-  static Transformation planet_temp_transformation;
-  static Matrix planet_temp_matrix;
-  if (this->planet) {
-    if (this->planet->trans==_Universe->AccessCamera()->GetPlanetaryTransform()&&this->planet->trans!=NULL) {
-      Matrix tmp;
-      Vector p,q,r;
-      QVector c;
-      MatrixToVectors (this->cumulative_transformation_matrix,p,q,r,c);
-      this->planet->trans->InvTransformBasis(tmp,p,q,r,c);
-      MultMatrix (planet_temp_matrix,*_Universe->AccessCamera()->GetPlanetGFX(),tmp);
-      planet_temp_transformation = Transformation::from_matrix (planet_temp_matrix);
-      ct = &planet_temp_transformation;
-      *ctm = planet_temp_matrix;
-      ///warning: hack FIXME
-      this->cumulative_transformation=*ct;
-      CopyMatrix (this->cumulative_transformation_matrix,*ctm);
-    }
-  }  
-}
 
 template <class UnitType>
 GameUnit<UnitType>::GameUnit( int /*dummy*/ ) {
@@ -170,8 +149,6 @@ GameUnit<UnitType>::~GameUnit()
     delete this->image->explosion;
     this->image->explosion=NULL;
   }
-  if (this->planet)
-    delete this->planet;
   //  VSFileSystem::vs_fprintf (stderr,"Freeing Unit %s\n",name.c_str());
   for(unsigned int meshcount = 0; meshcount < this->meshdata.size(); meshcount++)
     if (this->meshdata[meshcount])
@@ -218,7 +195,7 @@ template <class UnitType>
 void GameUnit<UnitType>::UpdateHudMatrix(int whichcam) {
   Matrix m;
   Matrix ctm=this->cumulative_transformation_matrix;
-  if (this->planet) {
+  if (0) {// FIXME? help! I think the ctm should hold this info unless we're in a planet--which no longer exists
     Transformation ct (linear_interpolate(this->prev_physical_state, this->curr_physical_state, interpolation_blend_factor));  
     ct.to_matrix (m);
     ctm=m;
@@ -357,7 +334,6 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 
 	  ctm = &invview;
   }
-  if (this->planet) SetPlanetHackTransformation (ct,ctm);
 
 #ifdef PERFRAMESOUND
   AUDAdjustSound (sound.engine,cumulative_transformation.position,GetVelocity());

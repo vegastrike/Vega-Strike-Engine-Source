@@ -40,6 +40,7 @@ public:
     this->SetPosition(p);
   }
 };
+#define VS_ENABLE_COLLIDE_KEY
 #ifdef VS_ENABLE_COLLIDE_KEY
 class CollideMap:public KeyMutableSet<Collidable> {
 #else

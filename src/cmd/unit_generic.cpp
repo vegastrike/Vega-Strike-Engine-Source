@@ -556,7 +556,6 @@ void Unit::ZeroAll( )
     // SubUnits has a constructor
     combat_role      = 0;
     nebula           = NULL;
-    planet           = NULL;
     activeStarSystem = NULL;
     // computer has a constructor
     // jump needs fixing
@@ -626,7 +625,6 @@ void Unit::ZeroAll( )
     faction               = 0;
     flightgroup           = NULL;
     flightgroup_subnumber = 0;
-    is_ejectdock          = false; //added by spiritplumber
     setTractorability(tractorImmune);
 }
 
@@ -673,7 +671,6 @@ void Unit::Init()
   graphicOptions.FaceCamera=false;
   jump.drive=-2;// disabled
   afterburnenergy=0;
-  planet=NULL;
   nebula=NULL;
   limits.structurelimits=Vector(0,0,1);
   limits.limitmin=-1;
@@ -793,7 +790,6 @@ void Unit::Init()
   flightgroup=NULL;
   flightgroup_subnumber=0;
 
-  scanner.last_scantime=0.0;
   // No cockpit reference here
   if (!image->cockpit_damage) {
     int numg= (1+MAXVDUS+UnitImages::NUMGAUGES)*2;
@@ -1046,83 +1042,6 @@ void Unit::calculate_extent(bool update_collide_queue) {
   }
 }
 
-void Unit::scanSystem(){
-
-  double nowtime=mission->getGametime();
-
-  if(scanner.last_scantime==nowtime){
-    return;
-  }
-
-    StarSystem *ssystem=_Universe->activeStarSystem();
-    un_iter uiter(ssystem->getUnitList().createIterator());
-    
-    float min_enemy_dist=9999999.0;
-    float min_friend_dist=9999999.0;
-    float min_ship_dist=9999999.0;
-    Unit * min_enemy=NULL;
-    Unit * min_friend=NULL;
-    Unit * min_ship=NULL;
-    
-    int leader_num=getFgSubnumber(); //my own subnumber
-    Unit *my_leader=this; // say I'm the leader
-    Flightgroup *my_fg=getFlightgroup();
-    
-    Unit *unit=uiter.current();
-    while(unit!=NULL){
-      
-      if(this!=unit){
-	// won;t scan ourselves
-	
-	QVector unit_pos=unit->Position();
-	double dist=getMinDis(unit_pos);
-	float relation=getRelation(unit);
-	
-	if(relation<0.0){
-	  //we are enmies
-	  if(dist<min_enemy_dist){
-	    min_enemy_dist=dist;
-	    min_enemy=unit;
-	  }
-	}
-	if(relation>0.0){
-	//we are friends
-	  if(dist<min_friend_dist){
-	    min_friend_dist=dist;
-	  min_friend=unit;
-	  }
-	  // check for flightgroup leader
-	  if(my_fg!=NULL && my_fg==unit->getFlightgroup()){
-	    // it's a ship from our flightgroup
-	    int fgnum=unit->getFgSubnumber();
-	    if(fgnum<leader_num){
-	      //set this to be our leader
-	      my_leader=unit;
-	      leader_num=fgnum;
-	    }
-	  }
-	}
-	// for all ships
-	if(dist<min_ship_dist){
-	  min_ship_dist=dist;
-	  min_ship=unit;
-	}
-      }
-      
-      unit=++(uiter);
-  }
-    
-    scanner.nearest_enemy_dist=min_enemy_dist;
-    scanner.nearest_enemy=min_enemy;
-
-    scanner.nearest_friend_dist=min_friend_dist;
-    scanner.nearest_friend=min_friend;
-
-    scanner.nearest_ship_dist=min_ship_dist;
-    scanner.nearest_ship=min_ship;
-    
-    scanner.leader=my_leader;
-}
 
 StarSystem * Unit::getStarSystem () {
 
@@ -1807,15 +1726,6 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   if (lastframe) {
     if (!(docked&(DOCKED|DOCKED_INSIDE))) 
       prev_physical_state = curr_physical_state;//the AIscript should take care
-#ifdef FIX_TERRAIN
-    if (planet) {
-      if (!planet->dirty) {
-	SetPlanetOrbitData (NULL);
-      }else {
-	planet->pps = planet->cps;
-      }
-    }
-#endif
   }
 
   if (isUnit()==PLANETPTR) {

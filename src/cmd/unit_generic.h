@@ -165,18 +165,6 @@ struct UnitSounds;
 class Cargo;
 class Mesh;
 
-/// used to scan the system - faster than c_alike code
-
-struct Scanner {
-  Unit *nearest_enemy;
-  Unit *nearest_friend;
-  Unit *nearest_ship;
-  Unit *leader;
-
-  float nearest_enemy_dist,nearest_friend_dist,nearest_ship_dist;
-
-  double last_scantime;
-};
 
 /**
  * Unit contains any physical object that may collide with something
@@ -360,7 +348,6 @@ public:
 protected:
   unsigned char combat_role;
   Nebula * nebula;
-  PlanetaryOrbitData * planet;
   ///The orbit needs to have access to the velocity directly to disobey physics laws to precalculate orbits
   friend class PlanetaryOrbit;
   friend class ContinuousTerrain;
@@ -523,11 +510,7 @@ public:
   const Computer & ViewComputerData () const {return computer;}
 
   // for scanning purposes
- protected:
-  struct Scanner scanner;
  public:
-  void scanSystem();
-  struct Scanner *getScanner() { return &scanner; };
   void ActivateJumpDrive (int destination=0);
   void DeactivateJumpDrive ();
 
@@ -571,7 +554,6 @@ private:
 protected:
   virtual float ExplosionRadius();
 public:
-  virtual void SetPlanetHackTransformation (Transformation *&ct,Matrix *&ctm) {}
   bool AutoPilotTo(Unit * un, bool automaticenergyrealloc,int recursive_level=2);
   ///The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
   void *owner; //void ensures that it won't be referenced by accident
@@ -1228,7 +1210,6 @@ public:
   bool isFriend(Unit *other) const { return (FactionUtil::GetIntRelation(this->faction,other->faction)>0.0); };
   bool isNeutral(Unit *other) const { return (FactionUtil::GetIntRelation(this->faction,other->faction)==0.0); };
   float getRelation(Unit *other) const;
-  bool is_ejectdock;
 
   void TurretFAW();
 };
