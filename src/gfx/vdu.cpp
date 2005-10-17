@@ -54,8 +54,7 @@ static string getUnitNameAndFgNoBase (Unit * target) {
 			offset++;
           }
 		  string fgnstring=string(fgnum);
-                  fgnstring+="=";
-                  fgnstring=fgnstring+" =";
+                  fgnstring=" ="+fgnstring+"=";
 		  free(fgnum);
 		  fgnum=NULL;
                   static bool printfgname = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","print_fg_name","true"));
