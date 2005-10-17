@@ -193,45 +193,60 @@ void CommunicatingAI::GetMadAt (Unit * un, int numHitsPerContrabandFail) {
 static int InList (std::string item, Unit * un) {
   float numcontr = 0;
   if (un) {
-  for (unsigned int i=0;i<un->numCargo();i++) {
-    if (item==un->GetCargo(i).content) {
-      if (un->GetCargo(i).quantity>0)
-	     numcontr++;
+    for (unsigned int i=0;i<un->numCargo();i++) {
+      if (item==un->GetCargo(i).content) {
+        if (un->GetCargo(i).quantity>0)
+          numcontr++;
+      }
     }
-  }
   }
   return numcontr;
 }
 
 void CommunicatingAI::UpdateContrabandSearch () {
-	Unit * u = contraband_searchee.GetUnit();
-	if (u && (u->faction != parent->faction)) { // don't scan your buddies
-		if (which_cargo_item<(int)u->numCargo()) {
-			if (u->GetCargo(which_cargo_item).quantity>0) {
-				std::string item = u->GetManifest (which_cargo_item++,parent,SpeedAndCourse);
-				static bool use_hidden_cargo_space=XMLSupport::parse_bool (vs_config->getVariable ("physics","use_hidden_cargo_space","true"));
-				static float speed_course_change = XMLSupport::parse_float (vs_config->getVariable ("AI","PercentageSpeedChangeToStopSearch","1"));
-				if (u->CourseDeviation(SpeedAndCourse,u->GetVelocity())>speed_course_change) {
-					CommunicationMessage c(parent,u,comm_face,sex);
-					c.SetCurrentState(c.fsm->GetContrabandWobblyNode(),comm_face,sex);
-					Order * o;
-					if ((o=u->getAIState()))
-						o->Communicate (c);
-					GetMadAt(u,1);
-					SpeedAndCourse=u->GetVelocity();
-				}
-				    float HiddenTotal = use_hidden_cargo_space?(u->getHiddenCargoVolume()):(0);
-					//float HiddenUsed = u->getHiddenCargoVolume();
-
-                                    if (InList (item,FactionUtil::GetContraband(parent->faction)) > HiddenTotal) { // inlist now returns an integer so that we can do this at all...
-                                      TerminateContrabandSearch(true); // BUCO this is where we want to check against free hidden cargo space.
-				}
-			}
-		}else {
-			TerminateContrabandSearch(false);
-			
-		}
-	}
+  Unit * u = contraband_searchee.GetUnit();
+  if (u && (u->faction != parent->faction)) { // don't scan your buddies
+    if (which_cargo_item<(int)u->numCargo()) {
+      if (u->GetCargo(which_cargo_item).quantity>0) {
+        int which_carg_item_bak=which_cargo_item;
+        std::string item = u->GetManifest (which_cargo_item++,parent,SpeedAndCourse);
+        static bool use_hidden_cargo_space=XMLSupport::parse_bool (vs_config->getVariable ("physics","use_hidden_cargo_space","true"));
+        static float speed_course_change = XMLSupport::parse_float (vs_config->getVariable ("AI","PercentageSpeedChangeToStopSearch","1"));
+        if (u->CourseDeviation(SpeedAndCourse,u->GetVelocity())>speed_course_change) {
+          CommunicationMessage c(parent,u,comm_face,sex);
+          c.SetCurrentState(c.fsm->GetContrabandWobblyNode(),comm_face,sex);
+          Order * o;
+          if ((o=u->getAIState()))
+            o->Communicate (c);
+          GetMadAt(u,1);
+          SpeedAndCourse=u->GetVelocity();
+        }
+        float HiddenTotal = use_hidden_cargo_space?(u->getHiddenCargoVolume()):(0);
+        //float HiddenUsed = u->getHiddenCargoVolume();
+        Unit * contrabandlist=FactionUtil::GetContraband(parent->faction);
+        if (InList (item,contrabandlist) > 0) { // inlist now returns an integer so that we can do this at all...
+          if (HiddenTotal==0||u->GetCargo(which_carg_item_bak).quantity>HiddenTotal) {
+            TerminateContrabandSearch(true); // BUCO this is where we want to check against free hidden cargo space.
+          }else {
+            unsigned int max=u->numCargo();
+            unsigned int quantity=0;
+            for (unsigned int i=0;i<max;++i) {
+              if (InList(u->GetCargo(i).content,contrabandlist)>0) {
+                quantity+=u->GetCargo(i).quantity;                              
+                if (quantity>HiddenTotal) {
+                  TerminateContrabandSearch(true);
+                  break;
+                }
+              }
+            }
+          }
+        }
+      }
+    }else {
+      TerminateContrabandSearch(false);
+      
+    }
+  }
 }
 static bool isDockedAtAll(Unit * un) {
   return (un->docked&(Unit::DOCKED_INSIDE|Unit::DOCKED))!=0;
