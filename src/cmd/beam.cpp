@@ -24,7 +24,7 @@ Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own, 
   if (decal>=beamdrawqueue.size()) {
     beamdrawqueue.push_back (vector<DrawContext>());
   }
-  Init(trans,clne,own);
+  Init(trans,clne,own,firer);
   impact=UNSTABLE;
 }
 
@@ -57,7 +57,7 @@ void Beam::Draw (const Transformation &trans, const Matrix &m, Unit * targ, floa
 #endif
   AUDSoundGain (sound,curthick*curthick/(thickness*thickness));
 
-  RecalculateVertices();
+  RecalculateVertices(cumulative_transformation_matrix);
 
   beamdrawqueue[decal].push_back(DrawContext (cumulative_transformation_matrix,vlist));
 
@@ -70,11 +70,7 @@ void Beam::ProcessDrawQueue() {
     GFXDisable (DEPTHWRITE);
     GFXPushBlendMode();
     static bool blendbeams = XMLSupport::parse_bool (vs_config->getVariable("graphics","BlendGuns","true"));
-    if (blendbeams==true) {
-      GFXBlendMode(ONE,ONE);
-    }else {
-      GFXBlendMode(ONE,ZERO);
-    }
+    GFXBlendMode(ONE,blendbeams?ONE:ZERO);
 
   GFXEnable (TEXTURE0);
   GFXDisable (TEXTURE1);

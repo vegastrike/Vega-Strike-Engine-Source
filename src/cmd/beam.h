@@ -48,12 +48,12 @@ private:
   QVector center;//in world coordinates as of last physics frame...
   Vector direction;
   
-  void RecalculateVertices();
+  void RecalculateVertices(const Matrix & trans);
   void CollideHuge(const LineCollide &, Unit * targetToCollideWith, Unit * firer, Unit * superunit);
 public:
   void ListenToOwner(bool listen){listen_to_owner=listen;}
   Beam (const Transformation & trans, const weapon_info & clne, void * own, Unit * firer, int sound);
-  void Init (const Transformation & trans, const weapon_info & clne, void * own);
+  void Init (const Transformation & trans, const weapon_info & clne, void * own, Unit * firer);
   ~Beam();
   void RemoveFromSystem(bool eradicate);
   float refireTime();
