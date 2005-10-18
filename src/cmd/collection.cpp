@@ -160,3 +160,31 @@ UnitCollection::UnitCollection (const UnitCollection& uc):u(NULL) {
   }
 }
 
+bool UnitCollection::contains(const Unit *unit) const { 
+    if (empty()) return false; 
+    ConstFastIterator it=constFastIterator(); 
+    while (it.notDone()) {
+        if (it.current()==unit) 
+            return true; else 
+            it.advance(); 
+    }
+    return false; 
+};
+
+bool UnitCollection::remove(const Unit *unit) { 
+    bool res=false;
+    if (empty()) return false; 
+    FastIterator it=fastIterator(); 
+    while (it.notDone()) {
+        if (it.current()==unit) 
+            it.remove(), res=true; else
+            it.advance(); 
+    }
+    return res; 
+};
+
+void UnitCollection::cleanup() {
+    //NOTE: advance() will be cleaning up the list by itself
+    un_iter ui = createIterator();
+    while (ui.notDone()) ui.advance();
+}

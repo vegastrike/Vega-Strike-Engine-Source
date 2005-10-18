@@ -51,7 +51,7 @@ class UnitCollection {
     ///the position in the list
     UnitListNode *pos;
     ///Finds the next unit (or NULL) that isn't Killed()
-    void GetNextValidUnit();
+    inline void GetNextValidUnit();
   public:
     UnitIterator() :pos(NULL) { }
     ///Creates this unit iterator
@@ -66,8 +66,8 @@ class UnitCollection {
         pos = NULL;
     }
 
-    bool isDone(){return current()==NULL;}
-    bool notDone() {return current()!=NULL;}
+    bool isDone() const {return pos->next->unit==NULL;}
+    bool notDone() const {return pos->next->unit!=NULL;}
     ///removes something after pos.  eg the first valid unit. or current()
     void remove();
     void moveBefore(UnitCollection& otherList);
@@ -125,6 +125,8 @@ class UnitCollection {
     inline const Unit * operator ++(int) {const Unit * un=current();advance();return un;}
     inline const Unit * operator * ()const {return current();}
     const Unit * next() {advance();return current();}
+	bool isDone()const{return pos->next->unit==NULL;}
+	bool notDone()const{return pos->next->unit!=NULL;}	  
   private:
     ConstFastIterator& operator=( const ConstFastIterator& );
   };
@@ -150,6 +152,8 @@ class UnitCollection {
     inline Unit * operator ++() {advance();return current();}
     inline Unit * operator * () {return current();}
     Unit * next() {advance();return current();}	  	  
+	bool isDone()const{return pos->next->unit==NULL;}
+	bool notDone()const{return pos->next->unit!=NULL;}	  
   private:
     FastIterator& operator=( const FastIterator& );
   };
@@ -174,6 +178,9 @@ class UnitCollection {
   void append(Unit *unit);
   void append(UnitIterator *iter);
   void clear () {destr();init();}
+  bool contains(const Unit *unit) const;
+  bool remove(const Unit *unit);
+  void cleanup();
   UnitCollection (const UnitCollection &c);
   const UnitCollection & operator = (const UnitCollection &c);
 };
