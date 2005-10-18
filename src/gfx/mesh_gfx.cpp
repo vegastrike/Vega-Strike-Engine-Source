@@ -384,7 +384,12 @@ void Mesh::DrawNow(float lod,  bool centered, const Matrix &m, int cloak, float 
     }
     GFXLoadMatrixModel (m);
   } 
-  vector <int> specialfxlight;
+
+  //Making it static avoids frequent reallocations - although may be troublesome for thread safety
+  //but... WTH... nothing is thread safe in VS.
+  //Also: Be careful with reentrancy... right now, this section is not reentrant.
+  static vector <int> specialfxlight;
+
   unsigned int i;
   for ( i=0;i<LocalFX.size();i++) {
     int ligh;
@@ -417,11 +422,12 @@ static GFXColor getMeshColor () {
   GFXColor tmp (color[0],color[1],color[2],color[3]);
   return tmp;
 }
-void Mesh::ProcessZFarMeshes () {
+void Mesh::ProcessZFarMeshes (bool nocamerasetup) {
 #ifndef PARTITIONED_Z_BUFFER
   static GFXColor meshcolor (getMeshColor());
   GFXLightContextAmbient(meshcolor);
-  _Universe->AccessCamera()->UpdateGFX (GFXFALSE, GFXFALSE);
+  if (!nocamerasetup)
+      _Universe->AccessCamera()->UpdateGFX (GFXFALSE, GFXFALSE);
   _Universe->activateLightMap();
   GFXEnable(LIGHTING);
   GFXEnable(CULLFACE);
@@ -440,7 +446,8 @@ void Mesh::ProcessZFarMeshes () {
 
   GFXFogMode(FOG_OFF);
   Animation::ProcessFarDrawQueue(-FLT_MAX);
-  _Universe->AccessCamera()->UpdateGFX (GFXTRUE, GFXFALSE);
+  if (!nocamerasetup)
+      _Universe->AccessCamera()->UpdateGFX (GFXTRUE, GFXFALSE);
   GFXEnable (DEPTHTEST);
   GFXEnable (DEPTHWRITE);
 #endif
@@ -456,7 +463,7 @@ template<typename T> inline bool rangesOverlap(T min1, T max1, T min2, T max2) {
              &&((min1<min2)==(min1<max2))  );
 }
 
-void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
+void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects,bool nocamerasetup) {
   static GFXColor meshcolor (getMeshColor());
 
   _Universe->activateLightMap();
@@ -507,7 +514,9 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
 
       do {
           fzmin2 = max(fzmin,fzmax2*MAX_ZRATIO);
-          _Universe->AccessCamera()->UpdateGFX(GFXTRUE,GFXTRUE,GFXFALSE,GFXTRUE,fzmin2,fzmax2);
+          if (!nocamerasetup)
+              _Universe->AccessCamera()->UpdateGFX(GFXTRUE,GFXTRUE,GFXFALSE,GFXTRUE,fzmin2,fzmax2); else
+              _Universe->AccessCamera()->UpdateGFXFrustum(GFXTRUE,fzmin2,fzmax2);
           GFXClear(GFXFALSE);
 
           GFXLightContextAmbient(meshcolor);
@@ -685,41 +694,56 @@ static void SetupFogState (char cloaked) {
         GFXFogMode (FOG_OFF);
     }    
 }
-bool SetupSpecMapFirstPass (vector <Texture *> &decal, unsigned int mat, bool envMap,float polygon_offset,Texture *detailTexture,const vector<Vector> &detailPlanes,bool &skip_glowpass) {
-    static bool multitex_glowpass=
-           XMLSupport::parse_bool(vs_config->getVariable("graphics","multitexture_glowmaps","true"))
-        && XMLSupport::parse_bool(vs_config->getVariable("graphics","displaylists","false")); //For now, it doesn't work without display lists - sorry
+bool SetupSpecMapFirstPass (vector <Texture *> &decal, unsigned int mat, bool envMap,float polygon_offset,Texture *detailTexture,const vector<Vector> &detailPlanes,bool &skip_glowpass,bool nomultienv) {
+    GFXPushBlendMode();
+
+    static bool separatespec = XMLSupport::parse_bool (vs_config->getVariable ("graphics","separatespecularcolor","false"))?GFXTRUE:GFXFALSE;
+    GFXSetSeparateSpecularColor(separatespec);
+
+    static bool multitex_glowpass=XMLSupport::parse_bool(vs_config->getVariable("graphics","multitexture_glowmaps","true"));
 	if (polygon_offset){
 		float a,b;
 		GFXGetPolygonOffset(&a,&b);
 		GFXPolygonOffset (a, b-polygon_offset);
 	}
+    if (nomultienv) {
+        GFXSelectMaterialHighlights(mat,
+                                    GFXColor(1,1,1,1),
+                                    GFXColor(1,1,1,1),
+                                    GFXColor(0,0,0,0),
+                                    GFXColor(0,0,0,0));
+        GFXBlendMode(ONE,ONE);
+        GFXDepthFunc(EQUAL);
+    }
     bool retval=false;
     skip_glowpass = false;
 	int detailoffset=2;
-    if (decal.size()>1) {
-        if (decal[1]) {
-			detailoffset=1;
-            GFXSelectMaterialHighlights(mat,
-                                        GFXColor(1,1,1,1),
-                                        GFXColor(1,1,1,1),
-                                        GFXColor(0,0,0,0),
-                                        GFXColor(0,0,0,0));
-            retval=true;
-            if (envMap&&detailTexture==NULL) {
-                if ((decal.size()>GLOW_PASS)&&decal[GLOW_PASS]&&gl_options.Multitexture&&multitex_glowpass) {
-                    decal[GLOW_PASS]->MakeActive(1);
-                    GFXTextureEnv(1,GFXADDTEXTURE);
-                    GFXToggleTexture(true,1);
-				    GFXTextureCoordGenMode(1,NO_GEN,NULL,NULL);
-                    skip_glowpass=true;
-                } else GFXDisable(TEXTURE1);
-            }
-            if (decal[0])
-                decal[0]->MakeActive();
-		}
-	}
-	if (detailTexture) {
+    if (!nomultienv&&(decal.size()>1)&&(decal[1])) {
+		detailoffset=1;
+        GFXSelectMaterialHighlights(mat,
+                                    GFXColor(1,1,1,1),
+                                    GFXColor(1,1,1,1),
+                                    GFXColor(0,0,0,0),
+                                    GFXColor(0,0,0,0));
+        retval=true;
+        if (envMap&&detailTexture==NULL) {
+            if ((decal.size()>GLOW_PASS)&&decal[GLOW_PASS]&&gl_options.Multitexture&&multitex_glowpass) {
+                decal[GLOW_PASS]->MakeActive(1);
+                GFXTextureEnv(1,GFXADDTEXTURE);
+                GFXToggleTexture(true,1);
+				GFXTextureCoordGenMode(1,NO_GEN,NULL,NULL);
+                skip_glowpass=true;
+            } else GFXDisable(TEXTURE1);
+        }
+        if (decal[0]) {
+            decal[0]->MakeActive(0);
+            GFXToggleTexture(true,0);
+        }
+    } else if (decal.size()&&decal[0]) {
+        GFXToggleTexture(true,0);
+        decal[0]->MakeActive(0);
+    }
+	if (detailTexture&&(gl_options.Multitexture>detailoffset)) {
 			for (unsigned int i=1;i<detailPlanes.size();i+=2) {
 				int stage = (i/2)+detailoffset;
 				const float params[4]={detailPlanes[i-1].i,detailPlanes[i-1].j,detailPlanes[i-1].k,0};
@@ -733,7 +757,9 @@ bool SetupSpecMapFirstPass (vector <Texture *> &decal, unsigned int mat, bool en
 	
     return retval;
 }
-void RestoreFirstPassState(Texture * detailTexture, const vector<Vector> & detailPlanes, bool skipped_glowpass ) {
+void RestoreFirstPassState(Texture * detailTexture, const vector<Vector> & detailPlanes, bool skipped_glowpass, bool nomultienv) {
+    GFXPopBlendMode();
+    if (!nomultienv) GFXDepthFunc(LESS);
     if (detailTexture||skipped_glowpass) {
 		static float tempo[4]={1,0,0,0};
 		_Universe->activeStarSystem()->activateLightMap();
@@ -745,25 +771,67 @@ void RestoreFirstPassState(Texture * detailTexture, const vector<Vector> & detai
 		}
     }
 }
+void SetupEnvmapPass(Texture * decal, unsigned int mat, int passno) {
+    //This is only used when there's no multitexturing... so don't use multitexturing
+    GFXPushBlendMode();
+    GFXSelectMaterialHighlights(mat,
+                                GFXColor(0,0,0,0),
+                                GFXColor(0,0,0,0),
+                                (passno==2)?GFXColor(1,1,1,1):GFXColor(0,0,0,0),
+                                (passno==2)?GFXColor(0,0,0,0):GFXColor(1,1,1,1));
+    if (passno==2)
+        GFXSetSeparateSpecularColor(GFXFALSE);
+    if (passno!=2)
+        GFXDisable(LIGHTING);
+    if (decal)
+        GFXBlendMode((passno!=1)?ONE:ZERO,(passno==1)?SRCCOLOR:(passno?ONE:ZERO)); else
+        GFXBlendMode(ONE,ONE);
+    if (decal&&((passno==0)||(passno==2))) {
+        decal->MakeActive(0);
+        GFXToggleTexture(true,0);
+    } else if (passno==1) {
+        _Universe->activateLightMap(0);
+    } else {
+        GFXToggleTexture(false,0);
+    }
+    GFXTextureEnv(0,((passno!=2)?GFXREPLACETEXTURE:GFXMODULATETEXTURE));
+    GFXDepthFunc(passno?EQUAL:LESS);
+}
+void RestoreEnvmapState() {
+    float dummy[4];
+    static bool separatespec = XMLSupport::parse_bool (vs_config->getVariable ("graphics","separatespecularcolor","false"))?GFXTRUE:GFXFALSE;
+    GFXSetSeparateSpecularColor(separatespec);
+    GFXEnable(LIGHTING);
+    GFXTextureCoordGenMode(0,NO_GEN,dummy,dummy);
+    GFXTextureEnv(0,GFXMODULATETEXTURE);
+    GFXDepthFunc(LESS);
+    GFXPopBlendMode();
+    GFXToggleTexture(false,0);
+}
 void SetupSpecMapSecondPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc, bool envMap, const GFXColor &cloakFX, float polygon_offset) {
 	GFXPushBlendMode();			
     GFXSelectMaterialHighlights(mat,
                                 GFXColor(0,0,0,0),
                                 GFXColor(0,0,0,0),
-				cloakFX,
-                                (envMap&&GFXMultiTexAvailable())?GFXColor (1,1,1,1):GFXColor(0,0,0,0));
+                                cloakFX,
+                                (envMap?GFXColor (1,1,1,1):GFXColor(0,0,0,0)));
     GFXBlendMode (ONE,ONE);
-    decal->MakeActive();
+    if (!envMap||gl_options.Multitexture)
+        if (decal) decal->MakeActive();
     //float a,b;
     //GFXGetPolygonOffset(&a,&b);
     //GFXPolygonOffset (a, b-1-polygon_offset); //Not needed, since we use GL_EQUAL and appeal to invariance
     GFXDepthFunc(EQUAL); //By Klauss - this, with invariance, assures correct rendering (and avoids z-buffer artifacts at low res)
     GFXDisable(DEPTHWRITE);
     if (envMap){
+      int stage=gl_options.Multitexture?1:0;
+      if (!gl_options.Multitexture)
+          _Universe->activateLightMap(0);
       GFXEnable(TEXTURE0);
-      GFXActiveTexture(1);
-      GFXTextureEnv(1,GFXMODULATETEXTURE); 
-      GFXEnable(TEXTURE1);
+      GFXActiveTexture(stage);
+      GFXTextureEnv(stage,GFXMODULATETEXTURE);
+      if (gl_options.Multitexture)
+          GFXEnable(TEXTURE1);
     }
     else {
       GFXSetSeparateSpecularColor(GFXFALSE);
@@ -781,7 +849,7 @@ void SetupGlowMapFourthPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc,
 								GFXColor(0,0,0,0),
                                 cloakFX);
     GFXBlendMode (ONE,ONE);
-    decal->MakeActive();
+    if (decal) decal->MakeActive();
     //float a,b;
     //GFXGetPolygonOffset(&a,&b);
     //GFXPolygonOffset (a, b-2-polygon_offset);
@@ -793,7 +861,7 @@ extern void GFXSelectMaterialAlpha(const unsigned int, float);
 void SetupDamageMapThirdPass(Texture * decal,unsigned int mat, float polygon_offset) {
 	GFXPushBlendMode();			
     GFXBlendMode (SRCALPHA,INVSRCALPHA);
-    decal->MakeActive();
+    if (decal) decal->MakeActive();
     //float a,b;
     //GFXGetPolygonOffset(&a,&b);
     //GFXPolygonOffset (a, b-DAMAGE_PASS-polygon_offset);
@@ -823,8 +891,13 @@ void RestoreSpecMapState(bool envMap, bool write_to_depthmap, float polygonoffse
     //GFXPolygonOffset (a, b+1+polygonoffset); //Not needed anymore, since InitSpecMapSecondPass() no longer messes with polygon offsets
     GFXDepthFunc(LESS); //By Klauss - restore original depth function
     if (envMap) {
-      GFXActiveTexture(1);
-      GFXTextureEnv(1,GFXADDTEXTURE); //restore modulate
+        if (gl_options.Multitexture) {
+            GFXActiveTexture(1);
+            GFXTextureEnv(1,GFXADDTEXTURE); //restore modulate
+        } else {
+            float dummy[4];
+            GFXTextureCoordGenMode(0,NO_GEN,dummy,dummy);
+        }
     }else {
        static bool separatespec = XMLSupport::parse_bool (vs_config->getVariable ("graphics","separatespecularcolor","false"))?GFXTRUE:GFXFALSE;
        GFXSetSeparateSpecularColor(separatespec);
@@ -912,11 +985,9 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
   GFXTextureEnv(0,GFXMODULATETEXTURE); //Default diffuse mode
   GFXTextureEnv(1,GFXADDTEXTURE);      //Default envmap mode
   GFXToggleTexture(true,0);
-  GFXSelectTexcoordSet(0, 0);
   if(getEnvMap()) {
     GFXEnable(TEXTURE1);
     _Universe->activateLightMap();
-    GFXSelectTexcoordSet(1, 1);
   } else {
     GFXDisable(TEXTURE1);
   }
@@ -943,40 +1014,54 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
 
   const GFXMaterial &mat=GFXGetMaterial(myMatNum);
   static bool wantsplitpass1 = XMLSupport::parse_bool( vs_config->getVariable("graphics","specmap_with_reflection","false") );
-  bool splitpass1 = wantsplitpass1&&getEnvMap()&&((mat.sa!=0)&&((mat.sr!=0)||(mat.sg!=0)||(mat.sb!=0)));
+  bool splitpass1 = (wantsplitpass1&&getEnvMap()&&((mat.sa!=0)&&((mat.sr!=0)||(mat.sg!=0)||(mat.sb!=0)))) || (getEnvMap()&&!gl_options.Multitexture&&(ENVSPEC_PASS<Decal.size())&&(Decal[ENVSPEC_PASS]==NULL)); //For now, no PPL reflections with no multitexturing - There is a way, however, doing it before the diffuse texture (odd, I know). If you see this, remind me to do it (Klauss).
   bool skipglowpass = false;
+  bool nomultienv = false;
+  int nomultienv_passno = 0;
 
-  //Making it static avoids frequent reallocations - although may be troublesome for thread safety
-  //but... WTH... nothing is thread safe in VS.
-  static vector <int> specialfxlight;
+#define SAFEDECAL(pass) ((Decal.size()>pass)?Decal[pass]:NULL)
 
-  while (whichpass < Decal.size()) {
-#ifndef PARTITIONED_Z_BUFFER
-      last_pass = (whichpass+1>=Decal.size())&&((whichpass!=ENVSPEC_PASS)||!splitpass1)||((whichpass+1==GLOW_PASS)&&skipglowpass&&(whichpass+2>Decal.size())); //Last one? (be careful, ENVSPEC_PASS may be executed twice, GLOW_PASS may be skipped)
-#endif
+  if (!gl_options.Multitexture&&getEnvMap()&&(whichpass==BASE_PASS)) {
+      if (SAFEDECAL(ENVSPEC_PASS)) {
+          whichpass = ENVSPEC_PASS;
+          nomultienv_passno = 0;
+      } else {
+          nomultienv_passno = 1;
+      }
+      nomultienv = true;
+  }
+
+  while ((nomultienv&&(whichpass == ENVSPEC_PASS))||(whichpass < Decal.size())) {
       if ((whichpass==GLOW_PASS)&&skipglowpass) {
           whichpass++;
           continue;
       }
       
-      if (Decal[whichpass]) {
+      if ((nomultienv&&whichpass==ENVSPEC_PASS) || SAFEDECAL(whichpass)) {
           switch (whichpass) {
           case BASE_PASS:
-              SetupSpecMapFirstPass (Decal,myMatNum,getEnvMap(),polygon_offset,detailTexture,detailPlanes,skipglowpass);
+              SetupSpecMapFirstPass (Decal,myMatNum,getEnvMap(),polygon_offset,detailTexture,detailPlanes,skipglowpass,nomultienv&&SAFEDECAL(ENVSPEC_PASS));
               break;
           case ENVSPEC_PASS: 
-              SetupSpecMapSecondPass(Decal[whichpass],myMatNum,blendSrc,(splitpass1?false:getEnvMap()), GFXColor(1,1,1,1),polygon_offset);
+              if (!nomultienv)
+                  SetupSpecMapSecondPass(SAFEDECAL(ENVSPEC_PASS),myMatNum,blendSrc,(splitpass1?false:getEnvMap()), GFXColor(1,1,1,1),polygon_offset); else
+                  SetupEnvmapPass(SAFEDECAL(ENVSPEC_PASS),myMatNum,nomultienv_passno);
               break;
           case DAMAGE_PASS:
-              SetupDamageMapThirdPass(Decal[whichpass],myMatNum,polygon_offset);
+              SetupDamageMapThirdPass(SAFEDECAL(DAMAGE_PASS),myMatNum,polygon_offset);
               break;
           case GLOW_PASS:
-              SetupGlowMapFourthPass (Decal[whichpass],myMatNum,ONE,GFXColor(1,1,1,1),polygon_offset);
+              SetupGlowMapFourthPass (SAFEDECAL(GLOW_PASS),myMatNum,ONE,GFXColor(1,1,1,1),polygon_offset);
               break;
           }
 
           vlist->BeginDrawState();	
           for(unsigned int draw_queue_index=0;draw_queue_index<cur_draw_queue->size();++draw_queue_index) {	  
+              //Making it static avoids frequent reallocations - although may be troublesome for thread safety
+              //but... WTH... nothing is thread safe in VS.
+              //Also: Be careful with reentrancy... right now, this section is not reentrant.
+              static vector <int> specialfxlight;
+
               MeshDrawContext &c =(*cur_draw_queue)[draw_queue_index];
               if (c.mesh_seq!=whichdrawqueue) 
                   continue;
@@ -1025,10 +1110,12 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
           
           switch(whichpass) {
           case BASE_PASS:
-              RestoreFirstPassState(detailTexture,detailPlanes,skipglowpass);
+              RestoreFirstPassState(detailTexture,detailPlanes,skipglowpass,nomultienv);
               break;
           case ENVSPEC_PASS:
-              RestoreSpecMapState((splitpass1?false:getEnvMap()),write_to_depthmap,polygon_offset);
+              if (!nomultienv)
+                  RestoreSpecMapState((splitpass1?false:getEnvMap()),write_to_depthmap,polygon_offset); else
+                  RestoreEnvmapState();
               break;
           case DAMAGE_PASS:
               RestoreDamageMapState(write_to_depthmap,polygon_offset);//nothin
@@ -1040,16 +1127,23 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
       }
       switch (whichpass) {
       case BASE_PASS:
-          if (Decal.size()>(whichpass=ENVSPEC_PASS)) {
-              if (Decal[whichpass]) break;
+          if (Decal.size()>(whichpass=((nomultienv&&SAFEDECAL(ENVSPEC_PASS))?DAMAGE_PASS:ENVSPEC_PASS))) {
+              if ((nomultienv&&whichpass==ENVSPEC_PASS)||SAFEDECAL(whichpass)) break;
           } else break;
       case ENVSPEC_PASS:
-          if (splitpass1) { 
-              splitpass1=false; 
+          if (!nomultienv) {
+              if (splitpass1) { 
+                  splitpass1=false; 
+                  break;
+              } else if (Decal.size()>(whichpass=DAMAGE_PASS)) {
+                  if (Decal[whichpass]) break;
+              } else break;
+          } else {
+              nomultienv_passno++;
+              if (nomultienv_passno>(2-((splitpass1||!SAFEDECAL(ENVSPEC_PASS))?0:1)))
+                  whichpass=SAFEDECAL(ENVSPEC_PASS)?BASE_PASS:GLOW_PASS;
               break;
-          } else if (Decal.size()>(whichpass=DAMAGE_PASS)) {
-              if (Decal[whichpass]) break;
-          } else break;
+          }
       case DAMAGE_PASS:
           if (Decal.size()>(whichpass=GLOW_PASS)) {
               if (Decal[whichpass]) break;
@@ -1057,7 +1151,9 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
       default: whichpass++; //always increment pass number, otherwise infinite loop espresso
       }
   }
-  if (last_pass) draw_queue[whichdrawqueue].clear();
+  draw_queue[whichdrawqueue].clear();
+
+#undef SAFEDECAL
 
   if (alphatest) GFXAlphaTest(ALWAYS,0); // Are you sure it was supposed to be after vlist->EndDrawState()? It makes more sense to put it here...
 

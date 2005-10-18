@@ -259,11 +259,11 @@ public:
   ///Will draw all undrawn far meshes beyond the range of zbuffer (better be convex).
   virtual void SelectCullFace (int whichdrawqueue);
   virtual void RestoreCullFace (int whichdrawqueue);
-  static void ProcessZFarMeshes ();
+  static void ProcessZFarMeshes (bool nocamerasetup=false);
   ///Will draw all undrawn meshes in total If pushSpclFX, the last series of meshes will be drawn with other lighting off
-  static void ProcessUndrawnMeshes(bool pushSpecialEffects=false);
+  static void ProcessUndrawnMeshes(bool pushSpecialEffects=false,bool nocamerasetup=false);
   ///Sets whether or not this unit should be environment mapped
-  void forceCullFace (GFXBOOL newValue) {if (newValue) envMapAndLit = (envMapAndLit|0x4); if (!newValue) envMapAndLit = (envMapAndLit|0x8);}
+  void forceCullFace (GFXBOOL newValue) {if (newValue) envMapAndLit = (envMapAndLit&~0x8|0x4); if (!newValue) envMapAndLit = (envMapAndLit&~0x4|0x8);}
   GFXBOOL getCullFaceForcedOn() {return ((envMapAndLit&0x4)!=0);}
   GFXBOOL getCullFaceForcedOff() {return ((envMapAndLit&0x8)!=0);}
   void setEnvMap(GFXBOOL newValue, bool lodcascade=false) {envMapAndLit = (newValue?(envMapAndLit|0x1):(envMapAndLit&(~0x1))); if (lodcascade&&orig) for (int i=0; i<numlods; i++) orig[i].setEnvMap(newValue); }
