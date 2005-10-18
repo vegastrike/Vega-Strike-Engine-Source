@@ -54,7 +54,7 @@ private:
   StarSystem * GenerateStarSystem (const char * file, const char * jumpback, Vector origin);
   void WriteSaveGame(bool auto_save);
   void SetupCockpits (std::vector <std::string> players);
-  void activateLightMap();
+  void activateLightMap(int stage=1);
   ///inits graphics with args
   GameUniverse(int argc, char **argv, const char * galaxy);
   GameUniverse();

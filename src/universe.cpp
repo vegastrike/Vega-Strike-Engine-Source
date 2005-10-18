@@ -106,8 +106,8 @@ void GameUniverse::SetupCockpits(vector  <string> playerNames) {
 	}
 }
 
-void GameUniverse::activateLightMap() {
-	getActiveStarSystem(0)->activateLightMap();
+void GameUniverse::activateLightMap(int stage) {
+	getActiveStarSystem(0)->activateLightMap(stage);
 }
 
 void GameUniverse::StartGFX()
