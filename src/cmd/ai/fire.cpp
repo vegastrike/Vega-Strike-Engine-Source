@@ -277,6 +277,7 @@ public:
 };
 template <size_t numTuple> class ChooseTargetClass{
   Unit * parent;
+  Unit * parentparent;
   vector<TurretBin>*tbin;
   StaticTuple<float,numTuple> maxinnerrange;
   float priority;
@@ -285,13 +286,16 @@ template <size_t numTuple> class ChooseTargetClass{
   bool reached;
   FireAt* fireat;
   float gunrange;
+  int numtargets;
+  int maxtargets;
 public:
   Unit * mytarg;
   ChooseTargetClass(){}
-  void init (FireAt* fireat, Unit*un, float gunrange, vector<TurretBin>*tbin, const StaticTuple<float,numTuple> &innermaxrange, char maxrolepriority) {
+  void init (FireAt* fireat, Unit*un, float gunrange, vector<TurretBin>*tbin, const StaticTuple<float,numTuple> &innermaxrange, char maxrolepriority, int maxtargets) {
     this->fireat=fireat;
     this->tbin=tbin;
     this->parent=un;
+    this->parentparent=un->owner?UniverseUtil::getUnitByPtr(un->owner,un):0;
     mytarg=NULL;
     this->maxinnerrange=innermaxrange;
     this->maxrolepriority=maxrolepriority;// max priority that will allow gun range to be ok
@@ -299,6 +303,8 @@ public:
     this->priority=-1;
     this->rolepriority=31;
     this->gunrange=gunrange;
+    this->numtargets=0;
+    this->maxtargets=maxtargets;
   }
   bool acquire(Unit*un, float distance) {
     
@@ -318,7 +324,15 @@ public:
     
     if (un->CloakVisible()>.8) {
       float rangetotarget = distance;
-      float relationship = fireat->GetEffectiveRelationship (un);
+      float rel[] = {
+          fireat->GetEffectiveRelationship (un),
+          un->getRelation(this->parent),
+          (parentparent?parentparent->getRelation(un):rel[0]),
+          (parentparent?un->getRelation(parentparent):rel[0]) };
+      float relationship = rel[0];
+      for (int i=1; i<sizeof(rel)/sizeof(*rel); i++) 
+          if (rel[i]<relationship) 
+              relationship=rel[i];
       char rp=31;
       float tmp=Priority (parent,un, gunrange,rangetotarget, relationship,&rp);
       if (tmp>priority) {
@@ -334,13 +348,15 @@ public:
 	if (relationship<0) {
 	  if (tprior<16){
 	    k->listOfTargets[0].push_back (TargetAndRange (un,rangetotarget,relationship));
+        numtargets++;
 	  }else if (tprior<31){
 	    k->listOfTargets[1].push_back (TargetAndRange (un,rangetotarget,relationship));
+        numtargets++;
 	  }
 	}
       }
     }
-    return true;
+    return (maxtargets==0)||(numtargets<maxtargets);
   }
 };
 void FireAt::ChooseTargets (int numtargs, bool force) {
@@ -389,15 +405,16 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   std::sort (tbin.begin(),tbin.end());
   float efrel = 0;
   float mytargrange = FLT_MAX;
-  static float unitRad = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","ai_search_extra_radius","1000"));
-  static char maxrolepriority = XMLSupport::parse_int(vs_config->getVariable("graphics","hud","ai_search_max_role_priority","16"));
+  static float unitRad = XMLSupport::parse_float(vs_config->getVariable("AI","Targetting","search_extra_radius","1000")); // Maximum target radius that is guaranteed to be detected
+  static char maxrolepriority = XMLSupport::parse_int(vs_config->getVariable("AI","Targetting","search_max_role_priority","16")); 
+  static int maxtargets = XMLSupport::parse_int(vs_config->getVariable("AI","Targetting","search_max_candidates","64")); // Cutoff candidate count (if that many hostiles found, stop search - performance/quality tradeoff, 0=no cutoff)
   UnitWithinRangeLocator<ChooseTargetClass<2> > unitLocator(parent->GetComputerData().radar.maxrange,unitRad);
   StaticTuple<float,2> maxranges;
   maxranges[0]=gunrange;
   maxranges[1]=missilerange;
   if (tbin.size())
     maxranges[0]=(tbin[0].maxrange>gunrange?tbin[0].maxrange:gunrange);
-  unitLocator.action.init(this,parent,gunrange,&tbin,maxranges,maxrolepriority);
+  unitLocator.action.init(this,parent,gunrange,&tbin,maxranges,maxrolepriority,maxtargets);
   findObjects(_Universe->activeStarSystem(),parent->location,&unitLocator);
   mytarg=unitLocator.action.mytarg;
   if (mytarg) {
