@@ -152,26 +152,26 @@ GameStarSystem::GameStarSystem(const char * filename, const Vector & centr,const
   _Universe->popActiveStarSystem ();
 
 }
-void GameStarSystem::activateLightMap() {
-  GFXActiveTexture (1);
+void GameStarSystem::activateLightMap(int stage) {
+  GFXActiveTexture (stage);
 #ifdef NV_CUBE_MAP
-  LightMap[0]->MakeActive();
-  LightMap[1]->MakeActive();
-  LightMap[2]->MakeActive();
-  LightMap[3]->MakeActive();
-  LightMap[4]->MakeActive();
-  LightMap[5]->MakeActive();
+  LightMap[0]->MakeActive(stage);
+  LightMap[1]->MakeActive(stage);
+  LightMap[2]->MakeActive(stage);
+  LightMap[3]->MakeActive(stage);
+  LightMap[4]->MakeActive(stage);
+  LightMap[5]->MakeActive(stage);
 #else
-  LightMap[0]->MakeActive();
+  LightMap[0]->MakeActive(stage);
 #endif
-  GFXTextureEnv(1,GFXADDTEXTURE);
+  GFXTextureEnv(stage,GFXADDTEXTURE);
 #ifdef NV_CUBE_MAP
-  GFXToggleTexture(true,1,CUBEMAP);
-  GFXTextureCoordGenMode(1,CUBE_MAP_GEN,NULL,NULL);
+  GFXToggleTexture(true,stage,CUBEMAP);
+  GFXTextureCoordGenMode(stage,CUBE_MAP_GEN,NULL,NULL);
 #else
   const float tempo[4]={1,0,0,0};
-  GFXToggleTexture(true,1,TEXTURE2D);
-  GFXTextureCoordGenMode(1,SPHERE_MAP_GEN,tempo,tempo);
+  GFXToggleTexture(true,stage,TEXTURE2D);
+  GFXTextureCoordGenMode(stage,SPHERE_MAP_GEN,tempo,tempo);
 #endif
   GFXActiveTexture (0);
 }
@@ -282,8 +282,8 @@ void GameStarSystem::SwapOut () {
 
 }
 
-static double calc_blend_factor(double frac, int priority, int when_it_will_be_simulated, int cur_simulation_frame) {
-	bool is_at_end=when_it_will_be_simulated==SIM_QUEUE_SIZE;
+double calc_blend_factor(double frac, int priority, int when_it_will_be_simulated, int cur_simulation_frame) {
+/*	bool is_at_end=when_it_will_be_simulated==SIM_QUEUE_SIZE;
   if (cur_simulation_frame>when_it_will_be_simulated) {
     when_it_will_be_simulated+=SIM_QUEUE_SIZE;
   }
@@ -294,8 +294,18 @@ static double calc_blend_factor(double frac, int priority, int when_it_will_be_s
 	  return 1;
   }else {
 	  return fraction_of_physics_frame;
-  }
+  }*/
+    if (when_it_will_be_simulated==SIM_QUEUE_SIZE) {
+        return 1;
+    } else {
+        int relwas = when_it_will_be_simulated - priority;
+        if (relwas < 0) relwas += SIM_QUEUE_SIZE;
+        int relcur = cur_simulation_frame - relwas - 1;
+        if (relcur < 0) relcur += SIM_QUEUE_SIZE;
+        return (relcur + frac)/(double)priority;
+    }
 }
+extern double saved_interpolation_blend_factor;
 extern double interpolation_blend_factor;
 extern bool cam_setup_phase;
 //#define UPDATEDEBUG  //for hard to track down bugs
@@ -303,7 +313,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   GFXEnable (DEPTHTEST);
   GFXEnable (DEPTHWRITE);
   Music::MuzakCycle();
-  double saved_interpolation_blend_factor=interpolation_blend_factor = (1./PHY_NUM)*((PHY_NUM*time)/SIMULATION_ATOM+current_stage);
+  saved_interpolation_blend_factor=interpolation_blend_factor = (1./PHY_NUM)*((PHY_NUM*time)/SIMULATION_ATOM+current_stage);
   GFXColor4f(1,1,1,1);
   if (DrawCockpit) {
     AnimatedTexture::UpdateAllFrame();
@@ -344,19 +354,23 @@ void GameStarSystem::Draw(bool DrawCockpit) {
       //       With camera setup ocurring between a) and b)
       cam_setup_phase=true;
 
+      //int numships=0;
       for (unsigned int sim_counter=0;sim_counter<=SIM_QUEUE_SIZE;++sim_counter) {
         Unit *unit;
         UnitCollection::UnitIterator iter = physics_buffer[sim_counter].createIterator();    
         float backup=SIMULATION_ATOM;
+        unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
         while((unit = iter.current())!=NULL) {
-          interpolation_blend_factor=calc_blend_factor(interpolation_blend_factor,unit->sim_atom_multiplier,sim_counter,current_sim_location);
+          interpolation_blend_factor=calc_blend_factor(saved_interpolation_blend_factor,unit->sim_atom_multiplier,unit->cur_sim_queue_slot,cur_sim_frame);
           SIMULATION_ATOM = backup*unit->sim_atom_multiplier;
           ((GameUnit<Unit> *)unit)->Draw();
-          interpolation_blend_factor=saved_interpolation_blend_factor;
           iter.advance();
+          //numships++;
         }
+        interpolation_blend_factor=saved_interpolation_blend_factor;
         SIMULATION_ATOM=backup;
       }
+      //printf("Number of insystem ships: %d (%d FPS)\n",numships,(int)(1.f/GetElapsedTime()));
 
       _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
 
@@ -370,16 +384,17 @@ void GameStarSystem::Draw(bool DrawCockpit) {
     Unit *unit;
     UnitCollection::UnitIterator iter = physics_buffer[sim_counter].createIterator();    
     float backup=SIMULATION_ATOM;
+    unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
     while((unit = iter.current())!=NULL) {
-      interpolation_blend_factor=calc_blend_factor(interpolation_blend_factor,unit->sim_atom_multiplier,sim_counter,current_sim_location);
+      interpolation_blend_factor=calc_blend_factor(saved_interpolation_blend_factor,unit->sim_atom_multiplier,unit->cur_sim_queue_slot,cur_sim_frame);
 	  //if (par&&par->Target()==unit) {
 		  //printf ("i:%f s:%f m:%d c:%d l:%d\n",interpolation_blend_factor,saved_interpolation_blend_factor,unit->sim_atom_multiplier,sim_counter,current_sim_location);
 	  //}
       SIMULATION_ATOM = backup*unit->sim_atom_multiplier;
       ((GameUnit<Unit> *)unit)->Draw();
-      interpolation_blend_factor=saved_interpolation_blend_factor;
       iter.advance();
     }
+    interpolation_blend_factor=saved_interpolation_blend_factor;
     SIMULATION_ATOM=backup;
   }
 

@@ -298,7 +298,7 @@ void StarSystem::AddUnit(Unit *unit) {
 
 bool StarSystem::RemoveUnit(Unit *un) {
   if (un->location!=null_collide_map.begin()) {
-    //    assert (collidemap->find(*un->location)!=collidemap->end());
+    //assert (collidemap->find(*un->location)!=collidemap->end());
     collidemap->erase(un->location);
     un->location=null_collide_map.begin();
   }
@@ -387,34 +387,45 @@ void CarSimUpdate (Unit *un, float height) {
 void StarSystem::UpdateUnitPhysics (bool firstframe) {
   static   bool phytoggle=true;
   if (phytoggle) {
-    un_iter iter = this->physics_buffer[current_sim_location].createIterator();
-    
-    Unit * unit=NULL;
+    // NOTE: Randomization is necessary to preserve scattering - otherwise, whenever a 
+    //     unit goes from low-priority to high-priority and back to low-priority, they 
+    //     get synchronized and start producing peaks.
+    // NOTE2: But... randomization must come only on priority changes. Otherwise, it may
+    //     interfere with subunit scheduling. Luckily, all units that make use of subunit
+    //     scheduling also require a constant base priority, since otherwise priority changes
+    //     will wreak havoc with subunit interpolation. Luckily again, we only need
+    //     randomization on priority changes, so we're fine.
+
     try {
+      Unit * unit=NULL;
+      un_iter iter = this->physics_buffer[current_sim_location].createIterator();
       while((unit = iter.current())!=NULL) {
-    int priority=UnitUtil::getPhysicsPriority(unit);
-	int newloc=(current_sim_location+priority)%SIM_QUEUE_SIZE;
-	float backup=SIMULATION_ATOM;
-	SIMULATION_ATOM*=priority;
-	unit->sim_atom_multiplier=priority;
-	unit->ExecuteAI(); 
+        int priority=UnitUtil::getPhysicsPriority(unit);
+        if (priority!=unit->sim_atom_multiplier)
+            priority = (priority + ((unsigned int)vsrandom.genrand_int32())%(priority/2+1))/2;
+        if (priority<1) priority=1; else if (priority>SIM_QUEUE_SIZE) priority=SIM_QUEUE_SIZE; 
+	    int newloc=(current_sim_location+priority)%SIM_QUEUE_SIZE;
+	    float backup=SIMULATION_ATOM;
+	    SIMULATION_ATOM*=priority;
+	    unit->sim_atom_multiplier=priority;
+	    unit->ExecuteAI(); 
         unit->ResetThreatLevel();
         unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits(),unit);    
-	unit->CollideAll();
-      if (newloc==current_sim_location) {
-	iter.advance();
-      }else{ 
-	iter.moveBefore(this->physics_buffer[newloc]);
-      }
-      SIMULATION_ATOM=backup;
+	    unit->CollideAll();
+        if (newloc==current_sim_location) {
+	      iter.advance();
+        }else{ 
+	      iter.moveBefore(this->physics_buffer[newloc]);
+        }
+        SIMULATION_ATOM=backup;
       }
     }catch (const boost::python::error_already_set) {
       if (PyErr_Occurred()) {
-	PyErr_Print();
-	PyErr_Clear();
-	fflush(stderr);         
-	fflush(stdout);
-    }
+        PyErr_Print();
+	    PyErr_Clear();
+	    fflush(stderr);         
+	    fflush(stdout);
+      }
       throw;
     }
     current_sim_location=(current_sim_location+1)%SIM_QUEUE_SIZE;

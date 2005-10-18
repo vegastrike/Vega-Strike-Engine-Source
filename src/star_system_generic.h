@@ -112,7 +112,7 @@ class StarSystem {
   virtual void AddMissileToQueue(class MissileEffect *);
   virtual void UpdateMissiles();
   void UpdateUnitPhysics(bool firstframe);
-  virtual void activateLightMap() {}
+  virtual void activateLightMap(int stage=1) {}
   ///activates the light map texture
   virtual unsigned int numTerrain () {return 0;}
   virtual unsigned int numContTerrain () {return 0;}
@@ -130,6 +130,8 @@ class StarSystem {
   virtual ContinuousTerrain * getContTerrain (unsigned int which) {return NULL;}
   virtual Background* getBackground() {return NULL;}
   virtual ClickList *getClickList() { return NULL;} 
+  ///Gets the current simulation frame
+  unsigned int getCurrentSimFrame() const { return current_sim_location; };
 
   void ExecuteUnitAI();
   class CollideTable *collidetable;
