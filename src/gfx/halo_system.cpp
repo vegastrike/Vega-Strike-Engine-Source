@@ -31,40 +31,24 @@ static float ffmax(float a, float b) {
 void DoParticles (QVector pos, float percent, const Vector & velocity, float radial_size,float particle_size,int faction) {
   percent = 1-percent;
   int i=rand();
-  static float scale = XMLSupport::parse_float (vs_config->getVariable("graphics",
-								       "sparklescale",
-								       
-								       "8"));
-  static float sspeed = XMLSupport::parse_float (vs_config->getVariable("graphics",
-								       "sparklespeed",
-								       
-								       ".5"));
-  static float flare = XMLSupport::parse_float (vs_config->getVariable("graphics",
-								       "sparkleflare",
-								       
-								       ".5"));
-  static float spread = XMLSupport::parse_float (vs_config->getVariable("graphics",
-								       "sparklespread",
-								       
-								       ".04"));
-  static float absspeed = XMLSupport::parse_float (vs_config->getVariable("graphics",
-								       "sparkleabsolutespeed",
-								       
-								       ".04"));
-  static bool fixed_size= XMLSupport::parse_bool (vs_config->getVariable("graphics",
-								       "sparklefixedsize",
-								       
-								       "0"));
-  if (i<(RAND_MAX*percent)*(GetElapsedTime()*scale)) {
+  static float scale = XMLSupport::parse_float (vs_config->getVariable("graphics","sparklescale","8"));
+  static float sspeed = XMLSupport::parse_float (vs_config->getVariable("graphics","sparklespeed",".5"));
+  static float flare = XMLSupport::parse_float (vs_config->getVariable("graphics","sparkleflare",".15"));
+  static float spread = XMLSupport::parse_float (vs_config->getVariable("graphics","sparklespread",".04"));
+  static float absspeed = XMLSupport::parse_float (vs_config->getVariable("graphics","sparkleabsolutespeed",".02"));
+  static bool  fixed_size= XMLSupport::parse_bool (vs_config->getVariable("graphics","sparklefixedsize","0"));
+  if (i<RAND_MAX*percent*scale) {
       ParticlePoint pp;
       float r1 = rand()/((float)RAND_MAX*.5)-1;
-      float r2 = rand()/((float)RAND_MAX*.5)-1;      
-      QVector rand(r1,r2,0);
+      float r2 = rand()/((float)RAND_MAX*.5)-1;
+      float r3 = rand()/((float)RAND_MAX*.5)-1;
+      QVector rand(r1,r2,r3);
       pp.loc = pos+rand*radial_size*flare;
       const float * col = FactionUtil::GetSparkColor(faction);
-      pp.col.i=col[0];
-      pp.col.j=col[1];
-      pp.col.k=col[2];
+      pp.col.r=col[0];
+      pp.col.g=col[1];
+      pp.col.b=col[2];
+      pp.col.a=1.0f;
 	  static float sciz=XMLSupport::parse_float (vs_config->getVariable("graphics","sparklesizeenginerelative",".125"));
       particleTrail.AddParticle(pp,rand*(ffmax(velocity.Magnitude(),absspeed)*spread+absspeed)+velocity*sspeed,fixed_size?sciz:(particle_size*sciz));
     }
@@ -72,7 +56,7 @@ void DoParticles (QVector pos, float percent, const Vector & velocity, float rad
   
 
 void LaunchOneParticle (const Matrix &mat,const Vector &vel,unsigned int seed, Unit * mush, float hull,int faction) {
-  static float sciz = XMLSupport::parse_float (vs_config->getVariable ("graphics","sparkleenginesizerelativetoship",".0625"));
+  static float sciz = XMLSupport::parse_float (vs_config->getVariable ("graphics","sparkleenginesizerelativetoship","0.1875"));
   
   if (mush){
           bool done=false;
@@ -115,6 +99,7 @@ HaloSystem::HaloSystem() {
   mesh=NULL;
   activation=0;
   oscale=0;
+  sparkle_accum=0;
 }
 
 MyIndHalo::MyIndHalo(const QVector & loc, const Vector & size) {
@@ -174,6 +159,9 @@ static float HaloAccelSmooth(float linaccel, float olinaccel, float maxlinaccel)
 
 bool HaloSystem::ShouldDraw (const Matrix & trans, const Vector & velocity, const Vector & accel, float maxaccel, float maxvelocity) {
     static bool halos_by_velocity = XMLSupport::parse_bool( vs_config->getVariable("graphics","halos_by_velocity","false") );
+
+    if (halo.size()==0) 
+        return false; //Any doubt?
 
     Vector thrustvector=trans.getR().Normalize();
     if (halos_by_velocity) {
@@ -263,8 +251,15 @@ void HaloSystem::Draw(const Matrix & trans, const Vector &scale, int halo_alpha,
         ScaleMatrix (m,Vector (scale.i*i->size.i,scale.j*i->size.j,scale.k*i->size.k*value/maxvalue));
         m.p = Transform (trans,i->loc);
         mesh->Draw(50000000000000.0,m,1,halo_alpha,nebdist);   
-        if (hullpercent<.99)
-            DoParticles(m.p,hullpercent,velocity,mesh->rSize()*scale.i,mesh->rSize()*scale.i,faction);
+        if (hullpercent<.99) {
+            static float sparklerate = XMLSupport::parse_float ( vs_config->getVariable("graphics","halosparklerate","20") );
+            sparkle_accum += GetElapsedTime()*sparklerate;
+            int spawn=(int)(sparkle_accum);
+            sparkle_accum -= spawn;
+            while (spawn-- > 0) {
+                DoParticles(m.p,hullpercent,velocity,mesh->rSize()*scale.i,mesh->rSize()*scale.i,faction);
+            }
+        }
     }
   }
 #endif

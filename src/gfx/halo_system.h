@@ -23,6 +23,7 @@ class HaloSystem {
   Mesh * mesh;
   float activation;
   float oscale;
+  double sparkle_accum;
  public:
   HaloSystem ();
   ~HaloSystem();
