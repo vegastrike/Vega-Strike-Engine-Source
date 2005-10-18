@@ -22,7 +22,7 @@ public:
       double percent;
       char * tempdata = (char *)malloc (sizeof(this->shield));
       memcpy (tempdata,&this->shield,sizeof(this->shield));
-      shield.number=2;//don't want them getting our boosted shields!
+      shield.number=0;//don't want them getting our boosted shields!
       shield.shield2fb.front=shield.shield2fb.back=shield.shield2fb.frontmax=shield.shield2fb.backmax=0;
       smaller->Upgrade (this,0,0,true,true,percent);
       memcpy (&this->shield,tempdata,sizeof(this->shield));
