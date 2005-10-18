@@ -82,6 +82,7 @@ public:
 	void UpdateGFX(GFXBOOL clip, GFXBOOL updateFrustum, GFXBOOL centerCamera, GFXBOOL overrideZFrustum, float overrideZNear, float overrideZFar);
     void UpdateGFX(GFXBOOL clip = GFXTRUE, GFXBOOL updateFrustum=GFXTRUE, GFXBOOL centerCamera = GFXFALSE) { UpdateGFX(clip,updateFrustum,centerCamera,lastGFXUpdate.overrideZFrustum,lastGFXUpdate.overrideZNear,lastGFXUpdate.overrideZFar); };
     void UpdateGFXFrustum(GFXBOOL overrideZFrustum, float overrideZNear, float overrideZFar) { UpdateGFX(lastGFXUpdate.clip,lastGFXUpdate.updateFrustum,lastGFXUpdate.centerCamera,overrideZFrustum,overrideZNear,overrideZFar); };
+    void UpdateGFXAgain() { UpdateGFX(lastGFXUpdate.clip,lastGFXUpdate.updateFrustum,lastGFXUpdate.centerCamera,lastGFXUpdate.overrideZFrustum,lastGFXUpdate.overrideZNear,lastGFXUpdate.overrideZFar); };
 	void UpdatePlanetGFX();//clip true, frustum true at all times
 	Matrix * GetPlanetGFX();
 	void UpdateGLCenter();
