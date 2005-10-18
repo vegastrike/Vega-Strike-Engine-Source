@@ -47,13 +47,13 @@ class XVector {
  public:
   inline XVector (const YVector &);
   inline YVector Cast() const;
-  XVector(QFLOAT i,QFLOAT j,QFLOAT k) {
+  inline XVector(QFLOAT i,QFLOAT j,QFLOAT k) {
     this->i = i;
     this->j = j;
     this->k = k;
   }
   inline void Set (QFLOAT x, QFLOAT y, QFLOAT z) {i=x;j=y;k=z;}
-  void netswap()
+  inline void netswap()
   {
   	this->i = NetSwap( this->i);
   	this->j = NetSwap( this->j);
@@ -62,37 +62,37 @@ class XVector {
   void Yaw(QFLOAT rad);
   void Roll (QFLOAT rad);
   void Pitch(QFLOAT rad);
-  XVector Scale (QFLOAT s)const  {return XVector (s*i,s*j,s*k);}
-  XVector Transform ( const XVector &p, const XVector &q, const XVector &r) {
+  inline XVector Scale (QFLOAT s)const  {return XVector (s*i,s*j,s*k);}
+  inline XVector Transform ( const XVector &p, const XVector &q, const XVector &r) {
     XVector tvect = XVector ( DotProduct(*this, p), DotProduct(*this,q), DotProduct(*this,r));
     *this = tvect;
     return *this;
   }
-  XVector operator+ (const XVector &obj) const {return XVector (i + obj.i, j + obj.j, k + obj.k);}
-  XVector operator- (const XVector &obj) const {return XVector (i - obj.i, j - obj.j, k - obj.k);}
-  XVector Normalize(){::Normalize (*this); return *this;};
-  XVector operator- () const {return XVector (-i, -j, -k);}
-  bool operator== (const XVector &b)const {return (i==b.i && j==b.j && k==b.k);};
-  XVector Cross(const XVector &v) const {return XVector ( this->j*v.k-this->k*v.j, 
+  inline XVector operator+ (const XVector &obj) const {return XVector (i + obj.i, j + obj.j, k + obj.k);}
+  inline XVector operator- (const XVector &obj) const {return XVector (i - obj.i, j - obj.j, k - obj.k);}
+  inline XVector Normalize(){::Normalize (*this); return *this;};
+  inline XVector operator- () const {return XVector (-i, -j, -k);}
+  inline bool operator== (const XVector &b)const {return (i==b.i && j==b.j && k==b.k);};
+  inline XVector Cross(const XVector &v) const {return XVector ( this->j*v.k-this->k*v.j, 
 						       this->k*v.i-this->i*v.k,
 						       this->i*v.j-this->j*v.i);}
-  QFLOAT operator* (const XVector &b) const {return (i*b.i+j*b.j+k*b.k);};
-  QFLOAT Dot(const XVector &b) const {return DotProduct(*this, b);}
-  QFLOAT Magnitude() const {return XSQRT(i*i+j*j+k*k);};
-  QFLOAT MagnitudeSquared() const { return i*i + j*j + k*k; };
-  XVector Vabs()const {
+  inline QFLOAT operator* (const XVector &b) const {return (i*b.i+j*b.j+k*b.k);};
+  inline QFLOAT Dot(const XVector &b) const {return DotProduct(*this, b);}
+  inline QFLOAT Magnitude() const {return XSQRT(i*i+j*j+k*k);};
+  inline QFLOAT MagnitudeSquared() const { return i*i + j*j + k*k; };
+  inline XVector Vabs()const {
     return XVector(i>=0?i:-i,
 				   j>=0?j:-j,
 				   k>=0?k:-k);
   }
   inline const XVector Transform(const class Matrix  &m1) const;
 
-  XVector Min(const XVector &other) const{
+  inline XVector Min(const XVector &other) const{
     return XVector((i<other.i)?i:other.i,
 		  (j<other.j)?j:other.j,
 		  (k<other.k)?k:other.k);
   }
-  XVector Max(const XVector &other) const{
+  inline XVector Max(const XVector &other) const{
     return XVector((i>other.i)?i:other.i,
 		  (j>other.j)?j:other.j,
 		  (k>other.k)?k:other.k);
