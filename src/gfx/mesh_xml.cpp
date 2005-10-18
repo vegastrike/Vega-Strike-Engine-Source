@@ -1459,36 +1459,28 @@ void Mesh::PostProcessLoading(MeshXML * xml,const vector<string> &textureOverrid
     SumNormals (xml->nrmllinstrip.size()/2,2,xml->vertices, xml->nrmllinstrip,xml->vertexcount, vertrw);
     delete []vertrw;
     for (i=0;i<xml->vertices.size();i++) {
-      float dis = sqrtf (xml->vertices[i].i*xml->vertices[i].i +
-			 xml->vertices[i].j*xml->vertices[i].j +
-			 xml->vertices[i].k*xml->vertices[i].k);
+      GFXVertex &v=xml->vertices[i];
+      float dis = (v.i*v.i + v.j*v.j + v.k*v.k);
+      if (dis==1.0f) continue;
+      dis = sqrtf(dis);
       if (dis!=0) {
-	xml->vertices[i].i/=dis;//renormalize
-	xml->vertices[i].j/=dis;
-	xml->vertices[i].k/=dis;
-	/*	VSFileSystem::vs_fprintf (stderr, "Vertex %d, (%f,%f,%f) <%f,%f,%f>\n",i,
-		 xml->vertices[i].x,
-		 xml->vertices[i].y,
-		 xml->vertices[i].z,
-		 xml->vertices[i].i,
-		 xml->vertices[i].j,
-		 xml->vertices[i].k);*/
+        v.i/=dis;//renormalize
+        v.j/=dis;
+        v.k/=dis;
       }else {
-	xml->vertices[i].i=xml->vertices[i].x;
-	xml->vertices[i].j=xml->vertices[i].y;
-	xml->vertices[i].k=xml->vertices[i].z;
-	dis = sqrtf (xml->vertices[i].i*xml->vertices[i].i +
-		     xml->vertices[i].j*xml->vertices[i].j +
-		     xml->vertices[i].k*xml->vertices[i].k);
-	if (dis!=0) {
-	  xml->vertices[i].i/=dis;//renormalize
-	  xml->vertices[i].j/=dis;
-	  xml->vertices[i].k/=dis;	  
-	}else {
-	  xml->vertices[i].i=0;
-	  xml->vertices[i].j=0;
-	  xml->vertices[i].k=1;	  
-	}
+        v.i=v.x;
+        v.j=v.y;
+        v.k=v.z;
+        dis = sqrtf (v.i*v.i + v.j*v.j + v.k*v.k);
+        if (dis!=0) {
+          v.i/=dis;//renormalize
+          v.j/=dis;
+          v.k/=dis;	  
+        }else {
+          v.i=0;
+          v.j=0;
+          v.k=1;	  
+        }
       } 
     }
   }
