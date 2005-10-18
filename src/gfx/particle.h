@@ -3,11 +3,12 @@
 
 #include <list>
 #include "vec.h"
+#include "gfxlib_struct.h"
 
 class ParticlePoint {
  public:
   QVector loc;
-  Vector col;
+  GFXColor col;
   float size;
   //draw and change color...if too dark kill
   bool Draw (const Vector& delta, const double time, Vector p, Vector q);

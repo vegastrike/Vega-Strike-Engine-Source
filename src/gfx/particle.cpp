@@ -8,28 +8,24 @@
 #include "aux_texture.h"
 using namespace std;
 //#define USE_POINTS
-ParticleTrail particleTrail(1000);
+ParticleTrail particleTrail(500);
 void ParticleTrail::ChangeMax (unsigned int max ) {
   this->maxparticles = max;
 }
-static bool colorOK(Vector &col, const double time) {
-  static float adj = XMLSupport::parse_float (vs_config->getVariable("graphics",
-								       "sparklefade",
-								       
-								       ".2"));
-  col=col-Vector (adj*time,adj*time,adj*time);
-  if (col.i<=0) {
-    col.i=0;}
-  if (col.j<=0) {
-    col.j=0;}
-  if (col.k<=0) {
-    col.k=0;}
-  return !(col.i==0&&col.j==0&&col.k==0);
-}
 
 bool ParticlePoint::Draw(const Vector & vel,const double time, Vector p, Vector q) {
-  loc+=(vel*time).Cast();
-  GFXColor4f(col.i,col.j,col.k,1);
+  static float pgrow=XMLSupport::parse_float (vs_config->getVariable ("graphics","sparkegrowrate","200.0")); // 200x size when disappearing
+  static float adj = XMLSupport::parse_float (vs_config->getVariable("graphics","sparklefade","0.1"));
+  static float trans=XMLSupport::parse_float (vs_config->getVariable("graphics","sparklealpha","2.5")); // NOTE: It's the base transparency, before surface attenuation, so it needn't be within the [0-1] range.
+
+
+  float size = this->size*(pgrow*(1-col.a)+col.a);
+  float maxsize = (this->size >size)?this->size:size;
+  float minsize = (this->size<=size)?this->size:size;
+  //Squared, surface-linked decay - looks nicer, more real for emmisive gasses
+  //NOTE: maxsize/minsize allows for inverted growth (shrinkage) while still fading correctly. Cheers!
+  GFXColorf(col*(col.a*trans*(minsize/((maxsize>0)?maxsize:1.f)))); 
+
   {
     QVector loc= this->loc-_Universe->AccessCamera()->GetPosition();
 #ifdef USE_POINTS
@@ -84,7 +80,10 @@ bool ParticlePoint::Draw(const Vector & vel,const double time, Vector p, Vector 
 #endif
 #endif
   }
-  return colorOK(col,time);
+
+  loc+=(vel*time).Cast();
+  col = (col-GFXColor(adj*time,adj*time,adj*time,adj*time)).clamp();
+  return (col.a != 0);
 }
 void ParticleTrail::DrawAndUpdate (){
   Vector P,Q;
