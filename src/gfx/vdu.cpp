@@ -12,6 +12,10 @@
 #include "xml_support.h"
 #include "gfx/animation.h"
 #include "gfx/vsimage.h"
+
+template<typename T> inline T min(T a, T b) { return (a<b)?a:b; };
+template<typename T> inline T max(T a, T b) { return (a>b)?a:b; };
+
 bool VDU::staticable() {
   unsigned int thismode=getMode();
   static bool only_scanner_modes_static=XMLSupport::parse_bool(vs_config->getVariable("graphics","only_scanner_modes_static","true"));
@@ -54,14 +58,13 @@ static string getUnitNameAndFgNoBase (Unit * target) {
 			offset++;
           }
 		  string fgnstring=string(fgnum);
-                  fgnstring=" ="+fgnstring+"=";
 		  free(fgnum);
 		  fgnum=NULL;
                   static bool printfgname = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","print_fg_name","true"));
                   static bool printshiptype = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","print_ship_type","true"));
 		  static bool confignums=XMLSupport::parse_bool (vs_config->getVariable ("graphics","hud","printFGsubID","false"));
                   string fgname;
-                  if (printfgname)fgname+=fg->name+(printshiptype?(confignums?fgnstring.c_str():" : "):"");
+                  if (printfgname)fgname+=fg->name+(printshiptype?(confignums?" =":" : "):"");
                   if (printshiptype)
                     return fgname+reformatName(target->getFullname());
                   return fgname;		  
@@ -368,24 +371,26 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
     bs = tmp;
   }
 
-  GFXColor shcolor[4][3]={{innershield,middleshield,outershield},{innershield,middleshield,outershield},{innershield,middleshield,outershield},{innershield,middleshield,outershield}};
-  float shthresh[3]={0.0f,0.33f,0.66f}; // if we are going to use fade with three lines, need to divide in 3, not 4
+  GFXColor shcolor[4][3]={
+      {innershield,middleshield,outershield},
+      {innershield,middleshield,outershield},
+      {innershield,middleshield,outershield},
+      {innershield,middleshield,outershield}
+  };
+  float shthresh[3]={0.2f,0.5f,0.75f};
   float shtrans[3]={1.0f,1.0f,1.0f};
-
-  // This was broken.  It adjusted the color used for the display of *all four quadrants* based on how much of the front shield is left.  IE: if you took out the front shield, the display would (falsely) show that the sides and back were gone too
-  // now shield color is a multidimensional array, for the three bars, and the four sides, all of which can have different values, and thus need to be able to have different colors
   shcolor[0][0].a *= max(0.0f,min(1.0f,(fs-shthresh[0])/(shthresh[1]-shthresh[0])*shtrans[0]));
   shcolor[0][1].a *= max(0.0f,min(1.0f,(fs-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1]));
-  shcolor[0][2].a *= max(0.0f,min(1.0f,(fs-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));  
+  shcolor[0][2].a *= max(0.0f,min(1.0f,(fs-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));
   shcolor[1][0].a *= max(0.0f,min(1.0f,(rs-shthresh[0])/(shthresh[1]-shthresh[0])*shtrans[0]));
   shcolor[1][1].a *= max(0.0f,min(1.0f,(rs-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1]));
-  shcolor[1][2].a *= max(0.0f,min(1.0f,(rs-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));  
+  shcolor[1][2].a *= max(0.0f,min(1.0f,(rs-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));
   shcolor[2][0].a *= max(0.0f,min(1.0f,(ls-shthresh[0])/(shthresh[1]-shthresh[0])*shtrans[0]));
   shcolor[2][1].a *= max(0.0f,min(1.0f,(ls-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1]));
-  shcolor[2][2].a *= max(0.0f,min(1.0f,(ls-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));  
+  shcolor[2][2].a *= max(0.0f,min(1.0f,(ls-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));
   shcolor[3][0].a *= max(0.0f,min(1.0f,(bs-shthresh[0])/(shthresh[1]-shthresh[0])*shtrans[0]));
   shcolor[3][1].a *= max(0.0f,min(1.0f,(bs-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1]));
-  shcolor[3][2].a *= max(0.0f,min(1.0f,(bs-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));  
+  shcolor[3][2].a *= max(0.0f,min(1.0f,(bs-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));
 
   if (fs>shthresh[0]) {
     GFXColorf(shcolor[0][0]);
@@ -506,18 +511,31 @@ static void DrawShieldArmor(Unit * parent, const float StartArmor[8], float x, f
   float ls = parent->LShieldData();
   float bs = parent->BShieldData();
   float armor[8];
-  GFXColor4f (.4,.4,1,1);
-  static float oshieldcolor[4]={.4,.4,1,1};
-  static float mshieldcolor[4]={.4,.4,1,1};
+
   static float ishieldcolor[4]={.4,.4,1,1};
-  static bool oshieldcolorloaded=(vs_config->getColor("default","outer_shield_color",oshieldcolor,true),true);
-  static bool mshieldcolorloaded=(vs_config->getColor("default","middle_shield_color",mshieldcolor,true),true);
+  static float mshieldcolor[4]={.4,.4,1,1};
+  static float oshieldcolor[4]={.4,.4,1,1};
   static bool ishieldcolorloaded=(vs_config->getColor("default","inner_shield_color",ishieldcolor,true),true);
+  static bool mshieldcolorloaded=(vs_config->getColor("default","middle_shield_color",mshieldcolor,true),true);
+  static bool oshieldcolorloaded=(vs_config->getColor("default","outer_shield_color",oshieldcolor,true),true);
+
+  static float iarmorcolor[4]={1,.6,0,1};
+  static float marmorcolor[4]={1,.6,0,1};
+  static float oarmorcolor[4]={1,.6,0,1};
+  static bool iarmorcolorloaded=(vs_config->getColor("default","inner_shield_color",ishieldcolor,true),true);
+  static bool marmorcolorloaded=(vs_config->getColor("default","middle_shield_color",mshieldcolor,true),true);
+  static bool oarmorcolorloaded=(vs_config->getColor("default","outer_shield_color",oshieldcolor,true),true);
+
   GFXDisable (TEXTURE0);
-  DrawShield (fs,rs,ls,bs,x,y,w,h,invertfrontback,GFXColor(oshieldcolor[0],oshieldcolor[1],oshieldcolor[2],oshieldcolor[3]),GFXColor(mshieldcolor[0],mshieldcolor[1],mshieldcolor[2],mshieldcolor[3]),GFXColor(ishieldcolor[0],ishieldcolor[1],ishieldcolor[2],ishieldcolor[3]));
+  DrawShield (fs,rs,ls,bs,x,y,w,h,invertfrontback,
+      GFXColor(ishieldcolor[0],ishieldcolor[1],ishieldcolor[2],ishieldcolor[3]),
+      GFXColor(mshieldcolor[0],mshieldcolor[1],mshieldcolor[2],mshieldcolor[3]),
+      GFXColor(oshieldcolor[0],oshieldcolor[1],oshieldcolor[2],oshieldcolor[3]));
   parent->ArmorData (armor);
-  GFXColor armorcol (1,.6,0,1);
-  DrawShield ((armor[0]+armor[2]+armor[4]+armor[6])/(float)(StartArmor[0]+StartArmor[2]+StartArmor[4]+StartArmor[6]),(armor[0]+armor[1]+armor[4]+armor[5])/(float)(StartArmor[0]+StartArmor[1]+StartArmor[4]+StartArmor[5]),(armor[2]+armor[3]+armor[6]+armor[7])/(float)(StartArmor[2]+StartArmor[3]+StartArmor[6]+StartArmor[7]),(armor[1]+armor[3]+armor[5]+armor[7])/(float)(StartArmor[1]+StartArmor[3]+StartArmor[5]+StartArmor[7]),x,y,w/2,h/2, invertfrontback,armorcol,armorcol,armorcol);
+  DrawShield ((armor[0]+armor[2]+armor[4]+armor[6])/(float)(StartArmor[0]+StartArmor[2]+StartArmor[4]+StartArmor[6]),(armor[0]+armor[1]+armor[4]+armor[5])/(float)(StartArmor[0]+StartArmor[1]+StartArmor[4]+StartArmor[5]),(armor[2]+armor[3]+armor[6]+armor[7])/(float)(StartArmor[2]+StartArmor[3]+StartArmor[6]+StartArmor[7]),(armor[1]+armor[3]+armor[5]+armor[7])/(float)(StartArmor[1]+StartArmor[3]+StartArmor[5]+StartArmor[7]),x,y,w/2,h/2, invertfrontback,
+      GFXColor(iarmorcolor[0],iarmorcolor[1],iarmorcolor[2],iarmorcolor[3]),
+      GFXColor(marmorcolor[0],marmorcolor[1],marmorcolor[2],marmorcolor[3]),
+      GFXColor(oarmorcolor[0],oarmorcolor[1],oarmorcolor[2],oarmorcolor[3]));
 }
 void VDU::DrawVDUShield (Unit * parent) {
   float x,y,w,h;
@@ -675,19 +693,28 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   retString128 qr=PrettyDistanceString(DistanceTwoTargets(parent,target));
   strcat (st,qr.str);
   tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
-  GFXColor4f (.4,.4,1,1);
-  static float oshieldcolor[4]={.4,.4,1,1};
-  static float mshieldcolor[4]={.4,.4,1,1};
+
   static float ishieldcolor[4]={.4,.4,1,1};
-
-  //float shieldcolor[4]={.9882,.7058,0,1};
-  //float ishieldcolor[4]={.9882,.3607,0,1};
-  static bool oshieldcolorloaded=(vs_config->getColor("default","outer_shield_color",oshieldcolor,true),true);
-  static bool mshieldcolorloaded=(vs_config->getColor("default","middle_shield_color",mshieldcolor,true),true);
+  static float mshieldcolor[4]={.4,.4,1,1};
+  static float oshieldcolor[4]={.4,.4,1,1};
   static bool ishieldcolorloaded=(vs_config->getColor("default","inner_shield_color",ishieldcolor,true),true);
+  static bool mshieldcolorloaded=(vs_config->getColor("default","middle_shield_color",mshieldcolor,true),true);
+  static bool oshieldcolorloaded=(vs_config->getColor("default","outer_shield_color",oshieldcolor,true),true);
 
-  DrawShield (fs,rs,ls,bs,x,y,w,h,invert_target_shields,GFXColor(oshieldcolor[0],oshieldcolor[1],oshieldcolor[2],oshieldcolor[3]),GFXColor(mshieldcolor[0],mshieldcolor[1],mshieldcolor[2],mshieldcolor[3]),GFXColor(ishieldcolor[0],ishieldcolor[1],ishieldcolor[2],ishieldcolor[3]));
+  static float iarmorcolor[4]={1,.6,0,1};
+  static float marmorcolor[4]={1,.6,0,1};
+  static float oarmorcolor[4]={1,.6,0,1};
+  static bool iarmorcolorloaded=(vs_config->getColor("default","inner_shield_color",ishieldcolor,true),true);
+  static bool marmorcolorloaded=(vs_config->getColor("default","middle_shield_color",mshieldcolor,true),true);
+  static bool oarmorcolorloaded=(vs_config->getColor("default","outer_shield_color",oshieldcolor,true),true);
+
+  DrawShield (fs,rs,ls,bs,x,y,w,h,invert_target_shields,
+      GFXColor(ishieldcolor[0],ishieldcolor[1],ishieldcolor[2],ishieldcolor[3]),
+      GFXColor(mshieldcolor[0],mshieldcolor[1],mshieldcolor[2],mshieldcolor[3]),
+      GFXColor(oshieldcolor[0],oshieldcolor[1],oshieldcolor[2],oshieldcolor[3]));
+
   GFXColor4f (1,1,1,1);
+
   }else {
   tp->Draw (MangleString ("\n[OutOfRange]",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);      
 
@@ -1107,18 +1134,26 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
 		  DrawHUDSprite(this,getSunImage(),1,x,y,w,h,1,1,1,1,1,false,false);
         h=fabs (h*.6);
         w=fabs (w*.6);
-        static float oshieldcolor[4]={.4,.4,1,1};
-        static float mshieldcolor[4]={.4,.4,1,1};
-        static float ishieldcolor[4]={.4,.4,1,1};
 
-        //float shieldcolor[4]={.9882,.7058,0,1};
-        //float ishieldcolor[4]={.9882,.3607,0,1};
-        static bool oshieldcolorloaded=(vs_config->getColor("default","outer_shield_color",oshieldcolor,true),true);
-        static bool mshieldcolorloaded=(vs_config->getColor("default","middle_shield_color",mshieldcolor,true),true);
+        static float ishieldcolor[4]={.4,.4,1,1};
+        static float mshieldcolor[4]={.4,.4,1,1};
+        static float oshieldcolor[4]={.4,.4,1,1};
         static bool ishieldcolorloaded=(vs_config->getColor("default","inner_shield_color",ishieldcolor,true),true);
-        
+        static bool mshieldcolorloaded=(vs_config->getColor("default","middle_shield_color",mshieldcolor,true),true);
+        static bool oshieldcolorloaded=(vs_config->getColor("default","outer_shield_color",oshieldcolor,true),true);
+
+        static float iarmorcolor[4]={1,.6,0,1};
+        static float marmorcolor[4]={1,.6,0,1};
+        static float oarmorcolor[4]={1,.6,0,1};
+        static bool iarmorcolorloaded=(vs_config->getColor("default","inner_shield_color",ishieldcolor,true),true);
+        static bool marmorcolorloaded=(vs_config->getColor("default","middle_shield_color",mshieldcolor,true),true);
+        static bool oarmorcolorloaded=(vs_config->getColor("default","outer_shield_color",oshieldcolor,true),true);
+
         static bool invert_view_shields = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","invert_view_shields","false"));
-        DrawShield(target->FShieldData(),target->RShieldData(),target->LShieldData(),target->BShieldData(),x,y,w,h,invert_view_shields,GFXColor(oshieldcolor[0],oshieldcolor[1],oshieldcolor[2],oshieldcolor[3]),GFXColor(mshieldcolor[0],mshieldcolor[1],mshieldcolor[2],mshieldcolor[3]),GFXColor(ishieldcolor[0],ishieldcolor[1],ishieldcolor[2],ishieldcolor[3]));
+        DrawShield(target->FShieldData(),target->RShieldData(),target->LShieldData(),target->BShieldData(),x,y,w,h,invert_view_shields,
+            GFXColor(ishieldcolor[0],ishieldcolor[1],ishieldcolor[2],ishieldcolor[3]),
+            GFXColor(mshieldcolor[0],mshieldcolor[1],mshieldcolor[2],mshieldcolor[3]),
+            GFXColor(oshieldcolor[0],oshieldcolor[1],oshieldcolor[2],oshieldcolor[3]));
       }
     }
     GFXColor4f (1,1,1,1);
