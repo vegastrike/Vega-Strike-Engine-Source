@@ -28,6 +28,8 @@
 #include "networking/inet.h"
 #include "python/python_compile.h"
 
+#include <set>
+
 Music * muzak=NULL;
 int muzak_count=0;
 int muzak_cross_index=0;
@@ -421,7 +423,9 @@ void Music::_GotoSong (std::string mus) {
 void Music::GotoSong (int whichlist,int whichsong,bool skip,int layer) {
 	if (g_game.music_enabled) {
 		if (whichsong!=NOLIST&&whichlist!=NOLIST&&whichlist<(int)playlist.size()&&whichsong<(int)playlist[whichlist].size()) {
-            lastlist=whichlist;
+            if ((layer<0)&&(muzak_count>=2))
+                muzak[0].lastlist=muzak[1].lastlist=whichlist; else
+                lastlist=whichlist;
 			GotoSong(playlist[whichlist][whichsong],layer);
 		} else {
 			_SkipRandList(layer);
