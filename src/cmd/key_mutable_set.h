@@ -36,24 +36,35 @@ public:
 	 */
 
 	void changeKey (typename SUPER::iterator &iter, const T & newKey, typename SUPER::iterator &templess, typename SUPER::iterator &rettempmore) {
-		MutableShell<T> newKeyShell(newKey);
-		templess=rettempmore=iter;
-		++rettempmore;
-                typename SUPER::iterator tempmore=rettempmore;
-                if (tempmore==this->end())
-                  --tempmore;
-		if (templess!=this->begin())
-                  --templess;
-		_Compare comparator;
-		if (comparator(newKeyShell,*templess)||comparator(*tempmore,newKeyShell)) {
-                  this->erase(iter);
-                  rettempmore=templess=iter=this->insert (newKeyShell);
-                  ++rettempmore;
-                  if (templess!=this->begin())
-                    --templess;                  
-		}else {
-                  (*iter).get()=newKey;
-		}
+        MutableShell<T> newKeyShell(newKey);
+        templess=rettempmore=iter;
+        ++rettempmore;
+        typename SUPER::iterator tempmore=rettempmore;
+        if (tempmore==this->end())
+          --tempmore;
+        if (templess!=this->begin())
+          --templess;
+
+        _Compare comparator;
+
+        //O(1) amortized time on the insertion - Yippie!
+        bool byebye=false;
+        if (comparator(newKeyShell,*templess)) {
+          rettempmore=templess=this->insert(templess,newKeyShell); 
+          byebye = true;
+        } else if (comparator(*tempmore,newKeyShell)) {
+          rettempmore=templess=this->insert(tempmore,newKeyShell); 
+          byebye = true;
+        } else (*iter).get()=newKey;
+
+        if (byebye) {
+          this->erase(iter);
+          iter=templess;
+          ++rettempmore;
+          if (templess!=this->begin())
+            --templess;
+        }
+
 		//return iter;
 	}
 
