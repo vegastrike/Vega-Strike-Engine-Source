@@ -142,10 +142,12 @@ namespace AIEvents {
 	using namespace VSFileSystem;
     const int chunk_size = 16384;
 
-    result.obedience=XMLSupport::parse_float (vs_config->getVariable ("AI",
+    static float cfg_obedience=XMLSupport::parse_float (vs_config->getVariable ("AI",
 								      "Targetting",
 								      "obedience",
 								      ".99"));
+    result.obedience=cfg_obedience;
+
     result.maxtime=10;
     //full_filename = string("ai/events/") + faction+string("/")+filename;
     //FILE * inFile = VSFileSystem::vs_open (full_filename.c_str(), "r");
