@@ -39,7 +39,7 @@ public:
 	void remove (){UnitIterator::remove();}
 };
 	
-	string LookupUnitStat(string unitname, string faction, string statname);
+	string LookupUnitStat(const string &unitname, const string &faction, const string &statname);
 
 	Unit * GetUnitFromSerial( ObjSerial serial);
 ///this gets a unit with 1 of each cargo type in it
@@ -60,6 +60,8 @@ public:
 	Unit *getUnit(int index);
 ///This function gets a unit given a name 
     Unit *getUnitByName(std::string name);
+///This function gets a unit given an unreferenceable pointer to it - much faster if finder is provided
+    Unit *getUnitByPtr(void* ptr, Unit * finder=0);
 	Unit *getScratchUnit();
 	void setScratchUnit(Unit *);
 	void precacheUnit(std::string name, std::string faction);

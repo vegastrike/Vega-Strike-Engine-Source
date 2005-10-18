@@ -24,6 +24,7 @@
 #include "cmd/csv.h"
 #include "linecollide.h"
 #include "cmd/unit_collide.h"
+#include "cmd/unit_find.h"
 //extern class Music *muzak;
 //extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );
 extern Unit&GetUnitMasterPartList();
@@ -128,7 +129,6 @@ namespace UniverseUtil {
 	    return newret;
 	  }
 	}
-	//NOTEXPORTEDYET
 	float GetGameTime () {
 		return mission->gametime;
 	}
@@ -248,6 +248,19 @@ namespace UniverseUtil {
 		}
 		return un;
 	}
+    Unit *getUnitByPtr(void* ptr, Unit * finder) {
+        if (finder) {
+            UnitPtrLocator unitLocator(ptr);
+            findObjects(activeSys,finder->location,&unitLocator);
+            if (unitLocator.retval)
+                return reinterpret_cast<Unit*>(ptr); else if (!finder->isSubUnit())
+                return 0;
+        }
+
+        un_fiter it=activeSys->getUnitList().fastIterator();
+        while (it.notDone()&&((void*)it.current()!=ptr)) it.advance();
+        return (((void*)it.current()==ptr)?reinterpret_cast<Unit*>(ptr):0);
+    }
     Unit *getUnitByName(std::string name) {
 		un_iter iter=activeSys->getUnitList().createIterator();
         while (iter.notDone() && UnitUtil::getName(iter.current()) != name)
@@ -504,12 +517,12 @@ namespace UniverseUtil {
 				}
 
 
-	string LookupUnitStat(string unitname, string faction, string statname){
-          CSVRow tmp(LookupUnitRow(unitname,faction));
-          if (tmp.success())
-            return tmp[statname];
-          return "";          
-        }
+                string LookupUnitStat(const string &unitname, const string &faction, const string &statname){
+                    CSVRow tmp(LookupUnitRow(unitname,faction));
+                    if (tmp.success())
+                        return tmp[statname]; else
+                        return string();
+                }
 
 	
                                 static std::vector <Unit *> cachedUnits;
