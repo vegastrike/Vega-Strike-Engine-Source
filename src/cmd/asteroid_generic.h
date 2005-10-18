@@ -6,7 +6,7 @@ class Asteroid: public Unit {
 	void Init( float difficulty);
 	virtual enum clsptr isUnit()const {return ASTEROIDPTR;}
 	virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist);
-  
+
 	//virtual void UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
 protected:
     /** Constructor that can only be called by the UnitFactory.
@@ -24,6 +24,9 @@ protected:
 
     /// assignment operator forbidden
     //Asteroid& operator=( const Asteroid& );
+
+private:
+    unsigned int asteroid_physics_offset;
 };
 
 #endif
