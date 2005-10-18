@@ -257,10 +257,11 @@ void Python::reseterrors() {
     PyErr_Print();
     PyErr_Clear();
     fflush(stderr);
-
-  fflush(stdout);
+    fflush(stdout);
   }
+#ifdef _DEBUG
   fflush(stderr);
+#endif
 }
 /*
 //PYTHON_INIT_GLOBALS(VS,UnitContainer);
