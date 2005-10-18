@@ -829,9 +829,7 @@ BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
 	vec.push_back(base->name);
 	if (un) {
 	    int cpt=UnitUtil::isPlayerStarship(un);
-		if (cpt>=0) {
-			saveStringList(UnitUtil::isPlayerStarship(un),mission_key,vec);
-		}
+		if (cpt>=0) saveStringList(cpt,mission_key,vec);
 	}
 	if (!rooms.size()) {
 		VSFileSystem::vs_fprintf(stderr,"ERROR: there are no rooms in basefile \"%s%s%s\" ...\n",basefile,compute_time_of_day(base,un),BASE_EXTENSION);
