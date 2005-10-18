@@ -154,8 +154,6 @@ void Logo::ProcessDrawQueue() {
 	GFXEnable(TEXTURE0);
 	GFXEnable(TEXTURE1);
 	Decal->MakeActive();
-	GFXSelectTexcoordSet(0, 0);
-	GFXSelectTexcoordSet(1, 1);
 	GFXDisable (DEPTHWRITE);
 	GFXDisable (LIGHTING);
 	GFXColor4f (1,1,1,1);

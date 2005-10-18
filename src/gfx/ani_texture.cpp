@@ -96,12 +96,11 @@ bool AnimatedTexture::SetupPass(int pass, int stage, const enum BLENDFUNC src, c
                 GFXTextureEnv(stage+1,GFXADDTEXTURE); //Most expect this
             }
         }
-        break;
+        return true;
     default:
         // Hey! Nothing to do! Yippie!
         return true;
     }
-    return true;//not sure what it's used for
 }
 void AnimatedTexture::UpdateAllPhysics() {
     for (set<AnimatedTexture *>::iterator iter=anis.begin(); iter!=anis.end(); iter++)

@@ -156,7 +156,6 @@ void Background::Draw()
       //GFXTextureWrap(0,GFXCLAMPTEXTURE);
       //glMatrixMode(GL_MODELVIEW);
       
-      GFXSelectTexcoordSet(0, 0);
       /***********************?????????
 			      //Matrix oldproject;
 			      //GFXGetMatrix(VIEW, oldproject);
