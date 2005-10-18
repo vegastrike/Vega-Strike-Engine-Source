@@ -2,6 +2,7 @@
 //#include "gfx/animation.h"
 #include <vector>
 #include <string>
+#include <map>
 #include <expat.h>
 #include "vegastrike.h"
 #include "xml_support.h"
@@ -345,6 +346,7 @@ using namespace FactionXML;
 void Faction::LoadXML(const char * filename, char * xmlbuffer, int buflength) {
 using namespace FactionXML;
 using namespace VSFileSystem;
+using namespace std;
   unitlevel=0;
   FILE * inFile;
   const int chunk_size = 16384;
@@ -391,6 +393,7 @@ using namespace VSFileSystem;
   }
   XML_ParserFree (parser);
   ParseAllAllies();
+  map<string,bool> cache;
   for (unsigned int i=0;i<factions.size();i++) {
     for (unsigned int j=0;j<factions[i]->faction.size();j++) {
       Faction * fact=factions[i];
@@ -404,9 +407,19 @@ using namespace VSFileSystem;
 		  }else {
 			  fname = factions[i]->factionname;
 		  }
-		  string f=fname+".xml";
-		  if (VSFileSystem::LookForFile( f, CommFile)>Ok)
-			  fname="neutral";
+
+          //Looking for a file is somewhat expensive - a cache speeds up a lot this N^2 loop.
+          //  I know... not a great improvement... but bare with me - I hate N^2 loops.
+          bool res;
+          map<string,bool>::iterator it = cache.find(fname);
+          if (it != cache.end()) {
+              res = it->second;
+          } else {
+              string f=fname+".xml";
+              res = (VSFileSystem::LookForFile(f, CommFile)<=Ok);
+              cache.insert(pair<string,bool>(fname,res));
+          }
+          if (!res) fname="neutral";
 		  factions[i]->faction[j].conversation=getFSM (/*"communications/" +*/ fname + ".xml");
       }else{
         //printf ("Already have converastion for %s with %s\n",fname.c_str(),factions[j]->factionname);
@@ -414,6 +427,8 @@ using namespace VSFileSystem;
     }
   }
   char * munull=NULL;
+  cache.clear();
+
   FactionUtil::LoadSerializedFaction(munull);
 }
 void FactionUtil::LoadContrabandLists() {
