@@ -1141,16 +1141,27 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
       return target->graphicOptions.WarpFieldStrength;
   case UnitImages::JUMP:
 	  return jumpok?1:0;
+
   case UnitImages::KPS:
-	if (lie) 
-		return (target->GetVelocity().Magnitude())/game_speed;
-	else
-		return display_in_meters?(target->GetVelocity().Magnitude()):(target->GetVelocity().Magnitude()*3.6);// JMS 6/28/05 - converted back to raw meters/second
   case UnitImages::SETKPS:
-	if (lie) 
-	    return target->GetComputerData().set_speed/game_speed;
-	else
-		return display_in_meters?(target->GetComputerData().set_speed):(target->GetComputerData().set_speed*3.6); //JMS 6/28/05 - converted back to raw meters/second
+  case UnitImages::MAXKPS:
+  case UnitImages::MAXCOMBATKPS:
+  case UnitImages::MAXCOMBATABKPS:
+    {
+        float value;
+        switch (stat) {
+            case UnitImages::KPS:            value=target->GetVelocity().Magnitude(); break;
+            case UnitImages::SETKPS:         value=target->GetComputerData().set_speed; break;
+            case UnitImages::MAXKPS:         value=target->GetComputerData().max_speed(); break;
+            case UnitImages::MAXCOMBATKPS:   value=target->GetComputerData().max_combat_speed; break;
+            case UnitImages::MAXCOMBATABKPS: value=target->GetComputerData().max_combat_ab_speed; break;
+            default:                         value=0;
+        }
+	    if (lie) 
+	        return value/game_speed; else
+		    return display_in_meters?value:value*3.6; //JMS 6/28/05 - converted back to raw meters/second
+    }
+
   case UnitImages::AUTOPILOT:
     {
     static int wasautopilot=0;
@@ -1834,8 +1845,18 @@ void GameCockpit::Draw() {
                 GFXEnable(STENCIL);
             };*/
             _Universe->activateLightMap();
-            for (i=0;i<mesh.size();++i) 
-                mesh[i]->DrawNow(1,true,headtrans.front());
+            for (i=0;i<mesh.size();++i) {
+                //mesh[i]->DrawNow(1,true,headtrans.front());
+                mesh[i]->Draw(FLT_MAX,headtrans.front());
+            }
+
+            //Whether cockpits shouldn't cull faces - not sure why, probably because 
+            //modellers always set normals the wrong way for cockpits.
+            static bool nocockpitcull = XMLSupport::parse_bool(vs_config->getVariable ("graphics","cockpit_no_face_cull","true")); 
+
+            Mesh::ProcessZFarMeshes(true);
+            if (nocockpitcull) GFXDisable(CULLFACE);
+            Mesh::ProcessUndrawnMeshes(false,true);
         };
 	    headtrans.pop_front();
         //if (COCKPITZ_PARTITIONS>1) GFXDisable(STENCIL);
@@ -2117,7 +2138,16 @@ void GameCockpit::Draw() {
   }
 
   GFXHudMode (false);
-  DrawNavSystem();
+
+  {
+    //again, NAV computer is unaffected by FOV WARP-Link
+    float oldfov=AccessCamera()->GetFov();
+    AccessCamera()->SetFov(g_game.fov);
+    AccessCamera()->UpdateGFXAgain();
+    DrawNavSystem();
+    AccessCamera()->SetFov(oldfov);
+    AccessCamera()->UpdateGFXAgain();
+  }
 
   GFXEnable (DEPTHWRITE);
   GFXEnable (DEPTHTEST);
@@ -2427,6 +2457,7 @@ void GameCockpit::SetupViewPort (bool clip) {
         static float stable_lowarpref   = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.stable.loref","1") );
         static float stable_hiwarpref   = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.stable.hiref","100000") );
         static float stable_refexp      = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.stable.exp","0.5") );
+        static bool  stable_asymptotic  = XMLSupport::parse_bool ( vs_config->getVariable("graphics","warp.fovlink.stable.asymptotic","1") );
         static float stable_offset_f    = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.stable.offset.front","0") );
         static float stable_offset_b    = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.stable.offset.back","0") );
         static float stable_offset_p    = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.stable.offset.perpendicular","0") );
@@ -2437,6 +2468,7 @@ void GameCockpit::SetupViewPort (bool clip) {
         static float shake_lowarpref    = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.shake.loref","10000") );
         static float shake_hiwarpref    = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.shake.hiref","200000") );
         static float shake_refexp       = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.shake.exp","1.5") );
+        static bool  shake_asymptotic   = XMLSupport::parse_bool ( vs_config->getVariable("graphics","warp.fovlink.shake.asymptotic","1") );
         static float shake_speed        = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.shake.speed","10") );
         static float shake_offset_f     = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.shake.offset.front","0") );
         static float shake_offset_b     = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.shake.offset.back","0") );
@@ -2445,6 +2477,8 @@ void GameCockpit::SetupViewPort (bool clip) {
         static float shake_multiplier_b = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.shake.multiplier.back","0") );
         static float shake_multiplier_p = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.shake.multiplier.perpendicular","0") );
 
+        static float refkpsoverride     = XMLSupport::parse_float( vs_config->getVariable("graphics","warp.fovlink.referencekps","0") ); // 0 means automatic
+
         static float theta=0;
         theta+=shake_speed*GetElapsedTime();
 
@@ -2452,19 +2486,21 @@ void GameCockpit::SetupViewPort (bool clip) {
         if (shake_lowarpref ==shake_hiwarpref ) shake_hiwarpref  = shake_lowarpref+1;
 
         float warpfieldstrength=LookupTargetStat(UnitImages::WARPFIELDSTRENGTH,un);
-        float setkps=LookupTargetStat(UnitImages::SETKPS,un);
+        float refkps=(refkpsoverride>0)?refkpsoverride:LookupTargetStat(UnitImages::MAXCOMBATABKPS,un); //This one is stable, as opposed to SETKPS - for full stability, use the override (user override of governor settings will create weird behaviour if done under SPEC)
         float kps=LookupTargetStat(UnitImages::KPS,un);
-        float st_warpfieldstrength=pow((max(stable_lowarpref,min(stable_hiwarpref,warpfieldstrength))-stable_lowarpref)/(stable_hiwarpref-stable_lowarpref),stable_refexp);
-        float sh_warpfieldstrength=pow((max(shake_lowarpref,min(shake_hiwarpref,warpfieldstrength))-shake_lowarpref)/(shake_hiwarpref-shake_lowarpref),shake_refexp);
+        float st_warpfieldstrength=pow((max(stable_lowarpref,min(stable_asymptotic?FLT_MAX:stable_hiwarpref,warpfieldstrength))-stable_lowarpref)/(stable_hiwarpref-stable_lowarpref),stable_refexp);
+        float sh_warpfieldstrength=pow((max(shake_lowarpref,min(shake_asymptotic?FLT_MAX:shake_hiwarpref,warpfieldstrength))-shake_lowarpref)/(shake_hiwarpref-shake_lowarpref),shake_refexp);
         float costheta = cos(theta);
-        if (setkps<=1) setkps=1;
-        if (kps>setkps) kps=setkps;
+        if (stable_asymptotic) st_warpfieldstrength = atan(st_warpfieldstrength);
+        if (shake_asymptotic)  sh_warpfieldstrength = atan(sh_warpfieldstrength);
+        if (refkps<=1) refkps=1;
+        if (kps>refkps) kps=refkps;
         for (int i=0; i<NUM_CAM; i++) {
             float unv = un->GetVelocity().Magnitude();
             float camv = _Universe->AccessCamera(i)->GetR().Magnitude();
             if (unv<=1) unv=1;
             if (camv<=1) camv=1;
-            float cosangle = (un->GetVelocity() * _Universe->AccessCamera(i)->GetR()) / (unv*camv) * (kps/setkps);
+            float cosangle = (un->GetVelocity() * _Universe->AccessCamera(i)->GetR()) / (unv*camv) * (kps/refkps);
             float st_offs,sh_offs,st_mult,sh_mult;
             if (cosangle>0) {
                 st_offs = stable_offset_f*cosangle + stable_offset_p*(1-cosangle);
