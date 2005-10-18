@@ -4974,8 +4974,12 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		}
 	}
 	if(!mode){
-		PRETTY_ADD(statcolor+"Number of shield emitter facings: #-c",playerUnit->shield.number,0);
-		text+="#n#"+prefix+statcolor+"Shield protection rating:#-c";
+        if (playerUnit->shield.number) {
+		    PRETTY_ADD(statcolor+"Number of shield emitter facings: #-c",playerUnit->shield.number,0);
+		    text+="#n#"+prefix+statcolor+"Shield protection rating:#-c";
+        } else {
+		    text+="#n#"+prefix+statcolor+"No shielding. #-c";
+        }
 	} else {
 		if(playerUnit->shield.shield2fb.frontmax!=blankUnit->shield.shield2fb.frontmax||playerUnit->shield.shield4fbrl.frontmax!=blankUnit->shield.shield4fbrl.frontmax||playerUnit->shield.shield8.frontrightbottommax!=blankUnit->shield.shield8.frontrightbottommax){
 			switch(replacement_mode){
@@ -4996,6 +5000,8 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	}
 
 	switch (playerUnit->shield.number) {
+        case 0:
+			break;
 		case 2:
 			if(!mode||playerUnit->shield.shield2fb.frontmax!=blankUnit->shield.shield2fb.frontmax){
 				PRETTY_ADDU(statcolor+"  fore - #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.shield2fb.backmax-1)):playerUnit->shield.shield2fb.frontmax*VSDM,0, "MJ");
@@ -5202,25 +5208,27 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		/*	PRETTY_ADDU("Power balance will make your reactor never recharge above ",(playerUnit->MaxEnergyData()-maxshield)*100.0/playerUnit->MaxEnergyData(),0,"% of it's max capacity");*/
 		}
 		
-		if (playerUnit->shield.recharge*playerUnit->shield.number*VSDM/shieldenergycap>playerUnit->EnergyRechargeData()*RSconverter) {
-			text+="#n##c1:1:.1#"+prefix+"WARNING: reactor recharge rate is less than combined shield recharge rate.#n#";
-			text+="Your shields won't be able to regenerate at their optimal speed!#-c";
-		}
-		if(shields_require_power){
-			text+="#n#"+prefix+statcolor+"Reactor recharge slowdown caused by shield maintenance: #-c";
-			float maint_draw_percent=playerUnit->shield.recharge*VSDM*100.0/shieldenergycap*shield_maintenance_cost*playerUnit->shield.number/(playerUnit->EnergyRechargeData()*RSconverter);
-			sprintf(conversionBuffer,"%.2f",maint_draw_percent);
-			text+=conversionBuffer;
-			text+=" %.";
-			if (maint_draw_percent>60) {
-		      text+="#n##c1:1:.1#"+prefix+"WARNING: Reactor power is heavily consumed by passive shield maintenance: consider downgrading shield or upgrading reactor.#-c";
-			} else if(maint_draw_percent>95){
-			  text+="#n##c1:.3:.3#"+prefix+"SEVERE WARNING: Reactor power is overdrawn! Unsustainable power is being consumed by passive shield maintenance: downgrade shield or upgrade reactor immediately!#-c";
-			}
-		}
+        if (playerUnit->shield.number) {
+		    if (playerUnit->shield.recharge*playerUnit->shield.number*VSDM/shieldenergycap>playerUnit->EnergyRechargeData()*RSconverter) {
+			    text+="#n##c1:1:.1#"+prefix+"WARNING: reactor recharge rate is less than combined shield recharge rate.#n#";
+			    text+="Your shields won't be able to regenerate at their optimal speed!#-c";
+		    }
+		    if(shields_require_power){
+			    text+="#n#"+prefix+statcolor+"Reactor recharge slowdown caused by shield maintenance: #-c";
+			    float maint_draw_percent=playerUnit->shield.recharge*VSDM*100.0/shieldenergycap*shield_maintenance_cost*playerUnit->shield.number/(playerUnit->EnergyRechargeData()*RSconverter);
+			    sprintf(conversionBuffer,"%.2f",maint_draw_percent);
+			    text+=conversionBuffer;
+			    text+=" %.";
+			    if (maint_draw_percent>60) {
+		          text+="#n##c1:1:.1#"+prefix+"WARNING: Reactor power is heavily consumed by passive shield maintenance: consider downgrading shield or upgrading reactor.#-c";
+			    } else if(maint_draw_percent>95){
+			      text+="#n##c1:.3:.3#"+prefix+"SEVERE WARNING: Reactor power is overdrawn! Unsustainable power is being consumed by passive shield maintenance: downgrade shield or upgrade reactor immediately!#-c";
+			    }
+		    }
+        }
 		totalWeaponEnergyUsage=totalWeaponEnergyUsage*RSconverter;
-		float maint_draw=(shields_require_power)?(playerUnit->shield.recharge*VSDM/shieldenergycap*shield_maintenance_cost*playerUnit->shield.number):0;
 		PRETTY_ADDU(statcolor+"Combined weapon energy usage: #-c",totalWeaponEnergyUsage,0,"MJ/s");
+		float maint_draw=(shields_require_power&&playerUnit->shield.number)?(playerUnit->shield.recharge*VSDM/shieldenergycap*shield_maintenance_cost*playerUnit->shield.number):0;
 		if (totalWeaponEnergyUsage<(playerUnit->EnergyRechargeData()*RSconverter-maint_draw)) {
 			//waouh, impressive...
 			text+="#n##c0:1:.2#"+prefix+"Your reactor produces more energy than your weapons can use!#-c";
