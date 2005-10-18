@@ -112,6 +112,10 @@ struct GFXColor
     this->a = VSSwapHostFloatToLittle( this->a);
   }
 
+  GFXColor clamp() const {
+      return GFXColor( ((r<0)?0:((r>1)?1:r)) , ((g<0)?0:((g>1)?1:g)) , ((b<0)?0:((b>1)?1:b)) , ((a<0)?0:((a>1)?1:a)) );
+  }
+
 };
 
 inline	GFXColor operator*(float s, const GFXColor&c) {
@@ -122,6 +126,9 @@ inline GFXColor operator*(const GFXColor&c, float s) {
 }
 inline GFXColor operator+(const GFXColor&c0, const GFXColor&c1) {
 	return GFXColor(c0.r+c1.r,c0.g+c1.g,c0.b+c1.b,c0.a+c1.a);
+}
+inline GFXColor operator-(const GFXColor&c0, const GFXColor&c1) {
+	return GFXColor(c0.r-c1.r,c0.g-c1.g,c0.b-c1.b,c0.a-c1.a);
 }
 
 ///This vertex is used for the interleaved array argument for color based arrays T2F_C4F_N3F_V3F 

@@ -284,9 +284,6 @@ void /*GFXDRVAPI*/ GFXPopBlendMode();
 ///Sets the active texture stage in multitexture
 void /*GFXDRVAPI*/ GFXActiveTexture (const int stage);
 
-///Selects which texture coordinates should go with which texture in multitex
-void /*GFXDRVAPI*/ GFXSelectTexcoordSet(const int stage, const int texset);
-
 ///Returns the current depth function
 enum DEPTHFUNC /*GFXDRVAPI*/ GFXDepthFunc();
 
