@@ -4,9 +4,10 @@
 #include "vsfilesystem.h"
 
 #include <vector>
+#include <algorithm>
 using std::priority_queue;
 #include "hashtable_3d.h"
-using std::list;
+//using std::list;
 using std::vector;
  //optimization globals
 float intensity_cutoff=.06;//something that would normally round down
@@ -29,9 +30,11 @@ static bool operator < (light_key tmp1,light_key tmp2) {return tmp1.intensity_ke
 
 static priority_queue<light_key> lightQ;
 
-static list <int> pickedlights [2];
-static list <int>* newpicked=&pickedlights[0];
-static list <int>* oldpicked=&pickedlights[1];
+//pickedlights was a list, but lists imply heavy reallocation, which is bad in critical sections
+// ( and pickedlights is used in the most critical section: just before GFXVertexList::Draw() )
+static vector <int> pickedlights [2];
+static vector <int>* newpicked=&pickedlights[0];
+static vector <int>* oldpicked=&pickedlights[1];
 
 inline int getIndex (const LineCollide & t) {
     return t.object.i;
@@ -48,7 +51,7 @@ static void swappicked () {
 }
 
 void unpicklights () {
-	for (std::list <int>::iterator i=newpicked->begin();i!=newpicked->end();i++) {
+	for (std::vector <int>::iterator i=newpicked->begin();i!=newpicked->end();i++) {
 	  if (GLLights[(*_llights)[*i].Target()].index!=*i) {
 	    	    VSFileSystem::vs_fprintf (stderr,"uh oh");
 	    (*_llights)[*i].Target()=-1;
@@ -113,9 +116,11 @@ static inline bool picklight (const LineCollide& light, const Vector & center, c
 }
 
 void gfx_light::dopickenables () {
-  newpicked->sort();//sort it to find minimum num lights changed from last time.
-  std::list<int>::iterator traverse= newpicked->begin();
-  std::list<int>::iterator oldtrav;
+  //sort it to find minimum num lights changed from last time.
+  sort(newpicked->begin(), newpicked->end());
+  //newpicked->sort();
+  std::vector<int>::iterator traverse= newpicked->begin();
+  std::vector<int>::iterator oldtrav;
   while (traverse!=newpicked->end()&&(!oldpicked->empty())) {
     oldtrav = oldpicked->begin();
     while (oldtrav!=oldpicked->end()&& *oldtrav < *traverse) {
@@ -150,7 +155,7 @@ void gfx_light::dopickenables () {
     traverse++;
   }    
   
-  while (!oldpicked->empty()) {
+  /*while (!oldpicked->empty()) {
     int glind=(*_llights)[oldpicked->front()].target;
     if ((GLLights[glind].options&OpenGLL::GL_ENABLED)&&GLLights[glind].index==-1) {//if hasn't been duly clobbered
       glDisable (GL_LIGHT0+glind);
@@ -158,7 +163,16 @@ void gfx_light::dopickenables () {
     }
     (*_llights)[oldpicked->front()].target=-1;//make sure it doesn't think it owns any gl lights!
     oldpicked->pop_front();
+  }*/
+  for (oldtrav = oldpicked->begin(); oldtrav!=oldpicked->end(); oldtrav++) {
+    int glind=(*_llights)[*oldtrav].target;
+    if ((GLLights[glind].options&OpenGLL::GL_ENABLED)&&GLLights[glind].index==-1) {//if hasn't been duly clobbered
+      glDisable (GL_LIGHT0+glind);
+      GLLights[glind].options &= (~OpenGLL::GL_ENABLED);
+    }
+    (*_llights)[*oldtrav].target=-1;//make sure it doesn't think it owns any gl lights!
   }
+  oldpicked->clear();
 
 }
 
