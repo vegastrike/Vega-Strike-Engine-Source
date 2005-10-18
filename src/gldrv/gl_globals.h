@@ -117,16 +117,28 @@ struct GFXStats{
 #define glClientActiveTextureARB_p glClientActiveTextureARB
 #define glActiveTextureARB_p glActiveTextureARB
 #define glColorTable_p glColorTable
+
+#if !defined(glLockArraysEXT)||!defined(glUnlockArraysEXT)
+#define NO_COMPILEDVERTEXARRAY_SUPPORT
+#endif
+
+#ifndef NO_COMPILEDVERTEXARRAY_SUPPORT
 #define glLockArraysEXT_p glLockArraysEXT
 #define glUnlockArraysEXT_p glUnlockArraysEXT
+#endif
 
+#if !defined(glDeleteBuffersARB)||!defined(glGenBuffersARB)||!defined(glBindBuffersARB)||!defined(glMapBufferARB)||!defined(glUnmapBufferARB)
+#define NO_VBO_SUPPORT
+#endif
 
+#ifndef NO_VBO_SUPPORT
 #define glDeleteBuffersARB_p glDeleteBuffersARB
 #define glGenBuffersARB_p glGenBuffersARB
 #define glBindBufferARB_p glBindBufferARB
 #define glBufferDataARB_p glBufferDataARB
 #define glMapBufferARB_p glMapBufferARB
 #define glUnmapBufferARB_p glUnmapBufferARB
+#endif
 
 #else
 extern PFNGLBINDBUFFERARBPROC glBindBufferARB_p;
@@ -145,8 +157,6 @@ extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
 
 
 //extern int sharedcolortable;
-extern GLenum GFXStage0;
-extern GLenum GFXStage1;
 #ifdef STATS_QUEUE
 extern queue<GFXStats> statsqueue;
 #endif

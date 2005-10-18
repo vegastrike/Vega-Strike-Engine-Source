@@ -71,7 +71,7 @@ typedef void (*PFNGLUNLOCKARRAYSEXTPROC)(void);
 #   error "*** You need a more recent copy of glext.h.  You can get one at http://oss.sgi.com/projects/ogl-sample/ABI/glext.h ; it goes in /usr/include/GL. ***"
 #endif
 #endif
-#ifdef PFNGLLOCKARRAYSEXTPROC
+#if defined(PFNGLLOCKARRAYSEXTPROC) && defined(PFNGLUNLOCKARRAYSEXTPROC)
 extern PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
 extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
 #endif

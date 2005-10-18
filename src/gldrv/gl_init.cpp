@@ -94,8 +94,8 @@ PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB_p=0;
 PFNGLCOLORTABLEEXTPROC glColorTable_p=0;
 PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB_p = 0;
 
-PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
-PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
+PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p = 0;
+PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p = 0;
 #endif /* __APPLE_PANTHER_GCC33_CLI__ */
 
 typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))(); 
@@ -155,11 +155,18 @@ void init_opengl_extensions()
 	const unsigned char * extensions = glGetString(GL_EXTENSIONS);
 
 (void) VSFileSystem::vs_fprintf(stderr, "OpenGL Extensions supported: %s\n", extensions);
+
+#ifndef NO_COMPILEDVERTEXARRAY_SUPPORT
     if (vsExtensionSupported( "GL_EXT_compiled_vertex_array")&&XMLSupport::parse_bool (vs_config->getVariable ("graphics","LockVertexArrays","true"))) {
 #ifdef __APPLE__
 #ifndef __APPLE_PANTHER_GCC33_CLI__
+#if defined(glLockArraysEXT)&&defined(glUnlockArraysEXT)
         glLockArraysEXT_p = &glLockArraysEXT;
         glUnlockArraysEXT_p = &glUnlockArraysEXT;
+#else
+		glLockArraysEXT_p = 0;
+		glUnlockArraysEXT_p = 0;
+#endif
 #endif /*__APPLE_PANTHER_GCC33_CLI__*/
 #else
 	glLockArraysEXT_p = (PFNGLLOCKARRAYSEXTPROC) 
@@ -171,12 +178,14 @@ void init_opengl_extensions()
     } else {    
 #ifdef __APPLE__
 #ifndef __APPLE_PANTHER_GCC33_CLI__
-		glLockArraysEXT_p = NULL;
-		glUnlockArraysEXT_p = NULL;
+		glLockArraysEXT_p = 0;
+		glUnlockArraysEXT_p = 0;
 #endif /*__APPLE_PANTHER_GCC33_CLI__*/
 #endif
 		(void) VSFileSystem::vs_fprintf(stderr, "OpenGL::GL_EXT_compiled_vertex_array unsupported\n");
     }
+#endif
+
 #ifdef __APPLE__
 #ifndef __APPLE_PANTHER_GCC33_CLI__
 	glColorTable_p = &glColorTableEXT;
@@ -185,12 +194,14 @@ void init_opengl_extensions()
 	glActiveTextureARB_p = &glActiveTextureARB;		
 #endif /*__APPLE_PANTHER_GCC33_CLI__*/
 #else
+#ifndef NO_VBO_SUPPORT
     glBindBufferARB_p=(PFNGLBINDBUFFERARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glBindBuffer");	;
     glGenBuffersARB_p=(PFNGLGENBUFFERSARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glGenBuffers");	;
     glDeleteBuffersARB_p=(PFNGLDELETEBUFFERSARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glDeleteBuffers");	;
     glBufferDataARB_p=(PFNGLBUFFERDATAARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glBufferData");	;
     glMapBufferARB_p=(PFNGLMAPBUFFERARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glMapBuffer");	;
     glUnmapBufferARB_p=(PFNGLUNMAPBUFFERARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUnmapBuffer");	
+#endif
 
     glColorTable_p = (PFNGLCOLORTABLEEXTPROC ) GET_GL_PROC((GET_GL_PTR_TYP)"glColorTableEXT");
     glMultiTexCoord2fARB_p = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fARB");

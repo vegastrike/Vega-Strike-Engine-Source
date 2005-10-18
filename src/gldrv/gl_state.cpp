@@ -64,6 +64,12 @@ GLenum GetGLTextureTarget(enum TEXTURE_TARGET texture_target) {
 }
 
 int activeTextureStage=-1;
+
+static inline bool _GFXActiveTextureValid()
+{
+    return !(activeTextureStage&&activeTextureStage>=gl_options.Multitexture);
+}
+
 extern GFXBOOL GFXLIGHTING;
 void /*GFXDRVAPI*/ GFXEnable (const STATE state)
 {
@@ -227,6 +233,8 @@ void /*GFXDRVAPI*/ GFXDisable (const STATE state)
 
 void GFXTextureAddressMode(const ADDRESSMODE mode, enum TEXTURE_TARGET target)
 {
+    if (!_GFXActiveTextureValid()) return;
+ 
     GLenum tt=GetGLTextureTarget(target);
 	float BColor [4] = {0,0,0,0};//set border color to clear... dunno if we wanna change?
     GLenum wm1,wm2;
@@ -502,24 +510,12 @@ void GFXStencilMask(unsigned int mask)
     cur_stencil_mask = mask;
 }
 
-void /*GFXDRVAPI*/ GFXSelectTexcoordSet(const int stage, const int texset)
-{
-	if (stage)
-	{
-		GFXStage1 = texset;
-	}
-	else
-	{
-		GFXStage0 = texset;
-	}
-}
-
 void GFXActiveTexture (const int stage) {
 #if !defined(IRIX)
   if (gl_options.Multitexture&&stage!=activeTextureStage&&glActiveTextureARB_p) {
     glActiveTextureARB_p(GL_TEXTURE0_ARB+stage);
     activeTextureStage=stage;
-  }
+  } else activeTextureStage=stage; //This ensures consistent behavior - they shouldn't even call us
 #endif
 }
 
@@ -559,33 +555,4 @@ void GFXAlphaTest (const enum DEPTHFUNC df, const float ref) {
   } 
   glAlphaFunc (tmp,ref);
 }
-
-GFXBOOL GFXSetTexFunc(int stage, int texset)
-{
-
-	if (stage)
-	{
-		GFXStage1 = texset;
-	}
-	else
-	{
-		GFXStage0 = texset;
-	}	
-	if (gl_options.Multitexture)
-	{
-	  GFXActiveTexture(stage);	
-	  if (!stage) {
-	    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	  }
-	  if (stage==1) {
-	    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
-	  }
-	  GFXActiveTexture(stage);
-
-	}
-	else return GFXFALSE;
-
-	return GFXTRUE;
-}
-
 

@@ -26,8 +26,6 @@
 //Matrix view = {0};
 
 //int sharedcolortable = 0;
-GLenum GFXStage0 = 0;
-GLenum GFXStage1 = 1;
 gl_options_t gl_options;
 namespace GFXMatrices {
   Matrix model,view;

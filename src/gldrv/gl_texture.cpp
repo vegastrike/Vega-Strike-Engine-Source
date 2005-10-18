@@ -812,6 +812,8 @@ void GFXDestroyAllTextures () {
 }
 
 void GFXTextureCoordGenMode(int stage, GFXTEXTURECOORDMODE tex, const float params[4],const float paramt[4]) {
+    if (stage&&stage>=gl_options.Multitexture) return;
+
     GFXActiveTexture(stage);
 	switch (tex) {
 	case NO_GEN:
@@ -860,6 +862,8 @@ void GFXTextureCoordGenMode(int stage, GFXTEXTURECOORDMODE tex, const float para
 }
 void /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 {
+  if (stage&&stage>=gl_options.Multitexture) return;
+
   if (activetexture[stage]!=handle) {
       GFXActiveTexture(stage);
       activetexture[stage] = handle;
@@ -870,9 +874,8 @@ void /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 
 
 void GFXTextureEnv (int stage, GFXTEXTUREENVMODES mode, float arg2) {
-	if (stage>=1&&!GFXMultiTexAvailable()) {
-		return;
-	}
+    if (stage&&stage>=gl_options.Multitexture) return;
+
 	GLenum type;
 	GFXActiveTexture(stage);
 	switch (mode) {
@@ -964,6 +967,8 @@ void GFXTextureEnv (int stage, GFXTEXTUREENVMODES mode, float arg2) {
 #endif
 
 void GFXTextureWrap(int stage, GFXTEXTUREWRAPMODES mode, enum TEXTURE_TARGET target) {
+  if (stage&&stage>=gl_options.Multitexture) return;
+
   GFXActiveTexture(stage);
   GLenum tt=GetGLTextureTarget(target);
   GLenum e1=GL_REPEAT;
