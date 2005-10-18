@@ -17,6 +17,8 @@ class MissileEffect {
     radialmultiplier=radmult;
     this->ownerDoNotDereference=owner;
   }
+  float GetRadius() const { return radius; };
+  const Vector& GetCenter() const { return pos; };
 };
 class Missile:public Unit {
  public:

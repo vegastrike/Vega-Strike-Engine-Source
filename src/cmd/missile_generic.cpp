@@ -12,6 +12,11 @@
 #include "faction_generic.h"
 #include "unit_util.h"
 void StarSystem::UpdateMissiles() {  
+  // WARNING: This is a big performance problem...
+  //   ...responsible for many hiccups.
+  //   TODO: Make it use the collidemap to only iterate through potential hits...
+  //   PROBLEM: The current collidemap does not allow this efficiently (no way of
+  //      taking the other unit's rSize() into account).
   if (!dischargedMissiles.empty()) {
     Unit * un;
     for (un_iter ui=getUnitList().createIterator();
