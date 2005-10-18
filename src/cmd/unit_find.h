@@ -152,6 +152,19 @@ public:
 		return true;
 	}
 };
+class UnitPtrLocator {
+  const void * unit;
+public:
+  bool retval;
+  bool BoltsOrUnits() { return false; }
+  bool UnitsOnly() { return true; }
+  bool NeedDistance() { return false; }
+  UnitPtrLocator(const void * unit) { retval = false; this->unit=unit; }
+  bool cullless (CollideMap::iterator tless) { return retval; }
+  bool cullmore (CollideMap::iterator tmore) { return retval; }
+  bool acquire(float distance, CollideMap::iterator i) { return (retval = (((const void*)((*i)->ref.unit)) == unit)); }
+  void init (CollideMap * cm, CollideMap::iterator parent) { }
+};
 
 
 #endif

@@ -14,6 +14,8 @@
 #include "audiolib.h"
 #include "collide/rapcol.h"
 #include "unit_collide.h"
+#include <string>
+#include <set>
 
 // Various functions that were used in .cpp files that are now included because of
 // the temple GameUnit class
@@ -40,18 +42,15 @@ int createSound( string file, bool val)
 // From unit_xml.cpp
 using std::map;
 static std::map<std::string,Animation *> cached_ani;
-vector <std::string> tempcache;
+std::set<std::string> tempcache;
 void cache_ani (string s) {
-  tempcache.push_back (s);
+  tempcache.insert(s);
 }
 void update_ani_cache () {
-  while (tempcache.size()) {
-    string explosion_type = tempcache.back();
-    tempcache.pop_back();
-    if (cached_ani.find (explosion_type)==cached_ani.end()) {
-      cached_ani.insert (pair <std::string,Animation *>(explosion_type,new Animation (explosion_type.c_str(),false,.1,BILINEAR,false)));
-    }
-  }
+    for (std::set<std::string>::iterator it=tempcache.begin(); it!=tempcache.end(); it++)
+        if (cached_ani.find(*it)==cached_ani.end())
+            cached_ani.insert(pair <std::string,Animation *>(*it,new Animation ((*it).c_str(),false,.1,BILINEAR,false)));
+    tempcache.clear();
 }
 std::string getRandomCachedAniString () {
   if (cached_ani.size()) {

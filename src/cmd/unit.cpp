@@ -69,6 +69,7 @@
 #include "python/init.h"
 #include "unit_const_cache.h"
 extern double interpolation_blend_factor;
+extern double saved_interpolation_blend_factor;
 extern bool cam_setup_phase;
 
 /**** MOVED FROM BASE_INTERFACE.CPP ****/
@@ -88,9 +89,8 @@ void GameUnit<UnitType>::UpgradeInterface(Unit * baseun) {
 //	  SetSoftwareMousePosition(0,0);
 }
 
-
 template <class UnitType>
-GameUnit<UnitType>::GameUnit( int /*dummy*/ ) {
+GameUnit<UnitType>::GameUnit( int /*dummy*/ ) : sparkle_accum(0) {
 		this->Unit::Init();
 }
 
@@ -131,12 +131,12 @@ VSSprite * GameUnit<UnitType>::getHudImage () const{
 }
 
 template <class UnitType>
-GameUnit<UnitType>::GameUnit (std::vector <Mesh *>& meshes, bool SubU, int fact):UnitType( meshes, SubU, fact) {
+GameUnit<UnitType>::GameUnit (std::vector <Mesh *>& meshes, bool SubU, int fact):UnitType( meshes, SubU, fact),sparkle_accum(0) {
 
 }
 extern void update_ani_cache();
 template <class UnitType>
-GameUnit<UnitType>::GameUnit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml) {
+GameUnit<UnitType>::GameUnit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml) : sparkle_accum(0) {
 	Unit::Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber, netxml);
 }
 
@@ -195,11 +195,11 @@ template <class UnitType>
 void GameUnit<UnitType>::UpdateHudMatrix(int whichcam) {
   Matrix m;
   Matrix ctm=this->cumulative_transformation_matrix;
-  if (0) {// FIXME? help! I think the ctm should hold this info unless we're in a planet--which no longer exists
+  /*if (this->planet) {
     Transformation ct (linear_interpolate(this->prev_physical_state, this->curr_physical_state, interpolation_blend_factor));  
     ct.to_matrix (m);
     ctm=m;
-  }
+  }*/
   Vector q (ctm.getQ());
   Vector r (ctm.getR());
   Vector tmp;
@@ -212,6 +212,10 @@ extern bool flickerDamage (Unit * un, float hullpercent);
 extern int cloakVal (int cloakint, int cloakminint, int cloakrateint, bool cloakglass); //short fix?
 template <class UnitType>
 void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
+  static const void* rootunit=NULL;
+
+  if (rootunit==NULL) rootunit=(const void*)this;
+
   unsigned int i;
   Matrix mat(mato);
   if (this->graphicOptions.FaceCamera){
@@ -239,7 +243,8 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
 #endif 
 				   );
       if (d) {  //d can be used for level of detail 
-	this->meshdata[i]->DrawNow(lod,false,mat,cloak);//cloakign and nebula
+          //this->meshdata[i]->DrawNow(lod,false,mat,cloak);//cloakign and nebula
+          this->meshdata[i]->Draw(lod,mat,d,cloak);
       }
     }
     un_fiter iter =this->SubUnits.fastIterator();
@@ -285,12 +290,28 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
              MultMatrix(ct,mat,mountmat);
              ScaleMatrix(ct,Vector(mahnt->xyscale,mahnt->xyscale,mahnt->zscale));
              gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));
-             gun->DrawNow(lod,0,ct,1,cloak);//cloakign and nebula
+
+             //gun->DrawNow(lod,0,ct,1,cloak);//cloakign and nebula
+             float d = GFXSphereInFrustum(mountLocation.position,
+                 gun->rSize()
+#ifdef VARIABLE_LENGTH_PQR
+                 *SizeScaleFactor
+#endif 
+                 );
+             if (d) gun->Draw(lod,ct,d,cloak);
+
              if (mahnt->type->gun1){
                gun = mahnt->type->gun1;
                gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));
 
-               gun->DrawNow(lod,0,ct,1,cloak);//cloakign and nebula			  
+               //gun->DrawNow(lod,0,ct,1,cloak);//cloakign and nebula			  
+               float d = GFXSphereInFrustum(mountLocation.position,
+                   gun->rSize()
+#ifdef VARIABLE_LENGTH_PQR
+                   *SizeScaleFactor
+#endif 
+                   );
+               if (d) gun->Draw(lod,ct,d,cloak);
              }
              glDisable(GL_NORMALIZE);
            }
@@ -302,25 +323,35 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
   Vector velocity = this->GetVelocity();
   if (halos.ShouldDraw (mat,velocity,accel,maxaccel,cmas)) 
     halos.Draw(mat,Scale,cloak,0, this->GetHullPercent(),velocity,accel,maxaccel,cmas,this->faction);
+
+  if (rootunit==(const void*)this) {
+      Mesh::ProcessZFarMeshes();
+      Mesh::ProcessUndrawnMeshes();
+      rootunit=NULL;
+  }
 }
+
+extern double calc_blend_factor(double frac, int priority, int when_it_will_be_simulated, int cur_simulation_frame);
 template <class UnitType>
 void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parentMatrix)
 {
   //Quick shortcut for camera setup phase 
   bool myparent = (this==_Universe->AccessCockpit()->GetParent());
-  bool ormygrampa = myparent||(_Universe->AccessCockpit()->GetParent()&&(this==_Universe->AccessCockpit()->GetParent()->owner));
+  /*bool ormygrampa = myparent||(_Universe->AccessCockpit()->GetParent()&&(this==_Universe->AccessCockpit()->GetParent()->owner));
   bool topparent = _Universe->AccessCockpit()->GetParent()&&(_Universe->AccessCockpit()->GetParent()->owner == NULL);
   if (cam_setup_phase&&!ormygrampa&&(topparent||UnitType::SubUnits.empty()))
-      return;
+      return;*/
 
-  this->cumulative_transformation = linear_interpolate(this->prev_physical_state, this->curr_physical_state, interpolation_blend_factor);
   Matrix *ctm;
   Matrix invview;
   Transformation * ct;
-  this->cumulative_transformation.Compose(parent, parentMatrix);
+  if (cam_setup_phase) {
+      this->cumulative_transformation = linear_interpolate(this->prev_physical_state, this->curr_physical_state, interpolation_blend_factor);
+      this->cumulative_transformation.Compose(parent, parentMatrix);
+      this->cumulative_transformation.to_matrix(this->cumulative_transformation_matrix);
+  }
   ctm =&this->cumulative_transformation_matrix;
   ct = &this->cumulative_transformation;
-  this->cumulative_transformation.to_matrix(this->cumulative_transformation_matrix);
   if (this->graphicOptions.FaceCamera==1) {
 	  Vector p,q,r;
 	  QVector pos (ctm->p);
@@ -348,14 +379,17 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
   if ((this->hull <0)&&(!cam_setup_phase)) {
     Explode(true, GetElapsedTime());
   }
-  float damagelevel=this->hull/this->maxhull;
-  unsigned char chardamage=(char)(damagelevel*255);
-  chardamage=255-chardamage;
+  float damagelevel;
+  unsigned char chardamage;
+  if (!cam_setup_phase) {
+      damagelevel=this->hull/this->maxhull;
+      chardamage=(255 - (unsigned char)(damagelevel*255));
+  }
   bool On_Screen=false;
-  float minmeshradius = (_Universe->AccessCamera()->GetVelocity().Magnitude()+this->Velocity.Magnitude())*SIMULATION_ATOM;
-  float numKeyFrames = this->graphicOptions.NumAnimationPoints;
   if ((!(this->invisible&UnitType::INVISUNIT))&&((!(this->invisible&UnitType::INVISCAMERA))||(!myparent))) {
       if (!cam_setup_phase) {
+          float minmeshradius = (_Universe->AccessCamera()->GetVelocity().Magnitude()+this->Velocity.Magnitude())*SIMULATION_ATOM;
+          unsigned int numKeyFrames = this->graphicOptions.NumAnimationPoints;
           for (i=0;i<this->meshdata.size();i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
               if (this->meshdata[i]==NULL) 
                   continue;
@@ -398,12 +432,12 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
                       unsigned int numAnimFrames=0;
                       if (this->meshdata[i]->getFramesPerSecond()&&
                           (numAnimFrames=this->meshdata[i]->getNumAnimationFrames(""))) {
-                          float currentprogress=floor(this->meshdata[i]->getCurrentFrame()*numKeyFrames/numAnimFrames);
+                          float currentprogress=floor(this->meshdata[i]->getCurrentFrame()*numKeyFrames/(float)numAnimFrames);
                           if (numKeyFrames&&
-                              floor(currentFrame*numKeyFrames/numAnimFrames)   !=
+                              floor(currentFrame*numKeyFrames/(float)numAnimFrames)   !=
                               currentprogress) {
                               this->graphicOptions.Animating=0;
-                              this->meshdata[i]->setCurrentFrame(.1+currentprogress*numAnimFrames/numKeyFrames);
+                              this->meshdata[i]->setCurrentFrame(.1+currentprogress*numAnimFrames/(float)numKeyFrames);
                           }else if (!this->graphicOptions.Animating) {
                               this->meshdata[i]->setCurrentFrame(currentFrame);//dont' budge
                           }
@@ -415,11 +449,23 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
           }
       }
       
-      un_fiter iter =this->SubUnits.fastIterator();
-      Unit * un;
-      while ((un = iter.current())) {
-          (un)->Draw (*ct,*ctm);
-          iter.advance();
+      {
+          un_fiter iter =this->SubUnits.fastIterator();
+          Unit * un;
+          double backup = interpolation_blend_factor;
+          int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
+          while ((un = iter.current())) {
+              float backup=SIMULATION_ATOM;
+              if (this->sim_atom_multiplier&&un->sim_atom_multiplier)
+                  SIMULATION_ATOM = SIMULATION_ATOM*un->sim_atom_multiplier/this->sim_atom_multiplier;
+
+              interpolation_blend_factor=calc_blend_factor(saved_interpolation_blend_factor,un->sim_atom_multiplier,un->cur_sim_queue_slot,cur_sim_frame);
+              (un)->Draw (*ct,*ctm);
+              iter.advance();
+
+              SIMULATION_ATOM = backup;
+          }
+          interpolation_blend_factor = backup;
       }
   
       if(this->selected) {
@@ -513,18 +559,25 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 		unsigned int switcher=(damagelevel>.8)?1:
 			(damagelevel>.6)?2:(damagelevel>.4)?3:(damagelevel>.2)?4:5;
 		const unsigned long thus=(unsigned long)this;
-		switch (switcher) {
-		case 5:
-			LaunchOneParticle(*ctm,this->GetVelocity(),((long)this)+165,this,damagelevel,this->faction);
-		case 4:
-			LaunchOneParticle(*ctm,this->GetVelocity(),((long)this)+47,this,damagelevel,this->faction);
-		case 3:
-			LaunchOneParticle(*ctm,this->GetVelocity(),((long)this)+61,this,damagelevel,this->faction);
-		case 2:
-			LaunchOneParticle(*ctm,this->GetVelocity(),((long)this)+65537,this,damagelevel,this->faction);			
-		default:
-			LaunchOneParticle(*ctm,this->GetVelocity(),((long)this)+257,this,damagelevel,this->faction);
-		}
+
+        static float sparklerate = XMLSupport::parse_float ( vs_config->getVariable("graphics","sparklerate","5") );
+        sparkle_accum += GetElapsedTime()*sparklerate;
+        int spawn=(int)(sparkle_accum);
+        sparkle_accum -= spawn;
+        while (spawn-- > 0) {
+		    switch (switcher) {
+		    case 5:
+			    LaunchOneParticle(*ctm,this->GetVelocity(),((long)this)+165,this,damagelevel,this->faction);
+		    case 4:
+			    LaunchOneParticle(*ctm,this->GetVelocity(),((long)this)+47,this,damagelevel,this->faction);
+		    case 3:
+			    LaunchOneParticle(*ctm,this->GetVelocity(),((long)this)+61,this,damagelevel,this->faction);
+		    case 2:
+			    LaunchOneParticle(*ctm,this->GetVelocity(),((long)this)+65537,this,damagelevel,this->faction);			
+		    default:
+			    LaunchOneParticle(*ctm,this->GetVelocity(),((long)this)+257,this,damagelevel,this->faction);
+		    }
+        }
 	}
   }
 }

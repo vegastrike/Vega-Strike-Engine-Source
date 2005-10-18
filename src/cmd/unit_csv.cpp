@@ -15,7 +15,7 @@
 #include "unit_csv.h"
 #include <algorithm>
 #define VS_PI 3.1415926535897931
-CSVRow LookupUnitRow(string unitname,string faction) {
+CSVRow LookupUnitRow(const string &unitname, const string &faction) {
   string hashname=unitname+"__"+faction;
   unsigned int where; //gets munged
   for (vector<CSVTable*>::reverse_iterator i=unitTables.rbegin();i!=unitTables.rend();++i) {
@@ -94,7 +94,7 @@ static void UpgradeUnit (Unit * un, std::string upgrades) {
 }
 
 
-void AddMeshes(std::vector<Mesh*>&xmeshes, float&randomstartframe, float&randomstartseconds, float unitscale, std::string meshes,int faction,Flightgroup *fg,vector<unsigned int> *counts){
+void AddMeshes(std::vector<Mesh*>&xmeshes, float&randomstartframe, float&randomstartseconds, float unitscale, const std::string &meshes,int faction,Flightgroup *fg,vector<unsigned int> *counts){
   string::size_type where,when,wheresf,wherest,ofs=0;
   if (counts) counts->clear();
   {   
@@ -574,10 +574,15 @@ float getFuelConversion(){
 }
 
 #define LOADROW_OPTIMIZER 0x348299ab
+#define FORCE_OPTIMIZER 1 /*After all, it's always used in the end*/
 #define OPTIMIZER_INDEX(Variable) OPTIDX_##Variable
 #define INIT_OPTIMIZER(keys,Variable) OPTIMIZER_INDEX(Variable) = (keys.push_back(#Variable),(keys.size()-1))
 #define DEF_OPTIMIZER(Variable) static unsigned int OPTIMIZER_INDEX(Variable) = CSVTable::optimizer_undefined;
-#define OPTIM_GET(row,table,variable) (use_optimizer?(((OPTIMIZER_INDEX(variable)==CSVTable::optimizer_undefined) || (table->optimizer_indexes[OPTIMIZER_INDEX(variable)]==CSVTable::optimizer_undefined))?std::string(""):(table->optimizer_indexes[OPTIMIZER_INDEX(variable)]<row.size()?row[table->optimizer_indexes[OPTIMIZER_INDEX(variable)]]:row[#variable])):row[#variable])
+#if FORCE_OPTIMIZER
+#define OPTIM_GET(row,table,variable) ((table->optimizer_indexes[OPTIMIZER_INDEX(variable)]==CSVTable::optimizer_undefined)?std::string(""):row[table->optimizer_indexes[OPTIMIZER_INDEX(variable)]])
+#else
+#define OPTIM_GET(row,table,variable) (use_optimizer?(((OPTIMIZER_INDEX(variable)==CSVTable::optimizer_undefined) || (table->optimizer_indexes[OPTIMIZER_INDEX(variable)]==CSVTable::optimizer_undefined))?std::string(""):row[table->optimizer_indexes[OPTIMIZER_INDEX(variable)]]):row[#variable])
+#endif
 
 void Unit::LoadRow(CSVRow &row, string modification, string * netxml) {
   CSVTable *table = row.getParent();
@@ -1033,7 +1038,7 @@ shield.range[3].   thetamax=r225;
 shield.range[3].   rhomin=-r90;
 shield.range[3].   rhomax=r90;
 
-  }else {
+  }else if (shieldcount==2) {
     shield.number=2;
 
     shield.shield.cur[0]=shield.shield.max[0]=four.shield2fb.frontmax;
@@ -1048,6 +1053,9 @@ shield.range[1].   thetamax=r270;
 shield.range[1].   rhomin=-r90;
 shield.range[1].   rhomax=r90;
 
+  } else {
+    //No shields
+    shield.number=0;
   }
   for (iter =0;iter<shieldcount;++iter) {
     std::string shieldname= "Shield_"+XMLSupport::tostring(iter);    
@@ -1167,8 +1175,12 @@ shield.range[1].   rhomax=r90;
   }
   
   this->image->explosion_type = OPTIM_GET(row,table,Explosion);
-  if (image->explosion_type.length())
+  if (image->explosion_type.length()) {
     cache_ani (image->explosion_type);
+  } else {
+    static std::string expani = vs_config->getVariable ("graphics","explosion_animation","explosion_orange.ani");
+    cache_ani (expani);
+  }
   AddLights(this,xml,OPTIM_GET(row,table,Light));
 
   xml.shieldmesh_str = OPTIM_GET(row,table,Shield_Mesh);
@@ -1507,11 +1519,10 @@ string Unit::WriteUnitString () {
             unit["Shield_Front_Bottom_Left"]=tos(shield.shield4fbrl.leftmax);            
             break;
           case 2:
-          default:
-            //assume 2 shields
             unit["Shield_Front_Top_Right"]=tos(shield.shield2fb.frontmax);            
             unit["Shield_Back_Top_Right"]=tos(shield.shield2fb.backmax);
             break;
+          // NOTE: otherwise, no shields
           }
         }
         unit["Shield_Leak"]=tos(shield.leak/100.0);

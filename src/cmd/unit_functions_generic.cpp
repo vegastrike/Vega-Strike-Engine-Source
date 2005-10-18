@@ -15,6 +15,7 @@
 // Those functions are generic ones
 
 // From unit.cpp
+double saved_interpolation_blend_factor;
 double interpolation_blend_factor;
 bool cam_setup_phase=false;
 extern const char * DamagedCategory;
@@ -92,7 +93,6 @@ void SetShieldZero(Unit * un) {
             un->shield.shield4fbrl.right=0;
           break;
         case 2:
-        default:
           un->shield.shield2fb.front=un->shield.shield2fb.back=0;
           break;
         }

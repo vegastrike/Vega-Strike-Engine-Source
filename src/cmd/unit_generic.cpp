@@ -633,6 +633,9 @@ void Unit::Init()
   location=null_collide_map.begin();
   specInterdiction=0;
   sim_atom_multiplier=1;
+  cur_sim_queue_slot=rand()%SIM_QUEUE_SIZE;
+  last_processed_sqs=0;
+  do_subunit_scheduling=false;
   /*
   static std::map <Unit *, bool> m;
   if (m[this]) {
@@ -725,7 +728,7 @@ void Unit::Init()
   shield.shield2fb.front=shield.shield2fb.back=shield.shield2fb.frontmax=shield.shield2fb.backmax=armor.frontrighttop=armor.backrighttop=armor.frontlefttop=armor.backlefttop=armor.frontrightbottom=armor.backrightbottom=armor.frontleftbottom=armor.backleftbottom=0;
   hull=1; //10;
   maxhull=1; //10;
-  shield.number=2;
+  shield.number=0;
   
   image->explosion=NULL;
   image->timeexplode=0;
@@ -798,6 +801,7 @@ void Unit::Init()
       image->cockpit_damage[damageiterator]=1;
     }
   }
+
   /*
   yprrestricted=0;
   ymin = pmin = rmin = -PI;
@@ -1041,7 +1045,6 @@ void Unit::calculate_extent(bool update_collide_queue) {
     radial_size = tmpmax(tmpmax(corner_max.i,corner_max.j),corner_max.k) ;
   }
 }
-
 
 StarSystem * Unit::getStarSystem () {
 
@@ -1393,10 +1396,10 @@ void disableSubUnits (Unit * uhn) {
         }
 
 }
-un_iter Unit::getSubUnits () {
+inline un_iter Unit::getSubUnits () {
   return SubUnits.createIterator();
 }
-un_kiter Unit::viewSubUnits() const{
+inline un_kiter Unit::viewSubUnits() const{
   return SubUnits.constIterator();
 }
 
@@ -1675,6 +1678,12 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   static float VELOCITY_MAX=XMLSupport::parse_float(vs_config->getVariable ("physics","velocity_max","10000"));
   static float SPACE_DRAG=XMLSupport::parse_float(vs_config->getVariable ("physics","unit_space_drag","0.000000"));
   static float EXTRA_CARGO_SPACE_DRAG=XMLSupport::parse_float(vs_config->getVariable ("physics","extra_space_drag_for_cargo","0.005"));
+
+  //Save information about when this happened
+  unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
+  this->last_processed_sqs = cur_sim_frame; //Well, wasn't skipped actually, but...
+  this->cur_sim_queue_slot = (cur_sim_frame+this->sim_atom_multiplier)%SIM_QUEUE_SIZE;
+
   if (maxhull < 0)
   {
     //if (this->owner)
@@ -1726,6 +1735,15 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   if (lastframe) {
     if (!(docked&(DOCKED|DOCKED_INSIDE))) 
       prev_physical_state = curr_physical_state;//the AIscript should take care
+#ifdef FIX_TERRAIN
+    if (planet) {
+      if (!planet->dirty) {
+	SetPlanetOrbitData (NULL);
+      }else {
+	planet->pps = planet->cps;
+      }
+    }
+#endif
   }
 
   if (isUnit()==PLANETPTR) {
@@ -1733,15 +1751,21 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   } else {
     if (resolveforces) {
       net_accel = ResolveForces (trans,transmat);//clamp velocity
-      if (fabs (Velocity.i)>VELOCITY_MAX) {
-	Velocity.i = copysign (VELOCITY_MAX,Velocity.i);
-      }
-      if (fabs (Velocity.j)>VELOCITY_MAX) {
-	Velocity.j = copysign (VELOCITY_MAX,Velocity.j);
-      }
-      if (fabs (Velocity.k)>VELOCITY_MAX) {
-	Velocity.k = copysign (VELOCITY_MAX,Velocity.k);
-      }
+
+      if (Velocity.i>VELOCITY_MAX)
+          Velocity.i=VELOCITY_MAX; else 
+      if (Velocity.i<-VELOCITY_MAX)
+          Velocity.i=-VELOCITY_MAX;
+
+      if (Velocity.j>VELOCITY_MAX)
+          Velocity.j=VELOCITY_MAX; else 
+      if (Velocity.j<-VELOCITY_MAX)
+          Velocity.j=-VELOCITY_MAX;
+
+      if (Velocity.k>VELOCITY_MAX)
+          Velocity.k=VELOCITY_MAX; else 
+      if (Velocity.k<-VELOCITY_MAX)
+          Velocity.k=-VELOCITY_MAX;
     }
   } 
   float difficulty;
@@ -1751,7 +1775,8 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 
   if (EXTRA_CARGO_SPACE_DRAG > 0)
   {
-	  if ((this->faction == FactionUtil::GetFaction("upgrades")) || (this->name=="eject") || (this->name=="Pilot"))
+      static int upgfac = FactionUtil::GetFaction("upgrades");
+	  if ((this->faction == upgfac) || (this->name=="eject") || (this->name=="Pilot"))
          Velocity = Velocity * (1 - EXTRA_CARGO_SPACE_DRAG);
   }
 
@@ -1766,9 +1791,8 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
       Vector TargetPos (InvTransform (cumulative_transformation_matrix,(target->Position()).Cast())); 
       dist_sqr_to_target = TargetPos.MagnitudeSquared(); 
       TargetPos.Normalize(); 
-      if (TargetPos.Dot(Vector(0,0,1))>computer.radar.lockcone) {
-	increase_locking=true;
-      }
+      if (TargetPos.k>computer.radar.lockcone)
+          increase_locking=true;
     }
   }
   static string LockingSoundName = vs_config->getVariable ("unitaudio","locking","locking.wav");
@@ -1900,32 +1924,68 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   }
   bool dead=true;
 
-  if (!SubUnits.empty()) {
-    Unit * su;
-    UnitCollection::UnitIterator iter=getSubUnits();
-    while ((su=iter.current())) {
-      su->UpdatePhysics(cumulative_transformation,cumulative_transformation_matrix,cumulative_velocity,lastframe,uc,superunit); 
-      su->cloaking = (unsigned int) cloaking; //short fix
-      if (hull<0) {
-	su->Target(NULL);
-		UnFire();//don't want to go off shooting while your body's splitting everywhere
-		//DEPRECATEDsu->hull-=SIMULATION_ATOM;
-      }
-      iter.advance();
-      //    dead &=(subunits[i]->hull<0);
-    }
-  }
+  UpdateSubunitPhysics(cumulative_transformation,cumulative_transformation_matrix,cumulative_velocity,lastframe,uc,superunit);
+
   // Really kill the unit only in non-networking or on server side
   if ((Network==NULL || SERVER) && hull<0) {
     dead&= (image->explosion==NULL);    
     if (dead)
       Kill();
   }
-  if ((!isSubUnit())&&(!killed)&&(!(docked&DOCKED_INSIDE))) {
-    //only do it in Unit::CollideAll UpdateCollideQueue();
-  }
+  //only do it in Unit::CollideAll 
+  /*if ((!isSubUnit())&&(!killed)&&(!(docked&DOCKED_INSIDE))) {
+    UpdateCollideQueue();
+  }*/
 }
 
+void Unit::UpdateSubunitPhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc, Unit * superunit) {
+  if (!SubUnits.empty()) {
+    Unit * su;
+    UnitCollection::UnitIterator iter=getSubUnits();
+
+    float backup=SIMULATION_ATOM;
+    float basesimatom=(this->sim_atom_multiplier?backup/(float)this->sim_atom_multiplier:backup);
+    unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
+    while ((su=iter.current())) {
+        if (this->sim_atom_multiplier&&su->sim_atom_multiplier) {
+            //This ugly thing detects skipped frames.
+            //This shouldn't happen during normal execution, as the interpolation will not be correct
+            //when outside the expected range (that is, if the target queue slot is skipped).
+            //BUT... this allows easy subunit simulation scattering by initializing cur_sim_frame
+            //with random data.
+            if (  ((su->last_processed_sqs<su->cur_sim_queue_slot)&&(cur_sim_frame>=su->cur_sim_queue_slot)) //Normal crossing
+                || (su->last_processed_sqs==cur_sim_frame) //Full round trip
+                ||((su->last_processed_sqs>cur_sim_frame)&&((su->cur_sim_queue_slot<=cur_sim_frame)||(su->last_processed_sqs<su->cur_sim_queue_slot))) //Incomplete round trip - but including target frame
+                ) {
+                if (do_subunit_scheduling) {
+                    int priority=UnitUtil::getPhysicsPriority(su);
+                    priority = (priority+rand()%priority)/2; // Add some scattering
+                    if (priority<1) priority=1;
+                    su->sim_atom_multiplier = this->sim_atom_multiplier*priority;
+                    if (su->sim_atom_multiplier > SIM_QUEUE_SIZE)
+                        su->sim_atom_multiplier = (SIM_QUEUE_SIZE/su->sim_atom_multiplier)*su->sim_atom_multiplier;
+                    if (su->sim_atom_multiplier < this->sim_atom_multiplier)
+                        su->sim_atom_multiplier = this->sim_atom_multiplier;
+                } else su->sim_atom_multiplier = this->sim_atom_multiplier;
+
+                SIMULATION_ATOM = basesimatom*(float)su->sim_atom_multiplier;
+                Unit::UpdateSubunitPhysics(su,cumulative_transformation,cumulative_transformation_matrix,cumulative_velocity,lastframe,uc,superunit); 
+            }
+        }
+        iter.advance();
+    }
+    SIMULATION_ATOM = backup;
+  }
+}
+void Unit::UpdateSubunitPhysics(Unit* subunit, const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool lastframe, UnitCollection *uc, Unit * superunit) {
+    subunit->UpdatePhysics(cumulative_transformation,cumulative_transformation_matrix,cumulative_velocity,lastframe,uc,superunit); 
+    subunit->cloaking = (unsigned int) cloaking; //short fix
+    if (hull<0) {
+        subunit->Target(NULL);
+        UnFire();//don't want to go off shooting while your body's splitting everywhere
+        //DEPRECATEDsu->hull-=SIMULATION_ATOM;
+    }
+}
 void Unit::AddVelocity(float difficulty) {
    static float warprampuptime=XMLSupport::parse_float (vs_config->getVariable ("physics","warprampuptime","5")); // for the heck of it.    
    static float warprampdowntime=XMLSupport::parse_float (vs_config->getVariable ("physics","warprampdowntime","0.5"));     
@@ -1958,7 +2018,7 @@ void Unit::AddVelocity(float difficulty) {
              findObjects(_Universe->activeStarSystem(),this->location,&locatespec);
              testthis=locatespec.retval.unit;
            }
-	   for (un_iter iter = _Universe->activeStarSystem()->gravitationalUnits().createIterator();(planet=*iter)||testthis;++iter) {
+	   for (un_fiter iter = _Universe->activeStarSystem()->gravitationalUnits().fastIterator();(planet=*iter)||testthis;++iter) if (!planet||!planet->Killed()) {
 		 if (planet==NULL) {
                    planet=testthis;
                    testthis=NULL;
@@ -2856,36 +2916,49 @@ void Unit::RegenShields () {
   int rechargesh=1; // used ... oddly
   float maxshield=totalShieldEnergyCapacitance(shield);
   bool velocity_discharge=false;
+  float rec=0;
   
+  // Reactor energy
   if (!energy_before_shield) {
     RechargeEnergy();
   }
-// GAHHH reactor in units of 100MJ, shields in units of VSD=5.4MJ to make 1MJ of shield use 1/shieldenergycap MJ
-  if(!graphicOptions.InWarp){
-    energy-=shield.recharge*VSD/(100*(shield.efficiency?shield.efficiency:1))/shieldenergycap*shield.number*shield_maintenance_cost*SIMULATION_ATOM*((apply_difficulty_shields)?g_game.difficulty:1);
-	if(energy<0){
-		velocity_discharge=true;
-		energy=0;
-	}
+
+
+  // Shield energy drain
+  if (shield.number) {
+      // GAHHH reactor in units of 100MJ, shields in units of VSD=5.4MJ to make 1MJ of shield use 1/shieldenergycap MJ
+      if(!graphicOptions.InWarp){
+        energy-=shield.recharge*VSD/(100*(shield.efficiency?shield.efficiency:1))/shieldenergycap*shield.number*shield_maintenance_cost*SIMULATION_ATOM*((apply_difficulty_shields)?g_game.difficulty:1);
+	    if(energy<0){
+		    velocity_discharge=true;
+		    energy=0;
+	    }
+      }
+      rec = (velocity_discharge)?0:((shield.recharge*VSD/100*SIMULATION_ATOM*shield.number/shieldenergycap)>energy)?(energy*shieldenergycap*100/VSD/shield.number):shield.recharge*SIMULATION_ATOM;
+      if (apply_difficulty_shields) {
+        if (!_Universe->isPlayerStarship(this)) {
+          rec*=g_game.difficulty;
+        }else {
+          rec*=g_game.difficulty;//sqrtf(g_game.difficulty);
+        }
+      }
+      /*
+      if ((computer.max_combat_ab_speed>4)&&(GetVelocity().MagnitudeSquared()>(computer.max_combat_ab_speed*speed_leniency*computer.max_combat_ab_speed*speed_leniency))) {
+          rec=0;
+          velocity_discharge=true;
+      }
+      */
+      if (graphicOptions.InWarp) {
+          rec=0;
+          velocity_discharge=true;
+      }
+      if (GetNebula()!=NULL) {
+        static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
+        rec *=nebshields;
+      }
   }
-  float rec = (velocity_discharge)?0:((shield.recharge*VSD/100*SIMULATION_ATOM*shield.number/shieldenergycap)>energy)?(energy*shieldenergycap*100/VSD/shield.number):shield.recharge*SIMULATION_ATOM;
-  if (apply_difficulty_shields) {
-    if (!_Universe->isPlayerStarship(this)) {
-      rec*=g_game.difficulty;
-    }else {
-      rec*=g_game.difficulty;//sqrtf(g_game.difficulty);
-    }
-  }
-  /*
-  if ((computer.max_combat_ab_speed>4)&&(GetVelocity().MagnitudeSquared()>(computer.max_combat_ab_speed*speed_leniency*computer.max_combat_ab_speed*speed_leniency))) {
-      rec=0;
-      velocity_discharge=true;
-  }
-  */
-  if (graphicOptions.InWarp) {
-      rec=0;
-      velocity_discharge=true;
-  }
+
+  //ECM energy drain
   if ((image->ecm>0)) {
     static float ecmadj = XMLSupport::parse_float(vs_config->getVariable ("physics","ecm_energy_cost",".05"));
     float sim_atom_ecm = ecmadj * image->ecm*SIMULATION_ATOM;
@@ -2895,13 +2968,10 @@ void Unit::RegenShields () {
       energy=0;
     }
   }
-  if (GetNebula()!=NULL) {
-    static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
-    rec *=nebshields;
-  }
+
+  //Shield regeneration
   switch (shield.number) {
   case 2:
-
     shield.shield2fb.front+=rec;
     shield.shield2fb.back+=rec;
     if (shield.shield2fb.front>shield.shield2fb.frontmax) {
@@ -2960,24 +3030,30 @@ void Unit::RegenShields () {
 	rec=rec*8/shieldenergycap*VSD/100;
     break;
   }
-  if (rechargesh==0){
-    energy-=rec;
+  if (shield.number) {
+      if (rechargesh==0){
+        energy-=rec;
+      }
+      if (shields_require_power) {
+	    maxshield=0;
+      }
+      if (max_shield_lowers_recharge) {
+        energy-=max_shield_lowers_recharge*SIMULATION_ATOM*maxshield*VSD/(100*(shield.efficiency?shield.efficiency:1));
+      }
+      if (!max_shield_lowers_capacitance) {
+        maxshield=0;
+      }
   }
-  if (shields_require_power) {
-	maxshield=0;
-  }
-  if (max_shield_lowers_recharge) {
-     energy-=max_shield_lowers_recharge*SIMULATION_ATOM*maxshield*VSD/(100*(shield.efficiency?shield.efficiency:1));
-  }
-  if (!max_shield_lowers_capacitance) {
-    maxshield=0;
-  }
+
+  // Reactor energy
   if (energy_before_shield) {
     RechargeEnergy();
   }
+
+
+  // Final energy computations
   float menergy = maxenergy;
-  
-  if (menergy-maxshield<low_power_mode) {
+  if (shield.number&&(menergy-maxshield<low_power_mode)) {
 	  menergy=maxshield+low_power_mode;
 	  if (_Universe->isPlayerStarship(this))
 		  if (rand()<.00005*RAND_MAX)
@@ -2994,6 +3070,7 @@ void Unit::RegenShields () {
 	  }
   }
 
+  //NOTE: !shield.number => maxshield==0
   if (menergy>maxshield) {
     if (energy>menergy-maxshield) {//allow warp caps to absorb xtra power
       float excessenergy = energy - (menergy-maxshield);
@@ -3666,6 +3743,11 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
   ClearMounts();
 
   if (docked&(DOCKING_UNITS)) {
+    static float survival = XMLSupport::parse_float( vs_config->getVariable("physics","survival_chance_on_base_death","0.1") );
+    static float player_survival = XMLSupport::parse_float( vs_config->getVariable("physics","player_survival_chance_on_base_death","1.0") );
+    static int i_survival = (RAND_MAX*survival);
+    static int i_player_survival = (RAND_MAX*player_survival);
+
     vector <Unit *> dockedun;
     unsigned int i;
     for (i=0;i<image->dockedunits.size();i++) {
@@ -3675,6 +3757,8 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
     }
     while (!dockedun.empty()) {
       dockedun.back()->UnDock(this);
+      if (rand() <= (UnitUtil::isPlayerStarship(dockedun.back())?i_player_survival:i_survival))
+          dockedun.back()->Kill();
       dockedun.pop_back();
     }
   }
@@ -3747,7 +3831,9 @@ void Unit::UnRef() {
 #endif
   ucref--;
   if (killed&&ucref==0) {
+#ifdef CONTAINER_DEBUG
     deletedUn.Put ((long)this,this);
+#endif
     Unitdeletequeue.push_back(this);//delete
 #ifdef DESTRUCTDEBUG
     VSFileSystem::vs_fprintf (stderr,"%s 0x%x - %d\n",name.c_str(),this,Unitdeletequeue.size());
@@ -4158,7 +4244,6 @@ if (pnt.i>0) {
 
     break;
   case 4:
-  default:
     if (fabs(pnt.k)>fabs (pnt.i)) {
       if (pnt.k>0) {
 	return shield.shield4fbrl.front>shieldmin;
@@ -4172,6 +4257,8 @@ if (pnt.i>0) {
 	return shield.shield4fbrl.right>shieldmin;
       }
     }
+    return false;
+  default:
     return false;
   }
 }
@@ -5683,19 +5770,21 @@ std::set<std::string> GetListOfDowngrades () {
   return retval;
 }
 
-static bool cell_has_recursive_data(string name, string faction, string key){
+static bool cell_has_recursive_data(const string &name, const string &faction, const string &key){
   string::size_type when;
   bool retval=false;
-  string upgrades=UniverseUtil::LookupUnitStat(name,faction,"Upgrades");
-  string::size_type ofs=0;
-  while (!retval&&((when=upgrades.find('{',ofs))!=string::npos)) {
-    string::size_type where = upgrades.find('}',when+1);
-    string upgrade = upgrades.substr(when+1,((where!=string::npos)?where-when-1:string::npos));
-	retval=retval||cell_has_recursive_data(upgrade,faction,key);
-    ofs = where+1;
-  }
   string lus = UniverseUtil::LookupUnitStat(name,faction,key);
-  retval=retval||((lus!="")&&(lus!="0"));
+  retval=((lus!="")&&(lus!="0"));
+  if (!retval) { // Big short circuit - avoids recursion
+      string upgrades=UniverseUtil::LookupUnitStat(name,faction,"Upgrades");
+      string::size_type ofs=0;
+      while (!retval&&((when=upgrades.find('{',ofs))!=string::npos)) {
+        string::size_type where = upgrades.find('}',when+1);
+        string upgrade = upgrades.substr(when+1,((where!=string::npos)?where-when-1:string::npos));
+	    retval=cell_has_recursive_data(upgrade,faction,key);
+        ofs = where+1;
+      }
+  }
   return retval;
 }
 

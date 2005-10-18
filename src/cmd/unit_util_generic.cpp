@@ -21,25 +21,21 @@ namespace UnitUtil {
                 static unsigned int capitaltypes=ROLES::getCapitalRoles();
                 return ((1<<(unsigned int)my_unit->combatRole())&capitaltypes)!=0;
 	}
-        static int jitter(int input) {
-          if (input<=2) return input;
-          int half=input/2;
-          int amt=rand()%(half*2);
-          int output=input-half+amt;
-          if (output>SIM_QUEUE_SIZE)
-            return SIM_QUEUE_SIZE;
-          return output;
-        }
 	int getPhysicsPriority (Unit*  un) {
-          return 1;
+        return 1;
+
 		float rad= un->rSize();
 		clsptr untype=un->isUnit();
 		if (_Universe->isPlayerStarship(un)||untype==MISSILEPTR)
 			return 1;
+        const int TOP_PRIORITY=1;
 		const int HIGH_PRIORITY=2;
 		const int MEDIUM_PRIORITY=3;
 		const int LOW_PRIORITY=4;
-                const int LOWEST_PRIORITY=SIM_QUEUE_SIZE;
+        const int ASTEROID_PARENT_PRIORITY=1;
+        const int ASTEROID_HIGH_PRIORITY=2;
+        const int ASTEROID_LOW_PRIORITY=24;
+        const int LOWEST_PRIORITY=SIM_QUEUE_SIZE;
 		const int NO_ENEMIES=SIM_QUEUE_SIZE;
 		const int NOT_VISIBLE_COMBAT_HIGH=7;
 		const int NOT_VISIBLE_COMBAT_MEDIUM=13;
@@ -68,32 +64,48 @@ namespace UnitUtil {
 		static int cargofac=FactionUtil::GetFaction("cargo");
 		static int upfac=FactionUtil::GetFaction("upgrades");
 		static int neutral=FactionUtil::GetFaction("neutral");
+
+        if (un->schedule_priority != Unit::scheduleDefault) {
+            //Asteroids do scheduling themselves within subunits, so...
+            //...only one caveat: units with their own internal scheduling
+            //must have constant priority... otherwise, big mess when changing
+            //priorities. I'll think of one way to overcome this...
+            switch (un->schedule_priority) {
+            case Unit::scheduleAField:
+                return ASTEROID_PARENT_PRIORITY;
+            case Unit::scheduleRoid:
+                if (dist<tooclose)
+                    return ASTEROID_HIGH_PRIORITY; else
+                    return ASTEROID_LOW_PRIORITY;
+            }
+        }
+
 		if (un->owner==getTopLevelOwner()||un->faction==cargofac||un->faction==upfac||un->faction==neutral) {
-                  if (dist<tooclose)
-                    return jitter(LOW_PRIORITY); else
-                      return jitter(LOWEST_PRIORITY);
+            if (dist<tooclose)
+                return LOW_PRIORITY; else
+                return LOWEST_PRIORITY;
 		}
 		Unit * targ = un->Target();
 		if (_Universe->isPlayerStarship(targ)) {
-			return jitter(HIGH_PRIORITY);
+			return HIGH_PRIORITY;
 		}
 		string obj = UnitUtil::getFgDirective(un);
 		if (!(obj.length()==0||(obj.length()>=1&&obj[0]=='b'))) {
-			return jitter(MEDIUM_PRIORITY);
+			return MEDIUM_PRIORITY;
 		}
 		if (dist<gun_range)
-			return jitter(MEDIUM_PRIORITY);
+			return MEDIUM_PRIORITY;
 		if (dist<missile_range)
-			return jitter(LOW_PRIORITY);
+			return LOW_PRIORITY;
 		if (targ){
 			float speed;
 			un->getAverageGunSpeed(speed,gun_range,missile_range);
 			double distance=UnitUtil::getDistance(un,targ);
 			if (distance<=gun_range)
-				return jitter(NOT_VISIBLE_COMBAT_HIGH);
+				return NOT_VISIBLE_COMBAT_HIGH;
 			if (distance<missile_range)
-				return jitter(NOT_VISIBLE_COMBAT_MEDIUM);
-			return jitter(NOT_VISIBLE_COMBAT_LOW);
+				return NOT_VISIBLE_COMBAT_MEDIUM;
+			return NOT_VISIBLE_COMBAT_LOW;
 		}
 		return NO_ENEMIES;
 	}

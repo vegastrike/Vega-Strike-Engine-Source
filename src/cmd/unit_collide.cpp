@@ -458,22 +458,23 @@ Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, Q
     return false;
 }
 
+inline float mysqr(float a) { return a*a; }
 
 bool Unit::Collide (Unit * target) {
+  //now first OF ALL make sure they're within bubbles of each other...
+  if ((Position()-target->Position()).MagnitudeSquared()>mysqr(radial_size+target->radial_size))
+    return false;
+
   clsptr targetisUnit=target->isUnit();
   clsptr thisisUnit=this->isUnit();
   static float NEBULA_SPACE_DRAG=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_space_drag","0.01"));
-  if ((targetisUnit==NEBULAPTR) && ((Position()-target->Position()).Magnitude() < radial_size+target->radial_size))
-	  this->Velocity = this->Velocity * (1 - NEBULA_SPACE_DRAG); // why? why not?
-//  if (target==this||((targetisUnit!=NEBULAPTR&&thisisUnit!=NEBULAPTR)&&(owner==target||target->owner==this||(owner!=NULL&&target->owner==owner))))
+  if (targetisUnit==NEBULAPTR)
+	  this->Velocity *= (1 - NEBULA_SPACE_DRAG); // why? why not?
   if (target==this||((targetisUnit!=NEBULAPTR&&thisisUnit!=NEBULAPTR)&&(owner==target||target->owner==this||(owner!=NULL&&target->owner==owner))))
     return false;
   if (targetisUnit==ASTEROIDPTR&&thisisUnit==ASTEROIDPTR)
     return false;
   //unit v unit? use point sampling?
-  //now first make sure they're within bubbles of each other...
-  if ((Position()-target->Position()).Magnitude()>radial_size+target->radial_size)
-    return false;
   if ((this->DockedOrDocking()&(DOCKED_INSIDE|DOCKED))||(target->DockedOrDocking()&(DOCKED_INSIDE|DOCKED))) {
     return false;
   }

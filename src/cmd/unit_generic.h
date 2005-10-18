@@ -23,7 +23,9 @@
 
 #ifndef _UNIT_H_
 #define _UNIT_H_
-//#define CONTAINER_DEBUG
+#ifdef VS_DEBUG
+#define CONTAINER_DEBUG
+#endif
 #ifdef CONTAINER_DEBUG
 #include "hashtable.h"
 class Unit;
@@ -154,7 +156,7 @@ class Mount {
      */ 
 	// Uses Sound Forcefeedback and other stuff
 	void PhysicsAlignedUnfire();
-	bool PhysicsAlignedFire (Unit * caller,const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, void *owner,  Unit *target, signed char autotrack, float trackingcone, CollideMap::iterator &hint);
+    bool PhysicsAlignedFire (Unit * caller,const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, void *owner,  Unit *target, signed char autotrack, float trackingcone, CollideMap::iterator &hint);
 	bool Fire (Unit * firer,void *owner, bool Missile=false, bool collide_only_with_target=false);
 };
 
@@ -164,7 +166,6 @@ struct UnitImages;
 struct UnitSounds;
 class Cargo;
 class Mesh;
-
 
 /**
  * Unit contains any physical object that may collide with something
@@ -509,7 +510,6 @@ public:
   Computer & GetComputerData () {return computer;}
   const Computer & ViewComputerData () const {return computer;}
 
-  // for scanning purposes
  public:
   void ActivateJumpDrive (int destination=0);
   void DeactivateJumpDrive ();
@@ -563,6 +563,14 @@ public:
   Transformation prev_physical_state;
   ///The state of the current physics frame to interpolate within
   Transformation curr_physical_state;
+  ///When will physical simulation occur
+  unsigned int cur_sim_queue_slot;
+  ///Used with subunit scheduling, to avoid the complex ickiness of having to synchronize scattered slots
+  unsigned int last_processed_sqs;
+  ///Whether or not to schedule subunits for deferred physics processing - if not, they're processed at the same time the parent unit is being processed
+  bool do_subunit_scheduling;
+  ///Does this unit require special scheduling?
+  enum schedulepriorityenum { scheduleDefault, scheduleAField, scheduleRoid } schedule_priority;
   ///number of meshes (each with separate texture) this unit has
   ///The cumulative (incl subunits parents' transformation)
   Matrix cumulative_transformation_matrix;
@@ -766,8 +774,10 @@ public:
   ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
 // Not needed here, so only in NetUnit and Unit classes
   void UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc, Unit * superunit);
-  void AddVelocity(float difficulty);
   virtual void UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
+  virtual void UpdateSubunitPhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc, Unit * superunit); //Useful if you want to override subunit processing, but not self-processing (Asteroids, people?)
+  virtual void UpdateSubunitPhysics(Unit* subunit, const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc, Unit * superunit); //A helper for those who override UpdateSubunitPhysics - Process one subunit (also, an easier way of overriding subunit processing uniformly)
+  void AddVelocity(float difficulty);
   ///Resolves forces of given unit on a physics frame
   virtual Vector ResolveForces (const Transformation &, const Matrix&);
   ///Returns the pqr oritnattion of the unit in world space
@@ -1073,7 +1083,6 @@ void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL); /
   bool Inside (const QVector &position, const float radius, Vector & normal, float &dist);
 // Uses collide and Universe stuff -> put in NetUnit
   void UpdateCollideQueue(StarSystem * ss, CollideMap::iterator hint);
-// Uses LineCollide stuff so only in NetUnit and Unit
 // Uses collision stuff so only in NetUnit and Unit classes
   bool querySphere (const QVector &pnt, float err)const;
   ///queries the sphere for beams (world space start,end)  size is added to by my_unit_radius

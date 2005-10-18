@@ -20,7 +20,9 @@
  */
 #ifndef _GAMEUNIT_H_
 #define _GAMEUNIT_H_
-//#define CONTAINER_DEBUG
+#ifdef VS_DEBUG
+#define CONTAINER_DEBUG
+#endif
 struct GFXColor;
 
 #include "gfx/matrix.h"
@@ -92,6 +94,8 @@ public:
 
 public:
   HaloSystem halos;
+  double sparkle_accum;
+
 protected:
   int nummesh()const {return ((int)this->meshdata.size())-1;}
 
