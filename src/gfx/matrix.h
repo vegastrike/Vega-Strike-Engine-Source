@@ -30,7 +30,7 @@ class Matrix {
   float r[9];
   QVector p;  
 
-  Matrix() : p(0,0,0) {
+  inline Matrix() : p(0,0,0) {
     r[0]=r[1]=r[2]=r[3]=r[4]=r[5]=r[6]=r[7]=r[8]=0;
   }
 
@@ -41,10 +41,10 @@ class Matrix {
   		r[i] = VSSwapHostFloatToLittle( r[i]);
 	p.netswap();
   }
-  Vector getR() const{return Vector (r[6],r[7],r[8]);}
-  Vector getQ() const{return Vector (r[3],r[4],r[5]);}
-  Vector getP() const{return Vector (r[0],r[1],r[2]);}
-  Matrix (float r0, float r1, float r2, float r3, float r4, float r5, float r6, float r7, float r8, QVector pos) {
+  inline Vector getR() const{return Vector (r[6],r[7],r[8]);}
+  inline Vector getQ() const{return Vector (r[3],r[4],r[5]);}
+  inline Vector getP() const{return Vector (r[0],r[1],r[2]);}
+  inline Matrix (float r0, float r1, float r2, float r3, float r4, float r5, float r6, float r7, float r8, QVector pos) {
     r[0]=r0;
     r[1]=r1;
     r[2]=r2;
@@ -56,7 +56,7 @@ class Matrix {
     r[8]=r8;
     p=pos;
   }
-  void InvertRotationInto (Matrix & result) const{
+  inline void InvertRotationInto (Matrix & result) const{
     result.r[0]=r[0];
     result.r[1]=r[3];
     result.r[2]=r[6];
@@ -67,7 +67,7 @@ class Matrix {
     result.r[7]=r[5];	
     result.r[8]=r[8];
   }
-  Matrix(const Vector &v1, const Vector &v2, const Vector &v3):p(0,0,0) {
+  inline Matrix(const Vector &v1, const Vector &v2, const Vector &v3):p(0,0,0) {
     this->r[0] = v1.i;
     this->r[1] = v1.j;
     this->r[2] = v1.k;
@@ -80,8 +80,8 @@ class Matrix {
     this->r[7] = v3.j;
     this->r[8] = v3.k;
   }
-  Matrix (const Vector &v1, const Vector & v2, const Vector & v3, const QVector & pos);
-  Matrix operator * (const Matrix &m2) const;
+  inline Matrix (const Vector &v1, const Vector & v2, const Vector & v3, const QVector & pos);
+  inline Matrix operator * (const Matrix &m2) const;
 };
 
 const Matrix identity_matrix (1,0,0,
