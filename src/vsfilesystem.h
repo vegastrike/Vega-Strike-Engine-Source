@@ -67,6 +67,7 @@ namespace VSFileSystem
 					};
 
 	enum VSVolumeType { VSFSNone, VSFSSplit, VSFSBig };
+    enum VSVolumeFormat { vfmtUNK, vfmtVSR, vfmtPK3 };
 
 	void	      DisplayType( VSFileType type);
 	void	      DisplayType( VSFileType type, std::ostream& ostr );
@@ -77,8 +78,9 @@ namespace VSFileSystem
 	/**** VSFileSystem global variables                                                          ****/
 	/************************************************************************************************/
 
-	extern	bool	use_volumes;
-	extern	string	volume_format;
+	extern bool	    use_volumes;
+	extern string   volume_format;
+    extern enum VSVolumeFormat q_volume_format;
 
 	extern vector <std::string> curdir;//current dir starting from datadir
 	extern vector <std::string> savedpwd;
@@ -328,7 +330,7 @@ namespace VSFileSystem
 					ret = fscanf( fp, format, a);
 				else
 				{
-					if( volume_format=="pk3")
+					if( q_volume_format==vfmtPK3 )
 					{
 						checkExtracted();
 						int ret = -1, readbytes=0;
@@ -344,7 +346,7 @@ namespace VSFileSystem
 						this->offset += readbytes;
 						this->GoAfterEOL();
 					}
-					else if( volume_format=="vsr")
+                    else if( q_volume_format==vfmtVSR )
 					{
 					}
 				}
@@ -358,7 +360,7 @@ namespace VSFileSystem
 					ret = fscanf( fp, format, a, b);
 				else
 				{
-					if( volume_format=="pk3")
+					if( q_volume_format==vfmtPK3 )
 					{
 						checkExtracted();
 						int ret = -1, readbytes=0;
@@ -374,7 +376,7 @@ namespace VSFileSystem
 						this->offset += readbytes;
 						this->GoAfterEOL();
 					}
-					else if( volume_format=="vsr")
+					else if( q_volume_format==vfmtVSR )
 					{
 					}
 				}
@@ -388,7 +390,7 @@ namespace VSFileSystem
 					ret = fscanf( fp, format, a, b, c);
 				else
 				{
-					if( volume_format=="pk3")
+					if( q_volume_format==vfmtPK3 )
 					{
 						checkExtracted();
 						int ret = -1, readbytes=0;
@@ -404,7 +406,7 @@ namespace VSFileSystem
 						this->offset += readbytes;
 						this->GoAfterEOL();
 					}
-					else if( volume_format=="vsr")
+					else if( q_volume_format==vfmtVSR )
 					{
 					}
 				}
@@ -418,7 +420,7 @@ namespace VSFileSystem
 					ret = fscanf( fp, format, a, b, c, d);
 				else
 				{
-					if( volume_format=="pk3")
+					if( q_volume_format==vfmtPK3 )
 					{
 						checkExtracted();
 						int ret = -1, readbytes=0;
@@ -433,7 +435,7 @@ namespace VSFileSystem
 						this->offset += readbytes;
 						this->GoAfterEOL();
 					}
-					else if( volume_format=="vsr")
+					else if( q_volume_format==vfmtVSR )
 					{
 					}
 				}
@@ -447,7 +449,7 @@ namespace VSFileSystem
 					ret = fscanf( fp, format, a, b, c, d, e);
 				else
 				{
-					if( volume_format=="pk3")
+					if( q_volume_format==vfmtPK3 )
 					{
 						checkExtracted();
 						int ret = -1, readbytes=0;
@@ -462,7 +464,7 @@ namespace VSFileSystem
 						this->offset += readbytes;
 						this->GoAfterEOL();
 					}
-					else if( volume_format=="vsr")
+					else if( q_volume_format==vfmtVSR )
 					{
 					}
 				}
@@ -476,7 +478,7 @@ namespace VSFileSystem
 					ret = fscanf( fp, format, a, b, c, d, e, f);
 				else
 				{
-					if( volume_format=="pk3")
+					if( q_volume_format==vfmtPK3 )
 					{
 						checkExtracted();
 						int ret = -1, readbytes=0;
@@ -491,7 +493,7 @@ namespace VSFileSystem
 						this->offset += readbytes;
 						this->GoAfterEOL();
 					}
-					else if( volume_format=="vsr")
+					else if( q_volume_format==vfmtVSR )
 					{
 					}
 				}

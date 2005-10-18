@@ -173,6 +173,7 @@ namespace VSFileSystem
 
 	bool	use_volumes;
 	string	volume_format;
+    enum VSVolumeFormat q_volume_format;
 
 	vector< vector <string> >	SubDirectories;		// Subdirectories where we should look for VSFileTypes files
 	vector<string>				Directories;		// Directories where we should look for VSFileTypes files
@@ -813,6 +814,10 @@ namespace VSFileSystem
 		// Also : Have to try with systems, not sure it would work well
 		// Setup the use of volumes for certain VSFileType
 		volume_format = vs_config->getVariable( "data", "volume_format", "pk3");
+        if (volume_format=="vsr") 
+            q_volume_format=vfmtVSR; else if (volume_format=="pk3")
+            q_volume_format=vfmtPK3; else
+            q_volume_format=vfmtUNK;
 
 		if( FileExists( datadir, "/data."+volume_format)>=0)
 		{
@@ -956,10 +961,10 @@ namespace VSFileSystem
 		}
 		else
 		{
-			if( volume_format=="vsr")
+			if( q_volume_format==vfmtVSR)
 			{
 			}
-			else if( volume_format=="pk3")
+			else if( q_volume_format==vfmtPK3)
 			{
 				CPK3 * vol;
 				string filestr;
@@ -1049,16 +1054,17 @@ namespace VSFileSystem
 		{
 			if( !UseVolumes[type])
 				failed += "\tTRY LOADING : "+nameof(type)+" "+fullpath+"... NOT FOUND\n";
-			else
+			else if (VSFS_DEBUG()>1)
 				failed += "\tTRY LOADING in "+nameof(type)+" "+fullpath+" : "+file+"... NOT FOUND\n";
 		}
 		else
 		{
-			failed = "";
 			if( !UseVolumes[type])
-				failed += "\tTRY LOADING : "+nameof( type)+" "+fullpath+"... SUCCESS";
-			else
-				failed += "\tTRY LOADING in "+nameof( type)+" "+fullpath+" : "+file+"... SUCCESS";
+				failed = "\tTRY LOADING : "+nameof( type)+" "+fullpath+"... SUCCESS";
+			else if (VSFS_DEBUG()>1)
+				failed = "\tTRY LOADING in "+nameof( type)+" "+fullpath+" : "+file+"... SUCCESS";
+            else
+                failed.erase();
 		}
                 //if (found<0&&root=="")
                 //return FileExists("/",filename,type,lookinvolume);
@@ -1111,17 +1117,22 @@ namespace VSFileSystem
 	{
 		int found = -1, shared = false;
 		string filepath, curpath, dir, extra(""), subdir;
-		failed="";
+		failed.erase();
 		VSFileType curtype=type;
 		// First try in the current path
-		if( type==UnitFile)
-			extra = "/"+GetUnitDir( f.GetFilename());
-		// For cockpits we look in subdirectories that have the same name as the cockpit itself
-		if( type==CockpitFile)
+        switch(type) {
+        case UnitFile: 
+            extra = "/"+GetUnitDir( f.GetFilename()); 
+            break;
+        case CockpitFile:
+		    // For cockpits we look in subdirectories that have the same name as the cockpit itself
 			extra = "/"+string( f.GetFilename());
-		/* Animations are always in subdir named like the anim itself */
-		if( type==AnimFile)
+            break;
+        case AnimFile:
+            // Animations are always in subdir named like the anim itself
 			extra = "/"+string( f.GetFilename());
+            break;
+        }
 
 		// This test lists all the VSFileType that should be looked for in the current directory
 		unsigned int i=0, j=0;
@@ -1306,7 +1317,7 @@ namespace VSFileSystem
 
 	void	VSFile::checkExtracted()
 	{
-		if( volume_format == "pk3")
+		if( q_volume_format==vfmtPK3)
 		{
 			if( !pk3_extracted_file)
 			{
@@ -1444,10 +1455,10 @@ namespace VSFileSystem
 		}
 		else
 		{
-			if( volume_format=="vsr")
+			if( q_volume_format==vfmtVSR)
 			{
 			}
-			else if( volume_format=="pk3")
+			else if( q_volume_format==vfmtPK3)
 			{
 				// Here we look for the file but we don't really open it, we just check if it exists
 				err = VSFileSystem::LookForFile( *this, type, file_mode);
@@ -1594,10 +1605,10 @@ namespace VSFileSystem
 		}
 		else
 		{
-			if( volume_format=="vsr")
+			if( q_volume_format==vfmtVSR)
 			{
 			}
-			else if( volume_format=="pk3")
+			else if( q_volume_format==vfmtPK3)
 			{
 				checkExtracted();
 				if( length > this->size-this->offset)
@@ -1621,10 +1632,10 @@ namespace VSFileSystem
 		}
 		else
 		{
-			if( volume_format=="vsr")
+			if( q_volume_format==vfmtVSR)
 			{
 			}
-			else if( volume_format=="pk3")
+			else if( q_volume_format==vfmtPK3)
 			{
 				checkExtracted();
 				ret = (char *) ptr;
@@ -1685,10 +1696,10 @@ namespace VSFileSystem
 		}
 		else
 		{
-			if( volume_format=="vsr")
+			if( q_volume_format==vfmtVSR)
 			{
 			}
-			else if( volume_format=="pk3")
+			else if( q_volume_format==vfmtPK3)
 			{
 				checkExtracted();
 				offset = this->Size();
@@ -1774,10 +1785,10 @@ namespace VSFileSystem
 		}
 		else
 		{
-			if( volume_format=="vsr")
+			if( q_volume_format==vfmtVSR)
 			{
 			}
-			else if( volume_format=="pk3")
+			else if( q_volume_format==vfmtPK3)
 			{
 				// If the file has not been extracted yet we do now
 				checkExtracted();
@@ -1802,9 +1813,9 @@ namespace VSFileSystem
 		}
 		else
 		{
-			if( volume_format=="vsr")
+			if( q_volume_format==vfmtVSR)
 				offset = 0;
-			else if( volume_format=="pk3")
+			else if( q_volume_format==vfmtPK3)
 				offset = 0;
 		}
 	}
@@ -1817,9 +1828,9 @@ namespace VSFileSystem
 		}
 		else
 		{
-			if( volume_format=="vsr")
+			if( q_volume_format==vfmtVSR)
 				offset = size;
-			else if( volume_format=="pk3")
+			else if( q_volume_format==vfmtPK3)
 				offset = size;
 		}
 	}
@@ -1832,9 +1843,9 @@ namespace VSFileSystem
 		}
 		else
 		{
-			if( volume_format=="vsr")
+			if( q_volume_format==vfmtVSR)
 				offset = foffset;
-			else if( volume_format=="pk3")
+			else if( q_volume_format==vfmtPK3)
 				offset = foffset;
 		}
 	}
@@ -1852,10 +1863,10 @@ namespace VSFileSystem
 			}
 			else
 			{
-				if( volume_format=="vsr")
+				if( q_volume_format==vfmtVSR)
 				{
 				}
-				else if( volume_format=="pk3")
+				else if( q_volume_format==vfmtPK3)
 				{
 					checkExtracted();
 					return this->size;
@@ -1895,10 +1906,10 @@ namespace VSFileSystem
 		}
 		else
 		{
-			if( volume_format=="vsr")
+			if( q_volume_format==vfmtVSR)
 			{
 			}
-			else if( volume_format=="pk3")
+			else if( q_volume_format==vfmtPK3)
 			{
 				ret = offset;
 			}
@@ -1915,10 +1926,10 @@ namespace VSFileSystem
 		}
 		else
 		{
-			if( volume_format=="vsr")
+			if( q_volume_format==vfmtVSR)
 			{
 			}
-			else if( volume_format=="pk3")
+			else if( q_volume_format==vfmtPK3)
 			{
 				eof = (offset==this->Size());
 			}
@@ -1959,10 +1970,10 @@ namespace VSFileSystem
 		}
 		else
 		{
-			if( volume_format=="vsr")
+			if( q_volume_format==vfmtVSR)
 			{
 			}
-			else if( volume_format=="pk3")
+			else if( q_volume_format==vfmtPK3)
 			{
 				if( pk3_extracted_file)
 					delete []pk3_extracted_file;
