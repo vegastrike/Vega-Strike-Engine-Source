@@ -116,11 +116,8 @@ void Bolt::Draw () {
   GFXDisable (CULLFACE);
 
   static bool blendbeams = XMLSupport::parse_bool (vs_config->getVariable("graphics","BlendGuns","true"));
-  if (blendbeams==true) {
-    GFXBlendMode (ONE,ONE);
-  }else {
-    GFXBlendMode (ONE,ZERO);
-  }
+  static float stretchbolts = XMLSupport::parse_float (vs_config->getVariable("graphics","StretchBolts","0.85"));
+  GFXBlendMode (ONE,blendbeams?ONE:ZERO);
 
   //  GFXDisable(DEPTHTEST);
   GFXDisable(DEPTHWRITE);
@@ -130,6 +127,7 @@ void Bolt::Draw () {
   vector <vector <Bolt> >::iterator i;
   vector <Bolt>::iterator j;
   vector <Animation *>::iterator k = q->animations.begin();
+  float etime = GetElapsedTime();
   for (i=q->balls.begin();i!=q->balls.end();i++,k++) {
     Animation * cur= *k;
     //Matrix result;
@@ -173,9 +171,14 @@ void Bolt::Draw () {
 	    dec->MakeActive();
         GFXToggleTexture(true,0);
 	    for (j=i->begin();j!=i->end();j++) {
-	      BlendTrans ((*j).drawmat,(*j).cur_position,(*j).prev_position);
-	      GFXLoadMatrixModel ((*j).drawmat);
-              const weapon_info * wt=(*j).type;
+          Bolt &bolt=*j;
+          const weapon_info *wt=bolt.type;
+
+	      BlendTrans (bolt.drawmat,bolt.cur_position,bolt.prev_position);
+          Matrix drawmat(bolt.drawmat);
+          if (stretchbolts>0)
+              ScaleMatrix(drawmat,Vector(1,1,bolt.type->Speed*etime*stretchbolts/bolt.type->Length));
+	      GFXLoadMatrixModel (drawmat);
 	      GFXColor4f (wt->r,wt->g,wt->b,wt->a);
 	      qmesh->Draw();
 	    }
