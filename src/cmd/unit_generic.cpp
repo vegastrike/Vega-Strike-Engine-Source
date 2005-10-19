@@ -1396,10 +1396,10 @@ void disableSubUnits (Unit * uhn) {
         }
 
 }
-inline un_iter Unit::getSubUnits () {
+un_iter Unit::getSubUnits () {
   return SubUnits.createIterator();
 }
-inline un_kiter Unit::viewSubUnits() const{
+un_kiter Unit::viewSubUnits() const{
   return SubUnits.constIterator();
 }
 
