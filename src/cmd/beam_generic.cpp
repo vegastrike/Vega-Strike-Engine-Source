@@ -502,7 +502,7 @@ bool Beam::Collide (Unit * target, Unit * firer, Unit * superunit) {
         float relspeed = target->GetVelocity() * direction.Cast(); 
         if (relspeed<maxrelspeed) {
             //Modulate force on little mass objects, so they don't slingshot right past you
-            target->ApplyForce (direction*(appldam/sqrt((target->sim_atom_multiplier>0)?target->sim_atom_multiplier:1)*mymin(1,target->GetMass()))); 
+            target->ApplyForce (direction*(appldam/sqrt((target->sim_atom_multiplier>0)?target->sim_atom_multiplier:1.0)*mymin(1,target->GetMass()))); 
         }
       }
 

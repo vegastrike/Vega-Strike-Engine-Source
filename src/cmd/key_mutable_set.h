@@ -50,10 +50,22 @@ public:
         //O(1) amortized time on the insertion - Yippie!
         bool byebye=false;
         if (comparator(newKeyShell,*templess)) {
-          rettempmore=templess=this->insert(templess,newKeyShell); 
+          rettempmore=templess=this->insert(
+#ifdef _WIN32
+                                            templess,newKeyShell
+#else
+                                            newKeyShell,templess
+#endif
+                                            );
           byebye = true;
         } else if (comparator(*tempmore,newKeyShell)) {
-          rettempmore=templess=this->insert(tempmore,newKeyShell); 
+          rettempmore=templess=this->insert(
+#ifdef _WIN32
+                                            tempmore,newKeyShell
+#else
+                                            newKeyShell,tempmore
+#endif
+          );
           byebye = true;
         } else (*iter).get()=newKey;
 
