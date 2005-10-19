@@ -50,22 +50,10 @@ public:
         //O(1) amortized time on the insertion - Yippie!
         bool byebye=false;
         if (comparator(newKeyShell,*templess)) {
-          rettempmore=templess=this->insert(
-#ifdef _WIN32
-                                            templess,newKeyShell
-#else
-                                            newKeyShell,templess
-#endif
-                                            );
+          rettempmore=templess=this->insert(templess,newKeyShell);
           byebye = true;
         } else if (comparator(*tempmore,newKeyShell)) {
-          rettempmore=templess=this->insert(
-#ifdef _WIN32
-                                            tempmore,newKeyShell
-#else
-                                            newKeyShell,tempmore
-#endif
-          );
+          rettempmore=templess=this->insert(tempmore,newKeyShell);
           byebye = true;
         } else (*iter).get()=newKey;
 
@@ -84,16 +72,6 @@ public:
 		typename SUPER::iterator templess=iter,tempmore=iter;
 		changeKey(iter,newKey,templess,tempmore);
                 return iter;
-	}
-	typename SUPER::iterator insert (const T & newKey,typename SUPER::iterator hint) {
-
-		return this->SUPER::insert(newKey);
-                 
-	}
-	typename SUPER::iterator insert (const T & newKey) {
-
-		return this->SUPER::insert(newKey);
-                 
 	}
 };
 
