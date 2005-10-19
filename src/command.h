@@ -86,7 +86,6 @@ class commandI : public RText {
 		//new command interpretor
 //                static std::vector<coms *> commands; //our vector of POINTERS
                         //to encapsulated COM objects. (see top of this file)
-		RegisterPythonWithCommandInterp fuckingsonofatwotimingwhoringlioness;
 		coms findCommand(const char *comm, int &sock_in);
 //		mud *World; //to print to the charactor - server object
 		menu *lastmenuadded;

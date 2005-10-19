@@ -1,4 +1,5 @@
 #include "command.h"
+#include "mmorpgclient.h"
 #include <sstream>
 #include <Python.h>
 #include <pyerrors.h>
@@ -297,7 +298,9 @@ coms::~coms() {
 //	std::cout << "Destroying coms object\n";
 };
 // }}}
-
+class HoldCommands;
+HoldCommands *rcCMD = 0x0;
+bool rcCMDEXISTS = false; //initialize to false
 class HoldCommands { //  Hold the commands here{{{ 
 /*
 // Large comment about why and what {{{
@@ -360,6 +363,11 @@ why:
 			std::vector<coms> rc;
 		};
 		HoldCommands() {
+			
+			if(rcCMD != 0x0) {
+				std::cout << "Error, there shouldn't be 2 holdCommands objects!\n";
+			}
+			rcCMD = this;
 			finishmeoff = false;
 		}
 		std::vector<procs> cmds; //for multiple command processors.
@@ -392,8 +400,9 @@ why:
 			}
 		}
 }; 
-HoldCommands *rcCMD = 0x0;
-bool rcCMDEXISTS = false; //initialize to false
+mmoc initclientobject;
+RegisterPythonWithCommandInterp fuckingsonofatwotimingwhoringlioness;
+
 // We use a pointer so we can initialize it in addCommand, which can, and does 
 // run before the command interpretor constructor, and before all local variables
 // on the command interpretor itself might be initialized.
@@ -554,7 +563,7 @@ void commandI::addCommand(TFunctor *com, char *name, int args){
 	newOne.Name.append(name);
 	newOne.argtype = args;
 	//push the new command back the vector.
-	if(!rcCMDEXISTS) {
+	if(!rcCMDEXISTS && rcCMD == 0x0) {
 		if(rcCMD != 0x0) {
 			std::cout << "Apparently rcCMD is not 0x0.. \n";
 		}
@@ -803,7 +812,7 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 	//eg, someone types: " do_something" instead of "do_something"
 	while(breaker == false) {
 		ls = incommand->find(" ");
-		if(ls > 2 || incommand->size() < 2 || ls == std::string::npos) {
+		if(ls != 0) {
 			breaker = true;
 		} else {
 			incommand->erase(ls, 1);
@@ -842,16 +851,9 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 		incommand->replace(y, 1, "");
 	}
 	// }}}
-    // {{{ ' to say
-
-    {
-        size_t x = incommand->find("'");
-        if(x == 0) {
-            incommand->replace(0, 1, "say ");
-        }
-        // }}}
         // {{{ ! to the last command typed
-        x = incommand->find("!");
+	{
+        size_t x = incommand->find("!");
         if(x == 0) {
             incommand->replace(0, 1, lastcommand);
         }
@@ -863,15 +865,7 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
         }
     }
     // }}}
-    // {{{ / to gossip
-    {
-        size_t x = incommand->find("/");
-        if(x == 0) {
-            incommand->replace(0, 1, "gossip ");
-        }
 
-    }
-    // }}}
 
 	breaker = false; //reset our exit bool 
     

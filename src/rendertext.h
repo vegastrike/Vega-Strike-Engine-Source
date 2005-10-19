@@ -28,7 +28,8 @@ class RText {
 		void renderconsole(); //renders the text in the console
 		void conline(std::string &sf, bool highlight); //add a line to
 			//the console
-		void conoutf(std::string &s, int a = 0, int b = 0, int c = 0);
+		void conoutf(char *);
+		virtual void conoutf(std::string &s, int a = 0, int b = 0, int c = 0);
 		//add a line to the console(Use this one.)
 		void saycommand(char *init); //actually does the appending of
 			//the string to the commandbuf, and seperates entries

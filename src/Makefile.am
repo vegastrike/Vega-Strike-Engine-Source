@@ -56,13 +56,15 @@ networking/lowlevel/libnetlowlevel.a \
 libroot =		\
 	command.h 			\
 	command.cpp 			\
-	ship_commands.h         \
-	ship_commands.cpp       \
+	ship_commands.h			\
+	ship_commands.cpp		\
+	mmorpgclient.h			\
+	mmorpgclient.cpp		\
 	rendertext.h			\
 	rendertext.cpp			\
-	debug_vs.h				\
+	debug_vs.h			\
 	debug_vs.cpp			\
-	gfxlib.h				\
+	gfxlib.h			\
 	gfxlib_struct.h			\
 	gfxlib_struct.cpp		\
 	linecollide.h			\

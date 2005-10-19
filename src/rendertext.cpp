@@ -84,10 +84,10 @@ void RText::renderconsole()// render buffer
 	std::vector<std::string>::iterator iter = refs.end();
 	if(iter == refs.begin()) breakout = false;
     for(; breakout;) {
-	iter--;
-	if(iter == refs.begin()) breakout = false;
-	workIt.append((*(iter)));
-	workIt.append("\n");
+		iter--;
+		if(iter == refs.begin()) breakout = false;
+		workIt.append((*(iter)));
+		workIt.append("\n");
     };
     y = 1;
     std::ostringstream drawCommand;
@@ -108,6 +108,14 @@ void RText::renderconsole()// render buffer
 //append a line to the console, optional "highlight" method , untested {{{
 void RText::conline(std::string &sf, bool highlight)        // add a line to the console buffer
 {
+	{
+		unsigned int search =0;
+		unsigned int lastsearch = 0;
+		for(; (search = sf.find("/r"))!=std::string::npos ; ) {
+			sf.replace(lastsearch, search-lastsearch, "");
+			lastsearch = search;
+		}
+	}
     cline cl;
     int lastmillis = 0;
     cl.outtime = lastmillis;                        // for how long to keep line on screen
@@ -126,26 +134,72 @@ void RText::conline(std::string &sf, bool highlight)        // add a line to the
 };
 // }}}
 // print a line to the console, broken at \n's {{{
+void RText::conoutf(char *in) {
+	std::string foobar(in);
+	conoutf(foobar);
+	return;
+}
 void RText::conoutf(std::string &s, int a, int b, int c)
 {
-	{for(int x = WORDWRAP; x < s.size(); x = x+WORDWRAP) {
-		s.insert(x, "\n");
-	}}
+	SDL_mutex * mymutex = SDL_CreateMutex();
+	SDL_mutexP(mymutex);
+	std::cout << s << std::endl;
+// Old {{{
+//	{
+//		for(int x = WORDWRAP; x < s.size(); x = x+WORDWRAP) {
+//			s.insert(x, "\n");
+//		}
+//	}
 
-	size_t x = s.find("\n");
-	if(x < std::string::npos) {
-		size_t xlast = 0;
-		for(; x < std::string::npos; x = s.find("\n", x+1)) {
-			std::string newone;
-			newone.append(s.substr(xlast, x-xlast));
-			conline(newone, 1);
-			xlast = x+1;
+//	size_t x = s.find("\n");
+//	if(x < std::string::npos) {
+//		size_t xlast = 0;
+//		for(; x < std::string::npos; x = s.find("\n", x+1)) {
+//			std::string newone;
+//			newone.append(s.substr(xlast, x-xlast));
+//			conline(newone, 1);
+//			xlast = x+1;
+//		}
+//		
+//	} else {
+//		conline(s, 1);
+//	}
+// }}}
+	unsigned int fries = s.size();
+	std::string customer;
+	for(unsigned int burger = 0; burger < fries; burger++) {
+		if(s[burger] == '\n' || burger == fries-1) {
+			if(burger == fries-1) 
+				if(s[fries-1] != '\n' && s[fries-1] != '\r')
+					customer += s[burger];
+			conline(customer, 1);
+			customer.erase();
+		} else if( customer.size() >= WORDWRAP) {
+			customer += s[burger];
+			std::string fliptheburger;
+			while( customer[customer.size()-1] != ' ') {
+				fliptheburger += customer[customer.size()-1];
+				std::string::iterator oldfloormeat = customer.end();
+				oldfloormeat--; 
+				customer.erase(oldfloormeat);
+			}
+			conline(customer, 1);
+			customer.erase();
+			{
+				std::string spatchula;
+				for(int salt = fliptheburger.size()-1; salt >= 0; salt--) {
+					spatchula += fliptheburger[salt];
+				}
+				fliptheburger.erase();
+				fliptheburger.append(spatchula);
+			}
+			customer.append(fliptheburger);
+		} else if( s[burger] != '\r') { 
+			customer += s[burger]; // get fat
 		}
-		
-	} else {
-		conline(s, 1);
 	}
-
+	SDL_mutexV(mymutex);
+	SDL_DestroyMutex(mymutex);
 };
 // }}}
 //same as above, but I think it works better {{{
@@ -236,10 +290,9 @@ void RText::ConsoleKeyboardI(int code, bool isdown, int cooked)
 //add it to the command buffer
 				if(cooked) {
 					char add[] = { cooked, 0};
-					std::cout << "Appending: " << add<< std::endl;
-					std::ostringstream l;
-					l << add;
-					commandbuf.append(l.str());
+					std::string l;
+					l += add;
+					commandbuf.append(l);
 				};
 				break;
 		}
