@@ -90,10 +90,10 @@ void Mesh::Draw(float lod, const Matrix &m, float toofar, int cloak, float nebdi
 }
 void Mesh::DrawNow(float lod,  bool centered, const Matrix &m, int cloak, float nebdist) { //short fix
 }
-void Mesh::ProcessZFarMeshes () {
+void Mesh::ProcessZFarMeshes (bool) {
 }
 
-void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
+void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects,bool) {
 }
 void Mesh::ProcessDrawQueue(int,int whichdrawqueue) {
 }
