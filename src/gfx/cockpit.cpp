@@ -934,7 +934,7 @@ void GameCockpit::DrawBlips (Unit * un) {
   if (allGravUnits){
     Unit *u;
     for (un_iter i=_Universe->activeStarSystem()->gravitationalUnits().createIterator();(u=*i)!=NULL;++i){
-      unitLocator.action.acquire(un,UnitUtil::getDistance(un,u));      
+      unitLocator.action.acquire(u,UnitUtil::getDistance(un,u));      
     }
   }
   GFXEnd();
