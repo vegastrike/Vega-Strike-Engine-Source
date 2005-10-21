@@ -5,17 +5,18 @@
 #include "vegastrike.h"
 #include "vs_globals.h"
 
-#ifdef WIN32
-	#include <winsock.h>     // For socket(), connect(), send(), and recv()
-typedef int socklen_t;
-#else
-	#include <sys/types.h>   // For data types
-	#include <sys/socket.h>  // For socket(), connect(), send(), and recv()
-	#include <netdb.h>       // For gethostbyname()
-	#include <arpa/inet.h>   // For inet_addr()
-	#include <unistd.h>      // For close()
-	#include <netinet/in.h>  // For sockaddr_in
-#endif
+//#ifdef WIN32
+//	#include <winsock.h>     // For socket(), connect(), send(), and recv()
+//typedef int socklen_t;
+//#else
+//	#include <sys/types.h>   // For data types
+//	#include <sys/socket.h>  // For socket(), connect(), send(), and recv()
+//	#include <netdb.h>       // For gethostbyname()
+//	#include <arpa/inet.h>   // For inet_addr()
+//	#include <unistd.h>      // For close()
+//	#include <netinet/in.h>  // For sockaddr_in
+//#endif
+#include "networking/inet.h"
 
 //This is created in command.cpp with single like (search for mmoc)
 //If you wish to disable this module, just comment out that single line in command.cpp,
@@ -24,9 +25,7 @@ typedef int socklen_t;
 extern commandI CommandInterpretor;
 mmoc::mmoc() { // {{{
 	status = false; // used to let the thread exit
-//	if( (socket = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
-//		RText::conoutf("Error creating the socket. Will continue, but your game will\n likely spew if you try to connect to a host.");
-//	}
+	INET_startup();
 	//add the connectto to the players command interp.
 	cmd = new Functor<mmoc>(this, &mmoc::connectTo);
 	CommandInterpretor.addCommand(cmd, "connectto", ARG_2CSTR);
@@ -43,11 +42,11 @@ mmoc::mmoc() { // {{{
 	 // }}}
 }; // }}}
 void mmoc::connectTo(const char *address_in, const char *port_in) { // {{{
-	sockaddr_in m_addr;
+//	sockaddr_in m_addr;
 	char *address = (char *)address_in;
 	char *port = (char *)port_in;
 	if(address == NULL) {
-		std::cout << "Need a host at least, a host and port at most!" << std::endl;
+		CommandInterpretor.conoutf( "Need a host at least, a host and port at most!");;
 		return;
 	}
 	if(port == NULL) {
@@ -60,30 +59,31 @@ void mmoc::connectTo(const char *address_in, const char *port_in) { // {{{
 		address = "ant.infice.com";
 		port = "5555";
 	}
-    if( (socket = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
-        RText::conoutf("Error creating the socket. Will continue, but your game will\n likely spew if you try to connect to a host.");
+    if( (socket =  INET_ConnectTo(address, atoi(port)) )< 0) {
+		CommandInterpretor.conoutf("Error connecting. Specify another host or verify the status if your network connection.");
+		return;
     }
 
-	hostent *server;  // Resolve name
-	if ((server = gethostbyname(address)) == NULL) {
-		CommandInterpretor.conoutf("Error, couldn't find host");
+//	hostent *server;  // Resolve name
+//	if ((server = gethostbyname(address)) == NULL) {
+//		CommandInterpretor.conoutf("Error, couldn't find host");
 		// strerror() will not work for gethostbyname() and hstrerror() 
 		// is supposedly obsolete
-	return;
-	}
+//	return;
+//	}
 
-	bzero((char *) &m_addr, sizeof(m_addr));
-	m_addr.sin_family = AF_INET;
-	bcopy((char *)server->h_addr, 
-		(char *)&m_addr.sin_addr.s_addr,
-		server->h_length);
-	m_addr.sin_port = htons(atoi(port));
-	int status = 0;
+//	bzero((char *) &m_addr, sizeof(m_addr));
+//	m_addr.sin_family = AF_INET;
+//	bcopy((char *)server->h_addr, 
+//		(char *)&m_addr.sin_addr.s_addr,
+//		server->h_length);
+//	m_addr.sin_port = htons(atoi(port));
+//	int status = 0;
 
-	if ( (status = ::connect(socket,reinterpret_cast<sockaddr *>(&m_addr),sizeof(m_addr))) < 0) {
-		CommandInterpretor.conoutf("Couldn't Connect\n");
-		return;
-	}
+//	if ( (status = ::connect(socket,reinterpret_cast<sockaddr *>(&m_addr),sizeof(m_addr))) < 0) {
+//		CommandInterpretor.conoutf("Couldn't Connect\n");
+//		return;
+//	}
 	std::string hellomsg;
 	hellomsg.append("Vegastrike-user");
 	send(hellomsg);
@@ -188,7 +188,7 @@ bool mmoc::listenThread() { // {{{
 	bool stat;
 	while( (stat = getStatus(0)) == true ) {
 		bzero(buffer, MAXBUF);
-	    if( ::read(socket, buffer, sizeof(buffer)-1) <= 0 ) { 
+	    if( ::INET_Recv(socket, buffer, sizeof(buffer)-1) <= 0 ) { 
 			getStatus(1); //1 toggles status, 0 reads status
 			return false;
 		} else {
@@ -202,11 +202,11 @@ void mmoc::createThread() { // {{{
 	::SDL_CreateThread(startThread, reinterpret_cast<void *>(this));
 } // }}}
 void mmoc::send(char *buffer, int size) { // {{{
-	::send(socket, buffer, size, 0); //or write(socket, buffer, size) for windwos?
+	::INET_Write(socket, size, buffer); //or write(socket, buffer, size) for windwos?
 } // }}}
 void mmoc::send(std::string &instring) { // {{{
 	unsigned int x = instring.find("send ");
-	if(x = 0) instring.replace(0, 5, "");
+	if(x == 0) instring.replace(0, 5, "");
 	instring.append("\r\n");
 	send( (char *)instring.c_str(), instring.size() );
 } // }}}
