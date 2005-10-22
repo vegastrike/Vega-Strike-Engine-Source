@@ -8,6 +8,9 @@ from xml.dom.minidom import *
 global varlines
 varlines = list()
 
+global templine
+templine = tuple()
+
 global config
 config = Document()
 
@@ -21,16 +24,33 @@ def add(filelist, dirname, filenames):
     filenames = fnmatch.filter(filenames, '*.cpp')
     filelist.extend([os.path.join(dirname, filename) for filename in filenames])
 
+def hasPreProcessor(line, filename):
+    commands = ["ifdef", "if", "else", "endif"]
+    for command in commands:
+        if line.find("#"+command) >= 0:
+            return True
+    return False
+
 def parseLine(line, filename):
+    global templine
+    if templine.__len__() == 2:#if this line continues on a getVariable
+        if filename != templine[1]:
+            print "Incomplete reference in file "+filename[1]
+            print filename[0]
+        else:
+            line = templine[0]+line
+        templine = tuple()
     while 1:
         ind = line.find("getVariable")
         if ind == -1:
             break
+        if hasPreProcessor(line, filename):#Don't want to include mixed stuff
+            return
         line = line[ind:]
         start = line.find("(")
         if start == -1:
-            print "Error: bracket not found"+filename
-            break
+            print "No opening bracket found: "+line +"("+filename+")"
+            return
         finish = False
         count = 0
         for i in range(len(line[start:])):
@@ -42,7 +62,9 @@ def parseLine(line, filename):
             if count == 0:
                 finish = start+i
                 break
-        if not finish:
+        if not finish:#no closed set of brackets found
+            global templine
+            templine = (line, filename)#Try multiline statement
             return
         parsed = line[start+1:finish]
         parsed = makeList(parsed)
@@ -55,26 +77,26 @@ def parseLine(line, filename):
 
 def makeList(parsed):
     parsed = cleanSection(parsed,True).split("\",\"")
-    if len(parsed) < 2:
-        print "Unparsable: "+filename+" : "+str(parsed)
+    if len(parsed) < 2:#This will happen when all the arguments to getVariable are variables themselves
+#        print "Unparsable: "+filename+" : "+str(parsed)
         return False
     if parsed[0][0] != "\"":
-        print 'a'
+#        print 'a'
         return False
     else:
         parsed[0] = parsed[0][1:]
     last = parsed[len(parsed)-1]
     last = last[len(last)-1]
     if last != "\"":
-        print 'b'
+#        print 'b'
         return False
     parsed[len(parsed)-1] = parsed[len(parsed)-1][:len(parsed[len(parsed)-1])-1]
     default = parsed.pop()
     var = parsed.pop()
     section=list()
-    for sec in parsed:
+    for sec in parsed:#This will happen when one or more of the arguments to getVariable are variables themselves
         if sec == '' or var == '':
-            print 'c'
+#            print 'c'
             return False
         section.append(sec)
     return [section,var,default]
