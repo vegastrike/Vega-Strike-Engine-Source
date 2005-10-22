@@ -25,6 +25,8 @@
 extern commandI CommandInterpretor;
 mmoc::mmoc() { // {{{
 	status = false; // used to let the thread exit
+	binmode = false;
+	POSmode = false;
 	INET_startup();
 	//add the connectto to the players command interp.
 	cmd = new Functor<mmoc>(this, &mmoc::connectTo);
@@ -182,17 +184,36 @@ void mmoc::ParseRemoteInput(char *buf) { // {{{ Main parser
 //		}
 	}
 } // }}}
+class POSpack {
+    public:
+        int playernum; //who's position is this
+        double x, y, z; //the position
+};
 bool mmoc::listenThread() { // {{{
 	const int MAXBUF=1000;
 	char buffer[MAXBUF+1];
 	bool stat;
 	while( (stat = getStatus(0)) == true ) {
 		bzero(buffer, MAXBUF);
+		if(!binmode)
 	    if( ::INET_Recv(socket, buffer, sizeof(buffer)-1) <= 0 ) { 
 			getStatus(1); //1 toggles status, 0 reads status
 			return false;
 		} else {
 			ParseRemoteInput(buffer);
+		}
+		if(binmode) {
+			if(POSmode) { // if Position mode
+				POSpack position;
+				if( ::INET_Read(socket, reinterpret_cast<char *>(&position), sizeof(POSpack)) <= 0) { //I believe INET_Read will keep looping until size is filled
+					getStatus(1); //toggle status
+					return false;
+				}
+				ParseMovement(position);
+				POSmode = false;
+			}
+			//other bin modes
+			binmode = false; //done
 		}
 	}
     /*---Clean up---*/
@@ -210,7 +231,24 @@ void mmoc::send(std::string &instring) { // {{{
 	instring.append("\r\n");
 	send( (char *)instring.c_str(), instring.size() );
 } // }}}
-
+void mmoc::negotiate(std::vector<std::string *> *d) {
+	std::vector<std::string *>::iterator iter = d->begin();
+	iter++;
+	if(iter >= d->end()) return; //nothing to negotiate
+	if((*(iter))->compare("P")) {
+		binarysize = sizeof(POSpack);
+		//check the next iterator for a number (X), if there is one
+		//set it up to loop in the listenThread() to read X Position packets
+		binmode = true;
+		POSmode = true;
+		std::string ack;
+		ack.append("ap"); //ack position, tell the server to send it
+		send(ack); 
+	}
+}
+void mmoc::ParseMovement(POSpack &in) {
+ // .....
+}
 int startThread(void *mmoc2use) { // {{{
 	mmoc *looper = reinterpret_cast<mmoc *>(mmoc2use);
 	if(!looper->getStatus(0)) looper->getStatus(1);
