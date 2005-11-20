@@ -400,7 +400,7 @@ why:
 			}
 		}
 }; 
-mmoc initclientobject;
+//mmoc initclientobject;
 RegisterPythonWithCommandInterp fuckingsonofatwotimingwhoringlioness;
 
 // We use a pointer so we can initialize it in addCommand, which can, and does 
