@@ -9,6 +9,7 @@ using std::vector;
 using std::string;
 #include "xml_support.h"
 #include "hashtable.h"
+#include "mesh_io.h"
 using namespace XMLSupport;
 struct GFXMaterial
 {  /// ambient rgba, if you don't like these things, ask me to rename them

@@ -1,3 +1,6 @@
+#ifndef __MESH_IO_H__INCLUDED_
+#define __MESH_IO_H__INCLUDED_
+
 #define int32bit int
 #define float32bit float
 #define char8bit unsigned char
@@ -31,3 +34,4 @@ enum textype{
     UNKNOWN
 };
 
+#endif//__MESH_IO_H__INCLUDED_

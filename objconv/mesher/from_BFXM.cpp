@@ -285,7 +285,7 @@ void BFXMToXmeshOrOBJ(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE 
 		    fprintf(Outputfile,"\t<Specular Red=\"%f\" Green=\"%f\" Blue=\"%f\" Alpha=\"%f\"/>\n",sr,sg,sb,sa);
 		    fprintf(Outputfile,"</Material>\n");
 		  }
-		  for(int32bit detplane=0;detplane<Detailplanes.size();detplane++){
+          for(std::vector<Mesh_vec3f>::size_type detplane=0;detplane<Detailplanes.size();detplane++){
 			  if(isxmesh){
 				  fprintf(Outputfile,"<DetailPlane x=\"%f\" y=\"%f\" z=\"%f\" />\n",Detailplanes[detplane].x,Detailplanes[detplane].y,Detailplanes[detplane].z);
 			  }

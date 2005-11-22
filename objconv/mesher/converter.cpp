@@ -1,5 +1,6 @@
 #include "from_obj.h"
 #include "from_BFXM.h"
+#include "to_OgreMesh.h"
 void usage();
 void usage(){
 	fprintf(stderr,"usage:\n\tmesher <inputfile> <outputfile> <command> [-x|-y|-z<Translation Distance>] [-forceflatshade]\n\nWhere command is a 3 letter sequence of:\n\tInputfiletype:\n\t\tb:BFXM\n\t\to:OBJ\n\t\tx:xmesh\n\tOutputfiletype:\n\t\tb:BFXM\n\t\to:OBJ\n\t\tx:xmesh\n\tCommandflag:\n\t\ta: append to Outputfile\n\t\tc: create Outputfile\n");
@@ -8,12 +9,26 @@ bool flip=false;
 bool flop=false;
 bool flips=false;
 bool flipt=false;
+bool flipn=false;
+bool autolod=false;
+bool autoedge=false;
+bool autotangent=false;
 float transx=0;
 float transy=0;
 float transz=0;
+const char* basepath="";
 static bool forcenormals=true;
 bool dims=false;
 int main (int argc, char** argv) {
+
+  // executable's path
+  std::string rootpath=argv[0];
+#if defined(_WIN32)&&!defined(__CYGWIN__)
+  rootpath.erase(rootpath.rfind('\\'));
+#else
+  rootpath.erase(rootpath.rfind('/'));
+#endif
+
   { 
 	for (int i=0;i<argc;++i) {
     bool match=false;
@@ -33,9 +48,29 @@ int main (int argc, char** argv) {
       match=true;
       flipt=true;
     }
+    if (strcmp(argv[i],"-flipn")==0) {
+      match=true;
+      flipn=true;
+    }
+    if (strcmp(argv[i],"-autolod")==0) {
+      match=true;
+      autolod=true;
+    }
+    if (strcmp(argv[i],"-autoedge")==0) {
+      match=true;
+      autoedge=true;
+    }
+    if (strcmp(argv[i],"-autotangent")==0) {
+      match=true;
+      autotangent=true;
+    }
     if (strcmp(argv[i],"-forceflatshade")==0) {
       match=true;
 	  forcenormals=false;
+    }
+    if (strncmp(argv[i],"-basepath=",10)==0) {
+      match=true;
+      basepath = argv[i]+10;
     }
 	
 	if (strncmp(argv[i],"-dims",5)==0) {
@@ -90,6 +125,10 @@ int main (int argc, char** argv) {
   bool createBFXMfromOBJ=(argv[3][0]=='o'&&argv[3][1]=='b'&&argv[3][2]=='c');
   bool createxmeshesfromOBJ=(argv[3][0]=='o'&&argv[3][1]=='x'&&argv[3][2]=='c');
 
+  char inputType = argv[3][0];
+  char outputType = argv[3][1];
+  char actionType = argv[3][2];
+
   FILE * Outputfile;
   if(appendxmeshtobfxm){
 	Outputfile=fopen(argv[2],"rb+"); //append to end, but not append, which doesn't do what you want it to.
@@ -131,6 +170,71 @@ int main (int argc, char** argv) {
   } else if(createOBJfromxmesh||createxmeshesfromOBJ){
 	fprintf(stderr,"some OBJ functions not yet supported: - aborting\n");
 	exit(-1);
+  } else if(outputType=='m') {
+      if (!(actionType=='a'||actionType=='c')) {
+          fprintf(stderr,"unrecognized action (%c)\n",actionType);
+      } else if (!(inputType=='o'||inputType=='x')) {
+          fprintf(stderr,"input type '%c' not implemented yet\n",inputType);
+      } else {
+          // OgreMesh
+          OgreMeshConverter::ConverterInit();
+          OgreMeshConverter::SetTemplatePath(rootpath);
+
+          // Material file - same name and path, .material extension
+          string matfile = argv[2];
+          matfile.erase(matfile.rfind('.'));
+          matfile += ".material";
+
+          void *ctxt = 0;
+          if (actionType=='a')
+              ctxt = OgreMeshConverter::Init(argv[2],matfile.c_str()); else 
+              ctxt = OgreMeshConverter::Init();
+          OgreMeshConverter::SetName(ctxt,argv[2]);
+          OgreMeshConverter::SetBasePath(ctxt,basepath);
+
+          float refDistance=100;
+
+          // If the input filename is "-", then we're just postprocessing the .mesh file
+          if ((argv[1][0]!='-')||(argv[1][1]!='\0')) switch(inputType) {
+          case 'o':
+              {
+                  FILE* Inputfile=fopen(argv[1],"r");
+                  string mtl = ObjGetMtl(Inputfile,argv[2]);
+                  FILE * InputMtl = fopen (mtl.c_str(),"r");
+
+                  vector<XML> xmls;
+                  ObjToXMESH(Inputfile, InputMtl, xmls, forcenormals);
+
+                  for (vector<XML>::iterator it=xmls.begin(); it!=xmls.end(); it++)
+                      OgreMeshConverter::Add(ctxt,*it);
+              }
+              break;
+          case 'x':
+              {
+	              XML memfile=LoadXML(argv[1],1);
+                  OgreMeshConverter::Add(ctxt,memfile);
+              }
+              break;
+          case 'b':
+          default:
+              fprintf(stderr,"input type '%c' not implemented yet\n",inputType);
+          }
+
+          OgreMeshConverter::DoneMeshes(ctxt);
+
+          // 4*radialsize - a sensible reference distance
+          refDistance = 4*OgreMeshConverter::RadialSize(ctxt);
+
+          // Roundup
+          OgreMeshConverter::Optimize(ctxt);
+          if (autolod)     OgreMeshConverter::AutoLOD(ctxt,false,4,0.75f,refDistance);
+          if (autoedge)    OgreMeshConverter::AutoEdgeList(ctxt);
+          if (autotangent) OgreMeshConverter::AutoTangents(ctxt);
+          OgreMeshConverter::Dump(ctxt,argv[2],matfile.c_str());
+
+          OgreMeshConverter::ConverterClose();
+      }
+
   } else {
 	  fprintf(stderr,"Invalid command: %s - aborting",argv[3]);
 	  usage();

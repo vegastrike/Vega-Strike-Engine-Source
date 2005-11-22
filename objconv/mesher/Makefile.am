@@ -2,4 +2,22 @@ bin_PROGRAMS = mesher
 
 
 mesher_SOURCES =		\
-	converter.cpp   from_BFXM.cpp  hashtable.cpp  to_obj.cpp endianness.cpp  from_obj.cpp   to_BFXM.cpp    xml_support.cpp endianness.h  from_BFXM.h  hashtable.h  mesh_io.h  to_obj.h expat.h       from_obj.h   mesh.h       to_BFXM.h  xml_support.h
+	converter.cpp       \
+	hashtable.h         \
+	hashtable.cpp       \
+	endianness.h        \
+	endianness.cpp      \
+	xml_support.h       \
+	xml_support.cpp     \
+	from_BFXM.h         \
+	from_BFXM.cpp       \
+	to_BFXM.h           \
+	to_BFXM.cpp         \
+	from_obj.h          \
+	from_obj.cpp        \
+	to_obj.h            \
+	to_obj.cpp          \
+	mesh_io.h           \
+	expat.h             \
+	mesh.h
+

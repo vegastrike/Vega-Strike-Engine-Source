@@ -122,7 +122,7 @@ void SetNormal (GFXVertex &outp,
   outp.i = left.j*right.k-left.k*right.j;//xpd
   outp.j = left.k*right.i-left.i*right.k;
   outp.k = left.i*right.j-left.j*right.i;
-  float len = sqrt (outp.i*outp.i+outp.j*outp.j+outp.k*outp.k);
+  float len = (float)sqrt (outp.i*outp.i+outp.j*outp.j+outp.k*outp.k);
   if (len>.00001) {
     outp.i/=len;
     outp.j/=len;
@@ -231,6 +231,7 @@ bool shouldreflect (string r) {
 }
 
 
+extern bool flips,flipt,flipn;
 
 void beginElement(const string &name, const AttributeList &attributes, XML * xml) {
   
@@ -455,10 +456,10 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 		xml->vertex.z = XMLSupport::parse_float((*iter).value);
 		break;
       case XML::S:
-		xml->vertex.s = XMLSupport::parse_float ((*iter).value);
+        xml->vertex.s = XMLSupport::parse_float ((*iter).value) * (flips ? -1:+1);
 		break;
       case XML::T:
-		xml->vertex.t = XMLSupport::parse_float ((*iter).value);
+		xml->vertex.t = XMLSupport::parse_float ((*iter).value) * (flipt ? -1:+1);
 		break;
       }
     }
@@ -467,13 +468,13 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::I:
-		xml->vertex.i = XMLSupport::parse_float((*iter).value);
+        xml->vertex.i = XMLSupport::parse_float((*iter).value) * (flipn?-1:+1);
 		break;
       case XML::J:
-		xml->vertex.j = XMLSupport::parse_float((*iter).value);
+		xml->vertex.j = XMLSupport::parse_float((*iter).value) * (flipn?-1:+1);
 		break;
       case XML::K:
-		xml->vertex.k = XMLSupport::parse_float((*iter).value);
+		xml->vertex.k = XMLSupport::parse_float((*iter).value) * (flipn?-1:+1);
 		break;
       }
 
@@ -556,10 +557,13 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
      }
     }
     if (index<xml->num_vertex_references.size()){
-      if (xml->num_vertex_references[index]==0)
-        xml->vertices[index].i=xml->vertices[index].j=xml->vertices[index].k=0;
-      xml->num_vertex_references[index]++;
-      
+        if (xml->num_vertex_references[index]==0) {
+            xml->vertices[index].i=xml->vertices[index].j=xml->vertices[index].k=0;
+
+            if (xml->vertices[index].s==0) xml->vertices[index].s=s;
+            if (xml->vertices[index].t==0) xml->vertices[index].t=t;
+        }
+        xml->num_vertex_references[index]++;
     }
 	switch(xml->curpolytype){
 	case LINE:
@@ -819,6 +823,14 @@ void endElement(const string &name, XML * xml) {
 	xml->quadstrips.push_back(xml->striptemp);
     break;
   case XML::POLYGONS:
+    { 
+        for (int i=0; (i<xml->vertices.size()) && (i<xml->num_vertex_references.size()); i++) {
+            float f=((xml->num_vertex_references[i]>0)?1.f/xml->num_vertex_references[i]:1.f) * (flipn?-1:+1);
+            xml->vertices[i].i *= f;
+            xml->vertices[i].j *= f;
+            xml->vertices[i].k *= f;
+        }
+    }
     break;
   case XML::REF:
     break;

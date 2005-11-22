@@ -3,13 +3,53 @@
 #include <set>
 #include <vector>
 #include <assert.h>
+
+/*
+ * Vega Strike
+ * Copyright (C) 2001-2002 Daniel Horn & Chris Fry
+ *
+ * http://vegastrike.sourceforge.net/
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
+
+
+class Vector {
+ public:
+  float i,j,k;
+  Vector () {}
+  Vector (const GFXVertex &v) : i(v.x), j(v.y), k(v.z) {}
+  Vector(float _i,float _j,float _k) : i(_i),j(_j),k(_k) {}
+
+  Vector operator+ (const Vector &o) const {return Vector (i + o.i, j + o.j, k + o.k);}
+  Vector operator- (const Vector &o) const {return Vector (i - o.i, j - o.j, k - o.k);}
+  Vector Cross(const Vector &v) const { return Vector ( j*v.k-k*v.j, k*v.i-i*v.k, i*v.j-j*v.i); }
+  float  Dot(const Vector &b) const { return i*b.i+j*b.j+k*b.k; }
+  void   Normalize() { float f=Dot(*this); if (f>0) f = 1.0f/(float)sqrt(f); i*=f; j*=f; k*=f; }
+
+  bool   operator==(const Vector &o) const { return i==o.i && j==o.j && k==o.k; }
+};
+
+
 using std::map;
 using std::vector;
 struct MTL:public GFXMaterial {
   MTL() {
     blend_src=ONE;
     blend_dst=ZERO;
-    reflect=true;
+    reflect=false;
   }  
   bool usenormals;
   bool reflect;
@@ -204,6 +244,40 @@ static void ObjToXML(XML &xml, const vector <VTX> &vtxlist, const vector <TEX> &
         case 3: 
             //Triangle...
             xml.tris.push_back(triangle(e1,e2,e3,xml.vertices[e1].s,xml.vertices[e1].t,xml.vertices[e2].s,xml.vertices[e2].t,xml.vertices[e3].s,xml.vertices[e3].t));
+            //Tri-to-quad
+            /*if (xml.tris.size()>=2) {
+                const triangle &t1 = xml.tris[xml.tris.size()-2];
+                const triangle &t2 = xml.tris[xml.tris.size()-1];
+                if (  (t1.indexref[0] == t2.indexref[0])
+                    &&(t1.indexref[2] == t2.indexref[1])  ) {
+                    //Quad?
+                    Vector v11 = xml.vertices[t1.indexref[0]];
+                    Vector v12 = xml.vertices[t1.indexref[1]];
+                    Vector v13 = xml.vertices[t1.indexref[2]];
+                    Vector v21 = xml.vertices[t2.indexref[0]];
+                    Vector v22 = xml.vertices[t2.indexref[1]];
+                    Vector v23 = xml.vertices[t2.indexref[2]];
+                    Vector n1  = (v12-v11).Cross(v13-v11);
+                    Vector n2  = (v22-v21).Cross(v23-v21);
+                    n1.Normalize();
+                    n2.Normalize();
+                    if (n1==n2) {
+                        //Good enough - it's a quad.
+                        xml.quads.push_back(quad(
+                            t1.indexref[0],
+                            t1.indexref[1],
+                            t1.indexref[2],
+                            t2.indexref[2],
+                            xml.vertices[t1.indexref[0]].s,xml.vertices[t1.indexref[0]].t,
+                            xml.vertices[t1.indexref[1]].s,xml.vertices[t1.indexref[1]].t,
+                            xml.vertices[t1.indexref[2]].s,xml.vertices[t1.indexref[2]].t,
+                            xml.vertices[t2.indexref[2]].s,xml.vertices[t2.indexref[2]].t
+                            ));
+                        xml.tris.pop_back();
+                        xml.tris.pop_back();
+                    }
+                }
+            }*/
             break;
         case 4: 
             //Quad...
@@ -217,14 +291,14 @@ static FACE map_face(const FACE& f,const vector<int> &txcmap,const vector<int> &
 {
     FACE rf(f);
     switch (f.num) {
-    case 4: rf.r4.t=txcmap[rf.r4.t];
-            rf.r4.n=normalmap[rf.r4.n];
-    case 3: rf.r3.t=txcmap[rf.r3.t];
-            rf.r3.n=normalmap[rf.r3.n];
-    case 2: rf.r2.t=txcmap[rf.r2.t];
-            rf.r2.n=normalmap[rf.r2.n];
-    case 1: rf.r1.t=txcmap[rf.r1.t];
-            rf.r1.n=normalmap[rf.r1.n];
+    case 4: rf.r4.t=((rf.r4.t>=0)?txcmap[rf.r4.t]:-1);
+            rf.r4.n=((rf.r4.n>=0)?normalmap[rf.r4.n]:-1);
+    case 3: rf.r3.t=((rf.r3.t>=0)?txcmap[rf.r3.t]:-1);
+            rf.r3.n=((rf.r3.n>=0)?normalmap[rf.r3.n]:-1);
+    case 2: rf.r2.t=((rf.r2.t>=0)?txcmap[rf.r2.t]:-1);
+            rf.r2.n=((rf.r2.n>=0)?normalmap[rf.r2.n]:-1);
+    case 1: rf.r1.t=((rf.r1.t>=0)?txcmap[rf.r1.t]:-1);
+            rf.r1.n=((rf.r1.n>=0)?normalmap[rf.r1.n]:-1);
     }
     return rf;
 }
@@ -266,9 +340,10 @@ string ObjGetMtl (FILE* obj, string objpath) {
     return ret;
 }
 
-extern bool flips,flipt;
+extern bool flips,flipt,flipn;
 
-void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile,bool forcenormals) {
+void ObjToXMESH (FILE* obj, FILE * mtl, vector<XML> &xmllist, bool forcenormals) 
+{
    fseek (obj,0,SEEK_END);
    int osize=ftell(obj);
    fseek (obj,0,SEEK_SET);
@@ -285,7 +360,6 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile,bool forcenormals) {
    char * str3 = (char*)malloc((osize+1)*sizeof(char));
    char * str4 = (char*)malloc((osize+1)*sizeof(char));
    map<string,MTL> mtls;
-   XML xml;
    mtls["default"]=MTL();
    MTL * cur=&mtls["default"];
    while (fgets(buf,osize,mtl)) {
@@ -295,17 +369,6 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile,bool forcenormals) {
          mtls[str]=MTL();
          cur=&mtls[str];
 		 cur->textures.push_back(textureholder());
-		 cur->textures.back().index=0;
-         cur->textures.back().type=TEXTURE;
-	     cur->textures.back().name.push_back('w');
-	     cur->textures.back().name.push_back('h');
-	     cur->textures.back().name.push_back('i');
-	     cur->textures.back().name.push_back('t');
-	     cur->textures.back().name.push_back('e');
-	     cur->textures.back().name.push_back('.');
-	     cur->textures.back().name.push_back('b');
-	     cur->textures.back().name.push_back('m');
-	     cur->textures.back().name.push_back('p');
          continue;
       }
       wordtoupper(buf);
@@ -430,7 +493,8 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile,bool forcenormals) {
       }
       if (3==sscanf(buf,"vn %f %f %f\n",&v.i,&v.j,&v.k)) {
         //Sharing is loussy in .obj files... so lets merge a little
-        NORMAL n(-v.i,-v.j,-v.k);
+        NORMAL n(v.i,v.j,v.k);
+        if (flipn) v.i=-v.i, v.j=-v.j, v.k=-v.k;
         map<NORMAL,int>::iterator mi = normalmap.find(n);
         if (mi==normalmap.end()) {
             normalmap_ii.push_back(normallist.size());
@@ -462,7 +526,7 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile,bool forcenormals) {
               //fan - decomposed into tris. Sorry, but after fanification-stripification is done, everything will be allright again.
               {
                   vector<string> splitwhite = splitWhiteSpace(buf+1);        
-                  for (int i=2; i<splitwhite.size(); i++)
+                  for (vector<string>::size_type i=2; i<splitwhite.size(); i++)
                       facelist.push_back(map_face(FACE(parsePoly(splitwhite[0]),parsePoly(splitwhite[i-1]),parsePoly(splitwhite[i-2])),txcmap_ii,normalmap_ii)); 
               }
               break;
@@ -479,7 +543,10 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile,bool forcenormals) {
    facelist.clear();
 
    int textnum=0;
+   int totface=0;
    for (map<string,vector<FACE> >::iterator it=facelistlist.begin(); it!=facelistlist.end(); it++) {
+     XML xml;
+
      string mat=(*it).first;
 
      xml.vertices.clear();
@@ -494,7 +561,7 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile,bool forcenormals) {
      xml.material=mtls[mat];
      xml.textures=mtls[mat].textures;
      xml.detailtexture=mtls[mat].detail;
-     for (int jjjj=0;jjjj<mtls[mat].detailplanei.size();++jjjj) {
+     for (vector<float>::size_type jjjj=0;jjjj<mtls[mat].detailplanei.size();++jjjj) {
          Mesh_vec3f v;
          v.x=mtls[mat].detailplanei[jjjj];
          v.y=mtls[mat].detailplanej[jjjj];
@@ -509,10 +576,23 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile,bool forcenormals) {
      xml.usenormals=mtls[mat].usenormals;
 
      ObjToXML(xml,vtxlist,txclist,normallist,(*it).second);
+     xmllist.push_back(xml);
 
-     printf("%d_0: %d faces, %d vertices, %d lines, %d tris, %d quads\n",textnum,(*it).second.size(),xml.vertices.size(),xml.lines.size()/2,xml.tris.size()/3,xml.quads.size()/4);
-
-     xmeshToBFXM(xml,outputFile,textnum==0?'c':'a',forcenormals);
+     printf("%d_0: %d faces, %d vertices, %d lines, %d tris, %d quads\n",textnum,(*it).second.size(),xml.vertices.size(),xml.lines.size(),xml.tris.size(),xml.quads.size());
      textnum++;
+     totface += (*it).second.size();
+   }
+   printf("Total faces: %d\n",totface);
+}
+
+void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile,bool forcenormals) 
+{
+   vector<XML> xmllist;
+
+   ObjToXMESH(obj,mtl,xmllist,forcenormals);
+
+   int textnum=0;
+   for (vector<XML>::iterator it=xmllist.begin(); it!=xmllist.end(); ++it,++textnum) {
+     xmeshToBFXM(*it,outputFile,textnum==0?'c':'a',forcenormals);
    }
 }
