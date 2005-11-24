@@ -13,8 +13,8 @@
 #include "gfx/animation.h"
 #include "gfx/vsimage.h"
 
-template<typename T> inline T min(T a, T b) { return (a<b)?a:b; };
-template<typename T> inline T max(T a, T b) { return (a>b)?a:b; };
+template<typename T> inline T mymin(T a, T b) { return (a<b)?a:b; };
+template<typename T> inline T mymax(T a, T b) { return (a>b)?a:b; };
 
 bool VDU::staticable() {
   unsigned int thismode=getMode();
@@ -360,12 +360,7 @@ static std::string MangleString (const char * in, float probability) {
   free (tmp);
   return retval;
 }
-static float mymin (float a, float b) {
-  return a<b?a:b;
-}
-static float mymax (float a, float b) {
-  return a<b?a:b;
-}
+
 static void DrawShield (float fs, float rs, float ls, float bs, float x, float y, float w, float h, bool invert, GFXColor outershield,GFXColor middleshield,GFXColor innershield) { //FIXME why is this static?
   GFXEnable(SMOOTH);
   GFXPushBlendMode();
@@ -383,7 +378,8 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
       {innershield,middleshield,outershield},
       {innershield,middleshield,outershield}
   };
-  float shthresh[3]={0.2f,0.5f,0.75f};
+ 
+  float shthresh[3]={0.0f,0.33f,0.66f}; // PM me if you don't know why I did this.
   float shtrans[3]={1.0f,1.0f,1.0f};
   shcolor[0][0].a *= mymax(0.0f,mymin(1.0f,(fs-shthresh[0])/(shthresh[1]-shthresh[0])*shtrans[0]));
   shcolor[0][1].a *= mymax(0.0f,mymin(1.0f,(fs-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1]));
@@ -706,14 +702,14 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   static bool ishieldcolorloaded=(vs_config->getColor("default","inner_shield_color",ishieldcolor,true),true);
   static bool mshieldcolorloaded=(vs_config->getColor("default","middle_shield_color",mshieldcolor,true),true);
   static bool oshieldcolorloaded=(vs_config->getColor("default","outer_shield_color",oshieldcolor,true),true);
-
+/*
   static float iarmorcolor[4]={1,.6,0,1};
   static float marmorcolor[4]={1,.6,0,1};
   static float oarmorcolor[4]={1,.6,0,1};
   static bool iarmorcolorloaded=(vs_config->getColor("default","inner_shield_color",ishieldcolor,true),true);
   static bool marmorcolorloaded=(vs_config->getColor("default","middle_shield_color",mshieldcolor,true),true);
   static bool oarmorcolorloaded=(vs_config->getColor("default","outer_shield_color",oshieldcolor,true),true);
-
+*/ // uncomment if these are ever actually used
   DrawShield (fs,rs,ls,bs,x,y,w,h,invert_target_shields,
       GFXColor(ishieldcolor[0],ishieldcolor[1],ishieldcolor[2],ishieldcolor[3]),
       GFXColor(mshieldcolor[0],mshieldcolor[1],mshieldcolor[2],mshieldcolor[3]),
@@ -1147,14 +1143,14 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
         static bool ishieldcolorloaded=(vs_config->getColor("default","inner_shield_color",ishieldcolor,true),true);
         static bool mshieldcolorloaded=(vs_config->getColor("default","middle_shield_color",mshieldcolor,true),true);
         static bool oshieldcolorloaded=(vs_config->getColor("default","outer_shield_color",oshieldcolor,true),true);
-
+/*
         static float iarmorcolor[4]={1,.6,0,1};
         static float marmorcolor[4]={1,.6,0,1};
         static float oarmorcolor[4]={1,.6,0,1};
         static bool iarmorcolorloaded=(vs_config->getColor("default","inner_shield_color",ishieldcolor,true),true);
         static bool marmorcolorloaded=(vs_config->getColor("default","middle_shield_color",mshieldcolor,true),true);
         static bool oarmorcolorloaded=(vs_config->getColor("default","outer_shield_color",oshieldcolor,true),true);
-
+*/ // uncomment if these are ever actually used
         static bool invert_view_shields = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","invert_view_shields","false"));
         DrawShield(target->FShieldData(),target->RShieldData(),target->LShieldData(),target->BShieldData(),x,y,w,h,invert_view_shields,
             GFXColor(ishieldcolor[0],ishieldcolor[1],ishieldcolor[2],ishieldcolor[3]),
