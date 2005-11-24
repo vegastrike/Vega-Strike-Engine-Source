@@ -298,7 +298,7 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
                  *SizeScaleFactor
 #endif 
                  );
-             if (d) gun->Draw(lod,ct,d,cloak);
+             if (true) gun->Draw(lod,ct,d,cloak); // drawing guns in bases was broken, which is about the only time this is used
 
              if (mahnt->type->gun1){
                gun = mahnt->type->gun1;
@@ -311,7 +311,7 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
                    *SizeScaleFactor
 #endif 
                    );
-               if (d) gun->Draw(lod,ct,d,cloak);
+               if (true) gun->Draw(lod,ct,d,cloak);
              }
              glDisable(GL_NORMALIZE);
            }
