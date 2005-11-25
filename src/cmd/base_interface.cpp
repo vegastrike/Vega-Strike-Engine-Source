@@ -129,6 +129,11 @@ void BaseInterface::Room::BaseShip::Draw (BaseInterface *base) {
 	Unit *un=base->caller.GetUnit();
 	if (un) {
 		GFXHudMode (GFXFALSE);
+                float tmp = g_game.fov;
+                static float standard_fov=XMLSupport::parse_float(vs_config->getVariable("graphics","base_fov","90"));
+                g_game.fov=standard_fov;
+                float tmp1=_Universe->AccessCamera()->GetFov();
+                _Universe->AccessCamera()->SetFov(standard_fov);
 		Vector p,q,r;
 		_Universe->AccessCamera()->GetOrientation (p,q,r);
 		int co=_Universe->AccessCamera()->getCockpitOffset();
@@ -164,6 +169,8 @@ void BaseInterface::Room::BaseShip::Draw (BaseInterface *base) {
                 SetupViewport();                
 //		_Universe->AccessCockpit()->SetView (CP_PAN);
 		GFXHudMode (GFXTRUE);
+                g_game.fov=tmp;
+                _Universe->AccessCamera()->SetFov(tmp1);
 	}
 }
 
