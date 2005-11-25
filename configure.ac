@@ -118,6 +118,18 @@ dnl Check for non-standard floating point functions and headers
 
 AC_CHECK_FUNCS([finite _finite isnan _isnan])
 
+dnl --------------------------------------------------------------------------
+dnl Check if compiling for MacOSX
+dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING([for MacOSX platform])
+AC_EGREP_CPP(yes,
+[ 
+#if defined(__APPLE__) || defined(MACOSX)
+  yes
+#endif
+], [is_macosx=yes], [is_macosx=no] )
+AC_MSG_RESULT([${is_macosx}])
+
 AC_CHECK_HEADERS([ieeefp.h zlib.h])
 
 dnl --------------------------------------------------------------------------
@@ -184,7 +196,11 @@ else
     CXXFLAGS="${saved_CXXFLAGS}"
 
     if test "x$g3_supported" = "xyes"; then
+       if test "x$is_macosx" = "xyes"; then
+	    DEBUG_FLAGS="-g3"
+       else
 	    DEBUG_FLAGS="-ggdb3"
+       fi
     else
 	    DEBUG_FLAGS="-g"
     fi
@@ -280,17 +296,6 @@ AC_MSG_RESULT([${is_freebsd}])
 #if test "x$is_freebsd" = "xyes" ; then
 #    VS_LIBS="$VS_LIBS -lutil"
 #fi
-dnl --------------------------------------------------------------------------
-dnl Check if compiling for MacOSX
-dnl --------------------------------------------------------------------------
-AC_MSG_CHECKING([for MacOSX platform])
-AC_EGREP_CPP(yes,
-[ 
-#if defined(__APPLE__) || defined(MACOSX)
-  yes
-#endif
-], [is_macosx=yes], [is_macosx=no] )
-AC_MSG_RESULT([${is_macosx}])
 
 
 
@@ -299,7 +304,7 @@ if test "x$is_macosx" = "xyes" ; then
 	CPPFLAGS="$CPPFLAGS -Wno-long-double"
     dnl GL_CPPFLAGS="$GL_CPPFLAGS -framework OpenGL"
     dnl GLUT_CPPFLAGS="$GLUT_CPPFLAGS -framework GLUT"
-	VS_LIBS="$VS_LIBS -F/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks  -framework OpenGL -framework GLUT"
+	VS_LIBS="$VS_LIBS -F/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks  -framework OpenGL -framework GLUT -framework CoreAudio"
     with_gl_inc=/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes
     with_gl_libs=/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks/OpenGL.framework/Libraries
     with_al_inc="/Developer/SDKs/MacOSX10.2.8.sdk/Library/Frameworks/OpenAL.framework/Headers -I/sw/include"
