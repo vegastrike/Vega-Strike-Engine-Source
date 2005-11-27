@@ -1,0 +1,10 @@
+echo Warning - This script expects to be run from the boost subdirectory
+BOOSTDIR=`echo $PWD|awk 'BEGIN{RS="/"}END{printf "%s", $0}'`
+if (test "$2" == "test"); then
+  CMD=more
+else
+  CMD=bash
+fi
+#for x in `find $(BOOSTDIR) -maxdepth 1 ! -wholename $(BOOSTDIR) -type d -printf '%f\n' |sort -r`; do
+    find $1 "(" -name CVS -prune ")" , "( -name .deps -prune ")" , "(" ! -name CVS -type d -printf "cvs add %p\n" ")" , "(" -type f -printf "cvs add %p\n" ")" | ${CMD}
+#done

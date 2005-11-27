@@ -1,3 +1,0 @@
-#!/bin/sh
-g++ -g -o tempgen -I/sw/include -L/sw/lib -lexpat template_generator.cpp xml_support.cpp hashtable.cpp
-g++ -g mesh_xml.cpp xml_support.cpp -I/sw/include -L/sw/lib -lexpat

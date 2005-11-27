@@ -1,0 +1,55 @@
+echo Warning - This script expects to be run from the boost subdirectory
+BOOSTDIR=`echo $PWD|awk 'BEGIN{RS="/"}END{printf "%s", $0}'`
+pushd .. > /dev/null
+NEWMAKE=$PWD/$BOOSTDIR/Makefile.new
+
+# Copy verbatim all of the Makefile.am before and including #BOOST_BEGIN
+awk 'BEGIN{ended=0}; {if (ended==0) print $0}; $1=="#BOOST_BEGIN" {ended=1}' Makefile.am > $NEWMAKE 
+
+echo BOOSTDIR=${BOOSTDIR} >> $NEWMAKE
+echo BOOSTSOURCES= >> $NEWMAKE
+
+# Allow the BOOST section to be emptied for simpler maintenance of the rest
+# of the file.  Since it is trivial to repopulate this section, allow admin
+# edits to be done with the file shrunk down.
+if (( ($# == 0) || ("$1x" != "-emptyx") )); then
+
+needelse=0;
+# List all $BOOSTSOURCES files for code inclusion
+for x in `find $BOOSTDIR -maxdepth 1 ! -wholename $BOOSTDIR -type d -printf '%f\n' |sort -r`; do
+	echo Working $x - BOOST SOURCE and Build
+        if (test $needelse = 1) then
+		echo "else !BOOST"$prevdir >> $NEWMAKE 
+        fi
+           
+	echo "if BOOST$x" >> $NEWMAKE
+	find $BOOSTDIR/$x/src "(" -name CVS -prune ")" , "(" -type f -name "*.cpp" ")"| 
+	awk 'BEGIN {printf "BOOSTSOURCES += "}; 
+		{printf "\\\n  %s ", $0};
+		END {printf "\n\n"}' >> $NEWMAKE
+
+        needelse=1
+	prevdir=$x
+done
+neednot=0
+for x in `find $BOOSTDIR -maxdepth 1 ! -wholename $BOOSTDIR -type d -printf '%f\n' |sort`; do
+	if (test $neednot = 1) then	
+		echo "endif !BOOST$x" >> $NEWMAKE
+	else
+		echo "endif BOOST$x" >> $NEWMAKE
+	fi
+        neednot=1
+done
+
+else
+# We are leaving it empty for now.  Put some placeholders
+# in so that we are reminded of what goes in here.
+	echo "BOOSTDIR=" >> $NEWMAKE
+	echo "BOOSTOBJECTS=" >> $NEWMAKE
+	echo "#run update in the $BOOSTDIR subdirectory to populate this section" >> $NEWMAKE
+fi
+
+# Copy verbatim all of the Makefile.am after and including #BOOST_END
+awk 'BEGIN{started=0}; $1=="#BOOST_END" {started=1}; {if (started==1) print $0}' Makefile.am >> $NEWMAKE
+mv $NEWMAKE Makefile.am
+popd > /dev/null

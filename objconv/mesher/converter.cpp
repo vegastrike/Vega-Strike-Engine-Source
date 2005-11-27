@@ -1,6 +1,8 @@
 #include "from_obj.h"
 #include "from_BFXM.h"
+#ifdef HAVE_OGRE
 #include "to_OgreMesh.h"
+#endif
 void usage();
 void usage(){
 	fprintf(stderr,"usage:\n\tmesher <inputfile> <outputfile> <command> [-x|-y|-z<Translation Distance>] [-forceflatshade]\n\nWhere command is a 3 letter sequence of:\n\tInputfiletype:\n\t\tb:BFXM\n\t\to:OBJ\n\t\tx:xmesh\n\tOutputfiletype:\n\t\tb:BFXM\n\t\to:OBJ\n\t\tx:xmesh\n\tCommandflag:\n\t\ta: append to Outputfile\n\t\tc: create Outputfile\n");
@@ -173,6 +175,7 @@ int main (int argc, char** argv) {
   } else if(outputType=='m') {
       if (!(actionType=='a'||actionType=='c')) {
           fprintf(stderr,"unrecognized action (%c)\n",actionType);
+#ifdef HAVE_OGRE
       } else if (!(inputType=='o'||inputType=='x')) {
           fprintf(stderr,"input type '%c' not implemented yet\n",inputType);
       } else {
@@ -234,7 +237,10 @@ int main (int argc, char** argv) {
 
           OgreMeshConverter::ConverterClose();
       }
-
+#else
+      } else
+          fprintf(stderr,"input type '%c' not implemented yet\n",inputType);
+#endif
   } else {
 	  fprintf(stderr,"Invalid command: %s - aborting",argv[3]);
 	  usage();

@@ -25,21 +25,21 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-
-class Vector {
+/* Renamed to get rid of namespace collisions */
+class TObj_Vector {
  public:
   float i,j,k;
-  Vector () {}
-  Vector (const GFXVertex &v) : i(v.x), j(v.y), k(v.z) {}
-  Vector(float _i,float _j,float _k) : i(_i),j(_j),k(_k) {}
+  TObj_Vector () {}
+  TObj_Vector (const GFXVertex &v) : i(v.x), j(v.y), k(v.z) {}
+  TObj_Vector(float _i,float _j,float _k) : i(_i),j(_j),k(_k) {}
 
-  Vector operator+ (const Vector &o) const {return Vector (i + o.i, j + o.j, k + o.k);}
-  Vector operator- (const Vector &o) const {return Vector (i - o.i, j - o.j, k - o.k);}
-  Vector Cross(const Vector &v) const { return Vector ( j*v.k-k*v.j, k*v.i-i*v.k, i*v.j-j*v.i); }
-  float  Dot(const Vector &b) const { return i*b.i+j*b.j+k*b.k; }
+  TObj_Vector operator+ (const TObj_Vector &o) const {return TObj_Vector (i + o.i, j + o.j, k + o.k);}
+  TObj_Vector operator- (const TObj_Vector &o) const {return TObj_Vector (i - o.i, j - o.j, k - o.k);}
+  TObj_Vector Cross(const TObj_Vector &v) const { return TObj_Vector ( j*v.k-k*v.j, k*v.i-i*v.k, i*v.j-j*v.i); }
+  float  Dot(const TObj_Vector &b) const { return i*b.i+j*b.j+k*b.k; }
   void   Normalize() { float f=Dot(*this); if (f>0) f = 1.0f/(float)sqrt(f); i*=f; j*=f; k*=f; }
 
-  bool   operator==(const Vector &o) const { return i==o.i && j==o.j && k==o.k; }
+  bool   operator==(const TObj_Vector &o) const { return i==o.i && j==o.j && k==o.k; }
 };
 
 
@@ -251,14 +251,14 @@ static void ObjToXML(XML &xml, const vector <VTX> &vtxlist, const vector <TEX> &
                 if (  (t1.indexref[0] == t2.indexref[0])
                     &&(t1.indexref[2] == t2.indexref[1])  ) {
                     //Quad?
-                    Vector v11 = xml.vertices[t1.indexref[0]];
-                    Vector v12 = xml.vertices[t1.indexref[1]];
-                    Vector v13 = xml.vertices[t1.indexref[2]];
-                    Vector v21 = xml.vertices[t2.indexref[0]];
-                    Vector v22 = xml.vertices[t2.indexref[1]];
-                    Vector v23 = xml.vertices[t2.indexref[2]];
-                    Vector n1  = (v12-v11).Cross(v13-v11);
-                    Vector n2  = (v22-v21).Cross(v23-v21);
+                    TObj_Vector v11 = xml.vertices[t1.indexref[0]];
+                    TObj_Vector v12 = xml.vertices[t1.indexref[1]];
+                    TObj_Vector v13 = xml.vertices[t1.indexref[2]];
+                    TObj_Vector v21 = xml.vertices[t2.indexref[0]];
+                    TObj_Vector v22 = xml.vertices[t2.indexref[1]];
+                    TObj_Vector v23 = xml.vertices[t2.indexref[2]];
+                    TObj_Vector n1  = (v12-v11).Cross(v13-v11);
+                    TObj_Vector n2  = (v22-v21).Cross(v23-v21);
                     n1.Normalize();
                     n2.Normalize();
                     if (n1==n2) {

@@ -41,6 +41,7 @@ case $target in
 	slabcheck=no;
 ;;
 esac                                             
-AM_CONDITIONAL(WIN32, test "${WIN32}" = "1")
+AM_CONDITIONAL(WIN32, test "$WIN32" = "1")
 AM_CONDITIONAL(LINUX, test "$LINUX" = "1")
+AM_CONDITIONAL(MACOSX, test "$MACOSX" = "1")
 ])

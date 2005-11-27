@@ -17,7 +17,7 @@ echo vegastrike.sourceforge.net for help in using this script
 checkversion()
 {
   ver_ok=NO
-  read t1 t2 t3 t4;
+  read t1 t2 t3 t4 t5;
   if (test x$t4 "<" x$ver_needed) then
     ver_ok=NO
   else
@@ -56,7 +56,6 @@ if (test $? -ne 0) then
   echo "autoheader is not new enough.  Please upgrade to at least version $ver_needed"
   vers_ok=NO
 fi
-
 
 autoconf --version|checkversion
 if (test $? -ne 0) then

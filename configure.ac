@@ -1,4 +1,4 @@
-AC_INIT(vegastrike, 0.4.3)
+AC_INIT(vegastrike, 0.4.4)
 AC_CONFIG_SRCDIR(src/vegastrike.h)
 AC_PREREQ(2.53)
 
@@ -18,12 +18,13 @@ AC_MSG_NOTICE([Using compiler: ${CXX}.])
 dnl Check system type
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
-AC_CANONICAL_TARGET
+dnl We aren't a compiler, so we shouldn't need target information
+dnl AC_CANONICAL_TARGET
 VS_CHECK_OS
 
 
 dnl Initialize AutoMake and AutoHeader systems
-AM_INIT_AUTOMAKE([1.6])
+AM_INIT_AUTOMAKE([1.6 subdir-objects dist-bzip2 tar-ustar ])
 AM_CONFIG_HEADER(config.h)
 
 
@@ -58,6 +59,7 @@ CXXFLAGS="${saved_CXXFLAGS}"
 
 case $target in
   *Darwin* | *darwin*)
+    is_macosx=yes
     bsdthread=no
     ;;
   *cygwin*)
@@ -196,11 +198,7 @@ else
     CXXFLAGS="${saved_CXXFLAGS}"
 
     if test "x$g3_supported" = "xyes"; then
-       if test "x$is_macosx" = "xyes"; then
 	    DEBUG_FLAGS="-g3"
-       else
-	    DEBUG_FLAGS="-ggdb3"
-       fi
     else
 	    DEBUG_FLAGS="-g"
     fi
@@ -210,9 +208,10 @@ AC_ARG_ENABLE(ggdb3, AC_HELP_STRING([--enable-ggdb3], [Add the -ggdb3 compiler f
 
 AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug], [Produce an executable with debugging symbols]), [VS_CXXFLAGS="${VS_CXXFLAGS} ${DEBUG_FLAGS}"])
 
-AC_ARG_ENABLE(release, AC_HELP_STRING([--enable-release], [Produce an executable with optimizations]), [VS_CXXFLAGS="${VS_CXXFLAGS} -O2 -ffast-math"])
+AC_ARG_ENABLE(release, AC_HELP_STRING([--enable-release], [Produce an executable with optimizations]), [VS_CXXFLAGS="${VS_CXXFLAGS} -O2 -ffast-math -static"])
 
 AC_ARG_ENABLE(profile, AC_HELP_STRING([--enable-profile], [Produce an executable with profiling code]),  [VS_CXXFLAGS="${VS_CXXFLAGS} -pg"])
+
 AC_ARG_ENABLE(wall, AC_HELP_STRING([--enable-wall], [Use the -Wall flag with the compiler.]), [VS_CXXFLAGS="${VS_CXXFLAGS} -Wall"])
 
 AC_ARG_ENABLE(pedantic, AC_HELP_STRING([--enable-pedantic], [Enable -pedantic (and -ansi for C) modes]), [VS_CXXFLAGS="${VS_CXXFLAGS} -pedantic"])
@@ -339,7 +338,8 @@ VS_CHECK_GL
 dnl --------------------------------------------------------------------------
 dnl Make sure that the scripts in m4scripts are available
 dnl --------------------------------------------------------------------------
-m4_ifdef([VS_CHECK_CRYPTO], [], [AC_FATAL([MISSING script(s) from m4scripts directory.
+m4_ifdef([VS_CHECK_CRYPTO], [], 
+[AC_FATAL([MISSING script(s) from m4scripts directory.
 An easy way to get these scripts is to use ./bootstrap-sh to create configure.
 If you get the message and are running bootstrap-sh, that probably means that 
 the m4scripts directory does not exist.  If you are using CVS to get 
@@ -706,62 +706,21 @@ AC_SUBST(PYTHON_CPPFLAGS)
 AC_SUBST(CG_CPPFLAGS)
 AC_SUBST(CG_LIBS)
 
-BOOST_CPPFLAGS="-DUSE_BOOST_128=1"' -I$(top_srcdir)/src/boost'
-BOOST_LIBS="../src/boost/libpython_boost.a"
-TESTUSEBOOST131="1"
-TESTUSEBOOST128="0"
-AC_ARG_ENABLE(boost-128, AC_HELP_STRING([--enable-boost-128], [Use if your compiler has trouble with boost-131 (such as gcc 2.9x)]),TESTUSEBOOST131="0")
-
-if test "$TESTUSEBOOST131" = "1" ; then
-   BOOST_CPPFLAGS="-DUSE_BOOST_131=1 "'-I$(top_srcdir)/src/boost129'
-   BOOST_LIBS="../src/boost129/libpython_boost.a"
-fi
-
-if test "$TESTUSEBOOST131" = "0" ; then
-TESTUSEBOOST128="1"
-fi
-
-AC_SUBST([BOOST_LIBS])
-AC_SUBST([BOOST_CPPFLAGS])
-AM_CONDITIONAL(USEBOOST128, test "$TESTUSEBOOST128" = "1")
-AM_CONDITIONAL(USEBOOST131, test "$TESTUSEBOOST131" = "1")
-AM_CONDITIONAL(MACOSX, test "x$is_macosx" = "xyes")
+VS_WITH_BOOST
 
 VS_WITH_NET_THREADS
 
 VS_WITH_COLLIDE_MAP
 
+VS_WITH_OGRE
+
 VS_CONFIG_VSLAUNCHER
 
-CPPFLAGS="${CPPFLAGS} ${VS_CPPFLAGS} ${PYTHON_CPPFLAGS} ${BOOST_CPPFLAGS} ${CG_CPPFLAGS}"' -I$(top_srcdir)/src '
+# The boost include must come first to override includes from elsewhere
+CPPFLAGS="${BOOST_CPPFLAGS} ${CPPFLAGS} ${VS_CPPFLAGS} ${PYTHON_CPPFLAGS} ${CG_CPPFLAGS}"' -I$(top_srcdir)/src '
 CXXFLAGS="${CXXFLAGS} ${VS_CXXFLAGS} ${PTHREAD_CXXFLAGS} -pipe"
 
 LIBS="${LIBS} ${VS_LIBS} ${PYTHON_LIBS} ${PTHREAD_LIBS} ${CG_LIBS}"
 
-
-AC_CONFIG_FILES(Makefile
-                 launcher/Makefile
-                 mission/Makefile
-                 objconv/Makefile
-                 src/Makefile
-                 src/aldrv/Makefile
-                 src/boost/Makefile
-                 src/boost129/Makefile
-                 src/cmd/Makefile
-                 src/cmd/ai/Makefile
-                 src/cmd/collide/Makefile
-                 src/cmd/collide/csgeom/Makefile
-                 src/cmd/script/Makefile
-                 src/cmd/script/c_alike/Makefile
-                 src/common/Makefile
-                 src/gfx/Makefile
-                 src/gfx/nav/Makefile
-                 src/gldrv/Makefile
-                 src/gui/Makefile
-                 src/networking/Makefile
-                 src/networking/lowlevel/Makefile
-                 src/python/Makefile
-		 objconv/mesher/Makefile
-                 tools/Makefile
-                 )
+AC_CONFIG_FILES(Makefile)
 AC_OUTPUT()

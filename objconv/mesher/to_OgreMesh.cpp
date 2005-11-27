@@ -149,13 +149,14 @@ static string getMaterialHash(const XML &memfile)
 {
     string hash;
     char tmp[64];
-
+    /* Moved out of for because used for both for loops. */
+    vector<textureholder>::size_type i;
     hash += getMaterialHash(memfile.material,memfile.reflect,memfile.lighting,memfile.cullface,memfile.polygon_offset,memfile.blend_src,memfile.blend_dst,memfile.alphatest);
     hash += "-";
 
     sprintf(tmp,"-%d-",memfile.textures.size()); 
     hash += tmp;
-    for (vector<textureholder>::size_type i=0; i<memfile.textures.size(); i++) {
+    for (i=0; i<memfile.textures.size(); i++) {
         sprintf(tmp,"%d,%d,",memfile.textures[i].index,memfile.textures[i].type);
         hash += tmp;
         hash += memfile.textures[i].name;

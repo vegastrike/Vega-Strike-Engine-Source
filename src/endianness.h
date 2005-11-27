@@ -4,11 +4,6 @@ double DONTUSE__NXSwapBigDoubleToLittleEndian(double x);
 
 #include "config.h"
 
-/*double VSSwapHostDoubleToLittle (double x);
-float VSSwapHostFloatToLittle (float x);
-unsigned int VSSwapHostIntToLittle (unsigned int x);
-unsigned short VSSwapHostShortToLittle (unsigned short x);*/
-
 #if defined(__APPLE__) || defined(MACOSX) || defined(BSD) || defined(__FreeBSD__)
     #include<machine/endian.h>
 #else
@@ -72,15 +67,19 @@ inline float VSSwapHostFloatToLittle (float x) {
   l.i = le32_to_cpu (l.i);
   return l.f;
 }
+
 inline double VSSwapHostDoubleToLittle (double x) {
   return le64_to_cpu (x);
 }
+
 inline unsigned int VSSwapHostIntToLittle (unsigned int x) {
   return le32_to_cpu (x);
 }
+
 inline unsigned short VSSwapHostShortToLittle (unsigned short x) {
   return le16_to_cpu (x);
 }
+
 inline double DONTUSE__NXSwapBigDoubleToLittleEndian(double x){
   union LILdubl {
     double d;

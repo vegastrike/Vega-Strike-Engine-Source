@@ -3,7 +3,7 @@ AC_DEFUN([VS_WITH_NET_THREADS],
 #--------------------------------------------------------------------------
 #Choosing networking threading approach
 #--------------------------------------------------------------------------
-AC_ARG_WITH(net-threads, AC_HELP_STRING([--with-net-threads], [TYPES are none (default) and posix]))
+AC_ARG_WITH(net-threads, AC_HELP_STRING([[--with-net-threads[=TYPE]]], [TYPES are none (default) and posix]))
 case "$with_net_threads" in
     "p" | "posix" | "yes" | "y")
         AC_MSG_NOTICE([Using Posix Threads (Experimental)])

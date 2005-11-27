@@ -743,9 +743,10 @@ void UnitBeginElement(const string &name, const AttributeList &attributes, XML *
                 if (XMLSupport::parse_float (tval)!=0)
                     bval=tval = "0";
             }
+            /* (float) done to get rid of ambiguity in function selection */
             if (xeq (name,"hold")) {
                 if (xeq (iter->name,"volume")) {
-                    tval = xts((XMLSupport::parse_float (iter->value)*1.2));
+                    tval = xts((float)(XMLSupport::parse_float (iter->value)*1.2));
                 }
             }
 			if (xeq (name,"subunit")) {
