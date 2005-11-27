@@ -66,7 +66,7 @@ fi
 if (test x$vers_ok = xOK) then
 {
 if (aclocal -I m4scripts) then
-  autoheader -f && autoconf -f && automake -cf --add-missing
+  autoheader -f && autoconf -f && automake -acf || echo An error occurred while running the autotools.  Please correct
 else
   echo m4scripts directory appears to be missing.
   echo try running cvs update -P -d
