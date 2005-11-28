@@ -2,9 +2,8 @@ ACLOCAL_AMFLAGS = -I m4scripts
 
 #BOOST_BEGIN -- Data between the BOOST_AUTO and BOOST_END tags auto generated.
 BOOSTDIR=boost
-BOOSTSOURCES=
 if BOOST1_33
-BOOSTSOURCES += \
+BOOSTSOURCES = \
   boost/1_33/src/list.cpp \
   boost/1_33/src/module.cpp \
   boost/1_33/src/wrapper.cpp \
@@ -33,7 +32,7 @@ BOOSTSOURCES += \
 
 else !BOOST1_33
 if BOOST1_31
-BOOSTSOURCES += \
+BOOSTSOURCES = \
   boost/1_31/src/list.cpp \
   boost/1_31/src/module.cpp \
   boost/1_31/src/aix_init_module.cpp \
@@ -60,7 +59,7 @@ BOOSTSOURCES += \
 
 else !BOOST1_31
 if BOOST1_28
-BOOSTSOURCES += \
+BOOSTSOURCES = \
   boost/1_28/src/module.cpp \
   boost/1_28/src/cross_module.cpp \
   boost/1_28/src/types.cpp \
@@ -82,7 +81,9 @@ BOOSTSOURCES += \
   boost/1_28/src/classes.cpp \
   boost/1_28/src/conversions.cpp 
 
-endif BOOST1_28
+else !BOOST1_28
+BOOSTSOURCES=
+endif !BOOST1_28
 endif !BOOST1_31
 endif !BOOST1_33
 #BOOST_END -- Data between the BOOST_AUTO and BOOST_END tags auto generated.
@@ -101,7 +102,7 @@ EXTRA_DIST = \
   src/cmd/unit_customize.cpp \
   src/cmd/unit_damage.cpp \
   src/cmd/unit_jump.cpp \
-  src/cmd/unit_physics.cpp \  
+  src/cmd/unit_physics.cpp \
   vc98/vegastrike.dsp \
   vc98/vegastrike.dsw \
   $(BOOSTDIR)/cvsadd \
@@ -385,6 +386,11 @@ LIBCMD = \
   src/cmd/weapon_xml.cpp \
   src/cmd/weapon_xml.h
 
+if VS_MAKE_LAUNCHER
+  VSLAUNCHER_PROG=vslauncher
+else
+  VSLUANCHER_PROG=
+endif
 bin_PROGRAMS = \
   accountserver \
   asteroidgen \
@@ -398,7 +404,8 @@ bin_PROGRAMS = \
   vegaserver \
   vegastrike \
   vsrextract \
-  vsrmake
+  vsrmake \
+  $(VSLAUNCHER_PROG)
 
 noinst_LIBRARIES=\
   libboost_python.a \
@@ -951,7 +958,7 @@ base_maker_SOURCES = \
 
 mesher_CXXFLAGS = $(OGRE_CFLAGS) -I../../src -I../..
 mesher_LDFLAGS = $(OGRE_LIBS)
-mesher_SOURCES = \
+mesher_SRC = \
   objconv/mesher/converter.cpp \
   objconv/mesher/expat.h  \
   objconv/mesher/from_BFXM.cpp \
@@ -970,9 +977,11 @@ mesher_SOURCES = \
   src/xml_support.cpp \
   src/xml_support.h
 if HAVE_OGRE
-mesher_SOURCES +=
+mesher_SOURCES = $(mesher_SRC) \
   objconv/mesher/to_OgreMesh.cpp \
   objconv/mesher/to_OgreMesh.h 
+else
+mesher_SOURCES = $(mesher_SRC)
 endif
 tempgen_LDFLAGS = -lexpat
 tempgen_CPPFLAGS = -I../../src
@@ -1013,8 +1022,6 @@ vsrextract_SOURCES= \
   tools/vsrtools.h
 
 
-if VS_MAKE_LAUNCHER
-  bin_PROGRAMS+=vslauncher
 
   vslauncher_LDFLAGS = `gtk-config --libs`
   vslauncher_CXXFLAGS=`gtk-config --cflags`
@@ -1024,7 +1031,6 @@ if VS_MAKE_LAUNCHER
     launcher/general.h \
     src/common/common.cpp \
     src/common/common.h
-endif
 
 src/cmd/script/c_alike/c_alike.tab.cpp: src/cmd/script/c_alike/c_alike.yacc
 
