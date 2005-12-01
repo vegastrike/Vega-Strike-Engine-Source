@@ -409,6 +409,7 @@ echo CPPFLAGS=$CPPFLAGS
 dnl Check for glext.h
 AC_LANG(C++)
 
+if test "x$is_macosx" = "xyes" ; then
 AC_COMPILE_IFELSE(
 [[
 #include <GL/gl.h>    
@@ -423,6 +424,7 @@ You can get a new copy at
 http://oss.sgi.com/projects/ogl-sample/ABI/glext.h
 Place it in the directory /usr/include/GL.
 *****************************************************************])])
+fi
 
 CPPFLAGS="$saved_CPPFLAGS"
 VS_CPPFLAGS="${VS_CPPFLAGS} $GL_CPPFLAGS"
