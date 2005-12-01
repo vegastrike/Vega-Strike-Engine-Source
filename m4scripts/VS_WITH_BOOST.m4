@@ -13,7 +13,7 @@ esac
 dnl the stuff between [ ] is treated as a string by autoconf
 dnl and placed verbatim into the configure script, where we want it.
 [BOOSTDIR=`grep '^BOOSTDIR=' Makefile.am|awk 'BEGIN{FS="="}{print $(2)}'`
-with_boost_ver=`echo $with_boost|awk '{gsub("[.]", "_", $(0)); print ($(0))}'`
+with_boost_ver=`echo $with_boost|awk '{gsub("[.]", "_"); print}'`
 BOOST_CPPFLAGS='-I$(top_srcdir)/$(BOOSTDIR)/'$with_boost_ver
 if [[ $with_boost = "1.28" ]]; then
   BOOST_CPPFLAGS="$BOOST_CPPFLAGS -DUSE_BOOST_128=1"
