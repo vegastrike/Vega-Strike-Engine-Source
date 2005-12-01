@@ -24,14 +24,16 @@ VS_CHECK_OS
 
 
 dnl Initialize AutoMake and AutoHeader systems
-AM_INIT_AUTOMAKE([1.6 subdir-objects dist-bzip2 tar-ustar ])
+AM_INIT_AUTOMAKE([1.6 subdir-objects dist-bzip2 ])
 AM_CONFIG_HEADER(config.h)
 
 
 dnl Check for compilers.  We set CXXFLAGS to null if unset, so
 dnl that these macros won't set them to default values that we don't want.
-CPPFLAGS=""
-CXXFLAGS=""
+dnl CPPFLAGS=""
+dnl CXXFLAGS=""
+echo CXXFLAGS=$CXXFLAGS
+echo CPPFLAGS=$CPPFLAGS
 dnl unfortunately most users (eg hellcatv) are too stupid to figure out where that environment variable is set (it's not in env or set or echo $CPPFLAGS gives nothing) so we have to force it to null
 if test "x${CXXFLAGS:-notset}" = "xnotset" ; then
    export CXXFLAGS
@@ -134,6 +136,8 @@ AC_MSG_RESULT([${is_macosx}])
 
 AC_CHECK_HEADERS([ieeefp.h zlib.h])
 
+echo CXXFLAGS=$CXXFLAGS
+echo CPPFLAGS=$CPPFLAGS
 dnl --------------------------------------------------------------------------
 dnl General options
 dnl --------------------------------------------------------------------------
@@ -220,6 +224,8 @@ AC_ARG_ENABLE(macosx_bundle, AC_HELP_STRING([--enable-macosx-bundle], [Produce a
 
 VS_CXXFLAGS="${VS_CXXFLAGS} ${VS_ALIGN} ${USER_FLAGS}"
 
+echo CXXFLAGS=$CXXFLAGS
+echo CPPFLAGS=$CPPFLAGS
 dnl --------------------------------------------------------------------------
 dnl Check if compiling for Win32
 dnl --------------------------------------------------------------------------
@@ -264,6 +270,8 @@ if test "x${is_mingw}" = "xyes" ; then
 	VS_LIBS="${VS_LIBS} -L/usr/lib/w32api -lwsock32"
 fi
 
+echo CXXFLAGS=$CXXFLAGS
+echo CPPFLAGS=$CPPFLAGS
 dnl --------------------------------------------------------------------------
 dnl Check if compiling for Linux
 dnl --------------------------------------------------------------------------
@@ -308,12 +316,12 @@ if test "x$is_macosx" = "xyes" ; then
     with_gl_libs=/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks/OpenGL.framework/Libraries
     with_al_inc="/Developer/SDKs/MacOSX10.2.8.sdk/Library/Frameworks/OpenAL.framework/Headers -I/sw/include"
     with_al_libs="/Developer/SDKs/MacOSX10.2.8.sdk/Library/Frameworks/OpenAL.framework/ -L/sw/lib"
-    with_expat_libs=/sw/lib
-    with_png_libs=/sw/lib
-    with_jpeg_libs=/sw/lib
-    with_jpeg_inc=/sw/include
-    with_expat_inc=/sw/include
-    with_png_inc=/sw/include
+dnl    with_expat_libs=/sw/lib
+dnl    with_png_libs=/sw/lib
+dnl    with_jpeg_libs=/sw/lib
+dnl    with_jpeg_inc=/sw/include
+dnl    with_expat_inc=/sw/include
+dnl    with_png_inc=/sw/include
     PYTHON_LDOPTS="-L/Library/Frameworks/Python.framework"
     with_python_inc=/Library/Frameworks/Python.framework/Headers
     VS_LIBS="$VS_LIBS -lobjc"
@@ -325,13 +333,15 @@ VS_CHECK_PYTHON
 
 VS_CHECK_SDL
 
+echo CXXFLAGS=$CXXFLAGS
+echo CPPFLAGS=$CPPFLAGS
 dnl --------------------------------------------------------------------------
 dnl Check for car sim
 dnl --------------------------------------------------------------------------
 AC_ARG_ENABLE(car, AC_HELP_STRING([--enable-car], [Produce an executable for car simulation]), [VS_CPPFLAGS="${VS_CPPFLAGS} -DCAR_SIM"; echo "making car simulator"])
 
 
-
+AC_LANG(C++)
 VS_CHECK_GL
 
 
@@ -353,6 +363,8 @@ m4_pattern_forbid([VS_CHECK_CRYPTO])
 dnl --------------------------------------------------------------------------
 dnl Check for OpenGL headers
 dnl --------------------------------------------------------------------------
+echo CXXFLAGS=$CXXFLAGS
+echo CPPFLAGS=$CPPFLAGS
 
 AC_ARG_WITH(gl-inc, AC_HELP_STRING([--with-gl-inc=DIR], [OpenGL header file location]))
 
@@ -390,56 +402,27 @@ if test "x$have_gl_h" = "xno" ; then
     AC_MSG_ERROR([Cannot find GL/gl.h])
 fi
 
-dnl Check for glext.h
-if test "x$is_macosx" = "xyes" ; then
-    have_glext_h=yes
-else
-    AC_CHECK_HEADERS([GL/gl.h GL/glext.h], [have_glext_h=yes], [have_glext_h=no],
-    [[
-    #include <GL/gl.h>    
-    #include <GL/glext.h>
-    #if (!defined(GL_ARB_vertex_buffer_object) ) && GL_GLEXT_VERSION<21
-    #error "Download http://oss.sgi.com/projects/ogl-sample/ABI/glext.h; Place it in the directory /usr/include/GL."
-    #endif
-    ]])
-fi
+echo CXXFLAGS=$CXXFLAGS
+echo CPPFLAGS=$CPPFLAGS
 
-if test "x$have_glext_h" = "xno" ; then
-    AC_MSG_ERROR([
+
+dnl Check for glext.h
+AC_LANG(C++)
+
+AC_COMPILE_IFELSE(
+[[
+#include <GL/gl.h>    
+#include <GL/glext.h>
+#if (!defined(GL_ARB_vertex_buffer_object) ) && GL_GLEXT_VERSION<21
+#error "Download http://oss.sgi.com/projects/ogl-sample/ABI/glext.h; Place it in the directory /usr/include/GL."
+#endif
+]], [], [AC_MSG_ERROR([
 *****************************************************************
 Your file glext.h is too old. (Must be Version 21 or greater)
 You can get a new copy at
 http://oss.sgi.com/projects/ogl-sample/ABI/glext.h
 Place it in the directory /usr/include/GL.
-*****************************************************************])
-fi
-
-dnl Check that glext.h version is recent enough
-AC_MSG_CHECKING([whether glext.h is recent enough]);
-if test "x$is_macosx" = "xno" ; then
-AC_EGREP_CPP(yes,
-[
-#include <GL/gl.h>
-#include <GL/glext.h>
-#if defined(GL_GLEXT_VERSION) && GL_GLEXT_VERSION >= 6
- yes
-#endif
-], is_glext_h_recent=yes, is_glext_h_recent=no )
-else
-    is_glext_h_recent=yes
-fi
-
-AC_MSG_RESULT([$is_glext_h_recent])
-
-if test "x$is_glext_h_recent" = "xno" ; then
-    AC_MSG_ERROR([
-*****************************************************************
-Your copy of glext.h is out of date.
-You can get a copy of the latest version at
-http://oss.sgi.com/projects/ogl-sample/ABI/glext.h
-Place it in the directory /usr/include/GL.
-*****************************************************************])
-fi
+*****************************************************************])])
 
 CPPFLAGS="$saved_CPPFLAGS"
 VS_CPPFLAGS="${VS_CPPFLAGS} $GL_CPPFLAGS"

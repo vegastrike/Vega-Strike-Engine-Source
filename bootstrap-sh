@@ -36,7 +36,7 @@ checkversion()
 
 
 vers_ok=OK
-ver_needed=1.6.0
+ver_needed=1.4
 
 aclocal --version|checkversion
 if (test $? -ne 0) then

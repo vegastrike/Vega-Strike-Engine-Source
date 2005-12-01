@@ -7,7 +7,7 @@ NEWMAKE=$PWD/$BOOSTDIR/Makefile.new
 awk 'BEGIN{ended=0}; {if (ended==0) print $0}; $1=="#BOOST_BEGIN" {ended=1}' Makefile.am > $NEWMAKE 
 
 echo BOOSTDIR=${BOOSTDIR} >> $NEWMAKE
-echo BOOSTSOURCES= >> $NEWMAKE
+#echo BOOSTSOURCES= >> $NEWMAKE
 
 # Allow the BOOST section to be emptied for simpler maintenance of the rest
 # of the file.  Since it is trivial to repopulate this section, allow admin
@@ -16,7 +16,7 @@ if (( ($# == 0) || ("$1x" != "-emptyx") )); then
 
 needelse=0;
 # List all $BOOSTSOURCES files for code inclusion
-for x in `find $BOOSTDIR -maxdepth 1 ! -wholename $BOOSTDIR -type d -printf '%f\n' |sort -r`; do
+for x in `find $BOOSTDIR -maxdepth 1 ! -name CVS ! -path $BOOSTDIR -type d -printf '%f\n' |sort -r`; do
 	echo Working $x - BOOST SOURCE and Build
         if (test $needelse = 1) then
 		echo "else !BOOST"$prevdir >> $NEWMAKE 
@@ -24,7 +24,7 @@ for x in `find $BOOSTDIR -maxdepth 1 ! -wholename $BOOSTDIR -type d -printf '%f\
            
 	echo "if BOOST$x" >> $NEWMAKE
 	find $BOOSTDIR/$x/src "(" -name CVS -prune ")" , "(" -type f -name "*.cpp" ")"| 
-	awk 'BEGIN {printf "BOOSTSOURCES += "}; 
+	awk 'BEGIN {printf "BOOSTSOURCES = "}; 
 		{printf "\\\n  %s ", $0};
 		END {printf "\n\n"}' >> $NEWMAKE
 
@@ -32,7 +32,7 @@ for x in `find $BOOSTDIR -maxdepth 1 ! -wholename $BOOSTDIR -type d -printf '%f\
 	prevdir=$x
 done
 neednot=0
-for x in `find $BOOSTDIR -maxdepth 1 ! -wholename $BOOSTDIR -type d -printf '%f\n' |sort`; do
+for x in `find $BOOSTDIR -maxdepth 1 ! -name CVS ! -path $BOOSTDIR -type d -printf '%f\n' |sort`; do
 	if (test $neednot = 1) then	
 		echo "endif !BOOST$x" >> $NEWMAKE
 	else
