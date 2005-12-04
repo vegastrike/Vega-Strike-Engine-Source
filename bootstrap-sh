@@ -1,3 +1,4 @@
+#!/bin/sh
 # This scripts prepares the configure script for execution.
 # Prior to building configure, it makes sure that at least
 # the basic autotools are there and are an acceptable version.
@@ -33,31 +34,53 @@ checkversion()
   fi
 }
 
+# Set these variables only if they are not set in the environment.
+
+if [ "x$ACLOCAL" = "x" ]; then
+    ACLOCAL=aclocal
+    # Debian systems need a new aclocal.
+    aclocal-1.7 --version > /dev/null 2> /dev/null && ACLOCAL=aclocal-1.7
+fi
+
+if [ "x$AUTOMAKE" = "x" ]; then
+    AUTOMAKE=automake
+    # Debian systems need a new automake.
+    automake-1.7 --version > /dev/null 2> /dev/null && AUTOMAKE=automake-1.7
+fi
+
+if [ "x$AUTOCONF" = "x" ]; then
+    AUTOCONF=autoconf
+fi
+
+if [ "x$AUTOHEADER" = "x" ]; then
+    AUTOHEADER=autoheader
+fi
+
 
 
 vers_ok=OK
-ver_needed=1.4
+ver_needed=1.5
 
-aclocal --version|checkversion
+"$ACLOCAL" --version|checkversion
 if (test $? -ne 0) then
   echo "aclocal is not new enough.  Please upgrade to at least version $ver_needed"
   vers_ok=NO
 fi
 
-automake --version|checkversion
+"$AUTOMAKE" --version|checkversion
 if (test $? -ne 0) then
   echo "automake is not new enough.  Please upgrade to at least version $ver_needed"
   vers_ok=NO
 fi
 
 ver_needed=2.53
-autoheader --version|checkversion
+"$AUTOHEADER" --version|checkversion
 if (test $? -ne 0) then
   echo "autoheader is not new enough.  Please upgrade to at least version $ver_needed"
   vers_ok=NO
 fi
 
-autoconf --version|checkversion
+"$AUTOCONF" --version|checkversion
 if (test $? -ne 0) then
   echo "autoconf is not new enough.  Please upgrade to at least version $ver_needed"
   vers_ok=NO
@@ -65,12 +88,14 @@ fi
 
 if (test x$vers_ok = xOK) then
 {
-if (aclocal -I m4scripts) then
-  autoheader -f && autoconf -f && automake -acf || echo An error occurred while running the autotools.  Please correct
+if ("$ACLOCAL" -I m4scripts) then
+  ( "$AUTOHEADER" -f && "$AUTOCONF" -f && "$AUTOMAKE" -acf && \
+    echo "Bootstrap is complete. Run ./configure to configure the build system." ) || \
+    echo "An error occurred while running the autotools.  Please correct."
 else
-  echo m4scripts directory appears to be missing.
-  echo try running cvs update -P -d
-  echo in the directory that bootstrap-sh is in.
+  echo "m4scripts directory appears to be missing."
+  echo "try running cvs update -P -d"
+  echo "in the directory that bootstrap-sh is in."
 fi
 }
 fi
