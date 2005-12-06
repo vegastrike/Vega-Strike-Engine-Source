@@ -131,7 +131,6 @@ echo Using ACLOCAL=$ACLOCAL
 echo Using AUTOHEADER=$AUTOHEADER
 echo Using AUTOCONF=$AUTOCONF
 echo Using AUTOMAKE=$AUTOMAKE
-exit 0;
 if ("$ACLOCAL" -I m4scripts) then
   ( "$AUTOHEADER" -f && "$AUTOCONF" -f && "$AUTOMAKE" -acf && \
     echo "Bootstrap is complete. Run ./configure to configure the build system." ) || \
