@@ -2,24 +2,34 @@ AC_INIT(vegastrike, 0.4.4)
 AC_CONFIG_SRCDIR(src/vegastrike.h)
 AC_PREREQ(2.53)
 
-AC_PROG_INSTALL
-AC_PROG_LN_S
-AC_PROG_RANLIB
+
 
 AC_LANG(C++)
-
+dnl AWK is used in configure
 AC_PROG_AWK
+dnl We are a C++ program, so of course we use a c++ compiler and preprocessor
 AC_PROG_CXX
 AC_PROG_CXXCPP
+dnl Install is used by make install
+AC_PROG_INSTALL
+dnl Lexx used for a parser we use
+AC_PROG_LEX
+dnl We use some static libraries to make building this program easier.
+AC_PROG_RANLIB
+
+dnl Most C++ programs also use C files.  We use some
+dnl Libraries where the testing for them needs done in C
+AC_PROG_CC
 AC_PROG_CPP
 
-AC_MSG_NOTICE([Using compiler: ${CXX}.])
+AC_MSG_NOTICE([Using C++ compiler: ${CXX}.])
+AC_MSG_NOTICE([Using C   compiler: ${CC}.])
 
 dnl Check system type
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
-dnl We aren't a compiler, so we shouldn't need target information
-dnl AC_CANONICAL_TARGET
+
+dnl Take the information from BUILD and use it to figure out what we are building for.
 VS_CHECK_OS
 
 
@@ -38,12 +48,6 @@ if test "x${CPPFLAGS:-notset}" = "xnotset" ; then
    export CPPFLAGS
    CPPFLAGS=""
 fi
-
-
-dnl AC_GNU_SOURCE()
-AC_AIX()
-AC_MINIX()
-AC_ISC_POSIX()
 
 
 saved_CXXFLAGS="${CXXFLAGS}"
@@ -73,13 +77,12 @@ case $target in
 esac
 
 
-dnl Checks for header files.
-dnl AC_HEADER_STDC
+# Checks for header files.
 AC_HEADER_DIRENT
-AC_FUNC_ALLOCA
+AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
+AC_CHECK_HEADERS([OS.h arpa/inet.h fcntl.h fenv.h float.h inttypes.h limits.h malloc.h memory.h netdb.h netinet/in.h stddef.h stdint.h stdlib.h string.h sys/file.h sys/ioctl.h sys/param.h sys/socket.h sys/time.h unistd.h values.h wchar.h wctype.h])
 
-AC_CHECK_HEADERS([OS.h arpa/inet.h fcntl.h float.h limits.h math.h netdb.h netinet/in.h stddef.h sys/ioctl.h sys/param.h sys/time.h sys/timeb.h values.h wchar.h wctype.h])
 
 if test "x$slabcheck" = "xyes"; then
 AC_CHECK_HEADERS([linux/slab.h linux/malloc.h])
@@ -89,31 +92,43 @@ fi
 
 AC_CHECK_FUNCS(vfscanf)
 
-dnl Checks for typedefs, structures, and compiler characteristics.
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_STDBOOL
 AC_C_CONST
-AC_HEADER_TIME
 AC_C_INLINE
 AC_TYPE_OFF_T
 AC_TYPE_PID_T
+AC_C_RESTRICT
 AC_TYPE_SIZE_T
 AC_HEADER_TIME
 AC_STRUCT_TM
-AC_TYPE_UID_T
+AC_C_VOLATILE
+AC_CHECK_TYPES([ptrdiff_t])
 
+
+# Checks for library functions.
 AC_FUNC_CLOSEDIR_VOID
+AC_FUNC_ERROR_AT_LINE
+AC_FUNC_FORK
+AC_PROG_GCC_TRADITIONAL
+AC_FUNC_LSTAT
+AC_FUNC_LSTAT_FOLLOWS_SLASHED_SYMLINK
+AC_FUNC_MALLOC
 AC_FUNC_MEMCMP
+AC_FUNC_MKTIME
 AC_FUNC_MMAP
+AC_FUNC_REALLOC
 AC_FUNC_SELECT_ARGTYPES
 AC_TYPE_SIGNAL
+AC_FUNC_STAT
+AC_FUNC_STRCOLL
+AC_FUNC_STRTOD
 AC_FUNC_VPRINTF
+AC_CHECK_FUNCS([atexit bzero fesetround floor getcwd gethostbyname gettimeofday inet_ntoa iswprint localtime_r mblen memchr memmove memset mkdir munmap pow putenv rint rmdir select setenv socket sqrt strcasecmp strchr strdup strerror strstr strtol strtoul])
 
-
-dnl Checks for library functions.
-
-AC_CHECK_FUNCS([access atexit bzero clock_gettime floor getcwd gethostbyname gethostname gettimeofday inet_ntoa lstat memmove memset mkdir munmap pow select socket sqrt strcasecmp strchr strdup strerror strstr strtol])
 
 dnl Check for non-standard floating point functions and headers
-
 AC_CHECK_FUNCS([finite _finite isnan _isnan])
 
 dnl --------------------------------------------------------------------------
@@ -130,8 +145,6 @@ AC_MSG_RESULT([${is_macosx}])
 
 AC_CHECK_HEADERS([ieeefp.h zlib.h])
 
-echo CXXFLAGS=$CXXFLAGS
-echo CPPFLAGS=$CPPFLAGS
 dnl --------------------------------------------------------------------------
 dnl General options
 dnl --------------------------------------------------------------------------
@@ -310,12 +323,6 @@ if test "x$is_macosx" = "xyes" ; then
     with_gl_libs=/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks/OpenGL.framework/Libraries
     with_al_inc="/Developer/SDKs/MacOSX10.2.8.sdk/Library/Frameworks/OpenAL.framework/Headers -I/sw/include"
     with_al_libs="/Developer/SDKs/MacOSX10.2.8.sdk/Library/Frameworks/OpenAL.framework/ -L/sw/lib"
-dnl    with_expat_libs=/sw/lib
-dnl    with_png_libs=/sw/lib
-dnl    with_jpeg_libs=/sw/lib
-dnl    with_jpeg_inc=/sw/include
-dnl    with_expat_inc=/sw/include
-dnl    with_png_inc=/sw/include
     PYTHON_LDOPTS="-L/Library/Frameworks/Python.framework"
     with_python_inc=/Library/Frameworks/Python.framework/Headers
     VS_LIBS="$VS_LIBS -lobjc"
