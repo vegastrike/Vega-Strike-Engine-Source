@@ -28,12 +28,6 @@ AM_INIT_AUTOMAKE([1.6 subdir-objects dist-bzip2 ])
 AM_CONFIG_HEADER(config.h)
 
 
-dnl Check for compilers.  We set CXXFLAGS to null if unset, so
-dnl that these macros won't set them to default values that we don't want.
-dnl CPPFLAGS=""
-dnl CXXFLAGS=""
-echo CXXFLAGS=$CXXFLAGS
-echo CPPFLAGS=$CPPFLAGS
 dnl unfortunately most users (eg hellcatv) are too stupid to figure out where that environment variable is set (it's not in env or set or echo $CPPFLAGS gives nothing) so we have to force it to null
 if test "x${CXXFLAGS:-notset}" = "xnotset" ; then
    export CXXFLAGS
@@ -699,7 +693,9 @@ VS_WITH_COLLIDE_MAP
 
 VS_WITH_OGRE
 
+AC_LANG(C)
 VS_CONFIG_VSLAUNCHER
+AC_LANG(C++)
 
 # The boost include must come first to override includes from elsewhere
 CPPFLAGS="${BOOST_CPPFLAGS} ${CPPFLAGS} ${VS_CPPFLAGS} ${PYTHON_CPPFLAGS} ${CG_CPPFLAGS}"' -I$(top_srcdir)/src '

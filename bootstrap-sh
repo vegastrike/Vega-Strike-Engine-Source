@@ -14,6 +14,14 @@ echo '(balloyd1@users.sourceforge.net)'
 echo Please send bug reports or comments about this script
 echo to the email above or else visit
 echo vegastrike.sourceforge.net for help in using this script
+echo The recommended way to change the behaviour of this script
+echo is to modify the path so that the version of automake or
+echo autoconf you want to use is found first.
+echo Alternately, you can explicitly specify the program to be
+echo used for each in the following variables.
+echo '$ACLOCAL, $AUTOMAKE, $AUTOCONF, $AUTOHEADER'
+echo For proper functionality, both aclocal and automake must be the
+echo same version, and autoconf and autoheader should be the same version.
 
 checkversion()
 {
@@ -34,47 +42,76 @@ checkversion()
   fi
 }
 
+findversioned()
+{
+  version=
+  vers=`echo -n $PATH | 
+    awk 'BEGIN{RS=":"}$0==""{$0=".";}
+      {printf "pushd %s >/dev/null; ls -1 aclocal-* 2>/dev/null; popd >/dev/null\n", $0}'| 
+    $SHELL |
+    awk 'BEGIN{FS="-"}{printf "%s ", $2}'`
+  for x in $vers; do
+    ACLOCAL=aclocal-$x
+    AUTOMAKE=automake-$x
+    "$ACLOCAL" --version 2>/dev/null |checkversion && 
+    "$AUTOMAKE" --version 2>/dev/null |checkversion
+    if (test $? -eq 0) then
+      ver_ok=OK
+      version=$x
+      break;
+    fi
+  done
+  echo -n $version 
+}
+
 # Set these variables only if they are not set in the environment.
 
-if [ "x$ACLOCAL" = "x" ]; then
+if (test "x$ACLOCAL" = "x" ); then
     ACLOCAL=aclocal
-    # Debian systems need a new aclocal.
-    aclocal-1.7 --version > /dev/null 2> /dev/null && ACLOCAL=aclocal-1.7
 fi
 
-if [ "x$AUTOMAKE" = "x" ]; then
+if (test "x$AUTOMAKE" = "x" ); then
     AUTOMAKE=automake
-    # Debian systems need a new automake.
-    automake-1.7 --version > /dev/null 2> /dev/null && AUTOMAKE=automake-1.7
 fi
 
-if [ "x$AUTOCONF" = "x" ]; then
+if (test "x$AUTOCONF" = "x" ); then
     AUTOCONF=autoconf
 fi
 
-if [ "x$AUTOHEADER" = "x" ]; then
+if (test "x$AUTOHEADER" = "x" ); then
     AUTOHEADER=autoheader
 fi
 
-
-
 vers_ok=OK
+
+# AUTOMAKE Programs
 ver_needed=1.5
 
-"$ACLOCAL" --version|checkversion
+AM_VER_NEEDED=$ver_needed
+"$ACLOCAL" --version|checkversion && "$AUTOMAKE" --version|checkversion
 if (test $? -ne 0) then
-  echo "aclocal is not new enough.  Please upgrade to at least version $ver_needed"
+  echo "automake tools (automake, aclocal) are not new enough.  Please upgrade to at least version $ver_needed"
   vers_ok=NO
 fi
 
-"$AUTOMAKE" --version|checkversion
-if (test $? -ne 0) then
-  echo "automake is not new enough.  Please upgrade to at least version $ver_needed"
-  vers_ok=NO
+if (test $vers_ok = NO); then
+  vers=`findversioned`
+  if (test "x$vers" != x); then
+    vers_ok=OK;
+    ACLOCAL=aclocal-$vers
+    AUTOMAKE=automake-$vers
+  fi
 fi
 
+if (test $vers_ok = NO); then
+  echo "Could not find new enough automake tools (automake, aclocal)."
+  echo "Please install new versions that are at least version $ver_needed"
+fi
+
+# AUTOCONF Programs
+# Versioned versions of these aren't available, making this scripts job easier.
 ver_needed=2.53
-"$AUTOHEADER" --version|checkversion
+"$AUTOHEADER" --version|checkversion 
 if (test $? -ne 0) then
   echo "autoheader is not new enough.  Please upgrade to at least version $ver_needed"
   vers_ok=NO
@@ -86,16 +123,25 @@ if (test $? -ne 0) then
   vers_ok=NO
 fi
 
+# If we have working versions, now we can do the work this script 
+# was designed to do.  Also had some 
 if (test x$vers_ok = xOK) then
 {
+echo Using ACLOCAL=$ACLOCAL
+echo Using AUTOHEADER=$AUTOHEADER
+echo Using AUTOCONF=$AUTOCONF
+echo Using AUTOMAKE=$AUTOMAKE
+exit 0;
 if ("$ACLOCAL" -I m4scripts) then
   ( "$AUTOHEADER" -f && "$AUTOCONF" -f && "$AUTOMAKE" -acf && \
     echo "Bootstrap is complete. Run ./configure to configure the build system." ) || \
     echo "An error occurred while running the autotools.  Please correct."
 else
-  echo "m4scripts directory appears to be missing."
-  echo "try running cvs update -P -d"
+  echo "aclocal execution failed."
+  echo "Try running cvs update -P -d"
   echo "in the directory that bootstrap-sh is in."
+  echo "If this does not fix the problem, please verify that"
+  echo "aclocal is at least version $AM_VER_NEEDED"
 fi
 }
 fi

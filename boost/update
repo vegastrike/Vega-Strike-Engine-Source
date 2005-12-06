@@ -1,5 +1,5 @@
 echo Warning - This script expects to be run from the boost subdirectory
-BOOSTDIR=`echo $PWD|awk 'BEGIN{RS="/"}END{printf "%s", $0}'`
+BOOSTDIR=`echo $PWD|awk 'BEGIN{RS="/";t=""}{t=$0}END{printf "%s", t}'`
 pushd .. > /dev/null
 NEWMAKE=$PWD/$BOOSTDIR/Makefile.new
 
@@ -33,11 +33,11 @@ for x in `find $BOOSTDIR -maxdepth 1 ! -name CVS ! -path $BOOSTDIR -type d -prin
 done
 neednot=0
 for x in `find $BOOSTDIR -maxdepth 1 ! -name CVS ! -path $BOOSTDIR -type d -printf '%f\n' |sort`; do
-	if (test $neednot = 1) then	
-		echo "endif !BOOST$x" >> $NEWMAKE
-	else
-		echo "endif BOOST$x" >> $NEWMAKE
+	if (test $neednot = 0) then	
+		echo "else !BOOST$x" >> $NEWMAKE
+                echo "BOOSTSOURCES=" >> $NEWMAKE
 	fi
+	echo "endif !BOOST$x" >> $NEWMAKE
         neednot=1
 done
 
