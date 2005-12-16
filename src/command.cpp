@@ -100,7 +100,19 @@ static WalkControls done; // and when the program starts, this variable will be 
 	the number of a key when pressed from sdl to a command is needed to 
 	use this practically
 
+
 	
+	A note about const char * types. If the user doesn't sent input, it
+	will pass NULL. So if you have two of them, and the user sends no
+	input, it will send them both as NULL. If the user types one
+	argument, the second one will be NULL, the first will be their argument.
+	If your function needs an argument, and NULL is passed, you can safely
+	throw an error message, either an std::exception or a const char *
+	so you can do: if(argument1 == NULL && argument2 == NULL) throw "I need at least one argument!";
+				else if(argument2 == NULL) do_something_with_argument1, or maybe throw an error
+				else we_have_both_arg1_and_arg2
+	const char *'s are the prefered method, std::exceptions get other error
+	text appended to them, and is mostly for detecting bugs in the std library
 
 
 	
@@ -108,15 +120,17 @@ static WalkControls done; // and when the program starts, this variable will be 
 	(Callbacks don't have to be on objects, there just is no support for that
 	in the functor class, and can be added as needed to make callbacks to existing
 	just do the 4 steps to makeing a new argument type in the functor, ignore the object part, it should be fairly trivial.
-	
+
+	Sometimes this is useful, like with servers when passing a socket arond
+	to functions to complete requests.	
+
+
 	To use a return value if support is added, the functor Call method returns
 	a void *, which by default is a casted reference to the return_type object
 	(see functors.h again) so it can be casted back with the string named "s"
 	extracted, which could have data if someone made a function that returned
 	an std::string and set it. 
 
-	Sometimes this is useful, like with servers when passing a socket arond
-	to functions to complete requests. 
 
 )
 ******************************************************************* */
@@ -141,7 +155,7 @@ You could create a new object: (psuedo)
 		perform different ops
 	}
 
-Then 
+then create it, and it will ovverride the existing command with the access word "left"
 
 ******************************************************************* */
 
@@ -158,7 +172,7 @@ Then
 	
 	Everything except std::string does this, std::string passess the entire input string
 	If you need a quote to pass through the command processor to a function, use \" the same way you'd pass a quote to a variable in c++ ;)
-
+	
 	
 */
 /* ********************
@@ -911,7 +925,11 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 			//gets really large.
 			theCommand.functor->Call(strvec, sock_in, &isDown);
 		//try to catch any errors that occured while executing
-		} catch (std::exception e) {
+		} catch(const char *in) {
+			std::string l;
+			l.append(in);
+			conoutf(l); //print the error to the console
+		}catch (std::exception e) {
 			std::string l; 
 			l.append("Command processor: Exception occured: ");
 			l.append(e.what());
