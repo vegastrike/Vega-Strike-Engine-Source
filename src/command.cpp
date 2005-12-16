@@ -1,5 +1,4 @@
 #include "command.h"
-#include "mmorpgclient.h"
 #include <sstream>
 #include <Python.h>
 #include <pyerrors.h>
@@ -18,16 +17,15 @@
 // and be able to quickly get to exactly what part they need.
 // It helps when a 300 line function is wrapped up to a one line comment
 /*
-Index:
-   Section 1: Example Commands
-   Section 2: Adding new callback types
-   Section 3: Polymorphic Behaviors
-   Section 4: Multiple Arguement behaviors
-   Section 5: Multiple Command Processors
+	Index:
+		1) Example Commands
+		2) Argument Types
+		3) PolyMorphic Behavior
+		4) Multiple Arguments
+		5) Multiple Command Processors made easy with Inheritence
 */
-/* *******************************************************************
-(******** 1 *******)
-Example Commands: 
+/* ******************************************************************* 
+1) Example Commands: 
 class WalkControls {
 	public:
 		WalkControls() { 
@@ -73,84 +71,54 @@ class WalkControls {
 		void setGravity(int &amount);
 }
 Then to get the commands to initiate, simply:
-WalkControls done; // and when the program starts, this variable will be made.
-(that *should* be enough, in concept, but usually getting it to actually work when working with multiple files can be a little more complex.
- You may have to call something on the "WalkControls" variable "done"
- from somewhere in the program flow that only runs once. 
- Or use the pointer method:
-WalkControls *done = 0x0;
-and somewhere that's called multiple times (but not in the main loop)
-(above the function declaration:
-class WalkControls;
-extern WalkControls *done;
-void myFunction(args..) {
-	if(done == 0x0) done = new WalkControls();
-
-	doMyfunction...
-	return;
-}
-but then it's up to you to do cleanup.
-)
+static WalkControls done; // and when the program starts, this variable will be made.
 ******************************************************************* */
 
 /* *******************************************************************
-(******* 2 ******)
-	Steps to adding a different argument types
+2) Argument type details
+
 	Usually:
-	std::string &entirecommandtyped (1STR)
-	std::vector<std::string *> *CommandsTypedBrokenUpAtSpaces (1STRVEC)
-	bool istheKeyPressedDownOrUp(True for down, false for up) (1BOOL)
+	std::string &entire_command_typed
+	std::vector<std::string *> *Commands_Typed_BrokenUp_At_Spaces 
+	bool is_the_Key_Pressed_Down_Or_Up(True for down, false for up) 
+	int first argument translated through atoi, or 0 if first word is not entered
+	const char * first argument, if there is no first argument, it sends NULL
+	const char *, const char * first two arguments, sends NULl if not defined
+		
 	are enough.
+	
+	If you use std::string &, the name of your command will be at
+	string &in[0]; followed by a space
 
+	if you use std::vector<std::string *>* you can use:
+	std::vector<std::string *>::iterator iter = in->begin();
+	the very first iterator will point to the name of the command entered
+	not what the user inputed, findCommand will auto-finish commands entered
+	then use in->size() to see how many arguments were passed, and do whatever
+	
+	1 Bool is for single keys bound to commands. An external layor to translate
+	the number of a key when pressed from sdl to a command is needed to 
+	use this practically
 
-	First, add a method of passing what you need to be included to execute
-	(Such as an object pointer or something)
-	Open Functors.h
-	add a new callback functor
-	(4 parts, 1 pure virtual function like the others in the base class
-	with the argument type you need, 1 private variable for holding
-	the function pointer on the second class, 1 constructor for
-	creating the callback like any other, and 1 overloaded call()
-	method to make it be called right)
-
-	Add a new type to the ENUM in command.h (TYPE_MYSPECIALARGUMENTS)
-	go to the execute function in this file, figure out how to pass
-	your extra data down through execute, past the menusystem, to fexecute,
-	down to the switch()
-	At the switch statement add your enum, and the proper method of calling
-	the functor.
-
-
-	There are already quite a few types supported, so code examples are
-	readily availble
-
-	Valid command examples: 
-	//Note: CMDOBJ stands for the Command Processor Object Name
-		class myClass() {
-			public:
-			myClass() {
-				 Functor<myClass> *newcommand = Functor<myClass>(this, &myClass::myFunction);
-				CMDOBJ.addCommand(newcommand, "access-word", 1STR);
-				Functor<myClass> *anotherone = Functor<myClass>(this, &myCommand::mySecondFunction);
-				CMDOBJ.addCommand(newcommand, "access-word2", 1STRVEC);
-			}
-			void myFunction(std::string &in) {
-				std::cout << in << "\n";
-			}
-			void mySecondFunction(std::vector<std::string *> *d) {
-				for(std::vector<std::string *>::iterator iter = d->begin();
-					iter < d->end(); iter++) {
-					std::cout << (*(iter))->c_str() << "\n";
-				}
-			}
-		};
-	There currently is no way of removing commands from a command proccessor
-	but it should be pretty easy, so something like:
-	~myClass() {  CMDOBJ.remCommand("access-word"); }; could be done
-	and the command proccessor could change depending on what objects exist.
-	Command Processor Object Name(for reference) (Named: FILL_IN_NAME)
 	
 
+
+	
+	If you need to add a new argument type, or callback type, see functors.h
+	(Callbacks don't have to be on objects, there just is no support for that
+	in the functor class, and can be added as needed to make callbacks to existing
+	just do the 4 steps to makeing a new argument type in the functor, ignore the object part, it should be fairly trivial.
+	
+	To use a return value if support is added, the functor Call method returns
+	a void *, which by default is a casted reference to the return_type object
+	(see functors.h again) so it can be casted back with the string named "s"
+	extracted, which could have data if someone made a function that returned
+	an std::string and set it. 
+
+	Sometimes this is useful, like with servers when passing a socket arond
+	to functions to complete requests. 
+
+)
 ******************************************************************* */
 /* *******************************************************************
 (****** 3 ******)
@@ -160,14 +128,14 @@ the flight-mode object may always be in memory, but imagine you want to land
 on a planet, where the command "left" might need to toggle a different vector
  to get it to perform different physics equations.
 You could create a new object: (psuedo)
-	class walkOnPlanet {
+	class walkOnPlanet  {
 		Functor<WOP> *leftCommand;
 		walkOnPlanet() { 
-			Functor<WOP> *leftCommand = new Functor<WOP>(This, &walkOnPlanet::left);
-			addCommand(leftCommand, "left", 1BOOL); //adding the second left command will automagically override the first
+			leftCommand = new Functor<WOP>(This, &walkOnPlanet::left);
+			CommandInterpretor.addCommand(leftCommand, "left"); //adding the second left command will automagically override the first
 	}
 	~walkOnPlanet() {
-		remCommand(leftCommand); //by passing it by pointer we can be assured the right one will be removed, in case commands are added/removed out of order
+		CommandInterpretor.remCommand(leftCommand); //by passing it by pointer we can be assured the right one will be removed, in case commands are added/removed out of order
 	}
 	void left(bool isDown) {
 		perform different ops
@@ -182,17 +150,14 @@ Then
  A quick comment on Multiple Arguments 
 	Imagine you have:
 	void MyClass::myFunction(const char *arg1, const char *arg2) 
-	If you set it to 2CSTR it will work, it also combines everything in a "" to a single arg.
-	
-	(In fact argument type does this.)
 
-	In other words, if you do:
+	if you do:
 	myFunction "a four word name" "some arguments"
 	it will send "a four word name" as arg1,
 	and "some arguments" as arg2 (With the quotes edited out.)
 	
-	Everything except 1STR (C++ style std::string &in) behaves as so.
-	1STR should still contain the quotes if they are needed. Just something to think about.
+	Everything except std::string does this, std::string passess the entire input string
+	If you need a quote to pass through the command processor to a function, use \" the same way you'd pass a quote to a variable in c++ ;)
 
 	
 */
@@ -227,10 +192,10 @@ Then
 		HTTPserver(char *port) : commandI() {
 			setupserveronport(atoi(port));
 			Functor<HTTPserver> *get = new Functor<HTTPserver>(this, &HTTPserver::GET);
-			commandI::addCommand(get, "GET", ARG_1STRSPEC);
+			commandI::addCommand(get, "GET");
 			
 			Functor<HTTPserver> *post = new Functor<HTTPserver(this, &HTTPserver::POST);
-			commandI::addCommand(post, "POST", ARG_1STRSPEC);
+			commandI::addCommand(post, "POST");
 
 
 			fork() {
@@ -285,13 +250,11 @@ coms::coms(TFunctor *t_in) {functor = t_in;};
 coms::coms(coms *oldCom) {
 	if(oldCom->Name.size() > 0)
 		Name.append(oldCom->Name);
-	argtype = oldCom->argtype;
 	functor = oldCom->functor;
 };
 coms::coms(const coms &in) {
 	if(in.Name.size() > 0) 
 		Name.append(in.Name);
-	argtype = in.argtype;
 	functor = in.functor;
 }
 coms::~coms() {
@@ -417,17 +380,17 @@ commandI::commandI() {
 	Functor<commandI> *dprompt = new Functor<commandI>(this, &commandI::prompt);
     //fill with dummy function.
 	dprompt->attribs.hidden = true;
-	addCommand(dprompt, "prompt", ARG_NONE);
+	addCommand(dprompt, "prompt");
 
 	Functor<commandI> *newFunct = new Functor<commandI>(this, &commandI::dummy);
 	newFunct->attribs.hidden = true;
-	addCommand(newFunct, "dummy", ARG_1STRVEC);
+	addCommand(newFunct, "dummy");
 
 	Functor<commandI> *dcommands = new Functor<commandI>(this, &commandI::pcommands);
-	addCommand(dcommands, "commands", ARG_NONE);
+	addCommand(dcommands, "commands");
 
 	Functor<commandI> *dhelp = new Functor<commandI>(this, &commandI::help);
-	addCommand(dhelp, "help", ARG_1STR);
+	addCommand(dhelp, "help");
 	// }}}
 	// set some local object variables {{{
 	menumode = false;
@@ -440,21 +403,21 @@ commandI::commandI() {
 commandI::~commandI() {
 		{
 			HoldCommands::procs *findme = rcCMD->getProc(this);
-	        std::vector<coms>::iterator iter = findme->rc.begin();// = rcCMD->rc.end();
-	        while(findme->rc.size() > 0) {
-					TFunctor *f = ((*(iter)).functor);
-					delete f;
-        	        findme->rc.erase(iter);
-					iter = findme->rc.begin();
-	       	 };
+			if(findme->rc.size() > 0) {
+		        coms *iter = &findme->rc.back();
+		        while(findme->rc.size() > 0) {
+						iter = &findme->rc.back();
+						delete iter->functor;
+	        	        findme->rc.pop_back();
+		       	};
+			}
 		}
 		{
-			std::vector<menu *>::iterator iter;
+			menu *iter;
 			while(menus.size() > 0) {
-				iter = menus.begin();
-				menu *m = (*(iter));
-				delete m;
-				menus.erase(iter);
+				iter = menus.back();
+				delete iter;
+				menus.pop_back();
 			};
 		}
 		if(rcCMDEXISTS) {
@@ -468,11 +431,11 @@ commandI::~commandI() {
 // }}}
 // {{{ Menu object destructor
 menu::~menu() {
-	for(std::vector<mItem *>::iterator iter = items.begin();
-		iter < items.end(); iter++ ) {
-			mItem *m = (*(iter));
-			delete m;
-			items.erase(iter);
+	for(mItem *iter;
+		items.size() > 0;) {
+			iter = items.back();
+			delete iter;
+			items.pop_back();
 	};
 };
 // }}}
@@ -514,15 +477,14 @@ void commandI::pcommands() {
 	std::ostringstream cmd;
 	cmd << "\n\rCommands available:\n\r";
 	std::vector<coms>::iterator iter;
-//	if(webb) cmd << "<PRE>";
+
 	HoldCommands::procs *commands = rcCMD->getProc(this);
 	for(iter = commands->rc.begin(); iter < commands->rc.end(); iter++) {
 		if(!(*(iter)).functor->attribs.hidden && !(*(iter)).functor->attribs.webbcmd) {
 			if((*(iter)).functor->attribs.immcmd == true) {
 				if(immortal) {
-					if(x != 5)  cmd << std::setiosflags(std::ios::left) <<std::setw(10);
-
-						cmd << (*(iter)).Name.c_str() ;
+					if(x != 5)  cmd << std::setiosflags(std::ios::left) <<std::setw(19);
+					cmd << (*(iter)).Name.c_str() ;
 
 					x++;
 				} //we don't want to add the command if we arn't immortal
@@ -533,35 +495,26 @@ void commandI::pcommands() {
 				x++;
 			}
 			if(x == 5)  {
-//				if(webb) cmd << "<br>"; //lowercase <br> 
+
 				cmd << "\n\r";
 				x = 0;
 			}
 		}
 	}
 	if(x != 5) {
-//		if(webb) {
-//			cmd << "<br>"; //lowercase <br> again
-//		} else 
 			cmd << "\n\r";
 	}
-//	if(webb) cmd << "</PRE>";
-//	cmd.append("\n\r");
 	std::string cmd2;
 	cmd2.append(cmd.str());
 	conoutf(cmd2);
-//	conoutf(this, &cmd2);
-	//use print1 for color formatting.
-
 }
 // }}}
 // {{{ addCommand - Add a command to the interpreter
-void commandI::addCommand(TFunctor *com, char *name, int args){
+void commandI::addCommand(TFunctor *com, char *name){
 	std::cout << "Adding command: " << name << std::endl;
 	coms newOne = new coms(com); 
 	// See the very bottom of this file for comments about possible optimization
 	newOne.Name.append(name);
-	newOne.argtype = args;
 	//push the new command back the vector.
 	if(!rcCMDEXISTS && rcCMD == 0x0) {
 		if(rcCMD != 0x0) {
@@ -603,10 +556,10 @@ void  commandI::remCommand(TFunctor *com) {
 }
 // }}}
 // {{{ Find a command in the command interpretor 
-coms commandI::findCommand(const char *comm, int &sock_in) {
+coms *commandI::findCommand(const char *comm, int &sock_in) {
 	HoldCommands::procs *findme = rcCMD->getProc(this);
 	if(findme->rc.size() < 1) throw "Error, commands vector empty, this shouldn't happen!\n";
-
+	
 	std::ostringstream in_s;
 
 	if(!comm) ;
@@ -628,10 +581,10 @@ coms commandI::findCommand(const char *comm, int &sock_in) {
 	    bool breaker = true;
 	    while(breaker == true) {
 	        if(iter >= findme->rc.end()) {iter--; breaker = false;continue;}
-    	    else if((*(iter)).Name.compare("prompt") == 0) { return (*(iter));}
+    	    else if((*(iter)).Name.compare("prompt") == 0) { return &(*(iter));}
 			else iter++;
 		}
-		return((*(iter))); //assign testCom to the iterator
+		return&(*(iter)); //assign testCom to the iterator
 	} 
 // }}}
 //transform name (the word in) to lowercase {{{
@@ -640,10 +593,11 @@ coms commandI::findCommand(const char *comm, int &sock_in) {
 		std::transform(name.begin(), name.end(), name.begin(),static_cast < int(*)(int) > (tolower));
 // }}}
 // Start testing command names against the command entered {{{
+	coms *fuzzymatch = NULL;
 	std::vector<coms>::iterator iter;
 	for(iter = findme->rc.begin();iter < findme->rc.end(); iter++) {
 	//set the test variable to the iterator of something in the command vector
-		coms testCom((*(iter)));
+		coms &testCom = ((*(iter)));
 		//clear the temporary buffer used for holding the name of this command
 		std::string temp;
 		//define a string to possibly print something to the user
@@ -677,8 +631,12 @@ coms commandI::findCommand(const char *comm, int &sock_in) {
 					} 
 				}
 				//if it's an immortal command and we are an immortal simply don't return it.
-				if(returnit) 
-					return testCom;
+				if(returnit) {
+					if(name.size() == testCom.Name.size()) 
+					return &testCom;
+					if(fuzzymatch == NULL)
+					fuzzymatch = &testCom;
+				}
 				// }}}
 			}	
 //} }}}
@@ -687,7 +645,6 @@ coms commandI::findCommand(const char *comm, int &sock_in) {
 		//if it's at most 1 larger try shaving off the last 1  
 		//try fuzzy match
 		} else if(testCom.Name.length() < name.length() && testCom.Name.length() >= name.length()-1 ) {
-//			if(webb && !p->canSend(sock_in)) continue;
 			temp.append(testCom.Name);
 			std::string commandentered2; 
 			commandentered2.append(name, 0, testCom.Name.size());
@@ -703,18 +660,14 @@ coms commandI::findCommand(const char *comm, int &sock_in) {
                     if(immortal);
                     else {
                         //if we arn't immortal move on to the next command
-                        //this allows commands to have immortal/mortal versions
-                        //that call different functions.
                         returnit = false;
-//                      iter = rcCMD->rc.begin();
-//                      iter++;
-//                      testCom = (*(iter));
 
                     }
                 }
                 //if it's an immortal command and we are an immortal simply don't return it.
                 if(returnit)
-                    return testCom;
+					if(fuzzymatch == NULL)
+                   fuzzymatch = &testCom;
                 // }}}
 
 			}
@@ -722,34 +675,30 @@ coms commandI::findCommand(const char *comm, int &sock_in) {
 		}
 		// }}}
 	}
-	
+	if(fuzzymatch != NULL) return fuzzymatch;
 // }}}
-// No command was found, so we find and return the dummy command {{{
-	{
-	std::vector<coms>::iterator iter = findme->rc.begin();
-	bool breaker = true;
-	for(;breaker == true;) {
-		if(iter >= findme->rc.end()) { iter--;breaker = false; break;}
-		else if((*(iter)).Name.compare("dummy") == 0) { return (*(iter)); } //here
-		else iter++;
+	iter = findme->rc.begin();
+	for(; iter < findme->rc.end(); iter++ ) {
+		if((*(iter)).Name.find("dummy") == 0) {
+			return &(*(iter));
+		}
 	}
-	coms testCom( (*(iter)) ); //we should never get here
-	return testCom; //or here, it exists on the first else above
-	}
-// }}}
+	//shouldn't get here.
+	return NULL;
+
 };
 /// }}}
-
-// {{{ main execute function
-
+//strips up command, extracts the first word and runs
+//findCommand on it,
+//then tries to execute the member function.
+//If one is not found, it will call commandI::dummy() .
+// {{{ Main execute entrace, all input comes in here, this sends it to the menusystem, then in the return at the very last line executes the fexecute function which actually parses and finds commands, if the menusystem allows. This way the menusystem can manipulate user input, ie insert command names into the input to make it go to any function.
 bool commandI::execute(std::string *incommand, bool isDown, int sock_in)
 {
-//	std::string wreplace;
-	// use the menusystem ONLY if the sock_in is the same as socket{{{
-	// All talk about sockets is due to the  the command processor
-	// being used in the heart of a (soon to be GPL) http/1.1 webserver
+	int socket = sock_in;
+	//use the menusystem ONLY if the sock_in is the same as socket{{{
 	{
-		if(menumode ) {
+		if(menumode && sock_in == socket) {
 			std::string l;
 			std::string y;
 			size_t x = incommand->find(" ");
@@ -791,7 +740,7 @@ bool commandI::execute(std::string *incommand, bool isDown, int sock_in)
 			char *name_out = NULL;
 			if(l.size() > 0) name_out = (char *)l.c_str();
 			if(callMenu(name_out, (char *)y.c_str(), t) ) return false;
-			incommand->erase();
+			incommand->clear();
 			incommand->append(t); //t may have changed if we got this far
 		}
 
@@ -799,15 +748,33 @@ bool commandI::execute(std::string *incommand, bool isDown, int sock_in)
 	// }}}
 	return fexecute(incommand, isDown, sock_in);
 };
+// }}}
 //broken up into two execute functions
 //the one below is the real execute, the one above uses the menusystem
 //it's broken up so the menusystem can call fexecute themself at the right
 //time
-//sock_in was used for passing commands around for an HTTP server
-
+//Main Execute Function {{{
 bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
-	size_t ls, y; //, args = 0;
+	size_t ls, y;
 	bool breaker = false;
+// ************
+	while(breaker == false) {
+		ls = incommand->find(" ");
+		if(ls != 0) {
+			breaker = true;
+		} else {
+			incommand->replace(ls, 1, "");
+		}
+	}
+	for(y = incommand->find("\r\n"); y != std::string::npos; y = incommand->find("\r\n", y+1)) {
+                incommand->replace(y, 2, "");
+        }
+	for(size_t y = incommand->find("  "); y != std::string::npos; y = incommand->find("  ", y+1)) {
+		incommand->replace(y, 1, "");
+	}
+
+	breaker = false; //reset our exit bool
+
     //************ try to replace erase leading space if there is one
 	//eg, someone types: " do_something" instead of "do_something"
 	while(breaker == false) {
@@ -877,6 +844,7 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 	std::string::const_iterator scroller = incommand->begin();
 	size_t last = 0, next = 0;
 	bool quote = false;
+	bool escape = false;
 	next=incommand->find(" ");
 	for(next = incommand->find("\"\"", 0); (next=incommand->find("\"\"",last),(last!=std::string::npos)); last=(next!=std::string::npos)?next+1:std::string::npos) {
 		if(next < std::string::npos)
@@ -886,6 +854,14 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 	strvec.push_back(starter);
 	for(scroller = incommand->begin(); scroller < incommand->end(); scroller++)
 	{
+		if(*scroller == '\\') {
+			escape = true;
+			continue;
+		}
+		if(escape) {
+			if(*scroller == '\"') strvec[strvec.size()-1] += *scroller;
+			continue;
+		}
 		if(*scroller=='\"') {
 			if(quote) {
 			quote = false;
@@ -913,114 +889,27 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 		// }}}
     }
 	try {
-	coms theCommand = findCommand((char *)strvec[0].c_str(), sock_in);
+	coms &theCommand = *findCommand((char *)strvec[0].c_str(), sock_in);
 	
-
-//	if(args == 0) args = 1; //hack fix. 
-//	else args += 1; 
-//
 //Now, we try to replace what was typed with the name returned by findCommand {{{
 //to autocomplete words (EX: translate gos into gossip so the gossip
 //command only has to find it's access name and not all possible
-//methods of accessing it.)
-		size_t x = incommand->find_first_of(strvec[0]);
-		if(x != std::string::npos) {
-			incommand->replace(x, strvec[0].size(), theCommand.Name); 
-			strvec[0] = theCommand.Name;
-		}
+//methods of accessing it.) 
+		if(theCommand.Name.compare("dummy") != 0) {	
+			size_t x = incommand->find_first_of(strvec[0]);
+			if(x != std::string::npos) {
+				strvec[0].erase();strvec[0].append( theCommand.Name);
+			}
+		
 // }}}
-        // {{{ try to execute it now - Switch based on the enumerated argument types
-		lastcommand.erase();lastcommand.append(*incommand); //set the
-		//last command entered.. Maybe this should only be set IF 
-		//the callback works, and is not dummy(). (Use ! to trigger)
+			lastcommand.erase();lastcommand.append(*incommand); //set the
+		// last command entered - use ! to trigger
+		}
+			//Try to execute now {{{
 		try {
 			//maybe if/else if would be more efficient, if this ever
 			//gets really large.
-			switch(theCommand.argtype) {
-			case ARG_1INT:
-				if(strvec.size() > 1)
-					theCommand.functor->Call(atoi(strvec.at(1).c_str()));
-				else theCommand.functor->Call(0);
-				break;
-			case ARG_NONE:
-				theCommand.functor->Call();
-				break; 
-			case ARG_1CSTR:
-				if(strvec.size() > 1)
-					theCommand.functor->Call(strvec.at(1).c_str());
-				else theCommand.functor->Call((const char *)NULL);
-				break;
-			case ARG_1CSTRARRAY: 
-				{
-					vector<const char*>w; 
-					size_t vargs = 0;
-					//put together a c style charactor array: char w[length] (1CSTRARRAY) {{{
-				{ 
-						for(std::string::size_type x = 0; x < strvec.size(); x++)
-						{
-	//						w[vargs] = "";
-							w.push_back(strvec.at(x).c_str());
-							vargs++;
-						}
-				}
-		// }}}
-					if(vargs == 0)
-						w[0] = incommand->c_str();
-					w.push_back("");
-					theCommand.functor->Call(&w[0]);
-					break;
-				}
-			case ARG_2CSTR:
-				if(strvec.size() > 2)
-					theCommand.functor->Call(strvec.at(1).c_str(),strvec.at(2).c_str());
-				else {
-					if(strvec.size() == 2) theCommand.functor->Call(strvec.at(1).c_str(), (const char *)NULL);
-					else theCommand.functor->Call((const char *)NULL, (const char *)NULL);
-				}
-
-				break;
-			case ARG_1BOOL:
-				theCommand.functor->Call((bool *)isDown);
-				break; 
-			case ARG_1STR: 
-				{
-					theCommand.functor->Call(*incommand);
-					break;
-				}
-			case ARG_1STRSPEC:
-				theCommand.functor->Call(*incommand, sock_in);
-				break;
-			case ARG_1STRVEC: 
-				{
-					std::vector<std::string *> stringvec;
-					{
-						for(std::string::size_type x = 0; x < strvec.size(); x++) 
-						{
-							stringvec.push_back(&strvec.at(x));
-						}
-					}
-					theCommand.functor->Call(&stringvec);
-					break;
-				}
-			case ARG_1STRVECSPEC:
-				{
-					std::vector<std::string *> stringvec;
-					{
-						for(std::string::size_type x = 0; x < strvec.size(); x++) 
-						{
-							stringvec.push_back(&strvec.at(x));
-						} 
-					}
-					theCommand.functor->Call(&stringvec, sock_in);
-					break;
-				}
-			default:
-				std::string err1;
-				err1.append("\n\rError, unsupported argument type!\n\r");
-				err1.append("Try using 1CSTRARRAY or 1STR!\n\r");
-				conoutf(err1);
-				break;
-			}
+			theCommand.functor->Call(strvec, sock_in, &isDown);
 		//try to catch any errors that occured while executing
 		} catch (std::exception e) {
 			std::string l; 
@@ -1044,6 +933,20 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 }	
 
 // }}}
+
+std::string commandI::display(std::string &in) {
+	//If the menusystem has a value to display, eg:
+	//	Editing User 
+	//	1) Change Username - Current Name: XXX
+	// and XXX is replaced with a value here
+	// basically, call: string.replace(xxx,3, display("uname") )
+	// then display does:
+	// if(in.compare(uname) == 0) return current_mob_editing.Name;
+	// The value to pass to display is set when creating a menuitem
+	std::string f;
+	f.append("FAKE");
+	return f;
+};
 
 // {{{ menusystem 
 /* ***************************************
@@ -1096,7 +999,6 @@ std::string commandI::displaymenu() {
 			if(menu_in->selected == true) {
 				buf.append(menu_in->iselected->selectstring);
 			buf.append(": ");
-//				if(webb == true) buf.append("\n\r");
 			}
 		} else {
 			if(!menu_in->noescape) {
@@ -1111,7 +1013,6 @@ std::string commandI::displaymenu() {
 				buf.append("Enter your selection: \n");
 			}
 		}
-//		if(webb) buf.append("\n\r");
 		return buf;
 //		conoutf(buf);
 	}
@@ -1308,13 +1209,6 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 				// or we append the input to the buffer  {{{
 				} else {
 					menu_in->iselected->menubuf.append(d);
-//					if(webb) {
-//						std::string buf;
-//						buf.append(d);
-//						size_t x = buf.find("\r\n");
-//						buf.replace(x, 2, "\n\r");
-//						conoutf(this, &buf);
-//					}
 				}
 				// }}}
 
@@ -1343,14 +1237,12 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 						else
 							buf.append(menu_in->escape);
 						buf.append(" to confirm: " );
-//						if(webb) buf.append("\n\r");
 
 						conoutf(buf);
 					} else if(menu_in->iselected->inputbit) {
  						std::string buf;
 						buf.append(menu_in->iselected->selectstring);
 						buf.append(": ");
-//						if(webb) buf.append("\n\r");
 						conoutf(buf);
 					}
 				}
@@ -1361,49 +1253,22 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 					menu_in->selected = false;
 					std::string arg;
 					arg.append(menu_in->iselected->action);
-					std::string funcn;
+                    std::string funcn;
 					funcn.append(menu_in->iselected->func2call);
 					std::string dreplace;
 					dreplace.append(d);
-					d.erase();
+					d.clear();
 					d.append(funcn);
 					d.append(" ");
 					d.append(arg);
 					d.append(" ");
 					d.append(dreplace);
-	                if(funcn.compare("setMenu") == 0) {
-	                    std::string l;
-	                    l.append(setMenu((char *)arg.c_str()));
-	                    conoutf(l);
-	                    return true;
-	                }
-	                if(funcn.compare("loginfunc") == 0) {
-	                    std::vector<std::string *> d_out;
-	                    d.append(" ");
-	                    for(size_t x = d.find("\r\n"); x < std::string::npos; x = d.find("\r\n", x+3)) {
-	                        d.replace(x, 1, " \r\n");
-	                    }
-						size_t ylast = 0, xasd = 0;
-	                    for(size_t iter= 0; iter < d.size();iter++) {
-	                        if(d[iter]==32) {
-	                            std::string *xs = new std::string();
-	                            xs->append(d.substr(ylast, xasd-ylast));
-	                            ylast = xasd;
-	                            d_out.push_back(xs);
-	                        }
-	                        xasd++;
-	                    }
-//	                    loginfunc(&d_out); //login function
-	                    std::vector<std::string *>::iterator itera = d_out.begin();
-	                    while(d_out.size() > 0 ) {
-	                        std::string *s = (*(itera));
-	                        delete s;
-	                        d_out.erase(itera);
-	                        itera=d_out.begin();
-	                    }
-	                    return true;
-	                }
-
+					if(funcn.compare("setMenu") == 0) {
+						std::string l;
+						l.append(setMenu((char *)arg.c_str()));
+						conoutf(l);
+						return true;
+					}
 					return false;
 				}
 				return true;
@@ -1416,10 +1281,10 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 				}
 			}
 		}
-		// }}}
-	} 
+	// }}}
+	}
 	if(menumode && !menu_in->selected) {
-	//we're in a menu but don't have anything selected {{{
+		//we're in a menu but don't have anything selected {{{
 		std::string y;
 		y.append(displaymenu());
 		conoutf(y);
@@ -1429,6 +1294,7 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 	return false;
 };
 // }}}
+
 // set a menu {{{
 std::string commandI::setMenu(char *name_in) {
 	std::string name;
@@ -1438,7 +1304,7 @@ std::string commandI::setMenu(char *name_in) {
 		iter < menus.end(); iter++ ){
 		if((*(iter))->Name.compare(name) == 0) {
 			if(!menumode) {
-			menumode = true;
+				menumode = true;
 			} else {
 				menustack.push_back(menu_in);
 			}
@@ -1452,7 +1318,6 @@ std::string commandI::setMenu(char *name_in) {
 		}
 	}
 	return displaymenu();
-
 };
 // }}}
 void commandI::breakmenu() {
@@ -1464,29 +1329,12 @@ void commandI::breakmenu() {
 };
 // }}}
 
-// commandI::display, find and display an existing value for an item on the menusystem {{{
-std::string commandI::display(std::string &in) {
-//this is used to build strings containing values related to the string in
-//For an Online Content Creation Menusystem
-//such as SHIP_SHIELD
-//        SHIPE_DESC
-//        then it would build a string based on the the current ship or editing
-//		if(in.compare("ship_desc") == 0){  return editing_ship->description; };
-	std::string f;
-	f.append("Bad commandI::Display value (predisplay value on menuitems) \n");
-	f.append(in);
-	return f;
-}
-// }}}
-
-
-
-//This whole python object could be moved to it's own cpp file and expanded to make a nice big python command that does stuff like... take multiple lines of input before executing, edit existing input (emacs/vim/notepad like or something)
 extern commandI CommandInterpretor;
 // {{{ Python object
+
 RegisterPythonWithCommandInterp::RegisterPythonWithCommandInterp() {
 	Functor<RegisterPythonWithCommandInterp> *l = new Functor<RegisterPythonWithCommandInterp>(this, &RegisterPythonWithCommandInterp::runPy);
-	CommandInterpretor.addCommand(l, "python", ARG_1STR);
+	CommandInterpretor.addCommand(l, "python");
 }
 
 //run a python string
@@ -1497,12 +1345,16 @@ void RegisterPythonWithCommandInterp::runPy(std::string &argsin) {
 	//and the first space
 	if(x == 0)
 		pyRunString.replace(x, 7, ""); //replace here
-	x = pyRunString.find("<BR>"); //newlines are converted to these in the menusystem. Can be changed if needed.
-	while(x != std::string::npos) {
-		pyRunString.replace(x, 4, "\r\n");
-		x = pyRunString.find("<BR>");
-	}
 //this method was copied from somewhere else in the vegastrike source
+	//now replace <BR> with \r\n
+	{
+		unsigned int x = pyRunString.find("<BR>");
+		while(x < std::string::npos) {
+			pyRunString.replace(x, 4, "\r\n");
+			x = pyRunString.find("<BR>");
+		}
+	}
+
 	char *temppython = strdup(pyRunString.c_str()); //copy to a char *
 	PyRun_SimpleString(temppython); //run it
 	Python::reseterrors();

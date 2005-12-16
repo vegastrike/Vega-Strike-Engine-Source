@@ -24,7 +24,6 @@ class coms {
 	~coms();
 
 	std::string Name;
-	int argtype;
 	TFunctor *functor;
 };
 //hmm so how do we do menus. Should they be done right in here?
@@ -86,7 +85,7 @@ class commandI : public RText {
 		//new command interpretor
 //                static std::vector<coms *> commands; //our vector of POINTERS
                         //to encapsulated COM objects. (see top of this file)
-		coms findCommand(const char *comm, int &sock_in);
+		coms *findCommand(const char *comm, int &sock_in);
 //		mud *World; //to print to the charactor - server object
 		menu *lastmenuadded;
 		std::vector<menu *> menus;
@@ -108,7 +107,7 @@ class commandI : public RText {
                 //if args is not supplied it assumes your function
                 //has no arguements (not even a void)
 		void help(std::string &d); //help command, should read a help file
-                void addCommand(TFunctor *com, char *name, int args); //add a downcasted Functor
+                void addCommand(TFunctor *com, char *name); //add a downcasted Functor
 		void remCommand(char *name);
 		void remCommand(TFunctor *com); //use this now if possible		
                 void dummy(std::vector<std::string *> *d);// {return;}; //first thing to be added to the vecto

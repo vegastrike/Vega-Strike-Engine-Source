@@ -26,9 +26,9 @@ class ShipCommands {
 		ShipCommands() {
 			//create some functors, register them with the command interp {{{
 			cpymenu = new Functor<ShipCommands>(this, &ShipCommands::pymenu);
-			CommandInterpretor.addCommand(cpymenu, "pymenu", ARG_NONE);
+			CommandInterpretor.addCommand(cpymenu, "pymenu");
 			csetkps = new Functor<ShipCommands>(this, &ShipCommands::setkps);
-			CommandInterpretor.addCommand(csetkps, "setspeed", ARG_1CSTR); //1 c string argument,
+			CommandInterpretor.addCommand(csetkps, "setspeed");
 			// }}}
 			// set some local bools false {{{
 			broll = false;
@@ -109,6 +109,7 @@ static ShipCommands *ship_commands=NULL;
 
 void ShipCommands::setkps(const char *in)
 {
+	if(in == NULL) throw "What speed?";
 	float kps = XMLSupport::parse_float(std::string(in));
 	Unit *player = UniverseUtil::getPlayer();
 	if (player) {

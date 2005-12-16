@@ -30,7 +30,7 @@ mmoc::mmoc() { // {{{
 	INET_startup();
 	//add the connectto to the players command interp.
 	cmd = new Functor<mmoc>(this, &mmoc::connectTo);
-	CommandInterpretor.addCommand(cmd, "connectto", ARG_2CSTR);
+	CommandInterpretor.addCommand(cmd, "connectto");
 	// {{{
 	//add commands here to be parsed from network input.
 	//some notes:
@@ -90,10 +90,10 @@ void mmoc::connectTo(const char *address_in, const char *port_in) { // {{{
 	hellomsg.append("Vegastrike-user");
 	send(hellomsg);
 	cl = new Functor<mmoc>(this, &mmoc::close);
-	CommandInterpretor.addCommand(cl, "disconnect", ARG_NONE);
+	CommandInterpretor.addCommand(cl, "disconnect");
 	
     csay = new Functor<mmoc>(this, &mmoc::send);
-    CommandInterpretor.addCommand(csay, "send", ARG_1STR);
+    CommandInterpretor.addCommand(csay, "send");
 
 	createThread(); 
 } // }}}
