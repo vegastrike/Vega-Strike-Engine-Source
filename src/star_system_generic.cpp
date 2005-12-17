@@ -734,7 +734,7 @@ static bool isJumping(const vector <unorigdest*>&pending,Unit * un) {
 	return false;
 }
 QVector SystemLocation(std::string system);
-float howFarToJump();
+double howFarToJump();
 QVector ComputeJumpPointArrival(QVector pos,std::string origin ,std::string destination)  {
   QVector finish=SystemLocation(destination);
   QVector start=SystemLocation(origin);
