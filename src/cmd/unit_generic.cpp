@@ -1676,7 +1676,7 @@ extern signed char  ComputeAutoGuarantee ( Unit * un);
 extern float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false);
 extern void SetShieldZero(Unit*);
 double howFarToJump() {
-  static float tmp=XMLSupport::parse_float(vs_config->getVariable("physics","distance_to_warp","40000000000.0"));
+  static float tmp=XMLSupport::parse_float(vs_config->getVariable("physics","distance_to_warp","100000000000.0"));
   return tmp;
 }
 
