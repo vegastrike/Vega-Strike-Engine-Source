@@ -53,6 +53,11 @@ NavigationSystem::NavigationSystem() {
 	whattodraw=(1|2);
 	pathman = new PathManager();
 	navcomp = new NavComputer(this);
+        for (int i=0;i<NAVTOTALMESHCOUNT;i++) {
+          mesh[i]=NULL;
+        }
+        factioncolours=NULL;
+
 }
 
 NavigationSystem::~NavigationSystem() {
@@ -1236,7 +1241,25 @@ void NavigationSystem::setDestinationSystemIndex(unsigned newSystemIndex) {
 }
 
 std::string NavigationSystem::getCurrentSystem() {
+  if (factioncolours==NULL||focusedsystemindex>=systemIter.size())
+    return _Universe->activeStarSystem()->getFileName();
   return systemIter[currentsystemindex].GetName();
+}
+std::string NavigationSystem::getSelectedSystem() {
+  if (factioncolours==NULL||focusedsystemindex>=systemIter.size())
+    return _Universe->activeStarSystem()->getFileName();
+  return systemIter[systemselectionindex].GetName();
+}
+std::string NavigationSystem::getDestinationSystem() {
+  if (factioncolours==NULL||focusedsystemindex>=systemIter.size())
+    return _Universe->activeStarSystem()->getFileName();
+  return systemIter[destinationsystemindex].GetName();
+}
+std::string NavigationSystem::getFocusedSystem() {
+  if (factioncolours==NULL||focusedsystemindex>=systemIter.size())
+    return _Universe->activeStarSystem()->getFileName();
+  
+  return systemIter[focusedsystemindex].GetName();
 }
 
 

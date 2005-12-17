@@ -289,6 +289,10 @@ static void DrawTargetCorners(float x, float y, float size, const GFXColor &col 
 static void DrawNavCircle(float x, float y, float rot_x, float rot_y, float size, const GFXColor &col );
 void setCurrentSystem(string newSystem);
 std::string getCurrentSystem();
+std::string getSelectedSystem();
+std::string getFocusedSystem();
+std::string getDestinationSystem();
+
 
 void DrawButton(float &x1, float &x2, float &y1, float &y2, int button_number, bool outline);
 void DrawButtonOutline(float &x1, float &x2, float &y1, float &y2, const GFXColor &col);

@@ -124,6 +124,7 @@ private:
   NavigationSystem ThisNav;
   // Draw the arrow pointing to the target.
   void DrawArrowToTarget(Unit *, Unit *);
+  void DrawArrowToTarget(Unit *, Vector LocalCoordinates);
  public:
   void	ReceivedTargetInfo();
   static void NavScreen (const KBData&,KBSTATE k); // scheherazade

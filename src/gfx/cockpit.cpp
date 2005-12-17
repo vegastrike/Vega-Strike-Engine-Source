@@ -190,7 +190,7 @@ GFXColor GameCockpit::relationToColor (float relation) {
   }
 }
 void GameCockpit::DrawNavigationSymbol (const Vector &Loc, const Vector & P, const Vector & Q, float size) {
-  GFXColor4f (1,1,1,1);
+
   if (1) {
     static float crossthick = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","NavCrossLineThickness","1")); //1.05;
     GFXLineWidth(crossthick);
@@ -395,7 +395,7 @@ inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &Ca
 }
 
 static GFXColor DockBoxColor (const string& name) {
-  GFXColor dockbox;
+  GFXColor dockbox(1,1,1,1);
   vs_config->getColor(name,&dockbox.r);
   return dockbox;
 }
@@ -480,8 +480,6 @@ void GameCockpit::DrawTargetBoxes(){
     target=(++uiter);
   }
 
-  GFXEnable (TEXTURE0);
-
 }
 
 
@@ -508,8 +506,10 @@ void GameCockpit::DrawTargetBox () {
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (LIGHTING);
   static bool draw_nav_symbol=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawNavSymbol","false"));
-  if (draw_nav_symbol)
+  if (draw_nav_symbol) {
+    GFXColor4f(1,1,1,1);
     DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Cast().Dot((un->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition()));
+  }
   GFXColorf (unitToColor(un,target,un->GetComputerData().radar.iff));
 
   if(draw_line_to_target){
@@ -534,6 +534,7 @@ void GameCockpit::DrawTargetBox () {
   bool nav_symbol=false;
   if (draw_target_nav_symbol&&((target->faction==neutral&&target->isUnit()==UNITPTR)||target->isUnit()==ASTEROIDPTR||(target->isPlanet()&&((Planet*)target)->isAtmospheric()&&(draw_jump_nav_symbol||target->GetDestinations().empty()))||distance>un->GetComputerData().radar.maxrange)) {
     static float nav_symbol_size = XMLSupport::parse_float(vs_config->getVariable("graphics","nav_symbol_size",".25"));
+    GFXColor4f(1,1,1,1);
     DrawNavigationSymbol (Loc,CamP,CamQ, Loc.Magnitude()*nav_symbol_size);  
     nav_symbol=true;
   }else {
@@ -564,9 +565,6 @@ void GameCockpit::DrawTargetBox () {
     GFXEnd();
     GFXDisable (SMOOTH);
   }
-  GFXEnable (TEXTURE0);
-  GFXEnable (DEPTHTEST);
-  GFXEnable (DEPTHWRITE);
 
 }
 
@@ -591,10 +589,6 @@ void GameCockpit::DrawCommunicatingBoxes () {
 
       DrawOneTargetBox (Loc, target->rSize()*1.05, CamP, CamQ, CamR,1,0);
 
-      
-      GFXEnable (TEXTURE0);
-      GFXEnable (DEPTHTEST);
-      GFXEnable (DEPTHWRITE);
      
     }
   }
@@ -639,8 +633,10 @@ void GameCockpit::DrawTurretTargetBoxes () {
     //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
     QVector Loc(target->Position()-_Universe->AccessCamera()->GetPosition());
     static bool draw_nav_symbol=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawNavSymbol","false"));
-    if (draw_nav_symbol)
+    if (draw_nav_symbol){
+      GFXColor4f(1,1,1,1);
       DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Cast().Dot((un->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition()));
+    }
     GFXColorf (unitToColor(un,target,un->GetComputerData().radar.iff));
 
     //DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),un->TargetLocked());
@@ -669,9 +665,6 @@ void GameCockpit::DrawTurretTargetBoxes () {
     iter.advance();
   }
 
-  GFXEnable (TEXTURE0);
-  GFXEnable (DEPTHTEST);
-  GFXEnable (DEPTHWRITE);
 }
 
 
@@ -770,11 +763,6 @@ void GameCockpit::DrawTacticalTargetBox () {
 
 
 
-    GFXEnable (TEXTURE0);
-
-    GFXEnable (DEPTHTEST);
-
-    GFXEnable (DEPTHWRITE);
 
     glLineWidth ((int)1); // temp
 
@@ -1736,7 +1724,11 @@ static void DrawCrosshairs (float x, float y, float wid, float hei, const GFXCol
 }
 extern bool QuitAllow;
 extern bool screenshotkey;
+QVector SystemLocation(std::string system);
+double howFarToJump();
 void GameCockpit::Draw() {
+  static GFXColor destination_system_color=DockBoxColor ("destination_system_color");             
+  Vector destination_system_location(0,0,0);
   cockpit_time+=GetElapsedTime();
   if (cockpit_time>=100000)
     InitStatic();
@@ -1752,11 +1744,44 @@ void GameCockpit::Draw() {
   if (draw_any_boxes&&screenshotkey==false) {
       DrawTargetBox();
       DrawTurretTargetBoxes();
-	  DrawTacticalTargetBox();
+      DrawTacticalTargetBox();
       DrawCommunicatingBoxes();
       if(draw_all_boxes){
         DrawTargetBoxes();
       }
+      {
+        std::string destination_system=AccessNavSystem()->getSelectedSystem();
+        std::string current_system=_Universe->activeStarSystem()->getFileName();
+        if (destination_system!=current_system) {
+          QVector cur=SystemLocation(current_system);
+          QVector dest=SystemLocation(destination_system);
+          QVector delta=dest-cur;
+          if (delta.i!=0||dest.j!=0||dest.k!=0) {
+            delta.Normalize();         
+            Unit * par=GetParent();
+            delta=delta*howFarToJump()*1.01-(par?(par->Position()):QVector(0,0,0));
+            destination_system_location=delta.Cast();
+	    Vector P,Q,R;
+            static float nav_symbol_size = XMLSupport::parse_float(vs_config->getVariable("graphics","nav_symbol_size",".25"));
+	    AccessCamera()->GetPQR (P,Q,R);
+
+            
+            GFXColor4f(destination_system_color.r,
+                       destination_system_color.g,
+                       destination_system_color.b,
+                       destination_system_color.a);
+            
+            DrawNavigationSymbol(delta.Cast(),P,Q,delta.Magnitude()*nav_symbol_size);
+
+
+            GFXColor4f(1,1,1,1);
+          }
+          
+        }
+      }
+      GFXEnable (TEXTURE0);
+      GFXEnable (DEPTHTEST);
+      GFXEnable (DEPTHWRITE);      
   }
   if (view<CP_CHASE) {
     if (mesh.size()){
@@ -2037,8 +2062,16 @@ void GameCockpit::Draw() {
     }
     // Draw the arrow to the target.
     static bool drawarrow = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_arrow_to_target","true"));
-    if (drawarrow) {
-      DrawArrowToTarget(parent.GetUnit(), parent.GetUnit()->Target());
+    
+    {
+      Unit * parent=NULL;
+      if (drawarrow&&(parent=this->parent.GetUnit())) {
+        DrawArrowToTarget(parent, parent->Target());
+        if (destination_system_location.i||destination_system_location.j||destination_system_location.k) {
+          GFXColorf(destination_system_color);
+          DrawArrowToTarget(parent,parent->ToLocalCoordinates(destination_system_location));
+        }
+      }
     }
   }
   if (QuitAllow||getTimeCompression()<.5) {
@@ -2545,13 +2578,15 @@ Camera* GameCockpit::AccessCamera(int num){
 #define TARGET_ARROW_SIN_THETA    0.34202014332566873304409961468226
 #define TARGET_ARROW_SIZE         0.05
 void GameCockpit::DrawArrowToTarget(Unit *un, Unit *target) {
+  if (un&&target) {
+    GFXColorf(unitToColor(un, target,un->GetComputerData().radar.iff));
+    DrawArrowToTarget(un,un->LocalCoordinates(target));
+  }
+}
+void GameCockpit::DrawArrowToTarget(Unit *un, Vector localcoord) {
   float s, t, s_normalized, t_normalized, inv_len;
   Vector p1, p2, p_n;
 
-  if ( ! target )
-    return;
-
-  Vector localcoord(un->LocalCoordinates(target));
 
   // Project target position on k.
   inv_len = 1 / fabs(localcoord.k);
@@ -2610,7 +2645,6 @@ void GameCockpit::DrawArrowToTarget(Unit *un, Unit *target) {
   p2.k = p1.k = 0;
 
   static GFXColor black_and_white = DockBoxColor("black_and_white");
-  GFXColorf(unitToColor(un, target,un->GetComputerData().radar.iff));
   GFXEnable(SMOOTH);
   GFXDisable(TEXTURE0);
   GFXDisable(TEXTURE1);
