@@ -157,9 +157,9 @@ static int stoi(string inp, int def=0) {
 }
 extern bool CheckAccessory(Unit *);
 extern int parseMountSizes (const char * str);
-static Mount * createMount(const std::string& name, int ammo, int volume, float xyscale, float zscale, float func, float maxfunc) //short fix
+static Mount * createMount(const std::string& name, int ammo, int volume, float xyscale, float zscale, float func, float maxfunc, bool banked) //short fix
 {
-	return new Mount (name.c_str(), ammo,volume,xyscale, zscale,func,maxfunc);
+	return new Mount (name.c_str(), ammo,volume,xyscale, zscale,func,maxfunc,banked);
 
 }
 
@@ -198,7 +198,7 @@ static void AddMounts(Unit * thus, Unit::XML &xml, std::string mounts) {
       Q.k = stof(nextElement(mount));
       float func =stof(nextElement(mount),1);
       float maxfunc =stof(nextElement(mount),1);
-
+      bool banked = stob(nextElement(mount),false);
       Q.Normalize();
       if (fabs(Q.i)==fabs(R.i)&&fabs(Q.j)==fabs(R.j)&&fabs(Q.k)==fabs(R.k)){
         Q.i=-1;
@@ -212,7 +212,7 @@ static void AddMounts(Unit * thus, Unit::XML &xml, std::string mounts) {
       Q.Normalize();
       //Transformation(Quaternion (from_vectors (P,Q,R),pos);
       unsigned int indx = xml.mountz.size();
-      xml.mountz.push_back(createMount (filename.c_str(), ammo,volume,xml.unitscale*xyscale,xml.unitscale*zscale,func,maxfunc));
+      xml.mountz.push_back(createMount (filename.c_str(), ammo,volume,xml.unitscale*xyscale,xml.unitscale*zscale,func,maxfunc,banked));
       xml.mountz[indx]->SetMountOrientation(Quaternion::from_vectors(P.Cast(),Q.Cast(),R.Cast()));
       xml.mountz[indx]->SetMountPosition(xml.unitscale*pos.Cast());
       int mntsiz=weapon_info::NOWEAP;

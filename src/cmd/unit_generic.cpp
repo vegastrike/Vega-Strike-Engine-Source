@@ -1067,10 +1067,10 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
   if ((cloaking>=0&&can_fire_in_cloak==false)||(graphicOptions.InWarp&&can_fire_in_spec==false)){
     return;
   }
-	int nm = 0;
-	vector <Mount>
-		::iterator i = mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
-    for (;i!=mounts.end();++i, nm++) {
+  int nm = 0;
+  vector <Mount>::iterator i = mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
+  bool banked=false;
+  for (;i!=mounts.end();++i, nm++) {
 			if ((*i).type->type==weapon_info::BEAM) {
 				if ((*i).type->EnergyRate*SIMULATION_ATOM>energy) {
 					// On server side send a PACKET TO ALL CLIENT TO NOTIFY UNFIRE
@@ -1088,6 +1088,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
 					continue;
 			}
 
+
 			const bool mis = isMissile((*i).type);
 			const bool locked_on = (*i).time_to_lock<=0;
 			const bool lockable_weapon = (*i).type->LockTime>0;
@@ -1099,7 +1100,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
 			if(missile_and_want_to_fire_missiles&&locked_missile){
 				VSFileSystem::vs_fprintf (stderr,"\n about to fire locked missile \n");
 			}
-			if (fire_non_autotrackers||autotracking_gun||locked_missile) {
+			if ((fire_non_autotrackers||autotracking_gun||locked_missile)&&banked==false) {
 				if ((ROLES::EVERYTHING_ELSE&weapon_type_bitmask&(*i).type->role_bits)
 					||(*i).type->role_bits==0) {
 					if ((locked_on&&missile_and_want_to_fire_missiles)
@@ -1108,8 +1109,11 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
 						if( Network==NULL || SERVER || (*i).processed==Mount::ACCEPTED)
 						{
 							// If we are on server or if the weapon has been accepted for fire we fire
-							if ((*i).Fire(this,owner==NULL?this:owner,mis,listen_to_owner)) {
+                                                        vector<Mount>::iterator tmpmount=i;
+							if ((*i).Fire(this,owner==NULL?this:owner,tmpmount!=mounts.end()?&*++tmpmount:NULL,mis,listen_to_owner)) {
 								ObjSerial serid;
+                                                                banked=(*i).bank;
+                                                                
 								if( missile_and_want_to_fire_missiles)
 								{
 									serid = getUniqueSerial();
@@ -1149,6 +1153,8 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
 					}
 				}
 			}
+                        if (!(*i).bank)
+                          banked=false;
     }
 
 }

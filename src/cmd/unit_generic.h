@@ -130,14 +130,16 @@ class Mount {
     enum MOUNTSTATUS{REQUESTED,ACCEPTED,PROCESSED,UNFIRED,FIRED} processed;
     ///Status of the selection of this weapon. Does it fire when we hit space
     enum STATUS{ACTIVE, INACTIVE, DESTROYED, UNCHOSEN} status;
-    ///The sound this mount makes when fired
+    bool bank;
+    ///bank implies whether the weapon is linked with the next mount (i.e. only one firing at a time)
     const weapon_info *type;
     float functionality;
     float maxfunctionality;
     int sound;
+    ///The sound this mount makes when fired
     float time_to_lock;
     Mount();
-    Mount(const std::string& name, int ammo, int volume, float xyscale, float zscale, float functionality, float maxfunctionality); //short fix
+    Mount(const std::string& name, int ammo, int volume, float xyscale, float zscale, float functionality, float maxfunctionality, bool banked); //short fix
 
     void Activate (bool Missile);
     void DeActive (bool Missile);
@@ -155,9 +157,10 @@ class Mount {
      * should it fire
      */ 
 	// Uses Sound Forcefeedback and other stuff
-	void PhysicsAlignedUnfire();
+    void PhysicsAlignedUnfire();
     bool PhysicsAlignedFire (Unit * caller,const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, void *owner,  Unit *target, signed char autotrack, float trackingcone, CollideMap::iterator &hint);
-	bool Fire (Unit * firer,void *owner, bool Missile=false, bool collide_only_with_target=false);
+    bool NextMountCloser(Mount *nextmount,Unit*);
+    bool Fire (Unit * firer,void *owner, Mount* nextmount, bool Missile=false, bool collide_only_with_target=false);
 };
 
 

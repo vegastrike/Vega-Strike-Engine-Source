@@ -505,9 +505,9 @@ void pushMesh( std::vector<Mesh*>&meshes, float &randomstartframe, float &random
   }
 }
 
-Mount * createMount(const std::string& name, int ammo, int volume, float xyscale, float zscale) //short fix
+Mount * createMount(const std::string& name, int ammo, int volume, float xyscale, float zscale, bool banked) //short fix
 {
-	return new Mount (name.c_str(), ammo,volume,xyscale, zscale,1,1);
+	return new Mount (name.c_str(), ammo,volume,xyscale, zscale,1,1, banked);
 
 }
 
@@ -958,7 +958,7 @@ using namespace UnitXML;
     Q.Normalize();
     //Transformation(Quaternion (from_vectors (P,Q,R),pos);
     indx = xml->mountz.size();
-    xml->mountz.push_back(createMount (filename.c_str(), ammo,volume,xyscale,zscale));
+    xml->mountz.push_back(createMount (filename.c_str(), ammo,volume,xyscale,zscale,false/*no way to do banked in XML*/));
     xml->mountz[indx]->SetMountOrientation(Quaternion::from_vectors(P.Cast(),Q.Cast(),R.Cast()));
 	xml->mountz[indx]->SetMountPosition(pos.Cast());
     //xml->mountz[indx]->Activate();

@@ -60,7 +60,7 @@ float Mount::ComputeAnimatedFrame(Mesh * gun) {
 		}
 	}
 }
-Mount::Mount(const string& filename, int am, int vol, float xyscale, float zscale, float func,float maxfunc){ //short fix
+Mount::Mount(const string& filename, int am, int vol, float xyscale, float zscale, float func,float maxfunc, bool banked):bank(banked){ //short fix
   functionality=func;
   maxfunctionality=maxfunc;
   static weapon_info wi(weapon_info::BEAM);
@@ -113,6 +113,8 @@ void Mount::SwapMounts(Mount * other) {
 	  int othervol = other->volume; //short fix
 	  //short othersize = other->size;
 	  int thissize = size;
+          bool thisbank=this->bank;
+          bool otherbank=other->bank;
 	  Mount mnt = *this;
 	  this->size=thissize;
 	  *this=*other;
@@ -126,12 +128,15 @@ void Mount::SwapMounts(Mount * other) {
 	  this->SetMountOrientation(other->GetMountOrientation());
 	  other->SetMountPosition (v);
 	  other->SetMountOrientation (q);  
+          other->bank=otherbank;
+          this->bank=thisbank;
 }
 void Mount::ReplaceMounts (const Mount * other) {
 	int thisvol = volume; //short fix
 	int thissize = size;  //short fix
         float xyscale=this->xyscale;
         float zscale=this->zscale;
+        bool thisbank=this->bank;
 	Quaternion q =this->GetMountOrientation();
 	Vector v = this->GetMountLocation();
 	*this=*other;
@@ -141,6 +146,7 @@ void Mount::ReplaceMounts (const Mount * other) {
 	this->SetMountOrientation(q);	
         this->xyscale=xyscale;
         this->zscale=zscale;
+        this->bank=thisbank;
 	ref.gun=NULL;
 	if (type->type!=weapon_info::BEAM)
 		ref.refire=type->Refire;
@@ -394,8 +400,19 @@ bool Mount::PhysicsAlignedFire(Unit * caller, const Transformation &Cumulative, 
   }
   return true;
 }
-
-bool Mount::Fire (Unit * firer, void * owner, bool Missile, bool listen_to_owner) {
+bool Mount::NextMountCloser(Mount * nextmount, Unit * firer) {
+  Unit * target;
+  if (nextmount&&(target=firer->Target())) {
+    Matrix mat;
+    nextmount->orient.to_matrix(mat);
+    Vector nextR=mat.getR();
+    this->orient.to_matrix(mat);
+    Vector diff = firer->LocalCoordinates(target);
+    return (nextR.Dot(diff-nextmount->pos) > mat.getR().Dot(diff-this->pos));
+  }
+  return false;
+}
+bool Mount::Fire (Unit * firer, void * owner,Mount* nextmount, bool Missile, bool listen_to_owner) {
   if (ammo==0) {
     processed=UNFIRED;
   }
@@ -403,18 +420,26 @@ bool Mount::Fire (Unit * firer, void * owner, bool Missile, bool listen_to_owner
   if (processed==FIRED||status!=ACTIVE||(Missile!=(isMissile(type)))||ammo==0)
     return false;
   if (type->type==weapon_info::BEAM) {
-	  bool fireit=ref.gun==NULL;
-	  if (!fireit)
-		  fireit = ref.gun->Ready();
-	  else
-		  ref.gun = new Beam (Transformation(orient,pos.Cast()),*type,owner,firer,sound);
-	if (fireit) {
-		if (ammo>0&&reduce_beam_ammo)
-			ammo--;//ditto about beams ahving ammo		
-		ref.gun->ListenToOwner(listen_to_owner);
-		processed=FIRED;
-	}
-	return true;
+#ifdef NO_MOUNT_STAR
+    if (!bank||this->NextMountCloser(nextmount,firer))
+#endif
+    {
+      bool fireit=ref.gun==NULL;
+      if (!fireit)
+        fireit = ref.gun->Ready();
+      else
+        ref.gun = new Beam (Transformation(orient,pos.Cast()),*type,owner,firer,sound);
+      if (fireit) {
+        if (ammo>0&&reduce_beam_ammo)
+          ammo--;//ditto about beams ahving ammo		
+        ref.gun->ListenToOwner(listen_to_owner);
+        processed=FIRED;
+      }
+    }else {
+      processed=UNFIRED;
+      return false;
+    }
+    return true;
   }else { 
     if (ref.refire>=type->Refire) {
       ref.refire =0;
