@@ -733,7 +733,24 @@ static bool isJumping(const vector <unorigdest*>&pending,Unit * un) {
 	}
 	return false;
 }
-bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system, bool force) {
+QVector SystemLocation(std::string system);
+float howFarToJump();
+QVector ComputeJumpPointArrival(QVector pos,std::string origin ,std::string destination)  {
+  QVector finish=SystemLocation(destination);
+  QVector start=SystemLocation(origin);
+  QVector dir=finish-start;
+  if (dir.MagnitudeSquared()) {
+    dir.Normalize();
+    dir = -dir;
+    pos =-pos;
+    pos.Normalize();
+    if (pos.MagnitudeSquared()) pos.Normalize();
+    return (dir*.5+pos*.125)*howFarToJump();
+  }
+  return QVector(0,0,0);
+
+}
+bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system, bool force, bool save_coordinates) {
   if ((un->DockedOrDocking()&(~Unit::DOCKING_UNITS))!=0) {
     return false;
   }
@@ -769,8 +786,8 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system,
     int ani =-1;
       if (dosightandsound) {
         ani=_Universe->activeStarSystem()->DoJumpingLeaveSightAndSound (un);
-      }
-      pendingjump.push_back (new unorigdest (un,jumppoint, this,ss,un->GetJumpStatus().delay,ani,justloaded ));
+      }      
+      pendingjump.push_back (new unorigdest (un,jumppoint, this,ss,un->GetJumpStatus().delay,ani,justloaded,save_coordinates?ComputeJumpPointArrival(un->Position(),this->getFileName(),system):QVector(0,0,0) ));
 #if 0
       UnitImages * im=  &un->GetImageInformation();
       for (unsigned int i=0;i<=im->dockedunits.size();i++) {

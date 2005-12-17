@@ -37,6 +37,7 @@
 #include "gfx/bounding_box.h"
 #include "csv.h"
 #include "vs_random.h"
+#include "galaxy_xml.h"
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
@@ -1674,6 +1675,65 @@ void Unit::DisableTurretAI () {
 extern signed char  ComputeAutoGuarantee ( Unit * un);
 extern float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false);
 extern void SetShieldZero(Unit*);
+double howFarToJump() {
+  static float tmp=XMLSupport::parse_float(vs_config->getVariable("physics","distance_to_warp","40000000000.0"));
+  return tmp;
+}
+
+QVector SystemLocation(std::string system) {
+  string xyz=_Universe->getGalaxyProperty(system,"xyz");
+  QVector pos;
+  if (xyz.size() && (sscanf(xyz.c_str(), "%lf %lf %lf", &pos.i, &pos.j, &pos.k)>=3)) {
+    return pos;
+  } else {
+    return QVector(0,0,0);
+  }
+}
+
+static std::string NearestSystem (std::string currentsystem,QVector pos) {
+  if (pos.i==0&&pos.j==0&&pos.k==0)
+    return "";
+  QVector posnorm=pos.Normalize();
+  posnorm.Normalize();
+  QVector cur = SystemLocation(currentsystem);
+  if (cur.i==0&&cur.j==0&&cur.k==0) {
+    return "";
+  }
+  double closest_distance=0.0;
+  std::string closest_system;
+  GalaxyXML::Galaxy * gal=_Universe->getGalaxy();
+  GalaxyXML::SubHeirarchy * sectors= &gal->getHeirarchy();
+  std::map<std::string,class GalaxyXML::SGalaxy>::iterator j,i =sectors->begin();
+
+  for (;i!=sectors->end();++i) {
+    GalaxyXML::SubHeirarchy * systems=&i->second.getHeirarchy();
+    for (j=systems->begin();
+         j!=systems->end();
+         ++j) {
+      std::string place=j->second["xyz"];
+      if (place.length()) {
+        QVector pos2=QVector(0,0,0);
+        sscanf(place.c_str(),"%lf %lf %lf",&pos2.i,&pos2.j,&pos2.k);
+        if ((pos2.i!=0||pos2.j!=0||pos2.k!=0)&&(pos2.i!=cur.i||pos2.j!=cur.j||pos2.k!=cur.k)) {
+          QVector dir=pos2-cur;
+          QVector norm=dir;
+          norm.Normalize();
+          double test=posnorm.Dot(norm);
+          if (test>.2) {
+            test=1-test;
+            double tmp=dir.MagnitudeSquared()*test;
+            if (tmp<closest_distance||closest_distance==0) {
+              closest_distance=tmp;
+              closest_system=i->first+"/"+j->first;
+            }
+          }
+        }
+      }
+    }
+    
+  }
+  return closest_system;
+}
 void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc, Unit * superunit) {
   static float VELOCITY_MAX=XMLSupport::parse_float(vs_config->getVariable ("physics","velocity_max","10000"));
   static float SPACE_DRAG=XMLSupport::parse_float(vs_config->getVariable ("physics","unit_space_drag","0.000000"));
@@ -1923,9 +1983,11 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
     }     
   }
   bool dead=true;
-
+  
   UpdateSubunitPhysics(cumulative_transformation,cumulative_transformation_matrix,cumulative_velocity,lastframe,uc,superunit);
-
+  if (curr_physical_state.position.MagnitudeSquared()>howFarToJump()*howFarToJump()&&!isSubUnit()) {
+    _Universe->activeStarSystem()->JumpTo(this,NULL,NearestSystem(_Universe->activeStarSystem()->getFileName(),curr_physical_state.position),true,true);
+  }
   // Really kill the unit only in non-networking or on server side
   if ((Network==NULL || SERVER) && hull<0) {
     dead&= (image->explosion==NULL);    

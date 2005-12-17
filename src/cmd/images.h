@@ -197,7 +197,8 @@ struct unorigdest {
   int animation;
   bool justloaded;
   bool ready;
-  unorigdest (Unit * un,Unit * jumppoint, StarSystem * orig, StarSystem * dest, float delay,  int ani, bool justloaded):un(un),jumppoint(jumppoint),orig(orig),dest(dest), delay(delay), animation(ani),justloaded(justloaded),ready(true){}
+  QVector final_location;
+  unorigdest (Unit * un,Unit * jumppoint, StarSystem * orig, StarSystem * dest, float delay,  int ani, bool justloaded, QVector use_coordinates/*set to 0,0,0 for crap*/):un(un),jumppoint(jumppoint),orig(orig),dest(dest), delay(delay), animation(ani),justloaded(justloaded),ready(true), final_location(use_coordinates){}
 };
 
 #endif

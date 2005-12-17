@@ -40,7 +40,7 @@ template <class UnitType>
 bool GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem, bool dosightandsound) {
   bool ret=false;
   if (pendingjump[kk]->orig==this->activeStarSystem||this->activeStarSystem==NULL) {
-	  if (Unit::TransferUnitToSystem (pendingjump[kk]->dest)) {
+    if (Unit::TransferUnitToSystem (pendingjump[kk]->dest)) {
 #ifdef JUMP_DEBUG
       VSFileSystem::vs_fprintf (stderr,"Unit removed from star system\n");
 #endif
@@ -77,8 +77,8 @@ bool GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
       if (an_active_cockpit!=NULL) {
 	an_active_cockpit->activeStarSystem=pendingjump[kk]->dest;
 	visitSystem (an_active_cockpit,pendingjump[kk]->dest->getFileName());
-//	vector<float> *v = &an_active_cockpit->savegame->getMissionData(string("visited_")+pendingjump[kk]->dest->getFileName());
-//	if (v->empty())v->push_back (1.0);else (*v)[0]=1.0;
+        //	vector<float> *v = &an_active_cockpit->savegame->getMissionData(string("visited_")+pendingjump[kk]->dest->getFileName());
+        //	if (v->empty())v->push_back (1.0);else (*v)[0]=1.0;
       }
       if (this==_Universe->AccessCockpit()->GetParent()) {
 	VSFileSystem::vs_fprintf (stderr,"Unit is the active player character...changing scene graph\n");
@@ -86,7 +86,7 @@ bool GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
 	AUDStopAllSounds();
 	savedStarSystem = pendingjump[kk]->dest;
 	pendingjump[kk]->dest->SwapIn();
-
+        
 	
       }
       
@@ -94,44 +94,52 @@ bool GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
       vector <Unit *> possibilities;
       iter = pendingjump[kk]->dest->getUnitList().createIterator();
       Unit * primary;
-      while ((primary = iter.current())!=NULL) {
-	vector <Unit *> tmp;
-	tmp = ComparePrimaries (primary,pendingjump[kk]->orig);
-	if (!tmp.empty()) {
-	  possibilities.insert (possibilities.end(),tmp.begin(), tmp.end());
-	}
-	iter.advance();
+      if (pendingjump[kk]->final_location.i==0&&
+          pendingjump[kk]->final_location.j==0&&
+          pendingjump[kk]->final_location.k==0){     
+        while ((primary = iter.current())!=NULL) {
+          vector <Unit *> tmp;
+          tmp = ComparePrimaries (primary,pendingjump[kk]->orig);
+          if (!tmp.empty()) {
+            possibilities.insert (possibilities.end(),tmp.begin(), tmp.end());
+          }
+          iter.advance();
+        }
+      }else {
+        this->SetCurPosition(pendingjump[kk]->final_location);
       }
       if (!possibilities.empty()) {
 		  static int jumpdest=235034;
 		  Unit * jumpnode = possibilities[jumpdest%possibilities.size()];
-		  this->SetCurPosition(jumpnode->Position());
+                  QVector pos=jumpnode->Position();
+
+		  this->SetCurPosition(pos);
 		  ActivateAnimation(jumpnode);
 		  if (jumpnode->isUnit()==UNITPTR) {
-			  QVector Offset (jumpnode->Position().i<0?1:-1,
-							  jumpnode->Position().j<0?1:-1,
-							  jumpnode->Position().k<0?1:-1);
+			  QVector Offset (pos.i<0?1:-1,
+                                          pos.j<0?1:-1,
+                                          pos.k<0?1:-1);
 			  Offset*=jumpnode->rSize()*2+this->rSize()*2;
-			  this->SetPosAndCumPos(jumpnode->Position()+Offset);
+			  this->SetPosAndCumPos(pos+Offset);
                           if (jumpnode->location!=null_collide_map.begin()) {
                             this->UpdateCollideQueue(pendingjump[kk]->dest,jumpnode->location);
                           }
-          }
-		  Unit * tester;
-		  for (unsigned int jjj=0;jjj<2;++jjj) {
-		  for (un_iter i= _Universe->activeStarSystem()->getUnitList().createIterator();
-			   (tester=*i)!=NULL; ++i){
-
-			  if (tester->isUnit()==UNITPTR && tester!=this){
-			  if ((this->LocalPosition()-tester->LocalPosition()).Magnitude()<this->rSize()+tester->rSize()) {
-				  SetCurPosition(this->LocalPosition()+this->cumulative_transformation_matrix.getR()*(4*(this->rSize()+tester->rSize())));
-                                  
-			  }
-			  }
-		  }
-		  }
-          jumpdest+=23231;
+                  }
+                  jumpdest+=23231;      
       }
+      Unit * tester;
+      for (unsigned int jjj=0;jjj<2;++jjj) {
+        for (un_iter i= _Universe->activeStarSystem()->getUnitList().createIterator();
+             (tester=*i)!=NULL; ++i){
+          
+          if (tester->isUnit()==UNITPTR && tester!=this){
+            if ((this->LocalPosition()-tester->LocalPosition()).Magnitude()<this->rSize()+tester->rSize()) {
+              SetCurPosition(this->LocalPosition()+this->cumulative_transformation_matrix.getR()*(4*(this->rSize()+tester->rSize())));
+              
+            }
+          }
+        }
+      }      
       DealPossibleJumpDamage (this);
       static int jumparrive=AUDCreateSound(vs_config->getVariable ("unitaudio","jumparrive", "sfx43.wav"),false);
       if (dosightandsound)
