@@ -1100,7 +1100,10 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
 			if(missile_and_want_to_fire_missiles&&locked_missile){
 				VSFileSystem::vs_fprintf (stderr,"\n about to fire locked missile \n");
 			}
-			if ((fire_non_autotrackers||autotracking_gun||locked_missile)&&banked==false) {
+                        if (banked) {
+                          (*i).UnFire();
+                          banked=(*i).bank;//if it's false, stop the banking
+			}else if (fire_non_autotrackers||autotracking_gun||locked_missile) {
 				if ((ROLES::EVERYTHING_ELSE&weapon_type_bitmask&(*i).type->role_bits)
 					||(*i).type->role_bits==0) {
 					if ((locked_on&&missile_and_want_to_fire_missiles)
@@ -1153,8 +1156,6 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
 					}
 				}
 			}
-                        if (!(*i).bank)
-                          banked=false;
     }
 
 }

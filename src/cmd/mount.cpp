@@ -408,7 +408,11 @@ bool Mount::NextMountCloser(Mount * nextmount, Unit * firer) {
     Vector nextR=mat.getR();
     this->orient.to_matrix(mat);
     Vector diff = firer->LocalCoordinates(target);
-    return (nextR.Dot(diff-nextmount->pos) > mat.getR().Dot(diff-this->pos));
+    Vector nextmountnorm=diff-nextmount->pos;
+    nextmountnorm.Normalize();
+    Vector thismountnorm=diff-this->pos;
+    thismountnorm.Normalize();
+    return (nextR.Dot(nextmountnorm) > mat.getR().Dot(thismountnorm));
   }
   return false;
 }
@@ -421,7 +425,7 @@ bool Mount::Fire (Unit * firer, void * owner,Mount* nextmount, bool Missile, boo
     return false;
   if (type->type==weapon_info::BEAM) {
 #ifdef NO_MOUNT_STAR
-    if (!bank||this->NextMountCloser(nextmount,firer))
+    if (bank==false||this->NextMountCloser(nextmount,firer)==false)
 #endif
     {
       bool fireit=ref.gun==NULL;
@@ -436,7 +440,7 @@ bool Mount::Fire (Unit * firer, void * owner,Mount* nextmount, bool Missile, boo
         processed=FIRED;
       }
     }else {
-      processed=UNFIRED;
+      this->UnFire();
       return false;
     }
     return true;

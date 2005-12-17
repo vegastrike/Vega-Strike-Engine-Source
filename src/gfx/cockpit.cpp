@@ -2074,6 +2074,7 @@ void GameCockpit::Draw() {
       }
     }
   }
+  GFXColor4f(1,1,1,1);
   if (QuitAllow||getTimeCompression()<.5) {
     if (QuitAllow){ 
       if (!die){
