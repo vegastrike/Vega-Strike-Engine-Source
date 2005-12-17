@@ -16,7 +16,8 @@
 
 LOCALCONST_DEF(Packet,unsigned short,header_length,sizeof( struct Header))
 
-#if defined(_WIN32) && defined(_MSC_VER) && !defined(USE_BOOST_128) //wierd error in MSVC
+#include <boost/version.hpp>
+#if defined(_WIN32) && defined(_MSC_VER) && BOOST_VERSION!=102800 //wierd error in MSVC
 #  define __LINE__NOMSC	0
 #else
 #  define __LINE__NOMSC	__LINE__ 

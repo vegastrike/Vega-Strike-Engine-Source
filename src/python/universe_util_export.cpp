@@ -1,5 +1,7 @@
 
-#ifndef USE_BOOST_128
+#include <boost/version.hpp>
+/* ToDo: Fix so Boost 1.28 is supported */
+#if BOOST_VERSION != 102800
 
 #include "cmd/container.h"
 #include <string>
@@ -7,7 +9,7 @@
 #include "gfx/vec.h"
 #include "cmd/unit_generic.h"
 #include "python_class.h"
-#ifndef USE_BOOST_128
+#if BOOST_VERSION != 102800
 #include <boost/python.hpp>
 #else
 #include <boost/python/objects.hpp>

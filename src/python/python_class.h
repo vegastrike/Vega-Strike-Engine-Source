@@ -15,7 +15,8 @@ class Pointer *from_python(PyObject *p,boost::python::type<class Pointer *>);
 class Unit *from_python(PyObject *p,boost::python::type<class Unit *>);
 //DEC_FROM_PYTHON_SMART_POINTER(Unit)
 */
-#ifndef USE_BOOST_128
+#include <boost/version.hpp>
+#if BOOST_VERSION != 102800
 #if defined (_MSC_VER) && _MSC_VER<=1200
 #define Vector Vactor
 #endif
@@ -40,6 +41,18 @@ class Unit *from_python(PyObject *p,boost::python::type<class Unit *>);
 #include "python/python_compile.h"
 #include "cmd/ai/fire.h"
 #include <memory>
+
+#if BOOST_VERSION == 102800
+#define PYTHONCALLBACK(rtype, ptr, str) \
+  boost::python::callback<rtype>::call_method(ptr, str)
+#define PYTHONCALLBACK2(rtype, ptr, str, str2) \
+  boost::python::callback<rtype>::call_method(ptr, str, str2)
+#else
+#define PYTHONCALLBACK(rtype, ptr, str) \
+  boost::python::call_method<rtype>(ptr, str)
+#define PYTHONCALLBACK2(rtype, ptr, str, str2) \
+  boost::python::call_method<rtype>(ptr, str, str2)
+#endif
 /*
 These following #defines will create a module for python
 call them with:
@@ -113,7 +126,7 @@ BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE \
 #define PYTHON_INIT_GLOBALS(name,Class)
 #endif
 //These two functions purposely have opening/closing braces that don't match up
-#ifndef USE_BOOST_128
+#if BOOST_VERSION != 102800
 #define PYTHON_BEGIN_MODULE(name) BOOST_PYTHON_MODULE(name) {
 #define PYTHON_DEFINE_GLOBAL(modul,fun,funname) boost::python::def (funname,fun)
 #define VS_BOOST_MAKE_TUPLE(a,b,c) boost::python::make_tuple(a,b,c)
@@ -128,7 +141,7 @@ BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE \
 #endif
 #define PYTHON_END_MODULE(name) }
 #define PYTHON_INIT_MODULE(name) init##name()
-#ifndef USE_BOOST_128
+#if BOOST_VERSION != 102800
 
 #define PYTHON_BASE_BEGIN_INHERIT_CLASS(name,NewClass,SuperClass,myclass) { \
 boost::python::class_builder <SuperClass, NewClass, boost::noncopyable > Class (myclass
@@ -179,11 +192,7 @@ template <class SuperClass> class PythonClass:public SuperClass {
     return myclass;
   }
   virtual void callFunction (std::string str) {
-#ifndef USE_BOOST_128
-	  boost::python::call_method<void>(self,str.c_str());
-#else
-	  boost::python::callback<void>::call_method(self,str.c_str());
-#endif
+    PYTHONCALLBACK(void, self, str.c_str());
   }
   static PythonClass * Factory(const std::string &file) {
     CompileRunPython (file);
@@ -204,26 +213,14 @@ public:
   PythonAI (PyObject * self_):PythonClass<SuperClass>(self_) {
   }
   virtual void Execute () {
-#ifndef USE_BOOST_128
-    boost::python::call_method<void> (this->self,"Execute");
-#else
-    boost::python::callback <void>::call_method (this->self,"Execute");
-#endif
+    PYTHONCALLBACK(void, this->self, "Execute");
   }
   virtual void ChooseTarget () {
-#ifndef USE_BOOST_128
-    boost::python::call_method<void> (this->self,"ChooseTarget");
-#else
-    boost::python::callback <void>::call_method (this->self,"ChooseTarget");
-#endif
+    PYTHONCALLBACK(void, this->self, "ChooseTarget");
   }
   virtual void SetParent (Unit * parent) {
     SuperClass::SetParent (parent);
-#ifndef USE_BOOST_128
-    boost::python::call_method<void> (this->self,"init",parent);
-#else
-    boost::python::callback<void>::call_method (this->self,"init",parent);
-#endif
+    PYTHONCALLBACK2(void, this->self, "init", parent);
   }
   static void default_Execute(SuperClass & self_) {
     (self_).SuperClass::Execute();
@@ -249,30 +246,18 @@ public:
   pythonMission (PyObject * self_):PythonClass<PythonMissionBaseClass>(self_) {
   }
   virtual void Execute () {
-#ifndef USE_BOOST_128
-    boost::python::call_method<void> (self,"Execute");
-#else
-    boost::python::callback <void>::call_method (self,"Execute");
-#endif
+    PYTHONCALLBACK(void, self, "Execute");
     Python::reseterrors();
   }
   virtual std::string Pickle() {
     Python::reseterrors();
-#ifndef USE_BOOST_128
-	std::string ret=boost::python::call_method<std::string> (self,"Pickle");
-#else
-	std::string ret=boost::python::callback <std::string>::call_method (self,"Pickle");
-#endif
+    std::string ret=PYTHONCALLBACK(std::string, self, "Pickle");
     Python::reseterrors();
-	return ret;
+    return ret;
   }
   virtual void UnPickle(std::string s)  {
     Python::reseterrors();
-#ifndef USE_BOOST_128
-    boost::python::call_method<void>(self,"UnPickle",s);
-#else
-    boost::python::callback<void>::call_method(self,"UnPickle",s);
-#endif
+    PYTHONCALLBACK2(void, self, "UnPickle",s);
     Python::reseterrors();
   }
   static void default_Execute(PythonMissionBaseClass & self_) {

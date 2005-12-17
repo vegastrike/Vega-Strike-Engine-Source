@@ -206,7 +206,5 @@ void ProcessJoystick (int whichplayer) {
 	} // is available
       }
   }
-
-
 }
 

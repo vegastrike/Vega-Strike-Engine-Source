@@ -39,7 +39,8 @@
 #include "savegame.h"
 #include "networking/netclient.h"
 #include "in_kb_data.h"
-#ifndef USE_BOOST_128
+#include <boost/version.hpp>
+#if BOOST_VERSION != 102800
 
 #if defined (_MSC_VER) && _MSC_VER<=1200
 

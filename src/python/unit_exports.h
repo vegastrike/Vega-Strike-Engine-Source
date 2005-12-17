@@ -5,7 +5,8 @@
 #include "init.h"
 #include "gfx/vec.h"
 #include "cmd/unit_generic.h"
-#ifndef USE_BOOST_128
+#include <boost/version.hpp>
+#if BOOST_VERSION != 102800
 #include <boost/python.hpp>
 #else
 #include <boost/python/objects.hpp>

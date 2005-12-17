@@ -1,6 +1,7 @@
 #if _MSC_VER <=1200
 #include "python_class.h"
-#ifndef USE_BOOST_128
+#include <boost/version.hpp>
+#if BOOST_VERSION != 102800 
 #include <boost/python.hpp>
 #else
 #include <boost/python/objects.hpp>

@@ -112,4 +112,3 @@ void UnbindDigitalHatswitchKey (int joystick,int hatswitch, int dir_index);
 
 
 #endif // _JOYSTICK_H_
-

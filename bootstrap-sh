@@ -9,11 +9,12 @@
 # directory as this file.
 
 echo VegaStrike Configuration Preparation Tool
-echo Maintained by Brian A. Lloyd 
-echo '(balloyd1@users.sourceforge.net)'
+echo "  "Maintained by Brian A. Lloyd 
+echo '  (balloyd1@users.sourceforge.net)'
 echo Please send bug reports or comments about this script
 echo to the email above or else visit
 echo vegastrike.sourceforge.net for help in using this script
+echo
 echo The recommended way to change the behaviour of this script
 echo is to modify the path so that the version of automake or
 echo autoconf you want to use is found first.
@@ -22,6 +23,7 @@ echo used for each in the following variables.
 echo '$ACLOCAL, $AUTOMAKE, $AUTOCONF, $AUTOHEADER'
 echo For proper functionality, both aclocal and automake must be the
 echo same version, and autoconf and autoheader should be the same version.
+echo
 
 checkversion()
 {
@@ -127,12 +129,10 @@ fi
 # was designed to do.  Also had some 
 if (test x$vers_ok = xOK) then
 {
-echo Using ACLOCAL=$ACLOCAL
-echo Using AUTOHEADER=$AUTOHEADER
-echo Using AUTOCONF=$AUTOCONF
-echo Using AUTOMAKE=$AUTOMAKE
-if ("$ACLOCAL" -I m4scripts) then
-  ( "$AUTOHEADER" -f && "$AUTOCONF" -f && "$AUTOMAKE" -acf && \
+if (echo Running $ACLOCAL && "$ACLOCAL" -I m4scripts) then
+  ( echo Running "$AUTOHEADER" && "$AUTOHEADER" -f && 
+    echo Running "$AUTOCONF" && "$AUTOCONF" -f 
+    echo Running "$AUTOMAKE" && "$AUTOMAKE" -acf && \
     echo "Bootstrap is complete. Run ./configure to configure the build system." ) || \
     echo "An error occurred while running the autotools.  Please correct."
 else

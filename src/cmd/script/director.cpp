@@ -62,7 +62,8 @@
 #endif
 #include "flightgroup.h"
 #include "gldrv/winsys.h"
-#ifndef USE_BOOST_128
+#include <boost/version.hpp>
+#if BOOST_VERSION != 102800
 #include <boost/python/class.hpp>
 #else
 #include <boost/python/detail/extension_class.hpp>

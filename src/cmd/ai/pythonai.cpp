@@ -2,7 +2,8 @@
 #include <compile.h>
 #include <eval.h>
 #include <stdio.h>
-#ifndef USE_BOOST_128
+#include <boost/version.hpp>
+#if BOOST_VERSION != 102800
 #include <boost/python/class.hpp>
 #else
 #include <boost/python/class_builder.hpp>

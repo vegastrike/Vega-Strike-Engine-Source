@@ -6,7 +6,8 @@
 #include "base.h"
 #include "base_util.h"
 #include "vsfilesystem.h"
-#ifndef USE_BOOST_128
+#include <boost/version.hpp>
+#if BOOST_VERSION != 102800
 #include <boost/python/object.hpp>
 #else
 #include <boost/python/objects.hpp>

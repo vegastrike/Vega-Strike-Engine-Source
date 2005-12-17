@@ -74,7 +74,6 @@ BOOSTSOURCES = \
   boost/1_28/src/converter/callback.cpp \
   boost/1_28/src/classes.cpp \
   boost/1_28/src/conversions.cpp 
-
 else !BOOST1_28
 BOOSTSOURCES=
 endif !BOOST1_28
@@ -120,6 +119,9 @@ EXTRA_DIST = \
   launcher/icon2.ico \
   src/cmd/script/c_alike/c_alike.lex \
   src/cmd/script/c_alike/c_alike.yacc
+
+#include src/Makefile
+
 LIBNET = \
   src/networking/inet_file.cpp \
   src/networking/inet_file.h \

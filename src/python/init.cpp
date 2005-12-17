@@ -7,7 +7,8 @@
 #include <eval.h>
 #include <stdio.h>
 #include <math.h>
-#ifndef USE_BOOST_128
+#include <boost/version.hpp>
+#if BOOST_VERSION != 102800
 #if defined (_MSC_VER) && _MSC_VER<=1200
 #define Vector Vactor
 #endif
@@ -280,7 +281,7 @@ PYTHON_END_CLASS(VS,Unit)
 PYTHON_END_MODULE(VS)
 TO_PYTHON_SMART_POINTER(Unit) 
 */
-#ifndef USE_BOOST_128
+#if BOOST_VERSION != 102800
 static void* Vector_convertible(PyObject* p) {
 	return PyTuple_Check(p)?p:0;
 }
@@ -315,7 +316,7 @@ void Python::init() {
 // initialize python library
   Py_Initialize();
   initpaths();
-#ifndef USE_BOOST_128
+#if BOOST_VERSION != 102800
   boost::python::converter::registry::insert(Vector_convertible, QVector_construct, boost::python::type_id<QVector>());
 	boost::python::converter::registry::insert(Vector_convertible, Vector_construct, boost::python::type_id<Vector>());
 #endif

@@ -1,6 +1,7 @@
 #ifndef _UNIT_FROM_TO_PYTHON_H_
 #define _UNIT_FROM_TO_PYTHON_H_
-#ifndef USE_BOOST_128
+#include <boost/version.hpp>
+#if BOOST_VERSION != 102800
 //#include <boost/python/converter/arg_from_python.hpp>
 #include "init.h"
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE

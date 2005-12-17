@@ -23,7 +23,8 @@
 #include "vegastrike.h"
 #include <math.h>
 #include "vec.h"
-#ifndef USE_BOOST_128
+#include <boost/version.hpp>
+#if BOOST_VERSION != 102800
 #if defined (_MSC_VER) && _MSC_VER<=1200
 #define Vector Vactor
 #endif

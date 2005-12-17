@@ -1,0 +1,20 @@
+LN_S := @LN_S@
+
+.PHONY: all vegastrike vegaserver accountserver soundserver
+all: vegastrike vegaserver accountserver soundserver
+
+vegastrike:
+	$(MAKE) -C .. vegastrike
+	$(LN_S) ../vegastrike vegastrike
+vegaserver:
+	$(MAKE) -C .. vegaserver
+	$(LN_S) ../vegaserver vegaserver
+accountserver:
+	$(MAKE) -C .. accountserver
+	$(LN_S) ../accountserver accountserver
+soundserver:
+	$(MAKE) -C .. soundserver
+	$(LN_S) ../soundserver soundserver
+clean:
+	$(MAKE) -C .. clean
+	rm -rf soundserver vegaserver vegastrike accountserver

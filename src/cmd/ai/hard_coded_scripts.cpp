@@ -1,3 +1,4 @@
+#include <boost/version.hpp>
 #include "python/python_class.h"
 #include "script.h"
 #include "cmd/unit_generic.h"
@@ -12,7 +13,7 @@ using Orders::FireAt;
 
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
 
-#ifdef USE_BOOST_128
+#if BOOST_VERSION == 102800
 extern PyObject *to_python (Unit *x);
 #endif
 

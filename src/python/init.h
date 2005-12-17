@@ -3,7 +3,8 @@
 #ifndef PY_INIT_H_
 #define PY_INIT_H_
 #include "gfx/vec.h"
-#ifndef USE_BOOST_128
+#include <boost/version.hpp>
+#if BOOST_VERSION != 102800 
 #if defined (_MSC_VER) && _MSC_VER<=1200
 #define Vector Vactor
 #endif
@@ -23,7 +24,7 @@ public:
 };
 
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
-#ifndef USE_BOOST_128
+#if BOOST_VERSION != 102800 
 /*
 typedef boost::tuples::tuple<double,double,double> python_wector;
 struct to_python <Vector> {

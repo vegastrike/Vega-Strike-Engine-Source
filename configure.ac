@@ -7,6 +7,8 @@ AC_PREREQ(2.53)
 AC_LANG(C++)
 dnl AWK is used in configure
 AC_PROG_AWK
+dnl LN_S is used by the helper makefile in src
+AC_PROG_LN_S
 dnl We are a C++ program, so of course we use a c++ compiler and preprocessor
 AC_PROG_CXX
 AC_PROG_CXXCPP
@@ -90,7 +92,7 @@ else
 AC_CHECK_HEADERS([malloc.h])
 fi
 
-AC_CHECK_FUNCS(vfscanf)
+AC_CHECK_FUNCS([vfscanf lstat])
 
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -231,8 +233,6 @@ AC_ARG_ENABLE(macosx_bundle, AC_HELP_STRING([--enable-macosx-bundle], [Produce a
 
 VS_CXXFLAGS="${VS_CXXFLAGS} ${VS_ALIGN} ${USER_FLAGS}"
 
-echo CXXFLAGS=$CXXFLAGS
-echo CPPFLAGS=$CPPFLAGS
 dnl --------------------------------------------------------------------------
 dnl Check if compiling for Win32
 dnl --------------------------------------------------------------------------
@@ -277,8 +277,6 @@ if test "x${is_mingw}" = "xyes" ; then
 	VS_LIBS="${VS_LIBS} -L/usr/lib/w32api -lwsock32"
 fi
 
-echo CXXFLAGS=$CXXFLAGS
-echo CPPFLAGS=$CPPFLAGS
 dnl --------------------------------------------------------------------------
 dnl Check if compiling for Linux
 dnl --------------------------------------------------------------------------
@@ -334,8 +332,6 @@ VS_CHECK_PYTHON
 
 VS_CHECK_SDL
 
-echo CXXFLAGS=$CXXFLAGS
-echo CPPFLAGS=$CPPFLAGS
 dnl --------------------------------------------------------------------------
 dnl Check for car sim
 dnl --------------------------------------------------------------------------
@@ -364,8 +360,6 @@ m4_pattern_forbid([VS_CHECK_CRYPTO])
 dnl --------------------------------------------------------------------------
 dnl Check for OpenGL headers
 dnl --------------------------------------------------------------------------
-echo CXXFLAGS=$CXXFLAGS
-echo CPPFLAGS=$CPPFLAGS
 
 AC_ARG_WITH(gl-inc, AC_HELP_STRING([--with-gl-inc=DIR], [OpenGL header file location]))
 
@@ -403,8 +397,6 @@ if test "x$have_gl_h" = "xno" ; then
     AC_MSG_ERROR([Cannot find GL/gl.h])
 fi
 
-echo CXXFLAGS=$CXXFLAGS
-echo CPPFLAGS=$CPPFLAGS
 
 
 dnl Check for glext.h
@@ -692,13 +684,12 @@ AC_SUBST(PYTHON_CPPFLAGS)
 AC_SUBST(CG_CPPFLAGS)
 AC_SUBST(CG_LIBS)
 
+
 VS_WITH_BOOST
-
 VS_WITH_NET_THREADS
-
 VS_WITH_COLLIDE_MAP
-
 VS_WITH_OGRE
+VS_WITH_CEGUI
 
 AC_LANG(C)
 VS_CONFIG_VSLAUNCHER
@@ -710,5 +701,5 @@ CXXFLAGS="${CXXFLAGS} ${VS_CXXFLAGS} ${PTHREAD_CXXFLAGS} -pipe"
 
 LIBS="${LIBS} ${VS_LIBS} ${PYTHON_LIBS} ${PTHREAD_LIBS} ${CG_LIBS}"
 
-AC_CONFIG_FILES(Makefile)
+AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT()
