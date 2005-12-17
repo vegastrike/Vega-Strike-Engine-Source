@@ -72,7 +72,7 @@ public:
     retval.unit=NULL;
   }
   bool cullless (CollideMap::iterator tless) {
-    return rad!=FLT_MAX&&(startkey-rad)*(startkey-rad)>(*tless)->GetMagnitudeSquared();
+    return rad!=FLT_MAX&&(startkey-rad>0)&&(startkey-rad)*(startkey-rad)>(*tless)->GetMagnitudeSquared();
   }
   bool cullmore (CollideMap::iterator tmore) {
     return rad!=FLT_MAX&&(startkey+rad)*(startkey+rad)<(*tmore)->GetMagnitudeSquared();
@@ -138,7 +138,8 @@ public:
 		startkey=sqrt((*parent)->GetMagnitudeSquared());
 	}
 	bool cullless (CollideMap::iterator tless) {
-		return (startkey-radius-maxUnitRadius)*(startkey-radius-maxUnitRadius)>(*tless)->GetMagnitudeSquared();
+		float tmp=startkey-radius-maxUnitRadius;
+		return tmp>0&&(tmp*tmp>(*tless)->GetMagnitudeSquared());
 	}
 	bool cullmore (CollideMap::iterator tmore) {
 		return (startkey+radius+maxUnitRadius)*(startkey+radius+maxUnitRadius)<(*tmore)->GetMagnitudeSquared();
