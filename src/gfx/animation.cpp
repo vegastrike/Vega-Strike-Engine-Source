@@ -164,9 +164,9 @@ void Animation::ProcessDrawQueue (std::vector <Animation *> &animationdrawqueue,
   	  GFXFogMode(FOG_OFF);
   	  animationdrawqueue[i]->CalculateOrientation(result);
       animationdrawqueue[i]->DrawNow(result);
-      animationdrawqueue.erase (animationdrawqueue.begin()+i);
 	}
-  }
+	animationdrawqueue.erase (animationdrawqueue.begin()+i);
+	}
 }
 void Animation::CalculateOrientation (Matrix & result) {
   Vector camp,camq,camr;
