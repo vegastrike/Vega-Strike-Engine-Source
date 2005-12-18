@@ -1080,6 +1080,8 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
           best=j;
           i->UnFire();
           i=&mounts[j];
+        }else {
+          mounts[j].UnFire();
         }
         if (mounts[j].bank==false) {
           ++j;
