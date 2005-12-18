@@ -1952,7 +1952,8 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
       t1.Compose (trans,transmat);
       t1.to_matrix (m1);
       int autotrack=0;
-      if ((0!=(mounts[i].size&weapon_info::AUTOTRACKING)&&(player_cockpit==NULL||TargetLocked()))) {
+	  static bool must_lock_to_autotrack=XMLSupport::parse_bool(vs_config->getVariable("physics","must_lock_to_autotrack","true"));
+      if ((0!=(mounts[i].size&weapon_info::AUTOTRACKING)&&(player_cockpit==NULL||TargetLocked()||!must_lock_to_autotrack))) {
         autotrack = computer.itts?2:1;
       }
       float trackingcone = computer.radar.trackingcone;	  
