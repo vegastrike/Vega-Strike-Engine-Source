@@ -1,5 +1,7 @@
 ACLOCAL_AMFLAGS = -I m4scripts
 
+
+
 #BOOST_BEGIN -- Data between the BOOST_AUTO and BOOST_END tags auto generated.
 BOOSTDIR=boost
 if BOOST1_33
@@ -612,7 +614,6 @@ libroot = \
   src/gfxlib_struct.cpp \
   src/gfxlib_struct.h \
   src/gfxlib.h \
-  src/in_handler.cpp \
   src/in_handler.h \
   src/in_joystick.cpp \
   src/in_joystick.h \
@@ -1041,3 +1042,15 @@ dist-hook:
 	  find $(BOOSTDIR)/$$x/boost "(" -name CVS -prune ")" , "(" ! -name CVS -type d -printf "D %p\n" ")" , "(" -type f -printf "F %p\n" ")" \
 	    | $(AWK) '$$1=="D"{print("'"$(mkdir_p) $(distdir)/"'"$$2)}; $$1=="F"{print("cp -p "$$2"'" $(distdir)/"'/"$$2)};'  | $(SHELL); \
 done
+
+
+%.h.gch: %.h
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $<
+
+.PHONY: headers
+headers:
+	find . -name '*.h' -exec make '{}.gch' ';'
+
+.PHONY: clean-local
+clean-local:
+	find . -name '*.h.gch' -delete

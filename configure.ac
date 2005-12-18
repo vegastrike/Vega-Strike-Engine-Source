@@ -15,7 +15,8 @@ AC_PROG_CXXCPP
 dnl Install is used by make install
 AC_PROG_INSTALL
 dnl Lexx used for a parser we use
-AC_PROG_LEX
+dnl AC_PROG_LEX
+AM_PROG_LEX
 dnl We use some static libraries to make building this program easier.
 AC_PROG_RANLIB
 
@@ -402,7 +403,7 @@ fi
 dnl Check for glext.h
 AC_LANG(C++)
 
-if test "x$is_macosx" = "xyes" ; then
+if test "x$is_macosx" != "xyes" ; then
 AC_COMPILE_IFELSE(
 [[
 #include <GL/gl.h>    
