@@ -1067,97 +1067,109 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
   if ((cloaking>=0&&can_fire_in_cloak==false)||(graphicOptions.InWarp&&can_fire_in_spec==false)){
     return;
   }
-  int nm = 0;
-  vector <Mount>::iterator i = mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
-  bool banked=false;
-  for (;i!=mounts.end();++i, nm++) {
-			if ((*i).type->type==weapon_info::BEAM) {
-				if ((*i).type->EnergyRate*SIMULATION_ATOM>energy) {
-					// On server side send a PACKET TO ALL CLIENT TO NOTIFY UNFIRE
-					// Including the one who fires to make sure it stops
-					if( SERVER)
-						VSServer->BroadcastUnfire( this->serial, nm, this->activeStarSystem->GetZone());
-					// NOT ONLY IN non-networking mode : anyway, the server will tell everyone including us to stop if not already done
-					// if( !SERVER && Network==NULL)
-						(*i).UnFire();
-					continue;
-				}
-			}else{
-				// Only in non-networking mode
-				if ( Network==NULL && (*i).type->EnergyRate>energy)
-					continue;
-			}
+  unsigned int mountssize=mounts.size();
 
-
-			const bool mis = isMissile((*i).type);
-			const bool locked_on = (*i).time_to_lock<=0;
-			const bool lockable_weapon = (*i).type->LockTime>0;
-			const bool autotracking_gun =(!mis)&&0!=((*i).size&weapon_info::AUTOTRACKING)&&locked_on;
-			const bool fire_non_autotrackers = (0==(weapon_type_bitmask&ROLES::FIRE_ONLY_AUTOTRACKERS));
-			const bool locked_missile = (mis&&locked_on&&lockable_weapon);
-			const bool missile_and_want_to_fire_missiles = (mis&&(weapon_type_bitmask&ROLES::FIRE_MISSILES));
-			const bool gun_and_want_to_fire_guns =((!mis)&&(weapon_type_bitmask&ROLES::FIRE_GUNS));
-			if(missile_and_want_to_fire_missiles&&locked_missile){
-				VSFileSystem::vs_fprintf (stderr,"\n about to fire locked missile \n");
-			}
-                        if (banked) {
-                          (*i).UnFire();
-                          banked=(*i).bank;//if it's false, stop the banking
-			}else if (fire_non_autotrackers||autotracking_gun||locked_missile) {
-				if ((ROLES::EVERYTHING_ELSE&weapon_type_bitmask&(*i).type->role_bits)
-					||(*i).type->role_bits==0) {
-					if ((locked_on&&missile_and_want_to_fire_missiles)
-						||gun_and_want_to_fire_guns) {
-						// If in non-networking mode and mount fire has been accepted or if on server side
-						if( Network==NULL || SERVER || (*i).processed==Mount::ACCEPTED)
-						{
-							// If we are on server or if the weapon has been accepted for fire we fire
-                                                        vector<Mount>::iterator tmpmount=i;
-							if ((*i).Fire(this,owner==NULL?this:owner,tmpmount!=mounts.end()?&*++tmpmount:NULL,mis,listen_to_owner)) {
-								ObjSerial serid;
-                                                                banked=(*i).bank;
-                                                                
-								if( missile_and_want_to_fire_missiles)
-								{
-									serid = getUniqueSerial();
-									(*i).serial = serid;
-								}
-								else
-									serid = 0;
-								if( SERVER)
-									VSServer->BroadcastFire( this->serial, nm, serid, this->activeStarSystem->GetZone());
-								// We could only refresh energy on server side or in non-networking mode, on client side it is done with
-								// info the server sends with ack for fire
-								// FOR NOW WE TRUST THE CLIENT SINCE THE SERVER CAN REFUSE A FIRE
-								// if( Network==NULL || SERVER)
-								if ((*i).type->type==weapon_info::BEAM) {
-									if ((*i).ref.gun)
-										if ((!(*i).ref.gun->Dissolved())||(*i).ref.gun->Ready()) {
-											energy -=(*i).type->EnergyRate*SIMULATION_ATOM;
-										}
-									
-								}else{
-									energy-=(*i).type->EnergyRate;
-								}
-								// IF WE REFRESH ENERGY FROM SERVER : Think to send the energy update to the firing client with ACK TO fireRequest
-								if (mis) weapon_type_bitmask &= (~ROLES::FIRE_MISSILES);//fire only 1 missile at a time
-							}
-						}
-						else
-						{
-							// Request a fire order to the server telling him the serial of the unit and the mount index (nm)
-							char mis2 = mis;
-							int playernum = _Universe->whichPlayerStarship( this);
-							if( playernum>=0)
-								Network[playernum].fireRequest( this->serial, nm, mis2);
-							// Mark the mount as fire requested
-							//(*i).processed = Mount::REQUESTED;
-						}
-					}
-				}
-			}
+  for (unsigned int counter=0;counter<mountssize;++counter) {
+    unsigned int index=counter;
+    Mount * i=&mounts[index];
+    if (i->bank==true) {
+      unsigned int best=index;
+      unsigned int j;
+      for (j=index+1;j<mountssize;++j) {             
+        if (i->NextMountCloser(&mounts[j],this)) {
+          best=j;
+          i->UnFire();
+          i=&mounts[j];
+        }
+        if (mounts[j].bank==false) {
+          ++j;
+          break;
+        }
+      }
+      counter=j-1;//will increment to the next one
+      index=best;
     }
-
+    if ((*i).type->type==weapon_info::BEAM) {
+      if ((*i).type->EnergyRate*SIMULATION_ATOM>energy) {
+        // On server side send a PACKET TO ALL CLIENT TO NOTIFY UNFIRE
+        // Including the one who fires to make sure it stops
+        if( SERVER)
+          VSServer->BroadcastUnfire( this->serial, index, this->activeStarSystem->GetZone());
+        // NOT ONLY IN non-networking mode : anyway, the server will tell everyone including us to stop if not already done
+        // if( !SERVER && Network==NULL)
+        (*i).UnFire();
+        continue;
+      }
+    }else{
+      // Only in non-networking mode
+      if ( Network==NULL && i->type->EnergyRate>energy)
+        continue;
+    }
+    
+    
+    const bool mis = isMissile(i->type);
+    const bool locked_on = i->time_to_lock<=0;
+    const bool lockable_weapon = i->type->LockTime>0;
+    const bool autotracking_gun =(!mis)&&0!=(i->size&weapon_info::AUTOTRACKING)&&locked_on;
+    const bool fire_non_autotrackers = (0==(weapon_type_bitmask&ROLES::FIRE_ONLY_AUTOTRACKERS));
+    const bool locked_missile = (mis&&locked_on&&lockable_weapon);
+    const bool missile_and_want_to_fire_missiles = (mis&&(weapon_type_bitmask&ROLES::FIRE_MISSILES));
+    const bool gun_and_want_to_fire_guns =((!mis)&&(weapon_type_bitmask&ROLES::FIRE_GUNS));
+    if(missile_and_want_to_fire_missiles&&locked_missile){
+      VSFileSystem::vs_fprintf (stderr,"\n about to fire locked missile \n");
+    }
+    if (fire_non_autotrackers||autotracking_gun||locked_missile) {
+      if ((ROLES::EVERYTHING_ELSE&weapon_type_bitmask&i->type->role_bits)
+          ||i->type->role_bits==0) {
+        if ((locked_on&&missile_and_want_to_fire_missiles)
+            ||gun_and_want_to_fire_guns) {
+          // If in non-networking mode and mount fire has been accepted or if on server side
+          if( Network==NULL || SERVER || i->processed==Mount::ACCEPTED)
+          {
+            // If we are on server or if the weapon has been accepted for fire we fire
+            if (i->Fire(this,owner==NULL?this:owner,mis,listen_to_owner)) {
+              ObjSerial serid;
+              
+              if( missile_and_want_to_fire_missiles)
+              {
+                serid = getUniqueSerial();
+                i->serial = serid;
+              }
+              else
+                serid = 0;
+              if( SERVER)
+                VSServer->BroadcastFire( this->serial, index, serid, this->activeStarSystem->GetZone());
+              // We could only refresh energy on server side or in non-networking mode, on client side it is done with
+              // info the server sends with ack for fire
+              // FOR NOW WE TRUST THE CLIENT SINCE THE SERVER CAN REFUSE A FIRE
+              // if( Network==NULL || SERVER)
+              if (i->type->type==weapon_info::BEAM) {
+                if (i->ref.gun)
+                  if ((!i->ref.gun->Dissolved())||i->ref.gun->Ready()) {
+                    energy -=i->type->EnergyRate*SIMULATION_ATOM;
+                  }
+                
+              }else{
+                energy-=i->type->EnergyRate;
+              }
+              // IF WE REFRESH ENERGY FROM SERVER : Think to send the energy update to the firing client with ACK TO fireRequest
+              if (mis) weapon_type_bitmask &= (~ROLES::FIRE_MISSILES);//fire only 1 missile at a time
+            }
+          }
+          else
+          {
+            // Request a fire order to the server telling him the serial of the unit and the mount index (nm)
+            char mis2 = mis;
+            int playernum = _Universe->whichPlayerStarship( this);
+            if( playernum>=0)
+              Network[playernum].fireRequest( this->serial, index, mis2);
+            // Mark the mount as fire requested
+            //i->processed = Mount::REQUESTED;
+          }
+        }
+      }
+    }
+  }
 }
 
 const string Unit::getFgID()  {

@@ -416,7 +416,7 @@ bool Mount::NextMountCloser(Mount * nextmount, Unit * firer) {
   }
   return false;
 }
-bool Mount::Fire (Unit * firer, void * owner,Mount* nextmount, bool Missile, bool listen_to_owner) {
+bool Mount::Fire (Unit * firer, void * owner,bool Missile, bool listen_to_owner) {
   if (ammo==0) {
     processed=UNFIRED;
   }
@@ -424,24 +424,16 @@ bool Mount::Fire (Unit * firer, void * owner,Mount* nextmount, bool Missile, boo
   if (processed==FIRED||status!=ACTIVE||(Missile!=(isMissile(type)))||ammo==0)
     return false;
   if (type->type==weapon_info::BEAM) {
-#ifdef NO_MOUNT_STAR
-    if (bank==false||this->NextMountCloser(nextmount,firer)==false)
-#endif
-    {
-      bool fireit=ref.gun==NULL;
-      if (!fireit)
-        fireit = ref.gun->Ready();
-      else
-        ref.gun = new Beam (Transformation(orient,pos.Cast()),*type,owner,firer,sound);
-      if (fireit) {
-        if (ammo>0&&reduce_beam_ammo)
-          ammo--;//ditto about beams ahving ammo		
-        ref.gun->ListenToOwner(listen_to_owner);
-        processed=FIRED;
-      }
-    }else {
-      this->UnFire();
-      return false;
+    bool fireit=ref.gun==NULL;
+    if (!fireit)
+      fireit = ref.gun->Ready();
+    else
+      ref.gun = new Beam (Transformation(orient,pos.Cast()),*type,owner,firer,sound);
+    if (fireit) {
+      if (ammo>0&&reduce_beam_ammo)
+        ammo--;//ditto about beams ahving ammo		
+      ref.gun->ListenToOwner(listen_to_owner);
+      processed=FIRED;
     }
     return true;
   }else { 
