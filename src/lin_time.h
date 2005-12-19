@@ -30,6 +30,10 @@ void micro_sleep( unsigned int n);
 double getNewTime();
 void setNewTime(double newnewtime);
 
+// Essentially calling UpdateTime();getNewTime() without modifying any state.
+// Always use this except at the beginning of a frame.
+double queryTime(); 
+
 extern float getTimeCompression();
 extern void setTimeCompression(float tc);
 
