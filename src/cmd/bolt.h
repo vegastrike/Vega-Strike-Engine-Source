@@ -9,6 +9,7 @@
 class Animation;
 class Unit;
 class StarSystem;
+class bolt_draw ;
 class Bolt {
 private:
   const weapon_info* type;//beam or bolt;
@@ -21,7 +22,8 @@ private:
   int decal;//which image it uses
  public:
   CollideMap::iterator location;
-
+  static int AddTexture(bolt_draw *q, std::string filename);
+  static int AddAnimation(bolt_draw *q, std::string filename, QVector cur_position);
   bool Collide (Unit * target);
   static bool CollideAnon (Collidable::CollideRef bolt_name, Unit* target);
   static Bolt * BoltFromIndex(StarSystem* ss,Collidable::CollideRef bolt_name);

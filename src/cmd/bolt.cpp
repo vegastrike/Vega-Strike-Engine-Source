@@ -67,47 +67,33 @@ extern double interpolation_blend_factor;
 inline void BlendTrans (Matrix & drawmat, const QVector & cur_position, const QVector & prev_position) {
     drawmat.p = prev_position.Scale(1-interpolation_blend_factor) + cur_position.Scale(interpolation_blend_factor);    
 }
-
-Bolt::Bolt (const weapon_info * typ, const Matrix &orientationpos,  const Vector & shipspeed, void * owner, CollideMap::iterator hint):  cur_position (orientationpos.p), ShipSpeed (shipspeed) {
-  VSCONSTRUCT2('t')
-  bolt_draw *q= _Universe->activeStarSystem()->bolts;
-  prev_position= cur_position;
-  this->owner = owner;
-  this->type = typ;
-  curdist = 0;
-  CopyMatrix (drawmat,orientationpos);
-  Vector vel=shipspeed+orientationpos.getR()*typ->Speed;
-  if (typ->type==weapon_info::BOLT) {
-    ScaleMatrix (drawmat,Vector (typ->Radius,typ->Radius,typ->Length));
-    decal = q->boltdecals->AddTexture (typ->file.c_str(),MIPMAP);
-    if (decal>=(int)q->bolts.size()) {
-      q->bolts.push_back (vector <Bolt>());
-      int blargh = q->boltdecals->AddTexture (typ->file.c_str(),MIPMAP);
-      if (blargh>=(int)q->bolts.size()) {
-	q->bolts.push_back (vector <Bolt>());	
-      }
-      q->cachedecals.push_back (blargh);
+int Bolt::AddTexture(bolt_draw *q, std::string file) {
+  int decal=q->boltdecals->AddTexture (file.c_str(),MIPMAP);
+  if (decal>=(int)q->bolts.size()) {
+    q->bolts.push_back (vector <Bolt>());
+    int blargh = q->boltdecals->AddTexture (file.c_str(),MIPMAP);
+    if (blargh>=(int)q->bolts.size()) {
+      q->bolts.push_back (vector <Bolt>());	
     }
-    this->location=_Universe->activeStarSystem()->collidemap->insert(Collidable(Bolt::BoltIndex(q->bolts[decal].size(),decal,false).bolt_index,(shipspeed+orientationpos.getR()*typ->Speed).Magnitude()*.5,cur_position+vel*SIMULATION_ATOM*.5),hint);
-    q->bolts[decal].push_back (*this);
-  } else {
-    ScaleMatrix (drawmat,Vector (typ->Radius,typ->Radius,typ->Radius));
-    decal=-1;
-    for (unsigned int i=0;i<q->animationname.size();i++) {
-      if (typ->file==q->animationname[i]) {
-	decal=i;
-      }
-    }
-    if (decal==-1) {
-      decal = q->animations.size();
-      q->animationname.push_back (typ->file);
-      q->animations.push_back (new Animation (typ->file.c_str(), true,.1,MIPMAP,false));//balls have their own orientation
-      q->animations.back()->SetPosition (cur_position);
-      q->balls.push_back (vector <Bolt> ());
-    }
-    this->location=_Universe->activeStarSystem()->collidemap->insert(Collidable(Bolt::BoltIndex(q->balls[decal].size(),decal,true).bolt_index,(shipspeed+orientationpos.getR()*typ->Speed).Magnitude()*.5,cur_position+vel*SIMULATION_ATOM*.5),hint);
-    q->balls[decal].push_back (*this);
+    q->cachedecals.push_back (blargh);
   }
+  return decal;
+}  
+int Bolt::AddAnimation(bolt_draw*q,std::string file, QVector cur_position) {
+  int decal=-1;
+  for (unsigned int i=0;i<q->animationname.size();i++) {
+    if (file==q->animationname[i]) {
+      decal=i;
+    }
+  }
+  if (decal==-1) {
+    decal = q->animations.size();
+    q->animationname.push_back (file);
+    q->animations.push_back (new Animation (file.c_str(), true,.1,MIPMAP,false));//balls have their own orientation
+    q->animations.back()->SetPosition (cur_position);
+    q->balls.push_back (vector <Bolt> ());
+  }
+  return decal;
 }
 
 void Bolt::Draw () {
