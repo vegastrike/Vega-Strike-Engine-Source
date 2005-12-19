@@ -157,7 +157,25 @@ void InitTime () {
 double GetElapsedTime() {
   return elapsedtime;
 }
+double queryTime() {
+#ifdef WIN32
+  LARGE_INTEGER tmpnewtime;
+  QueryPerformanceCounter(&tmpnewtime);
+  return ((double)tmpnewtime)/(double)freq-firsttime;
+#elif defined(HAVE_GETTIMEOFDAY)
+  struct timeval tv;
+  (void) gettimeofday(&tv, NULL);
+  double tmpnewtime = (double)tv.tv_sec + (double)tv.tv_usec * 1.e-6;
+  return tmpnewtime-firsttime;
+#elif defined(HAVE_SDL)
 
+  double tmpnewtime = SDL_GetTicks() * 1.e-3;
+  return tmpnewtime-firsttime;
+#else
+# error "We have no way to determine the time on this system."
+  return 0.;
+#endif
+}
 void UpdateTime() {
 #ifdef WIN32
   QueryPerformanceCounter((LARGE_INTEGER*)&newtime);
