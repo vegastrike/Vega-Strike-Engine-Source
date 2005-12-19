@@ -339,10 +339,13 @@ int NetClient::checkMsg( Packet* outpacket )
 {
     int ret=0;
 	string jpeg_str( "");
+	timeval tv;
+	tv.tv_sec=0;
+	tv.tv_usec=0;
 
     if( clt_sock.isActive( ) )
     {
-        ret = recvMsg( outpacket );
+        ret = recvMsg( outpacket, &tv );
     }
 	// If we have network communications enabled and webcam support enabled we grab an image
 	if( NetComm!=NULL && NetComm->IsActive())
@@ -354,12 +357,20 @@ int NetClient::checkMsg( Packet* outpacket )
     return ret;
 }
 
+#include "lowlevel/vsnet_err.h"
+
 /**************************************************************/
 /**** Receive a message from the server                    ****/
 /**************************************************************/
 
-int NetClient::recvMsg( Packet* outpacket )
+int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 {
+	/* // Returns false if no data hasarrived on the socket.
+	   // Required if you only want to poll.
+	if( !clt_sock.isActive( ) ) {
+		return 0;
+	}
+	*/
 	using namespace VSFileSystem;
     ObjSerial	packet_serial=0;
 
@@ -374,6 +385,25 @@ int NetClient::recvMsg( Packet* outpacket )
 
     Packet    p1;
     AddressIP ipadr;
+	clt_sock.addToSet( _sock_set );
+	int socketstat = _sock_set.wait( timeout );
+	
+    if( socketstat < 0)
+    {
+        perror( "Error select -1 ");
+        clt_sock.disconnect( "socket error", 0 );
+        return -1;
+    }
+	if ( socketstat == 0 )
+	{
+		COUT << "recvMsg socketstat == 0: " << (vsnetEWouldBlock()?"wouldblock":"") << endl;
+		// timeout expired.
+	}
+	
+
+//	NETFIXME: check for file descriptors in _sock_set.fd_set...
+
+
     int recvbytes = clt_sock.recvbuf( &p1, &ipadr );
 
     if( recvbytes <= 0)
@@ -779,10 +809,16 @@ int NetClient::recvMsg( Packet* outpacket )
 						string sysfile( newsystem+".system");
 						VsnetDownload::Client::NoteFile f( this->clt_sock, sysfile, SystemFile);
    		             	_downloadManagerClient->addItem( &f);
+						
+						timeval timeout = {10, 0};
+						
 						while( !f.done())
 						{
-							checkMsg( NULL);
-							micro_sleep( 40000);
+							if (recvMsg( NULL, &timeout )<=0) {
+//NETFIXME: What to do if the download times out?
+								COUT << "recvMsg <=0: " << (vsnetEWouldBlock()?"wouldblock":"") << endl;
+								break;
+							}
 						}
 						this->jumpok = true;
 					}
@@ -1036,6 +1072,8 @@ int NetClient::recvMsg( Packet* outpacket )
 				newunit = (Unit *) UnitFactory::createMissile( file.c_str(), faction, modifs, damage, phasedamage, time, radialeffect, radmult, detonation_radius, serial);
 				_Universe->activeStarSystem()->AddUnit( newunit);
 			}
+			break;
+			case CMD_SERVERTIME:
 			break;
             default :
                 COUT << ">>> " << local_serial << " >>> UNKNOWN COMMAND =( " << hex << cmd

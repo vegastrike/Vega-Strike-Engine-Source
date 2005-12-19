@@ -370,7 +370,7 @@ void	ZoneMgr::broadcastText( int zone, ObjSerial serial, Packet * pckt, float fr
 /************************************************************************************************/
 /**** broadcastSnapshots                                                                    *****/
 /************************************************************************************************/
-
+#include "lin_time.h"
 // Broadcast all positions
 // This function sends interpolated and predicted positions based on the "semi-ping" between the sender clients and the server
 // the receiver client will only have to interpolate and predict on his own "semi-ping" value
@@ -391,7 +391,7 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 		// Check if system contains player(s)
 		if( zone_clients[i]>0)
 		{
-			COUT << "BROADCAST SNAPSHOTS = "<<zone_clients[i]<<" clients in zone "<<i<<endl;
+			COUT << "BROADCAST SNAPSHOTS = "<<zone_clients[i]<<" clients in zone "<<i<<" time now: "<<queryTime()<<"; frame time: "<<getNewTime() << endl;
 			// Loop for all the zone's clients
 			for( k=zone_list[i]->begin(); k!=zone_list[i]->end(); k++)
 			{

@@ -108,7 +108,7 @@ class	NetClient
         static const char*                                _downloadSearchPaths[];
 
 		void	createChar();
-		int		recvMsg( Packet* outpacket );
+		int		recvMsg( Packet* outpacket, timeval *timeout = NULL );
 		void	disconnect();
 		int		checkAcctMsg( );
 
@@ -131,6 +131,7 @@ class	NetClient
 		void			loginAccept( Packet & p1);
 		SOCKETALT		init( const char* addr, unsigned short port);
 		SOCKETALT		init_acct( char * addr, unsigned short port);
+		void	synchronizeTime(); // Sends time packets back and forth to find the actual double time on the server.
 
 		void	start( char * addr, unsigned short port);
 		bool	PacketLoop( Cmd command );

@@ -135,6 +135,11 @@ bool SOCKETALT::set_nonblock( )
     return ( !_sock ? false : _sock->set_nonblock() );
 }
 
+bool SOCKETALT::set_block( )
+{
+    return ( !_sock ? false : _sock->set_block() );
+}
+
 int SOCKETALT::recvbuf( Packet* p, AddressIP* ipadr )
 {
     if( !_sock || !p )
@@ -186,3 +191,7 @@ bool SOCKETALT::lowerAddress( const SOCKETALT& right ) const
     }
 }
 
+void SOCKETALT::addToSet( SocketSet &set )
+{
+	if ( _sock ) set.set( &(*this->_sock) );
+}

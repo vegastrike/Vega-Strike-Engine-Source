@@ -43,7 +43,7 @@ NetClient * Network;
 int main( int argc, char **argv)
 {
 	InitTime();
-	setNewTime(time(NULL));
+	setNewTime(((double)time(NULL))-VEGA_EPOCH);
 	AccountServer *Server = new AccountServer;
 
 	Server->start();

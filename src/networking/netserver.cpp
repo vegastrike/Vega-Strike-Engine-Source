@@ -480,6 +480,8 @@ void	NetServer::checkKey( SocketSet & sets)
 /**** Check which clients are sending data to the server   ****/
 /**************************************************************/
 
+// NETFIXME: Completely separate code logic in debug and non-debug. put #ifdef's only around print statements.
+
 void	NetServer::checkMsg( SocketSet& sets )
 #ifdef VSNET_DEBUG
 {
@@ -681,6 +683,14 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			// Nothing to do here, just receiving the packet is enough
 			//COUT<<"Got PING from serial "<<packet.getSerial()<<endl;
 			break;
+		case CMD_SERVERTIME:
+		{
+			NetBuffer timeBuf;
+			timeBuf.addDouble(queryTime()); // get most "up-to-date" time.
+			// NETFIXME: is SENDANDFORGET really UDP?
+			p2.send( CMD_SERVERTIME, 0, timeBuf.getData(), timeBuf.getDataLength(), SENDANDFORGET, &ipadr, clt->sock, __FILE__, PSEUDO__LINE__(691) );
+		}
+			break;
 		case CMD_LOGOUT:
 			COUT<<">>> LOGOUT REQUEST =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 			// Client wants to quit the game
@@ -830,7 +840,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 		case CMD_SCAN :
 		{
 			// Received a target scan request
-			// WE SHOULD FIND A WAY TO CHECK THAT THE CLIENT HAS THE RIGHT SCAN SYSTEM FOR THAT
+			// NETFIXME: WE SHOULD FIND A WAY TO CHECK THAT THE CLIENT HAS THE RIGHT SCAN SYSTEM FOR THAT
 			target_serial = netbuf.getSerial();
 			zone = netbuf.getShort();
 			un = zonemgr->getUnit( target_serial, zone);
@@ -856,7 +866,8 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			//netbuf.addFloat( distance);
 		}
 		break;
-		/* SHOULD NOT RECEIVE THIS SINCE COMM SESSIONS ARE HANDLED IN A CLIENT-TO-CLIENT WAY
+		// NETFIXME: SHOULD NOT RECEIVE CMD_CAMSHOT SINCE COMM SESSIONS ARE HANDLED IN A CLIENT-TO-CLIENT WAY
+		/*
 		case CMD_CAMSHOT :
 		{
 			p2.bc_create( packet.getCommand(), packet.getSerial(),

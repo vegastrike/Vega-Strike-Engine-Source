@@ -61,12 +61,16 @@ void SocketSet::unset( VsnetSocketBase* s )
 }
 
 #ifdef USE_NO_THREAD
-void SocketSet::wait( )
+int SocketSet::wait( timeval *tv )
 {
-    assert( _blockmain ); // can't call wait if we haven't ordered the feature
-    if( _blockmain_pending == 0 )
+    //assert( _blockmain ); // can't call wait if we haven't ordered the feature (?)
+    if( tv!=NULL || _blockmain_pending == 0 )
     {
-        private_select( NULL );
+		int ret;
+		do {
+			ret = private_select( tv );
+		} while ( ret == 1 );
+		return ret;
     }
     else
     {
@@ -80,16 +84,17 @@ void SocketSet::wait( )
              << ostr.str()
              << " (" << _blockmain_pending << ")" << endl;
 #endif
-        struct timeval tv;
-        tv.tv_sec  = 0;
-        tv.tv_usec = 0;
-        private_select( &tv );
+        struct timeval zerotv;
+        zerotv.tv_sec  = 0;
+        zerotv.tv_usec = 0;
+        return private_select( &zerotv );
     }
 }
 #else
 #error You are using threaded network mode - do you really want this?
-void SocketSet::wait( )
+void SocketSet::wait( timeval *tv )
 {
+	assert( tv==NULL ); // No timeval.
     assert( _blockmain ); // can't call wait if we haven't ordered the feature
     _blockmain_mx.lock( );
     if( _blockmain_pending == 0 )
@@ -166,6 +171,24 @@ int SocketSet::private_select( timeval* timeout )
 
     FD_ZERO( &read_set_select );
     FD_ZERO( &write_set_select );
+    
+    if( !_client_mgr.expired() )
+    {
+        boost::shared_ptr<VsnetDownload::Client::Manager> mgr( boost::make_shared(_client_mgr) );
+        if( (bool)mgr )
+        {
+            mgr->lower_check_queues( );
+        }
+    }
+
+    if( !_server_mgr.expired() )
+    {
+        boost::shared_ptr<VsnetDownload::Server::Manager> mgr( boost::make_shared(_server_mgr) );
+        if( (bool)mgr )
+        {
+            mgr->lower_check_queues( );
+        }
+    }
 
     // private_test_dump_request_sets( timeout );
 
@@ -235,6 +258,7 @@ int SocketSet::private_select( timeval* timeout )
     }
     else
     {
+		ret++;
 #if defined(VSNET_DEBUG)
         private_test_dump_active_sets( max_sock_select,
                                        debug_copy_of_read_set_select,
@@ -249,11 +273,17 @@ int SocketSet::private_select( timeval* timeout )
             int fd = b->get_fd();
 	        if( fd >= 0 )
 	        {
-                if( FD_ISSET(fd,&read_set_select) )
+                if( FD_ISSET(fd,&read_set_select) ) {
                     b->lower_selected( );
+					if (!b->isActive()) {
+						ret--; // No complete packet received yet.
+					}
+				}
 
-                if( FD_ISSET(b->get_write_fd(),&write_set_select) )
+                if( FD_ISSET(b->get_write_fd(),&write_set_select) ) {
+					ret--;
                     b->lower_sendbuf( );
+				}
 	        }
             else
             {
@@ -275,24 +305,6 @@ int SocketSet::private_select( timeval* timeout )
             _thread_wakeup.read( &c, 1 );
         }
 #endif
-    }
-    
-    if( !_client_mgr.expired() )
-    {
-        boost::shared_ptr<VsnetDownload::Client::Manager> mgr( boost::make_shared(_client_mgr) );
-        if( (bool)mgr )
-        {
-            mgr->lower_check_queues( );
-        }
-    }
-
-    if( !_server_mgr.expired() )
-    {
-        boost::shared_ptr<VsnetDownload::Server::Manager> mgr( boost::make_shared(_server_mgr) );
-        if( (bool)mgr )
-        {
-            mgr->lower_check_queues( );
-        }
     }
 
     if( _blockmain )

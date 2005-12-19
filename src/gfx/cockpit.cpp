@@ -2036,13 +2036,13 @@ void GameCockpit::Draw() {
 		  char str[250];
 		  Unit *you=parent.GetUnit();
 		  if (you) {
-			  sprintf(str,"Your Position: (%lf,%lf,%lf); Velocity: (%f,%f,%f)\n",you->curr_physical_state.position.i,you->curr_physical_state.position.j,you->curr_physical_state.position.k,you->Velocity.i,you->Velocity.j,you->Velocity.k);
+			  sprintf(str,"Your Position: (%lf,%lf,%lf); Velocity: (%f,%f,%f); Frame: %lf\n",you->curr_physical_state.position.i,you->curr_physical_state.position.j,you->curr_physical_state.position.k,you->Velocity.i,you->Velocity.j,you->Velocity.k, getNewTime());
 			  Unit *yourtarg=you->computer.target.GetUnit();
 			  if (yourtarg) {
-				  sprintf(str+strlen(str),"Target Position: (%lf,%lf,%lf); Velocity: (%f,%f,%f)\n",yourtarg->curr_physical_state.position.i,yourtarg->curr_physical_state.position.j,yourtarg->curr_physical_state.position.k,yourtarg->Velocity.i,yourtarg->Velocity.j,yourtarg->Velocity.k);
+				  sprintf(str+strlen(str),"Target Position: (%lf,%lf,%lf); Velocity: (%f,%f,%f); Now: %lf\n",yourtarg->curr_physical_state.position.i,yourtarg->curr_physical_state.position.j,yourtarg->curr_physical_state.position.k,yourtarg->Velocity.i,yourtarg->Velocity.j,yourtarg->Velocity.k, queryTime());
 			  }
 		  }
-		  tp.SetPos(-0.5,-0.8);
+		  tp.SetPos(-0.8,-0.8);
 		  tp.SetText(str);
 		  tp.Draw();
 	  }

@@ -29,6 +29,7 @@
 
 class Packet;
 class VsnetSocket;
+class SocketSet;
 
 class SOCKETALT
 {
@@ -57,6 +58,7 @@ public:
     // int  sendbuf( PacketMem& packet, const AddressIP* to, int pcktflags );
     int  sendbuf( Packet* packet, const AddressIP* to, int pcktflags );
     bool set_nonblock();
+    bool set_block();
 
     int  recvbuf( Packet* p, AddressIP* ipadr );
     void disconnect( const char *s, bool fexit = true );
@@ -66,7 +68,9 @@ public:
 
     friend std::ostream& operator<<( std::ostream& ostr, const SOCKETALT& s );
     friend bool          operator==( const SOCKETALT& l, const SOCKETALT& r );
-
+	
+	void addToSet( SocketSet &set );
+	
     /** Required by the download manager achieve a sorting of sockets.
      */
     friend class CompareLt;

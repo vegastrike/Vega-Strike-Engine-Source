@@ -89,7 +89,7 @@ public:
     void unset( VsnetSocketBase* s );
 
     /// The upper thread waits for something to arrive on the socket
-    void wait( );
+    int wait( timeval *tv = NULL );
     void add_pending( int fd );
     void rem_pending( int fd );
 

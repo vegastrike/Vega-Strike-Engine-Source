@@ -132,10 +132,13 @@ void	NetClient::downloadZoneInfo()
     COUT << __PRETTY_FUNCTION__ << " zone: " << tbuf << endl;
 	VsnetDownload::Client::Buffer buf( this->clt_sock, tbuf, VSFileSystem::ZoneBuffer);
 	_downloadManagerClient->addItem( &buf);
+	timeval timeout={10,0};
 	while( !buf.done())
 	{
-		checkMsg( NULL);
-		micro_sleep( 40000);
+		if (recvMsg( NULL, &timeout )<=0) {
+			//NETFIXME: What if timeout or error occurs?
+			break;
+		}
 	}
 	const char * tmp = (char *) buf.getBuffer().get();
 	NetBuffer netbuf( tmp, buf.getSize());

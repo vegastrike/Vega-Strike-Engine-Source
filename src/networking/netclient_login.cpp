@@ -89,38 +89,34 @@ vector<string>	NetClient::loginLoop( string str_callsign, string str_passwd)
 	// Now the loop
 	int timeout=0, recv=0;
 	// int ret=0;
-	UpdateTime();
 
 	Packet packet;
 
-	double initial = getNewTime();
-	double newtime=0;
-	double elapsed=0;
 	string login_tostr = vs_config->getVariable( "network", "logintimeout", "10" );
-	int login_to = atoi( login_tostr.c_str());
-	while( !timeout && !recv)
+	timeval tv = {atoi( login_tostr.c_str()), 0};
+	
+	while( !timeout )
 	{
-		// If we have no response in "login_to" seconds -> fails
-		UpdateTime();
-		newtime = getNewTime();
-		elapsed = newtime-initial;
-		//COUT<<elapsed<<" seconds since login request"<<endl;
-		if( elapsed > login_to)
+		recv=this->recvMsg( &packet, &tv );
+		if( recv==0 )
 		{
 			globalsaves.push_back( "");
 			globalsaves.push_back( "!!! NETWORK ERROR : Connection to game server timed out !!!");
 			timeout = 1;
+		} else if (recv<0) {
+			globalsaves.push_back( "");
+			globalsaves.push_back( "!!! NETWORK ERROR in recieving socket.");
+			timeout = 1;
+		} else {
+			break;
 		}
-		recv=this->checkMsg( &packet );
-
-		micro_sleep( 40000);
 	}
 	COUT<<"End of login loop"<<endl;
 	if( globalsaves.empty() || globalsaves[0]!="")
 	{
 		this->callsign = str_callsign;
 	}
-	//cout<<"GLOBALSAVES[0] : "<<globalsaves[0]<<endl;
+	//cout<<"GLOBALSAVES[0] : " 
 	//cout<<"GLOBALSAVES[1] : "<<globalsaves[1]<<endl;
 	return globalsaves;
 }
@@ -155,11 +151,10 @@ vector<string>	NetClient::loginAcctLoop( string str_callsign, string str_passwd)
 	// Now the loop
 	int timeout=0, recv=0;
 	// int ret=0;
-	UpdateTime();
 
 	Packet packet;
 
-	double initial = getNewTime();
+	double initial = queryTime();
 	double newtime=0;
 	double elapsed=0;
 	string login_tostr = vs_config->getVariable( "network", "logintimeout", "10" );
@@ -167,8 +162,7 @@ vector<string>	NetClient::loginAcctLoop( string str_callsign, string str_passwd)
 	while( !timeout && !recv)
 	{
 		// If we have no response in "login_to" seconds -> fails
-		UpdateTime();
-		newtime = getNewTime();
+		newtime = queryTime();
 		elapsed = newtime-initial;
 		//COUT<<elapsed<<" seconds since login request"<<endl;
 		if( elapsed > login_to)
@@ -226,10 +220,13 @@ void	NetClient::loginAccept( Packet & p1)
 	{
 		VsnetDownload::Client::NoteFile f( this->clt_sock, univfile, VSFileSystem::UniverseFile);
 		_downloadManagerClient->addItem( &f);
+		timeval timeout={10,0};
 		while( !f.done())
 		{
-			checkMsg( NULL);
-			micro_sleep( 40000);
+			if (recvMsg( NULL, &timeout )<=0) {
+//NETFIXME: What to do if the download times out?
+				break;
+			}
 		}
 	}
 
@@ -245,10 +242,13 @@ void	NetClient::loginAccept( Packet & p1)
 	{
 		VsnetDownload::Client::NoteFile f( this->clt_sock, sysfile, VSFileSystem::SystemFile);
 		_downloadManagerClient->addItem( &f);
+		timeval timeout={10,0};
 		while( !f.done())
 		{
-			checkMsg( NULL);
-			micro_sleep( 40000);
+			if (recvMsg( NULL, &timeout )<=0) {
+				//NETFIXME: what to do if timeout elapses...
+				break;
+			}
 		}
 	}
     this->zone = netbuf.getShort();
@@ -313,6 +313,98 @@ SOCKETALT	NetClient::init( const char* addr, unsigned short port )
 
 	this->enabled = 1;
 	return this->clt_sock;
+}
+
+/*************************************************************/
+/**** Synchronize server time and client time             ****/
+/*************************************************************/
+
+#define NUM_TIMES 10 // Number of times to send back and forth and obtain average.
+// NETFIXME: Correctly obtain ping time.
+#include "vs_random.h" // For random ping time.
+
+void NetClient::synchronizeTime()
+{
+
+	int i=0;
+	int timeout=0;
+	int recv;
+	timeval tv = { 1, 0 }; // Timeout after 1 second, request send again.
+	double ping; // use deltaTime?
+	double pingavg=0.;
+	double timeavg=0.;
+	std::map<double, double> times; // sorted container.
+	double initialTime=queryTime();
+	this->clt_sock.set_block();
+	// Wait for NUM_TIMES (10) successful tries, or 10 consecutive 1-second timeouts
+	// (we use UDP on the response (SENDANDFORGET) to improve timing accuracy).
+	while (i<NUM_TIMES&&timeout<10) {
+		Packet packet;
+		
+		packet.send( CMD_SERVERTIME, 0,
+					 0, 0, // No data.
+					 SENDRELIABLE, NULL, this->clt_sock,
+					 __FILE__, PSEUDO__LINE__(343) );
+		recv=this->recvMsg( &packet, &tv );
+		// If we have no response.
+		if (recv<=0) {
+			COUT << "synchronizeTime() Timed out" << endl;
+			++timeout;
+			// NETFIXME: What should we do in case of CMD_SERVERTIME timeout? Probably lost packet.
+		} else if (packet.getCommand() == CMD_SERVERTIME ) {
+			// NETFIXME: obtain actual ping time
+			//ping = getPingTime( &tv );
+			ping = exp(vsrandom.uniformInc(-10, 0));
+			if (ping>0&&ping<1.) {
+				++i;
+				NetBuffer data (packet.getData(), packet.getDataLength());
+				double serverTime=data.getDouble();
+				double currentTime=queryTime();
+				serverTime+=initialTime-currentTime;
+				times.insert(std::multimap<double, double>::value_type(ping, serverTime-ping));
+				timeout=0;
+			} else {
+				++timeout;
+			}
+		}
+	}
+	this->clt_sock.set_nonblock();
+//	std::sort(times[0], times[i]);
+	if (i>=10) {
+		int mid=i/2;
+		double median=0.;
+		double tot=0.;
+		int location=0;
+		std::map<double, double>::const_iterator iter;
+		for (iter=times.begin();iter!=times.end();++iter) {
+			if (location==mid) {
+				median=iter->first;
+				if (i%2==1) {
+					++iter;
+					median+=iter->first;
+				}
+				break;
+			}
+			++location;
+		}
+		if (i%2==1) {
+			median/=2;
+		}
+		for (iter=times.begin();iter!=times.end();++iter) {
+			double wdiff=exp(-10*(median-iter->first)*(median-iter->first));
+			pingavg+=wdiff*iter->first;
+			timeavg+=wdiff*iter->second;
+			tot+=wdiff;
+		}
+		pingavg/=tot;
+		timeavg/=tot;
+	} else {
+		COUT << "Error in time synchronization: connection ended or timed out.";
+	}
+	this->deltatime=pingavg;
+	double newTime=timeavg+queryTime()-initialTime;
+	COUT << "Setting time to: New time: " << newTime << endl;
+	setNewTime(newTime);
 }
 
 /*************************************************************/

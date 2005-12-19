@@ -376,6 +376,7 @@ void VsnetTCPSocket::lower_selected( )
 {
     if( _connection_closed )
     {
+		COUT << "Connection already closed" << endl;
         return; /* Pretty sure that recv will return 0.  */
     }
 
@@ -398,7 +399,7 @@ void VsnetTCPSocket::lower_selected( )
 	        {
 	            if( ret == 0 || vsnetEConnAborted() || vsnetEConnReset() )
 		        {
-                    COUT << "Connection closed" << endl;
+                    COUT << "Connection closed in header" << endl;
                     _connection_closed = true;
                     close_fd();
                     _set.add_pending( _sq_fd );
@@ -410,7 +411,9 @@ void VsnetTCPSocket::lower_selected( )
                          << " = " << vsnetLastError()
                          << endl;
                     perror( "receiving TCP packetlength bytes" );
-                }
+                } else {
+					COUT << "Received EWOULDBLOCK." << (get_nonblock()?"true":"false") << endl;
+				}
                 return;
 	        }
 	        if( ret > 0 ) _incomplete_header += ret;
@@ -430,6 +433,7 @@ void VsnetTCPSocket::lower_selected( )
 	        {
 	            if( ret == 0 )
 		        {
+                    COUT << "Connection closed in data" << endl;
 		            _connection_closed = true;
                     close_fd();
                     _set.add_pending( _sq_fd );
@@ -437,7 +441,9 @@ void VsnetTCPSocket::lower_selected( )
                 else if( vsnetEWouldBlock() == false )
 		        {
                     perror( "receiving TCP packet" );
-		        }
+		        } else {
+					COUT << "Received EWOULDBLOCK in data." << (get_nonblock()?"true":"false") << endl;
+				}
                 return;
 	        }
             else

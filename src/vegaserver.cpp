@@ -38,7 +38,7 @@ void	VSExit( int code)
 
 int main( int argc, char **argv)
 {
-	setNewTime(time(NULL));
+	setNewTime(((double)time(NULL))-VEGA_EPOCH);
 	VSServer = new NetServer;
 	// Fake forcefeedback
     forcefeedback=new ForceFeedback();

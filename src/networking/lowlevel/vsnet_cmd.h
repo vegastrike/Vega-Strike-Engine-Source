@@ -23,6 +23,8 @@
 enum Cmd
 {
 	// Login commands
+	CMD_SERVERTIME   ,	// Client side : Request the most up-to-date server time.
+	                            // Server side : Send the current game time (double).
     CMD_LOGIN        ,	// Client side : login request sent to server with name and passwd
     CMD_LOGOUT       ,	// Client side : tells the server we are logging out
                                 // Server side : remove the client from the game
