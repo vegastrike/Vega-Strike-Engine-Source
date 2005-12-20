@@ -23,6 +23,8 @@
 #define _LIN_TIME_H_
 #include "vegastrike.h"
 
+#define VEGA_EPOCH 1136073600. // Jan 1, 2006 GMT
+
 void InitTime();
 double GetElapsedTime();
 void UpdateTime();
