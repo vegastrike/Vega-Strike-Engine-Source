@@ -293,7 +293,9 @@ void StarSystem::AddUnit(Unit *unit) {
   }
   drawList.prepend(unit);
   unsigned int priority=UnitUtil::getPhysicsPriority(unit);
-  unsigned int tmp=((unsigned int)vsrandom.genrand_int32())%priority;
+  // Do we need the +1 here or not - need to look at when current_sim_location is changed relative to this function
+  // and relative to this function, when the bucket is processed...
+  unsigned int tmp=1+((unsigned int)vsrandom.genrand_int32())%priority;
   this->physics_buffer[(this->current_sim_location+tmp)%SIM_QUEUE_SIZE].prepend(unit);
 }
 
