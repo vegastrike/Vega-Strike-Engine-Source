@@ -151,8 +151,8 @@ double GetElapsedTime() {
 }
 double queryTime() {
 #ifdef WIN32
-  LARGE_INTEGER tmpnewtime;
-  QueryPerformanceCounter(&tmpnewtime);
+  LONGLONG tmpnewtime;
+  QueryPerformanceCounter((LARGE_INTEGER*)&tmpnewtime);
   return ((double)tmpnewtime)/(double)freq-firsttime;
 #elif defined(HAVE_GETTIMEOFDAY)
   struct timeval tv;
