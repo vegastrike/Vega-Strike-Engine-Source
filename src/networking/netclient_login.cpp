@@ -42,7 +42,7 @@ int		NetClient::authenticate()
 
 		packet2.send( CMD_LOGIN, 0,
                       netbuf.getData(), netbuf.getDataLength(),
-                      SENDRELIABLE, NULL, this->clt_sock,
+                      SENDRELIABLE, NULL, this->clt_tcp_sock,
                       __FILE__, PSEUDO__LINE__(165) );
 		COUT << "Send login for player <" << str_callsign << ">:< "<< str_passwd
 		     << "> - buffer length : " << packet2.getDataLength()
@@ -80,7 +80,7 @@ vector<string>	NetClient::loginLoop( string str_callsign, string str_passwd)
 
 	packet2.send( CMD_LOGIN, 0,
                   netbuf.getData(), netbuf.getDataLength(),
-                  SENDRELIABLE, NULL, this->clt_sock,
+                  SENDRELIABLE, NULL, this->clt_tcp_sock,
                   __FILE__, PSEUDO__LINE__(316) );
 	COUT << "Sent login for player <" << str_callsign << ">:<" << str_passwd
 		 << ">" << endl
@@ -218,7 +218,7 @@ void	NetClient::loginAccept( Packet & p1)
 	// Compare to local hash and ask for the good file if we don't have it or bad version
 	if( !FileUtil::HashCompare( univfile, digest, UniverseFile))
 	{
-		VsnetDownload::Client::NoteFile f( this->clt_sock, univfile, VSFileSystem::UniverseFile);
+		VsnetDownload::Client::NoteFile f( this->clt_tcp_sock, univfile, VSFileSystem::UniverseFile);
 		_downloadManagerClient->addItem( &f);
 		timeval timeout={10,0};
 		while( !f.done())
@@ -240,7 +240,7 @@ void	NetClient::loginAccept( Packet & p1)
 #endif
 	if( !FileUtil::HashCompare( fullsys, digest, SystemFile))
 	{
-		VsnetDownload::Client::NoteFile f( this->clt_sock, sysfile, VSFileSystem::SystemFile);
+		VsnetDownload::Client::NoteFile f( this->clt_tcp_sock, sysfile, VSFileSystem::SystemFile);
 		_downloadManagerClient->addItem( &f);
 		timeval timeout={10,0};
 		while( !f.done())
@@ -254,11 +254,24 @@ void	NetClient::loginAccept( Packet & p1)
     this->zone = netbuf.getShort();
 }
 
+void NetClient::getConfigServerAddress( string &addr, unsigned short &port)
+{
+	int port_tmp;
+	string srvport = vs_config->getVariable("network","server_port", "6777");
+	port_tmp = atoi( srvport.c_str());
+	if (port_tmp>65535||port_tmp<0)
+		port_tmp=0;
+	port=(unsigned short)port_tmp;
+	
+	addr = vs_config->getVariable("network","server_ip","");
+	cout<<endl<<"Server IP : "<<addr<<" - port : "<<srvport<<endl<<endl;
+}
+
 /*************************************************************/
 /**** Initialize the client network to account server     ****/
 /*************************************************************/
 
-SOCKETALT	NetClient::init_acct( char * addr, unsigned short port)
+SOCKETALT	NetClient::init_acct( const char * addr, unsigned short port)
 {
     COUT << " enter " << __PRETTY_FUNCTION__
 	     << " with " << addr << ":" << port << endl;
@@ -289,19 +302,11 @@ SOCKETALT	NetClient::init( const char* addr, unsigned short port )
 		NETWORK_ATOM = 0.2;
 	else
 		NETWORK_ATOM = (double) atof( strnetatom.c_str());
+	
+	this->clt_tcp_sock = NetUITCP::createSocket( addr, port, _sock_set );
+	this->lossy_socket = &this->clt_tcp_sock;
 
-	string nettransport;
-	nettransport = vs_config->getVariable( "network", "transport", "udp" );
-	if( nettransport == "tcp" )
-	{
-	    this->clt_sock = NetUITCP::createSocket( addr, port, _sock_set );
-	}
-	else
-	{
-	    this->clt_sock = NetUIUDP::createSocket( addr, port, _sock_set );
-	}
-	COUT << "created " << (this->clt_sock.isTcp() ? "TCP" : "UDP")
-	     << "socket (" << addr << "," << port << ") -> " << this->clt_sock << endl;
+	COUT << "created TCP socket (" << addr << "," << port << ") -> " << this->clt_tcp_sock << endl;
 
 	/*
 	if( this->authenticate() == -1)
@@ -312,11 +317,15 @@ SOCKETALT	NetClient::init( const char* addr, unsigned short port )
 	*/
 
 	this->enabled = 1;
-	return this->clt_sock;
+	return this->clt_tcp_sock;
 }
 
 /*************************************************************/
 /**** Synchronize server time and client time             ****/
+/*************************************************************/
+/**** This function creates the UDP socket and determines ****/
+/**** whether to use the UDP or the TCP socket for lossy  ****/
+/**** packet data.                                        ****/
 /*************************************************************/
 
 #define NUM_TIMES 10 // Number of times to send back and forth and obtain average.
@@ -335,22 +344,56 @@ void NetClient::synchronizeTime()
 	double timeavg=0.;
 	std::map<double, double> times; // sorted container.
 	double initialTime=queryTime();
-	this->clt_sock.set_block();
+	int clt_port_read = XMLSupport::parse_int(vs_config->getVariable( "network", "udp_listen_port", "6778" ));
+	if (clt_port_read>65535||clt_port_read<0)
+		clt_port_read=0;
+	unsigned short clt_port=(unsigned short)clt_port_read;
+
+	string nettransport;
+	nettransport = vs_config->getVariable( "network", "transport", "udp" );
+
+	std::string addr;
+	unsigned short port;
+	getConfigServerAddress(addr, port);
+	
+	clt_udp_sock=NetUIUDP::createSocket( addr.c_str(), port, clt_port, _sock_set );
+	COUT << "created UDP socket (" << addr << "," << port << ", listen on " << clt_port << ") -> " << this->clt_udp_sock << endl;
+	
+	if (nettransport=="udp") {
+		// NETFIXME:  Keep trying ports until a connection is established.
+		COUT << "Default lossy transport configured to UDP." << endl;
+		this->lossy_socket=&clt_udp_sock;
+	} else {
+		COUT << "Default lossy transport configured to TCP (behind firewall)." << endl;
+		this->lossy_socket=&clt_tcp_sock;
+		clt_port=0;
+	}
+	
+	this->clt_tcp_sock.set_block();
+	this->clt_udp_sock.set_block();
+	
 	// Wait for NUM_TIMES (10) successful tries, or 10 consecutive 1-second timeouts
 	// (we use UDP on the response (SENDANDFORGET) to improve timing accuracy).
 	while (i<NUM_TIMES&&timeout<10) {
 		Packet packet;
-		
+		NetBuffer outData;
+		outData.addShort(clt_port);
 		packet.send( CMD_SERVERTIME, 0,
-					 0, 0, // No data.
-					 SENDRELIABLE, NULL, this->clt_sock,
+					 outData.getData(), outData.getDataLength(), // No data.
+					 SENDRELIABLE, NULL, this->clt_tcp_sock,
 					 __FILE__, PSEUDO__LINE__(343) );
 		recv=this->recvMsg( &packet, &tv );
 		// If we have no response.
 		if (recv<=0) {
 			COUT << "synchronizeTime() Timed out" << endl;
 			++timeout;
-			// NETFIXME: What should we do in case of CMD_SERVERTIME timeout? Probably lost packet.
+			if (timeout>=10&&this->lossy_socket->isTcp()==false) {
+				// no UDP requests made it, fallback to TCP.
+				this->lossy_socket=&this->clt_tcp_sock;
+				clt_port=0;
+				COUT << "Setting default lossy transport to TCP (UDP timeout)." << endl;
+				// NETFIXME: We may want to try different UDP ports to allow multiple people behind one firewall.  In that case, keep falling back to a different port, and make sure to set_nonblock or set_block on each one.
+			}
 		} else if (packet.getCommand() == CMD_SERVERTIME ) {
 			// NETFIXME: obtain actual ping time
 			//ping = getPingTime( &tv );
@@ -368,7 +411,9 @@ void NetClient::synchronizeTime()
 			}
 		}
 	}
-	this->clt_sock.set_nonblock();
+	this->clt_tcp_sock.set_nonblock();
+	this->clt_udp_sock.set_nonblock();
+
 //	std::sort(times[0], times[i]);
 	if (i>=10) {
 		int mid=i/2;

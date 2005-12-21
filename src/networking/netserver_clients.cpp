@@ -5,6 +5,7 @@
 #include "universe_generic.h"
 #include "networking/savenet_util.h"
 #include "networking/prediction.h"
+#include "lin_time.h"
 
 extern QVector DockToSavedBases( int n);
 extern StarSystem * GetLoadedStarSystem( const char * system);
@@ -13,10 +14,10 @@ extern StarSystem * GetLoadedStarSystem( const char * system);
 /**** Adds a new client                                    ****/
 /**************************************************************/
 
-ClientPtr NetServer::addNewClient( SOCKETALT sock, bool is_tcp )
+ClientPtr NetServer::addNewClient( SOCKETALT &sock )
 {
-    ClientPtr newclt( new Client( sock, is_tcp ) );
-    // New client -> now registering it in the active client list "Clients"
+    ClientPtr newclt( new Client( sock ) );
+    // New client -> now registering it in thx active client list "Clients"
     // Store the associated socket
 
     allClients.push_back( newclt);
@@ -102,7 +103,7 @@ void	NetServer::addClient( ClientPtr clt)
                            SENDRELIABLE,
                            __FILE__, PSEUDO__LINE__(1311));
 		COUT<<"<<< SEND ENTERCLIENT("<<un->GetSerial()<<") TO OTHER CLIENT IN THE ZONE------------------------------------------"<<endl;
-		zonemgr->broadcast( clt, &packet2 ); // , &NetworkToClient );
+		zonemgr->broadcast( clt, &packet2, true ); // , &NetworkToClient );
 		COUT<<"Serial : "<<un->GetSerial()<<endl;
 	}
 	// In all case set the zone and send the client the zone which it is in
@@ -118,11 +119,31 @@ void	NetServer::addClient( ClientPtr clt)
 	clt->prediction->InitInterpolation(un, un->old_state, 0, clt->getNextDeltatime());
 	// Add initial position to make sure the client is starting from where we tell him
 	netbuf.addTransformation(un->curr_physical_state);
-	pp.send( CMD_ADDEDYOU, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1325) );
+	pp.send( CMD_ADDEDYOU, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(1325) );
 
 	COUT<<"ADDED client n "<<un->GetSerial()<<" in ZONE "<<clt->game_unit.GetUnit()->activeStarSystem->GetZone()<<" at STARDATE "<<_Universe->current_stardate.GetFullTrekDate()<<endl;
 	//delete cltsbuf;
 	//COUT<<"<<< SENT ADDED YOU -----------------------------------------------------------------------"<<endl;
+}
+
+void	NetServer::serverTimeInitUDP( ClientPtr clt, NetBuffer &netbuf)
+{
+	Packet p2;
+	NetBuffer timeBuf;
+	// If client sent an unsigned short.
+	if (netbuf.getDataLength()>1) {
+		unsigned short clt_port = netbuf.getShort();
+		if (clt_port) {
+			AddressIP adr (clt->cltadr);
+			adr.sin_port = clt_port;
+			clt->setUDP( &udpNetwork, adr );
+		} else {
+			clt->setTCP();
+		}
+	}
+	timeBuf.addDouble(queryTime()); // get most "up-to-date" time.
+	// NETFIXME: is SENDANDFORGET really UDP? No.  Use the client's lossy_socket.
+	p2.send( CMD_SERVERTIME, 0, timeBuf.getData(), timeBuf.getDataLength(), SENDANDFORGET, &clt->cltudpadr, *clt->lossy_socket, __FILE__, PSEUDO__LINE__(691) );
 }
 
 /***************************************************************/
@@ -140,7 +161,7 @@ void	NetServer::removeClient( ClientPtr clt)
 	packet2.bc_create( CMD_EXITCLIENT, un->GetSerial(),
                        NULL, 0, SENDRELIABLE,
                        __FILE__, PSEUDO__LINE__(1311));
-	zonemgr->broadcast( clt, &packet2 );
+	zonemgr->broadcast( clt, &packet2, true );
 }
 
 /***************************************************************/
@@ -240,39 +261,20 @@ void	NetServer::disconnect( ClientPtr clt, const char* debug_from_file, int debu
         }
 	}
 
-    if( clt->isTcp() )
-	{
-		clt->sock.disconnect( __PRETTY_FUNCTION__, false );
-        if( un )
-        {
-	        COUT << "User " << clt->callsign << " with serial "<<un->GetSerial()<<" disconnected" << endl;
-        }
-        else
-        {
-			COUT<<"!!! ERROR : UNIT==NULL !!!"<<endl;
-			// VSExit(1);
-        }
-	    COUT << "There were " << allClients.size() << " clients - ";
-	    allClients.remove( clt );
-	}
-	else
-	{
-        if( un != NULL )
-        {
-		    Packet p1;
-	        p1.send( CMD_DISCONNECT, un->GetSerial(), (char *)NULL, 0,
-		             SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
-                     PSEUDO__LINE__(1432) );
-	        COUT << "Client " << un->GetSerial() << " disconnected" << endl;
-	        COUT << "There were " << allClients.size() << " clients - ";
-	        allClients.remove( clt );
-        }
-        else
-        {
-            COUT << "Could not get Unit for " << clt->callsign << endl;
-			// VSExit(1);
-        }
-	}
+	clt->tcp_sock.disconnect( __PRETTY_FUNCTION__, false );
+	if( un )
+    {
+	    COUT << "User " << clt->callsign << " with serial "<<un->GetSerial()<<" disconnected" << endl;
+    }
+    else
+    {
+		COUT<<"!!! ERROR : UNIT==NULL !!!"<<endl;
+		// Never should cause server to exit because of a client error.
+		// VSExit(1);
+    }
+	COUT << "There were " << allClients.size() << " clients - ";
+	allClients.remove( clt );
+	
 	// Removes the client from its starsystem
 	if( clt->ingame==true )
 		this->removeClient( clt );
@@ -306,19 +308,10 @@ void	NetServer::logout( ClientPtr clt )
 		}
 	}
 
-    if( clt->isTcp() )
-	{
-		clt->sock.disconnect( __PRETTY_FUNCTION__, false );
-	    COUT <<"Client "<<un->GetSerial()<<" disconnected"<<endl;
-	    COUT <<"There was "<< allClients.size() <<" clients - ";
-	    allClients.remove( clt );
-	}
-	else
-	{
-	    COUT <<"Client "<<un->GetSerial()<<" disconnected"<<endl;
-	    COUT <<"There was "<< allClients.size() <<" clients - ";
-	    allClients.remove( clt );
-	}
+	clt->tcp_sock.disconnect( __PRETTY_FUNCTION__, false );
+	COUT <<"Client "<<un->GetSerial()<<" disconnected"<<endl;
+	COUT <<"There was "<< allClients.size() <<" clients - ";
+	allClients.remove( clt );
 	// Removes the client from its starsystem
 	if( clt->ingame==true)
 		this->removeClient( clt );

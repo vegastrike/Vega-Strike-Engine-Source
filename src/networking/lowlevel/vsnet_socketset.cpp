@@ -274,10 +274,8 @@ int SocketSet::private_select( timeval* timeout )
 	        if( fd >= 0 )
 	        {
                 if( FD_ISSET(fd,&read_set_select) ) {
-                    b->lower_selected( );
-					if (!b->isActive()) {
+                    if (!b->lower_selected( ))
 						ret--; // No complete packet received yet.
-					}
 				}
 
                 if( FD_ISSET(b->get_write_fd(),&write_set_select) ) {

@@ -22,7 +22,7 @@ void	NetClient::scanRequest( Unit * target)
 
 	p.send( CMD_TARGET, this->game_unit.GetUnit()->GetSerial(),
             netbuf.getData(), netbuf.getDataLength(),
-            SENDRELIABLE, NULL, this->clt_sock,
+            SENDRELIABLE, NULL, this->clt_tcp_sock,
             __FILE__, PSEUDO__LINE__(1485) );
 }
 
@@ -37,9 +37,10 @@ void	NetClient::fireRequest( ObjSerial serial, int mount_index, char mis)
 	netbuf.addInt32( mount_index);
 	netbuf.addChar( mis);
 
+	//  NETFIXME: Use UDP for fire requests? or only from server->other clients
 	p.send( CMD_FIREREQUEST, this->game_unit.GetUnit()->GetSerial(),
             netbuf.getData(), netbuf.getDataLength(),
-            SENDRELIABLE, NULL, this->clt_sock,
+            SENDRELIABLE, NULL, this->clt_tcp_sock,
             __FILE__, PSEUDO__LINE__(1503) );
 }
 
@@ -53,7 +54,7 @@ void	NetClient::unfireRequest( ObjSerial serial, int mount_index)
 
 	p.send( CMD_UNFIREREQUEST, this->game_unit.GetUnit()->GetSerial(),
             netbuf.getData(), netbuf.getDataLength(),
-            SENDRELIABLE, NULL, this->clt_sock,
+            SENDRELIABLE, NULL, this->clt_tcp_sock,
             __FILE__, PSEUDO__LINE__(1518) );
 }
 
@@ -74,7 +75,7 @@ bool	NetClient::jumpRequest( string newsystem, ObjSerial jumpserial)
 
 	p.send( CMD_JUMP, this->game_unit.GetUnit()->GetSerial(),
             netbuf.getData(), netbuf.getDataLength(),
-            SENDRELIABLE, NULL, this->clt_sock,
+            SENDRELIABLE, NULL, this->clt_tcp_sock,
             __FILE__, PSEUDO__LINE__(1534) );
 	// NO, WE MUST NOT BLOCK THE GAME WHILE WE ARE WAITING FOR SERVER AUTH
 	// Should wait for jump authorization
@@ -112,7 +113,7 @@ void	NetClient::dockRequest( ObjSerial utdw_serial)
 	netbuf.addSerial( utdw_serial);
 	p.send( CMD_DOCK, this->game_unit.GetUnit()->GetSerial(),
             netbuf.getData(), netbuf.getDataLength(),
-            SENDRELIABLE, NULL, this->clt_sock,
+            SENDRELIABLE, NULL, this->clt_tcp_sock,
             __FILE__, PSEUDO__LINE__(97) );
 }
 
@@ -126,7 +127,7 @@ void	NetClient::undockRequest( ObjSerial utdw_serial)
 	netbuf.addSerial( utdw_serial);
 	p.send( CMD_UNDOCK, this->game_unit.GetUnit()->GetSerial(),
             netbuf.getData(), netbuf.getDataLength(),
-            SENDRELIABLE, NULL, this->clt_sock,
+            SENDRELIABLE, NULL, this->clt_tcp_sock,
             __FILE__, PSEUDO__LINE__(110) );
 }
 
@@ -169,7 +170,7 @@ void	NetClient::startCommunication()
 		//cerr<<"Session started."<<endl;
 		//cerr<<"Grabbing an image"<<endl;
 		Packet p;
-		p.send( CMD_STARTNETCOMM, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock,
+		p.send( CMD_STARTNETCOMM, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_tcp_sock,
    	         __FILE__, PSEUDO__LINE__(1565) );
 		cerr<<"Starting communication session\n\n"<<endl;
 		//NetComm->GrabImage();
@@ -183,7 +184,7 @@ void	NetClient::stopCommunication()
 		NetBuffer netbuf;
 		netbuf.addFloat( selected_freq);
 		Packet p;
-		p.send( CMD_STOPNETCOMM, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock,
+		p.send( CMD_STOPNETCOMM, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_tcp_sock,
    	         __FILE__, PSEUDO__LINE__(1578) );
 		NetComm->DestroySession();
 		cerr<<"Stopped communication session"<<endl;
@@ -222,7 +223,7 @@ void	NetClient::sendTextMessage( string message)
 {
 	// Only send if netcomm is active and we are connected on a frequency
 	if( NetComm!=NULL && NetComm->IsActive())
-		NetComm->SendMessage( this->clt_sock, this->serial, message);
+		NetComm->SendMessage( this->clt_tcp_sock, this->serial, message);
 }
 
 /**************************************************************/

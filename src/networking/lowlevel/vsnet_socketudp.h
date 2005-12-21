@@ -28,7 +28,7 @@ public:
     virtual int  sendbuf( Packet* packet, const AddressIP* to, int pcktflags );
     virtual int  recvbuf( Packet* p, AddressIP* ipadr );
 
-    virtual void lower_selected( );
+    virtual bool lower_selected( );
 
     virtual void dump( std::ostream& ostr ) const;
 

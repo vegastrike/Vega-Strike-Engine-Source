@@ -259,6 +259,7 @@ int		NetClient::checkAcctMsg( )
 /**** Launch the client                                   ****/
 /*************************************************************/
 
+/*
 extern bool cleanexit;
 
 void	NetClient::start( char * addr, unsigned short port)
@@ -301,6 +302,7 @@ void	NetClient::start( char * addr, unsigned short port)
 void	NetClient::checkKey()
 {
 }
+*/
 
 /**************************************************************/
 /**** Check if its is time to get network messages         ****/
@@ -343,7 +345,7 @@ int NetClient::checkMsg( Packet* outpacket )
 	tv.tv_sec=0;
 	tv.tv_usec=0;
 
-    if( clt_sock.isActive( ) )
+    if( clt_tcp_sock.isActive( ) || clt_udp_sock.isActive( ) )
     {
         ret = recvMsg( outpacket, &tv );
     }
@@ -351,7 +353,7 @@ int NetClient::checkMsg( Packet* outpacket )
 	if( NetComm!=NULL && NetComm->IsActive())
 	{
 		// Here also send samples
-		NetComm->SendSound( this->clt_sock, this->serial);
+		NetComm->SendSound( this->clt_tcp_sock, this->serial);
 	}
 	
     return ret;
@@ -385,13 +387,15 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 
     Packet    p1;
     AddressIP ipadr;
-	clt_sock.addToSet( _sock_set );
+	static bool udpgetspriority=true;
+	clt_tcp_sock.addToSet( _sock_set );
+	clt_udp_sock.addToSet( _sock_set );
 	int socketstat = _sock_set.wait( timeout );
 	
     if( socketstat < 0)
     {
         perror( "Error select -1 ");
-        clt_sock.disconnect( "socket error", 0 );
+        clt_tcp_sock.disconnect( "socket error", 0 );
         return -1;
     }
 	if ( socketstat == 0 )
@@ -404,12 +408,16 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 //	NETFIXME: check for file descriptors in _sock_set.fd_set...
 
 
-    int recvbytes = clt_sock.recvbuf( &p1, &ipadr );
-
+    int recvbytes = (udpgetspriority?clt_udp_sock:clt_tcp_sock).recvbuf( &p1, &ipadr );
+	
+    if( recvbytes <= 0) {
+		recvbytes = (udpgetspriority==false?clt_udp_sock:clt_tcp_sock).recvbuf( &p1, &ipadr );
+	}
+	udpgetspriority=!udpgetspriority;
     if( recvbytes <= 0)
     {
         perror( "Error recv -1 ");
-        clt_sock.disconnect( "socket error", 0 );
+        clt_tcp_sock.disconnect( "socket error", 0 );
         return -1;
     }
     else
@@ -465,7 +473,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				COUT << endl;
                 if( _downloadManagerClient )
                 {
-                    _downloadManagerClient->processCmdDownload( clt_sock, netbuf );
+                    _downloadManagerClient->processCmdDownload( clt_tcp_sock, netbuf );
                 }
                 break;
             // Login failed
@@ -670,7 +678,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					if( damages & Unit::CARGOFUEL_DAMAGED)
 					{
 						un->SetFuel( netbuf.getFloat());
-						un->SetAfterBurn(netbuf.getShort());
+						un->SetAfterBurn(netbuf.getFloat());
 						un->image->CargoVolume = netbuf.getFloat();
 						un->image->UpgradeVolume = netbuf.getFloat();
 						for( it=0; it<un->image->cargo.size(); it++)
@@ -682,7 +690,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 						un->shield.recharge = netbuf.getFloat();
 						un->SetEnergyRecharge( netbuf.getFloat());
 						un->SetMaxEnergy( netbuf.getFloat());
-						un->jump.energy = netbuf.getShort();
+						un->jump.energy = netbuf.getFloat();
 						un->jump.damage = netbuf.getChar();
 						un->image->repair_droid = netbuf.getChar();
 					}
@@ -807,7 +815,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 						Unit * jumpun = UniverseUtil::GetUnitFromSerial( jumpserial);
 						sts->JumpTo( un, jumpun, newsystem, true);
 						string sysfile( newsystem+".system");
-						VsnetDownload::Client::NoteFile f( this->clt_sock, sysfile, SystemFile);
+						VsnetDownload::Client::NoteFile f( this->clt_tcp_sock, sysfile, SystemFile);
    		             	_downloadManagerClient->addItem( &f);
 						
 						timeval timeout = {10, 0};
@@ -1101,9 +1109,10 @@ void	NetClient::logout()
 	Packet p;
 	p.send( CMD_LOGOUT, this->game_unit.GetUnit()->GetSerial(),
             (char *)NULL, 0,
-            SENDRELIABLE, NULL, this->clt_sock,
+            SENDRELIABLE, NULL, this->clt_tcp_sock,
             __FILE__, PSEUDO__LINE__(1382) );
-	clt_sock.disconnect( "Closing connection to server", false );
+	clt_tcp_sock.disconnect( "Closing connection to server", false );
+	clt_udp_sock.disconnect( "Closing UDP connection to server", false );
 }
 
 
@@ -1146,7 +1155,7 @@ Transformation	NetClient::Interpolate( Unit * un, double addtime)
 	if (clt) {
 		clt->elapsed_since_packet += addtime;
 		trans=clt->prediction->Interpolate( un, clt->elapsed_since_packet);
-		cerr << "  *** INTERPOLATE (" << un->curr_physical_state.position.i << ", " << un->curr_physical_state.position.j << ", " << un->curr_physical_state.position.k << "): next deltatime=" << clt->getNextDeltatime() << ", deltatime=" << clt->getDeltatime() << ", this-deltatime=" << this->deltatime << ", elapsed since packet=" << clt->elapsed_since_packet << "\n        =>        (" << trans.position.i << ", " << trans.position.j << ", " << trans.position.k << ")        Vel =    (" << un->Velocity.i << ", " << un->Velocity.j << ", " << un->Velocity.k << ")" << std::endl;
+//		cerr << "  *** INTERPOLATE (" << un->curr_physical_state.position.i << ", " << un->curr_physical_state.position.j << ", " << un->curr_physical_state.position.k << "): next deltatime=" << clt->getNextDeltatime() << ", deltatime=" << clt->getDeltatime() << ", this-deltatime=" << this->deltatime << ", elapsed since packet=" << clt->elapsed_since_packet << "\n        =>        (" << trans.position.i << ", " << trans.position.j << ", " << trans.position.k << ")        Vel =    (" << un->Velocity.i << ", " << un->Velocity.j << ", " << un->Velocity.k << ")" << std::endl;
 	} else {
 		trans=un->curr_physical_state;
 		cerr << "  *** INTERPOLATE (CLIENT==NULL).  Unit fullname=" << un->getFullname() << ";  name=" << un->name;

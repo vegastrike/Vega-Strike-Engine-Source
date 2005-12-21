@@ -73,7 +73,9 @@ class	NetClient
 
         string              _serverip;      // used during login
         string              _serverport;    // used during login
-        SOCKETALT			clt_sock;		// Comm. socket
+        SOCKETALT			clt_tcp_sock;	// Comm. socket
+        SOCKETALT			clt_udp_sock;	// Comm. socket
+		SOCKETALT *			lossy_socket;	// Usually points to the UDP socket, unless behind firewall.
         SOCKETALT			acct_sock;		// Connection socket for account server
         SocketSet           _sock_set;      // Encapsulates select()
         SaveGame			save;
@@ -125,17 +127,21 @@ class	NetClient
 		~NetClient();
 
 		/**** netclient_login.cpp stuff ****/
+		static void getConfigServerAddress( string & host, unsigned short &port );
+	
 		int				authenticate();
 		vector<string>	loginLoop( string str_callsign, string str_passwd); // Loops until receiving login response
 		vector<string>	loginAcctLoop( string str_callsign, string str_passwd);
 		void			loginAccept( Packet & p1);
 		SOCKETALT		init( const char* addr, unsigned short port);
-		SOCKETALT		init_acct( char * addr, unsigned short port);
+		SOCKETALT		init_acct( const char * addr, unsigned short port);
 		void	synchronizeTime(); // Sends time packets back and forth to find the actual double time on the server.
 
-		void	start( char * addr, unsigned short port);
+// start() should not used...  Use init() instead.
+//		void	start( char * addr, unsigned short port);
+//		void	checkKey();
+	
 		bool	PacketLoop( Cmd command );
-		void	checkKey();
 
 		void	setCallsign( char * calls) { this->callsign = string( calls);}
 		void	setCallsign( string calls) { this->callsign = calls;}

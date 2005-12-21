@@ -62,7 +62,7 @@ class NetServer
         SocketSet       _sock_set;              // Capsule for select()
 
         ServerSocket*   tcpNetwork;
-        ServerSocket*   udpNetwork;
+        SOCKETALT       udpNetwork;
 		Packet			packet;					// Network data packet
 		Packet			packeta;				// Network data packet for account server
 
@@ -100,6 +100,7 @@ class NetServer
 		void			authenticate( ClientPtr clt, AddressIP sernum, Packet& packet );	// Authenticate a connected client
 		void			posUpdate( ClientPtr clt);		// Update a client position
 		void			addClient( ClientPtr clt);		// Add the client in the game
+		void			serverTimeInitUDP( ClientPtr clt, NetBuffer &netbuf);
 		void			removeClient( ClientPtr clt);		// Remove the client from the game
 		void			checkSystem( ClientPtr clt);		// Check if the client has the good system file
 		ClientPtr       newConnection_udp( const AddressIP& ipadr);
@@ -115,7 +116,7 @@ class NetServer
 		void			logout( ClientPtr clt);			// Clean disconnect a client
         void            checkTimedoutClients_udp();     // Check for timed out clients  
 
-        ClientPtr       addNewClient( SOCKETALT sock, bool is_tcp );  // Adds a new client to listen for
+        ClientPtr       addNewClient( SOCKETALT &sock );  // Adds a new client to listen for.
 		void			sendLoginError( ClientPtr clt, AddressIP ipadr);
 		void			sendLoginAlready( ClientPtr clt, AddressIP ipadr);
 		void			sendLoginAccept( ClientPtr clt, AddressIP ipadr, int acctnew, char flags);
@@ -129,7 +130,7 @@ class NetServer
 		void	start( int argc, char ** argv);
 		void	save();
 
-		void	broadcast( NetBuffer & netbuf, unsigned short zone, Cmd command);
+		void	broadcast( NetBuffer & netbuf, unsigned short zone, Cmd command, bool isTcp );
 
 		// WEAPON STUFF
 		void	BroadcastUnfire( ObjSerial serial, int weapon_index, unsigned short zone);

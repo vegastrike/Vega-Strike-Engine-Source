@@ -184,7 +184,7 @@ void	NetServer::start(int argc, char **argv)
 
 	// Create and bind sockets
 	COUT << "Initializing TCP server ..." << endl;
-	tcpNetwork = NetUITCP::createServerSocket( atoi((vs_config->getVariable( "network", "serverport", "")).c_str()), _sock_set );
+	tcpNetwork = NetUITCP::createServerSocket( atoi((vs_config->getVariable( "network", "serverport", "6777")).c_str()), _sock_set );
     if( tcpNetwork == NULL )
     {
         COUT << "Couldn't create TCP server - quitting" << endl;
@@ -192,7 +192,7 @@ void	NetServer::start(int argc, char **argv)
     }
 
 	COUT << "Initializing UDP server ..." << endl;
-	udpNetwork = NetUIUDP::createServerSocket( atoi((vs_config->getVariable( "network", "serverport", "")).c_str()), _sock_set );
+	udpNetwork = NetUIUDP::createServerSocket( atoi((vs_config->getVariable( "network", "serverport", "6777")).c_str()), _sock_set );
     if( udpNetwork == NULL )
     {
         COUT << "Couldn't create UDP server - quitting" << endl;
@@ -491,15 +491,12 @@ void	NetServer::checkMsg( SocketSet& sets )
 	for( LI i=allClients.begin(); i!=allClients.end(); i++)
 	{
         ClientPtr cl = *i;
-        if( cl->isTcp() )
-        {
-		    if( cl->sock.isActive( ) )
-		    {
-                ostr << cl->sock.get_fd() << "+ ";
-                printit = true;
-			    this->recvMsg_tcp( cl );
-		    }
-        }
+	    if( cl->sock.isActive( ) )
+	    {
+            ostr << cl->sock.get_fd() << "+ ";
+            printit = true;
+			this->recvMsg_tcp( cl );
+		}
 	}
     ostr << " ";
 	if( udpNetwork->isActive( ) )
@@ -520,15 +517,12 @@ void	NetServer::checkMsg( SocketSet& sets )
 	for( LI i=allClients.begin(); i!=allClients.end(); i++)
 	{
         ClientPtr cl = *i;
-        if( cl->isTcp() )
-        {
-		    if( cl->sock.isActive( ) )
-		    {
-			    this->recvMsg_tcp( cl );
-		    }
-        }
+		if( cl->tcp_sock.isActive( ) )
+		{
+		    this->recvMsg_tcp( cl );
+		}
 	}
-	if( udpNetwork->isActive( ) )
+	if( udpNetwork.isActive( ) )
 	{
 	    recvMsg_udp( );
 	}
@@ -553,22 +547,24 @@ bool	NetServer::updateTimestamps( ClientPtr cltp, Packet & p )
 		double curtime = getNewTime();
 		// Check for late packet : compare received timestamp to the latest we have
 		assert( int_ts >= clt->getLatestTimestamp());
-		if( int_ts < clt->getLatestTimestamp())
+		if( int_ts < clt->getLatestTimestamp() )
 		{
 			// If ts > 0xFFFFFFF0 (15 seconds before the maxin an u_int) 
 			// This is not really a reliable test -> we may still have late packet in that range of timestamps
 			// Only check for late packets when sent non reliable because we need others
-			if( clt->isUdp() && (p.getFlags() & SENDANDFORGET))
-			{
-				ret = false;
-			}
+//			if(p.getFlags() & SENDANDFORGET)
+//			{
+			ret = !( p.getCommand()==CMD_SNAPSHOT || p.getCommand()==CMD_POSUPDATE || p.getCommand()==CMD_PING); //only invalidates updates if its a snapshot or posupdate--same reason it updates the timestamps to begin with
+//			}
+				/*
 			else if( clt->isTcp())
 			{
 				COUT << "!!!ERROR : Late packet in TCP mode : this should not happen !!!" << endl
                      << "   Previous client timestamp: " << clt->getLatestTimestamp() << "ms" << endl
                      << "   Current  client timtstamp: " << int_ts << "ms" << endl;
-				VSExit(1);
+//				VSExit(1);
 			}
+				*/
 		}
 		// If packet is late we don't update time vars but we process it if we have to
 		else
@@ -638,7 +634,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 					entry.t   = clt;
 					this->waitList.push( entry );
 					iptmp = &clt->cltadr;
-					tmpsock = clt->sock;
+					tmpsock = clt->tcp_sock;
 				}
 				else
 				{
@@ -684,11 +680,9 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			//COUT<<"Got PING from serial "<<packet.getSerial()<<endl;
 			break;
 		case CMD_SERVERTIME:
+			
+			serverTimeInitUDP( clt, netbuf );
 		{
-			NetBuffer timeBuf;
-			timeBuf.addDouble(queryTime()); // get most "up-to-date" time.
-			// NETFIXME: is SENDANDFORGET really UDP?
-			p2.send( CMD_SERVERTIME, 0, timeBuf.getData(), timeBuf.getDataLength(), SENDANDFORGET, &ipadr, clt->sock, __FILE__, PSEUDO__LINE__(691) );
 		}
 			break;
 		case CMD_LOGOUT:
@@ -724,7 +718,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			COUT<<">>> CMD DOWNLOAD =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
             if( _downloadManagerServer )
             {
-                _downloadManagerServer->addCmdDownload( clt->sock, netbuf );
+                _downloadManagerServer->addCmdDownload( clt->tcp_sock, netbuf );
             }
 			COUT<<"<<< CMD DOWNLOAD --------------------------------------------------------------"<<endl;
             break;
@@ -890,7 +884,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                           packet.getData(), packet.getDataLength(), SENDRELIABLE,
                           __FILE__, PSEUDO__LINE__(1293));
 			// Send to concerned clients
-			zonemgr->broadcast( clt->game_unit.GetUnit()->activeStarSystem->GetZone(), packet_serial, &p2);
+			zonemgr->broadcast( clt->game_unit.GetUnit()->activeStarSystem->GetZone(), packet_serial, &p2, true);
 		}
 		break;
 		case CMD_STOPNETCOMM :
@@ -902,7 +896,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                           packet.getData(), packet.getDataLength(), SENDRELIABLE,
                           __FILE__, PSEUDO__LINE__(1302));
 			// Send to concerned clients
-			zonemgr->broadcast( clt->game_unit.GetUnit()->activeStarSystem->GetZone(), packet_serial, &p2);
+			zonemgr->broadcast( clt->game_unit.GetUnit()->activeStarSystem->GetZone(), packet_serial, &p2, true);
 		}
 		break;
 		case CMD_SOUNDSAMPLE :
@@ -970,13 +964,13 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 /**** Broadcast a netbuffer to a given zone                ****/
 /**************************************************************/
 
-void	NetServer::broadcast( NetBuffer & netbuf, unsigned short zone, Cmd command)
+void	NetServer::broadcast( NetBuffer & netbuf, unsigned short zone, Cmd command, bool isTcp )
 {
 	Packet p;
 	p.bc_create( command, 0,
                  netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
                  __FILE__, PSEUDO__LINE__(902));
-	zonemgr->broadcast( zone, 0, &p);
+	zonemgr->broadcast( zone, 0, &p, isTcp );
 }
 
 /**************************************************************/
@@ -986,12 +980,11 @@ void	NetServer::broadcast( NetBuffer & netbuf, unsigned short zone, Cmd command)
 void	NetServer::closeAllSockets()
 {
 	tcpNetwork->disconnect( "Closing sockets", false );
-	udpNetwork->disconnect( "Closing sockets", false );
+	udpNetwork.disconnect( "Closing sockets", false );
 	for( LI i=allClients.begin(); i!=allClients.end(); i++)
 	{
         ClientPtr cl = *i;
-        if( cl->isTcp() )
-		    cl->sock.disconnect( __PRETTY_FUNCTION__, false );
+		cl->tcp_sock.disconnect( __PRETTY_FUNCTION__, false );
 	}
 }
 

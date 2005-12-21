@@ -47,21 +47,21 @@ class	Client
 public:
 	/* Network and identification properties */
 	UnitContainer	game_unit;
+
+	// NETFIXME: Move to server subclass.
 	AddressIP		cltadr;
-	//Prediction *	prediction;
-	bool			is_tcp;
-	SOCKETALT		sock;
-	//ObjSerial		serial;
+	AddressIP		cltudpadr;
+	SOCKETALT *		lossy_socket;
+	SOCKETALT		tcp_sock;
+
 	// 2 timeout vals to check a timeout for client connections
 	// those vals are server times
 	double			old_timeout;
 	double			latest_timeout;
 	double			elapsed_since_packet;
-	//unsigned int	deltatime;
 	string			callsign;
 	string			name;
 	string			passwd;
-	//ClientState		old_state;
 	/* In-game parameters */
 	bool			ingame;
 	char			webcam;
@@ -77,17 +77,17 @@ public:
 	Prediction*		prediction;
 	
 	Client();
-	Client( SOCKETALT& s, bool tcp );
+	Client( SOCKETALT& s );
 	~Client();
 
     void         setLatestTimestamp( unsigned int ts );
+	void         setUDP(SOCKETALT *udpSock, AddressIP &cltudpadr);
+	void         setTCP();
     void         clearLatestTimestamp( );
     unsigned int getLatestTimestamp( ) const;
     double       getDeltatime( ) const;
 	double       getNextDeltatime( ) const;
 
-	inline bool isTcp( ) const { return is_tcp; }
-	inline bool isUdp( ) const { return !is_tcp; }
 	friend std::ostream& operator<<( std::ostream& ostr, const Client& c );
 
 private:

@@ -290,7 +290,7 @@ int VsnetTCPSocket::recvbuf( Packet* p, AddressIP* ipadr )
         _cpq_mx.unlock( );
 
         AddressIP dummy;
-        if(ipadr) *ipadr = dummy;
+        if(ipadr) *ipadr = _remote_ip;
         p->copyfrom( *ptr.get() );
         return ( ptr->getDataLength() + ptr->getHeaderLength() );
     }
@@ -372,15 +372,16 @@ bool VsnetTCPSocket::isActive( )
     return retval;
 }
 
-void VsnetTCPSocket::lower_selected( )
+bool VsnetTCPSocket::lower_selected( )
 {
     if( _connection_closed )
     {
 		COUT << "Connection already closed" << endl;
-        return; /* Pretty sure that recv will return 0.  */
+        return false; /* Pretty sure that recv will return 0.  */
     }
 
     bool endless   = true;
+	bool successful = false;
 
     if( get_nonblock() == false ) endless = false;
 
@@ -414,7 +415,7 @@ void VsnetTCPSocket::lower_selected( )
                 } else {
 					COUT << "Received EWOULDBLOCK." << (get_nonblock()?"true":"false") << endl;
 				}
-                return;
+                return successful;
 	        }
 	        if( ret > 0 ) _incomplete_header += ret;
 	        if( _incomplete_header == sizeof(Header) )
@@ -444,7 +445,7 @@ void VsnetTCPSocket::lower_selected( )
 		        } else {
 					COUT << "Received EWOULDBLOCK in data." << (get_nonblock()?"true":"false") << endl;
 				}
-                return;
+                return successful;
 	        }
             else
             {
@@ -469,12 +470,14 @@ void VsnetTCPSocket::lower_selected( )
 
                     inner_complete_a_packet( _incomplete_packet );
 		            _incomplete_packet = 0;
+					successful=true;
                     // either endless is false, or we exit with EWOULDBLOCK
 	            }
             }
         }
     }
     while( endless );  // exit only for EWOULDBLOCK or closed socket
+	return successful;
 }
 
 void VsnetTCPSocket::inner_complete_a_packet( Blob* b )

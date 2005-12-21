@@ -100,7 +100,12 @@ void	ClientState::netswap()
 std::ostream& operator<<( std::ostream& ostr, const Client& c )
 {
     ostr << "(clnt addr " << c.cltadr
-         << " sock=" << c.sock;
+         << " tcpsock=" << c.tcp_sock << ", lossysock=";
+	if (c.lossy_socket) {
+		ostr << *c.lossy_socket;
+	} else {
+		ostr << "NULL";
+	}
     return ostr;
 }
 

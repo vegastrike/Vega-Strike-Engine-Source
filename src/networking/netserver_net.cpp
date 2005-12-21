@@ -9,13 +9,16 @@ extern double clienttimeout;
 /**** Handles new connections                              ****/
 /**************************************************************/
 
+// Why use this? Most clients use TCP except for position updates, in which case they notify the server through synchronizing time.
 ClientPtr NetServer::newConnection_udp( const AddressIP& ipadr )
 {
+	int clients_should_not_connect_with_udp=1;
+	assert(clients_should_not_connect_with_udp==1);
     COUT << " enter " << "NetServer::newConnection_udp" << endl;
 
-    SOCKETALT sock( udpNetwork->get_fd(), SOCKETALT::UDP, ipadr, _sock_set );
+    SOCKETALT sock( udpNetwork.get_fd(), SOCKETALT::UDP, ipadr, _sock_set );
 
-    ClientPtr ret = addNewClient( sock, false );
+    ClientPtr ret = addNewClient( sock ); // no second argument because we don't currently allow connections of *only* UDP with no TCP for some things that can't get lost.
     nbclients++;
 
     return ret;
@@ -33,7 +36,7 @@ ClientPtr NetServer::newConnection_tcp( )
         valid = sock.valid();
         if( valid )
         {
-            ret = addNewClient( sock, true );
+            ret = addNewClient( sock );
             nbclients++;
         }
     }
@@ -53,8 +56,9 @@ void	NetServer::checkTimedoutClients_udp()
 	for (LI i=allClients.begin(); i!=allClients.end(); i++)
 	{
         ClientPtr cl = *i;
-        if( cl->isUdp() )
+        if( !cl->lossy_socket->isTcp() )
         {
+			// NETFIXME: Does this delta and latest_timeout actually only check UDP or does this include TCP?
 			// Time elapsed since latest packet in seconds
 		    deltatmp = (fabs(curtime - cl->latest_timeout));
 		    if( cl->latest_timeout!=0)
@@ -75,6 +79,7 @@ void	NetServer::checkTimedoutClients_udp()
 				    COUT<<"t\tDifference : "<<deltatmp<<endl;
                     cl->_disconnectReason = "UDP timeout";
 				    discList.push_back( cl );
+					// NETFIXME: Should we actually disconnect them in a UDP timeout or should we just fallback to TCP?
 			    }
 		    }
         }
@@ -91,7 +96,7 @@ void	NetServer::recvMsg_tcp( ClientPtr clt )
 
     assert( clt );
 
-    SOCKETALT sockclt( clt->sock );
+    SOCKETALT sockclt( clt->tcp_sock );
 
     Packet    packet;
     AddressIP ipadr;
@@ -111,6 +116,7 @@ void	NetServer::recvMsg_tcp( ClientPtr clt )
     }
     else
     {
+		// NETFIXME: Cheat: We may want to check the serial of this packet and make sure it is what we expect.
 		command = packet.getCommand( );
         if( clt )
         {
@@ -123,13 +129,14 @@ void	NetServer::recvMsg_tcp( ClientPtr clt )
 
 void NetServer::recvMsg_udp( )
 {
-    SOCKETALT sockclt( udpNetwork->get_fd(), SOCKETALT::UDP, udpNetwork->get_adr(), _sock_set );
+//    SOCKETALT sockclt( udpNetwork->get_fd(), SOCKETALT::UDP, udpNetwork->get_adr(), _sock_set );
     ClientPtr clt;
 	bool process = true;
 
     Packet    packet;
     AddressIP ipadr;
-    int ret = sockclt.recvbuf( &packet, &ipadr );
+//    int ret = sockclt.recvbuf( &packet, &ipadr );
+    int ret = udpNetwork.recvbuf( &packet, &ipadr );
     if( ret > 0 )
     {
         ObjSerial nserial = packet.getSerial(); // Extract the serial from buffer received so we know who it is
@@ -143,7 +150,8 @@ void NetServer::recvMsg_udp( )
         for( LI i=allClients.begin(); i!=allClients.end(); i++)
         {
             tmp = (*i);
-            if( tmp->isUdp() && tmp->game_unit.GetUnit()->GetSerial() == nserial)
+			// NETFIXME: Cheat: We have to check the address and port of the sender to make sure it matches that of our client socket.
+            if( tmp->game_unit.GetUnit()->GetSerial() == nserial)
             {
                 clt = tmp;
                 found = 1;

@@ -158,7 +158,7 @@ ServerSocket* NetUITCP::createServerSocket( unsigned short port, SocketSet& set 
 // Creates and bind the socket designed to receive coms
 // host == NULL -> localhost
 
-SOCKETALT NetUIUDP::createSocket( const char * host, unsigned short srv_port, SocketSet& set )
+SOCKETALT NetUIUDP::createSocket( const char * host, unsigned short srv_port, unsigned short clt_port, SocketSet& set )
 {
     COUT << " enter " << __PRETTY_FUNCTION__ << std::endl;
     static_initNetwork( );
@@ -232,7 +232,7 @@ SOCKETALT NetUIUDP::createSocket( const char * host, unsigned short srv_port, So
     return ret;
 }
 
-ServerSocket* NetUIUDP::createServerSocket( unsigned short port, SocketSet& set )
+SOCKETALT NetUIUDP::createServerSocket( unsigned short port, SocketSet& set )
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << std::endl;
     static_initNetwork( );
@@ -261,16 +261,15 @@ ServerSocket* NetUIUDP::createServerSocket( unsigned short port, SocketSet& set 
         return NULL;
     }
 
-    ServerSocket* ret = new ServerSocketUDP( local_fd, local_ip, set );
+	SOCKETALT ret( local_fd, SOCKETALT::UDP, local_ip, set );
 
-    if( ret->set_nonblock() == false )
+    if( ret.set_nonblock() == false )
     {
-        ret->disconnect( "Setting server socket mode to nonblocking failed", true );
-        delete ret;
+        ret.disconnect( "Setting server socket mode to nonblocking failed", true );
         return NULL;
     }
 
-    COUT << "Bind on localhost, " << *ret << std::endl;
+    COUT << "Bind on localhost, " << ret << std::endl;
     return ret;
 }
 

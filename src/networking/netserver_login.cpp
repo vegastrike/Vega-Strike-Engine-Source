@@ -220,7 +220,7 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct, ch
 		cerr<<netbuf.getData()<<endl;
 		cerr<<endl<<"END FULL BUFFER ---------------------------------------------"<<endl<<endl;
 		*/
-		packet2.send( LOGIN_ACCEPT, cltserial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(241) );
+		packet2.send( LOGIN_ACCEPT, cltserial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(241) );
 		COUT<<"SHIP -- "<<savedships[0]<<" -- LOCATION: x="<<tmpvec.i<<",y="<<tmpvec.j<<",z="<<tmpvec.k<<endl;
 		COUT<<"<<< SENT LOGIN ACCEPT -----------------------------------------------------------------------"<<endl;
 	}
@@ -230,12 +230,9 @@ void	NetServer::sendLoginError( ClientPtr clt, AddressIP ipadr )
 {
 	Packet	packet2;
 	// Send a login error
-	SOCKETALT	sockclt;
-	if( clt )
-		sockclt = clt->sock;
 	//COUT<<"Creating packet... ";
 	COUT<<">>> SEND LOGIN ERROR -----------------------------------------------------------------"<<endl;
-	packet2.send( LOGIN_ERROR, 0, (char *)NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__, PSEUDO__LINE__(255) );
+	packet2.send( LOGIN_ERROR, 0, (char *)NULL, 0, SENDRELIABLE, &ipadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(255) );
 	COUT<<"<<< SENT LOGIN ERROR -----------------------------------------------------------------------"<<endl;
 }
 
@@ -243,12 +240,9 @@ void	NetServer::sendLoginUnavailable( ClientPtr clt, AddressIP ipadr )
 {
 	Packet	packet2;
 	// Send an unavailable login service
-	SOCKETALT	sockclt;
-	if( clt )
-		sockclt = clt->sock;
 	//COUT<<"Creating packet... ";
 	COUT<<">>> SEND LOGIN UNAVAILABLE -----------------------------------------------------------------"<<endl;
-	packet2.send( LOGIN_UNAVAIL, 0, (char *)NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__, PSEUDO__LINE__(268) );
+	packet2.send( LOGIN_UNAVAIL, 0, (char *)NULL, 0, SENDRELIABLE, &ipadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(268) );
 	COUT<<"<<< SENT LOGIN UNAVAILABLE -----------------------------------------------------------------------"<<endl;
 
 	discList.push_back( clt);
@@ -260,12 +254,9 @@ void	NetServer::sendLoginAlready( ClientPtr clt, AddressIP ipadr)
 	Packet	packet2;
 	// Send a login error
 	// int		retsend;
-	SOCKETALT	sockclt;
-	if( clt )
-		sockclt = clt->sock;
 	//COUT<<"Creating packet... ";
 	COUT<<">>> SEND LOGIN ALREADY =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
-	packet2.send( LOGIN_ALREADY, 0, (char *)NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__, PSEUDO__LINE__(283) );
+	packet2.send( LOGIN_ALREADY, 0, (char *)NULL, 0, SENDRELIABLE, &ipadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(283) );
 	COUT<<"<<< SENT LOGIN ALREADY -----------------------------------------------------------------------"<<endl;
 	discList.push_back( clt);
 }

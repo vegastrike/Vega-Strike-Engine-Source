@@ -31,7 +31,7 @@ void ServerSocket::child_disconnect( const char *s )
     COUT << s << " :\tWarning: disconnected" << strerror(errno) << endl;
 }
 
-void ServerSocketTCP::lower_selected( )
+bool ServerSocketTCP::lower_selected( )
 {
     COUT << endl
          << endl
@@ -57,11 +57,13 @@ void ServerSocketTCP::lower_selected( )
 	    _accepted_connections.push( newsock );
         _ac_mx.unlock( );
         _set.add_pending( get_fd() );
+		return true;
     }
     else
     {
         COUT << "accept failed" << endl;
         COUT << "Error accepting new conn: " << vsnetLastError() << endl;
+		return false;
     }
 }
 

@@ -58,7 +58,7 @@ public:
 
     void disconnect( const char *s, bool fexit );
     
-    virtual void lower_selected( ) = 0;
+    virtual bool lower_selected( ) = 0;
 
     virtual bool need_test_writable( ) { return false; }
     virtual int  get_write_fd( ) const { return _fd; }
@@ -121,7 +121,9 @@ public:
     friend std::ostream& operator<<( std::ostream& ostr, const VsnetSocket& s );
 
     virtual void dump( std::ostream& ostr ) const = 0;
-
+	
+	const AddressIP &getRemoteAddress() const { return _remote_ip; }
+	
     // virtual void ack( ) = 0;
 
 protected:

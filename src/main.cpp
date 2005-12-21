@@ -479,14 +479,12 @@ void bootstrap_main_loop () {
     mission->GetOrigin(pos,planetname);
     bool setplayerloc=false;
     string mysystem = mission->getVariable("system","sol.system");
-	string srvip = vs_config->getVariable("network","server_ip","");
-    if( ignore_network ) srvip = "";
 
 	int numplayers;
 	/*
 	string nbplayers = vs_config->getVariable("network","nbplayers","1");
 	// Test if nb players if present in network section
-	if( srvip != "" && nbplayers != "")
+	if( !ignore_network && nbplayers != "")
 	{
 		numplayers = atoi( nbplayers.c_str());
 		cout<<numplayers<<" Players in Networking Mode"<<endl;
@@ -502,7 +500,7 @@ void bootstrap_main_loop () {
     for (int p=0;p<numplayers;p++) {
 	  pname = vs_config->getVariable("player"+((p>0)?tostring(p+1):string("")),"callsign","");
 	  ppasswd = vs_config->getVariable("player"+((p>0)?tostring(p+1):string("")),"password","");
-	  if ( srvip != "")
+	  if ( !ignore_network )
 	  {
 		  // In network mode, test if all player sections are present
 		  if( pname=="")
@@ -527,25 +525,16 @@ void bootstrap_main_loop () {
 
 	/************************* NETWORK INIT ***************************/
 	  vector<vector<std::string> > savefiles;
-	char * srvipadr;
-	int port;
-	if ( srvip != "")
+	if ( !ignore_network )
 	{
 		cout<<"Number of local players = "<<numplayers<<endl;
 		// Initiate the network if in networking play mode for each local player
-		if( srvip != "")
+		if( !ignore_network )
 		{
             setNewTime(0.);
-			string srvport = vs_config->getVariable("network","server_port", "6777");
 			// Get the number of local players
 			Network = new NetClient[numplayers];
 
-			cout<<endl<<"Server IP : "<<srvip<<" - port : "<<srvport<<endl<<endl;
-			srvipadr = new char[srvip.length()+1];
-			memcpy( srvipadr, srvip.c_str(), srvip.length());
-			srvipadr[srvip.length()] = '\0';
-			port = atoi( srvport.c_str());
-			cout<<"Port : "<<port<<endl;
 		// Here we say we want to only handle activity in 1 starsystem not more
 			run_only_player_starsystem=true;
 		}
@@ -582,14 +571,17 @@ void bootstrap_main_loop () {
 		/************* NETWORK PART ***************/
 	  if( Network!=NULL)
 	  {
+        string srvipadr;
+        unsigned short port;
+        NetClient::getConfigServerAddress(srvipadr, port);
 		bool ret = false;
 		// Are we using the directly account server to identify us ?
 		string use_acctserver = vs_config->getVariable("network","use_account_server", "false");
 		if( use_acctserver=="true")
-			ret = Network[k].init_acct( srvipadr, (unsigned short) port).valid();
+			ret = Network[k].init_acct( srvipadr.c_str(), port).valid();
 		else
 		// Or are we going through a game server to do so ?
-			ret = Network[k].init( srvipadr, (unsigned short) port).valid();
+			ret = Network[k].init( srvipadr.c_str(), port).valid();
 		if( ret==false)
 		{
 			// If network initialization fails, exit

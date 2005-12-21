@@ -26,15 +26,18 @@ void Client::Init()
 	last_packet=ClientState();
 }
 
+// NetClient initialization
 Client::Client()
 {
+	lossy_socket=NULL;
 	this->Init();
 }
 
-Client::Client( SOCKETALT& s, bool tcp )
-	    : is_tcp(tcp)
-	    , sock(s)
+// NetServer initialization
+Client::Client( SOCKETALT& s )
+	    : tcp_sock(s)
 {
+	lossy_socket=&tcp_sock;
 	this->Init();
 }
 
@@ -47,9 +50,19 @@ Client::~Client()
     }
 }
 
+void Client::setUDP(SOCKETALT *udpSock, AddressIP &udpadr) {
+	this->lossy_socket=udpSock;
+	this->cltudpadr=udpadr;
+}
+
+void Client::setTCP() {
+	this->lossy_socket=&this->tcp_sock;
+	this->cltudpadr=this->cltadr;
+}
+
 void Client::setLatestTimestamp( unsigned int ts )
 {
-    COUT << "set latest client timestamp " << ts << " (old=" << _old_timestamp << ")" << endl;
+//    COUT << "set latest client timestamp " << ts << " (old=" << _old_timestamp << ")" << endl;
     _old_timestamp    = _latest_timestamp;
     _latest_timestamp = ts;
 
@@ -57,8 +70,8 @@ void Client::setLatestTimestamp( unsigned int ts )
     // in ms and the old_timestamp in ms
     _deltatime = ((double)(ts - _old_timestamp))/1000;
 	_next_deltatime = .33*_deltatime+.67*_next_deltatime;
-    cerr<<"DELTATIME = "<<(_deltatime*1000)<<" ms --------------------"<<endl;
-    cerr<<"NEXTDELTATIME = "<<(_deltatime*1000)<<" ms --------------------"<<endl;
+//    cerr<<"DELTATIME = "<<(_deltatime*1000)<<" ms --------------------"<<endl;
+//    cerr<<"NEXTDELTATIME = "<<(_deltatime*1000)<<" ms --------------------"<<endl;
 }
 
 void Client::clearLatestTimestamp( )

@@ -340,13 +340,13 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, ObjSerial serial,
 			if( this->secured && use_secured)
 			{
 				encrypted = this->EncryptBuffer( message.c_str(), message.length());
-				p.send( CMD_TXTMESSAGE, serial, encrypted.c_str(), message.length(), SENDRELIABLE, NULL, (*it)->sock,
+				p.send( CMD_TXTMESSAGE, serial, encrypted.c_str(), message.length(), SENDRELIABLE, NULL, (*it)->tcp_sock,
 						__FILE__, PSEUDO__LINE__(244) );
 			}
 			else
 #endif
 			{
-				p.send( CMD_SECMESSAGE, serial, message.c_str(), message.length(), SENDRELIABLE, NULL, (*it)->sock,
+				p.send( CMD_SECMESSAGE, serial, message.c_str(), message.length(), SENDRELIABLE, NULL, (*it)->tcp_sock,
 						__FILE__, PSEUDO__LINE__(244) );
 			}
 		}

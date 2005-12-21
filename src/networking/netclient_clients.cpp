@@ -130,7 +130,7 @@ void	NetClient::downloadZoneInfo()
 	char tbuf[1024];
 	sprintf( tbuf, "%d", this->zone);
     COUT << __PRETTY_FUNCTION__ << " zone: " << tbuf << endl;
-	VsnetDownload::Client::Buffer buf( this->clt_sock, tbuf, VSFileSystem::ZoneBuffer);
+	VsnetDownload::Client::Buffer buf( this->clt_tcp_sock, tbuf, VSFileSystem::ZoneBuffer);
 	_downloadManagerClient->addItem( &buf);
 	timeval timeout={10,0};
 	while( !buf.done())
@@ -217,7 +217,7 @@ void	NetClient::sendPosition( const ClientState* cs )
 	netbuf.addClientState( (*cs));
 	pckt.send( CMD_POSUPDATE, this->game_unit.GetUnit()->GetSerial(),
                netbuf.getData(), netbuf.getDataLength(),
-               SENDANDFORGET, NULL, this->clt_sock,
+               SENDANDFORGET, NULL, *this->lossy_socket,
                __FILE__, PSEUDO__LINE__(218) );
 }
 
@@ -391,7 +391,7 @@ void	NetClient::inGame()
 	//netbuf.addClientState( cs);
 	packet2.send( CMD_ADDCLIENT, this->serial,
                   netbuf.getData(), netbuf.getDataLength(),
-                  SENDRELIABLE, NULL, this->clt_sock,
+                  SENDRELIABLE, NULL, this->clt_tcp_sock,
                   __FILE__, PSEUDO__LINE__(392) );
 	this->game_unit.GetUnit()->SetSerial( this->serial);
 	COUT << "Sending ingame with serial n°" << this->serial << endl;
@@ -413,7 +413,7 @@ void NetClient::sendAlive()
         Packet	p;
         p.send( CMD_PING, this->game_unit.GetUnit()->GetSerial(),
                 (char *)NULL, 0,
-                SENDANDFORGET, NULL, this->clt_sock,
+                SENDANDFORGET, NULL, *this->lossy_socket,
                 __FILE__, PSEUDO__LINE__(414) );
     //}
 }

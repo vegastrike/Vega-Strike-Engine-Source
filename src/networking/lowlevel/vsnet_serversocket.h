@@ -65,7 +65,7 @@ public:
 	// Accept a new connection
 	virtual SOCKETALT acceptNewConn( );
 
-    virtual void lower_selected( );
+    virtual bool lower_selected( );
 
 private:
     std::queue<SOCKETALT> _accepted_connections;
@@ -88,7 +88,7 @@ public:
 	virtual SOCKETALT acceptNewConn( );
 
     // Can't happen
-    virtual void lower_selected( ) { }
+    virtual bool lower_selected( ) { return false; }
 
 private:
 	ServerSocketUDP( );

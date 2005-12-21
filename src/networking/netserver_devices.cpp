@@ -21,7 +21,7 @@ void	NetServer::BroadcastUnfire( ObjSerial serial, int weapon_index, unsigned sh
                  netbuf.getData(), netbuf.getDataLength(),
                  SENDRELIABLE,
                  __FILE__, PSEUDO__LINE__(1695) );
-	zonemgr->broadcast( zone, serial, &p );
+	zonemgr->broadcast( zone, serial, &p, true ); // NETFIXME: Should unfire be TCP?
 }
 
 // In BroadcastFire we must use the provided serial because it may not be the client's serial
@@ -40,7 +40,7 @@ void	NetServer::BroadcastFire( ObjSerial serial, int weapon_index, ObjSerial mis
                  SENDRELIABLE,
                  __FILE__, PSEUDO__LINE__(1710) );
 	// WARNING : WE WILL SEND THE INFO BACK TO THE CLIENT THAT HAS FIRED -> SHOULD USE broadcastNoSelf instead if we dont want that
-	zonemgr->broadcast( zone, serial, &p );
+	zonemgr->broadcast( zone, serial, &p, true ); // NETFIXME: Should unfire be TCP?
 }
 
 void	NetServer::sendDamages( ObjSerial serial, unsigned short zone, Shield shield, Armor armor, float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color)
@@ -62,7 +62,7 @@ void	NetServer::sendDamages( ObjSerial serial, unsigned short zone, Shield shiel
                  SENDRELIABLE,
                  __FILE__, PSEUDO__LINE__(1729) );
 	// WARNING : WE WILL SEND THE INFO BACK TO THE CLIENT THAT HAS FIRED
-	zonemgr->broadcast( zone, serial, &p );
+	zonemgr->broadcast( zone, serial, &p, true ); // NETFIXME: Should damages be TCP?
 }
 
 void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
@@ -89,7 +89,7 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
                  NULL, 0, SENDRELIABLE,
                  __FILE__, PSEUDO__LINE__(1771) );
 	// WARNING : WE WILL SEND THE INFO BACK TO THE CLIENT THAT HAS FIRED
-	zonemgr->broadcast( zone, serial, &p );
+	zonemgr->broadcast( zone, serial, &p, true );
 }
 
 void	NetServer::sendJump( ObjSerial serial, ObjSerial jumpserial, bool ok)
@@ -127,7 +127,7 @@ void	NetServer::sendJump( ObjSerial serial, ObjSerial jumpserial, bool ok)
 			p2.bc_create( CMD_JUMP, serial+1,
                           netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
                           __FILE__, PSEUDO__LINE__(1164) );
-		zonemgr->broadcast( clt, &p2);
+		zonemgr->broadcast( clt, &p2, true );
 	}
 
 	// Should broadcast JUMP so other client display jump anim too ?
@@ -152,7 +152,7 @@ void	NetServer::sendDockAuthorize( ObjSerial serial, ObjSerial utdw_serial, int 
 	p.bc_create( CMD_DOCK, serial,
                  netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
                  __FILE__, PSEUDO__LINE__(118) );
-	zonemgr->broadcast( zone, serial, &p );
+	zonemgr->broadcast( zone, serial, &p, true );
 }
 
 void	NetServer::sendDockDeny( ObjSerial serial, unsigned short zone)
@@ -169,7 +169,7 @@ void	NetServer::sendUnDock( ObjSerial serial, ObjSerial utdwserial, unsigned sho
 	p.bc_create( CMD_UNDOCK, serial,
                  netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
                  __FILE__, PSEUDO__LINE__(134) );
-	zonemgr->broadcastNoSelf( zone, serial, &p );
+	zonemgr->broadcastNoSelf( zone, serial, &p, true );
 
 	// Set client ingame
 	ClientPtr clt = this->getClientFromSerial( serial);

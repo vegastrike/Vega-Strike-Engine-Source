@@ -119,7 +119,7 @@ bool VsnetUDPSocket::isActive( )
     return ret;
 }
 
-void VsnetUDPSocket::lower_selected( )
+bool VsnetUDPSocket::lower_selected( )
 {
     int       ret = 0;
     socklen_t len1;
@@ -147,6 +147,8 @@ void VsnetUDPSocket::lower_selected( )
         _cpq.push( mem );
         _cpq_mx.unlock( );
         _set.add_pending( get_fd() );
+		return true;
     }
+	return false;
 }
 

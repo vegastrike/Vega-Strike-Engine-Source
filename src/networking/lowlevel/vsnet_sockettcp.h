@@ -46,7 +46,7 @@ public:
 
     virtual bool isActive( );
 
-    virtual void lower_selected( );
+    virtual bool lower_selected( );
 
     virtual bool need_test_writable( );
     virtual int  get_write_fd( ) const;

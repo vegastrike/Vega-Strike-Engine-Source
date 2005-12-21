@@ -222,15 +222,15 @@ void	ZoneMgr::removeClient( ClientPtr clt )
 /************************************************************************************************/
 
 // Broadcast a packet to a client's zone clients
-void ZoneMgr::broadcast( ClientWeakPtr cltw, Packet * pckt )
+void ZoneMgr::broadcast( ClientWeakPtr fromcltw, Packet * pckt, bool isTcp  )
 {
-    if( cltw.expired() )
+    if( fromcltw.expired() )
     {
         cerr<<"Trying to send update without client" << endl;
         return;
     }
-    ClientPtr clt( cltw );
-	Unit * un = clt->game_unit.GetUnit();
+    ClientPtr fromclt( fromcltw );
+	Unit * un = fromclt->game_unit.GetUnit();
 	Unit * un2 = NULL;
 	unsigned short zonenum = un->activeStarSystem->GetZone();
     if( zonenum > zone_list.size() )
@@ -251,14 +251,18 @@ void ZoneMgr::broadcast( ClientWeakPtr cltw, Packet * pckt )
 	{
         if( (*i).expired() ) continue;
 
-        ClientPtr cpi(*i);
-        un2 = cpi->game_unit.GetUnit();
+        ClientPtr clt(*i);
+        un2 = clt->game_unit.GetUnit();
         // Broadcast to other clients
-        if( cpi->ingame && un->GetSerial() != un2->GetSerial())
+        if( clt->ingame && un->GetSerial() != un2->GetSerial())
         {
             COUT << "BROADCASTING " << pckt->getCommand()
                  << " to client n° "<<un2->GetSerial() << endl;
-            pckt->bc_send( cpi->cltadr, cpi->sock);
+			if (isTcp) {
+				pckt->bc_send( clt->cltadr, clt->tcp_sock);
+			} else {
+				pckt->bc_send( clt->cltudpadr, *clt->lossy_socket);
+			}
         }
     }
 }
@@ -268,7 +272,7 @@ void ZoneMgr::broadcast( ClientWeakPtr cltw, Packet * pckt )
 /************************************************************************************************/
 
 // Broadcast a packet to a zone clients with its serial as argument
-void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt )
+void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt, bool isTcp )
 {
     ClientWeakList* lst = zone_list[zone];
     if( lst == NULL ) return;
@@ -283,13 +287,17 @@ void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt )
 		{
 			COUT<<"Sending update to client n° "<< clt->game_unit.GetUnit()->GetSerial();
 			COUT<<endl;
-			pckt->bc_send( clt->cltadr, clt->sock);
+			if (isTcp) {
+				pckt->bc_send( clt->cltadr, clt->tcp_sock);
+			} else {
+				pckt->bc_send( clt->cltudpadr, *clt->lossy_socket);
+			}
 		}
 	}
 }
 
 // Broadcast a packet to a zone clients with its serial as argument but not to the originating client
-void	ZoneMgr::broadcastNoSelf( int zone, ObjSerial serial, Packet * pckt )
+void	ZoneMgr::broadcastNoSelf( int zone, ObjSerial serial, Packet * pckt, bool isTcp )
 {
     ClientWeakList* lst = zone_list[zone];
     if( lst == NULL ) return;
@@ -304,7 +312,11 @@ void	ZoneMgr::broadcastNoSelf( int zone, ObjSerial serial, Packet * pckt )
 		{
 			COUT<<"Sending update to client n° "<< clt->game_unit.GetUnit()->GetSerial();
 			COUT<<endl;
-			pckt->bc_send( clt->cltadr, clt->sock);
+			if (isTcp) {
+				pckt->bc_send( clt->cltadr, clt->tcp_sock);
+			} else {
+				pckt->bc_send( clt->cltudpadr, *clt->lossy_socket);
+			}
 		}
 	}
 }
@@ -314,6 +326,7 @@ void	ZoneMgr::broadcastNoSelf( int zone, ObjSerial serial, Packet * pckt )
 /************************************************************************************************/
 
 // Broadcast a packet to a zone clients with its serial as argument
+// NETFIXME: Should this be always TCP?
 void	ZoneMgr::broadcastSample( int zone, ObjSerial serial, Packet * pckt, float frequency )
 {
     ClientWeakList* lst = zone_list[zone];
@@ -333,7 +346,7 @@ void	ZoneMgr::broadcastSample( int zone, ObjSerial serial, Packet * pckt, float 
 		{
 			COUT<<"Sending sound sample to client n° "<<clt->game_unit.GetUnit()->GetSerial();
 			COUT<<endl;
-			pckt->bc_send( clt->cltadr, clt->sock);
+			pckt->bc_send( clt->cltadr, clt->tcp_sock);
 		}
 	}
 }
@@ -343,6 +356,7 @@ void	ZoneMgr::broadcastSample( int zone, ObjSerial serial, Packet * pckt, float 
 /************************************************************************************************/
 
 // Broadcast a packet to a zone clients with its serial as argument
+// Always TCP.
 void	ZoneMgr::broadcastText( int zone, ObjSerial serial, Packet * pckt, float frequency )
 {
     ClientWeakList* lst = zone_list[zone];
@@ -362,7 +376,7 @@ void	ZoneMgr::broadcastText( int zone, ObjSerial serial, Packet * pckt, float fr
 		{
 			COUT<<"Sending sound sample to client n° "<<clt->game_unit.GetUnit()->GetSerial();
 			COUT<<endl;
-			pckt->bc_send( clt->cltadr, clt->sock);
+			pckt->bc_send( clt->cltadr, clt->tcp_sock);
 		}
 	}
 }
@@ -374,6 +388,8 @@ void	ZoneMgr::broadcastText( int zone, ObjSerial serial, Packet * pckt, float fr
 // Broadcast all positions
 // This function sends interpolated and predicted positions based on the "semi-ping" between the sender clients and the server
 // the receiver client will only have to interpolate and predict on his own "semi-ping" value
+// Always UDP.
+// NETFIXME:  May be too big for UDP if there are too many ships.  We may want to split these up into reasonable sizes.
 void	ZoneMgr::broadcastSnapshots( bool update_planets)
 {
 	unsigned int i=0;
@@ -391,7 +407,7 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 		// Check if system contains player(s)
 		if( zone_clients[i]>0)
 		{
-			COUT << "BROADCAST SNAPSHOTS = "<<zone_clients[i]<<" clients in zone "<<i<<" time now: "<<queryTime()<<"; frame time: "<<getNewTime() << endl;
+//			COUT << "BROADCAST SNAPSHOTS = "<<zone_clients[i]<<" clients in zone "<<i<<" time now: "<<queryTime()<<"; frame time: "<<getNewTime() << endl;
 			// Loop for all the zone's clients
 			for( k=zone_list[i]->begin(); k!=zone_list[i]->end(); k++)
 			{
@@ -403,7 +419,7 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 			        Packet    pckt;
                     NetBuffer netbuf;
 
-                    COUT << "CLEAN NETBUF" << endl;
+//                    COUT << "CLEAN NETBUF" << endl;
 
 					// This also means clients will receive info about themselves
                     // which they should ignore or take into account sometimes
@@ -413,7 +429,7 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 
 					// Add the client we send snapshot to its own deltatime (semi-ping)
 					netbuf.addFloat( cltk->getDeltatime() );
-                    COUT << "   *** deltatime " << cltk->getDeltatime() << endl;
+//                    COUT << "   *** deltatime " << cltk->getDeltatime() << endl;
 					// Clients not ingame are removed from the drawList so it is ok not to test that
 					while( (unit=iter.current()) != NULL)
 					{
@@ -487,7 +503,7 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 						//COUT<<"\tsend update for "<<(p+j)<<" clients"<<endl;
 						pckt.send( CMD_SNAPSHOT, /*nbclients+*/nbunits,
                                    netbuf.getData(), netbuf.getDataLength(),
-                                   SENDANDFORGET, &(cltk->cltadr), cltk->sock,
+                                   SENDANDFORGET, &(cltk->cltudpadr), *cltk->lossy_socket,
                                    __FILE__, PSEUDO__LINE__(337) );
 					}
 				}
@@ -512,7 +528,7 @@ bool ZoneMgr::addPosition( NetBuffer & netbuf, Unit * un, ClientState & un_cs)
 			//ratio = radius/distance;
 			if( 1 /* ratio > XX client not too far */)
 			{
-                COUT << "   *** FullUpdate ser=" << un->GetSerial() << " cs=" << un_cs << endl;
+//                COUT << "   *** FullUpdate ser=" << un->GetSerial() << " cs=" << un_cs << endl;
 				// Mark as position+orientation+velocity update
 				netbuf.addChar( ZoneMgr::FullUpdate );
 				netbuf.addShort( un->GetSerial());
@@ -523,10 +539,10 @@ bool ZoneMgr::addPosition( NetBuffer & netbuf, Unit * un, ClientState & un_cs)
 			// Here find a condition for which sending only position would be enough
 			else if( 0 /* ratio>=1 far but still visible */)
 			{
-                COUT << "   *** PosUpdate ser=" << un->GetSerial()
-                     << " pos=" << un_cs.getPosition().i
-                     << "," << un_cs.getPosition().j
-                     << "," << un_cs.getPosition().k << endl;
+//                COUT << "   *** PosUpdate ser=" << un->GetSerial()
+//                     << " pos=" << un_cs.getPosition().i
+//                     << "," << un_cs.getPosition().j
+//                     << "," << un_cs.getPosition().k << endl;
 				// Mark as position update only
 				netbuf.addChar( ZoneMgr::PosUpdate );
 				// Add the client serial
@@ -559,6 +575,7 @@ bool ZoneMgr::addPosition( NetBuffer & netbuf, Unit * un, ClientState & un_cs)
 /************************************************************************************************/
 
 // Broadcast all damages
+// NETFIXME:  May be too big for UDP.
 void	ZoneMgr::broadcastDamage( )
 {
 	unsigned int i=0;
@@ -630,13 +647,13 @@ void	ZoneMgr::broadcastDamage( )
 							this->addDamage( netbuf, (*m));
 					}
 					*/
-
+// NETFIXME: Should damage updates be UDP or TCP?
 					// Send snapshot to client k
 					if( netbuf.getDataLength() > 0)
 					{
 						pckt.send( CMD_SNAPDAMAGE, /*nbclients+*/nbunits,
                                    netbuf.getData(), netbuf.getDataLength(),
-                                   SENDANDFORGET, &(cp->cltadr), cp->sock,
+                                   SENDANDFORGET, &(cp->cltudpadr), *cp->lossy_socket,
                                    __FILE__, PSEUDO__LINE__(442) );
 					}
 				}
@@ -696,7 +713,7 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 		if( damages & Unit::CARGOFUEL_DAMAGED)
 		{
 			netbuf.addFloat( un->FuelData());
-			netbuf.addShort( un->AfterburnData());
+			netbuf.addFloat( un->AfterburnData());
 			netbuf.addFloat( un->image->CargoVolume);
 			netbuf.addFloat( un->image->UpgradeVolume);
 			for( it=0; it<un->image->cargo.size(); it++)
@@ -708,7 +725,7 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 			netbuf.addFloat( un->shield.recharge);
 			netbuf.addFloat( un->EnergyRechargeData());
 			netbuf.addFloat( un->MaxEnergyData());
-			netbuf.addShort( un->jump.energy);
+			netbuf.addFloat( un->jump.energy); //  NETFIXME: Add insys energy too?
 			netbuf.addChar( un->jump.damage);
 			netbuf.addChar( un->image->repair_droid);
 		}
@@ -739,6 +756,7 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 /************************************************************************************************/
 
 // Send one by one a CMD_ADDLCIENT to the client for every ship in the star system we enter
+// Always TCP.
 void ZoneMgr::sendZoneClients( ClientWeakPtr clt )
 {
 	CWLI k;
@@ -776,7 +794,7 @@ void ZoneMgr::sendZoneClients( ClientWeakPtr clt )
 			netbuf.addString( xmlstr);
 			packet2.send( CMD_ENTERCLIENT, kp->game_unit.GetUnit()->GetSerial(),
                           netbuf.getData(), netbuf.getDataLength(),
-                          SENDRELIABLE, &cp->cltadr, cp->sock,
+                          SENDRELIABLE, &cp->cltadr, cp->tcp_sock,
                           __FILE__, PSEUDO__LINE__(579) );
 			nbclients++;
 		}
