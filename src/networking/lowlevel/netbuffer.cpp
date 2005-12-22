@@ -69,13 +69,13 @@ void	NetBuffer::checkBuffer( int len, const char * fun)
 	if( offset+len > size-1)
 	{
 		cerr<<"!!! ERROR : trying to read more data than buffer size (offset="<<offset<<" - size="<<size<<" - to read="<<len<<") in "<<fun<<" !!!"<<endl;
+		assert(0);
 		exit(1);
 	}
 #endif
 }
 
 // NOTE : IMPORTANT - I ONLY INCREMENT OFFSET IN PRIMARY DATATYPES SINCE ALL OTHER ARE COMPOSED WITH THEM
-
 void	NetBuffer::addClientState( ClientState cs)
 {
     //this->addFloat( cs.delay);

@@ -27,11 +27,13 @@
 #endif
 
 static void fixup_function_pointers(void) {
+  alutLoadMP3p = NULL; // We don't use this anyway since it does not exist on Windows.
+  /*
   alutLoadMP3p = (mp3Loader *) AL_GET_PROC("alutLoadMP3_LOKI");
   if(alutLoadMP3p == NULL) {
     VSFileSystem::vs_fprintf(stderr, "Could not GetProc %s\n","alutLoadMP3_LOKI");
   }
-
+  */
 
   /* UNCOMMENT AS NEEDED
 	talcGetAudioChannel = (ALfloat (*)(ALuint channel))

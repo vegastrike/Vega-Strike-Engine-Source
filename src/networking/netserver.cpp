@@ -546,7 +546,7 @@ bool	NetServer::updateTimestamps( ClientPtr cltp, Packet & p )
 		cerr<<"GOT TIMESTAMP="<<int_ts<<" latest is="<<clt->getLatestTimestamp() << " in " << p.getCommand() << endl;
 		double curtime = getNewTime();
 		// Check for late packet : compare received timestamp to the latest we have
-		assert( int_ts >= clt->getLatestTimestamp());
+//		assert( int_ts >= clt->getLatestTimestamp());
 		if( int_ts < clt->getLatestTimestamp() )
 		{
 			// If ts > 0xFFFFFFF0 (15 seconds before the maxin an u_int) 
