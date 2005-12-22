@@ -20,8 +20,8 @@
 #include "al_globals.h"
 #include <vector>
 
-#ifndef ALchar
-#define AL_GET_PROC(name) (alGetProcAddress(const_cast<ALchar*>(reinterpret_cast<const ALchar *>(name))))
+#if 1
+#define AL_GET_PROC(name) (alGetProcAddress(const_cast<ALubyte*>(reinterpret_cast<const ALubyte *>(name))))
 #else
 #define AL_GET_PROC(name) (alGetProcAddress(name))
 #endif
