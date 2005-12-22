@@ -64,32 +64,34 @@ void SocketSet::unset( VsnetSocketBase* s )
 int SocketSet::wait( timeval *tv )
 {
     //assert( _blockmain ); // can't call wait if we haven't ordered the feature (?)
-    if( tv!=NULL || _blockmain_pending == 0 )
-    {
-		int ret;
-		do {
-			timeval tvCopy (*tv); // select resets timeval.
-			ret = private_select( &tvCopy );
-		} while ( ret == 1 );
-		return ret;
-    }
-    else
+  if (_blockmain_pending==0) {
+    int ret;
+    do {
+      if (tv==NULL) {
+        ret = private_select(NULL);
+      }else {
+        timeval tvCopy (*tv); // select resets timeval.
+        ret = private_select( &tvCopy );
+      }
+    } while ( ret == 1 );
+    return ret;  
+  } else
     {
 #ifdef VSNET_DEBUG
-        std::ostringstream ostr;
-        for( int i=0; i<_blockmain_pending; i++ )
-        {
-            if( FD_ISSET( i, &_blockmain_set ) ) ostr << " " << i;
-        }
-        COUT << "something pending for sockets:"
-             << ostr.str()
-             << " (" << _blockmain_pending << ")" << endl;
+      std::ostringstream ostr;
+      for( int i=0; i<_blockmain_pending; i++ )
+      {
+        if( FD_ISSET( i, &_blockmain_set ) ) ostr << " " << i;
+      }
+      COUT << "something pending for sockets:"
+           << ostr.str()
+           << " (" << _blockmain_pending << ")" << endl;
 #endif
-        struct timeval zerotv;
-        zerotv.tv_sec  = 0;
-        zerotv.tv_usec = 0;
-        return private_select( &zerotv );
-    }
+      struct timeval zerotv;
+      zerotv.tv_sec  = 0;
+      zerotv.tv_usec = 0;
+      return private_select( &zerotv );
+  }
 }
 #else
 #error You are using threaded network mode - do you really want this?
