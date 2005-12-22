@@ -1,6 +1,7 @@
 #include <config.h>
 
 #include "vsnet_address.h"
+#include "vsnet_oss.h"
 
 AddressIP::AddressIP (const AddressIP &orig, unsigned short port) {
 	memcpy( this, &orig, sizeof(AddressIP) );
@@ -9,7 +10,7 @@ AddressIP::AddressIP (const AddressIP &orig, unsigned short port) {
 
 AddressIP::AddressIP (const char *address, unsigned short port) {
 	memset( this, 0, sizeof(AddressIP) );
-	inet_aton(address, &this->sin_addr);
+	VsnetOSS::inet_aton(address, &this->sin_addr);
 	this->sin_port = htons(port);
 }
 
