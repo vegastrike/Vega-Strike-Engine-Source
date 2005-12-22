@@ -74,6 +74,7 @@ ClientPtr NetServer::getClientFromSerial( ObjSerial serial)
 	return clt;
 }
 
+// WARNING: ipadr is NULL since we are getting this packet from acctserver, not the client itself.
 void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct, char flags)
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << endl;
@@ -92,15 +93,15 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct, ch
 	{
 	    // This must be UDP mode, because the client would exist otherwise.
 	    // In UDP mode, client is created here.
-		clt = newConnection_udp( ipadr );
+		clt = newConnection_udp( ipadr ); // WARNING: ipadr is null.  This code is broken anyway.
 		if( !clt )
 		{
 		    COUT << "Error creating new client connection"<<endl;
-			VSExit(1);
+//			VSExit(1);
 		}
 	}
+//	memcpy( &clt->cltadr, &ipadr, sizeof( AddressIP)); // ipadr is uninitialized... see above.
 
-	memcpy( &clt->cltadr, &ipadr, sizeof( AddressIP));
 	clt->callsign = callsign;
 	clt->passwd = passwd;
 	cltserial = getUniqueSerial();

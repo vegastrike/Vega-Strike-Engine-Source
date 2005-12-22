@@ -2033,7 +2033,7 @@ void GameCockpit::Draw() {
 	  static bool debug_position = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","debug_position","false"));
 	  if (debug_position) {
 		  TextPlane tp;
-		  char str[250];
+		  char str[400]; // don't make the sprintf format too big... :-P
 		  Unit *you=parent.GetUnit();
 		  if (you) {
 			  sprintf(str,"Your Position: (%lf,%lf,%lf); Velocity: (%f,%f,%f); Frame: %lf\n",you->curr_physical_state.position.i,you->curr_physical_state.position.j,you->curr_physical_state.position.k,you->Velocity.i,you->Velocity.j,you->Velocity.k, getNewTime());

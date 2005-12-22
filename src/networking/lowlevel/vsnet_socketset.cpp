@@ -68,7 +68,8 @@ int SocketSet::wait( timeval *tv )
     {
 		int ret;
 		do {
-			ret = private_select( tv );
+			timeval tvCopy (*tv); // select resets timeval.
+			ret = private_select( &tvCopy );
 		} while ( ret == 1 );
 		return ret;
     }

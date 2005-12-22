@@ -131,11 +131,10 @@ void	NetServer::serverTimeInitUDP( ClientPtr clt, NetBuffer &netbuf)
 	Packet p2;
 	NetBuffer timeBuf;
 	// If client sent an unsigned short.
-	if (netbuf.getDataLength()>1) {
+	if (netbuf.getSize()>1) {
 		unsigned short clt_port = netbuf.getShort();
 		if (clt_port) {
-			AddressIP adr (clt->cltadr);
-			adr.sin_port = clt_port;
+			AddressIP adr (clt->cltadr, clt_port);
 			clt->setUDP( &udpNetwork, adr );
 		} else {
 			clt->setTCP();

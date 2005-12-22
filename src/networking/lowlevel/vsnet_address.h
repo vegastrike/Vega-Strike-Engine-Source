@@ -38,6 +38,10 @@ struct AddressIP : public sockaddr_in
     AddressIP( const sockaddr_in& orig ) {
         memcpy( this, &orig, sizeof(AddressIP) );
     }
+
+	AddressIP( const AddressIP& orig, unsigned short port );
+	AddressIP (const char *address, unsigned short port);
+	
     AddressIP& operator=( const AddressIP& orig ) {
         memcpy( this, &orig, sizeof(AddressIP) );
         return *this;
@@ -46,7 +50,6 @@ struct AddressIP : public sockaddr_in
         memcpy( this, &orig, sizeof(AddressIP) );
         return *this;
     }
-
     /// print ip:port to stdout
     void dump( );
 

@@ -2,6 +2,17 @@
 
 #include "vsnet_address.h"
 
+AddressIP::AddressIP (const AddressIP &orig, unsigned short port) {
+	memcpy( this, &orig, sizeof(AddressIP) );
+	this->sin_port = htons(port);
+}
+
+AddressIP::AddressIP (const char *address, unsigned short port) {
+	memset( this, 0, sizeof(AddressIP) );
+	inet_aton(address, &this->sin_addr);
+	this->sin_port = htons(port);
+}
+
 std::ostream& operator<<( std::ostream& ostr, const AddressIP& adr )
 {
     ostr << inet_ntoa(adr.sin_addr) << ":" << ntohs(adr.sin_port);

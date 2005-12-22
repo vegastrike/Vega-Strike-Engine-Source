@@ -97,11 +97,11 @@ int VsnetUDPSocket::recvbuf( Packet* p, AddressIP* ipadr )
     }
 
     PacketMem buffer = _cpq.front().mem;
+    if(ipadr) *ipadr = _cpq.front().ip;
     _cpq.pop();
     _cpq_mx.unlock( );
     int len = buffer.len();
     Packet packet( buffer );
-    if(ipadr) *ipadr = _cpq.front().ip;
     *p = packet;
     return len;
 }

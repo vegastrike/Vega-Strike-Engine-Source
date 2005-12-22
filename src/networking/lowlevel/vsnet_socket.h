@@ -71,6 +71,8 @@ public:
 	
 	void addToSet( SocketSet &set );
 	
+	const AddressIP &getRemoteAddress() const;
+	
     /** Required by the download manager achieve a sorting of sockets.
      */
     friend class CompareLt;

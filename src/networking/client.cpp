@@ -38,6 +38,7 @@ Client::Client( SOCKETALT& s )
 	    : tcp_sock(s)
 {
 	lossy_socket=&tcp_sock;
+	cltadr = s.getRemoteAddress();
 	this->Init();
 }
 

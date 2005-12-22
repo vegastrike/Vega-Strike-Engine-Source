@@ -195,3 +195,12 @@ void SOCKETALT::addToSet( SocketSet &set )
 {
 	if ( _sock ) set.set( &(*this->_sock) );
 }
+
+const AddressIP &SOCKETALT::getRemoteAddress() const {
+	static AddressIP nullAdr;
+	if ( _sock ) {
+		return _sock->getRemoteAddress();
+	} else {
+		return nullAdr; // just in case.
+	}
+}

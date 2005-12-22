@@ -208,7 +208,7 @@ SOCKETALT NetUIUDP::createSocket( const char * host, unsigned short srv_port, un
     remote_ip.sin_family= AF_INET;
 
     local_ip.sin_addr.s_addr = htonl(INADDR_ANY);
-    local_ip.sin_port = htons( 0);
+    local_ip.sin_port = htons( clt_port );
     local_ip.sin_family = AF_INET;
 
     // binds socket

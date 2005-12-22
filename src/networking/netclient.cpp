@@ -401,6 +401,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 	if ( socketstat == 0 )
 	{
 		COUT << "recvMsg socketstat == 0: " << (vsnetEWouldBlock()?"wouldblock":"") << endl;
+		return -1;
 		// timeout expired.
 	}
 	

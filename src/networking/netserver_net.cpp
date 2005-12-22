@@ -168,7 +168,7 @@ void NetServer::recvMsg_udp( )
 
         // Check if the client's IP is still the same (a very little and unaccurate in some cases protection
 		// against spoofing client serial#)
-        if (clt && (ipadr!=clt->cltadr))
+        if (clt && (ipadr!=clt->cltudpadr))
         {
 	    	assert( command != CMD_LOGIN ); // clt should be 0 because ObjSerial was 0
 
