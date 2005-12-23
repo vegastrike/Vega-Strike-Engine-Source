@@ -667,9 +667,9 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			break;
 		case CMD_POSUPDATE:
 			// Received a position update from a client
-			cerr<<">>> POSITION UPDATE =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
+//			cerr<<">>> POSITION UPDATE =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 			this->posUpdate( clt );
-			cerr<<"<<< POSITION UPDATE ---------------------------------------------------------------"<<endl;
+//			cerr<<"<<< POSITION UPDATE ---------------------------------------------------------------"<<endl;
 			break;
 		case CMD_LETSGO:
 			// Add the client to the game in its zone

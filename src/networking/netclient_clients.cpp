@@ -209,10 +209,11 @@ void	NetClient::sendPosition( const ClientState* cs )
 	// Serial in ClientState is updated in UpdatePhysics code at ClientState creation (with pos, veloc...)
 	Packet pckt;
 	NetBuffer netbuf;
+	static bool debugPos = XMLSupport::parse_bool(vs_config->getVariable("network", "debug_position_interpolation", "false"));
 
 	// Send the client state
-	COUT<<"Sending ClientState == ";
-	(*cs).display();
+	if (debugPos) COUT<<"Sending ClientState == ";
+	if (debugPos) (*cs).display();
 	netbuf.addSerial( cs->getSerial());
 	netbuf.addClientState( (*cs));
 	pckt.send( CMD_POSUPDATE, this->game_unit.GetUnit()->GetSerial(),
@@ -229,9 +230,11 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 {
 	// Computes deltatime only when receiving a snapshot since we interpolate positions between 2 snapshots
 	// We don't want to consider a late snapshot
+	cout << "netSnapshot ";
+	static bool debugPos = XMLSupport::parse_bool(vs_config->getVariable("network", "debug_position_interpolation", "false"));
 	if( latest_timestamp < int_ts)
 	{
-        COUT << "   *** SNAPSHOT is not late - evaluating" << endl;
+        if (debugPos) COUT << "   *** SNAPSHOT is not late - evaluating" << endl;
 
 		this->latest_timestamp = int_ts;
 		this->deltatime        = delta_t;
@@ -274,21 +277,20 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 
 			if( cmd == ZoneMgr::FullUpdate )
 			{
-                COUT << "   *** SubCommand is FullUpdate ser=" << sernum << endl;
+                if (debugPos) COUT << "   *** SubCommand is FullUpdate ser=" << sernum << endl;
 
 	            ClientState	cs;
 
 				// Do what needed with update
-				COUT<<"Received ZoneMgr::FullUpdate ";
+				if (debugPos) COUT<<"Received ZoneMgr::FullUpdate ";
 				// Tell we received the ClientState so we can convert byte order from network to host
 				cs = netbuf.getClientState();
-                COUT << "   *** cs=" << cs << endl;
+                if (debugPos) COUT << "   *** cs=" << cs << endl;
 
 // NETFIXME: Why not set local player? It can't hurt...
 				
 				if( (clt || un) && (!localplayer) )
 				{
-					cs.display();
 					if( clt) {
 						un = clt->game_unit.GetUnit();
 					}
@@ -317,19 +319,19 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 					}
 					
 					QVector predpos = un->curr_physical_state.position;
-					cerr<<"Predicted location : x="<<predpos.i<<",y="<<predpos.j<<",z="<<predpos.k<<endl;
+					if (debugPos) cerr<<"Predicted location : x="<<predpos.i<<",y="<<predpos.j<<",z="<<predpos.k<<endl;
 				}
 				else if( localplayer)
                 {
-					cerr<<" IGNORING LOCAL PLAYER"<<endl;
+					if (debugPos) cerr<<" IGNORING LOCAL PLAYER"<<endl;
                 }
 				i++;
 			}
 			else if( cmd == ZoneMgr::PosUpdate )
 			{
-                COUT << "   *** SubCommand is PosUpdate ser=" << sernum << endl;
+                if (debugPos) COUT << "   *** SubCommand is PosUpdate ser=" << sernum << endl;
 				QVector pos = netbuf.getQVector();
-                COUT << "   *** pos=" << pos.i << "," << pos.j << "," << pos.k << endl;
+                if (debugPos) COUT << "   *** pos=" << pos.i << "," << pos.j << "," << pos.k << endl;
 				if( (clt || un) && (!localplayer) )
 				{
 					if( clt)
@@ -358,15 +360,18 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 				}
 				else if( localplayer)
                 {
-					cerr<<" IGNORING LOCAL PLAYER"<<endl;
+					if (debugPos) cerr<<" IGNORING LOCAL PLAYER"<<endl;
                 }
 				j++;
 			}
             else
             {
-                COUT << "   *** SubCommand is neither FullUpdate nor PosUpdate" << endl
-                     << "   *** TERMINATING ***" << endl;
-                VSExit( 1 );
+			// NETFIXME: Not an exit condition.  Just print a warning message and ignore the rest of the packet.
+			// NETFIXME: we should include a length field for each sub-packet so that we can safely ignore a part of the packet.
+                COUT << "   *** SubCommand is neither FullUpdate nor PosUpdate" << endl;
+				return;
+//                     << "   *** TERMINATING ***" << endl;
+//                VSExit( 1 );
             }
 		}
 	}

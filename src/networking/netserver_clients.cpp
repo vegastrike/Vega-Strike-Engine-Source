@@ -191,7 +191,8 @@ void	NetServer::posUpdate( ClientPtr clt)
 	un->BackupState();
 	// Update client position in client list : should be enough like it is below
 	cs = netbuf.getClientState();
-	COUT<<"Received ZoneMgr::PosUpdate from client "<<clt_serial<<"   *** cs="<<cs<< endl;
+	static bool debugPos = XMLSupport::parse_bool(vs_config->getVariable("network", "debug_position_interpolation", "false"));
+	if (debugPos) COUT<<"Received ZoneMgr::PosUpdate from client "<<clt_serial<<"   *** cs="<<cs<< endl;
 	un->curr_physical_state.position = cs.getPosition();
 	un->curr_physical_state.orientation = cs.getOrientation();
 	un->Velocity = cs.getVelocity();
