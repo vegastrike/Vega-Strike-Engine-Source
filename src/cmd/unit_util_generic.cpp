@@ -22,24 +22,31 @@ namespace UnitUtil {
                 return ((1<<(unsigned int)my_unit->combatRole())&capitaltypes)!=0;
 	}
 	int getPhysicsPriority (Unit*  un) {
-        return 1;
+        //return 1;
 
 		float rad= un->rSize();
 		clsptr untype=un->isUnit();
 		if (_Universe->isPlayerStarship(un)||untype==MISSILEPTR)
 			return 1;
-        const int TOP_PRIORITY=1;
-		const int HIGH_PRIORITY=2;
-		const int MEDIUM_PRIORITY=3;
-		const int LOW_PRIORITY=4;
-        const int ASTEROID_PARENT_PRIORITY=1;
+        //Some other comment mentions these need special treatment for subunit scheduling
+		const int ASTEROID_PARENT_PRIORITY=1;
         const int ASTEROID_HIGH_PRIORITY=2;
-        const int ASTEROID_LOW_PRIORITY=24;
+        const int ASTEROID_LOW_PRIORITY=32;
+		
+		const int TOP_PRIORITY=1;
+		const int HIGH_PRIORITY=2;
+		const int MEDIUM_PRIORITY=4;
+		const int LOW_PRIORITY=8;
+        
+		const int NOT_VISIBLE_COMBAT_HIGH=8;	
+		const int NOT_VISIBLE_COMBAT_MEDIUM=16;
+		const int NOT_VISIBLE_COMBAT_LOW=32;
+
+		const int NO_ENEMIES=64;
+		// Here we assume that SIM_QUEUE_SIZE is >=64
         const int LOWEST_PRIORITY=SIM_QUEUE_SIZE;
-		const int NO_ENEMIES=SIM_QUEUE_SIZE;
-		const int NOT_VISIBLE_COMBAT_HIGH=7;
-		const int NOT_VISIBLE_COMBAT_MEDIUM=13;
-		const int NOT_VISIBLE_COMBAT_LOW=SIM_QUEUE_SIZE/2+1;
+		
+		
 
 		Cockpit* cockpit=_Universe->AccessCockpit();
 		Unit * parent=cockpit->GetParent();
@@ -82,32 +89,32 @@ namespace UnitUtil {
 
 		if (un->owner==getTopLevelOwner()||un->faction==cargofac||un->faction==upfac||un->faction==neutral) {
             if (dist<tooclose)
-                return LOW_PRIORITY; else
-                return LOWEST_PRIORITY;
+                return 1+(rand()%LOW_PRIORITY); else
+                return 1+(rand()%LOWEST_PRIORITY);
 		}
 		Unit * targ = un->Target();
 		if (_Universe->isPlayerStarship(targ)) {
-			return HIGH_PRIORITY;
+			return 1+(rand()%HIGH_PRIORITY);
 		}
 		string obj = UnitUtil::getFgDirective(un);
 		if (!(obj.length()==0||(obj.length()>=1&&obj[0]=='b'))) {
-			return MEDIUM_PRIORITY;
+			return 1+(rand()%MEDIUM_PRIORITY);
 		}
 		if (dist<gun_range)
-			return MEDIUM_PRIORITY;
+			return 1+(rand()%MEDIUM_PRIORITY);
 		if (dist<missile_range)
-			return LOW_PRIORITY;
+			return 1+(rand()%LOW_PRIORITY);
 		if (targ){
 			float speed;
 			un->getAverageGunSpeed(speed,gun_range,missile_range);
 			double distance=UnitUtil::getDistance(un,targ);
 			if (distance<=gun_range)
-				return NOT_VISIBLE_COMBAT_HIGH;
+				return 1+(rand()%NOT_VISIBLE_COMBAT_HIGH);
 			if (distance<missile_range)
-				return NOT_VISIBLE_COMBAT_MEDIUM;
-			return NOT_VISIBLE_COMBAT_LOW;
+				return 1+(rand()%NOT_VISIBLE_COMBAT_MEDIUM);
+			return 1+(rand()%NOT_VISIBLE_COMBAT_LOW);
 		}
-		return NO_ENEMIES;
+		return 1+(rand()%NO_ENEMIES);
 	}
 
 	void orbit (Unit * my_unit, Unit * orbitee, float speed, QVector R, QVector S, QVector center) {

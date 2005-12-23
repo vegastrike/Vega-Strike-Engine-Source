@@ -404,9 +404,11 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
       un_iter iter = this->physics_buffer[current_sim_location].createIterator();
       while((unit = iter.current())!=NULL) {
         int priority=UnitUtil::getPhysicsPriority(unit);
+		/* This isn't where we want to do the spreading, and it wasn't being done correctly anyway
         if (priority!=unit->sim_atom_multiplier)
             priority = (priority + ((unsigned int)vsrandom.genrand_int32())%(priority/2+1))/2;
         if (priority<1) priority=1; else if (priority>SIM_QUEUE_SIZE) priority=SIM_QUEUE_SIZE; 
+		*/
 	    int newloc=(current_sim_location+priority)%SIM_QUEUE_SIZE;
 	    float backup=SIMULATION_ATOM;
 	    SIMULATION_ATOM*=priority;
