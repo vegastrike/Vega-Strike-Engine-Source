@@ -391,6 +391,7 @@ void NetClient::synchronizeTime()
 				// no UDP requests made it, fallback to TCP.
 				this->lossy_socket=&this->clt_tcp_sock;
 				clt_port=0;
+				timeout=0;
 				COUT << "Setting default lossy transport to TCP (UDP timeout)." << endl;
 				// NETFIXME: We may want to try different UDP ports to allow multiple people behind one firewall.  In that case, keep falling back to a different port, and make sure to set_nonblock or set_block on each one.
 			}

@@ -388,41 +388,50 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
     Packet    p1;
     AddressIP ipadr;
 	static bool udpgetspriority=true;
-	clt_tcp_sock.addToSet( _sock_set );
-	clt_udp_sock.addToSet( _sock_set );
-	int socketstat = _sock_set.wait( timeout );
-	
-    if( socketstat < 0)
-    {
-        perror( "Error select -1 ");
-        clt_tcp_sock.disconnect( "socket error", 0 );
-        return -1;
-    }
-	if ( socketstat == 0 )
-	{
-		COUT << "recvMsg socketstat == 0: " << (vsnetEWouldBlock()?"wouldblock":"") << endl;
-		return -1;
-		// timeout expired.
-	}
-	
 
-//	NETFIXME: check for file descriptors in _sock_set.fd_set...
-
-
-    int recvbytes = (udpgetspriority?clt_udp_sock:clt_tcp_sock).recvbuf( &p1, &ipadr );
+	// First check if there is data in the client's recv queue.
+	int recvbytes = (udpgetspriority?clt_udp_sock:clt_tcp_sock).recvbuf( &p1, &ipadr );
 	
     if( recvbytes <= 0) {
 		recvbytes = (udpgetspriority==false?clt_udp_sock:clt_tcp_sock).recvbuf( &p1, &ipadr );
 	}
-	udpgetspriority=!udpgetspriority;
-    if( recvbytes <= 0)
-    {
-        perror( "Error recv -1 ");
-        clt_tcp_sock.disconnect( "socket error", 0 );
-        return -1;
+
+	if (recvbytes <= 0) {
+		// Now, select and wait for data to come in the queue.
+		clt_tcp_sock.addToSet( _sock_set );
+		clt_udp_sock.addToSet( _sock_set );
+		int socketstat = _sock_set.wait( timeout );
+		
+		if( socketstat < 0)
+		{
+			perror( "Error select -1 ");
+			clt_tcp_sock.disconnect( "socket error", 0 );
+			return -1;
+		}
+		if ( socketstat == 0 )
+		{
+//			COUT << "recvMsg socketstat == 0: " << (vsnetEWouldBlock()?"wouldblock":"") << endl;
+			return -1;
+			// timeout expired.
+		}
+
+		//	NETFIXME: check for file descriptors in _sock_set.fd_set...
+		// Check the queues again.
+		recvbytes = (udpgetspriority?clt_udp_sock:clt_tcp_sock).recvbuf( &p1, &ipadr );
+		
+		if( recvbytes <= 0) {
+			recvbytes = (udpgetspriority==false?clt_udp_sock:clt_tcp_sock).recvbuf( &p1, &ipadr );
+		}
+		udpgetspriority=!udpgetspriority;
+		if( recvbytes <= 0)
+		{
+			// If nothing has come in either queue, and the select did not return 0, then this must be from a socket error.
+			perror( "Error recv -1 ");
+			clt_tcp_sock.disconnect( "socket error", 0 );
+			return -1;
+		}
     }
-    else
-    {
+	if (p1.getDataLength()>0) {
 		NetBuffer netbuf( p1.getData(), p1.getDataLength());
 	    if( outpacket )
 	    {
