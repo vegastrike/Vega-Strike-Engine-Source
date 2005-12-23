@@ -315,7 +315,7 @@ void	NetBuffer::addFloat( float f)
 			int tmpsize = sizeof( f);
 			resizeBuffer( offset+tmpsize);
 			posh_u32_t bits = POSH_BigFloatBits( f );
-			*((posh_u32_t*)(offset+tmpsize)) = bits;
+			*((posh_u32_t*)(this->buffer+offset)) = bits;
 			offset += tmpsize;
 		}
 float	NetBuffer::getFloat()
