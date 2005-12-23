@@ -387,9 +387,16 @@ void CarSimUpdate (Unit *un, float height) {
 
 }
 
+//Variables for debugging purposes only - eliminate later
+unsigned int physicsframecounter=1;
+unsigned int theunitcounter=0;
+unsigned int totalprocessed=0;
+unsigned int movingavgarray[128]={0};
+unsigned int movingtotal=0;
 void StarSystem::UpdateUnitPhysics (bool firstframe) {
   static   bool phytoggle=true;
   if (phytoggle) {
+    // BELOW COMMENTS ARE NO LONGER IN SYNCH
     // NOTE: Randomization is necessary to preserve scattering - otherwise, whenever a 
     //     unit goes from low-priority to high-priority and back to low-priority, they 
     //     get synchronized and start producing peaks.
@@ -404,13 +411,14 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
       un_iter iter = this->physics_buffer[current_sim_location].createIterator();
       while((unit = iter.current())!=NULL) {
         int priority=UnitUtil::getPhysicsPriority(unit);
-		/* This isn't where we want to do the spreading, and it wasn't being done correctly anyway
-        if (priority!=unit->sim_atom_multiplier)
-            priority = (priority + ((unsigned int)vsrandom.genrand_int32())%(priority/2+1))/2;
-        if (priority<1) priority=1; else if (priority>SIM_QUEUE_SIZE) priority=SIM_QUEUE_SIZE; 
-		*/
+		// Doing spreading here and only on priority changes, so as to make AI easier
+		if (priority!=unit->sim_atom_multiplier){
+            priority = 1 + (((unsigned int)vsrandom.genrand_int32())%priority);
+		}
+        
 	    int newloc=(current_sim_location+priority)%SIM_QUEUE_SIZE;
 	    float backup=SIMULATION_ATOM;
+		theunitcounter=theunitcounter+1;
 	    SIMULATION_ATOM*=priority;
 	    unit->sim_atom_multiplier=priority;
 	    unit->ExecuteAI(); 
@@ -433,7 +441,16 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
       }
       throw;
     }
+	//Book-keeping for debug - remove later
+	int movingavgindex=physicsframecounter%128;
+	movingtotal=movingtotal-movingavgarray[movingavgindex]+theunitcounter;
+	movingavgarray[movingavgindex]=theunitcounter;
+	fprintf(stderr,"Frame:%u - %u, %u, %u\n",physicsframecounter,theunitcounter,movingtotal/128,totalprocessed/physicsframecounter);
     current_sim_location=(current_sim_location+1)%SIM_QUEUE_SIZE;
+	++physicsframecounter;
+	totalprocessed+=theunitcounter;
+	theunitcounter=0;
+	//end debug bookkeeping
   }else {
     un_iter iter = this->getUnitList().createIterator();
     Unit * unit=NULL;

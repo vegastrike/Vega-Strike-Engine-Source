@@ -35,12 +35,12 @@ namespace UnitUtil {
 		
 		const int TOP_PRIORITY=1;
 		const int HIGH_PRIORITY=2;
-		const int MEDIUM_PRIORITY=4;
-		const int LOW_PRIORITY=8;
+		const int MEDIUM_PRIORITY=8;
+		const int LOW_PRIORITY=32;
         
-		const int NOT_VISIBLE_COMBAT_HIGH=8;	
-		const int NOT_VISIBLE_COMBAT_MEDIUM=16;
-		const int NOT_VISIBLE_COMBAT_LOW=32;
+		const int NOT_VISIBLE_COMBAT_HIGH=10;	
+		const int NOT_VISIBLE_COMBAT_MEDIUM=20;
+		const int NOT_VISIBLE_COMBAT_LOW=40;
 
 		const int NO_ENEMIES=64;
 		// Here we assume that SIM_QUEUE_SIZE is >=64
@@ -89,32 +89,32 @@ namespace UnitUtil {
 
 		if (un->owner==getTopLevelOwner()||un->faction==cargofac||un->faction==upfac||un->faction==neutral) {
             if (dist<tooclose)
-                return 1+(rand()%LOW_PRIORITY); else
-                return 1+(rand()%LOWEST_PRIORITY);
+                return LOW_PRIORITY; else
+                return LOWEST_PRIORITY;
 		}
 		Unit * targ = un->Target();
 		if (_Universe->isPlayerStarship(targ)) {
-			return 1+(rand()%HIGH_PRIORITY);
+			return HIGH_PRIORITY;
 		}
 		string obj = UnitUtil::getFgDirective(un);
 		if (!(obj.length()==0||(obj.length()>=1&&obj[0]=='b'))) {
-			return 1+(rand()%MEDIUM_PRIORITY);
+			return MEDIUM_PRIORITY;
 		}
 		if (dist<gun_range)
-			return 1+(rand()%MEDIUM_PRIORITY);
+			return MEDIUM_PRIORITY;
 		if (dist<missile_range)
-			return 1+(rand()%LOW_PRIORITY);
+			return LOW_PRIORITY;
 		if (targ){
 			float speed;
 			un->getAverageGunSpeed(speed,gun_range,missile_range);
 			double distance=UnitUtil::getDistance(un,targ);
 			if (distance<=gun_range)
-				return 1+(rand()%NOT_VISIBLE_COMBAT_HIGH);
+				return NOT_VISIBLE_COMBAT_HIGH;
 			if (distance<missile_range)
-				return 1+(rand()%NOT_VISIBLE_COMBAT_MEDIUM);
-			return 1+(rand()%NOT_VISIBLE_COMBAT_LOW);
+				return NOT_VISIBLE_COMBAT_MEDIUM;
+			return NOT_VISIBLE_COMBAT_LOW;
 		}
-		return 1+(rand()%NO_ENEMIES);
+		return NO_ENEMIES;
 	}
 
 	void orbit (Unit * my_unit, Unit * orbitee, float speed, QVector R, QVector S, QVector center) {
