@@ -314,14 +314,16 @@ void	NetBuffer::addFloat( float f)
 		{
 			int tmpsize = sizeof( f);
 			resizeBuffer( offset+tmpsize);
-			POSH_WriteU32ToBig( this->buffer+offset, POSH_BigFloatBits( f));
+			posh_u32_t bits = POSH_BigFloatBits( f );
+			*((posh_u32_t*)(offset+tmpsize)) = bits;
 			offset += tmpsize;
 		}
 float	NetBuffer::getFloat()
 		{
 			float s;
 			checkBuffer( sizeof( s), "getFloat");
-			s = POSH_FloatFromBigBits( POSH_ReadU32FromBig( this->buffer+offset));
+			posh_u32_t bits = *((posh_u32_t*)(this->buffer+offset));
+			s = POSH_FloatFromBigBits( bits );
 			offset+=sizeof(s);
 			return s;
 		}
