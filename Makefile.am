@@ -1053,4 +1053,4 @@ headers:
 
 .PHONY: clean-local
 clean-local:
-	find . -name '*.h.gch' -delete
+	rm -f `find . -name '*.h.gch'`
