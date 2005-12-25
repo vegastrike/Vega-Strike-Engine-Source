@@ -191,9 +191,9 @@ bool SOCKETALT::lowerAddress( const SOCKETALT& right ) const
     }
 }
 
-void SOCKETALT::addToSet( SocketSet &set )
+void SOCKETALT::addToSet( SocketSet &sockset )
 {
-	if ( _sock ) set.set( &(*this->_sock) );
+	if ( _sock ) sockset.set( &(*this->_sock) );
 }
 
 const AddressIP &SOCKETALT::getRemoteAddress() const {

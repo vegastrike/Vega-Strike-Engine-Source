@@ -8,6 +8,7 @@
 #include "cg_global.h"
 #include "SDL/SDL.h"
 #include "gfx/hud.h"
+#include "gldrv/winsys.h"
 #include <sstream>
 // ****************
 // Console Rendering System by Rogue
@@ -236,12 +237,12 @@ void RText::saycommand(char *init)///
 };
 // }}}
 // Console Keyboard Input {{{
-void RText::ConsoleKeyboardI(int code, bool isdown, int cooked)
+void RText::ConsoleKeyboardI(int code, bool isdown)
 {
 	if(isdown) {
 		switch(code){
 //pop teh back of commandbuf
-	                case SDLK_BACKSPACE:
+	                case WSK_BACKSPACE:
 				{
 				std::string::iterator iter = commandbuf.begin();
 				if(iter < commandbuf.end()) {
@@ -251,13 +252,13 @@ void RText::ConsoleKeyboardI(int code, bool isdown, int cooked)
 				}
 				break;
 				}
-	                case SDLK_LEFT:
+	                case WSK_LEFT:
 //this should move a put pointer for commandbuf
 //right should move it the other way.
 //		                for(int i = 0; commandbuf[i]; i++) if(!commandbuf[i+1]) commandbuf[i] = 0;
 		        break;
 
-			case SDLK_RETURN:
+			case WSK_RETURN:
 				if(commandbuf[0])
 				{
 					
@@ -288,11 +289,9 @@ void RText::ConsoleKeyboardI(int code, bool isdown, int cooked)
 				break;
 			default:
 //add it to the command buffer
-				if(cooked) {
-					char add[] = { cooked, 0};
-					std::string l;
-					l += add;
-					commandbuf.append(l);
+				if (code>0&&code<256) {
+					unsigned char k = (unsigned char)code;
+					commandbuf+=k;
 				};
 				break;
 		}

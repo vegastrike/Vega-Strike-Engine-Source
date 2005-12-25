@@ -2145,10 +2145,10 @@ void GameCockpit::Draw() {
       dietime=0;
     }    
   }
-  if(CommandInterpretor.console){
-    GFXColorf(textcol);
-    CommandInterpretor.renderconsole();
-  }
+  //if(CommandInterpretor.console){
+  //  GFXColorf(textcol);
+  //  CommandInterpretor.renderconsole();
+  //}
   GFXAlphaTest (ALWAYS,0);  
   static bool mouseCursor = XMLSupport::parse_bool (vs_config->getVariable ("joystick","mouse_cursor","false"));
   if (mouseCursor&&screenshotkey==false) {  

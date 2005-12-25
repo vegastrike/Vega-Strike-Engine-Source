@@ -1,5 +1,4 @@
 #ifndef _DRAWLIST_H_
-
 #define _DRAWLIST_H_
 
 #include <stdlib.h>

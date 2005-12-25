@@ -11,11 +11,6 @@
 
 //this class is ONLY used by commandI.
 //it encapsulates a function pointer, with a name and an ARG_TYPE.
-class RegisterPythonWithCommandInterp {
-        public:
-                RegisterPythonWithCommandInterp();
-                void runPy(std::string &argsin);
-};
 class coms {
         public:
         coms(TFunctor *t_in);
@@ -81,7 +76,7 @@ class menu {
 };
 
 class commandI : public RText {
-        private:
+	private:
 		//new command interpretor
 //                static std::vector<coms *> commands; //our vector of POINTERS
                         //to encapsulated COM objects. (see top of this file)
@@ -95,13 +90,17 @@ class commandI : public RText {
 		bool menumode;
 //		object *player; -- player object
 		std::string lastcommand;
-        public:
+	public:
 		commandI();		
 //                commandI(mud *mud_in);
 //		commandI(mud *mud_in, object *player_in);
 		virtual ~commandI();
+
 		bool console;
 		bool immortal;
+		
+		static void keypress(int code, int modifiers, bool isDown, int x, int y);
+		
 		bool getmenumode() { return menumode; };
                 //creates a coms object, adds it to the command vector
                 //if args is not supplied it assumes your function
@@ -134,6 +133,12 @@ class commandI : public RText {
 		virtual std::string display(std::string &s); // build parts
 		//of the menu, eg, if(s.compare("SHIPNAME") == 0 )return editingship->Name;
 		
+};
+
+class RegisterPythonWithCommandInterpreter {
+public:
+	RegisterPythonWithCommandInterpreter(commandI *cI);
+	void runPy(std::string &argsin);
 };
 
 enum { ARG_1INT, ARG_NONE, ARG_1STR, ARG_2STR, ARG_1CSTR, ARG_2CSTR, ARG_1CSTRARRAY, ARG_1BOOL, ARG_1STRVEC, ARG_1STRVECSPEC, ARG_1STRSPEC };

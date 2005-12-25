@@ -69,8 +69,6 @@
 #include "cg_global.h"
 #endif
 
-commandI CommandInterpretor;
-
 int nadanixnuthin() {
   float a=0;
   int test=0;
@@ -299,9 +297,12 @@ int main( int argc, char *argv[] )
 
 #endif
     */
-
-    //Register commands
-    InitShipCommands();
+      //Register commands
+      // COmmand Interpretor Seems to break VC8, so I'm leaving disabled for now - Patrick, Dec 24
+	if (XMLSupport::parse_bool(vs_config->getVariable("general","command_interpretor","false"))) {
+		CommandInterpretor = new commandI;
+		InitShipCommands();
+	}
 
     _Universe= new GameUniverse(argc,argv,vs_config->getVariable ("general","galaxy","milky_way.xml").c_str());
 	//_Universe.Init(argc, argv, vs_config->getVariable ("general","galaxy","milky_way.xml").c_str());

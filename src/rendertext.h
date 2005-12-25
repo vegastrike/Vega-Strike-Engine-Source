@@ -33,7 +33,7 @@ class RText {
 		//add a line to the console(Use this one.)
 		void saycommand(char *init); //actually does the appending of
 			//the string to the commandbuf, and seperates entries
-		void RText::ConsoleKeyboardI(int code, bool isdown, int cooked);
+		void RText::ConsoleKeyboardI(int code, bool isdown);
 			//interpret keyboard input to the console
 		void RText::conoutn(std::string &in, int a, int b, int c);
 };

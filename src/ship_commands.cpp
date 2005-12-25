@@ -3,6 +3,7 @@
 #include "xml_support.h"
 #include "vs_globals.h"
 #include "universe_util.h"
+#include "gldrv/winsys.h"
 
 static inline float fmin(float a, float b) { return (a<b)?a:b; };
 static inline float fmax(float a, float b) { return (a>b)?a:b; };
@@ -26,9 +27,9 @@ class ShipCommands {
 		ShipCommands() {
 			//create some functors, register them with the command interp {{{
 			cpymenu = new Functor<ShipCommands>(this, &ShipCommands::pymenu);
-			CommandInterpretor.addCommand(cpymenu, "pymenu");
+			CommandInterpretor->addCommand(cpymenu, "pymenu");
 			csetkps = new Functor<ShipCommands>(this, &ShipCommands::setkps);
-			CommandInterpretor.addCommand(csetkps, "setspeed");
+			CommandInterpretor->addCommand(csetkps, "setspeed");
 			// }}}
 			// set some local bools false {{{
 			broll = false;
@@ -40,7 +41,7 @@ class ShipCommands {
 			// a test menu {{{
 			{
 				menu *m = new menu("python test", "This is a test of the menusystem", "\r\n");
-				CommandInterpretor.addMenu(m);
+				CommandInterpretor->addMenu(m);
 				{
 					mItem *mi = new mItem;
 					mi->autoreprint = true;
@@ -52,7 +53,7 @@ class ShipCommands {
 					mi->selectstring.append("Type a single line of Python"); // call function "Display" with this string
 //					mi->predisplay.append("Python");
 					
-					CommandInterpretor.addMenuItem(mi);
+					CommandInterpretor->addMenuItem(mi);
 				}
 				{
 					mItem *mi = new mItem;
@@ -65,14 +66,14 @@ class ShipCommands {
 					mi->inputbit2 = true; // set single-line input mode
 					mi->selectstring.append("Type multiple lines of python input. Use <ENTER> on a line ALONE to finish"); //Call function "Display" with this string
 //					mi->predisplay.append(""); // this would be called if we wanted to look up a value of something on another object, using this string to do the lookup
-					CommandInterpretor.addMenuItem(mi);
+					CommandInterpretor->addMenuItem(mi);
 				}
 			}
 			// }}}
 		}
 		~ShipCommands() {
-			CommandInterpretor.remCommand(cpymenu);
-			CommandInterpretor.remCommand(csetkps);
+			CommandInterpretor->remCommand(cpymenu);
+			CommandInterpretor->remCommand(csetkps);
 		}
 		void pymenu();
 		void left(bool *isKeyDown);
@@ -85,8 +86,8 @@ class ShipCommands {
 // these _would_ work if the physics routines polled the ship_commands object
 // for these bools.. 
 void ShipCommands::pymenu() {
-        std::string response(CommandInterpretor.setMenu("python test"));
-        CommandInterpretor.conoutf(response);
+        std::string response(CommandInterpretor->setMenu("python test"));
+        CommandInterpretor->conoutf(response);
 }
 void ShipCommands::left(bool *isKeyDown) {
 	bleft = isKeyDown;

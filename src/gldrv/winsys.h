@@ -74,7 +74,22 @@ typedef enum {
     WSK_KP_PLUS = SDLK_KP_PLUS,
     WSK_KP_ENTER = SDLK_KP_ENTER,
     WSK_KP_EQUALS = SDLK_KP_EQUALS,
-
+	
+	WSK_RETURN = 13,
+	WSK_TAB = '\t',
+	WSK_ESCAPE = 27,
+	WSK_BACKSPACE =
+#ifdef __APPLE__
+    127,
+#else
+    8,
+#endif
+	WSK_DELETE = 
+#ifdef __APPLE__
+    8,
+#else
+    127,
+#endif
     /* Arrows + Home/End pad */
     WSK_UP = SDLK_UP,
     WSK_DOWN = SDLK_DOWN,
@@ -186,6 +201,22 @@ typedef enum {
     WSK_KP_PLUS = 0,
     WSK_KP_ENTER = 0,
     WSK_KP_EQUALS = 0,
+
+	WSK_RETURN = 13,
+	WSK_TAB = '\t',
+	WSK_ESCAPE = 27,
+	WSK_BACKSPACE =
+#ifdef __APPLE__
+    127,
+#else
+    8,
+#endif
+	WSK_DELETE = 
+#ifdef __APPLE__
+    8,
+#else
+    127,
+#endif
 
     /* Arrows + Home/End pad */
     WSK_UP = GLUT_KEY_UP+128,

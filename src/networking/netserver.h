@@ -30,7 +30,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include "configxml.h"
 #include "networking/accountsxml.h"
 #include "networking/const.h"

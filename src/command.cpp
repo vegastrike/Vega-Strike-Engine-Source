@@ -3,7 +3,8 @@
 #include <Python.h>
 #include <pyerrors.h>
 #include <pythonrun.h>
-
+#include "gldrv/winsys.h"
+#include "main_loop.h"
 #include "vs_random.h"
 #include "python/python_class.h"
 
@@ -39,19 +40,19 @@ class WalkControls {
 
 
 
-			CommandInterpretor.addCommand(ctalk, "say", ARG_1STR); //1 c++ string argument,
+			CommandInterpretor->addCommand(ctalk, "say", ARG_1STR); //1 c++ string argument,
 			// CommandInterpretor is a global (defined in vs_globals.h or 
 			// vegastrike.h (don't remember which) and created in main.cpp
  // ******************************* 2
 			Functor<WalkControls> *ctalk = new Functor<WalkControls>(this, &WalkControls::talk);
-			CommandInterpretor.addCommand(ctalk, "order", ARG_1STRVEC); 
+			CommandInterpretor->addCommand(ctalk, "order", ARG_1STRVEC); 
 // easy way to scroll through arguments to make logical desicions aboot them.
 // use std::vector<std::string *>::iterator iter = d->begin(); 
 // and (*(iter))->c_str() or (*(iter))->compare etc. iter++ to go up 
 // iter-- to go down, and if(iter >= d->end()) to check and see if it's at the end.
   // ******************************* 3
 			Functor<WalkControls> *dWalkLeft = new Functor<WalkControls>(this, &WalkControls::WalkLeft);
-			CommandInterpretor.addCommand(dWalkLeft, "left", ARG_1BOOL);
+			CommandInterpretor->addCommand(dWalkLeft, "left", ARG_1BOOL);
 			//to use this, there'd need to be a mechanism to bind
 			//a single charactor to a full command, then when that
 			//charactor is passed alone to execute it should translate it to 
@@ -146,10 +147,10 @@ You could create a new object: (psuedo)
 		Functor<WOP> *leftCommand;
 		walkOnPlanet() { 
 			leftCommand = new Functor<WOP>(This, &walkOnPlanet::left);
-			CommandInterpretor.addCommand(leftCommand, "left"); //adding the second left command will automagically override the first
+			CommandInterpretor->addCommand(leftCommand, "left"); //adding the second left command will automagically override the first
 	}
 	~walkOnPlanet() {
-		CommandInterpretor.remCommand(leftCommand); //by passing it by pointer we can be assured the right one will be removed, in case commands are added/removed out of order
+		CommandInterpretor->remCommand(leftCommand); //by passing it by pointer we can be assured the right one will be removed, in case commands are added/removed out of order
 	}
 	void left(bool isDown) {
 		perform different ops
@@ -375,10 +376,12 @@ why:
 			for(std::vector<procs>::iterator iter = cmds.begin(); iter < cmds.end(); iter++) {
 				if(in == (*(iter)).proc) return (&(*(iter)));
 			}
+			return NULL;
 		}
 }; 
 //mmoc initclientobject;
-RegisterPythonWithCommandInterp fuckingsonofatwotimingwhoringlioness;
+
+// Formerly RegisterPythonWithCommandInterp f***ingsonofat***w***lioness;
 
 // We use a pointer so we can initialize it in addCommand, which can, and does 
 // run before the command interpretor constructor, and before all local variables
@@ -410,6 +413,7 @@ commandI::commandI() {
 	menumode = false;
 	immortal = false;
 	console = false;
+	new RegisterPythonWithCommandInterpreter(this); // mem leak - not cleaned up at end of program.
 	// }}}
 };
 // }}}
@@ -526,9 +530,9 @@ void commandI::pcommands() {
 // {{{ addCommand - Add a command to the interpreter
 void commandI::addCommand(TFunctor *com, char *name){
 	std::cout << "Adding command: " << name << std::endl;
-	coms newOne = new coms(com); 
+	coms *newOne = new coms(com); 
 	// See the very bottom of this file for comments about possible optimization
-	newOne.Name.append(name);
+	newOne->Name.append(name);
 	//push the new command back the vector.
 	if(!rcCMDEXISTS && rcCMD == 0x0) {
 		if(rcCMD != 0x0) {
@@ -537,7 +541,7 @@ void commandI::addCommand(TFunctor *com, char *name){
 		rcCMD = new HoldCommands(); 
 		rcCMDEXISTS = true; 
 	}; 
-	rcCMD->addCMD(newOne, this);
+	rcCMD->addCMD(*newOne, this);
 //        rcCMD->rc.push_back(newOne);
 };
 // }}}
@@ -754,7 +758,7 @@ bool commandI::execute(std::string *incommand, bool isDown, int sock_in)
 			char *name_out = NULL;
 			if(l.size() > 0) name_out = (char *)l.c_str();
 			if(callMenu(name_out, (char *)y.c_str(), t) ) return false;
-			incommand->clear();
+			*incommand=std::string();
 			incommand->append(t); //t may have changed if we got this far
 		}
 
@@ -783,7 +787,7 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 	for(y = incommand->find("\r\n"); y != std::string::npos; y = incommand->find("\r\n", y+1)) {
                 incommand->replace(y, 2, "");
         }
-	for(size_t y = incommand->find("  "); y != std::string::npos; y = incommand->find("  ", y+1)) {
+	for(y = incommand->find("  "); y != std::string::npos; y = incommand->find("  ", y+1)) {
 		incommand->replace(y, 1, "");
 	}
 
@@ -1275,7 +1279,7 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 					funcn.append(menu_in->iselected->func2call);
 					std::string dreplace;
 					dreplace.append(d);
-					d.clear();
+					d=std::string();
 					d.append(funcn);
 					d.append(" ");
 					d.append(arg);
@@ -1347,16 +1351,18 @@ void commandI::breakmenu() {
 };
 // }}}
 
-extern commandI CommandInterpretor;
+commandI *CommandInterpretor = NULL;
+
 // {{{ Python object
 
-RegisterPythonWithCommandInterp::RegisterPythonWithCommandInterp() {
-	Functor<RegisterPythonWithCommandInterp> *l = new Functor<RegisterPythonWithCommandInterp>(this, &RegisterPythonWithCommandInterp::runPy);
-	CommandInterpretor.addCommand(l, "python");
+RegisterPythonWithCommandInterpreter::RegisterPythonWithCommandInterpreter(commandI *addTo) {
+	Functor<RegisterPythonWithCommandInterpreter> *l = new Functor<RegisterPythonWithCommandInterpreter>
+		(this, &RegisterPythonWithCommandInterpreter::runPy);
+	addTo->addCommand(l, "python");
 }
 
 //run a python string
-void RegisterPythonWithCommandInterp::runPy(std::string &argsin) {
+void RegisterPythonWithCommandInterpreter::runPy(std::string &argsin) {
 	std::string pyRunString;
 	pyRunString.append(argsin); //append the arguments in to the string to run
 	size_t x = pyRunString.find("python "); //strip out the name of the command
@@ -1380,6 +1386,61 @@ void RegisterPythonWithCommandInterp::runPy(std::string &argsin) {
 }
 
 // }}};
+
+/*---------------------------------------------------------------------------*/
+/*!
+  New input wrapper for new Command Processor SDL version
+  \author  Rogue
+  \date    Created:  2005-8-16
+*/
+
+//if(!keypress(event.key.keysym.sym, event.key.state==SDL_PRESSED, event.key.keysym.unicode))
+void commandI::keypress(int code, int modifiers, bool isDown, int x, int y) {
+	
+	if(CommandInterpretor && CommandInterpretor->console) {
+		if(code==WSK_ESCAPE) {
+			CommandInterpretor->console = false;
+			restore_main_loop();
+//			SDL_EnableUNICODE(false);
+			return;
+		};
+		if(code==WSK_RETURN && isDown) {
+			std::string commandBuf = CommandInterpretor->getcurcommand();
+			commandBuf.append("\r\n"); 
+			CommandInterpretor->execute(&commandBuf, isDown, 0); //execute console on enter
+			//don't return so the return get's processed by
+			//CommandInterpretor->ConsoleKeyboardI, so it can clear the
+			//command buffer
+		}
+		CommandInterpretor->ConsoleKeyboardI(code, isDown); 
+		return;
+	} else {
+		restore_main_loop();
+		return;
+	}
+	
+/* Proposed (Would need a couple commands inserted into the command processor
+	// one to read a keymap file and one to re-map a single key
+	// (and the keymap file would have to be read at startup)
+	// struct keym { int code; char * name; char * action; }; or so
+	std::vector<KeyMapObject>::iterator iter = keyMapVector.begin();
+        while(iter < keyMapVector.end()) {
+            keym *tester = &(*(iter));
+            if(tester->code == code){
+            // lookup in keymap and execute
+            if(tester->action)
+                    execCommand(tester->action, isdown);
+                return true; 
+            }
+            iter++;
+        }
+    }
+
+
+
+*/
+}
+
 
 
 /* ***************************************************************
@@ -1417,10 +1478,13 @@ namespace ConsoleKeys {
     {
         //this way, keyboard state stays synchronized
         if(newState==RELEASE){
-            CommandInterpretor.console = true;
+			if (CommandInterpretor) {
+				winsys_set_keyboard_func((winsys_keyboard_func_t)&commandI::keypress);
+	            CommandInterpretor->console = true;
 #if HAVE_SDL
-            SDL_EnableUNICODE(true);
+	            SDL_EnableUNICODE(true);
 #endif
+			}
         }
     }
 

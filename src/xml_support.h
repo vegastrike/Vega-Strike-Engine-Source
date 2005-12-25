@@ -12,6 +12,11 @@
 #include <iostream>		// needed for cout calls in config_xml.cpp (and other places too i'm sure)
 #include "gfx/vec.h"
 
+#if defined(_MSC_VER)&&defined(_WIN32)&&(_MSC_VER >= 1400)
+// Disable useless "sprintf depricated" errors in Visual Studio 2005 Express.
+#pragma warning(disable : 4996)
+#endif
+
 #define ARRAY_LENGTH(a) (sizeof(a)/sizeof(a[0]))
 
 using std::string;
