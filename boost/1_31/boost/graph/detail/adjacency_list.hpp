@@ -1043,7 +1043,7 @@ namespace boost {
       detail::remove_edge_and_property(g, g.out_edge_list(u), v, Cat());
       detail::erase_from_incidence_list(in_edge_list(g, v), u, Cat());
     }
-
+#if !defined(_MSC_VER) || _MSC_VER>=1300
     // O(E/V) or O(log(E/V))
     template <class Config>
     inline void
@@ -1053,6 +1053,7 @@ namespace boost {
       graph_type& g = static_cast<graph_type&>(*this);
       boost::remove_edge(source(e, g), target(e, g), *this);
     }
+#endif
     // O(E/V) or O(log(E/V))
     template <class EdgeOrIter, class Config>
     inline void

@@ -424,9 +424,9 @@ PyObject* class_t<T>::instance_number_divmod(PyObject* obj, PyObject* other) con
 }
 
 template <class T>
-PyObject* class_t<T>::instance_number_power(PyObject* obj, PyObject* exponent, PyObject* modulus) const
+PyObject* class_t<T>::instance_number_power(PyObject* obj, PyObject* exponent, PyObject* modulusp) const
 {
-    return downcast<T>(obj)->power(exponent, modulus);
+    return downcast<T>(obj)->power(exponent, modulusp);
 }
 
 template <class T>
@@ -556,9 +556,9 @@ PyObject* class_t<T>::instance_number_inplace_remainder(PyObject* obj, PyObject*
 }
 
 template <class T>
-PyObject* class_t<T>::instance_number_inplace_power(PyObject* obj, PyObject* exponent, PyObject* modulus) const
+PyObject* class_t<T>::instance_number_inplace_power(PyObject* obj, PyObject* exponent, PyObject* modulusp) const
 {
-    return downcast<T>(obj)->inplace_power(exponent, modulus);
+    return downcast<T>(obj)->inplace_power(exponent, modulusp);
 }
 
 template <class T>
