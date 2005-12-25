@@ -22,7 +22,6 @@
 //If you wish to disable this module, just comment out that single line in command.cpp,
 //and don't compile this .cpp file. 
 
-extern commandI CommandInterpretor;
 mmoc::mmoc() { // {{{
 	status = false; // used to let the thread exit
 	binmode = false;
@@ -30,7 +29,7 @@ mmoc::mmoc() { // {{{
 	INET_startup();
 	//add the connectto to the players command interp.
 	cmd = new Functor<mmoc>(this, &mmoc::connectTo);
-	CommandInterpretor.addCommand(cmd, "connectto");
+	CommandInterpretor->addCommand(cmd, "connectto");
 	// {{{
 	//add commands here to be parsed from network input.
 	//some notes:
@@ -48,7 +47,7 @@ void mmoc::connectTo(const char *address_in, const char *port_in) { // {{{
 	char *address = (char *)address_in;
 	char *port = (char *)port_in;
 	if(address == NULL) {
-		CommandInterpretor.conoutf( "Need a host at least, a host and port at most!");;
+		CommandInterpretor->conoutf( "Need a host at least, a host and port at most!");;
 		return;
 	}
 	if(port == NULL) {
@@ -62,13 +61,13 @@ void mmoc::connectTo(const char *address_in, const char *port_in) { // {{{
 		port = "5555";
 	}
     if( (socket =  INET_ConnectTo(address, atoi(port)) )< 0) {
-		CommandInterpretor.conoutf("Error connecting. Specify another host or verify the status if your network connection.");
+		CommandInterpretor->conoutf("Error connecting. Specify another host or verify the status if your network connection.");
 		return;
     }
 
 //	hostent *server;  // Resolve name
 //	if ((server = gethostbyname(address)) == NULL) {
-//		CommandInterpretor.conoutf("Error, couldn't find host");
+//		CommandInterpretor->conoutf("Error, couldn't find host");
 		// strerror() will not work for gethostbyname() and hstrerror() 
 		// is supposedly obsolete
 //	return;
@@ -83,17 +82,17 @@ void mmoc::connectTo(const char *address_in, const char *port_in) { // {{{
 //	int status = 0;
 
 //	if ( (status = ::connect(socket,reinterpret_cast<sockaddr *>(&m_addr),sizeof(m_addr))) < 0) {
-//		CommandInterpretor.conoutf("Couldn't Connect\n");
+//		CommandInterpretor->conoutf("Couldn't Connect\n");
 //		return;
 //	}
 	std::string hellomsg;
 	hellomsg.append("Vegastrike-user");
 	send(hellomsg);
 	cl = new Functor<mmoc>(this, &mmoc::close);
-	CommandInterpretor.addCommand(cl, "disconnect");
+	CommandInterpretor->addCommand(cl, "disconnect");
 	
     csay = new Functor<mmoc>(this, &mmoc::send);
-    CommandInterpretor.addCommand(csay, "send");
+    CommandInterpretor->addCommand(csay, "send");
 
 	createThread(); 
 } // }}}
@@ -168,7 +167,7 @@ void mmoc::ParseRemoteInput(char *buf) { // {{{ Main parser
 			ender = start.size();
 		}
 	}
-	CommandInterpretor.conoutf(start); //print what's left to the console
+	CommandInterpretor->conoutf(start); //print what's left to the console
 
 	start.erase();
 	if(tempstr.size() > 0) {
@@ -252,13 +251,13 @@ void mmoc::ParseMovement(POSpack &in) {
 int startThread(void *mmoc2use) { // {{{
 	mmoc *looper = reinterpret_cast<mmoc *>(mmoc2use);
 	if(!looper->getStatus(0)) looper->getStatus(1);
-	CommandInterpretor.conoutf("Connected.");
+	CommandInterpretor->conoutf("Connected.");
 	while(looper->listenThread());
 
 	::close(looper->getSocket());
-	CommandInterpretor.remCommand(looper->csay);
-	CommandInterpretor.remCommand(looper->cl);
-	CommandInterpretor.conoutf("Closed");
+	CommandInterpretor->remCommand(looper->csay);
+	CommandInterpretor->remCommand(looper->cl);
+	CommandInterpretor->conoutf("Closed");
 	if(looper->getStatus(0)) looper->getStatus(1);
 	return 0;
 } // }}}
@@ -268,7 +267,7 @@ void mmoc::close() {
 	return;
 }
 void mmoc::conoutf(std::string &in, int x, int y, int z) {
-	CommandInterpretor.conoutf(in, x, y, z);
+	CommandInterpretor->conoutf(in, x, y, z);
 }
 /*
  * Local variables:
