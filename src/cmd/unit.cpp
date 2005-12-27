@@ -178,7 +178,7 @@ bool GameUnit<UnitType>::queryFrustum(double frustum [6][4]) const{
 				)){
 	  return true;
 	}
-  }	
+  }
   un_fkiter iter =this->SubUnits.constFastIterator();
   const Unit * un;
   while ((un = iter.current())) {
@@ -216,6 +216,17 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
 
   if (rootunit==NULL) rootunit=(const void*)this;
 
+  float damagelevel;
+  unsigned char chardamage;
+  damagelevel=this->hull/this->maxhull;
+  chardamage=(255 - (unsigned char)(damagelevel*255));
+
+#ifdef VARIABLE_LENGTH_PQR
+  const float vlpqrScaleFactor = SizeScaleFactor;
+#else
+  const float vlpqrScaleFactor = 1.f;
+#endif
+
   unsigned int i;
   Matrix mat(mato);
   if (this->graphicOptions.FaceCamera){
@@ -236,13 +247,8 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
       continue;
     Vector TransformedPosition = Transform (mat,
 					    this->meshdata[i]->Position());
-      float d = GFXSphereInFrustum(TransformedPosition,
-				   this->meshdata[i]->rSize()
-#ifdef VARIABLE_LENGTH_PQR
-				   *SizeScaleFactor
-#endif 
-				   );
-      if (d) {  //d can be used for level of detail 
+      float d = GFXSphereInFrustum(TransformedPosition,this->meshdata[i]->rSize()*vlpqrScaleFactor);
+      if (d) {  //d can be used for level of detail
           //this->meshdata[i]->DrawNow(lod,false,mat,cloak);//cloakign and nebula
           this->meshdata[i]->Draw(lod,mat,d,cloak);
       }
@@ -273,55 +279,42 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
     Vector Scale (1,1,enginescale/(cmas));*/
     Vector Scale (1,1,1); //Now HaloSystem should handle it
 #endif
+
   int nummounts= this->GetNumMounts();
   for (i=0;(int)i<nummounts;i++) {
     static bool draw_mounts = XMLSupport::parse_bool (vs_config->getVariable ("graphics","draw_weapons","false"));
     Mount * mahnt = &this->mounts[i];
     if (draw_mounts) {
-		
+
 //      Mesh * gun = WeaponMeshCache::getCachedMutable (mounts[i]->type->weapon_name);
-	 if (mahnt->xyscale!=0&&mahnt->zscale!=0) {		
-           Mesh * gun = mahnt->type->gun;	  
-           if (gun&&mahnt->status!=Mount::UNCHOSEN) {
-             glEnable(GL_NORMALIZE);
-             Transformation mountLocation(mahnt->GetMountOrientation(),mahnt->GetMountLocation().Cast());
-             Matrix mountmat; mountLocation.to_matrix(mountmat);
-             Matrix ct;
-             MultMatrix(ct,mat,mountmat);
-             ScaleMatrix(ct,Vector(mahnt->xyscale,mahnt->xyscale,mahnt->zscale));
-             gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));
-
-             //gun->DrawNow(lod,0,ct,1,cloak);//cloakign and nebula
-             float d = GFXSphereInFrustum(mountLocation.position,
-                 gun->rSize()
-#ifdef VARIABLE_LENGTH_PQR
-                 *SizeScaleFactor
-#endif 
-                 );
-             if (true) gun->Draw(lod,ct,d,cloak); // drawing guns in bases was broken, which is about the only time this is used
-
-             if (mahnt->type->gun1){
-               gun = mahnt->type->gun1;
-               gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));
-
-               //gun->DrawNow(lod,0,ct,1,cloak);//cloakign and nebula			  
-               float d = GFXSphereInFrustum(mountLocation.position,
-                   gun->rSize()
-#ifdef VARIABLE_LENGTH_PQR
-                   *SizeScaleFactor
-#endif 
-                   );
-               if (true) gun->Draw(lod,ct,d,cloak);
-             }
-             glDisable(GL_NORMALIZE);
-           }
+	 if (mahnt->xyscale!=0&&mahnt->zscale!=0) {
+      Mesh * gun = mahnt->type->gun;
+      if (gun&&mahnt->status!=Mount::UNCHOSEN) {
+		  Transformation mountLocation(mahnt->GetMountOrientation(),mahnt->GetMountLocation().Cast());
+          mountLocation.Compose (Transformation::from_matrix(mat),this->WarpMatrix(mat));
+		  Matrix mmat;
+		  mountLocation.to_matrix(mmat);
+          if (GFXSphereInFrustum(mountLocation.position,gun->rSize()*vlpqrScaleFactor) > 0) {
+              float d = (mountLocation.position-_Universe->AccessCamera()->GetPosition()).Magnitude();
+              float lod = g_game.detaillevel*g_game.x_resolution*2*gun->rSize()/GFXGetZPerspective((d-gun->rSize()<g_game.znear)?g_game.znear:d-gun->rSize());
+		      ScaleMatrix(mmat,Vector(mahnt->xyscale,mahnt->xyscale,mahnt->zscale));
+		      gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));
+		      gun->Draw(lod,mmat,d,cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,chardamage,true);//cloakign and nebula
+		      if (mahnt->type->gun1){
+			      gun = mahnt->type->gun1;
+			      gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));
+			      gun->Draw(lod,mmat,d,cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,chardamage,true);//cloakign and nebula			  
+		      }
+          }
+      }
 	 }
     }
   }
+
   Vector accel = this->GetAcceleration();
   float maxaccel = this->GetMaxAccelerationInDirectionOf(mat.getR(),true);
   Vector velocity = this->GetVelocity();
-  if (halos.ShouldDraw (mat,velocity,accel,maxaccel,cmas)) 
+  if (halos.ShouldDraw (mat,velocity,accel,maxaccel,cmas) && !(docked&(DOCKED|DOCKED_INSIDE)))
     halos.Draw(mat,Scale,cloak,0, this->GetHullPercent(),velocity,accel,maxaccel,cmas,this->faction);
 
   if (rootunit==(const void*)this) {
@@ -341,6 +334,12 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
   bool topparent = _Universe->AccessCockpit()->GetParent()&&(_Universe->AccessCockpit()->GetParent()->owner == NULL);
   if (cam_setup_phase&&!ormygrampa&&(topparent||UnitType::SubUnits.empty()))
       return;*/
+
+#ifdef VARIABLE_LENGTH_PQR
+  const float vlpqrScaleFactor = SizeScaleFactor;
+#else
+  const float vlpqrScaleFactor = 1.f;
+#endif
 
   Matrix *ctm;
   Matrix invview;
@@ -415,12 +414,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 #endif
               
               //      VSFileSystem::vs_fprintf (stderr,"%s %d ",name.c_str(),i);
-              double d = GFXSphereInFrustum(TransformedPosition,
-                  minmeshradius+this->meshdata[i]->clipRadialSize()
-#ifdef VARIABLE_LENGTH_PQR
-                  *SizeScaleFactor
-#endif 
-                  );
+              double d = GFXSphereInFrustum(TransformedPosition,minmeshradius+this->meshdata[i]->clipRadialSize()*vlpqrScaleFactor);
               double lod;
               //      VSFileSystem::vs_fprintf (stderr,"\n");
               if (d) {  //d can be used for level of detail shit
@@ -509,16 +503,18 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 		  mountLocation.Compose (*ct,this->WarpMatrix(*ctm));
 		  Matrix mat;
 		  mountLocation.to_matrix(mat);
-                  float d = (mat.p-_Universe->AccessCamera()->GetPosition()).Magnitude();
-                  float lod =g_game.detaillevel*g_game.x_resolution*2*gun->rSize()/GFXGetZPerspective((d-gun->rSize()<g_game.znear)?g_game.znear:d-gun->rSize());
-		  ScaleMatrix(mat,Vector(mahnt->xyscale,mahnt->xyscale,mahnt->zscale));
-		  gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));
-		  gun->Draw(lod,mat,1,cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,chardamage,true);//cloakign and nebula
-		  if (mahnt->type->gun1){
-			  gun = mahnt->type->gun1;
-			  gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));
-			  gun->Draw(lod,mat,1,cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,chardamage,true);//cloakign and nebula			  
-		  }
+          if (GFXSphereInFrustum(mountLocation.position,gun->rSize()*vlpqrScaleFactor) > 0) {
+              float d = (mountLocation.position-_Universe->AccessCamera()->GetPosition()).Magnitude();
+              float lod = g_game.detaillevel*g_game.x_resolution*2*gun->rSize()/GFXGetZPerspective((d-gun->rSize()<g_game.znear)?g_game.znear:d-gun->rSize());
+		      ScaleMatrix(mat,Vector(mahnt->xyscale,mahnt->xyscale,mahnt->zscale));
+		      gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));
+		      gun->Draw(lod,mat,d,cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,chardamage,true);//cloakign and nebula
+		      if (mahnt->type->gun1){
+			      gun = mahnt->type->gun1;
+			      gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));
+			      gun->Draw(lod,mat,d,cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,chardamage,true);//cloakign and nebula
+		      }
+          }
       }
 	 }
 	}
@@ -532,7 +528,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
   if (cloak>=0) {
     haloalpha=((float)cloak)/2147483647;
   }
-  if (On_Screen&&(halos.NumHalos()>0)) {
+  if (On_Screen&&(halos.NumHalos()>0)&&!(docked&(DOCKED|DOCKED_INSIDE))) {
     Vector accel = this->GetAcceleration();
     float maxaccel = this->GetMaxAccelerationInDirectionOf(this->WarpMatrix(*ctm).getR(),true);
     Vector velocity = this->GetVelocity();
@@ -553,7 +549,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
     if (halos.ShouldDraw(this->WarpMatrix(*ctm),velocity,accel,maxaccel,cmas)) 
       halos.Draw(this->WarpMatrix(*ctm),Scale,cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,this->GetHull()>0?damagelevel:1.0,velocity,accel,maxaccel,cmas,this->faction);
   }
-  if (On_Screen&&!UnitType::graphicOptions.NoDamageParticles) {
+  if (On_Screen&&!UnitType::graphicOptions.NoDamageParticles&&!(docked&(DOCKED|DOCKED_INSIDE))) {
 	int numm = this->nummesh();
 	if (damagelevel<.99&&numm>0&&this->GetHull()>0) {
 		unsigned int switcher=(damagelevel>.8)?1:
