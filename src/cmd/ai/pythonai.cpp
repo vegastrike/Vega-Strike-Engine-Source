@@ -50,5 +50,5 @@ void PythonAI::InitModuleAI () {
   
 }
 PythonAI::~PythonAI () {
-  VSFileSystem::vs_fprintf (stderr,"Destruct called. If called from C++ this is death %d (%x)",this,this);
+  VSFileSystem::vs_fprintf (stderr,"Destruct called. If called from C++ this is death %ld (%lx)",(unsigned long)this,(unsigned long)this);
 }

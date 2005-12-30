@@ -536,7 +536,7 @@ using namespace UnitXML;
   float zscale=-1;
   bool tempbool;
   unsigned int dirfrac=0;
-  float fbrltb[6];
+  float fbrltb[6]={-1};
   AttributeList::const_iterator iter;
   float halocolor[4];
   int ammo=-1; //short fix
@@ -978,7 +978,6 @@ using namespace UnitXML;
     Q = QVector (0,1,0);
     R = QVector (0,0,1);
     pos = QVector (0,0,0);
-    fbrltb[0] =-1;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:

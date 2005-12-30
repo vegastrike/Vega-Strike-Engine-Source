@@ -122,7 +122,7 @@ bool flickerDamage (Unit * un, float hullpercent) {
 		  }
 		  diff = fmod (diff,tmpflicker);
 		  //we know counter is somewhere between 0 and damage level
-		  unsigned int thus = ((int)un)>>2;//cast this to an int for fun!
+		  unsigned int thus = ((unsigned int)(size_t)un)>>2;//cast this to an int for fun!
 		  thus = thus % ((unsigned int)tmpflicker);
 		  diff = fmod (diff+thus,tmpflicker);
 		  if (flickerofftime>diff) {

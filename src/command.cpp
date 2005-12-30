@@ -589,9 +589,9 @@ coms *commandI::findCommand(const char *comm, int &sock_in) {
 	size_t x;
 
 // remove \n and \r's (4 possible network input) {{{
-	for(x = name.find(" "); x != std::string::npos; x = name.find(" ", x+1)) name.replace(x, sizeof((int)"\n"), "");
-	for(x = name.find("\n"); x != std::string::npos; x = name.find("\n", x+1)) name.replace(x, sizeof((int)"\n"), "");
-	for(x = name.find("\r"); x != std::string::npos; x = name.find("\r", x+1)) name.replace(x, sizeof((int)"\r"), "");
+	for(x = name.find(' '); x != std::string::npos; x = name.find(' ', x+1)) name.erase(name.begin()+x);
+	for(x = name.find('\n'); x != std::string::npos; x = name.find('\n', x+1)) name.erase(name.begin()+x);
+	for(x = name.find('\r'); x != std::string::npos; x = name.find('\r', x+1)) name.erase(name.begin()+x);
 // }}}
 //if the input is less than one return prompt function{{{
 	if(name.size() < 1) {
@@ -1372,8 +1372,8 @@ void RegisterPythonWithCommandInterpreter::runPy(std::string &argsin) {
 //this method was copied from somewhere else in the vegastrike source
 	//now replace <BR> with \r\n
 	{
-		unsigned int x = pyRunString.find("<BR>");
-		while(x < std::string::npos) {
+		size_t x = pyRunString.find("<BR>");
+		while(x != std::string::npos) {
 			pyRunString.replace(x, 4, "\r\n");
 			x = pyRunString.find("<BR>");
 		}

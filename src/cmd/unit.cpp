@@ -314,7 +314,7 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
   Vector accel = this->GetAcceleration();
   float maxaccel = this->GetMaxAccelerationInDirectionOf(mat.getR(),true);
   Vector velocity = this->GetVelocity();
-  if (halos.ShouldDraw (mat,velocity,accel,maxaccel,cmas) && !(docked&(DOCKED|DOCKED_INSIDE)))
+  if (halos.ShouldDraw (mat,velocity,accel,maxaccel,cmas) && !(this->docked&(UnitType::DOCKED|UnitType::DOCKED_INSIDE)))
     halos.Draw(mat,Scale,cloak,0, this->GetHullPercent(),velocity,accel,maxaccel,cmas,this->faction);
 
   if (rootunit==(const void*)this) {
@@ -528,7 +528,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
   if (cloak>=0) {
     haloalpha=((float)cloak)/2147483647;
   }
-  if (On_Screen&&(halos.NumHalos()>0)&&!(docked&(DOCKED|DOCKED_INSIDE))) {
+  if (On_Screen&&(halos.NumHalos()>0)&&!(this->docked&(UnitType::DOCKED|UnitType::DOCKED_INSIDE))) {
     Vector accel = this->GetAcceleration();
     float maxaccel = this->GetMaxAccelerationInDirectionOf(this->WarpMatrix(*ctm).getR(),true);
     Vector velocity = this->GetVelocity();
@@ -549,7 +549,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
     if (halos.ShouldDraw(this->WarpMatrix(*ctm),velocity,accel,maxaccel,cmas)) 
       halos.Draw(this->WarpMatrix(*ctm),Scale,cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,this->GetHull()>0?damagelevel:1.0,velocity,accel,maxaccel,cmas,this->faction);
   }
-  if (On_Screen&&!UnitType::graphicOptions.NoDamageParticles&&!(docked&(DOCKED|DOCKED_INSIDE))) {
+  if (On_Screen&&!UnitType::graphicOptions.NoDamageParticles&&!(this->docked&(UnitType::DOCKED|UnitType::DOCKED_INSIDE))) {
 	int numm = this->nummesh();
 	if (damagelevel<.99&&numm>0&&this->GetHull()>0) {
 		unsigned int switcher=(damagelevel>.8)?1:

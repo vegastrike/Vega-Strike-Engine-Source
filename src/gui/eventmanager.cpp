@@ -61,7 +61,7 @@ void EventManager::addToDeleteQueue(EventResponder *controlToDelete) {
 	if (controlToDelete == NULL || find(deleteQueue.begin(), deleteQueue.end(), controlToDelete)!=deleteQueue.end()) {
 		bool DUPLICATE_DELETE_OF_OBJECT = true;
 		char tempstr[254];
-		sprintf(tempstr, "\nERROR: duplicate delete of object %X.\n\n", (int)controlToDelete);
+		sprintf(tempstr, "\nERROR: duplicate delete of object %lX.\n\n", (long unsigned int)controlToDelete);
 		fputs(tempstr, stderr);
 #if defined (_MSC_VER) && defined(_DEBUG) && 0
 		if (DEBUG_ERROR_IN_MY_CODE) {

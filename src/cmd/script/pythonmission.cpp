@@ -17,7 +17,7 @@ void PythonMissionBaseClass::Destructor () {
 	delete this;
 }
 PythonMissionBaseClass::~PythonMissionBaseClass(){
-	VSFileSystem::vs_fprintf (stderr,"BASE Destruct called. If called from C++ this is death %ld (0x%x)",(unsigned long)this,(unsigned int)this);
+	VSFileSystem::vs_fprintf (stderr,"BASE Destruct called. If called from C++ this is death %ld (0x%x)",(unsigned long)(size_t)this,(unsigned int)(size_t)this);
 }
 
 void PythonMissionBaseClass::Execute () {
