@@ -1402,7 +1402,7 @@ string Unit::WriteUnitString () {
               printedname="";
             }
             mountstr+="{"+printedname+";"+XMLSupport::tostring(mounts[j].ammo)+";"+XMLSupport::tostring(mounts[j].volume)+";"+lookupMountSize(mounts[j].size);
-            sprintf(mnt,";%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf}",
+            sprintf(mnt,";%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf}",
                     m.p.i/unitScale,
                     m.p.j/unitScale,
                     m.p.k/unitScale,
