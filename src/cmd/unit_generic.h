@@ -562,6 +562,8 @@ public:
   void *owner; //void ensures that it won't be referenced by accident
   ///The number of frames ahead this was put in the simulation queue
   unsigned int sim_atom_multiplier;
+  ///The number of frames ahead this is predicted to be scheduled in the next scheduling round
+  unsigned int predicted_priority;
   ///The previous state in last physics frame to interpolate within
   Transformation prev_physical_state;
   ///The state of the current physics frame to interpolate within

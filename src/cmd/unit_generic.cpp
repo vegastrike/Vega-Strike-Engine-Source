@@ -634,6 +634,7 @@ void Unit::Init()
   location=null_collide_map.begin();
   specInterdiction=0;
   sim_atom_multiplier=1;
+  predicted_priority=1;
   cur_sim_queue_slot=rand()%SIM_QUEUE_SIZE;
   last_processed_sqs=0;
   do_subunit_scheduling=false;

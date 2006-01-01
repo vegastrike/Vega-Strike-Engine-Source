@@ -412,8 +412,16 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
       while((unit = iter.current())!=NULL) {
         int priority=UnitUtil::getPhysicsPriority(unit);
 		// Doing spreading here and only on priority changes, so as to make AI easier
-		if (priority!=unit->sim_atom_multiplier){
+
+		//If the priority has really changed (not an initial scattering, because prediction doesn't match)
+		if (priority!=unit->predicted_priority){
+			//Save priority value as prediction for next scheduling
+			unit->predicted_priority=priority;
+			//Scatter, so as to achieve uniform distribution
             priority = 1 + (((unsigned int)vsrandom.genrand_int32())%priority);
+		} else {
+			//Save priority value as prediction
+			unit->predicted_priority=priority;
 		}
         
 	    int newloc=(current_sim_location+priority)%SIM_QUEUE_SIZE;
