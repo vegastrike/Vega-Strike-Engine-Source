@@ -298,7 +298,7 @@ void file_ok_auto_sel( GtkWidget        *w,
 }
 
 void hello( GtkWidget *widget, gpointer   data ) {
-    int i=(int)data;
+    int i=(int)(size_t)data;
     int pid=0;
     switch (i) {
     case 5:
