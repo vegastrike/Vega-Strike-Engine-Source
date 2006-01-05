@@ -188,61 +188,66 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 #ifdef NOBOUNCECOLLISION
 #else
     static float bouncepercent = XMLSupport::parse_float (vs_config->getVariable ("physics","BouncePercent",".1"));
-	
-	float m1=smalle->GetMass(),m2=GetMass();
-    
-	//Vector Elastic_dvl = (m1-m2)/(m1+m2)*smalle->GetVelocity() + smalle->GetVelocity()*2*m2/(m1+m2);
-    //Vector Elastic_dvs = (m2-m1)/(m1+m2)*smalle->GetVelocity() + smalle->GetVelocity()*2*m1/(m1+m2);
-    Vector Inelastic_vf = (m1/(m1+m2))*smalle->GetVelocity() + (m2/(m1+m2))*GetVelocity();
-//	Vector SmallerElastic_vf = ReflectNormal(smalle->GetVelocity()-Inelastic_vf,bignormal)+Inelastic_vf;
-//	Vector ThisElastic_vf = ReflectNormal(smalle->GetVelocity()-Inelastic_vf,smallnormal)+Inelastic_vf;
-	Vector SmallerElastic_vf = (smalle->GetVelocity()*(m1-m2)/(m1+m2)+(2*m2/(m1+m2))*GetVelocity());
-	Vector ThisElastic_vf = (GetVelocity()*(m2-m1)/(m1+m2)+(2*m1/(m1+m2))*smalle->GetVelocity());
-	// Make bounce along opposite normals
-	// HACK ALERT: FOLLOWING LINES are the victims of A HACK
-	Cockpit * thcp = _Universe->isPlayerStarship (this);
-	Cockpit * smcp = _Universe->isPlayerStarship (smalle);
-	static float mintime = XMLSupport::parse_float (vs_config->getVariable ("physics","minimum_time_between_recorded_player_collisions","0.1"));
-	bool isnotplayerorhasbeenmintime=true;
-	static float minvel = XMLSupport::parse_float (vs_config->getVariable ("physics","minimum_collision_velocity","5"));
-	ThisElastic_vf=((ThisElastic_vf.Magnitude()>minvel||!thcp)?ThisElastic_vf.Magnitude():minvel)*smallnormal;
-	SmallerElastic_vf=((SmallerElastic_vf.Magnitude()>minvel||!smcp)?SmallerElastic_vf.Magnitude():minvel)*bignormal;
-
-    float LargeKE = (0.5)*m2*GetVelocity().MagnitudeSquared();
-    float SmallKE = (0.5)*m1*smalle->GetVelocity().MagnitudeSquared();
-    float FinalInelasticKE = Inelastic_vf.MagnitudeSquared()*(0.5)*(m1+m2);
-	float InelasticDeltaKE = LargeKE +SmallKE - FinalInelasticKE;
     static float kilojoules_per_damage = XMLSupport::parse_float (vs_config->getVariable ("physics","kilojoules_per_unit_damage","5400"));
     static float collision_scale_factor=XMLSupport::parse_float(vs_config->getVariable("physics","collision_damage_scale","1.0"));
-	
     static float inelastic_scale = XMLSupport::parse_float (vs_config->getVariable ("physics","inelastic_scale",".5"));
-    float large_damage=inelastic_scale*(InelasticDeltaKE *(1.0/4.0 + (0.5*m2/(m1+m2))) )/kilojoules_per_damage*collision_scale_factor;
-    float small_damage=inelastic_scale*(InelasticDeltaKE *(1.0/4.0 + (0.5*m1/(m1+m2))) )/kilojoules_per_damage*collision_scale_factor;
+	static float mintime = XMLSupport::parse_float (vs_config->getVariable ("physics","minimum_time_between_recorded_player_collisions","0.1"));
+	static float minvel = XMLSupport::parse_float (vs_config->getVariable ("physics","minimum_collision_velocity","5"));
+
+	float m1=smalle->GetMass(),m2=GetMass();
+
+	//Compute elastic and inelastic terminal velocities (point object approximation)
+    Vector Inelastic_vf = (m1/(m1+m2))*smalle->GetVelocity() + (m2/(m1+m2))*GetVelocity();
+	Vector SmallerElastic_vf = (smalle->GetVelocity()*(m1-m2)/(m1+m2)+(2*m2/(m1+m2))*GetVelocity());
+	Vector ThisElastic_vf = (GetVelocity()*(m2-m1)/(m1+m2)+(2*m1/(m1+m2))*smalle->GetVelocity());
+
+	// Make bounce along opposite normals (what we really want to do? no, I think we want application of force, not forced direction along the opposite normals) 
+	// HACK ALERT: 
+	// following code referencing minvel and time between collisions attempts to alleviate ping-pong problems due to collisions being detected 
+	// after the player has penetrated the hull of another vessel because of discretization of time.
+	Cockpit * thcp = _Universe->isPlayerStarship (this);
+	Cockpit * smcp = _Universe->isPlayerStarship (smalle);
+	
+	bool isnotplayerorhasbeenmintime=true;
+	//Need to incorporate normals of colliding polygons somehow, without overiding directions of travel.
+    //We'll use the point object approximation for the magnitude of damage, and then apply the force along the appropriate normals
+	//Also missing from this model - velocity of impacting portions vs. center of mass (all angular velocity issues currently ignored pre-collision (torque still occurs due to placement of the collision force).
+
+	//ThisElastic_vf=((ThisElastic_vf.Magnitude()>minvel||!thcp)?ThisElastic_vf.Magnitude():minvel)*smallnormal;
+	//SmallerElastic_vf=((SmallerElastic_vf.Magnitude()>minvel||!smcp)?SmallerElastic_vf.Magnitude():minvel)*bignormal;
+	Vector ThisFinalVelocity=inelastic_scale*Inelastic_vf+(1-inelastic_scale)*ThisElastic_vf;
+	Vector SmallerFinalVelocity=inelastic_scale*Inelastic_vf+(1-inelastic_scale)*SmallerElastic_vf;
+	
+    //float LargeKE = (0.5)*m2*GetVelocity().MagnitudeSquared();
+    //float SmallKE = (0.5)*m1*smalle->GetVelocity().MagnitudeSquared();
+    //float FinalInelasticKE = Inelastic_vf.MagnitudeSquared()*(0.5)*(m1+m2);
+	//float InelasticDeltaKE = LargeKE +SmallKE - FinalInelasticKE;
+	float LargeDeltaE=(0.5)*m2*(ThisFinalVelocity-ThisElastic_vf).MagnitudeSquared(); // 1/2Mass*deltavfromnoenergyloss^2
+	float SmallDeltaE=(0.5)*m1*(SmallerFinalVelocity-SmallerElastic_vf).MagnitudeSquared(); // 1/2Mass*deltavfromnoenergyloss^2
+	//Damage distribution (NOTE: currently arbitrary - no known good model for calculating how much energy object endures as a result of the collision)
+    float large_damage=(0.25*SmallDeltaE+0.75*LargeDeltaE)/kilojoules_per_damage*collision_scale_factor;
+    float small_damage=(0.25*LargeDeltaE+0.75*SmallDeltaE)/kilojoules_per_damage*collision_scale_factor;
 	
 
-#if 0	
-	Vector smforce =(bignormal*.4*smalle->GetMass()*fabs(bignormal.Dot (((smalle->GetVelocity()-this->GetVelocity())/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
-	Vector thisforce=(smallnormal*.4*GetMass()*fabs(smallnormal.Dot ((smalle->GetVelocity()-this->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
-	float smag = smforce.Magnitude();
-	float tmag= thisforce.Magnitude();
-	if (smag>.000001)
-		smforce = (smforce/smag)*(large_damage+small_damage)*INVERSEFORCEDISTANCE*bouncepercent;
-	if (tmag>.000001)
-		thisforce = (thisforce/tmag)*(large_damage+small_damage)*INVERSEFORCEDISTANCE*bouncepercent;
-#endif
-	Vector ThisDesiredVelocity = ThisElastic_vf*(1-inelastic_scale/2)+Inelastic_vf*inelastic_scale/2;
-	Vector SmallerDesiredVelocity = SmallerElastic_vf*(1-inelastic_scale)+Inelastic_vf*inelastic_scale;
-	Vector smforce = (SmallerDesiredVelocity-smalle->GetVelocity())*smalle->GetMass()/SIMULATION_ATOM;
-	Vector thisforce = (ThisDesiredVelocity-GetVelocity())*GetMass()/SIMULATION_ATOM;
+	//Vector ThisDesiredVelocity = ThisElastic_vf*(1-inelastic_scale/2)+Inelastic_vf*inelastic_scale/2;
+	//Vector SmallerDesiredVelocity = SmallerElastic_vf*(1-inelastic_scale)+Inelastic_vf*inelastic_scale;
+	
+	//FIXME need to resolve 2 problems - 
+	//1) SIMULATION_ATOM for small!= SIMULATION_ATOM for large
+	//2) Double counting due to collision occurring for each object in a different physics frame.
+	Vector smforce = (SmallerFinalVelocity-smalle->GetVelocity()).Magnitude()*bignormal*smalle->GetMass()/SIMULATION_ATOM;
+	Vector thisforce = (ThisFinalVelocity-GetVelocity()).Magnitude()*smallnormal*GetMass()/SIMULATION_ATOM;
 	
 	
-	//UniverseUtil::IOmessage(0,"game","all",string("damaging collision ")+XMLSupport::tostring(smforce.i)+string(",")+XMLSupport::tostring(smforce.j)+string(",")+XMLSupport::tostring(smforce.k)+string(" resultantkinetic ")+XMLSupport::tostring(FinalInelasticKE)+string(" resultant damages ")+XMLSupport::tostring(small_damage)+string(" ")+XMLSupport::tostring(large_damage)+string(" bouncepercent ")+XMLSupport::tostring(bouncepercent)); 
+//	UniverseUtil::IOmessage(0,"game","all",string("collision")+string(" DE_s ")+XMLSupport::tostring(SmallDeltaE)+string(" DE_l ")+XMLSupport::tostring(LargeDeltaE)+string(" resultant damages ")+XMLSupport::tostring(small_damage)+string(" ")+XMLSupport::tostring(large_damage));//+string(" inelastic factor ")+XMLSupport::tostring(inelastic_scale)+string(" collision factor ")+XMLSupport::tostring(collision_scale_factor)); 
 
+// Following HACK doesn't seem to have been working properly (didn't handle the multiple copies of the same collision), so I disabled it. Shouldn't make too much difference. -- jacks	
+/*
 	if(thcp){
 		if((getNewTime()-thcp->TimeOfLastCollision)>mintime){
-			if(ThisDesiredVelocity.Magnitude()>minvel){
+			//if((ThisFinalVelocity-GetVelocity()).Magnitude()>minvel){
 				thcp->TimeOfLastCollision=getNewTime();
-			}
+			//}
 		}else{
 			isnotplayerorhasbeenmintime=false;
 		}
@@ -250,14 +255,14 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
     
 	if(smcp){
 		if((getNewTime()-smcp->TimeOfLastCollision)>mintime){
-			if(SmallerDesiredVelocity.Magnitude()>minvel){
+			//if((SmallerFinalVelocity-smalle->GetVelocity()).Magnitude()>minvel){
 				smcp->TimeOfLastCollision=getNewTime();
-			}
+			//}
 		}else{
 			isnotplayerorhasbeenmintime=false;
 		}
 	}
-
+*/
 	if((smalle->isUnit()!=MISSILEPTR)&&isnotplayerorhasbeenmintime){ 
 	  smalle->ApplyForce (smforce);
 	}
