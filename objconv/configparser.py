@@ -1,4 +1,23 @@
 #!/usr/bin/python
+#
+# Configuration Parser
+# Copyright (C) 2005-2006 Daniel Aleksandrow
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+#
+
 import sys
 import os
 import fnmatch
@@ -7,6 +26,9 @@ from xml.dom.minidom import *
 
 global varlines
 varlines = list()
+
+global bindlines
+bindlines = list()
 
 global templine
 templine = tuple()
@@ -75,6 +97,94 @@ def parseLine(line, filename):
         line=line[finish+1:]
     return
 
+def parseColorLine(line, filename):
+    global templine
+    if templine.__len__() == 2:#if this line continues on a getVariable
+        if filename != templine[1]:
+            print "Incomplete color in file "+filename[1]
+            print filename[0]
+        else:
+            line = templine[0]+line
+        templine = tuple()
+    while 1:
+        ind = line.find("getColor")
+        if ind == -1:
+            break
+        if hasPreProcessor(line, filename):#Don't want to include mixed stuff
+            return
+        line = line[ind:]
+        start = line.find("(")
+        if start == -1:
+            print "No opening bracket found: "+line +"("+filename+")"
+            return
+        finish = False
+        count = 0
+        for i in range(len(line[start:])):
+            ch = line[start:][i]
+            if ch is '(':
+                count+=1
+            if ch is ')':
+                count-=1
+            if count == 0:
+                finish = start+i
+                break
+        if not finish:#no closed set of brackets found
+            global templine
+            templine = (line, filename)#Try multiline statement
+            return
+        parsed = line[start+1:finish]
+        parsed = makeColorList(parsed)
+        print parsed
+        if parsed:
+            global varlines
+            parsed.append(filename)
+            varlines.append(parsed)
+        line=line[finish+1:]
+    return
+    
+def parseKeyBindingLine(line, filename):
+    global templine
+    if templine.__len__() == 2:#if this line continues on a getVariable
+        if filename != templine[1]:
+            print "Incomplete keybinding in file "+filename[1]
+            print filename[0]
+        else:
+            line = templine[0]+line
+        templine = tuple()
+    while 1:
+        ind = line.find("commandMap")
+        if ind == -1:
+            break
+        if hasPreProcessor(line, filename):#Don't want to include mixed stuff
+            return
+        line = line[ind:]
+        start = line.find("[")
+        if start == -1:
+            print "No opening bracket found: "+line +"("+filename+")"
+            return
+        finish = False
+        count = 0
+        for i in range(len(line[start:])):
+            ch = line[start:][i]
+            if ch is '[':
+                count+=1
+            if ch is ']':
+                count-=1
+            if count == 0:
+                finish = start+i
+                break
+        if not finish:#no closed set of brackets found
+            global templine
+            templine = (line, filename)#Try multiline statement
+            return
+        parsed = line[start+1:finish]
+        parsed = makeKeyBinding(parsed)
+        if parsed:
+            global bindlines
+            bindlines.append(parsed)
+        line=line[finish+1:]
+    return
+    
 def makeList(parsed):
     parsed = cleanSection(parsed,True).split("\",\"")
     if len(parsed) < 2:#This will happen when all the arguments to getVariable are variables themselves
@@ -101,6 +211,48 @@ def makeList(parsed):
         section.append(sec)
     return [section,var,default]
 
+def makeColorList(parsed):
+    print "-----------------"
+    print parsed
+    parsed = cleanSection(parsed,True).split("\"")
+    if len(parsed) < 1:
+        return False
+    print parsed
+    if parsed[0] != "":
+#        print 'a'
+        return False
+    parsed = parsed[1:]
+    newparsed = list()
+    print newparsed
+    for item in parsed:
+        if item == "":
+            break
+        if item == ",":
+            continue
+        newparsed.append(item)
+    parsed = newparsed
+    if len(parsed) < 1:#ie there is no string in the method call, unparsable
+#        print "Unparsable: "+filename+" : "+str(parsed)
+        return False
+    if len(parsed) != 1:#if not a single string
+        if len(parsed) != 2:#if not two strings
+            print "More than the expected number of color strings!"
+            return False
+    else:
+        if parsed[0] == "default":
+            return False
+        parsed = ["default",parsed[0]]
+    name = parsed.pop()
+    section = parsed.pop()
+    return [section,name]
+
+def makeKeyBinding(parsed):
+    parsed = parsed.split("\"")
+    if len(parsed) != 3:
+        print "Bad keybinding ... this should *never* happen if the code compiles"
+        return False
+    return parsed[1]
+        
 def cleanSection(word,onlywhitespace=False):
     """Cleans the arguments of the config function call for parsing."""
     newword=str()
@@ -244,6 +396,42 @@ def createVar(currnode, var, default):
         newchild.setAttribute('value', default)
         currnode.appendChild(newchild)
 
+def createColor(currnode, name):#<color name="engine" r="1" g="1" b="1" a="1"/>	    <section name="absolute">
+    print "color %s added"%name
+    add = True
+    for element in currnode.getElementsByTagName('color'):
+        if element.attributes.has_key('name'):
+            if element.attributes['name'].value == name:
+#                if shouldOverwrite(element,default):
+#                    element.attributes['name'].value = var
+                add = False
+                break
+    if add:
+        global config
+        newchild = config.createElement('color')
+        newchild.setAttribute('name', name)
+        newchild.setAttribute('r', '1')
+        newchild.setAttribute('g', '1')
+        newchild.setAttribute('b', '1')
+        newchild.setAttribute('a', '1')
+        currnode.appendChild(newchild)
+
+def createBinding(currnode, binding):
+    add = True
+    for element in currnode.getElementsByTagName('bind'):
+        if element.attributes.has_key('command'):
+            if element.attributes['command'].value == binding:
+                print "Not adding keybinding %s.  Already present."%binding
+                add = False
+                break
+    if add:
+        global config
+        newchild = config.createElement('bind')
+        newchild.setAttribute('key', '')
+        newchild.setAttribute('modifier', '')
+        newchild.setAttribute('command', binding)
+        currnode.appendChild(newchild)
+
 def shouldOverwrite(element,new):
     current = element.attributes['value'].value
     if current == str() and new != str():
@@ -273,6 +461,7 @@ os.path.walk(srcpath, add, filelist)
 
 print 'Parsing list'
 
+#Browse through for normal variables.
 for filename in filelist:
     a = file(filename)
     comment = False
@@ -286,15 +475,54 @@ for filename in filelist:
 
 varlines.sort()
 
+#Extract keybindings.
+a = file(srcpath+os.sep+"config_xml.cpp")
+comment = False
+while 1:
+    line = a.readline()
+    if not line:
+        break
+    parsable, comment = removeComments(line,comment)
+    parseKeyBindingLine(parsable, filename)
+a.close()
+
+
 printDuplicates()
 
 print 'Creating XML'
 
 config.appendChild(config.createElement('vegaconfig'))
+
+node = config.createElement('bindings')
+config.firstChild.appendChild(node)
+for binding in bindlines:
+    createBinding(node, binding)
+
 for [section, var, default, cpp] in varlines:
     node = createSection(config.firstChild,section)
     createVar(node, var, default)
 
+varlines = list()
+#Doing it again for colors
+for filename in filelist:
+    a = file(filename)
+    comment = False
+    while 1:
+        line = a.readline()
+        if not line:
+            break
+        parsable, comment = removeComments(line,comment)
+        parseColorLine(parsable, filename)
+    a.close()
+
+varlines.sort()
+colorsnode = config.createElement('colors')
+config.firstChild.appendChild(colorsnode)
+for [section, name, cpp] in varlines:
+    node = createSection(colorsnode,[section])#as our section is a string rather than the list like for vars
+    createColor(node, name)
+
+    
 #a = open('pygrep','w')
 #for line in varlines:
 #    a.write(str(line)+"\n")
@@ -303,3 +531,7 @@ for [section, var, default, cpp] in varlines:
 a = open('pygrep.config','w')
 a.write(config.toprettyxml('    '))
 a.close()
+
+# TODO
+# "color" support
+# "doc" tag support, and the support of merging into an existing file (with prompt)
