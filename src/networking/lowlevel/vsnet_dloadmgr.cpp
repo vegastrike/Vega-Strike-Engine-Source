@@ -913,7 +913,7 @@ size_t Manager::private_file_size( const string& file )
 }; // namespace VsnetDownload
 
 #ifndef HAVE_ACCESS
-int access( const char* name, int mode )
+int accesscxx( const char* name, int mode )
 {
     if( mode == R_OK )
     {
@@ -927,6 +927,12 @@ int access( const char* name, int mode )
         if( f.good() ) return 0;
         return -1;
     }
+}
+extern "C" {
+  int access (const char * name, int mode ) {
+    return accesscxx(name,mode);
+  }
+
 }
 #endif /* HAVE_ACCESS */
 
