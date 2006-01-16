@@ -190,7 +190,7 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
     static float bouncepercent = XMLSupport::parse_float (vs_config->getVariable ("physics","BouncePercent",".1"));
     static float kilojoules_per_damage = XMLSupport::parse_float (vs_config->getVariable ("physics","kilojoules_per_unit_damage","5400"));
     static float collision_scale_factor=XMLSupport::parse_float(vs_config->getVariable("physics","collision_damage_scale","1.0"));
-    static float inelastic_scale = XMLSupport::parse_float (vs_config->getVariable ("physics","inelastic_scale",".5"));
+    static float inelastic_scale = XMLSupport::parse_float (vs_config->getVariable ("physics","inelastic_scale",".8"));
 	static float mintime = XMLSupport::parse_float (vs_config->getVariable ("physics","minimum_time_between_recorded_player_collisions","0.1"));
 	static float minvel = XMLSupport::parse_float (vs_config->getVariable ("physics","minimum_collision_velocity","5"));
 
@@ -203,8 +203,12 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 
 	// Make bounce along opposite normals (what we really want to do? no, I think we want application of force, not forced direction along the opposite normals) 
 	// HACK ALERT: 
-	// following code referencing minvel and time between collisions attempts to alleviate ping-pong problems due to collisions being detected 
+	// following code referencing minvel and time between collisions attempts 
+	// to alleviate ping-pong problems due to collisions being detected 
 	// after the player has penetrated the hull of another vessel because of discretization of time.
+	// this should eventually be replaced by instead figuring out where 
+	// the point of collision should have occurred, and moving the vessels to the 
+	// actual collision location before applying forces
 	Cockpit * thcp = _Universe->isPlayerStarship (this);
 	Cockpit * smcp = _Universe->isPlayerStarship (smalle);
 	
@@ -233,16 +237,14 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 	//Vector SmallerDesiredVelocity = SmallerElastic_vf*(1-inelastic_scale)+Inelastic_vf*inelastic_scale;
 	
 	//FIXME need to resolve 2 problems - 
-	//1) SIMULATION_ATOM for small!= SIMULATION_ATOM for large
+	//1) SIMULATION_ATOM for small!= SIMULATION_ATOM for large (below smforce line should mostly address this)
 	//2) Double counting due to collision occurring for each object in a different physics frame.
-	Vector smforce = (SmallerFinalVelocity-smalle->GetVelocity()).Magnitude()*bignormal*smalle->GetMass()/SIMULATION_ATOM;
+	Vector smforce = (SmallerFinalVelocity-smalle->GetVelocity()).Magnitude()*bignormal*smalle->GetMass()/(SIMULATION_ATOM*((float)smalle->sim_atom_multiplier)/((float)this->sim_atom_multiplier));
 	Vector thisforce = (ThisFinalVelocity-GetVelocity()).Magnitude()*smallnormal*GetMass()/SIMULATION_ATOM;
 	
 	
-//	UniverseUtil::IOmessage(0,"game","all",string("collision")+string(" DE_s ")+XMLSupport::tostring(SmallDeltaE)+string(" DE_l ")+XMLSupport::tostring(LargeDeltaE)+string(" resultant damages ")+XMLSupport::tostring(small_damage)+string(" ")+XMLSupport::tostring(large_damage));//+string(" inelastic factor ")+XMLSupport::tostring(inelastic_scale)+string(" collision factor ")+XMLSupport::tostring(collision_scale_factor)); 
+	
 
-// Following HACK doesn't seem to have been working properly (didn't handle the multiple copies of the same collision), so I disabled it. Shouldn't make too much difference. -- jacks	
-/*
 	if(thcp){
 		if((getNewTime()-thcp->TimeOfLastCollision)>mintime){
 			//if((ThisFinalVelocity-GetVelocity()).Magnitude()>minvel){
@@ -262,8 +264,14 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 			isnotplayerorhasbeenmintime=false;
 		}
 	}
-*/
+	/*
+	if(isnotplayerorhasbeenmintime){
+		UniverseUtil::IOmessage(0,"game","all",string("c1")+XMLSupport::tostring((float)getNewTime())+string(" DE_s ")+XMLSupport::tostring(SmallDeltaE)+string(" DE_l ")+XMLSupport::tostring(LargeDeltaE)+string(" resultant damages ")+XMLSupport::tostring(small_damage)+string(" ")+XMLSupport::tostring(large_damage));//+string(" inelastic factor ")+XMLSupport::tostring(inelastic_scale)+string(" collision factor ")+XMLSupport::tostring(collision_scale_factor)); 
+		UniverseUtil::IOmessage(0,"game","all",string("c2")+string(" TFV ")+XMLSupport::tostring(ThisFinalVelocity.Magnitude())+string(" SFV ")+XMLSupport::tostring(SmallerFinalVelocity.Magnitude())+string(" pVF ")+XMLSupport::tostring(Inelastic_vf.Magnitude())+string(" ")+XMLSupport::tostring(ThisElastic_vf.Magnitude())+string(" ")+XMLSupport::tostring(SmallerElastic_vf.Magnitude()));
+	}
+	*/
 	if((smalle->isUnit()!=MISSILEPTR)&&isnotplayerorhasbeenmintime){ 
+		
 	  smalle->ApplyForce (smforce);
 	}
     if((this->isUnit()!=MISSILEPTR)&&isnotplayerorhasbeenmintime) {
