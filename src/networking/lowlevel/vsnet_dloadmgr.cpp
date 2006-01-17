@@ -25,7 +25,7 @@ extern void	getZoneInfoBuffer( unsigned short zoneid, NetBuffer & netbuf);
     #endif
     #define W_OK 2
 
-    extern "C" int access( const char* name, int mode );
+    extern "C" int access( const char* name, int mode ) throw();
 #endif
 
 #include <sys/stat.h>
@@ -929,7 +929,7 @@ int accesscxx( const char* name, int mode )
     }
 }
 extern "C" {
-  int access (const char * name, int mode ) {
+  int access (const char * name, int mode ) throw(){
     return accesscxx(name,mode);
   }
 
