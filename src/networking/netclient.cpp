@@ -376,6 +376,8 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 	using namespace VSFileSystem;
     ObjSerial	packet_serial=0;
 
+	static vector<Mount::STATUS> backupMountStatus;
+	
     // Receive data
 	Unit * un = NULL;
 	int mount_num;
@@ -395,7 +397,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
     if( recvbytes <= 0) {
 		recvbytes = (udpgetspriority==false?clt_udp_sock:clt_tcp_sock).recvbuf( &p1, &ipadr );
 	}
-
+	
 	if (recvbytes <= 0) {
 		// Now, select and wait for data to come in the queue.
 		clt_tcp_sock.addToSet( _sock_set );
@@ -583,8 +585,17 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					// Set the concerned mount as ACTIVE and others as INACTIVE
 					vector <Mount>
 						::iterator i = un->mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
-					for (;i!=un->mounts.end();++i)
-						(*i).status=Mount::INACTIVE;
+					int j;
+					
+					for (j=backupMountStatus.size();j<un->mounts.size();++j) {
+						backupMountStatus.push_back(Mount::UNCHOSEN);
+					}
+					
+					for (j=0;i!=un->mounts.end();++i,++j) {
+						backupMountStatus[j]=(*i).status;
+						if ((*i).status==Mount::ACTIVE)
+							(*i).status=Mount::INACTIVE;
+					}
 					un->mounts[mount_num].processed=Mount::ACCEPTED;
 					un->mounts[mount_num].status=Mount::ACTIVE;
 					// Store the missile id in the mount that should fire a missile
@@ -594,6 +605,11 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 						un->Fire(ROLES::FIRE_MISSILES|ROLES::EVERYTHING_ELSE,false);
 					else
 						un->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false);
+					
+					i = un->mounts.begin();
+					for (j=0;i!=un->mounts.end();++i,++j) {
+						(*i).status=backupMountStatus[j];
+					}
 				}
 				else
 					COUT<<"!!! Problem -> CANNOT FIRE UNIT NOT FOUND !!!"<<endl;
@@ -610,13 +626,29 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					// Set the concerned mount as ACTIVE and others as INACTIVE
 					vector <Mount>
 						::iterator i = un->mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
-					for (;i!=un->mounts.end();++i)
-						(*i).status=Mount::INACTIVE;
+					int j;
+					
+					for (j=backupMountStatus.size();j<un->mounts.size();++j) {
+						backupMountStatus.push_back(Mount::UNCHOSEN);
+					}
+					
+					for (j=0;i!=un->mounts.end();++i,++j) {
+						backupMountStatus[j]=(*i).status;
+						if ((*i).status==Mount::ACTIVE)
+							(*i).status=Mount::INACTIVE;
+					}
+					
 					un->mounts[mount_num].processed=Mount::UNFIRED;
+					un->mounts[mount_num].status=Mount::ACTIVE;
 					// Store the missile id in the mount that should fire a missile
 					un->mounts[mount_num].serial=0;//mis;
 					// Ask for fire
 					un->UnFire();
+					
+					i = un->mounts.begin();
+					for (j=0;i!=un->mounts.end();++i,++j) {
+						(*i).status=backupMountStatus[j];
+					}
 				}
 				else
 					COUT<<"!!! Problem -> CANNOT UNFIRE UNIT NOT FOUND !!!"<<endl;

@@ -1086,6 +1086,8 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
   for (unsigned int counter=0;counter<mountssize;++counter) {
     unsigned int index=counter;
     Mount * i=&mounts[index];
+    if (i->status!=Mount::ACTIVE)
+      continue;
     if (i->bank==true) {
       unsigned int best=index;
       unsigned int j;
@@ -1180,7 +1182,8 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
             if( playernum>=0)
               Network[playernum].fireRequest( this->serial, index, mis2);
             // Mark the mount as fire requested
-            //i->processed = Mount::REQUESTED;
+            i->processed = Mount::REQUESTED;
+			// NETFIXME: REQUESTED was commented out.
           }
         }
       }
