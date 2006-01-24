@@ -1908,7 +1908,7 @@ void GameCockpit::Draw() {
   Unit * un;
   float crosscenx=0,crossceny=0;
   if (view==CP_FRONT) {
-    if (Panel.size()>0&&screenshotkey==false) {
+    if (Panel.size()>0&&Panel.front()&&screenshotkey==false) {
       static bool drawCrosshairs=parse_bool(vs_config->getVariable("graphics","draw_rendered_crosshairs","true"));
       Panel.front()->GetPosition(crosscenx,crossceny);
       if (drawCrosshairs) {
@@ -1930,27 +1930,30 @@ void GameCockpit::Draw() {
   GFXAlphaTest (GREATER,AlphaTestingCutoff);
   GFXColor4f(1,1,1,1);
   if (view<CP_CHASE) {
-    if (Pit[view]) 
+    if (Pit[view])
       Pit[view]->Draw();
   }
-  static bool blend_panels=XMLSupport::parse_bool(vs_config->getVariable("graphics","blend_panels","false"));
+
+  static bool blend_panels = XMLSupport::parse_bool(vs_config->getVariable("graphics","blend_panels","false"));
+  static bool drawF5VDU    = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_chase_cam","false"));
+  static bool drawF6VDU    = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_panning_cam","false"));
+  static bool drawF7VDU    = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_target_cam","false"));
+
   if (blend_panels) {
     GFXAlphaTest (ALWAYS,0);
     GFXBlendMode (SRCALPHA,INVSRCALPHA);
   }
   GFXColor4f(1,1,1,1);
-  for (unsigned int j=1;j<Panel.size();j++) {
-    Panel[j]->Draw();
-  }
+  if (view==CP_FRONT||(view==CP_CHASE&&drawF5VDU)||(view==CP_PAN&&drawF6VDU)||(view==CP_TARGET&&drawF7VDU))
+      for (unsigned int j=1;j<Panel.size();j++)
+          if (Panel[j])
+              Panel[j]->Draw();
 
   GFXAlphaTest (ALWAYS,0);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXColor4f(1,1,1,1);
 	bool die=true;
   if ((un = parent.GetUnit())) {
-    static bool drawF5VDU (XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_chase_cam","false")));
-    static bool drawF6VDU (XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_panning_cam","false")));
-    static bool drawF7VDU (XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_target_cam","false")));
     if (view==CP_FRONT||(view==CP_CHASE&&drawF5VDU)||(view==CP_PAN&&drawF6VDU)||(view==CP_TARGET&&drawF7VDU)) {//only draw crosshairs for front view
       DrawGauges(un);
 

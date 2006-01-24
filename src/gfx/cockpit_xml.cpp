@@ -167,6 +167,7 @@ string getRes(string inp) {
 }
 void GameCockpit::beginElement(const string &name, const AttributeList &attributes) {
   static bool cockpit_smooth=XMLSupport::parse_bool(vs_config->getVariable("graphics","cockpit_smooth_texture","false"));
+  static bool panel_smooth=XMLSupport::parse_bool(vs_config->getVariable("graphics","panel_smooth_texture","true"));
   static bool crosshair_smooth=XMLSupport::parse_bool(vs_config->getVariable("graphics","crosshair_smooth_texture","true"));
   AttributeList::const_iterator iter;
   Gauge::DIRECTION tmpdir=Gauge::GAUGE_UP;
@@ -346,11 +347,19 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
     break;
   case CROSSHAIRS:
   case PANEL: 
-    Panel.push_back (NULL);
-    newsprite = &Panel.back ();
     if (elem==CROSSHAIRS) {
-      Panel.back() = Panel.front();
-      Panel.front()=NULL;//make sure null at the beginning
+        if (Panel.size()==0)
+            Panel.push_back(NULL);
+        if (Panel.front()) {
+            delete Panel.front();
+            Panel.front() = NULL;
+        }
+        newsprite = &Panel.front();
+    } else {
+        if (Panel.size()==0) /* Create NULL crosshairs */
+            Panel.push_back(NULL);
+        Panel.push_back(NULL);
+        newsprite = &Panel.back();
     }
     goto loadsprite;
   case RADAR: newsprite = &Radar[0];goto loadsprite;
@@ -385,7 +394,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
       case XFILE:
 	if (newsprite) {
           std::string tmp=getRes((*iter).value);
-          bool bil=elem==PANEL?cockpit_smooth:crosshair_smooth;
+          bool bil=elem==PANEL?panel_smooth:crosshair_smooth;
           (*newsprite) = new VSSprite (tmp.c_str(),bil?BILINEAR:NEAREST);
           if (!(*newsprite)->LoadSuccess()) {
             delete (*newsprite);
