@@ -1925,23 +1925,32 @@ void GameCockpit::Draw() {
   }
 
   RestoreViewPort();
-  GFXBlendMode (ONE,ZERO);
-  static float AlphaTestingCutoff =XMLSupport::parse_float(vs_config->getVariable("graphics","AlphaTestCutoff",".8"));
-  GFXAlphaTest (GREATER,AlphaTestingCutoff);
-  GFXColor4f(1,1,1,1);
-  if (view<CP_CHASE) {
-    if (Pit[view])
-      Pit[view]->Draw();
-  }
 
   static bool blend_panels = XMLSupport::parse_bool(vs_config->getVariable("graphics","blend_panels","false"));
+  static bool blend_cockpit= XMLSupport::parse_bool(vs_config->getVariable("graphics","blend_cockpit","false"));
   static bool drawF5VDU    = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_chase_cam","false"));
   static bool drawF6VDU    = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_panning_cam","false"));
   static bool drawF7VDU    = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_target_cam","false"));
+  static float AlphaTestingCutoff = XMLSupport::parse_float(vs_config->getVariable("graphics","AlphaTestCutoff",".8"));
+
+  if (blend_cockpit) {
+    GFXAlphaTest (ALWAYS,0);
+    GFXBlendMode (SRCALPHA,INVSRCALPHA);
+  } else {
+    GFXBlendMode (ONE,ZERO);
+    GFXAlphaTest (GREATER,AlphaTestingCutoff);
+  }
+  GFXColor4f(1,1,1,1);
+  if (view<CP_CHASE)
+    if (Pit[view])
+      Pit[view]->Draw();
 
   if (blend_panels) {
     GFXAlphaTest (ALWAYS,0);
     GFXBlendMode (SRCALPHA,INVSRCALPHA);
+  } else {
+    GFXBlendMode (ONE,ZERO);
+    GFXAlphaTest (GREATER,AlphaTestingCutoff);
   }
   GFXColor4f(1,1,1,1);
   if (view==CP_FRONT||(view==CP_CHASE&&drawF5VDU)||(view==CP_PAN&&drawF6VDU)||(view==CP_TARGET&&drawF7VDU))
@@ -1952,7 +1961,7 @@ void GameCockpit::Draw() {
   GFXAlphaTest (ALWAYS,0);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXColor4f(1,1,1,1);
-	bool die=true;
+  bool die=true;
   if ((un = parent.GetUnit())) {
     if (view==CP_FRONT||(view==CP_CHASE&&drawF5VDU)||(view==CP_PAN&&drawF6VDU)||(view==CP_TARGET&&drawF7VDU)) {//only draw crosshairs for front view
       DrawGauges(un);
