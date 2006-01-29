@@ -1962,7 +1962,8 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
     }
     if (mounts[i].type->type==weapon_info::BEAM) {
       if (mounts[i].ref.gun) {
-		  Unit * autotarg = ((mounts[i].size&weapon_info::AUTOTRACKING)&&(mounts[i].time_to_lock<=0)&&(player_cockpit==NULL||TargetLocked()))?target:NULL;
+	  static bool must_lock_to_autotrack=XMLSupport::parse_bool(vs_config->getVariable("physics","must_lock_to_autotrack","true"));
+		  Unit * autotarg = ((mounts[i].size&weapon_info::AUTOTRACKING)&&(mounts[i].time_to_lock<=0)&&(player_cockpit==NULL||TargetLocked()||!must_lock_to_autotrack))?target:NULL;
 		  float trackingcone = computer.radar.trackingcone;
 		  if (CloseEnoughToAutotrack(this,target,trackingcone)) {
 			  if (autotarg) {
