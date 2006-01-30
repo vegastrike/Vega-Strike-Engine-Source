@@ -4393,7 +4393,17 @@ void Unit::TargetTurret (Unit * targ) {
         }
 	}
 }
+void WarpPursuit(Unit* un, StarSystem * sourcess, std::string destination) {
+  static bool AINotUseJump=XMLSupport::parse_bool(vs_config->getVariable("physics","no_ai_jump_points","false"));
+  if (AINotUseJump) {
+    static float seconds_per_parsec=XMLSupport::parse_float(vs_config->getVariable("physics","seconds_per_parsec","10"));
+    float ttime=(SystemLocation(sourcess->getFileName())-SystemLocation(destination)).Magnitude()*seconds_per_parsec;
+    un->jump.delay+=ttime;
+    sourcess->JumpTo(un,NULL,destination,true,true);
+    un->jump.delay-=ttime;
+  }
 
+}
 // WARNING : WHEN TURRETS WE MAY NOT WANT TO ASK THE SERVER FOR INFOS ! ONLY FOR LOCAL PLAYERS (_Universe-isStarship())
 void Unit::LockTarget(bool myboo) {
   computer.radar.locked=myboo;
@@ -4425,6 +4435,7 @@ void Unit::Target (Unit *targ) {
       }
     }else {
       if (jump.drive!=-1) {
+        bool found=false;
 	un_iter i= _Universe->activeStarSystem()->getUnitList().createIterator();
 	Unit * u;
 	for (;(u=*i)!=NULL;i++) {
@@ -4432,9 +4443,13 @@ void Unit::Target (Unit *targ) {
 	    if (std::find (u->GetDestinations().begin(),u->GetDestinations().end(),targ->activeStarSystem->getFileName())!=u->GetDestinations().end()) {
 	      Target (u);
 	      ActivateJumpDrive(0);
+              found=true;
 	    }
 	  }
 	}
+        if (!found) {
+          WarpPursuit(this,_Universe->activeStarSystem(),targ->activeStarSystem->getFileName());
+        }
       }else {
 	computer.target.SetUnit(NULL);
       }

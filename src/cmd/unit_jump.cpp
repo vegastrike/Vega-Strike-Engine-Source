@@ -36,6 +36,8 @@ inline std::vector <Unit *> ComparePrimaries (Unit * primary, StarSystem *origin
 }
 extern void DealPossibleJumpDamage (Unit *un);
 extern void ActivateAnimation(Unit *);
+void WarpPursuit(Unit* un, StarSystem * sourcess, std::string destination);
+
 template <class UnitType>
 bool GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem, bool dosightandsound) {
   bool ret=false;
@@ -59,8 +61,12 @@ bool GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
 	  unit->VelocityReference(NULL);
 	}
 	if (unit->Target()==this) {
-	  unit->Target (pendingjump[kk]->jumppoint.GetUnit());
-	  unit->ActivateJumpDrive (0);
+          if (pendingjump[kk]->jumppoint.GetUnit()) {
+            unit->Target (pendingjump[kk]->jumppoint.GetUnit());
+            unit->ActivateJumpDrive (0);
+          }else {
+            WarpPursuit(unit,pendingjump[kk]->orig,pendingjump[kk]->dest->getFileName());
+          }
 	}else {
 	  Flightgroup * ff = unit->getFlightgroup();
 	  if (ff) {
