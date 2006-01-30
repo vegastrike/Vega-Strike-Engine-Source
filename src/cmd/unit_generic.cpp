@@ -1758,8 +1758,17 @@ static std::string NearestSystem (std::string currentsystem,QVector pos) {
           norm.Normalize();
           double test=posnorm.Dot(norm);
           if (test>.2) {
-            test=1-test;
-            double tmp=dir.MagnitudeSquared()*test;
+            //            test=1-test;
+            double tmp=dir.MagnitudeSquared()/test/test/test;
+            for (unsigned int cp=0;cp<_Universe->numPlayers();++cp) {
+              std::string whereto=_Universe->AccessCockpit(cp)->GetNavSelectedSystem();
+              if (whereto.length()==1+i->first.length()+j->first.length()) {
+                if (whereto.substr(0,i->first.length())==i->first && whereto.substr(i->first.length()+1)==j->first) {
+                  static float SystemWarpTargetBonus=XMLSupport::parse_float(vs_config->getVariable("physics","target_distance_to_warp_bonus","1.33"));
+                  tmp/=SystemWarpTargetBonus;
+                }
+              }
+            }
             if (tmp<closest_distance||closest_distance==0) {
               closest_distance=tmp;
               closest_system=i->first+"/"+j->first;

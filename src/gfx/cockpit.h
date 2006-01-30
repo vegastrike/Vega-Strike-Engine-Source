@@ -165,6 +165,7 @@ private:
   void SetStaticAnimation ();
   ///Accesses the current navigationsystem
   NavigationSystem *AccessNavSystem() {return &ThisNav;}
+  virtual std::string GetNavSelectedSystem();
   ///Accesses the current camera
   Camera *AccessCamera() {return &cam[currentcamera];}
   ///Returns the passed in cam

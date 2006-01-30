@@ -149,6 +149,7 @@ protected:
   class SaveGame * savegame;
   ///Accesses the current navigationsystem
   virtual NavigationSystem *AccessNavSystem() {return NULL;}
+  virtual std::string GetNavSelectedSystem() {return "";}
   ///Accesses the current camera
   virtual Camera *AccessCamera() {return NULL;}
   ///Returns the passed in cam

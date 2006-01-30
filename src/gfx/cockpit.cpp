@@ -49,7 +49,9 @@ static soundContainer disableautosound;
 static soundContainer enableautosound;
 
 #define sqr(x) (x*x)
-
+std::string GameCockpit::GetNavSelectedSystem() {
+  return AccessNavSystem()->getSelectedSystem();
+}
 void soundContainer::loadsound (string soundfile,bool looping) {
 	if (this->sound==-2&&soundfile.size()) {
 		string sound=GameCockpit::getsoundfile(soundfile);
