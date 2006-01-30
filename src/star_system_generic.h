@@ -8,6 +8,7 @@
 using std::string;
 #include "gfx/vec.h"
 #include "cmd/collection.h"
+#include "hashtable.h"
 class Stars;
 //#include "planet_generic.h"
 class Planet;
@@ -107,7 +108,8 @@ class StarSystem {
   std::vector <class MissileEffect *> dischargedMissiles;
   unsigned int zone; //short fix
  public:
-	 void	SetZone( unsigned int zonenum) { this->zone = zonenum; } //short fix
+  Hashtable<std::pair<Unit*,Unit*>,void,5>last_collisions;
+  void	SetZone( unsigned int zonenum) { this->zone = zonenum; } //short fix
   unsigned int GetZone() { return this->zone; } //short fix
   virtual void AddMissileToQueue(class MissileEffect *);
   virtual void UpdateMissiles();

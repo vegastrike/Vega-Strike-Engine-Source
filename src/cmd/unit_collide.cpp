@@ -474,6 +474,17 @@ bool Unit::Collide (Unit * target) {
     return false;
   if (targetisUnit==ASTEROIDPTR&&thisisUnit==ASTEROIDPTR)
     return false;
+  std::pair<Unit*,Unit*>last_collision_check;
+  if (this<target){
+    last_collision_check.first=this;last_collision_check.second=target;
+  }else{
+    last_collision_check.first=target;last_collision_check.second=this;
+  }
+  if (_Universe->activeStarSystem()->last_collisions.Get(last_collision_check)) {
+    printf ("No double collision\n");
+    return false;
+  }
+  _Universe->activeStarSystem()->last_collisions.Put(last_collision_check,_Universe);
   //unit v unit? use point sampling?
   if ((this->DockedOrDocking()&(DOCKED_INSIDE|DOCKED))||(target->DockedOrDocking()&(DOCKED_INSIDE|DOCKED))) {
     return false;

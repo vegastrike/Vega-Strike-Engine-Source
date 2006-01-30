@@ -432,7 +432,8 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
 	    unit->ExecuteAI(); 
         unit->ResetThreatLevel();
         unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits(),unit);    
-	    unit->CollideAll();
+        last_collisions.clear();
+        unit->CollideAll();
         if (newloc==current_sim_location) {
 	      iter.advance();
         }else{ 
@@ -464,8 +465,9 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
     Unit * unit=NULL;
     while((unit = iter.current())!=NULL) {
       unit->ExecuteAI(); 
-      unit->CollideAll();
+      last_collisions.clear();
       unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits(),unit);    
+      unit->CollideAll();
       iter.advance();
     }
   }

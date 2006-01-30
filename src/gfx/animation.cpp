@@ -149,10 +149,9 @@ void Animation::ProcessDrawQueue (std::vector <Animation *> &animationdrawqueue,
   if (g_game.use_animations==0&&g_game.use_textures==0) {
     return;
   }
-
   unsigned char alphamaps=ani_alpha;
-	int i;//NOT UNSIGNED
-	for (i=animationdrawqueue.size()-1;i>=0;i--) {
+  int i;//NOT UNSIGNED
+  for (i=animationdrawqueue.size()-1;i>=0;i--) {
     GFXColorf (animationdrawqueue[i]->mycolor);//fixme, should we need this? we get som egreenie explosions
     Matrix result;
     if (alphamaps!=(animationdrawqueue[i]->options&ani_alpha)) {
@@ -160,21 +159,21 @@ void Animation::ProcessDrawQueue (std::vector <Animation *> &animationdrawqueue,
       GFXBlendMode ((alphamaps!=0)?SRCALPHA:ONE,(alphamaps!=0)?INVSRCALPHA:ONE);
     }
     QVector campos=_Universe->AccessCamera()->GetPosition();
-	if ((animationdrawqueue[i]->Position()-campos).Magnitude()-animationdrawqueue[i]->height>limit) {
-  	  GFXFogMode(FOG_OFF);
-  	  animationdrawqueue[i]->CalculateOrientation(result);
+    animationdrawqueue[i]->CalculateOrientation(result);
+    //if ((animationdrawqueue[i]->Position()-campos).Magnitude()-animationdrawqueue[i]->height>limit) {//other way was inconsistent about what was far and what was not--need to use the same test for putting to far queueu and drawing it--otherwise graphical glitches
+      GFXFogMode(FOG_OFF);           
       animationdrawqueue[i]->DrawNow(result);
-	}
-	animationdrawqueue.erase (animationdrawqueue.begin()+i);
-	}
+      //}
+    animationdrawqueue.erase (animationdrawqueue.begin()+i);
+  }
 }
-void Animation::CalculateOrientation (Matrix & result) {
+bool Animation::CalculateOrientation (Matrix & result) {
   Vector camp,camq,camr;
   QVector pos (Position());
   float hei=height;
   float wid=width;
   static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable ("graphics","HaloOffset",".1"));
-  ::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?HaloOffset:0,false,(options&ani_up)?NULL:&local_transformation);
+  bool retval=::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?HaloOffset:0,false,(options&ani_up)?NULL:&local_transformation);
   
   /*
   Camera* TempCam = _Universe->AccessCamera();
@@ -195,6 +194,7 @@ void Animation::CalculateOrientation (Matrix & result) {
   }
   */
   VectorAndPositionToMatrix (result, camp,camq,camr,pos);    
+  return retval;
 }
 void Animation::DrawNow(const Matrix &final_orientation) {
  
@@ -357,14 +357,14 @@ void Animation:: Draw() {
     float wid=width;
     static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable ("graphics","HaloOffset",".1"));
 
-    /*
+    /**/
     // Why do all this if we can use ::CalculateOrientation?
+    //  -- well one reason is that the code change broke it :-/  Until suns display properly or we switch to ogre we should keep it as it was (problem was, flare wouldn't display--- or would display behind the sun)
     QVector R (_Universe->AccessCamera()->GetR().i,_Universe->AccessCamera()->GetR().j,_Universe->AccessCamera()->GetR().k);
     static float too_far_dist = XMLSupport::parse_float (vs_config->getVariable ("graphics","anim_far_percent",".8"));
-    if ((R.Dot (Position()-_Universe->AccessCamera()->GetPosition())+HaloOffset*(height>width?height:width))<too_far_dist*g_game.zfar   ) {
-    */
-
-    if (::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?HaloOffset:0,false)) {
+    if ((/*R.Dot*/ (Position()-_Universe->AccessCamera()->GetPosition()).Magnitude()+HaloOffset*(height>width?height:width))<too_far_dist*g_game.zfar   ) {
+    
+      //if (::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?HaloOffset:0,false)) {ss
       animationdrawqueue.push_back (this);
     }else {
       far_animationdrawqueue.push_back(this);

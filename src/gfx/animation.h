@@ -64,7 +64,7 @@ public:
   void Draw();
   void SetFaceCam(bool face);
   void SetInterpolate(bool interp);
-  void CalculateOrientation (Matrix &result);
+  bool CalculateOrientation (Matrix &result);
 
   void DrawNow(const Matrix & final_orientation);
 

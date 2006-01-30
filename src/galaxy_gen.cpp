@@ -913,14 +913,17 @@ void beginStar () {
   float radius=starradius[staroffset];
   Vector r,s;
   int i;
-  //Vector center=generateAndUpdateRS (r,s,radius);
+  Vector center=generateAndUpdateRS (r,s,radius,false);//WTF why was this commented out--that means all stars start on top of each other
   planetoffset=0;
 
   char b[3]=" A";
   b[1]+=staroffset;
   Tab();f.Fprintf ("<Planet name=\"%s%s\" file=\"%s\" ",systemname.c_str(),b,starentities[staroffset].c_str());
   f.Fprintf ("ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",r.i,r.j,r.k,s.i,s.j,s.k);
-  f.Fprintf ("radius=\"%f\" x=\"0\" y=\"0\" z=\"0\" ",radius);
+  if (staroffset!=0)
+    f.Fprintf ("radius=\"%f\" x=\"%f\" y=\"%f\" z=\"%f\" ",radius,center.i,center.j,center.k);
+  else
+    f.Fprintf ("radius=\"%f\" x=\"0\" y=\"0\" z=\"0\" ",radius);
   float loy = LengthOfYear(r,s);
   if (loy) {
     f.Fprintf ("year= \"%f\" ",loy);
@@ -930,6 +933,7 @@ void beginStar () {
     }
   }
   f.Fprintf (" Red=\"%f\" Green=\"%f\" Blue=\"%f\" ReflectNoLight=\"true\" light=\"%d\">\n",lights[staroffset].r,lights[staroffset].g,lights[staroffset].b,staroffset);
+  f.Fprintf("<fog>\n\t<FogElement file=\"atmXatm.bfxm\" ScaleAtmosphereHeight=\".900\" red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"1.0\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"1\" concavity=\".3\" focus=\".6\" minalpha=\".7\" maxalpha=\"1\"/>\n\t<FogElement file=\"atmXhalo.bfxm\" ScaleAtmosphereHeight=\".9000\" red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"1.0\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"1\" concavity=\".3\" focus=\".6\" minalpha=\".7\" maxalpha=\"1\"/>\n</fog>\n",lights[staroffset].r,lights[staroffset].g,lights[staroffset].b,lights[staroffset].r,lights[staroffset].g,lights[staroffset].b,lights[staroffset].r,lights[staroffset].g,lights[staroffset].b,lights[staroffset].r,lights[staroffset].g,lights[staroffset].b);
   radii.push_back (1.5*radius);
   static float planet_size_compared_to_sun = XMLSupport::parse_float (vs_config->getVariable ("galaxy","RockyRelativeToPrinary",".05"));
 //  static float gas_size_compared_to_sun = XMLSupport::parse_float (vs_config->getVariable ("galaxy","GasRelativeToPrinary",".2"));

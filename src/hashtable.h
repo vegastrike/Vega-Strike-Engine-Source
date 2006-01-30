@@ -26,11 +26,11 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-
+#include <utility>
 #define HASH_INTSIZE (sizeof(int)*8)
 #define HASH_SALT_0 0x7EF92C3B
 #define HASH_SALT_1 0x9B
-
+class Unit;
 //const int hashsize = 1001;
 using namespace std;
 //Hashtable doesn't grow
@@ -76,9 +76,17 @@ template<class KEY, class VALUE, int SIZ> class Hashtable {
 		}
 		k %= SIZ;
 		return k;
-	}	
+	}
+  static int hash (const std::pair<Unit *,Unit*> a) {
+    return (int)(((unsigned int)(hash((int)(((size_t)a.first)>>4))^
+                                 hash((int)(((size_t)a.second)>>4))))%SIZ);
+  }
 public:
-
+  void clear () {
+    for (int i=0;i<SIZ;++i){
+      table[i].clear();
+    }
+  }
 	Hashtable()
 	{
 	}
