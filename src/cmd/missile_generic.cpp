@@ -177,11 +177,11 @@ void Missile::UpdatePhysics2 (const Transformation &trans, const Transformation 
 		float checker = targ->querySphere (Position()-(SIMULATION_ATOM*GetVelocity()),Position(),rSize());
 		if ((checker&&detonation_radius>=0)||((Position()-targ->Position()).Magnitude()-targ->rSize()-rSize()<detonation_radius)) {
 // spiritplumber assumes that the missile is hitting a much larger object than itself
-            this->Velocity = targ->Velocity;
-            Velocity = targ->Velocity;
-
-			Discharge();
-			time=-1;
+                  static float percent_missile_match_target_velocity=XMLSupport::parse_float(vs_config->getVariable("physics","percent_missile_match_target_velocity",".5"));                  
+                  
+                  this->Velocity += percent_missile_match_target_velocity*(targ->Velocity-this->Velocity);                
+                  Discharge();
+                  time=-1;
 	//Vector norm;
 	//float dist;
 	/*** WARNING COLLISION STUFF... TO FIX FOR SERVER SIDE SOMEDAY ***

@@ -1909,9 +1909,11 @@ void GameCockpit::Draw() {
 
   Unit * un;
   float crosscenx=0,crossceny=0;
-  if (view==CP_FRONT) {
+  static bool crosshairs_on_chasecam=parse_bool(vs_config->getVariable("graphics","hud","crosshairs_on_chasecam","false"));
+
+  if (view==CP_FRONT||(view==CP_CHASE&&crosshairs_on_chasecam)) {
     if (Panel.size()>0&&Panel.front()&&screenshotkey==false) {
-      static bool drawCrosshairs=parse_bool(vs_config->getVariable("graphics","draw_rendered_crosshairs","true"));
+      static bool drawCrosshairs=parse_bool(vs_config->getVariable("graphics","hud","draw_rendered_crosshairs",vs_config->getVariable("graphics","draw_rendered_crosshairs","true")));
       Panel.front()->GetPosition(crosscenx,crossceny);
       if (drawCrosshairs) {
         float x,y,wid,hei;
@@ -1925,6 +1927,8 @@ void GameCockpit::Draw() {
       }
     }
   }
+  GFXBlendMode(SRCALPHA,INVSRCALPHA);
+  GFXEnable (TEXTURE0);
 
   RestoreViewPort();
 
@@ -1933,6 +1937,12 @@ void GameCockpit::Draw() {
   static bool drawF5VDU    = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_chase_cam","false"));
   static bool drawF6VDU    = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_panning_cam","false"));
   static bool drawF7VDU    = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_target_cam","false"));
+
+  static bool drawF5cp    = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_cockpit_from_chase_cam","false"));
+  static bool drawF6cp    = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_cockpit_from_panning_cam","false"));
+  static bool drawF7cp    = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_cockpit_from_target_cam","false"));
+
+
   static float AlphaTestingCutoff = XMLSupport::parse_float(vs_config->getVariable("graphics","AlphaTestCutoff",".8"));
 
   if (blend_cockpit) {
@@ -1943,10 +1953,15 @@ void GameCockpit::Draw() {
     GFXAlphaTest (GREATER,AlphaTestingCutoff);
   }
   GFXColor4f(1,1,1,1);
-  if (view<CP_CHASE)
-    if (Pit[view])
+  if (view<CP_CHASE) {
+    if (Pit[view]) {
       Pit[view]->Draw();
+    }
+  } else if ((view==CP_CHASE&&drawF5cp)||(view==CP_PAN&&drawF6cp)||(view==CP_TARGET&&drawF7cp)) {
+    if (Pit[0])
+      Pit[0]->Draw();
 
+  }
   if (blend_panels) {
     GFXAlphaTest (ALWAYS,0);
     GFXBlendMode (SRCALPHA,INVSRCALPHA);

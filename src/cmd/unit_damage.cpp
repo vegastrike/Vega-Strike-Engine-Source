@@ -33,6 +33,12 @@ extern std::vector <Mesh *> MakeMesh(unsigned int mysize);
 
 template<class UnitType>
 void GameUnit<UnitType>::Split (int level) {
+  static bool split_subunits=XMLSupport::parse_bool(vs_config->getVariable("graphics","split_dead_subunits","true"));
+  if (split_subunits) {
+    for(un_iter su=this->getSubUnits();*su;++su) {
+      (*su)->Split(level);
+    }
+  }
   static float debrismassmult = XMLSupport::parse_float(vs_config->getVariable("physics","debris_mass",".00001"));
   Vector PlaneNorm;
   int i;
@@ -45,16 +51,18 @@ void GameUnit<UnitType>::Split (int level) {
 	  }else{this->meshdata.erase(this->meshdata.begin()+i);}
   }
   int nm = this->nummesh();
-  if (nm<=0) {
+  std::string fac = FactionUtil::GetFaction(this->faction);
+
+  CSVRow unit_stats(LookupUnitRow(this->name,fac));
+  unsigned int num_chunks = unit_stats.success()?atoi(unit_stats["Num_Chunks"].c_str()):0;
+  if (nm<=0&&num_chunks==0) {
     return;
   }
   
   std::vector <Mesh *> old = this->meshdata;
   Mesh * shield=old.back();
   old.pop_back();
-  std::string fac = FactionUtil::GetFaction(this->faction);
-  CSVRow unit_stats(LookupUnitRow(this->name,fac));
-  unsigned int num_chunks = unit_stats.success()?atoi(unit_stats["Num_Chunks"].c_str()):0;
+
   vector <unsigned int> meshsizes;
   if (num_chunks&&unit_stats.success()) {
     size_t i;
