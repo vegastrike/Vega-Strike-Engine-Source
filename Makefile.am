@@ -8,7 +8,6 @@ if BOOST1_33
 BOOSTSOURCES = \
   boost/1_33/src/list.cpp \
   boost/1_33/src/module.cpp \
-  boost/1_33/src/wrapper.cpp \
   boost/1_33/src/aix_init_module.cpp \
   boost/1_33/src/object_protocol.cpp \
   boost/1_33/src/dict.cpp \
@@ -16,7 +15,6 @@ BOOSTSOURCES = \
   boost/1_33/src/errors.cpp \
   boost/1_33/src/str.cpp \
   boost/1_33/src/object_operators.cpp \
-  boost/1_33/src/slice.cpp \
   boost/1_33/src/long.cpp \
   boost/1_33/src/object/pickle_support.cpp \
   boost/1_33/src/object/life_support.cpp \
