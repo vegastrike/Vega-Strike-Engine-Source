@@ -290,7 +290,7 @@ static vector<SubUnitStruct> GetSubUnits(std::string subunits) {
       Q.i=stof(nextElement(subunit));
       Q.j=stof(nextElement(subunit));
       Q.k=stof(nextElement(subunit));
-      double restricted=cos(stof(nextElement(subunit),-1)*VS_PI/180.0);
+      double restricted=cos(stof(nextElement(subunit),180)*VS_PI/180.0);
       ret.push_back(SubUnitStruct(filename,pos,Q,R,restricted));
     } else ofs = string::npos;
   }
