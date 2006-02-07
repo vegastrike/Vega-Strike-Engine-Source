@@ -124,16 +124,33 @@ domNodeType *LoadXML(const char *filename) {
   unsigned int length = strlen( filename);
   assert( length > 8);
   VSFile f;
-  VSError err;
-  if( !memcmp( (filename+length-7), "mission", 7))
+  VSError err=FileNotFound;
+  if( !memcmp( (filename+length-7), "mission", 7)) {
   	err = f.OpenReadOnly( filename, MissionFile);
-  else {
+  }
+  if (err>Ok) {
   	err = f.OpenReadOnly( filename, UnknownFile);
         if (err>Ok) {
            string rootthis = string("/")+filename;
            err = f.OpenReadOnly(rootthis,UnknownFile);
         }
   }
+  if (err>Ok) {
+    string prefix=("../mission/");
+    prefix+=filename;
+    err = f.OpenReadOnly( prefix.c_str(), UnknownFile);
+  }
+  if (err>Ok) {
+    string prefix=("mission/");
+    prefix+=filename;
+    err = f.OpenReadOnly( prefix.c_str(), UnknownFile);      
+  }
+  if (err>Ok) {
+    string prefix=("../");
+    prefix+=filename;
+    err = f.OpenReadOnly( prefix.c_str(), UnknownFile);      
+  }
+
   if(err>Ok) {
     //cout << "warning: could not open file: " << filename << endl;
     //    assert(0);
