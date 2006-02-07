@@ -213,7 +213,7 @@ const EnumMap XML::element_map(XML::element_names, 23);
 const EnumMap XML::attribute_map(XML::attribute_names, 32);
 
 
-namespace Unit {
+namespace UnitNS {
     enum Names {
         UNKNOWN,
         UNIT,
@@ -669,8 +669,8 @@ std::string getTurretSize (const std::string &size) {
 void UnitBeginElement(const string &name, const AttributeList &attributes, XML * xml) {
   
   AttributeList::const_iterator iter;
-  Unit::Names elem = (Unit::Names)Unit::element_map.lookup(name);
-  Unit::Names top;
+  UnitNS::Names elem = (UnitNS::Names)UnitNS::element_map.lookup(name);
+  UnitNS::Names top;
   if(globalfileout){
 	if(globaltab>globallasttab){
             //fprintf (xml->tfp,">\n");
@@ -785,21 +785,21 @@ void UnitBeginElement(const string &name, const AttributeList &attributes, XML *
   fprintf (xml->bfp,">\n");
 
   switch(elem) {
-  case Unit::UNIT:
+  case UnitNS::UNIT:
 	  
       //IN FORMER TIMES fprintf (xml->tfp,"\t<Upgrade file=\"godsansshields\"/>\n");
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-	  switch(Unit::attribute_map.lookup((*iter).name)) {
-      case Unit::UNITSCALE:
+	  switch(UnitNS::attribute_map.lookup((*iter).name)) {
+      case UnitNS::UNITSCALE:
 	xml->unitscale=XMLSupport::parse_float ((*iter).value);
 	break;
       }
     }
     break;
-  case Unit::MESHFILE:
+  case UnitNS::MESHFILE:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-      switch(Unit::attribute_map.lookup((*iter).name)) {
-      case Unit::XFILE:
+      switch(UnitNS::attribute_map.lookup((*iter).name)) {
+      case UnitNS::XFILE:
 	xml->meshnames.push_back ((*iter).value);
       }
     }
