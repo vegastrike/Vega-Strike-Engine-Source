@@ -12,11 +12,11 @@ Summer
 *Developer tasks - do profiling to enumerate current performance bottlenecks.
 
 *Systems
-** Fix station, wormhole, planet placement/generation (avoid too close together - make docking points at stations around/on planet) 
+** Fix station, wormhole, planet placement/generation (avoid too close together - make docking points at stations around/on planet)
 ** tweak system scales
 ** tweak system names
 ** tweak system inhabitations, make more diverse set of planet types
-** Docking at planet (test fixed) vs "landing in BFE" on uninhabited world. 
+** Docking at planet (test fixed) vs "landing in BFE" on uninhabited world.
 ** Homeworlds
 ***Pick hierarchy of interest
 ** Reduce Jump Points per system
@@ -49,7 +49,7 @@ Future
 ** Classification (fleet, squadron, flotilla? etc. - something to differentiate between {5 plowshares} and {3 archimedes, 2 Tesla, 8 kahan, 20 schroedinger, 10 goddard, 5 watson} )
 ** Flightgroups should have subsets of ships that spawn together (combined arms)
 ** make news use new naming scheme
-** Organize news to group stories depending on "local" importance 
+** Organize news to group stories depending on "local" importance
 
 *AI
 ** add another dimension to roles (attack AND defend/predator AND prey roles) instead of forcing both to be the same.
@@ -72,7 +72,7 @@ Future
 
 New Developers
 * Graphical stuff
-** make engine lights proportional to accel, not to speed - in the works
+** make engine lights proportional to accel, not to speed - done
 *Run-time changeable configuration option and key-binding infrastructure
 *Remove duplicate tags/ move out of the way of text.
 
