@@ -6808,8 +6808,11 @@ void Unit::EjectCargo (unsigned int index) {
             cargo->owner = this;
 
           arot=erot;
-          cargo->PrimeOrders();
-          cargo->SetAI (new Orders::AggressiveAI ("default.agg.xml")); // generally fraidycat AI
+          static bool eject_attacks=XMLSupport::parse_bool(vs_config->getVariable("AI","eject_attacks","false"));
+          if (eject_attacks) {
+            cargo->PrimeOrders();
+            cargo->SetAI (new Orders::AggressiveAI ("default.agg.xml")); // generally fraidycat AI
+          }
           //                          cargo->SetTurretAI();	  
           
           // Meat. Docking should happen here
