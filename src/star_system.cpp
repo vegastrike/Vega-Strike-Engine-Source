@@ -308,8 +308,10 @@ double calc_blend_factor(double frac, int priority, int when_it_will_be_simulate
 extern double saved_interpolation_blend_factor;
 extern double interpolation_blend_factor;
 extern bool cam_setup_phase;
+extern bool debugPerformance();
 //#define UPDATEDEBUG  //for hard to track down bugs
 void GameStarSystem::Draw(bool DrawCockpit) {
+  double starttime=queryTime();
   GFXEnable (DEPTHTEST);
   GFXEnable (DEPTHWRITE);
   Music::MuzakCycle();
@@ -339,7 +341,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
     }
 
   }
-
+  double setupdrawtime=queryTime();
   static bool always_make_smooth=XMLSupport::parse_bool(vs_config->getVariable("graphics","always_make_smooth_cam","false"));
   //bool whichview=  _Universe->AccessCockpit()->GetView()==CP_CHASE;//||_Universe->AccessCockpit()->GetView()==CP_VIEWTARGET;
   /*if (!whichview) */{
@@ -353,7 +355,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
       //         b) actual drawing (currently duplicating a's work)
       //       With camera setup ocurring between a) and b)
       cam_setup_phase=true;
-
+      
       //int numships=0;
       for (unsigned int sim_counter=0;sim_counter<=SIM_QUEUE_SIZE;++sim_counter) {
         Unit *unit;
@@ -376,11 +378,13 @@ void GameStarSystem::Draw(bool DrawCockpit) {
 
       cam_setup_phase=false;
   }
-
+  setupdrawtime=queryTime()-setupdrawtime;
   GFXDisable (LIGHTING);
   bg->Draw();
-
+  double drawtime=queryTime();
+  double maxdrawtime=0;
   for (unsigned int sim_counter=0;sim_counter<=SIM_QUEUE_SIZE;++sim_counter) {
+    double tmp=queryTime();
     Unit *unit;
     UnitCollection::UnitIterator iter = physics_buffer[sim_counter].createIterator();    
     float backup=SIMULATION_ATOM;
@@ -396,15 +400,17 @@ void GameStarSystem::Draw(bool DrawCockpit) {
     }
     interpolation_blend_factor=saved_interpolation_blend_factor;
     SIMULATION_ATOM=backup;
+    tmp=queryTime()-tmp;
+    if (tmp>maxdrawtime)maxdrawtime=tmp;
   }
-
+  drawtime=queryTime()-drawtime;
   WarpTrailDraw();
 
   GFXFogMode (FOG_OFF);
 
   GFXColor tmpcol (0,0,0,1);
   GFXGetLightContextAmbient(tmpcol);
-
+  double processmesh=queryTime();
   static bool DrawNearStarsLast =XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_near_stars_in_front_of_planets","false"));
   if (!DrawNearStarsLast) stars->Draw();
   Mesh::ProcessZFarMeshes();
@@ -416,6 +422,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   GamePlanet::ProcessTerrains();
   Terrain::RenderAll();
   Mesh::ProcessUndrawnMeshes(true);
+  processmesh=queryTime()-processmesh;
   Nebula * neb;
 
   Matrix ident;
@@ -446,6 +453,10 @@ void GameStarSystem::Draw(bool DrawCockpit) {
     //      systemInputDFA->Draw();
     //      GFXHudMode (false);
     //    }
+  }
+  double fintime=queryTime()-starttime;
+  if (debugPerformance()) {
+    printf("draw: %f setup %f units %f maxunit %f processmesh %f ",fintime,setupdrawtime,drawtime,maxdrawtime,processmesh);
   }
 }
 extern void update_ani_cache();

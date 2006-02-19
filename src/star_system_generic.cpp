@@ -386,7 +386,10 @@ void CarSimUpdate (Unit *un, float height) {
 	
 
 }
-
+bool debugPerformance() {
+  static bool dp = XMLSupport::parse_bool(vs_config->getVariable("physics","debug_performance","true"));
+  return dp;
+}
 //Variables for debugging purposes only - eliminate later
 unsigned int physicsframecounter=1;
 unsigned int theunitcounter=0;
@@ -395,6 +398,10 @@ unsigned int movingavgarray[128]={0};
 unsigned int movingtotal=0;
 void StarSystem::UpdateUnitPhysics (bool firstframe) {
   static   bool phytoggle=true;
+  double updatebegin=queryTime();
+  double aitime=0;
+  double phytime=0;
+  double collidetime=0;
   if (phytoggle) {
     // BELOW COMMENTS ARE NO LONGER IN SYNCH
     // NOTE: Randomization is necessary to preserve scattering - otherwise, whenever a 
@@ -411,29 +418,36 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
       un_iter iter = this->physics_buffer[current_sim_location].createIterator();
       while((unit = iter.current())!=NULL) {
         int priority=UnitUtil::getPhysicsPriority(unit);
-		// Doing spreading here and only on priority changes, so as to make AI easier
-
-		//If the priority has really changed (not an initial scattering, because prediction doesn't match)
-		if (priority!=unit->predicted_priority){
-			//Save priority value as prediction for next scheduling
-			unit->predicted_priority=priority;
-			//Scatter, so as to achieve uniform distribution
-            priority = 1 + (((unsigned int)vsrandom.genrand_int32())%priority);
-		} else {
-			//Save priority value as prediction
-			unit->predicted_priority=priority;
-		}
+        // Doing spreading here and only on priority changes, so as to make AI easier
         
-	    int newloc=(current_sim_location+priority)%SIM_QUEUE_SIZE;
-	    float backup=SIMULATION_ATOM;
-		theunitcounter=theunitcounter+1;
-	    SIMULATION_ATOM*=priority;
-	    unit->sim_atom_multiplier=priority;
-	    unit->ExecuteAI(); 
+        //If the priority has really changed (not an initial scattering, because prediction doesn't match)
+        if (priority!=unit->predicted_priority){
+          //Save priority value as prediction for next scheduling
+          unit->predicted_priority=priority;
+          //Scatter, so as to achieve uniform distribution
+          priority = 1 + (((unsigned int)vsrandom.genrand_int32())%priority);
+        } else {
+          //Save priority value as prediction
+          unit->predicted_priority=priority;
+        }
+        
+        int newloc=(current_sim_location+priority)%SIM_QUEUE_SIZE;
+        float backup=SIMULATION_ATOM;
+        theunitcounter=theunitcounter+1;
+        SIMULATION_ATOM*=priority;
+        unit->sim_atom_multiplier=priority;
+        double aa=queryTime();
+        unit->ExecuteAI(); 
+        double bb=queryTime();
         unit->ResetThreatLevel();
         unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits(),unit);    
+        double cc= queryTime();
         last_collisions.clear();
         unit->CollideAll();
+        double dd = queryTime();
+        aitime+=bb-aa;
+        phytime+=cc-bb;
+        collidetime+=dd-cc;
         if (newloc==current_sim_location) {
 	      iter.advance();
         }else{ 
@@ -454,8 +468,10 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
 	int movingavgindex=physicsframecounter%128;
 	movingtotal=movingtotal-movingavgarray[movingavgindex]+theunitcounter;
 	movingavgarray[movingavgindex]=theunitcounter;
-	fprintf(stderr,"Frame:%u - %u, %u, %u\n",physicsframecounter,theunitcounter,movingtotal/128,totalprocessed/physicsframecounter);
-    current_sim_location=(current_sim_location+1)%SIM_QUEUE_SIZE;
+        if (debugPerformance()) {
+          printf("PhysFrame:%u - %u, %u, %u t:%f ai:%f p:%f c:%f ",physicsframecounter,theunitcounter,movingtotal/128,totalprocessed/physicsframecounter,queryTime()-updatebegin,aitime,phytime,collidetime);
+        }
+        current_sim_location=(current_sim_location+1)%SIM_QUEUE_SIZE;
 	++physicsframecounter;
 	totalprocessed+=theunitcounter;
 	theunitcounter=0;
@@ -564,7 +580,8 @@ void StarSystem::Update(float priority , bool executeDirector) {
 
   Unit *unit;
   bool firstframe = true;
-
+  double beginss=queryTime();
+  double pythontime=0;
   ///this makes it so systems without players may be simulated less accurately
   for (int k=0;k<_Universe->numPlayers();k++) {
     if (_Universe->AccessCockpit(k)->activeStarSystem==this) {
@@ -578,9 +595,10 @@ void StarSystem::Update(float priority , bool executeDirector) {
   time += GetElapsedTime();
   _Universe->pushActiveStarSystem(this);
   //WARNING PERFORMANCE HACK!!!!!
-    if (time>2*SIMULATION_ATOM) {
-      time = 2*SIMULATION_ATOM;
-    }
+  if (time>2*SIMULATION_ATOM) {
+    time = 2*SIMULATION_ATOM;
+  }
+  double bolttime=0; 
   if(time/SIMULATION_ATOM>=(1./PHY_NUM)) {
     while(time/SIMULATION_ATOM >= (1./PHY_NUM)) { // Chew up all SIMULATION_ATOMs that have elapsed since last update
       //UnitCollection::UnitIterator iter;
@@ -589,11 +607,14 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	UpdateAnimatedTexture();
         //	iter = units.createIterator();
 	Unit::ProcessDeleteQueue();
+        double pythonidea=queryTime();
 	if( (run_only_player_starsystem && _Universe->getActiveStarSystem(0)==this) || !run_only_player_starsystem) {
 	  if (executeDirector) {
 	    ExecuteDirector();
 	  }
 	}
+        pythontime=queryTime()-pythonidea;
+        
         static int dothis=0;
         if (this==_Universe->getActiveStarSystem(0)) {
           if (dothis++%2==0) {
@@ -612,7 +633,9 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	  UpdateCameraSnds();
 
 	//iter = drawList.createIterator();
+        bolttime=queryTime();
 	bolts->UpdatePhysics();
+        bolttime=queryTime()-bolttime;
 	current_stage=MISSION_SIMULATION;
 	firstframe = false;
       }
@@ -639,6 +662,9 @@ void StarSystem::Update(float priority , bool executeDirector) {
   //WARNING cockpit does not get here...
   _Universe->popActiveStarSystem();
   //  VSFileSystem::vs_fprintf (stderr,"bf:%lf",interpolation_blend_factor);
+  if (debugPerformance()) {
+    printf ("SS Update: pyth: %f tot: %f\n",pythontime, queryTime()-beginss);
+  }
 }
 
 /***************************************************************************************/
