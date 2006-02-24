@@ -694,6 +694,8 @@ CommandMap initGlobalCommandMap() {
   commandMap["PickTargetKey"]=FireKeyboard::PickTargetKey ;
   commandMap["SubUnitTargetKey"]=FireKeyboard::SubUnitTargetKey ;
   commandMap["NearestTargetKey"]=FireKeyboard::NearestTargetKey ;
+  commandMap["MissileTargetKey"]=FireKeyboard::MissileTargetKey ;
+  commandMap["IncomingMissileTargetKey"]=FireKeyboard::IncomingMissileTargetKey ;
   commandMap["ThreatTargetKey"]=FireKeyboard::ThreatTargetKey ;
   commandMap["SigTargetKey"]=FireKeyboard::SigTargetKey ;
   commandMap["UnitTargetKey"]=FireKeyboard::UnitTargetKey ;

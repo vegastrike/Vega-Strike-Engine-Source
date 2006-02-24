@@ -59,6 +59,10 @@ struct FIREKEYBOARDTYPE {
   KBSTATE headlightkey;
   KBSTATE sirenkey;
 #endif
+ KBSTATE missiletargetkey;
+ KBSTATE incomingmissiletargetkey;
+ KBSTATE rmissiletargetkey;
+ KBSTATE rincomingmissiletargetkey;
  KBSTATE rneartargetkey;
  KBSTATE rthreattargetkey;
  KBSTATE rpicktargetkey;
@@ -492,7 +496,36 @@ void FireKeyboard::PickTargetKey(const KBData&,KBSTATE k) {
   if (k==PRESS)
     ExamineWhenTargetKey();
 }
+void FireKeyboard::MissileTargetKey(const KBData&,KBSTATE k) {
+  if (g().missiletargetkey!=PRESS)
+    g().missiletargetkey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
+ 
+}
 
+void FireKeyboard::IncomingMissileTargetKey(const KBData&,KBSTATE k) {
+  if (g().incomingmissiletargetkey!=PRESS)
+    g().incomingmissiletargetkey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
+ 
+}
+void FireKeyboard::ReverseMissileTargetKey(const KBData&,KBSTATE k) {
+  if (g().rmissiletargetkey!=PRESS)
+    g().rmissiletargetkey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
+ 
+}
+
+void FireKeyboard::ReverseIncomingMissileTargetKey(const KBData&,KBSTATE k) {
+  if (g().rincomingmissiletargetkey!=PRESS)
+    g().rincomingmissiletargetkey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
+ 
+}
 void FireKeyboard::NearestTargetKey(const KBData&,KBSTATE k) {
   if (g().neartargetkey!=PRESS)
     g().neartargetkey = k;
@@ -988,6 +1021,18 @@ bool TargUn (Unit *me,Unit *target) {
   return me->InRange(target,true,false)&&(target->isUnit()==UNITPTR||target->isUnit()==ENHANCEMENTPTR)&&getTopLevelOwner()!=target->owner&&(can_target_cargo||target->faction!=up)&&isNotTurretOwner(me,target);
 }
 
+
+bool TargMissile(Unit *me,Unit *target) {
+  return me->InRange(target,true,false)&&(target->isUnit()==MISSILEPTR)&&isNotTurretOwner(me,target);
+}
+
+bool TargIncomingMissile(Unit *me,Unit *target) {
+  Unit *tt=target->Target();
+  return TargMissile(me,target)&&(tt==me||(me->isSubUnit()&&tt==_Universe->AccessCockpit()->GetSaveParent()));
+}
+
+
+ 
 bool TargFront (Unit *me,Unit *target) {
 	/*
 	float dist;
@@ -1716,6 +1761,32 @@ void FireKeyboard::Execute () {
     f().neartargetkey=DOWN;
     refresh_target=true;
   }
+  if (f().missiletargetkey==PRESS) {
+    ChooseTargets(parent,TargMissile,false);
+    f().missiletargetkey=DOWN;
+    refresh_target=true;
+  }
+
+  if (f().incomingmissiletargetkey==PRESS) {
+    ChooseTargets(parent,TargIncomingMissile,false);
+    f().incomingmissiletargetkey=DOWN;
+    refresh_target=true;
+  }
+
+
+  if (f().rmissiletargetkey==PRESS) {
+    ChooseTargets(parent,TargMissile,true);
+    f().rmissiletargetkey=DOWN;
+    refresh_target=true;
+  }
+
+  if (f().rincomingmissiletargetkey==PRESS) {
+    ChooseTargets(parent,TargIncomingMissile,true);
+    f().rincomingmissiletargetkey=DOWN;
+    refresh_target=true;
+  }
+
+
   if (f().threattargetkey==PRESS) {
     ChooseTargets(parent,TargThreat,false);
     f().threattargetkey=DOWN;

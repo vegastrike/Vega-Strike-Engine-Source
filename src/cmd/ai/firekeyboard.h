@@ -73,6 +73,10 @@ class FireKeyboard: public Order {
   static void FireKey(const KBData&,KBSTATE);
   static void MissileKey(const KBData&,KBSTATE);
   static void TargetKey(const KBData&,KBSTATE k);
+  static void MissileTargetKey(const KBData&,KBSTATE k);
+  static void IncomingMissileTargetKey(const KBData&,KBSTATE k);
+  static void ReverseMissileTargetKey(const KBData&,KBSTATE k);
+  static void ReverseIncomingMissileTargetKey(const KBData&,KBSTATE k);
   static void PickTargetKey(const KBData&,KBSTATE k);
   static void NearestTargetKey(const KBData&,KBSTATE k);
   static void SubUnitTargetKey(const KBData&,KBSTATE k);
