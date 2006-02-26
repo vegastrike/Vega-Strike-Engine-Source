@@ -24,7 +24,7 @@ Summer
 *Damage
 ** Fix System Damage so it happens with reasonable frequency
 
-*Fix up starting system.
+*Fix up starting system. Especially wrt Atlantis HUD
 
 
 *Loci of control
