@@ -92,7 +92,7 @@ ver_needed=1.5
 AM_VER_NEEDED=$ver_needed
 "$ACLOCAL" --version|checkversion && "$AUTOMAKE" --version|checkversion
 if (test $? -ne 0) then
-  echo "automake tools (automake, aclocal) are not new enough.  Please upgrade to at least version $ver_needed"
+#  echo "automake tools (automake, aclocal) are not new enough.  Please upgrade to at least version $ver_needed"
   vers_ok=NO
 fi
 

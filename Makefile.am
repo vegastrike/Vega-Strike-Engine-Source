@@ -162,7 +162,7 @@ libnetgeneric = \
   src/networking/prediction.h \
   src/networking/zonemgr.cpp \
   src/networking/zonemgr.h
-  
+
 libnetclientserver = \
   $(libnetgeneric)
 
@@ -242,7 +242,7 @@ LIBPYTHON = \
   src/python/unit_wrapper_class.h \
   src/python/unit_wrapper.cpp \
   src/python/universe_util_export.cpp
-  
+
 LIBSCRIPT = \
   src/cmd/script/director_generic.cpp \
   src/cmd/script/mission_script.cpp \
@@ -264,7 +264,7 @@ LIBSCRIPT = \
   src/cmd/script/script_statement.cpp \
   src/cmd/script/script_util.cpp \
   src/cmd/script/script_variables.cpp
-  
+
 LIBAI = \
   src/cmd/ai/aggressive.cpp \
   src/cmd/ai/aggressive.h \
@@ -324,7 +324,7 @@ LIBCOLLIDE = \
   src/cmd/collide/csgeom/vector3.h \
   src/cmd/collide/csgeom/box.h \
   src/cmd/collide/csgeom/transfrm.h
-  
+
 
 LIBCMD = \
   src/cmd/alphacurve.cpp \
@@ -565,7 +565,7 @@ vegastrike_DEPENDENCIES = \
   libboost_python.a \
   libgfx.a \
   libnetlowlevel.a
-  
+
 vegaserver_LDADD = \
   libboost_python.a \
   libcmdserver.a \
@@ -628,8 +628,6 @@ libroot = \
   src/macosx_math.h \
   src/main_loop.cpp \
   src/main_loop.h \
-  src/mmorpgclient.cpp \
-  src/mmorpgclient.h \
   src/physics.cpp \
   src/physics.h \
   src/profile.h \
@@ -645,6 +643,11 @@ libroot = \
   src/universe_util.h \
   src/universe.cpp \
   src/universe.h
+
+# Disabled from libroot since MMORPG depends on SDL which is not
+# easily available on Macs. -Patrick
+#  src/mmorpgclient.cpp
+#  src/mmorpgclient.h
 
 librootgeneric = \
   src/cg_global.h \
@@ -987,7 +990,7 @@ tempgen_SOURCES = \
   src/xml_support.h \
   src/hashtable.cpp \
   src/hashtable.h
-  
+
 mesh_xml_LDFLAGS = -lexpat
 mesh_xml_CPPFLAGS = -I../../src
 mesh_xml_SOURCES = \
