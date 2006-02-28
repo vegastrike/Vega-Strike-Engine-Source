@@ -275,7 +275,7 @@ static int LoadSound (ALuint buffer, bool looping) {
 #endif
 
 using namespace VSFileSystem;
-
+ALuint nil_wavebuf=0;
 int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 #ifdef HAVE_AL
 #ifdef SOUND_DEBUG
@@ -286,12 +286,14 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 	    std::string hashname;
 	    if (!music)
 		{
-	      hashname = VSFileSystem::GetHashName (s);
+                  hashname = VSFileSystem::GetHashName (s);
 		  wavbuf = soundHash.Get(hashname);
 		  if (!wavbuf) {
 		      hashname = VSFileSystem::GetSharedSoundHashName(s);
 		      wavbuf = soundHash.Get(hashname);
 		  }
+                  if (wavbuf==&nil_wavebuf)
+                    return -1;//404
 	    }
 		if (wavbuf) {
 #ifdef SOUND_DEBUG
@@ -307,8 +309,10 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 			  hashname = VSFileSystem::GetSharedSoundHashName(s);
 		  else
 		      hashname = VSFileSystem::GetHashName (s);
-		  if (error>Ok)
-			  return -1;
+		  if (error>Ok) {
+                    soundHash.Put(hashname,&nil_wavebuf);
+                    return -1;
+                  }
 	      wavbuf = (ALuint *) malloc (sizeof (ALuint));
 	      alGenBuffers (1,wavbuf);
 #ifdef SOUND_DEBUG
