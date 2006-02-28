@@ -357,15 +357,26 @@ void GameStarSystem::Draw(bool DrawCockpit) {
       cam_setup_phase=true;
       
       //int numships=0;
-      for (unsigned int sim_counter=0;sim_counter<=SIM_QUEUE_SIZE;++sim_counter) {
+      Unit * saveparent=_Universe->AccessCockpit()->GetSaveParent();
+      Unit * targ;
+      if (saveparent) {
+        targ=saveparent->Target();
+      }
+      for (unsigned int sim_counter=0;sim_counter<=SIM_QUEUE_SIZE&&(targ||saveparent);++sim_counter) {
         Unit *unit;
         UnitCollection::UnitIterator iter = physics_buffer[sim_counter].createIterator();    
         float backup=SIMULATION_ATOM;
         unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
         while((unit = iter.current())!=NULL) {
-          interpolation_blend_factor=calc_blend_factor(saved_interpolation_blend_factor,unit->sim_atom_multiplier,unit->cur_sim_queue_slot,cur_sim_frame);
-          SIMULATION_ATOM = backup*unit->sim_atom_multiplier;
-          ((GameUnit<Unit> *)unit)->Draw();
+          if (unit==saveparent||unit==targ) {
+            interpolation_blend_factor=calc_blend_factor(saved_interpolation_blend_factor,unit->sim_atom_multiplier,unit->cur_sim_queue_slot,cur_sim_frame);
+            SIMULATION_ATOM = backup*unit->sim_atom_multiplier;
+            ((GameUnit<Unit> *)unit)->Draw();
+            if (unit==saveparent)
+              saveparent=NULL;
+            if (unit==targ)
+              targ=NULL;
+          }
           iter.advance();
           //numships++;
         }

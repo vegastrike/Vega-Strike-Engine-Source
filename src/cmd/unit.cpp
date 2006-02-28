@@ -344,11 +344,11 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
   Matrix *ctm;
   Matrix invview;
   Transformation * ct;
-  if (cam_setup_phase) {
+  //if (cam_setup_phase) {
       this->cumulative_transformation = linear_interpolate(this->prev_physical_state, this->curr_physical_state, interpolation_blend_factor);
       this->cumulative_transformation.Compose(parent, parentMatrix);
       this->cumulative_transformation.to_matrix(this->cumulative_transformation_matrix);
-  }
+  //}
   ctm =&this->cumulative_transformation_matrix;
   ct = &this->cumulative_transformation;
   if (this->graphicOptions.FaceCamera==1) {
