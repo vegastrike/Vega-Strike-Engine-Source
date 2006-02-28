@@ -2157,7 +2157,9 @@ void Unit::AddVelocity(float difficulty) {
 	     graphicOptions.RampCounter-=SIMULATION_ATOM;
 	     if(graphicOptions.RampCounter<=0){
 	       graphicOptions.RampCounter=0;
-		 }
+             }
+             if (graphicOptions.RampCounter>warprampdowntime)
+               graphicOptions.RampCounter=warprampdowntime;
 	     rampmult=(graphicOptions.InWarp)?1.0-((graphicOptions.RampCounter/warprampuptime)*(graphicOptions.RampCounter/warprampuptime)):(graphicOptions.RampCounter/warprampdowntime)*(graphicOptions.RampCounter/warprampdowntime);
 	   }
 	   if(minmultiplier<warpMultiplierMin) {
@@ -4447,7 +4449,7 @@ void Unit::Target (Unit *targ) {
 	    }
 	  }
 	}
-        if (!found) {
+        if (!found&&!_Universe->isPlayerStarship(this)) {
           WarpPursuit(this,_Universe->activeStarSystem(),targ->activeStarSystem->getFileName());
         }
       }else {
