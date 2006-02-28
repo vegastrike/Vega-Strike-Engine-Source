@@ -59,6 +59,8 @@ static void ActuallyWarpTo(Unit * parent,const QVector &tarpos, Vector tarvel, U
     static float min_energy_to_enter_warp=XMLSupport::parse_float(vs_config->getVariable("AI","min_energy_to_enter_warp",".33"));
     if (parent->WarpEnergyData()>min_energy_to_enter_warp) {
       parent->graphicOptions.InWarp=1;// don't want the AI thrashing
+      parent->graphicOptions.WarpRamping=1;// don't want the AI thrashing
+      
     }
   } else {
     parent->graphicOptions.InWarp=0;
