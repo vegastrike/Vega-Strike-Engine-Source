@@ -3012,6 +3012,7 @@ void Unit::RechargeEnergy() {
 #endif
 }
 void Unit::RegenShields () {
+  static bool shields_in_spec = XMLSupport::parse_bool(vs_config->getVariable("physics","shields_in_spec","false"));
   static float shieldenergycap = XMLSupport::parse_float(vs_config->getVariable ("physics","shield_energy_capacitance",".2"));
   static bool energy_before_shield=XMLSupport::parse_bool(vs_config->getVariable ("physics","engine_energy_priority","true"));
   static bool apply_difficulty_shields = XMLSupport::parse_bool (vs_config->getVariable("physics","difficulty_based_shield_recharge","true"));
@@ -3040,7 +3041,7 @@ void Unit::RegenShields () {
   // Shield energy drain
   if (shield.number) {
       // GAHHH reactor in units of 100MJ, shields in units of VSD=5.4MJ to make 1MJ of shield use 1/shieldenergycap MJ
-      if(!graphicOptions.InWarp){
+      if(shields_in_spec||!graphicOptions.InWarp){
         energy-=shield.recharge*VSD/(100*(shield.efficiency?shield.efficiency:1))/shieldenergycap*shield.number*shield_maintenance_cost*SIMULATION_ATOM*((apply_difficulty_shields)?g_game.difficulty:1);
 	    if(energy<0){
 		    velocity_discharge=true;
@@ -3061,7 +3062,7 @@ void Unit::RegenShields () {
           velocity_discharge=true;
       }
       */
-      if (graphicOptions.InWarp) {
+      if (graphicOptions.InWarp&&!shields_in_spec) {
           rec=0;
           velocity_discharge=true;
       }
