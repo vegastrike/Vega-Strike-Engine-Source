@@ -248,7 +248,7 @@ namespace UniverseUtil {
 		}
 		return un;
 	}
-    Unit *getUnitByPtr(void* ptr, Unit * finder) {
+    Unit *getUnitByPtr(void* ptr, Unit * finder, bool allowslowness) {
         if (finder) {
             UnitPtrLocator unitLocator(ptr);
             findObjects(activeSys,finder->location,&unitLocator);
@@ -256,6 +256,9 @@ namespace UniverseUtil {
                 return reinterpret_cast<Unit*>(ptr); else if (!finder->isSubUnit())
                 return 0;
         }
+
+	if (!allowslowness)
+		return 0;
 
         un_fiter it=activeSys->getUnitList().fastIterator();
         while (it.notDone()&&((void*)it.current()!=ptr)) it.advance();

@@ -295,7 +295,7 @@ public:
     this->fireat=fireat;
     this->tbin=tbin;
     this->parent=un;
-    this->parentparent=un->owner?UniverseUtil::getUnitByPtr(un->owner,un):0;
+    this->parentparent=un->owner?UniverseUtil::getUnitByPtr(un->owner,un,false):0;
     mytarg=NULL;
     this->maxinnerrange=innermaxrange;
     this->maxrolepriority=maxrolepriority;// max priority that will allow gun range to be ok
@@ -459,9 +459,12 @@ bool FireAt::ShouldFire(Unit * targ, bool &missilelock) {
     distance = dist;
   }
   static float firewhen = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","InWeaponRange","1.2"));
+  static float fireangle_minagg = (float)cos(XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MaximumFiringAngle.minagg","0.35"))); //Roughly 20 degrees
+  static float fireangle_maxagg = (float)cos(XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MaximumFiringAngle.maxagg","0.785"))); //Roughly 45 degrees
   bool temp=parent->TrackingGuns(missilelock);
   bool isjumppoint=targ->isUnit()==PLANETPTR&&((Planet*)targ)->GetDestinations().empty()==false;
-  return ((dist<firewhen&&angle>1/agg)||(temp&&dist<firewhen&&angle>0))&&!isjumppoint;
+  float fangle = (fireangle_minagg+fireangle_maxagg*agg)/(1.0f+agg);
+  return ((dist<firewhen&&angle>fangle)||(temp&&dist<firewhen&&angle>0))&&!isjumppoint;
 }
 
 FireAt::~FireAt() {

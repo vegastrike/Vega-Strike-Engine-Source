@@ -58,10 +58,10 @@ public:
 	PythonUnitIter getUnitList();
 ///This function gets a unit given a number (how many iterations to go down in the iterator)
 	Unit *getUnit(int index);
-///This function gets a unit given a name 
-    Unit *getUnitByName(std::string name);
+///This function gets a unit given a name
+	Unit *getUnitByName(std::string name);
 ///This function gets a unit given an unreferenceable pointer to it - much faster if finder is provided
-    Unit *getUnitByPtr(void* ptr, Unit * finder=0);
+	Unit *getUnitByPtr(void* ptr, Unit * finder=0, bool allowslowness=true);
 	Unit *getScratchUnit();
 	void setScratchUnit(Unit *);
 	void precacheUnit(std::string name, std::string faction);
