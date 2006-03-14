@@ -37,8 +37,9 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
   //Matrix m;
   CollideInfo.object.b = NULL;
   CollideInfo.type = LineCollide::BEAM;
-  if (vlist)
-    delete vlist;
+  //DO NOT DELETE - shared vlist
+  //if (vlist)
+  //  delete vlist;
   local_transformation = trans;//location on ship
   //  cumalative_transformation =trans; 
   //  trans.to_matrix (cumalative_transformation_matrix);
@@ -73,16 +74,24 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
   curlength = SIMULATION_ATOM*speed;
   lastthick=0;
   curthick = SIMULATION_ATOM*radialspeed;
-  int numvertex=mymax(48,(doscoop?(4*radslices+1)*longslices*4:0));
-  GFXColorVertex *beam = new GFXColorVertex[numvertex]; //regretably necessary: radslices and longslices come from the config file... so it's at runtime.
-  memset(beam,0,sizeof(*beam)*numvertex);
+  //int numvertex=mymax(48,(doscoop?(4*radslices+1)*longslices*4:0));
+  static GFXVertexList *_vlist = 0;
+  if (!_vlist) {
+      int numvertex=mymax(48,(4*radslices+1)*longslices*4);
+      GFXColorVertex *beam = new GFXColorVertex[numvertex]; //regretably necessary: radslices and longslices come from the config file... so it's at runtime.
+      memset(beam,0,sizeof(*beam)*numvertex);
   
-  vlist = new GFXVertexList (GFXQUAD,numvertex,beam,numvertex,true);//mutable color contained list
+      _vlist = new GFXVertexList (GFXQUAD,numvertex,beam,numvertex,true);//mutable color contained list
+
+      delete[] beam;
+  }
+
+  // Shared vlist - we recalculate it every time, so no loss
+  vlist = _vlist;
+
 #ifdef PERBOLTSOUND
   AUDStartPlaying (sound);
 #endif
-
-  delete[] beam;
 }
 
 void Beam::RecalculateVertices(const Matrix & trans) {

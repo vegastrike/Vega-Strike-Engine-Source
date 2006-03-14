@@ -9,8 +9,17 @@ using std::vector;
 #include "audiolib.h"
 #include "configxml.h"
 #include "images.h"
+
+struct BeamDrawContext {
+  Matrix m;
+  class GFXVertexList *vlist;
+  Beam *beam;
+  BeamDrawContext() { }
+  BeamDrawContext(const Matrix  &a, GFXVertexList *vl, Beam * b) :m(a),vlist(vl),beam(b){}
+};
+
 static DecalQueue beamdecals;
-static vector <vector <DrawContext> > beamdrawqueue;
+static vector <vector <BeamDrawContext> > beamdrawqueue;
 
 Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own, Unit * firer, int sound) :vlist(NULL), Col(clne.r,clne.g,clne.b,clne.a){
   VSCONSTRUCT2('B')
@@ -22,7 +31,7 @@ Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own, 
 #endif
   decal = beamdecals.AddTexture (clne.file.c_str(),TRILINEAR);
   if (decal>=beamdrawqueue.size()) {
-    beamdrawqueue.push_back (vector<DrawContext>());
+    beamdrawqueue.push_back (vector<BeamDrawContext>());
   }
   Init(trans,clne,own,firer);
   impact=UNSTABLE;
@@ -37,7 +46,8 @@ Beam::~Beam () {
 #ifdef BEAMCOLQ
   RemoveFromSystem(true);
 #endif
-  delete vlist;
+  // DO NOT DELETE - shared vlist
+  // delete vlist;
   beamdecals.DelTexture(decal);
 }
 
@@ -57,9 +67,7 @@ void Beam::Draw (const Transformation &trans, const Matrix &m, Unit * targ, floa
 #endif
   AUDSoundGain (sound,curthick*curthick/(thickness*thickness));
 
-  RecalculateVertices(cumulative_transformation_matrix);
-
-  beamdrawqueue[decal].push_back(DrawContext (cumulative_transformation_matrix,vlist));
+  beamdrawqueue[decal].push_back(BeamDrawContext (cumulative_transformation_matrix,vlist,this));
 
 }
 
@@ -74,7 +82,7 @@ void Beam::ProcessDrawQueue() {
 
   GFXEnable (TEXTURE0);
   GFXDisable (TEXTURE1);
-  DrawContext c;
+  BeamDrawContext c;
   for (unsigned int decal = 0;decal < beamdrawqueue.size();decal++) {	
     Texture * tex = beamdecals.GetTexture(decal);
     if (tex) {
@@ -82,15 +90,14 @@ void Beam::ProcessDrawQueue() {
       GFXTextureEnv(0,GFXMODULATETEXTURE);
       GFXToggleTexture(true,0);
       if (beamdrawqueue[decal].size()) {
-	beamdrawqueue[decal].back().vlist->LoadDrawState();//loads clarity+color
-	while (beamdrawqueue[decal].size()) {
-	  c= beamdrawqueue[decal].back();
-	  beamdrawqueue[decal].pop_back();
-	  GFXLoadMatrixModel ( c.m);
-	  c.vlist->BeginDrawState(GFXFALSE);
-	  c.vlist->Draw();
-	  c.vlist->EndDrawState(GFXFALSE);
-	}
+	    while (beamdrawqueue[decal].size()) {
+	      c = beamdrawqueue[decal].back();
+	      beamdrawqueue[decal].pop_back();
+
+          c.beam->RecalculateVertices(c.m);
+	      GFXLoadMatrixModel ( c.m);
+          c.vlist->DrawOnce();
+	    }
       }
     }
   }
