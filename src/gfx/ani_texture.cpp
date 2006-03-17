@@ -135,12 +135,12 @@ void AnimatedTexture::setTime (double tim) {
       this->active_fraction = fraction;
       if (!vidMode) {
           if (GetInterpolateTCoord()&&(active!=nextactive)) {
-              if (Decal[active]&&Decal[nextactive]) {
+              if (Decal&&Decal[active]&&Decal[nextactive]) {
                   this->maxtcoord = (1-fraction)*Decal[active]->maxtcoord + fraction*Decal[nextactive]->maxtcoord;
                   this->mintcoord = (1-fraction)*Decal[active]->mintcoord + fraction*Decal[nextactive]->mintcoord;
               }
           } else {
-              if (Decal[active]) {
+              if (Decal&&Decal[active]) {
                   this->maxtcoord = Decal[active]->maxtcoord;
                   this->mintcoord = Decal[active]->mintcoord;
               }
