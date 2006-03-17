@@ -2121,7 +2121,7 @@ void Unit::AddVelocity(float difficulty) {
 	   static double warpcruisemult=XMLSupport::parse_float(vs_config->getVariable("physics","warpcruisemult","5000")); // Mult at 1-2 boundary
 	   static double curvedegree=XMLSupport::parse_float(vs_config->getVariable("physics","warpcurvedegree","1.5")); // degree of curve
        static double upcurvek=warpcruisemult/pow((warpregion1-warpregion0),curvedegree); // coefficient so as to agree with above
-	   float minmultiplier=warpMultiplierMax;
+	   float minmultiplier=warpMultiplierMax*graphicOptions.MaxWarpMultiplier;
 	   Unit * planet;
            Unit * testthis=NULL;
            {
@@ -2162,12 +2162,12 @@ void Unit::AddVelocity(float difficulty) {
                graphicOptions.RampCounter=warprampdowntime;
 	     rampmult=(graphicOptions.InWarp)?1.0-((graphicOptions.RampCounter/warprampuptime)*(graphicOptions.RampCounter/warprampuptime)):(graphicOptions.RampCounter/warprampdowntime)*(graphicOptions.RampCounter/warprampdowntime);
 	   }
-	   if(minmultiplier<warpMultiplierMin) {
-		 minmultiplier=warpMultiplierMin;
+	   if(minmultiplier<warpMultiplierMin*graphicOptions.MinWarpMultiplier) {
+		 minmultiplier=warpMultiplierMin*graphicOptions.MinWarpMultiplier;
 	   }
 	   
-	   if(minmultiplier>warpMultiplierMax) {
-		   minmultiplier=warpMultiplierMax; //SOFT LIMIT
+	   if(minmultiplier>warpMultiplierMax*graphicOptions.MaxWarpMultiplier) {
+		   minmultiplier=warpMultiplierMax*graphicOptions.MaxWarpMultiplier; //SOFT LIMIT
 	   }
 	   minmultiplier*=rampmult;
 	   if (minmultiplier < 1){
@@ -6037,7 +6037,15 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
       }
     }
   }
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Warp_Min_Multiplier")){
+    STDUPGRADE(graphicOptions.MinWarpMultiplier,up->graphicOptions.MinWarpMultiplier,templ->graphicOptions.MinWarpMultiplier,1);
+  }
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Warp_Max_Multiplier")){
+    STDUPGRADE(graphicOptions.MaxWarpMultiplier,up->graphicOptions.MaxWarpMultiplier,templ->graphicOptions.MaxWarpMultiplier,1);
+  }
+  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Warp_Max_Multiplier")){
 
+  }
   if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Armor_Front_Top_Right")){
     STDUPGRADE(armor.frontrighttop,up->armor.frontrighttop,templ->armor.frontrighttop,0);
     STDUPGRADE(armor.backrighttop,up->armor.backrighttop,templ->armor.backrighttop,0);

@@ -14,6 +14,7 @@
 #include "role_bitmask.h"
 #include "unit_csv.h"
 #include <algorithm>
+#include "lin_time.h"
 #define VS_PI 3.1415926535897931
 CSVRow LookupUnitRow(const string &unitname, const string &faction) {
   string hashname=unitname+"__"+faction;
@@ -650,6 +651,8 @@ void Unit::LoadRow(CSVRow &row, string modification, string * netxml) {
   DEF_OPTIMIZER(Shield_Recharge);
   DEF_OPTIMIZER(Shield_Efficiency);
   DEF_OPTIMIZER(Warp_Capacitor);
+  DEF_OPTIMIZER(Warp_Min_Multiplier);
+  DEF_OPTIMIZER(Warp_Max_Multiplier);
   DEF_OPTIMIZER(Primary_Capacitor);
   DEF_OPTIMIZER(Reactor_Recharge);
   DEF_OPTIMIZER(Jump_Drive_Present);
@@ -771,6 +774,8 @@ void Unit::LoadRow(CSVRow &row, string modification, string * netxml) {
           INIT_OPTIMIZER(keys,Shield_Recharge);
           INIT_OPTIMIZER(keys,Shield_Efficiency);
           INIT_OPTIMIZER(keys,Warp_Capacitor);
+          INIT_OPTIMIZER(keys,Warp_Min_Multiplier);
+          INIT_OPTIMIZER(keys,Warp_Max_Multiplier);
           INIT_OPTIMIZER(keys,Primary_Capacitor);
           INIT_OPTIMIZER(keys,Reactor_Recharge);
           INIT_OPTIMIZER(keys,Jump_Drive_Present);
@@ -846,7 +851,7 @@ void Unit::LoadRow(CSVRow &row, string modification, string * netxml) {
   bool use_optimizer=(table&&table->optimizer_setup&&table->optimizer_type==LOADROW_OPTIMIZER);
 
   //begin the geometry (and things that depend on stats)
-
+  double start=queryTime();
   fullname=OPTIM_GET(row,table,Name);
   //image->description=OPTIM_GET(row,table,Description);
   if ((tmpstr=OPTIM_GET(row,table,Hud_image)).length()!=0) {
@@ -859,7 +864,7 @@ void Unit::LoadRow(CSVRow &row, string modification, string * netxml) {
       image->hudImage = createVSSprite(tmpstr.c_str());
     }
   }  
-
+  double spritet=queryTime();
   combat_role=ROLES::getRole(OPTIM_GET(row,table,Combat_Role));
   graphicOptions.NumAnimationPoints=stoi(OPTIM_GET(row,table,Num_Animation_Stages),0);
   graphicOptions.NoDamageParticles=stoi(OPTIM_GET(row,table,NoDamageParticles),0);
@@ -868,9 +873,9 @@ void Unit::LoadRow(CSVRow &row, string modification, string * netxml) {
   xml.unitscale = stof(OPTIM_GET(row,table,Unit_Scale),1);
   if (!xml.unitscale) xml.unitscale=1;
   image->unitscale=xml.unitscale;
-
+  double meshest=queryTime();
   AddMeshes(xml.meshes,xml.randomstartframe,xml.randomstartseconds,xml.unitscale,OPTIM_GET(row,table,Mesh),faction,getFlightgroup());
-
+  double subunt=queryTime();
   AddDocks(this,xml,OPTIM_GET(row,table,Dock));
   AddSubUnits(this,xml,OPTIM_GET(row,table,Sub_Units),faction,modification);
 
@@ -879,16 +884,17 @@ void Unit::LoadRow(CSVRow &row, string modification, string * netxml) {
   corner_min = Vector(FLT_MAX, FLT_MAX, FLT_MAX);
   corner_max = Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX);
   calculate_extent(false);
+  double mountst=queryTime();
   AddMounts(this,xml,OPTIM_GET(row,table,Mounts));
+  double cargot=queryTime();
   this->image->CargoVolume=stof(OPTIM_GET(row,table,Hold_Volume));
   this->image->HiddenCargoVolume=stof(OPTIM_GET(row,table,Hidden_Hold_Volume));
   this->image->UpgradeVolume=stof(OPTIM_GET(row,table,Upgrade_Storage_Volume));
   this->image->equipment_volume=stof(OPTIM_GET(row,table,Equipment_Space));
   ImportCargo(this,OPTIM_GET(row,table,Cargo_Import));//if this changes change planet_generic.cpp
   AddCarg(this,OPTIM_GET(row,table,Cargo));
-
+  double soundst=queryTime();
   AddSounds(this,OPTIM_GET(row,table,Sounds));
-
   LoadCockpit(this,OPTIM_GET(row,table,Cockpit));
   image->CockpitCenter.i=stof(OPTIM_GET(row,table,CockpitX))*xml.unitscale;
   image->CockpitCenter.j=stof(OPTIM_GET(row,table,CockpitY))*xml.unitscale;
@@ -1070,6 +1076,10 @@ shield.range[1].   rhomax=r90;
 
   static bool  WCfuelhack=XMLSupport::parse_bool (vs_config->getVariable("physics","fuel_equals_warp","false"));
   maxwarpenergy=warpenergy=stof(OPTIM_GET(row,table,Warp_Capacitor));
+
+  graphicOptions.MinWarpMultiplier=stof(OPTIM_GET(row,table,Warp_Min_Multiplier),1.0);
+  graphicOptions.MaxWarpMultiplier=stof(OPTIM_GET(row,table,Warp_Max_Multiplier),1.0);
+
   maxenergy=energy=stof(OPTIM_GET(row,table,Primary_Capacitor));
   recharge=stof(OPTIM_GET(row,table,Reactor_Recharge));
   jump.drive=XMLSupport::parse_bool(OPTIM_GET(row,table,Jump_Drive_Present))?-1:-2;
@@ -1158,7 +1168,7 @@ shield.range[1].   rhomax=r90;
   image->SPECDriveFunctionalityMax=stof(OPTIM_GET(row,table,Max_SPECDrive_Functionality));
   computer.slide_start=stoi(OPTIM_GET(row,table,Slide_Start));
   computer.slide_end=stoi(OPTIM_GET(row,table,Slide_End));
-
+  double upgradet=queryTime();
   UpgradeUnit(this,OPTIM_GET(row,table,Upgrades));
 
   {
@@ -1173,7 +1183,7 @@ shield.range[1].   rhomax=r90;
     } else tflags = tractorPush;
     setTractorability((enum tractorHow)tflags);
   }
-  
+  double explodet=queryTime();
   this->image->explosion_type = OPTIM_GET(row,table,Explosion);
   if (image->explosion_type.length()) {
     cache_ani (image->explosion_type);
@@ -1181,6 +1191,7 @@ shield.range[1].   rhomax=r90;
     static std::string expani = vs_config->getVariable ("graphics","explosion_animation","explosion_orange.ani");
     cache_ani (expani);
   }
+  double lightt=queryTime();
   AddLights(this,xml,OPTIM_GET(row,table,Light));
 
   xml.shieldmesh_str = OPTIM_GET(row,table,Shield_Mesh);
@@ -1195,10 +1206,12 @@ shield.range[1].   rhomax=r90;
   meshdata.back()->EnableSpecialFX();
 
   //Begin the Pow-w-w-war Zone Collide Tree Generation
+    double treet=queryTime();
   {
     xml.bspmesh_str = OPTIM_GET(row,table,BSP_Mesh);
     xml.rapidmesh_str = OPTIM_GET(row,table,Rapid_Mesh);
     vector<bsp_polygon> polies;
+
     std::string collideTreeHash = VSFileSystem::GetHashName(string(modification)+"#"+row[0]);
     this->colTrees = collideTrees::Get(collideTreeHash);
     if (this->colTrees) {
@@ -1288,6 +1301,8 @@ shield.range[1].   rhomax=r90;
   }
 
   CheckAccessory(this);//turns on the ceerazy rotation for any accessories
+  double endt=queryTime();
+  printf ("spr %f mesh %f subun %f mount %f carg %f sound %f upg %f exp %f light %f tree %f ",spritet-start,subunt-meshest,mountst-subunt,cargot-mountst,soundst-cargot,upgradet-soundst,explodet-upgradet, lightt-explodet, treet-lightt, endt-treet); 
 }
 
 CSVRow GetUnitRow(string filename, bool subu, int faction, bool readlast, bool &rread) {
@@ -1529,6 +1544,8 @@ string Unit::WriteUnitString () {
         unit["Shield_Recharge"]=tos(shield.recharge);
         unit["Shield_Efficiency"]=tos(shield.efficiency);
         unit["Warp_Capacitor"]=tos(maxwarpenergy);
+        unit["Warp_Min_Multiplier"]=tos(graphicOptions.MinWarpMultiplier);
+        unit["Warp_Max_Multiplier"]=tos(graphicOptions.MaxWarpMultiplier);
         unit["Primary_Capacitor"]=tos(maxenergy);
         unit["Reactor_Recharge"]=tos(recharge);
         unit["Jump_Drive_Present"]=tos(jump.drive>=-1);

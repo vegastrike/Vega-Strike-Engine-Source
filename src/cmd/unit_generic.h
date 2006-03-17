@@ -309,11 +309,14 @@ public:
       unsigned NoDamageParticles:1;
 	  float WarpFieldStrength;
 	  float RampCounter;
+	  float MinWarpMultiplier;
+	  float MaxWarpMultiplier;
 	  unsigned char NumAnimationPoints;
 	  graphic_options() {
 		  FaceCamera=Animating=missilelock=InWarp=unused1=WarpRamping=NoDamageParticles=0;
 		  NumAnimationPoints=0;
 		  RampCounter=0;
+                  MinWarpMultiplier=MaxWarpMultiplier=1;
 	  }
   }graphicOptions;
   bool isSubUnit() {return graphicOptions.SubUnit?true:false;}
