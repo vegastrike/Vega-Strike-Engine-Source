@@ -6,7 +6,9 @@
 #endif
 #include "vegastrike.h"
 #include "cg_global.h"
+#ifdef HAVE_SDL
 #include "SDL/SDL.h"
+#endif
 #include "gfx/hud.h"
 #include "gldrv/winsys.h"
 #include <sstream>
@@ -16,8 +18,23 @@
 //
 // ****************
 
+#ifdef HAVE_SDL
+static SDL_mutex * _rtextSDLMutex()
+{
+	static SDL_mutex * rv = SDL_CreateMutex();
+	return rv;
+}
+#endif
+
+
 //Render Text (Console) Constructor {{{
 RText::RText() {
+#ifdef HAVE_SDL
+	//Initialize shared mutex
+	// (creation is always single-threaded, since no aliases are possible yet)
+	_rtextSDLMutex();
+#endif
+
 	ndraw = 15;
 	WORDWRAP = 85;
 	conskip = 0;
@@ -140,10 +157,14 @@ void RText::conoutf(char *in) {
 	conoutf(foobar);
 	return;
 }
+
 void RText::conoutf(std::string &s, int a, int b, int c)
 {
-	SDL_mutex * mymutex = SDL_CreateMutex();
-	SDL_mutexP(mymutex);
+#ifdef HAVE_SDL
+	// NOTE: first call must be single-threaded!
+	SDL_mutex * mymutex = _rtextSDLMutex();
+	SDL_LockMutex(mymutex);
+#endif
 	std::cout << s << std::endl;
 // Old {{{
 //	{
@@ -199,8 +220,9 @@ void RText::conoutf(std::string &s, int a, int b, int c)
 			customer += s[burger]; // get fat
 		}
 	}
-	SDL_mutexV(mymutex);
-	SDL_DestroyMutex(mymutex);
+#ifdef HAVE_SDL
+	SDL_UnlockMutex(mymutex);
+#endif
 };
 // }}}
 //same as above, but I think it works better {{{
