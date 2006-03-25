@@ -475,15 +475,12 @@ void NavPath::addNewPath() {
    //Inscribe new path
    //*************************
   
-  list<unsigned>::iterator prev, next;
+  list<unsigned>::iterator aux;
   for(list<unsigned>::iterator iter=path.begin(); iter!=path.end(); ++iter) {
-    prev = next = iter;
-    --prev;
-    ++next;
     if((*iter)!=path.front())
-      pathNeighbors[(*iter)].first=(*prev);
+      pathNeighbors[(*iter)].first=(*--(aux=iter));
     if((*iter)!=path.back())
-      pathNeighbors[(*iter)].second=(*next);
+      pathNeighbors[(*iter)].second=(*++(aux=iter));
     systemIter[*iter].part_of_path=true;
     systemIter[*iter].paths.insert(this);
   }

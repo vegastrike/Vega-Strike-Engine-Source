@@ -25,8 +25,9 @@ void Order::Communicate (const CommunicationMessage &c) {
     bool thisissender=( un==newC->sender.GetUnit());
     if (un==NULL||thisissender) {
       delete (*ii);
-      ii=messagequeue.erase (ii);
       if (thisissender) already_communicated=true;
+      if ((ii=messagequeue.erase (ii))==messagequeue.end())
+		  break;
     }
   }
   if ((un=newC->sender.GetUnit())) {

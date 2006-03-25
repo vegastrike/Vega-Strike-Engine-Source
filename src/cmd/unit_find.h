@@ -2,7 +2,7 @@
 #define _UNIT_FIND_H_
 #include "unit_util.h"
 template <class Locator> void findObjects (StarSystem * ss,CollideMap::iterator location, Locator *check) {
-    if (location!=null_collide_map.begin()) {
+    if (!is_null(location)) {
       QVector thispos = (**location).GetPosition();
       float thisrad=fabs((*location)->radius);
       CollideMap::iterator tless=location;

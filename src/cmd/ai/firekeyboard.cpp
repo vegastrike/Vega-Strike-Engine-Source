@@ -1431,7 +1431,8 @@ void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
     reallydospeech=true;
     for (list<CommunicationMessage>::iterator i=resp.begin();i!=resp.end();i++) {
       if ((*i).sender.GetUnit()==un) {
-	i = resp.erase (i);
+		if ((i = resp.erase (i))==resp.end())
+			break;
       }
     }
     resp.push_back(c);

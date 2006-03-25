@@ -2,6 +2,8 @@
 #include "unit_generic.h"
 #include "bolt.h"
 CollideMap null_collide_map;
+CollideMap::iterator null_collide_iter;
+bool null_collide_iter_initialized = false;
 
 Collidable::Collidable(Unit *un):radius(un->rSize()){
   assert(!un->isSubUnit());
@@ -89,13 +91,11 @@ template <class T> class CollideChecker
     return true;
   }
   static bool endAfterCollide(Unit * un) {
-    if (un->location==null_collide_map.begin())
-      return true;
-    return false;
+	return is_null(un->location);
   }
   static bool isNew(CollideMap * cm, Unit * b) {
     assert(!b->isSubUnit());
-    if (b->location==null_collide_map.begin()) {
+    if (is_null(b->location)) {
       b->location=cm->insert(Collidable(b));
       return true;
     }

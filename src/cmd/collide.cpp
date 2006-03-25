@@ -164,7 +164,7 @@ void Beam::CollideHuge (const LineCollide & lc, Unit * targetToCollideWith, Unit
   if (newUnitCollisions) {
     QVector x0=center;
     QVector v=direction*curlength;
-    if (superunit->location==null_collide_map.begin()&&curlength) {
+    if (is_null(superunit->location)&&curlength) {
       if (targetToCollideWith){
         this->Collide(targetToCollideWith,firer,superunit);
       }

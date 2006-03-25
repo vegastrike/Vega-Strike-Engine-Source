@@ -644,7 +644,7 @@ void Unit::ZeroAll( )
 
 void Unit::Init()
 {
-  location=null_collide_map.begin();
+  set_null(location);
   specInterdiction=0;
   sim_atom_multiplier=1;
   predicted_priority=1;
@@ -1909,7 +1909,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 
   bool locking=false;
   bool touched=false;
-  CollideMap::iterator hint=superunit->location!=null_collide_map.begin()?superunit->location:_Universe->activeStarSystem()->collidemap->begin();
+  CollideMap::iterator hint=(!is_null(superunit->location))?superunit->location:_Universe->activeStarSystem()->collidemap->begin();
   for (int i=0;(int)i<GetNumMounts();i++) {
 //    if (increase_locking&&cloaking<0) {
 //      mounts[i].time_to_lock-=SIMULATION_ATOM;
@@ -2184,7 +2184,7 @@ void Unit::AddVelocity(float difficulty) {
 	   graphicOptions.WarpFieldStrength=1;
    }
    curr_physical_state.position = curr_physical_state.position +  (v*SIMULATION_ATOM*difficulty).Cast();
-   if (location!=null_collide_map.begin()&&activeStarSystem){
+   if (!is_null(location)&&activeStarSystem){
      location=activeStarSystem->collidemap->changeKey(location,Collidable(this));// do we need this?
      //I guess you have to, to be robust
    }

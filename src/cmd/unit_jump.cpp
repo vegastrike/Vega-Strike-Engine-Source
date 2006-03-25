@@ -127,7 +127,7 @@ bool GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
                                           pos.k<0?1:-1);
 			  Offset*=jumpnode->rSize()*2+this->rSize()*2;
 			  this->SetPosAndCumPos(pos+Offset);
-                          if (jumpnode->location!=null_collide_map.begin()) {
+                          if (!is_null(jumpnode->location)) {
                             this->UpdateCollideQueue(pendingjump[kk]->dest,jumpnode->location);
                           }
                   }

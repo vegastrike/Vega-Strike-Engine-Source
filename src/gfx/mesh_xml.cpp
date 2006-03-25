@@ -1797,7 +1797,12 @@ void Mesh::PostProcessLoading(MeshXML * xml,const vector<string> &textureOverrid
  	 radialSize = .5*(mx-mn).Magnitude();
 
   if (xml->sharevert) {
-    vlist = new GFXVertexList (&polytypes[0], xml->vertices.size(),&xml->vertices[0],o_index,&poly_offsets[0],false,&ind[0]);
+	  vlist = new GFXVertexList (
+		  (polytypes.size()?&polytypes[0]:0), 
+		  xml->vertices.size(),
+		  (xml->vertices.size()?&xml->vertices[0]:0), o_index,
+		  (poly_offsets.size()?&poly_offsets[0]:0), false, 
+		  (ind.size()?&ind[0]:0)  );
   }else {
     static bool usopttmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","OptimizeVertexArrays","false")));
     static float optvertexlimit= (XMLSupport::parse_float (vs_config->getVariable ("graphics", "OptimizeVertexCondition","1.0")));
@@ -1808,14 +1813,21 @@ void Mesh::PostProcessLoading(MeshXML * xml,const vector<string> &textureOverrid
       unsigned int * ind;
       GFXOptimizeList (vertexlist,totalvertexsize,&newv,&numopt,&ind);
       if (numopt < totalvertexsize*optvertexlimit) {
-	vlist = new GFXVertexList (&polytypes[0], numopt,newv,o_index,&poly_offsets[0],false,ind);
+	vlist = new GFXVertexList (
+		(polytypes.size()?&polytypes[0]:0), 
+		numopt,newv,o_index,
+		(poly_offsets.size()?&poly_offsets[0]:0), false, 
+		ind  );
 	cachunk = true;
       }
       free (ind);
       free (newv);
     }
     if (!cachunk) {
-      vlist= new GFXVertexList(&polytypes[0],totalvertexsize,vertexlist,o_index,&poly_offsets[0]); 
+      vlist= new GFXVertexList(
+		  (polytypes.size()?&polytypes[0]:0), 
+		  totalvertexsize,vertexlist,o_index,
+		  (poly_offsets.size()?&poly_offsets[0]:0)  ); 
     }
   }
   /*

@@ -3,13 +3,14 @@
 #include "key_mutable_set.h"
 #include "vegastrike.h"
 #include "gfx/vec.h"
+#include <limits>
 class Unit;
 class Bolt;
 class Collidable{
   float key;
   QVector position;
 public:
-  float radius;//radius == 0, bolt  radius <0 beam, radius >0 unit
+  float radius;//radius == 0, bolt  radius <0 beam, radius >0 unit, radius == nan  null
   
   union CollideRef{
     Unit * unit;
@@ -33,6 +34,8 @@ public:
   bool operator <(const Collidable &other) const {
     return key<other.key;
   }
+
+  Collidable() : radius(std::numeric_limits<float>::quiet_NaN()) {}
   Collidable(Unit * un);
   Collidable(unsigned int bolt_index, float speed, const QVector &p){
     ref.bolt_index=bolt_index;
@@ -54,4 +57,27 @@ public:
   bool CheckCollisions(Unit * un, const Collidable & updated);//will be handed off to a templated function
 };
 extern CollideMap null_collide_map;
+extern CollideMap::iterator null_collide_iter;
+extern bool null_collide_iter_initialized;
+
+inline void init_null_collide_iter()
+{
+	if (!null_collide_iter_initialized) {
+		null_collide_map.insert(Collidable());
+		null_collide_iter = null_collide_map.begin();
+		null_collide_iter_initialized = true;
+	}
+}
+
+inline bool is_null(const CollideMap::iterator &it)
+{
+	return ISNAN(it->get().radius);
+}
+
+inline void set_null(CollideMap::iterator &it)
+{
+	init_null_collide_iter();
+	it = null_collide_iter;
+}
+
 #endif

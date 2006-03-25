@@ -30,7 +30,7 @@ void Unit::RemoveFromSystem() {
 #endif
 #endif
   
-  if (this->location!=null_collide_map.begin()) {
+  if (!is_null(this->location)) {
     if (activeStarSystem==NULL) {
       printf ("NONFATAL NULL activeStarSystem detected...please fix\n");
       activeStarSystem=_Universe->activeStarSystem();
@@ -70,7 +70,7 @@ void Unit::RemoveFromSystem() {
       }
     }
     activeStarSystem->collidemap->erase(this->location);
-    this->location=null_collide_map.begin();
+    set_null(this->location);
   }
 #ifdef OLD_COLLIDE_SYSTEM
 #ifndef UNSAFE_COLLIDE_RELEASE
@@ -116,7 +116,7 @@ void Unit::UpdateCollideQueue (StarSystem * ss, CollideMap::iterator hint) {
   } else {
     assert (activeStarSystem==ss);
   }
-  if (location==null_collide_map.begin()) {
+  if (is_null(location)) {
     assert (!isSubUnit());
     if (!isSubUnit()) {
       location=ss->collidemap->insert(Collidable(this),hint);

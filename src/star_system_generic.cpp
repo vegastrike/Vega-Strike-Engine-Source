@@ -300,10 +300,10 @@ void StarSystem::AddUnit(Unit *unit) {
 }
 
 bool StarSystem::RemoveUnit(Unit *un) {
-  if (un->location!=null_collide_map.begin()) {
+  if (!is_null(un->location)) {
     //assert (collidemap->find(*un->location)!=collidemap->end());
     collidemap->erase(un->location);
-    un->location=null_collide_map.begin();
+    set_null(un->location);
   }
   bool removed2=false;
   UnitCollection::UnitIterator iter = gravitationalUnits().createIterator();

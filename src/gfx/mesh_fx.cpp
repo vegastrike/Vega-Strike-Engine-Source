@@ -92,9 +92,7 @@ void Mesh::UpdateFX(float howmuchtime) {
   //adjusts lights by TTL, eventually removing them
   for (unsigned int i=0;i<LocalFX.size();i++) {
     if (!LocalFX[i].Update(howmuchtime)) {
-      vector <MeshFX>::iterator er = LocalFX.begin();
-      er+=i;
-      LocalFX.erase (er);
+      LocalFX.erase (LocalFX.begin()+i);
       i--;
     }
   }

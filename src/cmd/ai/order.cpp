@@ -39,7 +39,7 @@ void Order::Execute () {
       if ((suborders[i])->Done()) {
 	vector<Order*>::iterator ord = suborders.begin()+i;
 	(*ord)->Destroy();
-	ord =suborders.erase(ord);
+	suborders.erase(ord);
 	i--;
       } 
     }
@@ -108,18 +108,16 @@ Order* Order::EnqueueOrderFirst (Order *ord) {
   return this;
 }
 Order* Order::ReplaceOrder (Order *ord) {
-  vector<Order*>::iterator ordd = suborders.begin();
-  for (unsigned int i=0;i<suborders.size();i++) {
-    if ((ord->getType()&(*ordd)->getType()&(ALLTYPES))){
-      	(*ordd)->Destroy();
-	ordd =suborders.erase(ordd);
-    } else {
-      ordd++;
-    }
-  }
-  suborders.push_back(ord);
-  return this;
-
+	for (vector<Order*>::iterator ordd = suborders.begin(); ordd!=suborders.end();) {
+		if ((ord->getType()&(*ordd)->getType()&(ALLTYPES))) {
+			(*ordd)->Destroy();
+			ordd = suborders.erase(ordd);
+		} else {
+			ordd++;
+		}
+	}
+	suborders.push_back(ord);
+	return this;
 }
 
 bool Order::AttachOrder (Unit *targets1) {

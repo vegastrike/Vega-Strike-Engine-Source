@@ -314,7 +314,8 @@ void JoyStick::GetMouse (float &x, float &y, float &z, int &buttons) {
           avg++;
         ++i;
       } else {
-        i=md.erase(i);
+        if ((i=md.erase(i))==md.end())
+			break;
       } 
     }
     if (_dx||_dy)
