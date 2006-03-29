@@ -205,7 +205,9 @@ bool Mount::PhysicsAlignedFire(Unit * caller, const Transformation &Cumulative, 
   if (time_to_lock>0) {
     target=NULL;
   }
-  time_to_lock = type->LockTime;
+  static bool lock_disrupted_by_false_fire=XMLSupport::parse_bool(vs_config->getVariable("physics","out_of_arc_fire_disrupts_lock","false"));
+  if (lock_disrupted_by_false_fire)
+    time_to_lock = type->LockTime;
   if (processed==FIRED) {
     processed = PROCESSED;
     Unit * temp;
@@ -234,6 +236,7 @@ bool Mount::PhysicsAlignedFire(Unit * caller, const Transformation &Cumulative, 
         ammo--;
       }
     }
+    time_to_lock = type->LockTime;
 			switch (type->type) {
 			case weapon_info::BEAM:
 				if (ref.gun)
