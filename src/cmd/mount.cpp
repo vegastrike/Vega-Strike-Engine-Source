@@ -214,16 +214,26 @@ bool Mount::PhysicsAlignedFire(Unit * caller, const Transformation &Cumulative, 
     Matrix mat;
     tmp.to_matrix (mat);
     mat.p = Transform(mat,(type->offset+Vector(0,0,zscale)).Cast());
-	static bool firemissingautotrackers = XMLSupport::parse_bool (vs_config->getVariable("physics","fire_missing_autotrackers","true"));
+    static bool firemissingautotrackers = XMLSupport::parse_bool (vs_config->getVariable("physics","fire_missing_autotrackers","true"));
     if (autotrack&&NULL!=target) {
-		if (!AdjustMatrix (mat,velocity,target,type->Speed,autotrack>=2,trackingcone)) {
-			if (!firemissingautotrackers)
-				return false;
-		}
+      if (!AdjustMatrix (mat,velocity,target,type->Speed,autotrack>=2,trackingcone)) {
+        if (!firemissingautotrackers)
+          return false;
+      }
     }else if (this->size&weapon_info::AUTOTRACKING) {
-		if (!firemissingautotrackers)
-			return false;
-	}
+      if (!firemissingautotrackers)
+        return false;
+    }
+    if (type->type!=weapon_info::BEAM) {
+      ref.refire =0;
+      if (ammo>0)
+        ammo--;
+    }else {
+      static bool reduce_beam_ammo = XMLSupport::parse_bool (vs_config->getVariable ("physics","reduce_beam_ammo","0"));      
+      if (ammo>0&&reduce_beam_ammo) {
+        ammo--;
+      }
+    }
 			switch (type->type) {
 			case weapon_info::BEAM:
 				if (ref.gun)
@@ -420,7 +430,7 @@ bool Mount::Fire (Unit * firer, void * owner,bool Missile, bool listen_to_owner)
   if (ammo==0) {
     processed=UNFIRED;
   }
-  static bool reduce_beam_ammo = XMLSupport::parse_bool (vs_config->getVariable ("physics","reduce_beam_ammo","0"));
+
   if (processed==FIRED||status!=ACTIVE||(Missile!=(isMissile(type)))||ammo==0)
     return false;
   if (type->type==weapon_info::BEAM) {
@@ -430,17 +440,12 @@ bool Mount::Fire (Unit * firer, void * owner,bool Missile, bool listen_to_owner)
     else
       ref.gun = new Beam (Transformation(orient,pos.Cast()),*type,owner,firer,sound);
     if (fireit) {
-      if (ammo>0&&reduce_beam_ammo)
-        ammo--;//ditto about beams ahving ammo		
       ref.gun->ListenToOwner(listen_to_owner);
       processed=FIRED;
     }
     return true;
   }else { 
     if (ref.refire>=type->Refire) {
-      ref.refire =0;
-      if (ammo>0)
-		  ammo--;
       processed=FIRED;	
       if(owner==_Universe->AccessCockpit()->GetParent()){
 		  forcefeedback->playLaser();

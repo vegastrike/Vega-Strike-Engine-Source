@@ -2007,11 +2007,9 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 		  autotrack=2;
       }
       if (!mounts[i].PhysicsAlignedFire (this,t1,m1,cumulative_velocity,(!isSubUnit()||owner==NULL)?this:owner,target,autotrack, trackingcone,hint)) {
-		  const weapon_info * typ = mounts[i].type;
-		  energy+=typ->EnergyRate*(typ->type==weapon_info::BEAM?SIMULATION_ATOM:1);
-		  if (mounts[i].ammo>=0)
-			  mounts[i].ammo++;
-	  }
+        const weapon_info * typ = mounts[i].type;
+        energy+=typ->EnergyRate*(typ->type==weapon_info::BEAM?SIMULATION_ATOM:1);
+      }
       if (mounts[i].ammo==0&&isMissile(mounts[i].type), i) {
 //		  if (isPlayerStarship(this))
 //			  ToggleWeapon (true);
