@@ -1206,7 +1206,9 @@ pos.i*fabs(w)/parent->rSize()*percent+x;
       }else {
         ref=cref/tref;
       }
-      mountcolor=colLerp(GFXColor(0,1,1),GFXColor(0,1,.2),ref);      
+      mountcolor=colLerp(GFXColor(.2,.2,.2),GFXColor(0,1,1),ref);      
+      if (ref==1.0)
+        mountcolor=GFXColor(0,1,.2);
     }else {
       mountcolor=colLerp(GFXColor(1,0,0),GFXColor(0,1,.2),parent->mounts[i].functionality);
     }
