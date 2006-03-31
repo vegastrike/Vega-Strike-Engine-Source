@@ -440,7 +440,7 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
         unit->ExecuteAI(); 
         double bb=queryTime();
         unit->ResetThreatLevel();
-        unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits(),unit);    
+        unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),priority==1?firstframe:true,&this->gravitationalUnits(),unit);    //FIXME "firstframe"-- assume no more than 2 physics updates per frame.
         double cc= queryTime();
         last_collisions.clear();
         unit->CollideAll();
