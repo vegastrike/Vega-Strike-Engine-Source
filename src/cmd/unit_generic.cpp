@@ -7023,16 +7023,23 @@ float Unit::getHiddenCargoVolume()const {
   return image->HiddenCargoVolume;
 }
 bool Unit::CanAddCargo (const Cargo &carg)const {
+  // Always can, in this case (this accounts for some odd precision issues)
+  if ((carg.quantity == 0) || (carg.volume == 0))
+	  return true;
+
+  // Test volume availability
   bool upgradep=cargoIsUpgrade(carg);
   float total_volume=carg.quantity*carg.volume + (upgradep?getUpgradeVolume():getCargoVolume());
   if  (total_volume<=(upgradep?getEmptyUpgradeVolume():getEmptyCargoVolume()))
     return true;
+
+  // Hm... not in main unit... perhaps a subunit can take it
   const Unit * un;
-  for (un_kiter i=viewSubUnits();(un = *i)!=NULL;i++) {
-    if (un->CanAddCargo (carg)) {
+  for (un_kiter i=viewSubUnits();(un = *i)!=NULL;i++)
+    if (un->CanAddCargo (carg))
       return true;
-    }
-  }
+
+  // Bad luck
   return false;
 }
 
