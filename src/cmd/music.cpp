@@ -40,6 +40,7 @@ bool soundServerPipes() {
 }
 Music::Music (Unit *parent):random(false), p(parent),song(-1),thread_initialized(false) {
   loopsleft=0;
+  socketw=socketr=-1;
   if (!g_game.music_enabled)
 	  return;
   lastlist=PEACELIST;
@@ -54,7 +55,6 @@ Music::Music (Unit *parent):random(false), p(parent),song(-1),thread_initialized
   for (i=0;i<MAXLIST;i++) {
     LoadMusic(vs_config->getVariable ("audio",listvars[i],deflistvars[i]).c_str());
   }
-  socketw=socketr=-1;
 
 #if !defined( _WIN32)
   if (g_game.music_enabled&&!soundServerPipes()) {
@@ -522,21 +522,24 @@ void Music::_Skip(int layer)
 Music::~Music() 
 {
 	char send[2]={'t','\n'};
-    if (soundServerPipes()) {
-        if (threadalive&&thread_initialized) {
-            killthread=1;
-            while (threadalive) micro_sleep(100000);
-        }
+	if (socketw != -1) {
+		if (soundServerPipes()) {
+			if (threadalive&&thread_initialized) {
+				killthread=1;
+				while (threadalive) micro_sleep(100000);
+			}
 
-        fNET_Write(socketw,2,send);
-        fNET_close(socketw);
-        //fNET_close(socketr);
-        fNET_cleanup();
-    }else {
-        INET_Write(socketw,2,send);
-        INET_close(socketw);
-        INET_cleanup();
-    }
+			fNET_Write(socketw,2,send);
+			fNET_close(socketw);
+			//fNET_close(socketr);
+			fNET_cleanup();
+		}else {
+			INET_Write(socketw,2,send);
+			INET_close(socketw);
+			INET_cleanup();
+		}
+		socketw=-1;
+	}
 }
 void incmusicvol (const KBData&, KBSTATE a) 
 {
