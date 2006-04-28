@@ -2133,7 +2133,7 @@ void GameCockpit::Draw() {
         float x; float y;
         if (dietime==0) {
           if (respawnunit.size()>_Universe->CurrentCockpit()) 
-            if (respawnunit[_Universe->CurrentCockpit()]==1) {
+            if (respawnunit[_Universe->CurrentCockpit()]==1&&_Universe->numPlayers()==1) {
               respawnunit[_Universe->CurrentCockpit()]=0;
             }
           text->GetCharSize (x,y);
