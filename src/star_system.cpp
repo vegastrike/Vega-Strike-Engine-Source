@@ -358,7 +358,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
       
       //int numships=0;
       Unit * saveparent=_Universe->AccessCockpit()->GetSaveParent();
-      Unit * targ;
+      Unit * targ=NULL;
       if (saveparent) {
         targ=saveparent->Target();
       }
