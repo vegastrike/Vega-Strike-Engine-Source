@@ -236,7 +236,7 @@ void HaloSystem::Draw(const Matrix & trans, const Vector &scale, int halo_alpha,
   float value,maxvalue,minvalue;
   if (halos_by_velocity) {
       value = velocity.Dot(thrustvector);
-      maxvalue = maxvelocity;
+      maxvalue = sqrt(maxvelocity);
       minvalue = activation;
   } else {
       oscale = HaloAccelSmooth(accel.Dot(thrustvector)/maxaccel,oscale,1.0f);
