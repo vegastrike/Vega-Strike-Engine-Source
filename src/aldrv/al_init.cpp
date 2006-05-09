@@ -157,7 +157,7 @@ bool AUDInit () {
 		return false;
 	}
 
-	alcMakeContextCurrent( context_id );
+	alcMakeContextCurrent((ALCcontext*) context_id );
 
 	fixup_function_pointers();
 	ALenum alGetEr = 0;
@@ -198,7 +198,7 @@ void AUDDestroy() {
   }
   buffers.clear();
   if (context_id)
-    alcDestroyContext(context_id);
+    alcDestroyContext((ALCcontext*)context_id);
   if (dev)
     alcCloseDevice( dev );
 #endif
