@@ -2,7 +2,6 @@
 #include "al_globals.h"
 #include "hashtable.h"
 #ifdef HAVE_AL
-mp3Loader *alutLoadMP3p = 0;
 Hashtable<std::string, ALuint, 127> soundHash;
 unsigned int maxallowedsingle=10;
 unsigned int maxallowedtotal=40;

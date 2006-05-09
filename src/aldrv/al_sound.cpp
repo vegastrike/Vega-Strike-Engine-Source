@@ -9,6 +9,172 @@
 #include "cmd/unit_generic.h"
 #include "gfx/cockpit_generic.h"
 #ifdef HAVE_AL
+
+
+
+ typedef struct                                  /* WAV File-header */
+ {
+   ALubyte  Id[4];
+   ALsizei  Size;
+   ALubyte  Type[4];
+ } WAVFileHdr_Struct;
+ 
+ typedef struct                                  /* WAV Fmt-header */
+ {
+   ALushort Format;                              
+   ALushort Channels;
+   ALuint   SamplesPerSec;
+   ALuint   BytesPerSec;
+   ALushort BlockAlign;
+   ALushort BitsPerSample;
+ } WAVFmtHdr_Struct;
+ 
+ typedef struct                                                                  /* WAV FmtEx-header */
+ {
+   ALushort Size;
+   ALushort SamplesPerBlock;
+ } WAVFmtExHdr_Struct;
+ 
+ typedef struct                                  /* WAV Smpl-header */
+ {
+   ALuint   Manufacturer;
+   ALuint   Product;
+   ALuint   SamplePeriod;                          
+   ALuint   Note;                                  
+   ALuint   FineTune;                              
+   ALuint   SMPTEFormat;
+   ALuint   SMPTEOffest;
+   ALuint   Loops;
+   ALuint   SamplerData;
+   struct
+   {
+     ALuint Identifier;
+     ALuint Type;
+     ALuint Start;
+     ALuint End;
+     ALuint Fraction;
+     ALuint Count;
+   }      Loop[1];
+ } WAVSmplHdr_Struct;
+ 
+ typedef struct                                  /* WAV Chunk-header */
+ {
+   ALubyte  Id[4];
+   ALuint   Size;
+ } WAVChunkHdr_Struct;
+void SwapWords(unsigned int *puint)
+{
+    unsigned int tempint=POSH_LittleU32(*puint);
+    *puint=tempint;
+}
+
+void SwapBytes(unsigned short *pshort)
+{
+    unsigned short tempshort=POSH_LittleU16(*pshort);
+    *pshort=tempshort;
+}
+ void blutLoadWAVMemory(ALbyte *memory,ALenum *format,ALvoid **data,ALsizei *size,ALsizei *freq, ALboolean *loop)
+{
+	WAVChunkHdr_Struct ChunkHdr;
+	WAVFmtExHdr_Struct FmtExHdr;
+	WAVFileHdr_Struct FileHdr;
+	WAVSmplHdr_Struct SmplHdr;
+	WAVFmtHdr_Struct FmtHdr;
+	int i;
+	ALbyte *Stream;
+	
+	*format=AL_FORMAT_MONO16;
+	*data=NULL;
+	*size=0;
+	*freq=22050;
+	*loop=AL_FALSE;
+
+	if (memory)
+	{		
+		Stream=memory;
+		if (Stream)
+		{
+		    memcpy(&FileHdr,Stream,sizeof(WAVFileHdr_Struct));
+		    Stream+=sizeof(WAVFileHdr_Struct);
+			SwapWords((unsigned int *) &FileHdr.Size);
+			FileHdr.Size=((FileHdr.Size+1)&~1)-4;
+			while ((FileHdr.Size!=0)&&(memcpy(&ChunkHdr,Stream,sizeof(WAVChunkHdr_Struct))))
+			{
+				Stream+=sizeof(WAVChunkHdr_Struct);
+			    SwapWords(&ChunkHdr.Size);
+			    
+				if ((ChunkHdr.Id[0] == 'f') && (ChunkHdr.Id[1] == 'm') && (ChunkHdr.Id[2] == 't') && (ChunkHdr.Id[3] == ' '))
+				{
+					memcpy(&FmtHdr,Stream,sizeof(WAVFmtHdr_Struct));
+				    SwapBytes(&FmtHdr.Format);
+					if (FmtHdr.Format==0x0001)
+					{
+					    SwapBytes(&FmtHdr.Channels);
+					    SwapBytes(&FmtHdr.BitsPerSample);
+					    SwapWords(&FmtHdr.SamplesPerSec);
+					    SwapBytes(&FmtHdr.BlockAlign);
+					    
+						*format=(FmtHdr.Channels==1?
+								(FmtHdr.BitsPerSample==8?AL_FORMAT_MONO8:AL_FORMAT_MONO16):
+								(FmtHdr.BitsPerSample==8?AL_FORMAT_STEREO8:AL_FORMAT_STEREO16));
+						*freq=FmtHdr.SamplesPerSec;
+						Stream+=ChunkHdr.Size;
+					} 
+					else
+					{
+						memcpy(&FmtExHdr,Stream,sizeof(WAVFmtExHdr_Struct));
+						Stream+=ChunkHdr.Size;
+					}
+				}
+				else if ((ChunkHdr.Id[0] == 'd') && (ChunkHdr.Id[1] == 'a') && (ChunkHdr.Id[2] == 't') && (ChunkHdr.Id[3] == 'a'))
+				{
+					if (FmtHdr.Format==0x0001)
+					{
+						*size=ChunkHdr.Size;
+						if(*data == NULL){
+							*data=malloc(ChunkHdr.Size + 31);
+						}
+						else{
+							realloc(*data,ChunkHdr.Size + 31);
+						}
+						if (*data) 
+						{
+							memcpy(*data,Stream,ChunkHdr.Size);
+						    memset(((char *)*data)+ChunkHdr.Size,0,31);
+							Stream+=ChunkHdr.Size;
+						    if (FmtHdr.BitsPerSample == 16) 
+						    {
+						        for (i = 0; i < (ChunkHdr.Size / 2); i++)
+						        {
+						        	SwapBytes(&(*(unsigned short **)data)[i]);
+						        }
+						    }
+						}
+					}
+					else if (FmtHdr.Format==0x0011)
+					{
+						//IMA ADPCM
+					}
+					else if (FmtHdr.Format==0x0055)
+					{
+						//MP3 WAVE
+					}
+				}
+				else if ((ChunkHdr.Id[0] == 's') && (ChunkHdr.Id[1] == 'm') && (ChunkHdr.Id[2] == 'p') && (ChunkHdr.Id[3] == 'l'))
+				{
+				   	memcpy(&SmplHdr,Stream,sizeof(WAVSmplHdr_Struct));
+					Stream+=ChunkHdr.Size;
+				}
+				else Stream+=ChunkHdr.Size;
+				Stream+=ChunkHdr.Size&1;
+				FileHdr.Size-=(((ChunkHdr.Size+1)&~1)+8);
+			}
+		}
+	}
+}
+
+
+
 #ifdef __APPLE__
 #include <al.h>
 #include <alc.h>
@@ -17,12 +183,14 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 //their LoadWav is b0rken seriously!!!!!!
-
+#ifdef __APPLE__
 bool MacFixedLoadWAVFile(char * buf, ALenum *format,ALvoid **data,ALsizei *size,ALsizei *freq){
     alutLoadWAVMemory((ALbyte*)buf,format,data,size,freq);
-    //THIS IS NOW A VECTOR, no freeing    free(buf);
+   //THIS IS NOW A VECTOR, no freeing    free(buf);
     return true;
 }
+#endif
+
 
 #else
 #include <AL/al.h>
@@ -329,24 +497,19 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
               ConvertFormat(dat);
               if (dat.size()==0)//conversion messed up
                 return -1;
-#ifndef WIN32
-#ifdef __APPLE__
+              //blutLoadWAVMemory((ALbyte *)&dat[0], &format, &wave, &size, &freq, &looping);
+              
+#if 0
 		  ALint format;
 		  // MAC OS X
 		  err = false;
 		  if( error<=Ok)
 			err=MacFixedLoadWAVFile( &dat[0], &format, &wave, &size, &freq);
 #else
-		  // LINUX
 		  ALsizei format;
-                  alutLoadWAVMemory((ALbyte *)&dat[0], &format, &wave, &size, &freq, &looping);
+                  blutLoadWAVMemory((ALbyte *)&dat[0], &format, &wave, &size, &freq, &looping);
 #endif
-#else
-		  ALint format;
-	  	  // WIN32
-                  alutLoadWAVMemory(&dat[0], (int*)&format, &wave, &size, &freq, &looping);
-#endif
-
+              
       	  if(err == AL_FALSE)
 		  {
 			alDeleteBuffers (1,wavbuf);
@@ -376,6 +539,7 @@ int AUDCreateMusicWAV (const std::string &s, const bool LOOP) {
 
 int AUDCreateSoundMP3 (const std::string &s, const bool music, const bool LOOP){
 #ifdef HAVE_AL
+  assert(0);
   if ((g_game.sound_enabled&&!music)||(g_game.music_enabled&&music)) {
 	VSFile f;
 	VSError error = f.OpenReadOnly( s.c_str(), SoundFile);
@@ -397,10 +561,11 @@ int AUDCreateSoundMP3 (const std::string &s, const bool music, const bool LOOP){
 	  f.Read( data, f.Size());
       mp3buf = (ALuint *) malloc (sizeof (ALuint));
       alGenBuffers (1,mp3buf);
+      /*
       if ((*alutLoadMP3p)(*mp3buf,data,f.Size())!=AL_TRUE) {
 	    delete []data;
 		return -1;
-      }
+                }*/
 	  delete []data;
       if (!music) {
 		soundHash.Put (hashname,mp3buf);

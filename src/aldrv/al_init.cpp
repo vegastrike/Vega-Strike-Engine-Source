@@ -8,12 +8,10 @@
 #include <al.h>
 #include <alc.h>
 #define KeyMap AppleKeyMap 
-#include <alut.h>
 #undef KeyMap
 #else
 #include <AL/al.h>
 #include <AL/alc.h>
-#include <AL/alut.h>
 #endif
 #include <stdlib.h>
 #include <stdio.h>
@@ -27,13 +25,6 @@
 #endif
 
 static void fixup_function_pointers(void) {
-  alutLoadMP3p = NULL; // We don't use this anyway since it does not exist on Windows.
-  /*
-  alutLoadMP3p = (mp3Loader *) AL_GET_PROC("alutLoadMP3_LOKI");
-  if(alutLoadMP3p == NULL) {
-    VSFileSystem::vs_fprintf(stderr, "Could not GetProc %s\n","alutLoadMP3_LOKI");
-  }
-  */
 
   /* UNCOMMENT AS NEEDED
 	talcGetAudioChannel = (ALfloat (*)(ALuint channel))
@@ -82,23 +73,7 @@ static void fixup_function_pointers(void) {
 		exit(1);
 	}
 	
-	talutLoadRAW_ADPCMData = (ALboolean (*)(ALuint bid,ALvoid *data, ALuint size, ALuint freq,ALenum format)) GP("alutLoadRAW_ADPCMData_LOKI");
-	if( talutLoadRAW_ADPCMData == NULL ) {
-		VSFileSystem::vs_fprintf( stderr, "Could not GP alutLoadRAW_ADPCMData_LOKI\n");
-		exit(1);
-	}
 
-	talutLoadIMA_ADPCMData = (ALboolean (*)(ALuint bid,ALvoid *data, ALuint size, ALuint freq,ALenum format)) GP("alutLoadIMA_ADPCMData_LOKI");
-	if( talutLoadIMA_ADPCMData == NULL ) {
-		VSFileSystem::vs_fprintf( stderr, "Could not GP alutLoadIMA_ADPCMData_LOKI\n");
-		exit(1);
-	}
-
-	talutLoadMS_ADPCMData = (ALboolean (*)(ALuint bid,ALvoid *data, ALuint size, ALuint freq,ALenum format)) GP("alutLoadMS_ADPCMData_LOKI");
-	if( talutLoadMS_ADPCMData == NULL ) {
-		VSFileSystem::vs_fprintf( stderr, "Could not GP alutLoadMS_ADPCMData_LOKI\n");
-		exit(1);
-	}
 
   */
 	return;
@@ -176,7 +151,6 @@ bool AUDInit () {
 		return false;
 	}
 
-	/* Initialize ALUT. */
 	context_id = alcCreateContext( dev, attrlist );
 	if(context_id == NULL) {
 		alcCloseDevice( dev );
