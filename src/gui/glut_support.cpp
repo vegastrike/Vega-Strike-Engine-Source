@@ -41,7 +41,7 @@ GUITexture ReadTex(char *texfile) {
 		GLuint name=0;
 		unsigned int width=0,height=0;
 		if (err<=Ok) {
-				VSImage img;
+				::VSImage img;
 				int bpp,colortype;
 				unsigned char * palette;
 				unsigned char * image=img.ReadImage( &file);

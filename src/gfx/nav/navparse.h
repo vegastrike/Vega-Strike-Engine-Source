@@ -1,7 +1,8 @@
 #include "vsfilesystem.h"
 
-using namespace VSFileSystem;
-
+//using namespace VSFileSystem;
+using VSFileSystem::CockpitFile;
+using VSFileSystem::vs_fprintf;
 bool NavigationSystem::ParseFile(string filename)
 {
 	string expression = "";

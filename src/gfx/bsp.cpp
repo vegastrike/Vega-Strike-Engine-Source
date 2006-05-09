@@ -23,6 +23,9 @@
 #include "file_main.h"
 #include <float.h>
 #include "vsfilesystem.h"
+using VSFileSystem::VSError;
+using VSFileSystem::Ok;
+using VSFileSystem::BSPFile;
 //All or's are coded with the assumption that the inside of the object has a much bigger impact than the outside of the object when both need to be analyzed
 //#define BSPHACK .1
 

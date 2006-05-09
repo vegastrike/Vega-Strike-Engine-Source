@@ -61,7 +61,7 @@ textureTransform texTransform;
 
 void png_write (const char * myfile, unsigned char * data, unsigned int width, unsigned int height, bool alpha, char bpp);
 
-using namespace VSFileSystem;
+//using namespace VSFileSystem;
 
 enum	VSImageType { PngImage, BmpImage, JpegImage, Unrecognized };
 
@@ -69,7 +69,10 @@ typedef struct {
     char *Buffer;
     int  Pos;
 } TPngFileBuffer;
-
+using VSFileSystem::VSFile;
+using VSFileSystem::VSError;
+using VSFileSystem::UnknownFile;
+using VSFileSystem::VSFileType;
 class VSImage
 {
 		VSFile *			img_file;
@@ -129,9 +132,9 @@ class VSImage
 		// f2 is needed for bmp loading
 		unsigned char*	ReadImage( VSFile * f, textureTransform * t=NULL, bool strip=false, VSFile * f2 = NULL);
 		VSError	WriteImage( char * filename, unsigned char * data, VSImageType type, unsigned int width, unsigned int height,
-							bool alpha=1, char bpp=16, VSFileType ft=::VSFileSystem::UnknownFile, bool flip=false);
+								bool alpha=1, char bpp=16, VSFileType ft=UnknownFile, bool flip=false);
 		VSError	WriteImage( VSFile * pf, unsigned char * data, VSImageType type, unsigned int width, unsigned int height,
-							bool alpha=1, char bpp=16, bool flip=false);
+								bool alpha=1, char bpp=16, bool flip=false);
 
 		int		Depth() { return this->img_depth; }
 		int		Format() { return this->img_color_type; }

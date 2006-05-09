@@ -23,7 +23,8 @@
 //#include "gfxlib.h"
 #include "endianness.h"
 #include "vsfilesystem.h"
-using namespace VSFileSystem;
+using VSFileSystem::VSFile;
+//using namespace VSFileSystem;
 extern VSFile fpread;
 
 /*File utility functions*/

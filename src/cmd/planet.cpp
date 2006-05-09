@@ -67,7 +67,7 @@ Mesh * MakeFogMesh (const AtmosphericFogMesh & f, float radius) {
       tex[i*4+3]=get_alpha(i,rez,f.min_alpha,f.max_alpha,f.focus,f.concavity,f.tail_mode_start,f.tail_mode_end);
     }
     // Writing in the homedir texture directory
-    VSImage image;
+    ::VSImage image;
     image.WriteImage( (char *)nam.c_str(), &tex[0], PngImage, rez, 1, true, 8, TextureFile);
     
   }  

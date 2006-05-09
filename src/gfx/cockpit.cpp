@@ -37,6 +37,7 @@
 #include "cmd/base.h"
 #include "in_kb_data.h"
 extern float rand01();
+using VSFileSystem::SoundFile;
 #define SWITCH_CONST .9
 #define VERYNEAR_CONST 0.004f /* The smaller VERYNEAR_CONST is, the worse Z-Buffer precision will be. So keep this above 0.004) */
 #define COCKPITZ_HEADROOM 1.005f /*so that znear/zfar are not too close to max/min values, and account for off-center cockpits */

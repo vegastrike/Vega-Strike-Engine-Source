@@ -147,7 +147,7 @@ static const GuiTexture* addTextureToCache(const std::string& fileName) {
 	int bppDummy;			// Not used.
 	int colorType;			// Info about color in the image.
 	int width, height;		// Size of the image.
-	VSImage img;
+	::VSImage img;
 	unsigned char* image = img.ReadImage(&file);
 	colorType = img.Format();
 	width = img.sizeX;

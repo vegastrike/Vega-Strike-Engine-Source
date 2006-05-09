@@ -18,7 +18,7 @@ class AnimatedTexture: public Texture {
   vector<Vector> frames_maxtc; //Maximum tcoords for each frame
   vector<Vector> frames_mintc; //Minimum tcoords for each frame
   string wrapper_file_path;
-  VSFileType wrapper_file_type;
+  VSFileSystem::VSFileType wrapper_file_type;
 
   //Options
   enum optionenum { 

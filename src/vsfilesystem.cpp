@@ -27,7 +27,8 @@ struct dirent { char d_name[1]; };
 
 using std::map;
 
-
+using VSFileSystem::VSVolumeType;
+using VSFileSystem::VSFSNone;
 int VSFS_DEBUG() {
   if (vs_config) {
     static int vs_debug = XMLSupport::parse_int(vs_config->getVariable("general","debug_fs","0"));

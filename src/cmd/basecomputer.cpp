@@ -25,7 +25,7 @@
 #include <crtdbg.h>
 #endif
 #include "basecomputer.h"
-
+using VSFileSystem::SaveFile;
 #include "savegame.h"
 #include "universe_util.h"
 #include <algorithm>                // For std::sort.

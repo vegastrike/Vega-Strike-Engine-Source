@@ -33,7 +33,15 @@
 #include <map>
 #include <stdlib.h>
 #include "vsfilesystem.h"
-using namespace VSFileSystem;
+//using namespace VSFileSystem;
+using VSFileSystem::VSFile;
+using VSFileSystem::VSError;
+using VSFileSystem::Ok;
+using VSFileSystem::FileNotFound;
+using VSFileSystem::MissionFile;
+using VSFileSystem::UnitFile;
+using VSFileSystem::UnknownFile;
+using VSFileSystem::AiFile;
 #include "xml_support.h"
 
 using std::string;

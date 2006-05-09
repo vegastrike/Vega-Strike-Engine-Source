@@ -457,7 +457,7 @@ static void GenerateSphereMap()
 	info.biClrUsed=0;
 	info.biClrImportant=0;
 
-	VSImage image;
+	::VSImage image;
 	image.WriteImage( (char *)OutputName, LightMap, PngImage, lmwid, lmwid, false, 8, TextureFile);
  
 }

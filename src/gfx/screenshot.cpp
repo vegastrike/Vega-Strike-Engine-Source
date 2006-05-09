@@ -6,6 +6,7 @@
 #else
 #include <GLUT/glut.h>
 #endif
+using namespace VSFileSystem;
 void Screenshot (const KBData&, KBSTATE state) {
   if (state==PRESS) {
     GLint xywh[4]={0,0,0,0};
@@ -20,12 +21,12 @@ void Screenshot (const KBData&, KBSTATE state) {
     glFinish();
     glReadPixels(0,0,xywh[2],xywh[3],GL_RGB,GL_UNSIGNED_BYTE,tmp);
     glPixelStorei(GL_PACK_ROW_LENGTH,0);
-    VSImage image;
+    ::VSImage image;
     VSFileSystem::VSFile f;
     static int count=0;
     std::string filename="Screenshot"+XMLSupport::tostring(count)+".png";
     for (;;) {
-      if (f.OpenReadOnly( filename, TextureFile)<=Ok) {
+      if (f.OpenReadOnly( filename, TextureFile)<=VSFileSystem::Ok) {
         f.Close();
         filename="Screenshot"+XMLSupport::tostring(++count)+".png";
       }else break;

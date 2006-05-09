@@ -20,19 +20,21 @@
  */
 #ifndef _TEXTURE_H_
 #define _TEXTURE_H_
+#include "vsimage.h"
 #include "gfxlib.h"
 #include "gfxlib_struct.h"
 
 #include <string>
-#include "vsimage.h"
-#include "vsfilesystem.h"
+//#include "vsimage.h"
+//#include "vsfilesystem.h" this is included by gfxlib.h
 
 /**
  *  The texture class defines a method of loading bitmap textures
  *  It also defines a hash table in which textures are kept and looked up
  *  to prevent the loading of duplicate textures
  */
-class Texture :public VSImage
+;
+class Texture : public ::VSImage
 {
 public:
   void FileNotFound(const std::string &);//undoes what it did to hash table when file is not located

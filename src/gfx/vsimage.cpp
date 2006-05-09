@@ -1,6 +1,7 @@
 #include "cmd/unit_generic.h"
-#include "vsimage.h"
+
 #include "vsfilesystem.h"
+#include "vsimage.h"
 #include "vs_globals.h"
 
 #include <png.h>
@@ -27,15 +28,15 @@ typedef int INT32;
 
 #include "gfx/jpeg_memory.h"
 
-using namespace VSFileSystem;
+
 
 #undef VSIMAGE_DEBUG
 
 #include <iostream>
-using std::cerr;
-using std::cout;
-using std::endl;
-
+using VSFileSystem::VSError;
+using VSFileSystem::BadFormat;
+using VSFileSystem::VSFileType;
+//using VSFileSystem::img_file;
 int PNG_HAS_PALETTE =1;
 int PNG_HAS_COLOR=2;
 int PNG_HAS_ALPHA=4;
@@ -105,7 +106,7 @@ unsigned char *	VSImage::ReadImage( VSFile * f, textureTransform * t, bool strip
 		break;
 		default :
 			this->img_type = Unrecognized;
-			cerr<<"VSImage ERROR : Unknown image format"<<endl;
+			cerr<<"::VSImage ERROR : Unknown image format"<<endl;
 			VSExit(1);
 	}
 	return ret;
