@@ -1481,7 +1481,7 @@ namespace ConsoleKeys {
 			if (CommandInterpretor) {
 				winsys_set_keyboard_func((winsys_keyboard_func_t)&commandI::keypress);
 	            CommandInterpretor->console = true;
-#if HAVE_SDL
+#ifdef HAVE_SDL
 	            SDL_EnableUNICODE(true);
 #endif
 			}
