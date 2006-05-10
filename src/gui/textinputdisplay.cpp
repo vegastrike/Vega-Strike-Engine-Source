@@ -69,5 +69,5 @@ void TextInputDisplay::draw() {
 }
 
 TextInputDisplay::~TextInputDisplay() {
-  delete this->disallowed;
+  delete []this->disallowed;
 }

@@ -161,7 +161,8 @@ void BoltDestroyGeneric (Bolt * whichbolt, int index, int decal, bool isBall) {
     (*vec->back().location)->ref=(*(*vec)[index].location)->ref;
     assert (index<tsize);
     _Universe->activeStarSystem()->collidemap->erase((*vec)[index].location);
-    (*vec)[index]=vec->back();//just a memcopy, yo    
+    if(index+1!=vec->size())
+      (*vec)[index]=vec->back();//just a memcopy, yo    
     vec->pop_back();//pop that back up
   }else {
     VSFileSystem::vs_fprintf (stderr,"Bolt Fault Nouveau! Not found in draw queue! No Chance to recover\n");

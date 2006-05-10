@@ -26,7 +26,7 @@ public:
 			std::string text;
 			const std::string index;
 			virtual void Click (::BaseInterface* base,float x, float y, int button, int state);
-			explicit Link (std::string ind,std::string pfile) : pythonfile(pfile),index(ind) {}
+			explicit Link (std::string ind,std::string pfile) : pythonfile(pfile),alpha(1.0f),index(ind) {}
 			virtual ~Link(){} 
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
