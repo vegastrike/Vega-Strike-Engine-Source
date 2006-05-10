@@ -644,6 +644,7 @@ void Unit::ZeroAll( )
 
 void Unit::Init()
 {
+  this->schedule_priority=Unit::scheduleDefault;
   set_null(location);
   specInterdiction=0;
   sim_atom_multiplier=1;
