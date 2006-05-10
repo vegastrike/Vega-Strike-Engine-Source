@@ -4254,8 +4254,10 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
                               EjectCargo ((unsigned int)-1);
 			  }
                         }
+                        static unsigned int max_dump_cargo=XMLSupport::parse_int(vs_config->getVariable("physics","max_dumped_cargo","15"));
+                        int dumpedcargo=0;
                         for (unsigned int i=0;i<numCargo();i++) {
-                          if (rand()<(RAND_MAX*cargoejectpercent)) {
+                          if (rand()<(RAND_MAX*cargoejectpercent)&&dumpedcargo++<max_dump_cargo) {
                             EjectCargo(i);
                           }
                         }

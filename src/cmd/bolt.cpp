@@ -102,7 +102,8 @@ void Bolt::Draw () {
   GFXDisable (CULLFACE);
 
   static bool blendbeams = XMLSupport::parse_bool (vs_config->getVariable("graphics","BlendGuns","true"));
-  static float stretchbolts = XMLSupport::parse_float (vs_config->getVariable("graphics","StretchBolts","0.85"));
+  static float stretchbolts = XMLSupport::parse_float (vs_config->getVariable("graphics","StretchBolts","0"));//set DEFAULT TO BE ZERO--it was wrecking all the mods.
+
   GFXBlendMode (ONE,blendbeams?ONE:ZERO);
 
   //  GFXDisable(DEPTHTEST);
@@ -156,18 +157,19 @@ void Bolt::Draw () {
       if (dec) {
 	    dec->MakeActive();
         GFXToggleTexture(true,0);
-	    for (j=i->begin();j!=i->end();j++) {
+        for (j=i->begin();j!=i->end();j++) {
           Bolt &bolt=*j;
           const weapon_info *wt=bolt.type;
-
-	      BlendTrans (bolt.drawmat,bolt.cur_position,bolt.prev_position);
+          
+          BlendTrans (bolt.drawmat,bolt.cur_position,bolt.prev_position);
           Matrix drawmat(bolt.drawmat);
-          if (stretchbolts>0)
-              ScaleMatrix(drawmat,Vector(1,1,bolt.type->Speed*etime*stretchbolts/bolt.type->Length));
-	      GFXLoadMatrixModel (drawmat);
-	      GFXColor4f (wt->r,wt->g,wt->b,wt->a);
-	      qmesh->Draw();
-	    }
+          if (stretchbolts>0) {
+            ScaleMatrix(drawmat,Vector(1,1,bolt.type->Speed*etime*stretchbolts/bolt.type->Length));
+          }
+          GFXLoadMatrixModel (drawmat);
+          GFXColor4f (wt->r,wt->g,wt->b,wt->a);
+          qmesh->Draw();
+        }
       }
     }
     qmesh->EndDrawState();
