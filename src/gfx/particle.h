@@ -1,7 +1,7 @@
 #ifndef __PARTICLE_H
 #define __PARTICLE_H
 
-#include <list>
+#include <vector>
 #include "vec.h"
 #include "gfxlib_struct.h"
 
@@ -15,8 +15,8 @@ class ParticlePoint {
 };
 
 class ParticleTrail {
-  std::list <Vector> particleVel;
-  std::list <ParticlePoint> particle; 
+  std::vector <Vector> particleVel;
+  std::vector <ParticlePoint> particle; 
   unsigned int maxparticles;
  public:
   ParticleTrail (unsigned int max) {
@@ -24,7 +24,7 @@ class ParticleTrail {
   }
   void DrawAndUpdate();
   void AddParticle (const ParticlePoint &,  const Vector &, float size);
-  void PopParticle();
+  //void PopParticle();not efficient right now
   void ChangeMax (unsigned int max);
 };
 extern ParticleTrail particleTrail;

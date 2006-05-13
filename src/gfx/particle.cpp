@@ -95,8 +95,8 @@ void ParticleTrail::DrawAndUpdate (){
 	  Q*=particlesize;
   }
 
-  list<Vector>::iterator v=particleVel.begin();
-  list<ParticlePoint>::iterator p=particle.begin();
+  vector<Vector>::iterator v=particleVel.begin();
+  vector<ParticlePoint>::iterator p=particle.begin();
 #ifdef USE_POINTS
   GFXDisable(TEXTURE0);
   GFXDisable(CULLFACE);
@@ -134,8 +134,15 @@ void ParticleTrail::DrawAndUpdate (){
   double mytime= GetElapsedTime();
   while (p!=particle.end()) {
     if (!(*p).Draw(*v,mytime,P,Q)) {
-      p =particle.erase(p);
-      v = particleVel.erase(v);
+      vector<Vector>::iterator vlast=particleVel.end();
+      vector<ParticlePoint>::iterator plast=particle.end();
+      --vlast;--plast;
+      if (p!=plast) {
+        *v=*vlast;
+        *p=*plast;
+      }
+      particle.pop_back();
+      particleVel.pop_back();
     }else {
       ++p;
       ++v;
@@ -153,17 +160,18 @@ void ParticleTrail::DrawAndUpdate (){
 }
 
 void ParticleTrail::AddParticle (const ParticlePoint &P, const Vector &V,float size) {
-	
-  particle.push_back (P);
-  particle.back().size=size;
-  particleVel.push_back (V);
   if (particle.size()>maxparticles) {
-    PopParticle();
-  }
-}
-void ParticleTrail::PopParticle() {
-  if (!particle.empty()) {
-    particle.pop_front();
-    particleVel.pop_front();
+    vector<Vector>::iterator vel=particleVel.begin();
+    vector<ParticlePoint>::iterator p=particle.begin();
+    size_t off=((size_t)rand())%particle.size();
+    vel+=off;
+    p+=off;
+    *p=P;
+    (*p).size=size;
+    *vel=V;
+  }else {
+    particle.push_back (P);
+    particle.back().size=size;
+    particleVel.push_back (V);
   }
 }
