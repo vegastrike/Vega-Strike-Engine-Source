@@ -517,7 +517,7 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 			return -1;
       	  }
       	  alBufferData( *wavbuf, format, wave, size, freq );
-          alutUnloadWAV(format,wave,size,freq);
+          free(wave);//alutUnloadWAV(format,wave,size,freq);
       	  if (!music)
 		  {
 			soundHash.Put (hashname,wavbuf);
