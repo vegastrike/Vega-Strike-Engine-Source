@@ -278,49 +278,56 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
 	bleh = expani;
       }
     }
-    this->image->explosion= new Animation (bleh.c_str(),false,.1,BILINEAR,false);
+    static bool explosion_face_player=XMLSupport::parse_bool(vs_config->getVariable("graphics","explosion_face_player","true"));
+    this->image->explosion= new Animation (bleh.c_str(),explosion_face_player,.1,BILINEAR,true);
     this->image->explosion->SetDimensions(this->ExplosionRadius(),this->ExplosionRadius());
+    Vector p,q,r;
+    this->GetOrientation (p,q,r);
+    this->image->explosion->SetOrientation(p,q,r);
+    
     if (this->isUnit()!=MISSILEPTR) {
       static float expdamagecenter=XMLSupport::parse_float(vs_config->getVariable ("physics","explosion_damage_center","1"));
       static float damageedge=XMLSupport::parse_float(vs_config->getVariable ("graphics","explosion_damage_edge",".125"));
       _Universe->activeStarSystem()->AddMissileToQueue (new MissileEffect (this->Position().Cast(),this->MaxShieldVal(),0,this->ExplosionRadius()*expdamagecenter,this->ExplosionRadius()*expdamagecenter*damageedge,NULL));
     }
-	if (!this->isSubUnit()){
-		QVector exploc = this->cumulative_transformation.position;
-		Unit * un;
-		if (NULL!=(un=_Universe->AccessCockpit(0)->GetParent())) {
-			exploc = un->Position();						
-		}
-	    AUDPlay (this->sound->explode,exploc,this->Velocity,1);
+	
+    QVector exploc = this->cumulative_transformation.position;
+    bool sub=this->isSubUnit();
+    Unit * un=NULL;
+    if (!sub)
+      if (un=_Universe->AccessCockpit(0)->GetParent()) 
+        exploc = un->Position();						
+    AUDPlay (this->sound->explode,exploc,this->Velocity,1);
+    if (!sub) {
+      un=_Universe->AccessCockpit()->GetParent();
+      if (this->isUnit()==UNITPTR) {
+        static float percentage_shock=XMLSupport::parse_float(vs_config->getVariable ("graphics","percent_shockwave",".5"));
+        if (rand () < RAND_MAX*percentage_shock&&(!this->isSubUnit())) {
+          static float shockwavegrowth=XMLSupport::parse_float(vs_config->getVariable ("graphics","shockwave_growth","1.05"));
+          static string shockani (vs_config->getVariable ("graphics","shockwave_animation","explosion_wave.ani"));
+          
+          static Animation * __shock__ani = new Animation (shockani.c_str(),true,.1,MIPMAP,false);
+          __shock__ani->SetFaceCam(false);
+          unsigned int which = AddAnimation (this->Position(),this->ExplosionRadius(),true,shockani,shockwavegrowth);
+          Animation * ani = GetVolatileAni (which);
+          if (ani) {
+            ani->SetFaceCam(false);
+            Vector p,q,r;
+            this->GetOrientation(p,q,r);
+            int tmp = rand();
+            
+            if (tmp < RAND_MAX/24) {
+              ani->SetOrientation (Vector(0,0,1),Vector(1,0,0),Vector(0,1,0));
+            }else if (tmp< RAND_MAX/16) {
+              ani->SetOrientation (Vector(0,1,0),Vector(0,0,1),Vector(1,0,0));
+            }else if (tmp < RAND_MAX/8) {
+              ani->SetOrientation (Vector(1,0,0),Vector(0,1,0),Vector(0,0,1));
+            }else {
+              ani->SetOrientation (p,q,r);
+            }
+          }
+        }
 
-	  un=_Universe->AccessCockpit()->GetParent();
-	  if (this->isUnit()==UNITPTR) {
-	    static float percentage_shock=XMLSupport::parse_float(vs_config->getVariable ("graphics","percent_shockwave",".5"));
-	    if (rand () < RAND_MAX*percentage_shock&&(!this->isSubUnit())) {
-	      static float shockwavegrowth=XMLSupport::parse_float(vs_config->getVariable ("graphics","shockwave_growth","1.05"));
-	      static string shockani (vs_config->getVariable ("graphics","shockwave_animation","explosion_wave.ani"));
-	      
-	      static Animation * __shock__ani = new Animation (shockani.c_str(),true,.1,MIPMAP,false);
-	      __shock__ani->SetFaceCam(false);
-	      unsigned int which = AddAnimation (this->Position(),this->ExplosionRadius(),true,shockani,shockwavegrowth);
-	      Animation * ani = GetVolatileAni (which);
-	      if (ani) {
-		ani->SetFaceCam(false);
-		Vector p,q,r;
-		this->GetOrientation(p,q,r);
-		int tmp = rand();
-
-		if (tmp < RAND_MAX/24) {
-		  ani->SetOrientation (Vector(0,0,1),Vector(1,0,0),Vector(0,1,0));
-		}else if (tmp< RAND_MAX/16) {
-		  ani->SetOrientation (Vector(0,1,0),Vector(0,0,1),Vector(1,0,0));
-		}else if (tmp < RAND_MAX/8) {
-		  ani->SetOrientation (Vector(1,0,0),Vector(0,1,0),Vector(0,0,1));
-		}else {
-		  ani->SetOrientation (p,q,r);
-		}
-	      }
-	    }
 		  if (un ) {
             static int upgradesfaction=FactionUtil::GetFaction("upgrades");
 			static float badrel=XMLSupport::parse_float(vs_config->getVariable("sound","loss_relationship","-.1"));

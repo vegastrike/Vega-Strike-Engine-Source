@@ -220,7 +220,9 @@ std::string FSM::GetEdgesString (int curstate) {
   for (unsigned int i=0;i<nodes[curstate].edges.size();i++) {
     retval+= tostring ((int)((i+1)%10))+"."+nodes[nodes[curstate].edges[i]].messages[0]+"\n";
   }
-  retval+= "0. Request Docking Clearence";
+  static bool print_docking=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","print_request_docking","true"));
+  if (print_docking)
+    retval+= "0. Request Docking Clearence";
   return retval;
 }
 float FSM::getDeltaRelation (int prevstate, int current_state) const{

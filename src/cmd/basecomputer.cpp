@@ -1683,22 +1683,28 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo& item, Transaction
                     commitButton->setCommand("");
                   }
                 }
+                NewButton* commitFixButton = static_cast<NewButton*>( window()->findControlById("CommitFix") );
+				bool unhidden=true;
                 if (m_player.GetUnit()&&PercentOperational(m_player.GetUnit(), item.content,item.category)<1) {
-                    NewButton* commitFixButton = static_cast<NewButton*>( window()->findControlById("CommitFix") );
                     if (m_base.GetUnit()) {
                       if (RepairPrice(PercentOperational(m_player.GetUnit(),
                                                          item.content, item.category),
                                       m_base.GetUnit()->PriceCargo(item.content))
                           <= _Universe->AccessCockpit()->credits) {
                                                          
-                        assert(commitButton != NULL);
-                        commitFixButton->setHidden(false);
-                        commitFixButton->setLabel("Fix");
-                        commitFixButton->setCommand("FixUpgrade");
+                        assert(commitFixButton != NULL);
+                        if (commitFixButton) {
+                          commitFixButton->setHidden(false);
+                          commitFixButton->setLabel("Fix");
+                          commitFixButton->setCommand("FixUpgrade");
+                          unhidden=false;
+                        }
                       }
                     }
                 
                 }
+                if (unhidden && commitFixButton)
+					commitFixButton->setHidden(true);
 	}
         return damaged_mode;
 }
@@ -1906,8 +1912,11 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
                 } else {
                     
                     sprintf(tempString, "Price: #b#%.2f#-b#n#", baseUnit->PriceCargo(item.content));
-                    descString += tempString;
-                    sprintf(tempString, "Cargo volume: %.2f;  Mass: %.2f#n1.5#", item.volume, item.mass);
+                    static bool printvolume=XMLSupport::parse_bool(vs_config->getVariable("graphics","base_print_cargo_volume","true"));
+                    if (printvolume) {
+                      descString += tempString;
+                      sprintf(tempString, "Cargo volume: %.2f;  Mass: %.2f#n1.5#", item.volume, item.mass);
+                    }
                 }
                 descString += tempString;
                 break;

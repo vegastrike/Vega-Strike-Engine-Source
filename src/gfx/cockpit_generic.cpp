@@ -615,7 +615,12 @@ bool Cockpit::Update () {
                 int whichcp=k;
 		string newsystem;QVector pos; bool setplayerXloc;
                 savegame->SetStarSystem("");
+                QVector tmpoldpos=savegame->GetPlayerLocation();
+                savegame->SetPlayerLocation(QVector(FLT_MAX,FLT_MAX,FLT_MAX));
 		savegame->ParseSaveGame(savegamefile,newsystem,newsystem,pos,setplayerXloc,this->credits,unitfilename,k);
+                if (pos.i==FLT_MAX&&pos.j==FLT_MAX&&pos.k==FLT_MAX)
+                  pos=tmpoldpos;
+                savegame->SetPlayerLocation(pos);
                 CopySavedShips(savegame->GetCallsign(),whichcp,unitfilename,true);
 		bool actually_have_save=false;
                 static bool persistent_on_load =XMLSupport::parse_bool(vs_config->getVariable("physics","persistent_on_load","true"));

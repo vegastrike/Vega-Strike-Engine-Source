@@ -3695,15 +3695,30 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 	}
 	if (degrees>=35&&degrees<60) {
 		//DAMAGE FUEL
-		if (randnum>=.75) {
+		static float fuel_damage_prob = 1.f -
+			XMLSupport::parse_float(vs_config->getVariable("physics","fuel_damage_prob",".25"));
+		static float warpenergy_damage_prob = fuel_damage_prob -
+			XMLSupport::parse_float(vs_config->getVariable("physics","warpenergy_damage_prob","0.05"));
+		static float ab_damage_prob = warpenergy_damage_prob -
+			XMLSupport::parse_float(vs_config->getVariable("physics","ab_damage_prob",".2"));
+		static float cargovolume_damage_prob = ab_damage_prob -
+			XMLSupport::parse_float(vs_config->getVariable("physics","cargovolume_damage_prob",".15"));
+		static float upgradevolume_damage_prob = cargovolume_damage_prob -
+			XMLSupport::parse_float(vs_config->getVariable("physics","upgradevolume_damage_prob",".1"));
+		static float cargo_damage_prob = upgradevolume_damage_prob -
+			XMLSupport::parse_float(vs_config->getVariable("physics","cargo_damage_prob","1"));
+		if (randnum>=fuel_damage_prob) {
 			fuel*=dam;
-		} else if (randnum>=.5) {
+		} else if (randnum>=warpenergy_damage_prob) {
+			warpenergy*=dam;
+		} else if (randnum>=ab_damage_prob) {
 			this->afterburnenergy+=((1-dam)*recharge);
-		} else if (randnum>=.35) {
-                  image->CargoVolume*=dam;
-		} else if (randnum>=.25) {
-                  image->UpgradeVolume*=dam;
-                }else {  //Do something NASTY to the cargo
+		} else if (randnum>=cargovolume_damage_prob) {
+            image->CargoVolume*=dam;
+		} else if (randnum>=upgradevolume_damage_prob) {
+            image->UpgradeVolume*=dam;
+		} else if (randnum>=cargo_damage_prob) {  
+			//Do something NASTY to the cargo
 			if (image->cargo.size()>0) {
 				int i=0;
                 unsigned int cargorand_o=rand();
@@ -5342,7 +5357,10 @@ bool Unit::UnDock (Unit * utdw) {
       docked&=(~(DOCKED_INSIDE|DOCKED));
       image->DockedTo.SetUnit (NULL);
       Velocity=utdw->Velocity;
+      static float launch_speed=XMLSupport::parse_float(vs_config->getVariable("physics","launch_speed","-1"));
       static bool auto_turn_towards =XMLSupport::parse_bool(vs_config->getVariable ("physics","undock_turn_away","true"));
+	  if (launch_speed>0)
+		computer.set_speed=launch_speed;
       if (auto_turn_towards) {
         for (int i=0;i<3;++i) {
           Vector methem(RealPosition(this)-RealPosition(utdw).Cast());
@@ -6908,7 +6926,9 @@ void Unit::EjectCargo (unsigned int index) {
 			{
 	    //cargo->SetPosAndCumPos (Position()+DockingPortLocations()[1].pos.Cast());
 
-        const QVector loc (Transform (this->GetTransformation(),this->DockingPortLocations()[0].pos.Cast()));
+        static float eject_cargo_offset=XMLSupport::parse_float(vs_config->getVariable("physics","eject_distance","20"));
+        QVector loc (Transform (this->GetTransformation(),this->DockingPortLocations()[0].pos.Cast()));
+		loc += tmpvel*1.5*rSize() + randVector(-.5*rSize()+(index==-1?eject_cargo_offset/2:0), .5*rSize()+(index==-1?eject_cargo_offset:0));
         cargo->SetPosAndCumPos (loc);
         Vector p,q,r;
         this->GetOrientation(p,q,r);

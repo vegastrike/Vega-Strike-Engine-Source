@@ -32,7 +32,7 @@ string reformatName (string nam) {
 		nam[0]=toupper(nam[0]);
 	return nam;
 }
-static string getUnitNameAndFgNoBase (Unit * target) {
+string getUnitNameAndFgNoBase (Unit * target) {
   Flightgroup* fg = target->getFlightgroup();
   if (target->isUnit()==PLANETPTR) {
     string hr = ((Planet *)target)->getHumanReadablePlanetType();
@@ -791,8 +791,9 @@ void VDU::DrawMessages(Unit *target){
       }
   }
 
+  static string message_prefix = XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","message_prefix",""));
   fullstr=targetstr+fullstr;
-  tp->Draw(MangleString (fullstr.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
+  tp->Draw(message_prefix + MangleString (fullstr.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
 }
 
 void	VDU::DrawScanningMessage()
@@ -864,12 +865,14 @@ void VDU::DrawComm () {
 
 
   }else {
-    tp->Draw (MangleString (_Universe->AccessCockpit()->communication_choices.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true);  
+	static string message_prefix = XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","message_prefix",""));
+    tp->Draw (message_prefix + MangleString (_Universe->AccessCockpit()->communication_choices.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true);  
   }
 }
 
 void VDU::DrawManifest (Unit * parent, Unit * target) {	//	zadeVDUmanifest
-  string retval ("Manifest\n");
+  static string manifest_heading = XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","manifest_heading","Manifest\n"));
+  string retval(manifest_heading);
   if (target!=parent) {
     retval+=string ("Tgt: ")+reformatName(target->name)+string("\n");
   }else {
@@ -1033,7 +1036,8 @@ void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
 
     }
     colorstring fpstring=colToString(GFXColor(cfullpower[0],cfullpower[1],cfullpower[2],cfullpower[3]));
-    string retval("#00ff00DAMAGE REPORT\n\n");
+    static string damage_report_heading = XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","damage_report_heading","#00ff00DAMAGE REPORT\n\n"));
+    string retval(damage_report_heading);
     retval+=fpstring.str;
     unsigned int numCargo =parent->numCargo();
     double percent_working = 0.88;

@@ -22,27 +22,50 @@ namespace UnitUtil {
                 return ((1<<(unsigned int)my_unit->combatRole())&capitaltypes)!=0;
 	}
 	int getPhysicsPriority (Unit*  un) {
-        //return 1;
+		static const bool FORCE_TOP_PRIORITY=XMLSupport::parse_bool(
+			vs_config->getVariable("physics","priorities","force_top_priority","false") );
+		if (FORCE_TOP_PRIORITY)
+			return 1;
+
+        //Some other comment mentions these need special treatment for subunit scheduling
+		static const int PLAYER_PRIORITY=XMLSupport::parse_int(
+			vs_config->getVariable("physics","priorities","player","1") );
+		static const int MISSILE_PRIORITY=XMLSupport::parse_int(
+			vs_config->getVariable("physics","priorities","missile","1") );
 
 		float rad= un->rSize();
 		clsptr untype=un->isUnit();
-		if (_Universe->isPlayerStarship(un)||untype==MISSILEPTR)
-			return 1;
-        //Some other comment mentions these need special treatment for subunit scheduling
-		const int ASTEROID_PARENT_PRIORITY=1;
-        const int ASTEROID_HIGH_PRIORITY=2;
-        const int ASTEROID_LOW_PRIORITY=32;
-		
-		const int TOP_PRIORITY=1;
-		const int HIGH_PRIORITY=2;
-		const int MEDIUM_PRIORITY=8;
-		const int LOW_PRIORITY=32;
-        
-		const int NOT_VISIBLE_COMBAT_HIGH=10;	
-		const int NOT_VISIBLE_COMBAT_MEDIUM=20;
-		const int NOT_VISIBLE_COMBAT_LOW=40;
+		if (_Universe->isPlayerStarship(un))
+			return PLAYER_PRIORITY;
+		if (untype==MISSILEPTR)
+			return MISSILE_PRIORITY;
 
-		const int NO_ENEMIES=64;
+		static const int ASTEROID_PARENT_PRIORITY=XMLSupport::parse_int(
+			vs_config->getVariable("physics","priorities","asteroid_parent","1") );
+        static const int ASTEROID_HIGH_PRIORITY=XMLSupport::parse_int(
+			vs_config->getVariable("physics","priorities","asteroid_high","2") );
+        static const int ASTEROID_LOW_PRIORITY=XMLSupport::parse_int(
+			vs_config->getVariable("physics","priorities","asteroid.low","32") );
+		
+		static const int TOP_PRIORITY=XMLSupport::parse_int(
+			vs_config->getVariable("physics","priorities","top","1") );
+		static const int HIGH_PRIORITY=XMLSupport::parse_int(
+			vs_config->getVariable("physics","priorities","high","2") );
+		static const int MEDIUM_PRIORITY=XMLSupport::parse_int(
+			vs_config->getVariable("physics","priorities","medium","8") );
+		static const int LOW_PRIORITY=XMLSupport::parse_int(
+			vs_config->getVariable("physics","priorities","low","32") );
+        
+		static const int NOT_VISIBLE_COMBAT_HIGH=XMLSupport::parse_int(
+			vs_config->getVariable("physics","priorities","notvisible_combat_high","10") );
+		static const int NOT_VISIBLE_COMBAT_MEDIUM=XMLSupport::parse_int(
+			vs_config->getVariable("physics","priorities","notvisible_combat_medium","20") );
+		static const int NOT_VISIBLE_COMBAT_LOW=XMLSupport::parse_int(
+			vs_config->getVariable("physics","priorities","notvisible_combat_low","40") );
+
+		static const int NO_ENEMIES=XMLSupport::parse_int(
+			vs_config->getVariable("physics","priorities","no_enemies","64") );
+
 		// Here we assume that SIM_QUEUE_SIZE is >=64
         const int LOWEST_PRIORITY=SIM_QUEUE_SIZE;
 		

@@ -1622,11 +1622,11 @@ void FireKeyboard::Execute () {
     vectorOfKeyboardInput.push_back(FIREKEYBOARDTYPE());
   }
   ProcessCommunicationMessages(SIMULATION_ATOM,true);
-  Unit * targ;
-  if ((targ = parent->Target())) {
+  Unit * targ = parent->Target();
+  DoDockingOps(parent,targ,whichplayer,sex);
+  if (targ) {
     double mm=0.0;
     ShouldFire (targ);
-    DoDockingOps(parent,targ,whichplayer,sex);
     if (targ->GetHull()<0) {
       parent->Target(NULL);
       ForceChangeTarget(parent);

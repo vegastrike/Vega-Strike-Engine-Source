@@ -110,4 +110,26 @@ namespace XMLSupport {
     }
     return value;
   }
-}
+
+  string escaped_string(const string &str)
+  {
+#define ESCAPE_CASE(e,c,skip) case e: if (rp&&str[rp-1]=='\\') rv[ip++] = c; else if (!skip) rv[ip++] = e; break
+	string::size_type rp,ip,n=str.length();
+	string rv;
+	rv.resize(n);
+	for (rp=ip=0; rp<n; ++rp) {
+	  switch(str[rp]) {
+	    ESCAPE_CASE('\\','\\',true);
+	    ESCAPE_CASE('n','\n',false);
+	    ESCAPE_CASE('r','\r',false);
+		ESCAPE_CASE('t','\t',false);
+		default: rv[ip++] = str[rp];
+	  }
+	}
+#undef ESCAPE_CASE
+	rv.resize(ip);
+	return rv;
+  }
+
+}//namespace XMLSupport
+

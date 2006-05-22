@@ -36,6 +36,10 @@
 #include "save_util.h"
 #include "cmd/base.h"
 #include "in_kb_data.h"
+
+#include <set>
+#include <string>
+
 extern float rand01();
 using VSFileSystem::SoundFile;
 #define SWITCH_CONST .9
@@ -304,6 +308,9 @@ inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &Ca
       lock_percent=0;
     }
 //  eallySwitch=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","switchToTargetModeOnKey","true"));
+    static float diamondthick = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","DiamondLineThickness","1"));; // 1.05;
+    glLineWidth(diamondthick);
+    static bool center=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","LockCenterCrosshair","false"));
     static float absmin = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","min_lock_box_size",".001"));
     static float endreticle = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","MinMissileBracketSize","1.05"));; // 1.05;
     static float startreticle = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","MaxMissileBracketSize","2.05"));; // 2.05;
@@ -312,86 +319,122 @@ inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &Ca
     static float thetaspeed = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","DiamondRotationSpeed","1"));; // 1.05;
     static float lockline = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","LockConfirmLineLength","1.5"));; // 1.05;
 
-    float max=diamondsize; 
-    //    VSFileSystem::Fprintf (stderr,"lock percent %f\n",lock_percent);
-    float coord = endreticle+(startreticle-endreticle)*lock_percent;//rSize/(1-lock_percent);//this is a number between 1 and 100
-    double rtot = 1./sqrtf(2);
+    if (center) {
+      static float bracketwidth = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","RotatingBracketWidth","0.1"));; // 1.05;
+      static bool bracketinnerouter = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","RotatingBracketInner","true"));; // 1.05;
+      float innerdis=endreticle+(startreticle-endreticle)*lock_percent;
+      float outerdis=innerdis+bracketsize;
+      float bracketdis=(bracketinnerouter?innerdis:outerdis);
+      float r=rSize<absmin?absmin:rSize;
+      GFXBegin(GFXLINE);
+      
+      GFXVertexf(Loc+CamP*(innerdis*r));
+      GFXVertexf(Loc+CamP*(outerdis*r));
 
-	// this causes the rotation!
-    float theta = 4*M_PI*lock_percent*thetaspeed;
-    Vector LockBox (-cos(theta)*rtot,-rtot,sin(theta)*rtot);
- //   Vector LockBox (0*rtot,-rtot,1*rtot);
+      GFXVertexf(Loc+CamP*(bracketdis*r)+CamQ*(bracketwidth*r));
+      GFXVertexf(Loc+CamP*(bracketdis*r)-CamQ*(bracketwidth*r));
 
-    static float diamondthick = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","DiamondLineThickness","1"));; // 1.05;
-    GFXLineWidth(diamondthick);
-    Vector TLockBox (rtot*LockBox.i+rtot*LockBox.j,rtot*LockBox.j-rtot*LockBox.i,LockBox.k);
-    Vector SLockBox (TLockBox.j,TLockBox.i,TLockBox.k);
-    QVector Origin = (CamP+CamQ).Cast()*(rSize*coord);
-    TLockBox = (TLockBox.i*CamP+TLockBox.j*CamQ+TLockBox.k*CamR);
-    SLockBox = (SLockBox.i*CamP+SLockBox.j*CamQ+SLockBox.k*CamR);
-    double r1Size = rSize*bracketsize;
-	if (r1Size < absmin)
+      GFXVertexf(Loc-CamP*(innerdis*r));
+      GFXVertexf(Loc-CamP*(outerdis*r));
+
+      GFXVertexf(Loc-CamP*(bracketdis*r)+CamQ*(bracketwidth*r));
+      GFXVertexf(Loc-CamP*(bracketdis*r)-CamQ*(bracketwidth*r));
+
+      GFXVertexf(Loc+CamQ*(innerdis*r));
+      GFXVertexf(Loc+CamQ*(outerdis*r));
+
+      GFXVertexf(Loc+CamQ*(bracketdis*r)+CamP*(bracketwidth*r));
+      GFXVertexf(Loc+CamQ*(bracketdis*r)-CamP*(bracketwidth*r));
+
+      GFXVertexf(Loc-CamQ*(innerdis*r));
+      GFXVertexf(Loc-CamQ*(outerdis*r));
+
+      GFXVertexf(Loc-CamQ*(bracketdis*r)+CamP*(bracketwidth*r));
+      GFXVertexf(Loc-CamQ*(bracketdis*r)-CamP*(bracketwidth*r));
+
+      
+      GFXEnd();
+    }else {
+      float max=diamondsize; 
+      //    VSFileSystem::Fprintf (stderr,"lock percent %f\n",lock_percent);
+      float coord = endreticle+(startreticle-endreticle)*lock_percent;//rSize/(1-lock_percent);//this is a number between 1 and 100
+      double rtot = 1./sqrtf(2);
+
+	  // this causes the rotation!
+      float theta = 4*M_PI*lock_percent*thetaspeed;
+      Vector LockBox (-cos(theta)*rtot,-rtot,sin(theta)*rtot);
+	  //Vector LockBox (0*rtot,-rtot,1*rtot);
+
+      static float diamondthick = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","DiamondLineThickness","1"));; // 1.05;
+      GFXLineWidth(diamondthick);
+      Vector TLockBox (rtot*LockBox.i+rtot*LockBox.j,rtot*LockBox.j-rtot*LockBox.i,LockBox.k);
+      Vector SLockBox (TLockBox.j,TLockBox.i,TLockBox.k);
+      QVector Origin = (CamP+CamQ).Cast()*(rSize*coord);
+      TLockBox = (TLockBox.i*CamP+TLockBox.j*CamQ+TLockBox.k*CamR);
+      SLockBox = (SLockBox.i*CamP+SLockBox.j*CamQ+SLockBox.k*CamR);
+      double r1Size = rSize*bracketsize;
+	  if (r1Size < absmin)
 		r1Size = absmin;
-    GFXBegin (GFXLINESTRIP);
-    max*=rSize*.75*endreticle;
-    if (lock_percent==0) {
-      GFXVertexf (Loc+CamQ.Cast()*max*lockline);
+      GFXBegin (GFXLINESTRIP);
+      max*=rSize*.75*endreticle;
+	  if (lock_percent==0) {
+		GFXVertexf (Loc+CamQ.Cast()*max*lockline);
+		GFXVertexf (Loc+CamQ.Cast()*max);
+	  }
 
-      GFXVertexf (Loc+CamQ.Cast()*max);
-    }
+      GFXVertexf (Loc+Origin+(TLockBox.Cast()*r1Size));
+      GFXVertexf (Loc+Origin);
+      GFXVertexf (Loc+Origin+(SLockBox.Cast()*r1Size));
+      if (lock_percent==0) {
+        GFXVertexf (Loc+CamP.Cast()*max);
+        GFXVertexf (Loc+CamP.Cast()*max*lockline);
 
-    GFXVertexf (Loc+Origin+(TLockBox.Cast()*r1Size));
-    GFXVertexf (Loc+Origin);
-    GFXVertexf (Loc+Origin+(SLockBox.Cast()*r1Size));
-    if (lock_percent==0) {
-      GFXVertexf (Loc+CamP.Cast()*max);
-      GFXVertexf (Loc+CamP.Cast()*max*lockline);
+        GFXEnd();
+        GFXBegin(GFXLINESTRIP);
+        GFXVertexf (Loc-CamP.Cast()*max);
+      }else {
+        GFXEnd();
+        GFXBegin(GFXLINESTRIP);
+      }
+      GFXVertexf (Loc-Origin-(SLockBox.Cast()*r1Size));
+      GFXVertexf (Loc-Origin);
+      GFXVertexf (Loc-Origin-(TLockBox.Cast()*r1Size));
 
+      Origin=(CamP-CamQ).Cast()*(rSize*coord);
+      if (lock_percent==0) {
+        GFXVertexf (Loc-CamQ.Cast()*max);
+        GFXVertexf (Loc-CamQ.Cast()*max*lockline);
+
+        GFXVertexf (Loc-CamQ.Cast()*max);
+      }else {
+        GFXEnd();
+        GFXBegin(GFXLINESTRIP);
+      }
+
+      GFXVertexf (Loc+Origin+(TLockBox.Cast()*r1Size));
+      GFXVertexf (Loc+Origin);
+      GFXVertexf (Loc+Origin-(SLockBox.Cast()*r1Size));
+      if (lock_percent==0) {
+        GFXVertexf (Loc+CamP.Cast()*max);
+        GFXEnd();
+        GFXBegin(GFXLINESTRIP);
+        GFXVertexf (Loc-CamP.Cast()*max*lockline);
+
+        GFXVertexf (Loc-CamP.Cast()*max);
+      }else {
+        GFXEnd();
+        GFXBegin(GFXLINESTRIP);
+      }
+
+      GFXVertexf (Loc-Origin+(SLockBox.Cast()*r1Size));
+      GFXVertexf (Loc-Origin);
+      GFXVertexf (Loc-Origin-(TLockBox.Cast()*r1Size));
+
+      if (lock_percent==0) {
+        GFXVertexf (Loc+CamQ.Cast()*max);
+      }
       GFXEnd();
-      GFXBegin(GFXLINESTRIP);
-      GFXVertexf (Loc-CamP.Cast()*max);
-    }else {
-      GFXEnd();
-      GFXBegin(GFXLINESTRIP);
     }
-    GFXVertexf (Loc-Origin-(SLockBox.Cast()*r1Size));
-    GFXVertexf (Loc-Origin);
-    GFXVertexf (Loc-Origin-(TLockBox.Cast()*r1Size));
-
-    Origin=(CamP-CamQ).Cast()*(rSize*coord);
-    if (lock_percent==0) {
-      GFXVertexf (Loc-CamQ.Cast()*max);
-      GFXVertexf (Loc-CamQ.Cast()*max*lockline);
-
-      GFXVertexf (Loc-CamQ.Cast()*max);
-    }else {
-      GFXEnd();
-      GFXBegin(GFXLINESTRIP);
-    }
-
-    GFXVertexf (Loc+Origin+(TLockBox.Cast()*r1Size));
-    GFXVertexf (Loc+Origin);
-    GFXVertexf (Loc+Origin-(SLockBox.Cast()*r1Size));
-    if (lock_percent==0) {
-      GFXVertexf (Loc+CamP.Cast()*max);
-      GFXEnd();
-      GFXBegin(GFXLINESTRIP);
-      GFXVertexf (Loc-CamP.Cast()*max*lockline);
-
-      GFXVertexf (Loc-CamP.Cast()*max);
-    }else {
-      GFXEnd();
-      GFXBegin(GFXLINESTRIP);
-    }
-
-    GFXVertexf (Loc-Origin+(SLockBox.Cast()*r1Size));
-    GFXVertexf (Loc-Origin);
-    GFXVertexf (Loc-Origin-(TLockBox.Cast()*r1Size));
-
-    if (lock_percent==0) {
-      GFXVertexf (Loc+CamQ.Cast()*max);
-    }
-    GFXEnd();
   }
   GFXLineWidth(1);
   GFXDisable(SMOOTH);
@@ -831,6 +874,104 @@ void GameCockpit::EjectDock() {
   going_to_dock_screen=true;
 }
 
+static void DoAutoLanding(Cockpit * thus, Unit * un, Unit * target) {
+  if (!thus || !un || !target)
+    return;
+  if (UnitUtil::isDockableUnit(target)==false)
+    return;
+  static std::set<std::string> autoLandingExcludeList;
+  static std::set<std::string> autoLandingExcludeWarningList;
+  static bool autoLandingExcludeList_initialised=false;
+  if (!autoLandingExcludeList_initialised) {
+	autoLandingExcludeList_initialised = true;
+	std::string excludes;
+	
+	excludes = vs_config->getVariable("physics","AutoLandingExcludeList","");
+	if (!excludes.empty()) {
+		std::string::size_type pos=0, epos=0;
+		while (epos != std::string::npos) {
+			autoLandingExcludeList.insert(excludes.substr(pos,epos=excludes.find(' ',pos)));
+			pos = epos+1;
+		}
+	}
+
+	excludes = vs_config->getVariable("physics","AutoLandingExcludeWarningList","");
+	if (!excludes.empty()) {
+		std::string::size_type pos=0, epos=0;
+		while (epos != std::string::npos) {
+			autoLandingExcludeWarningList.insert(excludes.substr(pos,epos=excludes.find(' ',pos)));
+			pos = epos+1;
+		}
+	}
+  }
+  if (autoLandingExcludeList.count(target->name)>0) 
+    return;
+  static float lessthan=XMLSupport::parse_float(vs_config->getVariable("physics","AutoLandingDockDistance","50"));
+  static float warnless=XMLSupport::parse_float(vs_config->getVariable("physics","AutoLandingWarningDistance","350"));
+  static float AutoLandingMoveDistance=XMLSupport::parse_float(vs_config->getVariable("physics","AutoLandingMoveDistance","50"));
+  static float moveout=XMLSupport::parse_float(vs_config->getVariable("physics","AutoLandingDisplaceDistance","50"));
+  static float autorad=XMLSupport::parse_float(vs_config->getVariable("physics","unit_default_autodock_radius","0"));
+  static bool adjust_unit_radius=XMLSupport::parse_float(vs_config->getVariable("physics","use_unit_autodock_radius","false"));
+  float rsize=target->isPlanet()?target->rSize():(autorad+(adjust_unit_radius?target->rSize():0));
+  QVector diffvec=un->Position()-target->Position();
+  float dist =diffvec.Magnitude()-un->rSize()-rsize;
+  diffvec.Normalize();
+
+  static bool haswarned=false;
+  static void * lastwarned=NULL;
+  static float docktime=-FLT_MAX;
+
+  if (dist<lessthan&&haswarned&&lastwarned==target) {
+      //CrashForceDock(target,un,true);      
+      un->SetPosAndCumPos(target->Position()+diffvec.Scale(un->rSize()+rsize+AutoLandingMoveDistance));
+      FireKeyboard::DockKey(KBData(),PRESS);
+      haswarned=false;
+      lastwarned=target;
+      docktime=getNewTime();
+  } else if (haswarned==false&&lastwarned==target) {
+    if (getNewTime()-docktime>SIMULATION_ATOM*2) {
+      haswarned=false;
+      un->SetPosAndCumPos(UniverseUtil::SafeEntrancePoint(target->Position()+diffvec*(rsize+moveout+un->rSize()),un->rSize()*1.1));
+      lastwarned=NULL;
+    }
+  } else if (dist<warnless){
+    if (lastwarned!=target||!haswarned) {
+      if (autoLandingExcludeWarningList.count(target->name)==0) {
+        static string str=vs_config->getVariable("cockpitaudio","automatic_landing_zone","als");
+        static string str1=vs_config->getVariable("cockpitaudio","automatic_landing_zone1","als");
+        static string str2=vs_config->getVariable("cockpitaudio","automatic_landing_zone2","als");
+        static string autolandinga=vs_config->getVariable("graphics","automatic_landing_zone_warning","comm_docking.ani");
+        static string autolandinga1=vs_config->getVariable("graphics","automatic_landing_zone_warning1","comm_docking.ani");
+        static string autolandinga2=vs_config->getVariable("graphics","automatic_landing_zone_warning2","comm_docking.ani");
+        static string message=vs_config->getVariable("graphics","automatic_landing_zone_warning_text","Now Entering an \"Automatic Landing Zone\".");
+        UniverseUtil::IOmessage(0,"game","all",message);
+        static Animation * ani0=new Animation(autolandinga.c_str());
+        static Animation * ani1=new Animation(autolandinga1.c_str());
+        static Animation * ani2=new Animation(autolandinga2.c_str());
+        static soundContainer warnsound;
+        static soundContainer warnsound1;
+        static soundContainer warnsound2;
+        int num=rand()<RAND_MAX/2?0:(rand()<RAND_MAX/2?1:2);
+        if (warnsound.sound<0) {
+          warnsound.loadsound(str);
+          warnsound1.loadsound(str1);
+          warnsound2.loadsound(str2);
+        }
+        switch (num){        
+        case 0:warnsound.playsound();    thus->SetCommAnimation(ani0,target);  break;
+        case 1: warnsound1.playsound();  thus->SetCommAnimation(ani1,target);break;
+        default: warnsound2.playsound(); thus->SetCommAnimation(ani2,target);break;
+        }
+      }
+      haswarned=true; 
+      lastwarned=target;
+    }
+  } else if (lastwarned==target) {
+    haswarned=false;
+    lastwarned=NULL;
+  }
+}
+
 class DrawUnitBlip {
 	Unit *un;
 	Unit * makeBigger;
@@ -861,6 +1002,11 @@ public:
 			int rad;
 			static bool draw_significant_blips = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_significant_blips","true"));
 			static bool untarget_out_cone=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","untarget_beyond_cone","false"));
+			static bool autolanding_enable=XMLSupport::parse_bool(vs_config->getVariable("physics","AutoLandingEnable","false"));
+
+			if (autolanding_enable)
+				DoAutoLanding(parent,un,target);
+
 			if (!un->InRange (target,dist,makeBigger==target&&untarget_out_cone,true,true)) {
 				if (makeBigger==target) {
 					un->Target(NULL);
@@ -958,6 +1104,10 @@ void GameCockpit::DrawEliteBlips (Unit * un) {
   static bool draw_significant_blips = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_significant_blips","true"));
   while ((target = iter.current())!=NULL) {
     if (target!=un) {
+      static bool autolanding_enable=XMLSupport::parse_bool(vs_config->getVariable("physics","AutoLandingEnable","false"));
+      if (autolanding_enable)
+        DoAutoLanding(this,un,target);
+
       double mm;
       static bool untarget_out_cone=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","untarget_beyond_cone","false"));
       if (!un->InRange (target,mm,makeBigger==target&&untarget_out_cone,true,true)) {

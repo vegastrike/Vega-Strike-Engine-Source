@@ -565,7 +565,14 @@ bool Beam::Collide (Unit * target, Unit * firer, Unit * superunit) {
               if (_Universe->isPlayerStarship(un)) {
                 static int tractor_onboard = AUDCreateSoundWAV(vs_config->getVariable("unitaudio","player_tractor_cargo","tractor_onboard.wav"));
                 AUDPlay(tractor_onboard,QVector(0,0,0),Vector(0,0,0),1);
-              }
+			  } else {
+				Unit * tmp=_Universe->AccessCockpit()->GetParent();
+				if (tmp && tmp->owner == un) {
+					// Subunit of player (a turret)
+					static int tractor_onboard_fromturret = AUDCreateSoundWAV(vs_config->getVariable("unitaudio","player_tractor_cargo_fromturret","tractor_onboard.wav"));
+					AUDPlay(tractor_onboard_fromturret,QVector(0,0,0),Vector(0,0,0),1);
+				}
+			  }
 		      target->Kill();
             }
 	      }
