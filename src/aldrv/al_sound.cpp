@@ -506,7 +506,7 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 		  if( error<=Ok)
 			err=MacFixedLoadWAVFile( &dat[0], &format, &wave, &size, &freq);
 #else
-		  ALsizei format;
+		  ALenum format;
                   blutLoadWAVMemory((ALbyte *)&dat[0], &format, &wave, &size, &freq, &looping);
 #endif
               
