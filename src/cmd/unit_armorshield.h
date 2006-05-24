@@ -36,8 +36,8 @@
       }shield4fbrl;
       ///If the shield is 8 sided, 16 floats make it up
       struct {
-        float frontlefttop, backlefttop, frontrighttop, backrighttop, frontleftbottom, backleftbottom, frontrightbottom, backrightbottom;
-        float frontlefttopmax, backlefttopmax, frontrighttopmax, backrighttopmax, frontleftbottommax, backleftbottommax, frontrightbottommax, backrightbottommax;
+        float frontrighttop, backrighttop, frontlefttop, backlefttop, frontrightbottom, backrightbottom, frontleftbottom, backleftbottom;
+        float frontrighttopmax, backrighttopmax, frontlefttopmax, backlefttopmax, frontrightbottommax, backrightbottommax, frontleftbottommax, backleftbottommax;
       }shield8;
       struct {
         float cur[MAX_SHIELD_NUMBER];

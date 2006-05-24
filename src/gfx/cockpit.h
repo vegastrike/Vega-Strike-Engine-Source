@@ -60,7 +60,8 @@ private:
 
   float last_locktime;
   float last_mlocktime;
-
+  bool armor8;
+  bool shield8;
   std::vector<class Mesh *> mesh;
 
   int soundfile;

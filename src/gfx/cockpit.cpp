@@ -1184,6 +1184,22 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
   float retval;
   int armori;
   Unit * tmpunit;
+  if (shield8) {
+    switch (stat) {
+    case UnitImages::SHIELDF:
+    case UnitImages::SHIELDR:
+    case UnitImages::SHIELDL:
+    case UnitImages::SHIELDB:
+    case UnitImages::SHIELD4:
+    case UnitImages::SHIELD5:
+    case UnitImages::SHIELD6:
+    case UnitImages::SHIELD7:
+      if (target->shield.shield.max[stat-UnitImages::SHIELDF]) {
+        return target->shield.shield.cur[stat-UnitImages::SHIELDF]/target->shield.shield.max[stat-UnitImages::SHIELDF];
+      }else return 0;
+    default:break;
+    }
+  }
   switch (stat) {
   case UnitImages::SHIELDF:
     return target->FShieldData();
@@ -1197,24 +1213,32 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
   case UnitImages::ARMORR:
   case UnitImages::ARMORL:
   case UnitImages::ARMORB:
+  case UnitImages::ARMOR4:
+  case UnitImages::ARMOR5:
+  case UnitImages::ARMOR6:
+  case UnitImages::ARMOR7:
     target->ArmorData (armordat);
+    if (armor8) {
+      return armordat[stat-UnitImages::ARMORF]/StartArmor[stat-UnitImages::ARMORF];
+    }else {
 	for (armori=0;armori<8;++armori) {	   
 		if (armordat[armori]>StartArmor[armori]) {
 			StartArmor[armori]=armordat[armori];
 		}
 		armordat[armori]/=StartArmor[armori];		
 	}
-	switch (stat) {
-	case UnitImages::ARMORR:
-		return .25*(armordat[0]+armordat[1]+armordat[4]+armordat[5]);	   
-	case UnitImages::ARMORL:
-		return .25*(armordat[2]+armordat[3]+armordat[6]+armordat[7]);		
-	case UnitImages::ARMORB:
-		return .25*(armordat[1]+armordat[3]+armordat[5]+armordat[7]);
-	case UnitImages::ARMORF:
-	default:
-		return .25*(armordat[0]+armordat[2]+armordat[4]+armordat[6]);
-	}
+    }
+    switch (stat) {
+    case UnitImages::ARMORR:
+      return .25*(armordat[0]+armordat[1]+armordat[4]+armordat[5]);	   
+    case UnitImages::ARMORL:
+      return .25*(armordat[2]+armordat[3]+armordat[6]+armordat[7]);		
+    case UnitImages::ARMORB:
+      return .25*(armordat[1]+armordat[3]+armordat[5]+armordat[7]);
+    case UnitImages::ARMORF:
+    default:
+      return .25*(armordat[0]+armordat[2]+armordat[4]+armordat[6]);
+    }
   case UnitImages::FUEL:
 	if (target->FuelData()>maxfuel)
 		maxfuel=target->FuelData();
@@ -1406,6 +1430,8 @@ void GameCockpit::DrawGauges(Unit * un) {
   GFXColor4f (1,1,1,1);
 }
 void GameCockpit::Init (const char * file) {
+  armor8=false;
+  shield8=false;
   Cockpit::Init( file);
   if (Panel.size()>0) {
     float x,y;

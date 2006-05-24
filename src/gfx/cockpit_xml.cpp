@@ -87,10 +87,22 @@ namespace CockpitXML {
     EnumMap::Pair ("ArmorR", UnitImages::ARMORR),
     EnumMap::Pair ("ArmorL", UnitImages::ARMORL),
     EnumMap::Pair ("ArmorB", UnitImages::ARMORB),
+    EnumMap::Pair ("Armor4", UnitImages::ARMOR4),
+    EnumMap::Pair ("Armor5", UnitImages::ARMOR5),
+    EnumMap::Pair ("Armor6", UnitImages::ARMOR6),
+    EnumMap::Pair ("Armor7", UnitImages::ARMOR7),
     EnumMap::Pair ("ShieldF", UnitImages::SHIELDF),
     EnumMap::Pair ("ShieldR", UnitImages::SHIELDR),
     EnumMap::Pair ("ShieldL", UnitImages::SHIELDL),
     EnumMap::Pair ("ShieldB", UnitImages::SHIELDB),
+    EnumMap::Pair ("ShieldFRT", UnitImages::SHIELDF),
+    EnumMap::Pair ("ShieldBRT", UnitImages::SHIELDR),
+    EnumMap::Pair ("ShieldFLT", UnitImages::SHIELDL),
+    EnumMap::Pair ("ShieldBLT", UnitImages::SHIELDB),
+    EnumMap::Pair ("ShieldFRB", UnitImages::SHIELD4),
+    EnumMap::Pair ("ShieldBRB", UnitImages::SHIELD5),
+    EnumMap::Pair ("ShieldFLB", UnitImages::SHIELD6),
+    EnumMap::Pair ("ShieldBLB", UnitImages::SHIELD7),
     EnumMap::Pair ("Fuel", UnitImages::FUEL),
     EnumMap::Pair ("Energy", UnitImages::ENERGY),
     EnumMap::Pair ("Eject", UnitImages::EJECT),
@@ -264,6 +276,18 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
       }
     }
     break;
+  case UnitImages::SHIELD4:
+  case UnitImages::SHIELD5:
+  case UnitImages::SHIELD6:
+  case UnitImages::SHIELD7:
+    shield8=true;
+    goto pastarmor8;
+  case UnitImages::ARMOR4:
+  case UnitImages::ARMOR5:
+  case UnitImages::ARMOR6:
+  case UnitImages::ARMOR7:
+    armor8=true;
+  pastarmor8:
   case UnitImages::JUMP:
   case UnitImages::MISSILELOCK:
   case UnitImages::ECM:
