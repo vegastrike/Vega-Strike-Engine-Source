@@ -1171,7 +1171,48 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
   // _Universe->AccessCockpit()->RestoreViewPort();
 }
 
-
+static GFXColor MountColor(Mount * mnt) {
+  GFXColor mountcolor(0,1,.2,1);
+  if (mnt->functionality==1) {
+    float ref=1;
+    float tref=mnt->type->Refire;
+    float cref=0;
+    if (mnt->type->type==weapon_info::BEAM) {
+      if (mnt->ref.gun) {
+        cref = mnt->ref.gun->refireTime();
+      }          
+    }else {
+      cref=  mnt->ref.refire;        
+    }
+    if (cref>tref) {
+      ref=1;
+    }else {
+      ref=cref/tref;
+    }
+    mountcolor=colLerp(GFXColor(.2,.2,.2),GFXColor(0,1,1),ref);      
+    if (ref==1.0)
+      mountcolor=GFXColor(0,1,.2);
+  }else {
+    mountcolor=colLerp(GFXColor(1,0,0),GFXColor(0,1,.2),mnt->functionality);
+  }
+  switch (mnt->ammo!=0?mnt->status:127) {
+  case Mount::ACTIVE:
+    return mountcolor;
+    goto drawme;
+  case Mount::DESTROYED:
+    mountcolor=GFXColor(1,0,0,1);
+    return mountcolor;
+  drawme:
+  case Mount::INACTIVE:
+    mountcolor=GFXColor(1,1,1,1);
+    return mountcolor;    
+  case Mount::UNCHOSEN:
+    return GFXColor (1,1,1,1);
+  case 127:
+    return GFXColor (0,.2,0,1);
+  }
+  return GFXColor(0,1,.2,1);
+}
 void VDU::DrawWeapon (Unit * parent) {
   static bool drawweapsprite = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_weapon_sprite","false"));
 
@@ -1186,69 +1227,41 @@ void VDU::DrawWeapon (Unit * parent) {
   DrawTargetSpr (drawweapsprite?parent->getHudImage ():NULL,percent,x,y,w,h);
   GFXDisable (TEXTURE0);
   GFXDisable(LIGHTING);
-  for (int i=0;i<parent->GetNumMounts();i++) {
-    Vector pos (parent->mounts[i].GetMountLocation());
-    pos.i=-
-pos.i*fabs(w)/parent->rSize()*percent+x;
-    pos.j=pos.k*fabs(h)/parent->rSize()*percent+y;
-    pos.k=0;
-    string ammo =(parent->mounts[i].ammo>=0)?string("(")+tostring(parent->mounts[i].ammo)+string(")"):string("");
-    GFXColor mountcolor(0,1,.2,1);
-    if (parent->mounts[i].functionality==1) {
-      float ref=1;
-      float tref=parent->mounts[i].type->Refire;
-      float cref=0;
-      if (parent->mounts[i].type->type==weapon_info::BEAM) {
-        if (parent->mounts[i].ref.gun) {
-          cref = parent->mounts[i].ref.gun->refireTime();
-        }          
-      }else {
-        cref=  parent->mounts[i].ref.refire;        
-      }
-      if (cref>tref) {
-        ref=1;
-      }else {
-        ref=cref/tref;
-      }
-      mountcolor=colLerp(GFXColor(.2,.2,.2),GFXColor(0,1,1),ref);      
-      if (ref==1.0)
-        mountcolor=GFXColor(0,1,.2);
-    }else {
-      mountcolor=colLerp(GFXColor(1,0,0),GFXColor(0,1,.2),parent->mounts[i].functionality);
+  int nummounts=parent->GetNumMounts();
+  int numave=0;
+  GFXColor average(0,0,0,0);
+  for (int i=0;i<nummounts;i++) {
+    if (drawweapsprite) {
+      Vector pos (parent->mounts[i].GetMountLocation());
+      pos.i=-pos.i*fabs(w)/parent->rSize()*percent+x;
+      pos.j=pos.k*fabs(h)/parent->rSize()*percent+y;
+      pos.k=0;      
+      DrawGun (pos,w,h,parent->mounts[i].type->size);
     }
-    switch (parent->mounts[i].ammo!=0?parent->mounts[i].status:127) {
-    case Mount::ACTIVE:
-      GFXColorf (mountcolor);
-      goto drawme;
-    case Mount::DESTROYED:
-      mountcolor=GFXColor(1,0,0,1);
-      GFXColorf (mountcolor);
-    drawme:
+  string ammo =(parent->mounts[i].ammo>=0)?string("(")+tostring(parent->mounts[i].ammo)+string(")"):string("");
+
+    GFXColor mntcolor=MountColor(&parent->mounts[i]);
+    numave+=1;
+    average.r+=mntcolor.r;
+    average.g+=mntcolor.g;
+    average.b+=mntcolor.b;
+    average.a+=mntcolor.a;
+    
+    if(i+1<nummounts&&parent->mounts[i].bank){
+      //nothing
+    }else if (parent->mounts[i].status==Mount::ACTIVE||parent->mounts[i].status==Mount::DESTROYED) {
+      GFXColor mountcolor(average.r/numave,average.g/numave,average.b/numave,average.a/numave);
       if (parent->mounts[i].type->size<weapon_info::LIGHTMISSILE) {
         
 	buf+=((buf.length()==(unsigned int)len)?string(""):string(","))+((count++%1==0)?"\n":"")+string(colToString(mountcolor).str)+parent->mounts[i].type->weapon_name+ammo;
       }else {
-
+        
 	mbuf+=((mbuf.length()==(unsigned int)mlen)?string(""):string(","))+((mcount++%1==0)?"\n":"")+string(colToString(mountcolor).str)+parent->mounts[i].type->weapon_name+ammo;;
       }
-    case Mount::INACTIVE:
-      mountcolor=GFXColor(1,1,1,1);
-      GFXColorf (mountcolor);
-      break;
-      
-    case Mount::UNCHOSEN:
-      GFXColor4f (1,1,1,1);
-      break;
-    case 127:
-      GFXColor4f (0,.2,0,1);
-      break;
-    }
-    if (drawweapsprite) {
-
-      DrawGun (pos,w,h,parent->mounts[i].type->size);
-	}
+      numave=0;
+      average=GFXColor(0,0,0,0);
+    }    
   }
-  GFXColor4f(0,1,.2,1);
   if (mbuf.length()!=(unsigned int)mlen) {
     buf+=mbuf;
   }
