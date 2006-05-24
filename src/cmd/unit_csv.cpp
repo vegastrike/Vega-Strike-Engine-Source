@@ -452,7 +452,7 @@ static void AddCarg (Unit *thus, string cargos) {
 void HudDamage(float * dam, string damages) {
   if (dam) {
     for (int i=0;i<1+MAXVDUS+UnitImages::NUMGAUGES;++i) {
-      dam[i] = stof(nextElement(damages),0);
+      dam[i] = stof(nextElement(damages),1);
     }
   }
 }
