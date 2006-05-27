@@ -9,6 +9,26 @@
 typedef int Mix_Music;
 #endif
 
+
+// Catch SDL 1.2.10's new 64-bit macros
+#if ((SDL_MAJOR_VERSION>1) || (SDL_MINOR_VERSION>2) || (SDL_PATCHLEVEL>=10))
+	#if (defined(SDL_HAS_64BIT_TYPE) && (SDL_HAS_64BIT_TYPE!=0))
+		#define SDL_INT64 int64_t
+		#define SDL_UINT64 uint64_t
+	#else
+		#define SDL_INT64 __undefined_64bit_type__
+		#define SDL_UINT64 __undefined_64bit_type__
+	#endif
+#else
+	#if (defined(SDL_HAS_64BIT_TYPE))
+		#define SDL_INT64 signed SDL_HAS_64BIT_TYPE
+		#define SDL_UINT64 unsigned SDL_HAS_64BIT_TYPE
+	#else
+		#define SDL_INT64 __undefined_64bit_type__
+		#define SDL_UINT64 __undefined_64bit_type__
+	#endif
+#endif
+
 #include <stdlib.h>
 #include <map>
 #include <memory.h>
@@ -67,7 +87,7 @@ private:
 #if (defined(SDL_HAS_64BIT_TYPE) && !defined(USE_FAST_F16MATH))
 
 inline unsigned long interpolateF16F16(unsigned long a, unsigned long b, unsigned long t)
-{   return (unsigned long)((a*(SDL_HAS_64BIT_TYPE)(0x10000-t) + b*(SDL_HAS_64BIT_TYPE)t) >> 16);   }
+{   return (unsigned long)((a*(SDL_INT64)(0x10000-t) + b*(SDL_INT64)t) >> 16);   }
 
 #else
 
@@ -117,10 +137,10 @@ inline double linear2log(double lin){ return (lin<=0)?DB_INF:(20*log(lin)*INV_LO
 #if (defined(SDL_HAS_64BIT_TYPE) && !defined(USE_FAST_F16MATH))
 
 inline unsigned short mpyUS16F16(unsigned short a, unsigned long f16)
-{   return (unsigned short)min((unsigned SDL_HAS_64BIT_TYPE)US16_MAX,max((unsigned SDL_HAS_64BIT_TYPE)US16_MIN, (unsigned SDL_HAS_64BIT_TYPE)(((((((signed SDL_HAS_64BIT_TYPE)a)-0x8000)*f16) + rng16.get()) >> 16) + 0x8000) ));   }
+{   return (unsigned short)min((SDL_UINT64)US16_MAX,max((SDL_UINT64)US16_MIN, (SDL_UINT64)(((((((SDL_INT64)a)-0x8000)*f16) + rng16.get()) >> 16) + 0x8000) ));   }
 
 inline signed short mpySS16F16(signed short a, unsigned long f16)
-{   return (signed short)min((signed SDL_HAS_64BIT_TYPE)SS16_MAX,max((signed SDL_HAS_64BIT_TYPE)SS16_MIN,((signed SDL_HAS_64BIT_TYPE)((((signed SDL_HAS_64BIT_TYPE)a))*f16) + rng16.get()) / (1<<16) ));   }
+{   return (signed short)min((SDL_INT64)SS16_MAX,max((SDL_INT64)SS16_MIN,((SDL_INT64)((((SDL_INT64)a))*f16) + rng16.get()) / (1<<16) ));   }
 
 #else
 
