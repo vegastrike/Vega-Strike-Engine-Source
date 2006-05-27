@@ -32,7 +32,7 @@ struct weapon_info {
   void Type (enum WEAPON_TYPE typ) {type=typ;switch(typ) {case BOLT:file=string("");break;case BEAM:file=string("beamtexture.bmp");break;case BALL:file=string("ball.ani");break;case PROJECTILE:file=string("missile.bfxm");break;default:break;}} 
   void MntSize(enum MOUNT_SIZE size) {this->size = size;}
   weapon_info(enum WEAPON_TYPE typ) {init();Type(typ);}
-  weapon_info::weapon_info(const weapon_info &tmp) {*this = tmp;}
+  weapon_info(const weapon_info &tmp) {*this = tmp;}
   //  weapon_info& operator = (const weapon_info &tmp);
   void netswap();
 };

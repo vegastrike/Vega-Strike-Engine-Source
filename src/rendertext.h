@@ -23,8 +23,8 @@ class RText {
 		RText();
 		virtual ~RText();
 		std::string getcurcommand();
-		int RText::text_width(char *str); //set the text width?
-		void RText::draw_text(std::string &str, float left, float top, int gl_num); //creates textplane object 
+		int text_width(char *str); //set the text width?
+		void draw_text(std::string &str, float left, float top, int gl_num); //creates textplane object 
 		void renderconsole(); //renders the text in the console
 		void conline(std::string &sf, bool highlight); //add a line to
 			//the console
@@ -33,8 +33,8 @@ class RText {
 		//add a line to the console(Use this one.)
 		void saycommand(char *init); //actually does the appending of
 			//the string to the commandbuf, and seperates entries
-		void RText::ConsoleKeyboardI(int code, bool isdown);
+		void ConsoleKeyboardI(int code, bool isdown);
 			//interpret keyboard input to the console
-		void RText::conoutn(std::string &in, int a, int b, int c);
+		void conoutn(std::string &in, int a, int b, int c);
 };
 

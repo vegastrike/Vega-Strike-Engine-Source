@@ -34,11 +34,11 @@ int get_alpha(int _query, int _maxrez_x, int _min, int _max, double _focus, doub
 	//	EXCESSIVE POSITICE VALUES WILL MAKE 255|0 RESULTS.
 	//	DEPENDING ON THE RESOLUTION AND LIMITS, DIFFERENT SLOPES WILL HIT THE RANGE AT DIFFERNT SETTINGS
 	//	I LEAVE THIS UNCAPPED, AND UP TO AN INTELLIGENT PERSON TO UNDERSTAND WHY IT BEHAVES SO IF THEY ENTER 10000000000
-	int half 			= maxrez_x * focus;		//	half-the-work-point
+	int half 			= int(maxrez_x * focus);	//	half-the-work-point
 	double _t 			= 0.0;
 	if(query > half)	{_t = double(query-half)/double(maxrez_x - half);}	//	set parameter to second half
 	else				{_t = double(query)/double(half);}					//	set parameter to first half
-	int center_y 		= (((double(max-min)/double(maxrez_x)) * (half))+min);
+	int center_y 		= int(((double(max-min)/double(maxrez_x)) * (half))+min);
 	int delta 			= 0;					//	difference from linear
 	if(concavity<0)		{delta = max-center_y;}	//	go down by concavity
 	else				{delta = center_y-min;}	//	go up by convexity (-concavity)
@@ -80,9 +80,9 @@ int get_alpha(int _query, int _maxrez_x, int _min, int _max, double _focus, doub
 //				+	( ((3*(x1-x0)) - ((2*vx0) + vx1) ) * pow(_t0,2) ) 
 //				+	( ((2*(x0-x1))+(vx0+vx1) ) * pow(_t0,3));
 
-		yt = y0 +	(vy0 * _t0) 
+		yt = int(y0 +	(vy0 * _t0) 
 				+	(( (3*(y1-y0)) - ((2*vy0) + vy1) ) * pow(_t0,2)) 
-				+	(( (2*(y0-y1))+(vy0+vy1) ) * pow(_t0,3));
+				+	(( (2*(y0-y1))+(vy0+vy1) ) * pow(_t0,3)));
 	}
 	else
 	{
@@ -90,9 +90,9 @@ int get_alpha(int _query, int _maxrez_x, int _min, int _max, double _focus, doub
 //		xt = x1	+	(vx1 * _t1) 
 //				+	(( (3*(x2-x1)) - ((2*vx1) + vx2) ) * pow(_t1,2)) 
 //				+	(( (2*(x1-x2))+(vx1+vx2) ) * pow(_t1,3));
-		yt = y1 + (vy1 * _t1)
+		yt = int(y1 + (vy1 * _t1)
 				+	(( (3*(y2-y1)) - ((2*vy1) + vy2) ) * pow(_t1,2))
-				+	(( (2*(y1-y2))+(vy1+vy2) ) * pow(_t1,3));
+				+	(( (2*(y1-y2))+(vy1+vy2) ) * pow(_t1,3)));
 	}
 	int return_alpha = yt;
 	if(return_alpha < min)		{return_alpha = min;}	//	error-test

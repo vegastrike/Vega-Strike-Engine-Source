@@ -59,7 +59,7 @@ class UnitCollection {
         GetNextValidUnit();
     }
     UnitIterator( const UnitIterator& orig ) : pos(orig.pos) { }
-    UnitIterator& UnitIterator::operator=( const UnitIterator& orig ) {
+    UnitIterator& operator=( const UnitIterator& orig ) {
         pos = orig.pos; return *this;
     }
     ~UnitIterator() {
@@ -94,7 +94,7 @@ class UnitCollection {
     ConstIterator(const UnitListNode *start):pos(start) {
       GetNextValidUnit();
     }
-    ConstIterator& ConstIterator::operator=( const ConstIterator& orig ) {
+    ConstIterator& operator=( const ConstIterator& orig ) {
         pos = orig.pos;
         return *this;
     }

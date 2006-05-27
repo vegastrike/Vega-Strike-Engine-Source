@@ -84,7 +84,7 @@ public:
   Flightgroup (Flightgroup & other) {
 	  *this = other;
   }
-  Flightgroup& Flightgroup::operator = (Flightgroup & other);
+  Flightgroup& operator = (Flightgroup & other);
   ~Flightgroup();
 };
 
