@@ -4,7 +4,7 @@
 
 class Nebula: public Unit {
 protected:
-	static void Nebula::beginElement (void * Userdata,const XML_Char * name, const XML_Char ** atts);
+	static void beginElement (void * Userdata,const XML_Char * name, const XML_Char ** atts);
 	Vector color;
 	float Density;
 	float fognear;
