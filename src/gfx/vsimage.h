@@ -124,10 +124,10 @@ class VSImage
 		//const static int SIZEOF_RGBQUAD;
         LOCALCONST_DECL(int,SIZEOF_RGBQUAD,sizeof(BYTE)*4)
 
-		VSImage::VSImage();
+		VSImage();
 		// f2 is needed for bmp loading
-		VSImage::VSImage( VSFile * f, textureTransform * t=NULL, bool strip=false, VSFile * f2 = NULL);
-		VSImage::~VSImage();
+		VSImage( VSFile * f, textureTransform * t=NULL, bool strip=false, VSFile * f2 = NULL);
+		~VSImage();
 
 		// f2 is needed for bmp loading
 		unsigned char*	ReadImage( VSFile * f, textureTransform * t=NULL, bool strip=false, VSFile * f2 = NULL);

@@ -209,7 +209,7 @@ public:
 //	static void BaseInterface::beginElement(void *userData, const XML_Char *names, const XML_Char **atts);
 //	void BaseInterface::beginElement(const string &name, const AttributeList attributes);
 //	static void BaseInterface::endElement(void *userData, const XML_Char *name);
-	void BaseInterface::Load(const char * filename, const char * time_of_day, const char * faction);
+	void Load(const char * filename, const char * time_of_day, const char * faction);
 	static void ClickWin (int x, int y, int button, int state);
 	void Click (int x, int y, int button, int state);
 	static void PassiveMouseOverWin (int x, int y);

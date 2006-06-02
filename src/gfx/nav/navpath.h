@@ -85,7 +85,7 @@ class NavPath {
   void addNewPath();
   bool update();
 
-  bool NavPath::isNeighborPath(unsigned system, unsigned neighbor);
+  bool isNeighborPath(unsigned system, unsigned neighbor);
 
   NavPath();
   ~NavPath();
