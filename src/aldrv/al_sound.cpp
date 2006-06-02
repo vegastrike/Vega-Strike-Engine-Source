@@ -73,7 +73,10 @@ void SwapBytes(unsigned short *pshort)
     unsigned short tempshort=POSH_LittleU16(*pshort);
     *pshort=tempshort;
 }
- void blutLoadWAVMemory(ALbyte *memory,ALenum *format,ALvoid **data,ALsizei *size,ALsizei *freq, ALboolean *loop)
+ void blutLoadWAVMemory(ALbyte *memory,
+ALenum
+ *format,ALvoid **data,
+ALsizei *size,ALsizei *freq, ALboolean *loop)
 {
 	WAVChunkHdr_Struct ChunkHdr;
 	WAVFmtExHdr_Struct FmtExHdr;
