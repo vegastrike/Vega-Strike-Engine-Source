@@ -38,8 +38,8 @@ std::vector <Index> p;
 };
 class Mesh {
     void processline (char * line);
-    Index Mesh::processfacevertex(char * chunk) const;
-    Face Mesh::processface( char * line)const;
+    Index processfacevertex(char * chunk) const;
+    Face processface( char * line)const;
 std::vector <Vector> p;
 std::vector <Vector> n;
 std::vector <Vector> t;//tex coords i=s j=t
