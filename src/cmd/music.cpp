@@ -29,6 +29,9 @@
 #include "python/python_compile.h"
 
 #include <set>
+#include <algorithm>
+
+#define MAX_RECENT_HISTORY 5
 
 Music * muzak=NULL;
 int muzak_count=0;
@@ -271,6 +274,15 @@ int Music::SelectTracks(int layer) {
     }
     if (!playlist[lastlist].empty()) {
       int whichsong=(random?rand():playlist[lastlist].counter++)%playlist[lastlist].size();
+	  int spincount=10;
+	  std::list<std::string> &recent = muzak[(layer>=0)?layer:0].recent_songs;
+	  while (  random && (--spincount > 0) &&  (std::find(recent.begin(), recent.end(), playlist[lastlist][whichsong])!=recent.end())  )
+		  whichsong=(random?rand():playlist[lastlist].counter++)%playlist[lastlist].size();
+	  if (spincount<=0)
+		  recent.clear();
+	  recent.push_back(playlist[lastlist][whichsong]);
+	  while (recent.size()>MAX_RECENT_HISTORY)
+		  recent.pop_front();
       GotoSong(lastlist,whichsong,true,layer);
       return whichsong;
     }

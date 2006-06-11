@@ -3,6 +3,7 @@
 #include "container.h"
 #include <vector>
 #include <string>
+#include <list>
 
 namespace Muzak {
 #ifndef _WIN32
@@ -72,6 +73,8 @@ private:
   void _SkipRandList(int layer=-1);
   void _Skip(int layer=-1);
   void _Stop();
+
+  std::list<std::string> recent_songs;
 
   int SelectTracks(int layer=-1);
 
