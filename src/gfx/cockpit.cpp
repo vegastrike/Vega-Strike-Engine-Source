@@ -553,7 +553,7 @@ void GameCockpit::DrawTargetBox () {
   GFXDisable (LIGHTING);
   static bool draw_nav_symbol=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawNavSymbol","false"));
   if (draw_nav_symbol) {
-    GFXColor4f(1,1,1,1);
+    static GFXColor suncol=RetrColor("nav",GFXColor(1,1,1,1));
     DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Cast().Dot((un->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition()));
   }
   GFXColorf (unitToColor(un,target,un->GetComputerData().radar.iff));
@@ -715,114 +715,57 @@ void GameCockpit::DrawTurretTargetBoxes () {
 
 
 void GameCockpit::DrawTacticalTargetBox () {
-
   static bool drawtactarg=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","DrawTacticalTarget","false"));
-
   if (!drawtactarg)
-
     return;
-
   static GFXColor black_and_white=DockBoxColor ("black_and_white");
-
   Unit * parun = parent.GetUnit();
-
   if (!parun)
-
     return;
   if (parun->getFlightgroup()==NULL)
     return;
 
-
   Unit *target = parun->getFlightgroup()->target.GetUnit();
-
     if (target){
-
 	Vector CamP,CamQ,CamR;
-
     _Universe->AccessCamera()->GetPQR(CamP,CamQ,CamR);
-
     //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
-
     QVector Loc(target->Position()-_Universe->AccessCamera()->GetPosition());
-
     GFXDisable (TEXTURE0);
-
     GFXDisable (TEXTURE1);
-
     GFXDisable (DEPTHTEST);
-
     GFXDisable (DEPTHWRITE);
-
     GFXBlendMode (SRCALPHA,INVSRCALPHA);
-
     GFXDisable (LIGHTING);
 
     static float thethick=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","TacTargetThickness","1.0"));
-
     static float fudge=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","TacTargetLength","0.1"));
-
     static float foci=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","TacTargetFoci","0.5"));
-
     glLineWidth ((int)thethick); // temp
-
     GFXColorf (unitToColor(parun,target,parun->GetComputerData().radar.iff));
-
-
 
     //DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),un->TargetLocked());
 
-
-
 	// ** jay
-
 	float rSize = target->rSize();
 
-
-
 	GFXBegin(GFXLINE);
-
 	GFXVertexf (Loc+((-CamP).Cast()+(-CamQ).Cast())*rSize*(foci+fudge));
-
     GFXVertexf (Loc+((-CamP).Cast()+(-CamQ).Cast())*rSize*(foci-fudge));
 
-
-
 	GFXVertexf (Loc+((-CamP).Cast()+(CamQ).Cast())*rSize*(foci+fudge));
-
     GFXVertexf (Loc+((-CamP).Cast()+(CamQ).Cast())*rSize*(foci-fudge));
 
-
-
 	GFXVertexf (Loc+((CamP).Cast()+(-CamQ).Cast())*rSize*(foci+fudge));
-
     GFXVertexf (Loc+((CamP).Cast()+(-CamQ).Cast())*rSize*(foci-fudge));
 
-
-
 	GFXVertexf (Loc+((CamP).Cast()+(CamQ).Cast())*rSize*(foci+fudge));
-
     GFXVertexf (Loc+((CamP).Cast()+(CamQ).Cast())*rSize*(foci-fudge));
-
 	GFXEnd();
 
-
-
-
-
-
     glLineWidth ((int)1); // temp
-
-
-
   }
-
-
-
 }
-
-
-
-
 
 void GameCockpit::drawUnToTarget ( Unit * un, Unit* target,float xcent,float ycent, float xsize, float ysize, bool reardar){
   static GFXColor black_and_white=DockBoxColor ("black_and_white"); 
@@ -1950,6 +1893,8 @@ void GameCockpit::Draw() {
                        destination_system_color.b,
                        destination_system_color.a);
             
+			static GFXColor suncol=RetrColor("remote_star",GFXColor(0,1,1,.8));
+			GFXColorf(suncol);
             DrawNavigationSymbol(delta.Cast(),P,Q,delta.Magnitude()*nav_symbol_size);
 
 
@@ -2087,8 +2032,11 @@ void GameCockpit::Draw() {
   Unit * un;
   float crosscenx=0,crossceny=0;
   static bool crosshairs_on_chasecam=parse_bool(vs_config->getVariable("graphics","hud","crosshairs_on_chasecam","false"));
+  static bool crosshairs_on_padlock =parse_bool(vs_config->getVariable("graphics","hud","crosshairs_on_padlock","false"));
 
-  if (view==CP_FRONT||(view==CP_CHASE&&crosshairs_on_chasecam)) {
+  if (  (view==CP_FRONT)
+	  ||(view==CP_CHASE&&crosshairs_on_chasecam)
+	  ||(view==CP_VIEWTARGET&&crosshairs_on_padlock)  ) {
     if (Panel.size()>0&&Panel.front()&&screenshotkey==false) {
       static bool drawCrosshairs=parse_bool(vs_config->getVariable("graphics","hud","draw_rendered_crosshairs",vs_config->getVariable("graphics","draw_rendered_crosshairs","true")));
       Panel.front()->GetPosition(crosscenx,crossceny);
@@ -2111,14 +2059,15 @@ void GameCockpit::Draw() {
 
   static bool blend_panels = XMLSupport::parse_bool(vs_config->getVariable("graphics","blend_panels","false"));
   static bool blend_cockpit= XMLSupport::parse_bool(vs_config->getVariable("graphics","blend_cockpit","false"));
-  static bool drawF5VDU    = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_chase_cam","false"));
-  static bool drawF6VDU    = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_panning_cam","false"));
-  static bool drawF7VDU    = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_target_cam","false"));
+  static bool drawChaseVDU  = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_chase_cam","false"));
+  static bool drawPanVDU    = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_panning_cam","false"));
+  static bool drawTgtVDU    = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_target_cam","false"));
+  static bool drawPadVDU    = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_padlock_cam","false"));
 
-  static bool drawF5cp    = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_cockpit_from_chase_cam","false"));
-  static bool drawF6cp    = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_cockpit_from_panning_cam","false"));
-  static bool drawF7cp    = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_cockpit_from_target_cam","false"));
-
+  static bool drawChasecp   = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_cockpit_from_chase_cam","false"));
+  static bool drawPancp     = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_cockpit_from_panning_cam","false"));
+  static bool drawTgtcp     = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_cockpit_from_target_cam","false"));
+  static bool drawPadcp     = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_cockpit_from_padlock_cam","false"));
 
   static float AlphaTestingCutoff = XMLSupport::parse_float(vs_config->getVariable("graphics","AlphaTestCutoff",".8"));
 
@@ -2134,7 +2083,7 @@ void GameCockpit::Draw() {
     if (Pit[view]) {
       Pit[view]->Draw();
     }
-  } else if ((view==CP_CHASE&&drawF5cp)||(view==CP_PAN&&drawF6cp)||(view==CP_TARGET&&drawF7cp)) {
+  } else if ((view==CP_CHASE&&drawChasecp)||(view==CP_PAN&&drawPancp)||(view==CP_TARGET&&drawTgtcp)||(view==CP_VIEWTARGET&&drawPadcp)) {
     if (Pit[0])
       Pit[0]->Draw();
 
@@ -2147,7 +2096,7 @@ void GameCockpit::Draw() {
     GFXAlphaTest (GREATER,AlphaTestingCutoff);
   }
   GFXColor4f(1,1,1,1);
-  if (view==CP_FRONT||(view==CP_CHASE&&drawF5VDU)||(view==CP_PAN&&drawF6VDU)||(view==CP_TARGET&&drawF7VDU))
+  if (view==CP_FRONT||(view==CP_CHASE&&drawChaseVDU)||(view==CP_PAN&&drawPanVDU)||(view==CP_TARGET&&drawTgtVDU)||(view==CP_VIEWTARGET&&drawPadVDU))
       for (unsigned int j=1;j<Panel.size();j++)
           if (Panel[j])
               Panel[j]->Draw();
@@ -2157,7 +2106,7 @@ void GameCockpit::Draw() {
   GFXColor4f(1,1,1,1);
   bool die=true;
   if ((un = parent.GetUnit())) {
-    if (view==CP_FRONT||(view==CP_CHASE&&drawF5VDU)||(view==CP_PAN&&drawF6VDU)||(view==CP_TARGET&&drawF7VDU)) {//only draw crosshairs for front view
+    if (view==CP_FRONT||(view==CP_CHASE&&drawChaseVDU)||(view==CP_PAN&&drawPanVDU)||(view==CP_TARGET&&drawTgtVDU)||(view==CP_VIEWTARGET&&drawPadVDU)) {//only draw crosshairs for front view
       DrawGauges(un);
 
       if (Radar) {
@@ -2630,12 +2579,33 @@ static void ShoveCamBelowUnit (int cam, Unit * un, float zoomfactor) {
   static float ammttoshovecam = XMLSupport::parse_float(vs_config->getVariable("graphics","shove_camera_down",".3"));
   _Universe->AccessCamera(cam)->SetPosition(unpos-(r-ammttoshovecam*q).Cast()*(un->rSize()+g_game.znear*2)*zoomfactor,un->GetWarpVelocity(),un->GetAngularVelocity(),un->GetAcceleration());
 }
+static Vector lerp(const Vector &a, const Vector &b, float t)
+{
+	t = min(1.0f,max(0.0f,t));
+	return a*(1-t)+b*t;
+}
+static void translate_as(Vector &p, Vector &q, Vector &r, Vector p1, Vector q1, Vector r1, Vector p2, Vector q2, Vector r2)
+{
+	// Translate p,q,r to <p1,q1,r1> base
+	p = Vector(p.Dot(p1),p.Dot(q1),p.Dot(r1));
+	q = Vector(q.Dot(p1),q.Dot(q1),q.Dot(r1));
+	r = Vector(r.Dot(p1),r.Dot(q1),r.Dot(r1));
+	// Interpret now as if it were in <p2,q2,r2> base
+	p = p2*p.i + q2*p.j + r2*p.k;
+	q = p2*q.i + q2*q.j + r2*q.k;
+	r = p2*r.i + q2*r.j + r2*r.k;
+}
+
 void GameCockpit::SetupViewPort (bool clip) {
   _Universe->AccessCamera()->RestoreViewPort (0,(view==CP_FRONT?viewport_offset:0));
    GFXViewPort (0,(int)((view==CP_FRONT?viewport_offset:0)*g_game.y_resolution), g_game.x_resolution,g_game.y_resolution);
   _Universe->AccessCamera()->setCockpitOffset (view<CP_CHASE?cockpit_offset:0);
   Unit * un, *tgt;
   if ((un = parent.GetUnit())) {
+    //Previous frontal orientation - useful, sometimes...
+    Vector prev_fp,prev_fq,prev_fr;
+    _Universe->AccessCamera(CP_FRONT)->GetOrientation(prev_fp,prev_fq,prev_fr);
+
     un->UpdateHudMatrix (CP_FRONT);
     un->UpdateHudMatrix (CP_LEFT);
     un->UpdateHudMatrix (CP_RIGHT);
@@ -2666,14 +2636,42 @@ void GameCockpit::SetupViewPort (bool clip) {
 #endif
     tgt = un->Target();
     if (tgt) {
-      
       Vector p,q,r,tmp;
       un->GetOrientation (p,q,r);
       r = (tgt->Position()-un->Position()).Cast();
       r.Normalize();
       CrossProduct (r,q,tmp);
       CrossProduct (tmp,r,q);
-      _Universe->AccessCamera(CP_VIEWTARGET)->SetOrientation(tmp,q,r);
+
+	  // Padlock block
+	  if (view == CP_VIEWTARGET) {
+		  static float PadlockViewLag       = XMLSupport::parse_float( vs_config->getVariable("graphics","hud","PadlockViewLag","1.5") );
+		  static float PadlockViewLag_inv   = 1.f/PadlockViewLag;
+		  static float PadlockViewLag_fix   = XMLSupport::parse_float( vs_config->getVariable("graphics","hud","PadlockViewLagFixZone","0.0872") ); // ~5 deg
+		  static float PadlockViewLag_fixcos= (float)cos(PadlockViewLag_fix);
+
+		  // pp,qq,rr <-- world-relative padlock target
+		  // p_p,p_q,p_r <-- previous head orientation translated to new front orientation
+		  Vector p_p,p_q,p_r,f_p,f_q,f_r,pp=tmp,qq=q,rr=r;
+		  _Universe->AccessCamera(CP_VIEWTARGET)->GetOrientation(p_p,p_q,p_r);
+		  _Universe->AccessCamera(CP_FRONT)->GetOrientation(f_p,f_q,f_r);
+		  translate_as(p_p,p_q,p_r,prev_fp,prev_fq,prev_fr,f_p,f_q,f_r);
+
+		  // Compute correction amount (vtphase), accounting for lag and fix-zone
+		  un->UpdateHudMatrix (CP_VIEWTARGET);
+		  bool fixzone = (rr.Dot(p_r)>=PadlockViewLag_fixcos)&&(qq.Dot(p_q)>=PadlockViewLag_fixcos);
+		  float vtphase = 1.0f-(float)pow(0.1,GetElapsedTime()*PadlockViewLag_inv*(fixzone?0.1f:1.0f));
+
+		  // Apply correction
+		  _Universe->AccessCamera(CP_VIEWTARGET)->SetOrientation(
+			  lerp(p_p,pp,vtphase).Normalize(),
+			  lerp(p_q,qq,vtphase).Normalize(),
+			  lerp(p_r,rr,vtphase).Normalize());
+	  } else {
+		  // Reset padlock matrix
+		  un->UpdateHudMatrix (CP_VIEWTARGET);
+	  }
+
       _Universe->AccessCamera(CP_TARGET)->SetOrientation(tmp,q,r);
       //      _Universe->AccessCamera(CP_PANTARGET)->SetOrientation(tmp,q,r);
       ShoveCamBelowUnit (CP_TARGET,un,zoomfactor);

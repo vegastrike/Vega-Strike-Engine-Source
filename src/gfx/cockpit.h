@@ -14,7 +14,7 @@ class NavigationSystem;
 #include "vdu.h"
 #include "camera.h"
 #include "nav/navscreen.h"
-#define NUM_CAM		12
+#define NUM_CAM CP_NUMVIEWS
 /**
  * The Cockpit Contains all displayable information about a particular Unit *
  * Gauges are used to indicate analog controls, and some diagital ones
