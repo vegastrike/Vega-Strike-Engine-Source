@@ -446,7 +446,12 @@ static int LoadSound (ALuint buffer, bool looping) {
 #endif
 
 using namespace VSFileSystem;
-ALuint nil_wavebuf=0;
+#ifdef HAVE_AL
+ALuint 
+#else
+unsigned int
+#endif
+nil_wavebuf=0;
 int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 #ifdef HAVE_AL
 #ifdef SOUND_DEBUG
