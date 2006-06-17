@@ -1671,11 +1671,9 @@ Unit * Unit::makeMasterPartList() {
   if (err<=VSFileSystem::Ok) {
          CSVTable table(mplf,mplf.GetRoot());
          mplf.Close();
-         unsigned int siz=table.rows.size();
-
-
-		 for (i=0;i<siz;++i) {
-			 CSVRow row(&table,i);
+		 std::map<std::string,int>::const_iterator it;
+		 for (it=table.rows.begin();it!=table.rows.end();++it) {
+			 CSVRow row(&table,it->second);
 			 Cargo carg;
 			 carg.content=row["file"];
 			 carg.category=row["categoryname"];
