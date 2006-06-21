@@ -323,6 +323,7 @@ void CommunicatingAI::AdjustRelationTo (Unit * un, float factor) {
 
 //modified not to check player when hostiles are around--unless player IS the hostile
 Unit * CommunicatingAI::GetRandomUnit (float playaprob, float targprob) {
+  //return _Universe->AccessCockpit()->GetParent();
   float a =rand ();
   Unit * target=NULL;
   Unit * originaltarget=parent->Target();

@@ -11,10 +11,15 @@
 #include "universe_util.h"
 #include <algorithm>
 #include "cmd/unit_find.h"
+#include "vs_random.h"
+
 static bool NoDockWithClear() {
 	static bool nodockwithclear = XMLSupport::parse_bool (vs_config->getVariable ("physics","dock_with_clear_planets","true"));
 	return nodockwithclear;
 }
+
+VSRandom targrand(time(NULL));
+
 Unit * getAtmospheric (Unit * targ) {
   if (targ) {
     Unit * un;
@@ -92,6 +97,7 @@ bool CanFaceTarget (Unit * su, Unit *targ,const Matrix & matrix) {
 
 void FireAt::ReInit (float reaction_time, float aggressivitylevel) {
   static float missileprob = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MissileProbability",".01"));
+  static float mintimetoswitch = XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","MinTimeToSwitchTargets","3"));
   lastmissiletime=UniverseUtil::GetGameTime()-65536.;
   missileprobability = missileprob;  
   gunspeed=float(.0001);
@@ -101,8 +107,10 @@ void FireAt::ReInit (float reaction_time, float aggressivitylevel) {
   agg = aggressivitylevel;
   rxntime = reaction_time;
   distance=1;
-  lastchangedtarg=-100000;
+  //JS --- spreading target switch times
+  lastchangedtarg=0.0-targrand.uniformInc(0,1)*mintimetoswitch;
   had_target=false;
+
 }
 FireAt::FireAt (float reaction_time, float aggressivitylevel): CommunicatingAI (WEAPON,STARGET){
   ReInit (reaction_time,aggressivitylevel);
@@ -359,17 +367,47 @@ public:
     return (maxtargets==0)||(numtargets<maxtargets);
   }
 };
+
+static float targettimer =UniverseUtil::GetGameTime(); // timer used to determine passage of physics frames
+static int numpolled=0; // number of units that searched for a target
+static int prevpollindex=10000; // previous number of units touched (doesn't need to be precise)
+static int pollindex=1; // current count of number of units touched (doesn't need to be precise)  -- used for "fairness" heuristic
 void FireAt::ChooseTargets (int numtargs, bool force) {
   static float mintimetoswitch = XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","MinTimeToSwitchTargets","3"));
+  static float targetswitchtime = XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","TimeUntilSwitch","20"));	
+  static int numpollers = XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","Numberofpollersperframe","49")); // maximum number of vessels allowed to search for a target in a given physics frame
   if (lastchangedtarg+mintimetoswitch>0) 
     return;//don't switch if switching too soon
+  
+  // Following code exists to limit the number of craft polling for a target in a given frame - this is an expensive operation, and needs to be spread out, or there will be pauses.
+  if((UniverseUtil::GetGameTime())-targettimer>SIMULATION_ATOM){ // Check if at least one physics frame has passed
+    numpolled=0; // reset counters
+	prevpollindex=pollindex;
+	pollindex=0;
+    targettimer=UniverseUtil::GetGameTime();
+  }
+  pollindex++; // count number of craft touched - will use in the next physics frame to spread out the vessels actually chosen to be processed among all of the vessels being touched
+  if(numpolled>numpollers){ // over quota, wait until next physics frame
+	return;
+  }
+  if(!(pollindex%((prevpollindex/numpollers)+1))){ // spread out, in modulo fashion, the possibility of changing one's target. Use previous physics frame count of craft to estimate current number of craft
+	  if(parent->Target()==NULL){ // if they didn't have a target, they probably won't have one this time either - we're likely wasting our time, so 
+		  if(rand()%2){ // half the time we see an unlikely candidate, we punt until the next time we see them
+		    lastchangedtarg+=mintimetoswitch; // which we make sure isn't for a while.
+		    return;
+		  }
+	  }
+	numpolled++; // if a more likely candidate, we're going to search for a target.
+  }else{
+	return; // skipped to achieve better fairness - see comment on modulo distribution above
+  }
   Unit * curtarg=NULL;
   if ((curtarg=parent->Target())) 
     if (isJumpablePlanet (curtarg))
       return;
   Flightgroup * fg = parent->getFlightgroup();;
   parent->getAverageGunSpeed (gunspeed,gunrange,missilerange);  
-  lastchangedtarg=0;
+  lastchangedtarg=0+targrand.uniformInc(0,1)*mintimetoswitch; // spread out next valid time to switch targets - helps to ease per-frame loads.
   if (fg) {
     if (!fg->directive.empty()) {
       if (curtarg!=NULL&&(*fg->directive.begin())==toupper (*fg->directive.begin())) {
