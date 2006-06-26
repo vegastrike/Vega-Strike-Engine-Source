@@ -140,6 +140,7 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
   unsigned int i;
   if (lastframe) {
     char tmp=0;
+	double blah=queryTime();
     for (i=0;i<this->meshdata.size();i++) {
       if (!this->meshdata[i])
 		continue;
@@ -149,10 +150,15 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
       }
       this->meshdata[i]->UnDraw();
     }
+	double blah1=queryTime();
     if (!tmp&&this->hull<0) {
       Explode(false,SIMULATION_ATOM);
 	
     }
+	double blah2=queryTime();
+	if (blah2-blah1>.001||blah1-blah>.001) {
+		printf ("fx: %f exp: %f ",blah1-blah,blah2-blah1);
+	}
   }
   //UnitType::UpdatePhysics2 (trans,old_physical_state,accel,difficulty,transmat, cum_vel,  lastframe,uc);
 }

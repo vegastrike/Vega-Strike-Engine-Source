@@ -35,8 +35,13 @@ namespace UnitUtil {
 
 		float rad= un->rSize();
 		clsptr untype=un->isUnit();
-		if (_Universe->isPlayerStarship(un))
-			return PLAYER_PRIORITY;
+                unsigned int np = _Universe->numPlayers();
+                for (unsigned int i=0;i<np;++i) {
+                  if (_Universe->AccessCockpit(i)->GetParent()==un||
+                      _Universe->AccessCockpit(i)->GetSaveParent()==un) {                    
+                    return PLAYER_PRIORITY;                    
+                  }
+                }
 		if (untype==MISSILEPTR)
 			return MISSILE_PRIORITY;
 

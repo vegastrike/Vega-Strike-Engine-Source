@@ -2289,6 +2289,10 @@ void GameCockpit::Draw() {
         }
 	dietime +=GetElapsedTime();
 	SetView (CP_PAN);
+        YawLeft (std::string(),RELEASE);
+        YawRight (std::string(),RELEASE);
+        PitchUp(std::string(),RELEASE);
+        PitchDown (std::string(),RELEASE);
 	zoomfactor=dietime*10;
       }
       QuitAllow=true;
