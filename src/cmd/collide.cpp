@@ -30,7 +30,9 @@ csRapidCollider * collideTrees::colTree(Unit * un, const Vector & othervelocity)
 	float magsqr = un->GetVelocity().MagnitudeSquared();
 	float newmagsqr = (un->GetVelocity()-othervelocity).MagnitudeSquared();	
 	float speedsquared =const_factor*const_factor*(magsqr>newmagsqr?newmagsqr:magsqr);
-	if (un->rSize()*un->rSize()>SIMULATION_ATOM*SIMULATION_ATOM*speedsquared) {
+        static int max_collide_trees=XMLSupport::parse_int(vs_config->getVariable("physics","max_collide_trees","16384"));
+
+	if (un->rSize()*un->rSize()>SIMULATION_ATOM*SIMULATION_ATOM*speedsquared||max_collide_trees==1) {
 		return rapidColliders[0];
 	}
 	if (rapidColliders[0]==NULL)
@@ -40,7 +42,8 @@ csRapidCollider * collideTrees::colTree(Unit * un, const Vector & othervelocity)
 //	pow=collideTreesMaxTrees-1;
 	if (pow<0)
 		pow=0;
-	if (pow>=collideTreesMaxTrees)
+
+	if (pow>=collideTreesMaxTrees||pow>=max_collide_trees)
 		pow=collideTreesMaxTrees-1;
 	
 	int val = 1<<pow;
