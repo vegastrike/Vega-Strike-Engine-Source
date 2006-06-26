@@ -36,7 +36,7 @@
 #include "save_util.h"
 #include "cmd/base.h"
 #include "in_kb_data.h"
-
+#include "main_loop.h"
 #include <set>
 #include <string>
 
@@ -2289,10 +2289,10 @@ void GameCockpit::Draw() {
         }
 	dietime +=GetElapsedTime();
 	SetView (CP_PAN);
-        YawLeft (std::string(),RELEASE);
-        YawRight (std::string(),RELEASE);
-        PitchUp(std::string(),RELEASE);
-        PitchDown (std::string(),RELEASE);
+        CockpitKeys::YawLeft (std::string(),RELEASE);
+        CockpitKeys::YawRight (std::string(),RELEASE);
+        CockpitKeys::PitchUp(std::string(),RELEASE);
+        CockpitKeys::PitchDown (std::string(),RELEASE);
 	zoomfactor=dietime*10;
       }
       QuitAllow=true;
