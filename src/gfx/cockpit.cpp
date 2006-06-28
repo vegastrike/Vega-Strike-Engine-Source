@@ -1718,11 +1718,17 @@ int GameCockpit::Autopilot (Unit * target) {
       if((retauto = un->AutoPilotTo(un,false))) {//can he even start to autopilot
 		un->AutoPilotTo(target,false);
 		if (autopan){
-		  SetView (CP_FIXED);
+		  SetView (CP_FIXEDPOS);
                   Vector P(1,0,0),Q(0,1,0),R(0,0,1);
-                  //un->GetOrientation(P,Q,R);
+                  Vector uP,uQ,uR;
+                  un->GetOrientation(uP,uQ,uR);
+                  P+=uP*1.1+uR*1.1;
+                  P.Normalize();
+                  R= P.Cross(Q);
                   AccessCamera(CP_FIXED)->SetPosition(un->LocalPosition()+2*un->rSize()*P,Vector(0,0,0),Vector(0,0,0),Vector(0,0,0));
                   AccessCamera(CP_FIXED)->SetOrientation(R,Q,-P);
+                  AccessCamera(CP_FIXEDPOS)->SetPosition(un->LocalPosition()+2*un->rSize()*P,Vector(0,0,0),Vector(0,0,0),Vector(0,0,0));
+                  AccessCamera(CP_FIXEDPOS)->SetOrientation(R,Q,-P);
 		}
 		static bool face_target_on_auto = XMLSupport::parse_bool (vs_config->getVariable ( "physics","face_on_auto", "false"));
 		if (face_target_on_auto) {
@@ -2575,7 +2581,14 @@ void GameCockpit::SetCommAnimation (Animation * ani,Unit*un) {
 void GameCockpit::RestoreViewPort() {
   _Universe->AccessCamera()->RestoreViewPort(0,0);
 }
-
+static void FaceCamTarget(Cockpit * cp, int cam, Unit * un) {
+    QVector diff=un->Position()-cp->AccessCamera()->GetPosition();
+    diff.Normalize();
+    if (diff.i!=0&&diff.k!=0) {
+        Vector z=diff.Cross(QVector(0,1,0)).Cast();
+        cp->AccessCamera(cam)->SetOrientation(z,Vector(0,1,0),diff.Cast());
+    }
+}
 static void ShoveCamBehindUnit (int cam, Unit * un, float zoomfactor) {
   QVector unpos = un->GetPlanetOrbit()?un->LocalPosition():un->Position();
   _Universe->AccessCamera(cam)->SetPosition(unpos-_Universe->AccessCamera()->GetR().Cast()*(un->rSize()+g_game.znear*2)*zoomfactor,un->GetWarpVelocity(),un->GetAngularVelocity(),un->GetAcceleration());
@@ -2684,6 +2697,8 @@ void GameCockpit::SetupViewPort (bool clip) {
       //      _Universe->AccessCamera(CP_PANTARGET)->SetOrientation(tmp,q,r);
       ShoveCamBelowUnit (CP_TARGET,un,zoomfactor);
       ShoveCamBehindUnit (CP_PANTARGET,tgt,zoomfactor);
+      FaceCamTarget(this,CP_FIXEDPOSTARGET,tgt);
+
     }else {
       un->UpdateHudMatrix (CP_VIEWTARGET);
       un->UpdateHudMatrix (CP_TARGET);
@@ -2691,7 +2706,7 @@ void GameCockpit::SetupViewPort (bool clip) {
     }
     ShoveCamBelowUnit (CP_CHASE,un,zoomfactor);
     //    ShoveCamBehindUnit (CP_PANTARGET,un,zoomfactor);
-
+    FaceCamTarget(this,CP_FIXEDPOS,un);
 
 
 
