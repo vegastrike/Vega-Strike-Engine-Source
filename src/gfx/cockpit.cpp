@@ -1716,10 +1716,14 @@ int GameCockpit::Autopilot (Unit * target) {
     Unit * un=NULL;
     if ((un=GetParent())) {
       if((retauto = un->AutoPilotTo(un,false))) {//can he even start to autopilot
-		if (autopan){
-		  SetView (CP_PAN);
-		}
 		un->AutoPilotTo(target,false);
+		if (autopan){
+		  SetView (CP_FIXED);
+                  Vector P(1,0,0),Q(0,1,0),R(0,0,1);
+                  //un->GetOrientation(P,Q,R);
+                  AccessCamera(CP_FIXED)->SetPosition(un->LocalPosition()+2*un->rSize()*P,Vector(0,0,0),Vector(0,0,0),Vector(0,0,0));
+                  AccessCamera(CP_FIXED)->SetOrientation(R,Q,-P);
+		}
 		static bool face_target_on_auto = XMLSupport::parse_bool (vs_config->getVariable ( "physics","face_on_auto", "false"));
 		if (face_target_on_auto) {
 			//	  FaceTarget(un,un->LocalPosition(),un->Target());
@@ -2430,22 +2434,22 @@ void GameCockpit::UpdAutoPilot()
         origP.Normalize();
         origQ.Normalize();
         origR.Normalize();
-        AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));//hack
-        AccessCamera(CP_PAN)->SetOrientation(origP,origQ,origR);
+        AccessCamera(CP_FIXED)->myPhysics.SetAngularVelocity(Vector(0,0,0));//hack
+        //AccessCamera(CP_FIXED)->SetOrientation(origP,origQ,origR);
         static float initialzoom=XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
         zoomfactor=initialzoom;
       }
 
     }
     if (autopilot_time<= 0) {
-      AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
+      AccessCamera(CP_FIXED)->myPhysics.SetAngularVelocity(Vector(0,0,0));
       if (disableautosound.sound<0) {
 	static string str=vs_config->getVariable("cockpitaudio","autopilot_disabled","autopilot_disabled");
 	disableautosound.loadsound(str);
       }
       disableautosound.playsound();
       if (autopan) {
-	AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
+	AccessCamera(CP_FIXED)->myPhysics.SetAngularVelocity(Vector(0,0,0));
 	SetStartupView(this);
       }
       autopilot_time=0;
