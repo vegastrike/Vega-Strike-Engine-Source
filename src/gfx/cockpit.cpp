@@ -1722,7 +1722,9 @@ int GameCockpit::Autopilot (Unit * target) {
                   Vector P(1,0,0),Q(0,1,0),R(0,0,1);
                   Vector uP,uQ,uR;
                   un->GetOrientation(uP,uQ,uR);
-                  P+=uP*1.1+uR*1.1;
+                  static float auto_side_bias=XMLSupport::parse_float(vs_config->getVariable("graphics","autopilot_side_bias","1.1"));
+                  static float auto_front_bias=XMLSupport::parse_float(vs_config->getVariable("graphics","autopilot_front_bias","1.65"));
+                  P+=uP*auto_side_bias+uR*auto_front_bias;
                   P.Normalize();
                   R= P.Cross(Q);
                   AccessCamera(CP_FIXED)->SetPosition(un->LocalPosition()+2*un->rSize()*P,Vector(0,0,0),Vector(0,0,0),Vector(0,0,0));
@@ -2707,7 +2709,6 @@ void GameCockpit::SetupViewPort (bool clip) {
     ShoveCamBelowUnit (CP_CHASE,un,zoomfactor);
     //    ShoveCamBehindUnit (CP_PANTARGET,un,zoomfactor);
     FaceCamTarget(this,CP_FIXEDPOS,un);
-
 
 
     ShoveCamBehindUnit (CP_PAN,un,zoomfactor);
