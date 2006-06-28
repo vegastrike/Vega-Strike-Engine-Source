@@ -2397,7 +2397,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
         if (r.Dot(methem)<0) {
           Rotate (p*(PI/theta));
         }
-        
+        Velocity=methem*Velocity.Magnitude();
       }
     }
     static string insys_jump_ani = vs_config->getVariable ("graphics","insys_jump_animation","warp.ani");
