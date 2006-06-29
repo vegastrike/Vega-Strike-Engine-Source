@@ -328,7 +328,7 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m, Unit * ta
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
   bool possible= AdjustMatrix (cumulative_transformation_matrix,Vector(0,0,0),targ,speed,false,tracking_cone);
   static bool firemissingautotrackers = XMLSupport::parse_bool (vs_config->getVariable("physics","fire_missing_autotrackers","true"));
-  if (possible==false&&!firemissingautotrackers)
+  if (targ&&possible==false&&!firemissingautotrackers)
     Destabilize();
   //to help check for crashing.
   center = cumulative_transformation.position;
