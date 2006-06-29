@@ -1168,14 +1168,14 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
                     energy -=i->type->EnergyRate*SIMULATION_ATOM;
                   }
                 
-              }else{
+              }else if (i->type->type!=weapon_info::BOLT && i->type->type!=weapon_info::BALL) {
                 energy-=i->type->EnergyRate;
               }
               // IF WE REFRESH ENERGY FROM SERVER : Think to send the energy update to the firing client with ACK TO fireRequest
               if (mis) weapon_type_bitmask &= (~ROLES::FIRE_MISSILES);//fire only 1 missile at a time
             }
           }
-          else
+          else if (i->processed!=Mount::FIRED && i->processed!=Mount::REQUESTED)
           {
             // Request a fire order to the server telling him the serial of the unit and the mount index (nm)
             char mis2 = mis;
@@ -4535,6 +4535,16 @@ void Unit::UnFire () {
     }
   }else 
   for (int i=0;i<GetNumMounts();i++) {
+    if (mounts[i].status!=Mount::ACTIVE)
+      continue;
+    if (Network && mounts[i].processed != Mount::UNFIRED) {
+      int playernum = _Universe->whichPlayerStarship( this);
+      if (playernum>=0)
+        Network[playernum].unfireRequest( this->serial, i);
+    }
+    if (SERVER) {
+      VSServer->BroadcastUnfire( this->serial, i, this->activeStarSystem->GetZone());
+    }
     mounts[i].UnFire();//turns off beams;
   }
 }

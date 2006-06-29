@@ -261,7 +261,7 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
             {
 				localplayer = true;
             }
-			else if( !(clt = Clients.get(sernum)))
+			if( !(clt = Clients.get(sernum)))
 			{
 			    // Test if it is a client or a unit
 				if( !(un = UniverseUtil::GetUnitFromSerial( sernum)))
@@ -280,51 +280,51 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
                 if (debugPos) COUT << "   *** SubCommand is FullUpdate ser=" << sernum << endl;
 
 	            ClientState	cs;
+				float newEnergy;
 
 				// Do what needed with update
 				if (debugPos) COUT<<"Received ZoneMgr::FullUpdate ";
 				// Tell we received the ClientState so we can convert byte order from network to host
 				cs = netbuf.getClientState();
+				newEnergy = netbuf.getFloat();
                 if (debugPos) COUT << "   *** cs=" << cs << endl;
 
 // NETFIXME: Why not set local player? It can't hurt...
 				
-				if( (clt || un) && (!localplayer) )
+				if( clt || un )
 				{
 					if( clt) {
 						un = clt->game_unit.GetUnit();
 					}
-					// Get our "semi-ping" from server
-					// We received delay in ms so we convert it into seconds
-					// Backup old state
-					un->BackupState();
-					// Update concerned client with predicted position directly in network client list
-					un->curr_physical_state.position = cs.getPosition();
-					un->curr_physical_state.orientation = cs.getOrientation();
-					un->Velocity = cs.getVelocity();
-
-
-// NETFIXME: Predictions are absolutely borked.  Disabled for now.
-
-					if (clt) {
-						clt->setLatestTimestamp(int_ts);
-						clt->elapsed_since_packet = 0;
-						assert( clt->prediction );
-						clt->prediction->InitInterpolation( un,
+					if (!un)
+						continue; // NETFIXME: GetUnit() can return NULL.
+					if (!localplayer) {
+						// Get our "semi-ping" from server
+						// We received delay in ms so we convert it into seconds
+						// Backup old state
+						un->BackupState();
+						// Update concerned client with predicted position directly in network client list
+						un->curr_physical_state.position = cs.getPosition();
+						un->curr_physical_state.orientation = cs.getOrientation();
+						un->Velocity = cs.getVelocity();
+						if (clt) {
+							clt->setLatestTimestamp(int_ts);
+							clt->elapsed_since_packet = 0;
+							assert( clt->prediction );
+							clt->prediction->InitInterpolation( un,
 								clt->last_packet,
 								clt->getDeltatime(),
 								clt->getNextDeltatime());
-						clt->last_packet=cs;
-						un->curr_physical_state = clt->prediction->Interpolate( un, 0);
-					}
+							clt->last_packet=cs;
+							un->curr_physical_state = clt->prediction->Interpolate( un, 0);
+						}
 					
-					QVector predpos = un->curr_physical_state.position;
-					if (debugPos) cerr<<"Predicted location : x="<<predpos.i<<",y="<<predpos.j<<",z="<<predpos.k<<endl;
+						QVector predpos = un->curr_physical_state.position;
+						if (debugPos) cerr<<"Predicted location : x="<<predpos.i<<",y="<<predpos.j<<",z="<<predpos.k<<endl;
+					}
+					// Everyone gets energy updates.
+					un->energy = newEnergy;
 				}
-				else if( localplayer)
-                {
-					if (debugPos) cerr<<" IGNORING LOCAL PLAYER"<<endl;
-                }
 				i++;
 			}
 			else if( cmd == ZoneMgr::PosUpdate )
@@ -336,15 +336,12 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 				{
 					if( clt)
 						un = clt->game_unit.GetUnit();
+					if (!un)
+						continue; // NETFIXME: GetUnit() can return NULL.
 					// Backup old state
 					un->BackupState();
 					// Set the new received position in curr_physical_state
 					un->curr_physical_state.position = pos;
-
-
-
-// NETFIXME: Predictions are absolutely borked.  Disabled for now.
-
 					if (clt) {
 						clt->setLatestTimestamp(int_ts);
 						clt->elapsed_since_packet = 0;

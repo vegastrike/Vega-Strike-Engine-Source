@@ -534,6 +534,8 @@ bool ZoneMgr::addPosition( NetBuffer & netbuf, Unit * un, ClientState & un_cs)
 				netbuf.addShort( un->GetSerial());
 				// Put the current client state in
 				netbuf.addClientState( un_cs);
+				// Throw in some other cheap but useful info.
+				netbuf.addFloat (un->energy);
 				// Increment the number of clients we send full info about
 			}
 			// Here find a condition for which sending only position would be enough

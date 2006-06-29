@@ -209,7 +209,15 @@ bool Mount::PhysicsAlignedFire(Unit * caller, const Transformation &Cumulative, 
   if (lock_disrupted_by_false_fire)
     time_to_lock = type->LockTime;
   if (processed==FIRED) {
-    processed = PROCESSED;
+    if (type->type!=weapon_info::BOLT && type->type!=weapon_info::BALL) {
+      // Missiles and beams set to processed.
+      processed = PROCESSED;
+    } else {
+      if (ref.refire<type->Refire || type->EnergyRate>caller->energy) {
+        // Wait until refire has expired and reactor has produced enough energy for the next bolt.
+        return true; // Not ready to refire yet.  But don't stop firing.
+      }
+    }
     Unit * temp;
     Transformation tmp (orient,pos.Cast());
     tmp.Compose (Cumulative,m);
@@ -243,10 +251,9 @@ bool Mount::PhysicsAlignedFire(Unit * caller, const Transformation &Cumulative, 
 					ref.gun->Init(Transformation(orient,pos.Cast()),*type,owner,caller);
 			  break;
 			case weapon_info::BOLT:
-			  hint=Bolt (type, mat, velocity, owner,hint).location;//FIXME turrets! Velocity      
-			  break;
 			case weapon_info::BALL:
-			  hint=Bolt (type,mat, velocity,  owner,hint).location;//FIXME:turrets won't work      
+              caller->energy-=type->EnergyRate;
+			  hint=Bolt (type, mat, velocity, owner,hint).location;//FIXME turrets won't work! Velocity
 			  break;
 			case weapon_info::PROJECTILE:
 			{

@@ -387,7 +387,7 @@ void CarSimUpdate (Unit *un, float height) {
 
 }
 bool debugPerformance() {
-  static bool dp = XMLSupport::parse_bool(vs_config->getVariable("physics","debug_performance","true"));
+  static bool dp = XMLSupport::parse_bool(vs_config->getVariable("physics","debug_performance","false"));
   return dp;
 }
 //Variables for debugging purposes only - eliminate later

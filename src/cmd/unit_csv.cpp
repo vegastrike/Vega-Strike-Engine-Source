@@ -1302,7 +1302,7 @@ shield.range[1].   rhomax=r90;
 
   CheckAccessory(this);//turns on the ceerazy rotation for any accessories
   double endt=queryTime();
-  printf ("spr %f mesh %f subun %f mount %f carg %f sound %f upg %f exp %f light %f tree %f ",spritet-start,subunt-meshest,mountst-subunt,cargot-mountst,soundst-cargot,upgradet-soundst,explodet-upgradet, lightt-explodet, treet-lightt, endt-treet); 
+//  printf ("spr %f mesh %f subun %f mount %f carg %f sound %f upg %f exp %f light %f tree %f ",spritet-start,subunt-meshest,mountst-subunt,cargot-mountst,soundst-cargot,upgradet-soundst,explodet-upgradet, lightt-explodet, treet-lightt, endt-treet); 
 }
 
 CSVRow GetUnitRow(string filename, bool subu, int faction, bool readlast, bool &rread) {

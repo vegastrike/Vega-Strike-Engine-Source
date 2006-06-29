@@ -877,6 +877,8 @@ public:
   Shield shield;
   ///The structual integ of the current unit
   float hull;
+  ///current energy
+  float energy;
 protected:
   ///Original hull
   float maxhull;
@@ -887,8 +889,6 @@ protected:
 
   ///maximum energy
   float maxenergy;
-  ///current energy
-  float energy;
   ///maximum energy
   float maxwarpenergy; //short fix
   ///current energy

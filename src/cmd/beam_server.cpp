@@ -19,7 +19,7 @@ Beam::~Beam () {
 #ifdef BEAMCOLQ
   RemoveFromSystem(true);
 #endif
-  delete vlist;
+//  delete vlist;  // Do not delete shared vlist.
 }
 
 void Beam::Draw (const Transformation &trans, const Matrix &m, Unit * targ, float tracking_cone) {//hope that the correct transformation is on teh stack
