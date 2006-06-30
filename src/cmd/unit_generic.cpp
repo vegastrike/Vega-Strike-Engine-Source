@@ -7516,11 +7516,15 @@ bool isWeapon (std::string name) {
 	return false;
 }
 
-float PercentOperational (Unit * un, std::string name, std::string category="upgrades/") {
+float PercentOperational (Unit * un, std::string name, std::string category, bool countHullAndArmorAsFull) {
   if (category.find(DamagedCategory)==0) {
     return 0.0f;
-  }else if (isWeapon(category)) {
-    const Unit * upgrade=getUnitFromUpgradeName(name,un->faction); 
+  }
+  const Unit * upgrade=getUnitFromUpgradeName(name,un->faction); 
+  if (!upgrade)return 1.0f;
+  if (isWeapon(category)) {
+    static std::string loadfailed("LOAD_FAILED");    
+
     if (upgrade->GetNumMounts()) {
       const Mount * mnt = &upgrade->mounts[0];
       unsigned int nummounts=un->GetNumMounts();
@@ -7535,7 +7539,13 @@ float PercentOperational (Unit * un, std::string name, std::string category="upg
       }
     }
   }else if (name.find("add_")!=0&&name.find("mult_")!=0) {
-    const Unit * upgrade=getUnitFromUpgradeName(name,un->faction);    
+    float armor[8];
+    upgrade->ArmorData(armor);          
+    if (upgrade->GetHull()>1||armor[0]||armor[1]||armor[2]||armor[3]||armor[4]||armor[5]||armor[6]||armor[7]) {
+      if (countHullAndArmorAsFull){
+        return 1.0f;
+      }
+    }
     double percent=0;
     if (un->canUpgrade(upgrade,-1,-1,0,true,percent,makeTemplateUpgrade(un->name,un->faction),false)) {
       if (percent)
@@ -7543,125 +7553,103 @@ float PercentOperational (Unit * un, std::string name, std::string category="upg
       else return .5;//FIXME does not interact well with radar type
     }else if (percent>0) return percent;
   }
+  
   return 1.0;
 }
 void Unit::Repair() {
   //note work slows down under time compression!
+
   static float repairtime=XMLSupport::parse_float(vs_config->getVariable ("physics","RepairDroidTime","180"));
   static float checktime =XMLSupport::parse_float(vs_config->getVariable ("physics","RepairDroidCheckTime","5"));
   static bool  continuous=XMLSupport::parse_bool (vs_config->getVariable ("physics","RepairDroidContinuous","true"));
   if ((repairtime<=0)||(checktime<=0)) return;
+  
+
+  /*
+  if (image->next_repair_time==FLT_MAX)
+    image->next_repair_time = UniverseUtil::GetGameTime();
+  */
 
   //float workunit = image->repair_droid*SIMULATION_ATOM/repairtime;//a droid completes 1 work unit in repairtime
   //if (image->repair_droid&&vsrandom.uniformInc(0,1)<workunit) {
-  while (image->repair_droid&&(UniverseUtil::GetGameTime()>image->next_repair_time)) {
-    bool repaired=false;
-    bool foundupg=false;
-    bool fulldelay=false;
-    int spindown=100;
-    unsigned int ini_repair_cargo=image->next_repair_cargo^1;
-    if (numCargo()) while (!foundupg && ini_repair_cargo!=image->next_repair_cargo && spindown--) {
-      int which;
-      if ((image->next_repair_cargo==~0)||(image->next_repair_cargo>=numCargo())) 
-          which = vsrandom.genrand_int31()%numCargo(); else
-          which = image->next_repair_cargo;
-      Cargo &carg = GetCargo(which);
-
-      if (spindown==99) ini_repair_cargo=which;
-
-      if (carg.category.find("upgrades/")==0) {
-        if (  carg.category.find(DamagedCategory)!=0
-            &&carg.content.find("add_")!=0
-            &&carg.content.find("mult_")!=0
-            &&(PercentOperational(this,carg.content,carg.category)<1.f)) {
-          // won't repair destroyed items - or already functional ones
-          static int upfac = FactionUtil::GetFaction("upgrades");
-          const Unit * up=getUnitFromUpgradeName(carg.content,upfac);
-          float armor[8];
-          up->ArmorData(armor);
-          
-          if (up->GetHull()>1||armor[0]||armor[1]||armor[2]||armor[3]||armor[4]||armor[5]||armor[6]||armor[7]) {
-            //DO not repair hull or armor 
-          }else if (up->name == string("LOAD_FAILED")) {
-            //IGNORE those - only attempt to fix integrated systems
-#define REPAIRINTEGRATED(continuous,checktime,repairtime,repaired,fulldelay,foundupg,functionality,max_functionality) \
-            if ((!(repaired))&&((functionality)<(max_functionality))) { \
-              if (continuous) \
-                (functionality)+=(max_functionality)*(checktime)/(repairtime); \
-              if ((functionality)>(max_functionality)) \
-                (functionality) = (max_functionality); \
-              (repaired)=true; \
-              (foundupg)=true; \
-              if (!(continuous)) (fulldelay)=true; \
-            }
-
-            REPAIRINTEGRATED(continuous,checktime,repairtime,repaired,fulldelay,foundupg,
-                image->LifeSupportFunctionality,image->LifeSupportFunctionalityMax);
-            REPAIRINTEGRATED(continuous,checktime,repairtime,repaired,fulldelay,foundupg,
-                image->fireControlFunctionality,image->fireControlFunctionalityMax);
-            REPAIRINTEGRATED(continuous,checktime,repairtime,repaired,fulldelay,foundupg,
-                image->SPECDriveFunctionality,image->SPECDriveFunctionalityMax);
-            REPAIRINTEGRATED(continuous,checktime,repairtime,repaired,fulldelay,foundupg,
-                image->CommFunctionality,image->CommFunctionalityMax);
-
-#undef REPAIRINTEGRATED
-          }else{
-            double percentage=0;
-            if (up->SubUnits.empty()&&up->GetNumMounts()==0) {//don't want to repair these things
-              fulldelay=true;
-              repaired=true;
-              foundupg=true;
-              this->Upgrade(up,0,0,0,true,percentage,makeTemplateUpgrade(this->name,this->faction),false,false);
-              if (percentage==0) {
-                fulldelay=false;
-                repaired=false;
-                VSFileSystem::vs_fprintf (stderr,"Failed repair for unit %s, cargo item %d: %s (%s) - please report error\n",name.c_str(),which,carg.content.c_str(),carg.category.c_str());
+  if (image->repair_droid){
+    if (image->next_repair_time==-FLT_MAX||image->next_repair_time<=UniverseUtil::GetGameTime()) {
+      unsigned int numcargo=numCargo();
+      if (numcargo>0) {    
+        if (image->next_repair_cargo>=numCargo()) {
+          image->next_repair_cargo=0;
+        }
+        Cargo *carg = &GetCargo(image->next_repair_cargo);
+        float percentoperational=1;
+        if (carg->category.find("upgrades/")==0
+            &&carg->category.find(DamagedCategory)!=0
+            &&carg->content.find("add_")!=0
+            &&carg->content.find("mult_")!=0
+            &&((percentoperational=PercentOperational(this,carg->content,carg->category,true))<1.f)) {
+          if (image->next_repair_time==-FLT_MAX) {
+            image->next_repair_time=UniverseUtil::GetGameTime()+repairtime*(1-percentoperational);
+          }else {
+            //ACtually fix the cargo here
+            static int upfac = FactionUtil::GetFaction("upgrades");
+            const Unit * up=getUnitFromUpgradeName(carg->content,upfac);
+            static std::string loadfailed("LOAD_FAILED");
+            if (up->name == loadfailed) {
+              printf ("Bug: Load failed cargo encountered: report to hellcatv@hotmail.com\n");
+            }else{            
+              double percentage=0;
+              if (up->SubUnits.empty()&&up->GetNumMounts()==0) {//don't want to repair these things
+                this->Upgrade(up,0,0,0,true,percentage,makeTemplateUpgrade(this->name,this->faction),false,false);
+                if (percentage==0) {
+                  VSFileSystem::vs_fprintf (stderr,"Failed repair for unit %s, cargo item %d: %s (%s) - please report error\n",name.c_str(),image->next_repair_cargo,carg->content.c_str(),carg->category.c_str());
+                }
               }
             }
+            image->next_repair_time=-FLT_MAX;
+            image->next_repair_cargo++;
           }
+        }else {
+          image->next_repair_cargo++;
         }
-      }
-
-      if (!repaired) {
-          if (foundupg)
-            image->next_repair_cargo=~0; else
-            image->next_repair_cargo=((which+1)%numCargo());
-      }
-    }
-    if (!repaired) {
-      unsigned int numg=(1+UnitImages::NUMGAUGES+MAXVDUS);
-      unsigned int which= vsrandom.genrand_int31()%numg;
-      static float hud_repair_quantity=XMLSupport::parse_float(vs_config->getVariable("physics","hud_repair_unit",".25"));
-      
-      if (image->cockpit_damage[which]<image->cockpit_damage[which+numg]) {//total damage
-        repaired=true;
-        fulldelay=true;
-        image->cockpit_damage[which]+=hud_repair_quantity;
         
-        if (image->cockpit_damage[which]>image->cockpit_damage[which+numg]) {
-          image->cockpit_damage[which]=image->cockpit_damage[which+numg];//total damage
-        }
       }
-      if (mounts.size()) {
-        static float mount_repair_quantity=XMLSupport::parse_float(vs_config->getVariable("physics","mount_repair_unit",".25"));
-        unsigned int i= vsrandom.genrand_int31()%mounts.size();          
-        if (mounts[i].functionality<mounts[i].maxfunctionality) {
-          repaired=true;
-          fulldelay=true;
-          mounts[i].functionality+=mount_repair_quantity;
-          if (mounts[i].functionality>mounts[i].maxfunctionality) {
-            mounts[i].functionality=mounts[i].maxfunctionality;
-          }
-        }
+   
+    }
+    float ammt_repair = SIMULATION_ATOM/repairtime;
+
+#define REPAIRINTEGRATED(functionality,max_functionality) \
+            if (functionality<max_functionality) { \
+              (functionality)+=ammt_repair; \
+              if ((functionality)>(max_functionality)) \
+                (functionality) = (max_functionality); \
+            }
+    REPAIRINTEGRATED(image->LifeSupportFunctionality,image->LifeSupportFunctionalityMax);
+    REPAIRINTEGRATED(image->fireControlFunctionality,image->fireControlFunctionalityMax);
+    REPAIRINTEGRATED(image->SPECDriveFunctionality,image->SPECDriveFunctionalityMax);
+    REPAIRINTEGRATED(image->CommFunctionality,image->CommFunctionalityMax);
+#undef REPAIRINTEGRATED
+    
+    unsigned int numg=(1+UnitImages::NUMGAUGES+MAXVDUS);
+    unsigned int which= vsrandom.genrand_int31()%numg;
+    static float hud_repair_quantity=XMLSupport::parse_float(vs_config->getVariable("physics","hud_repair_unit",".25"));
+    
+    if (image->cockpit_damage[which]<image->cockpit_damage[which+numg]) {//total damage
+      image->cockpit_damage[which]+=hud_repair_quantity;        
+      if (image->cockpit_damage[which]>image->cockpit_damage[which+numg]) {
+        image->cockpit_damage[which]=image->cockpit_damage[which+numg];//total damage
       }
     }
-    if (image->next_repair_time==-FLT_MAX)
-        image->next_repair_time = UniverseUtil::GetGameTime();
-    image->next_repair_time += ((repaired&&(!continuous||fulldelay))?repairtime:checktime)/image->repair_droid;
+    if (mounts.size()) {
+      static float mount_repair_quantity=XMLSupport::parse_float(vs_config->getVariable("physics","mount_repair_unit",".25"));
+      unsigned int i= vsrandom.genrand_int31()%mounts.size();          
+      if (mounts[i].functionality<mounts[i].maxfunctionality) {
+        mounts[i].functionality+=mount_repair_quantity;
+        if (mounts[i].functionality>mounts[i].maxfunctionality) {
+          mounts[i].functionality=mounts[i].maxfunctionality;
+        }
+      }
+    }  
   }
-  
 }
-
 bool Unit::isTractorable(enum tractorHow how) const
 {
     if (how!=tractorImmune)
