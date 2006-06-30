@@ -8,6 +8,8 @@
 #include "vs_globals.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/unit_util.h"
+#include "vs_random.h"
+#include "cmd/unit_find.h"
 CommunicatingAI::CommunicatingAI (int ttype, int stype,  float rank, float mood, float anger,float appeas,  float moodswingyness, float randomresp) :Order (ttype,stype),anger(anger), appease(appeas), moodswingyness(moodswingyness),randomresponse (randomresp),mood(mood),rank(rank) {
   comm_face=NULL;
   if (rank>665&&rank<667) {
@@ -119,7 +121,7 @@ float CommunicatingAI::GetEffectiveRelationship (const Unit * target)const {
 }
 void GetMadAt(Unit* un, Unit * parent, int numhits=0) {
   if (numhits==0) {
-    static float snumhits = XMLSupport::parse_float(vs_config->getVariable("AI","ContrabandMadness","5"));
+    static int snumhits = XMLSupport::parse_int(vs_config->getVariable("AI","ContrabandMadness","5"));
     numhits =snumhits;
   }
   CommunicationMessage hit (un,parent,NULL,0);
@@ -323,28 +325,39 @@ void CommunicatingAI::AdjustRelationTo (Unit * un, float factor) {
 
 //modified not to check player when hostiles are around--unless player IS the hostile
 Unit * CommunicatingAI::GetRandomUnit (float playaprob, float targprob) {
-  //return _Universe->AccessCockpit()->GetParent();
-  float a =rand ();
-  Unit * target=NULL;
-  Unit * originaltarget=parent->Target();
-  if (originaltarget==NULL&&a<RAND_MAX*playaprob&&_Universe->AccessCockpit()->GetParent()!=parent) {
-    target = _Universe->AccessCockpit()->GetParent();
-  }
-  if (originaltarget!=NULL||a>RAND_MAX*(1-targprob)) {
-    target = originaltarget;
-  }
-  if (target!=NULL) {
-  if ((!parent->InRange (target))) {
-    target=NULL;
-  }
-  }
-  if (target==NULL) {
-    for (un_iter ui=_Universe->activeStarSystem()->getUnitList().createIterator();
-	 (*ui)!=NULL; ++ui) {
-      if (parent->InRange ((*ui))) {
-	target = *ui;
+  if (vsrandom.uniformInc(0,1)<playaprob) {
+    Unit* playa = _Universe->AccessCockpit(rand()%_Universe->numPlayers())->GetParent();
+    if (playa) {
+      if ((playa->Position()-parent->Position()).Magnitude()-parent->rSize()-playa->rSize()) {
+        return playa;
       }
     }
+  }
+  if (vsrandom.uniformInc(0,1)<targprob&&parent->Target()) {
+    return parent->Target();
+  }
+  //return parent->Target();
+  QVector where=parent->Position()+parent->GetComputerData().radar.maxrange*QVector(vsrandom.uniformInc(-1,1),
+                                                                                   vsrandom.uniformInc(-1,1),
+                                                                                   vsrandom.uniformInc(-1,1));
+  Collidable wherewrapper(0,0,where);
+  
+  CollideMap* cm=_Universe->activeStarSystem()->collidemap;
+  static float unitRad = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","radar_search_extra_radius","1000"));
+  
+  NearestUnitLocator unitLocator;    
+  CollideMap::iterator iter=cm->lower_bound(wherewrapper);
+  
+  if (iter!=cm->end()&&(*iter)->radius>0) {
+    if ((*iter)->ref.unit!=parent)
+      return (*iter)->ref.unit;
+  }
+  findObjects(_Universe->activeStarSystem(),iter,&unitLocator);
+
+  Unit *target = unitLocator.retval.unit;
+
+  if (target==NULL||target==parent) {
+    target=parent->Target();
   }
   return target;
 }

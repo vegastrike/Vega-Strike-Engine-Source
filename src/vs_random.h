@@ -59,15 +59,15 @@ class VSRandom {
   static const int LOWER_MASK() {
     return 0x7fffffffUL;
   }
-  unsigned long mt[NN_CONSTANT]; /* the array for the state vector  */
+  unsigned int mt[NN_CONSTANT]; /* the array for the state vector  */
 #undef NN_CONSTANT
   int mti; /* mti==N+1 means mt[N] is not initialized */
 /* initializes mt[N] with a seed */
 public:
-  VSRandom(unsigned long s):mti(N()+1) {
+  VSRandom(unsigned int s):mti(N()+1) {
 		init_genrand(s);
   }
-  void init_genrand(unsigned long s) {
+  void init_genrand(unsigned int s) {
 		mt[0]= s & 0xffffffffUL;
 		for (mti=1; mti<N(); mti++) {
 			mt[mti] = 
@@ -83,7 +83,7 @@ public:
 /* initialize by an array with array-length */
 /* init_key is the array for initializing keys */
 /* key_length is its length */
-  VSRandom(unsigned long init_key[], unsigned int key_length):mti(N()+1) {
+  VSRandom(unsigned int init_key[], unsigned int key_length):mti(N()+1) {
     int i, j, k;
     init_genrand(19650218UL);
     i=1; j=0;
@@ -106,9 +106,9 @@ public:
     mt[0] = 0x80000000UL; /* MSB is 1; assuring non-zero initial array */ 
   }
 /* generates a random number on [0,0xffffffff]-interval */
-  unsigned long genrand_int32(void) {
-    unsigned long y;
-    static unsigned long mag01[2]={0x0UL, MATRIX_A()};
+  unsigned int genrand_int32(void) {
+    unsigned int y;
+    static unsigned int mag01[2]={0x0UL, MATRIX_A()};
     /* mag01[x] = x * MATRIX_A  for x=0,1 */
     if (mti >= N()) { /* generate N words at one time */
         int kk;
@@ -136,10 +136,10 @@ public:
     return y;
   }
 /* generates a random number on [0,0x7fffffff]-interval */
-  long genrand_int31(void) {
-    return (long)(genrand_int32()>>1);
+  int genrand_int31(void) {
+    return (int)(genrand_int32()>>1);
   }
-  long rand() {
+  int rand() {
 	  return genrand_int31();
   }
 /* generates a random number on [0,1]-real-interval */
@@ -167,7 +167,7 @@ public:
   }
 /* generates a random number on [0,1) with 53-bit resolution*/
   double genrand_res53(void) { 
-    unsigned long a=genrand_int32()>>5, b=genrand_int32()>>6; 
+    unsigned int a=genrand_int32()>>5, b=genrand_int32()>>6; 
     return(a*67108864.0+b)*(1.0/9007199254740992.0); 
   } 
 /* These real versions are due to Isaku Wada, 2002/01/09 added */
