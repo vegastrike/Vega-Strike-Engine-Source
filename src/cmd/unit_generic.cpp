@@ -1095,9 +1095,14 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
       for (j=index+1;j<mountssize;++j) {             
         if (i->NextMountCloser(&mounts[j],this)) {
           best=j;
+          if( SERVER&&(mounts[j].processed==Mount::FIRED||mounts[j].processed==Mount::PROCESSED))
+            VSServer->BroadcastUnfire( this->serial, j, this->activeStarSystem->GetZone());
           i->UnFire();
           i=&mounts[j];
         }else {
+          if( SERVER&&(mounts[j].processed==Mount::FIRED||mounts[j].processed==Mount::PROCESSED))
+            VSServer->BroadcastUnfire( this->serial, j, this->activeStarSystem->GetZone());
+
           mounts[j].UnFire();
         }
         if (mounts[j].bank==false) {
@@ -1108,23 +1113,6 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
       counter=j-1;//will increment to the next one
       index=best;
     }
-    if ((*i).type->type==weapon_info::BEAM) {
-      if ((*i).type->EnergyRate*SIMULATION_ATOM>energy) {
-        // On server side send a PACKET TO ALL CLIENT TO NOTIFY UNFIRE
-        // Including the one who fires to make sure it stops
-        if( SERVER)
-          VSServer->BroadcastUnfire( this->serial, index, this->activeStarSystem->GetZone());
-        // NOT ONLY IN non-networking mode : anyway, the server will tell everyone including us to stop if not already done
-        // if( !SERVER && Network==NULL)
-        (*i).UnFire();
-        continue;
-      }
-    }else{
-      // Only in non-networking mode
-      if ( Network==NULL && i->type->EnergyRate>energy)
-        continue;
-    }
-    
     
     const bool mis = isMissile(i->type);
     const bool locked_on = i->time_to_lock<=0;
@@ -1137,11 +1125,37 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
     if(missile_and_want_to_fire_missiles&&locked_missile){
       VSFileSystem::vs_fprintf (stderr,"\n about to fire locked missile \n");
     }
-    if (fire_non_autotrackers||autotracking_gun||locked_missile) {
-      if ((ROLES::EVERYTHING_ELSE&weapon_type_bitmask&i->type->role_bits)
-          ||i->type->role_bits==0) {
-        if ((locked_on&&missile_and_want_to_fire_missiles)
-            ||gun_and_want_to_fire_guns) {
+    bool want_to_fire=
+      (fire_non_autotrackers||autotracking_gun||locked_missile)
+      &&((ROLES::EVERYTHING_ELSE&weapon_type_bitmask&i->type->role_bits)||i->type->role_bits==0)
+      &&((locked_on&&missile_and_want_to_fire_missiles)||gun_and_want_to_fire_guns);
+
+    if ((*i).type->type==weapon_info::BEAM) {
+      if ((*i).type->EnergyRate*SIMULATION_ATOM>energy) {
+        // On server side send a PACKET TO ALL CLIENT TO NOTIFY UNFIRE
+        // Including the one who fires to make sure it stops
+        if( SERVER&&((*i).processed==Mount::FIRED||(*i).processed==Mount::PROCESSED))
+          VSServer->BroadcastUnfire( this->serial, index, this->activeStarSystem->GetZone());
+        // NOT ONLY IN non-networking mode : anyway, the server will tell everyone including us to stop if not already done
+        // if( !SERVER && Network==NULL)
+        (*i).UnFire();
+        continue;
+      }
+    }else{
+      // Only in non-networking mode
+      if (i->type->EnergyRate>energy){
+        if (!want_to_fire) {
+          if( SERVER&&((*i).processed==Mount::FIRED||(*i).processed==Mount::PROCESSED))
+            VSServer->BroadcastUnfire( this->serial, index, this->activeStarSystem->GetZone());
+          i->UnFire();
+        }
+        if ( Network==NULL)
+          continue;
+        
+      }
+    }
+    
+    if (want_to_fire) {
           // If in non-networking mode and mount fire has been accepted or if on server side
           if( Network==NULL || SERVER || i->processed==Mount::ACCEPTED)
           {
@@ -1186,7 +1200,11 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
             i->processed = Mount::REQUESTED;
 			// NETFIXME: REQUESTED was commented out.
           }
-        }
+    }
+    if (want_to_fire==false&&(i->processed==Mount::FIRED||i->processed==Mount::REQUESTED||i->processed==Mount::PROCESSED)) {
+      i->UnFire();
+      if (SERVER) {
+        VSServer->BroadcastUnfire( this->serial, index, this->activeStarSystem->GetZone());
       }
     }
   }
