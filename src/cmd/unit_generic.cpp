@@ -1182,7 +1182,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
                     energy -=i->type->EnergyRate*SIMULATION_ATOM;
                   }
                 
-              }else if (i->type->type!=weapon_info::BOLT && i->type->type!=weapon_info::BALL) {
+              }else if (isMissile(i->type)) {
                 energy-=i->type->EnergyRate;
               }
               // IF WE REFRESH ENERGY FROM SERVER : Think to send the energy update to the firing client with ACK TO fireRequest
