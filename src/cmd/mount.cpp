@@ -209,7 +209,7 @@ bool Mount::PhysicsAlignedFire(Unit * caller, const Transformation &Cumulative, 
   if (lock_disrupted_by_false_fire)
     time_to_lock = type->LockTime;
   if (processed==FIRED) {
-    if (type->type!=weapon_info::BOLT && type->type!=weapon_info::BALL) {
+    if (type->type==weapon_info::BEAM||(type->size&(weapon_info::LIGHTMISSILE|weapon_info::MEDIUMMISSILE|weapon_info::HEAVYMISSILE|weapon_info::CAPSHIPLIGHTMISSILE|weapon_info::CAPSHIPHEAVYMISSILE|weapon_info::SPECIALMISSILE))) {
       // Missiles and beams set to processed.
       processed = PROCESSED;
     } else {
