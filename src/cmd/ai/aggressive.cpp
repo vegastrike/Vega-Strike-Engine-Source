@@ -1220,19 +1220,25 @@ static Unit * ChooseNavPoint(Unit * parent) {
   static double ttime= 0;
   if (fabs(getNewTime()-ttime)>.000001||lastss!=_Universe->activeStarSystem()) {
     Unit* un;
-    navs.clear();
+
+    size_t navs_size=0;
     for (un_iter i= _Universe->activeStarSystem()->getUnitList().createIterator();
          (un=*i)!=NULL;
          ++i) {
       if (UnitUtil::isSignificant(un)) {
         if (parent->getRelation(un)>=-.05) {
-          navs.push_back(UnitContainer(un));
+          if (navs_size<=navs.size())
+            navs.push_back(UnitContainer(un));
+          else
+            navs[navs_size].SetUnit(un);          
+          navs_size++;
         }
       }
-    } 
+    }
     ttime=getNewTime();
     lastss=_Universe->activeStarSystem();
-    
+    while(navs_size>navs.size())
+      navs.pop_back();
   }
   if (navs.size()>0) {
     int k = (int)(getNewTime()/120);// two minutes

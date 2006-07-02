@@ -88,6 +88,7 @@ void Missile::reactToCollision (Unit * smaller, const QVector & biglocation, con
 }
 
 Unit * getNearestTarget (Unit *me) {
+  return NULL;//THIS FUNCTION IS TOO SLOW__AND ECM SHOULD WORK DIFFERENTLY ANYHOW...WILL SAVE FIXING IT FOR LATER
   QVector pos (me->Position());
   Unit * un=NULL;
   Unit * targ=NULL;
@@ -169,7 +170,7 @@ void Missile::UpdatePhysics2 (const Transformation &trans, const Transformation 
       }
     }
     if (retarget&&targ==NULL) {
-      Target (getNearestTarget (this));
+      Target (NULL);// BROKEN
     }
 	Unit::UpdatePhysics2 (trans, old_physical_state, accel, difficulty,transmat, CumulativeVelocity, ResolveLast, uc);
     this->time-=SIMULATION_ATOM;

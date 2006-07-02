@@ -2,7 +2,6 @@
 #define MISSILE_H_
 
 #include "missile_generic.h"
-Unit * getNearestTarget (Unit *me);
 class GameMissile:public GameUnit<Missile> {
 protected:
     /// constructor only to be called by UnitFactory
@@ -45,7 +44,7 @@ public:
     Unit * targ;
 	if ((targ=(Unit::Target()))) {
       if (rand()/((float)RAND_MAX)<((float)targ->GetImageInformation().ecm)*SIMULATION_ATOM/32768){
-	Target (this);//go wild
+	Target (NULL);//go wild
       }
     }
     if (retarget==-1){
@@ -56,7 +55,7 @@ public:
       }
     }
     if (retarget&&targ==NULL) {
-      Target (getNearestTarget (this));
+      Target (NULL);
     }
     GameUnit<Missile>::	UpdatePhysics2 (trans, old_physical_state, accel, difficulty,transmat, CumulativeVelocity, ResolveLast, uc);
     this->time-=SIMULATION_ATOM;
