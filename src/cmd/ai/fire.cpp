@@ -595,13 +595,18 @@ void FireAt::Execute () {
     static float cont_initiate_time = XMLSupport::parse_float (vs_config->getVariable ("AI","CommInitiateTime","300"));
     if ((float)rand()<((float)RAND_MAX*(SIMULATION_ATOM/cont_initiate_time))) {
       static float contraband_initiate_time = XMLSupport::parse_float (vs_config->getVariable ("AI","ContrabandInitiateTime","3000"));
+	  static float comm_to_player=XMLSupport::parse_float(vs_config->getVariable("AI","CommToPlayerPercent",".05"));
+	  static float comm_to_target=XMLSupport::parse_float(vs_config->getVariable("AI","CommToTargetPercent",".25"));
+	  static float contraband_to_player=XMLSupport::parse_float(vs_config->getVariable("AI","ContrabandToPlayerPercent",".98"));
+	  static float contraband_to_target=XMLSupport::parse_float(vs_config->getVariable("AI","ContrabandToTargetPercent","0.001"));
+
       unsigned int modulo = ((unsigned int)(contraband_initiate_time/cont_initiate_time));
       if (modulo<1)
 	modulo=1;
       if (rand()%modulo) {
-	RandomInitiateCommunication(.5,.25);
+	RandomInitiateCommunication(comm_to_player,comm_to_target);
       }else {
-	InitiateContrabandSearch (.98,.02);
+	InitiateContrabandSearch (contraband_to_player,contraband_to_target);
       }
     }
   }
