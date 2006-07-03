@@ -376,7 +376,7 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   static float mintimetoswitch = XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","MinTimeToSwitchTargets","3"));
   static float minnulltimetoswitch = XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","MinNullTimeToSwitchTargets","5"));
   //static float targetswitchtime = XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","TimeUntilSwitch","20"));	
-  static int minnumpollers = XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","MaxNumberofpollersperframe","5")); // maximum number of vessels allowed to search for a target in a given physics frame
+  static int minnumpollers = XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","MinNumberofpollersperframe","5")); // maximum number of vessels allowed to search for a target in a given physics frame
   static int maxnumpollers = XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","MaxNumberofpollersperframe","49")); // maximum number of vessels allowed to search for a target in a given physics frame
   static int numpollers[2]={maxnumpollers,maxnumpollers};
 
