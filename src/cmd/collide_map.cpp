@@ -4,6 +4,15 @@
 CollideMap null_collide_map;
 CollideMap::iterator null_collide_iter;
 bool null_collide_iter_initialized = false;
+#define collisionperf
+
+#ifdef collisionperf
+int boltcalls=0;
+int boltchecks=0;
+int boltonboltchecks=0;
+int unitcalls=0;
+int unitchecks=0;
+#endif
 
 Collidable::Collidable(Unit *un):radius(un->rSize()){
   assert(!un->isSubUnit());
@@ -21,6 +30,14 @@ template <class T> class CollideChecker
   float maxsqr=maxlook*maxlook;
   float minsqr=minlook*minlook;
   bool isnew =isNew(cm,un);
+#ifdef collisionperf
+  bool isbolt = rad<0;
+  if(isbolt){
+		boltcalls++;
+  }else{
+	  unitcalls++;
+  }
+#endif
   if (isnew==false && doUpdateKey(un)) {
     cm->changeKey(un->location,collider,tless,tmore);
   }else {
@@ -31,7 +48,19 @@ template <class T> class CollideChecker
   }
   if (un->location!=cm->begin()) {
     while((*tless)->GetMagnitudeSquared()>=minsqr) {
+	#ifdef collisionperf
+	  if(isbolt){
+	 	boltchecks++;
+	  }else{
+	    unitchecks++;
+	  }
+	#endif
       bool boltSpecimen=(*tless)->radius<0;
+#ifdef collisionperf
+	  if(isbolt&&boltSpecimen){
+		boltonboltchecks++;
+	  }
+#endif
       Collidable::CollideRef ref=(*tless)->ref;
       if (tless==cm->begin()) {
         if (boltSpecimen) {
@@ -66,7 +95,19 @@ template <class T> class CollideChecker
     }
   } 
   while (tmore!=cm->end()&&(*tmore)->GetMagnitudeSquared()<=maxsqr){
+	#ifdef collisionperf
+	  if(isbolt){
+	 	boltchecks++;
+	  }else{
+	    unitchecks++;
+	  }
+	#endif
     bool boltSpecimen=(*tmore)->radius<0;
+	#ifdef collisionperf
+	  if(isbolt&&boltSpecimen){
+		boltonboltchecks++;
+	  }
+	#endif
     Collidable::CollideRef ref=(*tmore)->ref;
     if (boltSpecimen) {
       if (CheckCollision(un,collider,ref,**tmore++))

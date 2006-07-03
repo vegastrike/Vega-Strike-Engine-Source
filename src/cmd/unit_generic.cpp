@@ -2051,7 +2051,8 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   bool dead=true;
   
   UpdateSubunitPhysics(cumulative_transformation,cumulative_transformation_matrix,cumulative_velocity,lastframe,uc,superunit);
-  if (curr_physical_state.position.MagnitudeSquared()>howFarToJump()*howFarToJump()&&!isSubUnit()) {
+  static float warp_is_interstellar=XMLSupport::parse_bool (vs_config->getVariable ("physics","warp_is_interstellar","false")); // can a unit get to another system without jumping?.	
+  if (warp_is_interstellar&&(curr_physical_state.position.MagnitudeSquared()>howFarToJump()*howFarToJump()&&!isSubUnit())) {
     _Universe->activeStarSystem()->JumpTo(this,NULL,NearestSystem(_Universe->activeStarSystem()->getFileName(),curr_physical_state.position),true,true);
   }
   // Really kill the unit only in non-networking or on server side
