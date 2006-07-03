@@ -469,7 +469,25 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
 	movingtotal=movingtotal-movingavgarray[movingavgindex]+theunitcounter;
 	movingavgarray[movingavgindex]=theunitcounter;
         if (debugPerformance()) {
-          printf("PhysFrame:%u - %u, %u, %u t:%f ai:%f p:%f c:%f ",physicsframecounter,theunitcounter,movingtotal/128,totalprocessed/physicsframecounter,queryTime()-updatebegin,aitime,phytime,collidetime);
+          printf("PhysFrame:%u - %u, %u, %u t:%f ai:%f p:%f c:%f\n",physicsframecounter,theunitcounter,movingtotal/128,totalprocessed/physicsframecounter,queryTime()-updatebegin,aitime,phytime,collidetime);
+#define collisionperf
+#ifdef collisionperf
+		extern int boltcalls;
+        extern int boltchecks;
+	    extern int unitcalls;
+		extern int unitchecks;
+		extern int boltonboltchecks;
+		static int totboltcalls=0;
+		static int totunitcalls=0;
+		static int totboltchecks=0;
+		static int totunitchecks=0;
+		totboltcalls+=boltcalls;
+		totunitcalls+=unitcalls;
+		totboltchecks+=boltchecks;
+		totunitchecks+=unitchecks;
+		printf("Colcheck: pucl:%d puck:%d puclck:%d pbcl:%d pbck:%d pbclck:%d tuclck:%d tbclck:%d bobck:%d\n",unitcalls,unitchecks,(unitcalls)?unitchecks/unitcalls:0,boltcalls,boltchecks,(boltcalls)?boltchecks/boltcalls:0,(totunitcalls)?totunitchecks/totunitcalls:0,(totboltcalls)?totboltchecks/totboltcalls:0,boltonboltchecks);
+		unitcalls=boltcalls=boltchecks=unitchecks=boltonboltchecks=0;
+#endif
         }
         current_sim_location=(current_sim_location+1)%SIM_QUEUE_SIZE;
 	++physicsframecounter;
