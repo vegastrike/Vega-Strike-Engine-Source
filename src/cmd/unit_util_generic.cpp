@@ -55,7 +55,7 @@ namespace UnitUtil {
 		static const int TOP_PRIORITY=XMLSupport::parse_int(
 			vs_config->getVariable("physics","priorities","top","1") );
 		static const int HIGH_PRIORITY=XMLSupport::parse_int(
-			vs_config->getVariable("physics","priorities","high","2") );
+			vs_config->getVariable("physics","priorities","high",SERVER?"1":"2") );
 		static const int MEDIUM_PRIORITY=XMLSupport::parse_int(
 			vs_config->getVariable("physics","priorities","medium","8") );
 		static const int LOW_PRIORITY=XMLSupport::parse_int(
@@ -79,11 +79,16 @@ namespace UnitUtil {
 		Cockpit* cockpit=_Universe->AccessCockpit();
 		Unit * parent=cockpit->GetParent();
 		Camera * cam = cockpit->AccessCamera();
-		QVector campos = cam->GetPosition();
-        float tooclose = 
-              2*(un->radial_size+(parent?parent->radial_size:0)) 
-            + (cam->GetVelocity() - un->GetVelocity()).Magnitude();
-		double dist =(campos-un->Position()).Magnitude()-rad;
+		QVector campos;
+		float tooclose=0;
+		double dist=0;
+		if (cam) {
+			campos = cam->GetPosition();
+			tooclose = 
+			   2*(un->radial_size+(parent?parent->radial_size:0)) 
+			   + (cam->GetVelocity() - un->GetVelocity()).Magnitude();
+			dist =(campos-un->Position()).Magnitude()-rad;
+		}
 		float gun_range=0;
 		float missile_range=0;
 		if (parent) {

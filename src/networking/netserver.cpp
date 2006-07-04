@@ -726,9 +726,9 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			// Here should put a flag on the concerned mount of the concerned Unit to say we want to fire
 			// target_serial is in fact the serial of the firing unit (client itself or turret)
 			target_serial = netbuf.getSerial();
-			mount_num = netbuf.getInt32();
 			zone = clt->game_unit.GetUnit()->activeStarSystem->GetZone();
 			mis = netbuf.getChar();
+			mount_num = netbuf.getInt32();
 			// Find the unit
 			// Set the concerned mount as ACTIVE and others as INACTIVE
 			un = zonemgr->getUnit( target_serial, zone);
@@ -740,10 +740,13 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 					::iterator i = un->mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
 				for (;i!=un->mounts.end();++i)
 					(*i).status=Mount::INACTIVE;
-				if (mount_num<un->mounts.size()&&mount_num>=0) {
-					un->mounts[mount_num].status=Mount::ACTIVE;
-				} else {
-					COUT<<"ERROR --> Received a fire order on an invalid MOUNT: "<<mount_num<<" > "<<(un->mounts.size())<<endl;
+				for (int j=0;j<mount_num;++j) {
+					int mnt = netbuf.getInt32();
+					if (mnt<un->mounts.size()&&mnt>=0) {
+						un->mounts[mnt].status=Mount::ACTIVE;
+					} else {
+						COUT<<"ERROR --> Received a fire order on an invalid MOUNT: "<<mount_num<<" > "<<(un->mounts.size())<<endl;
+					}
 				}
 				// Ask for fire
 				if( mis != 0)
@@ -767,10 +770,13 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 					::iterator i = un->mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
 				for (;i!=un->mounts.end();++i)
 					(*i).status=Mount::INACTIVE;
-				if (mount_num<un->mounts.size()&&mount_num>=0) {
-					un->mounts[mount_num].status=Mount::ACTIVE;
-				} else {
-					COUT<<"ERROR --> Received an unfire order on an invalid MOUNT: "<<mount_num<<" > "<<(un->mounts.size())<<endl;
+				for (int j=0;j<mount_num;j++) {
+					int mnt = netbuf.getInt32();
+					if (mnt<un->mounts.size()&&mnt>=0) {
+						un->mounts[mnt].status=Mount::ACTIVE;
+					} else {
+						COUT<<"ERROR --> Received an unfire order on an invalid MOUNT: "<<mount_num<<" > "<<(un->mounts.size())<<endl;
+					}
 				}
 				// Ask for fire
 				un->UnFire();
@@ -831,12 +837,22 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 #endif
 		}
 		break;
+		case CMD_TARGET :
+			// Received a computer targetting request
+			target_serial = netbuf.getSerial();
+			zone = clt->game_unit.GetUnit()->activeStarSystem->GetZone();
+			un = zonemgr->getUnit( target_serial, zone);
+			unclt = zonemgr->getUnit( packet.getSerial(), zone);
+			if (unclt) {
+				unclt->Target(un);
+			}
+			break;
 		case CMD_SCAN :
 		{
 			// Received a target scan request
 			// NETFIXME: WE SHOULD FIND A WAY TO CHECK THAT THE CLIENT HAS THE RIGHT SCAN SYSTEM FOR THAT
 			target_serial = netbuf.getSerial();
-			zone = netbuf.getShort();
+			zone = clt->game_unit.GetUnit()->activeStarSystem->GetZone(); //netbuf.getShort();
 			un = zonemgr->getUnit( target_serial, zone);
 			// Get the un Unit data and send it in a packet
 			// Here we should get what a scanner could get on the target ship

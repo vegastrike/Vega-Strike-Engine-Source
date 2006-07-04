@@ -1083,6 +1083,10 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
     return;
   }
   unsigned int mountssize=mounts.size();
+  int playernum = _Universe->whichPlayerStarship( this);
+  vector<int> gunFireRequests;
+  vector<int> missileFireRequests;
+  vector<int> serverUnfireRequests;
 
   for (unsigned int counter=0;counter<mountssize;++counter) {
     unsigned int index=counter;
@@ -1096,13 +1100,12 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
         if (i->NextMountCloser(&mounts[j],this)) {
           best=j;
           if( SERVER&&(mounts[j].processed==Mount::FIRED||mounts[j].processed==Mount::PROCESSED))
-            VSServer->BroadcastUnfire( this->serial, j, this->activeStarSystem->GetZone());
+            serverUnfireRequests.push_back(j);
           i->UnFire();
           i=&mounts[j];
         }else {
           if( SERVER&&(mounts[j].processed==Mount::FIRED||mounts[j].processed==Mount::PROCESSED))
-            VSServer->BroadcastUnfire( this->serial, j, this->activeStarSystem->GetZone());
-
+            serverUnfireRequests.push_back(j);
           mounts[j].UnFire();
         }
         if (mounts[j].bank==false) {
@@ -1135,7 +1138,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
         // On server side send a PACKET TO ALL CLIENT TO NOTIFY UNFIRE
         // Including the one who fires to make sure it stops
         if( SERVER&&((*i).processed==Mount::FIRED||(*i).processed==Mount::PROCESSED))
-          VSServer->BroadcastUnfire( this->serial, index, this->activeStarSystem->GetZone());
+          serverUnfireRequests.push_back(index);
         // NOT ONLY IN non-networking mode : anyway, the server will tell everyone including us to stop if not already done
         // if( !SERVER && Network==NULL)
         (*i).UnFire();
@@ -1146,7 +1149,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
       if (i->type->EnergyRate>energy){
         if (!want_to_fire) {
           if( SERVER&&((*i).processed==Mount::FIRED||(*i).processed==Mount::PROCESSED))
-            VSServer->BroadcastUnfire( this->serial, index, this->activeStarSystem->GetZone());
+            serverUnfireRequests.push_back(index);
           i->UnFire();
         }
         if ( Network==NULL)
@@ -1170,8 +1173,16 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
               }
               else
                 serid = 0;
-              if( SERVER)
-                VSServer->BroadcastFire( this->serial, index, serid, this->activeStarSystem->GetZone());
+              if( SERVER) {
+                if (serid) {
+                  // One Serial ID per broadcast.  Not mush point in optimizing this.
+                  vector<int> indexvec;
+                  indexvec.push_back(index);
+                  VSServer->BroadcastFire( this->serial, indexvec, serid, this->energy, this->activeStarSystem->GetZone());
+                } else {
+                  gunFireRequests.push_back(index);
+                }
+              }
               // We could only refresh energy on server side or in non-networking mode, on client side it is done with
               // info the server sends with ack for fire
               // FOR NOW WE TRUST THE CLIENT SINCE THE SERVER CAN REFUSE A FIRE
@@ -1189,13 +1200,14 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
               if (mis) weapon_type_bitmask &= (~ROLES::FIRE_MISSILES);//fire only 1 missile at a time
             }
           }
-          else if (i->processed!=Mount::FIRED && i->processed!=Mount::REQUESTED)
+          else if (i->processed!=Mount::FIRED && i->processed!=Mount::REQUESTED && playernum>=0)
           {
             // Request a fire order to the server telling him the serial of the unit and the mount index (nm)
-            char mis2 = mis;
-            int playernum = _Universe->whichPlayerStarship( this);
-            if( playernum>=0)
-              Network[playernum].fireRequest( this->serial, index, mis2);
+            if (mis) {
+              missileFireRequests.push_back(index);
+            } else {
+              gunFireRequests.push_back(index);
+            }
             // Mark the mount as fire requested
             i->processed = Mount::REQUESTED;
 			// NETFIXME: REQUESTED was commented out.
@@ -1204,9 +1216,25 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
     if (want_to_fire==false&&(i->processed==Mount::FIRED||i->processed==Mount::REQUESTED||i->processed==Mount::PROCESSED)) {
       i->UnFire();
       if (SERVER) {
-        VSServer->BroadcastUnfire( this->serial, index, this->activeStarSystem->GetZone());
+        serverUnfireRequests.push_back(index);
       }
     }
+  }
+  if (!gunFireRequests.empty()) {
+    if (SERVER) {
+      VSServer->BroadcastFire( this->serial, gunFireRequests, 0, this->energy, this->activeStarSystem->GetZone());
+    } else {
+      char mis2 = false;
+      Network[playernum].fireRequest( this->serial, gunFireRequests, mis2);
+    }
+  }
+  if (SERVER && !serverUnfireRequests.empty()) {
+    VSServer->BroadcastUnfire( this->serial, missileFireRequests, this->activeStarSystem->GetZone());
+  }
+  // Client missile requests can be grouped because clients only send a boolean, not a serial.
+  if (!SERVER && !missileFireRequests.empty()) {
+    char mis2 = true;
+    Network[playernum].fireRequest( this->serial, missileFireRequests, mis2);
   }
 }
 
@@ -1858,7 +1886,8 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   }
 
   // Only on server or non-networking
-  if( SERVER || Network==NULL)
+  // Do it everywhere -- "interpolation" for client-side.
+//  if( SERVER || Network==NULL)
   	RegenShields();
   if (lastframe) {
     if (!(docked&(DOCKED|DOCKED_INSIDE))) 
@@ -4454,15 +4483,22 @@ void Unit::LockTarget(bool myboo) {
 }
 
 void Unit::Target (Unit *targ) {
+  if (Network && !SERVER) {
+    return; // Client only targets upon server request.
+  }
   if (targ==this) {
     return;
   }
   if (!(activeStarSystem==NULL||activeStarSystem==_Universe->activeStarSystem())) {
     computer.target.SetUnit(NULL);
+	if (SERVER)
+		VSServer->BroadcastTarget(GetSerial(), 0, this->activeStarSystem->GetZone());
     return;
+	/*
     VSFileSystem::vs_fprintf (stderr,"bad target system");
     const int BADTARGETSYSTEM=0;
     assert (BADTARGETSYSTEM);
+	*/
   }
   if (targ) {
     if (targ->activeStarSystem==_Universe->activeStarSystem()||targ->activeStarSystem==NULL) {
@@ -4470,6 +4506,8 @@ void Unit::Target (Unit *targ) {
         for (int i=0;i<GetNumMounts();i++){ 
   	  mounts[i].time_to_lock = mounts[i].type->LockTime;
         }
+        if (SERVER)
+          VSServer->BroadcastTarget(GetSerial(), targ->GetSerial(), this->activeStarSystem->GetZone());
         computer.target.SetUnit(targ);
 	LockTarget(false);
       }
@@ -4491,10 +4529,14 @@ void Unit::Target (Unit *targ) {
           WarpPursuit(this,_Universe->activeStarSystem(),targ->activeStarSystem->getFileName());
         }
       }else {
+        if (SERVER)
+          VSServer->BroadcastTarget(GetSerial(), 0, this->activeStarSystem->GetZone());
 	computer.target.SetUnit(NULL);
       }
     }
   }else {
+    if (SERVER)
+      VSServer->BroadcastTarget(GetSerial(), 0, this->activeStarSystem->GetZone());
     computer.target.SetUnit(NULL);
   }
 }
@@ -4554,19 +4596,23 @@ void Unit::UnFire () {
     for (un_iter i=this->getSubUnits();(tur=*i)!=NULL;++i) {
       tur->UnFire();
     }
-  }else 
+  } else {
+  int playernum = _Universe->whichPlayerStarship( this);
+  vector<int> unFireRequests;
   for (int i=0;i<GetNumMounts();i++) {
     if (mounts[i].status!=Mount::ACTIVE)
       continue;
-    if (Network && mounts[i].processed != Mount::UNFIRED) {
-      int playernum = _Universe->whichPlayerStarship( this);
-      if (playernum>=0)
-        Network[playernum].unfireRequest( this->serial, i);
-    }
-    if (SERVER) {
-      VSServer->BroadcastUnfire( this->serial, i, this->activeStarSystem->GetZone());
-    }
+    if (SERVER || Network && mounts[i].processed != Mount::UNFIRED && playernum>=0)
+      unFireRequests.push_back(i);
     mounts[i].UnFire();//turns off beams;
+  }
+  if (!unFireRequests.empty()) {
+    if (SERVER) {
+      VSServer->BroadcastUnfire( this->serial, unFireRequests, this->activeStarSystem->GetZone());
+    } else {
+      Network[playernum].unfireRequest( this->serial, unFireRequests);
+    }
+  }
   }
 }
 

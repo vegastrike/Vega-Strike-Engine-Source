@@ -78,7 +78,7 @@ void	NetServer::checkTimedoutClients_udp()
 				    COUT<<"\t\tLatest timeout : "<<(cl->latest_timeout)<<endl;
 				    COUT<<"t\tDifference : "<<deltatmp<<endl;
                     cl->_disconnectReason = "UDP timeout";
-				    discList.push_back( cl );
+//				    discList.push_back( cl );
 					// NETFIXME: Should we actually disconnect them in a UDP timeout or should we just fallback to TCP?
 			    }
 		    }
@@ -118,6 +118,10 @@ void	NetServer::recvMsg_tcp( ClientPtr clt )
     {
 		// NETFIXME: Cheat: We may want to check the serial of this packet and make sure it is what we expect.
 		command = packet.getCommand( );
+        COUT << "Received TCP" << Cmd(command) << ", ser=";
+	if (clt->game_unit.GetUnit())
+		COUT << clt->game_unit.GetUnit()->GetSerial();
+	COUT << endl;
         if( clt )
         {
 			this->updateTimestamps( clt, packet);
@@ -142,7 +146,7 @@ void NetServer::recvMsg_udp( )
         ObjSerial nserial = packet.getSerial(); // Extract the serial from buffer received so we know who it is
         char      command = packet.getCommand();
 
-        COUT << "Received from serial : " << nserial << endl;
+        COUT << "Received UDP" << Cmd(command) << ", ser=" << nserial << endl;
 
         // Find the corresponding client
         ClientPtr tmp;
@@ -155,7 +159,7 @@ void NetServer::recvMsg_udp( )
             {
                 clt = tmp;
                 found = 1;
-				COUT << " found client " << *(clt.get()) << endl;
+//				COUT << " found client " << *(clt.get()) << endl;
 				break;
             }
         }

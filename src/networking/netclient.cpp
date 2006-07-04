@@ -518,7 +518,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
                 break;
             case CMD_SNAPSHOT :
                 {
-                    COUT << "CMD_SNAPSHOT received" << endl;
+//                    COUT << "CMD_SNAPSHOT received" << endl;
                     // Should update another client's position
                     // Zone hack:
 	                // When receiving a snapshot, packet serial is considered as the
@@ -527,10 +527,10 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
                     unsigned int timestamp = p1.getTimestamp( );
                     double       deltatime = netbuf.getFloat( );
 
-                    COUT << "   *** #units=" << numUnits << " ts=" << timestamp << " delta-t=" << deltatime << endl;
+//                    COUT << "   *** #units=" << numUnits << " ts=" << timestamp << " delta-t=" << deltatime << endl;
 
                     this->receivePositions( numUnits, timestamp, netbuf, deltatime );
-                    COUT << "   *** CMD_SNAPSHOT DONE" << endl;
+//                    COUT << "   *** CMD_SNAPSHOT DONE" << endl;
                 }
                 break;
             case CMD_ENTERCLIENT :
@@ -572,9 +572,11 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 // 				p1.ack( );
 //                 break;
 			case CMD_FIREREQUEST :
+			{
 				// WE RECEIVED A FIRE NOTIFICATION SO FIRE THE WEAPON
-				mount_num = netbuf.getInt32();
+				float energy = netbuf.getFloat();
 				mis = netbuf.getSerial();
+				mount_num = netbuf.getInt32();
 				// Find the unit
 				if( mis==local_serial) // WE have fired and receive the broadcast
 					un = this->game_unit.GetUnit();
@@ -587,6 +589,8 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 						::iterator i = un->mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
 					int j;
 					
+					un->energy = energy; // It's important to set energy before firing.
+					
 					for (j=backupMountStatus.size();j<un->mounts.size();++j) {
 						backupMountStatus.push_back(Mount::UNCHOSEN);
 					}
@@ -596,10 +600,15 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 						if ((*i).status==Mount::ACTIVE)
 							(*i).status=Mount::INACTIVE;
 					}
-					un->mounts[mount_num].processed=Mount::ACCEPTED;
-					un->mounts[mount_num].status=Mount::ACTIVE;
-					// Store the missile id in the mount that should fire a missile
-					un->mounts[mount_num].serial=mis;
+					for (j=0;j<mount_num;++j) {
+						int mnt = netbuf.getInt32();
+						if (mnt<un->mounts.size()&&mnt>=0) {
+							un->mounts[mnt].processed=Mount::ACCEPTED;
+							un->mounts[mnt].status=Mount::ACTIVE;
+							// Store the missile id in the mount that should fire a missile
+							un->mounts[mnt].serial=mis;
+						}
+					}
 					// Ask for fire
 					if( mis != 0)
 						un->Fire(ROLES::FIRE_MISSILES|ROLES::EVERYTHING_ELSE,false);
@@ -613,7 +622,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				}
 				else
 					COUT<<"!!! Problem -> CANNOT FIRE UNIT NOT FOUND !!!"<<endl;
-
+			}
 			break;
 			case CMD_UNFIREREQUEST :
 				// WE RECEIVED AN UNFIRE NOTIFICATION SO DEACTIVATE THE WEAPON
@@ -638,10 +647,15 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 							(*i).status=Mount::INACTIVE;
 					}
 					
-					un->mounts[mount_num].processed=Mount::UNFIRED;
-					un->mounts[mount_num].status=Mount::ACTIVE;
-					// Store the missile id in the mount that should fire a missile
-					un->mounts[mount_num].serial=0;//mis;
+					for (j=0;j<mount_num;++j) {
+						int mnt = netbuf.getInt32();
+						if (mnt<un->mounts.size()&&mnt>=0) {
+							un->mounts[mnt].processed=Mount::UNFIRED;
+							un->mounts[mnt].status=Mount::ACTIVE;
+							// Store the missile id in the mount that should fire a missile
+							un->mounts[mnt].serial=0;//mis;
+						}
+					}
 					// Ask for fire
 					un->UnFire();
 					
@@ -653,6 +667,13 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				else
 					COUT<<"!!! Problem -> CANNOT UNFIRE UNIT NOT FOUND !!!"<<endl;
 
+			break;
+			case CMD_TARGET:
+				un = UniverseUtil::GetUnitFromSerial( packet_serial );
+				if (un) {
+					Unit * target_un = UniverseUtil::GetUnitFromSerial( netbuf.getSerial() );
+					un->computer.target.SetUnit(target_un);
+				}
 			break;
 			case CMD_SCAN :
 				// We received the target info with the target serial in the packet as an answer to a scanRequest
@@ -1200,7 +1221,7 @@ Transformation	NetClient::Interpolate( Unit * un, double addtime)
 //		cerr << "  *** INTERPOLATE (" << un->curr_physical_state.position.i << ", " << un->curr_physical_state.position.j << ", " << un->curr_physical_state.position.k << "): next deltatime=" << clt->getNextDeltatime() << ", deltatime=" << clt->getDeltatime() << ", this-deltatime=" << this->deltatime << ", elapsed since packet=" << clt->elapsed_since_packet << "\n        =>        (" << trans.position.i << ", " << trans.position.j << ", " << trans.position.k << ")        Vel =    (" << un->Velocity.i << ", " << un->Velocity.j << ", " << un->Velocity.k << ")" << std::endl;
 	} else {
 		trans=un->curr_physical_state;
-		cerr << "  *** INTERPOLATE (CLIENT==NULL).  Unit fullname=" << un->getFullname() << ";  name=" << un->name;
+		cerr << "  *** Interpolate with NULL CLIENT serial " << un->GetSerial() << "!  Unit fullname=" << un->getFullname() << ";  name=" << un->name << endl;
 	}
 	return trans;
 }

@@ -1093,7 +1093,14 @@ bool ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
 	while (1) {
 		while (veciter!=vec.end()) {
 			if (((*veciter)!=me)&&((*veciter)->GetHull()>=0)&&typeofunit(me,(*veciter))) {
-				me->Target(*veciter);
+				if (Network==NULL) {
+					me->Target(*veciter);
+				} else {
+					int player = _Universe->whichPlayerStarship( me);
+					if (player>=0) {
+						Network[player].targetRequest(*veciter);
+					}
+				}
 				if ((*veciter)!=NULL) {
 					if (reverse) {
 						static soundContainer foosound;

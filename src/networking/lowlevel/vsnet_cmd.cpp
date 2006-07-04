@@ -38,6 +38,7 @@ const char* displayCmd( Cmd cmd )
     CASE( CMD_ADDCLIENT    )
     CASE( CMD_PING         )
     CASE( CMD_SNAPSHOT     )
+    CASE( CMD_SERVERTIME   )
 
     CASE( CMD_CREATECHAR   )
     CASE( CMD_LOCATIONS    )

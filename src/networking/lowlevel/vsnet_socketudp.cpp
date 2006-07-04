@@ -65,7 +65,7 @@ int VsnetUDPSocket::queueLen( int )
 
 int VsnetUDPSocket::sendbuf( Packet* packet, const AddressIP* to, int pcktflags )
 {
-    COUT << "enter " << __PRETTY_FUNCTION__ << endl;
+//    COUT << "enter " << __PRETTY_FUNCTION__ << endl;
     int numsent;
 
     // In UDP mode, always send on this->sock
@@ -82,7 +82,7 @@ int VsnetUDPSocket::sendbuf( Packet* packet, const AddressIP* to, int pcktflags 
         COUT << "Error sending: " << vsnetLastError() << endl;
         return -1;
     }
-    cout<<"Sent "<<numsent<<" bytes"<<" -> "<<inet_ntoa( dest->sin_addr)<<":"<<ntohs(dest->sin_port)<<endl;
+//    cout<<"Sent "<<numsent<<" bytes"<<" -> "<<inet_ntoa( dest->sin_addr)<<":"<<ntohs(dest->sin_port)<<endl;
     return numsent;
 }
 
@@ -141,7 +141,7 @@ bool VsnetUDPSocket::lower_selected( )
     }
     else
     {
-	    COUT << "NETUI : Recvd " << ret << " bytes" << " <- " << from << endl;
+//	    COUT << "NETUI : Recvd " << ret << " bytes" << " <- " << from << endl;
         Pending mem( _recv_buf, ret, from );
         _cpq_mx.lock( );
         _cpq.push( mem );

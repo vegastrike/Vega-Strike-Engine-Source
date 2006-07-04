@@ -453,6 +453,8 @@ namespace VSFileSystem
 #endif
 		data_paths.push_back( ".");
 		data_paths.push_back( "..");
+		data_paths.push_back( "../data4.x");
+		data_paths.push_back( "../../data4.x");
 		data_paths.push_back( "../data");
 		data_paths.push_back( "../../data");
 		data_paths.push_back( "../Resources");
@@ -464,8 +466,6 @@ namespace VSFileSystem
 		data_paths.push_back( "/usr/local/games/vegastrike/data");
 		data_paths.push_back( "/usr/games/vegastrike/data");
 		data_paths.push_back( "/opt/share/vegastrike/data");
-		data_paths.push_back( "../data4.x");
-		data_paths.push_back( "../../data4.x");
 		data_paths.push_back( "../Resources/data4.x");
 		data_paths.push_back( "/usr/share/local/vegastrike/data4.x");
 		data_paths.push_back( "/usr/local/share/vegastrike/data4.x");

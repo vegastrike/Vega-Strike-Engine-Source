@@ -8,13 +8,31 @@ extern StarSystem * GetLoadedStarSystem( const char * system);
 
 // WEAPON STUFF
 
-void	NetServer::BroadcastUnfire( ObjSerial serial, int weapon_index, unsigned short zone)
+void	NetServer::BroadcastTarget( ObjSerial serial, ObjSerial target, unsigned short zone)
+{
+	Packet p;
+	NetBuffer netbuf;
+
+	netbuf.addSerial( target);
+
+	//p.send( CMD_UNFIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
+	p.bc_create( CMD_TARGET, serial,
+                 netbuf.getData(), netbuf.getDataLength(),
+                 SENDRELIABLE,
+                 __FILE__, PSEUDO__LINE__(26) );
+	zonemgr->broadcast( zone, serial, &p, true ); // NETFIXME: Should unfire be TCP?
+}
+
+void	NetServer::BroadcastUnfire( ObjSerial serial, const vector<int> &weapon_indicies, unsigned short zone)
 {
 	Packet p;
 	NetBuffer netbuf;
 
 	//netbuf.addSerial( serial);
-	netbuf.addInt32( weapon_index);
+	netbuf.addInt32( weapon_indicies.size());
+	for (unsigned int i=0;i<weapon_indicies.size();i++) {
+		netbuf.addInt32( weapon_indicies[i] );
+	}
 
 	//p.send( CMD_UNFIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
 	p.bc_create( CMD_UNFIREREQUEST, serial,
@@ -26,14 +44,18 @@ void	NetServer::BroadcastUnfire( ObjSerial serial, int weapon_index, unsigned sh
 
 // In BroadcastFire we must use the provided serial because it may not be the client's serial
 // but may be a turret serial
-void	NetServer::BroadcastFire( ObjSerial serial, int weapon_index, ObjSerial missile_serial, unsigned short zone)
+void	NetServer::BroadcastFire( ObjSerial serial, const vector<int> &weapon_indicies, ObjSerial missile_serial, float player_energy, unsigned short zone)
 {
 	Packet p;
 	NetBuffer netbuf;
 	// bool found = false;
 
-	netbuf.addInt32( weapon_index);
+	netbuf.addFloat( player_energy );
 	netbuf.addSerial( missile_serial);
+	netbuf.addInt32( weapon_indicies.size());
+	for (unsigned int i=0;i<weapon_indicies.size();i++) {
+		netbuf.addInt32( weapon_indicies[i] );
+	}
 
 	p.bc_create( CMD_FIREREQUEST, serial,
                  netbuf.getData(), netbuf.getDataLength(),

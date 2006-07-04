@@ -18,7 +18,22 @@ void	NetClient::scanRequest( Unit * target)
 	NetBuffer netbuf;
 
 	netbuf.addSerial( target->GetSerial());
-	netbuf.addShort( this->game_unit.GetUnit()->activeStarSystem->GetZone());
+	// Shold people be allowed to scan units in other zones?
+//	netbuf.addShort( this->game_unit.GetUnit()->activeStarSystem->GetZone());
+
+	p.send( CMD_SCAN, this->game_unit.GetUnit()->GetSerial(),
+            netbuf.getData(), netbuf.getDataLength(),
+            SENDRELIABLE, NULL, this->clt_tcp_sock,
+            __FILE__, PSEUDO__LINE__(1485) );
+}
+
+// Send a info request about the target
+void	NetClient::targetRequest( Unit * target)
+{
+	Packet p;
+	NetBuffer netbuf;
+
+	netbuf.addSerial( target->GetSerial());
 
 	p.send( CMD_TARGET, this->game_unit.GetUnit()->GetSerial(),
             netbuf.getData(), netbuf.getDataLength(),
@@ -28,14 +43,17 @@ void	NetClient::scanRequest( Unit * target)
 
 // In fireRequest we must use the provided serial because it may not be the client's serial
 // but may be a turret serial
-void	NetClient::fireRequest( ObjSerial serial, int mount_index, char mis)
+void	NetClient::fireRequest( ObjSerial serial, const vector<int> &mount_indicies, char mis)
 {
 	Packet p;
 	NetBuffer netbuf;
 
 	netbuf.addSerial( serial);
-	netbuf.addInt32( mount_index);
 	netbuf.addChar( mis);
+	netbuf.addInt32( mount_indicies.size());
+	for (unsigned int i=0;i<mount_indicies.size();++i) {
+		netbuf.addInt32(mount_indicies[i]);
+	}
 
 	//  NETFIXME: Use UDP for fire requests? or only from server->other clients
 	p.send( CMD_FIREREQUEST, this->game_unit.GetUnit()->GetSerial(),
@@ -44,13 +62,16 @@ void	NetClient::fireRequest( ObjSerial serial, int mount_index, char mis)
             __FILE__, PSEUDO__LINE__(1503) );
 }
 
-void	NetClient::unfireRequest( ObjSerial serial, int mount_index)
+void	NetClient::unfireRequest( ObjSerial serial, const vector<int> &mount_indicies)
 {
 	Packet p;
 	NetBuffer netbuf;
 
 	netbuf.addSerial( serial);
-	netbuf.addInt32( mount_index);
+	netbuf.addInt32( mount_indicies.size());
+	for (unsigned int i=0;i<mount_indicies.size();++i) {
+		netbuf.addInt32(mount_indicies[i]);
+	}
 
 	p.send( CMD_UNFIREREQUEST, this->game_unit.GetUnit()->GetSerial(),
             netbuf.getData(), netbuf.getDataLength(),

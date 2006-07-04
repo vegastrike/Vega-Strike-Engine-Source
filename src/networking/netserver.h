@@ -133,8 +133,9 @@ class NetServer
 		void	broadcast( NetBuffer & netbuf, unsigned short zone, Cmd command, bool isTcp );
 
 		// WEAPON STUFF
-		void	BroadcastUnfire( ObjSerial serial, int weapon_index, unsigned short zone);
-		void	BroadcastFire( ObjSerial serial, int weapon_index, ObjSerial missile_serial, unsigned short zone);
+		void	BroadcastTarget( ObjSerial serial, ObjSerial target, unsigned short zone);
+		void	BroadcastUnfire( ObjSerial serial, const vector<int> &weapon_indicies, unsigned short zone);
+		void	BroadcastFire( ObjSerial serial, const vector<int> &weapon_indicies, ObjSerial missile_serial, float energy, unsigned short zone);
 		//void	sendDamages( ObjSerial serial, int zone, string shields, float recharge, char leak, unsigned short ab, unsigned short af, unsigned short al, unsigned short ar, float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color);
 		void	sendDamages( ObjSerial serial, unsigned short zone, Shield shields, Armor armor, float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color);
 		//void	sendDamages( ObjSerial serial, Vector & pnt, Vector & normal, float amt, GFXColor & color, float phasedamage);

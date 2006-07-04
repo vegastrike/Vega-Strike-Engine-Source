@@ -172,10 +172,11 @@ class	NetClient
 		// void	setNetworkedMode( bool mode) { enabled = mode;}
 
 		/********************* Weapon stuff **********************/
-		// Functions called when we receive a firing order from the server (other clients or ai or us)
+		// Functions called when to give a firing order to the server (only for player units).
 		void	scanRequest( Unit * target);
-		void	fireRequest( ObjSerial serial, int mount_index, char mis);
-		void	unfireRequest( ObjSerial serial, int mount_index);
+		void	targetRequest( Unit * target);
+		void	fireRequest( ObjSerial serial, const vector<int> &mount_indicies, char mis);
+		void	unfireRequest( ObjSerial serial, const vector<int> &mount_indicies);
 
 		void	downloadZoneInfo();
 		void	AddObjects( NetBuffer & netbuf);
