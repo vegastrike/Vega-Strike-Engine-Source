@@ -1385,6 +1385,28 @@ void AggressiveAI::Execute () {
   Flightgroup * fg=parent->getFlightgroup();
   //ReCommandWing(fg);
   FireAt::Execute();
+  static bool resistance_to_side_movement=XMLSupport::parse_bool(vs_config->getVariable("AI","resistance_to_side_movement","false"));
+  if(resistance_to_side_movement) {
+    Vector p,q,r;
+    parent->GetOrientation(p,q,r);
+    float forwardness=parent->Velocity.Dot(r);
+    Vector countervelocity=-parent->Velocity;
+    Vector counterforce=-parent->NetForce;
+    float forceforwardness=parent->NetForce.Dot(r);    
+    if (forceforwardness>0){
+      counterforce=forceforwardness*r-parent->NetForce;
+    }
+    if (forwardness>0) {
+      countervelocity=forwardness*r-parent->Velocity;
+    }
+    static float resistance_percent=XMLSupport::parse_float(vs_config->getVariable("AI","resistance_to_side_movement_percent",".1"));
+    parent->Velocity+=countervelocity*resistance_percent;
+    parent->NetForce+=counterforce*resistance_percent;
+    counterforce=-parent->NetLocalForce;
+    counterforce.k=0;
+    parent->NetLocalForce+=counterforce*resistance_percent;
+    
+  }
   Unit * target = parent->Target();
 
   bool isjumpable = target?(!target->GetDestinations().empty()):false;
