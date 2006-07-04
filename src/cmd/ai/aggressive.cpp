@@ -1399,12 +1399,13 @@ void AggressiveAI::Execute () {
     if (forwardness>0) {
       countervelocity=forwardness*r-parent->Velocity;
     }
-    static float resistance_percent=XMLSupport::parse_float(vs_config->getVariable("AI","resistance_to_side_movement_percent",".1"));
+    static float resistance_percent=XMLSupport::parse_float(vs_config->getVariable("AI","resistance_to_side_movement_percent",".01"));
+    static float force_resistance_percent=XMLSupport::parse_float(vs_config->getVariable("AI","resistance_to_side_force_percent","1"));
     parent->Velocity+=countervelocity*resistance_percent;
-    parent->NetForce+=counterforce*resistance_percent;
+    parent->NetForce+=counterforce*force_resistance_percent;
     counterforce=-parent->NetLocalForce;
     counterforce.k=0;
-    parent->NetLocalForce+=counterforce*resistance_percent;
+    parent->NetLocalForce+=counterforce*force_resistance_percent;
     
   }
   Unit * target = parent->Target();
