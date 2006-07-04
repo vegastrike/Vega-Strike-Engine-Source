@@ -1377,14 +1377,16 @@ float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) cons
    if (!FINITE(dist)||dist<0) {
      dist=0;
    }
-   float tmpsin=sqrtf(1-tmpcos*tmpcos);
-   float turnangle = SIMULATION_ATOM*(SIMULATION_ATOM*.5*(limits.yaw+limits.pitch)+sqrtf(AngularVelocity.i*AngularVelocity.i+AngularVelocity.j*AngularVelocity.j));
-   float osin=sin(turnangle);
-   float ocos=cos(turnangle);
-   float cos1=ocos*tmpcos-tmpsin*osin;
-   float cos2=ocos*tmpcos+tmpsin*osin;// sin could be opposite
-   float ret=tmpmax(cos1,cos2);
-   
+   float ret=tmpcos;
+   if (tmpcos<1&&tmpcos>-1) {
+     float tmpsin=sqrtf(1-tmpcos*tmpcos);
+     float turnangle = SIMULATION_ATOM*(SIMULATION_ATOM*.5*(limits.yaw+limits.pitch)+sqrtf(AngularVelocity.i*AngularVelocity.i+AngularVelocity.j*AngularVelocity.j));
+     float osin=sin(turnangle);
+     float ocos=cos(turnangle);
+     float cos1=ocos*tmpcos-tmpsin*osin;
+     float cos2=ocos*tmpcos+tmpsin*osin;// sin could be opposite
+     ret=tmpmax(cos1,cos2);
+   }   
    return tmpmax(tmpcos,ret);
 }
 
