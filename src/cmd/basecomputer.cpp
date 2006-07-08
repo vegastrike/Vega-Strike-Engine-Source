@@ -4399,7 +4399,7 @@ static const char *WeaponTypeStrings[]= {
 	};
 
 void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Cargo & item) {
-	static Unit* blankUnit = UnitFactory::createUnit("blank",1,FactionUtil::GetFactionIndex("upgrades"));
+	static Unit* blankUnit = UnitFactory::createUnit("upgrading_dummy_unit",1,FactionUtil::GetFactionIndex("upgrades"));
 	static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
 	static float game_accel = XMLSupport::parse_float (vs_config->getVariable("physics","game_accel","1"));
 	static float warpenratio = XMLSupport::parse_float (vs_config->getVariable("physics","warp_energy_multiplier","0.12"));
