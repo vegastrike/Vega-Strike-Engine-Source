@@ -10,8 +10,11 @@
 #include "cmd/planet_generic.h"
 #include "faction_generic.h"
 #include "cmd/ai/fire.h"
-#include "gfx/cockpit.h"
+#include "gfx/cockpit_generic.h"
 #include "role_bitmask.h"
+#ifndef NO_GFX
+#include "gfx/cockpit.h"
+#endif
 using std::string;
 extern Unit * getTopLevelOwner();
 namespace UnitUtil {
@@ -35,13 +38,44 @@ namespace UnitUtil {
 
 		float rad= un->rSize();
 		clsptr untype=un->isUnit();
-                unsigned int np = _Universe->numPlayers();
-                for (unsigned int i=0;i<np;++i) {
-                  if (_Universe->AccessCockpit(i)->GetParent()==un||
-                      _Universe->AccessCockpit(i)->GetSaveParent()==un) {                    
-                    return PLAYER_PRIORITY;                    
-                  }
-                }
+		float cpdist=FLT_MAX;
+		float tooclose=0;
+        unsigned int np = _Universe->numPlayers();
+		Cockpit* cockpit=_Universe->AccessCockpit();
+        for (unsigned int i=0;i<np;++i) {
+			
+			Unit * player=_Universe->AccessCockpit(i)->GetParent();
+			if (player) {
+				if (un==player->Target())
+					return PLAYER_PRIORITY;
+				float tmpdist = UnitUtil::getDistance(un,player);
+				if (tmpdist<cpdist) {
+					cockpit=_Universe->AccessCockpit(i);
+					cpdist=tmpdist;
+					tooclose = 
+						2*(un->radial_size+player->radial_size)
+						+ (player->Velocity - un->GetVelocity()).Magnitude();
+				}
+			}
+#ifndef NO_GFX
+			Camera * cam = _Universe->AccessCockpit(i)->AccessCamera();
+				if (cam) {
+					QVector campos = cam->GetPosition();
+					double dist =(campos-un->Position()).Magnitude()-rad;
+					if (dist<cpdist) {
+						cpdist=dist;
+						Unit * parent=_Universe->AccessCockpit(i)->GetParent();
+						tooclose = 
+							2*(un->radial_size+(parent?parent->radial_size:0)) 
+							+ (cam->GetVelocity() - un->GetVelocity()).Magnitude();
+					}
+				}
+#endif
+            if (player==un||
+               _Universe->AccessCockpit(i)->GetSaveParent()==un) {                    
+               return PLAYER_PRIORITY;                    
+            }
+		}
 		if (untype==MISSILEPTR)
 			return MISSILE_PRIORITY;
 
@@ -76,28 +110,13 @@ namespace UnitUtil {
 		
 		
 
-		Cockpit* cockpit=_Universe->AccessCockpit();
 		Unit * parent=cockpit->GetParent();
-		Camera * cam = cockpit->AccessCamera();
-		QVector campos;
-		float tooclose=0;
-		double dist=0;
-		if (cam) {
-			campos = cam->GetPosition();
-			tooclose = 
-			   2*(un->radial_size+(parent?parent->radial_size:0)) 
-			   + (cam->GetVelocity() - un->GetVelocity()).Magnitude();
-			dist =(campos-un->Position()).Magnitude()-rad;
-		}
+
+
 		float gun_range=0;
 		float missile_range=0;
+		float dist=cpdist;
 		if (parent) {
-			float dist1=UnitUtil::getDistance(parent,un);
-			if (dist1<dist) {
-				dist=dist1;
-			}
-			if (parent->Target()==un)
-				return 1;
 			float speed=0;
 			parent->getAverageGunSpeed(speed,gun_range,missile_range);
 		}

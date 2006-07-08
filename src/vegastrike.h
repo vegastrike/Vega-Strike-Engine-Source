@@ -66,6 +66,7 @@ extern float simulation_atom_var;
 //#include "command.h"
 #endif /* defined( WIN32 ) || defined( __CYGWIN__ ) */
 
+#ifndef NO_GFX
 #if defined(__APPLE__) || defined(MACOSX)
     #include <OpenGL/gl.h>
     #include <OpenGL/glu.h>
@@ -76,6 +77,7 @@ extern float simulation_atom_var;
     #include <GL/glu.h>
     #include <GL/glut.h>
 #undef __glext_h_
+#endif
 #endif
 
 #ifndef PI

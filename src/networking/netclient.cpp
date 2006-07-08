@@ -43,7 +43,6 @@
 #include "vsfilesystem.h"
 #include "cmd/role_bitmask.h"
 #include "gfx/cockpit_generic.h"
-#include "gldrv/winsys.h"
 
 #include "networking/lowlevel/vsnet_clientstate.h"
 #include "networking/lowlevel/vsnet_debug.h"

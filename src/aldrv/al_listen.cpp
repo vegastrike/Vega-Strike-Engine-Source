@@ -186,5 +186,7 @@ void AUDListenerGain (const float gain) {
 float AUDGetListenerGain () {
 #ifdef HAVE_AL
   return mylistener.gain;
+#else
+  return 0;
 #endif
 }

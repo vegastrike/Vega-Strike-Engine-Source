@@ -92,8 +92,8 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
       int fir=0;//Insideout?1:0;
       int sec=1;//Insideout?0:1;
       /* Code below adapted from gluSphere */
-      drho = (rho_max-rho_min)/ (GLfloat) stacks;
-      dtheta = (theta_max-theta_min)/ (GLfloat) slices;
+      drho = (rho_max-rho_min)/ (float) stacks;
+      dtheta = (theta_max-theta_min)/ (float) slices;
       
       ds = 1.0 / slices;
       dt = 1.0 / stacks;

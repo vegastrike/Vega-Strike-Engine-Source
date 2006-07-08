@@ -25,6 +25,7 @@
 #include "linecollide.h"
 #include "cmd/unit_collide.h"
 #include "cmd/unit_find.h"
+
 //extern class Music *muzak;
 //extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );
 extern Unit&GetUnitMasterPartList();

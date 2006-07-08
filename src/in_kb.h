@@ -26,11 +26,16 @@
 //const int KEYMAP_SIZE =SDLK_LAST;
 //const int KEY_SPECIAL_OFFSET=0;
 //#else
+#ifndef NO_GFX
 #include "gldrv/winsys.h"
-#include "in.h"
 const int KEYMAP_SIZE =WSK_LAST;
 const int LAST_MODIFIER=3;
+#else
+const int KEYMAP_SIZE =0;
+const int LAST_MODIFIER=0;
+#endif
 //#endif
+#include "in.h"
 
 unsigned int getModifier(const char* mod_name);
 void ProcessKB(unsigned int player);

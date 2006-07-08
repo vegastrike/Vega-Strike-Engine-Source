@@ -41,7 +41,6 @@
 #include "vegastrike.h"
 #include "sphere.h"
 #include "lin_time.h"
-#include "gldrv/winsys.h"
 #include "mesh_xml.h"
 #if defined(__APPLE__) || defined(MACOSX)
     #include <OpenGL/gl.h>
@@ -216,8 +215,8 @@ Mesh::Mesh(const char * filename,const Vector & scale, int faction, Flightgroup 
     if( err>Ok)
     {
       VSFileSystem::vs_fprintf (stderr,"Cannot Open Mesh File %s\n",filename);
-      cleanexit=1;
-      winsys_exit(1);
+//      cleanexit=1;
+//      winsys_exit(1);
       return;
     }
     shared = (err==Shared);

@@ -24,7 +24,11 @@
 #include "vegastrike.h"
 #include "vs_globals.h"
 #include <assert.h>
+#ifndef NO_GFX // Server cannot depend on GL, but still needs a mesh library.
 #include "gl_globals.h"
+#else
+#define GFX_BUFFER_MAP_UNMAP false
+#endif
 // Untransformed and transformed data 
 
 #ifndef GFX_SCALE

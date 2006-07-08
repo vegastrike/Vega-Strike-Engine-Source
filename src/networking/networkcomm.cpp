@@ -35,7 +35,6 @@ extern bool cleanexit;
 bool use_pa;
 bool use_secured;
 
-#include "gldrv/winsys.h"
 #include "networking/lowlevel/packet.h"
 #include <assert.h>
 #include "xml_support.h"

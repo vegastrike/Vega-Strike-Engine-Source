@@ -15,8 +15,8 @@
 #include "cmd/images.h"
 #include "cmd/script/mission.h"
 #include "cmd/script/msgcenter.h"
-#include "cmd/ai/flyjoystick.h"
-#include "cmd/ai/firekeyboard.h"
+//#include "cmd/ai/flyjoystick.h"
+//#include "cmd/ai/firekeyboard.h"
 #include "cmd/ai/aggressive.h"
 //#include "main_loop.h"
 #include <assert.h>	// needed for assert() calls

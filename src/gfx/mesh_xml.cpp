@@ -31,7 +31,6 @@
 #ifdef max
 #undef max
 #endif
-#include "gldrv/winsys.h"
 static inline float max(float x, float y) {
 
   if(x>y) return x;
@@ -1328,8 +1327,8 @@ vector <Mesh*> Mesh::LoadMeshes(const char * filename, const Vector &scale, int 
     if (!isbfxm) {
       if (!loadObj(f,filename)) {
 	VSFileSystem::vs_fprintf (stderr,"Cannot Open Mesh File %s\n",filename);
-	cleanexit=1;
-	winsys_exit(1);
+//	cleanexit=1;
+//	winsys_exit(1);
 	return vector<Mesh*>();        
       }
     }
@@ -1360,8 +1359,8 @@ void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flight
   if( err>Ok)
   {
 	VSFileSystem::vs_fprintf (stderr,"Cannot Open Mesh File %s\n",filename);
-	cleanexit=1;
-	winsys_exit(1);
+//	cleanexit=1;
+//	winsys_exit(1);
 	return;
   }
   LoadXML( f, scale, faction, fg, origthis,textureOverride);

@@ -1,9 +1,11 @@
 #include <assert.h>
 #include "faction_generic.h"
 #include "vsfilesystem.h"
-#include "universe.h"
+#include "universe_generic.h"
 #include "config_xml.h"
 #include "vs_globals.h"
+#include "gfx/cockpit_generic.h"
+#include "cmd/unit_generic.h"
 using namespace FactionUtil;
 
 FSM* FactionUtil::GetConversation(int Myfaction, int TheirFaction) {
