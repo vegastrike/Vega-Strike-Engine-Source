@@ -20,7 +20,7 @@ Collidable::Collidable(Unit *un):radius(un->rSize()){
   ref.unit=un;  
 }
 extern size_t nondecal_index(Collidable::CollideRef b);
-template <class T> class CollideChecker
+template <class T, bool canbebolt> class CollideChecker
 {public:static bool CheckCollisions(CollideMap* cm, T* un, const Collidable& collider){
   CollideMap::iterator tless,tmore;
   float sortedloc=sqrt(collider.GetMagnitudeSquared());
@@ -31,7 +31,7 @@ template <class T> class CollideChecker
   float minsqr=minlook*minlook;
   bool isnew =isNew(cm,un);
 #ifdef collisionperf
-  bool isbolt = rad<0;
+  bool isbolt = canbebolt&&rad<0;
   if(isbolt){
 		boltcalls++;
   }else{
@@ -55,7 +55,7 @@ template <class T> class CollideChecker
 	    unitchecks++;
 	  }
 	#endif
-      bool boltSpecimen=(*tless)->radius<0;
+      bool boltSpecimen=canbebolt&&((*tless)->radius<0);
 #ifdef collisionperf
 	  if(isbolt&&boltSpecimen){
 		boltonboltchecks++;
@@ -63,7 +63,7 @@ template <class T> class CollideChecker
 #endif
       Collidable::CollideRef ref=(*tless)->ref;
       if (tless==cm->begin()) {
-        if (boltSpecimen) {
+        if (canbebolt&&boltSpecimen) {
           if (CheckCollision(un,collider,ref,**tless)){
             if (endAfterCollide(un)) {
               return true;       
@@ -78,7 +78,7 @@ template <class T> class CollideChecker
           }else break;
         }        
       }else {
-        if (boltSpecimen) {
+        if (canbebolt&&boltSpecimen) {
           if (CheckCollision(un,collider,ref,**tless--)) {
             if (endAfterCollide(un))
               return true;        
@@ -102,14 +102,14 @@ template <class T> class CollideChecker
 	    unitchecks++;
 	  }
 	#endif
-    bool boltSpecimen=(*tmore)->radius<0;
+    bool boltSpecimen=canbebolt&&((*tmore)->radius<0);
 	#ifdef collisionperf
 	  if(isbolt&&boltSpecimen){
 		boltonboltchecks++;
 	  }
 	#endif
     Collidable::CollideRef ref=(*tmore)->ref;
-    if (boltSpecimen) {
+    if (canbebolt&&boltSpecimen) {
       if (CheckCollision(un,collider,ref,**tmore++))
         if (endAfterCollide(un))
           return true;      
@@ -175,7 +175,7 @@ template <class T> class CollideChecker
 
 
 bool CollideMap::CheckCollisions (Bolt * bol, const Collidable &updated) {
-  return CollideChecker<Bolt>::CheckCollisions(this,bol, updated);
+  return CollideChecker<Bolt,true>::CheckCollisions(this,bol, updated);
 }
 bool CollideMap::CheckCollisions (Unit * un, const Collidable &updated) {
   //need to check beams
@@ -184,5 +184,5 @@ bool CollideMap::CheckCollisions (Unit * un, const Collidable &updated) {
   } else {
     assert (un->activeStarSystem==_Universe->activeStarSystem());
   }
-  return CollideChecker<Unit>::CheckCollisions(this,un, updated);
+  return CollideChecker<Unit,true>::CheckCollisions(this,un, updated);
 }

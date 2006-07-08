@@ -6,6 +6,9 @@
 template <class T> class MutableShell {
 	mutable T t;
 public:
+  //flatten restores sortedness--in this case it does nothing
+	void flatten () {
+	}
 	MutableShell (const T &t) : t(t) {}
 	T &get ()const {return t;}
 	T &operator* ()const {return t;}
@@ -86,6 +89,9 @@ template <class T, class _Compare = std::less <T > >
 class ListMutableSet : public std::list <T> {
 	typedef std::list <T> SUPER;
 public:
+  //flatten restores sortedness--in this case it does nothing
+	void flatten () {
+	}
 	/// This just checks the order of the set for testing purposes..
 	void checkSet () {
 		_Compare comparator;
@@ -163,5 +169,11 @@ public:
                  
 	}
 };
+
+
+
+
+
+
 
 #endif

@@ -473,7 +473,36 @@ libgfxserver_a_SOURCES = \
   src/gfx/sphere_server.cpp \
   src/gfx/vsbox_server.cpp \
   src/gfx/mesh_server.cpp \
-  src/gfx/background_server.cpp
+  src/gfx/background_server.cpp \
+  src/gfx/aux_texture.h \
+  src/gfx/bounding_box.cpp \
+  src/gfx/bounding_box.h \
+  src/gfx/bsp.cpp \
+  src/gfx/bsp.h \
+  src/gfx/cockpit_generic.cpp \
+  src/gfx/cockpit_generic.h \
+  src/gfx/halo_system.h \
+  src/gfx/lerp.cpp \
+  src/gfx/lerp.h \
+  src/gfx/matrix.cpp \
+  src/gfx/matrix.h \
+  src/gfx/mesh_bin.cpp \
+  src/gfx/mesh_bxm.cpp \
+  src/gfx/mesh_bxm.h \
+  src/gfx/mesh_io.h \
+  src/gfx/mesh_poly.cpp \
+  src/gfx/mesh_xml.cpp \
+  src/gfx/mesh_xml.h \
+  src/gfx/mesh.cpp \
+  src/gfx/mesh.h \
+  src/gfx/quaternion.cpp \
+  src/gfx/quaternion.h \
+  src/gfx/screenshot.cpp \
+  src/gfx/screenshot.h \
+  src/gfx/sphere_generic.cpp \
+  src/gfx/vec.cpp \
+  src/gfx/vec.h \
+  src/gfx/vertex.h
 
 
 
@@ -569,7 +598,6 @@ vegastrike_DEPENDENCIES = \
 vegaserver_LDADD = \
   libboost_python.a \
   libcmdserver.a \
-  libgfx.a \
   libgfxserver.a \
   libnetlowlevel.a \
   libscriptserver.a \
