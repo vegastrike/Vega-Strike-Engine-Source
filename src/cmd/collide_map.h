@@ -88,7 +88,7 @@ inline void init_null_collide_iter()
 
 inline bool is_null(const CollideMap::iterator &it)
 {
-	return ISNAN(it->radius);
+  return ISNAN((**it).radius);
 }
 
 inline void set_null(CollideMap::iterator &it)
