@@ -4,7 +4,7 @@
 CollideMap null_collide_map;
 CollideMap::iterator null_collide_iter;
 bool null_collide_iter_initialized = false;
-#define collisionperf
+//#define collisionperf
 
 #ifdef collisionperf
 int boltcalls=0;
@@ -12,6 +12,8 @@ int boltchecks=0;
 int boltonboltchecks=0;
 int unitcalls=0;
 int unitchecks=0;
+int boltruns=0;
+bool seenunit=false;
 #endif
 
 Collidable::Collidable(Unit *un):radius(un->rSize()){
@@ -34,6 +36,7 @@ template <class T, bool canbebolt> class CollideChecker
   bool isbolt = rad<0;
   if(isbolt){
 		boltcalls++;
+		seenunit=false;
   }else{
 	  unitcalls++;
   }
@@ -57,8 +60,14 @@ template <class T, bool canbebolt> class CollideChecker
 	#endif
       bool boltSpecimen=canbebolt&&((*tless)->radius<0);
 #ifdef collisionperf
+	  if(!seenunit&&!boltSpecimen){
+		  seenunit=true;
+	  }
 	  if(isbolt&&boltSpecimen){
 		boltonboltchecks++;
+		if(!seenunit){
+			boltruns++;
+		}
 	  }
 #endif
       Collidable::CollideRef ref=(*tless)->ref;
