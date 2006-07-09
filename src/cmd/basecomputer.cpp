@@ -4990,7 +4990,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		    text+="#n#"+prefix+statcolor+"No shielding. #-c";
         }
 	} else {
-		if(playerUnit->shield.shield2fb.frontmax!=blankUnit->shield.shield2fb.frontmax||playerUnit->shield.shield4fbrl.frontmax!=blankUnit->shield.shield4fbrl.frontmax||playerUnit->shield.shield8.frontrightbottommax!=blankUnit->shield.shield8.frontrightbottommax){
+		if(playerUnit->shield.number &&((playerUnit->shield.shield2fb.frontmax!=blankUnit->shield.shield2fb.frontmax)||(playerUnit->shield.shield4fbrl.frontmax!=blankUnit->shield.shield4fbrl.frontmax)||(playerUnit->shield.shield8.frontrightbottommax!=blankUnit->shield.shield8.frontrightbottommax))){
 			switch(replacement_mode){
 				case 0: // Replacement or new Module
 					text+="#n#"+prefix+statcolor+"Installs shield with following protection ratings:#-c";
