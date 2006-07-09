@@ -4658,7 +4658,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 				PRETTY_ADDN(statcolor+" Vertical acceleration #-c",playerUnit->limits.vertical/(9.8*playerUnit->GetMass()),2);
 				text+=" gravities";
     		}
-			PRETTY_ADDU(statcolor+"Forward acceleration with Afterburner: #-c",playerUnit->limits.afterburn/(9.8*playerUnit->GetMass()),2,"gravities");
+			PRETTY_ADDU(statcolor+"Forward acceleration with overthrust: #-c",playerUnit->limits.afterburn/(9.8*playerUnit->GetMass()),2,"gravities");
     		text.append("#n##n##c0:1:.5#"+prefix+"[GOVERNOR SETTINGS]#n##-c");
 		} else {
 			switch(replacement_mode){
@@ -4676,7 +4676,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 						PRETTY_ADDU(statcolor+"Provides lateral thrust rated at: #-c",playerUnit->limits.lateral/1000.0,2,"MegaNewtons");
 					}
 					if(playerUnit->limits.afterburn!=blankUnit->limits.afterburn){
-						PRETTY_ADDU(statcolor+"Afterburner thrust rated at: #-c",playerUnit->limits.afterburn/1000.0,2,"MegaNewtons");
+						PRETTY_ADDU(statcolor+"Overdrive thrust rated at: #-c",playerUnit->limits.afterburn/1000.0,2,"MegaNewtons");
 					}
 					break;
 				case 1: // Additive
@@ -4693,7 +4693,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 						PRETTY_ADDU(statcolor+"Increases lateral thrust rating by: #-c",playerUnit->limits.lateral/1000.0,2,"MegaNewtons");
 					}
 					if(playerUnit->limits.afterburn!=blankUnit->limits.afterburn){
-						PRETTY_ADDU(statcolor+"Increases afterburner thrust rating by: #-c",playerUnit->limits.afterburn/1000.0,2,"MegaNewtons");
+						PRETTY_ADDU(statcolor+"Increases overdrive thrust rating by: #-c",playerUnit->limits.afterburn/1000.0,2,"MegaNewtons");
 					}
 					break;
 				case 2: // multiplicative
@@ -4710,7 +4710,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 						PRETTY_ADDU(statcolor+"Increases lateral thrust rating by: #-c",(playerUnit->limits.lateral-1)*100,0,"%");
 					}
 					if(playerUnit->limits.afterburn!=blankUnit->limits.afterburn){
-						PRETTY_ADDU(statcolor+"Afterburner thrust rating by: #-c",(playerUnit->limits.afterburn-1)*100,0,"%");
+						PRETTY_ADDU(statcolor+"Overdrive thrust rating by: #-c",(playerUnit->limits.afterburn-1)*100,0,"%");
 					}
 					break;
 				default: // Failure 
@@ -4721,7 +4721,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		static float non_combat_mode_mult = XMLSupport::parse_float (vs_config->getVariable ("physics","combat_speed_boost","100"));
 		if(!mode){
 			PRETTY_ADDU(statcolor+"Max combat speed: #-c",uc.max_speed()*3.6,0,"km/h");
-			PRETTY_ADDU(statcolor+"Max afterburner combat speed: #-c",uc.max_ab_speed()*3.6,0,"km/h");
+			PRETTY_ADDU(statcolor+"Max overdrive combat speed: #-c",uc.max_ab_speed()*3.6,0,"km/h");
 			PRETTY_ADDU(statcolor+"Max non-combat speed: #-c",uc.max_speed()*3.6*non_combat_mode_mult,0,"km/h");
 		} else {
 			switch(replacement_mode){
@@ -4731,7 +4731,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 						PRETTY_ADDU(statcolor+"Sets max non-combat speed governor to: #-c",uc.max_speed()*3.6*non_combat_mode_mult,0,"km/h");
 					}
 					if(uc.max_ab_speed()!=buc.max_ab_speed()){
-						PRETTY_ADDU(statcolor+"Sets max afterburner combat speed governor to: #-c",uc.max_ab_speed()*3.6,0,"km/h");
+						PRETTY_ADDU(statcolor+"Sets max overdrive combat speed governor to: #-c",uc.max_ab_speed()*3.6,0,"km/h");
 					}
 					break;
 				case 1: // Additive
@@ -4740,7 +4740,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 						PRETTY_ADDU(statcolor+"Increases max non-combat speed governor setting by: #-c",uc.max_speed()*3.6*non_combat_mode_mult,0,"km/h");
 					}
 					if(uc.max_ab_speed()!=buc.max_ab_speed()){
-						PRETTY_ADDU(statcolor+"Increases max afterburner combat speed governor setting by: #-c",uc.max_ab_speed()*3.6,0,"km/h");
+						PRETTY_ADDU(statcolor+"Increases max overdrive combat speed governor setting by: #-c",uc.max_ab_speed()*3.6,0,"km/h");
 					}
 					break;
 				case 2: // multiplicative
@@ -4749,7 +4749,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 						PRETTY_ADDU(statcolor+"Increases max non-combat speed governor settings by: #-c",100.0*(uc.max_speed()-1),0,"%");
 					}
 					if(uc.max_ab_speed()!=buc.max_ab_speed()){
-						PRETTY_ADDU(statcolor+"Increases max afterburner combat speed governor settings by: #-c",(uc.max_ab_speed()-1)*100,0,"%");
+						PRETTY_ADDU(statcolor+"Increases max overdrive combat speed governor settings by: #-c",(uc.max_ab_speed()-1)*100,0,"%");
 					}
 					break;
 				default: // Failure 
@@ -5201,7 +5201,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		if(shields_require_power){
 			maxshield=0;
 		}
-		PRETTY_ADDU(statcolor+"Minimum time to reach full afterburner speed: #-c",playerUnit->GetMass()*uc.max_ab_speed()/playerUnit->limits.afterburn,2,"seconds");
+		PRETTY_ADDU(statcolor+"Minimum time to reach full overthrust speed: #-c",playerUnit->GetMass()*uc.max_ab_speed()/playerUnit->limits.afterburn,2,"seconds");
 		//reactor
 		float avail=(playerUnit->MaxEnergyData()*RSconverter-maxshield*VSDM);
 		float overhead=(shields_require_power)?(playerUnit->shield.recharge/shieldenergycap*shield_maintenance_cost*playerUnit->shield.number*VSDM):0;
