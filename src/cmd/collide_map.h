@@ -46,15 +46,32 @@ public:
 /* Arbitrarily use Set for ALL PLATFORMS -hellcatv */
 #define VS_ENABLE_COLLIDE_KEY
 
+
+class CollideArray{
+public:
+  Collidable * sorted;
+  Collidable * unsorted;
+  vector<int> *toflattenhints;
+  
+
+};
+
+
 #ifdef VS_ENABLE_COLLIDE_KEY
 class CollideMap:public KeyMutableSet<Collidable> {
 #else
+#ifdef VS_ENABLE_COLLIDE_LIST
 class CollideMap:public ListMutableSet<Collidable> {
+#else
+class CollideMap:public CollideArray {
+#endif
 #endif
 public:
 //Check collisions takes an item to check collisions with, and returns whether that item collided with a Unit only
   bool CheckCollisions(Bolt * bol, const Collidable & updated);
+  bool CheckUnitCollisions(Bolt * bol, const Collidable & updated);//DANGER must be used on lists that are only populated with Units, not bolts
   bool CheckCollisions(Unit * un, const Collidable & updated);//will be handed off to a templated function
+  bool CheckUnitCollisions(Unit * un, const Collidable & updated);//DANGER must be used on lists that are only populated with Units, not bolts
 };
 extern CollideMap null_collide_map;
 extern CollideMap::iterator null_collide_iter;

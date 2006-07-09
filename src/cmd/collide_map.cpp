@@ -31,7 +31,7 @@ template <class T, bool canbebolt> class CollideChecker
   float minsqr=minlook*minlook;
   bool isnew =isNew(cm,un);
 #ifdef collisionperf
-  bool isbolt = canbebolt&&rad<0;
+  bool isbolt = rad<0;
   if(isbolt){
 		boltcalls++;
   }else{
@@ -177,6 +177,10 @@ template <class T, bool canbebolt> class CollideChecker
 bool CollideMap::CheckCollisions (Bolt * bol, const Collidable &updated) {
   return CollideChecker<Bolt,true>::CheckCollisions(this,bol, updated);
 }
+
+bool CollideMap::CheckUnitCollisions (Bolt * bol, const Collidable &updated) {
+  return CollideChecker<Bolt,false>::CheckCollisions(this,bol, updated);
+}
 bool CollideMap::CheckCollisions (Unit * un, const Collidable &updated) {
   //need to check beams
   if (un->activeStarSystem==NULL) {
@@ -185,4 +189,15 @@ bool CollideMap::CheckCollisions (Unit * un, const Collidable &updated) {
     assert (un->activeStarSystem==_Universe->activeStarSystem());
   }
   return CollideChecker<Unit,true>::CheckCollisions(this,un, updated);
+}
+
+
+bool CollideMap::CheckUnitCollisions (Unit * un, const Collidable &updated) {
+  //need to check beams
+  if (un->activeStarSystem==NULL) {
+    un->activeStarSystem = _Universe->activeStarSystem();
+  } else {
+    assert (un->activeStarSystem==_Universe->activeStarSystem());
+  }
+  return CollideChecker<Unit,false>::CheckCollisions(this,un, updated);
 }
