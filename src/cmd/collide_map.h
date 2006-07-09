@@ -4,6 +4,7 @@
 #include "vegastrike.h"
 #include "gfx/vec.h"
 #include <limits>
+#include <vector>
 class Unit;
 class Bolt;
 class Collidable{
@@ -51,7 +52,7 @@ class CollideArray{
 public:
   Collidable * sorted;
   Collidable * unsorted;
-  vector<int> *toflattenhints;
+  std::vector<int> *toflattenhints;
   
 
 };
