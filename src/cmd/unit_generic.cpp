@@ -5909,7 +5909,7 @@ bool Unit::UpgradeSubUnitsWithFactory (const Unit * up, int subunitoffset, bool 
 	} else {
 	  Unit * un;//make garbage unit
 	  // NOT 100% SURE A GENERIC UNIT CAN FIT (WAS GAME UNIT CREATION)
-	  ui.preinsert (un=UnitFactory::createUnit("blank",true,faction));//give a default do-nothing unit
+	  ui.preinsert (un=UnitFactory::createUnit("upgrading_dummy_unit",true,faction));//give a default do-nothing unit
 	  //WHAT?!?!?!?! 102302	  ui.preinsert (un=new Unit(0));//give a default do-nothing unit
 	  un->SetFaction(faction);
 	  un->curr_physical_state = addToMeCur;
@@ -6087,7 +6087,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   double resultdoub;
   int retval;
   double temppercent;
-  static Unit * blankship = UnitFactory::createServerSideUnit ("blank",true,FactionUtil::GetFaction("upgrades"));
+  static Unit * blankship = UnitFactory::createServerSideUnit ("upgrading_dummy_unit",true,FactionUtil::GetFaction("upgrades"));
 
   #define STDUPGRADE_SPECIFY_DEFAULTS(my,oth,temp,noth,dgradelimer,dgradelimerdefault,clamp,value_to_lookat) \
   retval=(UpgradeFloat(resultdoub,my,oth,(templ!=NULL)?temp:0,Adder,Comparer,noth,noth,Percenter, temppercent,forcetransaction,templ!=NULL,(downgradelimit!=NULL)?dgradelimer:dgradelimerdefault,AGreaterB,clamp,force_change_on_nothing)); \
