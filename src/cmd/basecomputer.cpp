@@ -2064,7 +2064,18 @@ bool UpgradeAllowed (const Cargo& item, Unit * playerUnit) {
       if (numUpgrades) {
         if (numUpgrades->quantity>=quantity)
           return false;
-      }            
+      }
+	  unsigned int limit= playerUnit->numCargo();
+	  int totalquant=0;
+	  for(i=0;i<limit;++i){
+		  numUpgrades=&(playerUnit->GetCargo(i));
+		  if(numUpgrades&&numUpgrades->category==item.category){
+			totalquant+=numUpgrades->quantity;
+		  }
+	  }
+	  if(totalquant>=quantity){
+		return false;
+	  }
     }
   }
   return true;
