@@ -3043,25 +3043,10 @@ float Unit::MaxShieldVal() const{
   return maxshield;
 }
 void Unit::RechargeEnergy() {
-#if 1
-	energy+=recharge*SIMULATION_ATOM;
-#else
-	/* short fix
-    unsigned short newenergy=apply_float_to_short (recharge *SIMULATION_ATOM);
-    if (((int)energy)+((int)newenergy)>65535) {
-      newenergy= 65535 - energy;
-      energy=65535;
-      if (newenergy>0) {
-	newenergy=apply_float_to_short (newenergy*WARPENERGYMULTIPLIER(this));
-	if (((int)warpenergy)+((int)newenergy)>65535) {	
-	  warpenergy+=newenergy;
+	static bool reactor_uses_fuel = XMLSupport::parse_bool(vs_config->getVariable("physics","reactor_uses_fuel","false"));
+	if((!reactor_uses_fuel)||(fuel > 0)){
+		energy+=recharge*SIMULATION_ATOM;
 	}
-      }
-    }else {
-      energy+=recharge*SIMULATION_ATOM;
-	}
-	*/
-#endif
 }
 void Unit::RegenShields () {
   static bool shields_in_spec = XMLSupport::parse_bool(vs_config->getVariable("physics","shields_in_spec","false"));
@@ -3263,7 +3248,7 @@ void Unit::RegenShields () {
 
   excessenergy=(excessenergy>precharge)?excessenergy-precharge:0;
   if(reactor_uses_fuel){
-	fuel-=FMEC_factor*(FMEC_efficiency*(recharge*SIMULATION_ATOM-(reactor_idle_efficiency*excessenergy)));
+	fuel-=FMEC_factor*((recharge*SIMULATION_ATOM-(reactor_idle_efficiency*excessenergy)));
   }
 
   energy=energy<0?0:energy;
