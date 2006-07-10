@@ -2746,11 +2746,12 @@ Vector Unit::ClampTorque (const Vector &amt1) {
     Res.k=copysign(fuelclamp*limits.roll,amt1.k);
 
   //static float fuelenergytomassconversionconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","FuelEnergyDensity","343596000000000.0")); // note that we have KiloJoules, so it's to the 14th
-  static float Deuteriumconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Deuterium","1"));
-  static float Antimatterconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Antimatter","250"));
-  static float Lithium6constant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Lithium",".6"));
-  fuel-=GetFuelUsage(false)*SIMULATION_ATOM*Res.Magnitude()*.00000004/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-
+  //static float Deuteriumconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Deuterium","1/0.6"));
+  //static float Antimatterconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Antimatter","250/0.6"));
+  static float Lithium6constant = XMLSupport::parse_float(vs_config->getVariable ("physics","LithiumRelativeEfficiency_Lithium","1"));
+  static float FMEC_factor=XMLSupport::parse_float (vs_config->getVariable("physics","FMEC_factor","0.000000008")); // Fuel Mass in metric tons expended per generation of 100MJ assuming 5,000,000m/s exit velocity
+  static float FMEC_exit_vel_inverse=XMLSupport::parse_float (vs_config->getVariable("physics","FMEC_exit_vel","0.0000002")); // 1/5,000,000 m/s
+  fuel-=GetFuelUsage(false)*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;//HACK this forces the reaction to be Li-6+D fusion with efficiency governed by the getFuelUsage function
   if (fuel < 0) fuel = 0;
   if (warpenergy < 0) warpenergy = 0;
   if (WCfuelhack) warpenergy = fuel;
@@ -2904,17 +2905,18 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
   if (amt1.k<-limits.retro)
     Res.k =-limits.retro;
 
-  //energy = 1/2t^2*Force^2/mass
-  static float Deuteriumconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Deuterium","1"));
-  static float Antimatterconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Antimatter","250"));
-  static float Lithium6constant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Lithium",".6"));
-
-	  if (afterburntype == 2) // fuel-burning afterburner
-		  warpenergy-=GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*.00000004/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-	  if (afterburntype == 1) // fuel-burning afterburner
-  fuel-=GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*.00000004/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-	  if (afterburntype == 0) // fuel-burning afterburner
-	      fuel-=GetFuelUsage(false)*SIMULATION_ATOM*Res.Magnitude()*.00000004/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
+  
+  //static float Deuteriumconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Deuterium","1/0.6"));
+  //static float Antimatterconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Antimatter","250/0.6"));
+  static float Lithium6constant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Lithium","1"));
+  static float FMEC_factor=XMLSupport::parse_float (vs_config->getVariable("physics","FMEC_factor","0.000000008")); // Fuel Mass in metric tons expended per generation of 100MJ assuming 5,000,000m/s exit velocity
+  static float FMEC_exit_vel_inverse=XMLSupport::parse_float (vs_config->getVariable("physics","FMEC_exit_vel","0.0000002")); // 1/5,000,000 m/s
+	  if (afterburntype == 2) // Energy-consuming afterburner
+		  warpenergy-=GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
+	  if (afterburntype == 1) // fuel-burning overdrive - uses afterburner efficiency
+		  fuel-=GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
+	  if (afterburntype == 0) // fuel-burning afterburner - uses default efficiency - appears to check for available energy? FIXME
+	      fuel-=GetFuelUsage(false)*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
 
   if ((afterburn) && (afterburntype == 0)) {
 		energy -= instantenergy;
@@ -2973,7 +2975,7 @@ void Unit::RollTorque(float amt) {
 }
 float WARPENERGYMULTIPLIER(Unit * un) {
   static float warpenergymultiplier = XMLSupport::parse_float (vs_config->getVariable ("physics","warp_energy_multiplier","0.12"));
-  static float playerwarpenergymultiplier = XMLSupport::parse_float (vs_config->getVariable ("physics","warp_energy_player_multiplier",".3"));
+  static float playerwarpenergymultiplier = XMLSupport::parse_float (vs_config->getVariable ("physics","warp_energy_player_multiplier",".12"));
   bool player=_Universe->isPlayerStarship(un)!=NULL;
   Flightgroup * fg =un->getFlightgroup();
   if (fg&&!player) {
@@ -3076,17 +3078,21 @@ void Unit::RegenShields () {
   static float max_shield_lowers_recharge=XMLSupport::parse_float(vs_config->getVariable("physics","max_shield_recharge_drain","0"));
   static bool max_shield_lowers_capacitance=XMLSupport::parse_bool(vs_config->getVariable("physics","max_shield_lowers_capacitance","false"));
   static bool use_max_shield_value = XMLSupport::parse_bool(vs_config->getVariable("physics","use_max_shield_energy_usage","false"));
+  static bool reactor_uses_fuel = XMLSupport::parse_bool(vs_config->getVariable("physics","reactor_uses_fuel","false"));
+  static float reactor_idle_efficiency = XMLSupport::parse_float(vs_config->getVariable("physics","reactor_idle_efficiency","0.98"));
   static float VSD=XMLSupport::parse_float (vs_config->getVariable("physics","VSD_MJ_yield","5.4"));
+  static float FMEC_factor=XMLSupport::parse_float (vs_config->getVariable("physics","FMEC_factor","0.000000008")); // Fuel Mass in metric tons expended per generation of 100MJ
+  static float FMEC_efficiency=XMLSupport::parse_float (vs_config->getVariable("physics","FMEC_efficiency","2")); // Fudge factor -> increase fuel expenditure
   int rechargesh=1; // used ... oddly
   float maxshield=totalShieldEnergyCapacitance(shield);
   bool velocity_discharge=false;
   float rec=0;
-  
+  float precharge=energy;
+
   // Reactor energy
   if (!energy_before_shield) {
     RechargeEnergy();
   }
-
 
   // Shield energy drain
   if (shield.number) {
@@ -3234,23 +3240,32 @@ void Unit::RegenShields () {
 	  }
   }
 
+  float excessenergy=0;
   //NOTE: !shield.number => maxshield==0
   if (menergy>maxshield) {
     if (energy>menergy-maxshield) {//allow warp caps to absorb xtra power
-      float excessenergy = energy - (menergy-maxshield);
+      excessenergy = energy - (menergy-maxshield);
       energy=menergy-maxshield;  
       if (excessenergy >0) {
 		  warpenergy=warpenergy+WARPENERGYMULTIPLIER(this)*excessenergy;
 		  float mwe = maxwarpenergy;
 		  if (mwe<jump.energy&&mwe==0)
 			  mwe = jump.energy;
-		  if (warpenergy>mwe)
+		  if (warpenergy>mwe){
+			  excessenergy=(warpenergy-mwe)/WARPENERGYMULTIPLIER(this);
 			  warpenergy=mwe;
+		  }
       }
     }
   }else {
     energy=0;
   }
+
+  excessenergy=(excessenergy>precharge)?excessenergy-precharge:0;
+  if(reactor_uses_fuel){
+	fuel-=FMEC_factor*(FMEC_efficiency*(recharge*SIMULATION_ATOM-(reactor_idle_efficiency*excessenergy)));
+  }
+
   energy=energy<0?0:energy;
 }
 
