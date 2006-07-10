@@ -155,15 +155,26 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct, ch
 
         int saved_faction = FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str());
 		//vector<vector <string> > path = lookforUnit( savedships[0].c_str(), saved_faction, false);
-		bool exist = (VSFileSystem::LookForFile( savedships[0], VSFileSystem::UnitFile)<=VSFileSystem::Ok);
+		bool exist = true; //(VSFileSystem::LookForFile( savedships[0], VSFileSystem::UnitFile)<=VSFileSystem::Ok);
+		static std::string loadfailed ("LOAD_FAILED");
+		Unit * un = UnitFactory::createUnit( PLAYER_SHIPNAME.c_str(),
+                             false,
+							 saved_faction,
+                             string(""),
+                             Flightgroup::newFlightgroup (PLAYER_CALLSIGN,PLAYER_SHIPNAME,PLAYER_FACTION_STRING,"default",1,1,"","",mission),
+                             0, &saves[1]);
+		if (un->name==loadfailed) {
+			exist = false;
+			un->Kill();
+		}
 		if( !exist)
 		{
+			unsigned short serial = cltserial;
 			// We can't find the unit saved for player -> send a login error
 			this->sendLoginError( clt, ipadr);
 			Packet p2;
 			// Send the account server a logout info
-			Unit * un = clt->game_unit.GetUnit();
-			if( p2.send( CMD_LOGOUT, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(),
+			if( p2.send( CMD_LOGOUT, serial, netbuf.getData(), netbuf.getDataLength(),
 						 SENDRELIABLE, NULL, acct_sock, __FILE__,
 						 PSEUDO__LINE__(162) ) < 0 )
 			{
@@ -173,12 +184,6 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct, ch
 			return;
 		}
 
-		Unit * un = UnitFactory::createUnit( PLAYER_SHIPNAME.c_str(),
-                             false,
-							 saved_faction,
-                             string(""),
-                             Flightgroup::newFlightgroup (PLAYER_CALLSIGN,PLAYER_SHIPNAME,PLAYER_FACTION_STRING,"default",1,1,"","",mission),
-                             0, &saves[1]);
 		COUT<<"\tAFTER UNIT FACTORY WITH XML"<<endl;
 		clt->game_unit.SetUnit( un);
 		// Assign its serial to client*

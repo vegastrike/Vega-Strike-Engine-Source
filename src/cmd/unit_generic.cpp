@@ -3515,9 +3515,9 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
 #else
 		// SECOND METHOD : we just put a flag on the unit telling its shield/armor data has changed
 		if( spercentage)
-			this->damages &= SHIELD_DAMAGED;
+			this->damages |= SHIELD_DAMAGED;
 		if( ppercentage)
-			this->damages &= ARMOR_DAMAGED;
+			this->damages |= ARMOR_DAMAGED;
 #endif
   }
 
@@ -3692,7 +3692,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 		    image->cockpit_damage[which]=0;
 		  }
 		}
-		damages &= COMPUTER_DAMAGED;
+		damages |= COMPUTER_DAMAGED;
 		return;
 	}
         static float thruster_hit_chance=XMLSupport::parse_float(vs_config->getVariable("physics","thruster_hit_chance",".25"));
@@ -3720,7 +3720,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
           } else {
             limits.lateral*=dam;
           }
-          damages &= LIMITS_DAMAGED;
+          damages |= LIMITS_DAMAGED;
           return;
 	}
 	if (degrees>=20&&degrees<35) {
@@ -3741,7 +3741,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
                           mounts[whichmount].maxfunctionality*=dam;
                         }
 		}
-		damages &= MOUNT_DAMAGED;
+		damages |= MOUNT_DAMAGED;
 		return;
 	}
 	if (degrees>=35&&degrees<60) {
@@ -3780,7 +3780,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 				image->cargo[cargorand].quantity*=dam;
 			}
 		}
-		damages &= CARGOFUEL_DAMAGED;
+		damages |= CARGOFUEL_DAMAGED;
 		return;
 	}
 
@@ -3789,13 +3789,13 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 		//DAMAGE cloak
 		if (randnum>=.95) {
 			this->cloaking=-1;
-            damages &= CLOAK_DAMAGED;
+            damages |= CLOAK_DAMAGED;
 		} else if (randnum>=.78) {
 			image->cloakenergy+=((1-dam)*recharge);
-            damages &= CLOAK_DAMAGED;
+            damages |= CLOAK_DAMAGED;
 		} else if (randnum>=.7) {
 			cloakmin+=(rand()%(32000-cloakmin));
-            damages &= CLOAK_DAMAGED;
+            damages |= CLOAK_DAMAGED;
 		}
 		switch (shield.number) {
 		case 2:
@@ -3836,7 +3836,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 			}
 			break;
 		}
-		damages &= SHIELD_DAMAGED;
+		damages |= SHIELD_DAMAGED;
 		return;
 	}
 	if (degrees>=120&&degrees<150) {
@@ -3866,7 +3866,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
             if (image->repair_droid>0)
 		        image->repair_droid--;
 		}
-        damages &= JUMP_DAMAGED;
+        damages |= JUMP_DAMAGED;
 		return;
 	}
 	if (degrees>=150&&degrees<=180) {
@@ -3882,7 +3882,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 		} else {
 			limits.forward*=dam;
 		}
-		damages &= LIMITS_DAMAGED;
+		damages |= LIMITS_DAMAGED;
 		return;
 	}
 }
