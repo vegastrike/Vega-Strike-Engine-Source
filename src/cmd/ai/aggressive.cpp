@@ -1182,6 +1182,7 @@ void AggressiveAI::ReCommandWing(Flightgroup * fg) {
 											"Targetting",
 											"TargetCommandierTime",
 											"100"));
+  static bool verbose_debug = XMLSupport::parse_bool(vs_config->getVariable("data","verbose_debug","false"));
   if (fg!=NULL) {
     Unit* lead;
     if (overridable (fg->directive)) {//computer won't override capital orders
@@ -1190,7 +1191,9 @@ void AggressiveAI::ReCommandWing(Flightgroup * fg) {
 	    if (parent->Threat()&&(parent->FShieldData()<.2||parent->RShieldData()<.2)){
 	      fg->directive = string("h");
 	      LeadMe (parent,"h","I need help here!", false);
-	      VSFileSystem::vs_fprintf (stderr,"he needs help %s",parent->name.c_str());
+		  if(verbose_debug){
+			  VSFileSystem::vs_fprintf (stderr,"he needs help %s",parent->name.c_str());
+		  }
 	    }else {
 	      if (lead->getFgSubnumber()>=parent->getFgSubnumber()) {	
 		fg->directive = string("b");

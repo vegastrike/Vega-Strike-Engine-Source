@@ -315,6 +315,7 @@ static GLint appleBuild2DMipmaps(GLenum target, GLint components,
 
 GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette , int texturestage, enum FILTER mipmap, enum TEXTURE_TARGET texture_target, enum ADDRESSMODE address_mode)
 {
+  static bool verbose_debug = XMLSupport::parse_bool(vs_config->getVariable("data","verbose_debug","false"));	
   int dummy=0;
   if ((mipmap&(MIPMAP|TRILINEAR))&&!isPowerOfTwo (width,dummy)) {
     VSFileSystem::vs_fprintf (stderr,"Width %d not a power of two",width);
@@ -337,7 +338,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
     }
   }
   if ((*handle)==textures.size()) {
-    VSFileSystem::vs_fprintf (stderr,"x");
+	  if(verbose_debug){
+		  VSFileSystem::vs_fprintf (stderr,"x");
+	  }
     textures.push_back(GLTexture());
     textures.back().palette=NULL;
     textures.back().alive=GFXTRUE;
@@ -362,13 +365,17 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
 #endif
   case CUBEMAP: textures [*handle].targets=GL_TEXTURE_CUBE_MAP_EXT; break;
   }
-  VSFileSystem::vs_fprintf (stderr,"y");  
+  if(verbose_debug){
+	  VSFileSystem::vs_fprintf (stderr,"y");  
+  }
   textures[*handle].name = *handle+1; //for those libs with stubbed out handle gen't
   //VSFileSystem::vs_fprintf (stderr,"Texture Handle %d",*handle);
   textures[*handle].alive = GFXTRUE;
   textures[*handle].texturestage = texturestage;
   textures[*handle].mipmapped = mipmap;
-  VSFileSystem::vs_fprintf (stderr,"z");
+  if(verbose_debug){
+	  VSFileSystem::vs_fprintf (stderr,"z");
+  }
   glGenTextures (1,&textures[*handle].name);
   glBindTexture (textures[*handle].targets,textures[*handle].name);
   activetexture[texturestage]=*handle;
@@ -401,7 +408,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
       ConvertPalette(textures[*handle].palette, (unsigned char *)palette);
     }
   textures[*handle].textureformat = GetUncompressedTextureFormat(textureformat);
-  VSFileSystem::vs_fprintf (stderr,"w");
+  if(verbose_debug){
+	  VSFileSystem::vs_fprintf (stderr,"w");
+  }
   //  GFXActiveTexture(0);
   return GFXTRUE;
 }

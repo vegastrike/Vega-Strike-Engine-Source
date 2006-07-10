@@ -418,12 +418,13 @@ static void ConvertFormat (vector<char>& ogg ) {
   }
 }
 static int LoadSound (ALuint buffer, bool looping) {
+  static bool verbose_debug = XMLSupport::parse_bool(vs_config->getVariable("data","verbose_debug","false"));	
   unsigned int i;
   if (!dirtysounds.empty()) {
     i = dirtysounds.back();
     dirtysounds.pop_back();
     //    assert (sounds[i].buffer==(ALuint)0);
-    if (sounds[i].buffer!=(ALuint)0) {
+    if (verbose_debug&&sounds[i].buffer!=(ALuint)0) {
       VSFileSystem::vs_fprintf (stderr,"using claimed buffer %d",sounds[i].buffer);
     }
     sounds[i].buffer= buffer;

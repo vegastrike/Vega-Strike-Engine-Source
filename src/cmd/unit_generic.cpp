@@ -950,7 +950,7 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 
   if(!foundFile) {
 	cout << "Unit file " << filename << " not found" << endl;
-	fprintf (stderr,"Assertion failed unit_generic.cpp:711 Unit %s not found\n",filename);
+	VSFileSystem::vs_fprintf (stderr,"Assertion failed unit_generic.cpp:711 Unit %s not found\n",filename);
 
     VSFileSystem::vs_fprintf (stderr,"Warning: Cannot locate %s\n",filename);	  
     meshdata.clear();
@@ -1079,6 +1079,7 @@ StarSystem * Unit::getStarSystem () {
 void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
   static bool can_fire_in_spec = XMLSupport::parse_bool(vs_config->getVariable("physics","can_fire_in_spec","false"));
   static bool can_fire_in_cloak = XMLSupport::parse_bool(vs_config->getVariable("physics","can_fire_in_cloak","false"));
+  static bool verbose_debug = XMLSupport::parse_bool(vs_config->getVariable("data","verbose_debug","false"));
   if ((cloaking>=0&&can_fire_in_cloak==false)||(graphicOptions.InWarp&&can_fire_in_spec==false)){
     return;
   }
@@ -1125,7 +1126,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
     const bool locked_missile = (mis&&locked_on&&lockable_weapon);
     const bool missile_and_want_to_fire_missiles = (mis&&(weapon_type_bitmask&ROLES::FIRE_MISSILES));
     const bool gun_and_want_to_fire_guns =((!mis)&&(weapon_type_bitmask&ROLES::FIRE_GUNS));
-    if(missile_and_want_to_fire_missiles&&locked_missile){
+    if(verbose_debug&&missile_and_want_to_fire_missiles&&locked_missile){
       VSFileSystem::vs_fprintf (stderr,"\n about to fire locked missile \n");
     }
     bool want_to_fire=
