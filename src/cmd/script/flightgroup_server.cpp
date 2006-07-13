@@ -29,7 +29,8 @@ Flightgroup * Flightgroup::newFlightgroup (const std::string &name,
 }
 
 Flightgroup& Flightgroup::operator = (Flightgroup & other) {
-  *this = other;
+  printf ("warning: Flightgroup::operator= may *really* not work properly.\n"
+	  "In fact, this shouldn't be called at all anyway!\n");
   return other;
 }
 

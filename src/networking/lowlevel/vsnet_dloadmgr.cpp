@@ -358,13 +358,14 @@ void Manager::private_eval_download( SOCKETALT sock, NetBuffer& buffer, Subcomma
                         _currentItems.erase( smi );
                     }
                     _currentItems.insert( ItemSockPair(sock,mapi->second) );
-                    cl->erase( mapi );
 
                     int   len = buffer.getInt32( );
                     short sz  = buffer.getShort( );
                     mapi->second->setSize( len );
                     mapi->second->append( buffer.getBuffer(sz), sz );
                     mapi->second->changeState( FragmentReceived, Ok );
+
+                    cl->erase( mapi );
                 }
                 else
                 {

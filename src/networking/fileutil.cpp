@@ -11,7 +11,7 @@
 #ifndef PASCAL
 #define PASCAL
 #endif
-#ifdef FAR
+#ifndef FAR
 #define FAR
 #endif
 
