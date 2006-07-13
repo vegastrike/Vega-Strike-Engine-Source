@@ -245,8 +245,16 @@ int		NetClient::checkAcctMsg( )
 		}
 		else
 		{
+			char str[127];
+			sprintf(str, "!!! NETWORK ERROR : Connection to account server lost (error number %d)!!!",
+#ifdef _WIN32
+				WSAGetLastError()
+#else
+				errno
+#endif
+				);
 			globalsaves.push_back( "");
-			globalsaves.push_back( "!!! NETWORK ERROR : Connection to account server lost !!!");
+			globalsaves.push_back( str);
 			acct_sock.disconnect( __PRETTY_FUNCTION__, false );
 		}
 	}

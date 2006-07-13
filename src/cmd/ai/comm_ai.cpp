@@ -346,6 +346,8 @@ Unit * CommunicatingAI::GetRandomUnit (float playaprob, float targprob) {
   static float unitRad = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","radar_search_extra_radius","1000"));
   
   NearestUnitLocator unitLocator;    
+  
+#ifdef VS_ENABLE_COLLIDE_KEY
   CollideMap::iterator iter=cm->lower_bound(wherewrapper);
   
   if (iter!=cm->end()&&(*iter)->radius>0) {
@@ -359,6 +361,9 @@ Unit * CommunicatingAI::GetRandomUnit (float playaprob, float targprob) {
   if (target==NULL||target==parent) {
     target=parent->Target();
   }
+#else
+  Unit *target = parent->Target();
+#endif
   return target;
 }
 void CommunicatingAI::RandomInitiateCommunication (float playaprob, float targprob) {

@@ -104,8 +104,16 @@ vector<string>	NetClient::loginLoop( string str_callsign, string str_passwd)
 			globalsaves.push_back( "!!! NETWORK ERROR : Connection to game server timed out !!!");
 			timeout = 1;
 		} else if (recv<0) {
+			char str[127];
+			sprintf(str, "!!! NETWORK ERROR in recieving socket (error number %d)!!!",
+#ifdef _WIN32
+				WSAGetLastError()
+#else
+				errno
+#endif
+				);
 			globalsaves.push_back( "");
-			globalsaves.push_back( "!!! NETWORK ERROR in recieving socket.");
+			globalsaves.push_back( str);
 			timeout = 1;
 		} else {
 			break;
