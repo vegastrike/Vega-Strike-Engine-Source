@@ -7,13 +7,12 @@ template <class Locator> void findObjects (StarSystem * ss,CollideMap::iterator 
       float thisrad=fabs((*location)->radius);
       CollideMap::iterator tless=location;
       CollideMap::iterator tmore=location;
-      
-      ++tmore;
       CollideMap *cm=ss->collidemap;             
+      if (tmore!=cm->end())        
+        ++tmore;
       check->init(cm,location);
       bool workA=true;
       bool workB=true;
-      
       if (tless!=cm->begin())
         --tless;
       else 
@@ -21,8 +20,9 @@ template <class Locator> void findObjects (StarSystem * ss,CollideMap::iterator 
       while(workA||workB){
         if (workA
             &&!check->cullless(tless)) {
-          if (check->BoltsOrUnits()||(check->UnitsOnly()==(*tless)->radius>0)) {
-            float trad = check->NeedDistance()?((*tless)->GetPosition()-thispos).Magnitude()-fabs((*tless)->radius)-thisrad:0;
+          float rad=(*tless)->radius;
+          if (rad!=0.0f&&(check->BoltsOrUnits()||(check->UnitsOnly()==(rad>0)))) {
+            float trad = check->NeedDistance()?((*tless)->GetPosition()-thispos).Magnitude()-fabs(rad)-thisrad:0;
             if (!check->acquire(trad,tless)) {
               workA=false;
             }
@@ -35,8 +35,9 @@ template <class Locator> void findObjects (StarSystem * ss,CollideMap::iterator 
         if (workB
             &&tmore!=cm->end()
             &&!check->cullmore(tmore)) {
-          if (check->BoltsOrUnits()||(check->UnitsOnly()==(*tmore)->radius>0)) {
-            float trad = check->NeedDistance()?((*tmore)->GetPosition()-thispos).Magnitude()-fabs((*tmore)->radius)-thisrad:0;
+          float rad = (*tmore)->radius;
+          if (rad!=0.0f&&(check->BoltsOrUnits()||(check->UnitsOnly()==rad>0))) {
+            float trad = check->NeedDistance()?((*tmore)->GetPosition()-thispos).Magnitude()-fabs(rad)-thisrad:0;
             if (!check->acquire(trad,tmore)) {
               workB=false;
             }
