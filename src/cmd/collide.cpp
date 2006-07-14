@@ -126,9 +126,9 @@ bool usehuge_table() {
 bool Bolt::Collide (int index) {
   static bool New_Collide_System=XMLSupport::parse_bool(vs_config->getVariable("physics","new_collisions","true"));
   if (New_Collide_System) {
-    Collidable updated(**location);
-    updated.SetPosition(.5*(prev_position+cur_position));
-    return _Universe->activeStarSystem()->collidemap->CheckCollisions(this,updated);
+    //Collidable updated(**location);
+    //updated.SetPosition(.5*(prev_position+cur_position));
+    return _Universe->activeStarSystem()->collidemap->CheckCollisions(this,**location);
   }else {
 #ifdef OLD_COLLIDE_SYSTEM
     UnitCollection *candidates[2];  

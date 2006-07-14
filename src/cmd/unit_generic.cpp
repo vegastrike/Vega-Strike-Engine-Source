@@ -195,7 +195,13 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 	static float minvel = XMLSupport::parse_float (vs_config->getVariable ("physics","minimum_collision_velocity","5"));
 
 	float m1=smalle->GetMass(),m2=GetMass();
-
+        if (m1<1e-6||m2<1e-6){
+          if (m1<=0)m1=0;
+          if (m2<=0)m2=0;
+          m1+=(float)1.0e-7;
+          m2+=(float)1.0e-7;
+        }
+          
 	//Compute elastic and inelastic terminal velocities (point object approximation)
     Vector Inelastic_vf = (m1/(m1+m2))*smalle->GetVelocity() + (m2/(m1+m2))*GetVelocity();
 	Vector SmallerElastic_vf = (smalle->GetVelocity()*(m1-m2)/(m1+m2)+(2*m2/(m1+m2))*GetVelocity());
@@ -2092,11 +2098,19 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
     dead&= (image->explosion==NULL);    
     if (dead)
       Kill();
-  }
+  }else {
   //only do it in Unit::CollideAll 
   /*if ((!isSubUnit())&&(!killed)&&(!(docked&DOCKED_INSIDE))) {
     UpdateCollideQueue();
   }*/
+    if (!isSubUnit()) {
+      if (is_null(this->location)) {
+        this->getStarSystem()->collidemap->insert(Collidable(this));
+      }else {
+        this->getStarSystem()->collidemap->changeKey(this->location,Collidable(this));
+      }
+    }
+  }
 }
 
 void Unit::UpdateSubunitPhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc, Unit * superunit) {
@@ -2234,10 +2248,11 @@ void Unit::AddVelocity(float difficulty) {
 	   graphicOptions.WarpFieldStrength=1;
    }
    curr_physical_state.position = curr_physical_state.position +  (v*SIMULATION_ATOM*difficulty).Cast();
+   /*
    if (!is_null(location)&&activeStarSystem){
      location=activeStarSystem->collidemap->changeKey(location,Collidable(this));// do we need this?
-     //I guess you have to, to be robust
-   }
+   */// now we do this later in update physics
+     //I guess you have to, to be robust}
 }
 void Unit::UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc)
 {
@@ -2752,7 +2767,12 @@ Vector Unit::ClampTorque (const Vector &amt1) {
   static float FMEC_factor=XMLSupport::parse_float (vs_config->getVariable("physics","FMEC_factor","0.000000008")); // Fuel Mass in metric tons expended per generation of 100MJ assuming 5,000,000m/s exit velocity
   static float FMEC_exit_vel_inverse=XMLSupport::parse_float (vs_config->getVariable("physics","FMEC_exit_vel","0.0000002")); // 1/5,000,000 m/s
   fuel-=GetFuelUsage(false)*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;//HACK this forces the reaction to be Li-6+D fusion with efficiency governed by the getFuelUsage function
+  if (ISNAN(fuel)) {
+    fprintf (stderr,"FUEL is NAN\n");
+    fuel=0;
+  }
   if (fuel < 0) fuel = 0;
+  
   if (warpenergy < 0) warpenergy = 0;
   if (WCfuelhack) warpenergy = fuel;
 
@@ -2913,10 +2933,21 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
   static float FMEC_exit_vel_inverse=XMLSupport::parse_float (vs_config->getVariable("physics","FMEC_exit_vel","0.0000002")); // 1/5,000,000 m/s
 	  if (afterburntype == 2) // Energy-consuming afterburner
 		  warpenergy-=GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-	  if (afterburntype == 1) // fuel-burning overdrive - uses afterburner efficiency
-		  fuel-=GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-	  if (afterburntype == 0) // fuel-burning afterburner - uses default efficiency - appears to check for available energy? FIXME
-	      fuel-=GetFuelUsage(false)*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
+	  if (afterburntype == 1) {// fuel-burning overdrive - uses afterburner efficiency
+            fuel-=GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
+            if (ISNAN(fuel)) {
+              fprintf(stderr,"Fuel is NAN A\n");
+              fuel=0;
+            }
+          }
+	  if (afterburntype == 0){ // fuel-burning afterburner - uses default efficiency - appears to check for available energy? FIXME
+            fuel-=GetFuelUsage(false)*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
+            if (ISNAN(fuel)) {
+              fprintf(stderr,"Fuel is NAN B\n");
+              fuel=0;
+            }
+            
+          }
 
   if ((afterburn) && (afterburntype == 0)) {
 		energy -= instantenergy;
@@ -3249,6 +3280,10 @@ void Unit::RegenShields () {
   excessenergy=(excessenergy>precharge)?excessenergy-precharge:0;
   if(reactor_uses_fuel){
 	fuel-=FMEC_factor*((recharge*SIMULATION_ATOM-(reactor_idle_efficiency*excessenergy)));
+        if (ISNAN(fuel)) {
+          fprintf (stderr,"Fuel is nan C\n");
+          fuel=0;
+        }
   }
 
   energy=energy<0?0:energy;
@@ -4226,7 +4261,8 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
   }
   unsigned int biggerthan=*targ; //short fix
   float absdamage = damage>=0?damage:-damage;
-  percent = absdamage/(*targ+hull);
+  float denom=(*targ+hull);
+  percent = (denom>absdamage&&denom!=0)?absdamage/denom:(denom==0?0.0:1.0);
 
   // ONLY APLY DAMAGE ON SERVER SIDE
   if( Network==NULL || SERVER)
@@ -4274,9 +4310,9 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
 				static float system_failure=XMLSupport::parse_float(vs_config->getVariable ("physics","indiscriminate_system_destruction",".25"));
 				if ((!isplayer)&&DestroySystem(hull,maxhull,1)) {
 					
-					DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(absdamage/hull)),pnt);
+					DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(hull>0?absdamage/hull:1.0f)),pnt);
 				}else if (isplayer&&DestroyPlayerSystem(hull,maxhull,1)) {
-					DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(absdamage/hull)),pnt);
+					DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(hull>0?absdamage/hull:1.0f)),pnt);
 				}
                         
                                 if (did_hull_damage) {

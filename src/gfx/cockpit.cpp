@@ -1455,6 +1455,7 @@ void GameCockpit::InitStatic () {
 /***** WARNING CHANGED ORDER *****/
 GameCockpit::GameCockpit (const char * file, Unit * parent,const std::string &pilot_name): Cockpit( file, parent, pilot_name),shake_time(0),shake_type(0),textcol (1,1,1,1),text(NULL)
 {
+  shield8=false;
   static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
   int i;
   for (i=0;i<headlag;i++) {

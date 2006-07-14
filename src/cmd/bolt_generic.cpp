@@ -48,7 +48,7 @@ bool Bolt::Update (int index) {
   }
   Collidable updated(**location);
   updated.SetPosition(.5*(prev_position+cur_position));
-  //location=_Universe->activeStarSystem()->collidemap->changeKey(location,updated);
+  location=_Universe->activeStarSystem()->collidemap->changeKey(location,updated);
   return true;
 }
 
@@ -60,10 +60,10 @@ void bolt_draw::UpdatePhysics () {
         int size=i->size();
         Bolt * b=&((*i)[j]);
 	///warning these require active star system to be set appropriately
-	if (!b->Update(j)) {
-	  j--;//deleted itself
-	} else if (b->Collide(j)) {
+	if (b->Collide(j)) {//gotta collide before position update (old bolt table)
 	  j--;//deleted itself!
+	}else if (!b->Update(j)) {
+	  j--;//deleted itself
 	}
       }
     }
@@ -158,9 +158,11 @@ void BoltDestroyGeneric (Bolt * whichbolt, int index, int decal, bool isBall) {
   int fsize=vec->size();
   if (&(*vec)[index]==whichbolt) {
     int tsize=vec->size();
-    (*vec->back().location)->ref=(*(*vec)[index].location)->ref;
+    CollideMap*cm=_Universe->activeStarSystem()->collidemap;
+    cm->UpdateBoltInfo(vec->back().location,(*(*vec)[index].location)->ref);
+    
     assert (index<tsize);
-    _Universe->activeStarSystem()->collidemap->erase((*vec)[index].location);
+    cm->erase((*vec)[index].location);
     if(index+1!=vec->size())
       (*vec)[index]=vec->back();//just a memcopy, yo    
     vec->pop_back();//pop that back up

@@ -256,7 +256,7 @@ float Priority (Unit * me, Unit * targ, float gunrange,float rangetotarget, floa
       static float mass_inertial_priority_scale =XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","MassInertialPriorityScale",".0000001"));
       Vector normv (me->GetVelocity());
       float Speed = me->GetVelocity().Magnitude();
-      normv*=1/Speed;
+      normv*=Speed?1.0f/Speed:1.0f;
       Vector ourToThem = targ->Position()-me->Position();
       ourToThem.Normalize();
       inertial_priority = mass_inertial_priority_scale*(.5 + .5 * (normv.Dot(ourToThem)))*me->GetMass()*Speed;

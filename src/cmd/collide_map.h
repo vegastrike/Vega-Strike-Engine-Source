@@ -5,13 +5,15 @@
 #include "gfx/vec.h"
 #include <limits>
 #include <vector>
+/* Arbitrarily use Set for ALL PLATFORMS -hellcatv */
+//#define VS_ENABLE_COLLIDE_KEY
 class Unit;
 class Bolt;
 class Collidable{
   float key;
   QVector position;
 public:
-  float radius;//radius == 0, bolt  radius <0 beam, radius >0 unit, radius == nan  null
+  float radius;//radius == 0: to-be-deleted, radius <0 bolt (radius == speed in phys frame), radius >0 unit
   
   union CollideRef{
     Unit * unit;
@@ -35,28 +37,52 @@ public:
   bool operator <(const Collidable &other) const {
     return key<other.key;
   }
-
+  Collidable &get () {return *this;}
   Collidable() : radius(std::numeric_limits<float>::quiet_NaN()) {}
   Collidable(Unit * un);
   Collidable(unsigned int bolt_index, float speed, const QVector &p){
     ref.bolt_index=bolt_index;
     radius=-speed*SIMULATION_ATOM;
+    if (ISNAN(radius)||radius>=-FLT_MIN) radius=-FLT_MIN*2;
     this->SetPosition(p);
   }
 };
-/* Arbitrarily use Set for ALL PLATFORMS -hellcatv */
-#define VS_ENABLE_COLLIDE_KEY
 
 
 class CollideArray{
 public:
-  Collidable * sorted;
-  Collidable * unsorted;
-  std::vector<int> *toflattenhints;
-  
+  class  CollidableBackref:public Collidable{
+  public:
+
+    size_t toflattenhints_offset;
+    CollidableBackref() : Collidable(){}
+    CollidableBackref(Unit * un):Collidable(un){}
+    CollidableBackref(unsigned int bolt_index, float speed, const QVector &p):Collidable(bolt_index,speed,p) {}
+    CollidableBackref(const Collidable &b,size_t offset):Collidable(b){toflattenhints_offset=offset;}
+    
+  };
+  typedef Collidable *iterator;
+  bool Iterable(iterator);
+  std::vector<Collidable> sorted;
+  std::vector<Collidable> unsorted;
+  std::vector<std::list<CollidableBackref> >toflattenhints;
+  int count;
+  void UpdateBoltInfo(iterator iter,Collidable::CollideRef ref);
+  void flatten();
+  iterator insert (const Collidable & newKey,iterator hint);
+  iterator insert (const Collidable & newKey);
+  iterator changeKey (iterator iter, const Collidable & newKey);
+  iterator changeKey (iterator iter, const Collidable & newKey, iterator tless, iterator tmore);
+  iterator begin() {return &*sorted.begin();}
+  iterator end() {return this->begin()+sorted.size();}
+  iterator lower_bound(const Collidable&);
+  void erase(iterator iter);
+  void checkSet ();
+  CollideArray():toflattenhints(1),count(0) {
+    
+  }
 
 };
-
 
 #ifdef VS_ENABLE_COLLIDE_KEY
 class CollideMap:public KeyMutableSet<Collidable> {
@@ -74,6 +100,8 @@ public:
   bool CheckCollisions(Unit * un, const Collidable & updated);//will be handed off to a templated function
   bool CheckUnitCollisions(Unit * un, const Collidable & updated);//DANGER must be used on lists that are only populated with Units, not bolts
 };
+
+#if defined(VS_ENABLE_COLLIDE_LIST)||defined(VS_ENABLE_COLLIDE_KEY)
 extern CollideMap null_collide_map;
 extern CollideMap::iterator null_collide_iter;
 extern bool null_collide_iter_initialized;
@@ -97,5 +125,16 @@ inline void set_null(CollideMap::iterator &it)
 	init_null_collide_iter();
 	it = null_collide_iter;
 }
+#else
+inline void init_null_collide_iter(){}
+inline bool is_null(const CollideMap::iterator &it)
+{
+  return it==NULL;
+}
+inline void set_null(CollideMap::iterator &it)
+{
+	it = NULL;
+}
 
+#endif
 #endif

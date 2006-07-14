@@ -431,7 +431,6 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
           unit->predicted_priority=priority;
         }
         
-        int newloc=(current_sim_location+priority)%SIM_QUEUE_SIZE;
         float backup=SIMULATION_ATOM;
         theunitcounter=theunitcounter+1;
         SIMULATION_ATOM*=priority;
@@ -442,18 +441,13 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
         unit->ResetThreatLevel();
         unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),priority==1?firstframe:true,&this->gravitationalUnits(),unit);    //FIXME "firstframe"-- assume no more than 2 physics updates per frame.
         double cc= queryTime();
-        last_collisions.clear();
-        unit->CollideAll();
         double dd = queryTime();
         aitime+=bb-aa;
         phytime+=cc-bb;
         collidetime+=dd-cc;
-        if (newloc==current_sim_location) {
-	      iter.advance();
-        }else{ 
-	      iter.moveBefore(this->physics_buffer[newloc]);
-        }
         SIMULATION_ATOM=backup;
+        iter.advance();
+        unit->predicted_priority=priority;
       }
     }catch (const boost::python::error_already_set) {
       if (PyErr_Occurred()) {
@@ -472,31 +466,52 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
           printf("PhysFrame:%u - %u, %u, %u t:%f ai:%f p:%f c:%f\n",physicsframecounter,theunitcounter,movingtotal/128,totalprocessed/physicsframecounter,queryTime()-updatebegin,aitime,phytime,collidetime);
 //#define collisionperf
 #ifdef collisionperf
-		extern int boltcalls;
-        extern int boltchecks;
-	    extern int unitcalls;
-		extern int unitchecks;
-		extern int boltonboltchecks;
-		extern int boltruns;
-		static int totboltcalls=0;
-		static int totunitcalls=0;
-		static int totboltchecks=0;
-		static int totunitchecks=0;
-		static int totboltruns=0;
-		totboltcalls+=boltcalls;
-		totunitcalls+=unitcalls;
-		totboltchecks+=boltchecks;
-		totunitchecks+=unitchecks;
-		totboltruns+=boltruns;
-		printf("Colcheck: pucl:%d puck:%d puclck:%d pbcl:%d pbck:%d pbclck:%d tuclck:%d tbclck:%d bobck:%d pbra:%d tbra:%d\n",unitcalls,unitchecks,(unitcalls)?unitchecks/unitcalls:0,boltcalls,boltchecks,(boltcalls)?boltchecks/boltcalls:0,(totunitcalls)?totunitchecks/totunitcalls:0,(totboltcalls)?totboltchecks/totboltcalls:0,boltonboltchecks,(boltcalls)?boltruns/boltcalls:0,(totboltcalls)?totboltruns/totboltcalls:0);
+          extern int boltcalls;
+          extern int boltchecks;
+          extern int unitcalls;
+          extern int unitchecks;
+          extern int boltonboltchecks;
+          extern int boltruns;
+          static int totboltcalls=0;
+          static int totunitcalls=0;
+          static int totboltchecks=0;
+          static int totunitchecks=0;
+          static int totboltruns=0;
+          totboltcalls+=boltcalls;
+          totunitcalls+=unitcalls;
+          totboltchecks+=boltchecks;
+          totunitchecks+=unitchecks;
+          totboltruns+=boltruns;
+          printf("Colcheck: pucl:%d puck:%d puclck:%d pbcl:%d pbck:%d pbclck:%d tuclck:%d tbclck:%d bobck:%d pbra:%d tbra:%d\n",unitcalls,unitchecks,(unitcalls)?unitchecks/unitcalls:0,boltcalls,boltchecks,(boltcalls)?boltchecks/boltcalls:0,(totunitcalls)?totunitchecks/totunitcalls:0,(totboltcalls)?totboltchecks/totboltcalls:0,boltonboltchecks,(boltcalls)?boltruns/boltcalls:0,(totboltcalls)?totboltruns/totboltcalls:0);
 		unitcalls=boltcalls=boltchecks=unitchecks=boltonboltchecks=boltruns=0;
 #endif
+        }
+	//end debug bookkeeping
+        bolts->UpdatePhysics();                
+        last_collisions.clear();
+        collidemap->flatten();
+        un_iter iter = this->physics_buffer[current_sim_location].createIterator();
+        Unit * unit;
+        while((unit = iter.current())!=NULL) {
+          int priority=unit->predicted_priority;
+          unit->predicted_priority=UnitUtil::getPhysicsPriority(unit);//FIXME I hope this is deterministic--it's kinda stupid to call it twice
+          float backup=SIMULATION_ATOM;
+          theunitcounter=theunitcounter+1;
+          SIMULATION_ATOM*=priority;
+
+          int newloc=(current_sim_location+priority)%SIM_QUEUE_SIZE;
+          unit->CollideAll();
+          SIMULATION_ATOM=backup;        
+          if (newloc==current_sim_location) {
+            iter.advance();
+          }else{ 
+            iter.moveBefore(this->physics_buffer[newloc]);
+          }
         }
         current_sim_location=(current_sim_location+1)%SIM_QUEUE_SIZE;
 	++physicsframecounter;
 	totalprocessed+=theunitcounter;
 	theunitcounter=0;
-	//end debug bookkeeping
   }else {
     un_iter iter = this->getUnitList().createIterator();
     Unit * unit=NULL;
@@ -549,8 +564,8 @@ void StarSystem::Update( float priority)
 	    }
 	  UpdateMissiles();//do explosions
 	  UpdateUnitPhysics(firstframe);
+
 	  
-	  bolts->UpdatePhysics();
 	  
 	  firstframe = false;
 	}
@@ -647,6 +662,8 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	}
 	current_stage=PROCESS_UNIT;
       }else if (current_stage==PROCESS_UNIT) { 	
+
+
 	UpdateUnitPhysics(firstframe);
 	UpdateMissiles();//do explosions
 	collidetable->Update();  
@@ -655,7 +672,6 @@ void StarSystem::Update(float priority , bool executeDirector) {
 
 	//iter = drawList.createIterator();
         bolttime=queryTime();
-	bolts->UpdatePhysics();
         bolttime=queryTime()-bolttime;
 	current_stage=MISSION_SIMULATION;
 	firstframe = false;

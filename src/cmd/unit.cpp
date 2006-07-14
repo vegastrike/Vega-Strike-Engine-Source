@@ -216,11 +216,12 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
 
   if (rootunit==NULL) rootunit=(const void*)this;
 
-  float damagelevel;
-  unsigned char chardamage;
-  damagelevel=this->hull/this->maxhull;
-  chardamage=(255 - (unsigned char)(damagelevel*255));
-
+  float damagelevel=1.0;
+  unsigned char chardamage=0;
+  if (this->hull<this->maxhull) {
+    damagelevel=this->hull/this->maxhull;
+    chardamage=(255 - (unsigned char)(damagelevel*255));
+  }
 #ifdef VARIABLE_LENGTH_PQR
   const float vlpqrScaleFactor = SizeScaleFactor;
 #else
@@ -378,9 +379,9 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
   if ((this->hull <0)&&(!cam_setup_phase)) {
     Explode(true, GetElapsedTime());
   }
-  float damagelevel;
-  unsigned char chardamage;
-  if (!cam_setup_phase) {
+  float damagelevel=1.0f;
+  unsigned char chardamage=0;
+  if (this->hull<this->maxhull&&!cam_setup_phase) {
       damagelevel=this->hull/this->maxhull;
       chardamage=(255 - (unsigned char)(damagelevel*255));
   }

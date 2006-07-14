@@ -1,5 +1,5 @@
 #include <stdlib.h>
-
+//#include <fenv.h>
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -168,6 +168,8 @@ void ExamineWhenTargetKey() {
    
   }
 }
+//  extern int allexcept;
+//int allexcept=FE_DIVBYZERO;//|FE_INVALID;//|FE_OVERFLOW|FE_UNDERFLOW;
 namespace CockpitKeys {
   
   void QuitNow () {
@@ -319,19 +321,27 @@ bool cockpitfront=true;
   if(newState==PRESS||newState==DOWN) 
   _Universe->AccessCockpit()->zoomfactor+=GetElapsedTime()/getTimeCompression();  
 }
+
   static float scrolltime=0;
   void ScrollUp (const KBData&,KBSTATE newState) {
    scrolltime+=GetElapsedTime();
    if(newState==PRESS||(newState==DOWN&&scrolltime>=.5)){
      scrolltime=0;
+     //     feenableexcept(allexcept);
+     //printf ("Enabling exceptions %d\n",allexcept);
      _Universe->AccessCockpit()->ScrollAllVDU (-1);
+
    }    
   }
   void ScrollDown (const KBData&,KBSTATE newState) {
    scrolltime+=GetElapsedTime();
    if(newState==PRESS||(newState==DOWN&&scrolltime>=.5)){
      scrolltime=0;
+     //     feenableexcept(0);
+     //printf("Disabling exceptions\n");
      _Universe->AccessCockpit()->ScrollAllVDU (1);
+
+
    }    
 
   }

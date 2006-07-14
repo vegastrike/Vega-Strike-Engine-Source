@@ -133,7 +133,11 @@ void Unit::CollideAll() {
     return;
   static bool newUnitCollisions=XMLSupport::parse_bool(vs_config->getVariable("physics","new_collisions","true"));  
   if (newUnitCollisions) {
-    this->getStarSystem()->collidemap->CheckCollisions(this,Collidable(this));
+    CollideMap *cm=this->getStarSystem()->collidemap;
+    if (is_null(this->location)) {
+      this->location=cm->insert(Collidable(this));
+    }
+    cm->CheckCollisions(this,*this->location);
   }else{
 #ifdef OLD_COLLIDE_SYSTEM
     UnitCollection * colQ [tablehuge+1];

@@ -2,18 +2,32 @@
 #define _UNIT_FIND_H_
 #include "unit_util.h"
 template <class Locator> void findObjects (StarSystem * ss,CollideMap::iterator location, Locator *check) {
-    if (!is_null(location)) {
-      QVector thispos = (**location).GetPosition();
-      float thisrad=fabs((*location)->radius);
+  CollideMap *cm=ss->collidemap;             
+  CollideMap::iterator cmend=cm->end();
+  CollideMap::iterator cmbegin=cm->begin();
+  if (cmend!=cmbegin&&!is_null(location)) {
       CollideMap::iterator tless=location;
       CollideMap::iterator tmore=location;
-      CollideMap *cm=ss->collidemap;             
-      if (tmore!=cm->end())        
-        ++tmore;
-      check->init(cm,location);
       bool workA=true;
       bool workB=true;
-      if (tless!=cm->begin())
+      
+      if (location!=cmend&&!cm->Iterable(location)) {
+        CollideArray::CollidableBackref * br=static_cast<CollideArray::CollidableBackref*>(location);
+        location=cmbegin+br->toflattenhints_offset;
+        if (location==cmend)
+          location--;
+        tmore=location;
+        tless=location;
+      }else if (location!=cmend) {
+        ++tmore;        
+      } else {
+        --location;
+        workB=false;
+      }
+      QVector thispos = (**location).GetPosition();
+      float thisrad=fabs((*location)->radius);
+      check->init(cm,location);
+      if (tless!=cmbegin)
         --tless;
       else 
         workA=false;      
@@ -27,13 +41,13 @@ template <class Locator> void findObjects (StarSystem * ss,CollideMap::iterator 
               workA=false;
             }
           }
-          if (tless!=cm->begin()) 
+          if (tless!=cmbegin) 
             tless--;
           else
             workA=false;
         }else workA=false;
         if (workB
-            &&tmore!=cm->end()
+            &&tmore!=cmend
             &&!check->cullmore(tmore)) {
           float rad = (*tmore)->radius;
           if (rad!=0.0f&&(check->BoltsOrUnits()||(check->UnitsOnly()==rad>0))) {

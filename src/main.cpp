@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-
+//#include <fenv.h>
 #include <Python.h>
 #include "config.h"
 #if defined(HAVE_SDL)
@@ -191,6 +191,7 @@ void bootstrap_first_loop();
 void nothinghappens (unsigned int, unsigned int, bool,int,int) {
 
 }
+//int allexcept=FE_DIVBYZERO;//|FE_INVALID;//|FE_OVERFLOW|FE_UNDERFLOW;
 extern void InitUnitTables();
 int main( int argc, char *argv[] ) 
 {
