@@ -324,7 +324,7 @@ static void ConvertFormat (vector<char>& ogg ) {
         vorbis_info *info=ov_info(&vf,-1);
         //ogg_int64_t totalsize=ov_pcm_total(&vf,-1);
         //long num_streams=ov_streams(&vf);
-        const int segmentsize=16384;
+        const int segmentsize=65536*32;
         const int samples=16;
         converted.push_back('R');
         converted.push_back('I');
@@ -392,15 +392,16 @@ static void ConvertFormat (vector<char>& ogg ) {
         int signedvalue=1;
         int bitstream=0;
         while ((bytesread=ov_read(&vf,&converted[converted.size()-segmentsize], segmentsize, 0, samples/8, signedvalue, &bitstream))>0){
+          int numtoerase=0;
           if (bytesread<segmentsize) {
-            int numtoerase=segmentsize-bytesread;
-            converted.erase(converted.end()-numtoerase,converted.end());
+            numtoerase=segmentsize-bytesread;
+            //converted.erase(converted.end()-numtoerase,converted.end());
           }
           
           
-          converted.resize(converted.size()+segmentsize);
+          converted.resize(converted.size()+segmentsize-numtoerase);
         }
-        converted.erase(converted.end()-segmentsize,converted.end());
+        converted.resize(converted.size()-segmentsize);
         convertToLittle(converted.size()-8,&converted[4]);
         convertToLittle(converted.size()-pcmsizestart,&converted[pcmsizestart-4]);
 #if 0
