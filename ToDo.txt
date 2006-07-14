@@ -10,6 +10,7 @@ Summer
 
 
 *Developer tasks - do profiling to enumerate current performance bottlenecks.
+** Changed collision check on revision from 10331 to 10332 to use array instead of r/b tree
 
 *Systems
 ** Fix station, wormhole, planet placement/generation (avoid too close together - make docking points at stations around/on planet)
