@@ -7,6 +7,7 @@ Summer
 ** Merge in Privateer vegastrike.config
 *** make pirates... more pirate-like
 *** faction standing changes -- sanity?
+***upgrade space - upgrades need to be bigger
 
 
 *Developer tasks - do profiling to enumerate current performance bottlenecks.
