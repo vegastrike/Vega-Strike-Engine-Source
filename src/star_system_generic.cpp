@@ -398,6 +398,9 @@ unsigned int movingavgarray[128]={0};
 unsigned int movingtotal=0;
 double aggfire=0;
 int numprocessed=0;
+int acqcalls=0;
+int erguns=0;
+int ermis=0;
 double targetpick=0;
 void StarSystem::UpdateUnitPhysics (bool firstframe) {
   static   bool phytoggle=true;
@@ -408,7 +411,10 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
   double flattentime=0;
   double bolttime=0;
   targetpick=0;
+  acqcalls=0;
   aggfire=0;
+  ermis=0;
+  erguns=0;
   numprocessed=0;
   if (phytoggle) {
     // BELOW COMMENTS ARE NO LONGER IN SYNCH
@@ -492,7 +498,7 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
 	     int movingavgindex=physicsframecounter%128;
 	     movingtotal=movingtotal-movingavgarray[movingavgindex]+theunitcounter;
 	     movingavgarray[movingavgindex]=theunitcounter;
-		 printf("PhysFrame:%u - %u, %u, %u t:%f ai:%f:%f:ctc_%d,tp_%f p:%f c:%f b:%f fl:%f\n",physicsframecounter,theunitcounter,movingtotal/128,totalprocessed/physicsframecounter,queryTime()-updatebegin,aitime,aggfire,numprocessed,targetpick,phytime,collidetime,bolttime,flattentime);
+		 printf("PhysFrame:%u - %u, %u, %u t:%f ai:%f:%f:ctc_%d:%d,%d,%d,tp_%f p:%f c:%f b:%f fl:%f\n",physicsframecounter,theunitcounter,movingtotal/128,totalprocessed/physicsframecounter,queryTime()-updatebegin,aitime,aggfire,numprocessed,acqcalls,erguns,ermis,targetpick,phytime,collidetime,bolttime,flattentime);
        }
 	//end debug bookkeeping
      current_sim_location=(current_sim_location+1)%SIM_QUEUE_SIZE;

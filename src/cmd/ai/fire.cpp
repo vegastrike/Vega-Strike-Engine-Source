@@ -316,10 +316,18 @@ public:
     this->maxtargets=maxtargets;
   }
   bool acquire(Unit*un, float distance) {
-    
+    extern int acqcalls;
+	extern int erguns;
+	extern int ermis;
+	++acqcalls;
     if (distance>maxinnerrange[0]&&!reached) {
       reached=true;          
       if (mytarg&&rolepriority<maxrolepriority) {
+		  if(maxinnerrange[0]==maxinnerrange[1]){
+			++ermis;
+		  } else {
+			++erguns;
+		  }
         return false;
       }else {
         for (size_t i=1;i<numTuple;++i) {
@@ -350,19 +358,19 @@ public:
         rolepriority=rp;
       }
       for (vector <TurretBin>::iterator k=tbin->begin();k!=tbin->end();++k) {
-	if (rangetotarget>k->maxrange) {
-	  break;
-	}
-	const char tprior=ROLES::getPriority (k->turret[0].tur->combatRole())[un->combatRole()];
-	if (relationship<0) {
-	  if (tprior<16){
-	    k->listOfTargets[0].push_back (TargetAndRange (un,rangetotarget,relationship));
-        numtargets++;
-	  }else if (tprior<31){
-	    k->listOfTargets[1].push_back (TargetAndRange (un,rangetotarget,relationship));
-        numtargets++;
-	  }
-	}
+	    if (rangetotarget>k->maxrange) {
+	      break;
+	    }
+	    const char tprior=ROLES::getPriority (k->turret[0].tur->combatRole())[un->combatRole()];
+	    if (relationship<0) {
+	      if (tprior<16){
+	        k->listOfTargets[0].push_back (TargetAndRange (un,rangetotarget,relationship));
+            numtargets++;
+	      }else if (tprior<31){
+	        k->listOfTargets[1].push_back (TargetAndRange (un,rangetotarget,relationship));
+            numtargets++;
+	    }
+	   }
       }
     }
     return (maxtargets==0)||(numtargets<maxtargets);
