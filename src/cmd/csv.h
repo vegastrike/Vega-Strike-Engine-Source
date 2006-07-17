@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
-#include <hash_map>
+#include <gnuhash.h>
+
 #include "hashtable.h"
 namespace VSFileSystem
 {

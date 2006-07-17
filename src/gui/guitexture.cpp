@@ -24,7 +24,10 @@
 
 #include "guitexture.h"
 
-#include <hash_map>
+
+#include <gnuhash.h>
+
+
 #include <string>
 #include <png.h>
 #include "vsfilesystem.h"

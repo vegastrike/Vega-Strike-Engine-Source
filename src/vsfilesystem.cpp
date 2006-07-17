@@ -23,7 +23,9 @@ struct dirent { char d_name[1]; };
 #include "common/common.h"
 #include "galaxy_gen.h"
 #include "pk3.h"
-#include <hash_map>
+
+#include <gnuhash.h>
+
 
 using stdext::hash_map;
 

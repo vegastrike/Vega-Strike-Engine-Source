@@ -2,7 +2,10 @@
 #define __UNIT_CONST_CACHE_H
 
 #include <string>
+#include <gnuhash.h>
+class ConstHasher;
 class StringIntKey {
+  friend class ConstHasher;
   std::string key;
   int fac;
 public:
@@ -10,20 +13,33 @@ public:
     key=k;
     fac=f;
   }
+  bool operator == (const StringIntKey &b) const {
+    return fac==b.fac&&key==b.key;
+  }
   bool operator < (const StringIntKey &b) const {
     if (fac!=b.fac)
       return fac<b.fac;
     return key < b.key;
   }
 };
+class ConstHasher {
+public:
+  template <class T> size_t operator () (const T&key)const{
+    return stdext::hash<T>()(key);
+  }
+  size_t operator () (const StringIntKey &key)const{
+    return stdext::hash<std::string>()(key.key)^stdext::hash<size_t>()((size_t)key.fac);
+  }
+};
 template <class Typ,class Key> class ClassCache {
-  static std::map<Key, Typ *> unit_cache;
+
+  static stdext::hash_map<Key, Typ *, ConstHasher> unit_cache;
  public:
   static const Typ *getCachedConst (Key k) {
     return getCachedMutable(k);
   }
   static Typ *getCachedMutable (const Key &k) {
-    typename std::map<Key,Typ *>::iterator i=unit_cache.find(k);
+    typename stdext::hash_map<Key,Typ *,ConstHasher>::iterator i=unit_cache.find(k);
     if (i!=unit_cache.end())
       return (*i).second;
     return NULL;
@@ -36,16 +52,18 @@ template <class Typ,class Key> class ClassCache {
     return setCachedMutable (k,un);
   }
   static void purgeCache(void (*Kill) (Typ * un)) {
-    typename stdext::hash_map<Key,Typ *>::iterator i=unit_cache.begin();
+    typename stdext::hash_map<Key,Typ *,ConstHasher>::iterator i=unit_cache.begin();
     for (;i!=unit_cache.end();++i) {
       (*Kill) ((*i).second);
     }
     unit_cache.clear();
   }
 };
+
 #if (defined(__GNUC__)&& ((__GNUC__ == 3 && __GNUC_MINOR__ >= 4)|| __GNUC__>3))
-template <class Typ,class Key> stdext::hash_map<Key,Typ*> ClassCache<Typ,Key>::unit_cache;
+template <class Typ,class Key> stdext::hash_map<Key,Typ*,ConstHasher> ClassCache<Typ,Key>::unit_cache;
 #endif
+
 typedef ClassCache<Unit,StringIntKey> UnitConstCache;
 typedef ClassCache<Mesh,std::string> WeaponMeshCache;
 

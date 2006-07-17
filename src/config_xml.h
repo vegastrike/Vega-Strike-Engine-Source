@@ -28,7 +28,8 @@
 
 #include <expat.h>
 #include <string>
-#include <hash_map>
+#include <gnuhash.h>
+
 #include "configxml.h"
 #include "xml_support.h"
 #include "easydom.h"

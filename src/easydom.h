@@ -30,7 +30,7 @@
 #include <string>
 #include <vector>
 #include <stack>
-#include <hash_map>
+#include <gnuhash.h>
 #include <stdlib.h>
 #include "vsfilesystem.h"
 //using namespace VSFileSystem;

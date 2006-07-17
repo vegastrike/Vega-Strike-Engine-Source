@@ -2,7 +2,8 @@
 //#include "gfx/animation.h"
 #include <vector>
 #include <string>
-#include <hash_map>
+#include <gnuhash.h>
+
 #include <expat.h>
 #include "vegastrike.h"
 #include "xml_support.h"

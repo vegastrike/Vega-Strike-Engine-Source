@@ -5,7 +5,8 @@
 #include "mission.h"
 #include <string>
 #include <vector>
-#include <hash_map>
+#include <gnuhash.h>
+
 class Texture;
 
 class Flightgroup {

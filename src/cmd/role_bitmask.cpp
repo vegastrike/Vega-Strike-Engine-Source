@@ -1,6 +1,7 @@
 #include "role_bitmask.h"
 #include "xml_support.h"
-#include <hash_map>
+#include <gnuhash.h>
+
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "vsfilesystem.h"

@@ -652,8 +652,6 @@ libroot = \
   src/in_mouse.h \
   src/in_sdl.cpp \
   src/linecollide.h \
-  src/macosx_math.cpp \
-  src/macosx_math.h \
   src/main_loop.cpp \
   src/main_loop.h \
   src/physics.cpp \
@@ -685,6 +683,8 @@ librootgeneric = \
   src/easydom.h \
   src/endianness.cpp \
   src/endianness.h \
+  src/macosx_math.cpp \
+  src/macosx_math.h \
   src/faction_generic.cpp \
   src/faction_generic.h \
   src/faction_util_generic.cpp \

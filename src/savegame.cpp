@@ -412,8 +412,10 @@ template <class MContainerType> void RemoveEmpty (MContainerType &t) {
 	for (i=t.begin();i!=t.end();) {
 		typename MContainerType::key_type k = (*i).first;
 		if ((*i).second.empty()) {
-			t.erase(i);
-			i = t.lower_bound(k);
+                  typename MContainerType::iterator j=i;                  
+                  t.erase(i);
+                  i=j;
+                  //i = t.lower_bound(k);
 		}else {
 			i++;
 		}

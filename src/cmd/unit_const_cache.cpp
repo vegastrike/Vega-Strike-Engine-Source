@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
-#include <hash_map>
+#include <gnuhash.h>
+
 
 #include "unit_generic.h"
 #include "unit_const_cache.h"

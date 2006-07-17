@@ -191,7 +191,7 @@ void bootstrap_first_loop();
 void nothinghappens (unsigned int, unsigned int, bool,int,int) {
 
 }
-//int allexcept=FE_DIVBYZERO;//|FE_INVALID;//|FE_OVERFLOW|FE_UNDERFLOW;
+//int allexcept=FE_DIVBYZERO|FE_INVALID;//|FE_OVERFLOW|FE_UNDERFLOW;
 extern void InitUnitTables();
 int main( int argc, char *argv[] ) 
 {

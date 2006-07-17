@@ -11,7 +11,8 @@ using std::vector;
 #include "gfx/vec.h"
 #include "networking/const.h"
 #include "pk3.h"
-#include <hash_map>
+#include <gnuhash.h>
+
 using stdext::hash_map;
 
 class VegaConfig;

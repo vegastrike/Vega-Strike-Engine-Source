@@ -26,7 +26,8 @@
 #ifndef _MISSION_H_
 #define _MISSION_H_
 
-#include <hash_map>
+#include <gnuhash.h>
+
 #include <expat.h>
 #include <string>
 #include <fstream>

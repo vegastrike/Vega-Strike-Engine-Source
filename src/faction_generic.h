@@ -2,7 +2,9 @@
 #define __FACTIONGENERIC_H
 
 #include <string>
-#include <hash_map>
+
+#include <gnuhash.h>
+
 #include "xml_support.h"
 
 class FSM;
