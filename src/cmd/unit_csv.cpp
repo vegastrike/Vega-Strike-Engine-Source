@@ -1358,8 +1358,8 @@ void Unit::WriteUnit (const char * modifications) {
 }
 using XMLSupport::tostring;
 
-static void mapToStringVec(map<string,string> a, vector<string> &key, vector<string> &value) {
-  for (map<string,string>::iterator i = a.begin();i!=a.end();++i) {
+static void mapToStringVec(stdext::hash_map<string,string> a, vector<string> &key, vector<string> &value) {
+	for (stdext::hash_map<string,string>::iterator i = a.begin();i!=a.end();++i) {
     key.push_back(i->first);
     value.push_back(i->second);
   }
@@ -1391,7 +1391,7 @@ string Unit::WriteUnitString () {
       string val;
       if (unitTables[i]->RowExists(csvRow,where)) {
         CSVRow row(unitTables[i],where);        
-        map<string,string> unit;        
+		stdext::hash_map<string,string> unit;        
         for (int jj=0;
              jj<row.size();
              ++jj) {
@@ -1671,7 +1671,7 @@ Unit * Unit::makeMasterPartList() {
   if (err<=VSFileSystem::Ok) {
          CSVTable table(mplf,mplf.GetRoot());
          mplf.Close();
-		 std::map<std::string,int>::const_iterator it;
+		 stdext::hash_map<std::string,int>::const_iterator it;
 		 for (it=table.rows.begin();it!=table.rows.end();++it) {
 			 CSVRow row(&table,it->second);
 			 Cargo carg;

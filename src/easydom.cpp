@@ -69,7 +69,7 @@ string easyDomNode::attr_value(string search_name){
 }
 
 void easyDomNode::printNode(ostream& out,int recurse_level,int level){
- map<string,string>::const_iterator iter;
+	stdext::hash_map<string,string>::const_iterator iter;
  //vector<string>::const_iterator iter2;
 
  out << "<" << name ;

@@ -2,14 +2,14 @@
 #define __FACTIONGENERIC_H
 
 #include <string>
-#include <map>
+#include <hash_map>
 #include "xml_support.h"
 
 class FSM;
 class Animation;
 class Unit;
 class Texture;
-typedef std::map<std::string, float> MapStringFloat;
+typedef stdext::hash_map<std::string, float> MapStringFloat;
   class Faction {
 
   public:

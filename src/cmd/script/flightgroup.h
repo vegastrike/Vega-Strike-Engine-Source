@@ -5,7 +5,7 @@
 #include "mission.h"
 #include <string>
 #include <vector>
-#include <map>
+#include <hash_map>
 class Texture;
 
 class Flightgroup {
@@ -27,7 +27,7 @@ public:
   int nr_ships_left;
   int nr_waves_left;
 
-  std::map<std::string,std::string> ordermap;
+  stdext::hash_map<std::string,std::string> ordermap;
   std::vector <class varInst *> *orderlist;
   //removes a ship from the flightgroup below
   void Decrement(Unit * trashed) {

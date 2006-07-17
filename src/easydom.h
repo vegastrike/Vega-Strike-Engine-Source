@@ -30,7 +30,7 @@
 #include <string>
 #include <vector>
 #include <stack>
-#include <map>
+#include <hash_map>
 #include <stdlib.h>
 #include "vsfilesystem.h"
 //using namespace VSFileSystem;
@@ -73,7 +73,7 @@ class easyDomNode {
   easyDomNode *parent;
   AttributeList *attributes;
 
-  map<string,string> attribute_map;
+  stdext::hash_map<string,string> attribute_map;
 
   //vector<string> att_name;
   //vector<string> att_value;
@@ -81,7 +81,7 @@ class easyDomNode {
   string name;
 };
 
-typedef map<string,int> tagMap;
+typedef stdext::hash_map<string,int> tagMap;
 
 class tagDomNode : public easyDomNode {
  public:

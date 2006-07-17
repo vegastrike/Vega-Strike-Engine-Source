@@ -225,7 +225,7 @@ void Mission::printVarInst(int dbg_level,varInst *vi){
 /* *********************************************************** */
 
 void Mission::printVarmap(const varInstMap & vmap){
-  map<string,varInst *>::const_iterator iter;
+	stdext::hash_map<string,varInst *>::const_iterator iter;
 
   for(iter=vmap.begin();iter!=vmap.end();iter++){
     cout << "variable " << (*iter).first ;
@@ -238,7 +238,7 @@ void Mission::printVarmap(const varInstMap & vmap){
 /* *********************************************************** */
 
 void Mission::printModules(){
-  map<string,missionNode *>::iterator iter;
+	stdext::hash_map<string,missionNode *>::iterator iter;
 
   for(iter=runtime.modules.begin();iter!=runtime.modules.end();iter++){
     cout << "  module " << (*iter).first ;
@@ -246,7 +246,7 @@ void Mission::printModules(){
     printNode(mnode,0);
     cout << "        scripts" << endl;
 
-    map<string,missionNode *>::iterator iter2;
+	stdext::hash_map<string,missionNode *>::iterator iter2;
 
     for(iter2=mnode->script.scripts.begin();iter2!=mnode->script.scripts.end();iter2++){
       cout << "  script " << (*iter2).first ;
@@ -264,7 +264,7 @@ void Mission::printRuntime(){
   cout << "RUNTIME" << endl;
   cout << "MODULES:" << endl;
 
-  map<string,missionNode *>::iterator iter;
+  stdext::hash_map<string,missionNode *>::iterator iter;
   //=runtime.modules.begin()
 
   for(iter=runtime.modules.begin();iter!=runtime.modules.end();iter++){
@@ -283,7 +283,7 @@ void Mission::printGlobals(int dbg_level){
     return;
   }
 
-  map<string,missionNode *>::iterator iter;
+  stdext::hash_map<string,missionNode *>::iterator iter;
 
   for(iter=runtime.global_variables.begin();iter!=runtime.global_variables.end();iter++){
     cout << "  global var " << (*iter).first ;

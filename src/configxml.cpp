@@ -283,7 +283,7 @@ void VegaConfig::doColors(configNode *node){
 
 string VegaConfig::getVariable(string section,string subsection,string name,string defaultvalue){
   string hashname = section + "/" + subsection + "/" + name;
-  map<string,string>::iterator it;
+  std::map<string,string>::iterator it;
   if ((it=map_variables.find(hashname)) != map_variables.end())
       return (*it).second; else
       return defaultvalue;
@@ -306,7 +306,7 @@ string VegaConfig::getVariable(string section,string subsection,string name,stri
 
 string VegaConfig::getVariable(string section,string name,string defaultval){
   string hashname = section + "/" + name;
-  map<string,string>::iterator it;
+  std::map<string,string>::iterator it;
   if ((it=map_variables.find(hashname)) != map_variables.end())
       return (*it).second; else
       return defaultval;
@@ -368,7 +368,7 @@ void VegaConfig::gethColor(string section, string name, float color[4],int hexco
 
 void VegaConfig::getColor(string section, string name, float color[4],bool have_color){
   string hashname = section + "/" + name;
-  map<string,vColor>::iterator it;
+  std::map<string,vColor>::iterator it;
   if ((it=map_colors.find(hashname)) != map_colors.end()) {
       color[0] = (*it).second.r;
       color[1] = (*it).second.g;

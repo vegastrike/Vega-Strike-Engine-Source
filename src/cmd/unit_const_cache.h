@@ -17,13 +17,13 @@ public:
   }
 };
 template <class Typ,class Key> class ClassCache {
-  static std::map <Key, Typ *> unit_cache;
+  static std::map<Key, Typ *> unit_cache;
  public:
   static const Typ *getCachedConst (Key k) {
     return getCachedMutable(k);
   }
   static Typ *getCachedMutable (const Key &k) {
-    typename std::map <Key,Typ *>::iterator i=unit_cache.find(k);
+    typename std::map<Key,Typ *>::iterator i=unit_cache.find(k);
     if (i!=unit_cache.end())
       return (*i).second;
     return NULL;
@@ -36,7 +36,7 @@ template <class Typ,class Key> class ClassCache {
     return setCachedMutable (k,un);
   }
   static void purgeCache(void (*Kill) (Typ * un)) {
-    typename std::map <Key,Typ *>::iterator i=unit_cache.begin();
+    typename stdext::hash_map<Key,Typ *>::iterator i=unit_cache.begin();
     for (;i!=unit_cache.end();++i) {
       (*Kill) ((*i).second);
     }
@@ -44,7 +44,7 @@ template <class Typ,class Key> class ClassCache {
   }
 };
 #if (defined(__GNUC__)&& ((__GNUC__ == 3 && __GNUC_MINOR__ >= 4)|| __GNUC__>3))
-template <class Typ,class Key> std::map<Key,Typ*> ClassCache<Typ,Key>::unit_cache;
+template <class Typ,class Key> stdext::hash_map<Key,Typ*> ClassCache<Typ,Key>::unit_cache;
 #endif
 typedef ClassCache<Unit,StringIntKey> UnitConstCache;
 typedef ClassCache<Mesh,std::string> WeaponMeshCache;

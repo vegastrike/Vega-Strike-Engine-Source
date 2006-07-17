@@ -2,14 +2,14 @@
 #define __COMM_AI_H
 
 #include "order.h"
-#include <map>
+#include <hash_map>
 #include <vector>
 /// this class is meant to be inherited by AI wishing to process comm messages
 
 
 class CommunicatingAI:public Order{
 
-  typedef std::map<const Unit*,float> relationmap;
+  typedef stdext::hash_map<const Unit*,float> relationmap;
  protected:
   unsigned char sex;//male female robot???
   float anger;//how easily he will target you if you taunt him enough (-.00001 is always -.4 is often -.6 is normal

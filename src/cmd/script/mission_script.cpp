@@ -201,7 +201,7 @@ void Mission::removeContext()
   scriptContext *old=stack->contexts[lastelem];
   stack->contexts.pop_back();
 #if 0
-  map<string,varInst *>::const_iterator iter;
+  stdext::hash_map<string,varInst *>::const_iterator iter;
   for(iter=old->varinsts->begin();iter!=old->varinsts->end();iter++){
     varInst *vi=(*iter).second;
     deleteVarInst(vi);
@@ -666,7 +666,7 @@ void Mission::deleteVarInst(varInst *vi,bool del_local){
 }
 
 void Mission::deleteVarMap(varInstMap *vmap){
-    map<string,varInst *>::const_iterator iter;
+	stdext::hash_map<string,varInst *>::const_iterator iter;
     for(iter=vmap->begin();iter!=vmap->end();iter++){
       varInst *vi=(*iter).second;
       if(vi==NULL){
@@ -697,7 +697,7 @@ unsigned int Mission::createClassInstance(string modulename){
 
   varInstMap *cvmap0=module_node->script.classvars[0];
 
-  map<string,varInst *>::const_iterator iter;
+  stdext::hash_map<string,varInst *>::const_iterator iter;
   for(iter=cvmap0->begin();iter!=cvmap0->end();iter++){
     varInst *vi0=(*iter).second;
     string  vi0_name=(*iter).first;

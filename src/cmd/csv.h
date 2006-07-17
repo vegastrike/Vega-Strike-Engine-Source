@@ -1,6 +1,6 @@
 #include <string>
 #include <vector>
-#include <map>
+#include <hash_map>
 #include "hashtable.h"
 namespace VSFileSystem
 {
@@ -15,8 +15,8 @@ private:
     void Init (std::string data);
 public:
     std::string rootdir;
-    std::map<std::string,int> columns;
-    std::map<std::string,int> rows;
+    stdext::hash_map<std::string,int> columns;
+    stdext::hash_map<std::string,int> rows;
     std::vector<std::string> key;
     std::vector<std::string> table;
 

@@ -28,7 +28,7 @@
 
 #include <expat.h>
 #include <string>
-#include <map>
+#include <hash_map>
 #include "configxml.h"
 #include "xml_support.h"
 #include "easydom.h"
@@ -38,8 +38,8 @@ using std::string;
 
 using XMLSupport::AttributeList;
 
-typedef map<string,KBHandler> CommandMap;
-typedef map<string,int> KeyMap;
+typedef stdext::hash_map<string,KBHandler> CommandMap;
+typedef stdext::hash_map<string,int> KeyMap;
 
 class GameVegaConfig: public VegaConfig {
  public:

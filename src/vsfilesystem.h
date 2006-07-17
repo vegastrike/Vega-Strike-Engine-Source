@@ -11,8 +11,8 @@ using std::vector;
 #include "gfx/vec.h"
 #include "networking/const.h"
 #include "pk3.h"
-#include "map"
-using std::map;
+#include <hash_map>
+using stdext::hash_map;
 
 class VegaConfig;
 class VSImage;
@@ -119,7 +119,7 @@ namespace VSFileSystem
 
 	extern string failed;
 
-	extern map<string, CPK3 *>	pk3_opened_files; 			// Map of the currently opened PK3 volume/resource files
+	extern stdext::hash_map<string, CPK3 *>	pk3_opened_files; 			// Map of the currently opened PK3 volume/resource files
 
 	/************************************************************************************************/
 	/**** VSFileSystem wrappers to stdio calls                                                   ****/

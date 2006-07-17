@@ -188,12 +188,12 @@ void SaveFileCopy (const char * src, const char * dst) {
 }
 class MissionStringDat {
 public:
-  typedef std::map <string,vector <string> >MSD;
+  typedef stdext::hash_map<string,vector <string> >MSD;
   MSD m;
 };
 class MissionFloatDat {
 public:
-  typedef std::map <string,vector <float> >MFD;
+  typedef stdext::hash_map<string,vector <float> >MFD;
   MFD m;
 };
 SaveGame::SaveGame(const std::string &pilot) {

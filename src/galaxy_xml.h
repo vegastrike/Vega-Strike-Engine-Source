@@ -16,7 +16,7 @@ public:
 	StringWrapper() {}
 	StringWrapper(const string &s) : string(s) {}
 };
-class StringMap : public std::map<StringWrapper, StringWrapper> {};
+class StringMap : public std::map <StringWrapper, StringWrapper> {};
 class SubHeirarchy;
 class SGalaxy {
 protected:
@@ -73,7 +73,7 @@ class Galaxy: public SGalaxy {
 
 };
 
-class SubHeirarchy : public std::map <std::string,class SGalaxy> {};
+class SubHeirarchy : public stdext::hash_map<std::string,class SGalaxy> {};
 
 }
 

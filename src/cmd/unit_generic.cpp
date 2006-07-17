@@ -659,7 +659,7 @@ void Unit::Init()
   last_processed_sqs=0;
   do_subunit_scheduling=false;
   /*
-  static std::map <Unit *, bool> m;
+  static stdext::hash_map<Unit *, bool> m;
   if (m[this]) {
     VSFileSystem::vs_fprintf (stderr,"already called this");
   }else {
@@ -1797,7 +1797,7 @@ static std::string NearestSystem (std::string currentsystem,QVector pos) {
   std::string closest_system;
   GalaxyXML::Galaxy * gal=_Universe->getGalaxy();
   GalaxyXML::SubHeirarchy * sectors= &gal->getHeirarchy();
-  std::map<std::string,class GalaxyXML::SGalaxy>::iterator j,i =sectors->begin();
+  stdext::hash_map<std::string,class GalaxyXML::SGalaxy>::iterator j,i =sectors->begin();
 
   for (;i!=sectors->end();++i) {
     GalaxyXML::SubHeirarchy * systems=&i->second.getHeirarchy();
@@ -5717,7 +5717,7 @@ std::map<VCString,VCString> parseTurretSizes () {
 }
 
 std::string getTurretSize (const std::string &size) {
-  static std::map <VCString,VCString> turretmap = parseTurretSizes();
+  static std::map<VCString,VCString> turretmap = parseTurretSizes();
   std::map<VCString,VCString>::iterator h= turretmap.find(size);
   if (h!=turretmap.end()) {
 	  return (*h).second;
@@ -6001,11 +6001,11 @@ public:
     d = -FLT_MAX;
   }
 };
-std::map <int, DoubleName> downgrademap;
+stdext::hash_map<int, DoubleName> downgrademap;
 int curdowngrademapoffset = 5*sizeof (Unit);
-bool AddToDowngradeMap (std::string name,double value, int unitoffset,std::map <int,DoubleName> &tempdowngrademap) {
-  using std::map;
-  map<int,DoubleName>::iterator i =downgrademap.find (unitoffset);
+bool AddToDowngradeMap (std::string name,double value, int unitoffset,stdext::hash_map<int,DoubleName> &tempdowngrademap) {
+  using stdext::hash_map;
+  stdext::hash_map<int,DoubleName>::iterator i =downgrademap.find (unitoffset);
   if (i!=downgrademap.end()) {
     if ((*i).second.d<=value) {
         tempdowngrademap[unitoffset] = DoubleName (name,value);
@@ -6021,8 +6021,8 @@ void ClearDowngradeMap () {
   downgrademap.clear();
 }
 std::set<std::string> GetListOfDowngrades () {
-  using std::map;
-  map<int,DoubleName>::iterator i =downgrademap.begin();
+  using stdext::hash_map;
+  stdext::hash_map<int,DoubleName>::iterator i =downgrademap.begin();
   std::set<std::string> retval;
   for (;i!=downgrademap.end();++i) {
     retval.insert ((*i).second.s);
@@ -6064,7 +6064,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   adder Adder;
   comparer Comparer;
   percenter Percenter;
-  std::map <int, DoubleName> tempdownmap;
+  stdext::hash_map<int, DoubleName> tempdownmap;
   if (cancompletefully&&cancompletefully1&&downgrade) {
 	  if (percentage>0)
 		  AddToDowngradeMap (up->name,1,curdowngrademapoffset++,tempdownmap);
@@ -6522,7 +6522,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   if (gen_downgrade_list) {
       float MyPercentMin = ComputeMinDowngradePercent();
       if (downgrade && percentage > MyPercentMin) {
-          for (std::map<int,DoubleName>::iterator i = tempdownmap.begin();i!=tempdownmap.end();++i) {
+          for (stdext::hash_map<int,DoubleName>::iterator i = tempdownmap.begin();i!=tempdownmap.end();++i) {
               downgrademap[(*i).first]=(*i).second;
           }
       }

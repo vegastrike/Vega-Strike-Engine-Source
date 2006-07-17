@@ -464,7 +464,7 @@ SGalaxy*Galaxy::getInitialPlanetTypes() {
 }
 void Galaxy::setupPlanetTypeMaps() {
   if (planet_types) {
-    std::map<std::string,SGalaxy>::iterator i=planet_types->getHeirarchy().begin();
+    stdext::hash_map<std::string,SGalaxy>::iterator i=planet_types->getHeirarchy().begin();
     for(;i!=planet_types->getHeirarchy().end();++i) {
       string name = (*i).first;
       string val = (*i).second["texture"];

@@ -24,7 +24,7 @@ public:
 		unsigned int which;
 		unsigned int count;
 		unsigned int maxcount;
-		map <string,bool>visited;
+		stdext::hash_map<string,bool>visited;
 
 	public:
 

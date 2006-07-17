@@ -24,7 +24,7 @@
 
 #include "guitexture.h"
 
-#include <map>
+#include <hash_map>
 #include <string>
 #include <png.h>
 #include "vsfilesystem.h"
@@ -35,7 +35,7 @@ using namespace VSFileSystem;
 // TEXTURE CACHE
 
 // Typedefs to make things easier.
-typedef std::map<std::string, GuiTexture> TextureCacheType;		// The cache.
+typedef stdext::hash_map<std::string, GuiTexture> TextureCacheType;		// The cache.
 typedef std::pair<std::string, GuiTexture> TextureCacheEntry;	// Entry in the cache.
 
 // The cache.

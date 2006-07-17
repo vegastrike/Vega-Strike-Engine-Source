@@ -342,9 +342,13 @@ void GameStarSystem::Draw(bool DrawCockpit) {
 
   }
   double setupdrawtime=queryTime();
+  
+  
   static bool always_make_smooth=XMLSupport::parse_bool(vs_config->getVariable("graphics","always_make_smooth_cam","false"));
+  
   //bool whichview=  _Universe->AccessCockpit()->GetView()==CP_CHASE;//||_Universe->AccessCockpit()->GetView()==CP_VIEWTARGET;
-  /*if (!whichview) */{
+  /*if (!whichview) */
+  {
       // Note: If subunits had parents, I could just get the camera´s parent and traverse
       //   the hierachy upwards to the root. Sadly, they don't. Perhaps we should
       //   consider adding them. They could be used to fix lots of bugs.
@@ -354,7 +358,8 @@ void GameStarSystem::Draw(bool DrawCockpit) {
       //         a) frame interpolation (currently the cam_setup_phase)
       //         b) actual drawing (currently duplicating a's work)
       //       With camera setup ocurring between a) and b)
-      cam_setup_phase=true;
+  
+	cam_setup_phase=true;
       
       //int numships=0;
       Unit * saveparent=_Universe->AccessCockpit()->GetSaveParent();
@@ -393,7 +398,9 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   GFXDisable (LIGHTING);
   bg->Draw();
   double drawtime=queryTime();
+
   double maxdrawtime=0;
+
   for (unsigned int sim_counter=0;sim_counter<=SIM_QUEUE_SIZE;++sim_counter) {
     double tmp=queryTime();
     Unit *unit;
@@ -414,6 +421,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
     tmp=queryTime()-tmp;
     if (tmp>maxdrawtime)maxdrawtime=tmp;
   }
+
   drawtime=queryTime()-drawtime;
   WarpTrailDraw();
 

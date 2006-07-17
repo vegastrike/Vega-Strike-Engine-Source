@@ -12,6 +12,7 @@
 #include <algorithm>
 #include "cmd/unit_find.h"
 #include "vs_random.h"
+#include "lin_time.h" //DEBUG ONLY
 
 static bool NoDockWithClear() {
 	static bool nodockwithclear = XMLSupport::parse_bool (vs_config->getVariable ("physics","dock_with_clear_planets","true"));
@@ -372,6 +373,8 @@ int numpolled[2]={0,0}; // number of units that searched for a target
 int prevpollindex[2]={10000,10000}; // previous number of units touched (doesn't need to be precise)
 int pollindex[2]={1,1}; // current count of number of units touched (doesn't need to be precise)  -- used for "fairness" heuristic
 void FireAt::ChooseTargets (int numtargs, bool force) {
+  extern int numprocessed;
+  extern double targetpick;
   static float targettimer =UniverseUtil::GetGameTime(); // timer used to determine passage of physics frames
   static float mintimetoswitch = XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","MinTimeToSwitchTargets","3"));
   static float minnulltimetoswitch = XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","MinNullTimeToSwitchTargets","5"));
@@ -419,8 +422,8 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
       }
     }
   }
+  numprocessed++;
   
-
   Unit * un=NULL;
   vector <TurretBin> tbin;;
   
@@ -454,11 +457,14 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   StaticTuple<float,2> maxranges;
   maxranges[0]=gunrange;
   maxranges[1]=missilerange;
-  if (tbin.size())
+  if (tbin.size()){
     maxranges[0]=(tbin[0].maxrange>gunrange?tbin[0].maxrange:gunrange);
+  }
+  double pretable=queryTime();
   unitLocator.action.init(this,parent,gunrange,&tbin,maxranges,maxrolepriority,maxtargets);
   findObjects(_Universe->activeStarSystem(),parent->location,&unitLocator);
   mytarg=unitLocator.action.mytarg;
+  targetpick+=queryTime()-pretable;
   if (mytarg) {
     efrel=GetEffectiveRelationship (mytarg);
     mytargrange = UnitUtil::getDistance (parent,mytarg);
@@ -604,11 +610,13 @@ void FireAt::PossiblySwitchTarget(bool unused) {
   }
 }
 void FireAt::Execute () {
+  
   lastchangedtarg-=SIMULATION_ATOM;
   
   bool missilelock=false;
   bool tmp = done;
-  Order::Execute();	
+  Order::Execute();
+
   if (gunspeed==float(.0001)) {
     ChooseTarget();//starting condition
   }
@@ -637,7 +645,6 @@ void FireAt::Execute () {
       }
     }
   }
-
   bool shouldfire=false;
   //  if (targets) 
   //    shouldfire |=DealWithMultipleTargets();
@@ -663,9 +670,12 @@ void FireAt::Execute () {
       lastchangedtarg=-100000;
     }
   }
+
   PossiblySwitchTarget(istargetjumpableplanet);
 
   if ((!istargetjumpableplanet)&&parent->GetNumMounts ()>0) {
     FireWeapons (shouldfire,missilelock);
   }
+  
+  
 }

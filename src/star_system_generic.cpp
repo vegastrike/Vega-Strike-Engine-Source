@@ -396,12 +396,20 @@ unsigned int theunitcounter=0;
 unsigned int totalprocessed=0;
 unsigned int movingavgarray[128]={0};
 unsigned int movingtotal=0;
+double aggfire=0;
+int numprocessed=0;
+double targetpick=0;
 void StarSystem::UpdateUnitPhysics (bool firstframe) {
   static   bool phytoggle=true;
   double updatebegin=queryTime();
   double aitime=0;
   double phytime=0;
   double collidetime=0;
+  double flattentime=0;
+  double bolttime=0;
+  targetpick=0;
+  aggfire=0;
+  numprocessed=0;
   if (phytoggle) {
     // BELOW COMMENTS ARE NO LONGER IN SYNCH
     // NOTE: Randomization is necessary to preserve scattering - otherwise, whenever a 
@@ -417,19 +425,16 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
       Unit * unit=NULL;
       un_iter iter = this->physics_buffer[current_sim_location].createIterator();
       while((unit = iter.current())!=NULL) {
-        int priority=UnitUtil::getPhysicsPriority(unit);
+		int priority=UnitUtil::getPhysicsPriority(unit);
         // Doing spreading here and only on priority changes, so as to make AI easier
-        
+		int predprior=unit->predicted_priority;
         //If the priority has really changed (not an initial scattering, because prediction doesn't match)
-        if (priority!=unit->predicted_priority){
-          //Save priority value as prediction for next scheduling
-          unit->predicted_priority=priority;
+        if (priority!=predprior){
+          //Save priority value as prediction for next scheduling, but don't overwrite yet.
+          predprior=priority;
           //Scatter, so as to achieve uniform distribution
           priority = 1 + (((unsigned int)vsrandom.genrand_int32())%priority);
-        } else {
-          //Save priority value as prediction
-          unit->predicted_priority=priority;
-        }
+		}
         
         float backup=SIMULATION_ATOM;
         theunitcounter=theunitcounter+1;
@@ -441,13 +446,11 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
         unit->ResetThreatLevel();
         unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),priority==1?firstframe:true,&this->gravitationalUnits(),unit);    //FIXME "firstframe"-- assume no more than 2 physics updates per frame.
         double cc= queryTime();
-        double dd = queryTime();
         aitime+=bb-aa;
         phytime+=cc-bb;
-        collidetime+=dd-cc;
-        SIMULATION_ATOM=backup;
+		SIMULATION_ATOM=backup;
         iter.advance();
-        unit->predicted_priority=priority;
+        unit->predicted_priority=predprior;
       }
     }catch (const boost::python::error_already_set) {
       if (PyErr_Occurred()) {
@@ -458,45 +461,18 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
       }
       throw;
     }
-	//Book-keeping for debug - remove later
-	int movingavgindex=physicsframecounter%128;
-	movingtotal=movingtotal-movingavgarray[movingavgindex]+theunitcounter;
-	movingavgarray[movingavgindex]=theunitcounter;
-        if (debugPerformance()) {
-          printf("PhysFrame:%u - %u, %u, %u t:%f ai:%f p:%f c:%f\n",physicsframecounter,theunitcounter,movingtotal/128,totalprocessed/physicsframecounter,queryTime()-updatebegin,aitime,phytime,collidetime);
-//#define collisionperf
-#ifdef collisionperf
-          extern int boltcalls;
-          extern int boltchecks;
-          extern int unitcalls;
-          extern int unitchecks;
-          extern int boltonboltchecks;
-          extern int boltruns;
-          static int totboltcalls=0;
-          static int totunitcalls=0;
-          static int totboltchecks=0;
-          static int totunitchecks=0;
-          static int totboltruns=0;
-          totboltcalls+=boltcalls;
-          totunitcalls+=unitcalls;
-          totboltchecks+=boltchecks;
-          totunitchecks+=unitchecks;
-          totboltruns+=boltruns;
-          printf("Colcheck: pucl:%d puck:%d puclck:%d pbcl:%d pbck:%d pbclck:%d tuclck:%d tbclck:%d bobck:%d pbra:%d tbra:%d\n",unitcalls,unitchecks,(unitcalls)?unitchecks/unitcalls:0,boltcalls,boltchecks,(boltcalls)?boltchecks/boltcalls:0,(totunitcalls)?totunitchecks/totunitcalls:0,(totboltcalls)?totboltchecks/totboltcalls:0,boltonboltchecks,(boltcalls)?boltruns/boltcalls:0,(totboltcalls)?totboltruns/totboltcalls:0);
-		unitcalls=boltcalls=boltchecks=unitchecks=boltonboltchecks=boltruns=0;
-#endif
-        }
-	//end debug bookkeeping
+		double c0=queryTime();
         bolts->UpdatePhysics();                
+		double cc= queryTime();
         last_collisions.clear();
+		double fl0=queryTime();
         collidemap->flatten();
+		flattentime=queryTime()-fl0;
         un_iter iter = this->physics_buffer[current_sim_location].createIterator();
         Unit * unit;
         while((unit = iter.current())!=NULL) {
-          int priority=unit->predicted_priority;
-          unit->predicted_priority=UnitUtil::getPhysicsPriority(unit);//FIXME I hope this is deterministic--it's kinda stupid to call it twice
+          int priority=unit->sim_atom_multiplier;
           float backup=SIMULATION_ATOM;
-          theunitcounter=theunitcounter+1;
           SIMULATION_ATOM*=priority;
 
           int newloc=(current_sim_location+priority)%SIM_QUEUE_SIZE;
@@ -508,7 +484,18 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
             iter.moveBefore(this->physics_buffer[newloc]);
           }
         }
-        current_sim_location=(current_sim_location+1)%SIM_QUEUE_SIZE;
+		double dd= queryTime();	
+		collidetime+=dd-cc;
+		bolttime+=cc-c0;
+		//Book-keeping for debug - remove later
+	   if (debugPerformance()) {
+	     int movingavgindex=physicsframecounter%128;
+	     movingtotal=movingtotal-movingavgarray[movingavgindex]+theunitcounter;
+	     movingavgarray[movingavgindex]=theunitcounter;
+		 printf("PhysFrame:%u - %u, %u, %u t:%f ai:%f:%f:ctc_%d,tp_%f p:%f c:%f b:%f fl:%f\n",physicsframecounter,theunitcounter,movingtotal/128,totalprocessed/physicsframecounter,queryTime()-updatebegin,aitime,aggfire,numprocessed,targetpick,phytime,collidetime,bolttime,flattentime);
+       }
+	//end debug bookkeeping
+     current_sim_location=(current_sim_location+1)%SIM_QUEUE_SIZE;
 	++physicsframecounter;
 	totalprocessed+=theunitcounter;
 	theunitcounter=0;

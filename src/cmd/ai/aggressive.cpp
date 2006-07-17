@@ -24,7 +24,7 @@
 #include "python/python_compile.h"
 #include "cmd/unit_find.h"
 using namespace Orders;
-using std::map;
+using stdext::hash_map;
 const EnumMap::Pair element_names[] = {
   EnumMap::Pair ("AggressiveAI" , AggressiveAI::AGGAI),
   EnumMap::Pair ("UNKNOWN", AggressiveAI::UNKNOWN),
@@ -54,7 +54,7 @@ const EnumMap::Pair element_names[] = {
 };
 const EnumMap AggressiveAIel_map(element_names, 25);
 using std::pair;
-std::map<string,AIEvents::ElemAttrMap *> logic;
+stdext::hash_map<string,AIEvents::ElemAttrMap *> logic;
 
 extern bool CheckAccessory (Unit *tur);
 //extern void TurretFAW(Unit *parent); /*
@@ -72,13 +72,13 @@ static void TurretFAW(Unit * parent) {
   
 }
 
-static map<string,string> getAITypes() {
-  map <string,string> ret;
+static stdext::hash_map<string,string> getAITypes() {
+	stdext::hash_map<string,string> ret;
   VSFileSystem::VSFile f;
   VSError err = f.OpenReadOnly( "VegaPersonalities.csv", AiFile);
   if (err<=Ok) {
     CSVTable table(f,f.GetRoot());
-    map<std::string,int>::iterator browser=table.rows.begin();
+	stdext::hash_map<std::string,int>::iterator browser=table.rows.begin();
     for (;browser!=table.rows.end();++browser) {
       string rowname = (*browser).first;
       CSVRow row(&table,rowname);
@@ -123,10 +123,10 @@ static string select_from_space_list(string inp,unsigned int seed) {
   }
   return inp;
 }
-static AIEvents::ElemAttrMap* getLogicOrInterrupt (string name,int faction, string unittype, std::map<string,AIEvents::ElemAttrMap *> &mymap, int personalityseed) {
+static AIEvents::ElemAttrMap* getLogicOrInterrupt (string name,int faction, string unittype, stdext::hash_map<string,AIEvents::ElemAttrMap *> &mymap, int personalityseed) {
   string append="agg";
-  static map<string,string>myappend=getAITypes();
-  map<string,string>::iterator iter;
+  static stdext::hash_map<string,string>myappend=getAITypes();
+  stdext::hash_map<string,string>::iterator iter;
   string factionname= FactionUtil::GetFaction(faction);
   if ((iter=myappend.find(factionname+"%"+unittype))!=myappend.end()) {    
     append = select_from_space_list((*iter).second,personalityseed);
@@ -135,7 +135,7 @@ static AIEvents::ElemAttrMap* getLogicOrInterrupt (string name,int faction, stri
   }
   if (append.length()==0) append="agg";
   string hashname = name +"."+append;
-  map<string,AIEvents::ElemAttrMap *>::iterator i = mymap.find (hashname);
+  stdext::hash_map<string,AIEvents::ElemAttrMap *>::iterator i = mymap.find (hashname);
   if (i==mymap.end()) {
     AIEvents::ElemAttrMap * attr = new AIEvents::ElemAttrMap(AggressiveAIel_map);
     string filename (name+"."+append+".xml");
@@ -1382,12 +1382,17 @@ void AggressiveAI::AfterburnerJumpTurnTowards (Unit * target) {
   }
   
 }
+
+
 void AggressiveAI::Execute () {  
+  extern double aggfire;
   jump_time_check++;//just so we get a nicely often wrapping var;
   jump_time_check%=5;
   Flightgroup * fg=parent->getFlightgroup();
   //ReCommandWing(fg);
+  double firetime=queryTime();
   FireAt::Execute();
+  aggfire+=queryTime()-firetime;
   static bool resistance_to_side_movement=XMLSupport::parse_bool(vs_config->getVariable("AI","resistance_to_side_movement","false"));
   if(resistance_to_side_movement) {
     Vector p,q,r;
@@ -1414,7 +1419,6 @@ void AggressiveAI::Execute () {
   Unit * target = parent->Target();
 
   bool isjumpable = target?(!target->GetDestinations().empty()):false;
-  
   if (!ProcessCurrentFgDirective (fg)) {
   if (isjumpable) {
   if (parent->GetJumpStatus().drive<0) {

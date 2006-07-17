@@ -336,6 +336,7 @@ Unit * CommunicatingAI::GetRandomUnit (float playaprob, float targprob) {
   if (vsrandom.uniformInc(0,1)<targprob&&parent->Target()) {
     return parent->Target();
   }
+  //FIXME FOR TESTING ONLY
   //return parent->Target();
   QVector where=parent->Position()+parent->GetComputerData().radar.maxrange*QVector(vsrandom.uniformInc(-1,1),
                                                                                    vsrandom.uniformInc(-1,1),

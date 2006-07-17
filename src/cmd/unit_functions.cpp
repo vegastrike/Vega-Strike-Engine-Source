@@ -40,8 +40,8 @@ int createSound( string file, bool val)
 }
 
 // From unit_xml.cpp
-using std::map;
-static std::map<std::string,Animation *> cached_ani;
+using stdext::hash_map;
+static stdext::hash_map<std::string,Animation *> cached_ani;
 std::set<std::string> tempcache;
 void cache_ani (string s) {
   tempcache.insert(s);
@@ -55,7 +55,7 @@ void update_ani_cache () {
 std::string getRandomCachedAniString () {
   if (cached_ani.size()) {
     unsigned int rn = rand()%cached_ani.size();
-    map<std::string,Animation *>::iterator j=cached_ani.begin();
+	stdext::hash_map<std::string,Animation *>::iterator j=cached_ani.begin();
     for (unsigned int i=0;i<rn;i++) {
       j++;
     }
@@ -68,7 +68,7 @@ std::string getRandomCachedAniString () {
 Animation* getRandomCachedAni () {
   if (cached_ani.size()) {
     unsigned int rn = rand()%cached_ani.size();
-    map<std::string,Animation *>::iterator j=cached_ani.begin();
+	stdext::hash_map<std::string,Animation *>::iterator j=cached_ani.begin();
     for (unsigned int i=0;i<rn;i++) {
       j++;
     }

@@ -384,7 +384,7 @@ void Mission::DirectorStart(missionNode *node){
 
   doModule(node,SCRIPT_PARSE);
 
-  map<string,missionNode *>::iterator iter;
+  stdext::hash_map<string,missionNode *>::iterator iter;
   //=runtime.modules.begin()
 
   for(iter=runtime.modules.begin();iter!=runtime.modules.end();iter++){

@@ -23,9 +23,9 @@ struct dirent { char d_name[1]; };
 #include "common/common.h"
 #include "galaxy_gen.h"
 #include "pk3.h"
-#include "map"
+#include <hash_map>
 
-using std::map;
+using stdext::hash_map;
 
 using VSFileSystem::VSVolumeType;
 using VSFileSystem::VSFSNone;
@@ -213,7 +213,7 @@ namespace VSFileSystem
 	string failed;
 
 	// Map of the currently opened PK3 volume/resource files
-	map<string, CPK3 *>	pk3_opened_files;
+	stdext::hash_map<string, CPK3 *>	pk3_opened_files;
 
 	/************************************************************************************************/
 	/**** vs_path functions                                                                      ****/
@@ -973,7 +973,7 @@ namespace VSFileSystem
 				// TRY TO OPEN A DATA.VOLFORMAT FILE IN THE ROOT DIRECTORY PASSED AS AN ARG
 				filestr = Directories[type]+"/"+file;
 				fullpath = root+"data."+volume_format;
-				map<string, CPK3 *>::iterator it;
+				stdext::hash_map<string, CPK3 *>::iterator it;
 				it = pk3_opened_files.find( fullpath);
 				failed+="Looking for file in VOLUME : "+fullpath+"... ";
 				if( it==pk3_opened_files.end())
@@ -1331,7 +1331,7 @@ namespace VSFileSystem
 				{
 					full_vol_path = this->rootname+"/"+Directories[this->alt_type]+"."+volume_format;
 				}
-				map<string, CPK3*>::iterator it;
+				stdext::hash_map<string, CPK3*>::iterator it;
 				it = pk3_opened_files.find( full_vol_path);
 				if( it==pk3_opened_files.end())
 				{

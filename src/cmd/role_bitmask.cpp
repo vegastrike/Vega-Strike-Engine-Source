@@ -1,11 +1,11 @@
 #include "role_bitmask.h"
 #include "xml_support.h"
-#include <map>
+#include <hash_map>
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "vsfilesystem.h"
 #include "csv.h"
-using std::map;
+using stdext::hash_map;
 using std::string;
 using std::pair;
 using namespace VSFileSystem;
@@ -33,16 +33,16 @@ namespace ROLES {
 		}
 		return getAllRolePriorities()[rolerow];
 	}
-	std::map<string,int> rolemap;
+	stdext::hash_map<string,int> rolemap;
 	unsigned char InternalGetRole (const std::string &s) {
-		map<string,int>::iterator i = rolemap.find (strtoupper (s));
+		stdext::hash_map<string,int>::iterator i = rolemap.find (strtoupper (s));
 		if (i!=rolemap.end()) {
 			return (*i).second;
 		}
 		return 0;
 	}
 	std::string InternalGetStrRole (unsigned char c) {
-	   std::map<string,int>::iterator i = rolemap.begin();
+	   stdext::hash_map<string,int>::iterator i = rolemap.begin();
 	   for (;i!=rolemap.end();++i) {
               if ((*i).second==c)
                  return (*i).first;

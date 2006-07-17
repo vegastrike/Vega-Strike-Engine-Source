@@ -20,16 +20,16 @@
 
 unsigned int NumStarsInGalaxy () {
 	unsigned int count=0;
-	map<std::string,GalaxyXML::SGalaxy>::iterator i = _Universe->getGalaxy()->getHeirarchy().begin();
-	map<std::string,GalaxyXML::SGalaxy>::iterator e = _Universe->getGalaxy()->getHeirarchy().end();
+	stdext::hash_map<std::string,GalaxyXML::SGalaxy>::iterator i = _Universe->getGalaxy()->getHeirarchy().begin();
+	stdext::hash_map<std::string,GalaxyXML::SGalaxy>::iterator e = _Universe->getGalaxy()->getHeirarchy().end();
 	for (;i!=e;++i) {
 		count+=(*i).second.getHeirarchy().size();
 	}
 	return count;
 }
 class StarIter {
-	map<std::string,GalaxyXML::SGalaxy>::iterator sector;
-	map<std::string,GalaxyXML::SGalaxy>::iterator system;
+	stdext::hash_map<std::string,GalaxyXML::SGalaxy>::iterator sector;
+	stdext::hash_map<std::string,GalaxyXML::SGalaxy>::iterator system;
 public:
 	StarIter() {
 		sector = _Universe->getGalaxy()->getHeirarchy().begin();

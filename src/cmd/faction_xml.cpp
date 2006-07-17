@@ -2,7 +2,7 @@
 //#include "gfx/animation.h"
 #include <vector>
 #include <string>
-#include <map>
+#include <hash_map>
 #include <expat.h>
 #include "vegastrike.h"
 #include "xml_support.h"
@@ -19,7 +19,7 @@ using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 //using std::sort;
-using std::map;
+using stdext::hash_map;
 
 static FSM * getFSM (const std::string & value) {
   static Hashtable <std::string, FSM, 17> fsms;
@@ -37,8 +37,8 @@ static FSM * getFSM (const std::string & value) {
 }
 #if 0
 static FSM * getFSM (const std::string &value) {
-  static map <const std::string, FSM *> fsms;
-  map<const std::string,FSM*>::iterator i = fsms.find (value);
+	static stdext::hash_map<const std::string, FSM *> fsms;
+  stdext::hash_map<const std::string,FSM*>::iterator i = fsms.find (value);
   if (i!=fsms.end()) {
     return (*i).second;
   }else {
@@ -393,7 +393,7 @@ using namespace std;
   }
   XML_ParserFree (parser);
   ParseAllAllies();
-  map<string,bool> cache;
+  stdext::hash_map<string,bool> cache;
   for (unsigned int i=0;i<factions.size();i++) {
     for (unsigned int j=0;j<factions[i]->faction.size();j++) {
       Faction * fact=factions[i];
@@ -411,7 +411,7 @@ using namespace std;
           //Looking for a file is somewhat expensive - a cache speeds up a lot this N^2 loop.
           //  I know... not a great improvement... but bare with me - I hate N^2 loops.
           bool res;
-          map<string,bool>::iterator it = cache.find(fname);
+		  stdext::hash_map<string,bool>::iterator it = cache.find(fname);
           if (it != cache.end()) {
               res = it->second;
           } else {
