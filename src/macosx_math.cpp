@@ -1,4 +1,22 @@
 #include <macosx_math.h>
+
+int float_to_int (float a) {
+  int maxint= 0x7ffffff;
+  int minint=-0x8000000;
+  if (a<maxint&&a>minint) return a;
+  if (a>0) return maxint;
+  if (a<0) return minint;
+  return 0;
+}
+int double_to_int (double a) {
+  int maxint= 0x7ffffff;
+  int minint=-0x8000000;
+  if (a<maxint&&a>minint) return a;
+  if (a>0) return maxint;
+  if (a<0) return minint;
+  return 0;
+}
+
 #if defined(__APPLE__) || defined(MACOSX)
 extern "C" {
   char * ctermid_r(char *buf) {

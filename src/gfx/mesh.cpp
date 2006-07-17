@@ -276,8 +276,8 @@ Mesh * Mesh::getLOD (float lod, bool bBypassDamping) {
   vector <int> *animFrames=0;
   if (getFramesPerSecond()>.0000001&&(animFrames=animationSequences.Get(hash_name))) {
 	  //return &orig[(int)floor(fmod (getNewTime()*getFramesPerSecond(),numlods))];
-	  unsigned int which=(int)floor(fmod(getCurrentFrame(),
-                                             animFrames->size()));
+	  unsigned int which=(int)float_to_int(floor(fmod(getCurrentFrame(),
+                                                          animFrames->size())));
 	  float adv = GetElapsedTime()*getFramesPerSecond();
 	  static float max_frames_skipped=XMLSupport::parse_float(vs_config->getVariable("graphics","mesh_animation_max_frames_skipped","3"));
 	  if (adv>max_frames_skipped) {
@@ -286,13 +286,13 @@ Mesh * Mesh::getLOD (float lod, bool bBypassDamping) {
 	  setCurrentFrame(getCurrentFrame()+adv);
 	  return &orig[(*animFrames)[which%animFrames->size()]%getNumLOD()];
   }else {
-	  int maxlodsize=retval?retval->lodsize:0;
+	  int maxlodsize=float_to_int(retval?retval->lodsize:0.0f);
 	  for (int i=1;i<numlods;i++) {
 		  int lodoffs=0;
 		  if (!bBypassDamping) {
 		      if (lod<orig[i].lodsize) 
-			  lodoffs = (i<numlods-1)?(orig[i+1].lodsize-orig[i].lodsize)/LOD_HYSTHERESIS_DIVIDER:0; else
-			  lodoffs = (i>0)?(orig[i-1].lodsize-orig[i].lodsize)/LOD_HYSTHERESIS_DIVIDER:0;
+			  lodoffs = float_to_int((i<numlods-1)?(orig[i+1].lodsize-orig[i].lodsize)/LOD_HYSTHERESIS_DIVIDER:0.0f); else
+			  lodoffs = float_to_int((i>0)?(orig[i-1].lodsize-orig[i].lodsize)/LOD_HYSTHERESIS_DIVIDER:0.0f);
               int maxenlargement = (int)(orig[i].lodsize*LOD_HYSTHERESIS_MAXENLARGEMENT_FACTOR)-orig[i].lodsize;
               if ((lodoffs>0)&&(lodoffs>maxenlargement)) lodoffs=maxenlargement; //Avoid excessive enlargement of low-detail LOD levels, when LOD levels are far apart.
 		  };
