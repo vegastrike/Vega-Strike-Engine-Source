@@ -246,9 +246,9 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
   for (i=0;(int)i<this->nummesh();i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
     if (this->meshdata[i]==NULL) 
       continue;
-    Vector TransformedPosition = Transform (mat,
-					    this->meshdata[i]->Position());
-      float d = GFXSphereInFrustum(TransformedPosition,this->meshdata[i]->rSize()*vlpqrScaleFactor);
+      QVector TransformedPosition = Transform (mat,
+					    this->meshdata[i]->Position().Cast());
+      float d = GFXSphereInFrustum(TransformedPosition,this->meshdata[i]->clipRadialSize()*vlpqrScaleFactor);
       if (d) {  //d can be used for level of detail
           //this->meshdata[i]->DrawNow(lod,false,mat,cloak);//cloakign and nebula
           this->meshdata[i]->Draw(lod,mat,d,cloak);

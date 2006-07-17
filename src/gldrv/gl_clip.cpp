@@ -181,20 +181,20 @@ void WackyMultFloatMatrix(double dest[], const float m1[], const Matrix &m2)
   QVector p (InvTransformNormal (m2,m2.p));
   p=(TransformNormal (m2,-m2.p));
   //  p=m2.p;
-  dest[0] = m1[0]*m2.r[0] + m1[4]*m2.r[1] + m1[8]*m2.r[2]; 
-  dest[1] = m1[1]*m2.r[0] + m1[5]*m2.r[1] + m1[9]*m2.r[2] ;
-  dest[2] = m1[2]*m2.r[0] + m1[6]*m2.r[1] + m1[10]*m2.r[2];
-  dest[3] = m1[3]*m2.r[0] + m1[7]*m2.r[1] + m1[11]*m2.r[2];
+  dest[0] = m1[0]*(double)m2.r[0] + m1[4]*(double)m2.r[1] + m1[8]*(double)m2.r[2]; 
+  dest[1] = m1[1]*(double)m2.r[0] + m1[5]*(double)m2.r[1] + m1[9]*(double)m2.r[2] ;
+  dest[2] = m1[2]*(double)m2.r[0] + m1[6]*(double)m2.r[1] + m1[10]*(double)m2.r[2];
+  dest[3] = m1[3]*(double)m2.r[0] + m1[7]*(double)m2.r[1] + m1[11]*(double)m2.r[2];
 
-  dest[4] = m1[0]*m2.r[3] + m1[4]*m2.r[4] + m1[8]*m2.r[5];
-  dest[5] = m1[1]*m2.r[3] + m1[5]*m2.r[4] + m1[9]*m2.r[5];
-  dest[6] = m1[2]*m2.r[3] + m1[6]*m2.r[4] + m1[10]*m2.r[5];
-  dest[7] = m1[3]*m2.r[3] + m1[7]*m2.r[4] + m1[11]*m2.r[5];
+  dest[4] = m1[0]*(double)m2.r[3] + m1[4]*(double)m2.r[4] + m1[8]*(double)m2.r[5];
+  dest[5] = m1[1]*(double)m2.r[3] + m1[5]*(double)m2.r[4] + m1[9]*(double)m2.r[5];
+  dest[6] = m1[2]*(double)m2.r[3] + m1[6]*(double)m2.r[4] + m1[10]*(double)m2.r[5];
+  dest[7] = m1[3]*(double)m2.r[3] + m1[7]*(double)m2.r[4] + m1[11]*(double)m2.r[5];
 
-  dest[8] = m1[0]*m2.r[6] + m1[4]*m2.r[7] + m1[8]*m2.r[8];
-  dest[9] = m1[1]*m2.r[6] + m1[5]*m2.r[7] + m1[9]*m2.r[8];
-  dest[10] = m1[2]*m2.r[6] + m1[6]*m2.r[7] + m1[10]*m2.r[8];
-  dest[11] = m1[3]*m2.r[6] + m1[7]*m2.r[7] + m1[11]*m2.r[8];
+  dest[8] = m1[0]*(double)m2.r[6] + m1[4]*(double)m2.r[7] + m1[8]*(double)m2.r[8];
+  dest[9] = m1[1]*(double)m2.r[6] + m1[5]*(double)m2.r[7] + m1[9]*(double)m2.r[8];
+  dest[10] = m1[2]*(double)m2.r[6] + m1[6]*(double)m2.r[7] + m1[10]*(double)m2.r[8];
+  dest[11] = m1[3]*(double)m2.r[6] + m1[7]*(double)m2.r[7] + m1[11]*(double)m2.r[8];
 
   dest[12] = m1[0]*p.i + m1[4]*p.j + m1[8]*p.k + m1[12];
   dest[13] = m1[1]*p.i + m1[5]*p.j + m1[9]*p.k + m1[13];
@@ -206,7 +206,7 @@ void WackyMultFloatMatrix(double dest[], const float m1[], const Matrix &m2)
 void /*GFXDRVAPI*/ GFXCalculateFrustum (double frustum[6][4], const Matrix &modl,const float *proj){
    double   clip[16];
    WackyMultFloatMatrix (clip,proj,modl);
-   float  t;
+   double  t;
    /* Extract the numbers for the RIGHT plane */
    frustum[0][0] = clip[ 3] - clip[ 0];
    frustum[0][1] = clip[ 7] - clip[ 4];
