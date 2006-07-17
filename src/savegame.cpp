@@ -406,21 +406,15 @@ std::vector<string> &SaveGame::getMissionStringData(const std::string &magic_num
   return missionstringdata->m[magic_number];
 }
 template <class MContainerType> void RemoveEmpty (MContainerType &t) {
-	bool done=false;
-	done=true;
-	typename MContainerType::iterator i;
-	for (i=t.begin();i!=t.end();) {
-		typename MContainerType::key_type k = (*i).first;
-		if ((*i).second.empty()) {
-                  typename MContainerType::iterator j=i;                  
-                  ++j;
-                  t.erase(i);
-                  i=j;
-                  //i = t.lower_bound(k);
-		}else {
-			i++;
-		}
-	}
+  typename MContainerType::iterator i;
+  MContainerType retval;
+  for (i=t.begin();i!=t.end();++i) {
+    typename MContainerType::key_type k = (*i).first;
+    if (!(*i).second.empty()) {
+      std::swap(retval[(*i).first],(*i).second);
+    }
+  }
+  t=retval;
 }
 string SaveGame::WriteMissionData () {
   string ret(" ");
