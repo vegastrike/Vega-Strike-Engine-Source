@@ -367,6 +367,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
       if (saveparent) {
         targ=saveparent->Target();
       }
+  
       for (unsigned int sim_counter=0;sim_counter<=SIM_QUEUE_SIZE&&(targ||saveparent);++sim_counter) {
         Unit *unit;
         UnitCollection::UnitIterator iter = physics_buffer[sim_counter].createIterator();    

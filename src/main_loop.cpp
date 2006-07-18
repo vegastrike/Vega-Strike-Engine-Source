@@ -1,5 +1,7 @@
 #include <stdlib.h>
+#ifndef _WIN32
 #include <fenv.h>
+#endif
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -169,7 +171,11 @@ void ExamineWhenTargetKey() {
   }
 }
 //  extern int allexcept;
+#ifndef _WIN32
 int allexcept=FE_DIVBYZERO;//|FE_INVALID;//|FE_OVERFLOW|FE_UNDERFLOW;
+#else
+int allexcept=0;
+#endif
 namespace CockpitKeys {
   
   void QuitNow () {

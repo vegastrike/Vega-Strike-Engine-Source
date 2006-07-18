@@ -316,18 +316,9 @@ public:
     this->maxtargets=maxtargets;
   }
   bool acquire(Unit*un, float distance) {
-    extern int acqcalls;
-	extern int erguns;
-	extern int ermis;
-	++acqcalls;
     if (distance>maxinnerrange[0]&&!reached) {
       reached=true;          
       if (mytarg&&rolepriority<maxrolepriority) {
-		  if(maxinnerrange[0]==maxinnerrange[1]){
-			++ermis;
-		  } else {
-			++erguns;
-		  }
         return false;
       }else {
         for (size_t i=1;i<numTuple;++i) {

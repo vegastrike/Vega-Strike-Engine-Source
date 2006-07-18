@@ -3,7 +3,9 @@
 
 #include <string>
 #include <gnuhash.h>
+#ifndef _WIN32
 class ConstHasher;
+#endif
 class StringIntKey {
   friend class ConstHasher;
   std::string key;
@@ -22,6 +24,8 @@ public:
     return key < b.key;
   }
 };
+
+#ifndef _WIN32
 class ConstHasher {
 public:
   template <class T> size_t operator () (const T&key)const{
@@ -31,15 +35,24 @@ public:
     return stdext::hash<std::string>()(key.key)^stdext::hash<size_t>()((size_t)key.fac);
   }
 };
-template <class Typ,class Key> class ClassCache {
+#endif
 
+template <class Typ,class Key> class ClassCache {
+#ifndef _WIN32
   static stdext::hash_map<Key, Typ *, ConstHasher> unit_cache;
+#else
+  static std::map<Key, Typ *> unit_cache;
+#endif
  public:
   static const Typ *getCachedConst (Key k) {
     return getCachedMutable(k);
   }
   static Typ *getCachedMutable (const Key &k) {
+#ifndef _WIN32
     typename stdext::hash_map<Key,Typ *,ConstHasher>::iterator i=unit_cache.find(k);
+#else
+	typename std::map<Key,Typ *>::iterator i=unit_cache.find(k);
+#endif
     if (i!=unit_cache.end())
       return (*i).second;
     return NULL;
