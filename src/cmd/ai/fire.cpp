@@ -288,11 +288,13 @@ template <size_t numTuple> class ChooseTargetClass{
   Unit * parent;
   Unit * parentparent;
   vector<TurretBin>*tbin;
-  StaticTuple<float,numTuple> maxinnerrange;
+  StaticTuple<float,numTuple> maxinnerrangeless;
+  StaticTuple<float,numTuple> maxinnerrangemore;
   float priority;
   char rolepriority;
   char maxrolepriority;
-  bool reached;
+  bool reachedMore;
+  bool reachedLess;
   FireAt* fireat;
   float gunrange;
   int numtargets;
@@ -306,9 +308,19 @@ public:
     this->parent=un;
     this->parentparent=un->owner?UniverseUtil::getUnitByPtr(un->owner,un,false):0;
     mytarg=NULL;
-    this->maxinnerrange=innermaxrange;
+    float currad=0;
+    if (!is_null(un->location)) {
+      currad=sqrtf(un->location->GetMagnitudeSquared());
+    }
+    for (size_t i=0;i<numTuple;++i) {
+      float tmpless=currad-innermaxrange[i];
+      float tmpmore=currad+innermaxrange[i];
+      this->maxinnerrangeless[i]=tmpless*tmpless;
+      this->maxinnerrangemore[i]=tmpmore*tmpmore;
+    }
     this->maxrolepriority=maxrolepriority;// max priority that will allow gun range to be ok
-    reached=false;
+    reachedMore=false;
+    reachedLess=false;
     this->priority=-1;
     this->rolepriority=31;
     this->gunrange=gunrange;
@@ -316,15 +328,25 @@ public:
     this->maxtargets=maxtargets;
   }
   bool acquire(Unit*un, float distance) {
-    if (distance>maxinnerrange[0]&&!reached) {
-      reached=true;          
-      if (mytarg&&rolepriority<maxrolepriority) {
-        return false;
-      }else {
-        for (size_t i=1;i<numTuple;++i) {
-          if (distance<maxinnerrange[i]){
-            maxinnerrange[0]=maxinnerrange[i];
-            reached=false;
+    float unkey=un->location->GetMagnitudeSquared();
+    bool lesscheck=unkey<maxinnerrangeless[0];
+    bool morecheck=unkey>maxinnerrangemore[0];
+    if (reachedMore==false||reachedLess==false){
+      if (lesscheck||morecheck) {
+        if (lesscheck)
+          reachedLess=true;    
+        if (morecheck)
+          reachedMore=true;
+        if (mytarg&&rolepriority<maxrolepriority) {
+          return false;
+        }else if (reachedLess==true&&reachedMore==true){
+          for (size_t i=1;i<numTuple;++i) {
+            if (unkey>maxinnerrangeless[i]&&unkey<maxinnerrangemore[i]){
+              maxinnerrangeless[0]=maxinnerrangeless[i];
+              maxinnerrangemore[0]=maxinnerrangemore[i];
+              reachedLess=false;
+              reachedMore=false;
+            }
           }
         }
       }
