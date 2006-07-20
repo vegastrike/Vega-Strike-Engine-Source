@@ -317,7 +317,7 @@ extern bool debugPerformance();
 // Used to do distance based pre-culling for draw function based on sorted search structure
 class UnitDrawer{
 	struct empty{};
-	stdext::hash_map<Unit*,struct empty> gravunits;
+	stdext::hash_map<void*,struct empty> gravunits;
 public:
 	bool acquire(Unit * unit, float distance){
 		if(gravunits.find(unit)==gravunits.end()){
