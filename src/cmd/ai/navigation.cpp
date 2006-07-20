@@ -74,7 +74,7 @@ static float CalculateBalancedDecelTime (float l, float v, float &F, float mass)
   }
   float vsqr=v*v;
   float fourac=2*accel*((.5*v*v/decel) - v*SIMULATION_ATOM*.5- l)/(1+accel/decel);
-  if(fourac>vsqr) return 0.0f;//FIXME avoid div/0  not sure if this is right
+  if(fourac>vsqr) return FLT_MAX;//FIXME avoid sqrt negative  not sure if this is right
   return (-v + sqrtf (vsqr-fourac))/accel;
 } 
 
