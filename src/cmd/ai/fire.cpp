@@ -351,7 +351,9 @@ public:
         }
       }
     }
-    
+    return ShouldTargetUnit(un,distance);
+  }
+  bool ShouldTargetUnit(Unit*un,float distance) {
     if (un->CloakVisible()>.8) {
       float rangetotarget = distance;
       float rel[] = {
@@ -449,7 +451,6 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   vector <TurretBin> tbin;;
   
   float priority=0;
-  Unit * mytarg=NULL;
   Unit * su=NULL;
   un_iter subun = parent->getSubUnits();
   for (;(su = *subun)!=NULL;++subun) {
@@ -483,8 +484,33 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   }
   double pretable=queryTime();
   unitLocator.action.init(this,parent,gunrange,&tbin,maxranges,maxrolepriority,maxtargets);
-  findObjects(_Universe->activeStarSystem(),parent->location,&unitLocator);
-  mytarg=unitLocator.action.mytarg;
+  static int gcounter=0;
+  static int min_rechoose_interval=XMLSupport::parse_int(vs_config->getVariable("AI","min_rechoose_interval","128"));
+  if (curtarg){
+    if (gcounter++<min_rechoose_interval||rand()/8<RAND_MAX/9) {
+      // in this case only look at potentially *interesting* units rather than huge swaths of nearby units...including target, threat, players, and leader's target
+      unitLocator.action.ShouldTargetUnit(curtarg,UnitUtil::getDistance(parent,curtarg));
+      unsigned int np=_Universe->numPlayers();
+      for (unsigned int i=0;i<np;++i) {
+        Unit * playa=_Universe->AccessCockpit(i)->GetParent();
+        if (playa) 
+          unitLocator.action.ShouldTargetUnit(playa,UnitUtil::getDistance(parent,playa));
+      }
+      Unit* lead=UnitUtil::getFlightgroupLeader(parent);
+      if (lead!=NULL&&lead!=parent&&(lead=lead->Target())!=NULL) {
+        unitLocator.action.ShouldTargetUnit(lead,UnitUtil::getDistance(parent,lead));
+      }
+      Unit * threat=parent->Threat();
+      if (threat)
+        unitLocator.action.ShouldTargetUnit(threat,UnitUtil::getDistance(parent,threat));    
+    }else{
+      gcounter=0;
+    }
+  }
+  if (unitLocator.action.mytarg==NULL){//decided to rechoose or did not have initial target
+    findObjects(_Universe->activeStarSystem(),parent->location,&unitLocator);
+  }
+  Unit *mytarg=unitLocator.action.mytarg;
   targetpick+=queryTime()-pretable;
   if (mytarg) {
     efrel=GetEffectiveRelationship (mytarg);
