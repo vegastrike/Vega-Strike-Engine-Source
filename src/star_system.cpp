@@ -40,6 +40,7 @@
 extern int muzak_count;
 extern Vector mouseline;
 #include "vsfilesystem.h"
+#include "cmd/unit_find.h"
 //static SphereMesh *foo;
 //static Unit *earth;
 
@@ -309,6 +310,42 @@ extern double saved_interpolation_blend_factor;
 extern double interpolation_blend_factor;
 extern bool cam_setup_phase;
 extern bool debugPerformance();
+
+
+
+// Class for use of UnitWithinRangeLocator template
+// Used to do distance based pre-culling for draw function based on sorted search structure
+class UnitDrawer{
+	struct empty{};
+	stdext::hash_map<Unit*,struct empty> gravunits;
+public:
+	bool acquire(Unit * unit, float distance){
+		if(gravunits.find(unit)==gravunits.end()){
+			return draw(unit);
+		} else {
+			return true;
+		}
+	}
+	bool draw(Unit* unit){
+	  float backup=SIMULATION_ATOM;
+	  unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
+	  interpolation_blend_factor=calc_blend_factor(saved_interpolation_blend_factor,unit->sim_atom_multiplier,unit->cur_sim_queue_slot,cur_sim_frame);
+	  SIMULATION_ATOM = backup*unit->sim_atom_multiplier;
+	  ((GameUnit<Unit> *)unit)->Draw();
+      interpolation_blend_factor=saved_interpolation_blend_factor;
+      SIMULATION_ATOM=backup;
+	  return true;
+	}
+	bool grav_acquire(Unit* unit){
+	  gravunits[unit]=empty();
+	  return draw(unit);
+	}
+};
+
+
+
+
+
 //#define UPDATEDEBUG  //for hard to track down bugs
 void GameStarSystem::Draw(bool DrawCockpit) {
   double starttime=queryTime();
@@ -383,7 +420,29 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   double drawtime=queryTime();
 
   double maxdrawtime=0;
+  
+  //Ballpark estimate of when an object of configurable size first becomes one pixel
+  static float precull_distance=XMLSupport::parse_float(vs_config->getVariable("graphics","precull_dist","500000000"));
+  QVector drawstartpos=_Universe->AccessCamera()->GetPosition();
+  Collidable key_iterator(0,1,drawstartpos);
+  UnitWithinRangeOfPosition<UnitDrawer> drawer(precull_distance,0,key_iterator);
+  //Need to draw really big stuff (i.e. planets, deathstars, and other mind-bogglingly big things that shouldn't be culled despited extreme distance
+  Unit* unit;
+  for(un_iter iter=this->GravitationalUnits.createIterator();(unit=*iter)!=NULL;++iter){
+	  float distance = (drawstartpos-unit->Position()).Magnitude()-unit->rSize();
+	  if(distance < precull_distance){
+	    drawer.action.grav_acquire(unit);
+	  }else {
+	    drawer.action.draw(unit);
+	  }
+  }
 
+  // Need to get iterator to approx camera position
+  CollideMap::iterator parent=collidemap->lower_bound(key_iterator);
+  findObjectsFromPosition(this,parent,&drawer,drawstartpos,0,true);
+
+
+#if 0
   for (unsigned int sim_counter=0;sim_counter<=SIM_QUEUE_SIZE;++sim_counter) {
     double tmp=queryTime();
     Unit *unit;
@@ -404,7 +463,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
     tmp=queryTime()-tmp;
     if (tmp>maxdrawtime)maxdrawtime=tmp;
   }
-
+#endif
   drawtime=queryTime()-drawtime;
   WarpTrailDraw();
 

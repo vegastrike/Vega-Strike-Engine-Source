@@ -1,7 +1,7 @@
 #ifndef _UNIT_FIND_H_
 #define _UNIT_FIND_H_
 #include "unit_util.h"
-template <class Locator> void findObjects (StarSystem * ss,CollideMap::iterator location, Locator *check) {
+template <class Locator> void findObjectsFromPosition (StarSystem * ss,CollideMap::iterator location, Locator *check,QVector thispos, float thisrad, bool acquire_on_location) {
   CollideMap *cm=ss->collidemap;             
   CollideMap::iterator cmend=cm->end();
   CollideMap::iterator cmbegin=cm->begin();
@@ -24,13 +24,14 @@ template <class Locator> void findObjects (StarSystem * ss,CollideMap::iterator 
         --location;
         workB=false;
       }
-      QVector thispos = (**location).GetPosition();
-      float thisrad=fabs((*location)->radius);
+
       check->init(cm,location);
-      if (tless!=cmbegin)
-        --tless;
-      else 
-        workA=false;      
+      if(!acquire_on_location){
+        if (tless!=cmbegin)
+          --tless;
+        else 
+          workA=false;      
+      }
       while(workA||workB){
         if (workA
             &&!check->cullless(tless)) {
@@ -61,6 +62,16 @@ template <class Locator> void findObjects (StarSystem * ss,CollideMap::iterator 
       }      
     }
 }
+
+template <class Locator> void findObjects (StarSystem * ss,CollideMap::iterator location, Locator *check) {
+	if(is_null(location)){
+		return;
+	}
+      QVector thispos = (**location).GetPosition();
+      float thisrad=fabs((*location)->radius);
+      findObjectsFromPosition(ss,location,check,thispos,thisrad,false);
+}
+
 
 class NearestUnitLocator {
   CollideMap::iterator location;
@@ -150,7 +161,7 @@ public:
 	bool NeedDistance() {return true;}
 	
 	void init (CollideMap * cm, CollideMap::iterator parent) {
-		startkey=sqrt((*parent)->GetMagnitudeSquared());
+                startkey=sqrt((*parent)->GetMagnitudeSquared());
 	}
 	bool cullless (CollideMap::iterator tless) {
 		float tmp=startkey-radius-maxUnitRadius;
@@ -161,12 +172,21 @@ public:
 	}
 
 	bool acquire(float dist, CollideMap::iterator i) {
-		if (dist<radius) {
-			// Inside radius...
-			return action.acquire((*i)->ref.unit, dist);
-		}
-		return true;
+            if (dist<radius) {
+                // Inside radius...
+                return action.acquire((*i)->ref.unit, dist);
+            }
+            return true;
 	}
+};
+template <class T> class UnitWithinRangeOfPosition:public UnitWithinRangeLocator<T>{
+ public:
+    UnitWithinRangeOfPosition( float radius, float maxUnitRadius, const Collidable& key_iterator) : 
+	   UnitWithinRangeLocator<T>(radius,maxUnitRadius)
+    {
+        this->startkey=sqrt(key_iterator.GetMagnitudeSquared());
+    }
+    void init (CollideMap * cm, CollideMap::iterator parent) {}
 };
 class UnitPtrLocator {
   const void * unit;
