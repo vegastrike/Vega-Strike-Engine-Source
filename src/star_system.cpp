@@ -346,50 +346,32 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   
   static bool always_make_smooth=XMLSupport::parse_bool(vs_config->getVariable("graphics","always_make_smooth_cam","false"));
   
-  //bool whichview=  _Universe->AccessCockpit()->GetView()==CP_CHASE;//||_Universe->AccessCockpit()->GetView()==CP_VIEWTARGET;
-  /*if (!whichview) */
   {
-      // Note: If subunits had parents, I could just get the camera´s parent and traverse
-      //   the hierachy upwards to the root. Sadly, they don't. Perhaps we should
-      //   consider adding them. They could be used to fix lots of bugs.
-      //       Then again, if the camera setup needs other objects to be updated as well,
-      //   as in a supposed follow-target mode, we'll need to update those objects as well...
-      //       Perhaps, much better would be to propperly separate this in two phases:
-      //         a) frame interpolation (currently the cam_setup_phase)
-      //         b) actual drawing (currently duplicating a's work)
-      //       With camera setup ocurring between a) and b)
-  
-	cam_setup_phase=true;
-      
-      //int numships=0;
-      Unit * saveparent=_Universe->AccessCockpit()->GetSaveParent();
-      Unit * targ=NULL;
-      if (saveparent) {
-        targ=saveparent->Target();
-      }
-  
-      for (unsigned int sim_counter=0;sim_counter<=SIM_QUEUE_SIZE&&(targ||saveparent);++sim_counter) {
-        Unit *unit;
-        UnitCollection::UnitIterator iter = physics_buffer[sim_counter].createIterator();    
-        float backup=SIMULATION_ATOM;
-        unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
-        while((unit = iter.current())!=NULL) {
-          if (unit==saveparent||unit==targ) {
-            interpolation_blend_factor=calc_blend_factor(saved_interpolation_blend_factor,unit->sim_atom_multiplier,unit->cur_sim_queue_slot,cur_sim_frame);
-            SIMULATION_ATOM = backup*unit->sim_atom_multiplier;
-            ((GameUnit<Unit> *)unit)->Draw();
-            if (unit==saveparent)
-              saveparent=NULL;
-            if (unit==targ)
-              targ=NULL;
-          }
-          iter.advance();
-          //numships++;
-        }
-        interpolation_blend_factor=saved_interpolation_blend_factor;
-        SIMULATION_ATOM=backup;
-      }
-      //printf("Number of insystem ships: %d (%d FPS)\n",numships,(int)(1.f/GetElapsedTime()));
+  	cam_setup_phase=true;
+    
+    //int numships=0;
+    Unit * saveparent=_Universe->AccessCockpit()->GetSaveParent();
+    Unit * targ=NULL;
+    if (saveparent) {
+      targ=saveparent->Target();
+    }
+	//Array containing the two interesting units, so as not to have to copy-paste code
+	Unit * camunits[2]={saveparent,targ}; 
+    float backup=SIMULATION_ATOM;
+    unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
+    for(int i=0;i<2;i++) {
+	  Unit *unit=camunits[i];
+	  // Make sure unit is not null;
+	  if(unit){
+        interpolation_blend_factor=calc_blend_factor(saved_interpolation_blend_factor,unit->sim_atom_multiplier,unit->cur_sim_queue_slot,cur_sim_frame);
+        SIMULATION_ATOM = backup*unit->sim_atom_multiplier;
+        ((GameUnit<Unit> *)unit)->Draw();
+       }
+    }
+    interpolation_blend_factor=saved_interpolation_blend_factor;
+    SIMULATION_ATOM=backup;
+
+     //printf("Number of insystem ships: %d (%d FPS)\n",numships,(int)(1.f/GetElapsedTime()));
 
       _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
 
