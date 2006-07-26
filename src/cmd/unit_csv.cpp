@@ -605,7 +605,7 @@ void Unit::LoadRow(CSVRow &row, string modification, string * netxml) {
   
   string tmpstr;
   csvRow = row[0];
-
+  DEF_OPTIMIZER(FaceCamera);
   DEF_OPTIMIZER(Name);
   DEF_OPTIMIZER(Hud_image);
   DEF_OPTIMIZER(Combat_Role);
@@ -731,6 +731,7 @@ void Unit::LoadRow(CSVRow &row, string modification, string * netxml) {
           printf("Initializing optimizer\n");
           INIT_OPTIMIZER(keys,Name);
           INIT_OPTIMIZER(keys,Hud_image);
+          INIT_OPTIMIZER(keys,FaceCamera);
           INIT_OPTIMIZER(keys,Combat_Role);
           INIT_OPTIMIZER(keys,Num_Animation_Stages);
           INIT_OPTIMIZER(keys,Unit_Scale);
@@ -864,6 +865,9 @@ void Unit::LoadRow(CSVRow &row, string modification, string * netxml) {
       image->hudImage = createVSSprite(tmpstr.c_str());
     }
   }  
+  if ((tmpstr=OPTIM_GET(row,table,FaceCamera)).length()!=0) {
+    graphicOptions.FaceCamera=XMLSupport::parse_bool(tmpstr)?1:0;
+  }
   double spritet=queryTime();
   combat_role=ROLES::getRole(OPTIM_GET(row,table,Combat_Role));
   graphicOptions.NumAnimationPoints=stoi(OPTIM_GET(row,table,Num_Animation_Stages),0);
