@@ -18,6 +18,6 @@ static inline void endTime(const char* comment, const char* file, int lineno) {
   timeval end;
   gettimeofday(&end, NULL);
   double time = end.tv_sec - start.tv_sec + (end.tv_usec - start.tv_usec)/1000000.0;
-  clog << file << "(" << comment << "):" << lineno << ": " << time << endl;
+  std::clog << file << "(" << comment << "):" << lineno << ": " << time << std::endl;
 }
 #endif

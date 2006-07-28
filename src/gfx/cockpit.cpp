@@ -39,7 +39,7 @@
 #include "main_loop.h"
 #include <set>
 #include <string>
-
+using namespace std;
 extern float rand01();
 using VSFileSystem::SoundFile;
 #define SWITCH_CONST .9

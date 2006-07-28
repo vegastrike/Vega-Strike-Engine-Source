@@ -205,9 +205,11 @@ void Music::ChangeVolume(float inc,int layer)
         }
     }
 }
+static float tmpmin(float a, float b) {return a<b?a:b;}
+static float tmpmax(float a, float b) {return a<b?b:a;}
 
 void Music::_SetVolume (float vol,bool hardware,float latency_override) {
-    vol = max(0.0f,min((hardware?1.0f:2.0f),vol));
+    vol = tmpmax(0.0f,tmpmin((hardware?1.0f:2.0f),vol));
 	char tempbuf [100];
     if (  (hardware&&(this->vol==vol))
         ||(!hardware&&(this->soft_vol==vol))  )
