@@ -1,7 +1,7 @@
-
 #include "vegastrike.h"
 //#include "unit.h"
 #include "beam.h"
+
 #include "bolt.h"
 #include "gfx/mesh.h"
 #include "unit_collide.h"
@@ -11,9 +11,7 @@
 #include "collide/csgeom/transfrm.h"
 #include "collide/collider.h"
 #include "hashtable.h"
-bool operator < (const std::pair<Unit*, Unit*>&a,const std::pair<Unit*, Unit*>&b) {
-  return (a.first==b.first)?a.second<b.second:a.first<b.first;
-}
+
 #include <string>
 #include "vs_globals.h"
 #include "configxml.h"
@@ -481,17 +479,16 @@ bool Unit::Collide (Unit * target) {
     return false;
   if (targetisUnit==ASTEROIDPTR&&thisisUnit==ASTEROIDPTR)
     return false;
-  std::pair<Unit*,Unit*>last_collision_check;
-  if (this<target){
-    last_collision_check.first=this;last_collision_check.second=target;
-  }else{
-    last_collision_check.first=target;last_collision_check.second=this;
+  std::multimap<Unit*,Unit*>* last_collisions=&_Universe->activeStarSystem()->last_collisions;
+  std::multimap<Unit*,Unit*>::iterator iter;
+  iter=last_collisions->find(target);
+  for (;iter!=last_collisions->end()&&iter->first==target;++iter) {
+	  if (iter->second==this) {
+		  printf ("No double collision\n");
+		  return false;
+	  }
   }
-  if (_Universe->activeStarSystem()->last_collisions.Get(last_collision_check)) {
-    printf ("No double collision\n");
-    return false;
-  }
-  _Universe->activeStarSystem()->last_collisions.Put(last_collision_check,_Universe);
+  last_collisions->insert(std::pair<Unit*,Unit*>(this,target));
   //unit v unit? use point sampling?
   if ((this->DockedOrDocking()&(DOCKED_INSIDE|DOCKED))||(target->DockedOrDocking()&(DOCKED_INSIDE|DOCKED))) {
     return false;

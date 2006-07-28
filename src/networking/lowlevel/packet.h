@@ -15,7 +15,7 @@
 using std::cout;
 using std::endl;
 using std::list;
-using namespace std;
+//using namespace std;
 
 class Packet
 {

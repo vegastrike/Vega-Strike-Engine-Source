@@ -332,7 +332,7 @@ void NavigationSystem::CachedSystemIterator::init (string current_system, unsign
 	string sys;
 
 	map<string, unsigned> index_table;
-	deque<std::string> frontier;
+	std::deque<std::string> frontier;
 	frontier.push_back(current_system);
 	systems.push_back(SystemInfo(current_system));
 	index_table[current_system]=0;

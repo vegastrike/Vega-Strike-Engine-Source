@@ -1,20 +1,39 @@
+#ifndef _WIN32
 #include <ext/hash_map>
+#define stdext __gnu_cxx
+#else
+#include <hash_map>
+#endif
+#ifndef _WIN32
 #include <sys/time.h>
 #include <sys/types.h>
+#else
+#include <windows.h>
+static LONGLONG ttime;
+static LONGLONG newtime = 0;
+static LONGLONG freq;
+static double dblnewtime;
+#endif
 #include<map>
-#define stdext __gnu_cxx
+#include "../src/vs_random.h"
+VSRandom vsrandom(11376130011);
 size_t globmax=1024;
 class size{
 public:
   size_t num;
-  size() {num=(size_t)rand()%globmax;}
+	size() {num=(size_t)vsrandom.genrand_int32()%globmax;}
   bool operator== (const size &a) const{
     return this->num==a.num;
   }
-  bool operator< (const size &a) const{
-    return this->num<a.num;
-  }
+	operator size_t ()const {
+		return num;
+	}
+
 };
+bool operator< (const size &a, const size&b) {
+    return a.num<b.num;
+}
+#ifndef _WIN32
 namespace stdext{
   template<> class hash<size>{
     hash<size_t> a;
@@ -24,9 +43,10 @@ namespace stdext{
     }
   };
 }
+#endif
 double firsttime=0;
 double queryTime() {
-#ifdef WIN32
+#ifdef _WIN32
   LONGLONG tmpnewtime;
   QueryPerformanceCounter((LARGE_INTEGER*)&tmpnewtime);
   return ((double)tmpnewtime)/(double)freq-firsttime;
@@ -50,6 +70,10 @@ double getTime(){
 std::map<size_t,size_t> pod;
 stdext::hash_map<size,size> clas;
 int main (int argc, char ** argv) {
+#ifdef _WIN32
+  QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
+  QueryPerformanceCounter((LARGE_INTEGER*)&ttime);
+#endif
   size_t lima = (size_t)atof(argv[1]);
   size_t limb = (size_t)atof(argv[2]);
   size_t limc = (size_t)atof(argv[3]);
