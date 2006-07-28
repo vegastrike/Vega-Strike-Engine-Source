@@ -49,7 +49,7 @@ void cache_ani (string s) {
 void update_ani_cache () {
     for (std::set<std::string>::iterator it=tempcache.begin(); it!=tempcache.end(); it++)
         if (cached_ani.find(*it)==cached_ani.end())
-            cached_ani.insert(pair <std::string,Animation *>(*it,new Animation ((*it).c_str(),false,.1,BILINEAR,false)));
+			cached_ani.insert(std::pair <std::string,Animation *>(*it,new Animation ((*it).c_str(),false,.1,BILINEAR,false)));
     tempcache.clear();
 }
 std::string getRandomCachedAniString () {
