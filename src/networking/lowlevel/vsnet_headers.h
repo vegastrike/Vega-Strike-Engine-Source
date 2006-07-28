@@ -19,4 +19,7 @@
 #include <sys/types.h>
 #endif
 #include <stdlib.h>
-
+#include <iostream>
+using std::cout;
+using std::endl;
+using std::cerr;

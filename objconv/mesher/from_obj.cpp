@@ -26,6 +26,7 @@
  */
 
 /* Renamed to get rid of namespace collisions */
+using namespace std;
 class TObj_Vector {
  public:
   float i,j,k;
@@ -119,7 +120,7 @@ struct FACE {
 };
 
 // For stripifying, but not worth it now that we're switching to OGRE...
-struct TRISORT : public binary_function<FACE,FACE,bool> {
+struct TRISORT : public std::binary_function<FACE,FACE,bool> {
     bool operator()(const FACE& a, const FACE& b) {
         assert(a.num==3 && b.num==3);
         if (a.r1<b.r1) 
@@ -129,7 +130,7 @@ struct TRISORT : public binary_function<FACE,FACE,bool> {
     }
 };
 
-struct QUADSORT : public binary_function<FACE,FACE,bool> {
+struct QUADSORT : public std::binary_function<FACE,FACE,bool> {
     bool operator()(const FACE& a, const FACE& b) {
         assert(a.num==4 && b.num==4);
         if (a.r1<b.r1) 

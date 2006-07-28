@@ -58,7 +58,7 @@ template <class Typ,class Key> class ClassCache {
     return NULL;
   }
   static Typ *setCachedMutable (const Key &k, Typ *un) {
-    unit_cache.insert (pair<Key,Typ *> (k,un));
+    unit_cache.insert (std::pair<Key,Typ *> (k,un));
     return un;
   }
   static const Typ *setCachedConst (const Key &k, Typ *un) {

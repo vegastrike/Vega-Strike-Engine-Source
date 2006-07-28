@@ -35,7 +35,7 @@ void	FileUtil::WriteSaveFiles( string savestr, string xmlstr, string name)
 	VSError err = f.OpenCreateWrite( savefile, AccountFile);
 	if( err>Ok)
 	{
-		cout<<"Error opening save file "<<savefile<<endl;
+		std::cout<<"Error opening save file "<<savefile<<std::endl;
 		VSExit(1);
 	}
 	f.Write( savestr);
@@ -45,7 +45,7 @@ void	FileUtil::WriteSaveFiles( string savestr, string xmlstr, string name)
 	err = f.OpenCreateWrite( savefile, AccountFile);
 	if( err>Ok)
 	{
-		cout<<"Error opening save file "<<savefile<<endl;
+		std::cout<<"Error opening save file "<<savefile<<std::endl;
 		VSExit(1);
 	}
 	f.Write( xmlstr);
@@ -104,7 +104,7 @@ else
 void	FileUtil::displayHash( unsigned char * hash, unsigned int length)
 {
 	for( unsigned int i=0; i<length; i++)
-		cerr<<hash[i];
+		std::cerr<<hash[i];
 }
 
 int		FileUtil::HashCompute( const char * filename, unsigned char * digest, VSFileType type)

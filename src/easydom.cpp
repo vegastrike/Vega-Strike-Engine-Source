@@ -35,6 +35,9 @@
 //using XMLSupport::AttributeList;
 
 
+using std::cout;
+using std::cerr;
+using std::endl;
 easyDomNode::easyDomNode(){
 }
 

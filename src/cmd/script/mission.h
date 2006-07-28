@@ -300,7 +300,7 @@ class varInst {
     objectname=string();
     object=NULL;
   };
-  varInst() { cout << "varInst() obsolete\n" << endl; assert(0); };
+  varInst() { std::cout << "varInst() obsolete\n" << std::endl; assert(0); };
 
   string name;
   var_type type;

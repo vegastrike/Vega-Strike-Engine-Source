@@ -170,7 +170,7 @@ void Mission::call_string_print(missionNode *node,int mode,varInst *ovi){
 
   string *my_string =getStringObject(node,mode,ovi);
 
-  cout << *my_string ;
+  std::cout << *my_string ;
 }
 
 varInst * Mission::call_string_new(missionNode *node,int mode,string initstring){

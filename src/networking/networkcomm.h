@@ -34,7 +34,7 @@ class JVOIPRTPTransmissionParams;
 #include "networking/lowlevel/vsnet_dloadmgr.h"
 #include "networking/lowlevel/vsnet_notify.h"
 
-typedef list<ClientPtr>::iterator CltPtrIterator;
+typedef std::list<ClientPtr>::iterator CltPtrIterator;
 
 class WebcamSupport;
 
@@ -44,7 +44,7 @@ class NetworkCommunication
 		// Text message
 		std::deque<std::string>	message_history;		// Text message history
 		unsigned short			max_messages;			// Maximum number of text messages recorded
-		list<ClientPtr>			commClients;			// List of client communicating on the same frequency
+		std::list<ClientPtr>			commClients;			// List of client communicating on the same frequency
 		CltPtrIterator			webcamClient;			// The client we are watching the webcam
 
 		char				crypt_key[DESKEY_SIZE];		// Key used for encryption on secured channels
@@ -84,33 +84,33 @@ class NetworkCommunication
 #ifdef CRYPTO
 		//Algorithm *			cryptalgo;
 		RandomPool			randPool;
-		string				crypto_method;
-		string				seed;
+		std::string				crypto_method;
+		std::string				seed;
 		unsigned int		key_length;
-		string				pubKeyFilename;
-		string				privKeyFilename;
-		string				pubkey;
-		string				privkey;
+		std::string				pubKeyFilename;
+		std::string				privKeyFilename;
+		std::string				pubkey;
+		std::string				privkey;
 
 #endif
 		void				GenerateKey();
-		string				EncryptBuffer( const char * buffer, unsigned int length = 0);
-		string				DecryptBuffer( const char * buffer, unsigned int length = 0);
+		std::string				EncryptBuffer( const char * buffer, unsigned int length = 0);
+		std::string				DecryptBuffer( const char * buffer, unsigned int length = 0);
 
 	public:
 		enum	CommunicationMethod { ClientBroadcast, ServerUnicast };
 
 		NetworkCommunication();
-		NetworkCommunication( float minfreq, float maxfreq, bool video, bool secured, string method);
+		NetworkCommunication( float minfreq, float maxfreq, bool video, bool secured, std::string method);
 		NetworkCommunication( int nb);
 		~NetworkCommunication();
 
 		int		InitSession( float frequency);
 		//void	SendImage( SOCKETALT & send_sock);
 		void	SendSound( SOCKETALT & send_sock, ObjSerial serial);
-		void	SendMessage( SOCKETALT & send_sock, ObjSerial serial, string message);
+		void	SendMessage( SOCKETALT & send_sock, ObjSerial serial, std::string message);
 		void	RecvSound( const char * sndbuffer, int length, bool encrypted=false);
-		void	RecvMessage( string message, bool encrypted=false);
+		void	RecvMessage( std::string message, bool encrypted=false);
 		int		DestroySession();
 
 		void	AddToSession( ClientPtr clt);

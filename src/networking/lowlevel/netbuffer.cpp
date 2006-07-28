@@ -68,7 +68,7 @@ void	NetBuffer::checkBuffer( int len, const char * fun)
 #ifndef NDEBUG
 	if( offset+len > size-1)
 	{
-		cerr<<"!!! ERROR : trying to read more data than buffer size (offset="<<offset<<" - size="<<size<<" - to read="<<len<<") in "<<fun<<" !!!"<<endl;
+		std::cerr<<"!!! ERROR : trying to read more data than buffer size (offset="<<offset<<" - size="<<size<<" - to read="<<len<<") in "<<fun<<" !!!"<<std::endl;
 		assert(0);
 		exit(1);
 	}

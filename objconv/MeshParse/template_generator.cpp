@@ -8,8 +8,10 @@
 #include <float.h>
 using std::vector;
 using std::string;
+
 #include "xml_support.h"
 #include "hashtable.h"
+using namespace std;
 using namespace XMLSupport;
 struct GFXVertex {
   float x,y,z;

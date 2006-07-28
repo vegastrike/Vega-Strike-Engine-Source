@@ -23,6 +23,7 @@
 #endif
 #include <sys/stat.h> // for mkdir
 #include <sys/types.h>
+
 /*
  * Globals 
  */
@@ -178,7 +179,9 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
   }
   chdir("..");
 }	
-
+using std::cout;
+using std::cerr;
+using std::endl;
 void	VSSprite::ReadTexture( FILE * f)
 {
 	if( !f)
@@ -534,7 +537,7 @@ public:
 		};
 		class Comp : public Link {
 		public:
-			vector <DisplayMode> modes;
+			std::vector <DisplayMode> modes;
 			virtual void Click (::Base* base,float x, float y, int button, int state);
 			virtual ~Comp () {}
 			explicit Comp (unsigned int parind, std::string ind, std::string pythonfile) : Link(parind, ind,pythonfile) {}

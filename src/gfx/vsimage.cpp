@@ -33,6 +33,9 @@ typedef int INT32;
 #undef VSIMAGE_DEBUG
 
 #include <iostream>
+using std::cout;
+using std::cerr;
+using std::endl;
 using VSFileSystem::VSError;
 using VSFileSystem::BadFormat;
 using VSFileSystem::VSFileType;

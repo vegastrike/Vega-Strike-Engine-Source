@@ -31,6 +31,10 @@ using stdext::hash_map;
 
 using VSFileSystem::VSVolumeType;
 using VSFileSystem::VSFSNone;
+using std::cout;
+using std::cerr;
+using std::endl;
+using std::string;
 int VSFS_DEBUG() {
   if (vs_config) {
     static int vs_debug = XMLSupport::parse_int(vs_config->getVariable("general","debug_fs","0"));
@@ -986,7 +990,7 @@ namespace VSFileSystem
 					{
 						failed+=" VOLUME OPENED\n";
 						// We add the resource file to the map only if we could have opened it
-						pair<string, CPK3 *> pk3_pair( fullpath, vol);
+						std::pair<std::string, CPK3 *> pk3_pair( fullpath, vol);
 						pk3_opened_files.insert( pk3_pair);
 					}
 					else
@@ -1026,7 +1030,7 @@ namespace VSFileSystem
 						{
 							failed+=" VOLUME OPENED\n";
 							// We add the resource file to the map only if we could have opened it
-							pair<string, CPK3 *> pk3_pair( fullpath, vol);
+							std::pair<std::string, CPK3 *> pk3_pair( fullpath, vol);
 							pk3_opened_files.insert( pk3_pair);
 						}
 						else
@@ -1344,7 +1348,7 @@ namespace VSFileSystem
 						cerr<<"!!! ERROR : opening volume : "<<full_vol_path<<endl;
 						VSExit(1);
 					}
-					pair<string, CPK3 *> pk3_pair( full_vol_path, pk3newfile);
+					std::pair<std::string, CPK3 *> pk3_pair( full_vol_path, pk3newfile);
 					pk3_opened_files.insert( pk3_pair);
 
 					this->pk3_file = pk3newfile;
@@ -1664,14 +1668,14 @@ namespace VSFileSystem
 					{
 						ret[i] = pk3_extracted_file[offset];
 						if (VSFS_DEBUG()>1) {
-							cerr<<hex<<ret[i]<<" ";
+							cerr<<std::hex<<ret[i]<<" ";
 						}
 					}
 				}
 				this->GoAfterEOL( length);
 				ret[i] = 0;
 				if (VSFS_DEBUG()>1) {
-					cerr<<dec<<" - read "<<i<<" char - "<<ret<<endl;
+					cerr<<std::dec<<" - read "<<i<<" char - "<<ret<<endl;
 				}
 				if( !nl_found)
 					return Unspecified;

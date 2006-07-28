@@ -1,7 +1,7 @@
 #include "flykeyboard.h"
 
 class FlyByJoystick: public FlyByKeyboard {
-  vector <int> whichjoystick;//which joysticks are bound to this
+  std::vector <int> whichjoystick;//which joysticks are bound to this
   bool keyboard;
  public:
   FlyByJoystick(unsigned int whichplayer);

@@ -88,7 +88,7 @@ void ProcessJoystick (int whichplayer) {
       if(joystick[i]->debug_digital_hatswitch){
 	char buf[100];
 	sprintf(buf,"hsw: %d",hsw);
-	cout << buf << endl;
+	std::cout << buf << std::endl;
 	  }
 	for(int dir_index=0;dir_index<MAX_DIGITAL_VALUES;dir_index++){
 	  bool press=false;
@@ -97,7 +97,7 @@ void ProcessJoystick (int whichplayer) {
 	  // CENTERED is an exact position.
 	  if(dir_index==VS_HAT_CENTERED && (hsw == SDL_HAT_CENTERED)){
 	    if(joystick[i]->debug_digital_hatswitch){
-	      cout << "center" << endl;
+	      std::cout << "center" << std::endl;
 	    }
 	    press=true;
 	  }

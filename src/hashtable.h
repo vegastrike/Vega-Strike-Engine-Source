@@ -33,7 +33,7 @@
 #define HASH_SALT_1 0x9B
 class Unit;
 //const int hashsize = 1001;
-using namespace std;
+
 //Hashtable doesn't grow
 template<class KEY, class VALUE, int SIZ> class Hashtable :public stdext::hash_map<KEY,VALUE*> {
 

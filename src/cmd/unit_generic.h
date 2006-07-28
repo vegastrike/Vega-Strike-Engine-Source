@@ -820,7 +820,7 @@ public:
     float tp=(lref.i==0)?0:fabs(Limits().lateral/lref.i);
     float tq=(lref.j==0)?0:fabs(Limits().vertical/lref.j);
     float tr=(lref.k==0)?0:fabs(((lref.k>0)?Limits().forward:Limits().retro)/lref.k);
-    float tm=min(tp,min(tr,tq));
+    float tm=std::min(tp,std::min(tr,tq));
     return lref.Magnitude()*tm/GetMass();
   }
   ///Transforms a orientation vector Up a coordinate level. Does not take position into account

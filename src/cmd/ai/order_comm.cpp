@@ -1,6 +1,7 @@
 #include "order.h"
 #include "communication.h"
-
+using std::list;
+using std::vector;
 void Order::AdjustRelationTo (Unit * un, float factor) {
   //virtual stub function
 }

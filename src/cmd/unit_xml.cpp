@@ -1172,12 +1172,12 @@ using namespace UnitXML;
       case ENGINEWAV:
 	ADDDEFAULT;
 	sound->engine = AUDCreateSoundWAV ((*iter).value,true);
-	cout<<"engine sound wav : "<<(*iter).value<<endl;
+	//std::cout<<"engine sound wav : "<<(*iter).value<<endl;
 	break;
       case ENGINEMP3:
 	ADDDEFAULT;
 	sound->engine = AUDCreateSoundMP3((*iter).value,true); 
-	cout<<"engine sound mp3 : "<<(*iter).value<<endl;
+	//std::cout<<"engine sound mp3 : "<<(*iter).value<<endl;
 	break;
       case SHIELDMP3:
 	ADDDEFAULT;
@@ -1855,9 +1855,9 @@ void Unit::LoadXML(VSFileSystem::VSFile & f, const char * modifications, string 
   const int chunk_size = 16384;
  // rrestricted=yrestricted=prestricted=false;
   std::string collideTreeHash = VSFileSystem::GetHashName(string(modifications)+"#"+filename);
-  cout<<endl;
+  //std::cout<<std::endl;
   //cout<<"Loading XML unit : "<<filename<<" in "<<curdir[0]<<endl;
-  cout<<endl;
+  //std::cout<<std::endl;
   image->unitwriter=new XMLSerializer (name.c_str(),modifications,this);
   image->unitwriter->AddTag ("Unit");
   string * myhudim = &image->unitwriter->randomdata[0];

@@ -11,7 +11,7 @@
 extern Hashtable < std::string, PyCodeObject, 1023> compiled_python;
 class PythonBasicType {
  public:
-  string objects;
+  std::string objects;
   long objecti;
   double objectd;
   enum {MYSTRING, MYLONG, MYDOUBLE} type;
@@ -42,7 +42,7 @@ class PythonBasicType {
 void InterpretPython (const std::string &filename);
 PyCodeObject *CompilePython (const std::string &filename);
 void CompileRunPython (const std::string &filename);
-PyObject *CreateTuple (const vector <PythonBasicType> &values);
+PyObject *CreateTuple (const std::vector <PythonBasicType> &values);
 
 ///Warning: The basic pointer class does NOTHING for the user.
 ///NO Refcounts...if python holds onto this for longer than it can...

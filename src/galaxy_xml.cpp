@@ -279,7 +279,7 @@ SGalaxy::SGalaxy(const char *configfile){
   {
   	if(SERVER)
 	{
-		cerr<<"!!! ERROR : couldn't find galaxy file : "<<configfile<<endl;
+		std::cerr<<"!!! ERROR : couldn't find galaxy file : "<<configfile<<std::endl;
 		exit(1);
 	}
   }

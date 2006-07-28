@@ -47,7 +47,7 @@ public:
   size_t size() {return parent->key.size();}
   CSVRow(CSVTable * parent, std::string key);
   CSVRow(CSVTable * parent, unsigned int which);
-  CSVRow(){parent=NULL;iter=string::npos;}
+  CSVRow(){parent=NULL;iter=std::string::npos;}
   std::string operator[](std::string);
   std::string operator[](unsigned int);
   std::vector<std::string>::iterator begin();

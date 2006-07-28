@@ -46,6 +46,9 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 
+using std::cout;
+using std::cerr;
+using std::endl;
 //#include "vegastrike.h"
 
 

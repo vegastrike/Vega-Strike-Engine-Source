@@ -56,6 +56,9 @@
 //#include "vegastrike.h"
 
 /* *********************************************************** */
+using std::cout;
+using std::cerr;
+using std::endl;
 Mission::~Mission() {
   VSFileSystem::vs_fprintf (stderr,"Mission Cleanup Not Yet Implemented");
   //do not delete msgcenter...could be vital

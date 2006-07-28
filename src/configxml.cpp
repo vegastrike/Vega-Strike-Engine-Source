@@ -35,6 +35,9 @@
 
 //#include "vs_globals.h"
 //#include "vegastrike.h"
+using std::cout;
+using std::cerr;
+using std::endl;
 
 /* *********************************************************** */
 

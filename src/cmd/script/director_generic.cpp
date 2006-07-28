@@ -24,7 +24,9 @@
 #include "mission.h"
 #include "savegame.h"
 extern bool have_yy_error;
-
+using std::cout;
+using std::cerr;
+using std::endl;
 PYTHON_INIT_INHERIT_GLOBALS(Director,PythonMissionBaseClass);
 float getSaveData (int whichcp, string key, unsigned int num) {
   if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {

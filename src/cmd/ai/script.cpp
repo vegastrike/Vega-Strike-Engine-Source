@@ -15,7 +15,7 @@
 typedef stdext::hash_map<string,CCScript *> HardCodedMap;
 static HardCodedMap MakeHardCodedScripts() {
   HardCodedMap tmp;
-  typedef pair<string, CCScript *> MyPair;
+  typedef std::pair<std::string, CCScript *> MyPair;
   tmp.insert (MyPair ("loop around fast",&LoopAroundFast));
   tmp.insert (MyPair ("aggressive loop around fast",&AggressiveLoopAroundFast));  
   tmp.insert (MyPair ("loop around slow",&LoopAroundSlow));

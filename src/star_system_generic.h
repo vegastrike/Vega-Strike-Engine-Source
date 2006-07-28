@@ -61,7 +61,7 @@ class StarSystem {
     bool fade;
     float starsp;
     float scale;
-	vector <AtmosphericFogMesh> fog;
+	std::vector <AtmosphericFogMesh> fog;
 	int fogopticalillusion;
   } *xml;
   void LoadXML(const char*, const Vector & centroid, const float timeofyear);

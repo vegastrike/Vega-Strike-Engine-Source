@@ -49,6 +49,9 @@
 //#include "vs_globals.h"
 //#include "vegastrike.h"
 
+using std::cout;
+using std::cerr;
+using std::endl;
 string varToString (varInst * vi) {
   switch (vi->type) {
   case VAR_FLOAT:

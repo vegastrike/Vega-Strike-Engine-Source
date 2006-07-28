@@ -25,6 +25,8 @@
 #include "communication.h"
 #include "config_xml.h"
 #include "vs_globals.h"
+using std::vector;
+using std::list;
 //#define ORDERDEBUG
 void Order::Execute () {
   static float airesptime=XMLSupport::parse_float(vs_config->getVariable ("AI","CommResponseTime","3"));
