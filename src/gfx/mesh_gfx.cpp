@@ -70,7 +70,7 @@ public:
   }
   bool operator < (const OrigMeshContainer & b) const {
     if(orig->Decal[0]==NULL || b.orig->Decal[0]==NULL){
-      cout << "DEcal is nulll" << endl;
+      std::cout << "DEcal is nulll" << std::endl;
       return b.orig->Decal[0]!=NULL;
     }
     return ((*orig->Decal[0]) < (*b.orig->Decal[0]));

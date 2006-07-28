@@ -10,7 +10,7 @@
 #include "vs_globals.h"
 #include "../gldrv/gl_globals.h"
 #include <set>
-
+using std::set;
 static set<AnimatedTexture *> anis;
 
 static enum ADDRESSMODE parseAddressMode(const string& addrmodestr, ADDRESSMODE defaultAddressMode) {
