@@ -45,6 +45,9 @@
 //#include "vs_globals.h"
 //#include "vegastrike.h"
 #include "gfx/screenshot.h"
+using std::cout;
+using std::endl;
+using std::cerr;
 /* *********************************************************** */
 
 GameVegaConfig::GameVegaConfig(const char *configfile): VegaConfig( configfile)

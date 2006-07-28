@@ -238,7 +238,7 @@ int		NetClient::checkAcctMsg( )
 					globalsaves.push_back( "!!! ACCESS DENIED : Account already logged in !!!");
 				break;
 				default:
-					COUT<<">>> UNKNOWN COMMAND =( "<<hex<<packeta.getSerial()<<" )= --------------------------------------"<<endl;
+					COUT<<">>> UNKNOWN COMMAND =( "<<std::hex<<packeta.getSerial()<<" )= --------------------------------------"<<std::endl;
 					globalsaves.push_back( "");
 					globalsaves.push_back( "!!! PROTOCOL ERROR : Unexpected command received !!!");
 			}
@@ -1154,8 +1154,8 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 			case CMD_SERVERTIME:
 			break;
             default :
-                COUT << ">>> " << local_serial << " >>> UNKNOWN COMMAND =( " << hex << cmd
-                     << " )= --------------------------------------" << endl;
+                COUT << ">>> " << local_serial << " >>> UNKNOWN COMMAND =( " << std::hex << cmd
+                     << " )= --------------------------------------" << std::endl;
                 keeprun = 0;
                 this->disconnect();
         }

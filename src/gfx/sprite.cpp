@@ -97,7 +97,7 @@ void	VSSprite::ReadTexture( VSFileSystem::VSFile * f)
 	{
     	widtho2 = heighto2 = 0;
     	xcenter = ycenter = 0;
-		cerr<<"VSSprite::ReadTexture error : VSFile not valid"<<endl;
+		std::cerr<<"VSSprite::ReadTexture error : VSFile not valid"<<std::endl;
 		return;
 	}
 	surface = new Texture( f);
