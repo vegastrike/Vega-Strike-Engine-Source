@@ -6,6 +6,7 @@
 #include <ext/hash_map>
 #define stdext __gnu_cxx
 #include "hashtable.h"
+class Unit;
 namespace stdext{
   template<> class hash<std::string> {
   public:
@@ -43,7 +44,15 @@ namespace stdext{
     hash<size_t> a;
   public:
     size_t operator () (const Unit * const &key) const{
-      return a((size_t)key);
+      return a((size_t)key>>4);
+    }
+  };
+  template<> class hash<std::pair<Unit *,Unit*> > {
+    hash<size_t> a;
+  public:
+    size_t operator () (const std::pair<Unit*,Unit*> &key) const{
+      return (size_t)(size_t)(a((int)(((size_t)key.first)>>4))^
+                              a((int)(((size_t)key.second)>>4)));
     }
   };
 

@@ -22,6 +22,7 @@
 #ifndef _HASHTABLE_H_
 #define _HASHTABLE_H_
 
+#include "gnuhash.h"
 #include <math.h>
 #include <string>
 #include <vector>
@@ -34,22 +35,11 @@ class Unit;
 //const int hashsize = 1001;
 using namespace std;
 //Hashtable doesn't grow
-template<class KEY, class VALUE, int SIZ> class Hashtable {
+template<class KEY, class VALUE, int SIZ> class Hashtable :public stdext::hash_map<KEY,VALUE*> {
 
-    typedef std::pair<KEY,VALUE*>                             HashElement;
-    typedef typename std::vector<HashElement>::iterator       It;
-    typedef typename std::vector<HashElement>::const_iterator CIt;
-
-    struct HashElementEq {
-        const KEY& key;
-        HashElementEq( const KEY& k ) : key(k) { }
-        bool operator()( const HashElement& elem ) const {
-            return ( key == elem.first );
-        }
-    };
-
-	std::vector<HashElement> table[SIZ];
-
+  typedef std::pair<KEY,VALUE*> HashElement;
+  typedef ::stdext::hash_map<KEY,VALUE* > supertype;
+  
 	static int hash(const int key) {
 		unsigned int k = key;
 		k%=SIZ;
@@ -67,89 +57,51 @@ template<class KEY, class VALUE, int SIZ> class Hashtable {
           return k;
 	}
 	static int hash(const std::string &key) {
-		unsigned int k = 0;
-		for(typename std::string::const_iterator start = key.begin(); start!=key.end(); start++) {
+          unsigned int k = 0;
+          for(typename std::string::const_iterator start = key.begin(); start!=key.end(); start++) {
             k ^= (*start&HASH_SALT_1);
             k ^= HASH_SALT_0;
             k  = (((k>>4)&0xF)|(k<<(HASH_INTSIZE-4)));
             k ^= *start;
-		}
-		k %= SIZ;
-		return k;
+          }
+          k %= SIZ;
+          return k;
 	}
-  static int hash (const std::pair<Unit *,Unit*> a) {
-    return (int)(((unsigned int)(hash((int)(((size_t)a.first)>>4))^
-                                 hash((int)(((size_t)a.second)>>4))))%SIZ);
-  }
 public:
-  void clear () {
-    for (int i=0;i<SIZ;++i){
-      table[i].clear();
-    }
-  }
-	Hashtable()
-	{
-	}
-	Hashtable( const Hashtable& orig )
-	{
-        for( int i=0; i<SIZ; i++ ) {
-            table[i] = orig.table[i];
-        }
-	}
 	std::vector <VALUE *> GetAll() const
 	{
-	  std::vector <VALUE *> retval;
-	  for (unsigned int hashval=0;hashval<SIZ;hashval++) {
-	    CIt iter = table[hashval].begin(), end = table[hashval].end();
-	    for(;iter!=end;iter++) {
-	      retval.push_back (iter->second);
-	    }
-	  }
+	  std::vector <VALUE *> retval(this->size());
+          typename supertype::const_iterator iter=this->begin();
+          typename supertype::const_iterator end=this->end();
+          size_t i=0;
+          for (;iter!=end;++iter) {
+            retval[i++]=iter->second;
+          }
 	  return retval;
 	}
-
+  
 	VALUE *Get(const KEY &key) const
 	{
-        HashElementEq eq(key);
-		int hashval = hash(key);
-	    CIt iter = table[hashval].begin(), end = table[hashval].end();
-	    for(;iter!=end;iter++) {
-			if( eq(*iter) ) break;
-		}
-		if(iter==end)
-			return NULL;
-		else
-			return iter->second;
+          typename supertype::const_iterator iter=this->find(key);
+          typename supertype::const_iterator end=this->end();
+          if (iter!=end) return iter->second;
+          return NULL;
 	}
 
 	void Put(const KEY &key, VALUE *value)
 	{
-        int hashval = hash(key);
-		table[hashval].push_back(HashElement(key, value));
+          (*this)[key]=value;
 	}
 
 	void Delete(const KEY &key)
 	{
-        HashElementEq eq(key);
-		int hashval = hash(key);
-        It iter;
-        It end = table[hashval].end();
-        iter = find_if( table[hashval].begin(), end, eq );
-		if(iter==end)
-			return;
-		else {
-			table[hashval].erase(iter);
-		}
+          if (this->find(key)==this->end()) {
+            fprintf(stderr,"failed to remove item in hash_map\n");
+            return;//FIXME could be double slow to delete
+          }
+          typename supertype::iterator iter=this->find(key);
+          this->erase(iter);
 	}
-
-/*
-	VALUE *Get(const KEY &key);
-	void Put(const KEY &key, VALUE *value);
-	void Delete(const KEY &key);
-*/
-
-private:
-	Hashtable& operator=( const Hashtable& orig );
 };
 
 #endif
