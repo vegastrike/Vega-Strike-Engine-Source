@@ -83,7 +83,7 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 					COUT<<"<<< LOGIN ALREADY --------------------------------------------------------------"<<endl;
 				break;
 				default:
-					COUT<<">>> UNKNOWN COMMAND =( "<<hex<<cmd<<" )= --------------------------------------"<<endl;
+					COUT<<">>> UNKNOWN COMMAND =( "<<std::hex<<cmd<<" )= --------------------------------------"<<endl;
 			}
 		}
 		else
