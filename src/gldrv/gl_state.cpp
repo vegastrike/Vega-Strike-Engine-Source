@@ -260,7 +260,7 @@ struct BlendMode {
 	BLENDFUNC sfactor, dfactor;
 	BlendMode() {sfactor = dfactor = ONE;};
 } currBlendMode;
-
+using std::stack;
 stack<BlendMode> blendstack;
 
 void /*GFXDRVAPI*/ GFXGetBlendMode(enum BLENDFUNC &src, enum BLENDFUNC &dst)
