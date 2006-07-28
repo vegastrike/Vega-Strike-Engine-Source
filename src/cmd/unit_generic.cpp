@@ -43,6 +43,12 @@
 #endif
 #include "config.h"
 #include "unit_find.h"
+
+//cannot seem to get min and max working properly across win and lin without using namespace std
+static float mymax (float a, float b) {return a<b?b:a;}
+static float mymin (float a, float b) {return a<b?a:b;}
+
+
 using namespace Orders;
 extern void DestroyMount(Mount*);
 
@@ -3454,7 +3460,7 @@ Vector Unit::ToWorldCoordinates(const Vector &v) const {
 
 void Unit::LightShields(const Vector & pnt, const Vector & normal, float amt, const GFXColor &color)
 {
-    meshdata.back()->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),min(1.0f,max(0.0f,amt)),color);
+    meshdata.back()->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),mymin(1.0f,mymax(0.0f,amt)),color);
 }
 
 // NEW TESTING MODIFICATIONS
@@ -3878,9 +3884,9 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 		//DAMAGE Reactor
 		//DAMAGE JUMP
 		if (randnum>=.9) {
-            static char max_shield_leak=(char)max(0.0,min(100.0,XMLSupport::parse_float(vs_config->getVariable("physics","max_shield_leak","90"))));
-            static char min_shield_leak=(char)max(0.0,min(100.0,XMLSupport::parse_float(vs_config->getVariable("physics","max_shield_leak","0"))));
-            char newleak=max(min_shield_leak,max(max_shield_leak,(char)((randnum-.9)*10.0*100.0)));
+            static char max_shield_leak=(char)mymax(0.0,mymin(100.0,XMLSupport::parse_float(vs_config->getVariable("physics","max_shield_leak","90"))));
+            static char min_shield_leak=(char)mymax(0.0,mymin(100.0,XMLSupport::parse_float(vs_config->getVariable("physics","max_shield_leak","0"))));
+            char newleak=mymax(min_shield_leak,mymax(max_shield_leak,(char)((randnum-.9)*10.0*100.0)));
             if (shield.leak<newleak)
                 shield.leak=newleak;
 		} else if (randnum>=.7) {
