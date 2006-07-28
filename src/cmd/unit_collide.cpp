@@ -11,7 +11,7 @@
 #include "collide/csgeom/transfrm.h"
 #include "collide/collider.h"
 #include "hashtable.h"
-static bool operator < (const std::pair<Unit*, Unit*>&a,const std::pair<Unit*, Unit*>&b) {
+bool operator < (const std::pair<Unit*, Unit*>&a,const std::pair<Unit*, Unit*>&b) {
   return (a.first==b.first)?a.second<b.second:a.first<b.first;
 }
 #include <string>
