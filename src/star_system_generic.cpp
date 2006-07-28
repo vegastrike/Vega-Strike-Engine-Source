@@ -24,6 +24,7 @@
 #include "universe_generic.h"
 //#include "cmd/atmosphere.h"
 #include "hashtable.h"
+bool operator < (const std::pair<Unit*, Unit*>&a,const std::pair<Unit*, Unit*>&b);
 #include "cmd/nebula_generic.h"
 #include "galaxy_gen.h"
 #include "cmd/script/mission.h"
