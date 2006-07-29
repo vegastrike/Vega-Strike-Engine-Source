@@ -34,7 +34,7 @@ const static bool GFX_BUFFER_MAP_UNMAP=false;
     #endif
 #endif
 
-using namespace std;
+//using namespace std;
 
 #ifndef GFXSTAT
 #define GFXSTAT

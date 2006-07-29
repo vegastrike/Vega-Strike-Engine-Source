@@ -23,6 +23,7 @@ public:
       return fac<b.fac;
     return key < b.key;
   }
+  operator size_t () const{return Hashtable<std::string,int,(1<<30)>::hash(key)^fac;}
 };
 
 #ifndef _WIN32
@@ -41,7 +42,7 @@ template <class Typ,class Key> class ClassCache {
 #ifndef _WIN32
   static stdext::hash_map<Key, Typ *, ConstHasher> unit_cache;
 #else
-  static std::map<Key, Typ *> unit_cache;
+  static stdext::hash_map<Key, Typ *> unit_cache;
 #endif
  public:
   static const Typ *getCachedConst (Key k) {
@@ -51,7 +52,7 @@ template <class Typ,class Key> class ClassCache {
 #ifndef _WIN32
     typename stdext::hash_map<Key,Typ *,ConstHasher>::iterator i=unit_cache.find(k);
 #else
-	typename std::map<Key,Typ *>::iterator i=unit_cache.find(k);
+	typename stdext::hash_map<Key,Typ *>::iterator i=unit_cache.find(k);
 #endif
     if (i!=unit_cache.end())
       return (*i).second;

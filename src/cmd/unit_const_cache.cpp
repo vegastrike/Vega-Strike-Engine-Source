@@ -5,12 +5,15 @@
 
 #include "unit_generic.h"
 #include "unit_const_cache.h"
-
 #if (!defined(__GNUC__)) || !(defined(__GNUC__)&& ((__GNUC__ == 3 && __GNUC_MINOR__ >= 4)|| __GNUC__>3))
-std::map<StringIntKey,Unit*> UnitConstCache::unit_cache;
-std::map<std::string , Mesh*> WeaponMeshCache::unit_cache;
+#ifdef _WIN32
+stdext::hash_map<StringIntKey,Unit*> UnitConstCache::unit_cache;
+stdext::hash_map<std::string , Mesh*> WeaponMeshCache::unit_cache;
+#else
+stdext::hash_map<StringIntKey,Unit*,ConstHasher> UnitConstCache::unit_cache;
+stdext::hash_map<std::string , Mesh*,ConstHasher> WeaponMeshCache::unit_cache;
 #endif
-
+#endif
 
 #if 0
 typedef stdext::hash_map<keyval, Unit *> UnitCacheType;

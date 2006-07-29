@@ -40,6 +40,7 @@ template<class KEY, class VALUE, int SIZ> class Hashtable :public stdext::hash_m
   typedef std::pair<KEY,VALUE*> HashElement;
   typedef ::stdext::hash_map<KEY,VALUE* > supertype;
   
+public:
 	static int hash(const int key) {
 		unsigned int k = key;
 		k%=SIZ;
@@ -67,7 +68,6 @@ template<class KEY, class VALUE, int SIZ> class Hashtable :public stdext::hash_m
           k %= SIZ;
           return k;
 	}
-public:
 	std::vector <VALUE *> GetAll() const
 	{
 	  std::vector <VALUE *> retval(this->size());
