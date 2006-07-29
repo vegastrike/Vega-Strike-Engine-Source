@@ -257,7 +257,7 @@ void Universe::Generate2( StarSystem * ss)
 
   pushActiveStarSystem(ss);
   for (int tume=0;tume<=6*SIM_QUEUE_SIZE+1;++tume) {
-    ss->ExecuteUnitAI();
+	  //ss->ExecuteUnitAI();
     ss->UpdateUnitPhysics(true);    
   }
   // notify the director that a new system is loaded (gotta have at least one active star system)
