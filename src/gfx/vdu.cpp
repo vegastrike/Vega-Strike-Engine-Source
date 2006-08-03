@@ -594,11 +594,19 @@ retString128 PrettyDistanceString(double distance) {
 		sprintf (qr.str,"Distance: %.2lf",distance/game_speed);
 	} else {
 		if(distance<100000){
-			sprintf (qr.str,"Distance: %.0lf Meters",distance);
-		} else if (distance<100000000){
-			sprintf (qr.str,"Distance: %.0lf Kilometers",distance/1000);
-		} else {
-			sprintf (qr.str,"Distance: %.2lf LightSeconds",distance/300000000);
+			sprintf (qr.str,"Distance: %.0lf meters",distance);
+		} else if (distance<100000000){					// use kilometers up to 100,000 km
+			sprintf (qr.str,"Distance: %.0lf kilometers",distance/1000);
+		} else if (distance<(120*299792458)){ 			// use light seconds up to 120
+			sprintf (qr.str,"Distance: %.2lf light seconds",distance/299792458);
+		} else if (distance<(120*60*299792458)){		// use light minutes up to 120
+			sprintf (qr.str,"Distance: %.2lf light minutes",distance/(60*299792458));
+		} else if (distance<(48*3600*299792458)){		// use light hours up to 48
+			sprintf (qr.str,"Distance: %.2lf light hours",distance/(3600*299792458));
+		} else if (distance<(365*24*3600*299792458)){	// use light days up to 365
+			sprintf (qr.str,"Distance: %.2lf light days",distance/(24*3600*299792458));
+		} else {										// use light years
+			sprintf (qr.str,"Distance: %.2lf lightyears",distance/(365*24*3600*299792458));
 		}
 	}
 	return qr;
