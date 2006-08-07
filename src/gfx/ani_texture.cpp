@@ -111,6 +111,7 @@ void AnimatedTexture::UpdateAllFrame() {
     for (set<AnimatedTexture *>::iterator iter=anis.begin(); iter!=anis.end(); iter++)
       (*iter)->setTime((*iter)->curTime()+elapsed);
 }
+
 bool AnimatedTexture::Done() {
   //return physicsactive<0;
   // Explosions aren't working right, and this would fix them.
@@ -119,6 +120,12 @@ bool AnimatedTexture::Done() {
   // If I'm wrong, and the above line is crucial, well... feel free to fix it.
   return curtime >= numframes*timeperframe; 
 }
+static unsigned int intmin(int a, int b){
+  return a<b?a:b;
+}
+static unsigned int intmax(int a, int b){
+  return a<b?b:a;
+}
 void AnimatedTexture::setTime (double tim) {
 	curtime=tim;
     if (timeperframe) {
@@ -126,8 +133,8 @@ void AnimatedTexture::setTime (double tim) {
       unsigned int active=((unsigned int)(curtime/timeperframe));
       if (GetLoop()) 
           active %= numframes; else 
-          active = min(active,numframes-1);
-      unsigned int nextactive=(GetLoopInterp()?((active+1)%numframes):min(active+1,numframes-1));
+          active = intmin(active,numframes-1);
+      unsigned int nextactive=(GetLoopInterp()?((active+1)%numframes):intmin(active+1,numframes-1));
       float fraction = (curtime/timeperframe)-(unsigned int)(curtime/timeperframe);
       if (fraction<0) fraction += 1.0f;
       this->active = active;
@@ -147,7 +154,7 @@ void AnimatedTexture::setTime (double tim) {
           }
       } else {
           if (GetInterpolateTCoord()&&(active!=nextactive)) {
-              if (frames_maxtc.size()<max(active,nextactive)) {
+              if (frames_maxtc.size()<intmax(active,nextactive)) {
                   this->maxtcoord = (1-fraction)*frames_maxtc[active] + fraction*frames_maxtc[nextactive];
                   this->mintcoord = (1-fraction)*frames_mintc[active] + fraction*frames_mintc[nextactive];
               }
