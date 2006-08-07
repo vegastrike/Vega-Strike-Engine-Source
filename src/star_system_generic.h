@@ -137,7 +137,7 @@ class StarSystem {
 
   void ExecuteUnitAI();
   class CollideTable *collidetable;
-  CollideMap *collidemap;
+  CollideMap *collidemap[2];//0 = UNIT_ONLY 1 = UNIT_BOLT...use enum from Unit::
   class bolt_draw *bolts;
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);

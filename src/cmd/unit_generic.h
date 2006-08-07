@@ -158,7 +158,7 @@ class Mount {
      */ 
 	// Uses Sound Forcefeedback and other stuff
     void PhysicsAlignedUnfire();
-    bool PhysicsAlignedFire (Unit * caller,const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, void *owner,  Unit *target, signed char autotrack, float trackingcone, CollideMap::iterator &hint);
+    bool PhysicsAlignedFire (Unit * caller,const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, void *owner,  Unit *target, signed char autotrack, float trackingcone, CollideMap::iterator hint[]);
     bool NextMountCloser(Mount *nextmount,Unit*);
     bool Fire (Unit * firer,void *owner, bool Missile=false, bool collide_only_with_target=false);
 };
@@ -1067,11 +1067,12 @@ public:
 
 public:
   ///The information about the minimum and maximum ranges of this unit. Collide Tables point to this bit of information.
-  CollideMap::iterator location;
+  enum COLLIDELOCATIONTYPES {UNIT_ONLY=0,UNIT_BOLT=1,NUM_COLLIDE_MAPS=2};
+  CollideMap::iterator location[2];//location[0] is for units only, location[1] is for units + bolts
   struct collideTrees * colTrees;
   ///Sets the parent to be this unit. Unit never dereferenced for this operation
   void SetCollisionParent (Unit *name);
-  ///won't collide with owner
+  ///won't collide with ownery
   void SetOwner(Unit *target);
   void SetRecursiveOwner(Unit *target);
 
@@ -1091,7 +1092,7 @@ void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL); /
 // Uses mesh stuff (only rSize()) : I have to find something to do
   bool Inside (const QVector &position, const float radius, Vector & normal, float &dist);
 // Uses collide and Universe stuff -> put in NetUnit
-  void UpdateCollideQueue(StarSystem * ss, CollideMap::iterator hint);
+  void UpdateCollideQueue(StarSystem * ss, CollideMap::iterator hint[NUM_COLLIDE_MAPS]);
 // Uses collision stuff so only in NetUnit and Unit classes
   bool querySphere (const QVector &pnt, float err)const;
   ///queries the sphere for beams (world space start,end)  size is added to by my_unit_radius

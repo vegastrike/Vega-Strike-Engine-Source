@@ -51,9 +51,10 @@ public:
 
 class CollideArray{
 public:
+  unsigned int location_index;//either UNIT_ONLY or UNIT_BOLT
   class  CollidableBackref:public Collidable{
   public:
-
+    
     size_t toflattenhints_offset;
     CollidableBackref() : Collidable(){}
     CollidableBackref(Unit * un):Collidable(un){}
@@ -61,6 +62,7 @@ public:
     CollidableBackref(const Collidable &b,size_t offset):Collidable(b){toflattenhints_offset=offset;}
     
   };
+  void SetLocationIndex(unsigned int li) {location_index=li;}
   typedef Collidable *iterator;
   bool Iterable(iterator);
   std::vector<Collidable> sorted;
@@ -78,8 +80,8 @@ public:
   iterator lower_bound(const Collidable&);
   void erase(iterator iter);
   void checkSet ();
-  CollideArray():toflattenhints(1),count(0) {
-    
+  CollideArray(unsigned int location_index):toflattenhints(1),count(0) {
+    this->location_index=location_index;
   }
 
 };
@@ -94,6 +96,9 @@ class CollideMap:public CollideArray {
 #endif
 #endif
 public:
+  CollideMap(unsigned int location_offset):CollideArray(location_offset){
+  }
+  
 //Check collisions takes an item to check collisions with, and returns whether that item collided with a Unit only
   bool CheckCollisions(Bolt * bol, const Collidable & updated);
   bool CheckUnitCollisions(Bolt * bol, const Collidable & updated);//DANGER must be used on lists that are only populated with Units, not bolts

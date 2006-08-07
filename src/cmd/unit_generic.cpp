@@ -657,7 +657,9 @@ void Unit::ZeroAll( )
 void Unit::Init()
 {
   this->schedule_priority=Unit::scheduleDefault;
-  set_null(location);
+  for (unsigned int locind=0;locind<NUM_COLLIDE_MAPS;++locind) {
+    set_null(location[locind]);
+  }
   specInterdiction=0;
   sim_atom_multiplier=1;
   predicted_priority=1;
@@ -1972,11 +1974,11 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 
   bool locking=false;
   bool touched=false;
-  CollideMap::iterator hint=(!is_null(superunit->location))?superunit->location:_Universe->activeStarSystem()->collidemap->begin();
   for (int i=0;(int)i<GetNumMounts();i++) {
 //    if (increase_locking&&cloaking<0) {
 //      mounts[i].time_to_lock-=SIMULATION_ATOM;
 //    }
+
     if (mounts[i].status==Mount::ACTIVE&&cloaking<0&&mounts[i].ammo!=0) {
       if (player_cockpit) {
 	  touched=true;
@@ -2069,6 +2071,11 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 		  }
 		  autotrack=2;
       }
+      CollideMap::iterator hint[Unit::NUM_COLLIDE_MAPS];
+      for (unsigned int locind =0;locind<Unit::NUM_COLLIDE_MAPS;++locind) {
+        hint[locind]=(!is_null(superunit->location[locind]))?superunit->location[locind]:_Universe->activeStarSystem()->collidemap[locind]->begin();
+      }
+
       if (!mounts[i].PhysicsAlignedFire (this,t1,m1,cumulative_velocity,(!isSubUnit()||owner==NULL)?this:owner,target,autotrack, trackingcone,hint)) {
         const weapon_info * typ = mounts[i].type;
         energy+=typ->EnergyRate*(typ->type==weapon_info::BEAM?SIMULATION_ATOM:1);
@@ -2110,10 +2117,12 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
     UpdateCollideQueue();
   }*/
     if (!isSubUnit()) {
-      if (is_null(this->location)) {
-        this->getStarSystem()->collidemap->insert(Collidable(this));
-      }else {
-        this->getStarSystem()->collidemap->changeKey(this->location,Collidable(this));
+      for (unsigned int locind=0;locind<Unit::NUM_COLLIDE_MAPS;++locind) {
+        if (is_null(this->location[locind])) {
+          this->getStarSystem()->collidemap[locind]->insert(Collidable(this));
+        }else {
+          this->getStarSystem()->collidemap[locind]->changeKey(this->location[locind],Collidable(this));
+        }
       }
     }
   }
@@ -2196,7 +2205,7 @@ void Unit::AddVelocity(float difficulty) {
            Unit * testthis=NULL;
            {
              NearestUnitLocator locatespec;
-             findObjects(_Universe->activeStarSystem(),this->location,&locatespec);
+             findObjects(_Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY],this->location[Unit::UNIT_ONLY],&locatespec);
              testthis=locatespec.retval.unit;
            }
 	   for (un_fiter iter = _Universe->activeStarSystem()->gravitationalUnits().fastIterator();(planet=*iter)||testthis;++iter) if (!planet||!planet->Killed()) {

@@ -1203,8 +1203,10 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
    Unit **units= new Unit *[fg->nr_ships];
    int u;
    Unit * par=_Universe->AccessCockpit()->GetParent();
-   CollideMap::iterator hint=_Universe->scriptStarSystem()->collidemap->begin();
-   if (par&&!is_null(par->location)&&par->activeStarSystem==_Universe->scriptStarSystem())
+   CollideMap::iterator metahint[2]={_Universe->scriptStarSystem()->collidemap[Unit::UNIT_ONLY]->begin(),
+            _Universe->scriptStarSystem()->collidemap[Unit::UNIT_BOLT]->begin()};
+   CollideMap::iterator *hint=metahint;
+   if (par&&!is_null(par->location[Unit::UNIT_ONLY])&&!is_null(par->location[Unit::UNIT_BOLT])&&par->activeStarSystem==_Universe->scriptStarSystem())
      hint=par->location;
    for(u=0;u<fg->nr_ships;u++){
      Unit * my_unit;
@@ -1268,7 +1270,7 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
 
      _Universe->scriptStarSystem()->AddUnit(my_unit);
      my_unit->UpdateCollideQueue(     _Universe->scriptStarSystem(),hint);
-     if (!is_null(my_unit->location))
+     if (!is_null(my_unit->location[Unit::UNIT_ONLY])&&!is_null(my_unit->location[Unit::UNIT_BOLT]))
        hint=my_unit->location;
 
      //findNextEnemyTarget(my_unit);

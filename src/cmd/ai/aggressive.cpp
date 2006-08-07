@@ -1261,8 +1261,11 @@ static Unit * ChooseNearNavPoint(Unit * parent,QVector location, float locradius
   float dist = FLT_MAX;
   Unit * un;
   NearestNavLocator nnl;
-  findObjects(_Universe->activeStarSystem(),parent->location,&nnl);
+  findObjects(_Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY],
+              parent->location[Unit::UNIT_ONLY],
+              &nnl);
   return nnl.retval.unit;
+  //DEAD CODE
   for (un_iter i= _Universe->activeStarSystem()->getUnitList().createIterator();
        (un=*i)!=NULL;
        ++i) {
@@ -1275,6 +1278,7 @@ static Unit * ChooseNearNavPoint(Unit * parent,QVector location, float locradius
     }
   }
   return candidate;
+  //END DEAD CODE
 }
 
 class FlyTo:public Orders::MoveTo {

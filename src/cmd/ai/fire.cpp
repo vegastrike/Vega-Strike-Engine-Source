@@ -309,8 +309,8 @@ public:
     this->parentparent=un->owner?UniverseUtil::getUnitByPtr(un->owner,un,false):0;
     mytarg=NULL;
     float currad=0;
-    if (!is_null(un->location)) {
-      currad=sqrtf(un->location->GetMagnitudeSquared());
+    if (!is_null(un->location[Unit::UNIT_ONLY])) {
+      currad=sqrtf(un->location[Unit::UNIT_ONLY]->GetMagnitudeSquared());
     }
     for (size_t i=0;i<numTuple;++i) {
       float tmpless=currad-innermaxrange[i];
@@ -328,7 +328,7 @@ public:
     this->maxtargets=maxtargets;
   }
   bool acquire(Unit*un, float distance) {
-    float unkey=un->location->GetMagnitudeSquared();
+    float unkey=un->location[Unit::UNIT_ONLY]->GetMagnitudeSquared();
     bool lesscheck=unkey<maxinnerrangeless[0];
     bool morecheck=unkey>maxinnerrangemore[0];
     if (reachedMore==false||reachedLess==false){
@@ -508,7 +508,7 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
     }
   }
   if (unitLocator.action.mytarg==NULL){//decided to rechoose or did not have initial target
-    findObjects(_Universe->activeStarSystem(),parent->location,&unitLocator);
+    findObjects(_Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY],parent->location[Unit::UNIT_ONLY],&unitLocator);
   }
   Unit *mytarg=unitLocator.action.mytarg;
   targetpick+=queryTime()-pretable;

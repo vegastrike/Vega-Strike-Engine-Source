@@ -48,15 +48,15 @@ CollideArray::iterator CollideArray::changeKey(CollideArray::iterator iter, cons
   return this->changeKey(iter,newKey);
 }
 
-class UpdateBackpointers{
+template <int location_index> class UpdateBackpointers{
 public:
   void operator() (Collidable &collidable) {
     StarSystem * ss=_Universe->activeStarSystem();
     assert(collidable.radius!=0.0f);
-    if (collidable.radius<0) {
+    if (location_index!=Unit::UNIT_ONLY&&collidable.radius<0) {
       Bolt::BoltFromIndex(ss,collidable.ref)->location=&collidable;
     }else {
-      collidable.ref.unit->location=&collidable;
+      collidable.ref.unit->location[location_index]=&collidable;
     }
   }
 };
@@ -83,7 +83,13 @@ void CollideArray::flatten () {
   unsorted=sorted;
  
   toflattenhints.resize(count+1);
-  for_each(sorted.begin(),sorted.end(),UpdateBackpointers());
+  if (location_index==1) {
+    for_each(sorted.begin(),sorted.end(),UpdateBackpointers<1>());
+  }else if (location_index==0){
+    for_each(sorted.begin(),sorted.end(),UpdateBackpointers<0>());
+  }else {
+    assert(0&&"Only Support arrays of units_only and mixed units bolts");//right now only support 2 array types;
+  }
 }
 
 
@@ -127,9 +133,9 @@ void CollideArray::checkSet() {
 
 
 
-CollideMap null_collide_map;
-CollideMap::iterator null_collide_iter;
-bool null_collide_iter_initialized = false;
+//CollideMap null_collide_map;
+//CollideMap::iterator null_collide_iter;
+//bool null_collide_iter_initialized = false;
 
 Collidable::Collidable(Unit *un){
   radius=un->rSize();
@@ -142,36 +148,27 @@ Collidable::Collidable(Unit *un){
 bool CollideArray::Iterable(CollideArray::iterator a){ 
   return a>=begin()&&a<end();
 }
+template <class T> class CheckBackref {
+public:
+  CollideMap::iterator operator () (T* input, unsigned int location_index) {
+    return input->location[location_index];
+  }
+};
+template <> class CheckBackref<Bolt> {
+public:
+  CollideMap::iterator operator () (Bolt* input, unsigned int location_index) {
+    return input->location;
+  }
+};
 extern size_t nondecal_index(Collidable::CollideRef b);
 template <class T, bool canbebolt> class CollideChecker
-{public:static bool CheckCollisions(CollideMap* cm, T* un, const Collidable& collider){
-  CollideMap::iterator tless,tmore;
-  float sortedloc=sqrt(collider.GetMagnitudeSquared());
-  float rad=collider.radius;
-  float maxlook=sortedloc+2.0625*fabs(rad);
-  float minlook=sortedloc-2.0625*fabs(rad);
-  float maxsqr=maxlook*maxlook;
-  float minsqr=minlook*minlook;
-  CollideMap::iterator cmbegin= cm->begin();
-  CollideMap::iterator cmend= cm->end();
-  if (cmbegin==cmend) return false;
-  //CollideChecker<T,canbebolt>::isNew(cm,un); Now we do this in the caller
-  if (!cm->Iterable(un->location)) {
-    //fprintf (stderr,"ERROR: New collide map entry checked for collision\n Aborting collide\n");
-    CollideArray::CollidableBackref * br=static_cast<CollideArray::CollidableBackref*>(un->location);    
-    CollideMap::iterator tmploc=cmbegin+br->toflattenhints_offset;
-    if (tmploc==cmend)
-      tmploc--;
-    tless=tmore=tmploc;//don't decrease tless
-  }else {
-    tless=tmore=un->location;
-    if (tless!=cmbegin)
-      --tless;
-
-  }
-  ++tmore;
-
-  if (un->location!=cmbegin) {//if will happen in case of !Iterable
+{public:
+  static bool CheckCollisionsInner(CollideMap::iterator cmbegin, CollideMap::iterator cmend,
+                            T*un, const Collidable&collider, unsigned int location_index,
+                            CollideMap::iterator tmore, CollideMap::iterator tless,
+                            float minsqr,float maxsqr) {
+  CheckBackref<T> backref_obtain;
+  if (backref_obtain(un,location_index)!=cmbegin) {//if will happen in case of !Iterable
     while((*tless)->GetMagnitudeSquared()>=minsqr) {
           float rad=(*tless)->radius;
           bool boltSpecimen=canbebolt&&(rad<0);
@@ -181,14 +178,25 @@ template <class T, bool canbebolt> class CollideChecker
       if (tless==cmbegin) {
         if (canbebolt&&boltSpecimen) {
           if (CheckCollision(un,collider,ref,**tless)){
-            if (endAfterCollide(un)) {
+            if (endAfterCollide(un,location_index)) {
               return true;       
             }else break;
           }else break;
           
         }else if (rad!=0){
+          if (canbebolt==true&&BoltType(un)) {
+            CollideMap::iterator tmptmore=ref.unit->location[Unit::UNIT_ONLY];
+            CollideMap::iterator tmptless=tmptmore;
+            ++tmptmore;
+            CollideMap *tmpcm=_Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
+            return CollideChecker<T,false>::CheckCollisionsInner(tmpcm->begin(),tmpcm->end(),
+                                        un,collider,Unit::UNIT_ONLY,
+                                        tmptless,tmptmore,
+                                        minsqr,maxsqr);
+                                        
+          }
           if (CheckCollision(un,collider,ref.unit,**tless)){
-            if (endAfterCollide(un)){
+            if (endAfterCollide(un,location_index)){
               return true;
             }else break;
           }else break;
@@ -196,20 +204,29 @@ template <class T, bool canbebolt> class CollideChecker
       }else {
         if (canbebolt&&boltSpecimen) {
           if (CheckCollision(un,collider,ref,**tless--)) {
-            if (endAfterCollide(un))
+            if (endAfterCollide(un,location_index))
               return true;        
           }
         }else if (rad!=0){
+          if (canbebolt==true&&BoltType(un)) {
+            CollideMap::iterator tmptmore=ref.unit->location[Unit::UNIT_ONLY];
+            CollideMap::iterator tmptless=tmptmore;
+            ++tmptmore;
+            CollideMap *tmpcm=_Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
+            return CollideChecker<T,false>::CheckCollisionsInner(tmpcm->begin(),tmpcm->end(),
+                                        un,collider,Unit::UNIT_ONLY,
+                                        tmptless,tmptmore,
+                                        minsqr,maxsqr);
+                                        
+          }
           if (CheckCollision(un,collider,ref.unit,**tless--)){
-            if (endAfterCollide(un)) 
+            if (endAfterCollide(un,location_index)) 
               return true;      
           }
         }else {
           --tless;
         }
       }
-    
-     
     }
   }
   while (tmore!=cmend&&(*tmore)->GetMagnitudeSquared()<=maxsqr){
@@ -218,16 +235,58 @@ template <class T, bool canbebolt> class CollideChecker
     Collidable::CollideRef ref=(*tmore)->ref;
     if (canbebolt&&boltSpecimen) {
       if (CheckCollision(un,collider,ref,**tmore++))
-        if (endAfterCollide(un))
+        if (endAfterCollide(un,location_index))
           return true;      
     }else if (rad!=0){//not null unit
+      if (canbebolt==true&&BoltType(un)) {
+        CollideMap::iterator tmptmore=ref.unit->location[Unit::UNIT_ONLY];
+        CollideMap::iterator tmptless=tmptmore;
+        ++tmptmore;
+        CollideMap *tmpcm=_Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
+        return CollideChecker<T,false>::CheckCollisionsInner(tmpcm->begin(),tmpcm->end(),
+                                                             un,collider,Unit::UNIT_ONLY,
+                                                             tmptless,tmptmore,
+                                                             minsqr,maxsqr);
+        
+      }
       if (CheckCollision(un,collider,ref.unit,**tmore++))
-        if (endAfterCollide(un))
+        if (endAfterCollide(un,location_index))
           return true;      
     }else ++tmore;
   }
-  
   return false;
+}
+static bool CheckCollisions(CollideMap* cm, T* un, const Collidable& collider, unsigned int location_index){
+  CollideMap::iterator tless,tmore;
+  float sortedloc=sqrt(collider.GetMagnitudeSquared());
+  float rad=collider.radius;
+  float maxlook=sortedloc+2.0625*fabs(rad);
+  float minlook=sortedloc-2.0625*fabs(rad);
+  float maxsqr=maxlook*maxlook;
+  float minsqr=minlook*minlook;
+  CollideMap::iterator cmbegin= cm->begin();
+  CollideMap::iterator cmend= cm->end();
+
+  if (cmbegin==cmend) return false;
+  CheckBackref<T> backref_obtain;
+  //CollideChecker<T,canbebolt>::isNew(cm,un); Now we do this in the caller
+  if (!cm->Iterable(backref_obtain(un,location_index))) {
+    //fprintf (stderr,"ERROR: New collide map entry checked for collision\n Aborting collide\n");
+    CollideArray::CollidableBackref * br=static_cast<CollideArray::CollidableBackref*>(backref_obtain(un,location_index));    
+    CollideMap::iterator tmploc=cmbegin+br->toflattenhints_offset;
+    if (tmploc==cmend)
+      tmploc--;
+    tless=tmore=tmploc;//don't decrease tless
+  }else {
+    tless=tmore=backref_obtain(un,location_index);
+    if (tless!=cmbegin)
+      --tless;
+  }
+  ++tmore;
+  return CheckCollisionsInner(cmbegin,cmend,
+                              un,collider,location_index,
+                              tmore,tless,
+                              minsqr,maxsqr);
 }
   static bool doUpdateKey(Bolt * b) {
     return true;
@@ -235,11 +294,11 @@ template <class T, bool canbebolt> class CollideChecker
   static bool doUpdateKey (Unit *un) {
     return false;
   }
-  static bool endAfterCollide(Bolt * b) {
+  static bool endAfterCollide(Bolt * b, unsigned int location_index/*meaningless, just for templtae goodness*/) {
     return true;
   }
-  static bool endAfterCollide(Unit * un) {
-	return is_null(un->location);
+  static bool endAfterCollide(Unit * un, unsigned int location_index) {
+	return is_null(un->location[location_index]);
   }
   /*
   static bool isNew(CollideMap * cm, Unit * b) {
@@ -270,6 +329,13 @@ template <class T, bool canbebolt> class CollideChecker
     }
     return false;
   }
+  static bool BoltType(Bolt * a) {
+    return true;
+  }
+  static bool BoltType(Unit * a) {
+    return false;
+  }
+  
   static bool CheckCollision (Bolt * a, const Collidable &aiter, Collidable::CollideRef  b, const Collidable &biter) {
     return false;
   }
@@ -283,11 +349,11 @@ template <class T, bool canbebolt> class CollideChecker
 
 
 bool CollideMap::CheckCollisions (Bolt * bol, const Collidable &updated) {
-  return CollideChecker<Bolt,true>::CheckCollisions(this,bol, updated);
+  return CollideChecker<Bolt,true>::CheckCollisions(this,bol, updated,Unit::UNIT_BOLT);
 }
 
 bool CollideMap::CheckUnitCollisions (Bolt * bol, const Collidable &updated) {
-  return CollideChecker<Bolt,false>::CheckCollisions(this,bol, updated);
+  return CollideChecker<Bolt,false>::CheckCollisions(this,bol, updated,Unit::UNIT_ONLY);
 }
 bool CollideMap::CheckCollisions (Unit * un, const Collidable &updated) {
   //need to check beams
@@ -296,7 +362,7 @@ bool CollideMap::CheckCollisions (Unit * un, const Collidable &updated) {
   } else {
     assert (un->activeStarSystem==_Universe->activeStarSystem());
   }
-  return CollideChecker<Unit,true>::CheckCollisions(this,un, updated);
+  return CollideChecker<Unit,true>::CheckCollisions(this,un, updated,Unit::UNIT_BOLT);
 }
 
 
@@ -307,5 +373,5 @@ bool CollideMap::CheckUnitCollisions (Unit * un, const Collidable &updated) {
   } else {
     assert (un->activeStarSystem==_Universe->activeStarSystem());
   }
-  return CollideChecker<Unit,false>::CheckCollisions(this,un, updated);
+  return CollideChecker<Unit,false>::CheckCollisions(this,un, updated,Unit::UNIT_ONLY);
 }

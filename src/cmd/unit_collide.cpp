@@ -30,48 +30,49 @@ void Unit::RemoveFromSystem() {
   }
 #endif
 #endif
-  
-  if (!is_null(this->location)) {
-    if (activeStarSystem==NULL) {
-      printf ("NONFATAL NULL activeStarSystem detected...please fix\n");
-      activeStarSystem=_Universe->activeStarSystem();
-    }
-    static bool collidemap_sanity_check = XMLSupport::parse_bool(vs_config->getVariable("physics","collidemap_sanity_check","false"));
-    if (collidemap_sanity_check) {
-      if (0) {//activeStarSystem->collidemap->find(*this->location)==activeStarSystem->collidemap->end()){
-        CollideMap::iterator i;
-        CollideMap::iterator j=activeStarSystem->collidemap->begin();
-        
-        bool found=false;
-        for (i=activeStarSystem->collidemap->begin();
-             i!=activeStarSystem->collidemap->end();++i) {
-          if (i==this->location) {
-            printf ("hussah %d\n",*i==*this->location);
-            found=true;
-          }
-          if(**i<**j) {
-          printf ("(%f %f %f) and (%f %f %f) %f < %f %d!!!",
-                  (**i).GetPosition().i,
-                  (**i).GetPosition().j,
-                  (**i).GetPosition().k,
-                  (**j).GetPosition().i,
-                  (**j).GetPosition().j,
-                  (**j).GetPosition().k,
-                  (**i).GetPosition().MagnitudeSquared(),
-                  (**j).GetPosition().MagnitudeSquared(),
-                  (**i).GetPosition().MagnitudeSquared()<
-                  (**j).GetPosition().MagnitudeSquared());
-          
-          }
-          j=i;
-        }
-        printf ("fin %d %d ",*(int*)&i,found);
-        activeStarSystem->collidemap->checkSet();
-        assert(0);
+  for (unsigned int locind=0;locind<NUM_COLLIDE_MAPS;++locind) {
+    if (!is_null(this->location[locind])) {
+      if (activeStarSystem==NULL) {
+        printf ("NONFATAL NULL activeStarSystem detected...please fix\n");
+        activeStarSystem=_Universe->activeStarSystem();
       }
+      static bool collidemap_sanity_check = XMLSupport::parse_bool(vs_config->getVariable("physics","collidemap_sanity_check","false"));
+      if (collidemap_sanity_check) {
+        if (0) {//activeStarSystem->collidemap->find(*this->location)==activeStarSystem->collidemap->end()){
+          CollideMap::iterator i;
+          CollideMap::iterator j=activeStarSystem->collidemap[locind]->begin();
+          
+          bool found=false;
+          for (i=activeStarSystem->collidemap[locind]->begin();
+               i!=activeStarSystem->collidemap[locind]->end();++i) {
+            if (i==this->location[locind]) {
+              printf ("hussah %d\n",*i==*this->location[locind]);
+              found=true;
+            }
+            if(**i<**j) {
+              printf ("(%f %f %f) and (%f %f %f) %f < %f %d!!!",
+                      (**i).GetPosition().i,
+                      (**i).GetPosition().j,
+                      (**i).GetPosition().k,
+                      (**j).GetPosition().i,
+                      (**j).GetPosition().j,
+                      (**j).GetPosition().k,
+                      (**i).GetPosition().MagnitudeSquared(),
+                      (**j).GetPosition().MagnitudeSquared(),
+                      (**i).GetPosition().MagnitudeSquared()<
+                      (**j).GetPosition().MagnitudeSquared());
+              
+            }
+            j=i;
+          }
+          printf ("fin %d %d ",*(int*)&i,found);
+          activeStarSystem->collidemap[locind]->checkSet();
+          assert(0);
+        }
+      }
+      activeStarSystem->collidemap[locind]->erase(this->location[locind]);
+      set_null(this->location[locind]);
     }
-    activeStarSystem->collidemap->erase(this->location);
-    set_null(this->location);
   }
 #ifdef OLD_COLLIDE_SYSTEM
 #ifndef UNSAFE_COLLIDE_RELEASE
@@ -110,19 +111,20 @@ void Unit::RemoveFromSystem() {
   activeStarSystem=NULL;
 }
 
-void Unit::UpdateCollideQueue (StarSystem * ss, CollideMap::iterator hint) {
+void Unit::UpdateCollideQueue (StarSystem * ss, CollideMap::iterator hint[NUM_COLLIDE_MAPS]) {
   if (activeStarSystem==NULL) {
     activeStarSystem = ss;
     
   } else {
     assert (activeStarSystem==ss);
   }
-  if (is_null(location)) {
-    assert (!isSubUnit());
-    if (!isSubUnit()) {
-      location=ss->collidemap->insert(Collidable(this),hint);
-    }
-    
+  for (unsigned int locind=0;locind<NUM_COLLIDE_MAPS;++locind) {
+    if (is_null(location[locind])) {
+      assert (!isSubUnit());
+      if (!isSubUnit()) {
+        location[locind]=ss->collidemap[locind]->insert(Collidable(this),hint[locind]);
+      }
+    }    
   }
   
 }
@@ -134,11 +136,13 @@ void Unit::CollideAll() {
     return;
   static bool newUnitCollisions=XMLSupport::parse_bool(vs_config->getVariable("physics","new_collisions","true"));  
   if (newUnitCollisions) {
-    CollideMap *cm=this->getStarSystem()->collidemap;
-    if (is_null(this->location)) {
-      this->location=cm->insert(Collidable(this));
+    for (unsigned int locind=0;locind<NUM_COLLIDE_MAPS;++locind) {
+      if (is_null(this->location[locind])) {
+        this->location[locind]=this->getStarSystem()->collidemap[locind]->insert(Collidable(this));
+      }
     }
-    cm->CheckCollisions(this,*this->location);
+    CollideMap *cm=this->getStarSystem()->collidemap[Unit::UNIT_BOLT];
+    cm->CheckCollisions(this,*this->location[Unit::UNIT_BOLT]);
   }else{
 #ifdef OLD_COLLIDE_SYSTEM
     UnitCollection * colQ [tablehuge+1];

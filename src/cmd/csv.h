@@ -29,7 +29,7 @@ public:
 
 public:
     //Optimizer toolbox
-    enum optimizer_enum { optimizer_undefined=((1<<31)-1) };
+    enum optimizer_enum { optimizer_undefined=0x7fffffff };
     void SetupOptimizer(std::vector<std::string> keys, unsigned int type);
 
     //Opaque Optimizers - use the optimizer toolbox to set them up

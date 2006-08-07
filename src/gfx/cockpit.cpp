@@ -1009,7 +1009,9 @@ void GameCockpit::DrawBlips (Unit * un) {
 
   UnitWithinRangeLocator<DrawUnitBlip> unitLocator(un->GetComputerData().radar.maxrange, unitRad);
   unitLocator.action.init(un, this, numradar, xsize, ysize, xcent, ycent, reardar);
-  if (!is_null(un->location))  findObjects(_Universe->activeStarSystem(), un->location, &unitLocator);
+  if (!is_null(un->location[Unit::UNIT_ONLY])) {
+    findObjects(_Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY], un->location[Unit::UNIT_ONLY], &unitLocator);
+  }
   static bool allGravUnits=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_gravitational_objects","true"));
   if (allGravUnits){
     Unit *u;

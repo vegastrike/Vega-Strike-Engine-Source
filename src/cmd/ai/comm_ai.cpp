@@ -343,7 +343,7 @@ Unit * CommunicatingAI::GetRandomUnit (float playaprob, float targprob) {
                                                                                    vsrandom.uniformInc(-1,1));
   Collidable wherewrapper(0,0,where);
   
-  CollideMap* cm=_Universe->activeStarSystem()->collidemap;
+  CollideMap* cm=_Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
   static float unitRad = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","radar_search_extra_radius","1000"));
   
   NearestUnitLocator unitLocator;    
@@ -355,7 +355,7 @@ Unit * CommunicatingAI::GetRandomUnit (float playaprob, float targprob) {
     if ((*iter)->ref.unit!=parent)
       return (*iter)->ref.unit;
   }
-  findObjects(_Universe->activeStarSystem(),iter,&unitLocator);
+  findObjects(_Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY],iter,&unitLocator);
 
   Unit *target = unitLocator.retval.unit;
 

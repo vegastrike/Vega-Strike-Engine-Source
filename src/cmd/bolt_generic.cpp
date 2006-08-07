@@ -25,13 +25,13 @@ Bolt::Bolt (const weapon_info * typ, const Matrix &orientationpos,  const Vector
   if (typ->type==weapon_info::BOLT) {
     ScaleMatrix (drawmat,Vector (typ->Radius,typ->Radius,typ->Length));
     decal = Bolt::AddTexture(q,typ->file);
-    this->location=_Universe->activeStarSystem()->collidemap->insert(Collidable(Bolt::BoltIndex(q->bolts[decal].size(),decal,false).bolt_index,(shipspeed+orientationpos.getR()*typ->Speed).Magnitude()*.5,cur_position+vel*SIMULATION_ATOM*.5),hint);
+    this->location=_Universe->activeStarSystem()->collidemap[Unit::UNIT_BOLT]->insert(Collidable(Bolt::BoltIndex(q->bolts[decal].size(),decal,false).bolt_index,(shipspeed+orientationpos.getR()*typ->Speed).Magnitude()*.5,cur_position+vel*SIMULATION_ATOM*.5),hint);
     q->bolts[decal].push_back (*this);
   } else {
     ScaleMatrix (drawmat,Vector (typ->Radius,typ->Radius,typ->Radius));
     decal=Bolt::AddAnimation(q,typ->file,cur_position);
 
-    this->location=_Universe->activeStarSystem()->collidemap->insert(Collidable(Bolt::BoltIndex(q->balls[decal].size(),decal,true).bolt_index,(shipspeed+orientationpos.getR()*typ->Speed).Magnitude()*.5,cur_position+vel*SIMULATION_ATOM*.5),hint);
+    this->location=_Universe->activeStarSystem()->collidemap[Unit::UNIT_BOLT]->insert(Collidable(Bolt::BoltIndex(q->balls[decal].size(),decal,true).bolt_index,(shipspeed+orientationpos.getR()*typ->Speed).Magnitude()*.5,cur_position+vel*SIMULATION_ATOM*.5),hint);
     q->balls[decal].push_back (*this);
   }
 }
@@ -48,7 +48,7 @@ bool Bolt::Update (int index) {
   }
   Collidable updated(**location);
   updated.SetPosition(.5*(prev_position+cur_position));
-  location=_Universe->activeStarSystem()->collidemap->changeKey(location,updated);
+  location=_Universe->activeStarSystem()->collidemap[Unit::UNIT_BOLT]->changeKey(location,updated);
   return true;
 }
 
@@ -158,7 +158,7 @@ void BoltDestroyGeneric (Bolt * whichbolt, int index, int decal, bool isBall) {
   int fsize=vec->size();
   if (&(*vec)[index]==whichbolt) {
     int tsize=vec->size();
-    CollideMap*cm=_Universe->activeStarSystem()->collidemap;
+    CollideMap*cm=_Universe->activeStarSystem()->collidemap[Unit::UNIT_BOLT];
     cm->UpdateBoltInfo(vec->back().location,(*(*vec)[index].location)->ref);
     
     assert (index<tsize);

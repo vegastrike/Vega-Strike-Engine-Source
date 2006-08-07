@@ -438,9 +438,9 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   }
 
   // Need to get iterator to approx camera position
-  CollideMap::iterator parent=collidemap->lower_bound(key_iterator);
-  findObjectsFromPosition(this,parent,&drawer,drawstartpos,0,true);
-
+  CollideMap::iterator parent=collidemap[Unit::UNIT_ONLY]->lower_bound(key_iterator);
+  findObjectsFromPosition(this->collidemap[Unit::UNIT_ONLY],parent,&drawer,drawstartpos,0,true);
+  //FIXME  maybe we could do bolts & units instead of unit only--and avoid bolt drawing step
 
 #if 0
   for (unsigned int sim_counter=0;sim_counter<=SIM_QUEUE_SIZE;++sim_counter) {

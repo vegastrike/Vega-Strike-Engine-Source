@@ -1,8 +1,7 @@
 #ifndef _UNIT_FIND_H_
 #define _UNIT_FIND_H_
 #include "unit_util.h"
-template <class Locator> void findObjectsFromPosition (StarSystem * ss,CollideMap::iterator location, Locator *check,QVector thispos, float thisrad, bool acquire_on_location) {
-  CollideMap *cm=ss->collidemap;             
+template <class Locator> void findObjectsFromPosition (CollideMap *cm,CollideMap::iterator location, Locator *check,QVector thispos, float thisrad, bool acquire_on_location) {
   CollideMap::iterator cmend=cm->end();
   CollideMap::iterator cmbegin=cm->begin();
   if (cmend!=cmbegin&&!is_null(location)) {
@@ -63,13 +62,13 @@ template <class Locator> void findObjectsFromPosition (StarSystem * ss,CollideMa
     }
 }
 
-template <class Locator> void findObjects (StarSystem * ss,CollideMap::iterator location, Locator *check) {
+template <class Locator> void findObjects (CollideMap * cm,CollideMap::iterator location, Locator *check) {
 	if(is_null(location)){
 		return;
 	}
       QVector thispos = (**location).GetPosition();
       float thisrad=fabs((*location)->radius);
-      findObjectsFromPosition(ss,location,check,thispos,thisrad,false);
+      findObjectsFromPosition(cm,location,check,thispos,thisrad,false);
 }
 
 

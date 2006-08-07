@@ -128,7 +128,7 @@ bool Bolt::Collide (int index) {
   if (New_Collide_System) {
     //Collidable updated(**location);
     //updated.SetPosition(.5*(prev_position+cur_position));
-    return _Universe->activeStarSystem()->collidemap->CheckCollisions(this,**location);
+    return _Universe->activeStarSystem()->collidemap[Unit::UNIT_BOLT]->CheckCollisions(this,**location);
   }else {
 #ifdef OLD_COLLIDE_SYSTEM
     UnitCollection *candidates[2];  
@@ -164,14 +164,31 @@ static bool beamCheckCollision (QVector pos, float len, const Collidable & un) {
 }
 void Beam::CollideHuge (const LineCollide & lc, Unit * targetToCollideWith, Unit * firer, Unit * superunit) {
   static bool newUnitCollisions=XMLSupport::parse_bool(vs_config->getVariable("physics","new_collisions","true"));  
+
+
+
   if (newUnitCollisions) {
     QVector x0=center;
     QVector v=direction*curlength;
-    if (is_null(superunit->location)&&curlength) {
+    if (is_null(superunit->location[Unit::UNIT_ONLY])&&curlength) {
       if (targetToCollideWith){
         this->Collide(targetToCollideWith,firer,superunit);
       }
     }else if (curlength) {
+      CollideMap * cm=_Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
+
+      CollideMap::iterator superloc=superunit->location[Unit::UNIT_ONLY];
+      CollideMap::iterator tmore=superloc;
+      if (!cm->Iterable(superloc)) {
+        //fprintf (stderr,"ERROR: New collide map entry checked for collision\n Aborting collide\n");
+        CollideArray::CollidableBackref * br=static_cast<CollideArray::CollidableBackref*>(superloc);    
+        CollideMap::iterator tmploc=cm->begin()+br->toflattenhints_offset;
+        if (tmploc==cm->end())
+          tmploc--;
+        tmore=superloc=tmploc;//don't decrease tless
+      }else {
+        ++tmore;
+      }
       double t = v.Dot(x0)/v.Dot(v);//find where derivative of radius is zero
       float r0= x0.MagnitudeSquared();
       float r1 = (x0+v.Scale((t<0||t>1)?1.0f:t)).MagnitudeSquared();
@@ -180,14 +197,13 @@ void Beam::CollideHuge (const LineCollide & lc, Unit * targetToCollideWith, Unit
       float maxsqr=r0<r1?(r1<r2?r2:r1):r0;
       bool targcheck=false;
     
-      maxsqr+=(maxsqr-(*superunit->location)->GetMagnitudeSquared())+2*curlength*curlength;//double damage, yo
-      minsqr+=(minsqr-(*superunit->location)->GetMagnitudeSquared())-2*curlength*curlength;
+      maxsqr+=(maxsqr-(*superunit->location[Unit::UNIT_ONLY])->GetMagnitudeSquared())+2*curlength*curlength;//double damage, yo
+      minsqr+=(minsqr-(*superunit->location[Unit::UNIT_ONLY])->GetMagnitudeSquared())-2*curlength*curlength;
       // (a+2*b)^2-(a+b)^2 = 3b^2+2ab = 2b^2+(a+b)^2-a^2
-      CollideMap * cm=_Universe->activeStarSystem()->collidemap;
-      if (superunit->location!=cm->begin()&&
-          minsqr<(*superunit->location)->GetMagnitudeSquared()){
+      if (superloc!=cm->begin()&&
+          minsqr<(*superunit->location[Unit::UNIT_ONLY])->GetMagnitudeSquared()){
         //less traversal
-        CollideMap::iterator tless=superunit->location;
+        CollideMap::iterator tless=superloc;
         --tless;
         while((*tless)->GetMagnitudeSquared()>=minsqr) {
           CollideMap::iterator curcheck=tless;          
@@ -209,10 +225,8 @@ void Beam::CollideHuge (const LineCollide & lc, Unit * targetToCollideWith, Unit
           
         }
       }
-      if (maxsqr>(*superunit->location)->GetMagnitudeSquared()) {
+      if (maxsqr>(*superunit->location[Unit::UNIT_ONLY])->GetMagnitudeSquared()) {
         //greater traversal
-        CollideMap::iterator tmore=superunit->location;
-        ++tmore;
         while (tmore!=cm->end()&&(*tmore)->GetMagnitudeSquared()<=maxsqr){        
           if ((*tmore)->radius>0) {
             Unit *un=(*tmore)->ref.unit;

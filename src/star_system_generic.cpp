@@ -87,7 +87,9 @@ StarSystem::StarSystem() {
   stars = NULL;
   bolts = NULL;
   collidetable = NULL;
-  collidemap=new CollideMap;
+  collidemap[Unit::UNIT_ONLY]=new CollideMap(Unit::UNIT_ONLY);
+  collidemap[Unit::UNIT_BOLT]=new CollideMap(Unit::UNIT_BOLT);
+
   no_collision_time=0;//(int)(1+2.000/SIMULATION_ATOM);
   ///adds to jumping table;
   name = NULL;
@@ -107,7 +109,10 @@ StarSystem::StarSystem() {
 }
 StarSystem::StarSystem(const char * filename, const Vector & centr,const float timeofyear) {
   no_collision_time=0;//(int)(1+2.000/SIMULATION_ATOM);
-  collidemap=new CollideMap;
+  //  collidemap=new CollideMap;
+  collidemap[Unit::UNIT_ONLY]=new CollideMap(Unit::UNIT_ONLY);
+  collidemap[Unit::UNIT_BOLT]=new CollideMap(Unit::UNIT_BOLT);
+
   this->current_sim_location=0;
   ///adds to jumping table;
   name = NULL;
@@ -203,7 +208,8 @@ StarSystem::~StarSystem() {
   _Universe->popActiveStarSystem();
   _Universe->activeStarSystem()->SwapIn();  
   RemoveStarsystemFromUniverse();
-  delete collidemap;
+  delete collidemap[Unit::UNIT_ONLY];
+  delete collidemap[Unit::UNIT_BOLT];
   
 }
 
@@ -299,10 +305,12 @@ void StarSystem::AddUnit(Unit *unit) {
 }
 
 bool StarSystem::RemoveUnit(Unit *un) {
-  if (!is_null(un->location)) {
-    //assert (collidemap->find(*un->location)!=collidemap->end());
-    collidemap->erase(un->location);
-    set_null(un->location);
+  for (unsigned int locind=0;locind<Unit::NUM_COLLIDE_MAPS;++locind) {
+    if (!is_null(un->location[locind])) {
+      //assert (collidemap->find(*un->location)!=collidemap->end());
+      collidemap[locind]->erase(un->location[locind]);
+      set_null(un->location[locind]);
+    }
   }
   bool removed2=false;
   UnitCollection::UnitIterator iter = gravitationalUnits().createIterator();
@@ -464,9 +472,11 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
         bolts->UpdatePhysics();                
 		double cc= queryTime();
         last_collisions.clear();
-		double fl0=queryTime();
-        collidemap->flatten();
-		flattentime=queryTime()-fl0;
+        double fl0=queryTime();
+        for (unsigned int locind=0;locind<Unit::NUM_COLLIDE_MAPS;++locind) {
+          collidemap[locind]->flatten();
+        }
+        flattentime=queryTime()-fl0;
         un_iter iter = this->physics_buffer[current_sim_location].createIterator();
         Unit * unit;
         while((unit = iter.current())!=NULL) {
