@@ -92,9 +92,18 @@ public:
     }
   }
 };
+class UpdateBolts{
+  UpdateBolt sub;
+public:
+  UpdateBolts(StarSystem * ss, CollideMap * collidemap):sub(ss,collidemap) {}  
+  template <class T> void operator () (T & collidableList) {
+    for_each(collidableList.begin(),collidableList.end(),sub);
+  }
+};
 void Bolt::UpdatePhysics(StarSystem * ss) {
   CollideMap * cm = ss->collidemap[Unit::UNIT_BOLT];
   for_each(cm->sorted.begin(),cm->sorted.end(),UpdateBolt(ss,cm));
+  for_each(cm->toflattenhints.begin(),cm->toflattenhints.end(),UpdateBolts(ss,cm));
 }
 bool Bolt::Collide (Unit * target) {
   Vector normal;
