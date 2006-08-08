@@ -38,9 +38,9 @@ private:
   Bolt(const weapon_info *type, const Matrix &orientationpos, const Vector & ShipSpeed, void *owner, CollideMap::iterator hint);//makes a bolt
   void Destroy(int index);
   static void Draw();
-  bool Update(int index);
-  bool Collide(int index);
-
+  bool Update(Collidable::CollideRef index);
+  bool Collide(Collidable::CollideRef index);
+  static void UpdatePhysics(StarSystem *ss);//updates all physics in the starsystem
   void noop()const{}
 };
 class bolt_draw {
@@ -54,7 +54,7 @@ public:
   vector <int> cachedecals;
   bolt_draw();
   ~bolt_draw();
-  void UpdatePhysics();
+  //  void UpdatePhysics();
 };
 
 #endif

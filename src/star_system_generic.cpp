@@ -469,7 +469,7 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
       throw;
     }
 		double c0=queryTime();
-        bolts->UpdatePhysics();                
+        Bolt::UpdatePhysics(this);
 		double cc= queryTime();
         last_collisions.clear();
         double fl0=queryTime();

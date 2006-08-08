@@ -35,15 +35,18 @@ Bolt::Bolt (const weapon_info * typ, const Matrix &orientationpos,  const Vector
     q->balls[decal].push_back (*this);
   }
 }
+size_t nondecal_index(Collidable::CollideRef b) {
+  return b.bolt_index>>8;
+}
  
-bool Bolt::Update (int index) {
+bool Bolt::Update (Collidable::CollideRef index) {
   const weapon_info *type=this->type;
   float speed=type->Speed;
   curdist +=speed*SIMULATION_ATOM;
   prev_position = cur_position;
   cur_position+=((ShipSpeed+drawmat.getR()*speed/((type->type==weapon_info::BALL)*type->Radius+(type->type!=weapon_info::BALL)*type->Length)).Cast()*SIMULATION_ATOM);
   if (curdist>type->Range) {
-    this->Destroy(index);//risky
+    this->Destroy(nondecal_index(index));//risky
     return false;
   }
   Collidable updated(**location);
@@ -51,7 +54,7 @@ bool Bolt::Update (int index) {
   location=_Universe->activeStarSystem()->collidemap[Unit::UNIT_BOLT]->changeKey(location,updated);
   return true;
 }
-
+/*
 void bolt_draw::UpdatePhysics () {
   vector <vector <Bolt> > *tmp = &bolts;
   for (int l=0;l<2;l++) {    
@@ -70,7 +73,29 @@ void bolt_draw::UpdatePhysics () {
     tmp = &balls;
   }
 }
+*/
 
+class UpdateBolt {
+  CollideMap * collidemap;
+  StarSystem * starSystem;
+public:
+  UpdateBolt(StarSystem * ss, CollideMap * collidemap) {
+    this->starSystem=ss;
+    this->collidemap=collidemap;
+  }
+  void operator () (Collidable & collidable) {
+    if (collidable.radius<0) {
+      Bolt * thus=Bolt::BoltFromIndex(starSystem,collidable.ref);
+      if (!collidemap->CheckCollisions(thus,collidable)) {
+        thus->Update(collidable.ref);
+      }
+    }
+  }
+};
+void Bolt::UpdatePhysics(StarSystem * ss) {
+  CollideMap * cm = ss->collidemap[Unit::UNIT_BOLT];
+  for_each(cm->sorted.begin(),cm->sorted.end(),UpdateBolt(ss,cm));
+}
 bool Bolt::Collide (Unit * target) {
   Vector normal;
   float distance;
@@ -114,9 +139,6 @@ bool Bolt::Collide (Unit * target) {
     return true;
   }
   return false;
-}
-size_t nondecal_index(Collidable::CollideRef b) {
-  return b.bolt_index>>8;
 }
 Bolt * Bolt::BoltFromIndex(StarSystem * ss, Collidable::CollideRef b) {
   size_t ind =nondecal_index(b);

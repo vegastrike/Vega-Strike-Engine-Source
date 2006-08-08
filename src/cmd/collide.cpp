@@ -123,7 +123,8 @@ bool usehuge_table() {
   seed = (seed * A + C) % M;
   return seed<(M/100);
 }
-bool Bolt::Collide (int index) {
+size_t nondecal_index(Collidable::CollideRef b);
+bool Bolt::Collide (Collidable::CollideRef index) {
   static bool New_Collide_System=XMLSupport::parse_bool(vs_config->getVariable("physics","new_collisions","true"));
   if (New_Collide_System) {
     //Collidable updated(**location);
@@ -146,7 +147,7 @@ bool Bolt::Collide (int index) {
             if (j==0&&use_huge_list) {
               _Universe->activeStarSystem()->collidetable->c.AddHugeToActive(un);
             }
-            Destroy(index);
+            Destroy(nondecal_index(index));
             return true;
           }
           
