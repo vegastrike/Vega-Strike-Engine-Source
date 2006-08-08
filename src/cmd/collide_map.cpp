@@ -9,9 +9,12 @@ void CollideArray::erase(iterator target) {
   if (target>=this->begin()&&target<this->end()) {
     target->radius=0;
     target->ref.unit=NULL;
-    iterator tmp = &*(this->unsorted.begin()+(target-this->begin()));
-    tmp->radius=0;
-    tmp->ref.unit=NULL;    
+	size_t diff=(target-this->begin());
+	if (this->unsorted.size()>diff) {//for secondary collide arrays that have no unsorted array
+		iterator tmp = &*(this->unsorted.begin()+diff);
+		tmp->radius=0;
+		tmp->ref.unit=NULL;    
+	}
     return;
   }else if (target==NULL) {
     return;
@@ -156,7 +159,7 @@ void CollideArray::flatten (CollideArray &hint) {
 				}
 			}
 			}*/
-		unsorted=sorted;
+		//unsorted=sorted;
 	}else {
 		printf ("Trying to use flatten hint on a array with both bolts and units\n");
 		flatten();
@@ -390,7 +393,7 @@ static bool CheckCollisions(CollideMap* cm, T* un, const Collidable& collider, u
   static bool ApartNeg(const Collidable &a, const Collidable &b) {
     float aradius=a.radius;
     float bradius=b.radius;
-    return (a.GetPosition()-b.GetPosition()).MagnitudeSquared()>aradius*aradius-aradius*bradius*2+bradius*bradius;
+	return (a.GetPosition()-b.GetPosition()).MagnitudeSquared()>aradius*aradius-aradius*bradius*2+bradius*bradius;
   }
   static bool CheckCollision(Unit* a, const Collidable& aiter, Unit * b, const Collidable& biter) {
     if (!ApartPositive(aiter,biter)) 

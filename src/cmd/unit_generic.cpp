@@ -2117,16 +2117,17 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
     UpdateCollideQueue();
   }*/
     if (!isSubUnit()) {
-      for (unsigned int locind=0;locind<Unit::NUM_COLLIDE_MAPS;++locind) {
-        if (is_null(this->location[locind])) {
-          this->getStarSystem()->collidemap[locind]->insert(Collidable(this));
-        }else {
-          this->getStarSystem()->collidemap[locind]->changeKey(this->location[locind],Collidable(this));
-        }
-      }
-    }
+		for (unsigned int locind=0;locind<Unit::NUM_COLLIDE_MAPS;++locind) {
+			if (is_null(this->location[locind])) {
+				this->getStarSystem()->collidemap[locind]->insert(Collidable(this));
+			}else if (locind==Unit::UNIT_BOLT) {
+				this->getStarSystem()->collidemap[Unit::UNIT_BOLT]->changeKey(this->location[locind],Collidable(this));// that update will propagate with the flatten
+			}
+		}
+	}
   }
 }
+
 
 void Unit::UpdateSubunitPhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc, Unit * superunit) {
   if (!SubUnits.empty()) {
