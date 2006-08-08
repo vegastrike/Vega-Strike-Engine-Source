@@ -382,16 +382,23 @@ static bool CheckCollisions(CollideMap* cm, T* un, const Collidable& collider, u
   static bool isNew(CollideMap *cm, Bolt * b) {
     return false;
     }*/ // no longer necessary--done in caller
-  static bool Apart(const Collidable &a, const Collidable &b) {
-    return (a.GetPosition()-b.GetPosition()).MagnitudeSquared()>a.radius*a.radius+fabs(a.radius*b.radius)*2+b.radius*b.radius;
+  static bool ApartPositive(const Collidable &a, const Collidable &b) {
+    float aradius=a.radius;
+    float bradius=b.radius;
+    return (a.GetPosition()-b.GetPosition()).MagnitudeSquared()>aradius*aradius+aradius*bradius*2+bradius*bradius;
+  }
+  static bool ApartNeg(const Collidable &a, const Collidable &b) {
+    float aradius=a.radius;
+    float bradius=b.radius;
+    return (a.GetPosition()-b.GetPosition()).MagnitudeSquared()>aradius*aradius-aradius*bradius*2+bradius*bradius;
   }
   static bool CheckCollision(Unit* a, const Collidable& aiter, Unit * b, const Collidable& biter) {
-    if (!Apart(aiter,biter)) 
+    if (!ApartPositive(aiter,biter)) 
       return a->Collide(b);
     return false;
   }
   static bool CheckCollision(Bolt* a, const Collidable &aiter, Unit * b, const Collidable& biter) {
-    if (!Apart(aiter,biter)) {
+    if (!ApartNeg(aiter,biter)) {
       if (a->Collide(b)) {
         a->Destroy(nondecal_index(aiter.ref));
         return true;
@@ -410,7 +417,7 @@ static bool CheckCollisions(CollideMap* cm, T* un, const Collidable& collider, u
     return false;
   }
   static bool CheckCollision (Unit * un, const Collidable &aiter, Collidable::CollideRef b, const Collidable &biter) {
-    if (!Apart(aiter,biter)) {
+    if (!ApartNeg(aiter,biter)) {
       return Bolt::CollideAnon(b,un);
     }
     return false;

@@ -565,22 +565,20 @@ float globQueryShell (QVector st, QVector dir, float radius) {
 float globQuerySphere (QVector start, QVector end, QVector pos, float radius) {
   
     QVector st = start-pos;
-    QVector dir = end-start;
     if (st.MagnitudeSquared()<radius*radius)
       return 1.0e-6;
-    return globQueryShell(st,dir,radius);
+    return globQueryShell(st,end-start,radius);
 }
 
  
 Unit * Unit::queryBSP (const QVector &pt, float err, Vector & norm, float &dist, bool ShieldBSP) {
   int i;
-  if (graphicOptions.RecurseIntoSubUnitsOnCollision)
-  if (!SubUnits.empty()) {
+  if ((!SubUnits.empty())&&graphicOptions.RecurseIntoSubUnitsOnCollision) {
     un_fiter i = SubUnits.fastIterator();
     for (Unit * un;(un=i.current())!=NULL;i.advance()) {
       Unit * retval;
       if ((retval=un->queryBSP(pt,err, norm,dist,ShieldBSP))) {
-	return retval;
+		  return retval;
       }
     }
   }
@@ -691,8 +689,8 @@ bool testRayInsideBB(const Vector &Min, const Vector &Max, const QVector& start,
 Unit * Unit::queryBSP (const QVector &start, const QVector & end, Vector & norm, float &distance, bool ShieldBSP) {
   Unit * tmp;
   float rad=this->rSize();
-  if (graphicOptions.RecurseIntoSubUnitsOnCollision)    
-    if (!SubUnits.empty()&&NULL!=(tmp=SubUnits.fastIterator().current()))
+  if ((!SubUnits.empty())&&graphicOptions.RecurseIntoSubUnitsOnCollision)    
+    if (NULL!=(tmp=SubUnits.fastIterator().current()))
       rad+=tmp->rSize();
   if (!globQuerySphere(start,end,cumulative_transformation_matrix.p,rad))
     return NULL;
