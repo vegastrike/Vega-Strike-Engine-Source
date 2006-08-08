@@ -65,12 +65,14 @@ public:
   void SetLocationIndex(unsigned int li) {location_index=li;}
   typedef Collidable *iterator;
   bool Iterable(iterator);
-  std::vector<Collidable> sorted;
-  std::vector<Collidable> unsorted;
+  typedef std::vector<Collidable> ResizableArray;
+  ResizableArray sorted;
+  ResizableArray unsorted;
   std::vector<std::list<CollidableBackref> >toflattenhints;
   int count;
   void UpdateBoltInfo(iterator iter,Collidable::CollideRef ref);
   void flatten();
+  void flatten(CollideArray &example);//maybe it has some xtra bolts
   iterator insert (const Collidable & newKey,iterator hint);
   iterator insert (const Collidable & newKey);
   iterator changeKey (iterator iter, const Collidable & newKey);

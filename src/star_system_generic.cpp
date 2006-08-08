@@ -473,9 +473,10 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
 		double cc= queryTime();
         last_collisions.clear();
         double fl0=queryTime();
-        for (unsigned int locind=0;locind<Unit::NUM_COLLIDE_MAPS;++locind) {
-          collidemap[locind]->flatten();
-        }
+		collidemap[Unit::UNIT_BOLT]->flatten();
+		if (Unit::NUM_COLLIDE_MAPS>1) {
+		  collidemap[Unit::UNIT_ONLY]->flatten(*collidemap[Unit::UNIT_BOLT]);
+		}
         flattentime=queryTime()-fl0;
         un_iter iter = this->physics_buffer[current_sim_location].createIterator();
         Unit * unit;

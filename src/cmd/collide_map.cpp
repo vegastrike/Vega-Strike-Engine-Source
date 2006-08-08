@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <assert.h>
 #include "collide_map.h"
 #include "unit_generic.h"
 #include "bolt.h"
@@ -50,16 +51,19 @@ CollideArray::iterator CollideArray::changeKey(CollideArray::iterator iter, cons
 
 template <int location_index> class UpdateBackpointers{
 public:
-  void operator() (Collidable &collidable) {
+  void updateBackpointer (Collidable &collidable) {
     StarSystem * ss=_Universe->activeStarSystem();
     assert(collidable.radius!=0.0f);
     if (location_index!=Unit::UNIT_ONLY&&collidable.radius<0) {
       Bolt::BoltFromIndex(ss,collidable.ref)->location=&collidable;
     }else {
       collidable.ref.unit->location[location_index]=&collidable;
-    }
+    }	 
   }
-};
+  void operator() (Collidable &collidable) {
+	  updateBackpointer(collidable);
+  }
+};extern bool debugPerformance();
 void CollideArray::flatten () {
   sorted.resize(count);
   size_t len=unsorted.size();
@@ -79,6 +83,19 @@ void CollideArray::flatten () {
     }
     toflattenhints[i].resize(0);
   }
+  if (0&&debugPerformance()) {
+	  unsigned int oo=0;
+	  std::vector<Collidable>::iterator ii,jj=sorted.begin(),sortedend=sorted.end();	  
+	  if (jj!=sortedend)++jj;	  
+	  for (ii=sorted.begin();
+		   ii!=sortedend;++ii,++jj) {
+		  if (*jj<*ii) {
+			  oo++;
+		  }
+	  }
+	  printf ("sorted list %d is %d long with %d elements out of order\n",
+			  location_index,(unsigned int)sorted.size(),oo);
+  }
   std::sort(sorted.begin(),sorted.end());
   unsorted=sorted;
  
@@ -91,7 +108,60 @@ void CollideArray::flatten () {
     assert(0&&"Only Support arrays of units_only and mixed units bolts");//right now only support 2 array types;
   }
 }
+class CopyExample:public UpdateBackpointers<Unit::UNIT_ONLY> {
+public:
+	CollideArray::ResizableArray::iterator examplebegin;
+	CollideArray::ResizableArray::iterator exampleend;
+public:
+	CopyExample(CollideArray::ResizableArray::iterator beg,CollideArray::ResizableArray::iterator end) {
+		examplebegin=beg;
+		exampleend=end;
+	}
+	void operator () (Collidable &collidable) {
+		assert(examplebegin!=exampleend);
+		while (!(examplebegin->radius>0)) {
+			examplebegin++;
+			assert(examplebegin!=exampleend);			
+		}
+		collidable=*examplebegin++;
+		updateBackpointer(collidable);
+	}
+};
+class resizezero {
+public:
+	template <class T> void operator () (T& toclear) {
+		toclear.resize(0);
+	}
+};
+void CollideArray::flatten (CollideArray &hint) {
+	if (location_index==Unit::UNIT_ONLY) {
+		sorted.resize(count);
+		if (0&&debugPerformance()) {
+			size_t tmpcount=0;
+			for (size_t ii=0;ii<hint.sorted.size();++ii) {
+				tmpcount+=(hint.sorted[ii].radius>0?1:0);
+			}
+			if (count!=tmpcount)
+				printf ("Actual count is %d, local count is %d\n",count,tmpcount);
+		}
+		for_each(toflattenhints.begin(),toflattenhints.end(),resizezero());
+		toflattenhints.resize(count+1);
 
+		for_each(sorted.begin(),sorted.end(),CopyExample(hint.sorted.begin(),hint.sorted.end()));
+/*		if (debugPerformance()) {
+
+			for (ResizableArray::iterator ii=cp.examplebegin;ii!=cp.exampleend;++ii) {
+				if (ii->radius>0.0f) {
+					printf( "Failed to copy unit %s when doing fast flatten\n",ii->ref.unit->name.c_str());
+				}
+			}
+			}*/
+		unsorted=sorted;
+	}else {
+		printf ("Trying to use flatten hint on a array with both bolts and units\n");
+		flatten();
+	}
+}
 
 
 CollideArray::iterator CollideArray::insert(const Collidable &newKey, iterator hint) {
