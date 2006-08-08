@@ -1095,6 +1095,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
   static bool can_fire_in_cloak = XMLSupport::parse_bool(vs_config->getVariable("physics","can_fire_in_cloak","false"));
   static bool verbose_debug = XMLSupport::parse_bool(vs_config->getVariable("data","verbose_debug","false"));
   if ((cloaking>=0&&can_fire_in_cloak==false)||(graphicOptions.InWarp&&can_fire_in_spec==false)){
+    UnFire();
     return;
   }
   unsigned int mountssize=mounts.size();
