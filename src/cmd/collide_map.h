@@ -10,7 +10,6 @@
 class Unit;
 class Bolt;
 class Collidable{
-  float key;
   QVector position;
 public:
   float radius;//radius == 0: to-be-deleted, radius <0 bolt (radius == speed in phys frame), radius >0 unit
@@ -25,17 +24,20 @@ public:
   void SetPosition(const QVector &bpos) {
     //in case we want to drop in an xtra radius parameter when we get performance testing    
     this->position=bpos;
+    /*
     key=bpos.MagnitudeSquared();
-    if (ISNAN(key)) {
-      key=0;//hack for now
+    */
+    if (ISNAN(getKey())) {
+      position=QVector(0,0,0);//hack for now      
     }
   }
   Collidable &operator* () {return *this;}
   Collidable *operator-> () {return this;}
 
-  float GetMagnitudeSquared()const {return key;}
+  //float GetMagnitudeSquared()const {return key;}
+  double getKey()const {return position.i;}
   bool operator <(const Collidable &other) const {
-    return key<other.key;
+    return getKey()<other.getKey();
   }
   Collidable &get () {return *this;}
   Collidable() : radius(std::numeric_limits<float>::quiet_NaN()) {}

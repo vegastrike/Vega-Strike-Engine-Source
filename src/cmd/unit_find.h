@@ -19,8 +19,10 @@ template <class Locator> void findObjectsFromPosition (CollideMap *cm,CollideMap
         tless=location;
       }else if (location!=cmend) {
         ++tmore;        
-      } else {
+      } else {//location == cmend
         --location;
+        if (acquire_on_location)
+          --tless;//allowed because cmend!=cmbegin
         workB=false;
       }
 

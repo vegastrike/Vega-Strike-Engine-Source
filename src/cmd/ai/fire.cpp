@@ -308,15 +308,15 @@ public:
     this->parent=un;
     this->parentparent=un->owner?UniverseUtil::getUnitByPtr(un->owner,un,false):0;
     mytarg=NULL;
-    float currad=0;
+    double currad=0;
     if (!is_null(un->location[Unit::UNIT_ONLY])) {
-      currad=sqrtf(un->location[Unit::UNIT_ONLY]->GetMagnitudeSquared());
+      currad=un->location[Unit::UNIT_ONLY]->getKey();
     }
     for (size_t i=0;i<numTuple;++i) {
-      float tmpless=currad-innermaxrange[i];
-      float tmpmore=currad+innermaxrange[i];
-      this->maxinnerrangeless[i]=tmpless*tmpless;
-      this->maxinnerrangemore[i]=tmpmore*tmpmore;
+      double tmpless=currad-innermaxrange[i];
+      double tmpmore=currad+innermaxrange[i];
+      this->maxinnerrangeless[i]=tmpless;
+      this->maxinnerrangemore[i]=tmpmore;
     }
     this->maxrolepriority=maxrolepriority;// max priority that will allow gun range to be ok
     reachedMore=false;
@@ -328,7 +328,7 @@ public:
     this->maxtargets=maxtargets;
   }
   bool acquire(Unit*un, float distance) {
-    float unkey=un->location[Unit::UNIT_ONLY]->GetMagnitudeSquared();
+    double unkey=un->location[Unit::UNIT_ONLY]->getKey();
     bool lesscheck=unkey<maxinnerrangeless[0];
     bool morecheck=unkey>maxinnerrangemore[0];
     if (reachedMore==false||reachedLess==false){

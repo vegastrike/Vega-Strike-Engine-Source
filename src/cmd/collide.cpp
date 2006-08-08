@@ -190,22 +190,21 @@ void Beam::CollideHuge (const LineCollide & lc, Unit * targetToCollideWith, Unit
         ++tmore;
       }
       double t = v.Dot(x0)/v.Dot(v);//find where derivative of radius is zero
-      float r0= x0.MagnitudeSquared();
-      float r1 = (x0+v.Scale((t<0||t>1)?1.0f:t)).MagnitudeSquared();
-      float r2 = (x0+v.Scale(1.0f)).MagnitudeSquared();
-      float minsqr=r0<r1?(r0<r2?r0:r2):r1;
-      float maxsqr=r0<r1?(r1<r2?r2:r1):r0;
+      double r0= x0.i;
+      double r1= x0.i+v.i;
+      double minlook=r0<r1?r0:r1;
+      double maxlook=r0<r1?r1:r0;
       bool targcheck=false;
     
-      maxsqr+=(maxsqr-(*superunit->location[Unit::UNIT_ONLY])->GetMagnitudeSquared())+2*curlength*curlength;//double damage, yo
-      minsqr+=(minsqr-(*superunit->location[Unit::UNIT_ONLY])->GetMagnitudeSquared())-2*curlength*curlength;
+      maxlook+=(maxlook-(*superunit->location[Unit::UNIT_ONLY])->getKey())+2*curlength;//double damage, yo
+      minlook+=(minlook-(*superunit->location[Unit::UNIT_ONLY])->getKey())-2*curlength*curlength;
       // (a+2*b)^2-(a+b)^2 = 3b^2+2ab = 2b^2+(a+b)^2-a^2
       if (superloc!=cm->begin()&&
-          minsqr<(*superunit->location[Unit::UNIT_ONLY])->GetMagnitudeSquared()){
+          minlook<(*superunit->location[Unit::UNIT_ONLY])->getKey()){
         //less traversal
         CollideMap::iterator tless=superloc;
         --tless;
-        while((*tless)->GetMagnitudeSquared()>=minsqr) {
+        while((*tless)->getKey()>=minlook) {
           CollideMap::iterator curcheck=tless;          
           bool breakit=false;
           if (tless!=cm->begin()) {
@@ -225,9 +224,9 @@ void Beam::CollideHuge (const LineCollide & lc, Unit * targetToCollideWith, Unit
           
         }
       }
-      if (maxsqr>(*superunit->location[Unit::UNIT_ONLY])->GetMagnitudeSquared()) {
+      if (maxlook>(*superunit->location[Unit::UNIT_ONLY])->getKey()) {
         //greater traversal
-        while (tmore!=cm->end()&&(*tmore)->GetMagnitudeSquared()<=maxsqr){        
+        while (tmore!=cm->end()&&(*tmore)->getKey()<=maxlook){        
           if ((*tmore)->radius>0) {
             Unit *un=(*tmore)->ref.unit;
             if (beamCheckCollision(center,curlength,**tmore++)) {

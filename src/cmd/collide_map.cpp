@@ -239,10 +239,10 @@ template <class T, bool canbebolt> class CollideChecker
   static bool CheckCollisionsInner(CollideMap::iterator cmbegin, CollideMap::iterator cmend,
                             T*un, const Collidable&collider, unsigned int location_index,
                             CollideMap::iterator tmore, CollideMap::iterator tless,
-                            float minsqr,float maxsqr) {
+                            double minlook,double maxlook) {
   CheckBackref<T> backref_obtain;
   if (backref_obtain(un,location_index)!=cmbegin) {//if will happen in case of !Iterable
-    while((*tless)->GetMagnitudeSquared()>=minsqr) {
+    while((*tless)->getKey()>=minlook) {
           float rad=(*tless)->radius;
           bool boltSpecimen=canbebolt&&(rad<0);
           
@@ -265,7 +265,7 @@ template <class T, bool canbebolt> class CollideChecker
             return CollideChecker<T,false>::CheckCollisionsInner(tmpcm->begin(),tmpcm->end(),
                                         un,collider,Unit::UNIT_ONLY,
                                         tmptless,tmptmore,
-                                        minsqr,maxsqr);
+                                        minlook,maxlook);
                                         
           }
           if (CheckCollision(un,collider,ref.unit,**tless)){
@@ -289,7 +289,7 @@ template <class T, bool canbebolt> class CollideChecker
             return CollideChecker<T,false>::CheckCollisionsInner(tmpcm->begin(),tmpcm->end(),
                                         un,collider,Unit::UNIT_ONLY,
                                         tmptless,tmptmore,
-                                        minsqr,maxsqr);
+                                        minlook,maxlook);
                                         
           }
           if (CheckCollision(un,collider,ref.unit,**tless--)){
@@ -302,7 +302,7 @@ template <class T, bool canbebolt> class CollideChecker
       }
     }
   }
-  while (tmore!=cmend&&(*tmore)->GetMagnitudeSquared()<=maxsqr){
+  while (tmore!=cmend&&(*tmore)->getKey()<=maxlook){
     float rad=(*tmore)->radius;
     bool boltSpecimen=canbebolt&&(rad<0);
     Collidable::CollideRef ref=(*tmore)->ref;
@@ -319,7 +319,7 @@ template <class T, bool canbebolt> class CollideChecker
         return CollideChecker<T,false>::CheckCollisionsInner(tmpcm->begin(),tmpcm->end(),
                                                              un,collider,Unit::UNIT_ONLY,
                                                              tmptless,tmptmore,
-                                                             minsqr,maxsqr);
+                                                             minlook,maxlook);
         
       }
       if (CheckCollision(un,collider,ref.unit,**tmore++))
@@ -331,12 +331,10 @@ template <class T, bool canbebolt> class CollideChecker
 }
 static bool CheckCollisions(CollideMap* cm, T* un, const Collidable& collider, unsigned int location_index){
   CollideMap::iterator tless,tmore;
-  float sortedloc=sqrt(collider.GetMagnitudeSquared());
+  double sortedloc=collider.getKey();
   float rad=collider.radius;
-  float maxlook=sortedloc+2.0625*fabs(rad);
-  float minlook=sortedloc-2.0625*fabs(rad);
-  float maxsqr=maxlook*maxlook;
-  float minsqr=minlook*minlook;
+  double maxlook=sortedloc+2.0625*fabs(rad);
+  double minlook=sortedloc-2.0625*fabs(rad);
   CollideMap::iterator cmbegin= cm->begin();
   CollideMap::iterator cmend= cm->end();
 
@@ -359,7 +357,7 @@ static bool CheckCollisions(CollideMap* cm, T* un, const Collidable& collider, u
   return CheckCollisionsInner(cmbegin,cmend,
                               un,collider,location_index,
                               tmore,tless,
-                              minsqr,maxsqr);
+                              minlook,maxlook);
 }
   static bool doUpdateKey(Bolt * b) {
     return true;
