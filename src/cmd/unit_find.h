@@ -76,7 +76,7 @@ template <class Locator> void findObjects (CollideMap * cm,CollideMap::iterator 
 
 class NearestUnitLocator {
   CollideMap::iterator location;
-  float startkey;
+  double startkey;
   float rad;
 public:
   Collidable::CollideRef retval;
@@ -94,15 +94,15 @@ public:
   }
   void init (CollideMap * cm, CollideMap::iterator parent) {
     this->location=parent;
-    startkey = sqrt((*location)->GetMagnitudeSquared());
+    startkey = (*location)->getKey();
     rad=FLT_MAX;
     retval.unit=NULL;
   }
   bool cullless (CollideMap::iterator tless) {
-    return rad!=FLT_MAX&&(startkey-rad>0)&&(startkey-rad)*(startkey-rad)>(*tless)->GetMagnitudeSquared();
+    return rad!=FLT_MAX&&(startkey-rad)>(*tless)->getKey();
   }
   bool cullmore (CollideMap::iterator tmore) {
-    return rad!=FLT_MAX&&(startkey+rad)*(startkey+rad)<(*tmore)->GetMagnitudeSquared();
+    return rad!=FLT_MAX&&(startkey+rad)<(*tmore)->getKey();
   }
   bool acquire(float distance, CollideMap::iterator i) {
     if (distance<rad) {
@@ -150,7 +150,7 @@ template <class T>
 class UnitWithinRangeLocator {
 public:
 	T action;
-	float startkey;
+	double startkey;
 	float radius;
 	float maxUnitRadius;
 	UnitWithinRangeLocator( float radius, float maxUnitRadius)
@@ -162,14 +162,14 @@ public:
 	bool NeedDistance() {return true;}
 	
 	void init (CollideMap * cm, CollideMap::iterator parent) {
-                startkey=sqrt((*parent)->GetMagnitudeSquared());
+                startkey=(*parent)->getKey();
 	}
 	bool cullless (CollideMap::iterator tless) {
-		float tmp=startkey-radius-maxUnitRadius;
-		return tmp>0&&(tmp*tmp>(*tless)->GetMagnitudeSquared());
+		double tmp=startkey-radius-maxUnitRadius;
+		return tmp>(*tless)->getKey();
 	}
 	bool cullmore (CollideMap::iterator tmore) {
-		return (startkey+radius+maxUnitRadius)*(startkey+radius+maxUnitRadius)<(*tmore)->GetMagnitudeSquared();
+		return startkey+radius+maxUnitRadius<(*tmore)->getKey();
 	}
 
 	bool acquire(float dist, CollideMap::iterator i) {
@@ -185,7 +185,7 @@ template <class T> class UnitWithinRangeOfPosition:public UnitWithinRangeLocator
     UnitWithinRangeOfPosition( float radius, float maxUnitRadius, const Collidable& key_iterator) : 
 	   UnitWithinRangeLocator<T>(radius,maxUnitRadius)
     {
-        this->startkey=sqrt(key_iterator.GetMagnitudeSquared());
+        this->startkey=key_iterator.getKey();
     }
     void init (CollideMap * cm, CollideMap::iterator parent) {}
 };
