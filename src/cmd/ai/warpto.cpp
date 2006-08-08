@@ -48,6 +48,7 @@ bool TargetWorthPursuing (Unit * parent, Unit * target) {
 static void ActuallyWarpTo(Unit * parent,const QVector &tarpos, Vector tarvel, Unit* MatchSpeed=NULL) {
   Vector vel = parent->GetVelocity();
   static float mindirveldot= XMLSupport::parse_float(vs_config->getVariable("AI","warp_cone",".8"));
+  static float mintarveldot= XMLSupport::parse_float(vs_config->getVariable("AI","match_velocity_cone","-.8"));
   tarvel.Normalize();
   vel.Normalize();
   Vector dir = tarpos-parent->Position();
@@ -65,7 +66,8 @@ static void ActuallyWarpTo(Unit * parent,const QVector &tarpos, Vector tarvel, U
   } else {
     parent->graphicOptions.InWarp=0;
   }
-  if(chasedot>.80){
+  static bool domatch = XMLSupport::parse_bool (vs_config->getVariable ("AI","match_velocity_of_pursuant","false"));	    
+  if(chasedot>mintarveldot||!domatch){
     parent->computer.velocity_ref.SetUnit(NULL);
   } else {
     parent->computer.velocity_ref.SetUnit(MatchSpeed);
