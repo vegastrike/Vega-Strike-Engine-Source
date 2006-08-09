@@ -574,15 +574,16 @@ float getFuelConversion(){
   return fuel_conversion;
 }
 
+const std::string EMPTY_STRING("");
 #define LOADROW_OPTIMIZER 0x348299ab
 #define FORCE_OPTIMIZER 1 /*After all, it's always used in the end*/
 #define OPTIMIZER_INDEX(Variable) OPTIDX_##Variable
 #define INIT_OPTIMIZER(keys,Variable) OPTIMIZER_INDEX(Variable) = (keys.push_back(#Variable),(keys.size()-1))
 #define DEF_OPTIMIZER(Variable) static unsigned int OPTIMIZER_INDEX(Variable) = CSVTable::optimizer_undefined;
 #if FORCE_OPTIMIZER
-#define OPTIM_GET(row,table,variable) ((table->optimizer_indexes[OPTIMIZER_INDEX(variable)]==CSVTable::optimizer_undefined)?std::string(""):row[table->optimizer_indexes[OPTIMIZER_INDEX(variable)]])
+#define OPTIM_GET(row,table,variable) ((table->optimizer_indexes[OPTIMIZER_INDEX(variable)]==CSVTable::optimizer_undefined)?EMPTY_STRING:row[table->optimizer_indexes[OPTIMIZER_INDEX(variable)]])
 #else
-#define OPTIM_GET(row,table,variable) (use_optimizer?(((OPTIMIZER_INDEX(variable)==CSVTable::optimizer_undefined) || (table->optimizer_indexes[OPTIMIZER_INDEX(variable)]==CSVTable::optimizer_undefined))?std::string(""):row[table->optimizer_indexes[OPTIMIZER_INDEX(variable)]]):row[#variable])
+#define OPTIM_GET(row,table,variable) (use_optimizer?(((OPTIMIZER_INDEX(variable)==CSVTable::optimizer_undefined) || (table->optimizer_indexes[OPTIMIZER_INDEX(variable)]==CSVTable::optimizer_undefined))?EMPTY_STRING:row[table->optimizer_indexes[OPTIMIZER_INDEX(variable)]]):row[#variable])
 #endif
 
 void Unit::LoadRow(CSVRow &row, string modification, string * netxml) {

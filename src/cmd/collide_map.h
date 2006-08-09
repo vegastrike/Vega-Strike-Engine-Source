@@ -10,8 +10,9 @@
 class Unit;
 class Bolt;
 class Collidable{
-  QVector position;
+
 public:
+  QVector position;
   float radius;//radius == 0: to-be-deleted, radius <0 bolt (radius == speed in phys frame), radius >0 unit
   
   union CollideRef{

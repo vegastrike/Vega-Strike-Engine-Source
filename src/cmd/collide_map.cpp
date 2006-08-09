@@ -3,7 +3,7 @@
 #include "collide_map.h"
 #include "unit_generic.h"
 #include "bolt.h"
-
+volatile bool apart_return=true;
 void CollideArray::erase(iterator target) {
   count-=1;
   if (target>=this->begin()&&target<this->end()) {
@@ -389,9 +389,18 @@ static bool CheckCollisions(CollideMap* cm, T* un, const Collidable& collider, u
     return (a.GetPosition()-b.GetPosition()).MagnitudeSquared()>aradius*aradius+aradius*bradius*2+bradius*bradius;
   }
   static bool ApartNeg(const Collidable &a, const Collidable &b) {
-    float aradius=a.radius;
-    float bradius=b.radius;
-	return (a.GetPosition()-b.GetPosition()).MagnitudeSquared()>aradius*aradius-aradius*bradius*2+bradius*bradius;
+	  //return apart_return;
+    double tempy=a.position.j-b.position.j;
+	double tempz=a.position.k-b.position.k;
+    float radiussum=b.radius-a.radius; //a is negative
+	if(fabs(tempy)>radiussum||fabs(tempz)>radiussum){
+		return true;
+	}
+	double tempx=(a.position.i-b.position.i);
+	tempx*=tempx;
+	tempy*=tempy;
+	tempz*=tempz;
+	return (tempx+tempy+tempz)>radiussum*radiussum;
   }
   static bool CheckCollision(Unit* a, const Collidable& aiter, Unit * b, const Collidable& biter) {
     if (!ApartPositive(aiter,biter)) 
