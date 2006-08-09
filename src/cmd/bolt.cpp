@@ -97,7 +97,7 @@ int Bolt::AddAnimation(bolt_draw*q,std::string file, QVector cur_position) {
 }
 
 void Bolt::Draw () {
-  bolt_draw *q = _Universe->activeStarSystem()->bolts;
+  bolt_draw *qq = _Universe->activeStarSystem()->bolts;
   GFXDisable (LIGHTING);
   GFXDisable (CULLFACE);
 
@@ -113,30 +113,41 @@ void Bolt::Draw () {
   GFXAlphaTest (GREATER,.1);
   vector <vector <Bolt> >::iterator i;
   vector <Bolt>::iterator j;
-  vector <Animation *>::iterator k = q->animations.begin();
+  vector <Animation *>::iterator k = qq->animations.begin();
   float etime = GetElapsedTime();
-  for (i=q->balls.begin();i!=q->balls.end();i++,k++) {
+  static float bolt_constant = XMLSupport::parse_float(vs_config->getVariable("graphics","bolt_pixel_size",".5"));
+  float pixel_angle = 2*sin(g_game.fov*M_PI/180.0/(g_game.y_resolution>g_game.x_resolution?g_game.y_resolution:g_game.x_resolution))*bolt_constant;
+  pixel_angle*=pixel_angle;
+  Vector p,q,r;
+  _Universe->AccessCamera()->GetOrientation(p,q,r);
+  QVector campos=_Universe->AccessCamera()->GetPosition();
+  for (i=qq->balls.begin();i!=qq->balls.end();i++,k++) {
     Animation * cur= *k;
-    //Matrix result;
-    //FIXME::MuST USE DRAWNOTRANSFORMNOW cur->CalculateOrientation (result);
-    for (j=i->begin();j!=i->end();j++) {//don't update time more than once
-      Vector p,q,r;
-      Bolt * bolt=&*j;
-      const weapon_info * type = bolt->type;
-      _Universe->AccessCamera()->GetOrientation(p,q,r);
-      BlendTrans (bolt->drawmat,bolt->cur_position,bolt->prev_position);
-      Matrix tmp;
-      VectorAndPositionToMatrix(tmp,p,q,r,bolt->drawmat.p);
-      //result[12]=(*j)->drawmat[12];
-      //result[13]=(*j)->drawmat[13];
-      //result[13]=(*j)->drawmat[14];
-      //            cur->SetPosition (result[12],result[13],result[14]);
-      cur->SetDimensions (bolt->type->Radius,bolt->type->Radius);
-      //      cur->DrawNow(result);
-      GFXLoadMatrixModel (tmp );
-      GFXColor4f (type->r,type->g,type->b,type->a);
-      cur->DrawNoTransform(false,true);
-    }
+	if (i->begin()!=i->end()) {
+		float bolt_size=2*i->begin()->type->Radius*2;//+i->begin()->type->Length;
+		bolt_size*=bolt_size;
+		//Matrix result;	
+		//FIXME::MuST USE DRAWNO	TRANSFORMNOW cur->CalculateOrientation (result);
+		for (j=i->begin();j!=i->end();j++) {//don't update time more than once
+			Bolt * bolt=&*j;
+			float distance = (bolt->cur_position-campos).MagnitudeSquared();
+			if (distance*pixel_angle<bolt_size) {
+				const weapon_info * type = bolt->type;
+				BlendTrans (bolt->drawmat,bolt->cur_position,bolt->prev_position);
+				Matrix tmp;
+				VectorAndPositionToMatrix(tmp,p,q,r,bolt->drawmat.p);
+				//result[12]=(*j)->	drawmat[12];
+				//result[13]=(*j)->drawmat[13]	;
+				//result[13]=(*j)->drawmat[14];		
+				//            cur->SetPosition (result[12],result[13],result[14]);
+				cur->SetDimensions (bolt->type->Radius,bolt->type->Radius);
+				//      cur->DrawNow(result);		
+				GFXLoadMatrixModel (tmp );
+				GFXColor4f (type->r,type->g,type->b,type->a);
+				cur->DrawNoTransform(false,true);
+			}
+		}
+	}
     //    cur->UpdateTime (GetElapsedTime());//update the time of the animation;
   }
   GFXAlphaTest (ALWAYS,0);
@@ -147,29 +158,36 @@ void Bolt::Draw () {
   }else {
     GFXBlendMode (ONE,ZERO);
   }
-  GFXVertexList * qmesh=q->boltmesh;
+  GFXVertexList * qmesh=qq->boltmesh;
   if (qmesh) {
     qmesh->LoadDrawState();
     qmesh->BeginDrawState();
     int decal=0;
-    for (i=q->bolts.begin();i!=q->bolts.end();decal++,i++) {
-      Texture * dec = q->boltdecals->GetTexture(decal);
-      if (dec) {
-	    dec->MakeActive();
-        GFXToggleTexture(true,0);
-        for (j=i->begin();j!=i->end();j++) {
-          Bolt &bolt=*j;
-          const weapon_info *wt=bolt.type;
-          
-          BlendTrans (bolt.drawmat,bolt.cur_position,bolt.prev_position);
-          Matrix drawmat(bolt.drawmat);
-          if (stretchbolts>0) {
-            ScaleMatrix(drawmat,Vector(1,1,bolt.type->Speed*etime*stretchbolts/bolt.type->Length));
-          }
-          GFXLoadMatrixModel (drawmat);
-          GFXColor4f (wt->r,wt->g,wt->b,wt->a);
-          qmesh->Draw();
-        }
+    for (i=qq->bolts.begin();i!=qq->bolts.end();decal++,i++) {
+      Texture * dec = qq->boltdecals->GetTexture(decal);
+      if (dec&&i->begin()!=i->end()) {
+		  float bolt_size=2*i->begin()->type->Radius+i->begin()->type->Length;
+		  bolt_size*=bolt_size;
+		  dec->MakeActive();
+		  GFXToggleTexture(true,0);
+		  for (j=i->begin();j!=i->end();j++) {
+			  
+			  Bolt &bolt=*j;
+			  float distance = (bolt.cur_position-campos).MagnitudeSquared();
+			  if (distance*pixel_angle<bolt_size) {
+
+				  const weapon_info *wt=bolt.type;
+				  
+				  BlendTrans (bolt.drawmat,bolt.cur_position,bolt.prev_position);
+				  Matrix drawmat(bolt.drawmat);
+				  if (stretchbolts>0) {
+					  ScaleMatrix(drawmat,Vector(1,1,bolt.type->Speed*etime*stretchbolts/bolt.type->Length));
+				  }
+				  GFXLoadMatrixModel (drawmat);
+				  GFXColor4f (wt->r,wt->g,wt->b,wt->a);
+				  qmesh->Draw();
+			  }
+		  }
       }
     }
     qmesh->EndDrawState();
