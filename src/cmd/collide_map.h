@@ -54,6 +54,9 @@ public:
 
 class CollideArray{
 public:
+  static float max_bolt_radius;
+
+  std::vector<float> max_radius;
   unsigned int location_index;//either UNIT_ONLY or UNIT_BOLT
   class  CollidableBackref:public Collidable{
   public:

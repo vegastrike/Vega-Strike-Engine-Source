@@ -47,10 +47,48 @@ CollideArray::iterator CollideArray::changeKey(CollideArray::iterator iter, cons
   }
   return iter;
 }
+float CollideArray::max_bolt_radius=0;
 CollideArray::iterator CollideArray::changeKey(CollideArray::iterator iter, const Collidable &newKey, CollideArray::iterator tless, CollideArray::iterator tmore) {
   
   return this->changeKey(iter,newKey);
 }
+template <int direction, bool always_replace> class RadiusUpdate {
+    float last_radius;
+    double last_radius_key;
+
+    float last_big_radius;
+    double last_big_radius_key;
+    CollideArray *cm;
+public:
+    RadiusUpdate(CollideArray * cm) {
+	last_radius=0;
+	last_big_radius=0;
+	last_radius_key=0;
+	last_big_radius_key=0;
+	this->cm=cm;
+    }
+    void operator () (const Collidable & collidable, size_t index) {
+	double key = collidable.getKey();
+	float rad=collidable.radius;
+	if (rad>0){
+	    if (rad>last_big_radius){
+		last_radius=last_big_radius=rad;
+		last_radius_key=last_big_radius_key=key;
+	    }else if (rad>last_radius) {
+		last_radius=rad;
+		last_radius_key=key;
+	    }else last_radius_key=key;
+	}
+	if (last_big_radius&&fabs(key-last_big_radius_key)>2*cm->max_bolt_radius*SIMULATION_ATOM) {
+	    last_big_radius=last_radius;
+	    last_big_radius_key=last_radius_key;
+	    last_radius=0;
+	    last_radius_key=key;
+	}
+	if (always_replace||cm->max_radius[index]<last_big_radius)
+	    cm->max_radius[index]=last_big_radius;
+    }
+};
 
 template <int location_index> class UpdateBackpointers{
 public:
@@ -69,19 +107,23 @@ public:
 };extern bool debugPerformance();
 void CollideArray::flatten () {
   sorted.resize(count);
+  max_radius.resize(count);
   size_t len=unsorted.size();
-  size_t index=0;
-  for (size_t i=0;i<=len;++i) {
+  size_t index=count;
+  RadiusUpdate<-1,true> collideUpdate(this);
+  for (ptrdiff_t i=len;i>=0;i--) {
     Collidable * tmp;
     if (i<len&&(tmp=&unsorted[i])->radius!=0.0f) {
-      sorted[index++]=*tmp;
+      sorted[--index]=*tmp;
+      collideUpdate(*tmp,index);
     }
     std::list<CollidableBackref>::iterator listend=toflattenhints[i].end();
     for (std::list<CollidableBackref>::iterator j=toflattenhints[i].begin();
          j!=listend;
          ++j) {
       if (j->radius!=0){
-        sorted[index++]=*j;
+        sorted[--index]=*j;
+	collideUpdate(*j,index);
       }
     }
     toflattenhints[i].resize(0);
@@ -103,10 +145,19 @@ void CollideArray::flatten () {
   unsorted=sorted;
  
   toflattenhints.resize(count+1);
-  if (location_index==1) {
-    for_each(sorted.begin(),sorted.end(),UpdateBackpointers<1>());
-  }else if (location_index==0){
-    for_each(sorted.begin(),sorted.end(),UpdateBackpointers<0>());
+  if (location_index==Unit::UNIT_BOLT) {
+      size_t i = 0;
+      size_t size = sorted.size();
+      ResizableArray::iterator iter=sorted.begin();
+      UpdateBackpointers<Unit::UNIT_BOLT> update;
+      RadiusUpdate<1,false> radUpdate(this);
+      for (i=0;i!=size;++i,++iter){
+	  update(*iter);
+	  radUpdate(*iter,i);
+      }
+      //for_each(sorted.begin(),sorted.end(),UpdateBackpointers<1>(1));
+  }else if (location_index==Unit::UNIT_ONLY){
+      for_each(sorted.begin(),sorted.end(),UpdateBackpointers<Unit::UNIT_ONLY>());
   }else {
     assert(0&&"Only Support arrays of units_only and mixed units bolts");//right now only support 2 array types;
   }
@@ -168,6 +219,10 @@ void CollideArray::flatten (CollideArray &hint) {
 
 
 CollideArray::iterator CollideArray::insert(const Collidable &newKey, iterator hint) {
+  if (newKey.radius<-max_bolt_radius*SIMULATION_ATOM)
+  {
+      max_bolt_radius=-newKey.radius/SIMULATION_ATOM;
+  }
   if (this->begin()==this->end()){
     count+=1;
     this->unsorted.push_back(newKey);
@@ -236,6 +291,11 @@ public:
 extern size_t nondecal_index(Collidable::CollideRef b);
 template <class T, bool canbebolt> class CollideChecker
 {public:
+  static void FixMinLookMaxLook(CollideMap*tmpcm,CollideMap::iterator tmptmore,double&minlook,double&maxlook){
+	  double mid=(minlook+maxlook)*.5;
+	  minlook=(minlook+mid)*.5-tmptmore->radius;
+	  maxlook=(maxlook+mid)*.5+tmptmore->radius;
+  }
   static bool CheckCollisionsInner(CollideMap::iterator cmbegin, CollideMap::iterator cmend,
                             T*un, const Collidable&collider, unsigned int location_index,
                             CollideMap::iterator tmore, CollideMap::iterator tless,
@@ -329,27 +389,49 @@ template <class T, bool canbebolt> class CollideChecker
   }
   return false;
 }
+static bool ComputeMaxLookMinLook(Unit* un, CollideMap*cm, CollideMap::iterator collider,CollideMap::iterator begin, CollideMap::iterator end,double sortedloc, float radius, double &minlook, double&maxlook) {
+	maxlook=sortedloc+2.0625*radius;
+	minlook=sortedloc-2.0625*radius;
+	return false;
+}
+static bool ComputeMaxLookMinLook(Bolt* un, CollideMap*cm, CollideMap::iterator collider,CollideMap::iterator cmbegin, CollideMap::iterator cmend,double sortedloc, float rad, double &minlook, double&maxlook) {
+  float dboltdist=-2.0625*rad;
+  float boltdist=-1.0625*rad;
+  if (collider>=cmbegin&&collider<cmend) {
+	  float maxrad=cm->max_radius[collider-cmbegin];
+	  if (maxrad==0) {
+		  return true;
+	  }
+      boltdist+=maxrad;
+      if (dboltdist<boltdist) {
+	      boltdist=dboltdist;
+      }
+  }else boltdist+=fabs(rad);
+
+  maxlook=sortedloc+boltdist;
+  minlook=sortedloc-boltdist;
+  return false;
+}
 static bool CheckCollisions(CollideMap* cm, T* un, const Collidable& collider, unsigned int location_index){
   CollideMap::iterator tless,tmore;
   double sortedloc=collider.getKey();
   float rad=collider.radius;
-  double maxlook=sortedloc+2.0625*fabs(rad);
-  double minlook=sortedloc-2.0625*fabs(rad);
   CollideMap::iterator cmbegin= cm->begin();
   CollideMap::iterator cmend= cm->end();
-
   if (cmbegin==cmend) return false;
-  CheckBackref<T> backref_obtain;
+  double minlook,maxlook;
+  CollideMap::iterator startIter=CheckBackref<T>()(un,location_index);
+  if (ComputeMaxLookMinLook(un,cm,startIter,cmbegin,cmend,sortedloc,rad,minlook,maxlook)) return false;// no units in area
   //CollideChecker<T,canbebolt>::isNew(cm,un); Now we do this in the caller
-  if (!cm->Iterable(backref_obtain(un,location_index))) {
+  if (!cm->Iterable(startIter)) {
     //fprintf (stderr,"ERROR: New collide map entry checked for collision\n Aborting collide\n");
-    CollideArray::CollidableBackref * br=static_cast<CollideArray::CollidableBackref*>(backref_obtain(un,location_index));    
+    CollideArray::CollidableBackref * br=static_cast<CollideArray::CollidableBackref*>(startIter);    
     CollideMap::iterator tmploc=cmbegin+br->toflattenhints_offset;
     if (tmploc==cmend)
       tmploc--;
     tless=tmore=tmploc;//don't decrease tless
   }else {
-    tless=tmore=backref_obtain(un,location_index);
+    tless=tmore=startIter;
     if (tless!=cmbegin)
       --tless;
   }
