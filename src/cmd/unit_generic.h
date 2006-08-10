@@ -407,7 +407,7 @@ protected:
   ///Begin and continue explosion
 // Uses GFX so only in Unit class
 // But should always return true on server side = assuming explosion time=0 here
-  virtual bool Explode(bool draw, float timeit) {return true;}
+  virtual bool Explode(bool draw, float timeit);
   ///explodes then deletes
   void Destroy();
 

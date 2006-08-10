@@ -171,6 +171,8 @@ void	NetServer::start(int argc, char **argv)
 	strnetatom = vs_config->getVariable( "network", "planet_atom", "10");
 	PLANET_ATOM = (double) atof( strnetatom.c_str());
 
+	strnetatom = vs_config->getVariable( "server", "difficulty", "1");
+	g_game.difficulty = atof( strnetatom.c_str());
 	InitTime();
 	UpdateTime();
 	savetime = getNewTime();
@@ -980,10 +982,10 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 /**** Broadcast a netbuffer to a given zone                ****/
 /**************************************************************/
 
-void	NetServer::broadcast( NetBuffer & netbuf, unsigned short zone, Cmd command, bool isTcp )
+void	NetServer::broadcast( NetBuffer & netbuf, ObjSerial serial, unsigned short zone, Cmd command, bool isTcp )
 {
 	Packet p;
-	p.bc_create( command, 0,
+	p.bc_create( command, serial,
                  netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
                  __FILE__, PSEUDO__LINE__(902));
 	zonemgr->broadcast( zone, 0, &p, isTcp );

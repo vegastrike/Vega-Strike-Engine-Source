@@ -130,7 +130,7 @@ class NetServer
 		void	start( int argc, char ** argv);
 		void	save();
 
-		void	broadcast( NetBuffer & netbuf, unsigned short zone, Cmd command, bool isTcp );
+		void	broadcast( NetBuffer & netbuf, ObjSerial serial, unsigned short zone, Cmd command, bool isTcp );
 
 		// WEAPON STUFF
 		void	BroadcastTarget( ObjSerial serial, ObjSerial target, unsigned short zone);
@@ -141,6 +141,8 @@ class NetServer
 		//void	sendDamages( ObjSerial serial, Vector & pnt, Vector & normal, float amt, GFXColor & color, float phasedamage);
 		void	sendKill( ObjSerial serial, unsigned short zone);
 		void	sendJump( ObjSerial serial, ObjSerial jumpserial, bool ok);
+
+		void	invalidateSnapshot( ) { snapchanged = 1; }
 
 		// DOCKING STUFF
 		void	sendDockAuthorize( ObjSerial serial, ObjSerial utdwserial, int docknum, unsigned short zone);

@@ -222,7 +222,9 @@ AC_ARG_ENABLE(ggdb3, AC_HELP_STRING([--enable-ggdb3], [Add the -ggdb3 compiler f
 
 AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug], [Produce an executable with debugging symbols]), [VS_CXXFLAGS="${VS_CXXFLAGS} ${DEBUG_FLAGS}"])
 
-AC_ARG_ENABLE(release, AC_HELP_STRING([--enable-release], [Produce an executable with optimizations]), [VS_CXXFLAGS="${VS_CXXFLAGS} -O2 -ffast-math -static"])
+AC_ARG_ENABLE(release, AC_HELP_STRING([--enable-release], [Produce an executable with optimizations]), [VS_CXXFLAGS="${VS_CXXFLAGS} -O2 -ffast-math"])
+
+AC_ARG_ENABLE(static, AC_HELP_STRING([--enable-static], [Produce a statically linked executable]), [VS_CXXFLAGS="${VS_CXXFLAGS} -static"])
 
 AC_ARG_ENABLE(profile, AC_HELP_STRING([--enable-profile], [Produce an executable with profiling code]),  [VS_CXXFLAGS="${VS_CXXFLAGS} -pg"])
 

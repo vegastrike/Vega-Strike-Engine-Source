@@ -440,7 +440,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 			return -1;
 		}
     }
-	if (p1.getDataLength()>0) {
+	if (true) { //p1.getDataLength()>0) {
 		NetBuffer netbuf( p1.getData(), p1.getDataLength());
 	    if( outpacket )
 	    {
@@ -545,7 +545,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
                 COUT << ">>> " << local_serial << " >>> ENTERING CLIENT =( serial n°"
                      << packet_serial << " )= --------------------------------------" << endl;
 				NetBuffer netbuf( p1.getData(), p1.getDataLength());
-                this->AddClientObject( netbuf, p1.getSerial());
+				this->enterClient( netbuf, p1.getSerial() );
 			}
             break;
             case CMD_EXITCLIENT :
@@ -585,7 +585,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				mis = netbuf.getSerial();
 				mount_num = netbuf.getInt32();
 				// Find the unit
-				if( mis==local_serial) // WE have fired and receive the broadcast
+				if( p1.getSerial()==local_serial) // WE have fired and receive the broadcast
 					un = this->game_unit.GetUnit();
 				else
 					un = UniverseUtil::GetUnitFromSerial( p1.getSerial());
@@ -841,8 +841,8 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				else
 				{
 					//Remove the player unit
-					Unit * un = clt->game_unit.GetUnit();
-					_Universe->activeStarSystem()->RemoveUnit(clt->game_unit.GetUnit());
+					un = clt->game_unit.GetUnit();
+//					_Universe->activeStarSystem()->RemoveUnit(clt->game_unit.GetUnit());
 					nbclients--;
 					Clients.remove(p1.getSerial());
 					un->Destroy();
@@ -1040,11 +1040,12 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				int fg_num = netbuf.getInt32();
 
 				cerr<<"NETCREATE UNIT : "<<file<<endl;
-
+				
 				string facname = FactionUtil::GetFactionName( faction);
 				Flightgroup * fg = mission[0].findFlightgroup( fname, facname);
 				newunit = UnitFactory::createUnit( file.c_str(), sub, faction, custom, fg, fg_num, NULL, serial);
-				_Universe->activeStarSystem()->AddUnit( newunit);
+//				_Universe->activeStarSystem()->AddUnit( newunit);
+				AddClientObject(newunit, serial);
 			}
 			break;
 			case CMD_CREATENEBULA :
@@ -1062,7 +1063,8 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				string facname = FactionUtil::GetFactionName( faction);
 				Flightgroup * fg = mission[0].findFlightgroup( fname, facname);
 				newunit = (Unit*) UnitFactory::createNebula( file.c_str(), sub, faction, fg, fg_num, serial);
-				_Universe->activeStarSystem()->AddUnit( newunit);
+//				_Universe->activeStarSystem()->AddUnit( newunit);
+				AddClientObject(newunit, serial);
 			}
 			break;
 			case CMD_CREATEPLANET :
@@ -1110,7 +1112,8 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 
 				newunit = UnitFactory::createPlanet( x, y, vely, rotvel, pos, gravity, radius, file.c_str(), (BLENDFUNC)sr, (BLENDFUNC)ds,
 											dest, orbitcent, un, mat, lights, faction, fullname, insideout, serial);
-				_Universe->activeStarSystem()->AddUnit( newunit);
+//				_Universe->activeStarSystem()->AddUnit( newunit);
+				AddClientObject(newunit, serial);
 			}
 			break;
 			case CMD_CREATEASTER :
@@ -1128,7 +1131,8 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				string facname = FactionUtil::GetFactionName( faction);
 				Flightgroup * fg = mission[0].findFlightgroup( fname, facname);
 				newunit = (Unit *) UnitFactory::createAsteroid( file.c_str(), faction, fg, fg_snumber, diff, serial);
-				_Universe->activeStarSystem()->AddUnit( newunit);
+//				_Universe->activeStarSystem()->AddUnit( newunit);
+				AddClientObject(newunit, serial);
 			}
 			case CMD_CREATEMISSILE :
 			{
@@ -1148,7 +1152,8 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 
 				const string modifs( mods);
 				newunit = (Unit *) UnitFactory::createMissile( file.c_str(), faction, modifs, damage, phasedamage, time, radialeffect, radmult, detonation_radius, serial);
-				_Universe->activeStarSystem()->AddUnit( newunit);
+//				_Universe->activeStarSystem()->AddUnit( newunit);
+				AddClientObject(newunit, serial);
 			}
 			break;
 			case CMD_SERVERTIME:

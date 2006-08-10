@@ -18,48 +18,16 @@
 /**** Adds an entering client in the actual zone          ****/
 /*************************************************************/
 
-void	NetClient::addClient( const Packet* packet )
+void	NetClient::enterClient( NetBuffer &netbuf, ObjSerial cltserial )
 {
-	//Packet ptmp = packet;
-	NetBuffer netbuf( packet->getData(), packet->getDataLength());
-	this->AddClientObject( netbuf, packet->getSerial());
-}
-
-void	NetClient::AddClientObject( NetBuffer & netbuf, ObjSerial cltserial)
-{
-	ClientPtr clt;
-	// NOTE : in splitscreen mode we may receive info about us so we comment the following test
-	/*
-	if( cltserial==this->serial)
-	{
-		// Maybe just ignore here
-		COUT<<"FATAL ERROR : RECEIVED INFO ABOUT ME !"<<endl;
-		VSExit(1);
-	}
-	*/
-
-	clt = Clients.get(cltserial);
-	if( clt)
-	{
-		// Client may exist if it jumped from a starsystem to another of if killed and respawned
-		COUT<<"Existing client n°"<<cltserial<<endl;
-	}
-	else
-	{
-		clt = Clients.insert( cltserial, new Client );
-		nbclients++;
-		COUT<<"New client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
-	}
 	// Should receive the name
-	clt->name = netbuf.getString();
+	string cltname = netbuf.getString();
 	string savestr = netbuf.getString();
 	string xmlstr = netbuf.getString();
+	Transformation trans = netbuf.getTransformation();
 	// If not a local player, add it in our array
 	if( !isLocalSerial( cltserial))
 	{
-		// The save buffer and XML buffer come after the ClientState
-		//COUT<<"GETTING SAVES FOR NEW CLIENT"<<endl;
-		//COUT<<"SAVE="<<saves[0].length()<<" bytes - XML="<<saves[1].length()<<" bytes"<<endl;
 
 		// We will ignore - starsys as if a client enters he is in the same system
 		//                - pos since we received a ClientState
@@ -89,6 +57,40 @@ void	NetClient::AddClientObject( NetBuffer & netbuf, ObjSerial cltserial)
 							 string(""),
 							 Flightgroup::newFlightgroup ( callsign,savedships[0],PLAYER_FACTION_STRING,"default",1,1,"","",mission),
 							 0, &xmlstr);
+		ClientPtr clt = this->AddClientObject( un, cltserial);
+
+		// Assign new coordinates to client
+		un->SetPosition( trans.position );
+		un->curr_physical_state=trans;
+		un->BackupState();
+		clt->last_packet=un->old_state;
+		clt->prediction->InitInterpolation(un, un->old_state, 0, this->deltatime);
+
+		save.SetPlayerLocation(un->curr_physical_state.position);
+		clt->name = cltname;
+		string msg = clt->callsign+" entered the system";
+		UniverseUtil::IOmessage(0,"game","all","#FFFF66"+msg+"#000000");
+	}
+}
+
+ClientPtr NetClient::AddClientObject( Unit *un, ObjSerial cltserial)
+{
+	ClientPtr clt;
+
+	clt = Clients.get(cltserial);
+	if( clt)
+	{
+		// Client may exist if it jumped from a starsystem to another of if killed and respawned
+		COUT<<"Existing client n°"<<cltserial<<endl;
+	}
+	else
+	{
+		clt = Clients.insert( cltserial, new Client );
+		nbclients++;
+		COUT<<"New client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
+	}
+	if( !isLocalSerial( cltserial))
+	{
 		clt->game_unit.SetUnit( un);
 		// Set all weapons to inactive
 		vector <Mount>
@@ -98,27 +100,20 @@ void	NetClient::AddClientObject( NetBuffer & netbuf, ObjSerial cltserial)
 		un->SetNetworkMode( true);
 		un->SetSerial( cltserial);
 		//COUT<<"Addclient 4"<<endl;
-
-		// Assign new coordinates to client
-		un->SetPosition( save.GetPlayerLocation());
-		un->SetSerial( cltserial);
-		
-		un->curr_physical_state=netbuf.getTransformation();
-		save.SetPlayerLocation(un->curr_physical_state.position);
-
-		_Universe->activeStarSystem()->AddUnit( un);
-		string msg = clt->callsign+" entered the system";
-		UniverseUtil::IOmessage(0,"game","all","#FFFF66"+msg+"#000000");
+		un->SetPosition( QVector(0,0,0) );
+		un->curr_physical_state=Transformation();
 		un->BackupState();
 		clt->last_packet=un->old_state;
-		clt->prediction->InitInterpolation(un, un->old_state, 0, this->deltatime);
-	}
-	// If this is a local player (but not the current), we must affect its Unit to Client[sernum]
-	else if( cltserial!=this->game_unit.GetUnit()->GetSerial())
+//		clt->prediction->InitInterpolation(un, un->old_state, 0, this->deltatime);
+
+		_Universe->activeStarSystem()->AddUnit( un);
+	
+	} else if( cltserial!=this->game_unit.GetUnit()->GetSerial())
 	{
 		clt->game_unit.SetUnit( getNetworkUnit( cltserial));
 		assert( clt->game_unit.GetUnit() != NULL);
 	}
+	return clt;
 }
 
 /*************************************************************/
@@ -157,7 +152,7 @@ void	NetClient::AddObjects( NetBuffer & netbuf)
 			case ZoneMgr::AddClient :
 			{
 				ObjSerial serial = netbuf.getSerial();
-				this->AddClientObject( netbuf, serial);
+				this->enterClient( netbuf, serial);
 			}
 			break;
 			default :
@@ -308,6 +303,11 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 						un->curr_physical_state.orientation = cs.getOrientation();
 						un->Velocity = cs.getVelocity();
 						if (clt) {
+							if(clt->last_packet.getPosition()==QVector(0,0,0)) {
+								// Position previously uninitialized...
+								un->BackupState();
+								clt->last_packet=cs;
+							}
 							clt->setLatestTimestamp(int_ts);
 							clt->elapsed_since_packet = 0;
 							assert( clt->prediction );
@@ -343,6 +343,11 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 					// Set the new received position in curr_physical_state
 					un->curr_physical_state.position = pos;
 					if (clt) {
+						if(clt->last_packet.getPosition()==QVector(0,0,0)) {
+							// Position previously uninitialized...
+							un->BackupState();
+							clt->last_packet.setPosition(pos);
+						}
 						clt->setLatestTimestamp(int_ts);
 						clt->elapsed_since_packet = 0;
 						assert( clt->prediction );

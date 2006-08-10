@@ -47,9 +47,10 @@ Unit* UnitFactory::createUnit( const char *filename,
 		NetBuffer netbuf;
 		getUnitBuffer( netbuf, filename, SubUnit, faction, customizedUnit, flightgroup, fg_subnumber, netxml, netcreate);
 		// Broadcast to the current universe star system
-		VSServer->broadcast( netbuf, _Universe->activeStarSystem()->GetZone(), CMD_CREATEUNIT, true);
+		VSServer->broadcast( netbuf, 0, _Universe->activeStarSystem()->GetZone(), CMD_CREATEUNIT, true);
 
 		un->SetSerial( netcreate);
+		VSServer->invalidateSnapshot();
 	}
 	return un;
 }
@@ -93,9 +94,10 @@ Nebula* UnitFactory::createNebula( const char * unitfile,
 		// Send a packet to clients in order to make them create this unit
 		NetBuffer netbuf;
 		getNebulaBuffer( netbuf, unitfile, SubU, faction, fg, fg_snumber, netcreate);
-		VSServer->broadcast( netbuf, _Universe->activeStarSystem()->GetZone(), CMD_CREATENEBULA, true);
+		VSServer->broadcast( netbuf, 0, _Universe->activeStarSystem()->GetZone(), CMD_CREATENEBULA, true);
 
 		neb->SetSerial( netcreate);
+		VSServer->invalidateSnapshot();
 	}
 	return neb;
 }
@@ -123,9 +125,10 @@ Unit* UnitFactory::createMissile( const char * filename,
 	{
 		NetBuffer netbuf;
 		getMissileBuffer( netbuf, filename, faction, modifications, damage, phasedamage, time, radialeffect, radmult, detonation_radius, netcreate);
-		VSServer->broadcast( netbuf, _Universe->activeStarSystem()->GetZone(), CMD_CREATEMISSILE , true);
+		VSServer->broadcast( netbuf, 0, _Universe->activeStarSystem()->GetZone(), CMD_CREATEMISSILE , true);
 
 		un->SetSerial( netcreate);
+		VSServer->invalidateSnapshot();
 	}
 	return un;
 }
@@ -161,9 +164,10 @@ Planet* UnitFactory::createPlanet( QVector x,
 		// Send a packet to clients in order to make them create this unit
 		NetBuffer netbuf;
 		getPlanetBuffer( netbuf, x, y, vely, rotvel, pos, gravity, radius, filename, sr, ds, dest, orbitcent, parent, ourmat, ligh, faction, fullname, inside_out, netcreate);
-		VSServer->broadcast( netbuf, _Universe->activeStarSystem()->GetZone(), CMD_CREATEPLANET, true);
+		VSServer->broadcast( netbuf, 0, _Universe->activeStarSystem()->GetZone(), CMD_CREATEPLANET, true);
 
 		p->SetSerial( netcreate);
+		VSServer->invalidateSnapshot();
 	}
 	return p;
 }
@@ -211,9 +215,10 @@ Asteroid* UnitFactory::createAsteroid( const char * filename,
 		// Send a packet to clients in order to make them create this unit
 		NetBuffer netbuf;
 		getAsteroidBuffer( netbuf, filename, faction, fg, fg_snumber, difficulty, netcreate);
-		VSServer->broadcast( netbuf, _Universe->activeStarSystem()->GetZone(), CMD_CREATEASTER, true);
+		VSServer->broadcast( netbuf, 0, _Universe->activeStarSystem()->GetZone(), CMD_CREATEASTER, true);
 
 		ast->SetSerial( netcreate);
+		VSServer->invalidateSnapshot();
 	}
 	return ast;
 }

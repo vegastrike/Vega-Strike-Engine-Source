@@ -258,92 +258,64 @@ bool Mount::PhysicsAlignedFire(Unit * caller, const Transformation &Cumulative, 
                           
 			  break;
 			case weapon_info::PROJECTILE:
-			{
+			if (Network==NULL || SERVER) { // Server will create a networked unit, and send it over to the client.
 				static bool match_speed_with_target = XMLSupport::parse_float (vs_config->getVariable("physics","match_speed_with_target","true"));
 				string skript =/*string("ai/script/")+*/type->file+string(".xai");
 				VSError err = LookForFile( skript, AiFile);
-                                if (err<=Ok) {
-                                  temp = UnitFactory::createMissile (type->file.c_str(),caller->faction,"",type->Damage,type->PhaseDamage,type->Range/type->Speed,type->Radius,type->RadialSpeed,type->PulseSpeed/*detonation_radius*/);
-                                  if (!match_speed_with_target) {
-                                    temp->GetComputerData().max_combat_speed= type->Speed+velocity.Magnitude();
-                                    temp->GetComputerData().max_combat_ab_speed= type->Speed+velocity.Magnitude();
-                                  }
-                                }else {
-//						temp = UnitFactory::createUnit(type->file.c_str(),false,owner->faction);
-                                          
-                                  Flightgroup * testfg = caller->getFlightgroup();
-                                  if (testfg == NULL) {
-                                    static Flightgroup bas;
-                                    bas.name="Base";
-                                    testfg=&bas;
-
-                                  }
-                                  if (testfg->name == "Base")
-                                  {
-                                    int fgsnumber=0;
-                                    Flightgroup * fg = Flightgroup::newFlightgroup ("Base_Patrol",
-                                                                                    type->file,
-                                                                                    FactionUtil::GetFactionName(caller->faction),
-                                                                                    "deafult",
-                                                                                    1,
-                                                                                    1,
-                                                                                    "",
-                                                                                    "",
-                                                                                    mission);
-                                    if (fg!=NULL) {
-                                      fg->target.SetUnit(caller->Target());
-                                      fg->directive="a";
-                                      fg->name = "Base_Patrol";   // this fixes base-spawned fighters becoming navpoints, which happens sometimes
-                                      
-                                      fgsnumber=fg->nr_ships;
-                                      fg->nr_ships=1;
-                                      fg->nr_ships_left=1;
-                                    }
-                                    
-                                    temp = UnitFactory::createUnit (type->file.c_str(),false,caller->faction,"",fg,fgsnumber);
-                                  }
-                                  else
-                                  {
-                                    Flightgroup * fg = caller->getFlightgroup();
-                                    int fgsnumber=0;
-                                    if (fg!=NULL) {                                      
-                                      fgsnumber=fg->nr_ships;
-                                      fg->nr_ships++;
-                                      fg->nr_ships_left++;
-                                    }                                    
-                                    temp = UnitFactory::createUnit (type->file.c_str(),false,caller->faction,"",fg,fgsnumber);
-                                  }
-                                  
-                                  
-//      fg->name += "_Patrol";
-
-
-
-//	  temp = UnitFactory::createUnit (type->file.c_str(),false,caller->faction,"",fg,fgsnumber);
-// this stuff happens farther down, no panic
-//	  temp->PrimeOrdersLaunched();
-//	  temp->SetTurretAI();
-//	  temp->EnqueueAI (new Orders::AggressiveAI ("interceptor.agg.xml"));
-//	  temp->Tar=caller->Target;
-	  //he's alive!!!!!
-					
-					
-
-
-					
-					
-					
-					
-					
-					
+				if (err<=Ok) {
+					temp = UnitFactory::createMissile (type->file.c_str(),caller->faction,"",type->Damage,type->PhaseDamage,type->Range/type->Speed,type->Radius,type->RadialSpeed,type->PulseSpeed/*detonation_radius*/,this->serial);
+					if (!match_speed_with_target) {
+						temp->GetComputerData().max_combat_speed= type->Speed+velocity.Magnitude();
+						temp->GetComputerData().max_combat_ab_speed= type->Speed+velocity.Magnitude();
 					}
-                                        Vector adder=Vector(mat.r[6],mat.r[7],mat.r[8])*type->Speed;
-					temp->SetVelocity(caller->GetVelocity()+adder);
+				}else {
+					Flightgroup * testfg = caller->getFlightgroup();
+					if (testfg == NULL) {
+						static Flightgroup bas;
+						bas.name="Base";
+						testfg=&bas;
+					}
+					if (testfg->name == "Base") {
+						int fgsnumber=0;
+						Flightgroup * fg = Flightgroup::newFlightgroup ("Base_Patrol",
+												type->file,
+												FactionUtil::GetFactionName(caller->faction),
+												"deafult",
+												1,
+												1,
+												"",
+												"",
+												mission);
+						if (fg!=NULL) {
+							fg->target.SetUnit(caller->Target());
+							fg->directive="a";
+							fg->name = "Base_Patrol";   // this fixes base-spawned fighters becoming navpoints, which happens sometimes
+                                      
+							fgsnumber=fg->nr_ships;
+							fg->nr_ships=1;
+							fg->nr_ships_left=1;
+						}
+						
+						temp = UnitFactory::createUnit (type->file.c_str(),false,caller->faction,"",fg,fgsnumber,NULL,this->serial);
+					} else {
+						Flightgroup * fg = caller->getFlightgroup();
+						int fgsnumber=0;
+						if (fg!=NULL) {                                      
+							fgsnumber=fg->nr_ships;
+							fg->nr_ships++;
+							fg->nr_ships_left++;
+						}                                    
+						temp = UnitFactory::createUnit (type->file.c_str(),false,caller->faction,"",fg,fgsnumber,NULL,this->serial);
+					}
+				}
+				Vector adder=Vector(mat.r[6],mat.r[7],mat.r[8])*type->Speed;
+				temp->SetVelocity(caller->GetVelocity()+adder);
 					
-			  // Affect the stored mount serial to the new missile
-			  temp->SetSerial( this->serial);
-			  this->serial = 0;
-			  if (target&&target!=owner) {
+				// Affect the stored mount serial to the new missile
+				temp->SetSerial( this->serial);
+				printf("Creating missile with SERIAL ID %d\n", this->serial);
+				this->serial = 0;
+				if (target&&target!=owner) {
 					temp->Target (target);
 //void GetMadAt(Unit* un, Unit * parent, int numhits=0) {
 
@@ -359,34 +331,34 @@ bool Mount::PhysicsAlignedFire(Unit * caller, const Transformation &Cumulative, 
 						temp->TurretFAW(); // turrets are for DEFENSE damnit!
 						temp->owner = caller; // spawned wingmen act as cargo (owned) wingmen, not as hired wingmen
 //						static float fudge = XMLSupport::parse_float(vs_config->getVariable("ai","launched_relation_mult","100.0"));
-                                                float relat;
+						float relat;
 						relat = caller->getRelation(target);
 						if (caller->isSubUnit()&&relat>=0)
-						{
+							{
 
-                                                  //relat = caller->owner->getRelation(target);
-                                                  relat=-1;
-                                                  temp->owner = caller->owner;
-						}
+								//relat = caller->owner->getRelation(target);
+								relat=-1;
+								temp->owner = caller->owner;
+							}
 						if (relat<0) {
-                                                  int i=0;
-                                                  while (relat < temp->getRelation(target)&&i++<100) {
-                                                    GetMadAt(target, temp, 2);
-                                                  }
-                                                }
-                                                // pissed off					getMadAt(target, 10); // how do I cause an attack here?
+							int i=0;
+							while (relat < temp->getRelation(target)&&i++<100) {
+								GetMadAt(target, temp, 2);
+							}
+						}
+						// pissed off					getMadAt(target, 10); // how do I cause an attack here?
                                                 
 					}
-			  } else {
+				} else {
 					temp->EnqueueAI (new Orders::MatchLinearVelocity(Vector (0,0,100000),true,false));
 					temp->EnqueueAI (new Orders::FireAllYouGot);
-			  }
-			  temp->SetOwner ((Unit*)owner);
-			  temp->Velocity = velocity+adder;
-			  temp->curr_physical_state = temp->prev_physical_state= temp->cumulative_transformation = tmp;
-			  CopyMatrix (temp->cumulative_transformation_matrix,m);
-			  _Universe->activeStarSystem()->AddUnit(temp);
-                          temp->UpdateCollideQueue(_Universe->activeStarSystem(),hint);
+				}
+				temp->SetOwner ((Unit*)owner);
+				temp->Velocity = velocity+adder;
+				temp->curr_physical_state = temp->prev_physical_state= temp->cumulative_transformation = tmp;
+				CopyMatrix (temp->cumulative_transformation_matrix,m);
+				_Universe->activeStarSystem()->AddUnit(temp);
+				temp->UpdateCollideQueue(_Universe->activeStarSystem(),hint);
                           for (unsigned int locind=0;locind<Unit::NUM_COLLIDE_MAPS;++locind) {
                             if (!is_null(temp->location[locind])) {
                               hint[locind]=temp->location[locind];

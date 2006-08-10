@@ -1194,7 +1194,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
                   // One Serial ID per broadcast.  Not mush point in optimizing this.
                   vector<int> indexvec;
                   indexvec.push_back(index);
-                  VSServer->BroadcastFire( this->serial, indexvec, serid, this->energy, this->activeStarSystem->GetZone());
+                  VSServer->BroadcastFire( this->serial, indexvec, serid, this->energy, this->getStarSystem()->GetZone());
                 } else {
                   gunFireRequests.push_back(index);
                 }
@@ -1238,14 +1238,14 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
   }
   if (!gunFireRequests.empty()) {
     if (SERVER) {
-      VSServer->BroadcastFire( this->serial, gunFireRequests, 0, this->energy, this->activeStarSystem->GetZone());
+      VSServer->BroadcastFire( this->serial, gunFireRequests, 0, this->energy, this->getStarSystem()->GetZone());
     } else {
       char mis2 = false;
       Network[playernum].fireRequest( this->serial, gunFireRequests, mis2);
     }
   }
   if (SERVER && !serverUnfireRequests.empty()) {
-    VSServer->BroadcastUnfire( this->serial, missileFireRequests, this->activeStarSystem->GetZone());
+    VSServer->BroadcastUnfire( this->serial, missileFireRequests, this->getStarSystem()->GetZone());
   }
   // Client missile requests can be grouped because clients only send a boolean, not a serial.
   if (!SERVER && !missileFireRequests.empty()) {
@@ -2060,7 +2060,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
       t1.to_matrix (m1);
       int autotrack=0;
 	  static bool must_lock_to_autotrack=XMLSupport::parse_bool(vs_config->getVariable("physics","must_lock_to_autotrack","true"));
-      if ((0!=(mounts[i].size&weapon_info::AUTOTRACKING)&&(player_cockpit==NULL||TargetLocked()||!must_lock_to_autotrack))) {
+      if ((0!=(mounts[i].size&weapon_info::AUTOTRACKING)&&((Network!=NULL&&!SERVER)||player_cockpit==NULL||TargetLocked()||!must_lock_to_autotrack))) {
         autotrack = computer.itts?2:1;
       }
       float trackingcone = computer.radar.trackingcone;	  
@@ -2108,7 +2108,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
     _Universe->activeStarSystem()->JumpTo(this,NULL,NearestSystem(_Universe->activeStarSystem()->getFileName(),curr_physical_state.position),true,true);
   }
   // Really kill the unit only in non-networking or on server side
-  if ((Network==NULL || SERVER) && hull<0) {
+  if (hull<0) {
     dead&= (image->explosion==NULL);    
     if (dead)
       Kill();
@@ -3561,7 +3561,7 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
 	  Vector netpnt = pnt;
 	  Vector netnormal = normal;
 	  GFXColor col( color.r, color.g, color.b, color.a);
-	  VSServer->sendDamages( this->serial, this->activeStarSystem->GetZone(), shield, armor, ppercentage, spercentage, amt, netpnt, netnormal, col);
+	  VSServer->sendDamages( this->serial, this->getStarSystem()->GetZone(), shield, armor, ppercentage, spercentage, amt, netpnt, netnormal, col);
 	  // This way the client computes damages based on what we send to him => less reliable
 	  //VSServer->sendDamages( this->serial, pnt, normal, amt, col, phasedamage);
 #else
@@ -4546,7 +4546,7 @@ void Unit::Target (Unit *targ) {
   if (!(activeStarSystem==NULL||activeStarSystem==_Universe->activeStarSystem())) {
     computer.target.SetUnit(NULL);
 	if (SERVER)
-		VSServer->BroadcastTarget(GetSerial(), 0, this->activeStarSystem->GetZone());
+		VSServer->BroadcastTarget(GetSerial(), 0, this->getStarSystem()->GetZone());
     return;
 	/*
     VSFileSystem::vs_fprintf (stderr,"bad target system");
@@ -4561,7 +4561,7 @@ void Unit::Target (Unit *targ) {
   	  mounts[i].time_to_lock = mounts[i].type->LockTime;
         }
         if (SERVER)
-          VSServer->BroadcastTarget(GetSerial(), targ->GetSerial(), this->activeStarSystem->GetZone());
+          VSServer->BroadcastTarget(GetSerial(), targ->GetSerial(), this->getStarSystem()->GetZone());
         computer.target.SetUnit(targ);
 	LockTarget(false);
       }
@@ -4580,17 +4580,17 @@ void Unit::Target (Unit *targ) {
 	  }
 	}
         if (!found&&!_Universe->isPlayerStarship(this)) {
-          WarpPursuit(this,_Universe->activeStarSystem(),targ->activeStarSystem->getFileName());
+          WarpPursuit(this,_Universe->activeStarSystem(),targ->getStarSystem()->getFileName());
         }
       }else {
         if (SERVER)
-          VSServer->BroadcastTarget(GetSerial(), 0, this->activeStarSystem->GetZone());
+          VSServer->BroadcastTarget(GetSerial(), 0, this->getStarSystem()->GetZone());
 	computer.target.SetUnit(NULL);
       }
     }
   }else {
     if (SERVER)
-      VSServer->BroadcastTarget(GetSerial(), 0, this->activeStarSystem->GetZone());
+      VSServer->BroadcastTarget(GetSerial(), 0, this->getStarSystem()->GetZone());
     computer.target.SetUnit(NULL);
   }
 }
@@ -4662,7 +4662,7 @@ void Unit::UnFire () {
   }
   if (!unFireRequests.empty()) {
     if (SERVER) {
-      VSServer->BroadcastUnfire( this->serial, unFireRequests, this->activeStarSystem->GetZone());
+      VSServer->BroadcastUnfire( this->serial, unFireRequests, this->getStarSystem()->GetZone());
     } else {
       Network[playernum].unfireRequest( this->serial, unFireRequests);
     }
@@ -4964,16 +4964,25 @@ int Unit::LockMissile() const{
 /**** UNIT_COLLIDE STUFF                                                            */
 /***********************************************************************************/
 
+// virtual
+bool Unit::Explode(bool draw, float timeit) {
+	return true;
+}
+
 void Unit::Destroy() {
   if (!killed) {
+    if (hull >= 0)
+      hull = -1;
     for (int beamcount=0;beamcount<GetNumMounts();beamcount++) {
       DestroyMount(&mounts[beamcount]);
     }
+	// The server send a kill notification to all concerned clients but not if it is an upgrade
+	
+	if( SERVER)
+		VSServer->sendKill( this->serial, this->getStarSystem()->GetZone());
+
     if (!Explode(false,SIMULATION_ATOM))
 	{
-  		// The server send a kill notification to all concerned clients but not if it is an upgrade
-  		if( SERVER)
-  			VSServer->sendKill( this->serial, this->activeStarSystem->GetZone());
   
         Kill();
  	}
@@ -7606,7 +7615,7 @@ float Unit::CourseDeviation (const Vector &OriginalCourse, const Vector &FinalCo
 /***************************************************************************************/
 
 bool Unit::TransferUnitToSystem (StarSystem * Current) {
-  if (activeStarSystem->RemoveUnit (this)) {
+  if (getStarSystem()->RemoveUnit (this)) {
     this->RemoveFromSystem();  
     this->Target(NULL);
     Current->AddUnit (this);    

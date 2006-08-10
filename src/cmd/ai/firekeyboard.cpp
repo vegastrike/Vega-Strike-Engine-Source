@@ -1631,22 +1631,24 @@ void FireKeyboard::Execute () {
   ProcessCommunicationMessages(SIMULATION_ATOM,true);
   Unit * targ = parent->Target();
   DoDockingOps(parent,targ,whichplayer,sex);
-  if (targ) {
-    double mm=0.0;
-    ShouldFire (targ);
-    if (targ->GetHull()<0) {
-      parent->Target(NULL);
+  if (SERVER || Network==NULL) {
+    if (targ) {
+      double mm=0.0;
+      ShouldFire (targ);
+      if (targ->GetHull()<0) {
+        parent->Target(NULL);
+        ForceChangeTarget(parent);
+        refresh_target=true;
+      }else if (false==parent->InRange(targ,mm,true,true,true)&&!parent->TargetLocked()) {
+        ChooseTargets(parent,TargUn,false);//only go for other active units in cone
+        if (parent->Target()==NULL) {
+          parent->Target(targ);
+        }
+      }
+    } else {
       ForceChangeTarget(parent);
       refresh_target=true;
-    }else if (false==parent->InRange(targ,mm,true,true,true)&&!parent->TargetLocked()) {
-      ChooseTargets(parent,TargUn,false);//only go for other active units in cone
-      if (parent->Target()==NULL) {
-        parent->Target(targ);
-      }
     }
-  } else {
-    ForceChangeTarget(parent);
-    refresh_target=true;
   }
   if (f().shieldpowerstate!=1) {
     Shield  * shield = &parent->shield;

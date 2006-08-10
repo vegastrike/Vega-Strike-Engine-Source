@@ -119,7 +119,7 @@ class	NetClient
                                   unsigned int timestamp,
                                   NetBuffer&   netbuf,
                                   double       deltat );
-		void	addClient( const Packet* packet );
+		void	enterClient( NetBuffer & netbuf, ObjSerial ser );
 		void	removeClient( const Packet* packet );
 
 	public:
@@ -180,7 +180,7 @@ class	NetClient
 
 		void	downloadZoneInfo();
 		void	AddObjects( NetBuffer & netbuf);
-		void	AddClientObject( NetBuffer & netbuf, ObjSerial cltserial);
+		ClientPtr	AddClientObject( Unit *un, ObjSerial cltserial);
 
 		bool	jumpRequest( string newsystem, ObjSerial jumpserial);
 		bool	readyToJump();
