@@ -423,10 +423,7 @@ static GFXColor getMeshColor () {
   return tmp;
 }
 void Mesh::ProcessZFarMeshes (bool nocamerasetup) {
-  double begintime=queryTime();
-  int count=0;
 #ifndef PARTITIONED_Z_BUFFER
-
   static GFXColor meshcolor (getMeshColor());
   GFXLightContextAmbient(meshcolor);
   if (!nocamerasetup)
@@ -439,7 +436,7 @@ void Mesh::ProcessZFarMeshes (bool nocamerasetup) {
   //std::sort<OrigMeshVector::iterator,Meshvs_closer>(undrawn_meshes[NUM_ZBUF_SEQ].begin(),undrawn_meshes[NUM_ZBUF_SEQ].end(),Meshvs_closer());
   for (int k=0;k<NUM_PASSES;++k) {
 	  std::sort(undrawn_meshes[NUM_ZBUF_SEQ][k].begin(),undrawn_meshes[NUM_ZBUF_SEQ][k].end(),Meshvs_closer());
-	  count+=undrawn_meshes[NUM_ZBUF_SEQ][k].size();
+	  
 	  for (OrigMeshVector::iterator i=undrawn_meshes[NUM_ZBUF_SEQ][k].begin();i!=undrawn_meshes[NUM_ZBUF_SEQ][k].end();i++) {
 		  i->orig->ProcessDrawQueue (k,NUM_ZBUF_SEQ);
 		  i->orig->will_be_drawn &= (~(1<<NUM_ZBUF_SEQ));//not accurate any more
@@ -453,7 +450,6 @@ void Mesh::ProcessZFarMeshes (bool nocamerasetup) {
       _Universe->AccessCamera()->UpdateGFX (GFXTRUE, GFXFALSE);
   GFXEnable (DEPTHTEST);
   GFXEnable (DEPTHWRITE);
-printf ("ZfarTime: %f num: %d ",queryTime()-begintime,count);
 #endif
 }
 
@@ -567,8 +563,6 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects,bool nocamerasetup) {
   undrawn_meshes.clear();
   undrawn_logos.clear();
 #else
-  double begintime=queryTime();
-  int count=0;
   for(int a=0; a<NUM_ZBUF_SEQ; a++) {
       if (a==MESH_SPECIAL_FX_ONLY) {
           GFXPushGlobalEffects();
@@ -576,7 +570,6 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects,bool nocamerasetup) {
       } else {
       }
       for (int k=0;k<NUM_PASSES;++k) {
-          count+=undrawn_meshes[a][k].size();
           if (!undrawn_meshes[a][k].empty()) {
               std::sort(undrawn_meshes[a][k].begin(),undrawn_meshes[a][k].end());//sort by texture address
           }
@@ -602,7 +595,6 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects,bool nocamerasetup) {
       }
       undrawn_logos.clear();
   }
-  printf ("UndrawnTime: %f num: %d ",queryTime()-begintime,count);
 #endif
 }
 void Mesh::RestoreCullFace (int whichdrawqueue) {

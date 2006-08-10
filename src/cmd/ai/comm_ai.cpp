@@ -325,7 +325,6 @@ void CommunicatingAI::AdjustRelationTo (Unit * un, float factor) {
 
 //modified not to check player when hostiles are around--unless player IS the hostile
 Unit * CommunicatingAI::GetRandomUnit (float playaprob, float targprob) {
-	return parent->Target();
   if (vsrandom.uniformInc(0,1)<playaprob) {
     Unit* playa = _Universe->AccessCockpit(rand()%_Universe->numPlayers())->GetParent();
     if (playa) {
@@ -346,7 +345,7 @@ Unit * CommunicatingAI::GetRandomUnit (float playaprob, float targprob) {
   
   CollideMap* cm=_Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
   static float unitRad = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","radar_search_extra_radius","1000"));
-#if 0
+  
   NearestUnitLocator unitLocator;    
   
 #ifdef VS_ENABLE_COLLIDE_KEY
@@ -367,7 +366,6 @@ Unit * CommunicatingAI::GetRandomUnit (float playaprob, float targprob) {
   Unit *target = parent->Target();
 #endif
   return target;
-#endif
 }
 void CommunicatingAI::RandomInitiateCommunication (float playaprob, float targprob) {
   Unit * target = GetRandomUnit(playaprob,targprob);

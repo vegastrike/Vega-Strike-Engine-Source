@@ -48,7 +48,6 @@ void Order::ProcessCommMessage(CommunicationMessage & c) {
 }
 float Order::GetEffectiveRelationship (const Unit * target)const {
   float staticrel = FactionUtil::GetIntRelation (parent->faction,target->faction);
-  return staticrel;
   for (unsigned int i=0;i<suborders.size();i++) {
     float effrel = suborders[i]->GetEffectiveRelationship(target);
     if (effrel !=staticrel) {
