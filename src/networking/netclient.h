@@ -115,6 +115,7 @@ class	NetClient
 		int		checkAcctMsg( );
 
 		void	receiveLocations( const Packet* packet );
+		void	receiveUnitDamage( NetBuffer &netbuf, Unit *un );
 		void	receivePositions( unsigned int numUnits,
                                   unsigned int timestamp,
                                   NetBuffer&   netbuf,

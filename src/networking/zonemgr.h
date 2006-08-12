@@ -49,14 +49,15 @@ class ZoneMgr
          */
         enum SnapshotSubCommand
         {
-            PosUpdate, // On client side (send): containing a ship's
+            PosUpdate=1, // On client side (send): containing a ship's
                        // data sent to server for position update
                        // On client side (recv) : receive minimal update
                        // data for a ship
-            FullUpdate,// On client side (recv) : receive full update
+            FullUpdate=2,// On client side (recv) : receive full update
                        // info for a ship
-			AddClient, // On client side (recv) : receive an order to add a client
-			End		   /// On client side (recv) : tells the buffer ends
+			AddClient=4, // On client side (recv) : receive an order to add a client
+			DamageUpdate=8, // On client side (recv) : update changed damages.
+			End=0		   /// On client side (recv) : tells the buffer ends
         };
 
     private:

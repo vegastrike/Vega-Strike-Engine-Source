@@ -225,7 +225,7 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 {
 	// Computes deltatime only when receiving a snapshot since we interpolate positions between 2 snapshots
 	// We don't want to consider a late snapshot
-	cout << "netSnapshot ";
+//	cout << "netSnapshot ";
 	static bool debugPos = XMLSupport::parse_bool(vs_config->getVariable("network", "debug_position_interpolation", "false"));
 	if( latest_timestamp < int_ts)
 	{
@@ -267,10 +267,12 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 			// Test if local player
 			else
             {
-				localplayer = _Universe->isPlayerStarship( Clients.get(sernum)->game_unit.GetUnit())?true:false;
+				un = clt->game_unit.GetUnit();
+				if (un)
+					localplayer = _Universe->isPlayerStarship(un)?true:false;
             }
 
-			if( cmd == ZoneMgr::FullUpdate )
+			if( cmd & ZoneMgr::FullUpdate )
 			{
                 if (debugPos) COUT << "   *** SubCommand is FullUpdate ser=" << sernum << endl;
 
@@ -286,13 +288,8 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 
 // NETFIXME: Why not set local player? It can't hurt...
 				
-				if( clt || un )
+				if( un )
 				{
-					if( clt) {
-						un = clt->game_unit.GetUnit();
-					}
-					if (!un)
-						continue; // NETFIXME: GetUnit() can return NULL.
 					if (!localplayer) {
 						// Get our "semi-ping" from server
 						// We received delay in ms so we convert it into seconds
@@ -327,17 +324,13 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 				}
 				i++;
 			}
-			else if( cmd == ZoneMgr::PosUpdate )
+			else if( cmd & ZoneMgr::PosUpdate )
 			{
                 if (debugPos) COUT << "   *** SubCommand is PosUpdate ser=" << sernum << endl;
 				QVector pos = netbuf.getQVector();
                 if (debugPos) COUT << "   *** pos=" << pos.i << "," << pos.j << "," << pos.k << endl;
-				if( (clt || un) && (!localplayer) )
+				if( un && (!localplayer) )
 				{
-					if( clt)
-						un = clt->game_unit.GetUnit();
-					if (!un)
-						continue; // NETFIXME: GetUnit() can return NULL.
 					// Backup old state
 					un->BackupState();
 					// Set the new received position in curr_physical_state
@@ -366,21 +359,101 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
                 }
 				j++;
 			}
-            else
-            {
+			if ( cmd & ZoneMgr::DamageUpdate ) {
+				cout << "Received damage info for client "<< serial << endl;
+				receiveUnitDamage( netbuf, un );
+			}
+            
 			// NETFIXME: Not an exit condition.  Just print a warning message and ignore the rest of the packet.
 			// NETFIXME: we should include a length field for each sub-packet so that we can safely ignore a part of the packet.
-                COUT << "   *** SubCommand is neither FullUpdate nor PosUpdate" << endl;
-				return;
+            //    COUT << "   *** SubCommand is neither FullUpdate nor PosUpdate" << endl;
+			//	return;
 //                     << "   *** TERMINATING ***" << endl;
 //                VSExit( 1 );
-            }
 		}
 	}
     else
     {
         COUT << "   *** SNAPSHOT is late - ignoring" << endl;
     }
+}
+
+void NetClient::receiveUnitDamage( NetBuffer &netbuf, Unit *un ) {
+	size_t it=0;
+	unsigned short damages;
+	damages = netbuf.getShort();
+
+	if( damages & Unit::SHIELD_DAMAGED)
+	{
+		un->shield = netbuf.getShield();
+	}
+	if( damages & Unit::ARMOR_DAMAGED)
+	{
+		un->armor = netbuf.getArmor();
+	}
+	if( damages & Unit::COMPUTER_DAMAGED)
+	{
+		un->computer.itts = netbuf.getChar();
+		un->computer.radar.iff = netbuf.getChar();
+		un->limits.retro = netbuf.getFloat();
+		un->computer.radar.maxcone = netbuf.getFloat();
+		un->computer.radar.lockcone = netbuf.getFloat();
+		un->computer.radar.trackingcone = netbuf.getFloat();
+		un->computer.radar.maxrange = netbuf.getFloat();
+		for( it = 0; it<1+UnitImages::NUMGAUGES+MAXVDUS; it++)
+			un->image->cockpit_damage[it] = netbuf.getFloat();
+	}
+	if( damages & Unit::MOUNT_DAMAGED)
+	{
+		un->image->ecm = netbuf.getShort();
+		for( it=0; it<un->mounts.size(); it++)
+		{
+			un->mounts[it].status = ( Mount::STATUS) netbuf.getChar();
+
+			un->mounts[it].ammo = netbuf.getInt32();
+			un->mounts[it].time_to_lock = netbuf.getFloat();
+			un->mounts[it].size = netbuf.getShort();
+		}
+	}
+	if( damages & Unit::CARGOFUEL_DAMAGED)
+	{
+		un->SetFuel( netbuf.getFloat());
+		un->SetAfterBurn(netbuf.getFloat());
+		un->image->CargoVolume = netbuf.getFloat();
+		un->image->UpgradeVolume = netbuf.getFloat();
+		// NRTFIXME: cargo unimplented.
+//		for( it=0; it<un->image->cargo.size(); it++)
+//			un->image->cargo[it].quantity = netbuf.getInt32();
+	}
+	if( damages & Unit::JUMP_DAMAGED)
+	{
+		un->shield.leak = netbuf.getChar();
+		un->shield.recharge = netbuf.getFloat();
+		un->SetEnergyRecharge( netbuf.getFloat());
+		un->SetMaxEnergy( netbuf.getFloat());
+		un->jump.energy = netbuf.getFloat();
+		un->jump.damage = netbuf.getChar();
+		un->image->repair_droid = netbuf.getChar();
+	}
+	if( damages & Unit::CLOAK_DAMAGED)
+	{
+		un->cloaking = netbuf.getShort();
+		un->image->cloakenergy = netbuf.getFloat();
+		un->cloakmin = netbuf.getShort();
+	}
+	if( damages & Unit::LIMITS_DAMAGED)
+	{
+		un->computer.max_pitch_down = netbuf.getFloat( );
+		un->computer.max_pitch_up = netbuf.getFloat( );
+		un->computer.max_yaw_left = netbuf.getFloat( );
+		un->computer.max_yaw_right = netbuf.getFloat( );
+		un->computer.max_roll_left = netbuf.getFloat( );
+		un->computer.max_roll_right = netbuf.getFloat( );
+		un->limits.roll = netbuf.getFloat( );
+		un->limits.yaw = netbuf.getFloat( );
+		un->limits.pitch = netbuf.getFloat( );
+		un->limits.lateral = netbuf.getFloat( );
+	}
 }
 
 /*************************************************************/

@@ -146,6 +146,7 @@ void NetServer::recvMsg_udp( )
         ObjSerial nserial = packet.getSerial(); // Extract the serial from buffer received so we know who it is
         char      command = packet.getCommand();
 
+		if (command!=CMD_POSUPDATE)
         COUT << "Received UDP" << Cmd(command) << ", ser=" << nserial << endl;
 
         // Find the corresponding client

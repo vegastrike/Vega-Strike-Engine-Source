@@ -12,6 +12,7 @@
 #include "endianness.h"
 #include <assert.h>
 #include "networking/netserver.h"
+#include "vs_random.h"
 
 extern StarSystem * GetLoadedStarSystem( const char * system);
 
@@ -36,7 +37,6 @@ string			ZoneMgr::getSystem( string & name)
 StarSystem *	ZoneMgr::addZone( string starsys)
 {
 	COUT<<">>> ADDING A NEW ZONE = "<<starsys<<" - # OF ZONES = "<<_Universe->star_system.size()<<endl;
-    ClientWeakList* lst = new ClientWeakList;
 	//list<Unit *> ulst;
 	StarSystem * sts=NULL;
 	// Generate the StarSystem
@@ -45,12 +45,24 @@ StarSystem *	ZoneMgr::addZone( string starsys)
 	//sts = new StarSystem( starsysfile.c_str(), Vector(0,0,0));
 	//_Universe->Generate2( sts);
 	sts = _Universe->GenerateStarSystem (starsysfile.c_str(),"",Vector(0,0,0));
-	zone_list.push_back( lst);
-	//zone_unitlist.push_back( ulst);
-	// Add zero as number of clients in zone since we increment in ZoneMgr::addClient()
-	zone_clients.push_back( 0);
-	//zone_units.push_back( 0);
-	COUT<<"<<< NEW ZONE ADDED - # OF ZONES = "<<_Universe->star_system.size()<<endl;
+	bool newSystem=true;
+	unsigned int i;
+	for (i=0;i<_Universe->star_system.size();i++) {
+		if (_Universe->star_system[i]==sts) {
+			newSystem=false;
+			break;
+		}
+	}
+	while (newSystem||i>=zone_list.size()) {
+		newSystem=false;
+		ClientWeakList* lst = new ClientWeakList;
+		zone_list.push_back( lst);
+		//zone_unitlist.push_back( ulst);
+		// Add zero as number of clients in zone since we increment in ZoneMgr::addClient()
+		zone_clients.push_back( 0);
+		//zone_units.push_back( 0);
+		COUT<<"<<< NEW ZONE ADDED - # OF ZONES = "<<_Universe->star_system.size()<<endl;
+	}
 	return sts;
 }
 
@@ -285,7 +297,7 @@ void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt, bool isTcp )
 		// Broadcast to all clients including the one who did a request
 		if( clt->ingame /*&& un->GetSerial() != un2->GetSerial()*/ )
 		{
-			COUT<<"Sending update to client n° "<< clt->game_unit.GetUnit()->GetSerial();
+			//COUT<<"Sending update to client n° "<< clt->game_unit.GetUnit()->GetSerial();
 			COUT<<endl;
 			if (isTcp) {
 				pckt->bc_send( clt->cltadr, clt->tcp_sock);
@@ -310,7 +322,7 @@ void	ZoneMgr::broadcastNoSelf( int zone, ObjSerial serial, Packet * pckt, bool i
 		// Broadcast to all clients including the one who did a request
 		if( clt->ingame && clt->game_unit.GetUnit()->GetSerial()!=serial )
 		{
-			COUT<<"Sending update to client n° "<< clt->game_unit.GetUnit()->GetSerial();
+			//COUT<<"Sending update to client n° "<< clt->game_unit.GetUnit()->GetSerial();
 			COUT<<endl;
 			if (isTcp) {
 				pckt->bc_send( clt->cltadr, clt->tcp_sock);
@@ -404,6 +416,7 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 	// Loop for all systems/zones
 	for( i=0; i<zone_list.size(); i++)
 	{
+		int totalunits=0;
 		// Check if system contains player(s)
 		if( zone_clients[i]>0)
 		{
@@ -411,6 +424,7 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 			// Loop for all the zone's clients
 			for( k=zone_list[i]->begin(); k!=zone_list[i]->end(); k++)
 			{
+				totalunits=0;
                 ClientPtr cltk( *k );
 				// If that client is ingame we send to it position info
 				if( cltk->ingame==true)
@@ -433,6 +447,7 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 					// Clients not ingame are removed from the drawList so it is ok not to test that
 					while( (unit=iter.current()) != NULL)
 					{
+						totalunits++;
 						// Only send unit that ate UNITPTR and PLANETPTR+NEBULAPTR if update_planets
 						if( (unit->isUnit()==UNITPTR || unit->isUnit()==ASTEROIDPTR || unit->isUnit()==MISSILEPTR) || ((unit->isUnit()==PLANETPTR || unit->isUnit()==NEBULAPTR) && update_planets) )
 						{
@@ -509,6 +524,20 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 				}
 			}
 		}
+		{
+			UnitCollection::UnitIterator iter = (_Universe->star_system[i]->getUnitList()).createIterator();
+			Unit * unit;
+
+			// Clients not ingame are removed from the drawList so it is ok not to test that
+			while( (unit=iter.current()) != NULL)
+			{
+				unit->damages = Unit::NO_DAMAGE;
+				if (vsrandom.genrand_int31()%(totalunits*10+1) == 1) {
+					unit->damages = 0xffff;
+				}
+				iter.advance();
+			}
+		}
 	}
 }
 
@@ -522,21 +551,29 @@ bool ZoneMgr::addPosition( NetBuffer & netbuf, Unit * un, ClientState & un_cs)
 		// For now only check if the 'iter' client is in front of Unit 'un')
 		if( 1 /*(distance = this->isVisible( source_orient, source_pos, target_pos)) > 0*/)
 		{
+			
 			// Test if client 'l' is far away from client 'k' = test radius/distance<=X
 			// So we can send only position
 			// Here distance should never be 0
 			//ratio = radius/distance;
 			if( 1 /* ratio > XX client not too far */)
 			{
+				unsigned char type = ZoneMgr::FullUpdate;
+				if (un->damages) {
+					type |= ZoneMgr::DamageUpdate;
+				}
 //                COUT << "   *** FullUpdate ser=" << un->GetSerial() << " cs=" << un_cs << endl;
 				// Mark as position+orientation+velocity update
-				netbuf.addChar( ZoneMgr::FullUpdate );
+				netbuf.addChar( type );
 				netbuf.addShort( un->GetSerial());
 				// Put the current client state in
 				netbuf.addClientState( un_cs);
 				// Throw in some other cheap but useful info.
 				netbuf.addFloat (un->energy);
 				// Increment the number of clients we send full info about
+				if (un->damages) {
+					addDamage( netbuf, un );
+				}
 			}
 			// Here find a condition for which sending only position would be enough
 			else if( 0 /* ratio>=1 far but still visible */)
@@ -589,6 +626,7 @@ void	ZoneMgr::broadcastDamage( )
 	// Loop for all systems/zones
 	for( i=0; i<zone_list.size(); i++)
 	{
+		int totalunits=0; 
 		// Check if system is non-empty
 		if( zone_clients[i]>0)
 		{
@@ -596,7 +634,7 @@ void	ZoneMgr::broadcastDamage( )
 			// It allows to check (for a given client) if other clients are far away (so we can only
 			// send position, not orientation and stuff) and if other clients are visible to the given
 			// client.
-			int	nbclients = 0, nbunits=0;
+			//int	nbclients = 0;
 			Packet pckt;
 
 			//cerr<<"BROADCAST DAMAGE = "<<zone_clients[i]<<" clients in zone "<<i<<endl;
@@ -604,6 +642,8 @@ void	ZoneMgr::broadcastDamage( )
 			for( k=zone_list[i]->begin(); k!=zone_list[i]->end(); k++)
 			{
                 if( (*k).expired() ) continue;
+				int nbunits = 0;
+				totalunits = 0;
                 ClientPtr cp( *k );
 				if( cp->ingame )
 				{
@@ -615,9 +655,12 @@ void	ZoneMgr::broadcastDamage( )
 					{
 						if( unit->damages)
 						{
+							// Add the client serial
+							netbuf.addSerial( unit->GetSerial());
 							this->addDamage( netbuf, unit);
 							nbunits++;
 						}
+						totalunits++;
 
 						iter.advance();
 					}
@@ -661,6 +704,20 @@ void	ZoneMgr::broadcastDamage( )
 				}
 			}
 		}
+		{
+			UnitCollection::UnitIterator iter = (_Universe->star_system[i]->getUnitList()).createIterator();
+			Unit * unit;
+
+			// Clients not ingame are removed from the drawList so it is ok not to test that
+			while( (unit=iter.current()) != NULL)
+			{
+				unit->damages = Unit::NO_DAMAGE;
+				if (vsrandom.genrand_int31()%(totalunits*10+1) == 1) {
+					unit->damages = 0xffff&(~Unit::COMPUTER_DAMAGED);
+				}
+				iter.advance();
+			}
+		}
 	}
 }
 
@@ -671,9 +728,6 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 		// Add the damage flag
 		unsigned short damages = un->damages;
 		netbuf.addShort( damages);
-		un->damages = Unit::NO_DAMAGE;
-		// Add the client serial
-		netbuf.addSerial( un->GetSerial());
 		// Put the altered stucts after the damage enum flag
 		if( damages & Unit::SHIELD_DAMAGED)
 		{
@@ -700,14 +754,9 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 			netbuf.addShort( un->image->ecm);
 			for( it=0; it<un->mounts.size(); it++)
 			{
-				if( sizeof( Mount::STATUS) == sizeof( char))
-					netbuf.addChar( un->mounts[it].status);
-				else if( sizeof( Mount::STATUS) == sizeof( unsigned short))
-					netbuf.addShort( un->mounts[it].status);
-				else if( sizeof( Mount::STATUS) == sizeof( unsigned int))
-					netbuf.addInt32( un->mounts[it].status);
+				netbuf.addChar( (char) un->mounts[it].status);
 
-				netbuf.addShort( un->mounts[it].ammo);
+				netbuf.addInt32( un->mounts[it].ammo);
 				netbuf.addFloat( un->mounts[it].time_to_lock);
 				netbuf.addShort( un->mounts[it].size);
 			}
@@ -718,8 +767,8 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 			netbuf.addFloat( un->AfterburnData());
 			netbuf.addFloat( un->image->CargoVolume);
 			netbuf.addFloat( un->image->UpgradeVolume);
-			for( it=0; it<un->image->cargo.size(); it++)
-				netbuf.addInt32( un->image->cargo[it].quantity);
+//			for( it=0; it<un->image->cargo.size(); it++)
+//				netbuf.addInt32( un->image->cargo[it].quantity);
 		}
 		if( damages & Unit::JUMP_DAMAGED)
 		{
@@ -736,7 +785,6 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 			netbuf.addShort( un->cloaking);
 			netbuf.addFloat( un->image->cloakenergy);
 			netbuf.addShort( un->cloakmin);
-			netbuf.addShield( un->shield);
 		}
 		if( damages & Unit::LIMITS_DAMAGED)
 		{

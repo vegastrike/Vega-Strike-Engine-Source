@@ -60,7 +60,7 @@ namespace UniverseUtil {
 		}
 		while(un==NULL && it.current()!=NULL);
 		if( un==NULL)
-			cout<<"ERROR --> Received a fire order for non-existing UNIT"<<endl;
+			cout<<"ERROR --> no unit for serial "<<serial<<endl;
 		return un;
 	}
 	std::string vsConfig(std::string category,std::string option,std::string def){

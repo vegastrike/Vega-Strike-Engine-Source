@@ -192,6 +192,7 @@ void	NetBuffer::addShield( Shield shield)
 	this->addChar( shield.number);
 	this->addChar( shield.leak);
 	this->addFloat( shield.recharge);
+	this->addFloat( shield.efficiency );
 	switch( shield.number)
 	{
 		case 2 :
@@ -236,6 +237,7 @@ Shield	NetBuffer::getShield()
 	shield.number = this->getChar();
 	shield.leak = this->getChar();
 	shield.recharge = this->getFloat();
+	shield.efficiency = this->getFloat();
 	switch( shield.number)
 	{
 		case 2 :

@@ -188,7 +188,7 @@ void Packet::create( Cmd cmd, ObjSerial nserial,
                  << " microtime " << microtime
                  << " timestamp " << h.timestamp << endl;
 #else
-    COUT << "*** create " << cmd << " ser=" << nserial << ", " << length << endl;
+//    COUT << "*** create " << cmd << " ser=" << nserial << ", " << length << endl;
 #endif
 
     h.command   = cmd;
