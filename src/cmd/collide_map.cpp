@@ -298,7 +298,7 @@ template <class T, bool canbebolt> class CollideChecker
   }
   static bool CheckCollisionsInner(CollideMap::iterator cmbegin, CollideMap::iterator cmend,
                             T*un, const Collidable&collider, unsigned int location_index,
-                            CollideMap::iterator tmore, CollideMap::iterator tless,
+                            CollideMap::iterator tless, CollideMap::iterator tmore, 
                             double minlook,double maxlook) {
   CheckBackref<T> backref_obtain;
   if (backref_obtain(un,location_index)!=cmbegin) {//if will happen in case of !Iterable
@@ -438,7 +438,7 @@ static bool CheckCollisions(CollideMap* cm, T* un, const Collidable& collider, u
   ++tmore;
   return CheckCollisionsInner(cmbegin,cmend,
                               un,collider,location_index,
-                              tmore,tless,
+                              tless,tmore,
                               minlook,maxlook);
 }
   static bool doUpdateKey(Bolt * b) {
