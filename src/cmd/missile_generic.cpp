@@ -64,7 +64,7 @@ void StarSystem::AddMissileToQueue(MissileEffect * me) {
   dischargedMissiles.push_back (me);
 }
 void Missile::Discharge() {
-  if (!discharged)
+  if ((damage!=0||phasedamage!=0)&&!discharged)
     _Universe->activeStarSystem()->AddMissileToQueue(new MissileEffect(Position().Cast(),damage,phasedamage,radial_effect,radial_multiplier,owner));
   discharged =true;
 }

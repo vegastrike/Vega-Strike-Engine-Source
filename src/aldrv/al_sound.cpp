@@ -478,6 +478,7 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 		  printf ("Sound %s restored with alBuffer %d\n",s.c_str(),*wavbuf);
 #endif
 		}
+
 	    if (wavbuf==NULL)
 		{
 	  	  VSFile f;

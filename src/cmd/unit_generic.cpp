@@ -4358,26 +4358,30 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
                   //VSFileSystem::vs_fprintf (stderr,"errore fatale mit den armorn")
 ;
 		  if (hull <0) {
-			  static float cargoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","eject_cargo_percent","1"));
-                          
+                    static int neutralfac=FactionUtil::GetFaction("neutral");
+                    static int upgradesfac=FactionUtil::GetFaction("upgrades");
+                     
+                    static float cargoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","eject_cargo_percent","1"));
+                    
 			  static float hulldamtoeject = XMLSupport::parse_float(vs_config->getVariable ("physics","hull_damage_to_eject","100"));
 //			if (!isSubUnit()&&hull>-hulldamtoeject) {
 			if (hull>-hulldamtoeject) {
 			  static float autoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","autoeject_percent",".5"));
-
+                          if (SERVER||Network==NULL)
 			  if (rand()<(RAND_MAX*autoejectpercent)&&isUnit()==UNITPTR) {
                             static bool player_autoeject=XMLSupport::parse_bool(vs_config->getVariable("physics","player_autoeject","true"));
-                            static int neutralfac=FactionUtil::GetFaction("neutral");
-                            static int upgradesfac=FactionUtil::GetFaction("upgrades");
                             if (faction!=neutralfac&&faction!=upgradesfac&&(player_autoeject||NULL==_Universe->isPlayerStarship(this)))
                               EjectCargo ((unsigned int)-1);
 			  }
                         }
                         static unsigned int max_dump_cargo=XMLSupport::parse_int(vs_config->getVariable("physics","max_dumped_cargo","15"));
                         int dumpedcargo=0;
-                        for (unsigned int i=0;i<numCargo();i++) {
-                          if (rand()<(RAND_MAX*cargoejectpercent)&&dumpedcargo++<max_dump_cargo) {
-                            EjectCargo(i);
+                        if (SERVER||Network==NULL)
+                        if (faction!=neutralfac&&faction!=upgradesfac) {
+                          for (unsigned int i=0;i<numCargo();i++) {
+                            if (rand()<(RAND_MAX*cargoejectpercent)&&dumpedcargo++<max_dump_cargo) {
+                              EjectCargo(i);
+                            }
                           }
                         }
 			
@@ -6872,6 +6876,9 @@ void Unit::TurretFAW() {
 extern int SelectDockPort(Unit *, Unit*parent);
 //extern unsigned int current_cockpit;
 void Unit::EjectCargo (unsigned int index) {
+  if (Network!=NULL&&!SERVER) {
+    return ;// NETFIXME: transmit eject cargo request across the net
+  }
   Cargo * tmp=NULL;
   Cargo ejectedPilot;
   Cargo dockedPilot;
@@ -6911,6 +6918,7 @@ void Unit::EjectCargo (unsigned int index) {
   if (index<numCargo()) {
     tmp = &GetCargo (index);
   }
+  static float cargotime=XMLSupport::parse_float(vs_config->getVariable("physics","cargo_live_time","600"));
   if (tmp) {
     string tmpcontent=tmp->content;
     if (tmp->mission)
@@ -6941,7 +6949,7 @@ void Unit::EjectCargo (unsigned int index) {
 	    fg->nr_ships++;
 	    fg->nr_ships_left++;
 	  }
-	  cargo = UnitFactory::createUnit (ans.c_str(),false,faction,"",fg,fgsnumber);
+	  cargo = UnitFactory::createUnit (ans.c_str(),false,faction,"",fg,fgsnumber,NULL,getUniqueSerial());
 	  cargo->PrimeOrders();
 	  cargo->SetAI (new Orders::AggressiveAI ("default.agg.xml"));
 	  cargo->SetTurretAI();	  
@@ -6965,12 +6973,12 @@ void Unit::EjectCargo (unsigned int index) {
               fg->nr_ships++;
               fg->nr_ships_left++;
             }
-            cargo = UnitFactory::createUnit ("eject",false,faction,"",fg,fgsnumber);
+            cargo = UnitFactory::createUnit ("eject",false,faction,"",fg,fgsnumber,NULL,getUniqueSerial());
           }
           else
           {
             int fac = FactionUtil::GetFaction("upgrades");
-            cargo = UnitFactory::createUnit ("eject",false,fac);
+            cargo = UnitFactory::createUnit ("eject",false,fac,"",NULL,0,NULL,getUniqueSerial());
           }
           if (owner)
             cargo->owner = owner;
@@ -6998,7 +7006,7 @@ void Unit::EjectCargo (unsigned int index) {
               fg->nr_ships++;
               fg->nr_ships_left++;
             }
-            cargo = UnitFactory::createUnit ("return_to_cockpit",false,faction,"",fg,fgsnumber);
+            cargo = UnitFactory::createUnit ("return_to_cockpit",false,faction,"",fg,fgsnumber,NULL,getUniqueSerial());
             if (owner)
               cargo->owner = owner;
             else
@@ -7007,7 +7015,7 @@ void Unit::EjectCargo (unsigned int index) {
           else
           {
             int fac = FactionUtil::GetFaction("upgrades");
-            cargo = UnitFactory::createUnit ("eject",false,fac);
+            cargo = UnitFactory::createUnit ("eject",false,fac,"",NULL,0,NULL,getUniqueSerial());
           }
           
           arot=erot;
@@ -7023,7 +7031,17 @@ void Unit::EjectCargo (unsigned int index) {
           
         }else {
           string tmpnam = tmpcontent+".cargo";
-          cargo = UnitFactory::createUnit (tmpnam.c_str(),false,FactionUtil::GetFaction("upgrades"));
+          cargo = UnitFactory::createMissile (tmpnam.c_str(),
+                                              FactionUtil::GetFaction("upgrades"),
+                                              "",
+                                              0,
+                                              0,
+                                              cargotime,
+                                              1,
+                                              1,
+                                              1,
+                                              getUniqueSerial()
+                                              );
           arot=crot;
           //cargo->PrimeOrders();
           //cargo->SetAI (new Orders::AggressiveAI ("cargo.agg.xml"));
@@ -7034,7 +7052,15 @@ void Unit::EjectCargo (unsigned int index) {
       if (cargo->name=="LOAD_FAILED") {
         static float grot=XMLSupport::parse_float(vs_config->getVariable("graphics","generic_cargo_rotation_speed","1"))*3.1415926536/180;
 	cargo->Kill();
-	cargo = UnitFactory::createUnit ("generic_cargo",false,FactionUtil::GetFaction("upgrades"));        
+	cargo = UnitFactory::createMissile ("generic_cargo",
+                                         FactionUtil::GetFaction("upgrades"),"",
+                                         0,
+                                         0,
+                                         cargotime,
+                                         1,
+                                         1,
+                                         1,
+                                         getUniqueSerial());        
         arot=grot;
 
       }
