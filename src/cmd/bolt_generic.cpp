@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "bolt.h"
 #include "gfxlib.h"
 #include "gfx/mesh.h"
@@ -9,6 +10,7 @@
 #include "unit_generic.h"
 #include "audiolib.h"
 #include "config_xml.h"
+
 using std::vector;
 using std::string;
 
@@ -97,13 +99,13 @@ class UpdateBolts{
 public:
   UpdateBolts(StarSystem * ss, CollideMap * collidemap):sub(ss,collidemap) {}  
   template <class T> void operator () (T & collidableList) {
-    for_each(collidableList.begin(),collidableList.end(),sub);
+	  std::for_each(collidableList.begin(),collidableList.end(),sub);
   }
 };
 void Bolt::UpdatePhysics(StarSystem * ss) {
   CollideMap * cm = ss->collidemap[Unit::UNIT_BOLT];
-  for_each(cm->sorted.begin(),cm->sorted.end(),UpdateBolt(ss,cm));
-  for_each(cm->toflattenhints.begin(),cm->toflattenhints.end(),UpdateBolts(ss,cm));
+  std::for_each(cm->sorted.begin(),cm->sorted.end(),UpdateBolt(ss,cm));
+  std::for_each(cm->toflattenhints.begin(),cm->toflattenhints.end(),UpdateBolts(ss,cm));
 }
 bool Bolt::Collide (Unit * target) {
   Vector normal;
