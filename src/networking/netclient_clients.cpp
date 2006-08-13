@@ -437,9 +437,9 @@ void NetClient::receiveUnitDamage( NetBuffer &netbuf, Unit *un ) {
 	}
 	if( damages & Unit::CLOAK_DAMAGED)
 	{
-		un->cloaking = netbuf.getShort();
+		un->cloaking = netbuf.getInt32();
 		un->image->cloakenergy = netbuf.getFloat();
-		un->cloakmin = netbuf.getShort();
+		un->cloakmin = netbuf.getInt32();
 	}
 	if( damages & Unit::LIMITS_DAMAGED)
 	{

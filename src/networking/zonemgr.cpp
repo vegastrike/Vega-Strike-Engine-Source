@@ -782,9 +782,9 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 		}
 		if( damages & Unit::CLOAK_DAMAGED)
 		{
-			netbuf.addShort( un->cloaking);
+			netbuf.addInt32( un->cloaking);
 			netbuf.addFloat( un->image->cloakenergy);
-			netbuf.addShort( un->cloakmin);
+			netbuf.addInt32( un->cloakmin);
 		}
 		if( damages & Unit::LIMITS_DAMAGED)
 		{
