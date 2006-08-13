@@ -7031,7 +7031,7 @@ void Unit::EjectCargo (unsigned int index) {
           
         }else {
           string tmpnam = tmpcontent+".cargo";
-          static std::string nam("name");
+          static std::string nam("Name");
           float rot=crot;
           if (UniverseUtil::LookupUnitStat(tmpnam,"upgrades",nam).length()==0) {
             tmpnam="generic_cargo";
