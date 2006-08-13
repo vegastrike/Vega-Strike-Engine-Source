@@ -6957,7 +6957,7 @@ void Unit::EjectCargo (unsigned int index) {
 	}
       }
       float arot=0;
-
+      static float grot=XMLSupport::parse_float(vs_config->getVariable("graphics","generic_cargo_rotation_speed","1"))*3.1415926536/180;
       if (!cargo) {
         static float crot=XMLSupport::parse_float(vs_config->getVariable("graphics","cargo_rotation_speed","60"))*3.1415926536/180;
         static float erot=XMLSupport::parse_float(vs_config->getVariable("graphics","eject_rotation_speed","0"))*3.1415926536/180;
@@ -7031,6 +7031,12 @@ void Unit::EjectCargo (unsigned int index) {
           
         }else {
           string tmpnam = tmpcontent+".cargo";
+          static std::string nam("name");
+          float rot=crot;
+          if (UniverseUtil::LookupUnitStat(tmpnam,"upgrades",nam).length()==0) {
+            tmpnam="generic_cargo";
+            rot=grot;
+          }
           cargo = UnitFactory::createMissile (tmpnam.c_str(),
                                               FactionUtil::GetFaction("upgrades"),
                                               "",
@@ -7042,7 +7048,7 @@ void Unit::EjectCargo (unsigned int index) {
                                               1,
                                               getUniqueSerial()
                                               );
-          arot=crot;
+          arot=rot;
           //cargo->PrimeOrders();
           //cargo->SetAI (new Orders::AggressiveAI ("cargo.agg.xml"));
         }
@@ -7050,7 +7056,7 @@ void Unit::EjectCargo (unsigned int index) {
       }
 
       if (cargo->name=="LOAD_FAILED") {
-        static float grot=XMLSupport::parse_float(vs_config->getVariable("graphics","generic_cargo_rotation_speed","1"))*3.1415926536/180;
+
 	cargo->Kill();
 	cargo = UnitFactory::createMissile ("generic_cargo",
                                          FactionUtil::GetFaction("upgrades"),"",
