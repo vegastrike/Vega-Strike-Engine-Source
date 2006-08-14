@@ -31,7 +31,7 @@ int FactionUtil::GetFaction (const char * factionname) {
     if (strcasecmp (factionname, factions[i]->factionname)==0) {
       int * tmp=new int;
       *tmp=i;
-      factioncache.Put(factionname,tmp);
+      factioncache.Put(strdup(factionname),tmp);
       return i;
     }
   }
