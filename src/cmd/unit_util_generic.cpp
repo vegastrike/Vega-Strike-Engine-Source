@@ -17,7 +17,24 @@
 #endif
 using std::string;
 extern Unit * getTopLevelOwner();
+static bool nameIsAsteroid(std::string name){
+  if (name.length()<8) return false;
+  return (name[0]=='A'||name[0]=='a')&&
+    name[1]=='s'&&
+    name[2]=='t'&&
+    name[3]=='e'&&
+    name[4]=='r'&&
+    name[5]=='o'&&
+    name[6]=='i'&&
+    name[7]=='d'
+    ;
+}
+
 namespace UnitUtil {
+  bool isAsteroid(Unit * my_unit) {
+		if (!my_unit)return false;
+                return (my_unit->isUnit()==ASTEROIDPTR||nameIsAsteroid(my_unit->name));
+  }
 	bool isCapitalShip(Unit *my_unit){
 		if (!my_unit)return false;
 		bool res=false;

@@ -41,7 +41,6 @@ int FactionUtil::GetFaction (const char * factionname) {
 Unit* FactionUtil::GetContraband(int faction){
   return factions[faction]->contraband;
 }
-
 /**
 * Returns the relationship between myfaction and theirfaction
 * 1 is happy. 0 is neutral (btw 1 and 0 will not attack)
@@ -57,6 +56,12 @@ int FactionUtil::GetFactionIndex(string name) {
   *tmp=i;
   factioncache.Put(name,tmp);
   return i;
+}
+bool FactionUtil::isCitizenInt(int faction) {
+  return factions[faction]->citizen;
+}
+bool FactionUtil::isCitizen(std::string name) {
+  return isCitizenInt(GetFactionIndex(name));
 }
 float FactionUtil::GetIntRelation (const int myfaction, const int theirfaction){
 	return factions[myfaction]->faction[theirfaction].relationship;

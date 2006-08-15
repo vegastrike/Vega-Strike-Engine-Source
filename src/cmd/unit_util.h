@@ -40,6 +40,7 @@ namespace UnitUtil {
 	bool isSignificant(Unit *my_unit);
 	bool isCapitalShip(Unit *my_unit);
 	bool isDockableUnit(Unit *my_unit);
+	bool isAsteroid(Unit *my_unit);
 	bool isSun(Unit *my_unit);
 	void switchFg(Unit *my_unit,string arg);
 	int communicateTo(Unit *my_unit,Unit *other_unit,float mood);

@@ -152,6 +152,7 @@
 	EXPORT_UTIL0(bool,isCapitalShip)
 	EXPORT_UTIL0(bool,isDockableUnit)
 	EXPORT_UTIL0(bool,isSun)
+	EXPORT_UTIL0(bool,isAsteroid)
 	voidEXPORT_UTIL1(switchFg,string,arg)
 	EXPORT_UTIL2(int,communicateTo,UnitWrapper,other_unit,float,mood)
 	EXPORT_UTIL1(bool,commAnimation,string,anim)

@@ -82,7 +82,8 @@ namespace FactionXML {
 	SPARKGREEN,
 	SPARKBLUE,
 	SPARKALPHA,
-        SHIPMODIFIER
+        SHIPMODIFIER,
+        ISCITIZEN
   };
 
   const EnumMap::Pair element_names[] = {
@@ -113,12 +114,13 @@ namespace FactionXML {
 	EnumMap::Pair ("Contraband",CONTRABAND),
 	EnumMap::Pair ("sex",SEX),
 	EnumMap::Pair ("base_only",BASE_ONLY),
-	EnumMap::Pair ("dockable_only",DOCKABLE_ONLY)
+	EnumMap::Pair ("dockable_only",DOCKABLE_ONLY),
+        EnumMap::Pair ("citizen",ISCITIZEN)
 };
 
 
   const EnumMap element_map(element_names, 10);
-  const EnumMap attribute_map(attribute_names, 16);
+  const EnumMap attribute_map(attribute_names, 17);
 
 }
 
@@ -240,6 +242,9 @@ void Faction::beginElement(void *userData, const XML_Char *names, const XML_Char
       case CONTRABAND:
 	contrabandlists.back()= ((*iter).value);
 	break;
+      case ISCITIZEN:
+        factions.back()->citizen= XMLSupport::parse_bool((*iter).value);
+        break;
       case LOGORGB:
 		if (RGBfirst==0||RGBfirst==1) {
 			RGBfirst=1;

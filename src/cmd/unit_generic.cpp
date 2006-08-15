@@ -2179,14 +2179,17 @@ void Unit::UpdateSubunitPhysics(Unit* subunit, const Transformation &trans, cons
     }
 }
 void Unit::AddVelocity(float difficulty) {
-   static float warprampuptime=XMLSupport::parse_float (vs_config->getVariable ("physics","warprampuptime","5")); // for the heck of it.    
+   static float humanwarprampuptime=XMLSupport::parse_float (vs_config->getVariable ("physics","warprampuptime","5")); // for the heck of it.    
+   static float compwarprampuptime=XMLSupport::parse_float (vs_config->getVariable ("physics","computerwarprampuptime","50")); // for the heck of it.    
    static float warprampdowntime=XMLSupport::parse_float (vs_config->getVariable ("physics","warprampdowntime","0.5"));     
    Vector v=Velocity;
+   bool  playa=_Universe->isPlayerStarship(this)?true:false;
+   float warprampuptime=playa?humanwarprampuptime:compwarprampuptime;
    if(graphicOptions.WarpRamping){ // Warp Turning on/off
 	  if(graphicOptions.InWarp==1){ // Warp Turning on
-		graphicOptions.RampCounter=warprampuptime;
+            graphicOptions.RampCounter=warprampuptime;
 	  } else { //Warp Turning off
-		graphicOptions.RampCounter=warprampdowntime;
+            graphicOptions.RampCounter=warprampdowntime;
 	  }
 	  graphicOptions.WarpRamping=0;
    }
@@ -2218,7 +2221,15 @@ void Unit::AddVelocity(float difficulty) {
                  if (planet==this) {
                      continue;
                  }
-		 float shiphack=(planet->isUnit()==PLANETPTR)?.25:(testthis?(planet->specInterdiction?1./specInterdiction:1):1);
+		 float shiphack=.25;
+                 if (planet->isUnit()!=PLANETPTR) {
+                   shiphack=1;
+                   if (planet->specInterdiction>0)
+                     shiphack=1./planet->specInterdiction;
+                   if (this->specInterdiction>1) {
+                     shiphack*=this->specInterdiction;
+                   }
+                 }
 		 float multipliertemp=1;
 		 float minsizeeffect = (planet->rSize()>smallwarphack)?planet->rSize():smallwarphack;
 		 float effectiverad = minsizeeffect*(1.0f+UniverseUtil::getPlanetRadiusPercent())+rSize();
@@ -2239,8 +2250,12 @@ void Unit::AddVelocity(float difficulty) {
 	     if(graphicOptions.RampCounter<=0){
 	       graphicOptions.RampCounter=0;
              }
-             if (graphicOptions.RampCounter>warprampdowntime)
-               graphicOptions.RampCounter=warprampdowntime;
+             if (graphicOptions.InWarp==0&&graphicOptions.RampCounter>warprampdowntime){
+
+               graphicOptions.RampCounter=(1-graphicOptions.RampCounter/warprampuptime)*warprampdowntime;
+             }
+             if (graphicOptions.InWarp==1&&graphicOptions.RampCounter>warprampuptime)
+               graphicOptions.RampCounter=warprampuptime;
 	     rampmult=(graphicOptions.InWarp)?1.0-((graphicOptions.RampCounter/warprampuptime)*(graphicOptions.RampCounter/warprampuptime)):(graphicOptions.RampCounter/warprampdowntime)*(graphicOptions.RampCounter/warprampdowntime);
 	   }
 	   if(minmultiplier<warpMultiplierMin*graphicOptions.MinWarpMultiplier) {

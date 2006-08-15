@@ -23,6 +23,7 @@
 #include "vs_random.h"
 #include "python/python_compile.h"
 #include "cmd/unit_find.h"
+#include "faction_generic.h"
 using namespace Orders;
 using stdext::hash_map;
 const EnumMap::Pair element_names[] = {
@@ -1205,9 +1206,23 @@ void AggressiveAI::ReCommandWing(Flightgroup * fg) {
     }
   }
 }
-static Unit * ChooseNavPoint(Unit * parent) {
+static Unit * GetRandomNav(vector<UnitContainer> navs[3], unsigned int randnum) {
+  size_t total_size = navs[0].size()+navs[1].size()+navs[2].size();
+  if (total_size==0) return NULL;
+  randnum%=total_size;
+  if (randnum>=navs[0].size()) {
+    randnum-=navs[0].size();
+    if (randnum>=navs[1].size()) {    
+      randnum-=navs[1].size();
+      return navs[2][randnum].GetUnit();
+    }
+    return navs[1][randnum].GetUnit();
+  }
+  return navs[0][randnum].GetUnit();
+}
+static Unit * ChooseNavPoint(Unit * parent, Unit **otherdest, float *lurk_on_arrival) {
   static string script=vs_config->getVariable("AI","ChooseDestinationScript","");
-
+  *lurk_on_arrival=0;
   if (script.length()>0) {
     Unit * ret=NULL;
     UniverseUtil::setScratchUnit(parent);
@@ -1218,40 +1233,105 @@ static Unit * ChooseNavPoint(Unit * parent) {
       return ret;
     }
   }
-  static vector<UnitContainer> navs;
+  static vector<UnitContainer> navs[3];
+  static hash_map <std::string, UnitContainer> jumpPoints;
   static StarSystem * lastss;
   static double ttime= 0;
+  static int system_faction=0;
+  static int friendlycount=0;
+  static int enemycount=0;
+  static int neutralcount=0;
+  static int citizencount=0;
   if (fabs(getNewTime()-ttime)>.000001||lastss!=_Universe->activeStarSystem()) {
+    system_faction=FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction(UniverseUtil::getSystemFile()));
     Unit* un;
-
-    size_t navs_size=0;
+    jumpPoints.clear();
+    size_t navs_size[3]={0,0,0};
     for (un_iter i= _Universe->activeStarSystem()->getUnitList().createIterator();
          (un=*i)!=NULL;
          ++i) {
-      if (UnitUtil::isSignificant(un)) {
-        if (parent->getRelation(un)>=-.05) {
-          if (navs_size<=navs.size())
-            navs.push_back(UnitContainer(un));
-          else
-            navs[navs_size].SetUnit(un);          
-          navs_size++;
+      float rel=FactionUtil::GetIntRelation(system_faction,un->faction);      
+
+      if (FactionUtil::isCitizenInt(un->faction)) {
+        citizencount++;
+      }else {          
+        if (rel>0.05) {
+          friendlycount++;
+        }else if (rel<0.){
+          enemycount++;
+        }else {
+          neutralcount++;
         }
       }
+      if (un->GetDestinations().size()) {
+        jumpPoints[un->GetDestinations()[0]].SetUnit(un);
+      }
+      if (UnitUtil::isSignificant(un)) {
+        int k=0;
+        if (rel>.05) k=1;//base
+        if (UnitUtil::isAsteroid(un)) k=2;//asteroid field/debris field
+        if (navs_size[k]<=navs[k].size())
+          navs[k].push_back(UnitContainer(un));
+        else
+          navs[k][navs_size[k]].SetUnit(un);          
+        navs_size[k]++;
+      
+      }
     }
+    navs[0].resize(navs_size[0]);
+    navs[1].resize(navs_size[1]);
+    navs[2].resize(navs_size[2]);
     ttime=getNewTime();
     lastss=_Universe->activeStarSystem();
-    while(navs_size>navs.size())
-      navs.pop_back();
   }
-  if (navs.size()>0) {
-    int k = (int)(getNewTime()/120);// two minutes
-    string key = UnitUtil::getFlightgroupName(parent);
-    std::string::const_iterator start = key.begin();
-    for(;start!=key.end(); start++) {
-      k += (k * 128) + *start;
+  float sysrel=FactionUtil::GetIntRelation(system_faction,parent->faction);          
+  static float lurk_time = XMLSupport::parse_float(vs_config->getVariable("AI","lurk_time","600"));
+  static float select_time = XMLSupport::parse_float(vs_config->getVariable("AI","fg_nav_select_time","120"));
+  static float hostile_select_time = XMLSupport::parse_float(vs_config->getVariable("AI","pirate_nav_select_time","400"));
+  static int num_ships_per_roid = XMLSupport::parse_float(vs_config->getVariable("AI","num_pirates_per_asteroid_field","12"));
+  bool hostile=sysrel<0;
+  bool anarchy=enemycount>friendlycount;
+  float timehash=select_time;
+  if (hostile&&!anarchy)
+    timehash=hostile_select_time;
+  
+  int k = (int)(getNewTime()/timehash);// two minutes
+  string key = UnitUtil::getFlightgroupName(parent);
+  std::string::const_iterator start = key.begin();
+  for(;start!=key.end(); start++) {
+    k += (k * 128) + *start;
+  }
+  VSRandom choosePlace(k);
+  unsigned int firstRand=choosePlace.genrand_int31();
+  float secondRand=choosePlace.uniformExc(0,1);
+  
+  bool asteroidhide = (secondRand < enemycount/(float)friendlycount)&&(secondRand<num_ships_per_roid*navs[2].size()/(float)enemycount);
+  bool siege=enemycount>2*friendlycount;//rough approx
+  int whichlist=((sysrel<0&&siege==false)?2:1);
+  size_t total_size = (siege||!hostile)?navs[0].size()+navs[whichlist].size():navs[whichlist].size();
+
+  if (hostile&&((anarchy==false&&asteroidhide==false)||total_size==0)) {
+    //hit and run
+    unsigned int thirdRand=choosePlace.genrand_int31();
+    Unit * a=GetRandomNav(navs,firstRand);
+    Unit * b=GetRandomNav(navs,thirdRand);
+    if (a==b) {
+      b=GetRandomNav(navs,thirdRand+1);
     }
-    VSRandom choosePlace(k);
-    return navs[choosePlace.genrand_int32()%navs.size()].GetUnit();
+    if (a!=b) {
+      *otherdest=b;
+      *lurk_on_arrival=lurk_time;
+    }
+    return a;
+  }else {
+    if (total_size>0) {
+      firstRand%=total_size;
+      if (firstRand>=navs[whichlist].size()) {
+        firstRand-=navs[whichlist].size();
+        whichlist=0;//allows you to look for both neutral and ally lists  
+      }
+      return navs[whichlist][firstRand].GetUnit();
+    }
   }
   return NULL;
 }
@@ -1284,10 +1364,13 @@ static Unit * ChooseNearNavPoint(Unit * parent,QVector location, float locradius
 class FlyTo:public Orders::MoveTo {
   float creationtime;
 public:
-  FlyTo(const QVector &target, bool aft, bool terminating=true, float creationtime=0) : MoveTo(target,aft,4,terminating) {this->creationtime=creationtime;}
+  FlyTo(const QVector &target, bool aft, bool terminating=true, float creationtime=0,int leniency) : MoveTo(target,aft,leniency,terminating) {this->creationtime=creationtime;}
 
   virtual void Execute() {
     MoveTo::Execute();
+    if (done) {
+      printf ("Flyto done\n");
+    }
     Unit * un=NULL;
     static float mintime=XMLSupport::parse_float(vs_config->getVariable("AI","min_time_to_auto","25"));
     if (getNewTime()-creationtime>mintime) {
@@ -1295,7 +1378,7 @@ public:
         WarpToP(parent,un,true);
       }else {
         Unit* playa=_Universe->AccessCockpit()->GetParent();
-        if (playa==NULL||playa->Target()!=parent) {
+        if (playa==NULL||playa->Target()!=parent||1) {
           WarpToP(parent,targetlocation,0,true);
         }
       }
@@ -1305,10 +1388,12 @@ public:
 static Vector randVector() {
   return Vector((rand()/(float)RAND_MAX)*2-1,(rand()/(float)RAND_MAX)*2-1,(rand()/(float)RAND_MAX)*2-1);
 }
-static void GoTo(AggressiveAI * ai, Unit * parent, const QVector &nav, float creationtime) {
+static void GoTo(AggressiveAI * ai, Unit * parent, const QVector &nav, float creationtime, bool boonies=false) {
   static bool can_afterburn = XMLSupport::parse_bool(vs_config->getVariable("AI","afterburn_to_no_enemies","true")); 
-  Order * mt=new FlyTo(nav,can_afterburn,true,creationtime);
+  Order * mt=new FlyTo(nav,can_afterburn,true,creationtime,boonies?16:6);
   Order * ch=new Orders::ChangeHeading(nav,32,.25f,true);
+  ai->eraseType(Order::FACING);
+  ai->eraseType(Order::MOVEMENT);
   mt->SetParent(parent);
   ch->SetParent(parent);
   ai->ReplaceOrder(mt);
@@ -1316,7 +1401,9 @@ static void GoTo(AggressiveAI * ai, Unit * parent, const QVector &nav, float cre
 }
 void AggressiveAI::ExecuteNoEnemies() {
   if (nav.i==0&&nav.j==0&&nav.k==0) {
-    Unit * dest=ChooseNavPoint (parent);
+    Unit * otherdest=NULL;
+    Unit * dest=ChooseNavPoint (parent,&otherdest,&this->lurk_on_arrival);
+   
     if (dest) {
       static bool can_warp_to=XMLSupport::parse_bool(vs_config->getVariable("AI","warp_to_no_enemies","true"));      
       static float mintime=XMLSupport::parse_float(vs_config->getVariable("AI","min_time_to_auto","25"));
@@ -1330,17 +1417,25 @@ void AggressiveAI::ExecuteNoEnemies() {
       }
       Vector dir = parent->Position()-dest->Position();
       dir.Normalize();
-      dir*=dest->rSize()+parent->rSize();
-      dir+=randVector()*parent->rSize()*4;
-      if (dest->isUnit()==PLANETPTR) {
-        float planetpct=UniverseUtil::getPlanetRadiusPercent();
-        dir *=planetpct+1.0f;
+      if (!otherdest) {
+        dir*=dest->rSize()+parent->rSize();
+        if (dest->isUnit()==PLANETPTR) {
+          float planetpct=UniverseUtil::getPlanetRadiusPercent();
+          dir *=planetpct+1.0f;
+        }
       }
-      nav=dest->Position()+dir;      
-      GoTo(this,parent,nav,creationtime);
+      dir+=randVector()*parent->rSize()*4;
+      nav=dest->Position()+dir;
+      if (otherdest) {
+        nav+=otherdest->Position();
+        nav=nav*.5;
+      }
+      
+
+      GoTo(this,parent,nav,creationtime,otherdest!=NULL);
     }
   }else {          
-    if ((nav-parent->Position()).MagnitudeSquared()<4*parent->rSize()*parent->rSize()) {
+    if ((nav-parent->Position()).MagnitudeSquared()<4*parent->rSize()*parent->rSize()&&lurk_on_arrival==0) {
       nav=QVector(0,0,0);
       Unit * dest =ChooseNearNavPoint(parent,parent->Position(),parent->rSize());
       if (dest) {
@@ -1356,6 +1451,17 @@ void AggressiveAI::ExecuteNoEnemies() {
         ExecuteNoEnemies();//no suitable docking point found, recursive call which will take door1
       }
       // go dock to the nav point
+    }else if (lurk_on_arrival>0) {
+      lurk_on_arrival-=SIMULATION_ATOM;
+      //slowdown
+      parent->Thrust(-parent->GetMass()*parent->UpCoordinateLevel(parent->GetVelocity())/SIMULATION_ATOM,false);
+      parent->graphicOptions.InWarp=0;
+      if (lurk_on_arrival<=0) {
+        nav=QVector(0,0,0);
+        ExecuteNoEnemies();//select new place to go
+      }
+      // have to do something while here.
+      
     }else {
       GoTo(this,parent,nav,creationtime);
     }
@@ -1460,8 +1566,8 @@ void AggressiveAI::Execute () {
     if (logiccurtime<0) {
       logiccurtime=20;
       currentpriority=-FLT_MAX;
-      eraseType (Order::FACING);
-      eraseType (Order::MOVEMENT);      
+      //eraseType (Order::FACING);
+      //eraseType (Order::MOVEMENT);      
     }
   }
 

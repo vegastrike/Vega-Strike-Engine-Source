@@ -38,6 +38,7 @@ typedef stdext::hash_map<std::string, float> MapStringFloat;
      * holds the relationships to all _other_ factions loaded 
      * hold misguided info for self FIXME
      */
+    bool citizen;
     int playlist;
     float sparkcolor[4];
     std::vector <faction_stuff> faction;
@@ -69,6 +70,7 @@ typedef stdext::hash_map<std::string, float> MapStringFloat;
 	static void endElement(void *userData, const XML_Char *name);
 	Faction() {
 	playlist=-1;
+        citizen=false;
 		logo=NULL;
 		contraband=NULL;
 		factionname=NULL;
@@ -103,6 +105,8 @@ namespace FactionUtil {
 		float GetIntRelation (const int myfaction, const int theirfaction);
 		float GetRelation (string myfaction, string theirfaction);
 		string GetFactionName(int index);
+		bool isCitizenInt(int index);
+		bool isCitizen(std::string name);
 		void AdjustIntRelation (const int myfaction, const int theirfaction, const float factor, const float rank);
 		void AdjustRelation(string myfaction,string theirfaction, float factor, float rank);
 		int GetPlaylist (const int myfaction);
