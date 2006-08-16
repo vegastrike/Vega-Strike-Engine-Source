@@ -47,8 +47,11 @@ void Order::ProcessCommMessage(CommunicationMessage & c) {
   
 }
 float Order::GetEffectiveRelationship (const Unit * target)const {
+  
   float staticrel = FactionUtil::GetIntRelation (parent->faction,target->faction);
-  return staticrel;
+  static bool returnStaticRel=XMLSupport::parse_float(vs_config->getVariable("AI","return_static_relation","false"));
+  if (returnStaticRel)
+      return staticrel;
   for (unsigned int i=0;i<suborders.size();i++) {
     float effrel = suborders[i]->GetEffectiveRelationship(target);
     if (effrel !=staticrel) {
