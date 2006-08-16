@@ -159,7 +159,7 @@ namespace UnitUtil {
 	if (_Universe->isPlayerStarship(targ)) {
 	    return HIGH_PRIORITY;
 	}
-	if (un->graphicOptions.WarpRamping||un->graphicOptions.RampCounter!=0) {
+	if(0)if (un->graphicOptions.WarpRamping||un->graphicOptions.RampCounter!=0) {
 	    static float compwarprampuptime=XMLSupport::parse_float (vs_config->getVariable ("physics","computerwarprampuptime","50")); // for the heck of it.  NOTE, variable also in unit_generic.cpp    
 	    static float warprampdowntime=XMLSupport::parse_float (vs_config->getVariable ("physics","warprampdowntime","0.5"));     
 	    float lowest_priority_time=SIM_QUEUE_SIZE*SIMULATION_ATOM;
@@ -169,7 +169,7 @@ namespace UnitUtil {
 		time_ramped=warprampdowntime-un->graphicOptions.RampCounter;
 	    }
 	    if (un->graphicOptions.WarpRamping||time_ramped<lowest_priority_time/2) {
-		return HIGH_PRIORITY;
+		return MEDIUM_PRIORITY;
 	    }else if (time_ramped<lowest_priority_time) {
 		return MEDIUM_PRIORITY;
 	    }//else defer decision	    
