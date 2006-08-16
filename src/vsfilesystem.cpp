@@ -952,18 +952,26 @@ namespace VSFileSystem
 				fullpath = root+Directories[type]+"/"+file;
 
 			struct stat s;
-			if( stat( fullpath.c_str(), &s) >= 0)
-			{
-				if( s.st_mode & S_IFDIR)
-				{
-					cerr<<" File is a directory ! ";
-					found = -1;
+			static stdext::hash_map<std::string,bool> fileExistsCache;
+			stdext::hash_map<std::string,bool>::iterator iter;
+			iter=fileExistsCache.find(fullpath);
+			if (iter!=fileExistsCache.end()) {
+			    if (iter->second) found=1;
+			}else {
+			    if( stat( fullpath.c_str(), &s) >= 0){
+				if( s.st_mode & S_IFDIR) {
+				    cerr<<" File is a directory ! ";
+				    found = -1;
+				    fileExistsCache[fullpath]=false;
 				}
-				else
-				{
-					isin_bigvolumes = VSFSNone;
-					found = 1;
+				else {
+				    isin_bigvolumes = VSFSNone;
+				    found = 1;
+				    fileExistsCache[fullpath]=true;
 				}
+			    }else {
+				fileExistsCache[fullpath]=false;
+			    }
 			}
 		}
 		else

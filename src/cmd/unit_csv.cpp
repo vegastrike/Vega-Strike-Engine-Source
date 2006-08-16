@@ -15,6 +15,7 @@
 #include "unit_csv.h"
 #include <algorithm>
 #include "lin_time.h"
+#include "unit_const_cache.h"
 #define VS_PI 3.1415926535897931
 CSVRow LookupUnitRow(const string &unitname, const string &faction) {
   string hashname=unitname+"__"+faction;
@@ -81,16 +82,18 @@ static void UpgradeUnit (Unit * un, std::string upgrades) {
     upgrade = upgrade.substr(0,where1);
     if (upgrade.length()==0) 
       continue;
-    Unit *upgradee =UnitFactory::createUnit(upgrade.c_str(),
+    const Unit * upgradee = UnitConstCache::getCachedConst (StringIntKey(upgrade,FactionUtil::GetUpgradeFaction()));
+	if (!upgradee) {
+		upgradee=UnitConstCache::setCachedConst(StringIntKey(upgrade,FactionUtil::GetUpgradeFaction()),
+			UnitFactory::createUnit(upgrade.c_str(),
                                             true,
-                                            FactionUtil::
-                                            GetUpgradeFaction());
+                                            FactionUtil::GetUpgradeFaction()));
+	}
     double percent=1.0;
     un->Unit::Upgrade (upgradee,
                        mountoffset,
                        subunitoffset,
-                       GetModeFromName (upgrade.c_str()),true,percent,NULL);
-    upgradee->Kill();    
+                       GetModeFromName (upgrade.c_str()),true,percent,NULL); 
   }  
 }
 
