@@ -6191,7 +6191,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
 
   if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Spec_Interdiction")) {
     bool neg = specInterdiction<0;
-    bool upneg=templ->specInterdiction<0;
+    bool upneg=up->specInterdiction<0;
     bool interdictionUnits=specInterdiction>0;
     specInterdiction=fabs(specInterdiction);
     STDUPGRADE(specInterdiction,fabs(up->specInterdiction),upneg?fabs(templ->specInterdiction):templ->specInterdiction,0);
