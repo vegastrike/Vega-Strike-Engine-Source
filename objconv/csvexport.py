@@ -86,11 +86,11 @@ def CsvExport():
 	                    outfile.write(csv.writeList([makeName(KeyList[i],GuideList[i]), row[i]]))
 
 
-    print
-    print "Number of Keys:", KeyLL, "\tNumber of Guides:", GuideLL 
-    print """By strickest definition of CSV, Every record should have the same number
-    of Columns (commas) as above. units.csv does not. The old csvexport.py would have
-    failed most of these records."""
+    #print
+    #print "Number of Keys:", KeyLL, "\tNumber of Guides:", GuideLL 
+    #print """By strickest definition of CSV, Every record should have the same number
+    #of Columns (commas) as above. units.csv does not. The old csvexport.py would have
+    #failed most of these records."""
 
 def filterParen(l):
 	global showunits
