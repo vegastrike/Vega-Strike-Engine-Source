@@ -46,7 +46,7 @@ namespace UnitUtil {
 			vs_config->getVariable("physics","priorities","force_top_priority","false") );
 		if (FORCE_TOP_PRIORITY)
 			return 1;
-
+		
         //Some other comment mentions these need special treatment for subunit scheduling
 		static const int PLAYER_PRIORITY=XMLSupport::parse_int(
 			vs_config->getVariable("physics","priorities","player","1") );
@@ -123,7 +123,7 @@ namespace UnitUtil {
 			vs_config->getVariable("physics","priorities","no_enemies","64") );
 
 		// Here we assume that SIM_QUEUE_SIZE is >=64
-        const int LOWEST_PRIORITY=SIM_QUEUE_SIZE;
+		const int LOWEST_PRIORITY=SIM_QUEUE_SIZE;
 		
 		
 
@@ -140,7 +140,7 @@ namespace UnitUtil {
 		static int cargofac=FactionUtil::GetFactionIndex("cargo");
 		int upfac=FactionUtil::GetUpgradeFaction();
 		int neutral=FactionUtil::GetNeutralFaction();
-
+		
         if (un->schedule_priority != Unit::scheduleDefault) {
             //Asteroids do scheduling themselves within subunits, so...
             //...only one caveat: units with their own internal scheduling
@@ -155,35 +155,49 @@ namespace UnitUtil {
                     return ASTEROID_LOW_PRIORITY;
             }
         }
+	Unit * targ = un->Target();
+	if (_Universe->isPlayerStarship(targ)) {
+	    return HIGH_PRIORITY;
+	}
+	if (un->graphicOptions.WarpRamping||un->graphicOptions.RampCounter!=0) {
+	    static float compwarprampuptime=XMLSupport::parse_float (vs_config->getVariable ("physics","computerwarprampuptime","50")); // for the heck of it.  NOTE, variable also in unit_generic.cpp    
+	    static float warprampdowntime=XMLSupport::parse_float (vs_config->getVariable ("physics","warprampdowntime","0.5"));     
+	    float lowest_priority_time=SIM_QUEUE_SIZE*SIMULATION_ATOM;
 
-		if (un->owner==getTopLevelOwner()||un->faction==cargofac||un->faction==upfac||un->faction==neutral) {
+	    float time_ramped=compwarprampuptime-un->graphicOptions.RampCounter;;
+	    if (un->graphicOptions.InWarp==0) {
+		time_ramped=warprampdowntime-un->graphicOptions.RampCounter;
+	    }
+	    if (un->graphicOptions.WarpRamping||time_ramped<lowest_priority_time/2) {
+		return HIGH_PRIORITY;
+	    }else if (time_ramped<lowest_priority_time) {
+		return MEDIUM_PRIORITY;
+	    }//else defer decision	    
+	}
+	if (un->owner==getTopLevelOwner()||un->faction==cargofac||un->faction==upfac||un->faction==neutral) {
             if (dist<tooclose)
                 return LOW_PRIORITY; else
                 return LOWEST_PRIORITY;
-		}
-		Unit * targ = un->Target();
-		if (_Universe->isPlayerStarship(targ)) {
-			return HIGH_PRIORITY;
-		}
-		string obj = UnitUtil::getFgDirective(un);
-		if (!(obj.length()==0||(obj.length()>=1&&obj[0]=='b'))) {
-			return MEDIUM_PRIORITY;
-		}
-		if (dist<gun_range)
-			return MEDIUM_PRIORITY;
-		if (dist<missile_range)
-			return LOW_PRIORITY;
-		if (targ){
-			float speed;
-			un->getAverageGunSpeed(speed,gun_range,missile_range);
-			double distance=UnitUtil::getDistance(un,targ);
-			if (distance<=gun_range)
-				return NOT_VISIBLE_COMBAT_HIGH;
-			if (distance<missile_range)
-				return NOT_VISIBLE_COMBAT_MEDIUM;
-			return NOT_VISIBLE_COMBAT_LOW;
-		}
-		return NO_ENEMIES;
+	}
+	string obj = UnitUtil::getFgDirective(un);
+	if (!(obj.length()==0||(obj.length()>=1&&obj[0]=='b'))) {
+	    return MEDIUM_PRIORITY;
+	}
+	if (dist<gun_range)
+	    return MEDIUM_PRIORITY;
+	if (dist<missile_range)
+	    return LOW_PRIORITY;
+	if (targ){
+	    float speed;
+	    un->getAverageGunSpeed(speed,gun_range,missile_range);
+	    double distance=UnitUtil::getDistance(un,targ);
+	    if (distance<=gun_range)
+		return NOT_VISIBLE_COMBAT_HIGH;
+	    if (distance<missile_range)
+		return NOT_VISIBLE_COMBAT_MEDIUM;
+	    return NOT_VISIBLE_COMBAT_LOW;
+	}
+	return NO_ENEMIES;
 	}
 
 	void orbit (Unit * my_unit, Unit * orbitee, float speed, QVector R, QVector S, QVector center) {
