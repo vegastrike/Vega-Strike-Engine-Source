@@ -237,7 +237,13 @@ void Faction::beginElement(void *userData, const XML_Char *names, const XML_Char
 	factions[factions.size()-1]->factionname=new char[strlen((*iter).value.c_str())+1];
 	
 	strcpy(factions[factions.size()-1]->factionname,(*iter).value.c_str());
-		break;
+	if (strcmp(factions[factions.size()-1]->factionname,"neutral")==0)
+	    FactionUtil::neutralfac=factions.size()-1;
+	if (strcmp(factions[factions.size()-1]->factionname,"planets")==0)
+	    FactionUtil::planetfac=factions.size()-1;
+	if (strcmp(factions[factions.size()-1]->factionname,"upgrades")==0)
+	    FactionUtil::upgradefac=factions.size()-1;
+	break;
 
       case CONTRABAND:
 	contrabandlists.back()= ((*iter).value);

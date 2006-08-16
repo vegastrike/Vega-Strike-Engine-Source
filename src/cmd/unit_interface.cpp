@@ -106,11 +106,12 @@ static bool match (vector <string>::const_iterator cat, vector<string>::const_it
 }
 const Unit * getUnitFromUpgradeName (string upgrade_name, int myunitfaction=0) {
     const char * input_buffer = upgrade_name.c_str();
-    const Unit * NewPart = UnitConstCache::getCachedConst (StringIntKey (input_buffer,FactionUtil::GetFaction("upgrades")));
+	int upfac=FactionUtil::GetUpgradeFaction();
+    const Unit * NewPart = UnitConstCache::getCachedConst (StringIntKey (input_buffer,upfac));
     if (!NewPart) {
 	    NewPart = NewPart = UnitConstCache::setCachedConst (StringIntKey (input_buffer,
-					  FactionUtil::GetFaction("upgrades")),
-					  UnitFactory::createUnit (input_buffer,true,FactionUtil::GetFaction("upgrades")));
+					  upfac),
+					  UnitFactory::createUnit (input_buffer,true,upfac));
     }
     if (NewPart->name==string("LOAD_FAILED")) {
 	    NewPart = UnitConstCache::getCachedConst (StringIntKey(input_buffer,myunitfaction));

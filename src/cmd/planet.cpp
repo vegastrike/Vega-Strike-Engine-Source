@@ -274,7 +274,7 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
 	  string wormholename = wormhole_unit+stab;
 	  string wormholeneutralname = wormhole_unit+".neutral"+stab;
 	  Unit * jum = UnitFactory::createUnit (wormholename.c_str(),true,faction);
-	  static int neutralfaction=FactionUtil::GetFaction("neutral");
+	  int neutralfaction=FactionUtil::GetNeutralFaction();
 	  faction = neutralfaction;
 	  
 	  Unit * neujum = UnitFactory::createUnit (wormholeneutralname.c_str(),true,neutralfaction);

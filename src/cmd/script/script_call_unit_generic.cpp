@@ -1198,7 +1198,7 @@ extern BLENDFUNC parse_alpha (const char *);
 
 Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &destinations){
   //  VSFileSystem::vs_fprintf (stderr,"calling unit launch with Mission 0x%x Flightgroup 0x%x" ,this, fg);
-   int faction_nr=FactionUtil::GetFaction(fg->fg->faction.c_str());
+   int faction_nr=FactionUtil::GetFactionIndex(fg->fg->faction);
    //   printf("faction nr: %d %s\n",faction_nr,fg->faction.c_str());
    Unit **units= new Unit *[fg->nr_ships];
    int u;

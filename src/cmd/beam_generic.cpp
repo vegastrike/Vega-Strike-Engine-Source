@@ -407,8 +407,8 @@ bool Beam::Collide (Unit * target, Unit * firer, Unit * superunit) {
   //A bunch of needed config variables - its best to have them here, so that they're loaded the
   //very first time Collide() is called. That way, we avoid hiccups.
   static float nbig = XMLSupport::parse_float(vs_config->getVariable("physics","percent_to_tractor",".1"));
-  static int upgradesfaction=FactionUtil::GetFaction("upgrades");
-  static int cargofaction=FactionUtil::GetFaction("cargo");
+  int upgradesfaction=FactionUtil::GetUpgradeFaction();
+  static int cargofaction=FactionUtil::GetFactionIndex("cargo");
 
   static bool c_fp = XMLSupport::parse_bool(vs_config->getVariable("physics","tractor.cargo.force_push","true"));
   static bool c_fi = XMLSupport::parse_bool(vs_config->getVariable("physics","tractor.cargo.force_in","true"));

@@ -38,11 +38,11 @@ double GameUnit<UnitType>::Upgrade (const std::string &file, int mountoffset, in
 
   }
 #endif
-  const Unit * up = UnitConstCache::getCachedConst (StringIntKey(file,FactionUtil::GetFaction("upgrades")));
+  int upgradefac=FactionUtil::GetUpgradeFaction();
+  const Unit * up = UnitConstCache::getCachedConst (StringIntKey(file,upgradefac));
   if (!up) {
-    up = UnitConstCache::setCachedConst (StringIntKey (file,
-						       FactionUtil::GetFaction("upgrades")),
-			     UnitFactory::createUnit (file.c_str(),true,FactionUtil::GetFaction("upgrades")));
+    up = UnitConstCache::setCachedConst (StringIntKey (file,upgradefac),
+			     UnitFactory::createUnit (file.c_str(),true,upgradefac));
   }
   char * unitdir  = GetUnitDir(this->name.c_str());
   string templnam = string(unitdir)+".template";	  

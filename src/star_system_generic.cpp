@@ -281,7 +281,7 @@ string StarSystem::getName () {
 
 
 void StarSystem::AddUnit(Unit *unit) {
-  if (unit->specInterdiction!=0||unit->isPlanet()||unit->isJumppoint()||unit->isUnit()==ASTEROIDPTR) {
+  if (unit->specInterdiction>0||unit->isPlanet()||unit->isJumppoint()||unit->isUnit()==ASTEROIDPTR) {
     Unit * un;
     bool found=false;
     for (un_iter i=gravitationalUnits().createIterator();

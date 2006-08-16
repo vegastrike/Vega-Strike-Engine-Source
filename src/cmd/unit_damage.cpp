@@ -329,7 +329,7 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
         }
 
 		  if (un ) {
-            static int upgradesfaction=FactionUtil::GetFaction("upgrades");
+            int upgradesfaction=FactionUtil::GetUpgradeFaction();
 			static float badrel=XMLSupport::parse_float(vs_config->getVariable("sound","loss_relationship","-.1"));
 			static float goodrel=XMLSupport::parse_float(vs_config->getVariable("sound","victory_relationship",".5"));
 			static float timelapse=XMLSupport::parse_float(vs_config->getVariable("sound","time_between_music","180"));

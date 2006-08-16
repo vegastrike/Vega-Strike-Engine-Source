@@ -229,8 +229,8 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
   if (SSCK.setunvel) {
     SSCK.setunvel=false;
     Unit * t=parent->Target();
-    static int neu=FactionUtil::GetFaction("neutral");
-    static int upg=FactionUtil::GetFaction("upgrades");   
+    int neu=FactionUtil::GetNeutralFaction();
+    int upg=FactionUtil::GetUpgradeFaction();   
     static bool allowanyreference=XMLSupport::parse_bool(vs_config->getVariable("AI","AllowAnySpeedReference","false"));
     static bool onlyupgraderef=XMLSupport::parse_bool(vs_config->getVariable("AI","OnlyUpgradeSpeedReference","false"));
     if (t)

@@ -354,7 +354,7 @@ extern float ScaleJumpRadius (float radius);
 
 void StarSystem::beginElement(const string &name, const AttributeList &attributes) {
   using namespace StarXML;
-  static int neutralfaction=FactionUtil::GetFaction("neutral");
+  int neutralfaction=FactionUtil::GetNeutralFaction();
   static float asteroiddiff = XMLSupport::parse_float (vs_config->getVariable ("physics","AsteroidDifficulty",".4"));
   std::string myfile;
   vector <GFXLightLocal> curlights;

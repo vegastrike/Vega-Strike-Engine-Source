@@ -85,6 +85,9 @@ typedef stdext::hash_map<std::string, float> MapStringFloat;
 extern  std::vector <Faction *> factions; //the factions
 
 namespace FactionUtil {
+    extern int upgradefac;
+    extern int neutralfac;
+    extern int planetfac;
 		std::vector <class Animation *>* GetRandCommAnimation(int faction, Unit * unit, unsigned char &sex);
 		void SerializeFaction (FILE * file);
 		string SerializeFaction();
@@ -92,7 +95,7 @@ namespace FactionUtil {
 		void LoadSerializedFaction( char * &buf);
 		int numnums (const char * str);
 		///returns the index of the faction with that name
-		int GetFaction (const char *factionname);
+		//int GetFaction (const char *factionname);
 		int GetNumAnimation(int faction);
 		const char * GetFaction (int faction);
 		class Unit * GetContraband(int faction);
@@ -102,6 +105,9 @@ namespace FactionUtil {
 		* -1 is mad. <0 will attack
 		*/
 		int GetFactionIndex(string name);
+		inline int GetUpgradeFaction(){return upgradefac;}
+		inline int GetNeutralFaction(){return neutralfac;}
+		inline int GetPlanetFaction(){return planetfac;}
 		float GetIntRelation (const int myfaction, const int theirfaction);
 		float GetRelation (string myfaction, string theirfaction);
 		string GetFactionName(int index);

@@ -1364,7 +1364,7 @@ static Unit * ChooseNearNavPoint(Unit * parent,QVector location, float locradius
 class FlyTo:public Orders::MoveTo {
   float creationtime;
 public:
-  FlyTo(const QVector &target, bool aft, bool terminating=true, float creationtime=0,int leniency) : MoveTo(target,aft,leniency,terminating) {this->creationtime=creationtime;}
+  FlyTo(const QVector &target, bool aft, bool terminating=true, float creationtime=0,int leniency=6) : MoveTo(target,aft,leniency,terminating) {this->creationtime=creationtime;}
 
   virtual void Execute() {
     MoveTo::Execute();

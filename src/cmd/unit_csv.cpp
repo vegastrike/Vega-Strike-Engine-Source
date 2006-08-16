@@ -84,7 +84,7 @@ static void UpgradeUnit (Unit * un, std::string upgrades) {
     Unit *upgradee =UnitFactory::createUnit(upgrade.c_str(),
                                             true,
                                             FactionUtil::
-                                            GetFaction("upgrades"));
+                                            GetUpgradeFaction());
     double percent=1.0;
     un->Unit::Upgrade (upgradee,
                        mountoffset,
@@ -1502,7 +1502,7 @@ string Unit::WriteUnitString () {
         unit["Moment_Of_Inertia"]=tos(Momentofinertia);
         unit["Fuel_Capacity"]=tos(fuel);
         unit["Hull"]=tos(hull);
-        unit["Spec_Interdiction"]=tos(fabs(specInterdiction));
+        unit["Spec_Interdiction"]=tos(specInterdiction);
         unit["Armor_Front_Top_Left"]=tos(armor.frontlefttop);
         unit["Armor_Front_Top_Right"]=tos(armor.frontrighttop);
         unit["Armor_Back_Top_Left"]=tos(armor.backlefttop);

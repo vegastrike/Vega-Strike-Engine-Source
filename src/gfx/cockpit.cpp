@@ -134,7 +134,7 @@ GFXColor GameCockpit::unitToColor (Unit *un,Unit *target, char ifflevel) {
   static GFXColor suncol=RetrColor("star",GFXColor(1,1,1,1));
   static GFXColor missilecol=RetrColor("missile",GFXColor(.25,0,.5,1));
   static GFXColor cargocol=RetrColor("cargo",GFXColor(.6,.2,0,1));
-  static int cargofac=FactionUtil::GetFaction("upgrades");
+  int cargofac=FactionUtil::GetUpgradeFaction();
   static GFXColor black_and_white=RetrColor ("black_and_white",GFXColor(.5,.5,.5));  
   if (ifflevel==0)
     return black_and_white;
@@ -532,7 +532,7 @@ void GameCockpit::DrawTargetBoxes(){
 void GameCockpit::DrawTargetBox () {
   float speed,range;
   static GFXColor black_and_white=DockBoxColor ("black_and_white"); 
-  static int neutral = FactionUtil::GetFaction("neutral");
+  int neutral = FactionUtil::GetNeutralFaction();
   Unit * un = parent.GetUnit();
   if (!un)
     return;

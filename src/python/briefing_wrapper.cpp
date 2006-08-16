@@ -8,7 +8,7 @@
 namespace BriefingUtil {
 	int addShip(string name, string faction, Vector vec){
 		return mission->briefing->AddStarship(name.c_str(),
-			FactionUtil::GetFaction(faction.c_str()),
+			FactionUtil::GetFactionIndex(faction),
 			vec);
 	}
 	void removeShip(int whichship) {

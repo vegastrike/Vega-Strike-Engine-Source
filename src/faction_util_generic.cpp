@@ -7,7 +7,9 @@
 #include "gfx/cockpit_generic.h"
 #include "cmd/unit_generic.h"
 using namespace FactionUtil;
-
+int FactionUtil::upgradefac=0;
+int FactionUtil::planetfac=0;
+int FactionUtil::neutralfac=0;
 FSM* FactionUtil::GetConversation(int Myfaction, int TheirFaction) {
   assert (factions[Myfaction]->faction[TheirFaction].stats.index == TheirFaction);
   return factions[Myfaction]->faction[TheirFaction].conversation;
@@ -20,18 +22,12 @@ const char *FactionUtil::GetFaction (int i) {
   return NULL;
 }
 
-int FactionUtil::GetFaction (const char * factionname) {
+static int GetFactionLookup (const char * factionname) {
 #ifdef _WIN32
   #define strcasecmp stricmp
 #endif
-  static Hashtable<const char*,int,47> factioncache;
-  int * retval=factioncache.Get(factionname);
-  if (retval) return *retval;
  for (unsigned int i=0;i<factions.size();i++) {
     if (strcasecmp (factionname, factions[i]->factionname)==0) {
-      int * tmp=new int;
-      *tmp=i;
-      factioncache.Put(strdup(factionname),tmp);
       return i;
     }
   }
@@ -51,7 +47,7 @@ int FactionUtil::GetFactionIndex(string name) {
   int * tmp=factioncache.Get(name);
   if (tmp) 
     return *tmp;
-  int i=GetFaction(name.c_str());
+  int i=GetFactionLookup(name.c_str());
   tmp=new int;
   *tmp=i;
   factioncache.Put(name,tmp);

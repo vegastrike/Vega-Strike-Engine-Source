@@ -47,8 +47,8 @@ void TurretAI::Execute () {
       double mag = Pos.Magnitude();
       Pos=Pos/mag;
       float dot = R.Dot (Pos.Cast());
-      static int neu=FactionUtil::GetFaction("neutral");
-      static int upg=FactionUtil::GetFaction("upgrades");   
+      int neu=FactionUtil::GetNeutralFaction();
+      int upg=FactionUtil::GetUpgradeFaction();   
       bool isplayerstarship=_Universe->isPlayerStarshipVoid(parent->owner)!=NULL;
       
       bool shouldfire = ((mag-targ->rSize()-parent->rSize()<range&&dot>dot_cutoff)&&(isplayerstarship==false||targ->faction==upg||(isplayerstarship&&(targ->getRelation((Unit*)parent->owner/*now that it is a player, we know it's dereferencable*/)<0||targ->Target()==(Unit*)parent->owner)))&&targ->faction!=neu);

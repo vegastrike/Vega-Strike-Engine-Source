@@ -137,9 +137,9 @@ namespace UnitUtil {
 			float speed=0;
 			parent->getAverageGunSpeed(speed,gun_range,missile_range);
 		}
-		static int cargofac=FactionUtil::GetFaction("cargo");
-		static int upfac=FactionUtil::GetFaction("upgrades");
-		static int neutral=FactionUtil::GetFaction("neutral");
+		static int cargofac=FactionUtil::GetFactionIndex("cargo");
+		int upfac=FactionUtil::GetUpgradeFaction();
+		int neutral=FactionUtil::GetNeutralFaction();
 
         if (un->schedule_priority != Unit::scheduleDefault) {
             //Asteroids do scheduling themselves within subunits, so...

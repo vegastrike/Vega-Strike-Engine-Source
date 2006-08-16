@@ -172,8 +172,8 @@ namespace UniverseUtil {
 	}
 	///tells the respective flightgroups in this system to start shooting at each other
 	void TargetEachOther (string fgname, string faction, string enfgname, string enfaction){
-		int fac = FactionUtil::GetFaction(faction.c_str());
-		int enfac = FactionUtil::GetFaction(enfaction.c_str());		
+		int fac = FactionUtil::GetFactionIndex(faction);
+		int enfac = FactionUtil::GetFactionIndex(enfaction);		
 		un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
 		Unit * un=i.current();
 		Unit * en=NULL;
@@ -201,8 +201,8 @@ namespace UniverseUtil {
 
 	///tells the respective flightgroups in this system to stop killing each other urgently...they may still attack--just not warping and stuff
 	void StopTargettingEachOther(string fgname, string faction, string enfgname, string enfaction){
-		int fac = FactionUtil::GetFaction(faction.c_str());
-		int enfac = FactionUtil::GetFaction(enfaction.c_str());	 		
+		int fac = FactionUtil::GetFactionIndex(faction);
+		int enfac = FactionUtil::GetFactionIndex(enfaction);	 		
 		un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
 		Unit * un=i.current();
 		int clear = 0;
@@ -431,7 +431,7 @@ namespace UniverseUtil {
 								mission->msgcenter->add(from,to,message,delay);
 				}
 				Unit *GetContrabandList (string faction) {
-						return FactionUtil::GetContraband(FactionUtil::GetFaction(faction.c_str()));
+						return FactionUtil::GetContraband(FactionUtil::GetFactionIndex(faction));
 				}
 				void LoadMission (string missionname) {
 					::LoadMission (missionname.c_str(),"",false);

@@ -3561,7 +3561,7 @@ void BaseComputer::SellUpgradeOperation::selectMount(void) {
 		if(playerUnit->mounts[i].status==Mount::ACTIVE || playerUnit->mounts[i].status==Mount::INACTIVE) {
 			// Something is mounted here.
 			const std::string unitName = playerUnit->mounts[i].type->weapon_name;
-			const Unit* partUnit = UnitConstCache::getCachedConst(StringIntKey(m_part.content, FactionUtil::GetFaction("upgrades")));
+			const Unit* partUnit = UnitConstCache::getCachedConst(StringIntKey(m_part.content, FactionUtil::GetUpgradeFaction()));
 			string ammoexp;
 			mountName=tostring(i+1)+" "+ unitName.c_str();
 			ammoexp=(playerUnit->mounts[i].ammo==-1)?string(""):string((" ammo: "+tostring(playerUnit->mounts[i].ammo)));
@@ -3936,7 +3936,7 @@ string buildUpgradeDescription(Cargo &item) {
     Flightgroup* flightGroup=new Flightgroup();//sigh
     int fgsNumber=0;
 	current_unit_load_mode=NO_MESH;
-    Unit* newPart = UnitFactory::createUnit(item.content.c_str(), false, FactionUtil::GetFaction("upgrades"),blnk,flightGroup,fgsNumber);
+    Unit* newPart = UnitFactory::createUnit(item.content.c_str(), false, FactionUtil::GetUpgradeFaction(),blnk,flightGroup,fgsNumber);
 	current_unit_load_mode=DEFAULT;
 	string str="";
 	str+=item.description;
@@ -4270,10 +4270,10 @@ bool BaseComputer::showPlayerInfo(const EventCommandId& command, Control* contro
     for(; i<numFactions; i++) {
 		Unit *currentplayer=UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer());
 		float relation=0;
-                static int upgrades = FactionUtil::GetFaction("upgrades");
-                static int planets = FactionUtil::GetFaction("planets");
-                static int privateer = FactionUtil::GetFaction("privateer");
-                static int neutral = FactionUtil::GetFaction("neutral");
+                int upgrades = FactionUtil::GetUpgradeFaction();
+                int planets = FactionUtil::GetPlanetFaction();
+                static int privateer = FactionUtil::GetFactionIndex("privateer");
+                int neutral = FactionUtil::GetNeutralFaction();
                 
                 if (i < killList->size()&&i!=upgrades&&i!=planets&&i!=neutral&&i!=privateer) {
                   totkills+=(int)(*killList)[i];

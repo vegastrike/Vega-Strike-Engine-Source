@@ -1017,7 +1017,7 @@ extern Unit*getTopLevelOwner();
 
 bool TargUn (Unit *me,Unit *target) {
   static bool can_target_cargo=XMLSupport::parse_bool(vs_config->getVariable("graphics","can_target_cargo","false"));
-  static int up=FactionUtil::GetFaction("upgrades");
+  int up=FactionUtil::GetUpgradeFaction();
   return me->InRange(target,true,false)&&(target->isUnit()==UNITPTR||target->isUnit()==ENHANCEMENTPTR)&&getTopLevelOwner()!=target->owner&&(can_target_cargo||target->faction!=up)&&isNotTurretOwner(me,target);
 }
 

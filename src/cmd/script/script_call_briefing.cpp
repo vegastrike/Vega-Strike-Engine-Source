@@ -25,7 +25,7 @@ varInst * Mission::call_briefing (missionNode * node, int mode) {
       float z = getFloatArg(node,mode,4);
       if (mode==SCRIPT_RUN) {
 	viret->int_val=briefing->AddStarship(name.c_str(),
-					FactionUtil::GetFaction(faction.c_str()),
+					FactionUtil::GetFactionIndex(faction),
 					     Vector(x,y,z));
       }
       viret->type = VAR_INT;

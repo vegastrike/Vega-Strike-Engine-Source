@@ -304,7 +304,7 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 }
 
 static Unit * getFuelUpgrade () {
-  return UnitFactory::createUnit("add_fuel",true,FactionUtil::GetFaction("upgrades"));
+  return UnitFactory::createUnit("add_fuel",true,FactionUtil::GetUpgradeFaction());
 }
 static float getFuelAmt () {
   Unit * un = getFuelUpgrade();
@@ -1948,7 +1948,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 
   if (EXTRA_CARGO_SPACE_DRAG > 0)
   {
-      static int upgfac = FactionUtil::GetFaction("upgrades");
+      int upgfac = FactionUtil::GetUpgradeFaction();
 	  if ((this->faction == upgfac) || (this->name=="eject") || (this->name=="Pilot"))
          Velocity = Velocity * (1 - EXTRA_CARGO_SPACE_DRAG);
   }
@@ -2224,11 +2224,12 @@ void Unit::AddVelocity(float difficulty) {
 		 float shiphack=.25;
                  if (planet->isUnit()!=PLANETPTR) {
                    shiphack=1;
-                   if (planet->specInterdiction>0)
-                     shiphack=1./planet->specInterdiction;
-                   if (this->specInterdiction>1) {
-                     shiphack*=this->specInterdiction;
-                   }
+                   if (planet->specInterdiction!=0&&planet->graphicOptions.specInterdictionOnline!=0) {
+		       shiphack=1./fabs(planet->specInterdiction);
+		       if (this->specInterdiction!=0&&this->graphicOptions.specInterdictionOnline!=0) {
+			   shiphack*=fabs(this->specInterdiction);//only counters artificial interdiction ... or maybe it cheap ones shouldn't counter expensive ones!? or expensive ones should counter planets...this is safe now, for gameplay
+		       }
+		   }
                  }
 		 float multipliertemp=1;
 		 float minsizeeffect = (planet->rSize()>smallwarphack)?planet->rSize():smallwarphack;
@@ -4373,8 +4374,8 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
                   //VSFileSystem::vs_fprintf (stderr,"errore fatale mit den armorn")
 ;
 		  if (hull <0) {
-                    static int neutralfac=FactionUtil::GetFaction("neutral");
-                    static int upgradesfac=FactionUtil::GetFaction("upgrades");
+                    int neutralfac=FactionUtil::GetNeutralFaction();
+                    int upgradesfac=FactionUtil::GetUpgradeFaction();
                      
                     static float cargoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","eject_cargo_percent","1"));
                     
@@ -6169,7 +6170,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   double resultdoub;
   int retval;
   double temppercent;
-  static Unit * blankship = UnitFactory::createServerSideUnit ("upgrading_dummy_unit",true,FactionUtil::GetFaction("upgrades"));
+  static Unit * blankship = UnitFactory::createServerSideUnit ("upgrading_dummy_unit",true,FactionUtil::GetUpgradeFaction());
 
   #define STDUPGRADE_SPECIFY_DEFAULTS(my,oth,temp,noth,dgradelimer,dgradelimerdefault,clamp,value_to_lookat) \
   retval=(UpgradeFloat(resultdoub,my,oth,(templ!=NULL)?temp:0,Adder,Comparer,noth,noth,Percenter, temppercent,forcetransaction,templ!=NULL,(downgradelimit!=NULL)?dgradelimer:dgradelimerdefault,AGreaterB,clamp,force_change_on_nothing)); \
@@ -6190,13 +6191,14 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
 
   if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,upgrade_faction,"Spec_Interdiction")) {
     bool neg = specInterdiction<0;
-    bool interdictionUnits=specInterdiction!=0;
+    bool upneg=templ->specInterdiction<0;
+    bool interdictionUnits=specInterdiction>0;
     specInterdiction=fabs(specInterdiction);
-    STDUPGRADE(specInterdiction,up->specInterdiction,templ->specInterdiction,0);
-    if (neg) {
+    STDUPGRADE(specInterdiction,fabs(up->specInterdiction),upneg?fabs(templ->specInterdiction):templ->specInterdiction,0);
+    if (upneg) {
       specInterdiction=-specInterdiction;
     }
-    if (interdictionUnits!=(specInterdiction!=0)) {
+    if (interdictionUnits!=(specInterdiction>0)) {
       StarSystem *ss = activeStarSystem;
       if (_Universe->getNumActiveStarSystem()&&!ss) ss=_Universe->activeStarSystem();
       if (ss){
@@ -6580,7 +6582,7 @@ bool Unit::ReduceToTemplate() {
 	savedCargo.swap(image->cargo);
 	vector <Mount> savedWeap;
 	savedWeap.swap(mounts);
-	int upfac = FactionUtil::GetFaction("upgrades");
+	int upfac = FactionUtil::GetUpgradeFaction();
 	const Unit * temprate = makeFinalBlankUpgrade (name,faction);
     bool success=false;
     double pct=0;
@@ -6630,7 +6632,7 @@ int Unit::RepairUpgrade () {
 	savedCargo.swap(image->cargo);
 	vector <Mount> savedWeap;
 	savedWeap.swap(mounts);
-	int upfac = FactionUtil::GetFaction("upgrades");
+	int upfac = FactionUtil::GetUpgradeFaction();
 	const Unit * temprate = makeFinalBlankUpgrade (name,faction);
     int success=0;
     double pct=0;
@@ -6772,14 +6774,15 @@ vector <CargoColor>& Unit::FilterDowngradeList (vector <CargoColor> & mylist, bo
   const Unit * downgradelimit=NULL;
   static bool staticrem =XMLSupport::parse_bool (vs_config->getVariable ("general","remove_impossible_downgrades","true"));
   static float MyPercentMin= ComputeMinDowngradePercent();
+  int upgrfac=FactionUtil::GetUpgradeFaction();
 
   for (unsigned int i=0;i<mylist.size();i++) {
     bool removethis=true/*staticrem*/;
     int mode=GetModeFromName(mylist[i].cargo.content.c_str());
     if (mode!=2 || (!downgrade)) {
-      const Unit * NewPart =  UnitConstCache::getCachedConst (StringIntKey (mylist[i].cargo.content.c_str(),FactionUtil::GetFaction("upgrades")));
+      const Unit * NewPart =  UnitConstCache::getCachedConst (StringIntKey (mylist[i].cargo.content.c_str(),upgrfac));
       if (!NewPart){
-	NewPart= UnitConstCache::setCachedConst (StringIntKey (mylist[i].cargo.content,FactionUtil::GetFaction("upgrades")),UnitFactory::createUnit(mylist[i].cargo.content.c_str(),false,FactionUtil::GetFaction("upgrades")));
+	NewPart= UnitConstCache::setCachedConst (StringIntKey (mylist[i].cargo.content,upgrfac),UnitFactory::createUnit(mylist[i].cargo.content.c_str(),false,upgrfac));
       }
       if (NewPart->name==string("LOAD_FAILED")) {
 	const Unit * NewPart = UnitConstCache::getCachedConst (StringIntKey (mylist[i].cargo.content.c_str(),faction));
@@ -6992,7 +6995,7 @@ void Unit::EjectCargo (unsigned int index) {
           }
           else
           {
-            int fac = FactionUtil::GetFaction("upgrades");
+            int fac = FactionUtil::GetUpgradeFaction();
             cargo = UnitFactory::createUnit ("eject",false,fac,"",NULL,0,NULL,getUniqueSerial());
           }
           if (owner)
@@ -7029,7 +7032,7 @@ void Unit::EjectCargo (unsigned int index) {
           }
           else
           {
-            int fac = FactionUtil::GetFaction("upgrades");
+            int fac = FactionUtil::GetUpgradeFaction();
             cargo = UnitFactory::createUnit ("eject",false,fac,"",NULL,0,NULL,getUniqueSerial());
           }
           
@@ -7052,8 +7055,9 @@ void Unit::EjectCargo (unsigned int index) {
             tmpnam="generic_cargo";
             rot=grot;
           }
+		  int upgrfac=FactionUtil::GetUpgradeFaction();
           cargo = UnitFactory::createMissile (tmpnam.c_str(),
-                                              FactionUtil::GetFaction("upgrades"),
+                                              upgrfac,
                                               "",
                                               0,
                                               0,
@@ -7074,7 +7078,7 @@ void Unit::EjectCargo (unsigned int index) {
 
 	cargo->Kill();
 	cargo = UnitFactory::createMissile ("generic_cargo",
-                                         FactionUtil::GetFaction("upgrades"),"",
+                                         FactionUtil::GetUpgradeFaction(),"",
                                          0,
                                          0,
                                          cargotime,
@@ -7767,7 +7771,7 @@ void Unit::Repair() {
             image->next_repair_time=UniverseUtil::GetGameTime()+repairtime*(1-percentoperational);
           }else {
             //ACtually fix the cargo here
-            static int upfac = FactionUtil::GetFaction("upgrades");
+            static int upfac = FactionUtil::GetUpgradeFaction();
             const Unit * up=getUnitFromUpgradeName(carg->content,upfac);
             static std::string loadfailed("LOAD_FAILED");
             if (up->name == loadfailed) {

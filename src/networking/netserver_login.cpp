@@ -153,7 +153,7 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct, ch
 		string PLAYER_SHIPNAME = savedships[0];
 		string PLAYER_FACTION_STRING = cp->savegame->GetPlayerFaction();
 
-        int saved_faction = FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str());
+        int saved_faction = FactionUtil::GetFactionIndex( PLAYER_FACTION_STRING);
 		//vector<vector <string> > path = lookforUnit( savedships[0].c_str(), saved_faction, false);
 		bool exist = true; //(VSFileSystem::LookForFile( savedships[0], VSFileSystem::UnitFile)<=VSFileSystem::Ok);
 		static std::string loadfailed ("LOAD_FAILED");

@@ -137,7 +137,7 @@ Vector Planet::AddSpaceElevator (const std::string &name, const std::string & fa
 	Mesh * tmp = meshdata.back()=Mesh::LoadMesh (elevator_mesh.c_str(),
 										   scale,
 										   FactionUtil::
-										   GetFaction(faction.c_str()),
+										   GetFactionIndex(faction),
 										   NULL);
 	
 	meshdata.push_back(shield);
@@ -332,7 +332,7 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
  
   int tmpfac=faction;
   if (UniverseUtil::LookupUnitStat(tempname,FactionUtil::GetFactionName(faction),"Cargo_Import").length()==0) {
-    tmpfac=FactionUtil::GetFaction("planets");
+    tmpfac=FactionUtil::GetPlanetFaction();
   }
   Unit * un = UnitFactory::createUnit (tempname.c_str(),true,tmpfac);
  
@@ -355,7 +355,7 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
     }
     static bool neutralplanets = XMLSupport::parse_bool(vs_config->getVariable ("physics","planets_always_neutral","true"));
     if (neutralplanets) {
-        static int neutralfaction=FactionUtil::GetFaction("neutral");
+        static int neutralfaction=FactionUtil::GetNeutralFaction();
         this->faction = neutralfaction;
     }
     else {

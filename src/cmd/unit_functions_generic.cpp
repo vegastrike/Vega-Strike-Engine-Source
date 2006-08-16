@@ -35,11 +35,11 @@ int cloakVal (int cloak, int cloakmin, int cloakrate, bool cloakglass) { // Shor
 }
 const Unit* getUnitFromUpgradeName(const string& upgradeName, int myUnitFaction = 0) {
     const char* name = upgradeName.c_str();
-    const Unit* partUnit = UnitConstCache::getCachedConst(StringIntKey(name, FactionUtil::GetFaction("upgrades")));
+    const Unit* partUnit = UnitConstCache::getCachedConst(StringIntKey(name, FactionUtil::GetUpgradeFaction()));
     if (!partUnit) {
         partUnit = UnitConstCache::setCachedConst(StringIntKey(name,
-	    FactionUtil::GetFaction("upgrades")),
-	    UnitFactory::createUnit(name, true, FactionUtil::GetFaction("upgrades")));
+	    FactionUtil::GetUpgradeFaction()),
+	    UnitFactory::createUnit(name, true, FactionUtil::GetUpgradeFaction()));
     }
     if (partUnit->name == "LOAD_FAILED") {
 	partUnit = UnitConstCache::getCachedConst(StringIntKey(name, myUnitFaction));
@@ -114,8 +114,8 @@ void ScoreKill (Cockpit * cp, Unit * un, Unit * killedUnit) {
         FactionUtil::AdjustIntRelation(i,un->faction,FRIEND_FACTOR*relation,1);
     }
   }
-  static int upgrades = FactionUtil::GetFaction("upgrades");
-  static int planets = FactionUtil::GetFaction("planets");
+  int upgrades = FactionUtil::GetUpgradeFaction();
+  int planets = FactionUtil::GetPlanetFaction();
 
 
   if (cp!=NULL) {
@@ -173,8 +173,8 @@ float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
   static float friendly_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","friendly_auto_radius","00"))*gamespeed;
   static float neutral_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","neutral_auto_radius","0"))*gamespeed;
   static float hostile_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","hostile_auto_radius","1000"))*gamespeed;
-  static int upgradefaction = FactionUtil::GetFaction("upgrades");
-  static int neutral = FactionUtil::GetFaction("neutral");
+  int upgradefaction = FactionUtil::GetUpgradeFaction();
+  int neutral = FactionUtil::GetNeutralFaction();
   if (un->isUnit()==ASTEROIDPTR) {
     static float minasteroiddistance = XMLSupport::parse_float(vs_config->getVariable("physics","min_asteroid_distance","-100"));
     return minasteroiddistance;

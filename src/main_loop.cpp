@@ -751,7 +751,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 		  pox.k=rand()*10000./RAND_MAX-5000;
       }
       
-      tmptarget[a]=FactionUtil::GetFaction(fg->faction.c_str()); // that should not be in xml?
+      tmptarget[a]=FactionUtil::GetFactionIndex(fg->faction); // that should not be in xml?
       int fg_terrain=-1;
       //	  cout << "before unit" << endl;
       if (fg_terrain==-1||(fg_terrain==-2&&myterrain==NULL))
@@ -903,12 +903,12 @@ void AddUnitToSystem (const SavedUnits *su) {
   Unit * un=NULL;
   switch (su->type) {
   case ENHANCEMENTPTR:
-    un = UnitFactory::createEnhancement (su->filename.c_str(),FactionUtil::GetFaction (su->faction.c_str()),string(""));
+    un = UnitFactory::createEnhancement (su->filename.c_str(),FactionUtil::GetFactionIndex (su->faction),string(""));
     un->SetPosition(QVector(0,0,0));
     break;
   case UNITPTR:
   default:
-    un = UnitFactory::createUnit (su->filename.c_str(),false,FactionUtil::GetFaction (su->faction.c_str()));
+    un = UnitFactory::createUnit (su->filename.c_str(),false,FactionUtil::GetFactionIndex (su->faction));
     un->EnqueueAI (new Orders::AggressiveAI ("default.agg.xml"));
     un->SetTurretAI ();
     if (_Universe->AccessCockpit()->GetParent()) {

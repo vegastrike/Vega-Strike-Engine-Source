@@ -306,14 +306,17 @@ public:
 	  unsigned InWarp:1;
 	  unsigned WarpRamping:1;
 	  unsigned unused1:1;
-      unsigned NoDamageParticles:1;
+          unsigned NoDamageParticles:1;
+          unsigned specInterdictionOnline:1;
+	  unsigned char NumAnimationPoints;
+
 	  float WarpFieldStrength;
 	  float RampCounter;
 	  float MinWarpMultiplier;
 	  float MaxWarpMultiplier;
-	  unsigned char NumAnimationPoints;
 	  graphic_options() {
 		  FaceCamera=Animating=missilelock=InWarp=unused1=WarpRamping=NoDamageParticles=0;
+		  specInterdictionOnline=1;
 		  NumAnimationPoints=0;
 		  RampCounter=0;
                   MinWarpMultiplier=MaxWarpMultiplier=1;

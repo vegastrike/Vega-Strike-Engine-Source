@@ -53,7 +53,7 @@ void	NetClient::enterClient( NetBuffer &netbuf, ObjSerial cltserial )
 		
 		Unit * un = UnitFactory::createUnit( savedships[0].c_str(),
 							 false,
-							 FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str()),
+							 FactionUtil::GetFactionIndex( PLAYER_FACTION_STRING),
 							 string(""),
 							 Flightgroup::newFlightgroup ( callsign,savedships[0],PLAYER_FACTION_STRING,"default",1,1,"","",mission),
 							 0, &xmlstr);
