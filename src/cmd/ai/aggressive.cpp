@@ -64,7 +64,7 @@ static void TurretFAW(Unit * parent) {
   Unit * un;
   while (NULL!=(un=iter.current())) {
     if (!CheckAccessory(un)) {
-      un->EnqueueAIFirst (new Orders::FireAt(.2,15));
+      un->EnqueueAIFirst (new Orders::FireAt(15.0f));
       un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
     }
     TurretFAW(un);

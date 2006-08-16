@@ -47,9 +47,6 @@ void Ikarus::ExecuteStrategy (Unit * target) {
 void Ikarus::WillFire (Unit * target) {
 	float mrange;
     bool missilelockp=false;
-    if (gunspeed==float(.0001)) {
-        parent->getAverageGunSpeed (gunspeed,gunrange,mrange);
-    }
     if (ShouldFire (target,missilelockp)) {//this is a function from fire.cpp  you probably want to write a better one
         parent->Fire (false);
     }
@@ -64,7 +61,7 @@ void Ikarus::DecideTarget( ) {
     if (!targ||/*some other qualifying factor for changing targets*/0) {
         Unit * un=NULL;
         for (UniverseUtil::PythonUnitIter i=UniverseUtil::getUnitList();(un=i.current());i.advance()) {
-            if (GetEffectiveRelationship (un)<0) {
+            if (parent->getRelation (un)<0) {
                 parent->Target(un);
                 break;
             }

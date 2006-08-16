@@ -13,20 +13,16 @@ protected:
   bool ShouldFire(Unit * targ,bool &missilelock);
   float missileprobability;
   float lastmissiletime;
-  float rxntime;
   float delay;
   float agg;
   float distance;
-  float gunspeed;
-  float gunrange;
-  float missilerange;
   float lastchangedtarg;
   bool had_target;
   void FireWeapons (bool shouldfire,bool lockmissile);
   //  bool DealWithMultipleTargets();
   virtual void ChooseTargets(int num, bool force=false);//chooses n targets and puts the best to attack in unit's target container
   bool isJumpablePlanet(Unit *);
-  void ReInit (float rxntime, float agglevel);
+  void ReInit (float agglevel);
   virtual void SignalChosenTarget();
 public:
   //Other new Order functions that can be called from Python.
@@ -34,7 +30,6 @@ public:
     ChooseTargets (1,true);
   }
   void PossiblySwitchTarget(bool istargetjumpableplanet);
-  virtual void getAverageGunSpeed (float & speed, float & range, float &missilerange) const;
   virtual bool PursueTarget(Unit *, bool leader);
   void AddReplaceLastOrder (bool replace);
   void ExecuteLastScriptFor(float time);
@@ -57,7 +52,7 @@ public:
 	  CommunicatingAI::SetParent (parent);
   }
   Unit * GetParent() {return CommunicatingAI::GetParent();}
-  FireAt (float reaction_time, float aggressivitylevel);//weapon prefs?
+  FireAt (float aggressivitylevel);//weapon prefs?
   FireAt();
   virtual void Execute();
   virtual std::string Pickle() {return std::string();}//these are to serialize this AI

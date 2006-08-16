@@ -62,6 +62,7 @@
 #include "cmd/unit_factory.h"
 #include "cmd/asteroid_generic.h"
 #include "gfxlib.h"
+#include "cmd/pilot.h"
 //#include "vegastrike.h"
 extern vector <char *> ParseDestinations (const string &value);
 
@@ -1141,12 +1142,9 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       if(mode==SCRIPT_RUN){
 	Cockpit * tmp;
 	if ((tmp=_Universe->isPlayerStarship (my_unit))) {
-	  Order * ord=other_unit->getAIState();
-	  if (ord) {
-	    Animation * ani= ord->getCommFace (mood,sex);
-	    if (NULL!=ani) {
-	      tmp->SetCommAnimation (ani,NULL);
-	    }
+          Animation * ani= other_unit->pilot->getCommFace (other_unit,mood,sex);
+          if (NULL!=ani) {
+            tmp->SetCommAnimation (ani,NULL);         
 	  }
 	}
       }

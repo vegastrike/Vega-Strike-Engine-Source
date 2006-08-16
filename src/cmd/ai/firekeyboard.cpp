@@ -19,6 +19,7 @@
 #include <algorithm>
 #include "fire.h"
 #include "docking.h"
+#include "cmd/pilot.h"
 //for getatmospheric
 #include "cmd/role_bitmask.h"
 FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick): Order (WEAPON,0){
@@ -29,8 +30,6 @@ FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick
   this->whichplayer=whichplayer;
   gunspeed = gunrange = .0001;
   refresh_target=true;
-  static bool def_sex = XMLSupport::parse_int( vs_config->getVariable ("player","sex","0"));
-  sex = def_sex;
 }
 const unsigned int NUMCOMMKEYS=10;
 
@@ -1291,19 +1290,19 @@ static bool SuperDock(Unit * parent, Unit* target) {
 static bool TryDock(Unit * parent, Unit * targ, unsigned char playa, int severity) {
   static float min_docking_relationship = XMLSupport::parse_float(vs_config->getVariable("AI","min_docking_relationship","-.002"));
   static bool can_dock_to_enemy_base = XMLSupport::parse_bool(vs_config->getVariable("AI","can_dock_to_enemy_base","true"));
-  unsigned char sex=0;
+  unsigned char gender=0;
   vector <Animation *>* anim = NULL;
-  if (targ->getAIState()){
-    anim=targ->getAIState()->getCommFaces(sex);
-  }
+
+  anim=targ->pilot->getCommFaces(gender);
+  
   bool isDone=false;  
   if (targ->getRelation(parent)>=min_docking_relationship||(can_dock_to_enemy_base&&UnitUtil::getFlightgroupName(targ)=="Base")) {
     bool hasDock = severity==0?parent->Dock(targ):SuperDock(parent,targ);
 
-    CommunicationMessage c(targ,parent,anim,sex);    
+    CommunicationMessage c(targ,parent,anim,gender);    
     if (hasDock) {
       isDone=true;
-      c.SetCurrentState (c.fsm->GetDockNode(),anim,sex);
+      c.SetCurrentState (c.fsm->GetDockNode(),anim,gender);
       abletodock(3);
       //vectorOfKeyboardInput[playa].req=true;
       if (parent->getAIState()) parent->getAIState()->Communicate (c);
@@ -1311,15 +1310,15 @@ static bool TryDock(Unit * parent, Unit * targ, unsigned char playa, int severit
     }else {
       if (UnDockNow(parent,targ)) {
         isDone=true;
-        c.SetCurrentState (c.fsm->GetUnDockNode(),anim,sex);
+        c.SetCurrentState (c.fsm->GetUnDockNode(),anim,gender);
         if (parent->getAIState()) parent->getAIState()->Communicate (c);
         abletodock(5);
       }
     }
   }else {
     if (parent->GetComputerData().target==targ) {
-      CommunicationMessage c(targ,parent,anim,sex);  
-      c.SetCurrentState (c.fsm->GetNoNode(),anim,sex);
+      CommunicationMessage c(targ,parent,anim,gender);  
+      c.SetCurrentState (c.fsm->GetNoNode(),anim,gender);
       if (parent->getAIState()) parent->getAIState()->Communicate(c);
     }
   }
@@ -1334,7 +1333,7 @@ static bool ExecuteRequestClearenceKey(Unit * parent, Unit * endt) {
   }
   return tmp;
 }
-static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsigned char sex) {
+static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsigned char gender) {
   static int maxseverity=XMLSupport::parse_bool(vs_config->getVariable("AI","dock_to_area","false"))?2:1;
   Unit * endt=targ;
   bool nodockwithclear=NoDockWithClear();
@@ -1630,7 +1629,7 @@ void FireKeyboard::Execute () {
   }
   ProcessCommunicationMessages(SIMULATION_ATOM,true);
   Unit * targ = parent->Target();
-  DoDockingOps(parent,targ,whichplayer,sex);
+  DoDockingOps(parent,targ,whichplayer,parent->pilot->getGender());
   if (SERVER || Network==NULL) {
     if (targ) {
       double mm=0.0;
@@ -1986,7 +1985,7 @@ void FireKeyboard::Execute () {
 	CommunicationMessage * mymsg = GetTargetMessageQueue(targ,resp);       
         FSM *fsm =FactionUtil::GetConversation (parent->faction,targ->faction);
 	if (mymsg==NULL||mymsg->curstate>=fsm->nodes.size()) {
-	  CommunicationMessage c(parent,targ,i,NULL,sex);
+	  CommunicationMessage c(parent,targ,i,NULL,parent->pilot->getGender());
 	  unsigned int whichspeech=DoSpeech (targ,targ,*c.getCurrentState());
           int sound = c.getCurrentState()->GetSound(c.sex,whichspeech);
           //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());
@@ -2001,7 +2000,7 @@ void FireKeyboard::Execute () {
           mymsg->fsm = fsm;
 	  FSM::Node * n = mymsg->getCurrentState();
 	  if (i<n->edges.size()) {
-	    CommunicationMessage c(parent,targ,*mymsg,i,NULL,sex);
+	    CommunicationMessage c(parent,targ,*mymsg,i,NULL,parent->pilot->getGender());
 	    unsigned int whichmessage=DoSpeech (targ,targ,*c.getCurrentState());
             int sound=c.getCurrentState()->GetSound(c.sex,whichmessage);
             //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());

@@ -1245,7 +1245,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  //     xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,NULL,vector <char *>(),xml->unitlevel-((xml->parentterrain==NULL&&xml->ct==NULL)?1:2),ourmat,curlights,true,faction);
 	  if (elem==UNIT&&un->faction!=neutralfaction) {
 	    un->SetTurretAI ();
-	    un->EnqueueAI(new Orders::FireAt (.2,15));
+	    un->EnqueueAI(new Orders::FireAt (15));
 	  }
           if (scalex<0&&elem!=ASTEROID) {
             SetSubunitRotation(un,-scalex);
@@ -1271,7 +1271,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	b->SetPosAndCumPos (xml->cursun.Cast()+xml->systemcentroid.Cast());
 	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml"));
 	  b->SetTurretAI ();
-	    b->EnqueueAI(new Orders::FireAt (.2,15));
+	    b->EnqueueAI(new Orders::FireAt (15));
 	AddUnit (b);
 	  while (!dest.empty()) {
 	    b->AddDestination (dest.back());
@@ -1308,7 +1308,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	    if (elem==UNIT&&xml->moons.back()->faction!=neutralfaction) {
 
 	      xml->moons.back()->SetTurretAI ();
-	      xml->moons.back()->EnqueueAI(new Orders::FireAt (.2,15));
+	      xml->moons.back()->EnqueueAI(new Orders::FireAt (15));
 	    }else if (scalex<0&&elem!=ASTEROID) {
               SetSubunitRotation(xml->moons.back(),-scalex);
             }

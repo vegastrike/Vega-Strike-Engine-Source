@@ -9,6 +9,7 @@
 #include "unit_util.h"
 #include "universe_util.h"
 #include "unit_const_cache.h"
+#include "pilot.h"
 // Various functions that were used in .cpp files that are now included because of
 // the temple GameUnit class
 // If not separated from those files functions would be defined in multiple places
@@ -134,7 +135,7 @@ void ScoreKill (Cockpit * cp, Unit * un, Unit * killedUnit) {
       if (UnitUtil::getUnitSystemFile(whichrecv)==UnitUtil::getUnitSystemFile(un)) {
         if (un->getAIState()&&whichrecv->getAIState()) {      
           unsigned char sex;
-          vector< Animation *>* anim = un->getAIState()->getCommFaces(sex);
+          vector< Animation *>* anim = un->pilot->getCommFaces(sex);
           CommunicationMessage c(un,whichrecv,anim,sex);
           c.SetCurrentState(c.fsm->GetScoreKillNode(),anim,sex);
           whichrecv->getAIState()->Communicate (c);

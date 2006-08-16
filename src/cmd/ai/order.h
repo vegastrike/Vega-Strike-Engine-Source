@@ -70,14 +70,12 @@ class Order {
   ///a bunch of communications that have not been answered CommunicationMessages are actually containing reference to a nice Finite State Machine that can allow a player to have a reasonable conversation with an AI
   std::list<class CommunicationMessage *>messagequeue;
   ///changes the local relation of this unit to another...may inform superiors about "good" or bad! behavior depending on the AI
-  virtual void AdjustRelationTo (Unit * un, float factor);
   virtual void Destructor();
  protected:
   /// this function calls the destructor (needs to be overridden for python;
 
  public:
-  virtual void getAverageGunSpeed (float & speed, float & range, float & mrange) const;
-  virtual float GetEffectiveRelationship (const Unit * target) const;
+
   virtual void ChooseTarget() {/*not implemented see fire.cpp*/}
   virtual bool PursueTarget(Unit *,bool isleader) {return false;}
   ///clears the messasges of this order
@@ -130,6 +128,7 @@ class Order {
   Order* EnqueueOrderFirst (Order *ord);
   /// returns the orderlist (NULL for orders that haven't got any)
   virtual olist_t* getOrderList(){ return NULL;};
+  virtual void AdjustRelationTo (Unit * un, float factor);
 
   virtual std::string getOrderDescription() { return "empty"; };
 
@@ -138,9 +137,7 @@ class Order {
   std::string createFullOrderDescription(int level=0);
   void setActionString(std::string astring) { actionstring=astring; };
   std::string getActionString() { return actionstring; };
-  Animation * getCommFace(float mood, unsigned char & sex);
   virtual float getMood() {return 0;}
-  virtual std::vector <Animation *>* getCommFaces(unsigned char &sex);
  protected:
   std::string  actionstring;
 };
@@ -174,7 +171,6 @@ class ExecuteFor:  public Order {
     child->Destroy();
     Order::Destroy();
   }
-
 };
 
 #endif

@@ -13,7 +13,7 @@
 #include "cmd/unit_find.h"
 #include "vs_random.h"
 #include "lin_time.h" //DEBUG ONLY
-
+#include "cmd/pilot.h"
 static bool NoDockWithClear() {
 	static bool nodockwithclear = XMLSupport::parse_bool (vs_config->getVariable ("physics","dock_with_clear_planets","true"));
 	return nodockwithclear;
@@ -96,30 +96,25 @@ bool CanFaceTarget (Unit * su, Unit *targ,const Matrix & matrix) {
 }
 
 
-void FireAt::ReInit (float reaction_time, float aggressivitylevel) {
+void FireAt::ReInit (float aggressivitylevel) {
   static float missileprob = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MissileProbability",".01"));
   static float mintimetoswitch = XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","MinTimeToSwitchTargets","3"));
   lastmissiletime=UniverseUtil::GetGameTime()-65536.;
   missileprobability = missileprob;  
-  gunspeed=float(.0001);
-  gunrange=float(.0001);
-  missilerange=float(.0001);
   delay=0;
   agg = aggressivitylevel;
-  rxntime = reaction_time;
   distance=1;
   //JS --- spreading target switch times
   lastchangedtarg=0.0-targrand.uniformInc(0,1)*mintimetoswitch;
   had_target=false;
 
 }
-FireAt::FireAt (float reaction_time, float aggressivitylevel): CommunicatingAI (WEAPON,STARGET){
-  ReInit (reaction_time,aggressivitylevel);
+FireAt::FireAt (float aggressivitylevel): CommunicatingAI (WEAPON,STARGET){
+  ReInit (aggressivitylevel);
 }
 FireAt::FireAt (): CommunicatingAI (WEAPON,STARGET) {
-  static float reaction = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","ReactionTime",".2"));
   static float aggr = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","Aggressivity","15"));
-  ReInit (reaction,aggr);
+  ReInit (aggr);
 }
 
 void FireAt::SignalChosenTarget () {
@@ -192,11 +187,6 @@ struct TurretBin{
     }
   }
 };
-void FireAt::getAverageGunSpeed (float & speed, float & range, float &mmrange) const{
-  speed =gunspeed;
-  range= gunrange;
-  mmrange=missilerange;
-}
 void AssignTBin (Unit * su, vector <TurretBin> & tbin) {
     unsigned int bnum=0;
     for (;bnum<tbin.size();bnum++) {
@@ -208,20 +198,15 @@ void AssignTBin (Unit * su, vector <TurretBin> & tbin) {
     }
     float gspeed, grange, mrange;
     grange=FLT_MAX;
-	Order * o = su->getAIState();
-	if (o) {
-          o->getAverageGunSpeed (gspeed,grange,mrange);
-        }
+    su->getAverageGunSpeed (gspeed,grange,mrange);
         {
           float ggspeed,ggrange,mmrange;
           Unit * ssu;
           for (un_iter i=su->getSubUnits();(ssu=*i)!=NULL;++i) {
-            if (ssu->getAIState()) {
-              ssu->getAIState()->getAverageGunSpeed(ggspeed,ggrange,mmrange);
+              ssu->getAverageGunSpeed(ggspeed,ggrange,mmrange);
               if (ggspeed>gspeed)gspeed=ggspeed;
               if (ggrange>grange)grange=ggrange;
               if (mmrange>mrange)mrange=mmrange;
-            }
           }
         }
     if (tbin [bnum].maxrange<grange) {
@@ -357,7 +342,7 @@ public:
     if (un->CloakVisible()>.8) {
       float rangetotarget = distance;
       float rel[] = {
-          fireat->GetEffectiveRelationship (un),
+          parent->getRelation (un),
           un->getRelation(this->parent),
           (parentparent?parentparent->getRelation(un):rel[0]),
           (parentparent?un->getRelation(parentparent):rel[0]) };
@@ -396,6 +381,8 @@ int numpolled[2]={0,0}; // number of units that searched for a target
 int prevpollindex[2]={10000,10000}; // previous number of units touched (doesn't need to be precise)
 int pollindex[2]={1,1}; // current count of number of units touched (doesn't need to be precise)  -- used for "fairness" heuristic
 void FireAt::ChooseTargets (int numtargs, bool force) {
+  float gunspeed,gunrange,missilerange;
+  parent->getAverageGunSpeed(gunspeed,gunrange,missilerange);
   extern int numprocessed;
   extern double targetpick;
   static float targettimer =UniverseUtil::GetGameTime(); // timer used to determine passage of physics frames
@@ -436,7 +423,7 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
       return;
   bool wasnull=(curtarg==NULL);
   Flightgroup * fg = parent->getFlightgroup();;
-  parent->getAverageGunSpeed (gunspeed,gunrange,missilerange);  
+  //parent->getAverageGunSpeed (gunspeed,gunrange,missilerange);  
   lastchangedtarg=0+targrand.uniformInc(0,1)*mintimetoswitch; // spread out next valid time to switch targets - helps to ease per-frame loads.
   if (fg) {
     if (!fg->directive.empty()) {
@@ -477,6 +464,7 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   static int maxtargets = XMLSupport::parse_int(vs_config->getVariable("AI","Targetting","search_max_candidates","64")); // Cutoff candidate count (if that many hostiles found, stop search - performance/quality tradeoff, 0=no cutoff)
   UnitWithinRangeLocator<ChooseTargetClass<2> > unitLocator(parent->GetComputerData().radar.maxrange,unitRad);
   StaticTuple<float,2> maxranges;
+  
   maxranges[0]=gunrange;
   maxranges[1]=missilerange;
   if (tbin.size()){
@@ -513,7 +501,7 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   Unit *mytarg=unitLocator.action.mytarg;
   targetpick+=queryTime()-pretable;
   if (mytarg) {
-    efrel=GetEffectiveRelationship (mytarg);
+    efrel=parent->getRelation (mytarg);
     mytargrange = UnitUtil::getDistance (parent,mytarg);
   }
   TargetAndRange my_target (mytarg,mytargrange,efrel);
@@ -570,12 +558,14 @@ bool FireAt::ShouldFire(Unit * targ, bool &missilelock) {
         if (test++%1000==1)
             VSFileSystem::vs_fprintf (stderr,"lost target");
     }
-  float angle = parent->cosAngleTo (targ, dist,parent->GetComputerData().itts?gunspeed:FLT_MAX,gunrange);
-  missilelock=false;
-  targ->Threaten (parent,angle/(dist<.8?.8:dist));
-  if (targ==parent->Target()) {
-    distance = dist;
-  }
+    float gunspeed,gunrange,missilerange;
+    parent->getAverageGunSpeed(gunspeed,gunrange,missilerange);
+    float angle = parent->cosAngleTo (targ, dist,parent->GetComputerData().itts?gunspeed:FLT_MAX,gunrange);
+    missilelock=false;
+    targ->Threaten (parent,angle/(dist<.8?.8:dist));
+    if (targ==parent->Target()) {
+      distance = dist;
+    }
   static float firewhen = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","InWeaponRange","1.2"));
   static float fireangle_minagg = (float)cos(XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MaximumFiringAngle.minagg","0.35"))); //Roughly 20 degrees
   static float fireangle_maxagg = (float)cos(XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MaximumFiringAngle.maxagg","0.785"))); //Roughly 45 degrees
@@ -616,7 +606,7 @@ void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
   static float missiledelayprob =XMLSupport::parse_float(vs_config->getVariable("AI","MissileGunDelayProbability",".25"));
   bool fire_missile=lockmissile&&rand()<RAND_MAX*missileprobability*SIMULATION_ATOM;
   delay+=SIMULATION_ATOM;
-  if (shouldfire&&delay<rxntime) {
+  if (shouldfire&&delay<parent->pilot->getReactionTime()) {
 
     return;
   }else if (!shouldfire) {
@@ -663,10 +653,11 @@ void FireAt::Execute () {
   bool missilelock=false;
   bool tmp = done;
   Order::Execute();
-
+  /*FIXME--may not choose target for a while
   if (gunspeed==float(.0001)) {
     ChooseTarget();//starting condition
   }
+  */
   done = tmp;
   Unit * targ;
   if (parent->isUnit()==UNITPTR) {

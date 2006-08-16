@@ -107,7 +107,7 @@ void Mount::UnFire () {
   //  AUDStopPlaying (sound);
   ref.gun->Destabilize();
 }
-
+/*
 void Mount::SwapMounts(Mount * other) {
 	  int thisvol = volume; //short fix
 	  int othervol = other->volume; //short fix
@@ -130,8 +130,9 @@ void Mount::SwapMounts(Mount * other) {
 	  other->SetMountOrientation (q);  
           other->bank=otherbank;
           this->bank=thisbank;
-}
-void Mount::ReplaceMounts (const Mount * other) {
+}NO LONGER NEEDED
+*/
+void Mount::ReplaceMounts (Unit * un, const Mount * other) {
 	int thisvol = volume; //short fix
 	int thissize = size;  //short fix
         float xyscale=this->xyscale;
@@ -156,6 +157,7 @@ void Mount::ReplaceMounts (const Mount * other) {
 	else if (other->ammo!=-1 && ammo==-1) {
 		ammo=0;//zero ammo if other was not zero earlier.
 	}
+        un->setAverageGunSpeed();
 }
 double Mount::Percentage (const Mount *newammo) const{
 	  float percentage=1./1024;

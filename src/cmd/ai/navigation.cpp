@@ -162,13 +162,14 @@ bool MoveToParent::Execute(Unit * parent, const QVector& targetlocation) {
   }else {
     float div=1.0f;
     float vdiv=1.0f;
-    if (0&&selfterminating&&terminatingX>16&&terminatingY>16&&terminatingZ>16) {
-      int tmp=(terminatingX-12);
-      if (terminatingY<terminatingX) tmp=terminatingY-12;
-      if (terminatingZ<terminatingX&&terminatingZ<terminatingY) tmp=terminatingZ-12;
-      
-      vdiv=(float)(1<<(tmp/4));
-      div=1.0f;
+    if (selfterminating&&terminatingX>8&&terminatingY>8&&terminatingZ>8) {
+      int tmp=(terminatingX-4);
+      if (terminatingY<terminatingX) tmp=terminatingY-4;
+      if (terminatingZ<terminatingX&&terminatingZ<terminatingY) tmp=terminatingZ-4;
+      tmp/=4;
+      if (tmp>30) tmp=30;
+      vdiv=(float)(1<<tmp);
+      div=vdiv;
       thrust.i/=div;
       thrust.j/=div;
       thrust.k/=div;

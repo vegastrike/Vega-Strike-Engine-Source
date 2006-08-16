@@ -7,7 +7,6 @@
 //all unified AI's should inherit from FireAt, so they can choose targets together.
 #define NUMSAVEDTARGETS 10
 class FireKeyboard: public Order {
-  unsigned char sex;
   bool itts;
   bool cloaktoggle;
   bool refresh_target;

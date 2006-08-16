@@ -7,7 +7,7 @@
 #include "unit_util.h"
 #include "config_xml.h"
 #include "vs_globals.h"
-
+#include "pilot.h"
 using std::string;
 namespace UnitUtil {
 	void switchFg(Unit *my_unit,string arg){
@@ -49,13 +49,10 @@ namespace UnitUtil {
 		unsigned char sex=0;
 		Cockpit * tmp;
 		if ((tmp=_Universe->isPlayerStarship (my_unit))) {
-			Order * ord=other_unit->getAIState();
-			if (ord) {
-				Animation * ani= ord->getCommFace (mood,sex);
-				if (NULL!=ani) {
-					tmp->SetCommAnimation (ani,other_unit);
-				}
-			}
+                  Animation * ani= other_unit->pilot->getCommFace (other_unit,mood,sex);
+                  if (NULL!=ani) {
+                    tmp->SetCommAnimation (ani,other_unit);
+                  }
 		}
 		return sex;
 	}

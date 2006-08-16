@@ -46,20 +46,6 @@ void Order::Communicate (const CommunicationMessage &c) {
 void Order::ProcessCommMessage(CommunicationMessage & c) {
   
 }
-float Order::GetEffectiveRelationship (const Unit * target)const {
-  
-  float staticrel = FactionUtil::GetIntRelation (parent->faction,target->faction);
-  static bool returnStaticRel=XMLSupport::parse_float(vs_config->getVariable("AI","return_static_relation","false"));
-  if (returnStaticRel)
-      return staticrel;
-  for (unsigned int i=0;i<suborders.size();i++) {
-    float effrel = suborders[i]->GetEffectiveRelationship(target);
-    if (effrel !=staticrel) {
-      return effrel;
-    }
-  }
-  return staticrel;
-}
 void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMessageProcessed) {
   float time = AICommresponseTime/SIMULATION_ATOM;
   if (time<=.001)
@@ -73,7 +59,7 @@ void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMe
 	  if (un) {
             CommunicationMessage c(parent,un,NULL,0);
             
-            if (GetEffectiveRelationship(un)>=0||(parent->getFlightgroup()&&parent->getFlightgroup()->name=="Base")) {
+            if (parent->getRelation(un)>=0||(parent->getFlightgroup()&&parent->getFlightgroup()->name=="Base")) {
 	      parent->RequestClearance (un);
 	      c.SetCurrentState (c.fsm->GetAbleToDockNode(),NULL,0);
             }else {
@@ -100,34 +86,4 @@ void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMe
 	}
   }
 }
-std::vector <Animation *>* Order::getCommFaces (unsigned char &sex) {
-  std::vector <Animation *>* ani = NULL;
-  //   return _Universe->GetRandCommAnimation(parent->faction,parent,sex);
-  for (unsigned int i=0;i<suborders.size();i++) {
-    ani = suborders[i]->getCommFaces(sex);
-    if (ani!=NULL) {
-      return ani;
-    }
-  }
-  return NULL;
-}
-extern float myroundclamp(float i);
-Animation * Order::getCommFace(float mood, unsigned char & sex) {
-  vector <Animation *> *ani = getCommFaces (sex);
-  if (ani==NULL) {
-    ani = FactionUtil::GetRandCommAnimation(parent->faction,parent,sex);
-    if (ani==NULL) {
-      return NULL;
-    }
-  }
-  if (ani->size()==0) {
-    return NULL;
-  }
-  mood+=.1;
-  mood*=(ani->size())/.2;
-  unsigned int index=(unsigned int)myroundclamp(floor(mood));
-  if (index>=ani->size()) {
-    index=ani->size()-1;
-  }
-  return (*ani)[index];
-}
+

@@ -173,15 +173,13 @@ varInst *Mission::call_order(missionNode *node,int mode){
     return viret;
   }
   else if(method_id==CMT_ORDER_newFireAt){
-    missionNode *reaction_node=getArgument(node,mode,0);
-    float reaction=checkFloatExpr(reaction_node,mode);
 
     missionNode *aggr_node=getArgument(node,mode,1);
     float aggr=checkFloatExpr(aggr_node,mode);
 
     Order *my_order=NULL;
     if(mode==SCRIPT_RUN){
-      my_order=new Orders::FireAt(reaction,aggr);
+      my_order=new Orders::FireAt(aggr);
     }
 
     viret=newVarInst(VI_TEMP);

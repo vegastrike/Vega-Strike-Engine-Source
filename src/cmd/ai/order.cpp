@@ -139,9 +139,7 @@ bool Order::AttachSelfOrder (Unit *targets1) {
   group.SetUnit(targets1);
   return true;
 }
-void Order::getAverageGunSpeed (float & speed, float & grange, float & mrange) const{
-	parent->getAverageGunSpeed (speed,grange,mrange);
-}
+
 bool Order::AttachOrder (QVector targetv) {
   if (!(subtype&SLOCATION)) {
     return false;

@@ -968,7 +968,7 @@ using namespace UnitXML;
     else
       xml->mountz[indx]->size = xml->mountz[indx]->type->size;
     //->curr_physical_state=xml->units[indx]->prev_physical_state;
-
+    setAverageGunSpeed();
     break;
 
   case SUBUNIT:

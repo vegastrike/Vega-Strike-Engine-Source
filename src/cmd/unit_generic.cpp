@@ -43,7 +43,7 @@
 #endif
 #include "config.h"
 #include "unit_find.h"
-
+#include "pilot.h"
 //cannot seem to get min and max working properly across win and lin without using namespace std
 static float mymax (float a, float b) {return a<b?b:a;}
 static float mymin (float a, float b) {return a<b?a:b;}
@@ -455,6 +455,7 @@ Unit::Unit( int /*dummy*/ ) {
   aistate=NULL;
   image->cockpit_damage=NULL;
   //SetAI (new Order());
+  pilot= new Pilot(FactionUtil::GetNeutralFaction());
   Init();
 }
 Unit::Unit() {
@@ -464,6 +465,7 @@ Unit::Unit() {
   aistate=NULL;
   image->cockpit_damage=NULL;
   //SetAI (new Order());
+  pilot= new Pilot(FactionUtil::GetNeutralFaction());
   Init();
 }
 
@@ -471,6 +473,7 @@ Unit::Unit (std::vector <Mesh *> & meshes, bool SubU, int fact) {
   ZeroAll();
   image = new UnitImages;
   sound = new UnitSounds;
+  pilot= new Pilot(fact);
   aistate=NULL;
   image->cockpit_damage=NULL;
   //SetAI (new Order());
@@ -483,6 +486,7 @@ Unit::Unit (std::vector <Mesh *> & meshes, bool SubU, int fact) {
   meshes.clear();
   meshdata.push_back(NULL);
   calculate_extent(false);
+  pilot->SetComm(this);
 }
 
 extern void update_ani_cache();
@@ -490,10 +494,12 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
   ZeroAll();
   image = new UnitImages;
   sound = new UnitSounds;
+  pilot= new Pilot(faction);
   aistate=NULL;
   image->cockpit_damage=NULL;
   //SetAI (new Order());
   Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber, netxml);
+  pilot->SetComm(this);
 }
 
 Unit::~Unit()
@@ -528,6 +534,7 @@ Unit::~Unit()
 #endif
   delete image;
   delete sound;
+  delete pilot;
 #ifdef DESTRUCTDEBUG
   VSFileSystem::vs_fprintf (stderr,"%d %x %x", 4,bspTree, bspShield);
   fflush (stderr);
@@ -979,6 +986,7 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
           delete unitTables.back();
           unitTables.pop_back();
         }
+        pilot->SetComm(this);
 	return;
   }
 
@@ -1013,6 +1021,7 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
         }
 
         calculate_extent(false);
+        pilot->SetComm(this);
 ///	  ToggleWeapon(true);//change missiles to only fire 1
 }
 
@@ -1309,10 +1318,10 @@ float Unit::TrackingGuns(bool &missilelock) {
   return trackingcone;
 }
 
-void Unit::getAverageGunSpeed(float & speed, float &grange, float &mrange) const {
-  mrange=-1;
-  grange=-1;
-  speed=-1;
+void Unit::setAverageGunSpeed(){
+  float mrange=-1;
+  float grange=-1;
+  float speed=-1;
   bool beam=true;
   if (GetNumMounts()) {
     grange=0;
@@ -1348,6 +1357,9 @@ void Unit::getAverageGunSpeed(float & speed, float &grange, float &mrange) const
 	  
 	}
   }
+  this->missilerange=mrange;
+  this->gunrange=grange;
+  this->gunspeed=speed;
 }
 
 QVector Unit::PositionITTS (const QVector& absposit,Vector velocity, float speed, bool steady_itts) const{
@@ -1671,12 +1683,13 @@ string Unit::getFullAIDescription(){
   }
 }
 
+void Unit::getAverageGunSpeed (float & speed, float & range, float &mmrange) const{
+  speed =gunspeed;
+  range= gunrange;
+  mmrange=missilerange;
+}
 float Unit::getRelation (Unit * targ) const {
-  if (aistate) {
-    return aistate->GetEffectiveRelationship (targ);
-  }else {
-    return FactionUtil::GetIntRelation (faction,targ->faction);
-  }
+  return pilot->GetEffectiveRelationship (targ);
 }
 
 void Unit::setTargetFg(string primary,string secondary,string tertiary){
@@ -1734,7 +1747,7 @@ void Unit::SetTurretAI () {
     Unit * un;
     while (NULL!=(un=iter.current())) {
       if (!CheckAccessory(un)) {
-	un->EnqueueAIFirst (new Orders::FireAt(.2,15));
+	un->EnqueueAIFirst (new Orders::FireAt(15.0f));
 	un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
       }
       un->SetTurretAI ();
@@ -2180,7 +2193,7 @@ void Unit::UpdateSubunitPhysics(Unit* subunit, const Transformation &trans, cons
 }
 void Unit::AddVelocity(float difficulty) {
    static float humanwarprampuptime=XMLSupport::parse_float (vs_config->getVariable ("physics","warprampuptime","5")); // for the heck of it.    
-   static float compwarprampuptime=XMLSupport::parse_float (vs_config->getVariable ("physics","computerwarprampuptime","50")); // for the heck of it.    
+   static float compwarprampuptime=XMLSupport::parse_float (vs_config->getVariable ("physics","computerwarprampuptime","10")); // for the heck of it.    
    static float warprampdowntime=XMLSupport::parse_float (vs_config->getVariable ("physics","warprampdowntime","0.5"));     
    Vector v=Velocity;
    bool  playa=_Universe->isPlayerStarship(this)?true:false;
@@ -3689,16 +3702,16 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
     }
     if (computerai&&player&&computerai->getAIState()&&player->getAIState()&&computerai->isUnit()==UNITPTR&&player->isUnit()==UNITPTR) {
 
-      unsigned char sex;
-      vector <Animation *>* anim = computerai->getAIState()->getCommFaces(sex);
+      unsigned char gender;
+      vector <Animation *>* anim = computerai->pilot->getCommFaces(gender);
       if (cp) {
         static bool assistallyinneed=XMLSupport::parse_bool(vs_config->getVariable("AI","assist_friend_in_need","true"));
         if (assistallyinneed)
           AllUnitsCloseAndEngage(player,computerai->faction);
       }
       if (GetHullPercent()>0||!cp) {
-        CommunicationMessage c(computerai,player,anim,sex);
-        c.SetCurrentState(cp?c.fsm->GetDamagedNode():c.fsm->GetDealtDamageNode(),anim,sex);
+        CommunicationMessage c(computerai,player,anim,gender);
+        c.SetCurrentState(cp?c.fsm->GetDamagedNode():c.fsm->GetDealtDamageNode(),anim,gender);
         player->getAIState()->Communicate(c);
       }
     }
@@ -5820,7 +5833,7 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 	      }
               percentage+=mounts[jmod].Percentage(&upmount);//compute here
 	      if (touchme) {//if we wish to modify the mounts
-		mounts[jmod].ReplaceMounts (&upmount);//switch this mount with the upgrador mount
+		mounts[jmod].ReplaceMounts (this,&upmount);//switch this mount with the upgrador mount
 	      }
 	    }else {
 	      int tmpammo = mounts[jmod].ammo;
@@ -5930,6 +5943,7 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
   if (i<up->GetNumMounts()) {
     cancompletefully=false;//if we didn't reach the last mount that we wished to upgrade, we did not fully complete
   }
+
   return cancompletefully;
 }
 Unit * CreateGenericTurret (std::string tur,int faction) {
@@ -6047,6 +6061,58 @@ public:
     d = -FLT_MAX;
   }
 };
+
+extern int GetModeFromName (const char *);
+
+extern Unit * CreateGameTurret (std::string tur,int faction);
+
+extern char * GetUnitDir (const char *);
+double Unit::Upgrade (const std::string &file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts) {
+#if 0
+  if (shield.number==2) {
+    printf ("shields before %s %f %f",file.c_str(),shield.fb[2],shield.fb[3]);
+  }else {
+    printf ("shields before %s %d %d",file.c_str(),shield.fbrl.frontmax,shield.fbrl.backmax);    
+
+  }
+#endif
+  int upgradefac=FactionUtil::GetUpgradeFaction();
+  const Unit * up = UnitConstCache::getCachedConst (StringIntKey(file,upgradefac));
+  if (!up) {
+    up = UnitConstCache::setCachedConst (StringIntKey (file,upgradefac),
+			     UnitFactory::createUnit (file.c_str(),true,upgradefac));
+  }
+  char * unitdir  = GetUnitDir(this->name.c_str());
+  string templnam = string(unitdir)+".template";	  
+  const Unit * templ = UnitConstCache::getCachedConst (StringIntKey(templnam,this->faction));
+	if (templ==NULL) {
+	  templ = UnitConstCache::setCachedConst (StringIntKey(templnam,this->faction),UnitFactory::createUnit (templnam.c_str(),true,this->faction));
+	}
+	free (unitdir);
+	double percentage=0;
+	if (up->name!="LOAD_FAILED") {
+	  
+	  for  (int i=0;percentage==0;i++ ) {
+		  if (!this->Unit::Upgrade(up,mountoffset+i, subunitoffset+i, GetModeFromName(file.c_str()),force, percentage,(templ->name=="LOAD_FAILED")?NULL:templ),false,false) {
+	      percentage=0;
+	    }
+	    if (!loop_through_mounts||(i+1>=this->GetNumMounts ())||percentage>0) {
+	      break;
+	    }
+	  }
+	}
+#if 0
+  if (shield.number==2) {
+    printf ("shields before %s %f %f",file.c_str(),shield.fb[2],shield.fb[3]);
+  }else {
+    printf ("shields before %s %d %d",file.c_str(),shield.fbrl.frontmax,shield.fbrl.backmax);    
+
+  }
+#endif
+
+	return percentage;
+}
+
 stdext::hash_map<int, DoubleName> downgrademap;
 int curdowngrademapoffset = 5*sizeof (Unit);
 bool AddToDowngradeMap (std::string name,double value, int unitoffset,stdext::hash_map<int,DoubleName> &tempdowngrademap) {
@@ -6898,7 +6964,7 @@ void Unit::TurretFAW() {
   Unit * un;
   while (NULL!=(un=iter.current())) {
     if (!CheckAccessory(un)) {
-      un->EnqueueAIFirst (new Orders::FireAt(.2,15));
+      un->EnqueueAIFirst (new Orders::FireAt(15.0f));
       un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
     }
     un->TurretFAW();

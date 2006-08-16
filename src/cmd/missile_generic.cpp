@@ -144,56 +144,56 @@ void Missile::UpdatePhysics2 (const Transformation &trans, const Transformation 
 				
 				Unit * su;
 				for (;(su =*i)!=NULL;++i) {
-					if (su->combatRole()==pointdef) {
-						if (su->Target()==NULL) {
-							if (su->aistate){
-								float speed,range,mrange;
-								su->aistate->getAverageGunSpeed(speed,range,mrange);
-								if ((Position()-su->Position()).MagnitudeSquared()<range*range) {
-									su->Target(this);
-									su->TargetTurret(this);
-									//VSFileSystem::vs_fprintf (stderr,"%f targets %s",mission->getGametime(),targ->name.c_str());
-
-								}
-							}
-						}
-					}
+                                  if (su->combatRole()==pointdef) {
+                                    if (su->Target()==NULL) {
+                                      
+                                      float speed,range,mrange;
+                                      su->getAverageGunSpeed(speed,range,mrange);
+                                      if ((Position()-su->Position()).MagnitudeSquared()<range*range) {
+                                        su->Target(this);
+                                        su->TargetTurret(this);
+                                        //VSFileSystem::vs_fprintf (stderr,"%f targets %s",mission->getGametime(),targ->name.c_str());
+                                        
+                                      }
+                                      
+                                    }
+                                  }
 				}
 			}
 		}
-    }
-    if (retarget==-1){
-      if (targ) {
-        retarget=1;
-      }else {
-        retarget=0;
-      }
-    }
-    if (retarget&&targ==NULL) {
-      Target (NULL);// BROKEN
-    }
+        }
+        if (retarget==-1){
+          if (targ) {
+            retarget=1;
+          }else {
+            retarget=0;
+          }
+        }
+        if (retarget&&targ==NULL) {
+          Target (NULL);// BROKEN
+        }
 	Unit::UpdatePhysics2 (trans, old_physical_state, accel, difficulty,transmat, CumulativeVelocity, ResolveLast, uc);
-    this->time-=SIMULATION_ATOM;
-    if (NULL!=targ) {
-		float checker = targ->querySphere (Position()-(SIMULATION_ATOM*GetVelocity()),Position(),rSize());
-		if ((checker&&detonation_radius>=0)||((Position()-targ->Position()).Magnitude()-targ->rSize()-rSize()<detonation_radius)) {
-// spiritplumber assumes that the missile is hitting a much larger object than itself
-                  static float percent_missile_match_target_velocity=XMLSupport::parse_float(vs_config->getVariable("physics","percent_missile_match_target_velocity",".5"));                  
-                  
-                  this->Velocity += percent_missile_match_target_velocity*(targ->Velocity-this->Velocity);                
-                  Discharge();
-                  time=-1;
-	//Vector norm;
-	//float dist;
-	/*** WARNING COLLISION STUFF... TO FIX FOR SERVER SIDE SOMEDAY ***
-	if ((targ)->queryBoundingBox (Position(),detonation_radius+rSize())) {
-	  Discharge();
-	  time=-1;
-	}
-	*/
-		}
-    }
-    if (time<0) {
-      DealDamageToHull (Vector(.1,.1,.1),hull+1);
-    }
-  }
+        this->time-=SIMULATION_ATOM;
+        if (NULL!=targ) {
+          float checker = targ->querySphere (Position()-(SIMULATION_ATOM*GetVelocity()),Position(),rSize());
+          if ((checker&&detonation_radius>=0)||((Position()-targ->Position()).Magnitude()-targ->rSize()-rSize()<detonation_radius)) {
+            // spiritplumber assumes that the missile is hitting a much larger object than itself
+            static float percent_missile_match_target_velocity=XMLSupport::parse_float(vs_config->getVariable("physics","percent_missile_match_target_velocity",".5"));                  
+            
+            this->Velocity += percent_missile_match_target_velocity*(targ->Velocity-this->Velocity);                
+            Discharge();
+            time=-1;
+            //Vector norm;
+            //float dist;
+            /*** WARNING COLLISION STUFF... TO FIX FOR SERVER SIDE SOMEDAY ***
+                 if ((targ)->queryBoundingBox (Position(),detonation_radius+rSize())) {
+                 Discharge();
+                 time=-1;
+                 }
+            */
+          }
+        }
+        if (time<0) {
+          DealDamageToHull (Vector(.1,.1,.1),hull+1);
+        }
+}

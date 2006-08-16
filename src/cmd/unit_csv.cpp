@@ -254,6 +254,7 @@ static void AddMounts(Unit * thus, Unit::XML &xml, std::string mounts) {
       }
     }
   }
+
 }
 struct SubUnitStruct{
   string filename;
@@ -1309,6 +1310,7 @@ shield.range[1].   rhomax=r90;
   }
 
   CheckAccessory(this);//turns on the ceerazy rotation for any accessories
+  this->setAverageGunSpeed();
   double endt=queryTime();
 //  printf ("spr %f mesh %f subun %f mount %f carg %f sound %f upg %f exp %f light %f tree %f ",spritet-start,subunt-meshest,mountst-subunt,cargot-mountst,soundst-cargot,upgradet-soundst,explodet-upgradet, lightt-explodet, treet-lightt, endt-treet); 
 }

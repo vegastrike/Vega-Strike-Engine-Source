@@ -81,7 +81,7 @@ class VSSprite;
 class Box;
 class StarSystem;
 struct colTrees;
-
+class Pilot;
 #include "images.h"
 
 /**
@@ -110,8 +110,7 @@ class Mount {
 	ObjSerial serial;
 	float xyscale;float zscale;//for guns!
 	float ComputeAnimatedFrame(Mesh * gun);
-    void SwapMounts (Mount * other);
-    void ReplaceMounts (const Mount * other);
+  void ReplaceMounts (Unit * unit, const Mount * other);//pass inunit so it can update gunspeed
 	double Percentage (const Mount *newammo) const;
 // Gotta look at that, if we can make Beam a string in AcctUnit and a Beam elsewhere
     union REF{
@@ -292,6 +291,10 @@ public:
 public:
 #define NO_MOUNT_STAR
   vector <Mount> mounts;
+  float gunspeed;
+  float gunrange;
+  float missilerange;
+
 protected:
   ///Mount may access unit
   friend class Mount;
@@ -338,7 +341,7 @@ public:
   int RepairCost();//returns how many things need to be repaired--if nothing is damaged it will return 1 for labor.  doesn't assume any given cost on such thigns.
   int RepairUpgrade();//returns how many things were repaired
   bool ReduceToTemplate();
-  virtual double Upgrade (const std::string &file,int mountoffset, int subunitoffset, bool force, bool loop_through_mounts) { return 1;}
+  virtual double Upgrade (const std::string &file,int mountoffset, int subunitoffset, bool force, bool loop_through_mounts);
   bool canDowngrade (const Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage, const Unit * downgradelimit, bool gen_downgrade_list=true);
   bool Downgrade (const Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage, const Unit * downgradelimit, bool gen_downgrade_list=true);
 
@@ -512,6 +515,7 @@ public:
     unsigned char damage;
     //negative means fuel
   } jump;
+  Pilot *pilot;
   bool selected;  
  
   const UnitJump &GetJumpStatus() const {return jump;}
@@ -901,7 +905,7 @@ protected:
   virtual float DealDamageToShield (const Vector & pnt, float &Damage);
   ///If the shields are up from this position
   bool ShieldUp (const Vector &) const;
-
+  void setAverageGunSpeed ();
 public:
   int LockMissile() const;//-1 is no lock necessary 1 is locked
   void LockTarget(bool myboo);
@@ -913,6 +917,7 @@ public:
   void SelectAllWeapon (bool Missile);
   ///Gets the average gun speed of the unit::caution SLOW
   void getAverageGunSpeed (float & speed, float & grange, float & mrange) const;
+
   ///Finds the position from the local position if guns are aimed at it with speed
   QVector PositionITTS (const QVector &firingposit, Vector firingvelocity, float gunspeed, bool smooth_itts) const;
   ///returns percentage of course deviation for contraband searches.  .5 causes error and 1 causes them to get mad 

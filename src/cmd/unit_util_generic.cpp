@@ -63,7 +63,7 @@ namespace UnitUtil {
 			
 			Unit * player=_Universe->AccessCockpit(i)->GetParent();
 			if (player) {
-				if (un==player->Target())
+				if (0&&un==player->Target())
 					return PLAYER_PRIORITY;
 				float tmpdist = UnitUtil::getDistance(un,player);
 				if (tmpdist<cpdist) {
@@ -89,7 +89,7 @@ namespace UnitUtil {
 				}
 #endif
             if (player==un||
-               _Universe->AccessCockpit(i)->GetSaveParent()==un) {                    
+               (0&&_Universe->AccessCockpit(i)->GetSaveParent()==un)) {                    
                return PLAYER_PRIORITY;                    
             }
 		}
@@ -159,8 +159,8 @@ namespace UnitUtil {
 	if (_Universe->isPlayerStarship(targ)) {
 	    return HIGH_PRIORITY;
 	}
-	if(0)if (un->graphicOptions.WarpRamping||un->graphicOptions.RampCounter!=0) {
-	    static float compwarprampuptime=XMLSupport::parse_float (vs_config->getVariable ("physics","computerwarprampuptime","50")); // for the heck of it.  NOTE, variable also in unit_generic.cpp    
+	if (un->graphicOptions.WarpRamping||un->graphicOptions.RampCounter!=0) {
+	    static float compwarprampuptime=XMLSupport::parse_float (vs_config->getVariable ("physics","computerwarprampuptime","10")); // for the heck of it.  NOTE, variable also in unit_generic.cpp    
 	    static float warprampdowntime=XMLSupport::parse_float (vs_config->getVariable ("physics","warprampdowntime","0.5"));     
 	    float lowest_priority_time=SIM_QUEUE_SIZE*SIMULATION_ATOM;
 
@@ -168,10 +168,14 @@ namespace UnitUtil {
 	    if (un->graphicOptions.InWarp==0) {
 		time_ramped=warprampdowntime-un->graphicOptions.RampCounter;
 	    }
-	    if (un->graphicOptions.WarpRamping||time_ramped<lowest_priority_time/2) {
+	    if (un->graphicOptions.WarpRamping||time_ramped<lowest_priority_time) {
 		return MEDIUM_PRIORITY;
-	    }else if (time_ramped<lowest_priority_time) {
-		return MEDIUM_PRIORITY;
+	    }
+            if (dist<gun_range)
+              return MEDIUM_PRIORITY;
+
+            if (time_ramped<lowest_priority_time*2) {
+		return LOW_PRIORITY;
 	    }//else defer decision	    
 	}
 	if (un->owner==getTopLevelOwner()||un->faction==cargofac||un->faction==upfac||un->faction==neutral) {
@@ -183,8 +187,6 @@ namespace UnitUtil {
 	if (!(obj.length()==0||(obj.length()>=1&&obj[0]=='b'))) {
 	    return MEDIUM_PRIORITY;
 	}
-	if (dist<gun_range)
-	    return MEDIUM_PRIORITY;
 	if (dist<missile_range)
 	    return LOW_PRIORITY;
 	if (targ){
@@ -209,7 +211,7 @@ namespace UnitUtil {
 				}
 			}
 			if (my_unit->faction!=FactionUtil::GetFactionIndex ("neutral")) {
-				Order * tmp = new Orders::FireAt (0.2,15.0);
+				Order * tmp = new Orders::FireAt (15.0);
 				my_unit->EnqueueAI (tmp);
 				my_unit->SetTurretAI();
 			}
