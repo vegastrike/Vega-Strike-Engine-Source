@@ -259,7 +259,7 @@ void CommunicatingAI::AdjustRelationTo (Unit * un, float factor) {
   Order::AdjustRelationTo(un,factor);
 
   //now we do our magik  insert 0 if nothing's there... and add on our faction
-  Pilot::relationmap::iterator i=parent->pilot->effective_relationship.insert (pair<const Unit*,float>(un,0)).first;
+  Pilot::relationmap::iterator i=parent->pilot->effective_relationship.insert (pair<const void*,float>(un,0)).first;
   bool abovezero=(*i).second+FactionUtil::GetIntRelation (parent->faction,un->faction)>=0;
   if (!abovezero) {
     static float slowrel=XMLSupport::parse_float (vs_config->getVariable ("AI","SlowDiplomacyForEnemies",".25"));

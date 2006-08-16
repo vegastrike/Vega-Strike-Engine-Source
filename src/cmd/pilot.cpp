@@ -1,6 +1,8 @@
 #include "faction_generic.h"
 #include "unit_generic.h"
 #include "pilot.h"
+#include "ai/order.h"
+
 #include <vector>
 
 Pilot::Pilot(int faction) {
@@ -17,6 +19,38 @@ void Pilot::SetComm(Unit * parent) {
   this->faction=parent->faction;
   //GET BETTER REACTION TIME AND RANK HERE
   comm_face=FactionUtil::GetRandCommAnimation(faction,parent,gender);
+}
+
+void Pilot::adjustSpecificRelationship(Unit * parent, void * aggressor, float factor, int faction) {
+  relationmap::iterator i=effective_relationship.insert (std::pair<const void*,float>(aggressor,0)).first;
+  if (faction!=FactionUtil::GetNeutralFaction()) {
+    float rel=FactionUtil::GetIntRelation (parent->faction,faction)>=0;
+    bool abovezero=(*i).second+rel<0;
+    if (!abovezero) {
+      static float slowrel=XMLSupport::parse_float (vs_config->getVariable ("AI","SlowDiplomacyForEnemies",".25"));
+      factor *=slowrel;
+    }
+    FactionUtil::AdjustIntRelation (parent->faction,faction,factor,getRank());  
+    (*i).second+=factor;
+    if (rel+factor<0&&parent->Target()==NULL&&parent->aistate)
+      parent->aistate->ChooseTarget();
+  }else{
+    static float lessrel=XMLSupport::parse_float (vs_config->getVariable ("AI","UnknownRelationEnemy","-.05"));
+    bool abovezero=(*i).second<lessrel;
+    if (!abovezero) {
+      static float slowrel=XMLSupport::parse_float (vs_config->getVariable ("AI","SlowDiplomacyForEnemies",".25"));
+      factor *=slowrel;
+    }
+    (*i).second+=factor;
+    if ((*i).second<lessrel&&parent->Target()==NULL&&parent->aistate) {
+      parent->aistate->ChooseTarget();
+    }
+  }
+}
+void Pilot:: DoHit(Unit * parent, void *aggressor, int faction) {
+ static float hitcost=XMLSupport::parse_float (vs_config->getVariable ("AI","UnknownRelationHitCost",".01"));
+ if (hitcost)
+   adjustSpecificRelationship(parent,aggressor,hitcost,faction);
 }
 float Pilot::getAnger(const Unit * target)const {
     relationmap::const_iterator iter=effective_relationship.find(target);

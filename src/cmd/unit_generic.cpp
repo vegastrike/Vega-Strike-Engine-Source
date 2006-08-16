@@ -3672,6 +3672,8 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
       if (this->getAIState()) this->getAIState()->Communicate (c);      
     }
     Threaten (reinterpret_cast<Unit*>(ownerDoNotDereference),10);//the dark danger is real!
+  }else {
+    pilot->DoHit(this,ownerDoNotDereference,FactionUtil::GetNeutralFaction());// if only the damage contained which faction it belonged to
   }
 
   if (hull<0) {
