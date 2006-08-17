@@ -1233,68 +1233,19 @@ static Unit * ChooseNavPoint(Unit * parent, Unit **otherdest, float *lurk_on_arr
       return ret;
     }
   }
-  static vector<UnitContainer> navs[3];
-  static hash_map <std::string, UnitContainer> jumpPoints;
-  static StarSystem * lastss;
-  static double ttime= 0;
-  static int system_faction=0;
-  static int friendlycount=0;
-  static int enemycount=0;
-  static int neutralcount=0;
-  static int citizencount=0;
-  if (fabs(getNewTime()-ttime)>.000001||lastss!=_Universe->activeStarSystem()) {
-    system_faction=FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction(UniverseUtil::getSystemFile()));
-    Unit* un;
-    jumpPoints.clear();
-    size_t navs_size[3]={0,0,0};
-    for (un_iter i= _Universe->activeStarSystem()->getUnitList().createIterator();
-         (un=*i)!=NULL;
-         ++i) {
-      float rel=FactionUtil::GetIntRelation(system_faction,un->faction);      
+  StarSystem::Statistics *stats=&_Universe->activeStarSystem()->stats;
 
-      if (FactionUtil::isCitizenInt(un->faction)) {
-        citizencount++;
-      }else {          
-        if (rel>0.05) {
-          friendlycount++;
-        }else if (rel<0.){
-          enemycount++;
-        }else {
-          neutralcount++;
-        }
-      }
-      if (un->GetDestinations().size()) {
-        jumpPoints[un->GetDestinations()[0]].SetUnit(un);
-      }
-      if (UnitUtil::isSignificant(un)) {
-        int k=0;
-        if (rel>.05) k=1;//base
-        if (UnitUtil::isAsteroid(un)) k=2;//asteroid field/debris field
-        if (navs_size[k]<=navs[k].size())
-          navs[k].push_back(UnitContainer(un));
-        else
-          navs[k][navs_size[k]].SetUnit(un);          
-        navs_size[k]++;
-      
-      }
-    }
-    navs[0].resize(navs_size[0]);
-    navs[1].resize(navs_size[1]);
-    navs[2].resize(navs_size[2]);
-    ttime=getNewTime();
-    lastss=_Universe->activeStarSystem();
-  }
-  float sysrel=FactionUtil::GetIntRelation(system_faction,parent->faction);          
+  float sysrel=FactionUtil::GetIntRelation(stats->system_faction,parent->faction);          
   static float lurk_time = XMLSupport::parse_float(vs_config->getVariable("AI","lurk_time","600"));
   static float select_time = XMLSupport::parse_float(vs_config->getVariable("AI","fg_nav_select_time","120"));
   static float hostile_select_time = XMLSupport::parse_float(vs_config->getVariable("AI","pirate_nav_select_time","400"));
   static int num_ships_per_roid = XMLSupport::parse_float(vs_config->getVariable("AI","num_pirates_per_asteroid_field","12"));
+
   bool hostile=sysrel<0;
-  bool anarchy=enemycount>friendlycount;
+  bool anarchy=stats->enemycount>stats->friendlycount;
   float timehash=select_time;
   if (hostile&&!anarchy)
     timehash=hostile_select_time;
-  
   int k = (int)(getNewTime()/timehash);// two minutes
   string key = UnitUtil::getFlightgroupName(parent);
   std::string::const_iterator start = key.begin();
@@ -1305,18 +1256,18 @@ static Unit * ChooseNavPoint(Unit * parent, Unit **otherdest, float *lurk_on_arr
   unsigned int firstRand=choosePlace.genrand_int31();
   float secondRand=choosePlace.uniformExc(0,1);
   
-  bool asteroidhide = (secondRand < enemycount/(float)friendlycount)&&(secondRand<num_ships_per_roid*navs[2].size()/(float)enemycount);
-  bool siege=enemycount>2*friendlycount;//rough approx
+  bool asteroidhide = (secondRand < stats->enemycount/(float)stats->friendlycount)&&(secondRand<num_ships_per_roid*stats->navs[2].size()/(float)stats->enemycount);
+  bool siege=stats->enemycount>2*stats->friendlycount;//rough approx
   int whichlist=((sysrel<0&&siege==false)?2:1);
-  size_t total_size = (siege||!hostile)?navs[0].size()+navs[whichlist].size():navs[whichlist].size();
+  size_t total_size = (siege||!hostile)?stats->navs[0].size()+stats->navs[whichlist].size():stats->navs[whichlist].size();
 
   if (hostile&&((anarchy==false&&asteroidhide==false)||total_size==0)) {
     //hit and run
     unsigned int thirdRand=choosePlace.genrand_int31();
-    Unit * a=GetRandomNav(navs,firstRand);
-    Unit * b=GetRandomNav(navs,thirdRand);
+    Unit * a=GetRandomNav(stats->navs,firstRand);
+    Unit * b=GetRandomNav(stats->navs,thirdRand);
     if (a==b) {
-      b=GetRandomNav(navs,thirdRand+1);
+      b=GetRandomNav(stats->navs,thirdRand+1);
     }
     if (a!=b) {
       *otherdest=b;
@@ -1326,11 +1277,11 @@ static Unit * ChooseNavPoint(Unit * parent, Unit **otherdest, float *lurk_on_arr
   }else {
     if (total_size>0) {
       firstRand%=total_size;
-      if (firstRand>=navs[whichlist].size()) {
-        firstRand-=navs[whichlist].size();
+      if (firstRand>=stats->navs[whichlist].size()) {
+        firstRand-=stats->navs[whichlist].size();
         whichlist=0;//allows you to look for both neutral and ally lists  
       }
-      return navs[whichlist][firstRand].GetUnit();
+      return stats->navs[whichlist][firstRand].GetUnit();
     }
   }
   return NULL;

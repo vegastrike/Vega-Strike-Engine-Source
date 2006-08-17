@@ -108,7 +108,10 @@ namespace FactionUtil {
 		inline int GetUpgradeFaction(){return upgradefac;}
 		inline int GetNeutralFaction(){return neutralfac;}
 		inline int GetPlanetFaction(){return planetfac;}
-		float GetIntRelation (const int myfaction, const int theirfaction);
+                inline float GetIntRelation (const int myfaction, const int theirfaction){
+                   return factions[myfaction]->faction[theirfaction].relationship;
+                }
+
 		float GetRelation (string myfaction, string theirfaction);
 		string GetFactionName(int index);
 		bool isCitizenInt(int index);

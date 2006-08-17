@@ -59,14 +59,14 @@ bool FactionUtil::isCitizenInt(int faction) {
 bool FactionUtil::isCitizen(std::string name) {
   return isCitizenInt(GetFactionIndex(name));
 }
-float FactionUtil::GetIntRelation (const int myfaction, const int theirfaction){
-	return factions[myfaction]->faction[theirfaction].relationship;
-}
 float FactionUtil::GetRelation (string myfaction, string theirfaction){
 	return GetIntRelation(GetFactionIndex(myfaction),GetFactionIndex(theirfaction));
 }
 string FactionUtil::GetFactionName(int index) {
-	return GetFaction(index);
+	const char * tmp=GetFaction(index);
+	if (tmp) return tmp;
+	static std::string nullstr;
+	return nullstr;
 }
 
 static bool isPlayerFaction(const int MyFaction) {

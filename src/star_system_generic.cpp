@@ -38,6 +38,7 @@
 #include "savegame.h"
 #include "networking/netclient.h"
 #include "in_kb_data.h"
+#include "universe_util.h"//get galaxy faction, dude
 #include <boost/version.hpp>
 #if BOOST_VERSION != 102800
 
@@ -281,6 +282,9 @@ string StarSystem::getName () {
 
 
 void StarSystem::AddUnit(Unit *unit) {
+  if (stats.system_faction==FactionUtil::GetNeutralFaction()){
+      stats.CheckVitals(this);
+  }
   if (unit->specInterdiction>0||unit->isPlanet()||unit->isJumppoint()||unit->isUnit()==ASTEROIDPTR) {
     Unit * un;
     bool found=false;
@@ -296,12 +300,15 @@ void StarSystem::AddUnit(Unit *unit) {
       gravitationalUnits().prepend(unit);
     }
   }
+
+
   drawList.prepend(unit);
   unsigned int priority=UnitUtil::getPhysicsPriority(unit);
   // Do we need the +1 here or not - need to look at when current_sim_location is changed relative to this function
   // and relative to this function, when the bucket is processed...
   unsigned int tmp=1+((unsigned int)vsrandom.genrand_int32())%priority;
   this->physics_buffer[(this->current_sim_location+tmp)%SIM_QUEUE_SIZE].prepend(unit);
+  stats.AddUnit(unit);
 }
 
 bool StarSystem::RemoveUnit(Unit *un) {
@@ -353,6 +360,7 @@ bool StarSystem::RemoveUnit(Unit *un) {
 				}
 			}
 		}
+		stats.RemoveUnit(un);
 	}
  
   return removed;
@@ -393,6 +401,141 @@ void CarSimUpdate (Unit *un, float height) {
 	
 
 }
+
+StarSystem::Statistics::Statistics() {
+    system_faction=FactionUtil::GetNeutralFaction();
+    newfriendlycount=0;
+    newenemycount=0;
+    newcitizencount=0;
+    newneutralcount=0;
+    friendlycount=0;
+    enemycount=0;
+    neutralcount=0;
+    citizencount=0;
+    checkIter=0;
+    navCheckIter=0;
+}
+void StarSystem::Statistics::CheckVitals(StarSystem * ss) {
+    int faction=FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction(ss->getFileName()));
+    if (faction!=system_faction) {
+	*this=Statistics();//invoke copy constructor to clear it
+	this->system_faction=faction;
+	Unit * un;
+	for (un_iter ui=ss->getUnitList().createIterator();
+	     (un=*ui)!=NULL;
+	     ++ui) {
+	    this->AddUnit(un);//siege will take some time
+	}
+	return;//no need to check vitals now, they're all set
+    }
+    size_t iter=navCheckIter;
+    int k=0;
+    if (iter>=navs[0].size()){
+	iter-=navs[0].size();
+	k=1;
+    }
+    if (iter>=navs[1].size()){
+	iter-=navs[1].size();
+	k=2;
+    }
+    size_t totalnavchecking=25;
+    size_t totalsyschecking=25;
+    while (iter<totalnavchecking&&iter<navs[k].size()) {
+	if (navs[k][iter].GetUnit()==NULL) {
+	    navs[k].erase(navs[k].begin()+iter);
+	}else {
+	    ++iter;
+	    ++navCheckIter;
+	}
+    }
+    if (k==2&&iter>=navs[k].size()) {
+	navCheckIter=0;//start over next time
+    }
+    size_t sortedsize=ss->collidemap[Unit::UNIT_ONLY]->sorted.size();
+    int sysfac=system_faction;
+    size_t counter=checkIter+totalsyschecking;
+    for (;checkIter<counter&&checkIter<sortedsize;++checkIter) {
+	Collidable* collide=&ss->collidemap[Unit::UNIT_ONLY]->sorted[checkIter];
+	if (collide->radius>0){
+	    Unit * un=collide->ref.unit;
+	    float rel=FactionUtil::GetIntRelation(sysfac,un->faction);
+	    if (FactionUtil::isCitizenInt(un->faction)) {
+		newcitizencount++;
+	    }else {          
+		if (rel>0.05) {
+		    newfriendlycount++;
+		}else if (rel<0.){
+		    newenemycount++;
+		}else {
+		    newneutralcount++;
+		}
+	    }
+	}
+    }
+    if (checkIter>=sortedsize&&sortedsize>(enemycount+neutralcount+friendlycount+citizencount)/4/*suppose at least 1/4 survive a given frame*/) {
+	citizencount=newcitizencount;
+	newcitizencount=0;
+	enemycount=newenemycount;
+	newenemycount=0;
+	neutralcount=newneutralcount;
+	newneutralcount=0;
+	friendlycount=newfriendlycount;
+	newfriendlycount=0;
+	checkIter=0;//start over with list
+    }
+    
+}
+void StarSystem::Statistics::AddUnit(Unit * un) {
+    float rel=FactionUtil::GetIntRelation(system_faction,un->faction);
+    if (FactionUtil::isCitizenInt(un->faction)) {
+        citizencount++;
+    }else {          
+        if (rel>0.05) {
+	    friendlycount++;
+        }else if (rel<0.){
+	    enemycount++;
+        }else {
+	    neutralcount++;
+        }
+    }
+    if (un->GetDestinations().size()) {
+        jumpPoints[un->GetDestinations()[0]].SetUnit(un);
+    }
+    if (UnitUtil::isSignificant(un)) {
+        int k=0;
+        if (rel>.05) k=1;//base
+        if (UnitUtil::isAsteroid(un)) k=2;//asteroid field/debris field
+	navs[k].push_back(UnitContainer(un));
+    }
+}
+void StarSystem::Statistics::RemoveUnit(Unit * un) {
+    float rel=FactionUtil::GetIntRelation(system_faction,un->faction);
+    if (FactionUtil::isCitizenInt(un->faction)) {
+        citizencount--;
+    }else {          
+        if (rel>0.05) {
+	    friendlycount--;
+        }else if (rel<0.){
+	    enemycount--;
+        }else {
+	    neutralcount--;
+        }
+    }
+    if (un->GetDestinations().size()) {
+	jumpPoints[(un->GetDestinations()[0])].SetUnit(NULL);//make sure it is there
+	jumpPoints.erase(jumpPoints.find(un->GetDestinations()[0]));//kill it--stupid I know--but hardly time critical
+    }
+    if (UnitUtil::isSignificant(un)) {
+	for (int k=0;k<3;++k) {
+	    for (size_t i=0;i<navs[k].size();) {
+		if (navs[k][i].GetUnit()==un) {
+		    navs[k].erase(navs[k].begin()+i);//slow but who cares
+		}else ++i;//only increment if you didn't erase current
+	    }
+	}
+    }
+}
+
 bool debugPerformance() {
   static bool dp = XMLSupport::parse_bool(vs_config->getVariable("physics","debug_performance","false"));
   return dp;
@@ -417,6 +560,7 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
   targetpick=0;
   aggfire=0;
   numprocessed=0;
+  stats.CheckVitals(this);
   if (phytoggle) {
     // BELOW COMMENTS ARE NO LONGER IN SYNCH
     // NOTE: Randomization is necessary to preserve scattering - otherwise, whenever a 

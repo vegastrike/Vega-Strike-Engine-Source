@@ -8,6 +8,7 @@
 using std::string;
 #include "gfx/vec.h"
 #include "cmd/collection.h"
+#include "cmd/container.h"
 #include <map>
 class Stars;
 //#include "planet_generic.h"
@@ -67,8 +68,27 @@ class StarSystem {
   void LoadXML(const char*, const Vector & centroid, const float timeofyear);
   void beginElement(const string &name, const AttributeList &attributes);
   void endElement(const string &name);
-
- public:
+  
+public:
+  struct Statistics{
+      std::vector<UnitContainer> navs[3];//neutral, friendly, enemy
+      stdext::hash_map <std::string, UnitContainer> jumpPoints;
+      int system_faction;
+      int newfriendlycount;
+      int newenemycount;
+      int newcitizencount;
+      int newneutralcount;
+      int friendlycount;
+      int enemycount;
+      int neutralcount;
+      int citizencount;
+      size_t checkIter;
+      size_t navCheckIter;
+      Statistics();
+      void AddUnit(Unit * un);
+      void RemoveUnit(Unit *un);
+      void CheckVitals(StarSystem*ss);
+  }stats;
   StarSystem();
   StarSystem(const char * filename, const Vector & centroid=Vector (0,0,0), const float timeofyear=0);
   virtual ~StarSystem();
