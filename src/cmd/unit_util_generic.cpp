@@ -63,7 +63,7 @@ namespace UnitUtil {
 			
 			Unit * player=_Universe->AccessCockpit(i)->GetParent();
 			if (player) {
-				if (0&&un==player->Target())
+				if (un==player->Target())
 					return PLAYER_PRIORITY;
 				float tmpdist = UnitUtil::getDistance(un,player);
 				if (tmpdist<cpdist) {
