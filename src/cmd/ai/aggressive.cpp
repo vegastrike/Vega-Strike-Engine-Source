@@ -1220,6 +1220,8 @@ static Unit * GetRandomNav(vector<UnitContainer> navs[3], unsigned int randnum) 
   }
   return navs[0][randnum].GetUnit();
 }
+static std::string insysString("Insys");
+static std::string arrowString("->");
 static Unit * ChooseNavPoint(Unit * parent, Unit **otherdest, float *lurk_on_arrival) {
   static string script=vs_config->getVariable("AI","ChooseDestinationScript","");
   *lurk_on_arrival=0;
@@ -1233,37 +1235,70 @@ static Unit * ChooseNavPoint(Unit * parent, Unit **otherdest, float *lurk_on_arr
       return ret;
     }
   }
-  StarSystem::Statistics *stats=&_Universe->activeStarSystem()->stats;
+  StarSystem * ss=_Universe->activeStarSystem();
+  StarSystem::Statistics *stats=&ss->stats;
+  
 
   float sysrel=FactionUtil::GetIntRelation(stats->system_faction,parent->faction);          
   static float lurk_time = XMLSupport::parse_float(vs_config->getVariable("AI","lurk_time","600"));
   static float select_time = XMLSupport::parse_float(vs_config->getVariable("AI","fg_nav_select_time","120"));
   static float hostile_select_time = XMLSupport::parse_float(vs_config->getVariable("AI","pirate_nav_select_time","400"));
   static int num_ships_per_roid = XMLSupport::parse_float(vs_config->getVariable("AI","num_pirates_per_asteroid_field","12"));
+  bool civilian=FactionUtil::isCitizenInt(parent->faction);
 
   bool hostile=sysrel<0;
   bool anarchy=stats->enemycount>stats->friendlycount;
   float timehash=select_time;
   if (hostile&&!anarchy)
     timehash=hostile_select_time;
-  int k = (int)(getNewTime()/timehash);// two minutes
-  string key = UnitUtil::getFlightgroupName(parent);
-  std::string::const_iterator start = key.begin();
-  for(;start!=key.end(); start++) {
-    k += (k * 128) + *start;
+  unsigned int firstRand,thirdRand;
+  float secondRand;
+  if (civilian) {
+    firstRand=vsrandom.genrand_int31();
+    secondRand=vsrandom.uniformExc(0,1);
+    thirdRand=vsrandom.genrand_int31();
+  }else{
+    int k = (int)(getNewTime()/timehash);// two minutes
+    string key = UnitUtil::getFlightgroupName(parent);
+    std::string::const_iterator start = key.begin();
+    for(;start!=key.end(); start++) {
+      k += (k * 128) + *start;
+    }
+    VSRandom choosePlace(k);
+    firstRand=choosePlace.genrand_int31();
+    secondRand=choosePlace.uniformExc(0,1);
+    thirdRand=choosePlace.genrand_int31();
   }
-  VSRandom choosePlace(k);
-  unsigned int firstRand=choosePlace.genrand_int31();
-  float secondRand=choosePlace.uniformExc(0,1);
   
   bool asteroidhide = (secondRand < stats->enemycount/(float)stats->friendlycount)&&(secondRand<num_ships_per_roid*stats->navs[2].size()/(float)stats->enemycount);
   bool siege=stats->enemycount>2*stats->friendlycount;//rough approx
-  int whichlist=((sysrel<0&&siege==false)?2:1);
-  size_t total_size = (siege||!hostile)?stats->navs[0].size()+stats->navs[whichlist].size():stats->navs[whichlist].size();
+  int whichlist=1;//friendly
+  std::string fgname=UnitUtil::getFlightgroupName(parent);
 
-  if (hostile&&((anarchy==false&&asteroidhide==false)||total_size==0)) {
+  bool insys=(parent->GetJumpStatus().drive==-2)||fgname.find(insysString)!=std::string::npos;
+  std::string::size_type whereconvoy=fgname.find(arrowString);
+  bool convoy=(whereconvoy!=std::string::npos);
+  size_t total_size=stats->navs[0].size()+stats->navs[whichlist].size();//friendly and neutral
+  if (hostile) {
+    if (anarchy&&!siege) {
+      whichlist=2;
+      total_size=stats->navs[0].size()+stats->navs[whichlist].size();//asteroids and neutrals
+    }else {
+      whichlist=2;
+      total_size=stats->navs[whichlist].size();//just asteroids
+    }
+  }else if (civilian) {
+    if (anarchy||siege) {
+      whichlist=0;
+      total_size=stats->navs[0].size();
+    }else if (insys||convoy) {
+      whichlist=1;
+      total_size=stats->navs[1].size();//don't go to jump point
+    }
+  }
+  
+  if (hostile&&((anarchy==false&&asteroidhide==false)||total_size==0)&&civilian==false) {
     //hit and run
-    unsigned int thirdRand=choosePlace.genrand_int31();
     Unit * a=GetRandomNav(stats->navs,firstRand);
     Unit * b=GetRandomNav(stats->navs,thirdRand);
     if (a==b) {
@@ -1275,6 +1310,26 @@ static Unit * ChooseNavPoint(Unit * parent, Unit **otherdest, float *lurk_on_arr
     }
     return a;
   }else {
+    if(convoy) {
+      std::string srcdst[2]={fgname.substr(0,whereconvoy),fgname.substr(whereconvoy+2)};
+      if (srcdst[0]==ss->getFileName())
+        srcdst[0]=srcdst[1];
+      if (srcdst[1]==ss->getFileName())
+        srcdst[1]=srcdst[0];      
+      size_t rand8=thirdRand%8;
+      if (thirdRand<2) {
+        stdext::hash_map <std::string, UnitContainer>::iterator i=stats->jumpPoints.find(srcdst[thirdRand]);
+        if (i!=stats->jumpPoints.end()) {
+          Unit * un=i->second.GetUnit();
+          if (un) {
+            return un;
+          }
+        }else{
+          total_size=stats->navs[whichlist].size()+stats->navs[0].size();//no such jump point--have to random-walk it
+          //maybe one day we can incorporate some sort of route planning
+        }
+      }
+    }
     if (total_size>0) {
       firstRand%=total_size;
       if (firstRand>=stats->navs[whichlist].size()) {

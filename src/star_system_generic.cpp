@@ -503,7 +503,9 @@ void StarSystem::Statistics::AddUnit(Unit * un) {
     }
     if (UnitUtil::isSignificant(un)) {
         int k=0;
-        if (rel>.05) k=1;//base
+        if (rel>0) k=1;//base
+        if (un->isPlanet()&&!un->isJumppoint())
+          k=1;//friendly planet
         if (UnitUtil::isAsteroid(un)) k=2;//asteroid field/debris field
 	navs[k].push_back(UnitContainer(un));
     }
