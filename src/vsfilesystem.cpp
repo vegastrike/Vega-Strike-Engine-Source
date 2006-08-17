@@ -956,7 +956,10 @@ namespace VSFileSystem
 			stdext::hash_map<std::string,bool>::iterator iter;
 			iter=fileExistsCache.find(fullpath);
 			if (iter!=fileExistsCache.end()) {
-			    if (iter->second) found=1;
+			    if (iter->second) {
+                              found=1;
+                              isin_bigvolumes = VSFSNone;
+                            }
 			}else {
 			    if( stat( fullpath.c_str(), &s) >= 0){
 				if( s.st_mode & S_IFDIR) {
