@@ -739,9 +739,9 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
       numf++;
       QVector pox (1000+150*a,100*a,100);
       
-      pox.i=fg->pos.i+s*fg_radius*3;
-      pox.j=fg->pos.j+s*fg_radius*3;
-      pox.k=fg->pos.k+s*fg_radius*3;
+      pox.i=fg->pos.i+s*fg_radius*30000;
+      pox.j=fg->pos.j+s*fg_radius*30000;
+      pox.k=fg->pos.k+s*fg_radius*30000;
       //	  cout << "loop pos " << fg_name << " " << pox.i << pox.j << pox.k << " a=" << a << endl;
       
       if (pox.i==pox.j&&pox.j==pox.k&&pox.k==0)

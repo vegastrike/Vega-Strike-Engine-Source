@@ -1406,6 +1406,7 @@ static void GoTo(AggressiveAI * ai, Unit * parent, const QVector &nav, float cre
   ai->EnqueueOrder(ch);
 }
 void AggressiveAI::ExecuteNoEnemies() {
+
   if (nav.i==0&&nav.j==0&&nav.k==0) {
     Unit * otherdest=NULL;
     Unit * dest=ChooseNavPoint (parent,&otherdest,&this->lurk_on_arrival);
@@ -1436,16 +1437,26 @@ void AggressiveAI::ExecuteNoEnemies() {
         nav+=otherdest->Position();
         nav=nav*.5;
       }
-      
+      std::string fgname=UnitUtil::getFlightgroupName(parent);
+      std::string pfullname=parent->getFullname();
+      std::string dfullname=dest->getFullname();
+      printf ("%s:%s %s going to %s:%s",parent->name.c_str(),pfullname.c_str(),fgname.c_str(),dest->name.c_str(),dfullname.c_str());
+      if (otherdest) {
+      std::string ofullname=otherdest->getFullname();
+        printf (" between %s:%s\n",otherdest->name.c_str(),ofullname.c_str());
+       
+      }else printf("\n");
 
       GoTo(this,parent,nav,creationtime,otherdest!=NULL);
     }
   }else {          
     if ((nav-parent->Position()).MagnitudeSquared()<4*parent->rSize()*parent->rSize()&&lurk_on_arrival==0) {
+      std::string fgname=UnitUtil::getFlightgroupName(parent);
+
       nav=QVector(0,0,0);
       Unit * dest =ChooseNearNavPoint(parent,parent->Position(),parent->rSize());
       if (dest) {
-        if (dest->GetDestinations().size()>0&&UniverseUtil::systemInMemory(dest->GetDestinations()[0])) {
+        if (fgname.find(insysString)==string::npos&&dest->GetDestinations().size()>0&&UniverseUtil::systemInMemory(dest->GetDestinations()[0])){
           parent->ActivateJumpDrive(0);
           parent->Target(dest);// fly there, baby!          
         }else if (dest->GetDestinations().size()==0&&UnitUtil::isDockableUnit(dest)){          
