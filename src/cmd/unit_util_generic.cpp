@@ -39,7 +39,7 @@ namespace UnitUtil {
 		if (!my_unit)return false;
 		bool res=false;
                 static unsigned int capitaltypes=ROLES::getCapitalRoles();
-                return ((1<<(unsigned int)my_unit->combatRole())&capitaltypes)!=0;
+                return ((1<<(unsigned int)my_unit->unitRole())&capitaltypes)!=0;
 	}
 	int getPhysicsPriority (Unit*  un) {
 		static const bool FORCE_TOP_PRIORITY=XMLSupport::parse_bool(

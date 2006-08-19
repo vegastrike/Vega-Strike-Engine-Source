@@ -159,7 +159,7 @@ static AIEvents::ElemAttrMap * getProperScript(Unit * me, Unit * targ, bool inte
     }
     return getProperLogicOrInterruptScript("default",fac,nam,interrupt,personalityseed);
   }
-  return getProperLogicOrInterruptScript (ROLES::getRoleEvents(me->combatRole(),targ->combatRole()),me->faction,me->name,interrupt,personalityseed);
+  return getProperLogicOrInterruptScript (ROLES::getRoleEvents(me->attackPreference(),targ->unitRole()),me->faction,me->name,interrupt,personalityseed);
 }
 
 inline std::string GetRelationshipColor (float rel) {

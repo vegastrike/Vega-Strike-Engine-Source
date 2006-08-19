@@ -329,7 +329,6 @@ public:
   void setFaceCamera(){graphicOptions.FaceCamera=1;}
   bool UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage, const Unit * downgrade_min, bool force_change_on_nothing,bool gen_downgrade_list);
   void ImportPartList (const std::string& category, float price, float pricedev,  float quantity, float quantdev);
-  unsigned char RecomputeRole();//changes own role
   int GetNumMounts ()const  {return mounts.size();}
   void ClearMounts();
   ///Loads a user interface for the user to upgrade his ship
@@ -354,12 +353,21 @@ public:
   ///number of meshes (each with separate texture) this unit has
 
   std::vector <Mesh *> meshdata;
-  unsigned char combatRole() const {return combat_role;}
-  void combatRole(unsigned char c){combat_role=c;}
+  unsigned attackPreference() const {return attack_preference;}
+  void attackPreference(unsigned char c){attack_preference=c;}
+  unsigned unitRole() const {return unit_role;}
+  void unitRole(unsigned char c){unit_role=c;}
+//following 2 are legacy functions for python export only
   void setCombatRole(std::string s);
   std::string getCombatRole()const;
+//end legacy functions
+  std::string getUnitRole()const;
+  void setUnitRole(std::string s);
+  std::string getAttackPreference()const;
+  void setAttackPreference(std::string s);
 protected:
-  unsigned char combat_role;
+  unsigned char attack_preference;
+  unsigned char unit_role;
   Nebula * nebula;
   ///The orbit needs to have access to the velocity directly to disobey physics laws to precalculate orbits
   friend class PlanetaryOrbit;

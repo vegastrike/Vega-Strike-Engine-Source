@@ -587,7 +587,7 @@ void Unit::ZeroAll( )
     // old_state has a constructor
     damages          = NO_DAMAGE;
     // SubUnits has a constructor
-    combat_role      = 0;
+    attack_preference=unit_role = 0;
     nebula           = NULL;
     activeStarSystem = NULL;
     // computer has a constructor
@@ -690,7 +690,7 @@ void Unit::Init()
 	graphicOptions.RecurseIntoSubUnitsOnCollision=false;
         graphicOptions.WarpFieldStrength=1;
         
-	this->combat_role=ROLES::getRole("INERT");
+	this->unit_role=this->attack_preference=ROLES::getRole("INERT");
 	this->computer.combat_mode=true;
 #ifdef CONTAINER_DEBUG
   UncheckUnit (this);
@@ -7676,11 +7676,31 @@ std::string Unit::subunitSerializer (const XMLType &input, void * mythis) {
   }
   return string("destroyed_turret");
 }
-void Unit::setCombatRole(std::string s) {
-   combatRole(ROLES::getRole(s));
+void Unit::setUnitRole(std::string s) {
+   unitRole(ROLES::getRole(s));
 }
-std::string Unit::getCombatRole() const{
-   return ROLES::getRole(combatRole());
+void Unit::setAttackPreference(std::string s) {
+   attackPreference(ROLES::getRole(s));
+}
+std::string Unit::getUnitRole() const {
+   return ROLES::getRole(unitRole());
+}
+std::string Unit::getAttackPreference() const {
+   return ROLES::getRole(attackPreference());
+}
+
+//legacy function for python
+void Unit::setCombatRole(std::string s) {
+   unitRole(ROLES::getRole(s));
+   attackPreference(ROLES::getRole(s));
+}
+//legacy function for python
+std::string Unit::getCombatRole() const {
+   static unsigned char inert= ROLES::getRole("INERT");
+   unsigned char retA=unitRole();
+   unsigned char retB=attackPreference();
+   if (retA==inert||retB==inert) return "INERT";//often missions used this to render items either uninteresting or not attacking...so want to prioritize that behavior
+   return ROLES::getRole(retA);
 }
 
 void Unit::SortCargo() {

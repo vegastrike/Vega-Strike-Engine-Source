@@ -144,7 +144,7 @@ void Missile::UpdatePhysics2 (const Transformation &trans, const Transformation 
 				
 				Unit * su;
 				for (;(su =*i)!=NULL;++i) {
-                                  if (su->combatRole()==pointdef) {
+                                  if (su->attackPreference()==pointdef) {
                                     if (su->Target()==NULL) {
                                       
                                       float speed,range,mrange;

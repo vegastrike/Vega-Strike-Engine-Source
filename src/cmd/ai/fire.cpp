@@ -160,7 +160,7 @@ struct TurretBin{
 		    uniter->gunrange=FLT_MAX; // IS MISSILE TURRET (we hope)
 		  }
 		  */
-	    if (finalChoice.range<uniter->gunrange&&ROLES::getPriority (uniter->tur->combatRole())[finalChoice.t->combatRole()]<31) {
+	    if (finalChoice.range<uniter->gunrange&&ROLES::getPriority (uniter->tur->attackPreference())[finalChoice.t->unitRole()]<31) {
 			if (CanFaceTarget(uniter->tur,finalChoice.t,pos)) {
 				uniter->tur->Target(finalChoice.t);
 				uniter->tur->TargetTurret(finalChoice.t);
@@ -190,7 +190,7 @@ struct TurretBin{
 void AssignTBin (Unit * su, vector <TurretBin> & tbin) {
     unsigned int bnum=0;
     for (;bnum<tbin.size();bnum++) {
-      if (su->combatRole()==tbin[bnum].turret[0].tur->combatRole())
+      if (su->attackPreference()==tbin[bnum].turret[0].tur->attackPreference())
 	break;
     }
     if (bnum>=tbin.size()) {
@@ -219,7 +219,7 @@ float Priority (Unit * me, Unit * targ, float gunrange,float rangetotarget, floa
     return -1;
   if (targ->GetHull()<0)
     return -1;
-  *rolepriority = ROLES::getPriority (me->combatRole())[targ->combatRole()];//number btw 0 and 31 higher better
+  *rolepriority = ROLES::getPriority (me->attackPreference())[targ->unitRole()];//number btw 0 and 31 higher better
   char invrolepriority=31-*rolepriority;
   if(invrolepriority<=0)
     return -1;
@@ -361,7 +361,7 @@ public:
 	    if (rangetotarget>k->maxrange) {
 	      break;
 	    }
-	    const char tprior=ROLES::getPriority (k->turret[0].tur->combatRole())[un->combatRole()];
+	    const char tprior=ROLES::getPriority (k->turret[0].tur->attackPreference())[un->unitRole()];
 	    if (relationship<0) {
 	      if (tprior<16){
 	        k->listOfTargets[0].push_back (TargetAndRange (un,rangetotarget,relationship));
@@ -444,8 +444,8 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
 	  static int inert = ROLES::getRole ("INERT");
 	  static int pointdef = ROLES::getRole("POINTDEF");
 	  static bool assignpointdef = XMLSupport::parse_bool(vs_config->getVariable("AI","Targetting","AssignPointDef","true"));
-	  if ((su->combatRole()!=pointdef)||assignpointdef) {
-		if (su->combatRole()!=inert) {
+	  if ((su->attackPreference()!=pointdef)||assignpointdef) {
+		if (su->attackPreference()!=inert) {
 		  AssignTBin (su,tbin);
 		}else {
 			Unit * ssu=NULL;
@@ -586,7 +586,7 @@ unsigned int FireBitmask (Unit * parent,bool shouldfire, bool firemissile) {
    unsigned int firebitm = ROLES::EVERYTHING_ELSE;
     Unit * un=parent->Target();
     if (un) {
-      firebitm = (1 << un->combatRole());
+      firebitm = (1 << un->unitRole());
 
       static bool AlwaysFireAutotrackers = XMLSupport::parse_bool(vs_config->getVariable("AI","AlwaysFireAutotrackers","true"));
       if (shouldfire)

@@ -110,7 +110,15 @@
 
   voidWRAPPED1(setCombatRole,string,role)
 
-  WRAPPED0(string,getCombatRole,"INERT")
+  WRAPPED0(string,getCombatRole,"INERT")//legacy function returns getUnitType
+
+  voidWRAPPED1(setAttackPreference,string,role)
+
+  WRAPPED0(string,getAttackPreference,"INERT")
+
+  voidWRAPPED1(setUnitRole,string,role)
+
+  WRAPPED0(string,getUnitRole,"INERT")
 
 
   WRAPPED1(bool,UnDock,UnitWrapper,unitToDockWith,false)

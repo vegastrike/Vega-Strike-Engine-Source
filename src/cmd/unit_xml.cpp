@@ -1671,7 +1671,7 @@ using namespace UnitXML;
       case COMBATROLE:
 		  ADDDEFAULT;
 		  xml->calculated_role=true;
-		  combat_role = ROLES::getRole(iter->value);
+		  this->setCombatRole(iter->value);
 		break;
 	  case NUMANIMATIONSTAGES:
 		graphicOptions.NumAnimationPoints=XMLSupport::parse_int (iter->value);
@@ -1832,6 +1832,7 @@ void Unit::endElement(const string &name) {
     break;
   }
 }
+/*
 unsigned char Unit::RecomputeRole() {
 	//combat_role = 0;
 	unsigned int mount_bitmask;
@@ -1840,8 +1841,8 @@ unsigned char Unit::RecomputeRole() {
 	}
 
 	return combatRole();
-}
-
+} VERY VERY LEGACY--no idea why or who did this
+*/
 
 using namespace VSFileSystem;
 

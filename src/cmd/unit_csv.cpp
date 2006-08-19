@@ -613,7 +613,9 @@ void Unit::LoadRow(CSVRow &row, string modification, string * netxml) {
   DEF_OPTIMIZER(FaceCamera);
   DEF_OPTIMIZER(Name);
   DEF_OPTIMIZER(Hud_image);
-  DEF_OPTIMIZER(Combat_Role);
+  DEF_OPTIMIZER(Combat_Role);//legacy only
+  DEF_OPTIMIZER(Unit_Role);
+  DEF_OPTIMIZER(Attack_Preference);
   DEF_OPTIMIZER(Num_Animation_Stages);
   DEF_OPTIMIZER(Unit_Scale);
   DEF_OPTIMIZER(Mesh);
@@ -737,7 +739,9 @@ void Unit::LoadRow(CSVRow &row, string modification, string * netxml) {
           INIT_OPTIMIZER(keys,Name);
           INIT_OPTIMIZER(keys,Hud_image);
           INIT_OPTIMIZER(keys,FaceCamera);
-          INIT_OPTIMIZER(keys,Combat_Role);
+          INIT_OPTIMIZER(keys,Combat_Role);//legacy only
+          INIT_OPTIMIZER(keys,Unit_Role);
+          INIT_OPTIMIZER(keys,Attack_Preference);
           INIT_OPTIMIZER(keys,Num_Animation_Stages);
           INIT_OPTIMIZER(keys,Unit_Scale);
           INIT_OPTIMIZER(keys,Mesh);
@@ -874,7 +878,19 @@ void Unit::LoadRow(CSVRow &row, string modification, string * netxml) {
     graphicOptions.FaceCamera=XMLSupport::parse_bool(tmpstr)?1:0;
   }
   double spritet=queryTime();
-  combat_role=ROLES::getRole(OPTIM_GET(row,table,Combat_Role));
+  std::string llegacy_combat_role(OPTIM_GET(row,table,Combat_Role));
+  std::string lunit_role(OPTIM_GET(row,table,Unit_Role));
+  std::string lattack_preference(OPTIM_GET(row,table,Attack_Preference));
+  if (lunit_role.length()==0){
+      this->setUnitRole(llegacy_combat_role);
+  }else {
+      this->setUnitRole(lunit_role);
+  }
+  if (lattack_preference.length()==0){
+      this->setAttackPreference(llegacy_combat_role);
+  }else {
+      this->setAttackPreference(lattack_preference);
+  }
   graphicOptions.NumAnimationPoints=stoi(OPTIM_GET(row,table,Num_Animation_Stages),0);
   graphicOptions.NoDamageParticles=stoi(OPTIM_GET(row,table,NoDamageParticles),0);
   if (graphicOptions.NumAnimationPoints>0)
