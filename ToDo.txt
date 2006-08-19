@@ -18,7 +18,8 @@ Summer
 ***make the fg_util.MinNmFlightgroupsInSystem and fg_util.MaxNumFlgihtgroupsInSystem return something other than 1 or 3 for boonies systems in case it's not in the hash table
 **fix the faction_ships.fightersPerFG so it's reasonable for civvies
 ***Remember that when testing this stuff you need to delete savegames and view the resulting saved game :-)
-
+**Elasticity down
+***things could be crashing into each other a lot... maya s well not have them die needless deaths
 
 
 * DATASET BALANCING:
