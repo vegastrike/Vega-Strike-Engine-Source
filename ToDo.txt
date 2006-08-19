@@ -37,6 +37,7 @@ Summer
 
 *Developer tasks - do profiling to enumerate current load-time bottlenecks.
 **two sets of roles--- combat_role_attack, combat_role_defense
+***Fixed above... needs some testing--but has had some alrady
 **negative relation numbers affect the targetting algorithms so that only slightly negative relations don't cause indefinite pursuit
 
 
