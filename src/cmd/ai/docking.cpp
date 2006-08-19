@@ -18,7 +18,7 @@ static void DockedScript(Unit * docker, Unit * base) {
   }
 }
 namespace Orders {
-  DockingOps::DockingOps (Unit * unitToDockWith, Order * ai,bool physical_docking): MoveTo (QVector (0,0,1),
+  DockingOps::DockingOps (Unit * unitToDockWith, Order * ai,bool physically_dock,bool keeptrying): MoveTo (QVector (0,0,1),
 								      false,
 								      10,false),
 							      
@@ -26,8 +26,9 @@ namespace Orders {
 							      state(GETCLEARENCE),
 							      oldstate(ai){
     formerOwnerDoNotDereference = NULL;
+    this->keeptrying=keeptrying;
     facedtarget=false;
-    physicallyDock=true;//physical_docking;
+    physicallyDock=true;
     port=-1;
     static float temptimer=XMLSupport::parse_float (vs_config->getVariable ("physics","docking_time","10"));
     timer = temptimer;
@@ -50,11 +51,14 @@ namespace Orders {
     switch (state) {
     case GETCLEARENCE:
       if (!RequestClearence(utdw)) {
-	RestoreOldAI();
-	Destroy();
-	return;
+        if (!keeptrying) {
+          RestoreOldAI();
+          Destroy();
+          return;
+        }
+      }else {
+        state = DOCKING;
       }
-      state = DOCKING;
       //no break
     case DOCKING:
       if (DockToTarget(utdw))
@@ -141,8 +145,14 @@ namespace Orders {
   }
   bool DockingOps::DockToTarget(Unit * utdw) {
     if (utdw->DockingPortLocations()[port].used) {
-      state = GETCLEARENCE;
-      return false; 
+      if (keeptrying) {
+        state = GETCLEARENCE;
+        return false; 
+      }else {
+        docking.SetUnit(NULL);
+        state = GETCLEARENCE;
+        return false;
+      }
     }
     QVector loc=Movement(utdw);
     float rad = utdw->DockingPortLocations()[port].radius+parent->rSize();
@@ -216,4 +226,5 @@ namespace Orders {
     timer-=SIMULATION_ATOM;
     return (len<1)||done||timer<0;
   }
+  DockingOps * DONOTUSEAI=NULL;
 }

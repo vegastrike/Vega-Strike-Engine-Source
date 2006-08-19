@@ -1540,7 +1540,7 @@ void Arrested (Unit * parent) {
 		if (owner) {
 			Order * tmp =parent->aistate;
 			parent->aistate=NULL;
-			parent->PrimeOrders(new Orders::DockingOps (owner,tmp));
+			parent->PrimeOrders(new Orders::DockingOps (owner,tmp,true,true));
 			arrested_list_do_not_dereference.insert (parent);
 			for (int i = parent->numCargo()-1;i>=0;--i) {
 				parent->RemoveCargo (i,parent->GetCargo((unsigned int)i).quantity,true);

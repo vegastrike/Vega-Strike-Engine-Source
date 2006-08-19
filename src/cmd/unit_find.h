@@ -146,6 +146,20 @@ public:
     return true;
   }
 };
+class NearestNavOrCapshipLocator:public NearestUnitLocator{
+public:
+  bool BoltsOrUnits() {
+    return false;
+  }
+  bool UnitsOnly() {
+    return true;
+  }
+  bool acquire(float distance, CollideMap::iterator i) {
+    if (UnitUtil::isSignificant((*i)->ref.unit)||UnitUtil::isCapitalShip((*i)->ref.unit))
+      return NearestUnitLocator::acquire(distance,i); 
+    return true;
+  }
+};
 template <class T>
 class UnitWithinRangeLocator {
 public:

@@ -24,6 +24,7 @@
 #include "python/python_compile.h"
 #include "cmd/unit_find.h"
 #include "faction_generic.h"
+#include "docking.h"
 using namespace Orders;
 using stdext::hash_map;
 const EnumMap::Pair element_names[] = {
@@ -1346,7 +1347,7 @@ static Unit * ChooseNearNavPoint(Unit * parent,QVector location, float locradius
   Unit * candidate=NULL;
   float dist = FLT_MAX;
   Unit * un;
-  NearestNavLocator nnl;
+  NearestNavOrCapshipLocator nnl;
   findObjects(_Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY],
               parent->location[Unit::UNIT_ONLY],
               &nnl);
@@ -1465,8 +1466,11 @@ void AggressiveAI::ExecuteNoEnemies() {
         if (fgname.find(insysString)==string::npos&&dest->GetDestinations().size()>0&&UniverseUtil::systemInMemory(dest->GetDestinations()[0])){
           parent->ActivateJumpDrive(0);
           parent->Target(dest);// fly there, baby!          
-        }else if (dest->GetDestinations().size()==0&&UnitUtil::isDockableUnit(dest)){          
-          UnitUtil::performDockingOperations(parent,dest,0);//dock there, baby
+        }else if (dest->GetDestinations().size()==0&&false==UnitUtil::isCapitalShip(parent)&&UnitUtil::isDockableUnit(dest)){          
+          //UnitUtil::performDockingOperations(parent,dest,0);//dock there, baby
+          Order*ai=parent->aistate;
+          parent->aistate=NULL;
+          parent->PrimeOrders(new Orders::DockingOps (dest, ai,true,false));
         }else {
           ExecuteNoEnemies();//find a new place to go
         }
@@ -1653,6 +1657,7 @@ void AggressiveAI::Execute () {
         parent->ActivateJumpDrive(-1);
      }     
   }
-}  
+}
+AggressiveAI * DONOTUSEAG=NULL;
 
 

@@ -522,7 +522,7 @@ namespace UnitUtil {
 	  if (un && unitToDockWith) {
 	    Order * ai = un->aistate;
 	    un->aistate = NULL;
-	    un->PrimeOrders (new Orders::DockingOps (unitToDockWith, ai,actually_dock!=0));
+	    un->PrimeOrders (new Orders::DockingOps (unitToDockWith, ai,actually_dock,true));
 	  }
 	}
 }

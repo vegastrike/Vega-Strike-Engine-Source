@@ -2247,16 +2247,30 @@ void Unit::AddVelocity(float difficulty) {
 		 float multipliertemp=1;
 		 float minsizeeffect = (planet->rSize()>smallwarphack)?planet->rSize():smallwarphack;
 		 float effectiverad = minsizeeffect*(1.0f+UniverseUtil::getPlanetRadiusPercent())+rSize();
-		 double dist=(Position()-planet->Position()).Magnitude()*shiphack*4;
-		 if (dist>(effectiverad+warpregion0)){
-			multipliertemp=pow((dist-effectiverad-warpregion0),curvedegree)*upcurvek;
-		 }else{
-		    multipliertemp=1;
-			minmultiplier=1;
-		 }
-		 minmultiplier=(multipliertemp<minmultiplier)?multipliertemp:minmultiplier;
+                 QVector dir=Position()-planet->Position();
+		 double udist=dir.Magnitude();
+                 QVector veldiff=Velocity*graphicOptions.WarpFieldStrength-planet->Velocity*planet->graphicOptions.WarpFieldStrength;
+                 double velproj=veldiff.Dot(dir*(1./udist));
+                 int itercount=0;
+                 do {
+                   double dist=udist+(velproj<0?velproj*SIMULATION_ATOM:0);
+                   if (dist<0) dist=0;
+                   dist*=shiphack*4;
+                   
+                   if (dist>(effectiverad+warpregion0)){
+                     multipliertemp=pow((dist-effectiverad-warpregion0),curvedegree)*upcurvek;
+                   }else{
+                     multipliertemp=1;
+                     minmultiplier=1;
+                   }
+                   if (multipliertemp<minmultiplier) {
+                     minmultiplier=multipliertemp;
+                     //eventually use new multiplier to compute
+                   }else break;                 
+                 }while(0);//++itercount<=1); only repeat 1 iter right now
                  if (!testthis)
                    break;//don't want the ++
+                 
 	   }
 	   float rampmult=1;
 	   if(graphicOptions.RampCounter!=0){
