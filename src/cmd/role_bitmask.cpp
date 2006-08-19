@@ -61,12 +61,22 @@ namespace ROLES {
 			char *temp = (char *)malloc (len+1);
 			memset (temp,0,len+1);
 			f.ReadLine(temp,len);
+                        size_t siz=getAllRolePriorities().size();
+
 			vector <string> vec=readCSV(temp);
-			if (vec.size()) vec.erase (vec.begin());
+                        if (siz&&getAllRolePriorities()[0].size()!=vec.size()) {
+                          fprintf (stderr, "FATAL error in hash map... column %d in ai/VegaEvents.csv does not line up with that item in ai/VegaPriorities.csv\n",vec.size());
+                        }
+			if (vec.size()) vec.erase (vec.begin());                        
+                        for (unsigned int j=0;j<vec.size();j++) {
+                          if (getRole(vec[j])!=j){
+                            fprintf (stderr, "FATAL error in hash map... column %d in ai/VegaEvents.csv does not line up with that item in ai/VegaPriorities.csv\n",j);
+                          }
+                        }
 			unsigned int i=0;
-			for (i=0;i<maxRoleValue();i++) {
+			for (i=0;i<siz;i++) {
 			  scripts.push_back (vector<string>());
-			  for (unsigned int j=0;j<maxRoleValue();j++) {
+			  for (unsigned int j=0;j<vec.size();j++) {
 			    scripts[i].push_back("default");
 			  }
 			}
@@ -76,10 +86,14 @@ namespace ROLES {
 			  vector <string> strs=readCSV(temp);
 			  if (strs.size()) {
 			    string front = strs.front();
-			    strs.erase(strs.begin());
 			    unsigned int scriptind = getRole(front);
-			    for (unsigned int j=0;j<strs.size();j++) {
+                              while(scripts.size()<=scriptind)
+                                scripts.push_back(vector<string>());
+                              
+			    for (unsigned int j=1;j<strs.size();j++) {
 			      int index=  getRole(vec[j]);
+                              while(scripts[scriptind].size()<=index)
+                                scripts[scriptind].push_back("default");
 			      scripts[scriptind][index]=strs[j]; 
 			    }
 			  }
@@ -113,33 +127,50 @@ namespace ROLES {
 			memset (temp,0,len+1);
 			f.ReadLine(temp,len);
 			vector <string> vec=readCSV(temp);
-			if (vec.size()) vec.erase (vec.begin());
 			//VSFileSystem::vs_fprintf (stderr," SIZE %d\n",vec.size());
 			unsigned int i;
-			for (i=0;i<vec.size();i++) {
+			for (i=1;i<vec.size();i++) {
 			  //VSFileSystem::vs_fprintf (stderr," %s AS %d\n",vec[i].c_str(),i);
-				rolemap.insert (pair<string,int>(strtoupper(vec[i]),i));
+				rolemap.insert (pair<string,int>(strtoupper(vec[i]),i-1));
 			}
-
-			for (i=0;i<vec.size();i++) {
-				rolePriorities.push_back (vector<char>());
-			}
-			for (i=0;i<vec.size();i++) {
-				temp[0]=0;
-				f.ReadLine(temp,len);
-				vector <string> priority = readCSV(temp);
-				unsigned int i=InternalGetRole (priority[0]);
-				//VSFileSystem::vs_fprintf (stderr, "role of %s is %d\n",priority[0].c_str(),i);
-				if (i<rolePriorities.size()) {
-					for (unsigned int j=0;j<rolePriorities.size();j++) {
-						if (rolePriorities[i].size()<rolePriorities.size())
-							rolePriorities[i].push_back(31);
-						if (j+1<priority.size()) {
-							rolePriorities[i][j]=XMLSupport::parse_int(priority[j+1]);
-						}
-					}
-				}
-			}
+                        vector<vector<char> >tmprolepriorities;
+                        vector<string> tmpnamelist;
+                        while(f.ReadLine(temp,len)==Ok) {				
+                          vector <string> priority = readCSV(temp);
+                          if (priority.size()>0) {
+                            tmpnamelist.push_back(strtoupper(priority[0]));
+                            tmprolepriorities.push_back(vector<char>());
+                            for (unsigned int j=1;j<priority.size();j++) {
+                              tmprolepriorities.back().push_back(XMLSupport::parse_int(priority[j]));
+                            }
+                            while(tmprolepriorities.back().size()<vec.size()) {
+                              tmprolepriorities.back().push_back(31);
+                            }
+                          }                                  
+                        }
+                        for (int k=0;k<2;++k) {
+                          for (i=0;i<tmpnamelist.size();++i) {
+                            stdext::hash_map<string,int>::iterator iter=rolemap.find(tmpnamelist[i]);
+                            int j=-1;
+                            if (iter!=rolemap.end()) {
+                              if (k==0)
+                                j=iter->second;
+                            }else if (k==1){
+                              for (j=0;j<(int)rolePriorities.size();++j){
+                                if (rolePriorities[j].size()==0) {
+                                  break;
+                                }
+                              }
+                              rolemap[tmpnamelist[i]]=j;
+                            }       
+                            if (j!=-1) {
+                              while(rolePriorities.size()<=j) {
+                                rolePriorities.push_back(vector<char>());                              
+                              }
+                              rolePriorities[j].swap(tmprolepriorities[i]);                            
+                            }
+                          }
+                        }			
 			free( temp);
 			f.Close();
 		}else {
@@ -147,10 +178,6 @@ namespace ROLES {
 		  rolePriorities[0].push_back(0);
 		}
 		return rolePriorities;
-	}
-	unsigned int maxRoleValue() {
-		static int i=getAllRolePriorities().size();
-		return i;
 	}
 	unsigned char getRole (const std::string &s) {
 		//int temp = maxRoleValue();
