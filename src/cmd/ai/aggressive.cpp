@@ -1406,7 +1406,8 @@ static void GoTo(AggressiveAI * ai, Unit * parent, const QVector &nav, float cre
   ai->EnqueueOrder(ch);
 }
 void AggressiveAI::ExecuteNoEnemies() {
-
+  static float safetyspacing=XMLSupport::parse_float(vs_config->getVariable("AI","safetyspacing","25000"));	
+  static float randspacingfactor=XMLSupport::parse_float(vs_config->getVariable("AI","randomspacingfactor","4"));	
   if (nav.i==0&&nav.j==0&&nav.k==0) {
     Unit * otherdest=NULL;
     Unit * dest=ChooseNavPoint (parent,&otherdest,&this->lurk_on_arrival);
@@ -1423,15 +1424,20 @@ void AggressiveAI::ExecuteNoEnemies() {
         }
       }
       Vector dir = parent->Position()-dest->Position();
-      dir.Normalize();
+      Vector unitdir=dir.Normalize();
       if (!otherdest) {
-        dir*=dest->rSize()+parent->rSize();
+        dir=unitdir*(dest->rSize()+parent->rSize());
         if (dest->isUnit()==PLANETPTR) {
           float planetpct=UniverseUtil::getPlanetRadiusPercent();
-          dir *=planetpct+1.0f;
-        }
+          dir *=(planetpct+1.0f);
+		  dir+=randVector()*parent->rSize()*2*randspacingfactor;
+		}else {
+		 dir*=2;
+		 dir+=(unitdir*safetyspacing);
+		 dir+=((randVector()*randspacingfactor/4)+(unitdir*randspacingfactor))*((parent->rSize() > (safetyspacing/5))?(safetyspacing/5):(parent->rSize()));
+		}
       }
-      dir+=randVector()*parent->rSize()*4;
+      
       nav=dest->Position()+dir;
       if (otherdest) {
         nav+=otherdest->Position();
