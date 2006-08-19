@@ -118,7 +118,7 @@ namespace ROLES {
 	  return script[ourrole][theirs];
 	}
 	vector < vector <char > > buildroles() {
-		vector <vector <char> >rolePriorities;
+          vector <vector <char> >rolePriorities;
 		VSFile f;
 		VSError err = f.OpenReadOnly( "VegaPriorities.csv", AiFile);
 		if (err<=Ok) {
@@ -170,7 +170,20 @@ namespace ROLES {
                               rolePriorities[j].swap(tmprolepriorities[i]);                            
                             }
                           }
-                        }			
+                        }	
+                        size_t a =rolePriorities.size();
+                        if (rolePriorities.size()){
+                          size_t b=rolePriorities[0].size();
+                          while (b>a) {
+                            rolePriorities.push_back(rolePriorities[0]);
+                            a++;
+                          }
+                          if (a>b){
+                            for (size_t i=0;i<rolePriorities.size();++i) {
+                              rolePriorities[i].resize(a);//this is just to square out the table and make it safe to access with *any * input string
+                            }
+                          }
+                        }
 			free( temp);
 			f.Close();
 		}else {
