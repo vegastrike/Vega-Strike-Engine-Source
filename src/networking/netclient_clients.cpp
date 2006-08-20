@@ -174,7 +174,8 @@ void	NetClient::removeClient( const Packet* packet )
 	if( !(clt=Clients.get(cltserial)))
 	{
 		cerr<<"Error, client does not exists !!"<<endl;
-		exit( 1);
+		return;
+//		exit( 1);
 	}
 	Unit * un = clt->game_unit.GetUnit();
 

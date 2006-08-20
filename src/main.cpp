@@ -625,8 +625,9 @@ void bootstrap_main_loop () {
 		cout<<"UNIT FILE NAME = "<<_Universe->AccessCockpit(k)->unitfilename[0]<<endl;
 		*/
 	  }
-	  else
+	  else {
 		_Universe->AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k);
+      }
           CopySavedShips(playername[k],k,_Universe->AccessCockpit()->unitfilename,true);
 	  playersaveunit.push_back(_Universe->AccessCockpit(k)->GetUnitFileName());
 	  _Universe->AccessCockpit(k)->credits=credits;
@@ -700,10 +701,14 @@ void bootstrap_main_loop () {
 	// Send a network msg saying we are ready and also send position info
 	if( Network!=NULL) {
 		int l;
+		/*
 		for(l=0; l<_Universe->numPlayers(); l++)
 		{
 			Network[l].downloadZoneInfo();
 		}
+		*/
+		// Downloading zone info before setting inGame (CMD_ADDCLIENT) causes a race condition.
+		// CMD_ADDEDYOU (response to CMD_ADDCLIENT) now sends zone info.
 		for(l=0; l<_Universe->numPlayers(); l++)
 		{
 			Network[l].inGame();

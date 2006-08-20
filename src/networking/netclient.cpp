@@ -563,6 +563,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				    //_Universe->current_stardate.InitTrek( netbuf.getString());
                     //COUT << "Compression: " << ( (flags & CMD_CAN_COMPRESS) ? "yes" : "no" ) << endl;
 					this->game_unit.GetUnit()->curr_physical_state = netbuf.getTransformation();
+					this->AddObjects( netbuf);
                     //this->getZoneData( &p1 );
                 }
                 break;

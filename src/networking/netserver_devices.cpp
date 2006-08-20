@@ -95,6 +95,13 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 	cerr<<"SENDING A KILL for serial "<<serial<<" in zone "<<zone<<endl;
 	// Find the client in the udp & tcp client lists in order to set it out of the game (not delete it yet)
 	ClientPtr clt = this->getClientFromSerial( serial);
+
+	p.bc_create( CMD_KILL, serial,
+                 NULL, 0, SENDRELIABLE,
+                 __FILE__, PSEUDO__LINE__(1771) );
+	// WARNING : WE WILL SEND THE INFO BACK TO THE CLIENT THAT HAS FIRED
+	zonemgr->broadcast( zone, serial, &p, true );
+
 	if( !clt )
 	{
 		COUT<<"Killed a non client Unit = "<<serial<<endl;
@@ -106,12 +113,6 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 		COUT<<"Killed client serial = "<<serial<<endl;
 		zonemgr->removeClient( clt );
 	}
-
-	p.bc_create( CMD_KILL, serial,
-                 NULL, 0, SENDRELIABLE,
-                 __FILE__, PSEUDO__LINE__(1771) );
-	// WARNING : WE WILL SEND THE INFO BACK TO THE CLIENT THAT HAS FIRED
-	zonemgr->broadcast( zone, serial, &p, true );
 }
 
 void	NetServer::sendJump( ObjSerial serial, ObjSerial jumpserial, bool ok)

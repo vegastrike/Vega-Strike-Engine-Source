@@ -119,9 +119,10 @@ void	NetServer::addClient( ClientPtr clt)
 	clt->prediction->InitInterpolation(un, un->old_state, 0, clt->getNextDeltatime());
 	// Add initial position to make sure the client is starting from where we tell him
 	netbuf.addTransformation(un->curr_physical_state);
+	getZoneInfo(un->activeStarSystem->GetZone(), netbuf);
 	pp.send( CMD_ADDEDYOU, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(1325) );
 
-	COUT<<"ADDED client n "<<un->GetSerial()<<" in ZONE "<<clt->game_unit.GetUnit()->activeStarSystem->GetZone()<<" at STARDATE "<<_Universe->current_stardate.GetFullTrekDate()<<endl;
+	COUT<<"ADDED client n "<<un->GetSerial()<<" in ZONE "<<un->activeStarSystem->GetZone()<<" at STARDATE "<<_Universe->current_stardate.GetFullTrekDate()<<endl;
 	//delete cltsbuf;
 	//COUT<<"<<< SENT ADDED YOU -----------------------------------------------------------------------"<<endl;
 }
