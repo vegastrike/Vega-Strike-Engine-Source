@@ -1368,17 +1368,36 @@ static Unit * ChooseNearNavPoint(Unit * parent,QVector location, float locradius
   //END DEAD CODE
 }
 
+bool CloseEnoughToNavOrDest(Unit *parent, Unit *navUnit, QVector nav) {
+  if (navUnit) {
+    float dist = UnitUtil::getDistance(navUnit, parent);
+    if (dist < SIMULATION_ATOM * parent->Velocity.Magnitude() * 10)
+      return true;
+  }
+  return ((nav-parent->Position()).MagnitudeSquared()<4*parent->rSize()*parent->rSize());
+}
+
 class FlyTo:public Orders::MoveTo {
   float creationtime;
+  UnitContainer destUnit;
 public:
-  FlyTo(const QVector &target, bool aft, bool terminating=true, float creationtime=0,int leniency=6) : MoveTo(target,aft,leniency,terminating) {this->creationtime=creationtime;}
+  FlyTo(const QVector &target, bool aft, bool terminating=true, float creationtime=0,int leniency=6, Unit *destUnit=NULL) : MoveTo(target,aft,leniency,terminating) {
+    this->creationtime=creationtime;
+    this->destUnit = destUnit;
+  }
 
   virtual void Execute() {
     MoveTo::Execute();
+    Unit *un = destUnit.GetUnit();
+    if (CloseEnoughToNavOrDest(parent, un, targetlocation)) {
+      done = true;
+      printf("Uh-oh! Me = %08X (%s), other = %08X (%s)\n", (unsigned int)(void*)parent, parent->name.c_str(),
+          (unsigned int)(void*)un, un->name.c_str());
+    }
     if (done) {
       printf ("Flyto done\n");
     }
-    Unit * un=NULL;
+    un=NULL;
     static float mintime=XMLSupport::parse_float(vs_config->getVariable("AI","min_time_to_auto","25"));
     if (getNewTime()-creationtime>mintime) {
       if (_Universe->AccessCockpit()->autoInProgress()&&(!_Universe->AccessCockpit()->unitInAutoRegion(parent))&&(un =ChooseNearNavPoint(parent,targetlocation,0))!=NULL) {
@@ -1395,9 +1414,9 @@ public:
 static Vector randVector() {
   return Vector((rand()/(float)RAND_MAX)*2-1,(rand()/(float)RAND_MAX)*2-1,(rand()/(float)RAND_MAX)*2-1);
 }
-static void GoTo(AggressiveAI * ai, Unit * parent, const QVector &nav, float creationtime, bool boonies=false) {
+static void GoTo(AggressiveAI * ai, Unit * parent, const QVector &nav, float creationtime, bool boonies=false, Unit *destUnit=NULL) {
   static bool can_afterburn = XMLSupport::parse_bool(vs_config->getVariable("AI","afterburn_to_no_enemies","true")); 
-  Order * mt=new FlyTo(nav,can_afterburn,true,creationtime,boonies?16:6);
+  Order * mt=new FlyTo(nav,can_afterburn,true,creationtime,boonies?16:6, destUnit);
   Order * ch=new Orders::ChangeHeading(nav,32,.25f,true);
   ai->eraseType(Order::FACING);
   ai->eraseType(Order::MOVEMENT);
@@ -1427,6 +1446,7 @@ void AggressiveAI::ExecuteNoEnemies() {
       Vector dir = parent->Position()-dest->Position();
       Vector unitdir=dir.Normalize();
       if (!otherdest) {
+        navDestination=dest;
         dir=unitdir*(dest->rSize()+parent->rSize());
         if (dest->isUnit()==PLANETPTR) {
           float planetpct=UniverseUtil::getPlanetRadiusPercent();
@@ -1454,10 +1474,10 @@ void AggressiveAI::ExecuteNoEnemies() {
        
       }else printf("\n");
 
-      GoTo(this,parent,nav,creationtime,otherdest!=NULL);
+      GoTo(this,parent,nav,creationtime,otherdest!=NULL, otherdest==NULL?dest:NULL);
     }
   }else {          
-    if ((nav-parent->Position()).MagnitudeSquared()<4*parent->rSize()*parent->rSize()&&lurk_on_arrival==0) {
+    if (CloseEnoughToNavOrDest(parent, navDestination.GetUnit(), nav) && lurk_on_arrival==0) {
       std::string fgname=UnitUtil::getFlightgroupName(parent);
 
       nav=QVector(0,0,0);
@@ -1490,7 +1510,7 @@ void AggressiveAI::ExecuteNoEnemies() {
       // have to do something while here.
       
     }else {
-      GoTo(this,parent,nav,creationtime);
+		GoTo(this,parent,nav,creationtime,false,navDestination.GetUnit());
     }
   }
   /*

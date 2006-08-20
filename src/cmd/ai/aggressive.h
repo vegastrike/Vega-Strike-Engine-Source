@@ -18,6 +18,7 @@ protected:
   float logiccurtime;
   float interruptcurtime;
   QVector nav;
+  UnitContainer navDestination;
   float lurk_on_arrival;
   bool ProcessLogicItem (const AIEvents::AIEvresult & item);
   bool ExecuteLogicItem (const AIEvents::AIEvresult & item);
