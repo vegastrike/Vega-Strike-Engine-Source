@@ -1343,7 +1343,8 @@ static Unit * ChooseNavPoint(Unit * parent, Unit **otherdest, float *lurk_on_arr
   return NULL;
 }
 
-static Unit * ChooseNearNavPoint(Unit * parent,QVector location, float locradius) {
+static Unit * ChooseNearNavPoint(Unit * parent,Unit* suggestion, QVector location, float locradius) {
+  if (suggestion) return suggestion;
   Unit * candidate=NULL;
   float dist = FLT_MAX;
   Unit * un;
@@ -1401,7 +1402,7 @@ public:
     un=NULL;
     static float mintime=XMLSupport::parse_float(vs_config->getVariable("AI","min_time_to_auto","25"));
     if (getNewTime()-creationtime>mintime) {
-      if (_Universe->AccessCockpit()->autoInProgress()&&(!_Universe->AccessCockpit()->unitInAutoRegion(parent))&&(un =ChooseNearNavPoint(parent,targetlocation,0))!=NULL) {
+      if (_Universe->AccessCockpit()->autoInProgress()&&(!_Universe->AccessCockpit()->unitInAutoRegion(parent))&&(un =ChooseNearNavPoint(parent,destUnit.GetUnit(),targetlocation,0))!=NULL) {
         WarpToP(parent,un,true);
       }else {
         Unit* playa=_Universe->AccessCockpit()->GetParent();
@@ -1482,7 +1483,7 @@ void AggressiveAI::ExecuteNoEnemies() {
       std::string fgname=UnitUtil::getFlightgroupName(parent);
 
       nav=QVector(0,0,0);
-      Unit * dest =ChooseNearNavPoint(parent,parent->Position(),parent->rSize());
+      Unit * dest =ChooseNearNavPoint(parent,navDestination.GetUnit(),parent->Position(),parent->rSize());
       if (dest) {
         if (fgname.find(insysString)==string::npos&&dest->GetDestinations().size()>0&&UniverseUtil::systemInMemory(dest->GetDestinations()[0])){
           parent->ActivateJumpDrive(0);
