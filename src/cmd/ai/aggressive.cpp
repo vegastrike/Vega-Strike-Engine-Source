@@ -1369,9 +1369,10 @@ static Unit * ChooseNearNavPoint(Unit * parent,QVector location, float locradius
 }
 
 bool CloseEnoughToNavOrDest(Unit *parent, Unit *navUnit, QVector nav) {
-  if (navUnit) {
+	static float how_far_to_stop_moving=XMLSupport::parse_float(vs_config->getVariable("AI","how_far_to_stop_navigating","10000" ));
+  if (navUnit&&navUnit->isUnit()!=PLANETPTR) {
     float dist = UnitUtil::getDistance(navUnit, parent);
-    if (dist < SIMULATION_ATOM * parent->Velocity.Magnitude() * 10)
+    if (dist < SIMULATION_ATOM * parent->Velocity.Magnitude() * parent->predicted_priority*how_far_to_stop_moving)
       return true;
   }
   return ((nav-parent->Position()).MagnitudeSquared()<4*parent->rSize()*parent->rSize());
@@ -1629,9 +1630,11 @@ void AggressiveAI::Execute () {
       if (target) {
 		  ProcessLogic(*logic,false);
       }else {
-        ExecuteNoEnemies();
+        
       }
     }
+	if (!isjumpable)
+	  ExecuteNoEnemies();
   } else {
     if (target) {
     static bool can_warp_to=XMLSupport::parse_bool(vs_config->getVariable("AI","warp_to_enemies","true"));      
@@ -1653,8 +1656,10 @@ void AggressiveAI::Execute () {
 		  ProcessLogic (*logic,false);
       }
 
-    }
-    }
+	}
+	}else if (queryAny (Order::MOVEMENT)==NULL){
+		ExecuteNoEnemies();
+	}
   }
   }
 #ifdef AGGDEBUG
