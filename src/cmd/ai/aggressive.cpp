@@ -1370,7 +1370,7 @@ static Unit * ChooseNearNavPoint(Unit * parent,Unit* suggestion, QVector locatio
 }
 
 bool CloseEnoughToNavOrDest(Unit *parent, Unit *navUnit, QVector nav) {
-	static float how_far_to_stop_moving=XMLSupport::parse_float(vs_config->getVariable("AI","how_far_to_stop_navigating","10000" ));
+	static float how_far_to_stop_moving=XMLSupport::parse_float(vs_config->getVariable("AI","how_far_to_stop_navigating","100" ));
   if (navUnit&&navUnit->isUnit()!=PLANETPTR) {
     float dist = UnitUtil::getDistance(navUnit, parent);
     if (dist < SIMULATION_ATOM * parent->Velocity.Magnitude() * parent->predicted_priority*how_far_to_stop_moving)
@@ -1428,7 +1428,7 @@ static void GoTo(AggressiveAI * ai, Unit * parent, const QVector &nav, float cre
   ai->EnqueueOrder(ch);
 }
 void AggressiveAI::ExecuteNoEnemies() {
-  static float safetyspacing=XMLSupport::parse_float(vs_config->getVariable("AI","safetyspacing","25000"));	
+  static float safetyspacing=XMLSupport::parse_float(vs_config->getVariable("AI","safetyspacing","2500"));	
   static float randspacingfactor=XMLSupport::parse_float(vs_config->getVariable("AI","randomspacingfactor","4"));	
   if (nav.i==0&&nav.j==0&&nav.k==0) {
     Unit * otherdest=NULL;
