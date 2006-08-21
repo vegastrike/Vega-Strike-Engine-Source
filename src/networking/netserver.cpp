@@ -693,8 +693,8 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                           packet.getData(), packet.getDataLength(), SENDRELIABLE,
                           __FILE__, PSEUDO__LINE__(1293));
 			// Send to concerned clients
-                  
 			zonemgr->broadcast( un==NULL?_Universe->activeStarSystem()->GetZone():un->getStarSystem()->GetZone(), packet_serial, &p2, true);
+                        cerr << "Received text message "<<netbuf.getString()<<endl;
                     
                   }
                   break;    
@@ -834,6 +834,9 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			server_hash = new unsigned char[FileUtil::Hash.DigestSize()];
 			client_hash = netbuf.getBuffer( FileUtil::Hash.DigestSize());
 #endif
+                        cerr << "ATTEMPTING TO JUMP, BUT JUMP UNIMPLEMENTED"<<endl;
+                        break;
+
 			bool found = false;
 			NetBuffer	netbuf2;
 
@@ -1002,6 +1005,9 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			ObjSerial utdwserial = netbuf.getShort();
 			unsigned short zonenum = un->getStarSystem()->GetZone();
 			cerr<<"RECEIVED a DockRequest from unit "<<un->GetSerial()<<" to unit "<<utdwserial<<" in zone "<<zonenum<<endl;
+                        //NETFIXME unimplemented
+                        cerr <<"DOCKING AS OF YET UNIMPLEMENTED "<<endl;
+                        break;
 			docking_unit = zonemgr->getUnit( utdwserial, zonenum);
 			if( docking_unit)
 			{
@@ -1022,6 +1028,9 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			ObjSerial utdwserial = netbuf.getShort();
 			unsigned short zonenum = un->getStarSystem()->GetZone();
 			cerr<<"RECEIVED an UnDockRequest from unit "<<un->GetSerial()<<" to unit "<<utdwserial<<" in zone "<<zonenum<<endl;
+                        //NETFIXME unimplemented
+                        cerr <<"DOCKING AS OF YET UNIMPLEMENTED "<<endl;
+                        break;
 			docking_unit = zonemgr->getUnit( utdwserial, zonenum);
 			if( docking_unit)
 			{

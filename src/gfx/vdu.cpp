@@ -802,7 +802,13 @@ void VDU::DrawMessages(GameCockpit* parentcp,Unit *target){
       }
   }
   static std::string newline("\n");
-  if (rows_used>=row_lim&&parentcp->textMessage.length()>0) {
+  std::string textMessage=parentcp->textMessage;
+  if (parentcp->editingTextMessage&&floor(nowtime/2)!=floor(nowtime)/2.0) {
+    textMessage+="]";
+  }
+    
+  
+  if (rows_used>=row_lim&&parentcp->editingTextMessage) {
     size_t where=fullstr.find(newline);
     if (where!=string::npos) {
       if (where>1.6*cols) {
@@ -811,8 +817,8 @@ void VDU::DrawMessages(GameCockpit* parentcp,Unit *target){
       fullstr=fullstr.substr(where+1);
     }
   }
-  if (parentcp->textMessage.length()>0) {
-    fullstr+=parentcp->textMessage;
+  if (parentcp->editingTextMessage) {
+    fullstr+=textMessage;
     fullstr+=newline;
   }
   static string message_prefix = XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","message_prefix",""));

@@ -127,6 +127,7 @@ private:
   void DrawArrowToTarget(Unit *, Vector LocalCoordinates);
  public:
   std::string textMessage;
+  bool editingTextMessage;
   void	ReceivedTargetInfo();
   static void NavScreen (const KBData&,KBSTATE k); // scheherazade
   static string getsoundending(int which=0);

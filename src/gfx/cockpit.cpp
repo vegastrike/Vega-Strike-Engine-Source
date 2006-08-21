@@ -1375,6 +1375,7 @@ void GameCockpit::DrawGauges(Unit * un) {
   GFXColor4f (1,1,1,1);
 }
 void GameCockpit::Init (const char * file) {
+  editingTextMessage=false;
   armor8=false;
   shield8=false;
   Cockpit::Init( file);
