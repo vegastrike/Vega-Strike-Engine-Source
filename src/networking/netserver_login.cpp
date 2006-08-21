@@ -59,7 +59,9 @@ ClientPtr NetServer::getClientFromSerial( ObjSerial serial)
 
 	for( LI li=allClients.begin(); li!=allClients.end(); li++)
 	{
-		if( serial == (clt=(*li))->game_unit.GetUnit()->GetSerial())
+		clt = (*li);
+		Unit *un = clt->game_unit.GetUnit();
+		if( un && serial == un->GetSerial())
         {
 			found = true;
             break;

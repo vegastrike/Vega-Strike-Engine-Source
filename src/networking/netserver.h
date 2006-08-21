@@ -102,7 +102,6 @@ class NetServer
 		void			addClient( ClientPtr clt);		// Add the client in the game
 		void			serverTimeInitUDP( ClientPtr clt, NetBuffer &netbuf);
 		void			removeClient( ClientPtr clt);		// Remove the client from the game
-		void			checkSystem( ClientPtr clt);		// Check if the client has the good system file
 		ClientPtr       newConnection_udp( const AddressIP& ipadr);
 		ClientPtr       newConnection_tcp( );
 		void			checkAcctMsg( SocketSet& set );			// Check for account server message to receive

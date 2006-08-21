@@ -106,10 +106,8 @@ class ZoneMgr
         void    broadcastText( int zone, ObjSerial serial, Packet * pckt, float frequency );
         void    broadcastSnapshots( bool update_planets=false);
 		void	broadcastDamage();
-		int		getZoneClients( ClientWeakPtr clt, char * bufzone);
 		double	isVisible( Quaternion orient, QVector src_pos, QVector tar_pos);
 		ClientWeakList * getZoneList( unsigned int id) { assert( id<zone_list.size()); return zone_list[id]; }
-		void	sendZoneClients( ClientWeakPtr clt );
 		int		getZoneNumber() { return zone_list.size(); }
 
 		void	displayStats();

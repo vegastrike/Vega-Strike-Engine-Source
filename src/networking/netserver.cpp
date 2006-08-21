@@ -229,8 +229,8 @@ void	NetServer::start(int argc, char **argv)
 		acct_sock = NetUITCP::createSocket( srvip, tmpport, _sock_set );
 		if( !acct_sock.valid())
 		{
-			cerr<<"Cannot connect to account server... quitting"<<endl;
-			VSExit(1);
+			cerr<<"Cannot connect to account server... "<<endl;
+//			VSExit(1);
 		}
 		COUT <<"accountserver on socket "<<acct_sock<<" done."<<endl;
 	}
@@ -297,14 +297,12 @@ void	NetServer::start(int argc, char **argv)
 				COUT <<">>> Reconnected accountserver on socket "<<acct_sock<<" done."<<endl;
 				// Send a list of ingame clients
 				// Build a buffer with number of clients and client serials
-				int listlen = allClients.size()*sizeof(ObjSerial);
-				char * buflist = new char[listlen];
 				// Put first the number of clients
 				//netbuf.addShort( nbclients);
 				for( j=0, i = allClients.begin(); i!=allClients.end(); i++, j++)
 				{
 					// Add the current client's serial to the buffer
-					netbuf.addSerial((*i)->game_unit.GetUnit()->GetSerial());
+					netbuf.addString((*i)->callsign);
 				}
 				// Passing NULL to AddressIP arg because between servers -> only TCP
 				// Use the serial packet's field to send the number of clients
@@ -312,9 +310,7 @@ void	NetServer::start(int argc, char **argv)
 				{
 					perror( "ERROR sending redirected login request to ACCOUNT SERVER : ");
 					COUT<<"SOCKET was : "<<acct_sock<<endl;
-					VSExit(1);
 				}
-				delete buflist;
 			}
 			else
 				cerr<<">>> Reconnection to account server failed."<<endl;
@@ -654,9 +650,10 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				<< "*** Packet to copy length : " << packet.getDataLength()<<endl;
 				if( p2.send( packet.getCommand(), 0, (char *)packet.getData(), packet.getDataLength(), SENDRELIABLE, iptmp, acct_sock, __FILE__, PSEUDO__LINE__(1031) ) < 0 )
 				{
-					perror( "ERROR sending redirected login request to ACCOUNT SERVER : ");
+					perror( "FATAL ERROR sending redirected login request to ACCOUNT SERVER : ");
 					COUT<<"SOCKET was : "<<acct_sock<<endl;
-					VSExit(1);
+					this->sendLoginUnavailable( clt, ipadr );
+//					VSExit(1);
 				}
             }
             COUT<<"<<< LOGIN REQUEST --------------------------------------"<<endl;
@@ -730,7 +727,12 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			// Here should put a flag on the concerned mount of the concerned Unit to say we want to fire
 			// target_serial is in fact the serial of the firing unit (client itself or turret)
 			target_serial = netbuf.getSerial();
-			zone = clt->game_unit.GetUnit()->activeStarSystem->GetZone();
+			un = clt->game_unit.GetUnit();
+			if (!un) {
+				COUT<<"ERROR --> Received a fire order for dead UNIT"<<endl;
+				break; // Don't fire from a dead unit...
+			}
+			zone = un->activeStarSystem->GetZone();
 			mis = netbuf.getChar();
 			mount_num = netbuf.getInt32();
 			// Find the unit
@@ -762,7 +764,12 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 		case CMD_UNFIREREQUEST :
 			target_serial = netbuf.getSerial();
 			mount_num = netbuf.getInt32();
-			zone = clt->game_unit.GetUnit()->activeStarSystem->GetZone();
+			un = clt->game_unit.GetUnit();
+			if (!un) {
+				COUT<<"ERROR --> Received an unfire order for dead UNIT"<<endl;
+				break; // Don't fire from a dead unit...
+			}
+			zone = un->activeStarSystem->GetZone();
 			// Find the unit
 			// Set the concerned mount as ACTIVE and others as INACTIVE
 			un = zonemgr->getUnit( target_serial, zone);
@@ -844,10 +851,16 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 		case CMD_TARGET :
 			// Received a computer targetting request
 			target_serial = netbuf.getSerial();
-			zone = clt->game_unit.GetUnit()->activeStarSystem->GetZone();
+			unclt = clt->game_unit.GetUnit();
+			if (!unclt) {
+				break;
+			}
+			zone = unclt->activeStarSystem->GetZone();
+			// NETFIXME: Make sure that serials have 0 allocated for NULL
 			un = zonemgr->getUnit( target_serial, zone);
 			unclt = zonemgr->getUnit( packet.getSerial(), zone);
 			if (unclt) {
+				// It's fine if un is null...
 				unclt->Target(un);
 			}
 			break;
@@ -856,7 +869,8 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			// Received a target scan request
 			// NETFIXME: WE SHOULD FIND A WAY TO CHECK THAT THE CLIENT HAS THE RIGHT SCAN SYSTEM FOR THAT
 			target_serial = netbuf.getSerial();
-			zone = clt->game_unit.GetUnit()->activeStarSystem->GetZone(); //netbuf.getShort();
+			unclt = clt->game_unit.GetUnit();
+			zone = unclt->activeStarSystem->GetZone(); //netbuf.getShort();
 			un = zonemgr->getUnit( target_serial, zone);
 			// Get the un Unit data and send it in a packet
 			// Here we should get what a scanner could get on the target ship
@@ -884,16 +898,21 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 		/*
 		case CMD_CAMSHOT :
 		{
+			un = clt->game_unit.GetUnit();
+			if (!un)
+				break;
 			p2.bc_create( packet.getCommand(), packet.getSerial(),
                           packet.getData(), packet.getDataLength(), SENDANDFORGET,
                           __FILE__, PSEUDO__LINE__(1281));
 			// Send to concerned clients
-			zonemgr->broadcast_camshots( clt->game_unit.GetUnit()->activeStarSystem->GetZone(), clt->serial, &p2);
+			zonemgr->broadcast_camshots( un->activeStarSystem->GetZone(), clt->serial, &p2);
 		}
 		*/
 		break;
 		case CMD_STARTNETCOMM :
 		{
+			un = clt->game_unit.GetUnit();
+			if (!un) break;
 			float freq = netbuf.getFloat();
 			clt->comm_freq = freq;
 			clt->secured = netbuf.getChar();
@@ -904,11 +923,13 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                           packet.getData(), packet.getDataLength(), SENDRELIABLE,
                           __FILE__, PSEUDO__LINE__(1293));
 			// Send to concerned clients
-			zonemgr->broadcast( clt->game_unit.GetUnit()->activeStarSystem->GetZone(), packet_serial, &p2, true);
+			zonemgr->broadcast( un->activeStarSystem->GetZone(), packet_serial, &p2, true);
 		}
 		break;
 		case CMD_STOPNETCOMM :
 		{
+			un = clt->game_unit.GetUnit();
+			if (!un) break;
 			clt->comm_freq = -1;
 			// float freq = netbuf.getFloat();
 			// Broadcast players with same frequency that this client is leaving the comm session
@@ -916,33 +937,38 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                           packet.getData(), packet.getDataLength(), SENDRELIABLE,
                           __FILE__, PSEUDO__LINE__(1302));
 			// Send to concerned clients
-			zonemgr->broadcast( clt->game_unit.GetUnit()->activeStarSystem->GetZone(), packet_serial, &p2, true);
+			zonemgr->broadcast( un->activeStarSystem->GetZone(), packet_serial, &p2, true);
 		}
 		break;
 		case CMD_SOUNDSAMPLE :
 		{
+			un = clt->game_unit.GetUnit();
+			if (!un) break;
 			// Broadcast sound sample to the clients in the same zone and the have PortAudio support
 			p2.bc_create( packet.getCommand(), packet_serial,
                           packet.getData(), packet.getDataLength(), SENDRELIABLE,
                           __FILE__, PSEUDO__LINE__(1341));
-			zonemgr->broadcastSample( clt->game_unit.GetUnit()->activeStarSystem->GetZone(), packet_serial, &p2, clt->comm_freq);
+			zonemgr->broadcastSample( un->activeStarSystem->GetZone(), packet_serial, &p2, clt->comm_freq);
 
 		}
 		case CMD_TXTMESSAGE :
 		{
+			un = clt->game_unit.GetUnit();
+			if (!un) break;
 			// Broadcast sound sample to the clients in the same zone and the have PortAudio support
 			p2.bc_create( packet.getCommand(), packet_serial,
                           packet.getData(), packet.getDataLength(), SENDRELIABLE,
                           __FILE__, PSEUDO__LINE__(1341));
-			zonemgr->broadcastText( clt->game_unit.GetUnit()->activeStarSystem->GetZone(), packet_serial, &p2, clt->comm_freq);
+			zonemgr->broadcastText( un->activeStarSystem->GetZone(), packet_serial, &p2, clt->comm_freq);
 
 		}
 		case CMD_DOCK :
 		{
 			Unit * docking_unit;
 			un = clt->game_unit.GetUnit();
+			if (!un) break;
 			ObjSerial utdwserial = netbuf.getShort();
-			unsigned short zonenum = clt->game_unit.GetUnit()->activeStarSystem->GetZone();
+			unsigned short zonenum = un->activeStarSystem->GetZone();
 			cerr<<"RECEIVED a DockRequest from unit "<<un->GetSerial()<<" to unit "<<utdwserial<<" in zone "<<zonenum<<endl;
 			docking_unit = zonemgr->getUnit( utdwserial, zonenum);
 			if( docking_unit)
@@ -960,8 +986,9 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 		{
 			Unit * docking_unit;
 			un = clt->game_unit.GetUnit();
+			if (!un) break;
 			ObjSerial utdwserial = netbuf.getShort();
-			unsigned short zonenum = clt->game_unit.GetUnit()->activeStarSystem->GetZone();
+			unsigned short zonenum = un->activeStarSystem->GetZone();
 			cerr<<"RECEIVED an UnDockRequest from unit "<<un->GetSerial()<<" to unit "<<utdwserial<<" in zone "<<zonenum<<endl;
 			docking_unit = zonemgr->getUnit( utdwserial, zonenum);
 			if( docking_unit)
@@ -975,8 +1002,14 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 		}
 		break;
     	default:
-        	COUT << "Unknown command " << Cmd(cmd) << " ! "
-             	 << "from client " << clt->game_unit.GetUnit()->GetSerial() << endl;
+			un = clt->game_unit.GetUnit();
+        	COUT << "Unknown command " << Cmd(cmd) << " ! " << "from client ";
+			if (un)
+				COUT << un->GetSerial();
+			else
+				COUT << "(Dead)";
+			COUT << " (" << clt->callsign << ")";
+			COUT << endl;
     }
 }
 

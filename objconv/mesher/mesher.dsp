@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "$(OGRE_HOME)\include" /I "$(STLPORT_INCLUDE)" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\src" /I "..\.." /I "..\..\..\vega-proj" /I "..\..\..\vega-proj\include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 # SUBTRACT CPP /WX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -68,7 +68,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /w /W0 /Gm /GX /ZI /Od /I "$(OGRE_HOME)\include" /I "$(STLPORT_INCLUDE)" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /Zm500 /c
+# ADD CPP /nologo /MDd /w /W0 /Gm /GX /ZI /Od /I "$(OGRE_HOME)\include" /I "$(STLPORT_INCLUDE)" /I "..\..\src" /I "..\.." /I "..\..\..\vega-proj" /I "..\..\..\vega-proj\include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /Zm500 /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -93,7 +93,7 @@ SOURCE=.\converter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\endianness.cpp
+SOURCE=..\..\src\endianness.cpp
 # End Source File
 # Begin Source File
 
@@ -105,7 +105,7 @@ SOURCE=.\from_obj.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\hashtable.cpp
+SOURCE=..\..\src\hashtable.cpp
 # End Source File
 # Begin Source File
 
@@ -121,7 +121,7 @@ SOURCE=.\to_OgreMesh.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\xml_support.cpp
+SOURCE=..\..\src\xml_support.cpp
 # End Source File
 # End Group
 # Begin Group "Header Files"

@@ -156,16 +156,25 @@ void	NetServer::sendJump( ObjSerial serial, ObjSerial jumpserial, bool ok)
 	// Should broadcast JUMP so other client display jump anim too ?
 }
 
+// NETFIXME: AI Units won't be removed when docking... this may be desired but may be confusing for clients.
+
 void	NetServer::sendDockAuthorize( ObjSerial serial, ObjSerial utdw_serial, int docknum, unsigned short zone)
 {
 	// Set client not ingame while docked
 	ClientPtr clt = this->getClientFromSerial( serial);
+	if (!clt) {
+		cerr << "Client " << serial << " for dock autorization is NULL." << endl;
+		return;
+	}
+	Unit * un=clt->game_unit.GetUnit();
+	if (!un)
+		return;
 	clt->ingame = false;
 	// Set timestamps to 0 so we won't have prediction problem when undocking
 	clt->clearLatestTimestamp();
-	StarSystem * currentsys = clt->game_unit.GetUnit()->activeStarSystem;
+	StarSystem * currentsys = un->getStarSystem();
 	// Remove the unit from the system list
-	currentsys->RemoveUnit( clt->game_unit.GetUnit());
+	currentsys->RemoveUnit( un );
 
 	NetBuffer netbuf;
 	Packet p;
@@ -185,6 +194,20 @@ void	NetServer::sendDockDeny( ObjSerial serial, unsigned short zone)
 
 void	NetServer::sendUnDock( ObjSerial serial, ObjSerial utdwserial, unsigned short zone)
 {
+	// Set client ingame
+	ClientPtr clt = this->getClientFromSerial( serial);
+	if (!clt) {
+		cerr << "Client " << serial << " for dock autorization is NULL." << endl;
+		return;
+	}
+	Unit *un = clt->game_unit.GetUnit();
+	if (!un)
+		return;
+	clt->ingame = true;
+	// Add the unit back into the system list
+	StarSystem * currentsys = un->getStarSystem();
+	currentsys->AddUnit( un );
+	
 	// SEND A CMD_UNDOCK TO OTHER CLIENTS IN THE ZONE with utdw serial
 	NetBuffer netbuf;
 	Packet p;
@@ -193,12 +216,5 @@ void	NetServer::sendUnDock( ObjSerial serial, ObjSerial utdwserial, unsigned sho
                  netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
                  __FILE__, PSEUDO__LINE__(134) );
 	zonemgr->broadcastNoSelf( zone, serial, &p, true );
-
-	// Set client ingame
-	ClientPtr clt = this->getClientFromSerial( serial);
-	clt->ingame = true;
-	// Add the unit back into the system list
-	StarSystem * currentsys = clt->game_unit.GetUnit()->activeStarSystem;
-	currentsys->AddUnit( clt->game_unit.GetUnit());
 }
 

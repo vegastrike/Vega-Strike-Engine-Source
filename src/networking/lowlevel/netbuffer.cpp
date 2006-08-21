@@ -63,16 +63,14 @@ void	NetBuffer::resizeBuffer( int newsize)
 			}
 		}
 // Check the buffer to see if we can still get info from it
-void	NetBuffer::checkBuffer( int len, const char * fun)
+bool	NetBuffer::checkBuffer( int len, const char * fun)
 {
-#ifndef NDEBUG
-	if( offset+len > size-1)
+	if( offset+len >= size)
 	{
 		std::cerr<<"!!! ERROR : trying to read more data than buffer size (offset="<<offset<<" - size="<<size<<" - to read="<<len<<") in "<<fun<<" !!!"<<std::endl;
-		assert(0);
-		exit(1);
+		return false;
 	}
-#endif
+	return true;
 }
 
 // NOTE : IMPORTANT - I ONLY INCREMENT OFFSET IN PRIMARY DATATYPES SINCE ALL OTHER ARE COMPOSED WITH THEM
@@ -323,7 +321,8 @@ void	NetBuffer::addFloat( float f)
 float	NetBuffer::getFloat()
 		{
 			float s;
-			checkBuffer( sizeof( s), "getFloat");
+			if (!checkBuffer( sizeof( s), "getFloat"))
+				return 0;
 			posh_u32_t bits = *((posh_u32_t*)(this->buffer+offset));
 			s = POSH_FloatFromBigBits( bits );
 			offset+=sizeof(s);
@@ -339,7 +338,8 @@ void	NetBuffer::addDouble( double d)
 double	NetBuffer::getDouble()
 		{
 			double s;
-			checkBuffer( sizeof( s), "getDouble");
+			if (!checkBuffer( sizeof( s), "getDouble"))
+				return 0;
 			s = POSH_DoubleFromBits( (posh_byte_t *) this->buffer+offset);
 			offset+=sizeof(s);
 			return s;
@@ -354,7 +354,8 @@ void	NetBuffer::addShort( unsigned short s)
 unsigned short	NetBuffer::getShort()
 		{
 			unsigned short s;
-			checkBuffer( sizeof( s), "getShort");
+			if (!checkBuffer( sizeof( s), "getShort"))
+				return 0;
 			s = POSH_ReadU16FromBig( this->buffer+offset);
 			//cerr<<"getShort :: offset="<<offset<<" - length="<<sizeof( s)<<" - value="<<s<<endl;
 			offset+=sizeof(s);
@@ -370,7 +371,8 @@ void	NetBuffer::addInt32( int i)
 int		NetBuffer::getInt32()
 		{
 			int s;
-			checkBuffer( sizeof( s), "getInt32");
+			if (!checkBuffer( sizeof( s), "getInt32"))
+				return 0;
 			s = POSH_ReadS32FromBig( this->buffer+offset);
 			offset+=sizeof(s);
 			return s;
@@ -385,7 +387,8 @@ void	NetBuffer::addUInt32( unsigned int i)
 unsigned int	NetBuffer::getUInt32()
 		{
 			unsigned int s;
-			checkBuffer( sizeof( s), "getUInt32");
+			if (!checkBuffer( sizeof( s), "getUInt32"))
+				return 0;
 			s = POSH_ReadU32FromBig( this->buffer+offset);
 			offset+=sizeof(s);
 			return s;
@@ -400,7 +403,8 @@ void	NetBuffer::addChar( char c)
 char	NetBuffer::getChar()
 		{
 			char c;
-			checkBuffer( sizeof( c), "getChar");
+			if (!checkBuffer( sizeof( c), "getChar"))
+				return 0;
 			VsnetOSS::memcpy( &c, buffer+offset, sizeof( c));
 			offset+=sizeof(c);
 			return c;
@@ -418,9 +422,13 @@ unsigned char* NetBuffer::extAddBuffer( int bufsize )
 			offset+=bufsize;
             return retval;
 		}
+
+static unsigned char null = '\0';
+
 unsigned char *	NetBuffer::getBuffer( int offt)
 		{
-			checkBuffer( offt, "getBuffer");
+			if (!checkBuffer( offt, "getBuffer"))
+				return &null;
 			unsigned char * tmp = (unsigned char *)buffer + offset;
 			offset += offt;
 			return tmp;
@@ -454,7 +462,8 @@ string	NetBuffer::getString()
 	s = this->getShort();
 	if( s != 0xffff )
 	{
-		checkBuffer( s, "getString");
+		if (!checkBuffer( s, "getString"))
+			return std::string();
 		char c = buffer[offset+s];
 		buffer[offset+s]=0;
 	    string str( buffer+offset);
@@ -465,8 +474,10 @@ string	NetBuffer::getString()
 	}
 	else
 	{
+		// NETFIXME: Possible DOS attack here...
 		unsigned int len = this->getInt32();
-		checkBuffer( len, "getString");
+		if (!checkBuffer( len, "getString"))
+			return std::string();
 		char c = buffer[offset+len];
 		buffer[offset+len]=0;
 	    string str( buffer+offset);

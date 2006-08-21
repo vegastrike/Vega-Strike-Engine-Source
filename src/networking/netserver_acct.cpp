@@ -118,8 +118,7 @@ void	NetServer::save()
 	VSError err = f.OpenCreateWrite( dynuniv_path, ::VSFileSystem::UnknownFile);
 	if( err>Ok)
 	{
-		cerr<<"Error opening dynamic universe file"<<endl;
-		VSExit(1);
+		cerr<<"FATAL ERROR: Error opening dynamic universe file"<<endl;
 	}
 	else
 	{
@@ -143,18 +142,19 @@ void	NetServer::save()
 			bool found = false;
 			// Loop through clients to find the one corresponding to the unit (we need its serial)
 			ClientPtr clt;
-			if (un)
+			if (un) {
 				clt=getClientFromSerial( un->GetSerial());
-			if( !clt )
+			}
+			if( !clt || !un )
 			{
 				cerr<<"Error client not found in save process !!!!"<<endl;
-				VSExit(1);
+				return;
 			}
 			netbuf.addString( savestr);
 			netbuf.addString( xmlstr);
 			//buffer = new char[savestr.length() + xmlstr.length() + 2*sizeof( unsigned int)];
 			//SaveNetUtil::GetSaveBuffer( savestr, xmlstr, buffer);
-			if( pckt.send( CMD_SAVEACCOUNTS, clt->game_unit.GetUnit()->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(1678) ) < 0 )
+			if( pckt.send( CMD_SAVEACCOUNTS, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(1678) ) < 0 )
 				COUT<<"ERROR sending SAVE to account server"<<endl;
 		}
 	}

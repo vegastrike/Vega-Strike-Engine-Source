@@ -16,12 +16,14 @@ void	NetClient::scanRequest( Unit * target)
 {
 	Packet p;
 	NetBuffer netbuf;
+	Unit *un = this->game_unit.GetUnit();
+	if (!un) return;
 
 	netbuf.addSerial( target->GetSerial());
 	// Shold people be allowed to scan units in other zones?
-//	netbuf.addShort( this->game_unit.GetUnit()->activeStarSystem->GetZone());
+//	netbuf.addShort( un->activeStarSystem->GetZone());
 
-	p.send( CMD_SCAN, this->game_unit.GetUnit()->GetSerial(),
+	p.send( CMD_SCAN, un->GetSerial(),
             netbuf.getData(), netbuf.getDataLength(),
             SENDRELIABLE, NULL, this->clt_tcp_sock,
             __FILE__, PSEUDO__LINE__(1485) );
@@ -32,10 +34,12 @@ void	NetClient::targetRequest( Unit * target)
 {
 	Packet p;
 	NetBuffer netbuf;
+	Unit *un = this->game_unit.GetUnit();
+	if (!un) return;
 
 	netbuf.addSerial( target->GetSerial());
 
-	p.send( CMD_TARGET, this->game_unit.GetUnit()->GetSerial(),
+	p.send( CMD_TARGET, un->GetSerial(),
             netbuf.getData(), netbuf.getDataLength(),
             SENDRELIABLE, NULL, this->clt_tcp_sock,
             __FILE__, PSEUDO__LINE__(1485) );
@@ -47,6 +51,8 @@ void	NetClient::fireRequest( ObjSerial serial, const vector<int> &mount_indicies
 {
 	Packet p;
 	NetBuffer netbuf;
+	Unit *un = this->game_unit.GetUnit();
+	if (!un) return;
 
 	netbuf.addSerial( serial);
 	netbuf.addChar( mis);
@@ -56,7 +62,7 @@ void	NetClient::fireRequest( ObjSerial serial, const vector<int> &mount_indicies
 	}
 
 	//  NETFIXME: Use UDP for fire requests? or only from server->other clients
-	p.send( CMD_FIREREQUEST, this->game_unit.GetUnit()->GetSerial(),
+	p.send( CMD_FIREREQUEST, un->GetSerial(),
             netbuf.getData(), netbuf.getDataLength(),
             SENDRELIABLE, NULL, this->clt_tcp_sock,
             __FILE__, PSEUDO__LINE__(1503) );
@@ -66,6 +72,8 @@ void	NetClient::unfireRequest( ObjSerial serial, const vector<int> &mount_indici
 {
 	Packet p;
 	NetBuffer netbuf;
+	Unit *un = this->game_unit.GetUnit();
+	if (!un) return;
 
 	netbuf.addSerial( serial);
 	netbuf.addInt32( mount_indicies.size());
@@ -73,7 +81,7 @@ void	NetClient::unfireRequest( ObjSerial serial, const vector<int> &mount_indici
 		netbuf.addInt32(mount_indicies[i]);
 	}
 
-	p.send( CMD_UNFIREREQUEST, this->game_unit.GetUnit()->GetSerial(),
+	p.send( CMD_UNFIREREQUEST, un->GetSerial(),
             netbuf.getData(), netbuf.getDataLength(),
             SENDRELIABLE, NULL, this->clt_tcp_sock,
             __FILE__, PSEUDO__LINE__(1518) );
@@ -83,10 +91,12 @@ bool	NetClient::jumpRequest( string newsystem, ObjSerial jumpserial)
 {
 	Packet p;
 	NetBuffer netbuf;
+	Unit *un = this->game_unit.GetUnit();
+	if (!un) return false;
 
 	netbuf.addString( newsystem);
 	netbuf.addSerial( jumpserial);
-	netbuf.addShort( this->game_unit.GetUnit()->activeStarSystem->GetZone());
+	netbuf.addShort( un->getStarSystem()->GetZone());
 #ifdef CRYPTO
 	unsigned char * hash = new unsigned char[FileUtil::Hash.DigestSize()];
 	bool autogen;
@@ -94,7 +104,7 @@ bool	NetClient::jumpRequest( string newsystem, ObjSerial jumpserial)
 	netbuf.addBuffer( hash, FileUtil::Hash.DigestSize());
 #endif
 
-	p.send( CMD_JUMP, this->game_unit.GetUnit()->GetSerial(),
+	p.send( CMD_JUMP, un->GetSerial(),
             netbuf.getData(), netbuf.getDataLength(),
             SENDRELIABLE, NULL, this->clt_tcp_sock,
             __FILE__, PSEUDO__LINE__(1534) );
@@ -129,10 +139,12 @@ void	NetClient::dockRequest( ObjSerial utdw_serial)
 	// Send a packet with CMD_DOCK with serial and an ObjSerial = unit_to_dock_with_serial
 	Packet p;
 	NetBuffer netbuf;
+	Unit *un = this->game_unit.GetUnit();
+	if (!un) return;
 
 	cerr<<"SENDING A DOCK REQUEST FOR UNIT "<<utdw_serial<<endl;
 	netbuf.addSerial( utdw_serial);
-	p.send( CMD_DOCK, this->game_unit.GetUnit()->GetSerial(),
+	p.send( CMD_DOCK, un->GetSerial(),
             netbuf.getData(), netbuf.getDataLength(),
             SENDRELIABLE, NULL, this->clt_tcp_sock,
             __FILE__, PSEUDO__LINE__(97) );
@@ -143,10 +155,12 @@ void	NetClient::undockRequest( ObjSerial utdw_serial)
 	// Send a packet with CMD_UNDOCK with serial and an ObjSerial = unit_to_undock_with_serial
 	Packet p;
 	NetBuffer netbuf;
+	Unit *un = this->game_unit.GetUnit();
+	if (!un) return;
 
 	cerr<<"SENDING A UNDOCK NOTIFICATION FOR UNIT "<<utdw_serial<<endl;
 	netbuf.addSerial( utdw_serial);
-	p.send( CMD_UNDOCK, this->game_unit.GetUnit()->GetSerial(),
+	p.send( CMD_UNDOCK, un->GetSerial(),
             netbuf.getData(), netbuf.getDataLength(),
             SENDRELIABLE, NULL, this->clt_tcp_sock,
             __FILE__, PSEUDO__LINE__(110) );

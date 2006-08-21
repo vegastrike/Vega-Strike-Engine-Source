@@ -184,13 +184,15 @@ StarSystem *	ZoneMgr::addClient( ClientWeakPtr cltw, string starsys, unsigned sh
         zone_list[num_zone] = lst = new ClientWeakList;
 	lst->push_back( cltw );
     ClientPtr clt(cltw);
-	// Not needed : zone is an attribute of StarSystem
-	//clt->game_unit.GetUnit()->SetZone( num_zone);
 	zone_clients[num_zone]++;
 	cerr<<zone_clients[num_zone]<<" clients now in zone "<<num_zone<<endl;
 
 	//QVector safevec;
-	sts->AddUnit( clt->game_unit.GetUnit());
+	Unit *addun = clt->game_unit.GetUnit();
+	if (addun)
+		sts->AddUnit( addun );
+	else
+		cerr << "dead client attempted to be added to system: refusing\n";
 	return ret;
 }
 
@@ -203,26 +205,36 @@ void	ZoneMgr::removeClient( ClientPtr clt )
 {
 	StarSystem * sts;
 	Unit * un = clt->game_unit.GetUnit();
-	unsigned short zonenum = un->activeStarSystem->GetZone();
-    ClientWeakList* lst = zone_list[zonenum];
-
-	if( lst == NULL || lst->empty() )
-	{
-        cerr<<"Trying to remove client on an empty list !!"<<endl;
-        exit( 1);
-    }
-	for (ClientWeakList::iterator q = lst->begin();
-		q!=lst->end();) {
-			ClientWeakPtr cwp = *q;
-			ClientWeakPtr ocwp (clt);
-			if ((!(cwp<ocwp))&&!(ocwp<cwp)) {
-				q=lst->erase(q);
-			} else {
-				++q;
-			}
+	unsigned int zonenum = 0;
+	if (un)
+		zonenum = un->activeStarSystem->GetZone();
+	for (; zonenum < zone_list.size(); ++zonenum) {
+		bool found=false;
+		ClientWeakList* lst = zone_list[zonenum];
+		
+		for (ClientWeakList::iterator q = lst->begin();
+			 q!=lst->end();) {
+				ClientWeakPtr cwp = *q;
+				ClientWeakPtr ocwp (clt);
+				if ((!(cwp<ocwp))&&!(ocwp<cwp)) {
+					q=lst->erase(q);
+					found=true;
+					break;
+				} else {
+					++q;
+				}
 		}
+		if (found)
+			break;
+	}
+	if (zonenum>=zone_list.size()) {
+		cerr<<"Client "<<clt->callsign<<" not found in any zone when attempting to remove it"<<endl;
+		return;
+	}
 	zone_clients[zonenum]--;
 	cerr<<zone_clients[zonenum]<<" clients left in zone "<<zonenum<<endl;
+	if (!un)
+		return;
 	sts = _Universe->star_system[zonenum];
 	sts->RemoveUnit( un);
 	// SHIP MAY NOT HAVE BEEN KILLED BUT JUST CHANGED TO ANOTHER STAR SYSTEM -> NO KILL
@@ -238,16 +250,19 @@ void ZoneMgr::broadcast( ClientWeakPtr fromcltw, Packet * pckt, bool isTcp  )
 {
     if( fromcltw.expired() )
     {
-        cerr<<"Trying to send update without client" << endl;
+        cerr<<"Trying to send update without client" << pckt->getCommand() << endl;
         return;
     }
     ClientPtr fromclt( fromcltw );
 	Unit * un = fromclt->game_unit.GetUnit();
-	Unit * un2 = NULL;
-	unsigned short zonenum = un->activeStarSystem->GetZone();
+	if (!un) {
+		cerr<<"Trying to broadcast information with dead client unit" << pckt->getCommand() << endl;
+		return;
+	}
+	unsigned short zonenum = un->getStarSystem()->GetZone();
     if( zonenum > zone_list.size() )
     {
-        cerr<<"Trying to send update to nonexistant zone " << zonenum << endl;
+        cerr<<"Trying to send update to nonexistant zone " << zonenum << pckt->getCommand() << endl;
         return;
     }
 
@@ -255,7 +270,7 @@ void ZoneMgr::broadcast( ClientWeakPtr fromcltw, Packet * pckt, bool isTcp  )
     ClientWeakList* lst = zone_list[zonenum];
     if( lst == NULL )
     {
-        cerr<<"Trying to send update to nonexistant zone " << zonenum << endl;
+        cerr<<"Trying to send update to nonexistant zone " << zonenum << pckt->getCommand() << endl;
         return;
     }
 
@@ -264,12 +279,17 @@ void ZoneMgr::broadcast( ClientWeakPtr fromcltw, Packet * pckt, bool isTcp  )
         if( (*i).expired() ) continue;
 
         ClientPtr clt(*i);
-        un2 = clt->game_unit.GetUnit();
+		Unit * un2 = clt->game_unit.GetUnit();
         // Broadcast to other clients
-        if( clt->ingame && un->GetSerial() != un2->GetSerial())
+        if( clt->ingame && ((un2==NULL) || (un->GetSerial() != un2->GetSerial())))
         {
             COUT << "BROADCASTING " << pckt->getCommand()
-                 << " to client n° "<<un2->GetSerial() << endl;
+                 << " to client n° ";
+			if (un2)
+				cout<<un2->GetSerial();
+			else
+				cout<<"dead";
+			cout << endl;
 			if (isTcp) {
 				pckt->bc_send( clt->cltadr, clt->tcp_sock);
 			} else {
@@ -297,7 +317,6 @@ void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt, bool isTcp )
 		// Broadcast to all clients including the one who did a request
 		if( clt->ingame /*&& un->GetSerial() != un2->GetSerial()*/ )
 		{
-			//COUT<<"Sending update to client n° "<< clt->game_unit.GetUnit()->GetSerial();
 			COUT<<endl;
 			if (isTcp) {
 				pckt->bc_send( clt->cltadr, clt->tcp_sock);
@@ -319,11 +338,10 @@ void	ZoneMgr::broadcastNoSelf( int zone, ObjSerial serial, Packet * pckt, bool i
         if( (*i).expired() ) continue;
 
         ClientPtr clt( *i );
+		Unit *broadcastTo = clt->game_unit.GetUnit();
 		// Broadcast to all clients including the one who did a request
-		if( clt->ingame && clt->game_unit.GetUnit()->GetSerial()!=serial )
+		if( clt->ingame && ((!broadcastTo) || broadcastTo->GetSerial()!=serial))
 		{
-			//COUT<<"Sending update to client n° "<< clt->game_unit.GetUnit()->GetSerial();
-			COUT<<endl;
 			if (isTcp) {
 				pckt->bc_send( clt->cltadr, clt->tcp_sock);
 			} else {
@@ -354,10 +372,9 @@ void	ZoneMgr::broadcastSample( int zone, ObjSerial serial, Packet * pckt, float 
 		// Broadcast to all clients excluding the one who did a request and
 		// excluding those who are listening on a different frequency, those who aren't communicating
 		// and those who don't have PortAudio support
-		if( clt->ingame && clt->comm_freq!=-1 && clt->portaudio && clt->comm_freq==frequency && un->GetSerial() != serial )
+		if( clt->ingame && clt->comm_freq!=-1 && clt->portaudio && clt->comm_freq==frequency &&
+			((!un)||(un->GetSerial() != serial)))
 		{
-			COUT<<"Sending sound sample to client n° "<<clt->game_unit.GetUnit()->GetSerial();
-			COUT<<endl;
 			pckt->bc_send( clt->cltadr, clt->tcp_sock);
 		}
 	}
@@ -384,10 +401,8 @@ void	ZoneMgr::broadcastText( int zone, ObjSerial serial, Packet * pckt, float fr
 		// Broadcast to all clients excluding the one who did a request and
 		// excluding those who are listening on a different frequency, those who aren't communicating
 		// and those who don't have PortAudio support
-		if( clt->ingame && clt->comm_freq!=-1 && un->GetSerial() != serial )
+		if( clt->ingame && clt->comm_freq!=-1 && ((!un)||(un->GetSerial() != serial)) )
 		{
-			COUT<<"Sending sound sample to client n° "<<clt->game_unit.GetUnit()->GetSerial();
-			COUT<<endl;
 			pckt->bc_send( clt->cltadr, clt->tcp_sock);
 		}
 	}
@@ -466,52 +481,7 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 						}
 						iter.advance();
 					}
-			/************************* START CLIENTS BROADCAST ***************************/
-				/*
-				// If we don't want to send a client its own info set nbclients to zone_clients-1 for memory saving (ok little)
-					nbclients = zone_clients[i]-1;
-					netbuf.Reset();
-					for( l=zone_list[i]->begin(); l!=zone_list[i]->end(); l++)
-					{
-						// Check if we are on the same client and that the client has moved !
-                        ClientPtr cltl( *l );
-						if( l!=k && cltl->ingame)
-						{
-							Unit * un = cltl->game_unit.GetUnit();
-							// Create a client state with a delta time
-							ClientState cs( un);
-							// HAVE TO VERIFY WHICH DELTATIME IS TO BE SENT
-							cs.setDelay( cltl->getDeltatime());
-							bool added = addPosition( netbuf, un, cs);
-                            if( added )
-							    nbunits++;
-						}
-						// Else : always send back to clients their own info or just ignore ?
-						// Ignore for now
-					}
-					*/
-			/************************* END CLIENTS BROADCAST ***************************/
-			/************************* START UNITS BROADCAST ***************************/
-				/*
-					nbunits = zone_units[i];
-					cerr<<"BROADCAST SNAPSHOTS = "<<zone_units[i]<<" units in zone "<<i<<endl;
-					//netbuf.Reset();
-					for( m=zone_unitlist[i].begin(); m!=zone_unitlist[i].end(); m++)
-					{
-						// Only send planets and nebulas update when PLANET_ATOM is reached
-						if( ((*m)->isUnit()!=PLANETPTR && (*m)->isUnit()!=NEBULAPTR) || update_planets )
-						{
-							// Create a client state with a delta time too ?? WHICH ONE ???
-							ClientState cs( (*m));
-							bool added = addPosition( netbuf, (*m), cs);
-                            if( added )
-							    nbunits++;
-							// Else : always send back to clients their own info or just ignore ?
-							// Ignore for now
-						}
-					}
-				*/
-			/************************* END UNITS BROADCAST ***************************/
+
 					// Send snapshot to client k
 					if(nbunits>0)
 					{
@@ -664,35 +634,7 @@ void	ZoneMgr::broadcastDamage( )
 
 						iter.advance();
 					}
-			/************************* START CLIENTS BROADCAST ***************************/
-					/*
-					nbclients = zone_clients[i];
-					netbuf.Reset();
-					for( l=zone_list[i]->begin(); l!=zone_list[i]->end(); l++)
-					{
-                        if( (*l).expired() ) continue;
-
-                        ClientPtr cltl( *l );
-						// Check if there is damages on that client
-						un = cltl->game_unit.GetUnit();
-						if( cltl->ingame && un && un->damages)
-							this->addDamage( netbuf, un);
-					}
-					*/
-			/************************* END CLIENTS BROADCAST ***************************/
-			/************************* START UNITS BROADCAST ***************************/
-					/*
-					//cerr<<"BROADCAST DAMAGE = "<<zone_units[i]<<" units in zone "<<i<<endl;
-					nbunits = zone_units[i];
-					//netbuf.Reset();
-					for( m=zone_unitlist[i].begin(); m!=zone_unitlist[i].end(); m++)
-					{
-						// Check if there is damages on that unit
-						if( (*m)->damages)
-							this->addDamage( netbuf, (*m));
-					}
-					*/
-// NETFIXME: Should damage updates be UDP or TCP?
+					// NETFIXME: Should damage updates be UDP or TCP?
 					// Send snapshot to client k
 					if( netbuf.getDataLength() > 0)
 					{
@@ -799,93 +741,6 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 			netbuf.addFloat( un->limits.pitch);
 			netbuf.addFloat( un->limits.lateral);
 		}
-}
-
-/************************************************************************************************/
-/**** sendZoneClients                                                                       *****/
-/************************************************************************************************/
-
-// Send one by one a CMD_ADDLCIENT to the client for every ship in the star system we enter
-// Always TCP.
-void ZoneMgr::sendZoneClients( ClientWeakPtr clt )
-{
-	CWLI k;
-	int nbclients=0;
-	Packet packet2;
-	string savestr, xmlstr;
-	NetBuffer netbuf;
-
-	// Loop through client in the same zone to send their current_state and save and xml to "clt"
-    if( clt.expired() ) return;
-    ClientPtr cp( clt );
-
-    unsigned short cltzone = cp->game_unit.GetUnit()->activeStarSystem->GetZone();
-    ClientWeakList* lst = zone_list[cltzone];
-    if( lst == NULL )
-    {
-	    COUT << "\t>>> WARNING: Did not send info about " << nbclients << " other ships to client serial " << cp->game_unit.GetUnit()->GetSerial() << " because of empty (inconsistent?) zone" << endl;
-        return;
-    }
-
-	for( k=lst->begin(); k!=lst->end(); k++)
-	{
-        if( (*k).expired() ) continue;
-        ClientPtr kp( *k );
-
-		// Test if *k is the same as clt in which case we don't need to send info
-		if( cp!=kp && kp->ingame)
-		{
-			SaveNetUtil::GetSaveStrings( kp, savestr, xmlstr);
-			// Add the ClientState at the beginning of the buffer -> NO THIS IS IN THE SAVE !!
-			//netbuf.addClientState( ClientState( kp->game_unit.GetUnit()));
-			// Add the callsign and save and xml strings
-			netbuf.addString( kp->callsign);
-			netbuf.addString( savestr);
-			netbuf.addString( xmlstr);
-			packet2.send( CMD_ENTERCLIENT, kp->game_unit.GetUnit()->GetSerial(),
-                          netbuf.getData(), netbuf.getDataLength(),
-                          SENDRELIABLE, &cp->cltadr, cp->tcp_sock,
-                          __FILE__, PSEUDO__LINE__(579) );
-			nbclients++;
-		}
-	}
-	COUT<<"\t>>> SENT INFO ABOUT "<<nbclients<<" OTHER SHIPS TO CLIENT SERIAL "<<cp->game_unit.GetUnit()->GetSerial()<<endl;
-}
-
-/************************************************************************************************/
-/**** getZoneClients                                                                        *****/
-/************************************************************************************************/
-
-// Fills buffer with descriptions of clients in the same zone as our client
-// Called after the client has been added in the zone so that it can get his
-// own information/save from the server
-int		ZoneMgr::getZoneClients( ClientWeakPtr clt, char * bufzone)
-{
-	CWLI k;
-	int state_size;
-	unsigned short nbt;
-	state_size = sizeof(ClientState);
-
-    if( clt.expired() ) return 0;
-    ClientPtr cp( clt );
-
-	unsigned short cltzone = cp->game_unit.GetUnit()->activeStarSystem->GetZone();
-	nbt = zone_clients[cltzone];
-	NetBuffer netbuf;
-
-	COUT<<"ZONE "<<cltzone<<" - "<<nbt<<" clients"<<endl;
-	netbuf.addShort( nbt);
-    assert( zone_list[cltzone] != NULL );
-	for( k=zone_list[cltzone]->begin(); k!=zone_list[cltzone]->end(); k++)
-	{
-		COUT<<"SENDING : ";
-        if( (*k).expired() ) continue;
-        ClientPtr kp( *k );
-		if( kp->ingame)
-			netbuf.addClientState( ClientState( kp->game_unit.GetUnit() )  );
-	}
-
-	return state_size*nbt;
 }
 
 /************************************************************************************************/

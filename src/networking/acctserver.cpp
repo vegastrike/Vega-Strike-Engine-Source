@@ -390,7 +390,7 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                 ObjSerial nbclients = packet.getSerial();
                 int i=0;
                 cout<<">>>>>>>>> SYNC RECEIVED FOR "<<nbclients<<" CLIENTS <<<<<<<<<<<<"<<endl;
-                ObjSerial sertmp;
+				std::string nameTmp;
                 VI vi;
                 
                 // Loop through accounts
@@ -409,13 +409,13 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                 // Loop through received client serials
                 for( i=0; i<nbclients; i++)
                 {
-                    sertmp = netbuf.getShort();
+                    nameTmp = netbuf.getString();
                     //sertmp = ntohs( *( (ObjSerial *)(buf+sizeof( ObjSerial)*i)));
                     // Loop through accounts
                     for( vi = Cltacct.begin(); vi!=Cltacct.end(); vi++)
                     {
                         // Reactivate the serial we received from server
-                        if( (*vi)->getSerial() == sertmp)
+                        if( (*vi)->compareName(nameTmp))
                             (*vi)->setConnected( true);
                     }
                 }

@@ -43,6 +43,8 @@ void	NetServer::addClient( ClientPtr clt)
 
 	QVector nullVec( 0, 0, 0);
 	int player = _Universe->whichPlayerStarship( un);
+	if (player==-1)
+		return;
 	cerr<<"ADDING Player number "<<player<<endl;
 	Cockpit * cp = _Universe->AccessCockpit(player);
 	string starsys = cp->savegame->GetStarSystem();
@@ -56,8 +58,8 @@ void	NetServer::addClient( ClientPtr clt)
 	st2 = GetLoadedStarSystem( sysfile.c_str());
 	if( !st2)
 	{
-		cerr<<"!!! ERROR : star system '"<<starsys<<"' not found"<<endl;
-		VSExit(1);
+		cerr<<"!!! FATAL ERROR : star system '"<<starsys<<"' not found"<<endl;
+		st2 = _Universe->GenerateStarSystem(sysfile.c_str(), "", Vector(0,0,0));
 	}
 
 	// On server side this is not done in Cockpit::SetParent()
@@ -154,6 +156,8 @@ void	NetServer::removeClient( ClientPtr clt)
 {
 	Packet packet2;
 	Unit * un = clt->game_unit.GetUnit();
+	if (!un)
+		return; // Don't broadcast if already dead.
 	clt->ingame = false;
 	// Remove the client from its current starsystem
 	zonemgr->removeClient( clt);
@@ -178,6 +182,8 @@ void	NetServer::posUpdate( ClientPtr clt)
 
 	NetBuffer netbuf( packet.getData(), packet.getDataLength());
 	Unit * un = clt->game_unit.GetUnit();
+	if (!un)
+		return; // Don't receive data if dead.
 	ObjSerial clt_serial = netbuf.getSerial();
 //   clt->setLatestTimestamp(packet.getTimestamp( ));
     clt->setLatestTimestamp(packet.getTimestamp( ));
@@ -203,26 +209,9 @@ void	NetServer::posUpdate( ClientPtr clt)
 //	un->curr_physical_state.position = clt->prediction->InterpolatePosition( un, 0);
 	clt->last_packet=cs;
 	// deltatime has already been updated when the packet was received
-	Cockpit * cp = _Universe->isPlayerStarship( clt->game_unit.GetUnit());
+	Cockpit * cp = _Universe->isPlayerStarship( un );
 	cp->savegame->SetPlayerLocation( un->curr_physical_state.position);
 	snapchanged = 1;
-}
-
-/**************************************************************/
-/**** Check if the client has the right system file        ****/
-/**************************************************************/
-
-void	NetServer::checkSystem( ClientPtr clt)
-{
-	// HERE SHOULD CONTROL THE CLIENT HAS THE SAME STARSYSTEM FILE OTHERWISE SEND IT TO CLIENT
-
-	Unit * un = clt->game_unit.GetUnit();
-	Cockpit * cp = _Universe->isPlayerStarship( un);
-
-	string starsys = cp->savegame->GetStarSystem();
-	// getCRC( starsys+".system");
-	// 
-
 }
 
 /**************************************************************/
@@ -241,25 +230,17 @@ void	NetServer::disconnect( ClientPtr clt, const char* debug_from_file, int debu
 
 	if( acctserver )
 	{
-        if( un != NULL )
+	    // Send a disconnection info to account server
+	    netbuf.addString( clt->callsign );
+	    netbuf.addString( clt->passwd );
+	    Packet p2;
+	    if( p2.send( CMD_LOGOUT, 0,
+                     netbuf.getData(), netbuf.getDataLength(),
+	                 SENDRELIABLE, NULL, acct_sock, __FILE__,
+                     PSEUDO__LINE__(1395) ) < 0 )
         {
-		    // Send a disconnection info to account server
-		    netbuf.addString( clt->callsign );
-		    netbuf.addString( clt->passwd );
-		    Packet p2;
-		    if( p2.send( CMD_LOGOUT, un->GetSerial(),
-                         netbuf.getData(), netbuf.getDataLength(),
-		                 SENDRELIABLE, NULL, acct_sock, __FILE__,
-                         PSEUDO__LINE__(1395) ) < 0 )
-            {
-			    COUT<<"ERROR sending LOGOUT to account server"<<endl;
-		    }
-		    //p2.display( "", 0);
-        }
-        else
-        {
-            COUT << "Could not get Unit for " << clt->callsign << endl;
-        }
+		    COUT<<"ERROR sending LOGOUT to account server"<<endl;
+	    }
 	}
 
 	clt->tcp_sock.disconnect( __PRETTY_FUNCTION__, false );
@@ -301,7 +282,7 @@ void	NetServer::logout( ClientPtr clt )
 		netbuf.addString( clt->passwd);
 		COUT<<"Loggin out "<<clt->callsign<<":"<<clt->passwd<<endl;
 		Packet p2;
-		if( p2.send( CMD_LOGOUT, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(),
+		if( p2.send( CMD_LOGOUT, 0, netbuf.getData(), netbuf.getDataLength(),
 		             SENDRELIABLE, NULL, acct_sock, __FILE__,
                      PSEUDO__LINE__(1555) ) < 0 )
         {
@@ -310,7 +291,7 @@ void	NetServer::logout( ClientPtr clt )
 	}
 
 	clt->tcp_sock.disconnect( __PRETTY_FUNCTION__, false );
-	COUT <<"Client "<<un->GetSerial()<<" disconnected"<<endl;
+	COUT <<"Client "<<clt->callsign<<" disconnected"<<endl;
 	COUT <<"There was "<< allClients.size() <<" clients - ";
 	allClients.remove( clt );
 	// Removes the client from its starsystem
@@ -353,12 +334,15 @@ void  NetServer::getZoneInfo( unsigned short zoneid, NetBuffer & netbuf)
 		// Test if *k is the same as clt in which case we don't need to send info
 		if( kp->ingame)
 		{
+			Unit *un = kp->game_unit.GetUnit();
+			if (!un)
+				continue;
 			SaveNetUtil::GetSaveStrings( kp, savestr, xmlstr);
 			// Add the ClientState at the beginning of the buffer -> NO THIS IS IN THE SAVE !!
 			//netbuf.addClientState( ClientState( kp->game_unit.GetUnit()));
 			// Add the callsign and save and xml strings
 			netbuf.addChar( ZoneMgr::AddClient);
-			netbuf.addSerial( kp->game_unit.GetUnit()->GetSerial());
+			netbuf.addSerial( un->GetSerial());
 			netbuf.addString( kp->callsign);
 			netbuf.addString( savestr);
 			netbuf.addString( xmlstr);

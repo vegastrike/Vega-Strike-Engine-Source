@@ -73,7 +73,12 @@ void	NetServer::checkTimedoutClients_udp()
 			    {
 	                Unit * un;
 				    un = cl->game_unit.GetUnit();
-				    cerr<<"ACTIVITY TIMEOUT for client number "<<un->GetSerial()<<endl;
+				    COUT<<"ACTIVITY TIMEOUT for client number ";
+					if (un)
+						cout<<un->GetSerial();
+					else
+						cout << "Dead unit";
+					cout<<endl;
 				    COUT<<"\t\tCurrent time : "<<curtime<<endl;
 				    COUT<<"\t\tLatest timeout : "<<(cl->latest_timeout)<<endl;
 				    COUT<<"t\tDifference : "<<deltatmp<<endl;
@@ -155,8 +160,9 @@ void NetServer::recvMsg_udp( )
         for( LI i=allClients.begin(); i!=allClients.end(); i++)
         {
             tmp = (*i);
+			Unit *myun = tmp->game_unit.GetUnit();
 			// NETFIXME: Cheat: We have to check the address and port of the sender to make sure it matches that of our client socket.
-            if( tmp->game_unit.GetUnit()->GetSerial() == nserial)
+            if( myun && myun->GetSerial() == nserial)
             {
                 clt = tmp;
                 found = 1;
@@ -176,8 +182,10 @@ void NetServer::recvMsg_udp( )
         if (clt && (ipadr!=clt->cltudpadr))
         {
 	    	assert( command != CMD_LOGIN ); // clt should be 0 because ObjSerial was 0
-
-            COUT << "Error : IP changed for client # " << clt->game_unit.GetUnit()->GetSerial() << endl;
+			Unit * un = clt->game_unit.GetUnit();
+			if (un) {
+				COUT << "Error : IP changed for client # " << un->GetSerial() << endl;
+			}
             clt->_disconnectReason = "possible IP spoofing";
             discList.push_back( clt );
 	    	/* It is not entirely impossible for this to happen; it would be nice

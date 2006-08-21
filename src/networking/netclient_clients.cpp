@@ -108,10 +108,12 @@ ClientPtr NetClient::AddClientObject( Unit *un, ObjSerial cltserial)
 
 		_Universe->activeStarSystem()->AddUnit( un);
 	
-	} else if( cltserial!=this->game_unit.GetUnit()->GetSerial())
-	{
-		clt->game_unit.SetUnit( getNetworkUnit( cltserial));
-		assert( clt->game_unit.GetUnit() != NULL);
+	} else {
+		Unit *myun = this->game_unit.GetUnit();
+		if( myun==NULL || cltserial!=myun->GetSerial())
+		{
+			clt->game_unit.SetUnit( getNetworkUnit( cltserial));
+		}
 	}
 	return clt;
 }
@@ -178,14 +180,17 @@ void	NetClient::removeClient( const Packet* packet )
 //		exit( 1);
 	}
 	Unit * un = clt->game_unit.GetUnit();
-
-	// Removes the unit from starsystem, destroys it and delete client
-	_Universe->activeStarSystem()->RemoveUnit(clt->game_unit.GetUnit());
+	if (un) {
+		// Removes the unit from starsystem, destroys it and delete client
+		_Universe->activeStarSystem()->RemoveUnit( un );
+	}
 	nbclients--;
 	Clients.remove(cltserial);
-	un->Kill();
+	if (un) {
+		un->Kill();
+	}
 	COUT<<"Leaving client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
-	string msg = clt->callsign+" leaved the system";
+	string msg = clt->callsign+" left the system";
 	UniverseUtil::IOmessage(0,"game","all","#FFFF66"+msg+"#000000");
 }
 
@@ -195,13 +200,13 @@ void	NetClient::removeClient( const Packet* packet )
 
 void	NetClient::sendPosition( const ClientState* cs )
 {
-
-
-
 // NETFIXME: POSUPDATE's need to happen much more often, and should send info more onften about closer units than farther ones.
 
 
 
+	Unit *un = this->game_unit.GetUnit();
+	if (!un)
+		return;
 	// Serial in ClientState is updated in UpdatePhysics code at ClientState creation (with pos, veloc...)
 	Packet pckt;
 	NetBuffer netbuf;
@@ -212,7 +217,7 @@ void	NetClient::sendPosition( const ClientState* cs )
 	if (debugPos) (*cs).display();
 	netbuf.addSerial( cs->getSerial());
 	netbuf.addClientState( (*cs));
-	pckt.send( CMD_POSUPDATE, this->game_unit.GetUnit()->GetSerial(),
+	pckt.send( CMD_POSUPDATE, un->GetSerial(),
                netbuf.getData(), netbuf.getDataLength(),
                SENDANDFORGET, NULL, *this->lossy_socket,
                __FILE__, PSEUDO__LINE__(218) );
@@ -466,18 +471,18 @@ void	NetClient::inGame()
 	Packet    packet2;
 	NetBuffer netbuf;
     char      flags = 0;
+	Unit    * un = this->game_unit.GetUnit();
 
-	//ClientState cs( this->serial, this->game_unit.GetUnit()->curr_physical_state, this->game_unit.GetUnit()->Velocity, Vector(0,0,0), 0);
+	//ClientState cs( this->serial, un->curr_physical_state, un->Velocity, Vector(0,0,0), 0);
 	// HERE SEND INITIAL CLIENTSTATE !! NOT NEEDED ANYMORE -> THE SERVER ALREADY KNOWS
 	//netbuf.addClientState( cs);
 	packet2.send( CMD_ADDCLIENT, this->serial,
                   netbuf.getData(), netbuf.getDataLength(),
                   SENDRELIABLE, NULL, this->clt_tcp_sock,
                   __FILE__, PSEUDO__LINE__(392) );
-	this->game_unit.GetUnit()->SetSerial( this->serial);
+	un->SetSerial( this->serial);
 	COUT << "Sending ingame with serial n°" << this->serial << endl;
 	this->ingame = true;
-	Unit * un = this->game_unit.GetUnit();
 	cerr<<"STARTING LOCATION : x="<<un->Position().i<<",y="<<un->Position().j<<",z="<<un->Position().k<<endl;
 }
 
@@ -491,8 +496,11 @@ void NetClient::sendAlive()
 	if( clt_sock.isTcp() == false )
     {
 	*/
-        Packet	p;
-        p.send( CMD_PING, this->game_unit.GetUnit()->GetSerial(),
+        Unit * un = this->game_unit.GetUnit();
+        if ( !un )
+            return;
+        Packet p;
+        p.send( CMD_PING, un->GetSerial(),
                 (char *)NULL, 0,
                 SENDANDFORGET, NULL, *this->lossy_socket,
                 __FILE__, PSEUDO__LINE__(414) );

@@ -143,6 +143,7 @@ NetClient::~NetClient()
 
 bool	NetClient::PacketLoop( Cmd command)
 {
+	// NETFIXME: This code doesn't look like it works... it seems like it could easily discard data.
 	Packet packet;
 	bool timeout = false;
 	bool recv = false;
@@ -172,16 +173,15 @@ bool	NetClient::PacketLoop( Cmd command)
 		ret=this->checkMsg( &packet );
 		if( ret>0)
 		{
-			if( packet.getCommand() == command)
+			if( packet.getCommand() == command) {
 				COUT<<"Got a response with corresponding command"<<endl;
-			else
+				recv = true;
+			} else
 			{
 				COUT<<"Got a response with unexpected command : ";
 				displayCmd( packet.getCommand());
-				COUT<<endl<<"!!! PROTOCOL ERROR -> EXIT !!!"<<endl;
-				VSExit(1);
+				cout << " instead of "<<command<<endl;
 			}
-			recv = true;
 		}
 		else if( ret<0)
 		{
@@ -388,8 +388,8 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
     // Receive data
 	Unit * un = NULL;
 	int mount_num;
-	ObjSerial mis;
-	ObjSerial local_serial;
+	ObjSerial mis=0;
+	ObjSerial local_serial=0;
 	if( this->game_unit.GetUnit() != NULL)
 		local_serial = this->game_unit.GetUnit()->GetSerial();
 	Cockpit * cp;
@@ -458,13 +458,16 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
             break;
 			case CMD_ASKFILE :
 			{
+				// NETFIXME: Broken code... shouldn't write to client's stuff
+				// Also, shouldn't open files Read-only and then write to them.
+				// Also it shouldn't exit(1)...
 				FILE * fp;
 				string filename;
 				string file;
 				filename = netbuf.getString();
 				file = netbuf.getString();
 				// If packet serial == 0 then it means we have an up to date file
-				if( packet_serial==this->game_unit.GetUnit()->GetSerial())
+				if( packet_serial==local_serial)
 				{
 					// Receive the file and write it (trunc if exists)
 					cerr<<"RECEIVING file : "<<filename<<endl;
@@ -763,12 +766,13 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				}
 				else
 				{
-					//Remove the player unit
 					un = clt->game_unit.GetUnit();
-//					_Universe->activeStarSystem()->RemoveUnit(clt->game_unit.GetUnit());
+					//Remove the player unit
 					nbclients--;
 					Clients.remove(p1.getSerial());
-					un->Destroy();
+					if (un) {
+						un->Destroy();
+					}
 					COUT<<"Client n°"<<p1.getSerial()<<" killed - now "<<nbclients<<" clients in system"<<endl;
 
 					string msg = clt->callsign+" was killed";
@@ -784,12 +788,14 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				ObjSerial jumpserial = netbuf.getSerial();
 				unsigned short zoneid = netbuf.getShort();
 				un = this->game_unit.GetUnit();
+				if (!un)
+					break;
 				// Get the pointer to the new star system sent by server
 				if( !(sts=star_system_table.Get( newsystem)))
 				{
 					// The system should have been loaded just before we asked for the jump so this is just a safety check
-					cerr<<"!!! ERROR : Couldn't find destination Star system !!!"<<endl;
-					VSExit(1);
+					cerr<<"!!! FATAL ERROR : Couldn't find destination Star system !!!"<<endl;
+					sts = _Universe->GenerateStarSystem( newsystem.c_str(), "", Vector(0,0,0) );
 				}
 				// If unserial == un->GetSerial() -> then we are jumping otherwise it is another unit/player
 				if( unserial == un->GetSerial())
@@ -927,28 +933,14 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 			break;
 			case CMD_POSUPDATE :
 			{
-
-
-
-
-/**************************************************************/
-////////////////////////////////////////////////////////////////
-// NETFIXME: Check for NULL (dead) Unit! ///////////////////////
-////////////////////////////////////////////////////////////////
-/**************************************************************/
-
-
-
-
-
-
-
-				
 				// If a client receives that it means the server want to force the client position to be updated
 				// with server data
 				QVector serverpos = netbuf.getQVector();
-				this->game_unit.GetUnit()->old_state.setPosition( serverpos);
-				this->game_unit.GetUnit()->curr_physical_state.position = serverpos;
+				un = this->game_unit.GetUnit();
+				if (!un)
+					break;
+				un->old_state.setPosition( serverpos);
+				un->curr_physical_state.position = serverpos;
 			}
 			break;
 			case CMD_CREATEUNIT :
@@ -1105,10 +1097,13 @@ void	NetClient::logout()
 {
 	keeprun = 0;
 	Packet p;
-	p.send( CMD_LOGOUT, this->game_unit.GetUnit()->GetSerial(),
+	Unit *un = this->game_unit.GetUnit();
+	if (un) {
+		p.send( CMD_LOGOUT, un->GetSerial(),
             (char *)NULL, 0,
             SENDRELIABLE, NULL, this->clt_tcp_sock,
             __FILE__, PSEUDO__LINE__(1382) );
+	}
 	clt_tcp_sock.disconnect( "Closing connection to server", false );
 	clt_udp_sock.disconnect( "Closing UDP connection to server", false );
 }
