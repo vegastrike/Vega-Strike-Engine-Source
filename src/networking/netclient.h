@@ -86,7 +86,11 @@ class	NetClient
         int					zone;			// Zone id in universe
         char				keeprun;		// Bool to test client stop
         string				callsign;		// Callsign of the networked player
+        vector<string> lastsave;
+
         Clients 			Clients;		// Clients in the same zone
+
+
 		// This unit array has to be changed into a map too !!
         // Unit *				Units[MAXOBJECTS];			// Server controlled units in the same zone
 	    // a vector because always accessed by their IDs
@@ -131,8 +135,8 @@ class	NetClient
 		static void getConfigServerAddress( string & host, unsigned short &port );
 	
 		int				authenticate();
-		vector<string>	loginLoop( string str_callsign, string str_passwd); // Loops until receiving login response
-		vector<string>	loginAcctLoop( string str_callsign, string str_passwd);
+		vector<string>	&loginLoop( string str_callsign, string str_passwd); // Loops until receiving login response
+		vector<string>	&loginAcctLoop( string str_callsign, string str_passwd);
 		void			loginAccept( Packet & p1);
 		SOCKETALT		init( const char* addr, unsigned short port);
 		SOCKETALT		init_acct( const char * addr, unsigned short port);
@@ -157,6 +161,7 @@ class	NetClient
 		int		isTime();
 		// Warn the server we are leaving the game
 		void	logout();
+		void	Respawn(ObjSerial clientname);
 		// Check if there are info incoming over the network
 		int		checkMsg( Packet* outpacket );
 		// Send a position update

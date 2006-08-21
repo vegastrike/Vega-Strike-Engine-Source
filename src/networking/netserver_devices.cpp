@@ -121,7 +121,9 @@ void	NetServer::sendJump( ObjSerial serial, ObjSerial jumpserial, bool ok)
 	NetBuffer netbuf;
 	string file_content;
 	ClientPtr clt = this->getClientFromSerial( serial);
-
+        if (!clt) {
+          cerr<<"Client "<< serial<<" Trying to jump but cannot retrieve client struct \n";
+        }
 	// Send a CMD_JUMP to tell the client if the jump is allowed
 	netbuf.addString( clt->jumpfile );
 	netbuf.addSerial( serial);

@@ -13,7 +13,6 @@
 #include "networking/client.h"
 #include "networking/fileutil.h"
 
-vector<string> globalsaves;
 
 /*************************************************************/
 /**** Authenticate the client                             ****/
@@ -61,7 +60,7 @@ int		NetClient::authenticate()
 /**** Login loop : waiting for game server to respond     ****/
 /*************************************************************/
 
-vector<string>	NetClient::loginLoop( string str_callsign, string str_passwd)
+vector<string>	&NetClient::loginLoop( string str_callsign, string str_passwd)
 {
 	COUT << "enter " << "NetClient::loginLoop" << endl;
 
@@ -100,8 +99,8 @@ vector<string>	NetClient::loginLoop( string str_callsign, string str_passwd)
 		recv=this->recvMsg( &packet, &tv );
 		if( recv==0 )
 		{
-			globalsaves.push_back( "");
-			globalsaves.push_back( "!!! NETWORK ERROR : Connection to game server timed out !!!");
+			lastsave.push_back( "");
+			lastsave.push_back( "!!! NETWORK ERROR : Connection to game server timed out !!!");
 			timeout = 1;
 		} else if (recv<0) {
 			char str[127];
@@ -112,28 +111,28 @@ vector<string>	NetClient::loginLoop( string str_callsign, string str_passwd)
 				errno
 #endif
 				);
-			globalsaves.push_back( "");
-			globalsaves.push_back( str);
+			lastsave.push_back( "");
+			lastsave.push_back( str);
 			timeout = 1;
 		} else {
 			break;
 		}
 	}
 	COUT<<"End of login loop"<<endl;
-	if( globalsaves.empty() || globalsaves[0]!="")
+	if( lastsave.empty() || lastsave[0]!="")
 	{
 		this->callsign = str_callsign;
 	}
 	//cout<<"GLOBALSAVES[0] : " 
 	//cout<<"GLOBALSAVES[1] : "<<globalsaves[1]<<endl;
-	return globalsaves;
+	return lastsave;
 }
 
 /*************************************************************/
 /**** Login loop : waiting for account server to respond  ****/
 /*************************************************************/
 
-vector<string>	NetClient::loginAcctLoop( string str_callsign, string str_passwd)
+vector<string>	&NetClient::loginAcctLoop( string str_callsign, string str_passwd)
 {
 	COUT << "enter " << "NetClient::loginAcctLoop" << endl;
 
@@ -175,8 +174,8 @@ vector<string>	NetClient::loginAcctLoop( string str_callsign, string str_passwd)
 		//COUT<<elapsed<<" seconds since login request"<<endl;
 		if( elapsed > login_to)
 		{
-			globalsaves.push_back( "");
-			globalsaves.push_back( "!!! NETWORK ERROR : Connection to account server timed out !!!");
+			lastsave.push_back( "");
+			lastsave.push_back( "!!! NETWORK ERROR : Connection to account server timed out !!!");
 			timeout = 1;
 		}
 
@@ -186,7 +185,7 @@ vector<string>	NetClient::loginAcctLoop( string str_callsign, string str_passwd)
 	}
 	COUT<<"End of loginAcct loop"<<endl;
 	// globalsaves should be empty otherwise we filled it with an empty string followed by the error message
-	if( globalsaves.empty() || globalsaves[0]!="")
+	if( lastsave.empty() || lastsave[0]!="")
 	{
 		//this->callsign = str_callsign;
 		//savefiles = globalsaves;
@@ -194,7 +193,7 @@ vector<string>	NetClient::loginAcctLoop( string str_callsign, string str_passwd)
              << "\tIP=" << _serverip << ":" << _serverport << endl;
 		this->init( _serverip.c_str(), atoi( _serverport.c_str()));
 	}
-	return globalsaves;
+	return lastsave;
 }
 
 void	NetClient::loginAccept( Packet & p1)
@@ -213,8 +212,8 @@ void	NetClient::loginAccept( Packet & p1)
 	cerr << "Stardate initialized"<<endl;
     cerr << "WE ARE ON STARDATE " << datestr << " - converted : "
          <<_Universe->current_stardate.GetFullTrekDate() << endl;
-	globalsaves.push_back( netbuf.getString());
-	globalsaves.push_back( netbuf.getString());
+	lastsave.push_back( netbuf.getString());
+	lastsave.push_back( netbuf.getString());
 	// Set the zone number
 	// Get the galaxy file from buffer with relative path to datadir !
 	string univfile = netbuf.getString();

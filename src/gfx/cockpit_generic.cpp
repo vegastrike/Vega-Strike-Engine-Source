@@ -594,13 +594,13 @@ bool Cockpit::Update () {
   if (!par) {
 	if (respawnunit.size()>_Universe->CurrentCockpit()){
 	  if (respawnunit[_Universe->CurrentCockpit()]){
+           static float initialzoom = XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
+           zoomfactor=initialzoom;
 	   if (Network!=NULL) {
 	    Network[_Universe->CurrentCockpit()].respawnRequest();
 		respawnunit[_Universe->CurrentCockpit()]=0;
 	   } else {
 		parentturret.SetUnit(NULL);
-		static float initialzoom = XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
-		zoomfactor=initialzoom;
 		respawnunit[_Universe->CurrentCockpit()]=0;
 		std::string savegamefile =mission->getVariable ("savegame","");
 		int k;

@@ -2680,8 +2680,10 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
   }
   else
   {
-	if( SERVER)
+    /*
+	if(0&& SERVER)
 		VSServer->sendJump( this->serial, smalle->GetSerial(), false);
+    */ //didn't even TRY to jump here--don't go about sending anything, d'oh!
   }
   return false;
 }

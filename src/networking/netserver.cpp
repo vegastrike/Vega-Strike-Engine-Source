@@ -718,6 +718,19 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 		case CMD_RESPAWN :
 			COUT << "Received a respawning request for "<<
 				clt->callsign<<"..." << endl;
+                        {
+                          // Remove the client from its current starsystem
+                          Unit * oldun=clt->game_unit.GetUnit();
+                          if (oldun==NULL||oldun->GetHull()<=0) {
+                            zonemgr->removeClient( clt);
+                            if(oldun) oldun->Kill(true,true);
+                            Cockpit* cp = loadFromSavegame(clt);
+                            //actually cp not used
+                            this->addClient( clt);
+                          }else {
+                            COUT << clt->callsign<<"'s not quite dead yet laddie. Disallowing respawn\n";
+                          }
+                        }
 			break;
         case CMD_DOWNLOAD :
 			COUT<<">>> CMD DOWNLOAD =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;

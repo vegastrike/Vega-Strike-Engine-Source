@@ -593,12 +593,12 @@ void bootstrap_main_loop () {
 		}
 		//sleep( 3);
         cout<<"Waiting for player "<<(k)<<" = "<<(*it)<<":"<<(*jt)<<"login response...";
-        vector<string> loginResp;
+        vector<string> *loginResp;
         if( use_acctserver=="true")
-            loginResp = Network[k].loginAcctLoop( (*it), (*jt));
+            loginResp = &Network[k].loginAcctLoop( (*it), (*jt));
         else
-            loginResp = Network[k].loginLoop( (*it), (*jt));
-        savefiles.push_back( loginResp );
+            loginResp = &Network[k].loginLoop( (*it), (*jt));
+        savefiles.push_back( *loginResp );
 
         if( savefiles[k].empty() || savefiles[k][0]=="")
         {

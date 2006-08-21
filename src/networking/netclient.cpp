@@ -66,7 +66,7 @@ using std::endl;
 using std::cin;
 
 double NETWORK_ATOM;
-extern vector<string> globalsaves;
+
 extern vector<unorigdest *> pendingjump;
 extern Hashtable<std::string, StarSystem, 127> star_system_table;
 typedef vector<Client *>::iterator VC;
@@ -229,18 +229,21 @@ int		NetClient::checkAcctMsg( )
 				break;
 				case LOGIN_ERROR :
 					COUT<<">>> LOGIN ERROR =( DENIED )= --------------------------------------"<<endl;
-					globalsaves.push_back( "");
-					globalsaves.push_back( "!!! ACCESS DENIED : Account does not exist !!!");
+                                        lastsave.resize(0);
+					lastsave.push_back( "");
+					lastsave.push_back( "!!! ACCESS DENIED : Account does not exist !!!");
 				break;
 				case LOGIN_ALREADY :
 					COUT<<">>> LOGIN ERROR =( ALREADY LOGGED IN )= --------------------------------------"<<endl;
-					globalsaves.push_back( "");
-					globalsaves.push_back( "!!! ACCESS DENIED : Account already logged in !!!");
+                                        lastsave.resize(0);
+					lastsave.push_back( "");
+					lastsave.push_back( "!!! ACCESS DENIED : Account already logged in !!!");
 				break;
 				default:
 					COUT<<">>> UNKNOWN COMMAND =( "<<std::hex<<packeta.getSerial()<<" )= --------------------------------------"<<std::endl;
-					globalsaves.push_back( "");
-					globalsaves.push_back( "!!! PROTOCOL ERROR : Unexpected command received !!!");
+                                        lastsave.resize(0);
+					lastsave.push_back( "");
+					lastsave.push_back( "!!! PROTOCOL ERROR : Unexpected command received !!!");
 			}
 		}
 		else
@@ -253,8 +256,8 @@ int		NetClient::checkAcctMsg( )
 				errno
 #endif
 				);
-			globalsaves.push_back( "");
-			globalsaves.push_back( str);
+			lastsave.push_back( "");
+			lastsave.push_back( str);
 			acct_sock.disconnect( __PRETTY_FUNCTION__, false );
 		}
 	}
@@ -367,7 +370,47 @@ int NetClient::checkMsg( Packet* outpacket )
 }
 
 #include "lowlevel/vsnet_err.h"
-
+extern void SwitchUnits2(Unit*un);
+void NetClient::Respawn( ObjSerial newserial) {
+  unsigned int whichcp;
+  for (whichcp=0;whichcp<_Universe->numPlayers();++whichcp) {
+    if (_Universe->AccessCockpit(whichcp)->GetParent()==NULL)
+      break;
+  }
+  if (whichcp==_Universe->numPlayers()) {
+    whichcp=0;
+    cerr<<"Error could not find blank cockpit to respawn into\n";
+  }
+  QVector pos(0,0,0);
+  bool setplayerXloc;
+  string mysystem="Crucible/Cephid_17";
+  Cockpit * cp = _Universe->AccessCockpit(whichcp);
+  cp->savegame->ParseSaveGame ("",mysystem,mysystem,pos,setplayerXloc,cp->credits,cp->unitfilename,whichcp, lastsave[0], false);
+  StarSystem * ss = _Universe->GenerateStarSystem(mysystem.c_str(),"",Vector(0,0,0));
+  _Universe->pushActiveStarSystem(ss);
+  unsigned int oldcp=_Universe->CurrentCockpit();
+  _Universe->SetActiveCockpit(cp);
+  std::string unkeyname=cp->unitfilename[0];
+  int fgsnumber = 0;
+  if (cp->fg) {
+    fgsnumber=cp->fg->flightgroup_nr++;
+    cp->fg->nr_ships++;
+    cp->fg->nr_ships_left++;
+  }
+  Unit *un=UnitFactory::createUnit(unkeyname.c_str(), false,FactionUtil::GetFactionIndex( cp->savegame->GetPlayerFaction()),std::string(""),cp->fg,fgsnumber, &lastsave[1],newserial);
+  un->SetSerial(newserial);
+  //  fighters[a]->faction = FactionUtil::GetFactionIndex( cp->savegame->GetPlayerFaction());
+  cp->SetParent(un,unkeyname.c_str(),"",pos);
+  this->game_unit.SetUnit(un);
+  localSerials.push_back( newserial);
+  ss->AddUnit(un);
+  AddClientObject(un,newserial);
+  SwitchUnits2(un);
+  cp->SetView(CP_FRONT);
+  _Universe->SetActiveCockpit(oldcp);
+  _Universe->popActiveStarSystem();
+  
+}
 /**************************************************************/
 /**** Receive a message from the server                    ****/
 /**************************************************************/
@@ -504,14 +547,14 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
                 COUT<<">>> LOGIN ERROR =( DENIED )= ------------------------------------------------"<<endl;
                 //COUT<<"Received LOGIN_ERROR"<<endl;
                 this->disconnect();
-				globalsaves.push_back( "");
-				globalsaves.push_back( "!!! ACCESS DENIED : Account does not exist !!!");
+				lastsave.push_back( "");
+				lastsave.push_back( "!!! ACCESS DENIED : Account does not exist !!!");
                 return -1;
                 break;
 			case LOGIN_UNAVAIL :
 				COUT<<">>> ACCOUNT SERVER UNAVAILABLE ------------------------------------------------"<<endl;
-				globalsaves.push_back( "");
-				globalsaves.push_back( "!!! ACCESS DENIED : Account server unavailable !!!");
+				lastsave.push_back( "");
+				lastsave.push_back( "!!! ACCESS DENIED : Account server unavailable !!!");
 				this->disconnect();
 				return -1;
 				break;
@@ -561,12 +604,12 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
                 {
                     COUT << ">>> " << local_serial << " >>> ADDED IN GAME =( serial n°"
                          << packet_serial << " )= --------------------------------------" << endl;
-				    // Get the zone id in the packet
-				    //this->game_unit.GetUnit()->activeStarSystem->SetZone(netbuf.getShort());
-				    //_Universe->current_stardate.InitTrek( netbuf.getString());
-                    //COUT << "Compression: " << ( (flags & CMD_CAN_COMPRESS) ? "yes" : "no" ) << endl;
-					this->game_unit.GetUnit()->curr_physical_state = netbuf.getTransformation();
-					this->AddObjects( netbuf);
+                    //now we have to make the unit if it is null (this would be a respawn)
+                    if (this->game_unit.GetUnit()==NULL) {
+                      this->Respawn(packet_serial);
+                    }
+                    this->game_unit.GetUnit()->curr_physical_state = netbuf.getTransformation();
+                    this->AddObjects( netbuf);
                     //this->getZoneData( &p1 );
                 }
                 break;

@@ -26,6 +26,12 @@ void	NetClient::enterClient( NetBuffer &netbuf, ObjSerial cltserial )
 	string xmlstr = netbuf.getString();
 	Transformation trans = netbuf.getTransformation();
 	// If not a local player, add it in our array
+        Unit * shouldbenull=UniverseUtil::GetUnitFromSerial(cltserial);
+          //NETFIXME could be slow--but alas
+        if (NULL!=shouldbenull) {
+          cout << " not adding unit with serial number "<< cltserial<<" named " <<shouldbenull->name<<" to system .";
+          return;//already exists
+        }
 	if( !isLocalSerial( cltserial))
 	{
 
@@ -110,10 +116,16 @@ ClientPtr NetClient::AddClientObject( Unit *un, ObjSerial cltserial)
 	
 	} else {
 		Unit *myun = this->game_unit.GetUnit();
+		Unit *cltun = clt->game_unit.GetUnit();
+		if( cltun==NULL || cltserial!=cltun->GetSerial())
+		{
+			clt->game_unit.SetUnit( un?un:getNetworkUnit( cltserial));
+		}
 		if( myun==NULL || cltserial!=myun->GetSerial())
 		{
-			clt->game_unit.SetUnit( getNetworkUnit( cltserial));
+			this->game_unit.SetUnit( un?un:getNetworkUnit( cltserial));
 		}
+                
 	}
 	return clt;
 }
