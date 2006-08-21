@@ -1393,8 +1393,10 @@ public:
     Unit *un = destUnit.GetUnit();
     if (CloseEnoughToNavOrDest(parent, un, targetlocation)) {
       done = true;
-      printf("Uh-oh! Me = %08X (%s), other = %08X (%s)\n", (unsigned int)(void*)parent, parent->name.c_str(),
-          (unsigned int)(void*)un, un->name.c_str());
+        /*
+      printf("Uh-oh! Me = %08X (%s), other = %08X (%s)\n", (size_t)(void*)parent, parent->name.c_str(),
+          (size_t)(void*)un, un->name.c_str());
+        */
     }
     if (done) {
       printf ("Flyto done\n");
