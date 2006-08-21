@@ -69,6 +69,7 @@ public:
 	char			secured;
 	char			jumpok;
 	string			jumpfile;
+	vector<string>	savegame;
 	float			comm_freq;
 	ClientState     last_packet;        // Last FullUpdate packet recieved.
 

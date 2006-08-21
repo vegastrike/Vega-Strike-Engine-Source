@@ -715,6 +715,10 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			*/
 		}
 		break;
+		case CMD_RESPAWN :
+			COUT << "Received a respawning request for "<<
+				clt->callsign<<"..." << endl;
+			break;
         case CMD_DOWNLOAD :
 			COUT<<">>> CMD DOWNLOAD =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
             if( _downloadManagerServer )

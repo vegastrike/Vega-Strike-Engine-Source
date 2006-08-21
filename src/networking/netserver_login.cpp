@@ -106,7 +106,6 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct, ch
 
 	clt->callsign = callsign;
 	clt->passwd = passwd;
-	cltserial = getUniqueSerial();
 
 	COUT << "LOGIN REQUEST SUCCESS for <" << callsign << ">" << endl;
 	// Verify that client already has a character
@@ -117,121 +116,152 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct, ch
 	}
 	else
 	{
-		COUT << ">>> SEND LOGIN ACCEPT =( serial n°" << cltserial << " )= --------------------------------------" << endl;
+		clt->savegame.resize(0);
 		// Get the save parts in a string array
-		vector<string> saves;
-		saves.push_back( netbuf.getString());
-		saves.push_back( netbuf.getString());
+		clt->savegame.push_back( netbuf.getString());
+		clt->savegame.push_back( netbuf.getString());
 		// Put the save parts in buffers in order to load them properly
-		COUT<<"SAVE="<<saves[0].length()<<" bytes - XML="<<saves[1].length()<<" bytes"<<endl;
 		netbuf.Reset();
 
 		string datestr = _Universe->current_stardate.GetFullTrekDate();
-		cerr<<"SENDING STARDATE : "<<datestr<<endl;
 		netbuf.addString( datestr);
-		netbuf.addString( saves[0]);
-		netbuf.addString( saves[1]);
-
-		string PLAYER_CALLSIGN( clt->name);
-		QVector tmpvec( 0, 0, 0);
-		bool update = true;
-		float credits;
-		vector<string> savedships;
-		string str("");
-		// Create a cockpit for the player and parse its savegame
-		Cockpit * cp = _Universe->createCockpit( PLAYER_CALLSIGN);
-		cp->Init ("");
-		COUT<<"-> LOADING SAVE FROM NETWORK"<<endl;
-		cp->savegame->ParseSaveGame( "", str, "", tmpvec, update, credits, savedships, cltserial, saves[0], false);
-		// Generate the system we enter in if needed and add the client in it
-
-		COUT<<"\tcredits = "<<credits<<endl;
-		COUT<<"\tfaction = "<<cp->savegame->GetPlayerFaction()<<endl;
-		COUT<<"-> SAVE LOADED"<<endl;
-
-		// WARNING : WE DON'T SAVE FACTION NOR FLIGHTGROUP YET
-		COUT<<"-> UNIT FACTORY WITH XML"<<endl;
-		// We may have to determine which is the current ship of the player if we handle several ships for one player
-		string PLAYER_SHIPNAME = savedships[0];
-		string PLAYER_FACTION_STRING = cp->savegame->GetPlayerFaction();
-
-        int saved_faction = FactionUtil::GetFactionIndex( PLAYER_FACTION_STRING);
-		//vector<vector <string> > path = lookforUnit( savedships[0].c_str(), saved_faction, false);
-		bool exist = true; //(VSFileSystem::LookForFile( savedships[0], VSFileSystem::UnitFile)<=VSFileSystem::Ok);
-		static std::string loadfailed ("LOAD_FAILED");
-		Unit * un = UnitFactory::createUnit( PLAYER_SHIPNAME.c_str(),
-                             false,
-							 saved_faction,
-                             string(""),
-                             Flightgroup::newFlightgroup (PLAYER_CALLSIGN,PLAYER_SHIPNAME,PLAYER_FACTION_STRING,"default",1,1,"","",mission),
-                             0, &saves[1]);
-		if (un->name==loadfailed) {
-			exist = false;
-			un->Kill();
-		}
-		if( !exist)
-		{
-			unsigned short serial = cltserial;
-			// We can't find the unit saved for player -> send a login error
-			this->sendLoginError( clt, ipadr);
-			Packet p2;
-			// Send the account server a logout info
-			if( p2.send( CMD_LOGOUT, serial, netbuf.getData(), netbuf.getDataLength(),
-						 SENDRELIABLE, NULL, acct_sock, __FILE__,
-						 PSEUDO__LINE__(162) ) < 0 )
-			{
-				COUT<<"ERROR sending LOGOUT to account server"<<endl;
-			}
-			cerr<<"WARNING : Unit file ("<<savedships[0]<<") not found for "<<callsign<<endl;
-			return;
-		}
-
-		COUT<<"\tAFTER UNIT FACTORY WITH XML"<<endl;
-		clt->game_unit.SetUnit( un);
-		// Assign its serial to client*
-		un->SetSerial( cltserial);
-
-		// Affect the created unit to the cockpit
-		COUT<<"-> UNIT LOADED"<<endl;
-
-		cp->SetParent( un,PLAYER_SHIPNAME.c_str(),"",tmpvec);
-		COUT<<"-> COCKPIT AFFECTED TO UNIT"<<endl;
-
-        Packet packet2;
+		netbuf.addString( clt->savegame[0]);
+		netbuf.addString( clt->savegame[1]);
 		netbuf.addString( universe_file);
 #ifdef CRYPTO
 		unsigned char * digest = new unsigned char[FileUtil::Hash.DigestSize()];
 		FileUtil::HashFileCompute( universe_file, digest, UniverseFile);
 		// Add the galaxy filename with relative path to datadir
+		netbuf.addShort( FileUtil::Hash.DigestSize() );
 		netbuf.addBuffer( digest, FileUtil::Hash.DigestSize());
+#else
+		netbuf.addShort( 0 );
 #endif
 
+		Packet packet2;
+		
+		// Create a cockpit for the player and parse its savegame
+		Cockpit *cp = loadFromSavegame( clt );
+		Unit *un = cp->GetParent();
+		if (!un) {
+			sendLoginError( clt, ipadr );
+			return;
+		}
+		cltserial = un->GetSerial();
+
+		COUT << ">>> SEND LOGIN ACCEPT =( serial n°" << cltserial << " )= --------------------------------------" << endl;
+		COUT<<"SAVE="<<clt->savegame[0].length()<<" bytes - XML="<<clt->savegame[1].length()<<" bytes"<<endl;
+		cerr<<"SENDING STARDATE : "<<datestr<<endl;
 		// Add the initial star system filename + hash if crypto++ support too
 		string relsys = cp->savegame->GetStarSystem()+".system";
 		netbuf.addString( relsys);
-
+		
 		// Generate the starsystem before addclient so that it already contains serials
 		StarSystem * sts = zonemgr->addZone( cp->savegame->GetStarSystem());
-		int zoneid = _Universe->StarSystemIndex(sts);
+		
 #ifdef CRYPTO
 		string sysxml;
 		if( (sysxml=zonemgr->getSystem( relsys))!="")
 			FileUtil::HashStringCompute( sysxml, digest);
 		else
 			FileUtil::HashFileCompute( relsys, digest, SystemFile);
+		netbuf.addShort( FileUtil::Hash.DigestSize() );
 		netbuf.addBuffer( digest, FileUtil::Hash.DigestSize());
 		delete digest;
+#else
+		netbuf.addShort( 0 );
 #endif
+		
+		int zoneid = _Universe->StarSystemIndex(sts);
 		netbuf.addShort( zoneid);
-		/*
-		cerr<<endl<<"BEGIN FULL BUFFER -------------------------------------------"<<endl<<endl;
-		cerr<<netbuf.getData()<<endl;
-		cerr<<endl<<"END FULL BUFFER ---------------------------------------------"<<endl<<endl;
-		*/
+	
 		packet2.send( LOGIN_ACCEPT, cltserial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(241) );
-		COUT<<"SHIP -- "<<savedships[0]<<" -- LOCATION: x="<<tmpvec.i<<",y="<<tmpvec.j<<",z="<<tmpvec.k<<endl;
-		COUT<<"<<< SENT LOGIN ACCEPT -----------------------------------------------------------------------"<<endl;
 	}
+}
+
+Cockpit * NetServer::loadFromSavegame( ClientPtr clt ) {
+	ObjSerial cltserial = getUniqueSerial();
+	QVector tmpvec( 0, 0, 0);
+	bool update = true;
+	float credits;
+	vector<string> savedships;
+	string str("");
+	Cockpit *cp = NULL;
+	for (int i=0; i<_Universe->numPlayers(); i++) {
+		cp = _Universe->AccessCockpit(i);
+		if (cp->savegame->GetCallsign() == clt->callsign) {
+			// awesome! this player already has a cockpit.
+			break;
+		} else {
+			cp = NULL;
+		}
+	}
+	if (cp == NULL) {
+		cp = _Universe->createCockpit( clt->callsign );
+		cp->Init ("");
+	}
+	COUT<<"-> LOADING SAVE FROM NETWORK"<<endl;
+	cp->savegame->ParseSaveGame( "", str, "", tmpvec, update, credits, savedships, cltserial, clt->savegame[0], false);
+	// Generate the system we enter in if needed and add the client in it
+
+	COUT<<"\tcredits = "<<credits<<endl;
+	COUT<<"\tfaction = "<<cp->savegame->GetPlayerFaction()<<endl;
+	COUT<<"-> SAVE LOADED"<<endl;
+
+	// WARNING : WE DON'T SAVE FACTION NOR FLIGHTGROUP YET
+	COUT<<"-> UNIT FACTORY WITH XML"<<endl;
+	// We may have to determine which is the current ship of the player if we handle several ships for one player
+	string PLAYER_SHIPNAME = savedships[0];
+	string PLAYER_FACTION_STRING = cp->savegame->GetPlayerFaction();
+
+    int saved_faction = FactionUtil::GetFactionIndex( PLAYER_FACTION_STRING);
+	//vector<vector <string> > path = lookforUnit( savedships[0].c_str(), saved_faction, false);
+	bool exist = true; //(VSFileSystem::LookForFile( savedships[0], VSFileSystem::UnitFile)<=VSFileSystem::Ok);
+	static std::string loadfailed ("LOAD_FAILED");
+	Unit * un = UnitFactory::createUnit( PLAYER_SHIPNAME.c_str(),
+                         false,
+						 saved_faction,
+                         string(""),
+                         Flightgroup::newFlightgroup (clt->callsign,PLAYER_SHIPNAME,PLAYER_FACTION_STRING,"default",1,1,"","",mission),
+                         0, &clt->savegame[1]);
+	if (un->name==loadfailed) {
+		exist = false;
+		un->Kill();
+	}
+	if( !exist)
+	{
+		unsigned short serial = cltserial;
+		NetBuffer logoutnetbuf;
+		logoutnetbuf.addString(clt->callsign);
+		logoutnetbuf.addString(clt->passwd);
+		// We can't find the unit saved for player -> send a login error
+		this->logout( clt );
+		Packet p2;
+		// Send the account server a logout info
+		if( p2.send( CMD_LOGOUT, serial, logoutnetbuf.getData(), logoutnetbuf.getDataLength(),
+					 SENDRELIABLE, NULL, acct_sock, __FILE__,
+					 PSEUDO__LINE__(162) ) < 0 )
+		{
+			COUT<<"ERROR sending LOGOUT to account server"<<endl;
+		}
+		cerr<<"WARNING : Unit file ("<<savedships[0]<<") not found for "<<clt->callsign<<endl;
+		return cp;
+	}
+
+	COUT<<"\tAFTER UNIT FACTORY WITH XML"<<endl;
+	clt->game_unit.SetUnit( un);
+	// Assign its serial to client*
+	un->SetSerial( cltserial);
+
+	// Affect the created unit to the cockpit
+	COUT<<"-> UNIT LOADED"<<endl;
+
+	cp->SetParent( un,PLAYER_SHIPNAME.c_str(),"",tmpvec);
+	COUT<<"-> COCKPIT AFFECTED TO UNIT"<<endl;
+
+	COUT<<"SHIP -- "<<savedships[0]<<" -- LOCATION: x="<<tmpvec.i<<",y="<<tmpvec.j<<",z="<<tmpvec.k<<endl;
+	COUT<<"<<< SENT LOGIN ACCEPT -----------------------------------------------------------------------"<<endl;
+	return cp;
 }
 
 void	NetServer::sendLoginError( ClientPtr clt, AddressIP ipadr )

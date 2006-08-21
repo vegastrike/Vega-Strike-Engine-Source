@@ -28,7 +28,7 @@
 #include "background.h"
 //#include "in_mouse.h"
 //#include "gui/glut_support.h"
-//#include "networking/netclient.h"
+#include "networking/netclient.h"
 extern float rand01();
 #define SWITCH_CONST .9
 
@@ -594,7 +594,10 @@ bool Cockpit::Update () {
   if (!par) {
 	if (respawnunit.size()>_Universe->CurrentCockpit()){
 	  if (respawnunit[_Universe->CurrentCockpit()]){
-
+	   if (Network!=NULL) {
+	    Network[_Universe->CurrentCockpit()].respawnRequest();
+		respawnunit[_Universe->CurrentCockpit()]=0;
+	   } else {
 		parentturret.SetUnit(NULL);
 		static float initialzoom = XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
 		zoomfactor=initialzoom;
@@ -692,6 +695,7 @@ bool Cockpit::Update () {
                 return true;
                   
           }
+      }
 	} 
   }
   return false;

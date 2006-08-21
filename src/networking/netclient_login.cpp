@@ -219,47 +219,64 @@ void	NetClient::loginAccept( Packet & p1)
 	// Get the galaxy file from buffer with relative path to datadir !
 	string univfile = netbuf.getString();
 	unsigned char * digest=0;
+	unsigned short digest_length = netbuf.getShort();
+	if (digest_length) {
+		digest = netbuf.getBuffer( digest_length );
 #ifdef CRYPTO
-	digest = netbuf.getBuffer( FileUtil::Hash.DigestSize());
-	cerr<<"Initial system = "<<VSFileSystem::datadir+univfile<<" - File Hash = "<<digest<<endl;
-#endif
-	// Compare to local hash and ask for the good file if we don't have it or bad version
-	if( !FileUtil::HashCompare( univfile, digest, UniverseFile))
-	{
-		VsnetDownload::Client::NoteFile f( this->clt_tcp_sock, univfile, VSFileSystem::UniverseFile);
-		_downloadManagerClient->addItem( &f);
-		timeval timeout={10,0};
-		while( !f.done())
+		cerr<<"Initial system = "<<VSFileSystem::datadir+univfile<<" - File Hash = "<<digest<<endl;
+		// Compare to local hash and ask for the good file if we don't have it or bad version
+		if( !FileUtil::HashCompare( univfile, digest, UniverseFile))
 		{
-			if (recvMsg( NULL, &timeout )<=0) {
+			VsnetDownload::Client::NoteFile f( this->clt_tcp_sock, univfile, VSFileSystem::UniverseFile);
+			_downloadManagerClient->addItem( &f);
+			timeval timeout={10,0};
+			while( !f.done())
+			{
+				if (recvMsg( NULL, &timeout )<=0) {
 //NETFIXME: What to do if the download times out?
-				break;
+					break;
+				}
 			}
 		}
+#endif
 	}
 
 	// Get the initial system file...
 	string sysfile = netbuf.getString();
 	bool autogen;
 	string fullsys = VSFileSystem::GetCorrectStarSysPath(sysfile, autogen);
+	digest_length = netbuf.getShort();
+	if (digest_length) {
+		digest = netbuf.getBuffer( digest_length );
 #ifdef CRYPTO
-	digest = netbuf.getBuffer( FileUtil::Hash.DigestSize());
-	cerr<<"Initial system = "<<fullsys<<" - File Hash = "<<digest<<endl;
-#endif
-	if( !FileUtil::HashCompare( fullsys, digest, SystemFile))
-	{
-		VsnetDownload::Client::NoteFile f( this->clt_tcp_sock, sysfile, VSFileSystem::SystemFile);
-		_downloadManagerClient->addItem( &f);
-		timeval timeout={10,0};
-		while( !f.done())
+		cerr<<"Initial system = "<<fullsys<<" - File Hash = "<<digest<<endl;
+		if( !FileUtil::HashCompare( fullsys, digest, SystemFile))
 		{
-			if (recvMsg( NULL, &timeout )<=0) {
-				//NETFIXME: what to do if timeout elapses...
-				break;
+			VsnetDownload::Client::NoteFile f( this->clt_tcp_sock, sysfile, VSFileSystem::SystemFile);
+			_downloadManagerClient->addItem( &f);
+			timeval timeout={10,0};
+			while( !f.done())
+			{
+				if (recvMsg( NULL, &timeout )<=0) {
+					//NETFIXME: what to do if timeout elapses...
+					break;
+				}
 			}
 		}
+#endif
 	}
     this->zone = netbuf.getShort();
+}
+
+void NetClient::respawnRequest( )
+{
+	Packet packet2;
+	NetBuffer netbuf;
+	// No data.
+	packet2.send( CMD_RESPAWN, 0,
+                  netbuf.getData(), netbuf.getDataLength(),
+                  SENDRELIABLE, NULL, this->clt_tcp_sock,
+                  __FILE__, PSEUDO__LINE__(165) );
 }
 
 void NetClient::getConfigServerAddress( string &addr, unsigned short &port)

@@ -176,6 +176,7 @@ class	NetClient
 		// Functions called when to give a firing order to the server (only for player units).
 		void	scanRequest( Unit * target);
 		void	targetRequest( Unit * target);
+		void	respawnRequest( );
 		void	fireRequest( ObjSerial serial, const vector<int> &mount_indicies, char mis);
 		void	unfireRequest( ObjSerial serial, const vector<int> &mount_indicies);
 

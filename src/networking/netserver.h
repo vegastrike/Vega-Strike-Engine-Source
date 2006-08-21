@@ -120,6 +120,8 @@ class NetServer
 		void			sendLoginAlready( ClientPtr clt, AddressIP ipadr);
 		void			sendLoginAccept( ClientPtr clt, AddressIP ipadr, int acctnew, char flags);
 		void			sendLoginUnavailable( ClientPtr clt, AddressIP ipadr);
+
+		Cockpit *		loadFromSavegame( ClientPtr clt );
 		ClientPtr       getClientFromSerial( ObjSerial serial);
 
 	public:

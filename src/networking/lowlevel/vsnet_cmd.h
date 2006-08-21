@@ -58,6 +58,7 @@ enum Cmd
     CMD_EXITCLIENT   ,		// (Server -> Client) Indicates that a client
                                     // is leaving the current zone
     CMD_ADDEDYOU     ,		// NOT USED
+	CMD_RESPAWN      ,
 
 	// Ships movements data
     CMD_POSUPDATE    ,		// On client side (send): containing a ship's
@@ -96,7 +97,7 @@ enum Cmd
 	CMD_DOWNLOAD     ,		// May be identical to CMD_ASKFILE in the end
 	CMD_CAMSHOT      ,		// This means a webcam-shot just arrived (from client to server and from server to concerned clients)
 	CMD_SOUNDSAMPLE  ,		// This means a sound sample just arrived (from client to server and from server to concerned clients or from client to clients)
-	CMD_TXTMESSAGE   ,		// This means a sound sample just arrived (from client to server and from server to concerned clients or from client to clients)
+	CMD_TXTMESSAGE   ,		// This means a text message has arrived
 	CMD_STARTNETCOMM ,		// A client tells the server he starts a netcomm session
 	CMD_STOPNETCOMM  ,		// A client tells the server he stops a netcomm session
 	CMD_SECMESSAGE   ,		// This means a sound sample just arrived (from client to server and from server to concerned clients or from client to clients)
