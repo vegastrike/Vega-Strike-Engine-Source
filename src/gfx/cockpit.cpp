@@ -2162,7 +2162,7 @@ void GameCockpit::Draw() {
       GFXColor4f(1,1,1,1);
       for (unsigned int vd=0;vd<vdu.size();vd++) {
 	if (vdu[vd]) {
-	  vdu[vd]->Draw(un,textcol);
+	  vdu[vd]->Draw(this,un,textcol);
 	  GFXColor4f (1,1,1,1);
 	  float damage = un->GetImageInformation().cockpit_damage[(1+vd)%(MAXVDUS+1)];
           if (vdu[vd]->staticable()) {

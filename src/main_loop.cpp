@@ -176,8 +176,58 @@ int allexcept=FE_DIVBYZERO;//|FE_INVALID;//|FE_OVERFLOW|FE_UNDERFLOW;
 #else
 int allexcept=0;
 #endif
+int shiftup(int);
+string getUnitNameAndFgNoBase(Unit * target);
+
 namespace CockpitKeys {
-  
+  unsigned int textmessager=0;
+  unsigned int firstkey=0xffffffff;
+  void TextMessageCallback(unsigned int ch, unsigned int mod, bool release, int x, int y){
+    if (firstkey==0xffffffff) {
+      if (release)
+        firstkey=ch;
+    }
+    if (release) return;
+    unsigned int code=((WSK_MOD_LSHIFT==(mod&WSK_MOD_LSHIFT))||(WSK_MOD_RSHIFT==(mod&WSK_MOD_RSHIFT)))?shiftup(ch):ch;
+    if (textmessager<_Universe->numPlayers()) {
+      GameCockpit *gcp=static_cast<GameCockpit*>(_Universe->AccessCockpit(textmessager));
+      if (ch==WSK_BACKSPACE||ch==WSK_DELETE) {
+        gcp->textMessage= gcp->textMessage.substr(0,gcp->textMessage.length()-1);
+      } else if (code!=0&&code<127) {
+        if (code=='\n'||ch==WSK_RETURN||ch==WSK_KP_ENTER||ch==firstkey) {
+          RestoreKB();
+          std::string name=gcp->savegame->GetCallsign();
+          if (Network!=NULL) {
+
+            Unit*par=gcp->GetParent();
+            if (0&&par) {
+              name=getUnitNameAndFgNoBase(par);
+            }
+            Network[textmessager].textMessage(name+"> "+gcp->textMessage);
+          }
+          /*
+          static std::string anglestring=" >";
+          //unit util checks for null, it's ok
+          UniverseUtil::IOmessage(0,"game","all",name+"> "+gcp->textMessage);
+          *///server seems to send it again
+          gcp->textMessage="";
+          firstkey=0xffffffff;
+        }else {
+          char newstr[2]={(char)code,0};
+          gcp->textMessage+=newstr;      
+          
+        }
+      }
+    }else {
+      RestoreKB();
+    }
+  }
+  void TextMessageKey(const KBData&,KBSTATE newState) {
+    if(newState==PRESS){
+      winsys_set_keyboard_func(TextMessageCallback);
+      textmessager=_Universe->CurrentCockpit();
+    }
+  }
   void QuitNow () {
     {
       cleanexit=true;

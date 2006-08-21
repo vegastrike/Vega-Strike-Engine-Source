@@ -596,7 +596,7 @@ CommandMap initGlobalCommandMap() {
   commandMap["ThrustFront"]=FlyByKeyboard::KThrustFront ;
   commandMap["ThrustDown"]=FlyByKeyboard::KThrustDown ;
   commandMap["ThrustUp"]=FlyByKeyboard::KThrustUp ;
-
+  commandMap["TextMessage"]=CockpitKeys::TextMessageKey;
   commandMap["JoyStickToggleKey"]=JoyStickToggleKey;
   commandMap["ToggleAutotracking"]=FireKeyboard::ToggleAutotracking;
   commandMap["SheltonKey"]=FlyByKeyboard::SheltonKey ;

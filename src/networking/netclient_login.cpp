@@ -277,6 +277,17 @@ void NetClient::respawnRequest( )
                   SENDRELIABLE, NULL, this->clt_tcp_sock,
                   __FILE__, PSEUDO__LINE__(165) );
 }
+void NetClient::textMessage(const std::string & data )
+{
+	Packet packet2;
+	NetBuffer netbuf;
+        netbuf.addString(data);
+	// No data.
+	packet2.send( CMD_TXTMESSAGE, 0,
+                  netbuf.getData(), netbuf.getDataLength(),
+                  SENDRELIABLE, NULL, this->clt_tcp_sock,
+                  __FILE__, PSEUDO__LINE__(165) );
+}
 
 void NetClient::getConfigServerAddress( string &addr, unsigned short &port)
 {

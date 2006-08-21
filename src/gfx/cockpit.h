@@ -63,7 +63,6 @@ private:
   bool armor8;
   bool shield8;
   std::vector<class Mesh *> mesh;
-
   int soundfile;
   VSSprite *Pit [4];
   VSSprite *Radar[2];
@@ -127,6 +126,7 @@ private:
   void DrawArrowToTarget(Unit *, Unit *);
   void DrawArrowToTarget(Unit *, Vector LocalCoordinates);
  public:
+  std::string textMessage;
   void	ReceivedTargetInfo();
   static void NavScreen (const KBData&,KBSTATE k); // scheherazade
   static string getsoundending(int which=0);

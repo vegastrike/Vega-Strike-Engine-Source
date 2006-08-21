@@ -570,6 +570,12 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
                 // Should receive possible starting locations list
                 this->receiveLocations( &p1 );
                 break;
+            case CMD_TXTMESSAGE:
+              {
+                UniverseUtil::IOmessage(0,"game","all",netbuf.getString());
+              }
+              break;
+
             case CMD_SNAPSHOT :
                 {
 //                    COUT << "CMD_SNAPSHOT received" << endl;
@@ -940,12 +946,15 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 			}
 #endif
 			break;
+#if 0
+                        //NETFIXME  this is probably more consistent
 			case CMD_TXTMESSAGE :
 #ifdef NETCOMM
 			{
 				string msg( p1.getData());
 				NetComm->RecvMessage( msg, false);
 			}
+#endif
 #endif
 			case CMD_SECMESSAGE :
 #ifdef NETCOMM

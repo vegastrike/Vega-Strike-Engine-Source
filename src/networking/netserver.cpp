@@ -685,7 +685,19 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			serverTimeInitUDP( clt, netbuf );
 		{
 		}
-			break;
+                break;
+                case CMD_TXTMESSAGE:
+                  {
+			un = clt->game_unit.GetUnit();
+			p2.bc_create( CMD_TXTMESSAGE, packet_serial,
+                          packet.getData(), packet.getDataLength(), SENDRELIABLE,
+                          __FILE__, PSEUDO__LINE__(1293));
+			// Send to concerned clients
+                  
+			zonemgr->broadcast( un==NULL?_Universe->activeStarSystem()->GetZone():un->getStarSystem()->GetZone(), packet_serial, &p2, true);
+                    
+                  }
+                  break;    
 		case CMD_LOGOUT:
 			COUT<<">>> LOGOUT REQUEST =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 			// Client wants to quit the game
@@ -749,7 +761,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				COUT<<"ERROR --> Received a fire order for dead UNIT"<<endl;
 				break; // Don't fire from a dead unit...
 			}
-			zone = un->activeStarSystem->GetZone();
+			zone = un->getStarSystem()->GetZone();
 			mis = netbuf.getChar();
 			mount_num = netbuf.getInt32();
 			// Find the unit
@@ -786,7 +798,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				COUT<<"ERROR --> Received an unfire order for dead UNIT"<<endl;
 				break; // Don't fire from a dead unit...
 			}
-			zone = un->activeStarSystem->GetZone();
+			zone = un->getStarSystem()->GetZone();
 			// Find the unit
 			// Set the concerned mount as ACTIVE and others as INACTIVE
 			un = zonemgr->getUnit( target_serial, zone);
@@ -940,7 +952,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                           packet.getData(), packet.getDataLength(), SENDRELIABLE,
                           __FILE__, PSEUDO__LINE__(1293));
 			// Send to concerned clients
-			zonemgr->broadcast( un->activeStarSystem->GetZone(), packet_serial, &p2, true);
+			zonemgr->broadcast( un->getStarSystem()->GetZone(), packet_serial, &p2, true);
 		}
 		break;
 		case CMD_STOPNETCOMM :
@@ -954,7 +966,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                           packet.getData(), packet.getDataLength(), SENDRELIABLE,
                           __FILE__, PSEUDO__LINE__(1302));
 			// Send to concerned clients
-			zonemgr->broadcast( un->activeStarSystem->GetZone(), packet_serial, &p2, true);
+			zonemgr->broadcast( un->getStarSystem()->GetZone(), packet_serial, &p2, true);
 		}
 		break;
 		case CMD_SOUNDSAMPLE :
@@ -965,9 +977,11 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			p2.bc_create( packet.getCommand(), packet_serial,
                           packet.getData(), packet.getDataLength(), SENDRELIABLE,
                           __FILE__, PSEUDO__LINE__(1341));
-			zonemgr->broadcastSample( un->activeStarSystem->GetZone(), packet_serial, &p2, clt->comm_freq);
+			zonemgr->broadcastSample( un->getStarSystem()->GetZone(), packet_serial, &p2, clt->comm_freq);
 
 		}
+#if 0
+                //NETFIXME maybe this code just works fine
 		case CMD_TXTMESSAGE :
 		{
 			un = clt->game_unit.GetUnit();
@@ -976,16 +990,17 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			p2.bc_create( packet.getCommand(), packet_serial,
                           packet.getData(), packet.getDataLength(), SENDRELIABLE,
                           __FILE__, PSEUDO__LINE__(1341));
-			zonemgr->broadcastText( un->activeStarSystem->GetZone(), packet_serial, &p2, clt->comm_freq);
+			zonemgr->broadcastText( un->getStarSystem()->GetZone(), packet_serial, &p2, clt->comm_freq);
 
 		}
+#endif
 		case CMD_DOCK :
 		{
 			Unit * docking_unit;
 			un = clt->game_unit.GetUnit();
 			if (!un) break;
 			ObjSerial utdwserial = netbuf.getShort();
-			unsigned short zonenum = un->activeStarSystem->GetZone();
+			unsigned short zonenum = un->getStarSystem()->GetZone();
 			cerr<<"RECEIVED a DockRequest from unit "<<un->GetSerial()<<" to unit "<<utdwserial<<" in zone "<<zonenum<<endl;
 			docking_unit = zonemgr->getUnit( utdwserial, zonenum);
 			if( docking_unit)
@@ -1005,7 +1020,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			un = clt->game_unit.GetUnit();
 			if (!un) break;
 			ObjSerial utdwserial = netbuf.getShort();
-			unsigned short zonenum = un->activeStarSystem->GetZone();
+			unsigned short zonenum = un->getStarSystem()->GetZone();
 			cerr<<"RECEIVED an UnDockRequest from unit "<<un->GetSerial()<<" to unit "<<utdwserial<<" in zone "<<zonenum<<endl;
 			docking_unit = zonemgr->getUnit( utdwserial, zonenum);
 			if( docking_unit)

@@ -182,6 +182,7 @@ class	NetClient
 		void	scanRequest( Unit * target);
 		void	targetRequest( Unit * target);
 		void	respawnRequest( );
+		void	textMessage(const string &data);
 		void	fireRequest( ObjSerial serial, const vector<int> &mount_indicies, char mis);
 		void	unfireRequest( ObjSerial serial, const vector<int> &mount_indicies);
 

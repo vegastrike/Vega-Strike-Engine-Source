@@ -733,7 +733,7 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   }
 }
 
-void VDU::DrawMessages(Unit *target){
+void VDU::DrawMessages(GameCockpit* parentcp,Unit *target){
   string fullstr;
   double nowtime=mission->getGametime();
 
@@ -774,7 +774,8 @@ void VDU::DrawMessages(Unit *target){
   static int num_messages=XMLSupport::parse_int(vs_config->getVariable("graphics","num_messages","2"));
   vector <std::string> message_people;//should be "all", parent's name
   gameMessage lastmsg;
-  for(int i=scrolloffset<0?-scrolloffset-1:0;rows_used<((scrolloffset<0||num_messages>rows)?rows:num_messages)&&mc->last(i,lastmsg,message_people,whoNOT);i++){
+  int row_lim=((scrolloffset<0||num_messages>rows)?rows:num_messages);
+  for(int i=scrolloffset<0?-scrolloffset-1:0;rows_used<row_lim&&mc->last(i,lastmsg,message_people,whoNOT);i++){
       char timebuf[100];
       double sendtime=lastmsg.time;
       if (scrolloffset>=0&&sendtime<nowtime-oldtime*4){
@@ -800,7 +801,20 @@ void VDU::DrawMessages(Unit *target){
 		  //      cout << "nav  " << mymsg << " rows " << rows_needed << endl;
       }
   }
-
+  static std::string newline("\n");
+  if (rows_used>=row_lim&&parentcp->textMessage.length()>0) {
+    size_t where=fullstr.find(newline);
+    if (where!=string::npos) {
+      if (where>1.6*cols) {
+        where=(size_t)(1.6*cols+1);
+      }
+      fullstr=fullstr.substr(where+1);
+    }
+  }
+  if (parentcp->textMessage.length()>0) {
+    fullstr+=parentcp->textMessage;
+    fullstr+=newline;
+  }
   static string message_prefix = XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","message_prefix",""));
   fullstr=targetstr+fullstr;
   tp->Draw(message_prefix + MangleString (fullstr.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
@@ -1397,7 +1411,7 @@ void VDU::DrawWebcam( Unit * parent)
 	}
 }
 
-void VDU::Draw (Unit * parent, const GFXColor & color) {
+void VDU::Draw (GameCockpit*parentcp,Unit * parent, const GFXColor & color) {
   tp->col=color;
   GFXDisable(LIGHTING);
       GFXBlendMode(SRCALPHA,INVSRCALPHA);
@@ -1509,7 +1523,7 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
     DrawNav(parent->ToLocalCoordinates (parent->GetComputerData().NavPoint-parent->Position().Cast()));
     break;
   case MSG:
-    DrawMessages(targ);
+    DrawMessages(parentcp,targ);
     break;
   case COMM:
     DrawComm();

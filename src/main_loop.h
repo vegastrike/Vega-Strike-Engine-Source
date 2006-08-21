@@ -41,7 +41,7 @@ namespace CockpitKeys {
    void  ViewTarget(const KBData&,KBSTATE newState) ;
    void  OutsideTarget(const KBData&,KBSTATE newState) ;
    void  Quit(const KBData&,KBSTATE newState) ;
-
+   void  TextMessageKey(const KBData&,KBSTATE newState) ;
    void  QuitNow();
 }
 
