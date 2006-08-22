@@ -157,7 +157,11 @@ void	NetClient::downloadZoneInfo()
 void	NetClient::AddObjects( NetBuffer & netbuf)
 {
 	char subcmd;
-
+        std::set<ObjSerial> enteredSerials;
+        for (unsigned int i=0;i<_Universe->numPlayers();++i) {
+          Unit*un=_Universe->AccessCockpit(i)->GetParent();
+          if(un) enteredSerials.insert(un->GetSerial());
+        }
 	// Loop until the end of the buffer
 	while( (subcmd=netbuf.getChar())!=ZoneMgr::End)
 	{
@@ -165,14 +169,27 @@ void	NetClient::AddObjects( NetBuffer & netbuf)
 		{
 			case ZoneMgr::AddClient :
 			{
-				ObjSerial serial = netbuf.getSerial();
-				this->enterClient( netbuf, serial);
+                          
+                          ObjSerial serial = netbuf.getSerial();
+                          enteredSerials.insert(serial);
+                          this->enterClient( netbuf, serial);
 			}
 			break;
 			default :
 				cerr<<"WARNING : Unknown sub command in AddObjects"<<endl;
 		}
 	}
+        Unit *un;
+        for (un_iter it = UniverseUtil::getUnitList();
+             un=(*it);
+             ) {
+          ++it;
+          if (enteredSerials.find(un->GetSerial())==enteredSerials.end()) {            
+            un->Kill();//doesnt belong here..not an allowed serial
+            //NETFIXME could result in star system being killed off one by one--need to differentiate that
+          }
+        }
+
 }
 
 /*************************************************************/

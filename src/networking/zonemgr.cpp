@@ -236,7 +236,10 @@ void	ZoneMgr::removeClient( ClientPtr clt )
 	if (!un)
 		return;
 	sts = _Universe->star_system[zonenum];
-	sts->RemoveUnit( un);
+        if (un->GetHull()<0)
+          un->Kill(true,true);
+        else
+          sts->RemoveUnit( un);
 	// SHIP MAY NOT HAVE BEEN KILLED BUT JUST CHANGED TO ANOTHER STAR SYSTEM -> NO KILL
 	//un->Kill();
 }

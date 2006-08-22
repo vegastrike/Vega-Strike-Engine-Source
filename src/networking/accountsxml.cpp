@@ -95,73 +95,70 @@ namespace accountXML
   const EnumMap element_map(element_names, 4);
   const EnumMap attribute_map(attribute_names, 5);
   string curname;
-  Account * tmpacct;
-  Account acct;
+  string file;
+
+  Account tmpacct;
+  //  Account acct;
   int level=-1;
-  Hashtable <string, Account, 257> accounttable;
+  stdext::hash_map <string, Account*> accounttable;
   int nbaccounts = 0;
  
   void beginElement (void *userData, const XML_Char *name, const XML_Char **atts)
   {
     AttributeList attributes (atts);
-    tmpacct = new Account();
+    tmpacct=Account ();
     Names elem = (Names) element_map.lookup(string (name));
-
-	AttributeList::const_iterator iter;
-	//cout<<"Elem : "<<elem<<" - name : "<<name<<endl;
+    
+    AttributeList::const_iterator iter;
     switch (elem) {
     case UNKNOWN:
-		tmpacct->type=Account::UNKNOWN;
+      tmpacct.type=Account::UNKNOWN;
       break;
     case ACCOUNTS:
       assert (level==-1);
       level++;
-	  //cout<<"Level : "<<level<<endl;
       break;
     case PLAYER:
     case ADMIN:
       assert (level==0);
       level++;
       switch(elem) {
-		case PLAYER:
-		tmpacct->type=Account::PLAYER;
-		break;
-		case ADMIN:
-		tmpacct->type=Account::ADMIN;
-		break;
-		default:
-		tmpacct->type=Account::UNKNOWN;
-		break;
-		  }
+      case PLAYER:
+        tmpacct.type=Account::PLAYER;
+        break;
+      case ADMIN:
+        tmpacct.type=Account::ADMIN;
+        break;
+      default:
+        tmpacct.type=Account::UNKNOWN;
+        break;
+      }
       for (iter= attributes.begin(); iter!=attributes.end();iter++)
-	  {
-			switch (attribute_map.lookup ((*iter).name)) {
-			case UNKNOWN:
-			  VSFileSystem::vs_fprintf (stderr,"Unknown Account Element %s\n",(*iter).name.c_str());
-			  break;
-			case NAME:
-			  curname = (*iter).value;
-			  tmpacct->callsign = curname;
-			  break;
-			case PASSWORD:
-			  curname = (*iter).value;
-			  tmpacct->passwd = curname;
-			  break;
-			case SERVERIP:
-			  curname = (*iter).value;
-			  tmpacct->serverip = curname;
-			  break;
-			case SERVERPORT:
-			  curname = (*iter).value;
-			  tmpacct->serverport = curname;
-			  break;
-			default:
-			  assert (0);
-			  break;
-			}
+      {
+        switch (attribute_map.lookup ((*iter).name)) {
+        case UNKNOWN:
+          VSFileSystem::vs_fprintf (stderr,"Unknown Account Element %s\n",(*iter).name.c_str());
+          break;
+        case NAME:
+          tmpacct.callsign = (*iter).value;
+          break;
+        case PASSWORD:
+          tmpacct.passwd = (*iter).value;
+          break;
+        case SERVERIP:
+          tmpacct.serverip = (*iter).value;
+          break;
+        case SERVERPORT:
+          tmpacct.serverport = (*iter).value;
+          break;
+        default:
+          assert (0);
+          break;
+        }
       }
       break;
-	}
+    }
+    
   }
 
   void endElement (void *userData, const XML_Char *name) {
@@ -175,13 +172,13 @@ namespace accountXML
       break;
     case PLAYER:
     case ADMIN:
-		//cout<<"Level : "<<level<<endl;
       assert (level==1);
       level--;
-	  //tmpacct->display();
-      accounttable.Put(strtoupper(curname), tmpacct);
-	  nbaccounts++;
-	break;
+      if (!accounttable[strtoupper(tmpacct.callsign)]) { 
+        accounttable[strtoupper(tmpacct.callsign)]=new Account(tmpacct);
+        nbaccounts++;
+      }
+      break;
     default:
       break;
     }
@@ -191,18 +188,51 @@ namespace accountXML
 
 using namespace accountXML;
 
-Account * getAcctTemplate(const string &key) {
-  return accounttable.Get(strtoupper(key));
-}
 
 vector<Account *> getAllAccounts() {
-  return accounttable.GetAll();
+  vector<Account*>retval;
+  for (stdext::hash_map<string,Account*>::iterator iter=accounttable.begin();
+       iter!=accounttable.end();
+       ++iter) {
+    if(iter->second)
+      retval.push_back(iter->second);
+  }
+  return retval;
 }
 
+
+Account*getAcctSerial(ObjSerial ser) {
+
+  for (stdext::hash_map<string,Account*>::iterator iter=accounttable.begin();
+       iter!=accounttable.end();
+       ++iter) {
+    if (iter->second) {
+      if (iter->second->getSerial()==ser) {
+        return iter->second;
+      }
+    }
+  }
+  return NULL;
+}
+
+
+Account*getAcctAddress(SOCKETALT ser) {
+
+  for (stdext::hash_map<string,Account*>::iterator iter=accounttable.begin();
+       iter!=accounttable.end();
+       ++iter) {
+    if (iter->second) {
+      if (iter->second->getSocket().sameAddress(ser)) {
+        return iter->second;
+      }
+    }
+  }
+  return NULL;
+}
 void LoadAccounts(const char *filename)
 {
   const int chunk_size = 16384;
-
+  file=filename;
   VSFile f;
   VSError err = f.OpenReadOnly(filename,AccountFile);
   if (err>Ok) {
@@ -210,26 +240,23 @@ void LoadAccounts(const char *filename)
   }
   XML_Parser parser = XML_ParserCreate (NULL);
   XML_SetElementHandler (parser, &beginElement, &endElement);
-  XML_Parse (parser,(f.ReadFull()).c_str(),f.Size(),1);
- /*
- do {
-#ifdef BIDBG
-    char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
-#else
-    char buf[chunk_size];
-#endif
-    int length;
-    
-    length = VSFileSystem::vs_read (buf,1, chunk_size,inFile);
-    //length = inFile.gcount();
-#ifdef BIDBG
-    XML_ParseBuffer(parser, length, VSFileSystem::vs_feof(inFile));
-#else
-    XML_Parse (parser,buf,length,VSFileSystem::vs_feof (inFile));
-#endif
-  } while(!VSFileSystem::vs_feof(inFile));
- VSFileSystem::vs_close (inFile);
- */
- f.Close();
- XML_ParserFree (parser);
+  std::string data(f.ReadFull());
+  XML_Parse (parser,data.c_str(),f.Size(),1);
+  f.Close();
+  XML_ParserFree (parser);
+}
+void addAcct(string key, Account * acct) {
+  accounttable[strtoupper(key)]=acct;
+}
+
+Account * getAcctNoReload(const string &key) {
+  return accounttable[strtoupper(key)];
+}
+Account * getAcctTemplate(const string &key) {
+  Account*acct= accounttable[strtoupper(key)];
+  if (acct==NULL) {
+    LoadAccounts(file.c_str());
+    acct=accounttable[strtoupper(key)];
+  }
+  return acct;
 }

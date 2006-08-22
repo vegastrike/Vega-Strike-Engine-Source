@@ -104,9 +104,11 @@ class Account
 			connected = mode;
 		}
 };
-
+Account * getAcctNoReload(const string &key);
 Account * getAcctTemplate(const string &key);
 vector<Account *> getAllAccounts();
 void LoadAccounts(const char *filename);
-
+Account * getAcctSerial(ObjSerial ser);
+Account * getAcctAddress(SOCKETALT ser);
+void addAcct(std::string key,Account*);
 #endif

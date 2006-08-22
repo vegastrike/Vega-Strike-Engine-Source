@@ -30,7 +30,6 @@ class AccountServer
 		NetUITCP			NetworkToClient;
 		ServerSocket*		Network;
 		// TCPNetUI *		Network;	// Network Interface
-		vector<Account *>	Cltacct;	// Client accounts
 		list<SOCKETALT>		Socks;		// List of active sockets on which we can receive requests
 		list<SOCKETALT>		DeadSocks;	// List of sockets to close
 

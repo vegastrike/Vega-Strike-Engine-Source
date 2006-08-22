@@ -81,13 +81,6 @@ void    AccountServer::start()
     cout<<"Loading accounts data... ";
     LoadAccounts( "accounts.xml");
     // Gets hashtable accounts elements and put them in vector Cltacct
-    Cltacct = getAllAccounts();
-    if(Cltacct.size()<=0)
-    {
-        cout<<"No account found in accounts.xml"<<endl;
-		VSExit(1);
-    }
-    cout<<Cltacct.size()<<" accounts loaded."<<endl;
 
     // Create and bind socket
     cout<<"Initializing network..."<<endl;
@@ -173,18 +166,13 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                 callsign = netbuf.getString();
                 passwd = netbuf.getString();
                 cout<<">>> SERVER REQUEST =( "<<callsign<<":"<<passwd<<" )= --------------------------------------"<<endl;
-
-                for (  j=Cltacct.begin(); j!=Cltacct.end() && !found && !connected; j++)
-                {
-                    elem = *j;
-                    if( !elem->compareName( callsign) && !elem->comparePass( passwd))
-                    {
-                        // We found the client in the account list
-                        found = 1;
-                        cout<<"Found player : "<<elem->callsign<<":"<<elem->passwd<<endl;
-                    }
+                elem=getAcctTemplate(callsign);
+                if (elem) {
+                  if (elem->passwd!=passwd) {
+                    elem=NULL;
+                  }
                 }
-                if( !found)
+                if( !elem)
                 {
                     COUT<<"Login/passwd not found"<<endl;
                     Account elt(callsign, passwd);
@@ -207,33 +195,19 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                 }
             break;
             case CMD_LOGIN :
-			{
-				char flags = netbuf.getChar();
+              {
+                char flags = netbuf.getChar();
                 callsign = netbuf.getString();
                 passwd = netbuf.getString();
                 cout<<">>> LOGIN REQUEST =( "<<callsign<<":"<<passwd<<" )= --------------------------------------"<<endl;
-
-                for (  j=Cltacct.begin(); j!=Cltacct.end() && !found && !connected; j++)
+                elem=getAcctTemplate(strtoupper(callsign));
+                if (elem) {
+                  if (elem->passwd!=passwd) {
+                    elem=NULL;
+                  }
+                }                
+                if( !elem)
                 {
-                    elem = *j;
-                    if( !elem->compareName( callsign) && !elem->comparePass( passwd))
-                    {
-                        // We found the client in the account list
-                        found = 1;
-                        cout<<"Found player : "<<elem->callsign<<":"<<elem->passwd<<endl;
-                    }
-                }
-                if( !found)
-                {
-#ifdef VSNET_DEBUG
-                    COUT << "Login/passwd not found, we know:" << endl;
-                    for( j=Cltacct.begin(); j!=Cltacct.end(); j++ )
-		            {
-                        COUT << "    " << (*j)->callsign << ":" << (*j)->passwd << endl;
-		            }
-#else
-                    COUT<<"Login/passwd not found"<<endl;
-#endif
                     Account elt(callsign, passwd);
                     this->sendUnauthorized( sock, &elt);
                 }
@@ -252,26 +226,28 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                     }
                 }
                 cout<<"<<< LOGIN REQUEST ------------------------------------------"<<endl;
-			}
+              }
             break;
             case CMD_LOGOUT :
                 callsign = netbuf.getString();
                 passwd = netbuf.getString();
                 cout<<">>> LOGOUT REQUEST =( "<<callsign<<":"<<passwd<<" )= --------------------------------------"<<endl;
                 // Receive logout request containing name of player
-                for (  j=Cltacct.begin(); j!=Cltacct.end() && !found && !connected; j++)
-                {
-                    elem = *j;
-                    if( !elem->compareName( callsign) && !elem->comparePass( passwd))
-                    {
-                        found = 1;
-                        if( elem->isConnected())
-                            connected = 1;
-                        else
-                            connected = 0;
-                    }
+
+                elem=getAcctTemplate(callsign);
+                if (elem) {
+                  if (elem->passwd!=passwd) {
+                    elem=NULL;
+                  }
                 }
-                if( !found)
+
+                if(elem&& elem->isConnected())
+                  connected = 1;
+                else
+                  connected = 0;
+        
+        
+                if( !elem)
                 {
                     cout<<"ERROR LOGOUT -> didn't find player to disconnect = <"<<callsign<<">:<"<<passwd<<">"<<endl;
                 }
@@ -297,52 +273,45 @@ void    AccountServer::recvMsg( SOCKETALT sock)
             case CMD_NEWSUBSCRIBE :
             {
                 cout<<">>> SUBSRIBE REQUEST =( "<<callsign<<" )= --------------------------------------"<<endl;
+                
                 // Should receive a new subscription
                 callsign = netbuf.getString();
                 passwd = netbuf.getString();
                 // Loop through accounts to see if the required callsign already exists
                 bool found = false;
                 Packet  packet2;
-                for (  j=Cltacct.begin(); j!=Cltacct.end() && !found && !connected; j++)
-                {
-                    elem = *j;
-                    if( !elem->compareName( callsign))
-                    {
-                        // We found an account with the requested name
-                        found = true;
-                        if( packet2.send( LOGIN_ERROR, packet.getSerial(), (char *)NULL, 0, SENDRELIABLE, NULL, sock, __FILE__, __LINE__ ) < 0 )
-                        {
-                            cout<<"ERROR sending authorization"<<endl;
-                            exit( 1);
-                        }
-                    }
+                if (1||getAcctNoReload(callsign)) {
+                  found = true;
+                  if( packet2.send( LOGIN_ERROR, packet.getSerial(), (char *)NULL, 0, SENDRELIABLE, NULL, sock, __FILE__, __LINE__ ) < 0 )
+                  {
+                    cout<<"ERROR sending authorization"<<endl;
+                    exit( 1);
+                  }
                 }
                 if( !found)
                 {
                     // Add the account at the end of accounts.xml
-					VSFile f;
-					VSError err = f.OpenReadOnly( "accounts.xml", AccountFile);
-                    if( err>Ok)
-                    {
-                        cout<<"ERROR opening accounts file";
-                        if( packet2.send( (Cmd) 0, packet.getSerial(), (char *)NULL, 0, SENDRELIABLE, NULL, sock, __FILE__, __LINE__ ) < 0 )
-                            cout<<"ERROR sending errormsg to subscription website"<<endl;
-                        VSExit(1);
-                    }
-                    else
-                    {
+                  VSFile f;
+                  VSError err = f.OpenReadOnly( "accounts.xml", AccountFile);
+                  if( err>Ok)
+                  {
+                    cout<<"ERROR opening accounts file";
+                    if( packet2.send( (Cmd) 0, packet.getSerial(), (char *)NULL, 0, SENDRELIABLE, NULL, sock, __FILE__, __LINE__ ) < 0 )
+                      cout<<"ERROR sending errormsg to subscription website"<<endl;
+                    VSExit(1);
+                  }
+                  else
+                  {
                         cout<<"Account file opened"<<endl;
-                        char * fbuf = new char[MAXBUFFER];
-                        size_t i=0;
+                        char * fbuf = new char[MAXBUFFER+1];
+                        fbuf[MAXBUFFER]='\0';
                         vector<string> acctlines;
                         // Read a line per account and one line for the "<ACCOUNTS>" tag
-                        for( i=0; i<Cltacct.size()+1; i++)
-                        {
-                            f.ReadLine( fbuf, MAXBUFFER);
+                        while(f.ReadLine( fbuf, MAXBUFFER)==Ok) {
                             acctlines.push_back( fbuf);
                             cout<<"Read line : "<<fbuf<<endl;
                         }
-						f.Close();
+                        f.Close();
                         err = f.OpenCreateWrite( "accounts.xml", AccountFile);
                         if( err>Ok)
                         {
@@ -352,7 +321,7 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                         acctlines.push_back( "\t<PLAYER name=\""+callsign+"\"\tpassword=\""+passwd+"\" />\n");
                         acctlines.push_back( "</ACCOUNTS>\n");
                         //cout<<"Adding to file : "<<acctstr<<endl;
-                        for( i=0; i<acctlines.size(); i++)
+                        for( size_t i=0; i<acctlines.size(); i++)
                         {
                             if( f.WriteLine( acctlines[i].c_str()) < 0)
                             {
@@ -368,8 +337,8 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                             VSExit(1);
                         }
                         */
-						f.Close();
-                        Cltacct.push_back( new Account( callsign, passwd));
+                        f.Close();
+                        addAcct(callsign, new Account( callsign, passwd));
                     }
                     if( packet2.send( packet.getCommand(), packet.getSerial(), (char*)NULL, 0, SENDRELIABLE, NULL, sock, __FILE__, __LINE__ ) < 0 )
                     {
@@ -384,9 +353,6 @@ void    AccountServer::recvMsg( SOCKETALT sock)
             case CMD_RESYNCACCOUNTS:
             {
                 cout<<">>> RESYNC ACCOUNTS --------------------------------------"<<endl;
-                // Should receive a list of active players for the concerned server
-                // So go through the Account list, look if server_sock == sock
-                // Then compare status (connected and now not anymore...)
                 ObjSerial nbclients = packet.getSerial();
                 int i=0;
                 cout<<">>>>>>>>> SYNC RECEIVED FOR "<<nbclients<<" CLIENTS <<<<<<<<<<<<"<<endl;
@@ -396,27 +362,18 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                 // Loop through accounts
                 // Maybe not necessary since when we get a game server disconnect we should have
                 // set all its accounts disconnected
-                /*
-                for( vi = Cltacct.begin; vi!=Cltacct.end(); vi++)
-                {
-                    // Check if the socket correspond to the one of the current account
-                    // -> it was a client on the server that asked for sync
-                    // We set them to disconnected in order to reactivate those in the received list
-                    if( (*vi)->getSocket() == sock)
-                        (*vi)->setConnected( false);
-                }
-                */
                 // Loop through received client serials
+
                 for( i=0; i<nbclients; i++)
                 {
                     nameTmp = netbuf.getString();
                     //sertmp = ntohs( *( (ObjSerial *)(buf+sizeof( ObjSerial)*i)));
                     // Loop through accounts
-                    for( vi = Cltacct.begin(); vi!=Cltacct.end(); vi++)
-                    {
+                    elem=getAcctTemplate(callsign);
+                    if (elem) {
                         // Reactivate the serial we received from server
-                        if( (*vi)->compareName(nameTmp))
-                            (*vi)->setConnected( true);
+                        if( elem->compareName(nameTmp))
+                            elem->setConnected( true);
                     }
                 }
                 cout<<"<<< RESYNC'ED ACCOUNTS --------------------------------------"<<endl;
@@ -597,10 +554,12 @@ void    AccountServer::sendServerData( SOCKETALT sock, Account * acct)
 void    AccountServer::save()
 {
     // Loop through all accounts and write their status
+  /*
     VI vi;
     for( vi=Cltacct.begin(); vi!=Cltacct.end(); vi++)
     {
     }
+  */
 }
 
 void    AccountServer::removeDeadSockets()
@@ -611,25 +570,20 @@ void    AccountServer::removeDeadSockets()
     int nbc_disc = 0;
     int nbs_disc = 0;
     list<SOCKETALT>::iterator j;
+    Account * elem;
     for (j=DeadSocks.begin(); j!=DeadSocks.end(); j++)
     {
         bool found=false;
         COUT << ">>>>>>> Closing socket number "<<(*j)<<endl;
         // Disconnect all of that server clients
-        for( vi = Cltacct.begin(); vi!=Cltacct.end(); vi++)
-        {
-            // Check if the socket correspond to the one of the current account
-            // -> it was a client on the server that got disconnected
-            // We set them to disconnected in order to reactivate those in the resync list if we receive one
+        elem=getAcctAddress(*j);
+        if (elem) {
 
-            // We check only if it is the same address since the "fd" member of the socket should have been
-            // set to -1 because of disconnect
-            if( (*vi)->getSocket().sameAddress( (*j)))
-            {
+        //            if( (*vi)->getSocket().sameAddress( (*j)))
                 (*vi)->setConnected( false);
                 nbc_disc++;
                 found=true;
-            }
+
         }
         if( !found)
             nbs_disc++;
@@ -650,17 +604,12 @@ void    AccountServer::writeSave( const char * buffer, unsigned int length)
 
     // Find the account associated with serial packet.getSerial();
     VI vi;
-    bool found = false;
-    for( vi=Cltacct.begin(); vi!=Cltacct.end() && !found; vi++)
-    {
-        if( (*vi)->getSerial()==packet.getSerial())
-            found = true;
-    }
-    if( !found)
+    Account*elem=getAcctSerial(packet.getSerial());
+    if( !elem)
     {
         // Problem, we should have found it
     }
     else
         // Save the files
-        FileUtil::WriteSaveFiles( savestr, xmlstr, (*vi)->callsign);
+        FileUtil::WriteSaveFiles( savestr, xmlstr, elem->callsign);
 }
