@@ -242,27 +242,31 @@ int main( int argc, char *argv[] )
     //this sets up the vegastrike config variable
     setup_game_data(); 
     // loads the configuration file .vegastrike/vegastrike.config from home dir if such exists
-	{
-	    string subdir=ParseCommandLine(argc,argv);
-		cerr<<"GOT SUBDIR ARG = "<<subdir<<endl;
-		if (CONFIGFILE==0) {
-			CONFIGFILE=new char[42];
-			sprintf(CONFIGFILE,"vegastrike.config");
-		}
+    {
+      string subdir=ParseCommandLine(argc,argv);
+      cerr<<"GOT SUBDIR ARG = "<<subdir<<endl;
+      if (CONFIGFILE==0) {
+        CONFIGFILE=new char[42];
+        sprintf(CONFIGFILE,"vegastrike.config");
+      }
+      
+      // Specify the config file and the possible mod subdir to play
+      VSFileSystem::InitPaths( CONFIGFILE, subdir);
+    }
 
-		// Specify the config file and the possible mod subdir to play
-		VSFileSystem::InitPaths( CONFIGFILE, subdir);
-	}
     //can use the vegastrike config variable to read in the default mission
-
+    if (XMLSupport::parse_bool(vs_config->getVariable ("network","force_client_connect","false"))) {
+      ignore_network=false;
+    }
   g_game.music_enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","Music","true"));
-    if (mission_name[0]=='\0')
-	{
-      strcpy(mission_name,vs_config->getVariable ("general","default_mission","test/test1.mission").c_str());
-	  cerr<<"MISSION_NAME is empty using : "<<mission_name<<endl;
-	}
-    //might overwrite the default mission with the command line
-	InitUnitTables();
+  if (mission_name[0]=='\0')
+  {
+    std::string defmis=vs_config->getVariable ("general","default_mission","test/test1.mission");
+    strcpy(mission_name,defmis.c_str());
+    cerr<<"MISSION_NAME is empty using : "<<mission_name<<endl;
+  }
+  //might overwrite the default mission with the command line
+  InitUnitTables();
 #ifdef HAVE_PYTHON
     Python::init();
 
