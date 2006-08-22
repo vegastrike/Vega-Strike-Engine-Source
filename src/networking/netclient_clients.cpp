@@ -43,26 +43,34 @@ void	NetClient::enterClient( NetBuffer &netbuf, ObjSerial cltserial )
 		float creds;
 		bool update=true;
 		vector<string> savedships;
+                string PLAYER_FACTION_STRING;
+                string * savegamestr=NULL;
+                if (cltname.length()) {
 		// Parse the save buffer
-		save.ParseSaveGame( "", starsys, "", pos, update, creds, savedships, 0, savestr, false);
-		
-		string PLAYER_FACTION_STRING( save.GetPlayerFaction());
-
-		// CREATES THE UNIT... GET SAVE AND XML FROM SERVER
-		// Use the first ship if there are more than one -> we don't handle multiple ships for now
-		// We name the flightgroup with the player name
-		cerr<<"Found saveship[0] = "<<savedships[0]<<endl;
-		cerr<<"NEW PLAYER POSITION : x="<<pos.i<<",y="<<pos.j<<"z="<<pos.k<<endl;
-		
-		cerr<<"SAFE PLATER POSITION: x="<<pos.i<<",y="<<pos.j<<"z="<<pos.k<<endl;
-		
+                  save.ParseSaveGame( "", starsys, "", pos, update, creds, savedships, 0, savestr, false);
+                  
+                  PLAYER_FACTION_STRING= save.GetPlayerFaction();
+                  
+                  // CREATES THE UNIT... GET SAVE AND XML FROM SERVER
+                  // Use the first ship if there are more than one -> we don't handle multiple ships for now
+                  // We name the flightgroup with the player name
+                  cerr<<"Found saveship[0] = "<<savedships[0]<<endl;
+                  cerr<<"NEW PLAYER POSITION : x="<<pos.i<<",y="<<pos.j<<"z="<<pos.k<<endl;
+                  
+                  cerr<<"SAFE PLATER POSITION: x="<<pos.i<<",y="<<pos.j<<"z="<<pos.k<<endl;
+                  savegamestr=&xmlstr;
+		}else {
+                  savedships.push_back(savestr);
+                  PLAYER_FACTION_STRING=xmlstr;
+                  cltname = "Object_"+XMLSupport::tostring(cltserial);
+                }
 		
 		Unit * un = UnitFactory::createUnit( savedships[0].c_str(),
 							 false,
 							 FactionUtil::GetFactionIndex( PLAYER_FACTION_STRING),
 							 string(""),
-							 Flightgroup::newFlightgroup ( callsign,savedships[0],PLAYER_FACTION_STRING,"default",1,1,"","",mission),
-							 0, &xmlstr);
+							 Flightgroup::newFlightgroup ( cltname,savedships[0],PLAYER_FACTION_STRING,"default",1,1,"","",mission),
+							 0, savegamestr);
 		ClientPtr clt = this->AddClientObject( un, cltserial);
 
 		// Assign new coordinates to client
@@ -415,6 +423,10 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 
 void NetClient::receiveUnitDamage( NetBuffer &netbuf, Unit *un ) {
 	size_t it=0;
+        if (!un) {
+          cerr<< "Received Damage Update for null unit"<<endl;
+          return;
+        }
 	unsigned short damages;
 	damages = netbuf.getShort();
 

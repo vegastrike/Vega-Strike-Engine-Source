@@ -318,14 +318,13 @@ void  NetServer::getZoneInfo( unsigned short zoneid, NetBuffer & netbuf)
 	string savestr, xmlstr;
 
 	// Loop through client in the same zone to send their current_state and save and xml to "clt"
-
-    ClientWeakList* lst = zonemgr->getZoneList(zoneid);
-    if( lst == NULL )
-    {
-	    COUT << "\t>>> WARNING: Did not send info about " << nbclients << " other ships because of empty (inconsistent?) zone" << endl;
-        return;
-    }
-
+        std::set<ObjSerial> activeObjects;
+        ClientWeakList* lst = zonemgr->getZoneList(zoneid);
+        if( lst == NULL )
+        {
+          COUT << "\t>>> WARNING: Did not send info about " << nbclients << " other ships because of empty (inconsistent?) zone" << endl;
+        }
+        else
 	for( k=lst->begin(); k!=lst->end(); k++)
 	{
         if( (*k).expired() ) continue;
@@ -347,9 +346,28 @@ void  NetServer::getZoneInfo( unsigned short zoneid, NetBuffer & netbuf)
 			netbuf.addString( savestr);
 			netbuf.addString( xmlstr);
 			netbuf.addTransformation(kp->game_unit.GetUnit()->curr_physical_state);
+                        activeObjects.insert(un->GetSerial());
 			nbclients++;
 		}
 	}
-	netbuf.addChar( ZoneMgr::End);
+        Unit *un;
+        for (un_iter ui=_Universe->star_system[zoneid]->getUnitList().createIterator();
+             (un=*ui)!=NULL;
+             ++ui) {
+          ObjSerial ser=un->GetSerial();
+          if (activeObjects.find(ser)==activeObjects.end()) {
+            netbuf.addChar( ZoneMgr::AddClient);
+            netbuf.addSerial( un->GetSerial());
+            netbuf.addString( "");
+            netbuf.addString( un->name);
+            netbuf.addString(FactionUtil::GetFactionName(un->faction));
+            netbuf.addTransformation(un->curr_physical_state);
+            activeObjects.insert(un->GetSerial());
+            nbclients++;
+       
+          }
+        }
+        netbuf.addChar( ZoneMgr::End);
+          
 	COUT<<"\t>>> GOT INFO ABOUT "<<nbclients<<" OTHER SHIPS"<<endl;
 }
