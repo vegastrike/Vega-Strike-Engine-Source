@@ -38,7 +38,9 @@ class Account
 {
 		ObjSerial	serial;
 		char		haschar;
-		bool		connected;
+  //int indicates retry count
+		int		isconnected;
+
 		SOCKETALT	server_sock;
 
 	public:
@@ -54,7 +56,7 @@ class Account
 		string serverport;
 
 		// Assume player has created ship/char -> to remove in the future
-		Account() { haschar=1; connected=false; };
+		Account() { haschar=1; isconnected=0; };
 		Account( char * scallsign, char * spasswd)
 		{
 			callsign = string(scallsign);
@@ -94,15 +96,18 @@ class Account
 		{ return callsign!=str; }
 		int		comparePass( string str)
 		{ return passwd!=str; }
-
-		int		isConnected()
+		bool		isConnected()
 		{
-			return (connected==true);
+			return (isconnected!=0);
 		}
+                int retryConnectedCount() {
+                  return isconnected;
+                }
 		void	setConnected( bool mode)
 		{
-			connected = mode;
+			isconnected = mode?1:0;
 		}
+                void incConnected() {if (isconnected) isconnected++;}
 };
 Account * getAcctNoReload(const string &key);
 Account * getAcctTemplate(const string &key);

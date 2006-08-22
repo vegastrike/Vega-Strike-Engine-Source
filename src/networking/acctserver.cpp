@@ -180,9 +180,10 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                 }
                 else
                 {
-                    if( elem->isConnected())
+                    if( elem->isConnected()&&elem->retryConnectedCount()<6)
                     {
                         COUT<<"Login already connected !"<<endl;
+                        //elem->incConnected();//right now causes fatal clientside error
                         this->sendAlreadyConnected( sock, elem);
                     }
                     else
@@ -213,9 +214,10 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                 }
                 else
                 {
-                    if( elem->isConnected())
+                    if( elem->isConnected()&&elem->retryConnectedCount()<6)
                     {
                         cout<<"Client already connected"<<endl;
+                        //elem->incConnected();//right now causes fatal clientside error
                         this->sendUnauthorized( sock, elem);
                     }
                     else

@@ -210,7 +210,10 @@ void	NetServer::posUpdate( ClientPtr clt)
 	clt->last_packet=cs;
 	// deltatime has already been updated when the packet was received
 	Cockpit * cp = _Universe->isPlayerStarship( un );
-	cp->savegame->SetPlayerLocation( un->curr_physical_state.position);
+        if (cp)
+          cp->savegame->SetPlayerLocation( un->curr_physical_state.position);
+        else
+          COUT << "ERROR Want to set player location for position update, but the cockpit is null for unit. Therefore client must not have his own cockpit "<< un->GetSerial();
 	snapchanged = 1;
 }
 
