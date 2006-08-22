@@ -3711,13 +3711,14 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
             }
           }
   }else if (hullpercent>=hull_percent_for_comm&&((float)GetHullPercent())<hull_percent_for_comm&&(cp||_Universe->isPlayerStarship(this))) {
-    Unit * computerai=this;
+    Unit * computerai=NULL;
     Unit * player = NULL;
-    if (!cp) {
+    if (cp==NULL) {
       computerai=findUnitInStarsystem(ownerDoNotDereference);
       player = this;
     } else {
-      player = reinterpret_cast<Unit*>(ownerDoNotDereference);//cp != NULL
+      computerai=this;
+      player = cp->GetParent();//cp != NULL
     }
     if (computerai&&player&&computerai->getAIState()&&player->getAIState()&&computerai->isUnit()==UNITPTR&&player->isUnit()==UNITPTR) {
 
