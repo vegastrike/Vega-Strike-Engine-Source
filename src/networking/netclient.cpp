@@ -762,7 +762,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				}
 			}
 			break;
-#ifdef NET_SHIELD_SYSTEM_1
+#if 1
 			case CMD_DAMAGE :
 			{
 				float amt = netbuf.getFloat();
@@ -776,8 +776,8 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				Armor ar = netbuf.getArmor();
 				if( un)
 				{
-					un->shield = sh;
-					un->armor = ar();
+                                  un->shield=sh;
+                                  un->armor=ar;
 					// Apply the damage
 					un->ApplyNetDamage( pnt, normal, amt, ppercentage, spercentage, col);
 				}
@@ -785,6 +785,8 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					COUT<<"!!! Problem -> CANNOT APPLY DAMAGE UNIT NOT FOUND !!!"<<endl;
 			}
 			break;
+#endif
+#if 0
 			case CMD_DAMAGE1 :
 			{
 				/*

@@ -67,6 +67,14 @@ void	NetServer::BroadcastFire( ObjSerial serial, const vector<int> &weapon_indic
 
 void	NetServer::sendDamages( ObjSerial serial, unsigned short zone, Shield shield, Armor armor, float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color)
 {
+  static ObjSerial lastserial;
+  static float timestamp=getNewTime();
+  float curtime=getNewTime();
+  static float mintime=XMLSupport::parse_float(vs_config->getVariable( "network", "min_time_btw_damage_updates", ".25" ));
+
+  if (lastserial!=serial||curtime-timestamp>mintime) {
+    timestamp=curtime;
+    lastserial=serial;
 	Packet p;
 	NetBuffer netbuf;
 
@@ -84,7 +92,8 @@ void	NetServer::sendDamages( ObjSerial serial, unsigned short zone, Shield shiel
                  SENDRELIABLE,
                  __FILE__, PSEUDO__LINE__(1729) );
 	// WARNING : WE WILL SEND THE INFO BACK TO THE CLIENT THAT HAS FIRED
-	zonemgr->broadcast( zone, serial, &p, true ); // NETFIXME: Should damages be TCP?
+	zonemgr->broadcast( zone, serial, &p, false ); // NETFIXME: Should damages be TCP? NO..we have alternate method to deal with it
+  }
 }
 
 void	NetServer::sendKill( ObjSerial serial, unsigned short zone)

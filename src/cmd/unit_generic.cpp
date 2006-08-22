@@ -3600,7 +3600,7 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
   // If server and there is damage to shields or if unit is not killed (ppercentage>0)
   if( SERVER && (ppercentage>0 || spercentage>0))
   {
-#ifdef NET_SHIELD_SYSTEM_1
+#if 1//def NET_SHIELD_SYSTEM_1
 	  // FIRST METHOD : send each time a unit is hit all the damage info to all clients in the current zone
 	  // If server side, we send the unit serial + serialized shields + shield recharge + shield leak + ...
 	  Vector netpnt = pnt;
@@ -3609,7 +3609,8 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
 	  VSServer->sendDamages( this->serial, this->getStarSystem()->GetZone(), shield, armor, ppercentage, spercentage, amt, netpnt, netnormal, col);
 	  // This way the client computes damages based on what we send to him => less reliable
 	  //VSServer->sendDamages( this->serial, pnt, normal, amt, col, phasedamage);
-#else
+#endif
+#if 1
 		// SECOND METHOD : we just put a flag on the unit telling its shield/armor data has changed
 		if( spercentage)
 			this->damages |= SHIELD_DAMAGED;

@@ -566,7 +566,6 @@ void    AccountServer::removeDeadSockets()
 {
     if( DeadSocks.empty() ) return;
 
-    VI vi;
     int nbc_disc = 0;
     int nbs_disc = 0;
     list<SOCKETALT>::iterator j;
@@ -580,7 +579,7 @@ void    AccountServer::removeDeadSockets()
         if (elem) {
 
         //            if( (*vi)->getSocket().sameAddress( (*j)))
-                (*vi)->setConnected( false);
+                elem->setConnected( false);
                 nbc_disc++;
                 found=true;
 
