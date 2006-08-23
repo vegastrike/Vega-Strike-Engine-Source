@@ -2,24 +2,36 @@ Goals:
 *---------------------------------*
 Summer
 * August 18th
-**Change factions.xml to make no one attack civvies (unless they are mean...i'm talkin to you, pirates.)
+
 ** add unit called "laser" in units.csv with default weakest multifaction bolt weapon (doesn't have to be a laser at alll)
+
 ** add spec interdictor to pirate vessels (make sure it's negative for no speed hit. Possibly between -10 and -20...but maybe only -5 or -2)
 ***Test this heavily--don't change a value without verifying that pirates actually stop ships with it...
+
 ** faction_ships.useBlank should be 0 for all civvie factions (the 1,1,1,1,1 without spaces between them)
 *** This will require making various variants of standard craft for civilians... they can be called llama.civvie or something.
 ****remember to add any variants or new craft to faction_ships.stattableexp (then we have a logified version of it I think that we had some generator for)
 *** Armed is fine...but they should be lightly so--if unarmed should have a different role perhaps
 *** add these new ships to the appropriate faction_ships.fighters and faction_ships.capships list at the appropriate faction
-** currently code calls faction_ships.get_enemy_of_no_citizen... want to eventually change those calls to actually using the friends and enemy list without costly citizen checks...
-***To resolve this, fix the rabble list to actually not have rlaan_citizen and andolian_citizen as rabble of another faction (unless you really want to see them there, like the forsaken)...then we won't need this code wart and we can just make the function return faction_ships.get_enemy with the same args
+
+
 **Fix the num of MILITARY flightgroups in any given system
 ***make the faction_ships.max_flightgroups and faction_ships.min_flightgroups functions return different values for appropriate systems... 
 ***make the fg_util.MinNmFlightgroupsInSystem and fg_util.MaxNumFlgihtgroupsInSystem return something other than 1 or 3 for boonies systems in case it's not in the hash table
+
 **fix the faction_ships.fightersPerFG so it's reasonable for civvies
 ***Remember that when testing this stuff you need to delete savegames and view the resulting saved game :-)
+
 **Elasticity down
 ***things could be crashing into each other a lot... maya s well not have them die needless deaths
+
+
+*August 22nd - First pass completed on following
+**Change factions.xml to make no one attack civvies (unless they are mean...i'm talkin to you, pirates.) -- Should be good now.
+
+** currently code calls faction_ships.get_enemy_of_no_citizen... want to eventually change those calls to actually using the friends and enemy list without costly citizen checks...
+***To resolve this, fix the rabble list to actually not have rlaan_citizen and andolian_citizen as rabble of another faction (unless you really want to see them there, like the forsaken)...then we won't need this code wart and we can just make the function return faction_ships.get_enemy with the same args
+-- Should be good now.
 
 
 * DATASET BALANCING:
