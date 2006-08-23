@@ -455,11 +455,14 @@ void NetClient::receiveUnitDamage( NetBuffer &netbuf, Unit *un ) {
 		un->image->ecm = netbuf.getShort();
 		for( it=0; it<un->mounts.size(); it++)
 		{
-			un->mounts[it].status = ( Mount::STATUS) netbuf.getChar();
-
-			un->mounts[it].ammo = netbuf.getInt32();
-			un->mounts[it].time_to_lock = netbuf.getFloat();
-			un->mounts[it].size = netbuf.getShort();
+                  Mount::STATUS tmpstatus=( Mount::STATUS) netbuf.getChar();
+                  if (_Universe->isPlayerStarship(un)==NULL||tmpstatus==Mount::UNCHOSEN||tmpstatus==Mount::DESTROYED) {
+                    un->mounts[it].status = tmpstatus;
+                        //don't reset my mount status on me... that's my 
+                  }                  
+                  un->mounts[it].ammo = netbuf.getInt32();
+                  un->mounts[it].time_to_lock = netbuf.getFloat();
+                  un->mounts[it].size = netbuf.getShort();
 		}
 	}
 	if( damages & Unit::CARGOFUEL_DAMAGED)
