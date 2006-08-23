@@ -1185,8 +1185,23 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
     
     if (want_to_fire) {
           // If in non-networking mode and mount fire has been accepted or if on server side
-          if( Network==NULL || SERVER || i->processed==Mount::ACCEPTED)
+          if (Network!=NULL && (!SERVER) && i->processed!=Mount::ACCEPTED&&i->processed!=Mount::FIRED && i->processed!=Mount::REQUESTED && playernum>=0)
           {
+            // Request a fire order to the server telling him the serial of the unit and the mount index (nm)
+            if (mis) {
+              missileFireRequests.push_back(index);
+            } else {
+              gunFireRequests.push_back(index);
+            }
+            // Mark the mount as fire requested
+            i->processed = Mount::REQUESTED;
+			// NETFIXME: REQUESTED was commented out.
+          }
+          static bool
+              client_side_fire=XMLSupport::parse_bool(vs_config->getVariable("network","client_side_fire","true"));
+          if( Network==NULL || SERVER || i->processed==Mount::ACCEPTED || (client_side_fire&&mis==false))
+          {
+
             // If we are on server or if the weapon has been accepted for fire we fire
             if (i->Fire(this,owner==NULL?this:owner,mis,listen_to_owner)) {
               ObjSerial serid;
@@ -1224,18 +1239,6 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
               // IF WE REFRESH ENERGY FROM SERVER : Think to send the energy update to the firing client with ACK TO fireRequest
               if (mis) weapon_type_bitmask &= (~ROLES::FIRE_MISSILES);//fire only 1 missile at a time
             }
-          }
-          else if (i->processed!=Mount::FIRED && i->processed!=Mount::REQUESTED && playernum>=0)
-          {
-            // Request a fire order to the server telling him the serial of the unit and the mount index (nm)
-            if (mis) {
-              missileFireRequests.push_back(index);
-            } else {
-              gunFireRequests.push_back(index);
-            }
-            // Mark the mount as fire requested
-            i->processed = Mount::REQUESTED;
-			// NETFIXME: REQUESTED was commented out.
           }
     }
     if (want_to_fire==false&&(i->processed==Mount::FIRED||i->processed==Mount::REQUESTED||i->processed==Mount::PROCESSED)) {
