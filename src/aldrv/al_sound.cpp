@@ -198,7 +198,7 @@ bool MacFixedLoadWAVFile(char * buf, ALenum *format,ALvoid **data,ALsizei *size,
 #else
 #include <AL/al.h>
 #include <AL/alc.h>
-#include <AL/alut.h>
+
 #endif
 //#include <AL/alext.h>
 #endif
