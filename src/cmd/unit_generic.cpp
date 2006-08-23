@@ -1199,7 +1199,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
           }
           static bool
               client_side_fire=XMLSupport::parse_bool(vs_config->getVariable("network","client_side_fire","true"));
-          if( Network==NULL || SERVER || i->processed==Mount::ACCEPTED || (client_side_fire&&mis==false))
+          if( Network==NULL || SERVER || i->processed==Mount::ACCEPTED || (client_side_fire&&i->type->type!=weapon_info::BEAM&&i->type->type!=weapon_info::PROJECTILE))//projectile and beam weapons should be confirmed by server...not just fired off willy-nilly
           {
 
             // If we are on server or if the weapon has been accepted for fire we fire
