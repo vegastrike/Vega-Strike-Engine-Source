@@ -16,7 +16,7 @@ void UnitFactory::getUnitBuffer( NetBuffer & netbuf, const char *filename,
 		netbuf.addChar( SubUnit);
 		netbuf.addInt32( faction);
 		netbuf.addString( customizedUnit);
-		netbuf.addString( flightgroup->name);
+		netbuf.addString( flightgroup!=NULL?flightgroup->name:std::string("Object"));
 		netbuf.addInt32( fg_subnumber);
 }
 Unit* UnitFactory::getMasterPartList( )
