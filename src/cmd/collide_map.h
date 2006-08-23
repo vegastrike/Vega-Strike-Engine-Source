@@ -83,7 +83,7 @@ public:
   iterator insert (const Collidable & newKey);
   iterator changeKey (iterator iter, const Collidable & newKey);
   iterator changeKey (iterator iter, const Collidable & newKey, iterator tless, iterator tmore);
-  iterator begin() {return &*sorted.begin();}
+  iterator begin() {return sorted.size()!=0?&*sorted.begin():NULL;}
   iterator end() {return this->begin()+sorted.size();}
   iterator lower_bound(const Collidable&);
   void erase(iterator iter);
