@@ -385,6 +385,9 @@ void NetClient::Respawn( ObjSerial newserial) {
   bool setplayerXloc;
   string mysystem="Crucible/Cephid_17";
   Cockpit * cp = _Universe->AccessCockpit(whichcp);
+  static float initialzoom = XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
+  cp->zoomfactor=initialzoom;
+
   cp->savegame->ParseSaveGame ("",mysystem,mysystem,pos,setplayerXloc,cp->credits,cp->unitfilename,whichcp, lastsave[0], false);
   StarSystem * ss = _Universe->GenerateStarSystem(mysystem.c_str(),"",Vector(0,0,0));
   _Universe->pushActiveStarSystem(ss);

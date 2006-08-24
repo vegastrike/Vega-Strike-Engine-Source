@@ -32,6 +32,7 @@ class Missile:public Unit {
   float radial_multiplier;
   float detonation_radius;
   bool discharged;
+  bool had_target;
   signed char retarget;
  public:
   void Discharge();
@@ -57,7 +58,7 @@ protected:
         , detonation_radius(detonation_radius)
         , discharged(false)
         , retarget (-1)
-    {maxhull*=10; }
+  {maxhull*=10; had_target=false;}
 
   void InitMissile( float ptime, const float pdamage, float pphasedamage, float pradial_effect,
 					float pradial_multiplier, float pdetonation_radius, bool pdischarged, signed char pretarget)
@@ -70,6 +71,7 @@ protected:
 	  detonation_radius=pdetonation_radius;
 	  discharged=pdischarged;
 	  retarget=pretarget;
+          had_target=false;
   }
   friend class UnitFactory;
 

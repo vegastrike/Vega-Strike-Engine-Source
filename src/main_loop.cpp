@@ -185,14 +185,13 @@ namespace CockpitKeys {
   void TextMessageCallback(unsigned int ch, unsigned int mod, bool release, int x, int y){
     GameCockpit *gcp=static_cast<GameCockpit*>(_Universe->AccessCockpit(textmessager));
     gcp->editingTextMessage=true;
-    if (release){
-      if (waszero||ch==WSK_KP_ENTER){
-        waszero=false;
-        gcp->editingTextMessage=false;
-        RestoreKB();
-      }          
-      return;
+    if ((release&&(waszero||ch==WSK_KP_ENTER||ch==WSK_ESCAPE))||(release==false&&(ch==']'||ch=='['))){
+      waszero=false;
+      gcp->editingTextMessage=false;
+      RestoreKB();
+
     }
+    if (release||(ch==']'||ch=='['))return;
     
     unsigned int code=((WSK_MOD_LSHIFT==(mod&WSK_MOD_LSHIFT))||(WSK_MOD_RSHIFT==(mod&WSK_MOD_RSHIFT)))?shiftup(ch):ch;
     if (textmessager<_Universe->numPlayers()) {

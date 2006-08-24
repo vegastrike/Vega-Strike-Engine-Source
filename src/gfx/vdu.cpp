@@ -803,8 +803,11 @@ void VDU::DrawMessages(GameCockpit* parentcp,Unit *target){
   }
   static std::string newline("\n");
   std::string textMessage=parentcp->textMessage;
-  if (parentcp->editingTextMessage&&floor(nowtime/2)!=floor(nowtime)/2.0) {
-    textMessage+="]";
+  if (parentcp->editingTextMessage) {
+    textMessage="Chat> "+textMessage;
+    if (floor(nowtime/2)!=floor(nowtime)/2.0) {
+      textMessage+="]";
+    }
   }
     
   

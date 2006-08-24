@@ -131,6 +131,7 @@ Unit * getNearestTarget (Unit *me) {
 void Missile::UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc) {
     Unit * targ;
 	if ((targ=(Unit::Target()))) {
+          had_target=true;
 		if (targ->hull<0){
 			targ=NULL; 
 		}else {
@@ -171,6 +172,12 @@ void Missile::UpdatePhysics2 (const Transformation &trans, const Transformation 
         }
         if (retarget&&targ==NULL) {
           Target (NULL);// BROKEN
+        }
+        if (had_target&&!(Unit::Target())) {
+          static float max_lost_target_live_time=XMLSupport::parse_float(vs_config->getVariable("physics","max_lost_target_live_time","30"));
+          if (time>max_lost_target_live_time) {
+            time=max_lost_target_live_time;
+          }
         }
 	Unit::UpdatePhysics2 (trans, old_physical_state, accel, difficulty,transmat, CumulativeVelocity, ResolveLast, uc);
         this->time-=SIMULATION_ATOM;

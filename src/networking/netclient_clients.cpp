@@ -88,6 +88,7 @@ void	NetClient::enterClient( NetBuffer &netbuf, ObjSerial cltserial )
 
 		save.SetPlayerLocation(un->curr_physical_state.position);
 		clt->name = cltname;
+                clt->callsign=cltname;
 		string msg = clt->callsign+" entered the system";
 		UniverseUtil::IOmessage(0,"game","all","#FFFF66"+msg+"#000000");
 	}
