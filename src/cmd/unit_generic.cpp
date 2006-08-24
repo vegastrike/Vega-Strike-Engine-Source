@@ -1996,7 +1996,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 //      mounts[i].time_to_lock-=SIMULATION_ATOM;
 //    }
 
-    if (mounts[i].status==Mount::ACTIVE&&cloaking<0&&mounts[i].ammo!=0) {
+    if (((SERVER&&Network!=NULL&&mounts[i].status==Mount::INACTIVE)||mounts[i].status==Mount::ACTIVE)&&cloaking<0&&mounts[i].ammo!=0) {
       if (player_cockpit) {
 	  touched=true;
       }
@@ -7140,7 +7140,20 @@ void Unit::EjectCargo (unsigned int index) {
           else
           {
             int fac = FactionUtil::GetUpgradeFaction();
-            cargo = UnitFactory::createUnit ("eject",false,fac,"",NULL,0,NULL,getUniqueSerial());
+            static float ejectcargotime=XMLSupport::parse_float(vs_config->getVariable("physics","eject_live_time",SERVER?"200":"0"));
+            if (cargotime==0.0) {
+              cargo = UnitFactory::createUnit ("eject",false,fac,"",NULL,0,NULL,getUniqueSerial());
+            }else {
+              cargo = UnitFactory::createMissile ("eject",
+                                                  fac,"",
+                                                  0,
+                                                  0,
+                                                  ejectcargotime,
+                                                  1,
+                                                  1,
+                                                  1,
+                                                  getUniqueSerial());   
+            }
           }
           
           arot=erot;

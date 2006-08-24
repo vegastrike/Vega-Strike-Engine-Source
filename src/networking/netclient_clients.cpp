@@ -1,3 +1,4 @@
+
 #include "lin_time.h"
 #include "networking/lowlevel/vsnet_debug.h"
 #include "networking/client.h"
@@ -60,6 +61,11 @@ void	NetClient::enterClient( NetBuffer &netbuf, ObjSerial cltserial )
                   cerr<<"SAFE PLATER POSITION: x="<<pos.i<<",y="<<pos.j<<"z="<<pos.k<<endl;
                   savegamestr=&xmlstr;
 		}else {
+                  if (savestr=="Pilot")
+                    savestr="eject";
+                  if (savestr.find(".cargo")!=string::npos) {
+                    savestr="generic_cargo";
+                  }
                   savedships.push_back(savestr);
                   PLAYER_FACTION_STRING=xmlstr;
                   cltname = "Object_"+XMLSupport::tostring(cltserial);
