@@ -4599,10 +4599,12 @@ void Unit::Target (Unit *targ) {
   if (targ==this) {
     return;
   }
+
   if (!(activeStarSystem==NULL||activeStarSystem==_Universe->activeStarSystem())) {
-    computer.target.SetUnit(NULL);
-	if (SERVER)
-		VSServer->BroadcastTarget(GetSerial(), 0, this->getStarSystem()->GetZone());
+      
+      if (SERVER&&computer.target.GetUnit()!=NULL)
+	  VSServer->BroadcastTarget(GetSerial(), 0, this->getStarSystem()->GetZone());
+      computer.target.SetUnit(NULL);
     return;
 	/*
     VSFileSystem::vs_fprintf (stderr,"bad target system");
@@ -4616,7 +4618,7 @@ void Unit::Target (Unit *targ) {
         for (int i=0;i<GetNumMounts();i++){ 
   	  mounts[i].time_to_lock = mounts[i].type->LockTime;
         }
-        if (SERVER)
+        if (SERVER&&computer.target.GetUnit()!=targ)
           VSServer->BroadcastTarget(GetSerial(), targ->GetSerial(), this->getStarSystem()->GetZone());
         computer.target.SetUnit(targ);
 	LockTarget(false);
@@ -4639,13 +4641,13 @@ void Unit::Target (Unit *targ) {
           WarpPursuit(this,_Universe->activeStarSystem(),targ->getStarSystem()->getFileName());
         }
       }else {
-        if (SERVER)
+        if (SERVER&&computer.target.GetUnit()!=NULL)
           VSServer->BroadcastTarget(GetSerial(), 0, this->getStarSystem()->GetZone());
 	computer.target.SetUnit(NULL);
       }
     }
   }else {
-    if (SERVER)
+    if (SERVER&&computer.target.GetUnit()!=NULL)
       VSServer->BroadcastTarget(GetSerial(), 0, this->getStarSystem()->GetZone());
     computer.target.SetUnit(NULL);
   }
