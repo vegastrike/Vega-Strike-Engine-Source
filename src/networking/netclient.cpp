@@ -735,8 +735,13 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 			case CMD_TARGET:
 				un = UniverseUtil::GetUnitFromSerial( packet_serial );
 				if (un) {
-					Unit * target_un = UniverseUtil::GetUnitFromSerial( netbuf.getSerial() );
-					un->computer.target.SetUnit(target_un);
+                                        Unit * target_un = UniverseUtil::GetUnitFromSerial( netbuf.getSerial() );
+                                        Unit* oldtarg=un->Target();
+                                        if (oldtarg&&oldtarg->GetSerial()==0&&(packet_serial==0||target_un==NULL)) {
+                                          //don't do anything
+                                        }else {
+                                          un->computer.target.SetUnit(target_un);
+                                        }
 				}
 			break;
 			case CMD_SCAN :
@@ -1208,7 +1213,8 @@ Transformation	NetClient::Interpolate( Unit * un, double addtime)
 //		cerr << "  *** INTERPOLATE (" << un->curr_physical_state.position.i << ", " << un->curr_physical_state.position.j << ", " << un->curr_physical_state.position.k << "): next deltatime=" << clt->getNextDeltatime() << ", deltatime=" << clt->getDeltatime() << ", this-deltatime=" << this->deltatime << ", elapsed since packet=" << clt->elapsed_since_packet << "\n        =>        (" << trans.position.i << ", " << trans.position.j << ", " << trans.position.k << ")        Vel =    (" << un->Velocity.i << ", " << un->Velocity.j << ", " << un->Velocity.k << ")" << std::endl;
 	} else {
 		trans=un->curr_physical_state;
-		cerr << "  *** Interpolate with NULL CLIENT serial " << un->GetSerial() << "!  Unit fullname=" << un->getFullname() << ";  name=" << un->name << endl;
+                if (rand()<RAND_MAX/5000)
+                  cerr << "  *** Interpolate with NULL CLIENT serial " << un->GetSerial() << "!  Unit fullname=" << un->getFullname() << ";  name=" << un->name << endl;
 	}
 	return trans;
 }

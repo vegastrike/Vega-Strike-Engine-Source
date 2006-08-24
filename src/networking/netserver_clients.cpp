@@ -363,7 +363,7 @@ void  NetServer::getZoneInfo( unsigned short zoneid, NetBuffer & netbuf)
             netbuf.addSerial( un->GetSerial());
             netbuf.addString( "");
             netbuf.addString( un->name);
-            netbuf.addString(FactionUtil::GetFactionName(un->faction));
+            netbuf.addString(FactionUtil::GetFactionName(un->faction)+std::string("|")+UnitUtil::getFlightgroupName(un));
             netbuf.addTransformation(un->curr_physical_state);
             activeObjects.insert(un->GetSerial());
             nbclients++;

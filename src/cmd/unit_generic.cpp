@@ -1977,7 +1977,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   bool increase_locking=false;
   if (target&&cloaking<0/*-1 or -32768*/) {
     if (target->isUnit()!=PLANETPTR) {
-      Vector TargetPos (InvTransform (cumulative_transformation_matrix,(target->Position()).Cast())); 
+      Vector TargetPos (InvTransform (cumulative_transformation_matrix,(target->Position())).Cast()); 
       dist_sqr_to_target = TargetPos.MagnitudeSquared(); 
       TargetPos.Normalize(); 
       if (TargetPos.k>computer.radar.lockcone)

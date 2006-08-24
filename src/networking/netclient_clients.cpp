@@ -61,14 +61,21 @@ void	NetClient::enterClient( NetBuffer &netbuf, ObjSerial cltserial )
                   cerr<<"SAFE PLATER POSITION: x="<<pos.i<<",y="<<pos.j<<"z="<<pos.k<<endl;
                   savegamestr=&xmlstr;
 		}else {
-                  if (savestr=="Pilot")
+                  std::string::size_type wherepipe=xmlstr.find("|");
+                  PLAYER_FACTION_STRING=((wherepipe!=string::npos)?xmlstr.substr(0,wherepipe):xmlstr);
+                  
+                  if (savestr=="Pilot"||savestr=="pilot")
                     savestr="eject";
-                  if (savestr.find(".cargo")!=string::npos) {
+                  else if (savestr.find(".cargo")==string::npos&&PLAYER_FACTION_STRING=="upgrades") {
                     savestr="generic_cargo";
                   }
                   savedships.push_back(savestr);
-                  PLAYER_FACTION_STRING=xmlstr;
-                  cltname = "Object_"+XMLSupport::tostring(cltserial);
+                  if (wherepipe!=string::npos) {
+                    cltname=xmlstr.substr(wherepipe+1);
+                  }
+                  if (wherepipe==string::npos||cltname.length()==0){
+                    cltname = "Object_"+XMLSupport::tostring(cltserial);
+                  }
                 }
 		
 		Unit * un = UnitFactory::createUnit( savedships[0].c_str(),

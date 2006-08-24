@@ -38,11 +38,15 @@ void	NetClient::targetRequest( Unit * target)
 	if (!un) return;
 
 	netbuf.addSerial( target->GetSerial());
-
+        
 	p.send( CMD_TARGET, un->GetSerial(),
             netbuf.getData(), netbuf.getDataLength(),
             SENDRELIABLE, NULL, this->clt_tcp_sock,
             __FILE__, PSEUDO__LINE__(1485) );
+        if (target->GetSerial()==0) {
+          //not networked unit
+          un->computer.target.SetUnit(target);
+        }
 }
 
 // In fireRequest we must use the provided serial because it may not be the client's serial

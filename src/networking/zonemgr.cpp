@@ -465,7 +465,8 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 					// Clients not ingame are removed from the drawList so it is ok not to test that
 					while( (unit=iter.current()) != NULL)
 					{
-						totalunits++;
+                                          totalunits++;
+                                          if (unit->GetSerial()!=0) {
 						// Only send unit that ate UNITPTR and PLANETPTR+NEBULAPTR if update_planets
 						if( (unit->isUnit()==UNITPTR || unit->isUnit()==ASTEROIDPTR || unit->isUnit()==MISSILEPTR) || ((unit->isUnit()==PLANETPTR || unit->isUnit()==NEBULAPTR) && update_planets) )
 						{
@@ -479,10 +480,11 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 								// This should be moved out of the 'if' when download manager is working
 							//}
 							bool added = addPosition( netbuf, unit, cs);
-                            if( added )
+                                                        if( added )
 							    nbunits++;
 						}
-						iter.advance();
+                                          }
+                                          iter.advance();
 					}
 
 					// Send snapshot to client k
@@ -626,6 +628,7 @@ void	ZoneMgr::broadcastDamage( )
 					// Clients not ingame are removed from the drawList so it is ok not to test that
 					while( (unit=iter.current()) != NULL)
 					{
+                                          if (unit->GetSerial()!=0) {
 						if( unit->damages)
 						{
 							// Add the client serial
@@ -635,7 +638,8 @@ void	ZoneMgr::broadcastDamage( )
 						}
 						totalunits++;
 
-						iter.advance();
+                                          }
+                                          iter.advance();
 					}
 					// NETFIXME: Should damage updates be UDP or TCP?
 					// Send snapshot to client k
