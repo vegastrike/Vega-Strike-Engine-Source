@@ -737,7 +737,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				if (un) {
                                         Unit * target_un = UniverseUtil::GetUnitFromSerial( netbuf.getSerial() );
                                         Unit* oldtarg=un->Target();
-                                        if (oldtarg&&oldtarg->GetSerial()==0&&(packet_serial==0||target_un==NULL)) {
+                                        if (oldtarg&&oldtarg->GetSerial()==0&&(target_un==NULL||target_un->GetSerial()==0)) {
                                           //don't do anything
                                         }else {
                                           un->computer.target.SetUnit(target_un);
