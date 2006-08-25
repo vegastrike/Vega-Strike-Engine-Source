@@ -86,6 +86,8 @@ class	NetClient
         int					zone;			// Zone id in universe
         char				keeprun;		// Bool to test client stop
         string				callsign;		// Callsign of the networked player
+        string				password;		// Callsign of the networked player
+  
         vector<string> lastsave;
 
         Clients 			Clients;		// Clients in the same zone
@@ -140,7 +142,7 @@ class	NetClient
 		void			loginAccept( Packet & p1);
 		SOCKETALT		init( const char* addr, unsigned short port);
 		SOCKETALT		init_acct( const char * addr, unsigned short port);
-		void	synchronizeTime(); // Sends time packets back and forth to find the actual double time on the server.
+		void	synchronizeTime(SOCKETALT*); // Sends time packets back and forth to find the actual double time on the server.
 
 // start() should not used...  Use init() instead.
 //		void	start( char * addr, unsigned short port);
@@ -160,7 +162,7 @@ class	NetClient
 		// Check if it is time to send our update
 		int		isTime();
 		// Warn the server we are leaving the game
-		void	logout();
+		SOCKETALT*	logout(bool leaveUDP);
 		void	Respawn(ObjSerial clientname);
 		// Check if there are info incoming over the network
 		int		checkMsg( Packet* outpacket );
@@ -221,7 +223,7 @@ class	NetClient
 		void	sendTextMessage( string message);
 		bool	IsNetcommActive() const;
 		bool	IsNetcommSecured() const;
-
+                static void Reconnect(std::string srvipaddr, std::string port);
     private:
         NetClient( const NetClient& );
         NetClient& operator=( const NetClient& );
@@ -231,6 +233,6 @@ Unit * getNetworkUnit( ObjSerial cserial);
 bool isLocalSerial( ObjSerial sernum);
 
 extern vector<ObjSerial>	localSerials;
-
+void Reconnect(std::string ip,std::string port); 
 #endif
 

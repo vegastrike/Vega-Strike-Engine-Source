@@ -156,7 +156,7 @@ void cleanup(void)
 		cout<<"Number of players"<<_Universe->numPlayers()<<endl;
 		for( int i=0; i<_Universe->numPlayers(); i++)
 			if( Network[i].isInGame())
-				Network[i].logout();
+				Network[i].logout(false);
 		delete [] Network;
   }
 
@@ -617,7 +617,7 @@ void bootstrap_main_loop () {
         else
         {
             cout<<" logged in !"<<endl;
-			Network[k].synchronizeTime();
+			Network[k].synchronizeTime(NULL);
         }
 	  }
 		/************* NETWORK PART ***************/

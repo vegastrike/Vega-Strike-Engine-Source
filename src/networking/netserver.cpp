@@ -887,7 +887,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			if (!unclt) {
 				break;
 			}
-			zone = unclt->activeStarSystem->GetZone();
+			zone = unclt->getStarSystem()->GetZone();
 			// NETFIXME: Make sure that serials have 0 allocated for NULL
 			un = zonemgr->getUnit( target_serial, zone);
 			unclt = zonemgr->getUnit( packet.getSerial(), zone);

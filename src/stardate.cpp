@@ -20,8 +20,9 @@ StarDate::StarDate()
 
 void	StarDate::Init( double time)
 {
-	assert( initial_star_time == NULL );
-
+	if( initial_star_time != NULL ){
+          delete[] initial_star_time;
+        }
 	initial_time = getNewTime();
 	initial_star_time = new double[factions.size()];
 	for( unsigned int i=0; i<factions.size(); i++)
@@ -47,8 +48,11 @@ double	StarDate::GetCurrentStarTime( int faction)
 
 void	StarDate::InitTrek( string date)
 {
-	assert( initial_star_time == NULL );
-
+	if( initial_star_time != NULL )
+        {
+          //we must be reinitializing;
+          delete []initial_star_time;
+        }
 	initial_star_time = 0;
 	initial_time = getNewTime();
 	initial_star_time = new double[factions.size()];

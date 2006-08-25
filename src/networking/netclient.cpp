@@ -387,9 +387,9 @@ void NetClient::Respawn( ObjSerial newserial) {
   Cockpit * cp = _Universe->AccessCockpit(whichcp);
   static float initialzoom = XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
   cp->zoomfactor=initialzoom;
-
   cp->savegame->ParseSaveGame ("",mysystem,mysystem,pos,setplayerXloc,cp->credits,cp->unitfilename,whichcp, lastsave[0], false);
-  StarSystem * ss = _Universe->GenerateStarSystem(mysystem.c_str(),"",Vector(0,0,0));
+  string fullsysname=mysystem+".system";
+  StarSystem * ss = _Universe->GenerateStarSystem(fullsysname.c_str(),"",Vector(0,0,0));
   _Universe->pushActiveStarSystem(ss);
   unsigned int oldcp=_Universe->CurrentCockpit();
   _Universe->SetActiveCockpit(cp);
@@ -404,6 +404,7 @@ void NetClient::Respawn( ObjSerial newserial) {
   un->SetSerial(newserial);
   //  fighters[a]->faction = FactionUtil::GetFactionIndex( cp->savegame->GetPlayerFaction());
   cp->SetParent(un,unkeyname.c_str(),"",pos);
+  un->SetPosAndCumPos(pos);
   this->game_unit.SetUnit(un);
   localSerials.push_back( newserial);
   ss->AddUnit(un);
@@ -1155,7 +1156,7 @@ void	NetClient::disconnect()
 	// Disconnection is handled in the VSExit(1) function for each player
 }
 
-void	NetClient::logout()
+SOCKETALT*	NetClient::logout(bool leaveUDP)
 {
 	keeprun = 0;
 	Packet p;
@@ -1167,9 +1168,80 @@ void	NetClient::logout()
             __FILE__, PSEUDO__LINE__(1382) );
 	}
 	clt_tcp_sock.disconnect( "Closing connection to server", false );
-	clt_udp_sock.disconnect( "Closing UDP connection to server", false );
+        if (!leaveUDP) {
+          clt_udp_sock.disconnect( "Closing UDP connection to server", false);
+        }else {
+          if (lossy_socket==&clt_udp_sock) {
+            return &clt_udp_sock;
+          }
+        }
+        return NULL;
 }
-
+void NetClient::Reconnect(std::string srvipadr, std::string port) {
+  vector<string> usernames;
+  vector<string> passwords;
+  vector <SOCKETALT*> udp;
+  for (unsigned int i=0;i<_Universe->numPlayers();++i) {
+    usernames.push_back(Network[i].callsign);
+    passwords.push_back(Network[i].password);
+    SOCKETALT * udpsocket=Network[i].logout(true);
+    if (udpsocket)
+      udp.push_back(new SOCKETALT(*udpsocket));
+    else
+      udp.push_back(NULL);
+    Network[i].disconnect();
+  }
+  _Universe->clearAllSystems();
+  delete [] Network;    
+  localSerials.resize(0);
+  Network = new NetClient [_Universe->numPlayers()];
+  //necessary? usually we would ask acctserver for it .. or pass it in NetClient::getConfigServerAddress(srvipadr, port);
+  for (unsigned int k=0;k<_Universe->numPlayers();++k) {
+    bool ret = false;
+    // Are we using the directly account server to identify us ?
+    string use_acctserver = vs_config->getVariable("network","use_account_server", "false");
+    if( use_acctserver=="true")
+      ret = Network[k].init_acct( srvipadr.c_str(), atoi(port.c_str())).valid();
+    else
+      // Or are we going through a game server to do so ?
+      ret = Network[k].init( srvipadr.c_str(),atoi( port.c_str())).valid();
+    if( ret==false)
+    {
+      // If network initialization fails, exit
+      cout<<"Network initialization error - exiting"<<endl;
+      cleanexit=true;
+      exit(1);
+    }
+    //sleep( 3);
+    cout<<"Waiting for player "<<(k)<<" = "<<usernames[k]<<":"<<passwords[k]<<"login response...";
+    vector<string> *loginResp;
+    if( use_acctserver=="true")
+      loginResp = &Network[k].loginAcctLoop( usernames[k], passwords[k]);
+    else
+      loginResp = &Network[k].loginLoop( usernames[k], passwords[k]);
+    Network[k].lastsave=*loginResp;
+    
+    if( Network[k].lastsave.empty() || Network[k].lastsave[0]=="")
+    {
+      if( Network[k].lastsave.empty() )
+        cout << "Server must have closed connection without warning" << endl;
+      else
+        cout<<Network[k].lastsave[1]<<endl;
+      cout<<"QUITTING"<<endl;
+      cleanexit=true;
+      exit(1);
+    }
+    else
+    {
+      cout<<" logged in !"<<endl;
+      Network[k].Respawn(Network[k].serial);
+      Network[k].synchronizeTime(udp[k]);
+      if (udp[k]) delete udp[k];
+    }
+    Network[k].inGame();
+    
+  }
+}
 
 ClientPtr NetClient::Clients::insert( int x, Client* c )
 {

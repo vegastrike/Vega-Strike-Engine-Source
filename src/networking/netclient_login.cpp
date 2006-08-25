@@ -29,8 +29,8 @@ int		NetClient::authenticate()
 	// Get the name and password from vegastrike.config
 	// Maybe someday use a default Guest account if no callsign or password is provided thus allowing
 	// Player to wander but not interact with the universe
-	str_callsign = vs_config->getVariable ("player","callsign","");
-	str_passwd = vs_config->getVariable ("player","password","");
+	this->callsign=str_callsign = vs_config->getVariable ("player","callsign","");
+	this->password=str_passwd = vs_config->getVariable ("player","password","");
 	if( str_callsign.length() && str_passwd.length())
 	{
 	    COUT << "callsign:   " << str_callsign << endl
@@ -122,6 +122,7 @@ vector<string>	&NetClient::loginLoop( string str_callsign, string str_passwd)
 	if( lastsave.empty() || lastsave[0]!="")
 	{
 		this->callsign = str_callsign;
+                this->password= str_passwd;
 	}
 	//cout<<"GLOBALSAVES[0] : " 
 	//cout<<"GLOBALSAVES[1] : "<<globalsaves[1]<<endl;
@@ -367,7 +368,7 @@ SOCKETALT	NetClient::init( const char* addr, unsigned short port )
 // NETFIXME: Correctly obtain ping time.
 #include "vs_random.h" // For random ping time.
 
-void NetClient::synchronizeTime()
+void NetClient::synchronizeTime(SOCKETALT*udpsock)
 {
 
 	int i=0;
@@ -391,7 +392,7 @@ void NetClient::synchronizeTime()
 	unsigned short port;
 	getConfigServerAddress(addr, port);
 	
-	clt_udp_sock=NetUIUDP::createSocket( addr.c_str(), port, clt_port, _sock_set );
+	clt_udp_sock=udpsock!=NULL?*udpsock:NetUIUDP::createSocket( addr.c_str(), port, clt_port, _sock_set );
 	COUT << "created UDP socket (" << addr << "," << port << ", listen on " << clt_port << ") -> " << this->clt_udp_sock << endl;
 	
 	if (nettransport=="udp") {
