@@ -1378,7 +1378,7 @@ bool CloseEnoughToNavOrDest(Unit *parent, Unit *navUnit, QVector nav) {
   }
   return ((nav-parent->Position()).MagnitudeSquared()<4*parent->rSize()*parent->rSize());
 }
-
+volatile Unit * uoif;
 class FlyTo:public Orders::MoveTo {
   float creationtime;
   UnitContainer destUnit;
@@ -1389,6 +1389,9 @@ public:
   }
 
   virtual void Execute() {
+    if (parent==uoif) {
+      printf ("kewl");
+    }
     MoveTo::Execute();
     Unit *un = destUnit.GetUnit();
     if (CloseEnoughToNavOrDest(parent, un, targetlocation)) {
@@ -1544,14 +1547,22 @@ void AggressiveAI::AfterburnerJumpTurnTowards (Unit * target) {
   
 }
 
-
+volatile Unit * uoi;
 void AggressiveAI::Execute () {  
+    if (parent==uoi) {
+      printf ("kewl");
+    }
+
   extern double aggfire;
   jump_time_check++;//just so we get a nicely often wrapping var;
   jump_time_check%=5;
   Flightgroup * fg=parent->getFlightgroup();
   //ReCommandWing(fg);
   double firetime=queryTime();
+  static int pir=FactionUtil::GetFactionIndex("pirates");
+  if (parent->faction==pir) {
+    if (rand()==0) printf ("ahoy, a pirates!");
+  }
   FireAt::Execute();
   aggfire+=queryTime()-firetime;
   static bool resistance_to_side_movement=XMLSupport::parse_bool(vs_config->getVariable("AI","resistance_to_side_movement","false"));
