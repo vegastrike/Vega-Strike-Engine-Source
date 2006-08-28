@@ -126,6 +126,7 @@ int VsnetHTTPSocket::lower_sendbuf(  )
 		reopenConnection();
 		VsnetTCPSocket::lower_sendbuf( );
 	}
+	return ret;
 }
 
 bool VsnetHTTPSocket::lower_selected( int datalen )
@@ -264,4 +265,5 @@ bool VsnetHTTPSocket::lower_selected( int datalen )
 		this->close_fd();
 	}
 	_connection_closed = false;
+	return ret;
 }
