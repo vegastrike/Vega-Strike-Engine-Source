@@ -31,7 +31,7 @@ void ServerSocket::child_disconnect( const char *s )
     COUT << s << " :\tWarning: disconnected" << strerror(errno) << endl;
 }
 
-bool ServerSocketTCP::lower_selected( )
+bool ServerSocketTCP::lower_selected( int datalen )
 {
     COUT << endl
          << endl

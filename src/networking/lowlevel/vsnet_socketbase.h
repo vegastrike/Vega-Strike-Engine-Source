@@ -58,7 +58,7 @@ public:
 
     void disconnect( const char *s, bool fexit );
     
-    virtual bool lower_selected( ) = 0;
+    virtual bool lower_selected( int datalen=-1 ) = 0;
 
     virtual bool need_test_writable( ) { return false; }
     virtual int  get_write_fd( ) const { return _fd; }
@@ -72,9 +72,11 @@ public:
 protected:
     virtual void child_disconnect( const char* s ) { }
 
-private:
+protected:
+	// _fd may need to change for HTTP if server closes connection.
     int        _fd;
 
+private:
     /// variable meant to figure out what type of socket triggered select
     char*      _socktype;
 protected:

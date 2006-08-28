@@ -46,7 +46,7 @@ public:
 
     virtual bool isActive( );
 
-    virtual bool lower_selected( );
+    virtual bool lower_selected( int datalen = -1 );
 
     virtual bool need_test_writable( );
     virtual int  get_write_fd( ) const;
@@ -56,7 +56,8 @@ public:
 protected:
     virtual void child_disconnect( const char *s );
 
-private:
+protected:
+	// HTTP needs to be able to add raw data to send and receive.
     /* --- BEGIN section for nonblocking receive support --- */
 
     struct Blob;

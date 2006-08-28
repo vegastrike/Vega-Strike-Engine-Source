@@ -7,8 +7,10 @@
 
 #include "vsnet_socket.h"
 #include "vsnet_sockettcp.h"
+#include "vsnet_sockethttp.h"
 #include "vsnet_socketudp.h"
 #include "vsnet_socketset.h"
+
 
 using namespace std;
 
@@ -29,6 +31,11 @@ SOCKETALT::SOCKETALT( int sock, bool mode, const AddressIP& remote_ip, SocketSet
         _sock = ptr( new VsnetTCPSocket( sock, remote_ip, sets ) );
     else
         _sock = ptr( new VsnetUDPSocket( sock, remote_ip, sets ) );
+}
+
+SOCKETALT::SOCKETALT( std::string url, SocketSet& sets )
+{
+	_sock = ptr( new VsnetHTTPSocket( url, sets ) );
 }
 
 SOCKETALT::SOCKETALT( const SOCKETALT& orig )

@@ -119,15 +119,18 @@ bool VsnetUDPSocket::isActive( )
     return ret;
 }
 
-bool VsnetUDPSocket::lower_selected( )
+bool VsnetUDPSocket::lower_selected( int datalen )
 {
     int       ret = 0;
     socklen_t len1;
     AddressIP from;
+    size_t    lentoread = _negotiated_max_size;
+    if (datalen!=-1)
+        lentoread = datalen;
 
     // In UDP mode, always receive data on sock
     len1 = sizeof(sockaddr_in);
-    ret = recvfrom( get_fd(), _recv_buf, _negotiated_max_size,
+    ret = recvfrom( get_fd(), _recv_buf, lentoread,
                     0, (sockaddr*)(sockaddr_in*)&from, &len1 );
     if( ret < 0 )
     {

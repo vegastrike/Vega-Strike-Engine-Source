@@ -215,18 +215,20 @@ void	NetServer::start(int argc, char **argv)
 	else
 	{
 		cout<<"Initializing connection to account server..."<<endl;
-		if( vs_config->getVariable( "network", "accountsrvip", "")=="")
+		std::string acctsrv = vs_config->getVariable( "network", "accountsrv", "");
+		if(acctsrv.empty())
 		{
 			cout<<"Account server IP not specified, exiting"<<endl;
 			VSExit(1);
 		}
-		memset( srvip, 0, 256);
-		memcpy( srvip, (vs_config->getVariable( "network", "accountsrvip", "")).c_str(), 256);
-		if( vs_config->getVariable( "network", "accountsrvport", "")=="")
-			tmpport = ACCT_PORT;
-		else
-			tmpport = atoi((vs_config->getVariable( "network", "accountsrvport", "")).c_str());
-		acct_sock = NetUITCP::createSocket( srvip, tmpport, _sock_set );
+		if (acctsrv.find('/')==std::string::npos) {
+			int acctport = atoi(vs_config->getVariable( "network", "accountsrvport", "").c_str());
+			if(!acctport)
+				acctport = ACCT_PORT;
+			acct_sock = NetUITCP::createSocket( acctsrv.c_str(), acctport, _sock_set );
+		} else {
+			acct_sock = NetUIHTTP::createSocket( acctsrv.c_str(), _sock_set );
+		}
 		if( !acct_sock.valid())
 		{
 			cerr<<"Cannot connect to account server... "<<endl;

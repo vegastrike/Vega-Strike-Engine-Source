@@ -372,7 +372,7 @@ bool VsnetTCPSocket::isActive( )
     return retval;
 }
 
-bool VsnetTCPSocket::lower_selected( )
+bool VsnetTCPSocket::lower_selected( int datalen )
 {
     if( _connection_closed )
     {
@@ -383,7 +383,7 @@ bool VsnetTCPSocket::lower_selected( )
     bool endless   = true;
 	bool successful = false;
 
-    if( get_nonblock() == false ) endless = false;
+    if( get_nonblock() == false && datalen==-1 ) endless = false;
 
     do
     {
@@ -418,6 +418,7 @@ bool VsnetTCPSocket::lower_selected( )
                 return successful;
 	        }
 	        if( ret > 0 ) _incomplete_header += ret;
+            if (datalen!=-1) datalen -= ret;
 	        if( _incomplete_header == sizeof(Header) )
 	        {
 	            _incomplete_header = 0;
@@ -426,8 +427,11 @@ bool VsnetTCPSocket::lower_selected( )
 	        }
 	    }
         if( _incomplete_packet != 0 )
-	    {
-	        int len = _incomplete_packet->missing( );
+        {
+            int len = _incomplete_packet->missing( );
+            if (datalen>0) {
+                len = datalen<len?datalen:len;
+            }
 	        int ret = VsnetOSS::recv( get_fd(), _incomplete_packet->base(), len, 0 );
 	        assert( ret <= len );
 	        if( ret <= 0 )
@@ -449,6 +453,11 @@ bool VsnetTCPSocket::lower_selected( )
 	        }
             else
             {
+                if (datalen!=-1) {
+                    datalen -= ret;
+                    if (datalen<=0)
+                        endless=false;
+                }
 	            _incomplete_packet->present_len += ret;
 	            if( ret == len )
 	            {
@@ -471,6 +480,8 @@ bool VsnetTCPSocket::lower_selected( )
                     inner_complete_a_packet( _incomplete_packet );
 		            _incomplete_packet = 0;
 					successful=true;
+					endless = false; // If we're done, let's stop while we're ahead.
+					
                     // either endless is false, or we exit with EWOULDBLOCK
 	            }
             }

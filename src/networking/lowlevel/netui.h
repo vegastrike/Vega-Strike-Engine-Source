@@ -27,11 +27,29 @@
 struct ServerSocket;
 class SocketSet;
 
+// these return an int handle.
+class NetUIBase
+{
+public:
+	static AddressIP lookupHost(const char* host, unsigned short port);
+	static int createClientSocket(const AddressIP &host, bool isTCP);
+	static int createServerSocket(const AddressIP &host, bool isTCP);
+};
+
+// These create the appropriate SOCKETALT from the NetUIBase's handle.
 class NetUITCP
 {
 public:
     static SOCKETALT     createSocket( const char* host, unsigned short port, SocketSet& set );
     static ServerSocket* createServerSocket( unsigned short port, SocketSet& set );
+};
+
+class NetUIHTTP
+{
+public:
+    static SOCKETALT     createSocket( const char* uri, SocketSet& set );
+	// Why would we ever need an HTTP server socket? Would more likely be a CGI.
+    //static SOCKETALT     createServerSocket( unsigned short port, SocketSet& set );
 };
 
 class NetUIUDP

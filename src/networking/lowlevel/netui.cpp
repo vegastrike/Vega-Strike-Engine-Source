@@ -25,6 +25,114 @@ static void static_initNetwork( )
 #endif
 }
 
+AddressIP NetUIBase::lookupHost(const char* host, unsigned short port)
+{
+    static_initNetwork( );
+
+    AddressIP      remote_ip;
+    memset( &remote_ip, 0, sizeof(AddressIP) );
+
+    struct hostent  *he = NULL;
+	
+    // Gets the host info for host
+    if( host[0]<48 || host[0]>57)
+    {
+        COUT <<"Resolving host name... ";
+        if( (he = gethostbyname( host)) == NULL)
+        {
+            COUT << "Could not resolve hostname" << std::endl;
+            return AddressIP();
+        }
+        memcpy( &remote_ip.sin_addr.s_addr, he->h_addr_list[0], he->h_length);
+        COUT <<"found : "<<inet_ntoa( remote_ip.sin_addr)<<std::endl;
+    }
+    else
+    {
+        if( VsnetOSS::inet_aton( host, &remote_ip.sin_addr) == 0)
+        {
+            COUT << "Error inet_aton" << std::endl;
+            return AddressIP();
+        }
+    }
+    // Store it in srv_ip struct
+    remote_ip.sin_port   = htons( port );
+    remote_ip.sin_family = AF_INET;
+	return remote_ip;
+}
+
+int NetUIBase::createClientSocket(const AddressIP &remote_ip, bool isTCP)
+{
+    static_initNetwork( );
+
+    int            local_fd;
+
+    if( (local_fd = VsnetOSS::socket( PF_INET, isTCP ? SOCK_STREAM : SOCK_DGRAM, 0)) == -1)
+    {
+        COUT << "Could not create socket" << std::endl;
+        return -1;
+    }
+
+    if (isTCP) {
+        COUT << "Connecting to " << inet_ntoa( remote_ip.sin_addr) << " on port " << remote_ip.sin_port << std::endl;
+#if defined(_WIN32) && !defined(__CYGWIN__)
+        if( ::connect( local_fd, (sockaddr *)&remote_ip, sizeof( struct sockaddr))==SOCKET_ERROR)
+#else
+        if( ::connect( local_fd, (sockaddr *)&remote_ip, sizeof( struct sockaddr)) < 0 )
+#endif
+        {
+            perror( "Can't connect to server ");
+            VsnetOSS::close_socket( local_fd );
+            return -1;
+        }
+    } else {
+        // binds socket
+        if( bind( local_fd, (sockaddr *)&remote_ip, sizeof(struct sockaddr_in))==SOCKET_ERROR )
+        {
+            perror( "Can't bind socket" );
+            VsnetOSS::close_socket( local_fd );
+            return -1;
+        }
+    }
+	
+	return local_fd;
+}
+
+int NetUIBase::createServerSocket(const AddressIP &local_ip, bool isTCP)
+{
+    if (!isTCP)
+        return createClientSocket(local_ip, false);
+    
+    static_initNetwork( );
+    
+    int       local_fd;
+
+    if( (local_fd = VsnetOSS::socket( PF_INET, SOCK_STREAM, 0)) == -1 )
+    {
+        COUT << "Could not create socket" << std::endl;
+        return -1;
+    }
+
+    // binds socket
+    COUT << "Bind on " << ntohl(local_ip.sin_addr.s_addr) << ", port "
+         << ntohs( local_ip.sin_port) << std::endl;
+    if( bind( local_fd, (sockaddr *)&local_ip, sizeof( struct sockaddr_in) )==SOCKET_ERROR )
+    {
+        perror( "Problem binding socket" );
+        VsnetOSS::close_socket( local_fd );
+        return -1;
+    }
+
+    COUT << "Accepting max : " << SOMAXCONN << std::endl;
+    if( listen( local_fd, SOMAXCONN)==SOCKET_ERROR)
+    {
+        perror( "Problem listening on socket" );
+        VsnetOSS::close_socket( local_fd );
+        return -1;
+    }
+
+	return local_fd;
+}
+
 /**************************************************************/
 /**************************************************************/
 /**** Create (and bind) a socket on host                   ****/
@@ -37,67 +145,25 @@ SOCKETALT NetUITCP::createSocket( const char * host, unsigned short srv_port, So
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << std::endl;
 
-    static_initNetwork( );
-
-    int            local_fd;
-    AddressIP      remote_ip;
-
-    struct hostent  *he = NULL;
-
-    if( (local_fd = VsnetOSS::socket( PF_INET, SOCK_STREAM, 0)) == -1)
-    {
-        COUT << "Could not create socket" << std::endl;
-        SOCKETALT ret; // ( -1, SOCKETALT::TCP, remote_ip );
-        return ret;
-    }
-
     // If port is not given, use the defaults ones --> do not work with specified ones yet... well, didn't try
     if( srv_port == 0 )
     {
         srv_port = SERVER_PORT;
     }
-
-    // Gets the host info for host
-    if( host[0]<48 || host[0]>57)
-    {
-        COUT <<"Resolving host name... ";
-        if( (he = gethostbyname( host)) == NULL)
-        {
-            COUT << "Could not resolve hostname" << std::endl;
-            VsnetOSS::close_socket( local_fd );
-            SOCKETALT ret; // ( -1, SOCKETALT::TCP, remote_ip );
-            return ret;
-        }
-        memcpy( &remote_ip.sin_addr.s_addr, he->h_addr_list[0], he->h_length);
-        COUT <<"found : "<<inet_ntoa( remote_ip.sin_addr)<<std::endl;
-    }
-    else
-    {
-        if( VsnetOSS::inet_aton( host, &remote_ip.sin_addr) == 0)
-        {
-            COUT << "Error inet_aton" << std::endl;
-            VsnetOSS::close_socket( local_fd );
-            SOCKETALT ret; // ( -1, SOCKETALT::TCP, remote_ip );
-            return ret;
-        }
-    }
-    // Store it in srv_ip struct
-    remote_ip.sin_port   = htons( srv_port );
-    remote_ip.sin_family = AF_INET;
-
-    COUT << "Connecting to " << inet_ntoa( remote_ip.sin_addr) << " on port " << srv_port << std::endl;
-#if defined(_WIN32) && !defined(__CYGWIN__)
-    if( ::connect( local_fd, (sockaddr *)&remote_ip, sizeof( struct sockaddr))==SOCKET_ERROR)
-#else
-    if( ::connect( local_fd, (sockaddr *)&remote_ip, sizeof( struct sockaddr)) < 0 )
-#endif
-    {
-        perror( "Can't connect to server ");
-        VsnetOSS::close_socket( local_fd );
+	
+	AddressIP remote_ip = NetUIBase::lookupHost(host, srv_port);
+	if (remote_ip.sin_port == 0 ) {
+		SOCKETALT ret;
+		return ret;
+	}
+    int local_fd = NetUIBase::createClientSocket(remote_ip, true);
+    if (local_fd==-1) {
         SOCKETALT ret; // ( -1, SOCKETALT::TCP, remote_ip );
         return ret;
     }
+	
     COUT << "Connected to " << inet_ntoa( remote_ip.sin_addr) << ":" << srv_port << std::endl;
+	
     SOCKETALT ret( local_fd, SOCKETALT::TCP, remote_ip, set );
     if( ret.set_nonblock() == false )
     {
@@ -111,41 +177,18 @@ ServerSocket* NetUITCP::createServerSocket( unsigned short port, SocketSet& set 
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << std::endl;
 
-    static_initNetwork( );
-    
-    int       local_fd;
-    AddressIP local_ip;
-
-    if( (local_fd = VsnetOSS::socket( PF_INET, SOCK_STREAM, 0)) == -1 )
-    {
-        COUT << "Could not create socket" << std::endl;
-        return NULL;
-    }
-
     // If port is not given, use the defaults ones --> do not work with specified ones yet... well, didn't try
     if( port == 0 ) port = SERVER_PORT;
-
-    memset( &local_ip, 0, sizeof(AddressIP) );
-    local_ip.sin_addr.s_addr = htonl(INADDR_ANY);
-    local_ip.sin_port        = htons( port );
-    local_ip.sin_family      = AF_INET;
-    // binds socket
-    COUT << "Bind on " << ntohl(local_ip.sin_addr.s_addr) << ", port "
-         << ntohs( local_ip.sin_port) << std::endl;
-    if( bind( local_fd, (sockaddr *)&local_ip, sizeof( struct sockaddr_in) )==SOCKET_ERROR )
-    {
-        perror( "Problem binding socket" );
-        VsnetOSS::close_socket( local_fd );
+	
+	AddressIP local_ip = NetUIBase::lookupHost("0.0.0.0", port);
+	if (local_ip.sin_port == 0 ) {
+		return NULL;
+	}
+    int local_fd = NetUIBase::createServerSocket(local_ip, true);
+    if (local_fd==-1) {
         return NULL;
     }
 
-    COUT << "Accepting max : " << SOMAXCONN << std::endl;
-    if( listen( local_fd, SOMAXCONN)==SOCKET_ERROR)
-    {
-        perror( "Problem listening on socket" );
-        VsnetOSS::close_socket( local_fd );
-        return NULL;
-    }
     COUT << "Listening on socket " << local_fd << std::endl
          << "*** ServerSocket n° : " << local_fd << std::endl;
     return new ServerSocketTCP( local_fd, local_ip, set );
@@ -163,60 +206,16 @@ SOCKETALT NetUIUDP::createSocket( const char * host, unsigned short srv_port, un
     COUT << " enter " << __PRETTY_FUNCTION__ << std::endl;
     static_initNetwork( );
 
-    AddressIP local_ip;
-    AddressIP remote_ip;
-    int       local_fd;
-
     // If port is not given, use the defaults ones --> do not work with specified ones yet... well, didn't try
     if( srv_port==0 ) srv_port = SERVER_PORT;
+    if( clt_port==0 ) clt_port = SERVER_PORT;
+	
+    AddressIP local_ip = NetUIBase::lookupHost("0.0.0.0", clt_port);
+    AddressIP remote_ip = NetUIBase::lookupHost(host, srv_port);
+    int       local_fd = NetUIBase::createClientSocket( local_ip, false );
 
-    if( (local_fd = VsnetOSS::socket( PF_INET, SOCK_DGRAM, 0)) == -1 )
-    {
-        perror( "Could not create socket");
-        SOCKETALT ret; // ( -1, SOCKETALT::UDP, remote_ip );
-        return ret;
-    }
-
-    // Gets the host info for host
-    struct hostent  *he = NULL;
-
-    if( host[0]<48 || host[0]>57)
-    {
-        COUT <<"Resolving host name... ";
-        if( (he = gethostbyname( host)) == NULL)
-        {
-            COUT << "Could not resolve hostname" << std::endl;
-            VsnetOSS::close_socket( local_fd );
-            SOCKETALT ret; // ( -1, SOCKETALT::UDP, remote_ip );
-            return ret;
-        }
-        memcpy( &remote_ip.sin_addr.s_addr, he->h_addr_list[0], he->h_length);
-        COUT <<"found : "<<inet_ntoa( remote_ip.sin_addr)<<std::endl;
-    }
-    else
-    {
-        if( VsnetOSS::inet_aton( host, &remote_ip.sin_addr) == 0)
-        {
-            COUT << "Error inet_aton" << std::endl;
-            VsnetOSS::close_socket( local_fd );
-            SOCKETALT ret; // ( -1, SOCKETALT::UDP, remote_ip );
-            return ret;
-        }
-    }
-    // Store it in srv_ip struct
-    remote_ip.sin_port= htons( srv_port);
-    remote_ip.sin_family= AF_INET;
-
-    local_ip.sin_addr.s_addr = htonl(INADDR_ANY);
-    local_ip.sin_port = htons( clt_port );
-    local_ip.sin_family = AF_INET;
-
-    // binds socket
-    if( bind( local_fd, (sockaddr *)&local_ip, sizeof(struct sockaddr_in))==SOCKET_ERROR )
-    {
-        perror( "Can't bind socket" );
-        VsnetOSS::close_socket( local_fd );
-        SOCKETALT ret; // ( -1, SOCKETALT::UDP, remote_ip );
+    if (local_fd == -1) {
+        SOCKETALT ret;
         return ret;
     }
 
@@ -224,9 +223,10 @@ SOCKETALT NetUIUDP::createSocket( const char * host, unsigned short srv_port, un
 
     if( ret.set_nonblock() == false )
     {
-        ret.disconnect( "Could not set socket to nonblocking state" );
-        SOCKETALT ret; // ( -1, SOCKETALT::UDP, remote_ip );
-        return ret;
+		COUT << "Could not set socket to nonblocking state";
+        //ret.disconnect( "Could not set socket to nonblocking state" );
+        //SOCKETALT ret; // ( -1, SOCKETALT::UDP, remote_ip );
+        //return ret;
     }
     COUT << "Bind on localhost, " << ret << std::endl;
     return ret;
@@ -237,39 +237,36 @@ SOCKETALT NetUIUDP::createServerSocket( unsigned short port, SocketSet& set )
     COUT << "enter " << __PRETTY_FUNCTION__ << std::endl;
     static_initNetwork( );
 
-    int       local_fd;
-    AddressIP local_ip;
-
     // If port is not given, use the defaults ones --> do not work with specified ones yet... well, didn't try
     if( port == 0 ) port = SERVER_PORT;
+	
+    AddressIP local_ip = NetUIBase::lookupHost( "0.0.0.0", port );
+    int       local_fd = NetUIBase::createServerSocket( local_ip, false );
 
-    if( (local_fd = VsnetOSS::socket( PF_INET, SOCK_DGRAM, 0 )) == -1 )
-    {
-        COUT << "Could not create socket" << std::endl;
-        return NULL;
-    }
-
-    memset( &local_ip, 0, sizeof(AddressIP) );
-    local_ip.sin_addr.s_addr = htonl(INADDR_ANY);
-    local_ip.sin_port        = htons( port );
-    local_ip.sin_family      = AF_INET;
-    // binds socket
-    if( bind( local_fd, (sockaddr *)&local_ip, sizeof( struct sockaddr_in ) )==SOCKET_ERROR )
-    {
-        perror( "Cannot bind socket");
-        VsnetOSS::close_socket( local_fd );
-        return NULL;
+    if (local_fd == -1) {
+        SOCKETALT ret;
+        return ret;
     }
 
 	SOCKETALT ret( local_fd, SOCKETALT::UDP, local_ip, set );
 
     if( ret.set_nonblock() == false )
     {
-        ret.disconnect( "Setting server socket mode to nonblocking failed", true );
-        return NULL;
+		COUT << "Setting server socket mode to nonblocking failed";
+        //ret.disconnect( "Setting server socket mode to nonblocking failed", true );
+        //SOCKETALT ret;
+        //return ret;
     }
 
     COUT << "Bind on localhost, " << ret << std::endl;
     return ret;
+}
+
+// This is as simple as NetUI (factory) functions *SHOULD* be.
+SOCKETALT NetUIHTTP::createSocket(const char* uri, SocketSet &set)
+{
+    COUT << "enter " << __PRETTY_FUNCTION__ << std::endl;
+	SOCKETALT ret( uri, set );
+	return ret;
 }
 
