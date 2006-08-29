@@ -25,7 +25,12 @@ extern void	getZoneInfoBuffer( unsigned short zoneid, NetBuffer & netbuf);
     #endif
     #define W_OK 2
 
-    extern "C" int access( const char* name, int mode ) throw();
+    extern "C" int vs_access( const char* name, int mode );
+#else
+
+// Make it use the real access().
+#define vs_access access
+
 #endif
 
 #include <sys/stat.h>
@@ -416,7 +421,7 @@ bool Manager::private_lower_test_access( Item* i )
          it++ )
     {
         string path = *it + "/" + file;
-        if( ::access( path.c_str(), R_OK ) == 0 )
+        if( ::vs_access( path.c_str(), R_OK ) == 0 )
         {
             COUT << "Found local file " << path.c_str() << endl;
             return true;
@@ -850,7 +855,7 @@ bool Manager::private_test_access( const string& file , VSFileSystem::VSFileType
          it++ )
     {
         string path = *it + "/" + file;
-        //if( ::access( path.c_str(), R_OK ) == 0 )
+        //if( ::vs_access( path.c_str(), R_OK ) == 0 )
 		string ffile( file);
 		if( LookForFile( ffile, ft) <= Ok)
         {
@@ -914,24 +919,26 @@ size_t Manager::private_file_size( const string& file )
 }; // namespace VsnetDownload
 
 #ifndef HAVE_ACCESS
-int accesscxx( const char* name, int mode )
-{
-    if( mode == R_OK )
-    {
-        std::ifstream f( name, std::ios::in );
-        if( f.good() ) return 0;
-        return -1;
-    }
-    else
-    {
-        std::ofstream f( name, std::ios::out );
-        if( f.good() ) return 0;
-        return -1;
-    }
-}
 extern "C" {
-  int access (const char * name, int mode ) throw(){
-    return accesscxx(name,mode);
+  int vs_access (const char * name, int mode ) {
+    FILE *fp;
+    if (mode & R_OK) {
+      fp = fopen(name, "r");
+      if (fp) {
+        fclose(fp);
+      } else {
+        return -1;
+      }
+    }
+    if (mode & W_OK) {
+      fp = fopen(name, "a");
+      if (fp) {
+        fclose(fp);
+      } else {
+        return -1;
+      }
+    }
+    return 1;
   }
 
 }
