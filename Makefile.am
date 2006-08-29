@@ -564,6 +564,7 @@ libnetlowlevel_a_SOURCES = \
   src/networking/lowlevel/vsnet_socketbase.h \
   src/networking/lowlevel/vsnet_socketflags.cpp \
   src/networking/lowlevel/vsnet_socketflags.h \
+  src/networking/lowlevel/vsnet_sockethttp.cpp \
   src/networking/lowlevel/vsnet_socketset.cpp \
   src/networking/lowlevel/vsnet_socketset.h \
   src/networking/lowlevel/vsnet_sockettcp.cpp \
