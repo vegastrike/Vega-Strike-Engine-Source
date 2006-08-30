@@ -61,7 +61,8 @@ def write_abstract_page(f, presenter, title, abstract):
     f.write('<p>%s</p>' % abstract)
     f.write('<hr> <a href="../index.html">GCafe lecture series</a></body></html>')
 
-
+HOMEPATH='/tmp/persistent/vegastrike_forum/accounts/'
+CGIPATH='/home/groups/v/ve/vegastrike/cgi-bin/'
 form = cgi.FieldStorage()
 check_form(form)
 username = form["username"].value
@@ -73,54 +74,44 @@ checkString(password)
 checkString(type)
 checkString(faction)
 lok=-1
-iter=100
+#iter=100
 import traceback
-for i in range(iter):
-  try:
-    lok=os.open ("/u/danielrh/win/acctserver/lock",os.O_EXCL|os.O_CREAT)
-    break
-  except:
-    pass
-if 0 and lok==-1:
-  lok=os.open ("/u/danielrh/win/acctserver/lock",os.O_EXCL|os.O_CREAT)
-if lok==-1:
-  print header
-  print "Failed to write to database at this time... please retry"
-  print errorvar
-  print footer
-  sys.exit(0)
+#for i in range(iter):
+#  try:
+#    lok=os.open (HOMEPATH+"lock",os.O_EXCL|os.O_CREAT)
+#    break
+#  except:
+#    pass
+#if 0 and lok==-1:
+#  lok=os.open (HOMEPATH+"lock",os.O_EXCL|os.O_CREAT)
+#if lok==-1:
+#  print header
+#  print "Failed to write to database at this time... please retry"
+#  print errorvar
+#  print footer
+#  sys.exit(0)
 s="BLAH"
+success=False
 try:
-  f=open("/u/danielrh/win/acctserver/accounts/accounts.xml","rb")
+  f=open(HOMEPATH+username+".password","rb")
   s=f.read()
   f.close()
-  namstr='name="'+username+'"'
-  passtr=' password="'+password+'"'
-  success=False
-  if s.find(namstr)!=-1:
-      if s.find(namstr+passtr)!=-1:
-           success=True
-  else:
-      where=s.rfind("</accounts>")
-      if where!=-1:
-          s=s[0:where]
-      s+='<player '+namstr+passtr+' />\n'
-      s+='</accounts>\n';
-      success=True
-  if success:
-    f=open("/u/danielrh/win/acctserver/accounts/accounts.xml","wb")
-    f.write(s)
-    f.close()
-except:
-  os.close(lok)
-  os.unlink("/u/danielrh/win/acctserver/lock")
-  print header
-  traceback.print_exc()
-  print errorvar
-  print footer
-  sys.exit(0)
-os.close(lok)
-os.unlink("/u/danielrh/win/acctserver/lock")
+  if s==password:
+    success=True
+except IOError:
+  f=open(HOMEPATH+username+".password","wb")
+  f.write(password)
+  f.close()
+  success=True
+  #os.close(lok)
+  #os.unlink(HOMEPATH+"lock")
+  #print header
+  #traceback.print_exc()
+  #print errorvar
+  #print footer
+  #sys.exit(0)
+#os.close(lok)
+#os.unlink(HOMEPATH+"lock")
 if not success:
   print header
   print "Error password for username "+username+" does not match our records"
@@ -128,20 +119,17 @@ if not success:
   print footer
   sys.exit(0)
 
-
-
-
 print header
-f=open("/u/danielrh/win/acctserver/accounts/default.save","rb")
+f=open(HOMEPATH+"default.save","rb")
 s=f.read()
 f.close()
 import random
-o=open("/u/danielrh/win/acctserver/accounts/"+username+".save","wb")
-s=s.replace("^llama.begin 0 0 0 neutral","^"+type+" "+str(random.uniform(-10000,10000))+" "+str(random.uniform(-10000,10000))+" "+str(random.uniform(-10000,10000))+" "+faction)
+o=open(HOMEPATH+username+".save","wb")
+s=s.replace("^hyena 120000000000 40000000 -110000000000 pirates","^"+type+" "+str(120000000000+random.uniform(-10000,10000))+" "+str(40000000+random.uniform(-10000,10000))+" "+str(-110000000000+random.uniform(-10000,10000))+" "+faction)
 o.write(s)
 o.close()
-o=open("/u/danielrh/win/acctserver/accounts/"+username+".xml","wb")
-unfp=open("/u/danielrh/win/acctserver/units/units.csv")
+o=open(HOMEPATH+username+".xml","wb")
+unfp=open(CGIPATH+"units/units.csv")
 if not unfp:
   print header
   print "CRITICAL ERROR, not able to open units.csv"
@@ -171,14 +159,7 @@ if len(type_dat)>3:
                    o.write(line)
                    break;
 o.close()
-# open the title/abstract page for writing
-# if it already exists, it will be overwritten
-#abstract_file = open("/usr/graphics/www/private/gcafe/abstracts/" + abstract_filename, 'w')
-#write_abstract_page(abstract_file, presenter, title, abstract)
-#abstract_file.close()
 
-#update_gcafe_dat(presenter, title, abstract_filename)
-#regenerate_gcafe_index()
 def makeForm(s,v):
     print '<tr>'
     print '<td align= "right"></td>'

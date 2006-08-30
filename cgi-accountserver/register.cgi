@@ -19,7 +19,7 @@ def print_heading():
     print '<h1>Create Username/password</h1>'
 
 def print_form():
-    print '<form name="type" action="http://graphics.stanford.edu/cgi-bin/danielrh/register_submit.cgi" method="post">'
+    print '<form name="type" action="http://vegastrike.sourceforge.net/cgi-bin/register_submit.cgi" method="post">'
     print '<table>'
     type_select()
     faction_select()
@@ -33,7 +33,7 @@ def type_select():
     print '<tr>'
     print '<td align= "right">Which type?</td>'
     print '<td><select name="type" size="1">'
-    type_dat = open("/u/danielrh/win/acctserver/units/units.csv").readlines()
+    type_dat = open("/home/groups/v/ve/vegastrike/cgi-bin/units/units.csv").readlines()
     for line in type_dat[2:]:
         
         if (len(line) and line.find("turret")==-1):
@@ -58,7 +58,7 @@ def faction_select():
     print '<tr>'
     print '<td align= "right">Which faction?</td>'
     print '<td><select name="faction" size="1">'
-    type_dat = open("/u/danielrh/win/acctserver/factions.xml").readlines()
+    type_dat = open("/home/groups/v/ve/vegastrike/cgi-bin/units/factions.xml").readlines()
     for line in type_dat[2:]:
         factionnamestr='action name="'
         where=line.find(factionnamestr)
