@@ -4,7 +4,7 @@
 #include "networking/savenet_util.h"
 #include "networking/lowlevel/netbuffer.h"
 #include "networking/fileutil.h"
-
+#include "networking/lowlevel/vsnet_sockethttp.h"
 extern int acct_con;
 
 /**************************************************************/
@@ -13,21 +13,21 @@ extern int acct_con;
 
 void	NetServer::checkAcctMsg( SocketSet& sets )
 {
-	int len=0;
+
+  
 	AddressIP	ipadr;
 	ClientPtr   clt;
 	unsigned char cmd=0;
-
 	// Watch account server socket
 	// Get the number of active clients
-	if( acct_sock.isActive( ))
+	if( acct_sock->isActive( ))
 	{
 		//COUT<<"Net activity !"<<endl;
 		// Receive packet and process according to command
 
-		Packet    p;
-        AddressIP act_srv_ipadr;
-		if( (len=acct_sock.recvbuf( &p, &act_srv_ipadr ))>0 )
+		std::string    p;
+
+		if( acct_sock->recvstr( p)!=0 &&p.length()!=0)
 		{
 			// Maybe copy that in a "else" condition too if when it fails we
             // have to disconnect a client
@@ -38,10 +38,15 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 			// should be ok and we can use a "queue" for waiting clients
 			if( waitList.size()==0)
 			{
-				cerr<<"Error : trying to remove client on empty waitList"<<" - len="<<len<<endl;
-				exit( 1);
-			}
-            WaitListEntry entry( waitList.front() );
+                          if (p.length()&&getSimpleChar(p)==ACCT_SUCCESS) {
+                            // this is just the webserver response to any post... should be ignored
+                            return;
+                          }else {
+                            cerr<<"Error : trying to remove client on empty waitList"<<" - len="<<p.length()<<endl;
+                            return;
+                          }
+                        }
+                        WaitListEntry entry( waitList.front() );
 			char flags = 0;
 			if( entry.tcp )
 			{
@@ -54,30 +59,31 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 				COUT << "Got response for client IP : " << ipadr << endl;
 			}
 			waitList.pop();
+                        ObjSerial serial =0;
 
-			packeta = p;
-			switch( packeta.getCommand())
+
+			switch( getSimpleChar(p))
 			{
-				case LOGIN_NEW :
-					COUT << ">>> NEW LOGIN =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
+				case ACCT_LOGIN_NEW :
+					COUT << ">>> NEW LOGIN =( serial n°"<<serial<<" )= --------------------------------------"<<endl;
 					// We received a login authorization for a new account (no ship created)
-					this->sendLoginAccept( clt, ipadr, 1, flags);
+					this->sendLoginAccept(p, clt, ipadr, 1, flags);
 					COUT << "<<< NEW LOGIN ----------------------------------------------------------------"<<endl;
 				break;
-				case LOGIN_ACCEPT :
+				case ACCT_LOGIN_ACCEPT :
 					// Login is ok
-					COUT<<">>> LOGIN ACCEPTED =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
-					sendLoginAccept( clt, ipadr, 0, flags);
+					COUT<<">>> LOGIN ACCEPTED =( serial n°"<<serial<<" )= --------------------------------------"<<endl;
+					sendLoginAccept(p, clt, ipadr, 0, flags);
 					COUT<<"<<< LOGIN ACCEPTED -----------------------------------------------------------"<<endl;
 				break;
-				case LOGIN_ERROR :
+				case ACCT_LOGIN_ERROR :
 					COUT<<">>> LOGIN ERROR =( DENIED )= --------------------------------------"<<endl;
 					// Login error -> disconnect
 					this->sendLoginError( clt, ipadr);
 					COUT<<"<<< LOGIN ERROR ---------------------------------------------------"<<endl;
 				break;
-				case LOGIN_ALREADY :
-					COUT<<">>> LOGIN ALREADY =( ALREADY LOGGED IN -> serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
+				case ACCT_LOGIN_ALREADY :
+					COUT<<">>> LOGIN ALREADY =( ALREADY LOGGED IN -> serial n°"<<serial<<" )= --------------------------------------"<<endl;
 					// Client already logged in -> disconnect
 					this->sendLoginAlready( clt, ipadr);
 					COUT<<"<<< LOGIN ALREADY --------------------------------------------------------------"<<endl;
@@ -89,7 +95,6 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 		else
 		{
 			cerr<<"Connection to account server lost !!"<<endl;
-			acct_sock.disconnect( __PRETTY_FUNCTION__, false );
 			acct_con = 0;
 		}
 	}
@@ -138,7 +143,7 @@ void	NetServer::save()
 		if( cp && acctserver && acct_con)
 		{
 			Unit *un=cp->GetParent();
-			netbuf.Reset();
+			std::string snetbuf;
 			bool found = false;
 			// Loop through clients to find the one corresponding to the unit (we need its serial)
 			ClientPtr clt;
@@ -150,12 +155,16 @@ void	NetServer::save()
 				cerr<<"Error client not found in save process !!!!"<<endl;
 				return;
 			}
-			netbuf.addString( savestr);
-			netbuf.addString( xmlstr);
+                        addSimpleChar(snetbuf,ACCT_SAVE);
+                        addSimpleString(snetbuf,clt->callsign);
+                        addSimpleString(snetbuf,clt->passwd);
+			addSimpleString(snetbuf, savestr);
+			addSimpleString(snetbuf, xmlstr);
+                        if (!acct_sock->sendstr(snetbuf)) {
 			//buffer = new char[savestr.length() + xmlstr.length() + 2*sizeof( unsigned int)];
 			//SaveNetUtil::GetSaveBuffer( savestr, xmlstr, buffer);
-			if( pckt.send( CMD_SAVEACCOUNTS, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(1678) ) < 0 )
 				COUT<<"ERROR sending SAVE to account server"<<endl;
+                        }
 		}
 	}
 }

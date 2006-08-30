@@ -33,11 +33,6 @@ SOCKETALT::SOCKETALT( int sock, bool mode, const AddressIP& remote_ip, SocketSet
         _sock = ptr( new VsnetUDPSocket( sock, remote_ip, sets ) );
 }
 
-SOCKETALT::SOCKETALT( std::string url, SocketSet& sets )
-{
-	_sock = ptr( new VsnetHTTPSocket( url, sets ) );
-}
-
 SOCKETALT::SOCKETALT( const SOCKETALT& orig )
 {
     _sock = orig._sock;

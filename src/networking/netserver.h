@@ -55,7 +55,7 @@ namespace VsnetDownload {
     class Manager;
   };
 };
-
+class VsnetHTTPSocket;
 /** Class Netserver : runs the "game server" */
 class NetServer
 {
@@ -71,7 +71,7 @@ class NetServer
 		int				nbclients;				// Active client connections number
 		int				nbaccts;				// Number of registered accounts
 
-		SOCKETALT		acct_sock;				// Connection socket for account server
+		VsnetHTTPSocket*		acct_sock;				// Connection socket for account server
 		int				keeprun;				// Tells if we should keep running server
 		int				snapchanged;			// Tells the snapshot has changed and can be sent
 		int				acctserver;				// Tells if we use an account server
@@ -97,7 +97,6 @@ class NetServer
 
 		bool			updateTimestamps( ClientPtr clt, Packet & p);
 		//void			loadConfig();					// Loads configuration from server.xml
-		void			authenticate( ClientPtr clt, AddressIP sernum, Packet& packet );	// Authenticate a connected client
 		void			posUpdate( ClientPtr clt);		// Update a client position
 		void			addClient( ClientPtr clt);		// Add the client in the game
 		void			serverTimeInitUDP( ClientPtr clt, NetBuffer &netbuf);
@@ -118,7 +117,7 @@ class NetServer
         ClientPtr       addNewClient( SOCKETALT &sock );  // Adds a new client to listen for.
 		void			sendLoginError( ClientPtr clt, AddressIP ipadr);
 		void			sendLoginAlready( ClientPtr clt, AddressIP ipadr);
-		void			sendLoginAccept( ClientPtr clt, AddressIP ipadr, int acctnew, char flags);
+		void			sendLoginAccept(std::string packetdata, ClientPtr clt, AddressIP ipadr, int acctnew, char flags);
 		void			sendLoginUnavailable( ClientPtr clt, AddressIP ipadr);
 
 		Cockpit *		loadFromSavegame( ClientPtr clt );

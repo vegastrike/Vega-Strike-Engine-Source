@@ -30,9 +30,12 @@
 #include "savegame.h"
 #include "networking/const.h"
 #include "networking/lowlevel/vsnet_socket.h"
+#include "networking/lowlevel/vsnet_sockethttp.h"
 #include "networking/lowlevel/vsnet_socketset.h"
 #include "networking/lowlevel/vsnet_cmd.h"
 #include "networking/lowlevel/netbuffer.h"
+
+
 #include "cmd/container.h"   // for UnitContainer
 #include "gfx/quaternion.h"  // for Transformation
 
@@ -76,7 +79,7 @@ class	NetClient
         SOCKETALT			clt_tcp_sock;	// Comm. socket
         SOCKETALT			clt_udp_sock;	// Comm. socket
 		SOCKETALT *			lossy_socket;	// Usually points to the UDP socket, unless behind firewall.
-        SOCKETALT			acct_sock;		// Connection socket for account server
+        VsnetHTTPSocket*			acct_sock;		// Connection socket for account server
         SocketSet           _sock_set;      // Encapsulates select()
         SaveGame			save;
 	public:
@@ -141,7 +144,7 @@ class	NetClient
 		vector<string>	&loginAcctLoop( string str_callsign, string str_passwd);
 		void			loginAccept( Packet & p1);
 		SOCKETALT		init( const char* addr, unsigned short port);
-		SOCKETALT		init_acct( const char * addr, unsigned short port);
+		VsnetHTTPSocket*		init_acct( const std::string &addr);
 		void	synchronizeTime(SOCKETALT*); // Sends time packets back and forth to find the actual double time on the server.
 
 // start() should not used...  Use init() instead.

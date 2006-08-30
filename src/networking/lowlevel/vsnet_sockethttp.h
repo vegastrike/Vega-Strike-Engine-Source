@@ -15,17 +15,29 @@ typedef unsigned int u_int32_t;
  * VsnetTCPSocket - declaration
  ***********************************************************************/
  
-class VsnetHTTPSocket : public VsnetTCPSocket
+class VsnetHTTPSocket : public VsnetSocketBase //VsnetTCPSocket
 {
     // I would like an entire VsnetTCPSocket, but that requires that data is VS packet format, which HTTP is not.
-    std::string _path;
-	std::string _hostheader;
-	std::map<std::string, std::string> _header;
-	std::string _incompleteheader;
-	int _incompleteheadersection;
-	int _content_length;
-	bool _send_more_data; // Has the server allowed keep-alive?
+  std::string _path;
+  std::string _hostheader;
+  std::map<std::string, std::string> _header;
+  std::string _incompleteheader;
+  int _incompleteheadersection;
+  int _content_length;
+  bool _send_more_data; // Has the server allowed keep-alive?
+  
+  std::queue<std::string> dataToSend;
+  std::string dataToReceive;
+  AddressIP _remote_ip;
+  bool waitingToReceive;
+  bool readHeader;
+  bool parseHeaderByte( char rcvchr );
+  bool ischunked;
+  bool readingchunked;
+  int chunkedlen;
+  char chunkedchar;
 public:
+
     VsnetHTTPSocket(
                  const AddressIP&   remote_ip,
 				 const std::string& host,
@@ -37,14 +49,21 @@ public:
 	
 	virtual bool lower_selected( int datalen = -1 );
 	virtual int lower_sendbuf();
+	virtual void lower_clean_sendbuf();
+    friend std::ostream& operator<<( std::ostream& ostr, const VsnetHTTPSocket& s ); 
 
+	bool sendstr(const std::string &data);
+	bool recvstr(std::string &data);
+    virtual bool need_test_writable( );
+    virtual bool write_on_negative();
     virtual int  optPayloadSize( ) const { return 500; }
 
-	virtual bool isActive() { return true; }
+	virtual bool isActive();
 
     void reopenConnection();
-	
+    virtual bool isReadyToSend(fd_set*);
     virtual void dump( std::ostream& ostr ) const;
 };
 
+std::ostream& operator<<( std::ostream& ostr, const VsnetHTTPSocket& s );
 #endif

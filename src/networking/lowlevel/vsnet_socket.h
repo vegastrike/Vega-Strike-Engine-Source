@@ -46,7 +46,7 @@ public:
     SOCKETALT( const SOCKETALT& orig );
     SOCKETALT( VsnetSocket* sock );
     SOCKETALT( int sock, bool mode, const AddressIP& remote_ip, SocketSet& set );
-    SOCKETALT( std::string url, SocketSet& sets );
+  // not actually a socketalt    SOCKETALT( std::string url, SocketSet& sets );
     SOCKETALT& operator=( const SOCKETALT& orig );
 
     int  get_fd() const;

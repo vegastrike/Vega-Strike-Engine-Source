@@ -53,6 +53,7 @@
 #include "posh.h"
 #include "fileutil.h"
 
+#include "networking/lowlevel/vsnet_sockethttp.h"
 double	clienttimeout;
 double	logintimeout;
 int		acct_con;
@@ -179,7 +180,6 @@ void	NetServer::start(int argc, char **argv)
 	reconnect_time = getNewTime()+periodrecon;
 
 	string tmp;
-	char srvip[256];
 	unsigned short tmpport = ACCT_PORT;
 	stracct = vs_config->getVariable( "server", "useaccountserver", "");
 	acctserver = ( stracct=="true");
@@ -202,6 +202,7 @@ void	NetServer::start(int argc, char **argv)
     }
 
 	COUT << "done." << endl;
+        std::string acctsrv = vs_config->getVariable( "network", "accountsrv", "");
 
 	if( !acctserver)
 	{
@@ -215,7 +216,6 @@ void	NetServer::start(int argc, char **argv)
 	else
 	{
 		cout<<"Initializing connection to account server..."<<endl;
-		std::string acctsrv = vs_config->getVariable( "network", "accountsrv", "");
 		if(acctsrv.empty())
 		{
 			cout<<"Account server IP not specified, exiting"<<endl;
@@ -225,16 +225,16 @@ void	NetServer::start(int argc, char **argv)
 			int acctport = atoi(vs_config->getVariable( "network", "accountsrvport", "").c_str());
 			if(!acctport)
 				acctport = ACCT_PORT;
-			acct_sock = NetUITCP::createSocket( acctsrv.c_str(), acctport, _sock_set );
+			//acct_sock = NetUITCP::createSocket( acctsrv.c_str(), acctport, _sock_set );
 		} else {
-			acct_sock = NetUIHTTP::createSocket( acctsrv.c_str(), _sock_set );
+			acct_sock = new VsnetHTTPSocket( acctsrv, _sock_set );
 		}
-		if( !acct_sock.valid())
+		if( acct_sock==NULL||!acct_sock->valid())
 		{
 			cerr<<"Cannot connect to account server... "<<endl;
 //			VSExit(1);
-		}
-		COUT <<"accountserver on socket "<<acct_sock<<" done."<<endl;
+		}else
+		  COUT <<"accountserver on socket "<<acct_sock<<" done."<<endl;
 	}
 
 	// Create the _Universe telling it we are on server side
@@ -286,32 +286,33 @@ void	NetServer::start(int argc, char **argv)
 		curtime = getNewTime();
 		if( acctserver && !acct_con && (curtime - reconnect_time)>periodrecon)
 		{
-			NetBuffer netbuf;
+			std::string netbuf;
 			reconnect_time = curtime+periodrecon;
 			// We previously lost connection to account server
 			// We try to reconnect
-			acct_sock = NetUITCP::createSocket( srvip, tmpport, _sock_set );
-			if( acct_sock.valid())
+                        if (acct_sock)
+                          delete acct_sock;
+			acct_sock = new VsnetHTTPSocket( acctsrv, _sock_set );
+			if( acct_sock->valid())
 			{
 				int nbclients_here = allClients.size();
 				LI i;
 				int j=0;
-				COUT <<">>> Reconnected accountserver on socket "<<acct_sock<<" done."<<endl;
+				COUT <<">>> Reconnected accountserver on socket "<<*acct_sock<<" done."<<endl;
 				// Send a list of ingame clients
 				// Build a buffer with number of clients and client serials
 				// Put first the number of clients
 				//netbuf.addShort( nbclients);
+                                addSimpleChar(netbuf,ACCT_RESYNC);
 				for( j=0, i = allClients.begin(); i!=allClients.end(); i++, j++)
 				{
 					// Add the current client's serial to the buffer
-					netbuf.addString((*i)->callsign);
+                                  addSimpleString(netbuf,(*i)->callsign);
 				}
 				// Passing NULL to AddressIP arg because between servers -> only TCP
 				// Use the serial packet's field to send the number of clients
-				if( p2.send( CMD_RESYNCACCOUNTS, nbclients_here, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(524) ) < 0 )
-				{
-					perror( "ERROR sending redirected login request to ACCOUNT SERVER : ");
-					COUT<<"SOCKET was : "<<acct_sock<<endl;
+                                if (!acct_sock->sendstr(netbuf)) {
+					COUT<<"Failure to resync, SOCKET was : "<<*acct_sock<<endl;
 				}
 			}
 			else
@@ -616,16 +617,15 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
             // Need to give the IP address of incoming message in UDP mode to store it
             // in the Client struct
             if( !acctserver)
-			{
-                this->authenticate( clt, ipadr, packet );
-			}
-			else if( !acct_con)
-			{
-				this->sendLoginUnavailable( clt, ipadr );
-			}
+            {
+              //ugh brokenthis->authenticate( clt, ipadr, packet );//NETFIXME--right now assume acctserver
+            }
+            else if( !acct_con)
+            {
+              this->sendLoginUnavailable( clt, ipadr );
+            }
             else
             {
-	  			char flags = netbuf.getChar();
 				SOCKETALT tmpsock;
 				const AddressIP* iptmp;
 				WaitListEntry entry;
@@ -648,15 +648,24 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				}
 
 				// Redirect the login request packet to account server
-				COUT << "Redirecting login request to account server on socket " << acct_sock << endl
+				COUT << "Redirecting login request to account server on socket " << *acct_sock << endl
 				<< "*** Packet to copy length : " << packet.getDataLength()<<endl;
-				if( p2.send( packet.getCommand(), 0, (char *)packet.getData(), packet.getDataLength(), SENDRELIABLE, iptmp, acct_sock, __FILE__, PSEUDO__LINE__(1031) ) < 0 )
+                                char redirectcommand[2]={ACCT_LOGIN,'\0'};
+                                std::string redirect(redirectcommand);
+                                redirect+=std::string(packet.getData(),packet.getDataLength());
+                                
+                                if (!acct_sock->sendstr(redirect))//NETFIXME is this in http format or binary format
 				{
 					perror( "FATAL ERROR sending redirected login request to ACCOUNT SERVER : ");
 					COUT<<"SOCKET was : "<<acct_sock<<endl;
 					this->sendLoginUnavailable( clt, ipadr );
 //					VSExit(1);
 				}
+                                getSimpleChar(redirect);
+                                if (clt){
+                                  clt->callsign=getSimpleString(redirect);
+                                  clt->passwd=getSimpleString(redirect);
+                                }
             }
             COUT<<"<<< LOGIN REQUEST --------------------------------------"<<endl;
         }

@@ -208,6 +208,8 @@ int SocketSet::private_select( timeval* timeout )
                                 write_set_select,
                                 max_sock_select );
 	        }
+        }else if (b->write_on_negative()) {
+          b->lower_clean_sendbuf( ); 
         }
     }
 
@@ -272,24 +274,23 @@ int SocketSet::private_select( timeval* timeout )
 
         for( Set::iterator it = _autoset.begin(); it != _autoset.end(); it++ )
         {
-	        VsnetSocketBase* b = (*it);
-            int fd = b->get_fd();
-	        if( fd >= 0 )
-	        {
-                if( FD_ISSET(fd,&read_set_select) ) {
-                    if (!b->lower_selected( ))
-						ret--; // No complete packet received yet.
-				}
-
-                if( FD_ISSET(b->get_write_fd(),&write_set_select) ) {
-					ret--;
-                    b->lower_sendbuf( );
-				}
-	        }
-            else
+          VsnetSocketBase* b = (*it);
+          int fd = b->get_fd();
+          if( fd >= 0 )
+          {
+            if( FD_ISSET(fd,&read_set_select) ) {
+              if (!b->lower_selected( ))
+                ret--; // No complete packet received yet.
+            }
+            if(b->isReadyToSend(&write_set_select) ) {
+              ret--;
+              b->lower_sendbuf( );
+            }
+          }
+          else
+          {
+            if(b->isReadyToSend(&write_set_select))
             {
-                if( FD_ISSET(b->get_write_fd(),&write_set_select) )
-                {
 #ifdef VSNET_DEBUG
                     COUT << "saw activity on " << b->get_write_fd()
                          << " but main file descriptor is " << b->get_fd() << endl;

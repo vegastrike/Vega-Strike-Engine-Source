@@ -5,6 +5,7 @@
 #include "universe_generic.h"
 #include "networking/savenet_util.h"
 #include "networking/prediction.h"
+#include "networking/lowlevel/vsnet_sockethttp.h"
 #include "lin_time.h"
 
 extern QVector DockToSavedBases( int n);
@@ -220,7 +221,31 @@ void	NetServer::posUpdate( ClientPtr clt)
 /**************************************************************/
 /**** Disconnect a client                                  ****/
 /**************************************************************/
-
+void AddWriteSave(ClientPtr clt, std::string &netbuf, Unit * un, Cockpit * cp){
+  std::string fn=cp->activeStarSystem->getFileName();
+  addSimpleString(netbuf, cp->savegame->WriteSaveGame (fn.c_str(),un->LocalPosition(),cp->credits,cp->unitfilename,-1,FactionUtil::GetFactionName(un->faction), false));
+  addSimpleString(netbuf, un->WriteUnitString());
+ 
+}
+void AcctLogout(VsnetHTTPSocket* acct_sock,ClientPtr clt) {
+  if (acct_sock==NULL) return;
+  if (clt) {
+    std::string netbuf;
+    
+    Unit * un = clt->game_unit.GetUnit();
+    Cockpit * cp = un==NULL?NULL:_Universe->isPlayerStarship(un);
+    bool dosave=(cp!=NULL&&un!=NULL);
+    addSimpleChar(netbuf,dosave?ACCT_SAVE_LOGOUT:ACCT_LOGOUT);
+    addSimpleString(netbuf, clt->callsign );
+    addSimpleString(netbuf, clt->passwd );
+    if (dosave) {
+      AddWriteSave(clt,netbuf,un,cp);
+    }
+    if (!acct_sock->sendstr(netbuf)) {
+      COUT<<"ERROR sending LOGOUT to account server"<<endl;
+    }
+  }
+}
 void	NetServer::disconnect( ClientPtr clt, const char* debug_from_file, int debug_from_line )
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << endl
@@ -228,22 +253,12 @@ void	NetServer::disconnect( ClientPtr clt, const char* debug_from_file, int debu
          << " *** disconnecting " << clt->callsign << " because of "
          << clt->_disconnectReason << endl;
 
-	NetBuffer netbuf;
 	Unit * un = clt->game_unit.GetUnit();
 
 	if( acctserver )
 	{
 	    // Send a disconnection info to account server
-	    netbuf.addString( clt->callsign );
-	    netbuf.addString( clt->passwd );
-	    Packet p2;
-	    if( p2.send( CMD_LOGOUT, 0,
-                     netbuf.getData(), netbuf.getDataLength(),
-	                 SENDRELIABLE, NULL, acct_sock, __FILE__,
-                     PSEUDO__LINE__(1395) ) < 0 )
-        {
-		    COUT<<"ERROR sending LOGOUT to account server"<<endl;
-	    }
+          AcctLogout(acct_sock,clt);
 	}
 
 	clt->tcp_sock.disconnect( __PRETTY_FUNCTION__, false );
@@ -275,22 +290,12 @@ void	NetServer::disconnect( ClientPtr clt, const char* debug_from_file, int debu
 void	NetServer::logout( ClientPtr clt )
 {
 	Packet p, p1, p2;
-	NetBuffer netbuf;
+	std::string netbuf;
 	Unit * un = clt->game_unit.GetUnit();
 
 	if( acctserver)
 	{
-		// Send a disconnection info to account server
-		netbuf.addString( clt->callsign);
-		netbuf.addString( clt->passwd);
-		COUT<<"Loggin out "<<clt->callsign<<":"<<clt->passwd<<endl;
-		Packet p2;
-		if( p2.send( CMD_LOGOUT, 0, netbuf.getData(), netbuf.getDataLength(),
-		             SENDRELIABLE, NULL, acct_sock, __FILE__,
-                     PSEUDO__LINE__(1555) ) < 0 )
-        {
-			COUT<<"ERROR sending LOGOUT to account server"<<endl;
-		}
+          AcctLogout(acct_sock,clt);
 	}
 
 	clt->tcp_sock.disconnect( __PRETTY_FUNCTION__, false );

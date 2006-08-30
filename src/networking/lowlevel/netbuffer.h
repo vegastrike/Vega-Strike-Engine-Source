@@ -11,7 +11,12 @@
 #include "gfxlib_struct.h"
 
 struct GFXColor;
-
+std::string getSimpleString(std::string &input);
+char getSimpleChar(std::string &input);
+int getSimpleInt(std::string &input);
+void addSimpleString(std::string &input, const std::string adder);
+void addSimpleChar(std::string &input, const char adder);
+void addSimpleInt(std::string &input, const int adder);
 class NetBuffer
 {
 		char *	buffer;

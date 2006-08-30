@@ -8,6 +8,7 @@
 #include "networking/lowlevel/packet.h"
 #include "lin_time.h"
 #include "networking/lowlevel/vsnet_notify.h"
+#include "networking/lowlevel/vsnet_sockethttp.h"
 #include "networking/lowlevel/vsnet_dloadmgr.h"
 #include "networking/lowlevel/netui.h"
 #include "networking/client.h"
@@ -24,7 +25,7 @@ int		NetClient::authenticate()
 
 	Packet	packet2;
 	string  str_callsign, str_passwd;
-	NetBuffer netbuf;
+	std::string netbuf;
 
 	// Get the name and password from vegastrike.config
 	// Maybe someday use a default Guest account if no callsign or password is provided thus allowing
@@ -33,14 +34,14 @@ int		NetClient::authenticate()
 	this->password=str_passwd = vs_config->getVariable ("player","password","");
 	if( str_callsign.length() && str_passwd.length())
 	{
+		addSimpleString(netbuf,str_callsign);
+		addSimpleString(netbuf,str_passwd);
 	    COUT << "callsign:   " << str_callsign << endl
 	         << " *** passwd: " << str_passwd << endl
-	         << " *** buffer: " << netbuf.getData() << endl;
-		netbuf.addString( str_callsign);
-		netbuf.addString( str_passwd);
+	         << " *** buffer: " << netbuf << endl;
 
 		packet2.send( CMD_LOGIN, 0,
-                      netbuf.getData(), netbuf.getDataLength(),
+                      netbuf.data(), netbuf.length(),
                       SENDRELIABLE, NULL, this->clt_tcp_sock,
                       __FILE__, PSEUDO__LINE__(165) );
 		COUT << "Send login for player <" << str_callsign << ">:< "<< str_passwd
@@ -65,26 +66,24 @@ vector<string>	&NetClient::loginLoop( string str_callsign, string str_passwd)
 	COUT << "enter " << "NetClient::loginLoop" << endl;
 
 	Packet	packet2;
-	NetBuffer netbuf;
+	std::string netbuf;
 
 	//memset( buffer, 0, tmplen+1);
-	char flags = 0;
-    netbuf.addChar( flags );
-	netbuf.addString( str_callsign);
-	netbuf.addString( str_passwd);
+	addSimpleString(netbuf, str_callsign);
+	addSimpleString(netbuf, str_passwd);
 
 	COUT << "Buffering to send with CMD_LOGIN: " << endl;
-	PacketMem m( netbuf.getData(), netbuf.getDataLength(), PacketMem::LeaveOwnership );
+	PacketMem m( (char*)netbuf.data(), netbuf.length(), PacketMem::LeaveOwnership );
 	m.dump( cerr, 3 );
 
 	packet2.send( CMD_LOGIN, 0,
-                  netbuf.getData(), netbuf.getDataLength(),
+                  netbuf.data(), netbuf.length(),
                   SENDRELIABLE, NULL, this->clt_tcp_sock,
                   __FILE__, PSEUDO__LINE__(316) );
 	COUT << "Sent login for player <" << str_callsign << ">:<" << str_passwd
 		 << ">" << endl
 	     << "   - buffer length : " << packet2.getDataLength() << endl
-	     << "   - buffer: " << netbuf.getData() << endl;
+	     << "   - buffer: " << netbuf.data() << endl;
 	// Now the loop
 	int timeout=0, recv=0;
 	// int ret=0;
@@ -137,25 +136,27 @@ vector<string>	&NetClient::loginAcctLoop( string str_callsign, string str_passwd
 {
 	COUT << "enter " << "NetClient::loginAcctLoop" << endl;
 
-	Packet	packet2;
-	NetBuffer netbuf;
 
+	std::string netbuf;
+        addSimpleChar(netbuf,ACCT_LOGIN_DATA);
 	//memset( buffer, 0, tmplen+1);
-	netbuf.addString( str_callsign);
-	netbuf.addString( str_passwd);
+	addSimpleString(netbuf, str_callsign);
+	addSimpleString(netbuf, str_passwd);
 
-	COUT << "Buffering to send with LOGIN_DATA: " << endl;
-	PacketMem m( netbuf.getData(), netbuf.getDataLength(), PacketMem::LeaveOwnership );
-	m.dump( cerr, 3 );
-
+	COUT << "Buffering to send with LOGIN_DATA: " <<netbuf<< endl;
+	//PacketMem m( netbuf.getData(), netbuf.getDataLength(), PacketMem::LeaveOwnership );
+        //	m.dump( cerr, 3 );
+        acct_sock->sendstr(netbuf);
+        /*
 	packet2.send( LOGIN_DATA, 0,
                   netbuf.getData(), netbuf.getDataLength(),
                   SENDRELIABLE, NULL, this->acct_sock,
                   __FILE__, PSEUDO__LINE__(378) );
+        */
 	COUT << "Sent ACCOUNT SERVER login for player <" << str_callsign << ">:<" << str_passwd
 		 << ">" << endl
-	     << "   - buffer length : " << packet2.getDataLength() << endl
-	     << "   - buffer: " << netbuf.getData() << endl;
+	     << "   - buffer length : " << netbuf.length() << endl
+	     << "   - buffer: " << netbuf << endl;
 	// Now the loop
 	int timeout=0, recv=0;
 	// int ret=0;
@@ -306,16 +307,15 @@ void NetClient::getConfigServerAddress( string &addr, unsigned short &port)
 /*************************************************************/
 /**** Initialize the client network to account server     ****/
 /*************************************************************/
-
-SOCKETALT	NetClient::init_acct( const char * addr, unsigned short port)
+VsnetHTTPSocket*	NetClient::init_acct( const std::string& addr)
 {
     COUT << " enter " << __PRETTY_FUNCTION__
-	     << " with " << addr << ":" << port << endl;
+	     << " with " << addr << endl;
 
     _sock_set.start( );
 
 	cout<<"Initializing connection to account server..."<<endl;
-	acct_sock = NetUITCP::createSocket( addr, port, _sock_set );
+	acct_sock = new VsnetHTTPSocket( addr, _sock_set );
 	COUT <<"accountserver on socket "<<acct_sock<<" done."<<endl;
 
 	return acct_sock;

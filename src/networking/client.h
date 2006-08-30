@@ -40,7 +40,21 @@ class Prediction;
 extern VegaConfig *vs_config;
 
 void	displayError( ObjSerial error_code);
-
+enum accountServerCommands{
+  ACCT_LOGIN='l',
+  ACCT_NEWCHAR='c',
+  ACCT_NEWSUBSCRIBE='u',
+  ACCT_LOGIN_DATA='d',
+  ACCT_LOGIN_ERROR='e',
+  ACCT_LOGIN_ALREADY='f',
+  ACCT_LOGIN_NEW='n',
+  ACCT_LOGIN_ACCEPT='a',
+  ACCT_LOGOUT='o',
+  ACCT_RESYNC='r',
+  ACCT_SAVE='s',
+  ACCT_SAVE_LOGOUT='S',
+  ACCT_SUCCESS='!',
+};
 // Network part of a client description
 class	Client
 {

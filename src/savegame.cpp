@@ -741,12 +741,11 @@ using namespace VSFileSystem;
 
 string SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float credits, std::vector<std::string> unitname, int player_num, std::string fact, bool write) {
   savestring = string("");
-  if (outputsavegame.length()!=0) {
     printf ("Writing Save Game %s",outputsavegame.c_str());
 
 	savestring += WritePlayerData( FP, unitname, systemname, credits, fact);
 	savestring += WriteDynamicUniverse();
-
+  if (outputsavegame.length()!=0) {
     if( write){
 	VSFile f;
 	VSError err = f.OpenCreateWrite( outputsavegame, SaveFile);

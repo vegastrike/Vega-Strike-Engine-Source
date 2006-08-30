@@ -81,7 +81,9 @@ VsnetSocketBase::VsnetSocketBase( int fd, const char* socktype, SocketSet& sets 
     set_block( );
     sets.set( this );
 }
-
+bool VsnetSocketBase::isReadyToSend(fd_set* write_set_select){
+  return get_write_fd()>=0&&FD_ISSET(get_write_fd(),write_set_select);
+}
 VsnetSocketBase::~VsnetSocketBase( )
 {
     CHECK_VALID

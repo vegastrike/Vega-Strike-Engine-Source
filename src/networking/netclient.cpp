@@ -200,47 +200,48 @@ bool	NetClient::PacketLoop( Cmd command)
 
 int		NetClient::checkAcctMsg( )
 {
-	int len=0;
-	Packet    packeta;
+
+	std::string    packeta;
     AddressIP ipadr;
 	int ret=0;
 
 	// Watch account server socket
 	// Get the number of active clients
-	if( acct_sock.isActive( ))
+	if( acct_sock->isActive( ))
 	{
 		//COUT<<"Net activity !"<<endl;
 		// Receive packet and process according to command
 
-		if( (len=acct_sock.recvbuf( &packeta, &ipadr ))>0 )
+		if(acct_sock->recvstr( packeta )!=false&&packeta.length() )
 		{
 			ret = 1;
-			NetBuffer netbuf( packeta.getData(), packeta.getDataLength());
-			switch( packeta.getCommand())
+                        std::string netbuf=packeta;
+                        
+			switch( getSimpleChar(netbuf)) 
 			{
-				case LOGIN_DATA :
+				case ACCT_LOGIN_DATA :
 				{
 					COUT << ">>> LOGIN DATA --------------------------------------"<<endl;
 					// We received game server info (the one we should connect to)
-					_serverip = netbuf.getString();
-					_serverport = netbuf.getString();
+					_serverip = getSimpleString(netbuf);
+					_serverport = getSimpleString(netbuf);
 					COUT << "<<< LOGIN DATA --------------------------------------"<<endl;
 				}
 				break;
-				case LOGIN_ERROR :
+				case ACCT_LOGIN_ERROR :
 					COUT<<">>> LOGIN ERROR =( DENIED )= --------------------------------------"<<endl;
                                         lastsave.resize(0);
 					lastsave.push_back( "");
 					lastsave.push_back( "!!! ACCESS DENIED : Account does not exist !!!");
 				break;
-				case LOGIN_ALREADY :
+				case ACCT_LOGIN_ALREADY :
 					COUT<<">>> LOGIN ERROR =( ALREADY LOGGED IN )= --------------------------------------"<<endl;
                                         lastsave.resize(0);
 					lastsave.push_back( "");
 					lastsave.push_back( "!!! ACCESS DENIED : Account already logged in !!!");
 				break;
 				default:
-					COUT<<">>> UNKNOWN COMMAND =( "<<std::hex<<packeta.getSerial()<<" )= --------------------------------------"<<std::endl;
+					COUT<<">>> UNKNOWN COMMAND =( "<<std::hex<<packeta<<" )= --------------------------------------"<<std::endl;
                                         lastsave.resize(0);
 					lastsave.push_back( "");
 					lastsave.push_back( "!!! PROTOCOL ERROR : Unexpected command received !!!");
@@ -258,7 +259,7 @@ int		NetClient::checkAcctMsg( )
 				);
 			lastsave.push_back( "");
 			lastsave.push_back( str);
-			acct_sock.disconnect( __PRETTY_FUNCTION__, false );
+			//acct_sock.disconnect( __PRETTY_FUNCTION__, false );
 		}
 	}
 
@@ -1199,10 +1200,12 @@ void NetClient::Reconnect(std::string srvipadr, std::string port) {
   for (unsigned int k=0;k<_Universe->numPlayers();++k) {
     bool ret = false;
     // Are we using the directly account server to identify us ?
-    string use_acctserver = vs_config->getVariable("network","use_account_server", "false");
-    if( use_acctserver=="true")
-      ret = Network[k].init_acct( srvipadr.c_str(), atoi(port.c_str())).valid();
-    else
+    bool use_acctserver = XMLSupport::parse_bool(vs_config->getVariable("network","use_account_server", "false"));
+                
+    if( use_acctserver!=false){
+      Network[k].init_acct( srvipadr);
+      ret=true;
+    }else
       // Or are we going through a game server to do so ?
       ret = Network[k].init( srvipadr.c_str(),atoi( port.c_str())).valid();
     if( ret==false)
@@ -1215,7 +1218,7 @@ void NetClient::Reconnect(std::string srvipadr, std::string port) {
     //sleep( 3);
     cout<<"Waiting for player "<<(k)<<" = "<<usernames[k]<<":"<<passwords[k]<<"login response...";
     vector<string> *loginResp;
-    if( use_acctserver=="true")
+    if( use_acctserver!=false)
       loginResp = &Network[k].loginAcctLoop( usernames[k], passwords[k]);
     else
       loginResp = &Network[k].loginLoop( usernames[k], passwords[k]);

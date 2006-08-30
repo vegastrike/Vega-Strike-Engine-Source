@@ -261,7 +261,7 @@ SOCKETALT NetUIUDP::createServerSocket( unsigned short port, SocketSet& set )
     COUT << "Bind on localhost, " << ret << std::endl;
     return ret;
 }
-
+/*
 // This is as simple as NetUI (factory) functions *SHOULD* be.
 SOCKETALT NetUIHTTP::createSocket(const char* uri, SocketSet &set)
 {
@@ -269,4 +269,4 @@ SOCKETALT NetUIHTTP::createSocket(const char* uri, SocketSet &set)
 	SOCKETALT ret( uri, set );
 	return ret;
 }
-
+*/

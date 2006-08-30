@@ -582,9 +582,12 @@ void bootstrap_main_loop () {
         NetClient::getConfigServerAddress(srvipadr, port);
 		bool ret = false;
 		// Are we using the directly account server to identify us ?
-		string use_acctserver = vs_config->getVariable("network","use_account_server", "false");
-		if( use_acctserver=="true")
-			ret = Network[k].init_acct( srvipadr.c_str(), port).valid();
+		bool use_acctserver = XMLSupport::parse_bool(vs_config->getVariable("network","use_account_server", "false"));
+
+		if( use_acctserver!=false){
+			Network[k].init_acct( srvipadr);
+                        ret=true;
+                }
 		else
 		// Or are we going through a game server to do so ?
 			ret = Network[k].init( srvipadr.c_str(), port).valid();
@@ -598,7 +601,7 @@ void bootstrap_main_loop () {
 		//sleep( 3);
         cout<<"Waiting for player "<<(k)<<" = "<<(*it)<<":"<<(*jt)<<"login response...";
         vector<string> *loginResp;
-        if( use_acctserver=="true")
+        if( use_acctserver!=false)
             loginResp = &Network[k].loginAcctLoop( (*it), (*jt));
         else
             loginResp = &Network[k].loginLoop( (*it), (*jt));
@@ -695,8 +698,8 @@ void bootstrap_main_loop () {
 			}
 		}
 	}
-	// Always dock on load in networking if it was said so in the save file
-	if (/*Network!=NULL ||*/ mission->getVariable("savegame","").length()!=0&&XMLSupport::parse_bool(vs_config->getVariable("AI","dockOnLoad","true"))) {
+	// Never dock on load in networking if it was said so in the save file NETFIXME--this may change
+	if (Network==NULL && mission->getVariable("savegame","").length()!=0&&XMLSupport::parse_bool(vs_config->getVariable("AI","dockOnLoad","true"))) {
 		for (int i=0;i<_Universe->numPlayers();i++) {
 			DockToSavedBases(i);
 		}

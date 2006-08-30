@@ -43,7 +43,7 @@ public:
     static SOCKETALT     createSocket( const char* host, unsigned short port, SocketSet& set );
     static ServerSocket* createServerSocket( unsigned short port, SocketSet& set );
 };
-
+/*
 class NetUIHTTP
 {
 public:
@@ -51,7 +51,7 @@ public:
 	// Why would we ever need an HTTP server socket? Would more likely be a CGI.
     //static SOCKETALT     createServerSocket( unsigned short port, SocketSet& set );
 };
-
+*/
 class NetUIUDP
 {
 public:

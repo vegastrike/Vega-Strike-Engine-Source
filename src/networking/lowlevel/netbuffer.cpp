@@ -4,6 +4,42 @@
 #include "networking/const.h"
 #include "posh.h"
 #include "gfxlib_struct.h"
+std::string getSimpleString(std::string &input){
+  std::string::size_type where=input.find(" ");
+  int len=getSimpleInt(input);
+  if (len>=0&&len<=input.length()){
+    std::string retval=input.substr(0,len);
+    input=input.substr(len);
+    return retval;
+  }
+  return "";
+}
+char getSimpleChar(std::string &input){
+  char retval=input[0];
+  input=input.substr(1);
+  return retval;
+}
+int getSimpleInt(std::string &input){
+  std::string::size_type where=input.find(" ");
+  if (where!=string::npos) {
+    std::string num=input.substr(0,where);
+    int len=XMLSupport::parse_int(num);
+    input=input.substr(where+1);
+    return len;
+  }
+  return 0;  
+}
+void addSimpleString(std::string &input, const std::string adder){
+  addSimpleInt(input,adder.length());
+  input+=adder;
+}
+void addSimpleChar(std::string &input, const char adder){
+  char add[2]={adder,'\0'};
+  input+=std::string(add,1);
+}
+void addSimpleInt(std::string &input, const int adder){
+  input+=XMLSupport::tostring(adder)+" ";
+}
 
 NetBuffer::NetBuffer()
 		{

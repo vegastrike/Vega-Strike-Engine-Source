@@ -6,6 +6,7 @@
 #include "cmd/unit_factory.h"
 #include "networking/fileutil.h"
 
+#include "networking/lowlevel/vsnet_sockethttp.h"
 extern string universe_file;
 extern bool verify_path (const vector<string> &path, bool allowmpl=false);
 extern void vschdirs (const vector<string> &path);
@@ -15,42 +16,6 @@ extern vector<vector <string> > lookforUnit( const char * filename, int faction,
 /**************************************************************/
 /**** Authenticate a connected client                      ****/
 /**************************************************************/
-
-// Not used anymore
-void	NetServer::authenticate( ClientPtr clt, AddressIP ipadr, Packet& packet )
-{
-	Packet	packet2;
-	string	callsign;
-	string	passwd;
-	int		i;
-	Account *	elem = NULL;
-	NetBuffer netbuf( packet.getData(), packet.getDataLength());
-
-	char flags = 0;
-	// Get the callsign/passwd from network
-	callsign = netbuf.getString();
-	passwd = netbuf.getString();
-
-	i=0;
-	int found=0;
-	for ( VI j=Cltacct.begin(); j!=Cltacct.end() && !found; j++, i++)
-	{
-		elem = *j;
-		if( !elem->compareName( callsign) && !elem->comparePass( passwd))
-			found = 1;
-	}
-	if( !found)
-    {
-		sendLoginError( clt, ipadr);
-    }
-	else
-	{
-		if( elem->isNew())
-			sendLoginAccept( clt, ipadr, 1, flags);
-		else
-			sendLoginAccept( clt, ipadr, 0, flags);
-	}
-}
 
 ClientPtr NetServer::getClientFromSerial( ObjSerial serial)
 {
@@ -77,19 +42,18 @@ ClientPtr NetServer::getClientFromSerial( ObjSerial serial)
 }
 
 // WARNING: ipadr is NULL since we are getting this packet from acctserver, not the client itself.
-void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct, char flags)
+void	NetServer::sendLoginAccept( std::string inetbuf,ClientPtr clt, AddressIP ipadr, int newacct, char flags)
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << endl;
 
     string callsign;
     string passwd;
-
-	NetBuffer netbuf( packeta.getData(), packeta.getDataLength());
+    NetBuffer netbuf;
 	ObjSerial cltserial;
-	callsign = netbuf.getString();
-	passwd = netbuf.getString();
-	string serverip = netbuf.getString();
-	string serverport = netbuf.getString();
+	callsign = getSimpleString(inetbuf);
+	passwd = getSimpleString(inetbuf);
+	string serverip = getSimpleString(inetbuf);
+	string serverport = getSimpleString(inetbuf);
 
     if( !clt )
 	{
@@ -118,8 +82,8 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct, ch
 	{
 		clt->savegame.resize(0);
 		// Get the save parts in a string array
-		clt->savegame.push_back( netbuf.getString());
-		clt->savegame.push_back( netbuf.getString());
+		clt->savegame.push_back( getSimpleString(inetbuf));
+		clt->savegame.push_back( getSimpleString(inetbuf));
 		// Put the save parts in buffers in order to load them properly
 		netbuf.Reset();
 
@@ -231,17 +195,15 @@ Cockpit * NetServer::loadFromSavegame( ClientPtr clt ) {
 	if( !exist)
 	{
 		unsigned short serial = cltserial;
-		NetBuffer logoutnetbuf;
-		logoutnetbuf.addString(clt->callsign);
-		logoutnetbuf.addString(clt->passwd);
+		std::string logoutnetbuf;
+                addSimpleChar(logoutnetbuf,ACCT_LOGOUT);
+		addSimpleString( logoutnetbuf,clt->callsign);
+		addSimpleString(logoutnetbuf,clt->passwd);
 		// We can't find the unit saved for player -> send a login error
 		this->logout( clt );
 		Packet p2;
 		// Send the account server a logout info
-		if( p2.send( CMD_LOGOUT, serial, logoutnetbuf.getData(), logoutnetbuf.getDataLength(),
-					 SENDRELIABLE, NULL, acct_sock, __FILE__,
-					 PSEUDO__LINE__(162) ) < 0 )
-		{
+                if (!acct_sock->sendstr(logoutnetbuf)) {
 			COUT<<"ERROR sending LOGOUT to account server"<<endl;
 		}
 		cerr<<"WARNING : Unit file ("<<savedships[0]<<") not found for "<<clt->callsign<<endl;

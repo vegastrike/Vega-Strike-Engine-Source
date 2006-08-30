@@ -101,6 +101,7 @@ ACCT_LOGIN_ALREADY='f'
 ACCT_LOGIN_NEW='n'
 ACCT_LOGIN_ACCEPT='a'
 ACCT_LOGOUT='o'
+ACCT_SAVE_LOGOUT='S'
 ACCT_RESYNC='r'
 ACCT_SAVE='s'
 ACCT_NEWCHAR='c'
@@ -164,6 +165,7 @@ def getLoginQueryFS(conn,user,password):
 		try:
 			f=open(HOMEPATH+user+".password","rb")
 			tpass=f.read()
+
 			f.close()
 			if tpass==password:
 				try:
@@ -184,10 +186,7 @@ def getLoginQueryFS(conn,user,password):
 					f.close()
 				except IOError:
 					result['logged_in_server']=None
-				f=open(HOMEPATH+user+".logged","wb")
-				f.write("1")
-				f.close()
-				return result
+				return result#should back this ass up
 		except IOError:
 			print "Unpossible, file not found"
 	return None
@@ -217,7 +216,8 @@ def setConnectedAcctFS(conn,user,passwd,setOne):
 		f.close()
 		if tpass==passwd:
 			f=open(HOMEPATH+user+".logged","wb")
-			
+			if setOne:
+				f.write("1")
 			f.close()#empty file
 def setConnectedAcct(conn,user,passwd,b):
 	if USE_SQL:
@@ -257,8 +257,6 @@ def getDefaultXML():
 	except IOError:
 		return ",Directory,Name\nKey,string,string\nllame,llame,llame\n"
 
-defcsv=getDefaultXML()
-defsavegame=getDefaultSave()
 def getSystem(savegame):
 	where=savegame.find("^")
 	if where==-1:
@@ -266,6 +264,8 @@ def getSystem(savegame):
 	else:
 		return savegame[0:where]
 def getServer(system):
+	if not checkString(system):
+		return "0.0.0.0:4364"
 	try:
 		f=open(HOMEPATH+system.replace("/","-")+".system","r")
 	except IOError:
@@ -282,9 +282,9 @@ def getLoginInfo(conn, user, passwd, dologin):
 		if result['logged_in_server']:
 			print ACCT_LOGIN_ALREADY+stringField('username', user)
 			return
-		if not result['savegame'] or result['csv']:
-			#res = getLoginQuery(conn, 'default', '')
-			#result['savegame'] = res['savegame']
+		if not (result['savegame'] and result['csv']):
+			defcsv=getDefaultXML()
+			defsavegame=getDefaultSave()
 			result['savegame'] = defsavegame
 			result['csv'] = defcsv
 			#result['csv'] = res['csv']
@@ -478,6 +478,14 @@ def vegastrike(conn,path,url,post):
 		save=getSimpleString(post)
 		xml=getSimpleString(post)
 		saveAcct(conn,username,password,save,xml)
+		print "!"
+	elif command==ACCT_SAVE_LOGOUT:
+		username=getSimpleString(post)
+		password=getSimpleString(post)
+		save=getSimpleString(post)
+		xml=getSimpleString(post)
+		saveAcct(conn,username,password,save,xml)
+		logoutAcct(conn,username,password)
 		print "!"
 	else:
 		if command==ACCT_NEWCHAR:

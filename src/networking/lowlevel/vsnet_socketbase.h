@@ -61,13 +61,14 @@ public:
     virtual bool lower_selected( int datalen=-1 ) = 0;
 
     virtual bool need_test_writable( ) { return false; }
+    virtual bool write_on_negative( ) {return false;}
     virtual int  get_write_fd( ) const { return _fd; }
     virtual int  lower_sendbuf( ) { return 0; }
-
     /** Called when we noticed that the primary file descriptor is closed
      *  but data remains in the send queue.
      */
     virtual void lower_clean_sendbuf( ) { }
+    virtual bool isReadyToSend(fd_set*);//i.e. can call send_lower based on fd_set
 
 protected:
     virtual void child_disconnect( const char* s ) { }
@@ -86,7 +87,6 @@ private:
     // Indicates whether a socket is in blocking or non-blocking mode.
     // Necessary since WIN32 does not allow testing.
 	int _noblock;
-
 private:
     VsnetSocketBase( );
     VsnetSocketBase( const VsnetSocketBase& orig );
