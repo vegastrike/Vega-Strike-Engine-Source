@@ -603,8 +603,8 @@ void bootstrap_main_loop () {
         vector<string> *loginResp;
         if( use_acctserver!=false)
             loginResp = &Network[k].loginAcctLoop( (*it), (*jt));
-        else
-            loginResp = &Network[k].loginLoop( (*it), (*jt));
+        
+        loginResp = &Network[k].loginLoop( (*it), (*jt));
         savefiles.push_back( *loginResp );
 
         if( savefiles[k].empty() || savefiles[k][0]=="")

@@ -264,7 +264,7 @@ def getSystem(savegame):
 	else:
 		return savegame[0:where]
 def getServer(system):
-	if not checkString(system):
+	if not checkString(system.replace("/","-")):
 		return "0.0.0.0:4364"
 	try:
 		f=open(HOMEPATH+system.replace("/","-")+".system","r")
@@ -291,7 +291,9 @@ def getLoginInfo(conn, user, passwd, dologin):
 		serverstrings=getServer(getSystem(result['savegame'])).split(":")
 		if dologin:
 			setConnectedAcct(conn,user,passwd,True)
-		print ACCT_LOGIN_ACCEPT+stringField('username',user)+stringField('password',passwd)+stringField('serverip',serverstrings[0])+stringField('serverport',serverstrings[1])+stringField('savegame', result['savegame'])+stringField('csv', result['csv'])
+			print ACCT_LOGIN_ACCEPT+stringField('username',user)+stringField('password',passwd)+stringField('serverip',serverstrings[0])+stringField('serverport',serverstrings[1])+stringField('savegame', result['savegame'])+stringField('csv', result['csv'])
+		else:
+			print ACCT_LOGIN_DATA+stringField('username',user)+stringField('password',passwd)+stringField('serverip',serverstrings[0])+stringField('serverport',serverstrings[1])
 	else:
 		print ACCT_LOGIN_ERROR+stringField('username', user)
 		return
@@ -493,12 +495,12 @@ def vegastrike(conn,path,url,post):
 		print "UNKNOWN"
 	
 handler_function = {
-	'user': queryAccount,
-	'signup': addAccount,
-	'login': loginAccount,
-	'logout': logoutAccount,
+	#'user': queryAccount,
+	#'signup': addAccount,
+	#'login': loginAccount,
+	#'logout': logoutAccount,
 	'vegastrike':vegastrike,
-	'': indexPage
+	#'': indexPage
 	}
 
 if __name__=='__main__':

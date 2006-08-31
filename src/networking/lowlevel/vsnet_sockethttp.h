@@ -26,10 +26,10 @@ class VsnetHTTPSocket : public VsnetSocketBase //VsnetTCPSocket
   int _content_length;
   bool _send_more_data; // Has the server allowed keep-alive?
   
-  std::queue<std::string> dataToSend;
+  std::list<std::string> dataToSend;
   std::string dataToReceive;
   AddressIP _remote_ip;
-  bool waitingToReceive;
+  std::string waitingToReceive;
   bool readHeader;
   bool parseHeaderByte( char rcvchr );
   bool ischunked;
@@ -59,7 +59,7 @@ public:
     virtual int  optPayloadSize( ) const { return 500; }
 
 	virtual bool isActive();
-
+    void resendData();
     void reopenConnection();
     virtual bool isReadyToSend(fd_set*);
     virtual void dump( std::ostream& ostr ) const;

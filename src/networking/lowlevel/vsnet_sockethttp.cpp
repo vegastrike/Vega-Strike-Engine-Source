@@ -16,7 +16,7 @@ VsnetHTTPSocket::VsnetHTTPSocket(
                  const std::string&     path,
                  SocketSet&       set )
 		: VsnetSocketBase(NetUIBase::createClientSocket(remote_ip, true), "http", set), _path(path), _hostheader(host),
-		  _incompleteheadersection(0), _content_length(0), _send_more_data(false), waitingToReceive(false)
+		  _incompleteheadersection(0), _content_length(0), _send_more_data(false)
 
 		{
                   readHeader=false;
@@ -86,7 +86,7 @@ VsnetHTTPSocket::VsnetHTTPSocket(
                  const std::string& uri,
                  SocketSet&       set )
 		: VsnetSocketBase(NetUIBase::createClientSocket(remoteIPFromURI(uri), true), "http", set),
-		  _incompleteheadersection(0), _content_length(0), _send_more_data(false), waitingToReceive(false)
+		  _incompleteheadersection(0), _content_length(0), _send_more_data(false)
 {
   readHeader=false;
   std::string dummy;
@@ -100,8 +100,10 @@ VsnetHTTPSocket::VsnetHTTPSocket(
 }
 
 void VsnetHTTPSocket::reopenConnection() {
+
   if (dataToReceive.length()==0)
-    waitingToReceive=false;
+      waitingToReceive=std::string();
+
   if (this->_fd>=0) {
     this->close_fd();
     this->_fd=-1;
@@ -122,14 +124,14 @@ void VsnetHTTPSocket::dump( std::ostream& ostr ) const
 }
 
 bool VsnetHTTPSocket::sendstr(const std::string &data) {
-	dataToSend.push(data);
+	dataToSend.push_back(data);
 	return true;
 }
 
 bool VsnetHTTPSocket::recvstr(std::string &data) {
-	if (waitingToReceive ) {
+	if (!waitingToReceive.empty() ) {
 		if (_content_length==0 && !dataToReceive.empty()) {
-                  waitingToReceive = false;
+		  waitingToReceive = std::string();
                   data = dataToReceive;
                   dataToReceive = std::string();
                   _incompleteheader=std::string();
@@ -151,7 +153,7 @@ void VsnetHTTPSocket::lower_clean_sendbuf( ) {
 }
 int VsnetHTTPSocket::lower_sendbuf(  )
 {
-	if (waitingToReceive)
+        if (!waitingToReceive.empty())
 		return 0;
 	
 	if (!(this->_fd == -1 || _send_more_data || _content_length ||
@@ -202,8 +204,8 @@ int VsnetHTTPSocket::lower_sendbuf(  )
 		if (pos>=httpData.length())
 			break;
 	}
-	dataToSend.pop();
-	waitingToReceive = true;
+	waitingToReceive = dataToSend.front();
+	dataToSend.pop_front();
 	return 1;
 }
 
@@ -229,10 +231,10 @@ bool VsnetHTTPSocket::parseHeaderByte( char rcvchr )
 				std::string::size_type sp1, sp2;
 				sp1 = _incompleteheader.find(' ');
 				if (sp1==std::string::npos) break;
-				sp2 = _incompleteheader.find(' ', sp1+1);
-				if (sp2==std::string::npos) break;
+				//sp2 = _incompleteheader.find(' ', sp1+1);
+				//if (sp2==std::string::npos) break;
 				_header.insert(std::pair<std::string, std::string>(
-								   "Status", _incompleteheader.substr(sp1+1, sp2-sp1-1)));
+								   "Status", _incompleteheader.substr(sp1+1/*, sp2-sp1-1*/)));
 			} else {
 				std::string::size_type colon, colonsp;
 				colon = _incompleteheader.find(':');
@@ -252,14 +254,32 @@ bool VsnetHTTPSocket::parseHeaderByte( char rcvchr )
 	_incompleteheader.push_back(rcvchr);
 	return false;
 }
-
+int errchance=9;
+void VsnetHTTPSocket::resendData() {
+    dataToSend.push_front(waitingToReceive);
+    waitingToReceive=std::string();
+    _header.clear();
+    readHeader=false;
+    _content_length=0;
+    readingchunked=false;
+    ischunked=false;
+    _send_more_data=false;
+    chunkedlen=0;
+    _incompleteheadersection=0;							
+    chunkedchar='\0';
+    if (this->_fd>=0) {
+	this->close_fd();
+    }
+    this->_fd=-1;
+}
 bool VsnetHTTPSocket::lower_selected( int datalen )
 {
-	if (!waitingToReceive) {
+        if (waitingToReceive.empty()) {
 		return false;
 	}
 	if ( this->_fd == -1 ) {
-		return false;
+	    resendData();
+	    return false;
 	}
 
 	char rcvbuf[1440];
@@ -279,7 +299,7 @@ bool VsnetHTTPSocket::lower_selected( int datalen )
 		int ret = VsnetOSS::recv( get_fd(), &rcvbuf, dataToRead, 0 );
 		if (ret==0) {
                   // closed;
-                  _content_length=0;
+ 	          resendData();
                   break;
 		}else
 		if (ret<0) {
@@ -288,7 +308,7 @@ bool VsnetHTTPSocket::lower_selected( int datalen )
 				return false;
 			}
 			// errored;
-			_fd = -1;
+			resendData();
 			return false;
 		}else
 		if (datalen>0||datalen<0) {
@@ -305,10 +325,12 @@ bool VsnetHTTPSocket::lower_selected( int datalen )
 						_send_more_data = true;
 	
 						iter = _header.find("Status");
-						if (iter == _header.end()) return false;
-	
-						if ((*iter).second != "200") {
-							COUT << "Received HTTP error: status is "+ (*iter).second << std::endl;
+						
+						if (iter == _header.end()||(*iter).second.find("200")==std::string::npos) {
+							if (iter!=_header.end()) COUT << "Received HTTP error: status is "+ (*iter).second << std::endl;
+							else COUT<<"Missing status, resending\n";
+							resendData();
+							return false;
 						}
 	
 						iter = _header.find("Content-Length");
@@ -418,7 +440,7 @@ bool VsnetHTTPSocket::lower_selected( int datalen )
           //reopenConnection();
           if (dataToReceive.length()==0||(dataToReceive[0]=='!'&&dataToReceive.length()<4)) {//don't bother with the bangs
             dataToReceive=std::string();
-            waitingToReceive=false;//can't receive a null info
+            waitingToReceive=std::string();//can't receive a null info
           }
 	}
 	//_connection_closed = false;

@@ -56,10 +56,6 @@
 #include "networking/prediction.h"
 #include "fileutil.h"
 
-#ifdef micro_sleep
-#undef micro_sleep
-#endif
-#define micro_sleep(m) _sock_set.waste_time( 0, m )
 
 using std::cout;
 using std::endl;
@@ -189,7 +185,7 @@ bool	NetClient::PacketLoop( Cmd command)
 			VSExit(1);
 		}
 
-		micro_sleep( 40000);
+		_sock_set.waste_time(0,40000);
 	}
 	return recv;
 }
@@ -223,6 +219,8 @@ int		NetClient::checkAcctMsg( )
 				{
 					COUT << ">>> LOGIN DATA --------------------------------------"<<endl;
 					// We received game server info (the one we should connect to)
+					getSimpleString(netbuf);//uname
+					getSimpleString(netbuf);//passwd
 					_serverip = getSimpleString(netbuf);
 					_serverport = getSimpleString(netbuf);
 					COUT << "<<< LOGIN DATA --------------------------------------"<<endl;

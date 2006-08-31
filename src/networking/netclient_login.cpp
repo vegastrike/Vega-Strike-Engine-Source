@@ -180,10 +180,9 @@ vector<string>	&NetClient::loginAcctLoop( string str_callsign, string str_passwd
 			lastsave.push_back( "!!! NETWORK ERROR : Connection to account server timed out !!!");
 			timeout = 1;
 		}
-
 		recv = checkAcctMsg( );
-
-		micro_sleep( 40000);
+		_sock_set.waste_time(0,40000);
+		
 	}
 	COUT<<"End of loginAcct loop"<<endl;
 	// globalsaves should be empty otherwise we filled it with an empty string followed by the error message
