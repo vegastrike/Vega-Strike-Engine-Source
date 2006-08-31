@@ -1,0 +1,72 @@
+Index: src/networking/accountserver.py
+===================================================================
+--- src/networking/accountserver.py	(revision 10577)
++++ src/networking/accountserver.py	(working copy)
+@@ -107,7 +107,7 @@
+ ACCT_NEWCHAR='c'
+ ACCT_NEWSUBSCRIBE='u'
+ ACCT_SUCCESS='!'
+-HOMEPATH='/tmp/persistent/vegastrike_forum/accounts/'#
++HOMEPATH='/u/danielrh/win/acctserver/accounts/'#
+ try:
+ 	os.mkdir(HOMEPATH[0:-1])	
+ except:
+Index: cgi-accountserver/vegastrike.config
+===================================================================
+--- cgi-accountserver/vegastrike.config	(revision 10573)
++++ cgi-accountserver/vegastrike.config	(working copy)
+@@ -4,7 +4,7 @@
+ header = """
+ <!DOCTYPE html>
+ """
+-CGIPATH='/home/groups/v/ve/vegastrike/cgi-bin/'
++CGIPATH='/u/danielrh/win/acctserver/'
+ f=open (CGIPATH+"units/vegastrike.config")
+ s=f.read()
+ f.close()
+Index: cgi-accountserver/register.cgi.html
+===================================================================
+--- cgi-accountserver/register.cgi.html	(revision 10575)
++++ cgi-accountserver/register.cgi.html	(working copy)
+@@ -19,7 +19,7 @@
+     print '<h1>Create Username/password</h1>'
+ 
+ def print_form():
+-    print '<form name="type" action="http://vegastrike.sourceforge.net/cgi-bin/register_submit.cgi.html" method="post">'
++    print '<form name="type" action="http://graphics.stanford.edu/cgi-bin/danielrh/register_submit.cgi.html" method="post">'
+     print '<table>'
+     type_select()
+     faction_select()
+@@ -33,7 +33,7 @@
+     print '<tr>'
+     print '<td align= "right">Which type?</td>'
+     print '<td><select name="type" size="1">'
+-    type_dat = open("/home/groups/v/ve/vegastrike/cgi-bin/units/units.csv").readlines()
++    type_dat = open("/u/danielrh/win/acctserver/units/units.csv").readlines()
+     for line in type_dat[2:]:
+         
+         if (len(line) and line.find("turret")==-1):
+@@ -58,7 +58,7 @@
+     print '<tr>'
+     print '<td align= "right">Which faction?</td>'
+     print '<td><select name="faction" size="1">'
+-    type_dat = open("/home/groups/v/ve/vegastrike/cgi-bin/units/factions.xml").readlines()
++    type_dat = open("/u/danielrh/win/acctserver/units/factions.xml").readlines()
+     for line in type_dat[2:]:
+         factionnamestr='action name="'
+         where=line.find(factionnamestr)
+Index: cgi-accountserver/register_submit.cgi.html
+===================================================================
+--- cgi-accountserver/register_submit.cgi.html	(revision 10578)
++++ cgi-accountserver/register_submit.cgi.html	(working copy)
+@@ -61,8 +61,8 @@
+     f.write('<p>%s</p>' % abstract)
+     f.write('<hr> <a href="../index.html">GCafe lecture series</a></body></html>')
+ 
+-HOMEPATH='/tmp/persistent/vegastrike_forum/accounts/'
+-CGIPATH='/home/groups/v/ve/vegastrike/cgi-bin/'
++HOMEPATH='/u/danielrh/win/acctserver/accounts/'
++CGIPATH='/u/danielrh/win/acctserver/'
+ form = cgi.FieldStorage()
+ check_form(form)
+ username = form["username"].value
