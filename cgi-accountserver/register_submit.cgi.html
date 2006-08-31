@@ -20,7 +20,7 @@ footer = """
 </body>
 </html>
 """
-errorvar="<br><a href=\"http://graphics.stanford.edu/cgi-bin/danielrh/register.cgi.html\">Return To Account Creation Form </a>"
+errorvar="<br><a href=\"http://vegastrike.sourceforge.net/register.cgi.html\">Return To Account Creation Form </a>"
 def checkString(s):
   foundyet=False
   for c in s:
@@ -170,11 +170,11 @@ def makeForm(s,v):
 	
 print '<h2>Account Created Successfully.</h2>\n'
 print "<p>Username "+username+" in type: "+type+"</p>"
-#print '<form name="type" action="http://graphics.stanford.edu/cgi-bin/danielrh/vegastrike.config" method="post">'
+#print '<form name="type" action="http://vegastrike.sourceforge.net/cgi-bin/vegastrike.config" method="post">'
 #makeForm("username",username);
 #makeForm("password",password);
 #print '<input value="Get matching vegastrike.config" type="submit">'
 #print '</form>'
 print '<br>'
-print 'Download functional <a href="http://graphics.stanford.edu/cgi-bin/danielrh/vegastrike.config?username='+username+';password='+password+'">vegastrike.config</a> to put in your vegastrike folder that has your appropriate login and password<br>'
+print 'Download functional <a href="http://vegastrike.sourceforge.net/cgi-bin/vegastrike.config?username='+username+';password='+password+'">vegastrike.config</a> to put in your vegastrike folder that has your appropriate login and password<br>'
 print footer
