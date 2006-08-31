@@ -234,7 +234,7 @@ void AcctLogout(VsnetHTTPSocket* acct_sock,ClientPtr clt) {
     
     Unit * un = clt->game_unit.GetUnit();
     Cockpit * cp = un==NULL?NULL:_Universe->isPlayerStarship(un);
-    bool dosave=(cp!=NULL&&un!=NULL&&_Universe->star_system.size()>0);
+    bool dosave=(cp!=NULL&&un!=NULL&&_Universe->star_system.size()>0&&cp->activeStarSystem);
     addSimpleChar(netbuf,dosave?ACCT_SAVE_LOGOUT:ACCT_LOGOUT);
     addSimpleString(netbuf, clt->callsign );
     addSimpleString(netbuf, clt->passwd );
