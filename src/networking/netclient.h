@@ -137,7 +137,7 @@ class	NetClient
 		~NetClient();
 
 		/**** netclient_login.cpp stuff ****/
-		static void getConfigServerAddress( string & host, unsigned short &port );
+		void GetConfigServerAddress( string & host, unsigned short &port );
 	
 		int				authenticate();
 		vector<string>	&loginLoop( string str_callsign, string str_passwd); // Loops until receiving login response

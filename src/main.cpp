@@ -579,15 +579,16 @@ void bootstrap_main_loop () {
 	  {
         string srvipadr;
         unsigned short port;
-        NetClient::getConfigServerAddress(srvipadr, port);
+        Network[k].GetConfigServerAddress(srvipadr, port);
 		bool ret = false;
 		// Are we using the directly account server to identify us ?
 		bool use_acctserver = XMLSupport::parse_bool(vs_config->getVariable("network","use_account_server", "false"));
 
 		if( use_acctserver!=false){
 			Network[k].init_acct( srvipadr);
-                        ret=true;
-                }
+			Network[k].loginAcctLoop( (*it), (*jt));
+			ret = Network[k].init( NULL,0).valid();
+        }
 		else
 		// Or are we going through a game server to do so ?
 			ret = Network[k].init( srvipadr.c_str(), port).valid();
@@ -600,11 +601,7 @@ void bootstrap_main_loop () {
 		}
 		//sleep( 3);
         cout<<"Waiting for player "<<(k)<<" = "<<(*it)<<":"<<(*jt)<<"login response...";
-        vector<string> *loginResp;
-        if( use_acctserver!=false)
-            loginResp = &Network[k].loginAcctLoop( (*it), (*jt));
-        
-        loginResp = &Network[k].loginLoop( (*it), (*jt));
+        vector<string> *loginResp = &Network[k].loginLoop( (*it), (*jt));
         savefiles.push_back( *loginResp );
 
         if( savefiles[k].empty() || savefiles[k][0]=="")

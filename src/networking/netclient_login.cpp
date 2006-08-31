@@ -176,8 +176,8 @@ vector<string>	&NetClient::loginAcctLoop( string str_callsign, string str_passwd
 		//COUT<<elapsed<<" seconds since login request"<<endl;
 		if( elapsed > login_to)
 		{
-			lastsave.push_back( "");
-			lastsave.push_back( "!!! NETWORK ERROR : Connection to account server timed out !!!");
+			//lastsave.push_back( "");
+			//lastsave.push_back( "!!! NETWORK ERROR : Connection to account server timed out !!!");
 			timeout = 1;
 		}
 		recv = checkAcctMsg( );
@@ -192,7 +192,7 @@ vector<string>	&NetClient::loginAcctLoop( string str_callsign, string str_passwd
 		//savefiles = globalsaves;
 		COUT << "Trying to connect to game server..." << endl
              << "\tIP=" << _serverip << ":" << _serverport << endl;
-		this->init( _serverip.c_str(), atoi( _serverport.c_str()));
+		
 	}
 	return lastsave;
 }
@@ -290,7 +290,7 @@ void NetClient::textMessage(const std::string & data )
                   __FILE__, PSEUDO__LINE__(165) );
 }
 
-void NetClient::getConfigServerAddress( string &addr, unsigned short &port)
+void NetClient::GetConfigServerAddress( string &addr, unsigned short &port)
 {
 	int port_tmp;
 	string srvport = vs_config->getVariable("network","server_port", "6777");
@@ -300,6 +300,8 @@ void NetClient::getConfigServerAddress( string &addr, unsigned short &port)
 	port=(unsigned short)port_tmp;
 	
 	addr = vs_config->getVariable("network","server_ip","");
+	this->_serverip=addr;
+	this->_serverport=srvport;
 	cout<<endl<<"Server IP : "<<addr<<" - port : "<<srvport<<endl<<endl;
 }
 
@@ -326,6 +328,10 @@ VsnetHTTPSocket*	NetClient::init_acct( const std::string& addr)
 
 SOCKETALT	NetClient::init( const char* addr, unsigned short port )
 {
+	if (addr==NULL) {
+		addr=_serverip.c_str();
+		port=atoi(_serverport.c_str());
+	}
     COUT << " enter " << __PRETTY_FUNCTION__
 	     << " with " << addr << ":" << port << endl;
 
@@ -387,12 +393,12 @@ void NetClient::synchronizeTime(SOCKETALT*udpsock)
 	string nettransport;
 	nettransport = vs_config->getVariable( "network", "transport", "udp" );
 
-	std::string addr;
-	unsigned short port;
-	getConfigServerAddress(addr, port);
+	//std::string addr;
+	unsigned short port=atoi(this->_serverport.c_str());
+	//getConfigServerAddress(addr, port);
 	
-	clt_udp_sock=udpsock!=NULL?*udpsock:NetUIUDP::createSocket( addr.c_str(), port, clt_port, _sock_set );
-	COUT << "created UDP socket (" << addr << "," << port << ", listen on " << clt_port << ") -> " << this->clt_udp_sock << endl;
+	clt_udp_sock=udpsock!=NULL?*udpsock:NetUIUDP::createSocket( this->_serverip.c_str(), port, clt_port, _sock_set );
+	COUT << "created UDP socket (" << this->_serverip << "," << port << ", listen on " << clt_port << ") -> " << this->clt_udp_sock << endl;
 	
 	if (nettransport=="udp") {
 		// NETFIXME:  Keep trying ports until a connection is established.
