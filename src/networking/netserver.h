@@ -62,7 +62,7 @@ class NetServer
         SocketSet       _sock_set;              // Capsule for select()
 
         ServerSocket*   tcpNetwork;
-        SOCKETALT       udpNetwork;
+        SOCKETALT       *udpNetwork;
 		Packet			packet;					// Network data packet
 		Packet			packeta;				// Network data packet for account server
 
@@ -140,7 +140,7 @@ class NetServer
 		void	sendDamages( ObjSerial serial, unsigned short zone, Shield shields, Armor armor, float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color);
 		//void	sendDamages( ObjSerial serial, Vector & pnt, Vector & normal, float amt, GFXColor & color, float phasedamage);
 		void	sendKill( ObjSerial serial, unsigned short zone);
-		void	sendJump( ObjSerial serial, ObjSerial jumpserial, bool ok);
+		void	sendJump( Unit * src, Unit *jumppoint,std::string destination);
 
 		void	invalidateSnapshot( ) { snapchanged = 1; }
 

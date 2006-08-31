@@ -161,7 +161,7 @@ void	NetClient::downloadZoneInfo()
 	char tbuf[1024];
 	sprintf( tbuf, "%d", this->zone);
     COUT << __PRETTY_FUNCTION__ << " zone: " << tbuf << endl;
-	VsnetDownload::Client::Buffer buf( this->clt_tcp_sock, tbuf, VSFileSystem::ZoneBuffer);
+	VsnetDownload::Client::Buffer buf( *this->clt_tcp_sock, tbuf, VSFileSystem::ZoneBuffer);
 	_downloadManagerClient->addItem( &buf);
 	timeval timeout={10,0};
 	while( !buf.done())
@@ -536,7 +536,7 @@ void	NetClient::inGame()
 	//netbuf.addClientState( cs);
 	packet2.send( CMD_ADDCLIENT, this->serial,
                   netbuf.getData(), netbuf.getDataLength(),
-                  SENDRELIABLE, NULL, this->clt_tcp_sock,
+                  SENDRELIABLE, NULL, *this->clt_tcp_sock,
                   __FILE__, PSEUDO__LINE__(392) );
 	un->SetSerial( this->serial);
 	COUT << "Sending ingame with serial n°" << this->serial << endl;

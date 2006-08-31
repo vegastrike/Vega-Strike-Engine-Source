@@ -82,7 +82,7 @@ public:
   virtual ContinuousTerrain * getTerrain(PlanetaryTransform *&t) {return NULL;}
   virtual void setAtmosphere (Atmosphere *) {}
   virtual Atmosphere * getAtmosphere () {return NULL;}
-  virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal,  float dist) {}
+  virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal,  float dist) {this->Unit::reactToCollision(smaller,biglocation,bignormal,smalllocation,smallnormal,dist);}
   virtual void gravitate(UnitCollection *units);
 
   class PlanetIterator : public UnIterator {

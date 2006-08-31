@@ -71,12 +71,33 @@ void	NetServer::addClient( ClientPtr clt)
 
 	
 // NETFIXME: Dock not yet working!
-
-	
+        bool besafe=true;
+	vector<std::string> *dat=&cp->savegame->getMissionStringData("jump_from");
+        
+        if (dat->size()) {
+          std::string srcsys=(*dat)[0];
+          Unit * grav;
+          for (un_iter ui=st2->gravitationalUnits().createIterator();
+               (grav=*ui)!=NULL;
+               ++ui) {
+            size_t siz=grav->GetDestinations().size();
+            for (unsigned int i=0;i<siz;++i) {
+              if (srcsys==grav->GetDestinations()[i]) {
+                cp->savegame->SetPlayerLocation(grav->LocalPosition());
+                besafe=false;
+              }
+            }
+          }
+          dat->clear();
+        }
 	QVector safevec;//( DockToSavedBases( player));
 	if( true) //safevec == nullVec)
 	{
+          if (besafe) {
 		safevec = UniverseUtil::SafeStarSystemEntrancePoint( st2, cp->savegame->GetPlayerLocation(), clt->game_unit.GetUnit()->radial_size);
+          }else{
+            safevec=cp->savegame->GetPlayerLocation();
+          }
 		cerr<<"PLAYER NOT DOCKED - STARTING AT POSITION : x="<<safevec.i<<",y="<<safevec.j<<",z="<<safevec.k<<endl;
 		clt->ingame   = true;
 	}
@@ -139,7 +160,7 @@ void	NetServer::serverTimeInitUDP( ClientPtr clt, NetBuffer &netbuf)
 		unsigned short clt_port = netbuf.getShort();
 		if (clt_port) {
 			AddressIP adr (clt->cltadr, clt_port);
-			clt->setUDP( &udpNetwork, adr );
+			clt->setUDP( udpNetwork, adr );
 		} else {
 			clt->setTCP();
 		}
@@ -234,7 +255,7 @@ void AcctLogout(VsnetHTTPSocket* acct_sock,ClientPtr clt) {
     
     Unit * un = clt->game_unit.GetUnit();
     Cockpit * cp = un==NULL?NULL:_Universe->isPlayerStarship(un);
-    bool dosave=(cp!=NULL&&un!=NULL&&_Universe->star_system.size()>0&&cp->activeStarSystem);
+    bool dosave=(cp!=NULL&&un!=NULL&&_Universe->star_system.size()>0&&cp->activeStarSystem&&clt->jumpok==0);
     addSimpleChar(netbuf,dosave?ACCT_SAVE_LOGOUT:ACCT_LOGOUT);
     addSimpleString(netbuf, clt->callsign );
     addSimpleString(netbuf, clt->passwd );

@@ -62,7 +62,7 @@ extern bool isLocalSerial( ObjSerial sernum);
 
 class	NetClient
 {
-    class Clients
+    class ClientsMap
     {
         ClientMap _map;
 
@@ -76,9 +76,9 @@ class	NetClient
 
         string              _serverip;      // used during login
         string              _serverport;    // used during login
-        SOCKETALT			clt_tcp_sock;	// Comm. socket
-        SOCKETALT			clt_udp_sock;	// Comm. socket
-		SOCKETALT *			lossy_socket;	// Usually points to the UDP socket, unless behind firewall.
+        SOCKETALT			*clt_tcp_sock;	// Comm. socket...memory allocated in class
+        SOCKETALT			*clt_udp_sock;	// Comm. socket...memory allocated in class
+		SOCKETALT *			lossy_socket;	// Usually points to the UDP socket, unless behind firewall... do not free this one
         VsnetHTTPSocket*			acct_sock;		// Connection socket for account server
         SocketSet           _sock_set;      // Encapsulates select()
         SaveGame			save;
@@ -93,7 +93,7 @@ class	NetClient
   
         vector<string> lastsave;
 
-        Clients 			Clients;		// Clients in the same zone
+        ClientsMap 			Clients;		// Clients in the same zone
 
 
 		// This unit array has to be changed into a map too !!
@@ -134,8 +134,8 @@ class	NetClient
 
 	public:
 		NetClient();
+                void Reinitialize();//sets all values back to defaults
 		~NetClient();
-
 		/**** netclient_login.cpp stuff ****/
 		void GetConfigServerAddress( string & host, unsigned short &port );
 	

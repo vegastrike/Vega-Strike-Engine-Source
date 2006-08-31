@@ -369,10 +369,14 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
 
 Planet::Planet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename, vector<char *> dest, const QVector &orbitcent, Unit * parent, int faction,string fullname, bool inside_out, unsigned int lights_num)
 {
-	inside=false;
-	terraintrans = NULL;
-	atmospheric = false;
-	this->InitPlanet( x, y, vely, rotvel, pos, gravity, radius, filename, dest, orbitcent, parent, faction, fullname, inside_out, lights_num);
+  inside=false;
+  terraintrans = NULL;
+  atmospheric = false;
+  this->InitPlanet( x, y, vely, rotvel, pos, gravity, radius, filename, dest, orbitcent, parent, faction, fullname, inside_out, lights_num);
+  corner_min.i=corner_min.j=corner_min.k=-this->radius;
+  corner_max.i=corner_max.j=corner_max.k=this->radius;
+  this->radial_size=this->radius;
+
   for (unsigned int i=0;i<lights_num;i++) {
     int l=-1;
     lights.push_back (l);

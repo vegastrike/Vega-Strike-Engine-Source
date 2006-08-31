@@ -97,40 +97,75 @@ Unit * getNetworkUnit( ObjSerial cserial)
 	}
 	return NULL;
 }
-
-NetClient::NetClient()
-    : save("")
-{
-	deltatime = 0;
-    game_unit = NULL;
-	latest_timestamp=0;
-    //old_time = 0;
-    cur_time = getNewTime();
-    enabled = 0;
-    nbclients = 0;
-	jumpok = false;
-	ingame = false;
+void NetClient::Reinitialize() {
+  deltatime = 0;
+  game_unit = NULL;
+  latest_timestamp=0;
+  keeprun=1;
+  //old_time = 0;
+  cur_time = getNewTime();
+  enabled = 0;
+  nbclients = 0;
+  jumpok = false;
+  ingame = false;
 #ifdef CRYPTO
-	FileUtil::use_crypto = true;
+  FileUtil::use_crypto = true;
+#endif
+  
+  NetComm = NULL;
+  
+  //_downloadManagerClient.reset( new VsnetDownload::Client::Manager( _sock_set ) );
+  //_sock_set.addDownloadManager( _downloadManagerClient );
+  _serverip="";
+  _serverport="";
+  callsign=password="";
+  this->Clients=ClientsMap();
+  
+  delete clt_tcp_sock;
+  clt_tcp_sock=new SOCKETALT;
+  //leave UDP well-enough alone
+
+}
+NetClient::NetClient()
+  : save("")
+{
+  keeprun=1;
+  clt_tcp_sock=new SOCKETALT;
+  clt_udp_sock=new SOCKETALT;
+  deltatime = 0;
+  game_unit = NULL;
+  latest_timestamp=0;
+  //old_time = 0;
+  cur_time = getNewTime();
+  enabled = 0;
+  nbclients = 0;
+  jumpok = false;
+  ingame = false;
+#ifdef CRYPTO
+  FileUtil::use_crypto = true;
 #endif
 
-    NetComm = NULL;
-
-    _downloadManagerClient.reset( new VsnetDownload::Client::Manager( _sock_set ) );
-    _sock_set.addDownloadManager( _downloadManagerClient );
-
+  NetComm = NULL;
+  
+  _downloadManagerClient.reset( new VsnetDownload::Client::Manager( _sock_set ) );
+  _sock_set.addDownloadManager( _downloadManagerClient );
+  
 #ifdef CRYPTO
-	cout<<endl<<endl<<POSH_GetArchString()<<endl;
+  cout<<endl<<endl<<POSH_GetArchString()<<endl;
 #endif
 }
 
 NetClient::~NetClient()
 {
+  
+  
 	if( NetComm!=NULL)
     {
 		delete NetComm;
         NetComm = NULL;
     }
+        delete clt_tcp_sock;
+        delete clt_udp_sock;
 }
 
 /*************************************************************/
@@ -354,7 +389,7 @@ int NetClient::checkMsg( Packet* outpacket )
 	tv.tv_sec=0;
 	tv.tv_usec=0;
 
-    if( clt_tcp_sock.isActive( ) || clt_udp_sock.isActive( ) )
+    if( clt_tcp_sock->isActive( ) || clt_udp_sock->isActive( ) )
     {
         ret = recvMsg( outpacket, &tv );
     }
@@ -362,7 +397,7 @@ int NetClient::checkMsg( Packet* outpacket )
 	if( NetComm!=NULL && NetComm->IsActive())
 	{
 		// Here also send samples
-		NetComm->SendSound( this->clt_tcp_sock, this->serial);
+		NetComm->SendSound( *this->clt_tcp_sock, this->serial);
 	}
 	
     return ret;
@@ -445,22 +480,22 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 	static bool udpgetspriority=true;
 
 	// First check if there is data in the client's recv queue.
-	int recvbytes = (udpgetspriority?clt_udp_sock:clt_tcp_sock).recvbuf( &p1, &ipadr );
+	int recvbytes = (udpgetspriority?clt_udp_sock:clt_tcp_sock)->recvbuf( &p1, &ipadr );
 	
     if( recvbytes <= 0) {
-		recvbytes = (udpgetspriority==false?clt_udp_sock:clt_tcp_sock).recvbuf( &p1, &ipadr );
+		recvbytes = (udpgetspriority==false?clt_udp_sock:clt_tcp_sock)->recvbuf( &p1, &ipadr );
 	}
 	
 	if (recvbytes <= 0) {
 		// Now, select and wait for data to come in the queue.
-		clt_tcp_sock.addToSet( _sock_set );
-		clt_udp_sock.addToSet( _sock_set );
+		clt_tcp_sock->addToSet( _sock_set );
+		clt_udp_sock->addToSet( _sock_set );
 		int socketstat = _sock_set.wait( timeout );
 		
 		if( socketstat < 0)
 		{
 			perror( "Error select -1 ");
-			clt_tcp_sock.disconnect( "socket error", 0 );
+			clt_tcp_sock->disconnect( "socket error", 0 );
 			return -1;
 		}
 		if ( socketstat == 0 )
@@ -472,17 +507,17 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 
 		//	NETFIXME: check for file descriptors in _sock_set.fd_set...
 		// Check the queues again.
-		recvbytes = (udpgetspriority?clt_udp_sock:clt_tcp_sock).recvbuf( &p1, &ipadr );
+		recvbytes = (udpgetspriority?clt_udp_sock:clt_tcp_sock)->recvbuf( &p1, &ipadr );
 		
 		if( recvbytes <= 0) {
-			recvbytes = (udpgetspriority==false?clt_udp_sock:clt_tcp_sock).recvbuf( &p1, &ipadr );
+			recvbytes = (udpgetspriority==false?clt_udp_sock:clt_tcp_sock)->recvbuf( &p1, &ipadr );
 		}
 		udpgetspriority=!udpgetspriority;
 		if( recvbytes <= 0)
 		{
 			// If nothing has come in either queue, and the select did not return 0, then this must be from a socket error.
 			perror( "Error recv -1 ");
-			clt_tcp_sock.disconnect( "socket error", 0 );
+			clt_tcp_sock->disconnect( "socket error", 0 );
 			return -1;
 		}
     }
@@ -542,7 +577,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				COUT << endl;
                 if( _downloadManagerClient )
                 {
-                    _downloadManagerClient->processCmdDownload( clt_tcp_sock, netbuf );
+                    _downloadManagerClient->processCmdDownload( *clt_tcp_sock, netbuf );
                 }
                 break;
             // Login failed
@@ -840,7 +875,12 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 			}
 			break;
 			case CMD_JUMP :
-			{
+			if (1) {
+                          unsigned short port;
+                          std::string srvipadr;
+                          GetConfigServerAddress(srvipadr,port);
+                          Reconnect(srvipadr,XMLSupport::tostring((unsigned int)port));
+                        }else{//this is the old way of doing it
 				StarSystem * sts;
 				string newsystem = netbuf.getString();
 				ObjSerial unserial = netbuf.getSerial();
@@ -873,7 +913,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 						Unit * jumpun = UniverseUtil::GetUnitFromSerial( jumpserial);
 						sts->JumpTo( un, jumpun, newsystem, true);
 						string sysfile( newsystem+".system");
-						VsnetDownload::Client::NoteFile f( this->clt_tcp_sock, sysfile, SystemFile);
+						VsnetDownload::Client::NoteFile f( *this->clt_tcp_sock, sysfile, SystemFile);
    		             	_downloadManagerClient->addItem( &f);
 						
 						timeval timeout = {10, 0};
@@ -1163,15 +1203,15 @@ SOCKETALT*	NetClient::logout(bool leaveUDP)
 	if (un) {
 		p.send( CMD_LOGOUT, un->GetSerial(),
             (char *)NULL, 0,
-            SENDRELIABLE, NULL, this->clt_tcp_sock,
+            SENDRELIABLE, NULL, *this->clt_tcp_sock,
             __FILE__, PSEUDO__LINE__(1382) );
 	}
-	clt_tcp_sock.disconnect( "Closing connection to server", false );
+	clt_tcp_sock->disconnect( "Closing connection to server", false );
         if (!leaveUDP) {
-          clt_udp_sock.disconnect( "Closing UDP connection to server", false);
+          clt_udp_sock->disconnect( "Closing UDP connection to server", false);
         }else {
-          if (lossy_socket==&clt_udp_sock) {
-            return &clt_udp_sock;
+          if (lossy_socket==clt_udp_sock) {
+            return clt_udp_sock;
           }
         }
         return NULL;
@@ -1191,18 +1231,25 @@ void NetClient::Reconnect(std::string srvipadr, std::string port) {
     Network[i].disconnect();
   }
   _Universe->clearAllSystems();
-  delete [] Network;    
   localSerials.resize(0);
-  Network = new NetClient [_Universe->numPlayers()];
+
+  for (unsigned int i=0;i<_Universe->numPlayers();++i) {
+    Network[i].Reinitialize();
+  }
   //necessary? usually we would ask acctserver for it .. or pass it in NetClient::getConfigServerAddress(srvipadr, port);
   for (unsigned int k=0;k<_Universe->numPlayers();++k) {
     bool ret = false;
     // Are we using the directly account server to identify us ?
     bool use_acctserver = XMLSupport::parse_bool(vs_config->getVariable("network","use_account_server", "false"));
-                
+    micro_sleep(8000000);
     if( use_acctserver!=false){
-      Network[k].init_acct( srvipadr);
-      ret=true;
+      int retrycount=0;
+      while (ret==false&&retrycount++<10) {
+        Network[k].init_acct( srvipadr);      
+        Network[k].loginAcctLoop(usernames[k], passwords[k]);
+        ret = Network[k].init( NULL,0).valid();
+        if (!ret) micro_sleep(100000);
+      }
     }else
       // Or are we going through a game server to do so ?
       ret = Network[k].init( srvipadr.c_str(),atoi( port.c_str())).valid();
@@ -1215,11 +1262,7 @@ void NetClient::Reconnect(std::string srvipadr, std::string port) {
     }
     //sleep( 3);
     cout<<"Waiting for player "<<(k)<<" = "<<usernames[k]<<":"<<passwords[k]<<"login response...";
-    vector<string> *loginResp;
-    if( use_acctserver!=false)
-      loginResp = &Network[k].loginAcctLoop( usernames[k], passwords[k]);
-    else
-      loginResp = &Network[k].loginLoop( usernames[k], passwords[k]);
+    vector<string> *loginResp = &Network[k].loginLoop( usernames[k], passwords[k]);
     Network[k].lastsave=*loginResp;
     
     if( Network[k].lastsave.empty() || Network[k].lastsave[0]=="")
@@ -1244,7 +1287,7 @@ void NetClient::Reconnect(std::string srvipadr, std::string port) {
   }
 }
 
-ClientPtr NetClient::Clients::insert( int x, Client* c )
+ClientPtr NetClient::ClientsMap::insert( int x, Client* c )
 {
     if( c != NULL )
     {
@@ -1258,14 +1301,14 @@ ClientPtr NetClient::Clients::insert( int x, Client* c )
     }
 }
 
-ClientPtr NetClient::Clients::get( int x )
+ClientPtr NetClient::ClientsMap::get( int x )
 {
     ClientIt it = _map.find(x);
     if( it == _map.end() ) return ClientPtr();
     return it->second;
 }
 
-bool NetClient::Clients::remove( int x )
+bool NetClient::ClientsMap::remove( int x )
 {
     size_t s = _map.erase( x );
     if( s == 0 ) return false;

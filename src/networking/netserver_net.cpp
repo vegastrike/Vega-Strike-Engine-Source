@@ -16,7 +16,7 @@ ClientPtr NetServer::newConnection_udp( const AddressIP& ipadr )
 	assert(clients_should_not_connect_with_udp==1);
     COUT << " enter " << "NetServer::newConnection_udp" << endl;
 
-    SOCKETALT sock( udpNetwork.get_fd(), SOCKETALT::UDP, ipadr, _sock_set );
+    SOCKETALT sock( udpNetwork->get_fd(), SOCKETALT::UDP, ipadr, _sock_set );
 
     ClientPtr ret = addNewClient( sock ); // no second argument because we don't currently allow connections of *only* UDP with no TCP for some things that can't get lost.
     nbclients++;
@@ -145,7 +145,7 @@ void NetServer::recvMsg_udp( )
     Packet    packet;
     AddressIP ipadr;
 //    int ret = sockclt.recvbuf( &packet, &ipadr );
-    int ret = udpNetwork.recvbuf( &packet, &ipadr );
+    int ret = udpNetwork->recvbuf( &packet, &ipadr );
     if( ret > 0 )
     {
         ObjSerial nserial = packet.getSerial(); // Extract the serial from buffer received so we know who it is

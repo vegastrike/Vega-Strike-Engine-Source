@@ -233,7 +233,7 @@ bool Unit::Inside (const QVector &target, const float radius, Vector & normal, f
     }
   }
   */
-  if (queryBSP(target, radius, normal,dist,false)) {
+  if (isPlanet()==true||queryBSP(target, radius, normal,dist,false)) {// if its' in the sphre, that's enough
     return true;
   }
 
@@ -775,21 +775,38 @@ bool Unit::querySphere (const QVector &pnt, float err) const{
 #ifdef VARIABLE_LENGTH_PQR
   double SizeScaleFactor = sqrt(TargetPoint.Dot(TargetPoint));//adjust the ship radius by the scale of local coordinates
 #endif
-  for (i=0;i<nummesh();i++) {
-    TargetPoint = (Transform (*tmpo,meshdata[i]->Position().Cast())-pnt).Cast();
+  if (nummesh()<1&&isPlanet()) {
+    TargetPoint = (tmpo->p-pnt).Cast();
     if (TargetPoint.Dot (TargetPoint)< 
-	err*err+
-	meshdata[i]->rSize()*meshdata[i]->rSize()
+          err*err+
+          radial_size*radial_size
 #ifdef VARIABLE_LENGTH_PQR
-	*SizeScaleFactor*SizeScaleFactor
+          *SizeScaleFactor*SizeScaleFactor
 #endif
-	+
+          +
 #ifdef VARIABLE_LENGTH_PQR
-	SizeScaleFactor*
+          SizeScaleFactor*
 #endif
-	2*err*meshdata[i]->rSize()
-	)
-      return true;
+          2*err*radial_size
+          )
+        return true;
+  }else {
+    for (i=0;i<nummesh();i++) {
+      TargetPoint = (Transform (*tmpo,meshdata[i]->Position().Cast())-pnt).Cast();
+      if (TargetPoint.Dot (TargetPoint)< 
+          err*err+
+          meshdata[i]->rSize()*meshdata[i]->rSize()
+#ifdef VARIABLE_LENGTH_PQR
+          *SizeScaleFactor*SizeScaleFactor
+#endif
+          +
+#ifdef VARIABLE_LENGTH_PQR
+          SizeScaleFactor*
+#endif
+          2*err*meshdata[i]->rSize()
+          )
+        return true;
+    }
   }
   if (graphicOptions.RecurseIntoSubUnitsOnCollision) 
   if (!SubUnits.empty()) {

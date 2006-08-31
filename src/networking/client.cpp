@@ -20,6 +20,7 @@ void Client::Init()
 	webcam = 0;
 	portaudio = 0;
 	secured = 0;
+        jumpok=0;
 	jumpfile="";
     _disconnectReason = "none";
 	comm_freq = 0;

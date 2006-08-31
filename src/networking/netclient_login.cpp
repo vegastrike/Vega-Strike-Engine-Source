@@ -42,7 +42,7 @@ int		NetClient::authenticate()
 
 		packet2.send( CMD_LOGIN, 0,
                       netbuf.data(), netbuf.length(),
-                      SENDRELIABLE, NULL, this->clt_tcp_sock,
+                      SENDRELIABLE, NULL, *this->clt_tcp_sock,
                       __FILE__, PSEUDO__LINE__(165) );
 		COUT << "Send login for player <" << str_callsign << ">:< "<< str_passwd
 		     << "> - buffer length : " << packet2.getDataLength()
@@ -78,7 +78,7 @@ vector<string>	&NetClient::loginLoop( string str_callsign, string str_passwd)
 
 	packet2.send( CMD_LOGIN, 0,
                   netbuf.data(), netbuf.length(),
-                  SENDRELIABLE, NULL, this->clt_tcp_sock,
+                  SENDRELIABLE, NULL, *this->clt_tcp_sock,
                   __FILE__, PSEUDO__LINE__(316) );
 	COUT << "Sent login for player <" << str_callsign << ">:<" << str_passwd
 		 << ">" << endl
@@ -275,7 +275,7 @@ void NetClient::respawnRequest( )
 	// No data.
 	packet2.send( CMD_RESPAWN, 0,
                   netbuf.getData(), netbuf.getDataLength(),
-                  SENDRELIABLE, NULL, this->clt_tcp_sock,
+                  SENDRELIABLE, NULL, *this->clt_tcp_sock,
                   __FILE__, PSEUDO__LINE__(165) );
 }
 void NetClient::textMessage(const std::string & data )
@@ -286,7 +286,7 @@ void NetClient::textMessage(const std::string & data )
 	// No data.
 	packet2.send( CMD_TXTMESSAGE, 0,
                   netbuf.getData(), netbuf.getDataLength(),
-                  SENDRELIABLE, NULL, this->clt_tcp_sock,
+                  SENDRELIABLE, NULL, *this->clt_tcp_sock,
                   __FILE__, PSEUDO__LINE__(165) );
 }
 
@@ -344,8 +344,8 @@ SOCKETALT	NetClient::init( const char* addr, unsigned short port )
 	else
 		NETWORK_ATOM = (double) atof( strnetatom.c_str());
 	
-	this->clt_tcp_sock = NetUITCP::createSocket( addr, port, _sock_set );
-	this->lossy_socket = &this->clt_tcp_sock;
+	*this->clt_tcp_sock = NetUITCP::createSocket( addr, port, _sock_set );
+	this->lossy_socket = this->clt_tcp_sock;
 
 	COUT << "created TCP socket (" << addr << "," << port << ") -> " << this->clt_tcp_sock << endl;
 
@@ -358,7 +358,7 @@ SOCKETALT	NetClient::init( const char* addr, unsigned short port )
 	*/
 
 	this->enabled = 1;
-	return this->clt_tcp_sock;
+	return *this->clt_tcp_sock;
 }
 
 /*************************************************************/
@@ -397,21 +397,21 @@ void NetClient::synchronizeTime(SOCKETALT*udpsock)
 	unsigned short port=atoi(this->_serverport.c_str());
 	//getConfigServerAddress(addr, port);
 	
-	clt_udp_sock=udpsock!=NULL?*udpsock:NetUIUDP::createSocket( this->_serverip.c_str(), port, clt_port, _sock_set );
+	*clt_udp_sock=udpsock!=NULL?*udpsock:NetUIUDP::createSocket( this->_serverip.c_str(), port, clt_port, _sock_set );
 	COUT << "created UDP socket (" << this->_serverip << "," << port << ", listen on " << clt_port << ") -> " << this->clt_udp_sock << endl;
 	
 	if (nettransport=="udp") {
 		// NETFIXME:  Keep trying ports until a connection is established.
 		COUT << "Default lossy transport configured to UDP." << endl;
-		this->lossy_socket=&clt_udp_sock;
+		this->lossy_socket=clt_udp_sock;
 	} else {
 		COUT << "Default lossy transport configured to TCP (behind firewall)." << endl;
-		this->lossy_socket=&clt_tcp_sock;
+		this->lossy_socket=clt_tcp_sock;
 		clt_port=0;
 	}
 	
-	this->clt_tcp_sock.set_block();
-	this->clt_udp_sock.set_block();
+	this->clt_tcp_sock->set_block();
+	this->clt_udp_sock->set_block();
 	
 	// Wait for NUM_TIMES (10) successful tries, or 10 consecutive 1-second timeouts
 	// (we use UDP on the response (SENDANDFORGET) to improve timing accuracy).
@@ -421,7 +421,7 @@ void NetClient::synchronizeTime(SOCKETALT*udpsock)
 		outData.addShort(clt_port);
 		packet.send( CMD_SERVERTIME, 0,
 					 outData.getData(), outData.getDataLength(), // No data.
-					 SENDRELIABLE, NULL, this->clt_tcp_sock,
+					 SENDRELIABLE, NULL,* this->clt_tcp_sock,
 					 __FILE__, PSEUDO__LINE__(343) );
 		recv=this->recvMsg( &packet, &tv );
 		// If we have no response.
@@ -430,7 +430,7 @@ void NetClient::synchronizeTime(SOCKETALT*udpsock)
 			++timeout;
 			if (timeout>=10&&this->lossy_socket->isTcp()==false) {
 				// no UDP requests made it, fallback to TCP.
-				this->lossy_socket=&this->clt_tcp_sock;
+				this->lossy_socket=this->clt_tcp_sock;
 				clt_port=0;
 				timeout=0;
 				COUT << "Setting default lossy transport to TCP (UDP timeout)." << endl;
@@ -453,8 +453,8 @@ void NetClient::synchronizeTime(SOCKETALT*udpsock)
 			}
 		}
 	}
-	this->clt_tcp_sock.set_nonblock();
-	this->clt_udp_sock.set_nonblock();
+	this->clt_tcp_sock->set_nonblock();
+	this->clt_udp_sock->set_nonblock();
 
 //	std::sort(times[0], times[i]);
 	if (i>=10) {

@@ -2643,9 +2643,11 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
 			dest=0;
 		smalle->DeactivateJumpDrive();
 		Unit * jumppoint = this;
-		_Universe->activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[dest%GetDestinations().size()]));
+
 		if( SERVER)
-			VSServer->sendJump( smalle->GetSerial(), this->serial, true);
+			VSServer->sendJump( smalle,this,std::string(GetDestinations()[dest%GetDestinations().size()]));
+                else
+                  _Universe->activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[dest%GetDestinations().size()]));
 		return true;
     }
 	/* NOT NECESSARY ANYMORE SINCE THE CLIENT ONLY ASK FOR AUTH WITHOUT EXPECTING AN ANSWER
@@ -2669,16 +2671,19 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
 	  warpenergy-=GetJumpStatus().energy;		
       DeactivateJumpDrive();
       Unit * jumppoint = smalle;
-      _Universe->activeStarSystem()->JumpTo (this, jumppoint, std::string(smalle->GetDestinations()[GetJumpStatus().drive%smalle->GetDestinations().size()]));
-		if( SERVER)
-			VSServer->sendJump( smalle->GetSerial(), this->serial, true);
+      if( SERVER)
+        VSServer->sendJump( this,smalle,std::string(smalle->GetDestinations()[GetJumpStatus().drive%smalle->GetDestinations().size()]));
+      else
+        _Universe->activeStarSystem()->JumpTo (this, jumppoint, std::string(smalle->GetDestinations()[GetJumpStatus().drive%smalle->GetDestinations().size()]));
       return true;
     }
-	else
+    /*
+    else
 	{
 		if( SERVER)
 			VSServer->sendJump( this->serial, smalle->GetSerial(), false);
 	}
+    *///not sure why you'd jump here... it's just a blooddddy else statementtttt
     return true;
   }
   else

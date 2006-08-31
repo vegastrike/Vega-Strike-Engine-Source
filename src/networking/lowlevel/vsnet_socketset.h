@@ -103,7 +103,9 @@ public:
     virtual void run( );
 
     void wakeup( );
-
+  
+  ///only call predestroy if you know the whole set will be destructed soonish--clears the autoset
+    void predestroy();
 private:
     int  private_select( timeval* timeout );
     void private_addset( int fd, fd_set& fds, int& maxfd );

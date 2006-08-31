@@ -33,7 +33,9 @@ SocketSet::~SocketSet( )
     _thread_mx.unlock( );
 #endif
 }
-
+void SocketSet::predestroy() {
+  _autoset.clear();
+}
 bool SocketSet::addDownloadManager( boost::shared_ptr<VsnetDownload::Client::Manager> mgr )
 {
     if( !_client_mgr.expired() ) return false;
@@ -56,8 +58,9 @@ void SocketSet::set( VsnetSocketBase* s )
 
 void SocketSet::unset( VsnetSocketBase* s )
 {
+  if (_autoset.size())
     _autoset.erase( s );
-    private_wakeup( );
+  private_wakeup( );
 }
 
 #ifdef USE_NO_THREAD

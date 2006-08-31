@@ -2,6 +2,7 @@
 #include "networking/lowlevel/vsnet_debug.h"
 #include "networking/lowlevel/netbuffer.h"
 #include "networking/lowlevel/vsnet_debug.h"
+#include "networking/lowlevel/vsnet_sockethttp.h"
 #include "lin_time.h"
 
 extern StarSystem * GetLoadedStarSystem( const char * system);
@@ -124,8 +125,47 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 	}
 }
 
-void	NetServer::sendJump( ObjSerial serial, ObjSerial jumpserial, bool ok)
+void	NetServer::sendJump(Unit * un, Unit * dst,std::string dststr)
 {
+  ClientPtr clt = this->getClientFromSerial(un->GetSerial());
+  Cockpit * cp =NULL;
+  if (clt&&(cp=_Universe->isPlayerStarship(un))!=NULL&&un!=NULL) {
+    Packet p2;
+    std::string netbuf;
+    std::string fn=dststr;
+    vector<std::string>*dat=&cp->savegame->getMissionStringData("jump_from");
+    if (dat->empty()) {
+      dat->push_back(_Universe->activeStarSystem()->getFileName());
+    }else {
+      (*dat)[0]=_Universe->activeStarSystem()->getFileName();
+    }
+    std::string savestr= cp->savegame->WriteSaveGame (fn.c_str(),un->LocalPosition(),cp->credits,cp->unitfilename,-1,FactionUtil::GetFactionName(un->faction), false);
+    std::string::size_type where=savestr.find("^");
+    addSimpleChar(netbuf,ACCT_SAVE);
+    
+    if (where!=std::string::npos) {
+      if (dststr.substr(0,where)!=savestr) {
+        savestr=dststr+savestr.substr(where);
+      }
+    }
+    addSimpleString(netbuf, clt->callsign );
+    addSimpleString(netbuf, clt->passwd );
+    addSimpleString(netbuf,savestr);
+    addSimpleString(netbuf, un->WriteUnitString());
+    if (acct_sock)
+      acct_sock->sendstr(netbuf);
+    p2.send(CMD_JUMP,0,NULL,0,SENDANDFORGET,NULL,clt->tcp_sock,__FILE__,148);
+    clt->jumpok=1;
+    if (clt)
+      logoutList.push_back(clt);
+
+  }else {
+    // do something intelligent for NPCs
+    
+  }
+  
+  /*
+  if (0) {
 	Packet p2;
 	NetBuffer netbuf;
 	string file_content;
@@ -152,17 +192,18 @@ void	NetServer::sendJump( ObjSerial serial, ObjSerial jumpserial, bool ok)
 	if( ok)
 	{
 		// If jumpfile is empty the hash was correct
-		if( clt->jumpok==1 )
+		if( clt->jumpokOLD==1 )
 			p2.bc_create( CMD_JUMP, serial,
                           netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
                           __FILE__, PSEUDO__LINE__(1164) );
 		// New system file HASH is wrong tell the client with serial != player serial so he can ask for a new download
-		else if( clt->jumpok==2)
+		else if( clt->jumpokOLD==2)
 			p2.bc_create( CMD_JUMP, serial+1,
                           netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
                           __FILE__, PSEUDO__LINE__(1164) );
 		zonemgr->broadcast( clt, &p2, true );
 	}
+*/
 
 	// Should broadcast JUMP so other client display jump anim too ?
 }

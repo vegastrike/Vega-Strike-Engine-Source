@@ -81,6 +81,7 @@ void	getZoneInfoBuffer( unsigned short zoneid, NetBuffer & netbuf)
 
 NetServer::NetServer()
 {
+        udpNetwork=new SOCKETALT();
 	this->nbclients = 0;
 	this->nbaccts = 0;
 	this->keeprun = 1;
@@ -107,6 +108,7 @@ NetServer::~NetServer()
 {
 	delete zonemgr;
 	delete globalsave;
+        delete udpNetwork;
 }
 
 /**************************************************************/
@@ -194,8 +196,8 @@ void	NetServer::start(int argc, char **argv)
     }
 
 	COUT << "Initializing UDP server ..." << endl;
-	udpNetwork = NetUIUDP::createServerSocket( atoi((vs_config->getVariable( "network", "serverport", "6777")).c_str()), _sock_set );
-    if( udpNetwork == NULL )
+	*udpNetwork = NetUIUDP::createServerSocket( atoi((vs_config->getVariable( "network", "serverport", "6777")).c_str()), _sock_set );
+    if( *udpNetwork == NULL )
     {
         COUT << "Couldn't create UDP server - quitting" << endl;
         exit( -100 );
@@ -525,7 +527,7 @@ void	NetServer::checkMsg( SocketSet& sets )
 		    this->recvMsg_tcp( cl );
 		}
 	}
-	if( udpNetwork.isActive( ) )
+	if( udpNetwork->isActive( ) )
 	{
 	    recvMsg_udp( );
 	}
@@ -835,6 +837,9 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 		break;
 		case CMD_JUMP :
 		{
+                  un = clt->game_unit.GetUnit();
+                  un->ActivateJumpDrive();
+                  break;
 			vector<string>	adjacent;
 			string newsystem = netbuf.getString();
 			ObjSerial jumpserial = netbuf.getSerial();
@@ -846,7 +851,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			client_hash = netbuf.getBuffer( FileUtil::Hash.DigestSize());
 #endif
                         cerr << "ATTEMPTING TO JUMP, BUT JUMP UNIMPLEMENTED"<<endl;
-                        break;
+                        
 
 			bool found = false;
 			NetBuffer	netbuf2;
@@ -1085,7 +1090,7 @@ void	NetServer::broadcast( NetBuffer & netbuf, ObjSerial serial, unsigned short 
 void	NetServer::closeAllSockets()
 {
 	tcpNetwork->disconnect( "Closing sockets", false );
-	udpNetwork.disconnect( "Closing sockets", false );
+	udpNetwork->disconnect( "Closing sockets", false );
 	for( LI i=allClients.begin(); i!=allClients.end(); i++)
 	{
         ClientPtr cl = *i;
