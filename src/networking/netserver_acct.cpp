@@ -20,14 +20,14 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 	unsigned char cmd=0;
 	// Watch account server socket
 	// Get the number of active clients
-	if( acct_sock->isActive( ))
+	if( !acct_sock || acct_sock->isActive( ))
 	{
 		//COUT<<"Net activity !"<<endl;
 		// Receive packet and process according to command
 
 		std::string    p;
 
-		if( acct_sock->recvstr( p)!=0 &&p.length()!=0)
+		if( acct_sock && acct_sock->recvstr( p)!=0 &&p.length()!=0)
 		{
 			// Maybe copy that in a "else" condition too if when it fails we
             // have to disconnect a client
