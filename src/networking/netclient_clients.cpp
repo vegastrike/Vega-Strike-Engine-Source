@@ -18,7 +18,16 @@
 /*************************************************************/
 /**** Adds an entering client in the actual zone          ****/
 /*************************************************************/
+void DoEnterExitAni(QVector pos, float size, bool enter) {
+  static std::string enterclientani=vs_config->getVariable("graphics","enter_client_ani","warp.ani");
+  static std::string exitclientani=vs_config->getVariable("graphics","enter_client_ani","warp.ani");
+  std::string tmp = enter?enterclientani:exitclientani;
+  if (tmp.length()) {
+    static float scale=XMLSupport::parse_float(vs_config->getVariable("graphics","client_anim_scale","3"));
+    UniverseUtil::playAnimation(tmp,pos,size*scale);
+  }
 
+}
 void	NetClient::enterClient( NetBuffer &netbuf, ObjSerial cltserial )
 {
 	// Should receive the name
@@ -90,6 +99,7 @@ void	NetClient::enterClient( NetBuffer &netbuf, ObjSerial cltserial )
 		un->SetPosition( trans.position );
 		un->curr_physical_state=trans;
 		un->BackupState();
+                DoEnterExitAni(trans.position,un->rSize(),true);
 		clt->last_packet=un->old_state;
 		clt->prediction->InitInterpolation(un, un->old_state, 0, this->deltatime);
 
@@ -232,6 +242,7 @@ void	NetClient::removeClient( const Packet* packet )
 	}
 	Unit * un = clt->game_unit.GetUnit();
 	if (un) {
+                DoEnterExitAni(un->Position(),un->rSize(),false);
 		// Removes the unit from starsystem, destroys it and delete client
 		_Universe->activeStarSystem()->RemoveUnit( un );
 	}

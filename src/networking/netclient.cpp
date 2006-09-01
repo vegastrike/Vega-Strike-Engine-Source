@@ -1242,7 +1242,7 @@ void NetClient::Reconnect(std::string srvipadr, std::string port) {
     bool ret = false;
     // Are we using the directly account server to identify us ?
     bool use_acctserver = XMLSupport::parse_bool(vs_config->getVariable("network","use_account_server", "false"));
-    micro_sleep(8000000);
+    micro_sleep(2000000);
     if( use_acctserver!=false){
       int retrycount=0;
       while (ret==false&&retrycount++<10) {
