@@ -701,7 +701,7 @@ string SaveGame::WriteDynamicUniverse()
 	if( SERVER)
 	{
 		cerr<<"SAVING STARDATE - SERVER="<<SERVER<<endl;
-		dyn_univ += "\n0 stardate data"+AnyStringWriteString( _Universe->current_stardate.GetFullTrekDate());
+		dyn_univ += "\n0 stardate data "+AnyStringWriteString( _Universe->current_stardate.GetFullTrekDate());
 	}
     memset( tmp, 0, MB);
     sprintf (tmp,"\n%d %s %s",0,"mission","data ");

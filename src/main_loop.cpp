@@ -828,6 +828,31 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 				{
 					pox = UniverseUtil::SafeEntrancePoint(savedloc[squadnum]);
 				}
+
+                                vector<std::string> *dat=&cp->savegame->getMissionStringData("jump_from");
+                                
+                                if (dat->size()) {
+                                  std::string srcsys=(*dat)[0];
+                                  Unit * grav;
+                                  for (un_iter ui=cp->activeStarSystem->gravitationalUnits().createIterator();
+                                       (grav=*ui)!=NULL;
+                                       ++ui) {
+                                    size_t siz=grav->GetDestinations().size();
+                                    for (unsigned int i=0;i<siz;++i) {
+                                      if (srcsys==grav->GetDestinations()[i]) {
+                                        QVector newpos=grav->LocalPosition();
+                                        if (grav->isUnit()!=PLANETPTR) {
+                                          newpos = UniverseUtil::SafeEntrancePoint(newpos);
+                                        }
+                                        cp->savegame->SetPlayerLocation(newpos);
+                                        pox=newpos;
+                                      }
+                                    }
+                                  }
+                                  
+                                  dat->clear();
+                                }
+
 				fighter0mods.push_back(modifications =vs_config->getVariable (string("player")+((squadnum>0)?tostring(squadnum+1):string("")),"callsign","pilot"));
 				fprintf( stderr, "FOUND MODIFICATION = %s FOR PLAYER #%d\n", modifications.c_str(), squadnum);
 			  }

@@ -84,7 +84,7 @@ void	NetServer::addClient( ClientPtr clt)
             for (unsigned int i=0;i<siz;++i) {
               if (srcsys==grav->GetDestinations()[i]) {
                 cp->savegame->SetPlayerLocation(grav->LocalPosition());
-                besafe=false;
+                besafe=grav->isUnit()!=PLANETPTR;
               }
             }
           }
