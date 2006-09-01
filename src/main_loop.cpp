@@ -57,6 +57,7 @@
 #include "networking/netclient.h"
 #include "save_util.h"
 #include "in_kb_data.h"
+#include "vs_random.h"
 using namespace std;
 
 #define KEYDOWN(name,key) (name[key] & 0x80)
@@ -840,7 +841,10 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
                                     size_t siz=grav->GetDestinations().size();
                                     for (unsigned int i=0;i<siz;++i) {
                                       if (srcsys==grav->GetDestinations()[i]) {
-                                        QVector newpos=grav->LocalPosition();
+                                        QVector newpos=grav->LocalPosition()+QVector(vsrandom.uniformExc(-grav->rSize()/4,grav->rSize()/4),
+                                                                                     vsrandom.uniformExc(-grav->rSize()/4,grav->rSize()/4),
+                                                                                     vsrandom.uniformExc(-grav->rSize()/4,grav->rSize()/4));
+
                                         if (grav->isUnit()!=PLANETPTR) {
                                           newpos = UniverseUtil::SafeEntrancePoint(newpos);
                                         }

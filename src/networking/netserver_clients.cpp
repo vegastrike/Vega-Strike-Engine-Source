@@ -7,7 +7,7 @@
 #include "networking/prediction.h"
 #include "networking/lowlevel/vsnet_sockethttp.h"
 #include "lin_time.h"
-
+#include "vs_random.h"
 extern QVector DockToSavedBases( int n);
 extern StarSystem * GetLoadedStarSystem( const char * system);
 
@@ -83,7 +83,10 @@ void	NetServer::addClient( ClientPtr clt)
             size_t siz=grav->GetDestinations().size();
             for (unsigned int i=0;i<siz;++i) {
               if (srcsys==grav->GetDestinations()[i]) {
-                cp->savegame->SetPlayerLocation(grav->LocalPosition());
+                cp->savegame->SetPlayerLocation(grav->LocalPosition()+QVector(vsrandom.uniformExc(-un->rSize(),un->rSize()),
+                                                                              vsrandom.uniformExc(-un->rSize(),un->rSize()),
+                                                                              vsrandom.uniformExc(-un->rSize(),un->rSize())
+                                                                              ));
                 besafe=grav->isUnit()!=PLANETPTR;
               }
             }

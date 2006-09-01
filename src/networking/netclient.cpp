@@ -1280,7 +1280,7 @@ void NetClient::Reconnect(std::string srvipadr, std::string port) {
     {
       cout<<" logged in !"<<endl;
       Network[k].Respawn(Network[k].serial);
-      Network[k].synchronizeTime(udp[k]);
+      Network[k].synchronizeTime(udp[k],_Universe->AccessCockpit(k));
     }
     Network[k].inGame();
     

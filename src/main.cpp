@@ -617,7 +617,7 @@ void bootstrap_main_loop () {
         else
         {
             cout<<" logged in !"<<endl;
-			Network[k].synchronizeTime(NULL);
+			Network[k].synchronizeTime(NULL,_Universe->AccessCockpit(k));
         }
 	  }
 		/************* NETWORK PART ***************/

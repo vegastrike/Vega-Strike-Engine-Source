@@ -42,7 +42,7 @@ ClientPtr NetServer::getClientFromSerial( ObjSerial serial)
 }
 
 // WARNING: ipadr is NULL since we are getting this packet from acctserver, not the client itself.
-void	NetServer::sendLoginAccept( std::string inetbuf,ClientPtr clt, AddressIP ipadr, int newacct, char flags)
+bool	NetServer::sendLoginAccept( std::string inetbuf,ClientPtr clt, AddressIP ipadr, int newacct, char flags)
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << endl;
 
@@ -54,7 +54,17 @@ void	NetServer::sendLoginAccept( std::string inetbuf,ClientPtr clt, AddressIP ip
 	passwd = getSimpleString(inetbuf);
 	string serverip = getSimpleString(inetbuf);
 	string serverport = getSimpleString(inetbuf);
-
+        string savestr=getSimpleString(inetbuf);
+        string xmlstr=getSimpleString(inetbuf);
+        if (_Universe->star_system.size()) {
+          std::string system = _Universe->star_system[0]->getFileName();
+          std::string newsystem=savestr.substr(0,savestr.find("^"));
+          if (newsystem!=system) {
+            sendLoginError( clt, ipadr );
+            return false;
+          }
+          
+        }
     if( !clt )
 	{
 	    // This must be UDP mode, because the client would exist otherwise.
@@ -82,8 +92,8 @@ void	NetServer::sendLoginAccept( std::string inetbuf,ClientPtr clt, AddressIP ip
 	{
 		clt->savegame.resize(0);
 		// Get the save parts in a string array
-		clt->savegame.push_back( getSimpleString(inetbuf));
-		clt->savegame.push_back( getSimpleString(inetbuf));
+		clt->savegame.push_back( savestr);
+		clt->savegame.push_back( xmlstr);
 		// Put the save parts in buffers in order to load them properly
 		netbuf.Reset();
 
@@ -109,7 +119,7 @@ void	NetServer::sendLoginAccept( std::string inetbuf,ClientPtr clt, AddressIP ip
 		Unit *un = cp->GetParent();
 		if (!un) {
 			sendLoginError( clt, ipadr );
-			return;
+			return false;
 		}
 		cltserial = un->GetSerial();
 
@@ -141,6 +151,7 @@ void	NetServer::sendLoginAccept( std::string inetbuf,ClientPtr clt, AddressIP ip
 	
 		packet2.send( LOGIN_ACCEPT, cltserial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(241) );
 	}
+        return true;
 }
 
 Cockpit * NetServer::loadFromSavegame( ClientPtr clt ) {

@@ -117,7 +117,8 @@ class NetServer
         ClientPtr       addNewClient( SOCKETALT &sock );  // Adds a new client to listen for.
 		void			sendLoginError( ClientPtr clt, AddressIP ipadr);
 		void			sendLoginAlready( ClientPtr clt, AddressIP ipadr);
-		void			sendLoginAccept(std::string packetdata, ClientPtr clt, AddressIP ipadr, int acctnew, char flags);
+		bool			sendLoginAccept(std::string packetdata, ClientPtr clt, AddressIP ipadr, int acctnew, char flags);
+  //returns false if unwilling to load star system
 		void			sendLoginUnavailable( ClientPtr clt, AddressIP ipadr);
 
 		Cockpit *		loadFromSavegame( ClientPtr clt );

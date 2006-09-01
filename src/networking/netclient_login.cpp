@@ -373,7 +373,7 @@ SOCKETALT	NetClient::init( const char* addr, unsigned short port )
 // NETFIXME: Correctly obtain ping time.
 #include "vs_random.h" // For random ping time.
 
-void NetClient::synchronizeTime(SOCKETALT*udpsock)
+void NetClient::synchronizeTime(SOCKETALT*udpsock,Cockpit *cp)
 {
 
 	int i=0;
@@ -495,6 +495,8 @@ void NetClient::synchronizeTime(SOCKETALT*udpsock)
 	double newTime=timeavg+queryTime()-initialTime;
 	COUT << "Setting time to: New time: " << newTime << endl;
 	setNewTime(newTime);
+        cur_time=newTime;
+        cp->TimeOfLastCollision=cur_time;
 }
 
 /*************************************************************/
