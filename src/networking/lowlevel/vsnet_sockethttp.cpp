@@ -326,11 +326,21 @@ bool VsnetHTTPSocket::lower_selected( int datalen )
 	
 						iter = _header.find("Status");
 						
-						if (iter == _header.end()||(*iter).second.find("200")==std::string::npos) {
-							if (iter!=_header.end()) COUT << "Received HTTP error: status is "+ (*iter).second << std::endl;
-							else COUT<<"Missing status, resending\n";
-							resendData();
-							return false;
+						if (iter == _header.end()) {
+                                                  COUT<<"Missing status, resending\n";
+                                                  resendData();
+                                                  return false;
+                                                }
+                                                if((*iter).second.find("100")!=std::string::npos) {                                                  
+                                                  _content_length=0;
+                                                  _header.clear();
+                                                  continue;
+                                                
+                                                  
+                                                }else if((*iter).second.find("200")==std::string::npos) {
+                                                  COUT << "Received HTTP error: status is "+ (*iter).second << std::endl;
+                                                  resendData();
+                                                  return false;
 						}
 	
 						iter = _header.find("Content-Length");
