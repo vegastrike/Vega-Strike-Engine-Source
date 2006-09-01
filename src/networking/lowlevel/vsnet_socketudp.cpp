@@ -62,7 +62,10 @@ int VsnetUDPSocket::queueLen( int )
 //     cout<<"Sent "<<numsent<<" bytes"<<" -> "<<inet_ntoa( dest->sin_addr)<<":"<<ntohs(dest->sin_port)<<endl;
 //     return numsent;
 // }
-
+bool VsnetUDPSocket::setRemoteAddress(const AddressIP&to) {
+  _remote_ip=to;
+  return true;
+}
 int VsnetUDPSocket::sendbuf( Packet* packet, const AddressIP* to, int pcktflags )
 {
 //    COUT << "enter " << __PRETTY_FUNCTION__ << endl;

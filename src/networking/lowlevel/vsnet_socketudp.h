@@ -31,7 +31,7 @@ public:
     virtual bool lower_selected( int datalen=-1 );
 
     virtual void dump( std::ostream& ostr ) const;
-
+    virtual bool setRemoteAddress(const AddressIP &inp);
 private:
     struct Pending
     {

@@ -103,6 +103,18 @@ bool SOCKETALT::CompareLt::operator()( const SOCKETALT& l, const SOCKETALT& r ) 
     return l.lowerAddress( r );
 }
 
+bool SOCKETALT::setRemoteAddress(const AddressIP &inp){
+
+    if( !_sock )
+    {
+        return false;
+    }
+    else
+    {
+        bool r = _sock->setRemoteAddress(inp);
+        return r;
+    }
+}
 bool SOCKETALT::isActive( )
 {
     if( !_sock )

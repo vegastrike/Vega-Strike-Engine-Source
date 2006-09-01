@@ -397,7 +397,10 @@ void NetClient::synchronizeTime(SOCKETALT*udpsock)
 	unsigned short port=atoi(this->_serverport.c_str());
 	//getConfigServerAddress(addr, port);
 	
-	*clt_udp_sock=udpsock!=NULL?*udpsock:NetUIUDP::createSocket( this->_serverip.c_str(), port, clt_port, _sock_set );
+	if (!(udpsock!=NULL&&udpsock->setRemoteAddress(NetUIBase::lookupHost(this->_serverip.c_str(), port))))
+          *this->clt_udp_sock=NetUIUDP::createSocket( this->_serverip.c_str(), port, clt_port, _sock_set );
+        else
+          this->clt_udp_sock=udpsock;
 	COUT << "created UDP socket (" << this->_serverip << "," << port << ", listen on " << clt_port << ") -> " << this->clt_udp_sock << endl;
 	
 	if (nettransport=="udp") {

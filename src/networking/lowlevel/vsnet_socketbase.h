@@ -125,7 +125,7 @@ public:
     virtual void dump( std::ostream& ostr ) const = 0;
 	
 	const AddressIP &getRemoteAddress() const { return _remote_ip; }
-	
+  virtual  bool setRemoteAddress(const AddressIP&){return false;}
     // virtual void ack( ) = 0;
 
 protected:

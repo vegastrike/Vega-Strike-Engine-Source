@@ -245,14 +245,14 @@ namespace BeamXML {
     case UNKNOWN:
       break;
     case WEAPONS:
-      assert (level==-1);
+      //      assert (level==-1);
       level++;
       break;
     case BOLT:
     case BEAM:
     case BALL:
     case PROJECTILE:
-      assert (level==0);
+      //      assert (level==0);
       level++;
       switch(elem) {
       case BOLT:
@@ -292,13 +292,13 @@ namespace BeamXML {
 	  tmpweapon.MntSize (lookupMountSize ((*iter).value.c_str()));
 	  break;
 	default:
-	  assert (0);
+          //	  assert (0);
 	  break;
 	}
       }
       break;
     case APPEARANCE:
-      assert (level==1);
+      //      assert (level==1);
       level++;
       for (iter= attributes.begin(); iter!=attributes.end();iter++) {
 	switch (attribute_map.lookup ((*iter).name)) {
@@ -340,13 +340,13 @@ namespace BeamXML {
 		  XMLSupport::parse_float((*iter).value);
 	  break;
  	default:
-	  assert (0);
+          //	  assert (0);
 	  break;
 	}
       }      
       break;
     case ENERGY:
-      assert (level==1);
+      //      assert (level==1);
       level++;
       for (iter= attributes.begin(); iter!=attributes.end();iter++) {
 	switch (attribute_map.lookup ((*iter).name)) {
@@ -369,14 +369,14 @@ namespace BeamXML {
 	  tmpweapon.LockTime = XMLSupport::parse_float ((*iter).value);
 	  break;
 	default:
-	  assert (0);
+          //	  assert (0);
 	  break;
 	}
       }      
       break;
     case DAMAGE: {
       static float damagemodifier = XMLSupport::parse_float(vs_config->getVariable("physics","weapon_damage_efficiency","1.0"));
-      assert (level==1);
+      //      assert (level==1);
       level++;
       for (iter= attributes.begin(); iter!=attributes.end();iter++) {
 	switch (attribute_map.lookup ((*iter).name)) {
@@ -402,14 +402,14 @@ namespace BeamXML {
 	  tmpweapon.Longrange = XMLSupport::parse_float ((*iter).value);
 	  break;
 	default:
-	  assert (0);
+          //	  assert (0);
 	  break;
 	}
       }
       break;
     }
     case DISTANCE:
-      assert (level==1);
+      //      assert (level==1);
       level++;
       for (iter= attributes.begin(); iter!=attributes.end();iter++) {
 	switch (attribute_map.lookup ((*iter).name)) {
@@ -460,13 +460,13 @@ namespace BeamXML {
 	  tmpweapon.Length = XMLSupport::parse_float ((*iter).value);
 	  break;
 	default:
-	  assert (0);
+          //	  assert (0);
 	  break;
 	}
       }
       break;
     default:
-      assert (0);
+      //      assert (0);
       break;
     }
   }
@@ -477,14 +477,14 @@ namespace BeamXML {
     case UNKNOWN:
       break;
     case WEAPONS:
-      assert (level==0);
+      //      assert (level==0);
       level--;
       break;
     case BEAM:
     case BOLT:
     case BALL:
     case PROJECTILE:
-      assert (level==1);
+      //      assert (level==1);
       level--;
       lookuptable.Put (strtoupper(curname),new weapon_info (tmpweapon));
       tmpweapon.init();
@@ -493,7 +493,7 @@ namespace BeamXML {
     case DAMAGE:
     case DISTANCE:
     case APPEARANCE:
-      assert (level==2);
+      //      assert (level==2);
       level--;
       break;
     default:

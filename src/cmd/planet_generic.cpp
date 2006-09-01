@@ -299,6 +299,7 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
     AddDestination(dest.back());
     dest.pop_back();
   }
+  meshdata.push_back(NULL);
   //name = "Planet - ";
   //name += textname;
   name=fullname;

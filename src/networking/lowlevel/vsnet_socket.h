@@ -72,6 +72,8 @@ public:
 	void addToSet( SocketSet &set );
 	
 	const AddressIP &getRemoteAddress() const;
+  //returns false if impossible (TCP)
+        bool setRemoteAddress(const AddressIP&);
 	
     /** Required by the download manager achieve a sorting of sockets.
      */

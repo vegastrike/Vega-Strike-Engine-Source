@@ -113,7 +113,7 @@ void NetClient::Reinitialize() {
 #endif
   
   NetComm = NULL;
-  
+  lastsave.resize(0);
   //_downloadManagerClient.reset( new VsnetDownload::Client::Manager( _sock_set ) );
   //_sock_set.addDownloadManager( _downloadManagerClient );
   _serverip="";
@@ -417,11 +417,12 @@ void NetClient::Respawn( ObjSerial newserial) {
   }
   QVector pos(0,0,0);
   bool setplayerXloc;
-  string mysystem="Crucible/Cephid_17";
+  string mysystem;
   Cockpit * cp = _Universe->AccessCockpit(whichcp);
   static float initialzoom = XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
   cp->zoomfactor=initialzoom;
-  cp->savegame->ParseSaveGame ("",mysystem,mysystem,pos,setplayerXloc,cp->credits,cp->unitfilename,whichcp, lastsave[0], false);
+  cp->savegame->SetStarSystem(mysystem);
+  cp->savegame->ParseSaveGame ("",mysystem,"",pos,setplayerXloc,cp->credits,cp->unitfilename,whichcp, lastsave[0], false);
   string fullsysname=mysystem+".system";
   StarSystem * ss = _Universe->GenerateStarSystem(fullsysname.c_str(),"",Vector(0,0,0));
   _Universe->pushActiveStarSystem(ss);
@@ -1225,7 +1226,7 @@ void NetClient::Reconnect(std::string srvipadr, std::string port) {
     passwords.push_back(Network[i].password);
     SOCKETALT * udpsocket=Network[i].logout(true);
     if (udpsocket)
-      udp.push_back(new SOCKETALT(*udpsocket));
+      udp.push_back(udpsocket);
     else
       udp.push_back(NULL);
     Network[i].disconnect();
@@ -1280,7 +1281,6 @@ void NetClient::Reconnect(std::string srvipadr, std::string port) {
       cout<<" logged in !"<<endl;
       Network[k].Respawn(Network[k].serial);
       Network[k].synchronizeTime(udp[k]);
-      if (udp[k]) delete udp[k];
     }
     Network[k].inGame();
     
