@@ -678,47 +678,6 @@ extern void reset_time_compression (const KBData&,KBSTATE);
 
 extern float getTimeCompression();
 //server
-void StarSystem::Update( float priority)
-{
-	Unit * unit;
-  bool firstframe = true;
-// No time compression here
-  float normal_simulation_atom = SIMULATION_ATOM;
-  time += GetElapsedTime();
-  _Universe->pushActiveStarSystem(this);
-
-  if(time/SIMULATION_ATOM>=(1./PHY_NUM))	  
-  {
-    while(time/SIMULATION_ATOM >= (1.))
-	{ // Chew up all SIMULATION_ATOMs that have elapsed since last update
-	  UnitCollection::UnitIterator iter;
-	  TerrainCollide();
-	  Unit::ProcessDeleteQueue();
-      UnitCollection::FreeUnusedNodes();
-	  current_stage=MISSION_SIMULATION;
-      collidetable->Update();
-	{
-	      iter = drawList.createIterator();
-	      while((unit = iter.current())!=NULL) {
-		unit->SetNebula(NULL); 
-		iter.advance();
-	      }
-	      iter = drawList.createIterator();
-	    }
-	  UpdateMissiles();//do explosions
-	  UpdateUnitPhysics(firstframe);
-
-	  
-	  
-	  firstframe = false;
-	}
-    time -= SIMULATION_ATOM;
-  }
-
-  SIMULATION_ATOM =  normal_simulation_atom;
-  _Universe->popActiveStarSystem();
-  //  VSFileSystem::vs_fprintf (stderr,"bf:%lf",interpolation_blend_factor);
-}
 void ExecuteDirector () {
 	    unsigned int curcockpit= _Universe->CurrentCockpit();
 		{for (unsigned int i=0;i<active_missions.size();i++) {
@@ -753,6 +712,48 @@ void ExecuteDirector () {
               }
         }}
 
+}
+void StarSystem::Update( float priority)
+{
+	Unit * unit;
+  bool firstframe = true;
+// No time compression here
+  float normal_simulation_atom = SIMULATION_ATOM;
+  time += GetElapsedTime();
+  _Universe->pushActiveStarSystem(this);
+
+  if(time/SIMULATION_ATOM>=(1./PHY_NUM))	  
+  {
+    while(time/SIMULATION_ATOM >= (1.))
+	{ // Chew up all SIMULATION_ATOMs that have elapsed since last update
+	    ExecuteDirector();
+	  UnitCollection::UnitIterator iter;
+	  TerrainCollide();
+	  Unit::ProcessDeleteQueue();
+      UnitCollection::FreeUnusedNodes();
+	  current_stage=MISSION_SIMULATION;
+      collidetable->Update();
+	{
+	      iter = drawList.createIterator();
+	      while((unit = iter.current())!=NULL) {
+		unit->SetNebula(NULL); 
+		iter.advance();
+	      }
+	      iter = drawList.createIterator();
+	    }
+	  UpdateMissiles();//do explosions
+	  UpdateUnitPhysics(firstframe);
+
+	  
+	  
+	  firstframe = false;
+	}
+    time -= SIMULATION_ATOM;
+  }
+
+  SIMULATION_ATOM =  normal_simulation_atom;
+  _Universe->popActiveStarSystem();
+  //  VSFileSystem::vs_fprintf (stderr,"bf:%lf",interpolation_blend_factor);
 }
 //client
 void StarSystem::Update(float priority , bool executeDirector) {

@@ -77,6 +77,7 @@ Mission::Mission (const char * filename, bool loadscripts) {
 }
 void Mission::ConstructMission(const char *configfile, const std::string &script, bool loadscripts){
   player_autopilot=global_autopilot=AUTO_NORMAL;
+  player_num=0;
   briefing=NULL;
   director=NULL;
   runtime.pymissions=NULL;

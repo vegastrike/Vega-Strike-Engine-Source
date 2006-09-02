@@ -162,7 +162,7 @@ void	NetServer::start(int argc, char **argv)
 	SAVE_ATOM = atoi( strperiod.c_str());
 	string strperiodrecon = vs_config->getVariable( "server", "reconnectperiod", "60");
 	periodrecon = atoi( strperiodrecon.c_str());
-	strtimeout = vs_config->getVariable( "server", "clienttimeout", "20");
+	strtimeout = vs_config->getVariable( "server", "clienttimeout", "180");
 	clienttimeout = atoi( strtimeout.c_str());
 	strlogintimeout = vs_config->getVariable( "server", "logintimeout", "60");
 	logintimeout = atoi( strlogintimeout.c_str());
@@ -362,7 +362,7 @@ void	NetServer::start(int argc, char **argv)
 // NETFIXME: No Director for you!
 
 
-			  _Universe->star_system[i]->Update((i==0)?1:systime/i,false);
+                    _Universe->star_system[i]->Update((i==0)?1:systime/i,true/*need to run python serverside*/);
 		  }
 		  StarSystem::ProcessPendingJumps();
 		/****************************** VS STUFF TO DO ************************************/

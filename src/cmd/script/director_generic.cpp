@@ -401,7 +401,7 @@ void Mission::DirectorStart(missionNode *node){
 }
 void Mission::DirectorInitgame(){
 
-  this->player_num=(_Universe->AccessCockpit()-_Universe->AccessCockpit(0));
+  this->player_num=_Universe->CurrentCockpit();
   if (nextpythonmission) {
 	// CAUSES AN UNRESOLVED EXTERNAL SYMBOL FOR PythonClass::last_instance ?!?!
 

@@ -452,7 +452,7 @@ void Mount::PhysicsAlignedUnfire() {
   if (processed==UNFIRED) {
   if (AUDIsPlaying (sound))
     AUDStopPlaying (sound);
-    processed=PROCESSED;
+  //processed=PROCESSED;
   }
 }
 

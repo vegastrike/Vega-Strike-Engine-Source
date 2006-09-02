@@ -82,8 +82,10 @@ void	NetServer::checkTimedoutClients_udp()
 				    COUT<<"\t\tCurrent time : "<<curtime<<endl;
 				    COUT<<"\t\tLatest timeout : "<<(cl->latest_timeout)<<endl;
 				    COUT<<"t\tDifference : "<<deltatmp<<endl;
-                    cl->_disconnectReason = "UDP timeout";
-//				    discList.push_back( cl );
+                                    cl->_disconnectReason = "UDP timeout";
+                                    static bool dodisc=XMLSupport::parse_bool(vs_config->getVariable("server", "disconnect_client_on_timeout", "true"));
+                                    if (dodisc)
+                                      discList.push_back( cl );
 					// NETFIXME: Should we actually disconnect them in a UDP timeout or should we just fallback to TCP?
 			    }
 		    }
