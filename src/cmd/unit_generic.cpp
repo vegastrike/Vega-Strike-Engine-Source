@@ -1098,7 +1098,11 @@ StarSystem * Unit::getStarSystem () {
   }
   return _Universe->activeStarSystem();
 }
-
+bool preEmptiveClientFire(const weapon_info*wi) {
+            static bool
+              client_side_fire=XMLSupport::parse_bool(vs_config->getVariable("network","client_side_fire","true"));
+            return (client_side_fire&&wi->type!=weapon_info::BEAM&&wi->type!=weapon_info::PROJECTILE);
+}
 void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
   static bool can_fire_in_spec = XMLSupport::parse_bool(vs_config->getVariable("physics","can_fire_in_spec","false"));
   static bool can_fire_in_cloak = XMLSupport::parse_bool(vs_config->getVariable("physics","can_fire_in_cloak","false"));
@@ -1197,9 +1201,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
             i->processed = Mount::REQUESTED;
 			// NETFIXME: REQUESTED was commented out.
           }
-          static bool
-              client_side_fire=XMLSupport::parse_bool(vs_config->getVariable("network","client_side_fire","true"));
-          if( Network==NULL || SERVER || i->processed==Mount::ACCEPTED || (client_side_fire&&i->type->type!=weapon_info::BEAM&&i->type->type!=weapon_info::PROJECTILE))//projectile and beam weapons should be confirmed by server...not just fired off willy-nilly
+          if( Network==NULL || SERVER || i->processed==Mount::ACCEPTED || preEmptiveClientFire(i->type))//projectile and beam weapons should be confirmed by server...not just fired off willy-nilly
           {
 
             // If we are on server or if the weapon has been accepted for fire we fire

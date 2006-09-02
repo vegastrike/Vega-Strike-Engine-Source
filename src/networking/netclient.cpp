@@ -453,7 +453,7 @@ void NetClient::Respawn( ObjSerial newserial) {
 /**************************************************************/
 /**** Receive a message from the server                    ****/
 /**************************************************************/
-
+extern bool preEmptiveClientFire(const weapon_info*);
 int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 {
 	/* // Returns false if no data hasarrived on the socket.
@@ -687,6 +687,8 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					// Set the concerned mount as ACTIVE and others as INACTIVE
 					vector <Mount>
 						::iterator i = un->mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
+                                        if (mount_num>un->mounts.size())
+                                          mount_num=un->mounts.size();
 					int j;
 					
 					un->energy = energy; // It's important to set energy before firing.
@@ -700,13 +702,16 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 						if ((*i).status==Mount::ACTIVE)
 							(*i).status=Mount::INACTIVE;
 					}
+                                        Cockpit *ps = _Universe->isPlayerStarship(un);
 					for (j=0;j<mount_num;++j) {
 						int mnt = netbuf.getInt32();
 						if (mnt<un->mounts.size()&&mnt>=0) {
+                                                  if (ps==NULL||!preEmptiveClientFire(un->mounts[mnt].type)) {
 							un->mounts[mnt].processed=Mount::ACCEPTED;
 							un->mounts[mnt].status=Mount::ACTIVE;
 							// Store the missile id in the mount that should fire a missile
 							un->mounts[mnt].serial=mis;
+                                                  }
 						}
 					}
 					// Ask for fire
@@ -736,7 +741,9 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					vector <Mount>
 						::iterator i = un->mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
 					int j;
-					
+                                        if (mount_num>un->mounts.size())
+                                          mount_num=un->mounts.size();
+
 					for (j=backupMountStatus.size();j<un->mounts.size();++j) {
 						backupMountStatus.push_back(Mount::UNCHOSEN);
 					}
