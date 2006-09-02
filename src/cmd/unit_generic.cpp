@@ -1185,7 +1185,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
     
     if (want_to_fire) {
           // If in non-networking mode and mount fire has been accepted or if on server side
-          if (Network!=NULL && (!SERVER) && i->processed!=Mount::ACCEPTED&&i->processed!=Mount::FIRED && i->processed!=Mount::REQUESTED && playernum>=0)
+          if (Network!=NULL && (!SERVER) && i->processed!=Mount::ACCEPTED&&i->processed!=Mount::FIRED && i->processed!=Mount::REQUESTED && playernum>=0 && i->ammo!=0)
           {
             // Request a fire order to the server telling him the serial of the unit and the mount index (nm)
             if (mis) {
@@ -1996,7 +1996,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 //      mounts[i].time_to_lock-=SIMULATION_ATOM;
 //    }
 
-    if (((SERVER&&Network!=NULL&&mounts[i].status==Mount::INACTIVE)||mounts[i].status==Mount::ACTIVE)&&cloaking<0&&mounts[i].ammo!=0) {
+    if (((SERVER&&mounts[i].status==Mount::INACTIVE)||mounts[i].status==Mount::ACTIVE)&&cloaking<0&&mounts[i].ammo!=0) {
       if (player_cockpit) {
 	  touched=true;
       }

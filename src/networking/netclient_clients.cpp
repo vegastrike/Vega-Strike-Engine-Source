@@ -195,8 +195,16 @@ void	NetClient::AddObjects( NetBuffer & netbuf)
           if(un) enteredSerials.insert(un->GetSerial());
         }
 	// Loop until the end of the buffer
+        int offset=netbuf.getOffset();
 	while( (subcmd=netbuf.getChar())!=ZoneMgr::End)
 	{
+                int noffset=netbuf.getOffset();
+                if (noffset==offset) {
+                  COUT << "ERROR Premature end of AddObjects buffer "<<std::hex<<std::string(netbuf.getData(),netbuf.getSize()) << std::endl;
+
+                  break;
+                }
+                offset=noffset;// to make sure we aren't at end of truncated buf
 		switch( subcmd)
 		{
 			case ZoneMgr::AddClient :
@@ -208,7 +216,7 @@ void	NetClient::AddObjects( NetBuffer & netbuf)
 			}
 			break;
 			default :
-				cerr<<"WARNING : Unknown sub command in AddObjects"<<endl;
+				cerr<<"WARNING : Unknown sub "<<(int)subcmd<< " command in AddObjects"<<endl;
 		}
 	}
         Unit *un;
@@ -305,6 +313,7 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 		// Loop throught received snapshot
         int i = 0;
         int j = 0;
+        int offset=netbuf.getOffset();
 		while( (i+j)<numUnits )
 		{
             ObjSerial       sernum = 0;
@@ -315,6 +324,13 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 
 			// Get the ZoneMgr::SnapshotSubCommand from buffer
 			cmd    = netbuf.getChar();
+                        int noffset=netbuf.getOffset();
+                        if (noffset==offset) {
+                          COUT << "ERROR Premature end of Snapshot buffer "<<std::hex<<std::string(netbuf.getData(),netbuf.getSize()) << std::endl;
+                          break;//if buffer is already used up...
+                        }
+                        offset=noffset;
+
 
 			// Get the serial number of current element
 			sernum = netbuf.getShort();

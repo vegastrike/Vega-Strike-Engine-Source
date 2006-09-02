@@ -131,7 +131,6 @@ Vector Planet::AddSpaceElevator (const std::string &name, const std::string & fa
 	}
 	Matrix ElevatorLoc(Vector(dir.j,dir.k,dir.i),dir,Vector(dir.k,dir.i,dir.j));
 	scale = dir * radius +Vector(1,1,1)-dir;
-	if (meshdata.empty()) meshdata.push_back(NULL);
 	Mesh * shield = meshdata.back();
 	string elevator_mesh=GetElMeshName(name,faction,direction);//filename	
 	Mesh * tmp = meshdata.back()=Mesh::LoadMesh (elevator_mesh.c_str(),
@@ -299,7 +298,6 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
     AddDestination(dest.back());
     dest.pop_back();
   }
-  meshdata.push_back(NULL);
   //name = "Planet - ";
   //name += textname;
   name=fullname;
@@ -393,6 +391,8 @@ Planet::Planet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,f
 */
   memset(&(this->shield),0,sizeof(Unit::shield));
   this->shield.number=2;
+  if (meshdata.empty()) meshdata.push_back(NULL);
+
 }
 
 extern stdext::hash_map<std::string,std::string> readPlanetTypes(std::string filename);

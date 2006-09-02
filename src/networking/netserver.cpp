@@ -784,10 +784,19 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				COUT<<"ERROR --> Received a fire order for non-existing UNIT"<<endl;
 			else
 			{
+                          if (mount_num>un->mounts.size()){
+                            COUT << "ERROR recvd information about "<<mount_num<<" mounts, only "<<un->mounts.size()<< " on ship"<<std::endl;
+                            mount_num=un->mounts.size();
+                          }
+
+                          printf("[x ");
+                        
 				vector <Mount>
 					::iterator i = un->mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
-				for (;i!=un->mounts.end();++i)
-					(*i).status=Mount::INACTIVE;
+				for (;i!=un->mounts.end();++i){
+                                  printf ("%.1f, ",(*i).time_to_lock);
+                                  (*i).status=Mount::INACTIVE;
+                                }
 				for (int j=0;j<mount_num;++j) {
 					int mnt = netbuf.getInt32();
 					if (mnt<un->mounts.size()&&mnt>=0) {
@@ -801,7 +810,9 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 					un->Fire(ROLES::FIRE_MISSILES|ROLES::EVERYTHING_ELSE,false);
 				else
 					un->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false);
+                                printf ("]\n");
 			}
+                        
 		break;
 		case CMD_UNFIREREQUEST :
 			target_serial = netbuf.getSerial();
@@ -821,6 +832,10 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			{
 				vector <Mount>
 					::iterator i = un->mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
+                                if (mount_num>un->mounts.size()){
+                                  COUT << "ERROR recvd information about "<<mount_num<<" mounts, only "<<un->mounts.size()<< " on ship"<<std::endl;
+                                  mount_num=un->mounts.size();
+                                }
 				for (;i!=un->mounts.end();++i)
 					(*i).status=Mount::INACTIVE;
 				for (int j=0;j<mount_num;j++) {

@@ -31,7 +31,7 @@ class NetBuffer
 
 		void			Reset();
 		char *			getData();
-
+                int getOffset()const {return offset;} //useful to see if it's at the end of data
 		// Extends the buffer if we exceed its size
 		void			resizeBuffer( int newsize);
 		// Check if there is still enough data for 'len' to be read in buffer

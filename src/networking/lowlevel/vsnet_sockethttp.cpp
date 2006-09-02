@@ -275,7 +275,11 @@ void VsnetHTTPSocket::resendData() {
 bool VsnetHTTPSocket::lower_selected( int datalen )
 {
         if (waitingToReceive.empty()) {
-		return false;
+          if (dataToSend.size()==0&&this->_fd>=0) {
+            this->close_fd();
+            this->_fd=-1;//don't bother keepalive
+          }
+          return false;
 	}
 	if ( this->_fd == -1 ) {
 	    resendData();

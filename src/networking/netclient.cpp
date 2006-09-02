@@ -798,9 +798,17 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				// SHOULD READ THE DAMAGE SNAPSHOT HERE !
 				int nbupdates = packet_serial;
 				ObjSerial serial;
+                                int offset=netbuf.getOffset();
 				for( int i=0; i<nbupdates; i++)
 				{
+                                  
 					serial = netbuf.getSerial();
+                                        int noffset=netbuf.getOffset();
+                                        if (noffset==offset) {
+                                          COUT << "ERROR Premature end of Snapshot buffer "<<std::hex<<std::string(netbuf.getData(),netbuf.getSize()) << std::endl;                                          
+                                          break;
+                                        }
+                                        offset=noffset;
 					Unit *un = UniverseUtil::GetUnitFromSerial(serial);
 					receiveUnitDamage( netbuf, un );
 				}
