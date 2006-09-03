@@ -25,9 +25,9 @@
 #include "cmd/script/mission.h"
 #include "force_feedback.h"
 #include "lin_time.h"
-#ifndef _WIN32
-#include <fenv.h>
-#endif
+//#ifndef _WIN32
+//#include <fenv.h>
+//#endif
 char SERVER = 1;
 Universe * _Universe;
 LeakVector<Mission *> active_missions;
@@ -40,9 +40,9 @@ void	VSExit( int code)
 
 int main( int argc, char **argv)
 {
-#ifndef _WIN32
-  feenableexcept(FE_DIVBYZERO|FE_INVALID);//|FE_OVERFLOW|FE_UNDERFLOW)
-#endif
+  //#ifndef _WIN32
+  //  feenableexcept(FE_DIVBYZERO|FE_INVALID);//|FE_OVERFLOW|FE_UNDERFLOW)
+  //#endif
 	setNewTime(((double)time(NULL))-VEGA_EPOCH);
 	VSServer = new NetServer;
 	// Fake forcefeedback

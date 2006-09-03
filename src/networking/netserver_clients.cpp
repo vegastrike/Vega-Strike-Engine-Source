@@ -8,9 +8,6 @@
 #include "networking/lowlevel/vsnet_sockethttp.h"
 #include "lin_time.h"
 #include "vs_random.h"
-#ifndef _WIN32
-#include <fenv.h>
-#endif
 extern QVector DockToSavedBases( int n);
 extern StarSystem * GetLoadedStarSystem( const char * system);
 
@@ -223,10 +220,9 @@ Vector ApplyQuaternion(const Quaternion & quat, Vector input) {
 ClientState aim_assist(ClientState cs, ClientState ocs/*old*/,
                 QVector realtargetpos,Vector realtargetvel, Vector targetpos, Vector targetvel) {
   float t=0;
+  static bool debug_predict=XMLSupport::parse_bool(vs_config->getVariable("network","debug_prediction","false"));    
   double velaimtheta=0;
   double orientaimtheta=0;
-  if (SERVER)
-    feenableexcept(FE_DIVBYZERO|FE_INVALID);//|FE_OVERFLOW|FE_UNDERFLOW)
   Matrix trans;
   ClientState OrientationAim(cs);
   ClientState VelocityAim(cs);
@@ -293,10 +289,8 @@ ClientState aim_assist(ClientState cs, ClientState ocs/*old*/,
       }
       //      if (t<=0) t=0;
     }
-    
     static float velaimlim=XMLSupport::parse_float(vs_config->getVariable("network","max_lead_prediction","10"));
     if (fabs(t)<velaimlim) {
-      printf ("Time %f\n",t);
       Vector newdirplane=realtargetpos+realtargetvel*t;
       Vector newdirperp=realtargetperp.Scale(distoffplane);
       newdirplane.Normalize();
@@ -331,11 +325,13 @@ ClientState aim_assist(ClientState cs, ClientState ocs/*old*/,
   }
 
   if (VelocityAimValid){
-    printf ("Velocity aim lead %f, rot %f deg\n",t,velaimtheta*180/M_PI);
+    if (debug_predict)
+      printf ("Velocity aim lead %f, rot %f deg\n",t,velaimtheta*180/M_PI);
     return VelocityAim;
   }
   if (OrientationAimValid) {
-    printf ("Using orientation aim rot %f deg\n",orientaimtheta*180/M_PI);
+    if (debug_predict)
+      printf ("Using orientation aim rot %f deg\n",orientaimtheta*180/M_PI);
     return OrientationAim;
   }
   printf("Using raw aim\n");
