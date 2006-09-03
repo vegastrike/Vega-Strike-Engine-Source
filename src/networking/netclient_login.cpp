@@ -15,6 +15,8 @@
 #include "networking/fileutil.h"
 
 
+std::string global_username;
+std::string global_password;
 /*************************************************************/
 /**** Authenticate the client                             ****/
 /*************************************************************/
@@ -32,6 +34,11 @@ int		NetClient::authenticate()
 	// Player to wander but not interact with the universe
 	this->callsign=str_callsign = vs_config->getVariable ("player","callsign","");
 	this->password=str_passwd = vs_config->getVariable ("player","password","");
+        if (global_username.length())
+          this->callsign=global_username;
+        if (global_password.length())
+          this->password=global_password;
+
 	if( str_callsign.length() && str_passwd.length())
 	{
 		addSimpleString(netbuf,str_callsign);

@@ -68,6 +68,8 @@
 #if defined(CG_SUPPORT)
 #include "cg_global.h"
 #endif
+extern std::string global_username;
+extern std::string global_password;
 
 int nadanixnuthin() {
   float a=0;
@@ -506,6 +508,11 @@ void bootstrap_main_loop () {
     for (int p=0;p<numplayers;p++) {
 	  pname = vs_config->getVariable("player"+((p>0)?tostring(p+1):string("")),"callsign","");
 	  ppasswd = vs_config->getVariable("player"+((p>0)?tostring(p+1):string("")),"password","");
+          if (p==0&&global_username.length())
+            pname=global_username;
+          if (p==0&&global_password.length())
+            ppasswd=global_password;
+          
 	  if ( !ignore_network )
 	  {
 		  // In network mode, test if all player sections are present
@@ -748,7 +755,6 @@ const char helpmessage[] =
 " -V -v     Super high resolution (1280x1024)\n"
 " --net     Networking Enabled (Experimental)\n"
 "\n";
-
 std::string ParseCommandLine(int argc, char ** lpCmdLine) {
   std::string st;
   std::string retstr;
@@ -792,8 +798,17 @@ std::string ParseCommandLine(int argc, char ** lpCmdLine) {
       case 'f':
       case 'F':
 	break;
+      case 'U':
+      case 'u':
+        global_username=lpCmdLine[i]+2;
+        break;
       case 'P':
       case 'p':
+        global_password=lpCmdLine[i]+2;
+        break;
+      case 'L':
+      case 'l':
+        
 	if (3==sscanf (lpCmdLine[i]+2,"%lf,%lf,%lf",&PlayerLocation.i,&PlayerLocation.j,&PlayerLocation.k)) {
           SetPlayerLoc (PlayerLocation,true);
         }

@@ -59,7 +59,7 @@
 #include "in_kb_data.h"
 #include "vs_random.h"
 using namespace std;
-
+extern std::string global_username;
 #define KEYDOWN(name,key) (name[key] & 0x80)
 
 Unit **fighters;
@@ -858,6 +858,10 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
                                 }
 
 				fighter0mods.push_back(modifications =vs_config->getVariable (string("player")+((squadnum>0)?tostring(squadnum+1):string("")),"callsign","pilot"));
+                                if (squadnum==0&&global_username.length()) {
+                                  fighter0mods.back()=global_username;
+                                  modifications=global_username;
+                                }
 				fprintf( stderr, "FOUND MODIFICATION = %s FOR PLAYER #%d\n", modifications.c_str(), squadnum);
 			  }
 			  else
