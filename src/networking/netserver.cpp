@@ -130,6 +130,22 @@ extern void InitUnitTables(); // universe_generic.cpp
 
 void	NetServer::start(int argc, char **argv)
 {
+  const char * serverport=NULL;
+   int i;
+   for (i=0;i<argc;++i) {
+     char match=1;
+     int j;
+     if (strncmp(argv[i],"-p",2)==0) {
+       serverport=argv[i]+2;
+     }else {
+       match=0;
+     }
+     if (match) {
+       for (j=i+1;j<argc;++j) argv[j-1]=argv[j];
+       argc--;
+       i--;
+     }
+   }
 	string strperiod, strtimeout, strlogintimeout, stracct, strnetatom;
 	int periodrecon;
 	keeprun = 1;
@@ -147,9 +163,12 @@ void	NetServer::start(int argc, char **argv)
     _sock_set.start( );
 
 	startMsg();
-
-	CONFIGFILE = new char[42];
-	strcpy( CONFIGFILE, "vegaserver.config");
+        if (argc==2) {
+          CONFIGFILE=argv[1];
+        }else {
+          CONFIGFILE = new char[42];
+          strcpy( CONFIGFILE, "vegaserver.config");
+        }
 	cout<<"Loading server config...";
 	VSFileSystem::InitPaths( CONFIGFILE);
 	InitUnitTables(); // universe_generic.cpp
@@ -180,7 +199,10 @@ void	NetServer::start(int argc, char **argv)
 	UpdateTime();
 	savetime = getNewTime();
 	reconnect_time = getNewTime()+periodrecon;
-
+        std::string configport=vs_config->getVariable( "network", "serverport", "6777");
+        if (serverport==NULL) {
+          serverport=configport.c_str();
+        }
 	string tmp;
 	unsigned short tmpport = ACCT_PORT;
 	stracct = vs_config->getVariable( "server", "useaccountserver", "");
@@ -188,7 +210,7 @@ void	NetServer::start(int argc, char **argv)
 
 	// Create and bind sockets
 	COUT << "Initializing TCP server ..." << endl;
-	tcpNetwork = NetUITCP::createServerSocket( atoi((vs_config->getVariable( "network", "serverport", "6777")).c_str()), _sock_set );
+	tcpNetwork = NetUITCP::createServerSocket( atoi(serverport), _sock_set );
     if( tcpNetwork == NULL )
     {
         COUT << "Couldn't create TCP server - quitting" << endl;
@@ -196,7 +218,7 @@ void	NetServer::start(int argc, char **argv)
     }
 
 	COUT << "Initializing UDP server ..." << endl;
-	*udpNetwork = NetUIUDP::createServerSocket( atoi((vs_config->getVariable( "network", "serverport", "6777")).c_str()), _sock_set );
+	*udpNetwork = NetUIUDP::createServerSocket( atoi(serverport), _sock_set );
     if( *udpNetwork == NULL )
     {
         COUT << "Couldn't create UDP server - quitting" << endl;
