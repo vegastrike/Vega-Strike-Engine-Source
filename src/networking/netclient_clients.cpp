@@ -287,6 +287,13 @@ void	NetClient::sendPosition( const ClientState* cs )
 	if (debugPos) (*cs).display();
 	netbuf.addSerial( cs->getSerial());
 	netbuf.addClientState( (*cs));
+        static bool aim_assist = XMLSupport::parse_bool(vs_config->getVariable("network","aim_assist","true"));
+        Unit * targ;
+        if ((targ=un->Target())!=NULL&&aim_assist&&un->Target()->GetSerial()!=0/*networked unit*/) {
+          netbuf.addSerial(targ->GetSerial());
+          netbuf.addVector((targ->Position()-cs->getPosition()).Cast());
+          netbuf.addVector(targ->Velocity);
+        }
 	pckt.send( CMD_POSUPDATE, un->GetSerial(),
                netbuf.getData(), netbuf.getDataLength(),
                SENDANDFORGET, NULL, *this->lossy_socket,

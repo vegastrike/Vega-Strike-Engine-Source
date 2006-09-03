@@ -89,7 +89,7 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
 				// We moved so update
 		  {
 			  /* If you're going to send an alive message, you might as well send your position while you're at it. */
-				ClientState cstmp( this->serial, this->curr_physical_state, this->Velocity, accel, 0);
+				ClientState cstmp( this->serial, this->curr_physical_state, this->Velocity, accel, this->AngularVelocity, 0);
 				Network[player].sendPosition( &cstmp);
 		  }
 //		  else

@@ -40,12 +40,13 @@ void		Prediction::InitInterpolation( Unit * un, const ClientState &last_packet_s
 	OB = un->curr_physical_state.orientation;
 	VA = un->old_state.getVelocity();
 	VB = un->Velocity;
-	AA = un->old_state.getAcceleration();
 	if (elapsed_since_last_packet>0.) {
 		AB = (last_packet_state.getVelocity()-VB)/((float)elapsed_since_last_packet);
 	} else {
 		AB = un->GetAcceleration();
 	}
+	AA = AB;//un->old_state.getAcceleration();//no longer supproted :-/ //NETFIXME now we don't have velocity
+
 	// A1 = old_position + old_velocity * 1 sec
 	A1 = A0 + VA;
 	// A3 is computed from position B and velocity VB

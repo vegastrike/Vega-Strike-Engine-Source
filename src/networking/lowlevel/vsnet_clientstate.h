@@ -37,28 +37,31 @@ class	ClientState
 	ObjSerial		client_serial;
 	Transformation	pos;
 	Vector			veloc;
-	Vector			accel;
-
+  //NO longer supproted--wasnt indicative of actual accel	Vector			accel;
+	Vector			angveloc;
 	public:
 		ClientState();
 		ClientState( ObjSerial serial);
-		ClientState( ObjSerial serial, QVector posit, Quaternion orientat, Vector velocity, Vector acc);
-		ClientState( ObjSerial serial, QVector posit, Quaternion orientat, Vector velocity, Vector acc, unsigned int del);
-		ClientState( ObjSerial serial, Transformation trans, Vector velocity, Vector acc, unsigned int del);
+		ClientState( ObjSerial serial, QVector posit, Quaternion orientat, Vector velocity, Vector acc, Vector angvel);
+		ClientState( ObjSerial serial, QVector posit, Quaternion orientat, Vector velocity, Vector acc, Vector angvel, unsigned int del);
+		ClientState( ObjSerial serial, Transformation trans, Vector velocity, Vector acc, Vector angvel, unsigned int del);
 		ClientState( Unit * un);
 
 		QVector		getPosition() const { return this->pos.position;}
 		Quaternion	getOrientation() const { return this->pos.orientation;}
 		Vector		getVelocity() const { return this->veloc;}
-		Vector		getAcceleration() const { return this->accel;}
+		Vector		getAngularVelocity() const { return this->angveloc;}
+  //NO longer supported--wasn't indicative of actual aggregated accel		Vector		getAcceleration() const { retu //rn if you change this, change setAcceleration too, and all consturctor this->accel;}
+                void		setAcceleration( Vector acc) { }
+
 		ObjSerial	getSerial() const { return this->client_serial;}
 		//float		getDelay() const { return this->delay;}
 		//void		setDelay( float del) { this->delay = del;}
 		void		setSerial( ObjSerial ser) { this->client_serial = ser;}
 		void		setPosition( QVector posit) { this->pos.position = posit;}
 		void		setOrientation( Quaternion orient) { this->pos.orientation = orient;}
-		void		setAcceleration( Vector acc) { this->accel = acc;}
 		void		setVelocity( Vector vel) { this->veloc = vel;}
+		void		setAngularVelocity( Vector vel) { this->angveloc = vel;}
 
 		void	display( std::ostream& ostr ) const;
 		void	display() const;

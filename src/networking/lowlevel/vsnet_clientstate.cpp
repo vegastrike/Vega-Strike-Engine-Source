@@ -13,7 +13,8 @@ ClientState::ClientState()
 	this->client_serial = 0;
 	this->pos.position.Set( 20400,-35400,84700000.0);
 	this->veloc.Set( 0,0,0);
-	this->accel.Set( 0,0,0);
+	//this->accel.Set( 0,0,0);
+        this->angveloc.Set(0,0,0);
 }
 
 ClientState::ClientState( Unit * un)
@@ -22,7 +23,8 @@ ClientState::ClientState( Unit * un)
 	this->pos.position = un->curr_physical_state.position;
 	this->pos.orientation = un->curr_physical_state.orientation;
 	this->veloc = un->Velocity;
-	this->accel = un->GetAcceleration();
+	//this->accel = un->GetAcceleration();
+        this->angveloc=un->AngularVelocity;
 }
 ClientState::ClientState( ObjSerial serial)
 {
@@ -30,36 +32,40 @@ ClientState::ClientState( ObjSerial serial)
 	this->pos.position.Set( 20400,-35400,84700000.0);
 	//pos.orientation.Set( 100,0,0);
 	this->veloc.Set( 0,0,0);
-	this->accel.Set( 0,0,0);
+	//this->accel.Set( 0,0,0);
+        this->angveloc.Set(0,0,0);
 	//this->delay = 50;
 }
 
-ClientState::ClientState( ObjSerial serial, QVector posit, Quaternion orientat, Vector velocity, Vector acc)
+ClientState::ClientState( ObjSerial serial, QVector posit, Quaternion orientat, Vector velocity, Vector acc, Vector angvel)
 {
 	this->client_serial = serial;
 	this->pos.position = posit;
 	this->pos.orientation = orientat;
 	this->veloc = velocity;
-	this->accel = acc;
+	//this->accel = acc;
+        this->angveloc=angvel;
 }
 
-ClientState::ClientState( ObjSerial serial, QVector posit, Quaternion orientat, Vector velocity, Vector acc, unsigned int del)
+ClientState::ClientState( ObjSerial serial, QVector posit, Quaternion orientat, Vector velocity, Vector acc, Vector angvel, unsigned int del)
 {
 	//this->delay = del;
 	this->client_serial = serial;
 	this->pos.position = posit;
 	this->pos.orientation = orientat;
 	this->veloc = velocity;
-	this->accel = acc;
+	//this->accel = acc;
+        this->angveloc=angvel;
 }
 
-ClientState::ClientState( ObjSerial serial, Transformation trans, Vector velocity, Vector acc, unsigned int del)
+ClientState::ClientState( ObjSerial serial, Transformation trans, Vector velocity, Vector acc, Vector angvel, unsigned int del)
 {
 	//this->delay = del;
 	this->client_serial = serial;
 	this->pos = trans;
 	this->veloc = velocity;
-	this->accel = acc;
+	//this->accel = acc;
+        this->angveloc=angvel;
 }
 
 void    ClientState::display() const
@@ -76,7 +82,8 @@ void    ClientState::display( std::ostream& ostr ) const
 	     << " - Position="<<pos.position.i<<","<<pos.position.j<<","<<pos.position.k
 	     << " - Orientation="<<pos.orientation.v.i<<","<<pos.orientation.v.j<<","<<pos.orientation.v.k
 	     << " - Velocity="<<veloc.i<<","<<veloc.j<<","<<veloc.k
-	     << " - Acceleration="<<accel.i<<","<<accel.j<<","<<accel.k;
+          //	     << " - Acceleration="<<accel.i<<","<<accel.j<<","<<accel.k;
+	     << " - Ang Velocity="<<angveloc.i<<","<<angveloc.j<<","<<angveloc.k;
 }
 
 int		ClientState::operator==( const ClientState & ctmp) const
@@ -94,7 +101,8 @@ void	ClientState::netswap()
 
 	this->pos.netswap();
 	this->veloc.netswap();
-	this->accel.netswap();
+        //	this->accel.netswap();
+	this->angveloc.netswap();
 }
 
 std::ostream& operator<<( std::ostream& ostr, const Client& c )

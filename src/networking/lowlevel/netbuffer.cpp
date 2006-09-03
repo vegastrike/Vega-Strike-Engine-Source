@@ -116,7 +116,7 @@ void	NetBuffer::addClientState( ClientState cs)
     this->addSerial( cs.client_serial);
     this->addTransformation( cs.pos);
     this->addVector( cs.veloc);
-    this->addVector( cs.accel);
+    this->addVector( cs.angveloc);
 }
 
 ClientState NetBuffer::getClientState()
@@ -126,7 +126,7 @@ ClientState NetBuffer::getClientState()
     cs.client_serial = this->getSerial();
     cs.pos = this->getTransformation();
     cs.veloc = this->getVector();
-    cs.accel = this->getVector();
+    cs.angveloc = this->getVector();
 
     return cs;
 }
