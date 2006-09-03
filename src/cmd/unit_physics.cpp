@@ -110,8 +110,9 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
 		  else
 		  {
 		  	// Networked unit so interpolate its position
-			this->curr_physical_state = Network[0].Interpolate( this, SIMULATION_ATOM);
  			this->AddVelocity(difficulty);
+
+			this->curr_physical_state = Network[0].Interpolate( this, SIMULATION_ATOM);
 		  }
 	  }
   }

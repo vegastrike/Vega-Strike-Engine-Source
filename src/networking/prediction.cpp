@@ -1,3 +1,6 @@
+
+
+
 #include "client.h"
 #include "prediction.h"
 #include "gfx/lerp.h"
@@ -97,6 +100,10 @@ Quaternion	LinearPrediction::InterpolateOrientation( Unit * un, double deltatime
 
 Transformation LinearPrediction::Interpolate( Unit * un, double deltatime) const
 {
+  static bool no_interp=XMLSupport::parse_bool(vs_config->getVariable("network","no_interpolation","false"));
+  if (no_interp) {
+  return Transformation(OB,B);
+  }
 	if (deltatime>this->deltatime||this->deltatime==0) {
 		double delay=deltatime-this->deltatime;
 		return Transformation(OB, A2+ VB*delay);
