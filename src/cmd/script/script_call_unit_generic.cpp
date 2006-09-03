@@ -1237,11 +1237,11 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
        free (nam);
        free (citylights);
      }else if (type==NEBULAPTR) {
-       my_unit=UnitFactory::createNebula (fg->fg->type.c_str(),false,faction_nr,fg->fg,u+fg->fg->nr_ships-fg->nr_ships, true);
+       my_unit=UnitFactory::createNebula (fg->fg->type.c_str(),false,faction_nr,fg->fg,u+fg->fg->nr_ships-fg->nr_ships, getUniqueSerial());
      } else if (type==ASTEROIDPTR) {
-       my_unit=UnitFactory::createAsteroid(fg->fg->type.c_str(),faction_nr,fg->fg,u+fg->fg->nr_ships-fg->nr_ships);
+       my_unit=UnitFactory::createAsteroid(fg->fg->type.c_str(),faction_nr,fg->fg,u+fg->fg->nr_ships-fg->nr_ships,.01,getUniqueSerial());
      }else {
-       my_unit=UnitFactory::createUnit(fg->fg->type.c_str(),false,faction_nr,string(""),fg->fg,u+fg->fg->nr_ships-fg->nr_ships);
+       my_unit=UnitFactory::createUnit(fg->fg->type.c_str(),false,faction_nr,string(""),fg->fg,u+fg->fg->nr_ships-fg->nr_ships,NULL,getUniqueSerial());
      }
      units[u]=my_unit;
    }

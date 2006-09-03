@@ -8,6 +8,9 @@
 #include "networking/lowlevel/vsnet_sockethttp.h"
 #include "lin_time.h"
 #include "vs_random.h"
+#include "load_mission.h"
+#include "cmd/script/mission.h"
+#include "python/init.h"
 extern QVector DockToSavedBases( int n);
 extern StarSystem * GetLoadedStarSystem( const char * system);
 
@@ -150,6 +153,15 @@ void	NetServer::addClient( ClientPtr clt)
 	pp.send( CMD_ADDEDYOU, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(1325) );
 
 	COUT<<"ADDED client n "<<un->GetSerial()<<" in ZONE "<<un->activeStarSystem->GetZone()<<" at STARDATE "<<_Universe->current_stardate.GetFullTrekDate()<<endl;
+        if (active_missions.size()==1) {
+          static bool doneinit=false;
+          if (!doneinit) {
+            Python::init();
+            Python::test();
+            doneinit=true;
+          }
+          LoadMission("",vs_config->getVariable("server","serverscript","import server;server.server();"),false);
+        }
 	//delete cltsbuf;
 	//COUT<<"<<< SENT ADDED YOU -----------------------------------------------------------------------"<<endl;
 }

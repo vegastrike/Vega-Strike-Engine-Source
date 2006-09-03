@@ -264,7 +264,7 @@ void	NetServer::start(int argc, char **argv)
 		globalsave->ReadSavedPackets( dynchar,true);
 		f.Close();
 	}
-
+        std::vector<std::vector <char > > temp = ROLES::getAllRolePriorities();
 	// Server loop
 	while( keeprun)
 	{

@@ -43,6 +43,8 @@
 #endif
 
 
+#include "python/python_class.h"
+
 #include "cmd/unit_generic.h"
 #include "mission.h"
 
@@ -57,7 +59,23 @@ void InitBriefing() {
 	Python::reseterrors();
 }
 
-void Mission::DirectorLoop(){}
+void Mission::DirectorLoop(){
+   try {
+      if (runtime.pymissions)
+         runtime.pymissions->Execute();
+   }catch (...) {
+      if (PyErr_Occurred()) {
+         PyErr_Print();
+         PyErr_Clear();
+         fflush(stderr);         
+         fflush(stdout);
+      }
+      throw;
+   }
+  if(director==NULL){
+    return;
+  }
+}
 void Mission::BriefingUpdate(){}
 void Mission::DirectorBenchmark(){
   double oldgametime=gametime;
