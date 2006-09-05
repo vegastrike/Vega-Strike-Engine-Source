@@ -575,7 +575,11 @@ private:
 protected:
   virtual float ExplosionRadius();
 public:
-  bool AutoPilotTo(Unit * un, bool automaticenergyrealloc,int recursive_level=2);
+  bool AutoPilotToErrorMessage(Unit * un, bool automaticenergyrealloc,std::string& failuremessage,int recursive_level=2);
+  bool AutoPilotTo(Unit * un, bool automaticenergyrealloc){
+    std::string tmp;
+    return this->AutoPilotToErrorMessage(un, automaticenergyrealloc,tmp);
+  }
   ///The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
   void *owner; //void ensures that it won't be referenced by accident
   ///The number of frames ahead this was put in the simulation queue

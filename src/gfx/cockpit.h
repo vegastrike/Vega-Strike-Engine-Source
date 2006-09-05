@@ -128,6 +128,8 @@ private:
  public:
   std::string textMessage;
   bool editingTextMessage;
+  std::string autoMessage;
+  float autoMessageTime;
   void	ReceivedTargetInfo();
   static void NavScreen (const KBData&,KBSTATE k); // scheherazade
   static string getsoundending(int which=0);

@@ -509,7 +509,7 @@ static bool CheckCollisions(CollideMap* cm, T* un, const Collidable& collider, u
     return false;
   }
   static bool CheckCollision (Unit * un, const Collidable &aiter, Collidable::CollideRef b, const Collidable &biter) {
-    if (!ApartNeg(aiter,biter)) {
+    if (!ApartNeg(biter,aiter)) {
       return Bolt::CollideAnon(b,un);
     }
     return false;

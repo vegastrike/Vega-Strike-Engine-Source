@@ -2381,17 +2381,35 @@ static QVector AutoSafeEntrancePoint (const QVector start, float rsize,Unit * go
 }
 
 float globQueryShell (QVector pos,QVector dir,float rad);
-bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recursive_level) {
+std::string GenerateAutoError(Unit * me,Unit * targ) {
+  if (UnitUtil::isAsteroid(targ)) {
+    static std::string err=XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","AsteroidsNearMessage","#ff0000Asteroids Near#000000"));            
+    return err;
+  }
+  if (targ->isPlanet()) {
+    static std::string err=XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","AsteroidsNearMessage","#ff0000Planetary Hazard Near#000000"));            
+    return err;    
+  }
+  if(targ->getRelation(me)<0) {
+    static std::string err=XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","AsteroidsNearMessage","#ff0000Enemy Near#000000"));            
+    return err;        
+  }
+  static std::string err=XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","AsteroidsNearMessage","#ff0000Starship Near#000000"));
+  return err;
+}
+bool Unit::AutoPilotToErrorMessage (Unit * target, bool ignore_energy_requirements, std::string&failuremessage,int recursive_level) {
 	static bool auto_valid = XMLSupport::parse_bool (vs_config->getVariable ("physics","insystem_jump_or_timeless_auto-pilot","false"));	
 	if(!auto_valid) {
-		return false;
+          static std::string err="No Insystem Jump";
+          failuremessage=err;
+          return false;
 	}
 	
 	if (target->isUnit()==PLANETPTR) {
 		un_iter i = target->getSubUnits();
 		Unit * targ =*i;
 		if (targ&&0==targ->graphicOptions.FaceCamera)
-			return AutoPilotTo(targ,ignore_energy_requirements,recursive_level);
+			return AutoPilotToErrorMessage(targ,ignore_energy_requirements,failuremessage,recursive_level);
 	}
 	//static float insys_jump_cost = XMLSupport::parse_float (vs_config->getVariable ("physics","insystem_jump_cost",".1"));
   if (warpenergy<jump.insysenergy) {
@@ -2407,6 +2425,8 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
   static float autopilot_no_enemies_multiplier=XMLSupport::parse_float(vs_config->getVariable ("physics","auto_pilot_no_enemies_distance_multiplier","4"));
 //  static float autopilot_p_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_termination_distance","60000"));
   if (isSubUnit()) {
+    static std::string err="Return To Cockpit for Auto";
+    failuremessage=err;
     return false;//we can't auto here;
   }
   StarSystem * ss = activeStarSystem;
@@ -2466,10 +2486,12 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
           float nedis=(end-un->Position()).Magnitude()-rSize()-un->rSize();
           float trad=getAutoRSize(this,un,ignore_friendlies)+getAutoRSize (this,this,ignore_friendlies);
     	  if (tdis<=trad) {
+            failuremessage=GenerateAutoError(this,un);
 	    return false;
 	  }
           if ((nedis<trad*autopilot_no_enemies_multiplier||tdis<=trad*autopilot_no_enemies_multiplier)&&un->getRelation(this)<0){
             unsafe =true;
+            failuremessage=GenerateAutoError(this,un);
           }
 	  float intersection = globQueryShell (start-un->Position(),end-start,getAutoRSize (this,un,ignore_friendlies)+un->rSize());
 	  if (intersection>0) {
@@ -2477,6 +2499,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
 	    end = start+ (end-start)*intersection;
 	    totpercent*=intersection;
 	    ok=false;
+            failuremessage=GenerateAutoError(this,un);
 	  }
 	 }
     }
@@ -2486,10 +2509,11 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
 	  //just make sure we aren't in an asteroid field
 	  Unit * un;
 	  for (un_iter i=ss->getUnitList().createIterator(); (un=*i)!=NULL; ++i) {
-		  if (un->isUnit()==ASTEROIDPTR) {
+		  if (UnitUtil::isAsteroid(un)) {
                     static float minasteroiddistance = XMLSupport::parse_float(vs_config->getVariable("physics","min_asteroid_distance","-100"));
 			  if (UnitUtil::getDistance(this,un)<minasteroiddistance) {
-				  return false;//no auto in roid field
+                            failuremessage=GenerateAutoError(this,un);
+                            return false;//no auto in roid field
 			  }
 		  }
 	  }
@@ -2565,7 +2589,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
     Cockpit * cp;
     if ((cp=_Universe->isPlayerStarship (this))!=NULL){
       
-
+      std::string followermessage;
       if (getFlightgroup()!=NULL) {
         Unit * other=NULL;
         if (recursive_level>0)
@@ -2580,7 +2604,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
             Order * otherord = other->getAIState();
             if (otherord)
               if (otherord->PursueTarget (this,leadah)) {
-                other->AutoPilotTo(this,ignore_energy_requirements,recursive_level-1);
+                other->AutoPilotToErrorMessage(this,ignore_energy_requirements,followermessage,recursive_level-1);
                 if (leadah) {
                   if (NULL==_Universe->isPlayerStarship (other)) {
                     other->SetPosition(AutoSafeEntrancePoint (LocalPosition(),other->rSize()*1.5,other));

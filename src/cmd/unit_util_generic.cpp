@@ -155,6 +155,14 @@ namespace UnitUtil {
                     return ASTEROID_LOW_PRIORITY;
             }
         }
+        if (UnitUtil::isAsteroid(un)){//some mods don't do the scheduling--still want correctness
+          static std::string blah=vs_config->getVariable("physics","priorities","min_asteroid_distance","none");
+          static float too_close_asteroid=(blah=="none")?tooclose:XMLSupport::parse_float(blah);
+           if (dist<too_close_asteroid)
+             return ASTEROID_HIGH_PRIORITY; 
+           else
+             return ASTEROID_LOW_PRIORITY;
+        }
 	Unit * targ = un->Target();
 	if (_Universe->isPlayerStarship(targ)) {
 	    return HIGH_PRIORITY;

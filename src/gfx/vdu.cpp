@@ -327,13 +327,9 @@ void VDU::Scroll (int howmuch) {
   scrolloffset+=howmuch;
 }
 
-static std::string MangleString (const char * in, float probability) {
+static std::string MangleString (std::string in, float probability) {
   vector <char> str;
-
-  
-  
-
-  for (int i=0;in[i]!='\0';i++) {
+  for (int i=0;i<(int)in.length();i++) {
     if (in[i]!='\n') {
       str.push_back (in[i]);
       if (rand()<probability*RAND_MAX){
@@ -351,14 +347,7 @@ static std::string MangleString (const char * in, float probability) {
       str.push_back (in[i]);
     }
   }
-  char * tmp = (char *)malloc (sizeof (char)*str.size()+1);
-  tmp[str.size()]='\0';
-  for (unsigned int kk=0;kk<str.size();kk++) {
-    tmp[kk]=str[kk];
-  }
-  std::string retval = string (tmp);
-  free (tmp);
-  return retval;
+  return std::string(str.begin(),str.end());
 }
 
 static void DrawShield (float fs, float rs, float ls, float bs, float x, float y, float w, float h, bool invert, GFXColor outershield,GFXColor middleshield,GFXColor innershield) { //FIXME why is this static?
@@ -643,7 +632,7 @@ static float TwoOfFour(float a, float b, float c, float d){
 		return .4;
 	return 0;
 }
-void VDU::DrawTarget(Unit * parent, Unit * target) {
+void VDU::DrawTarget(GameCockpit *cp, Unit * parent, Unit * target) {
     float x,y,w,h;
 
   float fs = target->FShieldData();
@@ -694,19 +683,24 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
     }
     
   }
-  tp->Draw (MangleString (unitandfg.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
-
+  tp->Draw (MangleString (unitandfg,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
+  static float auto_message_lim=XMLSupport::parse_float (vs_config->getVariable("graphics","auto_message_time_lim","5"));
+  bool draw_auto_message=(UniverseUtil::GetGameTime()-cp->autoMessageTime<auto_message_lim&&cp->autoMessage.length()!=0);
   if (inrange) {  
   int i=0;
   char st[1024];
-  for (i=0;i<rows-1&&i<128;i++) {
-    st[i]='\n';
-
+  memset(st,'\n',1023);
+  int tmplim=rows-1;
+  if (draw_auto_message==true)
+    tmplim--;
+  st[tmplim]='\0';
+  std::string newst(st);
+  if (draw_auto_message){
+    newst+=cp->autoMessage+"\n";
   }
-  st[i]='\0';
   retString128 qr=PrettyDistanceString(DistanceTwoTargets(parent,target));
-  strcat (st,qr.str);
-  tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
+  newst+=qr.str;
+  tp->Draw (MangleString (newst,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
 
   static float ishieldcolor[4]={.4,.4,1,1};
   static float mshieldcolor[4]={.4,.4,1,1};
@@ -730,7 +724,11 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   GFXColor4f (1,1,1,1);
 
   }else {
-  tp->Draw (MangleString ("\n[OutOfRange]",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);      
+    if (draw_auto_message) {
+      tp->Draw (MangleString (std::string("\n")+cp->autoMessage,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);      
+    }else {
+      tp->Draw (MangleString ("\n[OutOfRange]",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);      
+    }
 
   }
 }
@@ -828,7 +826,7 @@ void VDU::DrawMessages(GameCockpit* parentcp,Unit *target){
   }
   static string message_prefix = XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","message_prefix",""));
   fullstr=targetstr+fullstr;
-  tp->Draw(message_prefix + MangleString (fullstr.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
+  tp->Draw(message_prefix + MangleString (fullstr,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
 }
 
 void	VDU::DrawScanningMessage()
@@ -860,9 +858,9 @@ Unit *VDU::GetCommunicating() {
   }
   return NULL;
 }
-void VDU::DrawNav (const Vector & nav) {
-  Unit * you = _Universe->AccessCockpit()->GetParent();
-  Unit * targ = you!=NULL?you->Target():NULL;
+void VDU::DrawNav (GameCockpit *cp, Unit* you, Unit*targ, const Vector & nav) {
+  //  Unit * you = _Universe->AccessCockpit()->GetParent();
+  //  Unit * targ = you!=NULL?you->Target():NULL;
   char *navdata=new char [1024+(_Universe->activeStarSystem()->getName().length()+(targ?targ->name.length():0))];
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
   static bool lie=XMLSupport::parse_bool (vs_config->getVariable("physics","game_speed_lying","true"));
@@ -918,7 +916,7 @@ void VDU::DrawManifest (Unit * parent, Unit * target) {	//	zadeVDUmanifest
     if (target->GetCargo(i).category.find("upgrades/")!=0)
       retval+=target->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (target->GetCargo(i).quantity)+string (")\n");
   }
-  tp->Draw (MangleString (retval.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true);  
+  tp->Draw (MangleString (retval,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true);  
 }
 static void DrawGun (Vector  pos, float w, float h, weapon_info::MOUNT_SIZE sz) {
   w=fabs (w);
@@ -1107,7 +1105,7 @@ void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
       }
     }
     retval+=ecmstatus;
-    tp->Draw (MangleString (retval.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true);     
+    tp->Draw (MangleString (retval,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true);     
     //*******************************************************
 }
 void VDU::SetViewingStyle(VIEWSTYLE vs) {
@@ -1495,7 +1493,7 @@ void VDU::Draw (GameCockpit*parentcp,Unit * parent, const GFXColor & color) {
 			str += " - #FF0000OFF";
 		str += "#000000\n";
 		str += "SD: "+_Universe->current_stardate.GetFullTrekDate();
-  		tp->Draw(MangleString (str.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
+  		tp->Draw(MangleString (str,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
 	}
   }
   break;
@@ -1516,7 +1514,7 @@ void VDU::Draw (GameCockpit*parentcp,Unit * parent, const GFXColor & color) {
 	break;
   case TARGET:
     if (targ)
-   	    DrawTarget(parent,targ);
+   	    DrawTarget(parentcp,parent,targ);
     break;
   case MANIFEST:
     DrawManifest (parent,parent);
@@ -1531,7 +1529,7 @@ void VDU::Draw (GameCockpit*parentcp,Unit * parent, const GFXColor & color) {
     DrawStarSystemAgain (.5*(x-fabs(w/2)+1),.5*((y-fabs(h/2))+1),fabs(w/2),fabs(h/2),viewStyle,parent,targ);
     break;
   case NAV:
-    DrawNav(parent->ToLocalCoordinates (parent->GetComputerData().NavPoint-parent->Position().Cast()));
+    DrawNav(parentcp,parent,targ,parent->ToLocalCoordinates (parent->GetComputerData().NavPoint-parent->Position().Cast()));
     break;
   case MSG:
     DrawMessages(parentcp,targ);

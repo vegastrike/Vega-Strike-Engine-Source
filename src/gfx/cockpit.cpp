@@ -1459,6 +1459,7 @@ void GameCockpit::InitStatic () {
 /***** WARNING CHANGED ORDER *****/
 GameCockpit::GameCockpit (const char * file, Unit * parent,const std::string &pilot_name): Cockpit( file, parent, pilot_name),shake_time(0),shake_type(0),textcol (1,1,1,1),text(NULL)
 {
+  autoMessageTime=0;
   shield8=false;
   editingTextMessage=false;
   static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
@@ -1721,8 +1722,15 @@ int GameCockpit::Autopilot (Unit * target) {
     enableautosound.playsound();
     Unit * un=NULL;
     if ((un=GetParent())) {
-      if((retauto = un->AutoPilotTo(un,false))) {//can he even start to autopilot
-		un->AutoPilotTo(target,false);
+      autoMessage=std::string();
+      autoMessageTime=UniverseUtil::GetGameTime();
+      QVector posA=un->LocalPosition();
+      if((retauto = un->AutoPilotToErrorMessage(un,false,autoMessage))) {//can he even start to autopilot
+		un->AutoPilotToErrorMessage(target,false,autoMessage);
+                QVector posB=un->LocalPosition();
+                if (autoMessage.length()==0&&(posA-posB).Magnitude()<un->rSize()) {
+                  autoMessage=XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","AlreadyNearMessage","#ff0000Already Near#000000"));            
+                }else
 		if (autopan){
 		  SetView (CP_FIXEDPOS);
                   Vector P(1,0,0),Q(0,1,0),R(0,0,1);

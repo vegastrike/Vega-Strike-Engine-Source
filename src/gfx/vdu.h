@@ -45,14 +45,14 @@ class VDU: public VSSprite {
   ///Draws a shield display in the VDU
   void DrawVDUShield (Unit * parent);
   ///Draws the target display of Unit *target (only call with nonNULL)
-  void DrawTarget(Unit * parent, Unit *target);
+  void DrawTarget(GameCockpit* parentcp, Unit * parent, Unit *target);
   ///Draws a list of cargo contents
   void DrawManifest (Unit * parent, Unit * target);
   ///Draws the message from the messagecenter
   void DrawMessages(GameCockpit* parentcp, Unit *target);
   void DrawScanningMessage();
   ///Draws the nav point this unit is heading to
-  void DrawNav(const Vector &navPoint);
+  void DrawNav(GameCockpit* parentcp, Unit * parent, Unit *target, const Vector &navPoint);
   ///Draws the comm screen this unit can use to communicate
   void DrawComm();
   ///Draws a "scanning target" message

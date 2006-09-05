@@ -81,6 +81,7 @@ void WarpToP(Unit * parent, Unit * target, bool following) {
     if (TargetWorthPursuing(parent,target)){
       static bool auto_valid = XMLSupport::parse_bool (vs_config->getVariable ("physics","insystem_jump_or_timeless_auto-pilot","false"));	
       if(auto_valid){
+        std::string tmp;
         parent->AutoPilotTo(target,false);
       } else {
         ActuallyWarpTo(parent,target->Position(),target->GetVelocity(),target);
