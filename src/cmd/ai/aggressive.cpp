@@ -1298,7 +1298,8 @@ static Unit * ChooseNavPoint(Unit * parent, Unit **otherdest, float *lurk_on_arr
     }
   }
   
-  if (hostile&&((anarchy==false&&asteroidhide==false)||total_size==0)&&civilian==false) {
+  static bool bad_units_lurk=XMLSupport::parse_bool(vs_config->getVariable("AI","hostile_lurk","true"));
+  if (hostile&&((anarchy==false&&asteroidhide==false)||total_size==0)&&civilian==false&&bad_units_lurk) {
     //hit and run
     Unit * a=GetRandomNav(stats->navs,firstRand);
     Unit * b=GetRandomNav(stats->navs,thirdRand);

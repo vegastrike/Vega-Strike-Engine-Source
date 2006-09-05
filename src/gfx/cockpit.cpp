@@ -584,7 +584,8 @@ void GameCockpit::DrawTargetBox () {
     DrawNavigationSymbol (Loc,CamP,CamQ, Loc.Magnitude()*nav_symbol_size);  
     nav_symbol=true;
   }else {
-    DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),un->TargetLocked());
+    static bool lock_nav_symbol =XMLSupport::parse_bool(vs_config->getVariable("graphics","lock_significant_target_box","true"));
+    DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),un->TargetLocked()&&(lock_nav_symbol||!UnitUtil::isSignificant(target)));
   }
   static bool draw_dock_box =XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_docking_boxes","true"));
   if (draw_dock_box) {

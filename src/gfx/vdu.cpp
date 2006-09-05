@@ -381,19 +381,21 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
  
   float shthresh[3]={0.0f,0.33f,0.66f}; // PM me if you don't know why I did this.
   float shtrans[3]={1.0f,1.0f,1.0f};
-  shcolor[0][0].a *= mymax(0.0f,mymin(1.0f,(fs-shthresh[0])/(shthresh[1]-shthresh[0])*shtrans[0]));
-  shcolor[0][1].a *= mymax(0.0f,mymin(1.0f,(fs-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1]));
-  shcolor[0][2].a *= mymax(0.0f,mymin(1.0f,(fs-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));
-  shcolor[1][0].a *= mymax(0.0f,mymin(1.0f,(rs-shthresh[0])/(shthresh[1]-shthresh[0])*shtrans[0]));
-  shcolor[1][1].a *= mymax(0.0f,mymin(1.0f,(rs-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1]));
-  shcolor[1][2].a *= mymax(0.0f,mymin(1.0f,(rs-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));
-  shcolor[2][0].a *= mymax(0.0f,mymin(1.0f,(ls-shthresh[0])/(shthresh[1]-shthresh[0])*shtrans[0]));
-  shcolor[2][1].a *= mymax(0.0f,mymin(1.0f,(ls-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1]));
-  shcolor[2][2].a *= mymax(0.0f,mymin(1.0f,(ls-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));
-  shcolor[3][0].a *= mymax(0.0f,mymin(1.0f,(bs-shthresh[0])/(shthresh[1]-shthresh[0])*shtrans[0]));
-  shcolor[3][1].a *= mymax(0.0f,mymin(1.0f,(bs-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1]));
-  shcolor[3][2].a *= mymax(0.0f,mymin(1.0f,(bs-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));
-
+  static bool do_shield_fade=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","shield_vdu_fade","true"));
+  if (do_shield_fade) {
+    shcolor[0][0].a *= mymax(0.0f,mymin(1.0f,(fs-shthresh[0])/(shthresh[1]-shthresh[0])*shtrans[0]));
+    shcolor[0][1].a *= mymax(0.0f,mymin(1.0f,(fs-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1]));
+    shcolor[0][2].a *= mymax(0.0f,mymin(1.0f,(fs-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));
+    shcolor[1][0].a *= mymax(0.0f,mymin(1.0f,(rs-shthresh[0])/(shthresh[1]-shthresh[0])*shtrans[0]));
+    shcolor[1][1].a *= mymax(0.0f,mymin(1.0f,(rs-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1]));
+    shcolor[1][2].a *= mymax(0.0f,mymin(1.0f,(rs-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));
+    shcolor[2][0].a *= mymax(0.0f,mymin(1.0f,(ls-shthresh[0])/(shthresh[1]-shthresh[0])*shtrans[0]));
+    shcolor[2][1].a *= mymax(0.0f,mymin(1.0f,(ls-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1]));
+    shcolor[2][2].a *= mymax(0.0f,mymin(1.0f,(ls-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));
+    shcolor[3][0].a *= mymax(0.0f,mymin(1.0f,(bs-shthresh[0])/(shthresh[1]-shthresh[0])*shtrans[0]));
+    shcolor[3][1].a *= mymax(0.0f,mymin(1.0f,(bs-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1]));
+    shcolor[3][2].a *= mymax(0.0f,mymin(1.0f,(bs-shthresh[2])/(1.0f-shthresh[2])*shtrans[2]));
+  }
   if (fs>shthresh[0]) {
     GFXColorf(shcolor[0][0]);
     GFXVertex3d ((double)x-w/8,y+h/2,0.);
