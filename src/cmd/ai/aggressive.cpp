@@ -1280,7 +1280,9 @@ static Unit * ChooseNavPoint(Unit * parent, Unit **otherdest, float *lurk_on_arr
   std::string::size_type whereconvoy=fgname.find(arrowString);
   bool convoy=(whereconvoy!=std::string::npos);
   size_t total_size=stats->navs[0].size()+stats->navs[whichlist].size();//friendly and neutral
-  if (hostile) {
+  static bool bad_units_lurk=XMLSupport::parse_bool(vs_config->getVariable("AI","hostile_lurk","true"));
+
+  if (hostile&&bad_units_lurk) {
     if (anarchy&&!siege) {
       whichlist=2;
       total_size=stats->navs[0].size()+stats->navs[whichlist].size();//asteroids and neutrals
@@ -1298,7 +1300,6 @@ static Unit * ChooseNavPoint(Unit * parent, Unit **otherdest, float *lurk_on_arr
     }
   }
   
-  static bool bad_units_lurk=XMLSupport::parse_bool(vs_config->getVariable("AI","hostile_lurk","true"));
   if (hostile&&((anarchy==false&&asteroidhide==false)||total_size==0)&&civilian==false&&bad_units_lurk) {
     //hit and run
     Unit * a=GetRandomNav(stats->navs,firstRand);
