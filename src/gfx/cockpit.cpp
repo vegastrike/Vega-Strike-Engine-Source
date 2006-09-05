@@ -1726,11 +1726,12 @@ int GameCockpit::Autopilot (Unit * target) {
       autoMessageTime=UniverseUtil::GetGameTime();
       QVector posA=un->LocalPosition();
       if((retauto = un->AutoPilotToErrorMessage(un,false,autoMessage))) {//can he even start to autopilot
-		un->AutoPilotToErrorMessage(target,false,autoMessage);
-                QVector posB=un->LocalPosition();
-                if (autoMessage.length()==0&&(posA-posB).Magnitude()<un->rSize()) {
-                  autoMessage=XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","AlreadyNearMessage","#ff0000Already Near#000000"));            
-                }else
+        un->AutoPilotToErrorMessage(target,false,autoMessage);
+        QVector posB=un->LocalPosition();
+        if (autoMessage.length()==0&&(posA-posB).Magnitude()<un->rSize()) {
+          autoMessage=XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","AlreadyNearMessage","#ff0000Already Near#000000"));    
+          retauto=false;
+        }else {
 		if (autopan){
 		  SetView (CP_FIXEDPOS);
                   Vector P(1,0,0),Q(0,1,0),R(0,0,1);
@@ -1757,8 +1758,9 @@ int GameCockpit::Autopilot (Unit * target) {
 
 		autopilot_time=autotime;
 		autopilot_target.SetUnit (target);
-	  }
-	}
+        }
+      }
+    }
   }
   return retauto;
 }
