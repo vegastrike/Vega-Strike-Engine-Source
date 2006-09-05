@@ -1880,7 +1880,8 @@ void GameCockpit::Draw() {
   GFXDisable(DEPTHWRITE);
   GFXColor4f(1,1,1,1);
   static bool draw_any_boxes = XMLSupport::parse_bool (vs_config->getVariable("graphics","hud","DrawTargettingBoxes","true"));
-  if (draw_any_boxes&&screenshotkey==false) {
+  static bool draw_boxes_inside_only=XMLSupport::parse_bool (vs_config->getVariable("graphics","hud","DrawTargettingBoxesInside","true"));
+  if (draw_any_boxes&&screenshotkey==false&&(draw_boxes_inside_only==false||view<CP_CHASE)) {
       DrawTargetBox();
       DrawTurretTargetBoxes();
       DrawTacticalTargetBox();

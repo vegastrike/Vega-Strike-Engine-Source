@@ -247,9 +247,12 @@ ClientState aim_assist(ClientState cs, ClientState ocs/*old*/,
   Vector targetperp=targetpos.Cross(targetvel);
   realtargetpos=(realtargetpos-cs.getPosition());
   Vector realtargetperp=realtargetpos.Cast().Cross(realtargetvel);
+  Vector targetdir=targetpos;
+  targetdir.Normalize();
   float targetperpmag=targetperp.Magnitude();
   float realtargetperpmag=realtargetperp.Magnitude();
-  if (targetperpmag>.001&&realtargetperpmag>.001&&targetvel.MagnitudeSquared()>.25&&realtargetvel.MagnitudeSquared()>.25) {
+  static float cos_min_angle=acos(M_PI*(1./180)*XMLSupport::parse_float(vs_config->getVariable("network","max_lead_prediction_angle","60")));//120 degree leeway for using this method
+  if (targetperpmag>.001&&realtargetperpmag>.001&&targetvel.MagnitudeSquared()>.25&&realtargetvel.MagnitudeSquared()>.25&&dir.Dot(targetdir)>=cos_min_angle) {//gotta make sure target is at least in viewscreen before giving benefit of the doubt lead
     targetperp=targetperp*(1./targetperpmag);
     realtargetperp=realtargetperp*(1./realtargetperpmag);// compute a unit direction perpendicular to the plane made by the target and its relative velocity (to playerstarship)... we'll use this to see how far off that plane the velocity actually is
     float distoffplane=targetperp.Dot(dir);
