@@ -4364,7 +4364,8 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
                     if (numCargo()>0) {
 				if (DestroySystem(hull,maxhull,numCargo())) {
 					int which = rand()%numCargo();
-					if (GetCargo(which).category.find("upgrades/")==0&& GetCargo(which).category.find(DamagedCategory)!=0 &&GetCargo(which).content.find("add_")!=0&&GetCargo(which).content.find("mult_")!=0) {
+                                        static std::string Restricted_items=vs_config->getVariable("physics","indestructable_cargo_items","");
+					if (GetCargo(which).category.find("upgrades/")==0&& GetCargo(which).category.find(DamagedCategory)!=0 &&GetCargo(which).content.find("mult_")!=0&&Restricted_items.find(GetCargo(which).content)==string::npos) {//why not downgrade _add GetCargo(which).content.find("add_")!=0&&
 						int lenupgrades = strlen("upgrades/");
 						GetCargo(which).category = string(DamagedCategory)+GetCargo(which).category.substr(lenupgrades);
                                                 static bool NotActuallyDowngrade=XMLSupport::parse_bool(vs_config->getVariable("physics","separate_system_flakiness_component","false"));
@@ -6216,6 +6217,8 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   percentage=0;
   int numave=0;
   bool cancompletefully=true;
+  bool can_be_redeemed=false;
+  bool needs_redemption=false;
   if (mountoffset>=0)
 	  cancompletefully=UpgradeMounts(up,mountoffset,touchme,downgrade,numave,templ,percentage);
   bool cancompletefully1=true;
@@ -6293,10 +6296,15 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
     if (touchme) { my=resultdoub; } \
     percentage+=temppercent; \
     numave++; \
+    can_be_redeemed=true; \
     if (gen_downgrade_list) \
       AddToDowngradeMap (up->name,oth,((char *)&value_to_lookat)-(char *)this,tempdownmap); \
-  } else if (retval!=NOTTHERE) cancompletefully=false;
-
+  } else if (retval!=NOTTHERE) { \
+    if (retval==CAUSESDOWNGRADE) \
+      needs_redemption=true; \
+    else \
+      cancompletefully=false; \
+  }
   #define STDUPGRADE(my,oth,temp,noth) STDUPGRADE_SPECIFY_DEFAULTS (my,oth,temp,noth,downgradelimit->my,blankship->my,false,this->my)
   #define STDUPGRADECLAMP(my,oth,temp,noth) STDUPGRADE_SPECIFY_DEFAULTS (my,oth,temp,noth,downgradelimit->my,blankship->my,!force_change_on_nothing,this->my)
 
@@ -6665,6 +6673,11 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
       if (touchme) {jump.drive = up->jump.drive;jump.damage=0;}
       numave++;
     }else if (jump.drive>=-1&&up->jump.drive>=-1) {
+      cancompletefully=false;
+    }
+  }
+  if (needs_redemption) {
+    if (!can_be_redeemed) {
       cancompletefully=false;
     }
   }
