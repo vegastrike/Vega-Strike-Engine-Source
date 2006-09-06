@@ -367,10 +367,13 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
       {innershield,middleshield,outershield},
       {innershield,middleshield,outershield}
   };
- 
-  float shthresh[3]={0.0f,0.33f,0.66f}; // PM me if you don't know why I did this.
-  float shtrans[3]={1.0f,1.0f,1.0f};
   static bool do_shield_fade=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","shield_vdu_fade","true"));
+  
+  static float shthresh[3]={
+    XMLSupport::parse_float(vs_config->getVariable("graphics","hud","shield_vdu_thresh0",do_shield_fade?"0":".25")),
+    XMLSupport::parse_float(vs_config->getVariable("graphics","hud","shield_vdu_thresh1",do_shield_fade?".33":".50")),
+    XMLSupport::parse_float(vs_config->getVariable("graphics","hud","shield_vdu_thresh2",do_shield_fade?".66":".75"))  }; // PM me if you don't know why I did this.
+  float shtrans[3]={1.0f,1.0f,1.0f};
   if (do_shield_fade) {
     shcolor[0][0].a *= mymax(0.0f,mymin(1.0f,(fs-shthresh[0])/(shthresh[1]-shthresh[0])*shtrans[0]));
     shcolor[0][1].a *= mymax(0.0f,mymin(1.0f,(fs-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1]));
