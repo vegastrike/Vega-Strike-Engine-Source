@@ -14,7 +14,7 @@
 #include "cmd/unit_util.h"
 #include "universe_util.h"
 #include "cmd/csv.h"
-
+#include "cmd/role_bitmask.h"
 //#include "universe_util_generic.h" //Use universe_util.h instead
 
 using namespace GalaxyXML;
@@ -148,6 +148,7 @@ void SortStarSystems (std::vector <StarSystem *> &ss, StarSystem * drawn) {
 }
 void Universe::Init( const char * gal)
 {
+	ROLES::getAllRolePriorities();
 	LoadWeapons(VSFileSystem::weapon_list.c_str());
 
 	this->galaxy = new GalaxyXML::Galaxy (gal);
