@@ -10,7 +10,22 @@
 /******************************************************************************************/
 /*** WEAPON STUFF                                                                      ****/
 /******************************************************************************************/
+void NetClient::sendCloak(bool engage) {
+	Packet p;
+	NetBuffer netbuf;
+	Unit *un = this->game_unit.GetUnit();
+	if (!un) return;
 
+	netbuf.addChar( engage?1:0 );
+	// Shold people be allowed to scan units in other zones?
+//	netbuf.addShort( un->activeStarSystem->GetZone());
+
+	p.send( CMD_CLOAK, un->GetSerial(),
+            netbuf.getData(), netbuf.getDataLength(),
+            SENDRELIABLE, NULL, *this->clt_tcp_sock,
+            __FILE__, PSEUDO__LINE__(1485) );
+
+}
 // Send a info request about the target
 void	NetClient::scanRequest( Unit * target)
 {

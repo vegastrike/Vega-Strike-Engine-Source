@@ -83,6 +83,7 @@ enum Cmd
 	CMD_PROJECTILE   ,      // Fire a projectile
 	CMD_BALL         ,		// Fire a ball ?
 	CMD_TARGET       ,		// Receive a target request (server side)
+        CMD_CLOAK        ,
                                     // or receive target info (client side)
 	CMD_SCAN         ,		// Receive a scan request (server side)
                                     // or receive target info (client side)

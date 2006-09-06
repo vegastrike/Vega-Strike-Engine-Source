@@ -4692,6 +4692,7 @@ void Unit::SetOwner(Unit *target) {
 }
 
 void Unit::Cloak (bool loak) {
+  damages|=CLOAK_DAMAGED;
   if (loak) {
     static bool warp_energy_for_cloak=XMLSupport::parse_bool(vs_config->getVariable("physics","warp_energy_for_cloak","true"));
     if (image->cloakenergy<(warp_energy_for_cloak?warpenergy:energy)) {

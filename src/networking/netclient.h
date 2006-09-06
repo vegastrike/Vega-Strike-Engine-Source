@@ -171,6 +171,7 @@ class	NetClient
 		int		checkMsg( Packet* outpacket );
 		// Send a position update
 		void	sendPosition( const ClientState* cs );
+		void	sendCloak( bool engage );
 		// Send a PING-like packet to say we are still alive (UDP)
 		void	sendAlive();
 		void	inGame();		// Tells the server we are ready to go in game

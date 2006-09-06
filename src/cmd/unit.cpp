@@ -139,7 +139,19 @@ template <class UnitType>
 GameUnit<UnitType>::GameUnit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml) : sparkle_accum(0) {
 	Unit::Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber, netxml);
 }
-
+template<class UnitType>
+void GameUnit<UnitType>::Cloak(bool engage) {
+  if (Network!=NULL&&!SERVER ) {
+    int which=UnitUtil::isPlayerStarship(this);
+    if (which>=0) {
+      Network[which].sendCloak(engage);
+    }else {
+      UnitType::Cloak(engage);//client side unit
+    }
+  }else{
+    UnitType::Cloak(engage);//client side unit
+  }
+}
 template <class UnitType>
 GameUnit<UnitType>::~GameUnit()
 {

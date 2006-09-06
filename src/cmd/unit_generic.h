@@ -685,7 +685,7 @@ public:
   }
 
   ///cloaks or decloaks the starship depending on the bool
-  void Cloak (bool cloak);
+  virtual void Cloak (bool cloak);
   ///deletes
   void Kill(bool eraseFromSave=true, bool quitting=false);
   ///Is dead yet?
