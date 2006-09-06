@@ -6656,7 +6656,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
     // NOTE: Afterburner type 1 (gas) 
     // NOTE: Afterburner type 0 (pwr) 
     
-    if (afterburnenergy<32767&&afterburnenergy<=up->afterburnenergy&&up->afterburnenergy!=0) {
+    if (afterburnenergy<32767&&afterburnenergy<=up->afterburnenergy&&up->afterburnenergy!=32767&&up->afterburnenergy!=0) {
       if (touchme) afterburnenergy=32767, afterburntype=0;
       numave++;
       percentage++;
@@ -6687,7 +6687,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
     // NOTE: Afterburner type 1 (gas) 
     // NOTE: Afterburner type 0 (pwr) 
 
-    if ((afterburnenergy>up->afterburnenergy||afterburntype!=up->afterburntype)&&up->afterburnenergy>0||force_change_on_nothing) {
+    if ((afterburnenergy>up->afterburnenergy||(afterburntype!=up->afterburntype&&up->afterburnenergy!=32767))&&up->afterburnenergy>0||force_change_on_nothing) {
       numave++;
       if (touchme) afterburnenergy=up->afterburnenergy, afterburntype=up->afterburntype;
     }else if (afterburnenergy<=up->afterburnenergy&&afterburnenergy>=0&&up->afterburnenergy>0&&up->afterburnenergy<32767) {
