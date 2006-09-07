@@ -8,6 +8,15 @@ class DBError(RuntimeError):
 
 
 class DBBase:
+	def __init__(self, mod):
+		if mod not in settings.mods:
+			raise DBError,"Invalid mod '"+mod+"'"
+		self.moddata = settings.mods[mod]
+		self.mod = self.moddata['path']
+		self.modkey = mod
+		self.data_path = settings.data_path
+		if self.mod:
+			self.data_path += '/' + self.mod
 	def check_password(self, username, password):
 		return False
 	def modify_account(self, username, type="llama.begin", faction="confed"):
@@ -37,21 +46,40 @@ class DBBase:
 			if oc < 32 or oc >= 127:
 				raise DBError, "Invalid character "+str(oc)+" in field."
 		return s
-	def open_default_file(self, ext):
-		f=open(settings.data_path+"/units/default."+ext,"rb")
-		ret = f.read()
-		f.close()
-		return ret#demands that these files exist
-	def get_default_save(self, shiptype, faction):
+	
+	def get_server(self, system):
+		servers = self.moddata['servers']
+		return servers.get(system,
+			servers.get(system.split('/')[0],
+			servers.get('', "0.0.0.0:4364")))
+	def open_default_file(self, file):
+		return open(self.data_path+'/'+file,"rb")
+	
+	def get_default_save(self, shiptype='', faction=''):
 		try:
-			s=self.open_default_file('save')
+			f=self.open_default_file("default.save")
+			s = f.read()
+			f.close()
 		except IOError:
 			raise DBError, "Not able to open the default saved game."
-		s=s.replace("^hyena 120000000000 40000000 -110000000000 pirates","^"+shiptype+" "+str(120000000000+random.uniform(-10000,10000))+" "+str(40000000+random.uniform(-10000,10000))+" "+str(-110000000000+random.uniform(-10000,10000))+" "+faction)
+		if not shiptype:
+			return s
+		caret = s.find('^')
+		if caret != -1:
+			caret = s.find('^', caret+1)
+		eol = s.find('\n')
+		if caret == -1 or eol == -1:
+			s='Crucible/Cephid_17^\n'
+			caret = len(s)-2
+			eol = len(s)-1
+		if not faction:
+			lastsp = s.rfind(' ',0,eol)
+			faction = s[lastsp+1:eol]
+		s=s[:caret]+"^"+shiptype+" "+str(120000000000+random.uniform(-10000,10000))+" "+str(40000000+random.uniform(-10000,10000))+" "+str(-110000000000+random.uniform(-10000,10000))+" "+faction+s[eol:]
 		return s
 	def get_default_csv(self, shiptype):
 		try:
-			unfp=open(settings.data_path+'/units/units.csv',"rb")
+			unfp=self.open_default_file('units.csv')
 		except IOError:
 			raise DBError, "Not able to open units.csv"
 		type_dat = unfp.readlines()
@@ -82,7 +110,8 @@ class DBBase:
 		raise DBError, "Can not find information for unit '"+shiptype+"'"
 
 class FileDB(DBBase):
-	def __init__(self, config):
+	def __init__(self, config, mod):
+		DBBase.__init__(self, mod)
 		self.storage_path = config['storage']
 		if self.storage_path[-1]=='/':
 			self.storage_path = self.storage_path[:-1]
@@ -90,7 +119,15 @@ class FileDB(DBBase):
 			os.mkdir(self.storage_path)
 		except:
 			pass
+		if self.mod:
+			try:
+				os.mkdir(self.storage_path+'/'+self.mod)
+			except:
+				pass
 		self.storage_path += '/'
+		self.user_path = self.storage_path
+		if self.mod:
+			self.storage_path += self.mod + '/'
 		if config.get('create_user',True):
 			self.create_user=True
 		else:
@@ -98,14 +135,14 @@ class FileDB(DBBase):
 	def check_password(self, username, password, can_create = False):
 		success=False
 		try:
-			f=open(self.storage_path+username+".password","rb")
+			f=open(self.user_path+username+".password","rb")
 			s=f.read()
 			f.close()
 			if self.compare_password(s, password):
 				success=True
 		except IOError:
 			if self.create_user and can_create:
-				f=open(self.storage_path+username+".password","wb")
+				f=open(self.user_path+username+".password","wb")
 				f.write(self.hash_password(password))
 				f.close()
 				success=True
@@ -115,14 +152,14 @@ class FileDB(DBBase):
 	# Checks a string for valid username characters.
 	def check_string(self, s):
 		if not s:
-			raise db.DBError, "You must fill out the field"
+			raise DBError, "You must fill out all fields"
 		
 		for c in s:
 			if not (c.isalnum() or c=='_' or c=='-' or c=='.' or c=='$'):
 				raise DBError, "Invalid character "+c+" in input "+s
 		
 		if s.find("..")!=-1 or s.find(".xml")!= -1 or s.find(".save")!=-1 or s.find("accounts")!=-1 or s.find("default")!=-1:
-			raise db.DBError, "Invalid character . in input "+s
+			raise DBError, "Invalid character . in input "+s
 		
 		return s
 	
@@ -140,7 +177,7 @@ class FileDB(DBBase):
 		if not self.check_string(user):
 			return None
 		try:
-			f=open(self.storage_path+user+".password","rb")
+			f=open(self.user_path+user+".password","rb")
 			tpass=f.read()
 			f.close()
 			if self.compare_password(tpass, password):
@@ -176,12 +213,13 @@ class FileDB(DBBase):
 		f.close()#empty file
 
 class MysqlDB(DBBase):
-	def __init__(self, config):
+	def __init__(self, config, mod):
+		DBBase.__init__(self, mod)
 		try:
 			import MySQLdb
 			self.conn = MySQLdb.connect(
 				host   = config['host'],
-				port   = int(config['port']),
+				port   = int(config.get('port','3306')),
 				passwd = config['passwd'],
 				user   = config['user'],
 				db     = config['db'])
@@ -189,7 +227,9 @@ class MysqlDB(DBBase):
 		except:
 			self.conn = None
 			self.dict_cursor = None
-		self.user_table = config['user_table']
+		self.user_table = config.get('user_table', 'accounts')
+		self.account_table = config.get('account_table', 'accounts')
+
 		if config.get('create_user',True):
 			self.create_user = True
 		else:
@@ -220,19 +260,42 @@ class MysqlDB(DBBase):
 	
 	def save_account(self, username, save, csv):
 		c = self.conn.cursor()
-		c.execute('UPDATE ' + self.user_table +
-			' SET savegame=%s, csv=%s WHERE username=%s',
-			(save, csv, username) )
+		whereadd=''
+		if self.user_table != self.account_table:
+			c.execute('SELECT logged_in_server FROM '+self.account_table +
+				' WHERE username=%s AND modname=%s',
+				(username, self.modkey))
+			row = c.fetchone()
+			if not row:
+				c.execute('INSERT INTO '+self.account_table +
+					' (username, modname, csv, savegame, logged_in_server)'+
+					' VALUES (%s, %s, %s, %s, 1)',
+					(username, self.modkey, csv, save))
+			else:
+				c.execute('UPDATE ' + self.account_table +
+					' SET savegame=%s, csv=%s WHERE username=%s AND modname=%s',
+					(save, csv, username, self.modkey))
+		else:
+			c.execute('UPDATE ' +self.user_table+
+				'SET savegame=%s, csv=%s WHERE username=%s',
+				(save, csv, username))
 	
 	def get_login_info(self, username, password):
 		c = self.conn.cursor(self.dict_cursor)
-		c.execute('SELECT logged_in_server, user_password, savegame, csv FROM ' +
-			self.user_table + ' WHERE username=%s',
-			(username,))
-		result = c.fetchone()
-		if (result):
-			if self.compare_password(result['user_password'], password):
-				return result
+		if self.user_table != self.account_table:
+			if self.check_password(username, password, False):
+				c.execute('SELECT logged_in_server, savegame, csv FROM ' +
+					self.account_table + ' WHERE username=%s AND modname=%s',
+					(username,self.modkey))
+				return c.fetchone()
+		else:
+			c.execute('SELECT logged_in_server, user_password, savegame, csv FROM ' +
+				self.user_table + ' WHERE username=%s',
+				(username,))
+			result = c.fetchone()
+			if (result):
+				if self.compare_password(result['user_password'], password):
+					return result
 		return None
 	
 	def set_connected(self, user, isconnected):
@@ -243,11 +306,11 @@ class MysqlDB(DBBase):
 		c.execute('UPDATE '+self.user_table+' SET logged_in_server='+
 			logged_in_str+' WHERE username=%s', (user,) )
 
-def connect(config):
+def connect(config, mod):
 	if config['type'] == 'file':
-		return FileDB(config)
+		return FileDB(config, mod)
 	elif config['type'] == 'mysql':
-		return MysqlDB(config)
+		return MysqlDB(config, mod)
 	else:
 		raise DBError('invalid database type: '+str(dbconfig.type))
 

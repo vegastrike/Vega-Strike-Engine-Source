@@ -8,8 +8,6 @@ import cgitb; cgitb.enable()
 import db
 import settings
 
-dbconn = db.connect(settings.dbconfig)
-
 print "Content-Type: text/html"
 print ""
 
@@ -27,12 +25,24 @@ footer = """
 </html>
 """
 
-errorvar="<br><a href=\"register.cgi\">Return To Account Creation Form</a>"
+form = cgi.FieldStorage()
+if form.has_key("mod"):
+	mod = form["mod"].value
+else:
+	mod = os.environ.get('QUERY_STRING','')
+
+if mod:
+	query = '?'+mod
+else:
+	query=''
+
+errorvar="<br><a href=\"register.cgi"+query+"\">Return To Account Creation Form</a>"
 
 success = False
 
 try:
-	form = cgi.FieldStorage()
+	dbconn = db.connect(settings.dbconfig, mod)
+	
 	username = dbconn.check_string( form.getvalue("username",'') )
 	password = dbconn.check_string( form.getvalue("password",'') )
 	faction = dbconn.check_string( form.getvalue("faction",'') )
@@ -51,7 +61,7 @@ print header
 print '<br>'
 if success:
 	print 'Download functional'
-	print '<a href="http://vegastrike.sourceforge.net/cgi-bin/vegastrike.config?username='+username+';password='+password+'">vegastrike.config</a>'
+	print '<a href="http://vegastrike.sourceforge.net/cgi-bin/vegastrike.config?username='+username+'&password='+password+'&mod='+mod+'">vegastrike.config</a>'
 	print 'to put in your vegastrike folder that has your appropriate login and password<br>'
 else:
 	print '<b>Registration Error</b>: ' + str(failed_error)

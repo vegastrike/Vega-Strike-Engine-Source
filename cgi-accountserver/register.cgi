@@ -1,5 +1,10 @@
 #!/usr/bin/python
-import settings
+#import cgitb;print 'Content-Type: text/html\n';cgitb.enable()
+import db
+import os
+
+mod = os.environ.get('QUERY_STRING','')
+filedb = db.DBBase(mod)
 
 header = """
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
@@ -19,7 +24,10 @@ def print_heading():
     print '<h1>Create Username/password</h1>'
 
 def print_form():
-    print '<form name="type" action="register_submit.cgi" method="post">'
+    modstr=''
+    if mod:
+        modstr='?'+mod
+    print '<form name="type" action="register_submit.cgi'+modstr+'" method="post">'
     print '<table>'
     type_select()
     faction_select()
@@ -33,7 +41,9 @@ def type_select():
     print '<tr>'
     print '<td align= "right">Which type?</td>'
     print '<td><select name="type" size="1">'
-    type_dat = open(settings.data_path+"/units/units.csv").readlines()
+    f = filedb.open_default_file("units.csv")
+    type_dat = f.readlines()
+    f.close()
     for line in type_dat[2:]:
         
         if (len(line) and line.find("turret")==-1):
@@ -58,7 +68,9 @@ def faction_select():
     print '<tr>'
     print '<td align= "right">Which faction?</td>'
     print '<td><select name="faction" size="1">'
-    type_dat = open(settings.data_path+"/units/factions.xml").readlines()
+    f = filedb.open_default_file("factions.xml")
+    type_dat = f.readlines()
+    f.close()
     for line in type_dat[2:]:
         factionnamestr='action name="'
         where=line.find(factionnamestr)

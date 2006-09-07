@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import cgitb
+#;print "Content-Type: text/html\n";cgitb.enable()
 import sys
 import os
 import cgi
@@ -9,7 +10,7 @@ import urllib
 import db
 import settings
 
-conn = db.connect(settings.dbconfig)
+conn = None
 
 def urlDecode(args):
 	argsplit = args.split('&')
@@ -95,27 +96,18 @@ ACCT_NEWCHAR='c'
 ACCT_NEWSUBSCRIBE='u'
 ACCT_SUCCESS='!'
 
-defaultsave="""Crucible/Cephid_17^13500.000000^llama.begin 0 0 0 neutral
-0 mission data  4
-31337ness 2 0.050000 0.050000
-436457r1K3574r7uP71m35 1 5.000000
-stardate 1 151.199997
-unit_to_dock_with 10 1.000000 0.000000 116.000000 108.000000 97.000000 110.000000 116.000000 105.000000 115.000000 0.000000 
-0 missionstring data 0
-0 python data 1 0
-0 news data 1
-"""
-
 def getDefaultSave():
-	try:
-		return conn.open_default_file(".save")
-	except IOError:
-		return defaultsave;
-def getDefaultXML():
-	try:
-		return conn.open_default_file(".xml")
-	except IOError:
-		return ",Directory,Name\nKey,string,string\nllame,llame,llame\n"
+	return conn.get_default_save()
+def getDefaultXML(shipname):
+	return conn.get_default_csv(shipname)
+
+def getShipname(savegame):
+	where = savegame.find("^")
+	space = savegame.find(" ")
+	if where==-1 or space==-1:
+		return "llama.begin"
+	else:
+		return savegame[where+1:space]
 
 def getSystem(savegame):
 	where=savegame.find("^")
@@ -123,20 +115,6 @@ def getSystem(savegame):
 		return "testsystems/absolutelynothing.system"
 	else:
 		return savegame[0:where]
-def getServer(system):
-	sysstr = conn.check_string(system.replace("/","-"))
-	if not sysstr:
-		return "0.0.0.0:4364"
-	try:
-		f=open(settings.data_path+sysstr+".system","r")
-	except IOError:
-		try:
-			f=open(settings.data_path+"testsystems-absolutelynothing.system","r")
-		except IOError:
-			return "0.0.0.0:4364"
-	ret=f.read()
-	f.close()
-	return ret
 def getLoginInfo(conn, user, passwd, dologin):
 	p = Packet()
 	result = conn.get_login_info(user, passwd)
@@ -148,12 +126,12 @@ def getLoginInfo(conn, user, passwd, dologin):
 			print p
 			return
 		if not (result['savegame'] and result['csv']):
-			defcsv=getDefaultXML()
 			defsavegame=getDefaultSave()
+			defcsv=getDefaultXML(getShipname(defsavegame))
 			result['savegame'] = defsavegame
 			result['csv'] = defcsv
 			#result['csv'] = res['csv']
-		serverstrings=getServer(getSystem(result['savegame'])).split(":")
+		serverstrings=conn.get_server(getSystem(result['savegame'])).split(":")
 		if dologin:
 			conn.set_connected(user,True)
 			p.addChar(ACCT_LOGIN_ACCEPT)
@@ -189,7 +167,7 @@ def vegastrike(conn,url,post):
 	try:
 		packet = Packet(post) #if it crashes we dont care..this is python
 		command = packet.getChar()
-	except IndentationError:
+	except:
 		command='UNKNOWN'
 		print "EXCEPTION: "+str(url)+"\n"+str(post);
 		packet = Packet('')
@@ -242,9 +220,12 @@ if __name__=='__main__':
 	print "Content-Type: text/html"
 	print ""
 	cgitb.enable()
+	get_args = os.environ['QUERY_STRING']
+	conn = db.connect(settings.dbconfig, get_args)
 	post_args = ''
 	if os.environ['REQUEST_METHOD'] == 'POST':
 		leng = os.environ['CONTENT_LENGTH']
 		post_args = sys.stdin.read(int(leng))
-	get_args = os.environ['QUERY_STRING']
-	vegastrike(conn, urlDecode(get_args), post_args)
+	#get_args = urlDecode(get_args)
+	vegastrike(conn, get_args, post_args)
+
