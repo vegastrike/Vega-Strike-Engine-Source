@@ -2223,6 +2223,7 @@ void Unit::AddVelocity(float difficulty) {
 	   static double warpcruisemult=XMLSupport::parse_float(vs_config->getVariable("physics","warpcruisemult","5000")); // Mult at 1-2 boundary
 	   static double curvedegree=XMLSupport::parse_float(vs_config->getVariable("physics","warpcurvedegree","1.5")); // degree of curve
        static double upcurvek=warpcruisemult/pow((warpregion1-warpregion0),curvedegree); // coefficient so as to agree with above
+       static float def_inv_interdiction=1./XMLSupport::parse_float(vs_config->getVariable("physics","default_interdiction",".125")); // inverse fractional effect of ship vs real big object
 	   float minmultiplier=warpMultiplierMax*graphicOptions.MaxWarpMultiplier;
 	   Unit * planet;
            Unit * testthis=NULL;
@@ -2239,11 +2240,11 @@ void Unit::AddVelocity(float difficulty) {
                  if (planet==this) {
                      continue;
                  }
-		 float shiphack=.25;
+		 float shiphack=1;
                  if (planet->isUnit()!=PLANETPTR) {
-                   shiphack=1;
+                   shiphack=def_inv_interdiction;
                    if (planet->specInterdiction!=0&&planet->graphicOptions.specInterdictionOnline!=0) {
-		       shiphack=1./fabs(planet->specInterdiction);
+		       shiphack=1/fabs(planet->specInterdiction);
 		       if (this->specInterdiction!=0&&this->graphicOptions.specInterdictionOnline!=0) {
 			   shiphack*=fabs(this->specInterdiction);//only counters artificial interdiction ... or maybe it cheap ones shouldn't counter expensive ones!? or expensive ones should counter planets...this is safe now, for gameplay
 		       }
@@ -2260,7 +2261,7 @@ void Unit::AddVelocity(float difficulty) {
                  do {
                    double dist=udist+(velproj<0?velproj*SIMULATION_ATOM:0);
                    if (dist<0) dist=0;
-                   dist*=shiphack*4;
+                   dist*=shiphack;
                    
                    if (dist>(effectiverad+warpregion0)){
                      multipliertemp=pow((dist-effectiverad-warpregion0),curvedegree)*upcurvek;

@@ -1254,10 +1254,15 @@ static Unit * ChooseNavPoint(Unit * parent, Unit **otherdest, float *lurk_on_arr
     timehash=hostile_select_time;
   unsigned int firstRand,thirdRand;
   float secondRand;
+  const unsigned int maxrand=5;
+  unsigned int additionalrand[maxrand];
   if (civilian) {
     firstRand=vsrandom.genrand_int31();
     secondRand=vsrandom.uniformExc(0,1);
     thirdRand=vsrandom.genrand_int31();
+    for (unsigned int i=0;i<maxrand;++i) {
+	additionalrand[i]=thirdRand+i;
+    }
   }else{
     int k = (int)(getNewTime()/timehash);// two minutes
     string key = UnitUtil::getFlightgroupName(parent);
@@ -1269,6 +1274,9 @@ static Unit * ChooseNavPoint(Unit * parent, Unit **otherdest, float *lurk_on_arr
     firstRand=choosePlace.genrand_int31();
     secondRand=choosePlace.uniformExc(0,1);
     thirdRand=choosePlace.genrand_int31();
+    for (unsigned int i=0;i<maxrand;++i) {
+	additionalrand[i]=choosePlace.genrand_int31();
+    }
   }
   
   bool asteroidhide = (secondRand < stats->enemycount/(float)stats->friendlycount)&&(secondRand<num_ships_per_roid*stats->navs[2].size()/(float)stats->enemycount);
@@ -1308,8 +1316,14 @@ static Unit * ChooseNavPoint(Unit * parent, Unit **otherdest, float *lurk_on_arr
       b=GetRandomNav(stats->navs,thirdRand+1);
     }
     if (a!=b) {
-      *otherdest=b;
-      *lurk_on_arrival=lurk_time;
+	int retrycount=maxrand;
+	while (--retrycount > 0&&(UnitUtil::getDistance(a,b)<parent->GetComputerData().radar.maxrange*4||a==b)) {
+	    b=GetRandomNav(stats->navs,additionalrand[retrycount]);
+	}
+	if (retrycount!=0) {
+	    *otherdest=b;
+	    *lurk_on_arrival=lurk_time;
+	}
     }
     return a;
   }else {

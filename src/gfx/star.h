@@ -33,6 +33,7 @@ public:
 };
 
 class PointStarVlist:public StarVlist{
+  float smoothstreak;
   GFXVertexList * vlist;
   GFXVertexList * nonstretchvlist;
 public:

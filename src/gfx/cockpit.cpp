@@ -1376,6 +1376,7 @@ void GameCockpit::DrawGauges(Unit * un) {
   GFXColor4f (1,1,1,1);
 }
 void GameCockpit::Init (const char * file) {
+  smooth_fov=g_game.fov;
   editingTextMessage=false;
   armor8=false;
   shield8=false;
@@ -2776,31 +2777,31 @@ void GameCockpit::SetupViewPort (bool clip) {
         if (shake_asymptotic)  sh_warpfieldstrength = atan(sh_warpfieldstrength);
         if (refkps<=1) refkps=1;
         if (kps>refkps) kps=refkps;
-        for (int i=0; i<NUM_CAM; i++) {
-            float unv = un->GetVelocity().Magnitude();
-            float camv = _Universe->AccessCamera(i)->GetR().Magnitude();
-            if (unv<=1) unv=1;
-            if (camv<=1) camv=1;
-            float cosangle = (un->GetVelocity() * _Universe->AccessCamera(i)->GetR()) / (unv*camv) * (kps/refkps);
-            float st_offs,sh_offs,st_mult,sh_mult;
-            if (cosangle>0) {
-                st_offs = stable_offset_f*cosangle + stable_offset_p*(1-cosangle);
-                sh_offs = shake_offset_f *cosangle + shake_offset_p *(1-cosangle);
-                st_mult = stable_multiplier_f*cosangle + stable_multiplier_p*(1-cosangle);
-                sh_mult = shake_multiplier_f *cosangle + shake_multiplier_p *(1-cosangle);
-            } else {
-                st_offs = stable_offset_b*-cosangle+ stable_offset_p*(1+cosangle);
-                sh_offs = shake_offset_b *-cosangle+ shake_offset_p *(1+cosangle);
-                st_mult = stable_multiplier_b*-cosangle + stable_multiplier_p*(1+cosangle);
-                sh_mult = shake_multiplier_b *-cosangle + shake_multiplier_p *(1+cosangle);
-            }
-            st_offs *= st_warpfieldstrength;
-            sh_offs *= sh_warpfieldstrength*costheta;
-            st_mult = (1-st_warpfieldstrength)+st_mult*st_warpfieldstrength;
-            sh_mult *= sh_warpfieldstrength*costheta;
-
-            _Universe->AccessCamera(i)->SetFov(g_game.fov*(st_mult+sh_mult)+st_offs+sh_offs);
+        float unv = un->GetVelocity().Magnitude();
+        float camv = _Universe->AccessCamera()->GetR().Magnitude();
+        if (unv<=1) unv=1;
+        if (camv<=1) camv=1;
+        float cosangle = (un->GetVelocity() * _Universe->AccessCamera()->GetR()) / (unv*camv) * (kps/refkps);
+        float st_offs,sh_offs,st_mult,sh_mult;
+        if (cosangle>0) {
+             st_offs = stable_offset_f*cosangle + stable_offset_p*(1-cosangle);
+             sh_offs = shake_offset_f *cosangle + shake_offset_p *(1-cosangle);
+             st_mult = stable_multiplier_f*cosangle + stable_multiplier_p*(1-cosangle);
+             sh_mult = shake_multiplier_f *cosangle + shake_multiplier_p *(1-cosangle);
+        } else {
+             st_offs = stable_offset_b*-cosangle+ stable_offset_p*(1+cosangle);
+             sh_offs = shake_offset_b *-cosangle+ shake_offset_p *(1+cosangle);
+             st_mult = stable_multiplier_b*-cosangle + stable_multiplier_p*(1+cosangle);
+             sh_mult = shake_multiplier_b *-cosangle + shake_multiplier_p *(1+cosangle);
         }
+        st_offs *= st_warpfieldstrength;
+        sh_offs *= sh_warpfieldstrength*costheta;
+        st_mult = (1-st_warpfieldstrength)+st_mult*st_warpfieldstrength;
+        sh_mult *= sh_warpfieldstrength*costheta;
+	static float fov_smoothing=XMLSupport::parse_float(vs_config->getVariable("graphics","warp.fovlink.smoothing",".999"));
+	smooth_fov=fov_smoothing*smooth_fov+(1-fov_smoothing)*g_game.fov*(st_mult+sh_mult)+st_offs+sh_offs;
+        _Universe->AccessCamera()->SetFov(smooth_fov);
+      
     }
   }
   _Universe->AccessCamera()->UpdateGFX(clip?GFXTRUE:GFXFALSE);

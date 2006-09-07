@@ -57,7 +57,7 @@ private:
   float shake_time;
   int shake_type;
   Vector oaccel;
-
+  float smooth_fov;
   float last_locktime;
   float last_mlocktime;
   bool armor8;

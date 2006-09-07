@@ -287,6 +287,7 @@ static GFXColorVertex * AllocVerticesForSystem(std::string our_system_name, floa
         return tmpvertex;
 }
 PointStarVlist::PointStarVlist (int num ,float spread,const std::string &sysnam):StarVlist(spread) {
+    smoothstreak=0;
 	//static bool StarStreaks=XMLSupport::parse_bool(vs_config->getVariable("graphics","star_streaks","false"));
         GFXColorVertex * tmpvertex = AllocVerticesForSystem(sysnam,this->spread,&num,2);
 	//if(StarStreaks) {
@@ -316,22 +317,27 @@ bool PointStarVlist::BeginDrawState (const QVector &center, const Vector & veloc
 		Matrix rollMatrix;
 		static float velstreakscale= XMLSupport::parse_float (vs_config->getVariable ("graphics","velocity_star_streak_scale","5"));
 		static float minstreak= XMLSupport::parse_float (vs_config->getVariable ("graphics","velocity_star_streak_min","1"));
-
+		static float fov_smoothing=XMLSupport::parse_float(vs_config->getVariable("graphics","warp.fovlink.smoothing",".999"));
 		Vector vel (-velocity*velstreakscale);
-		if (vel.MagnitudeSquared()>=minstreak*minstreak) {
-			ret=true;
-                        float speed = vel.Magnitude();
-                        if (speed<minstreak) speed=minstreak;
-                        static float streakcap  = XMLSupport::parse_float (vs_config->getVariable ("graphics","velocity_star_streak_max","100"));
-                        if (speed>streakcap) {
-                          vel.Normalize();
-                          vel=vel*streakcap;
-                        }
-			GFXColorVertex * v = vlist->BeginMutate(0)->colors;
-			int numvertices = vlist->GetNumVertices();
-
-			static float torquestreakscale= XMLSupport::parse_float (vs_config->getVariable ("graphics","torque_star_streak_scale","1"));
-			for (int j=0;j<numvertices-1;j+=2) {
+		if (smoothstreak>=minstreak||vel.MagnitudeSquared()>=minstreak*minstreak) {
+		    ret=true;
+		    float speed = vel.Magnitude();
+		    vel*=1./speed;
+		    speed*=(1-fov_smoothing);
+		    speed+=fov_smoothing*smoothstreak;
+		    
+		    if (speed<minstreak) speed=minstreak;
+		    static float streakcap  = XMLSupport::parse_float (vs_config->getVariable ("graphics","velocity_star_streak_max","100"));
+		    if (speed>streakcap) {
+			speed=streakcap;
+		    }
+		    vel=vel*speed;
+		    smoothstreak=speed;
+		    GFXColorVertex * v = vlist->BeginMutate(0)->colors;
+		    int numvertices = vlist->GetNumVertices();
+		    
+		    static float torquestreakscale= XMLSupport::parse_float (vs_config->getVariable ("graphics","torque_star_streak_scale","1"));
+		    for (int j=0;j<numvertices-1;j+=2) {
 				int i=j;
 //				if (SlowStarStreaks)
 //					i=((rand()%numvertices)/2)*2;
@@ -347,8 +353,8 @@ bool PointStarVlist::BeginDrawState (const QVector &center, const Vector & veloc
 //				static float NumSlowStarStreaks=XMLSupport::parse_float(vs_config->getVariable("graphics","num_star_streaks",".05"));
 //				if (SlowStarStreaks&&j<NumSlowStarStreaks*numvertices)
 //					break;
-			}
-			vlist->EndMutate();
+		    }
+		    vlist->EndMutate();
 		}
 	}
 	if (ret) {
