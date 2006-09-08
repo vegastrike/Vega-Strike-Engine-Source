@@ -3029,7 +3029,7 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
   static float FMEC_factor=XMLSupport::parse_float (vs_config->getVariable("physics","FMEC_factor","0.000000008")); // Fuel Mass in metric tons expended per generation of 100MJ assuming 5,000,000m/s exit velocity
   static float FMEC_exit_vel_inverse=XMLSupport::parse_float (vs_config->getVariable("physics","FMEC_exit_vel","0.0000002")); // 1/5,000,000 m/s
 	  if (afterburntype == 2) // Energy-consuming afterburner
-		  warpenergy-=GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
+		  warpenergy-=afterburnenergy*GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
 	  if (afterburntype == 1) {// fuel-burning overdrive - uses afterburner efficiency
             fuel-=afterburnenergy*GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
             if (ISNAN(fuel)) {
