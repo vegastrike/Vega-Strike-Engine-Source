@@ -535,7 +535,7 @@ bool Nearby(ClientPtr clt, Unit * un) {
   if (parent) {
     if (un==parent) return true;
     double mm;
-    if (!parent->InRange(un,mm,false)) {
+    if (!parent->InRange(un,mm,false,false,true)) {
       return false;
     }
     static double maxrange=XMLSupport::parse_float(vs_config->getVariable("server","max_send_range","1e21"));
