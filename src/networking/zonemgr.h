@@ -81,7 +81,7 @@ class ZoneMgr
 		Systems			Systems;
 
 		void	addDamage( NetBuffer & netbuf, Unit * un);
-		bool	addPosition( NetBuffer & netbuf, Unit * un, ClientState & un_cs);
+		bool	addPosition( ClientPtr k, NetBuffer & netbuf, Unit * un, ClientState & un_cs);
 
 	public:
 

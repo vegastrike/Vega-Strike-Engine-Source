@@ -479,7 +479,7 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 								//cs.setDelay( cltl->getDeltatime() );
 								// This should be moved out of the 'if' when download manager is working
 							//}
-							bool added = addPosition( netbuf, unit, cs);
+							bool added = addPosition( cltk, netbuf, unit, cs);
                                                         if( added )
 							    nbunits++;
 						}
@@ -497,8 +497,22 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
                                    __FILE__, PSEUDO__LINE__(337) );
 					}
 				}
-			}
-		}
+                                {
+                                  Unit * unit;
+                                  if ((unit=cltk->game_unit.GetUnit())!=NULL){
+                                    Unit*targ=unit->Target();
+                                    if (targ) {
+                                      double range=unit->GetComputerData().radar.maxrange;
+                                      unit->GetComputerData().radar.maxrange*=1.5;//generous
+                                      if (!unit->InRange(targ,false)) {
+                                        unit->Target(NULL);                                 
+                                      }
+                                      unit->GetComputerData().radar.maxrange=range;
+                                    }
+                                  }
+                                }
+                        }
+                }
 		{
 			UnitCollection::UnitIterator iter = (_Universe->star_system[i]->getUnitList()).createIterator();
 			Unit * unit;
@@ -507,6 +521,7 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 			while( (unit=iter.current()) != NULL)
 			{
 				unit->damages = Unit::NO_DAMAGE;
+
 				if (vsrandom.genrand_int31()%(totalunits*10+1) == 1) {
 					unit->damages = 0xffff;
 				}
@@ -515,8 +530,21 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 		}
 	}
 }
-
-bool ZoneMgr::addPosition( NetBuffer & netbuf, Unit * un, ClientState & un_cs)
+bool Nearby(ClientPtr clt, Unit * un) {
+  Unit * parent=clt->game_unit.GetUnit();
+  if (parent) {
+    if (un==parent) return true;
+    double mm;
+    if (!parent->InRange(un,mm,false)) {
+      return false;
+    }
+    static double maxrange=XMLSupport::parse_float(vs_config->getVariable("server","max_send_range","1e21"));
+    if (mm>maxrange)
+      return false;
+  }else return false;
+  return true;
+}
+bool ZoneMgr::addPosition( ClientPtr client, NetBuffer & netbuf, Unit * un, ClientState & un_cs)
 {
 	// This test may be wrong for server side units -> may cause more traffic than needed
 	if( 1 /* !(un->old_state.getPosition()==un->curr_physical_state.position) ||
@@ -531,7 +559,7 @@ bool ZoneMgr::addPosition( NetBuffer & netbuf, Unit * un, ClientState & un_cs)
 			// So we can send only position
 			// Here distance should never be 0
 			//ratio = radius/distance;
-			if( 1 /* ratio > XX client not too far */)
+			if( un->damages||Nearby(client, un) /* ratio > XX client not too far */)
 			{
 				unsigned char type = ZoneMgr::FullUpdate;
 				if (un->damages) {
@@ -734,6 +762,7 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 			netbuf.addInt32( un->cloaking);
 			netbuf.addFloat( un->image->cloakenergy);
 			netbuf.addInt32( un->cloakmin);
+			netbuf.addInt32( un->image->cloakrate);
 		}
 		if( damages & Unit::LIMITS_DAMAGED)
 		{

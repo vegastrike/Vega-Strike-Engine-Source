@@ -952,7 +952,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 		case CMD_CLOAK :
                   {
 			// Received a computer targetting request
-			target_serial = netbuf.getSerial();
+			//target_serial = netbuf.getSerial();
                         char engage=netbuf.getChar();
 			unclt = clt->game_unit.GetUnit();
 			if (!unclt) {
