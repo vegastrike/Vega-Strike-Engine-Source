@@ -3775,11 +3775,16 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
 
 // NUMGAUGES has been moved to images.h in UnitImages
 void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degrees) {
+ 
 	float deg = fabs(180*atan2 (vec.i,vec.k)/M_PI);
 	//float randnum=rand01();
 	//float degrees=deg;
 	randnum=rand01();
-
+        static float inv_min_dam=1.0f-XMLSupport::parse_float(vs_config->getVariable("physics","min_damage",".001"));
+        static float inv_max_dam=1.0f-XMLSupport::parse_float(vs_config->getVariable("physics","min_damage",".999"));
+        
+        if (dam<inv_max_dam) dam=inv_max_dam;
+        if (dam>inv_min_dam) dam=inv_min_dam;
 	degrees=deg;
 	if (degrees>180) {
 		degrees=360-degrees;

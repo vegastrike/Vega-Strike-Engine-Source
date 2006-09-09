@@ -179,6 +179,7 @@ int allexcept=0;
 #endif
 int shiftup(int);
 string getUnitNameAndFgNoBase(Unit * target);
+  const Unit * loadUnitByCache(std::string name,int faction);
 
 namespace CockpitKeys {
   unsigned int textmessager=0;
@@ -344,7 +345,6 @@ namespace CockpitKeys {
 	}
 
   }
-
 bool cockpitfront=true;
   void Inside(const KBData&,KBSTATE newState) {
     {
@@ -388,6 +388,11 @@ bool cockpitfront=true;
    scrolltime+=GetElapsedTime();
    if(newState==PRESS||(newState==DOWN&&scrolltime>=.5)){
      scrolltime=0;
+     /*
+     if (_Universe->AccessCockpit()->GetParent()) {
+       _Universe->AccessCockpit()->GetParent()->DamageRandSys( _Universe->AccessCockpit()->GetParent()->GetHull()*(rand()/(float)RAND_MAX),Vector(rand()*2.0/(float)RAND_MAX-1.0,rand()*2.0/(float)RAND_MAX-1.0,rand()*2.0/(float)RAND_MAX-1.0),rand()/(float)RAND_MAX,rand()*3.14*2/(float)RAND_MAX);
+     }
+     */
      //feenableexcept(allexcept);
      printf ("Enabling exceptions %d\n",allexcept);
      _Universe->AccessCockpit()->ScrollAllVDU (-1);
@@ -398,6 +403,28 @@ bool cockpitfront=true;
    scrolltime+=GetElapsedTime();
    if(newState==PRESS||(newState==DOWN&&scrolltime>=.5)){
      scrolltime=0;
+     /*
+     Unit * thus=_Universe->AccessCockpit()->GetParent();
+     if (thus) {
+       const char * DamagedCategory="upgrades/Damaged/";
+       int which = rand()%thus->numCargo();
+       static std::string Restricted_items=vs_config->getVariable("physics","indestructable_cargo_items","");
+       if (thus->GetCargo(which).category.find("upgrades/")==0&& thus->GetCargo(which).category.find(DamagedCategory)!=0 &&thus->GetCargo(which).content.find("mult_")!=0&&Restricted_items.find(thus->GetCargo(which).content)==string::npos) {//why not downgrade _add GetCargo(which).content.find("add_")!=0&&
+         int lenupgrades = strlen("upgrades/");
+         thus->GetCargo(which).category = string(DamagedCategory)+thus->GetCargo(which).category.substr(lenupgrades);
+         static bool NotActuallyDowngrade=XMLSupport::parse_bool(vs_config->getVariable("physics","separate_system_flakiness_component","false"));
+         if (!NotActuallyDowngrade) {
+           const Unit * downgrade=loadUnitByCache(thus->GetCargo(which).content,FactionUtil::GetFactionIndex("upgrades"));
+           if (downgrade) {
+             if (0==downgrade->GetNumMounts()&&downgrade->SubUnits.empty()) {
+               double percentage=0;
+               thus->Downgrade(downgrade,0,0,percentage,NULL);
+             }
+           }
+         }
+       }
+     }
+     */
      //feenableexcept(0);
      printf("Disabling exceptions\n");
      _Universe->AccessCockpit()->ScrollAllVDU (1);
