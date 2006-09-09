@@ -193,13 +193,18 @@ Cockpit * NetServer::loadFromSavegame( ClientPtr clt ) {
 	//vector<vector <string> > path = lookforUnit( savedships[0].c_str(), saved_faction, false);
 	bool exist = true; //(VSFileSystem::LookForFile( savedships[0], VSFileSystem::UnitFile)<=VSFileSystem::Ok);
 	static std::string loadfailed ("LOAD_FAILED");
-	Unit * un = UnitFactory::createUnit( PLAYER_SHIPNAME.c_str(),
+	Unit * un = NULL;
+	if (!PLAYER_SHIPNAME.empty()) {
+		un = UnitFactory::createUnit( PLAYER_SHIPNAME.c_str(),
                          false,
 						 saved_faction,
                          string(""),
                          Flightgroup::newFlightgroup (clt->callsign,PLAYER_SHIPNAME,PLAYER_FACTION_STRING,"default",1,1,"","",mission),
                          0, &clt->savegame[1]);
-	if (un->name==loadfailed) {
+	}
+	if (!un) {
+		exist = false;
+	} else if (un->name==loadfailed) {
 		exist = false;
 		un->Kill();
 	}
