@@ -567,11 +567,18 @@ bool FireAt::ShouldFire(Unit * targ, bool &missilelock) {
       distance = dist;
     }
   static float firewhen = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","InWeaponRange","1.2"));
-  static float fireangle_minagg = (float)cos(XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MaximumFiringAngle.minagg","0.35"))); //Roughly 20 degrees
-  static float fireangle_maxagg = (float)cos(XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MaximumFiringAngle.maxagg","0.785"))); //Roughly 45 degrees
+  static float fireangle_minagg = (float)cos(M_PI*XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MaximumFiringAngle.minagg","10"))/180.); //Roughly 10 degrees
+  static float fireangle_maxagg = (float)cos(M_PI*XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MaximumFiringAngle.maxagg","18"))/180.); //Roughly 18 degrees
   bool temp=parent->TrackingGuns(missilelock);
   bool isjumppoint=targ->isUnit()==PLANETPTR&&((Planet*)targ)->GetDestinations().empty()==false;
   float fangle = (fireangle_minagg+fireangle_maxagg*agg)/(1.0f+agg);
+  /*
+  static int retro=FactionUtil::GetFactionIndex("retro");
+  static int pirates=FactionUtil::GetFactionIndex("pirates");
+  if (parent->faction==retro||parent->faction==pirates) {
+    printf ("sf: d %f fw %f ang %f fang %f ret:%d\n",dist,firewhen,angle,fangle,((dist<firewhen&&angle>fangle)||(temp&&dist<firewhen&&angle>0))&&!isjumppoint);
+    }*/
+
   return ((dist<firewhen&&angle>fangle)||(temp&&dist<firewhen&&angle>0))&&!isjumppoint;
 }
 
@@ -616,7 +623,12 @@ void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
     lastmissiletime=UniverseUtil::GetGameTime();
   }else if (UniverseUtil::GetGameTime()-lastmissiletime<missiledelay&&!fire_missile) {
     return;
-  }
+  }/*
+  static int retro=FactionUtil::GetFactionIndex("retro");
+  static int pirates=FactionUtil::GetFactionIndex("pirates");
+  if (parent->faction==retro||parent->faction==pirates) {
+    printf ("real %d\n",shouldfire);
+    }*/
   parent->Fire(FireBitmask(parent,shouldfire,fire_missile),true);
 }
 
