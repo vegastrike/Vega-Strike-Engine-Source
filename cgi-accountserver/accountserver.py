@@ -4,32 +4,14 @@ import cgitb
 #;print "Content-Type: text/html\n";cgitb.enable()
 import sys
 import os
-import cgi
-import urllib
 
 import db
 import settings
 
-conn = None
-
-def urlDecode(args):
-	argsplit = args.split('&')
-	arglist = {}
-	for arg in argsplit:
-		if not arg:
-			continue
-		argsp= arg.split('=')
-		name = urllib.unquote(argsp[0])
-		if len(argsp)>1:
-			value = urllib.unquote(argsp[1])
-		else:
-			value = ''
-		arglist[name] = value
-	return arglist
-
 class Packet:
-	def __init__(self, input=''):
+	def __init__(self, conn, input=''):
 		self.input = input;
+		self.conn = conn;
 		self.pos = 0
 	
 	def getChar(self):
@@ -58,7 +40,7 @@ class Packet:
 		return ""
 	
 	def getCheckedString(self):
-		return conn.check_string(self.getString())
+		return self.conn.check_string(self.getString())
 	
 	def addString(self, adder):
 		self.addInt(len(adder));
@@ -96,9 +78,9 @@ ACCT_NEWCHAR='c'
 ACCT_NEWSUBSCRIBE='u'
 ACCT_SUCCESS='!'
 
-def getDefaultSave():
+def getDefaultSave(conn):
 	return conn.get_default_save()
-def getDefaultXML(shipname):
+def getDefaultXML(conn,shipname):
 	return conn.get_default_csv(shipname)
 
 def getShipname(savegame):
@@ -116,7 +98,7 @@ def getSystem(savegame):
 	else:
 		return savegame[0:where]
 def getLoginInfo(conn, user, passwd, dologin):
-	p = Packet()
+	p = Packet(conn)
 	result = conn.get_login_info(user, passwd)
 	if result:
 		if 0 and dologin and result['logged_in_server']:
@@ -126,8 +108,8 @@ def getLoginInfo(conn, user, passwd, dologin):
 			print p
 			return
 		if not (result['savegame'] and result['csv']):
-			defsavegame=getDefaultSave()
-			defcsv=getDefaultXML(getShipname(defsavegame))
+			defsavegame=getDefaultSave(conn)
+			defcsv=getDefaultXML(conn,getShipname(defsavegame))
 			result['savegame'] = defsavegame
 			result['csv'] = defcsv
 			#result['csv'] = res['csv']
@@ -163,14 +145,18 @@ def getLoginInfo(conn, user, passwd, dologin):
 # REMOTE_ADDR/HOST (remote address.. could be used for finding fastest server?)
 # CONTENT_TYPE/LENGTH (POST data)
 # PATH_INFO (extra path info after CGI script [/cgi-bin/accountserver/test/blah => /test/blah])
-def vegastrike(conn,url,post):
+get_form=False
+post_form=False
+def execute(conn,url,post):
+	print '\r'
+	sys.stderr.write('Executing post query: '+post+'\n')
 	try:
-		packet = Packet(post) #if it crashes we dont care..this is python
+		packet = Packet(conn, post) #if it crashes we dont care..this is python
 		command = packet.getChar()
 	except:
 		command='UNKNOWN'
 		print "EXCEPTION: "+str(url)+"\n"+str(post);
-		packet = Packet('')
+		packet = Packet(conn, '')
 	if command==ACCT_LOGIN:
 		username=packet.getCheckedString()
 		password=packet.getCheckedString()
@@ -218,14 +204,13 @@ def vegastrike(conn,url,post):
 	
 if __name__=='__main__':
 	print "Content-Type: text/html"
-	print ""
 	cgitb.enable()
-	get_args = os.environ['QUERY_STRING']
+	get_args = os.environ.get('QUERY_STRING','')
 	conn = db.connect(settings.dbconfig, get_args)
 	post_args = ''
-	if os.environ['REQUEST_METHOD'] == 'POST':
+	if os.environ.get('REQUEST_METHOD','GET') == 'POST':
 		leng = os.environ['CONTENT_LENGTH']
 		post_args = sys.stdin.read(int(leng))
-	#get_args = urlDecode(get_args)
-	vegastrike(conn, get_args, post_args)
+	#get_args = db.urlDecode(get_args)
+	execute(conn, get_args, post_args)
 

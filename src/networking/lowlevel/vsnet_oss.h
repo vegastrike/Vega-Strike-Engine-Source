@@ -38,6 +38,8 @@ namespace VsnetOSS
  */
 INLINE int close_socket( int fd );
 
+bool set_blocking( int fd, bool isBlock );
+
 /** uses inet_aton if exists, otherwise inet_addr
  */
 INLINE int inet_aton(const char *cp, struct in_addr *inp);

@@ -3,9 +3,6 @@
 import db
 import os
 
-mod = os.environ.get('QUERY_STRING','')
-filedb = db.DBBase(mod)
-
 header = """
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -23,27 +20,26 @@ footer = """
 def print_heading():
     print '<h1>Create Username/password</h1>'
 
-def print_form():
+def print_form(filedb, mod):
+    
     modstr=''
     if mod:
         modstr='?'+mod
-    print '<form name="type" action="register_submit.cgi'+modstr+'" method="post">'
+    print '<form name="type" action="register_submit.py'+modstr+'" method="post">'
     print '<table>'
-    type_select()
-    faction_select()
-    title_field()
-    abstract_field()
+    type_select(filedb)
+    faction_select(filedb)
+    field('Handle','username')
+    field('Password','password')
     submit_button()
     print '</table>'
     print '</form>'
 
-def type_select():
+def type_select(filedb):
     print '<tr>'
     print '<td align= "right">Which type?</td>'
     print '<td><select name="type" size="1">'
-    f = filedb.open_default_file("units.csv")
-    type_dat = f.readlines()
-    f.close()
+    type_dat = filedb.get_default_csv(None)
     for line in type_dat[2:]:
         
         if (len(line) and line.find("turret")==-1):
@@ -64,7 +60,7 @@ def type_select():
     print '</tr>'
 
 
-def faction_select():
+def faction_select(filedb):
     print '<tr>'
     print '<td align= "right">Which faction?</td>'
     print '<td><select name="faction" size="1">'
@@ -87,17 +83,10 @@ def faction_select():
     print '</tr>'
 
 
-def title_field():
+def field(title, name):
     print '<tr>'
-    print '<td align="right">Handle:</td>'
-    print '<td><input name="username" type="text" size="20"></td>'
-    print '</tr>'
-
-def abstract_field():
-    print '<tr>'
-    print '<td valign="top" align="right">Password:</td>'
-    print '<td><input name="password" type="text" size="20"></td>'
-#    print '<td><textarea name="abstract" type="textarea" rows="1" cols="100"></textarea></td>'
+    print '<td align="right">'+title+':</td>'
+    print '<td><input name="'+name+'" type="text" size="20"></td>'
     print '</tr>'
 
 def submit_button():
@@ -105,13 +94,18 @@ def submit_button():
     print '<input value="Submit" type="submit">'
     print '</td></tr>'
 
-def print_registration():
+get_form=False
+post_form=False
+def execute(filedb, mod, post):
+	print "Content-Type: text/html"
+	print ""
 	print header
 	print_heading()
-	print_form()
+	print_form(filedb, mod)
 	print footer
 
 if __name__ == '__main__':
-	print "Content-Type: text/html"
-	print_registration()
+    mod = os.environ.get('QUERY_STRING','')
+    filedb = db.DBBase(mod)
+    execute(filedb, mod, '')
 

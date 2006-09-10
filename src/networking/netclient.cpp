@@ -274,7 +274,7 @@ int		NetClient::checkAcctMsg( )
 					lastsave.push_back( "!!! ACCESS DENIED : Account already logged in !!!");
 				break;
 				default:
-					COUT<<">>> UNKNOWN COMMAND =( "<<std::hex<<packeta<<" )= --------------------------------------"<<std::endl;
+					COUT<<">>> UNKNOWN COMMAND =( "<<std::hex<<packeta<<std::dec<<" )= --------------------------------------"<<std::endl;
                                         lastsave.resize(0);
 					lastsave.push_back( "");
 					lastsave.push_back( "!!! PROTOCOL ERROR : Unexpected command received !!!");
@@ -290,8 +290,8 @@ int		NetClient::checkAcctMsg( )
 				errno
 #endif
 				);
-			lastsave.push_back( "");
-			lastsave.push_back( str);
+//			lastsave.push_back( "");
+//			lastsave.push_back( str);
 			//acct_sock.disconnect( __PRETTY_FUNCTION__, false );
 		}
 	}
@@ -812,7 +812,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					serial = netbuf.getSerial();
                                         int noffset=netbuf.getOffset();
                                         if (noffset==offset) {
-                                          COUT << "ERROR Premature end of Snapshot buffer "<<std::hex<<std::string(netbuf.getData(),netbuf.getSize()) << std::endl;                                          
+                                          COUT << "ERROR Premature end of Snapshot buffer "<<std::hex<<std::string(netbuf.getData(),netbuf.getSize()) << std::dec << std::endl;
                                           break;
                                         }
                                         offset=noffset;

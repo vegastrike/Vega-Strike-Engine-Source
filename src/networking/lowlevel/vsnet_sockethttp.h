@@ -30,9 +30,11 @@ class VsnetHTTPSocket : public VsnetSocketBase //VsnetTCPSocket
   std::string dataToReceive;
   AddressIP _remote_ip;
   std::string waitingToReceive;
+  int numRetries;
   bool readHeader;
   bool parseHeaderByte( char rcvchr );
   bool ischunked;
+  int timeToNextRequest; // Wait a second between requests.
   bool readingchunked;
   int chunkedlen;
   char chunkedchar;

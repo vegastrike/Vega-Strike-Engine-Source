@@ -74,16 +74,25 @@ int NetUIBase::createClientSocket(const AddressIP &remote_ip, bool isTCP)
 
     if (isTCP) {
         COUT << "Connecting to " << inet_ntoa( remote_ip.sin_addr) << " on port " << remote_ip.sin_port << std::endl;
+        VsnetOSS::set_blocking( local_fd, false ); // Connect may hang... we don't want that.
 #if defined(_WIN32) && !defined(__CYGWIN__)
         if( ::connect( local_fd, (sockaddr *)&remote_ip, sizeof( struct sockaddr))==SOCKET_ERROR)
 #else
         if( ::connect( local_fd, (sockaddr *)&remote_ip, sizeof( struct sockaddr)) < 0 )
 #endif
         {
-            perror( "Can't connect to server ");
-            VsnetOSS::close_socket( local_fd );
-            return -1;
-        }
+            if
+#if defined(_WIN32) && !defined(__CYGWIN__)
+                ( WSAGetLastError() != WSAEINPROGRESS && WSAGetLastError() != WSAEWOULDBLOCK)
+#else
+                ( errno != EINPROGRESS && errno!= EWOULDBLOCK)
+#endif
+            {
+                perror( "Can't connect to server ");
+                VsnetOSS::close_socket( local_fd );
+                return -1;
+            }
+       }
     } else {
         // binds socket
         if( bind( local_fd, (sockaddr *)&remote_ip, sizeof(struct sockaddr_in))==SOCKET_ERROR )

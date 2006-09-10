@@ -1,6 +1,23 @@
 import random
 import settings
 import os
+import urllib
+
+#CGI Helper function to replace buggy FieldStorage
+def urlDecode(args):
+	argsplit = args.split('&')
+	arglist = {}
+	for arg in argsplit:
+		if not arg:
+			continue
+		argsp= arg.split('=')
+		name = urllib.unquote(argsp[0])
+		if len(argsp)>1:
+			value = urllib.unquote(argsp[1])
+		else:
+			value = ''
+		arglist[name] = value
+	return arglist
 
 class DBError(RuntimeError):
 	def __init__(self, args):
@@ -58,10 +75,13 @@ class DBBase:
 	def get_default_save(self, shiptype='', faction=''):
 		try:
 			f=self.open_default_file("default.save")
-			s = f.read()
-			f.close()
 		except IOError:
-			raise DBError, "Not able to open the default saved game."
+			try:
+				f=self.open_default_file("accounts/default.save")
+			except:
+				raise DBError, "Not able to open the default saved game."
+		s = f.read()
+		f.close()
 		if not shiptype:
 			return s
 		caret = s.find('^')
@@ -81,9 +101,14 @@ class DBBase:
 		try:
 			unfp=self.open_default_file('units.csv')
 		except IOError:
-			raise DBError, "Not able to open units.csv"
+			try:
+				unfp=self.open_default_file('units/units.csv')
+			except:
+				raise DBError, "Not able to open units.csv"
 		type_dat = unfp.readlines()
 		unfp.close()
+		if not shiptype:
+			return type_dat
 		s = ''
 		if len(type_dat)>3:
 			s += (type_dat[0])

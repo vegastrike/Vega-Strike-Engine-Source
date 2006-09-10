@@ -77,8 +77,9 @@ VsnetSocketBase::VsnetSocketBase( int fd, const char* socktype, SocketSet& sets 
     sprintf( _socktype, "%s (%s)", buf, socktype );
 
     assert( strlen(_socktype) == len-1 );
-
-    set_block( );
+	if (fd >= 0) {
+		set_block( );
+	}
     sets.set( this );
 }
 bool VsnetSocketBase::isReadyToSend(fd_set* write_set_select){
@@ -124,47 +125,27 @@ int VsnetSocketBase::close_fd( )
 bool VsnetSocketBase::set_nonblock( )
 {
     CHECK_VALID
-    assert( valid() );
-#if !defined(_WIN32) || defined(__CYGWIN__)
-    int datato = 1;
-    if( ::ioctl( _fd, FIONBIO, &datato ) == -1)
-    {
-        ::perror( "Error fcntl : ");
+    if( !valid() ) {
+        COUT << "Failed to set blocking socket "<<_socktype<<std::endl;
         return false;
     }
-#else
-    unsigned long datato = 1;
-    if( ::ioctlsocket( _fd, FIONBIO, &datato ) !=0 )
-    {
-        ::perror( "Error fcntl : ");
-        return false;
-    }
-#endif
-    _noblock = 1;
-    return true;
+	bool ret = VsnetOSS::set_blocking(_fd, false);
+	if (ret)
+		_noblock = 1;
+    return ret;
 }
 
 bool VsnetSocketBase::set_block( )
 {
     CHECK_VALID
-    assert( valid() );
-#if !defined(_WIN32) || defined(__CYGWIN__)
-    int datato = 0;
-    if( ::ioctl( _fd, FIONBIO, &datato ) == -1)
-    {
-        ::perror( "Error fcntl : ");
+    if( !valid() ) {
+        COUT << "Failed to set blocking socket "<<_socktype<<std::endl;
         return false;
     }
-#else
-    unsigned long datato = 0;
-    if( ::ioctlsocket( _fd, FIONBIO, &datato ) !=0 )
-    {
-        ::perror( "Error fcntl : ");
-        return false;
-    }
-#endif
-    _noblock = 0;
-    return true;
+	bool ret = VsnetOSS::set_blocking(_fd, true);
+	if (ret)
+		_noblock = 0;
+    return ret;
 }
 
 bool VsnetSocketBase::get_nonblock( ) const

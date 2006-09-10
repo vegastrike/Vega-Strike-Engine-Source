@@ -3,8 +3,9 @@
 #include "vsnet_oss.h"
 #include "vsnet_err.h"
 
-#include "packet.h"
+#include "lin_time.h"
 
+#include "packet.h"
 #include "netui.h"
 
 
@@ -15,10 +16,12 @@ VsnetHTTPSocket::VsnetHTTPSocket(
 				 const std::string&     host,
                  const std::string&     path,
                  SocketSet&       set )
-		: VsnetSocketBase(NetUIBase::createClientSocket(remote_ip, true), "http", set), _path(path), _hostheader(host),
+		: VsnetSocketBase(-1, "http", set), _path(path), _hostheader(host),
 		  _incompleteheadersection(0), _content_length(0), _send_more_data(false)
 
 		{
+			numRetries = 0;
+			timeToNextRequest = 0;
                   readHeader=false;
                   ischunked=false;
                   this->_remote_ip=remote_ip;
@@ -29,9 +32,13 @@ VsnetHTTPSocket::VsnetHTTPSocket(
 
 }
 bool VsnetHTTPSocket::write_on_negative() {
-  return !dataToSend.empty();
+  return need_test_writable();
 }
 bool VsnetHTTPSocket::need_test_writable( ){
+  if ((int)(getNewTime()-1) < timeToNextRequest) {
+    return false;
+  }
+  //std::cout << "retry: " << (int)(getNewTime()-1) << " < " << timeToNextRequest << std::endl;
   return !dataToSend.empty();
 }
 bool ishex(char x) {
@@ -85,9 +92,11 @@ bool VsnetHTTPSocket::isActive() {
 VsnetHTTPSocket::VsnetHTTPSocket(
                  const std::string& uri,
                  SocketSet&       set )
-		: VsnetSocketBase(NetUIBase::createClientSocket(remoteIPFromURI(uri), true), "http", set),
+		: VsnetSocketBase(-1, "http", set),
 		  _incompleteheadersection(0), _content_length(0), _send_more_data(false)
 {
+  numRetries = 0;
+  timeToNextRequest = 0;
   readHeader=false;
   std::string dummy;
   unsigned short port;
@@ -104,6 +113,7 @@ void VsnetHTTPSocket::reopenConnection() {
   if (dataToReceive.length()==0)
       waitingToReceive=std::string();
 
+  timeToNextRequest = (int)getNewTime() + 2;
   if (this->_fd>=0) {
     this->close_fd();
     this->_fd=-1;
@@ -113,7 +123,7 @@ void VsnetHTTPSocket::reopenConnection() {
 
 bool VsnetHTTPSocket::isReadyToSend(fd_set* write_set_select){
   if (get_write_fd()<0||FD_ISSET(get_write_fd(),write_set_select)) {
-    return !dataToSend.empty();
+	  return need_test_writable();
   }
   return false;
 }
@@ -256,6 +266,19 @@ bool VsnetHTTPSocket::parseHeaderByte( char rcvchr )
 }
 int errchance=9;
 void VsnetHTTPSocket::resendData() {
+    if (this->_fd>=0) {
+	this->close_fd();
+    }
+    this->_fd=-1;
+	if (waitingToReceive.empty())
+		return;
+	if (numRetries >= 10) {
+		waitingToReceive = std::string();
+		dataToReceive = "e";
+		return;
+	}
+	numRetries ++;
+	timeToNextRequest = (int)getNewTime() + 2;
     dataToSend.push_front(waitingToReceive);
     waitingToReceive=std::string();
     _header.clear();
@@ -267,15 +290,11 @@ void VsnetHTTPSocket::resendData() {
     chunkedlen=0;
     _incompleteheadersection=0;							
     chunkedchar='\0';
-    if (this->_fd>=0) {
-	this->close_fd();
-    }
-    this->_fd=-1;
 }
 bool VsnetHTTPSocket::lower_selected( int datalen )
 {
         if (waitingToReceive.empty()) {
-          if (dataToSend.size()==0&&this->_fd>=0) {
+			if (this->_fd>=0) { // dataToSend.size()==0&&
             this->close_fd();
             this->_fd=-1;//don't bother keepalive
           }
@@ -448,6 +467,11 @@ bool VsnetHTTPSocket::lower_selected( int datalen )
 		}
 	}
  donewiththis:
+	if (datalen == -1) {
+		resendData();
+		datalen = 0;
+		return false;
+	}
 	if (_content_length == 0 && !_send_more_data && _fd!=-1) {
           this->close_fd();
           this->_fd=-1;

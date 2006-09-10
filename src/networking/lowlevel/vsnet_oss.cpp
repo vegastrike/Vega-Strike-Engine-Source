@@ -66,6 +66,27 @@ INLINE void memcpy( void* dest, const void* src, int bytesize )
     ::memcpy( dest, src, bytesize );
 }
 
+bool set_blocking(int _fd, bool isBlocking) {
+	if (_fd==-1)
+		return false;
+#if !defined(_WIN32) || defined(__CYGWIN__)
+    int datato = isBlocking? 0 : 1;
+    if( ::ioctl( _fd, FIONBIO, &datato ) == -1)
+    {
+        ::perror( "Error fcntl : ");
+        return false;
+    }
+#else
+    unsigned long datato = isBlocking? 0 : 1;
+    if( ::ioctlsocket( _fd, FIONBIO, &datato ) !=0 )
+    {
+        ::perror( "Error fcntl : ");
+        return false;
+    }
+#endif
+	return true;
+}
+
 };
 
 #endif /* VSNET_OSS_CPP */

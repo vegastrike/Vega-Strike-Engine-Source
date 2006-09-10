@@ -89,13 +89,13 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 					COUT<<"<<< LOGIN ALREADY --------------------------------------------------------------"<<endl;
 				break;
 				default:
-					COUT<<">>> UNKNOWN COMMAND =( "<<std::hex<<cmd<<" )= --------------------------------------"<<endl;
+					COUT<<">>> UNKNOWN COMMAND =( "<<std::hex<<cmd<<std::dec<<" )= --------------------------------------"<<endl;
 			}
 		}
 		else
 		{
 			cerr<<"Connection to account server lost !!"<<endl;
-			acct_con = 0;
+//			acct_con = 0;
 		}
 	}
 }
