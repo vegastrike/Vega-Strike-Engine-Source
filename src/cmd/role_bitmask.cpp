@@ -90,8 +90,8 @@ namespace ROLES {
                               while(scripts.size()<=scriptind)
                                 scripts.push_back(vector<string>());
                               
-			    for (unsigned int j=1;j<strs.size();j++) {
-			      int index=  getRole(vec[j]);
+			    for (unsigned int j=1;j<strs.size() && j<=vec.size();j++) {
+			      int index=  getRole(vec[j-1]);
                               while(scripts[scriptind].size()<=index)
                                 scripts[scriptind].push_back("default");
 			      scripts[scriptind][index]=strs[j]; 
