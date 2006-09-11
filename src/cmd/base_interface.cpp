@@ -113,8 +113,20 @@ static FILTER BlurBases() {
   static bool blur_bases = XMLSupport::parse_bool(vs_config->getVariable("graphics","blur_bases","true"));
   return blur_bases?BILINEAR:NEAREST;
 }
-BaseInterface::Room::BaseVSSprite::BaseVSSprite (const char *spritefile, std::string ind) 
-  : BaseObj(ind),spr(spritefile,BlurBases(),GFXTRUE) {}
+BaseInterface::Room::BaseVSSprite::BaseVSSprite (const std::string &spritefile, const std::string &ind) 
+  : BaseObj(ind),spr(spritefile.c_str(),BlurBases(),GFXTRUE) {}
+
+void BaseInterface::Room::BaseVSSprite::SetSprite (const std::string &spritefile)
+{
+	// Destroy SPR
+	spr.~VSSprite();
+	// Re-create it (in case you don't know the following syntax, 
+	//	which is a weird but standard syntax, 
+	//	it initializes spr instead of allocating memory for it)
+	// PS: I hope it doesn't break many compilers ;) 
+	//	(if it does, spr will have to become a pointer)
+	new(&spr)VSSprite(spritefile.c_str(),BlurBases(),GFXTRUE);
+}
 
 void BaseInterface::Room::BaseVSSprite::Draw (BaseInterface *base) {
   static float AlphaTestingCutoff = XMLSupport::parse_float(vs_config->getVariable("graphics","base_alpha_test_cutoff","0"));  
@@ -287,7 +299,7 @@ void BaseInterface::Room::Draw (BaseInterface *base) {
 }
 static std::vector<BaseInterface::Room::BaseTalk *> active_talks;
 
-BaseInterface::Room::BaseTalk::BaseTalk (std::string msg,std::string ind, bool only_one) :BaseObj(ind), curchar (0), curtime (0), message(msg) {
+BaseInterface::Room::BaseTalk::BaseTalk (const std::string & msg,const std::string & ind, bool only_one) :BaseObj(ind), curchar (0), curtime (0), message(msg) {
 	if (only_one) {
 		active_talks.clear();
 	}
@@ -345,6 +357,11 @@ void BaseInterface::Room::BasePython::Draw (BaseInterface *base) {
 		RunPython(this->pythonfile.c_str());
 		return; //do not do ANYTHING with 'this' after the previous statement...
 	}
+}
+
+void BaseInterface::Room::BasePython::Relink(const std::string &python)
+{
+	pythonfile = python;
 }
 
 void BaseInterface::Room::BaseTalk::Draw (BaseInterface *base) {
@@ -732,7 +749,7 @@ void BaseInterface::InitCallbacks () {
 	}
 }
 
-BaseInterface::Room::Talk::Talk (std::string ind,std::string pythonfile)
+BaseInterface::Room::Talk::Talk (const std::string & ind,const std::string & pythonfile)
 		: BaseInterface::Room::Link(ind,pythonfile) {
 	index=-1;
 #ifndef BASE_MAKER
@@ -758,7 +775,7 @@ BaseInterface::Room::Talk::Talk (std::string ind,std::string pythonfile)
 	}
 #endif
 }
-BaseInterface::Room::Python::Python (std::string ind,std::string pythonfile)
+BaseInterface::Room::Python::Python (const std::string & ind,const std::string & pythonfile)
 		: BaseInterface::Room::Link(ind,pythonfile) {
 }
 double compute_light_dot (Unit * base,Unit *un) {
@@ -1054,6 +1071,11 @@ void BaseInterface::Room::Link::Click (BaseInterface *base,float x, float y, int
 	if (state==WS_MOUSE_UP) {
 		RunPython(this->pythonfile.c_str());
 	}
+}
+
+void BaseInterface::Room::Link::Relink(const std::string &pfile)
+{
+	pythonfile = pfile;
 }
 
 struct BaseColor {

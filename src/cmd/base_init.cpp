@@ -57,6 +57,9 @@ PYTHON_BEGIN_MODULE(Base)
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::EraseLink,"EraseLink");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Ship,"Ship");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Texture,"Texture");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetTexture,"SetTexture");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetTextureSize,"SetTextureSize");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetTexturePos,"SetTexturePos");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::EnqueueMessageToRoom,"EnqueueMessageToRoom");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::MessageToRoom,"MessageToRoom");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::EnqueueMessage,"EnqueueMessage");
@@ -66,6 +69,10 @@ PYTHON_BEGIN_MODULE(Base)
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::RunScript, "RunScript");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::TextBox, "TextBox");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetTextBoxText, "SetTextBoxText");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetLinkArea, "SetLinkArea");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetLinkText, "SetLinkText");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetLinkPython, "SetLinkPython");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetLinkRoom, "SetLinkRoom");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::BuyShip,"BuyShip");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SellShip,"SellShip");
 PYTHON_END_MODULE(Base)

@@ -22,12 +22,51 @@ namespace BaseUtil {
 #ifdef BASE_MAKER
 		((BaseInterface::Room::BaseVSSprite*)newroom->objs.back())->texfile=file;
 #endif
-                float tx=0, ty=0;
-                static bool addspritepos = XMLSupport::parse_bool(vs_config->getVariable("graphics","offset_sprites_by_pos","true"));
-                if (addspritepos)
-                  ((BaseInterface::Room::BaseVSSprite*)newroom->objs.back())->spr.GetPosition(tx,ty);
+		float tx=0, ty=0;
+		static bool addspritepos = XMLSupport::parse_bool(vs_config->getVariable("graphics","offset_sprites_by_pos","true"));
+		if (addspritepos)
+			((BaseInterface::Room::BaseVSSprite*)newroom->objs.back())->spr.GetPosition(tx,ty);
                 
 		((BaseInterface::Room::BaseVSSprite*)newroom->objs.back())->spr.SetPosition(x+tx,y+ty);
+	}
+	void SetTexture(int room, std::string index, std::string file)
+	{
+		BaseInterface::Room *newroom=CheckRoom(room);
+		if (!newroom) return;
+		for (int i=0;i<newroom->objs.size();i++) {
+			if (newroom->objs[i]) {
+				if (newroom->objs[i]->index==index) {
+					// FIXME: Will crash if not a Sprite object.
+					dynamic_cast<BaseInterface::Room::BaseVSSprite*>(newroom->objs[i])->SetSprite(file);
+				}
+			}
+		}
+	}
+	void SetTextureSize(int room, std::string index, float w, float h)
+	{
+		BaseInterface::Room *newroom=CheckRoom(room);
+		if (!newroom) return;
+		for (int i=0;i<newroom->objs.size();i++) {
+			if (newroom->objs[i]) {
+				if (newroom->objs[i]->index==index) {
+					// FIXME: Will crash if not a Sprite object.
+					dynamic_cast<BaseInterface::Room::BaseVSSprite*>(newroom->objs[i])->SetSize(w,h);
+				}
+			}
+		}
+	}
+	void SetTexturePos(int room, std::string index, float x, float y)
+	{
+		BaseInterface::Room *newroom=CheckRoom(room);
+		if (!newroom) return;
+		for (int i=0;i<newroom->objs.size();i++) {
+			if (newroom->objs[i]) {
+				if (newroom->objs[i]->index==index) {
+					// FIXME: Will crash if not a Sprite object.
+					dynamic_cast<BaseInterface::Room::BaseVSSprite*>(newroom->objs[i])->SetPos(x,y);
+				}
+			}
+		}
 	}
 	void Ship (int room, std::string index,QVector pos,Vector Q, Vector R) {
 		BaseInterface::Room *newroom=CheckRoom(room);
@@ -47,14 +86,66 @@ namespace BaseUtil {
 		if (!newroom) return;
 		newroom->objs.push_back(new BaseInterface::Room::BaseText(text, x, y, widheimult.i, widheimult.j, widheimult.k, GFXColor(backcol, backalp), GFXColor(forecol), ind));
 	}
-	void SetTextBoxText(int room, std::string ind, std::string text) {
+	void SetTextBoxText(int room, std::string index, std::string text) {
 		BaseInterface::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
 		for (int i=0;i<newroom->objs.size();i++) {
 			if (newroom->objs[i]) {
-				if (newroom->objs[i]->index==ind) {
+				if (newroom->objs[i]->index==index) {
 					// FIXME: Will crash if not a Text object.
 					dynamic_cast<BaseInterface::Room::BaseText*>(newroom->objs[i])->SetText(text);
+				}
+			}
+		}
+	}
+	void SetLinkArea(int room, std::string index, float x, float y, float wid, float hei)
+	{
+		BaseInterface::Room *newroom=CheckRoom(room);
+		if (!newroom) return;
+		for (int i=0;i<newroom->objs.size();i++) {
+			if (newroom->links[i]) {
+				if (newroom->links[i]->index==index) {
+					dynamic_cast<BaseInterface::Room::Link*>(newroom->links[i])->x   = x;
+					dynamic_cast<BaseInterface::Room::Link*>(newroom->links[i])->y   = y;
+					dynamic_cast<BaseInterface::Room::Link*>(newroom->links[i])->wid = wid;
+					dynamic_cast<BaseInterface::Room::Link*>(newroom->links[i])->hei = hei;
+				}
+			}
+		}
+	}
+	void SetLinkText(int room, std::string index, std::string text)
+	{
+		BaseInterface::Room *newroom=CheckRoom(room);
+		if (!newroom) return;
+		for (int i=0;i<newroom->objs.size();i++) {
+			if (newroom->links[i]) {
+				if (newroom->links[i]->index==index) {
+					dynamic_cast<BaseInterface::Room::Link*>(newroom->links[i])->text= text;
+				}
+			}
+		}
+	}
+	void SetLinkPython(int room, std::string index, std::string python)
+	{
+		BaseInterface::Room *newroom=CheckRoom(room);
+		if (!newroom) return;
+		for (int i=0;i<newroom->objs.size();i++) {
+			if (newroom->links[i]) {
+				if (newroom->links[i]->index==index) {
+					dynamic_cast<BaseInterface::Room::Link*>(newroom->links[i])->Relink(python);
+				}
+			}
+		}
+	}
+	void SetLinkRoom(int room, std::string index, int to)
+	{
+		BaseInterface::Room *newroom=CheckRoom(room);
+		if (!newroom) return;
+		for (int i=0;i<newroom->objs.size();i++) {
+			if (newroom->links[i]) {
+				if (newroom->links[i]->index==index) {
+					// FIXME: Will crash if not a Goto object.
+					dynamic_cast<BaseInterface::Room::Goto*>(newroom->links[i])->index = to;
 				}
 			}
 		}

@@ -26,18 +26,19 @@ public:
 			std::string text;
 			const std::string index;
 			virtual void Click (::BaseInterface* base,float x, float y, int button, int state);
-			explicit Link (std::string ind,std::string pfile) : pythonfile(pfile),alpha(1.0f),index(ind) {}
+			explicit Link (const std::string &ind,const std::string &pfile) : pythonfile(pfile),alpha(1.0f),index(ind) {}
 			virtual ~Link(){} 
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
+			virtual void Relink(const std::string &pfile);
 		};
 		class Goto : public Link {
 		public:
 			int index;
 			virtual void Click (::BaseInterface* base,float x, float y, int button, int state);
 			virtual ~Goto () {}
-			explicit Goto (std::string ind, std::string pythonfile) : Link(ind,pythonfile) {}
+			explicit Goto (const std::string & ind, const std::string & pythonfile) : Link(ind,pythonfile) {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
@@ -47,7 +48,7 @@ public:
 			vector <BaseComputer::DisplayMode> modes;
 			virtual void Click (::BaseInterface* base,float x, float y, int button, int state);
 			virtual ~Comp () {}
-			explicit Comp (std::string ind, std::string pythonfile) : Link(ind,pythonfile) {}
+			explicit Comp (const std::string & ind, const std::string & pythonfile) : Link(ind,pythonfile) {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
@@ -56,7 +57,7 @@ public:
 		public:
 			virtual void Click (::BaseInterface* base,float x, float y, int button, int state);
 			virtual ~Launch () {}
-			explicit Launch (std::string ind, std::string pythonfile) : Link(ind,pythonfile) {}
+			explicit Launch (const std::string & ind, const std::string & pythonfile) : Link(ind,pythonfile) {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
@@ -65,7 +66,7 @@ public:
 		public:
 			virtual void Click (::BaseInterface* base,float x, float y, int button, int state);
 			virtual ~Eject () {}
-			explicit Eject (std::string ind, std::string pythonfile) : Link(ind,pythonfile) {}
+			explicit Eject (const std::string & ind, const std::string & pythonfile) : Link(ind,pythonfile) {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
@@ -78,7 +79,7 @@ public:
 			int index;
 			int curroom;
 			virtual void Click (::BaseInterface* base,float x, float y, int button, int state);
-			explicit Talk (std::string ind, std::string pythonfile);
+			explicit Talk (const std::string & ind, const std::string & pythonfile);
 			virtual ~Talk () {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
@@ -88,7 +89,7 @@ public:
 		public:
 			std::string file;
 			virtual void Click (::BaseInterface* base,float x, float y, int button, int state);
-			Python(std::string ind,std::string pythonfile);
+			Python(const std::string & ind,const std::string & pythonfile);
 			virtual ~Python () {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
@@ -102,11 +103,11 @@ public:
 			virtual void EndXML(FILE *fp);
 #endif
 			virtual ~BaseObj () {}
-			explicit BaseObj (std::string ind) : index(ind) {}
+			explicit BaseObj (const std::string & ind) : index(ind) {}
 		};
 		class BasePython : public BaseObj{
 		public:
-			const std::string pythonfile;
+			std::string pythonfile;
 			float timeleft;
 			float maxtime;
 			virtual void Draw (::BaseInterface *base);
@@ -114,7 +115,8 @@ public:
 			virtual void EndXML(FILE *fp);
 #endif
 			virtual ~BasePython () {}
-			BasePython (std::string ind, std::string python, float time) : BaseObj(ind), pythonfile(python), maxtime(time), timeleft(0) {}
+			BasePython (const std::string & ind, const std::string & python, float time) : BaseObj(ind), pythonfile(python), maxtime(time), timeleft(0) {}
+			virtual void Relink(const std::string & python);
 		};
 		class BaseText : public BaseObj{
 		public:
@@ -124,7 +126,7 @@ public:
 			virtual void EndXML(FILE *fp);
 #endif
 			virtual ~BaseText () {}
-			BaseText (std::string texts, float posx, float posy, float wid, float hei, float charsizemult, GFXColor backcol, GFXColor forecol, std::string ind) : BaseObj(ind), text(forecol, backcol) {
+			BaseText (const std::string & texts, float posx, float posy, float wid, float hei, float charsizemult, GFXColor backcol, GFXColor forecol, const std::string & ind) : BaseObj(ind), text(forecol, backcol) {
 				text.SetPos(posx,posy);
 				text.SetSize(wid,hei);
 				float cx=0, cy=0;
@@ -134,9 +136,9 @@ public:
 				text.SetCharSize(cx, cy);
 				text.SetText(texts);
 			}
-			void SetText(std::string newtext) {
-				text.SetText(newtext);
-			}
+			void SetText(const std::string & newtext) { text.SetText(newtext); }
+			void SetPos(float posx, float posy) { text.SetPos(posx,posy); }
+			void SetSize(float wid, float hei) { text.SetSize(wid,hei); }
 		};
 		class BaseShip : public BaseObj {
 		public:
@@ -146,8 +148,8 @@ public:
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
-			explicit BaseShip (std::string ind) : BaseObj (ind) {}
-			BaseShip (float r0, float r1, float r2, float r3, float r4, float r5, float r6, float r7, float r8, QVector pos, std::string ind)
+			explicit BaseShip (const std::string & ind) : BaseObj (ind) {}
+			BaseShip (float r0, float r1, float r2, float r3, float r4, float r5, float r6, float r7, float r8, QVector pos, const std::string & ind)
 				:BaseObj (ind),mat (r0,r1,r2,r3,r4,r5,r6,r7,r8,QVector(pos.i/2,pos.j/2,pos.k))  {}
 		};
 		class BaseVSSprite : public BaseObj {
@@ -159,7 +161,11 @@ public:
 			virtual void EndXML(FILE *fp);
 #endif
 			virtual ~BaseVSSprite () {}
-			BaseVSSprite (const char *spritefile, std::string ind);
+			BaseVSSprite (const std::string &spritefile, const std::string & ind);
+			void SetSprite (const std::string &spritefile);
+			void SetPos (float posx, float posy) { spr.SetPosition(posx,posy); }
+			void SetSize (float wid, float hei) { spr.SetSize(wid,hei); }
+			void SetTime (float t) { spr.SetTime(t); }
 		};
 		class BaseTalk : public BaseObj {
 		public:
@@ -172,7 +178,7 @@ public:
 			virtual ~BaseTalk () {}
 			std::string message;
 //			BaseTalk (Talk *caller) : caller (caller),  sayindex (0),curchar(0) {}
-			BaseTalk (std::string msg,std::string ind, bool only_one_talk);
+			BaseTalk (const std::string & msg,const std::string & ind, bool only_one_talk);
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp) {}
 #endif
@@ -205,7 +211,7 @@ public:
 	void Terminate ();
 	void GotoLink(int linknum);
 	void InitCallbacks ();
-	void CallCommonLinks (std::string name, std::string value);
+	void CallCommonLinks (const std::string & name, const std::string & value);
 //	static void BaseInterface::beginElement(void *userData, const XML_Char *names, const XML_Char **atts);
 //	void BaseInterface::beginElement(const string &name, const AttributeList attributes);
 //	static void BaseInterface::endElement(void *userData, const XML_Char *name);

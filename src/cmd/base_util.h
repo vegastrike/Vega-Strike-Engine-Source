@@ -3,6 +3,9 @@
 namespace BaseUtil {
 	int Room (std::string text);
 	void Texture(int room, std::string index, std::string file, float x, float y);
+	void SetTexture(int room, std::string index, std::string file);
+	void SetTextureSize(int room, std::string index, float w, float h);
+	void SetTexturePos(int room, std::string index, float x, float y);
 	void Ship (int room, std::string index,QVector pos,Vector R, Vector Q);
 	void LinkPython (int room, std::string index,std::string pythonfile, float x, float y, float wid, float hei, std::string text, int to);
 	void LaunchPython (int room, std::string index,std::string pythonfile, float x, float y, float wid, float hei, std::string text);
@@ -20,6 +23,10 @@ namespace BaseUtil {
 	void RunScript (int room, std::string ind, std::string pythonfile, float time);
 	void TextBox (int room, std::string ind, std::string text, float x, float y, Vector widheimult, Vector backcol, float backalp, Vector forecol);
 	void SetTextBoxText(int room, std::string ind, std::string text);
+	void SetLinkArea(int room, std::string index, float x, float y, float wid, float hei);
+	void SetLinkText(int room, std::string index, std::string text);
+	void SetLinkPython(int room, std::string index, std::string python);
+	void SetLinkRoom(int room, std::string index, int to);
 	void EraseLink (int room, std::string index);
 	void EraseObj (int room, std::string index);
 	int GetCurRoom ();
