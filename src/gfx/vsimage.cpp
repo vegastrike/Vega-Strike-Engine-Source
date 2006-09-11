@@ -32,6 +32,13 @@ typedef int INT32;
 
 #undef VSIMAGE_DEBUG
 
+#ifdef _DEBUG
+//#define VSIMAGE_FAILURE(code) VSExit(code)
+#define VSIMAGE_FAILURE(code,file) VSFileSystem::vs_fprintf(stderr,"VSImage FAILURE! - trying graceful recovery... (while reading \"%s\")\n",file)
+#else
+#define VSIMAGE_FAILURE(code,file) VSFileSystem::vs_fprintf(stderr,"VSImage FAILURE! - trying graceful recovery... (while reading \"%s\")\n",file)
+#endif
+
 #include <iostream>
 using std::cout;
 using std::cerr;
@@ -110,7 +117,8 @@ unsigned char *	VSImage::ReadImage( VSFile * f, textureTransform * t, bool strip
 		default :
 			this->img_type = Unrecognized;
 			cerr<<"::VSImage ERROR : Unknown image format"<<endl;
-			VSExit(1);
+			VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
+			ret = NULL;
 	}
 	return ret;
 
@@ -247,7 +255,8 @@ unsigned char *	VSImage::ReadPNG()
 	if( !CheckPNGSignature( img_file))
 	{
 		cerr<<"VSImage::ReadPNG() ERROR : NOT A PNG FILE"<<endl;
-		VSExit(1);
+		VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
+		throw(1);
 	}
 	// Go after sig since we already checked it
 	// Only when reading from a buffer otherwise CheckPNGSignature already did the work
@@ -260,16 +269,16 @@ unsigned char *	VSImage::ReadPNG()
 	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, (png_error_ptr)png_cexcept_error, (png_error_ptr)NULL);
 	if (png_ptr == NULL)
 	{
-		VSExit(1);
-		return NULL;
+		VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
+		throw(1);
 	}
 	info_ptr = png_create_info_struct(png_ptr);
 	if (info_ptr == NULL)
 	{
 		png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
 		cerr<<"VSImage ERROR : PNG info_ptr == NULL !!!"<<endl;
-		VSExit(1);
-		return NULL;
+		VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
+		throw(1);
 	}
 	if (setjmp(png_jmpbuf(png_ptr)))
 	{
@@ -277,8 +286,8 @@ unsigned char *	VSImage::ReadPNG()
 		png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
 		/* If we get here, we had a problem reading the file */
 		cerr<<"VSImage ERROR : problem reading file/buffer -> setjmp !!!"<<endl;
-		VSExit(1);
-		return NULL;
+		VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
+		throw(1);
 	}
 
 	if( !img_file->UseVolume())
@@ -409,8 +418,8 @@ unsigned char *	VSImage::ReadJPEG()
 #ifdef VSIMAGE_DEBUG
 		cerr<<"VSImage ERROR : error reading jpg file"<<endl;
 #endif
-		VSExit(1);
-		return NULL;
+		VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
+		throw(1);
 	}
 
 	jpeg_create_decompress(&cinfo);
@@ -486,7 +495,8 @@ unsigned char *	VSImage::ReadBMP()
 	if( CheckBMPSignature( img_file)!=Ok)
 	{
 		cerr<<"VSImage ERROR : BMP signature check failed : this should not happen !!!"<<endl;
-		VSExit(1);
+		VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
+		throw(1);
 	}
 	//seek back to beginning
 	img_file->GoTo(SIZEOF_BITMAPFILEHEADER);
@@ -631,7 +641,8 @@ VSError	VSImage::WriteImage( char * filename, unsigned char * data, VSImageType 
 	if( err>Ok)
 	{
 		cerr<<"VSImage ERROR : failed to open "<<filename<<" for writing"<<endl;
-		VSExit(1);
+		VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
+		return VSFileSystem::FileNotFound;
 	}
 
 	VSError ret = this->WriteImage( &f, data, type, width, height, alpha, bpp,flip);
@@ -662,7 +673,8 @@ VSError	VSImage::WriteImage( VSFile * pf, unsigned char * data, VSImageType type
 		break;
 		default :
 			cerr<<"VSImage ERROR : Unknown image format"<<endl;
-			VSExit(1);
+			VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
+			return VSFileSystem::BadFormat;
 	}
 	this->img_file = NULL;
 	this->img_depth = 0;

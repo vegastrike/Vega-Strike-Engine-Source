@@ -923,7 +923,7 @@ extern "C" {
   int vs_access (const char * name, int mode ) {
     FILE *fp;
     if (mode & R_OK) {
-      fp = fopen(name, "r");
+      fp = fopen(name, "rb");
       if (fp) {
         fclose(fp);
       } else {
@@ -931,7 +931,7 @@ extern "C" {
       }
     }
     if (mode & W_OK) {
-      fp = fopen(name, "a");
+      fp = fopen(name, "r+b"); //NOTE: any other mode may destroy existing data
       if (fp) {
         fclose(fp);
       } else {

@@ -540,7 +540,8 @@ Music::~Music()
 		if (soundServerPipes()) {
 			if (threadalive&&thread_initialized) {
 				killthread=1;
-				while (threadalive) micro_sleep(100000);
+				int spindown = 50; // Thread has 5 seconds to close down.
+				while (threadalive&&(spindown-- > 0)) micro_sleep(100000);
 			}
 
 			fNET_Write(socketw,2,send);
