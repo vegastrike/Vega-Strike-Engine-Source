@@ -1568,10 +1568,14 @@ bool GameCockpit::DrawNavSystem() {
   bool ret = ThisNav.CheckDraw();
   if (ret) {
     float c_o = cockpit_offset;
+	float o_fov = cam[currentcamera].GetFov();
+	static float standard_fov=XMLSupport::parse_float(vs_config->getVariable("graphics","base_fov","90"));
+	cam[currentcamera].SetFov(standard_fov);
     cam[currentcamera].setCockpitOffset(0);
     cam[currentcamera].UpdateGFX (GFXFALSE,GFXFALSE,GFXTRUE);
     ThisNav.Draw();
     cockpit_offset= c_o;
+	cam[currentcamera].SetFov(o_fov);
     cam[currentcamera].setCockpitOffset(c_o);
     cam[currentcamera].UpdateGFX (GFXFALSE,GFXFALSE,GFXTRUE);
     
@@ -2798,8 +2802,9 @@ void GameCockpit::SetupViewPort (bool clip) {
         sh_offs *= sh_warpfieldstrength*costheta;
         st_mult = (1-st_warpfieldstrength)+st_mult*st_warpfieldstrength;
         sh_mult *= sh_warpfieldstrength*costheta;
-	static float fov_smoothing=XMLSupport::parse_float(vs_config->getVariable("graphics","warp.fovlink.smoothing",".999"));
-	smooth_fov=fov_smoothing*smooth_fov+(1-fov_smoothing)*g_game.fov*(st_mult+sh_mult)+st_offs+sh_offs;
+        static float fov_smoothing=XMLSupport::parse_float(vs_config->getVariable("graphics","warp.fovlink.smoothing",".4"));
+		float fov_smoot = pow(double(fov_smoothing),GetElapsedTime());
+        smooth_fov=min(170.0f,max(5.0f,(1-fov_smoot)*smooth_fov+fov_smoot*(g_game.fov*(st_mult+sh_mult)+st_offs+sh_offs)));
         _Universe->AccessCamera()->SetFov(smooth_fov);
       
     }

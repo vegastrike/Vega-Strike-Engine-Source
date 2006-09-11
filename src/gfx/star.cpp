@@ -317,14 +317,14 @@ bool PointStarVlist::BeginDrawState (const QVector &center, const Vector & veloc
 		Matrix rollMatrix;
 		static float velstreakscale= XMLSupport::parse_float (vs_config->getVariable ("graphics","velocity_star_streak_scale","5"));
 		static float minstreak= XMLSupport::parse_float (vs_config->getVariable ("graphics","velocity_star_streak_min","1"));
-		static float fov_smoothing=XMLSupport::parse_float(vs_config->getVariable("graphics","warp.fovlink.smoothing",".999"));
+		static float fov_smoothing=XMLSupport::parse_float(vs_config->getVariable("graphics","warp.fovlink.smoothing",".4"));
+		float fov_smoot = pow(double(fov_smoothing),GetElapsedTime());
 		Vector vel (-velocity*velstreakscale);
 		if (smoothstreak>=minstreak||vel.MagnitudeSquared()>=minstreak*minstreak) {
 		    ret=true;
 		    float speed = vel.Magnitude();
 		    vel*=1./speed;
-		    speed*=(1-fov_smoothing);
-		    speed+=fov_smoothing*smoothstreak;
+		    speed = fov_smoot*speed + (1-fov_smoot)*smoothstreak;
 		    
 		    if (speed<minstreak) speed=minstreak;
 		    static float streakcap  = XMLSupport::parse_float (vs_config->getVariable ("graphics","velocity_star_streak_max","100"));
