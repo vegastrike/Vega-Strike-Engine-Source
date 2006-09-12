@@ -148,8 +148,9 @@ def getLoginInfo(conn, user, passwd, dologin):
 get_form=False
 post_form=False
 def execute(conn,url,post):
-	print '\r'
-	sys.stderr.write('Executing post query: '+post+'\n')
+	print '\n'
+        # Can't write to stderr since on IIS it is concatenated with stdout.
+	#sys.stderr.write('Executing post query: '+post+'\n')
 	try:
 		packet = Packet(conn, post) #if it crashes we dont care..this is python
 		command = packet.getChar()

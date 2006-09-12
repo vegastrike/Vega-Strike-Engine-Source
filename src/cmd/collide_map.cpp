@@ -251,7 +251,6 @@ CollideArray::iterator CollideArray::insert(const Collidable &newKey) {
 void CollideArray::checkSet() {
  
   if (this->begin()!=this->end()) {
-    iterator iter;
     for (iterator newiter=this->begin(), iter=newiter++;newiter!=this->end();iter=newiter++) {
       assert(*iter<*newiter);
     }

@@ -1236,7 +1236,8 @@ void NetClient::Reconnect(std::string srvipadr, std::string port) {
   vector<string> usernames;
   vector<string> passwords;
   vector <SOCKETALT*> udp;
-  for (unsigned int i=0;i<_Universe->numPlayers();++i) {
+  unsigned int i;
+  for (i=0;i<_Universe->numPlayers();++i) {
     usernames.push_back(Network[i].callsign);
     passwords.push_back(Network[i].password);
     SOCKETALT * udpsocket=Network[i].logout(true);
@@ -1249,7 +1250,7 @@ void NetClient::Reconnect(std::string srvipadr, std::string port) {
   _Universe->clearAllSystems();
   localSerials.resize(0);
 
-  for (unsigned int i=0;i<_Universe->numPlayers();++i) {
+  for (i=0;i<_Universe->numPlayers();++i) {
     Network[i].Reinitialize();
   }
   //necessary? usually we would ask acctserver for it .. or pass it in NetClient::getConfigServerAddress(srvipadr, port);

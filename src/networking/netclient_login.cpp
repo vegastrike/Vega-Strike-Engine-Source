@@ -173,7 +173,7 @@ vector<string>	&NetClient::loginAcctLoop( string str_callsign, string str_passwd
 	double initial = queryTime();
 	double newtime=0;
 	double elapsed=0;
-	string login_tostr = vs_config->getVariable( "network", "logintimeout", "10" );
+	string login_tostr = vs_config->getVariable( "network", "logintimeout", "20" );
 	int login_to = atoi( login_tostr.c_str());
 	while( !timeout && !recv)
 	{

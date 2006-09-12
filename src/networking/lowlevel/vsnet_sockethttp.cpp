@@ -35,10 +35,12 @@ bool VsnetHTTPSocket::write_on_negative() {
   return need_test_writable();
 }
 bool VsnetHTTPSocket::need_test_writable( ){
-  if ((int)(getNewTime()-1) < timeToNextRequest) {
-    return false;
+  if (_fd<=0) {
+    if ((int)(queryTime()-1) < timeToNextRequest) {
+      return false;
+    }
   }
-  //std::cout << "retry: " << (int)(getNewTime()-1) << " < " << timeToNextRequest << std::endl;
+  //std::cout << "retry: " << (int)(queryTime()-1) << " < " << timeToNextRequest << std::endl;
   return !dataToSend.empty();
 }
 bool ishex(char x) {
@@ -112,8 +114,8 @@ void VsnetHTTPSocket::reopenConnection() {
 
   if (dataToReceive.length()==0)
       waitingToReceive=std::string();
-
-  timeToNextRequest = (int)getNewTime() + 2;
+  _send_more_data=true;
+  timeToNextRequest = (int)queryTime() + 2;
   if (this->_fd>=0) {
     this->close_fd();
     this->_fd=-1;
@@ -166,15 +168,16 @@ int VsnetHTTPSocket::lower_sendbuf(  )
         if (!waitingToReceive.empty())
 		return 0;
 	
-	if (!(this->_fd == -1 || _send_more_data || _content_length ||
+	if ( this->_fd == -1 ) {
+		reopenConnection();
+		return 0;
+	}
+
+	if (!(_send_more_data || _content_length ||
 		  _incompleteheader.length() || _header.size())) {
           COUT << "Error: HTTP data being sent while incomplete header exists";
           this->close_fd();
           this->_fd=-1;
-	}
-	if ( this->_fd == -1 ) {
-		reopenConnection();
-
 	}
 
 	std::string dataSending = dataToSend.front();
@@ -204,6 +207,7 @@ int VsnetHTTPSocket::lower_sendbuf(  )
 			if (retrycnt) {
 				// What!?! A HTTP server decided to close the connection? The horror...
 				reopenConnection();
+				return 0;
 			} else {
 				return 0;
 			}
@@ -261,7 +265,7 @@ bool VsnetHTTPSocket::parseHeaderByte( char rcvchr )
 		}
                 break;//always break
 	}
-	_incompleteheader.push_back(rcvchr);
+	_incompleteheader += (rcvchr);
 	return false;
 }
 int errchance=9;
@@ -278,7 +282,7 @@ void VsnetHTTPSocket::resendData() {
 		return;
 	}
 	numRetries ++;
-	timeToNextRequest = (int)getNewTime() + 2;
+	timeToNextRequest = (int)queryTime() + 2;
     dataToSend.push_front(waitingToReceive);
     waitingToReceive=std::string();
     _header.clear();
