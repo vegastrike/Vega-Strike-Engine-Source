@@ -202,17 +202,20 @@ int SocketSet::private_select( timeval* timeout )
     {
 	    VsnetSocketBase* b = (*it);
         int fd = b->get_fd();
+		bool wrote_on_negative=false;
+		if (b->write_on_negative()) {
+          b->lower_clean_sendbuf( ); 
+		  wrote_on_negative=true;
+        }
         if( fd >= 0 )
         {
             private_addset( fd, read_set_select, max_sock_select );
-	        if( b->need_test_writable( ) )
+	        if( b->need_test_writable( )&& !wrote_on_negative )
 	        {
                 private_addset( b->get_write_fd(),
                                 write_set_select,
                                 max_sock_select );
 	        }
-        }else if (b->write_on_negative()) {
-          b->lower_clean_sendbuf( ); 
         }
     }
 
