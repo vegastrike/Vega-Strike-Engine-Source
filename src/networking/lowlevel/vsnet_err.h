@@ -35,7 +35,8 @@ inline std::string vsnetLastError( )
 inline bool vsnetEWouldBlock( )
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-    return ( WSAGetLastError() == WSAEWOULDBLOCK );
+	int tmp=WSAGetLastError();
+    return (tmp  == WSAEWOULDBLOCK );
 #else
     return ( errno == EWOULDBLOCK );
 #endif

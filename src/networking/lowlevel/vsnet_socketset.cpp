@@ -203,7 +203,7 @@ int SocketSet::private_select( timeval* timeout )
 	    VsnetSocketBase* b = (*it);
         int fd = b->get_fd();
 		bool wrote_on_negative=false;
-		if (b->write_on_negative()) {
+		if (fd<0&&b->write_on_negative()) {
           b->lower_clean_sendbuf( ); 
 		  wrote_on_negative=true;
         }

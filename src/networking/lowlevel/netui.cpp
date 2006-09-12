@@ -59,6 +59,11 @@ AddressIP NetUIBase::lookupHost(const char* host, unsigned short port)
     remote_ip.sin_family = AF_INET;
 	return remote_ip;
 }
+#ifdef _WIN32
+int NONBLOCKING_CONNECT=0;
+#else
+int NONBLOCKING_CONNECT=1;
+#endif
 
 int NetUIBase::createClientSocket(const AddressIP &remote_ip, bool isTCP)
 {
@@ -74,20 +79,23 @@ int NetUIBase::createClientSocket(const AddressIP &remote_ip, bool isTCP)
 
     if (isTCP) {
         COUT << "Connecting to " << inet_ntoa( remote_ip.sin_addr) << " on port " << remote_ip.sin_port << std::endl;
-        VsnetOSS::set_blocking( local_fd, false ); // Connect may hang... we don't want that.
+		if (NONBLOCKING_CONNECT) {
+	        VsnetOSS::set_blocking( local_fd, false ); // Connect may hang... we don't want that.
+		}
 #if defined(_WIN32) && !defined(__CYGWIN__)
         if( ::connect( local_fd, (sockaddr *)&remote_ip, sizeof( struct sockaddr))==SOCKET_ERROR)
 #else
         if( ::connect( local_fd, (sockaddr *)&remote_ip, sizeof( struct sockaddr)) < 0 )
 #endif
         {
-            if
+
 #if defined(_WIN32) && !defined(__CYGWIN__)
-                ( WSAGetLastError() != WSAEINPROGRESS && WSAGetLastError() != WSAEWOULDBLOCK)
+			int lasterr=WSAGetLastError();
+            if    (  lasterr!= WSAEINPROGRESS && lasterr != WSAEWOULDBLOCK)
 #else
-                ( errno != EINPROGRESS && errno!= EWOULDBLOCK)
+            if   ( errno != EINPROGRESS && errno!= EWOULDBLOCK)
 #endif
-            {
+			{
                 perror( "Can't connect to server ");
                 VsnetOSS::close_socket( local_fd );
                 return -1;
@@ -102,7 +110,6 @@ int NetUIBase::createClientSocket(const AddressIP &remote_ip, bool isTCP)
             return -1;
         }
     }
-	
 	return local_fd;
 }
 

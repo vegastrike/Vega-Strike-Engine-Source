@@ -163,6 +163,7 @@ std::ostream& operator<<( std::ostream& ostr, const VsnetHTTPSocket& s )
 void VsnetHTTPSocket::lower_clean_sendbuf( ) { 
   lower_sendbuf();
 }
+extern int NONBLOCKING_CONNECT;
 int VsnetHTTPSocket::lower_sendbuf(  )
 {
         if (!waitingToReceive.empty())
@@ -170,7 +171,9 @@ int VsnetHTTPSocket::lower_sendbuf(  )
 	
 	if ( this->_fd == -1 ) {
 		reopenConnection();
-		return 0;
+		if (NONBLOCKING_CONNECT) {
+		   return 0;
+		}
 	}
 
 	if (!(_send_more_data || _content_length ||
@@ -207,7 +210,10 @@ int VsnetHTTPSocket::lower_sendbuf(  )
 			if (retrycnt) {
 				// What!?! A HTTP server decided to close the connection? The horror...
 				reopenConnection();
-				return 0;
+				if (NONBLOCKING_CONNECT) {
+			
+					return 0;
+				}
 			} else {
 				return 0;
 			}
