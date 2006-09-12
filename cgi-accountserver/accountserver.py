@@ -204,7 +204,7 @@ def execute(conn,url,post):
 		print "UNKNOWN"
 	
 if __name__=='__main__':
-	print "Content-Type: text/html"
+	sys.stdout.write("Content-Type: text/html\r\n\r\n");
 	cgitb.enable()
 	get_args = os.environ.get('QUERY_STRING','')
 	conn = db.connect(settings.dbconfig, get_args)
