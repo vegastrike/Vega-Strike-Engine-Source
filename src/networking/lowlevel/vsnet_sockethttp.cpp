@@ -161,7 +161,9 @@ std::ostream& operator<<( std::ostream& ostr, const VsnetHTTPSocket& s )
     return ostr;
 }
 void VsnetHTTPSocket::lower_clean_sendbuf( ) { 
-  lower_sendbuf();
+	if ( waitingToReceive.empty() && this->_fd == -1 ) {
+		reopenConnection();
+	}
 }
 extern int NONBLOCKING_CONNECT;
 int VsnetHTTPSocket::lower_sendbuf(  )
@@ -170,6 +172,7 @@ int VsnetHTTPSocket::lower_sendbuf(  )
 		return 0;
 	
 	if ( this->_fd == -1 ) {
+		printf("reopening from lower_sendbuf...\n");
 		reopenConnection();
 		if (NONBLOCKING_CONNECT) {
 		   return 0;
@@ -208,6 +211,7 @@ int VsnetHTTPSocket::lower_sendbuf(  )
 				continue;
 			}
 			if (retrycnt) {
+				printf("Server closed in writing... reopening\n");
 				// What!?! A HTTP server decided to close the connection? The horror...
 				reopenConnection();
 				if (NONBLOCKING_CONNECT) {
@@ -329,21 +333,33 @@ bool VsnetHTTPSocket::lower_selected( int datalen )
 		if (datalen>0) {
 			dataToRead = datalen<dataIWantToRead?datalen:dataIWantToRead;
 		}
+		cout<<" Reading "<<dataToRead<<" characters...";
 		int ret = VsnetOSS::recv( get_fd(), &rcvbuf, dataToRead, 0 );
+		if (ret>0) cout<<"got "<<std::string(rcvbuf, ret)<<endl; // DELETEME!
+		else cout << "recv returned " << ret << endl;
 		if (ret==0) {
-                  // closed;
+			//It is not an error if closed without a Content-Length header.
+			if (_content_length>=0) {
+				// incomplete transfer...
+			  printf("Server closed in reading...resending\n");
  	          resendData();
-                  break;
+			  return false;
+			}
+			datalen = 0;
+			_content_length=0;
+			break; // Done reading!
 		}else
 		if (ret<0) {
 			if (vsnetEWouldBlock()) {
 				datalen = 0;
 				return false;
 			}
-			// errored;
+			// errored
+			perror("Error in reading HTTP socket");
 			resendData();
 			return false;
-		}else
+		}
+		// Let ret==0 but transfer complete fall through.
 		if (datalen>0||datalen<0) {
 			if (datalen!=-1) datalen -= ret;
                         bufpos=0;
@@ -425,7 +441,7 @@ bool VsnetHTTPSocket::lower_selected( int datalen )
                             if (rcvchr=='\n'&&chunkedchar!='\0'/*make sure that it had read something of interest*/) {
                               readingchunked=false;
                               if (chunkedlen==0)
-                                goto donewiththis;
+                                goto donewiththis; // break(3);
                             }
                             if (ishex(rcvchr)&&(ishex(chunkedchar)||chunkedchar=='\0')) {
                               if (rcvchr>='0'&&rcvchr<='9') {
@@ -477,11 +493,14 @@ bool VsnetHTTPSocket::lower_selected( int datalen )
 		}
 	}
  donewiththis:
+	/*
+	  // What the heck?
 	if (datalen == -1) {
 		resendData();
 		datalen = 0;
 		return false;
 	}
+	*/
 	if (_content_length == 0 && !_send_more_data && _fd!=-1) {
           this->close_fd();
           this->_fd=-1;

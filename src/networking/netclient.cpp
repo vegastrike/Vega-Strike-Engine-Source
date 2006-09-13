@@ -1262,8 +1262,10 @@ void NetClient::Reconnect(std::string srvipadr, std::string port) {
     if( use_acctserver!=false){
       int retrycount=0;
       while (ret==false&&retrycount++<10) {
-        Network[k].init_acct( srvipadr);      
-        Network[k].loginAcctLoop(usernames[k], passwords[k]);
+        if (srvipadr.compare(0, 7, "http://")) {
+          Network[k].init_acct( srvipadr);
+          Network[k].loginAcctLoop(usernames[k], passwords[k]);
+        }
         ret = Network[k].init( NULL,0).valid();
         if (!ret) micro_sleep(100000);
       }

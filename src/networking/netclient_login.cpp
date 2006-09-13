@@ -184,8 +184,9 @@ vector<string>	&NetClient::loginAcctLoop( string str_callsign, string str_passwd
 		if( elapsed > login_to)
 		{
 			//lastsave.push_back( "");
-			//lastsave.push_back( "!!! NETWORK ERROR : Connection to account server timed out !!!");
+			COUT << "!!! NETWORK ERROR : Connection to account server timed out !!!" << endl;
 			timeout = 1;
+			VSExit(1);
 		}
 		recv = checkAcctMsg( );
 		_sock_set.waste_time(0,40000);

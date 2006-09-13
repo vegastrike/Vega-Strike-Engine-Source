@@ -412,6 +412,9 @@ bool VsnetTCPSocket::lower_selected( int datalen )
                          << " = " << vsnetLastError()
                          << endl;
                     perror( "receiving TCP packetlength bytes" );
+                    _connection_closed = true;
+					close_fd();
+					return false;
                 } else {
 					COUT << "Received EWOULDBLOCK." << (get_nonblock()?"true":"false") << endl;
 				}

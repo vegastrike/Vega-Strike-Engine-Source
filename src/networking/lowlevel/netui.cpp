@@ -40,11 +40,11 @@ AddressIP NetUIBase::lookupHost(const char* host, unsigned short port)
         COUT <<"Resolving host name... ";
         if( (he = gethostbyname( host)) == NULL)
         {
-            COUT << "Could not resolve hostname" << std::endl;
+            cerr << "Could not resolve hostname" << std::endl;
             return AddressIP();
         }
         memcpy( &remote_ip.sin_addr.s_addr, he->h_addr_list[0], he->h_length);
-        COUT <<"found : "<<inet_ntoa( remote_ip.sin_addr)<<std::endl;
+        cerr <<"found : "<<inet_ntoa( remote_ip.sin_addr)<<std::endl;
     }
     else
     {
