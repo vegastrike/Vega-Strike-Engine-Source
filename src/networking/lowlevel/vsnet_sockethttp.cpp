@@ -211,7 +211,7 @@ int VsnetHTTPSocket::lower_sendbuf(  )
 				continue;
 			}
 			if (retrycnt) {
-				printf("Server closed in writing... reopening\n");
+//				printf("Server closed in writing... reopening\n");
 				// What!?! A HTTP server decided to close the connection? The horror...
 				reopenConnection();
 				if (NONBLOCKING_CONNECT) {
@@ -333,10 +333,10 @@ bool VsnetHTTPSocket::lower_selected( int datalen )
 		if (datalen>0) {
 			dataToRead = datalen<dataIWantToRead?datalen:dataIWantToRead;
 		}
-		cout<<" Reading "<<dataToRead<<" characters...";
+//		cout<<" Reading "<<dataToRead<<" characters...";
 		int ret = VsnetOSS::recv( get_fd(), &rcvbuf, dataToRead, 0 );
-		if (ret>0) cout<<"got "<<std::string(rcvbuf, ret)<<endl; // DELETEME!
-		else cout << "recv returned " << ret << endl;
+//		if (ret>0) cout<<"got "<<std::string(rcvbuf, ret)<<endl; // DELETEME!
+//		else cout << "recv returned " << ret << endl;
 		if (ret==0) {
 			//It is not an error if closed without a Content-Length header.
 			if (_content_length>=0) {

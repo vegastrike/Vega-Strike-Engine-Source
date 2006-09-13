@@ -216,9 +216,9 @@ int SocketSet::private_select( timeval* timeout )
                 private_addset( b->get_write_fd(),
                                 write_set_select,
                                 max_sock_select );
-				printf("Checking for read/writability...");
+//				printf("Checking for read/writability...");
 	        } else {
-				printf("Checking for readability...");
+//				printf("Checking for readability...");
 			}
         }
     }
@@ -257,7 +257,7 @@ int SocketSet::private_select( timeval* timeout )
     }
     else if( ret == 0 )
     {
-		printf("Nothing to do.\n");
+//		printf("Nothing to do.\n");
 #ifdef VSNET_DEBUG
 #if 0
 	std::ostringstream s1;
@@ -290,12 +290,12 @@ int SocketSet::private_select( timeval* timeout )
           if( fd >= 0 )
           {
             if( FD_ISSET(fd,&read_set_select) ) {
-				printf("Reading.\n");
+//				printf("Reading.\n");
               if (!b->lower_selected( ))
                 ret--; // No complete packet received yet.
             }
             if(b->isReadyToSend(&write_set_select) ) {
-				printf("Writing.\n");
+//				printf("Writing.\n");
               ret--;
               b->lower_sendbuf( );
             }
@@ -304,7 +304,7 @@ int SocketSet::private_select( timeval* timeout )
           {
             if(b->isReadyToSend(&write_set_select))
             {
-				printf("reconnecting?\n");
+//				printf("reconnecting?\n");
 #ifdef VSNET_DEBUG
                     COUT << "saw activity on " << b->get_write_fd()
                          << " but main file descriptor is " << b->get_fd() << endl;

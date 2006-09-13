@@ -59,11 +59,11 @@ AddressIP NetUIBase::lookupHost(const char* host, unsigned short port)
     remote_ip.sin_family = AF_INET;
 	return remote_ip;
 }
-#ifdef _WIN32
-int NONBLOCKING_CONNECT=0;
-#else
+//#ifdef _WIN32
+//int NONBLOCKING_CONNECT=0;
+//#else
 int NONBLOCKING_CONNECT=1;
-#endif
+//#endif
 
 int NetUIBase::createClientSocket(const AddressIP &remote_ip, bool isTCP)
 {
