@@ -45,9 +45,10 @@ inline bool vsnetEWouldBlock( )
 inline bool vsnetEConnAborted()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-    return ( WSAGetLastError() == WSAECONNABORTED );
+    int err=WSAGetLastError();
+    return (err  == WSAECONNABORTED )||( err == WSAENETDOWN||( err == WSAENOTCONN )||( err == WSAECONNABORTED )||( err == WSAESHUTDOWN )||( err == WSAETIMEDOUT ) )|| (err==WSAECONNRESET);
 #else
-    return ( errno == ECONNABORTED );
+    return ( errno == ECONNABORTED )||(errno==ENETDOWN)||(errno==ENOTCONN)||(errno==ESHUTDOWN)||(errno==ECONNRESET)||(errno==ETIMEDOUT);
 #endif
 }
 

@@ -594,7 +594,9 @@ bool ZoneMgr::addPosition( ClientPtr client, NetBuffer & netbuf, Unit * un, Clie
 			}
             else
             {
-                COUT << "Client counted but not sent because of ratio!" << endl;
+                static int i=0;
+		if (i++%16384==0)
+		    COUT << "Client counted but not sent because of ratio: " << un->name<<endl;
                 return false;
             }
 		}

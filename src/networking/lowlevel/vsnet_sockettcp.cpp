@@ -219,6 +219,7 @@ int VsnetTCPSocket::lower_sendbuf( )
                  << "   *** packet len: " << packet.len() << endl;
             return 0;
         default :
+	    fprintf (stderr,"Failed sending TCP data of %d len to socket %d\n",len,_sq_fd);
             perror( "\tsending TCP data");
             _sq_mx.unlock( );
             return -1;
@@ -416,9 +417,9 @@ bool VsnetTCPSocket::lower_selected( int datalen )
 					close_fd();
 					return false;
                 } else {
-					COUT << "Received EWOULDBLOCK." << (get_nonblock()?"true":"false") << endl;
-				}
-                return successful;
+		    //COUT << "Received EWOULDBLOCK." << (get_nonblock()?"true":"false") << endl;
+		}
+		    return successful;
 	        }
 	        if( ret > 0 ) _incomplete_header += ret;
             if (datalen!=-1) datalen -= ret;
@@ -446,12 +447,25 @@ bool VsnetTCPSocket::lower_selected( int datalen )
                     close_fd();
                     _set.add_pending( _sq_fd );
 		        }
-                else if( vsnetEWouldBlock() == false )
-		        {
-                    perror( "receiving TCP packet" );
-		        } else {
-					COUT << "Received EWOULDBLOCK in data." << (get_nonblock()?"true":"false") << endl;
-				}
+		    else if( vsnetEConnAborted() ) {
+			static int i=0;
+			//if (i++<1000||i%1023==0)
+			perror( "receiving TCP packet" );
+			
+			if (get_fd()==-1) {
+			    perror( "receiving dead TCP packet" );
+			    }else{
+			    COUT << "Connection closed in error" << endl;
+			    _connection_closed = true;
+			    close_fd();
+			    _set.add_pending( _sq_fd );					
+			}
+			return false;
+		    } else if (vsnetEWouldBlock()){
+			static int i=0;
+			if (i++%128==0)
+			    COUT << "Received EWOULDBLOCK in data." << (get_nonblock()?"true":"false") << endl;
+		    }
                 return successful;
 	        }
             else
@@ -501,7 +515,7 @@ void VsnetTCPSocket::inner_complete_a_packet( Blob* b )
 
     PacketMem mem( b->buf, b->present_len, PacketMem::TakeOwnership );
     PacketPtr ptr = PacketPtr( new Packet( mem ) );
-    COUT << "Completely received a packet of type " << ptr->getCommand() << endl;
+    if (ptr->getCommand()!=CMD_POSUPDATE) COUT << "Completely received a packet of type " << ptr->getCommand() << endl;
     b->buf = NULL;
     _cpq_mx.lock( );
     _cpq.push( ptr );

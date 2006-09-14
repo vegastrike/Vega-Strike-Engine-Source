@@ -40,7 +40,7 @@ bool VsnetHTTPSocket::need_test_writable( ){
       return false;
     }
   }
-  //std::cout << "retry: " << (int)(queryTime()-1) << " < " << timeToNextRequest << std::endl;
+//  std::cout << "retry: " << (int)(queryTime()-1) << " < " << timeToNextRequest << std::endl;
   return !dataToSend.empty();
 }
 bool ishex(char x) {
@@ -120,6 +120,9 @@ void VsnetHTTPSocket::reopenConnection() {
     this->close_fd();
     this->_fd=-1;
   }
+  _incompleteheadersection=0;
+  _incompleteheader=std::string();
+  _header.clear();
   this->_fd = NetUIBase::createClientSocket(_remote_ip, true,true);
 }
 
@@ -237,7 +240,8 @@ bool VsnetHTTPSocket::parseHeaderByte( char rcvchr )
 {
 	if (rcvchr=='\r' && _incompleteheadersection!=1) {
 		_incompleteheadersection++;
-		return false;
+		if (_incompleteheadersection==1) // is it the first \r?
+			return false;
 	}
 	if (rcvchr=='\n' && _incompleteheadersection>0) {
 		if (_incompleteheadersection>2) {
@@ -248,9 +252,10 @@ bool VsnetHTTPSocket::parseHeaderByte( char rcvchr )
 			return false;
 		}
 	}
-	while (_incompleteheadersection==2) {
-		_incompleteheadersection=0;
-		if (!isspace(rcvchr)) {
+	while (_incompleteheadersection>=2) {
+		if (_incompleteheadersection==2)
+			_incompleteheadersection=0;
+		if (_incompleteheadersection>2 || !isspace(rcvchr)) {
 			if (_header.empty()) {
 				std::string::size_type sp1, sp2;
 				sp1 = _incompleteheader.find(' ');
@@ -275,6 +280,9 @@ bool VsnetHTTPSocket::parseHeaderByte( char rcvchr )
 		}
                 break;//always break
 	}
+	if (rcvchr=='\r' && _incompleteheadersection!=1 && _incompleteheadersection>2)
+		return false;
+	
 	_incompleteheader += (rcvchr);
 	return false;
 }
@@ -333,10 +341,10 @@ bool VsnetHTTPSocket::lower_selected( int datalen )
 		if (datalen>0) {
 			dataToRead = datalen<dataIWantToRead?datalen:dataIWantToRead;
 		}
-//		cout<<" Reading "<<dataToRead<<" characters...";
+		cout<<" Reading "<<dataToRead<<" characters...";
 		int ret = VsnetOSS::recv( get_fd(), &rcvbuf, dataToRead, 0 );
-//		if (ret>0) cout<<"got "<<std::string(rcvbuf, ret)<<endl; // DELETEME!
-//		else cout << "recv returned " << ret << endl;
+		if (ret>0) cout<<"got "<<std::string(rcvbuf, ret)<<endl; // DELETEME!
+		else cout << "recv returned " << ret << endl;
 		if (ret==0) {
 			//It is not an error if closed without a Content-Length header.
 			if (_content_length>=0) {
@@ -383,6 +391,7 @@ bool VsnetHTTPSocket::lower_selected( int datalen )
                                                 if((*iter).second.find("100")!=std::string::npos) {                                                  
                                                   _content_length=0;
                                                   _header.clear();
+												  printf ("100 found in header at marker %d... rest of string looks like:%s\n",bufpos,rcvbuf+bufpos);
                                                   continue;
                                                 
                                                   
@@ -399,12 +408,15 @@ bool VsnetHTTPSocket::lower_selected( int datalen )
 								_content_length = -1;
 						}
 
+						
+						  // Don't need to check content-type any more.
 						iter = _header.find("Content-Type");
 						if (iter != _header.end()) {
-							if ((*iter).second != "message/x-vsnet-packet") {
-								COUT << "Invalid content type " << (*iter).second << std::endl;
+							if ((*iter).second != "message/x-vsnet-packet"&&(*iter).second != "text/html") {
+								COUT << "content type " << (*iter).second << std::endl;
 							}
 						}
+						
 						iter = _header.find("Connection");
 						if (iter != _header.end()) {
 							if ((*iter).second == "close") {
