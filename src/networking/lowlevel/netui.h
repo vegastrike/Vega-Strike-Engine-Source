@@ -32,7 +32,7 @@ class NetUIBase
 {
 public:
 	static AddressIP lookupHost(const char* host, unsigned short port);
-	static int createClientSocket(const AddressIP &host, bool isTCP);
+	static int createClientSocket(const AddressIP &host, bool isTCP, bool isHTTP);
 	static int createServerSocket(const AddressIP &host, bool isTCP);
 };
 

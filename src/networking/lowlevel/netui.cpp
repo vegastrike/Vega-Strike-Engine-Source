@@ -65,7 +65,7 @@ AddressIP NetUIBase::lookupHost(const char* host, unsigned short port)
 int NONBLOCKING_CONNECT=1;
 //#endif
 
-int NetUIBase::createClientSocket(const AddressIP &remote_ip, bool isTCP)
+int NetUIBase::createClientSocket(const AddressIP &remote_ip, bool isTCP, bool isHTTP)
 {
     static_initNetwork( );
 
@@ -79,7 +79,7 @@ int NetUIBase::createClientSocket(const AddressIP &remote_ip, bool isTCP)
 
     if (isTCP) {
         COUT << "Connecting to " << inet_ntoa( remote_ip.sin_addr) << " on port " << remote_ip.sin_port << std::endl;
-		if (NONBLOCKING_CONNECT) {
+		if (NONBLOCKING_CONNECT&&isHTTP) {
 	        VsnetOSS::set_blocking( local_fd, false ); // Connect may hang... we don't want that.
 		}
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -116,7 +116,7 @@ int NetUIBase::createClientSocket(const AddressIP &remote_ip, bool isTCP)
 int NetUIBase::createServerSocket(const AddressIP &local_ip, bool isTCP)
 {
     if (!isTCP)
-        return createClientSocket(local_ip, false);
+        return createClientSocket(local_ip, false,false);
     
     static_initNetwork( );
     
@@ -172,7 +172,7 @@ SOCKETALT NetUITCP::createSocket( const char * host, unsigned short srv_port, So
 		SOCKETALT ret;
 		return ret;
 	}
-    int local_fd = NetUIBase::createClientSocket(remote_ip, true);
+    int local_fd = NetUIBase::createClientSocket(remote_ip, true,false);
     if (local_fd==-1) {
         SOCKETALT ret; // ( -1, SOCKETALT::TCP, remote_ip );
         return ret;
@@ -228,7 +228,7 @@ SOCKETALT NetUIUDP::createSocket( const char * host, unsigned short srv_port, un
 	
     AddressIP local_ip = NetUIBase::lookupHost("0.0.0.0", clt_port);
     AddressIP remote_ip = NetUIBase::lookupHost(host, srv_port);
-    int       local_fd = NetUIBase::createClientSocket( local_ip, false );
+    int       local_fd = NetUIBase::createClientSocket( local_ip, false,false );
 
     if (local_fd == -1) {
         SOCKETALT ret;

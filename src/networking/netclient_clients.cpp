@@ -57,6 +57,12 @@ void	NetClient::enterClient( NetBuffer &netbuf, ObjSerial cltserial )
                 string * savegamestr=NULL;
                 if (cltname.length()) {
 		// Parse the save buffer
+					if (savestr.length()==0){
+						if (this->lastsave.size()&&this->lastsave[0].length()&&
+							this->callsign==cltname) {
+					  savestr=this->lastsave[0];
+					  }
+					}
                   save.ParseSaveGame( "", starsys, "", pos, update, creds, savedships, 0, savestr, false);
                   
                   PLAYER_FACTION_STRING= save.GetPlayerFaction();

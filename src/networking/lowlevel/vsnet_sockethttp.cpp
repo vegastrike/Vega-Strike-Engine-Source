@@ -120,7 +120,7 @@ void VsnetHTTPSocket::reopenConnection() {
     this->close_fd();
     this->_fd=-1;
   }
-  this->_fd = NetUIBase::createClientSocket(_remote_ip, true);
+  this->_fd = NetUIBase::createClientSocket(_remote_ip, true,true);
 }
 
 bool VsnetHTTPSocket::isReadyToSend(fd_set* write_set_select){

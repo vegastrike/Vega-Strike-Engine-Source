@@ -62,7 +62,7 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
                         ObjSerial serial =0;
 
 
-			switch( getSimpleChar(p))
+			switch(cmd= getSimpleChar(p))
 			{
 				case ACCT_LOGIN_NEW :
 					COUT << ">>> NEW LOGIN =( serial n°"<<serial<<" )= --------------------------------------"<<endl;
@@ -89,7 +89,7 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 					COUT<<"<<< LOGIN ALREADY --------------------------------------------------------------"<<endl;
 				break;
 				default:
-					COUT<<">>> UNKNOWN COMMAND =( "<<std::hex<<cmd<<std::dec<<" )= --------------------------------------"<<endl;
+					COUT<<">>> UNKNOWN COMMAND =( "<<(unsigned int)cmd<<" )= --------------------------------------"<<endl<<"Full datastream was:"<<p<<endl;
 			}
 		}
 		else
