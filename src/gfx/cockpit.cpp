@@ -44,7 +44,7 @@ extern float rand01();
 using VSFileSystem::SoundFile;
 #define SWITCH_CONST .9
 #define VERYNEAR_CONST 0.004f /* The smaller VERYNEAR_CONST is, the worse Z-Buffer precision will be. So keep this above 0.004) */
-#define COCKPITZ_HEADROOM 1.005f /*so that znear/zfar are not too close to max/min values, and account for off-center cockpits */
+#define COCKPITZ_HEADROOM 1.01f /*so that znear/zfar are not too close to max/min values, and account for off-center cockpits */
 static GFXColor RetrColor (const string& name, GFXColor def=GFXColor(1,1,1,1)) {
   vs_config->getColor(name,&def.r);    
   return def;
@@ -1953,9 +1953,11 @@ void GameCockpit::Draw() {
 
         size_t i,j;
         float cockpitradial=1; //LET IT NOT BE ZERO!
-        for (i=0; i<mesh.size();++i) 
-            if (mesh[i]->rSize()>cockpitradial) 
-                cockpitradial=mesh[i]->rSize();
+		for (i=0; i<mesh.size();++i) {
+			float meshmaxdepth = mesh[i]->corner_min().Max(mesh[i]->corner_max()).Magnitude();
+            if (meshmaxdepth>cockpitradial) 
+                cockpitradial=meshmaxdepth;
+		}
         cockpitradial *= COCKPITZ_HEADROOM;
 
 	    GFXEnable (DEPTHTEST);
