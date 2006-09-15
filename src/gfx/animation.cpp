@@ -150,7 +150,7 @@ void Animation::ProcessDrawQueue (std::vector <Animation *> &animationdrawqueue,
     return;
   }
   unsigned char alphamaps=ani_alpha;
-  int i;//NOT UNSIGNED
+  int i,j;//NOT UNSIGNED
   for (i=animationdrawqueue.size()-1;i>=0;i--) {
     GFXColorf (animationdrawqueue[i]->mycolor);//fixme, should we need this? we get som egreenie explosions
     Matrix result;
@@ -160,12 +160,24 @@ void Animation::ProcessDrawQueue (std::vector <Animation *> &animationdrawqueue,
     }
     QVector campos=_Universe->AccessCamera()->GetPosition();
     animationdrawqueue[i]->CalculateOrientation(result);
-    //if ((animationdrawqueue[i]->Position()-campos).Magnitude()-animationdrawqueue[i]->height>limit) {//other way was inconsistent about what was far and what was not--need to use the same test for putting to far queueu and drawing it--otherwise graphical glitches
+    if ((animationdrawqueue[i]->Position()-campos).Magnitude()-animationdrawqueue[i]->height>limit) {//other way was inconsistent about what was far and what was not--need to use the same test for putting to far queueu and drawing it--otherwise graphical glitches
       GFXFogMode(FOG_OFF);           
       animationdrawqueue[i]->DrawNow(result);
-      //}
-    animationdrawqueue.erase (animationdrawqueue.begin()+i);
+	  animationdrawqueue[i]=0; // Flag for deletion
+    }
   }
+  // Delete flagged ones
+  i=0;
+  while (i<animationdrawqueue.size() && animationdrawqueue[i])
+	  ++i;
+  j=i;
+  while (i<animationdrawqueue.size()) {
+	  while (i<animationdrawqueue.size() && !animationdrawqueue[i])
+		  ++i;
+	  while (i<animationdrawqueue.size() && animationdrawqueue[i])
+		  animationdrawqueue[j++] = animationdrawqueue[i++];
+  }
+  animationdrawqueue.resize(j);
 }
 bool Animation::CalculateOrientation (Matrix & result) {
   Vector camp,camq,camr;
