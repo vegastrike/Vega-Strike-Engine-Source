@@ -180,5 +180,6 @@ public:
   virtual void	createBackground( StarSystem::StarXML * xml) {}
 };
 bool PendingJumpsEmpty();
+double calc_blend_factor(double frac, int priority, int when_it_will_be_simulated, int cur_simulation_frame);
 #endif
 

@@ -2523,6 +2523,10 @@ bool Unit::AutoPilotToErrorMessage (Unit * target, bool ignore_energy_requiremen
   bool nowhere=false;
 	
   if (this!=target) {
+    if ((end-start).MagnitudeSquared()<rSize()*rSize()){
+      failuremessage=XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","AlreadyNearMessage","#ff0000Already Near#000000"));    
+      return false;
+    }
     warpenergy-=totpercent*jump.insysenergy;
     if (unsafe==false&&totpercent==0)
       end=endne;
@@ -3492,6 +3496,7 @@ Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat)
 
 	return temp2;
 }
+
 void Unit::SetOrientation (QVector q, QVector r) {
   q.Normalize();
   r.Normalize();

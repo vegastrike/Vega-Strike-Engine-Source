@@ -957,6 +957,30 @@ void StarSystem::ProcessPendingJumps() {
   }
 
 }
+double calc_blend_factor(double frac, int priority, int when_it_will_be_simulated, int cur_simulation_frame) {
+/*	bool is_at_end=when_it_will_be_simulated==SIM_QUEUE_SIZE;
+  if (cur_simulation_frame>when_it_will_be_simulated) {
+    when_it_will_be_simulated+=SIM_QUEUE_SIZE;
+  }
+  double distance = when_it_will_be_simulated-cur_simulation_frame;//number between for next SIM_FRAME and SIM_QUEUE_SIZE-1
+  double when_it_was_simulated=when_it_will_be_simulated-(double)priority;
+  double fraction_of_physics_frame=(cur_simulation_frame-when_it_was_simulated+frac-1)/priority;
+  if (is_at_end) {
+	  return 1;
+  }else {
+	  return fraction_of_physics_frame;
+  }*/
+    if (when_it_will_be_simulated==SIM_QUEUE_SIZE) {
+        return 1;
+    } else {
+        int relwas = when_it_will_be_simulated - priority;
+        if (relwas < 0) relwas += SIM_QUEUE_SIZE;
+        int relcur = cur_simulation_frame - relwas - 1;
+        if (relcur < 0) relcur += SIM_QUEUE_SIZE;
+        return (relcur + frac)/(double)priority;
+    }
+}
+
 void ActivateAnimation(Unit * jumppoint) {
 	jumppoint->graphicOptions.Animating=1;
 	Unit * un;
