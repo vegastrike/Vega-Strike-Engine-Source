@@ -52,6 +52,9 @@ PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const 
 PlanetaryOrbit::~PlanetaryOrbit () {
   parent->SetResolveForces (true);
 }
+extern double saved_interpolation_blend_factor;
+
+double calc_blend_factor(double frac, int priority, int when_it_will_be_simulated, int cur_simulation_frame);
 void PlanetaryOrbit::Execute() {
   bool done =this->done;
   this->Order::Execute();
@@ -62,9 +65,11 @@ void PlanetaryOrbit::Execute() {
   QVector y_offset = sin(theta) * y_size;
   QVector origin (targetlocation);
   if (subtype&SSELF) {
-      Unit * tmp = group.GetUnit();
-      if (tmp) {
-		  origin+= tmp->Position();
+      Unit * unit = group.GetUnit();
+      if (unit) {
+		  unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
+          double blend_factor=calc_blend_factor(saved_interpolation_blend_factor,unit->sim_atom_multiplier,unit->cur_sim_queue_slot,cur_sim_frame);
+		  origin+= unit->prev_physical_state.position*(1-blend_factor)+blend_factor*unit->curr_physical_state.position;
       }else {
 		  done = true;
 		  parent->SetResolveForces(true);
