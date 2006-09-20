@@ -39,7 +39,7 @@ void	NetClient::enterClient( NetBuffer &netbuf, ObjSerial cltserial )
         Unit * shouldbenull=UniverseUtil::GetUnitFromSerial(cltserial);
           //NETFIXME could be slow--but alas
         if (NULL!=shouldbenull) {
-          cout << " not adding unit with serial number "<< cltserial<<" named " <<shouldbenull->name<<" to system .";
+          cout << " not adding unit with serial number "<< cltserial<<" named " <<shouldbenull->name.get()<<" to system .";
           return;//already exists
         }
 	if( !isLocalSerial( cltserial))

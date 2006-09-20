@@ -1,6 +1,8 @@
 #include "aux_texture.h"
 #include "vsfilesystem.h"
 #include <stdio.h>
+#include "../SharedPool.h"
+
 class AnimatedTexture: public Texture {
   Texture ** Decal;
   unsigned int activebound; //For video mode
@@ -14,10 +16,10 @@ class AnimatedTexture: public Texture {
   enum FILTER ismipmapped;
   int texstage;
 
-  vector<string> frames; //Filenames for each frame
+  vector<StringPool::Reference> frames; //Filenames for each frame
   vector<Vector> frames_maxtc; //Maximum tcoords for each frame
   vector<Vector> frames_mintc; //Minimum tcoords for each frame
-  string wrapper_file_path;
+  StringPool::Reference wrapper_file_path;
   VSFileSystem::VSFileType wrapper_file_type;
 
   //Options

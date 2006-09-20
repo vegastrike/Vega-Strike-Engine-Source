@@ -36,6 +36,7 @@ void UncheckUnit (class Unit * un);
 #include "vs_globals.h"
 
 #include <string>
+#include <set>
 #include "cmd/unit_armorshield.h"
 #include "gfx/matrix.h"
 #include "gfx/quaternion.h"
@@ -52,9 +53,8 @@ void UncheckUnit (class Unit * un);
 #include "networking/lowlevel/vsnet_clientstate.h"
 #include "gfx/cockpit_generic.h"
 #include "vsfilesystem.h"
-#include <set>
-#include <string>
 #include "collide_map.h"
+#include "SharedPool.h"
 using std::string;
 
 extern char * GetUnitDir (const char * filename);
@@ -183,12 +183,12 @@ class Unit
 protected:
   ///How many lists are referencing us
   int ucref;
-  std::string csvRow;
+  StringPool::Reference csvRow;
 public:
   UnitSounds * sound;
 
   ///The name (type) of this unit shouldn't be public
-  std::string name;
+  StringPool::Reference name;
   
 /***************************************************************************************/
 /**** CONSTRUCTORS / DESCTRUCTOR                                                    ****/
@@ -358,13 +358,13 @@ public:
   unsigned unitRole() const {return unit_role;}
   void unitRole(unsigned char c){unit_role=c;}
 //following 2 are legacy functions for python export only
-  void setCombatRole(std::string s);
+  void setCombatRole(const std::string &s);
   std::string getCombatRole()const;
 //end legacy functions
   std::string getUnitRole()const;
-  void setUnitRole(std::string s);
+  void setUnitRole(const std::string &s);
   std::string getAttackPreference()const;
-  void setAttackPreference(std::string s);
+  void setAttackPreference(const std::string &s);
 protected:
   unsigned char attack_preference;
   unsigned char unit_role;
@@ -953,7 +953,7 @@ public:
 
 protected:
   ///not used yet
-  string target_fgid[3];
+  StringPool::Reference target_fgid[3];
 public:
   bool InRange (Unit *target, bool cone=true, bool cap=true) const{
     double mm;

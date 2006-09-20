@@ -334,7 +334,7 @@ static void AddSubUnits (Unit *thus, Unit::XML &xml, std::string subunits, int f
     CheckAccessory(xml.units.back());//turns on the ceerazy rotation for the turr          
   }
   for(int a=xml.units.size()-1; a>=0; a--) {
-      bool randomspawn = xml.units[a]->name.find("randomspawn")!=string::npos;
+      bool randomspawn = xml.units[a]->name.get().find("randomspawn")!=string::npos;
       if (randomspawn) {
           int chancetospawn = xml.units[a]->WarpCapData();
           if (chancetospawn > rand()%100)
@@ -1210,7 +1210,7 @@ shield.range[1].   rhomax=r90;
   }
   double explodet=queryTime();
   this->image->explosion_type = OPTIM_GET(row,table,Explosion);
-  if (image->explosion_type.length()) {
+  if (image->explosion_type.get().length()) {
     cache_ani (image->explosion_type);
   } else {
     static std::string expani = vs_config->getVariable ("graphics","explosion_animation","explosion_orange.ani");
@@ -1358,7 +1358,7 @@ void Unit::WriteUnit (const char * modifications) {
       }
     }
     if (bad) {
-      fprintf(stderr,"Cannot Write out unit file %s %s that has no filename\n",name.c_str(),csvRow.c_str());
+      fprintf(stderr,"Cannot Write out unit file %s %s that has no filename\n",name.get().c_str(),csvRow.get().c_str());
       return;
     }
     std::string savedir = modifications;
@@ -1515,7 +1515,7 @@ string Unit::WriteUnitString () {
                      c->functionality,
                      c->maxfunctionality,
                      c->mission?"true":"false");
-            carg+="{"+c->content+";"+c->category+tmp;
+            carg+="{"+c->GetContent()+";"+c->GetCategory()+tmp;
           }
           unit["Cargo"]=carg;
         }
@@ -1643,7 +1643,7 @@ string Unit::WriteUnitString () {
         return writeCSV(keys,values);
       }
     }
-    fprintf (stderr,"Failed to locate base mesh for %s %s %s\n",csvRow.c_str(),name.c_str(),fullname.c_str());
+    fprintf (stderr,"Failed to locate base mesh for %s %s %s\n",csvRow.get().c_str(),name.get().c_str(),fullname.c_str());
   }else {
     if (image->unitwriter)
       ret = image->unitwriter->WriteString();
@@ -1656,12 +1656,12 @@ string Unit::WriteUnitString () {
 void UpdateMasterPartList(Unit * ret) {
   for (int i=0;i<_Universe->numPlayers();++i) {
     Cockpit* cp = _Universe->AccessCockpit(i);
-    std::vector<std::string>* addedcargoname= &cp->savegame->getMissionStringData("master_part_list_content");
-    std::vector<std::string>* addedcargocat= &cp->savegame->getMissionStringData("master_part_list_category");
-    std::vector<std::string>* addedcargovol= &cp->savegame->getMissionStringData("master_part_list_volume");
-    std::vector<std::string>* addedcargoprice= &cp->savegame->getMissionStringData("master_part_list_price");
-    std::vector<std::string>* addedcargomass= &cp->savegame->getMissionStringData("master_part_list_mass");
-    std::vector<std::string>* addedcargodesc= &cp->savegame->getMissionStringData("master_part_list_description");
+    std::vector<StringPool::Reference>* addedcargoname= &cp->savegame->getMissionStringData("master_part_list_content");
+    std::vector<StringPool::Reference>* addedcargocat= &cp->savegame->getMissionStringData("master_part_list_category");
+    std::vector<StringPool::Reference>* addedcargovol= &cp->savegame->getMissionStringData("master_part_list_volume");
+    std::vector<StringPool::Reference>* addedcargoprice= &cp->savegame->getMissionStringData("master_part_list_price");
+    std::vector<StringPool::Reference>* addedcargomass= &cp->savegame->getMissionStringData("master_part_list_mass");
+    std::vector<StringPool::Reference>* addedcargodesc= &cp->savegame->getMissionStringData("master_part_list_description");
     for (unsigned int j=0;j<addedcargoname->size();++j) {
       Cargo carg;
       carg.content=(*addedcargoname)[j];

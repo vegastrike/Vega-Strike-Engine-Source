@@ -857,7 +857,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 					pox = UniverseUtil::SafeEntrancePoint(savedloc[squadnum]);
 				}
 
-                                vector<std::string> *dat=&cp->savegame->getMissionStringData("jump_from");
+                                vector<StringPool::Reference> *dat=&cp->savegame->getMissionStringData("jump_from");
                                 
                                 if (dat->size()) {
                                   std::string srcsys=(*dat)[0];
@@ -1017,12 +1017,12 @@ void AddUnitToSystem (const SavedUnits *su) {
   Unit * un=NULL;
   switch (su->type) {
   case ENHANCEMENTPTR:
-    un = UnitFactory::createEnhancement (su->filename.c_str(),FactionUtil::GetFactionIndex (su->faction),string(""));
+    un = UnitFactory::createEnhancement (su->filename.get().c_str(),FactionUtil::GetFactionIndex (su->faction),string(""));
     un->SetPosition(QVector(0,0,0));
     break;
   case UNITPTR:
   default:
-    un = UnitFactory::createUnit (su->filename.c_str(),false,FactionUtil::GetFactionIndex (su->faction));
+    un = UnitFactory::createUnit (su->filename.get().c_str(),false,FactionUtil::GetFactionIndex (su->faction));
     un->EnqueueAI (new Orders::AggressiveAI ("default.agg.xml"));
     un->SetTurretAI ();
     if (_Universe->AccessCockpit()->GetParent()) {

@@ -446,7 +446,7 @@ bool Cockpit::Update () {
 
 	  if (i++==index) {
 	    index++;
-	    if (un->name.find ("accessory")==string::npos) {
+	    if (un->name.get().find ("accessory")==string::npos) {
 	      tmp=true;
 	      SwitchUnitsTurret(par,un);
 	      parentturret.SetUnit(par);

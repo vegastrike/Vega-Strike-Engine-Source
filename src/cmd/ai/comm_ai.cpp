@@ -153,7 +153,7 @@ static int InList (std::string item, Unit * un) {
   float numcontr = 0;
   if (un) {
     for (unsigned int i=0;i<un->numCargo();i++) {
-      if (item==un->GetCargo(i).content) {
+      if (un->GetCargo(i).content==item) {
         if (un->GetCargo(i).quantity>0)
           numcontr++;
       }

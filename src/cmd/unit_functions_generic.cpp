@@ -290,17 +290,17 @@ void RecomputeUnitUpgrades (Unit * un) {
 	unsigned int i;
 	for (i=0;i<un->numCargo();++i) {
 		Cargo * c = &un->GetCargo(i);
-		if (c->category.find("upgrades")==0&&c->category.find(DamagedCategory)!=0) {
-			if (c->content.find("mult_")!=0 &&
-				c->content.find("add_")!=0 ) {
+		if (c->GetCategory().find("upgrades")==0&&c->GetCategory().find(DamagedCategory)!=0) {
+			if (c->GetContent().find("mult_")!=0 &&
+				c->GetContent().find("add_")!=0 ) {
 				un->Upgrade(c->content,0,0,true,false);
 			}
 		}
 	}
 	for (i=0;i<un->numCargo();++i) {
 		Cargo * c = &un->GetCargo(i);
-		if (c->category.find("upgrades")==0&&c->category.find(DamagedCategory)!=0) {
-			if (c->content.find("add_")==0 ) {
+		if (c->GetCategory().find("upgrades")==0&&c->GetCategory().find(DamagedCategory)!=0) {
+			if (c->GetContent().find("add_")==0 ) {
 				for (int j=0;j<c->quantity;++j) {
 					un->Upgrade(c->content,0,0,true,false);
 				}
@@ -309,8 +309,8 @@ void RecomputeUnitUpgrades (Unit * un) {
 	}
 	for (i=0;i<un->numCargo();++i) {
 		Cargo * c = &un->GetCargo(i);
-		if (c->category.find("upgrades")==0&&c->category.find(DamagedCategory)!=0) {
-			if (c->content.find("mult_")==0) {
+		if (c->GetCategory().find("upgrades")==0&&c->GetCategory().find(DamagedCategory)!=0) {
+			if (c->GetContent().find("mult_")==0) {
 				for (int j=0;j<c->quantity;++j) {
 					un->Upgrade(c->content,0,0,true,false);
 				}
@@ -328,7 +328,7 @@ void Enslave (Unit* parent, bool enslave) {
   for (i=numcargo-1;i>=0;--i) {
     Cargo * carg= &parent->GetCargo(i);
     if (enslave) {
-      if (carg->category.find("Passengers")!=string::npos&&carg->content!="Hitchhiker") {
+      if (carg->GetCategory().find("Passengers")!=string::npos&&carg->content!="Hitchhiker") {
         ToBeChanged.push_back(*carg);
         parent->RemoveCargo(i,carg->quantity,true);
       }

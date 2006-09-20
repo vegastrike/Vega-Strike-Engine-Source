@@ -1860,7 +1860,7 @@ void Unit::LoadXML(VSFileSystem::VSFile & f, const char * modifications, string 
   //std::cout<<std::endl;
   //cout<<"Loading XML unit : "<<filename<<" in "<<curdir[0]<<endl;
   //std::cout<<std::endl;
-  image->unitwriter=new XMLSerializer (name.c_str(),modifications,this);
+  image->unitwriter=new XMLSerializer (name.get().c_str(),modifications,this);
   image->unitwriter->AddTag ("Unit");
   string * myhudim = &image->unitwriter->randomdata[0];
   float * myscale=&image->unitscale;
@@ -1888,7 +1888,7 @@ void Unit::LoadXML(VSFileSystem::VSFile & f, const char * modifications, string 
   {
     image->unitwriter->AddTag("Defense");
     image->unitwriter->AddElement("HudImage",stringStarHandler,XMLType (myhudim));
-    if (image->explosion_type.length()){
+    if (image->explosion_type.get().length()){
       image->unitwriter->AddElement("ExplosionAni",stringStarHandler,XMLType(&image->explosion_type));
     }
     image->unitwriter->AddElement("RepairDroid",ucharStarHandler,XMLType(&image->repair_droid));

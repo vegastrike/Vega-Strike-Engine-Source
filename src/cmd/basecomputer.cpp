@@ -94,9 +94,9 @@ bool upgradeNotAddedToCargo(std::string category) {
 }
 extern vector<unsigned int > base_keyboard_queue;
 std::string getDisplayCategory(const Cargo &cargo) {
-  std::string::size_type where= cargo.description.find("<");
+  std::string::size_type where= cargo.GetDescription().find("<");
   if (where!=string::npos) {
-    std::string category = cargo.description.substr(where+1);
+    std::string category = cargo.GetDescription().substr(where+1);
     where=category.find(">");
     return category.substr(0,where);   
   }
@@ -1662,7 +1662,7 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo& item, Transaction
                   if (!isWeapon(item.category)){//weapons can always be sold
                     for (unsigned int i=0;i<numc;++i) {
                       Cargo * c = &player->GetCargo(i);
-                      if (c->category.find("upgrades/")==0&&!isWeapon(c->category)) {
+                      if (c->GetCategory().find("upgrades/")==0&&!isWeapon(c->category)) {
                         float po=PercentOperational(player,c->content,c->category,false);
                         if (po>.02&&po<.98) {
                           static bool must_fix_first = XMLSupport::parse_bool(vs_config->getVariable("physics","must_repair_to_sell","true"));
@@ -1812,7 +1812,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
             case BUY_SHIP:
                 commitButton->setLabel("Buy");
                 commitButton->setCommand("BuyShip");
-                if(item.category.find("My_Fleet") != string::npos) {
+                if(item.GetCategory().find("My_Fleet") != string::npos) {
                   //note can only sell it if you can afford to ship it over here.
                   NewButton* commit10Button = static_cast<NewButton*>( window()->findControlById("Commit10") );
                   assert(commit10Button != NULL);
@@ -1831,7 +1831,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
 				damaged_mode=configureUpgradeCommitControls(item, SELL_UPGRADE);
                 break;
              case ACCEPT_MISSION:
-               if (item.category.find("Active_Missions")!=string::npos) {
+               if (item.GetCategory().find("Active_Missions")!=string::npos) {
                  commitButton->setLabel("Abort");
                  static bool allow_abort_mission=XMLSupport::parse_bool(vs_config->getVariable("physics","allow_mission_abort","true"));
                  if (allow_abort_mission==false) {
@@ -1859,10 +1859,10 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
         // Do the money.
         switch(tlist->transaction) {
             case BUY_CARGO:
-				if (item.description==""||item.description[0]!='@'){
+				if (item.GetDescription()==""||item.GetDescription()[0]!='@'){
 					item.description=buildCargoDescription(item);
 				}
-                if(item.category.find("My_Fleet") != string::npos) {
+                if(item.GetCategory().find("My_Fleet") != string::npos) {
                     // This ship is in my fleet -- the price is just the transport cost to get it to
                     //  the current base.  "Buying" this ship makes it my current ship.
                     sprintf(tempString, "#b#Transport cost: %.2f#-b#n1.5#", item.price);
@@ -1887,15 +1887,15 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
                     sprintf(tempString, "Price: #b#%.2f#-b#n1.5#", baseUnit->PriceCargo(item.content));
                 }
                 descString += tempString;
-				if(item.description==""||item.description[0]!='#'){
+				if(item.GetDescription()==""||item.GetDescription()[0]!='#'){
 					item.description=buildUpgradeDescription(item);
 				}
                 break;
             case BUY_SHIP:
-                if (item.category.find("My_Fleet")==string::npos) {
+                if (item.GetCategory().find("My_Fleet")==string::npos) {
                   UniverseUtil::StopAllSounds();
                   if (item.price < _Universe->AccessCockpit()->credits) {
-                    std::string tmp = item.content.substr(0,item.content.find("."));
+                    std::string tmp = item.GetContent().substr(0,item.GetContent().find("."));
                     UniverseUtil::playSound("sales/salespitch"+tmp+".wav",QVector(0,0,0),Vector(0,0,0));
                   }else {
                     UniverseUtil::playSound("sales/salespitchnotenoughmoney.wav",QVector(0,0,0),Vector(0,0,0));
@@ -1905,7 +1905,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
                   item.description=buildShipDescription(item,descriptiontexture);
                   
                 }
-                if(item.category.find("My_Fleet") != string::npos) {
+                if(item.GetCategory().find("My_Fleet") != string::npos) {
                     // This ship is in my fleet -- the price is just the transport cost to get it to
                     //  the current base.  "Buying" this ship makes it my current ship.
                     sprintf(tempString, "#b#Transport cost: %.2f#-b#n1.5#", item.price);
@@ -1921,7 +1921,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
                 descString += tempString;
                 break;
             case SELL_CARGO:
-              if (item.description==""||item.description[0]!='@'){
+              if (item.GetDescription()==""||item.GetDescription()[0]!='@'){
                 item.description=buildCargoDescription(item);
               }
               if (item.mission) {
@@ -1961,7 +1961,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
                 }
 //********************************************************************************************
                 
-                if(item.description==""||item.description[0]!='#'){
+                if(item.GetDescription()==""||item.GetDescription()[0]!='#'){
                   item.description=buildUpgradeDescription(item);
                 }
               }
@@ -2056,7 +2056,7 @@ bool UpgradeAllowed (const Cargo& item, Unit * playerUnit) {
       std::string tmp = prohibited_upgrade.substr(where+1);      
       quantity = atoi(tmp.c_str());      
     }
-    if (content==item.content||content==item.category) {
+    if (item.content==content||item.category==content) {
       if (quantity==0)
           return false;
       unsigned int i=0;
@@ -2120,7 +2120,7 @@ bool BaseComputer::isTransactionOK(const Cargo& originalItem, TransactionType tr
             break;
         case ACCEPT_MISSION:
             // Make sure the player doesn't take too many missions.
-			if(item.category.find("Active_Missions")!=string::npos||active_missions.size() < UniverseUtil::maxMissions()) {
+			if(item.GetCategory().find("Active_Missions")!=string::npos||active_missions.size() < UniverseUtil::maxMissions()) {
 				return true;
 			}
             break;
@@ -2372,15 +2372,15 @@ public:
     bool operator () (const CargoColor & a, const CargoColor&b) {
       std::string acategory(a.cargo.category);
       std::string bcategory(b.cargo.category);
-      std::string::size_type aless=a.cargo.description.find("<");
-      std::string::size_type agreater=a.cargo.description.find(">");
-      std::string::size_type bless=b.cargo.description.find("<");
-      std::string::size_type bgreater=b.cargo.description.find(">");
+      std::string::size_type aless=a.cargo.GetDescription().find("<");
+      std::string::size_type agreater=a.cargo.GetDescription().find(">");
+      std::string::size_type bless=b.cargo.GetDescription().find("<");
+      std::string::size_type bgreater=b.cargo.GetDescription().find(">");
       if (aless!=string::npos && agreater!=string::npos) {
-        acategory=a.cargo.description.substr(aless+1,agreater);        
+        acategory=a.cargo.GetDescription().substr(aless+1,agreater);        
       }
       if (bless!=string::npos && bgreater!=string::npos) {
-        bcategory=b.cargo.description.substr(bless+1,bgreater);        
+        bcategory=b.cargo.GetDescription().substr(bless+1,bgreater);        
       }
       if (acategory==bcategory)
         return a.cargo<b.cargo;
@@ -2397,11 +2397,11 @@ void BaseComputer::loadMasterList(Unit *un, const vector<string>& filtervec, con
 	    bool invfilter = true;
 		int vecindex;
         for (vecindex=0;!filter&&(vecindex<filtervec.size());vecindex++) {
-			if (un->GetCargo(i).category.find(filtervec[vecindex])!=string::npos)
+			if (un->GetCargo(i).GetCategory().find(filtervec[vecindex])!=string::npos)
 				filter = true;
 		}
         for (vecindex=0;invfilter&&(vecindex<invfiltervec.size());vecindex++) {
-			if (un->GetCargo(i).category.find(invfiltervec[vecindex])!=string::npos)
+			if (un->GetCargo(i).GetCategory().find(invfiltervec[vecindex])!=string::npos)
 				invfilter = false;
 		}
 		if (filter&&invfilter) {
@@ -2859,7 +2859,7 @@ void BaseComputer::loadMissionsMasterList(TransactionList& tlist) {
         amission.cargo.category="Active_Missions";
         amission.cargo.description="Objectives\\";
         for (unsigned int j=0;j<active_missions[i]->objectives.size();++j) {
-          amission.cargo.description+=active_missions[i]->objectives[j].objective+": "+XMLSupport::tostring((int)(100*active_missions[i]->objectives[j].completeness))+"%\\";          
+          amission.cargo.description = amission.cargo.GetDescription()+active_missions[i]->objectives[j].objective+": "+XMLSupport::tostring((int)(100*active_missions[i]->objectives[j].completeness))+"%\\";          
         }
         amission.color=DEFAULT_UPGRADE_COLOR();
         tlist.masterList.push_back(amission);
@@ -2896,8 +2896,8 @@ bool BaseComputer::acceptMission(const EventCommandId& command, Control* control
         updateTransactionControlsForSelection(NULL);
         return true;
     }
-    if (item->category.find("Active_Missions")!=string::npos) {
-      unsigned int whichmission=atoi(item->content.c_str());
+    if (item->GetCategory().find("Active_Missions")!=string::npos) {
+      unsigned int whichmission=atoi(item->GetContent().c_str());
       if (whichmission>0&&whichmission<active_missions.size()) {
         Mission * tmp=active_missions[whichmission];
         active_missions[whichmission]->terminateMission();        
@@ -2914,10 +2914,10 @@ bool BaseComputer::acceptMission(const EventCommandId& command, Control* control
     const int stringCount = getSaveStringLength(playernum, MISSION_NAMES_LABEL);
     assert(stringCount == getSaveStringLength(playernum, MISSION_SCRIPTS_LABEL));
     string qualifiedName;
-    if(item->category.empty()) {
+    if(item->GetCategory().empty()) {
         qualifiedName = item->content;
     } else {
-        qualifiedName = item->category + CATEGORY_SEP + item->content;
+        qualifiedName = item->GetCategory() + CATEGORY_SEP + item->GetContent();
     }
     string finalScript;
     for (unsigned int i=0; i<stringCount; i++) {
@@ -3291,7 +3291,7 @@ void BaseComputer::BuyUpgradeOperation::start(void) {
         return;
     }
 
-    const string unitDir = GetUnitDir(playerUnit->name.c_str());
+    const string unitDir = GetUnitDir(playerUnit->name.get().c_str());
     const string templateName = unitDir + ".template";
     const int faction = playerUnit->faction;
 
@@ -3303,7 +3303,7 @@ void BaseComputer::BuyUpgradeOperation::start(void) {
     if (m_theTemplate->name == LOAD_FAILED) {
       m_theTemplate=NULL;
     }
-    m_addMultMode = GetModeFromName(m_selectedItem.content.c_str());   // Whether the price is linear or geometric.
+    m_addMultMode = GetModeFromName(m_selectedItem.GetContent().c_str());   // Whether the price is linear or geometric.
     unsigned int offset;                // Temp.  Not used.
     Cargo* part = baseUnit->GetCargo(m_selectedItem.content, offset);    // Whether the base has any of these.
     if(part && part->quantity > 0) {
@@ -3476,14 +3476,14 @@ void BaseComputer::SellUpgradeOperation::start(void) {
         return;
     }
 
-    const string unitDir = GetUnitDir(playerUnit->name.c_str());
+    const string unitDir = GetUnitDir(playerUnit->name.get().c_str());
     const string limiterName = unitDir + ".blank";
     const int faction = playerUnit->faction;
 
     // Get the "limiter" for this operation.  Stats can't decrease more than the blank ship.
     m_downgradeLimiter = makeFinalBlankUpgrade(playerUnit->name,faction);
     if(m_downgradeLimiter->name != LOAD_FAILED) {
-        Cargo* part = GetMasterPartList(m_selectedItem.content.c_str());
+        Cargo* part = GetMasterPartList(m_selectedItem.GetContent().c_str());
         if(part) {
             m_part = *part;
             endInit();
@@ -3767,8 +3767,8 @@ bool BaseComputer::fixUpgrade(const EventCommandId& command, Control* control) {
                 }else {
 			Cargo sold;
 			const int quantity=1;
-                        bool notadditive=(item->content.find("add_")!=0&&item->content.find("mult_")!=0);
-			if (notadditive||item->category.find(DamagedCategory)==0) {
+                        bool notadditive=(item->GetContent().find("add_")!=0&&item->GetContent().find("mult_")!=0);
+			if (notadditive||item->GetCategory().find(DamagedCategory)==0) {
 				Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
                                 
 				//playerUnit->SellCargo(item->content, quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
@@ -3781,10 +3781,10 @@ bool BaseComputer::fixUpgrade(const EventCommandId& command, Control* control) {
                                     _Universe->AccessCockpit()->credits-=price;                                    
                                     if (notadditive)
                                       playerUnit->Upgrade(un,0,0,0,true,percentage,makeTemplateUpgrade(playerUnit->name,playerUnit->faction));
-                                    if (item->category.find(DamagedCategory)==0) {
+                                    if (item->GetCategory().find(DamagedCategory)==0) {
                                       unsigned int where;
                                       Cargo * c=playerUnit->GetCargo(item->content,where);
-                                      if (c) c->category="upgrades/"+c->category.substr(strlen(DamagedCategory));
+                                      if (c) c->category="upgrades/"+c->GetCategory().substr(strlen(DamagedCategory));
                                       
                                     }
                                     if (PercentOperational(playerUnit,item->content,"upgrades/",false)<1.0) {
@@ -3891,14 +3891,14 @@ void SwapInNewShipName(Cockpit* cockpit, const std::string& newFileName, int swa
 string buildShipDescription(Cargo &item,std::string & texturedescription) {
 	//load the Unit
       	string newModifications;
-      	if(item.category.find("My_Fleet") != string::npos) {
+      	if(item.GetCategory().find("My_Fleet") != string::npos) {
         	// Player owns this starship.
 		newModifications = _Universe->AccessCockpit()->GetUnitModifications();
      	 	}
       	Flightgroup* flightGroup=new Flightgroup();
       	int fgsNumber=0;
 		current_unit_load_mode=NO_MESH;
-      	Unit* newPart = UnitFactory::createUnit(item.content.c_str(), false, 0, newModifications,
+      	Unit* newPart = UnitFactory::createUnit(item.GetContent().c_str(), false, 0, newModifications,
 					      flightGroup,fgsNumber);
 		current_unit_load_mode=DEFAULT;
 	string hudimage;
@@ -3911,7 +3911,7 @@ string buildShipDescription(Cargo &item,std::string & texturedescription) {
                  std::string shipname= hudimage.substr(doublepng+4);
                  if (shipname.find(".png")!=string::npos||shipname.find(".jpg")!=string::npos) {
                     hudimage = hudimage.substr(0,doublepng+4-shipname.length());
-                    string shipnoblank = item.content.substr(0,item.content.find("."));
+                    string shipnoblank = item.GetContent().substr(0,item.GetContent().find("."));
                     string::size_type ship = hudimage.rfind(shipnoblank);
                     if (ship!=string::npos) {
                        texturedescription="../units/"+shipnoblank+"/"+shipname;
@@ -3940,7 +3940,7 @@ string buildUpgradeDescription(Cargo &item) {
     Flightgroup* flightGroup=new Flightgroup();//sigh
     int fgsNumber=0;
 	current_unit_load_mode=NO_MESH;
-    Unit* newPart = UnitFactory::createUnit(item.content.c_str(), false, FactionUtil::GetUpgradeFaction(),blnk,flightGroup,fgsNumber);
+    Unit* newPart = UnitFactory::createUnit(item.GetContent().c_str(), false, FactionUtil::GetUpgradeFaction(),blnk,flightGroup,fgsNumber);
 	current_unit_load_mode=DEFAULT;
 	string str="";
 	str+=item.description;
@@ -4086,7 +4086,7 @@ bool buyShip(Unit * baseUnit, Unit * playerUnit, std::string content, bool myfle
         // Player owns this starship.
         shipCargo = &myFleetShipCargo;
         myFleetShipCargo = CreateCargoForOwnerStarshipName(_Universe->AccessCockpit(), content, swappingShipsIndex);
-        if(shipCargo->content.empty()) {
+        if(shipCargo->GetContent().empty()) {
             // Something happened -- can't find ship by name.
             shipCargo = NULL;
             swappingShipsIndex = -1;
@@ -4138,7 +4138,7 @@ bool buyShip(Unit * baseUnit, Unit * playerUnit, std::string content, bool myfle
                     for (int j=0;j<2;++j) {
                       for (int i=playerUnit->numCargo()-1;i>=0;--i) {
                         Cargo c = playerUnit->GetCargo(i);
-                        if ((c.mission!=0&&j==0)||(c.mission==0&&j==1&&c.category.find("upgrades")!=0)) {
+                        if ((c.mission!=0&&j==0)||(c.mission==0&&j==1&&c.GetCategory().find("upgrades")!=0)) {
                           for (int k=c.quantity;k>0;--k) {
                             c.quantity=k;
                             if (newPart->CanAddCargo(c)) {
@@ -4203,7 +4203,7 @@ bool BaseComputer::buyShip(const EventCommandId& command, Control* control) {
     if(!(playerUnit && baseUnit && item)) {
         return true;
     }
-    ::buyShip(baseUnit,playerUnit,item->content,item->category.find("My_Fleet") != string::npos,true,this); // last was false BUCO
+    ::buyShip(baseUnit,playerUnit,item->GetContent(),item->GetCategory().find("My_Fleet") != string::npos,true,this); // last was false BUCO
     return true;
 }
 
@@ -4440,7 +4440,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	int nameindex=0;
 	int replacement_mode=-1;
 	if(mode){
-		replacement_mode=GetModeFromName(item.content.c_str());
+		replacement_mode=GetModeFromName(item.GetContent().c_str());
 		MPLdesc+=text;
 		text="";
 		string statcolor="#c.75:.9:1#";
@@ -4452,8 +4452,9 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		}
 		nametemp=playerUnit->getFullname();
 		if(nametemp==""){
-		  for(nameindex=0; (nameindex<playerUnit->name.size())&&playerUnit->name[nameindex]!='.';nameindex++){
-		  	  nametemp+=playerUnit->name[nameindex];
+		  const std::string& name = playerUnit->name.get();
+		  for(nameindex=0; (nameindex<name.size())&&name[nameindex]!='.';nameindex++){
+		  	  nametemp+=name[nameindex];
 		  }
 		}
 		if (nametemp.length()){
@@ -4480,16 +4481,15 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	}
 
 	if(!mode){
-		for(nameindex=0; (nameindex<playerUnit->name.size())&&playerUnit->name[nameindex]!='.';nameindex++){
+		const std::string &name = playerUnit->name;
+		for(nameindex=0; (nameindex<name.size())&&name[nameindex]!='.';nameindex++){
 			//nametemp+=playerUnit->name[nameindex];
 		}
 		nametemp=playerUnit->getFullname();
-		if (nametemp.length()){
+		if (nametemp.length())
 			nametemp[0]=toupper(nametemp[0]);
-		}
-		for(nameindex=nameindex+1;nameindex<playerUnit->name.size();nameindex++){
-			model+=playerUnit->name[nameindex];
-		}
+		for(nameindex=nameindex+1;nameindex<name.size();nameindex++)
+			model+=name[nameindex];
 
 		if(model=="blank"){
 			model="Stock";
@@ -4500,7 +4500,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		} else {
 			model="Military Spec. Variant ("+model+")";
 		}
-		Cargo * fullname = GetMasterPartList(playerUnit->name.c_str());
+		Cargo * fullname = GetMasterPartList(playerUnit->name.get().c_str());
 		Cargo * milname = GetMasterPartList(nametemp.c_str());
 		Cargo * blankname = GetMasterPartList((nametemp+".blank").c_str());
 		if(!subunitlevel && (fullname || milname || blankname)){

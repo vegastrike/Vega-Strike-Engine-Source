@@ -133,9 +133,9 @@ void	NetServer::sendJump(Unit * un, Unit * dst,std::string dststr)
     Packet p2;
     std::string netbuf;
     std::string fn=dststr;
-    vector<std::string>*dat=&cp->savegame->getMissionStringData("jump_from");
+    vector<StringPool::Reference>*dat=&cp->savegame->getMissionStringData("jump_from");
     if (dat->empty()) {
-      dat->push_back(_Universe->activeStarSystem()->getFileName());
+	  dat->push_back(StringPool::Reference(_Universe->activeStarSystem()->getFileName()));
     }else {
       (*dat)[0]=_Universe->activeStarSystem()->getFileName();
     }

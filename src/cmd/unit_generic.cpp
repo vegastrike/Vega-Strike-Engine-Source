@@ -48,7 +48,6 @@
 static float mymax (float a, float b) {return a<b?b:a;}
 static float mymin (float a, float b) {return a<b?a:b;}
 
-
 using namespace Orders;
 extern void DestroyMount(Mount*);
 
@@ -506,7 +505,7 @@ Unit::~Unit()
 {
   free(image->cockpit_damage);
   if ((!killed)) {
-    VSFileSystem::vs_fprintf (stderr,"Assumed exit on unit %s(if not quitting, report error)\n",name.c_str());
+    VSFileSystem::vs_fprintf (stderr,"Assumed exit on unit %s(if not quitting, report error)\n",name.get().c_str());
   }
   if (ucref) {
     VSFileSystem::vs_fprintf (stderr,"DISASTER AREA!!!!");
@@ -1041,7 +1040,7 @@ static float tmpmax (float a , float b) {
 	return a>b?a:b;
 }
 bool CheckAccessory (Unit * tur) {
-  bool accessory = tur->name.find ("accessory")!=string::npos;
+  bool accessory = tur->name.get().find ("accessory")!=string::npos;
   if (accessory) {
     tur->SetAngularVelocity(tur->DownCoordinateLevel(Vector (tur->GetComputerData().max_pitch_up,
 							   tur->GetComputerData().max_yaw_right,
@@ -3403,7 +3402,7 @@ Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat)
   if (GetMoment())
 	  temp1=temp1/GetMoment();
   else
-	  VSFileSystem::vs_fprintf (stderr,"zero moment of inertia %s\n",name.c_str());
+	  VSFileSystem::vs_fprintf (stderr,"zero moment of inertia %s\n",name.get().c_str());
   Vector temp (temp1*SIMULATION_ATOM);
   /*  //FIXME  does this shit happen!
       if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) */
@@ -4400,9 +4399,9 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
 				if (DestroySystem(hull,maxhull,numCargo())) {
 					int which = rand()%numCargo();
                                         static std::string Restricted_items=vs_config->getVariable("physics","indestructable_cargo_items","");
-					if (GetCargo(which).category.find("upgrades/")==0&& GetCargo(which).category.find(DamagedCategory)!=0 &&GetCargo(which).content.find("mult_")!=0&&Restricted_items.find(GetCargo(which).content)==string::npos) {//why not downgrade _add GetCargo(which).content.find("add_")!=0&&
+					if (GetCargo(which).GetCategory().find("upgrades/")==0&& GetCargo(which).GetCategory().find(DamagedCategory)!=0 &&GetCargo(which).GetContent().find("mult_")!=0&&Restricted_items.find(GetCargo(which).GetContent())==string::npos) {//why not downgrade _add GetCargo(which).content.find("add_")!=0&&
 						int lenupgrades = strlen("upgrades/");
-						GetCargo(which).category = string(DamagedCategory)+GetCargo(which).category.substr(lenupgrades);
+						GetCargo(which).category = string(DamagedCategory)+GetCargo(which).GetCategory().substr(lenupgrades);
                                                 static bool NotActuallyDowngrade=XMLSupport::parse_bool(vs_config->getVariable("physics","separate_system_flakiness_component","false"));
                                                 if (!NotActuallyDowngrade) {
                                                   const Unit * downgrade=loadUnitByCache(GetCargo(which).content,FactionUtil::GetFactionIndex("upgrades"));
@@ -6048,7 +6047,7 @@ bool Unit::UpgradeSubUnitsWithFactory (const Unit * up, int subunitoffset, bool 
     
 
     bool foundthis=false;
-    if (turSize == getTurretSize (addtome->name)&&addtome->rSize()&&(turSize+"_blank"!=addtome->name)) {//if the new turret has any size at all
+    if (turSize == getTurretSize (addtome->name)&&addtome->rSize()&&(turSize+"_blank"!=addtome->name.get())) {//if the new turret has any size at all
       if (!downgrade||addtome->name==giveAway->name) {
 	found=true;
 	foundthis=true;
@@ -6151,7 +6150,7 @@ double Unit::Upgrade (const std::string &file, int mountoffset, int subunitoffse
     up = UnitConstCache::setCachedConst (StringIntKey (file,upgradefac),
 			     UnitFactory::createUnit (file.c_str(),true,upgradefac));
   }
-  char * unitdir  = GetUnitDir(this->name.c_str());
+  char * unitdir  = GetUnitDir(this->name.get().c_str());
   string templnam = string(unitdir)+".template";	  
   const Unit * templ = UnitConstCache::getCachedConst (StringIntKey(templnam,this->faction));
 	if (templ==NULL) {
@@ -6785,7 +6784,7 @@ int Unit::RepairCost () {
           cost++;
         
 	for (i=0;i<numCargo();++i) {
-		if (GetCargo(i).category.find(DamagedCategory)==0)
+		if (GetCargo(i).GetCategory().find(DamagedCategory)==0)
 			cost++;
 	}
 	return cost;
@@ -6859,18 +6858,18 @@ int Unit::RepairUpgrade () {
 	static bool ComponentBasedUpgrades = XMLSupport::parse_bool (vs_config->getVariable("physics","component_based_upgrades","false"));
 	if (ComponentBasedUpgrades){
 	for (unsigned int i=0;i<numCargo();++i) {
-		if (GetCargo(i).category.find(DamagedCategory)==0){
+		if (GetCargo(i).GetCategory().find(DamagedCategory)==0){
 			success++;
 			static int damlen = strlen(DamagedCategory);
-			GetCargo(i).category="upgrades/"+GetCargo(i).category.substr(damlen);
+			GetCargo(i).category="upgrades/"+GetCargo(i).GetCategory().substr(damlen);
 		}
 	}
 	}else if (ret) {
-		const Unit * maxrecharge= makeTemplateUpgrade(name+".template",faction);
+		const Unit * maxrecharge= makeTemplateUpgrade(name.get()+".template",faction);
 		
 		Unit * mpl = UnitFactory::getMasterPartList();
 		for (unsigned int i=0;i<mpl->numCargo();++i) {
-			if (mpl->GetCargo(i).category.find("upgrades")==0) {
+			if (mpl->GetCargo(i).GetCategory().find("upgrades")==0) {
 				const Unit * up = loadUnitByCache(mpl->GetCargo(i).content,upfac);
 				//now we analyzify up!
 				if (up->MaxShieldVal()==MaxShieldVal()&&up->shield.recharge>shield.recharge) {
@@ -6941,22 +6940,22 @@ vector <CargoColor>& Unit::FilterDowngradeList (vector <CargoColor> & mylist, bo
 
   for (unsigned int i=0;i<mylist.size();i++) {
     bool removethis=true/*staticrem*/;
-    int mode=GetModeFromName(mylist[i].cargo.content.c_str());
+    int mode=GetModeFromName(mylist[i].cargo.GetContent().c_str());
     if (mode!=2 || (!downgrade)) {
-      const Unit * NewPart =  UnitConstCache::getCachedConst (StringIntKey (mylist[i].cargo.content.c_str(),upgrfac));
+      const Unit * NewPart =  UnitConstCache::getCachedConst (StringIntKey (mylist[i].cargo.GetContent().c_str(),upgrfac));
       if (!NewPart){
-	NewPart= UnitConstCache::setCachedConst (StringIntKey (mylist[i].cargo.content,upgrfac),UnitFactory::createUnit(mylist[i].cargo.content.c_str(),false,upgrfac));
+	NewPart= UnitConstCache::setCachedConst (StringIntKey (mylist[i].cargo.GetContent(),upgrfac),UnitFactory::createUnit(mylist[i].cargo.GetContent().c_str(),false,upgrfac));
       }
       if (NewPart->name==string("LOAD_FAILED")) {
-	const Unit * NewPart = UnitConstCache::getCachedConst (StringIntKey (mylist[i].cargo.content.c_str(),faction));
+	const Unit * NewPart = UnitConstCache::getCachedConst (StringIntKey (mylist[i].cargo.GetContent().c_str(),faction));
 	if (!NewPart){
 	  NewPart= UnitConstCache::setCachedConst (StringIntKey (mylist[i].cargo.content, faction),
-				       UnitFactory::createUnit(mylist[i].cargo.content.c_str(),false,faction));
+				       UnitFactory::createUnit(mylist[i].cargo.GetContent().c_str(),false,faction));
 	}
       }
       if (NewPart->name!=string("LOAD_FAILED")) {
 	int maxmountcheck = NewPart->GetNumMounts()?GetNumMounts():1;
-	char * unitdir  = GetUnitDir(name.c_str());
+	char * unitdir  = GetUnitDir(name.get().c_str());
 	string templnam = string(unitdir)+".template";
         string limiternam = string(unitdir)+".blank";
         
@@ -7109,15 +7108,15 @@ void Unit::EjectCargo (unsigned int index) {
 
 //prevents a number of bad things, incl. impossible speeds and people getting rich on broken stuff
 	  
-	if ((!tmp->mission)&&memcmp (tmp->category.c_str(),"upgrades",ulen)==0) {
+	if ((!tmp->mission)&&memcmp (tmp->GetCategory().c_str(),"upgrades",ulen)==0) {
 		tmpcontent="Space_Salvage";}
 
 	// this happens if it's a ship
     if (tmp->quantity>0) {
       const int sslen=strlen("starships");
       Unit * cargo = NULL;
-      if (tmp->category.length()>=(unsigned int)sslen) {
-	if ((!tmp->mission)&&memcmp (tmp->category.c_str(),"starships",sslen)==0) {
+      if (tmp->GetCategory().length()>=(unsigned int)sslen) {
+	if ((!tmp->mission)&&memcmp (tmp->GetCategory().c_str(),"starships",sslen)==0) {
 	  string ans = tmpcontent;
 	  string::size_type blank = ans.find (".blank");
 	  if (blank != string::npos) {
@@ -7407,7 +7406,7 @@ void Unit::AddCargo (const Cargo &carg, bool sort) {
     SortCargo();
 }
 bool cargoIsUpgrade(const Cargo& c) {
-  return c.category.find("upgrades")==0;
+  return c.GetCategory().find("upgrades")==0;
 }
 float Unit::getHiddenCargoVolume()const {
   return image->HiddenCargoVolume;
@@ -7474,10 +7473,10 @@ const Cargo& Unit::GetCargo (unsigned int i) const {
 class CatCompare{
 public:
   bool operator ()(const Cargo &a,const Cargo& b) {
-    std::string::const_iterator aiter=a.category.begin();
-    std::string::const_iterator aend=a.category.end();
-    std::string::const_iterator biter=b.category.begin();
-    std::string::const_iterator bend=b.category.end();
+    std::string::const_iterator aiter=a.GetCategory().begin();
+    std::string::const_iterator aend=a.GetCategory().end();
+    std::string::const_iterator biter=b.GetCategory().begin();
+    std::string::const_iterator bend=b.GetCategory().end();
     for (;aiter!=aend&&biter!=bend;++aiter,++biter) {
       char achar=*aiter;
       char bchar=*biter;
@@ -7768,10 +7767,10 @@ std::string Unit::subunitSerializer (const XMLType &input, void * mythis) {
   }
   return string("destroyed_turret");
 }
-void Unit::setUnitRole(std::string s) {
+void Unit::setUnitRole(const std::string &s) {
    unitRole(ROLES::getRole(s));
 }
-void Unit::setAttackPreference(std::string s) {
+void Unit::setAttackPreference(const std::string &s) {
    attackPreference(ROLES::getRole(s));
 }
 std::string Unit::getUnitRole() const {
@@ -7782,7 +7781,7 @@ std::string Unit::getAttackPreference() const {
 }
 
 //legacy function for python
-void Unit::setCombatRole(std::string s) {
+void Unit::setCombatRole(const std::string &s) {
    unitRole(ROLES::getRole(s));
    attackPreference(ROLES::getRole(s));
 }
@@ -7824,7 +7823,7 @@ std::string CargoToString (const Cargo& cargo) {
   if (cargo.mission) {
 	  missioncargo = string("\" missioncargo=\"")+XMLSupport::tostring(cargo.mission);
   }
-  return string ("\t\t\t<Cargo mass=\"")+XMLSupport::tostring((float)cargo.mass)+string("\" price=\"") +XMLSupport::tostring((float)cargo.price)+ string("\" volume=\"")+XMLSupport::tostring((float)cargo.volume)+string("\" quantity=\"")+XMLSupport::tostring((int)cargo.quantity)+string("\" file=\"")+cargo.content+missioncargo+ string("\"/>\n");
+  return string ("\t\t\t<Cargo mass=\"")+XMLSupport::tostring((float)cargo.mass)+string("\" price=\"") +XMLSupport::tostring((float)cargo.price)+ string("\" volume=\"")+XMLSupport::tostring((float)cargo.volume)+string("\" quantity=\"")+XMLSupport::tostring((int)cargo.quantity)+string("\" file=\"")+cargo.GetContent()+missioncargo+ string("\"/>\n");
 }
 
 std::string Unit::cargoSerializer (const XMLType &input, void * mythis) {
@@ -7835,11 +7834,11 @@ std::string Unit::cargoSerializer (const XMLType &input, void * mythis) {
   un->SortCargo();
   string retval("");
   if (!(un->image->cargo.empty())) {
-    retval= un->image->cargo[0].category+string ("\">\n")+CargoToString(un->image->cargo[0]);
+    retval= un->image->cargo[0].GetCategory()+string ("\">\n")+CargoToString(un->image->cargo[0]);
     
     for (unsigned int kk=1;kk<un->image->cargo.size();kk++) {
       if (un->image->cargo[kk].category!=un->image->cargo[kk-1].category) {
-	retval+=string("\t\t</Category>\n\t\t<Category file=\"")+un->image->cargo[kk].category+string ("\">\n");
+	retval+=string("\t\t</Category>\n\t\t<Category file=\"")+un->image->cargo[kk].GetCategory()+string ("\">\n");
       }
       retval+=CargoToString(un->image->cargo[kk]); 
     }
@@ -7958,10 +7957,10 @@ void Unit::Repair() {
         }
         Cargo *carg = &GetCargo(image->next_repair_cargo);
         float percentoperational=1;
-        if (carg->category.find("upgrades/")==0
-            &&carg->category.find(DamagedCategory)!=0
-            &&carg->content.find("add_")!=0
-            &&carg->content.find("mult_")!=0
+        if (carg->GetCategory().find("upgrades/")==0
+            &&carg->GetCategory().find(DamagedCategory)!=0
+            &&carg->GetContent().find("add_")!=0
+            &&carg->GetContent().find("mult_")!=0
             &&((percentoperational=PercentOperational(this,carg->content,carg->category,true))<1.f)) {
           if (image->next_repair_time==-FLT_MAX) {
             image->next_repair_time=UniverseUtil::GetGameTime()+repairtime*(1-percentoperational);
@@ -7977,7 +7976,7 @@ void Unit::Repair() {
               if (up->SubUnits.empty()&&up->GetNumMounts()==0) {//don't want to repair these things
                 this->Upgrade(up,0,0,0,true,percentage,makeTemplateUpgrade(this->name,this->faction),false,false);
                 if (percentage==0) {
-                  VSFileSystem::vs_fprintf (stderr,"Failed repair for unit %s, cargo item %d: %s (%s) - please report error\n",name.c_str(),image->next_repair_cargo,carg->content.c_str(),carg->category.c_str());
+                  VSFileSystem::vs_fprintf (stderr,"Failed repair for unit %s, cargo item %d: %s (%s) - please report error\n",name.get().c_str(),image->next_repair_cargo,carg->GetContent().c_str(),carg->GetCategory().c_str());
                 }
               }
             }

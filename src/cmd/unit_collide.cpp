@@ -403,7 +403,7 @@ Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, Q
 							&bigtransform)) {
       static int crashcount=0;
     
-            VSFileSystem::vs_fprintf (stderr,"%s Beam Crashez %d\n", name.c_str(),crashcount++);
+            VSFileSystem::vs_fprintf (stderr,"%s Beam Crashez %d\n", name.get().c_str(),crashcount++);
       csCollisionPair * mycollide = csRapidCollider::GetCollisions();
       int numHits = csRapidCollider::numHits;
       if (numHits) {

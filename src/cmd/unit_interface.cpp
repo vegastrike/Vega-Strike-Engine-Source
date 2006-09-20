@@ -432,7 +432,7 @@ void UpgradingInfo::SetupCargoList () {
 		vector <std::string> who;
 		who.push_back ("news");
 		while ((mission->msgcenter->last(i++,last,who))) {
-			CargoList->AddTextItem ((tostring(i-1)+" "+last.message).c_str(),last.message.c_str());
+			CargoList->AddTextItem ((tostring(i-1)+" "+last.message).c_str(),last.message.get().c_str());
 		}
 	}else {
 		int playernum=UnitUtil::isPlayerStarship(buyer.GetUnit());
@@ -474,7 +474,7 @@ void UpgradingInfo::SetupCargoList () {
 	  }
 
 	  for (unsigned int i=0;i<CurrentList->size();i++) {
-	    if (match(curcategory.begin(),curcategory.end(),(*CurrentList)[i].cargo.category.begin(),(*CurrentList)[i].cargo.category.end(),true)) {
+	    if (match(curcategory.begin(),curcategory.end(),(*CurrentList)[i].cargo.GetCategory().begin(),(*CurrentList)[i].cargo.GetCategory().end(),true)) {
 		if (mode!=UPGRADEMODE&&mode!=DOWNGRADEMODE
 #ifdef USE_BRIEFINGS
 		  &&mode!=BRIEFINGMODE
@@ -534,7 +534,7 @@ void UpgradingInfo::SetupCargoList () {
 			  }
 			  if ((*CurrentList)[i].cargo.quantity>1)
 				  printstr+="("+tostring((*CurrentList)[i].cargo.quantity)+")";
-			  CargoList->AddTextItem ((tostring((int)i)+ string(" ")+(*CurrentList)[i].cargo.content).c_str() ,printstr.c_str(),NULL,(*CurrentList)[i].color);
+			  CargoList->AddTextItem ((tostring((int)i)+ string(" ")+(*CurrentList)[i].cargo.GetContent()).c_str() ,printstr.c_str(),NULL,(*CurrentList)[i].color);
 			  addedsomething=true;
 	    }
 	  }
@@ -581,7 +581,7 @@ void UpgradingInfo::SetupCargoList () {
 	  break;
 	case SUBUNIT_MODE:
 	  for (ui=un->getSubUnits();(*ui)!=NULL;++ui,++i) {
-	    CargoList->AddTextItem ((tostring(i)+(*ui)->name).c_str(),(*ui)->name.c_str());
+	    CargoList->AddTextItem ((tostring(i)+(*ui)->name).c_str(),(*ui)->name.get().c_str());
 	  }
 	  break;
 	case CONFIRM_MODE:
@@ -760,9 +760,9 @@ bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
 		else
 			break;
 	}
-	CargoInfo->ChangeTextItem ("name",(*CurrentList)[cargonumber].cargo.content.c_str());
+	CargoInfo->ChangeTextItem ("name",(*CurrentList)[cargonumber].cargo.GetContent().c_str());
 	float oldprice=(*CurrentList)[cargonumber].cargo.price;
-	if ((*CurrentList)[cargonumber].cargo.category.find("My_Fleet")==std::string::npos) {
+	if ((*CurrentList)[cargonumber].cargo.GetCategory().find("My_Fleet")==std::string::npos) {
 	  oldprice=bas->PriceCargo((*CurrentList)[cargonumber].cargo.content);
 	}
         if (mode==DOWNGRADEMODE) {
@@ -782,7 +782,7 @@ bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
 //	CargoInfo->ChangeTextItemColor("price",(*CurrentList)[cargonumber].color);
 	sprintf(floatprice,"Cargo Volume: %.2f",(*CurrentList)[cargonumber].cargo.volume);
 	CargoInfo->ChangeTextItem ("volume",floatprice);
-	CargoInfo->ChangeTextItem ("description",(*CurrentList)[cargonumber].cargo.description.c_str(),true);
+	CargoInfo->ChangeTextItem ("description",(*CurrentList)[cargonumber].cargo.GetDescription().c_str(),true);
       }
 	} else {
       CommitItem (item,0,buttonstate);
@@ -799,7 +799,7 @@ bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
 	if (news_from_cargolist) {
 		who.push_back ("news");
 		if ((mission->msgcenter->last(cargonumber,last,who))) {
-			CargoInfo->ChangeTextItem ("description",last.message.c_str(),true);
+			CargoInfo->ChangeTextItem ("description",last.message.get().c_str(),true);
 			static string newssong=vs_config->getVariable("audio","newssong","../music/news1.ogg");
 			muzak->GotoSong(newssong);
 			readnews=true;
@@ -1006,7 +1006,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 
     {
 
-      char *unitdir =GetUnitDir(un->name.c_str());
+      char *unitdir =GetUnitDir(un->name.get().c_str());
       std::string templnam = (string(unitdir)+string(".template"));
       std::string limiternam = (string(unitdir)+string(".blank"));
       const Unit * temprate= UnitConstCache::getCachedConst (StringIntKey(templnam,un->faction));
@@ -1045,7 +1045,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	    NewPart=NULL;
 	  if (0==strcmp (input_buffer,"repair")) {
 	    free (input_buffer);
-	    char *unitdir =GetUnitDir(un->name.c_str());
+	    char *unitdir =GetUnitDir(un->name.get().c_str());
 	    VSFileSystem::vs_fprintf (stderr,"SOMETHING WENT WRONG WITH REPAIR UPGRADE");
 	    input_buffer = strdup ((string(unitdir)+string(".blank")).c_str());
 	    free(unitdir);
@@ -1482,11 +1482,11 @@ vector <CargoColor>&UpgradingInfo::MakeMissionsFromSavegame(Unit *base) {
     c.cargo.price=0;
     c.cargo.content=getSaveString(playernum,miss_name,i);
 	c.cargo.description=getSaveString(playernum,miss_desc,i);
-	string::size_type index=c.cargo.content.rfind("/");
+	string::size_type index=c.cargo.GetContent().rfind("/");
 	if (index==std::string::npos) {
 		c.cargo.category=std::string("missions");
 	} else {
-		c.cargo.category=std::string("missions/"+c.cargo.content.substr(0,index));
+		c.cargo.category=std::string("missions/"+c.cargo.GetContent().substr(0,index));
 	}
 //	if ((index+1)<c.cargo.content.size())
 //		c.cargo.content=c.cargo.content.substr(index+1);
@@ -1505,9 +1505,9 @@ vector <CargoColor>&UpgradingInfo::MakeMissionsFromSavegame(Unit *base) {
 vector <CargoColor>&UpgradingInfo::FilterCargo(Unit *un, const string filterthis, bool inv, bool removezero){
   TempCargo.clear();
     for (unsigned int i=0;i<un->numCargo();i++) {
-      unsigned int len = un->GetCargo(i).category.length();
+      unsigned int len = un->GetCargo(i).GetCategory().length();
       len = len<filterthis.length()?len:filterthis.length();
-      if ((0==memcmp(un->GetCargo(i).category.c_str(),filterthis.c_str(),len))==inv) {//only compares up to category...so we could have starship_blue
+      if ((0==memcmp(un->GetCargo(i).GetCategory().c_str(),filterthis.c_str(),len))==inv) {//only compares up to category...so we could have starship_blue
 		  if ((!removezero)||un->GetCargo(i).quantity>0) {
 		    if (!un->GetCargo(i).mission) {
 			CargoColor col;
@@ -1627,7 +1627,7 @@ vector <CargoColor>&UpgradingInfo::GetCargoList () {
 	vector <CargoColor> tmp;
 	for (unsigned int i=0;i<TempCargo.size();i++) {
 	  if (match(curcategory.begin(),curcategory.end(),
-		    TempCargo[i].cargo.category.begin(),TempCargo[i].cargo.category.end(),false)) {
+		    TempCargo[i].cargo.GetCategory().begin(),TempCargo[i].cargo.GetCategory().end(),false)) {
 	    tmp.push_back (TempCargo[i]);
 	  }
 	}

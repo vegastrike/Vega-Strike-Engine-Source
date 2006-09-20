@@ -864,7 +864,7 @@ Unit *VDU::GetCommunicating() {
 void VDU::DrawNav (GameCockpit *cp, Unit* you, Unit*targ, const Vector & nav) {
   //  Unit * you = _Universe->AccessCockpit()->GetParent();
   //  Unit * targ = you!=NULL?you->Target():NULL;
-  char *navdata=new char [1024+(_Universe->activeStarSystem()->getName().length()+(targ?targ->name.length():0))];
+  char *navdata=new char [1024+(_Universe->activeStarSystem()->getName().length()+(targ?targ->name.get().length():0))];
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
   static bool lie=XMLSupport::parse_bool (vs_config->getVariable("physics","game_speed_lying","true"));
   string nam="none";
@@ -916,7 +916,7 @@ void VDU::DrawManifest (Unit * parent, Unit * target) {	//	zadeVDUmanifest
   }
   unsigned int numCargo =target->numCargo();
   for (unsigned int i=0;i<numCargo;i++) {
-    if (target->GetCargo(i).category.find("upgrades/")!=0)
+    if (target->GetCargo(i).GetCategory().find("upgrades/")!=0)
       retval+=target->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (target->GetCargo(i).quantity)+string (")\n");
   }
   tp->Draw (MangleString (retval,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true);  
@@ -1082,7 +1082,7 @@ void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
       percent_working = 0.88;// cargo.damage
       Cargo& the_cargo = parent->GetCargo(i);
       bool damaged=the_cargo.GetCategory().find(DamagedCategory)==0;
-      if(damaged||(the_cargo.GetCategory().find("upgrades/")==0&&the_cargo.content.find("mult_")!=0&&the_cargo.content.find("add_")!=0)){
+      if(damaged||(the_cargo.GetCategory().find("upgrades/")==0&&the_cargo.GetContent().find("mult_")!=0&&the_cargo.GetContent().find("add_")!=0)){
         percent_working = PercentOperational(parent,the_cargo.content,the_cargo.category,false);
 	//	retval+=parent->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (int(percent_working*100))+string ("%)" +the_cargo.GetCategory()+"\n");
         GFXColor final_color ((chdamaged[0]*percent_working)+(cdamaged[0]*(1.0-percent_working)),

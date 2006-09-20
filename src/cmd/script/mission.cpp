@@ -222,11 +222,11 @@ void Mission::terminateMission(){
 	}
         if (queuenum>0) {
           int num=queuenum-1;
-          vector<std::string> * scripts = &_Universe->AccessCockpit(player_num)->savegame->getMissionStringData("active_scripts");
+          vector<StringPool::Reference> * scripts = &_Universe->AccessCockpit(player_num)->savegame->getMissionStringData("active_scripts");
           if (num<scripts->size()) {
             scripts->erase(scripts->begin()+num);
           }
-          vector<std::string> * missions = &_Universe->AccessCockpit(player_num)->savegame->getMissionStringData("active_missions");
+          vector<StringPool::Reference> * missions = &_Universe->AccessCockpit(player_num)->savegame->getMissionStringData("active_missions");
           if (num<missions->size()) {
             missions->erase(missions->begin()+num);
           }

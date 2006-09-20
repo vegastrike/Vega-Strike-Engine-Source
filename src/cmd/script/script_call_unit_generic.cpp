@@ -301,7 +301,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 		  if (mpl->numCargo()) {
 		    for (unsigned int i=0;i<500;i++) {
 		      ret = &mpl->GetCargo(rand()%max);  
-		      if (ret->content.find("mission")==string::npos) {
+		      if (ret->GetContent().find("mission")==string::npos) {
 			break;
 		      }
 		    }
@@ -1039,7 +1039,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	}
       }
       if (mode==SCRIPT_RUN) {
-	printf ("upgrading %s %s %d %d %s\n",my_unit->name.c_str(),file.c_str(),mountoffset, subunitoffset,loop_through_mounts?"true":"false");
+	printf ("upgrading %s %s %d %d %s\n",my_unit->name.get().c_str(),file.c_str(),mountoffset, subunitoffset,loop_through_mounts?"true":"false");
         fflush (stdout);
 	percentage=my_unit->Upgrade (file,mountoffset,subunitoffset,force,loop_through_mounts);
 	my_unit->SetTurretAI();

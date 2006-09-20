@@ -751,7 +751,7 @@ using namespace VSFileSystem;
     CCScript * myscript = (*iter).second;
     (*myscript)(this, parent);
 	if (aidebug>1)
-		VSFileSystem::vs_fprintf (stderr,"%f using hcs %s for %s threat %f\n",mission->getGametime(),filename, parent->name.c_str(),parent->GetComputerData().threatlevel);
+		VSFileSystem::vs_fprintf (stderr,"%f using hcs %s for %s threat %f\n",mission->getGametime(),filename, parent->name.get().c_str(),parent->GetComputerData().threatlevel);
 	if (_Universe->isPlayerStarship(parent->Target())){
 		float value;
 		static float game_speed=XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));

@@ -384,7 +384,7 @@ void AnimatedTexture::Load(VSFileSystem::VSFile & f, int stage, enum FILTER ismi
     }
     if (loadall||i==numframes/2) {
         if (vidMode) {
-            frames.push_back(string(temp));
+			frames.push_back(StringPool::Reference(string(temp)));
             frames_mintc.push_back(Vector(
                 XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"mins",defms)),
                 XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"mint",defmt)),
@@ -432,7 +432,7 @@ void AnimatedTexture::LoadFrame(int frame) {
   if ((frame<0)||(frame>=numframes)) return;
   if ((activebound>=0)&&(activebound<numframes)&&(frames[frame]==frames[activebound])) return;
 
-  const char *temp = frames[frame].c_str();
+  const char *temp = frames[frame].get().c_str();
   char file[512]="white.bmp";
   char alp[512]="white.bmp";
   char opt[512]="";

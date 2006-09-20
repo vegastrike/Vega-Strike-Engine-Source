@@ -1006,7 +1006,7 @@ bool TargSig (Unit *me,Unit *target) {
   bool ret=me->InRange(target,false,true)&&UnitUtil::isSignificant(target)&&isNotTurretOwner(me,target);
 
   if (can_target_asteroid==false) {
-    if (target->isUnit()==ASTEROIDPTR||target->name.find("Asteroid")==0){
+    if (target->isUnit()==ASTEROIDPTR||target->name.get().find("Asteroid")==0){
       ret=false;
     }
   }
@@ -2049,7 +2049,7 @@ void FireKeyboard::Execute () {
     }
     for(;offset<parent->numCargo();++offset) {
       Cargo * tmp=&parent->GetCargo(offset);
-      if (tmp->category.find("upgrades")==string::npos&&(missiontoo||tmp->mission==false)) {
+      if (tmp->GetCategory().find("upgrades")==string::npos&&(missiontoo||tmp->mission==false)) {
         parent->EjectCargo(offset);
         break;
       }

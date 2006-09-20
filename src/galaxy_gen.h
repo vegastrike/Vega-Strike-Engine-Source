@@ -32,11 +32,11 @@ struct SystemInfo {
 };
 
 ///appends .system
-std::string getStarSystemFileName (std::string input);
+std::string getStarSystemFileName (const std::string &input);
 ///finds the name after all / characters and capitalizes the first letter
-std::string getStarSystemName (std::string in);
+std::string getStarSystemName (const std::string &in);
 ///finds the name before the first /  this is the sector name
-std::string getStarSystemSector (std::string in);
+std::string getStarSystemSector (const std::string &in);
 string getUniversePath ();
 void readnames (vector <string> &entity, const char *filename);
 void generateStarSystem (SystemInfo &si);

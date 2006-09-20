@@ -5,6 +5,7 @@
 #include <vector>
 #include "gfx/vec.h"
 #include "container.h"
+#include "../SharedPool.h"
 
 struct DockingPorts {
   ///Center
@@ -46,32 +47,39 @@ struct DockedUnits {
 
 class Cargo {
 public:
+  StringPool::Reference content;
+  StringPool::Reference category;
+  StringPool::Reference description;
+
   int quantity;
-  std::string content;
-  std::string category;
   float price;
   float mass;
   float volume;
-  std::string description;
   bool mission;
   float functionality;
   float maxfunctionality;
-  Cargo () {mass=0; volume=0;price=0;quantity=1;mission=false;functionality=maxfunctionality=1.0f;}
-  Cargo (std::string name, std::string cc, float pp,int qq, float mm, float vv,float func, float maxfunc) {
+  Cargo ()
+  {
+	mass=0; volume=0;price=0;quantity=1;mission=false;
+	functionality=maxfunctionality=1.0f;
+  }
+  Cargo (std::string name, std::string cc, float pp,int qq, float mm, float vv,float func, float maxfunc) :
+	content(name),
+	category(cc)
+  {
 	quantity=qq;
-	content=name;
-	category=cc;
 	price=pp;
 	mass = mm;
 	volume=vv;
 	mission=false;
-        functionality=func;
-        maxfunctionality=maxfunc;
+	functionality=func;
+	maxfunctionality=maxfunc;
   }
-  Cargo (std::string name, std::string cc, float pp,int qq, float mm, float vv) {
+  Cargo (std::string name, std::string cc, float pp,int qq, float mm, float vv) :
+	content(name),
+	category(cc)
+  {
 	quantity=qq;
-	content=name;
-	category=cc;
 	price=pp;
 	mass = mm;
 	volume=vv;
@@ -90,20 +98,24 @@ public:
     maxfunctionality=func;
   }
   void SetMissionFlag(bool flag){this->mission=flag;}
-  bool GetMissionFlag() {return this->mission;}
   void SetPrice (float price) {this->price=price;}
   void SetMass (float mass) {this->mass=mass;}
   void SetVolume (float vol) {this->volume=vol;}
   void SetQuantity (int quantity) {this->quantity=quantity;}
-  void SetContent (std::string content) {this->content = content;}
-  void SetCategory (std::string category) {this->category = category;}
-  std::string GetCategory () {return category;}
-  std::string GetContent () {return content;}
-  int GetQuantity() {return quantity;}
-  float GetVolume () {return volume;}
-  float GetMass() {return mass;}
-  float GetPrice () {return price;}
-  std::string GetDescription() {return description;}
+  void SetContent (const std::string &content) {this->content = content;}
+  void SetCategory (const std::string &category) {this->category = category;}
+
+  bool GetMissionFlag() const {return this->mission;}
+  const std::string& GetCategory () const {return category;}
+  const std::string& GetContent () const {return content;}
+  const std::string& GetDescription() const {return description;}
+  std::string GetCategoryPython() {return category;}
+  std::string GetContentPython() {return content;}
+  std::string GetDescriptionPython() {return description;}
+  int GetQuantity() const {return quantity;}
+  float GetVolume () const {return volume;}
+  float GetMass() const {return mass;}
+  float GetPrice () const {return price;}
   bool operator == (const Cargo & other) const {
     return content==other.content;
   }
@@ -122,8 +134,8 @@ struct UnitImages {
   ~UnitImages() {
     VSDESTRUCT1
   }
-  std::string cockpitImage;
-  std::string explosion_type;
+  StringPool::Reference cockpitImage;
+  StringPool::Reference explosion_type;
   Vector CockpitCenter;
   VSSprite * hudImage;
   ///The explosion starts at null, when activated time explode is incremented and ends at null  

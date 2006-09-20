@@ -1348,7 +1348,7 @@ Transformation	NetClient::Interpolate( Unit * un, double addtime)
 	} else {
 		trans=un->curr_physical_state;
                 if (rand()<RAND_MAX/5000)
-                  cerr << "  *** Interpolate with NULL CLIENT serial " << un->GetSerial() << "!  Unit fullname=" << un->getFullname() << ";  name=" << un->name << endl;
+                  cerr << "  *** Interpolate with NULL CLIENT serial " << un->GetSerial() << "!  Unit fullname=" << un->getFullname() << ";  name=" << un->name.get() << endl;
 	}
 	return trans;
 }

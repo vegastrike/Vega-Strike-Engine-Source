@@ -11,12 +11,7 @@ void ComputeSerials( std::vector<std::string> & stak);
 
 namespace GalaxyXML {
 using std::string;
-class StringWrapper : public string {
-public:
-	StringWrapper() {}
-	StringWrapper(const string &s) : string(s) {}
-};
-class StringMap : public std::map <StringWrapper, StringWrapper> {};
+typedef std::map<std::string,std::string> StringMap;
 class SubHeirarchy;
 class SGalaxy {
 protected:
@@ -28,48 +23,67 @@ protected:
  public:
   SGalaxy () {subheirarchy=NULL;}
   SGalaxy(const char *configfile);
-  SGalaxy( const SGalaxy & g);
-  void writeGalaxy(VSFileSystem::VSFile &f);
-  void writeSector (VSFileSystem::VSFile & f, int tabs, string sectorType, SGalaxy * planet_types);
+  SGalaxy(const SGalaxy & g);
+  void writeGalaxy(VSFileSystem::VSFile &f) const;
+  void writeSector(VSFileSystem::VSFile &f, int tabs, const string &sectorType, SGalaxy * planet_types) const;
 
-  void processGalaxy(string sys);
-  void processSystem(string sys,const QVector &suggested_coordinates);
+  void processGalaxy(const string &sys);
+  void processSystem(const string &sys,const QVector &suggested_coordinates);
 
   ~SGalaxy();
-  string getVariable(std::vector<string> section, string name, string default_value);
-  string getRandSystem(string section,string default_value);
-  string getVariable(string section,string name,string defaultvalue);
-  string getVariable(string section,string subsection,string name,string defaultvalue);
-  bool setVariable(string section,string name,string value);
-  bool setVariable(string section,string subsection,string name,string value);
-  void addSection(std::vector<string> section);
-  void setVariable (std::vector<string> section, string name, string value);
+  const string& getVariable(const std::vector<string> &section, const string &name, const string &default_value) const;
+  const string& getRandSystem(const string &section, const string &default_value) const;
+  const string& getVariable(const string &section, const string &name, const string &defaultvalue) const;
+  const string& getVariable(const string &section, const string &subsection, const string &name, const string &defaultvalue) const;
+  bool setVariable(const string &section,const string &name, const string &value);
+  bool setVariable(const string &section,const string &subsection, const string &name, const string &value);
+  void addSection(const std::vector<string> &section);
+  void setVariable(const std::vector<string> &section, const string &name, const string &value);
   SubHeirarchy & getHeirarchy();
-  std::string operator [](const std::string &s) {
-	  return data[StringWrapper(s)];
+  const std::string& operator [](const std::string &s) const
+  {
+	  static std::string empty_string;
+	  StringMap::const_iterator it = data.find(s);
+	  if (it != data.end())
+		  return it->second; else
+		  return empty_string;
   }
 };
 class Galaxy: public SGalaxy {
   SGalaxy * getInitialPlanetTypes();
   SGalaxy *planet_types; 
   SGalaxy & operator = (const SGalaxy & a);
-  std::map<StringWrapper,StringWrapper> initial2name;
-  std::map<StringWrapper,StringWrapper> texture2name;  
+  StringMap initial2name;
+  StringMap texture2name;  
   void setupPlanetTypeMaps();
  public:
   
-  string getPlanetNameFromInitial(std::string abbrev) {return initial2name[abbrev];}
-  string getPlanetNameFromTexture(std::string tex) {return texture2name[tex];}
-  string getPlanetVariable(string name,string defaultvalue);
-  string getPlanetVariable(string planet,string name,string defaultvalue);
-  void writeGalaxy(VSFileSystem::VSFile &f);
+  const string& getPlanetNameFromInitial(const string &abbrev) const 
+  {
+	  static std::string empty_string;
+	  StringMap::const_iterator it = initial2name.find(abbrev);
+	  if (it != initial2name.end())
+		  return it->second; else
+		  return empty_string;
+  }
+  const string& getPlanetNameFromTexture(const string &tex) const
+  {
+	  static std::string empty_string;
+	  StringMap::const_iterator it = texture2name.find(tex);
+	  if (it != texture2name.end())
+		  return it->second; else
+		  return empty_string;
+  }
+  const string& getPlanetVariable(const string &name, const string &defaultvalue) const;
+  const string& getPlanetVariable(const string &planet, const string &name, const string &defaultvalue) const;
+  void writeGalaxy(VSFileSystem::VSFile &f) const;
   SGalaxy * getPlanetTypes();
-  bool setPlanetVariable(string name,string value);
-  void addPlanetSection(std::vector<string> section);
-  bool setPlanetVariable(string planet,string name,string value);
+  bool setPlanetVariable(const string &name, const string &value);
+  void addPlanetSection(const std::vector<string> &section);
+  bool setPlanetVariable(const string &planet, const string &name, const string &value);
   Galaxy () {subheirarchy=NULL;planet_types=NULL;}
   Galaxy(const char *configfile);
-  Galaxy( const SGalaxy & g);
+  Galaxy(const SGalaxy & g);
 
 };
 
@@ -77,7 +91,7 @@ class SubHeirarchy : public stdext::hash_map<std::string,class SGalaxy> {};
 
 }
 
-string getStarSystemFileName (string input);
-string getStarSystemName (string in);
-string getStarSystemSector (string in);
+string getStarSystemFileName (const string &input);
+string getStarSystemName (const string &in);
+string getStarSystemSector (const string &in);
 #endif

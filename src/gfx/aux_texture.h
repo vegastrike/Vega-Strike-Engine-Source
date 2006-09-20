@@ -23,6 +23,7 @@
 #include "vsimage.h"
 #include "gfxlib.h"
 #include "gfxlib_struct.h"
+#include "../SharedPool.h"
 
 #include <string>
 //#include "vsimage.h"
@@ -39,7 +40,7 @@ class Texture : public ::VSImage
 public:
   void FileNotFound(const std::string &);//undoes what it did to hash table when file is not located
   ///The file name used to load this texture
-  std::string texfilename;
+  StringPool::Reference texfilename;
   ///the filter mode of this texture
   enum FILTER ismipmapped;
   ///The data of this texture (used in between functions, deleted)
@@ -63,12 +64,12 @@ public:
   ///The address mode being used with this texture
   enum ADDRESSMODE address_mode;
   ///Returns if this texture is actually already loaded
-  GFXBOOL checkold(std::string s, bool shared, std::string & hashname);
-  void modold(std::string s, bool shared, std::string & hashname);
+  GFXBOOL checkold(const std::string &s, bool shared, std::string & hashname);
+  void modold(const std::string &s, bool shared, std::string & hashname);
   ///Loads the old texture
   void setold();
-  bool checkbad( string & s);
-  void setbad( const string & s);
+  bool checkbad(const string & s);
+  void setbad(const string & s);
   ///Inits the class with default values
   void InitTexture() {
     bound = false;

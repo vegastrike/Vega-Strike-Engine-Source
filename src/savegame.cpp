@@ -17,132 +17,132 @@
 using namespace std;
 using namespace VSFileSystem;
 std::string CurrentSaveGameName="";
- std::string GetHelperPlayerSaveGame (int num) {
-
-if( Network==NULL)
+std::string GetHelperPlayerSaveGame (int num)
 {
-	if (CurrentSaveGameName.length()>0){
-		VSFile f;
-		VSError err = f.OpenCreateWrite( "save.4.x.txt", UnknownFile);
-		if (err<=Ok) {
-			f.Write(CurrentSaveGameName);
-			f.Close();
-		}		
-		if (num!=0) {
-			return CurrentSaveGameName+XMLSupport::tostring(num);
-		}
-		return CurrentSaveGameName;
-	}
-    cout << "Hi helper play " << num << endl;
-  static string *res=NULL;
-  if (res==NULL) {
-    res = new std::string;
-    //char c[2]={'\0','\0'};
-	VSFile f;
-	// TRY TO OPEN THE save.4.x.txt FILE WHICH SHOULD CONTAIN THE NAME OF THE SAVE TO USE
-	VSError err = f.OpenReadOnly( "save.4.x.txt", UnknownFile);
-    if (err>Ok) {
-	  // IF save.4.x.txt DOES NOT EXIST WE CREATE ONE WITH "default" AS SAVENAME
-	  err = f.OpenCreateWrite( "save.4.x.txt", UnknownFile);
-      if (err<=Ok) {
-		f.Write("New_Game\n",9);
-		f.Close();
-      }
-	  else
-	  {
-	  	fprintf( stderr, "!!! ERROR : Creating default save.4.x.txt file : %s\n", f.GetFullPath().c_str());
-		exit(1);
-	  }
-	  err = f.OpenReadOnly( "save.4.x.txt", UnknownFile);
-	  if( err>Ok)
-	  {
-	  	fprintf( stderr, "!!! ERROR : Opening the default save we just created\n");
-		exit(1);
-	  }
-    }
-    if (err<=Ok) {
-	  long length=f.Size();
-      if (length>0) {
-      char * temp = (char *)malloc (length+1);
-      temp[length]='\0';
-      f.Read (temp,length);
-      bool end=true;
-      for (int i=length-1;i>=0;i--) {
-        if (temp[i]=='\r'||temp[i]=='\n') {
-          temp[i]=(end?'\0':'_');
-        }else if (temp[i]=='\0'||temp[i]==' '||temp[i]=='\t') {
-          temp[i]=(end?'\0':'_');
-        }else {
-          end=false;
-        }
-      }
-      *res = (temp);
-      free (temp);
-      }
-      f.Close();
-
-    }
-#if 0
-    if (err<=Ok) {
-    while (!f.Eof()) {
-      f.Read( &c[0], sizeof( char));
-      if (!f.Eof()) {
-        if (c[0]!='\r'&&c[0]!='\n'&&c[0]!='\0') {
-          if (c[0]==' ') {
-            c[0]='_';
-            if (f.Eof()) {
-              continue;
-            }
-          }
-          (*res)+=c;
-        }
-      }else {
-        break;
-      }
-    }
-    f.Close();
-#endif
-    if (!res->empty())
+	if( Network==NULL)
 	{
-	  // Set filetype to Unknown so that it is searched in homedir/
-      if (*res->begin()=='~')
-	  {
-		  err = f.OpenCreateWrite( "save.4.x.txt", VSFileSystem::UnknownFile);
+		if (CurrentSaveGameName.length()>0){
+			VSFile f;
+			VSError err = f.OpenCreateWrite( "save.4.x.txt", UnknownFile);
+			if (err<=Ok) {
+				f.Write(CurrentSaveGameName);
+				f.Close();
+			}		
+			if (num!=0) {
+				return CurrentSaveGameName+XMLSupport::tostring(num);
+			}
+			return CurrentSaveGameName;
+		}
+		cout << "Hi helper play " << num << endl;
+	  static string *res=NULL;
+	  if (res==NULL) {
+		res = new std::string;
+		//char c[2]={'\0','\0'};
+		VSFile f;
+		// TRY TO OPEN THE save.4.x.txt FILE WHICH SHOULD CONTAIN THE NAME OF THE SAVE TO USE
+		VSError err = f.OpenReadOnly( "save.4.x.txt", UnknownFile);
+		if (err>Ok) {
+		  // IF save.4.x.txt DOES NOT EXIST WE CREATE ONE WITH "default" AS SAVENAME
+		  err = f.OpenCreateWrite( "save.4.x.txt", UnknownFile);
+		  if (err<=Ok) {
+			f.Write("New_Game\n",9);
+			f.Close();
+		  }
+		  else
+		  {
+	  		fprintf( stderr, "!!! ERROR : Creating default save.4.x.txt file : %s\n", f.GetFullPath().c_str());
+			exit(1);
+		  }
+		  err = f.OpenReadOnly( "save.4.x.txt", UnknownFile);
+		  if( err>Ok)
+		  {
+	  		fprintf( stderr, "!!! ERROR : Opening the default save we just created\n");
+			exit(1);
+		  }
+		}
 		if (err<=Ok) {
-	  	for (unsigned int i=1;i<res->length();i++)
-		{
-			char cc = *(res->begin()+i);
-	    	f.Write ( &cc,sizeof(char));
-	  	}
-	 	char cc=0;
-	  	f.Write (&cc,sizeof(char));
-	  	f.Close();
-	  }
-    }
-  } 
+		  long length=f.Size();
+		  if (length>0) {
+		  char * temp = (char *)malloc (length+1);
+		  temp[length]='\0';
+		  f.Read (temp,length);
+		  bool end=true;
+		  for (int i=length-1;i>=0;i--) {
+			if (temp[i]=='\r'||temp[i]=='\n') {
+			  temp[i]=(end?'\0':'_');
+			}else if (temp[i]=='\0'||temp[i]==' '||temp[i]=='\t') {
+			  temp[i]=(end?'\0':'_');
+			}else {
+			  end=false;
+			}
+		  }
+		  *res = (temp);
+		  free (temp);
+		  }
+		  f.Close();
 
-    
-#if 0
-	err = f.OpenReadOnly( "save.4.x.txt", SaveFile);
-    if (err<=Ok) {
-	  char cc=0;
-      f.Write(&cc,sizeof( char));
-      f.Close();
-    }
-#endif
-  }
-  if (num==0||res->empty()) {
-    cout << "Here";
-    return (*res);  
-  }
-  return (*res)+XMLSupport::tostring(num);
-}
-else
-{
-	//return Network[num].getCallsign();
-	// Return "" so that the filename argument to ParseSavegame will be used
-	return "";
-}
+		}
+	#if 0
+		if (err<=Ok) {
+		while (!f.Eof()) {
+		  f.Read( &c[0], sizeof( char));
+		  if (!f.Eof()) {
+			if (c[0]!='\r'&&c[0]!='\n'&&c[0]!='\0') {
+			  if (c[0]==' ') {
+				c[0]='_';
+				if (f.Eof()) {
+				  continue;
+				}
+			  }
+			  (*res)+=c;
+			}
+		  }else {
+			break;
+		  }
+		}
+		f.Close();
+	#endif
+		if (!res->empty())
+		{
+		  // Set filetype to Unknown so that it is searched in homedir/
+		  if (*res->begin()=='~')
+		  {
+			  err = f.OpenCreateWrite( "save.4.x.txt", VSFileSystem::UnknownFile);
+			if (err<=Ok) {
+	  		for (unsigned int i=1;i<res->length();i++)
+			{
+				char cc = *(res->begin()+i);
+	    		f.Write ( &cc,sizeof(char));
+	  		}
+	 		char cc=0;
+	  		f.Write (&cc,sizeof(char));
+	  		f.Close();
+		  }
+		}
+	  } 
+
+	    
+	#if 0
+		err = f.OpenReadOnly( "save.4.x.txt", SaveFile);
+		if (err<=Ok) {
+		  char cc=0;
+		  f.Write(&cc,sizeof( char));
+		  f.Close();
+		}
+	#endif
+	  }
+	  if (num==0||res->empty()) {
+		cout << "Here";
+		return (*res);  
+	  }
+	  return (*res)+XMLSupport::tostring(num);
+	}
+	else
+	{
+		//return Network[num].getCallsign();
+		// Return "" so that the filename argument to ParseSavegame will be used
+		return "";
+	}
 }
 
 std::string GetWritePlayerSaveGame(int num) {
@@ -188,7 +188,7 @@ void SaveFileCopy (const char * src, const char * dst) {
 }
 class MissionStringDat {
 public:
-  typedef stdext::hash_map<string,vector <string> >MSD;
+  typedef stdext::hash_map<string,vector <StringPool::Reference> >MSD;
   MSD m;
 };
 class MissionFloatDat {
@@ -252,7 +252,7 @@ string SaveGame::WriteNewsData () {
   }
   ret += XMLSupport::tostring(i)+"\n";
   for (int j=tmp.size()-1;j>=0;j--) {
-    char * msg = strdup (tmp[j].message.c_str());
+    char * msg = strdup (tmp[j].message.get().c_str());
     int k=0;
     while (msg[k]) {
       if (msg[k]=='\r')
@@ -402,19 +402,15 @@ void SaveGame::AddUnitToSave (const char * filename, int type, const char * fact
 std::vector<float> &SaveGame::getMissionData(const std::string &magic_number) {
   return missiondata->m[magic_number];
 }
-std::vector<string> &SaveGame::getMissionStringData(const std::string &magic_number) {
+std::vector<StringPool::Reference> &SaveGame::getMissionStringData(const std::string &magic_number) {
   return missionstringdata->m[magic_number];
 }
 template <class MContainerType> void RemoveEmpty (MContainerType &t) {
   typename MContainerType::iterator i;
-  MContainerType retval;
-  for (i=t.begin();i!=t.end();++i) {
-    typename MContainerType::key_type k = (*i).first;
-    if (!(*i).second.empty()) {
-      std::swap(retval[(*i).first],(*i).second);
-    }
-  }
-  t=retval;
+  for (i=t.begin();i!=t.end();)
+	  if (i->second.empty())
+		  t.erase(i++); else
+		  ++i;
 }
 string SaveGame::WriteMissionData () {
   string ret(" ");
@@ -504,10 +500,10 @@ void SaveGame::ReadMissionStringData (char * &buf) {
 	md_i_size = strtol(buf2,(char **)NULL,10);
     // Put ptr to point after the number we just read
     buf2 +=hopto (buf2,' ','\n',0);
-    missionstringdata->m[mag_num] = vector<string>();
-    vector <string> * vecstring=&missionstringdata->m[mag_num];
+	missionstringdata->m[mag_num] = vector<StringPool::Reference>();
+	vector <StringPool::Reference> * vecstring=&missionstringdata->m[mag_num];
     for (int j=0;j<md_i_size;j++) {
-      vecstring->push_back (AnyStringScanInString(buf2));
+		vecstring->push_back (StringPool::Reference(AnyStringScanInString(buf2)));
     }
   }
   buf = buf2;
@@ -631,11 +627,11 @@ void SaveGame::ReadSavedPackets (char * &buf, bool commitfactions) {
 }
 
 void SaveGame::LoadSavedMissions() {
-  vector<std::string> scripts = getMissionStringData("active_scripts");
-  vector<std::string> missions = getMissionStringData("active_missions");
+  vector<StringPool::Reference> scripts = getMissionStringData("active_scripts");
+  vector<StringPool::Reference> missions = getMissionStringData("active_missions");
   for (unsigned int i=0;i<scripts.size()&&i<missions.size();++i) {
     try {
-      LoadMission(missions[i].c_str(),scripts[i],false);
+      LoadMission(missions[i].get().c_str(),scripts[i],false);
     }catch (...) {
       if (PyErr_Occurred()) {
         PyErr_Print();

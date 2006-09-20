@@ -42,6 +42,12 @@ typedef stdext::hash_map<std::string, float> MapStringFloat;
     int playlist;
     float sparkcolor[4];
     std::vector <faction_stuff> faction;
+	///If logo==0, load from this one
+	std::string logoName;
+	std::string logoAlphaName;
+	///If secondaryLogo==0, load from this one
+	std::string secondaryLogoName;
+	std::string secondaryLogoAlphaName;
     ///Logos used by the ships of that faction
     Texture * logo;
     //if the squadron doens't; have its own particular logo
@@ -71,7 +77,7 @@ typedef stdext::hash_map<std::string, float> MapStringFloat;
 	Faction() {
 	playlist=-1;
         citizen=false;
-		logo=NULL;
+		logo=secondaryLogo=NULL;
 		contraband=NULL;
 		factionname=NULL;
 		sparkcolor[0]=.5;

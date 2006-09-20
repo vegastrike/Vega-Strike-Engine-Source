@@ -8,13 +8,15 @@
 
 #include <string>
 #include <vector>
+#include "SharedPool.h"
+
   struct SavedUnits {
-    std::string filename;
+	StringPool::Reference filename;
     int type;
-    std::string faction;
+    StringPool::Reference faction;
     SavedUnits (const char * filen, int typ, const char * fact) {
-      faction=fact;
-      filename=filen;
+	  faction=std::string(fact);
+	  filename=std::string(filen);
       type = typ;
     }
   };
@@ -46,7 +48,7 @@ class SaveGame {
   void ReloadPickledData();
   std::string GetCallsign() {return callsign;}
   std::vector<float> &getMissionData(const std::string &magic_number);
-  std::vector<std::string> &getMissionStringData(const std::string &magic_number);
+  std::vector<StringPool::Reference> &getMissionStringData(const std::string &magic_number);
   SaveGame(const std::string &pilotname);
   float GetSavedCredits();
   void SetSavedCredits (float);

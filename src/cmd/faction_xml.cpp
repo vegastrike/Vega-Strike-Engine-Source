@@ -133,7 +133,6 @@ void Faction::beginElement(void *userData, const XML_Char *names, const XML_Char
   string name=names;
   AttributeList::const_iterator iter;
   Names elem = (Names)element_map.lookup(name);
-  char * tmpstr=NULL;
   char RGBfirst=0;
   std::string secString;
   std::string secStringAlph;
@@ -221,86 +220,48 @@ void Faction::beginElement(void *userData, const XML_Char *names, const XML_Char
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case SPARKRED:
-	factions.back()->sparkcolor[0]=XMLSupport::parse_float((*iter).value);
-
-	break;
+		factions.back()->sparkcolor[0]=XMLSupport::parse_float((*iter).value);
+		break;
       case SPARKGREEN:
-	factions.back()->sparkcolor[1]=XMLSupport::parse_float((*iter).value);
-	break;
+		factions.back()->sparkcolor[1]=XMLSupport::parse_float((*iter).value);
+		break;
       case SPARKBLUE:
-	factions.back()->sparkcolor[2]=XMLSupport::parse_float((*iter).value);
-	break;
+		factions.back()->sparkcolor[2]=XMLSupport::parse_float((*iter).value);
+		break;
       case SPARKALPHA:
-	factions.back()->sparkcolor[3]=XMLSupport::parse_float((*iter).value);
-	break;
+		factions.back()->sparkcolor[3]=XMLSupport::parse_float((*iter).value);
+		break;
       case NAME:
-	factions[factions.size()-1]->factionname=new char[strlen((*iter).value.c_str())+1];
-	
-	strcpy(factions[factions.size()-1]->factionname,(*iter).value.c_str());
-	if (strcmp(factions[factions.size()-1]->factionname,"neutral")==0)
-	    FactionUtil::neutralfac=factions.size()-1;
-	if (strcmp(factions[factions.size()-1]->factionname,"planets")==0)
-	    FactionUtil::planetfac=factions.size()-1;
-	if (strcmp(factions[factions.size()-1]->factionname,"upgrades")==0)
-	    FactionUtil::upgradefac=factions.size()-1;
-	break;
+		factions[factions.size()-1]->factionname=new char[strlen((*iter).value.c_str())+1];
 
+		strcpy(factions[factions.size()-1]->factionname,(*iter).value.c_str());
+		if (strcmp(factions[factions.size()-1]->factionname,"neutral")==0)
+			FactionUtil::neutralfac=factions.size()-1;
+		if (strcmp(factions[factions.size()-1]->factionname,"planets")==0)
+			FactionUtil::planetfac=factions.size()-1;
+		if (strcmp(factions[factions.size()-1]->factionname,"upgrades")==0)
+			FactionUtil::upgradefac=factions.size()-1;
+		break;
       case CONTRABAND:
-	contrabandlists.back()= ((*iter).value);
-	break;
+		contrabandlists.back()= ((*iter).value);
+		break;
       case ISCITIZEN:
         factions.back()->citizen= XMLSupport::parse_bool((*iter).value);
         break;
       case LOGORGB:
-		if (RGBfirst==0||RGBfirst==1) {
-			RGBfirst=1;
-			tmpstr=new char[strlen((*iter).value.c_str())+1];
-			strcpy(tmpstr,(*iter).value.c_str());
-		} else {
-			RGBfirst =3;
-			factions[factions.size()-1]->logo=FactionUtil::createTexture((*iter).value.c_str(),tmpstr);
-		}
+		factions[factions.size()-1]->logoName = (*iter).value;
 		break;
 	  case LOGOA:
-		if (RGBfirst==0||RGBfirst==2) {
-			RGBfirst=2;
-			tmpstr=new char[strlen((*iter).value.c_str())+1];
-			strcpy(tmpstr,(*iter).value.c_str());
-		} else {
-			RGBfirst =3;
-			factions[factions.size()-1]->logo=FactionUtil::createTexture(tmpstr,(*iter).value.c_str());
-		}
+		factions[factions.size()-1]->logoAlphaName = (*iter).value;
 		break;
       case SECLOGORGB:
-	secString= (*iter).value;
-	break;
-
+		factions[factions.size()-1]->secondaryLogoName = secString;
+		break;
       case SECLOGOA:
-	secStringAlph= (*iter).value;
-	break;
-
+		factions[factions.size()-1]->secondaryLogoAlphaName = secStringAlph;
+		break;
       }
-
     }
-    factions[factions.size()-1]->secondaryLogo=NULL;
-    if (!secString.empty()) {
-      if (secStringAlph.empty()) {
-	factions[factions.size()-1]->secondaryLogo=FactionUtil::createTexture(secString.c_str(),true);
-      }else {
-	factions[factions.size()-1]->secondaryLogo=FactionUtil::createTexture(secString.c_str(),secStringAlph.c_str(),true);
-      }
-
-    }
-	assert (RGBfirst!=0);
-	if (RGBfirst==1) {
-			factions[factions.size()-1]->logo=FactionUtil::createTexture(tmpstr,true);
-	}
-	if (RGBfirst==2) {
-			factions[factions.size()-1]->logo=FactionUtil::createTexture(tmpstr,tmpstr,true);
-	}
-	if (tmpstr!=NULL) {
-		delete []tmpstr; 
-	}
 	break;
   case STATS:
   case FRIEND:

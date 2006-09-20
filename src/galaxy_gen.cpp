@@ -66,7 +66,7 @@ static std::string GetWrapXY(std::string cname, int & wrapx, int & wrapy){
 }
 
 
-string getStarSystemName (string in);
+string getStarSystemName (const string &in);
 
 namespace StarSystemGent {
 
@@ -1056,35 +1056,19 @@ const char * noslash (const char * in) {
 }
 }
 using namespace StarSystemGent;
-string getStarSystemFileName (string input) {
+string getStarSystemFileName (const string &input) {
   return input+string (".system");
 
 }
-string getStarSystemName (string in) {
+string getStarSystemName (const string &in) {
   return string(noslash (in.c_str()));
 }
-string getStarSystemSector (string in) {
-
-  char * tmp = strdup (in.c_str());
-  char * freer=tmp;
-  bool found=false;
-  while (*tmp) {
-    if (*tmp=='/') {
-      found=true;
-      break;
-    }
-    tmp++;
-  }
-  if (*tmp=='/') {
-    *tmp='\0';
-    tmp++;
-  }
-  string sectorname (freer);
-  free (freer);
-  if (found)
-    return sectorname; 
-  else
-    return string (".");
+string getStarSystemSector (const string &in) 
+{
+	string::size_type sep = in.find('/');
+	if (sep == string::npos)
+		return string("."); else
+		return in.substr(0,sep);
 }
 void readnames (vector <string> &entity, const char * filename) {
   VSFile f;

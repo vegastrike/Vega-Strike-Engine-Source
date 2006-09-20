@@ -1194,7 +1194,7 @@ void AggressiveAI::ReCommandWing(Flightgroup * fg) {
 	      fg->directive = string("h");
 	      LeadMe (parent,"h","I need help here!", false);
 		  if(verbose_debug){
-			  VSFileSystem::vs_fprintf (stderr,"he needs help %s",parent->name.c_str());
+			  VSFileSystem::vs_fprintf (stderr,"he needs help %s",parent->name.get().c_str());
 		  }
 	    }else {
 	      if (lead->getFgSubnumber()>=parent->getFgSubnumber()) {	
@@ -1490,10 +1490,10 @@ void AggressiveAI::ExecuteNoEnemies() {
       std::string fgname=UnitUtil::getFlightgroupName(parent);
       std::string pfullname=parent->getFullname();
       std::string dfullname=dest->getFullname();
-      printf ("%s:%s %s going to %s:%s",parent->name.c_str(),pfullname.c_str(),fgname.c_str(),dest->name.c_str(),dfullname.c_str());
+      printf ("%s:%s %s going to %s:%s",parent->name.get().c_str(),pfullname.c_str(),fgname.c_str(),dest->name.get().c_str(),dfullname.c_str());
       if (otherdest) {
       std::string ofullname=otherdest->getFullname();
-        printf (" between %s:%s\n",otherdest->name.c_str(),ofullname.c_str());
+        printf (" between %s:%s\n",otherdest->name.get().c_str(),ofullname.c_str());
        
       }else printf("\n");
 

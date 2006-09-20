@@ -65,7 +65,7 @@ void MessageCenter::clear (const std::vector<std::string> &who, const std::vecto
 	  messages.clear();
   }
   for (int i=messages.size()-1;i>=0;i--) {
-      if (std::find(whoNOT.begin(),whoNOT.end(),messages[i].to)==whoNOT.end()&& (who.empty()||std::find (who.begin(),who.end(),messages[i].to)!=who.end())) {
+      if (std::find(whoNOT.begin(),whoNOT.end(),messages[i].to.get())==whoNOT.end()&& (who.empty()||std::find (who.begin(),who.end(),messages[i].to.get())!=who.end())) {
 		  messages.erase(messages.begin()+i);
 	  }
   }
@@ -88,7 +88,7 @@ bool MessageCenter::last(unsigned int n, gameMessage & m, const std::vector <std
     int j=0;
     int i=0;
     for (i=messages.size()-1;i>=0;i--) {
-      if (std::find(whoNOT.begin(),whoNOT.end(),messages[i].to)==whoNOT.end()&& (who.empty()||std::find (who.begin(),who.end(),messages[i].to)!=who.end())) {
+      if (std::find(whoNOT.begin(),whoNOT.end(),messages[i].to.get())==whoNOT.end()&& (who.empty()||std::find (who.begin(),who.end(),messages[i].to.get())!=who.end())) {
 	if (j==(int)n)
 	  break;
 	j++;

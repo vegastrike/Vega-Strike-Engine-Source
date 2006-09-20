@@ -114,7 +114,7 @@ namespace UniverseUtil {
 	    if (mpl->numCargo()) {
 	      for (unsigned int i=0;i<500;i++) {
 		ret = &mpl->GetCargo(rand()%max);  
-		if (ret->content.find("mission")==string::npos) {
+		if (ret->GetContent().find("mission")==string::npos) {
 		  break;
 		}
 	      }
@@ -302,18 +302,18 @@ namespace UniverseUtil {
 
 				string GetGalaxyFaction (string sys) {
 						string fac = _Universe->getGalaxyProperty (sys,"faction");
-						vector <string> * ans = &(_Universe->AccessCockpit(0)->savegame->getMissionStringData(string(DEFAULT_FACTION_SAVENAME)+sys));
+						vector <StringPool::Reference> * ans = &(_Universe->AccessCockpit(0)->savegame->getMissionStringData(string(DEFAULT_FACTION_SAVENAME)+sys));
 						if (ans->size()) {
 								fac = (*ans)[0];
 						}
 						return fac;
 				}
 				void SetGalaxyFaction (string sys, string fac) {
-						vector <string> * ans = &(_Universe->AccessCockpit(0)->savegame->getMissionStringData(string(DEFAULT_FACTION_SAVENAME)+sys));
+						vector <StringPool::Reference> * ans = &(_Universe->AccessCockpit(0)->savegame->getMissionStringData(string(DEFAULT_FACTION_SAVENAME)+sys));
 						if (ans->size()) {
-								(*ans)[0]=fac;
+							(*ans)[0]=fac;
 						}else {
-								ans->push_back(fac);
+							ans->push_back(StringPool::Reference(fac));
 						}
 				}
 				int GetNumAdjacentSystems (string sysname) {
@@ -426,9 +426,9 @@ namespace UniverseUtil {
 				void IOmessage(int delay,string from,string to,string message){
 						static bool news_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","news_from_cargolist","false"));
 						if (to=="news"&&(!news_from_cargolist))
-								_Universe->AccessCockpit(0)->savegame->getMissionStringData("dynamic_news").push_back(string("#")+message);
+							_Universe->AccessCockpit(0)->savegame->getMissionStringData("dynamic_news").push_back(StringPool::Reference(string("#")+message));
 						else
-								mission->msgcenter->add(from,to,message,delay);
+							mission->msgcenter->add(from,to,message,delay);
 				}
 				Unit *GetContrabandList (string faction) {
 						return FactionUtil::GetContraband(FactionUtil::GetFactionIndex(faction));

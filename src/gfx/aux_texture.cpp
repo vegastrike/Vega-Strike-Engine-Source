@@ -61,7 +61,7 @@ bool Texture::operator == (Texture & b) {
   return Original()==b.Original();
 }
 
-GFXBOOL Texture::checkold(string s, bool shared, string & hashname)
+GFXBOOL Texture::checkold(const string &s, bool shared, string & hashname)
 {
   hashname = shared?VSFileSystem::GetSharedTextureHashName(s):VSFileSystem::GetHashName(s);
   Texture *oldtex= texHashTable.Get (hashname);
@@ -76,7 +76,7 @@ GFXBOOL Texture::checkold(string s, bool shared, string & hashname)
     return GFXFALSE;
   }
 }
-void Texture::modold (string s, bool shared, string & hashname) {
+void Texture::modold (const string &s, bool shared, string & hashname) {
   hashname = shared?VSFileSystem::GetSharedTextureHashName(s):VSFileSystem::GetHashName(s);
   Texture * oldtex = new Texture;
   //  oldtex->InitTexture();new calls this
@@ -145,7 +145,7 @@ void Texture::FileNotFound(const string &texfilename) {
 	  return;
 }
 
-bool Texture::checkbad( string & s)
+bool Texture::checkbad(const string & s)
 {
   string hashname = VSFileSystem::GetSharedTextureHashName(s);
   bool * found=NULL;
@@ -211,17 +211,14 @@ void Texture::Load(const char * FileName, int stage, enum FILTER mipmap, enum TE
   this->stage = stage;
   this->address_mode = address_mode;
   texfilename = string(FileName);
-  string tempstr;
-  if( checkbad( texfilename))
+  if( checkbad(texfilename))
   	return;
   if (!nocache) {
-      if(checkold(texfilename,false,tempstr)) {
+	  string tempstr;
+      if (  checkold(texfilename,false,tempstr)
+		  ||checkold(texfilename,true,tempstr)  ) {
+        texfilename = tempstr;
         return;
-      } else {
-        texfilename = string(FileName);
-        if (checkold(texfilename,true,tempstr)) {
-          return;
-        }
       }
   }
 
@@ -281,12 +278,15 @@ void Texture::Load(const char * FileName, int stage, enum FILTER mipmap, enum TE
 		}
 		return;
 	}
-	if (!nocache) modold (texfilename,shared,texfilename);
-	if (texfilename.find("white")==string::npos)
+	if (!nocache) {
+		string tempstr;
+		modold (texfilename,shared,tempstr);
+		texfilename = tempstr;
+	}
+	if (texfilename.get().find("white")==string::npos)
 		bootstrap_draw("Loading "+string(FileName));
 	
 	//	strcpy(filename, FileName);
-	this->texfilename=texfilename;
 	if( err2>Ok)
 		data = this->ReadImage( &f, NULL, true, NULL);
 	else
@@ -431,16 +431,14 @@ void Texture::Load (const char * FileNameRGB, const char *FileNameA, int stage, 
     this->address_mode = address_mode;
 	texture_target=target;
 	image_target=imagetarget;
-	string texfilename = string(FileNameRGB) + string(FileNameA);
-	string tempstr;
+	texfilename = string(FileNameRGB) + string(FileNameA);
     if (!nocache) {
-	    if(checkold(texfilename,false,tempstr)) {
-	      return;
-	    } else {
-	      if (checkold(texfilename,true,tempstr)) {
-	        return;
-	      }
-	    }
+	  string tempstr;
+      if (  checkold(texfilename,false,tempstr)
+		  ||checkold(texfilename,true,tempstr)  ) {
+        texfilename = tempstr;
+        return;
+      }
     }
 	//VSFileSystem::vs_fprintf (stderr,"2.Loading bmp file %s alp %s ",FileNameRGB,FileNameA);
 	//this->texfilename = texfilename;
@@ -450,7 +448,9 @@ void Texture::Load (const char * FileNameRGB, const char *FileNameA, int stage, 
 	err = f.OpenReadOnly(FileNameRGB, TextureFile);
     if (!nocache) {
 	    bool shared = (err==Shared);
-	    modold (texfilename,shared,texfilename);
+		string tempstr;
+	    modold (texfilename,shared,tempstr);
+		texfilename = tempstr;
     }
 	if (err<=Ok&&g_game.use_textures==0&&!force_load) {
 	  f.Close();
@@ -485,7 +485,6 @@ void Texture::Load (const char * FileNameRGB, const char *FileNameA, int stage, 
                  }
            }else FileNameA=0;
 	}
-	this->texfilename=texfilename;
 	if( err1>Ok)
 		data = this->ReadImage( &f, NULL, true, NULL);
 	else

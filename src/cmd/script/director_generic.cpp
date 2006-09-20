@@ -42,7 +42,7 @@ string getSaveString (int whichcp, string key, unsigned int num) {
   if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
     return "";
   }
-  vector<string> * ans = &(_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key));
+  vector<StringPool::Reference> * ans = &(_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key));
   if (num >=ans->size()) {
     return "";
   }
@@ -85,8 +85,8 @@ unsigned int pushSaveString (int whichcp, string key, string value) {
   if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
     return 0;
   }
-  vector<string> * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key)));
-  ans->push_back (value);
+  vector<StringPool::Reference> * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key)));
+  ans->push_back (StringPool::Reference(value));
   return ans->size()-1;
 }
 
@@ -94,7 +94,7 @@ void putSaveString (int whichcp, string key, unsigned int num, string val) {
   if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
     return;
   }
-  vector<string> *ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key)));
+  vector<StringPool::Reference> *ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key)));
   if (num<ans->size()) {
     (*ans)[num]= val;
   }
@@ -114,7 +114,7 @@ unsigned int eraseSaveString (int whichcp, string key, unsigned int index) {
   if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
     return 0;
   }
-  vector<string> *ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key)));
+  vector<StringPool::Reference> *ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key)));
   if (index <ans->size()) {
     ans->erase (ans->begin()+index);
   }

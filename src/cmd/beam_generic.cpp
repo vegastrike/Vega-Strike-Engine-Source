@@ -529,11 +529,11 @@ bool Beam::Collide (Unit * target, Unit * firer, Unit * superunit) {
 	    if (target->faction==upgradesfaction||owner_rsize*nbig>target->rSize()) {
 	      //we have our man!
 	      //lets add our cargo to him
-	      Cargo *c = GetMasterPartList (target->name.c_str());
+	      Cargo *c = GetMasterPartList (target->name.get().c_str());
 	      Cargo tmp;
           bool isnotcargo = (c==NULL);
           if (!isnotcargo) {
-            if (c->category.find("upgrades")==0)
+            if (c->GetCategory().find("upgrades")==0)
               isnotcargo=true;// add upgrades as space junk
           }
 	      if (isnotcargo) {

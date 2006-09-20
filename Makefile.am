@@ -710,6 +710,8 @@ librootgeneric = \
   src/posh.h \
   src/savegame.cpp \
   src/savegame.h \
+  src/SharedPool.h \
+  src/SharedPool.cpp \
   src/star_system_generic.cpp \
   src/star_system_generic.h \
   src/star_system_xml.cpp \

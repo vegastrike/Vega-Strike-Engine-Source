@@ -14,16 +14,34 @@ Faction::~Faction() {
   delete logo;
 }
 
-Texture * FactionUtil::getForceLogo (int faction) {
-  return factions[faction]->logo;
+Texture * FactionUtil::getForceLogo (int faction) 
+{
+	Faction *fac = factions[faction];
+	if (fac->logo == 0) {
+		if (!fac->logoName.empty()) {
+			if (!fac->logoAlphaName.empty())
+				fac->logo = FactionUtil::createTexture(fac->logoName.c_str(),fac->logoAlphaName.c_str(),true); else
+				fac->logo = FactionUtil::createTexture(fac->logoName.c_str(),true);
+		} else {
+			fac->logo = FactionUtil::createTexture("white.png",true);
+		}
+	}
+	return factions[faction]->logo;
 }
 //fixme--add squads in here
-Texture *FactionUtil::getSquadLogo (int faction) {
-  if (!factions[faction]->secondaryLogo) {
-    return getForceLogo (faction);
-  }else {
-    return factions[faction]->secondaryLogo;
-  }
+Texture *FactionUtil::getSquadLogo (int faction) 
+{
+	Faction *fac = factions[faction];
+	if (fac->secondaryLogo == 0) {
+		if (!fac->secondaryLogoName.empty()) {
+			if (!fac->secondaryLogoAlphaName.empty())
+				fac->secondaryLogo = FactionUtil::createTexture(fac->secondaryLogoName.c_str(),fac->secondaryLogoAlphaName.c_str(),true); else
+				fac->secondaryLogo = FactionUtil::createTexture(fac->secondaryLogoName.c_str(),true);
+		} else {
+			return getForceLogo(faction);
+		}
+	}
+	return factions[faction]->secondaryLogo;
 }
 
 int FactionUtil::GetNumAnimation (int faction) {

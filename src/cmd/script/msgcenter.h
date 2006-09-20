@@ -50,9 +50,11 @@
 //#include "vs_globals.h"
 //#include "vegastrike.h"
 
+#include "SharedPool.h"
+
 class gameMessage {
  public:
-  string from,to,message;
+  StringPool::Reference from,to,message;
   double time;
 };
 
