@@ -1262,7 +1262,7 @@ void NetClient::Reconnect(std::string srvipadr, std::string port) {
     if( use_acctserver!=false){
       int retrycount=0;
       while (ret==false&&retrycount++<10) {
-        if (srvipadr.compare(0, 7, "http://")) {
+        if (srvipadr.find("http://")==0) {//the .compare() always returns false on windows, so am using find
           Network[k].init_acct( srvipadr);
           Network[k].loginAcctLoop(usernames[k], passwords[k]);
         }
