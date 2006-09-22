@@ -50,14 +50,14 @@ public:
 
 	public:
 		Reference() : 
-			_rc(&SharedPool<T>::getSingleton().referenceCounter), 
-			_it(SharedPool<T>::getSingleton().referenceCounter.end()) 
+			_it(SharedPool<T>::getSingleton().referenceCounter.end()), 
+			_rc(&SharedPool<T>::getSingleton().referenceCounter)
 		{
 		}
 
 		explicit Reference(const T& s) :
-			_rc(&SharedPool<T>::getSingleton().referenceCounter), 
-			_it(SharedPool<T>::getSingleton().referenceCounter.end())
+			_it(SharedPool<T>::getSingleton().referenceCounter.end()), 
+			_rc(&SharedPool<T>::getSingleton().referenceCounter)
 		{
 			set(s);
 		}
@@ -165,6 +165,7 @@ public:
 	{
 		return Reference(&referenceCounter);
 	}
+	friend class SharedPool<T>::Reference;
 };
 
 typedef SharedPool<std::string> StringPool;

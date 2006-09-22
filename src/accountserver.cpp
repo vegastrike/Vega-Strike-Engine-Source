@@ -28,7 +28,7 @@ using std::string;
 void	VSExit( int code)
 { exit( code); }
 
-string getStarSystemSector (string in) { return string( ""); }
+string getStarSystemSector (const string &in) { return string( ""); }
 
 string GetUnitDir( string filename)
 { return string( ""); }

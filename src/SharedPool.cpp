@@ -1,6 +1,7 @@
 #include "SharedPool.h"
+#include <string>
 
-StringPool* StringPool::ms_singleton = 0;
+template <typename T> SharedPool<T> * SharedPool<T>::ms_singleton = 0;
 
 template<typename T> SharedPool<T>::SharedPool()
 {

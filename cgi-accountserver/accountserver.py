@@ -148,7 +148,7 @@ def getLoginInfo(conn, user, passwd, dologin):
 get_form=False
 post_form=False
 def execute(conn,url,post):
-	#print '\n'
+	print '\r'
     # Can't write to stderr since on IIS it is concatenated with stdout.
 	#sys.stderr.write('Executing post query: '+post+'\n')
 	try:
@@ -204,7 +204,7 @@ def execute(conn,url,post):
 		print "UNKNOWN"
 	
 if __name__=='__main__':
-	sys.stdout.write("Content-Type: text/html\r\n\r\n");
+	sys.stdout.write("Content-Type: text/html\r\n");
 	cgitb.enable()
 	get_args = os.environ.get('QUERY_STRING','')
 	conn = db.connect(settings.dbconfig, get_args)
