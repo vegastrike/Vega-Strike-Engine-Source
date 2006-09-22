@@ -2237,84 +2237,45 @@ void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, 
 
         // Clear color means use the text color in the picker.
 		GFXColor base_color = (transOK? (item.mission?MISSION_COLOR():GUI_CLEAR) : NO_MONEY_COLOR());
-
 		GFXColor final_color;
 
-
-
 		if(transType == SELL_UPGRADE&&m_player.GetUnit())
-
 		{
-
 			//Adjust the base color if the item is 'damaged'
-
 			double percent_working = PercentOperational(m_player.GetUnit(),item.content,item.category,false);;
 
-
 			//Unit* playerUnit = m_player.GetUnit();
-
 			//Unit* upgradeUnit = getUnitFromUpgradeName(originalName, playerUnit->faction);
-
 			//playerUnit->canUpgrade(upgradeUnit,0,0,0,false,percent_working,NULL,false);
-
-
 
 			//UnitConstCache::getCachedConst(StringIntKey(itemName, FactionUtil::GetFaction("upgrades")))
 
-
-
 			//Unit* playerUnit = m_parent.m_player.GetUnit();
-
 			//if(!playerUnit) {percent_working = 1.0;}
-
 			//else
-
 			//{
-
 			//	playerUnit->canUpgrade(m_newPart, m_selectedMount, m_selectedTurret, m_addMultMode, false, percent_working, m_theTemplate);
-
 			//}
 
-
-
 			final_color = GFXColor(
-
 				(1.0*percent_working)+(1.0*(1.0-percent_working)),
-
 				(1.0*percent_working)+(0.0*(1.0-percent_working)),
-
 				(0.0*percent_working)+(0.0*(1.0-percent_working)),
-
 				(1.0*percent_working)+(1.0*(1.0-percent_working))
-
 				);
 
-
-
 			if(percent_working == 1.0){final_color = base_color;}	//	working = normal color
-
 			if(percent_working == 0.0){final_color = ITEM_DESTROYED_COLOR();}	//	dead = grey
-
 		}
-
 		else
-
 			final_color = base_color;
 
-
-
         //SimplePickerCell cell(itemName, item.content, (transOK? (item.mission?MISSION_COLOR():GUI_CLEAR) : NO_MONEY_COLOR()), i);
-
         SimplePickerCell *cell = new SimplePickerCell(itemName, item.content, final_color, i);
 
-
-
 	//	cell.textColor(
-
 	//		GFXColor(1,0,0)
-
 //*******************************************************************************
-
         // Add the cell.
         if(parentCell) {
             parentCell->addChild(cell);
