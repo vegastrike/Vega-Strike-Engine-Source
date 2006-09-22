@@ -112,6 +112,8 @@ public:
 
 		Reference& operator=(const Reference& s) 
 		{
+			if (this == &s)
+				return *this;
 			if (s._rc == _rc) {
 				unref();
 				_it = s._it;
