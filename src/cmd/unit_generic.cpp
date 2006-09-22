@@ -6328,8 +6328,8 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   static bool initblankship=false;
   if (!initblankship) {
     blankship=this;
-    blankship= UnitFactory::createServerSideUnit ("upgrading_dummy_unit",true,FactionUtil::GetUpgradeFaction());
     initblankship=true;
+    blankship= UnitFactory::createServerSideUnit ("upgrading_dummy_unit",true,FactionUtil::GetUpgradeFaction());
   }
 
   #define STDUPGRADE_SPECIFY_DEFAULTS(my,oth,temp,noth,dgradelimer,dgradelimerdefault,clamp,value_to_lookat) \
