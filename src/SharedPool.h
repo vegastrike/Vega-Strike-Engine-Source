@@ -2,7 +2,7 @@
 #define __STRINGPOOL_H__INCLUDED__
 
 #include <string>
-#include <hash_map>
+#include "gnuhash.h"
 
 // Need reference counted strings, or we'll eat memory like crazy
 template<class T> class SharedPool {
