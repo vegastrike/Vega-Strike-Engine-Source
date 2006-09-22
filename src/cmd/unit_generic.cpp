@@ -6323,7 +6323,14 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   double resultdoub;
   int retval;
   double temppercent;
-  static Unit * blankship = UnitFactory::createServerSideUnit ("upgrading_dummy_unit",true,FactionUtil::GetUpgradeFaction());
+  
+  static Unit * blankship=NULL;
+  static bool initblankship=false;
+  if (!initblankship) {
+    blankship=this;
+    blankship= UnitFactory::createServerSideUnit ("upgrading_dummy_unit",true,FactionUtil::GetUpgradeFaction());
+    initblankship=true;
+  }
 
   #define STDUPGRADE_SPECIFY_DEFAULTS(my,oth,temp,noth,dgradelimer,dgradelimerdefault,clamp,value_to_lookat) \
   retval=(UpgradeFloat(resultdoub,my,oth,(templ!=NULL)?temp:0,Adder,Comparer,noth,noth,Percenter, temppercent,forcetransaction,templ!=NULL,(downgradelimit!=NULL)?dgradelimer:dgradelimerdefault,AGreaterB,clamp,force_change_on_nothing)); \
