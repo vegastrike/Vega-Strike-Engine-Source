@@ -3,7 +3,7 @@
 
 
 
-enum
+enum NAVITEMTYPES
 {
 	navsun,
 	navplanet,
