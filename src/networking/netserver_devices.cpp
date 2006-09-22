@@ -152,11 +152,11 @@ void	NetServer::sendJump(Unit * un, Unit * dst,std::string dststr)
     addSimpleString(netbuf, clt->passwd );
     addSimpleString(netbuf,savestr);
     addSimpleString(netbuf, un->WriteUnitString());
-    if (acct_sock)
-      acct_sock->sendstr(netbuf);
     p2.send(CMD_JUMP,0,NULL,0,SENDANDFORGET,NULL,clt->tcp_sock,__FILE__,148);
-    clt->jumpok=1;
-    if (clt)
+    clt->jumpok=1;    if (acct_sock)
+      acct_sock->sendstr(netbuf);
+
+    if (clt&&0/*dont discon until client requests it*/)
       logoutList.push_back(clt);
 
   }else {
