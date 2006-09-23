@@ -210,13 +210,13 @@ void Texture::Load(const char * FileName, int stage, enum FILTER mipmap, enum TE
   image_target=imagetarget;
   this->stage = stage;
   this->address_mode = address_mode;
-  texfilename = string(FileName);
-  if( checkbad(texfilename))
+  string texfn = string(FileName);
+  if(checkbad(texfn))
   	return;
   if (!nocache) {
 	  string tempstr;
-      if (  checkold(texfilename,false,tempstr)
-		  ||checkold(texfilename,true,tempstr)  ) {
+      if (  checkold(texfn,false,tempstr)
+		  ||checkold(texfn,true,tempstr)  ) {
         texfilename = tempstr;
         return;
       }
@@ -271,7 +271,7 @@ void Texture::Load(const char * FileName, int stage, enum FILTER mipmap, enum TE
 	}
 	if (err>Ok)
 	{
-		FileNotFound(texfilename);
+		FileNotFound(texfn);
       	VSFileSystem::vs_fprintf (stderr, "\n%s, not found\n",FileName);
 		if (err2<=Ok) {
 			f2.Close();
@@ -280,10 +280,10 @@ void Texture::Load(const char * FileName, int stage, enum FILTER mipmap, enum TE
 	}
 	if (!nocache) {
 		string tempstr;
-		modold (texfilename,shared,tempstr);
+		modold (texfn,shared,tempstr);
 		texfilename = tempstr;
 	}
-	if (texfilename.get().find("white")==string::npos)
+	if (texfn.find("white")==string::npos)
 		bootstrap_draw("Loading "+string(FileName));
 	
 	//	strcpy(filename, FileName);
@@ -431,11 +431,11 @@ void Texture::Load (const char * FileNameRGB, const char *FileNameA, int stage, 
     this->address_mode = address_mode;
 	texture_target=target;
 	image_target=imagetarget;
-	texfilename = string(FileNameRGB) + string(FileNameA);
+	string texfn = string(FileNameRGB) + string("|") + string(FileNameA);
     if (!nocache) {
 	  string tempstr;
-      if (  checkold(texfilename,false,tempstr)
-		  ||checkold(texfilename,true,tempstr)  ) {
+      if (  checkold(texfn,false,tempstr)
+		  ||checkold(texfn,true,tempstr)  ) {
         texfilename = tempstr;
         return;
       }
@@ -449,7 +449,7 @@ void Texture::Load (const char * FileNameRGB, const char *FileNameA, int stage, 
     if (!nocache) {
 	    bool shared = (err==Shared);
 		string tempstr;
-	    modold (texfilename,shared,tempstr);
+	    modold (texfn,shared,tempstr);
 		texfilename = tempstr;
     }
 	if (err<=Ok&&g_game.use_textures==0&&!force_load) {
