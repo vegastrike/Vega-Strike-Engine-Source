@@ -14,9 +14,23 @@ AC_PROG_CXX
 AC_PROG_CXXCPP
 dnl Install is used by make install
 AC_PROG_INSTALL
-dnl Lexx used for a parser we use
+
+dnl Lexx used to be used for a parser we use
+
+dnl dnl pmx - 22/09/2006
+dnl AC_CHECK_TOOL(BISON,bison)
+dnl dnl AS the converter code in src/cmd/script/c_alike relies on bison, 
+dnl dnl we MUST be sure to use flex in bison compatibility mode
+dnl dnl (instad of the traditional 'lex')  pmx - 23/sept./2006
+dnl AC_CHECK_TOOL(LEX, flex)
+dnl AC_SUBST(LFLAGS,"$LFLAGS --yylineno --bison-bridge")
+dnl AC_SUBST(FLIB,"-lfl")
+
+dnl Old lex tool:
 dnl AC_PROG_LEX
-AM_PROG_LEX
+dnl AM_PROG_LEX
+dnl Lex isn't used any more since the switch to Python.
+
 dnl We use some static libraries to make building this program easier.
 AC_PROG_RANLIB
 
@@ -352,8 +366,8 @@ m4_ifdef([VS_CHECK_CRYPTO], [],
 [AC_FATAL([MISSING script(s) from m4scripts directory.
 An easy way to get these scripts is to use ./bootstrap-sh to create configure.
 If you get the message and are running bootstrap-sh, that probably means that 
-the m4scripts directory does not exist.  If you are using CVS to get 
-vegastrike, change to vegastrike directory, type 'cvs update -P -d' and this 
+the m4scripts directory does not exist.  If you are using SVN to get 
+vegastrike, change to vegastrike directory, type 'svn update' and this 
 directory should be created.])])  
 m4_pattern_forbid([VS_CHECK_CRYPTO])
 

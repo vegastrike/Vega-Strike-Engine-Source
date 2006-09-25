@@ -770,7 +770,9 @@ accountserver_SOURCES = \
   src/vsfilesystem.cpp \
   src/vsfilesystem.h \
   src/xml_support.cpp \
-  src/xml_support.h
+  src/xml_support.h \
+  src/SharedPool.cpp \
+  src/SharedPool.h
 
 vegastrike_CXXFLAGS = -DBISON
 vegastrike_SOURCES = \
@@ -1064,10 +1066,10 @@ vsrextract_SOURCES= \
     src/common/common.cpp \
     src/common/common.h
 
-src/cmd/script/c_alike/c_alike.tab.cpp: src/cmd/script/c_alike/c_alike.yacc
+#src/cmd/script/c_alike/c_alike.tab.cpp: src/cmd/script/c_alike/c_alike.yacc
 
-src/cmd/script/c_alike/lex.yy.cpp: src/cmd/script/c_alike/c_alike.lex
-	flex -o src/cmd/script/c_alike/lex.yy.cpp src/cmd/script/c_alike/c_alike.lex 
+#src/cmd/script/c_alike/lex.yy.cpp: src/cmd/script/c_alike/c_alike.lex
+#	flex -o src/cmd/script/c_alike/lex.yy.cpp src/cmd/script/c_alike/c_alike.lex 
 
 #The following is a way to get around the HUGE number of files that boost contains.
 dist-hook:
