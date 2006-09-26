@@ -347,7 +347,7 @@ bool VsnetHTTPSocket::lower_selected( int datalen )
 		else cout << "recv returned " << ret << endl;
 		if (ret==0) {
 			//It is not an error if closed without a Content-Length header.
-			if (_content_length>=0) {
+			if (_content_length>=0&&( (readHeader==false /*set to false on success return*/&&dataToReceive.length()==0)||readHeader==true)) {
 				// incomplete transfer...
 			  printf("Server closed in reading...resending\n");
  	          resendData();
