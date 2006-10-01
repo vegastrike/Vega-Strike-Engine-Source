@@ -2867,10 +2867,12 @@ Vector Unit::ClampTorque (const Vector &amt1) {
   static float FMEC_factor=XMLSupport::parse_float (vs_config->getVariable("physics","FMEC_factor","0.000000008")); // Fuel Mass in metric tons expended per generation of 100MJ assuming 5,000,000m/s exit velocity
   static float FMEC_exit_vel_inverse=XMLSupport::parse_float (vs_config->getVariable("physics","FMEC_exit_vel","0.0000002")); // 1/5,000,000 m/s
   fuel-=GetFuelUsage(false)*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;//HACK this forces the reaction to be Li-6+D fusion with efficiency governed by the getFuelUsage function
+#ifndef __APPLE__
   if (ISNAN(fuel)) {
     fprintf (stderr,"FUEL is NAN\n");
     fuel=0;
   }
+#endif
   if (fuel < 0) fuel = 0;
   
   if (warpenergy < 0) warpenergy = 0;
@@ -3035,18 +3037,21 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
 		  warpenergy-=afterburnenergy*GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
 	  if (afterburntype == 1) {// fuel-burning overdrive - uses afterburner efficiency
             fuel-=afterburnenergy*GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
+#ifndef __APPLE__
             if (ISNAN(fuel)) {
               fprintf(stderr,"Fuel is NAN A\n");
               fuel=0;
             }
+#endif
           }
 	  if (afterburntype == 0){ // fuel-burning afterburner - uses default efficiency - appears to check for available energy? FIXME
             fuel-=GetFuelUsage(false)*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
+#ifndef __APPLE__
             if (ISNAN(fuel)) {
               fprintf(stderr,"Fuel is NAN B\n");
               fuel=0;
             }
-            
+#endif
           }
 
   if ((afterburn) && (afterburntype == 0)) {
@@ -3380,10 +3385,12 @@ void Unit::RegenShields () {
   excessenergy=(excessenergy>precharge)?excessenergy-precharge:0;
   if(reactor_uses_fuel){
 	fuel-=FMEC_factor*((recharge*SIMULATION_ATOM-(reactor_idle_efficiency*excessenergy)));
+#ifndef __APPLE__
         if (ISNAN(fuel)) {
           fprintf (stderr,"Fuel is nan C\n");
           fuel=0;
         }
+#endif
   }
 
   energy=energy<0?0:energy;

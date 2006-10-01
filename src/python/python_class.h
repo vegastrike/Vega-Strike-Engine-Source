@@ -41,7 +41,7 @@ class Unit *from_python(PyObject *p,boost::python::type<class Unit *>);
 #include "python/python_compile.h"
 #include "cmd/ai/fire.h"
 #include <memory>
-
+#include "init.h"
 #if BOOST_VERSION == 102800
 #define PYTHONCALLBACK(rtype, ptr, str) \
   boost::python::callback<rtype>::call_method(ptr, str)

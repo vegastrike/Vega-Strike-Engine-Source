@@ -16,7 +16,7 @@ int double_to_int (double a) {
   if (a<0) return minint;
   return 0;
 }
-
+#if 0
 #if defined(__APPLE__) || defined(MACOSX)
 extern "C" {
   char * ctermid_r(char *buf) {
@@ -62,4 +62,5 @@ float powf (float v, float p)
     return (float) pow((double)v, (double) p);
 }
 
+#endif
 #endif

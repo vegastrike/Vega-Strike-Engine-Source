@@ -28,9 +28,15 @@ public:
     /*
     key=bpos.MagnitudeSquared();
     */
+#ifdef __APPLE__
+    if (!FINITE(getKey())) {
+      position=QVector(0,0,0);//hack for now      
+    }
+#else
     if (ISNAN(getKey())) {
       position=QVector(0,0,0);//hack for now      
     }
+#endif
   }
   Collidable &operator* () {return *this;}
   Collidable *operator-> () {return this;}
@@ -46,7 +52,13 @@ public:
   Collidable(unsigned int bolt_index, float speed, const QVector &p){
     ref.bolt_index=bolt_index;
     radius=-speed*SIMULATION_ATOM;
-    if (ISNAN(radius)||radius>=-FLT_MIN) radius=-FLT_MIN*2;
+    if (
+#ifdef __APPLE__
+	!FINITE(radius)
+#else
+	ISNAN(radius)
+#endif
+	||radius>=-FLT_MIN) radius=-FLT_MIN*2;
     this->SetPosition(p);
   }
 };
