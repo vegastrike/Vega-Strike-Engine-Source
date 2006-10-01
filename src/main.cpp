@@ -188,7 +188,7 @@ void bootstrap_main_loop();
 void bootstrap_first_loop();
 
 #if defined(WITH_MACOSX_BUNDLE)
- #undef main
+//WTF! this causes windowed creation to fail... please justify yourself ;-)  #undef main
 #endif
 void nothinghappens (unsigned int, unsigned int, bool,int,int) {
 
