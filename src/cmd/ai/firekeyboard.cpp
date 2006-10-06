@@ -40,7 +40,7 @@ struct FIREKEYBOARDTYPE {
     ejectdock=eject=ejectcargo=ejectnonmissioncargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=rweapk=rmisk=cloakkey=
       neartargetkey=targetskey=targetukey=threattargetkey=picktargetkey=subtargetkey=targetkey=
       rneartargetkey=rtargetskey=rtargetukey=rthreattargetkey=rpicktargetkey=rtargetkey=
-      nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=enslave=freeslave=incomingmissiletargetkey=rincomingmissiletargetkey=UP;
+      nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=enslave=freeslave=incomingmissiletargetkey=rincomingmissiletargetkey=nearesthostilekey=UP;
       shieldpowerstate=1;
 #ifdef CAR_SIM
     blinkleftkey=blinkrightkey=headlightkey=sirenkey=UP;
@@ -106,6 +106,7 @@ struct FIREKEYBOARDTYPE {
  KBSTATE turrettargetkey;
  KBSTATE enslave;
  KBSTATE freeslave;
+ KBSTATE nearesthostilekey; //Added for nearest hostile targeting -ch
 };
 static std::vector <FIREKEYBOARDTYPE> vectorOfKeyboardInput;
 static FIREKEYBOARDTYPE &g() {
@@ -605,8 +606,12 @@ void FireKeyboard::ReverseSigTargetKey(const KBData&,KBSTATE k) {
   if (k==PRESS)
     ExamineWhenTargetKey();
 }
-
-
+void FireKeyboard::NearestHostileTargetKey(const KBData&,KBSTATE k) {	
+	if (g().nearesthostilekey!=PRESS)
+		g().nearesthostilekey = k;
+	if (k==PRESS)
+		ExamineWhenTargetKey();
+}
 #ifdef CAR_SIM
 void FireKeyboard::BlinkLeftKey(const KBData&,KBSTATE k) {
     if (k==PRESS) {
@@ -1071,6 +1076,56 @@ bool TargNear (Unit *me,Unit *target) {
 	return (me->getRelation(target)<0||TargThreat(me,target)||target->getRelation(me)<0)&&TargAll(me,target)&&target->isUnit()!=MISSILEPTR&&(can_target_sun||!UnitUtil::isSun(target))&&isNotTurretOwner(me,target);
 }
 
+//Target the nearest hostile
+bool getNearestHostileTarget (Unit *me) {  
+  QVector pos (me->Position());
+  Unit * un=NULL;
+  Unit * targ=NULL;
+  double minrange=FLT_MAX;
+  for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator(); (un=(*i)); ++i) 
+  {
+	  if (un==me)
+		  continue;
+	  if (un->isUnit()!=UNITPTR)
+		  continue;     
+	  if (un->hull<0)
+		  continue;
+	  if (FactionUtil::GetIntRelation(me->faction,un->faction)>=0)
+		  continue;
+	  if (!(me->InRange(un,true,false))||!(me->InRange(un,true,true)))
+		  continue;
+	  
+	  double temp = (un->Position() - pos).Magnitude();
+	  if (targ==NULL) 
+	  {
+		  targ = un;
+		  minrange = temp;
+	  }
+	  else 
+	  {
+		  if (temp<minrange) {
+			  targ = un;
+			  minrange = temp;
+		  }
+	  }
+  }
+
+  if (targ == NULL)
+	  return true;
+
+  if (Network==NULL)
+  {
+	  me->Target(targ);
+	  return true;
+  }
+
+  int player = _Universe->whichPlayerStarship( me);
+  if (player>=0) 
+	  Network[player].targetRequest(targ);
+
+  return true;
+
+}
 bool ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
 	UnitCollection * drawlist = &_Universe->activeStarSystem()->getUnitList();
 	un_iter iter = drawlist->createIterator();
@@ -1883,8 +1938,12 @@ void FireKeyboard::Execute () {
     f().threatturrettargetkey=DOWN;
     refresh_target=true;
   }
-
-
+  //Added for nearest hostile targeting -ch
+  if (f().nearesthostilekey==PRESS) {
+	  getNearestHostileTarget(parent);
+	  f().nearesthostilekey=DOWN;
+	  refresh_target=true;
+  }
 
   if (f().weapk==PRESS||f().rweapk==PRESS) {
     bool forward;
