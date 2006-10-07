@@ -2575,6 +2575,22 @@ static std::string simplePrettyShip(std::string ship) {
 }
 static std::string GarnerInfoFromSaveGame(string text) {
   static SaveGame savegame("");
+  static set<string> campaign_score_vars;
+  static bool campaign_score_vars_init=false;
+  static bool quickmode = XMLSupport::parse_bool( vs_config->getVariable("general","quick_savegame_summaries","true") );
+  if (!campaign_score_vars_init) {
+	  string campaign_score = vs_config->getVariable("physics","campaigns","privateer_campaign vegastrike_campaign");
+
+	  string::size_type where=0, when=campaign_score.find(' ');
+	  while (where != string::npos) {
+		  campaign_score_vars.insert(campaign_score.substr(where,((when==string::npos)?when:when-where)));
+		  where = (when==string::npos)?when:when+1;
+		  when = campaign_score.find(' ',where);
+	  }
+
+	  campaign_score_vars_init = true;
+  }
+
   std::string system;
   QVector pos(0,0,0);
   bool updatepos=false;
@@ -2583,7 +2599,7 @@ static std::string GarnerInfoFromSaveGame(string text) {
   std::string sillytemp=CurrentSaveGameName;
   CurrentSaveGameName=text;
   savegame.SetStarSystem("");
-  savegame.ParseSaveGame(text,system,"",pos,updatepos,creds,Ships,_Universe->CurrentCockpit(),"",true,false);
+  savegame.ParseSaveGame(text,system,"",pos,updatepos,creds,Ships,_Universe->CurrentCockpit(),"",true,false,quickmode,true,true,campaign_score_vars);
   CurrentSaveGameName=sillytemp;
   text="Savegame: "+text+"#n#_________________#n#";  
   text+="Credits: "+tostring((unsigned int)creds)+"."+tostring(((unsigned int)(creds*100))%100)+"#n#";
@@ -2597,26 +2613,21 @@ static std::string GarnerInfoFromSaveGame(string text) {
       }
     }
   }
-  static string campaign_score=vs_config->getVariable("physics","campaigns","privateer_campaign vegastrike_campaign");
-  string score=campaign_score;
-  bool hit=false;
-  string::size_type where;
-  while (score.length()) {
-    where=score.find(" ");
-    string var = score.substr(0,where);
-    if (where!=string::npos) {
-      score = score.substr(where+1);
-    }else score="";
-    unsigned int curscore=savegame.getMissionData(var).size()+savegame.getMissionStringData(var).size();
-    if (curscore>0) {
-      hit =true;
-      if (var.length()>0)
-        var[0]=toupper(var[0]);
-      text+=var.substr(0,var.find("_"))+" Campaign Score: "+tostring(curscore)+"#n#";
-    }
-  }
-  if (!hit) {
-    text+="Campaign Score: 0#n#";
+  if (!quickmode) {
+	  bool hit=false;
+	  for (set<string>::const_iterator it=campaign_score_vars.begin(); it!=campaign_score_vars.end(); ++it) {
+		string var = *it;
+		unsigned int curscore=savegame.getMissionData(var).size()+savegame.getMissionStringData(var).size();
+		if (curscore>0) {
+		  hit =true;
+		  if (var.length()>0)
+			var[0]=toupper(var[0]);
+		  text+=var.substr(0,var.find("_"))+" Campaign Score: "+tostring(curscore)+"#n#";
+		}
+	  }
+	  if (!hit) {
+		text+="Campaign Score: 0#n#";
+	  }
   }
   return text;
 }

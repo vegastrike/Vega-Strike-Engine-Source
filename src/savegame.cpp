@@ -363,7 +363,7 @@ int hopto (char *buf,char endln, char endln2,int readlen) {
   return readlen;
 }
 
-void SaveGame::ReadNewsData (char * &buf) {
+void SaveGame::ReadNewsData (char * &buf, bool just_skip) {
   int numnews;
   int i=0;
   vector <string> n00s;
@@ -385,7 +385,7 @@ void SaveGame::ReadNewsData (char * &buf) {
 	  break;
 	}
       }
-      if (buf[l]!='\r'&&buf[l]!='\n'&&buf[l]) {
+      if (!just_skip&&buf[l]!='\r'&&buf[l]!='\n'&&buf[l]) {
 	mission->msgcenter->add ("game","news",buf+l);
       }
       buf+=offset;
@@ -439,7 +439,7 @@ std::string scanInString (char * &buf) {
   }
   return str;
 }
-void SaveGame::ReadMissionData (char * &buf) {
+void SaveGame::ReadMissionData (char * &buf, bool select_data, const std::set<std::string> &select_data_filter) {
   missiondata->m.clear();
   int mdsize;
   char * buf2 = buf;
@@ -452,15 +452,22 @@ void SaveGame::ReadMissionData (char * &buf) {
     sscanf (buf2,"%d ",&md_i_size);
     // Put ptr to point after the number we just read
     buf2 +=hopto (buf2,' ','\n',0);
-    missiondata->m[mag_num] = vector<float>();
-    vector <float> * vecfloat=&missiondata->m[mag_num];
-    for (int j=0;j<md_i_size;j++) {
-      double float_val;
-      sscanf (buf2,"%lf ",&float_val);
-      // Put ptr to point after the number we just read
-      buf2 +=hopto (buf2,' ','\n',0);
-      vecfloat->push_back (float_val);
-    }
+	vector <float> * vecfloat=0;
+	bool skip=true;
+	if (!select_data || select_data_filter.count(mag_num)) {
+		missiondata->m[mag_num] = vector<float>();
+		vecfloat=&missiondata->m[mag_num];
+		skip=false;
+	}
+	for (int j=0;j<md_i_size;j++) {
+	  if (!skip) {
+	    double float_val;
+		sscanf (buf2,"%lf ",&float_val);
+		vecfloat->push_back (float_val);
+	  }
+	  // Put ptr to point after the number we just read
+	  buf2 +=hopto (buf2,' ','\n',0);
+	}
   }
   buf = buf2;
 }
@@ -483,10 +490,26 @@ string AnyStringScanInString (char * &buf) {
   while (i<size&&*buf) ret[i++]=*(buf++);
   return ret;
 }
+void AnyStringSkipInString (char * &buf) {
+  unsigned int size=0;
+  bool found=false;
+  while ((*buf)&&((*buf)!=' '||(!found))) {
+    if ((*buf)>='0'&&(*buf)<='9') {
+      size*=10;
+      size+=(*buf)-'0';
+      found=true;
+    }
+    buf++;
+  }
+  if (*buf)
+    buf++;
+  unsigned int i=0;
+  while (i<size&&*buf) ++i,++buf;
+}
 string AnyStringWriteString (string input) {
   return XMLSupport::tostring ((int)input.length())+" "+input;
 }
-void SaveGame::ReadMissionStringData (char * &buf) {
+void SaveGame::ReadMissionStringData (char * &buf, bool select_data, const std::set<std::string> &select_data_filter) {
   missionstringdata->m.clear();
   int mdsize;
   char * buf2 = buf;
@@ -500,10 +523,17 @@ void SaveGame::ReadMissionStringData (char * &buf) {
 	md_i_size = strtol(buf2,(char **)NULL,10);
     // Put ptr to point after the number we just read
     buf2 +=hopto (buf2,' ','\n',0);
-	missionstringdata->m[mag_num] = vector<StringPool::Reference>();
-	vector <StringPool::Reference> * vecstring=&missionstringdata->m[mag_num];
+	vector <StringPool::Reference> * vecstring = 0;
+	bool skip=true;
+	if (!select_data || select_data_filter.count(mag_num)) {
+		missionstringdata->m[mag_num] = vector<StringPool::Reference>();
+		vecstring=&missionstringdata->m[mag_num];
+		skip=false;
+	}
     for (int j=0;j<md_i_size;j++) {
-		vecstring->push_back (StringPool::Reference(AnyStringScanInString(buf2)));
+		if (skip)
+			AnyStringSkipInString(buf2); else
+			vecstring->push_back (StringPool::Reference(AnyStringScanInString(buf2)));
     }
   }
   buf = buf2;
@@ -540,7 +570,7 @@ static inline void PushBackChars(const char * c,vector<char> & ret) {
     ret.resize(ret.size()+strlen(c));
     while (*c) ret[ini++]=*(c++);
 }
-static inline void PushBackString (string input,vector<char> &ret) {
+static inline void PushBackString (const string &input,vector<char> &ret) {
 	PushBackUInt(input.length(),ret);
 	PushBackChars(" ",ret);
 	PushBackChars(input.c_str(),ret);
@@ -593,7 +623,7 @@ void SaveGame::ReadStardate( char * &buf)
 	_Universe->current_stardate.InitTrek( stardate);
 }
 
-void SaveGame::ReadSavedPackets (char * &buf, bool commitfactions) {
+void SaveGame::ReadSavedPackets (char * &buf, bool commitfactions, bool skip_news, bool select_data, const std::set<std::string> &select_data_filter) {
   int a=0;
   char unitname[1024];
   char factname[1024];
@@ -608,13 +638,13 @@ void SaveGame::ReadSavedPackets (char * &buf, bool commitfactions) {
 
       break;//GOT TO BE THE LAST>... cus it's stupid :-) and mac requires the factions to be loaded AFTER this function call
     }else if (a==0&&0==strcmp(unitname,"mission")&&0==strcmp(factname,"data")) {
-      ReadMissionData(buf);
+      ReadMissionData(buf,select_data,select_data_filter);
     }else if (a==0&&0==strcmp(unitname,"missionstring")&&0==strcmp(factname,"data")) {
-      ReadMissionStringData(buf);
+      ReadMissionStringData(buf,select_data,select_data_filter);
     }else if (a==0&&0==strcmp(unitname,"python")&&0==strcmp(factname,"data")) {
       last_written_pickled_data=last_pickled_data=UnpickleAllMissions(buf);
     }else if (a==0&&0==strcmp(unitname,"news")&&0==strcmp(factname,"data")) {
-      if (commitfactions) ReadNewsData(buf);
+      if (commitfactions) ReadNewsData(buf,skip_news);
     }else if (a==0&&0==strcmp(unitname,"stardate")&&0==strcmp(factname,"data")) {
 	  // On server side we expect the latest saved stardate in dynaverse.dat too
       if (commitfactions&&!SERVER/*server never wants to take "orders" from shapeshifters...*/) ReadStardate(buf);
@@ -769,10 +799,9 @@ void SaveGame::SetSavedCredits (float c) {
 		savedcredits = c;
 }
 
-void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstarsystem, QVector &PP, bool & shouldupdatepos,float &credits, vector <string> &savedstarship, int player_num, string str, bool read, bool commitfaction) {
+void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstarsystem, QVector &PP, bool & shouldupdatepos,float &credits, vector <string> &savedstarship, int player_num, string str, bool read, bool commitfaction, bool quick_read, bool skip_news, bool select_data, const std::set<std::string> &select_data_filter) {
 	char *tempfullbuf=0;
 	int tempfulllength=2048;
-	int readlen=0;
 	if (filename.length()>0)
 			filename=callsign+filename;
 	shouldupdatepos=!(PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX);
@@ -794,27 +823,37 @@ void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstars
 		}
 		if( err<=Ok)
 		{
-				str = savestring = f.ReadFull();
+			if (quick_read) {
+				static int buflen = XMLSupport::parse_int( vs_config->getVariable("general","quick_savegame_summaries_buffer","16384") );
+				char *buf = (char*)malloc(buflen+1);
+				buf[buflen]='\0';
+				err = f.ReadLine(buf,buflen);
+				savestring = buf;
+				free(buf);
+			} else {
+				savestring = f.ReadFull();
+			}
 		}
   }
   if( err<=Ok || (!read && str!=""))
   {
-	  savestring = str;
+	  if (!read)
+		savestring = str;
 	  if ( savestring.length()>0) {
-	    char * buf = new char[str.length()+1];
-		buf[str.length()]='\0';
+	    char * buf = new char[savestring.length()+1];
+		buf[savestring.length()]='\0';
+		memcpy( buf, savestring.c_str(), savestring.length());
 
-		memcpy( buf, str.c_str(), str.length());
+		int headlen = hopto (buf,'\n','\n',0);
 		char * deletebuf = buf;
-		char *tmp2= (char *)malloc(savestring.length()+2);
+		char * tmp2= (char *)malloc(headlen+2);
 		char * freetmp2 = tmp2;
-		char * factionname = (char *)malloc(savestring.length()+2);
-                factionname[savestring.length()]='\0';
+		char * factionname = (char *)malloc(headlen+2);
+        factionname[headlen+1]=buf[headlen-1]='\0';
 		QVector tmppos;
-		int res = sscanf (buf,"%s %lf %lf %lf %s\n",tmp2,&tmppos.i,&tmppos.j,&tmppos.k, factionname);
+		int res = sscanf (buf,"%s %lf %lf %lf %s",tmp2,&tmppos.i,&tmppos.j,&tmppos.k, factionname);
 		if (res==4 || res==5) {
-		  // Put readlen to point to the end of the line we just parsed
-		  readlen = hopto (buf,'\n','\n',readlen);
+		  // Extract credits & starship
 		  for (int j=0;'\0'!=tmp2[j];j++) {
 			if (tmp2[j]=='^') {
 				sscanf (tmp2+j+1,"%f",&credits);
@@ -850,8 +889,8 @@ void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstars
 			shouldupdatepos=true;
 			PlayerLocation=tmppos;//LaunchUnitNear(tmppos);
 		  }
-		  buf+=readlen;
-		  ReadSavedPackets (buf,commitfaction);
+		  buf+=headlen;
+		  ReadSavedPackets (buf,commitfaction,skip_news,select_data,select_data_filter);
 		}
 		free(freetmp2);freetmp2=NULL;
 		tmp2=NULL;
