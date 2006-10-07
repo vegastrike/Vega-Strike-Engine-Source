@@ -552,7 +552,8 @@ double aggfire=0;
 int numprocessed=0;
 double targetpick=0;
 void StarSystem::UpdateUnitPhysics (bool firstframe) {
-  static   bool phytoggle=true;
+  static bool phytoggle=true;
+  static int batchcount=SIM_QUEUE_SIZE-1;
   double updatebegin=queryTime();
   double aitime=0;
   double phytime=0;
@@ -564,97 +565,99 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
   numprocessed=0;
   stats.CheckVitals(this);
   if (phytoggle) {
-    // BELOW COMMENTS ARE NO LONGER IN SYNCH
-    // NOTE: Randomization is necessary to preserve scattering - otherwise, whenever a 
-    //     unit goes from low-priority to high-priority and back to low-priority, they 
-    //     get synchronized and start producing peaks.
-    // NOTE2: But... randomization must come only on priority changes. Otherwise, it may
-    //     interfere with subunit scheduling. Luckily, all units that make use of subunit
-    //     scheduling also require a constant base priority, since otherwise priority changes
-    //     will wreak havoc with subunit interpolation. Luckily again, we only need
-    //     randomization on priority changes, so we're fine.
+	for (++batchcount; batchcount > 0; --batchcount) {
+		// BELOW COMMENTS ARE NO LONGER IN SYNCH
+		// NOTE: Randomization is necessary to preserve scattering - otherwise, whenever a 
+		//     unit goes from low-priority to high-priority and back to low-priority, they 
+		//     get synchronized and start producing peaks.
+		// NOTE2: But... randomization must come only on priority changes. Otherwise, it may
+		//     interfere with subunit scheduling. Luckily, all units that make use of subunit
+		//     scheduling also require a constant base priority, since otherwise priority changes
+		//     will wreak havoc with subunit interpolation. Luckily again, we only need
+		//     randomization on priority changes, so we're fine.
 
-    try {
-      Unit * unit=NULL;
-      un_iter iter = this->physics_buffer[current_sim_location].createIterator();
-      while((unit = iter.current())!=NULL) {
-		int priority=UnitUtil::getPhysicsPriority(unit);
-        // Doing spreading here and only on priority changes, so as to make AI easier
-		int predprior=unit->predicted_priority;
-        //If the priority has really changed (not an initial scattering, because prediction doesn't match)
-        if (priority!=predprior){
-          //Save priority value as prediction for next scheduling, but don't overwrite yet.
-          predprior=priority;
-          //Scatter, so as to achieve uniform distribution
-          priority = 1 + (((unsigned int)vsrandom.genrand_int32())%priority);
+		try {
+		  Unit * unit=NULL;
+		  un_iter iter = this->physics_buffer[current_sim_location].createIterator();
+		  while((unit = iter.current())!=NULL) {
+			int priority=UnitUtil::getPhysicsPriority(unit);
+			// Doing spreading here and only on priority changes, so as to make AI easier
+			int predprior=unit->predicted_priority;
+			//If the priority has really changed (not an initial scattering, because prediction doesn't match)
+			if (priority!=predprior){
+			  //Save priority value as prediction for next scheduling, but don't overwrite yet.
+			  predprior=priority;
+			  //Scatter, so as to achieve uniform distribution
+			  priority = 1 + (((unsigned int)vsrandom.genrand_int32())%priority);
+			}
+	        
+			float backup=SIMULATION_ATOM;
+			theunitcounter=theunitcounter+1;
+			SIMULATION_ATOM*=priority;
+			unit->sim_atom_multiplier=priority;
+			double aa=queryTime();
+			unit->ExecuteAI(); 
+			double bb=queryTime();
+			unit->ResetThreatLevel();
+			unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),priority==1?firstframe:true,&this->gravitationalUnits(),unit);    //FIXME "firstframe"-- assume no more than 2 physics updates per frame.
+			double cc= queryTime();
+			aitime+=bb-aa;
+			phytime+=cc-bb;
+			SIMULATION_ATOM=backup;
+			iter.advance();
+			unit->predicted_priority=predprior;
+		  }
+		}catch (const boost::python::error_already_set) {
+		  if (PyErr_Occurred()) {
+			PyErr_Print();
+			PyErr_Clear();
+			fflush(stderr);         
+			fflush(stdout);
+		  }
+		  throw;
 		}
-        
-        float backup=SIMULATION_ATOM;
-        theunitcounter=theunitcounter+1;
-        SIMULATION_ATOM*=priority;
-        unit->sim_atom_multiplier=priority;
-        double aa=queryTime();
-        unit->ExecuteAI(); 
-        double bb=queryTime();
-        unit->ResetThreatLevel();
-        unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),priority==1?firstframe:true,&this->gravitationalUnits(),unit);    //FIXME "firstframe"-- assume no more than 2 physics updates per frame.
-        double cc= queryTime();
-        aitime+=bb-aa;
-        phytime+=cc-bb;
-		SIMULATION_ATOM=backup;
-        iter.advance();
-        unit->predicted_priority=predprior;
-      }
-    }catch (const boost::python::error_already_set) {
-      if (PyErr_Occurred()) {
-        PyErr_Print();
-	    PyErr_Clear();
-	    fflush(stderr);         
-	    fflush(stdout);
-      }
-      throw;
-    }
 		double c0=queryTime();
-        Bolt::UpdatePhysics(this);
+		Bolt::UpdatePhysics(this);
 		double cc= queryTime();
-        last_collisions.clear();
-        double fl0=queryTime();
+		last_collisions.clear();
+		double fl0=queryTime();
 		collidemap[Unit::UNIT_BOLT]->flatten();
 		if (Unit::NUM_COLLIDE_MAPS>1) {
 		  collidemap[Unit::UNIT_ONLY]->flatten(*collidemap[Unit::UNIT_BOLT]);
 		}
-        flattentime=queryTime()-fl0;
-        un_iter iter = this->physics_buffer[current_sim_location].createIterator();
-        Unit * unit;
-        while((unit = iter.current())!=NULL) {
-          int priority=unit->sim_atom_multiplier;
-          float backup=SIMULATION_ATOM;
-          SIMULATION_ATOM*=priority;
+		flattentime=queryTime()-fl0;
+		un_iter iter = this->physics_buffer[current_sim_location].createIterator();
+		Unit * unit;
+		while((unit = iter.current())!=NULL) {
+		  int priority=unit->sim_atom_multiplier;
+		  float backup=SIMULATION_ATOM;
+		  SIMULATION_ATOM*=priority;
 
-          int newloc=(current_sim_location+priority)%SIM_QUEUE_SIZE;
-          unit->CollideAll();
-          SIMULATION_ATOM=backup;        
-          if (newloc==current_sim_location) {
-            iter.advance();
-          }else{ 
-            iter.moveBefore(this->physics_buffer[newloc]);
-          }
-        }
+		  int newloc=(current_sim_location+priority)%SIM_QUEUE_SIZE;
+		  unit->CollideAll();
+		  SIMULATION_ATOM=backup;        
+		  if (newloc==current_sim_location) {
+			iter.advance();
+		  }else{ 
+			iter.moveBefore(this->physics_buffer[newloc]);
+		  }
+		}
 		double dd= queryTime();	
 		collidetime+=dd-cc;
 		bolttime+=cc-c0;
 		//Book-keeping for debug - remove later
-	   if (debugPerformance()) {
-	     int movingavgindex=physicsframecounter%128;
-	     movingtotal=movingtotal-movingavgarray[movingavgindex]+theunitcounter;
-	     movingavgarray[movingavgindex]=theunitcounter;
-		 printf("PhysFrame:%u - %u, %u, %u t:%f ai:%f:%f:ctc_%d,tp_%f p:%f c:%f b:%f fl:%f\n",physicsframecounter,theunitcounter,movingtotal/128,totalprocessed/physicsframecounter,queryTime()-updatebegin,aitime,aggfire,numprocessed,targetpick,phytime,collidetime,bolttime,flattentime);
-       }
-	//end debug bookkeeping
-     current_sim_location=(current_sim_location+1)%SIM_QUEUE_SIZE;
-	++physicsframecounter;
-	totalprocessed+=theunitcounter;
-	theunitcounter=0;
+		if (debugPerformance()) {
+		  int movingavgindex=physicsframecounter%128;
+		  movingtotal=movingtotal-movingavgarray[movingavgindex]+theunitcounter;
+		  movingavgarray[movingavgindex]=theunitcounter;
+		  printf("PhysFrame:%u - %u, %u, %u t:%f ai:%f:%f:ctc_%d,tp_%f p:%f c:%f b:%f fl:%f\n",physicsframecounter,theunitcounter,movingtotal/128,totalprocessed/physicsframecounter,queryTime()-updatebegin,aitime,aggfire,numprocessed,targetpick,phytime,collidetime,bolttime,flattentime);
+		}
+		//end debug bookkeeping
+		current_sim_location=(current_sim_location+1)%SIM_QUEUE_SIZE;
+		++physicsframecounter;
+		totalprocessed+=theunitcounter;
+		theunitcounter=0;
+	}
   }else {
     un_iter iter = this->getUnitList().createIterator();
     Unit * unit=NULL;
