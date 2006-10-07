@@ -1,47 +1,54 @@
-{\rtf1\mac\ansicpg10000\cocoartf100
+{\rtf1\mac\ansicpg10000\cocoartf824\cocoasubrtf410
 {\fonttbl\f0\fswiss\fcharset77 Helvetica;\f1\fswiss\fcharset77 Helvetica-Bold;}
 {\colortbl;\red255\green255\blue255;}
 \margl1440\margr1440\vieww9000\viewh9000\viewkind0
 \pard\tx1440\tx2880\tx4320\tx5760\tx7200\ql\qnatural
 
-\f0\fs24 \cf0 Vegastrike for OS X README\
-----------------------------------------\
-
-\f1\b     Building and installing - \
-
-\f0\b0         First things first:  Make sure you have the dependencies filled out. Most of these can easily be installed using fink (fink.sourceforge.net)  If you have a specfic reason to not use fink in it's standard configuration, make sure you pass options to configure reflecting the differences. Right now configure epects everything to be where fink would install it. The dependencies are:\
-        - SDL (Framework or library, just make sure your sdl-config script works)\
-        - expat\
-        - libpng\
-        - Python (?Only needed for compiling?) I built vegastrike using the framework, but the library should work as well. Might need to pass a variable to configure saying otherwise though.\
+\f0\fs24 \cf0 -------------------------------------------
+\f1\b \
+Vega Strike for OS X README
+\f0\b0 \
+-------------------------------------------\
 \
-        Then check the latest code out from CVS. This'll (Hopefully) compile into a double-cliackable application with mission selector. :-D   The first thing you want to do once you got all the code from CVS is to open up Terminal to the code's directory and execute these commands:\
-    aclocal\
-    automake -a --add-missing\
-    autoconf configure.in > configure\
-    ./configure --enable-macosx-bundle\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+
+\f1\b \cf0 Requirements
+\f0\b0 \
 \
-       Then you can either use make. Or build using the project for ProjectBuilder.\
-       It is also possible to build vegastrike as a standard executable only by ommitting the --enable-macosx-bundle from the configure line.\
+In order to compile Vega Strike there are a few things to check:\
+\
+    * Ensure you have installed XCode Tools from your OS installation disc.\
+          o Various gcc versions included in XCode Tools releases may have bugs preventing the compilation of Vega Strike. Vega Strike is known to work, on OSX, with gcc version powerpc-apple-darwin8-gcc-4.0.0 (GCC) 4.0.0 20041026\
+          o You should also install the Mac OSX 10.3.9 SDK from the same disk. \
+    * Using Fink, make sure you install the following libraries:\
+          o libpng + libpng-devel <-- libpng 3 is recommended.\
+          o python and python-dev <-- 2.2.1\
+          o expat\
+          o (lib)jpeg + libjpeg-devel \
+    * Download the SDL source tarball, version 1.2.10 or later, compile, and install.\
+    * Download and install the OpenAL framework. \
 \
 
-\f1\b     Playing -\
-
-\f0\b0         Just place the application in the data directory and then double-click.\
+\f1\b Compiling
+\f0\b0 \
+\
+The compile procedure should look like the following listing. Remember the configure part depends on above requirements.\
+\
+cd ./vegastrike\
+./bootstrap-sh\
+./configure\
+make vegastrike\
+make soundserver\
+\
+Note: You will require various options on configure, to specify the paths to the various libraries you have installed. Note: If you intend to build a binary to replace the that packaged in a release (ie in a .app), then you must use the configure command --enable-macosx-bundle\
 \
 
-\f1\b     Remaining Issues - \
-
-\f0\b0     - The biggy: Most of the tim glLockFragment dies when vegastrike is spawned by the mission selector. So most missions don't work. This is another OS X GLUT issue.\
-    - The current method of making it a double clickable application is shoddy, it simply copies the executable in there. Works, but it's not elegant.\
-    - The app must be run from the data directory.\
-    - The dependencies are a little bit harder to install than it should be for novice users.  It would be nice to handle this in a better manner.\
-    - Bugs. I know there in there.\
-    There are some stability issues when running the double clickable app. Especially if using the mission selector to spawn vegastrike. You can run vegastrike from the terminal to improve stability also.\
+\f1\b See also
+\f0\b0 \
 \
-   Have fun!\
--Corey O'Connor\
-Lead Programmer\
-DogHeadBone Software\
-oconnorc@dogheadbone.com\
-www.dogheadbone.com}
+    * Compiling from SVN under your favourite Unixlike OS\
+         http://vegastrike.sourceforge.net/wiki/HowTo:Compile_from_CVS\
+    * "make clean/distclean" thread in the forum - A quite helpful thread about the make process. \
+         http://vegastrike.sourceforge.net/forums/viewtopic.php?t=4185\
+\
+}
