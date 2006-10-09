@@ -157,19 +157,21 @@ void concat_ostream(std::ofstream &o, const std::vector<std::string> &files) {
   if (o.is_open()) {
     for (unsigned int i=0;i<files.size();++i) {
       std::ifstream as;
-      changehome (true,false);
-      as.open(files[i].c_str(),std::ios::binary);
-      changehome (false);
-      changehome (true,true);
-      if (!as.is_open()) {
-        as.open(files[i].c_str(),std::ios::binary);
-      }
-      changehome(false);
+	  as.open(files[i].c_str(),std::ios::binary);
+	  if (!as.is_open()) {
+		  changehome (true,false);
+		  as.open(files[i].c_str(),std::ios::binary);
+		  changehome (false);
+	  }
+	  if (!as.is_open()) {
+		  changehome (true,true);
+		  as.open(files[i].c_str(),std::ios::binary);
+		  changehome(false);
+	  }
       if (as.is_open()) {
         o << as.rdbuf(); // read original file into target
         as.close();
       }
-
     }
     o.close();
   }
