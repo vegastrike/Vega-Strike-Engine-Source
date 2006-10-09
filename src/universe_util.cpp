@@ -53,6 +53,18 @@ namespace UniverseUtil {
     void musicLayerLoopList (int numloops,int layer) {
         muzak->SetLoops(numloops,layer);
     }
+    void musicLayerSetSoftVolume(float vol, float latency_override, int layer) {
+		Music::SetVolume(vol,layer,false,latency_override);
+	}
+	void musicLayerSetHardVolume(float vol, int layer) {
+		Music::SetVolume(vol,layer,true);
+	}
+    void musicSetSoftVolume(float vol, float latency_override) {
+		musicLayerSetSoftVolume(vol,latency_override,-1);
+	}
+	void musicSetHardVolume(float vol) {
+		musicLayerSetHardVolume(vol,-1);
+	}
     void musicMute (bool stopSound) {
         muzak->Mute(stopSound);
     }

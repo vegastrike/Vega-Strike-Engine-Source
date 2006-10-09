@@ -101,6 +101,10 @@ public:
 	void SetTimeCompression ();
 ///this adds a playlist to the music and may be triggered with an int
 	int musicAddList(string str);
+///sets the software volume, with smooth transitions (latency_override==-1 uses default transition time)
+    void musicSetSoftVolume(float vol, float latency_override);
+///sets the hardware volume, does not support transitions of any kind.
+    void musicSetHardVolume(float vol);
 ///this plays a specific song, at a specific layer
 	void musicLayerPlaySong(string str,int layer);
 ///this plays msuci from a given list, at a specific layer (where the int is what was returned by musicAddList)
@@ -111,6 +115,10 @@ public:
 	void musicLayerSkip(int layer);
 ///this stops the music currently playing at a specific layer - with a nice fadeout
     void musicLayerStop(int layer);
+///sets the software volume, with smooth transitions (latency_override==-1 uses default transition time)
+    void musicLayerSetSoftVolume(float vol, float latency_override, int layer);
+///sets the hardware volume, does not support transitions of any kind.
+    void musicLayerSetHardVolume(float vol, int layer);
 ///this mutes sound - or unmutes it
     void musicMute(bool stopSound);
 ///this plays a specific song, through the crossfader construct
