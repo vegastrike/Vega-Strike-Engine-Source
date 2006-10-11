@@ -82,9 +82,9 @@ void Mission::DirectorLoop(){
    }
 
    try {
+      BriefingLoop();
       if (runtime.pymissions)
          runtime.pymissions->Execute();
-      BriefingLoop();
    }catch (...) {
       if (PyErr_Occurred()) {
          PyErr_Print();
@@ -94,31 +94,7 @@ void Mission::DirectorLoop(){
       }
       throw;
    }
-  if(director==NULL){
-    return;
-  }
 
-  if(vi_counter!=old_vi_counter){
-    char buf[200];
-    sprintf(buf,"VI_COUNTER %d\n",vi_counter);
-    debug(2,NULL,0,buf);
-  }
-  old_vi_counter=vi_counter;
-  
-  if(olist_counter!=old_olist_counter){
-    char buf[200];
-    sprintf(buf,"OLIST_COUNTER %d\n",olist_counter);
-    debug(2,NULL,0,buf);
-  }
-  old_olist_counter=olist_counter;
-  
-  if(string_counter!=old_string_counter){
-    char buf[200];
-    sprintf(buf,"STRING_COUNTER %d\n",string_counter);
-    debug(2,NULL,0,buf);
-  }
-  old_string_counter=string_counter;
-  RunDirectorScript("gameloop");
 
 }
 void Mission::DirectorEnd(){

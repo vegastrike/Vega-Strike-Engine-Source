@@ -75,9 +75,6 @@ void Mission::DirectorLoop(){
       }
       throw;
    }
-  if(director==NULL){
-    return;
-  }
 }
 void Mission::BriefingUpdate(){}
 void Mission::DirectorBenchmark(){
