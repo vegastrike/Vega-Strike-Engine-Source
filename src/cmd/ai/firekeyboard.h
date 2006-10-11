@@ -116,8 +116,14 @@ class FireKeyboard: public Order {
   static void TurretAIOn (const KBData&,KBSTATE);
   static void TurretAIOff (const KBData&,KBSTATE);
   static void TurretFireAtWill (const KBData&,KBSTATE);
-  //Added for targeting nearest hostile. --ch
+  //Added for targeting nearest units. --ch
   static void NearestHostileTargetKey(const KBData&,KBSTATE k);
+  static void NearestDangerousHostileKey(const KBData&,KBSTATE k);
+  static void NearestFriendlyKey(const KBData&,KBSTATE k);
+  static void NearestBaseKey(const KBData&,KBSTATE k);
+  static void NearestPlanetKey(const KBData&,KBSTATE k);
+  static void NearestJumpKey(const KBData&,KBSTATE k);
+
 protected:
   void * savedTargets[NUMSAVEDTARGETS];
   float distance;

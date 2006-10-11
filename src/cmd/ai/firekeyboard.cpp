@@ -40,7 +40,10 @@ struct FIREKEYBOARDTYPE {
     ejectdock=eject=ejectcargo=ejectnonmissioncargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=rweapk=rmisk=cloakkey=
       neartargetkey=targetskey=targetukey=threattargetkey=picktargetkey=subtargetkey=targetkey=
       rneartargetkey=rtargetskey=rtargetukey=rthreattargetkey=rpicktargetkey=rtargetkey=
-      nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=enslave=freeslave=incomingmissiletargetkey=rincomingmissiletargetkey=nearesthostilekey=UP;
+      nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=enslave=
+	  freeslave=incomingmissiletargetkey=rincomingmissiletargetkey=nearesthostilekey=nearestdangeroushostilekey=
+	  nearestfriendlykey=nearestbasekey=nearestplanetkey=nearestjumpkey=UP;
+
       shieldpowerstate=1;
 #ifdef CAR_SIM
     blinkleftkey=blinkrightkey=headlightkey=sirenkey=UP;
@@ -106,7 +109,14 @@ struct FIREKEYBOARDTYPE {
  KBSTATE turrettargetkey;
  KBSTATE enslave;
  KBSTATE freeslave;
- KBSTATE nearesthostilekey; //Added for nearest hostile targeting -ch
+ //Added for nearest targets keys --ch
+ KBSTATE nearesthostilekey; 
+ KBSTATE nearestdangeroushostilekey;
+ KBSTATE nearestfriendlykey;
+ KBSTATE nearestbasekey;
+ KBSTATE nearestplanetkey;
+ KBSTATE nearestjumpkey;
+
 };
 static std::vector <FIREKEYBOARDTYPE> vectorOfKeyboardInput;
 static FIREKEYBOARDTYPE &g() {
@@ -612,6 +622,36 @@ void FireKeyboard::NearestHostileTargetKey(const KBData&,KBSTATE k) {
 	if (k==PRESS)
 		ExamineWhenTargetKey();
 }
+void FireKeyboard::NearestDangerousHostileKey(const KBData&,KBSTATE k) {	
+	if (g().nearestdangeroushostilekey!=PRESS)
+		g().nearestdangeroushostilekey = k;
+	if (k==PRESS)
+		ExamineWhenTargetKey();
+}
+void FireKeyboard::NearestFriendlyKey(const KBData&,KBSTATE k) {	
+	if (g().nearestfriendlykey!=PRESS)
+		g().nearestfriendlykey = k;
+	if (k==PRESS)
+		ExamineWhenTargetKey();
+}
+void FireKeyboard::NearestBaseKey(const KBData&,KBSTATE k) {	
+	if (g().nearestbasekey!=PRESS)
+		g().nearestbasekey = k;
+	if (k==PRESS)
+		ExamineWhenTargetKey();
+}
+void FireKeyboard::NearestPlanetKey(const KBData&,KBSTATE k) {	
+	if (g().nearestplanetkey!=PRESS)
+		g().nearestplanetkey = k;
+	if (k==PRESS)
+		ExamineWhenTargetKey();
+}
+void FireKeyboard::NearestJumpKey(const KBData&,KBSTATE k) {	
+	if (g().nearestjumpkey!=PRESS)
+		g().nearestjumpkey = k;
+	if (k==PRESS)
+		ExamineWhenTargetKey();
+}
 #ifdef CAR_SIM
 void FireKeyboard::BlinkLeftKey(const KBData&,KBSTATE k) {
     if (k==PRESS) {
@@ -1076,8 +1116,15 @@ bool TargNear (Unit *me,Unit *target) {
 	return (me->getRelation(target)<0||TargThreat(me,target)||target->getRelation(me)<0)&&TargAll(me,target)&&target->isUnit()!=MISSILEPTR&&(can_target_sun||!UnitUtil::isSun(target))&&isNotTurretOwner(me,target);
 }
 
-//Target the nearest hostile
-bool getNearestHostileTarget (Unit *me) {  
+//Target the nearest unit of a specified type
+//Possible types are:
+//0 = hostile
+//1 = hostile targetting me
+//2 = friendly
+//3 = base
+//4 = planet
+//5 = jump point
+bool getNearestTargetUnit (Unit *me, int iType) {
   QVector pos (me->Position());
   Unit * un=NULL;
   Unit * targ=NULL;
@@ -1085,15 +1132,44 @@ bool getNearestHostileTarget (Unit *me) {
   for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator(); (un=(*i)); ++i) 
   {
 	  if (un==me)
-		  continue;
-	  if (un->isUnit()!=UNITPTR)
-		  continue;     
+		  continue;   
 	  if (un->hull<0)
 		  continue;
-	  if (FactionUtil::GetIntRelation(me->faction,un->faction)>=0)
+	  if (!(me->InRange(un,true,false))||
+		  !(me->InRange(un,true,true)))
 		  continue;
-	  if (!(me->InRange(un,true,false))||!(me->InRange(un,true,true)))
+	  
+	  if ((iType == 0) &&
+		  ((un->isUnit()!=UNITPTR) ||
+		  (FactionUtil::GetIntRelation(me->faction,un->faction)>=0)))
 		  continue;
+
+	  if ((iType == 1) &&
+		  ((un->isUnit()!=UNITPTR) || 
+		  ((FactionUtil::GetIntRelation(me->faction,un->faction)>=0) &&
+		  (un->Target() != me))))
+		  continue;
+
+	  if ((iType == 2) &&
+		  ((un->isUnit()!=UNITPTR) ||
+		  (FactionUtil::GetIntRelation(me->faction,un->faction)<0) ||
+		  (UnitUtil::getFlightgroupName(un) == "Base")))
+		  continue;
+
+	  if ((iType == 3) &&
+		  (UnitUtil::getFlightgroupName(un) != "Base"))
+		  continue;
+
+	  if ((iType == 4) &&
+		  ((!un->isPlanet()) ||
+		  (un->isJumppoint())))
+		  continue;
+
+	  if ((iType == 5) &&
+		  (!un->isJumppoint()))
+		  continue;
+
+		  
 	  
 	  double temp = (un->Position() - pos).Magnitude();
 	  if (targ==NULL) 
@@ -1111,7 +1187,7 @@ bool getNearestHostileTarget (Unit *me) {
   }
 
   if (targ == NULL)
-	  return true;
+	  return false;
 
   if (Network==NULL)
   {
@@ -1327,11 +1403,8 @@ static bool NoDockWithClear() {
 	static bool nodockwithclear = XMLSupport::parse_bool (vs_config->getVariable ("physics","dock_with_clear_planets","true"));
 	return nodockwithclear;
 }
-static bool SuperDock(Unit * parent, Unit* target) {
-  static bool superdock = XMLSupport::parse_bool(vs_config->getVariable("physics","dock_within_base_shield","false"));
-  float dis=(target->isUnit()==PLANETPTR||superdock)?UnitUtil::getSignificantDistance(parent,target):UnitUtil::getDistance(parent,target);
-  
-  if (dis<parent->rSize()) {
+static bool SuperDock(Unit * parent, Unit* target) {  
+  if (UnitUtil::isCloseEnoughToDock(parent, target)) {
     if (UnitUtil::isDockableUnit(target)) {
       for (unsigned int i=0;i<target->GetImageInformation().dockingports.size();++i) {
         if (target->GetImageInformation().dockingports[i].used==false) {
@@ -1412,21 +1485,27 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
       for (un_iter u=_Universe->activeStarSystem()->getUnitList().createIterator();
            (targ=*u)!=NULL&&!isDone;
            ++u) {
-        if (targ!=parent) {
-          targ->RequestClearance(parent);
-          if (TryDock(parent,targ,playa,severity)) {
-            parent->Target(targ);
-            isDone=true;
-            parent->EndRequestClearance(targ);
-            break;
-          }else {
-            //if (targ!=parent->Target())
-            parent->EndRequestClearance(targ);
-          }
-        }
-      }
-      }
-    }
+	      //Let's make sure potentials are actually in range, and have
+	      //docking ports before we try to dock with them.
+	      if ((targ != parent) && 
+			  (UnitUtil::isDockableUnit(targ)) &&
+			  (UnitUtil::isCloseEnoughToDock(parent, targ))) {
+				  
+				  targ->RequestClearance(parent);
+				  
+				  if (TryDock(parent,targ,playa,severity)) {
+					  parent->Target(targ);
+					  isDone=true;
+					  parent->EndRequestClearance(targ);
+					  break;
+				  }else {
+					  //if (targ!=parent->Target())
+					  parent->EndRequestClearance(targ);
+				  }
+		  }
+	  }
+	  }
+	}
     if (!isDone) {
       if (endt) {
         ExecuteRequestClearenceKey(parent,endt);
@@ -1938,10 +2017,38 @@ void FireKeyboard::Execute () {
     f().threatturrettargetkey=DOWN;
     refresh_target=true;
   }
-  //Added for nearest hostile targeting -ch
+  //Added for nearest unit targeting -ch
   if (f().nearesthostilekey==PRESS) {
-	  getNearestHostileTarget(parent);
+	  getNearestTargetUnit (parent, 0);
 	  f().nearesthostilekey=DOWN;
+	  refresh_target=true;
+  }
+
+  if (f().nearestdangeroushostilekey==PRESS) {
+	  getNearestTargetUnit (parent, 1);
+	  f().nearestdangeroushostilekey=DOWN;
+	  refresh_target=true;
+  }
+
+  if (f().nearestfriendlykey==PRESS) {
+	  getNearestTargetUnit (parent, 2);
+	  f().nearestfriendlykey=DOWN;
+	  refresh_target=true;
+  }
+
+  if (f().nearestbasekey==PRESS) {
+	  getNearestTargetUnit (parent, 3);
+	  f().nearestbasekey=DOWN;
+	  refresh_target=true;
+  }
+  if (f().nearestplanetkey==PRESS) {
+	  getNearestTargetUnit (parent, 4);
+	  f().nearestplanetkey=DOWN;
+	  refresh_target=true;
+  }
+  if (f().nearestjumpkey==PRESS) {
+	  getNearestTargetUnit (parent, 5);
+	  f().nearestjumpkey=DOWN;
 	  refresh_target=true;
   }
 
@@ -2123,7 +2230,7 @@ void FireKeyboard::Execute () {
   if (f().eject==PRESS) {
     f().eject=DOWN;
     Cockpit * cp;
-    if ((parent->name != "eject") && (parent->name != "pilot") && (cp=_Universe->isPlayerStarship (parent))) {
+    if ((parent->name != "eject") && (parent->name != "Pilot") && (cp=_Universe->isPlayerStarship (parent))) {
       cp->Eject();
     }
   }

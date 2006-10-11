@@ -633,8 +633,14 @@ CommandMap initGlobalCommandMap() {
   commandMap["CommFormUp"]=FireKeyboard::FormUp;
   commandMap["CommDockWithMe"]=FireKeyboard::DockWithMe;
   commandMap["CommDefendTarget"]=FireKeyboard::DefendTarget;
-  //Added for nearest hostile targeting -ch
+  //Added for nearest unit targeting -ch
   commandMap["NearestHostileTargetKey"]=FireKeyboard::NearestHostileTargetKey;
+  commandMap["NearestDangerousHostileKey"]=FireKeyboard::NearestDangerousHostileKey;
+  commandMap["NearestFriendlyKey"]=FireKeyboard::NearestFriendlyKey;
+  commandMap["NearestBaseKey"]=FireKeyboard::NearestBaseKey;
+  commandMap["NearestPlanetKey"]=FireKeyboard::NearestPlanetKey;
+  commandMap["NearestJumpKey"]=FireKeyboard::NearestJumpKey;
+
 #ifdef CAR_SIM
   commandMap["BlinkLeftKey"]=FireKeyboard::BlinkLeftKey;
   commandMap["BlinkRightKey"]=FireKeyboard::BlinkRightKey;

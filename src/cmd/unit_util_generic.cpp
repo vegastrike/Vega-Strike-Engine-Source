@@ -453,6 +453,15 @@ namespace UnitUtil {
 		std::string unit_fgid = getFlightgroupName(my_unit);
 		return ((((my_unit->isPlanet ())&&(!isSun(my_unit))&&isSignificant(my_unit)&&(!my_unit->isJumppoint()))||unit_fgid=="Base"||my_unit->isUnit()==UNITPTR)&&my_unit->DockingPortLocations().size()>0);
 	}
+	bool isCloseEnoughToDock(Unit *my_unit, Unit *un) {
+		static bool superdock = XMLSupport::parse_bool(vs_config->getVariable("physics","dock_within_base_shield","false"));
+		float dis = (un->isUnit()==PLANETPTR||superdock)?UnitUtil::getSignificantDistance(my_unit, un):UnitUtil::getDistance(my_unit, un);
+
+		if (dis < un->rSize())
+			return true;
+		
+		return false;		
+	}
 	float getDistance(Unit *my_unit,Unit *un){
 	  if (my_unit==NULL||un==NULL)
 	    return FLT_MAX;
