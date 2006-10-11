@@ -38,6 +38,7 @@ namespace UnitUtil {
 	float getCredits(Unit *my_unit);
 	void addCredits(Unit *my_unit,float credits);
 	bool isSignificant(Unit *my_unit);
+        bool isCloseEnoughToDock(Unit *my_unit, Unit *un);
 	bool isCapitalShip(Unit *my_unit);
 	bool isDockableUnit(Unit *my_unit);
 	bool isAsteroid(Unit *my_unit);
