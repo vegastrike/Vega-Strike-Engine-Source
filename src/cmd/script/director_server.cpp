@@ -62,10 +62,7 @@ void InitBriefing() {
 void Mission::DirectorLoop(){
    double oldgametime=gametime;
    gametime+=SIMULATION_ATOM;//elapsed;
-   if (getTimeCompression()>=.1) {
-     if (gametime<=oldgametime)
-       gametime=SIMULATION_ATOM;
-   }
+
    try {
       if (runtime.pymissions)
          runtime.pymissions->Execute();
