@@ -690,7 +690,6 @@ void ExecuteDirector () {
 				if (ss) _Universe->pushActiveStarSystem(ss);
 				mission=active_missions[i];
 				active_missions[i]->DirectorLoop();
-				active_missions[i]->DirectorBenchmark();
 				if (ss)_Universe->popActiveStarSystem();
 			}
 		}}

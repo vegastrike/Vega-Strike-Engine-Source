@@ -78,8 +78,5 @@ void Mission::DirectorLoop(){
 }
 void Mission::BriefingUpdate(){}
 void Mission::DirectorBenchmark(){
-  double oldgametime=gametime;
-  gametime+=SIMULATION_ATOM;//elapsed;
-  total_nr_frames++;
 }
 varInst * Mission::call_briefing (missionNode * node, int mode) { return NULL;}

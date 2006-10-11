@@ -74,6 +74,13 @@
 /* *********************************************************** */
 //ADD_FROM_PYTHON_FUNCTION(pythonMission)
 void Mission::DirectorLoop(){
+   double oldgametime=gametime;
+   gametime+=SIMULATION_ATOM;//elapsed;
+   if (getTimeCompression()>=.1) {
+     if (gametime<=oldgametime)
+       gametime=SIMULATION_ATOM;
+   }
+
    try {
       if (runtime.pymissions)
          runtime.pymissions->Execute();
@@ -236,13 +243,7 @@ void Mission::BriefingEnd() {
 }
 
 void Mission::DirectorBenchmark(){
-  double oldgametime=gametime;
-  gametime+=SIMULATION_ATOM;//elapsed;
-  if (getTimeCompression()>=.1) {
-    if (gametime<=oldgametime)
-      gametime=SIMULATION_ATOM;
-  }
-  total_nr_frames++;
+   total_nr_frames++;
 
   //cout << "elapsed= " << elapsed << " fps= " << 1.0/elapsed << " average= " << ((double)total_nr_frames)/gametime << " in " << gametime << " seconds" << endl;
 
