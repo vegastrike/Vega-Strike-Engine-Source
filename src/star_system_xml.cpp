@@ -1112,6 +1112,8 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   case UNIT:
   case BUILDING:
   case VEHICLE:
+    if (Network&&!SERVER)
+      break;//don't spawn these clientside
   case NEBULA:
   case ASTEROID:
   case ENHANCEMENT:
