@@ -994,7 +994,7 @@ public:
   ///Rekeys the threat level to zero for another turn of impending danger
   void ResetThreatLevel() {computer.threatlevel=0;graphicOptions.missilelock=0;}
   ///The cosine of the angle to the target given passed in speed and range
-  float cosAngleTo (Unit * target, float & distance, float speed= 0.001, float range=0.001) const;
+  float cosAngleTo (Unit * target, float & distance, float speed= 0.001, float range=0.001, bool turnmargin=true) const;
   ///Highest cosine from given mounts to target. Returns distance and cosine
   float cosAngleFromMountTo (Unit * target, float & distance) const;
   float computeLockingPercent();//how locked are we

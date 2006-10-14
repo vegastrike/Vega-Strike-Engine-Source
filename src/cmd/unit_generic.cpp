@@ -1409,45 +1409,33 @@ bool CloseEnoughToAutotrack (Unit * me, Unit * targ, float &cone) {
 	return false;
 }
 
-float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) const{
-  Vector Normal (cumulative_transformation_matrix.getR());
+float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range, bool turnmargin) const
+{
+  Vector Normal (cumulative_transformation_matrix.getR().Normalize());
    //   if (range!=FLT_MAX) {
    //     getAverageGunSpeed(speed,range);
    //   }
    QVector totarget (targ->PositionITTS(cumulative_transformation.position,cumulative_velocity, speed,false));
    totarget = totarget-cumulative_transformation.position;
-   double tmpcos = Normal.Cast().Dot (totarget);
    dist = totarget.Magnitude();
-   if (tmpcos>0) {
-      tmpcos = dist*dist - tmpcos*tmpcos;
-	  if( tmpcos >0)
-    	  tmpcos = targ->rSize()/sqrt( tmpcos);//one over distance perpendicular away from straight ahead times the size...high is good WARNING POTENTIAL DIV/0
-	  else
-		  tmpcos = 1;
-   } else {
-     tmpcos /= dist;
-   }
+
+   // Trial code
+   float turnlimit = tmpmax(tmpmax(computer.max_yaw_left,computer.max_yaw_right),tmpmax(computer.max_pitch_up,computer.max_pitch_down));
+   float turnangle = SIMULATION_ATOM*tmpmax(turnlimit,tmpmax(SIMULATION_ATOM*.5*(limits.yaw+limits.pitch),sqrtf(AngularVelocity.i*AngularVelocity.i+AngularVelocity.j*AngularVelocity.j)));
+   float ittsangle = acos(Normal.Cast().Dot(totarget.Normalize()));
+   float radangle  = acos((cumulative_transformation_matrix.getP().Normalize()*targ->rSize()+totarget).Cast().Normalize().Dot(totarget.Normalize()));
+   float rv        = ittsangle - radangle - (turnmargin?turnangle:0);
+
    float rsize = targ->rSize()+rSize();
-   if ((!targ->GetDestinations().empty()&&jump.drive>=0)||(targ->faction==faction)) {
-     rsize=0;//HACK so missions work well
-   }
+   if ((!targ->GetDestinations().empty()&&jump.drive>=0)||(targ->faction==faction))
+	   rsize=0;//HACK so missions work well
    if (range != 0)
        dist = (dist-rsize)/range; else
        dist = 0;
-   if (!FINITE(dist)||dist<0) {
+   if (!FINITE(dist)||dist<0)
      dist=0;
-   }
-   float ret=tmpcos;
-   if (tmpcos<1&&tmpcos>-1) {
-     float tmpsin=sqrtf(1-tmpcos*tmpcos);
-     float turnangle = SIMULATION_ATOM*(SIMULATION_ATOM*.5*(limits.yaw+limits.pitch)+sqrtf(AngularVelocity.i*AngularVelocity.i+AngularVelocity.j*AngularVelocity.j));
-     float osin=sin(turnangle);
-     float ocos=cos(turnangle);
-     float cos1=ocos*tmpcos-tmpsin*osin;
-     float cos2=ocos*tmpcos+tmpsin*osin;// sin could be opposite
-     ret=tmpmax(cos1,cos2);
-   }   
-   return tmpmax(tmpcos,ret);
+
+   return (rv<0)?1:cos(rv);
 }
 
 float Unit::cosAngleFromMountTo (Unit * targ, float & dist) const{

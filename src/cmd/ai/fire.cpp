@@ -560,7 +560,7 @@ bool FireAt::ShouldFire(Unit * targ, bool &missilelock) {
     }
     float gunspeed,gunrange,missilerange;
     parent->getAverageGunSpeed(gunspeed,gunrange,missilerange);
-    float angle = parent->cosAngleTo (targ, dist,parent->GetComputerData().itts?gunspeed:FLT_MAX,gunrange);
+    float angle = parent->cosAngleTo (targ, dist,parent->GetComputerData().itts?gunspeed:FLT_MAX,gunrange,false);
     missilelock=false;
     targ->Threaten (parent,angle/(dist<.8?.8:dist));
     if (targ==parent->Target()) {
@@ -569,7 +569,7 @@ bool FireAt::ShouldFire(Unit * targ, bool &missilelock) {
   static float firewhen = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","InWeaponRange","1.2"));
   static float fireangle_minagg = (float)cos(M_PI*XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MaximumFiringAngle.minagg","10"))/180.); //Roughly 10 degrees
   static float fireangle_maxagg = (float)cos(M_PI*XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MaximumFiringAngle.maxagg","18"))/180.); //Roughly 18 degrees
-  bool temp=parent->TrackingGuns(missilelock);
+  float temp=parent->TrackingGuns(missilelock);
   bool isjumppoint=targ->isUnit()==PLANETPTR&&((Planet*)targ)->GetDestinations().empty()==false;
   float fangle = (fireangle_minagg+fireangle_maxagg*agg)/(1.0f+agg);
   /*
@@ -579,7 +579,7 @@ bool FireAt::ShouldFire(Unit * targ, bool &missilelock) {
     printf ("sf: d %f fw %f ang %f fang %f ret:%d\n",dist,firewhen,angle,fangle,((dist<firewhen&&angle>fangle)||(temp&&dist<firewhen&&angle>0))&&!isjumppoint);
     }*/
 
-  return ((dist<firewhen&&angle>fangle)||(temp&&dist<firewhen&&angle>0))&&!isjumppoint;
+  return ((dist<firewhen)&&((angle>fangle)||(temp&&(angle>temp))||(missilelock&&(angle>0))))&&!isjumppoint;
 }
 
 FireAt::~FireAt() {
