@@ -39,6 +39,17 @@
 #include "main_loop.h"
 #include <set>
 #include <string>
+
+static float mymin(float a, float b)
+{
+	return (a<b) ? a : b;
+}
+
+static float mymax(float a, float b)
+{
+	return (a>b) ? a : b;
+}
+
 using namespace std;
 extern float rand01();
 using VSFileSystem::SoundFile;
@@ -771,12 +782,20 @@ void GameCockpit::DrawTacticalTargetBox () {
 void GameCockpit::drawUnToTarget ( Unit * un, Unit* target,float xcent,float ycent, float xsize, float ysize, bool reardar){
   static GFXColor black_and_white=DockBoxColor ("black_and_white"); 
   static GFXColor communicating=DockBoxColor ("communicating"); 
+  static float fademax=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","BlipRangeMaxFade","1.0"));
+  static float fademin=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","BlipRangeMinFade","1.0"));
+  static float fademidpoint=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","BlipRangeFadeMidpoint","0.2"));
       Vector localcoord (un->LocalCoordinates(target));
 	  if (reardar)
 		  localcoord.k=-localcoord.k;
 	  float s,t;
       this->LocalToRadar (localcoord,s,t);
       GFXColor localcol (this->unitToColor (un,target,un->GetComputerData().radar.iff));
+	  float fade = float(localcoord.Magnitude()/un->GetComputerData().radar.maxrange);
+	  fade = mymin(1.f,mymax(0.f,(fade<fademidpoint)?(0.5f*fade/fademidpoint):(0.5f+0.5f*(fade-fademidpoint)/(1.0f-fademidpoint))));
+	  if (target==un->Target())
+		  fade = 0;
+	  localcol.a *= fade * fademax + (1.0f-fade) * fademin;
       if (1) {
         unsigned int s=vdu.size();
         for (unsigned int i=0;i<s;++i) {
