@@ -31,7 +31,7 @@
 #include <set>
 #include <algorithm>
 
-#define MAX_RECENT_HISTORY 5
+#define MAX_RECENT_HISTORY "5"
 
 Music * muzak=NULL;
 int muzak_count=0;
@@ -269,6 +269,7 @@ static int randInt (int max) {
 
 int Music::SelectTracks(int layer) {
   static bool random=XMLSupport::parse_bool(vs_config->getVariable("audio","shuffle_songs","true"));
+  static int maxrecent=XMLSupport::parse_int(vs_config->getVariable("audio","shuffle_songs.history_depth",MAX_RECENT_HISTORY));
   static std::string dj_script = vs_config->getVariable("sound","dj_script","modules/dj.py");
   if ((BaseInterface::CurrentBase||loopsleft>0)&&lastlist < (int)playlist.size()&&lastlist>=0) {
     if (loopsleft>0) {
@@ -283,7 +284,7 @@ int Music::SelectTracks(int layer) {
 	  if (spincount<=0)
 		  recent.clear();
 	  recent.push_back(playlist[lastlist][whichsong]);
-	  while (recent.size()>MAX_RECENT_HISTORY)
+	  while (recent.size()>maxrecent)
 		  recent.pop_front();
       GotoSong(lastlist,whichsong,true,layer);
       return whichsong;
@@ -437,6 +438,13 @@ void Music::_GotoSong (std::string mus) {
 void Music::GotoSong (int whichlist,int whichsong,bool skip,int layer) {
 	if (g_game.music_enabled) {
 		if (whichsong!=NOLIST&&whichlist!=NOLIST&&whichlist<(int)playlist.size()&&whichsong<(int)playlist[whichlist].size()) {
+			if (muzak[(layer>=0)?layer:0].lastlist!=whichlist) {
+				static bool clear = XMLSupport::parse_bool( vs_config->getVariable("audio","shuffle_songs.clear_history_on_list_change","true") );
+				if (clear) {
+					std::list<std::string> &recent = muzak[(layer>=0)?layer:0].recent_songs;
+					recent.clear();
+				}
+			}
             if ((layer<0)&&(muzak_count>=2))
                 muzak[0].lastlist=muzak[1].lastlist=whichlist; else
                 lastlist=whichlist;
