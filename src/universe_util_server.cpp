@@ -32,6 +32,19 @@ namespace UniverseUtil {
 	}
         void musicLayerLoopList (int numloops, int layer) {
         }
+    void musicLayerSetSoftVolume(float vol, float latency_override, int layer) {
+
+	}
+	void musicLayerSetHardVolume(float vol, int layer) {
+
+	}
+    void musicSetSoftVolume(float vol, float latency_override) {
+
+	}
+	void musicSetHardVolume(float vol) {
+
+	}
+
         void musicMute(bool stopSound){}
 	void playSound(string soundName, QVector loc, Vector speed) {
 	}
