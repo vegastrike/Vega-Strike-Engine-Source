@@ -195,9 +195,8 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
   if (!use_bit&&font_antialias) {
     GFXBlendMode (SRCALPHA,INVSRCALPHA);
     glEnable(GL_LINE_SMOOTH);
-
   }else {
-    GFXBlendMode (ONE,ZERO);
+	GFXBlendMode (SRCALPHA,INVSRCALPHA);
     glDisable (GL_LINE_SMOOTH);
   }
   GFXColorf(this->col);
