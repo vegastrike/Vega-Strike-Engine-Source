@@ -12,6 +12,7 @@
 #include "cmd/ai/fire.h"
 #include "gfx/cockpit_generic.h"
 #include "role_bitmask.h"
+#include "lin_time.h"
 #ifndef NO_GFX
 #include "gfx/cockpit.h"
 #endif
@@ -31,6 +32,11 @@ static bool nameIsAsteroid(std::string name){
 }
 
 namespace UnitUtil {
+  template<typename T> static inline T mymin(T a, T b) { return (a<b)?a:b; }
+  template<typename T> static inline T mymax(T a, T b) { return (a<b)?a:b; }
+
+  static const string& getFgDirectiveCR(Unit *my_unit);
+
   bool isAsteroid(Unit * my_unit) {
 		if (!my_unit)return false;
                 return (my_unit->isUnit()==ASTEROIDPTR||nameIsAsteroid(my_unit->name));
@@ -67,24 +73,35 @@ namespace UnitUtil {
 					return PLAYER_PRIORITY;
 				float tmpdist = UnitUtil::getDistance(un,player);
 				if (tmpdist<cpdist) {
+					QVector relvel = un->GetVelocity() - player->GetVelocity();
+					QVector relpos = un->Position() - player->Position();
 					cockpit=_Universe->AccessCockpit(i);
 					cpdist=tmpdist;
-					tooclose = 
-						2*(un->radial_size+player->radial_size)
-						+ (player->Velocity - un->GetVelocity()).Magnitude();
+					float lowest_priority_time=SIM_QUEUE_SIZE*SIMULATION_ATOM;
+					if (relpos.Dot(relvel) >= 0) {
+						// No need to be wary if they're getting away
+						tooclose = 
+							2*(un->radial_size+player->radial_size)
+							+ relvel.Magnitude() * lowest_priority_time;
+					}
 				}
 			}
 #ifndef NO_GFX
 			Camera * cam = _Universe->AccessCockpit(i)->AccessCamera();
 				if (cam) {
-					QVector campos = cam->GetPosition();
-					double dist =(campos-un->Position()).Magnitude()-rad;
+					QVector relvel = un->GetVelocity() - cam->GetVelocity();
+					QVector relpos = un->Position() - cam->GetPosition();
+					double dist = relpos.Magnitude()-rad;
 					if (dist<cpdist) {
 						cpdist=dist;
 						Unit * parent=_Universe->AccessCockpit(i)->GetParent();
-						tooclose = 
-							2*(un->radial_size+(parent?parent->radial_size:0)) 
-							+ (cam->GetVelocity() - un->GetVelocity()).Magnitude();
+						float lowest_priority_time=SIM_QUEUE_SIZE*SIMULATION_ATOM;
+						if (relpos.Dot(relvel) >= 0) {
+							// No need to be wary if they're getting away
+							tooclose = 
+								2*(un->radial_size+(parent?parent->radial_size:0)) 
+								+ relvel.Magnitude() * lowest_priority_time;
+						}
 					}
 				}
 #endif
@@ -107,8 +124,12 @@ namespace UnitUtil {
 			vs_config->getVariable("physics","priorities","top","1") );
 		static const int HIGH_PRIORITY=XMLSupport::parse_int(
 			vs_config->getVariable("physics","priorities","high",SERVER?"1":"2") );
+		static const int MEDIUMHIGH_PRIORITY=XMLSupport::parse_int(
+			vs_config->getVariable("physics","priorities","mediumhigh","4") );
 		static const int MEDIUM_PRIORITY=XMLSupport::parse_int(
 			vs_config->getVariable("physics","priorities","medium","8") );
+		static const int MEDIUMLOW_PRIORITY=XMLSupport::parse_int(
+			vs_config->getVariable("physics","priorities","mediumlow","16") );
 		static const int LOW_PRIORITY=XMLSupport::parse_int(
 			vs_config->getVariable("physics","priorities","low","32") );
         
@@ -121,6 +142,32 @@ namespace UnitUtil {
 
 		static const int NO_ENEMIES=XMLSupport::parse_int(
 			vs_config->getVariable("physics","priorities","no_enemies","64") );
+
+		static const float _PLAYERTHREAT_DISTANCE_FACTOR=XMLSupport::parse_float(
+			vs_config->getVariable("physics","priorities","playerthreat_distance_factor","2") );
+		static const float _THREAT_DISTANCE_FACTOR=XMLSupport::parse_float(
+			vs_config->getVariable("physics","priorities","threat_distance_factor","1") );
+
+		static const bool DYNAMIC_THROTTLE_ENABLE=XMLSupport::parse_bool(
+			vs_config->getVariable("physics","priorities","dynamic_throttle.enable","true") );
+		static const float DYNAMIC_THROTTLE_MINFACTOR=XMLSupport::parse_float(
+			vs_config->getVariable("physics","priorities","dynamic_throttle.mindistancefactor","0.25") );
+		static const float DYNAMIC_THROTTLE_MAXFACTOR=XMLSupport::parse_float(
+			vs_config->getVariable("physics","priorities","dynamic_throttle.maxdistancefactor","4") );
+		static const float DYNAMIC_THROTTLE_TARGETFPS=XMLSupport::parse_float(
+			vs_config->getVariable("physics","priorities","dynamic_throttle.targetfps","30") );
+		static const float DYNAMIC_THROTTLE_TARGETELAPSEDTIME = 1.f/DYNAMIC_THROTTLE_TARGETFPS;
+
+		static float DYNAMIC_THROTTLE_FACTOR=1.f;
+
+		{
+			float newfactor = DYNAMIC_THROTTLE_FACTOR * DYNAMIC_THROTTLE_TARGETELAPSEDTIME / GetElapsedTime();
+			newfactor = mymax(DYNAMIC_THROTTLE_MINFACTOR,mymin(DYNAMIC_THROTTLE_MAXFACTOR,newfactor));
+			DYNAMIC_THROTTLE_FACTOR = (newfactor * GetElapsedTime() + DYNAMIC_THROTTLE_FACTOR) / (1.0+GetElapsedTime());
+		}
+
+		const float PLAYERTHREAT_DISTANCE_FACTOR = _PLAYERTHREAT_DISTANCE_FACTOR * DYNAMIC_THROTTLE_FACTOR;
+		const float THREAT_DISTANCE_FACTOR = _THREAT_DISTANCE_FACTOR * DYNAMIC_THROTTLE_FACTOR;
 
 		// Here we assume that SIM_QUEUE_SIZE is >=64
 		const int LOWEST_PRIORITY=SIM_QUEUE_SIZE;
@@ -165,7 +212,9 @@ namespace UnitUtil {
         }
 	Unit * targ = un->Target();
 	if (_Universe->isPlayerStarship(targ)) {
-	    return HIGH_PRIORITY;
+		if (UnitUtil::getDistance(targ,un) <= PLAYERTHREAT_DISTANCE_FACTOR*mymax(gun_range,missile_range))
+			return (un->isJumppoint() ? PLAYER_PRIORITY : HIGH_PRIORITY); else // Needs to accurately collide with it...
+			return MEDIUMHIGH_PRIORITY;
 	}
 	if (un->graphicOptions.WarpRamping||un->graphicOptions.RampCounter!=0) {
 	    static float compwarprampuptime=XMLSupport::parse_float (vs_config->getVariable ("physics","computerwarprampuptime","10")); // for the heck of it.  NOTE, variable also in unit_generic.cpp    
@@ -188,26 +237,32 @@ namespace UnitUtil {
 	}
 	if (un->owner==getTopLevelOwner()||un->faction==cargofac||un->faction==upfac||un->faction==neutral) {
             if (dist<tooclose)
-                return LOW_PRIORITY; else
+                return MEDIUM_PRIORITY; else
                 return LOWEST_PRIORITY;
 	}
-	string obj = UnitUtil::getFgDirective(un);
+	const string &obj = UnitUtil::getFgDirective(un);
 	if (!(obj.length()==0||(obj.length()>=1&&obj[0]=='b'))) {
 	    return MEDIUM_PRIORITY;
 	}
-	if (dist<missile_range)
-	    return LOW_PRIORITY;
+	if (dist<mymax(missile_range,gun_range)){
+		if (dist<tooclose)
+			return MEDIUM_PRIORITY; else if (dist<gun_range)
+			return MEDIUMLOW_PRIORITY; else
+			return LOW_PRIORITY;
+	}
 	if (targ){
 	    float speed;
 	    un->getAverageGunSpeed(speed,gun_range,missile_range);
 	    double distance=UnitUtil::getDistance(un,targ);
-	    if (distance<=gun_range)
-		return NOT_VISIBLE_COMBAT_HIGH;
-	    if (distance<missile_range)
-		return NOT_VISIBLE_COMBAT_MEDIUM;
-	    return NOT_VISIBLE_COMBAT_LOW;
+		if (distance<=gun_range*THREAT_DISTANCE_FACTOR)
+			return NOT_VISIBLE_COMBAT_HIGH;
+		if (distance<missile_range*THREAT_DISTANCE_FACTOR)
+			return NOT_VISIBLE_COMBAT_MEDIUM;
+			return NOT_VISIBLE_COMBAT_LOW;
 	}
-	return NO_ENEMIES;
+	if (dist<tooclose)
+		return MEDIUMHIGH_PRIORITY; else // May not have weapons (hence missile_range|gun_range == 0)
+		return NO_ENEMIES;
 	}
 
 	void orbit (Unit * my_unit, Unit * orbitee, float speed, QVector R, QVector S, QVector center) {
@@ -302,6 +357,15 @@ namespace UnitUtil {
 		if (my_unit->getFlightgroup())
 			fgdir = my_unit->getFlightgroup()->directive;
 		return fgdir;
+	}
+	static const string& getFgDirectiveCR(Unit *my_unit){
+		static string emptystr;
+		static string fgdirdef("b");
+		if (!my_unit)
+			return emptystr;
+		if (my_unit->getFlightgroup())
+			return my_unit->getFlightgroup()->directive; else
+			return fgdirdef;
 	}
 	bool setFgDirective(Unit *my_unit,string inp){
 		if (!my_unit)return false;
