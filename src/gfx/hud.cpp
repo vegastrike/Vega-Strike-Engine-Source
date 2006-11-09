@@ -235,7 +235,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
   glScalef (scalex,scaley,1);
   while(text_it != newText.end() && row>myDims.j) {
     if (*text_it=='#') {
-      if (newText.end()>text_it+6) {
+      if (newText.end()-text_it>6) {
 	float r,g,b;
 	r = TwoCharToFloat (*(text_it+1),*(text_it+2));
 	g=TwoCharToFloat (*(text_it+3),*(text_it+4));
