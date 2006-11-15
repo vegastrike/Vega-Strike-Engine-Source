@@ -206,11 +206,13 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
           m1+=(float)1.0e-7;
           m2+=(float)1.0e-7;
         }
-          
+    //Compute linear velocity of points of impact by taking into account angular velocities
+	Vector small_velocity=smalle->GetVelocity()+smalle->GetAngularVelocity().Cross(smalllocation-smalle->Position());
+	Vector big_velocity=GetVelocity()+GetAngularVelocity().Cross(biglocation-Position());
 	//Compute elastic and inelastic terminal velocities (point object approximation)
-    Vector Inelastic_vf = (m1/(m1+m2))*smalle->GetVelocity() + (m2/(m1+m2))*GetVelocity();
-	Vector SmallerElastic_vf = (smalle->GetVelocity()*(m1-m2)/(m1+m2)+(2*m2/(m1+m2))*GetVelocity());
-	Vector ThisElastic_vf = (GetVelocity()*(m2-m1)/(m1+m2)+(2*m1/(m1+m2))*smalle->GetVelocity());
+    Vector Inelastic_vf = (m1/(m1+m2))*small_velocity + (m2/(m1+m2))*big_velocity;
+	Vector SmallerElastic_vf = (small_velocity*(m1-m2)/(m1+m2)+(2*m2/(m1+m2))*big_velocity);
+	Vector ThisElastic_vf = (big_velocity*(m2-m1)/(m1+m2)+(2*m1/(m1+m2))*small_velocity);
 
 	// Make bounce along opposite normals (what we really want to do? no, I think we want application of force, not forced direction along the opposite normals) 
 	// HACK ALERT: 
@@ -226,7 +228,7 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 	bool isnotplayerorhasbeenmintime=true;
 	//Need to incorporate normals of colliding polygons somehow, without overiding directions of travel.
     //We'll use the point object approximation for the magnitude of damage, and then apply the force along the appropriate normals
-	//Also missing from this model - velocity of impacting portions vs. center of mass (all angular velocity issues currently ignored pre-collision (torque still occurs due to placement of the collision force).
+	
 
 	//ThisElastic_vf=((ThisElastic_vf.Magnitude()>minvel||!thcp)?ThisElastic_vf.Magnitude():minvel)*smallnormal;
 	//SmallerElastic_vf=((SmallerElastic_vf.Magnitude()>minvel||!smcp)?SmallerElastic_vf.Magnitude():minvel)*bignormal;
@@ -250,8 +252,8 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 	//FIXME need to resolve 2 problems - 
 	//1) SIMULATION_ATOM for small!= SIMULATION_ATOM for large (below smforce line should mostly address this)
 	//2) Double counting due to collision occurring for each object in a different physics frame.
-	Vector smforce = (SmallerFinalVelocity-smalle->GetVelocity()).Magnitude()*bignormal*smalle->GetMass()/(SIMULATION_ATOM*((float)smalle->sim_atom_multiplier)/((float)this->sim_atom_multiplier));
-	Vector thisforce = (ThisFinalVelocity-GetVelocity()).Magnitude()*smallnormal*GetMass()/SIMULATION_ATOM;
+	Vector smforce = (SmallerFinalVelocity-small_velocity).Magnitude()*bignormal*smalle->GetMass()/(SIMULATION_ATOM*((float)smalle->sim_atom_multiplier)/((float)this->sim_atom_multiplier));
+	Vector thisforce = (ThisFinalVelocity-big_velocity).Magnitude()*smallnormal*GetMass()/SIMULATION_ATOM;
 	
 	
 	
@@ -283,10 +285,10 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 	*/
 	if((smalle->isUnit()!=MISSILEPTR)&&isnotplayerorhasbeenmintime){ 
 		
-	  smalle->ApplyForce (smforce);
+	  smalle->ApplyForce(smforce);// for torque... smalllocation
 	}
     if((this->isUnit()!=MISSILEPTR)&&isnotplayerorhasbeenmintime) {
-	  this->ApplyForce (thisforce);
+	  this->ApplyForce (thisforce); // for torque ... biglocation
 	}
 /*    smalle->curr_physical_state = smalle->prev_physical_state;
 	  this->curr_physical_state = this->prev_physical_state;*/
