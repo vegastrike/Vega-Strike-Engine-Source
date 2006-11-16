@@ -849,7 +849,9 @@ void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstars
 		char * tmp2= (char *)malloc(headlen+2);
 		char * freetmp2 = tmp2;
 		char * factionname = (char *)malloc(headlen+2);
-        factionname[headlen+1]=buf[headlen-1]='\0';
+		if (headlen>0&&(buf[headlen-1]=='\n'||buf[headlen-1]==' '||buf[headlen-1]=='\r'))
+			buf[headlen-1]='\0';
+        factionname[headlen+1]='\0';
 		QVector tmppos;
 		int res = sscanf (buf,"%s %lf %lf %lf %s",tmp2,&tmppos.i,&tmppos.j,&tmppos.k, factionname);
 		if (res==4 || res==5) {
