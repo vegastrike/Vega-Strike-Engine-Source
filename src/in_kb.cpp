@@ -62,6 +62,13 @@ static void kbGetInput(int key, int modifiers, bool release, int x, int y){
   keyState[modifiers][key] = release?UP:DOWN;
   _Universe->SetActiveCockpit(i);
 }
+
+static bool kbHasBinding(int key, int modifiers)
+{
+	static HandlerCall defaultHandler;
+	return (keyBindings[modifiers][key].function != defaultHandler.function);
+}
+
 int shiftup (int ch) {
   switch (ch) {
   case '1':
@@ -150,28 +157,50 @@ int shiftdown (int ch) {
   return tolower(ch);
 }
 
+static unsigned int _activeModifiers=0;
+
+unsigned int getActiveModifiers()
+{
+	return _activeModifiers;
+}
+
+void setActiveModifiers(unsigned int mask)
+{
+	_activeModifiers = mask;
+}
+
 unsigned int getModifier(const char* mod_name){
   if (mod_name[0]=='\0')
     return 0;
+  unsigned int rv = 0;
+  if (strstr(mod_name,"shift")||strstr(mod_name,"uppercase")||strstr(mod_name,"caps"))
+    rv |= KB_MOD_SHIFT;
   if (strstr(mod_name,"ctrl")||strstr(mod_name,"cntrl")||strstr(mod_name,"control"))
-    return 2;
+    rv |= KB_MOD_CTRL;
   if (strstr(mod_name,"alt")||strstr(mod_name,"alternate"))
-    return 1;
-  return 0;
+    rv |= KB_MOD_ALT;
+  return rv;
 }
-int getModifier(bool alton, bool cntrlon) {
-  return cntrlon?2:(alton?1:0);
+int getModifier(bool alton, bool cntrlon, bool shifton) {
+	return cntrlon?KB_MOD_CTRL:(alton?KB_MOD_ALT:(shifton?KB_MOD_SHIFT:0));
 }
  void glut_keyboard_cb( unsigned int  ch,unsigned int mod, bool release, int x, int y ) 
 {
   bool shifton=false;
   int alton=false;
   int ctrlon=false;
-  
+
+  unsigned int modmask = KB_MOD_MASK;
+
   //  VSFileSystem::Fprintf (stderr,"keyboard  %d",ch);
   if ((WSK_MOD_LSHIFT==(mod&WSK_MOD_LSHIFT))||(WSK_MOD_RSHIFT==(mod&WSK_MOD_RSHIFT))) {
-    ch = shiftup(ch);
-    shifton=true;
+    // This is ugly, but we have to support legacy config files...
+	// ...maybe add config option to disable this soooo ugly thing...
+	if (!kbHasBinding(ch,KB_MOD_SHIFT)) {
+		ch = shiftup(ch);
+		modmask &= ~KB_MOD_SHIFT;
+	}
+	shifton=true;
   }
   if ((WSK_MOD_LALT==(mod&WSK_MOD_LALT))||(WSK_MOD_RALT==(mod&WSK_MOD_RALT))) {
     alton=true;
@@ -179,7 +208,14 @@ int getModifier(bool alton, bool cntrlon) {
   if ((WSK_MOD_LCTRL==(mod&WSK_MOD_LCTRL))||(WSK_MOD_RCTRL==(mod&WSK_MOD_RCTRL))) {
     ctrlon=true;
   }
-  int curmod=getModifier(alton,ctrlon);
+
+  // Polling state
+  setActiveModifiers( 
+	    (shifton?KB_MOD_SHIFT:0)
+	  ||(alton  ?KB_MOD_ALT  :0)
+	  ||(ctrlon ?KB_MOD_CTRL :0)  );  
+
+  int curmod=getModifier(alton,ctrlon,shifton) & modmask;
   kbGetInput( ch, curmod,release, x, y );
   if (release) {
     for (int i=0;i<LAST_MODIFIER;++i) {

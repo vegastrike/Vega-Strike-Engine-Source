@@ -1,6 +1,18 @@
 #include <string>
 
+#if (defined(HAVE_BOOST) && defined(HAVE_PYTHON))
+	namespace boost { namespace python { class dict; } }
+#endif
+
 namespace BaseUtil {
+
+#if (defined(HAVE_BOOST) && defined(HAVE_PYTHON))
+	typedef boost::python::dict Dictionary;
+#else
+	#include <map>
+	typedef std::map<std::string,std::string> Dictionary;
+#endif
+
 	int Room (std::string text);
 	void Texture(int room, std::string index, std::string file, float x, float y);
 	void SetTexture(int room, std::string index, std::string file);
@@ -27,6 +39,7 @@ namespace BaseUtil {
 	void SetLinkText(int room, std::string index, std::string text);
 	void SetLinkPython(int room, std::string index, std::string python);
 	void SetLinkRoom(int room, std::string index, int to);
+	void SetLinkEventMask(int room, std::string index, std::string maskdef); // c=click, u=up, d=down, e=enter, l=leave, m=move
 	void EraseLink (int room, std::string index);
 	void EraseObj (int room, std::string index);
 	int GetCurRoom ();
@@ -34,4 +47,12 @@ namespace BaseUtil {
 	int GetNumRoom ();
 	bool BuyShip(std::string name, bool my_fleet, bool force_base_inventory);
 	bool SellShip(std::string name);
+
+	// GUI events
+	void SetEventData(boost::python::dict data);
+	void SetMouseEventData(std::string type, float x, float y, int buttonMask); // [type], [mousex], [mousey], [mousebuttons]
+	const Dictionary& GetEventData();
+
+	// GUI events (engine internals)
+	Dictionary& _GetEventData();
 }

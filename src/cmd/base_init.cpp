@@ -7,9 +7,15 @@
 #include <boost/version.hpp>
 #if BOOST_VERSION != 102800
 #include <boost/python/object.hpp>
+#include <boost/python/dict.hpp>
 #else
 #include <boost/python/objects.hpp>
 #endif
+
+static boost::python::dict GetEventDataPython()
+{
+	return BaseUtil::GetEventData();
+}
 
 static boost::python::tuple GetRandomBarMessage () {
 	gameMessage last;
@@ -65,7 +71,7 @@ PYTHON_BEGIN_MODULE(Base)
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::EnqueueMessage,"EnqueueMessage");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Message,"Message");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::EraseObj,"EraseObj");
-	PYTHON_DEFINE_GLOBAL(Base,&GetRandomBarMessage,"GetRandomBarMessage");
+	PYTHON_DEFINE_GLOBAL(Base,&::GetRandomBarMessage,"GetRandomBarMessage");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::RunScript, "RunScript");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::TextBox, "TextBox");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetTextBoxText, "SetTextBoxText");
@@ -73,8 +79,14 @@ PYTHON_BEGIN_MODULE(Base)
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetLinkText, "SetLinkText");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetLinkPython, "SetLinkPython");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetLinkRoom, "SetLinkRoom");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetLinkEventMask, "SetLinkEventMask");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::BuyShip,"BuyShip");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SellShip,"SellShip");
+
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetEventData, "SetEventData");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetMouseEventData, "SetMouseEventData");
+	PYTHON_DEFINE_GLOBAL(Base,&::GetEventDataPython, "GetEventData");
+
 PYTHON_END_MODULE(Base)
 
 void InitBase() {

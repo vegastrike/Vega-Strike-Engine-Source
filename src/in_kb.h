@@ -26,16 +26,27 @@
 //const int KEYMAP_SIZE =SDLK_LAST;
 //const int KEY_SPECIAL_OFFSET=0;
 //#else
+
+enum KB_MODIFIER_ENUM {
+	KB_MOD_ALT   = 1,
+	KB_MOD_CTRL  = 2,
+	KB_MOD_SHIFT = 4,
+	KB_MOD_MASK  = 7
+};
+
 #ifndef NO_GFX
 #include "gldrv/winsys.h"
 const int KEYMAP_SIZE =WSK_LAST;
-const int LAST_MODIFIER=3;
+const int LAST_MODIFIER=KB_MOD_MASK+1;
 #else
 const int KEYMAP_SIZE =0;
 const int LAST_MODIFIER=0;
 #endif
 //#endif
 #include "in.h"
+
+unsigned int getActiveModifiers();
+void setActiveModifiers(unsigned int mask);
 
 unsigned int getModifier(const char* mod_name);
 void ProcessKB(unsigned int player);

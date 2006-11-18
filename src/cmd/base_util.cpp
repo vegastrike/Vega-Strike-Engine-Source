@@ -1,8 +1,16 @@
+#include <Python.h>
+#include "python/python_class.h"
 #include <string>
 #include <stdlib.h>
 #include "base.h"
 #include "base_util.h"
 #include "basecomputer.h"
+
+#include <boost/version.hpp>
+#include <boost/python/dict.hpp>
+
+#include "in_kb.h"
+
 namespace BaseUtil {
 	inline BaseInterface::Room *CheckRoom (int room) {
 		if (!BaseInterface::CurrentBase) return 0;
@@ -105,10 +113,10 @@ namespace BaseUtil {
 		for (int i=0;i<newroom->objs.size();i++) {
 			if (newroom->links[i]) {
 				if (newroom->links[i]->index==index) {
-					dynamic_cast<BaseInterface::Room::Link*>(newroom->links[i])->x   = x;
-					dynamic_cast<BaseInterface::Room::Link*>(newroom->links[i])->y   = y;
-					dynamic_cast<BaseInterface::Room::Link*>(newroom->links[i])->wid = wid;
-					dynamic_cast<BaseInterface::Room::Link*>(newroom->links[i])->hei = hei;
+					newroom->links[i]->x   = x;
+					newroom->links[i]->y   = y;
+					newroom->links[i]->wid = wid;
+					newroom->links[i]->hei = hei;
 				}
 			}
 		}
@@ -120,7 +128,7 @@ namespace BaseUtil {
 		for (int i=0;i<newroom->objs.size();i++) {
 			if (newroom->links[i]) {
 				if (newroom->links[i]->index==index) {
-					dynamic_cast<BaseInterface::Room::Link*>(newroom->links[i])->text= text;
+					newroom->links[i]->text= text;
 				}
 			}
 		}
@@ -132,7 +140,7 @@ namespace BaseUtil {
 		for (int i=0;i<newroom->objs.size();i++) {
 			if (newroom->links[i]) {
 				if (newroom->links[i]->index==index) {
-					dynamic_cast<BaseInterface::Room::Link*>(newroom->links[i])->Relink(python);
+					newroom->links[i]->Relink(python);
 				}
 			}
 		}
@@ -146,6 +154,34 @@ namespace BaseUtil {
 				if (newroom->links[i]->index==index) {
 					// FIXME: Will crash if not a Goto object.
 					dynamic_cast<BaseInterface::Room::Goto*>(newroom->links[i])->index = to;
+				}
+			}
+		}
+	}
+	void SetLinkEventMask(int room, std::string index, std::string maskdef) 
+	{ 
+		int i;
+
+		// c=click, u=up, d=down, e=enter, l=leave, m=move
+		unsigned int mask = 0;
+		for (i=0; i<maskdef.length(); ++i) {
+			switch(maskdef[i]) {
+			case 'c': case 'C': mask |= BaseInterface::Room::Link::ClickEvent; break;
+			case 'u': case 'U': mask |= BaseInterface::Room::Link::UpEvent; break;
+			case 'd': case 'D': mask |= BaseInterface::Room::Link::DownEvent; break;
+			case 'e': case 'E': mask |= BaseInterface::Room::Link::EnterEvent; break;
+			case 'l': case 'L': mask |= BaseInterface::Room::Link::LeaveEvent; break;
+			case 'm': case 'M': mask |= BaseInterface::Room::Link::MoveEvent; break;
+			}
+		} 
+
+		BaseInterface::Room *newroom=CheckRoom(room);
+		if (!newroom) return;
+		for (i=0; i<newroom->links.size();i++) {
+			if (newroom->links[i]) {
+				if (newroom->links[i]->index==index) {
+					// FIXME: Will crash if not a Goto object.
+					newroom->links[i]->setEventMask(mask);
 				}
 			}
 		}
@@ -310,4 +346,38 @@ namespace BaseUtil {
           Unit * un=BaseInterface::CurrentBase->caller.GetUnit();
           return ::sellShip(base,un,name,NULL);
         }
+
+	Dictionary& _GetEventData()
+	{
+		static boost::python::dict data;
+		return data;
+	}
+
+	void SetEventData(boost::python::dict data)
+	{
+		_GetEventData() = data;
+	}
+
+	void SetMouseEventData(std::string type, float x, float y, int buttonMask)
+	{
+		boost::python::dict &data = _GetEventData();
+
+		// Event type
+		data["type"] = type;
+
+		// Mouse data
+		data["mousex"] = x;
+		data["mousey"] = y;
+		data["mousebuttons"] = buttonMask;
+
+		// Keyboard modifiers (for kb+mouse)
+		data["alt"]   = ((getActiveModifiers() & KB_MOD_ALT)!=0);
+		data["shift"] = ((getActiveModifiers() & KB_MOD_SHIFT)!=0);
+		data["ctrl"]  = ((getActiveModifiers() & KB_MOD_CTRL)!=0);
+	}
+	const Dictionary& GetEventData()
+	{
+		return _GetEventData();
+	}
+
 }

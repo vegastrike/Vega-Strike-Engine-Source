@@ -25,6 +25,14 @@
 #include "gfx/stream_texture.h"
 #endif
 #include "main_loop.h"
+#include "in_mouse.h"
+
+static unsigned int& getMouseButtonMask()
+{
+	static unsigned int mask = 0;
+	return mask;
+}
+
 static void biModifyMouseSensitivity(int &x, int &y, bool invert){
   int xrez=g_game.x_resolution;
   int yrez=g_game.y_resolution;
@@ -323,7 +331,9 @@ void BaseInterface::Room::BaseText::Draw (BaseInterface *base) {
 }
 
 void RunPython(const char *filnam) {
+#ifdef DEBUG_RUN_PYTHON
 	printf("Run python:\n%s\n", filnam);
+#endif
 	if (filnam[0]) {
 		if (filnam[0]=='#') {
 			::Python::reseterrors();
@@ -590,11 +600,20 @@ void BaseInterface::MouseOver (int xbeforecalc, int ybeforecalc) {
 	CalculateRealXAndY(xbeforecalc,ybeforecalc,&x,&y);
 	int i=rooms[curroom]->MouseOver(this,x,y);
 	Room::Link *link=0;
-	if (i<0) {
-		link=0;
-	} else {
+	Room::Link *hotlink=0;
+	if (i>=0)
 		link=rooms[curroom]->links[i];
-	}
+	if (lastmouseindex>=0 && lastmouseindex<rooms[curroom]->links.size())
+		hotlink=rooms[curroom]->links[lastmouseindex];
+
+	if (hotlink && (lastmouseindex != i))
+		hotlink->MouseLeave(this,x,y,getMouseButtonMask());
+	if (link && (lastmouseindex != i))
+		link->MouseEnter(this,x,y,getMouseButtonMask());
+	if (link)
+		link->MouseMove(this,x,y,getMouseButtonMask());
+	lastmouseindex = i;
+
 	if (link) {
           float overcolor[4]={1,.666666667,0,1};
           static bool donecolor=(vs_config->getColor("default","base_mouse_over",overcolor,true),true);
@@ -636,7 +655,10 @@ void BaseInterface::Click (int xint, int yint, int button, int state) {
 }
 
 void BaseInterface::ClickWin (int button, int state, int x, int y) {
-        ModifyMouseSensitivity(x,y);
+    ModifyMouseSensitivity(x,y);
+	if (state == WS_MOUSE_DOWN)
+		getMouseButtonMask() |=  (1<<(button-1)); else if (state == WS_MOUSE_UP)
+		getMouseButtonMask() &= ~(1<<(button-1));
 	if (CurrentBase) {
 		if (CurrentBase->CallComp) {
 #ifdef NEW_GUI
@@ -775,9 +797,6 @@ BaseInterface::Room::Talk::Talk (const std::string & ind,const std::string & pyt
 	}
 #endif
 }
-BaseInterface::Room::Python::Python (const std::string & ind,const std::string & pythonfile)
-		: BaseInterface::Room::Link(ind,pythonfile) {
-}
 double compute_light_dot (Unit * base,Unit *un) {
   StarSystem * ss =base->getStarSystem ();
   double ret=-1;
@@ -874,13 +893,6 @@ BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
         }
 }
 
-void BaseInterface::Room::Python::Click (BaseInterface *base,float x, float y, int button, int state) {
-	if (state==WS_MOUSE_UP) {
-		Link::Click(base,x,y,button,state);
-//		Do nothing...
-
-	}
-}
 
 // Need this for NEW_GUI.  Can't ifdef it out because it needs to link.
 void InitCallbacks(void) {
@@ -1067,11 +1079,62 @@ void BaseInterface::Room::Talk::Click (BaseInterface *base,float x, float y, int
 	}
 }
 
-void BaseInterface::Room::Link::Click (BaseInterface *base,float x, float y, int button, int state) {
+void BaseInterface::Room::Link::Click (BaseInterface *base,float x, float y, int button, int state) 
+{
+	unsigned int buttonmask = getMouseButtonMask();
 	if (state==WS_MOUSE_UP) {
+		if (eventMask & UpEvent) {
+			static std::string evtype("up");
+			BaseUtil::SetMouseEventData(evtype,x,y,buttonmask);
+			RunPython(this->pythonfile.c_str());
+		}
+	}
+	if (state==WS_MOUSE_UP) {
+		// For now, the same. Eventually, we'll want click & double-click
+		if (eventMask & ClickEvent) {
+			static std::string evtype("click");
+			BaseUtil::SetMouseEventData(evtype,x,y,buttonmask);
+			RunPython(this->pythonfile.c_str());
+		}
+	}
+	if (state==WS_MOUSE_DOWN) {
+		if (eventMask & DownEvent) {
+			static std::string evtype("down");
+			BaseUtil::SetMouseEventData(evtype,x,y,buttonmask);
+			RunPython(this->pythonfile.c_str());
+		}
+	}
+}
+
+void BaseInterface::Room::Link::MouseMove (::BaseInterface* base,float x, float y, int buttonmask)
+{
+	if (eventMask & MoveEvent) {
+		static std::string evtype("move");
+		BaseUtil::SetMouseEventData(evtype,x,y,buttonmask);
 		RunPython(this->pythonfile.c_str());
 	}
 }
+
+void BaseInterface::Room::Link::MouseEnter (::BaseInterface* base,float x, float y, int buttonmask)
+{
+	if (eventMask & EnterEvent) {
+		static std::string evtype("enter");
+		BaseUtil::SetMouseEventData(evtype,x,y,buttonmask);
+		RunPython(this->pythonfile.c_str());
+	}
+}
+
+void BaseInterface::Room::Link::MouseLeave (::BaseInterface* base,float x, float y, int buttonmask)
+{
+	if (eventMask & LeaveEvent) {
+		static std::string evtype("leave");
+		BaseUtil::SetMouseEventData(evtype,x,y,buttonmask);
+		RunPython(this->pythonfile.c_str());
+	}
+	clickbtn = -1;
+}
+
+
 
 void BaseInterface::Room::Link::Relink(const std::string &pfile)
 {

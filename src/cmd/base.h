@@ -14,6 +14,7 @@
 
 class BaseInterface {
 	int curlinkindex;
+	int lastmouseindex; // Last link index to be under the mouse
 	bool drawlinkcursor;
 	TextPlane curtext;
 public:
@@ -21,12 +22,31 @@ public:
 	public:
 		class Link {
 		public:
+			enum {
+				ClickEvent = (1<<0),
+				DownEvent  = (1<<1),
+				UpEvent    = (1<<2),
+				MoveEvent  = (1<<3),
+				EnterEvent = (1<<4),
+				LeaveEvent = (1<<5)
+			};
+
 			std::string pythonfile;
 			float x,y,wid,hei,alpha;
 			std::string text;
 			const std::string index;
-			virtual void Click (::BaseInterface* base,float x, float y, int button, int state);
-			explicit Link (const std::string &ind,const std::string &pfile) : pythonfile(pfile),alpha(1.0f),index(ind) {}
+			unsigned int eventMask;
+			int clickbtn;
+
+			virtual void Click (::BaseInterface* base, float x, float y, int button, int state);
+			virtual void MouseMove (::BaseInterface* base, float x, float y, int buttonmask);
+			virtual void MouseEnter (::BaseInterface* base, float x, float y, int buttonmask);
+			virtual void MouseLeave (::BaseInterface* base, float x, float y, int buttonmask);
+
+			void setEventMask(unsigned int mask) 
+				{ eventMask = mask; }
+
+			explicit Link (const std::string &ind,const std::string &pfile) : pythonfile(pfile),alpha(1.0f),index(ind),eventMask(ClickEvent),clickbtn(-1) {}
 			virtual ~Link(){} 
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
@@ -87,9 +107,9 @@ public:
 		};
 		class Python : public Link {
 		public:
-			std::string file;
-			virtual void Click (::BaseInterface* base,float x, float y, int button, int state);
-			Python(const std::string & ind,const std::string & pythonfile);
+			//std::string file;
+			//virtual void Click (::BaseInterface* base,float x, float y, int button, int state); // Commented since base class already does what's necessary
+			Python(const std::string & ind,const std::string & pythonfile) : Link(ind,pythonfile) {}
 			virtual ~Python () {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);

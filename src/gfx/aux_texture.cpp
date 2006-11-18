@@ -61,15 +61,30 @@ bool Texture::operator == (Texture & b) {
   return Original()==b.Original();
 }
 
+void Texture::setReference(Texture *other)
+{
+    original = other;
+    original->refcount++;
+
+	// Copy shared attributes
+	texfilename = other->texfilename;
+	data = other->data;
+	name = other->name;
+	bound = other->bound;
+	boundSizeX = other->boundSizeX;
+	boundSizeY = other->boundSizeY;
+	boundMode = other->boundMode;
+	texture_target = other->texture_target;
+	image_target = other->image_target;
+}
+
 GFXBOOL Texture::checkold(const string &s, bool shared, string & hashname)
 {
   hashname = shared?VSFileSystem::GetSharedTextureHashName(s):VSFileSystem::GetHashName(s);
   Texture *oldtex= texHashTable.Get (hashname);
   if(oldtex!=NULL) {
-	  //*this = *oldtex;//will be obsoleted--unpredictable results with string()
-	*this = *oldtex;
-    original = oldtex;
-    original->refcount++;
+	//*this = *oldtex;//will be obsoleted--unpredictable results with string()
+    setReference(oldtex);
 	//cerr<<"Found cached texture : "<<s<<" with hashname="<<hashname<<endl;
     return GFXTRUE;
   } else {

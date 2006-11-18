@@ -60,7 +60,8 @@ public:
   ///The number of references on the original data
   int refcount;
   ///The target this will go to (cubemap or otherwise)
-  enum TEXTURE_TARGET texture_target; enum TEXTURE_IMAGE_TARGET image_target;
+  enum TEXTURE_TARGET texture_target; 
+  enum TEXTURE_IMAGE_TARGET image_target;
   ///The address mode being used with this texture
   enum ADDRESSMODE address_mode;
   ///Returns if this texture is actually already loaded
@@ -121,6 +122,8 @@ public:
   bool operator < (Texture &b);
   ///A way to test if the texture is equal to another based on original values
   bool operator == (Texture &b);
+  ///Make this instance a reference of "other"
+  void setReference(Texture *other);
   ///Binds the texture in the GFX library
   virtual void MakeActive() { MakeActive(this->stage,0); } //Assumes stage=this->stage, pass=0
   virtual void MakeActive(int stage) { MakeActive(stage,0); } //Assumes pass=0
@@ -128,9 +131,8 @@ public:
   virtual bool SetupPass(int pass, const enum BLENDFUNC src, const enum BLENDFUNC dst) { return SetupPass(pass,stage,src,dst); } //If one is going to perform multipass rendering of this texture, the Texture() must handle blending - SetupPass() sets up blending. If it returns false, then blending is not compatible with the requested blend mode emulation. One may assume that if numPasses()==1, no SetupPass() is needed. pass==-1 means restore setup. You should call it after multipass rendering.
   virtual bool SetupPass(int pass, int stage, const enum BLENDFUNC src, const enum BLENDFUNC dst) { return true; } //If one is going to perform multipass rendering of this texture, the Texture() must handle blending - SetupPass() sets up blending. If it returns false, then blending is not compatible with the requested blend mode emulation. One may assume that if numPasses()==1, no SetupPass() is needed. pass==-1 means restore setup. You should call it after multipass rendering.
   ///If the texture has loaded properly returns true
-  virtual bool LoadSuccess () {
-    return (name>=0);
-  }
+  virtual bool LoadSuccess () 
+	{  return (name>=0);  }
   ///Changes priority of texture
   virtual void Prioritize (float);
 };

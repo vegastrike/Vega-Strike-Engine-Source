@@ -10,6 +10,8 @@
 #include "vs_globals.h"
 #include "../gldrv/gl_globals.h"
 #include <set>
+#include <math.h>
+
 using std::set;
 static set<AnimatedTexture *> anis;
 
