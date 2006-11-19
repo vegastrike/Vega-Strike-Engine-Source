@@ -40,7 +40,7 @@ namespace UnitUtil {
 		if (!my_unit)return false;
 		bool res=false;
 		clsptr typ = my_unit->isUnit();
-		string s=getFlightgroupName(my_unit);
+		const string &s=getFlightgroupNameCR(my_unit);
 		res=(typ==PLANETPTR||typ==ASTEROIDPTR||typ==NEBULAPTR||s=="Base");
 		return res&&!isSun(my_unit);
 	}

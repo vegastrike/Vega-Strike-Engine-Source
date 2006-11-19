@@ -402,6 +402,7 @@ protected:
   StarSystem * activeStarSystem;//the star system I'm in
   ///Takes out of the collide table for this system.
   void RemoveFromSystem();
+  void RequestPhysics(); // Requeues the unit so that it is simulated ASAP
   bool InCorrectStarSystem (StarSystem *active) {return active==activeStarSystem;}
   virtual int nummesh()const {return ((int)meshdata.size())-1;}
 //void FixGauges();
@@ -1174,6 +1175,7 @@ public:
 // Use AI
   bool RequestClearance (Unit * dockingunit);
   bool EndRequestClearance (Unit * dockingunit);
+  bool hasPendingClearanceRequests() const;
   int  Dock (Unit * unitToDockWith);
   void RestoreGodliness() {
 	_Universe->AccessCockpit()->RestoreGodliness();

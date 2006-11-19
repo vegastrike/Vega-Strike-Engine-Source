@@ -47,6 +47,11 @@ namespace UnitUtil {
                 static unsigned int capitaltypes=ROLES::getCapitalRoles();
                 return ((1<<(unsigned int)my_unit->unitRole())&capitaltypes)!=0;
 	}
+	bool hasDockingUnits(Unit *my_unit) {
+		if (!my_unit) return false;
+		return (my_unit->DockedOrDocking()&Unit::DOCKING_UNITS)
+			|| (my_unit->hasPendingClearanceRequests());
+	}
 	int getPhysicsPriority (Unit*  un) {
 		static const bool FORCE_TOP_PRIORITY=XMLSupport::parse_bool(
 			vs_config->getVariable("physics","priorities","force_top_priority","false") );
@@ -113,7 +118,7 @@ namespace UnitUtil {
 		}
 		if (untype==MISSILEPTR)
 			return MISSILE_PRIORITY;
-		if (isDockableUnit(un))
+		if (hasDockingUnits(un))
 			return DOCKABLE_PRIORITY;
 
 		static const int ASTEROID_PARENT_PRIORITY=XMLSupport::parse_int(
@@ -518,8 +523,18 @@ namespace UnitUtil {
 	}
 	bool isDockableUnit(Unit *my_unit) {
 		if (!my_unit) return false;
-		const std::string& unit_fgid = getFlightgroupName(my_unit);
-		return ((((my_unit->isPlanet ())&&(!isSun(my_unit))&&isSignificant(my_unit)&&(!my_unit->isJumppoint()))||unit_fgid=="Base"||my_unit->isUnit()==UNITPTR)&&my_unit->DockingPortLocations().size()>0);
+		return 
+			(  
+				(   
+					   my_unit->isPlanet()
+					&& !isSun(my_unit)
+					&& isSignificant(my_unit)
+					&& !my_unit->isJumppoint()  
+				)
+				|| (my_unit->isUnit()==UNITPTR)
+				|| (getFlightgroupName(my_unit)=="Base")
+			)
+			&& (my_unit->DockingPortLocations().size()>0);
 	}
 	bool isCloseEnoughToDock(Unit *my_unit, Unit *un) {
 		static bool superdock = XMLSupport::parse_bool(vs_config->getVariable("physics","dock_within_base_shield","false"));

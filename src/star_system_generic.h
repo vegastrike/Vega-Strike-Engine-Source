@@ -134,6 +134,8 @@ public:
   virtual void AddMissileToQueue(class MissileEffect *);
   virtual void UpdateMissiles();
   void UpdateUnitPhysics(bool firstframe);
+  ///Requeues the unit so that it is simulated ASAP.
+  void RequestPhysics(Unit *un, unsigned int queue);
   virtual void activateLightMap(int stage=1) {}
   ///activates the light map texture
   virtual unsigned int numTerrain () {return 0;}

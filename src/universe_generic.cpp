@@ -81,6 +81,7 @@ QVector DockToSavedBases (int playernum) {
 		}
 		plr->ForceDock(closestUnit,i);
 		closestUnit->image->clearedunits.push_back(plr);
+		closestUnit->RequestPhysics();
 	}
 	return dock_position;
 }

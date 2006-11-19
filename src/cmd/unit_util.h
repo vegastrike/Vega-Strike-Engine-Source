@@ -14,6 +14,7 @@ namespace UnitUtil {
 	void setName(Unit *my_unit,string name);
 	void SetHull(Unit *my_unit,float hull);
     string getFlightgroupName(Unit *my_unit);
+	const string& getFlightgroupNameCR(Unit *my_unit);
 	Unit *getFlightgroupLeader (Unit *my_unit);
 	void orbit (Unit * my_unit, Unit * orbitee, float speed, QVector R, QVector S, QVector center); 
 	bool setFlightgroupLeader (Unit *my_unit, Unit *un);

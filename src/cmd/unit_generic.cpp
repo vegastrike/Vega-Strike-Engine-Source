@@ -5544,6 +5544,11 @@ bool Unit::IsCleared (Unit * DockingUnit) {
   return (std::find (image->clearedunits.begin(),image->clearedunits.end(),DockingUnit)!=image->clearedunits.end());
 }
 
+bool Unit::hasPendingClearanceRequests() const
+{
+	return image && (image->clearedunits.size()>0);
+}
+
 bool Unit::isDocked (Unit* d) {
   if (!d)
 	  return false;
@@ -8064,4 +8069,11 @@ enum Unit::tractorHow Unit::getTractorability() const
         tflags = tractorability_flags;
 
     return (Unit::tractorHow)(tflags&tractorability_mask);
+}
+
+void Unit::RequestPhysics()
+{
+	// Request ASAP physics
+	if (getStarSystem())
+		getStarSystem()->RequestPhysics(this,cur_sim_queue_slot);
 }

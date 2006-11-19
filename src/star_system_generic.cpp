@@ -551,6 +551,21 @@ unsigned int movingtotal=0;
 double aggfire=0;
 int numprocessed=0;
 double targetpick=0;
+
+void StarSystem::RequestPhysics(Unit *un, unsigned int queue)
+{
+	Unit * unit=NULL;
+	un_iter iter = this->physics_buffer[queue].createIterator();
+	while(((unit = iter.current())!=NULL) && (unit != un))
+		iter.advance();
+	if (unit == un) {
+		un->predicted_priority = 0;
+		int newloc=(current_sim_location+1)%SIM_QUEUE_SIZE;
+		if (newloc!=current_sim_location)
+			iter.moveBefore(this->physics_buffer[newloc]);
+	}
+}
+
 void StarSystem::UpdateUnitPhysics (bool firstframe) {
   static bool phytoggle=true;
   static int batchcount=SIM_QUEUE_SIZE-1;
@@ -584,7 +599,11 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
 			// Doing spreading here and only on priority changes, so as to make AI easier
 			int predprior=unit->predicted_priority;
 			//If the priority has really changed (not an initial scattering, because prediction doesn't match)
-			if (priority!=predprior){
+			if (priority!=predprior) {
+			  if (predprior == 0) {
+				// Validate snapshot of current interpolated state (this is a reschedule)
+				unit->curr_physical_state = unit->cumulative_transformation;
+			  }
 			  //Save priority value as prediction for next scheduling, but don't overwrite yet.
 			  predprior=priority;
 			  //Scatter, so as to achieve uniform distribution
