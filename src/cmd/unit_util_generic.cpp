@@ -58,6 +58,8 @@ namespace UnitUtil {
 			vs_config->getVariable("physics","priorities","player","1") );
 		static const int MISSILE_PRIORITY=XMLSupport::parse_int(
 			vs_config->getVariable("physics","priorities","missile","1") );
+		static const int DOCKABLE_PRIORITY=XMLSupport::parse_int(
+			vs_config->getVariable("physics","priorities","dockable","1") );
 
 		float rad= un->rSize();
 		clsptr untype=un->isUnit();
@@ -65,8 +67,7 @@ namespace UnitUtil {
 		float tooclose=0;
         unsigned int np = _Universe->numPlayers();
 		Cockpit* cockpit=_Universe->AccessCockpit();
-        for (unsigned int i=0;i<np;++i) {
-			
+        for (unsigned int i=0;i<np;++i) {			
 			Unit * player=_Universe->AccessCockpit(i)->GetParent();
 			if (player) {
 				if (un==player->Target())
@@ -112,6 +113,8 @@ namespace UnitUtil {
 		}
 		if (untype==MISSILEPTR)
 			return MISSILE_PRIORITY;
+		if (isDockableUnit(un))
+			return DOCKABLE_PRIORITY;
 
 		static const int ASTEROID_PARENT_PRIORITY=XMLSupport::parse_int(
 			vs_config->getVariable("physics","priorities","asteroid_parent","1") );
@@ -325,14 +328,18 @@ namespace UnitUtil {
 			tmp->credits+=credits;
 		}
 	}
-    string getFlightgroupName(Unit *my_unit){
-		if (!my_unit)return "";
-		string fgname;
+    const string& getFlightgroupNameCR(Unit *my_unit)
+	{
+		static const string empty_string;
+		if (!my_unit) return empty_string;
 		Flightgroup *fg=my_unit->getFlightgroup();
-		if(fg){
-			fgname=fg->name;
-		}
-		return fgname;
+		if(fg)
+			return fg->name; else
+			return empty_string;
+	}
+    string getFlightgroupName(Unit *my_unit)
+	{
+		return getFlightgroupNameCR(my_unit);
 	}
 	Unit *getFlightgroupLeader (Unit *my_unit) {
 		if (!my_unit)return 0;
@@ -351,12 +358,9 @@ namespace UnitUtil {
 			return false;
 		}
 	}
-	string getFgDirective(Unit *my_unit){
-		if (!my_unit)return "";
-		string fgdir ("b");
-		if (my_unit->getFlightgroup())
-			fgdir = my_unit->getFlightgroup()->directive;
-		return fgdir;
+	string getFgDirective(Unit *my_unit)
+	{
+		return getFgDirectiveCR(my_unit);
 	}
 	static const string& getFgDirectiveCR(Unit *my_unit){
 		static string emptystr;
@@ -514,7 +518,7 @@ namespace UnitUtil {
 	}
 	bool isDockableUnit(Unit *my_unit) {
 		if (!my_unit) return false;
-		std::string unit_fgid = getFlightgroupName(my_unit);
+		const std::string& unit_fgid = getFlightgroupName(my_unit);
 		return ((((my_unit->isPlanet ())&&(!isSun(my_unit))&&isSignificant(my_unit)&&(!my_unit->isJumppoint()))||unit_fgid=="Base"||my_unit->isUnit()==UNITPTR)&&my_unit->DockingPortLocations().size()>0);
 	}
 	bool isCloseEnoughToDock(Unit *my_unit, Unit *un) {
