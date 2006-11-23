@@ -9,11 +9,9 @@
 #include "faction_generic.h"
 #endif
 #include <assert.h>
-#if defined(__APPLE__) || defined(MACOSX)
-    #include <OpenGL/gl.h>
-#else
-    #include <GL/gl.h>
-#endif
+
+#include "vegastrike.h"
+
 string inverseblend[16]={"ZERO","ZERO","ONE","SRCCOLOR","INVSRCCOLOR","SRCALPHA","INVSRCALPHA",
 "DESTALPHA","INVDESTALPHA","DESTCOLOR","INVDESTCOLOR","SRCALPHASAT","CONSTALPHA","INVCONSTALPHA",
 "CONSTCOLOR","INVCONSTCOLOR"};

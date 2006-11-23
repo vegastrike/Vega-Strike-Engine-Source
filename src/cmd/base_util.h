@@ -1,15 +1,16 @@
 #include <string>
 
-#if (defined(HAVE_BOOST) && defined(HAVE_PYTHON))
+#if defined(HAVE_PYTHON)
 	namespace boost { namespace python { class dict; } }
+#else
+	#include <map>
 #endif
 
 namespace BaseUtil {
 
-#if (defined(HAVE_BOOST) && defined(HAVE_PYTHON))
+#if defined(HAVE_PYTHON)
 	typedef boost::python::dict Dictionary;
 #else
-	#include <map>
 	typedef std::map<std::string,std::string> Dictionary;
 #endif
 

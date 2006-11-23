@@ -213,15 +213,15 @@ void Mesh::LoadBinary (const char * filename, int faction) {
 
 		/*for (ii=0; ii< temp; ii++)
 		{
-			vertexlist[ii].s = readf(fp);//*oo256;  
-			vertexlist[ii].t = readf (fp);//*oo256;
+			vertexlist[ii].s = readf(fp);// *oo256;  
+			vertexlist[ii].t = readf (fp);// *oo256;
 		}
 		
 		temp = NumTris*3+NumQuads*4;
 		for (; ii<temp; ii++)
 		{
-			vertexlist[ii].s = readf(fp);//*oo256;
-			vertexlist[ii].t = readf(fp);//*oo256;
+			vertexlist[ii].s = readf(fp);// *oo256;
+			vertexlist[ii].t = readf(fp);// *oo256;
 		}*/
 		if (AlphaMap)
 		{

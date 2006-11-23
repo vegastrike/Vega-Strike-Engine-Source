@@ -42,11 +42,6 @@
 #include "sphere.h"
 #include "lin_time.h"
 #include "mesh_xml.h"
-#if defined(__APPLE__) || defined(MACOSX)
-    #include <OpenGL/gl.h>
-#else
-    #include <GL/gl.h>
-#endif
 #include <float.h>
 #include <algorithm>
 
