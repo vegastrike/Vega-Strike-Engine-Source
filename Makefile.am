@@ -384,26 +384,41 @@ LIBCMD = \
   src/cmd/weapon_xml.cpp \
   src/cmd/weapon_xml.h
 
-if VS_MAKE_LAUNCHER
-  VSLAUNCHER_PROG=vslauncher
+if VS_MAKE_GTKUTILS
+  GTKUTILS_PROG=vssetup vslauncher
 else
-  VSLUANCHER_PROG=
+  GTKUTILS_PROG=
 endif
+
+if VS_MAKE_NO_CLIENT
+  VS_MAKE_SOUNDSERVER=
+  CLIENT_PROG=
+else
+  CLIENT_PROG= \
+    vegastrike \
+    base_maker
+endif
+
+if VS_MAKE_SOUNDSERVER
+  MUSIC_PROG= soundserver
+else
+  MUSIC_PROG=
+endif
+
 bin_PROGRAMS = \
+  $(CLIENT_PROG) \
+  $(MUSIC_PROG) \
   accountserver \
   asteroidgen \
-  base_maker \
   mesher \
   mesh_xml \
   tempgen \
   replace \
-  soundserver \
   trisort \
   vegaserver \
-  vegastrike \
   vsrextract \
   vsrmake \
-  $(VSLAUNCHER_PROG)
+  $(GTKUTILS_PROG)
 
 noinst_LIBRARIES=\
   libboost_python.a \
@@ -414,10 +429,11 @@ noinst_LIBRARIES=\
   libnetlowlevel.a \
   libscriptserver.a
 
+#  src/cmd/base_init.cpp cmdserver
+
 libcmdserver_a_SOURCES = \
   $(LIBCMD) \
   src/cmd/atmosphere_server.cpp \
-  src/cmd/base_init.cpp \
   src/cmd/beam_server.cpp \
   src/cmd/bolt_server.cpp \
   src/cmd/unit_factory_server.cpp \
@@ -464,12 +480,11 @@ libgfx_a_SOURCES = \
   src/gfx/mesh.h \
   src/gfx/quaternion.cpp \
   src/gfx/quaternion.h \
-  src/gfx/screenshot.cpp \
-  src/gfx/screenshot.h \
   src/gfx/sphere_generic.cpp \
   src/gfx/vec.cpp \
   src/gfx/vec.h \
   src/gfx/vertex.h
+
 
 libgfxserver_a_SOURCES = \
   src/gfx/sphere_server.cpp \
@@ -488,9 +503,9 @@ libgfxserver_a_SOURCES = \
   src/gfx/lerp.h \
   src/gfx/matrix.cpp \
   src/gfx/matrix.h \
-  src/gfx/mesh_bin.cpp \
   src/gfx/mesh_bxm.cpp \
   src/gfx/mesh_bxm.h \
+  src/gfx/mesh_bin.cpp \
   src/gfx/mesh_io.h \
   src/gfx/mesh_poly.cpp \
   src/gfx/mesh_xml.cpp \
@@ -499,8 +514,6 @@ libgfxserver_a_SOURCES = \
   src/gfx/mesh.h \
   src/gfx/quaternion.cpp \
   src/gfx/quaternion.h \
-  src/gfx/screenshot.cpp \
-  src/gfx/screenshot.h \
   src/gfx/sphere_generic.cpp \
   src/gfx/vec.cpp \
   src/gfx/vec.h \
@@ -609,7 +622,6 @@ vegaserver_LDADD = \
 vegaserver_DEPENDENCIES = \
   libboost_python.a \
   libcmdserver.a \
-  libgfx.a \
   libgfxserver.a \
   libnetlowlevel.a \
   libscriptserver.a
@@ -741,6 +753,7 @@ librootserver = \
   src/libserver.cpp \
   src/universe_util_server.cpp
 
+vegaserver_CXXFLAGS = -DNO_GFX
 vegaserver_SOURCES = \
   $(LIBAI) \
   $(LIBCOLLIDE) \
@@ -926,6 +939,8 @@ vegastrike_SOURCES = \
   src/gfx/quadtree.h \
   src/gfx/ring.cpp \
   src/gfx/ring.h \
+  src/gfx/screenshot.cpp \
+  src/gfx/screenshot.h \
   src/gfx/sphere.cpp \
   src/gfx/sphere.h \
   src/gfx/sprite.cpp \
@@ -1055,11 +1070,27 @@ vsrextract_SOURCES= \
   tools/vsrextract.cpp \
   tools/vsrtools.h
 
+GTK_LIBS=`gtk-config --libs`
+GTK_CFLAGS=`gtk-config --cflags`
 
+vssetup_LDFLAGS = $(GTK_LIBS)
+vssetup_CXXFLAGS= $(GTK_CFLAGS) -DGTK
+vssetup_SOURCES = \
+    setup/src/c/setup.cpp \
+    setup/src/include/central.cpp \
+    setup/src/include/central.h \
+    setup/src/include/display_gtk.cpp \
+    setup/src/include/display.h \
+    setup/src/include/file.cpp \
+    setup/src/include/file.h \
+    setup/src/include/general.cpp \
+    setup/src/include/general.h \
+    src/common/common.cpp \
+    src/common/common.h
 
-  vslauncher_LDFLAGS = `gtk-config --libs`
-  vslauncher_CXXFLAGS=`gtk-config --cflags`
-  vslauncher_SOURCES= \
+vslauncher_LDFLAGS = $(GTK_LIBS)
+vslauncher_CXXFLAGS= $(GTK_CFLAGS)
+vslauncher_SOURCES= \
     launcher/saveinterface.cpp \
     launcher/general.cpp \
     launcher/general.h \

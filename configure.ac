@@ -218,7 +218,7 @@ esac
 CXXFLAGS="${saved_CXXFLAGS}"
 
 if test "x$gwarf2g3_supported" = "xyes"; then
-	DEBUG_FLAGS="-gdwarf-2 -g3"
+	DEBUG_FLAGS="-O0 -gdwarf-2 -g3"
 else
     saved_CXXFLAGS="${CXXFLAGS}"
     CXXFLAGS="-g3"
@@ -226,17 +226,19 @@ else
     CXXFLAGS="${saved_CXXFLAGS}"
 
     if test "x$g3_supported" = "xyes"; then
-	    DEBUG_FLAGS="-g3"
+	    DEBUG_FLAGS="-O0 -g3"
     else
-	    DEBUG_FLAGS="-g"
+	    DEBUG_FLAGS="-O0 -g"
     fi
 fi
 
-AC_ARG_ENABLE(ggdb3, AC_HELP_STRING([--enable-ggdb3], [Add the -ggdb3 compiler flag.]), DEBUG_FLAGS="-ggdb3")
+AC_ARG_ENABLE(ggdb3, AC_HELP_STRING([--enable-ggdb3], [Add the -ggdb3 compiler flag.]), DEBUG_FLAGS="-O0 -ggdb3")
 
 AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug], [Produce an executable with debugging symbols]), [VS_CXXFLAGS="${VS_CXXFLAGS} ${DEBUG_FLAGS}"])
 
 AC_ARG_ENABLE(release, AC_HELP_STRING([--enable-release], [Produce an executable with optimizations]), [VS_CXXFLAGS="${VS_CXXFLAGS} -O2 -ffast-math"])
+
+AC_ARG_ENABLE(client, AC_HELP_STRING([--disable-client], [Only build vegaserver binary]), build_client=$enableval)
 
 AC_ARG_ENABLE(static, AC_HELP_STRING([--enable-static], [Produce a statically linked executable]), [VS_CXXFLAGS="${VS_CXXFLAGS} -static"])
 
@@ -247,6 +249,12 @@ AC_ARG_ENABLE(wall, AC_HELP_STRING([--enable-wall], [Use the -Wall flag with the
 AC_ARG_ENABLE(pedantic, AC_HELP_STRING([--enable-pedantic], [Enable -pedantic (and -ansi for C) modes]), [VS_CXXFLAGS="${VS_CXXFLAGS} -pedantic"])
 
 AC_ARG_ENABLE(macosx_bundle, AC_HELP_STRING([--enable-macosx-bundle], [Produce a MacOSX bundle executable]),  [VS_CPPFLAGS="${VS_CPPFLAGS} -DWITH_MACOSX_BUNDLE=1"])
+
+if test "x${build_client}" = "xno" ; then
+    VS_CXXFLAGS="${VS_CXXFLAGS} -DNO_GFX"
+fi
+
+AM_CONDITIONAL([VS_MAKE_NO_CLIENT], [test "x$build_client" = "xno"]) 
 
 VS_CXXFLAGS="${VS_CXXFLAGS} ${VS_ALIGN} ${USER_FLAGS}"
 
@@ -347,16 +355,24 @@ fi
 
 VS_CHECK_PYTHON
 
-VS_CHECK_SDL
+AC_LANG(C++)
+
+if test "x$build_client"  = "xno"; then
+    true
+else
+    VS_CHECK_SDL
+    
+    dnl Only build soundserver if we have SDL Mixer (this is defined in CHECK_SDL)
+    AM_CONDITIONAL([VS_MAKE_SOUNDSERVER], [test "x$have_SDL_mixer" = "xyes"]) 
+    
+    AC_LANG(C++)
+    VS_CHECK_GL
+fi
 
 dnl --------------------------------------------------------------------------
 dnl Check for car sim
 dnl --------------------------------------------------------------------------
 AC_ARG_ENABLE(car, AC_HELP_STRING([--enable-car], [Produce an executable for car simulation]), [VS_CPPFLAGS="${VS_CPPFLAGS} -DCAR_SIM"; echo "making car simulator"])
-
-
-AC_LANG(C++)
-VS_CHECK_GL
 
 
 dnl --------------------------------------------------------------------------
@@ -373,6 +389,12 @@ m4_pattern_forbid([VS_CHECK_CRYPTO])
 
 
 
+if test "x$build_client"  = "xno"; then
+    echo "*** Building server without OpenGL support as requested."
+else
+dnl ==============================
+dnl Disabling all checks for OpenGL if build_client is "no".
+dnl ==============================
 
 dnl --------------------------------------------------------------------------
 dnl Check for OpenGL headers
@@ -513,6 +535,10 @@ fi
 CPPFLAGS="$saved_CPPFLAGS"
 VS_CPPFLAGS="${VS_CPPFLAGS} $GLUT_CPPFLAGS"
 
+fi
+dnl ==============================
+dnl END if "$build_client" = "no" 
+dnl ==============================
 
 dnl --------------------------------------------------------------------------
 dnl Check for expat library
@@ -653,9 +679,13 @@ VS_CPPFLAGS="${VS_CPPFLAGS} ${PNG_CPPFLAGS}"
 
 VS_CHECK_JPEG
 
-VS_CHECK_OPENAL
-
-VS_CHECK_VORBIS
+if test "x$build_client" = "xno"; then
+    echo "Not checking for audio libraries."
+else
+    VS_CHECK_OPENAL
+    
+    VS_CHECK_VORBIS
+fi
 
 VS_CHECK_CRYPTO
 
@@ -709,7 +739,7 @@ VS_WITH_OGRE
 VS_WITH_CEGUI
 
 AC_LANG(C)
-VS_CONFIG_VSLAUNCHER
+VS_CONFIG_GTKUTILS
 AC_LANG(C++)
 
 # The boost include must come first to override includes from elsewhere
