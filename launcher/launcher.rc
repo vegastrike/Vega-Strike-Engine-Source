@@ -7,7 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
+//#include "afxres.h"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -17,7 +17,7 @@
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+//LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
 #endif //_WIN32
 
@@ -36,18 +36,18 @@ IDI_ICON1               ICON    DISCARDABLE     "icon1.ico"
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE MOVEABLE PURE 
+1 TEXTINCLUDE DISCARDABLE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE MOVEABLE PURE 
-BEGIN
-    "#include ""afxres.h""\r\n"
-    "\0"
-END
+//2 TEXTINCLUDE DISCARDABLE 
+//BEGIN
+//    "#include ""afxres.h""\r\n"
+//    "\0"
+//END
 
-3 TEXTINCLUDE MOVEABLE PURE 
+3 TEXTINCLUDE DISCARDABLE 
 BEGIN
     "\r\n"
     "\0"
@@ -63,8 +63,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,4,3,0
- PRODUCTVERSION 0,4,3,0
+ FILEVERSION 0,4,4,0
+ PRODUCTVERSION 0,4,4,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -82,14 +82,14 @@ BEGIN
             VALUE "Comments", "Vega Strike is the 3D Space Simulator that allows you to trade and bounty hunt in a vast universe. Can you face the dangers and decisions that await...\0"
             VALUE "CompanyName", "Vega Strike Project\0"
             VALUE "FileDescription", "Vega Strike Launcher\0"
-            VALUE "FileVersion", "0.4.3\0"
+            VALUE "FileVersion", "0.4.4\0"
             VALUE "InternalName", "vegastrike\0"
             VALUE "LegalCopyright", "© Copyright 1998-2005 Vega Strike Project.  All rights reserved.  See the Licence section of Readme.txt for details.\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "launcher.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Vega Strike\0"
-            VALUE "ProductVersion", "0.4.3\0"
+            VALUE "ProductVersion", "0.4.4\0"
             VALUE "SpecialBuild", "\0"
         END
     END
