@@ -252,8 +252,9 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 	//FIXME need to resolve 2 problems - 
 	//1) SIMULATION_ATOM for small!= SIMULATION_ATOM for large (below smforce line should mostly address this)
 	//2) Double counting due to collision occurring for each object in a different physics frame.
-	Vector smforce = (SmallerFinalVelocity-small_velocity).Magnitude()*bignormal*smalle->GetMass()/(SIMULATION_ATOM*((float)smalle->sim_atom_multiplier)/((float)this->sim_atom_multiplier));
-	Vector thisforce = (ThisFinalVelocity-big_velocity).Magnitude()*smallnormal*GetMass()/SIMULATION_ATOM;
+	// small_velocity and final velocity are not aligned
+	Vector smforce = ((SmallerFinalVelocity.Magnitude()*bignormal)-small_velocity)*smalle->GetMass()/(SIMULATION_ATOM*((float)smalle->sim_atom_multiplier)/((float)this->sim_atom_multiplier));
+	Vector thisforce = ((ThisFinalVelocity.Magnitude()*smallnormal)-big_velocity)*GetMass()/SIMULATION_ATOM;
 	
 	
 	
