@@ -174,6 +174,7 @@ inline XVector CrossProduct(const XVector& v1, const XVector& v2) {
     result.k = v1.i * v2.j  - v1.j * v2.i;     
 	return result;
 }
+
 inline void CrossProduct(const XVector & a, const XVector & b, XVector & RES) {RES = a.Cross(b);}
 
 void Yaw (QFLOAT rad, XVector &p,XVector &q, XVector &r);
@@ -182,5 +183,6 @@ void Roll (QFLOAT rad,XVector &p, XVector &q, XVector &r);
 void ResetVectors (XVector &p, XVector &q, XVector &r);
 void MakeRVector (XVector &p, XVector &q, XVector &r);
 void Orthogonize(XVector &p, XVector &q, XVector &r);
+Vector MakeNonColinearVector(const Vector &p);
 #endif
 

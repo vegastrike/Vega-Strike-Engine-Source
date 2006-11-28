@@ -198,6 +198,22 @@ void MakeRVector (Vector &p,Vector &q, Vector &r) {
   Normalize (p);
 
 }
+
+//Makes a non-colinear vector q to given r. assumes magnitude of r is nonzero, does not check
+Vector MakeNonColinearVector(const Vector &p){
+	Vector q(p);
+	if(p.i==p.j==0){
+		q.i=p.k;
+		q.j=p.i;
+		q.k=p.j;
+	}else{
+		q.i=-p.j;
+		q.j=p.i;
+		q.k=p.k;
+	}
+	return q;
+}
+
 void Orthogonize(Vector &p, Vector &q, Vector &r)
 {
 	Normalize(r);

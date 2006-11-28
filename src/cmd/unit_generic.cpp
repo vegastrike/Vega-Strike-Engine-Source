@@ -209,10 +209,24 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
     //Compute linear velocity of points of impact by taking into account angular velocities
 	Vector small_velocity=smalle->GetVelocity()+smalle->GetAngularVelocity().Cross(smalllocation-smalle->Position());
 	Vector big_velocity=GetVelocity()+GetAngularVelocity().Cross(biglocation-Position());
+	//Compute reference frame conversions to align along force normals (newZ)(currently using bignormal - will experiment to see if both are needed for sufficient approximation)
+	Vector orthoz=bignormal;
+	Vector orthox=MakeNonColinearVector(bignormal);
+	Vector orthoy(0,0,0);
+	//need z and non-colinear x to compute new basis trio. destroys x,y, preserves z.
+	Orthogonize(orthox,orthoy,orthoz);
+	Matrix fromNewRef(orthox,orthoy,orthoz); // transform matrix from normal aligned space
+	Matrix toNewRef=fromNewRef;
+	fromNewRef.InvertRotationInto(toNewRef); // transform matrix to normal aligned space
+	Vector small_velocity_aligned=Transform(toNewRef,small_velocity);
+	Vector big_velocity_aligned=Transform(toNewRef,big_velocity);
 	//Compute elastic and inelastic terminal velocities (point object approximation)
-    Vector Inelastic_vf = (m1/(m1+m2))*small_velocity + (m2/(m1+m2))*big_velocity;
-	Vector SmallerElastic_vf = (small_velocity*(m1-m2)/(m1+m2)+(2*m2/(m1+m2))*big_velocity);
-	Vector ThisElastic_vf = (big_velocity*(m2-m1)/(m1+m2)+(2*m1/(m1+m2))*small_velocity);
+    Vector Inelastic_vf = (m1/(m1+m2))*small_velocity + (m2/(m1+m2))*big_velocity; // doesn't need aligning (I think)
+	// compute along aligned dimension, then return to previous reference frame
+	small_velocity_aligned.k= (small_velocity_aligned.k*(m1-m2)/(m1+m2)+(2*m2/(m1+m2))*big_velocity_aligned.k);
+	big_velocity_aligned.k=(big_velocity_aligned.k*(m2-m1)/(m1+m2)+(2*m1/(m1+m2))*small_velocity_aligned.k); 
+	Vector SmallerElastic_vf =Transform(fromNewRef,small_velocity_aligned);
+	Vector ThisElastic_vf = Transform(fromNewRef,big_velocity_aligned);
 
 	// Make bounce along opposite normals (what we really want to do? no, I think we want application of force, not forced direction along the opposite normals) 
 	// HACK ALERT: 
@@ -252,9 +266,8 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 	//FIXME need to resolve 2 problems - 
 	//1) SIMULATION_ATOM for small!= SIMULATION_ATOM for large (below smforce line should mostly address this)
 	//2) Double counting due to collision occurring for each object in a different physics frame.
-	// small_velocity and final velocity are not aligned
-	Vector smforce = ((SmallerFinalVelocity.Magnitude()*bignormal)-small_velocity)*smalle->GetMass()/(SIMULATION_ATOM*((float)smalle->sim_atom_multiplier)/((float)this->sim_atom_multiplier));
-	Vector thisforce = ((ThisFinalVelocity.Magnitude()*smallnormal)-big_velocity)*GetMass()/SIMULATION_ATOM;
+	Vector smforce = (SmallerFinalVelocity-small_velocity)*smalle->GetMass()/(SIMULATION_ATOM*((float)smalle->sim_atom_multiplier)/((float)this->sim_atom_multiplier));
+	Vector thisforce = (ThisFinalVelocity-big_velocity)*GetMass()/SIMULATION_ATOM;
 	
 	
 	
