@@ -72,18 +72,8 @@ public:
   bool checkbad(const string & s);
   void setbad(const string & s);
   ///Inits the class with default values
-  void InitTexture() {
-    bound = false;
-    original = 0;
-    refcount = 0;
-    name = -1;
-    palette = NULL;
-    data = NULL;
-    mintcoord=Vector(0.0f,0.0f,0.0f);
-    maxtcoord=Vector(1.0f,1.0f,1.0f);
-    address_mode=DEFAULT_ADDRESS_MODE;
-  }
-  protected:
+  void InitTexture();
+protected:
   ///Binds this texture to GFX library
   int Bind(int maxdimension,GFXBOOL detailtexture);
   ///UnBinds from GFX library

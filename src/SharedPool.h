@@ -4,22 +4,30 @@
 #include <string>
 #include "gnuhash.h"
 
+#ifndef INITIAL_STRINGPOOL_SIZE
+#define INITIAL_STRINGPOOL_SIZE (1<<15)
+#endif
+
 // Need reference counted strings, or we'll eat memory like crazy
-template<class T> class SharedPool {
+template<class T, class RefcounterTraits=stdext::hash_compare<T> > class SharedPool {
 public:
 	typedef stdext::hash_map<T,unsigned int> ReferenceCounter;
+	typedef SharedPool<T,RefcounterTraits> PoolType;
 
 private:
 	ReferenceCounter referenceCounter;
-	static SharedPool<T> *ms_singleton;
+	static PoolType *ms_singleton;
 
 public:
-	static SharedPool<T>& getSingleton()
+	typedef T ValueType;
+	typedef RefcounterTraits RefocounterTraitsType;
+
+	static PoolType& getSingleton()
 	{
 		return *ms_singleton;
 	}
 
-	static SharedPool<T>* getSingletonPtr()
+	static PoolType* getSingletonPtr()
 	{
 		return ms_singleton;
 	}
@@ -50,14 +58,14 @@ public:
 
 	public:
 		Reference() : 
-			_it(SharedPool<T>::getSingleton().referenceCounter.end()), 
-			_rc(&SharedPool<T>::getSingleton().referenceCounter)
+			_it(PoolType::getSingleton().referenceCounter.end()), 
+			_rc(&PoolType::getSingleton().referenceCounter)
 		{
 		}
 
 		explicit Reference(const T& s) :
-			_it(SharedPool<T>::getSingleton().referenceCounter.end()), 
-			_rc(&SharedPool<T>::getSingleton().referenceCounter)
+			_it(PoolType::getSingleton().referenceCounter.end()), 
+			_rc(&PoolType::getSingleton().referenceCounter)
 		{
 			set(s);
 		}
@@ -167,10 +175,16 @@ public:
 	{
 		return Reference(&referenceCounter);
 	}
-	friend class SharedPool<T>::Reference;
+	friend class PoolType::Reference;
 };
 
-typedef SharedPool<std::string> StringPool;
+class StringpoolTraits : public stdext::hash_compare<std::string>
+{
+public:
+	static const size_t min_buckets = INITIAL_STRINGPOOL_SIZE;
+};
+
+typedef SharedPool<std::string,StringpoolTraits> StringPool;
 
 static StringPool stringPool;
 

@@ -41,6 +41,9 @@ class VSSprite {
 
 	Texture *surface;
 
+	// For private use only
+	VSSprite() : surface(0) {}
+
 public:
 	VSSprite (const char *file, enum FILTER texturefilter=BILINEAR, GFXBOOL force=GFXFALSE);
 	~VSSprite();

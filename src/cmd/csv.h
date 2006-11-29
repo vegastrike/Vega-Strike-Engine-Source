@@ -48,11 +48,11 @@ public:
   CSVRow(CSVTable * parent, std::string key);
   CSVRow(CSVTable * parent, unsigned int which);
   CSVRow(){parent=NULL;iter=std::string::npos;}
-  std::string operator[](std::string);
-  std::string operator[](unsigned int);
+  const std::string& operator[](const std::string&) const;
+  const std::string& operator[](unsigned int) const;
+  const std::string& getKey(unsigned int which) const;
   std::vector<std::string>::iterator begin();
   std::vector<std::string>::iterator end();
-  std::string getKey(unsigned int which);      
   bool success()const {
     return parent!=NULL;
   }

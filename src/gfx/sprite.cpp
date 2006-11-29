@@ -32,6 +32,7 @@
 #include "../gldrv/gl_globals.h"
 #include <assert.h>
 #include <math.h>
+#include "gnuhash.h"
 #ifdef _WIN32
 #include <direct.h>
 #endif
@@ -42,15 +43,46 @@ static float *mview = NULL;
 
 using namespace VSFileSystem;
 
-VSSprite::VSSprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
+typedef stdext::hash_map<std::string, VSSprite*> VSSpriteCache;
+static VSSpriteCache sprite_cache;
+
+static std::pair<bool,VSSprite*> cacheLookup(const char *file)
+{
+	std::string hashName = VSFileSystem::GetHashName(std::string(file));
+	VSSpriteCache::iterator it = sprite_cache.find(hashName);
+	if (it != sprite_cache.end())
+		return std::pair<bool,VSSprite*>(true,it->second); else
+		return std::pair<bool,VSSprite*>(false,0);
+}
+
+static void cacheInsert(const char *file, VSSprite *spr)
+{
+	std::string hashName = VSFileSystem::GetHashName(std::string(file));
+	sprite_cache.insert(std::pair<std::string,VSSprite*>(hashName,spr));
+}
+
+VSSprite::VSSprite(const char *file, enum FILTER texturefilter,GFXBOOL force) 
+{
   VSCONSTRUCT2('S')
-  xcenter = 0;
-  ycenter = 0;
-  widtho2 = 0;
-  heighto2 = 0;
+  xcenter = ycenter = 0;
+  widtho2 = heighto2 = 0;
   rotation = 0;
   surface = NULL;
-  maxs = maxt =0;
+  maxs = maxt = 0;
+
+	// Check cache
+	{
+		std::pair<bool,VSSprite*> lkup = cacheLookup(file);
+		if (lkup.first) {
+			if (lkup.second) {
+				*this = *lkup.second;
+				surface = surface->Clone();
+			} else {
+				return;
+			}
+		}
+	}
+
   VSFile f;
   VSError err = Unspecified;
   if (file[0]!='\0') {
@@ -79,13 +111,21 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
       }
       
       if (!surface->LoadSuccess()) {
+		cacheInsert(file,0); // Mark bad file
 		delete surface;
 		surface = NULL;
-      }
+	  } else {
+		//Update cache
+		VSSprite *newspr = new VSSprite();
+		*newspr = *this;
+		newspr->surface = this->surface->Clone();
+		cacheInsert(file,newspr);
+	  }
     }
     // Finally close file
     f.Close();
   }else {
+    cacheInsert(file,0); // Mark bad file
     widtho2 = heighto2 = 0;
     xcenter = ycenter = 0;
   }

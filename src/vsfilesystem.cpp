@@ -111,6 +111,15 @@ int	selectbigpk3s( const struct dirent * entry)
 
 namespace VSFileSystem
 {
+	VSError CachedFileLookup(FileLookupCache &cache, const string& file, VSFileType type)
+	{
+		string hashName = GetHashName(file);
+		FileLookupCache::iterator it = cache.find(hashName);
+		if (it != cache.end())
+			return it->second; else
+			return cache[hashName]=LookForFile(file,type);
+	}
+
 	void	DisplayType( VSFileSystem::VSFileType type)
 	{
 	    DisplayType( type, std::cerr );
@@ -909,11 +918,11 @@ namespace VSFileSystem
 		}
 	}
 
-	void	CreateDirectoryAbs( string filename) { CreateDirectoryAbs( filename.c_str()); }
+	void	CreateDirectoryAbs( const string &filename) { CreateDirectoryAbs( filename.c_str()); }
 	void	CreateDirectoryHome( const char * filename) { CreateDirectoryAbs( homedir+"/"+string( filename)); }
-	void	CreateDirectoryHome( string filename) { CreateDirectoryHome( filename.c_str()); }
+	void	CreateDirectoryHome( const string &filename) { CreateDirectoryHome( filename.c_str()); }
 	void	CreateDirectoryData( const char * filename) { CreateDirectoryAbs( datadir+"/"+string( filename)); }
-	void	CreateDirectoryData( string filename) { CreateDirectoryData( filename.c_str()); }
+	void	CreateDirectoryData( const string &filename) { CreateDirectoryData( filename.c_str()); }
 
 	// Absolute directory -- DO NOT USE FOR TESTS IN VOLUMES !!
 	bool	DirectoryExists( const char * filename)
@@ -927,11 +936,11 @@ namespace VSFileSystem
 		}
 		return false;
 	}
-	bool	DirectoryExists( string filename) { return DirectoryExists( filename.c_str()); }
+	bool	DirectoryExists( const string &filename) { return DirectoryExists( filename.c_str()); }
 
 	// root is the path to the type directory or the type volume
 	// filename is the subdirectory+"/"+filename
-	int		FileExists( string root, const char * filename, VSFileType type, bool lookinvolume)
+	int		FileExists( const string &root, const char * filename, VSFileType type, bool lookinvolume)
 	{
 		int found = -1;
 		bool volok = false;
@@ -941,15 +950,14 @@ namespace VSFileSystem
 			file = filename+1;
 		else
 			file = filename;
-		if( root!="")
-			root +="/";
+		const char * rootsep = (root=="")?"":"/";
 
 		if( !UseVolumes[type] || !lookinvolume)
 		{
 			if( type == UnknownFile)
-				fullpath = root+file;
+				fullpath = root+rootsep+file;
 			else
-				fullpath = root+Directories[type]+"/"+file;
+				fullpath = root+rootsep+Directories[type]+"/"+file;
 
 			struct stat s;
                         //cache doesn't work because we *do* create files....
@@ -991,7 +999,7 @@ namespace VSFileSystem
 
 				// TRY TO OPEN A DATA.VOLFORMAT FILE IN THE ROOT DIRECTORY PASSED AS AN ARG
 				filestr = Directories[type]+"/"+file;
-				fullpath = root+"data."+volume_format;
+				fullpath = root+rootsep+"data."+volume_format;
 				stdext::hash_map<string, CPK3 *>::iterator it;
 				it = pk3_opened_files.find( fullpath);
 				failed+="Looking for file in VOLUME : "+fullpath+"... ";
@@ -1032,7 +1040,7 @@ namespace VSFileSystem
 				{
 					// AND THEN A VOLUME FILE BASED ON DIRECTORIES[TYPE]
 					filestr = string( file);
-					fullpath = root+Directories[type]+"."+volume_format;
+					fullpath = root+rootsep+Directories[type]+"."+volume_format;
 					it = pk3_opened_files.find( fullpath);
 					failed+="Looking for file in VOLUME : "+fullpath+"... ";
 					if( it==pk3_opened_files.end())
@@ -1090,13 +1098,13 @@ namespace VSFileSystem
                 //return FileExists("/",filename,type,lookinvolume);
 		return found;
 	}
-	int		FileExists( string root, string filename, VSFileType type, bool lookinvolume) { return FileExists( root, filename.c_str(), type, lookinvolume); }
+	int		FileExists( const string &root, const string &filename, VSFileType type, bool lookinvolume) { return FileExists( root, filename.c_str(), type, lookinvolume); }
 
 	int		FileExistsData( const char * filename, VSFileType type) { return FileExists( datadir, filename, type); }
-	int		FileExistsData( string filename, VSFileType type) { return FileExists( datadir, filename, type); }
+	int		FileExistsData( const string &filename, VSFileType type) { return FileExists( datadir, filename, type); }
 
 	int		FileExistsHome( const char * filename, VSFileType type) { return FileExists( homedir, filename, type); }
-	int		FileExistsHome( string filename, VSFileType type) { return FileExists( homedir, filename, type); }
+	int		FileExistsHome( const string &filename, VSFileType type) { return FileExists( homedir, filename, type); }
 
 	VSError GetError( char * str)
 	{
@@ -1125,10 +1133,10 @@ namespace VSFileSystem
 			}
 	}
 
-	VSError LookForFile( string & file, VSFileType type, VSFileMode mode)
+	VSError LookForFile( const string &file, VSFileType type, VSFileMode mode)
 	{
 		VSFile vsfile;
-		vsfile.SetFilename( string(file));
+		vsfile.SetFilename(file);
 		VSError err = LookForFile( vsfile, type, mode);
 		return err;
 	}
@@ -1744,7 +1752,7 @@ namespace VSFileSystem
 		return Ok;
 	}
 
-	size_t  VSFile::Write( string content)
+	size_t  VSFile::Write( const string &content)
 	{
 		std::string::size_type length = content.length();
 		return this->Write( content.c_str(), length);
@@ -2008,40 +2016,6 @@ namespace VSFileSystem
 		this->rootname = "";
 		this->offset = 0;
 		this->file_index = -1;
-	}
-
-	string	VSFile::GetFilename()
-	{
-		return this->filename;
-	}
-	string	VSFile::GetDirectory()
-	{
-		return this->directoryname;
-	}
-	string	VSFile::GetSubDirectory()
-	{
-		return this->subdirectoryname;
-	}
-	string	VSFile::GetRoot()
-	{
-		return this->rootname;
-	}
-
-	void	VSFile::SetFilename( string file)
-	{
-		this->filename = file;
-	}
-	void	VSFile::SetDirectory( string directory)
-	{
-		this->directoryname = directory;
-	}
-	void	VSFile::SetSubDirectory( string subdirectory)
-	{
-		this->subdirectoryname = subdirectory;
-	}
-	void	VSFile::SetRoot( string root)
-	{
-		this->rootname = root;
 	}
 
 	string	VSFile::GetFullPath()

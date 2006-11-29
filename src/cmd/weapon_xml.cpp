@@ -507,19 +507,17 @@ using namespace BeamXML;
 using namespace VSFileSystem;
 extern string strtolower(const string &foo);
 weapon_info* getTemplate(const string &kkey) {
-  string key =strtolower(kkey);
-  weapon_info * wi =  lookuptable.Get(strtoupper(key));
+  weapon_info * wi =  lookuptable.Get(strtoupper(kkey));
   if (wi) {
     if (!WeaponMeshCache::getCachedMutable (wi->weapon_name)) {
 		static string sharedmountdir = vs_config->getVariable("data","mountlocation","weapons");
+		static FileLookupCache lookup_cache;
 
 		//string meshshell=VSFileSystem::sharedmeshes+"/"+sharedmountdir+string ("/") + key;
-		string meshname=key+".bfxm";
-		if (LookForFile( meshname, MeshFile)<=Ok) {
+		string meshname=strtolower(kkey)+".bfxm";
+		if (CachedFileLookup(lookup_cache, meshname, MeshFile)<=Ok) {
 			WeaponMeshCache::setCachedMutable (wi->weapon_name,wi->gun= Mesh::LoadMesh (meshname.c_str(),Vector(1,1,1),0,NULL));
-			if (LookForFile( meshname, MeshFile)<=Ok) {
-				WeaponMeshCache::setCachedMutable (wi->weapon_name+"_flare",wi->gun1=Mesh::LoadMesh (meshname.c_str(),Vector(1,1,1),0,NULL));
-			}
+			WeaponMeshCache::setCachedMutable (wi->weapon_name+"_flare",wi->gun1=Mesh::LoadMesh (meshname.c_str(),Vector(1,1,1),0,NULL));
 		}
     }
   }

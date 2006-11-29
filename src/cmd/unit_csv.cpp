@@ -61,7 +61,7 @@ static vector<vector<string> > parseBracketSemicolon(string inp) {
   return ret;
 }
 
-static void UpgradeUnit (Unit * un, std::string upgrades) {
+static void UpgradeUnit (Unit * un, const std::string &upgrades) {
   string::size_type when;
   string::size_type ofs=0;
   while ((when=upgrades.find('{',ofs))!=string::npos) {
@@ -132,29 +132,66 @@ void AddMeshes(std::vector<Mesh*>&xmeshes, float&randomstartframe, float&randoms
 	if (counts) counts->push_back(xmeshes.size()-s);
   }
 }
-static string nextElement (string&inp) {
-  string::size_type where=inp.find(';');
-  if (where!=string::npos) {
-    string ret=inp.substr(0,where);
-    inp=inp.substr(where+1);
-    return ret;
+static pair<string::size_type,string::size_type> nextElementRange (const string &inp, string::size_type &start, string::size_type end) 
+{
+  string::size_type ostart = start;
+  start = inp.find(';',start);
+  if (start != string::npos && (start != end && (end == string::npos || start < end))) {
+    ++start;
+	return pair<string::size_type,string::size_type>(ostart,start-1);
+  } else {
+    start = end;
+	return pair<string::size_type,string::size_type>(ostart,end);
   }
-  string ret=inp;
-  inp.erase();
+}
+
+static string nextElementString (const string &inp, string::size_type &start, string::size_type end) 
+{
+  pair<string::size_type,string::size_type> rng = nextElementRange(inp,start,end);
+  if (rng.second == string::npos)
+	  return inp.substr(rng.first); else
+	  return inp.substr(rng.first,rng.second-rng.first);
+}
+
+static int nextElementInt(const string &inp, string::size_type &start, string::size_type end, int def=0) 
+{
+  pair<string::size_type,string::size_type> rng = nextElementRange(inp,start,end);
+  return (rng.first==rng.second)?def:atoi(inp.c_str()+rng.first);
+}
+
+static double nextElementFloat(const string &inp, string::size_type &start, string::size_type end, double def=0) 
+{
+  pair<string::size_type,string::size_type> rng = nextElementRange(inp,start,end);
+  return (rng.first==rng.second)?def:atof(inp.c_str()+rng.first);
+}
+
+static double nextElementBool(const string &inp, string::size_type &start, string::size_type end, bool def=false) 
+{
+  pair<string::size_type,string::size_type> rng = nextElementRange(inp,start,end);
+  return (rng.first==rng.second)?def:XMLSupport::parse_bool(inp.substr(rng.first,((rng.second==string::npos)?string::npos:(rng.second-rng.first))));
+}
+
+static string nextElement (string &inp) 
+{
+  string::size_type start=0;
+  pair<string::size_type,string::size_type> rng = nextElementRange(inp,start,string::npos);
+  string ret = inp.substr(rng.first,((rng.second==string::npos)?string::npos:(rng.second-rng.first)));
+  inp.erase(0,((rng.second==string::npos)?string::npos:(rng.second+1)));
   return ret;
 }
 
-static bool stob(string inp, bool defaul) {
+
+static bool stob(const string &inp, bool defaul) {
   if (inp.length()!=0) 
     return XMLSupport::parse_bool(inp);
   return defaul;
 }
-static double stof(string inp, double def=0) {
+static double stof(const string &inp, double def=0) {
   if (inp.length()!=0)
     return XMLSupport::parse_float(inp);
   return def;
 }
-static int stoi(string inp, int def=0) {
+static int stoi(const string &inp, int def=0) {
   if (inp.length()!=0)
     return XMLSupport::parse_int(inp);
   return def;
@@ -167,17 +204,18 @@ static Mount * createMount(const std::string& name, int ammo, int volume, float 
 
 }
 
-static void AddMounts(Unit * thus, Unit::XML &xml, std::string mounts) {
+static void AddMounts(Unit * thus, Unit::XML &xml, const std::string &mounts) {
   string::size_type where,when,ofs=0;
+  unsigned int first_new_mount = thus->mounts.size();
   {   
       int nmountz=0;
       while ((ofs=mounts.find('{',ofs))!=string::npos) nmountz++,ofs++;
-      xml.mountz.reserve(nmountz);
+	  thus->mounts.reserve(nmountz+thus->mounts.size());
       ofs=0;
   }
   while ((where=mounts.find('{',ofs))!=string::npos) {
     if ((when=mounts.find('}',where+1))!=string::npos) {
-      string mount=mounts.substr(where+1,when-where-1);      
+      string::size_type elemstart = where+1, elemend = when;
       ofs = when+1;
 
       QVector P;
@@ -185,24 +223,24 @@ static void AddMounts(Unit * thus, Unit::XML &xml, std::string mounts) {
       QVector R = QVector (0,0,1);
       QVector pos = QVector (0,0,0);
       
-      string filename = nextElement(mount);
-      int ammo = stoi(nextElement(mount),-1);      
-      int volume = stoi(nextElement(mount));      
-      string mountsize=nextElement(mount);
-      pos.i = stof(nextElement(mount));
-      pos.j = stof(nextElement(mount));
-      pos.k = stof(nextElement(mount));
-      double xyscale = stof(nextElement(mount));
-      double zscale = stof(nextElement(mount));
-      R.i = stof(nextElement(mount));
-      R.j = stof(nextElement(mount));
-      R.k = stof(nextElement(mount),1);
-      Q.i = stof(nextElement(mount));
-      Q.j = stof(nextElement(mount),1);
-      Q.k = stof(nextElement(mount));
-      float func =stof(nextElement(mount),1);
-      float maxfunc =stof(nextElement(mount),1);
-      bool banked = stob(nextElement(mount),false);
+      string filename = nextElementString(mounts,elemstart,elemend);
+      int ammo = nextElementInt(mounts,elemstart,elemend,-1);
+      int volume = nextElementInt(mounts,elemstart,elemend);
+      string mountsize=nextElementString(mounts,elemstart,elemend);
+      pos.i = nextElementFloat(mounts,elemstart,elemend);
+      pos.j = nextElementFloat(mounts,elemstart,elemend);
+      pos.k = nextElementFloat(mounts,elemstart,elemend);
+      double xyscale = nextElementFloat(mounts,elemstart,elemend);
+      double zscale = nextElementFloat(mounts,elemstart,elemend);
+      R.i = nextElementFloat(mounts,elemstart,elemend);
+      R.j = nextElementFloat(mounts,elemstart,elemend);
+      R.k = nextElementFloat(mounts,elemstart,elemend,1);
+      Q.i = nextElementFloat(mounts,elemstart,elemend);
+      Q.j = nextElementFloat(mounts,elemstart,elemend,1);
+      Q.k = nextElementFloat(mounts,elemstart,elemend);
+      float func = nextElementFloat(mounts,elemstart,elemend,1);
+      float maxfunc = nextElementFloat(mounts,elemstart,elemend,1);
+      bool banked = nextElementBool(mounts,elemstart,elemend,false);
       Q.Normalize();
       if (fabs(Q.i)==fabs(R.i)&&fabs(Q.j)==fabs(R.j)&&fabs(Q.k)==fabs(R.k)){
         Q.i=-1;
@@ -215,33 +253,25 @@ static void AddMounts(Unit * thus, Unit::XML &xml, std::string mounts) {
       CrossProduct (R,P,Q);
       Q.Normalize();
       //Transformation(Quaternion (from_vectors (P,Q,R),pos);
-      unsigned int indx = xml.mountz.size();
-      xml.mountz.push_back(createMount (filename.c_str(), ammo,volume,xml.unitscale*xyscale,xml.unitscale*zscale,func,maxfunc,banked));
-      xml.mountz[indx]->SetMountOrientation(Quaternion::from_vectors(P.Cast(),Q.Cast(),R.Cast()));
-      xml.mountz[indx]->SetMountPosition(xml.unitscale*pos.Cast());
+	  Mount mnt(filename,ammo,volume,xml.unitscale*xyscale,xml.unitscale*zscale,func,maxfunc,banked);
+      mnt.SetMountOrientation(Quaternion::from_vectors(P.Cast(),Q.Cast(),R.Cast()));
+      mnt.SetMountPosition(xml.unitscale*pos.Cast());
       int mntsiz=weapon_info::NOWEAP;
       if (mountsize.length()) {
         mntsiz=parseMountSizes(mountsize.c_str());
-        xml.mountz[indx]->size=mntsiz;
-      }else {
-        xml.mountz[indx]->size = xml.mountz[indx]->type->size;
+        mnt.size=mntsiz;
+      } else {
+        mnt.size = mnt.type->size;
       }
+      thus->mounts.push_back(mnt);
     } else ofs=string::npos;
   }
-  if (xml.mountz.size())
-  {
-    // DO not destroy anymore, just affect address
-    for( int a=0; a<xml.mountz.size(); a++)
-      thus->mounts.push_back( *xml.mountz[a]);
-    //mounts[a]=*xml.mountz[a];
-    //delete xml.mountz[a];			//do it stealthily... no cons/destructor
-  }
   unsigned char parity=0;
-  for (int a=0;a<xml.mountz.size();a++) {
+  for (unsigned int a=first_new_mount;a<thus->mounts.size();++a) {
     static bool half_sounds = XMLSupport::parse_bool(vs_config->getVariable ("audio","every_other_mount","false"));
-    if (a%2==parity) {
+    if ((a&1)==parity) {
       int b=a;
-      if(a % 4 == 2 && (int) a < (thus->GetNumMounts()-1)) 
+      if((a&3) == 2 && (int) a < (thus->GetNumMounts()-1)) 
         if (thus->mounts[a].type->type != weapon_info::PROJECTILE&&thus->mounts[a+1].type->type != weapon_info::PROJECTILE)
           b=a+1;
       thus->mounts[b].sound = AUDCreateSound (thus->mounts[b].type->sound,thus->mounts[b].type->type!=weapon_info::PROJECTILE);
@@ -270,7 +300,7 @@ struct SubUnitStruct{
     restricted=res;
   }
 };
-static vector<SubUnitStruct> GetSubUnits(std::string subunits) {
+static vector<SubUnitStruct> GetSubUnits(const std::string &subunits) {
   string::size_type where,when,ofs=0;
   vector<SubUnitStruct> ret;
   {   
@@ -281,27 +311,29 @@ static vector<SubUnitStruct> GetSubUnits(std::string subunits) {
   }
   while ((where=subunits.find('{',ofs))!=string::npos) {
     if ((when=subunits.find('}',ofs))!=string::npos) {
-      string subunit=subunits.substr(where+1,when-where-1);      
+      string::size_type elemstart = where+1, elemend = when;
       ofs = when+1;
 
-      string filename=nextElement(subunit);
       QVector pos,Q,R;
-      pos.i=stof(nextElement(subunit));
-      pos.j=stof(nextElement(subunit));
-      pos.k=stof(nextElement(subunit));
-      R.i=stof(nextElement(subunit));
-      R.j=stof(nextElement(subunit));
-      R.k=stof(nextElement(subunit));
-      Q.i=stof(nextElement(subunit));
-      Q.j=stof(nextElement(subunit));
-      Q.k=stof(nextElement(subunit));
-      double restricted=cos(stof(nextElement(subunit),180)*VS_PI/180.0);
+      
+      string filename = nextElementString(subunits,elemstart,elemend);
+      pos.i = nextElementFloat(subunits,elemstart,elemend);
+      pos.j = nextElementFloat(subunits,elemstart,elemend);
+      pos.k = nextElementFloat(subunits,elemstart,elemend);
+      R.i = nextElementFloat(subunits,elemstart,elemend);
+      R.j = nextElementFloat(subunits,elemstart,elemend);
+      R.k = nextElementFloat(subunits,elemstart,elemend);
+      Q.i = nextElementFloat(subunits,elemstart,elemend);
+      Q.j = nextElementFloat(subunits,elemstart,elemend);
+      Q.k = nextElementFloat(subunits,elemstart,elemend);
+      double restricted=cos(nextElementFloat(subunits,elemstart,elemend,180)*VS_PI/180.0);
+
       ret.push_back(SubUnitStruct(filename,pos,Q,R,restricted));
     } else ofs = string::npos;
   }
   return ret;
 }
-static void AddSubUnits (Unit *thus, Unit::XML &xml, std::string subunits, int faction, std::string modification) {
+static void AddSubUnits (Unit *thus, Unit::XML &xml, const std::string &subunits, int faction, const std::string &modification) {
   vector<SubUnitStruct> su=GetSubUnits(subunits);
   xml.units.reserve(subunits.size()+xml.units.size());
   for (vector<SubUnitStruct>::iterator i=su.begin();i!=su.end();++i) {
@@ -310,7 +342,7 @@ static void AddSubUnits (Unit *thus, Unit::XML &xml, std::string subunits, int f
     QVector Q= (*i).Q;
     QVector R= (*i).R;
     double restricted=(*i).restricted;
-    xml.units.push_back(UnitFactory::createUnit (filename.c_str(),true,faction,modification.c_str(),NULL)); // I set here the fg arg to NULL
+    xml.units.push_back(UnitFactory::createUnit (filename.c_str(),true,faction,modification,NULL)); // I set here the fg arg to NULL
     if (xml.units.back()->name=="LOAD_FAILED") {
       xml.units.back()->limits.yaw=0;
       xml.units.back()->limits.pitch=0;
@@ -344,7 +376,7 @@ static void AddSubUnits (Unit *thus, Unit::XML &xml, std::string subunits, int f
   }
 }
 
-void AddDocks (Unit* thus, Unit::XML &xml, string docks) {
+void AddDocks (Unit* thus, Unit::XML &xml, const string &docks) {
   string::size_type where,when;
   string::size_type ofs=0;
   {   
@@ -355,47 +387,51 @@ void AddDocks (Unit* thus, Unit::XML &xml, string docks) {
   }
   while ((where=docks.find('{',ofs))!=string::npos) {
     if ((when=docks.find('}',where+1))!=string::npos) {
-      string dock = docks.substr(where+1,when-where-1);
+      string::size_type elemstart = where+1, elemend = when;
       ofs = when+1;
 
       QVector pos=QVector(0,0,0);
-      bool internal=XMLSupport::parse_bool(nextElement(dock));
-      pos.i=stof(nextElement(dock));
-      pos.j=stof(nextElement(dock));
-      pos.k=stof(nextElement(dock));
-      double size=stof(nextElement(dock));
-      double minsize=stof(nextElement(dock));
-      thus->image->dockingports.push_back (DockingPorts(pos.Cast()*xml.unitscale,size*xml.unitscale,minsize*xml.unitscale,internal));      
+      bool internal=nextElementBool(docks,elemstart,elemend);
+      pos.i=nextElementFloat(docks,elemstart,elemend);
+      pos.j=nextElementFloat(docks,elemstart,elemend);
+      pos.k=nextElementFloat(docks,elemstart,elemend);
+      double size=nextElementFloat(docks,elemstart,elemend);
+      double minsize=nextElementFloat(docks,elemstart,elemend);
+
+      thus->image->dockingports.push_back (DockingPorts(pos.Cast()*xml.unitscale,size*xml.unitscale,minsize*xml.unitscale,internal));
     } else ofs=string::npos;
   }
 }
-void AddLights (Unit * thus, Unit::XML &xml, string lights) {
+void AddLights (Unit * thus, Unit::XML &xml, const string &lights) 
+{
   string::size_type where,when;
   string::size_type ofs=0;
   while ((where=lights.find('{',ofs))!=string::npos) {
     if ((when=lights.find('}',where+1))!=string::npos) {
-      string light = lights.substr(where+1,when-where-1);
+      string::size_type elemstart = where+1, elemend = when;
       ofs = when+1;
 
-      string filename = nextElement(light);
+      string filename = nextElementString(lights,elemstart,elemend);
       QVector pos,scale;
       GFXColor halocolor;
-      pos.i=stof(nextElement(light));
-      pos.j=stof(nextElement(light));
-      pos.k=stof(nextElement(light));
-      scale.i=xml.unitscale*stof(nextElement(light),1);
+      pos.i=nextElementFloat(lights,elemstart,elemend);
+      pos.j=nextElementFloat(lights,elemstart,elemend);
+      pos.k=nextElementFloat(lights,elemstart,elemend);
+      scale.i=xml.unitscale*nextElementFloat(lights,elemstart,elemend,1);
       scale.j=scale.k=scale.i;
-      halocolor.r=stof(nextElement(light),1);
-      halocolor.g=stof(nextElement(light),1);
-      halocolor.b=stof(nextElement(light),1);
-      halocolor.a=stof(nextElement(light),1);
-      double act_speed=stof(nextElement(light));
+      halocolor.r=nextElementFloat(lights,elemstart,elemend,1);
+      halocolor.g=nextElementFloat(lights,elemstart,elemend,1);
+      halocolor.b=nextElementFloat(lights,elemstart,elemend,1);
+      halocolor.a=nextElementFloat(lights,elemstart,elemend,1);
+      double act_speed=nextElementFloat(lights,elemstart,elemend);
+
       thus->addHalo(filename.c_str(),pos*xml.unitscale,scale.Cast(),halocolor,"",act_speed);
     } else ofs=string::npos;
   }
 }
 
-static void ImportCargo(Unit * thus,string imports) {
+static void ImportCargo(Unit * thus, const string &imports) 
+{
   string::size_type where,when,ofs=0;
   {   
       int nelem=0;
@@ -405,19 +441,21 @@ static void ImportCargo(Unit * thus,string imports) {
   }
   while ((where=imports.find('{',ofs))!=string::npos) {
     if ((when=imports.find('}',where+1))!=string::npos) {
-      string imp = imports.substr(where+1,when-where-1);
+      string::size_type elemstart = where+1, elemend = when;
       ofs = when+1;
 
-      string filename = nextElement(imp);
-      double price = stof(nextElement(imp),1);
-      double pricestddev = stof(nextElement(imp));
-      double quant = stof(nextElement(imp),1);
-      double quantstddev = stof(nextElement(imp));
+      string filename = nextElementString(imports,elemstart,elemend);
+      double price = nextElementFloat(imports,elemstart,elemend,1);
+      double pricestddev = nextElementFloat(imports,elemstart,elemend);
+      double quant = nextElementFloat(imports,elemstart,elemend,1);
+      double quantstddev = nextElementFloat(imports,elemstart,elemend);
+
       thus->ImportPartList(filename,price,pricestddev,quant,quantstddev);
     } else ofs=string::npos;
   }
 }
-static void AddCarg (Unit *thus, string cargos) {
+static void AddCarg (Unit *thus, const string &cargos) 
+{
   string::size_type where,when,ofs=0;
   {   
       int nelem=0;
@@ -428,37 +466,31 @@ static void AddCarg (Unit *thus, string cargos) {
   while ((where=cargos.find('{',ofs))!=string::npos) {
     if ((when=cargos.find('}',where+1))!=string::npos) {
       Cargo carg;
-      string cargo = cargos.substr(where+1,when-where-1);
+      string::size_type elemstart = where+1, elemend = when;
       ofs = when+1;
 
-      carg.content = nextElement(cargo);      
-      carg.category = nextElement(cargo);      
-      carg.price = stof(nextElement(cargo));
-      carg.quantity = stoi(nextElement(cargo));
-      carg.mass = stof(nextElement(cargo));
-      carg.volume = stof(nextElement(cargo));
-      carg.functionality = stof(nextElement(cargo));
-      carg.maxfunctionality = stof(nextElement(cargo));
-      string ele=nextElement(cargo);
-      if (ele.length())
-        carg.description= strdup (ele.c_str());
-      else
-        carg.description="";
-      carg.mission = false;
-      string mis =nextElement(cargo);
-      if (mis.length()) {
-        carg.mission=XMLSupport::parse_bool(mis);
-      }
+      carg.content          = nextElementString(cargos,elemstart,elemend);      
+      carg.category         = nextElementString(cargos,elemstart,elemend);
+      carg.price            = nextElementFloat(cargos,elemstart,elemend);
+      carg.quantity         = nextElementInt(cargos,elemstart,elemend);
+      carg.mass             = nextElementFloat(cargos,elemstart,elemend);
+      carg.volume           = nextElementFloat(cargos,elemstart,elemend);
+      carg.functionality    = nextElementFloat(cargos,elemstart,elemend);
+      carg.maxfunctionality = nextElementFloat(cargos,elemstart,elemend);
+      carg.description      = nextElementString(cargos,elemstart,elemend);
+      carg.mission          = nextElementBool(cargos,elemstart,elemend,false);
+
       thus->AddCargo(carg,false);
     } else ofs = string::npos;
   }
 }
-void HudDamage(float * dam, string damages) {
-  if (dam) {
-    for (int i=0;i<1+MAXVDUS+UnitImages::NUMGAUGES;++i) {
-      dam[i] = stof(nextElement(damages),1);
-    }
-  }
+void HudDamage(float * dam, const string &damages) 
+{
+	if (dam) {
+		string::size_type elemstart = 0, elemend = string::npos;
+		for (int i=0;i<1+MAXVDUS+UnitImages::NUMGAUGES;++i)
+			dam[i] = nextElementFloat(damages,elemstart,elemend,1);
+	}
 }
 string WriteHudDamage (Unit * un) {
   string ret;
@@ -537,25 +569,19 @@ void AddSounds(Unit * thus, string sounds) {
         thus->sound->jump=AUDCreateSound (ssound,false);
     }
 }
-void LoadCockpit(Unit * thus, string cockpit) {
-  /*
-  int i=0;
-  while (cockpitdamage!=""&&i<2*(UnitImages::NUMGAUGES+1+MAXVDUS)) {    
-    thus->image->cockpit_damage[i]=stof(nextElement(cockpitdamage));   
-    thus->image->cockpit_damage[i+1]=stof(nextElement(cockpitdamage));
-    i+=2;
-    }*/
-  thus->image->cockpitImage=nextElement(cockpit);
-  thus->image->CockpitCenter.i=stof(nextElement(cockpit));   
-  thus->image->CockpitCenter.j=stof(nextElement(cockpit));   
-  thus->image->CockpitCenter.k=stof(nextElement(cockpit));   
-
+void LoadCockpit(Unit * thus, const string &cockpit) 
+{
+	string::size_type elemstart=0, elemend=string::npos;
+	thus->image->cockpitImage   =nextElementString(cockpit,elemstart,elemend);
+	thus->image->CockpitCenter.i=nextElementFloat(cockpit,elemstart,elemend);
+	thus->image->CockpitCenter.j=nextElementFloat(cockpit,elemstart,elemend);
+	thus->image->CockpitCenter.k=nextElementFloat(cockpit,elemstart,elemend);
 }
 static string str(string inp, string def) {
   if (inp.length()==0) return def;
   return inp;
 }
-static int AssignIf(string inp,float &val,float&val1, float&val2) {
+static int AssignIf(const string &inp,float &val,float&val1, float&val2) {
   if (inp.length()) {
     val=stof(inp);
     val1=stof(inp);
@@ -565,7 +591,7 @@ static int AssignIf(string inp,float &val,float&val1, float&val2) {
   return 0;
 }
 
-static int AssignIfDeg(string inp,float &val) {
+static int AssignIfDeg(const string &inp,float &val) {
   if (inp.length()) {
     val=stof(inp)*VS_PI/180;
     return 1;
@@ -1237,7 +1263,7 @@ shield.range[1].   rhomax=r90;
     xml.rapidmesh_str = OPTIM_GET(row,table,Rapid_Mesh);
     vector<bsp_polygon> polies;
 
-    std::string collideTreeHash = VSFileSystem::GetHashName(string(modification)+"#"+row[0]);
+    std::string collideTreeHash = VSFileSystem::GetHashName(modification+"#"+row[0]);
     this->colTrees = collideTrees::Get(collideTreeHash);
     if (this->colTrees) {
       this->colTrees->Inc();
@@ -1328,7 +1354,7 @@ shield.range[1].   rhomax=r90;
   CheckAccessory(this);//turns on the ceerazy rotation for any accessories
   this->setAverageGunSpeed();
   double endt=queryTime();
-//  printf ("spr %f mesh %f subun %f mount %f carg %f sound %f upg %f exp %f light %f tree %f ",spritet-start,subunt-meshest,mountst-subunt,cargot-mountst,soundst-cargot,upgradet-soundst,explodet-upgradet, lightt-explodet, treet-lightt, endt-treet); 
+  //printf ("spr %f mesh %f subun %f mount %f carg %f sound %f upg %f exp %f light %f tree %f\n",spritet-start,subunt-meshest,mountst-subunt,cargot-mountst,soundst-cargot,upgradet-soundst,explodet-upgradet, lightt-explodet, treet-lightt, endt-treet); 
 }
 
 CSVRow GetUnitRow(string filename, bool subu, int faction, bool readlast, bool &rread) {

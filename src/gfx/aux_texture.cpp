@@ -103,11 +103,22 @@ void Texture::modold (const string &s, bool shared, string & hashname) {
   texHashTable.Put(hashname, oldtex);
   original = oldtex;
 }
-Texture::Texture () {
-  data=NULL;
+Texture::Texture () 
+{
   InitTexture();
-  name=-1;
-  palette=NULL;
+}
+
+void Texture::InitTexture()
+{
+	bound = false;
+	original = 0;
+	refcount = 0;
+	name = -1;
+	palette = NULL;
+	data = NULL;
+	mintcoord = Vector(0.0f,0.0f,0.0f);
+	maxtcoord = Vector(1.0f,1.0f,1.0f);
+	address_mode = DEFAULT_ADDRESS_MODE;
 }
 
 void Texture::setold()

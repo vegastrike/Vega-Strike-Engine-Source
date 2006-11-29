@@ -501,6 +501,8 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 		  bxmfprintf(Outputfile,"<Points>\n");
 		  int32bit numvertices=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
 		  word32index+=1;
+		  xml.vertices.reserve(xml.vertices.size()+numvertices);
+		  xml.vertexcount.reserve(xml.vertexcount.size()+numvertices);
 		  for(int32bit vert=0;vert<numvertices;vert++){
 			float32bit x=VSSwapHostFloatToLittle(inmemfile[word32index].f32val);//x
 			float32bit y=VSSwapHostFloatToLittle(inmemfile[word32index+1].f32val);//y

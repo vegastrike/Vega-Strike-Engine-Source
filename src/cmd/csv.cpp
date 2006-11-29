@@ -304,16 +304,21 @@ CSVRow::CSVRow(CSVTable * parent, unsigned int i) {
    this->parent=parent;
    iter=i*parent->key.size();
 }
-string CSVRow::operator [] (string col) {
+const string& CSVRow::operator [] (const string &col) const
+{
+	static std::string empty_string;
 	stdext::hash_map<string,int>::iterator i = parent->columns.find(col);
-   if (i==parent->columns.end()) return std::string("");
-   return parent->table[iter+(*i).second];
+	if (i==parent->columns.end()) 
+		return empty_string; else
+		return parent->table[iter+(*i).second];
 }
-string CSVRow::operator [] (unsigned int col) {
-   return parent->table[iter+col];
+const string& CSVRow::operator [] (unsigned int col) const
+{
+	return parent->table[iter+col];
 }
-string CSVRow::getKey(unsigned int which ) {
-   return parent->key[which];
+const string& CSVRow::getKey(unsigned int which) const
+{
+	return parent->key[which];
 }
 bool CSVTable::RowExists(string name, unsigned int &where) {
 	stdext::hash_map<string,int>::iterator i = rows.find(name);

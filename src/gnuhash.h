@@ -56,6 +56,13 @@ namespace stdext{
     }
   };
 
+	// Minimum declaration needed by SharedPool.h
+    template<class Key, class Traits = std::less<Key> > class hash_compare
+	{
+	public:
+		static const size_t bucket_size = 4;
+		static const size_t min_buckets = 8;
+	};
 
 }
 #endif

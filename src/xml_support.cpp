@@ -5,17 +5,18 @@
 #include <assert.h>
 #include "xml_support.h"
 
-string strtoupper(const string &foo) {
-  string rval;
-  string::const_iterator src = foo.begin();
-  while(src!=foo.end()) rval += toupper(*src++);
+string strtoupper(const string &foo) 
+{
+  string rval(foo);
+  for (string::iterator it = rval.begin(); it != rval.end(); ++it)
+	  *it = toupper(*it);
   return rval;
 }
-string strtolower(const string &foo) {
-	
-  string rval;
-  string::const_iterator src = foo.begin();
-  while(src!=foo.end()) rval += tolower(*src++);
+string strtolower(const string &foo) 
+{
+  string rval(foo);
+  for (string::iterator it = rval.begin(); it != rval.end(); ++it)
+	  *it = tolower(*it);
   return rval;
 }
 namespace XMLSupport {

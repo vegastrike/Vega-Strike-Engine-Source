@@ -75,6 +75,9 @@ namespace VSFileSystem
 
 	int		GetReadBytes( char * fmt, va_list ap);
 
+	typedef hash_map<string,VSError> FileLookupCache;
+	VSError CachedFileLookup(FileLookupCache &cache, const string& file, VSFileType type);
+
 	/************************************************************************************************/
 	/**** VSFileSystem global variables                                                          ****/
 	/************************************************************************************************/
@@ -222,33 +225,33 @@ namespace VSFileSystem
 
 	// Create a directory
 	void	CreateDirectoryAbs( const char * filename);
-	void	CreateDirectoryAbs( string filename);
+	void	CreateDirectoryAbs( const string &filename);
 	// Create a directory in home_path
 	void	CreateDirectoryHome( const char * filename);
-	void	CreateDirectoryHome( string filename);
+	void	CreateDirectoryHome( const string &filename);
 	// Create a directory in data_path_path
 	void	CreateDirectoryData( const char * filename);
-	void	CreateDirectoryData( string filename);
+	void	CreateDirectoryData( const string &filename);
 
 	/********** DO NO USE FileExists functions directly : USE LookForFile instead **********/
 	// Test if a directory exists (absolute path)
 	bool	DirectoryExists( const char * filename);
-	bool	DirectoryExists( string filename);
+	bool	DirectoryExists( const string &filename);
 	// Returns positive int or index in archive if found or -1 if not found
 	// Test if a file exists (absolute path)
-	int		FileExists( string root, const char * filename, VSFileType type=UnknownFile, bool lookinvolume=true);
-	int		FileExists( string root, string filename, VSFileType type=UnknownFile, bool lookinvolume=true);
+	int		FileExists( const string &root, const char * filename, VSFileType type=UnknownFile, bool lookinvolume=true);
+	int		FileExists( const string &root, const string &filename, VSFileType type=UnknownFile, bool lookinvolume=true);
 	// Test if a file exists relative to home_path
 	int		FileExistsHome( const char * filename, VSFileType type=UnknownFile);
-	int		FileExistsHome( string filename, VSFileType type=UnknownFile);
+	int		FileExistsHome( const string &filename, VSFileType type=UnknownFile);
 	// Test if a file exists relative to data_path
 	int		FileExistsData( const char * filename, VSFileType type=UnknownFile);
-	int		FileExistsData( string filename, VSFileType type=UnknownFile);
+	int		FileExistsData( const string &filename, VSFileType type=UnknownFile);
 
 	VSError	GetError(char * str=NULL);
 
 	VSError	LookForFile( VSFile & f, VSFileType type, VSFileMode mode=ReadOnly);
-	VSError	LookForFile( string & filename, VSFileType type, VSFileMode mode=ReadOnly);
+	VSError	LookForFile( const string & filename, VSFileType type, VSFileMode mode=ReadOnly);
 
 	/************************************************************************************************/
 	/**** VSFileSystem::VSFile functions                                                         ****/
@@ -289,7 +292,7 @@ namespace VSFileSystem
 			VSFile();
 			VSFile( const char * buffer, long size, VSFileType type=ZoneBuffer, VSFileMode=ReadOnly);
 			VSFile( const char * filename, VSFileType type=UnknownFile, VSFileMode=ReadOnly);
-			VSFile( string filename, VSFileType type=UnknownFile) { VSFile::VSFile( filename.c_str(), type); }
+			VSFile( const string &filename, VSFileType type=UnknownFile) { VSFile::VSFile( filename.c_str(), type); }
   			~VSFile();
 
 			FILE *	GetFP() { return this->fp; } // This is still needed for special cases (when loading PNG files)
@@ -298,13 +301,13 @@ namespace VSFileSystem
 			/********************************** OPEN A FILE *********************************/
 			// Open an existing file read only
 			VSError	OpenReadOnly( const char * filename, VSFileType type=UnknownFile);
-			VSError	OpenReadOnly( string filename, VSFileType type=UnknownFile) { return OpenReadOnly( filename.c_str(), type); }
+			VSError	OpenReadOnly( const string &filename, VSFileType type=UnknownFile) { return OpenReadOnly( filename.c_str(), type); }
 			// Open an existing file read/write
 			VSError	OpenReadWrite( const char * filename, VSFileType type=UnknownFile);
-			VSError	OpenReadWrite( string filename, VSFileType type=UnknownFile) { return OpenReadWrite( filename.c_str(), type); }
+			VSError	OpenReadWrite( const string &filename, VSFileType type=UnknownFile) { return OpenReadWrite( filename.c_str(), type); }
 			// Open (truncate) or create a file read/write
 			VSError	OpenCreateWrite( const char * filename, VSFileType type=UnknownFile);
-			VSError	OpenCreateWrite( string filename, VSFileType type=UnknownFile) { return OpenCreateWrite( filename.c_str(), type); }
+			VSError	OpenCreateWrite( const string &filename, VSFileType type=UnknownFile) { return OpenCreateWrite( filename.c_str(), type); }
 			// Close the file
 			void	Close();
 
@@ -313,7 +316,7 @@ namespace VSFileSystem
 			VSError	ReadLine( void * ptr, size_t length);		// Read a line of maximum length
 			string	ReadFull();									// Read the entire file and returns the content in a string
 			size_t	Write( const void * ptr, size_t length);	// Write length from ptr (store written bytes number in length)
-			size_t	Write( string content);						// Write a string
+			size_t	Write( const string &content);				// Write a string
 			VSError	WriteLine( const void * ptr);				// Write a line
 			void	WriteFull( void * ptr);						// Write
 
@@ -514,15 +517,15 @@ namespace VSFileSystem
 			bool	Valid();				// Tells wether the file is valid or not
 
 			/********************************** FILE PATH *********************************/
-			string	GetFilename();
-			string	GetDirectory();
-			string	GetSubDirectory();
-			string	GetRoot();
+			const string& GetFilename() const { return this->filename; }
+			const string& GetDirectory() const { return this->directoryname; }
+			const string& GetSubDirectory() const { return this->subdirectoryname; }
+			const string& GetRoot() const { return this->rootname; }
 
-			void	SetFilename( string filename);
-			void	SetDirectory( string directory);
-			void	SetSubDirectory( string subdirectory);
-			void	SetRoot( string root);
+			void SetFilename(const string &filename) { this->filename = filename; }
+			void SetDirectory(const string &directory) { this->directoryname = directory; }
+			void SetSubDirectory(const string &subdirectory) { this->subdirectoryname = subdirectory; }
+			void SetRoot(const string &root) { this->rootname = root; }
 
 			string	GetFullPath();
             string  GetAbsPath();
