@@ -110,7 +110,7 @@ namespace BaseUtil {
 	{
 		BaseInterface::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
-		for (int i=0;i<newroom->objs.size();i++) {
+		for (int i=0;i<newroom->links.size();i++) {
 			if (newroom->links[i]) {
 				if (newroom->links[i]->index==index) {
 					newroom->links[i]->x   = x;
@@ -125,7 +125,7 @@ namespace BaseUtil {
 	{
 		BaseInterface::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
-		for (int i=0;i<newroom->objs.size();i++) {
+		for (int i=0;i<newroom->links.size();i++) {
 			if (newroom->links[i]) {
 				if (newroom->links[i]->index==index) {
 					newroom->links[i]->text= text;
@@ -137,7 +137,7 @@ namespace BaseUtil {
 	{
 		BaseInterface::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
-		for (int i=0;i<newroom->objs.size();i++) {
+		for (int i=0;i<newroom->links.size();i++) {
 			if (newroom->links[i]) {
 				if (newroom->links[i]->index==index) {
 					newroom->links[i]->Relink(python);
@@ -149,7 +149,7 @@ namespace BaseUtil {
 	{
 		BaseInterface::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
-		for (int i=0;i<newroom->objs.size();i++) {
+		for (int i=0;i<newroom->links.size();i++) {
 			if (newroom->links[i]) {
 				if (newroom->links[i]->index==index) {
 					// FIXME: Will crash if not a Goto object.
