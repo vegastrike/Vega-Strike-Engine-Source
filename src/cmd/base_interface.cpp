@@ -199,8 +199,7 @@ void BaseInterface::Room::Draw (BaseInterface *base) {
 	for (i=0;i<objs.size();i++) {
 		if (objs[i]) {
 			GFXBlendMode(SRCALPHA,INVSRCALPHA);
-			objs[i]->Draw(base);
-			
+			objs[i]->Draw(base);			
 		}
 	}
 	GFXBlendMode(SRCALPHA,INVSRCALPHA);
@@ -223,87 +222,118 @@ void BaseInterface::Room::Draw (BaseInterface *base) {
 	static float y_lower       = -0.9; // shows the offset on the lower edge of the screen (for the textline there) -> Should be defined globally somewhere
 	if (enable_markers) {
 		float x, y, text_wid, text_hei;
+		//get offset from config;
+		static float text_offset_x = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_textoffset_x","0"));
+		static float text_offset_y = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_textoffset_y","0"));
+		static float text_color_r  = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_textcolor_r","1"));
+		static float text_color_g  = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_textcolor_g","1"));
+		static float text_color_b  = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_textcolor_b","1"));
 		for (int i=0; i<links.size(); i++) { //loop through all links and draw a marker for each
 			if (links[i]) {
-			if ((links[i]->alpha < 1) || (draw_always)) {
-				if (draw_always) { links[i]->alpha = 1; }  // set all alphas to visible
-				x = (links[i]->x + (links[i]->wid / 2));   // get the center of the location
-				y = (links[i]->y + (links[i]->hei / 2));   // get the center of the location
+				if ((links[i]->alpha < 1) || (draw_always)) {
+					if (draw_always) { links[i]->alpha = 1; }  // set all alphas to visible
+					x = (links[i]->x + (links[i]->wid / 2));   // get the center of the location
+					y = (links[i]->y + (links[i]->hei / 2));   // get the center of the location
 
-				/* draw marker */
-				static string spritefile_marker = vs_config->getVariable("graphics","base_locationmarker_sprite","");
-				if (spritefile_marker.length()) {
-					static VSSprite *spr_marker = new VSSprite(spritefile_marker.c_str());
-					float wid,hei;
-					spr_marker->GetSize(wid,hei);
-					// check if the sprite is near a screenedge and correct its position if necessary
-					if ((x + (wid / 2)) >=  1     ) {x = ( 1      - (wid / 2));}
-					if ((y + (hei / 2)) >=  1     ) {y = ( 1      - (hei / 2));}
-					if ((x - (wid / 2)) <= -1     ) {x = (-1      + (wid / 2));}
-					if ((y - (hei / 2)) <= y_lower) {y = (y_lower + (hei / 2));}
-					spr_marker->SetPosition(x, y);
-					GFXDisable(TEXTURE1);
-					GFXEnable(TEXTURE0);
-					GFXColor4f(1,1,1,links[i]->alpha);
-					spr_marker->Draw();
-				} // if spritefile
+					/* draw marker */
+					static string spritefile_marker = vs_config->getVariable("graphics","base_locationmarker_sprite","");
+					if (spritefile_marker.length()) {
+						static VSSprite *spr_marker = new VSSprite(spritefile_marker.c_str());
+						float wid,hei;
+						spr_marker->GetSize(wid,hei);
+						// check if the sprite is near a screenedge and correct its position if necessary
+						if ((x + (wid / 2)) >=  1     ) {x = ( 1      - (wid / 2));}
+						if ((y + (hei / 2)) >=  1     ) {y = ( 1      - (hei / 2));}
+						if ((x - (wid / 2)) <= -1     ) {x = (-1      + (wid / 2));}
+						if ((y - (hei / 2)) <= y_lower) {y = (y_lower + (hei / 2));}
+						spr_marker->SetPosition(x, y);
+						GFXDisable(TEXTURE1);
+						GFXEnable(TEXTURE0);
+						GFXColor4f(1,1,1,links[i]->alpha);
+						spr_marker->Draw();
+					} // if spritefile
 
-				if (draw_text) {
-					GFXDisable(TEXTURE0);
-					//get offset from config;
-					static float text_offset_x = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_textoffset_x","0"));
-					static float text_offset_y = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_textoffset_y","0"));
-					static float text_color_r  = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_textcolor_r","1"));
-					static float text_color_g  = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_textcolor_g","1"));
-					static float text_color_b  = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_textcolor_b","1"));
+					if (draw_text) {
+						GFXDisable(TEXTURE0);
+						TextPlane text_marker;
+						text_marker.SetText(links[i]->text);
+						text_marker.GetCharSize(text_wid, text_hei);     // get average charactersize
+						float text_pos_x = x + text_offset_x;            // align right ...
+						float text_pos_y = y + text_offset_y + text_hei; // ...and on top
+						text_wid = text_wid * links[i]->text.length() * 0.25;     // calc ~width of text (=multiply the average characterwidth with the number of characters)
+						if ((text_pos_x + text_offset_x + text_wid) >= 1) {       // check right screenborder
+							text_pos_x = (x - abs(text_offset_x) - text_wid);     // align left
+						}
+						if ((text_pos_y + text_offset_y) >= 1) {                  // check upper screenborder
+							text_pos_y = (y - abs(text_offset_y));                // align on bottom
+						}
+						if ((text_pos_y + text_offset_y - text_hei) <= y_lower) { // check lower screenborder
+							text_pos_y = (y + abs(text_offset_y) + text_hei);     // align on top
+						}
+						text_marker.col = GFXColor(text_color_r, text_color_g, text_color_b, links[i]->alpha);
+						text_marker.SetPos(text_pos_x, text_pos_y);
+						text_marker.Draw();
+						GFXEnable(TEXTURE0);
+					} // if draw_text
+				}
+			} // if link
+		}  // for i
+	} // enable_markers
+
+	static bool draw_borders  = XMLSupport::parse_bool(vs_config->getVariable("graphics","base_drawlocationborders","false"));
+	static bool debug_markers = XMLSupport::parse_bool(vs_config->getVariable("graphics","base_enable_debugmarkers","false"));
+	if (draw_borders || debug_markers) {
+		float x, y, text_wid, text_hei;
+		//get offset from config;
+		static float text_offset_x = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_textoffset_x","0"));
+		static float text_offset_y = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_textoffset_y","0"));
+		for (int i=0; i<links.size(); i++) { //loop through all links and draw a marker for each
+			if (links[i]) {
+				// Debug marker
+				if (debug_markers) {
+					//compute label position
+					x = (links[i]->x + (links[i]->wid / 2));   // get the center of the location
+					y = (links[i]->y + (links[i]->hei / 2));   // get the center of the location
 					TextPlane text_marker;
-					text_marker.SetText(links[i]->text);
+					text_marker.SetText(links[i]->index);
 					text_marker.GetCharSize(text_wid, text_hei);     // get average charactersize
 					float text_pos_x = x + text_offset_x;            // align right ...
 					float text_pos_y = y + text_offset_y + text_hei; // ...and on top
 					text_wid = text_wid * links[i]->text.length() * 0.25;     // calc ~width of text (=multiply the average characterwidth with the number of characters)
-					if ((text_pos_x + text_offset_x + text_wid) >= 1) {       // check right screenborder
+					if ((text_pos_x + text_offset_x + text_wid) >= 1)         // check right screenborder
 						text_pos_x = (x - abs(text_offset_x) - text_wid);     // align left
-					}
-					if ((text_pos_y + text_offset_y) >= 1) {                  // check upper screenborder
+					if ((text_pos_y + text_offset_y) >= 1)                    // check upper screenborder
 						text_pos_y = (y - abs(text_offset_y));                // align on bottom
-					}
-					if ((text_pos_y + text_offset_y - text_hei) <= y_lower) { // check lower screenborder
+					if ((text_pos_y + text_offset_y - text_hei) <= y_lower)   // check lower screenborder
 						text_pos_y = (y + abs(text_offset_y) + text_hei);     // align on top
-					}
-					text_marker.col = GFXColor(text_color_r, text_color_g, text_color_b, links[i]->alpha);
+					if (enable_markers)
+						text_pos_y += text_hei;
+					
+					text_marker.col = GFXColor(1, 1, 1, 1);
 					text_marker.SetPos(text_pos_x, text_pos_y);
+					
+					GFXDisable(TEXTURE0);
 					text_marker.Draw();
 					GFXEnable(TEXTURE0);
-				} // if draw_text
-			}
+				}
+				// link border
+				GFXColor4f(1,1,1,1);
+				Vector c1(links[i]->x,links[i]->y,0);
+				Vector c3(links[i]->wid+c1.i,links[i]->hei+c1.j,0);
+				Vector c2(c1.i,c3.j,0);
+				Vector c4(c3.i,c1.j,0);
+				GFXDisable(TEXTURE0);
+				GFXBegin(GFXLINESTRIP);
+				GFXVertexf(c1);
+				GFXVertexf(c2);
+				GFXVertexf(c3);
+				GFXVertexf(c4);
+				GFXVertexf(c1);
+				GFXEnd();
+				GFXEnable(TEXTURE0);
 			} // if link
-		}  // for i
-		static bool draw_borders = XMLSupport::parse_bool(vs_config->getVariable("graphics","base_drawlocationborders","false"));
-		if (draw_borders) {
-			for (int i=0; i<links.size(); i++) { //loop through all links and draw a marker for each
-				if (links[i]) {
-					GFXColor4f(1,1,1,1);
-					GFXDisable(TEXTURE0);
-					GFXBegin (GFXLINE);
-					GFXVertex3d (links[i]->x              ,links[i]->y              ,0.0);
-					GFXVertex3d (links[i]->x              ,links[i]->y+links[i]->hei,0.0);
-
-					GFXVertex3d (links[i]->x              ,links[i]->y+links[i]->hei,0.0);
-					GFXVertex3d (links[i]->x+links[i]->wid,links[i]->y+links[i]->hei,0.0);
-
-					GFXVertex3d (links[i]->x+links[i]->wid,links[i]->y+links[i]->hei,0.0);
- 					GFXVertex3d (links[i]->x+links[i]->wid,links[i]->y              ,0.0);
-
-					GFXVertex3d (links[i]->x+links[i]->wid,links[i]->y              ,0.0);
-					GFXVertex3d (links[i]->x              ,links[i]->y              ,0.0);
-					GFXEnd();
-					GFXEnable (TEXTURE0);
-				} // if link
-			} // for i
-		} // if draw_borders
-	} // enable_markers
-
+		} // for i
+	} // if draw_borders
 }
 static std::vector<BaseInterface::Room::BaseTalk *> active_talks;
 
