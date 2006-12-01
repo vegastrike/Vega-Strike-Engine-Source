@@ -161,7 +161,7 @@ void AnimatedTexture::setTime (double tim) {
                   this->mintcoord = (1-fraction)*frames_mintc[active] + fraction*frames_mintc[nextactive];
               }
           } else {
-              if (frames_maxtc.size()<active) {
+              if (active<frames_maxtc.size()) {
                   this->maxtcoord = frames_maxtc[active];
                   this->mintcoord = frames_mintc[active];
               }
@@ -384,33 +384,31 @@ void AnimatedTexture::Load(VSFileSystem::VSFile & f, int stage, enum FILTER ismi
             alltrim(opt);
 		}else break;
     }
-    if (loadall||i==numframes/2) {
-        if (vidMode) {
-			frames.push_back(StringPool::Reference(string(temp)));
-            frames_mintc.push_back(Vector(
-                XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"mins",defms)),
-                XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"mint",defmt)),
-                XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"minr",defmr))));
-            frames_maxtc.push_back(Vector(
-                XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"maxs",defMs)),
-                XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"maxt",defMt)),
-                XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"maxr",defMr))));
-        } else {
-          enum ADDRESSMODE addrmode = parseAddressMode(XMLSupport::parse_option_value(opt,"addressMode",""),defaultAddressMode);
-          if (alp[0]!='\0')
-              Decal[j++]=new Texture (file,alp,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_animations)?GFXTRUE:GFXFALSE,65536,(detailtex?GFXTRUE:GFXFALSE),GFXFALSE,addrmode); else
-              Decal[j++]=new Texture (file,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,(g_game.use_animations)?GFXTRUE:GFXFALSE,65536,(detailtex?GFXTRUE:GFXFALSE),GFXFALSE,addrmode);
-          if (Decal[j-1]) {
-              Decal[j-1]->mintcoord=Vector(
-                XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"mins",defms)),
-                XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"mint",defmt)),
-                XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"minr",defmr)));
-              Decal[j-1]->maxtcoord=Vector(
-                XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"maxs",defMs)),
-                XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"maxt",defMt)),
-                XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"maxr",defMr)));
-          }
-        }
+    if (vidMode) {
+		frames.push_back(StringPool::Reference(string(temp)));
+        frames_mintc.push_back(Vector(
+            XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"mins",defms)),
+            XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"mint",defmt)),
+            XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"minr",defmr))));
+        frames_maxtc.push_back(Vector(
+            XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"maxs",defMs)),
+            XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"maxt",defMt)),
+            XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"maxr",defMr))));
+    } else {
+      enum ADDRESSMODE addrmode = parseAddressMode(XMLSupport::parse_option_value(opt,"addressMode",""),defaultAddressMode);
+      if (alp[0]!='\0')
+          Decal[j++]=new Texture (file,alp,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_animations)?GFXTRUE:GFXFALSE,65536,(detailtex?GFXTRUE:GFXFALSE),GFXFALSE,addrmode); else
+          Decal[j++]=new Texture (file,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,(g_game.use_animations)?GFXTRUE:GFXFALSE,65536,(detailtex?GFXTRUE:GFXFALSE),GFXFALSE,addrmode);
+      if (Decal[j-1]) {
+          Decal[j-1]->mintcoord=Vector(
+            XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"mins",defms)),
+            XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"mint",defmt)),
+            XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"minr",defmr)));
+          Decal[j-1]->maxtcoord=Vector(
+            XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"maxs",defMs)),
+            XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"maxt",defMt)),
+            XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"maxr",defMr)));
+      }
     }
   }
 
@@ -427,6 +425,9 @@ void AnimatedTexture::Load(VSFileSystem::VSFile & f, int stage, enum FILTER ismi
   loadSuccess=true;
 
   anis.insert(this);
+
+  //Needed - must do housekeeping, tcoord stuff and the like.
+  setTime(curtime);
 }
  
 void AnimatedTexture::LoadFrame(int frame) {
