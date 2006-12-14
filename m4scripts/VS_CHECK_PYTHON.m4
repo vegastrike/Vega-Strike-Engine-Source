@@ -83,7 +83,7 @@ dnl Simple check for libpython2.2.so
 if test "x${FOUND_PYTHON}" = "xyes";
 then
     FOUND_LIBPYTHON_SO=no
-    PYTHON_libchk="/usr/lib /usr/local/lib /sw/lib/python${PYTHON_SHORT}/config /usr/lib/python${PYTHON_SHORT} /usr/lib/python${PYTHON_SHORT}/config /usr/local/lib/python${PYTHON_SHORT} /usr/local/lib/python${PYTHON_SHORT}/config /lib/python2.2/config"
+    PYTHON_libchk="/usr/lib /usr/local/lib /usr/lib64 /usr/local/lib64 /usr/lib64/python${PYTHON_SHORT}/config /usr/local/lib64/python${PYTHON_SHORT}/config /sw/lib/python${PYTHON_SHORT}/config /usr/lib/python${PYTHON_SHORT} /usr/lib/python${PYTHON_SHORT}/config /usr/local/lib/python${PYTHON_SHORT} /usr/local/lib/python${PYTHON_SHORT}/config /lib/python2.2/config"
     for i in ${PYTHON_libchk};
     do
 	
@@ -92,9 +92,9 @@ then
 	    echo "$i/libpython${PYTHON_SHORT}.so yes"
 	    PYTHON_CXXFLAGS="-I${PYTHON_incdir}"
 	    if test "x$is_macosx" = "xyes" ; then
-	    	    PYTHON_LIBS="-lpython${PYTHON_SHORT} --export-dynamic"
+	    	    PYTHON_LIBS="-L$i -lpython${PYTHON_SHORT} --export-dynamic"
 	    else
-		    PYTHON_LIBS="-lpython${PYTHON_SHORT} -Xlinker -export-dynamic"
+		    PYTHON_LIBS="-L$i -lpython${PYTHON_SHORT} -Xlinker -export-dynamic"
 	    fi
             FOUND_LIBPYTHON_SO=yes
             break
