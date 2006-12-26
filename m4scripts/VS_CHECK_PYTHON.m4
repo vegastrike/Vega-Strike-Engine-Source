@@ -83,7 +83,7 @@ dnl Simple check for libpython2.2.so
 if test "x${FOUND_PYTHON}" = "xyes";
 then
     FOUND_LIBPYTHON_SO=no
-    PYTHON_libchk="/usr/lib /usr/local/lib /usr/lib64 /usr/local/lib64 /usr/lib64/python${PYTHON_SHORT}/config /usr/local/lib64/python${PYTHON_SHORT}/config /sw/lib/python${PYTHON_SHORT}/config /usr/lib/python${PYTHON_SHORT} /usr/lib/python${PYTHON_SHORT}/config /usr/local/lib/python${PYTHON_SHORT} /usr/local/lib/python${PYTHON_SHORT}/config /lib/python2.2/config"
+    PYTHON_libchk="${PYTHON_LIBPATH} /usr/lib /usr/local/lib /usr/lib64 /usr/local/lib64 /usr/lib64/python${PYTHON_SHORT}/config /usr/local/lib64/python${PYTHON_SHORT}/config /sw/lib/python${PYTHON_SHORT}/config /usr/lib/python${PYTHON_SHORT} /usr/lib/python${PYTHON_SHORT}/config /usr/local/lib/python${PYTHON_SHORT} /usr/local/lib/python${PYTHON_SHORT}/config /lib/python2.2/config"
     for i in ${PYTHON_libchk};
     do
 	

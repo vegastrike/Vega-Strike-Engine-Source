@@ -353,12 +353,16 @@ else
     VS_LIBS="$VS_LIBS -lutil"
 fi
 
+dnl Python needs to check known paths for the .so file.
+dnl We need a way for the user to specify his own path.
+AC_ARG_WITH(python-libs, AC_HELP_STRING([--with-python-libs=DIR], [Location of python library]),PYTHON_LIBPATH=$withval)
+
 VS_CHECK_PYTHON
 
 AC_LANG(C++)
 
 if test "x$build_client"  = "xno"; then
-    true
+    AM_CONDITIONAL([VS_MAKE_SOUNDSERVER], [false]) 
 else
     VS_CHECK_SDL
     
