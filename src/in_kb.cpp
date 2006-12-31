@@ -212,8 +212,8 @@ int getModifier(bool alton, bool cntrlon, bool shifton) {
   // Polling state
   setActiveModifiers( 
 	    (shifton?KB_MOD_SHIFT:0)
-	  ||(alton  ?KB_MOD_ALT  :0)
-	  ||(ctrlon ?KB_MOD_CTRL :0)  );  
+	   |(alton  ?KB_MOD_ALT  :0)
+	   |(ctrlon ?KB_MOD_CTRL :0)  );  
 
   int curmod=getModifier(alton,ctrlon,shifton) & modmask;
   kbGetInput( ch, curmod,release, x, y );

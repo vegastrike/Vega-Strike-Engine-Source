@@ -49,6 +49,8 @@ const char* displayCmd( Cmd cmd )
     CASE( LOGIN_NEW        )
     CASE( CMD_RESPAWN      )
 
+    CASE( CMD_CARGOUPGRADE )
+    CASE( CMD_SHIPSTATS    )
     CASE( CMD_FIREREQUEST  )
     CASE( CMD_UNFIREREQUEST)
     CASE( CMD_TARGET       )

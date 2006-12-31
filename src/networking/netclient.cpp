@@ -778,9 +778,14 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 			case CMD_TARGET:
 				un = UniverseUtil::GetUnitFromSerial( packet_serial );
 				if (un) {
-                                        Unit * target_un = UniverseUtil::GetUnitFromSerial( netbuf.getSerial() );
+					unsigned short targserial = netbuf.getSerial();
+                                        Unit * target_un = UniverseUtil::GetUnitFromSerial( targserial );
+										if (target_un) {
+											COUT<<"Confirmed targeting unit "<<target_un->name<<" ("<<targserial<<")."<<endl;
+										}
                                         Unit* oldtarg=un->Target();
                                         if (oldtarg&&oldtarg->GetSerial()==0&&(target_un==NULL||target_un->GetSerial()==0)) {
+                                          COUT <<"Targeting unit with serial 0: " << oldtarg->name;
                                           //don't do anything
                                         }else {
                                           un->computer.target.SetUnit(target_un);

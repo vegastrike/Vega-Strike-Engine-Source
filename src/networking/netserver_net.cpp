@@ -125,10 +125,12 @@ void	NetServer::recvMsg_tcp( ClientPtr clt )
     {
 		// NETFIXME: Cheat: We may want to check the serial of this packet and make sure it is what we expect.
 		command = packet.getCommand( );
-		if (command!=CMD_POSUPDATE)COUT << "Received TCP" << Cmd(command) << ", ser=";
-	if (clt->game_unit.GetUnit())
-		COUT << clt->game_unit.GetUnit()->GetSerial();
-	COUT << endl;
+		if (command!=CMD_POSUPDATE) {
+			COUT << "Received TCP" << Cmd(command) << ", ser=";
+			if (clt->game_unit.GetUnit())
+				cout << clt->game_unit.GetUnit()->GetSerial();
+			cout << endl;
+		}
         if( clt )
         {
 			this->updateTimestamps( clt, packet);

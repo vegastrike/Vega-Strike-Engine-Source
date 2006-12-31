@@ -153,12 +153,19 @@ bool CrashForceDock(Unit * thus, Unit * dockingUn, bool force) {
   Unit * un=dockingUn;
   int whichdockport=thus->CanDockWithMe(un,force);
   if (whichdockport!=-1) {
-    QVector place=UniverseUtil::SafeEntrancePoint(un->Position(),un->rSize()*1.5);
-    un->SetPosAndCumPos(place);
-    if (un->ForceDock(thus,whichdockport)>0) {
-      abletodock(3);
-      un->UpgradeInterface(thus);
-      return true;
+    if (Network==NULL) {
+      QVector place=UniverseUtil::SafeEntrancePoint(un->Position(),un->rSize()*1.5);
+      un->SetPosAndCumPos(place);
+      if (un->ForceDock(thus,whichdockport)>0) {
+        abletodock(3);
+        un->UpgradeInterface(thus);
+        return true;
+      }
+    } else {
+      int playernum = _Universe->whichPlayerStarship( dockingUn );
+      if( playernum>=0)
+        Network[playernum].dockRequest( thus->GetSerial() );
+      return false;
     }
   }
   return false;

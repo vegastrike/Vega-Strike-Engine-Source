@@ -1112,8 +1112,10 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   case UNIT:
   case BUILDING:
   case VEHICLE:
-    if (Network&&!SERVER)
+    if (Network&&!SERVER) {
+      xml->unitlevel++;
       break;//don't spawn these clientside
+    }
   case NEBULA:
   case ASTEROID:
   case ENHANCEMENT:
@@ -1427,7 +1429,6 @@ using namespace StarXML;
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &StarSystem::beginElement, &StarSystem::endElement);
-  
   XML_Parse(parser, (f.ReadFull()).c_str(), f.Size(), 1);
  /*
   do {

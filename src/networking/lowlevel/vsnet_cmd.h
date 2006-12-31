@@ -112,7 +112,10 @@ enum Cmd
 	CMD_CREATEPLANET ,		// From server to clients : server unit creation
 	CMD_CREATEASTER  ,		// From server to clients : server unit creation
 	CMD_CREATEMISSILE,		// From server to clients : server unit creation
-
+	
+	CMD_CARGOUPGRADE,		// C->S and S->C: buy/sell cargo or upgrade.
+	CMD_SHIPSTATS,			// S->C (broadcast): sent when upgrade involves more than just buying/selling cargo.
+	
 	// Account management commands
 	CMD_RESYNCACCOUNTS ,		// When connection to account server was lost
                                     // and established again :

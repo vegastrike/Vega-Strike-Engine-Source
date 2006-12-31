@@ -1071,15 +1071,11 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			ObjSerial utdwserial = netbuf.getShort();
 			unsigned short zonenum = un->getStarSystem()->GetZone();
 			cerr<<"RECEIVED a DockRequest from unit "<<un->GetSerial()<<" to unit "<<utdwserial<<" in zone "<<zonenum<<endl;
-                        //NETFIXME unimplemented
-                        cerr <<"DOCKING AS OF YET UNIMPLEMENTED "<<endl;
-                        break;
 			docking_unit = zonemgr->getUnit( utdwserial, zonenum);
 			if( docking_unit)
 			{
-				// In Unit::ForceDocking() we increase dockingport bye one because it may be 0
-				int dockport = un->Dock( docking_unit) - 1;
-				if( dockport)
+				int dockport = un->Dock( docking_unit);
+				if( dockport>=0)
 					this->sendDockAuthorize( un->GetSerial(), utdwserial, dockport, zonenum);
 			}
 			else
@@ -1094,14 +1090,11 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			ObjSerial utdwserial = netbuf.getShort();
 			unsigned short zonenum = un->getStarSystem()->GetZone();
 			cerr<<"RECEIVED an UnDockRequest from unit "<<un->GetSerial()<<" to unit "<<utdwserial<<" in zone "<<zonenum<<endl;
-                        //NETFIXME unimplemented
-                        cerr <<"DOCKING AS OF YET UNIMPLEMENTED "<<endl;
-                        break;
 			docking_unit = zonemgr->getUnit( utdwserial, zonenum);
 			if( docking_unit)
 			{
-				int dockport = un->UnDock( docking_unit);
-				if( dockport)
+				bool undocked = un->UnDock( docking_unit);
+				if( undocked )
 					this->sendUnDock( un->GetSerial(), utdwserial, zonenum);
 			}
 			else

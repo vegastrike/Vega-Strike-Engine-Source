@@ -36,14 +36,13 @@ void	NetClient::enterClient( NetBuffer &netbuf, ObjSerial cltserial )
 	string xmlstr = netbuf.getString();
 	Transformation trans = netbuf.getTransformation();
 	// If not a local player, add it in our array
-        Unit * shouldbenull=UniverseUtil::GetUnitFromSerial(cltserial);
-          //NETFIXME could be slow--but alas
-        if (NULL!=shouldbenull) {
-          cout << " not adding unit with serial number "<< cltserial<<" named " <<shouldbenull->name.get()<<" to system .";
-          return;//already exists
-        }
-	if( !isLocalSerial( cltserial))
-	{
+	Unit * shouldbenull=UniverseUtil::GetUnitFromSerial(cltserial);
+	//NETFIXME could be slow--but alas
+	if (NULL!=shouldbenull) {
+		cout << " not adding unit with serial number "<< cltserial<<" named " <<shouldbenull->name.get()<<" to system .";
+		return;//already exists
+	}
+	if( !isLocalSerial( cltserial)) {
 
 		// We will ignore - starsys as if a client enters he is in the same system
 		//                - pos since we received a ClientState
@@ -53,67 +52,69 @@ void	NetClient::enterClient( NetBuffer &netbuf, ObjSerial cltserial )
 		float creds;
 		bool update=true;
 		vector<string> savedships;
-                string PLAYER_FACTION_STRING;
-                string * savegamestr=NULL;
-                if (cltname.length()) {
-		// Parse the save buffer
-					if (savestr.length()==0){
-						if (this->lastsave.size()&&this->lastsave[0].length()&&
-							this->callsign==cltname) {
-					  savestr=this->lastsave[0];
-					  }
-					}
-                  save.ParseSaveGame( "", starsys, "", pos, update, creds, savedships, 0, savestr, false);
+		string PLAYER_FACTION_STRING;
+		string * savegamestr=NULL;
+		if (cltname.length()) {
+			// Parse the save buffer
+			if (savestr.length()==0){
+				if (this->lastsave.size()&&this->lastsave[0].length()&&
+					this->callsign==cltname) {
+					savestr=this->lastsave[0];
+				}
+			}
+			save.ParseSaveGame( "", starsys, "", pos, update, creds, savedships, 0, savestr, false);
                   
-                  PLAYER_FACTION_STRING= save.GetPlayerFaction();
+			PLAYER_FACTION_STRING= save.GetPlayerFaction();
                   
-                  // CREATES THE UNIT... GET SAVE AND XML FROM SERVER
-                  // Use the first ship if there are more than one -> we don't handle multiple ships for now
-                  // We name the flightgroup with the player name
-                  cerr<<"Found saveship[0] = "<<savedships[0]<<endl;
-                  cerr<<"NEW PLAYER POSITION : x="<<pos.i<<",y="<<pos.j<<"z="<<pos.k<<endl;
+			// CREATES THE UNIT... GET SAVE AND XML FROM SERVER
+			// Use the first ship if there are more than one -> we don't handle multiple ships for now
+			// We name the flightgroup with the player name
+			cerr<<"Found saveship[0] = "<<savedships[0]<<endl;
+			cerr<<"NEW PLAYER POSITION : x="<<pos.i<<",y="<<pos.j<<"z="<<pos.k<<endl;
                   
-                  cerr<<"SAFE PLATER POSITION: x="<<pos.i<<",y="<<pos.j<<"z="<<pos.k<<endl;
-                  savegamestr=&xmlstr;
+			cerr<<"SAFE PLATER POSITION: x="<<pos.i<<",y="<<pos.j<<"z="<<pos.k<<endl;
+			savegamestr=&xmlstr;
 		}else {
-                  std::string::size_type wherepipe=xmlstr.find("|");
-                  PLAYER_FACTION_STRING=((wherepipe!=string::npos)?xmlstr.substr(0,wherepipe):xmlstr);
+			std::string::size_type wherepipe=xmlstr.find("|");
+			PLAYER_FACTION_STRING=((wherepipe!=string::npos)?xmlstr.substr(0,wherepipe):xmlstr);
                   
-                  if (savestr=="Pilot"||savestr=="pilot")
-                    savestr="eject";
-                  else if (savestr.find(".cargo")==string::npos&&PLAYER_FACTION_STRING=="upgrades") {
-                    savestr="generic_cargo";
-                  }
-                  savedships.push_back(savestr);
-                  if (wherepipe!=string::npos) {
-                    cltname=xmlstr.substr(wherepipe+1);
-                  }
-                  if (wherepipe==string::npos||cltname.length()==0){
-                    cltname = "Object_"+XMLSupport::tostring(cltserial);
-                  }
-                }
+			if (savestr=="Pilot"||savestr=="pilot")
+				savestr="eject";
+			else if (savestr.find(".cargo")==string::npos&&PLAYER_FACTION_STRING=="upgrades") {
+				savestr="generic_cargo";
+			}
+			savedships.push_back(savestr);
+			if (wherepipe!=string::npos) {
+				cltname=xmlstr.substr(wherepipe+1);
+			}
+			if (wherepipe==string::npos||cltname.length()==0){
+				cltname = "Object_"+XMLSupport::tostring(cltserial);
+			}
+		}
 		
 		Unit * un = UnitFactory::createUnit( savedships[0].c_str(),
-							 false,
-							 FactionUtil::GetFactionIndex( PLAYER_FACTION_STRING),
-							 string(""),
-							 Flightgroup::newFlightgroup ( cltname,savedships[0],PLAYER_FACTION_STRING,"default",1,1,"","",mission),
-							 0, savegamestr);
+											 false,
+											 FactionUtil::GetFactionIndex( PLAYER_FACTION_STRING),
+											 string(""),
+											 Flightgroup::newFlightgroup ( cltname,savedships[0],PLAYER_FACTION_STRING,"default",1,1,"","",mission),
+											 0, savegamestr);
 		ClientPtr clt = this->AddClientObject( un, cltserial);
 
 		// Assign new coordinates to client
 		un->SetPosition( trans.position );
 		un->curr_physical_state=trans;
 		un->BackupState();
-                DoEnterExitAni(trans.position,un->rSize(),true);
-		clt->last_packet=un->old_state;
-		clt->prediction->InitInterpolation(un, un->old_state, 0, this->deltatime);
-
-		save.SetPlayerLocation(un->curr_physical_state.position);
-		clt->name = cltname;
-                clt->callsign=cltname;
-		string msg = clt->callsign+" entered the system";
-		UniverseUtil::IOmessage(0,"game","all","#FFFF66"+msg+"#000000");
+		DoEnterExitAni(trans.position,un->rSize(),true);
+		if (clt) {
+			clt->last_packet=un->old_state;
+			clt->prediction->InitInterpolation(un, un->old_state, 0, this->deltatime);
+				
+//			save.SetPlayerLocation(un->curr_physical_state.position);
+			clt->name = cltname;
+			clt->callsign=cltname;
+			string msg = clt->callsign+" entered the system";
+			UniverseUtil::IOmessage(0,"game","all","#FFFF66"+msg+"#000000");
+		}
 	}
 }
 
@@ -126,6 +127,11 @@ ClientPtr NetClient::AddClientObject( Unit *un, ObjSerial cltserial)
 	{
 		// Client may exist if it jumped from a starsystem to another of if killed and respawned
 		COUT<<"Existing client n°"<<cltserial<<endl;
+	}
+	else if (!cltserial)
+	{
+		COUT<<"Local client with serial 0: "<<un->name<<", "<<un->getFullname()<<endl;
+		return clt;
 	}
 	else
 	{

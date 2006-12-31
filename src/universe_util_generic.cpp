@@ -50,6 +50,8 @@ namespace UniverseUtil {
 	Unit * GetUnitFromSerial( ObjSerial serial)
 	{
 		Unit* un = NULL;
+		if (serial==0)
+			return NULL;
 		un_iter it = UniverseUtil::getUnitList();
 		// Find the unit
 		do

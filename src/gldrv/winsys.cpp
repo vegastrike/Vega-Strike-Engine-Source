@@ -297,7 +297,7 @@ void winsys_init( int *argc, char **argv, char *window_title,
 	{
 	SDL_Surface *tempsurf=SDL_LoadBMP(icon_title);
 	if (tempsurf) {
-		int ret=SDL_SetColorKey(tempsurf,SDL_SRCCOLORKEY,((Uint32*)(tempsurf->pixels))[0]);
+		SDL_SetColorKey(tempsurf,SDL_SRCCOLORKEY,((Uint32*)(tempsurf->pixels))[0]);
 		SDL_WM_SetIcon(tempsurf,0);
 	}
 	}
@@ -315,6 +315,8 @@ void winsys_init( int *argc, char **argv, char *window_title,
     setup_sdl_video_mode();
 
     SDL_WM_SetCaption( window_title, icon_title );
+    SDL_EnableUNICODE(0); // supposedly fixes int'l keyboards.
+    
     glutInit(argc,argv);
 }
 
@@ -385,32 +387,31 @@ void winsys_process_events()
     SDL_Event event; 
     unsigned int key;
     int x, y;
+    bool state;
 
     while (true) {
 
 	SDL_LockAudio();
 	SDL_UnlockAudio();
 	while ( SDL_PollEvent( &event ) ) {
-	    
+	    state = false;
 	    switch ( event.type ) {
+	    case SDL_KEYUP:
+		    state = true;
+		    // does same thing as KEYDOWN, but with different state.
 	    case SDL_KEYDOWN:
 		if ( keyboard_func ) {
 		    SDL_GetMouseState( &x, &y );
-		    key = event.key.keysym.sym; 
-		    (*keyboard_func)( key,
-				      event.key.keysym.mod,
-				      false,
-				      x, y );
-		}
-		break;
 
-	    case SDL_KEYUP:
-		if ( keyboard_func ) {
-		    SDL_GetMouseState( &x, &y );
-		    key = event.key.keysym.sym; 
+// Is this needed? Causes sticky numpad keys...
+/*		    if(event.key.keysym.unicode!=0 &&
+			        !(event.key.keysym.unicode & 0xff80))
+		        key = (event.key.keysym.unicode & 0x7f);
+		    else*/
+		    key = event.key.keysym.sym;
 		    (*keyboard_func)( key,
 				      event.key.keysym.mod,
-				      true,
+				      state,
 				      x, y );
 		}
 		break;
