@@ -1096,6 +1096,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       if (un)
 	  {
 		un->SetOwner (getTopLevelOwner());
+		un->SetSerial( serial);
       }
     }
 	else
@@ -1429,7 +1430,9 @@ using namespace StarXML;
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &StarSystem::beginElement, &StarSystem::endElement);
-  XML_Parse(parser, (f.ReadFull()).c_str(), f.Size(), 1);
+  {std::string fcontents = f.ReadFull();
+  printf("Contents of star system:\n%s\n",fcontents.c_str());
+  XML_Parse(parser, (fcontents).c_str(), f.Size(), 1);}
  /*
   do {
     char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);

@@ -1065,6 +1065,13 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 #endif
 		case CMD_DOCK :
 		{
+			break;
+			/* // NETFIXME: Causes a delayed server crash.
+			   A pointer to the docked Client gets stuck in some zone_list[0].
+			   It won't be removed when a player leaves the game.
+			   Next time someone joins, the Client will be dereferenced.
+			   (This occurs in ZoneMgr::broadcastSnapshots).
+			 */
 			Unit * docking_unit;
 			un = clt->game_unit.GetUnit();
 			if (!un) break;
