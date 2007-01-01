@@ -221,12 +221,9 @@ void	NetServer::sendDockAuthorize( ObjSerial serial, ObjSerial utdw_serial, int 
 	Unit * un=clt->game_unit.GetUnit();
 	if (!un)
 		return;
-	clt->ingame = false;
-	// Set timestamps to 0 so we won't have prediction problem when undocking
-	clt->clearLatestTimestamp();
-	StarSystem * currentsys = un->getStarSystem();
+//	StarSystem * currentsys = un->getStarSystem();
 	// Remove the unit from the system list
-	currentsys->RemoveUnit( un );
+//	currentsys->RemoveUnit( un );
 
 	NetBuffer netbuf;
 	Packet p;
@@ -237,6 +234,11 @@ void	NetServer::sendDockAuthorize( ObjSerial serial, ObjSerial utdw_serial, int 
                  netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
                  __FILE__, PSEUDO__LINE__(118) );
 	zonemgr->broadcast( zone, serial, &p, true );
+
+	// Whoops... Make sure to de-ingame the client *AFTER* the CMD_DOCK has been broadcast!
+	clt->ingame = false;
+	// Set timestamps to 0 so we won't have prediction problem when undocking
+	clt->clearLatestTimestamp();
 }
 
 void	NetServer::sendDockDeny( ObjSerial serial, unsigned short zone)
@@ -257,8 +259,8 @@ void	NetServer::sendUnDock( ObjSerial serial, ObjSerial utdwserial, unsigned sho
 		return;
 	clt->ingame = true;
 	// Add the unit back into the system list
-	StarSystem * currentsys = un->getStarSystem();
-	currentsys->AddUnit( un );
+//	StarSystem * currentsys = un->getStarSystem();
+//	currentsys->AddUnit( un );
 	
 	// SEND A CMD_UNDOCK TO OTHER CLIENTS IN THE ZONE with utdw serial
 	NetBuffer netbuf;

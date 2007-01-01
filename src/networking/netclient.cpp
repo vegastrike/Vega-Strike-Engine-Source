@@ -1042,6 +1042,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				cerr<<"RECEIVED A DOCK AUTHORIZATION for unit "<<p1.getSerial()<<" to unit "<<utdw_serial<<" at docking port #"<<dockport<<endl;
 				un = UniverseUtil::GetUnitFromSerial( utdw_serial);
 				Unit * un2 = UniverseUtil::GetUnitFromSerial( p1.getSerial());
+				un->RequestClearance(un2);
 				un2->ForceDock( un, dockport);
 			}
 			break;

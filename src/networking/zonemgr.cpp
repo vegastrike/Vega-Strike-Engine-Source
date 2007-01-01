@@ -320,7 +320,7 @@ void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt, bool isTcp )
 		// Broadcast to all clients including the one who did a request
 		if( clt->ingame /*&& un->GetSerial() != un2->GetSerial()*/ )
 		{
-			COUT<<endl;
+//			COUT<<endl;
 			if (isTcp) {
 				pckt->bc_send( clt->cltadr, clt->tcp_sock);
 			} else {
