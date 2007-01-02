@@ -1,7 +1,24 @@
 import random
-import settings
 import os
 import urllib
+import sys
+
+try:
+	import settings
+except(ImportError):
+	sys.stdout.write("Content-Type: text/html\r\n\r\n")
+	print "UNKNOWN Error&trade;:"
+	print "Failed to import settings module.  <br>"
+	print "You probably just checked out the server and have not customized it yet. <br>"
+	print ""
+	print "Copy settings.sample.py to settings.py and edit it to your liking."
+	print "Also, make sure that you have created a units/ folder that contains these four"
+	print "files: default.save, factions.xml, units.csv and vegastrike.config."
+	print "For each 'mod', make a folder inside the units/ folder containing a copy of"
+	print "those four files, with custom mod settings."
+	print ""
+	sys.exit(0)
+
 
 #CGI Helper function to replace buggy FieldStorage
 def urlDecode(args):
