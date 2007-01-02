@@ -84,7 +84,8 @@ def getDefaultXML(conn,shipname):
 	return conn.get_default_csv(shipname)
 
 def getShipname(savegame):
-	where = savegame.find("^")
+	where = savegame.find("^") # This will give the location of credits.
+	where = savegame.find("^", where+1)
 	space = savegame.find(" ")
 	if where==-1 or space==-1:
 		return "llama.begin"
