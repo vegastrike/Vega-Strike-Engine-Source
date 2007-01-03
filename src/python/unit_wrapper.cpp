@@ -174,3 +174,107 @@ void InitVS() {
 	Python::reseterrors();
 }
 
+static std::string ParseSizeFlags(int size)
+{
+	static const std::pair<int,std::string> masks[] = {
+		std::pair<int,std::string>(weapon_info::LIGHT," LIGHT"),
+		std::pair<int,std::string>(weapon_info::MEDIUM," MEDIUM"),
+		std::pair<int,std::string>(weapon_info::HEAVY," HEAVY"),
+		std::pair<int,std::string>(weapon_info::CAPSHIPLIGHT," CAPSHIPLIGHT"),
+		std::pair<int,std::string>(weapon_info::CAPSHIPHEAVY," CAPSHIPHEAVY"),
+		std::pair<int,std::string>(weapon_info::SPECIAL," SPECIAL"),
+		std::pair<int,std::string>(weapon_info::LIGHTMISSILE," LIGHTMISSILE"),
+		std::pair<int,std::string>(weapon_info::MEDIUMMISSILE," MEDIUMMISSILE"),
+		std::pair<int,std::string>(weapon_info::HEAVYMISSILE," HEAVYMISSILE"),
+		std::pair<int,std::string>(weapon_info::CAPSHIPLIGHTMISSILE," CAPSHIPLIGHTMISSILE"),
+		std::pair<int,std::string>(weapon_info::CAPSHIPHEAVYMISSILE," CAPSHIPHEAVYMISSILE"),
+		std::pair<int,std::string>(weapon_info::SPECIALMISSILE," SPECIALMISSILE"),
+		std::pair<int,std::string>(weapon_info::AUTOTRACKING," AUTOTRACKING")
+	};
+	std::string rv;
+	for (int i=0; i<sizeof(masks)/sizeof(*masks); ++i)
+		if (size & masks[i].first)
+			rv += masks[i].second;
+	if (!rv.empty())
+		return rv.substr(1); else
+		return std::string("NOWEAP");
+}
+
+#define PARSE_CASE(Class,Enum) case Class::Enum: return std::string(#Enum)
+#define PARSE_CASE_DEFAULT default: return std::string("UNDEFINED")
+
+static std::string ParseMountStatus(Mount::STATUS status)
+{
+	switch (status) {
+	PARSE_CASE(Mount,ACTIVE);
+	PARSE_CASE(Mount,INACTIVE);
+	PARSE_CASE(Mount,DESTROYED);
+	PARSE_CASE(Mount,UNCHOSEN);
+	PARSE_CASE_DEFAULT;
+	}
+}
+
+static std::string ParseWeaponType(weapon_info::WEAPON_TYPE type)
+{
+	switch (type) {
+	PARSE_CASE(weapon_info,BEAM);
+	PARSE_CASE(weapon_info,BALL);
+	PARSE_CASE(weapon_info,BOLT);
+	PARSE_CASE(weapon_info,PROJECTILE);
+	PARSE_CASE_DEFAULT;
+	}
+}
+
+static boost::python::dict GatherWeaponInfo(const weapon_info *wi)
+{
+	boost::python::dict rv;
+	if (wi) {
+		rv["type"] = ParseWeaponType(wi->type);
+		rv["speed"] = wi->Speed;
+		rv["range"] = wi->Range;
+		rv["damage"] = wi->Damage;
+		rv["phaseDamage"] = wi->PhaseDamage;
+		rv["stability"] = wi->Stability;
+		rv["longRange"] = wi->Longrange;
+		rv["lockTime"] = wi->LockTime;
+		rv["energyRate"] = wi->EnergyRate;
+		rv["refire"] = wi->Refire;
+		rv["volume"] = wi->volume;
+		rv["name"] = wi->weapon_name;
+	}
+	return rv;
+}
+
+boost::python::dict UnitWrapper::GetMountInfo(int index) const
+{
+	boost::python::dict rv;
+	if ((index>=0) && (index<unit->mounts.size())) {
+		Mount &mnt = unit->mounts[index];
+
+		Vector pos = mnt.GetMountLocation();
+		Vector scale = Vector(mnt.xyscale,mnt.xyscale,mnt.zscale);
+		Quaternion orientation = mnt.GetMountOrientation();
+
+		rv["position"] = VS_BOOST_MAKE_TUPLE(pos.i,pos.j,pos.k);
+		rv["orientation"] = VS_BOOST_MAKE_TUPLE_4(orientation.v.i,orientation.v.j,orientation.v.k,orientation.s);
+		rv["scale"] = VS_BOOST_MAKE_TUPLE(scale.i,scale.j,scale.k);
+
+		rv["empty"] = mnt.IsEmpty();
+		rv["volume"] = mnt.volume;
+		rv["ammo"] = mnt.ammo;
+		rv["size"] = mnt.size;
+		rv["size_flags"] = ParseSizeFlags(mnt.size);
+		rv["bank"] = mnt.bank;
+		rv["functionality"] = mnt.functionality;
+		rv["maxfunctionality"] = mnt.maxfunctionality;
+
+		rv["status"] = ParseMountStatus(mnt.status);
+
+		if (!mnt.IsEmpty())
+			rv["weapon_info"] = GatherWeaponInfo(mnt.type);
+	} else {
+		rv["empty"] = true;
+		rv["status"] = std::string("UNDEFINED");
+	}
+	return rv;
+}

@@ -20,5 +20,5 @@ void DefineOddUnitFunctions (boost::python::class_builder <UnitWrapper> &Class) 
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::GetVelocityDifficultyMult,"GetVelocityDifficultyMult");
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::GetJumpStatus,"GetJumpStatus");
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::ApplyDamage,"ApplyDamage");
-
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::GetMountInfo,"GetMountInfo");
 }

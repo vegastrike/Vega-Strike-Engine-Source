@@ -167,8 +167,10 @@ namespace UnitUtil {
 		static const float DYNAMIC_THROTTLE_TARGETELAPSEDTIME = 1.f/DYNAMIC_THROTTLE_TARGETFPS;
 
 		static float DYNAMIC_THROTTLE_FACTOR=1.f;
+		static float lastThrottleAdjust=0;
 
-		{
+		if (UniverseUtil::GetGameTime() != lastThrottleAdjust) {
+			lastThrottleAdjust = UniverseUtil::GetGameTime();
 			float newfactor = DYNAMIC_THROTTLE_FACTOR * DYNAMIC_THROTTLE_TARGETELAPSEDTIME / GetElapsedTime();
 			newfactor = mymax(DYNAMIC_THROTTLE_MINFACTOR,mymin(DYNAMIC_THROTTLE_MAXFACTOR,newfactor));
 			DYNAMIC_THROTTLE_FACTOR = (newfactor * GetElapsedTime() + DYNAMIC_THROTTLE_FACTOR) / (1.0+GetElapsedTime());
@@ -252,9 +254,9 @@ namespace UnitUtil {
 	if (!(obj.length()==0||(obj.length()>=1&&obj[0]=='b'))) {
 	    return MEDIUM_PRIORITY;
 	}
-	if (dist<mymax(missile_range,gun_range)){
-		if (dist<tooclose)
-			return MEDIUM_PRIORITY; else if (dist<gun_range)
+	if (dist<PLAYERTHREAT_DISTANCE_FACTOR*mymax(missile_range,gun_range)){
+		if (dist<tooclose*PLAYERTHREAT_DISTANCE_FACTOR)
+			return MEDIUM_PRIORITY; else if (dist<gun_range*PLAYERTHREAT_DISTANCE_FACTOR)
 			return MEDIUMLOW_PRIORITY; else
 			return LOW_PRIORITY;
 	}
@@ -268,7 +270,7 @@ namespace UnitUtil {
 			return NOT_VISIBLE_COMBAT_MEDIUM;
 			return NOT_VISIBLE_COMBAT_LOW;
 	}
-	if (dist<tooclose)
+	if (dist<tooclose*THREAT_DISTANCE_FACTOR)
 		return MEDIUMHIGH_PRIORITY; else // May not have weapons (hence missile_range|gun_range == 0)
 		return NO_ENEMIES;
 	}

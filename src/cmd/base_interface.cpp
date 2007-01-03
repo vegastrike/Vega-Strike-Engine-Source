@@ -26,6 +26,7 @@
 #endif
 #include "main_loop.h"
 #include "in_mouse.h"
+#include "in_kb.h"
 
 static unsigned int& getMouseButtonMask()
 {
@@ -784,6 +785,14 @@ BaseInterface::~BaseInterface () {
 void base_main_loop();
 int shiftup(int);
 static void base_keyboard_cb( unsigned int  ch,unsigned int mod, bool release, int x, int y ) {
+	// Set modifiers
+	unsigned int amods = 0;
+	amods |= (mod&(WSK_MOD_LSHIFT|WSK_MOD_RSHIFT)) ? KB_MOD_SHIFT : 0;
+	amods |= (mod&(WSK_MOD_LCTRL |WSK_MOD_RCTRL )) ? KB_MOD_CTRL  : 0;
+	amods |= (mod&(WSK_MOD_LALT  |WSK_MOD_RALT  )) ? KB_MOD_ALT   : 0;
+	setActiveModifiers(amods);
+
+	// Queue keystroke
 	if (!release)
 		base_keyboard_queue.push_back (((WSK_MOD_LSHIFT==(mod&WSK_MOD_LSHIFT))||(WSK_MOD_RSHIFT==(mod&WSK_MOD_RSHIFT)))?shiftup(ch):ch);
 }
