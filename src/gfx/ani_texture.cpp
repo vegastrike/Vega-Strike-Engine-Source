@@ -122,10 +122,10 @@ bool AnimatedTexture::Done() {
   // If I'm wrong, and the above line is crucial, well... feel free to fix it.
   return curtime >= numframes*timeperframe; 
 }
-static unsigned int intmin(int a, int b){
+static unsigned int intmin(unsigned int a, unsigned int b){
   return a<b?a:b;
 }
-static unsigned int intmax(int a, int b){
+static unsigned int intmax(unsigned int a, unsigned int b){
   return a<b?b:a;
 }
 void AnimatedTexture::setTime (double tim) {
