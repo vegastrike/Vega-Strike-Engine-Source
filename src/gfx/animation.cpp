@@ -163,8 +163,9 @@ void Animation::ProcessDrawQueue (std::vector <Animation *> &animationdrawqueue,
     if ((animationdrawqueue[i]->Position()-campos).Magnitude()-animationdrawqueue[i]->height>limit) {//other way was inconsistent about what was far and what was not--need to use the same test for putting to far queueu and drawing it--otherwise graphical glitches
       GFXFogMode(FOG_OFF);           
       animationdrawqueue[i]->DrawNow(result);
-	  animationdrawqueue[i]=0; // Flag for deletion
     }
+    animationdrawqueue[i]=0; // Flag for deletion---if this is NOT set for all objects---then they PILE up into a huge animationdrawqueue that gets bigger and bigger each frame until eventually vega strike grinds to a halt...I'm not sure what the purpose of not deleting them was.... mail me if you know better---
+
   }
   // Delete flagged ones
   i=0;
