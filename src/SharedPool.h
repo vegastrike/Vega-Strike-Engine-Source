@@ -58,14 +58,14 @@ public:
 
 	public:
 		Reference() : 
-			_it(PoolType::getSingleton().referenceCounter.end()), 
-			_rc(&PoolType::getSingleton().referenceCounter)
+			_it(SharedPool::getSingleton().referenceCounter.end()), 
+			_rc(&SharedPool::getSingleton().referenceCounter)
 		{
 		}
 
 		explicit Reference(const T& s) :
-			_it(PoolType::getSingleton().referenceCounter.end()), 
-			_rc(&PoolType::getSingleton().referenceCounter)
+			_it(SharedPool::getSingleton().referenceCounter.end()), 
+			_rc(&SharedPool::getSingleton().referenceCounter)
 		{
 			set(s);
 		}
