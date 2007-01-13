@@ -2,19 +2,18 @@
 
 """
 Name: 'VegaStrike (.xmesh)...'
-Blender: 232
+Blender: 237
 Group: 'Import'
 Tooltip: 'Import VegaStrike Models (.xmesh)'
 """
 
-__author__ = "Alex 'CubOfJudahsLion' Feterman"
-__url__ = ("blender", "http://www.blender.org",
-"Author's homepage, http://geocities.com/cubofjudahslion")
-__version__ = "0.1.1"
+__author__	= "Alex 'CubOfJudahsLion' Feterman"
+__url__		= ("blender", "http://www.blender.org", "Author's homepage, http://geocities.com/cubofjudahslion")
+__version__	= "0.1.2"
 
-__bpydoc__ = """\
+__bpydoc__	= """\
 xmesh_import.py | Python Script for Blender3D | imports a VegaStrike .xmesh
-Copyright (C)2005 Alex Feterman
+Copyright (C)2005 Alex 'CubOfJudahsLion' Feterman
 
 <p>This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -40,46 +39,69 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """
 
 import Blender
-from Blender import Image, Texture, Material, Object, NMesh, Types
+from Blender import Image, Texture, Material, Object, NMesh, Types, sys
 import xml.sax
-import mod_meshtools
-from string import rfind, lower
+import meshtools
+import os.path
+from string import lower
 
+
+locationDir = []		# registers the search of the results for images
+
+def SetLocationDir(fileName, aDir, fileList):
+	"""
+		adds finding of fileName in aDir to a global variable in a list
+	"""
+	global locationDir
+	fullPath = os.path.join(aDir, fileName)
+	if os.path.isfile(fullPath):
+		locationDir.append(fullPath)
+
+def FindTexture(path, fileName):
+	"""
+		finds the texture from path and its sub-paths
+	"""
+	sourcePath = os.path.join(path, fileName)
+	if os.path.isfile(sourcePath):
+		# check if the file is actually there and report if so
+		return sourcePath
+	else:
+		# otherwise check the directory hierarchy for the VS textures folder
+		global locationDir
+		searchBaseDir = os.path.normpath(os.path.join(path, '..', '..', 'textures'))
+		os.path.walk(searchBaseDir, SetLocationDir, fileName)
+		if len(locationDir) > 0:
+			return locationDir[0]
+		else:
+			return None
 
 class XMeshHandler(xml.sax.handler.ContentHandler):
 	"""
 		Created to handle XML contexts in XMESH objects
 	"""
 
+	locationDir = None
+
 	def __init__(self, filename):
 		# find where the directory path ends
 		# (both un*x and win accounted for)
-		backSlashPos	= rfind(filename, '\\')
-		slashPos		= rfind(filename, '/')
-		if backSlashPos > slashPos:
-			slashPos	= backSlashPos
-		slashPos += 1
-		# store the path
-		self.path		= filename[:slashPos]
-		dotPos			= rfind(filename, '.', slashPos)
-		# object name is the filename minus path and extension
-		if dotPos == -1:
-			self.objName = filename[slashPos:]
-		else:
-			self.objName = filename[slashPos:dotPos]
+		self.path, simpleFile	= os.path.split(sys.expandpath(filename))
+		self.objName			= os.path.splitext(simpleFile)[0]
 		# material values (to be checked later)
-		self.faces			= []
-		self.verts			= []
-		self.uvs			= []
-		self.faceuvs		= []
-		self.alpha			=\
-		self.rgbCol	 		=\
-		self.amb			=\
-		self.emit			=\
-		self.colorTexture	=\
-		self.specTexture	=\
-		self.spec			=\
-		self.specCol		= None
+		self.faces				= []
+		self.verts				= []
+		self.uvs				= []
+		self.faceuvs			= []
+		self.alpha				=\
+		self.rgbCol	 			=\
+		self.amb				=\
+		self.emit				=\
+		self.colorTexture		=\
+		self.specTexture		=\
+		self.spec				=\
+		self.specCol			= None
+		# finally, start chronometer
+		sys.time()
 
 	def startDocument(self):
 		"""
@@ -88,7 +110,7 @@ class XMeshHandler(xml.sax.handler.ContentHandler):
 		"""
 		print "Loading file..."
 		Blender.Window.DrawProgressBar(0.0, "Loading file...")
-		
+
 	def endDocument(self):
 		"""
 			Invoked when mesh processing is done. Used for realizing
@@ -98,22 +120,26 @@ class XMeshHandler(xml.sax.handler.ContentHandler):
 		print "Finished loading file, constructing mesh..."
 		Blender.Window.DrawProgressBar(0.9, "Building mesh...")
 		# build object
-		mod_meshtools.create_mesh(self.verts, self.faces, self.objName, self.faceuvs, self.uvs)
+		meshtools.create_mesh(self.verts, self.faces, self.objName, self.faceuvs, self.uvs)
 		print "Done, object built"
 		# load corresponding images and set texture
-		Blender.Window.DrawProgressBar(0.95, "Texture...")
+		Blender.Window.DrawProgressBar(0.95, "Loading/Applying Texture...")
 		colorTex, specTex = None, None
 		# convert images into textures
 		if self.colorTexture:
-			colorImg		= Image.Load(self.path + self.colorTexture)
-			colorTex		= Texture.New(self.objName + ".col.tx")
-			colorTex.type	= Texture.Types.IMAGE
-			colorTex.image	= colorImg
+			colTexFName		= FindTexture(self.path, self.colorTexture)
+			if colTexFName != None:
+				colorImg		= Image.Load(colTexFName)
+				colorTex		= Texture.New(self.objName + ".col.tx")
+				colorTex.type	= Texture.Types.IMAGE
+				colorTex.image	= colorImg
 		if self.specTexture:
-			specImg			= Image.Load(self.path + self.specTexture)
-			specTex			= Texture.New(self.objName + ".spe.tx")
-			specTex.type	= Texture.Types.IMAGE
-			specTex.image	= specImg
+			specTexFName	= FindTexture(self.path, self.specTexture)
+			if specTexFName != None:
+				specImg			= Image.Load(specTexFName)
+				specTex			= Texture.New(self.objName + ".spe.tx")
+				specTex.type	= Texture.Types.IMAGE
+				specTex.image	= specImg
 		# make material with them and all other previously collected data
 		mat = Material.New(self.objName + ".mat")
 		mat.mode		|= Material.Modes.TEXFACE | Material.Modes.SHADOW | Material.Modes.TRACEABLE | Material.Modes.ZTRANSP
@@ -131,23 +157,33 @@ class XMeshHandler(xml.sax.handler.ContentHandler):
 		# apply to mesh
 		obj = Object.Get(self.objName)
 		mesh = obj.data
-		mesh.mode = NMesh.Modes.NOVNORMALSFLIP
+		# mesh.mode = NMesh.Modes.NOVNORMALSFLIP
+		# uncomment the following if you want models automatically sub-surfaced
+		"""for currFace in mesh.faces:
+			currFace.smooth = 1
+		mesh.setSubDivLevels([1,2])
+		mesh.setMode("SubSurf", "TwoSided")"""
+		mesh.setMode("TwoSided")
 		mesh.addMaterial(mat)
-		mesh.update()
+		mesh.update(1)
 		# Done, notify user
 		Blender.Window.DrawProgressBar(1.0, "Done.")
 
-	def startElement(self, pname, attr):
+	def startElement(self, pname, attrMixed):
 		"""
 			Receives pre-parsed data for every geometry/texture
-			datum in the mesh
+			datum in the mesh.
+			Like blender, wings3d and vegastrike are also opengl apps.
+			the internal format described by the xml tags is similar to
+			that of blender. see the xmesh format description and the opengl
+			red/blue books for structure and mapping details.
 		"""
-		# we ignore case
+		# we transalte everything to lowercase
 		name = lower(pname)
-		# like blender, wings3d and vegastrike are also opengl apps.
-		# the internal format described by the xml tags is similar to
-		# that of blender. see the xmesh format description and the opengl
-		# red/blue books for structure and mapping details
+		attr = {}
+		for ik, iv in attrMixed.items():
+			attr[lower(ik)] = iv
+		# pre-parse attributes if available
 		if name == "mesh":
 			if "texture" in attr:
 				self.colorTexture = attr["texture"]
@@ -156,8 +192,8 @@ class XMeshHandler(xml.sax.handler.ContentHandler):
 				self.specTexture = attr["texture1"]
 				print "* spec tex:", self.specTexture
 		elif name == "points":
-			print "Reading point coordinates..."
-			Blender.Window.DrawProgressBar(0.1, "Reading coords...")
+			print "Reading vertex coordinates..."
+			Blender.Window.DrawProgressBar(0.1, "Reading vertexes...")
 		elif name == "location":
 			self.verts.append( (float(attr["x"]), float(attr["y"]), float(attr["z"])) )
 		elif name == "polygons":
@@ -201,8 +237,8 @@ class XMeshHandler(xml.sax.handler.ContentHandler):
 			insertPos = len(self.uvs)
 			self.faceuvs.append(range(insertPos, insertPos+len(self.facevUVs)))
 			self.uvs.extend(self.facevUVs)
-		# yes, opengl handles triangle fans naturally, but not blender
 		elif name == "trifan":
+			# yes, opengl handles triangle fans naturally, but not blender
 			fanIdx = 2
 			while fanIdx < len(self.faceVerts):
 				# so we make triangles out of them instead

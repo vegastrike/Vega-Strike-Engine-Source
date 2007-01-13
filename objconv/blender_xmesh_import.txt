@@ -26,7 +26,7 @@ never to profit from this utility.)
 Filename	: xmesh_import.py
 Description	: Python script imports a VegaStrike .xmesh into Blender3D
 Author		: Alex 'CubOfJudahsLion' Feterman
-Version		: 0.1
+Version		: 0.1.2
 
 
 2. INSTALLING
@@ -49,6 +49,21 @@ Blender3D.
 
 
 4. RELEASE LOG
+
+* V0.1.2
+	Fixed:
+	- Blender 2.37: library now is called meshtools. I'm importing it now by that name.
+	  I'm not supporting previous Blender versions. (It's free for cryin' out loud.)
+	- Finally able to load images from the centralized textures/ directory
+	Known Issues:
+	- No automatic elimination of duplicated vertexes (maybe next version)
+	- Doesn't handle UNC pathnames in Windows correctly. You'll need to map the UNC to
+	  a drive unit to correctly access files.
+	To do:
+	- Parse BFXM. I don't foresee doing this anytime soon, and MESHER can do BFXM->XMESH
+	  conversions anyway.
+	Cancelled:
+	- No longer intend to load logos, subunits or parse <Unit /> files.
 
 * V0.1.1
 	Fixed:
