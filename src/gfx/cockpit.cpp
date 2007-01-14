@@ -1749,13 +1749,15 @@ int GameCockpit::Autopilot (Unit * target) {
       autoMessage=std::string();
       autoMessageTime=UniverseUtil::GetGameTime();
       QVector posA=un->LocalPosition();
-      if((retauto = un->AutoPilotToErrorMessage(un,false,autoMessage))) {//can he even start to autopilot
+      bool retautoA=false;
+      if((retauto = retautoA=un->AutoPilotToErrorMessage(un,false,autoMessage))) {//can he even start to autopilot
         retauto=un->AutoPilotToErrorMessage(target,false,autoMessage);
         QVector posB=un->LocalPosition();
-        if (autoMessage.length()==0&&(posA-posB).Magnitude()<un->rSize()) {
+        bool movedatall=(posA-posB).Magnitude()>un->rSize();
+        if (autoMessage.length()==0&&!movedatall) {
           autoMessage=XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","AlreadyNearMessage","#ff0000Already Near#000000"));    
           retauto=false;
-        }else if (retauto) {
+        }else if ((retauto||retautoA)&&movedatall) {
 		if (autopan){
 		  SetView (CP_FIXEDPOS);
                   Vector P(1,0,0),Q(0,1,0),R(0,0,1);
