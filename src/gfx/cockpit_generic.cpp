@@ -411,11 +411,17 @@ bool Cockpit::Update () {
   }
   Unit * un;
   if ((un=*attack_iterator)!=NULL) {
-    if (parent==un->Target()&&parent!=NULL) {
-      partial_number_of_attackers+=1;
+    Unit * targ=un->Target();
+    float speed=0,range=0,mmrange=0;
+    if (parent==targ&&targ!=NULL) {
+      un->getAverageGunSpeed(speed,range,mmrange);
+      float dist=UnitUtil::getDistance(targ,un);
+      if (dist<=range*2||dist<=mmrange) {
+        partial_number_of_attackers+=1;
+      }
     }
   }else {
-    //    printf ("There are %d folks attacking player\n",partial_number_of_attackers);
+    //printf ("There are %d folks attacking player\n",partial_number_of_attackers);
     number_of_attackers=partial_number_of_attackers;//reupdate the count
     partial_number_of_attackers=-1;
   }
