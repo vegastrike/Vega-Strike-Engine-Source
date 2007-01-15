@@ -174,6 +174,9 @@ static float getInitialZoomFactor()
 Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name): view(CP_FRONT),parent (parent), cockpit_offset(0), viewport_offset(0), zoomfactor (getInitialZoomFactor()),savegame (new SaveGame(pilot_name)) {
   //  static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
   //int i;
+  partial_number_of_attackers=-1;
+  number_of_attackers=0;
+
   fg=NULL;
   jumpok = 0;
   TimeOfLastCollision=-200;
@@ -387,7 +390,36 @@ static float dockingdistance (Unit* port, Unit * un) {
 		return UnitUtil::getDistance(port,un);
 	return mag;
 }
+static bool too_many_attackers=false;
+bool Cockpit::tooManyAttackers() {
+  return too_many_attackers;
+}
 bool Cockpit::Update () {
+  static un_iter attack_iterator=_Universe->activeStarSystem()->getUnitList().createIterator();
+  if (_Universe->AccessCockpit(0)==this) {
+    if (partial_number_of_attackers!=-1) {
+      ++attack_iterator;    
+    }else {
+      attack_iterator=_Universe->activeStarSystem()->getUnitList().createIterator();
+      too_many_attackers=false;
+    }
+  }
+  if (partial_number_of_attackers==-1){
+    static int max_attackers=XMLSupport::parse_int(vs_config->getVariable("AI","max_player_attackers","0"));
+    partial_number_of_attackers=0;
+    too_many_attackers=max_attackers>0&&(too_many_attackers||number_of_attackers>max_attackers);
+  }
+  Unit * un;
+  if ((un=*attack_iterator)!=NULL) {
+    if (parent==un->Target()&&parent!=NULL) {
+      partial_number_of_attackers+=1;
+    }
+  }else {
+    //    printf ("There are %d folks attacking player\n",partial_number_of_attackers);
+    number_of_attackers=partial_number_of_attackers;//reupdate the count
+    partial_number_of_attackers=-1;
+  }
+  
   if (jumpok) {
 		jumpok++;
   }

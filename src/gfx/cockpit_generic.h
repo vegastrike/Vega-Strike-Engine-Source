@@ -88,9 +88,13 @@ protected:
   float cockpit_time;
   bool ejecting;
   bool going_to_dock_screen;
+  int partial_number_of_attackers;
  public:
+  int number_of_attackers;
+
   double TimeOfLastCollision;
   char jumpok;
+  static bool tooManyAttackers();// checks config file and declares if too many folks are attacking any of the players (to avoid expensive tests where unnecessary).
   virtual void	ReceivedTargetInfo() {}
   bool autoInProgress() {
     return autopilot_time>0;

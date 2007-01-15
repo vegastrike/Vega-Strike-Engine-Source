@@ -578,8 +578,30 @@ bool FireAt::ShouldFire(Unit * targ, bool &missilelock) {
   if (parent->faction==retro||parent->faction==pirates) {
     printf ("sf: d %f fw %f ang %f fang %f ret:%d\n",dist,firewhen,angle,fangle,((dist<firewhen&&angle>fangle)||(temp&&dist<firewhen&&angle>0))&&!isjumppoint);
     }*/
-
-  return ((dist<firewhen)&&((angle>fangle)||(temp&&(angle>temp))||(missilelock&&(angle>0))))&&!isjumppoint;
+  bool retval= ((dist<firewhen)&&((angle>fangle)||(temp&&(angle>temp))||(missilelock&&(angle>0))))&&!isjumppoint;
+  if (retval) {
+    if (Cockpit::tooManyAttackers()) {
+      Cockpit * player=_Universe->isPlayerStarship(targ);
+      if (player) {
+        static int max_attackers = XMLSupport::parse_int(vs_config->getVariable("AI","max_player_attackers","0")); 
+        int attackers=player->number_of_attackers;
+        if (attackers>max_attackers&&max_attackers>0) {
+          static float attacker_switch_time = XMLSupport::parse_float(vs_config->getVariable("AI","attacker_switch_time","15")); 
+          int curtime=(int)fmod(floor(UniverseUtil::GetGameTime()/attacker_switch_time),(float)(1<<24));
+          int seed=((((size_t)parent)&0xffffffff)^curtime);
+          static VSRandom decide(seed);
+          decide.init_genrand(seed);
+          if (decide.genrand_int31()%attackers>=max_attackers) {
+            //printf ("Over Limit 0x%x not firing\n",parent);
+            return false;
+          }else {
+            //printf ("Over Limit 0x%x FIRING\n",parent);          
+          }
+        }
+      }
+    }
+  }
+  return retval;
 }
 
 FireAt::~FireAt() {
