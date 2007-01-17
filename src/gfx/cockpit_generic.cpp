@@ -394,23 +394,31 @@ static bool too_many_attackers=false;
 bool Cockpit::tooManyAttackers() {
   return too_many_attackers;
 }
-bool Cockpit::Update () {
+
+void Cockpit::updateAttackers() {
   static un_iter attack_iterator=_Universe->activeStarSystem()->getUnitList().createIterator();
-  if (_Universe->AccessCockpit(0)==this) {
-    if (partial_number_of_attackers!=-1) {
+  bool isDone=attack_iterator.isDone();
+  if (_Universe->AccessCockpit(_Universe->numPlayers()-1)==this) {
+
+    if (!isDone) {
       ++attack_iterator;    
     }else {
       attack_iterator=_Universe->activeStarSystem()->getUnitList().createIterator();
-      too_many_attackers=false;
+      //too_many_attackers=false;
     }
   }
-  if (partial_number_of_attackers==-1){
+  if (isDone){
+    if (_Universe->AccessCockpit(0)==this) {
+      too_many_attackers=false;
+    }
     static int max_attackers=XMLSupport::parse_int(vs_config->getVariable("AI","max_player_attackers","0"));
+    printf ("There are %d folks attacking player\n",partial_number_of_attackers);
+    number_of_attackers=partial_number_of_attackers;//reupdate the count
     partial_number_of_attackers=0;
     too_many_attackers=max_attackers>0&&(too_many_attackers||number_of_attackers>max_attackers);
   }
   Unit * un;
-  if ((un=*attack_iterator)!=NULL) {
+  if (attack_iterator.isDone()==false&&(un=*attack_iterator)!=NULL) {
     Unit * targ=un->Target();
     float speed=0,range=0,mmrange=0;
     if (parent==targ&&targ!=NULL) {
@@ -421,10 +429,14 @@ bool Cockpit::Update () {
       }
     }
   }else {
-    //printf ("There are %d folks attacking player\n",partial_number_of_attackers);
-    number_of_attackers=partial_number_of_attackers;//reupdate the count
-    partial_number_of_attackers=-1;
+    //
+    
+    // partial_number_of_attackers=-1;
   }
+
+}
+
+bool Cockpit::Update () {
   
   if (jumpok) {
 		jumpok++;

@@ -33,14 +33,14 @@ class UnitCollection {
     UnitListNode( );
     UnitListNode( const UnitListNode& );
     UnitListNode& operator=( const UnitListNode& );
-  } u;
+  } *u;
   ///Destroys the list until init is called. Functions will segfault.
   void destr ();
   ///Initializes the list so that there are 2 empty nodes (u and u->next)  NULL unit terminates this list.
-  void init () {u.next = new UnitListNode (NULL, new UnitListNode(NULL));}
+  void init () {u= new UnitListNode(NULL);u->next = new UnitListNode (NULL, new UnitListNode(NULL));}
  public:  
   ///Initislizes the first unit and then calls init;
-  UnitCollection() : u(NULL) {init();}
+  UnitCollection()  {init();}
   ///destroys the list permanently
   ~UnitCollection() {destr();}
   class UnitIterator{
@@ -163,17 +163,17 @@ class UnitCollection {
   friend void Iterate (UnitCollection &c);
 #endif
   //could be empty and this returns false...but usually correct...never has units when it returns true
-  bool empty() const {return (u.next->unit==NULL);}
-  UnitIterator createIterator() {return UnitIterator(&u);}
-  ConstIterator constIterator() const {return ConstIterator (&u);}
-  FastIterator fastIterator() {return FastIterator (&u);}
-  ConstFastIterator constFastIterator () const{return ConstFastIterator(&u);}
+  bool empty() const {return (u->next->unit==NULL);}
+  UnitIterator createIterator() {return UnitIterator(u);}
+  ConstIterator constIterator() const {return ConstIterator (u);}
+  FastIterator fastIterator() {return FastIterator (u);}
+  ConstFastIterator constFastIterator () const{return ConstFastIterator(u);}
   void insert_unique(Unit *un) {
-    for (UnitListNode * i=u.next;i!=NULL;i=i->next) if (i->unit==un) return;
+    for (UnitListNode * i=u->next;i!=NULL;i=i->next) if (i->unit==un) return;
     prepend (un);
   }
-  void prepend(Unit *unit) {u.next= new UnitListNode (unit,u.next);}
-  void prepend(UnitListNode *unitlistnode) {unitlistnode->next=u.next;u.next= unitlistnode;}
+  void prepend(Unit *unit) {u->next= new UnitListNode (unit,u->next);}
+  void prepend(UnitListNode *unitlistnode) {unitlistnode->next=u->next;u->next= unitlistnode;}
   void prepend(UnitIterator *iter);
   void append(Unit *unit);
   void append(UnitIterator *iter);

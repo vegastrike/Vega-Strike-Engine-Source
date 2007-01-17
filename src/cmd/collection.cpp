@@ -26,13 +26,14 @@ UnitCollection::UnitListNode::~UnitListNode() {
 }
 void UnitCollection::destr() {
   UnitListNode *tmp;
-  while (u.next) {
-    tmp = u.next;
-    u.next = u.next->next;
-    delete tmp;
+  while (u->next) {
+    tmp = u->next;
+    u->next = u->next->next;
+    PushUnusedNode(tmp);
   }
-  u.unit = NULL;
-  u.next = NULL;
+  u->unit = NULL;
+  u->next = NULL;
+  PushUnusedNode(u);
 }
 
 void * UnitCollection::PushUnusedNode (UnitListNode * node) {
@@ -53,7 +54,9 @@ void * UnitCollection::PushUnusedNode (UnitListNode * node) {
   return NULL;
 }
 void UnitCollection::FreeUnusedNodes () {
+  static std::vector<UnitCollection::UnitListNode *> bakdogpile;
   std::vector<UnitCollection::UnitListNode *> *dogpile = (std::vector <UnitCollection::UnitListNode *> *)PushUnusedNode (NULL);
+  bakdogpile.swap (*dogpile);
   while (!dogpile->empty()) {
     delete dogpile->back();
     dogpile->pop_back ();
@@ -69,7 +72,7 @@ void UnitCollection::UnitIterator::moveBefore(UnitCollection&otherList) {
   }
 }
 void UnitCollection::prepend(UnitIterator *iter) {
-  UnitListNode *n = &u;
+  UnitListNode *n = u;
   Unit * tmp;
   while((tmp=iter->current())) {//iter->current checks for killed()
     n->next = new UnitListNode(tmp, n->next);
@@ -77,7 +80,7 @@ void UnitCollection::prepend(UnitIterator *iter) {
   }
 }
 void UnitCollection::append(UnitIterator *iter) {
-  UnitListNode *n = &u;
+  UnitListNode *n = u;
   while(n->next->unit!=NULL) n = n->next;
   Unit * tmp;
   while((tmp=iter->current())) {
@@ -87,7 +90,7 @@ void UnitCollection::append(UnitIterator *iter) {
   }
 }
 void UnitCollection::append(Unit *unit) { 
-  UnitListNode *n = &u;
+  UnitListNode *n = u;
   while(n->next->unit!=NULL) n = n->next;
   n->next = new UnitListNode(unit, n->next);
 }	
@@ -137,7 +140,7 @@ const UnitCollection &UnitCollection::operator = (const UnitCollection & uc){
   destr();
   init();
   un_iter ui = createIterator();
-  const UnitListNode * n = &uc.u;
+  const UnitListNode * n = uc.u;
   while (n) {
     if (n->unit) {
       ui.postinsert (n->unit);
@@ -150,7 +153,7 @@ const UnitCollection &UnitCollection::operator = (const UnitCollection & uc){
 UnitCollection::UnitCollection (const UnitCollection& uc):u(NULL) {
   init();
   un_iter ui = createIterator();
-  const UnitListNode * n = &uc.u;
+  const UnitListNode * n = uc.u;
   while (n) {
     if (n->unit) {
       ui.postinsert (n->unit);

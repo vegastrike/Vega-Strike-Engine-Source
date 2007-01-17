@@ -94,6 +94,7 @@ protected:
 
   double TimeOfLastCollision;
   char jumpok;
+  void updateAttackers();
   static bool tooManyAttackers();// checks config file and declares if too many folks are attacking any of the players (to avoid expensive tests where unnecessary).
   virtual void	ReceivedTargetInfo() {}
   bool autoInProgress() {
