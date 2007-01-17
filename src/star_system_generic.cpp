@@ -843,7 +843,6 @@ void StarSystem::Update(float priority , bool executeDirector) {
       }
       time -= (1./PHY_NUM)*SIMULATION_ATOM;
     }
-    UnitCollection::FreeUnusedNodes();
     unsigned int i=_Universe->CurrentCockpit();
     for (int j=0;j<_Universe->numPlayers();j++) {
       if (_Universe->AccessCockpit(j)->activeStarSystem==this) {
@@ -852,6 +851,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	  SIMULATION_ATOM =  normal_simulation_atom;
 	  _Universe->SetActiveCockpit(i);
 	  _Universe->popActiveStarSystem();
+
 	  return;
 	}
       }
@@ -867,6 +867,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
   if (debugPerformance()) {
     printf ("SS Update: pyth: %f tot: %f\n",pythontime, queryTime()-beginss);
   }
+  UnitCollection::FreeUnusedNodes();// last thing in a frame
 }
 
 /***************************************************************************************/
