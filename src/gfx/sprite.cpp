@@ -76,7 +76,8 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter,GFXBOOL force)
 		if (lkup.first) {
 			if (lkup.second) {
 				*this = *lkup.second;
-				surface = surface->Clone();
+                                if (surface!=NULL)
+                                  surface = surface->Clone();
 			} else {
 				return;
 			}
@@ -111,9 +112,12 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter,GFXBOOL force)
       }
       
       if (!surface->LoadSuccess()) {
-		cacheInsert(file,0); // Mark bad file
 		delete surface;
 		surface = NULL;
+		VSSprite *newspr = new VSSprite();
+		*newspr = *this;
+		newspr->surface = NULL;
+		cacheInsert(file,newspr);
 	  } else {
 		//Update cache
 		VSSprite *newspr = new VSSprite();
