@@ -74,7 +74,7 @@ static const char _himap[] = ")!@#$%^&*(_+\":?><~|";
 
 int shiftup (int ch) {
   if (ch == (ch&0xFF)) {
-    char *c = strchr(_lomap,ch);
+    const char *c = strchr(_lomap,ch);
     if (c) 
 	return _himap[c-_lomap]; else
 	return toupper(ch);
@@ -83,7 +83,7 @@ int shiftup (int ch) {
 
 int shiftdown (int ch) {
   if (ch == (ch&0xFF)) {
-    char *c = strchr(_himap,ch);
+    const char *c = strchr(_himap,ch);
     if (c) 
 	return _lomap[c-_himap]; else
 	return tolower(ch);
