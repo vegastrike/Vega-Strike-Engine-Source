@@ -315,7 +315,7 @@ void winsys_init( int *argc, char **argv, char *window_title,
     setup_sdl_video_mode();
 
     SDL_WM_SetCaption( window_title, icon_title );
-    SDL_EnableUNICODE(0); // supposedly fixes int'l keyboards.
+    SDL_EnableUNICODE(1); // supposedly fixes int'l keyboards.
     
     glutInit(argc,argv);
 }
@@ -382,6 +382,9 @@ void winsys_show_cursor( bool visible )
   \date    Modified: 2005-8-16 - Rogue
   \date    Modified: 2005-12-24 - ace123
 */
+extern int shiftdown(int);
+extern int shiftup(int);
+
 void winsys_process_events()
 {
     SDL_Event event; 
@@ -408,7 +411,17 @@ void winsys_process_events()
 			        !(event.key.keysym.unicode & 0xff80))
 		        key = (event.key.keysym.unicode & 0x7f);
 		    else*/
-		    key = event.key.keysym.sym;
+		    bool shifton = event.key.keysym.mod&(KMOD_LSHIFT|KMOD_RSHIFT|KMOD_CAPS);
+		    key = event.key.keysym.unicode ? 
+		          ( (shifton) ?
+			        shiftdown(event.key.keysym.unicode) 
+			      : event.key.keysym.unicode
+			  ) : event.key.keysym.sym;
+		    // Ugly hack: prevent shiftup/shiftdown screwups on intl keyboard
+		    // Note: Thank god we'll have OIS for 0.5.x
+		    if (shifton && event.key.keysym.unicode && 
+		        shiftup(key) != event.key.keysym.unicode)
+		        event.key.keysym.mod = SDLMod(event.key.keysym.mod & ~(KMOD_LSHIFT|KMOD_RSHIFT));
 		    (*keyboard_func)( key,
 				      event.key.keysym.mod,
 				      state,

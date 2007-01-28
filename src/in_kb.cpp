@@ -69,92 +69,25 @@ static bool kbHasBinding(int key, int modifiers)
 	return (keyBindings[modifiers][key].function != defaultHandler.function);
 }
 
+static const char _lomap[] = "0123456789-=\';/.,`\\";
+static const char _himap[] = ")!@#$%^&*(_+\":?><~|";
+
 int shiftup (int ch) {
-  switch (ch) {
-  case '1':
-    return '!';
-  case '2':
-    return '@';
-  case '3':
-    return '#';
-  case '4':
-    return '$';
-  case '5':
-    return '%';
-  case '6':
-    return '^';
-  case '7':
-    return '&';
-  case '8':
-    return '*';
-  case '9':
-    return '(';
-  case '0':
-    return ')';
-  case '-':
-    return '_';
-  case '=':
-    return '+';
-  case '\\':
-    return '|';
-  case '\'':
-    return '"';
-  case ';':
-    return ':';
-  case '/':
-    return '?';
-  case '.':
-    return '>';
-  case ',':
-    return '<';
-  case '`':
-    return '~';
-  }
-  return toupper(ch);
+  if (ch == (ch&0xFF)) {
+    char *c = strchr(_lomap,ch);
+    if (c) 
+	return _himap[c-_lomap]; else
+	return toupper(ch);
+  } else return ch;
 }
 
 int shiftdown (int ch) {
-  switch (ch){
-  case '!':
-    return '1';
-  case '@':
-    return '2';
-  case '#':
-    return '3';
-  case '$':
-    return '4'; 
-  case '%':
-    return '5';
-  case '^':
-    return '6';
-  case '&':
-    return '7';
-  case '*':
-    return '8';
-  case '(':
-    return '9';
-  case ')':
-    return '0';
-  case '_':
-    return '-';
-  case '+':
-    return '=';
-  case '|':
-    return '\\';
-  case '"':
-    return '\'';
-  case ';':
-    return ':';
-  case '?':
-    return '/';
-  case '>':
-    return '.';
-  case '<':
-    return ',';
-  case '~':
-    return '`';
-  }
-  return tolower(ch);
+  if (ch == (ch&0xFF)) {
+    char *c = strchr(_himap,ch);
+    if (c) 
+	return _lomap[c-_himap]; else
+	return tolower(ch);
+  } else return ch;
 }
 
 static unsigned int _activeModifiers=0;
