@@ -43,11 +43,11 @@ static void biModifyMouseSensitivity(int &x, int &y, bool invert){
     x-=g_game.x_resolution/2;
     y-=g_game.y_resolution/2;
     if (invert) {
-      x/=factor;
-      y/=factor;
+      x=int(x/factor);
+      y=int(y/factor);
     }else {
-      x*=factor;
-      y*=factor;
+      x=int(x*factor);
+      y=int(x*factor);
     }
     x+=g_game.x_resolution/2;
     y+=g_game.y_resolution/2;
@@ -157,7 +157,7 @@ void BaseInterface::Room::BaseShip::Draw (BaseInterface *base) {
                 _Universe->AccessCamera()->SetFov(standard_fov);
 		Vector p,q,r;
 		_Universe->AccessCamera()->GetOrientation (p,q,r);
-		int co=_Universe->AccessCamera()->getCockpitOffset();
+		float co=_Universe->AccessCamera()->getCockpitOffset();
 		_Universe->AccessCamera()->setCockpitOffset(0);
 		_Universe->AccessCamera()->UpdateGFX();
 		QVector pos =  _Universe->AccessCamera ()->GetPosition();
@@ -263,13 +263,13 @@ void BaseInterface::Room::Draw (BaseInterface *base) {
 						float text_pos_y = y + text_offset_y + text_hei; // ...and on top
 						text_wid = text_wid * links[i]->text.length() * 0.25;     // calc ~width of text (=multiply the average characterwidth with the number of characters)
 						if ((text_pos_x + text_offset_x + text_wid) >= 1) {       // check right screenborder
-							text_pos_x = (x - abs(text_offset_x) - text_wid);     // align left
+							text_pos_x = (x - fabs(text_offset_x) - text_wid);     // align left
 						}
 						if ((text_pos_y + text_offset_y) >= 1) {                  // check upper screenborder
-							text_pos_y = (y - abs(text_offset_y));                // align on bottom
+							text_pos_y = (y - fabs(text_offset_y));                // align on bottom
 						}
 						if ((text_pos_y + text_offset_y - text_hei) <= y_lower) { // check lower screenborder
-							text_pos_y = (y + abs(text_offset_y) + text_hei);     // align on top
+							text_pos_y = (y + fabs(text_offset_y) + text_hei);     // align on top
 						}
 						text_marker.col = GFXColor(text_color_r, text_color_g, text_color_b, links[i]->alpha);
 						text_marker.SetPos(text_pos_x, text_pos_y);
@@ -302,11 +302,11 @@ void BaseInterface::Room::Draw (BaseInterface *base) {
 					float text_pos_y = y + text_offset_y + text_hei; // ...and on top
 					text_wid = text_wid * links[i]->text.length() * 0.25;     // calc ~width of text (=multiply the average characterwidth with the number of characters)
 					if ((text_pos_x + text_offset_x + text_wid) >= 1)         // check right screenborder
-						text_pos_x = (x - abs(text_offset_x) - text_wid);     // align left
+						text_pos_x = (x - fabs(text_offset_x) - text_wid);     // align left
 					if ((text_pos_y + text_offset_y) >= 1)                    // check upper screenborder
-						text_pos_y = (y - abs(text_offset_y));                // align on bottom
+						text_pos_y = (y - fabs(text_offset_y));                // align on bottom
 					if ((text_pos_y + text_offset_y - text_hei) <= y_lower)   // check lower screenborder
-						text_pos_y = (y + abs(text_offset_y) + text_hei);     // align on top
+						text_pos_y = (y + fabs(text_offset_y) + text_hei);     // align on top
 					if (enable_markers)
 						text_pos_y += text_hei;
 					
@@ -613,9 +613,9 @@ void BaseInterface::Room::Click (BaseInterface* base,float x, float y, int butto
 			while (count++<links.size()) { 
 				Link *curlink=links[base->curlinkindex++%links.size()];
 				if (curlink) {
-					int x=(((curlink->x+(curlink->wid/2))+1)/2)*g_game.x_resolution;
-					int y=-(((curlink->y+(curlink->hei/2))-1)/2)*g_game.y_resolution;
-                                        biModifyMouseSensitivity(x,y,true);
+					int x=int((((curlink->x+(curlink->wid/2))+1)/2)*g_game.x_resolution);
+					int y=-int((((curlink->y+(curlink->hei/2))-1)/2)*g_game.y_resolution);
+					biModifyMouseSensitivity(x,y,true);
 					winsys_warp_pointer(x,y);
 					PassiveMouseOverWin(x,y);
 					break;
@@ -659,8 +659,7 @@ void BaseInterface::MouseOver (int xbeforecalc, int ybeforecalc) {
           drawlinkcursor=false;
 	}
         static bool  draw_always      = XMLSupport::parse_bool(vs_config->getVariable("graphics","base_locationmarker_drawalways","false"));
-        static float defined_distance = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_distance","0.5"));
-		defined_distance = abs(defined_distance);
+        static float defined_distance = fabs(XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_distance","0.5")));
         if (!draw_always) {
           float cx, cy, wid, hei;
           float dist_cur2link;
@@ -745,6 +744,13 @@ void BaseInterface::ActiveMouseOverWin (int x, int y) {
 	}
 }
 
+void BaseInterface::Key(unsigned int ch, unsigned int mod, bool release, int x, int y)
+{
+	if (!python_kbhandler.empty()) {
+		RunPython(python_kbhandler.c_str());
+	}
+}
+
 void BaseInterface::GotoLink (int linknum) {
 	othtext.SetText("");
 	if (rooms.size()>linknum&&linknum>=0) {
@@ -792,9 +798,17 @@ static void base_keyboard_cb( unsigned int  ch,unsigned int mod, bool release, i
 	amods |= (mod&(WSK_MOD_LALT  |WSK_MOD_RALT  )) ? KB_MOD_ALT   : 0;
 	setActiveModifiers(amods);
 
-	// Queue keystroke
-	if (!release)
-		base_keyboard_queue.push_back (((WSK_MOD_LSHIFT==(mod&WSK_MOD_LSHIFT))||(WSK_MOD_RSHIFT==(mod&WSK_MOD_RSHIFT)))?shiftup(ch):ch);
+	if (BaseInterface::CurrentBase && !BaseInterface::CurrentBase->CallComp) {
+		// Flush buffer
+		if (base_keyboard_queue.size())
+			BaseInterface::ProcessKeyboardBuffer();
+		// Send directly to base interface handlers
+		BaseInterface::CurrentBase->Key(ch,amods,release,x,y);
+	} else {
+		// Queue keystroke
+		if (!release)
+			base_keyboard_queue.push_back (((WSK_MOD_LSHIFT==(mod&WSK_MOD_LSHIFT))||(WSK_MOD_RSHIFT==(mod&WSK_MOD_RSHIFT)))?shiftup(ch):ch);
+	}
 }
 void BaseInterface::InitCallbacks () {
 	winsys_set_keyboard_func(base_keyboard_cb);	
@@ -1252,6 +1266,19 @@ void BaseInterface::Draw () {
 			}
 		}
 		Terminate();
+	}
+}
+
+void BaseInterface::ProcessKeyboardBuffer()
+{
+	if (CurrentBase) {
+		if (!CurrentBase->CallComp) {
+			for (std::vector<unsigned int>::iterator it=base_keyboard_queue.begin(); it!=base_keyboard_queue.end(); ++it) {
+				CurrentBase->Key(*it,0,false,0,0);
+				CurrentBase->Key(*it,0,true,0,0);
+			}
+			base_keyboard_queue.clear();
+		}
 	}
 }
 

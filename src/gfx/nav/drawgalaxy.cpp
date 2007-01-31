@@ -316,7 +316,7 @@ void NavigationSystem::CachedSystemIterator::SystemInfo::loadData(map<string, un
 	position=pos;
         
 	UpdateColor();
-	vector <std::string> destinations = _Universe->getAdjacentStarSystems(name);
+	const vector <std::string> &destinations = _Universe->getAdjacentStarSystems(name);
 	for (int i=0;i<destinations.size();++i) {
 	        if(index_table->count(destinations[i]) != 0) {
 		        lowerdestinations.push_back((*index_table)[destinations[i]]);

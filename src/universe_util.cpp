@@ -15,11 +15,14 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "gfx/particle.h"
-
+#include "cmd/base.h"
 
 
 
 extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );
+extern void RespawnNow (Cockpit * cp);
+extern void TerminateCurrentBase(void);
+
 
 using std::string;
 
@@ -102,5 +105,21 @@ namespace UniverseUtil {
 	  particleTrail.AddParticle (p,velocity,size);
 	}
 
+	void loadGame(const string &savename)
+	{	
+		Cockpit *cockpit = _Universe->AccessCockpit();
+		Unit *player = cockpit->GetParent();
+		UniverseUtil::setCurrentSaveGame(savename);
+		player->Kill();
+		RespawnNow(cockpit);
+		globalWindowManager().shutDown();
+		TerminateCurrentBase();
+	}
+
+	void saveGame(const string &savename)
+	{
+		UniverseUtil::setCurrentSaveGame(savename);
+		WriteSaveGame(_Universe->AccessCockpit(), false);
+	}
 }
 #undef activeSys

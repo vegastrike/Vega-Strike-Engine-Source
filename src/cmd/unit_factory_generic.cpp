@@ -43,7 +43,7 @@ void UnitFactory::getPlanetBuffer( NetBuffer & netbuf, QVector x,
 				   float radius,
 				   const char * filename,
 				   BLENDFUNC sr, BLENDFUNC ds,
-				   vector<char *> dest,
+				   const vector<string> &dest,
 				   const QVector &orbitcent,
 				   Unit * parent,
 				   const GFXMaterial & ourmat,
@@ -67,7 +67,7 @@ void UnitFactory::getPlanetBuffer( NetBuffer & netbuf, QVector x,
 
 		netbuf.addShort( dest.size());
 		for( unsigned int i=0; i<dest.size(); i++)
-			netbuf.addString( string(dest[i]));
+			netbuf.addString( dest[i] );
 		netbuf.addQVector( QVector( orbitcent));
 		netbuf.addSerial( parent->GetSerial());
 		netbuf.addGFXMaterial( ourmat);

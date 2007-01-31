@@ -93,6 +93,7 @@ protected:
         BaseComputer *m_parent;
         std::string type;
         std::string text;
+		std::string savefile;
     public:
         
         // CONSTRUCTION.

@@ -14,6 +14,7 @@ ok *
 #include "collection.h"
 #include "iterator.h"
 #include <vector>
+#include <string>
 
 
 struct GFXMaterial;
@@ -32,7 +33,7 @@ protected:
   GamePlanet();
 
     /// constructor - only to be called by UnitFactory
-    GamePlanet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename, BLENDFUNC blendsrc, BLENDFUNC blenddst, vector<char *> dest, const QVector &orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &, int faction,string fullname, bool inside_out=false);
+  GamePlanet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename, BLENDFUNC blendsrc, BLENDFUNC blenddst, const std::vector<std::string> &dest, const QVector &orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &, int faction,string fullname, bool inside_out=false);
 
     friend class UnitFactory;
 

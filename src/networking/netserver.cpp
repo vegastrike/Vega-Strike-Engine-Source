@@ -877,7 +877,6 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                   un = clt->game_unit.GetUnit();
                   un->ActivateJumpDrive();
                   break;
-			vector<string>	adjacent;
 			string newsystem = netbuf.getString();
 			ObjSerial jumpserial = netbuf.getSerial();
 			unsigned short zonenum = netbuf.getShort();
@@ -903,7 +902,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			{
 					cp = _Universe->isPlayerStarship( un);
 					// Verify if there really is a jump point to the new starsystem
-					adjacent = _Universe->getAdjacentStarSystems( cp->savegame->GetStarSystem()+".system");
+					const vector<string> &adjacent = _Universe->getAdjacentStarSystems( cp->savegame->GetStarSystem()+".system");
 					for( unsigned int i=0; !found && i<adjacent.size(); i++)
 					{
 						if( adjacent[i]==newsystem)

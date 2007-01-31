@@ -1122,7 +1122,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				char sr = netbuf.getChar();
 				char ds = netbuf.getChar();
 
-				vector<char *> dest;
+				vector<string> dest;
 				unsigned short nbdest = netbuf.getShort();
 				int i=0;
 				for( i=0; i<nbdest; i++)

@@ -546,9 +546,6 @@ Unit::~Unit()
   if (image->unitwriter)
     delete image->unitwriter;
   unsigned int i;
-  for (i=0;i<image->destination.size();i++) {
-    free (image->destination[i]);
-  }
 
 #ifdef DESTRUCTDEBUG
   VSFileSystem::vs_fprintf (stderr,"%d %x", 3,image);
@@ -1323,11 +1320,11 @@ void Unit::SetFg(Flightgroup * fg, int fg_subnumber) {
   flightgroup_subnumber=fg_subnumber;
 }
 
-void Unit::AddDestination (const char * dest) {
-  image->destination.push_back (strdup (dest));
+void Unit::AddDestination (const std::string &dest) {
+  image->destination.push_back (dest);
 }
 
-const std::vector <char *>& Unit::GetDestinations () const{
+const std::vector <std::string>& Unit::GetDestinations () const{
   return image->destination;
 }
 
@@ -2685,9 +2682,9 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
 		Unit * jumppoint = this;
 
 		if( SERVER)
-			VSServer->sendJump( smalle,this,std::string(GetDestinations()[dest%GetDestinations().size()]));
+			VSServer->sendJump( smalle,this,GetDestinations()[dest%GetDestinations().size()]);
                 else
-                  _Universe->activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[dest%GetDestinations().size()]));
+                  _Universe->activeStarSystem()->JumpTo (smalle, jumppoint, GetDestinations()[dest%GetDestinations().size()]);
 		return true;
     }
 	/* NOT NECESSARY ANYMORE SINCE THE CLIENT ONLY ASK FOR AUTH WITHOUT EXPECTING AN ANSWER
@@ -2712,9 +2709,9 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
       DeactivateJumpDrive();
       Unit * jumppoint = smalle;
       if( SERVER)
-        VSServer->sendJump( this,smalle,std::string(smalle->GetDestinations()[GetJumpStatus().drive%smalle->GetDestinations().size()]));
+        VSServer->sendJump( this,smalle,smalle->GetDestinations()[GetJumpStatus().drive%smalle->GetDestinations().size()]);
       else
-        _Universe->activeStarSystem()->JumpTo (this, jumppoint, std::string(smalle->GetDestinations()[GetJumpStatus().drive%smalle->GetDestinations().size()]));
+        _Universe->activeStarSystem()->JumpTo (this, jumppoint, smalle->GetDestinations()[GetJumpStatus().drive%smalle->GetDestinations().size()]);
       return true;
     }
     /*

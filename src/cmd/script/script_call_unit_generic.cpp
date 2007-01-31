@@ -64,7 +64,7 @@
 #include "gfxlib.h"
 #include "cmd/pilot.h"
 //#include "vegastrike.h"
-extern vector <char *> ParseDestinations (const string &value);
+extern const vector <string>& ParseDestinations (const string &value);
 
 /* *********************************************************** */
 

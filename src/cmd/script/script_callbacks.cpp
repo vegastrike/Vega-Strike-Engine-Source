@@ -437,7 +437,7 @@ varInst *Mission::callGetAdjacentSystem (missionNode *node,int mode) {
   int which= (int)getIntArg(node,mode,1);
   if(mode==SCRIPT_RUN){
     deleteVarInst(vi);
-    string sysname=_Universe->getAdjacentStarSystems(str)[which];
+    const string &sysname=_Universe->getAdjacentStarSystems(str)[which];
     vi=call_string_new(node,mode,sysname);
   }
   return vi;

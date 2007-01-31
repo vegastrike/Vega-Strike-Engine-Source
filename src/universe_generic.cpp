@@ -267,10 +267,10 @@ void Universe::Generate2( StarSystem * ss)
 
   script_system=ss;
   VSFileSystem::vs_fprintf (stderr,"Loading Star System %s",ss->getFileName().c_str());
-  vector <std::string> adjacent = getAdjacentStarSystems(ss->getFileName());
+  const vector <std::string> &adjacent = getAdjacentStarSystems(ss->getFileName());
   for (unsigned int i=0;i<adjacent.size();i++) {
     VSFileSystem::vs_fprintf (stderr,"\n Next To: %s",adjacent[i].c_str());
-    vector <std::string> adj = getAdjacentStarSystems(adjacent[i]);
+    const vector <std::string> &adj = getAdjacentStarSystems(adjacent[i]);
   }
   static bool first=true;
   if (!first) {

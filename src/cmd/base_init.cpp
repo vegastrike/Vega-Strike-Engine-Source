@@ -87,6 +87,9 @@ PYTHON_BEGIN_MODULE(Base)
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetMouseEventData, "SetMouseEventData");
 	PYTHON_DEFINE_GLOBAL(Base,&::GetEventDataPython, "GetEventData");
 
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::GetTextWidth, "GetTextWidth");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::GetTextHeight, "GetTextHeight");
+
 PYTHON_END_MODULE(Base)
 
 void InitBase() {

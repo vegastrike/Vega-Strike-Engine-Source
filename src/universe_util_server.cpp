@@ -59,8 +59,9 @@ namespace UniverseUtil {
         }
 	void musicLayerSkip(int layer) {}
 	void musicLayerStop(int layer) {}
-	void StopAllSounds(void) {
-        }
+	void StopAllSounds(void) {}
+	void loadGame(const string &savename) {}
+	void saveGame(const string &savename) {}
 
 }
 #undef activeSys

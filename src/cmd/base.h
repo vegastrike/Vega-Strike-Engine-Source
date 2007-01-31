@@ -225,6 +225,9 @@ public:
 	bool CallComp;
 	UnitContainer caller;
 	UnitContainer baseun;
+
+	std::string python_kbhandler;
+
 #ifdef BASE_MAKER
 	void EndXML(FILE *fp);
 #endif
@@ -238,12 +241,13 @@ public:
 	void Load(const char * filename, const char * time_of_day, const char * faction);
 	static void ClickWin (int x, int y, int button, int state);
 	void Click (int x, int y, int button, int state);
+	void Key(unsigned int ch, unsigned int mod, bool release, int x, int y);
 	static void PassiveMouseOverWin (int x, int y);
 	static void ActiveMouseOverWin (int x, int y);
+	static void ProcessKeyboardBuffer();
 	void MouseOver (int x, int y);
 	BaseInterface (const char *basefile, Unit *base, Unit *un);
 	~BaseInterface ();
-	static void DrawWin ();
 	void Draw ();
 };
 

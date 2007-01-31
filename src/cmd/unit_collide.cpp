@@ -488,7 +488,7 @@ bool Unit::Collide (Unit * target) {
   iter=last_collisions->find(target);
   for (;iter!=last_collisions->end()&&iter->first==target;++iter) {
 	  if (iter->second==this) {
-		  printf ("No double collision\n");
+		  //printf ("No double collision\n"); (litters debug output, and I bet it's not needed now)
 		  return false;
 	  }
   }

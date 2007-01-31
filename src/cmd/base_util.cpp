@@ -11,6 +11,8 @@
 
 #include "in_kb.h"
 
+extern float getFontHeight();
+
 namespace BaseUtil {
 	inline BaseInterface::Room *CheckRoom (int room) {
 		if (!BaseInterface::CurrentBase) return 0;
@@ -280,6 +282,13 @@ namespace BaseUtil {
 		}
 		BaseLink(newroom,x,y,wid,hei,text,front);
 	}
+
+	void GlobalKeyPython(std::string pythonfile)
+	{
+		if (BaseInterface::CurrentBase)
+			BaseInterface::CurrentBase->python_kbhandler = pythonfile;
+	}
+
 	void MessageToRoom(int room, std::string text) {
 		if (!BaseInterface::CurrentBase) return;
 		BaseInterface::CurrentBase->rooms[room]->objs.push_back(new BaseInterface::Room::BaseTalk(text,"currentmsg",true));
@@ -370,14 +379,55 @@ namespace BaseUtil {
 		data["mousey"] = y;
 		data["mousebuttons"] = buttonMask;
 
-		// Keyboard modifiers (for kb+mouse)
-		data["alt"]   = ((getActiveModifiers() & KB_MOD_ALT)!=0);
-		data["shift"] = ((getActiveModifiers() & KB_MOD_SHIFT)!=0);
-		data["ctrl"]  = ((getActiveModifiers() & KB_MOD_CTRL)!=0);
+		SetKeyStatusEventData();
 	}
+
+	void SetKeyStatusEventData(unsigned int modmask)
+	{
+		boost::python::dict &data = _GetEventData();
+
+		// Keyboard modifiers (for kb+mouse)
+		if (modmask==~0)
+			modmask = getActiveModifiers();
+		data["modifiers"] = modmask;
+		data["alt"]   = ((modmask & KB_MOD_ALT)!=0);
+		data["shift"] = ((modmask & KB_MOD_SHIFT)!=0);
+		data["ctrl"]  = ((modmask & KB_MOD_CTRL)!=0);
+	}
+
+	void SetKeyEventData(std::string type, unsigned int keycode, unsigned int modmask=~0)
+	{
+		boost::python::dict &data = _GetEventData();
+
+		// Event type
+		data["type"] = type;
+
+		// Keycode
+		data["key"] = keycode;
+		if ((keycode>0x20) && (keycode < 0xff))
+			data["char"] = string(1,keycode); else
+			data["char"] = string();
+
+		SetKeyStatusEventData(modmask);
+	}
+
 	const Dictionary& GetEventData()
 	{
 		return _GetEventData();
+	}
+
+	float GetTextHeight(std::string text, Vector widheimult)
+	{
+		static bool force_highquality = true;
+		static bool use_bit = force_highquality||XMLSupport::parse_bool(vs_config->getVariable ("graphics","high_quality_font","false"));
+		static float font_point = XMLSupport::parse_float (vs_config->getVariable ("graphics","font_point","16"));
+		return use_bit ? getFontHeight() : (font_point * 2 / g_game.y_resolution);
+	}
+
+	float GetTextWidth(std::string text, Vector widheimult)
+	{
+		// Unsupported for now
+		return 0;
 	}
 
 }

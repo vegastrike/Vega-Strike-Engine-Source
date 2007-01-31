@@ -236,7 +236,7 @@ void Planet::AddSatellite (Unit * orbiter) {
 }
 extern float ScaleJumpRadius(float);
 extern Flightgroup * getStaticBaseFlightgroup(int faction);
-Unit * Planet::beginElement(QVector x,QVector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,const char * filename,BLENDFUNC blendSrc, BLENDFUNC blendDst, vector<char *> dest,int level,  const GFXMaterial & ourmat, const vector <GFXLightLocal>& ligh, bool isunit, int faction,string fullname, bool inside_out){
+Unit * Planet::beginElement(QVector x,QVector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,const char * filename,BLENDFUNC blendSrc, BLENDFUNC blendDst, const vector<string> &dest,int level,  const GFXMaterial & ourmat, const vector <GFXLightLocal>& ligh, bool isunit, int faction,string fullname, bool inside_out){
   //this function is OBSOLETE
   Unit * un=NULL;
   if (level>2) {
@@ -284,7 +284,7 @@ Planet::Planet()
   this->shield.number=2;
 }
 
-void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename, vector<char *> dest, const QVector &orbitcent, Unit * parent, int faction,string fullname, bool inside_out, unsigned int lights_num)
+void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename, const vector<string> &dest, const QVector &orbitcent, Unit * parent, int faction,string fullname, bool inside_out, unsigned int lights_num)
 {
   atmosphere = NULL;
   terrain = NULL;
@@ -299,10 +299,7 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
   //this->faction = neutralfaction;
   killed=false;
   bool destempty=dest.empty();
-  while (!dest.empty()) {
-    AddDestination(dest.back());
-    dest.pop_back();
-  }
+  for (int i=0; i<dest.size(); ++i) AddDestination(dest[i]);
   //name = "Planet - ";
   //name += textname;
   name=fullname;
@@ -371,7 +368,7 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
   }
 }
 
-Planet::Planet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename, vector<char *> dest, const QVector &orbitcent, Unit * parent, int faction,string fullname, bool inside_out, unsigned int lights_num)
+Planet::Planet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename, const vector<string> &dest, const QVector &orbitcent, Unit * parent, int faction,string fullname, bool inside_out, unsigned int lights_num)
 {
   inside=false;
   terraintrans = NULL;

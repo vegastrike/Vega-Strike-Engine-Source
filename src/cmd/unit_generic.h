@@ -448,8 +448,8 @@ protected:
 /***************************************************************************************/
 
 public:
-  const std::vector <char *> &GetDestinations () const;
-  void AddDestination (const char *);
+	const std::vector <std::string> &GetDestinations () const;
+	void AddDestination (const std::string&);
   /**
    * The computer holds all data in the navigation computer of the current unit
    * It is outside modifyable with GetComputerData() and holds only volatile

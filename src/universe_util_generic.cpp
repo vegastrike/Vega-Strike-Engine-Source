@@ -9,6 +9,7 @@
 #include "cmd/collection.h"
 #include "star_system_generic.h"
 #include <string>
+#include <set>
 #include "savegame.h"
 #include "cmd/unit_csv.h"
 //#include "audiolib.h"
@@ -32,6 +33,7 @@ extern Unit&GetUnitMasterPartList();
 extern std::string universe_path;
 extern int num_delayed_missions();
 using std::string;
+using std::set;
 
 #define activeSys _Universe->activeStarSystem() //less to write
 using namespace VSFileSystem;
@@ -663,6 +665,104 @@ namespace UniverseUtil {
 		ComputeSystemSerials( sys);
 	}
 	cout<<"Computing done."<<endl;
+	}
+
+	string getSaveDir()
+	{
+		return GetSaveDir();
+	}
+
+	static std::string simplePrettySystem(std::string system) {
+	  std::string::size_type where=system.find("/");
+	  return std::string("Sec:")+system.substr(0,where)+" Sys:"+(where==string::npos?system:system.substr(where+1));
+	}
+	static std::string simplePrettyShip(std::string ship) {
+	  if (ship.length()>0) {
+		ship[0]=toupper(ship[0]);
+	  }
+	  std::string::size_type where = ship.find(".");
+	  if (where!=string::npos) {
+		ship=ship.substr(0,where);
+		ship="Refurbished "+ship;
+	  }
+	  return ship;
+	}
+
+	string getSaveInfo(const std::string &filename, bool formatForTextbox)
+	{
+		static SaveGame savegame("");
+		static set<string> campaign_score_vars;
+		static bool campaign_score_vars_init=false;
+		static bool quickmode = XMLSupport::parse_bool( vs_config->getVariable("general","quick_savegame_summaries","true") );
+		if (!campaign_score_vars_init) {
+			string campaign_score = vs_config->getVariable("physics","campaigns","privateer_campaign vegastrike_campaign");
+
+			string::size_type where=0, when=campaign_score.find(' ');
+			while (where != string::npos) {
+				campaign_score_vars.insert(campaign_score.substr(where,((when==string::npos)?when:when-where)));
+				where = (when==string::npos)?when:when+1;
+				when = campaign_score.find(' ',where);
+			}
+
+			campaign_score_vars_init = true;
+		}
+
+		std::string system;
+		std::string lf = (formatForTextbox?"#n#":"\n");
+		QVector pos(0,0,0);
+		bool updatepos=false;
+		float creds;
+		vector<std::string> Ships;
+		std::string sillytemp=UniverseUtil::setCurrentSaveGame(filename);
+		savegame.SetStarSystem("");
+		savegame.ParseSaveGame(filename,system,"",pos,updatepos,creds,Ships,_Universe->CurrentCockpit(),"",true,false,quickmode,true,true,campaign_score_vars);
+		UniverseUtil::setCurrentSaveGame(sillytemp);
+		string text;
+		text="Savegame: "+text+lf+"_________________"+lf;
+		text+="Credits: "+XMLSupport::tostring((unsigned int)creds)+"."+XMLSupport::tostring(((unsigned int)(creds*100))%100)+lf;
+		text+=simplePrettySystem(system)+lf;
+		if (Ships.size()) {
+			text+="Starship: "+simplePrettyShip(Ships[0])+lf;
+			if (Ships.size()>2){
+				text+="Fleet:"+lf;
+				for (int i=2;i<Ships.size();i+=2){
+					text+=" "+simplePrettyShip(Ships[i-1])+lf+"  Located At:"+lf+"  "+simplePrettySystem(Ships[i])+lf;
+				}
+			}
+		}
+		if (!quickmode) {
+			bool hit=false;
+			for (set<string>::const_iterator it=campaign_score_vars.begin(); it!=campaign_score_vars.end(); ++it) {
+				string var = *it;
+				unsigned int curscore=savegame.getMissionData(var).size()+savegame.getMissionStringData(var).size();
+				if (curscore>0) {
+					hit =true;
+					if (var.length()>0)
+						var[0]=toupper(var[0]);
+					text+=var.substr(0,var.find("_"))+" Campaign Score: "+XMLSupport::tostring(curscore)+lf;
+				}
+			}
+			if (!hit) {
+				text+="Campaign Score: 0"+lf;
+			}
+		}
+		return text;
+	}
+
+	string getCurrentSaveGame()
+	{
+		return GetCurrentSaveGame();
+	}
+
+	string setCurrentSaveGame(const string &newsave)
+	{
+		return SetCurrentSaveGame(newsave);
+	}
+
+	const string& getNewGameSaveName()
+	{
+		static string ngsn("New_Game");
+		return ngsn;
 	}
 }
 

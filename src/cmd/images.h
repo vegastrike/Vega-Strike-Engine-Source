@@ -162,7 +162,7 @@ struct UnitImages {
   float equipment_volume;//this one should be more general--might want to apply it to radioactive goods, passengers, ships (hangar), etc
   float HiddenCargoVolume;
   std::vector <Cargo> cargo;
-  std::vector <char *> destination;
+  std::vector <string> destination;
   std::vector <DockingPorts> dockingports;
   ///warning unreliable pointer, never dereference!
   std::vector <Unit *> clearedunits;

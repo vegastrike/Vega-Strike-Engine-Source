@@ -149,35 +149,19 @@ void AvgSystems (const SystemInfo &a, const SystemInfo &b, SystemInfo &si) {
   si.seed=iav (a.seed,b.seed);
   si.force = a.force||b.force;
 }
-vector <char *> ParseDestinations (const string &value) {
-  vector <char *> tmp;
-  int i;
-  int j;
-  int k;
-  for (j=0;value[j]!=0;){
-    for (i=0;value[j]!=' '&&value[j]!='\0';i++,j++) {
-    }
-    tmp.push_back(new char [i+1]);//leak...somewhere!
-    for (k=0;k<i;k++) {
-      tmp[tmp.size()-1][k]=value[k+j-i];
-    }
-    tmp[tmp.size()-1][i]='\0';
-    if (value[j]!=0)
-      j++;
+const vector<string>& ParseDestinations (const string &value) {
+  static vector <string> rv;
+  rv.clear();
+  string::size_type pos=0, sep;
+  while ((sep = value.find(' ',pos)) != string::npos) {
+	  rv.push_back(value.substr(pos,sep-pos));
+	  pos = sep+1;
   }
-  return tmp;
+  if (pos < value.length())
+	  rv.push_back(value.substr(pos));
+  return rv;
 }
 
-
-vector <string> ParseStringyDestinations (vector <char *> v) {
-  vector <string> retval;
-  while (!v.empty()) {
-    retval.push_back (string (v.back()));
-    delete [] v.back();
-    v.pop_back();
-  }
-  return retval;
-}
 
 void MakeStarSystem (string file, Galaxy *galaxy, string origin, int forcerandom) {
   SystemInfo Ave;
@@ -210,9 +194,8 @@ void MakeStarSystem (string file, Galaxy *galaxy, string origin, int forcerandom
   if (always_force)
 	  si.force=true;
   string dest = galaxy->getVariable (si.sector,si.name,"jumps","");
-  if (dest.length()) {
-    si.jumps = ParseStringyDestinations (ParseDestinations (dest));
-  }
+  if (dest.length()) 
+    si.jumps = ParseDestinations (dest);
   bool canret=origin.length()==0;
   for (unsigned int i=0;i<si.jumps.size();i++) {
     if (si.jumps[i]==origin) {
@@ -242,8 +225,8 @@ std::string Universe::getGalaxyPropertyDefault (const std::string & sys, const s
   string name = RemoveDotSystem (getStarSystemName (sys).c_str());
   return galaxy->getVariable (sector,name,prop,def);
 }
-vector <std::string> Universe::getAdjacentStarSystems (const std::string &file) {
+const vector <std::string> &Universe::getAdjacentStarSystems (const std::string &file) const {
   string sector =getStarSystemSector (file); 
   string name =RemoveDotSystem (getStarSystemName (file).c_str()); 
-  return ParseStringyDestinations (ParseDestinations (galaxy->getVariable (sector,name,"jumps","")));  
+  return ParseDestinations(galaxy->getVariable (sector,name,"jumps",""));  
 }

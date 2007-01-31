@@ -2558,78 +2558,9 @@ bool BaseComputer::newsPickerChangedSelection(const EventCommandId& command, Con
 //	}
     return true;
 }
-static std::string simplePrettySystem(std::string system) {
-  std::string::size_type where=system.find("/");
-  return std::string("Sec:")+system.substr(0,where)+" Sys:"+(where==string::npos?system:system.substr(where+1));
-}
-static std::string simplePrettyShip(std::string ship) {
-  if (ship.length()>0) {
-    ship[0]=toupper(ship[0]);
-  }
-  std::string::size_type where = ship.find(".");
-  if (where!=string::npos) {
-    ship=ship.substr(0,where);
-    ship="Refurbished "+ship;
-  }
-  return ship;
-}
-static std::string GarnerInfoFromSaveGame(string text) {
-  static SaveGame savegame("");
-  static set<string> campaign_score_vars;
-  static bool campaign_score_vars_init=false;
-  static bool quickmode = XMLSupport::parse_bool( vs_config->getVariable("general","quick_savegame_summaries","true") );
-  if (!campaign_score_vars_init) {
-	  string campaign_score = vs_config->getVariable("physics","campaigns","privateer_campaign vegastrike_campaign");
-
-	  string::size_type where=0, when=campaign_score.find(' ');
-	  while (where != string::npos) {
-		  campaign_score_vars.insert(campaign_score.substr(where,((when==string::npos)?when:when-where)));
-		  where = (when==string::npos)?when:when+1;
-		  when = campaign_score.find(' ',where);
-	  }
-
-	  campaign_score_vars_init = true;
-  }
-
-  std::string system;
-  QVector pos(0,0,0);
-  bool updatepos=false;
-  float creds;
-  vector<std::string> Ships;
-  std::string sillytemp=CurrentSaveGameName;
-  CurrentSaveGameName=text;
-  savegame.SetStarSystem("");
-  savegame.ParseSaveGame(text,system,"",pos,updatepos,creds,Ships,_Universe->CurrentCockpit(),"",true,false,quickmode,true,true,campaign_score_vars);
-  CurrentSaveGameName=sillytemp;
-  text="Savegame: "+text+"#n#_________________#n#";  
-  text+="Credits: "+tostring((unsigned int)creds)+"."+tostring(((unsigned int)(creds*100))%100)+"#n#";
-  text+=simplePrettySystem(system)+"#n#";
-  if (Ships.size()) {
-    text+="Starship: "+simplePrettyShip(Ships[0])+"#n#";
-    if (Ships.size()>2){
-      text+="Fleet:#n#";
-      for (int i=2;i<Ships.size();i+=2){
-        text+=" "+simplePrettyShip(Ships[i-1])+"#n#  Located At:#n#  "+simplePrettySystem(Ships[i])+"#n#";
-      }
-    }
-  }
-  if (!quickmode) {
-	  bool hit=false;
-	  for (set<string>::const_iterator it=campaign_score_vars.begin(); it!=campaign_score_vars.end(); ++it) {
-		string var = *it;
-		unsigned int curscore=savegame.getMissionData(var).size()+savegame.getMissionStringData(var).size();
-		if (curscore>0) {
-		  hit =true;
-		  if (var.length()>0)
-			var[0]=toupper(var[0]);
-		  text+=var.substr(0,var.find("_"))+" Campaign Score: "+tostring(curscore)+"#n#";
-		}
-	  }
-	  if (!hit) {
-		text+="Campaign Score: 0#n#";
-	  }
-  }
-  return text;
+static std::string GarnerInfoFromSaveGame(const string &filename) 
+{
+	return UniverseUtil::getSaveInfo(filename,true);
 }
 // The selection in the News picker changed.
 bool BaseComputer::loadSavePickerChangedSelection(const EventCommandId& command, Control* control) {
@@ -5378,7 +5309,7 @@ void BaseComputer::LoadSaveQuitConfirm::init(void) {
 bool BaseComputer::LoadSaveQuitConfirm::processWindowCommand(const EventCommandId& command, Control* control) {
 	if(command == "Save") {
 		m_parent->actionConfirmedSaveGame();
-                window()->close();
+        window()->close();
 	} else if(command == "Load") {
 		m_parent->actionConfirmedLoadGame();
 	} else if(command == "Quit") {
@@ -5413,34 +5344,30 @@ bool BaseComputer::actionConfirmedSaveGame() {
 		//		player = m_base.GetUnit(); // messes tuff up, besides, not having this appears to be good.
 	}
 	StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("InputText") );
-	bool ok=true;
 	if (desc) {	   
 		std::string tmp = desc->text();
 		VSFileSystem::VSFile fp;
 		VSFileSystem::VSError err = fp.OpenCreateWrite(tmp,SaveFile);
 		if (err>Ok) {
 			showAlert ("Could not create the saved game because it contains invalid characters or you do not have permissions or free space.");
-			ok=false;
-			return true;
-		}else {
+		} else {
 			fp.Close();
 			if (tmp.length()>0) {
-				CurrentSaveGameName=tmp;
-			}else {
-				ok=false;
+				Cockpit* cockpit = player?_Universe->isPlayerStarship(player):0;
+				if (player && cockpit) {
+					UniverseUtil::setCurrentSaveGame(tmp);
+					WriteSaveGame(cockpit, false);
+					loadLoadSaveControls();			
+					showAlert("Game saved successfully.");
+				} else {
+					showAlert ("Oops - unexpected error (player or cockpit is null)");
+				}
+			} else {
+				showAlert ("You Must Type In a Name To Save.");
 			}
 		}
-	}
-	if(player&&ok) {
-		Cockpit* cockpit = _Universe->isPlayerStarship(player);
-		if(cockpit) {
-			WriteSaveGame(cockpit, false);
-			loadLoadSaveControls();			
-			showAlert("Game saved successfully.");
-		}
-	}
-	if (!ok) {
-		showAlert ("You Must Type In a Name To Save.");
+	} else {
+		showAlert ("Oops - unexpected error (desc control not found!)");
 	}
 	return true;
 }
@@ -5481,30 +5408,32 @@ bool BaseComputer::actionSaveGame(const EventCommandId& command, Control* contro
 }
 
 bool BaseComputer::actionConfirmedLoadGame() {
-		Unit* player = m_player.GetUnit();
-		StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("InputText") );
-		if (desc) {
-			std::string tmp = desc->text();
-			if (tmp.length()>0) {
-				CurrentSaveGameName=tmp;
-				if(player) {
-					Cockpit* cockpit = _Universe->isPlayerStarship(player);
-					if(cockpit) {
-						player->Kill();
-						RespawnNow(cockpit);
-						globalWindowManager().shutDown();
-						TerminateCurrentBase();  //BaseInterface::CurrentBase->Terminate();
-					}
-				}							
-			}else {
-				showAlert ("You Must Type In a Name To Load....");
+	Unit* player = m_player.GetUnit();
+	StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("InputText") );
+	if (desc) {
+		std::string tmp = desc->text();
+		if (tmp.length()>0) {
+			Cockpit* cockpit = player?_Universe->isPlayerStarship(player):0;
+			if(player && cockpit) {
+				UniverseUtil::setCurrentSaveGame(tmp);
+				player->Kill();
+				RespawnNow(cockpit);
+				globalWindowManager().shutDown();
+				TerminateCurrentBase();  //BaseInterface::CurrentBase->Terminate();
+			} else {
+				showAlert ("Oops - unexpected error (player or cockpit is null)");
 			}
-		}		
-		return true;
+		} else {
+			showAlert ("You Must Type In a Name To Load....");
+		}
+	} else {
+		showAlert ("Oops - unexpected error (desc control not found!)");
+	}
+	return true;
 }
 bool BaseComputer::actionNewGame(const EventCommandId& command, Control* control) {
   StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("InputText") );  
-  desc->setText("New_Game");
+  desc->setText(UniverseUtil::getNewGameSaveName());
   return this->actionLoadGame(command,control);
 }
 bool BaseComputer::actionLoadGame(const EventCommandId& command, Control* control) {
@@ -5513,7 +5442,6 @@ bool BaseComputer::actionLoadGame(const EventCommandId& command, Control* contro
 		if (desc) {
 			std::string tmp = desc->text();
 			if (tmp.length()>0) {
-				CurrentSaveGameName=tmp;	
 				if(player) {
 					Cockpit* cockpit = _Universe->isPlayerStarship(player);
 					if(cockpit) {

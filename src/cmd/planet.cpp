@@ -246,8 +246,8 @@ void GamePlanet::AddRing(const std::string &texture,float iradius,float oradius,
   meshdata.push_back(shield);  
 }
 
-extern vector <char *> ParseDestinations (const string &value);
-GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,const char * textname,BLENDFUNC blendSrc, BLENDFUNC blendDst, vector <char *> dest, const QVector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction,string fgid, bool inside_out)
+extern const vector <string>& ParseDestinations (const string &value);
+GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,const char * textname,BLENDFUNC blendSrc, BLENDFUNC blendDst, const vector<string> &dest, const QVector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction,string fgid, bool inside_out)
     : GameUnit<Planet>( 0 )
 {
 	  atmosphere = NULL;
@@ -353,11 +353,12 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
 	c= ligh[0].ligh.GetProperties(AMBIENT);
 
 	
-      static vector <char *> shines = ParseDestinations (vs_config->getVariable("graphics","star_shine","shine.ani"));
-      if (shines.empty()) {
-	shines.push_back("shine.ani");
-      }
-      shine = new Animation (shines[rand()%shines.size()],true,.1,BILINEAR,false,true,c);//GFXColor(ourmat.er,ourmat.eg,ourmat.eb,ourmat.ea));
+      static const vector<string>& _shines = ParseDestinations (vs_config->getVariable("graphics","star_shine","shine.ani"));
+	  static vector<string> _shines_sg; 
+	  if (_shines_sg.empty()) 
+		  _shines_sg.push_back("shine.ani");
+	  static const vector<string>& shines = _shines.empty()?_shines_sg:_shines;
+      shine = new Animation (shines[rand()%shines.size()].c_str(),true,.1,BILINEAR,false,true,c);//GFXColor(ourmat.er,ourmat.eg,ourmat.eb,ourmat.ea));
       shine->SetDimensions ( glowradius*radius,glowradius*radius);
     
       if (!drawstar) {

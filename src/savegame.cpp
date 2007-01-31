@@ -920,3 +920,20 @@ void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstars
   //  return mysav;
 }
 
+const string& GetCurrentSaveGame()
+{
+	return CurrentSaveGameName;
+}
+
+string SetCurrentSaveGame(string newname)
+{
+	string oldname = CurrentSaveGameName;
+	CurrentSaveGameName = newname;
+	return oldname;
+}
+
+const string& GetSaveDir()
+{
+	static string rv = VSFileSystem::homedir+"/save/";
+	return rv;
+}

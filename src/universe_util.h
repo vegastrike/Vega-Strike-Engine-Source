@@ -245,6 +245,15 @@ public:
 
 	void	ComputeGalaxySerials( std::vector<std::string> & stak);
 	void	ComputeSystemSerials( std::string & systempath);
+
+	std::string getSaveDir();
+	std::string getSaveInfo(const std::string &filename, bool formatForTextbox);
+	std::string getCurrentSaveGame();
+	std::string setCurrentSaveGame(const std::string &newsave);
+	const std::string& getNewGameSaveName();
+	void loadGame(const std::string &savename);
+	void saveGame(const std::string &savename);
+
 }
 
 #undef activeSys

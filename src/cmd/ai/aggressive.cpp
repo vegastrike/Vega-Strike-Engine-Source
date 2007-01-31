@@ -830,10 +830,10 @@ lo->Communicate(c);
 */          
 
 		  int alternate = fgnum%2?1:-1;
-		  int psize = parent->radial_size;
+		  float psize = parent->radial_size;
 		  int Ypos = 0;
 		  int Xpos = 0;
-		  int position = floor((fgnum%3) * 0.5 * alternate);
+		  int position = int(floor((fgnum%3) * 0.5 * alternate));
 // nice square formation, how many of these are you going to have anyway? Max 9, then go back. Should be enough.
 		  switch (fgnum%9) {
 		  case 0: Xpos = 0; Ypos = 0; break;
@@ -970,10 +970,10 @@ lo->Communicate(c);
 */          
 
 		  int alternate = fgnum%2?1:-1;
-		  int psize = parent->radial_size;
+		  float psize = parent->radial_size;
 		  int Ypos = 0;
 		  int Xpos = 0;
-		  int position = floor((fgnum%3) * 0.5 * alternate);
+		  int position = int(floor((fgnum%3) * 0.5 * alternate));
 // nice square formation, how many of these are you going to have anyway? Max 9, then go back. Should be enough.
 		  switch (fgnum%9) {
 		  case 0: Xpos = 0; Ypos = 0; break;
@@ -1244,7 +1244,7 @@ static Unit * ChooseNavPoint(Unit * parent, Unit **otherdest, float *lurk_on_arr
   static float lurk_time = XMLSupport::parse_float(vs_config->getVariable("AI","lurk_time","600"));
   static float select_time = XMLSupport::parse_float(vs_config->getVariable("AI","fg_nav_select_time","120"));
   static float hostile_select_time = XMLSupport::parse_float(vs_config->getVariable("AI","pirate_nav_select_time","400"));
-  static int num_ships_per_roid = XMLSupport::parse_float(vs_config->getVariable("AI","num_pirates_per_asteroid_field","12"));
+  static int num_ships_per_roid = XMLSupport::parse_int(vs_config->getVariable("AI","num_pirates_per_asteroid_field","12"));
   bool civilian=FactionUtil::isCitizenInt(parent->faction);
 
   bool hostile=sysrel<0;
@@ -1410,16 +1410,8 @@ public:
     }
     MoveTo::Execute();
     Unit *un = destUnit.GetUnit();
-    if (CloseEnoughToNavOrDest(parent, un, targetlocation)) {
+    if (CloseEnoughToNavOrDest(parent, un, targetlocation)) 
       done = true;
-        /*
-      printf("Uh-oh! Me = %08X (%s), other = %08X (%s)\n", (size_t)(void*)parent, parent->name.c_str(),
-          (size_t)(void*)un, un->name.c_str());
-        */
-    }
-    if (done) {
-      printf ("Flyto done\n");
-    }
     un=NULL;
     static float mintime=XMLSupport::parse_float(vs_config->getVariable("AI","min_time_to_auto","25"));
     if (getNewTime()-creationtime>mintime) {

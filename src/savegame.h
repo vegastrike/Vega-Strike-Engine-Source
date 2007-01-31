@@ -73,6 +73,9 @@ class SaveGame {
   void LoadSavedMissions();
 };
 void WriteSaveGame (class Cockpit * cp, bool auto_save);
+const std::string& GetCurrentSaveGame();
+std::string SetCurrentSaveGame(std::string newname);
+const std::string& GetSaveDir();
 void CopySavedShips(std::string filename, int player_num,const std::vector<std::string>&starships,bool load);
 #endif
 
