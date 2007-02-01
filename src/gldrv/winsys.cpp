@@ -392,6 +392,15 @@ void winsys_process_events()
     int x, y;
     bool state;
 
+	static bool handle_unicode_kb = XMLSupport::parse_bool(vs_config->getVariable("keyboard","enable_unicode","true"));
+
+	static unsigned int keysym_to_unicode[256];
+	static bool keysym_to_unicode_init=false;
+	if (!keysym_to_unicode_init) {
+		keysym_to_unicode_init = true;
+		memset(keysym_to_unicode,0,sizeof(keysym_to_unicode));
+	}
+
     while (true) {
 
 	SDL_LockAudio();
@@ -406,22 +415,33 @@ void winsys_process_events()
 		if ( keyboard_func ) {
 		    SDL_GetMouseState( &x, &y );
 
-// Is this needed? Causes sticky numpad keys...
-/*		    if(event.key.keysym.unicode!=0 &&
-			        !(event.key.keysym.unicode & 0xff80))
-		        key = (event.key.keysym.unicode & 0x7f);
-		    else*/
+			bool maybe_unicode = handle_unicode_kb && !(event.key.keysym.sym&~0xFF);
+			// Translate untranslated release events
+			if (   state && maybe_unicode
+				&& keysym_to_unicode[event.key.keysym.sym&0xFF]  )
+				event.key.keysym.unicode = keysym_to_unicode[event.key.keysym.sym&0xFF];
+			bool is_unicode = maybe_unicode && event.key.keysym.unicode;
+			// Remember translation for translating release events
+			if (is_unicode)
+				keysym_to_unicode[event.key.keysym.sym&0xFF] = event.key.keysym.unicode;
+		    // Ugly hack: prevent shiftup/shiftdown screwups on intl keyboard
+		    // Note: Thank god we'll have OIS for 0.5.x
 		    bool shifton = event.key.keysym.mod&(KMOD_LSHIFT|KMOD_RSHIFT|KMOD_CAPS);
-		    key = event.key.keysym.unicode ? 
+		    if (   shifton && is_unicode 
+				&& shiftup(shiftdown(event.key.keysym.unicode)) != event.key.keysym.unicode)
+			{
+		        event.key.keysym.mod = SDLMod(event.key.keysym.mod & ~(KMOD_LSHIFT|KMOD_RSHIFT|KMOD_CAPS));
+				shifton = false;
+			}
+			// Choose unicode or symbolic, depending on whether ther is or not a unicode code
+			// (unicode codes must be postprocessed to make sure application of the shiftup
+			// modifier does not destroy it)
+		    key = is_unicode ? 
 		          ( (shifton) ?
 			        shiftdown(event.key.keysym.unicode) 
 			      : event.key.keysym.unicode
 			  ) : event.key.keysym.sym;
-		    // Ugly hack: prevent shiftup/shiftdown screwups on intl keyboard
-		    // Note: Thank god we'll have OIS for 0.5.x
-		    if (shifton && event.key.keysym.unicode && 
-		        shiftup(key) != event.key.keysym.unicode)
-		        event.key.keysym.mod = SDLMod(event.key.keysym.mod & ~(KMOD_LSHIFT|KMOD_RSHIFT));
+			// Send the event
 		    (*keyboard_func)( key,
 				      event.key.keysym.mod,
 				      state,
