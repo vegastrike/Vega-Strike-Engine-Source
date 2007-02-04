@@ -328,7 +328,6 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   double starttime=queryTime();
   GFXEnable (DEPTHTEST);
   GFXEnable (DEPTHWRITE);
-  Music::MuzakCycle();
   saved_interpolation_blend_factor=interpolation_blend_factor = (1./PHY_NUM)*((PHY_NUM*time)/SIMULATION_ATOM+current_stage);
   GFXColor4f(1,1,1,1);
   if (DrawCockpit) {

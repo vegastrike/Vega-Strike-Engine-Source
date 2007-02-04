@@ -1087,6 +1087,10 @@ void main_loop() {
   i++;
   if (i>1000)
   i=0;*/
+
+  // Execute DJ script
+  Music::MuzakCycle();
+
   _Universe->StartDraw();
   if(myterrain){ 
     myterrain->AdjustTerrain(_Universe->activeStarSystem());

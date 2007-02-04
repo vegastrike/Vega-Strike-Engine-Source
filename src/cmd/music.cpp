@@ -43,6 +43,7 @@ bool soundServerPipes() {
 }
 Music::Music (Unit *parent):random(false), p(parent),song(-1),thread_initialized(false) {
   loopsleft=0;
+  moredata=0;
   socketw=socketr=-1;
   if (!g_game.music_enabled)
 	  return;
