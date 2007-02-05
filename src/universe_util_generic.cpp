@@ -759,7 +759,7 @@ namespace UniverseUtil {
 		return SetCurrentSaveGame(newsave);
 	}
 
-	const string& getNewGameSaveName()
+	string getNewGameSaveName()
 	{
 		static string ngsn("New_Game");
 		return ngsn;

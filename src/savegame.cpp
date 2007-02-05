@@ -19,15 +19,18 @@ using namespace VSFileSystem;
 std::string CurrentSaveGameName="";
 std::string GetHelperPlayerSaveGame (int num)
 {
+	static bool rememberSave = XMLSupport::parse_bool(vs_config->getVariable("general","remember_savegame","true"));
 	if( Network==NULL)
 	{
 		if (CurrentSaveGameName.length()>0){
-			VSFile f;
-			VSError err = f.OpenCreateWrite( "save.4.x.txt", UnknownFile);
-			if (err<=Ok) {
-				f.Write(CurrentSaveGameName);
-				f.Close();
-			}		
+			if (rememberSave) {
+				VSFile f;
+				VSError err = f.OpenCreateWrite( "save.4.x.txt", UnknownFile);
+				if (err<=Ok) {
+					f.Write(CurrentSaveGameName);
+					f.Close();
+				}		
+			}
 			if (num!=0) {
 				return CurrentSaveGameName+XMLSupport::tostring(num);
 			}
@@ -45,7 +48,9 @@ std::string GetHelperPlayerSaveGame (int num)
 		  // IF save.4.x.txt DOES NOT EXIST WE CREATE ONE WITH "default" AS SAVENAME
 		  err = f.OpenCreateWrite( "save.4.x.txt", UnknownFile);
 		  if (err<=Ok) {
-			f.Write("New_Game\n",9);
+			static string NewGameSave = vs_config->getVariable("general","new_game_save_name","New_Game");
+			f.Write(NewGameSave.c_str(),NewGameSave.length());
+			f.Write("\n",1);
 			f.Close();
 		  }
 		  else
@@ -102,7 +107,7 @@ std::string GetHelperPlayerSaveGame (int num)
 		}
 		f.Close();
 	#endif
-		if (!res->empty())
+		if (rememberSave && !res->empty())
 		{
 		  // Set filetype to Unknown so that it is searched in homedir/
 		  if (*res->begin()=='~')

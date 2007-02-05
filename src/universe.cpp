@@ -58,6 +58,9 @@ StarSystem * GameUniverse::Init (string systemfile, const Vector & centr,const s
   }
   return this->Universe::Init( systemfile, centr, planetname);
 }
+
+extern void bootstrap_first_loop();
+
 void GameUniverse::Init( int argc, char** argv, const char * galaxy)
 {
 	current_cockpit=0;
@@ -76,6 +79,9 @@ void GameUniverse::Init( int argc, char** argv, const char * galaxy)
 	InitInput();
 
 	hud_camera = Camera();
+
+	// Hasten splash screen loading, to cover up lengthy universe initialization
+	bootstrap_first_loop();
 
 	this->Universe::Init( galaxy);
 	//this->galaxy = new GalaxyXML::Galaxy (galaxy);

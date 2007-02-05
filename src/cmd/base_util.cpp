@@ -4,7 +4,9 @@
 #include <stdlib.h>
 #include "base.h"
 #include "base_util.h"
+#include "universe_util.h"
 #include "basecomputer.h"
+#include "main_loop.h"
 
 #include <boost/version.hpp>
 #include <boost/python/dict.hpp>
@@ -428,6 +430,19 @@ namespace BaseUtil {
 	{
 		// Unsupported for now
 		return 0;
+	}
+
+	void LoadBaseInterface(string name)
+	{
+		if (BaseInterface::CurrentBase) 
+			BaseInterface::CurrentBase->Terminate();
+		BaseInterface *base = new BaseInterface(name.c_str(),UniverseUtil::getPlayer(),UniverseUtil::getPlayer());
+		base->InitCallbacks();
+	}
+
+	void ExitGame()
+	{
+		CockpitKeys::QuitNow();
 	}
 
 }

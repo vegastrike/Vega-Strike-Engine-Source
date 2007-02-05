@@ -63,4 +63,6 @@ namespace BaseUtil {
 	// Auxiliary
 	float GetTextHeight(std::string text, Vector widheimult);
 	float GetTextWidth(std::string text, Vector widheimult);
+	void LoadBaseInterface(string name);
+	void ExitGame();
 }

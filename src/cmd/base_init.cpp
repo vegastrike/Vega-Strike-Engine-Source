@@ -90,6 +90,9 @@ PYTHON_BEGIN_MODULE(Base)
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::GetTextWidth, "GetTextWidth");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::GetTextHeight, "GetTextHeight");
 
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::LoadBaseInterface, "LoadBaseInterface");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::ExitGame, "ExitGame");
+
 PYTHON_END_MODULE(Base)
 
 void InitBase() {

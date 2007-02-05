@@ -1281,4 +1281,3 @@ void BaseInterface::ProcessKeyboardBuffer()
 		}
 	}
 }
-

@@ -464,6 +464,7 @@ void bootstrap_main_loop () {
     //      delete SplashScreen;
     //    SplashScreen = new Animation (mission->getVariable ("splashscreen",vs_config->getVariable ("graphics","splash_screen","vega_splash.ani")).c_str(),0); 
     bootstrap_draw ("Vegastrike Loading...",SplashScreen);
+    bootstrap_draw ("Vegastrike Loading...",SplashScreen);
     if (g_game.music_enabled&&!soundServerPipes()) {
 #if defined( _WIN32) && !defined( __CYGWIN__)
         /*
@@ -635,9 +636,10 @@ void bootstrap_main_loop () {
 		cout<<"UNIT XML :"<<endl<<savefiles[k][0]<<endl<<endl;
 		cout<<"UNIT FILE NAME = "<<_Universe->AccessCockpit(k)->unitfilename[0]<<endl;
 		*/
-	  }
-	  else {
-		_Universe->AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k);
+	  } else {
+		static bool loadLastSave = XMLSupport::parse_bool(vs_config->getVariable("general","load_last_savegame","false"));
+		if (loadLastSave)
+		  _Universe->AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k);
       }
           CopySavedShips(playername[k],k,_Universe->AccessCockpit()->unitfilename,true);
 	  playersaveunit.push_back(_Universe->AccessCockpit(k)->GetUnitFileName());

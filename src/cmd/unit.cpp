@@ -60,6 +60,7 @@
 #include "unit_physics.cpp"
 #include "unit_bsp.h"
 #include "unit_click.cpp"
+#include "base_util.h"
 
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
@@ -76,17 +77,12 @@ extern bool cam_setup_phase;
 extern string getCargoUnitName (const char *name);
 
 template<class UnitType>
-void GameUnit<UnitType>::UpgradeInterface(Unit * baseun) {
-	if (BaseInterface::CurrentBase) {
-		BaseInterface::CurrentBase->Terminate();
-	}
-	  string basename = (::getCargoUnitName(baseun->getFullname().c_str()));
-	  if (baseun->isUnit()!=PLANETPTR) {
-	    basename = baseun->name;
-	  }
-	  BaseInterface *base=new BaseInterface (basename.c_str(),baseun,this);
-	  base->InitCallbacks();
-//	  SetSoftwareMousePosition(0,0);
+void GameUnit<UnitType>::UpgradeInterface(Unit * baseun) 
+{
+	string basename = (::getCargoUnitName(baseun->getFullname().c_str()));
+	if (baseun->isUnit()!=PLANETPTR)
+		basename = baseun->name;
+	BaseUtil::LoadBaseInterface(basename);
 }
 
 template <class UnitType>

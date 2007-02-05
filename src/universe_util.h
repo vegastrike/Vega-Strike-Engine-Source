@@ -250,7 +250,7 @@ public:
 	std::string getSaveInfo(const std::string &filename, bool formatForTextbox);
 	std::string getCurrentSaveGame();
 	std::string setCurrentSaveGame(const std::string &newsave);
-	const std::string& getNewGameSaveName();
+	std::string getNewGameSaveName();
 	void loadGame(const std::string &savename);
 	void saveGame(const std::string &savename);
 
