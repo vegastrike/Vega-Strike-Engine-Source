@@ -118,8 +118,10 @@ OrigMeshVector undrawn_meshes[NUM_MESH_SEQUENCE][NUM_PASSES]; // lower priority 
 
 Texture * Mesh::TempGetTexture(MeshXML * xml, std::string filename, std::string factionname, GFXBOOL detail) const{
 	static FILTER fil = XMLSupport::parse_bool(vs_config->getVariable("graphics","detail_texture_trilinear","true"))?TRILINEAR:MIPMAP;
+	static bool factionalize_textures = XMLSupport::parse_bool( vs_config->getVariable("graphics","faction_dependant_textures","true") );
+	string faction_prefix = (factionalize_textures?(factionname+"_"):string());
 	Texture * ret=NULL;
-	string facplus = factionname+"_"+filename;
+	string facplus = faction_prefix+filename;
 	if (filename.find(".ani")!=string::npos) {
 	    ret = new AnimatedTexture(facplus.c_str(),1,fil,detail);
 		if (!ret->LoadSuccess()) {
@@ -170,11 +172,13 @@ void Mesh::setTextureCumulativeTime(double d) {
 	}
 }
 Texture * Mesh::TempGetTexture (MeshXML * xml, int index, std::string factionname)const {
+	static bool factionalize_textures = XMLSupport::parse_bool( vs_config->getVariable("graphics","faction_dependant_textures","true") );
+	string faction_prefix = (factionalize_textures?(factionname+"_"):string());
     Texture *tex=NULL;
     assert (index<(int)xml->decals.size());
     MeshXML::ZeTexture * zt = &(xml->decals[index]);
     if (zt->animated_name.length()) {
-        string tempani = factionname+"_"+zt->animated_name;
+        string tempani = faction_prefix+zt->animated_name;
         tex = new AnimatedTexture (tempani.c_str(),0,BILINEAR);
         if (!tex->LoadSuccess()) {
             delete tex;
@@ -184,15 +188,15 @@ Texture * Mesh::TempGetTexture (MeshXML * xml, int index, std::string factionnam
         tex = NULL;
     } else {
         if (zt->alpha_name.length()==0) {
-            string temptex = factionname+"_"+zt->decal_name;
+            string temptex = faction_prefix+zt->decal_name;
             tex = new Texture(temptex.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,(g_game.use_ship_textures||xml->force_texture)?GFXTRUE:GFXFALSE);
             if (!tex->LoadSuccess()) {
                 delete tex;
                 tex = new Texture(zt->decal_name.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,(g_game.use_ship_textures||xml->force_texture)?GFXTRUE:GFXFALSE);
             }
         }else {
-            string temptex = factionname+"_"+zt->decal_name;
-            string tempalp = factionname+"_"+zt->alpha_name;
+            string temptex = faction_prefix+zt->decal_name;
+            string tempalp = faction_prefix+zt->alpha_name;
             tex = new Texture(temptex.c_str(), tempalp.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_ship_textures||xml->force_texture)?GFXTRUE:GFXFALSE);
             if (!tex->LoadSuccess()) {
                 delete tex;
