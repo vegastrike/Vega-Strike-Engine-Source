@@ -434,9 +434,14 @@ namespace BaseUtil {
 
 	void LoadBaseInterface(string name)
 	{
+		LoadBaseInterfaceAtDock(name,UniverseUtil::getPlayer(),UniverseUtil::getPlayer());
+	}
+
+	void LoadBaseInterfaceAtDock(string name, Unit* dockat, Unit *dockee)
+	{
 		if (BaseInterface::CurrentBase) 
 			BaseInterface::CurrentBase->Terminate();
-		BaseInterface *base = new BaseInterface(name.c_str(),UniverseUtil::getPlayer(),UniverseUtil::getPlayer());
+		BaseInterface *base = new BaseInterface(name.c_str(),dockat,dockee);
 		base->InitCallbacks();
 	}
 

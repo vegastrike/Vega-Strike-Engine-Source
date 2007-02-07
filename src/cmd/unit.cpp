@@ -82,7 +82,7 @@ void GameUnit<UnitType>::UpgradeInterface(Unit * baseun)
 	string basename = (::getCargoUnitName(baseun->getFullname().c_str()));
 	if (baseun->isUnit()!=PLANETPTR)
 		basename = baseun->name;
-	BaseUtil::LoadBaseInterface(basename);
+	BaseUtil::LoadBaseInterfaceAtDock(basename,baseun,this);
 }
 
 template <class UnitType>
