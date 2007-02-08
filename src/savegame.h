@@ -68,8 +68,8 @@ class SaveGame {
   ///cast address to long (for 64 bits compatibility)
   void AddUnitToSave (const char * unitname, int type, const char * faction, long address);
   void RemoveUnitFromSave (long address);//cast it to a long
-  //void ParseSaveGame (std::string filename, std::string &ForceStarSystem, std::string originalstarsystem, QVector & pos, bool &shouldupdatedfighter0pos, float &credits, std::vector <std::string> & originalunit, int player_num, char * savebuf=NULL, bool read=true);
-  void ParseSaveGame (std::string filename, std::string &ForceStarSystem, std::string originalstarsystem, QVector & pos, bool &shouldupdatedfighter0pos, float &credits, std::vector <std::string> & originalunit, int player_num, std::string savestr="", bool read=true, bool commitFaction=true, bool quick_read=false, bool skip_news=false, bool select_data=false, const std::set<std::string> &select_data_filter = std::set<std::string>());
+  void SetOutputFileName(const std::string &filename);
+  void ParseSaveGame (const std::string &filename, std::string &ForceStarSystem, const std::string &originalstarsystem, QVector & pos, bool &shouldupdatedfighter0pos, float &credits, std::vector <std::string> & originalunit, int player_num, const std::string &savestr=std::string(), bool read=true, bool commitFaction=true, bool quick_read=false, bool skip_news=false, bool select_data=false, const std::set<std::string> &select_data_filter = std::set<std::string>());
   void LoadSavedMissions();
 };
 void WriteSaveGame (class Cockpit * cp, bool auto_save);

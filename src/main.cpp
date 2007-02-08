@@ -639,7 +639,8 @@ void bootstrap_main_loop () {
 	  } else {
 		static bool loadLastSave = XMLSupport::parse_bool(vs_config->getVariable("general","load_last_savegame","false"));
 		if (loadLastSave)
-		  _Universe->AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k);
+		  _Universe->AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k); else
+		  _Universe->AccessCockpit(k)->savegame->SetOutputFileName (savegamefile);
       }
           CopySavedShips(playername[k],k,_Universe->AccessCockpit()->unitfilename,true);
 	  playersaveunit.push_back(_Universe->AccessCockpit(k)->GetUnitFileName());

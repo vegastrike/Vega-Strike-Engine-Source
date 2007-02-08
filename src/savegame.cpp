@@ -804,11 +804,19 @@ void SaveGame::SetSavedCredits (float c) {
 		savedcredits = c;
 }
 
-void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstarsystem, QVector &PP, bool & shouldupdatepos,float &credits, vector <string> &savedstarship, int player_num, string str, bool read, bool commitfaction, bool quick_read, bool skip_news, bool select_data, const std::set<std::string> &select_data_filter) {
+void SaveGame::SetOutputFileName(const string &filename)
+{
+	outputsavegame=filename;
+}
+
+void SaveGame::ParseSaveGame (const string &filename_p, string &FSS, const string &originalstarsystem, QVector &PP, bool & shouldupdatepos, float &credits, vector <string> &savedstarship, int player_num, const string &save_contents, bool read, bool commitfaction, bool quick_read, bool skip_news, bool select_data, const std::set<std::string> &select_data_filter) 
+{
+	const string &str = save_contents; // alias
 	char *tempfullbuf=0;
 	int tempfulllength=2048;
-	if (filename.length()>0)
-			filename=callsign+filename;
+	string filename;
+	if (!filename_p.empty())
+		filename = callsign + string("_") + filename;
 	shouldupdatepos=!(PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX);
 	// WE WILL ALWAYS SAVE THE CURRENT SAVEGAME IN THE MISSION SAVENAME (IT WILL BE COPIED TO THE SPECIFIED SAVENAME)
 	outputsavegame=filename;
