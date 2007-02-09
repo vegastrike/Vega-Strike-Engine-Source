@@ -806,7 +806,9 @@ void SaveGame::SetSavedCredits (float c) {
 
 void SaveGame::SetOutputFileName(const string &filename)
 {
-	outputsavegame=filename;
+	if (!filename.empty())
+		outputsavegame = callsign + string("_") + filename; else
+		outputsavegame = filename;
 }
 
 void SaveGame::ParseSaveGame (const string &filename_p, string &FSS, const string &originalstarsystem, QVector &PP, bool & shouldupdatepos, float &credits, vector <string> &savedstarship, int player_num, const string &save_contents, bool read, bool commitfaction, bool quick_read, bool skip_news, bool select_data, const std::set<std::string> &select_data_filter) 
