@@ -353,11 +353,9 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
 	c= ligh[0].ligh.GetProperties(AMBIENT);
 
 	
-      static const vector<string>& _shines = ParseDestinations (vs_config->getVariable("graphics","star_shine","shine.ani"));
-	  static vector<string> _shines_sg; 
-	  if (_shines_sg.empty()) 
-		  _shines_sg.push_back("shine.ani");
-	  static const vector<string>& shines = _shines.empty()?_shines_sg:_shines;
+      static vector<string> shines = ParseDestinations (vs_config->getVariable("graphics","star_shine","shine.ani"));
+	  if (shines.empty()) 
+		  shines.push_back("shine.ani");
       shine = new Animation (shines[rand()%shines.size()].c_str(),true,.1,BILINEAR,false,true,c);//GFXColor(ourmat.er,ourmat.eg,ourmat.eb,ourmat.ea));
       shine->SetDimensions ( glowradius*radius,glowradius*radius);
     
