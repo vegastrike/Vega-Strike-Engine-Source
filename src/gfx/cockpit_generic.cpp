@@ -412,7 +412,7 @@ void Cockpit::updateAttackers() {
       too_many_attackers=false;
     }
     static int max_attackers=XMLSupport::parse_int(vs_config->getVariable("AI","max_player_attackers","0"));
-    printf ("There are %d folks attacking player\n",partial_number_of_attackers);
+    //    printf ("There are %d folks attacking player\n",partial_number_of_attackers);
     number_of_attackers=partial_number_of_attackers;//reupdate the count
     partial_number_of_attackers=0;
     too_many_attackers=max_attackers>0&&(too_many_attackers||number_of_attackers>max_attackers);
