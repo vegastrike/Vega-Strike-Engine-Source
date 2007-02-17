@@ -1077,12 +1077,14 @@ void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
     retval+=fpstring.str;
     unsigned int numCargo =parent->numCargo();
     double percent_working = 0.88;
+    static std::string non_repair_screen_cargo=vs_config->getVariable("graphics","hud","not_included_in_damage_report","plasteel_hull tungsten_hull isometal_hull");
     for (unsigned int i=0;i<numCargo;i++) {
       
       percent_working = 0.88;// cargo.damage
       Cargo& the_cargo = parent->GetCargo(i);
       bool damaged=the_cargo.GetCategory().find(DamagedCategory)==0;
-      if(damaged||(the_cargo.GetCategory().find("upgrades/")==0&&the_cargo.GetContent().find("mult_")!=0&&the_cargo.GetContent().find("add_")!=0)){
+
+      if(damaged||(the_cargo.GetCategory().find("upgrades/")==0&&the_cargo.GetContent().find("mult_")!=0&&the_cargo.GetContent().find("add_")!=0&&non_repair_screen_cargo.find(the_cargo.GetContent())==std::string::npos)){
         percent_working = PercentOperational(parent,the_cargo.content,the_cargo.category,false);
 	//	retval+=parent->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (int(percent_working*100))+string ("%)" +the_cargo.GetCategory()+"\n");
         GFXColor final_color ((chdamaged[0]*percent_working)+(cdamaged[0]*(1.0-percent_working)),
