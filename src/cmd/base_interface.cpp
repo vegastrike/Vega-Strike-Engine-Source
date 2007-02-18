@@ -899,7 +899,7 @@ const char * compute_time_of_day (Unit * base,Unit *un) {
 
 extern void ExecuteDirector();
 BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
-		: curtext(GFXColor(0,1,0,1),GFXColor(0,0,0,1)) , othtext(getConfigColor("Fixer_Text_Color_Foreground",GFXColor(1,1,.5,1)),getConfigColor("FixerTextColor_Background",GFXColor(0,0,0,1))) {
+		: curtext(getConfigColor("Base_Text_Color_Foreground",GFXColor(0,1,0,1)),getConfigColor("Base_Text_Color_Background",GFXColor(0,0,0,1))) , othtext(getConfigColor("Fixer_Text_Color_Foreground",GFXColor(1,1,.5,1)),getConfigColor("FixerTextColor_Background",GFXColor(0,0,0,1))) {
 	CurrentBase=this;
 	CallComp=false;
         createdbase=true;
@@ -1248,8 +1248,10 @@ void BaseInterface::Draw () {
 //		GFXColor4f(0,1,0,1);
 //	else
 //		GFXColor4f(1,.333333,0,1);
-	curtext.Draw();
-	othtext.SetPos(-.99,1);
+        if (curtext.GetText().find("XXX")!=0) {
+          curtext.Draw();
+        }
+        othtext.SetPos(-.99,1);
 //	GFXColor4f(0,.5,1,1);
 	othtext.Draw();
         SetupViewport();

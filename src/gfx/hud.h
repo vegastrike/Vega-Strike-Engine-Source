@@ -68,6 +68,9 @@ public:
 	void SetText(const std::string &newText) {
 		myText = newText;
 	}
+	std::string GetText()const {
+		return myText;
+	}
 
 };
 
