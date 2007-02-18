@@ -585,24 +585,24 @@ retString128 PrettyDistanceString(double distance) {
 	static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
 	static bool lie=XMLSupport::parse_bool (vs_config->getVariable("physics","game_speed_lying","true"));
 	if(lie){
-		sprintf (qr.str,"Distance: %.2lf",distance/game_speed);
+		sprintf (qr.str,"%.2lf",distance/game_speed);
 	} else {
 		if(distance<20000){				// use meters up to 20,000 m
-			sprintf (qr.str,"Distance: %.0lf meters",distance);
+			sprintf (qr.str,"%.0lf meters",distance);
 		} else if (distance<100000){			// use kilometers with two decimals up to 100 km
-			sprintf (qr.str,"Distance: %.2lf kilometers",distance/1000);
+			sprintf (qr.str,"%.2lf kilometers",distance/1000);
 		} else if (distance<299792458){			// use kilometers without decimals up to 299792.458 km
-			sprintf (qr.str,"Distance: %.0lf kilometers",distance/1000);
+			sprintf (qr.str,"%.0lf kilometers",distance/1000);
 		} else if (distance<(120*299792458.)){ 		// use light seconds up to 120
-			sprintf (qr.str,"Distance: %.2lf light seconds",distance/299792458);
+			sprintf (qr.str,"%.2lf light seconds",distance/299792458);
 		} else if (distance<(120*60*299792458.)){	// use light minutes up to 120
-			sprintf (qr.str,"Distance: %.2lf light minutes",distance/(60*299792458.));
+			sprintf (qr.str,"%.2lf light minutes",distance/(60*299792458.));
 		} else if (distance<(48*3600*299792458.)){	// use light hours up to 48
-			sprintf (qr.str,"Distance: %.2lf light hours",distance/(3600*299792458.));
+			sprintf (qr.str,"%.2lf light hours",distance/(3600*299792458.));
 		} else if (distance<(365*24*3600*299792458.)){	// use light days up to 365
-			sprintf (qr.str,"Distance: %.2lf light days",distance/(24*3600*299792458.));
+			sprintf (qr.str,"%.2lf light days",distance/(24*3600*299792458.));
 		} else {					// use light years
-			sprintf (qr.str,"Distance: %.2lf lightyears",distance/(365*24*3600*299792458.));
+			sprintf (qr.str,"%.2lf lightyears",distance/(365*24*3600*299792458.));
 		}
 	}
 	return qr;
@@ -688,7 +688,9 @@ void VDU::DrawTarget(GameCockpit *cp, Unit * parent, Unit * target) {
   }
   tp->Draw (MangleString (unitandfg,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
   static float auto_message_lim=XMLSupport::parse_float (vs_config->getVariable("graphics","auto_message_time_lim","5"));
-  bool draw_auto_message=(UniverseUtil::GetGameTime()-cp->autoMessageTime<auto_message_lim&&cp->autoMessage.length()!=0);
+  float delautotime=UniverseUtil::GetGameTime()-cp->autoMessageTime;
+  
+  bool draw_auto_message=(delautotime<auto_message_lim&&cp->autoMessage.length()!=0);
   if (inrange) {  
   int i=0;
   char st[1024];
@@ -702,6 +704,7 @@ void VDU::DrawTarget(GameCockpit *cp, Unit * parent, Unit * target) {
     newst+=cp->autoMessage+"\n";
   }
   retString128 qr=PrettyDistanceString(DistanceTwoTargets(parent,target));
+  newst+="Range: ";
   newst+=qr.str;
   tp->Draw (MangleString (newst,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
 
@@ -864,15 +867,25 @@ Unit *VDU::GetCommunicating() {
 void VDU::DrawNav (GameCockpit *cp, Unit* you, Unit*targ, const Vector & nav) {
   //  Unit * you = _Universe->AccessCockpit()->GetParent();
   //  Unit * targ = you!=NULL?you->Target():NULL;
-  char *navdata=new char [1024+(_Universe->activeStarSystem()->getName().length()+(targ?targ->name.get().length():0))];
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
   static bool lie=XMLSupport::parse_bool (vs_config->getVariable("physics","game_speed_lying","true"));
   string nam="none";
   if (targ)
 	  nam= reformatName(targ->name);
-  sprintf (navdata,"Navigation\n----------\n%s\nTarget:\n  %s\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",_Universe->activeStarSystem()->getName().c_str(),nam.c_str(),nav.i,nav.j,nav.k,lie?(nav.Magnitude()/game_speed):nav.Magnitude());
-  tp->Draw (MangleString (navdata,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true,true);  
-  delete [] navdata;
+
+  std::string navdata=std::string("#ff0000         System\n     #ffff00")+_Universe->activeStarSystem()->getName()+"\n\n#ff0000Destination:\n  #ffff00"+getUnitNameAndFgNoBase(targ)+"\n\n#ff0000Range: #ffff00"+std::string(PrettyDistanceString(DistanceTwoTargets(you,targ)).str);
+  static float auto_message_lim=XMLSupport::parse_float (vs_config->getVariable("graphics","auto_message_time_lim","5"));
+  float delautotime=UniverseUtil::GetGameTime()-cp->autoMessageTime;
+  
+  bool draw_auto_message=(delautotime<auto_message_lim&&cp->autoMessage.length()!=0);
+  std::string msg=cp->autoMessage;
+  std::string::size_type where=msg.find("#");
+  while (where!=std::string::npos) {
+    msg=msg.substr(0,where)+msg.substr(where+7);
+    where=msg.find("#");
+  }
+  msg=std::string("\n\n#ffff00     ")+msg;
+  tp->Draw (MangleString (navdata+(draw_auto_message?msg:std::string()),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true,true);  
 
 }
 void VDU::DrawComm () {
@@ -1167,6 +1180,7 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
     }
     st[i]='\0';
     struct retString128 qr=PrettyDistanceString(DistanceTwoTargets(parent,target));
+    strcat(st,"Range: ");
     strcat (st,qr.str);
     tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
     GFXColor4f (.4,.4,1,1);
@@ -1464,6 +1478,16 @@ void VDU::Draw (GameCockpit*parentcp,Unit * parent, const GFXColor & color) {
       communicating.SetUnit(NULL);
     }
   }
+  float delautotime=UniverseUtil::GetGameTime()-parentcp->autoMessageTime;
+  static float auto_switch_lim=XMLSupport::parse_float (vs_config->getVariable("graphics","auto_message_nav_switch_time_lim",".15"));
+
+  if (delautotime<auto_switch_lim&&parentcp->autoMessage.length()!=0) {
+    if (thismode.back()!=COMM) {
+      thismode.back()=NAV;
+      parentcp->autoMessageTime-=auto_switch_lim;
+    }
+  }
+
   switch (thismode.back()) {
   case NETWORK:
   {
