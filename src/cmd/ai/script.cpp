@@ -56,7 +56,9 @@ static HardCodedMap MakeHardCodedScripts() {
   tmp.insert (MyPair ("drop half cargo",&DropHalfCargo));   
   tmp.insert (MyPair ("drop one cargo",&DropOneCargo));   
   tmp.insert (MyPair ("roll right",&RollRight));   
+  tmp.insert (MyPair ("roll right hard",&RollRightHard));   
   tmp.insert (MyPair ("roll left",&RollLeft));   
+  tmp.insert (MyPair ("roll left hard",&RollLeftHard));   
   tmp.insert (MyPair ("evade left right",&EvadeLeftRight));   
   tmp.insert (MyPair ("evade up down",&EvadeUpDown));   
   tmp.insert (MyPair ("afterburn evade left right",&AfterburnEvadeLeftRight));   
@@ -744,36 +746,51 @@ void AIScript::LoadXML() {
 	static int aidebug = XMLSupport::parse_int(vs_config->getVariable("AI","debug_level","0"));
 using namespace AiXml;
 using namespace VSFileSystem;
-  string full_filename;
-  HardCodedMap::const_iterator iter =  hard_coded_scripts.find (filename);
+  string full_filename=filename;
+  bool doroll=false;
+  if (full_filename.length()>5&&full_filename[0]=='r'&&full_filename[1]=='o'&&full_filename[2]=='l'&&full_filename[3]=='l'&&full_filename[4]==' '){
+    doroll=true;
+    full_filename=full_filename.substr(5);
+  }
+  HardCodedMap::const_iterator iter =  hard_coded_scripts.find (full_filename);
   if (iter!=hard_coded_scripts.end()) {
     //    VSFileSystem::vs_fprintf (stderr,"hcscript %s\n",filename);
     CCScript * myscript = (*iter).second;
     (*myscript)(this, parent);
-	if (aidebug>1)
-		VSFileSystem::vs_fprintf (stderr,"%f using hcs %s for %s threat %f\n",mission->getGametime(),filename, parent->name.get().c_str(),parent->GetComputerData().threatlevel);
-	if (_Universe->isPlayerStarship(parent->Target())){
-		float value;
-		static float game_speed=XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
-		static float game_accel=XMLSupport::parse_float(vs_config->getVariable("physics","game_accel","1"));
-		    {
-      Unit * targ = parent->Target();
-      if (targ) {
-	Vector PosDifference=targ->Position().Cast()-parent->Position().Cast();
-	float pdmag = PosDifference.Magnitude();
-	value = (pdmag-parent->rSize()-targ->rSize());
-	float myvel = PosDifference.Dot(parent->GetVelocity()-targ->GetVelocity())/pdmag;
-	
-	if (myvel>0)
-	  value-=myvel*myvel/(2*(parent->Limits().retro/parent->GetMass()));
+    if (doroll) {
+      unsigned int val=rand();
+      if (val<RAND_MAX/4) {
+        RollRightHard(this,parent);
+      }else if (val<RAND_MAX/2) {
+        RollLeftHard(this,parent);
       }else {
-	value = 10000; 
+        RollLeft(this,parent);        
       }
-      value/=game_speed*game_accel;
     }
-			if (aidebug>0)
-				UniverseUtil::IOmessage(0,parent->name,"all",string("using script ")+string(filename)+" threat "+XMLSupport::tostring(parent->GetComputerData().threatlevel)+" dis "+XMLSupport::tostring(value));
-	}
+    if (aidebug>1)
+      VSFileSystem::vs_fprintf (stderr,"%f using hcs %s for %s threat %f\n",mission->getGametime(),filename, parent->name.get().c_str(),parent->GetComputerData().threatlevel);
+    if (_Universe->isPlayerStarship(parent->Target())){
+      float value;
+      static float game_speed=XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
+      static float game_accel=XMLSupport::parse_float(vs_config->getVariable("physics","game_accel","1"));
+      {
+        Unit * targ = parent->Target();
+        if (targ) {
+          Vector PosDifference=targ->Position().Cast()-parent->Position().Cast();
+          float pdmag = PosDifference.Magnitude();
+          value = (pdmag-parent->rSize()-targ->rSize());
+          float myvel = PosDifference.Dot(parent->GetVelocity()-targ->GetVelocity())/pdmag;
+          
+          if (myvel>0)
+            value-=myvel*myvel/(2*(parent->Limits().retro/parent->GetMass()));
+        }else {
+          value = 10000; 
+        }
+        value/=game_speed*game_accel;
+      }
+      if (aidebug>0)
+        UniverseUtil::IOmessage(0,parent->name,"all",string("using script ")+string(filename)+" threat "+XMLSupport::tostring(parent->GetComputerData().threatlevel)+" dis "+XMLSupport::tostring(value));
+    }
     return;
   }else {
 	  if (aidebug>1)

@@ -285,6 +285,16 @@ void RollRight(Order *aisc, Unit* un) {
   if (un->aistate)
     AddOrd(un->aistate,un,new ExecuteFor(new Orders::MatchRoll(-un->GetComputerData().max_roll_left,false),1.0f));
 }
+void RollLeftHard(Order *aisc, Unit* un) {
+  static float durvar = XMLSupport::parse_float(vs_config->getVariable("AI","roll_order_duration","5.0"));
+  if (un->aistate)
+    AddOrd(un->aistate,un,new ExecuteFor(new Orders::MatchRoll(un->GetComputerData().max_roll_right,false),durvar));
+}
+void RollRightHard(Order *aisc, Unit* un) {
+  static float durvar = XMLSupport::parse_float(vs_config->getVariable("AI","roll_order_duration","5.0"));
+  if (un->aistate)
+    AddOrd(un->aistate,un,new ExecuteFor(new Orders::MatchRoll(-un->GetComputerData().max_roll_left,false),durvar));
+}
 void LoopAroundFast(Order* aisc, Unit * un) {
 	Order* broll = new Orders::LoopAround(false,true,true,(int)(size_t)un);
 	AddOrd(aisc,un,broll);

@@ -74,6 +74,8 @@ void Orders::MatchRoll::Execute() {
       return;
     }
   }
+ //prevent matchangvel from resetting this (kinda a hack)
+  parent->ApplyLocalTorque (parent->GetMoment()*Vector(0,0,desired_roll-angvel.k)/SIMULATION_ATOM);
   parent->ApplyLocalTorque (parent->GetMoment()*Vector(0,0,desired_roll-angvel.k)/SIMULATION_ATOM);
 }
 /*  //deprecated: now inherits from MatchAngVelocity and uses LinVel macros

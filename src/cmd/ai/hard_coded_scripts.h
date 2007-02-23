@@ -42,6 +42,8 @@ CCScript DropOneCargo;
 CCScript DropHalfCargo;
 CCScript RollLeft;
 CCScript RollRight;
+CCScript RollLeftHard;
+CCScript RollRightHard;
 CCScript EvadeLeftRight;
 CCScript EvadeUpDown;
 CCScript AfterburnEvadeLeftRight;
