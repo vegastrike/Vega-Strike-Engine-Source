@@ -51,6 +51,10 @@ static unsigned int playerBindings [LAST_MODIFIER][WSK_LAST];
 KBSTATE keyState [LAST_MODIFIER][WSK_LAST];
 
 static void kbGetInput(int key, int modifiers, bool release, int x, int y){
+  ///FIXME If key is out of array index range, do nothing. This is a quick hack, the underlying cause of invalid parameters ever being given should probably be fixed instead
+  if (key < 0 || key >= WSK_LAST)
+    return;
+
   int i=_Universe->CurrentCockpit();
   _Universe->SetActiveCockpit(playerBindings[modifiers][key]);
 

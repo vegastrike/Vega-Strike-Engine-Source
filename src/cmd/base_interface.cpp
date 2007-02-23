@@ -47,7 +47,7 @@ static void biModifyMouseSensitivity(int &x, int &y, bool invert){
       y=int(y/factor);
     }else {
       x=int(x*factor);
-      y=int(x*factor);
+      y=int(y*factor);
     }
     x+=g_game.x_resolution/2;
     y+=g_game.y_resolution/2;
