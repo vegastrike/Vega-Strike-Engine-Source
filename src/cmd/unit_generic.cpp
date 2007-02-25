@@ -7640,6 +7640,11 @@ bool Unit::BuyCargo (const Cargo &carg, float & creds){
 }
 bool Unit::BuyCargo (unsigned int i, unsigned int quantity, Unit * seller, float&creds) {
   Cargo soldcargo= seller->image->cargo[i];
+  if (Network!=NULL) {
+    int playernum = _Universe->whichPlayerStarship( this);
+    if (playernum>=0)
+      Network[playernum].cargoRequest( this->serial, seller->serial, soldcargo.content, quantity, -1, -1);
+  }
   if (quantity>(unsigned int)soldcargo.quantity)
     quantity=soldcargo.quantity;
   if (quantity==0)

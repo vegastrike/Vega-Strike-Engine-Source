@@ -106,6 +106,27 @@ void	NetClient::unfireRequest( ObjSerial serial, const vector<int> &mount_indici
             __FILE__, PSEUDO__LINE__(1518) );
 }
 
+void	NetClient::cargoRequest( ObjSerial buyer, ObjSerial seller, const std::string &cargo,unsigned int quantity,
+								 int mountOffset, int subunitOffset)
+{
+	Packet p;
+	NetBuffer netbuf;
+	Unit *un = this->game_unit.GetUnit();
+	if (!un) return;
+
+	netbuf.addSerial( buyer ); // If the buyer is the player, it is buying cargo.
+	netbuf.addSerial( seller ); // If seller is the player, it is selling cargo.
+	netbuf.addInt32( quantity );
+	netbuf.addString( cargo );
+	netbuf.addInt32( (unsigned int)(mountOffset+1) );
+	netbuf.addInt32 ((unsigned int)(subunitOffset+1) );
+	
+	p.send( CMD_CARGOUPGRADE, un->GetSerial(),
+            netbuf.getData(), netbuf.getDataLength(),
+            SENDRELIABLE, NULL, *this->clt_tcp_sock,
+            __FILE__, PSEUDO__LINE__(1518) );
+}
+
 bool	NetClient::jumpRequest( string newsystem, ObjSerial jumpserial)
 {
 	Packet p;

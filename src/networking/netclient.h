@@ -192,7 +192,8 @@ class	NetClient
 		void	fireRequest( ObjSerial serial, const vector<int> &mount_indicies, char mis);
 		void	unfireRequest( ObjSerial serial, const vector<int> &mount_indicies);
 
-		void	cargoRequest( ObjSerial buyer, ObjSerial seller, const std::string &cargo,unsigned int quantity);
+		void	cargoRequest( ObjSerial buyer, ObjSerial seller, const std::string &cargo,unsigned int quantity,
+	        int mountOffset, int subunitOffset);
 
 		void	downloadZoneInfo();
 		void	AddObjects( NetBuffer & netbuf);

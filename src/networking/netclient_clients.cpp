@@ -489,6 +489,7 @@ void NetClient::receiveUnitDamage( NetBuffer &netbuf, Unit *un ) {
         }
 	unsigned short damages;
 	damages = netbuf.getShort();
+	cout << "Received damage " <<damages<<" for unit "<<un->GetSerial()<<" ("<<un->name<<")"<<endl;
 
 	if( damages & Unit::SHIELD_DAMAGED)
 	{

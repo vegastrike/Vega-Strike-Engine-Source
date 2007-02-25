@@ -446,10 +446,14 @@ static void ImportCargo(Unit * thus, const string &imports)
 
       string filename = nextElementString(imports,elemstart,elemend);
       double price = nextElementFloat(imports,elemstart,elemend,1);
-      double pricestddev = nextElementFloat(imports,elemstart,elemend);
+      double pricestddev = 0;
+	  if (Network==NULL && !SERVER)
+		  pricestddev = nextElementFloat(imports,elemstart,elemend);
       double quant = nextElementFloat(imports,elemstart,elemend,1);
-      double quantstddev = nextElementFloat(imports,elemstart,elemend);
-
+      double quantstddev = 0;
+	  if (Network==NULL && !SERVER)
+		  quantstddev = nextElementFloat(imports,elemstart,elemend);
+	  
       thus->ImportPartList(filename,price,pricestddev,quant,quantstddev);
     } else ofs=string::npos;
   }

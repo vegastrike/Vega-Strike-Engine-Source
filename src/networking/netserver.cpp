@@ -52,6 +52,7 @@
 #include "gfxlib_struct.h"
 #include "posh.h"
 #include "fileutil.h"
+#include "cmd/unit_const_cache.h"
 
 #include "networking/lowlevel/vsnet_sockethttp.h"
 double	clienttimeout;
@@ -69,6 +70,12 @@ string	universe_file;
 string	universe_path;
 
 using namespace VSFileSystem;
+
+// What header are these *supposed* to be defined in ???
+extern const Unit* getUnitFromUpgradeName(const string& upgradeName, int myUnitFaction = 0);
+extern int GetModeFromName(const char *);  // 1=add, 2=mult, 0=neither.
+static const string LOAD_FAILED = "LOAD_FAILED";
+
 
 void	getZoneInfoBuffer( unsigned short zoneid, NetBuffer & netbuf)
 {
@@ -930,6 +937,78 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 #ifdef CRYPTO
 			delete server_hash;
 #endif
+		}
+		break;
+		case CMD_CARGOUPGRADE :
+		{
+			ObjSerial buyer_ser = netbuf.getSerial();
+			ObjSerial seller_ser = netbuf.getSerial();
+			int quantity = netbuf.getInt32();
+			std::string cargoName = netbuf.getString();
+			int mountOffset = ((int)netbuf.getInt32())-1;
+			int subunitOffset = ((int)netbuf.getInt32())-1;
+			
+//			ObjSerial sender_ser = packet.getSerial();
+            Unit *sender = clt->game_unit.GetUnit();
+			if (!sender) break;
+			
+			zone = sender->getStarSystem()->GetZone();
+			
+			unsigned int cargIndex = 0;
+			
+			Unit *seller = zonemgr->getUnit( seller_ser, zone);
+			Unit *buyer = zonemgr->getUnit( buyer_ser, zone);
+			if (!buyer || !seller) break;
+			
+			Cargo * carg = seller->GetCargo(cargoName, cargIndex);
+
+			Cockpit *buyer_cpt = _Universe->isPlayerStarship(buyer);
+			Cockpit *seller_cpt = _Universe->isPlayerStarship(seller);
+			if (buyer == sender && buyer_cpt) {
+				float creds_before = buyer_cpt->credits;
+				float &creds = buyer_cpt->credits;
+				buyer->BuyCargo(cargIndex, quantity, seller, creds);
+				if (seller_cpt) {
+					seller_cpt->credits += (creds_before-creds);
+				}
+			} else if (seller == sender && seller_cpt) {
+				float creds_before = seller_cpt->credits;
+				float &creds = seller_cpt->credits;
+				seller->SellCargo(cargIndex, quantity, creds, *carg, buyer);
+				if (buyer_cpt) {
+					buyer_cpt->credits += (creds_before-creds);
+				}
+			}
+			if (buyer==sender) {
+				double percent; // not used.
+				const Unit *unitCarg = getUnitFromUpgradeName(carg->GetContent(), seller->faction);
+				if (!unitCarg) break; // not an upgrade, and already did cargo transactions.
+				int multAddMode = GetModeFromName(carg->GetContent().c_str());
+				
+				// Wow! So much code just to perform an upgrade!
+				const string unitDir = GetUnitDir(buyer->name.get().c_str());
+				const string templateName = unitDir + ".template";
+				int faction = buyer->faction;
+				
+				// Get the "limiter" for the upgrade.  Stats can't increase more than this.
+				const Unit * templateUnit = UnitConstCache::getCachedConst(StringIntKey(templateName,faction));
+				if (!templateUnit) {
+					templateUnit = UnitConstCache::setCachedConst(StringIntKey(templateName,faction),
+						UnitFactory::createUnit(templateName.c_str(),true,faction));
+				}
+				if (templateUnit->name == LOAD_FAILED) {
+					templateUnit=NULL;
+				}
+				if(unitCarg->name == LOAD_FAILED) {
+					break;
+				}
+				//selectMount();
+				if (buyer->canUpgrade(unitCarg, mountOffset, subunitOffset, multAddMode, true, percent, templateUnit)) {
+					buyer->Upgrade(unitCarg, mountOffset, subunitOffset, multAddMode, true, percent, templateUnit);
+				}
+				//buyer->Repair()??????
+				//buyer->Upgrade()??????
+			}
 		}
 		break;
 		case CMD_TARGET :

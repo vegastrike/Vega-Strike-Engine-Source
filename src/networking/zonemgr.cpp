@@ -707,6 +707,7 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 		// Add the damage flag
 		unsigned short damages = un->damages;
 		netbuf.addShort( damages);
+		cout << "Sent damage " <<damages<<" for unit "<<un->GetSerial()<<" ("<<un->name<<")"<<endl;
 		// Put the altered stucts after the damage enum flag
 		if( damages & Unit::SHIELD_DAMAGED)
 		{
