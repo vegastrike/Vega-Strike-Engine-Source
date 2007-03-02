@@ -141,8 +141,12 @@ void ParticleTrail::DrawAndUpdate (){
         *v=*vlast;
         *p=*plast;
       }
+      size_t index=p-particle.begin();
+      size_t indexv=v-particleVel.begin();
       particle.pop_back();
       particleVel.pop_back();
+      p=particle.begin()+index;
+      v=particleVel.begin()+indexv;//continue where we left off
     }else {
       ++p;
       ++v;
