@@ -22,6 +22,14 @@ bool useAfterburner () {
 	static bool useafterburner = XMLSupport::parse_bool(vs_config->getVariable("AI","use_afterburner","true"));
 	return useafterburner;
 }
+bool useAfterburnerToRun () {
+	static bool useafterburner = XMLSupport::parse_bool(vs_config->getVariable("AI","use_afterburner_to_run","true"));
+	return useafterburner;
+}
+bool useAfterburnerToFollow () {
+	static bool useafterburner = XMLSupport::parse_bool(vs_config->getVariable("AI","use_afterburner_to_follow","true"));
+	return useafterburner;
+}
 void AddOrd (Order *aisc, Unit * un, Order * ord) {
   ord->SetParent (un);
   aisc->EnqueueOrder (ord);
@@ -138,7 +146,7 @@ public:
 
 void AfterburnTurnTowards (Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
-  bool afterburn = useAfterburner();
+  bool afterburn = useAfterburnerToFollow();
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,afterburn),true,afterburn,false);
   AddOrd (aisc,un,ord);
   ord =       (new Orders::FaceTarget(false, 3));
@@ -567,7 +575,7 @@ void AfterburnTurnAway(Order * aisc, Unit * un) {
   if (targ) {
     u=targ->Position();
   }
-  bool afterburn = useAfterburner();
+  bool afterburn = useAfterburner()||useAfterburnerToRun();
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(200*(v-u).Cast(),afterburn),false,afterburn,false);
   AddOrd (aisc,un,ord);
   ord = new Orders::ChangeHeading ((200*(v-u)) + v,3);
