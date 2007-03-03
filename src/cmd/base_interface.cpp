@@ -1253,7 +1253,8 @@ void BaseInterface::Draw () {
         }
         othtext.SetPos(-.99,1);
 //	GFXColor4f(0,.5,1,1);
-	othtext.Draw();
+        if (othtext.GetText().length()!=0)
+          othtext.Draw();
         SetupViewport();
 	EndGUIFrame (drawlinkcursor);
         glViewport (0, 0, g_game.x_resolution,g_game.y_resolution);
