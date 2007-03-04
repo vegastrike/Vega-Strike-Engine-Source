@@ -229,7 +229,11 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
   float scaley=1;
   int potentialincrease=0;
   if (!use_bit) {
-    scalex=(_Universe->numPlayers()>3?_Universe->numPlayers()/2:_Universe->numPlayers())*myFontMetrics.i/std_wid;
+    int numplayers=1;
+    if (_Universe) // _Universe can be NULL during bootstrap.
+      numplayers = (_Universe->numPlayers()>3?_Universe->numPlayers()/2:
+                    _Universe->numPlayers());
+    scalex=numplayers*myFontMetrics.i/std_wid;
     scaley=myFontMetrics.j/(119.05+33.33);
   }
   glScalef (scalex,scaley,1);
