@@ -341,6 +341,7 @@ public:
   bool Upgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, const Unit * templ=NULL, bool force_change_on_nothing=false, bool gen_downgrade_list=true);
   int RepairCost();//returns how many things need to be repaired--if nothing is damaged it will return 1 for labor.  doesn't assume any given cost on such thigns.
   int RepairUpgrade();//returns how many things were repaired
+  Vector MountPercentOperational(int whichmount);//returns percentOperational,maxPercentOperational,and whether mount is damaged (1 is damaged, 0 is fine, -1 is invalid mount)
   bool ReduceToTemplate();
   virtual double Upgrade (const std::string &file,int mountoffset, int subunitoffset, bool force, bool loop_through_mounts);
   bool canDowngrade (const Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage, const Unit * downgradelimit, bool gen_downgrade_list=true);

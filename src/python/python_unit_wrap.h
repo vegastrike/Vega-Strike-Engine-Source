@@ -175,4 +175,5 @@
         WRAPPED0(int, RepairCost,0)
         WRAPPED0(int, RepairUpgrade,0)
         EXPORT_UTIL3(float,PercentOperational,string,content,string,category,bool, countHullAndArmorAsFull)
+        WRAPPED1(Vector,MountPercentOperational, int, whichMount,Vector(-1.0f,-1.0f,-1.0f))
 #endif

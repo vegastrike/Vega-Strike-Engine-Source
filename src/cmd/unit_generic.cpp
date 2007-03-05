@@ -6783,6 +6783,12 @@ bool Unit::ReduceToTemplate() {
     return success;
 }
 
+Vector Unit::MountPercentOperational (int whichmount) {
+  if (whichmount<0||whichmount>=mounts.size()) return Vector(-1,-1,-1);
+  return Vector(mounts[whichmount].functionality,
+                mounts[whichmount].maxfunctionality,
+                ((mounts[whichmount].status==Mount::ACTIVE||mounts[whichmount].status==Mount::INACTIVE)?0.0:(Mount::UNCHOSEN?2.0:1.0)));
+}
 int Unit::RepairCost () {
 	int cost =1;
 	unsigned int i;
