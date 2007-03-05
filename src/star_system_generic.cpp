@@ -181,7 +181,8 @@ StarSystem::StarSystem(const char * filename, const Vector & centr,const float t
 }
 extern void ClientServerSetLightContext (int lightcontext);
 StarSystem::~StarSystem() {
-  _Universe->activeStarSystem()->SwapOut();
+  if (_Universe->getNumActiveStarSystem())
+    _Universe->activeStarSystem()->SwapOut();
   _Universe->pushActiveStarSystem(this);
   //  _Universe->activeStarSystem()->SwapIn();  
   ClientServerSetLightContext (lightcontext);
@@ -207,7 +208,21 @@ StarSystem::~StarSystem() {
   if (collidetable) delete collidetable;//DO NOT MOVE THIS LINE! IT MUST STAY
   //_Universe->activeStarSystem()->SwapOut();  
   _Universe->popActiveStarSystem();
-  _Universe->activeStarSystem()->SwapIn();  
+  vector<StarSystem*>activ;
+  while (_Universe->getNumActiveStarSystem()) {
+      if (_Universe->activeStarSystem()!=this) {
+	  activ.push_back(_Universe->activeStarSystem());
+      }else {
+	  fprintf(stderr,"Avoided fatal error in deleting star system %s\n",getFileName().c_str());
+      }
+      _Universe->popActiveStarSystem();
+  }
+  while(activ.size()) {
+      _Universe->pushActiveStarSystem(activ.back());
+      activ.pop_back();
+  }
+  if (_Universe->getNumActiveStarSystem())
+      _Universe->activeStarSystem()->SwapIn();  
   RemoveStarsystemFromUniverse();
   delete collidemap[Unit::UNIT_ONLY];
   delete collidemap[Unit::UNIT_BOLT];
