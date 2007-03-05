@@ -354,7 +354,6 @@ static std::string &tolower(std::string &loweritem) {
 
 // Takes in a category of an upgrade or cargo and returns true if it is any type of mountable weapon.
 extern bool isWeapon (std::string name);
-extern float PercentOperational(Unit*,string,string category,bool countHullAndArmorAsFull);
 
 // CONSTRUCTOR.
 BaseComputer::BaseComputer(Unit* player, Unit* base, const std::vector<DisplayMode>& modes)
@@ -1663,7 +1662,7 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo& item, Transaction
                     for (unsigned int i=0;i<numc;++i) {
                       Cargo * c = &player->GetCargo(i);
                       if (c->GetCategory().find("upgrades/")==0&&!isWeapon(c->category)) {
-                        float po=PercentOperational(player,c->content,c->category,false);
+                        float po=UnitUtil::PercentOperational(player,c->content,c->category,false);
                         if (po>.02&&po<.98) {
                           static bool must_fix_first = XMLSupport::parse_bool(vs_config->getVariable("physics","must_repair_to_sell","true"));
                           
@@ -1685,9 +1684,9 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo& item, Transaction
                 }
                 NewButton* commitFixButton = static_cast<NewButton*>( window()->findControlById("CommitFix") );
 				bool unhidden=true;
-                if (m_player.GetUnit()&&PercentOperational(m_player.GetUnit(), item.content,item.category,false)<1) {
+                if (m_player.GetUnit()&&UnitUtil::PercentOperational(m_player.GetUnit(), item.content,item.category,false)<1) {
                     if (m_base.GetUnit()) {
-                      if (RepairPrice(PercentOperational(m_player.GetUnit(),
+                      if (RepairPrice(UnitUtil::PercentOperational(m_player.GetUnit(),
                                                          item.content, item.category,false),
                                       m_base.GetUnit()->PriceCargo(item.content))
                           <= _Universe->AccessCockpit()->credits) {
@@ -1939,7 +1938,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
 
 //********************************************************************************************
               {
-              double percent_working=m_player.GetUnit()?PercentOperational(m_player.GetUnit(),item.content,item.category,false):0.0;
+              double percent_working=m_player.GetUnit()?UnitUtil::PercentOperational(m_player.GetUnit(),item.content,item.category,false):0.0;
               if(percent_working<1)	//	IF DAMAGED
               {
                 sprintf(tempString, "Damaged and Used value: #b#%.2f#-b, purchased for %.2f#n1.5#",
@@ -2242,7 +2241,7 @@ void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, 
 		if(transType == SELL_UPGRADE&&m_player.GetUnit())
 		{
 			//Adjust the base color if the item is 'damaged'
-			double percent_working = PercentOperational(m_player.GetUnit(),item.content,item.category,false);;
+			double percent_working = UnitUtil::PercentOperational(m_player.GetUnit(),item.content,item.category,false);;
 
 			//Unit* playerUnit = m_player.GetUnit();
 			//Unit* upgradeUnit = getUnitFromUpgradeName(originalName, playerUnit->faction);
@@ -3678,7 +3677,7 @@ bool BaseComputer::fixUpgrade(const EventCommandId& command, Control* control) {
 				//RecomputeUnitUpgrades(playerUnit);
                                 const Unit * un=  getUnitFromUpgradeName(item->content,playerUnit->faction);
                                 if (un) {
-                                  double percentage = PercentOperational(playerUnit,item->content,item->category,false);
+                                  double percentage = UnitUtil::PercentOperational(playerUnit,item->content,item->category,false);
                                   double price = RepairPrice(percentage,baseUnit->PriceCargo(item->content));
                                   if (price<=_Universe->AccessCockpit()->credits) {
                                     _Universe->AccessCockpit()->credits-=price;                                    
@@ -3690,7 +3689,7 @@ bool BaseComputer::fixUpgrade(const EventCommandId& command, Control* control) {
                                       if (c) c->category="upgrades/"+c->GetCategory().substr(strlen(DamagedCategory));
                                       
                                     }
-                                    if (PercentOperational(playerUnit,item->content,"upgrades/",false)<1.0) {
+                                    if (UnitUtil::PercentOperational(playerUnit,item->content,"upgrades/",false)<1.0) {
                                       emergency_downgrade_mode="EMERGENCY MODE ";
                                     }
                                   }

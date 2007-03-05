@@ -172,4 +172,7 @@
 	EXPORT_UTIL0(float,maxSpeed)
 	EXPORT_UTIL0(float,maxAfterburnerSpeed)
 	voidEXPORT_UTIL5(orbit,UnitWrapper,orbitee,float,speed,QVector,R,QVector,S,QVector,center)
+        WRAPPED0(int, RepairCost,0)
+        WRAPPED0(int, RepairUpgrade,0)
+        EXPORT_UTIL3(float,PercentOperational,string,content,string,category,bool, countHullAndArmorAsFull)
 #endif

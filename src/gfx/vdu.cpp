@@ -1013,7 +1013,7 @@ static void DrawGun (Vector  pos, float w, float h, weapon_info::MOUNT_SIZE sz) 
   }
   
 }
-extern float PercentOperational(Unit*,string,string,bool);
+
 extern const char * DamagedCategory;
 void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
   float x,y,w,h;
@@ -1098,7 +1098,7 @@ void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
       bool damaged=the_cargo.GetCategory().find(DamagedCategory)==0;
 
       if(damaged||(the_cargo.GetCategory().find("upgrades/")==0&&the_cargo.GetContent().find("mult_")!=0&&the_cargo.GetContent().find("add_")!=0&&non_repair_screen_cargo.find(the_cargo.GetContent())==std::string::npos)){
-        percent_working = PercentOperational(parent,the_cargo.content,the_cargo.category,false);
+        percent_working = UnitUtil::PercentOperational(parent,the_cargo.content,the_cargo.category,false);
 	//	retval+=parent->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (int(percent_working*100))+string ("%)" +the_cargo.GetCategory()+"\n");
         GFXColor final_color ((chdamaged[0]*percent_working)+(cdamaged[0]*(1.0-percent_working)),
                               (chdamaged[1]*percent_working)+(cdamaged[1]*(1.0-percent_working)),

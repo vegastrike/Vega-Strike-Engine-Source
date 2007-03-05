@@ -56,6 +56,7 @@ namespace UnitUtil {
 	float maxSpeed (Unit *un);
 	float maxAfterburnerSpeed (Unit *un);
 	void performDockingOperations (Unit * un, Unit * unitToDockWith,int actuallyDockP);
+        float PercentOperational(Unit * un, string,string category,bool countHullAndArmorAsFull);
 }
 
 #endif

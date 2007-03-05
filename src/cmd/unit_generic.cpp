@@ -7922,46 +7922,6 @@ bool isWeapon (std::string name) {
 	return false;
 }
 
-float PercentOperational (Unit * un, std::string name, std::string category, bool countHullAndArmorAsFull) {
-  if (category.find(DamagedCategory)==0) {
-    return 0.0f;
-  }
-  const Unit * upgrade=getUnitFromUpgradeName(name,un->faction); 
-  if (!upgrade)return 1.0f;
-  if (isWeapon(category)) {
-    static std::string loadfailed("LOAD_FAILED");    
-
-    if (upgrade->GetNumMounts()) {
-      const Mount * mnt = &upgrade->mounts[0];
-      unsigned int nummounts=un->GetNumMounts();
-      for (unsigned int i=0;i<nummounts;++i) {
-        if (mnt->type->weapon_name==un->mounts[i].type->weapon_name) {
-          if (un->mounts[i].status==Mount::DESTROYED)
-            return 0.0;
-          if (un->mounts[i].functionality<1.0f){
-            return un->mounts[i].functionality;
-          }
-        }
-      }
-    }
-  }else if (name.find("add_")!=0&&name.find("mult_")!=0) {
-    float armor[8];
-    upgrade->ArmorData(armor);          
-    if (upgrade->GetHull()>1||armor[0]||armor[1]||armor[2]||armor[3]||armor[4]||armor[5]||armor[6]||armor[7]) {
-      if (countHullAndArmorAsFull){
-        return 1.0f;
-      }
-    }
-    double percent=0;
-    if (un->canUpgrade(upgrade,-1,-1,0,true,percent,makeTemplateUpgrade(un->name,un->faction),false)) {
-      if (percent)
-        return percent;
-      else return .5;//FIXME does not interact well with radar type
-    }else if (percent>0) return percent;
-  }
-  
-  return 1.0;
-}
 void Unit::Repair() {
   //note work slows down under time compression!
 
@@ -7991,7 +7951,7 @@ void Unit::Repair() {
             &&carg->GetCategory().find(DamagedCategory)!=0
             &&carg->GetContent().find("add_")!=0
             &&carg->GetContent().find("mult_")!=0
-            &&((percentoperational=PercentOperational(this,carg->content,carg->category,true))<1.f)) {
+            &&((percentoperational=UnitUtil::PercentOperational(this,carg->content,carg->category,true))<1.f)) {
           if (image->next_repair_time==-FLT_MAX) {
             image->next_repair_time=UniverseUtil::GetGameTime()+repairtime*(1-percentoperational);
           }else {
