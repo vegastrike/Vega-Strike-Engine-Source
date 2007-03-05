@@ -873,7 +873,7 @@ void VDU::DrawNav (GameCockpit *cp, Unit* you, Unit*targ, const Vector & nav) {
   if (targ)
 	  nam= reformatName(targ->name);
 
-  std::string navdata=std::string("#ff0000System:\n     #ffff00")+_Universe->activeStarSystem()->getName()+"\n\n#ff0000Destination:\n  #ffff00"+getUnitNameAndFgNoBase(targ)+"\n\n#ff0000Range: #ffff00"+std::string(PrettyDistanceString(DistanceTwoTargets(you,targ)).str);
+  std::string navdata=std::string("#ff0000System:\n     #ffff00")+_Universe->activeStarSystem()->getName()+"\n\n#ff0000Destination:\n  #ffff00"+(targ?getUnitNameAndFgNoBase(targ):std::string("Nowhere"))+"\n\n#ff0000Range: #ffff00"+std::string(PrettyDistanceString(((you&&targ)?DistanceTwoTargets(you,targ):0.0)).str);
   static float auto_message_lim=XMLSupport::parse_float (vs_config->getVariable("graphics","auto_message_time_lim","5"));
   float delautotime=UniverseUtil::GetGameTime()-cp->autoMessageTime;
   
