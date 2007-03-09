@@ -154,6 +154,8 @@ namespace UnitUtil {
 
 		static const int NO_ENEMIES=XMLSupport::parse_int(
 			vs_config->getVariable("physics","priorities","no_enemies","64") );
+		static const int INERT_PRIORITY=XMLSupport::parse_int(
+			vs_config->getVariable("physics","priorities","inert","64") );
 
 		static const float _PLAYERTHREAT_DISTANCE_FACTOR=XMLSupport::parse_float(
 			vs_config->getVariable("physics","priorities","playerthreat_distance_factor","2") );
@@ -252,25 +254,25 @@ namespace UnitUtil {
 	if (un->owner==getTopLevelOwner()||un->faction==cargofac||un->faction==upfac||un->faction==neutral) {
             if (dist<tooclose)
                 return MEDIUM_PRIORITY; else
-                return LOWEST_PRIORITY;
+                return INERT_PRIORITY;
 	}
 	const string &obj = UnitUtil::getFgDirective(un);
 	if (!(obj.length()==0||(obj.length()>=1&&obj[0]=='b'))) {
 	    return MEDIUM_PRIORITY;
 	}
-	if (dist<PLAYERTHREAT_DISTANCE_FACTOR*mymax(missile_range,gun_range)){
+	if (dist<2*PLAYERTHREAT_DISTANCE_FACTOR*mymax(missile_range,gun_range)){
 		if (dist<tooclose*PLAYERTHREAT_DISTANCE_FACTOR)
-			return MEDIUM_PRIORITY; else if (dist<gun_range*PLAYERTHREAT_DISTANCE_FACTOR)
-			return MEDIUMLOW_PRIORITY; else
+			return MEDIUMHIGH_PRIORITY; else if (dist<2*gun_range*PLAYERTHREAT_DISTANCE_FACTOR)
+			return MEDIUM_PRIORITY; else
 			return LOW_PRIORITY;
 	}
 	if (targ){
 	    float speed;
 	    un->getAverageGunSpeed(speed,gun_range,missile_range);
 	    double distance=UnitUtil::getDistance(un,targ);
-		if (distance<=gun_range*THREAT_DISTANCE_FACTOR)
+		if (distance<=2*gun_range*THREAT_DISTANCE_FACTOR)
 			return NOT_VISIBLE_COMBAT_HIGH;
-		if (distance<missile_range*THREAT_DISTANCE_FACTOR)
+		if (distance<2*missile_range*THREAT_DISTANCE_FACTOR)
 			return NOT_VISIBLE_COMBAT_MEDIUM;
 			return NOT_VISIBLE_COMBAT_LOW;
 	}

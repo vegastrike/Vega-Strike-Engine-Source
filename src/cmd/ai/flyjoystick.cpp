@@ -62,7 +62,17 @@ void FlyByJoystick::JDecelKey (KBSTATE k, float, float, int) {
 #endif
 
 void FlyByJoystick::Execute() {
-	static bool clamp_joystick_axes = XMLSupport::parse_bool (vs_config->getVariable("joystick","clamp_axes","true"));
+  static bool clamp_joystick_axes = XMLSupport::parse_bool (vs_config->getVariable("joystick","clamp_axes","true"));
+  static bool nonlinear_throttle_nav    = XMLSupport::parse_bool (vs_config->getVariable("joystick","nonlinear_throttle_nav","true"));
+  static bool nonlinear_throttle_combat = XMLSupport::parse_bool (vs_config->getVariable("joystick","nonlinear_throttle_combat","false"));
+  static float expfactorn = XMLSupport::parse_float (vs_config->getVariable("joystick","nonlinear_expfactor_nav","6.0"));
+  static float pfactorn = XMLSupport::parse_float (vs_config->getVariable("joystick","nonlinear_pfactor_nav","2.0"));
+  static float expamountn = XMLSupport::parse_float (vs_config->getVariable("joystick","nonlinear_expamount_nav","1.0"));
+  static float pamountn = XMLSupport::parse_float (vs_config->getVariable("joystick","nonlinear_pamount_nav","0.0"));
+  static float expfactorc = XMLSupport::parse_float (vs_config->getVariable("joystick","nonlinear_expfactor_combat","6.0"));
+  static float pfactorc = XMLSupport::parse_float (vs_config->getVariable("joystick","nonlinear_pfactor_combat","2.0"));
+  static float expamountc = XMLSupport::parse_float (vs_config->getVariable("joystick","nonlinear_expamount_combat","1.0"));
+  static float pamountc = XMLSupport::parse_float (vs_config->getVariable("joystick","nonlinear_pamount_combat","0.0"));
   desired_ang_velocity=Vector(0,0,0); 
   for (unsigned int i=0;i<this->whichjoystick.size();i++) {
   int which_joystick = this->whichjoystick[i];
@@ -174,6 +184,13 @@ void FlyByJoystick::Execute() {
           axis_value++; 
           // put axis from 0 to 1 
           axis_value= axis_value / 2; //thanks!
+          if(nonlinear_throttle_nav && !cpu->combat_mode) {
+            static float norm = float(exp(expfactorn)-1);
+            axis_value = float(expamountn * (exp(expfactorn*axis_value)-1) / norm + pamountn * pow(axis_value,pfactorn));
+          } else if (nonlinear_throttle_combat && cpu->combat_mode) {
+            static float norm = float(exp(expfactorc)-1);
+            axis_value = float(expamountc * (exp(expfactorc*axis_value)-1) / norm + pamountc * pow(axis_value,pfactorc));
+          }
 	  cpu->set_speed=axis_value*cpu->max_speed();
 	  desired_velocity= Vector (0,0,cpu->set_speed);
       }
