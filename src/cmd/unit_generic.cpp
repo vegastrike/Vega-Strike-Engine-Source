@@ -2394,14 +2394,14 @@ std::string GenerateAutoError(Unit * me,Unit * targ) {
     return err;
   }
   if (targ->isPlanet()) {
-    static std::string err=XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","AsteroidsNearMessage","#ff0000Planetary Hazard Near#000000"));            
+    static std::string err=XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","PlanetNearMessage","#ff0000Planetary Hazard Near#000000"));            
     return err;    
   }
   if(targ->getRelation(me)<0) {
-    static std::string err=XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","AsteroidsNearMessage","#ff0000Enemy Near#000000"));            
+    static std::string err=XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","EnemyNearMessage","#ff0000Enemy Near#000000"));            
     return err;        
   }
-  static std::string err=XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","AsteroidsNearMessage","#ff0000Starship Near#000000"));
+  static std::string err=XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","StarshipNearMessage","#ff0000Starship Near#000000"));
   return err;
 }
 bool Unit::AutoPilotToErrorMessage (Unit * target, bool ignore_energy_requirements, std::string&failuremessage,int recursive_level) {
