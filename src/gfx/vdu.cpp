@@ -572,7 +572,9 @@ VSSprite * getNavImage () {
 }
 
 double DistanceTwoTargets(Unit *parent, Unit *target) {
-  return ((parent->Position()-target->Position()).Magnitude()-((target->isUnit()==PLANETPTR)?target->rSize():0));
+  double tmp=((parent->Position()-target->Position()).Magnitude()-((target->isUnit()==PLANETPTR)?target->rSize():0));
+  if (tmp<0) return 0;
+  return tmp;
 }
 
 struct retString128{
