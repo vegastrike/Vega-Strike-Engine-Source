@@ -155,7 +155,7 @@ void AfterburnTurnTowards (Order * aisc, Unit * un) {
 void AfterburnTurnTowardsITTS (Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
 
-  bool afterburn = useAfterburner();
+  bool afterburn = useAfterburnerToFollow();
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,afterburn),true,afterburn,false);
   AddOrd (aisc,un,ord);
   ord =       (new Orders::FaceTargetITTS(false, 3));
