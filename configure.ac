@@ -232,23 +232,61 @@ else
     fi
 fi
 
-AC_ARG_ENABLE(ggdb3, AC_HELP_STRING([--enable-ggdb3], [Add the -ggdb3 compiler flag.]), DEBUG_FLAGS="-O0 -ggdb3")
+AC_ARG_ENABLE(ggdb3, AC_HELP_STRING([--enable-ggdb3], [Add the -ggdb3 compiler flag.]), 
+	if test $enableval = yes ; then
+		DEBUG_FLAGS="-O0 -ggdb3"
+	fi)
 
-AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug], [Produce an executable with debugging symbols]), [VS_CXXFLAGS="${VS_CXXFLAGS} ${DEBUG_FLAGS}"])
+AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug], [Produce an executable with debugging symbols]), 
+	if test $enableval = yes ; then
+		AC_MSG_NOTICE(Enabling debug mode with $DEBUG_FLAGS)
+		VS_CXXFLAGS="${VS_CXXFLAGS} ${DEBUG_FLAGS}"
+	else
+		AC_MSG_NOTICE(Forcing debugging output disabled)
+		VS_CXXFLAGS=${VS_CXXFLAGS#-g}
+		CFLAGS=${CFLAGS#-g}
+	fi)
 
-AC_ARG_ENABLE(release, AC_HELP_STRING([--enable-release], [Produce an executable with optimizations]), [VS_CXXFLAGS="${VS_CXXFLAGS} -O2 -ffast-math"])
+AC_ARG_ENABLE(release, AC_HELP_STRING([--enable-release], [Produce an executable with optimizations]), 
+	if test $enableval = yes ; then
+		AC_MSG_NOTICE(Enabling optimizations)
+		VS_CXXFLAGS="${VS_CXXFLAGS} -O2 -ffast-math"
+	fi)
 
-AC_ARG_ENABLE(client, AC_HELP_STRING([--disable-client], [Only build vegaserver binary]), build_client=$enableval)
+AC_ARG_ENABLE(client, AC_HELP_STRING([--disable-client], [Only build vegaserver binary]), 
+	build_client=$enableval
+	AC_MSG_NOTICE(Building client: $enableval))
 
-AC_ARG_ENABLE(static, AC_HELP_STRING([--enable-static], [Produce a statically linked executable]), [VS_CXXFLAGS="${VS_CXXFLAGS} -static"])
+AC_ARG_ENABLE(static, AC_HELP_STRING([--enable-static], [Produce a statically linked executable]), 
+	if test $enableval = yes ; then
+		VS_CXXFLAGS="${VS_CXXFLAGS} -static"
+		AC_MSG_NOTICE(Linking statically)
+	else
+		AC_MSG_NOTICE(Linking dynamically)
+	fi)
 
-AC_ARG_ENABLE(profile, AC_HELP_STRING([--enable-profile], [Produce an executable with profiling code]),  [VS_CXXFLAGS="${VS_CXXFLAGS} -pg"])
+AC_ARG_ENABLE(profile, AC_HELP_STRING([--enable-profile], [Produce an executable with profiling code]),  
+	if test $enableval = yes ; then
+		VS_CXXFLAGS="${VS_CXXFLAGS} -pg"
+		AC_MSG_NOTICE(Enabling profiling)
+	fi)
 
-AC_ARG_ENABLE(wall, AC_HELP_STRING([--enable-wall], [Use the -Wall flag with the compiler.]), [VS_CXXFLAGS="${VS_CXXFLAGS} -Wall"])
+AC_ARG_ENABLE(wall, AC_HELP_STRING([--enable-wall], [Use the -Wall flag with the compiler.]), 
+	if test $enableval = yes ; then
+		VS_CXXFLAGS="${VS_CXXFLAGS} -Wall"
+	fi)
 
-AC_ARG_ENABLE(pedantic, AC_HELP_STRING([--enable-pedantic], [Enable -pedantic (and -ansi for C) modes]), [VS_CXXFLAGS="${VS_CXXFLAGS} -pedantic"])
+AC_ARG_ENABLE(pedantic, AC_HELP_STRING([--enable-pedantic], [Enable -pedantic (and -ansi for C) modes]), 
+	if test $enableval = yes ; then
+		AC_MSG_NOTICE(Setting compiler to pedantic (don't expect a successful build))
+		VS_CXXFLAGS="${VS_CXXFLAGS} -pedantic"
+	fi)
 
-AC_ARG_ENABLE(macosx_bundle, AC_HELP_STRING([--enable-macosx-bundle], [Produce a MacOSX bundle executable]),  [VS_CPPFLAGS="${VS_CPPFLAGS} -DWITH_MACOSX_BUNDLE=1"])
+AC_ARG_ENABLE(macosx_bundle, AC_HELP_STRING([--enable-macosx-bundle], [Produce a MacOSX bundle executable]),  
+	if test $enableval = yes ; then
+		AC_MSG_NOTICE(Producing a MacOSX bundle executable)
+		VS_CPPFLAGS="${VS_CPPFLAGS} -DWITH_MACOSX_BUNDLE=1"
+	fi)
 
 if test "x${build_client}" = "xno" ; then
     VS_CXXFLAGS="${VS_CXXFLAGS} -DNO_GFX"
