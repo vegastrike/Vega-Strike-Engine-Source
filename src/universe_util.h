@@ -254,6 +254,13 @@ public:
 	void loadGame(const std::string &savename);
 	void saveGame(const std::string &savename);
 
+	// Splash stuff
+	void showSplashScreen(const string &filename);
+	void showSplashMessage(const string &text);
+	void showSplashProgress(float progress);
+	void hideSplashScreen();
+	bool isSplashScreenShowing();
+
 }
 
 #undef activeSys

@@ -63,5 +63,11 @@ namespace UniverseUtil {
 	void loadGame(const string &savename) {}
 	void saveGame(const string &savename) {}
 
+	void showSplashScreen(const string &filename) {}
+	void showSplashMessage(const string &text) {}
+	void showSplashProgress(float progress) {}
+	void hideSplashScreen() {}
+	bool isSplashScreenShowing() { return false; }
+
 }
 #undef activeSys

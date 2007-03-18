@@ -269,8 +269,6 @@ struct mouseData{
 };
 extern void GetMouseXY(int &mousex,int &mousey);
 void JoyStick::GetMouse (float &x, float &y, float &z, int &buttons) {
-  static int savex = g_game.x_resolution/2;
-  static int savey = g_game.x_resolution/2;
   static bool warp_pointer = XMLSupport::parse_bool(vs_config->getVariable ("joystick","warp_mouse","false"));
   int def_mouse_sens = 1;
   static float mouse_sensitivity = XMLSupport::parse_float(vs_config->getVariable ("joystick","mouse_sensitivity","50"));

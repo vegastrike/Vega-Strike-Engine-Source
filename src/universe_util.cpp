@@ -22,6 +22,12 @@
 extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );
 extern void RespawnNow (Cockpit * cp);
 extern void TerminateCurrentBase(void);
+extern void SetStarSystemLoading (bool value);
+extern bool GetStarSystemLoading ();
+extern void bootstrap_draw(const std::string &message, Animation * newSplashScreen);
+extern Animation* GetSplashScreen();
+extern void SetSplashScreen(Animation *ss);
+extern const vector <string>& ParseDestinations (const string &value);
 
 
 using std::string;
@@ -121,5 +127,42 @@ namespace UniverseUtil {
 		UniverseUtil::setCurrentSaveGame(savename);
 		WriteSaveGame(_Universe->AccessCockpit(), false);
 	}
+
+	void showSplashScreen(const string &filename)
+	{
+		static Animation *curSplash = 0;
+		if (!filename.empty()) {
+			if (curSplash)
+				delete curSplash;
+			curSplash = new Animation(filename.c_str(),0);
+		} else if (!curSplash && !GetSplashScreen()) {
+			static std::vector<std::string> s = ParseDestinations(vs_config->getVariable ("graphics","splash_screen","vega_splash.ani"));
+			int snum=time(NULL)%s.size();
+			curSplash = new Animation(s[snum].c_str(),0);
+		}
+		SetStarSystemLoading(true);
+		bootstrap_draw("Loading...",curSplash);
+	}
+
+	void showSplashMessage(const string &text)
+	{
+		bootstrap_draw(text,0);
+	}
+
+	void showSplashProgress(float progress)
+	{
+		// Unimplemented
+	}
+
+	void hideSplashScreen()
+	{
+		SetStarSystemLoading(false);
+	}
+
+	bool isSplashScreenShowing()
+	{
+		return GetStarSystemLoading();
+	}
+
 }
 #undef activeSys

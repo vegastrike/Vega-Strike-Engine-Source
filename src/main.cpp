@@ -329,8 +329,13 @@ void SetStarSystemLoading (bool value) {
 bool GetStarSystemLoading () {
   return BootstrapMyStarSystemLoading;
 }
-void SetSplashScreen(Animation * ss) {
-  SplashScreen=ss;
+void SetSplashScreen(Animation * ss) 
+{
+	SplashScreen=ss;
+}
+Animation* GetSplashScreen() 
+{
+	return SplashScreen;
 }
 void bootstrap_draw (const std::string &message, Animation * newSplashScreen) {
 
@@ -448,8 +453,8 @@ void SetStartupView(Cockpit * cp) {
       cp->SetView(startupview=="view_target"?CP_TARGET:(startupview=="back"?CP_BACK:(startupview=="chase"?CP_CHASE:CP_FRONT)));
 }
 void bootstrap_main_loop () {
-
   static bool LoadMission=true;
+  static bool loadLastSave = XMLSupport::parse_bool(vs_config->getVariable("general","load_last_savegame","false"));
   InitTime();
 
   //  bootstrap_draw ("Beginning Load...",SplashScreen);
@@ -637,7 +642,6 @@ void bootstrap_main_loop () {
 		cout<<"UNIT FILE NAME = "<<_Universe->AccessCockpit(k)->unitfilename[0]<<endl;
 		*/
 	  } else {
-		static bool loadLastSave = XMLSupport::parse_bool(vs_config->getVariable("general","load_last_savegame","false"));
 		if (loadLastSave)
 		  _Universe->AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k); else
 		  _Universe->AccessCockpit(k)->savegame->SetOutputFileName (savegamefile);
@@ -680,9 +684,6 @@ void bootstrap_main_loop () {
     forcefeedback=new ForceFeedback();
 
     UpdateTime();
-    delete SplashScreen;
-    SplashScreen= NULL;
-    SetStarSystemLoading (false);
     FactionUtil::LoadContrabandLists();
 	{
 		string str=vs_config->getVariable ("general","intro1","Welcome to Vega Strike! Use #8080FFTab#000000 to afterburn (#8080FF+,-#000000 cruise control), #8080FFarrows#000000 to steer.");
@@ -728,7 +729,8 @@ void bootstrap_main_loop () {
 			Network[l].inGame();
 		}
 	}
-	{
+	if (loadLastSave) {
+		// Don't write if we didn't load...
 		for (unsigned int i=0;i<_Universe->numPlayers();++i) {
 			WriteSaveGame(_Universe->AccessCockpit(i),false);
 		}
@@ -739,6 +741,9 @@ void bootstrap_main_loop () {
         }
         _Universe->Loop(main_loop);
     ///return to idle func which now should call main_loop mohahahah
+    delete SplashScreen;
+    SplashScreen= NULL;
+    SetStarSystemLoading (false);
   }
   ///Draw Texture
   

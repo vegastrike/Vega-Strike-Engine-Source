@@ -236,8 +236,9 @@ namespace CockpitKeys {
   }
   void QuitNow () {
     {
+	  static bool writeSaveOnQuit = XMLSupport::parse_bool(vs_config->getVariable("general","write_savegame_on_exit","true"));
       cleanexit=true;
-	  if( Network==NULL)
+	  if(Network==NULL && writeSaveOnQuit)
 		_Universe->WriteSaveGame(true);//gotta do important stuff first
       for (unsigned int i=0;i<active_missions.size();i++) {
 	if (active_missions[i]) {

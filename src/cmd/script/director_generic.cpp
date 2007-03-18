@@ -52,13 +52,13 @@ unsigned int getSaveDataLength (int whichcp, string key) {
   if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
     return 0;
   }
-  return (_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)).size();
+  return (_Universe->AccessCockpit(whichcp)->savegame->getMissionDataLength(key));
 }
 unsigned int getSaveStringLength (int whichcp, string key) {
   if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
     return 0;
   }
-  return (_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key)).size();
+  return (_Universe->AccessCockpit(whichcp)->savegame->getMissionStringDataLength(key));
 }
 unsigned int pushSaveData (int whichcp, string key, float val) {
   if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {

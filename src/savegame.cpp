@@ -404,11 +404,23 @@ void SaveGame::AddUnitToSave (const char * filename, int type, const char * fact
     //    savedunits->Put (address,new SavedUnits (filename,type,faction));//not no more
   }
 }
-std::vector<float> &SaveGame::getMissionData(const std::string &magic_number) {
+std::vector<float> &SaveGame::getMissionData(const std::string &magic_number) 
+{
   return missiondata->m[magic_number];
 }
-std::vector<StringPool::Reference> &SaveGame::getMissionStringData(const std::string &magic_number) {
+unsigned int SaveGame::getMissionDataLength(const std::string &magic_number) const
+{
+  MissionFloatDat::MFD::const_iterator it = missiondata->m.find(magic_number);
+  return (it == missiondata->m.end()) ? 0 : it->second.size();
+}
+std::vector<StringPool::Reference> &SaveGame::getMissionStringData(const std::string &magic_number) 
+{
   return missionstringdata->m[magic_number];
+}
+unsigned int SaveGame::getMissionStringDataLength(const std::string &magic_number) const
+{
+  MissionStringDat::MSD::const_iterator it = missionstringdata->m.find(magic_number);
+  return (it == missionstringdata->m.end()) ? 0 : it->second.size();
 }
 template <class MContainerType> void RemoveEmpty (MContainerType &t) {
   typename MContainerType::iterator i;
