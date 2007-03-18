@@ -12,6 +12,7 @@
 #include "cmd/collection.h"
 #include "cmd/unit_util.h"
 #include "cmd/unit_find.h" // for radar iteration.
+#include "cmd/base_util.h"
 #include "hud.h"
 #include "vdu.h"
 #include "lin_time.h"//for fps
@@ -2341,10 +2342,15 @@ void GameCockpit::Draw() {
         
         static float min_die_time= XMLSupport::parse_float(vs_config->getVariable("graphics","death_scene_time","4"));
         if (dietime>min_die_time) {
-          static VSSprite DieSprite("died.spr",BILINEAR,GFXTRUE);
-          GFXBlendMode(SRCALPHA,INVSRCALPHA);
-          GFXEnable(TEXTURE0);
-          DieSprite.Draw();                         
+          static std::string death_menu_script = vs_config->getVariable("graphics","death_menu_script","");
+          if (death_menu_script.empty()) {
+            static VSSprite DieSprite("died.spr",BILINEAR,GFXTRUE);
+            GFXBlendMode(SRCALPHA,INVSRCALPHA);
+            GFXEnable(TEXTURE0);
+            DieSprite.Draw();
+          } else {
+            BaseUtil::LoadBaseInterface(death_menu_script);
+          }
         }
 	dietime +=GetElapsedTime();
 	SetView (CP_PAN);

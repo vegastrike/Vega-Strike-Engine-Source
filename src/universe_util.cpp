@@ -116,7 +116,8 @@ namespace UniverseUtil {
 		Cockpit *cockpit = _Universe->AccessCockpit();
 		Unit *player = cockpit->GetParent();
 		UniverseUtil::setCurrentSaveGame(savename);
-		player->Kill();
+		if (player)
+			player->Kill();
 		RespawnNow(cockpit);
 		globalWindowManager().shutDown();
 		TerminateCurrentBase();

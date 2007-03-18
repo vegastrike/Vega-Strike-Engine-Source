@@ -889,6 +889,8 @@ double compute_light_dot (Unit * base,Unit *un) {
 }
 
 const char * compute_time_of_day (Unit * base,Unit *un) {
+  if (!base || !un)
+    return "day";
   float rez= compute_light_dot (base,un);
   if (rez>.2) 
     return "day";
@@ -917,15 +919,16 @@ BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
 	//	othtext.SetSize(2-(x*4),-.75);
 	othtext.SetSize(1-.01,-.75);
 
-        std::string fac=FactionUtil::GetFaction(base->faction);
-        if (fac=="neutral")
+        std::string fac = base ? FactionUtil::GetFaction(base->faction) : "neutral";
+        if (base && fac=="neutral")
           fac  = UniverseUtil::GetGalaxyFaction(UnitUtil::getUnitSystemFile(base));
 	Load(basefile, compute_time_of_day(base,un),fac.c_str());
-	vector <string> vec;
-	vec.push_back(base->name);
-	if (un) {
-	    int cpt=UnitUtil::isPlayerStarship(un);
-		if (cpt>=0) saveStringList(cpt,mission_key,vec);
+	if (base && un) {
+		vector <string> vec;
+		vec.push_back(base->name);
+		int cpt=UnitUtil::isPlayerStarship(un);
+		if (cpt>=0) 
+			saveStringList(cpt,mission_key,vec);
 	}
 	if (!rooms.size()) {
 		VSFileSystem::vs_fprintf(stderr,"ERROR: there are no rooms in basefile \"%s%s%s\" ...\n",basefile,compute_time_of_day(base,un),BASE_EXTENSION);
