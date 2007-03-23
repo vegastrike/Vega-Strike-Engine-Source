@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 ///Stores all the load-time vertex info in the XML struct FIXME light calculations
-#include "expat.h"
+#include <expat.h>
 #include "endianness.h"
 using std::vector;
 using std::string;
