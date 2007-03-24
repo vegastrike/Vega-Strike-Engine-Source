@@ -94,6 +94,10 @@ BOOST_PYTHON_DECL void delitem(object const& target, object const& key)
         throw_error_already_set();
 }
 
+#if (PY_VERSION_HEX < 0x02050000)
+typedef int Py_ssize_t;
+#endif
+
 namespace // slicing code copied directly out of the Python implementation
 {
   #undef ISINT
@@ -106,7 +110,7 @@ namespace // slicing code copied directly out of the Python implementation
       PySequenceMethods *sq = tp->tp_as_sequence;
 
       if (sq && sq->sq_slice && ISINT(v) && ISINT(w)) {
-          int ilow = 0, ihigh = INT_MAX;
+          Py_ssize_t ilow = 0, ihigh = INT_MAX;
           if (!_PyEval_SliceIndex(v, &ilow))
               return NULL;
           if (!_PyEval_SliceIndex(w, &ihigh))
@@ -133,7 +137,7 @@ namespace // slicing code copied directly out of the Python implementation
       PySequenceMethods *sq = tp->tp_as_sequence;
 
       if (sq && sq->sq_slice && ISINT(v) && ISINT(w)) {
-          int ilow = 0, ihigh = INT_MAX;
+          Py_ssize_t ilow = 0, ihigh = INT_MAX;
           if (!_PyEval_SliceIndex(v, &ilow))
               return -1;
           if (!_PyEval_SliceIndex(w, &ihigh))
