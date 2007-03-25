@@ -1756,7 +1756,7 @@ void BaseComputer::configureUpgradeCommitControls(const Cargo& item, Transaction
 }
 */
 
-string buildShipDescription(Cargo &item,string & descriptiontexture);
+//string buildShipDescription(Cargo &item,string & descriptiontexture); //Redundant definition
 // Update the controls when the selection for a transaction changes.
 void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist) {
     // Get the controls we need.
@@ -1900,7 +1900,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
                     UniverseUtil::playSound("sales/salespitchnotenoughmoney.wav",QVector(0,0,0),Vector(0,0,0));
                   }
                 }
-                if (item.description==""){
+				if (item.description==""||item.GetDescription()[0]!='@'){
                   item.description=buildShipDescription(item,descriptiontexture);
                   
                 }
@@ -1973,7 +1973,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
 
         // Description.
         descString += item.description;
-    }
+	}
 
     // Change the description control.
     string::size_type pic;
@@ -3803,35 +3803,31 @@ string buildShipDescription(Cargo &item,std::string & texturedescription) {
       	Unit* newPart = UnitFactory::createUnit(item.GetContent().c_str(), false, 0, newModifications,
 					      flightGroup,fgsNumber);
 		current_unit_load_mode=DEFAULT;
-	string hudimage;
+	    string hudimage;	
+		string image;
         if (newPart->getHudImage()) {
            if (newPart->getHudImage()->getTexture()) {
               hudimage = newPart->getHudImage()->getTexture()->texfilename;
-              string::size_type doublepng = hudimage.find(".png");
-              if (doublepng==string::npos) doublepng=hudimage.find(".jpg");
-              if (doublepng!=string::npos) {
-                 std::string shipname= hudimage.substr(doublepng+4);
-                 if (shipname.find(".png")!=string::npos||shipname.find(".jpg")!=string::npos) {
-                    hudimage = hudimage.substr(0,doublepng+4-shipname.length());
-                    string shipnoblank = item.GetContent().substr(0,item.GetContent().find("."));
-                    string::size_type ship = hudimage.rfind(shipnoblank);
-                    if (ship!=string::npos) {
-                       texturedescription="../units/"+shipnoblank+"/"+shipname;
-                    }else {
-                       texturedescription=shipname;
-                    }                    
-                 }
-              }else {
-                 texturedescription = hudimage.substr(hudimage.find(item.content));
-                 
-              }
-           }
-        }
+              string::size_type delim = hudimage.find('|'); // cut off alpha texture
+              if (delim!=string::npos) {
+			    image=hudimage.substr(delim+1);
+				hudimage = hudimage.substr(0,delim-image.length()); // assumes RGBname == Alphaname for ships
+			  }
+			  delim = hudimage.rfind('.'); //cut off mangled base directory
+              if (delim!=string::npos) {
+				hudimage = hudimage.substr(delim+2);
+			  }
+			  texturedescription="../units/"+hudimage+"/"+image;
+		   }
+		}
         std::string str;
 	showUnitStats(newPart,str,0,0,item);
 	delete newPart;
-        if (texturedescription!="")
-           str+="@"+texturedescription+"@";
+   
+	if (texturedescription!=""&&(string::npos==str.find('@'))){
+           str="@"+texturedescription+"@"+str;
+	}
+	
 	return str;	
 }
 
