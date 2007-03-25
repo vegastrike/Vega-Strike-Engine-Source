@@ -1859,7 +1859,13 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
         switch(tlist->transaction) {
             case BUY_CARGO:
 				if (item.GetDescription()==""||item.GetDescription()[0]!='@'){
-					item.description=buildCargoDescription(item);
+				  buildShipDescription(item,descriptiontexture); //Check for ship
+			 	  item.description=buildCargoDescription(item); // do first, so can override default image, if so desired 
+				  string temp;
+				  temp+=item.description;
+				  if((string::npos!=temp.find('@'))&&(""!=descriptiontexture)){// not already pic-annotated, has non-null ship pic
+				    item.description="@"+descriptiontexture+"@"+item.description;
+				  }
 				}
                 if(item.GetCategory().find("My_Fleet") != string::npos) {
                     // This ship is in my fleet -- the price is just the transport cost to get it to
@@ -1921,7 +1927,13 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
                 break;
             case SELL_CARGO:
               if (item.GetDescription()==""||item.GetDescription()[0]!='@'){
-                item.description=buildCargoDescription(item);
+                buildShipDescription(item,descriptiontexture); //Check for ship
+			 	  item.description=buildCargoDescription(item); // do first, so can override default image, if so desired
+				  string temp;
+				  temp+=item.description;
+				  if((string::npos!=temp.find('@'))&&(""!=descriptiontexture)){// not already pic-annotated, has non-null ship pic
+				    item.description="@"+descriptiontexture+"@"+item.description;
+				  }
               }
               if (item.mission) {
                 sprintf(tempString, "Destroy evidence of mission cargo. Credit received: 0.00.");
@@ -5189,8 +5201,18 @@ bool BaseComputer::showShipStats(const EventCommandId& command, Control* control
     	string text;
 	text="";
 	Cargo uninitcargo;
-    	showUnitStats(playerUnit,text,0,0,uninitcargo);
-    	text.append("#n##n##c0:1:.5#[RAW DIAGNOSTIC OUTPUT]#n##-c");
+    showUnitStats(playerUnit,text,0,0,uninitcargo);
+	//remove picture, if any
+	string::size_type pic;
+	if ((pic=text.find("@"))!=string::npos){
+       std::string texture = text.substr(pic+1);
+       text = text.substr(0,pic);
+       string::size_type picend = texture.find("@");
+       if (picend!=string::npos) {
+          text+=texture.substr(picend+1);
+       }              
+	}// picture removed
+    text.append("#n##n##c0:1:.5#[RAW DIAGNOSTIC OUTPUT]#n##-c");
 	bool inQuote = false;
 	bool newLine = false;
 	static bool showdiags = XMLSupport::parse_bool (vs_config->getVariable("debug","showdiagnostics","false"));
