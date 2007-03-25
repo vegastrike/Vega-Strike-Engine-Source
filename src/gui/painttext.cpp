@@ -269,7 +269,7 @@ void PaintText::drawLines(int start, int count) const {
                 // We have a special-case for the ellipsis at the end of a line.
                 drawChars(ELLIPSIS_STRING, 0, 2, frag->font, frag->color,rasterpos);
             } else {
-                rasterpos+=drawChars(m_text, frag->start, frag->end, frag->font, frag->color,rasterpos);
+                rasterpos=drawChars(m_text, frag->start, frag->end, frag->font, frag->color,rasterpos);
             }
         }
 
@@ -742,7 +742,7 @@ void PaintText::calcLayout(void) {
     m_horizontalScaling = m_font.horizontalScaling();
 
     // Max line width in character reference space.
-    static float font_width_hack=XMLSupport::parse_float(vs_config->getVariable("graphics","font_width_hack","1.0"));
+    static float font_width_hack=XMLSupport::parse_float(vs_config->getVariable("graphics","font_width_hack","0.925"));
     const float maxLineWidth = m_rect.size.width*font_width_hack / m_horizontalScaling;
 
     // The temporary global state for the layout operation.

@@ -4320,7 +4320,9 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	float Wconv= warpenratio==0.0?0.0:(1.0/warpenratio); // converts from reactor to warp energy scales
 	char conversionBuffer[2048];
 	string prefix="";
-	for (int i=0;i<subunitlevel;i++) prefix+="   ";
+	for (int i=0;i<subunitlevel;i++) {
+		prefix+="  ";
+	}
 	//get conversion factor for damage -> MJ; note that shield and reactor stats use a different constant.
     static float kj_per_unit_damage = XMLSupport::parse_float (vs_config->getVariable ("physics","kilojoules_per_unit_damage","5400"));
 	float VSDM = kj_per_unit_damage/1000.0;
@@ -4329,6 +4331,8 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	float totalWeaponDamage=0;
 	string MPLdesc="";
 	string statcolor="#c.75:.9:1#";
+	string substatcolor="#c.675:.925:.825#";
+	string expstatcolor="#c.6:.7:.8#";
 	string nametemp="";
 	string model="";
 	int nameindex=0;
@@ -4337,7 +4341,6 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		replacement_mode=GetModeFromName(item.GetContent().c_str());
 		MPLdesc+=text;
 		text="";
-		string statcolor="#c.75:.9:1#";
 		string nametemp="";
 		string model="";
 		if(item.content == BASIC_REPAIR_NAME){
@@ -4397,6 +4400,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		Cargo * fullname = GetMasterPartList(playerUnit->name.get().c_str());
 		Cargo * milname = GetMasterPartList(nametemp.c_str());
 		Cargo * blankname = GetMasterPartList((nametemp+".blank").c_str());
+	
 		if(!subunitlevel && (fullname || milname || blankname)){
 			text+="#c0:1:.5#"+prefix+"[NOTES]#n##n##-c";
 			if(fullname){
@@ -4409,7 +4413,8 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 			text+="#n#";
 		}
 		text+="#n##c0:1:.5#"+prefix+"[GENERAL INFORMATION]#n##-c";
-		text+= "#n#"+prefix+statcolor+"Class: #-c"+nametemp+statcolor+"  Model: #-c"+model;
+		
+		text+= "#n#"+prefix+statcolor+"Class: #-c"+nametemp+statcolor+"    Model: #-c"+model;
 		/*  Flightgroup name for unsold or player ships not very important
 
 		text+= " " + playerUnit->getFullname();
@@ -4438,7 +4443,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
           bvol[1]=blankUnit->getEmptyUpgradeVolume();
           for (int index=0;index<2;++index) {
 		if(!mode){
-			PRETTY_ADDU(statcolor+" "+dvol[index]+" volume: #-c",vol[index],0,"cubic meters");
+			PRETTY_ADDU(statcolor+dvol[index]+" volume: #-c",vol[index],0,"cubic meters");
 		}else{
 			if(bvol[index]!=vol[index]){
 				switch(replacement_mode){
@@ -4492,23 +4497,23 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	const Unit::Computer buc=blankUnit->ViewComputerData();
     if(!mode){
 		text+="#n##n#"+prefix+"#c0:1:.5#[FLIGHT CHARACTERISTICS]#n##-c";
-    	text+="#n#"+prefix+statcolor+"Turning Response: #-c";
+		text+="#n#"+prefix+statcolor+"Turning Response: #-c";
 	}
     if (playerUnit->limits.yaw==playerUnit->limits.pitch &&playerUnit->limits.yaw==playerUnit->limits.roll) {
 		prettyPrintFloat(conversionBuffer,playerUnit->limits.yaw/((playerUnit->GetMoment()!=0)?playerUnit->GetMoment():1),0,4);
 		if(!mode){
 			text+=conversionBuffer;
-			text+=" radians/second^2 "+statcolor+"(yaw, pitch, roll)#-c";
+			text+=" radians/second^2#n#"+expstatcolor+"  (yaw, pitch, roll)#-c";
 		} else {
 			if(playerUnit->limits.yaw!=blankUnit->limits.yaw){
 				switch(replacement_mode){
 				case 0: // Replacement or new Module
-					PRETTY_ADDU(statcolor+"#n#Installs maneuvering jets with turning response #-c",playerUnit->limits.yaw,0," radians/second^2 "+statcolor+"(yaw, pitch, roll)#-c");
+					PRETTY_ADDU(statcolor+"#n#Installs maneuvering jets with turning response #-c",playerUnit->limits.yaw,0," radians/second^2#n#"+statcolor+"  (yaw, pitch, roll)#-c");
 					break;
 				case 1: // Additive
 					break;
 				case 2: // multiplicative
-					PRETTY_ADDU(statcolor+"#n#Increases turning response by #-c",100.0*((playerUnit->limits.yaw*180/PI)-1),0,"% "+statcolor+"(yaw, pitch, roll)#-c");
+					PRETTY_ADDU(statcolor+"#n#Increases turning response by #-c",100.0*((playerUnit->limits.yaw*180/PI)-1),0,"%#n#"+statcolor+"  (yaw, pitch, roll)#-c");
 					break;
 				default: // Failure 
 					text+="Oh dear, this wasn't an upgrade. Please debug code.";
@@ -4520,32 +4525,32 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	} else {
 		if(!mode){
 			float moment = (playerUnit->GetMoment()!=0)?playerUnit->GetMoment():1;
-			PRETTY_ADDN(statcolor+" yaw #-c",playerUnit->limits.yaw/(moment),4);
-			PRETTY_ADDN(statcolor+"  pitch #-c",playerUnit->limits.pitch/(moment),4);
-			PRETTY_ADDN(statcolor+"  roll #-c",playerUnit->limits.roll/(moment),4);
+			PRETTY_ADDN(substatcolor+"  yaw #-c",playerUnit->limits.yaw/(moment),4);
+			PRETTY_ADDN(substatcolor+"  pitch #-c",playerUnit->limits.pitch/(moment),4);
+			PRETTY_ADDN(substatcolor+"  roll #-c",playerUnit->limits.roll/(moment),4);
 			text+=" radians/second^2";
 		} else {
 			if(playerUnit->limits.yaw!=blankUnit->limits.yaw||playerUnit->limits.pitch!=blankUnit->limits.pitch||playerUnit->limits.roll!=blankUnit->limits.roll){
 				switch(replacement_mode){
 				case 0: // Replacement or new Module
 					text+="#n#Replaces existing maneuvering system with one rated at: #-c#n#";
-					PRETTY_ADDN(statcolor+"Yaw #-c",playerUnit->limits.yaw,2);
-					PRETTY_ADDN(statcolor+"  Pitch #-c",playerUnit->limits.pitch,2);
-					PRETTY_ADDN(statcolor+"  Roll #-c",playerUnit->limits.roll,2);
+					PRETTY_ADDN(substatcolor+"Yaw #-c",playerUnit->limits.yaw,2);
+					PRETTY_ADDN(substatcolor+"  Pitch #-c",playerUnit->limits.pitch,2);
+					PRETTY_ADDN(substatcolor+"  Roll #-c",playerUnit->limits.roll,2);
 					text+=" metric-ton*radians/second^2";
 					break;
 				case 1: // Additive
 					text+="#n#Upgrades existing maneuvering system by the following amounts: #-c#n#";
-					PRETTY_ADDN(statcolor+"Yaw #-c",playerUnit->limits.yaw,2);
-					PRETTY_ADDN(statcolor+"  Pitch #-c",playerUnit->limits.pitch,2);
-					PRETTY_ADDN(statcolor+"  Roll #-c",playerUnit->limits.roll,2);
+					PRETTY_ADDN(substatcolor+"Yaw #-c",playerUnit->limits.yaw,2);
+					PRETTY_ADDN(substatcolor+"  Pitch #-c",playerUnit->limits.pitch,2);
+					PRETTY_ADDN(substatcolor+"  Roll #-c",playerUnit->limits.roll,2);
 					text+=" metric-ton*radians/second^2";
 					break;
 				case 2: // multiplicative
 					text+="#n#Increases performance of existing maneuvering system by the following percentages: #-c#n#";
-					PRETTY_ADDN(statcolor+"Yaw #-c",100.0*((playerUnit->limits.yaw*180/PI)-1),0);
-					PRETTY_ADDN(statcolor+"  Pitch #-c",100.0*((playerUnit->limits.pitch*180/PI)-1),0);
-					PRETTY_ADDN(statcolor+"  Roll #-c",100.0*((playerUnit->limits.roll*180/PI)-1),0);
+					PRETTY_ADDN(substatcolor+"Yaw #-c",100.0*((playerUnit->limits.yaw*180/PI)-1),0);
+					PRETTY_ADDN(substatcolor+"  Pitch #-c",100.0*((playerUnit->limits.pitch*180/PI)-1),0);
+					PRETTY_ADDN(substatcolor+"  Roll #-c",100.0*((playerUnit->limits.roll*180/PI)-1),0);
 					break;
 				default: // Failure 
 					text+="Oh dear, this wasn't an upgrade. Please debug code.";
@@ -4561,7 +4566,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 			PRETTY_ADDU(statcolor+"Aft acceleration: #-c",playerUnit->limits.retro/(9.8*playerUnit->GetMass()),2,"gravities")
 			if (playerUnit->limits.lateral==playerUnit->limits.vertical) {
 				PRETTY_ADDU(statcolor+"Orthogonal acceleration: #-c",playerUnit->limits.vertical/(9.8*playerUnit->GetMass()),2,"gravities");
-    				text+=statcolor+" (vertical and lateral axes)#-c";
+				text+=expstatcolor+"#n#  (vertical and lateral axes)#-c";
     		}else {
 				PRETTY_ADDN(statcolor+" Lateral acceleration #-c",playerUnit->limits.lateral/(9.8*playerUnit->GetMass()),2);
 				PRETTY_ADDN(statcolor+" Vertical acceleration #-c",playerUnit->limits.vertical/(9.8*playerUnit->GetMass()),2);
@@ -4671,14 +4676,13 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	if(!mode){
 		if (uc.max_yaw_right==uc.max_pitch_up &&uc.max_yaw_right==uc.max_roll_right) {
 			PRETTY_ADD(statcolor+"Max turn rate: #-c",uc.max_yaw_right,2);
-			text+=" Radians/second "+statcolor+"(yaw, pitch, roll)#-c";
+			text+=" Radians/second "+expstatcolor+"(yaw, pitch, roll)#-c";
 			}
 		else {
-			text+=("#n#"+prefix+statcolor+"Max turn rates:#-c ");
-			PRETTY_ADDN(statcolor+"  yaw #-c",uc.max_yaw_right,2);
-			PRETTY_ADDN(statcolor+"  pitch #-c",uc.max_pitch_up,2);
-			PRETTY_ADDN(statcolor+"  roll #-c",uc.max_roll_right,2);
-			text+=" Radians/second";
+			text+=("#n#"+prefix+statcolor+"Max turn rates:#-c");
+			PRETTY_ADDU(substatcolor+" - yaw: #-c",uc.max_yaw_right,2,"Radians/second");
+			PRETTY_ADDU(substatcolor+" - pitch: #-c",uc.max_pitch_up,2,"Radians/second");
+			PRETTY_ADDU(substatcolor+" - roll: #-c",uc.max_roll_right,2,"Radians/second");
 		}
 
 		text+="#n##n##c0:1:.5#"+prefix+"[TARGETTING SUBSYSTEM]#n##-c";
@@ -4687,23 +4691,23 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 			switch(replacement_mode){
 				case 0: // Replacement or new Module
 					text+=("#n#"+prefix+"Governor settings for maximum turn rates set to: ");
-					PRETTY_ADDN(statcolor+"  yaw #-c",uc.max_yaw_right,2);
-					PRETTY_ADDN(statcolor+"  pitch #-c",uc.max_pitch_up,2);
-					PRETTY_ADDN(statcolor+"  roll #-c",uc.max_roll_right,2);
+					PRETTY_ADDN(substatcolor+"  yaw #-c",uc.max_yaw_right,2);
+					PRETTY_ADDN(substatcolor+"  pitch #-c",uc.max_pitch_up,2);
+					PRETTY_ADDN(substatcolor+"  roll #-c",uc.max_roll_right,2);
 					text+=" Radians/second";
 					break;
 				case 1: // Additive
 					text+=("#n#"+prefix+"Governor settings for maximum turn rates increased by: ");
-					PRETTY_ADDN(statcolor+"  yaw #-c",uc.max_yaw_right,2);
-					PRETTY_ADDN(statcolor+"  pitch #-c",uc.max_pitch_up,2);
-					PRETTY_ADDN(statcolor+"  roll #-c",uc.max_roll_right,2);
+					PRETTY_ADDN(substatcolor+"  yaw #-c",uc.max_yaw_right,2);
+					PRETTY_ADDN(substatcolor+"  pitch #-c",uc.max_pitch_up,2);
+					PRETTY_ADDN(substatcolor+"  roll #-c",uc.max_roll_right,2);
 					text+=" Radians/second";
 					break;
 				case 2: // multiplicative
-					text+=("#n#"+statcolor+"Increases governor settings for maximum turn rates by: #-c");
-					PRETTY_ADDN(statcolor+"  yaw #-c",100.0*((uc.max_yaw_right*180/PI)-1),0);
-					PRETTY_ADDN(statcolor+"  pitch #-c",100.0*((uc.max_pitch_up*180/PI)-1),0);
-					PRETTY_ADDN(statcolor+"  roll #-c",100.0*((uc.max_roll_right*180/PI)-1),0);
+					text+=("#n#"+substatcolor+"Increases governor settings for maximum turn rates by: #-c");
+					PRETTY_ADDN(substatcolor+"  yaw #-c",100.0*((uc.max_yaw_right*180/PI)-1),0);
+					PRETTY_ADDN(substatcolor+"  pitch #-c",100.0*((uc.max_pitch_up*180/PI)-1),0);
+					PRETTY_ADDN(substatcolor+"  roll #-c",100.0*((uc.max_roll_right*180/PI)-1),0);
 					text+=" %";
 					break;
 				default: // Failure 
@@ -4718,7 +4722,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		PRETTY_ADDU(statcolor+"Tracking range: #-c",uc.radar.maxrange/1000,0,"km");
 		if((acos(uc.radar.maxcone)*360/PI)<359){
 			PRETTY_ADDU(statcolor+"Tracking cone: #-c",acos(uc.radar.maxcone)*2,2,"Radians");
-			text+=statcolor+" (planar angle: 2 pi means full space)#-c";
+			text+=expstatcolor+"#n#  (planar angle: 2 pi means full space)#-c";
 		} else {
 			text+="#n#"+prefix+statcolor+"Tracking cone: #-cOMNIDIRECTIONAL";
 		}
@@ -4858,14 +4862,14 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		}
 	}
 	if(!mode||playerUnit->armor.frontrighttop!=blankUnit->armor.frontrighttop){
-		PRETTY_ADDU(statcolor+"  Fore-starboard-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.frontrighttop-1):playerUnit->armor.frontrighttop*VSDM,0,"MJ");
-		PRETTY_ADDU(statcolor+"  Aft-starboard-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.backrighttop-1):playerUnit->armor.backrighttop*VSDM,0,"MJ"); 
-		PRETTY_ADDU(statcolor+"  Fore-port-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.frontlefttop-1):playerUnit->armor.frontlefttop*VSDM,0,"MJ");
-		PRETTY_ADDU(statcolor+"  Aft-port-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.backlefttop-1):playerUnit->armor.backlefttop*VSDM,0,"MJ");
-		PRETTY_ADDU(statcolor+"  Fore-starboard-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.frontrightbottom-1):playerUnit->armor.frontrightbottom*VSDM,0,"MJ");
-		PRETTY_ADDU(statcolor+"  Aft-starboard-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.backrightbottom-1):playerUnit->armor.backrightbottom*VSDM,0,"MJ"); 
-		PRETTY_ADDU(statcolor+"  Fore-port-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.frontleftbottom-1):playerUnit->armor.frontleftbottom*VSDM,0,"MJ");
-		PRETTY_ADDU(statcolor+"  Aft-port-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.backleftbottom-1):playerUnit->armor.backleftbottom*VSDM,0,"MJ");
+		PRETTY_ADDU(substatcolor+" - Fore-starboard-high: #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.frontrighttop-1):playerUnit->armor.frontrighttop*VSDM,0,(2==replacement_mode)?"%":"MJ");
+		PRETTY_ADDU(substatcolor+" - Aft-starboard-high: #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.backrighttop-1):playerUnit->armor.backrighttop*VSDM,0,(2==replacement_mode)?"%":"MJ"); 
+		PRETTY_ADDU(substatcolor+" - Fore-port-high: #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.frontlefttop-1):playerUnit->armor.frontlefttop*VSDM,0,(2==replacement_mode)?"%":"MJ");
+		PRETTY_ADDU(substatcolor+" - Aft-port-high: #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.backlefttop-1):playerUnit->armor.backlefttop*VSDM,0,(2==replacement_mode)?"%":"MJ");
+		PRETTY_ADDU(substatcolor+" - Fore-starboard-low: #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.frontrightbottom-1):playerUnit->armor.frontrightbottom*VSDM,0,(2==replacement_mode)?"%":"MJ");
+		PRETTY_ADDU(substatcolor+" - Aft-starboard-low: #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.backrightbottom-1):playerUnit->armor.backrightbottom*VSDM,0,(2==replacement_mode)?"%":"MJ"); 
+		PRETTY_ADDU(substatcolor+" - Fore-port-low: #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.frontleftbottom-1):playerUnit->armor.frontleftbottom*VSDM,0,(2==replacement_mode)?"%":"MJ");
+		PRETTY_ADDU(substatcolor+" - Aft-port-low: #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.backleftbottom-1):playerUnit->armor.backleftbottom*VSDM,0,(2==replacement_mode)?"%":"MJ");
 	}
 	if(!mode){
 		PRETTY_ADDU(statcolor+"Sustainable Hull Damage: #-c",playerUnit->GetHull()/(playerUnit->GetHullPercent())*VSDM,0,"MJ");
@@ -4922,28 +4926,28 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 			break;
 		case 2:
 			if(!mode||playerUnit->shield.shield2fb.frontmax!=blankUnit->shield.shield2fb.frontmax){
-				PRETTY_ADDU(statcolor+"  fore - #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.shield2fb.backmax-1)):playerUnit->shield.shield2fb.frontmax*VSDM,0, "MJ");
-				PRETTY_ADDU(statcolor+"  aft - #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.shield2fb.backmax-1)):playerUnit->shield.shield2fb.backmax*VSDM,0, "MJ");
+				PRETTY_ADDU(substatcolor+" - fore: #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.shield2fb.backmax-1)):playerUnit->shield.shield2fb.frontmax*VSDM,0, (2==replacement_mode)?"%":"MJ");
+				PRETTY_ADDU(substatcolor+" - aft: #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.shield2fb.backmax-1)):playerUnit->shield.shield2fb.backmax*VSDM,0, (2==replacement_mode)?"%":"MJ");
 			}
 			break;
 		case 4:
 			if(!mode||playerUnit->shield.shield4fbrl.frontmax!=blankUnit->shield.shield4fbrl.frontmax){
-				PRETTY_ADDU(statcolor+"  fore - #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.shield4fbrl.frontmax-1)):playerUnit->shield.shield4fbrl.frontmax*VSDM,0,"MJ");
-				PRETTY_ADDU(statcolor+"  aft - #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.shield4fbrl.backmax-1)):playerUnit->shield.shield4fbrl.backmax*VSDM,0,"MJ");
-				PRETTY_ADDU(statcolor+"  port - #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.shield4fbrl.leftmax-1)):playerUnit->shield.shield4fbrl.leftmax*VSDM,0,"MJ");
-				PRETTY_ADDU(statcolor+"  starboard - #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.shield4fbrl.rightmax-1)):playerUnit->shield.shield4fbrl.rightmax*VSDM,0,"MJ");
+				PRETTY_ADDU(substatcolor+" - fore: #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.shield4fbrl.frontmax-1)):playerUnit->shield.shield4fbrl.frontmax*VSDM,0,(2==replacement_mode)?"%":"MJ");
+				PRETTY_ADDU(substatcolor+" - aft: #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.shield4fbrl.backmax-1)):playerUnit->shield.shield4fbrl.backmax*VSDM,0,(2==replacement_mode)?"%":"MJ");
+				PRETTY_ADDU(substatcolor+" - port: #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.shield4fbrl.leftmax-1)):playerUnit->shield.shield4fbrl.leftmax*VSDM,0,(2==replacement_mode)?"%":"MJ");
+				PRETTY_ADDU(substatcolor+" - starboard: #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.shield4fbrl.rightmax-1)):playerUnit->shield.shield4fbrl.rightmax*VSDM,0,(2==replacement_mode)?"%":"MJ");
 			}
 			break;
 		case 8:
 			if(!mode||playerUnit->shield.shield8.frontrightbottommax!=blankUnit->shield.shield8.frontrightbottommax){
-				PRETTY_ADDU(statcolor+"  Fore-starboard-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.frontrighttopmax-1):playerUnit->shield.shield8.frontrighttopmax*VSDM,0,"MJ");
-		PRETTY_ADDU(statcolor+"  Aft-starboard-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.backrighttopmax-1):playerUnit->shield.shield8.backrighttopmax*VSDM,0,"MJ"); 
-		PRETTY_ADDU(statcolor+"  Fore-port-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.frontlefttopmax-1):playerUnit->shield.shield8.frontlefttopmax*VSDM,0,"MJ");
-		PRETTY_ADDU(statcolor+"  Aft-port-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.backlefttopmax-1):playerUnit->shield.shield8.backlefttopmax*VSDM,0,"MJ");
-		PRETTY_ADDU(statcolor+"  Fore-starboard-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.frontrighttopmax-1):playerUnit->shield.shield8.frontrightbottommax*VSDM,0,"MJ");
-		PRETTY_ADDU(statcolor+"  Aft-starboard-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.backrighttopmax-1):playerUnit->shield.shield8.backrightbottommax*VSDM,0,"MJ"); 
-		PRETTY_ADDU(statcolor+"  Fore-port-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.frontlefttopmax-1):playerUnit->shield.shield8.frontleftbottommax*VSDM,0,"MJ");
-		PRETTY_ADDU(statcolor+"  Aft-port-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.backlefttopmax-1):playerUnit->shield.shield8.backleftbottommax*VSDM,0,"MJ");
+				PRETTY_ADDU(statcolor+" - Fore-starboard-high: #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.frontrighttopmax-1):playerUnit->shield.shield8.frontrighttopmax*VSDM,0,(2==replacement_mode)?"%":"MJ");
+				PRETTY_ADDU(substatcolor+" - Aft-starboard-high: #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.backrighttopmax-1):playerUnit->shield.shield8.backrighttopmax*VSDM,0,(2==replacement_mode)?"%":"MJ"); 
+		PRETTY_ADDU(substatcolor+" - Fore-port-high: #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.frontlefttopmax-1):playerUnit->shield.shield8.frontlefttopmax*VSDM,0,(2==replacement_mode)?"%":"MJ");
+		PRETTY_ADDU(substatcolor+" - Aft-port-high: #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.backlefttopmax-1):playerUnit->shield.shield8.backlefttopmax*VSDM,0,(2==replacement_mode)?"%":"MJ");
+		PRETTY_ADDU(substatcolor+" - Fore-starboard-low: #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.frontrighttopmax-1):playerUnit->shield.shield8.frontrightbottommax*VSDM,0,(2==replacement_mode)?"%":"MJ");
+		PRETTY_ADDU(substatcolor+" - Aft-starboard-low: #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.backrighttopmax-1):playerUnit->shield.shield8.backrightbottommax*VSDM,0,(2==replacement_mode)?"%":"MJ"); 
+		PRETTY_ADDU(substatcolor+" - Fore-port-low: #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.frontlefttopmax-1):playerUnit->shield.shield8.frontleftbottommax*VSDM,0,(2==replacement_mode)?"%":"MJ");
+		PRETTY_ADDU(substatcolor+" - Aft-port-low: #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.backlefttopmax-1):playerUnit->shield.shield8.backleftbottommax*VSDM,0,(2==replacement_mode)?"%":"MJ");
 			}
 			break;
 		default:
@@ -5002,8 +5006,8 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 			//let's go through all mountpoints
 	{	for(int i=0;i<playerUnit->GetNumMounts();i++){
 			if(!mode){
-				PRETTY_ADD(" #c0:1:.3#<#-c",i+1,0);
-				text+="#c0:1:.3#>#-c #c0:1:1#"+lookupMountSize(playerUnit->mounts[i].size)+"#-c";
+				PRETTY_ADD(" #c0:1:.3#[#-c",i+1,0);
+				text+="#c0:1:.3#]#-c #c0:1:1#"+lookupMountSize(playerUnit->mounts[i].size)+"#-c";
 			}
 			const weapon_info * wi=playerUnit->mounts[i].type;
 			if(wi&&wi->weapon_name!=""){
@@ -5024,8 +5028,8 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		//	int s=1; //??
 		//	int off=0;//??
 			if(!mode){
-				PRETTY_ADD("  #c0:1:.3#<#-c",i+1,0);
-				text+="#c0:1:.3#>#-c ";
+				PRETTY_ADD("  #c0:1:.3#[#-c",i+1,0);
+				text+="#c0:1:.3#]#-c ";
 			}
 			text+=wi->weapon_name+": #c0:1:1#"+lookupMountSize(wi->size)+"#-c#c.9:.9:.5#"+WeaponTypeStrings[wi->type]+" #-c";
 			if (wi->Damage<0) text+="#n#"+prefix+statcolor+"   Damage:#-c special";
@@ -5164,8 +5168,8 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		Unit *sub=ki.current();
 		while (sub) {
 			if (i==1) text+="#n##n##c0:1:.5#"+prefix+"[SUB UNITS]#-c";
-			PRETTY_ADD("#n#"+prefix+"#c0:1:.2#<#-csub unit ",i,0);
-			text+="#c0:1:.2#>#-c#n#";
+			PRETTY_ADD("#n#"+prefix+"#c0:1:.2#[#-csub unit ",i,0);
+			text+="#c0:1:.2#]#-c#n#";
 			showUnitStats(sub,text,subunitlevel+1,0,item);
 			i++;
 			sub=ki.next();
