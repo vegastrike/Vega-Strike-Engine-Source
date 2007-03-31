@@ -2007,7 +2007,9 @@ void FireKeyboard::Execute () {
     parent->TargetTurret(parent->Target());
     f().turretaikey=DOWN;
   }
-  if(f().turretoffkey==PRESS) {
+  static bool noturretai=XMLSupport::parse_bool(vs_config->getVariable("AI","no_turret_ai","false"));
+  static int taicounter=0;
+  if(f().turretoffkey==PRESS||(noturretai&&taicounter++%128==0)) {
       parent->DisableTurretAI();
       f().turretoffkey = DOWN;
   }
