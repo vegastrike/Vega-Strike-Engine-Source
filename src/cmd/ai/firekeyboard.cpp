@@ -1790,6 +1790,29 @@ void FireKeyboard::Execute () {
   }
   if (f().firekey==PRESS||f().jfirekey==PRESS||j().firekey==DOWN||j().jfirekey==DOWN){
     if (!_Universe->AccessCockpit()->CanDrawNavSystem()) {
+      static bool allow_special_with_weapons=XMLSupport::parse_bool(vs_config->getVariable("physics","special_and_normal_gun_combo","true"));
+      if (!allow_special_with_weapons) {
+        bool badness=false;
+        bool special=false;
+        bool normal=false;
+        int nm=parent->GetNumMounts();
+        for (int i=0;i<nm;++i) {
+          if (parent->mounts[i].status==Mount::ACTIVE) {
+            special=special||(parent->mounts[i].type->size&weapon_info::SPECIAL)!=0;
+            normal=normal||(parent->mounts[i].type->size&(weapon_info::LIGHT|weapon_info::MEDIUM|weapon_info::HEAVY|weapon_info::CAPSHIPLIGHT|weapon_info::CAPSHIPHEAVY))!=0;
+          }
+        }
+        for (int i=0;i<nm;++i) {
+          if (special&&normal) {
+            //parent->ToggleWepaon(false,true);
+            if (parent->mounts[i].status==Mount::ACTIVE) {
+              if ((parent->mounts[i].type->size&weapon_info::SPECIAL)!=0) {
+                parent->mounts[i].status=Mount::INACTIVE;
+              }
+            }
+          }
+        }
+      }
       parent->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false);
     }
   }
@@ -2062,6 +2085,7 @@ void FireKeyboard::Execute () {
       f().rweapk=DOWN;
       forward=false;
     }
+    parent->UnFire();
     parent->ToggleWeapon (false, forward);
 		static soundContainer weapsound;
 		if (weapsound.sound<0) {
