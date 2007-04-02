@@ -1036,8 +1036,14 @@ void GameCockpit::DrawBlips (Unit * un) {
   static bool allGravUnits=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_gravitational_objects","true"));
   if (allGravUnits){
     Unit *u;
+    bool foundtarget=false;
+    Unit * targ=un->Target();
     for (un_iter i=_Universe->activeStarSystem()->gravitationalUnits().createIterator();(u=*i)!=NULL;++i){
       unitLocator.action.acquire(u,UnitUtil::getDistance(un,u));      
+      if (u==targ)foundtarget=true;
+    }
+    if (targ&&!foundtarget) {
+      unitLocator.action.acquire(targ,UnitUtil::getDistance(un,targ));      
     }
   }
   GFXEnd();
