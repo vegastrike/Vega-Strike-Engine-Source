@@ -138,6 +138,7 @@
 	EXPORT_UTIL0(UnitWrapper,getFlightgroupLeader)
 	EXPORT_UTIL1(bool,setFlightgroupLeader,UnitWrapper,un)
 	EXPORT_UTIL0(string,getFgDirective)
+	EXPORT_UTIL0(void,RecomputeUnitUpgrades)
 	EXPORT_UTIL1(bool,setFgDirective,string,inp)
 //	EXPORT_UTIL0(int,getFgSubnumber)
 	EXPORT_UTIL3(int,removeCargo,string,s, int,quantity, bool, erasezero)

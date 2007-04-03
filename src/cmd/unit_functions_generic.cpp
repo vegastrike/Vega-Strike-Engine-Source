@@ -285,40 +285,6 @@ void DealPossibleJumpDamage (Unit *un) {
     un->SetCurPosition (un->LocalPosition()+(((float)rand())/RAND_MAX)*dam*un->GetVelocity().Cast());
   }
 }
-void RecomputeUnitUpgrades (Unit * un) {
-	un->ReduceToTemplate();
-	unsigned int i;
-	for (i=0;i<un->numCargo();++i) {
-		Cargo * c = &un->GetCargo(i);
-		if (c->GetCategory().find("upgrades")==0&&c->GetCategory().find(DamagedCategory)!=0) {
-			if (c->GetContent().find("mult_")!=0 &&
-				c->GetContent().find("add_")!=0 ) {
-				un->Upgrade(c->content,0,0,true,false);
-			}
-		}
-	}
-	for (i=0;i<un->numCargo();++i) {
-		Cargo * c = &un->GetCargo(i);
-		if (c->GetCategory().find("upgrades")==0&&c->GetCategory().find(DamagedCategory)!=0) {
-			if (c->GetContent().find("add_")==0 ) {
-				for (int j=0;j<c->quantity;++j) {
-					un->Upgrade(c->content,0,0,true,false);
-				}
-			}
-		}
-	}
-	for (i=0;i<un->numCargo();++i) {
-		Cargo * c = &un->GetCargo(i);
-		if (c->GetCategory().find("upgrades")==0&&c->GetCategory().find(DamagedCategory)!=0) {
-			if (c->GetContent().find("mult_")==0) {
-				for (int j=0;j<c->quantity;++j) {
-					un->Upgrade(c->content,0,0,true,false);
-				}
-			}
-		}
-	}
-
-}
 
 void Enslave (Unit* parent, bool enslave) {
   bool free=!enslave;

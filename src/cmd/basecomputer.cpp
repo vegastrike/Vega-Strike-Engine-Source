@@ -172,7 +172,7 @@ static const char* const NEWS_NAME_LABEL = "news";
 
 // Some upgrade declarations.
 // These should probably be in a header file somewhere.
-extern void RecomputeUnitUpgrades (Unit * un);
+
 extern const Unit* makeFinalBlankUpgrade(string name, int faction);
 extern int GetModeFromName(const char *);  // 1=add, 2=mult, 0=neither.
 extern Cargo* GetMasterPartList(const char *input_buffer);
@@ -3600,7 +3600,7 @@ bool BaseComputer::buyUpgrade(const EventCommandId& command, Control* control) {
                                         double percentage=0;
                                         playerUnit->Upgrade(upgrade,0,0,GetModeFromName(item->content.c_str()),true,percentage,makeTemplateUpgrade(playerUnit->name,playerUnit->faction));                                        
 					*/
-					//RecomputeUnitUpgrades(playerUnit); //Narfed damage
+					//UnitUtil::RecomputeUnitUpgrades(playerUnit); //Narfed damage
 					loadUpgradeControls();
 					updateTransactionControls(itemCopy, true);
 				}
@@ -3628,7 +3628,7 @@ bool BaseComputer::sellUpgrade(const EventCommandId& command, Control* control) 
 			if (baseUnit&&playerUnit) {
 				Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
 				playerUnit->SellCargo(item->content, quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
-				RecomputeUnitUpgrades(playerUnit);
+				UnitUtil::RecomputeUnitUpgrades(playerUnit);
 				loadUpgradeControls();
 				updateTransactionControls(itemCopy, true);				
 			}
@@ -3686,7 +3686,7 @@ bool BaseComputer::fixUpgrade(const EventCommandId& command, Control* control) {
 				Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
                                 
 				//playerUnit->SellCargo(item->content, quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
-				//RecomputeUnitUpgrades(playerUnit);
+				//UnitUtil::RecomputeUnitUpgrades(playerUnit);
                                 const Unit * un=  getUnitFromUpgradeName(item->content,playerUnit->faction);
                                 if (un) {
                                   double percentage = UnitUtil::PercentOperational(playerUnit,item->content,item->category,false);

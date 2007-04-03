@@ -9,6 +9,7 @@ namespace UnitUtil {
 	string getFactionName (Unit *my_unit);
 	int getFactionIndex (Unit *my_unit);
 	void setFactionIndex (Unit *my_unit,int factionname);
+	void RecomputeUnitUpgrades(Unit *my_unit);
 	void setFactionName (Unit *my_unit,string factionname);
 	string getName(Unit *my_unit);
 	void setName(Unit *my_unit,string name);
