@@ -1486,7 +1486,7 @@ void VDU::Draw (GameCockpit*parentcp,Unit * parent, const GFXColor & color) {
   if (delautotime<auto_switch_lim&&parentcp->autoMessage.length()!=0) {
     if (thismode.back()!=COMM) {
       thismode.back()=NAV;
-      parentcp->autoMessageTime-=auto_switch_lim;
+      parentcp->autoMessageTime-=auto_switch_lim*1.125;
     }
   }
 
