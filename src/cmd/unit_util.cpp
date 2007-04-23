@@ -49,9 +49,11 @@ namespace UnitUtil {
 		unsigned char sex=0;
 		Cockpit * tmp;
 		if ((tmp=_Universe->isPlayerStarship (my_unit))) {
-                  Animation * ani= other_unit->pilot->getCommFace (other_unit,mood,sex);
-                  if (NULL!=ani) {
-                    tmp->SetCommAnimation (ani,other_unit);
+                  if (other_unit) {
+                    Animation * ani= other_unit->pilot->getCommFace (other_unit,mood,sex);
+                    if (NULL!=ani) {
+                      tmp->SetCommAnimation (ani,other_unit);
+                    }
                   }
 		}
 		return sex;
