@@ -404,8 +404,14 @@ void Mission::DirectorInitgame(){
   this->player_num=_Universe->CurrentCockpit();
   if (nextpythonmission) {
 	// CAUSES AN UNRESOLVED EXTERNAL SYMBOL FOR PythonClass::last_instance ?!?!
-
-	runtime.pymissions=(pythonMission::FactoryString (nextpythonmission));
+#ifndef _WIN32
+    char * tmp=nextpythonmission;
+    while (*tmp) {
+      if (tmp[0]=='\r') tmp[0]='\n';
+      tmp++;
+    }
+#endif
+    runtime.pymissions=(pythonMission::FactoryString (nextpythonmission));
     delete [] nextpythonmission; //delete the allocated memory
     nextpythonmission=NULL;
 	if (!this->unpickleData.empty()) {
