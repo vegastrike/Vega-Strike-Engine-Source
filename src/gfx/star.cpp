@@ -681,9 +681,11 @@ void SpriteStarVlist::EndDrawState(bool stretch, int whichTex) {
   GFXEnable(CULLFACE);
   GFXColorMaterial(0);
 }
-
+extern bool isVista;
 void SpriteStarVlist::Draw(bool strertch, int whichTexture) {
-  vlist[whichTexture]->Draw();
+	static bool force_draw=XMLSupport::parse_bool(vs_config->getVariable("graphics","vista_draw_stars","false"));
+	if (force_draw||!isVista)
+	  vlist[whichTexture]->Draw();
 }
 
 SpriteStarVlist::~SpriteStarVlist() {

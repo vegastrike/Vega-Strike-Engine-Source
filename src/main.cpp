@@ -195,6 +195,7 @@ void nothinghappens (unsigned int, unsigned int, bool,int,int) {
 }
 //int allexcept=FE_DIVBYZERO|FE_INVALID;//|FE_OVERFLOW|FE_UNDERFLOW;
 extern void InitUnitTables();
+bool isVista=false;
 int main( int argc, char *argv[] ) 
 {
 #if defined(WITH_MACOSX_BUNDLE)||defined(_WIN32)
@@ -227,6 +228,15 @@ int main( int argc, char *argv[] )
           getcwd(pwd,8191);
           printf (" In path %s\n",pwd);
         }
+#endif
+#ifdef _WIN32
+	    OSVERSIONINFO osvi;
+    ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
+    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+
+    GetVersionEx(&osvi);
+	isVista=(osvi.dwMajorVersion==6);
+printf ("Windows version %d %d\n",osvi.dwMajorVersion,osvi.dwMinorVersion);
 #endif
     /* Print copyright notice */
 	printf("Vega Strike "  " \n"
