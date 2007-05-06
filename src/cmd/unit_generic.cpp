@@ -313,9 +313,13 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 	}
 /*    smalle->curr_physical_state = smalle->prev_physical_state;
 	  this->curr_physical_state = this->prev_physical_state;*/
-    smalle->ApplyDamage (biglocation.Cast(),bignormal,small_damage,smalle,GFXColor(1,1,1,2),this->owner!=NULL?this->owner:this);
-    this->ApplyDamage (smalllocation.Cast(),smallnormal,large_damage,this,GFXColor(1,1,1,2),smalle->owner!=NULL?smalle->owner:smalle);
-
+    {
+      static int upgradefac = XMLSupport::parse_bool(vs_config->getVariable("physics","cargo_deals_collide_damage","false"))?FactionUtil::GetUpgradeFaction():-1;
+      if (faction!=upgradefac)
+        smalle->ApplyDamage (biglocation.Cast(),bignormal,small_damage,smalle,GFXColor(1,1,1,2),this->owner!=NULL?this->owner:this);
+      if (smalle->faction!=upgradefac)
+        this->ApplyDamage (smalllocation.Cast(),smallnormal,large_damage,this,GFXColor(1,1,1,2),smalle->owner!=NULL?smalle->owner:smalle);
+    }
     //OLDE METHODE
     //    smalle->ApplyDamage (biglocation.Cast(),bignormal,.33*g_game.difficulty*(  .5*fabs((smalle->GetVelocity()-this->GetVelocity()).MagnitudeSquared())*this->mass*SIMULATION_ATOM),smalle,GFXColor(1,1,1,2),NULL);
     //    this->ApplyDamage (smalllocation.Cast(),smallnormal, .33*g_game.difficulty*(.5*fabs((smalle->GetVelocity()-this->GetVelocity()).MagnitudeSquared())*smalle->mass*SIMULATION_ATOM),this,GFXColor(1,1,1,2),NULL);
@@ -3857,7 +3861,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
         static float thruster_hit_chance=XMLSupport::parse_float(vs_config->getVariable("physics","thruster_hit_chance",".25"));
 	if (rand01()<thruster_hit_chance) {
 		//DAMAGE ROLL/YAW/PITCH/THRUST
-          float orandnum=rand01()*.75+.25;
+          float orandnum=rand01()*.82+.18;
           if (randnum>=.9) {
             computer.max_pitch_up*=orandnum;
           } else if (randnum>=.8) {
@@ -3928,16 +3932,16 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 		} else if (randnum>=upgradevolume_damage_prob) {
             image->UpgradeVolume*=dam;
 		} else if (randnum>=cargo_damage_prob) {  
-			//Do something NASTY to the cargo
-			if (image->cargo.size()>0) {
-				int i=0;
-                unsigned int cargorand_o=rand();
-				unsigned int cargorand;
-				do {
-					cargorand=(cargorand_o+i)%image->cargo.size();
-                } while ((image->cargo[cargorand].quantity==0||image->cargo[cargorand].mission)&&++i<image->cargo.size());
-				image->cargo[cargorand].quantity*=dam;
-			}
+                  //Do something NASTY to the cargo
+                  if (image->cargo.size()>0) {
+                    int i=0;
+                    unsigned int cargorand_o=rand();
+                    unsigned int cargorand;
+                    do {
+                      cargorand=(cargorand_o+i)%image->cargo.size();
+                    } while ((image->cargo[cargorand].quantity==0||image->cargo[cargorand].mission)&&++i<image->cargo.size());
+                    image->cargo[cargorand].quantity*=dam;
+                  }
 		}
 		damages |= CARGOFUEL_DAMAGED;
 		return;
