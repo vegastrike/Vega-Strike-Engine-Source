@@ -5051,7 +5051,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 			PRETTY_ADDU(statcolor+"   Range: #-c",wi->Range,0,"meters");
 			PRETTY_ADDU(statcolor+"   Energy usage: #-c",wi->EnergyRate*RSconverter,0,wi->type==weapon_info::BEAM?"MJ/s":"MJ/shot");
 			
-			PRETTY_ADDU(statcolor+"   Refire delay: #-c",wi->Refire,2,"seconds");
+			PRETTY_ADDU(statcolor+"   Refire delay: #-c",wi->Refire(),2,"seconds");
 			if (wi->PhaseDamage>0) {
 				PRETTY_ADDU(statcolor+"   Phase damage: #-c",wi->PhaseDamage*VSDM,2,"MJ");
 			}
@@ -5069,7 +5069,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 				case weapon_info::BALL: //may need ammo
 				case weapon_info::BOLT:
 					if (wi->Damage>0){
-						totalWeaponDamage+=(wi->Damage/wi->Refire); //damage per second
+						totalWeaponDamage+=(wi->Damage/wi->Refire()); //damage per second
 					}
 					PRETTY_ADDU(statcolor+"   Exit velocity: #-c",wi->Speed,0,"meters/second");
 					if((100000*(1.0 - wi->Longrange)/(wi->Range))>0.00001){
@@ -5083,7 +5083,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 							PRETTY_ADD(statcolor+"   Rockets remaining: #-c",playerUnit->mounts[i].ammo,0);
 						}
 					}
-					totalWeaponEnergyUsage+=(wi->EnergyRate/wi->Refire);
+					totalWeaponEnergyUsage+=(wi->EnergyRate/wi->Refire());
 					break;
 				case weapon_info::PROJECTILE: //need ammo
 					if(wi->LockTime > 0){
@@ -5094,7 +5094,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 						text+=statcolor+"   Missile Lock Type: #-c#c1:.3:.3#None.#-c Inertial Guidance Only";
 					}
 					PRETTY_ADD(statcolor+"   Missiles remaining: #-c",playerUnit->mounts[i].ammo,0);
-					totalWeaponEnergyUsage+=(wi->EnergyRate/wi->Refire);
+					totalWeaponEnergyUsage+=(wi->EnergyRate/wi->Refire());
 					break;
 				case weapon_info::BEAM:
 					if (wi->Damage>0)

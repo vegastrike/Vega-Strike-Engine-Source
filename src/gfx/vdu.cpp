@@ -1229,7 +1229,7 @@ static GFXColor MountColor(Mount * mnt) {
   GFXColor mountcolor(0,1,.2,1);
   if (mnt->functionality==1) {
     float ref=1;
-    float tref=mnt->type->Refire;
+    float tref=mnt->type->Refire();
     float cref=0;
     if (mnt->type->type==weapon_info::BEAM) {
       if (mnt->ref.gun) {

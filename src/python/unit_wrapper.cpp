@@ -238,7 +238,7 @@ static boost::python::dict GatherWeaponInfo(const weapon_info *wi)
 		rv["longRange"] = wi->Longrange;
 		rv["lockTime"] = wi->LockTime;
 		rv["energyRate"] = wi->EnergyRate;
-		rv["refire"] = wi->Refire;
+		rv["refire"] = wi->Refire();
 		rv["volume"] = wi->volume;
 		rv["name"] = wi->weapon_name;
 	}

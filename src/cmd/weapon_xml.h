@@ -4,10 +4,12 @@
 #include <string>
 #include "gfx/vec.h"
 
+namespace BeamXML{
+  void beginElement (void *userData, const char *name, const char **atts);
+}
 
-
-using std::string;
 struct weapon_info {
+  friend void BeamXML::beginElement (void *userData, const char *name, const char **atts);
   enum WEAPON_TYPE {
     UNKNOWN,
     BEAM,
@@ -22,26 +24,30 @@ struct weapon_info {
   float r,g,b,a;
   float Speed,PulseSpeed,RadialSpeed,Range,Radius, Length;
   float Damage,PhaseDamage,Stability,Longrange,LockTime;
-  float EnergyRate,Refire,volume;
+  float EnergyRate,volume;
+  float Refire()const;
   float TextureStretch;
-  string file;
-  string weapon_name;
+  std::string file;
+  std::string weapon_name;
   mutable class Mesh * gun;// requres nonconst to add to orig drawing queue when drawing
   mutable class Mesh * gun1;// requres nonconst to add to orig drawing queue when drawing
-  void init() {gun=gun1=NULL;TextureStretch=1;role_bits=0;offset=Vector(0,0,0);size=NOWEAP;r=g=b=a=127;Length=5;Speed=10;PulseSpeed=15;RadialSpeed=1;Range=100;Radius=.5;Damage=1.8;PhaseDamage=0;Stability=60;Longrange=.5;LockTime=0;EnergyRate=18;Refire=.2;sound=-1;volume=0;} 
-  void Type (enum WEAPON_TYPE typ) {type=typ;switch(typ) {case BOLT:file=string("");break;case BEAM:file=string("beamtexture.bmp");break;case BALL:file=string("ball.ani");break;case PROJECTILE:file=string("missile.bfxm");break;default:break;}} 
+  void init() {gun=gun1=NULL;TextureStretch=1;role_bits=0;offset=Vector(0,0,0);size=NOWEAP;r=g=b=a=127;Length=5;Speed=10;PulseSpeed=15;RadialSpeed=1;Range=100;Radius=.5;Damage=1.8;PhaseDamage=0;Stability=60;Longrange=.5;LockTime=0;EnergyRate=18;RefireRate=.2;sound=-1;volume=0;} 
+  void Type (enum WEAPON_TYPE typ) {type=typ;switch(typ) {case BOLT:file=std::string("");break;case BEAM:file=std::string("beamtexture.bmp");break;case BALL:file=std::string("ball.ani");break;case PROJECTILE:file=std::string("missile.bfxm");break;default:break;}} 
   void MntSize(enum MOUNT_SIZE size) {this->size = size;}
   weapon_info(enum WEAPON_TYPE typ) {init();Type(typ);}
   weapon_info(const weapon_info &tmp) {*this = tmp;}
   //  weapon_info& operator = (const weapon_info &tmp);
   void netswap();
+private:
+  float RefireRate;
 };
 weapon_info	getWeaponInfoFromBuffer( char * netbuf, int & size);
 void		setWeaponInfoToBuffer( weapon_info wi, char * netbuf, int & bufsize); // WARNING : ALLOCATES A CHAR * BUFFER SO IT MUST BE DELETED AFTER THAT CALL
 
+
 enum weapon_info::MOUNT_SIZE lookupMountSize (const char * str);
 std::string lookupMountSize (int size);
 void LoadWeapons(const char *filename);
-weapon_info * getTemplate(const string &key);
+weapon_info * getTemplate(const std::string &key);
 
 #endif

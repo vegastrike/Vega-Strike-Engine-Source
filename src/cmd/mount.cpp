@@ -45,7 +45,7 @@ float Mount::ComputeAnimatedFrame(Mesh * gun) {
 	if (type->type==weapon_info::BEAM) {
 		if (ref.gun) {
 			if (ref.gun->Ready() ) {
-				return getNewTime()+type->Refire-ref.gun->refireTime()-interpolation_blend_factor*SIMULATION_ATOM;
+				return getNewTime()+type->Refire()-ref.gun->refireTime()-interpolation_blend_factor*SIMULATION_ATOM;
 			}else {
 				return getNewTime()*gun->getFramesPerSecond();				
 			}
@@ -53,10 +53,10 @@ float Mount::ComputeAnimatedFrame(Mesh * gun) {
 			return 0;
 		}
 	}else {
-		if (ref.refire<type->Refire) {
+		if (ref.refire<type->Refire()) {
 			return getNewTime()*gun->getFramesPerSecond();
 		}else {
-			return getNewTime()+type->Refire-ref.refire-interpolation_blend_factor*SIMULATION_ATOM;
+			return getNewTime()+type->Refire()-ref.refire-interpolation_blend_factor*SIMULATION_ATOM;
 		}
 	}
 }
@@ -91,7 +91,7 @@ Mount::Mount(const string& filename, int am, int vol, float xyscale, float zscal
     status=ACTIVE;
     time_to_lock = temp->LockTime;
 	if (type->type!=weapon_info::BEAM)
-		ref.refire=type->Refire;
+		ref.refire=type->Refire();
   }
 }
 
@@ -150,7 +150,7 @@ void Mount::ReplaceMounts (Unit * un, const Mount * other) {
         this->bank=thisbank;
 	ref.gun=NULL;
 	if (type->type!=weapon_info::BEAM)
-		ref.refire=type->Refire;
+		ref.refire=type->Refire();
 	this->ReplaceSound();
 	if (other->ammo==-1)
 		ammo=-1;
@@ -215,7 +215,7 @@ bool Mount::PhysicsAlignedFire(Unit * caller, const Transformation &Cumulative, 
       // Missiles and beams set to processed.
       processed = PROCESSED;
     } else {
-      if (ref.refire<type->Refire || type->EnergyRate>caller->energy) {
+      if (ref.refire<type->Refire() || type->EnergyRate>caller->energy) {
         // Wait until refire has expired and reactor has produced enough energy for the next bolt.
         return true; // Not ready to refire yet.  But don't stop firing.
       }
@@ -436,7 +436,7 @@ bool Mount::Fire (Unit * firer, void * owner,bool Missile, bool listen_to_owner)
     }
     return true;
   }else { 
-    if (ref.refire>=type->Refire) {
+    if (ref.refire>=type->Refire()) {
       processed=FIRED;	
       if(owner==_Universe->AccessCockpit()->GetParent()){
 		  forcefeedback->playLaser();

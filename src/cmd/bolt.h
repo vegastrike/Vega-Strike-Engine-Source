@@ -47,7 +47,7 @@ class bolt_draw {
 public:
   class DecalQueue *boltdecals;
   static GFXVertexList * boltmesh;
-  vector <string> animationname;
+  vector <std::string> animationname;
   vector <Animation *> animations;
   vector <vector <Bolt> > bolts;
   vector <vector <Bolt> > balls;

@@ -54,7 +54,7 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
   phasedamage= cln.PhaseDamage;
   texturestretch=cln.TextureStretch;
   refiretime = 0;
-  refire = cln.Refire;
+  refire = cln.Refire();
   Col.r = cln.r;
   Col.g = cln.g;
   Col.b = cln.b;

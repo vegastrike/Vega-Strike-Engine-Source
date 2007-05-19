@@ -112,7 +112,7 @@ void	weapon_info::netswap()
 	Longrange = VSSwapHostFloatToLittle( Longrange);
 	LockTime = VSSwapHostFloatToLittle( LockTime);
 	EnergyRate = VSSwapHostFloatToLittle( EnergyRate);
-	Refire = VSSwapHostFloatToLittle( Refire);
+	RefireRate = VSSwapHostFloatToLittle( RefireRate);
 	volume = VSSwapHostFloatToLittle( volume);
 	TextureStretch = VSSwapHostFloatToLittle( TextureStretch);
 }
@@ -228,7 +228,10 @@ namespace BeamXML {
   string curname;
   weapon_info tmpweapon(weapon_info::BEAM);
   int level=-1;
-  void beginElement (void *userData, const XML_Char *name, const XML_Char **atts) {
+  void beginElementXML_Char(void *userData, const XML_Char *name, const XML_Char **atts) {
+    beginElement(userData,(const XML_Char*)name,(const XML_Char**)atts);
+  }
+  void beginElement (void *userData, const char *name, const char **atts) {
     static float game_speed=XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed","1"));
     static bool adj_gun_speed=XMLSupport::parse_bool (vs_config->getVariable ("physics","gun_speed_adjusted_game_speed","false"));
     static float gun_speed= XMLSupport::parse_float (vs_config->getVariable("physics","gun_speed","1"))*(adj_gun_speed?game_speed:1);
@@ -363,7 +366,7 @@ namespace BeamXML {
 	  tmpweapon.Stability = XMLSupport::parse_float ((*iter).value);
 	  break;
 	case REFIRE:
-	  tmpweapon.Refire = XMLSupport::parse_float ((*iter).value);
+	  tmpweapon.RefireRate = XMLSupport::parse_float ((*iter).value);
 	  break;
 	case LOCKTIME:
 	  tmpweapon.LockTime = XMLSupport::parse_float ((*iter).value);
@@ -533,7 +536,7 @@ void LoadWeapons(const char *filename) {
     return;
   }
   XML_Parser parser = XML_ParserCreate (NULL);
-  XML_SetElementHandler (parser, &beginElement, &endElement);
+  XML_SetElementHandler (parser, &beginElementXML_Char, &endElement);
   XML_Parse (parser,(f.ReadFull()).c_str(),f.Size(),1);
 
   /*
@@ -556,5 +559,13 @@ void LoadWeapons(const char *filename) {
   */
  f.Close();
  XML_ParserFree (parser);
+}
+float weapon_info::Refire()const {
+  unsigned int len=weapon_name.length();
+  if (g_game.difficulty>.98||len<9||weapon_name[len-8]!='C'||weapon_name[len-9]!='_'||weapon_name[len-7]!='o'||weapon_name[len-6]!='m'||weapon_name[len-5]!='p'||weapon_name[len-4]!='u'||weapon_name[len-3]!='t'||weapon_name[len-2]!='e'||weapon_name[len-1]!='r') {
+    return RefireRate;
+  }
+  static float three=XMLSupport::parse_float(vs_config->getVariable("physics","refire_difficutly_scaling","3.0"));
+  return this->RefireRate*(three/(1.0f+(three-1.0f)*g_game.difficulty));
 }
 extern enum weapon_info::MOUNT_SIZE lookupMountSize (const char * str);

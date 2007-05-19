@@ -2118,7 +2118,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 //		  if (isPlayerStarship(this))
 //			  ToggleWeapon (true);
       }
-    }else if (mounts[i].processed==Mount::UNFIRED||mounts[i].ref.refire>2*mounts[i].type->Refire) {
+    }else if (mounts[i].processed==Mount::UNFIRED||mounts[i].ref.refire>2*mounts[i].type->Refire()) {
       mounts[i].processed=Mount::UNFIRED;
       mounts[i].PhysicsAlignedUnfire();
     }
