@@ -53,7 +53,7 @@ namespace BaseUtil {
 	// GUI events
 	void SetEventData(boost::python::dict data);
 	void SetMouseEventData(std::string type, float x, float y, int buttonMask); // [type], [mousex], [mousey], [mousebuttons]
-	void SetKeyEventData(std::string type, unsigned int keycode, unsigned int modmask);
+	void SetKeyEventData(std::string type, unsigned int keycode, unsigned int modmask=~0);
 	void SetKeyStatusEventData(unsigned int modmask=~0);
 	const Dictionary& GetEventData();
 

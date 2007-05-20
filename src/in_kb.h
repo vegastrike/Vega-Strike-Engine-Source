@@ -46,6 +46,7 @@ const int LAST_MODIFIER=0;
 #include "in.h"
 
 unsigned int getActiveModifiers();
+unsigned int pullActiveModifiers();
 void setActiveModifiers(unsigned int mask);
 
 unsigned int getModifier(const char* mod_name);

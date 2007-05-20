@@ -238,7 +238,7 @@ namespace BaseUtil {
 		BaseInterface::Room::Comp *newcomp=new BaseInterface::Room::Comp (index,pythonfile);
 		newroom->links.push_back(newcomp);
 		BaseLink(newroom,x,y,wid,hei,text);
-		static const EnumMap::Pair modelist [BaseComputer::DISPLAY_MODE_COUNT] = {
+		static const EnumMap::Pair modelist [] = {
 			EnumMap::Pair ("Cargo", BaseComputer::CARGO), 
 			EnumMap::Pair ("Upgrade", BaseComputer::UPGRADE), 
 			EnumMap::Pair ("ShipDealer", BaseComputer::SHIP_DEALER), 
@@ -246,8 +246,9 @@ namespace BaseUtil {
 			EnumMap::Pair ("News", BaseComputer::NEWS), 
 			EnumMap::Pair ("Info", BaseComputer::INFO),
 			EnumMap::Pair ("LoadSave", BaseComputer::LOADSAVE), 
+			EnumMap::Pair ("UNKNOWN", BaseComputer::LOADSAVE),
 		};
-		static const EnumMap modemap (modelist,BaseComputer::DISPLAY_MODE_COUNT);
+		static const EnumMap modemap (modelist,sizeof(modelist)/sizeof(*modelist));
 		const char *newmode=modes.c_str();
 		int newlen=modes.size();
 		char *curmode=new char [newlen+1];
@@ -390,14 +391,14 @@ namespace BaseUtil {
 
 		// Keyboard modifiers (for kb+mouse)
 		if (modmask==~0)
-			modmask = getActiveModifiers();
+			modmask = pullActiveModifiers();
 		data["modifiers"] = modmask;
 		data["alt"]   = ((modmask & KB_MOD_ALT)!=0);
 		data["shift"] = ((modmask & KB_MOD_SHIFT)!=0);
 		data["ctrl"]  = ((modmask & KB_MOD_CTRL)!=0);
 	}
 
-	void SetKeyEventData(std::string type, unsigned int keycode, unsigned int modmask=~0)
+	void SetKeyEventData(std::string type, unsigned int keycode, unsigned int modmask)
 	{
 		boost::python::dict &data = _GetEventData();
 

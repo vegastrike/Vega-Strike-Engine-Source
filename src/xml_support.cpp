@@ -39,8 +39,8 @@ namespace XMLSupport {
 
   int EnumMap::lookup(const string &str) const {
     const int *result = forward.Get(strtoupper(str));
-    if(0!=result) return *result;
-    else return *forward.Get("UNKNOWN");
+    if (!result) result = forward.Get("UNKNOWN");
+    return result?*result:0;
   }
   const string &EnumMap::lookup(int val) const {
     const string *result = reverse.Get(tostring(val));

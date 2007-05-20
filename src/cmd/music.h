@@ -27,14 +27,28 @@ class Music {
   float soft_vol_down_latency;
   bool LoadMusic (const char *file);
   struct PlayList {
-    std::vector <std::string> songs;
+    typedef std::vector <std::string> SongList;
+    typedef std::map <std::string,std::string> PragmaList;
+
+    SongList songs;
+    PragmaList pragmas;
+
     unsigned int counter;
     PlayList() {counter=0;}
     bool empty()const {return songs.empty();}
     size_t size()const {return songs.size();}
     std::string& operator [](size_t index) {return songs[index];} 
     const std::string& operator [](size_t index) const {return songs[index];} 
-    void push_back (std::string s) {songs.push_back(s);}
+    void push_back (const std::string &s) {songs.push_back(s);}
+
+    bool haspragma(const std::string &name) const { return pragmas.find(name) != pragmas.end(); }
+    const std::string& pragma(const std::string &name, const std::string &def) const
+    {
+        PragmaList::const_iterator it = pragmas.find(name);
+        if (it != pragmas.end())
+            return it->second; else
+            return def;
+    }
   };
   std::vector <PlayList> playlist;
  public:

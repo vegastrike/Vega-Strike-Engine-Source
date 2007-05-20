@@ -96,14 +96,28 @@ int shiftdown (int ch) {
 
 static unsigned int _activeModifiers=0;
 
-unsigned int getActiveModifiers()
-{
-	return _activeModifiers;
-}
-
 void setActiveModifiers(unsigned int mask)
 {
 	_activeModifiers = mask;
+}
+
+void setActiveModifiersSDL(SDLMod mask)
+{
+    setActiveModifiers(
+        ((mask&(KMOD_LSHIFT|KMOD_RSHIFT))?KB_MOD_SHIFT:0) |
+        ((mask&(KMOD_LCTRL|KMOD_RCTRL))?KB_MOD_CTRL:0) |
+        ((mask&(KMOD_LALT|KMOD_RALT))?KB_MOD_ALT:0) );
+}
+
+unsigned int getActiveModifiers()
+{
+    return _activeModifiers;
+}
+
+unsigned int pullActiveModifiers()
+{
+    setActiveModifiersSDL(SDL_GetModState());
+    return getActiveModifiers();
 }
 
 unsigned int getModifier(const char* mod_name){

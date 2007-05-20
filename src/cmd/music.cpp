@@ -249,8 +249,20 @@ bool Music::LoadMusic (const char *file) {
 	if (songname[size-2]=='\r'||songname[size-2]=='\n') {
 	  songname[size-2]='\0';
 	}
-      if (songname[0]=='\0'||songname[0]=='#')
+      if (songname[0]=='\0')
 	continue;
+      if (songname[0]=='#') {
+        if (strncmp(songname,"#pragma ",8)==0) {
+          char *sep = strchr(songname+8,' ');
+          if (sep) {
+            *sep = 0;
+            this->playlist.back().pragmas[songname+8] = sep+1;
+          } else if(songname[8]) {
+            this->playlist.back().pragmas[songname+8] = "1";
+          }
+        }
+        continue;
+      }
       this->playlist.back().songs.push_back (std::string(songname));
     }
     f.Close();
@@ -276,7 +288,7 @@ int Music::SelectTracks(int layer) {
     if (loopsleft>0) {
       loopsleft--;
     }
-    if (!playlist[lastlist].empty()) {
+    if (!playlist[lastlist].empty() && !playlist[lastlist].haspragma("norepeat")) {
       int whichsong=(random?rand():playlist[lastlist].counter++)%playlist[lastlist].size();
 	  int spincount=10;
 	  std::list<std::string> &recent = muzak[(layer>=0)?layer:0].recent_songs;

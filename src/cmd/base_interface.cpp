@@ -747,6 +747,15 @@ void BaseInterface::ActiveMouseOverWin (int x, int y) {
 void BaseInterface::Key(unsigned int ch, unsigned int mod, bool release, int x, int y)
 {
 	if (!python_kbhandler.empty()) {
+		const std::string *evtype;
+		if (release) {
+			static const std::string release_evtype("keyup");
+			evtype = &release_evtype;
+		} else {
+			static const std::string press_evtype("keydown");
+			evtype = &press_evtype;
+		}
+		BaseUtil::SetKeyEventData(*evtype,ch);
 		RunPython(python_kbhandler.c_str());
 	}
 }
