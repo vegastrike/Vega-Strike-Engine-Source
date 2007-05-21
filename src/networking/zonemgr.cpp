@@ -70,13 +70,13 @@ StarSystem *	ZoneMgr::addZone( string starsys)
 /**** GetZone                                                                               *****/
 /************************************************************************************************/
 
-// Return the client list that are in the zone n° serial
+// Return the client list that are in the zone # serial
 ClientWeakList* ZoneMgr::GetZone( int serial )
 {
 	return zone_list[serial];
 }
 
-// Adds a client to the zone n° serial
+// Adds a client to the zone # serial
 /*
 void	ZoneMgr::addClient( ClientWeakPtr clt, int zone)
 {
@@ -287,7 +287,7 @@ void ZoneMgr::broadcast( ClientWeakPtr fromcltw, Packet * pckt, bool isTcp  )
         if( clt->ingame && ((un2==NULL) || (un->GetSerial() != un2->GetSerial())))
         {
             COUT << "BROADCASTING " << pckt->getCommand()
-                 << " to client n° ";
+                 << " to client #";
 			if (un2)
 				cout<<un2->GetSerial();
 			else

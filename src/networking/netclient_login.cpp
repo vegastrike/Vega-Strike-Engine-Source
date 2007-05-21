@@ -212,7 +212,7 @@ void	NetClient::loginAccept( Packet & p1)
 
 	Packet pckt;
 	this->serial = p1.getSerial();
-	COUT << ">>> LOGIN ACCEPTED =( serial n°" << serial << " )= --------------------------------------" << endl;
+	COUT << ">>> LOGIN ACCEPTED =( serial #" << serial << " )= --------------------------------------" << endl;
 	// Should receive player's data (savegame) from server if there is a save
 	localSerials.push_back( serial);
 

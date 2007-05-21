@@ -123,7 +123,7 @@ bool	NetServer::sendLoginAccept( std::string inetbuf,ClientPtr clt, AddressIP ip
 		}
 		cltserial = un->GetSerial();
 
-		COUT << ">>> SEND LOGIN ACCEPT =( serial n°" << cltserial << " )= --------------------------------------" << endl;
+		COUT << ">>> SEND LOGIN ACCEPT =( serial #" << cltserial << " )= --------------------------------------" << endl;
 		COUT<<"SAVE="<<clt->savegame[0].length()<<" bytes - XML="<<clt->savegame[1].length()<<" bytes"<<endl;
 		cerr<<"SENDING STARDATE : "<<datestr<<endl;
 		// Add the initial star system filename + hash if crypto++ support too
@@ -271,7 +271,7 @@ void	NetServer::sendLoginAlready( ClientPtr clt, AddressIP ipadr)
 	// Send a login error
 	// int		retsend;
 	//COUT<<"Creating packet... ";
-	COUT<<">>> SEND LOGIN ALREADY =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
+	COUT<<">>> SEND LOGIN ALREADY =( serial #"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 	packet2.send( LOGIN_ALREADY, 0, (char *)NULL, 0, SENDRELIABLE, &ipadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(283) );
 	COUT<<"<<< SENT LOGIN ALREADY -----------------------------------------------------------------------"<<endl;
 	discList.push_back( clt);

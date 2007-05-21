@@ -65,14 +65,14 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 			switch(cmd= getSimpleChar(p))
 			{
 				case ACCT_LOGIN_NEW :
-					COUT << ">>> NEW LOGIN =( serial n°"<<serial<<" )= --------------------------------------"<<endl;
+					COUT << ">>> NEW LOGIN =( serial #"<<serial<<" )= --------------------------------------"<<endl;
 					// We received a login authorization for a new account (no ship created)
 					this->sendLoginAccept(p, clt, ipadr, 1, flags);
 					COUT << "<<< NEW LOGIN ----------------------------------------------------------------"<<endl;
 				break;
 				case ACCT_LOGIN_ACCEPT :
 					// Login is ok
-					COUT<<">>> LOGIN ACCEPTED =( serial n°"<<serial<<" )= --------------------------------------"<<endl;
+					COUT<<">>> LOGIN ACCEPTED =( serial #"<<serial<<" )= --------------------------------------"<<endl;
 					sendLoginAccept(p, clt, ipadr, 0, flags);
 					COUT<<"<<< LOGIN ACCEPTED -----------------------------------------------------------"<<endl;
 				break;
@@ -83,7 +83,7 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 					COUT<<"<<< LOGIN ERROR ---------------------------------------------------"<<endl;
 				break;
 				case ACCT_LOGIN_ALREADY :
-					COUT<<">>> LOGIN ALREADY =( ALREADY LOGGED IN -> serial n°"<<serial<<" )= --------------------------------------"<<endl;
+					COUT<<">>> LOGIN ALREADY =( ALREADY LOGGED IN -> serial #"<<serial<<" )= --------------------------------------"<<endl;
 					// Client already logged in -> disconnect
 					this->sendLoginAlready( clt, ipadr);
 					COUT<<"<<< LOGIN ALREADY --------------------------------------------------------------"<<endl;

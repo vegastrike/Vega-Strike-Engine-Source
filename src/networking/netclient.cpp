@@ -634,20 +634,20 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
                 break;
             case CMD_ENTERCLIENT :
 			{
-                COUT << ">>> " << local_serial << " >>> ENTERING CLIENT =( serial n°"
+                COUT << ">>> " << local_serial << " >>> ENTERING CLIENT =( serial #"
                      << packet_serial << " )= --------------------------------------" << endl;
 				NetBuffer netbuf( p1.getData(), p1.getDataLength());
 				this->enterClient( netbuf, p1.getSerial() );
 			}
             break;
             case CMD_EXITCLIENT :
-                COUT << ">>> " << local_serial << " >>> EXITING CLIENT =( serial n°"
+                COUT << ">>> " << local_serial << " >>> EXITING CLIENT =( serial #"
                      << packet_serial << " )= --------------------------------------" << endl;
                 this->removeClient( &p1 );
                 break;
             case CMD_ADDEDYOU :
                 {
-                    COUT << ">>> " << local_serial << " >>> ADDED IN GAME =( serial n°"
+                    COUT << ">>> " << local_serial << " >>> ADDED IN GAME =( serial #"
                          << packet_serial << " )= --------------------------------------" << endl;
                     //now we have to make the unit if it is null (this would be a respawn)
                     if (this->game_unit.GetUnit()==NULL) {
@@ -660,7 +660,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
                 break;
             case CMD_DISCONNECT :
                 /*** TO REDO IN A CLEAN WAY ***/
-                COUT << ">>> " << local_serial << " >>> DISCONNECTED -> Client killed =( serial n°"
+                COUT << ">>> " << local_serial << " >>> DISCONNECTED -> Client killed =( serial #"
                      << packet_serial << " )= --------------------------------------" << endl;
                 VSExit(1);
                 break;
@@ -888,7 +888,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					if (un) {
 						un->Destroy();
 					}
-					COUT<<"Client n°"<<p1.getSerial()<<" killed - now "<<nbclients<<" clients in system"<<endl;
+					COUT<<"Client #"<<p1.getSerial()<<" killed - now "<<nbclients<<" clients in system"<<endl;
 
 					string msg = clt->callsign+" was killed";
 					UniverseUtil::IOmessage(0,"game","all","#FFFF66"+msg+"#000000");

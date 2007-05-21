@@ -38,7 +38,7 @@ ClientPtr NetServer::addNewClient( SOCKETALT &sock )
 void	NetServer::addClient( ClientPtr clt)
 {
 	Unit * un = clt->game_unit.GetUnit();
-	COUT<<">>> SEND ENTERCLIENT =( serial n°"<<un->GetSerial()<<" )= --------------------------------------"<<endl;
+	COUT<<">>> SEND ENTERCLIENT =( serial #"<<un->GetSerial()<<" )= --------------------------------------"<<endl;
 	Packet packet2;
 	string savestr, xmlstr;
 	NetBuffer netbuf;
@@ -137,7 +137,7 @@ void	NetServer::addClient( ClientPtr clt)
 		COUT<<"Serial : "<<un->GetSerial()<<endl;
 	}
 	// In all case set the zone and send the client the zone which it is in
-	COUT<<">>> SEND ADDED YOU =( serial n°"<<un->GetSerial()<<" )= --------------------------------------"<<endl;
+	COUT<<">>> SEND ADDED YOU =( serial #"<<un->GetSerial()<<" )= --------------------------------------"<<endl;
 	un->activeStarSystem->SetZone( zoneid);
 	Packet pp;
 	netbuf.Reset();

@@ -126,7 +126,7 @@ ClientPtr NetClient::AddClientObject( Unit *un, ObjSerial cltserial)
 	if( clt)
 	{
 		// Client may exist if it jumped from a starsystem to another of if killed and respawned
-		COUT<<"Existing client n°"<<cltserial<<endl;
+		COUT<<"Existing client #"<<cltserial<<endl;
 	}
 	else if (!cltserial)
 	{
@@ -137,7 +137,7 @@ ClientPtr NetClient::AddClientObject( Unit *un, ObjSerial cltserial)
 	{
 		clt = Clients.insert( cltserial, new Client );
 		nbclients++;
-		COUT<<"New client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
+		COUT<<"New client #"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
 	}
 	if( !isLocalSerial( cltserial))
 	{
@@ -271,7 +271,7 @@ void	NetClient::removeClient( const Packet* packet )
 	if (un) {
 		un->Kill();
 	}
-	COUT<<"Leaving client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
+	COUT<<"Leaving client #"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
 	string msg = clt->callsign+" left the system";
 	UniverseUtil::IOmessage(0,"game","all","#FFFF66"+msg+"#000000");
 }
@@ -587,7 +587,7 @@ void	NetClient::inGame()
                   SENDRELIABLE, NULL, *this->clt_tcp_sock,
                   __FILE__, PSEUDO__LINE__(392) );
 	un->SetSerial( this->serial);
-	COUT << "Sending ingame with serial n°" << this->serial << endl;
+	COUT << "Sending ingame with serial #" << this->serial << endl;
 	this->ingame = true;
 	cerr<<"STARTING LOCATION : x="<<un->Position().i<<",y="<<un->Position().j<<",z="<<un->Position().k<<endl;
 }

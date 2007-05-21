@@ -703,14 +703,14 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         break;
 		case CMD_ADDCLIENT:
 			// Add the client to the game
-			COUT<<">>> ADD REQUEST =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
+			COUT<<">>> ADD REQUEST =( serial #"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 			//COUT<<"Received ADDCLIENT request"<<endl;
 			this->addClient( clt);
 			COUT<<"<<< ADD REQUEST --------------------------------------------------------------"<<endl;
 			break;
 		case CMD_POSUPDATE:
 			// Received a position update from a client
-//			cerr<<">>> POSITION UPDATE =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
+//			cerr<<">>> POSITION UPDATE =( serial #"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 			this->posUpdate( clt );
 //			cerr<<"<<< POSITION UPDATE ---------------------------------------------------------------"<<endl;
 			break;
@@ -741,7 +741,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                   }
                   break;    
 		case CMD_LOGOUT:
-			COUT<<">>> LOGOUT REQUEST =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
+			COUT<<">>> LOGOUT REQUEST =( serial #"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 			// Client wants to quit the game
 			logoutList.push_back( clt );
 			COUT<<"<<< LOGOUT REQUEST -----------------------------------------------------------------"<<endl;
@@ -787,7 +787,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                         }
 			break;
         case CMD_DOWNLOAD :
-			COUT<<">>> CMD DOWNLOAD =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
+			COUT<<">>> CMD DOWNLOAD =( serial #"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
             if( _downloadManagerServer )
             {
                 _downloadManagerServer->addCmdDownload( clt->tcp_sock, netbuf );

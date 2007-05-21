@@ -185,7 +185,7 @@ SOCKETALT NetUITCP::createSocket( const char * host, unsigned short srv_port, So
     {
         COUT << "WARNING: TCP client socket may be in blocking mode" << std::endl;
     }
-    COUT << "SOCKETALT n° : " << ret.get_fd() << std::endl;
+    COUT << "SOCKETALT FD: " << ret.get_fd() << std::endl;
     return ret;
 }
 
@@ -206,7 +206,7 @@ ServerSocket* NetUITCP::createServerSocket( unsigned short port, SocketSet& set 
     }
 
     COUT << "Listening on socket " << local_fd << std::endl
-         << "*** ServerSocket n° : " << local_fd << std::endl;
+         << "*** ServerSocket FD : " << local_fd << std::endl;
     return new ServerSocketTCP( local_fd, local_ip, set );
 }
 

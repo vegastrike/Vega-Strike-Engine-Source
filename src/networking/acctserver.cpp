@@ -382,7 +382,7 @@ void    AccountServer::recvMsg( SOCKETALT sock)
             }
             break;
             case CMD_SAVEACCOUNTS :
-                cout<<">>> SAVING ACCOUNT N° "<<packet.getSerial()<<"-----------------------------"<<endl;
+                cout<<">>> SAVING ACCOUNT #"<<packet.getSerial()<<"-----------------------------"<<endl;
                 this->writeSave( packet.getData(), packet.getDataLength());
                 cout<<"<<< ACCOUNT SAVED --------------------------------------"<<endl;
             break;
