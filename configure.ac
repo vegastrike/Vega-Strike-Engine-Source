@@ -232,6 +232,11 @@ else
     fi
 fi
 
+# Remove these flags beforehand... this should not remove functionality.
+CXXFLAGS=${CFLAGS#-g}
+VS_CXXFLAGS=${VS_CXXFLAGS#-g}
+CFLAGS=${CFLAGS#-g}
+
 AC_ARG_ENABLE(ggdb3, AC_HELP_STRING([--enable-ggdb3], [Add the -ggdb3 compiler flag.]), 
 	if test $enableval = yes ; then
 		DEBUG_FLAGS="-O0 -ggdb3"
@@ -241,20 +246,27 @@ AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug], [Produce an executable wit
 	if test $enableval = yes ; then
 		AC_MSG_NOTICE(Enabling debug mode with $DEBUG_FLAGS)
 		VS_CXXFLAGS="${VS_CXXFLAGS} ${DEBUG_FLAGS}"
-	else
-		AC_MSG_NOTICE(Forcing debugging output disabled)
-		VS_CXXFLAGS=${VS_CXXFLAGS#-g}
-		CFLAGS=${CFLAGS#-g}
 	fi)
 
-AC_ARG_ENABLE(release, AC_HELP_STRING([--enable-release], [Produce an executable with optimizations]), 
-	if test $enableval = yes ; then
-		AC_MSG_NOTICE(Enabling optimizations)
-		VS_CXXFLAGS="${VS_CXXFLAGS} -O2 -ffast-math"
-	fi)
+AC_ARG_ENABLE(release, AC_HELP_STRING([--enable-release=LEVEL], [Produce an executable with optimizations (LEVEL=2)]), 
+	if test $enableval = no -o $enableval = 0; then
+		optimizationlevel=0
+		VS_CXXFLAGS="${VS_CXXFLAGS} -O0"
+	else
+		optimizationlevel=$enableval
+		if test $enableval = yes ; then
+			optimizationlevel=2
+		fi
+		AC_MSG_NOTICE(Enabling optimizations with -O$optimizationlevel)
+		VS_CXXFLAGS="${VS_CXXFLAGS} -O$optimizationlevel -ffast-math"
+	fi
+	)
 
 AC_ARG_ENABLE(client, AC_HELP_STRING([--disable-client], [Only build vegaserver binary]), 
 	build_client=$enableval
+	if test $enableval = no; then
+		VS_CPPFLAGS="${VS_CPPFLAGS} -DNO_GFX"
+	fi
 	AC_MSG_NOTICE(Building client: $enableval))
 
 AC_ARG_ENABLE(static, AC_HELP_STRING([--enable-static], [Produce a statically linked executable]), 
@@ -789,6 +801,10 @@ CPPFLAGS="${BOOST_CPPFLAGS} ${CPPFLAGS} ${VS_CPPFLAGS} ${PYTHON_CPPFLAGS} ${CG_C
 CXXFLAGS="${CXXFLAGS} ${VS_CXXFLAGS} ${PTHREAD_CXXFLAGS} -pipe"
 
 LIBS="${LIBS} ${VS_LIBS} ${PYTHON_LIBS} ${PTHREAD_LIBS} ${CG_LIBS}"
+
+AC_MSG_NOTICE([Compiling with CPPFLAGS: ${CPPFLAGS}.])
+AC_MSG_NOTICE([Compiling with CXXFLAGS: ${CXXFLAGS}.])
+AC_MSG_NOTICE([Compiling with LIBS: ${LIBS}.])
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT()

@@ -422,31 +422,19 @@ bin_PROGRAMS = \
 
 noinst_LIBRARIES=\
   libboost_python.a \
-  libcmdserver.a \
-  libgfx.a \
-  libgfxserver.a \
-  libnetacct.a \
-  libnetlowlevel.a \
-  libscriptserver.a
+  libnetlowlevel.a
 
-#  src/cmd/base_init.cpp cmdserver
-
-libcmdserver_a_SOURCES = \
-  $(LIBCMD) \
+LIBCMDSERVER = \
   src/cmd/atmosphere_server.cpp \
   src/cmd/beam_server.cpp \
   src/cmd/bolt_server.cpp \
   src/cmd/unit_factory_server.cpp \
   src/cmd/unit_functions_server.cpp \
-  src/cmd/unit_util_generic.cpp \
   src/cmd/unit_util_server.cpp
 
-libscriptserver_a_CXXFLAGS = -DBISON
-libscriptserver_a_SOURCES = \
-  $(LIBSCRIPT) \
+LIBSCRIPTSERVER = \
   src/cmd/script/flightgroup_server.cpp \
   src/cmd/script/flightgroup.h \
-  src/cmd/script/script_call_briefing.cpp \
   src/cmd/script/script_call_unit_server.cpp \
   src/cmd/script/c_alike/c_alike.tab.cpp \
   src/cmd/script/c_alike/lex.yy.cpp
@@ -455,7 +443,8 @@ libscriptserver_a_SOURCES = \
 libboost_python_a_SOURCES = \
   $(BOOSTSOURCES)
 
-libgfx_a_SOURCES = \
+
+LIBGFX = \
   src/gfx/aux_texture.h \
   src/gfx/bounding_box.cpp \
   src/gfx/bounding_box.h \
@@ -468,10 +457,9 @@ libgfx_a_SOURCES = \
   src/gfx/lerp.h \
   src/gfx/matrix.cpp \
   src/gfx/matrix.h \
-  src/gfx/mesh_bin.cpp \
   src/gfx/mesh_bxm.cpp \
   src/gfx/mesh_bxm.h \
-  src/gfx/mesh_fx.cpp \
+  src/gfx/mesh_bin.cpp \
   src/gfx/mesh_io.h \
   src/gfx/mesh_poly.cpp \
   src/gfx/mesh_xml.cpp \
@@ -486,51 +474,119 @@ libgfx_a_SOURCES = \
   src/gfx/vertex.h
 
 
-libgfxserver_a_SOURCES = \
+LIBGFXCLIENT = \
+  src/gfx/ani_texture.cpp \
+  src/gfx/ani_texture.h \
+  src/gfx/animation.cpp \
+  src/gfx/animation.h \
+  src/gfx/aux_logo.cpp \
+  src/gfx/aux_logo.h \
+  src/gfx/aux_palette.cpp \
+  src/gfx/aux_palette.h \
+  src/gfx/aux_texture.cpp \
+  src/gfx/aux_texture.h \
+  src/gfx/background.cpp \
+  src/gfx/background.h \
+  src/gfx/camera.cpp \
+  src/gfx/camera.h \
+  src/gfx/car_assist.h \
+  src/gfx/cockpit_xml.cpp \
+  src/gfx/cockpit.cpp \
+  src/gfx/cockpit.h \
+  src/gfx/coord_select.cpp \
+  src/gfx/coord_select.h \
+  src/gfx/decalqueue.h \
+  src/gfx/env_map_gent.cpp \
+  src/gfx/env_map_gent.h \
+  src/gfx/gauge.cpp \
+  src/gfx/gauge.h \
+  src/gfx/halo_system.cpp \
+  src/gfx/halo.cpp \
+  src/gfx/halo.h \
+  src/gfx/hud.cpp \
+  src/gfx/hud.h \
+  src/gfx/jpeg_memory.cpp \
+  src/gfx/jpeg_memory.h \
+  src/gfx/loc_select.cpp \
+  src/gfx/loc_select.h \
+  src/gfx/masks.cpp \
+  src/gfx/masks.h \
+  src/gfx/mesh_fx.cpp \
+  src/gfx/mesh_fx.h \
+  src/gfx/mesh_gfx.cpp \
+  src/gfx/nav/criteria_xml.cpp \
+  src/gfx/nav/criteria.cpp \
+  src/gfx/nav/criteria.h \
+  src/gfx/nav/drawgalaxy.cpp \
+  src/gfx/nav/drawlist.cpp \
+  src/gfx/nav/drawlist.h \
+  src/gfx/nav/drawsystem.cpp \
+  src/gfx/nav/navcomputer.cpp \
+  src/gfx/nav/navcomputer.h \
+  src/gfx/nav/navgetxmldata.cpp \
+  src/gfx/nav/navgetxmldata.h \
+  src/gfx/nav/navitemstodraw.h \
+  src/gfx/nav/navitemtypes.h \
+  src/gfx/nav/navparse.h \
+  src/gfx/nav/navpath.cpp \
+  src/gfx/nav/navpath.h \
+  src/gfx/nav/navscreen.cpp \
+  src/gfx/nav/navscreen.h \
+  src/gfx/nav/navscreenoccupied.cpp \
+  src/gfx/nav/navscreenoccupied.h \
+  src/gfx/nonlinear_transform.h \
+  src/gfx/particle.cpp \
+  src/gfx/particle.h \
+  src/gfx/pipelined_texture.cpp \
+  src/gfx/pipelined_texture.h \
+  src/gfx/planetary_transform.h \
+  src/gfx/point_to_cam.h \
+  src/gfx/quadsquare_cull.cpp \
+  src/gfx/quadsquare_render.cpp \
+  src/gfx/quadsquare_update.cpp \
+  src/gfx/quadsquare.cpp \
+  src/gfx/quadsquare.h \
+  src/gfx/quadtree_xml.cpp \
+  src/gfx/quadtree.cpp \
+  src/gfx/quadtree.h \
+  src/gfx/ring.cpp \
+  src/gfx/ring.h \
+  src/gfx/screenshot.cpp \
+  src/gfx/screenshot.h \
+  src/gfx/sphere.cpp \
+  src/gfx/sphere.h \
+  src/gfx/sprite.cpp \
+  src/gfx/sprite.h \
+  src/gfx/star.cpp \
+  src/gfx/star.h \
+  src/gfx/stream_texture.cpp \
+  src/gfx/stream_texture.h \
+  src/gfx/tex_transform.cpp \
+  src/gfx/vdu.cpp \
+  src/gfx/vdu.h \
+  src/gfx/vsbox.cpp \
+  src/gfx/vsbox.h \
+  src/gfx/vsimage.cpp \
+  src/gfx/vsimage.h \
+  src/gfx/warptrail.cpp \
+  src/gfx/warptrail.h \
+  src/gfx/xvector.h
+
+
+LIBGFXSERVER = \
   src/gfx/sphere_server.cpp \
   src/gfx/vsbox_server.cpp \
   src/gfx/mesh_server.cpp \
-  src/gfx/background_server.cpp \
-  src/gfx/aux_texture.h \
-  src/gfx/bounding_box.cpp \
-  src/gfx/bounding_box.h \
-  src/gfx/bsp.cpp \
-  src/gfx/bsp.h \
-  src/gfx/cockpit_generic.cpp \
-  src/gfx/cockpit_generic.h \
-  src/gfx/halo_system.h \
-  src/gfx/lerp.cpp \
-  src/gfx/lerp.h \
-  src/gfx/matrix.cpp \
-  src/gfx/matrix.h \
-  src/gfx/mesh_bxm.cpp \
-  src/gfx/mesh_bxm.h \
-  src/gfx/mesh_bin.cpp \
-  src/gfx/mesh_io.h \
-  src/gfx/mesh_poly.cpp \
-  src/gfx/mesh_xml.cpp \
-  src/gfx/mesh_xml.h \
-  src/gfx/mesh.cpp \
-  src/gfx/mesh.h \
-  src/gfx/quaternion.cpp \
-  src/gfx/quaternion.h \
-  src/gfx/sphere_generic.cpp \
-  src/gfx/vec.cpp \
-  src/gfx/vec.h \
-  src/gfx/vertex.h
+  src/gfx/background_server.cpp
 
 
 
-libnetacct_a_SOURCES = \
-  src/networking/client.cpp \
-  src/networking/client.h \
+LIBNETACCT = \
   src/networking/clientptr.h \
   src/networking/const.h \
   src/networking/accountsxml.cpp \
   src/networking/accountsxml.h \
   src/networking/acctserver.h \
-  src/networking/savenet_util.cpp \
-  src/networking/savenet_util.h \
   src/networking/fileutil.h \
   src/networking/fileutil.cpp \
   src/networking/acctserver.cpp \
@@ -602,43 +658,33 @@ soundserver_LDADD = \
 
 vegastrike_LDADD = \
   libboost_python.a \
-  libgfx.a \
   libnetlowlevel.a \
   -lz
 
 vegastrike_DEPENDENCIES = \
   libboost_python.a \
-  libgfx.a \
   libnetlowlevel.a
 
 vegaserver_LDADD = \
   libboost_python.a \
-  libcmdserver.a \
-  libgfxserver.a \
   libnetlowlevel.a \
-  libscriptserver.a \
   -lz
 
 vegaserver_DEPENDENCIES = \
   libboost_python.a \
-  libcmdserver.a \
-  libgfxserver.a \
-  libnetlowlevel.a \
-  libscriptserver.a
+  libnetlowlevel.a
 
 
 accountserver_LDADD = \
-  libnetacct.a \
   libnetlowlevel.a \
   -lz
 
 accountserver_DEPENDENCIES = \
-  libnetacct.a \
   libnetlowlevel.a
 
 
 
-libroot = \
+librootclient = \
   src/audiolib.h \
   src/cg_global.cpp \
   src/command.cpp \
@@ -685,7 +731,7 @@ libroot = \
   src/universe.cpp \
   src/universe.h
 
-# Disabled from libroot since MMORPG depends on SDL which is not
+# Disabled from librootclient since MMORPG depends on SDL which is not
 # easily available on Macs. -Patrick
 #  src/mmorpgclient.cpp
 #  src/mmorpgclient.h
@@ -753,20 +799,30 @@ librootserver = \
   src/libserver.cpp \
   src/universe_util_server.cpp
 
-vegaserver_CXXFLAGS = -DNO_GFX
-vegaserver_SOURCES = \
+LIBENGINE_COMMON = \
   $(LIBAI) \
+  $(LIBCMD) \
   $(LIBCOLLIDE) \
-  $(LIBNETSERVER) \
+  $(LIBNET) \
   $(LIBPYTHON) \
   $(librootgeneric) \
+  $(LIBSCRIPT) \
+  $(LIBGFX)
+
+vegaserver_SOURCES = \
+  $(LIBENGINE_COMMON) \
+  $(LIBCMDSERVER) \
+  $(LIBNETSERVER) \
   $(librootserver) \
+  $(LIBSCRIPTSERVER) \
+  $(LIBGFXSERVER) \
   src/vegaserver.cpp \
   src/cmd/script/director_server.cpp \
   src/gldrv/gl_vertex_list.cpp \
   src/gldrv/gl_sphere_list_server.cpp
 
 accountserver_SOURCES = \
+  $(LIBNETACCT) \
   src/accountserver.cpp \
   src/configxml.cpp \
   src/configxml.h \
@@ -787,18 +843,12 @@ accountserver_SOURCES = \
   src/SharedPool.cpp \
   src/SharedPool.h
 
-vegastrike_CXXFLAGS = -DBISON
 vegastrike_SOURCES = \
-  $(LIBAI) \
-  $(LIBCMD) \
-  $(LIBCOLLIDE) \
+  $(LIBENGINE_COMMON) \
   $(LIBGUI) \
-  $(LIBNET) \
   $(LIBNETCLIENT) \
-  $(LIBPYTHON) \
-  $(libroot) \
-  $(librootgeneric) \
-  $(LIBSCRIPT) \
+  $(librootclient) \
+  $(LIBGFXCLIENT) \
   src/aldrv/al_globals.cpp \
   src/aldrv/al_globals.h \
   src/aldrv/al_init.cpp \
@@ -865,100 +915,6 @@ vegastrike_SOURCES = \
   src/cmd/unit_util.cpp \
   src/cmd/unit_util.h \
   src/cmd/unit.h \
-  src/gfx/ani_texture.cpp \
-  src/gfx/ani_texture.h \
-  src/gfx/animation.cpp \
-  src/gfx/animation.h \
-  src/gfx/aux_logo.cpp \
-  src/gfx/aux_logo.h \
-  src/gfx/aux_palette.cpp \
-  src/gfx/aux_palette.h \
-  src/gfx/aux_texture.cpp \
-  src/gfx/aux_texture.h \
-  src/gfx/background.cpp \
-  src/gfx/background.h \
-  src/gfx/camera.cpp \
-  src/gfx/camera.h \
-  src/gfx/car_assist.h \
-  src/gfx/cockpit_xml.cpp \
-  src/gfx/cockpit.cpp \
-  src/gfx/cockpit.h \
-  src/gfx/coord_select.cpp \
-  src/gfx/coord_select.h \
-  src/gfx/decalqueue.h \
-  src/gfx/env_map_gent.cpp \
-  src/gfx/env_map_gent.h \
-  src/gfx/gauge.cpp \
-  src/gfx/gauge.h \
-  src/gfx/halo_system.cpp \
-  src/gfx/halo.cpp \
-  src/gfx/halo.h \
-  src/gfx/hud.cpp \
-  src/gfx/hud.h \
-  src/gfx/jpeg_memory.cpp \
-  src/gfx/jpeg_memory.h \
-  src/gfx/loc_select.cpp \
-  src/gfx/loc_select.h \
-  src/gfx/masks.cpp \
-  src/gfx/masks.h \
-  src/gfx/mesh_gfx.cpp \
-  src/gfx/nav/criteria_xml.cpp \
-  src/gfx/nav/criteria.cpp \
-  src/gfx/nav/criteria.h \
-  src/gfx/nav/drawgalaxy.cpp \
-  src/gfx/nav/drawlist.cpp \
-  src/gfx/nav/drawlist.h \
-  src/gfx/nav/drawsystem.cpp \
-  src/gfx/nav/navcomputer.cpp \
-  src/gfx/nav/navcomputer.h \
-  src/gfx/nav/navgetxmldata.cpp \
-  src/gfx/nav/navgetxmldata.h \
-  src/gfx/nav/navitemstodraw.h \
-  src/gfx/nav/navitemtypes.h \
-  src/gfx/nav/navparse.h \
-  src/gfx/nav/navpath.cpp \
-  src/gfx/nav/navpath.h \
-  src/gfx/nav/navscreen.cpp \
-  src/gfx/nav/navscreen.h \
-  src/gfx/nav/navscreenoccupied.cpp \
-  src/gfx/nav/navscreenoccupied.h \
-  src/gfx/nonlinear_transform.h \
-  src/gfx/particle.cpp \
-  src/gfx/particle.h \
-  src/gfx/pipelined_texture.cpp \
-  src/gfx/pipelined_texture.h \
-  src/gfx/planetary_transform.h \
-  src/gfx/point_to_cam.h \
-  src/gfx/quadsquare_cull.cpp \
-  src/gfx/quadsquare_render.cpp \
-  src/gfx/quadsquare_update.cpp \
-  src/gfx/quadsquare.cpp \
-  src/gfx/quadsquare.h \
-  src/gfx/quadtree_xml.cpp \
-  src/gfx/quadtree.cpp \
-  src/gfx/quadtree.h \
-  src/gfx/ring.cpp \
-  src/gfx/ring.h \
-  src/gfx/screenshot.cpp \
-  src/gfx/screenshot.h \
-  src/gfx/sphere.cpp \
-  src/gfx/sphere.h \
-  src/gfx/sprite.cpp \
-  src/gfx/sprite.h \
-  src/gfx/star.cpp \
-  src/gfx/star.h \
-  src/gfx/stream_texture.cpp \
-  src/gfx/stream_texture.h \
-  src/gfx/tex_transform.cpp \
-  src/gfx/vdu.cpp \
-  src/gfx/vdu.h \
-  src/gfx/vsbox.cpp \
-  src/gfx/vsbox.h \
-  src/gfx/vsimage.cpp \
-  src/gfx/vsimage.h \
-  src/gfx/warptrail.cpp \
-  src/gfx/warptrail.h \
-  src/gfx/xvector.h \
   src/gldrv/gl_clip.cpp \
   src/gldrv/gl_fog.cpp \
   src/gldrv/gl_globals.cpp \
