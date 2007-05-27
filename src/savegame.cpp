@@ -664,9 +664,14 @@ void SaveGame::ReadSavedPackets (char * &buf, bool commitfactions, bool skip_new
       if (commitfactions) ReadNewsData(buf,skip_news);
     }else if (a==0&&0==strcmp(unitname,"stardate")&&0==strcmp(factname,"data")) {
 	  // On server side we expect the latest saved stardate in dynaverse.dat too
-      if (commitfactions&&!SERVER/*server never wants to take "orders" from shapeshifters...*/) ReadStardate(buf);
+      if (commitfactions&&!SERVER/*server never wants to take "orders" from shapeshifters...*/)
+        ReadStardate(buf);
+      else
+        AnyStringScanInString(buf);
     }else {
-      printf ("buf unrecognized %s",buf);
+      char output[31]={0};
+      strncpy(output, buf, 30);
+      printf ("buf unrecognized %s...\n",output);
       //su.push_back (SavedUnits (unitname,(clsptr)a,factname));
     }
   }

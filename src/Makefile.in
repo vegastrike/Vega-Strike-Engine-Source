@@ -1,20 +1,35 @@
-LN_S := @LN_S@
+LN_S := @LN_S@ -f
 
-.PHONY: all vegastrike vegaserver accountserver soundserver
-all: vegastrike vegaserver accountserver soundserver
+#if VS_MAKE_NO_CLIENT
+#	CLIENT_PROG=
+#else
+#	CLIENT_PROG=vegastrike
+#endif
+
+EXEEXT = @EXEEXT@
+VS_MAKE_NO_CLIENT_FALSE = @VS_MAKE_NO_CLIENT_FALSE@
+VS_MAKE_NO_CLIENT_TRUE = @VS_MAKE_NO_CLIENT_TRUE@
+@VS_MAKE_NO_CLIENT_FALSE@CLIENT_PROG = vegastrike vssetup soundserver
+@VS_MAKE_NO_CLIENT_TRUE@CLIENT_PROG = 
+
+.PHONY: all vegastrike vegaserver accountserver soundserver vssetup
+all: $(CLIENT_PROG) vegaserver accountserver
 
 vegastrike:
-	$(MAKE) -C .. vegastrike
-	$(LN_S) ../vegastrike vegastrike
+	cd .. ; $(MAKE) vegastrike$(EXEEXT) && \
+	$(LN_S) "`pwd`"/vegastrike$(EXEEXT) src/vegastrike
+vssetup:
+	cd .. ; $(MAKE) vssetup$(EXEEXT) && \
+	$(LN_S) "`pwd`"/vssetup$(EXEEXT) src/vssetup
 vegaserver:
-	$(MAKE) -C .. vegaserver
-	$(LN_S) ../vegaserver vegaserver
+	cd .. ; $(MAKE) vegaserver$(EXEEXT) && \
+	$(LN_S) "`pwd`"/vegaserver$(EXEEXT) src/vegaserver
 accountserver:
-	$(MAKE) -C .. accountserver
-	$(LN_S) ../accountserver accountserver
+	cd .. ; $(MAKE) accountserver$(EXEEXT) && \
+	$(LN_S) "`pwd`"/accountserver$(EXEEXT) src/accountserver
 soundserver:
-	$(MAKE) -C .. soundserver
-	$(LN_S) ../soundserver soundserver
+	cd .. ; $(MAKE) soundserver$(EXEEXT) && \
+	$(LN_S) "`pwd`"/soundserver$(EXEEXT) src/soundserver
 clean:
 	$(MAKE) -C .. clean
-	rm -rf soundserver vegaserver vegastrike accountserver
+	rm -f soundserver vegaserver vegastrike accountserver
