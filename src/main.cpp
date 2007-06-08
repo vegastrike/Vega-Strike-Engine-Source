@@ -467,36 +467,15 @@ void bootstrap_main_loop () {
   static bool loadLastSave = XMLSupport::parse_bool(vs_config->getVariable("general","load_last_savegame","false"));
   InitTime();
 
-  //  bootstrap_draw ("Beginning Load...",SplashScreen);
-  //  bootstrap_draw ("Beginning Load...",SplashScreen);
   if (LoadMission) {
     LoadMission=false;
     active_missions.push_back(mission=new Mission(mission_name));
 
     mission->initMission();
 
-    //    if (SplashScreen)
-    //      delete SplashScreen;
-    //    SplashScreen = new Animation (mission->getVariable ("splashscreen",vs_config->getVariable ("graphics","splash_screen","vega_splash.ani")).c_str(),0); 
-    bootstrap_draw ("Vegastrike Loading...",SplashScreen);
-    bootstrap_draw ("Vegastrike Loading...",SplashScreen);
-    if (g_game.music_enabled&&!soundServerPipes()) {
-#if defined( _WIN32) && !defined( __CYGWIN__)
-        /*
-      string ss_path = VSFileSystem::datadir+"/soundserver.exe";
-      int pid=spawnl(P_NOWAIT,ss_path.c_str(),ss_path.c_str(),NULL);
-      if (pid==-1) {
-		ss_path = VSFileSystem::datadir+"/bin/soundserver.exe";
-		chdir("bin");
-		int pid=spawnl(P_NOWAIT,ss_path.c_str(),ss_path.c_str(),NULL);
-		if (pid==-1) {
-			g_game.music_enabled=false;
-			VSFileSystem::vs_fprintf(stderr,"Unable to spawn music player server Error (%d)\n",pid);
-		}
-      }
-      */
-#endif
-    }
+    UniverseUtil::showSplashScreen(""); // Twice for double or triple-buffering
+    UniverseUtil::showSplashScreen("");
+    
     QVector pos;
     string planetname;
 
@@ -751,9 +730,8 @@ void bootstrap_main_loop () {
         }
         _Universe->Loop(main_loop);
     ///return to idle func which now should call main_loop mohahahah
-    delete SplashScreen;
-    SplashScreen= NULL;
-    SetStarSystemLoading (false);
+    if (XMLSupport::parse_bool(vs_config->getVariable("splash","auto_hide","true")))
+        UniverseUtil::hideSplashScreen();
   }
   ///Draw Texture
   

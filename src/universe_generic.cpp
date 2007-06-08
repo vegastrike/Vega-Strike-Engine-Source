@@ -233,10 +233,29 @@ extern void MakeStarSystem (string file, Galaxy *galaxy, string origin, int forc
 extern string RemoveDotSystem (const char *input);
 using namespace VSFileSystem;
 
+static void ss_generating(bool enable)
+{
+	static bool ss_generating_active = false;
+	if (enable) {
+		if (!UniverseUtil::isSplashScreenShowing()) {
+			static const std::string empty;
+			UniverseUtil::showSplashScreen(empty);
+			ss_generating_active = true;
+		}
+	} else {
+		if (ss_generating_active) {
+			UniverseUtil::hideSplashScreen();
+			ss_generating_active = false;
+		}
+	}
+}
+
 void Universe::Generate1( const char * file, const char * jumpback)
 {
   int count=0;
-  //  SetStarSystemLoading (true);
+  static bool show_loading = XMLSupport::parse_bool(vs_config->getVariable("splash","while_loading_starsystem","false"));
+  if (show_loading)
+    ss_generating(true);
   std::string syspath;
   VSFile f;
   VSError err = f.OpenReadOnly( file, SystemFile);
@@ -289,7 +308,7 @@ void Universe::Generate2( StarSystem * ss)
   	firsttime=false;
   }else {
   }
-  SetStarSystemLoading (false);
+  ss_generating(false);
 }
 
 StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpback, Vector center) {
