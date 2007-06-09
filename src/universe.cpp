@@ -45,6 +45,7 @@
 #endif
 #include "savegame.h"
 #include "gfx/screenshot.h"
+#include "universe_util.h"
 using namespace std;
 ///Decides whether to toast the jump star from the cache
 extern void CacheJumpStar (bool);
@@ -283,7 +284,7 @@ void GameUniverse::StartDraw()
     AccessCockpit()->SelectProperCamera();
     if (cockpit.size()>0)
       AccessCamera()->UpdateGFX();
-    if (!RefreshGUI()) {
+    if (!RefreshGUI() && !UniverseUtil::isSplashScreenShowing()) {
       activeStarSystem()->Draw();
     }
     AccessCamera()->SetSubwindow (0,0,1,1);
