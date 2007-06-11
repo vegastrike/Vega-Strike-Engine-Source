@@ -385,27 +385,27 @@ AC_MSG_RESULT([${is_freebsd}])
 #fi
 
 
-
+dnl Python needs to check known paths for the .so file.
+dnl We need a way for the user to specify his own path.
+AC_ARG_WITH(python-libs, AC_HELP_STRING([--with-python-libs=DIR], [Location of python library]),PYTHON_LIBPATH=$withval)
+AC_ARG_WITH(python-inc, AC_HELP_STRING([--with-python-libs=DIR], [Location of python library]),PYTHON_INCPATH=$withval)
 if test "x$is_macosx" = "xyes" ; then
-	CXXFLAGS="$CXXFLAGS -I/Developer/SDKs/MacOSX10.2.8sdk/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes"
+	CXXFLAGS="$CXXFLAGS -I/Developer/SDKs/MacOSX10.2.8sdk/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes -DHAVE_PYTHON=1 -I$PYTHON_INCPATH "
 	CPPFLAGS="$CPPFLAGS -Wno-long-double"
     dnl GL_CPPFLAGS="$GL_CPPFLAGS -framework OpenGL"
     dnl GLUT_CPPFLAGS="$GLUT_CPPFLAGS -framework GLUT"
-	VS_LIBS="$VS_LIBS -F/Developer/SDKs/MacOSX10.3.9.sdk/System/Library/Frameworks  -framework OpenGL -framework GLUT -framework CoreAudio"
+	VS_LIBS="$VS_LIBS -I -F/Developer/SDKs/MacOSX10.3.9.sdk/System/Library/Frameworks  -framework OpenGL -framework GLUT -framework CoreAudio"
     with_gl_inc=/Developer/SDKs/MacOSX10.3.9.sdk/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes
     with_gl_libs=/Developer/SDKs/MacOSX10.3.9.sdk/System/Library/Frameworks/OpenGL.framework/Libraries
     with_al_inc="/System/Library/Frameworks/OpenAL.framework/Headers -I/sw/include"
     with_al_libs="/System/Library/Frameworks/OpenAL.framework/ -L/sw/lib"
-    PYTHON_LDOPTS="-L/System/Library/Frameworks/Python.framework"
-    with_python_inc="/System/Library/Frameworks/Python.framework/Headers"
-    VS_LIBS="$VS_LIBS -lobjc"
+#    PYTHON_LDOPTS="-L/System/Library/Frameworks/Python.framework"
+#    with_python_inc="/System/Library/Frameworks/Python.framework/Headers"
+    VS_LIBS="$VS_LIBS -lobjc -L$PYTHON_LIBPATH "
 else
     VS_LIBS="$VS_LIBS -lutil"
 fi
 
-dnl Python needs to check known paths for the .so file.
-dnl We need a way for the user to specify his own path.
-AC_ARG_WITH(python-libs, AC_HELP_STRING([--with-python-libs=DIR], [Location of python library]),PYTHON_LIBPATH=$withval)
 
 VS_CHECK_PYTHON
 
@@ -797,10 +797,10 @@ VS_CONFIG_GTKUTILS
 AC_LANG(C++)
 
 # The boost include must come first to override includes from elsewhere
-CPPFLAGS="${BOOST_CPPFLAGS} ${CPPFLAGS} ${VS_CPPFLAGS} ${PYTHON_CPPFLAGS} ${CG_CPPFLAGS}"' -I$(top_srcdir)/src '
+CPPFLAGS="${BOOST_CPPFLAGS} ${CPPFLAGS} ${VS_CPPFLAGS} ${PYTHON_CPPFLAGS} ${CG_CPPFLAGS} ${CXXFLAGS} "' -I$(top_srcdir)/src '
 CXXFLAGS="${CXXFLAGS} ${VS_CXXFLAGS} ${PTHREAD_CXXFLAGS} -pipe"
 
-LIBS="${LIBS} ${VS_LIBS} ${PYTHON_LIBS} ${PTHREAD_LIBS} ${CG_LIBS}"
+LIBS="${LDFLAGS} ${LIBS} ${VS_LIBS} ${PYTHON_LIBS} ${PTHREAD_LIBS} ${CG_LIBS}"
 
 AC_MSG_NOTICE([Compiling with CPPFLAGS: ${CPPFLAGS}.])
 AC_MSG_NOTICE([Compiling with CXXFLAGS: ${CXXFLAGS}.])
