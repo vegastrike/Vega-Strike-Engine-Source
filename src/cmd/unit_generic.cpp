@@ -5760,22 +5760,26 @@ static int UpgradeFloat (double &result,double tobeupgraded, double upgrador, do
 }
 
 
-int UpgradeBoolval (int a, int upga, bool touchme, bool downgrade, int &numave,double &percentage, bool force_nothing) {
+int UpgradeBoolval (int a, int upga, bool touchme, bool downgrade, int &numave,double &percentage, bool force_nothing, bool &can_be_redeemed) {
   if (downgrade) {
     if (a&&upga) {
       if (touchme) (a=false);
       numave++;
       percentage++;
+      can_be_redeemed=true;
+      
     }
   }else {
     if (!a&&upga) {
       if (touchme) a=true;
       numave++;
       percentage++;
+      can_be_redeemed=true;
     }else if (force_nothing && a  && !upga) {
       if (touchme) a=false;
       numave++;
       percentage++;
+      can_be_redeemed=true;
 	}
   }
   return a;
@@ -6640,9 +6644,9 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
 	  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,up->faction,"Radar_Color"))
 		STDUPGRADE(computer.radar.iff,up->computer.radar.iff,templ->computer.radar.iff,0);
 	  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,up->faction,"ITTS"))
-		computer.itts=UpgradeBoolval(computer.itts,up->computer.itts,touchme,downgrade,numave,percentage,force_change_on_nothing); 
+		computer.itts=UpgradeBoolval(computer.itts,up->computer.itts,touchme,downgrade,numave,percentage,force_change_on_nothing,can_be_redeemed); 
 	  if(!csv_cell_null_check||force_change_on_nothing||cell_has_recursive_data(upgrade_name,up->faction,"Can_Lock"))
-		computer.radar.canlock=UpgradeBoolval(computer.radar.canlock,up->computer.radar.canlock,touchme,downgrade,numave,percentage,force_change_on_nothing); 
+		computer.radar.canlock=UpgradeBoolval(computer.radar.canlock,up->computer.radar.canlock,touchme,downgrade,numave,percentage,force_change_on_nothing,      can_be_redeemed); 
 
 	  // Do the two reversed ones below  
 	  bool ccf = cancompletefully;

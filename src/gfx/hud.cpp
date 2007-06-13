@@ -28,10 +28,42 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "xml_support.h"
+#include "cmd/base.h"
 //#include "glut.h"
-void * getFont() {
+
+static bool isInside() {
+  if (BaseInterface::CurrentBase) return true;
+  return false;
+}
+const std::string& getStringFont(bool&changed, bool force_inside=false, bool whatinside=false) {
   static std::string whichfont=vs_config->getVariable("graphics","font","helvetica12");
-  void * retval=NULL;
+  static std::string whichdockedfont=vs_config->getVariable("graphics","basefont","helvetica12");
+  bool inside=isInside();
+  if (force_inside)
+    inside=whatinside;
+  static bool lastinside=inside;
+  if (lastinside!=inside) {
+    changed=true;
+    lastinside=inside;
+  }else changed=false;
+  return inside?whichdockedfont:whichfont;
+}
+const std::string& getStringFontForHeight(bool&changed) {
+  static std::string whichfont=vs_config->getVariable("graphics","font","helvetica12");
+  static std::string whichdockedfont=vs_config->getVariable("graphics","basefont","helvetica12");
+  bool inside=isInside();
+  static bool lastinside=inside;
+  if (lastinside!=inside) {
+    changed=true;
+    lastinside=inside;
+  }else changed=false;
+  return inside?whichdockedfont:whichfont;
+}
+void * getFont(bool forceinside=false, bool whichinside=false) {
+  bool changed=false;
+  std::string whichfont=getStringFont(changed,forceinside,whichinside);
+  static void * retval=NULL;
+  if (changed) retval=NULL;
   if (retval==NULL) {
     if (whichfont=="helvetica10")
       retval=GLUT_BITMAP_HELVETICA_10;
@@ -51,8 +83,12 @@ void * getFont() {
   return retval;            
 }
 float getFontHeight() {
-  static std::string whichfont=vs_config->getVariable("graphics","font","helvetica12");
+  bool changed=false;
+  std::string whichfont=getStringFontForHeight(changed);
   static float point=0;
+  if (changed){
+    point=0;
+  }
   if (point==0) {
     if (whichfont=="helvetica10")
       point=22;
@@ -86,20 +122,23 @@ int TextPlane::Draw (int offset) {
   return Draw (myText,offset,true);
 }
 
-static char * CreateLists() {
-  static char lists[256]={0};
-  void * fnt = getFont();
+static unsigned int * CreateLists() {
+  static unsigned int lists[256]={0};
+  void * fnt0 = getFont(true,false);
+  void * fnt1 = getFont(true,true);
   static bool use_bit = XMLSupport::parse_bool(vs_config->getVariable ("graphics","high_quality_font","false"));
   static bool use_display_lists = XMLSupport::parse_bool (vs_config->getVariable ("graphics","text_display_lists","true"));
   if (use_display_lists) {
-    for (unsigned char i=32;i<128;i++){
-      lists[i]= GFXCreateList();
-      if (use_bit)
-	glutBitmapCharacter (fnt,i);
-      else
-	glutStrokeCharacter (GLUT_STROKE_ROMAN,i);
-      if (!GFXEndList ()) {
-	lists[i]=0;
+    for (unsigned int i=32;i<256;i++){
+      if ((i<128)||(i>=128+32)) {
+        lists[i]= GFXCreateList();
+        if (use_bit)
+          glutBitmapCharacter (i<128?fnt0:fnt1,i%128);
+        else
+          glutStrokeCharacter (GLUT_STROKE_ROMAN,i%128);
+        if (!GFXEndList ()) {
+          lists[i]=0;
+        }
       }
     }
   }  
@@ -164,7 +203,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
 {
   int retval=1;
   bool drawbg = (bgcol.a!=0);
-  static char * display_lists=CreateLists ();
+  static unsigned int * display_lists=CreateLists ();
 	// some stuff to draw the text stuff
   string::const_iterator text_it = newText.begin();
   static bool use_bit = force_highquality||XMLSupport::parse_bool(vs_config->getVariable ("graphics","high_quality_font","false"));
@@ -237,7 +276,8 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
     scaley=myFontMetrics.j/(119.05+33.33);
   }
   glScalef (scalex,scaley,1);
-  while(text_it != newText.end() && row>myDims.j-rowheight*.25) {
+  bool firstThroughLoop=true;
+  while(text_it != newText.end() && (firstThroughLoop||row>myDims.j-rowheight*.25)) {
     if (*text_it=='#') {
       if (newText.end()-text_it>6) {
 	float r,g,b;
@@ -262,14 +302,14 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
       text_it++;
       continue;
     }else if(*text_it>=32) {//always true
-		unsigned char myc = *text_it;
-		if (myc=='_') {
-			myc = ' ';
-		}
+      unsigned char myc = *text_it;
+      if (myc=='_') {
+        myc = ' ';
+      }
       //glutStrokeCharacter (GLUT_STROKE_ROMAN,*text_it);
       retval+=potentialincrease;
       potentialincrease=0;
-      int lists = display_lists[myc];
+      int lists = display_lists[myc+(isInside()?128:0)];
       if (lists) {
 	GFXCallList(lists);
       }else{
@@ -295,6 +335,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
     }
     if(doNewLine(text_it,newText.end(),col,myDims.i, myFontMetrics.i,row-rowheight<=myDims.j)){
       GetPos (tmp,col);
+      firstThroughLoop=false;
       row -= rowheight;
       glPopMatrix();
       glPushMatrix ();
