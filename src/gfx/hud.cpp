@@ -237,7 +237,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
     scaley=myFontMetrics.j/(119.05+33.33);
   }
   glScalef (scalex,scaley,1);
-  while(text_it != newText.end() && row>myDims.j) {
+  while(text_it != newText.end() && row>myDims.j-rowheight*.25) {
     if (*text_it=='#') {
       if (newText.end()-text_it>6) {
 	float r,g,b;
