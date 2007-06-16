@@ -9,7 +9,11 @@
 namespace BaseUtil {
 
 #if defined(HAVE_PYTHON)
+#if BOOST_VERSION != 102800
+	typedef boost::python::dict Dictionary;
+#else
 	typedef boost::python::dictionary Dictionary;
+#endif
 #else
 	typedef std::map<std::string,std::string> Dictionary;
 #endif
@@ -51,7 +55,7 @@ namespace BaseUtil {
 	bool SellShip(std::string name);
 
 	// GUI events
-	void SetEventData(boost::python::dictionary data);
+	void SetEventData(Dictionary data);
 	void SetMouseEventData(std::string type, float x, float y, int buttonMask); // [type], [mousex], [mousey], [mousebuttons]
 	void SetKeyEventData(std::string type, unsigned int keycode, unsigned int modmask=~0);
 	void SetKeyStatusEventData(unsigned int modmask=~0);

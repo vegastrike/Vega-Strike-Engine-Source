@@ -4,7 +4,15 @@
 #include "base.h"
 #include "base_util.h"
 #include "vsfilesystem.h"
+
 #include <boost/version.hpp>
+#if BOOST_VERSION != 102800
+#include <boost/python.hpp>
+typedef boost::python::dict BoostPythonDictionary ;
+#else
+#include <boost/python/objects.hpp>
+typedef boost::python::dictionary BoostPythonDictionary ;
+#endif
 #if BOOST_VERSION != 102800
 #include <boost/python/object.hpp>
 #include <boost/python/dict.hpp>
@@ -12,7 +20,7 @@
 #include <boost/python/objects.hpp>
 #endif
 
-static boost::python::dictionary GetEventDataPython()
+static BoostPythonDictionary GetEventDataPython()
 {
 	return BaseUtil::GetEventData();
 }

@@ -3,8 +3,10 @@
 #include <boost/version.hpp>
 #if BOOST_VERSION != 102800
 #include <boost/python.hpp>
+typedef boost::python::dict BoostPythonDictionary ;
 #else
 #include <boost/python/objects.hpp>
+typedef boost::python::dictionary BoostPythonDictionary ;
 #endif
 #include "cmd/container.h"
 #include <string>
@@ -225,9 +227,9 @@ static std::string ParseWeaponType(weapon_info::WEAPON_TYPE type)
 	}
 }
 
-static boost::python::dictionary GatherWeaponInfo(const weapon_info *wi)
+static BoostPythonDictionary GatherWeaponInfo(const weapon_info *wi)
 {
-	boost::python::dictionary rv;
+	BoostPythonDictionary rv;
 	if (wi) {
 		rv["type"] = ParseWeaponType(wi->type);
 		rv["speed"] = wi->Speed;
@@ -245,9 +247,9 @@ static boost::python::dictionary GatherWeaponInfo(const weapon_info *wi)
 	return rv;
 }
 
-boost::python::dictionary UnitWrapper::GetMountInfo(int index) const
+BoostPythonDictionary UnitWrapper::GetMountInfo(int index) const
 {
-	boost::python::dictionary rv;
+	BoostPythonDictionary rv;
 	if ((index>=0) && (index<unit->mounts.size())) {
 		Mount &mnt = unit->mounts[index];
 

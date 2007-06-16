@@ -8,8 +8,10 @@
 #include <boost/version.hpp>
 #if BOOST_VERSION != 102800
 #include <boost/python.hpp>
+typedef boost::python::dict BoostPythonDictionary ;
 #else
 #include <boost/python/objects.hpp>
+typedef boost::python::dictionary BoostPythonDictionary ;
 #endif
 #include "universe_util.h"
 #include "cmd/unit_util.h"
