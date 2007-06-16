@@ -1,3 +1,4 @@
+#include <string>
 #include "python/python_compile.h"
 #include "docking.h"
 #include "xml_support.h"

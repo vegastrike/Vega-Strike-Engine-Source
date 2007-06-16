@@ -23,7 +23,6 @@
 #include "pythonmission.h"
 #include "mission.h"
 #include "savegame.h"
-extern bool have_yy_error;
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -207,36 +206,21 @@ void InitDirector() {
 
 void Mission::loadModule(string modulename){
   missionNode *node=director;
-
-      debug(3,node,SCRIPT_PARSE,"loading module "+modulename);
-
-      cout << "  loading module " << modulename << endl;
-
-      string filename="modules/"+modulename+".module";
-      missionNode *import_top=importf->LoadXML(filename.c_str());
-
-      if(import_top==NULL){
-	debug(5,node,SCRIPT_PARSE,"could not load "+filename);
-
-	//	fatalError(node,SCRIPT_PARSE,"could not load module file "+filename);
-	//assert(0);
-	string f2name="modules/"+modulename+".c";
-        import_top=importf->LoadCalike(f2name.c_str());
-
-	if(import_top==NULL){
-	  //debug(0,node,SCRIPT_PARSE,"could not load "+f2name);
-	  fatalError(node,SCRIPT_PARSE,"could not load module "+modulename);
-	  assert(0);
-	}
-	if(have_yy_error){
-	  fatalError(NULL,SCRIPT_PARSE,"yy-error while parsing "+modulename);
-	  assert(0);
-	}
-      }
-
-      import_top->Tag(&tagmap);
-
-      doModule(import_top,SCRIPT_PARSE);
+  
+  debug(3,node,SCRIPT_PARSE,"loading module "+modulename);
+  
+  cout << "  loading module " << modulename << endl;
+  
+  string filename="modules/"+modulename+".module";
+  missionNode *import_top=importf->LoadXML(filename.c_str());
+  
+  if(import_top==NULL){
+    
+  }
+  
+  import_top->Tag(&tagmap);
+  
+  doModule(import_top,SCRIPT_PARSE);
 
 }
 void Mission::loadMissionModules(){
@@ -249,37 +233,6 @@ void Mission::loadMissionModules(){
     missionNode *module=runtime.modules[importname];
     if(module==NULL){
       loadModule(importname);
-#if 0
-      debug(3,node,SCRIPT_PARSE,"loading module "+import->script.name);
-
-      cout << "  loading module " << import->script.name << endl;
-
-      string filename="modules/"+import->script.name+".module";
-      missionNode *import_top=importf->LoadXML(filename.c_str());
-
-      if(import_top==NULL){
-	debug(5,node,SCRIPT_PARSE,"could not load "+filename);
-
-	//	fatalError(node,SCRIPT_PARSE,"could not load module file "+filename);
-	//assert(0);
-	string f2name="modules/"+import->script.name+".c";
-        import_top=importf->LoadCalike(f2name.c_str());
-
-	if(import_top==NULL){
-	  //debug(0,node,SCRIPT_PARSE,"could not load "+f2name);
-	  fatalError(node,SCRIPT_PARSE,"could not load module "+import->script.name);
-	  assert(0);
-	}
-	if(have_yy_error){
-	  fatalError(NULL,SCRIPT_PARSE,"yy-error while parsing "+import->script.name);
-	  assert(0);
-	}
-      }
-
-      import_top->Tag(&tagmap);
-
-      doModule(import_top,SCRIPT_PARSE);
-#endif
     }
     else{
       debug(3,node,SCRIPT_PARSE,"already have module "+importname);

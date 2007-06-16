@@ -225,9 +225,9 @@ static std::string ParseWeaponType(weapon_info::WEAPON_TYPE type)
 	}
 }
 
-static boost::python::dict GatherWeaponInfo(const weapon_info *wi)
+static boost::python::dictionary GatherWeaponInfo(const weapon_info *wi)
 {
-	boost::python::dict rv;
+	boost::python::dictionary rv;
 	if (wi) {
 		rv["type"] = ParseWeaponType(wi->type);
 		rv["speed"] = wi->Speed;
@@ -245,9 +245,9 @@ static boost::python::dict GatherWeaponInfo(const weapon_info *wi)
 	return rv;
 }
 
-boost::python::dict UnitWrapper::GetMountInfo(int index) const
+boost::python::dictionary UnitWrapper::GetMountInfo(int index) const
 {
-	boost::python::dict rv;
+	boost::python::dictionary rv;
 	if ((index>=0) && (index<unit->mounts.size())) {
 		Mount &mnt = unit->mounts[index];
 

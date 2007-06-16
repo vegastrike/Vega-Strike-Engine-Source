@@ -9,11 +9,11 @@
   voidWRAPPED0(DisableTurretAI)
   voidWRAPPED3(leach,float,XshieldPercent,float,YrechargePercent,float,ZenergyPercent)
   WRAPPED0 (int,getFgSubnumber,-1)
-  WRAPPED0 (string,getFgID,string())
-  voidWRAPPED1(setFullname,string,name)
-  WRAPPED0(string,getFullname,string())
-  WRAPPED0(string,getFullAIDescription,string())
-  voidWRAPPED3(setTargetFg,string,primary,string,secondary,string,tertiary)
+  WRAPPED0 (std::string,getFgID,std::string(""))
+  voidWRAPPED1(setFullname,std::string,name)
+  WRAPPED0(std::string,getFullname,std::string())
+  WRAPPED0(std::string,getFullAIDescription,std::string())
+  voidWRAPPED3(setTargetFg,std::string,primary,std::string,secondary,std::string,tertiary)
   voidWRAPPED1(ReTargetFg,int,which_target)
   WRAPPED0(bool,isStarShip,false)
   WRAPPED0(bool,isPlanet,false)
@@ -108,17 +108,17 @@
   WRAPPED1(bool,isDocked,UnitWrapper,dockingUnit,false)
   WRAPPED1(bool,Dock,UnitWrapper,unitToDockWith,false)
 
-  voidWRAPPED1(setCombatRole,string,role)
+  voidWRAPPED1(setCombatRole,std::string,role)
 
-  WRAPPED0(string,getCombatRole,"INERT")//legacy function returns getUnitType
+  WRAPPED0(std::string,getCombatRole,"INERT")//legacy function returns getUnitType
 
-  voidWRAPPED1(setAttackPreference,string,role)
+  voidWRAPPED1(setAttackPreference,std::string,role)
 
-  WRAPPED0(string,getAttackPreference,"INERT")
+  WRAPPED0(std::string,getAttackPreference,"INERT")
 
-  voidWRAPPED1(setUnitRole,string,role)
+  voidWRAPPED1(setUnitRole,std::string,role)
 
-  WRAPPED0(string,getUnitRole,"INERT")
+  WRAPPED0(std::string,getUnitRole,"INERT")
 
 
   WRAPPED1(bool,UnDock,UnitWrapper,unitToDockWith,false)
@@ -127,23 +127,23 @@
   EXPORT_UTIL0(UnitWrapper,owner)
   voidEXPORT_UTIL2(performDockingOperations,UnitWrapper,unitToDockWith,int,acootuallydock)
 
-	EXPORT_UTIL0(string,getFactionName)
+	EXPORT_UTIL0(std::string,getFactionName)
 	EXPORT_UTIL0(int,getFactionIndex)
 	voidEXPORT_UTIL1(setFactionIndex,int,factionname)
-	voidEXPORT_UTIL1(setFactionName,string,factionname)
-	EXPORT_UTIL0(string,getName)
-	voidEXPORT_UTIL1(setName,string,name)
+	voidEXPORT_UTIL1(setFactionName,std::string,factionname)
+	EXPORT_UTIL0(std::string,getName)
+	voidEXPORT_UTIL1(setName,std::string,name)
 	voidEXPORT_UTIL1(SetHull,float,hull)
-    EXPORT_UTIL0(string,getFlightgroupName)
+    EXPORT_UTIL0(std::string,getFlightgroupName)
 	EXPORT_UTIL0(UnitWrapper,getFlightgroupLeader)
 	EXPORT_UTIL1(bool,setFlightgroupLeader,UnitWrapper,un)
-	EXPORT_UTIL0(string,getFgDirective)
+	EXPORT_UTIL0(std::string,getFgDirective)
 	EXPORT_UTIL0(void,RecomputeUnitUpgrades)
-	EXPORT_UTIL1(bool,setFgDirective,string,inp)
+	EXPORT_UTIL1(bool,setFgDirective,std::string,inp)
 //	EXPORT_UTIL0(int,getFgSubnumber)
-	EXPORT_UTIL3(int,removeCargo,string,s, int,quantity, bool, erasezero)
-	EXPORT_UTIL3(int,removeWeapon,string,name, int,offset, bool, loop)
-	EXPORT_UTIL5(float,upgrade,string,file,int,mountoffset,int, subunitoffset, bool, force,bool, loop_through_mounts)
+	EXPORT_UTIL3(int,removeCargo,std::string,s, int,quantity, bool, erasezero)
+	EXPORT_UTIL3(int,removeWeapon,std::string,name, int,offset, bool, loop)
+	EXPORT_UTIL5(float,upgrade,std::string,file,int,mountoffset,int, subunitoffset, bool, force,bool, loop_through_mounts)
 	EXPORT_UTIL1(int, addCargo, Cargo, carg)
 	EXPORT_UTIL1(int, forceAddCargo, Cargo, carg)
 	EXPORT_UTIL2(bool, incrementCargo,float, percentagechange,int, quantity)
@@ -154,7 +154,7 @@
 	EXPORT_UTIL1(int, hasCargo,std::string,mycarg)
 	EXPORT_UTIL1(Cargo, GetCargoIndex, int, index);
 	EXPORT_UTIL1(Cargo, GetCargo,std::string,cargname)
-	EXPORT_UTIL0(string,getUnitSystemFile)
+	EXPORT_UTIL0(std::string,getUnitSystemFile)
 	EXPORT_UTIL0(float,getCredits)
 	voidEXPORT_UTIL1(addCredits,float,credits)
 	EXPORT_UTIL0(bool,isSignificant)
@@ -162,10 +162,10 @@
 	EXPORT_UTIL0(bool,isDockableUnit)
 	EXPORT_UTIL0(bool,isSun)
 	EXPORT_UTIL0(bool,isAsteroid)
-	voidEXPORT_UTIL1(switchFg,string,arg)
+	voidEXPORT_UTIL1(switchFg,std::string,arg)
 	EXPORT_UTIL2(int,communicateTo,UnitWrapper,other_unit,float,mood)
-	EXPORT_UTIL1(bool,commAnimation,string,anim)
-	EXPORT_UTIL1(bool,JumpTo,string,system)
+	EXPORT_UTIL1(bool,commAnimation,std::string,anim)
+	EXPORT_UTIL1(bool,JumpTo,std::string,system)
 	EXPORT_UTIL0(int,isPlayerStarship )
 	voidEXPORT_UTIL1(setECM, int,NewECM) //short fix
 	EXPORT_UTIL0(int,getECM ) //short fix
@@ -175,6 +175,6 @@
 	voidEXPORT_UTIL5(orbit,UnitWrapper,orbitee,float,speed,QVector,R,QVector,S,QVector,center)
         WRAPPED0(int, RepairCost,0)
         WRAPPED0(int, RepairUpgrade,0)
-        EXPORT_UTIL3(float,PercentOperational,string,content,string,category,bool, countHullAndArmorAsFull)
+        EXPORT_UTIL3(float,PercentOperational,std::string,content,std::string,category,bool, countHullAndArmorAsFull)
         WRAPPED1(Vector,MountPercentOperational, int, whichMount,Vector(-1.0f,-1.0f,-1.0f))
 #endif

@@ -9,7 +9,13 @@
 #include "main_loop.h"
 
 #include <boost/version.hpp>
+
+#if BOOST_VERSION != 102800
+#include <boost/python/object.hpp>
 #include <boost/python/dict.hpp>
+#else
+#include <boost/python/objects.hpp>
+#endif
 
 #include "in_kb.h"
 
@@ -361,18 +367,18 @@ namespace BaseUtil {
 
 	Dictionary& _GetEventData()
 	{
-		static boost::python::dict data;
+		static boost::python::dictionary data;
 		return data;
 	}
 
-	void SetEventData(boost::python::dict data)
+	void SetEventData(boost::python::dictionary data)
 	{
 		_GetEventData() = data;
 	}
 
 	void SetMouseEventData(std::string type, float x, float y, int buttonMask)
 	{
-		boost::python::dict &data = _GetEventData();
+		boost::python::dictionary &data = _GetEventData();
 
 		// Event type
 		data["type"] = type;
@@ -387,7 +393,7 @@ namespace BaseUtil {
 
 	void SetKeyStatusEventData(unsigned int modmask)
 	{
-		boost::python::dict &data = _GetEventData();
+		boost::python::dictionary &data = _GetEventData();
 
 		// Keyboard modifiers (for kb+mouse)
 		if (modmask==~0)
@@ -400,7 +406,7 @@ namespace BaseUtil {
 
 	void SetKeyEventData(std::string type, unsigned int keycode, unsigned int modmask)
 	{
-		boost::python::dict &data = _GetEventData();
+		boost::python::dictionary &data = _GetEventData();
 
 		// Event type
 		data["type"] = type;

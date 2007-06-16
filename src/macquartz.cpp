@@ -16,7 +16,7 @@ extern "C"{
   }
   void glGetIntegerv() {
     
-  }*/
+  }
   void glBindBufferARB() {}
   void _glBindBufferARB() {}
 
@@ -34,5 +34,5 @@ extern "C"{
 
   void glUnmapBufferARB() {}
   void _glUnmapBufferARB() {}
-
+   */
 }

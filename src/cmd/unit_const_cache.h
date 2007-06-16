@@ -26,7 +26,7 @@ public:
   operator size_t () const{return Hashtable<std::string,int,(1<<30)>::hash(key)^fac;}
 };
 
-#ifndef _WIN32
+#if !defined(_WIN32) && __GNUC__!=2
 class ConstHasher {
 public:
   template <class T> size_t operator () (const T&key)const{
@@ -39,7 +39,7 @@ public:
 #endif
 
 template <class Typ,class Key> class ClassCache {
-#ifndef _WIN32
+#if !defined(_WIN32) && __GNUC__!=2
   static stdext::hash_map<Key, Typ *, ConstHasher> unit_cache;
 #else
   static stdext::hash_map<Key, Typ *> unit_cache;
@@ -49,7 +49,7 @@ template <class Typ,class Key> class ClassCache {
     return getCachedMutable(k);
   }
   static Typ *getCachedMutable (const Key &k) {
-#ifndef _WIN32
+#if !defined(_WIN32) && __GNUC__!=2
     typename stdext::hash_map<Key,Typ *,ConstHasher>::iterator i=unit_cache.find(k);
 #else
 	typename stdext::hash_map<Key,Typ *>::iterator i=unit_cache.find(k);

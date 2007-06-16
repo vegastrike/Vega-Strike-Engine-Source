@@ -1,6 +1,6 @@
 #ifndef VSNET_OSS_CPP
 #define VSNET_OSS_CPP
-
+#include <stdio.h>
 #include <config.h>
 
 #include "vsnet_headers.h"
@@ -73,14 +73,22 @@ bool set_blocking(int _fd, bool isBlocking) {
     int datato = isBlocking? 0 : 1;
     if( ::ioctl( _fd, FIONBIO, &datato ) == -1)
     {
+#if defined(_WIN32)||__GNUC__!=2
         ::perror( "Error fcntl : ");
+#else
+        fprintf(stderr,"Error fcntl : ");
+#endif
         return false;
     }
 #else
     unsigned long datato = isBlocking? 0 : 1;
     if( ::ioctlsocket( _fd, FIONBIO, &datato ) !=0 )
     {
+#if defined(_WIN32)||__GNUC__!=2
         ::perror( "Error fcntl : ");
+#else
+        fprintf(stderr,"Error fcntl : ");
+#endif
         return false;
     }
 #endif

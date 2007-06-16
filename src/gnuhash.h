@@ -3,6 +3,21 @@
 #ifdef _WIN32
 #include <hash_map>
 #else
+#if __GNUC__ == 2
+#include <map>
+#define hash_map map
+#define stdext std
+namespace stdext {
+    template<class Key, class Traits = std::less<Key> > class hash_compare
+	{
+	public:
+		static const size_t bucket_size = 4;
+		static const size_t min_buckets = 8;
+	};
+}
+
+#include "hashtable.h"
+#else
 #include <ext/hash_map>
 #define stdext __gnu_cxx
 #include "hashtable.h"
@@ -65,5 +80,6 @@ namespace stdext{
 	};
 
 }
+#endif
 #endif
 #endif

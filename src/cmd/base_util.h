@@ -1,7 +1,7 @@
 #include <string>
 
 #if defined(HAVE_PYTHON)
-	namespace boost { namespace python { class dict; } }
+//	namespace boost { namespace python { class dict; } }
 #else
 	#include <map>
 #endif
@@ -9,7 +9,7 @@
 namespace BaseUtil {
 
 #if defined(HAVE_PYTHON)
-	typedef boost::python::dict Dictionary;
+	typedef boost::python::dictionary Dictionary;
 #else
 	typedef std::map<std::string,std::string> Dictionary;
 #endif
@@ -51,7 +51,7 @@ namespace BaseUtil {
 	bool SellShip(std::string name);
 
 	// GUI events
-	void SetEventData(boost::python::dict data);
+	void SetEventData(boost::python::dictionary data);
 	void SetMouseEventData(std::string type, float x, float y, int buttonMask); // [type], [mousex], [mousey], [mousebuttons]
 	void SetKeyEventData(std::string type, unsigned int keycode, unsigned int modmask=~0);
 	void SetKeyStatusEventData(unsigned int modmask=~0);

@@ -267,7 +267,7 @@ void CollideArray::checkSet() {
 Collidable::Collidable(Unit *un){
   radius=un->rSize();
   
-  if (radius<=FLT_MIN||ISNAN(radius)) radius=2*FLT_MIN;
+  if (radius<=FLT_MIN||!FINITE(radius)) radius=2*FLT_MIN;
   assert(!un->isSubUnit());
   this->SetPosition(un->LocalPosition());
   ref.unit=un;  

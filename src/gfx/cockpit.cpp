@@ -1,3 +1,11 @@
+#include <boost/version.hpp>
+
+#if BOOST_VERSION != 102800
+#include <boost/python/object.hpp>
+#include <boost/python/dict.hpp>
+#else
+#include <boost/python/objects.hpp>
+#endif
 
 #include "vsfilesystem.h"
 #include "vs_globals.h"

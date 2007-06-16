@@ -12,7 +12,7 @@
 #include <boost/python/objects.hpp>
 #endif
 
-static boost::python::dict GetEventDataPython()
+static boost::python::dictionary GetEventDataPython()
 {
 	return BaseUtil::GetEventData();
 }

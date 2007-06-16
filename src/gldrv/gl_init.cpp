@@ -187,11 +187,11 @@ void init_opengl_extensions()
 #endif
 
 #ifdef __APPLE__
-#ifndef __APPLE_PANTHER_GCC33_CLI__
-	glColorTable_p = &glColorTableEXT;
-	glMultiTexCoord2fARB_p = &glMultiTexCoord2fARB;
-	glClientActiveTextureARB_p = &glClientActiveTextureARB;
-	glActiveTextureARB_p = &glActiveTextureARB;		
+#ifndef __APPLE__
+	glColorTable_p = glColorTableEXT;
+	glMultiTexCoord2fARB_p = glMultiTexCoord2fARB;
+	glClientActiveTextureARB_p = glClientActiveTextureARB;
+	glActiveTextureARB_p = glActiveTextureARB;		
 #endif /*__APPLE_PANTHER_GCC33_CLI__*/
 #else
 #ifndef NO_VBO_SUPPORT

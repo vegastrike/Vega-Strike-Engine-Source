@@ -188,9 +188,10 @@ ALsizei *size,ALsizei *freq, ALboolean *loop)
 //their LoadWav is b0rken seriously!!!!!!
 #ifdef __APPLE__
 bool MacFixedLoadWAVFile(char * buf, ALenum *format,ALvoid **data,ALsizei *size,ALsizei *freq){
-    alutLoadWAVMemory((ALbyte*)buf,format,data,size,freq);
-   //THIS IS NOW A VECTOR, no freeing    free(buf);
-    return true;
+  ALboolean mybool;
+  alutLoadWAVMemory((ALbyte*)buf,format,data,size,freq, &mybool);
+  //THIS IS NOW A VECTOR, no freeing    free(buf);
+  return true;
 }
 #endif
 

@@ -34,10 +34,12 @@ typedef int Mix_Music;
 #include <memory.h>
 #include <stdio.h>
 #include <math.h>
+#if defined(_WIN32) || __GNUC__!=2
 #include <limits>
+#endif
 
 #include "softvolume.h"
-
+#if defined(_WIN32) || __GNUC__!=2
 #define UC8_MIN ((unsigned long)std::numeric_limits<unsigned char>::min())
 #define UC8_MAX ((unsigned long)std::numeric_limits<unsigned char>::max())
 #define SC8_MIN ((signed long)std::numeric_limits<signed char>::min())
@@ -46,7 +48,16 @@ typedef int Mix_Music;
 #define US16_MAX ((unsigned long)std::numeric_limits<unsigned short>::max())
 #define SS16_MIN ((signed long)std::numeric_limits<signed short>::min())
 #define SS16_MAX ((signed long)std::numeric_limits<signed short>::max())
-
+#else
+#define UC8_MIN ((unsigned long)0)
+#define UC8_MAX ((unsigned long)255)
+#define SC8_MIN ((signed long)-128)
+#define SC8_MAX ((signed long)127)
+#define US16_MIN ((unsigned long)0)
+#define US16_MAX ((unsigned long)16384)
+#define SS16_MIN ((signed long)-32768)
+#define SS16_MAX ((signed long)32767)
+#endif
 // -144db is, for all practical purposes, -inf
 #define DB_INF -144.0
 
