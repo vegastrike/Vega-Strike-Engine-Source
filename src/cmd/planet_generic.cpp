@@ -170,10 +170,10 @@ void Planet::endElement() {
 }
 Planet * Planet::GetTopPlanet (int level) {
   if (level>2) {
-    UnitCollection::UnitIterator satiterator = satellites.createIterator();
-	  assert(satiterator.current()!=NULL);
-	  if (satiterator.current()->isUnit()==PLANETPTR) {
-	    return ((Planet *)satiterator.current())->GetTopPlanet (level-1);
+    un_iter satiterator = satellites.createIterator();
+	  assert(*satiterator);
+	  if ((*satiterator)->isUnit()==PLANETPTR) {
+	    return (((Planet *)(*satiterator))->GetTopPlanet(level-1));
 	  } else {
 	    VSFileSystem::vs_fprintf (stderr,"Planets are unable to orbit around units");
 	    return NULL;
@@ -215,7 +215,7 @@ void Planet::gravitate(UnitCollection *uc) {
 
   // fake gravity
   /***FIXME 091401 why do we need to traverse satellites??????
-  UnitCollection::UnitIterator * iter;
+  un_iter * iter;
   for (iter = satellites.createIterator();
        iter->current()!=NULL;
        iter->advance()) {
@@ -240,10 +240,10 @@ Unit * Planet::beginElement(QVector x,QVector y,float vely, const Vector & rotve
   //this function is OBSOLETE
   Unit * un=NULL;
   if (level>2) {
-    UnitCollection::UnitIterator satiterator = satellites.createIterator();
-	  assert(satiterator.current()!=NULL);
-	  if (satiterator.current()->isUnit()==PLANETPTR) {
-		un =((Planet *)satiterator.current())->beginElement(x,y,vely,rotvel, pos,gravity,radius,filename,blendSrc,blendDst,dest,level-1,ourmat,ligh, isunit, faction,fullname,inside_out);
+    un_iter satiterator = satellites.createIterator();
+	  assert(*satiterator);
+	  if ((*satiterator)->isUnit()==PLANETPTR) {
+		un =((Planet *)(*satiterator))->beginElement(x,y,vely,rotvel, pos,gravity,radius,filename,blendSrc,blendDst,dest,level-1,ourmat,ligh, isunit, faction,fullname,inside_out);
 	  } else {
 	    VSFileSystem::vs_fprintf (stderr,"Planets are unable to orbit around units");
 	  }
@@ -255,8 +255,8 @@ Unit * Planet::beginElement(QVector x,QVector y,float vely, const Vector & rotve
       sat_unit->setFullname(fullname);
       un = sat_unit;
       un_iter satiterator (satellites.createIterator());
-      satiterator.current()->SetAI (new PlanetaryOrbit (satiterator.current(),vely,pos,x,y, QVector (0,0,0), this)) ;
-      satiterator.current()->SetOwner (this);
+      (*satiterator)->SetAI (new PlanetaryOrbit (*satiterator,vely,pos,x,y, QVector (0,0,0), this)) ;
+      (*satiterator)->SetOwner (this);
     }else {
       Planet * p;
       if (dest.size()!=0) {
@@ -413,11 +413,11 @@ Planet::~Planet() {
 }
 
 void Planet::Kill(bool erasefromsave) {
-	UnitCollection::UnitIterator iter;
+	un_iter iter;
 	Unit *tmp;
 	for (iter = satellites.createIterator();
-	     (tmp = iter.current())!=NULL;
-	     iter.advance()) {
+	     (tmp = *iter);
+	     ++iter) {
 	  tmp->SetAI (new Order);
 	}
 	/* probably not FIXME...right now doesn't work on paged out systems... not a big deal */

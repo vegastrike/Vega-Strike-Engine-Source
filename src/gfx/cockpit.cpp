@@ -16,7 +16,6 @@
 #include "star_system.h"
 #include "cmd/unit_generic.h"
 #include "cmd/unit_factory.h"
-#include "cmd/iterator.h"
 #include "cmd/collection.h"
 #include "cmd/unit_util.h"
 #include "cmd/unit_find.h" // for radar iteration.
@@ -543,7 +542,7 @@ void GameCockpit::DrawTargetBoxes(){
 	  }
 	}
     }
-    target=(++uiter);
+    target=uiter.next();
   }
 
 }

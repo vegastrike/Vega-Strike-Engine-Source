@@ -1,193 +1,432 @@
-#include <stdlib.h>
-#include <vector>
+#include <list>
 #include "collection.h"
-#include <assert.h>
-#ifndef LIST_TESTING
 #include "unit_generic.h"
-#endif
 
-UnitCollection::UnitListNode::UnitListNode (Unit *unit):unit(unit), next(NULL){
-  if (unit) {
-    unit->Ref();
-  }
-}
-UnitCollection::UnitListNode::UnitListNode(Unit *unit, UnitListNode *next) : unit(unit), next(next) { 
-  if (unit) {
-    unit->Ref();
-  }
-}
+using std::list;
 
-UnitCollection::UnitListNode::~UnitListNode() { 
-  if(NULL!=unit) {
-    unit->UnRef(); 	
-  }
-  unit = NULL;
-  next = NULL;
-}
-void UnitCollection::destr() {
-  UnitListNode *tmp;
-  while (u->next) {
-    tmp = u->next;
-    u->next = u->next->next;
-    PushUnusedNode(tmp);
-  }
-  u->unit = NULL;
-  u->next = NULL;
-  PushUnusedNode(u);
-}
+// UnitIterator  BEGIN:
 
-void * UnitCollection::PushUnusedNode (UnitListNode * node) {
-  static UnitListNode cat(NULL,NULL);
-  static UnitListNode dog(NULL,&cat);
-  static bool cachunk=true;
-  if (cachunk) {
-    cachunk=false;
-    //VSFileSystem::vs_fprintf (stderr,"%x %x",&dog,&cat);
-  }
-  static std::vector <UnitCollection::UnitListNode * >dogpile;
-  if (node==NULL) {
-    return &dogpile;
-  }else {
-    node->next=&dog;
-    dogpile.push_back (node);
-  }
-  return NULL;
-}
-void UnitCollection::FreeUnusedNodes () {
-  static std::vector<UnitCollection::UnitListNode *> bakdogpile;
-  std::vector<UnitCollection::UnitListNode *> *dogpile = (std::vector <UnitCollection::UnitListNode *> *)PushUnusedNode (NULL);
-  bakdogpile.swap (*dogpile);
-  while (!dogpile->empty()) {
-    delete dogpile->back();
-    dogpile->pop_back ();
-  }
-}
-void UnitCollection::UnitIterator::moveBefore(UnitCollection&otherList) {
-  if (pos->next->unit) {
-    UnitListNode * tmp=pos->next->next;
-    otherList.prepend(pos->next);
-    pos->next=tmp;
-  }else {
-    assert(0);
-  }
-}
-void UnitCollection::prepend(UnitIterator *iter) {
-  UnitListNode *n = u;
-  Unit * tmp;
-  while((tmp=iter->current())) {//iter->current checks for killed()
-    n->next = new UnitListNode(tmp, n->next);
-    iter->advance();
-  }
-}
-void UnitCollection::append(UnitIterator *iter) {
-  UnitListNode *n = u;
-  while(n->next->unit!=NULL) n = n->next;
-  Unit * tmp;
-  while((tmp=iter->current())) {
-    n->next = new UnitListNode(tmp,n->next);
-    n = n->next;
-    iter->advance();
-  }
-}
-void UnitCollection::append(Unit *unit) { 
-  UnitListNode *n = u;
-  while(n->next->unit!=NULL) n = n->next;
-  n->next = new UnitListNode(unit, n->next);
-}	
-void UnitCollection::UnitListNode::PostInsert (Unit * unit) {
-  if(next->unit!=NULL)
-    next->next = new UnitListNode(unit, next->next);
-  else
-    next = new UnitListNode(unit, next);
-}
-void UnitCollection::UnitIterator::postinsert(Unit *unit) {
-  pos->PostInsert (unit);
-}
-void UnitCollection::FastIterator::postinsert(Unit *unit) {
-  pos->PostInsert (unit);
-}
-void UnitCollection::UnitListNode::Remove () {
-  if (next->unit) {
-    UnitListNode *tmp = next->next;
-    //    delete next; //takes care of unref! And causes a shitload of bugs
-    //concurrent lists, man
-    PushUnusedNode(next);
-    next = tmp;
-  }else {
-    assert (0);
-  }
-}
-void UnitCollection::UnitIterator::remove() {
-  pos->Remove ();
-}
-void UnitCollection::FastIterator::remove() {
-  pos->Remove ();
+UnitCollection::UnitIterator& UnitCollection::UnitIterator::operator=(const UnitCollection::UnitIterator& orig)
+{
+	col = orig.col;
+	it = orig.it;
+	col->reg(this);
+	return (*this);
 }
 
 
-
-
-void UnitCollection::ConstIterator::GetNextValidUnit () {
-  while (pos->next->unit?pos->next->unit->Killed():false) {
-    pos = pos->next;
-  }
+UnitCollection::UnitIterator::UnitIterator(const UnitIterator& orig)
+{
+	col = orig.col;
+	it = orig.it;
+	col->reg(this);
 }
 
-const UnitCollection &UnitCollection::operator = (const UnitCollection & uc){
-#ifdef _DEBUG
-  printf ("warning could cause problems with concurrent lists. Make sure no one is traversing gotten list");
-#endif
-  destr();
-  init();
-  un_iter ui = createIterator();
-  const UnitListNode * n = uc.u;
-  while (n) {
-    if (n->unit) {
-      ui.postinsert (n->unit);
-      ++ui;
-    }
-    n = n->next;
-  }
-  return uc;
-}
-UnitCollection::UnitCollection (const UnitCollection& uc):u(NULL) {
-  init();
-  un_iter ui = createIterator();
-  const UnitListNode * n = uc.u;
-  while (n) {
-    if (n->unit) {
-      ui.postinsert (n->unit);
-      ++ui;
-    }
-    n = n->next;
-  }
+
+UnitCollection::UnitIterator::UnitIterator(UnitCollection* orig)
+{
+	col = orig;
+	it = orig->u.begin();
+	col->reg(this);
 }
 
-bool UnitCollection::contains(const Unit *unit) const { 
-    if (empty()) return false; 
-    ConstFastIterator it=constFastIterator(); 
-    while (it.notDone()) {
-        if (it.current()==unit) 
-            return true; else 
-            it.advance(); 
-    }
-    return false; 
-};
 
-bool UnitCollection::remove(const Unit *unit) { 
-    bool res=false;
-    if (empty()) return false; 
-    FastIterator it=fastIterator(); 
-    while (it.notDone()) {
-        if (it.current()==unit) 
-            it.remove(), res=true; else
-            it.advance(); 
-    }
-    return res; 
-};
-
-void UnitCollection::cleanup() {
-    //NOTE: advance() will be cleaning up the list by itself
-    un_iter ui = createIterator();
-    while (ui.notDone()) ui.advance();
+UnitCollection::UnitIterator::~UnitIterator()
+{
+	if(col){
+		it = col->u.end();
+		col->unreg(this);
+	}
+	col = NULL;
 }
+
+
+bool UnitCollection::UnitIterator::isDone()
+{
+	if(it != col->u.end())
+		return(false);
+	return(true);
+}
+
+
+bool UnitCollection::UnitIterator::notDone()
+{
+	return(!isDone());
+}
+
+
+void UnitCollection::UnitIterator::remove()
+{
+	if(it != col->u.end())
+		it = col->erase(it);
+}
+
+
+void UnitCollection::UnitIterator::moveBefore(UnitCollection& otherlist)
+{
+	if(it != col->u.end()) {
+		otherlist.prepend(*it);
+		it = col->erase(it);
+	}
+}
+
+
+void UnitCollection::UnitIterator::preinsert(Unit *unit)
+{
+	if(unit)
+		it = col->insert(it,unit);
+}
+
+
+void UnitCollection::UnitIterator::postinsert(Unit *unit)
+{
+	list<Unit*>::iterator tmp = it;
+	if(unit) {
+		++tmp;
+		col->insert(tmp,unit);
+	}
+}
+
+
+Unit* UnitCollection::UnitIterator::current()
+{
+	if(it != col->u.end() && !col->empty())
+		return (*it);
+	return(NULL);
+}
+
+
+void UnitCollection::UnitIterator::advance()
+{
+	if(col->u.empty() || it == col->u.end()) return;
+	++it;
+	while(it != col->u.end()) {
+		if((*it) == NULL)
+			it = col->erase(it);
+		else if((*it)->Killed())
+			it = col->erase(it);
+		else
+			break;
+	}
+}
+
+
+Unit* UnitCollection::UnitIterator::next()
+{
+	advance();
+	if(it == col->u.end())
+		return(NULL);
+	return (*it);
+}
+
+
+const UnitCollection::UnitIterator  UnitCollection::UnitIterator::operator ++(int)
+{
+	UnitCollection::UnitIterator tmp(*this);
+	advance();
+	return(tmp);
+}
+
+
+const UnitCollection::UnitIterator& UnitCollection::UnitIterator::operator ++()
+{
+	advance();
+	return(*this);
+}
+
+
+Unit* UnitCollection::UnitIterator::operator *()
+{
+	if(it != col->u.end() && !col->empty())
+		return (*it);
+	return(NULL);
+}
+
+
+// UnitIterator END:
+
+// ConstIterator Begin:
+
+UnitCollection::ConstIterator& UnitCollection::ConstIterator::operator=(const UnitCollection::ConstIterator& orig)
+{
+	col = orig.col;
+	it = orig.it;
+	return(*this);
+}
+
+
+UnitCollection::ConstIterator::ConstIterator(const ConstIterator& orig)
+{
+	col = orig.col;
+	it = orig.it;
+}
+
+
+UnitCollection::ConstIterator::ConstIterator(const UnitCollection* orig)
+{
+	col = orig;
+	it = orig->u.begin();
+}
+
+
+UnitCollection::ConstIterator::~ConstIterator()
+{
+	if(col)
+		it = col->u.end();
+	col = NULL;
+}
+
+
+const Unit* UnitCollection::ConstIterator::next()
+{
+	advance();
+	if(it!= col->u.end())
+		return(*it);
+	return(NULL);
+}
+
+
+bool UnitCollection::ConstIterator::isDone()
+{
+	if(it != col->u.end())
+		return(false);
+	return(true);
+}
+
+
+bool UnitCollection::ConstIterator::notDone()
+{
+	return(!isDone());
+}
+
+
+void UnitCollection::ConstIterator::advance()
+{
+	if(col->u.empty()) return;
+	++it;
+	while(it != col->u.end()) {
+		if((*it) == NULL)
+			++it;
+		if((*it)->Killed())
+			++it;
+		else
+			break;
+	}
+}
+
+
+const UnitCollection::ConstIterator& UnitCollection::ConstIterator::operator ++()
+{
+	advance();
+	return(*this);
+}
+
+
+const UnitCollection::ConstIterator UnitCollection::ConstIterator::operator ++(int)
+{
+	UnitCollection::ConstIterator tmp(*this);
+	advance();
+	return(tmp);
+}
+
+
+// ConstIterator  END:
+
+// UnitCollection  BEGIN:
+
+UnitCollection::UnitCollection()
+{
+	destr();
+}
+
+
+UnitCollection::UnitCollection( const UnitCollection& uc)
+{
+	destr();
+	list<Unit*>::const_iterator in = uc.u.begin();
+	while(in != uc.u.end()) {
+		append(*in);
+		++in;
+	}
+}
+
+
+UnitCollection::~UnitCollection()
+{
+	destr();
+}
+
+
+UnitCollection::UnitIterator UnitCollection::createIterator()
+{
+	return(UnitIterator(this));
+}
+
+
+UnitCollection::FastIterator UnitCollection::fastIterator()
+{
+	return(FastIterator(this));
+}
+
+
+void UnitCollection::insert_unique(Unit* unit)
+{
+	if(unit) {
+		for(list<Unit*>::iterator it = u.begin();it!= u.end();++it) {
+			if(*it == unit)
+				return;
+		}
+		unit->Ref();
+		u.push_front(unit);
+	}
+}
+
+
+void UnitCollection::prepend(Unit* unit)
+{
+	if(unit) {
+		unit->Ref();
+		u.push_front(unit);
+	}
+}
+
+
+void UnitCollection::prepend(UnitIterator* it)
+{
+	Unit *tmp = NULL;
+	if(!it) return;
+	list<Unit*>::iterator tmpI = u.begin();
+	while((tmp = it->current())) {
+		tmp->Ref();
+		u.insert(tmpI,tmp);
+		++tmpI;
+		it->advance();
+	}
+}
+
+
+void UnitCollection::append(Unit* un)
+{
+	if(un) {
+		un->Ref();
+		u.push_back(un);
+	}
+}
+
+
+void UnitCollection::append(UnitIterator *it)
+{
+	if(!it) return;
+	Unit *tmp = NULL;
+	while((tmp = it->current())) {
+		tmp->Ref();
+		u.push_back(tmp);
+		it->advance();
+	}
+}
+
+
+list<Unit*>::iterator UnitCollection::insert(list<Unit*>::iterator temp,Unit* unit)
+{
+	if(unit) {
+		unit->Ref();
+		return(u.insert(temp,unit));
+	}
+	return(u.end());
+}
+
+
+void UnitCollection::clear()
+{
+	destr();
+}
+
+
+void UnitCollection::destr()
+{
+	for(list<Unit*>::iterator it = u.begin();it!=u.end();it = u.erase(it)) {
+		(*it)->UnRef();
+	}
+}
+
+
+bool UnitCollection::contains(const Unit* unit) const
+{
+	if(u.empty() || !unit)
+		return(false);
+	for (list<Unit*>::const_iterator it = u.begin();it != u.end();++it) {
+		if((*it) == unit && !(*it)->Killed())
+			return(true);
+	}
+	return(false);
+}
+
+
+list<Unit*>::iterator  UnitCollection::erase(list<Unit*>::iterator it)
+{
+	if(u.empty() || it == u.end())
+		return (it);
+	Unit* tUnit = *it;
+	for(list<UnitIterator*>::iterator t = activeIters.begin();t != activeIters.end(); ++t){
+		if(it == (*t)->it)
+			++(*t)->it;
+	}
+	it = u.erase(it);
+	tUnit->UnRef();
+	return(it);
+}
+
+
+bool UnitCollection::remove(const Unit *unit)
+{
+	bool res = false;
+	if(u.empty() || !unit)
+		return(false);
+	for(list<Unit*>::iterator it = u.begin(); it!= u.end();) {
+		if((*it) == unit) {
+			it = erase(it);		
+			res = true;
+		}
+		else
+			++it;
+	}
+	return (res);
+}
+
+
+const UnitCollection& UnitCollection::operator = (const UnitCollection& uc)
+{
+	destr();
+	list<Unit*>::const_iterator in = uc.u.begin();
+	while(in != uc.u.end()) {
+		append(*in);
+		++in;
+	}
+	return (*this);
+}
+
+
+void UnitCollection::cleanup()
+{
+	for(list<Unit*>::iterator it = u.begin();it != u.end();) {
+		if((*it)->Killed())
+			it = erase(it);
+		else
+			++it;
+	}
+}
+
+void UnitCollection::reg(un_iter* tmp)
+{
+	activeIters.push_back(tmp);
+}
+
+void UnitCollection::unreg(un_iter* tmp)
+{
+	if(!activeIters.empty())
+		activeIters.remove(tmp);
+}
+
+
+
+// UnitCollection END:

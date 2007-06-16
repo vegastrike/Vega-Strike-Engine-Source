@@ -15,8 +15,16 @@ AC_MSG_CHECKING([for python])
 FOUND_PYTHON=no
 PYTHON_CXXFLAGS=""
 PYTHON_LIBS=""
+AC_ARG_WITH(python,AC_HELP_STRING([[--with-python-version[=VERSION]]],[ Enter 2, 2.2, 2.3, 2.4, 2.5 (default 2.4)]))
+case "$with_python_version" in 
+"") with_python_version=2.4 ;; 
+"2" | "2.2" | "2.3" | "2.4" | "2.5") ;;
+*) AC_MSG_ERROR([${with_python_version} is not valid]) ;;
+esac
 
-PYTHON_binchk="python python2 python2.2 python2.3 python2.4"
+
+
+PYTHON_binchk="python${with_python_version} python2.4 python2.5 python2.3 python2.2 python2 python"
 for i in ${PYTHON_binchk};
 do
     PYTHON_check=`$i -V 2>/dev/null; echo $?`

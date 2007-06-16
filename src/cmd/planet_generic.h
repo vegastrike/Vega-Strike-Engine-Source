@@ -85,44 +85,27 @@ public:
   virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal,  float dist) {this->Unit::reactToCollision(smaller,biglocation,bignormal,smalllocation,smallnormal,dist);}
   virtual void gravitate(UnitCollection *units);
 
-  class PlanetIterator : public UnIterator {
-    UnitCollection planetStack;
-    un_iter *pos;
-  public:
-    PlanetIterator(Planet *p) : planetStack() { 
-      planetStack.append(p);
-      pos = new un_iter (planetStack.createIterator());
-    }
-    virtual ~PlanetIterator() {
-      delete pos;
-    }
-    virtual void preinsert(Unit *unit) {
-      abort();
-    }
-    virtual void postinsert(Unit *unit) {
-      abort();
-    }
-    virtual void remove() {
-      abort();
-    }
-    virtual Unit *current() {
-      return pos->current();
-    }
-    virtual void advance() {
-      if(pos->current()==NULL)
-	return;
-	
-      Unit *currentPlanet = pos->current();
-	  if (currentPlanet->isUnit()==PLANETPTR) {
-	    
-	    for(un_iter tmp (((Planet *)currentPlanet)->satellites.createIterator()); tmp.current()!=NULL; tmp.advance()) {
-			planetStack.append(tmp.current());
-		}
-	  }
-      pos->advance();
-    }
-  };
-  UnIterator *createIterator() { return new PlanetIterator(this);}
+    class PlanetIterator : public un_iter
+    {
+		public:
+			PlanetIterator(Planet *p) { col = new UnitCollection;col->append(p);it = col->u.begin();}
+			~PlanetIterator() { delete col;}
+			void preinsert(Unit *unit) {abort();}
+			void postinsert(Unit *unit) { abort();}
+			void remove() { abort(); }
+			void advance() 
+			{
+				if(col->u.empty()) return;
+				Unit *cur = *it;
+				if (cur->isUnit()==PLANETPTR) {
+					for(un_iter tmp(((Planet *)cur)->satellites.createIterator()); tmp.notDone(); tmp.advance()) {
+						col->append((*tmp));
+					}
+				}
+				++it;
+			}
+	};
+	un_iter *createIterator() { return new PlanetIterator(this);}
   bool isAtmospheric  () {
     return hasLights()||atmospheric;
   }

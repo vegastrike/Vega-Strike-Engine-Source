@@ -67,13 +67,6 @@ if test "x${CPPFLAGS:-notset}" = "xnotset" ; then
 fi
 
 
-saved_CXXFLAGS="${CXXFLAGS}"
-CXXFLAGS="-falign-loops=4"
-AC_TRY_COMPILE(, , [falign=yes], [falign=no])
-CXXFLAGS="-malign-loops=4"
-AC_TRY_COMPILE(, , [malign=yes], [malign=no])
-CXXFLAGS="${saved_CXXFLAGS}"
-
 case $target in
   *Darwin* | *darwin*)
     is_macosx=yes
@@ -169,13 +162,6 @@ VS_CPPFLAGS=""
 VS_CXXFLAGS="-pipe "
 VS_LIBS=""
 
-if test "x${falign}" = "xyes"; then
-VS_ALIGN="-falign-loops=2 -falign-jumps=2 -falign-functions=2"
-else if test "x${malign}" = "xyes"; then
-VS_ALIGN="-malign-loops=2 -malign-jumps=2 -malign-functions=2"
-else VS_ALIGN=""
-fi
-fi
 
 
 if test "x${bsdthread}" = "xyes"; then
@@ -233,9 +219,12 @@ else
 fi
 
 # Remove these flags beforehand... this should not remove functionality.
-CXXFLAGS=${CFLAGS#-g}
+CXXFLAGS=${CXXFLAGS#-g}
+CXXFLAGS=${CXXFLAS#-O2}
 VS_CXXFLAGS=${VS_CXXFLAGS#-g}
+VS_CXXFLAGS=${VS_CXXFLAGS#-O2}
 CFLAGS=${CFLAGS#-g}
+CFLAGS=${CFLAGS#-O2}
 
 AC_ARG_ENABLE(ggdb3, AC_HELP_STRING([--enable-ggdb3], [Add the -ggdb3 compiler flag.]), 
 	if test $enableval = yes ; then
@@ -306,7 +295,7 @@ fi
 
 AM_CONDITIONAL([VS_MAKE_NO_CLIENT], [test "x$build_client" = "xno"]) 
 
-VS_CXXFLAGS="${VS_CXXFLAGS} ${VS_ALIGN} ${USER_FLAGS}"
+VS_CXXFLAGS="${VS_CXXFLAGS} ${USER_FLAGS}"
 
 dnl --------------------------------------------------------------------------
 dnl Check if compiling for Win32
@@ -385,10 +374,6 @@ AC_MSG_RESULT([${is_freebsd}])
 #fi
 
 
-dnl Python needs to check known paths for the .so file.
-dnl We need a way for the user to specify his own path.
-AC_ARG_WITH(python-libs, AC_HELP_STRING([--with-python-libs=DIR], [Location of python library]),PYTHON_LIBPATH=$withval)
-AC_ARG_WITH(python-inc, AC_HELP_STRING([--with-python-libs=DIR], [Location of python library]),PYTHON_INCPATH=$withval)
 if test "x$is_macosx" = "xyes" ; then
 	CXXFLAGS="$CXXFLAGS -I/Developer/SDKs/MacOSX10.2.8sdk/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes -DHAVE_PYTHON=1 -I$PYTHON_INCPATH "
 	CPPFLAGS="$CPPFLAGS -Wno-long-double"
@@ -798,7 +783,7 @@ AC_LANG(C++)
 
 # The boost include must come first to override includes from elsewhere
 CPPFLAGS="${BOOST_CPPFLAGS} ${CPPFLAGS} ${VS_CPPFLAGS} ${PYTHON_CPPFLAGS} ${CG_CPPFLAGS} ${CXXFLAGS} "' -I$(top_srcdir)/src '
-CXXFLAGS="${CXXFLAGS} ${VS_CXXFLAGS} ${PTHREAD_CXXFLAGS} -pipe"
+CXXFLAGS="${CXXFLAGS} ${VS_CXXFLAGS} ${PTHREAD_CXXFLAGS}"
 
 LIBS="${LDFLAGS} ${LIBS} ${VS_LIBS} ${PYTHON_LIBS} ${PTHREAD_LIBS} ${CG_LIBS}"
 

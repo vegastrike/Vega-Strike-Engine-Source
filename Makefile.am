@@ -3,6 +3,7 @@ ACLOCAL_AMFLAGS = -I m4scripts
 
 
 #BOOST_BEGIN -- Data between the BOOST_AUTO and BOOST_END tags auto generated.
+if !BOOSTSYSTEM
 BOOSTDIR=boost
 if BOOST1_33
 BOOSTSOURCES = \
@@ -88,6 +89,7 @@ endif !BOOST1_33
 #	 -I/System/Library/Frameworks/Carbon.framework/Versions/A/Headers
 #endif
 
+endif 
 
 EXTRA_DIST = \
   src/cmd/unit.cpp \
@@ -98,9 +100,6 @@ EXTRA_DIST = \
   src/cmd/unit_physics.cpp \
   vc98/vegastrike.dsp \
   vc98/vegastrike.dsw \
-  $(BOOSTDIR)/cvsadd \
-  $(BOOSTDIR)/update \
-  $(BOOSTDIR)/integrating.txt \
   README \
   README.MACOSX.rtf \
   README.sgi \
@@ -331,7 +330,6 @@ LIBCMD = \
   src/cmd/alphacurve.h \
   src/cmd/asteroid_generic.cpp \
   src/cmd/asteroid_generic.h \
-  src/cmd/atmosphere_generic.cpp \
   src/cmd/beam_generic.cpp \
   src/cmd/beam.h \
   src/cmd/click_list.h \
@@ -420,9 +418,15 @@ bin_PROGRAMS = \
   vsrmake \
   $(GTKUTILS_PROG)
 
+
+if !BOOSTSYSTEM
 noinst_LIBRARIES=\
   libboost_python.a \
   libnetlowlevel.a
+else
+noinst_LIBRARIES= \
+  libnetlowlevel.a
+endif 
 
 LIBCMDSERVER = \
   src/cmd/atmosphere_server.cpp \
@@ -439,9 +443,10 @@ LIBSCRIPTSERVER = \
   src/cmd/script/c_alike/c_alike.tab.cpp \
   src/cmd/script/c_alike/lex.yy.cpp
 
-
+if !BOOSTSYSTEM
 libboost_python_a_SOURCES = \
   $(BOOSTSOURCES)
+endif
 
 
 LIBGFX = \
@@ -656,23 +661,47 @@ soundserver_LDADD = \
   $(SDL_LIBS) \
   $(SDL_MIXER_LIBS)
 
-vegastrike_LDADD = \
+if !BOOSTSYSTEM
+  vegastrike_LDADD = \
   libboost_python.a \
   libnetlowlevel.a \
+  -lz  
+else
+  vegastrike_LDADD = \
+  libnetlowlevel.a \
+  -lboost_python-st \
   -lz
+endif  
 
-vegastrike_DEPENDENCIES = \
+if !BOOSTSYSTEM 
+  vegastrike_DEPENDENCIES = \
   libboost_python.a \
   libnetlowlevel.a
+else
+  vegastrike_DEPENDENCIES = \
+    libnetlowlevel.a
+endif
 
+if !BOOSTSYSTEM
 vegaserver_LDADD = \
   libboost_python.a \
   libnetlowlevel.a \
   -lz
+else
+vegaserver_LDADD = \
+  libnetlowlevel.a \
+  -lboost_python-st \
+  -lz
+endif
 
+if !BOOSTSYSTEM
 vegaserver_DEPENDENCIES = \
   libboost_python.a \
   libnetlowlevel.a
+else
+vegaserver_DEPENDENCIES = \
+  libnetlowlevel.a
+endif
 
 
 accountserver_LDADD = \
@@ -769,7 +798,6 @@ librootgeneric = \
   src/savegame.cpp \
   src/savegame.h \
   src/SharedPool.h \
-  src/SharedPool.cpp \
   src/star_system_generic.cpp \
   src/star_system_generic.h \
   src/star_system_xml.cpp \
@@ -840,7 +868,6 @@ accountserver_SOURCES = \
   src/vsfilesystem.h \
   src/xml_support.cpp \
   src/xml_support.h \
-  src/SharedPool.cpp \
   src/SharedPool.h
 
 vegastrike_SOURCES = \
@@ -1059,13 +1086,14 @@ vslauncher_SOURCES= \
 #	flex -o src/cmd/script/c_alike/lex.yy.cpp src/cmd/script/c_alike/c_alike.lex 
 
 #The following is a way to get around the HUGE number of files that boost contains.
+if !BOOSTSYSTEM 
 dist-hook:
 	$(mkdir_p) $(distdir)/$(BOOSTDIR)
 	for x in `find $(BOOSTDIR) -maxdepth 1 ! -wholename $(BOOSTDIR) -type d -printf '%f\n' |sort -r`; do \
 	  find $(BOOSTDIR)/$$x/boost "(" -name CVS -prune ")" , "(" ! -name CVS -type d -printf "D %p\n" ")" , "(" -type f -printf "F %p\n" ")" \
 	    | $(AWK) '$$1=="D"{print("'"$(mkdir_p) $(distdir)/"'"$$2)}; $$1=="F"{print("cp -p "$$2"'" $(distdir)/"'/"$$2)};'  | $(SHELL); \
 done
-
+endif
 
 %.h.gch: %.h
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $<

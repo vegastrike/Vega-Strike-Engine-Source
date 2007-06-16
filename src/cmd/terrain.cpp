@@ -8,7 +8,6 @@
 #include "vegastrike.h"
 #include "universe.h"
 #include <vector>
-#include "iterator.h"
 #include "collection.h"
 #include "building.h"
 static std::vector <Terrain *> allterrains;

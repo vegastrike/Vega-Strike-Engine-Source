@@ -5,11 +5,7 @@ template <typename T, typename RT> SharedPool<T,RT> * SharedPool<T,RT>::ms_singl
 
 template<typename T, typename RT> SharedPool<T,RT>::SharedPool()
 #ifdef __GLIBC__
-	: referenceCounter(
-#if defined(_WIN32)||__GNUC__!=2
-                           RT::min_buckets
-#endif
-                           )
+	: referenceCounter(RT::min_buckets)
 #endif
 {
 	if (ms_singleton == 0)

@@ -136,8 +136,6 @@ public:
 # define M_PI_2		1.57079632679489661923	/* pi/2 */
 #endif
 static float *mview = NULL;
-void 
-UnitCollection::UnitIterator::GetNextValidUnit() {}
 VSSprite::VSSprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
   xcenter = 0;
   ycenter = 0;

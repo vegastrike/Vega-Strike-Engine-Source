@@ -208,4 +208,5 @@ template<typename T> bool operator==(const typename SharedPool<T>::Reference &r,
 	return r.get()==s;
 }
 
+#include "SharedPool.cpp"
 #endif//__STRINGPOOL_H__INCLUDED__

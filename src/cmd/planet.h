@@ -12,7 +12,6 @@ ok *
 #include "ai/order.h"
 //#include "physics.h"
 #include "collection.h"
-#include "iterator.h"
 #include <vector>
 #include <string>
 

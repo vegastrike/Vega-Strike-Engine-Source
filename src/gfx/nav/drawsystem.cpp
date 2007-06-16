@@ -8,7 +8,6 @@
 #include "star_system.h"
 #include "cmd/unit_generic.h"
 #include "cmd/unit_factory.h"
-#include "cmd/iterator.h"
 #include "cmd/collection.h"
 #include "gfx/hud.h"
 #include "gfx/vdu.h"

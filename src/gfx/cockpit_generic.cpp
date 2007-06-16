@@ -8,7 +8,6 @@
 #include "cmd/unit_generic.h"
 #include "cmd/unit_factory.h"
 #include "cmd/unit_util.h"
-#include "cmd/iterator.h"
 #include "cmd/collection.h"
 #include "lin_time.h"//for fps
 #include "configxml.h"

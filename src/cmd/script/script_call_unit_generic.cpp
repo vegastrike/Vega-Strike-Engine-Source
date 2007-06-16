@@ -40,7 +40,6 @@
 
 #include "vegastrike.h"
 #include "cmd/collection.h"
-#include "cmd/iterator.h"
 #include "cmd/planet_generic.h"
 #include "cmd/ai/order.h"
 #include "cmd/ai/aggressive.h"
@@ -1301,7 +1300,7 @@ void Mission::findNextEnemyTarget(Unit *my_unit){
 	}
 	else{
 	  //	  printf("relation was: %f %d %d\n",_Universe->GetRelation(my_faction,other_faction),my_faction,other_faction);
-	  unit=++(uiter);
+	  unit=uiter.next();
 	  i++;
 	}
       }
@@ -1326,7 +1325,7 @@ static Unit * getIthUnit (un_iter uiter, int unit_nr) {
       unit=NULL;
     }
     else{
-      unit=++(uiter);
+      unit=uiter.next();
       i++;
     }
   }

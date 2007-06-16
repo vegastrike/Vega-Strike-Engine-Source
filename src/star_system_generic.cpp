@@ -766,7 +766,6 @@ void StarSystem::Update( float priority)
 	  UnitCollection::UnitIterator iter;
 	  TerrainCollide();
 	  Unit::ProcessDeleteQueue();
-      UnitCollection::FreeUnusedNodes();
 	  current_stage=MISSION_SIMULATION;
       collidetable->Update();
 	{
@@ -864,8 +863,6 @@ void StarSystem::Update(float priority , bool executeDirector) {
       if (_Universe->AccessCockpit(j)->activeStarSystem==this) {
 	_Universe->SetActiveCockpit(j);
         _Universe->AccessCockpit(j)->updateAttackers();
-        if (j==_Universe->numPlayers()-1)
-          UnitCollection::FreeUnusedNodes();// last thing in a frame
 
 	if (_Universe->AccessCockpit(j)->Update()) {
 	  SIMULATION_ATOM =  normal_simulation_atom;

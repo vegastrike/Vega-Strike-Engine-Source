@@ -1433,7 +1433,7 @@ using namespace StarXML;
   */
   f.Close();
   XML_ParserFree (parser);
-  UnIterator * iter;
+  un_iter  *iter;
   unsigned int i;
   for (i =0;i<xml->moons.size();i++) {
     if (xml->moons[i]->isUnit()==PLANETPTR) {
