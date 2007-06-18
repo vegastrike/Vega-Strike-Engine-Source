@@ -100,7 +100,7 @@ void setActiveModifiers(unsigned int mask)
 {
 	_activeModifiers = mask;
 }
-
+#ifdef SDL_WINDOWING
 void setActiveModifiersSDL(SDLMod mask)
 {
     setActiveModifiers(
@@ -108,18 +108,18 @@ void setActiveModifiersSDL(SDLMod mask)
         ((mask&(KMOD_LCTRL|KMOD_RCTRL))?KB_MOD_CTRL:0) |
         ((mask&(KMOD_LALT|KMOD_RALT))?KB_MOD_ALT:0) );
 }
-
+#endif
 unsigned int getActiveModifiers()
 {
     return _activeModifiers;
 }
-
 unsigned int pullActiveModifiers()
 {
+#ifdef SDL_WINDOWING
     setActiveModifiersSDL(SDL_GetModState());
+#endif
     return getActiveModifiers();
 }
-
 unsigned int getModifier(const char* mod_name){
   if (mod_name[0]=='\0')
     return 0;
