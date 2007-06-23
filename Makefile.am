@@ -825,7 +825,7 @@ librootserver = \
   src/gfxlib_struct_server.cpp \
   src/libaudioserver.cpp \
   src/libserver.cpp \
-  src/universe_util_server.cpp 
+  src/universe_util_server.cpp
 
 LIBENGINE_COMMON = \
   $(LIBAI) \
@@ -842,7 +842,6 @@ vegaserver_SOURCES = \
   $(LIBCMDSERVER) \
   $(LIBNETSERVER) \
   $(librootserver) \
-  $(LIBUNIUTIL) \
   $(LIBSCRIPTSERVER) \
   $(LIBGFXSERVER) \
   src/vegaserver.cpp \
