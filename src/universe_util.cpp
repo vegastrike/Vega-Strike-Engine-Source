@@ -18,7 +18,6 @@
 #include "cmd/base.h"
 
 
-
 extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );
 extern void RespawnNow (Cockpit * cp);
 extern void TerminateCurrentBase(void);
@@ -31,13 +30,87 @@ extern const vector <string>& ParseDestinations (const string &value);
 
 
 using std::string;
-
 #define activeSys _Universe->activeStarSystem() //less to write
   void ClientServerSetLightContext (int lightcontext) {
     GFXSetLightContext(lightcontext);
   }
 
+
 namespace UniverseUtil {
+
+
+Unit* PythonUnitIter::current()
+{
+	return(**this);
+}
+
+void PythonUnitIter::advanceSignificant()
+{
+	advance();
+	while(it != col->u.end() && !UnitUtil::isSignificant(*it))
+		advance();
+}
+
+void PythonUnitIter::advanceInsignificant()
+{
+	advance();
+	while(it != col->u.end() && UnitUtil::isSignificant(*it))
+		advance();
+}
+
+void PythonUnitIter::advancePlanet()
+{
+	advance();
+	while(it != col->u.end() && !(*it)->isPlanet())
+		advance();
+}
+
+void PythonUnitIter::advanceJumppoint()
+{
+	advance();
+	while(it != col->u.end() && !(*it)->isJumppoint())
+		advance();
+}
+
+void PythonUnitIter::advanceN(int n)
+{
+	while(*it && n > 0){
+		advance();
+		--n;
+	}
+}
+
+void PythonUnitIter::advanceNSignificant(int n)
+{
+	while(it != col->u.end() && n > 0){
+		advanceSignificant();
+		--n;
+	}
+}
+
+void PythonUnitIter::advanceNInsignificant(int n)
+{
+	while(it != col->u.end() && n > 0){
+		advanceInsignificant();
+		--n;
+	}
+}
+
+void PythonUnitIter::advanceNPlanet(int n)
+{
+	while(it != col->u.end() && n > 0){
+		advancePlanet();
+		--n;
+	}
+}
+
+void PythonUnitIter::advanceNJumppoint(int n)
+{
+	while(it != col->u.end() && n > 0 ){
+		advanceJumppoint();
+		--n;
+	}
+}
 
 	void playVictoryTune () {
         static string newssong=vs_config->getVariable("audio","missionvictorysong","../music/victory.ogg");
@@ -164,6 +237,5 @@ namespace UniverseUtil {
 	{
 		return GetStarSystemLoading();
 	}
-
 }
 #undef activeSys

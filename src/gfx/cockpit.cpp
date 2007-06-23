@@ -510,7 +510,6 @@ void GameCockpit::DrawTargetBoxes(){
   StarSystem *ssystem=_Universe->activeStarSystem();
   UnitCollection *unitlist=&ssystem->getUnitList();
   //UnitCollection::UnitIterator *uiter=unitlist->createIterator();
-  un_iter uiter=unitlist->createIterator();
   
   Vector CamP,CamQ,CamR;
   _Universe->AccessCamera()->GetPQR(CamP,CamQ,CamR);
@@ -521,9 +520,8 @@ void GameCockpit::DrawTargetBoxes(){
   GFXDisable (DEPTHWRITE);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (LIGHTING);
-
-  Unit *target=uiter.current();
-  while(target!=NULL){
+  Unit *target;
+  for(un_iter uiter=unitlist->createIterator();target = *uiter;++uiter){
     if(target!=un){
         QVector Loc(target->Position());
 
@@ -542,7 +540,6 @@ void GameCockpit::DrawTargetBoxes(){
 	  }
 	}
     }
-    target=uiter.next();
   }
 
 }
@@ -669,7 +666,6 @@ void GameCockpit::DrawTurretTargetBoxes () {
   Unit * parun = parent.GetUnit();
   if (!parun)
     return;
-  UnitCollection::UnitIterator iter = parun->getSubUnits();
   Unit * un;
 
   GFXDisable (TEXTURE0);
@@ -680,8 +676,7 @@ void GameCockpit::DrawTurretTargetBoxes () {
 
   //This avoids rendering the same target box more than once
   std::set<void*> drawn_targets;
-
-  while (NULL!=(un=iter.current())) {
+  for(un_iter iter = parun->getSubUnits();un = *iter;++iter){
 	if (!un)
       return;
 	if (un->GetNebula()!=NULL)
@@ -689,7 +684,6 @@ void GameCockpit::DrawTurretTargetBoxes () {
     Unit *target = un->Target();
     void *vtgt=(void*)target;
     if (!target||(drawn_targets.count(vtgt)>0)){
-      iter.advance();
       continue;
     }
     drawn_targets.insert(vtgt);
@@ -727,8 +721,6 @@ void GameCockpit::DrawTurretTargetBoxes () {
     GFXVertexf (Loc+(-CamQ).Cast()*rSize*.8);
 	GFXEnd();
     GFXDisable(SMOOTH);
-
-    iter.advance();
   }
 
 }
@@ -1065,7 +1057,6 @@ void GameCockpit::DrawEliteBlips (Unit * un) {
   static GFXColor black_and_white=DockBoxColor ("black_and_white"); 
   Unit::Computer::RADARLIM * radarl = &un->GetComputerData().radar;
   UnitCollection * drawlist = &_Universe->activeStarSystem()->getUnitList();
-  un_iter iter = drawlist->createIterator();
   Unit * target;
   Unit * makeBigger = un->Target();
   float s,t,es,et,eh;
@@ -1081,7 +1072,7 @@ void GameCockpit::DrawEliteBlips (Unit * un) {
     DrawRadarCircles (xcent,ycent,xsize,ysize,textcol);
   }
   static bool draw_significant_blips = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_significant_blips","true"));
-  while ((target = iter.current())!=NULL) {
+  for(un_iter iter = drawlist->createIterator();target = *iter;++iter){
     if (target!=un) {
       static bool autolanding_enable=XMLSupport::parse_bool(vs_config->getVariable("physics","AutoLandingEnable","false"));
       if (autolanding_enable)
@@ -1093,11 +1084,9 @@ void GameCockpit::DrawEliteBlips (Unit * un) {
 	if (makeBigger==target) {
 	  un->Target(NULL);
 	}
-	iter.advance();	
 	continue;
       }
       if (makeBigger!=target&&draw_significant_blips==false&&getTopLevelOwner()==target->owner){
-	iter.advance();	
 	continue;      
       }
 
@@ -1145,7 +1134,6 @@ void GameCockpit::DrawEliteBlips (Unit * un) {
 
       GFXPointSize(1);
     }
-    iter.advance();
   }
   GFXDisable (SMOOTH);
   GFXPointSize (1);

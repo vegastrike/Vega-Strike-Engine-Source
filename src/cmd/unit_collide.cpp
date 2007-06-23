@@ -316,14 +316,14 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
 	}
       }
     }
-    UnitCollection::UnitIterator i;
+    un_iter i;
     static float rsizelim = XMLSupport::parse_float (vs_config->getVariable ("physics","smallest_subunit_to_collide",".2"));
     clsptr bigtype=bigasteroid?ASTEROIDPTR:bigger->isUnit();
     clsptr smalltype=smallasteroid?ASTEROIDPTR:smaller->isUnit();
     if (bigger->SubUnits.empty()==false&&(bigger->graphicOptions.RecurseIntoSubUnitsOnCollision==true||bigtype==ASTEROIDPTR)) {
       i=bigger->getSubUnits();
       float rad=smaller->rSize();
-      for (Unit * un;(un=i.current())!=NULL;i.advance()) {
+      for (Unit * un;un=*i;++i) {
         float subrad=un->rSize();
 	if ((bigtype!=ASTEROIDPTR)&&(subrad/bigger->rSize()<rsizelim)) {
 	  break;
@@ -340,7 +340,7 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
     if (smaller->SubUnits.empty()==false&&(smaller->graphicOptions.RecurseIntoSubUnitsOnCollision==true||smalltype==ASTEROIDPTR)) {
       i=smaller->getSubUnits();
       float rad=bigger->rSize();
-      for (Unit * un;(un=i.current())!=NULL;i.advance()) {
+      for (Unit * un;un=*i;++i) {
         float subrad=un->rSize();
 	if ((smalltype!=ASTEROIDPTR)&&(subrad/smaller->rSize()<rsizelim)) {
 	  //	  printf ("s:%f",un->rSize()/smaller->rSize());
@@ -575,7 +575,7 @@ Unit * Unit::queryBSP (const QVector &pt, float err, Vector & norm, float &dist,
   int i;
   if ((!SubUnits.empty())&&graphicOptions.RecurseIntoSubUnitsOnCollision) {
     un_fiter i = SubUnits.fastIterator();
-    for (Unit * un;(un=i.current())!=NULL;i.advance()) {
+    for (Unit * un;un=*i;++i) {
       Unit * retval;
       if ((retval=un->queryBSP(pt,err, norm,dist,ShieldBSP))) {
 		  return retval;
@@ -690,7 +690,7 @@ Unit * Unit::queryBSP (const QVector &start, const QVector & end, Vector & norm,
   Unit * tmp;
   float rad=this->rSize();
   if ((!SubUnits.empty())&&graphicOptions.RecurseIntoSubUnitsOnCollision)    
-    if (NULL!=(tmp=SubUnits.fastIterator().current()))
+    if (tmp=*SubUnits.fastIterator())
       rad+=tmp->rSize();
   if (!globQuerySphere(start,end,cumulative_transformation_matrix.p,rad))
     return NULL;
@@ -698,7 +698,7 @@ Unit * Unit::queryBSP (const QVector &start, const QVector & end, Vector & norm,
   if (graphicOptions.RecurseIntoSubUnitsOnCollision)
   if (!SubUnits.empty()) {
     un_fiter i(SubUnits.fastIterator());
-    for (Unit * un;(un=i.current())!=NULL;i.advance()) {
+    for (Unit * un;un=*i;++i) {
       if ((tmp=un->queryBSP(start,end, norm,distance,ShieldBSP))!=0) {
 	return tmp;
       }

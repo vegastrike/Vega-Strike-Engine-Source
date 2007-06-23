@@ -51,9 +51,9 @@ bool GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
 	  Unit::TransferUnitToSystem(pendingjump[kk]->dest);
           ret=true;
 
-      UnitCollection::UnitIterator iter = pendingjump[kk]->orig->getUnitList().createIterator();
       Unit * unit;
-      while((unit = iter.current())!=NULL) {
+
+	  for(un_iter iter = pendingjump[kk]->orig->getUnitList().createIterator();unit = *iter;++iter){
 	if (unit->Threat()==this) {
 	  unit->Threaten (NULL,0);
 	}
@@ -77,7 +77,6 @@ bool GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
 		  }
 	  }
 	}
-	iter.advance();
       }
       Cockpit * an_active_cockpit = _Universe->isPlayerStarship(this);
       if (an_active_cockpit!=NULL) {
@@ -98,18 +97,18 @@ bool GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
       
       _Universe->setActiveStarSystem(pendingjump[kk]->dest);
       vector <Unit *> possibilities;
-      iter = pendingjump[kk]->dest->getUnitList().createIterator();
       Unit * primary;
       if (pendingjump[kk]->final_location.i==0&&
           pendingjump[kk]->final_location.j==0&&
           pendingjump[kk]->final_location.k==0){     
-        while ((primary = iter.current())!=NULL) {
+     	
+
+		for(un_iter iter = pendingjump[kk]->dest->getUnitList().createIterator();primary = *iter;++iter){
           vector <Unit *> tmp;
           tmp = ComparePrimaries (primary,pendingjump[kk]->orig);
           if (!tmp.empty()) {
             possibilities.insert (possibilities.end(),tmp.begin(), tmp.end());
           }
-          iter.advance();
         }
       }else {
         this->SetCurPosition(pendingjump[kk]->final_location);

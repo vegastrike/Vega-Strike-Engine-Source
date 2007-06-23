@@ -6,6 +6,7 @@
 #ifndef _UNITCOLLECTION_H_
 #define _UNITCOLLECTION_H_
 #include <list>
+#include <vector>
 
 class Unit;
 
@@ -19,30 +20,30 @@ class UnitCollection
 				UnitIterator() : col(NULL) {;}
 				UnitIterator( const UnitIterator&);
 				UnitIterator(UnitCollection*);
-				virtual ~UnitIterator();
-				bool isDone();
-				bool notDone();
+				~UnitIterator();
+				
+				bool isDone() const;
+				bool notDone() const;
 				//removes current unit.
-				virtual void remove();
+				void remove();
 				//moves current unit to front of list passed
 				void moveBefore(UnitCollection&);
 				//inserts in front of current
-				virtual void preinsert(class Unit*);
+				void preinsert(class Unit*);
 				// inserts after current
-				virtual void postinsert(class Unit *unit);
-				//returns the unit pos is pointing at or NULL if all dead or end of list.
-				Unit* current();
-				//advances the counter
-				virtual void advance();
+				void postinsert(class Unit *unit);
 				//Returns next unit in list
 				Unit* next();
-
 				UnitIterator& operator=( const UnitIterator&);
 				const UnitIterator operator ++(int);
 				const UnitIterator& operator ++();
 				class Unit * operator * ();
+				//advances the counter
+				void advance();
+
+			protected:				
+				friend class UnitCollection;
 				std::list<class Unit*>::iterator it;
-			protected:
 				// Pointer to list
 				UnitCollection *col;
 				// Current position in list
@@ -55,13 +56,13 @@ class UnitCollection
 				ConstIterator() : col(NULL) {;}
 				ConstIterator( const ConstIterator&);
 				ConstIterator( const UnitCollection*);
-				virtual ~ConstIterator( );
+				~ConstIterator( );
 				ConstIterator& operator=( const ConstIterator& orig );
 				const Unit * next();
 				const Unit *current() const { if(it != col->u.end())return(*it); return(NULL);}
-				bool isDone();
-				bool notDone();
-				virtual void advance();
+				bool isDone() const;
+				bool notDone() const;
+				void advance();
 				const ConstIterator& operator ++();
 				const ConstIterator operator ++(int);
 				const class Unit * operator * () const { return(current());}
@@ -109,6 +110,7 @@ class UnitCollection
 		const UnitCollection& operator= (const UnitCollection&);
 		// traverses list and removes invalid units
 		void cleanup();
+		const int size() const { return(u.size()); }
 
 		std::list<class Unit*> u;
 		void reg(UnitCollection::UnitIterator*);
@@ -117,7 +119,7 @@ class UnitCollection
 	private:
 		// Removes elements from list, beginning state
 		void destr();
-		std::list<class UnitCollection::UnitIterator*> activeIters;
+		std::vector<class UnitCollection::UnitIterator*> activeIters;
 };
 
 typedef UnitCollection::UnitIterator un_iter;

@@ -109,9 +109,9 @@ void Unit::SetNebula(Nebula *neb)
 	if (!SubUnits.empty()) {
 		un_fiter iter =SubUnits.fastIterator();
 		Unit * un;
-		while ((un = iter.current())) {
+		while (un = *iter) {
 			un->SetNebula(neb);
-			iter.advance();
+			++iter;
 		}
 	}
 }
@@ -2125,9 +2125,9 @@ void Unit::ExecuteAI()
 	if (!SubUnits.empty()) {
 		un_iter iter =getSubUnits();
 		Unit * un;
-		while ((un = iter.current())) {
+		while (un = *iter) {
 			un->ExecuteAI();	 //like dubya
-			iter.advance();
+			++iter;
 		}
 	}
 }
@@ -2173,13 +2173,11 @@ void Unit::ReTargetFg(int which_target)
 #if 0
 	StarSystem *ssystem=_Universe->activeStarSystem();
 	UnitCollection *unitlist=ssystem->getUnitList();
-	Iterator uiter=unitlist->createIterator();
+	un_iter uiter=unitlist->createIterator();
 
-	GameUnit *other_unit=uiter.current();
 	GameUnit *found_target=NULL;
 	int found_attackers=1000;
-
-	while(other_unit!=NULL) {
+	for(GameUnit *other_unit = NULL;other_unit = *uiter;++uiter){
 		string other_fgid=other_unit->getFgID();
 		if(other_unit->matchesFg(target_fgid[which_target])) {
 			// the other unit matches our primary target
@@ -2192,8 +2190,6 @@ void Unit::ReTargetFg(int which_target)
 				setTarget(found_target);
 			}
 		}
-
-		other_unit=uiter.advance();
 	}
 
 	if(found_target==NULL) {
@@ -2214,21 +2210,18 @@ void Unit::SetTurretAI ()
 {
 	static bool talkinturrets = XMLSupport::parse_bool(vs_config->getVariable("AI","independent_turrets","false"));
 	if (talkinturrets) {
-		UnitCollection::UnitIterator iter = getSubUnits();
 		Unit * un;
-		while (NULL!=(un=iter.current())) {
+		for(un_iter iter = getSubUnits();un = *iter;++iter){
 			if (!CheckAccessory(un)) {
 				un->EnqueueAIFirst (new Orders::FireAt(15.0f));
 				un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
 			}
 			un->SetTurretAI ();
-			iter.advance();
 		}
 	}
 	else {
-		UnitCollection::UnitIterator iter = getSubUnits();
 		Unit * un;
-		while (NULL!=(un=iter.current())) {
+		for(un_iter iter = getSubUnits();un = *iter;++iter){
 			if (!CheckAccessory(un)) {
 				if (un->aistate) {
 					un->aistate->Destroy();
@@ -2237,7 +2230,6 @@ void Unit::SetTurretAI ()
 				un->aistate->SetParent (un);
 			}
 			un->SetTurretAI ();
-			iter.advance();
 		}
 	}
 }
@@ -2245,9 +2237,8 @@ void Unit::SetTurretAI ()
 
 void Unit::DisableTurretAI ()
 {
-	UnitCollection::UnitIterator iter = getSubUnits();
 	Unit * un;
-	while (NULL!=(un=iter.current())) {
+	for(un_iter iter = getSubUnits();un = *iter;++iter){
 		if (un->aistate) {
 			un->aistate->Destroy();
 		}
@@ -2255,7 +2246,6 @@ void Unit::DisableTurretAI ()
 		un->aistate->SetParent (un);
 		un->UnFire();
 		un->DisableTurretAI ();
-		iter.advance();
 	}
 }
 
@@ -2662,12 +2652,10 @@ void Unit::UpdateSubunitPhysics (const Transformation &trans, const Matrix &tran
 {
 	if (!SubUnits.empty()) {
 		Unit * su;
-		UnitCollection::UnitIterator iter=getSubUnits();
-
 		float backup=SIMULATION_ATOM;
 		float basesimatom=(this->sim_atom_multiplier?backup/(float)this->sim_atom_multiplier:backup);
 		unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
-		while ((su=iter.current())) {
+		for(un_iter iter = getSubUnits();su = *iter;++iter){
 			if (this->sim_atom_multiplier&&su->sim_atom_multiplier) {
 				//This ugly thing detects skipped frames.
 				//This shouldn't happen during normal execution, as the interpolation will not be correct
@@ -2697,7 +2685,6 @@ void Unit::UpdateSubunitPhysics (const Transformation &trans, const Matrix &tran
 					Unit::UpdateSubunitPhysics(su,cumulative_transformation,cumulative_transformation_matrix,cumulative_velocity,lastframe,uc,superunit);
 				}
 			}
-			iter.advance();
 		}
 		SIMULATION_ATOM = backup;
 	}
@@ -4882,11 +4869,9 @@ void Unit::Kill(bool erasefromsave, bool quitting)
 		aistate->Destroy();
 	}
 	aistate=NULL;
-	UnitCollection::UnitIterator iter = getSubUnits();
 	Unit *un;
-	while ((un=iter.current())) {
+	for(un_iter iter = getSubUnits();un = *iter;++iter){
 		un->Kill();
-		iter.advance();
 	}
 	if (ucref==0) {
 		Unitdeletequeue.push_back(this);
@@ -5472,14 +5457,12 @@ bool Unit::ShieldUp (const Vector &pnt) const
 void Unit::TargetTurret (Unit * targ)
 {
 	if (!SubUnits.empty()) {
-		un_iter iter = getSubUnits();
 		Unit * su;
 		bool inrange = (targ!=NULL)?InRange(targ):true;
 		if (inrange) {
-			while ((su=iter.current())) {
+			for(un_iter iter = getSubUnits();su = *iter;++iter){
 				su->Target (targ);
 				su->TargetTurret(targ);
-				iter.advance();
 			}
 		}
 	}
@@ -5952,14 +5935,9 @@ void Unit::ToggleWeapon (bool Missile) {
 void Unit::SetRecursiveOwner(Unit *target)
 {
 	owner=target;
-	if (!SubUnits.empty()) {
-		UnitCollection::UnitIterator iter = getSubUnits();
-		Unit * su;
-		while ((su=iter.current())) {
-			su->SetRecursiveOwner (target);
-			iter.advance();
-		}
-	}
+	Unit * su;
+	for(un_iter iter = getSubUnits();su = *iter;++iter)
+		su->SetRecursiveOwner (target);
 }
 
 
@@ -6048,14 +6026,12 @@ double Unit::getMinDis (const QVector &pnt)
 			minsofar = tmpvar;
 		}
 	}
-	un_fiter ui = SubUnits.fastIterator();
 	Unit * su;
-	while ((su=ui.current())) {
+	for(un_iter ui = getSubUnits();su = *ui;++ui){
 		tmpvar = su->getMinDis (pnt);
 		if (tmpvar<minsofar) {
 			minsofar=tmpvar;
 		}
-		ui.advance();
 	}
 	return minsofar;
 }
@@ -6167,12 +6143,10 @@ bool Unit::queryBoundingBox (const QVector &pnt, float err)
 		delete bbox;
 	}
 	Unit * su;
-	UnitCollection::UnitIterator ui=getSubUnits();
-	while ((su=ui.current())) {
+	for(un_iter ui = getSubUnits();su = *ui;++ui){
 		if ((su)->queryBoundingBox (pnt,err)) {
 			return true;
 		}
-		ui.advance();
 	}
 	return false;
 }
@@ -6196,9 +6170,8 @@ int Unit::queryBoundingBox (const QVector &origin, const Vector &direction, floa
 			break;
 		}
 	}
-	UnitCollection::UnitIterator ui = getSubUnits();
 	Unit  * su;
-	while ((su=ui.current())) {
+	for(un_iter iter = getSubUnits();su = *iter;++iter){
 		switch (su->queryBoundingBox (origin,direction,err)) {
 			case 1:
 				return 1;
@@ -6208,7 +6181,6 @@ int Unit::queryBoundingBox (const QVector &origin, const Vector &direction, floa
 			case 0:
 				break;
 		}
-		ui.advance();
 	}
 	return retval;
 }
@@ -7499,12 +7471,12 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
 				if (_Universe->getNumActiveStarSystem()&&!ss) ss=_Universe->activeStarSystem();
 				if (ss) {
 					Unit * un;
-					for (un_iter i = ss->gravitationalUnits().createIterator();
-					(un=*i)!=NULL;) {
-						if (un==this)
+					for (un_iter i = ss->gravitationalUnits().createIterator();un=*i;++i) {	
+						if (un==this){
 							i.remove();
-						else
-							i.advance();
+							// NOTE: I think we can only be in here once
+							break;
+						}
 					}
 					if (!interdictionUnits) {
 						// will interdict
@@ -8209,15 +8181,13 @@ inline QVector randVector (float min, float max)
 
 void Unit::TurretFAW()
 {
-	UnitCollection::UnitIterator iter = this->getSubUnits();
 	Unit * un;
-	while (NULL!=(un=iter.current())) {
+	for(un_iter iter = getSubUnits();un = *iter;++iter){
 		if (!CheckAccessory(un)) {
 			un->EnqueueAIFirst (new Orders::FireAt(15.0f));
 			un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
 		}
 		un->TurretFAW();
-		iter.advance();
 	}
 
 }
@@ -9009,7 +8979,7 @@ std::string Unit::subunitSerializer (const XMLType &input, void * mythis)
 	int index=input.w.hardint;
 	Unit *su;
 	int i=0;
-	for (un_iter ui=un->getSubUnits();NULL!= (su=ui.current());++ui,++i) {
+	for (un_iter ui=un->getSubUnits();su=*ui;++ui,++i) {
 		if (i==index) {
 			if (su->image->unitwriter) {
 				return su->image->unitwriter->getName();

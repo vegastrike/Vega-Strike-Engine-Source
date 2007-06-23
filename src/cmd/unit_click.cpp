@@ -53,13 +53,11 @@ bool GameUnit<UnitType>::querySphereClickList (int mouseX, int mouseY, float err
 	)
       return true;
   }
-  UnitCollection::UnitIterator ui = this->getSubUnits();
   Unit * su;
-  while ((su=ui.current())) {
+  for(un_iter ui = this->SubUnits.createIterator();su = *ui;++ui){
     if ((su)->querySphereClickList (mouseX,mouseY,err,activeCam)) {
       return true;
     }
-    ui.advance();
   }
   return false;
 }

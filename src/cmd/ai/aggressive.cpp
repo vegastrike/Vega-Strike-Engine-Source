@@ -61,15 +61,15 @@ stdext::hash_map<string,AIEvents::ElemAttrMap *> logic;
 extern bool CheckAccessory (Unit *tur);
 //extern void TurretFAW(Unit *parent); /*
 static void TurretFAW(Unit * parent) {
-  UnitCollection::UnitIterator iter = parent->getSubUnits();
+  un_iter iter = parent->getSubUnits();
   Unit * un;
-  while (NULL!=(un=iter.current())) {
+  while (NULL!=(un=*iter)) {
     if (!CheckAccessory(un)) {
       un->EnqueueAIFirst (new Orders::FireAt(15.0f));
       un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
     }
     TurretFAW(un);
-    iter.advance();
+    ++iter;
   }
   
 }

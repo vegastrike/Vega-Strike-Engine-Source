@@ -374,13 +374,11 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
   }
   bool alldone = this->image->explosion?!this->image->explosion->Done():false;
   if (!this->SubUnits.empty()) {
-    UnitCollection::UnitIterator ui = this->getSubUnits();
     Unit * su;
-    while ((su=ui.current())) {
+	for(un_iter ui = this->SubUnits.createIterator();su = *ui;++ui){
       bool temp = su->Explode(drawit,timeit);
       if (su->GetImageInformation().explosion)
 	alldone |=temp;
-      ui.advance();
     }
   }
 

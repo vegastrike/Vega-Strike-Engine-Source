@@ -262,15 +262,13 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
           this->meshdata[i]->Draw(lod,mat,d,cloak);
       }
     }
-    un_fiter iter =this->SubUnits.fastIterator();
     Unit * un;
-    while ((un = iter.current())) {
+	for(un_iter iter = this->SubUnits.createIterator();un = *iter;++iter){
       Matrix temp;
       un->curr_physical_state.to_matrix (temp);
       Matrix submat;
       MultMatrix (submat,mat,temp);
       (un)->DrawNow (submat,lod);
-      iter.advance();
     }
     float haloalpha=1;
     if (cloak>=0) {
@@ -453,18 +451,16 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
       }
       
       {
-          un_fiter iter =this->SubUnits.fastIterator();
           Unit * un;
           double backup = interpolation_blend_factor;
           int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
-          while ((un = iter.current())) {
+		  for(un_iter iter = this->SubUnits.createIterator();un = *iter;++iter){
               float backup=SIMULATION_ATOM;
               if (this->sim_atom_multiplier&&un->sim_atom_multiplier)
                   SIMULATION_ATOM = SIMULATION_ATOM*un->sim_atom_multiplier/this->sim_atom_multiplier;
 
               interpolation_blend_factor=calc_blend_factor(saved_interpolation_blend_factor,un->sim_atom_multiplier,un->cur_sim_queue_slot,cur_sim_frame);
               (un)->Draw (*ct,*ctm);
-              iter.advance();
 
               SIMULATION_ATOM = backup;
           }

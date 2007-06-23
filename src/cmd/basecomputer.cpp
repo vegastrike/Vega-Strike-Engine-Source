@@ -5175,17 +5175,14 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	
 	if(!mode){
 		//handle SubUnits
-		un_iter ki=playerUnit->getSubUnits(); //can't use kiter, MakeUnitXMLPretty takes non-const Unit
-		{	int i=1;
-		Unit *sub=ki.current();
-		while (sub) {
+		Unit *sub;
+		int i = 1;
+		for(un_iter ki = playerUnit->getSubUnits();sub = *ki;++ki,++i){
 			if (i==1) text+="#n##n##c0:1:.5#"+prefix+"[SUB UNITS]#-c";
 			PRETTY_ADD("#n#"+prefix+"#c0:1:.2#[#-csub unit ",i,0);
 			text+="#c0:1:.2#]#-c#n#";
 			showUnitStats(sub,text,subunitlevel+1,0,item);
-			i++;
-			sub=ki.next();
-		}}
+		}
 	}
 }
 

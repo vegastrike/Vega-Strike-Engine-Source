@@ -38,31 +38,17 @@ using std::set;
 #define activeSys _Universe->activeStarSystem() //less to write
 using namespace VSFileSystem;
 
-namespace UniverseUtil {
-	Unit * PythonUnitIter::current(){
-		Unit * ret=NULL;
-		while ((ret= UnitIterator::current())) {
-			if (ret->hull>0)
-				return ret;
-			advance();
-		}
-		return ret;
-	}
-	
+namespace UniverseUtil {	
 	Unit * GetUnitFromSerial( ObjSerial serial)
 	{
-		Unit* un = NULL;
+		Unit* un;
 		if (serial==0)
 			return NULL;
-		un_iter it = UniverseUtil::getUnitList();
 		// Find the unit
-		do
-		{
-			if( it.current()->GetSerial()==serial)
-				un = it.current();
-			it.advance();
-		}
-		while(un==NULL && it.current()!=NULL);
+		for(un_iter it = UniverseUtil::getUnitList();un = *it;++it){
+			if((*it)->GetSerial() == serial)
+				break;
+		}		
 		if( un==NULL)
 			cout<<"ERROR --> no unit for serial "<<serial<<endl;
 		return un;
@@ -178,11 +164,10 @@ namespace UniverseUtil {
 	void TargetEachOther (string fgname, string faction, string enfgname, string enfaction){
 		int fac = FactionUtil::GetFactionIndex(faction);
 		int enfac = FactionUtil::GetFactionIndex(enfaction);		
-		un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
-		Unit * un=i.current();
+		Unit * un;
 		Unit * en=NULL;
 		Unit * al=NULL;
-		while (un && ((NULL== en) || (NULL==al))){
+		for(un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();(un = *i) && ((!en) || (!al));++i){
 			if (un->faction==enfac && UnitUtil::getFlightgroupName(un)==enfgname) {
 				if ((NULL== en) || (rand()%3==0)){
 					en=un;
@@ -191,7 +176,6 @@ namespace UniverseUtil {
 			if (un->faction==fac && UnitUtil::getFlightgroupName(un)==fgname){
 				al=un;
 			}
-			un=i.next();
 		}
 		if (en && al) {
 			UnitUtil::setFlightgroupLeader(al,al);
@@ -207,10 +191,9 @@ namespace UniverseUtil {
 	void StopTargettingEachOther(string fgname, string faction, string enfgname, string enfaction){
 		int fac = FactionUtil::GetFactionIndex(faction);
 		int enfac = FactionUtil::GetFactionIndex(enfaction);	 		
-		un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
-		Unit * un=i.current();
+		Unit * un;
 		int clear = 0;
-		while (un&&clear!=3) {
+		for(un_iter i =_Universe->activeStarSystem()->getUnitList().createIterator();(un = *i) && clear != 3;++i){
 			if ((un->faction==enfac && UnitUtil::getFlightgroupName(un)==enfgname)) {
 				clear|=1;
 				UnitUtil::setFgDirective (un,"b");				
@@ -220,7 +203,6 @@ namespace UniverseUtil {
 					UnitUtil::setFgDirective (un,"b");
 					//check to see that its' in this flightgroup or something :-)
 				}
-			un=i.next();
 		}
 	}
 	
@@ -245,9 +227,9 @@ namespace UniverseUtil {
 	Unit *getUnit(int index) {
 		un_iter iter=activeSys->getUnitList().createIterator();
 		Unit * un=NULL;
-		for(int i=-1;(un=iter.current())&&i<index;iter.advance()) {
+		for(int i=-1;(un=*iter)&&i<index;++iter) {
 			if (un->GetHull()>0)
-				i++;
+				++i;
 			if (i==index)
 				break;
 		}
@@ -265,25 +247,19 @@ namespace UniverseUtil {
 	if (!allowslowness)
 		return 0;
 
-        un_fiter it=activeSys->getUnitList().fastIterator();
-        while (it.notDone()&&((void*)it.current()!=ptr)) it.advance();
-        return (((void*)it.current()==ptr)?reinterpret_cast<Unit*>(ptr):0);
+        un_iter it=activeSys->getUnitList().createIterator();
+        while (it.notDone()&&((void*)(*it)!=ptr)) ++it;
+        return (((void*)(*it)==ptr)?reinterpret_cast<Unit*>(ptr):0);
     }
     Unit *getUnitByName(std::string name) {
 		un_iter iter=activeSys->getUnitList().createIterator();
-        while (iter.notDone() && UnitUtil::getName(iter.current()) != name)
-            iter.advance();
-        return iter.notDone()?iter.current():NULL;
+        while (iter.notDone() && UnitUtil::getName(*iter) != name)
+			++iter;
+        return iter.notDone()?(*iter):NULL;
 	}
         int getNumUnits() {
-	  int count=0;
-	  un_iter iter=activeSys->getUnitList().createIterator();
-	  while (iter.current()){
-	    iter.advance();
-	    count++;
-	  }
-	  return count;
-	}
+			return (activeSys->getUnitList().size());
+		}
 	//NOTEXPORTEDYET
 	/*
 	float GetGameTime () {

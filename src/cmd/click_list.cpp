@@ -48,8 +48,6 @@ UnitCollection * ClickList::requestIterator (int minX,int minY, int maxX, int ma
   UnitCollection * uc = new UnitCollection();///arrgh dumb last collection thing to cycel through ships
     if (minX==maxX||minY==maxY)
       return uc;//nothing in it
-    UnitCollection::UnitIterator * UAye = new un_iter(uc->createIterator());
-    UnitCollection::UnitIterator * myParent = new un_iter(parentIter->createIterator());
     Matrix view;
     float frustmat [16];
     float l, r, b, t , n, f;
@@ -60,14 +58,10 @@ UnitCollection * ClickList::requestIterator (int minX,int minY, int maxX, int ma
     double frustum [6][4];
     GFXCalculateFrustum(frustum,view,frustmat);
     Unit * un;
-    while ((un=myParent->current())) {
-      if ((un)->queryFrustum(frustum)) {
-	UAye->preinsert (un);
-      }
-      myParent->advance(); 
+	for(un_iter myParent = parentIter->createIterator();un = *myParent;++myParent){
+      if ((un)->queryFrustum(frustum)) 
+		uc->prepend(un);
     }
-    delete myParent;
-    delete UAye;
     return uc;
     
 }
@@ -75,16 +69,11 @@ UnitCollection * ClickList::requestIterator (int minX,int minY, int maxX, int ma
 UnitCollection * ClickList::requestIterator (int mouseX, int mouseY) {
   perplines = vector<Vector>();
     UnitCollection * uc = new UnitCollection ();
-    UnitCollection::UnitIterator * UAye = new un_iter (uc->createIterator());
-    UnitCollection::UnitIterator * myParent = new un_iter (parentIter->createIterator());
     Unit * un;
-    while ((un = myParent->current())) {
+	for(un_iter myParent = parentIter->createIterator();un = *myParent;++myParent){
 	if (queryShip(mouseX,mouseY,un))
-	  UAye->preinsert (un);
-	myParent->advance();
+	  uc->prepend(un);
     }
-    delete myParent;
-    delete UAye;
     return uc;
 }
 
@@ -92,53 +81,41 @@ UnitCollection * ClickList::requestIterator (int mouseX, int mouseY) {
 Unit * ClickList::requestShip (int mouseX, int mouseY) {
   bool equalCheck=false;
   UnitCollection *uc = requestIterator (mouseX,mouseY);
-  UnitCollection::UnitIterator * UAye = NULL;
-  Unit *un;
   if (lastCollection!=NULL) {
     equalCheck=true;
-    UAye=new un_iter(uc->createIterator());
-    UnitCollection::UnitIterator *lastiter = new un_iter(lastCollection->createIterator());
     Unit *lastun;
-    while (equalCheck&& (un = UAye->current())&&(lastun=lastiter->current())) {
-      if (un !=lastun) {
+	Unit *un;
+	un_iter UAye = uc->createIterator();
+	for(un_iter lastiter = lastCollection->createIterator(); (lastun = *lastiter) && (un = *UAye) && equalCheck;++lastiter){
+      if (un !=lastun) 
 	equalCheck=false;
-      }
-      UAye->advance();
-      lastiter->advance();
     }    
-    delete lastiter;
     delete lastCollection;
-    delete UAye;
   }
   float minDistance=1e+10;
   float tmpdis;
   Unit * targetUnit=NULL;
   if (equalCheck&&lastSelected) {//the person clicked the same place and wishes to cycle through units from front to back
     float morethan = lastSelected->getMinDis(_Universe->AccessCamera()->GetPosition());//parent system for access cam
-    UAye = new un_iter (uc->createIterator());
-    while ((un=UAye->current())) {
+	Unit *un;
+	for(un_iter UAye = uc->createIterator();un = *UAye;++UAye){
       tmpdis = un->getMinDis (_Universe->AccessCamera()->GetPosition());//parent_system? FIXME (for access cam
       if (tmpdis>morethan&&tmpdis<minDistance) {
 	minDistance=tmpdis;
 	targetUnit=un;
       }
-      UAye->advance();
     }
-    delete UAye;
   }
   if (targetUnit==NULL) {//ok the click location is either different, or 
     //he clicked on the back of the list and wishes to start over
-    UAye = new un_iter (uc->createIterator());
-    while ((un=UAye->current())) {
+	Unit *un;
+	for(un_iter UAye = uc->createIterator();un = *UAye;++UAye){
       tmpdis = un->getMinDis (_Universe->AccessCamera()->GetPosition());//parent_system FIXME
       if (tmpdis<minDistance) {
 	minDistance=tmpdis;
 	targetUnit=un;
       }
-      UAye->advance();
     }
-   
-    delete UAye;  
   }
   lastCollection = uc;
   lastSelected = targetUnit;

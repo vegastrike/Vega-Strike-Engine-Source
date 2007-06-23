@@ -345,12 +345,10 @@ static void SwitchUnitsTurret (Unit *ol, Unit *nw) {
 
 Unit * GetFinalTurret(Unit * baseTurret) {
   Unit * un = baseTurret;
-  un_iter uj= un->getSubUnits();
   Unit * tur;
-  while ((tur=uj.current())) {
+  for(un_iter uj= un->getSubUnits();tur = *uj;++uj){
     SwitchUnits (NULL,tur);
     un = GetFinalTurret (tur);
-    ++uj;
   }
   return un;
 }
@@ -482,19 +480,15 @@ bool Cockpit::Update () {
 		  
 		  
 	tmpgot=true;
-	un_iter ui= par->getSubUnits();
 	Unit * un;
-	while ((un=ui.current())) {
+	for(un_iter ui = par->getSubUnits();un = *ui;){
 		if (_Universe->isPlayerStarship(un)){
 			++ui;
 			continue;
 		}
-
-
-
-
-	  if (i++==index) {
-	    index++;
+	  if (++i==index) {
+	  // NOTE : this may have been a correction to the conditional bug 
+	    ++index;
 	    if (un->name.get().find ("accessory")==string::npos) {
 	      tmp=true;
 	      SwitchUnitsTurret(par,un);
@@ -553,13 +547,11 @@ bool Cockpit::Update () {
 //    switch_nonowned_units = true;
 	//    static bool switch_to_fac=XMLSupport::parse_bool(vs_config->getVariable("AI","switch_to_whole_faction","true"));
 
-    un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();
     Unit * un;
     bool found=false;
     int i=0;
 
-
-	while ((un=ui.current())) {
+	for(un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();un = *ui;++ui){
       if (un->faction==this->unitfaction) {
 
 	
@@ -572,9 +564,9 @@ bool Cockpit::Update () {
 
 
 
-	if ( (((par != NULL) && (i++)>=index)||par==NULL) && (!_Universe->isPlayerStarship(un)) && (switch_nonowned_units || (par!=NULL &&un->owner == par->owner) || (par!=NULL&&un == par->owner ) || (par!=NULL&&un->owner == par)|| (par==NULL&&un->owner)) && (un->name!="eject") && (un->name!="Pilot") && (un->isUnit()!=MISSILEPTR)) {
+	if ( (((par != NULL) && (++i)>=index)||par==NULL) && (!_Universe->isPlayerStarship(un)) && (switch_nonowned_units || (par!=NULL &&un->owner == par->owner) || (par!=NULL&&un == par->owner ) || (par!=NULL&&un->owner == par)|| (par==NULL&&un->owner)) && (un->name!="eject") && (un->name!="Pilot") && (un->isUnit()!=MISSILEPTR)) {
 	  found=true;
-	  index++;
+	  ++index;
 	  Unit * k=GetParent(); 
           bool proceed=true;
           if (k) {
@@ -618,7 +610,6 @@ bool Cockpit::Update () {
           
 	}
       }
-      ++ui;
     }
     if (!found)
       index=0;

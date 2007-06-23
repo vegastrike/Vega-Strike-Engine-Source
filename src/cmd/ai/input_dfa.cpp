@@ -46,11 +46,9 @@ void InputDFA::NewLocationSelect(){
   Unit * un;
   int cnt=0;
   Vector RunningTotal(0,0,0);
-  UnitCollection::UnitIterator * ui = new un_iter(selected->createIterator());
-  while ((un=ui->current())) {
+  for(un_iter ui = selected->createIterator();un = *ui;++ui){
     RunningTotal+=un->Position().Cast();
     cnt++;
-    ui->advance();
   }
   if (cnt==0) return;
   RunningTotal = (RunningTotal.Scale((1./cnt)));
@@ -89,14 +87,13 @@ void InputDFA::TargetSelect (KBSTATE k,int x,int y, int delx, int dely, int mod)
   if (CurDFA->state==TARGET_SELECT) {
     //executeOrders from selected->target;
     if (k==RELEASE&&CurDFA->targetted!=NULL) {
-      un_iter * tmp = new un_iter(CurDFA->selected->createIterator());
       Unit * un;
-      while ((un = tmp->current())) {
+	  for(un_iter tmp = CurDFA->selected->createIterator();un = *tmp;++tmp){
 	Order * nAI = CurDFA->orderfac->newOrder();
 	if (CurDFA->targetted) {
-	  un_iter ui = CurDFA->targetted->createIterator();
-	  if (*ui) {
-	    nAI->AttachOrder(*ui);
+	  Unit *tar = CurDFA->targetted->u.front();
+	  if (tar) {
+	    nAI->AttachOrder(tar);
 	  }
 	}
 	if (CurDFA->queueOrder) {
@@ -104,9 +101,7 @@ void InputDFA::TargetSelect (KBSTATE k,int x,int y, int delx, int dely, int mod)
 	} else {
 	  un->SetAI(nAI);//will take care of doing the setparent 
 	}
-	tmp->advance();
       }
-      delete tmp;
       delete CurDFA->targetted;
       CurDFA->targetted=NULL;  
 
@@ -123,10 +118,9 @@ void InputDFA::LocSelect (KBSTATE k, int x, int y, int delx, int dely, int mod) 
 
   if (k==PRESS) {
     
-      UnitCollection::UnitIterator * tmp = new un_iter(CurDFA->selected->createIterator());
       Unit * un;
       Vector tmplocselvec = CurDFA->locsel->GetVector().Cast();
-      while ((un = tmp->current())) {
+	  for(un_iter tmp = CurDFA->selected->createIterator();un = *tmp;++tmp){
 	Order * nAI = CurDFA->orderfac->newOrder();
 	nAI->AttachOrder(tmplocselvec.Cast());
 	if (CurDFA->queueOrder) {
@@ -134,9 +128,7 @@ void InputDFA::LocSelect (KBSTATE k, int x, int y, int delx, int dely, int mod) 
 	} else {
 	  un->SetAI(nAI);//will take care of doing the setparent 
 	}
-	tmp->advance();
       }
-      delete tmp;
       delete CurDFA->targetted;
       CurDFA->targetted=NULL;  
       
@@ -236,13 +228,11 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
     UnitCollection *tmpcol = CurDFA->clickList->requestIterator(CurDFA->prevx,CurDFA->prevy,x,y);
     if (!(kmod&ACTIVE_SHIFT)){
       CurDFA->replaceCollection(tmpcol);
-      UnitCollection::UnitIterator * tmp2 = new un_iter(tmpcol->createIterator());
-      if (!tmp2->current()) {
+	  if(!tmpcol->u.front()){
 	CurDFA->SetStateNone();
 	VSFileSystem::vs_fprintf (stderr,"SelectBoxMissed\n");
       } else 
-	VSFileSystem::vs_fprintf (stderr,"SelectBoxReplace\n");//      SetStateSomeSelected(); already there
-      delete tmp2;
+	VSFileSystem::vs_fprintf (stderr,"SelectBoxReplace\n");
     }else {
       VSFileSystem::vs_fprintf (stderr,"Select:SelectBoxAppending\n");
       CurDFA->appendCollection(tmpcol);
@@ -302,11 +292,13 @@ void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) 
     CurDFA->Selecting=false;
     UnitCollection *tmpcol = CurDFA->clickList->requestIterator(CurDFA->prevx,CurDFA->prevy,x,y);
     CurDFA->replaceCollection(tmpcol);
-    UnitCollection::UnitIterator * tmp2 = new un_iter(tmpcol->createIterator());
-    if (tmp2->current()) {
+	Unit *tUnit;
+	if(tmpcol->u.front())
+		CurDFA->SetStateSomeSelected();
+/*		
+	for(un_iter tmp2 = tmpcol->createIterator();tUnit = *tmp2;++tmp2){
       VSFileSystem::vs_fprintf (stderr,"None::replacing SelectBox Units");if (CurDFA->state==TARGET_SELECT) VSFileSystem::vs_fprintf (stderr," to target");else VSFileSystem::vs_fprintf (stderr," to select");
       while(tmp2->current()) {
-//	cerr << *tmp2->current() << endl;
 	tmp2->advance();
       }
       CurDFA->SetStateSomeSelected();
@@ -314,6 +306,7 @@ void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) 
       VSFileSystem::vs_fprintf (stderr,"None::select box missed");
     }
     delete tmp2;
+*/
   }
 }
 
@@ -377,12 +370,9 @@ void InputDFA::UnselectAll() {
   case UNITS_SELECTED:
   case NONE:   
     if (selected) {
-      UnitCollection::UnitIterator *it = new un_iter(selected->createIterator());
-      while(it->current()) {
-	it->current()->Deselect();
-	it->advance();
-      }
-      delete it;
+	  Unit *tUnit;
+	  for(un_iter it = selected->createIterator();tUnit = *it;++it)
+		tUnit->Deselect();
       delete selected;
       selected = NULL;
     }
@@ -403,13 +393,10 @@ void InputDFA::replaceCollection (UnitCollection *newcol) {
   case NONE:
     UnselectAll();
     selected = newcol;
-    UnitCollection::UnitIterator *it;
-    for(it = new un_iter(selected->createIterator());
-	it->current();
-	it->advance()) {
-      it->current()->Select();
+    Unit *tUnit;
+    for(un_iter it = selected->createIterator();tUnit = *it;++it){
+      tUnit->Select();
     }
-    delete it;
     break;
   case TARGET_SELECT:
     UnselectAll();
@@ -424,13 +411,9 @@ void InputDFA::appendCollection (UnitCollection *newcol) {
   case UNITS_SELECTED:
   case NONE:
     if (selected) {
-      UnitCollection::UnitIterator *it;
-      for(it = new un_iter(newcol->createIterator());
-	  it->current();
-	  it->advance()) {
-	it->current()->Select();
-      }
-      delete it;
+		Unit *tUnit;
+	  for(un_iter it = newcol->createIterator();tUnit = *it;++it)
+		tUnit->Select();
     
       UnitCollection::UnitIterator *tmpit =new un_iter(newcol->createIterator());
       selected->append (tmpit);
@@ -443,9 +426,8 @@ void InputDFA::appendCollection (UnitCollection *newcol) {
     break;
   case TARGET_SELECT:
     if (targetted) {
-      UnitCollection::UnitIterator * tmpit = new un_iter(newcol->createIterator());
-      targetted->append (tmpit);
-      delete tmpit;
+	  un_iter tmpit = newcol->createIterator();
+      targetted->append (&tmpit);
       delete newcol;
       //remove duplicates FIXME
     }else {
@@ -453,8 +435,8 @@ void InputDFA::appendCollection (UnitCollection *newcol) {
     }
     break;	
   }
-
 }
+
 void InputDFA::SetStateNone() {
   switch (state) {
   case NONE:

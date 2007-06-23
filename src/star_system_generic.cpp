@@ -197,13 +197,10 @@ StarSystem::~StarSystem() {
 
   */
 
-  UnitCollection::UnitIterator iter = drawList.createIterator();
   Unit *unit;
   //  VSFileSystem::vs_fprintf (stderr,"|t%f i%lf|",GetElapsedTime(),interpolation_blend_factor);
-  while((unit = iter.current())!=NULL) {
+  for(un_iter iter = drawList.createIterator();unit = *iter;++iter)
     unit->Kill(false);
-    iter.advance();
-  }
   //if the next line goes ANYWHERE else Vega Strike will CRASH!!!!!
   if (collidetable) delete collidetable;//DO NOT MOVE THIS LINE! IT MUST STAY
   //_Universe->activeStarSystem()->SwapOut();  
@@ -335,43 +332,32 @@ bool StarSystem::RemoveUnit(Unit *un) {
     }
   }
   bool removed2=false;
-  UnitCollection::UnitIterator iter = gravitationalUnits().createIterator();
   Unit *unit;
-  while((unit = iter.current())!=NULL) {
+  for(un_iter iter = gravitationalUnits().createIterator();unit = *iter; ++iter){
     if (unit==un) {
       iter.remove();
       removed2 =true;
-      //break;//just in case
-    } else {
-      iter.advance();
+      break; // Shouldn't be in there twice
     }
   }
+  // NOTE: not sure why if(1) was here, but safemode removed it
   bool removed =false;
-  if (1) {
-    UnitCollection::UnitIterator iter = drawList.createIterator();
-    Unit *unit;
-    while((unit = iter.current())!=NULL) {
+	for(un_iter iter = drawList.createIterator();unit = *iter;++iter){
       if (unit==un) {
 	iter.remove();
 	removed =true;
 	break;
-      }else {
-	iter.advance();
       }
     }
-  }
 	if (removed) {
 		for (int i=0;i<=SIM_QUEUE_SIZE;++i) {
-			UnitCollection::UnitIterator iter = this->physics_buffer[i].createIterator();
 			Unit *unit;
-			while((unit = iter.current())!=NULL) {
+			for(un_iter iter = physics_buffer[i].createIterator();unit = *iter;++iter){
 				if (unit==un) {
 					iter.remove();
 					removed =true;
 					i=SIM_QUEUE_SIZE+1;//terminate outer loop
 					break;
-				}else {
-					iter.advance();
 				}
 			}
 		}
@@ -383,12 +369,10 @@ bool StarSystem::RemoveUnit(Unit *un) {
 
 void StarSystem::ExecuteUnitAI () {
    try {
-      un_iter iter = this->getUnitList().createIterator();
       Unit * unit=NULL;
-      while((unit = iter.current())!=NULL) {
+	  for(un_iter iter = getUnitList().createIterator();unit = *iter;++iter){
 	  unit->ExecuteAI(); 
 	  unit->ResetThreatLevel();
-	  iter.advance();
       }
    }catch (const boost::python::error_already_set) {
       if (PyErr_Occurred()) {
@@ -570,14 +554,14 @@ double targetpick=0;
 void StarSystem::RequestPhysics(Unit *un, unsigned int queue)
 {
 	Unit * unit=NULL;
-	un_iter iter = this->physics_buffer[queue].createIterator();
-	while(((unit = iter.current())!=NULL) && (unit != un))
-		iter.advance();
+	un_iter iter = physics_buffer[queue].createIterator();
+	while((unit = *iter) && *iter != un)
+		++iter;
 	if (unit == un) {
 		un->predicted_priority = 0;
 		int newloc=(current_sim_location+1)%SIM_QUEUE_SIZE;
 		if (newloc!=current_sim_location)
-			iter.moveBefore(this->physics_buffer[newloc]);
+			iter.moveBefore(physics_buffer[newloc]);
 	}
 }
 
@@ -608,8 +592,7 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
 
 		try {
 		  Unit * unit=NULL;
-		  un_iter iter = this->physics_buffer[current_sim_location].createIterator();
-		  while((unit = iter.current())!=NULL) {
+		  for(un_iter iter = physics_buffer[current_sim_location].createIterator();unit = *iter;++iter){
 			int priority=UnitUtil::getPhysicsPriority(unit);
 			// Doing spreading here and only on priority changes, so as to make AI easier
 			int predprior=unit->predicted_priority;
@@ -638,7 +621,6 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
 			aitime+=bb-aa;
 			phytime+=cc-bb;
 			SIMULATION_ATOM=backup;
-			iter.advance();
 			unit->predicted_priority=predprior;
 		  }
 		}catch (const boost::python::error_already_set) {
@@ -660,9 +642,8 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
 		  collidemap[Unit::UNIT_ONLY]->flatten(*collidemap[Unit::UNIT_BOLT]);
 		}
 		flattentime=queryTime()-fl0;
-		un_iter iter = this->physics_buffer[current_sim_location].createIterator();
 		Unit * unit;
-		while((unit = iter.current())!=NULL) {
+		for(un_iter iter = physics_buffer[current_sim_location].createIterator();unit = *iter;){
 		  int priority=unit->sim_atom_multiplier;
 		  float backup=SIMULATION_ATOM;
 		  SIMULATION_ATOM*=priority;
@@ -671,9 +652,9 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
 		  unit->CollideAll();
 		  SIMULATION_ATOM=backup;        
 		  if (newloc==current_sim_location) {
-			iter.advance();
+			++iter;
 		  }else{ 
-			iter.moveBefore(this->physics_buffer[newloc]);
+			iter.moveBefore(physics_buffer[newloc]);
 		  }
 		}
 		double dd= queryTime();	
@@ -693,14 +674,12 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
 		theunitcounter=0;
 	}
   }else {
-    un_iter iter = this->getUnitList().createIterator();
     Unit * unit=NULL;
-    while((unit = iter.current())!=NULL) {
+	for(un_iter iter = getUnitList().createIterator();unit = *iter;++iter){
       unit->ExecuteAI(); 
       last_collisions.clear();
       unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits(),unit);    
       unit->CollideAll();
-      iter.advance();
     }
   }
 }
@@ -763,19 +742,13 @@ void StarSystem::Update( float priority)
     while(time/SIMULATION_ATOM >= (1.))
 	{ // Chew up all SIMULATION_ATOMs that have elapsed since last update
 	    ExecuteDirector();
-	  UnitCollection::UnitIterator iter;
 	  TerrainCollide();
 	  Unit::ProcessDeleteQueue();
 	  current_stage=MISSION_SIMULATION;
       collidetable->Update();
-	{
-	      iter = drawList.createIterator();
-	      while((unit = iter.current())!=NULL) {
+	for(un_iter iter = drawList.createIterator();unit = *iter;++iter)
 		unit->SetNebula(NULL); 
-		iter.advance();
-	      }
-	      iter = drawList.createIterator();
-	    }
+
 	  UpdateMissiles();//do explosions
 	  UpdateUnitPhysics(firstframe);
 

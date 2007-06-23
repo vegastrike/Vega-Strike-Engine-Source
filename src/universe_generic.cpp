@@ -48,13 +48,12 @@ QVector DockToSavedBases (int playernum) {
 	if (strs.size()) {
 		str=strs[0];
 	}
-	un_iter iter=_Universe->activeStarSystem()->getUnitList().createIterator();
 	Unit *closestUnit=NULL;
 	float lastdist=0;
 	float dist=0;
+	Unit *un;
 	QVector dock_position( 0, 0, 0);
-	while (iter.current()) {
-		Unit *un=iter.current();
+	for(un_iter iter=_Universe->activeStarSystem()->getUnitList().createIterator();un = *iter;++iter){
 		if (un->name==str||un->getFullname()==str) {
 			dist=UnitUtil::getSignificantDistance(plr,un);
 			if (closestUnit==NULL||dist<lastdist) {
@@ -62,7 +61,6 @@ QVector DockToSavedBases (int playernum) {
 				closestUnit=un;
 			}
 		}
-		iter.advance();
 	}
 	if (closestUnit) {
 		if (UnitUtil::getSignificantDistance(plr,closestUnit)>0&&closestUnit->isUnit()!=PLANETPTR) {

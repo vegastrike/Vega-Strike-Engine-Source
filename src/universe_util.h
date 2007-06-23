@@ -21,22 +21,16 @@ public:
 	PythonUnitIter ():UnitIterator(){}
 //	PythonUnitIterator (UnitListNode * start):UnitIterator(start){}
 	PythonUnitIter (const UnitCollection::UnitIterator &t):UnitIterator(t){}
-	Unit *  current();
-	void advance () {UnitIterator::advance();}
-    void advanceSignificant() { advance(); while (!isDone()&&!UnitUtil::isSignificant(current())) advance(); }
-    void advanceInsignificant() { advance(); while (!isDone()&&UnitUtil::isSignificant(current())) advance(); }
-    void advancePlanet() { advance(); while (!isDone()&&!current()->isPlanet()) advance(); }
-    void advanceJumppoint() { advance(); while (!isDone()&&!current()->isJumppoint()) advance(); }
-    void advanceN(int n) { while (!isDone()&&(n>0)) advance(), n--; }
-    void advanceNSignificant(int n) { if (!isDone()&&!UnitUtil::isSignificant(current())) advanceSignificant(); while (!isDone()&&(n>0)) advanceSignificant(), n--; }
-    void advanceNInsignificant(int n) { if (!isDone()&&UnitUtil::isSignificant(current())) advanceInsignificant(); while (!isDone()&&(n>0)) advanceInsignificant(), n--; }
-    void advanceNPlanet(int n) { if (!isDone()&&!current()->isPlanet()) advancePlanet(); while (!isDone()&&(n>0)) advancePlanet(), n--; }
-    void advanceNJumppoint(int n) { if (!isDone()&&!current()->isJumppoint()) advanceJumppoint(); while (!isDone()&&(n>0)) advanceJumppoint(), n--; }
-	Unit * next () {advance();return current();}
-	void preinsert (Unit * unit) {UnitIterator::preinsert(unit);}
-	bool isDone(){return UnitIterator::isDone();}
-	bool notDone(){return UnitIterator::notDone();}
-	void remove (){UnitIterator::remove();}
+	Unit* current();
+    void advanceSignificant();
+    void advanceInsignificant();
+    void advancePlanet();
+    void advanceJumppoint();
+    void advanceN(int);
+    void advanceNSignificant(int n);
+    void advanceNInsignificant(int n);
+    void advanceNPlanet(int n);
+    void advanceNJumppoint(int n);
 };
 	
 	string LookupUnitStat(const string &unitname, const string &faction, const string &statname);

@@ -1204,12 +1204,10 @@ bool getNearestTargetUnit (Unit *me, int iType) {
 }
 bool ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
 	UnitCollection * drawlist = &_Universe->activeStarSystem()->getUnitList();
-	un_iter iter = drawlist->createIterator();
 	vector <Unit *> vec;
 	Unit *target;
-	while ((target = iter.current())!=NULL) {
+	for(un_iter iter = drawlist->createIterator();target = *iter;++iter){
 		vec.push_back(target);
-		iter.advance();
 	}
         if (vec.size()==0)
           return false;
@@ -1218,7 +1216,7 @@ bool ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
 	}
 	std::vector <Unit *>::const_iterator veciter=std::find(vec.begin(),vec.end(),me->Target());
 	if (veciter!=vec.end())
-		veciter++;
+		++veciter;
 	int cur=0;
 	while (1) {
 		while (veciter!=vec.end()) {
@@ -1250,9 +1248,9 @@ bool ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
 				}
 				return true;
 			}
-			veciter++;
+			++veciter;
 		}
-		cur++;
+		++cur;
 		if (cur>=2)
 			break;
 		veciter=vec.begin();
@@ -1267,24 +1265,23 @@ void ChooseSubTargets(Unit * me) {
 	}
 	un_iter uniter=parent->getSubUnits();
 	if (parent==me->Target()) {
-		if (!uniter.current()) {
+		if (!(*uniter)) {
 			return;
 		}
-		me->Target(uniter.current());
+		me->Target(*uniter);
 		return;
 	}
-	while (uniter.current()) {
-		if (uniter.current()==me->Target()) {
-			uniter.advance();
-			if (uniter.current()) {
-				me->Target(uniter.current());
-			} else {
-				me->Target(parent);
-			}
-			return;
+	Unit *tUnit;
+	for(;tUnit = *uniter;++uniter){
+		if(tUnit == me->Target()){
+			++uniter;
+			break;
 		}
-		uniter.advance();
 	}
+	if(tUnit)
+		me->Target(tUnit);
+	else
+		me->Target(parent);
 }
 
 

@@ -578,11 +578,8 @@ void GamePlanet::setAtmosphere (Atmosphere *t) {
 
 
 void GamePlanet::Kill(bool erasefromsave) {
-	UnitCollection::UnitIterator iter;
 	Unit *tmp;
-	for (iter = satellites.createIterator();
-	     (tmp = iter.current())!=NULL;
-	     iter.advance()) {
+	for (un_iter iter = satellites.createIterator();tmp = *iter;++iter) {
 	  tmp->SetAI (new Order);
 	}
 	/* probably not FIXME...right now doesn't work on paged out systems... not a big deal */

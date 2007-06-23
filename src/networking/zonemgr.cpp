@@ -124,22 +124,12 @@ void	ZoneMgr::removeUnit( Unit * un, int zone)
 Unit *	ZoneMgr::getUnit( ObjSerial unserial, unsigned short zone)
 {
 	Unit * un = NULL;
-	UnitCollection::UnitIterator iter = (_Universe->star_system[zone]->getUnitList()).createIterator();
 
 	// Clients not ingame are removed from the drawList so it is ok not to test that
-	while( (un=iter.current()) != NULL)
-	{
+	for(un_iter iter = (_Universe->star_system[zone]->getUnitList()).createIterator();un = *iter;++iter){
 		if( un->GetSerial() == unserial)
 			break;
-		iter.advance();
 	}
-	/*
-	for( i=zone_unitlist[zone].begin(); i!=zone_unitlist[zone].end(); i++)
-	{
-		if( (*i)->GetSerial()==unserial)
-			un = (*i);
-	}
-	*/
 
 	return un;
 }
@@ -456,16 +446,14 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 					// This also means clients will receive info about themselves
                     // which they should ignore or take into account sometimes
                     // (according to their ping value)
-					UnitCollection::UnitIterator iter = (_Universe->star_system[i]->getUnitList()).createIterator();
 					Unit* unit;
 
 					// Add the client we send snapshot to its own deltatime (semi-ping)
 					netbuf.addFloat( cltk->getDeltatime() );
 //                    COUT << "   *** deltatime " << cltk->getDeltatime() << endl;
 					// Clients not ingame are removed from the drawList so it is ok not to test that
-					while( (unit=iter.current()) != NULL)
-					{
-                                          totalunits++;
+					for(un_iter iter = (_Universe->star_system[i]->getUnitList()).createIterator();unit = *iter;++iter){
+                                          ++totalunits;
                                           if (unit->GetSerial()!=0) {
 						// Only send unit that ate UNITPTR and PLANETPTR+NEBULAPTR if update_planets
 						if( (unit->isUnit()==UNITPTR || unit->isUnit()==ASTEROIDPTR || unit->isUnit()==MISSILEPTR) || ((unit->isUnit()==PLANETPTR || unit->isUnit()==NEBULAPTR) && update_planets) )
@@ -481,10 +469,9 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 							//}
 							bool added = addPosition( cltk, netbuf, unit, cs);
                                                         if( added )
-							    nbunits++;
+							    ++nbunits;
 						}
-                                          }
-                                          iter.advance();
+                                }
 					}
 
 					// Send snapshot to client k
@@ -514,18 +501,15 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
                         }
                 }
 		{
-			UnitCollection::UnitIterator iter = (_Universe->star_system[i]->getUnitList()).createIterator();
 			Unit * unit;
 
 			// Clients not ingame are removed from the drawList so it is ok not to test that
-			while( (unit=iter.current()) != NULL)
-			{
+			for(un_iter iter = (_Universe->star_system[i]->getUnitList()).createIterator();unit = *iter;++iter){
 				unit->damages = Unit::NO_DAMAGE;
 
 				if (vsrandom.genrand_int31()%(totalunits*10+1) == 1) {
 					unit->damages = 0xffff;
 				}
-				iter.advance();
 			}
 		}
 	}
@@ -652,24 +636,21 @@ void	ZoneMgr::broadcastDamage( )
                 ClientPtr cp( *k );
 				if( cp->ingame )
 				{
-					UnitCollection::UnitIterator iter = (_Universe->star_system[i]->getUnitList()).createIterator();
 					Unit * unit;
 
 					// Clients not ingame are removed from the drawList so it is ok not to test that
-					while( (unit=iter.current()) != NULL)
-					{
+					for(un_iter iter = (_Universe->star_system[i]->getUnitList()).createIterator();unit = *iter;++iter){
                                           if (unit->GetSerial()!=0) {
 						if( unit->damages)
 						{
 							// Add the client serial
 							netbuf.addSerial( unit->GetSerial());
-							this->addDamage( netbuf, unit);
-							nbunits++;
+							addDamage( netbuf, unit);
+							++nbunits;
 						}
-						totalunits++;
+						++totalunits;
 
                                           }
-                                          iter.advance();
 					}
 					// NETFIXME: Should damage updates be UDP or TCP?
 					// Send snapshot to client k
@@ -684,17 +665,14 @@ void	ZoneMgr::broadcastDamage( )
 			}
 		}
 		{
-			UnitCollection::UnitIterator iter = (_Universe->star_system[i]->getUnitList()).createIterator();
 			Unit * unit;
 
 			// Clients not ingame are removed from the drawList so it is ok not to test that
-			while( (unit=iter.current()) != NULL)
-			{
+			for(un_iter iter = (_Universe->star_system[i]->getUnitList()).createIterator();unit = *iter;++iter){
 				unit->damages = Unit::NO_DAMAGE;
 				if (vsrandom.genrand_int31()%(totalunits*10+1) == 1) {
 					unit->damages = 0xffff&(~Unit::COMPUTER_DAMAGED);
 				}
-				iter.advance();
 			}
 		}
 	}

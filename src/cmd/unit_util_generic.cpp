@@ -642,11 +642,12 @@ namespace UnitUtil {
     return my_unit->GetImageInformation().ecm;
   }
 	static bool ishere (Unit *par,Unit *look) {
-		for (un_iter uniter=par->getSubUnits();uniter.current();uniter.advance()) {
-			if (uniter.current()==look) {
+		Unit *un;
+		for (un_iter uniter=par->getSubUnits();un = *uniter;++uniter) {
+			if (un==look) {
 				return true;
 			}
-			if (uniter.current()!=par&&ishere(uniter.current(),look)) {
+			if (un!=par&&ishere(un,look)) {
 				return true;
 			}
 		}
@@ -654,9 +655,10 @@ namespace UnitUtil {
 	}
 	Unit *owner (Unit *un) {
 		Unit *found=NULL;
-		for (UniverseUtil::PythonUnitIter uniter=UniverseUtil::getUnitList();uniter.current();uniter.advance()) {
-			if (uniter.current()==un||ishere(uniter.current(),un)) {
-				found=uniter.current();
+		Unit *tmp;
+		for (UniverseUtil::PythonUnitIter uniter=UniverseUtil::getUnitList();tmp = *uniter;++uniter) {
+			if (tmp==un||ishere(tmp,un)) {
+				found=tmp;
 				break;
 			}
 		}

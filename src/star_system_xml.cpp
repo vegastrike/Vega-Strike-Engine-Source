@@ -296,15 +296,13 @@ static void GetLights (const vector <GFXLight> &origlights, vector <GFXLightLoca
 extern Unit * getTopLevelOwner();
 extern BLENDFUNC parse_alpha (const char *);
 static void SetSubunitRotation(Unit*un, float difficulty) {
-  UnitCollection::UnitIterator iter = un->getSubUnits();
   Unit *unit;
-  while((unit = iter.current())!=NULL) {
+  for(un_iter iter = un->getSubUnits();unit = *iter;++iter){
     float x=2*difficulty*((float)rand())/RAND_MAX -difficulty;
     float y=2*difficulty*((float)rand())/RAND_MAX-difficulty;
     float z=2*difficulty*((float)rand())/RAND_MAX-difficulty;
     unit->SetAngularVelocity(Vector(x,y,z));
     SetSubunitRotation(unit,difficulty);
-    iter.advance();
   }
   
 }
@@ -1433,17 +1431,12 @@ using namespace StarXML;
   */
   f.Close();
   XML_ParserFree (parser);
-  un_iter  *iter;
   unsigned int i;
   for (i =0;i<xml->moons.size();i++) {
     if (xml->moons[i]->isUnit()==PLANETPTR) {
-      iter = ((Planet*)xml->moons[i])->createIterator();
       Unit * un;
-      while ((un = iter->current())) {
+	  for(un_iter *iter = ((Planet*)xml->moons[i])->createIterator();un = **iter;++(*iter))
         AddUnit(un);
-        iter->advance();
-      }
-      delete iter;
     } else {
       AddUnit(xml->moons[i]);
     }

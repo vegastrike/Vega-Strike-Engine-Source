@@ -1,16 +1,16 @@
 #include <list>
+#include <vector>
 #include "collection.h"
 #include "unit_generic.h"
 
 using std::list;
-
+using std::vector;
 // UnitIterator  BEGIN:
 
 UnitCollection::UnitIterator& UnitCollection::UnitIterator::operator=(const UnitCollection::UnitIterator& orig)
 {
 	col = orig.col;
 	it = orig.it;
-	col->reg(this);
 	return (*this);
 }
 
@@ -41,7 +41,7 @@ UnitCollection::UnitIterator::~UnitIterator()
 }
 
 
-bool UnitCollection::UnitIterator::isDone()
+bool UnitCollection::UnitIterator::isDone() const
 {
 	if(it != col->u.end())
 		return(false);
@@ -49,7 +49,7 @@ bool UnitCollection::UnitIterator::isDone()
 }
 
 
-bool UnitCollection::UnitIterator::notDone()
+bool UnitCollection::UnitIterator::notDone() const
 {
 	return(!isDone());
 }
@@ -86,15 +86,6 @@ void UnitCollection::UnitIterator::postinsert(Unit *unit)
 		col->insert(tmp,unit);
 	}
 }
-
-
-Unit* UnitCollection::UnitIterator::current()
-{
-	if(it != col->u.end() && !col->empty())
-		return (*it);
-	return(NULL);
-}
-
 
 void UnitCollection::UnitIterator::advance()
 {
@@ -186,7 +177,7 @@ const Unit* UnitCollection::ConstIterator::next()
 }
 
 
-bool UnitCollection::ConstIterator::isDone()
+bool UnitCollection::ConstIterator::isDone() const
 {
 	if(it != col->u.end())
 		return(false);
@@ -194,7 +185,7 @@ bool UnitCollection::ConstIterator::isDone()
 }
 
 
-bool UnitCollection::ConstIterator::notDone()
+bool UnitCollection::ConstIterator::notDone() const
 {
 	return(!isDone());
 }
@@ -204,8 +195,7 @@ void UnitCollection::ConstIterator::advance()
 {
 	if(col->u.empty()) return;
 	++it;
-	list<Unit*>::const_iterator end = col->u.end();
-	while(it != end) {
+	while(it != col->u.end()) {
 		if((*it) == NULL)
 			++it;
 		if((*it)->Killed())
@@ -345,8 +335,7 @@ void UnitCollection::clear()
 
 void UnitCollection::destr()
 {
-	list<Unit*>::iterator end = u.end();
-	for(list<Unit*>::iterator it = u.begin();it!=end;++it) {
+	for(list<Unit*>::iterator it = u.begin();it!=u.end();++it) {
 		(*it)->UnRef();
 	}
 	u.clear();
@@ -358,8 +347,7 @@ bool UnitCollection::contains(const Unit* unit) const
 {
 	if(u.empty() || !unit)
 		return(false);
-	list<Unit*>::const_iterator end = u.end();
-	for (list<Unit*>::const_iterator it = u.begin();it !=  end;++it) {
+	for (list<Unit*>::const_iterator it = u.begin();it !=  u.end();++it) {
 		if((*it) == unit && !(*it)->Killed())
 			return(true);
 	}
@@ -372,12 +360,11 @@ list<Unit*>::iterator  UnitCollection::erase(list<Unit*>::iterator it)
 	if(u.empty() || it == u.end())
 		return (it);
 	Unit* tUnit = *it;
-	list<UnitIterator*>::iterator end = activeIters.end();
-	for(list<UnitIterator*>::iterator t = activeIters.begin();t != end; ++t){
+	for(vector<UnitIterator*>::iterator t = activeIters.begin();t != activeIters.end(); ++t){
 		if(it == (*t)->it)
 			++(*t)->it;
 	}
-	it = u.erase(it);
+	it = u.erase(it);	
 	tUnit->UnRef();
 	return(it);
 }
@@ -388,8 +375,7 @@ bool UnitCollection::remove(const Unit *unit)
 	bool res = false;
 	if(u.empty() || !unit)
 		return(false);
-	list<Unit*>::iterator end = u.end();
-	for(list<Unit*>::iterator it = u.begin(); it!= end;) {
+	for(list<Unit*>::iterator it = u.begin(); it!= u.end();) {
 		if((*it) == unit) {
 			it = erase(it);		
 			res = true;
@@ -405,8 +391,7 @@ const UnitCollection& UnitCollection::operator = (const UnitCollection& uc)
 {
 	destr();
 	list<Unit*>::const_iterator in = uc.u.begin();
-	list<Unit*>::const_iterator end = uc.u.end();
-	while(in != end) {
+	while(in != uc.u.end()) {
 		append(*in);
 		++in;
 	}
@@ -416,8 +401,7 @@ const UnitCollection& UnitCollection::operator = (const UnitCollection& uc)
 
 void UnitCollection::cleanup()
 {
-	list<Unit*>::iterator end = u.end();
-	for(list<Unit*>::iterator it = u.begin();it != end;) {
+	for(list<Unit*>::iterator it = u.begin();it != u.end();) {
 		if((*it)->Killed())
 			it = erase(it);
 		else
@@ -427,19 +411,16 @@ void UnitCollection::cleanup()
 
 void UnitCollection::reg(un_iter* tmp)
 {
-	activeIters.push_front(tmp);
+	activeIters.push_back(tmp);
 }
 
 void UnitCollection::unreg(un_iter* tmp)
 {
-	list<un_iter*>::iterator t = activeIters.begin();
-	list<un_iter*>::iterator e = activeIters.end();
-	while(t!= e){
-		if(*t == tmp){
+	for(vector<un_iter*>::iterator t = activeIters.begin(),e = activeIters.end();t != e;++t){
+		if(*t == tmp){					
 			activeIters.erase(t);
-			break;
+			return;
 		}
-		++t;
 	}
 }
 

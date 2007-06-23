@@ -1285,49 +1285,25 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
 
 void Mission::findNextEnemyTarget(Unit *my_unit){
       StarSystem *ssystem=_Universe->scriptStarSystem();
-
       un_iter uiter(ssystem->getUnitList().createIterator());
-
-      int i=0;
-      Unit *unit=uiter.current();
+	  Unit *unit;
       Unit *target_unit=NULL;
-      //      int my_faction=_Universe->GetFaction(my_unit->getFlightgroup()->faction.c_str());
-      while(unit!=NULL){
-	//	int other_faction=_Universe->GetFaction(unit->getFlightgroup()->faction.c_str());
-	if(my_unit->getRelation(unit)<0.0){
-	  target_unit=uiter.current();
-	  unit=NULL;
-	}
-	else{
-	  //	  printf("relation was: %f %d %d\n",_Universe->GetRelation(my_faction,other_faction),my_faction,other_faction);
-	  unit=uiter.next();
-	  i++;
-	}
-      }
-
-      if(target_unit==NULL){
-	//
-      }
-      else{
-	my_unit->Target(target_unit);
-      }
-
-      return;
+	  for(un_iter uiter = ssystem->getUnitList().createIterator(); unit = *uiter;++uiter){
+		if(my_unit->getRelation(unit)<0.0){
+			target_unit = *uiter;
+			break;
+		}
+		}
+		if(target_unit)
+			my_unit->Target(target_unit);
+		return;
 }
 
 static Unit * getIthUnit (un_iter uiter, int unit_nr) {
-  int i=0;
-  Unit * my_unit=NULL;
-  Unit *unit=uiter.current();
-  while(unit!=NULL){
-    if(i==unit_nr){
-      my_unit=uiter.current();
-      unit=NULL;
-    }
-    else{
-      unit=uiter.next();
-      i++;
-    }
+  Unit *unit = NULL;
+  for(int i = 0;unit = *uiter;++uiter,++i){
+  	if(i == unit_nr)
+		return (unit);
   }
-  return my_unit;
+  return(NULL);
 }
