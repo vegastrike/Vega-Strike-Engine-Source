@@ -432,11 +432,11 @@ Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, Q
       }
     }
 #if 0
-    UnitCollection::UnitIterator i;
+   	un_iter i;
     static float rsizelim = XMLSupport::parse_float (vs_config->getVariable ("physics","smallest_subunit_to_collide",".2"));
     if (!bigger->SubUnits.empty()) {
       i=bigger->getSubUnits();
-      for (Unit * un;(un=i.current())!=NULL;i.advance()) {
+      for (Unit * un;(un=*i);++i) {
 	if ((bigtype!=ASTEROIDPTR)&&(un->rSize()/bigger->rSize()<rsizelim)) {
 	  break;
 	}else {
@@ -449,7 +449,7 @@ Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, Q
     }
     if (!smaller->SubUnits.empty()) {
       i=smaller->getSubUnits();
-      for (Unit * un;(un=i.current())!=NULL;i.advance()) {
+      for (Unit * un;(un=*i);++i) {
 	if ((smalltype!=ASTEROIDPTR)&&(un->rSize()/smaller->rSize()<rsizelim)) {
 	  //	  printf ("s:%f",un->rSize()/smaller->rSize());
 	  break;
@@ -811,7 +811,7 @@ bool Unit::querySphere (const QVector &pnt, float err) const{
   if (graphicOptions.RecurseIntoSubUnitsOnCollision) 
   if (!SubUnits.empty()) {
     un_fkiter i=SubUnits.constFastIterator();
-    for (const Unit * un;(un=i.current())!=NULL;i.advance()) {
+    for (const Unit * un;(un=*i);++i) {
       if ((un)->querySphere (pnt,err)) {
 	return true;
       }
@@ -824,7 +824,7 @@ bool Unit::querySphere (const QVector &pnt, float err) const{
 float Unit::querySphere (const QVector &start, const QVector &end, float min_radius) const{
   if (!SubUnits.empty()) {
     un_fkiter i=SubUnits.constFastIterator();
-    for (const Unit * un;(un=i.current())!=NULL;i.advance()) {
+    for (const Unit * un;(un=*i);++i) {
       float tmp;
       if ((tmp=un->querySphere (start,end,min_radius))!=0) {
 	return tmp;

@@ -3141,7 +3141,7 @@ bool BaseComputer::UpgradeOperation::gotSelectedMount(int index) {
 		return false; // kill the window.
     } else {
         m_selectedMount = index;
-        if(m_newPart->viewSubUnits().current() == NULL) {
+        if(!(*m_newPart->viewSubUnits())) {
             // Not a turret.  Proceed with the transaction.
             return checkTransaction();
 		} else {

@@ -9,7 +9,12 @@ using std::vector;
 
 UnitCollection::UnitIterator& UnitCollection::UnitIterator::operator=(const UnitCollection::UnitIterator& orig)
 {
-	col = orig.col;
+	if(col != orig.col){
+		if(col)
+			col->unreg(this);
+		col = orig.col;
+		col->reg(this);
+	}
 	it = orig.it;
 	return (*this);
 }
@@ -41,7 +46,7 @@ UnitCollection::UnitIterator::~UnitIterator()
 }
 
 
-bool UnitCollection::UnitIterator::isDone() const
+bool UnitCollection::UnitIterator::isDone()
 {
 	if(it != col->u.end())
 		return(false);
@@ -49,7 +54,7 @@ bool UnitCollection::UnitIterator::isDone() const
 }
 
 
-bool UnitCollection::UnitIterator::notDone() const
+bool UnitCollection::UnitIterator::notDone()
 {
 	return(!isDone());
 }
@@ -133,7 +138,6 @@ Unit* UnitCollection::UnitIterator::operator *()
 	return(NULL);
 }
 
-
 // UnitIterator END:
 
 // ConstIterator Begin:
@@ -177,7 +181,7 @@ const Unit* UnitCollection::ConstIterator::next()
 }
 
 
-bool UnitCollection::ConstIterator::isDone() const
+bool UnitCollection::ConstIterator::isDone()
 {
 	if(it != col->u.end())
 		return(false);
@@ -185,7 +189,7 @@ bool UnitCollection::ConstIterator::isDone() const
 }
 
 
-bool UnitCollection::ConstIterator::notDone() const
+bool UnitCollection::ConstIterator::notDone()
 {
 	return(!isDone());
 }
@@ -362,7 +366,7 @@ list<Unit*>::iterator  UnitCollection::erase(list<Unit*>::iterator it)
 	Unit* tUnit = *it;
 	for(vector<UnitIterator*>::iterator t = activeIters.begin();t != activeIters.end(); ++t){
 		if(it == (*t)->it)
-			++(*t)->it;
+			++((*t)->it);
 	}
 	it = u.erase(it);	
 	tUnit->UnRef();
@@ -416,7 +420,7 @@ void UnitCollection::reg(un_iter* tmp)
 
 void UnitCollection::unreg(un_iter* tmp)
 {
-	for(vector<un_iter*>::iterator t = activeIters.begin(),e = activeIters.end();t != e;++t){
+	for(vector<un_iter*>::iterator t = activeIters.begin();t != activeIters.end();++t){
 		if(*t == tmp){					
 			activeIters.erase(t);
 			return;

@@ -46,19 +46,27 @@
 #include "savegame.h"
 #include "gfx/screenshot.h"
 #include "universe_util.h"
-using namespace std;
+
+#include <algorithm>
+#include <string>
+#include <vector>
 ///Decides whether to toast the jump star from the cache
+using std::string;
+using std::vector;
+using std::find;
 extern void CacheJumpStar (bool);
-extern void SortStarSystems (std::vector <StarSystem *> &ss, StarSystem * drawn);
-StarSystem * GameUniverse::Init (string systemfile, const Vector & centr,const string planetname) {
-  static bool js = true;
-  if (js) {
-	js=false;
-	LoadWeapons(VSFileSystem::weapon_list.c_str());
-	CacheJumpStar(false);
-  }
-  return this->Universe::Init( systemfile, centr, planetname);
+extern void SortStarSystems (vector <StarSystem *> &ss, StarSystem * drawn);
+StarSystem * GameUniverse::Init (string systemfile, const Vector & centr,const string planetname)
+{
+	static bool js = true;
+	if (js) {
+		js=false;
+		LoadWeapons(VSFileSystem::weapon_list.c_str());
+		CacheJumpStar(false);
+	}
+	return this->Universe::Init( systemfile, centr, planetname);
 }
+
 
 extern void bootstrap_first_loop();
 
@@ -67,14 +75,14 @@ void GameUniverse::Init( int argc, char** argv, const char * galaxy)
 	current_cockpit=0;
 	//Select drivers
 #if defined(__APPLE__)
-    // get the current working directory so when glut trashes it we can restore.
-    char pwd[MAXPATHLEN];
-    getcwd (pwd,MAXPATHLEN);
+	// get the current working directory so when glut trashes it we can restore.
+	char pwd[MAXPATHLEN];
+	getcwd (pwd,MAXPATHLEN);
 #endif
 	GFXInit(argc,argv);
 #if defined(__APPLE__)
-    // Restore it
-    chdir(pwd);
+	// Restore it
+	chdir(pwd);
 #endif
 	StartGFX();
 	InitInput();
@@ -87,35 +95,47 @@ void GameUniverse::Init( int argc, char** argv, const char * galaxy)
 	this->Universe::Init( galaxy);
 	//this->galaxy = new GalaxyXML::Galaxy (galaxy);
 }
+
+
 GameUniverse::GameUniverse(int argc, char** argv, const char * galaxy)
 {
 	this->Init( argc, argv, galaxy);
 	is_server = false;
 }
+
+
 GameUniverse::GameUniverse():Universe()
 {
 }
+
+
 GameUniverse::~GameUniverse()
 {
-  //int i;
-  //CacheJumpStar(true);
-  DeInitInput();
-  GFXShutdown();
+	//int i;
+	//CacheJumpStar(true);
+	DeInitInput();
+	GFXShutdown();
 }
+
+
 //sets up all the stuff... in this case the ships to be rendered
 
-void GameUniverse::SetupCockpits(vector  <string> playerNames) {
-	for (unsigned int i=0;i<playerNames.size();i++) {
-	  cockpit.push_back(NULL);
-	  int temp = cockpit.size();
-	  cockpit.back() = new GameCockpit ("",NULL,playerNames[i]);
-	  temp = cockpit.size();
+void GameUniverse::SetupCockpits(vector  <string> playerNames)
+{
+	for (unsigned int i=0;i<playerNames.size();++i) {
+		cockpit.push_back(NULL);
+		int temp = cockpit.size();
+		cockpit.back() = new GameCockpit ("",NULL,playerNames[i]);
+		temp = cockpit.size();
 	}
 }
 
-void GameUniverse::activateLightMap(int stage) {
+
+void GameUniverse::activateLightMap(int stage)
+{
 	getActiveStarSystem(0)->activateLightMap(stage);
 }
+
 
 void GameUniverse::StartGFX()
 {
@@ -157,56 +177,65 @@ void GameUniverse::StartGFX()
 	//	GFXCreateLight (ligh, GFXLight(true,GFXColor (0.001,0.001,.001),GFXColor (1,1,.6,1),GFXColor(1,1,1,1), GFXColor (0,0,0,1), GFXColor (1,.0000,.000000004)),false);
 	GFXEnableLight (ligh);
 	*/
-      	GFXEndScene();
+	GFXEndScene();
 }
 
-void GameUniverse::Loop(void main_loop()) {
-  GFXLoop(main_loop);
+
+void GameUniverse::Loop(void main_loop())
+{
+	GFXLoop(main_loop);
 }
-void CalculateCoords (unsigned int i,unsigned int size, float &x,float &y,float &w,float &h){
-  if (size<=1) {
-    x=y=0;
-    w=h=1;
-    return;
-  }
-  if (size<=3||i<(size/2)) {
-    y=0;
-    h=1;
-    w=1./((float)size);
-    x= ((float)i)/size;
-    if (size>3) {
-      h=.5;
-    }
-  }
-  if (size>3) {
-    if (i>size/2) {
-      y=.5;
-      h=.5;
-      x=((float)i-(size/2))/(size-size/2);
-      w=1/(size-size/2);
-    }
-  }
+
+
+void CalculateCoords (unsigned int i,unsigned int size, float &x,float &y,float &w,float &h)
+{
+	if (size<=1) {
+		x=y=0;
+		w=h=1;
+		return;
+	}
+	if (size<=3||i<(size/2)) {
+		y=0;
+		h=1;
+		w=1./((float)size);
+		x= ((float)i)/size;
+		if (size>3) {
+			h=.5;
+		}
+	}
+	if (size>3) {
+		if (i>size/2) {
+			y=.5;
+			h=.5;
+			x=((float)i-(size/2))/(size-size/2);
+			w=1/(size-size/2);
+		}
+	}
 }
+
+
 extern bool RefreshGUI();
 extern float rand01();
 extern int timecount;
 
-inline void loadsounds(const string &str,const int max,soundArray& snds,bool loop=false) {
+inline void loadsounds(const string &str,const int max,soundArray& snds,bool loop=false)
+{
 	char addstr[2]={'\0'};
 	snds.allocate(max);
-	for (int i=0;i<max;i++) {
+	for (int i=0;i<max;++i) {
 		addstr[0]='1'+i;
 		string mynewstr=str;
-//		bool foundyet=false;
+		//		bool foundyet=false;
 		while (1) {
-			std::string::iterator found=std::find(mynewstr.begin(),mynewstr.end(),'?');
+			string::iterator found=find(mynewstr.begin(),mynewstr.end(),'?');
 			if (found!=mynewstr.end()) {
 				mynewstr[found-mynewstr.begin()]=addstr[0];
-//				foundyet=true;
-			} else {
-//				if (!foundyet) {
-//					mynewstr=mynewstr+addstr;
-//				}
+				//				foundyet=true;
+			}
+			else {
+				//				if (!foundyet) {
+				//					mynewstr=mynewstr+addstr;
+				//				}
 				break;
 			}
 		}
@@ -214,7 +243,9 @@ inline void loadsounds(const string &str,const int max,soundArray& snds,bool loo
 	}
 }
 
-static void UpdateTimeCompressionSounds() {
+
+static void UpdateTimeCompressionSounds()
+{
 	static int lasttimecompress=0;
 	static int numsnd=XMLSupport::parse_int(vs_config->getVariable("cockpitaudio","compress_max","3"));
 	if ((timecount!=lasttimecompress)&&(numsnd>0)) {
@@ -237,20 +268,23 @@ static void UpdateTimeCompressionSounds() {
 		if (timecount>0&&lasttimecompress>=0) {
 			if ((soundfile+1)>=numsnd) {
 				burst_snds.ptr[numsnd-1].playsound();
-			} else {
+			}
+			else {
 				if (lasttimecompress>0&&loop_snds.ptr[lastsoundfile].sound>=0&&AUDIsPlaying(loop_snds.ptr[lastsoundfile].sound))
 					AUDStopPlaying(loop_snds.ptr[lastsoundfile].sound);
 				loop_snds.ptr[soundfile].playsound();
 				burst_snds.ptr[soundfile].playsound();
 			}
-		} else if (lasttimecompress>0&&timecount==0) {
-			for (int i=0;i<numsnd;i++) {
+		}
+		else if (lasttimecompress>0&&timecount==0) {
+			for (int i=0;i<numsnd;++i) {
 				if (loop_snds.ptr[i].sound>=0&&AUDIsPlaying(loop_snds.ptr[i].sound))
 					AUDStopPlaying(loop_snds.ptr[i].sound);
 			}
 			if (lastsoundfile>=numsnd) {
 				end_snds.ptr[numsnd-1].playsound();
-			} else {
+			}
+			else {
 				end_snds.ptr[lastsoundfile].playsound();
 			}
 		}
@@ -258,116 +292,122 @@ static void UpdateTimeCompressionSounds() {
 	}
 }
 
-extern bool screenshotkey;
 
+extern bool screenshotkey;
 
 extern int getmicrosleep ();
 void GameUniverse::StartDraw()
 {
 #ifndef WIN32
-  RESETTIME();
+	RESETTIME();
 #endif
-  GFXBeginScene();
-  unsigned int i;
-  StarSystem * lastStarSystem = NULL;
-  for (i=0;i<cockpit.size();i++) {
-    SetActiveCockpit (i);
-    float x,y,w,h;
-    CalculateCoords (i,cockpit.size(),x,y,w,h);
-    AccessCamera()->SetSubwindow (x,y,w,h);
-    if (cockpit.size()>1&&AccessCockpit(i)->activeStarSystem!=lastStarSystem) {
-      active_star_system[0]->SwapOut();
-      lastStarSystem=AccessCockpit()->activeStarSystem;
-      active_star_system[0]=lastStarSystem;
-      lastStarSystem->SwapIn();
-    }
-    AccessCockpit()->SelectProperCamera();
-    if (cockpit.size()>0)
-      AccessCamera()->UpdateGFX();
-    if (!RefreshGUI() && !UniverseUtil::isSplashScreenShowing()) {
-      activeStarSystem()->Draw();
-    }
-    AccessCamera()->SetSubwindow (0,0,1,1);
-  }
-  UpdateTime();
-  UpdateTimeCompressionSounds();
-  static unsigned int numrunningsystems = XMLSupport::parse_int (vs_config->getVariable ("physics","NumRunningSystems","4"));
-  static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
-  float systime=nonactivesystemtime;
-  _Universe->SetActiveCockpit (((int)(rand01()*cockpit.size()))%cockpit.size());
-  
-  for (i=0;i<star_system.size()&&i<numrunningsystems;i++) {
-    star_system[i]->Update((i==0)?1:systime/i,true);
-  }
-  StarSystem::ProcessPendingJumps();
-  for (i=0;i<cockpit.size();i++) {
-    SetActiveCockpit(i);
-    pushActiveStarSystem(AccessCockpit(i)->activeStarSystem);
-    ProcessInput(i);//input neesd to be taken care of;
-    popActiveStarSystem();
-  }
-
-  if (screenshotkey) {
-    KBData b;
-    Screenshot(b,PRESS);
-    screenshotkey=false;
-  }
-  GFXEndScene();
-  micro_sleep (getmicrosleep());//so we don't starve the audio thread  
-
-  //remove systems not recently visited?
-  static int sorttime=0;
-  static int howoften = XMLSupport::parse_int(vs_config->getVariable ("general","garbagecollectfrequency","20"));
-  if (howoften!=0) {
-	  if (PendingJumpsEmpty()) {//don't want to delete something when there is something pending to jump therexo
-    if ((sorttime++)%howoften==1) {
-      SortStarSystems(star_system,active_star_system.back());
-      static unsigned int numrunningsystems = XMLSupport::parse_int(vs_config->getVariable ("general","numoldsystems","6"));
-      static bool deleteoldsystems = XMLSupport::parse_bool (vs_config->getVariable ("general","deleteoldsystems","true"));
-      if (star_system.size()>numrunningsystems&&deleteoldsystems) {
-	if (std::find (active_star_system.begin(),active_star_system.end(),star_system.back())==active_star_system.end()) {
-	  delete star_system.back();
-	  star_system.pop_back();
-	} else {
-	  VSFileSystem::vs_fprintf (stderr,"error with active star system list\n");
+	GFXBeginScene();
+	unsigned int i;
+	StarSystem * lastStarSystem = NULL;
+	for (i=0;i<cockpit.size();++i) {
+		SetActiveCockpit (i);
+		float x,y,w,h;
+		CalculateCoords (i,cockpit.size(),x,y,w,h);
+		AccessCamera()->SetSubwindow (x,y,w,h);
+		if (cockpit.size()>1&&AccessCockpit(i)->activeStarSystem!=lastStarSystem) {
+			active_star_system[0]->SwapOut();
+			lastStarSystem=AccessCockpit()->activeStarSystem;
+			active_star_system[0]=lastStarSystem;
+			lastStarSystem->SwapIn();
+		}
+		AccessCockpit()->SelectProperCamera();
+		if (cockpit.size()>0)
+			AccessCamera()->UpdateGFX();
+		if (!RefreshGUI() && !UniverseUtil::isSplashScreenShowing()) {
+			activeStarSystem()->Draw();
+		}
+		AccessCamera()->SetSubwindow (0,0,1,1);
 	}
-      }
+	UpdateTime();
+	UpdateTimeCompressionSounds();
+	static unsigned int numrunningsystems = XMLSupport::parse_int (vs_config->getVariable ("physics","NumRunningSystems","4"));
+	static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
+	float systime=nonactivesystemtime;
+	_Universe->SetActiveCockpit (((int)(rand01()*cockpit.size()))%cockpit.size());
+
+	for (i=0;i<star_system.size()&&i<numrunningsystems;++i) {
+		star_system[i]->Update((i==0)?1:systime/i,true);
 	}
-    }
-  }
-  
+	StarSystem::ProcessPendingJumps();
+	for (i=0;i<cockpit.size();++i) {
+		SetActiveCockpit(i);
+		pushActiveStarSystem(AccessCockpit(i)->activeStarSystem);
+		ProcessInput(i);		 //input neesd to be taken care of;
+		popActiveStarSystem();
+	}
+
+	if (screenshotkey) {
+		KBData b;
+		Screenshot(b,PRESS);
+		screenshotkey=false;
+	}
+	GFXEndScene();
+								 //so we don't starve the audio thread
+	micro_sleep (getmicrosleep());
+
+	//remove systems not recently visited?
+	static int sorttime=0;
+	static int howoften = XMLSupport::parse_int(vs_config->getVariable ("general","garbagecollectfrequency","20"));
+	if (howoften!=0) {
+								 //don't want to delete something when there is something pending to jump therexo
+		if (PendingJumpsEmpty()) {
+			if ((++sorttime)%howoften==1) {
+				SortStarSystems(star_system,active_star_system.back());
+				static unsigned int numrunningsystems = XMLSupport::parse_int(vs_config->getVariable ("general","numoldsystems","6"));
+				static bool deleteoldsystems = XMLSupport::parse_bool (vs_config->getVariable ("general","deleteoldsystems","true"));
+				if (star_system.size()>numrunningsystems&&deleteoldsystems) {
+					if (find (active_star_system.begin(),active_star_system.end(),star_system.back())==active_star_system.end()) {
+						delete star_system.back();
+						star_system.pop_back();
+					}
+					else {
+						VSFileSystem::vs_fprintf (stderr,"error with active star system list\n");
+					}
+				}
+			}
+		}
+	}
 
 }
 
-void GameUniverse::WriteSaveGame (bool auto_save) 
+
+void GameUniverse::WriteSaveGame (bool auto_save)
 {
-  for (unsigned int i=0;i<cockpit.size();i++) {
-    if (AccessCockpit(i)) {
-     ::WriteSaveGame (AccessCockpit(i),auto_save);
+	for (unsigned int i=0;i<cockpit.size();++i) {
+		if (AccessCockpit(i)) {
+			::WriteSaveGame (AccessCockpit(i),auto_save);
 #if 0
-      if (AccessCockpit(i)->GetParent()) {
-	if(AccessCockpit(i)->GetParent()->GetHull()>0) {  
-		AccessCockpit(i)->savegame->WriteSaveGame (AccessCockpit(i)->activeStarSystem->getFileName().c_str(),AccessCockpit(i)->GetParent()->Position(),AccessCockpit(i)->credits,AccessCockpit(i)->GetUnitFileName());
-	  AccessCockpit(i)->GetParent()->WriteUnit(AccessCockpit(i)->GetUnitModifications().c_str());
-	} 
-      }
+			if (AccessCockpit(i)->GetParent()) {
+				if(AccessCockpit(i)->GetParent()->GetHull()>0) {
+					AccessCockpit(i)->savegame->WriteSaveGame (AccessCockpit(i)->activeStarSystem->getFileName().c_str(),AccessCockpit(i)->GetParent()->Position(),AccessCockpit(i)->credits,AccessCockpit(i)->GetUnitFileName());
+					AccessCockpit(i)->GetParent()->WriteUnit(AccessCockpit(i)->GetUnitModifications().c_str());
+				}
+			}
 #endif
-    }
-  }
+		}
+	}
 }
+
 
 extern StarSystem *GetLoadedStarSystem(const char * system);
 
-StarSystem * GameUniverse::GenerateStarSystem (const char * file, const char * jumpback, Vector center) {
-  StarSystem *tmpcache;
-  if ((tmpcache =GetLoadedStarSystem(file))) {
-    return tmpcache;
-  }
-  this->Generate1( file, jumpback);
-  StarSystem * ss = new GameStarSystem (file,center);
-  this->Generate2( ss);
-  return ss;
+StarSystem * GameUniverse::GenerateStarSystem (const char * file, const char * jumpback, Vector center)
+{
+	StarSystem *tmpcache;
+	if ((tmpcache =GetLoadedStarSystem(file))) {
+		return tmpcache;
+	}
+	this->Generate1( file, jumpback);
+	StarSystem * ss = new GameStarSystem (file,center);
+	this->Generate2( ss);
+	return ss;
 }
+
 
 /************************************************************************
 extern char *viddrv;

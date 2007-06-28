@@ -48,7 +48,7 @@ public:
 	}
         static int hash(const char *key) {
           unsigned int k = 0;
-          for(const char * start = key; *start!='\0'; start++) {
+          for(const char * start = key; *start!='\0'; ++start) {
             k ^= (*start&HASH_SALT_1);
             k ^= HASH_SALT_0;
             k  = (((k>>4)&0xF)|(k<<(HASH_INTSIZE-4)));
@@ -59,7 +59,7 @@ public:
 	}
 	static int hash(const std::string &key) {
           unsigned int k = 0;
-          for(typename std::string::const_iterator start = key.begin(); start!=key.end(); start++) {
+          for(typename std::string::const_iterator start = key.begin(); start!=key.end(); ++start) {
             k ^= (*start&HASH_SALT_1);
             k ^= HASH_SALT_0;
             k  = (((k>>4)&0xF)|(k<<(HASH_INTSIZE-4)));
@@ -74,8 +74,8 @@ public:
           typename supertype::const_iterator iter=this->begin();
           typename supertype::const_iterator end=this->end();
           size_t i=0;
-          for (;iter!=end;++iter) {
-            retval[i++]=iter->second;
+          for (;iter!=end;++iter,++i) {
+            retval[i]=iter->second;
           }
 	  return retval;
 	}
@@ -95,11 +95,11 @@ public:
 
 	void Delete(const KEY &key)
 	{
-          if (this->find(key)==this->end()) {
-            fprintf(stderr,"failed to remove item in hash_map\n");
-            return;//FIXME could be double slow to delete
-          }
-          typename supertype::iterator iter=this->find(key);
+			 typename supertype::iterator iter=this->find(key);
+		  if(iter == this->end()){
+		  	fprintf(stderr,"failed to remove item in hash_map\n");
+		  	return;
+			}
           this->erase(iter);
 	}
 };

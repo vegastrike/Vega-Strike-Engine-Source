@@ -70,9 +70,9 @@ UnitCollection * ClickList::requestIterator (int mouseX, int mouseY) {
   perplines = vector<Vector>();
     UnitCollection * uc = new UnitCollection ();
     Unit * un;
-	for(un_iter myParent = parentIter->createIterator();un = *myParent;++myParent){
+	for(un_iter myParent = parentIter->createIterator(),UAye = uc->createIterator();un = *myParent;++myParent){
 	if (queryShip(mouseX,mouseY,un))
-	  uc->prepend(un);
+	  UAye.preinsert(un);
     }
     return uc;
 }
@@ -85,8 +85,7 @@ Unit * ClickList::requestShip (int mouseX, int mouseY) {
     equalCheck=true;
     Unit *lastun;
 	Unit *un;
-	un_iter UAye = uc->createIterator();
-	for(un_iter lastiter = lastCollection->createIterator(); (lastun = *lastiter) && (un = *UAye) && equalCheck;++lastiter){
+	for(un_iter lastiter = lastCollection->createIterator(),UAye = uc->createIterator(); (lastun = *lastiter) && (un = *UAye) && equalCheck;++lastiter,++UAye){
       if (un !=lastun) 
 	equalCheck=false;
     }    

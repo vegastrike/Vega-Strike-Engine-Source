@@ -129,7 +129,7 @@ PYTHON_BEGIN_CLASS(VS,UniverseUtil::PythonUnitIter,"un_iter")
   PYTHON_DEFINE_METHOD(Class,&UniverseUtil::PythonUnitIter::current,"current");
   PYTHON_DEFINE_METHOD(Class,&UniverseUtil::PythonUnitIter::isDone,"isDone");
   PYTHON_DEFINE_METHOD(Class,&UniverseUtil::PythonUnitIter::notDone,"notDone");
-  PYTHON_DEFINE_METHOD(Class,&UniverseUtil::PythonUnitIter::UnitIterator::advance,"advance");
+  PYTHON_DEFINE_METHOD(Class,&UniverseUtil::PythonUnitIter::advance,"advance");
   PYTHON_DEFINE_METHOD(Class,&UniverseUtil::PythonUnitIter::advanceN,"advanceN");
   PYTHON_DEFINE_METHOD(Class,&UniverseUtil::PythonUnitIter::advanceSignificant,"advanceSignificant");
   PYTHON_DEFINE_METHOD(Class,&UniverseUtil::PythonUnitIter::advanceNSignificant,"advanceNSignificant");

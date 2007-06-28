@@ -1159,7 +1159,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 
 
 void UpgradingInfo::CompleteTransactionAfterMountSelect() {
-    if (NewPart->viewSubUnits().current()!=NULL) {
+    if (*NewPart->viewSubUnits()) {
       SetMode (mode,SUBUNIT_MODE);
     }else {
       selectedturret=0;

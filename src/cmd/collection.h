@@ -20,30 +20,28 @@ class UnitCollection
 				UnitIterator() : col(NULL) {;}
 				UnitIterator( const UnitIterator&);
 				UnitIterator(UnitCollection*);
-				~UnitIterator();
-				
-				bool isDone() const;
-				bool notDone() const;
+				virtual ~UnitIterator();
+				bool isDone();
+				bool notDone();
 				//removes current unit.
-				void remove();
+				virtual void remove();
 				//moves current unit to front of list passed
 				void moveBefore(UnitCollection&);
 				//inserts in front of current
-				void preinsert(class Unit*);
+				virtual void preinsert(class Unit*);
 				// inserts after current
-				void postinsert(class Unit *unit);
+				virtual void postinsert(class Unit *unit);
+				//advances the counter
+				virtual void advance();
 				//Returns next unit in list
 				Unit* next();
+
 				UnitIterator& operator=( const UnitIterator&);
 				const UnitIterator operator ++(int);
 				const UnitIterator& operator ++();
 				class Unit * operator * ();
-				//advances the counter
-				void advance();
-
-			protected:				
-				friend class UnitCollection;
 				std::list<class Unit*>::iterator it;
+			protected:
 				// Pointer to list
 				UnitCollection *col;
 				// Current position in list
@@ -56,16 +54,15 @@ class UnitCollection
 				ConstIterator() : col(NULL) {;}
 				ConstIterator( const ConstIterator&);
 				ConstIterator( const UnitCollection*);
-				~ConstIterator( );
+				virtual ~ConstIterator( );
 				ConstIterator& operator=( const ConstIterator& orig );
 				const Unit * next();
-				const Unit *current() const { if(it != col->u.end())return(*it); return(NULL);}
-				bool isDone() const;
-				bool notDone() const;
-				void advance();
+				bool isDone();
+				bool notDone();
+				virtual void advance();
 				const ConstIterator& operator ++();
 				const ConstIterator operator ++(int);
-				const class Unit * operator * () const { return(current());}
+				const class Unit * operator * () const { if(it!=col->u.end()&&!col->empty())return(*it);return(NULL);}
 			protected:
 				const UnitCollection *col;
 				std::list<class Unit*>::const_iterator it;
@@ -110,8 +107,8 @@ class UnitCollection
 		const UnitCollection& operator= (const UnitCollection&);
 		// traverses list and removes invalid units
 		void cleanup();
-		const int size() const { return(u.size()); }
 
+		const int size() const { return(u.size());}
 		std::list<class Unit*> u;
 		void reg(UnitCollection::UnitIterator*);
 		void unreg(UnitCollection::UnitIterator*);

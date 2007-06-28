@@ -486,7 +486,7 @@ bool Cockpit::Update () {
 			++ui;
 			continue;
 		}
-	  if (++i==index) {
+	  if (i++==index) {
 	  // NOTE : this may have been a correction to the conditional bug 
 	    ++index;
 	    if (un->name.get().find ("accessory")==string::npos) {
@@ -564,7 +564,7 @@ bool Cockpit::Update () {
 
 
 
-	if ( (((par != NULL) && (++i)>=index)||par==NULL) && (!_Universe->isPlayerStarship(un)) && (switch_nonowned_units || (par!=NULL &&un->owner == par->owner) || (par!=NULL&&un == par->owner ) || (par!=NULL&&un->owner == par)|| (par==NULL&&un->owner)) && (un->name!="eject") && (un->name!="Pilot") && (un->isUnit()!=MISSILEPTR)) {
+	if ( (((par != NULL) && (i++)>=index)||par==NULL) && (!_Universe->isPlayerStarship(un)) && (switch_nonowned_units || (par!=NULL &&un->owner == par->owner) || (par!=NULL&&un == par->owner ) || (par!=NULL&&un->owner == par)|| (par==NULL&&un->owner)) && (un->name!="eject") && (un->name!="Pilot") && (un->isUnit()!=MISSILEPTR)) {
 	  found=true;
 	  ++index;
 	  Unit * k=GetParent(); 

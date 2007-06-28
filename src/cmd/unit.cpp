@@ -187,13 +187,11 @@ bool GameUnit<UnitType>::queryFrustum(double frustum [6][4]) const{
 	  return true;
 	}
   }
-  un_fkiter iter =this->SubUnits.constFastIterator();
   const Unit * un;
-  while ((un = iter.current())) {
+  for(un_fkiter iter = this->SubUnits.constFastIterator();un = *iter;++iter){
     if (((GameUnit<UnitType>*)un)->queryFrustum (frustum)) {
       return true;
     }
-    iter.advance();
   }
   return false;
 }

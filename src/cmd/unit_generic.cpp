@@ -1405,12 +1405,10 @@ void Unit::calculate_extent(bool update_collide_queue)
 		corner_min = corner_min.Min(meshdata[a]->corner_min());
 		corner_max = corner_max.Max(meshdata[a]->corner_max());
 	}							 /* have subunits now in table*/
-	un_kiter iter =SubUnits.constIterator();
 	const Unit * un;
-	while ((un = iter.current())) {
+	for(un_kiter iter = SubUnits.constIterator();un = *iter;++iter){
 		corner_min = corner_min.Min(un->LocalPosition().Cast()+un->corner_min);
 		corner_max = corner_max.Max(un->LocalPosition().Cast()+un->corner_max);
-		iter.advance();
 	}
 
 	if (corner_min.i==FLT_MAX||corner_max.i==-FLT_MAX||!FINITE (corner_min.i)||!FINITE(corner_max.i)) {
@@ -6101,12 +6099,10 @@ float Unit::querySphereClickList (const QVector &st, const QVector &dir, float e
 			}
 		}
 	}
-	un_kiter ui = viewSubUnits();
 	const Unit * su;
-	while ((su=ui.current())) {
+	for(un_kiter ui = viewSubUnits();su = *ui;++ui){
 		float tmp=su->querySphereClickList (st,dir,err);
 		if (tmp==0) {
-			ui.advance();
 			continue;
 		}
 		if (retval==0) {
@@ -6122,7 +6118,6 @@ float Unit::querySphereClickList (const QVector &st, const QVector &dir, float e
 				adjretval=tmp;
 			}
 		}
-		ui.advance();
 	}
 
 	return adjretval;
