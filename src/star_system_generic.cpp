@@ -371,7 +371,7 @@ bool StarSystem::RemoveUnit(Unit *un)
 	}
 	bool removed2=false;
 	Unit *unit;
-	for(un_iter iter = gravitationalUnits().createIterator();unit = *iter;) {
+	for(un_iter iter = gravitationalUnits().createIterator();unit = *iter;++iter) {
 		if (unit==un) {
 			iter.remove();
 			removed2 =true;
