@@ -6861,8 +6861,7 @@ std::string getTurretSize (const std::string &size)
 }
 
 
-bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool downgrade, int &numave, const Unit * templ, double &percentage)
-{
+bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool downgrade, int &numave, const Unit * templ, double &percentage){
 	int j;
 	int i;
 	bool cancompletefully=true;
@@ -6872,75 +6871,66 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 								 //make sure since we're offsetting the starting we don't overrun the mounts
 		int jmod=j%GetNumMounts();
 		if (!downgrade) {		 //if we wish to add guns instead of remove
-			if (up->mounts[i].type->weapon_name.find("_UPGRADE") == string::npos) {
-
+			
+			if (up->mounts[i].type->weapon_name.find("_UPGRADE") == string::npos) { //check for capability increase rather than actual weapon upgrade
+				bool isammo=(string::npos!=string(up->name).find("_ammo")); // is this ammo for a weapon rather than an actual weapon
+				bool ismissiletype=(0!=(up->mounts[i].type->size&(weapon_info::CAPSHIPHEAVYMISSILE|weapon_info::SPECIALMISSILE|weapon_info::MEDIUMMISSILE|weapon_info::LIGHTMISSILE|weapon_info::HEAVYMISSILE|weapon_info::CAPSHIPLIGHTMISSILE)));
 								 //only look at this mount if it can fit in the rack
 				if (up->mounts[i].type->size==(up->mounts[i].type->size&mounts[jmod].size)) {
 					if (up->mounts[i].type->weapon_name!=mounts[jmod].type->weapon_name || mounts[jmod].status==Mount::DESTROYED || mounts[jmod].status==Mount::UNCHOSEN) {
-						++numave;//ok now we can compute percentage of used parts
-						Mount upmount(up->mounts[i]);
-
-						if (templ) {
-							if (templ->GetNumMounts()>jmod) {
-
-								/* Volume controls maxammo, not template ammo
-
-								   int maxammo = templ->mounts[jmod].ammo;
-
-								  if ((upmount.ammo>maxammo||upmount.ammo==-1)&&maxammo!=-1) {
-									upmount.ammo = maxammo;
-								  }
-
-								*/
-								if (templ->mounts[jmod].volume!=-1) {
-									if (upmount.ammo*upmount.type->volume>templ->mounts[jmod].volume) {
-										upmount.ammo = (int)((templ->mounts[jmod].volume+1)/upmount.type->volume);
+						// If missile, can upgrade directly, if other type of ammo, needs actual gun to be present.
+						if(isammo&&!ismissiletype){
+						   cancompletefully=false;
+						}else {
+							++numave;//ok now we can compute percentage of used parts
+							Mount upmount(up->mounts[i]);
+								if (templ) {
+									if (templ->GetNumMounts()>jmod) {
+										if (templ->mounts[jmod].volume!=-1) {
+											if (upmount.ammo*upmount.type->volume>templ->mounts[jmod].volume) {
+												upmount.ammo = (int)((templ->mounts[jmod].volume+1)/upmount.type->volume);
+											}
+										}
 									}
-								}
-							}
-						}
-								 //compute here
-						percentage+=mounts[jmod].Percentage(&upmount);
+								}	
+									 //compute here
+							percentage+=mounts[jmod].Percentage(&upmount);
 								 //if we wish to modify the mounts
-						if (touchme) {
+							if (touchme) {
 								 //switch this mount with the upgrador mount
-							mounts[jmod].ReplaceMounts (this,&upmount);
+								mounts[jmod].ReplaceMounts (this,&upmount);
+							}
 						}
 					}
 					else {
-						int tmpammo = mounts[jmod].ammo;
-						if (mounts[jmod].ammo!=-1&&up->mounts[i].ammo!=-1) {
-							tmpammo+=up->mounts[i].ammo;
-							if (templ) {
-								if (templ->GetNumMounts()>jmod) {
-									/* this shouldn't be here... we don't know why it's here, but we're leaving it commented out
-									if (templ->mounts[jmod].ammo!=-1) {
-									  if (templ->mounts[jmod].ammo>tmpammo) {
-										tmpammo=templ->mounts[jmod].ammo;
-									  }
-									}
-									*/
-									if (templ->mounts[jmod].volume!=-1) {
-										if (templ->mounts[jmod].volume<mounts[jmod].type->volume*tmpammo) {
-											tmpammo=(int)floor(.125+((0+templ->mounts[jmod].volume)/mounts[jmod].type->volume));
+						if(isammo&&up->mounts[i].type->weapon_name==mounts[jmod].type->weapon_name){ // if is ammo and is same weapon type
+							int tmpammo = mounts[jmod].ammo;
+							if (mounts[jmod].ammo!=-1&&up->mounts[i].ammo!=-1) {
+								tmpammo+=up->mounts[i].ammo;
+								if (templ) {
+									if (templ->GetNumMounts()>jmod) {
+										if (templ->mounts[jmod].volume!=-1) {
+											if (templ->mounts[jmod].volume<mounts[jmod].type->volume*tmpammo) {
+												tmpammo=(int)floor(.125+((0+templ->mounts[jmod].volume)/mounts[jmod].type->volume));
+											}
 										}
 									}
-
+								}
+								if (tmpammo*mounts[jmod].type->volume > mounts[jmod].volume) {
+									tmpammo = (int)floor(.125+((0+mounts[jmod].volume)/mounts[jmod].type->volume));
+								}
+								if (tmpammo>mounts[jmod].ammo) {
+									cancompletefully=true;
+									if (touchme)
+										mounts[jmod].ammo = tmpammo;
+								}
+								else {
+									cancompletefully=false;
 								}
 							}
-							if (tmpammo*mounts[jmod].type->volume>mounts[jmod].volume) {
-								tmpammo = (int)floor(.125+((0+mounts[jmod].volume)/mounts[jmod].type->volume));
-							}
-							if (tmpammo>mounts[jmod].ammo) {
-								cancompletefully=true;
-								if (touchme)
-									mounts[jmod].ammo = tmpammo;
-							}
-							else {
-								cancompletefully=false;
-							}
+						}else {
+							cancompletefully=false;
 						}
-
 					}
 				}
 				else {
