@@ -935,8 +935,8 @@ void beginStar () {
   f.Fprintf (" Red=\"%f\" Green=\"%f\" Blue=\"%f\" ReflectNoLight=\"true\" light=\"%d\">\n",lights[staroffset].r,lights[staroffset].g,lights[staroffset].b,staroffset);
   f.Fprintf("<fog>\n\t<FogElement file=\"atmXatm.bfxm\" ScaleAtmosphereHeight=\".900\" red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"1.0\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"1\" concavity=\".3\" focus=\".6\" minalpha=\".7\" maxalpha=\"1\"/>\n\t<FogElement file=\"atmXhalo.bfxm\" ScaleAtmosphereHeight=\".9000\" red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"1.0\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"1\" concavity=\".3\" focus=\".6\" minalpha=\".7\" maxalpha=\"1\"/>\n</fog>\n",lights[staroffset].r,lights[staroffset].g,lights[staroffset].b,lights[staroffset].r,lights[staroffset].g,lights[staroffset].b,lights[staroffset].r,lights[staroffset].g,lights[staroffset].b,lights[staroffset].r,lights[staroffset].g,lights[staroffset].b);
   radii.push_back (1.5*radius);
-  static float planet_size_compared_to_sun = XMLSupport::parse_float (vs_config->getVariable ("galaxy","RockyRelativeToPrinary",".05"));
-//  static float gas_size_compared_to_sun = XMLSupport::parse_float (vs_config->getVariable ("galaxy","GasRelativeToPrinary",".2"));
+  static float planet_size_compared_to_sun = XMLSupport::parse_float (vs_config->getVariable ("galaxy","RockyRelativeToPrimary",".05"));
+//  static float gas_size_compared_to_sun = XMLSupport::parse_float (vs_config->getVariable ("galaxy","GasRelativeToPrimary",".2"));
   xmllevel++;
   int numu;
   if (numstarentities) {

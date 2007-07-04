@@ -1305,10 +1305,14 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 	}
 
 	if(!foundFile) {
-		cout << "Unit file " << filename << " not found" << endl;
-		VSFileSystem::vs_fprintf (stderr,"Assertion failed unit_generic.cpp:711 Unit %s not found\n",filename);
+		bool istemplate=(string::npos!=(string(filename).find(".template")));
+		static bool usingtemplates = XMLSupport::parse_bool(vs_config->getVariable("data","usingtemplates","true"));
+		if(!istemplate||(istemplate&&usingtemplates)){
+			cout << "Unit file " << filename << " not found" << endl;
+			VSFileSystem::vs_fprintf (stderr,"Assertion failed in Unit::Init -- Unit %s not found\n",filename);
 
-		VSFileSystem::vs_fprintf (stderr,"Warning: Cannot locate %s\n",filename);
+			VSFileSystem::vs_fprintf (stderr,"Warning: Cannot locate %s\n",filename);
+		}
 		meshdata.clear();
 		meshdata.push_back(NULL);
 		this->fullname=filename;
