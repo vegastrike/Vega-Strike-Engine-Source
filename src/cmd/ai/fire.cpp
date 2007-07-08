@@ -341,12 +341,13 @@ public:
   bool ShouldTargetUnit(Unit*un,float distance) {
     if (un->CloakVisible()>.8) {
       float rangetotarget = distance;
+      float rel0=parent->getRelation (un);
       float rel[] = {
-          parent->getRelation (un),
-          un->getRelation(this->parent),
-          (parentparent?parentparent->getRelation(un):rel[0]),
-          (parentparent?un->getRelation(parentparent):rel[0]) };
-      float relationship = rel[0];
+        rel0,//not initialized until after array
+        un->getRelation(this->parent),
+        (parentparent?parentparent->getRelation(un):rel0),//not initialized till after array
+        (parentparent?un->getRelation(parentparent):rel0) };
+      float relationship = rel0;
       for (int i=1; i<sizeof(rel)/sizeof(*rel); i++) 
           if (rel[i]<relationship) 
               relationship=rel[i];
