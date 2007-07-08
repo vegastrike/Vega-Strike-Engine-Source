@@ -29,10 +29,14 @@ checkversion()
 {
   ver_ok=NO
   read t1 t2 t3 t4 t5;
-  if (test x$t4 "<" x$ver_needed) then
+  if ( test `echo $t4 | cut -d. -f1` -lt `echo $ver_needed | cut -d. -f1`) then
     ver_ok=NO
   else
-    ver_ok=OK
+    if ( test `echo $t4 | cut -d. -f2` -lt `echo $ver_needed | cut -d. -f2`) then
+      ver_ok=NO    
+    else    
+      ver_ok=OK
+    fi
   fi
   while read; do
     true;
