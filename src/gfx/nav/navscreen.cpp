@@ -692,11 +692,11 @@ void NavigationSystem::DrawMission()
 		
 	}
 	
-	drawdescription(relationskills, (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(.3,1,.3,1));
-	drawdescription(" ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(.3,1,.3,1));
+	drawdescription(relationskills, (originx + (0.1*deltax)),(originy), 1, 1, 0, screenoccupation, GFXColor(.3,1,.3,1));
+	drawdescription(" ", (originx + (0.1*deltax)),(originy ), 1, 1, 0, screenoccupation, GFXColor(.3,1,.3,1));
 
-	drawdescription(" ", (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(.3,1,.3,1));
-	drawdescription(" ", (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(.3,1,.3,1));
+	drawdescription(" ", (originx + (0.3*deltax)),(originy ), 1, 1, 0, screenoccupation, GFXColor(.3,1,.3,1));
+	drawdescription(" ", (originx + (0.3*deltax)),(originy ), 1, 1, 0, screenoccupation, GFXColor(.3,1,.3,1));
 
 
 	int numfactions = FactionUtil::GetNumFactions();
@@ -704,6 +704,7 @@ void NavigationSystem::DrawMission()
 	string factionname = "factionname";
 	float relation = 0.0;
         static string disallowedFactions=vs_config->getVariable("graphics","unprintable_factions","");
+        static string disallowedExtension=vs_config->getVariable("graphics","unprintable_faction_extension","citizen");
         int totkills=0;
 	for(;i < numfactions;++i)
 	{
@@ -711,6 +712,9 @@ void NavigationSystem::DrawMission()
 		if (factionname!="neutral"&&factionname!="privateer"&&factionname!="planets"&&factionname!="upgrades") {
                   if (i<killlist->size()) {
                     totkills+=(int)(*killlist)[i];
+                  }
+				  if (factionname.find(disallowedExtension)!=string::npos) {
+                    continue;                 
                   }
 
                   if (disallowedFactions.find(factionname)!=string::npos) {
@@ -720,7 +724,7 @@ void NavigationSystem::DrawMission()
 
 		//	draw faction name
 		const float *colors=FactionUtil::GetSparkColor(i);
-		drawdescription(FactionUtil::GetFactionName(i), (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(colors[0],colors[1],colors[2],1.));
+		drawdescription(FactionUtil::GetFactionName(i), (originx + (0.1*deltax)),(originy), 1, 1, 0, screenoccupation, GFXColor(colors[0],colors[1],colors[2],1.));
 
 		float relation01 = relation * 0.5 + 0.5;
 		relation = ((relation>1?1:relation)<-1?-1:relation);
@@ -731,7 +735,7 @@ void NavigationSystem::DrawMission()
 			relationtext += XMLSupport::tostring ((int)(*killlist)[i]);
 		}
 
-		drawdescription(relationtext, (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor((1.0-relation01),(relation01),(1.0-(2.0*Delta(relation01, 0.5))),1));
+		drawdescription(relationtext, (originx + (0.3*deltax)),(originy), 1, 1, 0, screenoccupation, GFXColor((1.0-relation01),(relation01),(1.0-(2.0*Delta(relation01, 0.5))),1));
 		}
 	}
 	
@@ -739,7 +743,7 @@ void NavigationSystem::DrawMission()
         relation=1;
 		
         relationtext += XMLSupport::tostring (totkills);
-        drawdescription(relationtext, (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),1));
+        drawdescription(relationtext, (originx + (0.2*deltax)),(originy - (0.95*deltay)), 1, 1, 0, screenoccupation, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),1));
 							
 	
    
@@ -758,7 +762,7 @@ void NavigationSystem::DrawMission()
 	displayname.SetSize (.6,-.8);
 	displayname.SetPos(originx+ (.1*deltax)+.37,   originy/*+(1*deltay)*/);
         if (active_missions.size()<=1) {
-          displayname.SetText ("*******#00a6FFVega Strike 0.4#000000*********\nUse #8080FFTab#000000 to afterburn\n#8080FF+,-#000000 act as cruise controll\nYour ship undocks stopped;\nhit #8080FF+ or /#000000 to go to full speed,\n#8080FFarrows#000000 steer your ship. The #8080FFt#000000 key\ntargets objects; #8080FFspace#000000 fires at them\nThe #8080FFa#000000 key activates insystem warp\nto cross vast distances to your target.\nTime Compression: #8080FFF9; F10#000000 resets.\nBuy a jump drive for 10000\nFly into a green jump wireframe; hit #8080FFj#000000\nto warp to a system. Target a base.\nWhen you get close a green box shows.\nInside the box, #8080FFd#000000 will land.\nBe sure to click Options at the base,\nand select the Save option.\nPress #8080FFshift-M#000000 to toggle help.\n#FF0000If Vega Strike halts or acts oddly,#000000\n#FFFF00immediately#000000 post stderr.txt & stdout.txt\nto http://vegastrike.sourceforge.net/forums\nbefore you restart Vega Strike.\nPress #8080FFshift-M#000000 to get back here.\nRight buttons access the galaxy maps.");
+			displayname.SetText ("#FF0000Press M to toggle this Menu\n\n#000000*******#00a6FFVega Strike 0.5#000000*********\nWelcome to VS. Your ship undocks stopped;\n#8080FFArrow keys/mouse/joystick#000000 steer your ship.\nUse #8080FF+#000000 & #8080FF-#000000 to adjust cruise control, or #8080FF/#000000 & #8080FF[backspace]#000000 to go to max governor setting or \nfull-stop, respectively.\nUse#8080FFy#000000 to toggle between maneuver and travel \nsettings for your relative velocity governors.\nUse #8080ff[home]#000000 & #8080FF[end]#000000 to set and unset velocity \nreference point to the current target(friendly only).\nUse #8080FFTab#000000 to activate Overdrive(if present)\n#8080FF[space]#000000 fires guns, and #8080ff[Enter]#000000 fires missiles.\n\nThe #8080FFa#000000 key activates SPEC drive for insystem FTL.\nInterstellar Travel requires a #FFBB11 jump drive#000000 and #FFBB11FTL Capacitors#000000 to be installed.\nTo jump, fly into the green wireframe nav-marker;\nhit #8080FFj#000000 to jump to the linked system.\n\nTo dock, target a base, planet or large vessel\nand hail with #8080FF0#000000 to request docking clearance. \nWhen you get close, a green box will appear.\nFly to the box. When inside the box, #8080FFd#000000 will dock.\n\n#FF0000If Vega Strike halts or acts oddly,#000000\n#FFFF00immediately#000000 post stderr.txt & stdout.txt\nto http://vegastrike.sourceforge.net/forums\nbefore you restart Vega Strike.\n");
         }else {
           std::string text="";
           for (unsigned int i=1;i<active_missions.size();++i){
