@@ -343,10 +343,11 @@ public:
       float rangetotarget = distance;
       float rel0=parent->getRelation (un);
       float rel[] = {
-        rel0,//not initialized until after array
-        un->getRelation(this->parent),
-        (parentparent?parentparent->getRelation(un):rel0),//not initialized till after array
-        (parentparent?un->getRelation(parentparent):rel0) };
+        rel0//not initialized until after array
+        //,un->getRelation(this->parent)//when computer says nasty things to you it hurts
+        ,(parentparent?parentparent->getRelation(un):rel0)//not initialized till after array
+        //,(parentparent?un->getRelation(parentparent):rel0) 
+      };
       float relationship = rel0;
       for (int i=1; i<sizeof(rel)/sizeof(*rel); i++) 
           if (rel[i]<relationship) 
