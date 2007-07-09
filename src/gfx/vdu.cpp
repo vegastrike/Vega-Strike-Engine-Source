@@ -41,30 +41,19 @@ string getUnitNameAndFgNoBase (Unit * target) {
     }
   }else if (target->isUnit()==UNITPTR){
 	if (fg) {
+          int fgsnumber=target->getFgSubnumber();
+          string fgnstring=XMLSupport::tostring(fgsnumber);
+          static bool confignums=XMLSupport::parse_bool (vs_config->getVariable ("graphics","hud","print_fg_sub_id","false"));
+          string fgname;
+
 	  if (fg->name!="Base"&&fg->name!="Asteroid"&&fg->name!="Nebula") {
-		  char* fgnum;
-		  vector<char> stack;
-		  int tempint=target->getFgSubnumber();
-		  do{
-			  stack.push_back((char)((tempint%10)+48));
-			  tempint/=10;
-		  }while(tempint);
-		  fgnum=(char*)malloc(sizeof(char)*(stack.size()+1));
-		  fgnum[stack.size()]=0;
-		  int offset=0;
-		  int end=stack.size()-1;
-		  while(end-offset>=0){
-			fgnum[offset]=(char)(stack[end-offset]);
-			offset++;
-          }
-		  string fgnstring=string(fgnum);
-		  free(fgnum);
-		  fgnum=NULL;
+
+		 
                   static bool printfgname = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","print_fg_name","true"));
                   static bool printshiptype = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","print_ship_type","true"));
-		  static bool confignums=XMLSupport::parse_bool (vs_config->getVariable ("graphics","hud","printFGsubID","false"));
-                  string fgname;
-                  if (printfgname)fgname+=fg->name+(printshiptype?(confignums?" =":" : "):"");
+                  if (printfgname)fgname+=fg->name+(printshiptype?((confignums&&fgsnumber)?" =":" : "):"");
+                  if (confignums&&fgsnumber) 
+                    fgname+=fgnstring+"=";
                   if (printshiptype)
                     return fgname+reformatName(target->getFullname());
                   return fgname;		  
@@ -72,9 +61,13 @@ string getUnitNameAndFgNoBase (Unit * target) {
             static bool namecolonname=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","basename:basename","true"));
             
             if(namecolonname==false||reformatName(target->name)==(reformatName(target->getFullname()))){
-              return reformatName(target->getFullname());
+              
+              std::string retval( reformatName(target->getFullname()));
+              if (confignums&&fgsnumber) retval+=" "+fgnstring;
+              return retval;
             } else {
-              return reformatName(target->name)+":"+target->getFullname();
+              std::string retval(reformatName(target->name)+" "+((confignums&&fgsnumber)?confignums+":":std::string(":"))+target->getFullname());
+              return retval;
             }
 	  }
 	}	 
