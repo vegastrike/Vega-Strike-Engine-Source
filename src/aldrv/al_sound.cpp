@@ -699,6 +699,9 @@ void AUDSoundGain (int sound, float gain) {
 #endif
 }
 bool starSystemOK( ) {
+	if (!_Universe || !_Universe->AccessCockpit(0)) {
+		return true; // No Universe yet, so game is loading.
+	}
 	Unit * playa = _Universe->AccessCockpit(0)->GetParent();
 	if (!playa)
 		return false;

@@ -60,6 +60,7 @@ Music::Music (Unit *parent):random(false), p(parent),song(-1),thread_initialized
     LoadMusic(vs_config->getVariable ("audio",listvars[i],deflistvars[i]).c_str());
   }
 
+/*
 #if !defined( _WIN32)
   if (g_game.music_enabled&&!soundServerPipes()) {
     int pid=fork();
@@ -178,20 +179,22 @@ Music::Music (Unit *parent):random(false), p(parent),song(-1),thread_initialized
   if (socketw==-1||socketr==-1) {
 	  g_game.music_enabled=false;
   } else {
+*/
     string data=string("i")+vs_config->getVariable("audio","music_fadein","0")+"\n"
 		"o"+vs_config->getVariable("audio","music_fadeout","0")+"\n";
+/*
     if (soundServerPipes()) {
         fNET_Write(socketw,data.size(),data.c_str());
     }else {
         INET_Write(socketw,data.size(),data.c_str());
     }
+*/
     soft_vol_up_latency  = XMLSupport::parse_float(vs_config->getVariable("audio","music_volume_up_latency","15"));
     soft_vol_down_latency= XMLSupport::parse_float(vs_config->getVariable("audio","music_volume_down_latency","2"));
     //Hardware volume = 1
     _SetVolume(1,true);
     //Software volume = from config
     _SetVolume(XMLSupport::parse_float(vs_config->getVariable("audio","music_volume",".5")),false);
-  }
 
 }
 
@@ -210,6 +213,7 @@ static float tmpmin(float a, float b) {return a<b?a:b;}
 static float tmpmax(float a, float b) {return a<b?b:a;}
 
 void Music::_SetVolume (float vol,bool hardware,float latency_override) {
+/*
     vol = tmpmax(0.0f,tmpmin((hardware?1.0f:2.0f),vol));
 	char tempbuf [100];
     if (  (hardware&&(this->vol==vol))
@@ -224,6 +228,10 @@ void Music::_SetVolume (float vol,bool hardware,float latency_override) {
     if (soundServerPipes()) 
         fNET_Write(socketw,strlen(tempbuf),tempbuf); else
         INET_Write(socketw,strlen(tempbuf),tempbuf);
+*/
+	for (vector<int>::const_iterator iter = playingSource.begin() ; iter != playingSource.end(); iter++ ) {
+		AUDSoundGain(*iter, vol);
+	}
 }
 
 bool Music::LoadMusic (const char *file) {
@@ -306,50 +314,8 @@ int Music::SelectTracks(int layer) {
   CompileRunPython (dj_script);
   
   return 0;
-  /*
-  int whichlist=0;
-  static float hostile_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","hostile_auto_radius","1000"));
-  Unit * un=_Universe->AccessCockpit()->GetParent();
-  if (un==NULL) {
-    whichlist=PEACELIST;
-    if (playlist[PEACELIST].empty())
-      return NOLIST;
-    return randInt((playlist[PEACELIST].size()));
-  }
-  
-
-
-  bool perfect=true;
-  un_iter iter = _Universe->activeStarSystem()->getUnitList().createIterator();
-  Unit *target;
-  while ((target = iter.current())!=NULL) {
-    float ftmp;
-    ftmp = 2*FactionUtil::GetIntRelation (un->faction,target->faction);
-    if (ftmp<0&&((un->Position()-target->Position()).Magnitude())<hostile_autodist)
-      perfect=false;
-    iter.advance();
-  }
-  if (perfect||playlist[BATTLELIST].empty()) {
-    whichlist=PEACELIST;
-    if (playlist[PEACELIST].empty())
-      return NOLIST;
-    return randInt((playlist[PEACELIST].size()));
-  }
-  float ftmp =(un->FShieldData()+2*un->GetHull()/maxhull+un->RShieldData()-2.7)*10;
-  if (ftmp<-.5) {
-    whichlist=PANICLIST;
-    if (!playlist[PANICLIST].empty())
-	    return randInt((playlist[PANICLIST].size()));
-  }
-  whichlist=BATTLELIST;
-  int tmp=NOLIST;
-  if (!playlist[BATTLELIST].empty()) {
-    tmp=randInt((playlist[BATTLELIST].size()));
-  }
-  return (int)tmp;
-  */
 }
-
+/*
 namespace Muzak {
 
 #ifndef _WIN32
@@ -379,9 +345,10 @@ PVOID
 }
 
 }
-
+*/
 void Music::Listen() {
 	if (g_game.music_enabled) {
+		/*
             if (soundServerPipes()) {
                 killthread=0;
                 threadalive=0;
@@ -400,21 +367,20 @@ void Music::Listen() {
             _Skip();
 		}
             }else {
-		int bytes=INET_BytesToRead(socketr);
-		if (bytes) {
-			char data;
-			while (bytes) {
-				data=INET_fgetc(socketr);
-				bytes--;
+		*/
+		if (!playingSource.empty()) {
+			if (!AUDIsPlaying(playingSource.back())) {
+				AUDDeleteSound(playingSource.back());
+				playingSource.pop_back();
+				if (!playingSource.empty()) {
+					AUDStartPlaying(playingSource.back());
+				}
 			}
-			if (data=='e') {
-                cur_song_file = "";
-				_Skip();
-			} else {
-				g_game.music_enabled=false;
-			}
-		}                
-            }	
+		}
+		if (playingSource.empty() && muzak[muzak_cross_index].playingSource.empty()) {
+			cur_song_file = "";
+			_Skip();
+		}
 	}
 }
 
@@ -436,15 +402,41 @@ void Music::GotoSong (std::string mus,int layer)
     }
 }
 
+std::vector<std::string> split(std::string tmpstr,std::string splitter) {
+  std::string::size_type where;
+  std::vector<std::string> ret;
+  while ((where=tmpstr.find(splitter))!=std::string::npos) {
+    ret.push_back(tmpstr.substr(0,where));
+    tmpstr= tmpstr.substr(where+1);
+  }
+  if (tmpstr.length())
+    ret.push_back(tmpstr);
+  return ret;
+}
+
 void Music::_GotoSong (std::string mus) {
 	if (g_game.music_enabled) {
         if (mus==cur_song_file) return;
         cur_song_file = mus;
 
-		string data=string("p")+mus+string("\n");
+		_Stop(); // Kill all our currently playing songs.
+		std::vector <std::string> files = split(mus,"|");
+		
+		for (std::vector<std::string>::reverse_iterator iter = files.rbegin();iter!=files.rend();iter++) {
+			int source = AUDCreateSound(*iter);
+			if (source!=-1) {
+				playingSource.push_back(source);
+			}
+		}
+		if (!playingSource.empty()) {
+			AUDStartPlaying(playingSource.back());
+		}
+	/*
         if (soundServerPipes())
-            fNET_Write(socketw,data.size(),data.c_str()); else
+            fNET_Write(socketw,data.size(),data.c_str());
+		else
             INET_Write(socketw,data.size(),data.c_str());
+	*/
 	}
 }
 
@@ -556,6 +548,7 @@ void Music::_Skip(int layer)
 
 Music::~Music() 
 {
+	/*
 	char send[2]={'t','\n'};
 	if (socketw != -1) {
 		if (soundServerPipes()) {
@@ -576,6 +569,9 @@ Music::~Music()
 		}
 		socketw=-1;
 	}
+	*/
+	
+	// Kill the thread.
 }
 void incmusicvol (const KBData&, KBSTATE a) 
 {
@@ -628,11 +624,19 @@ void Music::Stop(int layer)
 void Music::_Stop() 
 {
     if (g_game.music_enabled) {
+		/*
         cur_song_file="";
 	    char send[1]={'s'};
         if (soundServerPipes())
             fNET_Write(socketw,1,send); else
             INET_Write(socketw,1,send);
+		*/
+		for (vector<int>::const_iterator iter = playingSource.begin(); iter!=playingSource.end(); iter++) {
+			int sound = *iter;
+			AUDStopPlaying(sound);
+			AUDDeleteSound(sound);
+		}
+		playingSource.clear();
 	}
 }
 

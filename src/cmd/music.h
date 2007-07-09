@@ -25,6 +25,9 @@ class Music {
   float soft_vol;
   float soft_vol_up_latency;
   float soft_vol_down_latency;
+
+  vector<int> playingSource;
+  
   bool LoadMusic (const char *file);
   struct PlayList {
     typedef std::vector <std::string> SongList;
