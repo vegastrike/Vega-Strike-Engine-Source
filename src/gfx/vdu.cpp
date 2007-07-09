@@ -51,9 +51,9 @@ string getUnitNameAndFgNoBase (Unit * target) {
 		 
                   static bool printfgname = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","print_fg_name","true"));
                   static bool printshiptype = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","print_ship_type","true"));
-                  if (printfgname)fgname+=fg->name+(printshiptype?((confignums&&fgsnumber)?" =":" : "):"");
-                  if (confignums&&fgsnumber) 
-                    fgname+=fgnstring+"=";
+                  if (printfgname)fgname+=fg->name+(printshiptype?((confignums&&(""!=fgnstring))?" =":" : "):"");
+                  if (confignums&&(""!=fgnstring)) 
+                    fgname+=fgnstring+"= ";
                   if (printshiptype)
                     return fgname+reformatName(target->getFullname());
                   return fgname;		  
@@ -63,10 +63,10 @@ string getUnitNameAndFgNoBase (Unit * target) {
             if(namecolonname==false||reformatName(target->name)==(reformatName(target->getFullname()))){
               
               std::string retval( reformatName(target->getFullname()));
-              if (confignums&&fgsnumber) retval+=" "+fgnstring;
+			  if (confignums&&(""!=fgnstring)) retval+=" #"+fgnstring;
               return retval;
             } else {
-              std::string retval(reformatName(target->name)+" "+((confignums&&fgsnumber)?confignums+":":std::string(":"))+target->getFullname());
+				std::string retval(reformatName(target->name)+" "+((confignums&&(""!=fgnstring))?confignums+":":std::string(":"))+target->getFullname());
               return retval;
             }
 	  }
