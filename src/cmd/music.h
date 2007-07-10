@@ -103,14 +103,20 @@ private:
 
 #ifdef _WIN32
   void * a_thread;
+  HANDLE musicinfo_mutex;
 #else
   pthread_t a_thread;
+  pthread_mutex_t musicinfo_mutex;
 #endif
 
   int thread_initialized;
-  volatile int killthread;
-  volatile int threadalive;
-  volatile int moredata;
+  volatile bool music_loaded;
+  volatile bool killthread;
+  volatile bool threadalive;
+  struct AUDSoundProperties *music_load_info;
+  vector<std::string> music_load_list; // reverse order.
+  
+  void _LoadLastSongAsync();
 
   std::string cur_song_file;
 };

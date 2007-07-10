@@ -28,6 +28,9 @@
 #include "networking/inet.h"
 #include "python/python_compile.h"
 
+// To allow for loading in another thread, we must handle some AL vars ourselves...
+#include "aldrv/al_globals.h"
+
 #include <set>
 #include <algorithm>
 
@@ -43,8 +46,19 @@ bool soundServerPipes() {
 }
 Music::Music (Unit *parent):random(false), p(parent),song(-1),thread_initialized(false) {
   loopsleft=0;
-  moredata=0;
   socketw=socketr=-1;
+  music_load_info = NULL;
+#ifdef HAVE_AL
+  music_load_info = new AUDSoundProperties;
+#endif
+  
+#ifdef _WIN32
+  musicinfo_mutex = CreateMutex(NULL, TRUE, NULL);
+#else
+  pthread_mutex_init(&musicinfo_mutex, NULL);
+  // Lock it immediately, since the loader will want to wait for its first data upon creation.
+  pthread_mutex_lock(&musicinfo_mutex);
+#endif
   if (!g_game.music_enabled)
 	  return;
   lastlist=PEACELIST;
@@ -315,7 +329,7 @@ int Music::SelectTracks(int layer) {
   
   return 0;
 }
-/*
+
 namespace Muzak {
 
 #ifndef _WIN32
@@ -334,18 +348,49 @@ PVOID
 	int socketr = me->socketr;
     me->threadalive=1;
 	while(!me->killthread) {
-          printf ("Reading from socket %d\n",socketr);
-          char data=fNET_fgetc(socketr);
-          printf ("Got data froms ocket %c\n",data);
-          if (data=='e')
-            me->moredata=1;
-          micro_sleep(100000);
+#ifdef _WIN32
+		WaitForSingleObject(me->musicinfo_mutex, INFINITE);
+#else
+		pthread_mutex_lock(&me->musicinfo_mutex);
+#endif
+		if (me->killthread) break;
+		me->music_loaded = false;
+		me->music_load_info->success=false;
+#ifdef _WIN32
+		ReleaseMutex(me->musicinfo_mutex);
+#else
+		pthread_mutex_unlock(&me->musicinfo_mutex);
+#endif
+		{
+			std::string songname = me->music_load_info->hashname;
+			if (!AUDLoadSoundFile(songname, me->music_load_info)) {
+				fprintf(stderr, "Failed to load song %s\n", songname.c_str());
+			}
+		}
+		me->music_loaded = true;
+		while (me->music_loaded) {
+			micro_sleep(10000); // 10ms of busywait for now... wait until end of frame.
+		}
 	}
+	me->threadalive=0;
 	return NULL;
 }
 
 }
-*/
+
+void Music::_LoadLastSongAsync() {
+#ifdef HAVE_AL
+	if (!music_load_info) return;
+	std::string song = music_load_list.back();
+	music_load_info->hashname = song;
+#endif
+#ifdef _WIN32
+	ReleaseMutex(musicinfo_mutex);
+#else
+	pthread_mutex_unlock(&musicinfo_mutex);
+#endif
+}
+
 void Music::Listen() {
 	if (g_game.music_enabled) {
 		/*
@@ -368,6 +413,39 @@ void Music::Listen() {
 		}
             }else {
 		*/
+		if (!music_load_list.empty()) {
+			if (music_loaded) {
+#ifdef _WIN32
+				if (WaitForSingleObject(musicinfo_mutex, 0)==WAIT_TIMEOUT) {
+#else
+				if (pthread_mutex_trylock(&musicinfo_mutex)==EBUSY) {
+#endif
+					fprintf(stderr,"Failed to lock music loading mutex despite loaded flag being set...\n");
+					return;
+				}
+				music_loaded = false; // once the loading thread sees this, it will try to grab a lock and wait.
+				// The lock will only be achieved once the next song is put in the queue.
+				
+#ifdef HAVE_AL
+				if (music_load_info->success && music_load_info->wave) {
+					int source = AUDBufferSound(music_load_info);
+					free(music_load_info->wave);
+					music_load_info->wave=NULL;
+					if (source!=-1) {
+						playingSource.push_back(source);
+					}
+				}
+#endif
+				if (playingSource.size()==1) { // Start playing if first in list.
+					AUDStartPlaying(playingSource.back());
+				}
+				music_load_list.pop_back();
+				if (!music_load_list.empty()) {
+					_LoadLastSongAsync();
+				}
+				return ; // Returns if finished loading, since the AUDIsPlaying() could fail right now.
+			}
+		}
 		if (!playingSource.empty()) {
 			if (!AUDIsPlaying(playingSource.back())) {
 				AUDDeleteSound(playingSource.back());
@@ -377,9 +455,12 @@ void Music::Listen() {
 				}
 			}
 		}
-		if (playingSource.empty() && muzak[muzak_cross_index].playingSource.empty()) {
+		if (playingSource.empty() && muzak[muzak_cross_index].playingSource.empty()
+			&& music_load_list.empty() && muzak[muzak_cross_index].music_load_list.empty()) {
 			cur_song_file = "";
-			_Skip();
+			if (_Universe) {
+				_Skip();
+			}
 		}
 	}
 }
@@ -420,17 +501,26 @@ void Music::_GotoSong (std::string mus) {
         cur_song_file = mus;
 
 		_Stop(); // Kill all our currently playing songs.
-		std::vector <std::string> files = split(mus,"|");
 		
-		for (std::vector<std::string>::reverse_iterator iter = files.rbegin();iter!=files.rend();iter++) {
-			int source = AUDCreateSound(*iter);
-			if (source!=-1) {
-				playingSource.push_back(source);
+		music_load_list = split(mus,"|"); // reverse order.
+
+		if (!thread_initialized) {
+#ifdef _WIN32
+			a_thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)Muzak::readerThread, (PVOID)this, 0, NULL);
+			if (a_thread) {
+				thread_initialized = true;
+			} else {
+				fprintf(stderr, "Error creating music load thread: %d\n", GetLastError());
 			}
+#else
+			if (pthread_create(&a_thread, NULL, Muzak::readerThread, this)==0) {
+				thread_initialized = true;
+			} else {
+				perror("Error creating music load thread");
+			}
+#endif
 		}
-		if (!playingSource.empty()) {
-			AUDStartPlaying(playingSource.back());
-		}
+		_LoadLastSongAsync();
 	/*
         if (soundServerPipes())
             fNET_Write(socketw,data.size(),data.c_str());
@@ -548,28 +638,28 @@ void Music::_Skip(int layer)
 
 Music::~Music() 
 {
-	/*
-	char send[2]={'t','\n'};
-	if (socketw != -1) {
-		if (soundServerPipes()) {
-			if (threadalive&&thread_initialized) {
-				killthread=1;
-				int spindown = 50; // Thread has 5 seconds to close down.
-				while (threadalive&&(spindown-- > 0)) micro_sleep(100000);
-			}
-
-			fNET_Write(socketw,2,send);
-			fNET_close(socketw);
-			//fNET_close(socketr);
-			fNET_cleanup();
-		}else {
-			INET_Write(socketw,2,send);
-			INET_close(socketw);
-			INET_cleanup();
+	if (threadalive&&thread_initialized) {
+		killthread=1;
+#ifdef _WIN32
+		ReleaseMutex(musicinfo_mutex);
+#else
+		pthread_mutex_unlock(&musicinfo_mutex);
+#endif
+		int spindown = 50; // Thread has 5 seconds to close down.
+		while (threadalive&&(spindown-- > 0)) micro_sleep(100000);
+		if (threadalive) {
+			/*
+			// The thread should be dead to make exiting easier...
+#ifdef _WIN32
+			TerminateThread(a_thread, 1);
+#else
+			// Taking its time to load a song...
+			pthread_kill(a_thread, SIGKILL);
+#endif
+			*/
+			threadalive=false;
 		}
-		socketw=-1;
 	}
-	*/
 	
 	// Kill the thread.
 }

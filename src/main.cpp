@@ -353,6 +353,7 @@ void bootstrap_draw (const std::string &message, Animation * newSplashScreen) {
   if (!BootstrapMyStarSystemLoading) {
     return;
   }
+  Music::MuzakCycle(); // Allow for loading music...
   if(SplashScreen==NULL&&newSplashScreen==NULL){
     // if there's no splashscreen, we don't draw on it
     // this happens, when the splash screens texture is loaded

@@ -260,9 +260,9 @@ void	NetServer::start(int argc, char **argv)
 		} else {
 			acct_sock = new VsnetHTTPSocket( acctsrv, _sock_set );
 		}
-		if( acct_sock==NULL||!acct_sock->valid())
+		if( acct_sock==NULL)
 		{
-			cerr<<"Cannot connect to account server... "<<endl;
+			cerr<<"Invalid Accountserver URL... "<<endl;
 //			VSExit(1);
 		}else
 		  COUT <<"accountserver on socket "<<acct_sock<<" done."<<endl;

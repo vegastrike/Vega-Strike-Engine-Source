@@ -38,5 +38,27 @@ extern bool usedoppler;
 extern bool usepositional;
 char AUDQueryAudability (const int sound, const Vector &pos, const Vector & vel, const float gain);
 void AUDAddWatchedPlayed (const int sound, const Vector &pos);
+
+struct AUDSoundProperties {
+	// Hashing.
+	// Set even if AUDLoadSoundFile fails so that a hash entry can be written.
+	bool shared;
+	std::string hashname;
+	
+	// OpenAL properties.
+	ALenum format;
+	ALsizei size;
+	ALsizei freq;
+	void *wave;
+	ALboolean looping; // can be set by caller.
+	
+	bool success;
+};
+
+bool AUDLoadSoundFile(const std::string &s, struct AUDSoundProperties *info);
+
+// It is up to the caller to free(info.wave) after using!!!
+int AUDBufferSound(const struct AUDSoundProperties *info);
+
 #endif
 #endif

@@ -449,6 +449,55 @@ static int LoadSound (ALuint buffer, bool looping) {
 #endif
 
 using namespace VSFileSystem;
+
+
+bool AUDLoadSoundFile(const std::string &s, struct AUDSoundProperties *info) {
+	  	  VSFile f;
+	  	  VSError error = f.OpenReadOnly( s.c_str(), SoundFile);
+		  info->shared=(error==Shared);
+		  info->success=false;
+		  if (info->shared)
+			  info->hashname = VSFileSystem::GetSharedSoundHashName(s);
+		  else
+		      info->hashname = VSFileSystem::GetHashName (s);
+		  if (error>Ok) {
+                    return false;
+                  }
+#ifdef SOUND_DEBUG
+		  printf ("Sound %s created with and alBuffer %d\n",s.c_str(),*wavbuf);
+#endif
+              vector <char> dat;
+              dat.resize(f.Size());
+              f.Read( &dat[0], f.Size());
+			  f.Close();
+              ConvertFormat(dat);
+              if (dat.size()==0)//conversion messed up
+                return false;
+              //blutLoadWAVMemory((ALbyte *)&dat[0], &format, &wave, &size, &freq, &looping);
+              
+#if 0
+		  ALint format;
+		  // MAC OS X
+		  if( error<=Ok)
+			MacFixedLoadWAVFile( &dat[0], &format, &wave, &size, &freq);
+#else
+          blutLoadWAVMemory((ALbyte *)&dat[0], &info->format, &info->wave, &info->size, &info->freq, &info->looping);
+#endif
+		  if (!info->wave)
+			  return false; //failure.
+		  
+		  info->success=true;
+		  return true;
+}
+
+int AUDBufferSound(const struct AUDSoundProperties *info) {
+	ALuint wavbuf;
+	alGenBuffers (1,&wavbuf);
+	alBufferData( wavbuf, info->format, info->wave, info->size, info->freq );
+	return LoadSound(wavbuf, info->looping);
+}
+
+
 #ifdef HAVE_AL
 ALuint 
 #else
@@ -482,60 +531,21 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 
 	    if (wavbuf==NULL)
 		{
-	  	  VSFile f;
-	  	  VSError error = f.OpenReadOnly( s.c_str(), SoundFile);
-		  bool shared=(error==Shared);
-		  if (shared)
-			  hashname = VSFileSystem::GetSharedSoundHashName(s);
-		  else
-		      hashname = VSFileSystem::GetHashName (s);
-		  if (error>Ok) {
-                    soundHash.Put(hashname,&nil_wavebuf);
-                    return -1;
-                  }
+          AUDSoundProperties info;
+          if (!AUDLoadSoundFile(s, &info)) {
+            soundHash.Put(info.hashname,&nil_wavebuf);
+            return -1;
+          }
+              
 	      wavbuf = (ALuint *) malloc (sizeof (ALuint));
 	      alGenBuffers (1,wavbuf);
-#ifdef SOUND_DEBUG
-		  printf ("Sound %s created with and alBuffer %d\n",s.c_str(),*wavbuf);
-#endif
-	      ALsizei size;	
-	      ALsizei freq;
-	      void *wave;
-		  ALboolean looping;
-	      ALboolean err=AL_TRUE;
-              vector <char> dat;
-              dat.resize(f.Size());
-              f.Read( &dat[0], f.Size());
-              ConvertFormat(dat);
-              if (dat.size()==0)//conversion messed up
-                return -1;
-              //blutLoadWAVMemory((ALbyte *)&dat[0], &format, &wave, &size, &freq, &looping);
-              
-#if 0
-		  ALint format;
-		  // MAC OS X
-		  err = false;
-		  if( error<=Ok)
-			err=MacFixedLoadWAVFile( &dat[0], &format, &wave, &size, &freq);
-#else
-		  ALenum format;
-                  blutLoadWAVMemory((ALbyte *)&dat[0], &format, &wave, &size, &freq, &looping);
-#endif
-              
-      	  if(err == AL_FALSE)
-		  {
-			alDeleteBuffers (1,wavbuf);
-			free (wavbuf);
-			return -1;
-      	  }
-      	  alBufferData( *wavbuf, format, wave, size, freq );
-          free(wave);//alutUnloadWAV(format,wave,size,freq);
+      	  alBufferData( *wavbuf, info.format, info.wave, info.size, info.freq );
+          free(info.wave);//alutUnloadWAV(format,wave,size,freq);
       	  if (!music)
 		  {
-			soundHash.Put (hashname,wavbuf);
+			soundHash.Put (info.hashname,wavbuf);
 			buffers.push_back (*wavbuf);
       	  }
-		  f.Close();
 		}
     	return LoadSound (*wavbuf,LOOP);  
   }
