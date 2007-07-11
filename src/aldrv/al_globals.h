@@ -19,6 +19,7 @@ struct OurSound{
   Vector vel;
   float gain;
   ALboolean looping;
+  bool music;
   OurSound(ALuint source, ALuint buffername) {buffer=buffername;pos.Set(0,0,0);vel.Set(0,0,0);gain=1.0f;};
 };
 extern float scalepos;
@@ -67,7 +68,7 @@ struct AUDSoundProperties {
 bool AUDLoadSoundFile(const std::string &s, struct AUDSoundProperties *info);
 
 // It is up to the caller to free(info.wave) after using!!!
-int AUDBufferSound(const struct AUDSoundProperties *info);
+int AUDBufferSound(const struct AUDSoundProperties *info, bool music);
 
 #endif
 #endif

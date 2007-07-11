@@ -419,7 +419,7 @@ static void ConvertFormat (vector<char>& ogg ) {
     }
   }
 }
-static int LoadSound (ALuint buffer, bool looping) {
+static int LoadSound (ALuint buffer, bool looping, bool music) {
   static bool verbose_debug = XMLSupport::parse_bool(vs_config->getVariable("data","verbose_debug","false"));	
   unsigned int i;
   if (!dirtysounds.empty()) {
@@ -436,6 +436,7 @@ static int LoadSound (ALuint buffer, bool looping) {
   }
   sounds[i].source = (ALuint)0;
   sounds[i].looping = looping?AL_TRUE:AL_FALSE;
+  sounds[i].music = music;
 #ifdef SOUND_DEBUG
   printf (" with buffer %d and looping property %d\n",i,(int)looping);
 #endif
@@ -454,6 +455,10 @@ using namespace VSFileSystem;
 bool AUDLoadSoundFile(const std::string &s, struct AUDSoundProperties *info) {
 	  	  VSFile f;
 	  	  VSError error = f.OpenReadOnly( s.c_str(), SoundFile);
+		  if (error>Ok) {
+	  	      error = f.OpenReadOnly( s.c_str(), UnknownFile);
+		
+		  }
 		  info->shared=(error==Shared);
 		  info->success=false;
 		  if (info->shared)
@@ -490,11 +495,12 @@ bool AUDLoadSoundFile(const std::string &s, struct AUDSoundProperties *info) {
 		  return true;
 }
 
-int AUDBufferSound(const struct AUDSoundProperties *info) {
-	ALuint wavbuf;
+int AUDBufferSound(const struct AUDSoundProperties *info, bool music) {
+	ALuint wavbuf=0;
 	alGenBuffers (1,&wavbuf);
+	if (!wavbuf) printf("OpenAL Error in alGenBuffers: %d\n", alGetError());
 	alBufferData( wavbuf, info->format, info->wave, info->size, info->freq );
-	return LoadSound(wavbuf, info->looping);
+	return LoadSound(wavbuf, info->looping, music);
 }
 
 
@@ -547,7 +553,7 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 			buffers.push_back (*wavbuf);
       	  }
 		}
-    	return LoadSound (*wavbuf,LOOP);  
+    	return LoadSound (*wavbuf,LOOP,music);  
   }
 #endif
   return -1;
@@ -596,7 +602,7 @@ int AUDCreateSoundMP3 (const std::string &s, const bool music, const bool LOOP){
     }
 	else
 		f.Close();
-    return LoadSound (*mp3buf,LOOP);
+    return LoadSound (*mp3buf,LOOP,music);
   }
 #endif
   return -1;
@@ -635,7 +641,7 @@ int AUDCreateSound (int sound,const bool LOOP/*=false*/){
   if (AUDIsPlaying (sound))
     AUDStopPlaying (sound);
   if (sound>=0&&sound<(int)sounds.size())
-    return LoadSound (sounds[sound].buffer,LOOP);
+    return LoadSound (sounds[sound].buffer,LOOP,false);
 #endif
   return -1;
 }
@@ -722,7 +728,7 @@ void AUDStopAllSounds () {
 #ifdef HAVE_AL
 	unsigned int s = ::sounds.size();
 	for (unsigned int i=0;i < s;++i) {
-		if (AUDIsPlaying(i))
+		if (!::sounds[i].music && AUDIsPlaying(i))
 			AUDStopPlaying(i);
 	}
 #endif
@@ -810,7 +816,7 @@ void AUDStartPlaying (const int sound){
 	
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()) {
-	  if (starSystemOK())
+	  if (sounds[sound].music||starSystemOK())
     if (AUDReclaimSource (sound,sounds[sound].pos==QVector(0,0,0))) {
 #ifdef SOUND_DEBUG
       printf("AUDStartPlaying sound %d source:%d buffer:%d\n",sound,sounds[sound].source,sounds[sound].buffer);
@@ -834,7 +840,7 @@ void AUDPlay (const int sound, const QVector &pos, const Vector & vel, const flo
   if (sounds[sound].buffer==0) {
 	return;
   }
-  if (!starSystemOK())
+  if (!starSystemOK() && !sounds[sound].music)
 	  return;
   if ((tmp=AUDQueryAudability (sound,pos.Cast(),vel,gain))!=0) {
     if (AUDReclaimSource (sound,pos==QVector(0,0,0))) {

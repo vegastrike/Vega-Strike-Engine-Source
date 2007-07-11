@@ -430,7 +430,7 @@ void Music::Listen() {
 				
 #ifdef HAVE_AL
 				if (music_load_info->success && music_load_info->wave) {
-					int source = AUDBufferSound(music_load_info);
+					int source = AUDBufferSound(music_load_info, true);
 					free(music_load_info->wave);
 					music_load_info->wave=NULL;
 					if (source!=-1) {
