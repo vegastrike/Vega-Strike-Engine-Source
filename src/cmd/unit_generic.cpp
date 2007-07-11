@@ -3212,18 +3212,24 @@ void Unit::IncreaseWarpEnergy(bool insys, float time)
 bool Unit::jumpReactToCollision (Unit * smalle)
 {
 	static bool ai_jump_cheat=XMLSupport::parse_bool(vs_config->getVariable("AI","jump_without_energy","false"));
+	static bool nojumpinSPEC=XMLSupport::parse_bool(vs_config->getVariable("physics","noSPECJUMP","true"));
+	bool SPEC_interference=(NULL!=_Universe->isPlayerStarship(smalle))?smalle->graphicOptions.InWarp&&nojumpinSPEC:(NULL!=_Universe->isPlayerStarship(this))?graphicOptions.InWarp&&nojumpinSPEC:false;
 								 //only allow big with small
 	if (!GetDestinations().empty()) {
 		Cockpit * cp = _Universe->isPlayerStarship(smalle);
-		TurnJumpOKLightOn(smalle,cp);
+		if(!SPEC_interference||image->forcejump){
+			TurnJumpOKLightOn(smalle,cp);
+		} else {
+			return false;
+		}
 		//ActivateAnimation(this);
 								 // we have a drive
-		if ((smalle->GetJumpStatus().drive>=0&&
+		if ((!SPEC_interference && (smalle->GetJumpStatus().drive>=0&&
 								 // we have power
 			(smalle->warpenergy>=smalle->GetJumpStatus().energy
 								 // or we're being cheap
 			||(ai_jump_cheat&&cp==NULL)
-			))
+			)))
 		||image->forcejump) {	 // or the jump is being forced?
 			//NOW done in star_system_generic.cpp before TransferUnitToSystem smalle->warpenergy-=smalle->GetJumpStatus().energy;
 			int dest = smalle->GetJumpStatus().drive;
@@ -3249,12 +3255,16 @@ bool Unit::jumpReactToCollision (Unit * smalle)
 	}
 	if (!smalle->GetDestinations().empty()) {
 		Cockpit * cp = _Universe->isPlayerStarship(this);
-		TurnJumpOKLightOn(this,cp);
+		if(!SPEC_interference||smalle->image->forcejump){
+			TurnJumpOKLightOn(this,cp);
+		} else {
+			return false;
+		}
 		//  ActivateAnimation(smalle);
-		if ((GetJumpStatus().drive>=0&&
+		if (!SPEC_interference&&((GetJumpStatus().drive>=0&&
 			(warpenergy>=GetJumpStatus().energy
 			||(ai_jump_cheat&&cp==NULL)
-			))
+			)))
 		||smalle->image->forcejump) {
 			warpenergy-=GetJumpStatus().energy;
 			DeactivateJumpDrive();

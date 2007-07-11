@@ -395,7 +395,7 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   static int maxnumpollers = XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","MaxNumberofpollersperframe","49")); // maximum number of vessels allowed to search for a target in a given physics frame
   static int numpollers[2]={maxnumpollers,maxnumpollers};
 
-  static int nextframenumpollers[2]={maxnumpollers,maxnumpollers};
+  static float nextframenumpollers[2]={maxnumpollers,maxnumpollers};
   if (lastchangedtarg+mintimetoswitch>0) 
     return;//don't switch if switching too soon
   Unit * curtarg=parent->Target();
