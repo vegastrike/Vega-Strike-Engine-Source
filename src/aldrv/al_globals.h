@@ -53,6 +53,15 @@ struct AUDSoundProperties {
 	ALboolean looping; // can be set by caller.
 	
 	bool success;
+	AUDSoundProperties() {
+		wave=NULL;
+		looping=false;
+		shared=false;
+		success=false;
+		size=0;
+		freq=22050;
+		
+	}
 };
 
 bool AUDLoadSoundFile(const std::string &s, struct AUDSoundProperties *info);

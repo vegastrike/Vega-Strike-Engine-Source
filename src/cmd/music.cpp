@@ -48,6 +48,8 @@ Music::Music (Unit *parent):random(false), p(parent),song(-1),thread_initialized
   loopsleft=0;
   socketw=socketr=-1;
   music_load_info = NULL;
+  killthread=0;
+  threadalive=0;
 #ifdef HAVE_AL
   music_load_info = new AUDSoundProperties;
 #endif
@@ -325,7 +327,8 @@ int Music::SelectTracks(int layer) {
       return whichsong;
     }
   }
-  CompileRunPython (dj_script);
+  if (_Universe&&_Universe->numPlayers())
+    CompileRunPython (dj_script);
   
   return 0;
 }
@@ -393,10 +396,9 @@ void Music::_LoadLastSongAsync() {
 
 void Music::Listen() {
 	if (g_game.music_enabled) {
+
 		/*
             if (soundServerPipes()) {
-                killthread=0;
-                threadalive=0;
                 if (!thread_initialized) {
 #ifdef _WIN32
                     a_thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)Muzak::readerThread, (PVOID)this, 0, NULL);
