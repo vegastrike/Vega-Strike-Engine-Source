@@ -117,10 +117,29 @@ static const char CATEGORY_TAG = (-1);
   }*/
 // Color of an item that there isn't enough money to buy.
 // We read this out of the config file (or use a default).
+static bool color_prohibited_upgrade_flag=false;
+static bool color_downgrade_or_noncompatible_flag=false;
+static bool color_insufficient_space_flag=false;
+static bool color_insufficient_money_flag=false;
+
 static GFXColor NO_MONEY_COLOR(){
-  static GFXColor NMC=getConfigColor("no_money",GFXColor(1,.3,.3,1));
+  static GFXColor NMC=getConfigColor("no_money",GFXColor(1,1,.3,1));
   return  NMC;        // Start out with bogus color.
 }
+
+static GFXColor PROHIBITED_COLOR(){
+  return getConfigColor("prohibited_upgrade",GFXColor(1,.1,0,1));
+}
+
+static GFXColor DOWNGRADE_OR_NONCOMPAT_COLOR(){
+  return getConfigColor("downgrade_or_noncompatible",GFXColor(.75,.5,.5,1));
+}
+
+static GFXColor NO_ROOM_COLOR(){
+  return getConfigColor("no_room_for_upgrade",GFXColor(1,0,1,1));
+}
+
+
 static GFXColor ITEM_DESTROYED_COLOR(){
   static GFXColor IDC=getConfigColor("upgrade_item_destroyed",GFXColor(0.2,0.2,0.2,1));
   return IDC;
@@ -2067,24 +2086,29 @@ bool UpgradeAllowed (const Cargo& item, Unit * playerUnit) {
       std::string tmp = prohibited_upgrade.substr(where+1);      
       quantity = atoi(tmp.c_str());      
     }
-    if (item.content==content||item.category==content) {
-      if (quantity==0)
+    if (item.content==content||(0==string(item.category).find(content))) {
+		if (quantity==0){
+		  color_prohibited_upgrade_flag=true;
           return false;
+		}
       unsigned int i=0;
       Cargo * numUpgrades = playerUnit->GetCargo(item.content,i);
       if (numUpgrades) {
-        if (numUpgrades->quantity>=quantity)
-          return false;
+		  if (numUpgrades->quantity>=quantity){
+		    color_prohibited_upgrade_flag=true;
+			return false;
+		  }
       }
 	  unsigned int limit= playerUnit->numCargo();
 	  int totalquant=0;
 	  for(i=0;i<limit;++i){
 		  numUpgrades=&(playerUnit->GetCargo(i));
-		  if(numUpgrades&&numUpgrades->category==item.category){
+		  if(numUpgrades&&(0==string(numUpgrades->category).find(content))){
 			totalquant+=numUpgrades->quantity;
 		  }
 	  }
 	  if(totalquant>=quantity){
+		color_prohibited_upgrade_flag=true;
 		return false;
 	  }
     }
@@ -2093,8 +2117,10 @@ bool UpgradeAllowed (const Cargo& item, Unit * playerUnit) {
 }
 // Return whether or not the current item and quantity can be "transacted".
 bool BaseComputer::isTransactionOK(const Cargo& originalItem, TransactionType transType, int quantity) {
-    if(originalItem.mission&&transType!=SELL_CARGO)
+	if(originalItem.mission&&transType!=SELL_CARGO){
+		color_downgrade_or_noncompatible_flag=true;
         return false;
+	}
     // Make sure we have somewhere to put stuff.
     Unit* playerUnit = m_player.GetUnit();
     if(!playerUnit) return false;
@@ -2105,20 +2131,38 @@ bool BaseComputer::isTransactionOK(const Cargo& originalItem, TransactionType tr
     Cargo item = originalItem;
     item.quantity = quantity;
     Unit* baseUnit = m_base.GetUnit();
+	bool havemoney=true;
+	bool havespace=true;
     switch(transType) {
         case BUY_CARGO:
+			{
             // Enough credits and room for the item in the ship.
-	    if(item.price*quantity <= cockpit->credits && playerUnit->CanAddCargo(item)) {
-	        return true;
-	    }
+			havemoney=item.price*quantity <= cockpit->credits;
+			havespace=playerUnit->CanAddCargo(item);
+			if(havemoney && havespace) {
+				return true;
+			} else{
+				if(!havemoney){
+					color_insufficient_money_flag=true;
+				}
+				if(!havespace){
+					color_insufficient_space_flag=true;
+				}
+			}
+			}
             break;
         case SELL_CARGO:
             // There is a base here, and it is willing to buy the item.
           if (!originalItem.mission) {
-            if(baseUnit && baseUnit->CanAddCargo(item)) {
-              return true;
-            }
-          }else return true;
+			  if(baseUnit){
+				  havespace=baseUnit->CanAddCargo(item);
+				  if(havespace){
+					  return true;
+				  }else {
+					color_insufficient_space_flag=true;
+				  }
+			  } 
+		  }else return true;
           break;
         case BUY_SHIP:
             // Either you are buying this ship for your fleet, or you already own the
@@ -2126,6 +2170,8 @@ bool BaseComputer::isTransactionOK(const Cargo& originalItem, TransactionType tr
             if(baseUnit) {
 				if(item.price*quantity <= cockpit->credits) {
 					return true;
+				} else {
+					color_insufficient_money_flag=true;
 				}
             }
             break;
@@ -2136,14 +2182,29 @@ bool BaseComputer::isTransactionOK(const Cargo& originalItem, TransactionType tr
 			}
             break;
         case SELL_UPGRADE:
-            if(baseUnit && baseUnit->CanAddCargo(item)) {
-              return true;
+			if(baseUnit){
+				havespace=baseUnit->CanAddCargo(item);
+				if(havespace){
+					return true;
+				} else {
+					color_insufficient_space_flag=true;
+				}
             }
         case BUY_UPGRADE:
             // cargo.mission == true means you can't do the transaction.
-            if(item.price*quantity <= cockpit->credits && (playerUnit->CanAddCargo(item)||upgradeNotAddedToCargo(item.category))&&UpgradeAllowed(item,playerUnit)&&!item.mission) {
+			havemoney=item.price*quantity <= cockpit->credits;
+			havespace=(playerUnit->CanAddCargo(item)||upgradeNotAddedToCargo(item.category));
+			//UpgradeAllowed must be first -- short circuit && operator
+            if(UpgradeAllowed(item,playerUnit) &&havemoney && havespace &&!item.mission) {
                 return true;
-            }
+			} else {
+				if(!havemoney){
+					color_insufficient_money_flag=true;
+				}
+				if(!havespace){
+					color_insufficient_space_flag=true;
+				}
+			}
             break;
         default:
             assert(false);          // Missed an enum in transaction switch statement.
@@ -2228,7 +2289,8 @@ void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, 
         }
 
         // Construct the cell for this item.
-        const bool transOK = isTransactionOK(item, transType);
+		// JS_NUDGE -- this is where I'll need to do the upgrades colorations goop hooks
+		const bool transOK = isTransactionOK(item, transType);
 		
 		string itemName = beautify(UniverseUtil::LookupUnitStat(item.content,"upgrades","Name"));
 		string originalName = itemName;
@@ -2247,7 +2309,23 @@ void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, 
 //*******************************************************************************
 
         // Clear color means use the text color in the picker.
-		GFXColor base_color = (transOK? (item.mission?MISSION_COLOR():GUI_CLEAR) : NO_MONEY_COLOR());
+		  GFXColor bad_trans_color=NO_MONEY_COLOR();
+		  if(color_downgrade_or_noncompatible_flag){
+			  bad_trans_color=DOWNGRADE_OR_NONCOMPAT_COLOR();
+		  } else if(color_prohibited_upgrade_flag){
+			  bad_trans_color=PROHIBITED_COLOR();
+		  } else if(color_insufficient_space_flag){
+			  bad_trans_color=NO_ROOM_COLOR();
+		  } else if(color_insufficient_money_flag){
+			  // Just in case we want to change the default reason for non-purchase
+			  bad_trans_color=NO_MONEY_COLOR();
+		  }
+		GFXColor base_color = (transOK? (item.mission?MISSION_COLOR():GUI_CLEAR) : bad_trans_color);
+		//Reset cause-color flags
+		color_prohibited_upgrade_flag=false;
+		color_downgrade_or_noncompatible_flag=false;
+		color_insufficient_space_flag=false;
+		color_insufficient_money_flag=false;
 		GFXColor final_color;
 
 		if(transType == SELL_UPGRADE&&m_player.GetUnit())
