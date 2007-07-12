@@ -706,7 +706,7 @@ namespace UnitUtil {
 	    if (un->canUpgrade(upgrade,-1,-1,0,true,percent,makeTemplateUpgrade(un->name,un->faction),false)) {
 		  if (percent>0&&percent<1){
 		    return percent;	
-		  } else if(percent>1){ //FIXME workaround for sensors -- see below comment, not sure why sensors report erroneous functional percentage
+		  } else if(percent>=1){ //FIXME workaround for sensors -- see below comment, not sure why sensors report erroneous functional percentage
 			return 1.0;
 		  } else return .5;//FIXME does not interact well with radar type
 	    }else if (percent>0) return percent;

@@ -7816,8 +7816,12 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
 			cancompletefully=false;
 		}
 	}
-	if (numave)
+	if(0==numave){ // Doesn't upgrade anything -- JS_NUDGE -- may want to revisit this later
+		percentage=1.0;
+	}
+	if (numave){
 		percentage=percentage/numave;
+	}
 	if (0&&touchme&&up->Mass&&numave) {
 		float multiplyer =((downgrade)?-1:1);
 		Mass +=multiplyer*percentage*up->Mass;
