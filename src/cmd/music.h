@@ -26,7 +26,7 @@ class Music {
   float soft_vol_up_latency;
   float soft_vol_down_latency;
 
-  vector<int> playingSource;
+  std::list<int> playingSource;
   
   bool LoadMusic (const char *file);
   struct PlayList {

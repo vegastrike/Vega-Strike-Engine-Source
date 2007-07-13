@@ -245,7 +245,7 @@ void Music::_SetVolume (float vol,bool hardware,float latency_override) {
         fNET_Write(socketw,strlen(tempbuf),tempbuf); else
         INET_Write(socketw,strlen(tempbuf),tempbuf);
 */
-	for (vector<int>::const_iterator iter = playingSource.begin() ; iter != playingSource.end(); iter++ ) {
+	for (std::list<int>::const_iterator iter = playingSource.begin() ; iter != playingSource.end(); iter++ ) {
 		AUDSoundGain(*iter, vol);
 	}
 }
@@ -431,6 +431,7 @@ void Music::Listen() {
 #ifdef HAVE_AL
 				if (music_load_info->success && music_load_info->wave) {
 					int source = AUDBufferSound(music_load_info, true);
+                                        AUDAdjustSound(source,QVector(0,0,0),Vector(0,0,0));
 					free(music_load_info->wave);
 					music_load_info->wave=NULL;
 					if (source!=-1) {
@@ -439,7 +440,8 @@ void Music::Listen() {
 				}
 #endif
 				if (playingSource.size()==1) { // Start playing if first in list.
-					AUDStartPlaying(playingSource.back());
+					AUDStartPlaying(playingSource.front());
+                                        AUDSoundGain(playingSource.front(),vol);
 				}
 				music_load_list.pop_back();
 				if (!music_load_list.empty()) {
@@ -449,11 +451,12 @@ void Music::Listen() {
 			}
 		}
 		if (!playingSource.empty()) {
-			if (!AUDIsPlaying(playingSource.back())) {
-				AUDDeleteSound(playingSource.back());
-				playingSource.pop_back();
+			if (!AUDIsPlaying(playingSource.front())) {
+				AUDDeleteSound(playingSource.front());
+				playingSource.pop_front();
 				if (!playingSource.empty()) {
-					AUDStartPlaying(playingSource.back());
+					AUDStartPlaying(playingSource.front());
+                                        AUDSoundGain(playingSource.front(),vol);
 				}
 			}
 		}
@@ -723,7 +726,7 @@ void Music::_Stop()
             fNET_Write(socketw,1,send); else
             INET_Write(socketw,1,send);
 		*/
-		for (vector<int>::const_iterator iter = playingSource.begin(); iter!=playingSource.end(); iter++) {
+		for (std::list<int>::const_iterator iter = playingSource.begin(); iter!=playingSource.end(); iter++) {
 			int sound = *iter;
 			AUDStopPlaying(sound);
 			AUDDeleteSound(sound);
