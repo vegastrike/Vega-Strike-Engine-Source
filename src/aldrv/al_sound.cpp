@@ -452,11 +452,11 @@ static int LoadSound (ALuint buffer, bool looping, bool music) {
 using namespace VSFileSystem;
 
 
-bool AUDLoadSoundFile(const std::string &s, struct AUDSoundProperties *info) {
+bool AUDLoadSoundFile(const char *s, struct AUDSoundProperties *info) {
 	  	  VSFile f;
-	  	  VSError error = f.OpenReadOnly( s.c_str(), SoundFile);
+	  	  VSError error = f.OpenReadOnly( s, SoundFile);
 		  if (error>Ok) {
-	  	      error = f.OpenReadOnly( s.c_str(), UnknownFile);
+	  	      error = f.OpenReadOnly( s, UnknownFile);
 		
 		  }
 		  info->shared=(error==Shared);
@@ -538,7 +538,7 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 	    if (wavbuf==NULL)
 		{
           AUDSoundProperties info;
-          if (!AUDLoadSoundFile(s, &info)) {
+          if (!AUDLoadSoundFile(s.c_str(), &info)) {
             soundHash.Put(info.hashname,&nil_wavebuf);
             return -1;
           }

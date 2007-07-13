@@ -359,17 +359,21 @@ PVOID
 		if (me->killthread) break;
 		me->music_loaded = false;
 		me->music_load_info->success=false;
+                size_t len=me->music_load_info->hashname.length();
+                char *songname = (char*)malloc(len+1);
+                songname[len]='\0';
+                memcpy(songname,me->music_load_info->hashname.data(),len);
 #ifdef _WIN32
 		ReleaseMutex(me->musicinfo_mutex);
 #else
 		pthread_mutex_unlock(&me->musicinfo_mutex);
 #endif
 		{
-			std::string songname = me->music_load_info->hashname;
 			if (!AUDLoadSoundFile(songname, me->music_load_info)) {
-				fprintf(stderr, "Failed to load song %s\n", songname.c_str());
+				fprintf(stderr, "Failed to load song %s\n", songname);
 			}
 		}
+                free(songname);
 		me->music_loaded = true;
 		while (me->music_loaded) {
 			micro_sleep(10000); // 10ms of busywait for now... wait until end of frame.
