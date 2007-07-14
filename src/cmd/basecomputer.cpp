@@ -4479,9 +4479,17 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 			model+=name[nameindex];
 
 		if(model=="blank"){
-			model="Stock";
+			model="TEMPLATE--WARNING--BUG";
 		}else if (model==""){
+			model="Military Issue (equipped)";
+		}else if (model=="rg"){
+			model="Regional Guard Issue (equipped)";
+		}else if (model=="milspec"){
 			model="Military Spec.";
+		}else if (model=="rgspec"){
+			model="Regional Guard Spec.";
+		}else if (model=="stock"){
+			model="Stock";
 		}else if (model=="begin"){
 			model="Stock(Refurbished)";
 		} else {
