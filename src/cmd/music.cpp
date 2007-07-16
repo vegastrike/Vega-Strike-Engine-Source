@@ -445,7 +445,11 @@ void Music::Listen() {
 #endif
 				if (playingSource.size()==1) { // Start playing if first in list.
 					AUDStartPlaying(playingSource.front());
-                                        AUDSoundGain(playingSource.front(),vol);
+#ifdef _WIN32
+					// FIXME FIXME FIXME Presumed race condition or somesuch -- AUDSoundGain here breaks windows music -- temporary hack, actual fix later
+#else
+					AUDSoundGain(playingSource.front(),vol);
+#endif
 				}
 				music_load_list.pop_back();
 				if (!music_load_list.empty()) {
@@ -460,7 +464,7 @@ void Music::Listen() {
 				playingSource.pop_front();
 				if (!playingSource.empty()) {
 					AUDStartPlaying(playingSource.front());
-                                        AUDSoundGain(playingSource.front(),vol);
+                                       AUDSoundGain(playingSource.front(),vol);
 				}
 			}
 		}
