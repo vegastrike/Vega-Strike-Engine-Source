@@ -50,7 +50,7 @@ void DoParticles (QVector pos, float percent, const Vector & velocity, float rad
       pp.col.b=col[2];
       pp.col.a=1.0f;
 	  static float sciz=XMLSupport::parse_float (vs_config->getVariable("graphics","sparklesizeenginerelative",".125"));
-      particleTrail.AddParticle(pp,rand*(ffmax(velocity.Magnitude(),absspeed)*spread+absspeed)+velocity*sspeed,fixed_size?sciz:(particle_size*sciz));
+      particleTrail.AddParticle(pp,rand*(ffmax(velocity.Magnitude(),absspeed)*spread+absspeed)+velocity*sspeed,fixed_size?sciz:(sqrt(particle_size)*sciz));
     }
 }
   
