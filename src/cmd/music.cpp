@@ -245,6 +245,9 @@ void Music::_SetVolume (float vol,bool hardware,float latency_override) {
         fNET_Write(socketw,strlen(tempbuf),tempbuf); else
         INET_Write(socketw,strlen(tempbuf),tempbuf);
 */
+
+	this->vol=vol;
+
 	for (std::list<int>::const_iterator iter = playingSource.begin() ; iter != playingSource.end(); iter++ ) {
 		AUDSoundGain(*iter, vol);
 	}
@@ -445,11 +448,8 @@ void Music::Listen() {
 #endif
 				if (playingSource.size()==1) { // Start playing if first in list.
 					AUDStartPlaying(playingSource.front());
-#ifdef _WIN32
 					// FIXME FIXME FIXME Presumed race condition or somesuch -- AUDSoundGain here breaks windows music -- temporary hack, actual fix later
-#else
 					AUDSoundGain(playingSource.front(),vol);
-#endif
 				}
 				music_load_list.pop_back();
 				if (!music_load_list.empty()) {
