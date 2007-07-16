@@ -1415,8 +1415,15 @@ static bool SuperDock(Unit * parent, Unit* target) {
 static bool TryDock(Unit * parent, Unit * targ, unsigned char playa, int severity) {
   static float min_docking_relationship = XMLSupport::parse_float(vs_config->getVariable("AI","min_docking_relationship","-.002"));
   static bool can_dock_to_enemy_base = XMLSupport::parse_bool(vs_config->getVariable("AI","can_dock_to_enemy_base","true"));
+  static bool nojumpinSPEC=XMLSupport::parse_bool(vs_config->getVariable("physics","noSPECJUMP","true"));
+  bool SPEC_interference=targ&&parent&&nojumpinSPEC&&(targ->graphicOptions.InWarp||parent->graphicOptions.InWarp);
   unsigned char gender=0;
   vector <Animation *>* anim = NULL;
+
+  if (SPEC_interference){
+    //FIXME js_NUDGE -- need some indicator of non-interaction because one or both objects are in SPEC.
+	return false;
+  }
 
   anim=targ->pilot->getCommFaces(gender);
   
