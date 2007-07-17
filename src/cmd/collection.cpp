@@ -12,6 +12,8 @@ UnitCollection::UnitIterator& UnitCollection::UnitIterator::operator=(const Unit
 	if(col != orig.col){
 		if(col)
 			col->unreg(this);
+		// If the collection isn't the same and both aren't null, unreg old collection
+		// Then set the new collection and register ourselves to it. 
 		col = orig.col;
 		col->reg(this);
 	}
@@ -70,6 +72,8 @@ void UnitCollection::UnitIterator::remove()
 void UnitCollection::UnitIterator::moveBefore(UnitCollection& otherlist)
 {
 	if(it != col->u.end()) {
+		// If our current iterator isn't the end, then we want to move all the 
+		// Units left in the list to the place in the argument list.
 		otherlist.prepend(*it);
 		it = col->erase(it);
 	}
@@ -95,15 +99,23 @@ void UnitCollection::UnitIterator::postinsert(Unit *unit)
 void UnitCollection::UnitIterator::advance()
 {
 	if(col->u.empty() || it == col->u.end()) return;
+	// If the collection is not empty, and local iterator isn't at the end
+	// we iterate 
 	++it;
 	while(it != col->u.end()) {
-		if((*it) == NULL)
+		if((*it) == NULL){
+			// If our new iterator isn't at the end but references a NULL, erase it.
 			it = col->erase(it);
-		else if((*it)->Killed())
+		}
+		else if((*it)->Killed()){
+			// If our new iterator isn't at the end but references a killed unit, erase it
 			it = col->erase(it);
+		}
 		else
 			break;
+		// If our new iterator isn't the at the end, it must reference a valid unit, return it
 	}
+	// Our unit is either end() or valid, let the calling code deal with it.
 }
 
 
@@ -136,6 +148,8 @@ Unit* UnitCollection::UnitIterator::operator *()
 	if(it != col->u.end() && !col->empty())
 		return (*it);
 	return(NULL);
+	// The return value for end() and empty lists is NULL, this means attempting 
+	// a * operator at end of list wont cause a segfault. Most calling code looks for NULL anyway.
 }
 
 // UnitIterator END:
@@ -197,7 +211,8 @@ bool UnitCollection::ConstIterator::notDone()
 
 void UnitCollection::ConstIterator::advance()
 {
-	if(col->u.empty()) return;
+	// Same idea as UnitIterator only we skip ahead instead of erase.
+	if(col->u.empty() && it != col->u.end()) return;
 	++it;
 	while(it != col->u.end()) {
 		if((*it) == NULL)
@@ -273,6 +288,7 @@ void UnitCollection::insert_unique(Unit* unit)
 		}
 		unit->Ref();
 		u.push_front(unit);
+		// If unit isn't null and there exists no unit like it, insert at beginning.
 	}
 }
 
@@ -297,6 +313,8 @@ void UnitCollection::prepend(UnitIterator* it)
 		++tmpI;
 		it->advance();
 	}
+	// Basically we concatenate our list onto the end of the argument list, 
+	// the result is our new list. 
 }
 
 
@@ -318,6 +336,7 @@ void UnitCollection::append(UnitIterator *it)
 		u.push_back(tmp);
 		it->advance();
 	}
+	// Same idea as prepend but only at the end.
 }
 
 
@@ -332,8 +351,9 @@ list<Unit*>::iterator UnitCollection::insert(list<Unit*>::iterator temp,Unit* un
 
 
 void UnitCollection::clear()
-{
+{	
 	destr();
+	// By clear we mean, comlpetely obliterate the list. same as destr()
 }
 
 
@@ -342,8 +362,12 @@ void UnitCollection::destr()
 	for(list<Unit*>::iterator it = u.begin();it!=u.end();++it) {
 		(*it)->UnRef();
 	}
+	for(vector<UnitIterator*>::iterator t = activeIters.begin();t != activeIters.end(); ++t)
+		(*t)->it = u.end();		
 	u.clear();
-	activeIters.clear();
+	// First we de-reference all our Units in the list.  Then we update all our iterators to 
+	// a known position that they can understand (if somehow the list is destroyed before it)
+	// Then we clear the list of all units.  
 }
 
 
@@ -359,20 +383,43 @@ bool UnitCollection::contains(const Unit* unit) const
 }
 
 
-list<Unit*>::iterator  UnitCollection::erase(list<Unit*>::iterator it)
+list<Unit*>::iterator  UnitCollection::erase(list<Unit*>::iterator it2)
 {
-	if(u.empty() || it == u.end())
-		return (it);
-	Unit* tUnit = *it;
+	if(u.empty() || it2 == u.end())
+		return (it2);
+	// If the list is empty or argument iterator is the end(), return now.
+	Unit* tUnit = *it2;
 	for(vector<UnitIterator*>::iterator t = activeIters.begin();t != activeIters.end(); ++t){
-		if(it == (*t)->it)
-			++((*t)->it);
+		if(it2 == (*t)->it){
+			// The following loop is an attempt to resolve race issues between
+			// iterators, since we dont trick them with a fake list. 
+			do {
+				++((*t)->it);
+				if((*t)->it == u.end())
+					break;
+				// Bascially: for any active UnitIterator that is referencing the iterator
+				// that we want to remove, we increment it and make sure it's not end()
+				// If it's end(), we return it.
+			}
+			while((*(*t)->it)->Killed());
+			/* The loop is run until a non-killed unit is reached. 
+			*  Hopefully this is good enough.  Though I fear it is not. 
+			*  Going behind the backs of classes holding an iterator
+			*  between frames means they wont know when their own unit is killed.
+			*  This could mean a better container should be found...not sure.
+			*/
+		}
 	}
-	it = u.erase(it);	
-	tUnit->UnRef();
-	return(it);
+	it2 = u.erase(it2);	
+	tUnit->UnRef();	
+	// we've made sure no UnitIterator is referencing the iterator we want to remove, not even the caller.
+	// So we erase and unreference it. 
+	return(it2);  
+	// This returns the calling un_iter to the correct place, since we incremented it 
+	// earlier with the rest.
+	// The caller will then have the opportunity to remove any Units that are Killed in the list
+	// that we skipped over in the activeIters for loop.
 }
-
 
 bool UnitCollection::remove(const Unit *unit)
 {
@@ -387,12 +434,14 @@ bool UnitCollection::remove(const Unit *unit)
 		else
 			++it;
 	}
+	// This is basically a loop wrapper around erase().
 	return (res);
 }
 
 
 const UnitCollection& UnitCollection::operator = (const UnitCollection& uc)
 {
+	// This function is technically illegal.
 	destr();
 	list<Unit*>::const_iterator in = uc.u.begin();
 	while(in != uc.u.end()) {
@@ -405,12 +454,17 @@ const UnitCollection& UnitCollection::operator = (const UnitCollection& uc)
 
 void UnitCollection::cleanup()
 {
-	for(list<Unit*>::iterator it = u.begin();it != u.end();) {
-		if((*it)->Killed())
-			it = erase(it);
-		else
-			++it;
+	for(list<Unit*>::iterator it = u.begin();it!=u.end();++it){
+		if(!(*it)){
+			for(vector<UnitIterator*>::iterator t = activeIters.begin();t != activeIters.end(); ++t)
+				++((*t)->it);
+		}
+		else if ((*it)->Killed()) {
+			for(vector<UnitIterator*>::iterator t = activeIters.begin();t != activeIters.end(); ++t)
+				++((*t)->it);
+		}
 	}
+	// Traverse entire list, removing all invalid units, updating active UnitIterators
 }
 
 void UnitCollection::reg(un_iter* tmp)
@@ -420,12 +474,15 @@ void UnitCollection::reg(un_iter* tmp)
 
 void UnitCollection::unreg(un_iter* tmp)
 {
-	for(vector<un_iter*>::iterator t = activeIters.begin();t != activeIters.end();++t){
+	vector<un_iter*>::iterator t = activeIters.end() - 1;
+	for(int i = activeIters.size();i > 0;--i,--t){
 		if(*t == tmp){					
 			activeIters.erase(t);
 			return;
 		}
 	}
+	// Traverse backwards in activeIter vector since we most likely are at the very back
+	// Might increase performance a little. 
 }
 
 

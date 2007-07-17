@@ -40,13 +40,14 @@ namespace UniverseUtil
 {
 
 	Unit* PythonUnitIter::current() {
-		Unit *ret;
-		while(ret = UnitIterator::operator*()){
+		Unit *ret = NULL;
+		while(ret = UnitCollection::UnitIterator::operator*()){
 			if(ret->hull > 0)
-				break;
+				return (ret);
 			advance();
 		}
 		return(ret);
+
 	}
 
 	void PythonUnitIter::advanceSignificant() {

@@ -102,7 +102,7 @@ public:
 				value=(*iter).value;
 				break;
 			}
-			iter++;
+			++iter;
 		}
 		}
 		return value;

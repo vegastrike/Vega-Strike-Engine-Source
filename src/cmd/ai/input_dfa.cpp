@@ -414,10 +414,8 @@ void InputDFA::appendCollection (UnitCollection *newcol) {
 		Unit *tUnit;
 	  for(un_iter it = newcol->createIterator();tUnit = *it;++it)
 		tUnit->Select();
-    
-      UnitCollection::UnitIterator *tmpit =new un_iter(newcol->createIterator());
-      selected->append (tmpit);
-      delete tmpit;
+	un_iter tmpit = newcol->createIterator();
+      selected->append (&tmpit);
       delete newcol;
       //remove duplicates FIXME
     } else {

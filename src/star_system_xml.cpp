@@ -1479,11 +1479,9 @@ void StarSystem::LoadXML(const char *filename, const Vector & centroid, const fl
 	unsigned int i;
 	for (i =0;i<xml->moons.size();++i) {
 		if (xml->moons[i]->isUnit()==PLANETPTR) {
-			Unit * un;
-			un_iter *iter = ((Planet*)xml->moons[i])->createIterator();
-			for(;un = **iter;++(*iter))
+			Unit * un = NULL;
+			for(Planet::PlanetIterator iter((Planet*)xml->moons[i]);un = *iter;iter.advance())
 				AddUnit(un);
-			delete iter;
 		}
 		else {
 			AddUnit(xml->moons[i]);

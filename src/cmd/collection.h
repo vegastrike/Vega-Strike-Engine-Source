@@ -35,11 +35,12 @@ class UnitCollection
 				virtual void advance();
 				//Returns next unit in list
 				Unit* next();
-
+				
+				virtual inline class Unit* current() { return(this->operator*());}
 				UnitIterator& operator=( const UnitIterator&);
 				const UnitIterator operator ++(int);
 				const UnitIterator& operator ++();
-				class Unit * operator * ();
+				virtual class Unit * operator * ();
 				std::list<class Unit*>::iterator it;
 			protected:
 				// Pointer to list

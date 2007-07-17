@@ -293,9 +293,11 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
 			  for (i=jump->getSubUnits();(su=*i)!=NULL;++i) {
 			  SubUnits.prepend (su);
 			  }
-			  for (i=jump->getSubUnits();(su=*i)!=NULL;) {
+			  jump->SubUnits.clear();
+/*			  for (i=jump->getSubUnits();(su=*i)!=NULL;) {
 				  i.remove();
 			  }
+*/
 		  }
 		  jump->Kill();
 		  if (jump!=neujum) {

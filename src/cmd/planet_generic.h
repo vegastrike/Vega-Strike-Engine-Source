@@ -88,24 +88,45 @@ public:
     class PlanetIterator : public un_iter
     {
 		public:
-			PlanetIterator(Planet *p) { col = new UnitCollection;col->append(p);it = col->u.begin();}
-			~PlanetIterator() { delete col;}
-			void preinsert(Unit *unit) {abort();}
-			void postinsert(Unit *unit) { abort();}
-			void remove() { abort(); }
-			void advance() 
-			{
-				if(col->u.empty()) return;
-				Unit *cur = *it;
-				if (cur->isUnit()==PLANETPTR) {
-					for(un_iter tmp(((Planet *)cur)->satellites.createIterator()); tmp.notDone(); tmp.advance()) {
-						col->append((*tmp));
-					}
-				}
-				++it;
+			PlanetIterator(Planet *p) { localCollection.append(p);pos = localCollection.createIterator();}
+			virtual ~PlanetIterator() {;}
+			virtual void preinsert(Unit *unit) {abort();}
+			virtual void postinsert(Unit *unit) { abort();}
+			virtual void remove() { abort(); }
+			virtual Unit* current() 
+			{ 
+				if(pos.notDone()) 
+					return(*pos);
+				return(NULL);
 			}
+			virtual void advance() 
+			{
+				if(current() != NULL){
+				Unit *cur = *pos;
+					if (cur->isUnit()==PLANETPTR) {
+						for(un_iter tmp(((Planet *)cur)->satellites.createIterator()); tmp.notDone(); ++tmp) {
+							localCollection.append((*tmp));
+						}
+					}
+					++pos;
+				}
+			}
+			virtual const un_iter& operator ++()
+			{
+				advance();
+			}
+			virtual Unit* operator *()
+			{
+				return(current());
+			}
+			virtual un_iter operator++(int) {abort();}
+			
+		private:
+			UnitCollection localCollection;
+			un_iter pos;
+			
 	};
-	un_iter *createIterator() { return new PlanetIterator(this);}
+	PlanetIterator createIterator() { return(PlanetIterator(this));}
   bool isAtmospheric  () {
     return hasLights()||atmospheric;
   }

@@ -16,13 +16,14 @@ class Cargo;
 namespace UniverseUtil
 {
 
-	class PythonUnitIter: public UnitCollection::UnitIterator
+	class PythonUnitIter: public un_iter
 	{
 		public:
 			PythonUnitIter ():UnitIterator(){}
 			//	PythonUnitIterator (UnitListNode * start):UnitIterator(start){}
 			PythonUnitIter (const UnitCollection::UnitIterator &t):UnitIterator(t){}
-			Unit* current();
+			virtual ~PythonUnitIter() {;}
+			virtual Unit* current();
 			void advanceSignificant();
 			void advanceInsignificant();
 			void advancePlanet();
@@ -32,6 +33,7 @@ namespace UniverseUtil
 			void advanceNInsignificant(int n);
 			void advanceNPlanet(int n);
 			void advanceNJumppoint(int n);
+			virtual class Unit* operator*() { return(this->current());}
 	};
 
 	std::string LookupUnitStat(const std::string &unitname, const std::string &faction, const std::string &statname);
