@@ -635,7 +635,7 @@ void StarSystem::RequestPhysics(Unit *un, unsigned int queue)
 	if (unit == un) {
 		un->predicted_priority = 0;
 		int newloc=(current_sim_location+1)%SIM_QUEUE_SIZE;
-		if (newloc!=current_sim_location)
+		if (newloc!=queue)
 			iter.moveBefore(this->physics_buffer[newloc]);
 	}
 }
