@@ -114,12 +114,13 @@ public:
 			virtual const un_iter& operator ++()
 			{
 				advance();
+				return *this;
 			}
 			virtual Unit* operator *()
 			{
 				return(current());
 			}
-			virtual un_iter operator++(int) {abort();}
+			virtual un_iter operator++(int) {abort(); return *this;}
 			
 		private:
 			UnitCollection localCollection;
