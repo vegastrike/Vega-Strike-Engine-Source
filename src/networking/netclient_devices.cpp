@@ -118,8 +118,8 @@ void	NetClient::cargoRequest( ObjSerial buyer, ObjSerial seller, const std::stri
 	netbuf.addSerial( seller ); // If seller is the player, it is selling cargo.
 	netbuf.addInt32( quantity );
 	netbuf.addString( cargo );
-	netbuf.addInt32( (unsigned int)(mountOffset+1) );
-	netbuf.addInt32 ((unsigned int)(subunitOffset+1) );
+	netbuf.addInt32( (unsigned int)(mountOffset) );
+	netbuf.addInt32 ((unsigned int)(subunitOffset) );
 	
 	p.send( CMD_CARGOUPGRADE, un->GetSerial(),
             netbuf.getData(), netbuf.getDataLength(),

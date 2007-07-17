@@ -68,7 +68,8 @@ namespace UniverseUtil
 		QVector pos,
 		string squadlogo,
 	string destinations) {
-
+		if (Network) return NULL;
+		
 		int clstype=UNITPTR;
 		if (unittype_string=="planet") {
 			clstype =PLANETPTR;
@@ -499,6 +500,7 @@ namespace UniverseUtil
 
 	}
 	Unit* launch (string name_string,string type_string,string faction_string,string unittype, string ai_string,int nr_of_ships,int nr_of_waves, QVector pos, string sqadlogo) {
+		if (Network) return NULL;
 		return launchJumppoint(name_string,faction_string,type_string,unittype,ai_string,nr_of_ships,nr_of_waves,pos,sqadlogo,"");
 	}
 
@@ -516,6 +518,9 @@ namespace UniverseUtil
 	}
 	Unit *getPlayer() {
 		return _Universe->AccessCockpit()->GetParent();;
+	}
+	bool networked() {
+		return Network!=NULL;
 	}
 	int getNumPlayers () {
 		return _Universe->numPlayers();

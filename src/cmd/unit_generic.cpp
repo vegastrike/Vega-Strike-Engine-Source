@@ -573,12 +573,14 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 			static int upgradefac = XMLSupport::parse_bool(vs_config->getVariable("physics","cargo_deals_collide_damage","false"))?-1:FactionUtil::GetUpgradeFaction();
 			if (faction!=upgradefac)
 				smalle->ApplyDamage (biglocation.Cast(),bignormal,small_damage,smalle,GFXColor(1,1,1,2),this->owner!=NULL?this->owner:this);
+			/* Happens too often to be useful.
 			else
-				printf ("Damage avoided due to cargo\n");
+				printf ("Damage avoided due to cargo\n"); */
 			if (smalle->faction!=upgradefac)
 				this->ApplyDamage (smalllocation.Cast(),smallnormal,large_damage,this,GFXColor(1,1,1,2),smalle->owner!=NULL?smalle->owner:smalle);
+			/* Happens too often to be useful
 			else
-				printf ("Damage avoided due to cargo\n");
+				printf ("Damage avoided due to cargo\n"); */
 		}
 		//OLDE METHODE
 		//    smalle->ApplyDamage (biglocation.Cast(),bignormal,.33*g_game.difficulty*(  .5*fabs((smalle->GetVelocity()-this->GetVelocity()).MagnitudeSquared())*this->mass*SIMULATION_ATOM),smalle,GFXColor(1,1,1,2),NULL);
@@ -6595,6 +6597,8 @@ bool Unit::UnDock (Unit * utdw)
 #define CAUSESDOWNGRADE -1
 #define LIMITEDBYTEMPLATE -2
 
+const Unit* getUnitFromUpgradeName(const string& upgradeName, int myUnitFaction = 0);
+
 typedef double (*adder) (double a, double b);
 typedef double (*percenter) (double a, double b, double c);
 typedef bool (*comparer) (double a, double b);
@@ -8778,9 +8782,17 @@ bool Unit::SellCargo (unsigned int i, int quantity, float &creds, Cargo & carg, 
 {
 	if (i<0||i>=image->cargo.size()||!buyer->CanAddCargo(image->cargo[i])||Mass<image->cargo[i].mass)
 		return false;
+	carg = image->cargo[i];
+	if (Network!=NULL) {
+		int playernum = _Universe->whichPlayerStarship( this);
+		// carg.GetCategory().find("upgrades")!=0 &&
+		if (playernum>=0) {
+			// Do not send request quite yet if it is an upgrade cargo.
+			Network[playernum].cargoRequest( buyer->serial, this->serial, image->cargo[i].content, quantity, 0, 0);
+		}
+	}
 	if (quantity>image->cargo[i].quantity)
 		quantity=image->cargo[i].quantity;
-	carg = image->cargo[i];
 	carg.price=buyer->PriceCargo (image->cargo[i].content);
 	creds+=quantity*carg.price;
 	carg.quantity=quantity;
@@ -8819,8 +8831,11 @@ bool Unit::BuyCargo (unsigned int i, unsigned int quantity, Unit * seller, float
 	Cargo soldcargo= seller->image->cargo[i];
 	if (Network!=NULL) {
 		int playernum = _Universe->whichPlayerStarship( this);
-		if (playernum>=0)
-			Network[playernum].cargoRequest( this->serial, seller->serial, soldcargo.content, quantity, -1, -1);
+		// soldcargo.GetCategory().find("upgrades")!=0 &&
+		if (playernum>=0) {
+			// Do not send request quite yet if it is an upgrade cargo.
+			Network[playernum].cargoRequest( this->serial, seller->serial, soldcargo.GetContent(), quantity, 0, 0);
+		}
 	}
 	if (quantity>(unsigned int)soldcargo.quantity)
 		quantity=soldcargo.quantity;
@@ -9136,7 +9151,6 @@ bool Unit::TransferUnitToSystem (StarSystem * Current)
 /***************************************************************************************/
 /*** UNIT_REPAIR STUFF                                                               ***/
 /***************************************************************************************/
-const Unit* getUnitFromUpgradeName(const string& upgradeName, int myUnitFaction = 0);
 extern float rand01();
 bool isWeapon (std::string name)
 {

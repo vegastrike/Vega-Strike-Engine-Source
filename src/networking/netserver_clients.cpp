@@ -111,6 +111,9 @@ void	NetServer::addClient( ClientPtr clt)
 		cerr<<"PLAYER DOCKED - STARTING DOCKED AT POSITION : x="<<safevec.i<<",y="<<safevec.j<<",z="<<safevec.k<<endl;
 	COUT<<"\tposition : x="<<safevec.i<<" y="<<safevec.j<<" z="<<safevec.k<<endl;
 	cp->savegame->SetPlayerLocation( safevec);
+	
+	cp->credits = (cp->savegame->GetSavedCredits());
+	
 	// UPDATE THE CLIENT Unit's state
 	un->SetPosition( safevec);
 

@@ -15,7 +15,8 @@ UnitCollection::UnitIterator& UnitCollection::UnitIterator::operator=(const Unit
 		// If the collection isn't the same and both aren't null, unreg old collection
 		// Then set the new collection and register ourselves to it. 
 		col = orig.col;
-		col->reg(this);
+		if (col)
+			col->reg(this);
 	}
 	it = orig.it;
 	return (*this);
@@ -26,7 +27,8 @@ UnitCollection::UnitIterator::UnitIterator(const UnitIterator& orig)
 {
 	col = orig.col;
 	it = orig.it;
-	col->reg(this);
+	if (col)
+		col->reg(this);
 }
 
 
@@ -64,14 +66,14 @@ bool UnitCollection::UnitIterator::notDone()
 
 void UnitCollection::UnitIterator::remove()
 {
-	if(it != col->u.end())
+	if(col && it != col->u.end())
 		it = col->erase(it);
 }
 
 
 void UnitCollection::UnitIterator::moveBefore(UnitCollection& otherlist)
 {
-	if(it != col->u.end()) {
+	if(col && it != col->u.end()) {
 		// If our current iterator isn't the end, then we want to move all the 
 		// Units left in the list to the place in the argument list.
 		otherlist.prepend(*it);
@@ -82,7 +84,7 @@ void UnitCollection::UnitIterator::moveBefore(UnitCollection& otherlist)
 
 void UnitCollection::UnitIterator::preinsert(Unit *unit)
 {
-	if(unit)
+	if(col && unit)
 		it = col->insert(it,unit);
 }
 
@@ -90,7 +92,7 @@ void UnitCollection::UnitIterator::preinsert(Unit *unit)
 void UnitCollection::UnitIterator::postinsert(Unit *unit)
 {
 	list<Unit*>::iterator tmp = it;
-	if(unit) {
+	if(col && unit) {
 		++tmp;
 		col->insert(tmp,unit);
 	}
@@ -98,7 +100,7 @@ void UnitCollection::UnitIterator::postinsert(Unit *unit)
 
 void UnitCollection::UnitIterator::advance()
 {
-	if(col->u.empty() || it == col->u.end()) return;
+	if(!col || col->u.empty() || it == col->u.end()) return;
 	// If the collection is not empty, and local iterator isn't at the end
 	// we iterate 
 	++it;
@@ -122,7 +124,7 @@ void UnitCollection::UnitIterator::advance()
 Unit* UnitCollection::UnitIterator::next()
 {
 	advance();
-	if(it == col->u.end())
+	if(!col || it == col->u.end())
 		return(NULL);
 	return (*it);
 }
@@ -145,7 +147,7 @@ const UnitCollection::UnitIterator& UnitCollection::UnitIterator::operator ++()
 
 Unit* UnitCollection::UnitIterator::operator *()
 {
-	if(it != col->u.end() && !col->empty())
+	if(col && it != col->u.end() && !col->empty())
 		return (*it);
 	return(NULL);
 	// The return value for end() and empty lists is NULL, this means attempting 
@@ -189,7 +191,7 @@ UnitCollection::ConstIterator::~ConstIterator()
 const Unit* UnitCollection::ConstIterator::next()
 {
 	advance();
-	if(it!= col->u.end())
+	if(col && it!= col->u.end())
 		return(*it);
 	return(NULL);
 }
@@ -197,7 +199,7 @@ const Unit* UnitCollection::ConstIterator::next()
 
 bool UnitCollection::ConstIterator::isDone()
 {
-	if(it != col->u.end())
+	if(col && it != col->u.end())
 		return(false);
 	return(true);
 }
@@ -211,8 +213,10 @@ bool UnitCollection::ConstIterator::notDone()
 
 void UnitCollection::ConstIterator::advance()
 {
+	if(!col) return;
 	// Same idea as UnitIterator only we skip ahead instead of erase.
 	if(col->u.empty() && it != col->u.end()) return;
+	
 	++it;
 	while(it != col->u.end()) {
 		if((*it) == NULL)

@@ -945,8 +945,8 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			ObjSerial seller_ser = netbuf.getSerial();
 			int quantity = netbuf.getInt32();
 			std::string cargoName = netbuf.getString();
-			int mountOffset = ((int)netbuf.getInt32())-1;
-			int subunitOffset = ((int)netbuf.getInt32())-1;
+			int mountOffset = ((int)netbuf.getInt32());
+			int subunitOffset = ((int)netbuf.getInt32());
 			
 //			ObjSerial sender_ser = packet.getSerial();
             Unit *sender = clt->game_unit.GetUnit();
@@ -961,7 +961,17 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			if (!buyer || !seller) break;
 			
 			Cargo * carg = seller->GetCargo(cargoName, cargIndex);
-
+			if (!carg) {
+				fprintf(stderr, "Player id %d attempted transaction with NULL cargo %s, %d->%d",
+						sender?sender->GetSerial():-1, cargoName.c_str(),
+						buyer?buyer->GetSerial():-1, seller?seller->GetSerial():-1);
+				break;
+			}
+			bool upgrade=false;
+			if (carg->GetCategory().find("upgrades")==0) {
+				upgrade=true;
+			}
+			
 			Cockpit *buyer_cpt = _Universe->isPlayerStarship(buyer);
 			Cockpit *seller_cpt = _Universe->isPlayerStarship(seller);
 			if (buyer == sender && buyer_cpt) {
@@ -979,17 +989,26 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 					buyer_cpt->credits += (creds_before-creds);
 				}
 			}
-			if (buyer==sender) {
+			if (seller==sender || buyer==sender) {
+				if (!upgrade) break;
+				
 				double percent; // not used.
 				const Unit *unitCarg = getUnitFromUpgradeName(carg->GetContent(), seller->faction);
 				if (!unitCarg) break; // not an upgrade, and already did cargo transactions.
 				int multAddMode = GetModeFromName(carg->GetContent().c_str());
-				
+
+				// Now we're sure it's an authentic upgrade...
 				// Wow! So much code just to perform an upgrade!
 				const string unitDir = GetUnitDir(buyer->name.get().c_str());
-				const string templateName = unitDir + ".template";
-				int faction = buyer->faction;
-				
+				string templateName;
+				int faction;
+				if (seller==sender) {
+					templateName = unitDir + ".blank";
+					faction = seller->faction;
+				} else {
+					faction = buyer->faction;
+					templateName = unitDir + ".template";
+				}
 				// Get the "limiter" for the upgrade.  Stats can't increase more than this.
 				const Unit * templateUnit = UnitConstCache::getCachedConst(StringIntKey(templateName,faction));
 				if (!templateUnit) {
@@ -1002,12 +1021,20 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				if(unitCarg->name == LOAD_FAILED) {
 					break;
 				}
-				//selectMount();
-				if (buyer->canUpgrade(unitCarg, mountOffset, subunitOffset, multAddMode, true, percent, templateUnit)) {
-					buyer->Upgrade(unitCarg, mountOffset, subunitOffset, multAddMode, true, percent, templateUnit);
+
+				if (seller==sender) {
+					// Selling it... Downgrade time!
+					if (seller->canDowngrade(unitCarg, mountOffset, subunitOffset, percent, templateUnit)) {
+						seller->Downgrade   (unitCarg, mountOffset, subunitOffset, percent, templateUnit);
+					}
+				} else { // buyer==sender
+					// Buying it... Upgrade time!
+					if (buyer->canUpgrade(unitCarg, mountOffset, subunitOffset, multAddMode, true, percent, templateUnit)) {
+						buyer->Upgrade   (unitCarg, mountOffset, subunitOffset, multAddMode, true, percent, templateUnit);
+					}
+					//buyer->Repair()??????
+					//buyer->Upgrade()??????
 				}
-				//buyer->Repair()??????
-				//buyer->Upgrade()??????
 			}
 		}
 		break;

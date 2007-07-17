@@ -80,6 +80,7 @@ voidEXPORT_UTIL(TargetEachOther)
 voidEXPORT_UTIL(StopTargettingEachOther)	
 EXPORT_UTIL(LookupUnitStat,"")
 
+EXPORT_UTIL(networked,false)
 EXPORT_UTIL(getSaveDir,"")
 EXPORT_UTIL(getSaveInfo,"")
 EXPORT_UTIL(getCurrentSaveGame,"")
