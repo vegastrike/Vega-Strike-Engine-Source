@@ -22,6 +22,7 @@
 #ifndef __PAINTTEXT_H__
 #define __PAINTTEXT_H__
 
+#include <string>
 #include "guidefs.h"
 #include "font.h"
 

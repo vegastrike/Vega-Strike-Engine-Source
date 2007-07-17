@@ -66,6 +66,10 @@ bool EventResponder::processMouseDown(const InputEvent& event) {
     return m_modal;
 }
 
+// Process a mouse button pressed elsewhere, unfocusing this control.
+void EventResponder::processUnfocus(const InputEvent& event) {
+}
+
 // Process a mouse button released.
 bool EventResponder::processMouseUp(const InputEvent& event) {
     return m_modal;

@@ -57,6 +57,9 @@ public:
     // PROCESS MOUSE
     // Process a mouse button pressed down.
     virtual bool processMouseDown(const InputEvent& event);
+
+	// Called for every click except those landing on the control.
+    virtual void processUnfocus(const InputEvent& event);
     
     // Process a mouse button released.
     virtual bool processMouseUp(const InputEvent& event);

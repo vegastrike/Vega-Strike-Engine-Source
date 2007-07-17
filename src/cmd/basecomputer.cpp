@@ -46,6 +46,7 @@ using VSFileSystem::SaveFile;
 #include "gui/simplepicker.h"
 #include "gui/groupcontrol.h"
 #include "gui/scroller.h"
+#include "networking/netclient.h"
 #include "unit_xml.h"
 #include "gfx/sprite.h"
 #include "gfx/aux_texture.h"
@@ -260,17 +261,18 @@ static const ModeInfo modeInfo[] = {
 // WARNING:  The order of this table is important.  There are multiple entries for
 //  some commands. Basically, you can make an entry for a particular control, and then
 //  later have an entry with an empty control id to cover the other cases.
-const BaseComputer::WctlTableEntry BaseComputer::WctlCommandTable[] = {
+template<>
+const BaseComputer::WctlTableEntry WctlBase<BaseComputer>::WctlCommandTable[] = {
     BaseComputer::WctlTableEntry ( "Picker::NewSelection", "NewsPicker", &BaseComputer::newsPickerChangedSelection ),
     BaseComputer::WctlTableEntry ( "Picker::NewSelection", "LoadSavePicker", &BaseComputer::loadSavePickerChangedSelection ),	
     BaseComputer::WctlTableEntry ( "Picker::NewSelection", "", &BaseComputer::pickerChangedSelection ),
-    BaseComputer::WctlTableEntry ( modeInfo[CARGO].command, "", &BaseComputer::changeToCargoMode ),
-    BaseComputer::WctlTableEntry ( modeInfo[UPGRADE].command, "", &BaseComputer::changeToUpgradeMode ),
-    BaseComputer::WctlTableEntry ( modeInfo[SHIP_DEALER].command, "", &BaseComputer::changeToShipDealerMode ),
-    BaseComputer::WctlTableEntry ( modeInfo[NEWS].command, "", &BaseComputer::changeToNewsMode ),
-    BaseComputer::WctlTableEntry ( modeInfo[MISSIONS].command, "", &BaseComputer::changeToMissionsMode ),
-    BaseComputer::WctlTableEntry ( modeInfo[INFO].command, "", &BaseComputer::changeToInfoMode ),
-	BaseComputer::WctlTableEntry ( modeInfo[LOADSAVE].command, "", &BaseComputer::changeToLoadSaveMode ),
+    BaseComputer::WctlTableEntry ( modeInfo[BaseComputer::CARGO].command, "", &BaseComputer::changeToCargoMode ),
+    BaseComputer::WctlTableEntry ( modeInfo[BaseComputer::UPGRADE].command, "", &BaseComputer::changeToUpgradeMode ),
+    BaseComputer::WctlTableEntry ( modeInfo[BaseComputer::SHIP_DEALER].command, "", &BaseComputer::changeToShipDealerMode ),
+    BaseComputer::WctlTableEntry ( modeInfo[BaseComputer::NEWS].command, "", &BaseComputer::changeToNewsMode ),
+    BaseComputer::WctlTableEntry ( modeInfo[BaseComputer::MISSIONS].command, "", &BaseComputer::changeToMissionsMode ),
+    BaseComputer::WctlTableEntry ( modeInfo[BaseComputer::INFO].command, "", &BaseComputer::changeToInfoMode ),
+	BaseComputer::WctlTableEntry ( modeInfo[BaseComputer::LOADSAVE].command, "", &BaseComputer::changeToLoadSaveMode ),
     BaseComputer::WctlTableEntry ( "BuyCargo", "", &BaseComputer::buyCargo ),
     BaseComputer::WctlTableEntry ( "Buy10Cargo", "", &BaseComputer::buy10Cargo ),
     BaseComputer::WctlTableEntry ( "BuyAllCargo", "", &BaseComputer::buyAllCargo ),
@@ -294,29 +296,6 @@ const BaseComputer::WctlTableEntry BaseComputer::WctlCommandTable[] = {
 	BaseComputer::WctlTableEntry ( "DoneComputer", "", &BaseComputer::actionDone ),
 
     BaseComputer::WctlTableEntry ( "", "", NULL )
-};
-
-// Process a command from the window.
-// This just dispatches to a handler.
-bool BaseComputer::processWindowCommand(const EventCommandId& command, Control* control) {
-
-    // Iterate through the dispatch table.
-    for(const WctlTableEntry *p = &WctlCommandTable[0]; p->function ; p++) {
-        if(p->command == command) {
-            if(p->controlId.size() == 0 || p->controlId == control->id()) {
-                // Found a handler for the command.
-                return( (this->*(p->function))(command, control) );
-            }
-        }
-    }
-
-    // Let the base class have a try at the command first.
-    if(WindowController::processWindowCommand(command, control)) {
-        return true;
-    }
-
-    // Didn't find a handler.
-    return false;
 };
 
 
@@ -3424,6 +3403,13 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
           _Universe->AccessCockpit()->credits -= price;
           // Upgrade the ship.
           playerUnit->Upgrade(m_newPart, m_selectedMount, m_selectedTurret, m_addMultMode, true, percent, m_theTemplate);
+          if (Network!=NULL) {
+            int playernum = _Universe->whichPlayerStarship( playerUnit );
+            if (playernum>=0) {
+              Network[playernum].cargoRequest( playerUnit->GetSerial(), baseUnit->GetSerial(),
+                  m_part.GetContent(), 1, m_selectedMount, m_selectedTurret);
+            }
+          }
           static bool allow_special_with_weapons=XMLSupport::parse_bool(vs_config->getVariable("physics","special_and_normal_gun_combo","true"));
           if (!allow_special_with_weapons) {
             playerUnit->ToggleWeapon (false, /*backwards*/true);
@@ -3474,14 +3460,14 @@ void BaseComputer::SellUpgradeOperation::start(void) {
 
     // Get the "limiter" for this operation.  Stats can't decrease more than the blank ship.
     m_downgradeLimiter = makeFinalBlankUpgrade(playerUnit->name,faction);
-    if(m_downgradeLimiter->name != LOAD_FAILED) {
-        Cargo* part = GetMasterPartList(m_selectedItem.GetContent().c_str());
-        if(part) {
-            m_part = *part;
-            endInit();
-        } else {
-            finish();
-        }
+	
+    //if(m_downgradeLimiter->name != LOAD_FAILED) {
+	// If its limiter is not available, just assume that there are no limits.
+	
+    Cargo* part = GetMasterPartList(m_selectedItem.GetContent().c_str());
+    if(part) {
+        m_part = *part;
+        endInit();
     } else {
         finish();
     }
@@ -3636,6 +3622,14 @@ void BaseComputer::SellUpgradeOperation::concludeTransaction(void) {
     _Universe->AccessCockpit()->credits += price;
     // Change the ship.
     if(playerUnit->Downgrade(m_newPart, m_selectedMount, m_selectedTurret, percent, m_downgradeLimiter)) {
+		if (Network!=NULL) {
+			int playernum = _Universe->whichPlayerStarship( playerUnit );
+			if (playernum>=0) {
+				// Do not send request quite yet if it is an upgrade cargo.
+				Network[playernum].cargoRequest( baseUnit->GetSerial(), playerUnit->GetSerial(),
+                    m_part.GetContent(), 1, m_selectedMount, m_selectedTurret);
+			}
+		}
         // Remove the item from the ship, since we sold it, and add it to the base.
         m_part.quantity = 1;
         m_part.price = baseUnit->PriceCargo(m_part.content);

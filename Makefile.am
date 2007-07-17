@@ -727,6 +727,8 @@ librootclient = \
   src/force_feedback.h \
   src/functors.h \
   src/fmod.h \
+  src/gamemenu.h \
+  src/gamemenu.cpp \
   src/gfxlib_struct.cpp \
   src/gfxlib_struct.h \
   src/gfxlib.h \

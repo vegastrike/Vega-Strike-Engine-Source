@@ -37,8 +37,9 @@
 //  Mission bulletin board.
 //  Player info.
 
-class BaseComputer : public WindowController
+class BaseComputer : public WctlBase<BaseComputer>
 {
+	friend class WctlBase<BaseComputer>;
 public:
     // The Computer displays that are possible.
     enum DisplayMode {
@@ -59,8 +60,8 @@ public:
     // Start it up!
     virtual void run(void);
 
-    // Process a command event from the window.
-    virtual bool processWindowCommand(const EventCommandId& command, Control* control);
+    // Process a command event from the window. Handled in parent class's WctlCommandTable.
+    // virtual bool processWindowCommand(const EventCommandId& command, Control* control);
 
     // CONSTRUCTION
     BaseComputer(Unit* player, Unit* base, const vector<DisplayMode>& modes);
@@ -258,19 +259,6 @@ protected:
 
     // Load a master list with missions.
     void loadMissionsMasterList(TransactionList& list);
-
-    // Dispatch table declarations.
-    // This is a member table so the handler functions don't need to be public.
-    typedef bool (BaseComputer::*WCtlHandler)(const EventCommandId& command, Control* control);
-    struct WctlTableEntry {
-        EventCommandId command;
-        std::string controlId;
-        WCtlHandler function;
-		WctlTableEntry(const EventCommandId& cmd, const std::string &cid, const WCtlHandler& func)
-			:command(cmd), controlId(cid), function(func) {
-		}
-    };
-    static const WctlTableEntry WctlCommandTable[];
 
     // VARIABLES
     vector<DisplayMode> m_displayModes;     // List of diaplays to provide.

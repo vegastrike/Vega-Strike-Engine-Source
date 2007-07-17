@@ -23,7 +23,7 @@
 #define __WINDOWCONTROLLER_H__
 
 #include "window.h"
-
+#include "control.h"
 
 // This class is meant to run, or control, a Window.  It probably creates
 //  the Window and its Controls, loads the controls with lists if necessary, etc.
@@ -59,6 +59,50 @@ protected:
     // VARIABLES
     Window* m_window;               // The window we control.
     bool m_deleteOnWindowClose;     // True = Delete this object when the window closes.
+};
+
+template <class T>
+struct WindowControllerTableEntry {
+	typedef bool (T::*Handler)(const EventCommandId& command, Control* control);
+	
+	EventCommandId command;
+	std::string controlId;
+	Handler function;
+	WindowControllerTableEntry(const EventCommandId& cmd, const std::string &cid, const Handler& func)
+			:command(cmd), controlId(cid), function(func) {
+	}
+};
+
+
+template <class Subclass>
+class WctlBase : public WindowController {
+public:
+	typedef WindowControllerTableEntry<Subclass> WctlTableEntry;
+	
+	virtual bool processWindowCommand(const EventCommandId& command, Control* control) {
+		
+		// Iterate through the dispatch table.
+		for(const WctlTableEntry *p = &WctlCommandTable[0]; p->function ; p++) {
+			if(p->command == command) {
+				if(p->controlId.size() == 0 || p->controlId == control->id()) {
+					// Found a handler for the command.
+					return( ((static_cast<Subclass*>(this))->*(p->function))(command, control) );
+				}
+			}
+		}
+		
+		// Let the base class have a try at the command first.
+		if(WindowController::processWindowCommand(command, control)) {
+			return true;
+		}
+		
+		// Didn't find a handler.
+		return false;
+	}
+protected:
+    // Dispatch table declarations.
+    // This is a member table so the handler functions don't need to be public.
+    static const WctlTableEntry WctlCommandTable[];
 };
 
 #endif   // __WINDOWCONTROLLER_H__

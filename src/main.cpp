@@ -55,6 +55,7 @@
 #include "gfx/masks.h"
 #include "cmd/music.h"
 #include "ship_commands.h"
+#include "gamemenu.h"
 
 #include <time.h>
 #ifndef _WIN32
@@ -91,6 +92,10 @@ char SERVER=0;
 
 // false if command line option --net is given to start without network
 static bool ignore_network = true;
+
+void enableNetwork(bool usenetwork) {
+	ignore_network = !usenetwork;
+}
 
 /* 
  * Function definitions
@@ -445,6 +450,7 @@ void bootstrap_first_loop() {
   static int i=0;
   static std::string ss=vs_config->getVariable ("graphics","splash_screen","vega_splash.ani");
   static std::string sas=vs_config->getVariable ("graphics","splash_audio","");
+  static bool isgamemenu=XMLSupport::parse_bool(vs_config->getVariable("graphics","main_menu","false"));
   if (i==0) {
 	vector<string> s = parse_space_string(ss);
     vector<string> sa = parse_space_string(sas);
@@ -456,7 +462,13 @@ void bootstrap_first_loop() {
   bootstrap_draw ("Vegastrike Loading...",SplashScreen);
   
   if (i++>4) {
-    if (_Universe) _Universe->Loop(bootstrap_main_loop);
+    if (_Universe) {
+      if (isgamemenu) {
+        GameMenu::startMenuInterface(true);
+      } else {
+        _Universe->Loop(bootstrap_main_loop);
+      }
+    }
   }
 }
 void SetStartupView(Cockpit * cp) {

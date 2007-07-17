@@ -486,42 +486,29 @@ bool VegaConfig::setVariable(string section,string name,string value){
     if(varnode!=NULL){
       // now set the thing
       setVariable(varnode,value);
-      return true;
     }
   }
-  return false;
+  string hashname = section + "/" + name;
+  map_variables[hashname]=value;
+  return true;
 }
 
 
 bool VegaConfig::setVariable(string section,string subsection,string name,string value){
-
   configNode *sectionnode=findSection(section,variables);
-
   if(sectionnode!=NULL){
-
     configNode *subnode=findSection(name,sectionnode);
-
-
-
+    
 	if(subnode!=NULL) {
-
 		configNode *varnode=findEntry(name,subnode);
-
 		if(varnode!=NULL){
-
 			// now set the thing
-
 			setVariable(varnode,value);
-
-			return true;
-
 		}
-
 	}
-
   }
-
-  return false;
-
+  string hashname = section + "/" + subsection + "/" + name;
+  map_variables[hashname]=value;
+  return true;
 }
 

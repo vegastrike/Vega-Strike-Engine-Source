@@ -118,25 +118,26 @@ void GroupControl::draw(void) {
 // OVERRIDES
 bool GroupControl::processMouseDown(const InputEvent& event) {
     std::vector<Control*>::reverse_iterator iter;
-
+	bool retval=false;
+	
     // Give this to the appropriate control.
     for(iter = m_controls.rbegin() ; iter != m_controls.rend() ; iter++ ) {
         Control& control = **iter;
         if(!control.hidden()) {
-            if(control.hasGroupChildren()) {
+            if(control.hasGroupChildren() && !retval) {
                 // Do children first.
                 GroupControl& group = static_cast<GroupControl&>( control );
-                if(group.processMouseDown(event)) {
-                    return true;
-                }
+                retval = group.processMouseDown(event);
             }
-            if(control.hitTest(event.loc)) {
-                return control.processMouseDown(event);
-            }
+            if(control.hitTest(event.loc) && !retval) {
+                retval = control.processMouseDown(event);
+            } else {
+                control.processUnfocus(event);
+			}
         }
     }
 
-    return false;
+    return retval;
 }
 
 bool GroupControl::processMouseUp(const InputEvent& event) {
