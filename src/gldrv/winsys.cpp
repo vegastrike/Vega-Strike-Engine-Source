@@ -312,12 +312,13 @@ void winsys_init( int *argc, char **argv, char *window_title,
     SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8 );
 #endif
 
+    glutInit(argc,argv);
     setup_sdl_video_mode();
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     SDL_WM_SetCaption( window_title, icon_title );
     SDL_EnableUNICODE(1); // supposedly fixes int'l keyboards.
     
-    glutInit(argc,argv);
 }
 
 

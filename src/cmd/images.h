@@ -109,9 +109,9 @@ public:
   const std::string& GetCategory () const {return category;}
   const std::string& GetContent () const {return content;}
   const std::string& GetDescription() const {return description;}
-  std::string GetCategoryPython() {return category;}
-  std::string GetContentPython() {return content;}
-  std::string GetDescriptionPython() {return description;}
+  std::string GetCategoryPython() {return GetCategory();}
+  std::string GetContentPython() {return GetContent();}
+  std::string GetDescriptionPython() {return GetDescription();}
   int GetQuantity() const {return quantity;}
   float GetVolume () const {return volume;}
   float GetMass() const {return mass;}
