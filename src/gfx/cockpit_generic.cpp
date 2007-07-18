@@ -393,7 +393,15 @@ bool Cockpit::tooManyAttackers() {
 }
 
 void Cockpit::updateAttackers() {
+
+  static int max_attackers=XMLSupport::parse_int(vs_config->getVariable("AI","max_player_attackers","0"));
+  if (max_attackers==0) return;
   static un_iter attack_iterator=_Universe->activeStarSystem()->getUnitList().createIterator();
+  static StarSystem* ss=_Universe->activeStarSystem();
+  if (ss!=_Universe->activeStarSystem()) {
+    attack_iterator=_Universe->activeStarSystem()->getUnitList().createIterator();
+	ss=_Universe->activeStarSystem();
+  }
   bool isDone=attack_iterator.isDone();
   if (_Universe->AccessCockpit(_Universe->numPlayers()-1)==this) {
 
@@ -408,7 +416,6 @@ void Cockpit::updateAttackers() {
     if (_Universe->AccessCockpit(0)==this) {
       too_many_attackers=false;
     }
-    static int max_attackers=XMLSupport::parse_int(vs_config->getVariable("AI","max_player_attackers","0"));
     //    printf ("There are %d folks attacking player\n",partial_number_of_attackers);
     number_of_attackers=partial_number_of_attackers;//reupdate the count
     partial_number_of_attackers=0;
