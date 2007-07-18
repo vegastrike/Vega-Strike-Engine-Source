@@ -1479,6 +1479,7 @@ void AggressiveAI::ExecuteNoEnemies() {
         nav+=otherdest->Position();
         nav=nav*.5;
       }
+#ifdef AGGDEBUG
       std::string fgname=UnitUtil::getFlightgroupName(parent);
       std::string pfullname=parent->getFullname();
       std::string dfullname=dest->getFullname();
@@ -1488,7 +1489,7 @@ void AggressiveAI::ExecuteNoEnemies() {
         printf (" between %s:%s\n",otherdest->name.get().c_str(),ofullname.c_str());
        
       }else printf("\n");
-
+#endif
       GoTo(this,parent,nav,creationtime,otherdest!=NULL, otherdest==NULL?dest:NULL);
     }
   }else {          

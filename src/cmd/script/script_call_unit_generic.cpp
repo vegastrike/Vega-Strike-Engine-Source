@@ -1274,7 +1274,9 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
      my_unit->Target(NULL);
    }
 
-   printf ("%s",(fg->fg->faction+string ("launched ")+fg->fg->name+string(":")+fg->fg->type+string("0-")+XMLSupport::tostring(fg->fg->nr_ships)).c_str());
+   printf ("Python launched %s %s FG %s with %d ships\n",
+		fg->fg->faction.c_str(), fg->fg->type.c_str(),
+		fg->fg->name.c_str(), fg->fg->nr_ships);
    my_unit= units[0];
    if (!_Universe->isPlayerStarship(fg->fg->leader.GetUnit())) {
 	   fg->fg->leader.SetUnit(my_unit);

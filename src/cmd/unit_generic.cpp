@@ -1311,9 +1311,11 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 		static bool usingtemplates = XMLSupport::parse_bool(vs_config->getVariable("data","usingtemplates","true"));
 		if(!istemplate||(istemplate&&usingtemplates)){
 			cout << "Unit file " << filename << " not found" << endl;
+/*
 			VSFileSystem::vs_fprintf (stderr,"Assertion failed in Unit::Init -- Unit %s not found\n",filename);
 
 			VSFileSystem::vs_fprintf (stderr,"Warning: Cannot locate %s\n",filename);
+*/
 		}
 		meshdata.clear();
 		meshdata.push_back(NULL);
@@ -5102,6 +5104,8 @@ Unit * makeBlankUpgrade (string templnam, int faction)
 }
 
 
+static const string LOAD_FAILED = "LOAD_FAILED";
+
 const Unit * makeFinalBlankUpgrade (string name, int faction)
 {
 	char * unitdir = GetUnitDir(name.c_str());
@@ -5112,6 +5116,9 @@ const Unit * makeFinalBlankUpgrade (string name, int faction)
 	const Unit * lim= UnitConstCache::getCachedConst (StringIntKey(limiternam,faction));
 	if (!lim)
 		lim = UnitConstCache::setCachedConst(StringIntKey(limiternam,faction),makeBlankUpgrade(limiternam,faction));
+	if (lim->name == LOAD_FAILED) {
+		lim=NULL;
+	}
 	return lim;
 }
 
@@ -5124,6 +5131,9 @@ const Unit * makeTemplateUpgrade (string name, int faction)
 	const Unit * lim= UnitConstCache::getCachedConst (StringIntKey(limiternam,faction));
 	if (!lim)
 		lim = UnitConstCache::setCachedConst(StringIntKey(limiternam,faction),UnitFactory::createUnit(limiternam.c_str(),true,faction));
+	if (lim->name == LOAD_FAILED) {
+		lim=NULL;
+	}
 	return lim;
 }
 

@@ -451,8 +451,8 @@ namespace UnitUtil {
 	float upgrade(Unit *my_unit, string file,int mountoffset,int subunitoffset, bool force,bool loop_through_mounts) {
 		if (!my_unit)return 0;
 		double percentage=0;
-		printf ("upgrading %s %s %d %d %s\n",my_unit->name.get().c_str(),file.c_str(),mountoffset, subunitoffset,loop_through_mounts?"true":"false");
-		fflush (stdout);
+		// printf ("upgrading %s %s %d %d %s\n",my_unit->name.get().c_str(),file.c_str(),mountoffset, subunitoffset,loop_through_mounts?"true":"false");
+		// fflush (stdout);
 		percentage=my_unit->Upgrade (file,mountoffset,subunitoffset,force,loop_through_mounts);
 		my_unit->SetTurretAI();
 		return percentage;

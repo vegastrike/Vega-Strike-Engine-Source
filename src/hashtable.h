@@ -97,7 +97,7 @@ public:
 	{
 			 typename supertype::iterator iter=this->find(key);
 		  if(iter == this->end()){
-		  	fprintf(stderr,"failed to remove item in hash_map\n");
+//		  	fprintf(stderr,"failed to remove item in hash_map\n");
 		  	return;
 			}
           this->erase(iter);

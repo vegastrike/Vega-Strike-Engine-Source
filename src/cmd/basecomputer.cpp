@@ -128,16 +128,20 @@ static GFXColor NO_MONEY_COLOR(){
   return  NMC;        // Start out with bogus color.
 }
 
+// Make the variable static, so it won't print so many annoying messages!
 static GFXColor PROHIBITED_COLOR(){
-  return getConfigColor("prohibited_upgrade",GFXColor(1,.1,0,1));
+  static GFXColor PU=getConfigColor("prohibited_upgrade",GFXColor(1,.1,0,1));
+  return PU;
 }
 
 static GFXColor DOWNGRADE_OR_NONCOMPAT_COLOR(){
-  return getConfigColor("downgrade_or_noncompatible",GFXColor(.75,.5,.5,1));
+  static GFXColor DNC = getConfigColor("downgrade_or_noncompatible",GFXColor(.75,.5,.5,1));
+  return DNC;
 }
 
 static GFXColor NO_ROOM_COLOR(){
-  return getConfigColor("no_room_for_upgrade",GFXColor(1,0,1,1));
+  static GFXColor NRFU = getConfigColor("no_room_for_upgrade",GFXColor(1,0,1,1));
+  return NRFU;
 }
 
 
@@ -3262,18 +3266,8 @@ void BaseComputer::BuyUpgradeOperation::start(void) {
         return;
     }
 
-    const string unitDir = GetUnitDir(playerUnit->name.get().c_str());
-    const string templateName = unitDir + ".template";
-    const int faction = playerUnit->faction;
-
-    // Get the "limiter" for the upgrade.  Stats can't increase more than this.
-    m_theTemplate = UnitConstCache::getCachedConst(StringIntKey(templateName,faction));
-    if (!m_theTemplate) {
-        m_theTemplate = UnitConstCache::setCachedConst(StringIntKey(templateName,faction),UnitFactory::createUnit(templateName.c_str(),true,faction));
-    }
-    if (m_theTemplate->name == LOAD_FAILED) {
-      m_theTemplate=NULL;
-    }
+    m_theTemplate = makeTemplateUpgrade (playerUnit->name.get(), playerUnit->faction);
+    
     m_addMultMode = GetModeFromName(m_selectedItem.GetContent().c_str());   // Whether the price is linear or geometric.
     unsigned int offset;                // Temp.  Not used.
     Cargo* part = baseUnit->GetCargo(m_selectedItem.content, offset);    // Whether the base has any of these.

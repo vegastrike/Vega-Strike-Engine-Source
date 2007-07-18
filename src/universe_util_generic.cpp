@@ -41,6 +41,95 @@ using namespace VSFileSystem;
 
 namespace UniverseUtil
 {
+
+	Unit* PythonUnitIter::current() 
+	{
+		Unit *ret = NULL;
+		while(ret = UnitCollection::UnitIterator::operator*()){
+			if(ret->hull > 0)
+				return (ret);
+			advance();
+		}
+		return(ret);
+
+	}
+
+	void PythonUnitIter::advanceSignificant() 
+	{
+		advance();
+		while(it != col->u.end() && !UnitUtil::isSignificant(*it))
+			advance();
+	}
+
+	void PythonUnitIter::advanceInsignificant() 
+	{
+		advance();
+		while(it != col->u.end() && UnitUtil::isSignificant(*it))
+			advance();
+	}
+
+	void PythonUnitIter::advancePlanet() 
+	{
+		advance();
+		while(it != col->u.end() && !(*it)->isPlanet())
+			advance();
+	}
+
+	void PythonUnitIter::advanceJumppoint() 
+	{
+		advance();
+		while(it != col->u.end() && !(*it)->isJumppoint())
+			advance();
+	}
+
+	void PythonUnitIter::advanceN(int n) 
+	{
+		while(it != col->u.end() && n > 0) {
+			advance();
+			--n;
+		}
+	}
+
+	void PythonUnitIter::advanceNSignificant(int n) 
+	{
+		if(it != col->u.end() && !UnitUtil::isSignificant(*it))
+			advanceSignificant();
+		while(it != col->u.end() &&( n > 0)){
+			advanceSignificant();
+			--n;
+		}
+	}
+
+	void PythonUnitIter::advanceNInsignificant(int n) 
+	{
+		if(it != col->u.end() && UnitUtil::isSignificant(*it))
+			advanceInsignificant();
+		while(it != col->u.end() && (n > 0)) {
+			advanceInsignificant();
+			--n;
+		}
+	}
+
+	void PythonUnitIter::advanceNPlanet(int n) 
+	{
+		if(it != col->u.end() && !(*it)->isPlanet())
+			advancePlanet();
+		while(it != col->u.end() && n > 0) {
+			advancePlanet();
+			--n;
+		}
+	}
+
+	void PythonUnitIter::advanceNJumppoint(int n) 
+	{
+		if(it!= col->u.end() && !(*it)->isJumppoint())
+			advanceJumppoint();
+		while(it != col->u.end() && n > 0 ) {
+			advanceJumppoint();
+			--n;
+		}
+	}
+	
 	Unit * GetUnitFromSerial( ObjSerial serial) {
 		Unit* un;
 		if (serial==0)

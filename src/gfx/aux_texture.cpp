@@ -298,7 +298,7 @@ void Texture::Load(const char * FileName, int stage, enum FILTER mipmap, enum TE
 	if (err>Ok)
 	{
 		FileNotFound(texfn);
-      	VSFileSystem::vs_fprintf (stderr, "\n%s, not found\n",FileName);
+//		VSFileSystem::vs_fprintf (stderr, "\n%s, not found\n",FileName);
 		if (err2<=Ok) {
 			f2.Close();
 		}

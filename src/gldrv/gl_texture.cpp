@@ -404,7 +404,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
   textures[*handle].iheight = height;
   textures[*handle].palette=NULL;
   if (palette&&textureformat == PALETTE8){
-    VSFileSystem::vs_fprintf (stderr," palette ");  
+    if(verbose_debug){
+      VSFileSystem::vs_fprintf (stderr," palette ");
+    }
     textures[*handle].palette = (GLubyte *)malloc (sizeof (GLubyte)*1024);
       ConvertPalette(textures[*handle].palette, (unsigned char *)palette);
     }
