@@ -366,9 +366,9 @@ void UnitCollection::destr()
 	for(list<Unit*>::iterator it = u.begin();it!=u.end();++it) {
 		(*it)->UnRef();
 	}
-	for(vector<UnitIterator*>::iterator t = activeIters.begin();t != activeIters.end(); ++t)
-		(*t)->it = u.end();		
 	u.clear();
+	for(vector<UnitIterator*>::iterator t = activeIters.begin();t != activeIters.end(); ++t)
+		(*t)->it = u.begin();		
 	// First we de-reference all our Units in the list.  Then we update all our iterators to 
 	// a known position that they can understand (if somehow the list is destroyed before it)
 	// Then we clear the list of all units.  
