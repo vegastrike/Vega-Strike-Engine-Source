@@ -425,7 +425,7 @@ void Music::_LoadLastSongAsync() {
               _StopNow();
               AUDStartPlaying(playingSource.front());
               // FIXME FIXME FIXME Presumed race condition or somesuch -- AUDSoundGain here breaks windows music -- temporary hack, actual fix later
-              AUDSoundGain(playingSource.front(),100);
+              AUDSoundGain(playingSource.front(),vol);
             }
             return;
           }
