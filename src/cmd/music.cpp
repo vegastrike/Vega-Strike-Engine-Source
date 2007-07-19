@@ -30,7 +30,7 @@
 
 // To allow for loading in another thread, we must handle some AL vars ourselves...
 #include "aldrv/al_globals.h"
-
+#include <map>
 #include <set>
 #include <algorithm>
 
@@ -50,6 +50,7 @@ Music::Music (Unit *parent):random(false), p(parent),song(-1),thread_initialized
   music_load_info = NULL;
   killthread=0;
   threadalive=0;
+  freeWav=true;
 #ifdef HAVE_AL
   music_load_info = new AUDSoundProperties;
 #endif
@@ -337,7 +338,7 @@ int Music::SelectTracks(int layer) {
 }
 
 namespace Muzak {
-
+  std::map<std::string, AUDSoundProperties> cachedSongs;
 #ifndef _WIN32
 void * 
 #else
@@ -366,16 +367,34 @@ PVOID
                 char *songname = (char*)malloc(len+1);
                 songname[len]='\0';
                 memcpy(songname,me->music_load_info->hashname.data(),len);
+                std::map<std::string, AUDSoundProperties>::iterator wherecache=cachedSongs.find(songname);
+                bool foundcache=wherecache!=cachedSongs.end();
+                static std::string cachable_songs=vs_config->getVariable("audio","cache_songs","../music/land.ogg");
+                bool docacheme=cachable_songs.find(songname)!=std::string::npos;
+                if (foundcache==false&&docacheme) {
+                  me->music_load_info->wave=NULL;
+                  cachedSongs[songname]=*me->music_load_info;
+                  wherecache=cachedSongs.find(songname);
+                }
 #ifdef _WIN32
 		ReleaseMutex(me->musicinfo_mutex);
 #else
 		pthread_mutex_unlock(&me->musicinfo_mutex);
 #endif
 		{
-			if (!AUDLoadSoundFile(songname, me->music_load_info)) {
-				fprintf(stderr, "Failed to load song %s\n", songname);
-			}
+                  me->freeWav=true;
+                  if (foundcache) {
+                    *me->music_load_info=wherecache->second;
+                    me->freeWav=false;
+                  }else if (!AUDLoadSoundFile(songname, me->music_load_info)) {
+                    fprintf(stderr, "Failed to load song %s\n", songname);
+                  }
 		}
+
+                if (me->freeWav&&docacheme) {
+                  me->freeWav=false;
+                  wherecache->second=*me->music_load_info;
+                }
                 free(songname);
 		me->music_loaded = true;
 		while (me->music_loaded) {
@@ -392,6 +411,25 @@ void Music::_LoadLastSongAsync() {
 #ifdef HAVE_AL
 	if (!music_load_info) return;
 	std::string song = music_load_list.back();
+
+        std::map<std::string, AUDSoundProperties>::iterator where=Muzak::cachedSongs.find(song);
+        if (where!=Muzak::cachedSongs.end()) {
+          if (where->second.wave!=NULL) {
+            int source = AUDBufferSound(&where->second, true);
+            AUDAdjustSound(source,QVector(0,0,0),Vector(0,0,0));
+            music_load_info->wave=NULL;
+            if (source!=-1) {
+              playingSource.push_back(source);
+            }
+            if (playingSource.size()==1) { // Start playing if first in list.
+              _StopNow();
+              AUDStartPlaying(playingSource.front());
+              // FIXME FIXME FIXME Presumed race condition or somesuch -- AUDSoundGain here breaks windows music -- temporary hack, actual fix later
+              AUDSoundGain(playingSource.front(),100);
+            }
+            return;
+          }
+        }
 	music_load_info->hashname = song;
 #endif
 #ifdef _WIN32
@@ -439,7 +477,8 @@ void Music::Listen() {
 				if (music_load_info->success && music_load_info->wave) {
 					int source = AUDBufferSound(music_load_info, true);
                                         AUDAdjustSound(source,QVector(0,0,0),Vector(0,0,0));
-					free(music_load_info->wave);
+                                        if (freeWav)
+                                          free(music_load_info->wave);
 					music_load_info->wave=NULL;
 					if (source!=-1) {
 						playingSource.push_back(source);
@@ -447,9 +486,10 @@ void Music::Listen() {
 				}
 #endif
 				if (playingSource.size()==1) { // Start playing if first in list.
-					AUDStartPlaying(playingSource.front());
-					// FIXME FIXME FIXME Presumed race condition or somesuch -- AUDSoundGain here breaks windows music -- temporary hack, actual fix later
-					AUDSoundGain(playingSource.front(),vol);
+                                  _StopNow();
+                                  AUDStartPlaying(playingSource.front());
+                                  // FIXME FIXME FIXME Presumed race condition or somesuch -- AUDSoundGain here breaks windows music -- temporary hack, actual fix later
+                                  AUDSoundGain(playingSource.front(),vol);
 				}
 				music_load_list.pop_back();
 				if (!music_load_list.empty()) {
@@ -463,8 +503,9 @@ void Music::Listen() {
 				AUDDeleteSound(playingSource.front());
 				playingSource.pop_front();
 				if (!playingSource.empty()) {
-					AUDStartPlaying(playingSource.front());
-                                       AUDSoundGain(playingSource.front(),vol);
+                                  _StopNow();
+                                  AUDStartPlaying(playingSource.front());
+                                  AUDSoundGain(playingSource.front(),vol);
 				}
 			}
 		}
@@ -484,7 +525,7 @@ void Music::GotoSong (std::string mus,int layer)
     if (cross && (muzak_count>=2)) {
         if (layer<0) {
             if (mus==muzak[muzak_cross_index].cur_song_file) return;
-            muzak[muzak_cross_index]._Stop();
+            muzak[muzak_cross_index]._StopLater();
             muzak_cross_index = (muzak_cross_index ^ 1);
             muzak[muzak_cross_index]._GotoSong(mus);
         } else if ((layer>=0)&&(layer<muzak_count)) {
@@ -513,7 +554,7 @@ void Music::_GotoSong (std::string mus) {
         if (mus==cur_song_file) return;
         cur_song_file = mus;
 
-		_Stop(); // Kill all our currently playing songs.
+		_StopLater(); // Kill all our currently playing songs.
 		
 		music_load_list = split(mus,"|"); // reverse order.
 
@@ -722,6 +763,41 @@ void Music::Stop(int layer)
             muzak[layer]._Stop();
         }
     }
+}
+void Music::_StopNow() {
+    if (g_game.music_enabled) {
+		/*
+        cur_song_file="";
+	    char send[1]={'s'};
+        if (soundServerPipes())
+            fNET_Write(socketw,1,send); else
+            INET_Write(socketw,1,send);
+		*/
+		for (std::vector<int>::const_iterator iter = sounds_to_stop.begin(); iter!=sounds_to_stop.end(); iter++) {
+			int sound = *iter;
+			AUDStopPlaying(sound);
+			AUDDeleteSound(sound);
+		}
+                sounds_to_stop.clear();
+	}
+
+}
+void Music::_StopLater() 
+{
+    if (g_game.music_enabled) {
+		/*
+        cur_song_file="";
+	    char send[1]={'s'};
+        if (soundServerPipes())
+            fNET_Write(socketw,1,send); else
+            INET_Write(socketw,1,send);
+		*/
+		for (std::list<int>::const_iterator iter = playingSource.begin(); iter!=playingSource.end(); iter++) {
+			int sound = *iter;
+                        sounds_to_stop.push_back(sound);
+		}
+		playingSource.clear();
+	}
 }
 
 void Music::_Stop() 

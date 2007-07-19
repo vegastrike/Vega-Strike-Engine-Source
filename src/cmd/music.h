@@ -81,8 +81,10 @@ class Music {
 
   static void SetVolume(float vol, int layer=-1,bool hardware=false,float latency_override=-1);
   static void Mute(bool mute=true, int layer=-1);
-
+  std::vector<int>sounds_to_stop;
 private:
+  void _StopLater();
+  void _StopNow();
   void _GotoSong (std::string mus);
   int  _Addlist (std::string listfile);
   void _SetVolume(float vol=0,bool hardware=false,float latency_override=-1);
@@ -113,6 +115,7 @@ private:
   volatile bool music_loaded;
   volatile bool killthread;
   volatile bool threadalive;
+  bool freeWav;
   struct AUDSoundProperties *music_load_info;
   vector<std::string> music_load_list; // reverse order.
   
