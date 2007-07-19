@@ -456,7 +456,7 @@ void bootstrap_first_loop() {
     vector<string> sa = parse_space_string(sas);
     int snum=time(NULL)%s.size();
     SplashScreen = new Animation (s[snum].c_str(),0);
-    if (sa.size()) muzak->GotoSong(sa[snum%sa.size()]);
+    if (sa.size()&&sa[0].length()) muzak->GotoSong(sa[snum%sa.size()]);
     bs_tp=new TextPlane();
   }
   bootstrap_draw ("Vegastrike Loading...",SplashScreen);

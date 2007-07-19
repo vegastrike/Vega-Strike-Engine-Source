@@ -331,9 +331,12 @@ int Music::SelectTracks(int layer) {
       return whichsong;
     }
   }
-  if (_Universe&&_Universe->numPlayers())
+  if (_Universe&&_Universe->numPlayers()){
     CompileRunPython (dj_script);
-  
+  }else {
+    static std::string loading_tune=vs_config->getVariable("audio","loading_sound","../music/loading.ogg");
+    GotoSong(loading_tune,layer);
+  }
   return 0;
 }
 
@@ -512,9 +515,8 @@ void Music::Listen() {
 		if (playingSource.empty() && muzak[muzak_cross_index].playingSource.empty()
 			&& music_load_list.empty() && muzak[muzak_cross_index].music_load_list.empty()) {
 			cur_song_file = "";
-			if (_Universe) {
-				_Skip();
-			}
+                        _Skip();
+			
 		}
 	}
 }
@@ -551,7 +553,7 @@ std::vector<std::string> split(std::string tmpstr,std::string splitter) {
 
 void Music::_GotoSong (std::string mus) {
 	if (g_game.music_enabled) {
-        if (mus==cur_song_file) return;
+        if (mus==cur_song_file||mus.length()==0) return;
         cur_song_file = mus;
 
 		_StopLater(); // Kill all our currently playing songs.
