@@ -136,6 +136,10 @@ class	NetClient
 		NetClient();
                 void Reinitialize();//sets all values back to defaults
 		~NetClient();
+	
+		vector<string>* connectLoad(string user, string pass); // Does entire loading process.
+		void startGame(); // Second half of loading process.
+	
 		/**** netclient_login.cpp stuff ****/
 		void GetConfigServerAddress( string & host, unsigned short &port );
 	
@@ -145,7 +149,7 @@ class	NetClient
 		void			loginAccept( Packet & p1);
 		SOCKETALT		init( const char* addr, unsigned short port);
 		VsnetHTTPSocket*		init_acct( const std::string &addr);
-		void	synchronizeTime(SOCKETALT*,Cockpit * parent); // Sends time packets back and forth to find the actual double time on the server.
+		void	synchronizeTime(SOCKETALT*); // Sends time packets back and forth to find the actual double time on the server.
 
 // start() should not used...  Use init() instead.
 //		void	start( char * addr, unsigned short port);

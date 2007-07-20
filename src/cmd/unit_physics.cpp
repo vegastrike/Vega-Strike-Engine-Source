@@ -158,7 +158,7 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
     }
 	double blah2=queryTime();
 	if (blah2-blah1>.001||blah1-blah>.001) {
-		printf ("fx: %f exp: %f ",blah1-blah,blah2-blah1);
+		printf ("Too much time in physics: fx: %f exp: %f \n",blah1-blah,blah2-blah1);
 	}
   }
   //UnitType::UpdatePhysics2 (trans,old_physical_state,accel,difficulty,transmat, cum_vel,  lastframe,uc);

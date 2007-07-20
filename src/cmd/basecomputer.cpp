@@ -50,6 +50,7 @@ using VSFileSystem::SaveFile;
 #include "unit_xml.h"
 #include "gfx/sprite.h"
 #include "gfx/aux_texture.h"
+#include "gamemenu.h" // network menu.
 #include "audiolib.h"
 
 //for directory thing
@@ -252,7 +253,8 @@ static const ModeInfo modeInfo[] = {
     ModeInfo ( "Missions BBS  ", "Missions", "MissionsMode", "MissionsGroup" ),
     ModeInfo ( "GNN News  ", "News", "NewsMode", "NewsGroup" ),
     ModeInfo ( "Info/Stats  ", "Info", "InfoMode", "InfoGroup" ),
-	ModeInfo ( "Load / Save ", "LoadSave", "LoadSaveMode", "LoadSaveGroup" )
+	ModeInfo ( "Load / Save ", "LoadSave", "LoadSaveMode", "LoadSaveGroup" ),
+	ModeInfo ( "Network ", "Network", "NetworkMode", "NetworkGroup" )
 };
 
  bool BaseComputer::actionDone(const EventCommandId& command, Control* control) {
@@ -277,6 +279,7 @@ const BaseComputer::WctlTableEntry WctlBase<BaseComputer>::WctlCommandTable[] = 
     BaseComputer::WctlTableEntry ( modeInfo[BaseComputer::MISSIONS].command, "", &BaseComputer::changeToMissionsMode ),
     BaseComputer::WctlTableEntry ( modeInfo[BaseComputer::INFO].command, "", &BaseComputer::changeToInfoMode ),
 	BaseComputer::WctlTableEntry ( modeInfo[BaseComputer::LOADSAVE].command, "", &BaseComputer::changeToLoadSaveMode ),
+	BaseComputer::WctlTableEntry ( modeInfo[BaseComputer::NETWORK].command, "", &BaseComputer::changeToNetworkMode ),
     BaseComputer::WctlTableEntry ( "BuyCargo", "", &BaseComputer::buyCargo ),
     BaseComputer::WctlTableEntry ( "Buy10Cargo", "", &BaseComputer::buy10Cargo ),
     BaseComputer::WctlTableEntry ( "BuyAllCargo", "", &BaseComputer::buyAllCargo ),
@@ -296,7 +299,11 @@ const BaseComputer::WctlTableEntry WctlBase<BaseComputer>::WctlCommandTable[] = 
     BaseComputer::WctlTableEntry ( "Quit", "", &BaseComputer::actionQuitGame ),
     BaseComputer::WctlTableEntry ( "Load", "", &BaseComputer::actionLoadGame ),
     BaseComputer::WctlTableEntry ( "New", "", &BaseComputer::actionNewGame ),
-    BaseComputer::WctlTableEntry ( "Save", "", &BaseComputer::actionSaveGame ),		
+    BaseComputer::WctlTableEntry ( "Save", "", &BaseComputer::actionSaveGame ),
+    BaseComputer::WctlTableEntry ( "ShowNetworkMenu", "", &BaseComputer::changeToNetworkMode ),
+    BaseComputer::WctlTableEntry ( "ShowJoinAccount", "", &BaseComputer::actionShowAccountMenu ),
+    BaseComputer::WctlTableEntry ( "ShowJoinServer", "", &BaseComputer::actionShowServerMenu ),
+    BaseComputer::WctlTableEntry ( "JoinGame", "", &BaseComputer::actionJoinGame ),
 	BaseComputer::WctlTableEntry ( "DoneComputer", "", &BaseComputer::actionDone ),
 
     BaseComputer::WctlTableEntry ( "", "", NULL )
@@ -419,6 +426,8 @@ GFXColor BaseComputer::getColorForGroup(std::string id) {
 			return GFXColor(faction_color_darkness,faction_color_darkness,0);
 		} else if (id=="LoadSaveGroup") {
 			return GFXColor(0,faction_color_darkness,faction_color_darkness);
+		} else if (id=="NetworkGroup") {
+			return GFXColor(0,faction_color_darkness,faction_color_darkness);
 		} else {
 			return GFXColor(0,0,0);
 		}
@@ -428,42 +437,51 @@ GFXColor BaseComputer::getColorForGroup(std::string id) {
 // Hack that constructs controls in code.
 void BaseComputer::constructControls(void) {
 
-    // Base info title.
-    StaticDisplay* baseTitle = new StaticDisplay;
-    baseTitle->setRect( Rect(-.96, .76, 1.9, .08) );
-    baseTitle->setText("ERROR");
-    static GFXColor baseNameColor=getConfigColor("base_name_color",GFXColor(.1,.8,.1));
-    baseTitle->setTextColor(baseNameColor);
-    baseTitle->setColor(GUI_CLEAR);
-    baseTitle->setFont( Font(.07, 1.75) );
-    baseTitle->setId("BaseInfoTitle");
-    // Put it on the window.
-    window()->addControl(baseTitle);
-
-    // Player info title.
-    StaticDisplay* playerTitle = new StaticDisplay;
-    static GFXColor basePlayerColor=getConfigColor("base_player_color",GFXColor(.7,.7,.9));
-    playerTitle->setRect( Rect(-.96, .69, 1.9, .07) );
-    playerTitle->setTextColor(basePlayerColor);
-    playerTitle->setColor(GUI_CLEAR);
-    playerTitle->setFont( Font(.06, BOLD_STROKE) );
-    playerTitle->setId("PlayerInfoTitle");
-    // Put it on the window.
-    window()->addControl(playerTitle);
-    static GFXColor saveLoadColor=getConfigColor("base_save_load_color",GFXColor(.75,0,0));
-    // Options button.
-    NewButton* options = new NewButton;
-    options->setRect( Rect(.64, .85, .32, .1) );
-    options->setLabel("Save/Load");
-    options->setCommand("ShowOptionsMenu");
-    options->setColor( UnsaturatedColor(saveLoadColor.r,saveLoadColor.g,saveLoadColor.b,.25) );
-    options->setTextColor( GUI_OPAQUE_WHITE() );
-    options->setDownColor( UnsaturatedColor(saveLoadColor.r,saveLoadColor.g,saveLoadColor.b,.6) );
-    options->setDownTextColor( GUI_OPAQUE_BLACK() );
-    options->setHighlightColor( GFXColor(0,0,1,.4) );
-    options->setFont(Font(.08));
-    // Put the button on the window.
-    window()->addControl(options);
+	if (m_displayModes.size()!=1 || m_displayModes[0]!=NETWORK) {
+		// Base info title.
+		StaticDisplay* baseTitle = new StaticDisplay;
+		baseTitle->setRect( Rect(-.96, .76, 1.9, .08) );
+		baseTitle->setText("ERROR");
+		static GFXColor baseNameColor=getConfigColor("base_name_color",GFXColor(.1,.8,.1));
+		baseTitle->setTextColor(baseNameColor);
+		baseTitle->setColor(GUI_CLEAR);
+		baseTitle->setFont( Font(.07, 1.75) );
+		baseTitle->setId("BaseInfoTitle");
+		// Put it on the window.
+		window()->addControl(baseTitle);
+		
+		// Player info title.
+		StaticDisplay* playerTitle = new StaticDisplay;
+		static GFXColor basePlayerColor=getConfigColor("base_player_color",GFXColor(.7,.7,.9));
+		playerTitle->setRect( Rect(-.96, .69, 1.9, .07) );
+		playerTitle->setTextColor(basePlayerColor);
+		playerTitle->setColor(GUI_CLEAR);
+		playerTitle->setFont( Font(.06, BOLD_STROKE) );
+		playerTitle->setId("PlayerInfoTitle");
+		// Put it on the window.
+		window()->addControl(playerTitle);
+		
+		static GFXColor saveLoadColor=getConfigColor("base_save_load_color",GFXColor(.75,0,0));
+		// Options button.
+		NewButton* options = new NewButton;
+		options->setRect( Rect(.64, .85, .32, .1) );
+		if (Network) {
+			options->setLabel("Net Play");
+			options->setCommand("ShowNetworkMenu");
+		} else {
+			options->setLabel("Save/Load");
+			options->setCommand("ShowOptionsMenu");
+		}
+		options->setColor( UnsaturatedColor(saveLoadColor.r,saveLoadColor.g,saveLoadColor.b,.25) );
+		options->setTextColor( GUI_OPAQUE_WHITE() );
+		options->setDownColor( UnsaturatedColor(saveLoadColor.r,saveLoadColor.g,saveLoadColor.b,.6) );
+		options->setDownTextColor( GUI_OPAQUE_BLACK() );
+		options->setHighlightColor( GFXColor(0,0,1,.4) );
+		options->setFont(Font(.08));
+		// Put the button on the window.
+		window()->addControl(options);
+	}
+	
     static GFXColor doneColor=getConfigColor("base_done_color",GFXColor(.75,0,0));
     // Done button.
     NewButton* done = new NewButton;
@@ -919,7 +937,7 @@ void BaseComputer::constructControls(void) {
 
         // Scroller for description.
         Scroller* inputTextScroller = new Scroller;
-        inputTextScroller->setRect( Rect(.91, -0.95, .05, .2) );
+        inputTextScroller->setRect( Rect(.61, -0.95, .05, .2) );
         inputTextScroller->setColor( UnsaturatedColor(color.r,color.g,color.b,.1) );
         inputTextScroller->setThumbColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE() );
         inputTextScroller->setButtonColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4) );
@@ -928,7 +946,7 @@ void BaseComputer::constructControls(void) {
 
         // Description box.
         StaticDisplay* inputText = new TextInputDisplay(&base_keyboard_queue,"\x1b\n \t\r*?\\/|:<>\"^");
-        inputText->setRect( Rect(-.6, -.95, 1.51, .2) );
+        inputText->setRect( Rect(-.6, -.95, 1.21, .2) );
         inputText->setColor( GFXColor(color.r,color.g,color.b,.1) );
 		inputText->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
         inputText->setFont( Font(.07) );
@@ -943,6 +961,7 @@ void BaseComputer::constructControls(void) {
 
 
 // Accept button.
+		if (!Network) { // no save in network mode!
         NewButton* buy10 = new NewButton;
         buy10->setRect( Rect(-.11, 0, .22, .12) );
         buy10->setColor( GFXColor(0,1,1,.1) );
@@ -958,6 +977,7 @@ void BaseComputer::constructControls(void) {
 		buy10->setLabel("Save");
 		buy10->setCommand("Save");
         loadSaveGroup->addChild(buy10);
+		}
 		
         NewButton* accept = new NewButton;
         accept->setRect( Rect(-.11,-.2, .22, .12) );
@@ -974,6 +994,7 @@ void BaseComputer::constructControls(void) {
 		accept->setLabel("Load");
 		accept->setCommand("Load");
 		loadSaveGroup->addChild(accept);
+		
         NewButton* quit = new NewButton;
         quit->setRect( Rect(-.95, -.9, .3, .1) );
         quit->setColor( GFXColor(.8,1,.1,.1) );
@@ -989,6 +1010,23 @@ void BaseComputer::constructControls(void) {
 		quit->setLabel("Quit Game");
 		quit->setCommand("Quit");
         loadSaveGroup->addChild(quit);
+		
+        NewButton * net = new NewButton;
+        net->setRect( Rect(.7, -.9, .25, .1) );
+        net->setColor( GFXColor(1,.5,.1,.1) );
+        net->setTextColor(GUI_OPAQUE_WHITE());
+		net->setDownColor( GFXColor(1,.5,.1,.4) );
+		net->setDownTextColor( GFXColor(.2,.2,.2) );
+		net->setVariableBorderCycleTime(1.0);
+		net->setBorderColor( GFXColor(.2,.5,.2) );
+		net->setEndBorderColor( GFXColor(.4,.7,.4) );
+		net->setShadowWidth(2.0);
+        net->setFont(Font(.07, 1));
+        net->setId("CommitAll");
+		net->setLabel("Net Play");
+		net->setCommand("ShowNetworkMenu");
+        loadSaveGroup->addChild(net);
+		
         NewButton * newgame = new NewButton;
         newgame->setRect(Rect(-.11,-.4, .22, .12) );
         newgame->setColor( GFXColor(0,1,1,.1) );
@@ -1006,6 +1044,80 @@ void BaseComputer::constructControls(void) {
         loadSaveGroup->addChild(newgame);        		
 		
 	}
+	{
+		GroupControl* networkGroup = new GroupControl;
+		networkGroup->setId("NetworkGroup");
+		window()->addControl(networkGroup);
+		GFXColor color=getColorForGroup("NetworkGroup");
+		
+		createNetworkControls(networkGroup, &base_keyboard_queue);
+		// Account Server button.
+        NewButton* joinAcct = new NewButton;
+        joinAcct->setRect( Rect(-.50, .7, .37, .09) );
+        joinAcct->setLabel("Online Account Server");
+        joinAcct->setCommand("ShowJoinAccount");
+        
+		joinAcct->setColor( GFXColor(color.r,color.g,color.b,.25) );
+		joinAcct->setTextColor( GUI_OPAQUE_WHITE() );
+		joinAcct->setDownColor( GFXColor(color.r,color.g,color.b,.5) );
+		joinAcct->setDownTextColor( GUI_OPAQUE_BLACK() );
+		joinAcct->setHighlightColor( GFXColor(color.r,color.g,color.b,.4) );
+        joinAcct->setFont(Font(.07));
+        networkGroup->addChild(joinAcct);
+
+        // Ship Stats button.
+        NewButton* joinServer = new NewButton;
+        joinServer->setRect( Rect(.05, .7, .37, .09) );
+        joinServer->setLabel("Independent Server");
+        joinServer->setCommand("ShowJoinServer");
+		joinServer->setColor( GFXColor(color.r,color.g,color.b,.25) );
+		joinServer->setTextColor( GUI_OPAQUE_WHITE() );
+		joinServer->setDownColor( GFXColor(color.r,color.g,color.b,.5) );
+		joinServer->setDownTextColor( GUI_OPAQUE_BLACK() );
+		joinServer->setHighlightColor( GFXColor(color.r,color.g,color.b,.4) );
+        joinServer->setFont(Font(.07));
+        networkGroup->addChild(joinServer);
+
+		
+		if (m_displayModes.size()!=1 || m_displayModes[0]!=NETWORK) {
+			NewButton * loadsave = new NewButton;
+			loadsave->setRect( Rect(.7, -.9, .25, .1) );
+			loadsave->setColor( GFXColor(1,.5,.1,.1) );
+			loadsave->setTextColor(GUI_OPAQUE_WHITE());
+			loadsave->setDownColor( GFXColor(1,.5,.1,.4) );
+			loadsave->setDownTextColor( GFXColor(.2,.2,.2) );
+			loadsave->setVariableBorderCycleTime(1.0);
+			loadsave->setBorderColor( GFXColor(.2,.5,.2) );
+			loadsave->setEndBorderColor( GFXColor(.4,.7,.4) );
+			loadsave->setShadowWidth(2.0);
+			loadsave->setFont(Font(.07, 1));
+			loadsave->setId("CommitAll");
+			if (Network!=NULL) {
+				loadsave->setLabel("Load/Quit");
+			} else {
+				loadsave->setLabel("Save/Load");
+			}
+			loadsave->setCommand("ShowOptionsMenu");
+			networkGroup->addChild(loadsave);
+		} else {
+			NewButton* quit = new NewButton;
+			quit->setRect( Rect(-.95, -.9, .3, .1) );
+			quit->setColor( GFXColor(.8,1,.1,.1) );
+			quit->setTextColor(GUI_OPAQUE_WHITE());
+			quit->setDownColor( GFXColor(.8,1,.1,.4) );
+			quit->setDownTextColor( GFXColor(.2,.2,.2) );
+			quit->setVariableBorderCycleTime(1.0);
+			quit->setBorderColor( GFXColor(.5,.2,.2) );
+			quit->setEndBorderColor( GFXColor(.7,.4,.4) );
+			quit->setShadowWidth(2.0);
+			quit->setFont(Font(.07, BOLD_STROKE));
+			quit->setId("CommitAll");
+			quit->setLabel("Quit Game");
+			quit->setCommand("Quit");
+			networkGroup->addChild(quit);
+		}
+	}
+	
     {
         // MISSIONS group control.
         GroupControl* missionsGroup = new GroupControl;
@@ -1306,6 +1418,9 @@ void BaseComputer::switchToControls(DisplayMode mode) {
         if (mode == LOADSAVE)
      		window()->setTexture("basecomputer_loadsave.png");
 
+        if (mode == NETWORK)
+     		window()->setTexture("basecomputer_network.png");
+
 
         if(m_currentDisplay != NULL_DISPLAY) {
             // Get the old controls out of the window.
@@ -1345,6 +1460,15 @@ bool BaseComputer::changeToLoadSaveMode(const EventCommandId& command, Control* 
     if(m_currentDisplay != LOADSAVE) {
         switchToControls(LOADSAVE);
         loadLoadSaveControls();
+    }
+    return true;
+}
+
+
+bool BaseComputer::changeToNetworkMode(const EventCommandId& command, Control* control) {
+    if(m_currentDisplay != NETWORK) {
+        switchToControls(NETWORK);
+        loadNetworkControls();
     }
     return true;
 }
@@ -5543,6 +5667,47 @@ bool BaseComputer::actionLoadGame(const EventCommandId& command, Control* contro
 		}
 		showAlert ("You Must Type In a Name To Load....");
 		return true;
+}
+
+void BaseComputer::loadNetworkControls() {
+	window()->findControlById("MultiPlayerAccountServer")->setHidden(false);
+	window()->findControlById("MultiPlayerHostPort")->setHidden(true);
+}
+
+bool BaseComputer::actionShowServerMenu(const EventCommandId& command, Control* control) {
+	window()->findControlById("MultiPlayerAccountServer")->setHidden(true);
+	window()->findControlById("MultiPlayerHostPort")->setHidden(false);
+	return true;
+}
+bool BaseComputer::actionShowAccountMenu(const EventCommandId& command, Control* control) {
+	window()->findControlById("MultiPlayerAccountServer")->setHidden(false);
+	window()->findControlById("MultiPlayerHostPort")->setHidden(true);
+	return true;
+}
+
+bool BaseComputer::actionJoinGame(const EventCommandId& command, Control* control) {
+	string user, pass;
+	int which = 0;
+	Unit* player = m_player.GetUnit();
+	if (player) {
+		which = _Universe->whichPlayerStarship(player);
+		player->Kill();
+	}
+	if (which==-1)
+		which=0;
+	_Universe->clearAllSystems();
+	
+	processJoinGame(window(), false, user, pass);
+	
+	globalWindowManager().shutDown();
+	TerminateCurrentBase();  //BaseInterface::CurrentBase->Terminate();
+
+	UniverseUtil::showSplashScreen(string());
+	Network[which].connectLoad(user, pass);
+	Network[which].startGame();
+	UniverseUtil::hideSplashScreen();
+	
+	return true;
 }
 
 // Process a command event from the Options Menu window.

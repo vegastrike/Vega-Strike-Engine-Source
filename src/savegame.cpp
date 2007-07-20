@@ -856,6 +856,10 @@ void SaveGame::ParseSaveGame (const string &filename_p, string &FSS, const strin
 				string plsave = GetReadPlayerSaveGame(player_num);
 				if (plsave.length()) {
 					err = f.OpenReadOnly( plsave, SaveFile);
+					if (err>Ok) { // failed in SaveFile
+						// Try as an UnknownFile to get a datadir saved game, like New_Game.
+						err = f.OpenReadOnly( plsave, UnknownFile);
+					}
 				}else {
 					// IF NONE SIMPLY LOAD THE MISSION DEFAULT ONE
 					err = f.OpenReadOnly( filename, SaveFile);

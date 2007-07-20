@@ -27,4 +27,13 @@ protected:
 	
 	void createControls();
 };	
+
+// Helper functions for use in a submenu of BaseComputer.
+
+// Caller is responsible for making a return button, as well as adding the "JoinGame" WctlTableEntry
+void createNetworkControls(GroupControl *serverConnGroup, std::vector <unsigned int> *keyboard_input_queue);
+
+// Caller is responsible for closing the window afterwards.
+void processJoinGame(Window *window, bool firstTime, string &user, string &pass);
+
 #endif

@@ -592,60 +592,17 @@ void bootstrap_main_loop () {
 		/************* NETWORK PART ***************/
 	  if( Network!=NULL)
 	  {
-        string srvipadr;
-        unsigned short port;
-        Network[k].GetConfigServerAddress(srvipadr, port);
-		bool ret = false;
-		// Are we using the directly account server to identify us ?
-		bool use_acctserver = XMLSupport::parse_bool(vs_config->getVariable("network","use_account_server", "false"));
-
-		if( use_acctserver!=false){
-			Network[k].init_acct( srvipadr);
-			Network[k].loginAcctLoop( (*it), (*jt));
-			ret = Network[k].init( NULL,0).valid();
-        }
-		else
-		// Or are we going through a game server to do so ?
-			ret = Network[k].init( srvipadr.c_str(), port).valid();
-		if( ret==false)
-		{
-			// If network initialization fails, exit
-			cout<<"Network initialization error - exiting"<<endl;
-			cleanexit=true;
-			winsys_exit(1);
-		}
-		//sleep( 3);
-        cout<<"Waiting for player "<<(k)<<" = "<<(*it)<<":"<<(*jt)<<"login response...";
-        vector<string> *loginResp = &Network[k].loginLoop( (*it), (*jt));
-        savefiles.push_back( *loginResp );
-
-        if( savefiles[k].empty() || savefiles[k][0]=="")
-        {
-            if( savefiles[k].empty() )
-                cout << "Server must have closed connection without warning" << endl;
-            else
-                cout<<savefiles[k][1]<<endl;
-            cout<<"QUITTING"<<endl;
-            cleanexit=true;
-            winsys_exit(1);
-        }
-        else
-        {
-            cout<<" logged in !"<<endl;
-			Network[k].synchronizeTime(NULL,_Universe->AccessCockpit(k));
-        }
-	  }
-		/************* NETWORK PART ***************/
-	  if( Network!=NULL)
-	  {
-		_Universe->AccessCockpit(k)->savegame->ParseSaveGame ("",mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit(k)->unitfilename,k, savefiles[k][0], false);
+		savefiles.push_back( *Network[k].connectLoad(pname, ppasswd) );
+		_Universe->AccessCockpit(k)->savegame->ParseSaveGame ("",mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k, savefiles[k][0], false);
+		_Universe->AccessCockpit(k)->TimeOfLastCollision=getNewTime();
 		/*
 		cout<<"UNIT XML :"<<endl<<savefiles[k][0]<<endl<<endl;
 		cout<<"UNIT FILE NAME = "<<_Universe->AccessCockpit(k)->unitfilename[0]<<endl;
 		*/
 	  } else {
 		if (loadLastSave)
-		  _Universe->AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k); else
+		  _Universe->AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k);
+		else
 		  _Universe->AccessCockpit(k)->savegame->SetOutputFileName (savegamefile);
       }
           CopySavedShips(playername[k],k,_Universe->AccessCockpit()->unitfilename,true);

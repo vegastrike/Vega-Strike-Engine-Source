@@ -4,6 +4,7 @@
 #include "vsfilesystem.h"
 #include "networking/netclient.h"
 #include "savegame.h"
+#include "main_loop.h"
 #include "networking/lowlevel/netbuffer.h"
 #include "networking/lowlevel/packet.h"
 #include "lin_time.h"
@@ -13,7 +14,6 @@
 #include "networking/lowlevel/netui.h"
 #include "networking/client.h"
 #include "networking/fileutil.h"
-
 
 std::string global_username;
 std::string global_password;
@@ -300,6 +300,15 @@ void NetClient::textMessage(const std::string & data )
 
 void NetClient::GetConfigServerAddress( string &addr, unsigned short &port)
 {
+	bool use_acctserver = XMLSupport::parse_bool(vs_config->getVariable("network","use_account_server", "false"));
+	if (use_acctserver) {
+		this->_serverport = port = 0;
+		this->_serverip = addr = vs_config->getVariable("network","account_server_url",
+			"http://localhost/cgi-bin/accountserver.py");
+		cout<<endl<<"Account Server URL : "<<addr<<endl<<endl;
+		return;
+	}
+	
 	int port_tmp;
 	string srvport = vs_config->getVariable("network","server_port", "6777");
 	port_tmp = atoi( srvport.c_str());
@@ -381,7 +390,7 @@ SOCKETALT	NetClient::init( const char* addr, unsigned short port )
 // NETFIXME: Correctly obtain ping time.
 #include "vs_random.h" // For random ping time.
 
-void NetClient::synchronizeTime(SOCKETALT*udpsock,Cockpit *cp)
+void NetClient::synchronizeTime(SOCKETALT*udpsock)
 {
 
 	int i=0;
@@ -504,7 +513,6 @@ void NetClient::synchronizeTime(SOCKETALT*udpsock,Cockpit *cp)
 	COUT << "Setting time to: New time: " << newTime << endl;
 	setNewTime(newTime);
         cur_time=newTime;
-        cp->TimeOfLastCollision=cur_time;
 }
 
 /*************************************************************/
@@ -535,3 +543,98 @@ void	NetClient::createChar()
 {
 }
 
+vector<string>* NetClient::connectLoad(string username, string passwd) {
+	localSerials.resize(0);
+	bootstrap_draw("#cc66ffNETWORK: Initializing...",NULL);
+	cout << "NETWORK: Initializing..."<<endl;
+	string srvipadr;
+	unsigned short port;
+	bool ret = false;
+	// Are we using the directly account server to identify us ?
+	GetConfigServerAddress(srvipadr, port);
+	
+	if( !port ){ // using account server.
+		string srvipadr = vs_config->getVariable("network", "account_server_url", "http://localhost/cgi-bin/accountserver.py");
+		bootstrap_draw("#cc66ffNETWORK: Connecting to account server.",NULL);
+		cout << "NETWORK: Connecting to account server."<<endl;
+		init_acct( srvipadr);
+		loginAcctLoop( username, passwd);
+		bootstrap_draw("#cc66ffNETWORK: Connecting to VegaServer.",NULL);
+		cout << "NETWORK: Connecting to VegaServer."<<endl;
+		ret = init( NULL,0).valid();
+	}
+	else {
+		// Or are we going through a game server to do so ?
+		bootstrap_draw("#cc66ffNETWORK: Connecting to VegaServer.",NULL);
+		cout<<"NETWORK: Connecting to VegaServer."<<endl;
+		ret = init( srvipadr.c_str(), port).valid();
+	}
+	if( ret==false)
+	{
+		// If network initialization fails, exit
+		cout<<"Network initialization error - exiting"<<endl;
+		cleanexit=true;
+		VSExit(1);
+	}
+	//sleep( 3);
+	cout<<"Waiting for player "<<username<<": login response..."<<endl;
+	vector<string> *loginResp = &loginLoop( username, passwd);
+	bootstrap_draw("#cc66ffNETWORK: Checking for UDP connection.",NULL);
+	cout<<"NETWORK: Checking for UDP connection."<<endl;
+
+	if( loginResp->empty() || (*loginResp)[0]=="")
+	{
+		if( loginResp->empty() )
+			cout << "Server must have closed connection without warning" << endl;
+		else
+			cout<<(*loginResp)[1]<<endl;
+		cout<<"QUITTING"<<endl;
+		cleanexit=true;
+		VSExit(1);
+	}
+	else
+	{
+		cout<<" logged in !"<<endl;
+		synchronizeTime(NULL);
+	}
+	/************* NETWORK PART ***************/
+	
+	lastsave = *loginResp;
+	
+	return loginResp;
+}
+
+void NetClient::startGame() {
+
+	vector<string> savedships;
+	QVector pos;
+	// useless.
+	string mysystem;
+	string savefiles;
+	bool setplayerXloc=false;
+	float credits=0.0;
+	vector <StarSystem *> ss;
+	vector <QVector> playerNloc;
+    vector <string> playersaveunit;
+	vector<vector<string> > vecstr;
+	
+	bootstrap_draw("#cc66ffNETWORK: Loading player ship.",NULL);
+	cout<<"NETWORK: Loading player ship."<<endl;
+	save.ParseSaveGame ("",mysystem,"",pos,setplayerXloc,credits,savedships,0, lastsave[0], false);
+	
+	ss.push_back (_Universe->Init (mysystem,Vector(0,0,0),string()));
+	
+	CopySavedShips(callsign,0,savedships,true);
+	playersaveunit.push_back(savedships[0]);
+	if (setplayerXloc) {
+		playerNloc.push_back(pos);
+	}else {
+		playerNloc.push_back(QVector(FLT_MAX,FLT_MAX,FLT_MAX));
+	}
+	vecstr.push_back(lastsave);
+    createObjects(playersaveunit,ss,playerNloc, vecstr);
+	bootstrap_draw("#cc66ffNETWORK: Loading system.",NULL);
+	cout<<"NETWORK: Loading system."<<endl;
+	inGame();
+	PacketLoop(CMD_ADDEDYOU); // Wait for the command before stopping.
+}

@@ -3,6 +3,7 @@
 #include "in_kb_data.h"
 #include "in_mouse.h"
 #include "main_loop.h"
+#include "universe_util.h"
 #include "lin_time.h"
 #include "gui/modaldialog.h"
 #include "gui/eventmanager.h"
@@ -63,6 +64,138 @@ void gamemenu_draw() {
 	GFXBeginScene();
 	globalWindowManager().draw();
 	GFXEndScene();
+}
+
+void createNetworkControls(GroupControl *serverConnGroup, std::vector <unsigned int> *inputqueue) {
+	GroupControl *acctConnGroup = new GroupControl;
+	acctConnGroup->setId("MultiPlayerAccountServer");
+	acctConnGroup->setHidden(true);
+	serverConnGroup->addChild(acctConnGroup);
+
+	GroupControl *hostConnGroup = new GroupControl;
+	hostConnGroup->setId("MultiPlayerHostPort");
+	hostConnGroup->setHidden(true);
+	serverConnGroup->addChild(hostConnGroup);
+	StaticDisplay *mplayTitle = new StaticDisplay;
+	mplayTitle->setRect( Rect(-.7, .6, 1, .1) );
+	mplayTitle->setText("Independent Server IP Address:");
+	mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
+	mplayTitle->setColor(GUI_CLEAR);
+	mplayTitle->setFont( Font(.07, 2) );
+	mplayTitle->setId("HostTitle");
+	hostConnGroup->addChild(mplayTitle);
+	
+	// Description box.
+	StaticDisplay* serverInputText = new TextInputDisplay(inputqueue,"\x1b\n \t\r*?\\/|:<>\"^");
+	serverInputText->setRect( Rect(-.6, .42, 1.2, .15) );
+	serverInputText->setColor( GFXColor(1,.5,0,.1) );
+	serverInputText->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+	serverInputText->setFont( Font(.07) );
+	serverInputText->setMultiLine(false);
+	serverInputText->setTextColor(GUI_OPAQUE_WHITE());
+	serverInputText->setTextMargins(Size(.02,.01));
+	serverInputText->setId("VegaserverHost");
+	serverInputText->setText(vs_config->getVariable("network", "server_ip", ""));
+	hostConnGroup->addChild(serverInputText);
+
+	
+	mplayTitle = new StaticDisplay;
+	mplayTitle->setRect( Rect(-.7, .3, 1, .1) );
+	mplayTitle->setText("Server Port: (default 6777)");
+	mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
+	mplayTitle->setColor(GUI_CLEAR);
+	mplayTitle->setFont( Font(.07, 2) );
+	mplayTitle->setId("PortTitle");
+	hostConnGroup->addChild(mplayTitle);
+	
+	StaticDisplay* portInputText = new TextInputDisplay(inputqueue,"\x1b\n \t\r*?\\/|:<>\"!@#$%^&*()[]{},.=_-+`~"
+													"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+	portInputText->setRect( Rect(-.6, .12, .4, .15) );
+	portInputText->setColor( GFXColor(1,.5,0,.1) );
+	portInputText->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+	portInputText->setFont( Font(.07) );
+	portInputText->setMultiLine(false);
+	portInputText->setTextColor(GUI_OPAQUE_WHITE());
+	portInputText->setTextMargins(Size(.02,.01));
+	portInputText->setId("VegaserverPort");
+	portInputText->setText(vs_config->getVariable("network", "server_port", "6777"));
+	hostConnGroup->addChild(portInputText);
+	
+	mplayTitle = new StaticDisplay;
+	mplayTitle->setRect( Rect(-.7, .6, 1, .1) );
+	mplayTitle->setText("Account Server URL:");
+	mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
+	mplayTitle->setColor(GUI_CLEAR);
+	mplayTitle->setFont( Font(.07, 2) );
+	mplayTitle->setId("AcctserverTitle");
+	acctConnGroup->addChild(mplayTitle);
+	
+	StaticDisplay* acctserverInput = new TextInputDisplay(inputqueue,"\x1b\n \t\r*\\|<>\"^");
+	acctserverInput->setRect( Rect(-.6, .42, 1.2, .15) );
+	acctserverInput->setColor( GFXColor(1,.5,0,.1) );
+	acctserverInput->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+	acctserverInput->setFont( Font(.07) );
+	acctserverInput->setMultiLine(false);
+	acctserverInput->setTextColor(GUI_OPAQUE_WHITE());
+	acctserverInput->setTextMargins(Size(.02,.01));
+	acctserverInput->setId("AccountServer");
+	acctserverInput->setText(vs_config->getVariable("network", "account_server_url",
+			"http://vegastrike.sourceforge.net/cgi-bin/accountserver.py?"));
+	acctConnGroup->addChild(acctserverInput);
+	
+	mplayTitle = new StaticDisplay;
+	mplayTitle->setRect( Rect(-.7, 0, 1, .1) );
+	mplayTitle->setText("Callsign:");
+	mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
+	mplayTitle->setColor(GUI_CLEAR);
+	mplayTitle->setFont( Font(.07, 2) );
+	mplayTitle->setId("UsernameTitle");
+	serverConnGroup->addChild(mplayTitle);
+	
+	StaticDisplay* usernameInput = new TextInputDisplay(inputqueue,"\x1b\n \t\r*\\|<>\"^");
+	usernameInput->setRect( Rect(-.6, -.18, 1.2, .15) );
+	usernameInput->setColor( GFXColor(1,.5,0,.1) );
+	usernameInput->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+	usernameInput->setFont( Font(.07) );
+	usernameInput->setMultiLine(false);
+	usernameInput->setTextColor(GUI_OPAQUE_WHITE());
+	usernameInput->setTextMargins(Size(.02,.01));
+	usernameInput->setId("Username");
+	usernameInput->setText(vs_config->getVariable("player", "callsign", ""));
+	serverConnGroup->addChild(usernameInput);
+	
+	mplayTitle = new StaticDisplay;
+	mplayTitle->setRect( Rect(-.7, -.3, 1, .1) );
+	mplayTitle->setText("Password:");
+	mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
+	mplayTitle->setColor(GUI_CLEAR);
+	mplayTitle->setFont( Font(.07, 2) );
+	mplayTitle->setId("PasswordTitle");
+	serverConnGroup->addChild(mplayTitle);
+	
+	TextInputDisplay* passwordInput = new TextInputDisplay(inputqueue,"\x1b\n\t\r");
+	passwordInput->setPassword('*');
+	passwordInput->setRect( Rect(-.6, -.48, 1.2, .15) );
+	passwordInput->setColor( GFXColor(1,.5,0,.1) );
+	passwordInput->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+	passwordInput->setFont( Font(.07) );
+	passwordInput->setMultiLine(false);
+	passwordInput->setTextColor(GUI_OPAQUE_WHITE());
+	passwordInput->setTextMargins(Size(.02,.01));
+	passwordInput->setId("Password");
+	passwordInput->setText(vs_config->getVariable("player", "password", ""));
+	serverConnGroup->addChild(passwordInput);
+	
+	NewButton *multiStart = new NewButton;
+	multiStart->setRect( Rect(-.25, -.65, .5, .15) );
+	multiStart->setColor( GFXColor(1,.2,0,.1) );
+	multiStart->setTextColor( GUI_OPAQUE_WHITE() );
+	multiStart->setDownColor( GFXColor(1,.2,0,.4) );
+	multiStart->setDownTextColor( GFXColor(.2,.2,.2) );
+	multiStart->setFont( Font(.07, 1) );
+	multiStart->setCommand("JoinGame");
+	multiStart->setLabel("Join Game");
+	serverConnGroup->addChild(multiStart);
 }
 
 void GameMenu::startMenuInterface(bool firstTime) {
@@ -158,16 +291,6 @@ void GameMenu::createControls() {
 	serverConnGroup->setHidden(true);
 	window()->addControl(serverConnGroup);
 
-	GroupControl *acctConnGroup = new GroupControl;
-	acctConnGroup->setId("MultiPlayerAccountServer");
-	acctConnGroup->setHidden(true);
-	serverConnGroup->addChild(acctConnGroup);
-
-	GroupControl *hostConnGroup = new GroupControl;
-	hostConnGroup->setId("MultiPlayerHostPort");
-	hostConnGroup->setHidden(true);
-	serverConnGroup->addChild(hostConnGroup);
-
 	StaticDisplay* mplayTitle = new StaticDisplay;
 	mplayTitle->setRect( Rect(-.96, .83, .8, .1) );
 	mplayTitle->setText("MultiPlayer Settings");
@@ -177,126 +300,6 @@ void GameMenu::createControls() {
 	mplayTitle->setId("GameTitle");
 	// Put it on the window.
 	serverConnGroup->addChild(mplayTitle);
-	// Scroller for description.
-	/*
-	Scroller* inputTextScroller = new Scroller;
-	inputTextScroller->setRect( Rect(.91, -0.95, .05, .2) );
-	inputTextScroller->setColor( UnsaturatedColor(color.r,color.g,color.b,.1) );
-	inputTextScroller->setThumbColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE() );
-	inputTextScroller->setButtonColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4) );
-	inputTextScroller->setTextColor(GUI_OPAQUE_WHITE());
-	inputTextScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
-	*/
-	
-	mplayTitle = new StaticDisplay;
-	mplayTitle->setRect( Rect(-.7, .6, 1, .1) );
-	mplayTitle->setText("Independent Server IP Address:");
-	mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
-	mplayTitle->setColor(GUI_CLEAR);
-	mplayTitle->setFont( Font(.07, 2) );
-	mplayTitle->setId("HostTitle");
-	hostConnGroup->addChild(mplayTitle);
-	
-	// Description box.
-	StaticDisplay* serverInputText = new TextInputDisplay(&gamemenu_keyboard_queue,"\x1b\n \t\r*?\\/|:<>\"^");
-	serverInputText->setRect( Rect(-.6, .42, 1.2, .15) );
-	serverInputText->setColor( GFXColor(1,.5,0,.1) );
-	serverInputText->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
-	serverInputText->setFont( Font(.07) );
-	serverInputText->setMultiLine(false);
-	serverInputText->setTextColor(GUI_OPAQUE_WHITE());
-	serverInputText->setTextMargins(Size(.02,.01));
-	serverInputText->setId("VegaserverHost");
-	serverInputText->setText(vs_config->getVariable("network", "server_ip", ""));
-	hostConnGroup->addChild(serverInputText);
-
-	
-	mplayTitle = new StaticDisplay;
-	mplayTitle->setRect( Rect(-.7, .3, 1, .1) );
-	mplayTitle->setText("Server Port: (default 6777)");
-	mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
-	mplayTitle->setColor(GUI_CLEAR);
-	mplayTitle->setFont( Font(.07, 2) );
-	mplayTitle->setId("PortTitle");
-	hostConnGroup->addChild(mplayTitle);
-	
-	StaticDisplay* portInputText = new TextInputDisplay(&gamemenu_keyboard_queue,"\x1b\n \t\r*?\\/|:<>\"!@#$%^&*()[]{},.=_-+`~"
-													"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
-	portInputText->setRect( Rect(-.6, .12, .4, .15) );
-	portInputText->setColor( GFXColor(1,.5,0,.1) );
-	portInputText->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
-	portInputText->setFont( Font(.07) );
-	portInputText->setMultiLine(false);
-	portInputText->setTextColor(GUI_OPAQUE_WHITE());
-	portInputText->setTextMargins(Size(.02,.01));
-	portInputText->setId("VegaserverPort");
-	portInputText->setText(vs_config->getVariable("network", "server_port", "6777"));
-	hostConnGroup->addChild(portInputText);
-	
-	mplayTitle = new StaticDisplay;
-	mplayTitle->setRect( Rect(-.7, .6, 1, .1) );
-	mplayTitle->setText("Account Server URL:");
-	mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
-	mplayTitle->setColor(GUI_CLEAR);
-	mplayTitle->setFont( Font(.07, 2) );
-	mplayTitle->setId("AcctserverTitle");
-	acctConnGroup->addChild(mplayTitle);
-	
-	StaticDisplay* acctserverInput = new TextInputDisplay(&gamemenu_keyboard_queue,"\x1b\n \t\r*\\|<>\"^");
-	acctserverInput->setRect( Rect(-.6, .42, 1.2, .15) );
-	acctserverInput->setColor( GFXColor(1,.5,0,.1) );
-	acctserverInput->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
-	acctserverInput->setFont( Font(.07) );
-	acctserverInput->setMultiLine(false);
-	acctserverInput->setTextColor(GUI_OPAQUE_WHITE());
-	acctserverInput->setTextMargins(Size(.02,.01));
-	acctserverInput->setId("AccountServer");
-	acctserverInput->setText(vs_config->getVariable("network", "server_ip",
-			"http://vegastrike.sourceforge.net/cgi-bin/accountserver.py?"));
-	acctConnGroup->addChild(acctserverInput);
-	
-	mplayTitle = new StaticDisplay;
-	mplayTitle->setRect( Rect(-.7, 0, 1, .1) );
-	mplayTitle->setText("Callsign:");
-	mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
-	mplayTitle->setColor(GUI_CLEAR);
-	mplayTitle->setFont( Font(.07, 2) );
-	mplayTitle->setId("UsernameTitle");
-	serverConnGroup->addChild(mplayTitle);
-	
-	StaticDisplay* usernameInput = new TextInputDisplay(&gamemenu_keyboard_queue,"\x1b\n \t\r*\\|<>\"^");
-	usernameInput->setRect( Rect(-.6, -.18, 1.2, .15) );
-	usernameInput->setColor( GFXColor(1,.5,0,.1) );
-	usernameInput->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
-	usernameInput->setFont( Font(.07) );
-	usernameInput->setMultiLine(false);
-	usernameInput->setTextColor(GUI_OPAQUE_WHITE());
-	usernameInput->setTextMargins(Size(.02,.01));
-	usernameInput->setId("Username");
-	usernameInput->setText(vs_config->getVariable("player", "callsign", ""));
-	serverConnGroup->addChild(usernameInput);
-	
-	mplayTitle = new StaticDisplay;
-	mplayTitle->setRect( Rect(-.7, -.3, 1, .1) );
-	mplayTitle->setText("Password:");
-	mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
-	mplayTitle->setColor(GUI_CLEAR);
-	mplayTitle->setFont( Font(.07, 2) );
-	mplayTitle->setId("PasswordTitle");
-	serverConnGroup->addChild(mplayTitle);
-	
-	TextInputDisplay* passwordInput = new TextInputDisplay(&gamemenu_keyboard_queue,"\x1b\n\t\r");
-	passwordInput->setPassword('*');
-	passwordInput->setRect( Rect(-.6, -.48, 1.2, .15) );
-	passwordInput->setColor( GFXColor(1,.5,0,.1) );
-	passwordInput->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
-	passwordInput->setFont( Font(.07) );
-	passwordInput->setMultiLine(false);
-	passwordInput->setTextColor(GUI_OPAQUE_WHITE());
-	passwordInput->setTextMargins(Size(.02,.01));
-	passwordInput->setId("Password");
-	passwordInput->setText(vs_config->getVariable("player", "password", ""));
-	serverConnGroup->addChild(passwordInput);
 	
 	NewButton *returnMainMenu = new NewButton;
 	returnMainMenu->setRect( Rect(0, .81, .75, .1) );
@@ -309,17 +312,8 @@ void GameMenu::createControls() {
 	returnMainMenu->setLabel("<-- Back to Main Menu");
 	serverConnGroup->addChild(returnMainMenu);
 	
-	NewButton *multiStart = new NewButton;
-	multiStart->setRect( Rect(-.25, -.65, .5, .15) );
-	multiStart->setColor( GFXColor(1,.2,0,.1) );
-	multiStart->setTextColor( GUI_OPAQUE_WHITE() );
-	multiStart->setDownColor( GFXColor(1,.2,0,.4) );
-	multiStart->setDownTextColor( GFXColor(.2,.2,.2) );
-	multiStart->setFont( Font(.07, 1) );
-	multiStart->setCommand("JoinGame");
-	multiStart->setLabel("Join Game");
-	serverConnGroup->addChild(multiStart);
-	
+	createNetworkControls(serverConnGroup, &gamemenu_keyboard_queue);
+
 	// Make a tab for mode switching...
 	// (Add buttons for acctserver/modname) (acctserver mode is default).
 	//
@@ -395,30 +389,54 @@ bool GameMenu::processExitGameButton(const EventCommandId& command, Control *con
 	return true;
 }
 
-bool GameMenu::processJoinGameButton(const EventCommandId& command, Control *control) {
+void processJoinGame(Window *window, bool firstTime, string &user, string &pass) {
 	// Magic goes here!
-	vs_config->setVariable("player","callsign",
-		static_cast<TextInputDisplay*>(window()->findControlById("Username"))->text());
-	vs_config->setVariable("player","password",
-		static_cast<TextInputDisplay*>(window()->findControlById("Password"))->text());
+	user = static_cast<TextInputDisplay*>(window->findControlById("Username"))->text();
+	pass = static_cast<TextInputDisplay*>(window->findControlById("Password"))->text();
+	vs_config->setVariable("player","callsign",user);
+	vs_config->setVariable("player","password",pass);
 	
-	if (window()->findControlById("MultiPlayerAccountServer")->hidden()) {
+	if (window->findControlById("MultiPlayerAccountServer")->hidden()) {
 		vs_config->setVariable("network","use_account_server","false");
 		vs_config->setVariable("network","server_ip",
-			static_cast<TextInputDisplay*>(window()->findControlById("VegaserverHost"))->text());
+			static_cast<TextInputDisplay*>(window->findControlById("VegaserverHost"))->text());
 		vs_config->setVariable("network","server_port",
-			static_cast<TextInputDisplay*>(window()->findControlById("VegaserverPort"))->text());
+			static_cast<TextInputDisplay*>(window->findControlById("VegaserverPort"))->text());
 	} else {
 		vs_config->setVariable("network","use_account_server","true");
-		vs_config->setVariable("network","server_ip",
-			static_cast<TextInputDisplay*>(window()->findControlById("AccountServer"))->text());
+		vs_config->setVariable("network","account_server_url",
+			static_cast<TextInputDisplay*>(window->findControlById("AccountServer"))->text());
 	}
 	
 	enableNetwork(true);
+	if (!firstTime) {
+		if (Network!=NULL) {
+			for (unsigned int i=0;i<_Universe->numPlayers();i++) {
+				Network[i].Reinitialize();
+			}
+		} else {
+			Network = new NetClient[_Universe->numPlayers()]; // Hardcode 1 player anyway.
+		}
+	}
+	
+}
+
+bool GameMenu::processJoinGameButton(const EventCommandId& command, Control *control) {
+	string user, pass;
+	processJoinGame(window(), m_firstTime, user, pass);
+
+	if (!m_firstTime) {
+		_Universe->clearAllSystems();
+		UniverseUtil::showSplashScreen(string());
+	}
+	Network[0].connectLoad(user, pass);
+	Network[0].startGame();
 	
 	restore_main_loop();
 	if (m_firstTime) {
 		GFXLoop(bootstrap_main_loop);
+	} else {
+		UniverseUtil::hideSplashScreen();
 	}
 	window()->close();
 	return true;

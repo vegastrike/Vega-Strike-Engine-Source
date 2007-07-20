@@ -492,7 +492,12 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 		clt_tcp_sock->addToSet( _sock_set );
 		clt_udp_sock->addToSet( _sock_set );
 		int socketstat = _sock_set.wait( timeout );
-		
+		if (clt_tcp_sock->closed()) {
+			perror( "Error socket closed ");
+			clt_tcp_sock->disconnect( "socket error", 0 );
+			VSExit(1);
+			return -1;
+		}
 		if( socketstat < 0)
 		{
 			perror( "Error select -1 ");
@@ -1243,6 +1248,9 @@ void NetClient::Reconnect(std::string srvipadr, std::string port) {
   vector<string> passwords;
   vector <SOCKETALT*> udp;
   unsigned int i;
+  if (!Network) {
+    Network = new NetClient[_Universe->numPlayers()];
+  }
   for (i=0;i<_Universe->numPlayers();++i) {
     usernames.push_back(Network[i].callsign);
     passwords.push_back(Network[i].password);
@@ -1304,7 +1312,8 @@ void NetClient::Reconnect(std::string srvipadr, std::string port) {
     {
       cout<<" logged in !"<<endl;
       Network[k].Respawn(Network[k].serial);
-      Network[k].synchronizeTime(udp[k],_Universe->AccessCockpit(k));
+      Network[k].synchronizeTime(udp[k]);
+	  _Universe->AccessCockpit(k)->TimeOfLastCollision=getNewTime();
     }
     Network[k].inGame();
     

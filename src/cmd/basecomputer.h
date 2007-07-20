@@ -50,6 +50,7 @@ public:
         NEWS,               // Show news items.
         INFO,				// Show basic info.
 		LOADSAVE,           // LOAD SAVE
+		NETWORK,            // Network submenu of Loadsave.
         DISPLAY_MODE_COUNT, // Number of display modes.
         NULL_DISPLAY = DISPLAY_MODE_COUNT,   // No display.
     };
@@ -149,6 +150,10 @@ protected:
     // Load Game
     bool actionConfirmedQuitGame();
     bool actionQuitGame(const EventCommandId& command, Control* control);
+	
+    bool actionJoinGame(const EventCommandId& command, Control* control);
+    bool actionShowAccountMenu(const EventCommandId& command, Control* control);
+    bool actionShowServerMenu(const EventCommandId& command, Control* control);
 
     bool actionDone(const EventCommandId& command, Control* control);
 
@@ -170,6 +175,8 @@ protected:
     bool changeToInfoMode(const EventCommandId& command, Control* control);
     // Change display mode to LOAD/SAVE
     bool changeToLoadSaveMode(const EventCommandId& command, Control* control);
+	// Change display mode to NETWORK.
+    bool changeToNetworkMode(const EventCommandId& command, Control* control);
     // Redo the title string.
     void recalcTitle(void);
 
@@ -228,6 +235,8 @@ protected:
     void loadNewsControls(void);
 
     void loadLoadSaveControls(void);
+
+    void loadNetworkControls(void);
 
     // Load the controls for the MISSIONS display.
     void loadMissionsControls(void);
