@@ -539,12 +539,12 @@ void Music::GotoSong (std::string mus,int layer)
     }
 }
 
-std::vector<std::string> split(std::string tmpstr,std::string splitter) {
+std::vector<std::string> rsplit(std::string tmpstr,std::string splitter) {
   std::string::size_type where;
   std::vector<std::string> ret;
-  while ((where=tmpstr.find(splitter))!=std::string::npos) {
-    ret.push_back(tmpstr.substr(0,where));
-    tmpstr= tmpstr.substr(where+1);
+  while ((where=tmpstr.rfind(splitter))!=std::string::npos) {
+    ret.push_back(tmpstr.substr(where+1));
+    tmpstr= tmpstr.substr(0,where);
   }
   if (tmpstr.length())
     ret.push_back(tmpstr);
@@ -558,8 +558,7 @@ void Music::_GotoSong (std::string mus) {
 
 		_StopLater(); // Kill all our currently playing songs.
 		
-		music_load_list = split(mus,"|"); // reverse order.
-
+		music_load_list = rsplit(mus,"|"); // reverse order.
 		if (!thread_initialized) {
 #ifdef _WIN32
 			a_thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)Muzak::readerThread, (PVOID)this, 0, NULL);
