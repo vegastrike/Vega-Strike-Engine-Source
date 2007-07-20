@@ -9316,7 +9316,7 @@ enum Unit::tractorHow Unit::getTractorability() const
 		tflags = tractorability_flags&tractorability_mask; else
 		tflags = tractorability_flags;
 
-	return (Unit::tractorHow)(tflags&tractorability_mask);
+	return (Unit::tractorHow)(tflags);
 }
 
 
