@@ -492,7 +492,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 		clt_tcp_sock->addToSet( _sock_set );
 		clt_udp_sock->addToSet( _sock_set );
 		int socketstat = _sock_set.wait( timeout );
-		if (clt_tcp_sock->closed()) {
+		if (!clt_tcp_sock->valid()) {
 			perror( "Error socket closed ");
 			clt_tcp_sock->disconnect( "socket error", 0 );
 			VSExit(1);
