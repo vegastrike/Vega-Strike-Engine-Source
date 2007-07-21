@@ -227,9 +227,9 @@ inline void loadsounds(const string &str,const int max,soundArray& snds,bool loo
 		string mynewstr=str;
 		//		bool foundyet=false;
 		while (1) {
-			string::iterator found=find(mynewstr.begin(),mynewstr.end(),'?');
-			if (found!=mynewstr.end()) {
-				mynewstr[found-mynewstr.begin()]=addstr[0];
+			std::string::size_type found=mynewstr.find('?');
+			if (found!=std::string::npos) {
+				mynewstr[found]=addstr[0];
 				//				foundyet=true;
 			}
 			else {
@@ -361,7 +361,7 @@ void GameUniverse::StartDraw()
 				static unsigned int numrunningsystems = XMLSupport::parse_int(vs_config->getVariable ("general","numoldsystems","6"));
 				static bool deleteoldsystems = XMLSupport::parse_bool (vs_config->getVariable ("general","deleteoldsystems","true"));
 				if (star_system.size()>numrunningsystems&&deleteoldsystems) {
-					if (find (active_star_system.begin(),active_star_system.end(),star_system.back())==active_star_system.end()) {
+					if (std::find (active_star_system.begin(),active_star_system.end(),star_system.back())==active_star_system.end()) {
 						delete star_system.back();
 						star_system.pop_back();
 					}

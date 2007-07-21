@@ -181,7 +181,7 @@ public:
 class StringpoolTraits : public stdext::hash_compare<std::string>
 {
 public:
-	static const size_t min_buckets = INITIAL_STRINGPOOL_SIZE;
+	enum { min_buckets = INITIAL_STRINGPOOL_SIZE };
 };
 
 typedef SharedPool<std::string,StringpoolTraits> StringPool;

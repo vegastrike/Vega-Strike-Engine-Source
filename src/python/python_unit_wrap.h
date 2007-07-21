@@ -138,7 +138,7 @@
 	EXPORT_UTIL0(UnitWrapper,getFlightgroupLeader)
 	EXPORT_UTIL1(bool,setFlightgroupLeader,UnitWrapper,un)
 	EXPORT_UTIL0(std::string,getFgDirective)
-	EXPORT_UTIL0(void,RecomputeUnitUpgrades)
+	voidEXPORT_UTIL0(RecomputeUnitUpgrades)
 	EXPORT_UTIL1(bool,setFgDirective,std::string,inp)
 //	EXPORT_UTIL0(int,getFgSubnumber)
 	EXPORT_UTIL3(int,removeCargo,std::string,s, int,quantity, bool, erasezero)

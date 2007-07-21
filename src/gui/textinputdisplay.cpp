@@ -63,7 +63,7 @@ void TextInputDisplay::draw() {
   if (!this->isFocused) {
     if (passwordChar) {
       std::string text1;
-      text1.insert(0, text.length(), passwordChar);
+      text1.insert(0u, text.length(), passwordChar);
       this->setText(text1);
     }
     this->StaticDisplay::draw();
@@ -98,7 +98,7 @@ void TextInputDisplay::draw() {
   unsigned int x= (unsigned int)getNewTime();
   string text1;
   if (passwordChar) {
-	text1.insert(0, text.length(), passwordChar);
+	text1.insert(0u, text.length(), passwordChar);
   } else {
     text1=text;
   }

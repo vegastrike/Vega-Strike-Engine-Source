@@ -1800,13 +1800,14 @@ void FireKeyboard::Execute () {
         bool special=false;
         bool normal=false;
         int nm=parent->GetNumMounts();
-        for (int i=0;i<nm;++i) {
+        int i;
+        for (i=0;i<nm;++i) {
           if (parent->mounts[i].status==Mount::ACTIVE) {
             special=special||(parent->mounts[i].type->size&weapon_info::SPECIAL)!=0;
             normal=normal||(parent->mounts[i].type->size&(weapon_info::LIGHT|weapon_info::MEDIUM|weapon_info::HEAVY|weapon_info::CAPSHIPLIGHT|weapon_info::CAPSHIPHEAVY))!=0;
           }
         }
-        for (int i=0;i<nm;++i) {
+        for (i=0;i<nm;++i) {
           if (special&&normal) {
             //parent->ToggleWepaon(false,true);
             if (parent->mounts[i].status==Mount::ACTIVE) {

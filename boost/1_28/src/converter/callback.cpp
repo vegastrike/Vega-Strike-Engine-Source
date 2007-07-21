@@ -61,6 +61,7 @@ namespace detail
       }
   }
 
+/*
   BOOST_PYTHON_DECL void* callback_convert_reference(
       PyObject* source
       , lvalue_from_python_registration*const& converters)
@@ -83,7 +84,7 @@ namespace detail
       }
       return result;
   }
-  
+
   BOOST_PYTHON_DECL void* callback_convert_pointer(
       PyObject* source
       , lvalue_from_python_registration*const& converters)
@@ -95,7 +96,7 @@ namespace detail
       }
       return callback_convert_reference(source, converters);
   }
-  
+*/
   BOOST_PYTHON_DECL void throw_no_class_registered()
   {
       PyErr_SetString(
@@ -103,7 +104,7 @@ namespace detail
           , const_cast<char*>("class not registered for to_python type"));
       throw_error_already_set();
   }
-  
+/*
   BOOST_PYTHON_DECL void* convert_rvalue(PyObject* src, rvalue_stage1_data& data, void* storage)
   {
       ref holder(src);
@@ -122,6 +123,7 @@ namespace detail
       
       return data.convertible;
   }
+*/
 }   
 
 }}} // namespace boost::python::converter

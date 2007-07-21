@@ -679,16 +679,17 @@ void SaveGame::ReadSavedPackets (char * &buf, bool commitfactions, bool skip_new
 }
 
 void SaveGame::LoadSavedMissions() {
+  unsigned int i;
   vector<StringPool::Reference> scripts = getMissionStringData("active_scripts");
   vector<StringPool::Reference> missions = getMissionStringData("active_missions");
   PyRun_SimpleString("import VS\nVS.loading_active_missions=True\nprint \"Loading active missions \"+str(VS.loading_active_missions)\n");
   // kill any leftovers so they don't get loaded twice.
-  for (int i=active_missions.size()-1;i>0;--i){// don't terminate zeroth mission
+  for (i=active_missions.size()-1;i>0;--i){// don't terminate zeroth mission
     if (active_missions[i]->player_num==_Universe->CurrentCockpit())
       active_missions[i]->terminateMission();
   }
   
-  for (unsigned int i=0;i<scripts.size()&&i<missions.size();++i) {
+  for (i=0;i<scripts.size()&&i<missions.size();++i) {
     try {
       LoadMission(missions[i].get().c_str(),scripts[i],false);
     }catch (...) {
