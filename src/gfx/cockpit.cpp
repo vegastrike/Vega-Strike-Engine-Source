@@ -609,6 +609,7 @@ void GameCockpit::DrawTargetBox () {
   }
   if ((always_itts || un->GetComputerData().itts)&&!nav_symbol) {
     float mrange;
+    un->setAverageGunSpeed();
     un->getAverageGunSpeed (speed,range,mrange);
     float err = (.01*(1-un->CloakVisible()));
     QVector iLoc = target->PositionITTS (un->Position(),un->cumulative_velocity,speed,steady_itts)-_Universe->AccessCamera()->GetPosition()+10*err*QVector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);

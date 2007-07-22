@@ -851,8 +851,9 @@ class Unit
 		virtual float DealDamageToShield (const Vector & pnt, float &Damage);
 		// If the shields are up from this position
 		bool ShieldUp (const Vector &) const;
-		void setAverageGunSpeed ();
 	public:
+                //resets average gun speed (in event of weapon change
+		void setAverageGunSpeed ();
 		int LockMissile() const; //-1 is no lock necessary 1 is locked
 		void LockTarget(bool myboo);
 		bool TargetLocked() const { return(computer.radar.locked);}
