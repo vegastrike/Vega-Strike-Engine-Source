@@ -273,7 +273,9 @@ void BaseInterface::Room::Draw (BaseInterface *base) {
 						}
 						text_marker.col = GFXColor(text_color_r, text_color_g, text_color_b, links[i]->alpha);
 						text_marker.SetPos(text_pos_x, text_pos_y);
-						text_marker.Draw();
+						if(text_marker.GetText().find("XXX")!=0){
+							text_marker.Draw();
+						}
 						GFXEnable(TEXTURE0);
 					} // if draw_text
 				}

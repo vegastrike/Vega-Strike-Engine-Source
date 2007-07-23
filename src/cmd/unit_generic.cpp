@@ -6897,12 +6897,13 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 								 //only mess with this if the upgrador has active mounts
 	if (up->mounts[i].status==Mount::ACTIVE||up->mounts[i].status==Mount::INACTIVE) {
 								 //make sure since we're offsetting the starting we don't overrun the mounts
+		bool isammo=(string::npos!=string(up->name).find("_ammo")); // is this ammo for a weapon rather than an actual weapon
+		bool ismissiletype=(0!=(up->mounts[i].type->size&(weapon_info::CAPSHIPHEAVYMISSILE|weapon_info::SPECIALMISSILE|weapon_info::MEDIUMMISSILE|weapon_info::LIGHTMISSILE|weapon_info::HEAVYMISSILE|weapon_info::CAPSHIPLIGHTMISSILE)));
+
 		int jmod=j%GetNumMounts();
 		if (!downgrade) {		 //if we wish to add guns instead of remove
 			
 			if (up->mounts[i].type->weapon_name.find("_UPGRADE") == string::npos) { //check for capability increase rather than actual weapon upgrade
-				bool isammo=(string::npos!=string(up->name).find("_ammo")); // is this ammo for a weapon rather than an actual weapon
-				bool ismissiletype=(0!=(up->mounts[i].type->size&(weapon_info::CAPSHIPHEAVYMISSILE|weapon_info::SPECIALMISSILE|weapon_info::MEDIUMMISSILE|weapon_info::LIGHTMISSILE|weapon_info::HEAVYMISSILE|weapon_info::CAPSHIPLIGHTMISSILE)));
 								 //only look at this mount if it can fit in the rack
 				if (up->mounts[i].type->size==(up->mounts[i].type->size&mounts[jmod].size)) {
 					if (up->mounts[i].type->weapon_name!=mounts[jmod].type->weapon_name || mounts[jmod].status==Mount::DESTROYED || mounts[jmod].status==Mount::UNCHOSEN) {
@@ -6987,7 +6988,7 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 				}
 				//we need to |= the mount type
 			}
-		}
+		} // DOWNGRADE
 		else {
 			if (up->mounts[i].type->weapon_name!="MOUNT_UPGRADE") {
 				bool found=false;//we haven't found a matching gun to remove
@@ -6996,27 +6997,37 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 				for (unsigned int k=0;k<(unsigned int)GetNumMounts();++k) {
 								 //we want to start with bias
 					int jkmod = (jmod+k)%GetNumMounts();
+					if(Mount::UNCHOSEN==mounts[jkmod].status){
+						// can't sell weapon that's already been sold/removed
+						continue;
+					}
 								 ///search for right mount to remove starting from j. this is the right name
 					if (strcasecmp(mounts[jkmod].type->weapon_name.c_str(),up->mounts[i].type->weapon_name.c_str())==0) {
-								 //we got one
-						found=true;
+								 //we got one, but check if we're trying to sell non-existent ammo
+						if(isammo&&mounts[jkmod].ammo<=0){
+							// whether it's gun ammo or a missile, you can't remove ammo from an infinite source, and you can't remove ammo if there isn't any
+							found=true;
+						}
 								 ///calculate scrap value (if damaged)
 						percentage+=mounts[jkmod].Percentage(&up->mounts[i]);
 								 //if we modify
 						if (touchme) {
 								 //if downgrading ammo based upgrade, checks for infinite ammo
-							if (up->mounts[i].ammo&&up->mounts[i].ammo!=-1&&mounts[jkmod].ammo!=-1) {
+							if (isammo&&up->mounts[i].ammo&&up->mounts[i].ammo!=-1&&mounts[jkmod].ammo!=-1) {
 								 //remove upgrade-worth, else remove remaining
 								mounts[jkmod].ammo-=(mounts[jkmod].ammo>=up->mounts[i].ammo)?up->mounts[i].ammo:mounts[jkmod].ammo;
 								 //if none left
 								if(!mounts[jkmod].ammo) {
 									///deactivate weapon
-									mounts[jkmod].status=Mount::UNCHOSEN;
+									if(ismissiletype){
+										mounts[jkmod].status=Mount::UNCHOSEN;
+									}
 								}
 							}
 							else {
 								 ///deactivate weapon
 								mounts[jkmod].status=Mount::UNCHOSEN;
+								mounts[jkmod].ammo=-1; //remove all ammo
 							}
 						}
 						break;
