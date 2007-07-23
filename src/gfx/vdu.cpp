@@ -63,11 +63,17 @@ string getUnitNameAndFgNoBase (Unit * target) {
             if(namecolonname==false||reformatName(target->name)==(reformatName(target->getFullname()))){
               
               std::string retval( reformatName(target->getFullname()));
-			  if (confignums&&(""!=fgnstring)) retval+=" #"+fgnstring;
+			  if (confignums&&(""!=fgnstring)) retval+=" : "+fgnstring;
               return retval;
             } else {
-				std::string retval(reformatName(target->name)+" "+((confignums&&(""!=fgnstring))?confignums+":":std::string(":"))+target->getFullname());
-              return retval;
+				if(reformatName(target->name)==(reformatName(target->getFullname()))){
+					std::string retval(reformatName(target->name)+" "+((confignums&&(""!=fgnstring))?(": "+fgnstring):""));
+					return retval;
+				} else {
+					std::string retval(reformatName(target->name)+" : "+target->getFullname());
+					return retval;
+				}
+              
             }
 	  }
 	}	 
