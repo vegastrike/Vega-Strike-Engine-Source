@@ -7006,6 +7006,8 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 								 //we got one, but check if we're trying to sell non-existent ammo
 						if(isammo&&mounts[jkmod].ammo<=0){
 							// whether it's gun ammo or a missile, you can't remove ammo from an infinite source, and you can't remove ammo if there isn't any
+							continue;
+						}else {
 							found=true;
 						}
 								 ///calculate scrap value (if damaged)
