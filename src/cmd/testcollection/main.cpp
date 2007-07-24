@@ -2,89 +2,114 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "unit.h"
-#include "unit_factory.h"
-#ifndef _TEST_
-#error DO NOT INCLUDE WITH VEGASTRIKE...these are regression tests ONLY
-#endif
+#include <time.h>
 
-
-#include "iterator.h"
 #include "collection.h"
 
-#define SIZE 64
+#define SIZE 60000
 
-void Iterate (UnitCollection &c) {
-  Unit * unit=NULL;
-  un_iter ui = c.createIterator();
-  while ((unit = ui.current())!=NULL) {
-    UnitCollection::UnitListNode * uln = ui.pos->next;
-    bool cachunk=false;
-    if (rand()<RAND_MAX/128) {
-      cachunk=true;
-      unit->Kill();
-    }    
-	if (rand()<RAND_MAX/102) {
-	  ui.remove();
-	}
-
-    if (rand()<RAND_MAX/100) {
-      Iterate(c);
-    }
-
-    if (!cachunk&&rand()<RAND_MAX/128) {
-      unit->Kill();
-    }    
-
-    ui.advance();
-  }
+/* to build:
+	g++  -pipe -O2 -DLIST_TESTING=1 -I. -I..  -o testcol ../collection.cpp ./main.cpp
+*/
+Unit* createUnit()
+{
+	return(new Unit(false));
 }
 
-int main () {
-  Unit * unit;
-  srand (124);
-  UnitCollection c;
-  Unit *u[SIZE];
-  unsigned int i;
-  for (unsigned int j=0;j<64;j++) {
-    for (unsigned int k=0;k<64;k++) {
-      for (i=0;i<SIZE;i++) {
-	u[i]= UnitFactory::createUnit(rand()<RAND_MAX/10);
-	c.prepend (u[i]);
-	if (rand()<RAND_MAX/200) {
-	  u[i]->Kill();
+void Iteration(UnitCollection *c,int *levels2)
+{
+	Unit *unit = NULL;
+	++(*levels2);
+	for(un_iter iter = c->createIterator();unit = *iter;) {
+		if((unit = *iter) == NULL) {iter.remove();continue;}
+		int temp = rand();
+		if (temp<RAND_MAX/400)
+			unit->Kill();
+		else if (temp<RAND_MAX/102) {
+			iter.remove();
+			continue;
+		}
+		else if (temp<RAND_MAX/90){
+			Iteration(c,levels2);
+		}
+		++iter;
 	}
-	if (rand()<RAND_MAX/102) {
+}
 
-	  
+int main ()
+{
+	Unit * unit;
+	srand (time(NULL));
+	UnitCollection *c = new UnitCollection;
+	Unit *u[SIZE];
+	time_t seconds;
+	for(int i = 0; i< SIZE;++i){
+		u[i]= createUnit();
 	}
-      }
-    }
-    for (unsigned int i=0;i<10;i++) {
-      un_iter iter = c.createIterator();
-      i=0;  
-      while ((unit = iter.current())!=NULL) {
-	assert (!unit->Killed()&&!unit->zapped);
-	if (rand()<RAND_MAX/8) {
-	  Iterate(c);
+	seconds = time(NULL);
+	for (int i=0;i<(SIZE/2);++i) {
+		c->prepend (u[i]);
 	}
+	seconds = time(NULL) - seconds;
+	printf("constructed list of size : %d  in %d seconds using prepend\n",SIZE/2,seconds);
+	printf("Randomnly inserting %d \n",SIZE/2);
+	int ii = SIZE/2;
+	seconds = time(NULL);
+	while(ii < SIZE){
+		for(un_iter iter = c->createIterator();iter.notDone()&&ii < SIZE;++iter){
+			int rnd = rand();
+			if(rnd < RAND_MAX / 200){
+				iter.postinsert(u[ii]);
+				++ii;
+			}
+			else if(rnd < RAND_MAX / 100){
+				iter.preinsert(u[ii]);
+				++ii;
+			}		
+		}		
+	}
+	seconds = time(NULL) - seconds;
+	printf(".... took %d seconds \n",seconds);		
 	
-	if (rand()<RAND_MAX/400) {
-	  unit->Kill();
+	for(int i = 0;i<SIZE/32;++i){		
+		if (rand()<RAND_MAX/20) 
+			u[i]->Kill();
 	}
-	if (rand()<RAND_MAX/102) {
-	  iter.remove();
+	printf("randomly killed SIZE/32 to start off with \n");
+	
+	
+	
+	printf("beginning unitCollection removal/advance operations\n");
+	seconds = time(NULL);
+	int passes = 0;
+	int levels = 0;
+	while((c->createIterator()).notDone()){
+		++passes;
+		Iteration(c,&levels);
+#if !oldtest
+		c->cleanup();
 	}
+	c->cleanup();
+#else
+		UnitCollection::FreeUnusedNodes();
+	}
+	UnitCollection::FreeUnusedNodes();
+#endif
+	seconds = time(NULL) - seconds;
+	printf("operations took %d seconds \n",seconds);
+	levels = levels / passes;
+	printf("Average number of concurrent iterators %d\n",levels);
+	printf("verifying destruction of units\n");
+	for (unsigned int i=0;i<SIZE;i++) {
+		if(u[i]->zapped != u[i]->killed )
+			printf("Unit at %d is zapped %d  killed %d\n",i,u[i]->zapped,u[i]->killed);
+	}
+	int size = 0;
+	for(un_iter counter = c->createIterator();counter.notDone();++counter){
+		++size;
+	}
+	printf("size of list is verified at %d  : %d killed \n",size,SIZE - size);
 
-	//    printf ("%d %d %d", i,unit->ucref,unit->zapped);
-	iter.advance();
-	i++;
-      }
-      UnitCollection::FreeUnusedNodes();
-    }
-    UnitCollection::FreeUnusedNodes();
-  }
-  for (unsigned int i=0;i<SIZE;i++) {
-    assert (u[i]->zapped==u[i]->killed);
-  }
-  return 0;
+	printf("completed\n");
+	return 0;
 }

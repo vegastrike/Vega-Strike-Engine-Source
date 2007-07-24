@@ -23,29 +23,36 @@ class UnitCollection
 				virtual ~UnitIterator();
 				bool isDone();
 				bool notDone();
-				//removes current unit.
 				virtual void remove();
-				//moves current unit to front of list passed
 				void moveBefore(UnitCollection&);
-				//inserts in front of current
 				virtual void preinsert(class Unit*);
-				// inserts after current
 				virtual void postinsert(class Unit *unit);
-				//advances the counter
 				virtual void advance();
-				//Returns next unit in list
 				Unit* next();
 				
 				virtual inline class Unit* current() { return(this->operator*());}
 				UnitIterator& operator=( const UnitIterator&);
-				const UnitIterator operator ++(int);
-				const UnitIterator& operator ++();
-				virtual class Unit * operator * ();
+				const inline UnitIterator operator ++(int)
+				{	
+					UnitCollection::UnitIterator tmp(*this);
+					advance();
+					return(tmp);
+				}
+				const inline UnitIterator& operator ++() 
+				{
+					advance();
+					return(*this);
+				}
+				virtual inline class Unit * operator * ()
+				{
+					if(col && it != col->u.end())
+						return(*it);
+					return(NULL);
+				}
 				std::list<class Unit*>::iterator it;
+				friend class UnitCollection;
 			protected:
-				// Pointer to list
 				UnitCollection *col;
-				// Current position in list
 
 		};
 
@@ -68,56 +75,42 @@ class UnitCollection
 				const UnitCollection *col;
 				std::list<class Unit*>::const_iterator it;
 		};
-		// For backwards compatibility: no difference between fast and regular
 		typedef ConstIterator ConstFastIterator;
 		typedef UnitIterator FastIterator;
 
 		UnitCollection();
 		UnitCollection (const UnitCollection&);
 		~UnitCollection();
-		// Returns iterators of list in "this" object
 		UnitIterator createIterator();
 		FastIterator fastIterator();
 		ConstIterator constIterator() const { return(ConstIterator(this));}
 		ConstFastIterator constFastIterator() const { return(ConstFastIterator(this));}
 
-		// prepend unit to beginning of list if not in list
 		void insert_unique(Unit*);
-
-		// Check if list is empty
 		bool empty() const { return(u.empty()); }
-		// adds unit to beginning of list
 		void prepend(Unit*);
-		// adds remainder of list pointed to by UnitIterator to start of this list
 		void prepend(UnitIterator*);
-		// adds unit to end of list
 		void append(class Unit*);
-		// adds remainder of list pointed to by UnitIterator to end of this list
 		void append(UnitIterator*);
-		// Inserts elements into list anywhere.
 		std::list<Unit*>::iterator insert(std::list<Unit*>::iterator, Unit*);
-		// removes elements from list, beginning state
 		void clear();
-		// checks if a unit is in the list
 		bool contains(const class Unit*) const;
-		// unreferences units before removing them
 		std::list<class Unit*>::iterator erase(std::list<class Unit*>::iterator);
-		// removes each instance of unit in list, unref'ing each
 		bool remove(const class Unit*);
-		// Copy all units in other list, killed and otherwise
 		const UnitCollection& operator= (const UnitCollection&);
-		// traverses list and removes invalid units
-		void cleanup();
-
+		static void cleanup();
 		const int size() const { return(u.size());}
+		
 		std::list<class Unit*> u;
 		void reg(UnitCollection::UnitIterator*);
 		void unreg(UnitCollection::UnitIterator*);
 		
+		
 	private:
-		// Removes elements from list, beginning state
 		void destr();
 		std::vector<class UnitCollection::UnitIterator*> activeIters;
+		std::vector<std::list<class Unit*>::iterator> removedIters;
+		static std::vector<class Unit*> removedUnits;
 };
 
 typedef UnitCollection::UnitIterator un_iter;

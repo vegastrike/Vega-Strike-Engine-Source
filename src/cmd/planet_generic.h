@@ -102,7 +102,7 @@ public:
 			virtual void advance() 
 			{
 				if(current() != NULL){
-				Unit *cur = *pos;
+					Unit *cur = *pos;
 					if (cur->isUnit()==PLANETPTR) {
 						for(un_iter tmp(((Planet *)cur)->satellites.createIterator()); tmp.notDone(); ++tmp) {
 							localCollection.append((*tmp));
