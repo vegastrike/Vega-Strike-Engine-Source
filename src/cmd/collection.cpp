@@ -323,11 +323,10 @@ void UnitCollection::clear()
 
 void UnitCollection::destr()
 {
-	cleanup();
 	for(list<Unit*>::iterator it = u.begin();it!=u.end();++it) {
-		(*it)->UnRef();
+		if(*it)
+			(*it)->UnRef();
 	}
-	u.clear();
 	for(vector<UnitIterator*>::iterator t = activeIters.begin();t != activeIters.end(); ++t)
 		(*t)->col = NULL;		
 }
