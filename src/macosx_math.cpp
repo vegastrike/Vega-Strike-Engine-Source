@@ -111,7 +111,7 @@ extern "C" {
 int float_to_int (float a) {
   int maxint= 0x7ffffff;
   int minint=-0x8000000;
-  if (a<maxint&&a>minint) return a;
+  if (a<maxint&&a>minint) return(int(a));
   if (a>0) return maxint;
   if (a<0) return minint;
   return 0;
@@ -119,7 +119,7 @@ int float_to_int (float a) {
 int double_to_int (double a) {
   int maxint= 0x7ffffff;
   int minint=-0x8000000;
-  if (a<maxint&&a>minint) return a;
+  if (a<maxint&&a>minint) return(int(a));
   if (a>0) return maxint;
   if (a<0) return minint;
   return 0;

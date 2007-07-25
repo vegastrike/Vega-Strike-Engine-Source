@@ -391,8 +391,8 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   static float mintimetoswitch = XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","MinTimeToSwitchTargets","3"));
   static float minnulltimetoswitch = XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","MinNullTimeToSwitchTargets","5"));
   //static float targetswitchtime = XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","TimeUntilSwitch","20"));	
-  static int minnumpollers = XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","MinNumberofpollersperframe","5")); // maximum number of vessels allowed to search for a target in a given physics frame
-  static int maxnumpollers = XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","MaxNumberofpollersperframe","49")); // maximum number of vessels allowed to search for a target in a given physics frame
+  static int minnumpollers = float_to_int(XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","MinNumberofpollersperframe","5"))); // maximum number of vessels allowed to search for a target in a given physics frame
+  static int maxnumpollers = float_to_int(XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","MaxNumberofpollersperframe","49"))); // maximum number of vessels allowed to search for a target in a given physics frame
   static int numpollers[2]={maxnumpollers,maxnumpollers};
 
   static float nextframenumpollers[2]={maxnumpollers,maxnumpollers};
@@ -408,8 +408,8 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
     prevpollindex[1]=pollindex[1];
     pollindex[hastarg]=0;
     targettimer=UniverseUtil::GetGameTime();
-    numpollers[0]=nextframenumpollers[0];
-    numpollers[1]=nextframenumpollers[1];
+    numpollers[0]=float_to_int(nextframenumpollers[0]);
+    numpollers[1]=float_to_int(nextframenumpollers[1]);
   }
   pollindex[hastarg]++; // count number of craft touched - will use in the next physics frame to spread out the vessels actually chosen to be processed among all of the vessels being touched
   if(numpolled[hastarg]>numpollers[hastarg]){ // over quota, wait until next physics frame

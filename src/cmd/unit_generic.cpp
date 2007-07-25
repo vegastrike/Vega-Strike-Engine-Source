@@ -4620,7 +4620,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 	if (degrees>=20&&degrees<35) {
 		//DAMAGE MOUNT
 		if (randnum>=.65&&randnum<.9) {
-			image->ecm*=dam;
+			image->ecm*=float_to_int(dam);
 		}
 		else if (GetNumMounts()) {
 			unsigned int whichmount=rand()%GetNumMounts();
@@ -4628,7 +4628,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 				DestroyMount(&mounts[whichmount]);
 			}
 			else if (mounts[whichmount].ammo>0&&randnum>=.75) {
-				mounts[whichmount].ammo*=dam;
+				mounts[whichmount].ammo*=float_to_int(dam);
 			}
 			else if (randnum>=.7) {
 				mounts[whichmount].time_to_lock+=(100-(100*dam));
@@ -4681,7 +4681,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 				do {
 					cargorand=(cargorand_o+i)%image->cargo.size();
 				} while ((image->cargo[cargorand].quantity==0||image->cargo[cargorand].mission)&&++i<image->cargo.size());
-				image->cargo[cargorand].quantity*=dam;
+				image->cargo[cargorand].quantity*=float_to_int(dam);
 			}
 		}
 		damages |= CARGOFUEL_DAMAGED;
@@ -4762,7 +4762,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 		if (randnum>=.9) {
 			static char max_shield_leak=(char)mymax(0.0,mymin(100.0,XMLSupport::parse_float(vs_config->getVariable("physics","max_shield_leak","90"))));
 			static char min_shield_leak=(char)mymax(0.0,mymin(100.0,XMLSupport::parse_float(vs_config->getVariable("physics","max_shield_leak","0"))));
-			char newleak=mymax(min_shield_leak,mymax(max_shield_leak,(char)((randnum-.9)*10.0*100.0)));
+			char newleak=float_to_int(mymax(min_shield_leak,mymax(max_shield_leak,(char)((randnum-.9)*10.0*100.0))));
 			if (shield.leak<newleak)
 				shield.leak=newleak;
 		}
@@ -4782,7 +4782,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 			this->maxenergy*=dam;
 		}
 		else if (randnum>=.2) {
-			this->jump.damage+=100*(1-dam);
+			this->jump.damage+= float_to_int(100*(1-dam));
 		}
 		else {
 			if (image->repair_droid>0)
@@ -4852,8 +4852,8 @@ void Unit::Kill(bool erasefromsave, bool quitting)
 	if (docked&(DOCKING_UNITS)) {
 		static float survival = XMLSupport::parse_float( vs_config->getVariable("physics","survival_chance_on_base_death","0.1") );
 		static float player_survival = XMLSupport::parse_float( vs_config->getVariable("physics","player_survival_chance_on_base_death","1.0") );
-		static int i_survival = (RAND_MAX*survival);
-		static int i_player_survival = (RAND_MAX*player_survival);
+		static int i_survival = float_to_int((RAND_MAX*survival));
+		static int i_player_survival = float_to_int((RAND_MAX*player_survival));
 
 		vector <Unit *> dockedun;
 		unsigned int i;
@@ -5220,7 +5220,7 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
 		}
 	}
 								 //short fix
-	unsigned int biggerthan=*targ;
+	unsigned int biggerthan=float_to_int(*targ);
 	float absdamage = damage>=0?damage:-damage;
 	float denom=(*targ+hull);
 	percent = (denom>absdamage&&denom!=0)?absdamage/denom:(denom==0?0.0:1.0);
@@ -5499,9 +5499,9 @@ void WarpPursuit(Unit* un, StarSystem * sourcess, std::string destination)
 	if (AINotUseJump) {
 		static float seconds_per_parsec=XMLSupport::parse_float(vs_config->getVariable("physics","seconds_per_parsec","10"));
 		float ttime=(SystemLocation(sourcess->getFileName())-SystemLocation(destination)).Magnitude()*seconds_per_parsec;
-		un->jump.delay+=ttime;
+		un->jump.delay+=float_to_int(ttime);
 		sourcess->JumpTo(un,NULL,destination,true,true);
-		un->jump.delay-=ttime;
+		un->jump.delay-=float_to_int(ttime);
 	}
 
 }
@@ -8909,12 +8909,12 @@ void Unit::ImportPartList (const std::string& category, float price, float price
 		if (c.category==category) {
 
 			static float aveweight = fabs(XMLSupport::parse_float (vs_config->getVariable ("cargo","price_recenter_factor","0")));
-			c.quantity=quantity-quantdev;
+			c.quantity=float_to_int(quantity-quantdev);
 			float baseprice=c.price;
 			c.price*=price-pricedev;
 
 			//stupid way
-			c.quantity+=(quantdev*2+1)*((double)rand())/(((double)RAND_MAX)+1);
+			c.quantity+=float_to_int((quantdev*2+1)*((double)rand())/(((double)RAND_MAX)+1));
 			c.price+=pricedev*2*((float)rand())/RAND_MAX;
 			c.price=fabs(c.price);
 			c.price=(c.price +(baseprice*aveweight))/ (aveweight+1);
@@ -8932,7 +8932,7 @@ void Unit::ImportPartList (const std::string& category, float price, float price
 					renormprice *= (maxpricequantadj-minpricequantadj);
 					renormprice+=1;
 					if (renormprice>.001) {
-						c.quantity/=renormprice;
+						c.quantity/=float_to_int(renormprice);
 						if (c.quantity<1)
 							c.quantity=1;
 					}

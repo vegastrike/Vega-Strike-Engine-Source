@@ -1128,7 +1128,7 @@ using namespace UnitXML;
         jump.warpDriveRating=parse_float((*iter).value);
         break;
   case DAMAGE:
-	  jump.damage=parse_float((*iter).value);  //short fix
+	  jump.damage=float_to_int(parse_float((*iter).value));  //short fix
 	  break;
   case DELAY:
 	//serialization covered in LoadXML

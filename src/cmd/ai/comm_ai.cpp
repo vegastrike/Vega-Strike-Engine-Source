@@ -159,7 +159,7 @@ static int InList (std::string item, Unit * un) {
       }
     }
   }
-  return numcontr;
+  return(float_to_int(numcontr));
 }
 
 void CommunicatingAI::UpdateContrabandSearch () {
@@ -217,7 +217,7 @@ void CommunicatingAI::Destroy(){
 		Unit * target = _Universe->AccessCockpit(i)->GetParent();
 		if (target) {
 			FSM * fsm = FactionUtil::GetConversation(this->parent->faction,target->faction);	
-			if (fsm->StopAllSounds(parent->pilot->getGender())) {
+			if (fsm->StopAllSounds((unsigned char)(parent->pilot->getGender()))) {
                           _Universe->AccessCockpit(i)->SetStaticAnimation ();
                           _Universe->AccessCockpit(i)->SetStaticAnimation ();
                           

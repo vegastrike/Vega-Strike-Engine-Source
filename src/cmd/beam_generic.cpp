@@ -80,7 +80,7 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
   //int numvertex=mymax(48,(doscoop?(4*radslices+1)*longslices*4:0));
   static GFXVertexList *_vlist = 0;
   if (!_vlist) {
-      int numvertex=mymax(48,(4*radslices+1)*longslices*4);
+      int numvertex=float_to_int(mymax(48,(4*radslices+1)*longslices*4));
       GFXColorVertex *beam = new GFXColorVertex[numvertex]; //regretably necessary: radslices and longslices come from the config file... so it's at runtime.
       memset(beam,0,sizeof(*beam)*numvertex);
   
