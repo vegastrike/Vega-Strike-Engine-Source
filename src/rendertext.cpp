@@ -62,10 +62,9 @@ return 0;
 // Draw text, used by the console, should be private, use conoutf to print to the console {{{
 void RText::draw_text(std::string &str, float left, float top, int gl_num)
 {
-    int x = left;
-    int y = top;
-
-    int i;
+    int x = float_to_int(left);
+    int y = float_to_int(top);
+	
     std::string::iterator iter = str.begin();
     GFXColor foreground(1, 1, 1, 1);
     GFXColor background(0.05f, 0.05f, 0.2f, 0.5f);
@@ -127,7 +126,8 @@ void RText::renderconsole()// render buffer
 void RText::conline(std::string &sf, bool highlight)        // add a line to the console buffer
 {
 	{
-		unsigned int search =0;
+		// std::string::npos could be negative, and comparing to unsigned int wont fly
+		int search =0;
 		unsigned int lastsearch = 0;
 		for(; (search = sf.find("/r"))!=std::string::npos ; ) {
 			sf.replace(lastsearch, search-lastsearch, "");

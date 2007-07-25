@@ -288,11 +288,11 @@ Mesh * Mesh::getLOD (float lod, bool bBypassDamping) {
 		      if (lod<orig[i].lodsize) 
 			  lodoffs = float_to_int((i<numlods-1)?(orig[i+1].lodsize-orig[i].lodsize)/LOD_HYSTHERESIS_DIVIDER:0.0f); else
 			  lodoffs = float_to_int((i>0)?(orig[i-1].lodsize-orig[i].lodsize)/LOD_HYSTHERESIS_DIVIDER:0.0f);
-              int maxenlargement = (int)(orig[i].lodsize*LOD_HYSTHERESIS_MAXENLARGEMENT_FACTOR)-orig[i].lodsize;
+              int maxenlargement = float_to_int((orig[i].lodsize*LOD_HYSTHERESIS_MAXENLARGEMENT_FACTOR)-orig[i].lodsize);
               if ((lodoffs>0)&&(lodoffs>maxenlargement)) lodoffs=maxenlargement; //Avoid excessive enlargement of low-detail LOD levels, when LOD levels are far apart.
 		  };
 		  if ((lod<(orig[i].lodsize+lodoffs))&&(lod>maxlodsize)) {
-		      maxlodsize = orig[i].lodsize;
+		      maxlodsize = float_to_int(orig[i].lodsize);
 		      retval = &orig[i];
 		  } else {
 		      break;

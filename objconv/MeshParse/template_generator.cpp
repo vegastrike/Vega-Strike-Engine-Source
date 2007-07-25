@@ -849,7 +849,7 @@ void UnitEndElement(const string &name, XML * xml) {
 	  float limit = xpf(LookUp (engineLimitLookup (),xml->energy_recharge));
 	  limit = xml->energy_limit-limit;
 	  if (limit>0) {
-		  int numcap = limit/100;
+		  int numcap = int(limit/100);
 		  for (int i=0;i<numcap;++i) {
 			  fprintf (xml->tfp,"	<upgrade file=\"add_reactor_capacitance\"/>\n");
 		  }

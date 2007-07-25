@@ -114,7 +114,7 @@ void NewButton::draw(void)
 void NewButton::drawCycleBorder(float lineWidth) {
 	if(m_cycleStepCount <= 0) {
 		// We need to figure out how many steps to use.
-		m_cycleStepCount = m_variableBorderCycleTime * CYCLE_STEPS_PER_SECOND;
+		m_cycleStepCount = float_to_int(m_variableBorderCycleTime * CYCLE_STEPS_PER_SECOND);
 	}
 
 	const double elapsedTime = getNewTime();

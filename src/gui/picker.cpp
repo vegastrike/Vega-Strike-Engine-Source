@@ -142,7 +142,7 @@ int Picker::selectedItem(void) {
 // Find the cell for a mouse point.
 PickerCell* Picker::cellForMouse(const Point& point) {
     if(m_rect.inside(point)) {
-        const int index = (m_rect.top() - point.y) / totalCellHeight() + m_scrollPosition;
+        const int index = float_to_int((m_rect.top() - point.y) / totalCellHeight() + m_scrollPosition);
         if(index < m_displayCells.size()) {
             // It's within the cells we are displaying.
             return m_displayCells[index].cell;
@@ -230,7 +230,7 @@ void Picker::recalcDisplay(void) {
     if(m_scroller) {
         // Update the scroller's view of the number of lines, and try to preserve the scroll position.
         int oldScrollPosition = m_scrollPosition;
-        const int visibleCells = m_rect.size.height / totalCellHeight();
+        const int visibleCells = float_to_int(m_rect.size.height / totalCellHeight());
         m_scroller->setRangeValues(m_displayCells.size()-1, visibleCells);
         m_scroller->setScrollPosition(oldScrollPosition);
     }
@@ -252,7 +252,7 @@ void Picker::scrollToCell(const PickerCell* cell, bool middle) {
 
     for(int i=0; i<m_displayCells.size(); i++) {
         if(cell == m_displayCells[i].cell) {
-            const int visibleCells = m_rect.size.height / totalCellHeight();
+            const int visibleCells = float_to_int(m_rect.size.height / totalCellHeight());
 			if(middle) {
 				// Regardless of where cell is, try to put it in the middle of
 				//  the visible area.

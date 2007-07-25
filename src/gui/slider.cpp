@@ -70,7 +70,7 @@ void Slider::setMaxMin(int max, int min) {
     m_minValue = min;
 
     // Set default page size
-    const int pageSize = (float)(max - min) / 10.0 + 0.5;
+    const int pageSize = float_to_int((max - min) / 10.0 + 0.5);
     setPageSize(pageSize);
 }
 
@@ -247,13 +247,13 @@ bool Slider::processMouseDrag(const InputEvent& event) {
                     //  total range.
                     const float totalMouseLength = (1.0-m_thumbLength) * m_rect.size.height;
                     const int totalRange = m_maxValue - m_minValue;
-                    const int positionChange = (m_buttonDownMouse-event.loc.y)*totalRange/totalMouseLength + 0.5;
+                    const int positionChange = float_to_int((m_buttonDownMouse-event.loc.y)*totalRange/totalMouseLength + 0.5);
                     setPosition(m_buttonDownPosition + positionChange);
                     return true;
             } else {
                     const float totalMouseLength = (1.0-m_thumbLength) * m_rect.size.width;
                     const int totalRange = m_maxValue - m_minValue;
-                    const int positionChange = (event.loc.x-m_buttonDownMouse)*totalRange/totalMouseLength + 0.5;
+                    const int positionChange = float_to_int((event.loc.x-m_buttonDownMouse)*totalRange/totalMouseLength + 0.5);
                     setPosition(m_buttonDownPosition + positionChange);
                     return true;
             }

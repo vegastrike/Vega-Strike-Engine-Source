@@ -1201,7 +1201,7 @@ void UpgradingInfo::SelectLastSelected() {
 	if (lastselected.last) {
     int ours = CargoList->DoMouse(lastselected.type, lastselected.x, lastselected.y, lastselected.button, lastselected.state);
     if (ours) {
-      ProcessMouse(lastselected.type, lastselected.x, lastselected.y, lastselected.button, lastselected.state);
+      ProcessMouse(lastselected.type, float_to_int(lastselected.x), float_to_int(lastselected.y), lastselected.button, lastselected.state);
       char *buy_name = CargoList->GetSelectedItemName();
       
       if (buy_name) {

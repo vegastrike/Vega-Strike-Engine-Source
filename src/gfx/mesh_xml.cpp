@@ -442,7 +442,7 @@ void Mesh::beginElement(MeshXML * xml, const string &name, const AttributeList &
           if (tmp>1)
             xml->mesh->alphatest=255;
           else if (tmp>0&&tmp<=1)
-            xml->mesh->alphatest=tmp*255.0f;
+            xml->mesh->alphatest=float_to_int(tmp*255.0f);
           else xml->mesh->alphatest=0;
 	}
 	break;
