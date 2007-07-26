@@ -87,7 +87,7 @@ class UnitCollection
 		ConstFastIterator constFastIterator() const { return(ConstFastIterator(this));}
 
 		void insert_unique(Unit*);
-		bool empty() const { return(u.empty()); }
+		bool empty() const { if(u.size() - removedIters.size() > 0) return false;return true; }
 		void prepend(Unit*);
 		void prepend(UnitIterator*);
 		void append(class Unit*);

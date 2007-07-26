@@ -326,6 +326,8 @@ void UnitCollection::destr()
 	for(list<Unit*>::iterator it = u.begin();it!=u.end();++it) {
 		if(*it)
 			(*it)->UnRef();
+			(*it) = NULL;
+			
 	}
 	for(vector<UnitIterator*>::iterator t = activeIters.begin();t != activeIters.end(); ++t)
 		(*t)->col = NULL;		
