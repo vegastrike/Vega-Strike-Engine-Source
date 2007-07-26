@@ -460,6 +460,13 @@ namespace BaseUtil {
 		base->InitCallbacks();
 	}
 
+	void refreshBaseComputerUI(const Cargo *carg) {
+		BaseComputer::dirty=true;
+		if (carg) {
+			BaseComputer::dirtyCargo=*carg;
+		}
+	}
+
 	void ExitGame()
 	{
 		CockpitKeys::QuitNow();

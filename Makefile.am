@@ -430,6 +430,7 @@ endif
 
 LIBCMDSERVER = \
   src/cmd/atmosphere_server.cpp \
+  src/cmd/base_util_server.cpp \
   src/cmd/beam_server.cpp \
   src/cmd/bolt_server.cpp \
   src/cmd/unit_factory_server.cpp \

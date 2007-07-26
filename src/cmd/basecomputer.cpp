@@ -71,6 +71,9 @@ struct dirent { char d_name[1]; };
 //end for directory thing
 extern const char * DamagedCategory;
 
+bool BaseComputer::dirty;
+Cargo BaseComputer::dirtyCargo;
+
 static GFXColor UnsaturatedColor(float r, float g, float b, float a=1.0f) {
   GFXColor ret(r,g,b,a);
   return ret;
@@ -1821,7 +1824,7 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo& item, Transaction
                         if (commitFixButton) {
                           commitFixButton->setHidden(false);
                           commitFixButton->setLabel("Fix");
-                          commitFixButton->setCommand("FixUpgrade");
+		  commitFixButton->setCommand("FixUpgrade");
                           unhidden=false;
                         }
                       }
@@ -2593,7 +2596,9 @@ Cargo* BaseComputer::selectedItem(void) {
 // Update the transaction controls after a transaction.
 void BaseComputer::updateTransactionControls(const Cargo& item, bool skipFirstCategory) {
     // Go reselect the item.
-    assert(m_selectedList != NULL);
+    if (m_selectedList == NULL) {
+        return;
+    }
     const bool success = scrollToItem(m_selectedList->picker, item, true, skipFirstCategory);
     // And scroll to that item in the other picker, too.
     TransactionList& otherList = ( (&m_transList1==m_selectedList)? m_transList2 : m_transList1 );
@@ -2628,6 +2633,7 @@ int BaseComputer::maxQuantityForPlayer(const Cargo& item, int suggestedQuantity)
 
 	return result;
 }
+
 static void eliminateZeroCargo(Unit * un) {
   for (int i=un->numCargo()-1;i>=0;--i) {
     if (un->GetCargo(i).quantity==0)
@@ -2635,6 +2641,19 @@ static void eliminateZeroCargo(Unit * un) {
   }
   
 }
+
+void BaseComputer::draw() {
+    if (BaseComputer::dirty && m_player.GetUnit()) {
+        eliminateZeroCargo(m_player.GetUnit());
+        // Reload the UI -- inventory has changed.  Because we reload the UI, we need to 
+        //  find, select, and scroll to the thing we bought.  The item might be gone from the
+        //  list (along with some categories) after the transaction.
+        loadCargoControls();
+        updateTransactionControls(BaseComputer::dirtyCargo);
+        recalcTitle();
+    }
+}
+
 // Buy some items from the Cargo list.  Use -1 for quantity to buy all of the item.
 bool BaseComputer::buySelectedCargo(int requestedQuantity) {
     Unit* playerUnit = m_player.GetUnit();
@@ -3518,16 +3537,12 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
       const float price = m_part.price;// * (1-usedValue(percent));
       if (_Universe->AccessCockpit()->credits >= price) {
           // Have enough money.  Buy it.
-          _Universe->AccessCockpit()->credits -= price;
+		  _Universe->AccessCockpit()->credits -= price;
+          if (Network) {
+        	  _Universe->AccessCockpit()->credits = 0;
+          }
           // Upgrade the ship.
           playerUnit->Upgrade(m_newPart, m_selectedMount, m_selectedTurret, m_addMultMode, true, percent, m_theTemplate);
-          if (Network!=NULL) {
-            int playernum = _Universe->whichPlayerStarship( playerUnit );
-            if (playernum>=0) {
-              Network[playernum].cargoRequest( playerUnit->GetSerial(), baseUnit->GetSerial(),
-                  m_part.GetContent(), 1, m_selectedMount, m_selectedTurret);
-            }
-          }
           static bool allow_special_with_weapons=XMLSupport::parse_bool(vs_config->getVariable("physics","special_and_normal_gun_combo","true"));
           if (!allow_special_with_weapons) {
             playerUnit->ToggleWeapon (false, /*backwards*/true);
@@ -3737,17 +3752,11 @@ void BaseComputer::SellUpgradeOperation::concludeTransaction(void) {
     playerUnit->canDowngrade(m_newPart, m_selectedMount, m_selectedTurret, percent, m_downgradeLimiter);
     const float price = m_part.price * usedValue(percent);
     // Adjust the money.
-    _Universe->AccessCockpit()->credits += price;
+    if (!Network) {
+        _Universe->AccessCockpit()->credits += price;
+    }
     // Change the ship.
     if(playerUnit->Downgrade(m_newPart, m_selectedMount, m_selectedTurret, percent, m_downgradeLimiter)) {
-		if (Network!=NULL) {
-			int playernum = _Universe->whichPlayerStarship( playerUnit );
-			if (playernum>=0) {
-				// Do not send request quite yet if it is an upgrade cargo.
-				Network[playernum].cargoRequest( baseUnit->GetSerial(), playerUnit->GetSerial(),
-                    m_part.GetContent(), 1, m_selectedMount, m_selectedTurret);
-			}
-		}
         // Remove the item from the ship, since we sold it, and add it to the base.
         m_part.quantity = 1;
         m_part.price = baseUnit->PriceCargo(m_part.content);
@@ -3770,7 +3779,9 @@ bool BaseComputer::buyUpgrade(const EventCommandId& command, Control* control) {
 			if (playerUnit) {
 				Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
 				BasicRepair(playerUnit);
-				assert(m_selectedList != NULL);				
+				if (m_selectedList == NULL) {
+					return true;
+				}
 				loadUpgradeControls();
 				updateTransactionControls(itemCopy, true);
 				m_selectedList->picker->selectCell(NULL);       // Turn off selection.

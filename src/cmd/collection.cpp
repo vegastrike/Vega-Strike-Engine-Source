@@ -187,7 +187,7 @@ void UnitCollection::ConstIterator::advance()
 	while(it != col->u.end()) {
 		if((*it) == NULL)
 			++it;
-		if((*it)->Killed())
+		else if((*it)->Killed())
 			++it;
 		else
 			break;

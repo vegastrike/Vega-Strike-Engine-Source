@@ -6498,7 +6498,7 @@ int Unit::CanDockWithMe(Unit * un, bool force)
 }
 
 
-bool Unit::IsCleared (Unit * DockingUnit)
+bool Unit::IsCleared (const Unit * DockingUnit) const
 {
 	return (std::find (image->clearedunits.begin(),image->clearedunits.end(),DockingUnit)!=image->clearedunits.end());
 }
@@ -6510,7 +6510,7 @@ bool Unit::hasPendingClearanceRequests() const
 }
 
 
-bool Unit::isDocked (Unit* d)
+bool Unit::isDocked (const Unit* d) const
 {
 	if (!d)
 		return false;
@@ -7370,8 +7370,26 @@ static bool cell_has_recursive_data(const string &name, int fac, const char*key)
 
 bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage, const Unit * downgradelimit,bool force_change_on_nothing,bool gen_downgrade_list)
 {
-	static bool csv_cell_null_check=XMLSupport::parse_bool(vs_config->getVariable("data","empty_cell_check","true"));
 	percentage=0;
+	if (Network && !_Universe->netLocked() && touchme) {
+		int playernum = _Universe->whichPlayerStarship( this );
+		if (playernum>=0) {
+			ObjSerial buySerial = downgrade?0:serial,
+				sellSerial = downgrade?serial:0;
+			Network[playernum].cargoRequest( buySerial, sellSerial,
+				up->fullname, 1, mountoffset, subunitoffset);
+		}
+		return false;
+	}
+	if (SERVER && touchme && !_Universe->netLocked() && getStarSystem() ) {
+		// Server may not go here if it wants to send an atomic upgrade message.
+		ObjSerial buySerial = downgrade?0:serial,
+			sellSerial = downgrade?serial:0;
+		VSServer->BroadcastCargoUpgrade( serial, buySerial, sellSerial,
+										 up->fullname, 0,0,0,false,0,
+										 mountoffset, subunitoffset, getStarSystem()->GetZone());
+	}
+	static bool csv_cell_null_check=XMLSupport::parse_bool(vs_config->getVariable("data","empty_cell_check","true"));
 	int numave=0;
 	bool cancompletefully=true;
 	bool can_be_redeemed=false;
@@ -8227,9 +8245,6 @@ extern int SelectDockPort(Unit *, Unit*parent);
 //extern unsigned int current_cockpit;
 void Unit::EjectCargo (unsigned int index)
 {
-	if (Network!=NULL&&!SERVER) {
-		return ;				 // NETFIXME: transmit eject cargo request across the net
-	}
 	Cargo * tmp=NULL;
 	Cargo ejectedPilot;
 	Cargo dockedPilot;
@@ -8561,13 +8576,29 @@ int Unit::RemoveCargo (unsigned int i, int quantity,bool eraseZero)
 		fprintf (stderr,"(previously) FATAL problem...removing cargo that is past the end of array bounds.");
 		return 0;
 	}
-	if (quantity>image->cargo[i].quantity)
-		quantity=image->cargo[i].quantity;
+	Cargo *carg = &(image->cargo[i]);
+	if (quantity>carg->quantity)
+		quantity=carg->quantity;
+	if (Network && !_Universe->netLocked()) {
+		int playernum = _Universe->whichPlayerStarship( this);
+		
+		if (playernum>=0) {
+			Network[playernum].cargoRequest( 0, this->serial, carg->GetContent(), quantity, 0, 0);
+		} else {
+			return 0;
+		}
+		return 0;
+	}
 	static bool usemass = XMLSupport::parse_bool(vs_config->getVariable ("physics","use_cargo_mass","true"));
 	if (usemass)
-		Mass-=quantity*image->cargo[i].mass;
-	image->cargo[i].quantity-=quantity;
-	if (image->cargo[i].quantity<=0&&eraseZero)
+		Mass-=quantity*carg->mass;
+	if (SERVER && !_Universe->netLocked() && getStarSystem()) {
+		VSServer->BroadcastCargoUpgrade( this->serial, 0, this->serial, carg->GetContent(),
+							carg->price, carg->mass, carg->volume, carg->mission,
+							quantity, 0, 0, getStarSystem()->GetZone());
+	}
+	carg->quantity-=quantity;
+	if (carg->quantity<=0&&eraseZero)
 		image->cargo.erase (image->cargo.begin()+i);
 	return quantity;
 }
@@ -8575,6 +8606,20 @@ int Unit::RemoveCargo (unsigned int i, int quantity,bool eraseZero)
 
 void Unit::AddCargo (const Cargo &carg, bool sort)
 {
+	if (Network && !_Universe->netLocked()) {
+		int playernum = _Universe->whichPlayerStarship( this);
+		if (playernum>=0) {
+			Network[playernum].cargoRequest( this->serial, 0, carg.GetContent(), carg.quantity, 0, 0);
+		} else {
+			return;
+		}
+		return;
+	}
+	if (SERVER && !_Universe->netLocked() && getStarSystem()) {
+		VSServer->BroadcastCargoUpgrade( this->serial, this->serial, 0, carg.GetContent(),
+								carg.price, carg.mass, carg.volume, carg.mission,
+								carg.quantity, 0, 0, getStarSystem()->GetZone());
+	}
 	static bool usemass = XMLSupport::parse_bool(vs_config->getVariable ("physics","use_cargo_mass","true"));
 	if (usemass)
 		Mass+=carg.quantity*carg.mass;
@@ -8806,18 +8851,16 @@ bool Unit::SellCargo (unsigned int i, int quantity, float &creds, Cargo & carg, 
 	if (i<0||i>=image->cargo.size()||!buyer->CanAddCargo(image->cargo[i])||Mass<image->cargo[i].mass)
 		return false;
 	carg = image->cargo[i];
-	if (Network!=NULL) {
-		int playernum = _Universe->whichPlayerStarship( this);
-		// carg.GetCategory().find("upgrades")!=0 &&
-		if (playernum>=0) {
-			// Do not send request quite yet if it is an upgrade cargo.
-			Network[playernum].cargoRequest( buyer->serial, this->serial, image->cargo[i].content, quantity, 0, 0);
-		}
-	}
 	if (quantity>image->cargo[i].quantity)
 		quantity=image->cargo[i].quantity;
 	carg.price=buyer->PriceCargo (image->cargo[i].content);
-	creds+=quantity*carg.price;
+	if (!Network || _Universe->netLocked()) {
+		// Don't give cash back until server acknowledges purchase.
+		creds+=quantity*carg.price;
+	}
+	if (SERVER && !_Universe->netLocked()) {
+		VSServer->sendCredits(serial, creds);
+	}
 	carg.quantity=quantity;
 	buyer->AddCargo (carg);
 
@@ -8837,7 +8880,6 @@ bool Unit::SellCargo (const std::string &s, int quantity, float & creds, Cargo &
 	return SellCargo (mycargo-image->cargo.begin(),quantity,creds,carg,buyer);
 }
 
-
 bool Unit::BuyCargo (const Cargo &carg, float & creds)
 {
 	if (!CanAddCargo(carg)||creds<carg.quantity*carg.price) {
@@ -8845,6 +8887,12 @@ bool Unit::BuyCargo (const Cargo &carg, float & creds)
 	}
 	AddCargo (carg);
 	creds-=carg.quantity*carg.price;
+	if (Network && !_Universe->netLocked()) {
+		creds=0;
+	}
+	if (SERVER && !_Universe->netLocked()) {
+		VSServer->sendCredits(serial, creds);
+	}
 	return true;
 }
 
@@ -8852,14 +8900,6 @@ bool Unit::BuyCargo (const Cargo &carg, float & creds)
 bool Unit::BuyCargo (unsigned int i, unsigned int quantity, Unit * seller, float&creds)
 {
 	Cargo soldcargo= seller->image->cargo[i];
-	if (Network!=NULL) {
-		int playernum = _Universe->whichPlayerStarship( this);
-		// soldcargo.GetCategory().find("upgrades")!=0 &&
-		if (playernum>=0) {
-			// Do not send request quite yet if it is an upgrade cargo.
-			Network[playernum].cargoRequest( this->serial, seller->serial, soldcargo.GetContent(), quantity, 0, 0);
-		}
-	}
 	if (quantity>(unsigned int)soldcargo.quantity)
 		quantity=soldcargo.quantity;
 	if (quantity==0)

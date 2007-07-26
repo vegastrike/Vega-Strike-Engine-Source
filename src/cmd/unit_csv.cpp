@@ -432,6 +432,9 @@ void AddLights (Unit * thus, Unit::XML &xml, const string &lights)
 
 static void ImportCargo(Unit * thus, const string &imports) 
 {
+  if (Network!=NULL) {
+    return; // Server takes care of this.
+  }
   string::size_type where,when,ofs=0;
   {   
       int nelem=0;
@@ -443,17 +446,13 @@ static void ImportCargo(Unit * thus, const string &imports)
     if ((when=imports.find('}',where+1))!=string::npos) {
       string::size_type elemstart = where+1, elemend = when;
       ofs = when+1;
-
+      
       string filename = nextElementString(imports,elemstart,elemend);
       double price = nextElementFloat(imports,elemstart,elemend,1);
-      double pricestddev = 0;
-	  if (Network==NULL && !SERVER)
-		  pricestddev = nextElementFloat(imports,elemstart,elemend);
+      double pricestddev = nextElementFloat(imports,elemstart,elemend);
       double quant = nextElementFloat(imports,elemstart,elemend,1);
-      double quantstddev = 0;
-	  if (Network==NULL && !SERVER)
-		  quantstddev = nextElementFloat(imports,elemstart,elemend);
-	  
+      double quantstddev = nextElementFloat(imports,elemstart,elemend);
+      
       thus->ImportPartList(filename,price,pricestddev,quant,quantstddev);
     } else ofs=string::npos;
   }

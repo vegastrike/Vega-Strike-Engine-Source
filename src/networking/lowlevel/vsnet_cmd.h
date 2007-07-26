@@ -83,7 +83,7 @@ enum Cmd
 	CMD_PROJECTILE   ,      // Fire a projectile
 	CMD_BALL         ,		// Fire a ball ?
 	CMD_TARGET       ,		// Receive a target request (server side)
-        CMD_CLOAK        ,
+	CMD_CLOAK        ,
                                     // or receive target info (client side)
 	CMD_SCAN         ,		// Receive a scan request (server side)
                                     // or receive target info (client side)
@@ -112,8 +112,10 @@ enum Cmd
 	CMD_CREATEPLANET ,		// From server to clients : server unit creation
 	CMD_CREATEASTER  ,		// From server to clients : server unit creation
 	CMD_CREATEMISSILE,		// From server to clients : server unit creation
-	
+
+	CMD_SNAPCARGO,			// S->C: A full update of the cargo inventory in all ships
 	CMD_CARGOUPGRADE,		// C->S and S->C: buy/sell cargo or upgrade.
+	CMD_CREDITS,            // S->C: updates the number of credits.  Required after a cargo/upgrade transaction.
 	CMD_SHIPSTATS,			// S->C (broadcast): sent when upgrade involves more than just buying/selling cargo.
 	
 	// Account management commands

@@ -32,6 +32,7 @@
 #include "endianness.h"
 #include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
+#include "cmd/unit_const_cache.h"
 #include "configxml.h"
 #include "networking/client.h"
 #include "networking/const.h"
@@ -42,6 +43,7 @@
 #include "lin_time.h"
 #include "vsfilesystem.h"
 #include "cmd/role_bitmask.h"
+#include "cmd/base_util.h"
 #include "gfx/cockpit_generic.h"
 
 #include "networking/lowlevel/vsnet_clientstate.h"
@@ -67,6 +69,11 @@ extern vector<unorigdest *> pendingjump;
 extern Hashtable<std::string, StarSystem, 127> star_system_table;
 typedef vector<Client *>::iterator VC;
 typedef vector<ObjSerial>::iterator ObjI;
+
+extern const Unit* getUnitFromUpgradeName(const string& upgradeName, int myUnitFaction = 0);
+extern int GetModeFromName(const char *);  // 1=add, 2=mult, 0=neither.
+static const string LOAD_FAILED = "LOAD_FAILED";
+extern Cargo* GetMasterPartList(const char *input_buffer);
 
 /*************************************************************/
 /**** Tool functions                                      ****/
@@ -528,6 +535,9 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 		}
     }
 	if (true) { //p1.getDataLength()>0) {
+		
+		_Universe->netLock(true); // Don't bounce any commands back to the server again!
+		
 		NetBuffer netbuf( p1.getData(), p1.getDataLength());
 	    if( outpacket )
 	    {
@@ -963,6 +973,132 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				}
 			}
 			break;
+			case CMD_SNAPCARGO:
+			{
+				ObjSerial ser;
+				Unit *mpl = UnitFactory::getMasterPartList();
+				while ((ser = netbuf.getSerial())!=0) {
+					Unit *un = UniverseUtil::GetUnitFromSerial( ser );
+					// Clear cargo... back to front to make it more efficient.
+					unsigned int i=un->numCargo();
+					while (i>0) {
+						i--;
+						un->RemoveCargo(i, un->GetCargo(i).GetQuantity(),true);
+					}
+					unsigned int numcargo = netbuf.getInt32();
+					for (i=0;i<numcargo;i++) {
+						unsigned int mplind;
+						unsigned int quantity = netbuf.getInt32();
+						Cargo carg = *mpl->GetCargo(netbuf.getString().c_str(), mplind);
+						carg.SetQuantity(quantity);
+						carg.SetPrice(netbuf.getFloat());
+						carg.SetMass(netbuf.getFloat());
+						carg.SetVolume(netbuf.getFloat());
+						un->AddCargo(carg,false);
+					}
+				}
+			}
+			break;
+			case CMD_CARGOUPGRADE:
+			{
+				ObjSerial buyer_ser = netbuf.getSerial();
+				ObjSerial seller_ser = netbuf.getSerial();
+				int quantity = netbuf.getInt32();
+				std::string cargoName = netbuf.getString();
+				float price = netbuf.getFloat();
+				float mass = netbuf.getFloat();
+				float volume = netbuf.getFloat();
+				int mountOffset = ((int)netbuf.getInt32());
+				int subunitOffset = ((int)netbuf.getInt32());
+				Unit *sender = UniverseUtil::GetUnitFromSerial( packet_serial);
+				Unit *buyer = UniverseUtil::GetUnitFromSerial( buyer_ser);
+				Unit *seller = UniverseUtil::GetUnitFromSerial( seller_ser);
+				bool missioncarg=false;
+				
+				unsigned int cargIndex = 0;
+				Cargo *cargptr;
+				if (seller) {
+					cargptr = seller->GetCargo(cargoName, cargIndex);
+				} else {
+					cargptr = GetMasterPartList(cargoName.c_str());
+				}
+				if (!cargptr) {
+					break;
+				}
+				Cargo carg = *cargptr;
+				bool upgrade=false;
+				if (carg.GetCategory().find("upgrades")==0) {
+					upgrade=true;
+				}
+				if (!upgrade) {
+					missioncarg = (mountOffset==1 && subunitOffset==1);
+				}
+				carg.mass = mass;
+				carg.price = price;
+				carg.volume = volume;
+				carg.mission = missioncarg;
+				if (quantity) {
+					if (buyer) {
+						carg.SetQuantity(quantity);
+						buyer->AddCargo(carg, true);
+					}
+					if (seller) {
+						seller->RemoveCargo(cargIndex, quantity, true);
+					}
+				}
+				if (upgrade && (seller==sender || buyer==sender)) {
+					double percent; // not used.
+					const Unit *unitCarg = getUnitFromUpgradeName(carg.GetContent(), seller->faction);
+					if (!unitCarg) break; // not an upgrade, and already did cargo transactions.
+					int multAddMode = GetModeFromName(carg.GetContent().c_str());
+					
+					// Now we're sure it's an authentic upgrade...
+					// Wow! So much code just to perform an upgrade!
+					const string unitDir = GetUnitDir(buyer->name.get().c_str());
+					string templateName;
+					int faction;
+					if (seller==sender) {
+						templateName = unitDir + ".blank";
+						faction = seller->faction;
+					} else {
+						faction = buyer->faction;
+						templateName = unitDir + ".template";
+					}
+					// Get the "limiter" for the upgrade.  Stats can't increase more than this.
+					const Unit * templateUnit = UnitConstCache::getCachedConst(StringIntKey(templateName,faction));
+					if (!templateUnit) {
+						templateUnit = UnitConstCache::setCachedConst(StringIntKey(templateName,faction),
+							UnitFactory::createUnit(templateName.c_str(),true,faction));
+					}
+					if (templateUnit->name == LOAD_FAILED) {
+						templateUnit=NULL;
+					}
+					if(unitCarg->name == LOAD_FAILED) {
+						break;
+					}
+					
+					if (seller==sender) {
+						// Selling it... Downgrade time!
+						if (seller->canDowngrade(unitCarg, mountOffset, subunitOffset, percent, templateUnit)) {
+							seller->Downgrade (unitCarg, mountOffset, subunitOffset, percent, templateUnit);
+						}
+					} else { // buyer==sender
+						// Buying it... Upgrade time!
+						if (buyer->canUpgrade(unitCarg, mountOffset, subunitOffset, multAddMode, true, percent, templateUnit)) {
+							buyer->Upgrade   (unitCarg, mountOffset, subunitOffset, multAddMode, true, percent, templateUnit);
+						}
+					}
+				}
+				BaseUtil::refreshBaseComputerUI(&carg);
+				break;
+			}
+			case CMD_CREDITS:
+				cp = _Universe->isPlayerStarship( this->game_unit.GetUnit());
+				if (cp) {
+					cp->credits=netbuf.getFloat();
+				}
+				BaseUtil::refreshBaseComputerUI(NULL);
+			break;
 			case CMD_STARTNETCOMM :
 #ifdef NETCOMM
 			{
@@ -1208,6 +1344,8 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
                 keeprun = 0;
                 this->disconnect();
         }
+		_Universe->netLock(false);
+		
     }
     return recvbytes;
 }

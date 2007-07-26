@@ -75,6 +75,8 @@ using namespace VSFileSystem;
 extern const Unit* getUnitFromUpgradeName(const string& upgradeName, int myUnitFaction = 0);
 extern int GetModeFromName(const char *);  // 1=add, 2=mult, 0=neither.
 static const string LOAD_FAILED = "LOAD_FAILED";
+// Takes in a category of an upgrade or cargo and returns true if it is any type of mountable weapon.
+extern bool isWeapon (std::string name);
 
 
 void	getZoneInfoBuffer( unsigned short zoneid, NetBuffer & netbuf)
@@ -950,7 +952,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			
 //			ObjSerial sender_ser = packet.getSerial();
             Unit *sender = clt->game_unit.GetUnit();
-			if (!sender) break;
+			if (!sender || !sender->getStarSystem()) break;
 			
 			zone = sender->getStarSystem()->GetZone();
 			
@@ -958,44 +960,81 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			
 			Unit *seller = zonemgr->getUnit( seller_ser, zone);
 			Unit *buyer = zonemgr->getUnit( buyer_ser, zone);
-			if (!buyer || !seller) break;
+			Unit *docked = NULL;
+			{
+				const Unit *un;
+				for (un_kiter ui = sender->getStarSystem()->getUnitList().constIterator(); (un = *ui); ++ui) {
+					if (un->isDocked(sender)) {
+						docked = const_cast<Unit*>(un); // Stupid STL.
+						break;
+					}
+				}
+				if (!docked) {
+					fprintf(stderr, "Player id %d attempted transaction with cargo %s while undocked\n",
+							sender?sender->GetSerial():-1, cargoName.c_str());
+					break;
+				}
+			}
+			if (seller==sender) {
+				buyer=docked;
+			} else {
+				seller=docked;
+				buyer=sender;
+			}
 			
-			Cargo * carg = seller->GetCargo(cargoName, cargIndex);
-			if (!carg) {
-				fprintf(stderr, "Player id %d attempted transaction with NULL cargo %s, %d->%d",
+			Cargo *cargptr = seller->GetCargo(cargoName, cargIndex);
+			if (!cargptr) {
+				fprintf(stderr, "Player id %d attempted transaction with NULL cargo %s, %d->%d\n",
 						sender?sender->GetSerial():-1, cargoName.c_str(),
 						buyer?buyer->GetSerial():-1, seller?seller->GetSerial():-1);
 				break;
 			}
+			Cargo carg=*cargptr;
 			bool upgrade=false;
-			if (carg->GetCategory().find("upgrades")==0) {
+			bool weapon=false;
+			bool didMoney=false;
+			bool didUpgrade=false;
+			if (carg.GetCategory().find("upgrades")==0) {
 				upgrade=true;
+				if (isWeapon(carg.GetCategory())) {
+					weapon=true;
+				}
 			}
-			
+			if (weapon && quantity) {
+				break;
+			}
+
 			Cockpit *buyer_cpt = _Universe->isPlayerStarship(buyer);
 			Cockpit *seller_cpt = _Universe->isPlayerStarship(seller);
-			if (buyer == sender && buyer_cpt) {
-				float creds_before = buyer_cpt->credits;
-				float &creds = buyer_cpt->credits;
-				buyer->BuyCargo(cargIndex, quantity, seller, creds);
-				if (seller_cpt) {
-					seller_cpt->credits += (creds_before-creds);
+			Cockpit *sender_cpt = _Universe->isPlayerStarship(sender);
+			_Universe->netLock(true);
+			if (quantity) {
+				if (buyer == sender && buyer_cpt) {
+					float creds_before = buyer_cpt->credits;
+					float &creds = buyer_cpt->credits;
+					buyer->BuyCargo(cargIndex, quantity, seller, creds);
+					if (seller_cpt) {
+						seller_cpt->credits += (creds_before-creds);
+					}
+				} else if (seller == sender && seller_cpt) {
+					float creds_before = seller_cpt->credits;
+					float &creds = seller_cpt->credits;
+					seller->SellCargo(cargIndex, quantity, creds, carg, buyer);
+					if (buyer_cpt) {
+						buyer_cpt->credits += (creds_before-creds);
+					}
 				}
-			} else if (seller == sender && seller_cpt) {
-				float creds_before = seller_cpt->credits;
-				float &creds = seller_cpt->credits;
-				seller->SellCargo(cargIndex, quantity, creds, *carg, buyer);
-				if (buyer_cpt) {
-					buyer_cpt->credits += (creds_before-creds);
-				}
+				didMoney=true;
 			}
-			if (seller==sender || buyer==sender) {
-				if (!upgrade) break;
-				
+			_Universe->netLock(false);
+			if (!weapon && !quantity) {
+				break;
+			}
+			if (upgrade && (seller==sender || buyer==sender)) {
 				double percent; // not used.
-				const Unit *unitCarg = getUnitFromUpgradeName(carg->GetContent(), seller->faction);
+				const Unit *unitCarg = getUnitFromUpgradeName(carg.GetContent(), seller->faction);
 				if (!unitCarg) break; // not an upgrade, and already did cargo transactions.
-				int multAddMode = GetModeFromName(carg->GetContent().c_str());
+				int multAddMode = GetModeFromName(carg.GetContent().c_str());
 
 				// Now we're sure it's an authentic upgrade...
 				// Wow! So much code just to perform an upgrade!
@@ -1025,17 +1064,54 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				if (seller==sender) {
 					// Selling it... Downgrade time!
 					if (seller->canDowngrade(unitCarg, mountOffset, subunitOffset, percent, templateUnit)) {
-						seller->Downgrade   (unitCarg, mountOffset, subunitOffset, percent, templateUnit);
+						if (weapon) {
+							if (seller_cpt) {
+								didMoney=true;
+								seller_cpt->credits += carg.GetPrice();
+							}
+						}
+						if (didMoney) {
+							_Universe->netLock(true);
+							seller->Downgrade (unitCarg, mountOffset, subunitOffset, percent, templateUnit);
+							_Universe->netLock(false);
+							didUpgrade=true;
+						}
 					}
 				} else { // buyer==sender
 					// Buying it... Upgrade time!
 					if (buyer->canUpgrade(unitCarg, mountOffset, subunitOffset, multAddMode, true, percent, templateUnit)) {
-						buyer->Upgrade   (unitCarg, mountOffset, subunitOffset, multAddMode, true, percent, templateUnit);
+						if (weapon) {
+							if (seller_cpt && seller_cpt->credits > carg.GetPrice()) {
+								seller_cpt->credits -= carg.GetPrice();
+								didMoney=true;
+							}
+						}
+						if (didMoney) {
+							_Universe->netLock(true);
+							buyer->Upgrade   (unitCarg, mountOffset, subunitOffset, multAddMode, true, percent, templateUnit);
+							_Universe->netLock(false);
+							didUpgrade=true;
+						}
 					}
-					//buyer->Repair()??????
-					//buyer->Upgrade()??????
 				}
 			}
+			if (didMoney) {
+				if (!upgrade) {
+					BroadcastCargoUpgrade(sender->GetSerial(),buyer->GetSerial(),seller->GetSerial(),cargoName,
+										  carg.GetPrice(), carg.GetMass(), carg.GetVolume(), carg.GetMissionFlag(),
+										  quantity,0,0,zone);
+				} else if (didUpgrade) {
+					BroadcastCargoUpgrade(sender->GetSerial(),buyer->GetSerial(),seller->GetSerial(),cargoName,
+										  carg.GetPrice(), carg.GetMass(), carg.GetVolume(), false,
+										  weapon?0:1,mountOffset, subunitOffset,zone);
+				}
+				if (sender_cpt) {
+					sendCredits(sender->GetSerial(), sender_cpt->credits);
+				}
+			}
+			// Completed transaction.
+			// Send player new amount of credits.
+			// Broadcast out cargo request.
 		}
 		break;
 		case CMD_TARGET :

@@ -253,7 +253,7 @@ void ZoneMgr::broadcast( ClientWeakPtr fromcltw, Packet * pckt, bool isTcp  )
 		return;
 	}
 	unsigned short zonenum = un->getStarSystem()->GetZone();
-    if( zonenum > zone_list.size() )
+    if( zonenum >= zone_list.size() )
     {
         cerr<<"Trying to send update to nonexistant zone " << zonenum << pckt->getCommand() << endl;
         return;
@@ -274,7 +274,7 @@ void ZoneMgr::broadcast( ClientWeakPtr fromcltw, Packet * pckt, bool isTcp  )
         ClientPtr clt(*i);
 		Unit * un2 = clt->game_unit.GetUnit();
         // Broadcast to other clients
-        if( clt->ingame && ((un2==NULL) || (un->GetSerial() != un2->GetSerial())))
+        if( (isTcp || clt->ingame) && ((un2==NULL) || (un->GetSerial() != un2->GetSerial())))
         {
             COUT << "BROADCASTING " << pckt->getCommand()
                  << " to client #";
@@ -299,6 +299,9 @@ void ZoneMgr::broadcast( ClientWeakPtr fromcltw, Packet * pckt, bool isTcp  )
 // Broadcast a packet to a zone clients with its serial as argument
 void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt, bool isTcp )
 {
+	if (zone >= zone_list.size()) {
+		return;
+	}
     ClientWeakList* lst = zone_list[zone];
     if( lst == NULL ) return;
 
@@ -308,7 +311,8 @@ void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt, bool isTcp )
 
         ClientPtr clt( *i );
 		// Broadcast to all clients including the one who did a request
-		if( clt->ingame /*&& un->GetSerial() != un2->GetSerial()*/ )
+		// Allow packets to non-ingame clients to get lost if requested UDP.
+		if( (isTcp || clt->ingame) /*&& un->GetSerial() != un2->GetSerial()*/ )
 		{
 //			COUT<<endl;
 			if (isTcp) {
@@ -323,6 +327,7 @@ void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt, bool isTcp )
 // Broadcast a packet to a zone clients with its serial as argument but not to the originating client
 void	ZoneMgr::broadcastNoSelf( int zone, ObjSerial serial, Packet * pckt, bool isTcp )
 {
+	if (zone >= zone_list.size()) return;
     ClientWeakList* lst = zone_list[zone];
     if( lst == NULL ) return;
 
@@ -333,7 +338,7 @@ void	ZoneMgr::broadcastNoSelf( int zone, ObjSerial serial, Packet * pckt, bool i
         ClientPtr clt( *i );
 		Unit *broadcastTo = clt->game_unit.GetUnit();
 		// Broadcast to all clients including the one who did a request
-		if( clt->ingame && ((!broadcastTo) || broadcastTo->GetSerial()!=serial))
+		if( (isTcp || clt->ingame) && ((!broadcastTo) || broadcastTo->GetSerial()!=serial))
 		{
 			if (isTcp) {
 				pckt->bc_send( clt->cltadr, clt->tcp_sock);
@@ -352,6 +357,7 @@ void	ZoneMgr::broadcastNoSelf( int zone, ObjSerial serial, Packet * pckt, bool i
 // NETFIXME: Should this be always TCP?
 void	ZoneMgr::broadcastSample( int zone, ObjSerial serial, Packet * pckt, float frequency )
 {
+	if (zone >= zone_list.size()) return;
     ClientWeakList* lst = zone_list[zone];
 	Unit * un;
     if( lst == NULL ) return;
@@ -381,6 +387,7 @@ void	ZoneMgr::broadcastSample( int zone, ObjSerial serial, Packet * pckt, float 
 // Always TCP.
 void	ZoneMgr::broadcastText( int zone, ObjSerial serial, Packet * pckt, float frequency )
 {
+	if (zone >= zone_list.size()) return;
     ClientWeakList* lst = zone_list[zone];
 	Unit * un;
     if( lst == NULL ) return;

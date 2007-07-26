@@ -408,6 +408,7 @@ namespace UnitUtil {
 	}
   void RecomputeUnitUpgrades (Unit * un) {
 	if (un==NULL) return;
+	if (Network) return;
 	un->ReduceToTemplate();
 	unsigned int i;
 	for (i=0;i<un->numCargo();++i) {

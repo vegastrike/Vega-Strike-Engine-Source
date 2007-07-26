@@ -41,6 +41,10 @@ class BaseComputer : public WctlBase<BaseComputer>
 {
 	friend class WctlBase<BaseComputer>;
 public:
+
+    static bool dirty;
+    static Cargo dirtyCargo;
+    
     // The Computer displays that are possible.
     enum DisplayMode {
         CARGO = 0,          // Buy and sell cargo.
@@ -60,6 +64,9 @@ public:
 
     // Start it up!
     virtual void run(void);
+
+    // Check if we are dirty.
+    virtual void draw(void);
 
     // Process a command event from the window. Handled in parent class's WctlCommandTable.
     // virtual bool processWindowCommand(const EventCommandId& command, Control* control);
@@ -272,6 +279,7 @@ protected:
     // VARIABLES
     vector<DisplayMode> m_displayModes;     // List of diaplays to provide.
   public:
+
     UnitContainer m_player;                 // Ship info, etc.
     UnitContainer m_base;                   // The base we are in.
   protected:

@@ -1081,8 +1081,8 @@ class Unit
 		void FreeDockingPort(unsigned int whichport);
 		virtual const std::vector <struct DockingPorts> &DockingPortLocations() { return image->dockingports;}
 		char DockedOrDocking()const {return docked;}
-		bool IsCleared (Unit * dockignunit);
-		bool isDocked ( Unit *dockingUnit);
+		bool IsCleared (const Unit * dockignunit) const;
+		bool isDocked (const Unit *dockingUnit) const;
 		bool UnDock (Unit * unitToDockWith);
 		// Use AI
 		bool RequestClearance (Unit * dockingunit);

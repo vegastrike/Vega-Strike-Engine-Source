@@ -38,6 +38,10 @@ ClientPtr NetServer::addNewClient( SOCKETALT &sock )
 void	NetServer::addClient( ClientPtr clt)
 {
 	Unit * un = clt->game_unit.GetUnit();
+	if (!un) {
+		COUT<<"Error: adding NULL (dead) client! "<<clt->callsign<<endl;
+		return;
+	}
 	COUT<<">>> SEND ENTERCLIENT =( serial #"<<un->GetSerial()<<" )= --------------------------------------"<<endl;
 	Packet packet2;
 	string savestr, xmlstr;
@@ -165,6 +169,7 @@ void	NetServer::addClient( ClientPtr clt)
           }
           LoadMission("",vs_config->getVariable("server","serverscript","import server;server.server();"),false);
         }
+		sendCargoSnapshot(un->GetSerial(), st2->getUnitList());
 	//delete cltsbuf;
 	//COUT<<"<<< SENT ADDED YOU -----------------------------------------------------------------------"<<endl;
 }
@@ -566,7 +571,7 @@ void  NetServer::getZoneInfo( unsigned short zoneid, NetBuffer & netbuf)
         ClientPtr kp( *k );
 
 		// Test if *k is the same as clt in which case we don't need to send info
-		if( kp->ingame)
+		if( true ) // kp->ingame)
 		{
 			Unit *un = kp->game_unit.GetUnit();
 			if (!un)

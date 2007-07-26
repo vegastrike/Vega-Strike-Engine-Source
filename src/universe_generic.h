@@ -62,6 +62,7 @@ protected:
   // the system currently used by the scripting
   StarSystem *script_system;
   bool is_server;
+  bool network_lock;
 
 private:
   ///Many C++ implementations count classes within as friends. (not all)
@@ -70,6 +71,9 @@ private:
   ///A list of all factions 
   
  public:
+  void netLock(bool enable);
+  bool netLocked();
+  
   StarDate	current_stardate;
   bool	isServer() { return is_server;}
   Cockpit * isPlayerStarship (const Unit* fighter);

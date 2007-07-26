@@ -66,6 +66,73 @@ void	NetServer::BroadcastFire( ObjSerial serial, const vector<int> &weapon_indic
 	zonemgr->broadcast( zone, serial, &p, true ); // NETFIXME: Should unfire be TCP?
 }
 
+void NetServer::BroadcastCargoUpgrade(ObjSerial sender, ObjSerial buyer, ObjSerial seller, const std::string &cargo,
+				float price, float mass, float volume, bool mission, unsigned int quantity,
+				int mountOffset, int subunitOffset, unsigned short zone)
+{
+	Packet p;
+	NetBuffer netbuf;
+
+	netbuf.addSerial( buyer ); // If the buyer is the player, it is buying cargo.
+	netbuf.addSerial( seller ); // If seller is the player, it is selling cargo.
+	netbuf.addInt32( quantity );
+	netbuf.addString( cargo );
+	netbuf.addFloat( price );
+	netbuf.addFloat( mass );
+	netbuf.addFloat( volume );
+	if (mission) {
+		netbuf.addInt32(1);
+		netbuf.addInt32(1);
+	} else {
+		netbuf.addInt32( (unsigned int)(mountOffset) );
+		netbuf.addInt32 ((unsigned int)(subunitOffset) );
+	}
+	
+	p.bc_create( CMD_CARGOUPGRADE, sender,
+                 netbuf.getData(), netbuf.getDataLength(),
+                 SENDRELIABLE,
+                 __FILE__, PSEUDO__LINE__(87) );
+	zonemgr->broadcast( zone, sender, &p, true ); // NETFIXME: Should unfire be TCP?
+}
+
+void NetServer::sendCredits(ObjSerial serial, float creds) {
+	Packet p;
+	NetBuffer netbuf;
+	netbuf.addFloat(creds);
+	ClientPtr clt = this->getClientFromSerial(serial);
+	if (!clt) return;
+	p.send( CMD_CREDITS, serial,
+                 netbuf.getData(), netbuf.getDataLength(),
+                 SENDRELIABLE,NULL,clt->tcp_sock,
+                 __FILE__, PSEUDO__LINE__(97) );
+}
+
+void	NetServer::sendCargoSnapshot( ObjSerial cltser, const UnitCollection &list) {
+	ClientPtr clt = this->getClientFromSerial(cltser);
+	if (!clt) return;
+	NetBuffer netbuf;
+	Packet p2;
+	const Unit *un;
+	for (un_kiter iter = list.constIterator(); (un = *iter); ++iter) {
+		if (!un->GetSerial() || un->GetSerial()==cltser) continue;
+		unsigned int numCargo = un->numCargo();
+		if (!numCargo) continue;
+		netbuf.addSerial(un->GetSerial());
+		netbuf.addInt32(numCargo);
+		for (unsigned int i=0;i<numCargo;i++) {
+			const Cargo &carg = un->GetCargo(i);
+			netbuf.addInt32(carg.GetQuantity());
+			netbuf.addString(carg.GetContent());
+			netbuf.addFloat(carg.GetPrice());
+			netbuf.addFloat(carg.GetMass());
+			netbuf.addFloat(carg.GetVolume());
+		}
+	}
+	netbuf.addSerial(0);
+	p2.send( CMD_SNAPCARGO, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
+			 NULL, clt->tcp_sock, __FILE__, PSEUDO__LINE__(196) );
+}
+
 void	NetServer::sendDamages( ObjSerial serial, unsigned short zone, Shield shield, Armor armor, float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color)
 {
   static ObjSerial lastserial;

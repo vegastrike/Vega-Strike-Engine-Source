@@ -1,4 +1,5 @@
 #include <string>
+#include <boost/python/dict.hpp>
 
 #if defined(HAVE_PYTHON)
 //	namespace boost { namespace python { class dict; } }
@@ -69,5 +70,6 @@ namespace BaseUtil {
 	float GetTextWidth(std::string text, Vector widheimult);
 	void LoadBaseInterface(std::string name);
 	void LoadBaseInterfaceAtDock(std::string name, Unit* dockat, Unit *dockee);
+	void refreshBaseComputerUI(const class Cargo *dirtyCarg);
 	void ExitGame();
 }

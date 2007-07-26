@@ -14,6 +14,7 @@
 #include "config_xml.h"
 #include "save_util.h"
 #include "unit_util.h"
+#include "networking/netclient.h"
 #include "gfx/cockpit.h"
 #include "gfx/ani_texture.h"
 #include "music.h"
@@ -491,6 +492,13 @@ bool RefreshGUI(void) {
 void base_main_loop() {
 	UpdateTime();
     Music::MuzakCycle();
+	if( Network!=NULL)
+	{
+		for( int jj=0; jj<_Universe->numPlayers(); jj++)
+		{
+			Network[jj].checkMsg( NULL);
+		}
+	}
 	GFXBeginScene();
 	if (createdbase) {
 
@@ -505,6 +513,7 @@ void base_main_loop() {
 	}else {
 		GFXEndScene();
 	}
+	BaseComputer::dirty = false;
 }
 
 

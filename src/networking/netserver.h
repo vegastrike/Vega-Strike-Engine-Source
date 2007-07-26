@@ -134,6 +134,9 @@ class NetServer
 		void	broadcast( NetBuffer & netbuf, ObjSerial serial, unsigned short zone, Cmd command, bool isTcp );
 
 		// WEAPON STUFF
+		void	BroadcastCargoUpgrade( ObjSerial sender, ObjSerial buyer, ObjSerial seller, const std::string &cargo,
+							float price, float mass, float volume, bool mission, unsigned int quantity,
+							int mountOffset, int subunitOffset, unsigned short zone);
 		void	BroadcastTarget( ObjSerial serial, ObjSerial target, unsigned short zone);
 		void	BroadcastUnfire( ObjSerial serial, const vector<int> &weapon_indicies, unsigned short zone);
 		void	BroadcastFire( ObjSerial serial, const vector<int> &weapon_indicies, ObjSerial missile_serial, float energy, unsigned short zone);
@@ -149,6 +152,8 @@ class NetServer
 		void	sendDockAuthorize( ObjSerial serial, ObjSerial utdwserial, int docknum, unsigned short zone);
 		void	sendDockDeny( ObjSerial serial, unsigned short zone);
 		void	sendUnDock( ObjSerial serial, ObjSerial utdwserial, unsigned short zone);
+		void	sendCredits( ObjSerial serial, float creds);
+		void	sendCargoSnapshot( ObjSerial serial, const UnitCollection &unitlist);
 
 		void	addSystem( string & sysname, string & system);
 		void	getZoneInfo( unsigned short zoneid, NetBuffer & netbuf);

@@ -37,6 +37,10 @@ void WindowController::run(void) {
     }
 }
 
+void WindowController::draw(void) {
+    // Do nothing.
+}
+
 // Process a command from the window.
 bool WindowController::processWindowCommand(const EventCommandId& command, Control* control) {
     if(command == "Window::Close") {

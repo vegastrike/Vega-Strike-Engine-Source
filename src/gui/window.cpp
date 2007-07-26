@@ -199,6 +199,9 @@ void WindowManager::draw() {
     // FIXME mbyron -- I think the event manager needs to get involved with window z-order.
     //   (Mouse events should go to windows in zorder, shouldn't they?)
     for(iter = m_windows.begin() ; iter != m_windows.end() ; iter++ ) {
+        if ((*iter)->controller()) {
+            (*iter)->controller()->draw();
+        }
         (*iter)->draw();
     }
 

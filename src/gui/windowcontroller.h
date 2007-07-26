@@ -42,7 +42,9 @@ public:
 
     // Make everything happen.
     virtual void run(void);
-
+    
+    virtual void draw(void);
+    
     // The window we are controlling.
     virtual Window* window(void) { return m_window; };
     virtual void setWindow(Window* w) { m_window = w; };
