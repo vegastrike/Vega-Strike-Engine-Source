@@ -98,7 +98,6 @@ class UnitCollection
 		std::list<class Unit*>::iterator erase(std::list<class Unit*>::iterator);
 		bool remove(const class Unit*);
 		const UnitCollection& operator= (const UnitCollection&);
-		static void cleanup();
 		const int size() const { return(u.size());}
 		
 		std::list<class Unit*> u;
@@ -110,7 +109,6 @@ class UnitCollection
 		void destr();
 		std::vector<class UnitCollection::UnitIterator*> activeIters;
 		std::vector<std::list<class Unit*>::iterator> removedIters;
-		static std::vector<class Unit*> removedUnits;
 };
 
 typedef UnitCollection::UnitIterator un_iter;

@@ -21,7 +21,6 @@ void Iteration(UnitCollection *c,int *levels2)
 	Unit *unit = NULL;
 	++(*levels2);
 	for(un_iter iter = c->createIterator();unit = *iter;) {
-		if((unit = *iter) == NULL) {iter.remove();continue;}
 		int temp = rand();
 		if (temp<RAND_MAX/400)
 			unit->Kill();
@@ -83,13 +82,11 @@ int main ()
 	seconds = time(NULL);
 	int passes = 0;
 	int levels = 0;
-	while((c->createIterator()).notDone()){
+	while(!c->empty()){
 		++passes;
 		Iteration(c,&levels);
 #if !oldtest
-		c->cleanup();
 	}
-	c->cleanup();
 #else
 		UnitCollection::FreeUnusedNodes();
 	}

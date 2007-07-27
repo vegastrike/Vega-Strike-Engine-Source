@@ -11,7 +11,7 @@ using std::list;
 using std::vector;
 // UnitIterator  BEGIN:
 
-std::vector<Unit*> UnitCollection::removedUnits;
+//std::vector<Unit*> UnitCollection::removedUnits;
 
 UnitCollection::UnitIterator& UnitCollection::UnitIterator::operator=(const UnitCollection::UnitIterator& orig)
 {
@@ -324,9 +324,10 @@ void UnitCollection::clear()
 void UnitCollection::destr()
 {
 	for(list<Unit*>::iterator it = u.begin();it!=u.end();++it) {
-		if(*it)
+		if(*it) {
 			(*it)->UnRef();
 			(*it) = NULL;
+		}
 			
 	}
 	for(vector<UnitIterator*>::iterator t = activeIters.begin();t != activeIters.end(); ++t)
@@ -354,7 +355,7 @@ list<Unit*>::iterator  UnitCollection::erase(list<Unit*>::iterator it2)
 	do {
 		if(tUnit){
 			removedIters.push_back(it2);
-			removedUnits.push_back(tUnit);
+			(*it2)->UnRef();
 			*it2 = NULL;
 		}
 		++it2;
@@ -394,14 +395,6 @@ const UnitCollection& UnitCollection::operator = (const UnitCollection& uc)
 }
 
 
-void UnitCollection::cleanup()
-{
-	while(!removedUnits.empty()){
-		removedUnits.back()->UnRef();
-		removedUnits.pop_back();
-	}
-}
-
 void UnitCollection::reg(un_iter* tmp)
 {
 	activeIters.push_back(tmp);
@@ -413,10 +406,10 @@ void UnitCollection::unreg(un_iter* tmp)
 	for(int i = activeIters.size();i > 0;--i,--t){
 		if(*t == tmp){					
 			activeIters.erase(t);
-			return;
+			break;
 		}
 	}
-	if(activeIters.size() <= 1){
+	if(activeIters.size() < 1){
 		while(!removedIters.empty()){
 			u.erase(removedIters.back());
 			removedIters.pop_back();
