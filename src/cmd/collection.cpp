@@ -39,7 +39,10 @@ UnitCollection::UnitIterator::UnitIterator(const UnitIterator& orig)
 UnitCollection::UnitIterator::UnitIterator(UnitCollection* orig)
 {
 	col = orig;
-	it = orig->u.begin();
+	for(it = orig->u.begin();it != col->u.end();++it){
+		if(*it) 
+			break;
+	}
 	col->reg(this);
 }
 
@@ -103,7 +106,10 @@ void UnitCollection::UnitIterator::postinsert(Unit *unit)
 void UnitCollection::UnitIterator::advance()
 {
 	if(!col || it == col->u.end()) return;
-	++it;
+	if((*it) != NULL && (*it)->Killed())
+		it = col->erase(it);
+	else
+		++it;
 	while(it != col->u.end()) {
 		if((*it) == NULL)
 			++it;
@@ -145,7 +151,10 @@ UnitCollection::ConstIterator::ConstIterator(const ConstIterator& orig)
 UnitCollection::ConstIterator::ConstIterator(const UnitCollection* orig)
 {
 	col = orig;
-	it = orig->u.begin();
+	for(it = orig->u.begin();it != col->u.end();++it){
+		if(*it)
+			break;
+	}
 }
 
 
@@ -180,7 +189,7 @@ bool UnitCollection::ConstIterator::notDone()
 }
 
 
-void UnitCollection::ConstIterator::advance()
+inline void UnitCollection::ConstIterator::advance()
 {
 	if(!col || it == col->u.end()) return;
 	++it;
@@ -215,13 +224,12 @@ const UnitCollection::ConstIterator UnitCollection::ConstIterator::operator ++(i
 
 UnitCollection::UnitCollection()
 {
-	destr();
+;	
 }
 
 
 UnitCollection::UnitCollection( const UnitCollection& uc)
 {
-	destr();
 	list<Unit*>::const_iterator in = uc.u.begin();
 	while(in != uc.u.end()) {
 		append(*in);
@@ -233,18 +241,6 @@ UnitCollection::UnitCollection( const UnitCollection& uc)
 UnitCollection::~UnitCollection()
 {
 	destr();
-}
-
-
-UnitCollection::UnitIterator UnitCollection::createIterator()
-{
-	return(UnitIterator(this));
-}
-
-
-UnitCollection::FastIterator UnitCollection::fastIterator()
-{
-	return(FastIterator(this));
 }
 
 
@@ -317,7 +313,13 @@ list<Unit*>::iterator UnitCollection::insert(list<Unit*>::iterator temp,Unit* un
 
 void UnitCollection::clear()
 {	
-	destr();
+	if(activeIters.size() > 0 ) return;
+	for(vector<list<Unit*>::iterator>::iterator t = removedIters.begin();t != removedIters.end();)
+		u.erase(*t);
+	for(list<Unit*>::iterator it = u.begin();it != u.end();){
+		(*it)->UnRef();
+		it = u.erase(it);
+	}
 }
 
 
@@ -355,7 +357,7 @@ list<Unit*>::iterator  UnitCollection::erase(list<Unit*>::iterator it2)
 	do {
 		if(tUnit){
 			removedIters.push_back(it2);
-			(*it2)->UnRef();
+			tUnit->UnRef();
 			*it2 = NULL;
 		}
 		++it2;

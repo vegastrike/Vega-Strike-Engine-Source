@@ -319,8 +319,8 @@ void JoyStick::GetMouse (float &x, float &y, float &z, int &buttons) {
     if (_dx||_dy)
       md.push_back(mouseData(_dx,_dy,ttime));
     if (avg) {
-      _dx=valx/avg;
-      _dy=valy/avg;
+      _dx=float_to_int(valx/avg);
+      _dy=float_to_int(valy/avg);
     }
     fdx=float(valx)/joystickblur;
     fdy=float(valy)/joystickblur;

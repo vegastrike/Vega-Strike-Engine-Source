@@ -100,13 +100,15 @@ int main ()
 	for (unsigned int i=0;i<SIZE;i++) {
 		if(u[i]->zapped != u[i]->killed )
 			printf("Unit at %d is zapped %d  killed %d\n",i,u[i]->zapped,u[i]->killed);
+		else
+			delete u[i];
 	}
 	int size = 0;
 	for(un_iter counter = c->createIterator();counter.notDone();++counter){
 		++size;
 	}
 	printf("size of list is verified at %d  : %d killed \n",size,SIZE - size);
-
+	delete c;
 	printf("completed\n");
 	return 0;
 }

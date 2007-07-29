@@ -59,7 +59,7 @@ namespace UniverseUtil
 	{
 		if(!col) return;
 		advance();
-		while(it != col->u.end() && !UnitUtil::isSignificant(*it))
+		while(notDone() && !UnitUtil::isSignificant(*it))
 			advance();
 	}
 
@@ -67,7 +67,7 @@ namespace UniverseUtil
 	{
 		if(!col) return;
 		advance();
-		while(it != col->u.end() && UnitUtil::isSignificant(*it))
+		while(notDone() && UnitUtil::isSignificant(*it))
 			advance();
 	}
 
@@ -75,7 +75,7 @@ namespace UniverseUtil
 	{
 		if(!col) return;
 		advance();
-		while(it != col->u.end() && !(*it)->isPlanet())
+		while(notDone() && !(*it)->isPlanet())
 			advance();
 	}
 
@@ -83,14 +83,14 @@ namespace UniverseUtil
 	{
 		if(!col) return;
 		advance();
-		while(it != col->u.end() && !(*it)->isJumppoint())
+		while(notDone() && !(*it)->isJumppoint())
 			advance();
 	}
 
 	void PythonUnitIter::advanceN(int n) 
 	{
 		if(!col) return;
-		while(it != col->u.end() && n > 0) {
+		while(notDone() && n > 0) {
 			advance();
 			--n;
 		}
@@ -99,9 +99,9 @@ namespace UniverseUtil
 	void PythonUnitIter::advanceNSignificant(int n) 
 	{
 		if(!col) return;
-		if(col && it != col->u.end() && !UnitUtil::isSignificant(*it))
+		if(col && notDone() && !UnitUtil::isSignificant(*it))
 			advanceSignificant();
-		while(col && it != col->u.end() &&( n > 0)){
+		while(col && notDone() &&( n > 0)){
 			advanceSignificant();
 			--n;
 		}
@@ -110,9 +110,9 @@ namespace UniverseUtil
 	void PythonUnitIter::advanceNInsignificant(int n) 
 	{
 		if(!col) return;
-		if(it != col->u.end() && UnitUtil::isSignificant(*it))
+		if(notDone() && UnitUtil::isSignificant(*it))
 			advanceInsignificant();
-		while(it != col->u.end() && (n > 0)) {
+		while(notDone() && (n > 0)) {
 			advanceInsignificant();
 			--n;
 		}
@@ -121,9 +121,9 @@ namespace UniverseUtil
 	void PythonUnitIter::advanceNPlanet(int n) 
 	{
 		if(!col) return;
-		if(it != col->u.end() && !(*it)->isPlanet())
+		if(notDone() && !(*it)->isPlanet())
 			advancePlanet();
-		while(it != col->u.end() && n > 0) {
+		while(notDone() && n > 0) {
 			advancePlanet();
 			--n;
 		}
@@ -132,9 +132,9 @@ namespace UniverseUtil
 	void PythonUnitIter::advanceNJumppoint(int n) 
 	{
 		if(!col) return;
-		if(it!= col->u.end() && !(*it)->isJumppoint())
+		if(notDone() && !(*it)->isJumppoint())
 			advanceJumppoint();
-		while(it != col->u.end() && n > 0 ) {
+		while(notDone() && n > 0 ) {
 			advanceJumppoint();
 			--n;
 		}

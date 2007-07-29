@@ -213,7 +213,7 @@ void launch_mission () {
 #ifdef _WIN32
   GoToParentDir();
 #endif
-  unsigned int player = my_mission.rfind ("player");
+  int player = my_mission.rfind ("player");
   if (player>0&&player!=std::string::npos) {
    char  num [4]={'-','m',(*(my_mission.begin()+(player-1))),'\0'};
    printf ("vegastrike %s %s",num,my_mission.c_str());

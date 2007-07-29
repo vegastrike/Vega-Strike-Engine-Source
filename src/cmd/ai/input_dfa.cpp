@@ -91,7 +91,7 @@ void InputDFA::TargetSelect (KBSTATE k,int x,int y, int delx, int dely, int mod)
 	  for(un_iter tmp = CurDFA->selected->createIterator();un = *tmp;++tmp){
 	Order * nAI = CurDFA->orderfac->newOrder();
 	if (CurDFA->targetted) {
-	  Unit *tar = CurDFA->targetted->u.front();
+	  Unit *tar = CurDFA->targetted->front();
 	  if (tar) {
 	    nAI->AttachOrder(tar);
 	  }
@@ -228,7 +228,7 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
     UnitCollection *tmpcol = CurDFA->clickList->requestIterator(CurDFA->prevx,CurDFA->prevy,x,y);
     if (!(kmod&ACTIVE_SHIFT)){
       CurDFA->replaceCollection(tmpcol);
-	  if(!tmpcol->u.front()){
+	  if(!tmpcol->front()){
 	CurDFA->SetStateNone();
 	VSFileSystem::vs_fprintf (stderr,"SelectBoxMissed\n");
       } else 
@@ -293,7 +293,7 @@ void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) 
     UnitCollection *tmpcol = CurDFA->clickList->requestIterator(CurDFA->prevx,CurDFA->prevy,x,y);
     CurDFA->replaceCollection(tmpcol);
 	Unit *tUnit;
-	if(tmpcol->u.front())
+	if(tmpcol->front())
 		CurDFA->SetStateSomeSelected();
 /*		
 	for(un_iter tmp2 = tmpcol->createIterator();tUnit = *tmp2;++tmp2){
