@@ -1017,13 +1017,17 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				
 				unsigned int cargIndex = 0;
 				Cargo *cargptr;
+				if (!sender) {
+					break;
+				}
 				if (seller) {
 					cargptr = seller->GetCargo(cargoName, cargIndex);
-				} else {
-					cargptr = GetMasterPartList(cargoName.c_str());
 				}
 				if (!cargptr) {
-					break;
+					cargptr = GetMasterPartList(cargoName.c_str());
+					if (!cargptr) {
+						break;
+					}
 				}
 				Cargo carg = *cargptr;
 				bool upgrade=false;
@@ -1054,13 +1058,13 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					
 					// Now we're sure it's an authentic upgrade...
 					// Wow! So much code just to perform an upgrade!
-					const string unitDir = GetUnitDir(buyer->name.get().c_str());
+					const string unitDir = GetUnitDir(sender->name.get().c_str());
 					string templateName;
 					int faction;
 					if (seller==sender) {
 						templateName = unitDir + ".blank";
 						faction = seller->faction;
-					} else {
+					} else if (buyer==sender) {
 						faction = buyer->faction;
 						templateName = unitDir + ".template";
 					}
@@ -1082,7 +1086,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 						if (seller->canDowngrade(unitCarg, mountOffset, subunitOffset, percent, templateUnit)) {
 							seller->Downgrade (unitCarg, mountOffset, subunitOffset, percent, templateUnit);
 						}
-					} else { // buyer==sender
+					} else if (buyer==sender) {
 						// Buying it... Upgrade time!
 						if (buyer->canUpgrade(unitCarg, mountOffset, subunitOffset, multAddMode, true, percent, templateUnit)) {
 							buyer->Upgrade   (unitCarg, mountOffset, subunitOffset, multAddMode, true, percent, templateUnit);

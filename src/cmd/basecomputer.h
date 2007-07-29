@@ -42,7 +42,7 @@ class BaseComputer : public WctlBase<BaseComputer>
 	friend class WctlBase<BaseComputer>;
 public:
 
-    static bool dirty;
+    static int dirty;
     static Cargo dirtyCargo;
     
     // The Computer displays that are possible.

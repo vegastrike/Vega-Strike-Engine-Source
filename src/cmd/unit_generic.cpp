@@ -7377,7 +7377,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
 			ObjSerial buySerial = downgrade?0:serial,
 				sellSerial = downgrade?serial:0;
 			Network[playernum].cargoRequest( buySerial, sellSerial,
-				up->fullname, 1, mountoffset, subunitoffset);
+				up->name, 0, mountoffset, subunitoffset);
 		}
 		return false;
 	}
@@ -7386,7 +7386,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
 		ObjSerial buySerial = downgrade?0:serial,
 			sellSerial = downgrade?serial:0;
 		VSServer->BroadcastCargoUpgrade( serial, buySerial, sellSerial,
-										 up->fullname, 0,0,0,false,0,
+										 up->name, 0,0,0,false,0,
 										 mountoffset, subunitoffset, getStarSystem()->GetZone());
 	}
 	static bool csv_cell_null_check=XMLSupport::parse_bool(vs_config->getVariable("data","empty_cell_check","true"));

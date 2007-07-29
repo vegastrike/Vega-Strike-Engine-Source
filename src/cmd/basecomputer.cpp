@@ -71,7 +71,7 @@ struct dirent { char d_name[1]; };
 //end for directory thing
 extern const char * DamagedCategory;
 
-bool BaseComputer::dirty;
+int BaseComputer::dirty=0;
 Cargo BaseComputer::dirtyCargo;
 
 static GFXColor UnsaturatedColor(float r, float g, float b, float a=1.0f) {
@@ -1102,7 +1102,8 @@ void BaseComputer::constructControls(void) {
 			}
 			loadsave->setCommand("ShowOptionsMenu");
 			networkGroup->addChild(loadsave);
-		} else {
+		}
+		if ((m_displayModes.size()==1 && m_displayModes[0]==NETWORK) || Network!=NULL) {
 			NewButton* quit = new NewButton;
 			quit->setRect( Rect(-.95, -.9, .3, .1) );
 			quit->setColor( GFXColor(.8,1,.1,.1) );
@@ -1452,9 +1453,9 @@ void BaseComputer::switchToControls(DisplayMode mode) {
 bool BaseComputer::changeToCargoMode(const EventCommandId& command, Control* control) {
     if(m_currentDisplay != CARGO) {
         switchToControls(CARGO);
-        loadCargoControls();
-        updateTransactionControlsForSelection(NULL);
     }
+    loadCargoControls();
+    updateTransactionControlsForSelection(NULL);
     return true;
 }
 
@@ -1462,8 +1463,8 @@ bool BaseComputer::changeToCargoMode(const EventCommandId& command, Control* con
 bool BaseComputer::changeToLoadSaveMode(const EventCommandId& command, Control* control) {
     if(m_currentDisplay != LOADSAVE) {
         switchToControls(LOADSAVE);
-        loadLoadSaveControls();
     }
+    loadLoadSaveControls();
     return true;
 }
 
@@ -1471,8 +1472,8 @@ bool BaseComputer::changeToLoadSaveMode(const EventCommandId& command, Control* 
 bool BaseComputer::changeToNetworkMode(const EventCommandId& command, Control* control) {
     if(m_currentDisplay != NETWORK) {
         switchToControls(NETWORK);
-        loadNetworkControls();
     }
+    loadNetworkControls();
     return true;
 }
 
@@ -2644,12 +2645,14 @@ static void eliminateZeroCargo(Unit * un) {
 
 void BaseComputer::draw() {
     if (BaseComputer::dirty && m_player.GetUnit()) {
-        eliminateZeroCargo(m_player.GetUnit());
-        // Reload the UI -- inventory has changed.  Because we reload the UI, we need to 
-        //  find, select, and scroll to the thing we bought.  The item might be gone from the
-        //  list (along with some categories) after the transaction.
-        loadCargoControls();
-        updateTransactionControls(BaseComputer::dirtyCargo);
+		if (BaseComputer::dirty&1) {
+			eliminateZeroCargo(m_player.GetUnit());
+			// Reload the UI -- inventory has changed.  Because we reload the UI, we need to 
+			//  find, select, and scroll to the thing we bought.  The item might be gone from the
+			//  list (along with some categories) after the transaction.
+			processWindowCommand(modeInfo[m_currentDisplay].command, NULL);
+			updateTransactionControls(BaseComputer::dirtyCargo);
+		}
         recalcTitle();
     }
 }
@@ -2745,8 +2748,8 @@ bool BaseComputer::sellAllCargo(const EventCommandId& command, Control* control)
 bool BaseComputer::changeToNewsMode(const EventCommandId& command, Control* control) {
     if(m_currentDisplay != NEWS) {
         switchToControls(NEWS);
-        loadNewsControls();
     }
+    loadNewsControls();
     return true;
 }
 
@@ -2898,9 +2901,9 @@ void BaseComputer::loadLoadSaveControls(void) {
 bool BaseComputer::changeToMissionsMode(const EventCommandId& command, Control* control) {
     if(m_currentDisplay != MISSIONS) {
         switchToControls(MISSIONS);
-        loadMissionsControls();
-        updateTransactionControlsForSelection(NULL);
     }
+    loadMissionsControls();
+    updateTransactionControlsForSelection(NULL);
     return true;
 }
 
@@ -3183,9 +3186,9 @@ bool BaseComputer::changeToUpgradeMode(const EventCommandId& command, Control* c
 
     if(m_currentDisplay != UPGRADE) {
         switchToControls(UPGRADE);
-        loadUpgradeControls();
-        updateTransactionControlsForSelection(NULL);
     }
+    loadUpgradeControls();
+    updateTransactionControlsForSelection(NULL);
     return true;
 }
 
@@ -3922,9 +3925,9 @@ bool BaseComputer::fixUpgrade(const EventCommandId& command, Control* control) {
 bool BaseComputer::changeToShipDealerMode(const EventCommandId& command, Control* control) {
     if(m_currentDisplay != SHIP_DEALER) {
         switchToControls(SHIP_DEALER);
-        loadShipDealerControls();
-        updateTransactionControlsForSelection(NULL);
     }
+    loadShipDealerControls();
+    updateTransactionControlsForSelection(NULL);
     return true;
 }
 

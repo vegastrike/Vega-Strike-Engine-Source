@@ -461,9 +461,12 @@ namespace BaseUtil {
 	}
 
 	void refreshBaseComputerUI(const Cargo *carg) {
-		BaseComputer::dirty=true;
 		if (carg) {
+			// BaseComputer::draw() used dirty to determine what to recalculate.
+			BaseComputer::dirty=1; // everything.
 			BaseComputer::dirtyCargo=*carg;
+		} else {
+			BaseComputer::dirty=2; // only title.
 		}
 	}
 

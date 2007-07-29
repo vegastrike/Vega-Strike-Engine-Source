@@ -152,7 +152,7 @@ void createNetworkControls(GroupControl *serverConnGroup, std::vector <unsigned 
 	mplayTitle->setId("UsernameTitle");
 	serverConnGroup->addChild(mplayTitle);
 	
-	StaticDisplay* usernameInput = new TextInputDisplay(inputqueue,"\x1b\n \t\r*\\|<>\"^");
+	StaticDisplay* usernameInput = new TextInputDisplay(inputqueue,"\x1b\n\t\r*\\|<>\"^");
 	usernameInput->setRect( Rect(-.6, -.18, 1.2, .15) );
 	usernameInput->setColor( GFXColor(1,.5,0,.1) );
 	usernameInput->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
@@ -392,6 +392,11 @@ bool GameMenu::processExitGameButton(const EventCommandId& command, Control *con
 void processJoinGame(Window *window, bool firstTime, string &user, string &pass) {
 	// Magic goes here!
 	user = static_cast<TextInputDisplay*>(window->findControlById("Username"))->text();
+	string::size_type pos=user.find(' ');
+	while (pos!=string::npos) {
+		user[pos]='_';
+		pos = user.find(' ', pos);
+	}
 	pass = static_cast<TextInputDisplay*>(window->findControlById("Password"))->text();
 	vs_config->setVariable("player","callsign",user);
 	vs_config->setVariable("player","password",pass);
