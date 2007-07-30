@@ -1929,7 +1929,8 @@ void GameCockpit::Draw() {
       if(draw_all_boxes){
         DrawTargetBoxes();
       }
-      {
+	  static bool draw_target_system = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawTargetSystem","false"));
+      if (draw_target_system) {
         std::string destination_system=AccessNavSystem()->getSelectedSystem();
         std::string current_system=_Universe->activeStarSystem()->getFileName();
         if (destination_system!=current_system) {
@@ -1961,10 +1962,10 @@ void GameCockpit::Draw() {
           
         }
       }
-      GFXEnable (TEXTURE0);
-      GFXEnable (DEPTHTEST);
-      GFXEnable (DEPTHWRITE);      
   }
+  GFXEnable (TEXTURE0);
+  GFXEnable (DEPTHTEST);
+  GFXEnable (DEPTHWRITE);      
   if (view<CP_CHASE) {
     if (mesh.size()){
       Unit * par=GetParent();
