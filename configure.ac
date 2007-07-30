@@ -742,14 +742,7 @@ dnl --------------------------------------------------------------------------
 dnl Other options
 dnl --------------------------------------------------------------------------
 
-
-AC_ARG_ENABLE(launcher, AC_HELP_STRING([--enable-launcher], [Build vslauncher]), [ACENABLE=$enableval], [ACENABLE=])
-AM_CONDITIONAL(VS_MAKE_LAUNCHER,test "x$ACENABLE" = "xyes")
-
-AC_ARG_ENABLE(gtkutils, AC_HELP_STRING([--enable-gtkutils], [Build GTK utils]),  [ACENABLE=$enableval], [ACENABLE=])
-AM_CONDITIONAL(VS_MAKE_GTKUTILS,test "x$ACENABLE" = "xyes")
-
-AC_ARG_ENABLE(boost,    AC_HELP_STRING([--disable-boost], [Build without boost]),[ACENABLE=$enableval], [ACENABLE=])
+AC_ARG_ENABLE(boost,    AC_HELP_STRING([--disable-boost], [Build without included boost]),[ACENABLE=$enableval], [ACENABLE=])
 AM_CONDITIONAL(BOOSTSYSTEM,test "x$ACENABLE" != "xno")
 
 dnl Turn use of stencil buffer on/off

@@ -1057,9 +1057,6 @@ vsrextract_SOURCES= \
   tools/vsrextract.cpp \
   tools/vsrtools.h
 
-GTK_LIBS=`gtk-config --libs`
-GTK_CFLAGS=`gtk-config --cflags`
-
 vssetup_LDFLAGS = $(GTK_LIBS)
 vssetup_CXXFLAGS= $(GTK_CFLAGS) -DGTK
 vssetup_SOURCES = \
