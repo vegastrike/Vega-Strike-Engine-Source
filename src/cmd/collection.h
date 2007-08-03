@@ -21,8 +21,18 @@ class UnitCollection
 				UnitIterator( const UnitIterator&);
 				UnitIterator(UnitCollection*);
 				virtual ~UnitIterator();
-				bool isDone();
-				bool notDone();
+				
+				inline bool isDone()
+				{
+					if(col && it != col->u.end())
+						return(false);
+					return(true);
+				}
+				inline bool notDone() 
+				{ 
+					return(!isDone());
+				}
+				
 				virtual void remove();
 				void moveBefore(UnitCollection&);
 				virtual void preinsert(class Unit*);
@@ -55,7 +65,6 @@ class UnitCollection
 				friend class UnitCollection;
 				UnitCollection *col;
 				std::list<class Unit*>::iterator it;
-
 		};
 
 		class ConstIterator
@@ -95,10 +104,10 @@ class UnitCollection
 		void prepend(UnitIterator*);
 		void append(class Unit*);
 		void append(UnitIterator*);
-		std::list<Unit*>::iterator insert(std::list<Unit*>::iterator, Unit*);
+		void insert(std::list<Unit*>::iterator &, Unit*);
 		void clear();
 		bool contains(const class Unit*) const;
-		std::list<class Unit*>::iterator erase(std::list<class Unit*>::iterator);
+		void erase(std::list<class Unit*>::iterator &);
 		bool remove(const class Unit*);
 		inline const int size() const { return(u.size());}
 		inline Unit* back() 
@@ -127,7 +136,7 @@ class UnitCollection
 		const UnitCollection& operator= (const UnitCollection&);
 		void reg(UnitCollection::UnitIterator*);
 		void unreg(UnitCollection::UnitIterator*);
-
+		
 		std::vector<class UnitCollection::UnitIterator*> activeIters;
 		std::vector<std::list<class Unit*>::iterator> removedIters;
 		std::list<class Unit*> u;

@@ -11,8 +11,6 @@ using std::list;
 using std::vector;
 // UnitIterator  BEGIN:
 
-//std::vector<Unit*> UnitCollection::removedUnits;
-
 UnitCollection::UnitIterator& UnitCollection::UnitIterator::operator=(const UnitCollection::UnitIterator& orig)
 {
 	if(col != orig.col){
@@ -57,24 +55,10 @@ UnitCollection::UnitIterator::~UnitIterator()
 }
 
 
-bool UnitCollection::UnitIterator::isDone()
-{
-	if(col && it != col->u.end())
-		return(false);
-	return(true);
-}
-
-
-bool UnitCollection::UnitIterator::notDone()
-{
-	return(!isDone());
-}
-
-
 void UnitCollection::UnitIterator::remove()
 {
 	if(col && it != col->u.end())
-		it = col->erase(it);
+		col->erase(it);
 }
 
 
@@ -82,7 +66,7 @@ void UnitCollection::UnitIterator::moveBefore(UnitCollection& otherlist)
 {
 	if(col && it != col->u.end()) {
 		otherlist.prepend(*it);
-		it = col->erase(it);
+		col->erase(it);
 	}
 }
 
@@ -90,7 +74,7 @@ void UnitCollection::UnitIterator::moveBefore(UnitCollection& otherlist)
 void UnitCollection::UnitIterator::preinsert(Unit *unit)
 {
 	if(col && unit)
-		it = col->insert(it,unit);
+		col->insert(it,unit);
 }
 
 
@@ -107,17 +91,18 @@ void UnitCollection::UnitIterator::advance()
 {
 	if(!col || it == col->u.end()) return;
 	if((*it) != NULL && (*it)->Killed())
-		it = col->erase(it);
+		col->erase(it);
 	else
 		++it;
 	while(it != col->u.end()) {
 		if((*it) == NULL)
 			++it;
 		else if((*it)->Killed())
-			it = col->erase(it);
+			col->erase(it);
 		else
 			break;
 	}
+
 }
 
 
@@ -222,13 +207,13 @@ const UnitCollection::ConstIterator UnitCollection::ConstIterator::operator ++(i
 
 // UnitCollection  BEGIN:
 
-UnitCollection::UnitCollection()
+UnitCollection::UnitCollection() 
 {
-;	
+	activeIters.reserve(20);	
 }
 
 
-UnitCollection::UnitCollection( const UnitCollection& uc)
+UnitCollection::UnitCollection( const UnitCollection& uc) 
 {
 	list<Unit*>::const_iterator in = uc.u.begin();
 	while(in != uc.u.end()) {
@@ -301,21 +286,23 @@ void UnitCollection::append(UnitIterator *it)
 }
 
 
-list<Unit*>::iterator UnitCollection::insert(list<Unit*>::iterator temp,Unit* unit)
+void UnitCollection::insert(list<Unit*>::iterator &temp,Unit* unit)
 {
 	if(unit) {
 		unit->Ref();
-		return(u.insert(temp,unit));
+		temp = u.insert(temp,unit);
 	}
-	return(u.end());
+	temp = u.end();
 }
 
 
 void UnitCollection::clear()
 {	
-	if(activeIters.size() > 0 ) return;
-	for(vector<list<Unit*>::iterator>::iterator t = removedIters.begin();t != removedIters.end();)
-		u.erase(*t);
+	if(!activeIters.empty()) return;
+	while(!removedIters.empty()){
+		u.erase(removedIters.back());
+		removedIters.pop_back();
+	}
 	for(list<Unit*>::iterator it = u.begin();it != u.end();){
 		(*it)->UnRef();
 		it = u.erase(it);
@@ -329,11 +316,10 @@ void UnitCollection::destr()
 		if(*it) {
 			(*it)->UnRef();
 			(*it) = NULL;
-		}
-			
+		}			
 	}
-	for(vector<UnitIterator*>::iterator t = activeIters.begin();t != activeIters.end(); ++t)
-		(*t)->col = NULL;		
+	for(vector<un_iter*>::iterator t = activeIters.begin();t != activeIters.end();++t)
+		(*t)->col = NULL;
 }
 
 
@@ -349,24 +335,19 @@ bool UnitCollection::contains(const Unit* unit) const
 }
 
 
-list<Unit*>::iterator  UnitCollection::erase(list<Unit*>::iterator it2)
+inline void  UnitCollection::erase(list<Unit*>::iterator &it2)
 {
-	if(u.empty() || it2 == u.end())
-		return (it2);
-	Unit* tUnit = *it2;
-	do {
-		if(tUnit){
-			removedIters.push_back(it2);
-			tUnit->UnRef();
-			*it2 = NULL;
-		}
+	if(activeIters.size() == 1){
+		(*it2)->UnRef();
+		it2 = u.erase(it2);
+	}	else {
+		removedIters.push_back(it2);
+		(*it2)->UnRef();
+		(*it2) = NULL;
 		++it2;
-		if(it2 == u.end()) 
-			break;
-		tUnit = *it2;
-	} while(!tUnit || tUnit->Killed());
-	return(it2);  
+	}
 }
+
 
 bool UnitCollection::remove(const Unit *unit)
 {
@@ -375,7 +356,7 @@ bool UnitCollection::remove(const Unit *unit)
 		return(false);
 	for(list<Unit*>::iterator it = u.begin(); it!= u.end();) {
 		if((*it) == unit) {
-			it = erase(it);		
+			erase(it);		
 			res = true;
 		}
 		else
@@ -397,21 +378,20 @@ const UnitCollection& UnitCollection::operator = (const UnitCollection& uc)
 }
 
 
-void UnitCollection::reg(un_iter* tmp)
+inline void UnitCollection::reg(un_iter *iter)
 {
-	activeIters.push_back(tmp);
+	activeIters.push_back(iter);
 }
 
-void UnitCollection::unreg(un_iter* tmp)
+inline void UnitCollection::unreg(un_iter *iter)
 {
-	vector<un_iter*>::iterator t = activeIters.end() - 1;
-	for(int i = activeIters.size();i > 0;--i,--t){
-		if(*t == tmp){					
+	for(vector<un_iter*>::iterator t = activeIters.begin();t != activeIters.end();++t){
+		if((*t) == iter){
 			activeIters.erase(t);
 			break;
 		}
 	}
-	if(activeIters.size() < 1){
+	if(activeIters.empty()){
 		while(!removedIters.empty()){
 			u.erase(removedIters.back());
 			removedIters.pop_back();
