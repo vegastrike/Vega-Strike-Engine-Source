@@ -10,6 +10,13 @@
 
 class Unit;
 
+
+/*
+	Get rid of Virtual shit.   It's slowing down the class.
+	Make removing null positions occur every Nth removal, to minimize impact. 
+	
+	
+*/
 class UnitCollection
 {
 	public:
@@ -20,7 +27,7 @@ class UnitCollection
 				UnitIterator() : col(NULL) {;}
 				UnitIterator( const UnitIterator&);
 				UnitIterator(UnitCollection*);
-				virtual ~UnitIterator();
+				~UnitIterator();
 				
 				inline bool isDone()
 				{
@@ -33,14 +40,14 @@ class UnitCollection
 					return(!isDone());
 				}
 				
-				virtual void remove();
+				void remove();
 				void moveBefore(UnitCollection&);
-				virtual void preinsert(class Unit*);
-				virtual void postinsert(class Unit *unit);
-				virtual void advance();
+				void preinsert(class Unit*);
+				void postinsert(class Unit *unit);
+				void advance();
 				Unit* next();
 				
-//				virtual inline class Unit* current() { return(this->operator*());}
+//				 inline class Unit* current() { return(this->operator*());}
 				UnitIterator& operator=( const UnitIterator&);
 				inline const UnitIterator operator ++(int)
 				{	
@@ -53,7 +60,7 @@ class UnitCollection
 					advance();
 					return(*this);
 				}
-				virtual inline class Unit * operator * ()
+				inline class Unit * operator * ()
 				{
 					if(col && it != col->u.end())
 						return(*it);
@@ -73,12 +80,12 @@ class UnitCollection
 				ConstIterator() : col(NULL) {;}
 				ConstIterator( const ConstIterator&);
 				ConstIterator( const UnitCollection*);
-				virtual ~ConstIterator( );
+				~ConstIterator( );
 				ConstIterator& operator=( const ConstIterator& orig );
 				const Unit * next();
 				bool isDone();
 				bool notDone();
-				virtual void advance();
+				void advance();
 				const ConstIterator& operator ++();
 				const ConstIterator operator ++(int);
 				inline const class Unit * operator * () const { if(it!=col->u.end()&&!col->empty())return(*it);return(NULL);}

@@ -22,8 +22,9 @@ namespace UniverseUtil
 			PythonUnitIter ():UnitIterator(){}
 			//	PythonUnitIterator (UnitListNode * start):UnitIterator(start){}
 			PythonUnitIter (const UnitCollection::UnitIterator &t):UnitIterator(t){}
-			virtual ~PythonUnitIter() {;}
-			virtual Unit* current();
+			 ~PythonUnitIter() {;}
+			Unit* current();
+			inline void advance() { UnitIterator::advance();}
 			void advanceSignificant();
 			void advanceInsignificant();
 			void advancePlanet();
@@ -33,7 +34,13 @@ namespace UniverseUtil
 			void advanceNInsignificant(int n);
 			void advanceNPlanet(int n);
 			void advanceNJumppoint(int n);
-			virtual class Unit* operator*() { return(this->current());}
+			inline class Unit* operator*() { return(current());}
+			inline void preinsert(Unit *unit) { UnitIterator::preinsert(unit);}
+			inline bool isDone() { return(UnitIterator::isDone());}
+			inline bool notDone() {return(UnitIterator::notDone());}
+			inline void remove() { UnitIterator::remove();}
+			inline class Unit* next() { advance();return(current());}
+			
 	};
 
 	std::string LookupUnitStat(const std::string &unitname, const std::string &faction, const std::string &statname);

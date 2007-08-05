@@ -85,21 +85,21 @@ public:
   virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal,  float dist) {this->Unit::reactToCollision(smaller,biglocation,bignormal,smalllocation,smallnormal,dist);}
   virtual void gravitate(UnitCollection *units);
 
-    class PlanetIterator : public un_iter
+    class PlanetIterator 
     {
 		public:
 			PlanetIterator(Planet *p) { localCollection.append(p);pos = localCollection.createIterator();}
-			virtual ~PlanetIterator() {;}
-			virtual void preinsert(Unit *unit) {abort();}
-			virtual void postinsert(Unit *unit) { abort();}
-			virtual void remove() { abort(); }
-			virtual Unit* current() 
+			 ~PlanetIterator() {;}
+			void preinsert(Unit *unit) {abort();}
+			void postinsert(Unit *unit) { abort();}
+			void remove() { abort(); }
+			inline Unit* current() 
 			{ 
 				if(pos.notDone()) 
 					return(*pos);
 				return(NULL);
 			}
-			virtual void advance() 
+			void advance() 
 			{
 				if(current() != NULL){
 					Unit *cur = *pos;
@@ -111,16 +111,15 @@ public:
 					++pos;
 				}
 			}
-			virtual const un_iter& operator ++()
+			inline const un_iter& operator ++()
 			{
 				advance();
-				return *this;
 			}
-			virtual Unit* operator *()
+			inline Unit* operator *()
 			{
 				return(current());
 			}
-			virtual un_iter operator++(int) {abort(); return *this;}
+			inline un_iter operator++(int) {abort();}
 			
 		private:
 			UnitCollection localCollection;

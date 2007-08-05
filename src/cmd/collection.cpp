@@ -105,7 +105,6 @@ void UnitCollection::UnitIterator::advance()
 
 }
 
-
 Unit* UnitCollection::UnitIterator::next()
 {
 	advance();
@@ -299,12 +298,15 @@ void UnitCollection::insert(list<Unit*>::iterator &temp,Unit* unit)
 void UnitCollection::clear()
 {	
 	if(!activeIters.empty()) return;
-	while(!removedIters.empty()){
+	printf("being called here\n");
+/*	while(!removedIters.empty()){
 		u.erase(removedIters.back());
 		removedIters.pop_back();
 	}
+*/
 	for(list<Unit*>::iterator it = u.begin();it != u.end();){
 		(*it)->UnRef();
+		(*it) = NULL;
 		it = u.erase(it);
 	}
 }
@@ -334,18 +336,36 @@ bool UnitCollection::contains(const Unit* unit) const
 	return(false);
 }
 
-
 inline void  UnitCollection::erase(list<Unit*>::iterator &it2)
 {
-	if(activeIters.size() == 1){
-		(*it2)->UnRef();
-		it2 = u.erase(it2);
-	}	else {
+	// If we have more than 4 iterators, just push node onto vector.
+	if(activeIters.size() > 4){
 		removedIters.push_back(it2);
 		(*it2)->UnRef();
 		(*it2) = NULL;
 		++it2;
+		return;
 	}
+	// If we have between 2 and 4 iterators, see if any are actually 
+	// on the node we want to remove, if so, just push onto vector.
+	// Purpose : This special case is to reduce the size of the list in the
+	//           situation where removedIters isn't being processed.
+	if(activeIters.size() > 1){
+		for(int i = 0;i<activeIters.size();++i){
+			if(activeIters[i]->it == it2){
+				removedIters.push_back(it2);
+				(*it2)->UnRef();
+				(*it2) = NULL;
+				++it2;
+				return;
+			}
+		}
+	}
+	// If we have 1 iterator, or none of the iterators are currently on the 
+	// requested node to be removed, then remove it right away. 
+	(*it2)->UnRef();
+	(*it2) = NULL;
+	it2 = u.erase(it2);
 }
 
 
@@ -391,7 +411,7 @@ inline void UnitCollection::unreg(un_iter *iter)
 			break;
 		}
 	}
-	if(activeIters.empty()){
+	if(activeIters.empty() || (activeIters.size() == 1 && (*(activeIters[0]->it))) ){
 		while(!removedIters.empty()){
 			u.erase(removedIters.back());
 			removedIters.pop_back();
