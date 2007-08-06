@@ -40,25 +40,21 @@ enum Cmd
                                 // account server is unavailable -> no login
 
 	// Character creation stuff (not used yet)
-    CMD_NEWCHAR      ,		// NOT USED : should get 
-                                    // the new character description for new account
-    CMD_INITIATE     ,		// NOT USED : should send
-                                    // starting locations for new account
-    CMD_CREATECHAR   ,
+    CMD_CREATECHAR   , // DELETEME?  Could come in handy from accountserver -> client...  but not so much from server...
     CMD_LOCATIONS    ,
 
 	// Commands used to add/remove ships in systems
-    CMD_LETSGO       ,		// NOT USED
     CMD_ADDCLIENT    ,		// Client side :
                                     // request the server to be added in the game
 									// Server side : adds the client to the game
     CMD_ENTERCLIENT  ,		// (Server -> Client) Indicates that a new
                                     // client is entering the current zone
 									// also send the new client's data
+			// Subcommands: ZoneMgr::AddClient,AddUnit,AddMissile,AddNebula,AddAsteroid,End
     CMD_EXITCLIENT   ,		// (Server -> Client) Indicates that a client
                                     // is leaving the current zone
-    CMD_ADDEDYOU     ,		// NOT USED
-	CMD_RESPAWN      ,
+    CMD_ADDEDYOU     ,		// Server -> Client
+	CMD_RESPAWN      ,      // Client -> Server: Request a respawn after dying.
 
 	// Ships movements data
     CMD_POSUPDATE    ,		// On client side (send): containing a ship's
@@ -68,7 +64,6 @@ enum Cmd
 									// On server side : sending minimal info
                                     // (just position) in case the ship is far from
 									// the one we send other ships' data to
-    CMD_UPDATECLT    ,
     CMD_PING         ,		// A packet sending a ping-like command just to
                                     // tell to the server
 									// that the client is still alive
@@ -78,17 +73,12 @@ enum Cmd
 	// Weapons commands
 	CMD_FIREREQUEST  ,		// Fire Request
 	CMD_UNFIREREQUEST,		// UnFire Request
-	CMD_BOLT         ,		// Fire a bolt
-	CMD_BEAM         ,		// Fire a beam
-	CMD_PROJECTILE   ,      // Fire a projectile
-	CMD_BALL         ,		// Fire a ball ?
 	CMD_TARGET       ,		// Receive a target request (server side)
 	CMD_CLOAK        ,
                                     // or receive target info (client side)
 	CMD_SCAN         ,		// Receive a scan request (server side)
                                     // or receive target info (client side)
 	CMD_DAMAGE       ,		// Send damages to apply
-	CMD_DAMAGE1      ,		// Send damages to apply
 	CMD_SNAPDAMAGE   ,		// A snapshot of damages
 
 	CMD_KILL         ,		// Send a kill to clients
@@ -107,16 +97,9 @@ enum Cmd
 	CMD_DOCK         ,		// Dock request or authorization from server
 	CMD_UNDOCK       ,		// Undock request or authorization from server
 
-	CMD_CREATEUNIT   ,		// From server to clients : server unit creation
-	CMD_CREATENEBULA ,		// From server to clients : server unit creation
-	CMD_CREATEPLANET ,		// From server to clients : server unit creation
-	CMD_CREATEASTER  ,		// From server to clients : server unit creation
-	CMD_CREATEMISSILE,		// From server to clients : server unit creation
-
-	CMD_SNAPCARGO,			// S->C: A full update of the cargo inventory in all ships
-	CMD_CARGOUPGRADE,		// C->S and S->C: buy/sell cargo or upgrade.
+	CMD_SNAPCARGO,			// S->C: A full update of the up-to-date cargo inventory in all ships.  Sent when logging in.
+	CMD_CARGOUPGRADE,		// C->S and S->C (broadcast): buy/sell cargo or upgrade.
 	CMD_CREDITS,            // S->C: updates the number of credits.  Required after a cargo/upgrade transaction.
-	CMD_SHIPSTATS,			// S->C (broadcast): sent when upgrade involves more than just buying/selling cargo.
 	
 	// Account management commands
 	CMD_RESYNCACCOUNTS ,		// When connection to account server was lost

@@ -1131,8 +1131,10 @@ class Unit
 		// if the unit is a planet, this contains the long-name 'mars-station'
 		std::string fullname;
 	public:
-		void setFullname(std::string name)  { fullname=name; };
-		std::string getFullname() const { return fullname; };
+		void setFullname(std::string name)  { fullname=name; }
+		std::string getFullname() const { return fullname; }
+
+		const string &getFilename() const { return name.get(); }
 
 		// Is this class a unit
 		virtual enum clsptr isUnit()const {return UNITPTR;}

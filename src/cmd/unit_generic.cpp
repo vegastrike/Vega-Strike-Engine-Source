@@ -22,6 +22,7 @@
 #include "cmd/ai/aggressive.h"
 #include "python/python_class.h"
 #include "cmd/unit_factory.h"
+#include "missile_generic.h"
 #include "gfx/cockpit_generic.h"
 #include "gfx/vsbox.h"
 #include <algorithm>
@@ -4359,15 +4360,15 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
 		Vector netpnt = pnt;
 		Vector netnormal = normal;
 		GFXColor col( color.r, color.g, color.b, color.a);
-		VSServer->sendDamages( this->serial, this->getStarSystem()->GetZone(), shield, armor, ppercentage, spercentage, amt, netpnt, netnormal, col);
+		VSServer->sendDamages( this->serial, this->getStarSystem()->GetZone(), hull, shield, armor, ppercentage, spercentage, amt, netpnt, netnormal, col);
 		// This way the client computes damages based on what we send to him => less reliable
 		//VSServer->sendDamages( this->serial, pnt, normal, amt, col, phasedamage);
 #endif
 #if 1
 		// SECOND METHOD : we just put a flag on the unit telling its shield/armor data has changed
-		if( spercentage)
+		if( spercentage>0)
 			this->damages |= SHIELD_DAMAGED;
-		if( ppercentage)
+		if( ppercentage>0)
 			this->damages |= ARMOR_DAMAGED;
 #endif
 	}

@@ -36,9 +36,18 @@ string			ZoneMgr::getSystem( string & name)
 
 StarSystem *	ZoneMgr::addZone( string starsys)
 {
-	COUT<<">>> ADDING A NEW ZONE = "<<starsys<<" - # OF ZONES = "<<_Universe->star_system.size()<<endl;
-	//list<Unit *> ulst;
+	_Universe->netLock(true);
 	StarSystem * sts=NULL;
+	string sysfile = starsys+".system";
+	if( (sts = GetLoadedStarSystem( sysfile.c_str() ))) {
+		cerr<<"--== STAR SYSTEM " << starsys << " ALREADY EXISTS ==--"<<endl;
+		return sts;
+	}
+	// Add a network zone (StarSystem equivalent) and create the new StarSystem
+	// StarSystem is not loaded so we generate it
+	COUT<<">>> ADDING A NEW ZONE = "<<starsys<<" - ZONE # = "<<_Universe->star_system.size()<<endl;
+	COUT<<"--== STAR SYSTEM NOT FOUND - GENERATING ==--"<<endl;
+	//list<Unit *> ulst;
 	// Generate the StarSystem
 	string starsysfile = starsys+".system";
 	UniverseUtil::ComputeSystemSerials( starsysfile);
@@ -63,6 +72,8 @@ StarSystem *	ZoneMgr::addZone( string starsys)
 		//zone_units.push_back( 0);
 		COUT<<"<<< NEW ZONE ADDED - # OF ZONES = "<<_Universe->star_system.size()<<endl;
 	}
+	sts->SetZone( _Universe->StarSystemIndex( sts));
+	_Universe->netLock(false);
 	return sts;
 }
 
@@ -141,30 +152,12 @@ Unit *	ZoneMgr::getUnit( ObjSerial unserial, unsigned short zone)
 StarSystem *	ZoneMgr::addClient( ClientWeakPtr cltw, string starsys, unsigned short & num_zone)
 {
 	// Remove the client from old starsystem if needed and add it in the new one
-	/*
-	string oldstarsys = cltw->save.GetOldStarSystem();
-	*/
 	StarSystem * sts=NULL;
-	StarSystem * ret=NULL;
 
-	string sysfile = starsys+".system";
-	if( !(ret = sts = GetLoadedStarSystem( sysfile.c_str())))
-	{
-		// Add a network zone (StarSystem equivalent) and create the new StarSystem
-		// StarSystem is not loaded so we generate it
-		COUT<<"--== STAR SYSTEM NOT FOUND - GENERATING ==--"<<endl;
-		sts = this->addZone( starsys);
-		// It also mean that there is nobody in that system so no need to send update
-		// Return false since the starsystem didn't contain any client
-		num_zone = _Universe->star_system.size()-1;
-		sts->SetZone( _Universe->StarSystemIndex( sts));
-	}
-	else
-	{
-		// Get the index of the existing star_system as it represents the zone number
-		num_zone = _Universe->StarSystemIndex( sts);
-		cerr<<"--== STAR SYSTEM ALREADY EXISTS ==--"<<endl;
-	}
+	sts = this->addZone( starsys);
+	
+	// Get the index of the existing star_system as it represents the zone number
+	num_zone = _Universe->StarSystemIndex( sts);
 
 	COUT<<">> ADDING CLIENT IN ZONE # "<<num_zone<<endl;
 	// Adds the client in the zone
@@ -183,7 +176,7 @@ StarSystem *	ZoneMgr::addClient( ClientWeakPtr cltw, string starsys, unsigned sh
 		sts->AddUnit( addun );
 	else
 		cerr << "dead client attempted to be added to system: refusing\n";
-	return ret;
+	return sts;
 }
 
 /************************************************************************************************/
@@ -701,6 +694,7 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 		if( damages & Unit::ARMOR_DAMAGED)
 		{
 			netbuf.addArmor( un->armor);
+			netbuf.addFloat( un->hull);
 		}
 		if( damages & Unit::COMPUTER_DAMAGED)
 		{
@@ -711,12 +705,15 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 			netbuf.addFloat( un->computer.radar.lockcone);
 			netbuf.addFloat( un->computer.radar.trackingcone);
 			netbuf.addFloat( un->computer.radar.maxrange);
-			for( it = 0; it<1+UnitImages::NUMGAUGES+MAXVDUS; it++)
+			char c = 1+UnitImages::NUMGAUGES+MAXVDUS;
+			netbuf.addChar(c);
+			for( it = 0; it<c; it++)
 				netbuf.addFloat( un->image->cockpit_damage[it]);
 		}
 		if( damages & Unit::MOUNT_DAMAGED)
 		{
 			netbuf.addShort( un->image->ecm);
+			netbuf.addShort( un->mounts.size());
 			for( it=0; it<un->mounts.size(); it++)
 			{
 				netbuf.addChar( (char) un->mounts[it].status);

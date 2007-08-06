@@ -120,9 +120,13 @@ void	NetClient::enterClient( NetBuffer &netbuf, ObjSerial cltserial )
 
 ClientPtr NetClient::AddClientObject( Unit *un, ObjSerial cltserial)
 {
-	ClientPtr clt;
+	if (!cltserial)
+		cltserial=un->GetSerial();
 
-	clt = Clients.get(cltserial);
+	COUT << " >>> ENTERING CLIENT =( serial #"
+		<< cltserial << " )= --------------------------------------" << endl;
+
+	ClientPtr clt = Clients.get(cltserial);
 	if( clt)
 	{
 		// Client may exist if it jumped from a starsystem to another of if killed and respawned
@@ -155,7 +159,6 @@ ClientPtr NetClient::AddClientObject( Unit *un, ObjSerial cltserial)
 		un->BackupState();
 		clt->last_packet=un->old_state;
 //		clt->prediction->InitInterpolation(un, un->old_state, 0, this->deltatime);
-
 		_Universe->activeStarSystem()->AddUnit( un);
 	
 	} else {
@@ -201,13 +204,15 @@ void	NetClient::downloadZoneInfo()
 void	NetClient::AddObjects( NetBuffer & netbuf)
 {
 	char subcmd;
+	/*
         std::set<ObjSerial> enteredSerials;
         for (unsigned int i=0;i<_Universe->numPlayers();++i) {
           Unit*un=_Universe->AccessCockpit(i)->GetParent();
           if(un) enteredSerials.insert(un->GetSerial());
         }
+	*/
 	// Loop until the end of the buffer
-        int offset=netbuf.getOffset();
+	int offset=netbuf.getOffset();
 	while( (subcmd=netbuf.getChar())!=ZoneMgr::End)
 	{
                 int noffset=netbuf.getOffset();
@@ -217,20 +222,47 @@ void	NetClient::AddObjects( NetBuffer & netbuf)
                   break;
                 }
                 offset=noffset;// to make sure we aren't at end of truncated buf
+		Unit * newunit;
+		ObjSerial serial;
 		switch( subcmd)
 		{
 			case ZoneMgr::AddClient :
-			{
-                          
-                          ObjSerial serial = netbuf.getSerial();
-                          enteredSerials.insert(serial);
-                          this->enterClient( netbuf, serial);
-			}
-			break;
+				serial = netbuf.getSerial();
+//				enteredSerials.insert(serial);
+				this->enterClient( netbuf, serial);
+				break;
+			case ZoneMgr::AddUnit :
+				newunit = UnitFactory::parseUnitBuffer(netbuf);
+				AddClientObject(newunit);
+//				enteredSerials.insert(newunit->GetSerial());
+				break;
+			case ZoneMgr::AddNebula :
+				newunit = (Unit*)UnitFactory::parseNebulaBuffer(netbuf);
+				AddClientObject(newunit);
+//				enteredSerials.insert(newunit->GetSerial());
+				break;
+			case ZoneMgr::AddPlanet :
+				newunit = (Unit*)UnitFactory::parsePlanetBuffer(netbuf);
+				AddClientObject(newunit);
+//				enteredSerials.insert(newunit->GetSerial());
+				break;
+			case ZoneMgr::AddAsteroid :
+				newunit = (Unit*)UnitFactory::parseAsteroidBuffer(netbuf);
+				AddClientObject(newunit);
+//				enteredSerials.insert(newunit->GetSerial());
+				break;
+			case ZoneMgr::AddMissile :
+				newunit = (Unit*)UnitFactory::parseMissileBuffer(netbuf);
+				AddClientObject(newunit);
+//				enteredSerials.insert(newunit->GetSerial());
+				break;
 			default :
 				cerr<<"WARNING : Unknown sub "<<(int)subcmd<< " command in AddObjects"<<endl;
+				break;
 		}
 	}
+	// NETFIXME: What is the point of killing off all non-networked units all the time?
+	/*
         Unit *un;
         for (un_iter it = UniverseUtil::getUnitList();
              un=(*it);
@@ -241,7 +273,7 @@ void	NetClient::AddObjects( NetBuffer & netbuf)
             //NETFIXME could result in star system being killed off one by one--need to differentiate that
           }
         }
-
+	*/
 }
 
 /*************************************************************/
@@ -481,90 +513,105 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
     }
 }
 
+#define SETNOTNULL(un, param, val) if (un) param=val; else val
+
 void NetClient::receiveUnitDamage( NetBuffer &netbuf, Unit *un ) {
-	size_t it=0;
-        if (!un) {
-          cerr<< "Received Damage Update for null unit"<<endl;
-          return;
-        }
+	int it=0;
 	unsigned short damages;
 	damages = netbuf.getShort();
-	cout << "Received damage " <<damages<<" for unit "<<un->GetSerial()<<" ("<<un->name<<")"<<endl;
 
+	if (!un) {
+		cerr<< "Received Damage Update for null unit"<<endl;
+	} else {
+		cout << "Received damage " <<damages<<" for unit "<<un->GetSerial()<<" ("<<un->name<<")"<<endl;
+	}
+	
 	if( damages & Unit::SHIELD_DAMAGED)
 	{
-		un->shield = netbuf.getShield();
+		SETNOTNULL(un,un->shield,netbuf.getShield());
 	}
 	if( damages & Unit::ARMOR_DAMAGED)
 	{
-		un->armor = netbuf.getArmor();
+		SETNOTNULL(un,un->armor, netbuf.getArmor());
+		SETNOTNULL(un,un->hull, netbuf.getFloat());
 	}
 	if( damages & Unit::COMPUTER_DAMAGED)
 	{
-		un->computer.itts = netbuf.getChar();
-		un->computer.radar.iff = netbuf.getChar();
-		un->limits.retro = netbuf.getFloat();
-		un->computer.radar.maxcone = netbuf.getFloat();
-		un->computer.radar.lockcone = netbuf.getFloat();
-		un->computer.radar.trackingcone = netbuf.getFloat();
-		un->computer.radar.maxrange = netbuf.getFloat();
-		for( it = 0; it<1+UnitImages::NUMGAUGES+MAXVDUS; it++)
-			un->image->cockpit_damage[it] = netbuf.getFloat();
+		SETNOTNULL(un,un->computer.itts, netbuf.getChar());
+		SETNOTNULL(un,un->computer.radar.iff, netbuf.getChar());
+		SETNOTNULL(un,un->limits.retro, netbuf.getFloat());
+		SETNOTNULL(un,un->computer.radar.maxcone, netbuf.getFloat());
+		SETNOTNULL(un,un->computer.radar.lockcone, netbuf.getFloat());
+		SETNOTNULL(un,un->computer.radar.trackingcone, netbuf.getFloat());
+		SETNOTNULL(un,un->computer.radar.maxrange, netbuf.getFloat());
+		int numvdus=(int)netbuf.getChar();
+		for( it = 0; it<numvdus; it++) {
+			float dam=netbuf.getFloat();
+			if (un && it<1+UnitImages::NUMGAUGES+MAXVDUS) {
+				un->image->cockpit_damage[it] = dam;
+			}
+		}
 	}
 	if( damages & Unit::MOUNT_DAMAGED)
 	{
-		un->image->ecm = netbuf.getShort();
-		for( it=0; it<un->mounts.size(); it++)
+		SETNOTNULL(un,un->image->ecm, netbuf.getShort());
+		int nummounts=(int)netbuf.getShort();
+		for( it=0; it<nummounts; it++)
 		{
-                  Mount::STATUS tmpstatus=( Mount::STATUS) netbuf.getChar();
-                  if (_Universe->isPlayerStarship(un)==NULL||tmpstatus==Mount::UNCHOSEN||tmpstatus==Mount::DESTROYED) {
-                    un->mounts[it].status = tmpstatus;
-                        //don't reset my mount status on me... that's my 
-                  }                  
-                  un->mounts[it].ammo = netbuf.getInt32();
-                  un->mounts[it].time_to_lock = netbuf.getFloat();
-                  un->mounts[it].size = netbuf.getShort();
+			Mount::STATUS tmpstatus=( Mount::STATUS) netbuf.getChar();
+			int ammo = netbuf.getInt32();
+			float ttl = netbuf.getFloat();
+			unsigned short size = netbuf.getShort();
+			if(un && it<un->mounts.size()) {
+				if (_Universe->isPlayerStarship(un)==NULL||tmpstatus==Mount::UNCHOSEN||tmpstatus==Mount::DESTROYED) {
+					un->mounts[it].status = tmpstatus;
+					//don't reset my mount status on me... that's my 
+				}
+				un->mounts[it].ammo = ammo;
+				un->mounts[it].time_to_lock = ttl;
+				un->mounts[it].size = size;
+			}
 		}
 	}
 	if( damages & Unit::CARGOFUEL_DAMAGED)
 	{
-		un->SetFuel( netbuf.getFloat());
-		un->SetAfterBurn(netbuf.getFloat());
-		un->image->CargoVolume = netbuf.getFloat();
-		un->image->UpgradeVolume = netbuf.getFloat();
+		if (un) un->SetFuel( netbuf.getFloat()); else netbuf.getFloat();
+		if (un) un->SetAfterBurn(netbuf.getFloat()); else netbuf.getFloat();
+		SETNOTNULL(un,un->image->CargoVolume, netbuf.getFloat());
+		SETNOTNULL(un,un->image->UpgradeVolume, netbuf.getFloat());
 		// NRTFIXME: cargo unimplented.
 //		for( it=0; it<un->image->cargo.size(); it++)
 //			un->image->cargo[it].quantity = netbuf.getInt32();
 	}
 	if( damages & Unit::JUMP_DAMAGED)
 	{
-		un->shield.leak = netbuf.getChar();
-		un->shield.recharge = netbuf.getFloat();
-		un->SetEnergyRecharge( netbuf.getFloat());
-		un->SetMaxEnergy( netbuf.getFloat());
-		un->jump.energy = netbuf.getFloat();
-		un->jump.damage = netbuf.getChar();
-		un->image->repair_droid = netbuf.getChar();
+		SETNOTNULL(un,un->shield.leak, netbuf.getChar());
+		SETNOTNULL(un,un->shield.recharge, netbuf.getFloat());
+		if (un) un->SetEnergyRecharge( netbuf.getFloat()); else netbuf.getFloat();
+		if (un) un->SetMaxEnergy( netbuf.getFloat()); else netbuf.getFloat();
+		SETNOTNULL(un,un->jump.energy, netbuf.getFloat());
+		SETNOTNULL(un,un->jump.damage, netbuf.getChar());
+		SETNOTNULL(un,un->image->repair_droid, netbuf.getChar());
 	}
 	if( damages & Unit::CLOAK_DAMAGED)
 	{
-		un->cloaking = netbuf.getInt32();
-		un->image->cloakenergy = netbuf.getFloat();
-		un->cloakmin = netbuf.getInt32();
-		un->image->cloakrate = netbuf.getInt32();
+		SETNOTNULL(un,un->cloaking, netbuf.getInt32());
+		SETNOTNULL(un,un->image->cloakenergy, netbuf.getFloat());
+		SETNOTNULL(un,un->cloakmin, netbuf.getInt32());
+		SETNOTNULL(un,un->image->cloakrate, netbuf.getInt32());
 	}
 	if( damages & Unit::LIMITS_DAMAGED)
 	{
-		un->computer.max_pitch_down = netbuf.getFloat( );
-		un->computer.max_pitch_up = netbuf.getFloat( );
-		un->computer.max_yaw_left = netbuf.getFloat( );
-		un->computer.max_yaw_right = netbuf.getFloat( );
-		un->computer.max_roll_left = netbuf.getFloat( );
-		un->computer.max_roll_right = netbuf.getFloat( );
-		un->limits.roll = netbuf.getFloat( );
-		un->limits.yaw = netbuf.getFloat( );
-		un->limits.pitch = netbuf.getFloat( );
-		un->limits.lateral = netbuf.getFloat( );
+		SETNOTNULL(un,un->computer.max_pitch_down, netbuf.getFloat( ));
+		SETNOTNULL(un,un->computer.max_pitch_up, netbuf.getFloat( ));
+		SETNOTNULL(un,un->computer.max_yaw_left, netbuf.getFloat( ));
+		SETNOTNULL(un,un->computer.max_yaw_right, netbuf.getFloat( ));
+		SETNOTNULL(un,un->computer.max_roll_left, netbuf.getFloat( ));
+		SETNOTNULL(un,un->computer.max_roll_right, netbuf.getFloat( ));
+		SETNOTNULL(un,un->limits.roll, netbuf.getFloat( ));
+		SETNOTNULL(un,un->limits.yaw, netbuf.getFloat( ));
+		SETNOTNULL(un,un->limits.pitch, netbuf.getFloat( ));
+		SETNOTNULL(un,un->limits.lateral, netbuf.getFloat( ));
 	}
 }
 

@@ -176,63 +176,6 @@ NetClient::~NetClient()
 }
 
 /*************************************************************/
-/**** Packet recpetion loop                               ****/
-/*************************************************************/
-
-bool	NetClient::PacketLoop( Cmd command)
-{
-	// NETFIXME: This code doesn't look like it works... it seems like it could easily discard data.
-	Packet packet;
-	bool timeout = false;
-	bool recv = false;
-
-	COUT<<"Enter NetClient::PacketLoop"<<endl;
-
-	string packet_tostr = vs_config->getVariable( "network", "packettimeout", "10" );
-	int packet_to = atoi( packet_tostr.c_str());
-
-	double initial = getNewTime();
-	double newtime=0;
-	double elapsed=0;
-	int ret;
-	while( !timeout && !recv)
-	{
-		// If we have no response in "login_to" seconds -> fails
-		UpdateTime();
-		newtime = getNewTime();
-		elapsed = newtime-initial;
-		//COUT<<elapsed<<" seconds since login request"<<endl;
-		if( elapsed > packet_to)
-		{
-			COUT<<"Timed out"<<endl;
-			timeout = true;
-			VSExit(1);
-		}
-		ret=this->checkMsg( &packet );
-		if( ret>0)
-		{
-			if( packet.getCommand() == command) {
-				COUT<<"Got a response with corresponding command"<<endl;
-				recv = true;
-			} else
-			{
-				COUT<<"Got a response with unexpected command : ";
-				displayCmd( packet.getCommand());
-				cout << " instead of "<<command<<endl;
-			}
-		}
-		else if( ret<0)
-		{
-			COUT<<"!!! Error, dead connection to server -> EXIT !!!"<<endl;
-			VSExit(1);
-		}
-
-		_sock_set.waste_time(0,40000);
-	}
-	return recv;
-}
-
-/*************************************************************/
 /**** Login loop                                          ****/
 /*************************************************************/
 
@@ -485,13 +428,18 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 
     Packet    p1;
     AddressIP ipadr;
+/*				
+				// Restart game!!!
+				_Universe->Loop(bootstrap_first_loop);*/
 	static bool udpgetspriority=true;
+	bool wasudp=udpgetspriority;
 
 	// First check if there is data in the client's recv queue.
 	int recvbytes = (udpgetspriority?clt_udp_sock:clt_tcp_sock)->recvbuf( &p1, &ipadr );
 	
     if( recvbytes <= 0) {
 		recvbytes = (udpgetspriority==false?clt_udp_sock:clt_tcp_sock)->recvbuf( &p1, &ipadr );
+		wasudp=!udpgetspriority;
 	}
 	
 	if (recvbytes <= 0) {
@@ -521,9 +469,11 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 		//	NETFIXME: check for file descriptors in _sock_set.fd_set...
 		// Check the queues again.
 		recvbytes = (udpgetspriority?clt_udp_sock:clt_tcp_sock)->recvbuf( &p1, &ipadr );
+		wasudp=udpgetspriority;
 		
 		if( recvbytes <= 0) {
 			recvbytes = (udpgetspriority==false?clt_udp_sock:clt_tcp_sock)->recvbuf( &p1, &ipadr );
+			wasudp=!udpgetspriority;
 		}
 		udpgetspriority=!udpgetspriority;
 		if( recvbytes <= 0)
@@ -546,7 +496,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
         packet_serial     = p1.getSerial();
 	    Cmd cmd           = p1.getCommand( );
 		if (cmd!=CMD_SNAPSHOT)
-			COUT << "Rcvd: " << cmd << " ";
+			COUT << "Rcvd " << (wasudp?"UDP":"TCP") << ": " << cmd << " from serial " << packet_serial << endl;
         switch( cmd )
         {
             // Login accept
@@ -599,7 +549,6 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
             // Login failed
             case LOGIN_ERROR :
                 COUT<<">>> LOGIN ERROR =( DENIED )= ------------------------------------------------"<<endl;
-                //COUT<<"Received LOGIN_ERROR"<<endl;
                 this->disconnect();
 				lastsave.push_back( "");
 				lastsave.push_back( "!!! ACCESS DENIED : Account does not exist !!!");
@@ -632,7 +581,6 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 
             case CMD_SNAPSHOT :
                 {
-//                    COUT << "CMD_SNAPSHOT received" << endl;
                     // Should update another client's position
                     // Zone hack:
 	                // When receiving a snapshot, packet serial is considered as the
@@ -644,15 +592,16 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 //                    COUT << "   *** #units=" << numUnits << " ts=" << timestamp << " delta-t=" << deltatime << endl;
 
                     this->receivePositions( numUnits, timestamp, netbuf, deltatime );
-//                    COUT << "   *** CMD_SNAPSHOT DONE" << endl;
                 }
                 break;
             case CMD_ENTERCLIENT :
 			{
-                COUT << ">>> " << local_serial << " >>> ENTERING CLIENT =( serial #"
-                     << packet_serial << " )= --------------------------------------" << endl;
-				NetBuffer netbuf( p1.getData(), p1.getDataLength());
-				this->enterClient( netbuf, p1.getSerial() );
+				// Saving 4 bytes for every 50kB saved game isn't worth the bugs that come with it.
+//				if (p1.getSerial()) {
+//					this->enterClient( netbuf, p1.getSerial() );
+//				} else {
+					this->AddObjects( netbuf);
+//				}
 			}
             break;
             case CMD_EXITCLIENT :
@@ -669,15 +618,13 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
                       this->Respawn(packet_serial);
                     }
                     this->game_unit.GetUnit()->curr_physical_state = netbuf.getTransformation();
-                    this->AddObjects( netbuf);
-                    //this->getZoneData( &p1 );
                 }
                 break;
             case CMD_DISCONNECT :
                 /*** TO REDO IN A CLEAN WAY ***/
                 COUT << ">>> " << local_serial << " >>> DISCONNECTED -> Client killed =( serial #"
                      << packet_serial << " )= --------------------------------------" << endl;
-                VSExit(1);
+				
                 break;
 //             case CMD_ACK :
 //                 /*** RECEIVED AN ACK FOR A PACKET : comparison on packet timestamp and the client serial in it ***/
@@ -800,7 +747,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 										}
                                         Unit* oldtarg=un->Target();
                                         if (oldtarg&&oldtarg->GetSerial()==0&&(target_un==NULL||target_un->GetSerial()==0)) {
-                                          COUT <<"Targeting unit with serial 0: " << oldtarg->name;
+											COUT <<"Setting target from " << oldtarg->name << " to NULL." << endl;
                                           //don't do anything
                                         }else {
                                           un->computer.target.SetUnit(target_un);
@@ -851,14 +798,16 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				Vector normal = netbuf.getVector();
 				GFXColor col = netbuf.getColor();
 				un = UniverseUtil::GetUnitFromSerial( p1.getSerial());
+				float hul = netbuf.getFloat();
 				Shield sh = netbuf.getShield();
 				Armor ar = netbuf.getArmor();
 				if( un)
 				{
-                                  un->shield=sh;
-                                  un->armor=ar;
 					// Apply the damage
 					un->ApplyNetDamage( pnt, normal, amt, ppercentage, spercentage, col);
+					un->shield=sh;
+					un->armor=ar;
+					un->hull=hul;
 				}
 				else
 					COUT<<"!!! Problem -> CANNOT APPLY DAMAGE UNIT NOT FOUND !!!"<<endl;
@@ -905,7 +854,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					}
 					COUT<<"Client #"<<p1.getSerial()<<" killed - now "<<nbclients<<" clients in system"<<endl;
 
-					string msg = clt->callsign+" was killed";
+					string msg = clt->callsign+" has died.";
 					UniverseUtil::IOmessage(0,"game","all","#FFFF66"+msg+"#000000");
 				}
 			}
@@ -979,22 +928,39 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				Unit *mpl = UnitFactory::getMasterPartList();
 				while ((ser = netbuf.getSerial())!=0) {
 					Unit *un = UniverseUtil::GetUnitFromSerial( ser );
+					unsigned int i;
 					// Clear cargo... back to front to make it more efficient.
-					unsigned int i=un->numCargo();
-					while (i>0) {
-						i--;
-						un->RemoveCargo(i, un->GetCargo(i).GetQuantity(),true);
+					if (un) {
+						i=un->numCargo();
+						while (i>0) {
+							i--;
+							un->RemoveCargo(i, un->GetCargo(i).GetQuantity(),true);
+						}
+					}
+					float mass = netbuf.getFloat();
+					float cargvol = netbuf.getFloat();
+					float upgvol = netbuf.getFloat();
+					if (un) {
+						un->Mass = mass;
+						un->image->CargoVolume = cargvol;
+						un->image->UpgradeVolume = upgvol;
 					}
 					unsigned int numcargo = netbuf.getInt32();
+					Cargo carg;
 					for (i=0;i<numcargo;i++) {
 						unsigned int mplind;
 						unsigned int quantity = netbuf.getInt32();
-						Cargo carg = *mpl->GetCargo(netbuf.getString().c_str(), mplind);
+						string str=netbuf.getString();
+						if (un) {
+							carg = *mpl->GetCargo(str.c_str(), mplind);
+						}
 						carg.SetQuantity(quantity);
 						carg.SetPrice(netbuf.getFloat());
 						carg.SetMass(netbuf.getFloat());
 						carg.SetVolume(netbuf.getFloat());
-						un->AddCargo(carg,false);
+						if (un) {
+							un->AddCargo(carg,false);
+						}
 					}
 				}
 			}
@@ -1210,134 +1176,6 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					break;
 				un->old_state.setPosition( serverpos);
 				un->curr_physical_state.position = serverpos;
-			}
-			break;
-			case CMD_CREATEUNIT :
-			{
-				Unit * newunit = NULL;
-				ObjSerial serial = netbuf.getSerial();
-				string file( netbuf.getString());
-				bool sub = netbuf.getChar();
-				int faction = netbuf.getInt32();
-				string fname( netbuf.getString());
-				string custom( netbuf.getString());
-				int fg_num = netbuf.getInt32();
-
-				cerr<<"NETCREATE UNIT : "<<file<<endl;
-				
-				string facname = FactionUtil::GetFactionName( faction);
-				Flightgroup * fg = mission[0].findFlightgroup( fname, facname);
-				newunit = UnitFactory::createUnit( file.c_str(), sub, faction, custom, fg, fg_num, NULL, serial);
-//				_Universe->activeStarSystem()->AddUnit( newunit);
-				AddClientObject(newunit, serial);
-			}
-			break;
-			case CMD_CREATENEBULA :
-			{
-				Unit * newunit = NULL;
-				ObjSerial serial = netbuf.getSerial();
-				string file( netbuf.getString());
-				bool sub = netbuf.getChar();
-				int faction = netbuf.getInt32();
-				string fname( netbuf.getString());
-				int fg_num = netbuf.getInt32();
-
-				cerr<<"NETCREATE NEBULA : "<<file<<endl;
-
-				string facname = FactionUtil::GetFactionName( faction);
-				Flightgroup * fg = mission[0].findFlightgroup( fname, facname);
-				newunit = (Unit*) UnitFactory::createNebula( file.c_str(), sub, faction, fg, fg_num, serial);
-//				_Universe->activeStarSystem()->AddUnit( newunit);
-				AddClientObject(newunit, serial);
-			}
-			break;
-			case CMD_CREATEPLANET :
-			{
-				Unit * newunit = NULL;
-				ObjSerial serial = netbuf.getSerial();
-				QVector x = netbuf.getQVector();
-				QVector y = netbuf.getQVector();
-				float vely = netbuf.getFloat();
-				const Vector rotvel( netbuf.getVector());
-				float pos = netbuf.getFloat();
-				float gravity = netbuf.getFloat();
-				float radius = netbuf.getFloat();
-
-				string file( netbuf.getString());
-				char sr = netbuf.getChar();
-				char ds = netbuf.getChar();
-
-				vector<string> dest;
-				unsigned short nbdest = netbuf.getShort();
-				int i=0;
-				for( i=0; i<nbdest; i++)
-				{
-					string tmp( netbuf.getString());
-					char * ctmp = new char[tmp.length()+1];
-					ctmp[tmp.length()] = 0;
-					memcpy( ctmp, tmp.c_str(), tmp.length());
-					dest.push_back( ctmp);
-				}
-
-				const QVector orbitcent( netbuf.getQVector());
-				un = UniverseUtil::GetUnitFromSerial( netbuf.getSerial());
-				GFXMaterial mat = netbuf.getGFXMaterial();
-				
-				vector<GFXLightLocal> lights;
-				unsigned short nblight = netbuf.getShort();
-				for( i=0; i<nblight; i++)
-					lights.push_back( netbuf.getGFXLightLocal());
-
-				int faction = netbuf.getInt32();
-				string fullname( netbuf.getString());
-				char insideout = netbuf.getChar();
-
-				cerr<<"NETCREATE PLANET : "<<file<<endl;
-
-				newunit = UnitFactory::createPlanet( x, y, vely, rotvel, pos, gravity, radius, file.c_str(), (BLENDFUNC)sr, (BLENDFUNC)ds,
-											dest, orbitcent, un, mat, lights, faction, fullname, insideout, serial);
-//				_Universe->activeStarSystem()->AddUnit( newunit);
-				AddClientObject(newunit, serial);
-			}
-			break;
-			case CMD_CREATEASTER :
-			{
-				Unit * newunit = NULL;
-				ObjSerial serial = netbuf.getSerial();
-				string file( netbuf.getString());
-				int faction = netbuf.getInt32();
-				string fname( netbuf.getString());
-				int fg_snumber = netbuf.getInt32();
-				float diff = netbuf.getFloat();
-
-				cerr<<"NETCREATE ASTEROID : "<<file<<endl;
-
-				string facname = FactionUtil::GetFactionName( faction);
-				Flightgroup * fg = mission[0].findFlightgroup( fname, facname);
-				newunit = (Unit *) UnitFactory::createAsteroid( file.c_str(), faction, fg, fg_snumber, diff, serial);
-//				_Universe->activeStarSystem()->AddUnit( newunit);
-				AddClientObject(newunit, serial);
-			}
-			case CMD_CREATEMISSILE :
-			{
-				Unit * newunit = NULL;
-				ObjSerial serial = netbuf.getSerial();
-				string file( netbuf.getString());
-				int faction = netbuf.getInt32();
-				string mods( netbuf.getString());
-				const float damage( netbuf.getFloat());
-				float phasedamage = netbuf.getFloat();
-				float time = netbuf.getFloat();
-				float radialeffect = netbuf.getFloat();
-				float radmult = netbuf.getFloat();
-				float detonation_radius = netbuf.getFloat();
-
-				cerr<<"NETCREATE MISSILE : "<<file<<endl;
-
-				const string modifs( mods);
-				newunit = (Unit *) UnitFactory::createMissile( file.c_str(), faction, modifs, damage, phasedamage, time, radialeffect, radmult, detonation_radius, serial);
-//				_Universe->activeStarSystem()->AddUnit( newunit);
-				AddClientObject(newunit, serial);
 			}
 			break;
 			case CMD_SERVERTIME:

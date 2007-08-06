@@ -515,7 +515,8 @@ void VsnetTCPSocket::inner_complete_a_packet( Blob* b )
 
     PacketMem mem( b->buf, b->present_len, PacketMem::TakeOwnership );
     PacketPtr ptr = PacketPtr( new Packet( mem ) );
-    if (ptr->getCommand()!=CMD_POSUPDATE) COUT << "Completely received a packet of type " << ptr->getCommand() << endl;
+    //if (ptr->getCommand()!=CMD_POSUPDATE && ptr->getCommand()!=CMD_SNAPSHOT)
+    //    COUT << "Completely received a packet of type " << ptr->getCommand() << endl;
     b->buf = NULL;
     _cpq_mx.lock( );
     _cpq.push( ptr );

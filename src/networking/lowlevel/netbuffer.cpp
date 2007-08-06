@@ -104,14 +104,121 @@ bool	NetBuffer::checkBuffer( int len, const char * fun)
 	if( offset+len >= size)
 	{
 		std::cerr<<"!!! ERROR : trying to read more data than buffer size (offset="<<offset<<" - size="<<size<<" - to read="<<len<<") in "<<fun<<" !!!"<<std::endl;
+
+		// NETFIXME: Be more graceful... but this is nice for Debugging in GDB.
+		int *x=NULL;
+		(const_cast<char*>(fun))[0]+=*x;
+		
 		return false;
 	}
 	return true;
 }
 
+enum NBType {
+	NB_CHAR=187,
+	NB_SHORT,
+	NB_SERIAL,
+	NB_INT32,
+	NB_UINT32,
+	NB_FLOAT=123,
+	NB_DOUBLE,
+	NB_STRING=33,
+	NB_BUFFER=44,
+	NB_CLIENTSTATE=211,
+	NB_TRANSFORMATION,
+	NB_VECTOR,
+	NB_QVECTOR,
+	NB_COLOR,
+	NB_MATRIX,
+	NB_QUATERNION,
+	NB_SHIELD,
+	NB_ARMOR,
+	NB_GFXMAT,
+	NB_GFXLIGHT,
+	NB_GFXLIGHTLOCAL,
+};
+#define NB_CASE(a)  case a: return #a; break;
+char typeerrbuf[32];
+const char *getTypeStr( unsigned char c ) {
+	switch (c) {
+		NB_CASE(NB_CHAR);
+		NB_CASE(NB_SHORT);
+		NB_CASE(NB_SERIAL);
+		NB_CASE(NB_INT32);
+		NB_CASE(NB_UINT32);
+		NB_CASE(NB_FLOAT);
+		NB_CASE(NB_DOUBLE);
+		NB_CASE(NB_STRING);
+		NB_CASE(NB_BUFFER);
+		NB_CASE(NB_CLIENTSTATE);
+		NB_CASE(NB_TRANSFORMATION);
+		NB_CASE(NB_VECTOR);
+		NB_CASE(NB_QVECTOR);
+		NB_CASE(NB_COLOR);
+		NB_CASE(NB_MATRIX);
+		NB_CASE(NB_QUATERNION);
+		NB_CASE(NB_SHIELD);
+		NB_CASE(NB_ARMOR);
+		NB_CASE(NB_GFXMAT);
+		NB_CASE(NB_GFXLIGHT);
+		NB_CASE(NB_GFXLIGHTLOCAL);
+	default:
+		sprintf(typeerrbuf, "<<Byte %d>>", (int)c);
+		return typeerrbuf;
+	}
+}
+
+void	NetBuffer::addType( unsigned char c)
+		{
+			int tmpsize = sizeof( c);
+			resizeBuffer( offset+tmpsize);
+			VsnetOSS::memcpy( buffer+offset, &c, sizeof( c));
+			offset += tmpsize;
+		}
+unsigned char	NetBuffer::getType()
+		{
+			unsigned char c;
+			if (!checkBuffer( sizeof( c), "getChar"))
+				return 0;
+			VsnetOSS::memcpy( &c, buffer+offset, sizeof( c));
+			offset+=sizeof(c);
+			return c;
+		}
+
+bool NetBuffer::checkType(unsigned char c) {
+	unsigned char got = getType();
+
+	if (got != c) {
+		const char *typ = getTypeStr(c);
+		const char *typgot = getTypeStr(got);
+		std::cerr<<"!!! ERROR : attempt to read invalid data at offset="<<offset<<": Actual type is a "<<typgot<<" but I wanted a "<<typ<<" !!!"<<std::endl;
+
+		// NETFIXME: Be more graceful... but this is nice for Debugging in GDB.
+		int *x=NULL;
+		(const_cast<char*>(typ))[0]+=*x;
+		
+		return false;
+	}
+	return true;
+}
+
+#define NETBUF_DEBUG_CLISERV
+
+#ifdef NETBUF_DEBUG_CLISERV
+// Must be enabled or disabled on ALL CLIENTS and ALL SERVERS
+// Since packets will be incompatible.
+#define ADD_NB(type) addType(type)
+#define CHECK_NB(type) checkType(type)
+#else
+#define ADD_NB(type)
+#define CHECK_NB(type)
+#endif
+	
+
 // NOTE : IMPORTANT - I ONLY INCREMENT OFFSET IN PRIMARY DATATYPES SINCE ALL OTHER ARE COMPOSED WITH THEM
 void	NetBuffer::addClientState( ClientState cs)
 {
+	ADD_NB(NB_CLIENTSTATE);
     //this->addFloat( cs.delay);
     this->addSerial( cs.client_serial);
     this->addTransformation( cs.pos);
@@ -121,6 +228,7 @@ void	NetBuffer::addClientState( ClientState cs)
 
 ClientState NetBuffer::getClientState()
 {
+	CHECK_NB(NB_CLIENTSTATE);
     ClientState cs;
     //cs.delay = this->getFloat();
     cs.client_serial = this->getSerial();
@@ -133,12 +241,14 @@ ClientState NetBuffer::getClientState()
 
 void	NetBuffer::addVector( Vector v)
 		{
+			ADD_NB(NB_VECTOR);
 			this->addFloat( v.i);
 			this->addFloat( v.j);
 			this->addFloat( v.k);
 		}
 Vector	NetBuffer::getVector()
 		{
+			CHECK_NB(NB_VECTOR);
 			Vector v;
 			v.i = this->getFloat();
 			v.j = this->getFloat();
@@ -148,12 +258,14 @@ Vector	NetBuffer::getVector()
 		}
 void	NetBuffer::addQVector( QVector v)
 		{
+			ADD_NB(NB_QVECTOR);
 			this->addDouble( v.i);
 			this->addDouble( v.j);
 			this->addDouble( v.k);
 		}
 QVector	NetBuffer::getQVector()
 		{
+			CHECK_NB(NB_QVECTOR);
 			QVector v;
 			v.i = this->getDouble();
 			v.j = this->getDouble();
@@ -163,6 +275,7 @@ QVector	NetBuffer::getQVector()
 		}
 void	NetBuffer::addColor( GFXColor col)
 		{
+			ADD_NB(NB_COLOR);
 			this->addFloat( col.r);
 			this->addFloat( col.g);
 			this->addFloat( col.b);
@@ -170,6 +283,7 @@ void	NetBuffer::addColor( GFXColor col)
 		}
 GFXColor NetBuffer::getColor()
 		{
+			CHECK_NB(NB_COLOR);
 			GFXColor col;
 			col.r = this->getFloat();
 			col.g = this->getFloat();
@@ -180,12 +294,14 @@ GFXColor NetBuffer::getColor()
 		}
 void	NetBuffer::addMatrix( Matrix m)
 		{
+			ADD_NB(NB_MATRIX);
 			for( int i=0; i<9; i++)
 				this->addFloat( m.r[i]);
 			this->addQVector( m.p);
 		}
 Matrix	NetBuffer::getMatrix()
 		{
+			CHECK_NB(NB_MATRIX);
 			Matrix m;
 			for( int i=0; i<9; i++)
 				m.r[i] = this->getFloat();
@@ -195,11 +311,13 @@ Matrix	NetBuffer::getMatrix()
 		}
 void	NetBuffer::addQuaternion( Quaternion quat)
 		{
+			ADD_NB(NB_QUATERNION);
 			this->addFloat( quat.s);
 			this->addVector( quat.v);
 		}
 Quaternion	NetBuffer::getQuaternion()
 		{
+			CHECK_NB(NB_QUATERNION);
 			Quaternion q;
 
 			q.s = this->getFloat();
@@ -209,11 +327,13 @@ Quaternion	NetBuffer::getQuaternion()
 		}
 void	NetBuffer::addTransformation( Transformation trans)
 		{
+			ADD_NB(NB_TRANSFORMATION);
 			this->addQuaternion( trans.orientation);
 			this->addQVector( trans.position);
 		}
 Transformation	NetBuffer::getTransformation()
 		{
+			CHECK_NB(NB_TRANSFORMATION);
 			Transformation t;
 			t.orientation = this->getQuaternion();
 			t.position = this->getQVector();
@@ -221,8 +341,9 @@ Transformation	NetBuffer::getTransformation()
 			return t;
 		}
 
-void	NetBuffer::addShield( Shield shield)
+void	NetBuffer::addShield( const Shield &shield)
 {
+	ADD_NB(NB_SHIELD);
 	this->addChar( shield.number);
 	this->addChar( shield.leak);
 	this->addFloat( shield.recharge);
@@ -267,6 +388,7 @@ void	NetBuffer::addShield( Shield shield)
 }
 Shield	NetBuffer::getShield()
 {
+	CHECK_NB(NB_SHIELD);
 	Shield shield;
 	shield.number = this->getChar();
 	shield.leak = this->getChar();
@@ -312,8 +434,9 @@ Shield	NetBuffer::getShield()
 
 	return shield;
 }
-void		NetBuffer::addArmor( Armor armor)
+void		NetBuffer::addArmor( const Armor &armor)
 {
+	ADD_NB(NB_ARMOR);
 	this->addFloat ( armor.frontrighttop);
 	this->addFloat( armor.backrighttop);
 	this->addFloat( armor.frontlefttop);
@@ -325,6 +448,7 @@ void		NetBuffer::addArmor( Armor armor)
 }
 Armor	NetBuffer::getArmor()
 {
+	CHECK_NB(NB_ARMOR);
 	Armor armor;
 	armor.frontrighttop = this->getFloat();
 	armor.backrighttop = this->getFloat();
@@ -340,14 +464,17 @@ Armor	NetBuffer::getArmor()
 
 void	NetBuffer::addSerial( ObjSerial serial)
 		{
+			ADD_NB(NB_SERIAL);
 			this->addShort( serial);
 		}
 ObjSerial	NetBuffer::getSerial()
 		{
+			CHECK_NB(NB_SERIAL);
 			return this->getShort();
 		}
 void	NetBuffer::addFloat( float f)
 		{
+			ADD_NB(NB_FLOAT);
 			int tmpsize = sizeof( f);
 			resizeBuffer( offset+tmpsize);
 			posh_u32_t bits = POSH_BigFloatBits( f );
@@ -356,6 +483,7 @@ void	NetBuffer::addFloat( float f)
 		}
 float	NetBuffer::getFloat()
 		{
+			CHECK_NB(NB_FLOAT);
 			float s;
 			if (!checkBuffer( sizeof( s), "getFloat"))
 				return 0;
@@ -366,6 +494,7 @@ float	NetBuffer::getFloat()
 		}
 void	NetBuffer::addDouble( double d)
 		{
+			ADD_NB(NB_DOUBLE);
 			int tmpsize = sizeof( d);
 			resizeBuffer( offset+tmpsize);
 			POSH_DoubleBits( d, (posh_byte_t *) this->buffer+offset);
@@ -373,6 +502,7 @@ void	NetBuffer::addDouble( double d)
 		}
 double	NetBuffer::getDouble()
 		{
+			CHECK_NB(NB_DOUBLE);
 			double s;
 			if (!checkBuffer( sizeof( s), "getDouble"))
 				return 0;
@@ -382,6 +512,7 @@ double	NetBuffer::getDouble()
 		}
 void	NetBuffer::addShort( unsigned short s)
 		{
+			ADD_NB(NB_SHORT);
 			int tmpsize = sizeof( s);
 			resizeBuffer( offset+tmpsize);
 			POSH_WriteU16ToBig( this->buffer+offset, s);
@@ -389,6 +520,7 @@ void	NetBuffer::addShort( unsigned short s)
 		}
 unsigned short	NetBuffer::getShort()
 		{
+			CHECK_NB(NB_SHORT);
 			unsigned short s;
 			if (!checkBuffer( sizeof( s), "getShort"))
 				return 0;
@@ -399,6 +531,7 @@ unsigned short	NetBuffer::getShort()
 		}
 void	NetBuffer::addInt32( int i)
 		{
+			ADD_NB(NB_INT32);
 			int tmpsize = sizeof( i);
 			resizeBuffer( offset+tmpsize);
 			POSH_WriteS32ToBig( this->buffer+offset, i);
@@ -406,6 +539,7 @@ void	NetBuffer::addInt32( int i)
 		}
 int		NetBuffer::getInt32()
 		{
+			CHECK_NB(NB_INT32);
 			int s;
 			if (!checkBuffer( sizeof( s), "getInt32"))
 				return 0;
@@ -415,6 +549,7 @@ int		NetBuffer::getInt32()
 		}
 void	NetBuffer::addUInt32( unsigned int i)
 		{
+			ADD_NB(NB_UINT32);
 			int tmpsize = sizeof( i);
 			resizeBuffer( offset+tmpsize);
 			POSH_WriteU32ToBig( this->buffer+offset, i);
@@ -422,6 +557,7 @@ void	NetBuffer::addUInt32( unsigned int i)
 		}
 unsigned int	NetBuffer::getUInt32()
 		{
+			CHECK_NB(NB_UINT32);
 			unsigned int s;
 			if (!checkBuffer( sizeof( s), "getUInt32"))
 				return 0;
@@ -431,6 +567,7 @@ unsigned int	NetBuffer::getUInt32()
 		}
 void	NetBuffer::addChar( char c)
 		{
+			ADD_NB(NB_CHAR);
 			int tmpsize = sizeof( c);
 			resizeBuffer( offset+tmpsize);
 			VsnetOSS::memcpy( buffer+offset, &c, sizeof( c));
@@ -438,6 +575,7 @@ void	NetBuffer::addChar( char c)
 		}
 char	NetBuffer::getChar()
 		{
+			CHECK_NB(NB_CHAR);
 			char c;
 			if (!checkBuffer( sizeof( c), "getChar"))
 				return 0;
@@ -447,12 +585,14 @@ char	NetBuffer::getChar()
 		}
 void	NetBuffer::addBuffer( const unsigned char * buf, int bufsize)
 		{
+			ADD_NB(NB_BUFFER);
 			resizeBuffer( offset+bufsize);
 			VsnetOSS::memcpy( buffer+offset, buf, bufsize);
 			offset+=bufsize;
 		}
 unsigned char* NetBuffer::extAddBuffer( int bufsize )
 		{
+			ADD_NB(NB_BUFFER);
 			resizeBuffer( offset+bufsize);
             unsigned char* retval = (unsigned char*)buffer+offset;
 			offset+=bufsize;
@@ -463,6 +603,7 @@ static unsigned char null = '\0';
 
 unsigned char *	NetBuffer::getBuffer( int offt)
 		{
+			CHECK_NB(NB_BUFFER);
 			if (!checkBuffer( offt, "getBuffer"))
 				return &null;
 			unsigned char * tmp = (unsigned char *)buffer + offset;
@@ -472,6 +613,7 @@ unsigned char *	NetBuffer::getBuffer( int offt)
 		// Add and get a string with its length before the char * buffer part
 void	NetBuffer::addString( const string& str)
 {
+	ADD_NB(NB_STRING);
 	unsigned int len = str.length();
     if( len < 0xffff )
 	{
@@ -494,6 +636,7 @@ void	NetBuffer::addString( const string& str)
 
 string	NetBuffer::getString()
 {
+	CHECK_NB(NB_STRING);
 	unsigned short s;
 	s = this->getShort();
 	if( s != 0xffff )
@@ -526,6 +669,7 @@ string	NetBuffer::getString()
 
 GFXMaterial		NetBuffer::getGFXMaterial()
 {
+	CHECK_NB(NB_GFXMAT);
 	GFXMaterial mat;
 
 	mat.ar = this->getFloat();
@@ -555,6 +699,7 @@ GFXMaterial		NetBuffer::getGFXMaterial()
 
 void	NetBuffer::addGFXMaterial( const GFXMaterial & mat)
 {
+	ADD_NB(NB_GFXMAT);
 	this->addFloat( mat.ar);
 	this->addFloat( mat.ag);
 	this->addFloat( mat.ab);
@@ -580,6 +725,7 @@ void	NetBuffer::addGFXMaterial( const GFXMaterial & mat)
 
 GFXLight		NetBuffer::getGFXLight()
 {
+	CHECK_NB(NB_GFXLIGHT);
 	GFXLight	light;
 	int i=0;
 	light.target = this->getInt32();
@@ -604,6 +750,7 @@ GFXLight		NetBuffer::getGFXLight()
 
 void	NetBuffer::addGFXLight( const GFXLight & light)
 {
+	ADD_NB(NB_GFXLIGHT);
 	int i=0;
 	this->addInt32( light.target);
 	for( i=0; i<3; i++)
@@ -625,6 +772,7 @@ void	NetBuffer::addGFXLight( const GFXLight & light)
 
 GFXLightLocal	NetBuffer::getGFXLightLocal()
 {
+	CHECK_NB(NB_GFXLIGHTLOCAL);
 	GFXLightLocal light;
 
 	light.ligh = this->getGFXLight();
@@ -635,6 +783,7 @@ GFXLightLocal	NetBuffer::getGFXLightLocal()
 
 void	NetBuffer::addGFXLightLocal( const GFXLightLocal & light)
 {
+	ADD_NB(NB_GFXLIGHTLOCAL);
 	this->addGFXLight( light.ligh);
 	this->addChar( light.islocal);
 }

@@ -143,7 +143,10 @@ private:
   ///Runs the main loop
   virtual void Loop(void f()) {}
   ///returns active star system
-  StarSystem* activeStarSystem() {return active_star_system.back();}
+  StarSystem* activeStarSystem() {
+    return active_star_system.empty()?NULL:
+      active_star_system.back();
+  }
   ///Wrapper function for Star System
   /*
   void SelectCamera(int cam) {

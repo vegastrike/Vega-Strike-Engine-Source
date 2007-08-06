@@ -155,8 +155,6 @@ class	NetClient
 //		void	start( char * addr, unsigned short port);
 //		void	checkKey();
 	
-		bool	PacketLoop( Cmd command );
-
 		void	setCallsign( char * calls) { this->callsign = string( calls);}
 		void	setCallsign( string calls) { this->callsign = calls;}
 		string	getCallsign() {return this->callsign;}
@@ -201,7 +199,7 @@ class	NetClient
 
 		void	downloadZoneInfo();
 		void	AddObjects( NetBuffer & netbuf);
-		ClientPtr	AddClientObject( Unit *un, ObjSerial cltserial);
+		ClientPtr	AddClientObject( Unit *un, ObjSerial cltserial=0);
 
 		bool	jumpRequest( string newsystem, ObjSerial jumpserial);
 		bool	readyToJump();

@@ -99,7 +99,7 @@ Nebula* UnitFactory::createNebula( const char * unitfile,
 	return neb;
 }
 
-Unit* UnitFactory::createMissile( const char * filename,
+Missile* UnitFactory::createMissile( const char * filename,
                                      int faction,
                                      const string &modifications,
                                      const float damage,
@@ -109,8 +109,8 @@ Unit* UnitFactory::createMissile( const char * filename,
                                      float radmult,
                                      float detonation_radius, ObjSerial netcreate )
 {
-  double startime= queryTime();
-    Unit * un =new GameMissile( filename,
+//  double startime= queryTime();
+    Missile * un =new GameMissile( filename,
                         faction,
                         modifications,
                         damage,
@@ -122,8 +122,8 @@ Unit* UnitFactory::createMissile( const char * filename,
 	if( netcreate)
 		un->SetSerial( netcreate);
 	return un;
-  double endtime= queryTime();
-  printf ("mcr %f ",endtime-startime);
+//  double endtime= queryTime();
+//  printf ("mcr %f ",endtime-startime);
 }
 
 Planet* UnitFactory::createPlanet( )
@@ -232,6 +232,9 @@ Asteroid* UnitFactory::createAsteroid( const char * filename,
 	if( netcreate)
 		ast->SetSerial( netcreate);
 	return ast;
+}
+
+void UnitFactory::broadcastUnit(const Unit *un, unsigned short zone) {
 }
 
 Terrain*	UnitFactory::createTerrain( const char * file, Vector scale, float position, float radius, Matrix & t)

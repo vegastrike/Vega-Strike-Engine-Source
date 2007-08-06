@@ -101,16 +101,6 @@ bool	NetServer::sendLoginAccept( std::string inetbuf,ClientPtr clt, AddressIP ip
 		netbuf.addString( datestr);
 		netbuf.addString( clt->savegame[0]);
 		netbuf.addString( clt->savegame[1]);
-		netbuf.addString( universe_file);
-#ifdef CRYPTO
-		unsigned char * digest = new unsigned char[FileUtil::Hash.DigestSize()];
-		FileUtil::HashFileCompute( universe_file, digest, UniverseFile);
-		// Add the galaxy filename with relative path to datadir
-		netbuf.addShort( FileUtil::Hash.DigestSize() );
-		netbuf.addBuffer( digest, FileUtil::Hash.DigestSize());
-#else
-		netbuf.addShort( 0 );
-#endif
 
 		Packet packet2;
 		
@@ -127,17 +117,18 @@ bool	NetServer::sendLoginAccept( std::string inetbuf,ClientPtr clt, AddressIP ip
 		COUT<<"SAVE="<<clt->savegame[0].length()<<" bytes - XML="<<clt->savegame[1].length()<<" bytes"<<endl;
 		cerr<<"SENDING STARDATE : "<<datestr<<endl;
 		// Add the initial star system filename + hash if crypto++ support too
-		string relsys = cp->savegame->GetStarSystem()+".system";
+		string sysname = cp->savegame->GetStarSystem();
+		string relsys = sysname+".system";
 		netbuf.addString( relsys);
 		
 		// Generate the starsystem before addclient so that it already contains serials
-		StarSystem * sts = zonemgr->addZone( cp->savegame->GetStarSystem());
+		StarSystem * sts = zonemgr->addZone( sysname );
 		
 #ifdef CRYPTO
 		string sysxml;
-		if( (sysxml=zonemgr->getSystem( relsys))!="")
+		if(!(sysxml=zonemgr->getSystem( relsys)).empty())
 			FileUtil::HashStringCompute( sysxml, digest);
-		else
+		else if (!sysname.empty())
 			FileUtil::HashFileCompute( relsys, digest, SystemFile);
 		netbuf.addShort( FileUtil::Hash.DigestSize() );
 		netbuf.addBuffer( digest, FileUtil::Hash.DigestSize());
@@ -148,6 +139,10 @@ bool	NetServer::sendLoginAccept( std::string inetbuf,ClientPtr clt, AddressIP ip
 		
 		int zoneid = _Universe->StarSystemIndex(sts);
 		netbuf.addShort( zoneid);
+
+		// Add system string to packet...
+		//Long, I know, but is there any other way to keep all the proper graphics-related data that the server discards?
+		//netbuf.addString( zonemgr->getSystem(sysname) );
 	
 		packet2.send( LOGIN_ACCEPT, cltserial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(241) );
 	}

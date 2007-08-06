@@ -267,11 +267,6 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                 }
                 cout<<"<<< LOGOUT REQUEST ---------------------------------------"<<endl;
             break;
-            case CMD_NEWCHAR :
-                cout<<">>> NEW CHAR REQUEST =( "<<callsign<<" )= --------------------------------------"<<endl;
-                // Should receive the result of the creation of a new char/ship
-                cout<<"<<< NEW CHAR REQUEST -------------------------------------------------------"<<endl;
-            break;
             case CMD_NEWSUBSCRIBE :
             {
                 cout<<">>> SUBSRIBE REQUEST =( "<<callsign<<" )= --------------------------------------"<<endl;

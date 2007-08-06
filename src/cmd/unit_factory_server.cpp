@@ -15,6 +15,7 @@
 #include <sys/types.h>
 #endif
 #include "networking/lowlevel/netbuffer.h"
+#include "networking/zonemgr.h"
 #include "networking/netserver.h"
 
 extern Unit * _masterPartList;
@@ -41,16 +42,23 @@ Unit* UnitFactory::createUnit( const char *filename,
                      customizedUnit,
                      flightgroup,
                      fg_subnumber, netxml);
+	
 	if( netcreate)
 	{
 		// Send a packet to clients in order to make them create this unit
-		NetBuffer netbuf;
-		getUnitBuffer( netbuf, filename, SubUnit, faction, customizedUnit, flightgroup, fg_subnumber, netxml, netcreate);
-		// Broadcast to the current universe star system
-		VSServer->broadcast( netbuf, 0, _Universe->activeStarSystem()->GetZone(), CMD_CREATEUNIT, true);
-
 		un->SetSerial( netcreate);
+
+/*		if (!_Universe->netLocked()) {
+			NetBuffer netbuf;
+			
+			// NETFIXME: addBuffer for all subunits?
+			addUnitBuffer(netbuf, un, netxml);
+			endBuffer(netbuf);
+			// Broadcast to the current universe star system
+			VSServer->broadcast( netbuf, 0, _Universe->activeStarSystem()->GetZone(), CMD_ENTERCLIENT, true);
+		}
 		VSServer->invalidateSnapshot();
+*/
 	}
 	return un;
 }
@@ -91,18 +99,23 @@ Nebula* UnitFactory::createNebula( const char * unitfile,
 	    fg_snumber);
 	if( netcreate)
 	{
-		// Send a packet to clients in order to make them create this unit
-		NetBuffer netbuf;
-		getNebulaBuffer( netbuf, unitfile, SubU, faction, fg, fg_snumber, netcreate);
-		VSServer->broadcast( netbuf, 0, _Universe->activeStarSystem()->GetZone(), CMD_CREATENEBULA, true);
 
 		neb->SetSerial( netcreate);
+
+/*
+		if (!_Universe->netLocked()) {
+			NetBuffer netbuf;
+			addNebulaBuffer(netbuf, neb);
+			endBuffer(netbuf);
+			VSServer->broadcast( netbuf, 0, _Universe->activeStarSystem()->GetZone(), CMD_ENTERCLIENT, true);
+		}
 		VSServer->invalidateSnapshot();
+*/
 	}
 	return neb;
 }
 
-Unit* UnitFactory::createMissile( const char * filename,
+Missile* UnitFactory::createMissile( const char * filename,
                                      int faction,
                                      const string &modifications,
                                      const float damage,
@@ -112,7 +125,7 @@ Unit* UnitFactory::createMissile( const char * filename,
                                      float radmult,
                                      float detonation_radius, ObjSerial netcreate )
 {
-    Unit * un = new Missile( filename,
+    Missile * un = new Missile( filename,
          faction,
 	     modifications,
 	     damage,
@@ -123,12 +136,16 @@ Unit* UnitFactory::createMissile( const char * filename,
 	     detonation_radius);
 	if( netcreate)
 	{
-		NetBuffer netbuf;
-		getMissileBuffer( netbuf, filename, faction, modifications, damage, phasedamage, time, radialeffect, radmult, detonation_radius, netcreate);
-		VSServer->broadcast( netbuf, 0, _Universe->activeStarSystem()->GetZone(), CMD_CREATEMISSILE , true);
-
 		un->SetSerial( netcreate);
+/*
+		if (!_Universe->netLocked()) {
+			NetBuffer netbuf;
+			addMissileBuffer( netbuf, un );
+			endBuffer( netbuf );
+			VSServer->broadcast( netbuf, 0, _Universe->activeStarSystem()->GetZone(), CMD_ENTERCLIENT, true);
+		}
 		VSServer->invalidateSnapshot();
+*/
 	}
 	return un;
 }
@@ -161,13 +178,20 @@ Planet* UnitFactory::createPlanet( QVector x,
 					   fullname, inside_out, 0);
 	if( netcreate)
 	{
-		// Send a packet to clients in order to make them create this unit
-		NetBuffer netbuf;
-		getPlanetBuffer( netbuf, x, y, vely, rotvel, pos, gravity, radius, filename, sr, ds, dest, orbitcent, parent, ourmat, ligh, faction, fullname, inside_out, netcreate);
-		VSServer->broadcast( netbuf, 0, _Universe->activeStarSystem()->GetZone(), CMD_CREATEPLANET, true);
-
 		p->SetSerial( netcreate);
+/*
+		// False: Only allow creation through system files?  Doesn't make sense to be able to dynamically generate these.
+		// Could cause inconsistencies with new clients that just read system files.
+		if ( false && !_Universe->netLocked()) {
+			NetBuffer netbuf;
+			// Send a packet to clients in order to make them create this unit
+			
+			addPlanetBuffer( netbuf, x, y, vely, rotvel, pos, gravity, radius, filename, sr, ds, dest, orbitcent, parent, ourmat, ligh, faction, fullname, inside_out, netcreate);
+			endBuffer( netbuf );
+			VSServer->broadcast( netbuf, 0, _Universe->activeStarSystem()->GetZone(), CMD_ENTERCLIENT, true);
+		}
 		VSServer->invalidateSnapshot();
+*/
 	}
 	return p;
 }
@@ -212,13 +236,18 @@ Asteroid* UnitFactory::createAsteroid( const char * filename,
     Asteroid * ast = new Asteroid( filename, faction, fg, fg_snumber, difficulty);
 	if( netcreate)
 	{
-		// Send a packet to clients in order to make them create this unit
-		NetBuffer netbuf;
-		getAsteroidBuffer( netbuf, filename, faction, fg, fg_snumber, difficulty, netcreate);
-		VSServer->broadcast( netbuf, 0, _Universe->activeStarSystem()->GetZone(), CMD_CREATEASTER, true);
-
+		// Only allow creating through system files?  Doesn't make sense to be able to dynamically generate these.
 		ast->SetSerial( netcreate);
+/*
+		if ( !_Universe->netLocked()) {
+			NetBuffer netbuf;
+			addAsteroidBuffer( netbuf, ast);
+			endBuffer(netbuf);
+			// NETFIXME: addBuffer for all subunits?
+			VSServer->broadcast( netbuf, 0, _Universe->activeStarSystem()->GetZone(), CMD_ENTERCLIENT, true);
+		}
 		VSServer->invalidateSnapshot();
+*/
 	}
 	return ast;
 }
@@ -231,5 +260,15 @@ Terrain*	UnitFactory::createTerrain( const char * file, Vector scale, float posi
 ContinuousTerrain*	UnitFactory::createContinuousTerrain( const char * file, Vector scale, float position, Matrix & t)
 {
 	  return NULL;
+}
+
+void UnitFactory::broadcastUnit(const Unit *unit, unsigned short zone) {
+	if (!_Universe->netLocked() && unit->GetSerial()) {
+		NetBuffer netbuf;
+		addBuffer(netbuf, unit, true);
+		endBuffer(netbuf);
+		VSServer->broadcast( netbuf, 0, zone, CMD_ENTERCLIENT, true);
+		VSServer->invalidateSnapshot();
+	}
 }
 

@@ -118,6 +118,9 @@ void	NetServer::sendCargoSnapshot( ObjSerial cltser, const UnitCollection &list)
 		unsigned int numCargo = un->numCargo();
 		if (!numCargo) continue;
 		netbuf.addSerial(un->GetSerial());
+		netbuf.addFloat(un->Mass);
+		netbuf.addFloat(un->image->CargoVolume);
+		netbuf.addFloat(un->image->UpgradeVolume);
 		netbuf.addInt32(numCargo);
 		for (unsigned int i=0;i<numCargo;i++) {
 			const Cargo &carg = un->GetCargo(i);
@@ -133,7 +136,8 @@ void	NetServer::sendCargoSnapshot( ObjSerial cltser, const UnitCollection &list)
 			 NULL, clt->tcp_sock, __FILE__, PSEUDO__LINE__(196) );
 }
 
-void	NetServer::sendDamages( ObjSerial serial, unsigned short zone, Shield shield, Armor armor, float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color)
+void	NetServer::sendDamages( ObjSerial serial, unsigned short zone, float hull, const Shield &shield, const Armor &armor,
+				float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color)
 {
   static ObjSerial lastserial;
   static float timestamp=getNewTime();
@@ -152,6 +156,7 @@ void	NetServer::sendDamages( ObjSerial serial, unsigned short zone, Shield shiel
 	netbuf.addVector( pnt);
 	netbuf.addVector( normal);
 	netbuf.addColor( color);
+	netbuf.addFloat( hull);
 	netbuf.addShield( shield);
 	netbuf.addArmor( armor);
 

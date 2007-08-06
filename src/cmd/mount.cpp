@@ -1,4 +1,5 @@
 #include "unit_generic.h"
+#include "missile_generic.h"
 #include "beam.h"
 #include "bolt.h"
 #include "weapon_xml.h"

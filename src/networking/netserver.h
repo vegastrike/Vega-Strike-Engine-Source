@@ -141,7 +141,8 @@ class NetServer
 		void	BroadcastUnfire( ObjSerial serial, const vector<int> &weapon_indicies, unsigned short zone);
 		void	BroadcastFire( ObjSerial serial, const vector<int> &weapon_indicies, ObjSerial missile_serial, float energy, unsigned short zone);
 		//void	sendDamages( ObjSerial serial, int zone, string shields, float recharge, char leak, unsigned short ab, unsigned short af, unsigned short al, unsigned short ar, float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color);
-		void	sendDamages( ObjSerial serial, unsigned short zone, Shield shields, Armor armor, float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color);
+		void	sendDamages( ObjSerial serial, unsigned short zone, float hull, const Shield &shields, const Armor &armor,
+							float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color);
 		//void	sendDamages( ObjSerial serial, Vector & pnt, Vector & normal, float amt, GFXColor & color, float phasedamage);
 		void	sendKill( ObjSerial serial, unsigned short zone);
 		void	sendJump( Unit * src, Unit *jumppoint,std::string destination);

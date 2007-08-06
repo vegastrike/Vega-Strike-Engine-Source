@@ -33,6 +33,7 @@
 //#include "gfx/particle.h"
 //extern Vector mouseline;
 #include "cmd/unit_util.h"
+#include "cmd/unit_factory.h"
 #include "cmd/unit_collide.h"
 #include "vs_random.h"
 #include "savegame.h"
@@ -351,6 +352,7 @@ void StarSystem::AddUnit(Unit *unit)
 	}
 
 	drawList.prepend(unit);
+	UnitFactory::broadcastUnit(unit, GetZone());
 	unsigned int priority=UnitUtil::getPhysicsPriority(unit);
 	// Do we need the +1 here or not - need to look at when current_sim_location is changed relative to this function
 	// and relative to this function, when the bucket is processed...

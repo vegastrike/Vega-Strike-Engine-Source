@@ -207,12 +207,18 @@ vector<string>	&NetClient::loginAcctLoop( string str_callsign, string str_passwd
 
 void	NetClient::loginAccept( Packet & p1)
 {
+	
 	using namespace VSFileSystem;
 	NetBuffer netbuf( p1.getData(), p1.getDataLength());
 
 	Packet pckt;
 	this->serial = p1.getSerial();
 	COUT << ">>> LOGIN ACCEPTED =( serial #" << serial << " )= --------------------------------------" << endl;
+	{
+		char msg[100];
+		sprintf(msg, "#cc66ffNETWORK: Login Accepted.  Serial number is %d.\nDownloading system file...",serial);
+		bootstrap_draw(msg,NULL);
+	}
 	// Should receive player's data (savegame) from server if there is a save
 	localSerials.push_back( serial);
 
@@ -223,11 +229,16 @@ void	NetClient::loginAccept( Packet & p1)
          <<_Universe->current_stardate.GetFullTrekDate() << endl;
 	lastsave.push_back( netbuf.getString());
 	lastsave.push_back( netbuf.getString());
-	// Set the zone number
-	// Get the galaxy file from buffer with relative path to datadir !
-	string univfile = netbuf.getString();
 	unsigned char * digest=0;
-	unsigned short digest_length = netbuf.getShort();
+	unsigned short digest_length;
+
+	/*
+	// Get universe file... not too useful.
+	// But this is a good example of using VsnetDownload download manager.
+	
+	// Get the galaxy file from buffer with relative path to datadir !
+	digest_length = netbuf.getShort();
+	string univfile = netbuf.getString();
 	if (digest_length) {
 		digest = netbuf.getBuffer( digest_length );
 #ifdef CRYPTO
@@ -248,32 +259,42 @@ void	NetClient::loginAccept( Packet & p1)
 		}
 #endif
 	}
-
+	*/
+	
 	// Get the initial system file...
 	string sysfile = netbuf.getString();
+	bool downloadsystem=true;
 	bool autogen;
 	string fullsys = VSFileSystem::GetCorrectStarSysPath(sysfile, autogen);
 	digest_length = netbuf.getShort();
+	COUT<<"Initial system = "<<fullsys;
 	if (digest_length) {
 		digest = netbuf.getBuffer( digest_length );
 #ifdef CRYPTO
-		cerr<<"Initial system = "<<fullsys<<" - File Hash = "<<digest<<endl;
-		if( !FileUtil::HashCompare( fullsys, digest, SystemFile))
+		cout<<" - File Hash = "<<digest;
+		if( FileUtil::HashCompare( fullsys, digest, SystemFile))
 		{
-			VsnetDownload::Client::NoteFile f( this->clt_tcp_sock, sysfile, VSFileSystem::SystemFile);
-			_downloadManagerClient->addItem( &f);
-			timeval timeout={10,0};
-			while( !f.done())
-			{
-				if (recvMsg( NULL, &timeout )<=0) {
-					//NETFIXME: what to do if timeout elapses...
-					break;
-				}
-			}
+			downloadsystem=false;
 		}
 #endif
 	}
+	// Set the zone number
     this->zone = netbuf.getShort();
+	
+	// Did the hash compare fail?
+	if (downloadsystem) {
+		cout<<": Downloading system from server...";
+		VsnetDownload::Client::NoteFile f( *this->clt_tcp_sock, sysfile, VSFileSystem::SystemFile);
+		_downloadManagerClient->addItem( &f);
+		timeval timeout={10,0};
+		while( !f.done()) {
+			if (recvMsg( NULL, &timeout )<=0) {
+				//NETFIXME: what to do if timeout elapses...
+				break;
+			}
+		}
+	}
+	cout<<endl;
 }
 
 void NetClient::respawnRequest( )
@@ -636,5 +657,5 @@ void NetClient::startGame() {
 	bootstrap_draw("#cc66ffNETWORK: Loading system.",NULL);
 	cout<<"NETWORK: Loading system."<<endl;
 	inGame();
-	PacketLoop(CMD_ADDEDYOU); // Wait for the command before stopping.
+	// PacketLoop(CMD_ADDEDYOU); // Wait for the command before stopping.
 }

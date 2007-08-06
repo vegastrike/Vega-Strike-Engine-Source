@@ -717,10 +717,6 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			this->posUpdate( clt );
 //			cerr<<"<<< POSITION UPDATE ---------------------------------------------------------------"<<endl;
 			break;
-		case CMD_LETSGO:
-			// Add the client to the game in its zone
-			//this->addClient( clt );
-			break;
 		case CMD_PING:
 			// Nothing to do here, just receiving the packet is enough
 			//COUT<<"Got PING from serial "<<packet.getSerial()<<endl;

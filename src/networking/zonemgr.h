@@ -49,15 +49,24 @@ class ZoneMgr
          */
         enum SnapshotSubCommand
         {
+            End=0,		 // On client side (recv) : tells the buffer ends
             PosUpdate=1, // On client side (send): containing a ship's
                        // data sent to server for position update
                        // On client side (recv) : receive minimal update
                        // data for a ship
             FullUpdate=2,// On client side (recv) : receive full update
                        // info for a ship
-			AddClient=4, // On client side (recv) : receive an order to add a client
-			DamageUpdate=8, // On client side (recv) : update changed damages.
-			End=0		   /// On client side (recv) : tells the buffer ends
+            DamageUpdate=8, // On client side (recv) : update changed damages.
+        };
+        enum AddClientId
+        {
+//          End=0, // Already defined... // Tells client that the buffer ends.
+			AddClient=1,
+            AddUnit=2,
+            AddNebula=3,
+            AddPlanet=4, // Not implented
+            AddAsteroid=5,
+            AddMissile=6
         };
 
     private:

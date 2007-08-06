@@ -126,7 +126,7 @@ void	NetServer::recvMsg_tcp( ClientPtr clt )
 		// NETFIXME: Cheat: We may want to check the serial of this packet and make sure it is what we expect.
 		command = packet.getCommand( );
 		if (command!=CMD_POSUPDATE) {
-			COUT << "Received TCP" << Cmd(command) << ", ser=";
+			COUT << "Rcvd TCP: " << Cmd(command) << " from serial ";
 			if (clt->game_unit.GetUnit())
 				cout << clt->game_unit.GetUnit()->GetSerial();
 			if (!clt->ingame)
@@ -158,7 +158,7 @@ void NetServer::recvMsg_udp( )
         char      command = packet.getCommand();
 
 		if (command!=CMD_POSUPDATE)
-        COUT << "Received UDP" << Cmd(command) << ", ser=" << nserial << endl;
+        COUT << "Rcvd UDP: " << Cmd(command) << " from serial " << nserial << endl;
 
         // Find the corresponding client
         ClientPtr tmp;

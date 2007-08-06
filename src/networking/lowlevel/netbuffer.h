@@ -70,9 +70,9 @@ class NetBuffer
 			offset += wisize;
 			return tmp;
 		}
-		void		addShield( Shield shield);
+		void		addShield( const Shield &shield);
 		Shield		getShield();
-		void		addArmor( Armor armor);
+		void		addArmor( const Armor &armor);
 		Armor		getArmor();
 
 		void			addSerial( ObjSerial serial);
@@ -89,6 +89,9 @@ class NetBuffer
 		unsigned int	getUInt32();
 		void			addChar( char c);
 		char			getChar();
+		void			addType( unsigned char t);
+		bool			checkType( unsigned char t);
+		unsigned char	getType();
 		void			addBuffer( const unsigned char * buf, int bufsize);
         unsigned char*  extAddBuffer( int bufsize);
 		unsigned char*  getBuffer( int offt);

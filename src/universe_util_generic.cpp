@@ -707,7 +707,7 @@ namespace UniverseUtil
 			}
 
 			// Add the system xml string to the server
-			VSServer->addSystem( systempath, system);
+			if (SERVER) VSServer->addSystem( systempath, system);
 
 			// Overwrite the system files with the buffer containing serials
 			f.Close();

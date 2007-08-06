@@ -3,6 +3,7 @@
 #include "networking/lowlevel/netbuffer.h"
 #include "universe_util.h"
 #include "universe_generic.h"
+#include "cmd/unit_factory.h"
 #include "networking/savenet_util.h"
 #include "networking/prediction.h"
 #include "networking/lowlevel/vsnet_sockethttp.h"
@@ -35,6 +36,8 @@ ClientPtr NetServer::addNewClient( SOCKETALT &sock )
 /**** Add a client in the game                             ****/
 /**************************************************************/
 
+// **** Make sure to use Lock around system creation in ZoneMgr. ****
+
 void	NetServer::addClient( ClientPtr clt)
 {
 	Unit * un = clt->game_unit.GetUnit();
@@ -43,7 +46,7 @@ void	NetServer::addClient( ClientPtr clt)
 		return;
 	}
 	COUT<<">>> SEND ENTERCLIENT =( serial #"<<un->GetSerial()<<" )= --------------------------------------"<<endl;
-	Packet packet2;
+	Packet packet2,packet3;
 	string savestr, xmlstr;
 	NetBuffer netbuf;
 	StarSystem * sts;
@@ -129,11 +132,19 @@ void	NetServer::addClient( ClientPtr clt)
 		//zonemgr->sendZoneClients( clt);
 
 		// Send savebuffers and name
+
+		// Don't need to send ZoneMgr::AddClient
+		// Uses packet's serial number
+		netbuf.addChar(ZoneMgr::AddClient);
+		netbuf.addSerial( un->GetSerial() );
+		
 		netbuf.addString( clt->callsign);
 		SaveNetUtil::GetSaveStrings( clt, savestr, xmlstr);
 		netbuf.addString( savestr);
 		netbuf.addString( xmlstr);
 		netbuf.addTransformation( un->curr_physical_state );
+		
+		netbuf.addChar(ZoneMgr::End);
 		// Put the save buffer after the ClientState
 		packet2.bc_create( CMD_ENTERCLIENT, un->GetSerial(),
                            netbuf.getData(), netbuf.getDataLength(),
@@ -156,8 +167,11 @@ void	NetServer::addClient( ClientPtr clt)
 	clt->prediction->InitInterpolation(un, un->old_state, 0, clt->getNextDeltatime());
 	// Add initial position to make sure the client is starting from where we tell him
 	netbuf.addTransformation(un->curr_physical_state);
+	pp.send( CMD_ADDEDYOU, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(170) );
+	
+	netbuf.Reset();
 	getZoneInfo(un->activeStarSystem->GetZone(), netbuf);
-	pp.send( CMD_ADDEDYOU, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(1325) );
+	packet3.send( CMD_ENTERCLIENT, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(174) );
 
 	COUT<<"ADDED client n "<<un->GetSerial()<<" in ZONE "<<un->activeStarSystem->GetZone()<<" at STARDATE "<<_Universe->current_stardate.GetFullTrekDate()<<endl;
         if (active_missions.size()==1) {
@@ -445,8 +459,8 @@ void	NetServer::posUpdate( ClientPtr clt)
   Cockpit * cp = _Universe->isPlayerStarship( un );
   if (cp)
     cp->savegame->SetPlayerLocation( un->curr_physical_state.position);
-  else
-    COUT << "ERROR Want to set player location for position update, but the cockpit is null for unit. Therefore client must not have his own cockpit "<< un->GetSerial();
+  else if (debugPos)
+    COUT << "ERROR: Client has NULL cockpit. Does he have two clients ingame? ser="<< un->GetSerial() << ", callsign="<<clt->callsign << endl;
   snapchanged = 1;
 }
 
@@ -596,12 +610,7 @@ void  NetServer::getZoneInfo( unsigned short zoneid, NetBuffer & netbuf)
              ++ui) {
           ObjSerial ser=un->GetSerial();
           if (activeObjects.find(ser)==activeObjects.end()) {
-            netbuf.addChar( ZoneMgr::AddClient);
-            netbuf.addSerial( un->GetSerial());
-            netbuf.addString( "");
-            netbuf.addString( un->name);
-            netbuf.addString(FactionUtil::GetFactionName(un->faction)+std::string("|")+UnitUtil::getFlightgroupName(un));
-            netbuf.addTransformation(un->curr_physical_state);
+            UnitFactory::addBuffer(netbuf, un, false);
             activeObjects.insert(un->GetSerial());
             nbclients++;
        

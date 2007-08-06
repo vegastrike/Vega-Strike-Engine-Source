@@ -72,7 +72,7 @@ public:
                                  Flightgroup* fg=NULL, 
                                  int fg_snumber=0, ObjSerial netcreate=0 );
 
-    static Unit* createMissile( const char * filename,
+    static Missile* createMissile( const char * filename,
                                    int faction,
                                    const string &modifications,
                                    const float damage,
@@ -135,14 +135,17 @@ public:
 	static ContinuousTerrain*	createContinuousTerrain( const char * file, Vector scale, float position, Matrix & t);
 
 	// Function used to put in a NetBuffer the necessary info to create the unit so that it can be send over network
-	static void getUnitBuffer( NetBuffer & netbuf, const char *filename,
+	static void addUnitBuffer( NetBuffer & netbuf, const char *filename,
 		               bool        SubUnit,
 		               int         faction,
 		               std::string customizedUnit,
+		               const Transformation &curr_physical_state,
 		               Flightgroup *flightgroup,
 		               int         fg_subnumber, string * netxml, ObjSerial netcreate);
-
-	static void getPlanetBuffer( NetBuffer & netbuf, QVector x,
+	static void addUnitBuffer( NetBuffer & netbuf, const Unit *un, string *netxml=NULL);
+	static Unit *parseUnitBuffer(NetBuffer &netbuf);
+	
+	static void addPlanetBuffer( NetBuffer & netbuf, QVector x,
                                    QVector y,
 				   float vely,
 				   const Vector & rotvel,
@@ -159,28 +162,44 @@ public:
 				   int faction,
 				   string fullname ,
 				   bool inside_out, ObjSerial netcreate);
-
-	static void getNebulaBuffer( NetBuffer & netbuf, const char * unitfile, 
+	// Not implemented: lots of orbit stuff is dissipated into private subclasses upon creation.
+	// static void addPlanetBuffer( NetBuffer & netbuf, const Planet *p);
+	static Planet *parsePlanetBuffer(NetBuffer &netbuf);
+	
+	static void addNebulaBuffer( NetBuffer & netbuf, const char * unitfile, 
                                    bool SubU, 
                                    int faction, 
                                    Flightgroup* fg,
                                    int fg_snumber, ObjSerial netcreate );
+	static void addNebulaBuffer( NetBuffer & netbuf, const Nebula *neb);
+	static Nebula *parseNebulaBuffer(NetBuffer &netbuf);
 
-	static void getMissileBuffer( NetBuffer & netbuf, const char * filename,
+	static void addMissileBuffer( NetBuffer & netbuf, const char * filename,
                                      int faction,
                                      const string &modifications,
+                                     const Transformation &curr_physical_state,
                                      const float damage,
                                      float phasedamage,
                                      float time,
                                      float radialeffect,
                                      float radmult,
                                      float detonation_radius, ObjSerial netcreate );
+	static void addMissileBuffer( NetBuffer & netbuf, const Missile *mis);
+	static Missile *parseMissileBuffer(NetBuffer &netbuf);
 
-	static void getAsteroidBuffer( NetBuffer & netbuf, const char * filename,
+	static void addAsteroidBuffer( NetBuffer & netbuf, const char * filename,
                                        int faction,
                                        Flightgroup* fg,
                                        int fg_snumber,
                                        float difficulty, ObjSerial netcreate );
+	static void addAsteroidBuffer( NetBuffer & netbuf, const Asteroid *ast);
+	static Asteroid *parseAsteroidBuffer(NetBuffer &netbuf);
+	
+	static void addBuffer(NetBuffer &netbuf, const Unit *un, bool allowSystemTypes, string *netxml=NULL);
+	
+	static void endBuffer(NetBuffer &netbuf); // Tells the client that we are done sending units... is this necessary?
+
+	static void broadcastUnit(const Unit *un, unsigned short zone);
 };
 
 #endif /* _UNIT_FACTORY_H_ */
