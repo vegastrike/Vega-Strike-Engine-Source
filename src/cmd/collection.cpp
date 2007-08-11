@@ -411,7 +411,7 @@ inline void UnitCollection::unreg(un_iter *iter)
 			break;
 		}
 	}
-	if(activeIters.empty() || (activeIters.size() == 1 && (*(activeIters[0]->it))) ){
+	if(activeIters.empty() || (activeIters.size() == 1 && (activeIters[0]->it == u.end() || (*(activeIters[0]->it)))) ){
 		while(!removedIters.empty()){
 			u.erase(removedIters.back());
 			removedIters.pop_back();
