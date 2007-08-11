@@ -717,6 +717,8 @@ CommandMap initGlobalCommandMap() {
   commandMap["ReverseThreatTargetKey"]=FireKeyboard::ReverseThreatTargetKey ;
   commandMap["ReverseSigTargetKey"]=FireKeyboard::ReverseSigTargetKey ;
   commandMap["ReverseUnitTargetKey"]=FireKeyboard::ReverseUnitTargetKey ;
+  commandMap["MissionTargetKey"]=FireKeyboard::MissionTargetKey ;
+  commandMap["ReverseMissionTargetKey"]=FireKeyboard::ReverseMissionTargetKey ;
   commandMap["TurretTargetKey"]=FireKeyboard::TargetTurretKey ;
   commandMap["TurretPickTargetKey"]=FireKeyboard::PickTargetTurretKey ;
   commandMap["TurretNearestTargetKey"]=FireKeyboard::NearestTargetTurretKey ;

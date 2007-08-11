@@ -68,6 +68,7 @@ namespace UniverseUtil
 	Unit *getUnitByPtr(void* ptr, Unit * finder=0, bool allowslowness=true);
 	Unit *getScratchUnit();
 	void setScratchUnit(Unit *);
+
 	void precacheUnit(std::string name, std::string faction);
 	QVector getScratchVector();
 	void setScratchVector(QVector);

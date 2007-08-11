@@ -37,7 +37,7 @@ struct FIREKEYBOARDTYPE {
   FIREKEYBOARDTYPE() {
     toggleautotracking=togglewarpdrive=toggleglow=toggleanimation=lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = turretoffkey=turretfaw=saveTargetKeys[0]=saveTargetKeys[1]=saveTargetKeys[2]=saveTargetKeys[3]=saveTargetKeys[4]=saveTargetKeys[5]=saveTargetKeys[6]=saveTargetKeys[7]=saveTargetKeys[8]=saveTargetKeys[9]=turretaikey = restoreTargetKeys[0]=restoreTargetKeys[1]=restoreTargetKeys[2]=restoreTargetKeys[3]=restoreTargetKeys[4]=restoreTargetKeys[5]=restoreTargetKeys[6]=restoreTargetKeys[7]=restoreTargetKeys[8]=restoreTargetKeys[9]=turretaikey = UP;
 
-    ejectdock=eject=ejectcargo=ejectnonmissioncargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=rweapk=rmisk=cloakkey=
+    missiontargetkey=rmissiontargetkey=ejectdock=eject=ejectcargo=ejectnonmissioncargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=rweapk=rmisk=cloakkey=
       neartargetkey=targetskey=targetukey=threattargetkey=picktargetkey=subtargetkey=targetkey=
       rneartargetkey=rtargetskey=rtargetukey=rthreattargetkey=rpicktargetkey=rtargetkey=
       nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=enslave=
@@ -72,6 +72,8 @@ struct FIREKEYBOARDTYPE {
  KBSTATE rtargetskey;
  KBSTATE rtargetukey;
  KBSTATE missilekey;
+ KBSTATE missiontargetkey;
+ KBSTATE rmissiontargetkey;
  KBSTATE jfirekey;
  KBSTATE jtargetkey;
  KBSTATE jmissilekey;
@@ -430,6 +432,16 @@ void FireKeyboard::TurretFireAtWill (const KBData&,KBSTATE k) {
 }
 
 
+void FireKeyboard::MissionTargetKey (const KBData&,KBSTATE k) {
+	if (k==PRESS) {
+		g().missiontargetkey=PRESS;
+	}
+}
+void FireKeyboard::ReverseMissionTargetKey (const KBData&,KBSTATE k) {
+	if (k==PRESS) {
+		g().rmissiontargetkey=PRESS;
+	}
+}
 void FireKeyboard::EjectCargoKey (const KBData&,KBSTATE k) {
     if (k==PRESS) {
       g().ejectcargo = k;      
@@ -1040,7 +1052,19 @@ void FireKeyboard::ChooseTargets (bool turret,bool significant,bool reverse) {
 static bool isNotTurretOwner(Unit * parent, Unit * un) {
   return parent->isSubUnit()==false||un!=parent->owner;
 }
-
+bool TargMission(Unit *me, Unit*target) {
+	for (unsigned int i=0;i<active_missions.size();++i) {
+		if (active_missions[i]->runtime.pymissions) {
+			vector<UnitContainer*> *relevant=&active_missions[i]->runtime.pymissions->relevant_units;
+			vector<UnitContainer*>::iterator ir=relevant->begin();
+			vector<UnitContainer*>::iterator ie=relevant->end();
+			for (;ir!=ie;++ir) {
+				if (**ir==target) return true;
+			}
+		}
+	}
+	return false;
+}
 bool TargAll (Unit *me,Unit *target) {
   static bool can_target_sun=XMLSupport::parse_bool(vs_config->getVariable("graphics","can_target_sun","false"));
 	return (me->InRange(target,true,false)||me->InRange(target,true,true))&&(can_target_sun||!UnitUtil::isSun(target))&&isNotTurretOwner(me,target);
@@ -1048,7 +1072,7 @@ bool TargAll (Unit *me,Unit *target) {
 bool TargSig (Unit *me,Unit *target) {
   static bool can_target_asteroid=XMLSupport::parse_bool(vs_config->getVariable("graphics","can_target_asteroid","true"));
   
-  bool ret=me->InRange(target,false,true)&&UnitUtil::isSignificant(target)&&isNotTurretOwner(me,target);
+  bool ret=me->InRange(target,false,true)&&(UnitUtil::isSignificant(target)||TargMission(me,target))&&isNotTurretOwner(me,target);
 
   if (can_target_asteroid==false) {
     if (target->isUnit()==ASTEROIDPTR||target->name.get().find("Asteroid")==0){
@@ -1897,6 +1921,16 @@ void FireKeyboard::Execute () {
   if (f().rtargetkey==PRESS) {
     f().rtargetkey=DOWN;
     ChooseTargets(parent,TargAll,true);
+    refresh_target=true;
+  }
+  if (f().missiontargetkey==PRESS) {
+    f().missiontargetkey=DOWN;
+    ChooseTargets(parent,TargMission,false);
+    refresh_target=true;
+  }
+  if (f().rmissiontargetkey==PRESS) {
+    f().rmissiontargetkey=DOWN;
+    ChooseTargets(parent,TargMission,true);
     refresh_target=true;
   }
   if (f().targetskey==PRESS) {

@@ -39,6 +39,7 @@
 #include "csv.h"
 #include "vs_random.h"
 #include "galaxy_xml.h"
+#include "gfx/camera.h"
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
@@ -572,16 +573,39 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 			  this->curr_physical_state = this->prev_physical_state;*/
 		{
 			static int upgradefac = XMLSupport::parse_bool(vs_config->getVariable("physics","cargo_deals_collide_damage","false"))?-1:FactionUtil::GetUpgradeFaction();
-			if (faction!=upgradefac)
-				smalle->ApplyDamage (biglocation.Cast(),bignormal,small_damage,smalle,GFXColor(1,1,1,2),this->owner!=NULL?this->owner:this);
-			/* Happens too often to be useful.
-			else
-				printf ("Damage avoided due to cargo\n"); */
-			if (smalle->faction!=upgradefac)
-				this->ApplyDamage (smalllocation.Cast(),smallnormal,large_damage,this,GFXColor(1,1,1,2),smalle->owner!=NULL?smalle->owner:smalle);
-			/* Happens too often to be useful
-			else
-				printf ("Damage avoided due to cargo\n"); */
+			Vector smalldelta=(_Universe->AccessCamera()->GetPosition()-smalle->Position()).Cast();
+			float smallmag=smalldelta.Magnitude();
+			Vector thisdelta=(_Universe->AccessCamera()->GetPosition()-this->Position()).Cast();
+			float thismag=thisdelta.Magnitude();
+			bool dealdamage=true;
+			static float collision_hack_distance=XMLSupport::parse_float(vs_config->getVariable("physics","collision_avoidance_hack_distance","10000"));
+			static float front_collision_hack_distance=XMLSupport::parse_float(vs_config->getVariable("physics","front_collision_avoidance_hack_distance","200000"));
+
+			if (thcp==NULL&&smcp==NULL) {
+				if (smallmag>collision_hack_distance+this->rSize()&&thismag>collision_hack_distance) {
+					static float front_collision_hack_angle=cos(3.1415926536*XMLSupport::parse_float(vs_config->getVariable("physics","front_collision_avoidance_hack_angle","40"))/180.);
+
+					if (smalldelta.Dot(_Universe->AccessCamera()->GetR())<smallmag*front_collision_hack_angle&&thisdelta.Dot(_Universe->AccessCamera()->GetR())<thismag*front_collision_hack_angle) {
+						if (smallmag>front_collision_hack_distance+this->rSize()&&thismag>front_collision_hack_distance) {
+							dealdamage=false;
+						}
+					}else {
+						dealdamage=false;
+					}
+				}
+			}
+			if (dealdamage) {
+				if (faction!=upgradefac)
+					smalle->ApplyDamage (biglocation.Cast(),bignormal,small_damage,smalle,GFXColor(1,1,1,2),this->owner!=NULL?this->owner:this);
+				/* Happens too often to be useful.
+				else
+					printf ("Damage avoided due to cargo\n"); */
+				if (smalle->faction!=upgradefac)
+					this->ApplyDamage (smalllocation.Cast(),smallnormal,large_damage,this,GFXColor(1,1,1,2),smalle->owner!=NULL?smalle->owner:smalle);
+				/* Happens too often to be useful
+				else
+					printf ("Damage avoided due to cargo\n"); */
+			}
 		}
 		//OLDE METHODE
 		//    smalle->ApplyDamage (biglocation.Cast(),bignormal,.33*g_game.difficulty*(  .5*fabs((smalle->GetVelocity()-this->GetVelocity()).MagnitudeSquared())*this->mass*SIMULATION_ATOM),smalle,GFXColor(1,1,1,2),NULL);
@@ -1307,6 +1331,8 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 		foundFile = (err<=Ok);
 	}
 
+	this->filename = filename;
+	
 	if(!foundFile) {
 		bool istemplate=(string::npos!=(string(filename).find(".template")));
 		static bool usingtemplates = XMLSupport::parse_bool(vs_config->getVariable("data","usingtemplates","true"));
@@ -1334,7 +1360,7 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 		return;
 	}
 
-	name = filename;
+	this->name = this->filename;
 	bool tmpbool;
 	if (UNITTAB) {
 		// load from table?
@@ -4065,13 +4091,13 @@ void Unit::RegenShields ()
 
 	excessenergy=(excessenergy>precharge)?excessenergy-precharge:0;
 	if(reactor_uses_fuel) {
-		fuel-=FMEC_factor*((recharge*SIMULATION_ATOM-(reactor_idle_efficiency*excessenergy)));
-#ifndef __APPLE__
-		if (ISNAN(fuel)) {
+		static float min_reactor_efficiency=XMLSupport::parse_float(vs_config->getVariable("physics","min_reactor_efficiency",".00001"));
+		fuel-=FMEC_factor*((recharge*SIMULATION_ATOM-(reactor_idle_efficiency*excessenergy))/(min_reactor_efficiency+(image->LifeSupportFunctionality*(1-min_reactor_efficiency))));
+		if (fuel<0) fuel=0;
+		if (!FINITE(fuel)) {
 			fprintf (stderr,"Fuel is nan C\n");
 			fuel=0;
 		}
-#endif
 	}
 
 	energy=energy<0?0:energy;
@@ -5289,13 +5315,22 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
 								 //FIXME
 						hull -=damage;
 					}
-					else {
+					else {// DISABLING WEAPON CODE HERE
+						static float disabling_constant=XMLSupport::parse_float(vs_config->getVariable("physics","disabling_weapon_constant","1"));
+						image->LifeSupportFunctionality+=disabling_constant*damage/hull;
+						if (image->LifeSupportFunctionality<0) {
+							image->LifeSupportFunctionalityMax+=image->LifeSupportFunctionality;
+							image->LifeSupportFunctionality=0;
+							if (image->LifeSupportFunctionalityMax<0)
+								image->LifeSupportFunctionalityMax=0;
+						}
+						/*
 						recharge+=damage;
 						shield.recharge+=damage;
 						if (recharge<0)
 							recharge=0;
 						if (shield.recharge<0)
-							shield.recharge=0;
+							shield.recharge=0;*/
 					}
 				}
 			}

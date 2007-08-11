@@ -11,12 +11,18 @@
 #include <boost/python/callback.hpp>
 #endif
 #include "vsfilesystem.h"
+#include "cmd/container.h"
 PythonMissionBaseClass::PythonMissionBaseClass () {
 }
 void PythonMissionBaseClass::Destructor () {
 	delete this;
 }
 PythonMissionBaseClass::~PythonMissionBaseClass(){
+	for (unsigned int i=0;i<relevant_units.size();++i) {
+		relevant_units[i]->SetUnit(NULL);
+		delete relevant_units[i];
+	}
+	relevant_units.clear();
 	VSFileSystem::vs_fprintf (stderr,"BASE Destruct called. If called from C++ this is death %ld (0x%x)",(unsigned long)(size_t)this,(unsigned int)(size_t)this);
 }
 

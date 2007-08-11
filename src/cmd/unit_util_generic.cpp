@@ -13,6 +13,8 @@
 #include "gfx/cockpit_generic.h"
 #include "role_bitmask.h"
 #include "lin_time.h"
+
+#include "cmd/script/pythonmission.h"
 #ifndef NO_GFX
 #include "gfx/cockpit.h"
 #endif
@@ -716,4 +718,9 @@ namespace UnitUtil {
 	  return 1.0;
 	}
 
+	void setMissionRelevant(Unit *un) {
+		if (un&&mission->runtime.pymissions) {
+			mission->runtime.pymissions->relevant_units.push_back(new UnitContainer(un));
+		}
+	}
 }

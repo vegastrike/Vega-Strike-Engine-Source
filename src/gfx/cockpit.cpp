@@ -609,7 +609,6 @@ void GameCockpit::DrawTargetBox () {
   }
   if ((always_itts || un->GetComputerData().itts)&&!nav_symbol) {
     float mrange;
-    un->setAverageGunSpeed();
     un->getAverageGunSpeed (speed,range,mrange);
     float err = (.01*(1-un->CloakVisible()));
     QVector iLoc = target->PositionITTS (un->Position(),un->cumulative_velocity,speed,steady_itts)-_Universe->AccessCamera()->GetPosition()+10*err*QVector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
@@ -783,12 +782,15 @@ void GameCockpit::DrawTacticalTargetBox () {
 void GameCockpit::drawUnToTarget ( Unit * un, Unit* target,float xcent,float ycent, float xsize, float ysize, bool reardar){
   static GFXColor black_and_white=DockBoxColor ("black_and_white"); 
   static GFXColor communicating=DockBoxColor ("communicating"); 
+  static bool draw_blips_behind=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_radar_blips_behind","true"));
+
   static float fademax=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","BlipRangeMaxFade","1.0"));
   static float fademin=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","BlipRangeMinFade","1.0"));
   static float fademidpoint=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","BlipRangeFadeMidpoint","0.2"));
       Vector localcoord (un->LocalCoordinates(target));
 	  if (reardar)
 		  localcoord.k=-localcoord.k;
+	  if (draw_blips_behind==false&&localcoord.k<0) return;
 	  float s,t;
       this->LocalToRadar (localcoord,s,t);
       GFXColor localcol (this->unitToColor (un,target,un->GetComputerData().radar.iff));
@@ -1281,9 +1283,11 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
   case UnitImages::MAXCOMBATKPS:
   case UnitImages::MAXCOMBATABKPS:
     {
+		static bool use_relative_velocity=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","display_relative_velocity","true"));
         float value;
         switch (stat) {
-            case UnitImages::KPS:            value=target->GetVelocity().Magnitude(); break;
+            case UnitImages::KPS:            value=target->GetVelocity().Magnitude()*target->graphicOptions.WarpFieldStrength; if (use_relative_velocity&&target->computer.velocity_ref.GetUnit()) value= (target->GetVelocity()*target->graphicOptions.WarpFieldStrength-target->computer.velocity_ref.GetUnit()->GetVelocity()*target->computer.velocity_ref.GetUnit()->graphicOptions.WarpFieldStrength).Magnitude() ;
+				break;
             case UnitImages::SETKPS:         value=target->GetComputerData().set_speed; break;
             case UnitImages::MAXKPS:         value=target->GetComputerData().max_speed(); break;
             case UnitImages::MAXCOMBATKPS:   value=target->GetComputerData().max_combat_speed; break;
@@ -1388,9 +1392,17 @@ void GameCockpit::DrawGauges(Unit * un) {
       gauges[i]->GetPosition (px,py);
       text->SetCharSize (sx,sy);
       text->SetPos (px,py);
-      int tmp = (int)LookupTargetStat (i,un);
+      float tmp = LookupTargetStat (i,un);
+	  float tmp2=0;
       char ourchar[32];
-      sprintf (ourchar,"%d", tmp);
+	  sprintf (ourchar,"%.0f", tmp);
+	  if (i==UnitImages::KPS) {
+		  float c=300000000.0f;
+		  if (tmp>c/10){
+			tmp2=tmp/c;
+		    sprintf (ourchar,"%.2f C", tmp2);
+		  }
+	  }
       GFXColorf (textcol);
       text->Draw (string (ourchar));
     }
@@ -1906,6 +1918,7 @@ extern bool screenshotkey;
 QVector SystemLocation(std::string system);
 double howFarToJump();
 void GameCockpit::Draw() {
+  static bool draw_star_destination_arrow=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_star_direction","true"));
   static GFXColor destination_system_color=DockBoxColor ("destination_system_color");             
   Vector destination_system_location(0,0,0);
   cockpit_time+=GetElapsedTime();
@@ -1929,8 +1942,7 @@ void GameCockpit::Draw() {
       if(draw_all_boxes){
         DrawTargetBoxes();
       }
-	  static bool draw_target_system = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawTargetSystem","false"));
-      if (draw_target_system) {
+      if (draw_star_destination_arrow) {
         std::string destination_system=AccessNavSystem()->getSelectedSystem();
         std::string current_system=_Universe->activeStarSystem()->getFileName();
         if (destination_system!=current_system) {
@@ -1965,8 +1977,21 @@ void GameCockpit::Draw() {
   }
   GFXEnable (TEXTURE0);
   GFXEnable (DEPTHTEST);
-  GFXEnable (DEPTHWRITE);      
+  GFXEnable (DEPTHWRITE);
   if (view<CP_CHASE) {
+/*broken velocity inidcator
+	  static bool draw_velocity_indicator=XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_velocity_indicator","true"));
+	  if (draw_velocity_indicator) {
+		    Vector P,Q,R;
+			Unit *par=GetParent();
+			if (par ) {
+				Vector vel=par->Velocity;
+				float speed=vel.Magnitude();
+            static float nav_symbol_size = XMLSupport::parse_float(vs_config->getVariable("graphics","nav_symbol_size",".25"));
+		    AccessCamera()->GetPQR (P,Q,R);
+	         DrawNavigationSymbol(vel,P,Q,speed*nav_symbol_size);
+			}
+	  }*/
     if (mesh.size()){
       Unit * par=GetParent();
       if (par) {
@@ -2283,7 +2308,7 @@ void GameCockpit::Draw() {
       Unit * parent=NULL;
       if (drawarrow&&(parent=this->parent.GetUnit())) {
         DrawArrowToTarget(parent, parent->Target());
-        if (destination_system_location.i||destination_system_location.j||destination_system_location.k) {
+        if (draw_star_destination_arrow&&(destination_system_location.i||destination_system_location.j||destination_system_location.k)) {
           GFXColorf(destination_system_color);
           DrawArrowToTarget(parent,parent->ToLocalCoordinates(destination_system_location));
         }

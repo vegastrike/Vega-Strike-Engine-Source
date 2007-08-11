@@ -320,7 +320,7 @@ bool PointStarVlist::BeginDrawState (const QVector &center, const Vector & veloc
 		static float fov_smoothing=XMLSupport::parse_float(vs_config->getVariable("graphics","warp.fovlink.smoothing",".4"));
 		float fov_smoot = pow(double(fov_smoothing),GetElapsedTime());
 		Vector vel (-velocity*velstreakscale);
-		if (smoothstreak>=minstreak||vel.MagnitudeSquared()>=minstreak*minstreak) {
+		if ((smoothstreak>=minstreak||vel.MagnitudeSquared()>=minstreak*minstreak)&&(vel.i!=0||vel.j!=0||vel.k!=0)) {
 		    ret=true;
 		    float speed = vel.Magnitude();
 		    vel*=1./speed;
