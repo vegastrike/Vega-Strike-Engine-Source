@@ -194,6 +194,7 @@ class Unit
 
 		// The name (type) of this unit shouldn't be public
 		StringPool::Reference name;
+		StringPool::Reference filename;
 
 		/***************************************************************************************/
 		/**** CONSTRUCTORS / DESCTRUCTOR                                                    ****/
@@ -1134,7 +1135,7 @@ class Unit
 		void setFullname(std::string name)  { fullname=name; }
 		std::string getFullname() const { return fullname; }
 
-		const string &getFilename() const { return name.get(); }
+		const string &getFilename() const { return filename.get(); }
 
 		// Is this class a unit
 		virtual enum clsptr isUnit()const {return UNITPTR;}
