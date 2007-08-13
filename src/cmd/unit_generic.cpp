@@ -2735,7 +2735,85 @@ void Unit::UpdateSubunitPhysics(Unit* subunit, const Transformation &trans, cons
 		//DEPRECATEDsu->hull-=SIMULATION_ATOM;
 	}
 }
-
+float CalculateNearestWarpUnit (const Unit *thus, float minmultiplier, Unit **nearest_unit) {
+	static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));
+	static float smallwarphack = XMLSupport::parse_float (vs_config->getVariable ("physics","minwarpeffectsize","100"));
+	static float WARPMEMORYEFFECT = XMLSupport::parse_float (vs_config->getVariable ("physics","WarpMemoryEffect","0.9"));
+							 // Pi^2
+	static float warpMultiplierMin=XMLSupport::parse_float(vs_config->getVariable("physics","warpMultiplierMin","9.86960440109"));
+							 // C
+	static float warpMultiplierMax=XMLSupport::parse_float(vs_config->getVariable("physics","warpMultiplierMax","300000000"));
+							 // Pi^2 * C
+	static float warpMaxEfVel=XMLSupport::parse_float(vs_config->getVariable("physics","warpMaxEfVel","2960881320"));
+							 // Boundary between multiplier regions 1&2. 2 is "high" mult
+	static double warpregion1=XMLSupport::parse_float(vs_config->getVariable("physics","warpregion1","5000000"));
+							 // Boundary between multiplier regions 0&1 0 is mult=1
+	static double warpregion0=XMLSupport::parse_float(vs_config->getVariable("physics","warpregion0","5000"));
+							 // Mult at 1-2 boundary
+	static double warpcruisemult=XMLSupport::parse_float(vs_config->getVariable("physics","warpcruisemult","5000"));
+							 // degree of curve
+	static double curvedegree=XMLSupport::parse_float(vs_config->getVariable("physics","warpcurvedegree","1.5"));
+							 // coefficient so as to agree with above
+	static double upcurvek=warpcruisemult/pow((warpregion1-warpregion0),curvedegree);
+							 // inverse fractional effect of ship vs real big object
+	static float def_inv_interdiction=1./XMLSupport::parse_float(vs_config->getVariable("physics","default_interdiction",".125"));
+	Unit * planet;
+	Unit * testthis=NULL;
+	{
+		NearestUnitLocator locatespec;
+		findObjects(_Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY],thus->location[Unit::UNIT_ONLY],&locatespec);
+		testthis=locatespec.retval.unit;
+	}
+	for (un_fiter iter = _Universe->activeStarSystem()->gravitationalUnits().fastIterator();(planet=*iter)||testthis;++iter) if (!planet||!planet->Killed()) {
+		if (planet==NULL) {
+			planet=testthis;
+			testthis=NULL;
+		}
+		if (planet==thus) {
+			continue;
+		}
+		float shiphack=1;
+		if (planet->isUnit()!=PLANETPTR) {
+			shiphack=def_inv_interdiction;
+			if (planet->specInterdiction!=0&&planet->graphicOptions.specInterdictionOnline!=0) {
+				shiphack=1/fabs(planet->specInterdiction);
+				if (thus->specInterdiction!=0&&thus->graphicOptions.specInterdictionOnline!=0) {
+							 //only counters artificial interdiction ... or maybe it cheap ones shouldn't counter expensive ones!? or expensive ones should counter planets...this is safe now, for gameplay
+					shiphack*=fabs(thus->specInterdiction);
+				}
+			}
+		}
+		float multipliertemp=1;
+		float minsizeeffect = (planet->rSize()>smallwarphack)?planet->rSize():smallwarphack;
+		float effectiverad = minsizeeffect*(1.0f+UniverseUtil::getPlanetRadiusPercent())+thus->rSize();
+		QVector dir=thus->Position()-planet->Position();
+		double udist=dir.Magnitude();
+		QVector veldiff=thus->Velocity*thus->graphicOptions.WarpFieldStrength-planet->Velocity*planet->graphicOptions.WarpFieldStrength;
+		double velproj=veldiff.Dot(dir*(1./udist));
+		int itercount=0;
+		do {
+							 //+(velproj<0?velproj*SIMULATION_ATOM:0);
+			double dist=udist;
+			if (dist<0) dist=0;
+			dist*=shiphack;
+			if (dist>(effectiverad+warpregion0)) {
+				multipliertemp=pow((dist-effectiverad-warpregion0),curvedegree)*upcurvek;
+			}
+			else {
+				multipliertemp=1;
+				//minmultiplier=1;
+			}
+			if (multipliertemp<minmultiplier) {
+				minmultiplier=multipliertemp;
+				*nearest_unit=planet;
+				//eventually use new multiplier to compute
+			}else break;
+		}while(0);			 //++itercount<=1); only repeat 1 iter right now
+		if (!testthis)
+			break;			 //don't want the ++
+	}
+	return minmultiplier;
+}
 
 void Unit::AddVelocity(float difficulty)
 {
@@ -2782,61 +2860,8 @@ void Unit::AddVelocity(float difficulty)
 								 // inverse fractional effect of ship vs real big object
 		static float def_inv_interdiction=1./XMLSupport::parse_float(vs_config->getVariable("physics","default_interdiction",".125"));
 		float minmultiplier=warpMultiplierMax*graphicOptions.MaxWarpMultiplier;
-		Unit * planet;
-		Unit * testthis=NULL;
-		{
-			NearestUnitLocator locatespec;
-			findObjects(_Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY],this->location[Unit::UNIT_ONLY],&locatespec);
-			testthis=locatespec.retval.unit;
-		}
-		for (un_fiter iter = _Universe->activeStarSystem()->gravitationalUnits().fastIterator();(planet=*iter)||testthis;++iter) if (!planet||!planet->Killed()) {
-			if (planet==NULL) {
-				planet=testthis;
-				testthis=NULL;
-			}
-			if (planet==this) {
-				continue;
-			}
-
-			float shiphack=1;
-			if (planet->isUnit()!=PLANETPTR) {
-				shiphack=def_inv_interdiction;
-				if (planet->specInterdiction!=0&&planet->graphicOptions.specInterdictionOnline!=0) {
-					shiphack=1/fabs(planet->specInterdiction);
-					if (this->specInterdiction!=0&&this->graphicOptions.specInterdictionOnline!=0) {
-								 //only counters artificial interdiction ... or maybe it cheap ones shouldn't counter expensive ones!? or expensive ones should counter planets...this is safe now, for gameplay
-						shiphack*=fabs(this->specInterdiction);
-					}
-				}
-			}
-			float multipliertemp=1;
-			float minsizeeffect = (planet->rSize()>smallwarphack)?planet->rSize():smallwarphack;
-			float effectiverad = minsizeeffect*(1.0f+UniverseUtil::getPlanetRadiusPercent())+rSize();
-			QVector dir=Position()-planet->Position();
-			double udist=dir.Magnitude();
-			QVector veldiff=Velocity*graphicOptions.WarpFieldStrength-planet->Velocity*planet->graphicOptions.WarpFieldStrength;
-			double velproj=veldiff.Dot(dir*(1./udist));
-			int itercount=0;
-			do {
-								 //+(velproj<0?velproj*SIMULATION_ATOM:0);
-				double dist=udist;
-				if (dist<0) dist=0;
-				dist*=shiphack;
-				if (dist>(effectiverad+warpregion0)) {
-					multipliertemp=pow((dist-effectiverad-warpregion0),curvedegree)*upcurvek;
-				}
-				else {
-					multipliertemp=1;
-					minmultiplier=1;
-				}
-				if (multipliertemp<minmultiplier) {
-					minmultiplier=multipliertemp;
-					//eventually use new multiplier to compute
-				}else break;
-			}while(0);			 //++itercount<=1); only repeat 1 iter right now
-			if (!testthis)
-				break;			 //don't want the ++
-		}
+		Unit * nearest_unit=NULL;
+		minmultiplier=CalculateNearestWarpUnit(this,minmultiplier,&nearest_unit);
 		float rampmult=1;
 		if(graphicOptions.RampCounter!=0) {
 			graphicOptions.RampCounter-=SIMULATION_ATOM;

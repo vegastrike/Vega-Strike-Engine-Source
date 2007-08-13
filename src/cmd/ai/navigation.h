@@ -106,6 +106,8 @@ public:
  */
 class AutoLongHaul : public ChangeHeading {
   bool finish;
+  bool deactivatewarp;
+  bool StraightToTarget;
 public:
   AutoLongHaul (bool fini=false, int accuracy =1);
   virtual void Execute ();

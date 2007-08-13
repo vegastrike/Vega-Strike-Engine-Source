@@ -12,6 +12,7 @@ using namespace Orders;
 #include "vs_globals.h"
 #include "warpto.h"
 #include "flybywire.h"
+#include "cmd/unit_util.h"
 /**
  * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
  * vslowdown - decel * t = 0               t = vslowdown/decel
@@ -444,27 +445,95 @@ FaceTarget::~FaceTarget() {
   fflush (stderr);
 #endif
 }
-
+extern float CalculateNearestWarpUnit (const Unit *thus, float minmultiplier, Unit **nearest_unit);
 AutoLongHaul::AutoLongHaul (bool fini, int accuracy):ChangeHeading(QVector(0,0,1),accuracy),finish(fini) {
   type=FACING|MOVEMENT;
   subtype =STARGET;
-  
+  deactivatewarp=false;
+  StraightToTarget=true;
+
 }
 
 void AutoLongHaul::SetParent(Unit *parent1){
 	ChangeHeading::SetParent(parent1);
-	MatchLinearVelocity *temp = new MatchLinearVelocity(Vector(0,0,parent1->GetComputerData().max_ab_speed()),true,true,false);
+	MatchLinearVelocity *temp = new MatchLinearVelocity(Vector(0,0,parent1->GetComputerData().max_speed()),true,false,false);
 	temp->SetParent(parent1);
 	Order::EnqueueOrder(temp);
 }
-
+extern bool DistanceWarrantsWarpTo (Unit * parent, float dist, bool following);
 void AutoLongHaul::Execute() {
   Unit * target = parent->Target();
   if (target==NULL){
     done = finish;
     return;
   }
-  SetDest(target->isSubUnit()?target->Position():target->LocalPosition());
+  static float enough_warp_for_cruise=XMLSupport::parse_float(vs_config->getVariable("physics","enough_warp_for_cruise","1000"));
+  static float min_warp_orbit_radius=XMLSupport::parse_float(vs_config->getVariable("physics","min_warp_orbit_radius","1000000"));
+  static float warp_orbit_multiplier=XMLSupport::parse_float(vs_config->getVariable("physics","warp_orbit_multiplier","4"));
+  static float warp_behind_angle=cos(3.1415926536*XMLSupport::parse_float(vs_config->getVariable("physics","warp_behind_angle","150"))/180.);
+  QVector myposition=parent->isSubUnit()?parent->Position():parent->LocalPosition();//get unit pos
+  QVector destination = target->isSubUnit()?target->Position():target->LocalPosition();//get destination
+  QVector destinationdirection=(destination-myposition);//find vector from us to destination
+  double destinationdistance=destinationdirection.Magnitude();
+  destinationdirection=destinationdirection*(1./destinationdistance);//this is a direction, so it is normalize
+
+  
+  if (parent->graphicOptions.WarpFieldStrength<enough_warp_for_cruise&&parent->graphicOptions.InWarp&&parent->graphicOptions.RampCounter==0) {//face target unless warp ramping is done and warp is less than some intolerable ammt
+	Unit *obstacle=NULL;
+	CalculateNearestWarpUnit(parent,FLT_MAX,&obstacle);//find the unit affecting our spec
+	if (obstacle!=NULL&&obstacle!=target) {//if it exists and is not our destination
+	  QVector obstacledirection=(obstacle->LocalPosition()-myposition);//find vector from us to obstacle
+      double obstacledistance=obstacledirection.Magnitude();
+
+      obstacledirection=obstacledirection*(1./obstacledistance);//normalize the obstacle direction as well
+	  if (obstacledistance<destinationdistance&&obstacledirection.Dot(destinationdirection)>warp_behind_angle) {//if our obstacle is closer than obj and the obstacle is not behind us
+			QVector planetdest=destination-obstacle->LocalPosition();//find the vector from planet to dest
+			QVector planetme=-destinationdirection;//obstacle to me
+			QVector planetperp=planetme.Cross(planetdest);//find vector out of that plane
+			QVector detourvector=destinationdirection.Cross(planetperp);//find vector perpendicular to our desired course emerging from planet
+			double renormalizedetour=detourvector.Magnitude();
+			if (renormalizedetour>.01) detourvector=detourvector*(1./renormalizedetour);//normalize it
+			double finaldetourdistance=(obstacle->rSize()*warp_orbit_multiplier+min_warp_orbit_radius);//scale that direction by some multiplier of obstacle size and a constant
+			detourvector=detourvector*finaldetourdistance;//we want to go perpendicular to our transit direction by that ammt
+			QVector newdestination=obstacle->LocalPosition()+detourvector;// add to our position
+			float weight=1-(enough_warp_for_cruise-parent->graphicOptions.WarpFieldStrength)/enough_warp_for_cruise;//find out how close we are to our desired warp multiplier and weight our direction by that
+			weight*=weight;//
+			QVector olddestination=myposition+destinationdirection*finaldetourdistance;//destination direction in the same magnitude as the newdestination from the ship
+			destination=newdestination*(1-weight)+olddestination*weight;//use the weight to combine our direction and the dest
+			StraightToTarget=false;
+	  }else StraightToTarget=true;
+	}else StraightToTarget=true;
+  }else if (parent->graphicOptions.WarpFieldStrength>=enough_warp_for_cruise) {
+    StraightToTarget=true;
+  }
+  if(parent->graphicOptions.InWarp==0&&parent->graphicOptions.RampCounter==0) {
+    deactivatewarp=false;
+  }
+  static float specInterdictionLimit=XMLSupport::parse_float(vs_config->getVariable("physics","min_spec_interdiction_for_jittery_autopilot",".05"));
+  if (StraightToTarget&&target->graphicOptions.specInterdictionOnline&&fabs(target->specInterdiction)<specInterdictionLimit) {
+	 QVector cvel=parent->cumulative_velocity.Cast();
+	 float speed=cvel.Magnitude();
+	 if (speed>.01)
+		 cvel=cvel*(1./speed);
+         static float dotLimit=cos(3.1415926536*XMLSupport::parse_float(vs_config->getVariable("physics","autopilot_spec_lining_up_angle","3"))/180.);
+	 if (cvel.Dot(destinationdirection)<dotLimit) {//if wanting to face target but overshooting.
+           deactivatewarp=true;//turn off drive
+	 }
+  }
+  if (DistanceWarrantsWarpTo(parent,UnitUtil::getSignificantDistance(parent,target),false)&&deactivatewarp==false) {\
+	  if (parent->graphicOptions.InWarp==0) {
+		parent->graphicOptions.InWarp=1;
+		parent->graphicOptions.WarpRamping=1;
+	  }
+  }else {
+	  if (parent->graphicOptions.InWarp==1) {
+		parent->graphicOptions.InWarp=0;
+                static bool rampdown=XMLSupport::parse_bool(vs_config->getVariable("physics","autopilot_ramp_warp_down","true"));
+                if (rampdown)
+                  parent->graphicOptions.WarpRamping=1;
+	  }
+  }
+  SetDest(destination);
   ChangeHeading::Execute();
   if (!finish) {
     ResetDone();
