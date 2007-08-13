@@ -250,6 +250,10 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
 	if(FlyByKeyboard::inauto){
 		this->eraseType(FACING|MOVEMENT);
 		FlyByKeyboard::inauto=false;
+		if(parent->graphicOptions.InWarp){
+		  parent->graphicOptions.InWarp=0;
+		  parent->graphicOptions.WarpRamping=1;
+		}
 	} else {
 		Orders::AutoLongHaul* temp = new Orders::AutoLongHaul();
 		temp->SetParent(parent);
