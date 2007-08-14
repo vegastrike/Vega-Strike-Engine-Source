@@ -445,7 +445,7 @@ FaceTarget::~FaceTarget() {
   fflush (stderr);
 #endif
 }
-extern float CalculateNearestWarpUnit (const Unit *thus, float minmultiplier, Unit **nearest_unit);
+extern float CalculateNearestWarpUnit (const Unit *thus, float minmultiplier, Unit **nearest_unit, bool negative_spec_units);
 AutoLongHaul::AutoLongHaul (bool fini, int accuracy):ChangeHeading(QVector(0,0,1),accuracy),finish(fini) {
   type=FACING|MOVEMENT;
   subtype =STARGET;
@@ -467,7 +467,9 @@ void AutoLongHaul::Execute() {
     done = finish;
     return;
   }
+  static bool compensate_for_interdiction=XMLSupport::parse_bool(vs_config->getVariable("phyics","autopilot_compensate_for_interdiction","false"));
   static float enough_warp_for_cruise=XMLSupport::parse_float(vs_config->getVariable("physics","enough_warp_for_cruise","1000"));
+  static float go_perpendicular_speed=XMLSupport::parse_float(vs_config->getVariable("physics","warp_perpendicular","80"));
   static float min_warp_orbit_radius=XMLSupport::parse_float(vs_config->getVariable("physics","min_warp_orbit_radius","1000000"));
   static float warp_orbit_multiplier=XMLSupport::parse_float(vs_config->getVariable("physics","warp_orbit_multiplier","4"));
   static float warp_behind_angle=cos(3.1415926536*XMLSupport::parse_float(vs_config->getVariable("physics","warp_behind_angle","150"))/180.);
@@ -478,17 +480,17 @@ void AutoLongHaul::Execute() {
   destinationdirection=destinationdirection*(1./destinationdistance);//this is a direction, so it is normalize
 
   
-  if (parent->graphicOptions.WarpFieldStrength<enough_warp_for_cruise&&parent->graphicOptions.InWarp&&parent->graphicOptions.RampCounter==0) {//face target unless warp ramping is done and warp is less than some intolerable ammt
-	Unit *obstacle=NULL;
-	CalculateNearestWarpUnit(parent,FLT_MAX,&obstacle);//find the unit affecting our spec
-	if (obstacle!=NULL&&obstacle!=target) {//if it exists and is not our destination
-	  QVector obstacledirection=(obstacle->LocalPosition()-myposition);//find vector from us to obstacle
+  if (parent->graphicOptions.WarpFieldStrength<enough_warp_for_cruise&&parent->graphicOptions.InWarp) {//face target unless warp ramping is done and warp is less than some intolerable ammt
+    Unit *obstacle=NULL;
+    float maxmultiplier=CalculateNearestWarpUnit(parent,FLT_MAX,&obstacle,compensate_for_interdiction);//find the unit affecting our spec
+    if (maxmultiplier<enough_warp_for_cruise&&obstacle!=NULL&&obstacle!=target) {//if it exists and is not our destination
+      QVector obstacledirection=(obstacle->LocalPosition()-myposition);//find vector from us to obstacle
       double obstacledistance=obstacledirection.Magnitude();
 
       obstacledirection=obstacledirection*(1./obstacledistance);//normalize the obstacle direction as well
 	  if (obstacledistance<destinationdistance&&obstacledirection.Dot(destinationdirection)>warp_behind_angle) {//if our obstacle is closer than obj and the obstacle is not behind us
 			QVector planetdest=destination-obstacle->LocalPosition();//find the vector from planet to dest
-			QVector planetme=-destinationdirection;//obstacle to me
+			QVector planetme=-obstacledirection;//obstacle to me
 			QVector planetperp=planetme.Cross(planetdest);//find vector out of that plane
 			QVector detourvector=destinationdirection.Cross(planetperp);//find vector perpendicular to our desired course emerging from planet
 			double renormalizedetour=detourvector.Magnitude();
@@ -496,10 +498,16 @@ void AutoLongHaul::Execute() {
 			double finaldetourdistance=(obstacle->rSize()*warp_orbit_multiplier+min_warp_orbit_radius);//scale that direction by some multiplier of obstacle size and a constant
 			detourvector=detourvector*finaldetourdistance;//we want to go perpendicular to our transit direction by that ammt
 			QVector newdestination=obstacle->LocalPosition()+detourvector;// add to our position
-			float weight=1-(enough_warp_for_cruise-parent->graphicOptions.WarpFieldStrength)/enough_warp_for_cruise;//find out how close we are to our desired warp multiplier and weight our direction by that
+			float weight=(maxmultiplier-go_perpendicular_speed)/(enough_warp_for_cruise-go_perpendicular_speed);//find out how close we are to our desired warp multiplier and weight our direction by that
 			weight*=weight;//
-			QVector olddestination=myposition+destinationdirection*finaldetourdistance;//destination direction in the same magnitude as the newdestination from the ship
-			destination=newdestination*(1-weight)+olddestination*weight;//use the weight to combine our direction and the dest
+                        if (maxmultiplier<go_perpendicular_speed) {
+                          QVector perpendicular=myposition+planetme*(finaldetourdistance/planetme.Magnitude());
+                          weight=(go_perpendicular_speed-maxmultiplier)/go_perpendicular_speed;
+                          destination=weight*perpendicular+(1-weight)*newdestination;
+                        }else {
+                          QVector olddestination=myposition+destinationdirection*finaldetourdistance;//destination direction in the same magnitude as the newdestination from the ship
+                          destination=newdestination*(1-weight)+olddestination*weight;//use the weight to combine our direction and the dest
+                        }
 			StraightToTarget=false;
 	  }else StraightToTarget=true;
 	}else StraightToTarget=true;
@@ -510,7 +518,7 @@ void AutoLongHaul::Execute() {
     deactivatewarp=false;
   }
   static float specInterdictionLimit=XMLSupport::parse_float(vs_config->getVariable("physics","min_spec_interdiction_for_jittery_autopilot",".05"));
-  if (StraightToTarget&&target->graphicOptions.specInterdictionOnline&&fabs(target->specInterdiction)<specInterdictionLimit) {
+  if (StraightToTarget&&target->graphicOptions.specInterdictionOnline&&target->isPlanet()==false&&fabs(target->specInterdiction)<specInterdictionLimit) {
 	 QVector cvel=parent->cumulative_velocity.Cast();
 	 float speed=cvel.Magnitude();
 	 if (speed>.01)
@@ -537,7 +545,11 @@ void AutoLongHaul::Execute() {
   ChangeHeading::Execute();
   if (!finish) {
     ResetDone();
-  } 
+  }
+  static float distance_to_stop=XMLSupport::parse_float(vs_config->getVariable("physics","auto_pilot_termination_distance","6000"));
+  static bool do_auto_finish=XMLSupport::parse_bool(vs_config->getVariable("physics","autopilot_terminate","true"));
+  if (do_auto_finish&&UnitUtil::getSignificantDistance(parent,target)<distance_to_stop) 
+    done=true;
 }
 
 

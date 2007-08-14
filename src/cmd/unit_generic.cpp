@@ -2735,7 +2735,7 @@ void Unit::UpdateSubunitPhysics(Unit* subunit, const Transformation &trans, cons
 		//DEPRECATEDsu->hull-=SIMULATION_ATOM;
 	}
 }
-float CalculateNearestWarpUnit (const Unit *thus, float minmultiplier, Unit **nearest_unit) {
+float CalculateNearestWarpUnit (const Unit *thus, float minmultiplier, Unit **nearest_unit, bool count_negative_warp_units) {
 	static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));
 	static float smallwarphack = XMLSupport::parse_float (vs_config->getVariable ("physics","minwarpeffectsize","100"));
 	static float WARPMEMORYEFFECT = XMLSupport::parse_float (vs_config->getVariable ("physics","WarpMemoryEffect","0.9"));
@@ -2775,7 +2775,7 @@ float CalculateNearestWarpUnit (const Unit *thus, float minmultiplier, Unit **ne
 		float shiphack=1;
 		if (planet->isUnit()!=PLANETPTR) {
 			shiphack=def_inv_interdiction;
-			if (planet->specInterdiction!=0&&planet->graphicOptions.specInterdictionOnline!=0) {
+			if (planet->specInterdiction!=0&&planet->graphicOptions.specInterdictionOnline!=0&&(planet->specInterdiction>0||count_negative_warp_units)) {
 				shiphack=1/fabs(planet->specInterdiction);
 				if (thus->specInterdiction!=0&&thus->graphicOptions.specInterdictionOnline!=0) {
 							 //only counters artificial interdiction ... or maybe it cheap ones shouldn't counter expensive ones!? or expensive ones should counter planets...this is safe now, for gameplay
@@ -2861,7 +2861,7 @@ void Unit::AddVelocity(float difficulty)
 		static float def_inv_interdiction=1./XMLSupport::parse_float(vs_config->getVariable("physics","default_interdiction",".125"));
 		float minmultiplier=warpMultiplierMax*graphicOptions.MaxWarpMultiplier;
 		Unit * nearest_unit=NULL;
-		minmultiplier=CalculateNearestWarpUnit(this,minmultiplier,&nearest_unit);
+		minmultiplier=CalculateNearestWarpUnit(this,minmultiplier,&nearest_unit,true);
 		float rampmult=1;
 		if(graphicOptions.RampCounter!=0) {
 			graphicOptions.RampCounter-=SIMULATION_ATOM;

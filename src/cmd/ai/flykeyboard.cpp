@@ -489,6 +489,9 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
 
   if(FlyByKeyboard::inauto){
 	  Order::Execute();
+          if (done) 
+            FlyByKeyboard::inauto=false;
+          done=false;
   } else {
 	  FlyByWire::Execute();
   }
