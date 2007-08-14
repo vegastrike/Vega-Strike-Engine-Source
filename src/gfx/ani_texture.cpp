@@ -8,6 +8,7 @@
 #include "vegastrike.h"
 #include "vsfilesystem.h"
 #include "vs_globals.h"
+#include "vs_random.h"
 #include "../gldrv/gl_globals.h"
 #include <set>
 #include <math.h>
@@ -342,7 +343,10 @@ void AnimatedTexture::Load(VSFileSystem::VSFile & f, int stage, enum FILTER ismi
   if (XMLSupport::parse_option_ispresent(options,"forceLoop"))
       SetLoop(true); else if (XMLSupport::parse_option_ispresent(options,"forceNoLoop"))
       SetLoop(false);
-  
+  if (XMLSupport::parse_option_ispresent(options,"startRandom")) {
+	  int curf = vsrandom.genrand_int32()%numframes;
+	  setTime((0.00001+curf)*timeperframe);
+  }
   string addrmodestr = XMLSupport::parse_option_value(options,"addressMode","");
   defaultAddressMode = parseAddressMode(addrmodestr,DEFAULT_ADDRESS_MODE);
 
