@@ -487,9 +487,9 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
   SSCK.dirty=true;
 #undef SSCK
 
-  if(FlyByKeyboard::inauto){
+  if(queryType(FACING|MOVEMENT)){
 	  Order::Execute();
-          if (done) 
+          if (queryType(FACING|MOVEMENT)==NULL) 
             FlyByKeyboard::inauto=false;
           done=false;
   } else {
