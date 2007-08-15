@@ -80,7 +80,12 @@ QVector DockToSavedBases (int playernum) {
 		plr->ForceDock(closestUnit,i);
 		closestUnit->image->clearedunits.push_back(plr);
 		closestUnit->RequestPhysics();
-	}
+                _Universe->AccessCockpit(playernum)->retry_dock=0;
+	}else {
+          if (_Universe->AccessCockpit(playernum)->retry_dock==0)
+            _Universe->AccessCockpit(playernum)->retry_dock=128;
+          else _Universe->AccessCockpit(playernum)->retry_dock-=1;
+        }
 	return dock_position;
 }
 

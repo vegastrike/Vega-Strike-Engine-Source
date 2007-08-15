@@ -91,7 +91,7 @@ protected:
   int partial_number_of_attackers;
  public:
   int number_of_attackers;
-
+  unsigned int retry_dock;
   double TimeOfLastCollision;
   char jumpok;
   void updateAttackers();

@@ -108,6 +108,12 @@ class AutoLongHaul : public ChangeHeading {
   bool finish;
   bool deactivatewarp;
   bool StraightToTarget;
+  /*
+  #define AUTOLONGHAULNUMDESTINATIONAVG 15
+  QVector PreviousNewDestinations[AUTOLONGHAULNUMDESTINATIONAVG];
+  unsigned int whichDestinationIsOld;
+  */
+  QVector NewDestination(const QVector&curnewdestination, double magnitude);
 public:
   AutoLongHaul (bool fini=false, int accuracy =1);
   virtual void Execute ();

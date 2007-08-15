@@ -451,7 +451,11 @@ AutoLongHaul::AutoLongHaul (bool fini, int accuracy):ChangeHeading(QVector(0,0,1
   subtype =STARGET;
   deactivatewarp=false;
   StraightToTarget=true;
-
+  /*
+  whichDestinationIsOld=0;
+  for (unsigned int i=0;i<AUTOLONGHAULNUMDESTINATIONAVG;++i) {
+    PreviousNewDestinations[i]=QVector(0,0,0);
+    }*/
 }
 
 void AutoLongHaul::SetParent(Unit *parent1){
@@ -461,6 +465,25 @@ void AutoLongHaul::SetParent(Unit *parent1){
 	Order::EnqueueOrder(temp);
 }
 extern bool DistanceWarrantsWarpTo (Unit * parent, float dist, bool following);
+
+QVector AutoLongHaul::NewDestination(const QVector&curnewdestination, double magnitude) {
+  /*
+  QVector avg=curnewdestination;
+  unsigned int numave=1;
+  magnitude*=magnitude;
+  for (unsigned int i=0;i<AUTOLONGHAULNUMDESTINATIONAVG;++i) {
+    if ((curnewdestination-PreviousNewDestinations[i]).MagnitudeSquared()<magnitude) {
+      avg+=PreviousNewDestinations[i];
+      numave++;
+    }
+  }
+  return PreviousNewDestinations[whichDestinationIsOld++%AUTOLONGHAULNUMDESTINATIONAVG]=avg*(1./(double)numave);
+  */
+  return curnewdestination;
+}
+static float mymax(float a, float b) {
+  return a>b?a:b;
+}
 void AutoLongHaul::Execute() {
   Unit * target = parent->Target();
   if (target==NULL){
@@ -470,7 +493,7 @@ void AutoLongHaul::Execute() {
   static bool compensate_for_interdiction=XMLSupport::parse_bool(vs_config->getVariable("phyics","autopilot_compensate_for_interdiction","false"));
   static float enough_warp_for_cruise=XMLSupport::parse_float(vs_config->getVariable("physics","enough_warp_for_cruise","1000"));
   static float go_perpendicular_speed=XMLSupport::parse_float(vs_config->getVariable("physics","warp_perpendicular","80"));
-  static float min_warp_orbit_radius=XMLSupport::parse_float(vs_config->getVariable("physics","min_warp_orbit_radius","1000000"));
+  static float min_warp_orbit_radius=XMLSupport::parse_float(vs_config->getVariable("physics","min_warp_orbit_radius","100000000"));
   static float warp_orbit_multiplier=XMLSupport::parse_float(vs_config->getVariable("physics","warp_orbit_multiplier","4"));
   static float warp_behind_angle=cos(3.1415926536*XMLSupport::parse_float(vs_config->getVariable("physics","warp_behind_angle","150"))/180.);
   QVector myposition=parent->isSubUnit()?parent->Position():parent->LocalPosition();//get unit pos
@@ -495,9 +518,9 @@ void AutoLongHaul::Execute() {
 			QVector detourvector=destinationdirection.Cross(planetperp);//find vector perpendicular to our desired course emerging from planet
 			double renormalizedetour=detourvector.Magnitude();
 			if (renormalizedetour>.01) detourvector=detourvector*(1./renormalizedetour);//normalize it
-			double finaldetourdistance=(obstacle->rSize()*warp_orbit_multiplier+min_warp_orbit_radius);//scale that direction by some multiplier of obstacle size and a constant
+			double finaldetourdistance=mymax(obstacle->rSize()*warp_orbit_multiplier,min_warp_orbit_radius);//scale that direction by some multiplier of obstacle size and a constant
 			detourvector=detourvector*finaldetourdistance;//we want to go perpendicular to our transit direction by that ammt
-			QVector newdestination=obstacle->LocalPosition()+detourvector;// add to our position
+			QVector newdestination=NewDestination(obstacle->LocalPosition()+detourvector,finaldetourdistance);// add to our position
 			float weight=(maxmultiplier-go_perpendicular_speed)/(enough_warp_for_cruise-go_perpendicular_speed);//find out how close we are to our desired warp multiplier and weight our direction by that
 			weight*=weight;//
                         if (maxmultiplier<go_perpendicular_speed) {

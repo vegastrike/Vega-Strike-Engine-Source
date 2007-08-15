@@ -72,6 +72,7 @@ void Cockpit::EjectDock() {
 
 using namespace VSFileSystem;
 void Cockpit::Init (const char * file, bool isDisabled) {
+  retry_dock=0;
   shakin=0;
   autopilot_time=0;
   bool f404=false;
@@ -439,9 +440,11 @@ void Cockpit::updateAttackers() {
   }
 
 }
-
+extern QVector DockToSavedBases(int);
 bool Cockpit::Update () {
-  
+  if (retry_dock) {
+    DockToSavedBases(_Universe->CurrentCockpit());
+  }
   if (jumpok) {
 		jumpok++;
   }
