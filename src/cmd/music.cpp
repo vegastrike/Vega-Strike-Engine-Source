@@ -503,7 +503,7 @@ void Music::Listen() {
 		}
 		if (!playingSource.empty()) {
 			if (!AUDIsPlaying(playingSource.front())) {
-				AUDDeleteSound(playingSource.front());
+				AUDDeleteSound(playingSource.front(),true);
 				playingSource.pop_front();
 				if (!playingSource.empty()) {
                                   _StopNow();
@@ -777,7 +777,7 @@ void Music::_StopNow() {
 		for (std::vector<int>::const_iterator iter = sounds_to_stop.begin(); iter!=sounds_to_stop.end(); iter++) {
 			int sound = *iter;
 			AUDStopPlaying(sound);
-			AUDDeleteSound(sound);
+			AUDDeleteSound(sound,true);
 		}
                 sounds_to_stop.clear();
 	}
@@ -814,7 +814,7 @@ void Music::_Stop()
 		for (std::list<int>::const_iterator iter = playingSource.begin(); iter!=playingSource.end(); iter++) {
 			int sound = *iter;
 			AUDStopPlaying(sound);
-			AUDDeleteSound(sound);
+			AUDDeleteSound(sound,true);
 		}
 		playingSource.clear();
 	}
