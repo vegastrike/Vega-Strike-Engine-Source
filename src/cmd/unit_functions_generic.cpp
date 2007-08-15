@@ -272,8 +272,10 @@ int parseMountSizes (const char * str) {
 void DealPossibleJumpDamage (Unit *un) {
   float speed = un->GetVelocity().Magnitude();
   float damage = un->GetJumpStatus().damage+(rand()%100<1)?(rand()%20):0;
-  float dam =speed*(damage/10);
-  if (dam>100) dam=100;
+  static float muld=XMLSupport::parse_float(vs_config->getVariable("physics","jump_damage_multiplier",".1"));
+  static float maxd =XMLSupport::parse_float(vs_config->getVariable("physics","max_jump_damage","100"));
+  float dam =speed*(damage*muld);
+  if (dam>maxd) dam=maxd;
   if (dam>1) {
     un->ApplyDamage ((un->Position()+un->GetVelocity().Cast()).Cast(),
 		     un->GetVelocity(), 
