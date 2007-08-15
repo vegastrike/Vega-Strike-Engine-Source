@@ -12,7 +12,7 @@ public:
   Pilot(int faction);
   void SetComm(Unit * comm_unit);//so we can specialize base sort of people
   float getReactionTime() {return reaction_time;}
-  float getGender() {return gender;}
+  unsigned char getGender() {return gender;}
   float getRank(){return rank;}//man it's rank in here
   typedef stdext::hash_map<const void*,float> relationmap;//non dereferencable Unit to float
   relationmap effective_relationship;

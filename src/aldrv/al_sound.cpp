@@ -138,7 +138,7 @@ ALsizei *size,ALsizei *freq, ALboolean *loop)
 							*data=malloc(ChunkHdr.Size + 31);
 						}
 						else{
-							realloc(*data,ChunkHdr.Size + 31);
+							*data=realloc(*data,ChunkHdr.Size + 31);
 						}
 						if (*data) 
 						{

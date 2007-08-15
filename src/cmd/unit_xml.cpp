@@ -8,6 +8,7 @@
 #include <expat.h>
 //#include <values.h>
 #include <float.h>
+#include <limits.h>
 #include "configxml.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
@@ -1250,7 +1251,7 @@ using namespace UnitXML;
     image->cloakrate=(int)(.2*(2147483647));  //short fix
     cloakmin=1;
     image->cloakenergy=0;
-    cloaking = -2147483648;//lowest negative number  //short fix
+    cloaking = INT_MIN;//lowest negative number  //short fix
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case MISSING:

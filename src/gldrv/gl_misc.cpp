@@ -35,7 +35,7 @@ bool GFXMultiTexAvailable() {
 void GFXCircle (float x, float y, float wid, float hei) {
 	static float aaccuracy=XMLSupport::parse_float(vs_config->getVariable("graphics","circle_accuracy","0.1"));
     float segmag = (Vector(wid*g_game.x_resolution,0,0)-Vector(wid*g_game.x_resolution*cos(2.*M_PI/360.0),hei*g_game.y_resolution*sin(2.*M_PI/360.0),0)).Magnitude();
-	int accuracy = 360.0f*aaccuracy*(1.0f<segmag?1.0:segmag);
+	int accuracy = (int)(360.0f*aaccuracy*(1.0f<segmag?1.0:segmag));
 	if (accuracy<4) accuracy=4;
 	//	const int accuracy=((wid*g_game.x_resolution)+(hei*g_game.y_resolution))*M_PI;
 	GFXBegin (GFXLINESTRIP);

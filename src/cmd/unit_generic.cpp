@@ -7792,7 +7792,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
 		double templeak = 100-(templ!=NULL?templ->shield.leak:0);
 		bool ccf = cancompletefully;
 		STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,100,100,false,shield.leak);
-		if (touchme&&myleak<=100&&myleak>=0)shield.leak=100-myleak;
+		if (touchme&&myleak<=100&&myleak>=0)shield.leak=(char)100-myleak;
 		cancompletefully = ccf;
 	}
 
