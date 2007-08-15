@@ -122,6 +122,7 @@ void AUDRefreshSounds () {
 	totalplaying--;
 	if (sounds[playingbuffers[i][j].soundname].source!=(ALuint)0) {
 	  unusedsrcs.push_back (sounds[playingbuffers[i][j].soundname].source);
+          alSourcei(sounds[playingbuffers[i][j].soundname].source,AL_BUFFER,0);
 	  sounds[playingbuffers[i][j].soundname].source=(ALuint)0;
 	}
 	ApproxSoundVec::iterator k = playingbuffers[i].begin();

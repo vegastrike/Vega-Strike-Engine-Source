@@ -665,6 +665,7 @@ void AUDDeleteSound (int sound, bool music){
 
     if (sounds[sound].source){
       unusedsrcs.push_back (sounds[sound].source);
+      alSourcei(sounds[sound].source,AL_BUFFER,0);//decrement the source refcount
       sounds[sound].source=(ALuint)0;
     }
 #ifdef SOUND_DEBUG
@@ -758,9 +759,10 @@ void AUDStopPlaying (const int sound){
 #endif	  
 	if (sounds[sound].source!=0) {
 	  alSourceStop(sounds[sound].source);
-      unusedsrcs.push_back (sounds[sound].source);
+          unusedsrcs.push_back (sounds[sound].source);
 	}
-    sounds[sound].source=(ALuint)0;
+        alSourcei(sounds[sound].source,AL_BUFFER,0);//decrement refcount
+        sounds[sound].source=(ALuint)0;
   }
 #endif
 }
@@ -793,6 +795,7 @@ static bool AUDReclaimSource (const int sound, bool high_priority=false) {
         } else {
           alSourceStop(sounds[candidate].source);
           sounds[sound].source=sounds[candidate].source;
+          alSourcei(sounds[candidate].source,AL_BUFFER,0);//reclaim the source
           sounds[candidate].source=0;
         }
       }else {        
