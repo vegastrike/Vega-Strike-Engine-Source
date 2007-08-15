@@ -107,18 +107,22 @@ bool _Slew = true;
  void VolUp(const KBData&,KBSTATE newState) {
    if(newState==PRESS){
      float gain=AUDGetListenerGain();
-     if (gain<.9375) {
+     if (gain<1) {
        gain+=.0625;
+       if (gain>1) gain=1;
        AUDListenerGain (gain);
+       Music::ChangeVolume(0);
      }
    }
  }
  void VolDown(const KBData&,KBSTATE newState) {
    if(newState==PRESS){
      float gain=AUDGetListenerGain();
-     if (gain>.0625) {
-       gain-=.0625;
+     if (gain>0) {       
+       gain-=.03125;
+       if (gain<0) gain=0;
        AUDListenerGain (gain);
+       Music::ChangeVolume(0);
      }
    }
  }

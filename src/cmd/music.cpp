@@ -219,8 +219,9 @@ void Music::ChangeVolume(float inc,int layer)
 {
     if (muzak) {
         if (layer<0) {
-            for (int i=0; i<muzak_count; i++)
+          for (int i=0; i<muzak_count; i++){
                 muzak[i]._SetVolume(muzak[i].soft_vol + inc,false,0.1);
+          }
         } else if ((layer>=0)&&(layer<muzak_count)) {
             muzak[layer]._SetVolume(muzak[layer].soft_vol + inc,false,0.1);
         }
@@ -246,12 +247,12 @@ void Music::_SetVolume (float vol,bool hardware,float latency_override) {
         fNET_Write(socketw,strlen(tempbuf),tempbuf); else
         INET_Write(socketw,strlen(tempbuf),tempbuf);
 */
-
-	this->vol=vol;
-
-	for (std::list<int>::const_iterator iter = playingSource.begin() ; iter != playingSource.end(); iter++ ) {
-		AUDSoundGain(*iter, vol);
-	}
+  if (vol<0)vol=0;
+  this->vol=vol;
+  this->soft_vol=vol;//for now fixme for fading
+  for (std::list<int>::const_iterator iter = playingSource.begin() ; iter != playingSource.end(); iter++ ) {
+    AUDSoundGain(*iter, soft_vol,true);
+  }
 }
 
 bool Music::LoadMusic (const char *file) {
@@ -428,7 +429,7 @@ void Music::_LoadLastSongAsync() {
               _StopNow();
               AUDStartPlaying(playingSource.front());
               // FIXME FIXME FIXME Presumed race condition or somesuch -- AUDSoundGain here breaks windows music -- temporary hack, actual fix later
-              AUDSoundGain(playingSource.front(),vol);
+              AUDSoundGain(playingSource.front(),vol,true);
             }
             return;
           }
@@ -444,7 +445,7 @@ void Music::_LoadLastSongAsync() {
 
 void Music::Listen() {
 	if (g_game.music_enabled) {
-
+          
 		/*
             if (soundServerPipes()) {
                 if (!thread_initialized) {
@@ -492,7 +493,7 @@ void Music::Listen() {
                                   _StopNow();
                                   AUDStartPlaying(playingSource.front());
                                   // FIXME FIXME FIXME Presumed race condition or somesuch -- AUDSoundGain here breaks windows music -- temporary hack, actual fix later
-                                  AUDSoundGain(playingSource.front(),vol);
+                                  AUDSoundGain(playingSource.front(),vol,true);
 				}
 				music_load_list.pop_back();
 				if (!music_load_list.empty()) {
@@ -508,7 +509,7 @@ void Music::Listen() {
 				if (!playingSource.empty()) {
                                   _StopNow();
                                   AUDStartPlaying(playingSource.front());
-                                  AUDSoundGain(playingSource.front(),vol);
+                                  AUDSoundGain(playingSource.front(),vol,true);
 				}
 			}
 		}

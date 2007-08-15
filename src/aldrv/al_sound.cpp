@@ -705,16 +705,6 @@ void AUDAdjustSound (const int sound, const QVector &pos, const Vector &vel){
   }
 #endif
 }
-void AUDSoundGain (int sound, float gain) {
-#ifdef HAVE_AL
-  if (sound>=0&&sound<(int)sounds.size()) {
-    if (sounds[sound].source) 
-      alSourcef(sounds[sound].source,AL_GAIN,gain);
-    sounds[sound].gain=gain;
-    //    alSourcefv(sounds[sound].source,AL_VELOCITY,v);
-  }
-#endif
-}
 bool starSystemOK( ) {
 	if (!_Universe || !_Universe->AccessCockpit(0)) {
 		return true; // No Universe yet, so game is loading.

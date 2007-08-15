@@ -5,7 +5,7 @@
 void AUDAdjustSound(int i, QVector const & qv, Vector const & vv) {}
 
 bool AUDIsPlaying(int snd) { return false;}
-void AUDSoundGain(int snd, float howmuch){}
+void AUDSoundGain(int snd, float howmuch,bool){}
 void	AUDRefreshSounds() {}
 int		AUDCreateSoundWAV (const std::string &, const bool LOOP) {return -1;}
 int		AUDCreateSoundMP3 (const std::string &, const bool LOOP) {return -1;}
