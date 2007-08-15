@@ -294,9 +294,12 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
     QVector exploc = this->cumulative_transformation.position;
     bool sub=this->isSubUnit();
     Unit * un=NULL;
-    if (!sub)
-      if (un=_Universe->AccessCockpit(0)->GetParent()) 
-        exploc = un->Position();						
+    if (!sub) {
+      if (un=_Universe->AccessCockpit(0)->GetParent()) {
+        static float explosion_closeness=XMLSupport::parse_float(vs_config->getVariable("audio","explosion_closeness",".8"));
+        exploc = un->Position()*explosion_closeness+exploc*(1-explosion_closeness); 
+      }			
+    }
     AUDPlay (this->sound->explode,exploc,this->Velocity,1);
     if (!sub) {
       un=_Universe->AccessCockpit()->GetParent();
