@@ -16,6 +16,9 @@ void	AUDStopPlaying( int i) {}
 void	AUDDeleteSound( int i) {}
 void	AUDDeleteSound( int i, bool b) {}
 void	AUDPlay (const int sound, const QVector &pos, const Vector & vel, const float gain) {}
+QVector AUDListenerLocation() {
+  return QVector(0,0,0);
+}
 
 // From communication_xml.cpp
 int createSound( std::string file, bool val) { return -1;}

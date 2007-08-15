@@ -376,16 +376,23 @@ bool Mount::PhysicsAlignedFire(Unit * caller, const Transformation &Cumulative, 
 	static bool ai_sound=XMLSupport::parse_bool (vs_config->getVariable ("audio","ai_sound","true"));
 	Cockpit * cp;
 	bool ips = ((cp=_Universe->isPlayerStarshipVoid(owner))!=NULL);
+        double distancesqr=(tmp.position-AUDListenerLocation()).MagnitudeSquared();
+        static double maxdistancesqr=XMLSupport::parse_float(vs_config->getVariable("audio","max_range_to_hear_weapon_fire","100000"))*XMLSupport::parse_float(vs_config->getVariable("audio","max_range_to_hear_weapon_fire","100000"));
     if ((((!use_separate_sound)||type->type==weapon_info::BEAM)||((!ai_use_separate_sound)&&!ips))&&(isMissile(type)==false)) {
 		if (ai_sound||(ips&&type->type==weapon_info::BEAM)) {
+
 			if (!AUDIsPlaying (sound)) {
+                          if (distancesqr<maxdistancesqr){
 				AUDPlay (sound,tmp.position,velocity,1);
+                          }
 			}else {
+                          if (distancesqr<maxdistancesqr){
 				AUDAdjustSound(sound,tmp.position,velocity);
+                          }else AUDStopPlaying(sound);
 			}
 		}
     }else {
-		if (ai_sound||ips) {
+		if ((ai_sound||ips)&&distancesqr<maxdistancesqr) {
 			int snd =AUDCreateSound(sound,false);
                         if (ips&&cp!=NULL&&cp->GetView()<=CP_RIGHT) {
                           AUDAdjustSound(snd,Vector(0,0,0),velocity);

@@ -37,6 +37,9 @@ float AUDDistanceSquared(const int sound) {
   return 0.0;
 #endif
 }
+QVector AUDListenerLocation(){
+return mylistener.pos.Cast();
+}
 char AUDQueryAudability (const int sound, const Vector &pos, const Vector & vel, const float gain) {
 #ifdef HAVE_AL
   if (sounds[sound].buffer==(ALuint)0) 

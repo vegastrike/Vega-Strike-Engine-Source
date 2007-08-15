@@ -7,6 +7,7 @@ void AUDDestroy();
 ///Sets the size in which all sounds are going to be played
 void AUDListenerSize (const float size);
 void AUDListener (const QVector &pos, const Vector &vel);
+QVector AUDListenerLocation();
 ///Checks if sounds are still playing
 void AUDRefreshSounds ();
 ///Will the sound be played
