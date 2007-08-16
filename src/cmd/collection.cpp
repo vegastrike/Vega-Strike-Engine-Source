@@ -47,11 +47,8 @@ UnitCollection::UnitIterator::UnitIterator(UnitCollection* orig)
 
 UnitCollection::UnitIterator::~UnitIterator()
 {
-	if(col){
-		it = col->u.end();
+	if(col)
 		col->unreg(this);
-	}
-	col = NULL;
 }
 
 
@@ -143,11 +140,7 @@ UnitCollection::ConstIterator::ConstIterator(const UnitCollection* orig)
 
 
 UnitCollection::ConstIterator::~ConstIterator()
-{
-	if(col)
-		it = col->u.end();
-	col = NULL;
-}
+{;}
 
 
 const Unit* UnitCollection::ConstIterator::next()
@@ -339,7 +332,7 @@ bool UnitCollection::contains(const Unit* unit) const
 inline void  UnitCollection::erase(list<Unit*>::iterator &it2)
 {
 	// If we have more than 4 iterators, just push node onto vector.
-	if(activeIters.size() > 4){
+	if(activeIters.size() > 3){
 		removedIters.push_back(it2);
 		(*it2)->UnRef();
 		(*it2) = NULL;

@@ -1,9 +1,9 @@
+#include <GL/glut.h>
 #include "cmd/unit_generic.h"
 
 #include "vsfilesystem.h"
 #include "vsimage.h"
 #include "vs_globals.h"
-
 #include <png.h>
 #ifndef png_jmpbuf
 #  define png_jmpbuf(png_ptr) ((png_ptr)->jmpbuf)
@@ -101,7 +101,6 @@ unsigned char *	VSImage::ReadImage( VSFile * f, textureTransform * t, bool strip
 	this->Init( f, t, strip, f2);
 
 	unsigned char * ret = NULL;
-
 	CheckFormat( img_file);
 	switch( this->img_type)
 	{
@@ -113,6 +112,9 @@ unsigned char *	VSImage::ReadImage( VSFile * f, textureTransform * t, bool strip
 		break;
 		case BmpImage :
 			ret = this->ReadBMP();
+		break;
+		case DdsImage :
+			ret = this->ReadDDS();
 		break;
 		default :
 			this->img_type = Unrecognized;
@@ -181,6 +183,18 @@ VSError	VSImage::CheckBMPSignature( VSFile * file)
 	return ret;
 }
 
+VSError VSImage::CheckDDSSignature(VSFile * file)
+{
+	VSError ret = Ok;
+	char ddsfile[5];
+	file->Begin();
+	file->Read(&ddsfile,4);
+	if(strncmp(ddsfile,"DDS ",4) != 0)
+		ret = BadFormat;
+	file->Begin();
+	return(ret);
+}
+
 void	VSImage::CheckFormat( VSFile * file)
 {
 	if( this->CheckPNGSignature(file)==Ok)
@@ -207,6 +221,14 @@ void	VSImage::CheckFormat( VSFile * file)
 		this->img_type = JpegImage;
 		return;
 	}
+	if( this->CheckDDSSignature(file) == Ok)
+	{
+	#ifdef VSIMAGE_DEBUG
+		cerr<<"\tFound a DDS file"<<endl;
+	#endif
+		this->img_type = DdsImage;
+		return;
+	}	
 }
 
 
@@ -609,6 +631,99 @@ unsigned char *	VSImage::ReadBMP()
     };
 }
 
+#define IS_POT(x) (!((x) & ((x) -1)))
+
+unsigned char *VSImage::ReadDDS()
+{
+	ddsHeader header;
+	unsigned char *d, *s;
+    try {	
+	// Probably redundent, we already check this in CheckFormat
+	if( CheckDDSSignature( img_file)!=Ok){
+		cerr <<"VSImage ERROR : DDS Signature invalid, impossible.  !!!\n";
+		VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
+		throw(1);
+	}
+	// Skip what we already know. 
+	img_file->GoTo(4);
+	// Read in bytes to header, 
+	img_file->Read(&(header.size),4);
+	img_file->Read(&header.flags,4);
+	img_file->Read(&header.height,4);
+	img_file->Read(&header.width,4);
+	img_file->Read(&header.linsize,4);
+	img_file->Read(&header.depth,4);
+	img_file->Read(&header.nmips,4);
+	img_file->GoTo(76);
+	img_file->Read(&header.pixelFormat.size,4);
+	img_file->Read(&header.pixelFormat.flags,4);
+	img_file->Read(&header.pixelFormat.fourcc[0],1);
+	img_file->Read(&header.pixelFormat.fourcc[1],1);
+	img_file->Read(&header.pixelFormat.fourcc[2],1);
+	img_file->Read(&header.pixelFormat.fourcc[3],1);
+	img_file->Read(&header.pixelFormat.bpp,4);
+	img_file->Read(&header.pixelFormat.rmask,4);
+	img_file->Read(&header.pixelFormat.gmask,4);
+	img_file->Read(&header.pixelFormat.bmask,4);
+	img_file->Read(&header.pixelFormat.amask,4);
+	img_file->Read(&header.caps.caps1,4);
+	img_file->Read(&header.caps.caps2,4);
+	img_file->GoTo(128);
+	// Set VSImage attributes 
+	this->img_depth = header.pixelFormat.bpp;
+	this->sizeX=header.width;
+	this->sizeY=header.height;
+	GLenum internal = GL_NONE,type = GL_RGB;
+	unsigned int inputSize = header.linsize;
+	s = (unsigned char*)malloc(inputSize);
+	img_file->Read(s,header.linsize);   
+	
+	switch(header.pixelFormat.bpp){
+		case 4: type = GL_LUMINANCE;
+				break;
+		case 8: type = GL_LUMINANCE_ALPHA;
+				this->mode=_8BIT;
+				this->img_alpha = true;
+				break;
+		case 24: type=GL_RGB;
+				this->mode=_24BIT;
+				this->img_alpha = false;
+				break;
+		case 32: type=GL_RGBA;
+				this->mode=_24BITRGBA;
+				this->img_alpha = true;
+				break;
+	}
+	int outsize =  sizeY*sizeX*(img_depth/8);
+	switch(header.pixelFormat.fourcc[3]){
+		case '1': internal = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+				  break;
+		case '3': internal = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+				  break;
+		case '5': internal = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+				  break;
+	}
+	d = (unsigned char*)malloc(outsize);	 
+	// Not sure if this stuff in between is needed 
+	unsigned int TextureID;
+	glGenTextures( 1, &TextureID );
+	glBindTexture( GL_TEXTURE_2D, TextureID );
+	glHint(GL_TEXTURE_COMPRESSION_HINT_ARB, GL_NICEST);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glTexImage2D(GL_TEXTURE_2D,0,internal,sizeX,sizeY,0,type,GL_UNSIGNED_BYTE,s);
+	glGetTexImage(GL_TEXTURE_2D,0,GL_RGB,GL_UNSIGNED_BYTE,d);	
+	free(s);
+	s = NULL;
+	return(d);
+    } catch(...) {
+		if(s) free(s);
+		if(d) free(d);
+        return NULL;
+    };
+}
+	
+	
 void	VSImage::AllocatePalette()
 {
 	  //FIXME deal with palettes and grayscale with alpha

@@ -30,6 +30,37 @@ typedef struct {
         DWORD      biClrUsed;
         DWORD      biClrImportant;
 } BITMAPINFOHEADER;
+
+typedef struct pxlformat 
+{
+	int size;
+	int flags;
+	char fourcc[4];
+	int bpp;
+	int rmask;
+	int gmask;
+	int bmask;
+	int amask;
+};
+typedef struct Caps 
+{
+	int caps1;
+	int caps2;
+};
+typedef struct ddsHeader
+{
+	int size;
+	int flags;
+	int height;
+	int width;
+	int linsize;
+	int depth;
+	int nmips;
+	pxlformat pixelFormat;
+	Caps caps;
+};
+	
+
 /**
  * File header of a bitmap. Won't work on mips architecture with 
  * misaligned structs
@@ -63,7 +94,7 @@ void png_write (const char * myfile, unsigned char * data, unsigned int width, u
 
 //using namespace VSFileSystem;
 
-enum	VSImageType { PngImage, BmpImage, JpegImage, Unrecognized };
+enum	VSImageType { PngImage, BmpImage, JpegImage, DdsImage, Unrecognized };
 
 typedef struct {
     char *Buffer;
@@ -101,11 +132,13 @@ class VSImage
 		VSError	CheckPNGSignature( VSFile * file);
 		VSError	CheckJPEGSignature( VSFile * file);
 		VSError	CheckBMPSignature( VSFile * file);
+		VSError CheckDDSSignature(VSFile * file);
 		void	CheckFormat( VSFile * file);
 
 		unsigned char *	ReadPNG();
 		unsigned char *	ReadJPEG();
 		unsigned char *	ReadBMP();
+		unsigned char *ReadDDS();
 
 		VSError	WritePNG( unsigned char * data);
 		VSError	WriteJPEG(unsigned char * data);

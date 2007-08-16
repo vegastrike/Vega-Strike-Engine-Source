@@ -27,7 +27,7 @@ class UnitCollection
 				UnitIterator() : col(NULL) {;}
 				UnitIterator( const UnitIterator&);
 				UnitIterator(UnitCollection*);
-				~UnitIterator();
+				virtual ~UnitIterator();
 				
 				inline bool isDone()
 				{
