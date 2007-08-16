@@ -1,4 +1,5 @@
 #include <config.h>
+#include <vector>
 
 #include "networking/const.h"
 #include "netui.h"
@@ -78,10 +79,15 @@ int NetUIBase::createClientSocket(const AddressIP &remote_ip, bool isTCP, bool i
     }
 
     if (isTCP) {
-        COUT << "Connecting to " << inet_ntoa( remote_ip.sin_addr) << " on port " << remote_ip.sin_port << std::endl;
-		if (NONBLOCKING_CONNECT&&isHTTP) {
+        COUT << "Connecting to " << inet_ntoa( remote_ip.sin_addr) << " on port " << ntohs(remote_ip.sin_port) << std::endl;
+		// NETFIXME: Always doing nonblocking because it's good for your health.
+		// Plus, we use select() for every read/write, so it should be safe.
+		if (NONBLOCKING_CONNECT) { //&&isHTTP) {
 	        VsnetOSS::set_blocking( local_fd, false ); // Connect may hang... we don't want that.
 		}
+		// No, it really is good for your health.  You don't have to stare at
+		// the screen for 3 minutes until the OS times out the connection.
+		
 #if defined(_WIN32) && !defined(__CYGWIN__)
         if( ::connect( local_fd, (sockaddr *)&remote_ip, sizeof( struct sockaddr))==SOCKET_ERROR)
 #else
@@ -217,17 +223,25 @@ ServerSocket* NetUITCP::createServerSocket( unsigned short port, SocketSet& set 
 // Creates and bind the socket designed to receive coms
 // host == NULL -> localhost
 
+std::vector<SOCKETALT> UDP_pool;
+
 SOCKETALT NetUIUDP::createSocket( const char * host, unsigned short srv_port, unsigned short clt_port, SocketSet& set )
 {
     COUT << " enter " << __PRETTY_FUNCTION__ << std::endl;
     static_initNetwork( );
-
+	
     // If port is not given, use the defaults ones --> do not work with specified ones yet... well, didn't try
     if( srv_port==0 ) srv_port = SERVER_PORT;
     if( clt_port==0 ) clt_port = SERVER_PORT;
+    AddressIP remote_ip = NetUIBase::lookupHost(host, srv_port);
+	
+	if (!UDP_pool.empty()) {
+		SOCKETALT ret = UDP_pool.back();
+		ret.setRemoteAddress(remote_ip);
+		return ret;
+	}
 	
     AddressIP local_ip = NetUIBase::lookupHost("0.0.0.0", clt_port);
-    AddressIP remote_ip = NetUIBase::lookupHost(host, srv_port);
     int       local_fd = NetUIBase::createClientSocket( local_ip, false,false );
 
     if (local_fd == -1) {
@@ -277,6 +291,13 @@ SOCKETALT NetUIUDP::createServerSocket( unsigned short port, SocketSet& set )
     COUT << "Bind on localhost, " << ret << std::endl;
     return ret;
 }
+
+void NetUIUDP::disconnectSaveUDP(SOCKETALT udp) {
+	if (udp.valid()) {
+		UDP_pool.push_back(udp);
+	}
+}
+
 /*
 // This is as simple as NetUI (factory) functions *SHOULD* be.
 SOCKETALT NetUIHTTP::createSocket(const char* uri, SocketSet &set)

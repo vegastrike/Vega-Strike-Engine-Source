@@ -20,13 +20,40 @@
 #include <map>
 #include <list>
 #include <vector>
+class Client;
+
+#ifdef USE_BOOST_WEAK_PTR
+
 #include "boost/smart_ptr.hpp"
 #include "boost/weak_ptr.hpp"
 
-class Client;
-
 typedef boost::shared_ptr<Client>          ClientPtr;
 typedef boost::weak_ptr<Client>            ClientWeakPtr;
+#else
+
+template <class T> class NormalPtr {
+	T *val;
+public:
+	NormalPtr(T*val) :val(val) {}
+	NormalPtr(const NormalPtr<T> &p) : val(p.val) {}
+	NormalPtr() :val(NULL) {}
+	~NormalPtr() {}
+	T& operator*() {return *val;}
+	const T& operator*() const {return *val;}
+	T* operator->() {return val;}
+	const T* operator->() const {return val;}
+	T* get() { return val; }
+	const T* get() const { return val; }
+	void reset() { val=NULL; }
+	bool expired() { return false; }
+	operator bool() const { return val?true:false; }
+	bool operator !() const { return val?false:true; }
+};
+
+typedef NormalPtr<Client> ClientPtr;
+typedef NormalPtr<Client> ClientWeakPtr;
+#endif
+
 typedef std::map<int,ClientPtr>            ClientMap;
 typedef std::pair<int,ClientPtr>           ClientPair;
 typedef std::map<int,ClientPtr>::iterator  ClientIt;

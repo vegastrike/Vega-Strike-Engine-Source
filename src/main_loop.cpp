@@ -823,6 +823,13 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 
     for(int s=0;s < fg->nr_ships;s++)
 	{
+      if (a >= mission->number_of_ships) {
+        a-=22;
+        printf("Error: in createObjects: more ships in flightgroups than in total for mission!\n"
+            "Variables a=%d, fg-number-of-ships=%d, total nr=%d, fact=%s, fgname=%s\n",
+            a, fg->nr_ships, mission->number_of_ships, fg->faction.c_str(), fg->name.c_str());
+        break;
+      }
       numf++;
       QVector pox (1000+150*a,100*a,100);
       

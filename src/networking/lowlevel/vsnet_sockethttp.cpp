@@ -205,13 +205,20 @@ int VsnetHTTPSocket::lower_sendbuf(  )
 	const char *httpDataStr = httpData.data();
 	int pos = 0;
 	int retrycnt = 10;
+	int blockcnt = 10;
 	while (true) {
 		int len = httpData.length() - pos;
 		int netsent;
 		netsent = ::send( _fd, &httpDataStr[pos], len, 0 );
 		if (netsent <=0 ) {
 			if (vsnetEWouldBlock()) {
-				continue;
+				if (blockcnt>0) {
+					blockcnt--;
+					continue;
+				} else {
+					// Can't hold up anything trying to wait to send data.
+					return 0;
+				}
 			}
 			if (retrycnt) {
 //				printf("Server closed in writing... reopening\n");

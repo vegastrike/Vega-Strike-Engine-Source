@@ -56,7 +56,7 @@ public:
 
     virtual bool isActive( ) = 0;
 
-    void disconnect( const char *s, bool fexit );
+    void disconnect( const char *s );
     
     virtual bool lower_selected( int datalen=-1 ) = 0;
 

@@ -44,6 +44,8 @@ const char* displayCmd( Cmd cmd )
     CASE( LOGIN_ALREADY    )
     CASE( LOGIN_NEW        )
     CASE( CMD_RESPAWN      )
+    CASE( CMD_RESYNCACCOUNTS)
+    CASE( CMD_SAVEACCOUNTS )
 
     CASE( CMD_SNAPCARGO    )
     CASE( CMD_CARGOUPGRADE )
@@ -74,6 +76,8 @@ const char* displayCmd( Cmd cmd )
     CASE( CMD_EXITCLIENT   )
     CASE( CMD_ADDEDYOU     )
     CASE( CMD_DISCONNECT   )
+    CASE( CMD_CONNECT      )
+    CASE( CMD_CHOOSESHIP   )
 
     // CASE( CMD_ACK          )
     default :

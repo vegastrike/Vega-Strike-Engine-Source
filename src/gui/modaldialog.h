@@ -71,6 +71,8 @@ public:
     // Process a command event from the window.
     virtual bool processWindowCommand(const EventCommandId& command, Control* control);
 
+	void modalFinished(void);
+
     // CONSTRUCTION
     ModalDialog();
     virtual ~ModalDialog(void) {};
@@ -136,6 +138,8 @@ public:
 
     // Process a command event from the window.
     virtual bool processWindowCommand(const EventCommandId& command, Control* control);
+
+    class SimplePicker *getPicker();
 
 protected:
 	static void CreateControlsForListWindow(Window* w);

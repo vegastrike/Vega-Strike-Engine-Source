@@ -18,6 +18,7 @@
 #include "gfxlib_struct.h"
 #include "cmd/music.h"
 
+extern void TerminateCurrentBase( void);
 vector<unsigned int > gamemenu_keyboard_queue;
 
 template <>
@@ -66,7 +67,8 @@ void gamemenu_draw() {
 	GFXEndScene();
 }
 
-void createNetworkControls(GroupControl *serverConnGroup, std::vector <unsigned int> *inputqueue) {
+//static
+void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector <unsigned int> *inputqueue) {
 	GroupControl *acctConnGroup = new GroupControl;
 	acctConnGroup->setId("MultiPlayerAccountServer");
 	acctConnGroup->setHidden(true);
@@ -166,12 +168,21 @@ void createNetworkControls(GroupControl *serverConnGroup, std::vector <unsigned 
 	
 	mplayTitle = new StaticDisplay;
 	mplayTitle->setRect( Rect(-.7, -.3, 1, .1) );
+	mplayTitle->setText("Password: (Server password is usually blank on local games)");
+	mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
+	mplayTitle->setColor(GUI_CLEAR);
+	mplayTitle->setFont( Font(.07, 2) );
+	mplayTitle->setId("PasswordTitleHost");
+	hostConnGroup->addChild(mplayTitle);
+	
+	mplayTitle = new StaticDisplay;
+	mplayTitle->setRect( Rect(-.7, -.3, 1, .1) );
 	mplayTitle->setText("Password:");
 	mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
 	mplayTitle->setColor(GUI_CLEAR);
 	mplayTitle->setFont( Font(.07, 2) );
 	mplayTitle->setId("PasswordTitle");
-	serverConnGroup->addChild(mplayTitle);
+	acctConnGroup->addChild(mplayTitle);
 	
 	TextInputDisplay* passwordInput = new TextInputDisplay(inputqueue,"\x1b\n\t\r");
 	passwordInput->setPassword('*');
@@ -198,7 +209,8 @@ void createNetworkControls(GroupControl *serverConnGroup, std::vector <unsigned 
 	serverConnGroup->addChild(multiStart);
 }
 
-void GameMenu::startMenuInterface(bool firstTime) {
+namespace UniverseUtil {
+  void startMenuInterface(bool firstTime, string error) {
 	winsys_set_keyboard_func(gamemenu_keyboard_handler);
 	winsys_set_mouse_func(EventManager::ProcessMouseClick);
 	winsys_set_passive_motion_func(EventManager::ProcessMousePassive);
@@ -207,8 +219,12 @@ void GameMenu::startMenuInterface(bool firstTime) {
 	GameMenu* gm = new GameMenu(firstTime);
 	gm->init();
 	gm->run();
+	if (!error.empty()) {
+		showAlert(error);
+	}
 	
 	GFXLoop(gamemenu_draw);
+  }
 }
 
 void GameMenu::init() {
@@ -352,6 +368,7 @@ extern void bootstrap_main_loop();
 extern void enableNetwork(bool usenet);
 
 bool GameMenu::processSinglePlayerButton(const EventCommandId& command, Control *control) {
+	NetClient::CleanUp();
 	enableNetwork(false);
 	
 	restore_main_loop();
@@ -359,6 +376,8 @@ bool GameMenu::processSinglePlayerButton(const EventCommandId& command, Control 
 		GFXLoop(bootstrap_main_loop);
 	}
 	window()->close();
+	globalWindowManager().shutDown();
+	TerminateCurrentBase();  //BaseInterface::CurrentBase->Terminate();
 	return true;
 }
 
@@ -389,7 +408,109 @@ bool GameMenu::processExitGameButton(const EventCommandId& command, Control *con
 	return true;
 }
 
-void processJoinGame(Window *window, bool firstTime, string &user, string &pass) {
+
+class ShipSelectorCallback: public ModalDialogCallback {
+	NetActionConfirm *nac;
+public:
+    ShipSelectorCallback(NetActionConfirm *nac) : nac(nac) {}
+    virtual void modalDialogResult(
+            const std::string& id,
+            int result,
+            WindowController& controller) {
+		nac->finalizeJoinGame(result);
+    }
+	virtual ~ShipSelectorCallback() {}
+};
+
+// Create the window and controls for the Options Menu.
+void NetActionConfirm::init(void) {
+	Window* window = new Window;
+	setWindow(window);
+	
+	window->setSizeAndCenter(Size(.9,.5));
+	window->setTexture("basecomputer.png");
+	window->setColor( GFXColor(0,1,0,.1) );
+	window->setOutlineColor( GFXColor(.7,.7,.7) );
+	window->setOutlineWidth(2.0);
+	window->setController(this);
+
+	// Information.
+	StaticDisplay* text = new StaticDisplay;
+	text->setRect( Rect(-.4, -.15, .8, .3) );
+	if (netAction==JOINGAME) {
+		text->setText("Leaving your current game and joining a new one will lose all progress since your last save.");
+	} else if (netAction==SAVEACCT) {
+		text->setText("Do you want to save your current account progress?");
+	} else if (netAction==DIE) {
+		text->setText("Rejoining your current game will lose all progress since your last save.");
+	}
+	text->setTextColor(GFXColor(.7,1,.4));
+	text->setMultiLine(true);
+	text->setColor(GUI_CLEAR);
+	text->setFont( Font(.07, 1.25) );
+	text->setId("Information");
+	// Put it on the window.
+	window->addControl(text);
+
+	// Save button.
+	NewButton* cont = new NewButton;
+	cont->setRect( Rect(.05, -.19, .30, .1) );
+	if (netAction==SAVEACCT) {
+		cont->setLabel("Save Account");
+		cont->setCommand("Save");
+	} else if (netAction==DIE) {
+		cont->setLabel("Die");
+		cont->setCommand("Load");
+	} else if (netAction==JOINGAME) {
+		cont->setLabel("Join New Game");
+		cont->setCommand("JoinGame");
+	}
+	cont->setColor( GFXColor(1,.5,0,.25) );
+	cont->setTextColor( GUI_OPAQUE_WHITE() );
+	cont->setDownColor( GFXColor(1,.5,0,.6) );
+	cont->setDownTextColor( GUI_OPAQUE_BLACK() );
+	cont->setHighlightColor( GFXColor(0,1,0,.4) );
+	cont->setFont(Font(.08, BOLD_STROKE));
+	// Put the button on the window.
+	window->addControl(cont);
+
+	// Abort action button
+	NewButton* resume = new NewButton;
+	resume->setRect( Rect(-.35, -.20, .30, .12) );
+	resume->setLabel("Cancel");
+	resume->setCommand("Window::Close");
+	resume->setColor( GFXColor(0,1,0,.25) );
+	resume->setTextColor( GUI_OPAQUE_WHITE() );
+	resume->setDownColor( GFXColor(0,1,0,.6) );
+	resume->setDownTextColor( GUI_OPAQUE_BLACK() );
+	resume->setHighlightColor( GFXColor(0,1,0,.4) );
+	resume->setFont(Font(.08, BOLD_STROKE));
+	// Put the button on the window.
+	window->addControl(resume);
+
+	window->setModal(true);
+}
+
+// Process a command event from the Options Menu window.
+bool NetActionConfirm::processWindowCommand(const EventCommandId& command, Control* control) {
+	if(command == "Save") {
+		confirmedNetSaveGame();
+		window()->close();
+	} else if(command == "Load") {
+		// Not implemented yet.
+		// m_parent->();
+		window()->close();
+	} else if(command == "JoinGame") {
+		confirmedJoinGame();
+	} else {
+		// Not a command we know about.
+		return WindowController::processWindowCommand(command, control);
+	}
+
+	return true;
+}
+
+void GameMenu::readJoinGameControls(Window *window, string &user, string &pass) {
 	// Magic goes here!
 	user = static_cast<TextInputDisplay*>(window->findControlById("Username"))->text();
 	string::size_type pos=user.find(' ');
@@ -414,36 +535,103 @@ void processJoinGame(Window *window, bool firstTime, string &user, string &pass)
 	}
 	
 	enableNetwork(true);
-	if (!firstTime) {
-		if (Network!=NULL) {
-			for (unsigned int i=0;i<_Universe->numPlayers();i++) {
-				Network[i].Reinitialize();
-			}
-		} else {
-			Network = new NetClient[_Universe->numPlayers()]; // Hardcode 1 player anyway.
+	if (Network!=NULL) {
+		for (unsigned int i=0;i<_Universe->numPlayers();i++) {
+			Network[i].Reinitialize();
 		}
+	} else {
+		Network = new NetClient[_Universe->numPlayers()]; // Hardcode 1 player anyway.
 	}
 	
 }
 
-bool GameMenu::processJoinGameButton(const EventCommandId& command, Control *control) {
-	string user, pass;
-	processJoinGame(window(), m_firstTime, user, pass);
+bool NetActionConfirm::confirmedNetSaveGame() {
+	// Do nothing yet.
+	return false;
+}
 
-	if (!m_firstTime) {
-		_Universe->clearAllSystems();
-		UniverseUtil::showSplashScreen(string());
-	}
-	Network[0].connectLoad(user, pass);
-	Network[0].startGame();
+bool NetActionConfirm::confirmedJoinGame() {
+	string user, pass,  err;
+	GameMenu::readJoinGameControls(m_parent, user, pass);
 	
-	restore_main_loop();
-	if (m_firstTime) {
-		GFXLoop(bootstrap_main_loop);
+	UniverseUtil::showSplashScreen(string());
+	int numships = Network[player].connectLoad(user, pass, err);
+	if (numships) {
+		const vector<string> &shipList = Network[player].shipSelections();
+		if (shipList.size()>1) {
+			showListQuestion("Select a ship to fly", shipList,
+				new ShipSelectorCallback(this), "ShipSelected" );
+		} else {
+			finalizeJoinGame(0);
+		}
 	} else {
 		UniverseUtil::hideSplashScreen();
+		if (window()) window()->close();
+		showAlert("Error when joining game!\n\n"+err);
+		NetClient::CleanUp();
+		return false;
 	}
-	window()->close();
+	return true;
+}
+
+// Caller is responsible for closing the window afterwards. (?)
+//static
+bool NetActionConfirm::finalizeJoinGame(int launchShip) {
+	if (!Network[player].loginSavedGame(launchShip)) {
+		showAlert("Error when logging into game with this ship!");
+		if (window()) window()->close();
+		NetClient::CleanUp();
+		return false;
+	}
+	if (!UniverseUtil::isSplashScreenShowing()) {
+		UniverseUtil::showSplashScreen("");
+		UniverseUtil::showSplashMessage("#cc66ffNETWORK: Loading saved game.");
+	}
+
+	Cockpit *cp = NULL;
+	Unit *playun = NULL;
+	if (_Universe) {
+		cp = _Universe->AccessCockpit(player);
+	}
+	if (cp) {
+		playun = cp->GetParent();
+	}
+	if (playun) {
+		playun->Kill();
+	}
+	if (_Universe) {
+		_Universe->clearAllSystems();
+	}
+	
+	string err;
+	
+	restore_main_loop();
+//	if (m_firstTime) {
+//		GFXLoop(bootstrap_main_loop);
+//	} else {
+//		UniverseUtil::hideSplashScreen();
+//	}
+	if (window()) window()->close();
+	
+	if (m_parent) {
+		m_parent->close();
+	}
+	
+	globalWindowManager().shutDown();
+	TerminateCurrentBase();  //BaseInterface::CurrentBase->Terminate();
+
+	Network[player].startGame();
+	UniverseUtil::hideSplashScreen();
+	
+	return true;
+}
+
+bool GameMenu::processJoinGameButton(const EventCommandId& command, Control *control) {
+	NetActionConfirm *nak = new NetActionConfirm(0, window(), NetActionConfirm::JOINGAME);
+//	nak->init();
+//	nak->run();
+	nak->confirmedJoinGame();
+
 	return true;
 }
 

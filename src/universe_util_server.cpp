@@ -71,6 +71,10 @@ namespace UniverseUtil
 	void showSplashProgress(float progress) {}
 	void hideSplashScreen() {}
 	bool isSplashScreenShowing() { return false; }
+	void startMenuInterface(bool firstTime, string error) {
+		// Critical game error... enough to bring you back to the game menu!
+		printf("GAME ERROR: %s\n",error.c_str());
+	}
 
 }
 

@@ -735,7 +735,7 @@ void Music::SetParent(Unit * parent)
 
 void Music::InitMuzak() 
 {
-    muzak_count = XMLSupport::parse_int( vs_config->getVariable ("audio","music_layers","2") );
+    muzak_count = XMLSupport::parse_int( vs_config->getVariable ("audio","music_layers","1") );
     muzak = new Music[muzak_count];
 }
 

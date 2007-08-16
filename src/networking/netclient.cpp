@@ -124,7 +124,7 @@ void NetClient::Reinitialize() {
   //_downloadManagerClient.reset( new VsnetDownload::Client::Manager( _sock_set ) );
   //_sock_set.addDownloadManager( _downloadManagerClient );
   _serverip="";
-  _serverport="";
+  _serverport=0;
   callsign=password="";
   this->Clients=ClientsMap();
   
@@ -207,7 +207,11 @@ int		NetClient::checkAcctMsg( )
 					getSimpleString(netbuf);//uname
 					getSimpleString(netbuf);//passwd
 					_serverip = getSimpleString(netbuf);
-					_serverport = getSimpleString(netbuf);
+					const char *srvport = getSimpleString(netbuf).c_str();
+					int porttemp = atoi(srvport);
+					if (porttemp>65535) porttemp=0;
+					if (porttemp<0) porttemp=0;
+					this->_serverport = (unsigned short)porttemp;
 					COUT << "<<< LOGIN DATA --------------------------------------"<<endl;
 				}
 				break;
@@ -274,7 +278,11 @@ void	NetClient::start( char * addr, unsigned short port)
 	{
 	    this->clt_sock = NetUIUDP::createSocket( addr, port, _sock_set );
 	}
-
+	if (!this->clt_sock) {
+		perror( "Error creating socket ");
+		cleanexit=true;
+		VSExit(1);
+	}
 	if( this->authenticate() == -1)
 	{
 		perror( "Error login in ");
@@ -343,6 +351,10 @@ int NetClient::checkMsg( Packet* outpacket )
     {
         ret = recvMsg( outpacket, &tv );
     }
+	if (ret==-1) {
+		UniverseUtil::startMenuInterface(false, "Connection to VegaServer closed.");
+		return -1;
+	}
 	// If we have network communications enabled and webcam support enabled we grab an image
 	if( NetComm!=NULL && NetComm->IsActive())
 	{
@@ -449,14 +461,14 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 		int socketstat = _sock_set.wait( timeout );
 		if (!clt_tcp_sock->valid()) {
 			perror( "Error socket closed ");
-			clt_tcp_sock->disconnect( "socket error", 0 );
-			VSExit(1);
+			clt_tcp_sock->disconnect( "socket error closed" );
+			// NETFIXME: Error handling on socket error?  Exit?
 			return -1;
 		}
 		if( socketstat < 0)
 		{
 			perror( "Error select -1 ");
-			clt_tcp_sock->disconnect( "socket error", 0 );
+			clt_tcp_sock->disconnect( "socket error recv err" );
 			return -1;
 		}
 		if ( socketstat == 0 )
@@ -480,7 +492,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 		{
 			// If nothing has come in either queue, and the select did not return 0, then this must be from a socket error.
 			perror( "Error recv -1 ");
-			clt_tcp_sock->disconnect( "socket error", 0 );
+			clt_tcp_sock->disconnect( "socket error recv" );
 			return -1;
 		}
     }
@@ -500,6 +512,17 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
         switch( cmd )
         {
             // Login accept
+            case CMD_CONNECT:
+			{
+				this->server_netversion = netbuf.getSerial();
+				string ipaddress = netbuf.getString();
+				cout<< "Successful connection to VegaServer version " <<
+					this->server_netversion << "from address " << ipaddress << endl;
+			}
+				break;
+            case CMD_CHOOSESHIP :
+				this->loginChooseShip( p1);
+				break;
             case LOGIN_ACCEPT :
 				this->loginAccept( p1);
             break;
@@ -863,7 +886,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 			if (1) {
                           unsigned short port;
                           std::string srvipadr;
-                          GetConfigServerAddress(srvipadr,port);
+                          SetConfigServerAddress(srvipadr,port);
                           Reconnect(srvipadr,XMLSupport::tostring((unsigned int)port));
                         }else{//this is the old way of doing it
 				StarSystem * sts;
@@ -1213,9 +1236,10 @@ SOCKETALT*	NetClient::logout(bool leaveUDP)
             SENDRELIABLE, NULL, *this->clt_tcp_sock,
             __FILE__, PSEUDO__LINE__(1382) );
 	}
-	clt_tcp_sock->disconnect( "Closing connection to server", false );
+	clt_tcp_sock->disconnect( "Closing connection to server" );
         if (!leaveUDP) {
-          clt_udp_sock->disconnect( "Closing UDP connection to server", false);
+          NetUIUDP::disconnectSaveUDP(*clt_udp_sock);
+//          clt_udp_sock->disconnect( "Closing UDP connection to server");
         }else {
           if (lossy_socket==clt_udp_sock) {
             return clt_udp_sock;
@@ -1223,6 +1247,17 @@ SOCKETALT*	NetClient::logout(bool leaveUDP)
         }
         return NULL;
 }
+
+void NetClient::CleanUp() {
+	if (Network) {
+		for (int i=0;i<_Universe->numPlayers();i++) {
+			SOCKETALT *udp = Network[i].logout(true);
+		}
+		delete [] Network;
+		Network = NULL;
+	}
+}
+
 void NetClient::Reconnect(std::string srvipadr, std::string port) {
   vector<string> usernames;
   vector<string> passwords;
@@ -1247,57 +1282,28 @@ void NetClient::Reconnect(std::string srvipadr, std::string port) {
   for (i=0;i<_Universe->numPlayers();++i) {
     Network[i].Reinitialize();
   }
+  UniverseUtil::showSplashScreen("");
   //necessary? usually we would ask acctserver for it .. or pass it in NetClient::getConfigServerAddress(srvipadr, port);
   for (unsigned int k=0;k<_Universe->numPlayers();++k) {
     bool ret = false;
-    // Are we using the directly account server to identify us ?
-    bool use_acctserver = XMLSupport::parse_bool(vs_config->getVariable("network","use_account_server", "false"));
-    micro_sleep(2000000);
-    if( use_acctserver!=false){
-      int retrycount=0;
-      while (ret==false&&retrycount++<10) {
-        if (srvipadr.find("http://")==0) {//the .compare() always returns false on windows, so am using find
-          Network[k].init_acct( srvipadr);
-          Network[k].loginAcctLoop(usernames[k], passwords[k]);
-        }
-        ret = Network[k].init( NULL,0).valid();
-        if (!ret) micro_sleep(100000);
-      }
-    }else
-      // Or are we going through a game server to do so ?
-      ret = Network[k].init( srvipadr.c_str(),atoi( port.c_str())).valid();
-    if( ret==false)
-    {
-      // If network initialization fails, exit
-      cout<<"Network initialization error - exiting"<<endl;
-      cleanexit=true;
-      exit(1);
-    }
-    //sleep( 3);
-    cout<<"Waiting for player "<<(k)<<" = "<<usernames[k]<<":"<<passwords[k]<<"login response...";
-    vector<string> *loginResp = &Network[k].loginLoop( usernames[k], passwords[k]);
-    Network[k].lastsave=*loginResp;
-    
-    if( Network[k].lastsave.empty() || Network[k].lastsave[0]=="")
-    {
-      if( Network[k].lastsave.empty() )
-        cout << "Server must have closed connection without warning" << endl;
-      else
-        cout<<Network[k].lastsave[1]<<endl;
-      cout<<"QUITTING"<<endl;
-      cleanexit=true;
-      exit(1);
-    }
-    else
-    {
-      cout<<" logged in !"<<endl;
-      Network[k].Respawn(Network[k].serial);
-      Network[k].synchronizeTime(udp[k]);
-	  _Universe->AccessCockpit(k)->TimeOfLastCollision=getNewTime();
-    }
+	string err;
+	int response = Network[k].connectLoad( usernames[k], passwords[k], err);
+	if (response==0) {
+		COUT<<"Network login error: "<<err<<endl;
+		return;
+	}
+    vector<string> *loginResp = Network[k].loginSavedGame(0);
+	if (!loginResp) {
+		COUT<<"Failed to get a ship";
+		return;
+	}
+	cout<<" logged in !"<<endl;
+	Network[k].Respawn(Network[k].serial);
+	Network[k].synchronizeTime(udp[k]);
+	_Universe->AccessCockpit(k)->TimeOfLastCollision=getNewTime();
     Network[k].inGame();
-    
   }
+  UniverseUtil::hideSplashScreen();
 }
 
 ClientPtr NetClient::ClientsMap::insert( int x, Client* c )

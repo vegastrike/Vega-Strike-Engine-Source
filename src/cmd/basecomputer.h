@@ -157,7 +157,8 @@ protected:
     // Load Game
     bool actionConfirmedQuitGame();
     bool actionQuitGame(const EventCommandId& command, Control* control);
-	
+
+    bool actionNetSaveGame(const EventCommandId& command, Control* control);
     bool actionJoinGame(const EventCommandId& command, Control* control);
     bool actionShowAccountMenu(const EventCommandId& command, Control* control);
     bool actionShowServerMenu(const EventCommandId& command, Control* control);
@@ -184,6 +185,9 @@ protected:
     bool changeToLoadSaveMode(const EventCommandId& command, Control* control);
 	// Change display mode to NETWORK.
     bool changeToNetworkMode(const EventCommandId& command, Control* control);
+	void showNetworkStatus(bool show=true);
+	bool hideNetworkStatus(const EventCommandId& command, Control* control);
+	
     // Redo the title string.
     void recalcTitle(void);
 
@@ -210,6 +214,10 @@ public:
     void updateTransactionControlsForSelection(TransactionList* list);
     // Load the controls for the MISSIONS display.
     void loadShipDealerControls(void);
+
+    void secondStageJoinGame(void);
+    void finalizeJoinGame(int launchShip=0);
+    void finalizeNetSaveGame(void);
 protected:
 
     // Hide the controls that commit transactions.

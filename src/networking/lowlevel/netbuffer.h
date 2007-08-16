@@ -20,8 +20,8 @@ void addSimpleInt(std::string &input, const int adder);
 class NetBuffer
 {
 		char *	buffer;
-		int		offset;
-		int		size;
+		unsigned int	offset;
+		unsigned int	size;
 	
 	public :
 		NetBuffer();
@@ -31,9 +31,9 @@ class NetBuffer
 
 		void			Reset();
 		char *			getData();
-                int getOffset()const {return offset;} //useful to see if it's at the end of data
+		unsigned int getOffset()const {return offset;} //useful to see if it's at the end of data
 		// Extends the buffer if we exceed its size
-		void			resizeBuffer( int newsize);
+		void			resizeBuffer( unsigned int newsize);
 		// Check if there is still enough data for 'len' to be read in buffer
 		bool			checkBuffer( int len, const char * fun);
 
@@ -106,8 +106,8 @@ class NetBuffer
 		GFXLightLocal	getGFXLightLocal();
 		void			addGFXLightLocal( const GFXLightLocal & light);
 
-		int				getDataLength();
-		int				getSize();
+		unsigned int	getDataLength();
+		unsigned int	getSize();
 };
 
 #endif

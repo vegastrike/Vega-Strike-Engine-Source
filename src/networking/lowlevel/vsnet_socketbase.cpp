@@ -154,7 +154,7 @@ bool VsnetSocketBase::get_nonblock( ) const
     return ( _noblock == 1 );
 }
 
-void VsnetSocketBase::disconnect( const char *s, bool fexit )
+void VsnetSocketBase::disconnect( const char *s)
 {
     CHECK_VALID
     if( _fd > 0 )
@@ -164,9 +164,5 @@ void VsnetSocketBase::disconnect( const char *s, bool fexit )
 
     child_disconnect( s );
 
-    if( fexit )
-    {
-        exit(1);
-    }
 }
 

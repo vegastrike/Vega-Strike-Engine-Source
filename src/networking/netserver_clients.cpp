@@ -507,7 +507,7 @@ void	NetServer::disconnect( ClientPtr clt, const char* debug_from_file, int debu
           AcctLogout(acct_sock,clt);
 	}
 
-	clt->tcp_sock.disconnect( __PRETTY_FUNCTION__, false );
+	clt->tcp_sock.disconnect( __PRETTY_FUNCTION__);
 	if( un )
     {
 	    COUT << "User " << clt->callsign << " with serial "<<un->GetSerial()<<" disconnected" << endl;
@@ -522,8 +522,7 @@ void	NetServer::disconnect( ClientPtr clt, const char* debug_from_file, int debu
 	allClients.remove( clt );
 	
 	// Removes the client from its starsystem
-	if( clt->ingame==true )
-		this->removeClient( clt );
+	this->removeClient( clt );
 	// Say true as 2nd arg because we don't want the server to broadcast since player is leaving hte game
 	if( un)
 		un->Kill( true, true);
@@ -544,7 +543,7 @@ void	NetServer::logout( ClientPtr clt )
           AcctLogout(acct_sock,clt);
 	}
 
-	clt->tcp_sock.disconnect( __PRETTY_FUNCTION__, false );
+	clt->tcp_sock.disconnect( __PRETTY_FUNCTION__ );
 	COUT <<"Client "<<clt->callsign<<" disconnected"<<endl;
 	COUT <<"There was "<< allClients.size() <<" clients - ";
 	allClients.remove( clt );

@@ -12,16 +12,8 @@ extern double clienttimeout;
 // Why use this? Most clients use TCP except for position updates, in which case they notify the server through synchronizing time.
 ClientPtr NetServer::newConnection_udp( const AddressIP& ipadr )
 {
-	int clients_should_not_connect_with_udp=1;
-	assert(clients_should_not_connect_with_udp==1);
-    COUT << " enter " << "NetServer::newConnection_udp" << endl;
-
-    SOCKETALT sock( udpNetwork->get_fd(), SOCKETALT::UDP, ipadr, _sock_set );
-
-    ClientPtr ret = addNewClient( sock ); // no second argument because we don't currently allow connections of *only* UDP with no TCP for some things that can't get lost.
-    nbclients++;
-
-    return ret;
+	ClientPtr ret;
+	return ret; // This function doesn't quite make sense.
 }
 
 ClientPtr NetServer::newConnection_tcp( )
@@ -176,9 +168,9 @@ void NetServer::recvMsg_udp( )
 				break;
             }
         }
-        if( !found && command!=CMD_LOGIN)
+        if( !found )
         {
-            COUT << "Error : non-login message received from unknown client !" << endl;
+            COUT << "Error : UDP message received from unknown client !" << endl;
             // Maybe send an error packet handled by the client
             return;
         }
@@ -187,19 +179,25 @@ void NetServer::recvMsg_udp( )
 		// against spoofing client serial#)
         if (clt && (ipadr!=clt->cltudpadr))
         {
-	    	assert( command != CMD_LOGIN ); // clt should be 0 because ObjSerial was 0
-			Unit * un = clt->game_unit.GetUnit();
-			if (un) {
-				COUT << "Error : IP changed for client # " << un->GetSerial() << endl;
-			}
-            clt->_disconnectReason = "possible IP spoofing";
-            discList.push_back( clt );
+			
+			COUT << "Error : IP changed for client " << clt->callsign << endl;
+//            clt->_disconnectReason = "possible IP spoofing";
+//            discList.push_back( clt );
 	    	/* It is not entirely impossible for this to happen; it would be nice
 			 * to add an additional identity check. For now we consider it an error.
 	     	*/
         }
         else
         {
+	    	if (command == CMD_LOGIN || command == CMD_CONNECT) {
+				// clt should be 0 because ObjSerial was 0
+				return;
+			}
+			// NETFIXME: Only allow lossy packets!!!
+			if (command != CMD_SNAPSHOT && command != CMD_PING &&
+				command != CMD_POSUPDATE && command != CMD_SERVERTIME) {
+				return;
+			}
             if( clt )
 				process = this->updateTimestamps( clt, packet);
 

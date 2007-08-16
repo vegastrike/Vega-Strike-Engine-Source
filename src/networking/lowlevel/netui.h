@@ -57,6 +57,7 @@ class NetUIUDP
 public:
     static SOCKETALT     createSocket( const char * host, unsigned short srv_port, unsigned short clt_port, SocketSet& set );
     static SOCKETALT     createServerSocket( unsigned short port, SocketSet& set );
+	static void disconnectSaveUDP(SOCKETALT udp);
 };
 
 #endif /* VS_NETUI_H */

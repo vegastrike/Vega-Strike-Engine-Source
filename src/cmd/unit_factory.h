@@ -135,7 +135,8 @@ public:
 	static ContinuousTerrain*	createContinuousTerrain( const char * file, Vector scale, float position, Matrix & t);
 
 	// Function used to put in a NetBuffer the necessary info to create the unit so that it can be send over network
-	static void addUnitBuffer( NetBuffer & netbuf, const char *filename,
+	static void addUnitBuffer( NetBuffer & netbuf, const string &filename,
+		               const string &name, const string &fullname,
 		               bool        SubUnit,
 		               int         faction,
 		               std::string customizedUnit,

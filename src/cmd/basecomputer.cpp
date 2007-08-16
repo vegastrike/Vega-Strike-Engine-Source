@@ -304,6 +304,7 @@ const BaseComputer::WctlTableEntry WctlBase<BaseComputer>::WctlCommandTable[] = 
     BaseComputer::WctlTableEntry ( "New", "", &BaseComputer::actionNewGame ),
     BaseComputer::WctlTableEntry ( "Save", "", &BaseComputer::actionSaveGame ),
     BaseComputer::WctlTableEntry ( "ShowNetworkMenu", "", &BaseComputer::changeToNetworkMode ),
+    BaseComputer::WctlTableEntry ( "HideNetworkStatus", "", &BaseComputer::hideNetworkStatus ),
     BaseComputer::WctlTableEntry ( "ShowJoinAccount", "", &BaseComputer::actionShowAccountMenu ),
     BaseComputer::WctlTableEntry ( "ShowJoinServer", "", &BaseComputer::actionShowServerMenu ),
     BaseComputer::WctlTableEntry ( "JoinGame", "", &BaseComputer::actionJoinGame ),
@@ -1051,9 +1052,17 @@ void BaseComputer::constructControls(void) {
 		GroupControl* networkGroup = new GroupControl;
 		networkGroup->setId("NetworkGroup");
 		window()->addControl(networkGroup);
+		GroupControl* netJoinGroup = new GroupControl;
+		netJoinGroup->setId("NetworkJoinGroup");
+		networkGroup->addChild(netJoinGroup);
+		GroupControl *netStatGroup = new GroupControl;
+		netStatGroup->setId("NetworkStatGroup");
+		netStatGroup->setHidden(true);
+		networkGroup->addChild(netStatGroup);
+		
 		GFXColor color=getColorForGroup("NetworkGroup");
 		
-		createNetworkControls(networkGroup, &base_keyboard_queue);
+		GameMenu::createNetworkControls(netJoinGroup, &base_keyboard_queue);
 		// Account Server button.
         NewButton* joinAcct = new NewButton;
         joinAcct->setRect( Rect(-.50, .7, .37, .09) );
@@ -1066,7 +1075,7 @@ void BaseComputer::constructControls(void) {
 		joinAcct->setDownTextColor( GUI_OPAQUE_BLACK() );
 		joinAcct->setHighlightColor( GFXColor(color.r,color.g,color.b,.4) );
         joinAcct->setFont(Font(.07));
-        networkGroup->addChild(joinAcct);
+        netJoinGroup->addChild(joinAcct);
 
         // Ship Stats button.
         NewButton* joinServer = new NewButton;
@@ -1079,9 +1088,249 @@ void BaseComputer::constructControls(void) {
 		joinServer->setDownTextColor( GUI_OPAQUE_BLACK() );
 		joinServer->setHighlightColor( GFXColor(color.r,color.g,color.b,.4) );
         joinServer->setFont(Font(.07));
-        networkGroup->addChild(joinServer);
+        netJoinGroup->addChild(joinServer);
 
-		
+		if (Network) {
+			NetClient &nc = Network[0]; // Hack?: Assume 0th player.
+			netStatGroup->setHidden(false);
+			netJoinGroup->setHidden(true);
+			
+			std::string serverip;
+			unsigned short serverport;
+			nc.GetCurrentServerAddress(serverip, serverport);
+			
+			StaticDisplay *mplayTitle = new StaticDisplay;
+			mplayTitle->setRect( Rect(-.7, .6, 1, .1) );
+			mplayTitle->setText("Independent Server IP Address:");
+			mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
+			mplayTitle->setColor(GUI_CLEAR);
+			mplayTitle->setFont( Font(.07, 2) );
+			netStatGroup->addChild(mplayTitle);
+	
+			// Description box.
+			StaticDisplay* serverInputText = new StaticDisplay;
+			serverInputText->setRect( Rect(-.6, .5, 1.2, .1) );
+			serverInputText->setColor( GUI_CLEAR );
+			serverInputText->setFont( Font(.07) );
+			serverInputText->setMultiLine(false);
+			if (serverip=="localhost" || serverip=="127.0.0.1") {
+				serverInputText->setText("Locally Hosted Game");
+				serverInputText->setTextColor(GFXColor(.5,1,.5) );
+			} else if (serverip.substr(0,3) == "10." || serverip.substr(0,8) == "192.168."
+					|| serverip.substr(0,8) == "169.254." || serverip.find('.') == std::string::npos) {
+				serverInputText->setText("LAN: "+serverip);
+				serverInputText->setTextColor(GFXColor(1,1,.5) );
+			} else {
+				serverInputText->setText(serverip);
+				serverInputText->setTextColor(GFXColor(1,.8,.5) );
+			}
+			netStatGroup->addChild(serverInputText);
+
+	
+			mplayTitle = new StaticDisplay;
+			mplayTitle->setRect( Rect(-.7, .4, 1, .1) );
+			mplayTitle->setText("Server Port: (default 6777)");
+			mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
+			mplayTitle->setColor(GUI_CLEAR);
+			mplayTitle->setFont( Font(.07, 2) );
+			netStatGroup->addChild(mplayTitle);
+	
+			StaticDisplay* portInputText = new StaticDisplay;
+			portInputText->setRect( Rect(-.6, .3, .4, .1) );
+			portInputText->setColor( GUI_CLEAR );
+			portInputText->setFont( Font(.07) );
+			portInputText->setMultiLine(false);
+			portInputText->setTextColor(GFXColor(.7,.7,1));
+			{
+				char portstr[15];
+				sprintf(portstr, "%d", (int)(serverport));
+				portInputText->setText(portstr);
+			}
+			netStatGroup->addChild(portInputText);
+	
+			mplayTitle = new StaticDisplay;
+			mplayTitle->setRect( Rect(-.7, .2, 1, .1) );
+			mplayTitle->setText("Account Server:");
+			mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
+			mplayTitle->setColor(GUI_CLEAR);
+			mplayTitle->setFont( Font(.07, 2) );
+			netStatGroup->addChild(mplayTitle);
+			
+			StaticDisplay* acctserverInput = new StaticDisplay;
+			acctserverInput->setRect( Rect(-.6, .1, 1.2, .1) );
+			acctserverInput->setColor( GUI_CLEAR );
+			acctserverInput->setFont( Font(.07) );
+			acctserverInput->setMultiLine(false);
+			acctserverInput->setTextColor(GFXColor(.9,1,.6));
+			
+			std::string acctserver;
+			bool useacctserver = XMLSupport::parse_bool(vs_config->getVariable("network", "use_account_server", "true"));
+			if (useacctserver) {
+				acctserver = vs_config->getVariable("network", "account_server_url", "http://vegastrike.sourceforge.net/");
+				std::string::size_type s1,s3,q;
+				s1 = acctserver.find('/');
+				if (s1!=std::string::npos) {
+					if (s1+1<acctserver.length() && acctserver[s1+1]=='/') {
+						s3 = acctserver.find('/',s1+3);
+						if (s3!=std::string::npos) {
+							std::string mod;
+							q=acctserver.find('?',s3);
+							if (q!=std::string::npos) {
+								mod = "; "+acctserver.substr(q+1);
+							}
+							acctserver=acctserver.substr(s1+2,s3-s1-2) + mod;
+						}
+					}
+				}
+			} else {
+				acctserverInput->setTextColor(GFXColor(.7,1,.6));
+				acctserver = "(Private Game)";
+			}
+			acctserverInput->setText(acctserver);
+			netStatGroup->addChild(acctserverInput);
+	
+			mplayTitle = new StaticDisplay;
+			mplayTitle->setRect( Rect(-.7, 0, .7, .1) );
+			mplayTitle->setText("Callsign:");
+			mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
+			mplayTitle->setColor(GUI_CLEAR);
+			mplayTitle->setFont( Font(.07, 2) );
+			netStatGroup->addChild(mplayTitle);
+	
+			StaticDisplay* usernameInput = new StaticDisplay;
+			usernameInput->setRect( Rect(-.6, -.1, .6, .1) );
+			usernameInput->setColor( GUI_CLEAR );
+			usernameInput->setFont( Font(.07) );
+			usernameInput->setMultiLine(false);
+			usernameInput->setTextColor(GFXColor(1,.7,.9));
+			usernameInput->setText(nc.getCallsign());
+			netStatGroup->addChild(usernameInput);
+	
+			mplayTitle = new StaticDisplay;
+			mplayTitle->setRect( Rect(0, 0, .7, .1) );
+			mplayTitle->setText("Serial Number:");
+			mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
+			mplayTitle->setColor(GUI_CLEAR);
+			mplayTitle->setFont( Font(.07, 2) );
+			netStatGroup->addChild(mplayTitle);
+	
+			StaticDisplay* currentSerial = new StaticDisplay;
+			currentSerial->setRect( Rect(.1, -.1, .6, .1) );
+			currentSerial->setColor( GUI_CLEAR );
+			currentSerial->setFont( Font(.07) );
+			currentSerial->setMultiLine(false);
+			currentSerial->setTextColor(GFXColor(1,.7,.9));
+			{
+				char serial[15];
+				sprintf(serial,"%d",(int)nc.serial);
+				currentSerial->setText(serial);
+			}
+			netStatGroup->addChild(currentSerial);
+	
+			mplayTitle = new StaticDisplay;
+			mplayTitle->setRect( Rect(-.7, -.2, .7, .1) );
+			mplayTitle->setText("Current Ship:");
+			mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
+			mplayTitle->setColor(GUI_CLEAR);
+			mplayTitle->setFont( Font(.07, 2) );
+			netStatGroup->addChild(mplayTitle);
+	
+			StaticDisplay* currentFighter = new StaticDisplay;
+			currentFighter->setRect( Rect(-.6, -.3, .6, .1) );
+			currentFighter->setColor( GUI_CLEAR );
+			currentFighter->setFont( Font(.07) );
+			currentFighter->setMultiLine(false);
+			currentFighter->setTextColor(GFXColor(1,.7,.9));
+			Unit *player = nc.getUnit();
+			if (player) {
+				currentFighter->setText(player->getFullname());
+			} else {
+				currentFighter->setTextColor(GFXColor(1,.6,.6));
+				currentFighter->setText("(Currently Destroyed)");
+			}
+			netStatGroup->addChild(currentFighter);
+	
+			mplayTitle = new StaticDisplay;
+			mplayTitle->setRect( Rect(0, -.2, .7, .1) );
+			mplayTitle->setText("Faction:");
+			mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
+			mplayTitle->setColor(GUI_CLEAR);
+			mplayTitle->setFont( Font(.07, 2) );
+			netStatGroup->addChild(mplayTitle);
+	
+			StaticDisplay* currentFaction = new StaticDisplay;
+			currentFaction->setRect( Rect(.1, -.3, .6, .1) );
+			currentFaction->setColor( GUI_CLEAR );
+			currentFaction->setFont( Font(.07) );
+			currentFaction->setMultiLine(false);
+			if (player) {
+				int fact = player->faction;
+				const float *col = FactionUtil::GetSparkColor(fact);
+				currentFaction->setTextColor(GFXColor(col[0],col[1],col[2]) );
+				currentFaction->setText(FactionUtil::GetFaction(fact) );
+			} else {
+				currentFaction->setTextColor(GFXColor(1,.6,.6));
+				currentFaction->setText("(Currently Destroyed)");
+			}
+			netStatGroup->addChild(currentFaction);
+			
+			/*
+			mplayTitle = new StaticDisplay;
+			mplayTitle->setRect( Rect(0, -.2, .7, .1) );
+			mplayTitle->setText("Number of Kills:");
+			mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
+			mplayTitle->setColor(GUI_CLEAR);
+			mplayTitle->setFont( Font(.07, 2) );
+			netStatGroup->addChild(mplayTitle);
+	
+			StaticDisplay* numKills = new StaticDisplay;
+			numKills->setRect( Rect(.1, -.3, .6, .1) );
+			numKills->setColor( GUI_CLEAR );
+			numKills->setFont( Font(.07) );
+			numKills->setMultiLine(false);
+			numKills->setTextColor(GUI_OPAQUE_WHITE());
+			Unit *player = nc.game_unit.GetUnit();
+			if (player) {
+				numKills->setText(player->fullname);
+			} else {
+				numKills->setTextColor(GFXColor(1,.6,.6));
+				numKills->setText("(Currently Destroyed)");
+			}
+			netStatGroup->addChild(numKills);
+			*/
+			NewButton *saveNetGame = new NewButton;
+			saveNetGame->setRect( Rect(-.6, -.6, .4, .13) );
+			saveNetGame->setColor( GFXColor(.2,1,0,.1) );
+			saveNetGame->setTextColor( GUI_OPAQUE_WHITE() );
+			saveNetGame->setDownColor( GFXColor(.2,1,0,.4) );
+			saveNetGame->setDownTextColor( GFXColor(.2,.2,.2) );
+			saveNetGame->setFont( Font(.07, 1) );
+			saveNetGame->setCommand("NetworkSaveGame");
+			saveNetGame->setLabel("Save Progress");
+			netStatGroup->addChild(saveNetGame);
+			
+			NewButton *reloadNet = new NewButton;
+			reloadNet->setRect( Rect(.2, -.6, .4, .13) );
+			reloadNet->setColor( GFXColor(1,.2,0,.1) );
+			reloadNet->setTextColor( GUI_OPAQUE_WHITE() );
+			reloadNet->setDownColor( GFXColor(1,.2,0,.4) );
+			reloadNet->setDownTextColor( GFXColor(.2,.2,.2) );
+			reloadNet->setFont( Font(.07, 1) );
+			reloadNet->setCommand("NetworkDie");
+			reloadNet->setLabel("Die and Reload");
+			netStatGroup->addChild(reloadNet);
+			
+			NewButton *hideNetStatus = new NewButton;
+			hideNetStatus->setRect( Rect(-.2, -.75, .4, .13) );
+			hideNetStatus->setColor( GFXColor(.2,.8,1,.1) );
+			hideNetStatus->setTextColor( GUI_OPAQUE_WHITE() );
+			hideNetStatus->setDownColor( GFXColor(.2,.8,1,.4) );
+			hideNetStatus->setDownTextColor( GFXColor(.2,.2,.2) );
+			hideNetStatus->setFont( Font(.07, 1) );
+			hideNetStatus->setCommand("HideNetworkStatus");
+			hideNetStatus->setLabel("Join Another Server");
+			netStatGroup->addChild(hideNetStatus);
+		}
 		if (m_displayModes.size()!=1 || m_displayModes[0]!=NETWORK) {
 			NewButton * loadsave = new NewButton;
 			loadsave->setRect( Rect(.7, -.9, .25, .1) );
@@ -1096,7 +1345,7 @@ void BaseComputer::constructControls(void) {
 			loadsave->setFont(Font(.07, 1));
 			loadsave->setId("CommitAll");
 			if (Network!=NULL) {
-				loadsave->setLabel("Load/Quit");
+				loadsave->setLabel("Single Player");
 			} else {
 				loadsave->setLabel("Save/Load");
 			}
@@ -1469,10 +1718,27 @@ bool BaseComputer::changeToLoadSaveMode(const EventCommandId& command, Control* 
 }
 
 
+void BaseComputer::showNetworkStatus(bool show) {
+	Control *group = window()->findControlById("NetworkJoinGroup");
+	if (group) group->setHidden(show);
+	group = window()->findControlById("NetworkStatGroup");
+	if (group) group->setHidden(!show);
+}
+
+bool BaseComputer::hideNetworkStatus(const EventCommandId& command, Control* control) {
+	showNetworkStatus(false);
+	return true;
+}
+
 bool BaseComputer::changeToNetworkMode(const EventCommandId& command, Control* control) {
     if(m_currentDisplay != NETWORK) {
         switchToControls(NETWORK);
     }
+	if (Network) {
+		showNetworkStatus(true);
+	} else {
+		showNetworkStatus(false);
+	}
     loadNetworkControls();
     return true;
 }
@@ -5641,6 +5907,9 @@ bool BaseComputer::actionConfirmedLoadGame() {
 		if (tmp.length()>0) {
 			Cockpit* cockpit = player?_Universe->isPlayerStarship(player):0;
 			if(player && cockpit) {
+				UniverseUtil::showSplashScreen("");
+				UniverseUtil::showSplashMessage("Loading saved game.");
+				NetClient::CleanUp();
 				UniverseUtil::setCurrentSaveGame(tmp);
 				player->Kill();
 				RespawnNow(cockpit);
@@ -5699,29 +5968,24 @@ bool BaseComputer::actionShowAccountMenu(const EventCommandId& command, Control*
 	return true;
 }
 
-bool BaseComputer::actionJoinGame(const EventCommandId& command, Control* control) {
-	string user, pass;
-	int which = 0;
-	Unit* player = m_player.GetUnit();
-	if (player) {
-		which = _Universe->whichPlayerStarship(player);
-		player->Kill();
-	}
-	if (which==-1)
-		which=0;
-	_Universe->clearAllSystems();
-	
-	processJoinGame(window(), false, user, pass);
-	
-	globalWindowManager().shutDown();
-	TerminateCurrentBase();  //BaseInterface::CurrentBase->Terminate();
-
-	UniverseUtil::showSplashScreen(string());
-	Network[which].connectLoad(user, pass);
-	Network[which].startGame();
-	UniverseUtil::hideSplashScreen();
-	
+bool BaseComputer::actionNetSaveGame(const EventCommandId& command, Control* control) {
+	NetActionConfirm *nak = new NetActionConfirm(0, window(), NetActionConfirm::SAVEACCT);
+	nak->init();
+	nak->run();
+	// NETFIXME: Implementme
 	return true;
 }
 
+bool BaseComputer::actionJoinGame(const EventCommandId& command, Control* control) {
+	NetActionConfirm *nak = new NetActionConfirm(0, window(), NetActionConfirm::JOINGAME);
+	if (Network!=NULL) {
+		// confirm.
+		nak->init();
+		nak->run();
+	} else {
+		nak->confirmedJoinGame();
+	}
+	
+	return true;
+}
 // Process a command event from the Options Menu window.

@@ -46,13 +46,18 @@ void ModalDialog::run(void) {
     WindowController::run();
 }
 
+void ModalDialog::modalFinished() {
+	globalEventManager().removeResponder(window());
+	// One of our buttons was clicked.  We're done.
+	window()->close();
+	
+	if(m_callback) {
+		m_callback->modalDialogResult(m_callbackId, m_result, *this);
+	}
+}
+
 // Process a command from the window.
 bool ModalDialog::processWindowCommand(const EventCommandId& command, Control* control) {
-    if(m_callback && command == "Window::Close") {
-		globalEventManager().removeResponder(window());
-        m_callback->modalDialogResult(m_callbackId, m_result, *this);
-    }
-
     return WindowController::processWindowCommand(command, control);
 }
 
@@ -285,15 +290,14 @@ class YesNoDialog : public QuestionDialog
 bool YesNoDialog::processWindowCommand(const EventCommandId& command, Control* control) {
     if(command == "Yes") {
         m_result = YES_ANSWER;
+		modalFinished();
     } else if(command == "No") {
         m_result = NO_ANSWER;
+		modalFinished();
     } else {
         // We only care about buttons clicked.
         return QuestionDialog::processWindowCommand(command, control);
     }
-
-    // One of our buttons was clicked.  We're done.
-    window()->close();
     return true;
 }
 
@@ -311,7 +315,7 @@ bool ListQuestionDialog::processWindowCommand(const EventCommandId& command, Con
     if(command == "Cancel") {
         // Just close down, with the result  unknown.
         m_result = (-1);
-        window()->close();
+        modalFinished();
         return true;
     } else if(command == "OK") {
         // The OK button was clicked.
@@ -320,7 +324,7 @@ bool ListQuestionDialog::processWindowCommand(const EventCommandId& command, Con
         m_result = picker->selectedItem();
         if(m_result >= 0) {
             // We have a selection.  We are done.
-            window()->close();
+            modalFinished();
         } else {
             // Ignore OK button until we have a selection.
             // Do nothing here.
@@ -334,6 +338,10 @@ bool ListQuestionDialog::processWindowCommand(const EventCommandId& command, Con
     assert(false);      // Should never get here.
 }
 
+SimplePicker *ListQuestionDialog::getPicker() {
+	return static_cast<SimplePicker*>( window()->findControlById("Picker") );
+}
+
 // Display a modal list of options.
 // The result is supplied in the callback.
 void showListQuestion(const std::string& title, const std::vector<std::string>& options,
@@ -343,7 +351,7 @@ void showListQuestion(const std::string& title, const std::vector<std::string>& 
 	dialog->setCallback(cb, id);
 
     // Fill the picker with the choices supplied by the caller.
-    SimplePicker* picker = static_cast<SimplePicker*>( dialog->window()->findControlById("Picker") );
+    SimplePicker* picker = dialog->getPicker();
     assert(picker != NULL);
     for(int i=0; i<options.size(); i++) {
         picker->addCell(new SimplePickerCell(options[i]));

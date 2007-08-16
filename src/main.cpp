@@ -464,7 +464,7 @@ void bootstrap_first_loop() {
   if (i++>4) {
     if (_Universe) {
       if (isgamemenu) {
-        GameMenu::startMenuInterface(true);
+        UniverseUtil::startMenuInterface(true);
       } else {
         _Universe->Loop(bootstrap_main_loop);
       }
@@ -592,7 +592,12 @@ void bootstrap_main_loop () {
 		/************* NETWORK PART ***************/
 	  if( Network!=NULL)
 	  {
-		savefiles.push_back( *Network[k].connectLoad(pname, ppasswd) );
+		string err;
+        if (!Network[k].connectLoad(pname, ppasswd, err)) {
+			cout<<"error while connecting: "<<err<<endl;
+			VSExit(1);
+		}
+		savefiles.push_back( *Network[k].loginSavedGame(0) );
 		_Universe->AccessCockpit(k)->savegame->ParseSaveGame ("",mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k, savefiles[k][0], false);
 		_Universe->AccessCockpit(k)->TimeOfLastCollision=getNewTime();
 		/*

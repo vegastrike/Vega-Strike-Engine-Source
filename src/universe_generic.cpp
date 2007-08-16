@@ -213,8 +213,11 @@ bool Universe::netLocked() {
 
 void Universe::netLock(bool enable) {
 	network_lock = false;
-	if (Network || SERVER)
+	if (Network || SERVER) {
+//		printf(" *** %sd network_lock *** \n",
+//			   enable?"!!! Enable":"Disable");
 		network_lock = enable;
+	}
 }
 
 void Universe::UnloadStarSystem (StarSystem * s) {

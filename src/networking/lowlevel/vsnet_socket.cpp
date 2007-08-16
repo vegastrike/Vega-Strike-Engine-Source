@@ -167,9 +167,9 @@ int SOCKETALT::recvbuf( Packet* p, AddressIP* ipadr )
     }
 }
 
-void SOCKETALT::disconnect( const char *s, bool fexit )
+void SOCKETALT::disconnect( const char *s )
 {
-    if( _sock ) _sock->disconnect( s, fexit );
+    if( _sock ) _sock->disconnect( s );
 }
 
 bool SOCKETALT::sameAddress( const SOCKETALT& l ) const

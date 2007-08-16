@@ -156,7 +156,7 @@ void	NetServer::start(int argc, char **argv)
        i--;
      }
    }
-	string strperiod, strtimeout, strlogintimeout, stracct, strnetatom;
+	string strperiod, strtimeout, strlogintimeout, strnetatom;
 	int periodrecon;
 	keeprun = 1;
 	double	savetime=0;
@@ -215,8 +215,7 @@ void	NetServer::start(int argc, char **argv)
         }
 	string tmp;
 	unsigned short tmpport = ACCT_PORT;
-	stracct = vs_config->getVariable( "server", "useaccountserver", "");
-	acctserver = ( stracct=="true");
+	acctserver = XMLSupport::parse_bool(vs_config->getVariable( "server", "useaccountserver", "true"));
 
 	// Create and bind sockets
 	COUT << "Initializing TCP server ..." << endl;
@@ -240,12 +239,15 @@ void	NetServer::start(int argc, char **argv)
 
 	if( !acctserver)
 	{
+		/*
 		// Read data files ;)
 		cout<<"Loading accounts data... ";
 		LoadAccounts( "accounts.xml");
 		// Gets hashtable accounts elements and put them in vector Cltacct
 		Cltacct = getAllAccounts();
 		cout<<Cltacct.size()<<" accounts loaded."<<endl;
+		*/
+		cout<<"Not connecting to account server."<<endl;
 	}
 	else
 	{
@@ -471,7 +473,7 @@ void	NetServer::checkKey( SocketSet & sets)
 		{
 			if( !strncmp( input_buffer, "quit", 4) || !strncmp( input_buffer, "QUIT", 4))
 			{
-				VSExit(1);
+				VSExit(0);
 			}
 			else if( !strncmp( input_buffer, "stats", 4) || !strncmp( input_buffer, "STATS", 4))
 			{
@@ -644,6 +646,17 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 
     switch( cmd)
     {
+		case CMD_CONNECT:
+		{
+			clt->netversion = packet_serial;
+			Packet psend;
+			NetBuffer netnewbuf;
+			netnewbuf.addSerial(clt->netversion);
+			netnewbuf.addString(clt->cltadr.ipadr());
+			psend.send(CMD_CONNECT, 0, netnewbuf.getData(), netnewbuf.getDataLength(), SENDRELIABLE,
+					&ipadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(656));
+		}
+			break;
 		case CMD_LOGIN:
         {
             COUT<<">>> LOGIN REQUEST --------------------------------------"<<endl;
@@ -652,11 +665,11 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
             // in the Client struct
             if( !acctserver)
             {
-              //ugh brokenthis->authenticate( clt, ipadr, packet );//NETFIXME--right now assume acctserver
+				this->localLogin( clt, packet );//NETFIXME--right now assume acctserver
             }
             else if( !acct_con)
             {
-              this->sendLoginUnavailable( clt, ipadr );
+              this->sendLoginUnavailable( clt );
             }
             else
             {
@@ -684,15 +697,19 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				// Redirect the login request packet to account server
 				COUT << "Redirecting login request to account server on socket " << *acct_sock << endl
 				<< "*** Packet to copy length : " << packet.getDataLength()<<endl;
-                                char redirectcommand[2]={ACCT_LOGIN,'\0'};
-                                std::string redirect(redirectcommand);
-                                redirect+=std::string(packet.getData(),packet.getDataLength());
-                                
-                                if (!acct_sock->sendstr(redirect))//NETFIXME is this in http format or binary format
+				char redirectcommand[2]={ACCT_LOGIN,'\0'};
+				std::string redirect(redirectcommand);
+				NetBuffer netbuf (packet.getData(),packet.getDataLength());
+				std::string user = netbuf.getString();
+				std::string passwd = netbuf.getString();
+				addSimpleString(redirect, user);
+				addSimpleString(redirect, passwd);
+				
+				if (!acct_sock->sendstr(redirect))//NETFIXME is this in http format or binary format
 				{
 					perror( "FATAL ERROR sending redirected login request to ACCOUNT SERVER : ");
 					COUT<<"SOCKET was : "<<acct_sock<<endl;
-					this->sendLoginUnavailable( clt, ipadr );
+					this->sendLoginUnavailable( clt );
 //					VSExit(1);
 				}
                                 getSimpleChar(redirect);
@@ -704,6 +721,16 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
             COUT<<"<<< LOGIN REQUEST --------------------------------------"<<endl;
         }
         break;
+		case CMD_CHOOSESHIP:
+			if (!acctserver) {
+				this->chooseShip( clt, packet);
+			} // No logic since accountserver only supports one ship per player.
+			else {
+				this->sendLoginError(clt); // Client is in a confused state if it sends this here.
+			}
+			// chooseShip is currently intended to be a temporary, one-time selection.
+			// In the future it can be expanded to pick a player ship from an account if there is more than one.
+			break;
 		case CMD_ADDCLIENT:
 			// Add the client to the game
 			COUT<<">>> ADD REQUEST =( serial #"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
@@ -768,6 +795,11 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			*/
 		}
 		break;
+		case CMD_SAVEACCOUNTS:
+			COUT << "Received a save request for "<<
+				clt->callsign<<" ("<<packet_serial<<")..." << endl;
+			// savecct(clt. packet_serial);
+			break;
 		case CMD_RESPAWN :
 			COUT << "Received a respawning request for "<<
 				clt->callsign<<"..." << endl;
@@ -880,9 +912,15 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 		break;
 		case CMD_JUMP :
 		{
-                  un = clt->game_unit.GetUnit();
-                  un->ActivateJumpDrive();
-                  break;
+			if (clt) {
+				un = clt->game_unit.GetUnit();
+				if (un) {
+					// Do Magic.
+					un->ActivateJumpDrive();
+				}
+			}
+			break;
+			// Everything handled by Magic.  We don't need this any more.
 			string newsystem = netbuf.getString();
 			ObjSerial jumpserial = netbuf.getSerial();
 			unsigned short zonenum = netbuf.getShort();
@@ -1306,7 +1344,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			Unit * docking_unit;
 			un = clt->game_unit.GetUnit();
 			if (!un) break;
-			ObjSerial utdwserial = netbuf.getShort();
+			ObjSerial utdwserial = netbuf.getSerial();
 			unsigned short zonenum = un->getStarSystem()->GetZone();
 			cerr<<"RECEIVED a DockRequest from unit "<<un->GetSerial()<<" to unit "<<utdwserial<<" in zone "<<zonenum<<endl;
 			docking_unit = zonemgr->getUnit( utdwserial, zonenum);
@@ -1328,7 +1366,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			Unit * docking_unit;
 			un = clt->game_unit.GetUnit();
 			if (!un) break;
-			ObjSerial utdwserial = netbuf.getShort();
+			ObjSerial utdwserial = netbuf.getSerial();
 			unsigned short zonenum = un->getStarSystem()->GetZone();
 			cerr<<"RECEIVED an UnDockRequest from unit "<<un->GetSerial()<<" to unit "<<utdwserial<<" in zone "<<zonenum<<endl;
 			docking_unit = zonemgr->getUnit( utdwserial, zonenum);
@@ -1373,12 +1411,12 @@ void	NetServer::broadcast( NetBuffer & netbuf, ObjSerial serial, unsigned short 
 
 void	NetServer::closeAllSockets()
 {
-	tcpNetwork->disconnect( "Closing sockets", false );
-	udpNetwork->disconnect( "Closing sockets", false );
+	tcpNetwork->disconnect( "Closing sockettcp" );
+	udpNetwork->disconnect( "Closing socketudp" );
 	for( LI i=allClients.begin(); i!=allClients.end(); i++)
 	{
         ClientPtr cl = *i;
-		cl->tcp_sock.disconnect( __PRETTY_FUNCTION__, false );
+		cl->tcp_sock.disconnect( cl->callsign.c_str() );
 	}
 }
 

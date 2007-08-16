@@ -74,8 +74,12 @@ class NetServer
 		VsnetHTTPSocket*		acct_sock;				// Connection socket for account server
 		int				keeprun;				// Tells if we should keep running server
 		int				snapchanged;			// Tells the snapshot has changed and can be sent
+		
 		int				acctserver;				// Tells if we use an account server
-
+		// If we don't use an account server:
+		string				server_password;
+		vector<string>		shipSelections;
+		
 		timeval				srvtimeout;			// timer
 
 		vector<Account *>	Cltacct;			// Client accounts
@@ -99,6 +103,9 @@ class NetServer
 		//void			loadConfig();					// Loads configuration from server.xml
 		void			posUpdate( ClientPtr clt);		// Update a client position
 		void			addClient( ClientPtr clt);		// Add the client in the game
+		void			chooseShip( ClientPtr clt, Packet &p);	// Client has chosen a ship to fly in.
+		void			localLogin( ClientPtr clt, Packet &p);	// No account server... client will choose a ship.
+		bool			loginAccept( std::string inetbuf,ClientPtr clt, int newacct, char flags);
 		void			serverTimeInitUDP( ClientPtr clt, NetBuffer &netbuf);
 		void			removeClient( ClientPtr clt);		// Remove the client from the game
 		ClientPtr       newConnection_udp( const AddressIP& ipadr);
@@ -115,13 +122,14 @@ class NetServer
         void            checkTimedoutClients_udp();     // Check for timed out clients  
 
         ClientPtr       addNewClient( SOCKETALT &sock );  // Adds a new client to listen for.
-		void			sendLoginError( ClientPtr clt, AddressIP ipadr);
-		void			sendLoginAlready( ClientPtr clt, AddressIP ipadr);
-		bool			sendLoginAccept(std::string packetdata, ClientPtr clt, AddressIP ipadr, int acctnew, char flags);
+		void			sendLoginError( ClientPtr clt);
+		void			sendLoginAlready( ClientPtr clt);
+		void			sendLoginAccept( ClientPtr clt, Cockpit *cp);
   //returns false if unwilling to load star system
-		void			sendLoginUnavailable( ClientPtr clt, AddressIP ipadr);
+		void			sendLoginUnavailable( ClientPtr clt);
 
 		Cockpit *		loadFromSavegame( ClientPtr clt );
+		Cockpit *		loadFromNewGame( ClientPtr clt, string shipname );
 		ClientPtr       getClientFromSerial( ObjSerial serial);
 
 	public:

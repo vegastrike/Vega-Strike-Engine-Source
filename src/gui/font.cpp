@@ -69,8 +69,12 @@ void Font::calcMetrics(void) {
     //  the same distance in all directions, so we need to apply the ratio of vert / horiz
     //  resolution.  Otherwise the fonts are slightly stretched horizontally -- there
     //  are more pixels horizontally than vertically per unit in the identity coord space.
-    m_horizontalScaling = (m_verticalScaling * g_game.y_resolution) / g_game.x_resolution;
-
+	if (useStroke()) {
+		m_horizontalScaling = (m_verticalScaling * g_game.y_resolution) / g_game.x_resolution;
+	} else {
+		// Calculation above seems broken... this seems to work for most sizes with bitmap.
+		m_horizontalScaling = m_verticalScaling / 1.6;
+	}
 	// The size of a horizontal pixel in reference space.
 	const double horizPixelInRefSpace = REFERENCE_LINE_SPACING / (g_game.x_resolution/2) / size();
 

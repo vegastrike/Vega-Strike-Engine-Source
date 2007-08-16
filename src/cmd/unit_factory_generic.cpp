@@ -24,7 +24,9 @@ Unit* UnitFactory::getMasterPartList( )
     return _masterPartList;
 }
 
-void UnitFactory::addUnitBuffer( NetBuffer & netbuf, const char *filename,
+void UnitFactory::addUnitBuffer( NetBuffer & netbuf, const string &filename,
+		               const string &name,
+		               const string &fullname,
 		               bool        SubUnit,
 		               int         faction,
 		               std::string customizedUnit,
@@ -34,7 +36,9 @@ void UnitFactory::addUnitBuffer( NetBuffer & netbuf, const char *filename,
 {
 		netbuf.addChar(ZoneMgr::AddUnit);
 		netbuf.addSerial( netcreate);
-		netbuf.addString( string( filename));
+		netbuf.addString( filename);
+		netbuf.addString( name);
+		netbuf.addString( fullname);
 		netbuf.addChar( SubUnit);
 		netbuf.addInt32( faction);
 		netbuf.addString( customizedUnit);
@@ -45,7 +49,7 @@ void UnitFactory::addUnitBuffer( NetBuffer & netbuf, const char *filename,
 
 void UnitFactory::addUnitBuffer( NetBuffer & netbuf, const Unit *un, string *netxml)
 {
-	addUnitBuffer( netbuf, un->getFilename().c_str(), un->isSubUnit(), un->faction,
+	addUnitBuffer( netbuf, un->getFilename(), un->name.get(), un->fullname, un->isSubUnit(), un->faction,
 		"" /* Not sure... maybe netxml will take care of this? */, un->curr_physical_state,
 	   un->getFlightgroup(), un->getFgSubnumber(), netxml /*For ENTERCLIENT, will generate a saved game netxml*/, un->GetSerial());
 }
@@ -55,6 +59,8 @@ Unit *UnitFactory::parseUnitBuffer(NetBuffer &netbuf)
 {
 	ObjSerial serial = netbuf.getSerial();
 	string file( netbuf.getString());
+	string name( netbuf.getString());
+	string fullname( netbuf.getString());
 	bool sub = netbuf.getChar();
 	int faction = netbuf.getInt32();
 	string fname( netbuf.getString());
@@ -68,6 +74,8 @@ Unit *UnitFactory::parseUnitBuffer(NetBuffer &netbuf)
 	
 	Unit *un = createUnit( file.c_str(), sub, faction, custom, fg, fg_num, NULL, serial);
 	un->curr_physical_state = netbuf.getTransformation();
+	un->name = name;
+	un->fullname = fullname;
 	return un;
 }
 

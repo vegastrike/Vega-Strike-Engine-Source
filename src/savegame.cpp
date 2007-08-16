@@ -928,7 +928,7 @@ void SaveGame::ParseSaveGame (const string &filename_p, string &FSS, const strin
 		  	playerfaction = string( "privateer");
 			cout<<"Faction not found assigning default one : privateer !!!"<<endl;
 		  }
-		  delete []factionname;
+		  free(factionname);
 
 		  if (ForceStarSystem.length()==0)
 			ForceStarSystem=string(tmp2);

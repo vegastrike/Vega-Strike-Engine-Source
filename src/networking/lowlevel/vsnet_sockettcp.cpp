@@ -317,7 +317,7 @@ void VsnetTCPSocket::child_disconnect( const char *s )
     {
         if( close_fd() < 0 )
         {
-            COUT << s << " :\tWarning: disconnected" << strerror(errno) << endl;
+            COUT << s << " :\tWarning: disconnect error: " << strerror(errno) << endl;
         }
         else
         {
@@ -326,7 +326,7 @@ void VsnetTCPSocket::child_disconnect( const char *s )
     }
     else
     {
-        COUT << s << " :\tWarning: disconnected" << strerror(errno) << endl;
+        COUT << s << " :\tWarning: disconnect null socket: " << strerror(errno) << endl;
     }
 }
 
@@ -378,7 +378,7 @@ bool VsnetTCPSocket::lower_selected( int datalen )
     if( _connection_closed )
     {
 		COUT << "Connection already closed" << endl;
-        return false; /* Pretty sure that recv will return 0.  */
+        return true; /* Pretty sure that recv will return 0.  */
     }
 
     bool endless   = true;
@@ -405,6 +405,7 @@ bool VsnetTCPSocket::lower_selected( int datalen )
                     _connection_closed = true;
                     close_fd();
                     _set.add_pending( _sq_fd );
+					return true;
 		        }
                 else if( vsnetEWouldBlock() == false )
                 {
@@ -415,7 +416,7 @@ bool VsnetTCPSocket::lower_selected( int datalen )
                     perror( "receiving TCP packetlength bytes" );
                     _connection_closed = true;
 					close_fd();
-					return false;
+					return true;
                 } else {
 		    //COUT << "Received EWOULDBLOCK." << (get_nonblock()?"true":"false") << endl;
 		}
@@ -460,7 +461,7 @@ bool VsnetTCPSocket::lower_selected( int datalen )
 			    close_fd();
 			    _set.add_pending( _sq_fd );					
 			}
-			return false;
+			return true;
 		    } else if (vsnetEWouldBlock()){
 			static int i=0;
 			if (i++%128==0)

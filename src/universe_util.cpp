@@ -159,5 +159,4 @@ namespace UniverseUtil
 	}
 }
 
-
 #undef activeSys

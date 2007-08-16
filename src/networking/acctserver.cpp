@@ -136,7 +136,7 @@ void    AccountServer::start()
     delete CONFIGFILE;
     delete vs_config;
     vs_config=NULL;
-    Network->disconnect( "Shutting down.", true );
+    Network->disconnect( "Shutting down." );
 }
 
 void    AccountServer::recvMsg( SOCKETALT sock)
@@ -583,7 +583,7 @@ void    AccountServer::removeDeadSockets()
         }
         if( !found)
             nbs_disc++;
-        j->disconnect( "\tclosing socket", false );
+        j->disconnect( "\tclosing socket" );
         Socks.remove( (*j));
     }
     cout<<"\tDisconnected "<<nbc_disc<<" clients associated with that server socket"<<endl;

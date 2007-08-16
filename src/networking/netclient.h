@@ -75,13 +75,14 @@ class	NetClient
         UnitContainer		game_unit;		// Unit struct from the game corresponding to that client
 
         string              _serverip;      // used during login
-        string              _serverport;    // used during login
+        unsigned short      _serverport;    // used during login
         SOCKETALT			*clt_tcp_sock;	// Comm. socket...memory allocated in class
         SOCKETALT			*clt_udp_sock;	// Comm. socket...memory allocated in class
 		SOCKETALT *			lossy_socket;	// Usually points to the UDP socket, unless behind firewall... do not free this one
         VsnetHTTPSocket*			acct_sock;		// Connection socket for account server
         SocketSet           _sock_set;      // Encapsulates select()
         SaveGame			save;
+		ObjSerial			server_netversion;
 	public:
         ObjSerial			serial;			// Serial # of client
 	private:
@@ -90,6 +91,8 @@ class	NetClient
         char				keeprun;		// Bool to test client stop
         string				callsign;		// Callsign of the networked player
         string				password;		// Callsign of the networked player
+		vector<string>			ship_select_list;
+		int				selected_ship;
   
         vector<string> lastsave;
 
@@ -137,17 +140,25 @@ class	NetClient
                 void Reinitialize();//sets all values back to defaults
 		~NetClient();
 	
-		vector<string>* connectLoad(string user, string pass); // Does entire loading process.
-		void startGame(); // Second half of loading process.
+		int connectLoad(string user, string pass, string &error); // First step of loading... returns ships.
+		vector<string>* loginSavedGame(int ship=0); // Second half of loading process... returns savegame
+		void startGame(); // Third half of loading process.
 	
 		/**** netclient_login.cpp stuff ****/
-		void GetConfigServerAddress( string & host, unsigned short &port );
+		void SetConfigServerAddress( string & host, unsigned short &port );
+		void GetCurrentServerAddress( string & host, unsigned short &port );
+
+		// Returns the list of valid ships to use upon logging in.
+		const vector<string>& shipSelections () { return ship_select_list; }
+		bool	selectShip(int ship);
 	
 		int				authenticate();
-		vector<string>	&loginLoop( string str_callsign, string str_passwd); // Loops until receiving login response
+		int loginAuth( string str_callsign, string str_passwd, string &error); // Loops until receiving login response
+		int loginLoop(string &error);
 		vector<string>	&loginAcctLoop( string str_callsign, string str_passwd);
 		void			loginAccept( Packet & p1);
-		SOCKETALT		init( const char* addr, unsigned short port);
+		void			loginChooseShip( Packet & p1);
+		SOCKETALT		init( const char* addr, unsigned short port, string &error);
 		VsnetHTTPSocket*		init_acct( const std::string &addr);
 		void	synchronizeTime(SOCKETALT*); // Sends time packets back and forth to find the actual double time on the server.
 
@@ -169,6 +180,9 @@ class	NetClient
 		// Warn the server we are leaving the game
 		SOCKETALT*	logout(bool leaveUDP);
 		void	Respawn(ObjSerial clientname);
+		void saveRequest();
+		// void dieRequest();
+		
 		// Check if there are info incoming over the network
 		int		checkMsg( Packet* outpacket );
 		// Send a position update
@@ -233,6 +247,7 @@ class	NetClient
 		bool	IsNetcommActive() const;
 		bool	IsNetcommSecured() const;
                 static void Reconnect(std::string srvipaddr, std::string port);
+                static void CleanUp();
     private:
         NetClient( const NetClient& );
         NetClient& operator=( const NetClient& );

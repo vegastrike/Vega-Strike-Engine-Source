@@ -977,7 +977,10 @@ void InitCallbacks(void) {
 	}
 }
 void TerminateCurrentBase(void) {
-    BaseInterface::CurrentBase->Terminate();
+	if (BaseInterface::CurrentBase) {
+		BaseInterface::CurrentBase->Terminate();
+		BaseInterface::CurrentBase=NULL;
+	}
 }
 void CurrentBaseUnitSet(Unit * un) {
 	if (BaseInterface::CurrentBase) {

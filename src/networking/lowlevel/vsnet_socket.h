@@ -61,7 +61,7 @@ public:
     bool set_block();
 
     int  recvbuf( Packet* p, AddressIP* ipadr );
-    void disconnect( const char *s, bool fexit = true );
+    void disconnect( const char *s );
 
     bool sameAddress(  const SOCKETALT& l) const;
     bool lowerAddress( const SOCKETALT& l) const;

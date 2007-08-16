@@ -5,9 +5,8 @@
 #include "posh.h"
 #include "gfxlib_struct.h"
 std::string getSimpleString(std::string &input){
-  std::string::size_type where=input.find(" ");
   int len=getSimpleInt(input);
-  if (len>=0&&len<=input.length()){
+  if (len>=0&&(unsigned int)len<=input.length()){
     std::string retval=input.substr(0,len);
     input=input.substr(len);
     return retval;
@@ -86,7 +85,7 @@ void	NetBuffer::Reset()
 char *	NetBuffer::getData() { return buffer;}
 
 		// Extends the buffer if we exceed its size
-void	NetBuffer::resizeBuffer( int newsize)
+void	NetBuffer::resizeBuffer( unsigned int newsize)
 		{
 			if( size-1 < newsize)
 			{
@@ -186,10 +185,11 @@ unsigned char	NetBuffer::getType()
 		}
 
 bool NetBuffer::checkType(unsigned char c) {
+	const char *typ = getTypeStr(c);
+	checkBuffer(1, typ); // Does this type exist?
 	unsigned char got = getType();
 
 	if (got != c) {
-		const char *typ = getTypeStr(c);
 		const char *typgot = getTypeStr(got);
 		std::cerr<<"!!! ERROR : attempt to read invalid data at offset="<<offset<<": Actual type is a "<<typgot<<" but I wanted a "<<typ<<" !!!"<<std::endl;
 
@@ -788,5 +788,5 @@ void	NetBuffer::addGFXLightLocal( const GFXLightLocal & light)
 	this->addChar( light.islocal);
 }
 
-int		NetBuffer::getDataLength() { return offset;}
-int		NetBuffer::getSize() { return size;}
+unsigned int		NetBuffer::getDataLength() { return offset;}
+unsigned int		NetBuffer::getSize() { return size;}

@@ -36,7 +36,6 @@ string			ZoneMgr::getSystem( string & name)
 
 StarSystem *	ZoneMgr::addZone( string starsys)
 {
-	_Universe->netLock(true);
 	StarSystem * sts=NULL;
 	string sysfile = starsys+".system";
 	if( (sts = GetLoadedStarSystem( sysfile.c_str() ))) {
@@ -49,6 +48,7 @@ StarSystem *	ZoneMgr::addZone( string starsys)
 	COUT<<"--== STAR SYSTEM NOT FOUND - GENERATING ==--"<<endl;
 	//list<Unit *> ulst;
 	// Generate the StarSystem
+	_Universe->netLock(true);
 	string starsysfile = starsys+".system";
 	UniverseUtil::ComputeSystemSerials( starsysfile);
 	//sts = new StarSystem( starsysfile.c_str(), Vector(0,0,0));

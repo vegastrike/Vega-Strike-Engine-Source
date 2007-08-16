@@ -36,6 +36,7 @@ enum Cmd
     LOGIN_ALREADY    ,	// Packet sent from account server to client
                                 // to tell account is already being used
     LOGIN_NEW        ,
+    LOGIN_CHOOSESHIP ,
 	LOGIN_UNAVAIL	 ,	// Packet sent from game server to client :
                                 // account server is unavailable -> no login
 
@@ -112,6 +113,9 @@ enum Cmd
                                     // to do a backup
     CMD_NEWSUBSCRIBE ,		// Account server : handle a new account creation
                                     // (login/passwd) on the web
+	CMD_CONNECT,			// C->S, response S->C: Upon opening connection
+	CMD_CHOOSESHIP,			// S->C, response C->S: Server needs client to choose a ship
+									// before it can send LOGIN_ACCEPT.
 
     CMD_DISCONNECT   ,		// UDP : after a problem (not clean exit) to make
                                     // the client exit if still alive
