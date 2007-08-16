@@ -571,16 +571,16 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 		}
 		/*    smalle->curr_physical_state = smalle->prev_physical_state;
 			  this->curr_physical_state = this->prev_physical_state;*/
-		{
-			static int upgradefac = XMLSupport::parse_bool(vs_config->getVariable("physics","cargo_deals_collide_damage","false"))?-1:FactionUtil::GetUpgradeFaction();
+		static int upgradefac = XMLSupport::parse_bool(vs_config->getVariable("physics","cargo_deals_collide_damage","false"))?-1:FactionUtil::GetUpgradeFaction();
+		bool dealdamage=true;
+		if (_Universe->AccessCamera())  {
 			Vector smalldelta=(_Universe->AccessCamera()->GetPosition()-smalle->Position()).Cast();
 			float smallmag=smalldelta.Magnitude();
 			Vector thisdelta=(_Universe->AccessCamera()->GetPosition()-this->Position()).Cast();
 			float thismag=thisdelta.Magnitude();
-			bool dealdamage=true;
 			static float collision_hack_distance=XMLSupport::parse_float(vs_config->getVariable("physics","collision_avoidance_hack_distance","10000"));
 			static float front_collision_hack_distance=XMLSupport::parse_float(vs_config->getVariable("physics","front_collision_avoidance_hack_distance","200000"));
-
+			
 			if (thcp==NULL&&smcp==NULL) {
 				if (smallmag>collision_hack_distance+this->rSize()&&thismag>collision_hack_distance) {
 					static float front_collision_hack_angle=cos(3.1415926536*XMLSupport::parse_float(vs_config->getVariable("physics","front_collision_avoidance_hack_angle","40"))/180.);
@@ -594,18 +594,18 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 					}
 				}
 			}
-			if (dealdamage) {
-				if (faction!=upgradefac)
-					smalle->ApplyDamage (biglocation.Cast(),bignormal,small_damage,smalle,GFXColor(1,1,1,2),this->owner!=NULL?this->owner:this);
-				/* Happens too often to be useful.
-				else
-					printf ("Damage avoided due to cargo\n"); */
-				if (smalle->faction!=upgradefac)
-					this->ApplyDamage (smalllocation.Cast(),smallnormal,large_damage,this,GFXColor(1,1,1,2),smalle->owner!=NULL?smalle->owner:smalle);
-				/* Happens too often to be useful
-				else
-					printf ("Damage avoided due to cargo\n"); */
-			}
+		}
+		if (dealdamage) {
+			if (faction!=upgradefac)
+				smalle->ApplyDamage (biglocation.Cast(),bignormal,small_damage,smalle,GFXColor(1,1,1,2),this->owner!=NULL?this->owner:this);
+			/* Happens too often to be useful.
+			else
+				printf ("Damage avoided due to cargo\n"); */
+			if (smalle->faction!=upgradefac)
+				this->ApplyDamage (smalllocation.Cast(),smallnormal,large_damage,this,GFXColor(1,1,1,2),smalle->owner!=NULL?smalle->owner:smalle);
+			/* Happens too often to be useful
+			else
+				printf ("Damage avoided due to cargo\n"); */
 		}
 		//OLDE METHODE
 		//    smalle->ApplyDamage (biglocation.Cast(),bignormal,.33*g_game.difficulty*(  .5*fabs((smalle->GetVelocity()-this->GetVelocity()).MagnitudeSquared())*this->mass*SIMULATION_ATOM),smalle,GFXColor(1,1,1,2),NULL);
