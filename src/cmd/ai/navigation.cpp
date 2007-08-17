@@ -488,7 +488,7 @@ static float mymin(float a, float b) {
   return a<b?a:b;
 }
 
-bool useJitteryAutopilot(Unit * parent, Unit*target) {
+bool useJitteryAutopilot(Unit * parent, Unit*target, float minaccel) {
   static float specInterdictionLimit=XMLSupport::parse_float(vs_config->getVariable("physics","min_spec_interdiction_for_jittery_autopilot",".05"));
 
   if (target->isPlanet()==false&&(target->graphicOptions.specInterdictionOnline==0||fabs(target->specInterdiction)<specInterdictionLimit)) {
@@ -497,10 +497,7 @@ bool useJitteryAutopilot(Unit * parent, Unit*target) {
   if (parent->computer.combat_mode==false) {
     return true;
   }
-  float mass=parent->GetMass();
-  if (mass==0) return true;
   static float accel_auto_limit=XMLSupport::parse_float(vs_config->getVariable("physics","max_accel_for_smooth_autopilot","10"));
-  float minaccel=mymin(parent->limits.lateral,mymin(parent->limits.vertical,mymin(parent->limits.forward,parent->limits.retro)))/mass;
   if (minaccel<accel_auto_limit) {
     return true;
   }
@@ -564,7 +561,10 @@ void AutoLongHaul::Execute() {
   if(parent->graphicOptions.InWarp==0&&parent->graphicOptions.RampCounter==0) {
     deactivatewarp=false;
   }
-  if (StraightToTarget&&useJitteryAutopilot(parent,target)) {
+  float mass=parent->GetMass();
+  float minaccel=mymin(parent->limits.lateral,mymin(parent->limits.vertical,mymin(parent->limits.forward,parent->limits.retro)));
+  if (mass) minaccel/=mass;
+  if (StraightToTarget&&useJitteryAutopilot(parent,target,minaccel)) {
 	 QVector cvel=parent->cumulative_velocity.Cast();
 	 float speed=cvel.Magnitude();
 	 if (speed>.01)
@@ -593,8 +593,19 @@ void AutoLongHaul::Execute() {
     ResetDone();
   }
   static float distance_to_stop=XMLSupport::parse_float(vs_config->getVariable("physics","auto_pilot_termination_distance","6000"));
+  static float enemy_distance_to_stop=XMLSupport::parse_float(vs_config->getVariable("physics","auto_pilot_termination_distance_enemy","24000"));
   static bool do_auto_finish=XMLSupport::parse_bool(vs_config->getVariable("physics","autopilot_terminate","true"));
-  if (do_auto_finish&&UnitUtil::getSignificantDistance(parent,target)<distance_to_stop) 
+  double dis=UnitUtil::getSignificantDistance(parent,target);
+  bool stopnow=false;
+  float speed=parent->GetComputerData().max_combat_ab_speed;
+  if (speed&&parent->limits.retro) {
+    float time_to_destination=dis/speed;//conservative
+    float time_to_stop=speed*mass/parent->limits.retro;
+    if (time_to_destination<=time_to_stop)
+      stopnow=true;
+  }
+  
+  if (do_auto_finish&&(stopnow||dis<distance_to_stop||(target->Target()==parent&&dis<enemy_distance_to_stop))) 
     done=true;
 }
 

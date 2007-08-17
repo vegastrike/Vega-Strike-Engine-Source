@@ -44,7 +44,7 @@ namespace Orders {
   }
   void DockingOps::Execute () {
     Unit * utdw = docking.GetUnit();
-    if (!utdw) {
+    if (parent==utdw||utdw==NULL) {
       RestoreOldAI();
       Destroy();
       return;
