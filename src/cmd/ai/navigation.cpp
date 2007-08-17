@@ -460,7 +460,7 @@ AutoLongHaul::AutoLongHaul (bool fini, int accuracy):ChangeHeading(QVector(0,0,1
 
 void AutoLongHaul::SetParent(Unit *parent1){
 	ChangeHeading::SetParent(parent1);
-	MatchLinearVelocity *temp = new MatchLinearVelocity(Vector(0,0,parent1->GetComputerData().max_combat_speed/*won't do insanity flight mode + spec = ludicrous speed*/),true,false,false);
+	MatchLinearVelocity *temp = new MatchLinearVelocity(Vector(0,0,parent1->GetComputerData().combat_mode?parent1->GetComputerData().max_combat_speed:parent1->GetComputerData().max_combat_ab_speed/*won't do insanity flight mode + spec = ludicrous speed*/),true,false,false);
 	temp->SetParent(parent1);
 	Order::EnqueueOrder(temp);
 }
