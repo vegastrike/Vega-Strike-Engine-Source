@@ -336,6 +336,10 @@ bool UnitCollection::contains(const Unit* unit) const
 
 inline void  UnitCollection::erase(list<Unit*>::iterator &it2)
 {
+	if(!(*it2)) {
+		++it2;
+		return;
+	}
 	// If we have more than 4 iterators, just push node onto vector.
 	if(activeIters.size() > 3){
 		removedIters.push_back(it2);

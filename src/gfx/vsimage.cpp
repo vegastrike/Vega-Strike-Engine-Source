@@ -646,14 +646,16 @@ unsigned char *VSImage::ReadDDS()
 	}
 	// Skip what we already know. 
 	img_file->GoTo(4);
-	// Read in bytes to header, 
-	img_file->Read(&(header.size),4);
+	// Read in bytes to header.   Probably not endian-safe
+	img_file->Read(&header.size,4);
 	img_file->Read(&header.flags,4);
 	img_file->Read(&header.height,4);
 	img_file->Read(&header.width,4);
 	img_file->Read(&header.linsize,4);
 	img_file->Read(&header.depth,4);
 	img_file->Read(&header.nmips,4);
+
+//	img_file->Read(&header,28);
 	img_file->GoTo(76);
 	img_file->Read(&header.pixelFormat.size,4);
 	img_file->Read(&header.pixelFormat.flags,4);
@@ -668,14 +670,17 @@ unsigned char *VSImage::ReadDDS()
 	img_file->Read(&header.pixelFormat.amask,4);
 	img_file->Read(&header.caps.caps1,4);
 	img_file->Read(&header.caps.caps2,4);
+//	img_file->Read(&header+28,40);
 	img_file->GoTo(128);
 	// Set VSImage attributes 
 	this->img_depth = header.pixelFormat.bpp;
 	this->sizeX=header.width;
 	this->sizeY=header.height;
 	GLenum internal = GL_NONE,type = GL_RGB;
-	unsigned int inputSize = header.linsize;
-	s = (unsigned char*)malloc(inputSize);
+	
+	// Without mipmaps, header.linsize is the entire size of the compressed image
+	s = (unsigned char*)malloc(header.linsize);
+	// the following is probably not endian-safe
 	img_file->Read(s,header.linsize);   
 	
 	switch(header.pixelFormat.bpp){
@@ -694,6 +699,7 @@ unsigned char *VSImage::ReadDDS()
 				this->img_alpha = true;
 				break;
 	}
+	// outsize is the size of the decompressed image in bytes
 	int outsize =  sizeY*sizeX*(img_depth/8);
 	switch(header.pixelFormat.fourcc[3]){
 		case '1': internal = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
@@ -703,8 +709,10 @@ unsigned char *VSImage::ReadDDS()
 		case '5': internal = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 				  break;
 	}
+	
 	d = (unsigned char*)malloc(outsize);	 
-	// Not sure if this stuff in between is needed 
+	// Prepare texture to be loaded and decompressed.  NOT needed once passthrough is functional
+	// When passthrough is working, s will be returned un-modified, no gl functions needed. 
 	unsigned int TextureID;
 	glGenTextures( 1, &TextureID );
 	glBindTexture( GL_TEXTURE_2D, TextureID );
