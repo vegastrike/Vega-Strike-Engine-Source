@@ -14,6 +14,7 @@
 #include "gfx/cockpit_generic.h"
 #include "networking/const.h"
 #include "vsfilesystem.h"
+#include "cmd/fg_util.h"
 using namespace std;
 using namespace VSFileSystem;
 std::string CurrentSaveGameName="";
@@ -554,8 +555,17 @@ void SaveGame::ReadMissionStringData (char * &buf, bool select_data, const std::
     }
   }
   buf = buf2;
+  this->PurgeZeroStarships();
 }
-
+void SaveGame::PurgeZeroStarships() {
+  for (MissionStringDat::MSD::iterator i=missionstringdata->m.begin(),ie=missionstringdata->m.end();i!=ie;++i) {
+    if (fg_util::IsFGKey(i->first))
+      if (fg_util::CheckFG(i->second)) {
+        printf("correcting flightgroup %s to have right landed ships\n",i->first.c_str());
+     
+      }
+  }
+}
 
 
 static inline void PushBackFloat(float f, vector <char> &ret) {

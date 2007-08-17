@@ -373,6 +373,8 @@ LIBCMD = \
   src/cmd/unit_functions_generic.cpp \
   src/cmd/unit_generic.cpp \
   src/cmd/unit_generic.h \
+  src/cmd/fg_util.cpp \
+  src/cmd/fg_util.h \
   src/cmd/pilot.cpp \
   src/cmd/pilot.h \
   src/cmd/unit_util_generic.cpp \

@@ -53,6 +53,7 @@ class SaveGame {
   std::vector<StringPool::Reference> &getMissionStringData(const std::string &magic_number);
   unsigned int getMissionStringDataLength(const std::string &magic_number) const;
   SaveGame(const std::string &pilotname);
+  void PurgeZeroStarships();
   float GetSavedCredits();
   void SetSavedCredits (float);
   void SetPlayerLocation (const QVector &playerloc);
