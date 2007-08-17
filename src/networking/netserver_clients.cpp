@@ -565,14 +565,14 @@ void	NetServer::logout( ClientPtr clt )
 // Send one by one a CMD_ADDLCIENT to the client for every ship in the star system we enter
 void  NetServer::getZoneInfo( unsigned short zoneid, NetBuffer & netbuf)
 {
-	CWLI k;
+	LI k;
 	int nbclients=0;
 	Packet packet2;
 	string savestr, xmlstr;
 
 	// Loop through client in the same zone to send their current_state and save and xml to "clt"
         std::set<ObjSerial> activeObjects;
-        ClientWeakList* lst = zonemgr->getZoneList(zoneid);
+        ClientList* lst = zonemgr->getZoneList(zoneid);
         if( lst == NULL )
         {
           COUT << "\t>>> WARNING: Did not send info about " << nbclients << " other ships because of empty (inconsistent?) zone" << endl;
@@ -580,7 +580,6 @@ void  NetServer::getZoneInfo( unsigned short zoneid, NetBuffer & netbuf)
         else
 	for( k=lst->begin(); k!=lst->end(); k++)
 	{
-        if( (*k).expired() ) continue;
         ClientPtr kp( *k );
 
 		// Test if *k is the same as clt in which case we don't need to send info

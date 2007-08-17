@@ -72,7 +72,7 @@ class ZoneMgr
     private:
 		//vector<StarSystem *> starsystems;
 		// List of clients in zones
-		vector<ClientWeakList*> zone_list;
+		vector<ClientList*>		zone_list;
 		vector<int>				zone_clients;
 		// List of units in zones (but not Clients)
 		//vector<list<Unit *> >	zone_unitlist;
@@ -101,14 +101,14 @@ class ZoneMgr
 		void	addSystem( string & sysname, string & system);
 		string	getSystem( string & name);
 		StarSystem* addZone( string starsys);
-		ClientWeakList* GetZone( int serial);
+		ClientList* GetZone( int serial);
 		//void	addUnit( Unit * un, int zone);
 		//void	removeUnit( Unit *un, int zone);
 		Unit *	getUnit( ObjSerial unserial, unsigned short zone);
 
-		StarSystem *	addClient( ClientWeakPtr clt, string starsys, unsigned short & num_zone);
+		StarSystem *	addClient( ClientPtr clt, string starsys, unsigned short & num_zone);
 		void	removeClient( ClientPtr clt );
-	void    broadcast( ClientWeakPtr clt, Packet * pckt, bool isTcp );
+		void    broadcast( ClientPtr clt, Packet * pckt, bool isTcp );
         void    broadcast( int zone, ObjSerial serial, Packet * pckt, bool isTcp );
         void    broadcastNoSelf( int zone, ObjSerial serial, Packet * pckt, bool isTcp );
         void    broadcastSample( int zone, ObjSerial serial, Packet * pckt, float frequency );
@@ -116,7 +116,7 @@ class ZoneMgr
         void    broadcastSnapshots( bool update_planets=false);
 		void	broadcastDamage();
 		double	isVisible( Quaternion orient, QVector src_pos, QVector tar_pos);
-		ClientWeakList * getZoneList( unsigned int id) { assert( id<zone_list.size()); return zone_list[id]; }
+		ClientList * getZoneList( unsigned int id) { assert( id<zone_list.size()); return zone_list[id]; }
 		int		getZoneNumber() { return zone_list.size(); }
 
 		void	displayStats();

@@ -22,13 +22,13 @@
 #include <vector>
 class Client;
 
-#ifdef USE_BOOST_WEAK_PTR
+#ifndef USE_VALGRINDABLE_CLIENTPTR
 
 #include "boost/smart_ptr.hpp"
 #include "boost/weak_ptr.hpp"
 
 typedef boost::shared_ptr<Client>          ClientPtr;
-typedef boost::weak_ptr<Client>            ClientWeakPtr;
+//typedef boost::weak_ptr<Client>            ClientWeakPtr;
 #else
 
 template <class T> class NormalPtr {
@@ -59,10 +59,10 @@ typedef std::pair<int,ClientPtr>           ClientPair;
 typedef std::map<int,ClientPtr>::iterator  ClientIt;
 
 typedef std::list<ClientPtr>               ClientList;
-typedef std::list<ClientWeakPtr>           ClientWeakList;
-typedef ClientList::iterator               LI;
-typedef ClientWeakList::iterator           CWLI;
-typedef std::vector<ClientList*>::iterator VLI;
+// typedef std::list<ClientWeakPtr>           ClientWeakList;
+typedef ClientList::iterator               ClientListIt, LI;
+//typedef ClientWeakList::iterator           CWLI;
+typedef std::vector<ClientList*>::iterator VCLI; //VLI;
 
 
 #endif /* CLIENT_PTR_H */

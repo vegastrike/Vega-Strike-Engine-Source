@@ -87,7 +87,7 @@ class Packet
         void    display( const char* file, int line );
         void    displayHex();
 
-        inline unsigned int getDataLength() const { return h.data_length; }
+        unsigned int getDataLength() const;
 
         static unsigned short   getHeaderLength()
         {

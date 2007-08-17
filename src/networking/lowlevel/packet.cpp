@@ -49,6 +49,7 @@ Packet::Packet( const void* buffer, size_t sz )
 	         << "    should be still " << h.data_length
                  << " but buffer has only " << sz << endl;
 	        display( __FILE__, __LINE__NOMSC );
+			h.data_length = sz; // Don't want game to crash later on!
         }
 	    else if( h.flags & COMPRESSED )
 	    {
@@ -97,6 +98,7 @@ Packet::Packet( PacketMem& buffer )
 	             << "    should be still " << h.data_length
                  << " but buffer has only " << sz << endl;
 	        display( __FILE__, __LINE__NOMSC );
+			h.data_length = sz; // Don't want game to crash later on!
         }
 	    else if( h.flags & COMPRESSED )
 	    {
@@ -351,7 +353,13 @@ const char* Packet::getData() const
     c += header_length;
     return c;
 }
-
+unsigned int Packet::getDataLength() const {
+	if (h.data_length > _packet.len()) {
+		return _packet.len();
+	} else {
+		return h.data_length;
+	}
+}
 const char* Packet::getSendBuffer() const
 {
     CHECK_VALID
