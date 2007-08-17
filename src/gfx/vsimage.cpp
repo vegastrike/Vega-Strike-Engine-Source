@@ -633,10 +633,26 @@ unsigned char *	VSImage::ReadBMP()
 
 #define IS_POT(x) (!((x) & ((x) -1)))
 
+#ifndef GL_COMPRESSED_RGB_S3TC_DXT1_EXT
+#define GL_COMPRESSED_RGB_S3TC_DXT1_EXT   0x83F0
+#endif
+#ifndef GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
+#define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT  0x83F1
+#endif
+#ifndef GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
+#define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT  0x83F2
+#endif
+#ifndef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
+#define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT  0x83F3
+#endif
+#ifndef GL_TEXTURE_COMPRESSION_HINT_ARB
+#define GL_TEXTURE_COMPRESSION_HINT_ARB   0x84EF
+#endif
+
 unsigned char *VSImage::ReadDDS()
 {
 	ddsHeader header;
-	unsigned char *d, *s;
+	unsigned char *d=NULL, *s=NULL;
     try {	
 	// Probably redundent, we already check this in CheckFormat
 	if( CheckDDSSignature( img_file)!=Ok){

@@ -31,36 +31,6 @@ typedef struct {
         DWORD      biClrImportant;
 } BITMAPINFOHEADER;
 
-typedef struct pxlformat 
-{
-	int size;
-	int flags;
-	char fourcc[4];
-	int bpp;
-	int rmask;
-	int gmask;
-	int bmask;
-	int amask;
-};
-typedef struct Caps 
-{
-	int caps1;
-	int caps2;
-};
-typedef struct ddsHeader
-{
-	int size;
-	int flags;
-	int height;
-	int width;
-	int linsize;
-	int depth;
-	int nmips;
-	pxlformat pixelFormat;
-	Caps caps;
-};
-	
-
 /**
  * File header of a bitmap. Won't work on mips architecture with 
  * misaligned structs
@@ -85,6 +55,38 @@ typedef struct {
 #include <windows.h>
 #include <wingdi.h>
 #endif
+
+
+typedef struct
+{
+	int size;
+	int flags;
+	char fourcc[4];
+	int bpp;
+	int rmask;
+	int gmask;
+	int bmask;
+	int amask;
+} pxlformat;
+typedef struct
+{
+	int caps1;
+	int caps2;
+} Caps;
+typedef struct
+{
+	int size;
+	int flags;
+	int height;
+	int width;
+	int linsize;
+	int depth;
+	int nmips;
+	pxlformat pixelFormat;
+	Caps caps;
+} ddsHeader;
+	
+
 typedef unsigned char * (textureTransform) (int &bpp, int &color_type, unsigned long &width, unsigned long &height, unsigned char ** row_pointers);
 textureTransform heightmapTransform;
 textureTransform terrainTransform;
