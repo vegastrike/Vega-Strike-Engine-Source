@@ -5,6 +5,15 @@
 
 #ifndef _UNITCOLLECTION_H_
 #define _UNITCOLLECTION_H_
+
+// Collection type:
+#define USE_OLD_COLLECTION
+// #define USE_STL_COLLECTION
+
+#if defined(USE_OLD_COLLECTION)
+#include "oldcollection.h"
+#elif defined(USE_STL_COLLECTION)
+
 #include <list>
 #include <vector>
 
@@ -154,4 +163,9 @@ typedef UnitCollection::UnitIterator un_iter;
 typedef UnitCollection::ConstIterator un_kiter;
 typedef UnitCollection::UnitIterator un_fiter;
 typedef UnitCollection::ConstIterator un_fkiter;
+
+#else
+#error "No collection type chosen in collection.h:10"
+#endif // USE_STL_COLLECTION
+
 #endif

@@ -1212,6 +1212,13 @@ inline Unit* UnitContainer::GetUnit()
 	return unit;
 }
 
+#ifdef USE_OLD_COLLECTION
+inline void UnitCollection::UnitIterator::GetNextValidUnit () {
+	while (pos->next->unit?pos->next->unit->Killed():false) {
+		remove();
+	}
+};
+#endif
 
 extern std::set <std::string> GetListOfDowngrades();
 extern void ClearDowngradeMap();

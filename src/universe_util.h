@@ -34,7 +34,6 @@ namespace UniverseUtil
 			void advanceNInsignificant(int n);
 			void advanceNPlanet(int n);
 			void advanceNJumppoint(int n);
-			inline class Unit* operator*() { return(current());}
 			inline void preinsert(Unit *unit) { UnitIterator::preinsert(unit);}
 			inline bool isDone() { return(UnitIterator::isDone());}
 			inline bool notDone() {return(UnitIterator::notDone());}

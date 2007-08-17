@@ -1,6 +1,11 @@
+#include "collection.h"
+
+#if defined(USE_OLD_COLLECTION)
+#include "oldcollection.cpp"
+#elif defined(USE_STL_COLLECTION)
+
 #include <list>
 #include <vector>
-#include "collection.h"
 #ifndef LIST_TESTING
 #include "unit_generic.h"
 #else
@@ -413,3 +418,5 @@ inline void UnitCollection::unreg(un_iter *iter)
 }
 
 // UnitCollection END:
+
+#endif // USE_STL_COLLECTION

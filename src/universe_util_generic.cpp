@@ -44,8 +44,7 @@ namespace UniverseUtil
 	Unit* PythonUnitIter::current() 
 	{
 		Unit *ret = NULL;
-		if(!col) return(ret);
-		while(ret = UnitCollection::UnitIterator::operator*()){
+		while(ret = **this){
 			if(ret->hull > 0)
 				return (ret);
 			advance();
@@ -56,39 +55,34 @@ namespace UniverseUtil
 
 	void PythonUnitIter::advanceSignificant() 
 	{
-		if(!col) return;
 		advance();
-		while(notDone() && !UnitUtil::isSignificant(*it))
+		while(notDone() && !UnitUtil::isSignificant(**this))
 			advance();
 	}
 
 	void PythonUnitIter::advanceInsignificant() 
 	{
-		if(!col) return;
 		advance();
-		while(notDone() && UnitUtil::isSignificant(*it))
+		while(notDone() && UnitUtil::isSignificant(**this))
 			advance();
 	}
 
 	void PythonUnitIter::advancePlanet() 
 	{
-		if(!col) return;
 		advance();
-		while(notDone() && !(*it)->isPlanet())
+		while(notDone() && !(**this)->isPlanet())
 			advance();
 	}
 
 	void PythonUnitIter::advanceJumppoint() 
 	{
-		if(!col) return;
 		advance();
-		while(notDone() && !(*it)->isJumppoint())
+		while(notDone() && !(**this)->isJumppoint())
 			advance();
 	}
 
 	void PythonUnitIter::advanceN(int n) 
 	{
-		if(!col) return;
 		while(notDone() && n > 0) {
 			advance();
 			--n;
@@ -97,10 +91,9 @@ namespace UniverseUtil
 
 	void PythonUnitIter::advanceNSignificant(int n) 
 	{
-		if(!col) return;
-		if(col && notDone() && !UnitUtil::isSignificant(*it))
+		if(notDone() && !UnitUtil::isSignificant(**this))
 			advanceSignificant();
-		while(col && notDone() &&( n > 0)){
+		while(notDone() &&( n > 0)){
 			advanceSignificant();
 			--n;
 		}
@@ -108,8 +101,7 @@ namespace UniverseUtil
 
 	void PythonUnitIter::advanceNInsignificant(int n) 
 	{
-		if(!col) return;
-		if(notDone() && UnitUtil::isSignificant(*it))
+		if(notDone() && UnitUtil::isSignificant(**this))
 			advanceInsignificant();
 		while(notDone() && (n > 0)) {
 			advanceInsignificant();
@@ -119,8 +111,7 @@ namespace UniverseUtil
 
 	void PythonUnitIter::advanceNPlanet(int n) 
 	{
-		if(!col) return;
-		if(notDone() && !(*it)->isPlanet())
+		if(notDone() && !(**this)->isPlanet())
 			advancePlanet();
 		while(notDone() && n > 0) {
 			advancePlanet();
@@ -130,8 +121,7 @@ namespace UniverseUtil
 
 	void PythonUnitIter::advanceNJumppoint(int n) 
 	{
-		if(!col) return;
-		if(notDone() && !(*it)->isJumppoint())
+		if(notDone() && !(**this)->isJumppoint())
 			advanceJumppoint();
 		while(notDone() && n > 0 ) {
 			advanceJumppoint();
@@ -363,7 +353,18 @@ namespace UniverseUtil
 		return iter.notDone()?(*iter):NULL;
 	}
 	int getNumUnits() {
+#ifdef USE_STL_COLLECTION
 		return (activeSys->getUnitList().size());
+#else
+		// Implentation-safe getNumUnits().
+		int count=0;
+		un_iter iter=activeSys->getUnitList().createIterator();
+		while (iter.current()){
+			iter.advance();
+			count++;
+		}
+		return count;
+#endif
 	}
 	//NOTEXPORTEDYET
 	/*
