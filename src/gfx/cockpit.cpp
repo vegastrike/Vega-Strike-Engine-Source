@@ -1495,7 +1495,7 @@ void GameCockpit::InitStatic () {
 GameCockpit::GameCockpit (const char * file, Unit * parent,const std::string &pilot_name): Cockpit( file, parent, pilot_name),shake_time(0),shake_type(0),textcol (1,1,1,1),text(NULL)
 {
   autoMessageTime=0;
-  shield8=false;
+  shield8=armor8=false;
   editingTextMessage=false;
   static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
   int i;
@@ -1527,6 +1527,7 @@ GameCockpit::GameCockpit (const char * file, Unit * parent,const std::string &pi
 
   // Compute the screen limits. Used to display the arrow pointing to the selected target.
   static float st_projection_limit_y = XMLSupport::parse_float(vs_config->getVariable("graphics","fov","78"));
+  smooth_fov=st_projection_limit_y;
   projection_limit_y = st_projection_limit_y;
   // The angle betwwen the center of the screen and the border is half the fov.
   projection_limit_y = tan(projection_limit_y * M_PI / (180*2));

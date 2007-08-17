@@ -41,7 +41,7 @@ struct FIREKEYBOARDTYPE {
       neartargetkey=targetskey=targetukey=threattargetkey=picktargetkey=subtargetkey=targetkey=
       rneartargetkey=rtargetskey=rtargetukey=rthreattargetkey=rpicktargetkey=rtargetkey=
       nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=enslave=
-	  freeslave=incomingmissiletargetkey=rincomingmissiletargetkey=nearesthostilekey=nearestdangeroushostilekey=
+	  freeslave=incomingmissiletargetkey=rincomingmissiletargetkey=nearesthostilekey=nearestdangeroushostilekey=missiletargetkey=rmissiletargetkey=
 	  nearestfriendlykey=nearestbasekey=nearestplanetkey=nearestjumpkey=UP;
 
       shieldpowerstate=1;

@@ -71,6 +71,7 @@ namespace CockpitXML {
       G_LEFT,
       G_RIGHT,
       G_TIME,
+      ALPH
     };
 
   const EnumMap::Pair element_names[] = {
@@ -151,7 +152,8 @@ namespace CockpitXML {
     EnumMap::Pair ("r", RED),
     EnumMap::Pair ("g", GREEN),
     EnumMap::Pair ("b", BLUE),
-    EnumMap::Pair ("type", VDUTYPE)
+    EnumMap::Pair ("type", VDUTYPE),
+    EnumMap::Pair ("a", ALPH)
   };
 
   const EnumMap element_map(element_names, sizeof(element_names)/sizeof(element_names[0]));
@@ -221,6 +223,9 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
       case BLUE:
 	textcol.b = XMLSupport::parse_float ((*iter).value);
 	break;
+      case ALPH:
+        textcol.a=XMLSupport::parse_float ((*iter).value);
+        break;
       case VIEWOFFSET:
 		  viewport_offset = XMLSupport::parse_float ((*iter).value);
 	break;

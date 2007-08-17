@@ -799,7 +799,7 @@ std::string lookupMountSize (int s)
 /***********************************************************************************/
 /**** UNIT STUFF                                                            */
 /***********************************************************************************/
-Unit::Unit( int /*dummy*/ ) {
+Unit::Unit( int /*dummy*/ ):cumulative_transformation_matrix(identity_matrix) {
 ZeroAll();
 image = new UnitImages;
 sound = new UnitSounds;
@@ -811,7 +811,7 @@ Init();
 }
 
 
-Unit::Unit()
+Unit::Unit():cumulative_transformation_matrix(identity_matrix)
 {
 	ZeroAll();
 	image = new UnitImages;
@@ -824,7 +824,7 @@ Unit::Unit()
 }
 
 
-Unit::Unit (std::vector <Mesh *> & meshes, bool SubU, int fact)
+Unit::Unit (std::vector <Mesh *> & meshes, bool SubU, int fact):cumulative_transformation_matrix(identity_matrix)
 {
 	ZeroAll();
 	image = new UnitImages;
@@ -847,7 +847,7 @@ Unit::Unit (std::vector <Mesh *> & meshes, bool SubU, int fact)
 
 
 extern void update_ani_cache();
-Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml)
+Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml):cumulative_transformation_matrix(identity_matrix)
 {
 	ZeroAll();
 	image = new UnitImages;
@@ -954,7 +954,7 @@ void Unit::ZeroAll( )
 	owner            = NULL;
 	// prev_physical_state has a constructor
 	// curr_physical_state has a constructor
-	// cumulative_transformation_matrix has a constructor
+	//cumulative_transformation_matrix has a constructor
 	// cumulative_transformation has a constructor
 	cumulative_velocity.i = 0;
 	cumulative_velocity.j = 0;
@@ -1835,7 +1835,8 @@ bool CloseEnoughToAutotrack (Unit * me, Unit * targ, float &cone)
 
 float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range, bool turnmargin) const
 {
-	Vector Normal (cumulative_transformation_matrix.getR().Normalize());
+	Vector Normal (cumulative_transformation_matrix.getR());
+        Normalize(Normal);
 	//   if (range!=FLT_MAX) {
 	//     getAverageGunSpeed(speed,range);
 	//   }
