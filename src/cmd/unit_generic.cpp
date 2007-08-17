@@ -7962,7 +7962,7 @@ bool Unit::ReduceToTemplate()
 	const Unit * temprate = makeFinalBlankUpgrade (name,faction);
 	bool success=false;
 	double pct=0;
-	if (temprate->name!=string("LOAD_FAILED")) {
+	if (temprate&&temprate->name!=string("LOAD_FAILED")) {
 		success = Upgrade(temprate,-1,-1,0,true,pct,NULL,true);
 		if (pct>0)
 			success=true;
