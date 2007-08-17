@@ -460,7 +460,7 @@ AutoLongHaul::AutoLongHaul (bool fini, int accuracy):ChangeHeading(QVector(0,0,1
 
 void AutoLongHaul::SetParent(Unit *parent1){
 	ChangeHeading::SetParent(parent1);
-	MatchLinearVelocity *temp = new MatchLinearVelocity(Vector(0,0,parent1->GetComputerData().max_speed()),true,false,false);
+	MatchLinearVelocity *temp = new MatchLinearVelocity(Vector(0,0,parent1->GetComputerData().max_combat_speed/*won't do insanity flight mode + spec = ludicrous speed*/),true,false,false);
 	temp->SetParent(parent1);
 	Order::EnqueueOrder(temp);
 }
@@ -484,6 +484,30 @@ QVector AutoLongHaul::NewDestination(const QVector&curnewdestination, double mag
 static float mymax(float a, float b) {
   return a>b?a:b;
 }
+static float mymin(float a, float b) {
+  return a<b?a:b;
+}
+
+bool useJitteryAutopilot(Unit * parent, Unit*target) {
+  static float specInterdictionLimit=XMLSupport::parse_float(vs_config->getVariable("physics","min_spec_interdiction_for_jittery_autopilot",".05"));
+
+  if (target->isPlanet()==false&&(target->graphicOptions.specInterdictionOnline==0||fabs(target->specInterdiction)<specInterdictionLimit)) {
+    return true;
+  }
+  if (parent->computer.combat_mode==false) {
+    return true;
+  }
+  float mass=parent->GetMass();
+  if (mass==0) return true;
+  static float accel_auto_limit=XMLSupport::parse_float(vs_config->getVariable("physics","max_accel_for_smooth_autopilot","10"));
+  float minaccel=mymin(parent->limits.lateral,mymin(parent->limits.vertical,mymin(parent->limits.forward,parent->limits.retro)))/mass;
+  if (minaccel<accel_auto_limit) {
+    return true;
+  }
+  return false;
+}
+
+
 void AutoLongHaul::Execute() {
   Unit * target = parent->Target();
   if (target==NULL){
@@ -540,8 +564,7 @@ void AutoLongHaul::Execute() {
   if(parent->graphicOptions.InWarp==0&&parent->graphicOptions.RampCounter==0) {
     deactivatewarp=false;
   }
-  static float specInterdictionLimit=XMLSupport::parse_float(vs_config->getVariable("physics","min_spec_interdiction_for_jittery_autopilot",".05"));
-  if (StraightToTarget&&target->graphicOptions.specInterdictionOnline&&target->isPlanet()==false&&fabs(target->specInterdiction)<specInterdictionLimit) {
+  if (StraightToTarget&&useJitteryAutopilot(parent,target)) {
 	 QVector cvel=parent->cumulative_velocity.Cast();
 	 float speed=cvel.Magnitude();
 	 if (speed>.01)
