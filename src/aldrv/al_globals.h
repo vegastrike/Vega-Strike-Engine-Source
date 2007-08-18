@@ -65,7 +65,7 @@ struct AUDSoundProperties {
 	}
 };
 
-bool AUDLoadSoundFile(const char *s, struct AUDSoundProperties *info);
+bool AUDLoadSoundFile(const char *s, struct AUDSoundProperties *info, bool use_fileptr=false);
 
 // It is up to the caller to free(info.wave) after using!!!
 int AUDBufferSound(const struct AUDSoundProperties *info, bool music);
