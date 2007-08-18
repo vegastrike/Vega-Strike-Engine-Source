@@ -172,9 +172,11 @@ StarSystem *	ZoneMgr::addClient( ClientPtr cltw, string starsys, unsigned short 
 
 	//QVector safevec;
 	Unit *addun = clt->game_unit.GetUnit();
-	if (addun)
+	if (addun) {
+		_Universe->netLock(true);
 		sts->AddUnit( addun );
-	else
+		_Universe->netLock(false);
+	} else
 		cerr << "dead client attempted to be added to system: refusing\n";
 	return sts;
 }

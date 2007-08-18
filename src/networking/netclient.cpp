@@ -352,6 +352,7 @@ int NetClient::checkMsg( Packet* outpacket )
         ret = recvMsg( outpacket, &tv );
     }
 	if (ret==-1) {
+		NetClient::CleanUp(); // Kill networking!!!
 		UniverseUtil::startMenuInterface(false, "Connection to VegaServer closed.");
 		return -1;
 	}

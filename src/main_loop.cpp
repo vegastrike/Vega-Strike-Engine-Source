@@ -915,36 +915,26 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 		  {
 			_Universe->pushActiveStarSystem (_Universe->AccessCockpit(squadnum)->activeStarSystem);
             _Universe->SetActiveCockpit(_Universe->AccessCockpit(squadnum));
-
- 			// In networking mode we name the ship save with .xml as they are xml files
-			if( Network!=NULL && backupcp!=NULL)
-			{
-				cout<<"CREATING A NETWORK PLAYER : "<<fightername<<endl;
-				//modifications = modifications+".xml";
-				fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],"",fg,s, &savefiles[squadnum][1]);
-				// Set the faction we have in the save file instead of the mission file (that is to be ignored in networking mode)
-				fighters[a]->faction = FactionUtil::GetFactionIndex( cp->savegame->GetPlayerFaction());
-				
+		  }
+		  // In networking mode we name the ship save with .xml as they are xml files
+		  if( Network!=NULL && squadnum<(int)fighter0name.size()) {
+//				if (backupcp==NULL) {
+					cout<<"CREATING A NETWORK PLAYER : "<<fightername<<endl;
+					//modifications = modifications+".xml";
+					fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],"",fg,s, &savefiles[squadnum][1]);
+					// Set the faction we have in the save file instead of the mission file (that is to be ignored in networking mode)
+					fighters[a]->faction = FactionUtil::GetFactionIndex( cp->savegame->GetPlayerFaction());
+					fighters[a]->SetNetworkMode();
+					fighters[a]->SetSerial(Network[squadnum].serial);
+					Network[squadnum].setUnit( fighters[a]);
+					cout<<"Creating fighter["<<squadnum<<"] from "<<modifications<<" on Network["<<squadnum<<"] named "<<Network[squadnum].getCallsign()<<endl;
+//				}
 			}
 			else
 			{
 				cout<<"CREATING A LOCAL SHIP : "<<fightername<<endl;
   				fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s);
 			}
-			if( Network!=NULL && backupcp != NULL)
-			{
-				fighters[a]->SetNetworkMode();
-				fighters[a]->SetSerial(Network[squadnum].serial);
-				Network[squadnum].setUnit( fighters[a]);
-				cout<<"Creating fighter["<<squadnum<<"] from "<<modifications<<" on Network["<<squadnum<<"] named "<<Network[squadnum].getCallsign()<<endl;
-			}
-		  }
-		  else
-			{
-				cout<<"CREATING A LOCAL SHIP : "<<fightername<<endl;
-				fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s);
-			}
-
 		  _Universe->activeStarSystem()->AddUnit(fighters[a]);
 		  if (s==0&&squadnum<(int)fighter0name.size())
 		  {

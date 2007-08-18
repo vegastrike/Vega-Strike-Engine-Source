@@ -207,7 +207,9 @@ Nebula *UnitFactory::parseNebulaBuffer(NetBuffer &netbuf)
 	return UnitFactory::createNebula( file.c_str(), sub, faction, fg, fg_num, serial);
 }
 
-void UnitFactory::addMissileBuffer( NetBuffer & netbuf, const char * filename,
+void UnitFactory::addMissileBuffer( NetBuffer & netbuf, const string &filename,
+		               const string &name,
+		               const string &fullname,
                                      int faction,
                                      const string &modifications,
 		                             const Transformation &curr_physical_state,
@@ -220,10 +222,13 @@ void UnitFactory::addMissileBuffer( NetBuffer & netbuf, const char * filename,
 {
 		netbuf.addChar(ZoneMgr::AddMissile);
 		netbuf.addSerial( netcreate);
-		netbuf.addString( string (filename));
+		netbuf.addString( filename);
+		netbuf.addString( name);
+		netbuf.addString( fullname);
+		
 		netbuf.addInt32( faction);
-		netbuf.addString( string( modifications));
-		netbuf.addFloat( float(damage));
+		netbuf.addString( modifications);
+		netbuf.addFloat( damage);
 		netbuf.addFloat( phasedamage);
 		netbuf.addFloat( time);
 		netbuf.addFloat( radialeffect);
@@ -233,8 +238,9 @@ void UnitFactory::addMissileBuffer( NetBuffer & netbuf, const char * filename,
 }
 
 void UnitFactory::addMissileBuffer( NetBuffer & netbuf, const Missile *mis) {
-	addMissileBuffer( netbuf, mis->getFilename().c_str(), mis->faction, "" /* modifications */, mis->curr_physical_state,
-		mis->damage, mis->phasedamage, mis->time, mis->radial_effect, mis->radial_multiplier, mis->detonation_radius, mis->GetSerial());
+	addMissileBuffer( netbuf, mis->getFilename().c_str(), mis->name, mis->getFullname(), mis->faction,
+		"" /* modifications */, mis->curr_physical_state, mis->damage, mis->phasedamage, mis->time,
+		mis->radial_effect, mis->radial_multiplier, mis->detonation_radius, mis->GetSerial());
 }
 
 
@@ -242,6 +248,8 @@ Missile *UnitFactory::parseMissileBuffer(NetBuffer &netbuf)
 {
 	ObjSerial serial = netbuf.getSerial();
 	string file( netbuf.getString());
+	string name( netbuf.getString());
+	string fullname( netbuf.getString());
 	int faction = netbuf.getInt32();
 	string mods( netbuf.getString());
 	const float damage( netbuf.getFloat());
@@ -256,6 +264,8 @@ Missile *UnitFactory::parseMissileBuffer(NetBuffer &netbuf)
 
 	Missile *mis = createMissile( file.c_str(), faction, modifs, damage, phasedamage, time, radialeffect, radmult, detonation_radius, serial);
 	mis->curr_physical_state = netbuf.getTransformation();
+	mis->name = name;
+	mis->fullname = fullname;
 	return mis;
 }
 

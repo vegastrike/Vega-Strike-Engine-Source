@@ -78,6 +78,9 @@ public:
 	string			passwd;
 	/* In-game parameters */
 	bool			ingame;
+	enum Loginstate {CONNECTED, LOGGEDIN, SAVEDGAME, INGAME};
+	int loginstate;
+	
 	char			webcam;
 	char			portaudio;
 	char			secured;

@@ -192,8 +192,6 @@ void NetServer::chooseShip(ClientPtr clt, Packet &p) {
 
 void NetServer::localLogin( ClientPtr clt, Packet &p) {
 	if (!clt) return;
-	vector<string> ships;
-	getShipList(ships);
 	
 	NetBuffer netbuf(p.getData(), p.getDataLength());
 	clt->callsign = netbuf.getString();
@@ -202,7 +200,17 @@ void NetServer::localLogin( ClientPtr clt, Packet &p) {
 		this->sendLoginError(clt);
 		return;
 	}
+	for (int i=0; i<_Universe->numPlayers(); i++) {
+		Cockpit *cp = _Universe->AccessCockpit(i);
+		if (cp->savegame && cp->savegame->GetCallsign() == clt->callsign) {
+			COUT << "Cannot login player "<<clt->callsign<<": already exists on this server!";
+			sendLoginAlready(clt);
+			return;
+		}
+	}
 	netbuf.Reset();
+	vector<string> ships;
+	getShipList(ships);
 	netbuf.addShort(ships.size());
 	for (vector<string>::const_iterator iter = ships.begin(); iter!=ships.end(); ++iter) {
 		netbuf.addString(*iter);
@@ -213,20 +221,23 @@ void NetServer::localLogin( ClientPtr clt, Packet &p) {
 
 Cockpit * NetServer::loadFromNewGame( ClientPtr clt, string fighter ) {
 	ObjSerial cltserial = getUniqueSerial();
-	Cockpit *cp = NULL;
-	for (int i=0; i<_Universe->numPlayers(); i++) {
-		cp = _Universe->AccessCockpit(i);
-		if (cp->savegame->GetCallsign() == clt->callsign) {
-			// awesome! this player already has a cockpit.
-			break;
-		} else {
-			cp = NULL;
+	for (int i=0;i<_Universe->numPlayers();i++) {
+		if (_Universe->AccessCockpit(i)->savegame->GetCallsign() == clt->callsign) {
+			sendLoginAlready(clt);
+			return NULL;
 		}
+	}
+	Cockpit *cp = NULL;
+	if (!unused_players.empty()) {
+		cp = _Universe->AccessCockpit(unused_players.back());
+		unused_players.pop();
 	}
 	if (cp == NULL) {
 		cp = _Universe->createCockpit( clt->callsign );
-		cp->Init ("");
+	} else {
+		cp->recreate(clt->callsign);
 	}
+	clt->loginstate = Client::LOGGEDIN;
 	string PLAYER_SHIPNAME = fighter;
 	Mission *mission = NULL;
 	if (active_missions.size()>0) {
@@ -247,6 +258,7 @@ Cockpit * NetServer::loadFromNewGame( ClientPtr clt, string fighter ) {
 	COUT<<"\tcredits = "<<cp->savegame->GetSavedCredits()<<endl;
 	COUT<<"\tfaction = "<<cp->savegame->GetPlayerFaction()<<endl;
 	COUT<<"-> SAVE LOADED"<<endl;
+	cp->credits = cp->savegame->GetSavedCredits();
 
 	// WARNING : WE DON'T SAVE FACTION NOR FLIGHTGROUP YET
 	COUT<<"-> UNIT FACTORY WITH XML"<<endl;
@@ -311,19 +323,22 @@ Cockpit * NetServer::loadFromSavegame( ClientPtr clt ) {
 	vector<string> savedships;
 	string str("");
 	Cockpit *cp = NULL;
-	for (int i=0; i<_Universe->numPlayers(); i++) {
-		cp = _Universe->AccessCockpit(i);
-		if (cp->savegame->GetCallsign() == clt->callsign) {
-			// awesome! this player already has a cockpit.
-			break;
-		} else {
-			cp = NULL;
+	for (int i=0;i<_Universe->numPlayers();i++) {
+		if (_Universe->AccessCockpit(i)->savegame->GetCallsign() == clt->callsign) {
+			sendLoginAlready(clt);
+			return NULL;
 		}
+	}
+	if (!unused_players.empty()) {
+		cp = _Universe->AccessCockpit(unused_players.back());
+		unused_players.pop();
 	}
 	if (cp == NULL) {
 		cp = _Universe->createCockpit( clt->callsign );
-		cp->Init ("");
+	} else {
+		cp->recreate(clt->callsign);
 	}
+	clt->loginstate = Client::LOGGEDIN;
 	COUT<<"-> LOADING SAVE FROM NETWORK"<<endl;
 	cp->savegame->ParseSaveGame( "", str, "", tmpvec, update, credits, savedships, cltserial, clt->savegame[0], false);
 	// Generate the system we enter in if needed and add the client in it

@@ -78,11 +78,11 @@ class NetServer
 		int				acctserver;				// Tells if we use an account server
 		// If we don't use an account server:
 		string				server_password;
-		vector<string>		shipSelections;
 		
 		timeval				srvtimeout;			// timer
+		std::queue<int>			unused_players;
 
-		vector<Account *>	Cltacct;			// Client accounts
+//		vector<Account *>	Cltacct;			// Client accounts
         ClientList          allClients;         // Active TCP and UDP client connections
 		ClientList          discList;			// Client connections to be disconnected
 		ClientList          logoutList;			// Client connections that logged out

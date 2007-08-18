@@ -257,6 +257,10 @@ void Cockpit::Respawn (const KBData&,KBSTATE k) {
 }
 */
 
+void Cockpit::recreate(const std::string &pilot_name) {
+	savegame->SetCallsign(pilot_name);
+	Init("");
+}
 static void FaceTarget (Unit * un) {
   Unit * targ = un->Target();
   if (targ) {

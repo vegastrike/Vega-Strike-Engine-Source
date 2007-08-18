@@ -552,6 +552,7 @@ bool NetActionConfirm::confirmedNetSaveGame() {
 
 bool NetActionConfirm::confirmedJoinGame() {
 	string user, pass,  err;
+	NetClient::CleanUp();
 	GameMenu::readJoinGameControls(m_parent, user, pass);
 	
 	UniverseUtil::showSplashScreen(string());
@@ -578,17 +579,17 @@ bool NetActionConfirm::confirmedJoinGame() {
 // Caller is responsible for closing the window afterwards. (?)
 //static
 bool NetActionConfirm::finalizeJoinGame(int launchShip) {
+	if (!UniverseUtil::isSplashScreenShowing()) {
+		UniverseUtil::showSplashScreen("");
+		UniverseUtil::showSplashMessage("#cc66ffNETWORK: Loading saved game.");
+	}
+
 	if (!Network[player].loginSavedGame(launchShip)) {
 		showAlert("Error when logging into game with this ship!");
 		if (window()) window()->close();
 		NetClient::CleanUp();
 		return false;
 	}
-	if (!UniverseUtil::isSplashScreenShowing()) {
-		UniverseUtil::showSplashScreen("");
-		UniverseUtil::showSplashMessage("#cc66ffNETWORK: Loading saved game.");
-	}
-
 	Cockpit *cp = NULL;
 	Unit *playun = NULL;
 	if (_Universe) {

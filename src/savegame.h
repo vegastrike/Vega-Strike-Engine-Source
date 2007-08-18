@@ -47,7 +47,8 @@ class SaveGame {
 
   ~SaveGame();
   void ReloadPickledData();
-  std::string GetCallsign() {return callsign;}
+  const std::string &GetCallsign() const {return callsign;}
+  void SetCallsign(const std::string &cs) {callsign=cs;}
   std::vector<float> &getMissionData(const std::string &magic_number);
   unsigned int getMissionDataLength(const std::string &magic_number) const;
   std::vector<StringPool::Reference> &getMissionStringData(const std::string &magic_number);

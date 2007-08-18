@@ -69,7 +69,14 @@ void	NetClient::enterClient( NetBuffer &netbuf, ObjSerial cltserial )
 			// CREATES THE UNIT... GET SAVE AND XML FROM SERVER
 			// Use the first ship if there are more than one -> we don't handle multiple ships for now
 			// We name the flightgroup with the player name
-			cerr<<"Found saveship[0] = "<<savedships[0]<<endl;
+			if (savedships.empty()) {
+				cerr<<"savedships is empty!!!"<<endl;
+				cerr<<"SAVEGAME: "<<endl<<savestr<<"-------"<<endl;
+				cerr<<"SHIPCSV: "<<endl<<xmlstr<<"-------"<<endl;
+				return;
+			} else {
+				cerr<<"Found saveship[0] = "<<savedships[0]<<endl;
+			}
 			cerr<<"NEW PLAYER POSITION : x="<<pos.i<<",y="<<pos.j<<"z="<<pos.k<<endl;
                   
 			cerr<<"SAFE PLATER POSITION: x="<<pos.i<<",y="<<pos.j<<"z="<<pos.k<<endl;

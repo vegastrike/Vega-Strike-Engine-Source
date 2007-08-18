@@ -124,6 +124,7 @@ protected:
   virtual float LookupTargetStat (int stat, Unit *target) {return 1;}
   ///Loads cockpit info...just as constructor
 	virtual void Init (const char * file, bool defaultCockpit=false);
+  void recreate(const std::string &pilotname);
   ///Sets owner of this cockpit
   //  unsigned int whichcockpit;//0 is the first player, 1 is the second and so forth
   class Flightgroup * fg;

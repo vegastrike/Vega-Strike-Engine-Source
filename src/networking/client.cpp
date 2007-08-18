@@ -17,6 +17,7 @@ void Client::Init()
 	prediction = new LinearPrediction();
 	old_timeout=0;
 	ingame = false;
+	loginstate = CONNECTED;
 	webcam = 0;
 	portaudio = 0;
 	secured = 0;

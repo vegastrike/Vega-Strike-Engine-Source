@@ -742,7 +742,9 @@ void Music::InitMuzak()
 void Music::CleanupMuzak()
 {
     if (muzak) {
-        delete[] muzak;
+//        delete[] muzak;
+		// Multithreading issues... don't care to waste time here waiting to get the lock back.
+		// Let the OS clean up this mess!
         muzak=NULL;
         muzak_count=0;
     }

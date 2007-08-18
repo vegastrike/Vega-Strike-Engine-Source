@@ -36,6 +36,7 @@
 #include "networking/client.h"
 #include "networking/lowlevel/packet.h"
 #include "lin_time.h"
+#include "python/init.h"
 #include "networking/netserver.h"
 #include "networking/lowlevel/vsnet_serversocket.h"
 #include "networking/lowlevel/vsnet_debug.h"
@@ -280,8 +281,10 @@ void	NetServer::start(int argc, char **argv)
 	_Universe = new Universe( argc, argv, universe_file.c_str(), true);
 	cout<<"Universe LOADED"<<endl;
 	string strmission = vs_config->getVariable( "server", "missionfile", "networking.mission");
+	Python::init();
+	Python::test();
 	active_missions.push_back( mission = new Mission( strmission.c_str()));
-	mission->initMission( false);
+	mission->initMission( true);
 
 	// Loads dynamic universe
 	string dynpath = "dynaverse.dat";
@@ -301,14 +304,19 @@ void	NetServer::start(int argc, char **argv)
         std::vector<std::vector <char > > temp = ROLES::getAllRolePriorities();
 	{
 		char hostName[128];
+		hostName[0]='\0';
 		gethostname(hostName, 128);
-		hostent *local = gethostbyname(hostName);
+		hostent *local = NULL;
 		cout << endl << endl << " ======== SERVER IS NOW RUNNING ========" << endl;
 		const AddressIP &adr = this->tcpNetwork->get_adr();
 		cout << "    Server Port: " << ntohs(adr.sin_port) << endl;
 		cout << "    Server IP Addresses: " << endl;
 //		cout << "        localhost (Local computer only)" << endl;
 		int num = 0;
+		if (hostName[0]) {
+//			cout << "        " << hostName << " (requires DNS lookup) "
+			local = gethostbyname(hostName);
+		}
 		if (local) {
 			in_addr **localaddr = (in_addr **)local->h_addr_list;
 			for (int i=0; i<5 && localaddr[i]; i++) {
@@ -332,7 +340,12 @@ void	NetServer::start(int argc, char **argv)
 			}
 		}
 		if (!num) {
-			cout << "        (You must look up other IP addresses in your system properties.)" << endl;
+			cout << "        No network interfaces found associated to your hostname." << endl;
+#ifdef _WIN32
+			cout << "        (Consult Start-> Run-> 'cmd /k ipconfig' for your IP.)" << endl;
+#else
+			cout << "        (Consult the '/sbin/ifconfig' command-line tool for your IP.)" << endl;
+#endif
 		}
 		cout << "        You can also connect locally using 'localhost'" << endl;
 		if (acctserver) {
@@ -713,6 +726,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			break;
 		case CMD_LOGIN:
         {
+			if (!clt) break;
             COUT<<">>> LOGIN REQUEST --------------------------------------"<<endl;
             // Authenticate client
             // Need to give the IP address of incoming message in UDP mode to store it
@@ -730,23 +744,12 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				SOCKETALT tmpsock;
 				const AddressIP* iptmp;
 				WaitListEntry entry;
-				if( clt )
-				{
-					// This must be a TCP client
-					entry.tcp = true;
-					entry.t   = clt;
-					this->waitList.push( entry );
-					iptmp = &clt->cltadr;
-					tmpsock = clt->tcp_sock;
-				}
-				else
-				{
-					entry.tcp = false;
-					entry.u   = ipadr;
-					this->waitList.push( entry );
-					iptmp = &ipadr;
-					COUT << "Waiting authorization for client IP : " << ipadr << endl;
-				}
+				// This must be a TCP client
+				entry.tcp = true;
+				entry.t   = clt;
+				this->waitList.push( entry );
+				iptmp = &clt->cltadr;
+				tmpsock = clt->tcp_sock;
 
 				// Redirect the login request packet to account server
 				COUT << "Redirecting login request to account server on socket " << *acct_sock << endl
@@ -756,21 +759,28 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				NetBuffer netbuf (packet.getData(),packet.getDataLength());
 				std::string user = netbuf.getString();
 				std::string passwd = netbuf.getString();
-				addSimpleString(redirect, user);
-				addSimpleString(redirect, passwd);
-				
-				if (!acct_sock->sendstr(redirect))//NETFIXME is this in http format or binary format
-				{
-					perror( "FATAL ERROR sending redirected login request to ACCOUNT SERVER : ");
-					COUT<<"SOCKET was : "<<acct_sock<<endl;
-					this->sendLoginUnavailable( clt );
-//					VSExit(1);
+				for (int i=0; i<_Universe->numPlayers(); i++) {
+					Cockpit *cp = _Universe->AccessCockpit(i);
+					if (cp->savegame && cp->savegame->GetCallsign() == user) {
+						COUT << "Cannot login player "<<user<<": already exists on this server!";
+						sendLoginAlready(clt);
+						user="";
+					}
 				}
-                                getSimpleChar(redirect);
-                                if (clt){
-                                  clt->callsign=getSimpleString(redirect);
-                                  clt->passwd=getSimpleString(redirect);
-                                }
+				if (!user.empty()) {
+					addSimpleString(redirect, user);
+					addSimpleString(redirect, passwd);
+					
+					if (!acct_sock->sendstr(redirect))//NETFIXME is this in http format or binary format
+					{
+						perror( "FATAL ERROR sending redirected login request to ACCOUNT SERVER : ");
+						COUT<<"SOCKET was : "<<acct_sock<<endl;
+						this->sendLoginUnavailable( clt );
+					}
+					getSimpleChar(redirect);
+					clt->callsign=getSimpleString(redirect);
+					clt->passwd=getSimpleString(redirect);
+				}
             }
             COUT<<"<<< LOGIN REQUEST --------------------------------------"<<endl;
         }
@@ -1241,6 +1251,11 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 					}
 				}
 			}
+			if (sender_cpt) {
+				// The client always needs to get credits back, no matter what.
+				sendCredits(sender->GetSerial(), sender_cpt->credits);
+				// Otherwise, it will get stuck with 0 credits.
+			}
 			if (didMoney) {
 				ObjSerial buyer_ser = buyer?buyer->GetSerial():0;
 				if (!upgrade) {
@@ -1252,11 +1267,6 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 										  carg.GetPrice(), carg.GetMass(), carg.GetVolume(), false,
 										  weapon?0:1,mountOffset, subunitOffset,zone);
 				}
-			}
-			if (sender_cpt) {
-				// The client always needs to get credits back, no matter what.
-				sendCredits(sender->GetSerial(), sender_cpt->credits);
-				// Otherwise, it will get stuck with 0 credits.
 			}
 			// Completed transaction.
 			// Send player new amount of credits.

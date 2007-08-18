@@ -11,7 +11,6 @@
 #include "vs_random.h"
 #include "load_mission.h"
 #include "cmd/script/mission.h"
-#include "python/init.h"
 extern QVector DockToSavedBases( int n);
 extern StarSystem * GetLoadedStarSystem( const char * system);
 
@@ -175,12 +174,6 @@ void	NetServer::addClient( ClientPtr clt)
 
 	COUT<<"ADDED client n "<<un->GetSerial()<<" in ZONE "<<un->activeStarSystem->GetZone()<<" at STARDATE "<<_Universe->current_stardate.GetFullTrekDate()<<endl;
         if (active_missions.size()==1) {
-          static bool doneinit=false;
-          if (!doneinit) {
-            Python::init();
-            Python::test();
-            doneinit=true;
-          }
           LoadMission("",vs_config->getVariable("server","serverscript","import server;server.server();"),false);
         }
 		sendCargoSnapshot(un->GetSerial(), st2->getUnitList());
@@ -498,37 +491,8 @@ void	NetServer::disconnect( ClientPtr clt, const char* debug_from_file, int debu
          << " *** from " << debug_from_file << ":" << debug_from_line << endl
          << " *** disconnecting " << clt->callsign << " because of "
          << clt->_disconnectReason << endl;
-
-	Unit * un = clt->game_unit.GetUnit();
-
-	if( acctserver )
-	{
-	    // Send a disconnection info to account server
-          AcctLogout(acct_sock,clt);
-	}
-
-	clt->tcp_sock.disconnect( __PRETTY_FUNCTION__);
-	if( un )
-    {
-	    COUT << "User " << clt->callsign << " with serial "<<un->GetSerial()<<" disconnected" << endl;
-    }
-    else
-    {
-		COUT<<"!!! ERROR : UNIT==NULL !!!"<<endl;
-		// Never should cause server to exit because of a client error.
-		// VSExit(1);
-    }
-	COUT << "There were " << allClients.size() << " clients - ";
-	allClients.remove( clt );
 	
-	// Removes the client from its starsystem
-	this->removeClient( clt );
-	// Say true as 2nd arg because we don't want the server to broadcast since player is leaving hte game
-	if( un)
-		un->Kill( true, true);
-	clt.reset();
-	COUT << allClients.size() << " clients left" << endl;
-	nbclients--;
+	logout(clt);
 }
 
 /*** Same as disconnect but do not respond to client since we assume clean exit ***/
@@ -537,22 +501,32 @@ void	NetServer::logout( ClientPtr clt )
 	Packet p, p1, p2;
 	std::string netbuf;
 	Unit * un = clt->game_unit.GetUnit();
+	std::string callsign = clt->callsign;
 
-	if( acctserver)
-	{
-          AcctLogout(acct_sock,clt);
+	if( acctserver && clt->loginstate >= Client::LOGGEDIN) {
+		AcctLogout(acct_sock,clt);
 	}
 
 	clt->tcp_sock.disconnect( __PRETTY_FUNCTION__ );
 	COUT <<"Client "<<clt->callsign<<" disconnected"<<endl;
-	COUT <<"There was "<< allClients.size() <<" clients - ";
+	COUT <<"There were "<< allClients.size() <<" clients - ";
 	allClients.remove( clt );
 	// Removes the client from its starsystem
-	if( clt->ingame==true)
-		this->removeClient( clt );
+	this->removeClient( clt );
 	// Say true as 2nd arg because we don't want the server to broadcast since player is leaving hte game
 	if( un)
 		un->Kill( true, true);
+
+	if (clt->loginstate >= Client::LOGGEDIN) {
+		for (int i=0;i<_Universe->numPlayers();i++) {
+			Cockpit *cp = _Universe->AccessCockpit(i);
+			if (cp->savegame && cp->savegame->GetCallsign() == callsign) {
+				cp->savegame->SetCallsign("");
+				unused_players.push(i);
+			}
+		}
+	}
+	
 	clt.reset( );
 	COUT << allClients.size() <<" clients left"<<endl;
 	nbclients--;

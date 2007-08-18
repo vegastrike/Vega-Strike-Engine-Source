@@ -126,7 +126,7 @@ int NetClient::loginLoop(string &error) {
 	if(lastsave.empty() || lastsave[0]=="")
 	{
 		if (ship_select_list.empty()) {
-			error = "No ships to choose from!";
+			error = "Login failure!";
 		}
 		return ship_select_list.size();
 	}
@@ -432,7 +432,7 @@ SOCKETALT	NetClient::init( const char* addr, unsigned short port, std::string &e
 		int recvd=this->recvMsg( &packet, &tv );
 		if( recvd==0 )
 		{
-			error = "Connection to game server timed out !!!";
+			error = "Connection to game server timed out!";
 			timeout = 1;
 		} else if (recvd<0) {
 			char str[127];
@@ -450,7 +450,8 @@ SOCKETALT	NetClient::init( const char* addr, unsigned short port, std::string &e
 		}
 	}
 	if (!this->server_netversion) {
-		error = "No serial received from server.";
+		if (error.empty())
+			error = "Unable to receive a valid version from this server.";
 		timeout = 1;
 	}
 	if (timeout) {

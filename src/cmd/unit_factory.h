@@ -175,7 +175,9 @@ public:
 	static void addNebulaBuffer( NetBuffer & netbuf, const Nebula *neb);
 	static Nebula *parseNebulaBuffer(NetBuffer &netbuf);
 
-	static void addMissileBuffer( NetBuffer & netbuf, const char * filename,
+	static void addMissileBuffer( NetBuffer & netbuf, const string &filename,
+                                     const string &name,
+                                     const string &fullname,
                                      int faction,
                                      const string &modifications,
                                      const Transformation &curr_physical_state,
