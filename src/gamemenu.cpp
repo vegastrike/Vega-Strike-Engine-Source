@@ -559,6 +559,7 @@ bool NetActionConfirm::confirmedJoinGame() {
 	if (numships) {
 		const vector<string> &shipList = Network[player].shipSelections();
 		if (shipList.size()>1) {
+			UniverseUtil::hideSplashScreen();
 			showListQuestion("Select a ship to fly", shipList,
 				new ShipSelectorCallback(this), "ShipSelected" );
 		} else {

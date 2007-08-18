@@ -2,33 +2,24 @@
 
 using namespace std;
 
-#if (defined(_WIN32) && defined(_MSC_VER)) || defined( __MINGW32__)
-  /*
-   * nothing if WIN32
-   */
-ostream& vsnetDbgOut( const char* file, int line )
-{
-    clog << file << " ";
-    return clog;
-}
-
-#else /* not _WIN32 or _MSC_VER */
-
 #include <time.h>
 
 #if !defined(_WIN32)
 #include <sys/time.h>
+#else
+#include <winsock.h>
 #endif
 
 struct TimeTriggerStruct { };
 
 static TimeTriggerStruct time_trigger;
-
 ostream& operator<<( ostream& ostr, const TimeTriggerStruct& c )
 {
+#ifndef _WIN32
     struct timeval tv;
     gettimeofday( &tv, NULL );
     ostr << tv.tv_sec << ":" << tv.tv_usec;
+#endif
     return ostr;
 }
 
@@ -48,5 +39,4 @@ ostream& vsnetDbgOut( const char* file, int line )
     return clog;
 }
 
-#endif
 

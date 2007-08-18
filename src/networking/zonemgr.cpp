@@ -189,7 +189,7 @@ void	ZoneMgr::removeClient( ClientPtr clt )
 	StarSystem * sts;
 	Unit * un = clt->game_unit.GetUnit();
 	unsigned int zonenum = 0;
-	if (un)
+	if (un && un->activeStarSystem)
 		zonenum = un->activeStarSystem->GetZone();
 	for (; zonenum < zone_list.size(); ++zonenum) {
 		bool found=false;

@@ -49,11 +49,13 @@ void ModalDialog::run(void) {
 void ModalDialog::modalFinished() {
 	globalEventManager().removeResponder(window());
 	// One of our buttons was clicked.  We're done.
+	m_deleteOnWindowClose = false; // Prevent deleting until we are done.
 	window()->close();
 	
 	if(m_callback) {
 		m_callback->modalDialogResult(m_callbackId, m_result, *this);
 	}
+	delete this;
 }
 
 // Process a command from the window.

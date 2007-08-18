@@ -299,6 +299,60 @@ void	NetServer::start(int argc, char **argv)
 		f.Close();
 	}
         std::vector<std::vector <char > > temp = ROLES::getAllRolePriorities();
+	{
+		char hostName[128];
+		gethostname(hostName, 128);
+		hostent *local = gethostbyname(hostName);
+		cout << endl << endl << " ======== SERVER IS NOW RUNNING ========" << endl;
+		const AddressIP &adr = this->tcpNetwork->get_adr();
+		cout << "    Server Port: " << ntohs(adr.sin_port) << endl;
+		cout << "    Server IP Addresses: " << endl;
+//		cout << "        localhost (Local computer only)" << endl;
+		int num = 0;
+		if (local) {
+			in_addr **localaddr = (in_addr **)local->h_addr_list;
+			for (int i=0; i<5 && localaddr[i]; i++) {
+				string ipaddr = inet_ntoa(*(localaddr[i]));
+				if (ipaddr.substr(0,4)=="127.") {
+					continue;
+//					cout << " (Local computer only)";
+				} else {
+					cout << "        " << ipaddr;
+					num++;
+					if (ipaddr.substr(0,8)=="169.254.") {
+						cout << " (Ethernet connection)";
+					} else if (ipaddr.substr(0,8)=="192.168." ||
+							ipaddr.substr(0,3)=="10.") {
+						cout << " (Local Area Network)";
+					} else {
+						cout << " (Internet Connection)";
+					}
+				}
+				cout << endl;
+			}
+		}
+		if (!num) {
+			cout << "        (You must look up other IP addresses in your system properties.)" << endl;
+		}
+		cout << "        You can also connect locally using 'localhost'" << endl;
+		if (acctserver) {
+			cout << "    Public Server: " << endl << "    ";
+			if (acctsrv.length()>75) {
+				cout << acctsrv.substr(0,50) << "..." << acctsrv.substr(acctsrv.length()-20,20) << endl;
+			} else {
+				cout << acctsrv << endl;
+			}
+		} else {
+			if (this->server_password.empty()) {
+				cout << "    Private Server" << endl;
+			} else {
+				cout << "    Private Server, Password Protected: <" << this->server_password << ">" << endl;
+			}
+		}
+		cout << " --------------------------------------- " << endl;
+		cout << "To stop this server, hit Ctrl-C, Ctrl-\\, Ctrl-Break, or close this window." << endl;
+		cout << endl << "Have fun!" << endl << endl;
+	}
 	// Server loop
 	while( keeprun)
 	{

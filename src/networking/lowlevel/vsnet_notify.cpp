@@ -166,7 +166,8 @@ File::~File( )
 
 void File::childSetSize( int len )
 {
-    string filename = _localbasepath + "/" + getFilename();
+	// string filename = _localbasepath + "/" + getFilename();
+	string filename = getFilename();
 
     _of = new VSFileSystem::VSFile;
 	VSFileSystem::VSError err = _of->OpenCreateWrite( filename.c_str(), this->_filetype );
