@@ -167,7 +167,6 @@ void	NetServer::addClient( ClientPtr clt)
 	// Add initial position to make sure the client is starting from where we tell him
 	netbuf.addTransformation(un->curr_physical_state);
 	pp.send( CMD_ADDEDYOU, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(170) );
-	
 	netbuf.Reset();
 	getZoneInfo(un->activeStarSystem->GetZone(), netbuf);
 	packet3.send( CMD_ENTERCLIENT, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(174) );
@@ -176,6 +175,7 @@ void	NetServer::addClient( ClientPtr clt)
         if (active_missions.size()==1) {
           LoadMission("",vs_config->getVariable("server","serverscript","import server;server.server();"),false);
         }
+	sendCredits(un->GetSerial(), cp->credits);
 		sendCargoSnapshot(un->GetSerial(), st2->getUnitList());
 	//delete cltsbuf;
 	//COUT<<"<<< SENT ADDED YOU -----------------------------------------------------------------------"<<endl;
