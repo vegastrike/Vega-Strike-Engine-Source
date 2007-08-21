@@ -532,7 +532,8 @@ void AutoLongHaul::Execute() {
       double obstacledistance=obstacledirection.Magnitude();
 
       obstacledirection=obstacledirection*(1./obstacledistance);//normalize the obstacle direction as well
-	  if (obstacledistance<destinationdistance&&obstacledirection.Dot(destinationdirection)>warp_behind_angle) {//if our obstacle is closer than obj and the obstacle is not behind us
+      float angle=obstacledirection.Dot(destinationdirection);
+      if (obstacledistance-obstacle->rSize()<destinationdistance-target->rSize()&&angle>warp_behind_angle) {//if our obstacle is closer than obj and the obstacle is not behind us
 			QVector planetdest=destination-obstacle->LocalPosition();//find the vector from planet to dest
 			QVector planetme=-obstacledirection;//obstacle to me
 			QVector planetperp=planetme.Cross(planetdest);//find vector out of that plane
