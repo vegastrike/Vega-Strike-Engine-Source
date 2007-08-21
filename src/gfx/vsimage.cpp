@@ -5,6 +5,7 @@
 #include "vsimage.h"
 #include "vs_globals.h"
 #include <png.h>
+#include "posh.h"
 #ifndef png_jmpbuf
 #  define png_jmpbuf(png_ptr) ((png_ptr)->jmpbuf)
 #endif
@@ -633,116 +634,104 @@ unsigned char *	VSImage::ReadBMP()
 
 #define IS_POT(x) (!((x) & ((x) -1)))
 
-#ifndef GL_COMPRESSED_RGB_S3TC_DXT1_EXT
-#define GL_COMPRESSED_RGB_S3TC_DXT1_EXT   0x83F0
-#endif
-#ifndef GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
-#define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT  0x83F1
-#endif
-#ifndef GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
-#define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT  0x83F2
-#endif
-#ifndef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
-#define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT  0x83F3
-#endif
-#ifndef GL_TEXTURE_COMPRESSION_HINT_ARB
-#define GL_TEXTURE_COMPRESSION_HINT_ARB   0x84EF
-#endif
-
 unsigned char *VSImage::ReadDDS()
 {
 	ddsHeader header;
-	unsigned char *d=NULL, *s=NULL;
+	GLenum internal = GL_NONE,type = GL_RGB;	
+	int blockSize = 16;
+	unsigned char *s=NULL;
+	unsigned int inputSize = 0;
+	int width=0;
+	int height=0;
     try {	
 	// Probably redundent, we already check this in CheckFormat
-	if( CheckDDSSignature( img_file)!=Ok){
-		cerr <<"VSImage ERROR : DDS Signature invalid, impossible.  !!!\n";
-		VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
-		throw(1);
-	}
-	// Skip what we already know. 
-	img_file->GoTo(4);
-	// Read in bytes to header.   Probably not endian-safe
-	img_file->Read(&header.size,4);
-	img_file->Read(&header.flags,4);
-	img_file->Read(&header.height,4);
-	img_file->Read(&header.width,4);
-	img_file->Read(&header.linsize,4);
-	img_file->Read(&header.depth,4);
-	img_file->Read(&header.nmips,4);
-
-//	img_file->Read(&header,28);
-	img_file->GoTo(76);
-	img_file->Read(&header.pixelFormat.size,4);
-	img_file->Read(&header.pixelFormat.flags,4);
-	img_file->Read(&header.pixelFormat.fourcc[0],1);
-	img_file->Read(&header.pixelFormat.fourcc[1],1);
-	img_file->Read(&header.pixelFormat.fourcc[2],1);
-	img_file->Read(&header.pixelFormat.fourcc[3],1);
-	img_file->Read(&header.pixelFormat.bpp,4);
-	img_file->Read(&header.pixelFormat.rmask,4);
-	img_file->Read(&header.pixelFormat.gmask,4);
-	img_file->Read(&header.pixelFormat.bmask,4);
-	img_file->Read(&header.pixelFormat.amask,4);
-	img_file->Read(&header.caps.caps1,4);
-	img_file->Read(&header.caps.caps2,4);
-//	img_file->Read(&header+28,40);
-	img_file->GoTo(128);
-	// Set VSImage attributes 
-	this->img_depth = header.pixelFormat.bpp;
-	this->sizeX=header.width;
-	this->sizeY=header.height;
-	GLenum internal = GL_NONE,type = GL_RGB;
-	
-	// Without mipmaps, header.linsize is the entire size of the compressed image
-	s = (unsigned char*)malloc(header.linsize);
-	// the following is probably not endian-safe
-	img_file->Read(s,header.linsize);   
-	
-	switch(header.pixelFormat.bpp){
-		case 4: type = GL_LUMINANCE;
+		if( CheckDDSSignature( img_file)!=Ok){
+			cerr <<"VSImage ERROR : DDS Signature invalid, impossible.  !!!\n";
+			VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
+			throw(1);
+		}
+		// Skip what we already know. 
+		img_file->GoTo(4);
+		// Read in bytes to header.   Probably not endian-safe
+                char ibuffer[4];                
+		img_file->Read(ibuffer,4);
+                header.size=POSH_ReadU32FromLittle(ibuffer);
+		img_file->Read(ibuffer,4);
+		header.flags=POSH_ReadU32FromLittle(ibuffer);
+		img_file->Read(ibuffer,4);
+		header.height=POSH_ReadU32FromLittle(ibuffer);
+		img_file->Read(ibuffer,4);
+		header.width=POSH_ReadU32FromLittle(ibuffer);
+		img_file->Read(ibuffer,4);
+		header.linsize=POSH_ReadU32FromLittle(ibuffer);
+		img_file->Read(ibuffer,4);
+		header.depth=POSH_ReadU32FromLittle(ibuffer);
+		img_file->Read(ibuffer,4);
+		header.nmips=POSH_ReadU32FromLittle(ibuffer);
+		img_file->GoTo(84);
+		img_file->Read(&header.pixelFormat.fourcc[0],1);
+		img_file->Read(&header.pixelFormat.fourcc[1],1);
+		img_file->Read(&header.pixelFormat.fourcc[2],1);
+		img_file->Read(&header.pixelFormat.fourcc[3],1);
+		img_file->Read(ibuffer,4);
+		header.pixelFormat.bpp=POSH_ReadU32FromLittle(ibuffer);
+		img_file->GoTo(128);
+		// Set VSImage attributes 
+		this->img_depth = header.pixelFormat.bpp;
+		this->sizeX=header.width;
+		this->sizeY=header.height;
+		switch(header.pixelFormat.bpp){
+			case 4: 
+				type = GL_LUMINANCE;
 				break;
-		case 8: type = GL_LUMINANCE_ALPHA;
+			case 8: 
+				type = GL_LUMINANCE_ALPHA;
 				this->mode=_8BIT;
 				this->img_alpha = true;
 				break;
-		case 24: type=GL_RGB;
+			case 24: 
+				type=GL_RGB;
 				this->mode=_24BIT;
 				this->img_alpha = false;
 				break;
-		case 32: type=GL_RGBA;
+			case 32: 
+				type=GL_RGBA;
 				this->mode=_24BITRGBA;
 				this->img_alpha = true;
 				break;
-	}
-	// outsize is the size of the decompressed image in bytes
-	int outsize =  sizeY*sizeX*(img_depth/8);
-	switch(header.pixelFormat.fourcc[3]){
-		case '1': internal = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-				  break;
-		case '3': internal = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-				  break;
-		case '5': internal = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-				  break;
-	}
-	
-	d = (unsigned char*)malloc(outsize);	 
-	// Prepare texture to be loaded and decompressed.  NOT needed once passthrough is functional
-	// When passthrough is working, s will be returned un-modified, no gl functions needed. 
-	unsigned int TextureID;
-	glGenTextures( 1, &TextureID );
-	glBindTexture( GL_TEXTURE_2D, TextureID );
-	glHint(GL_TEXTURE_COMPRESSION_HINT_ARB, GL_NICEST);
-	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glTexImage2D(GL_TEXTURE_2D,0,internal,sizeX,sizeY,0,type,GL_UNSIGNED_BYTE,s);
-	glGetTexImage(GL_TEXTURE_2D,0,GL_RGB,GL_UNSIGNED_BYTE,d);	
-	free(s);
-	s = NULL;
-	return(d);
+		}
+		switch(header.pixelFormat.fourcc[3]){
+			case '1': 
+				this->mode = _DXT1;
+				blockSize = 8;
+				break;
+			case '3': 
+				this->mode = _DXT3;
+				break;
+			case '5': 
+				this->mode = _DXT5;
+				break;
+		}
+		inputSize = 0;
+		width=header.width;
+		height= header.height;
+		for(int i = 0;i<header.nmips;++i){
+			inputSize += ((width+3)/4)*((height+3)/4)*blockSize;
+			width >>=1;
+			height >>=1;
+		}
+		s = (unsigned char*)malloc(inputSize);
+		// the following is probably not endian-safe
+		img_file->Read(s,inputSize);   
+		// At the end of execution what we have is the following
+		// s contains the main texture and all it's mipmaps 
+		// sizeY is the height of the initial texture, sizeX is the width.
+		// mode is the compressed format of the texture. It is assumed to be rgba
+		// depth is the depth of the uncompressed image. not sure where this is used
+		// nmaps is the number of mipmaps
+		return(s);
     } catch(...) {
 		if(s) free(s);
-		if(d) free(d);
         return NULL;
     };
 }

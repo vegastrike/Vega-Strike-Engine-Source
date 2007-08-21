@@ -468,7 +468,10 @@ enum TEXTUREFORMAT {
 	RGBA16 = 3,
 	RGB24 = 4,
 	RGBA32 = 5,
-	RGB32 = 6
+	RGB32 = 6,
+	DXT1 = 7,
+	DXT3 = 8,
+	DXT5 = 9
 };
 /**
  * The following state may be activated/deactivated

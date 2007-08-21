@@ -57,22 +57,28 @@ typedef struct {
 #endif
 
 
+#ifndef GL_COMPRESSED_RGB_S3TC_DXT1_EXT                                         
+#define GL_COMPRESSED_RGB_S3TC_DXT1_EXT   0x83F0                                
+#endif                                                                          
+#ifndef GL_COMPRESSED_RGBA_S3TC_DXT1_EXT                                        
+#define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT  0x83F1                                
+#endif                                                                          
+#ifndef GL_COMPRESSED_RGBA_S3TC_DXT3_EXT                                        
+#define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT  0x83F2                                
+#endif                                                                          
+#ifndef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT                                        
+#define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT  0x83F3                                
+#endif                                                                          
+#ifndef GL_TEXTURE_COMPRESSION_HINT_ARB                                         
+#define GL_TEXTURE_COMPRESSION_HINT_ARB   0x84EF                                
+#endif                                                                          
+ 
+
 typedef struct
 {
-	int size;
-	int flags;
 	char fourcc[4];
 	int bpp;
-	int rmask;
-	int gmask;
-	int bmask;
-	int amask;
 } pxlformat;
-typedef struct
-{
-	int caps1;
-	int caps2;
-} Caps;
 typedef struct
 {
 	int size;
@@ -83,7 +89,6 @@ typedef struct
 	int depth;
 	int nmips;
 	pxlformat pixelFormat;
-	Caps caps;
 } ddsHeader;
 	
 
@@ -122,11 +127,11 @@ class VSImage
 		///if we statically allocate it, then gl_texture will kill it when destructor is called...and if we delete this texture we be messed
 		unsigned char *		palette;
 		///The bitmode of this texture	
-        enum VSImageMode {_8BIT, _24BIT, _24BITRGBA,DXT1,DXT3,DXT5} mode;
+        enum VSImageMode {_8BIT, _24BIT, _24BITRGBA,_DXT1,_DXT3,_DXT5} mode;
 		///the dimensions of the texture
 		unsigned long		sizeX;
 		unsigned long		sizeY;
-
+		
 	private:
 		void	Init();
 		void	Init( VSFile * f, textureTransform * t=NULL, bool strip=false, VSFile * f2 = NULL);

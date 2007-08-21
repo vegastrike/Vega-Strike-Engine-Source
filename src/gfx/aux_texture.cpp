@@ -773,6 +773,16 @@ void Texture::Transfer (int maxdimension,GFXBOOL detailtexture)
 
 	switch (mode)
 	{
+	// send DXT1,DXT3,DXT5 ...need to have the function call other glcompressedTexImage2D function 
+	case _DXT1:
+			GFXTransferTexture(data, name,DXT1,image_target,maxdimension,detailtexture);
+			break;
+	case _DXT3:
+			GFXTransferTexture(data, name,DXT3,image_target,maxdimension,detailtexture);
+			break;
+	case _DXT5:
+			GFXTransferTexture(data, name,DXT5,image_target,maxdimension,detailtexture);
+			break;			
 	case _24BITRGBA:
 		GFXTransferTexture(data, name,RGBA32,image_target,maxdimension,detailtexture);
 		break;
@@ -794,6 +804,16 @@ int Texture::Bind(int maxdimension,GFXBOOL detailtexture)
 
         switch(mode)
 	    {
+		case _DXT1:
+			GFXCreateTexture(sizeX, sizeY,DXT1 , &name, NULL, stage,ismipmapped, texture_target, address_mode);
+			break;
+		case _DXT3:
+			GFXCreateTexture(sizeX, sizeY,DXT3 , &name, NULL, stage,ismipmapped, texture_target, address_mode);
+			break;
+		case _DXT5:
+			GFXCreateTexture(sizeX, sizeY,DXT5 , &name, NULL, stage,ismipmapped, texture_target, address_mode);
+			break;
+
 	    case _24BITRGBA:
 		    //GFXCreateTexture(sizeX, sizeY, RGBA32, &name, NULL, stage);
 		    GFXCreateTexture(sizeX, sizeY, RGBA32, &name, NULL, stage,ismipmapped, texture_target, address_mode);

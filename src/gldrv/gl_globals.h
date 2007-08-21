@@ -154,8 +154,7 @@ extern PFNGLCOLORTABLEEXTPROC glColorTable_p;
 extern PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
 extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
 #endif /* __APPLE_PANTHER_GCC33_CLI__ */
-
-
+extern PFNGLCOMPRESSEDTEXIMAGE2DPROC glCompressedTexImage2D_p;
 //extern int sharedcolortable;
 #ifdef STATS_QUEUE
 extern queue<GFXStats> statsqueue;
