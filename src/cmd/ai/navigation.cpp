@@ -510,14 +510,15 @@ bool useJitteryAutopilot(Unit * parent, Unit*target, float minaccel) {
   }
   float maxspeed=parent->GetComputerData().max_combat_ab_speed;
   static float accel_auto_limit=XMLSupport::parse_float(vs_config->getVariable("physics","max_accel_for_smooth_autopilot","10"));
-  static float speed_auto_limit=XMLSupport::parse_float(vs_config->getVariable("physics","max_over_combat_speed_for_smooth_autopilot","3"));
+  static float speed_auto_limit=XMLSupport::parse_float(vs_config->getVariable("physics","max_over_combat_speed_for_smooth_autopilot","1.3"));
   if (minaccel<accel_auto_limit||parent->Velocity.MagnitudeSquared()>maxspeed*maxspeed*speed_auto_limit*speed_auto_limit) {
     return true;
   }
   return false;
 }
 bool AutoLongHaul::InsideLandingPort(const Unit*obstacle)const {
-  return UnitUtil::getSignificantDistance(parent,obstacle)<0;
+  static float landing_port_limit=XMLSupport::parse_float(vs_config->getVariable("physics","auto_landing_port_unclamped_seconds","120"));
+  return UnitUtil::getSignificantDistance(parent,obstacle)<-landing_port_limit*parent->GetComputerData().max_combat_ab_speed;
 }
 
 void AutoLongHaul::Execute() {
