@@ -702,7 +702,10 @@ unsigned char *VSImage::ReadDDS()
 		}
 		switch(header.pixelFormat.fourcc[3]){
 			case '1': 
-				this->mode = _DXT1;
+				if(type==GL_RGB)
+					this->mode = _DXT1;
+				else
+					this->mode = _DXT1RGBA;
 				blockSize = 8;
 				break;
 			case '3': 

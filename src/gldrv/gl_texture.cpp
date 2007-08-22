@@ -649,7 +649,9 @@ GLenum GetTextureFormat (TEXTUREFORMAT textureformat)
 		case RGB16:
 			return RGBCompressed (GL_RGB16);
 		case DXT1:
-			return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+			return GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+		case DXT1RGBA:
+			return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;		
 		case DXT3:
 			return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
 		case DXT5:
@@ -764,7 +766,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 			float numdivisors = logsize>fullout+blankout?(1./(logsize-fullout-blankout)):1;
 			float detailscale=1;
 			//feenableexcept(0);
-			if(internformat == DXT1 || internformat == DXT3 || internformat == DXT5) {
+			if(internformat == DXT1 || internformat == DXT1RGBA || internformat == DXT3 || internformat == DXT5) {
 				int height = textures[handle].height;
 				int width = textures[handle].width;
 				int size = 0;

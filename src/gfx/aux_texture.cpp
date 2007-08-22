@@ -777,6 +777,9 @@ void Texture::Transfer (int maxdimension,GFXBOOL detailtexture)
 	case _DXT1:
 			GFXTransferTexture(data, name,DXT1,image_target,maxdimension,detailtexture);
 			break;
+	case _DXT1RGBA:
+			GFXTransferTexture(data, name,DXT1RGBA,image_target,maxdimension,detailtexture);
+			break;
 	case _DXT3:
 			GFXTransferTexture(data, name,DXT3,image_target,maxdimension,detailtexture);
 			break;
@@ -807,6 +810,10 @@ int Texture::Bind(int maxdimension,GFXBOOL detailtexture)
 		case _DXT1:
 			GFXCreateTexture(sizeX, sizeY,DXT1 , &name, NULL, stage,ismipmapped, texture_target, address_mode);
 			break;
+		case _DXT1RGBA:
+			GFXCreateTexture(sizeX, sizeY,DXT1RGBA , &name, NULL, stage,ismipmapped, texture_target, address_mode);
+			break;
+
 		case _DXT3:
 			GFXCreateTexture(sizeX, sizeY,DXT3 , &name, NULL, stage,ismipmapped, texture_target, address_mode);
 			break;
