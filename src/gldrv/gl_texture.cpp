@@ -790,7 +790,19 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 			if (tempbuf) 
 				free(tempbuf);
 			tempbuf=NULL;
-		} else {
+		} else{
+			if(internformat == DXT1 || internformat == DXT1RGBA || internformat == DXT3 || internformat == DXT5) {
+				int height = textures[handle].height;
+				int width = textures[handle].width;
+				int size = 0;
+				int blocksize = 16;
+				int i = 0;
+				unsigned int offset = 0;
+				if(internformat == DXT1)
+					blocksize = 8;
+				size = ((width +3)/4) * ((height +3)/4) * blocksize;
+				glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer);
+			} else {
 			glTexImage2D(image2D, 0, internalformat, textures[handle].width, textures[handle].height, 0, textures[handle].textureformat, GL_UNSIGNED_BYTE, buffer);
 		}
 	} else {
