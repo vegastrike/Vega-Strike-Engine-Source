@@ -27,7 +27,7 @@ namespace UnitUtil {
 		fg = Flightgroup::newFlightgroup (arg,type,FactionUtil::GetFaction(my_unit->faction),order,nr_ships,nr_waves_left,"","",mission);
 		my_unit->SetFg (fg,fg->nr_ships_left-1);
 	}
-	bool isSun(Unit *my_unit){
+	bool isSun(const Unit *my_unit){
 		if (!my_unit)return false;
 		bool res=false;
 		res=my_unit->isPlanet();
@@ -36,7 +36,7 @@ namespace UnitUtil {
 		}
 		return res;
 	}
-	bool isSignificant(Unit *my_unit){
+	bool isSignificant(const Unit *my_unit){
 		if (!my_unit)return false;
 		bool res=false;
 		clsptr typ = my_unit->isUnit();

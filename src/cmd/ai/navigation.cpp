@@ -451,18 +451,29 @@ AutoLongHaul::AutoLongHaul (bool fini, int accuracy):ChangeHeading(QVector(0,0,1
   subtype =STARGET;
   deactivatewarp=false;
   StraightToTarget=true;
+  inside_landing_zone=false;
   /*
   whichDestinationIsOld=0;
   for (unsigned int i=0;i<AUTOLONGHAULNUMDESTINATIONAVG;++i) {
     PreviousNewDestinations[i]=QVector(0,0,0);
     }*/
 }
+void AutoLongHaul::MakeLinearVelocityOrder() {
+  eraseType(MOVEMENT);
+  static float combat_mode_mult = XMLSupport::parse_float (vs_config->getVariable ("auto_physics","auto_docking_speed_boost","20"));
 
+  float speed=parent->GetComputerData().combat_mode?parent->GetComputerData().max_combat_speed:parent->GetComputerData().max_combat_ab_speed/*won't do insanity flight mode + spec = ludicrous speed*/;
+  if (inside_landing_zone)
+    speed*=combat_mode_mult;
+  MatchLinearVelocity *temp = new MatchLinearVelocity(Vector(0,0,speed),true,false,false);
+  temp->SetParent(parent);
+  Order::EnqueueOrder(temp);
+}
 void AutoLongHaul::SetParent(Unit *parent1){
-	ChangeHeading::SetParent(parent1);
-	MatchLinearVelocity *temp = new MatchLinearVelocity(Vector(0,0,parent1->GetComputerData().combat_mode?parent1->GetComputerData().max_combat_speed:parent1->GetComputerData().max_combat_ab_speed/*won't do insanity flight mode + spec = ludicrous speed*/),true,false,false);
-	temp->SetParent(parent1);
-	Order::EnqueueOrder(temp);
+  ChangeHeading::SetParent(parent1);
+  group.SetUnit(parent1->Target());
+  inside_landing_zone=false;
+  MakeLinearVelocityOrder();
 }
 extern bool DistanceWarrantsWarpTo (Unit * parent, float dist, bool following);
 
@@ -497,17 +508,22 @@ bool useJitteryAutopilot(Unit * parent, Unit*target, float minaccel) {
   if (parent->computer.combat_mode==false) {
     return true;
   }
+  float maxspeed=parent->GetComputerData().max_combat_ab_speed;
   static float accel_auto_limit=XMLSupport::parse_float(vs_config->getVariable("physics","max_accel_for_smooth_autopilot","10"));
-  if (minaccel<accel_auto_limit) {
+  static float speed_auto_limit=XMLSupport::parse_float(vs_config->getVariable("physics","max_over_combat_speed_for_smooth_autopilot","3"));
+  if (minaccel<accel_auto_limit||parent->Velocity.MagnitudeSquared()>maxspeed*maxspeed*speed_auto_limit*speed_auto_limit) {
     return true;
   }
   return false;
 }
-
+bool AutoLongHaul::InsideLandingPort(const Unit*obstacle)const {
+  return UnitUtil::getSignificantDistance(parent,obstacle)<0;
+}
 
 void AutoLongHaul::Execute() {
-  Unit * target = parent->Target();
+  Unit * target = group.GetUnit();
   if (target==NULL){
+    group.SetUnit(parent->Target());
     done = finish;
     return;
   }
@@ -527,6 +543,14 @@ void AutoLongHaul::Execute() {
   if (parent->graphicOptions.WarpFieldStrength<enough_warp_for_cruise&&parent->graphicOptions.InWarp) {//face target unless warp ramping is done and warp is less than some intolerable ammt
     Unit *obstacle=NULL;
     float maxmultiplier=CalculateNearestWarpUnit(parent,FLT_MAX,&obstacle,compensate_for_interdiction);//find the unit affecting our spec
+    bool currently_inside_landing_zone=false;
+    if (obstacle) {
+      currently_inside_landing_zone=InsideLandingPort(obstacle);
+    }
+    if (currently_inside_landing_zone!=inside_landing_zone) {
+      inside_landing_zone=currently_inside_landing_zone;
+      MakeLinearVelocityOrder();
+    }
     if (maxmultiplier<enough_warp_for_cruise&&obstacle!=NULL&&obstacle!=target) {//if it exists and is not our destination
       QVector obstacledirection=(obstacle->LocalPosition()-myposition);//find vector from us to obstacle
       double obstacledistance=obstacledirection.Magnitude();
@@ -589,7 +613,10 @@ void AutoLongHaul::Execute() {
 	  }
   }
   SetDest(destination);
+  bool combat_mode=parent->GetComputerData().combat_mode;
+  parent->GetComputerData().combat_mode=!inside_landing_zone;//turn off limits in landing zone
   ChangeHeading::Execute();
+  parent->GetComputerData().combat_mode=combat_mode;
   if (!finish) {
     ResetDone();
   }

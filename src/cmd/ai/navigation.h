@@ -108,11 +108,14 @@ class AutoLongHaul : public ChangeHeading {
   bool finish;
   bool deactivatewarp;
   bool StraightToTarget;
+  bool inside_landing_zone;
   /*
   #define AUTOLONGHAULNUMDESTINATIONAVG 15
   QVector PreviousNewDestinations[AUTOLONGHAULNUMDESTINATIONAVG];
   unsigned int whichDestinationIsOld;
   */
+  void MakeLinearVelocityOrder();
+  bool InsideLandingPort(const Unit *obstacle)const;
   QVector NewDestination(const QVector&curnewdestination, double magnitude);
 public:
   AutoLongHaul (bool fini=false, int accuracy =1);

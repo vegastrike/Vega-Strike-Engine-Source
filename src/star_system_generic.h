@@ -174,7 +174,7 @@ class StarSystem
 		class bolt_draw *bolts;
 		static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
 		static void endElement(void *userData, const XML_Char *name);
-		std::string getFileName();
+		std::string getFileName()const ;
 		std::string getName();
 		///Loads the star system from an XML file
 		UnitCollection& getUnitList() {return drawList;}

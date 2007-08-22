@@ -1483,6 +1483,22 @@ StarSystem * Unit::getStarSystem ()
 	return _Universe->activeStarSystem();
 }
 
+const StarSystem * Unit::getStarSystem () const
+{
+
+	if (activeStarSystem) {
+		return activeStarSystem;
+	}
+	else {
+		Cockpit * cp=_Universe->isPlayerStarship(this);
+		if (cp) {
+			if (cp->activeStarSystem)
+				return cp->activeStarSystem;
+		}
+	}
+	return _Universe->activeStarSystem();
+}
+
 
 bool preEmptiveClientFire(const weapon_info*wi)
 {
@@ -2793,7 +2809,7 @@ float CalculateNearestWarpUnit (const Unit *thus, float minmultiplier, Unit **ne
 		}
 		QVector dir=thus->Position()-planet->Position();
 		double udist=dir.Magnitude();
-		float sigdist=UnitUtil::getSignificantDistance((Unit*)thus,planet);
+		float sigdist=UnitUtil::getSignificantDistance(thus,planet);
 		if(planet->isPlanet()&&udist<(1<<28)){ // If distance is viable as a float approximation and it's an actual celestial body
 			udist = sigdist;
 		}
@@ -8840,8 +8856,14 @@ bool myless(const Cargo & a, const Cargo& b)
 	return a<b;
 }
 
-
-Cargo* Unit::GetCargo (const std::string &s, unsigned int &i)
+Cargo *Unit::GetCargo(const std::string &s, unsigned int &i) {
+  const Unit * thus=this;
+  if (thus->GetCargo(s,i)) {
+    return &GetCargo(i);
+  }
+  return NULL;
+}
+const Cargo* Unit::GetCargo (const std::string &s, unsigned int &i)const
 {
 	static Hashtable<string,unsigned int,2047> index_cache_table;
 	Unit * mpl=UnitFactory::getMasterPartList();

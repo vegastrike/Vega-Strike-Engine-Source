@@ -493,6 +493,7 @@ class Unit
 		virtual bool TransferUnitToSystem (StarSystem *NewSystem);
 		virtual bool TransferUnitToSystem (unsigned int whichJumpQueue, class StarSystem *&previouslyActiveStarSystem, bool DoSightAndSound);
 		StarSystem * getStarSystem();
+		const StarSystem * getStarSystem()const;
 		struct UnitJump
 		{
 			float warpDriveRating;
@@ -940,6 +941,7 @@ class Unit
 		void GetSortedCargoCat (const std::string &category, size_t &catbegin, size_t &catend);
 		// below function returns NULL if not found
 		Cargo * GetCargo (const std::string &s, unsigned int &i);
+		const Cargo * GetCargo (const std::string &s, unsigned int &i)const;
 		unsigned int numCargo ()const;
 		std::string GetManifest (unsigned int i, Unit * scanningUnit, const Vector & original_velocity) const;
 		bool SellCargo (unsigned int i, int quantity, float &creds, Cargo & carg, Unit *buyer);
@@ -1080,7 +1082,7 @@ class Unit
 		int ForceDock (Unit * utdw, int whichdockport);
 		void PerformDockingOperations();
 		void FreeDockingPort(unsigned int whichport);
-		virtual const std::vector <struct DockingPorts> &DockingPortLocations() { return image->dockingports;}
+		const std::vector <struct DockingPorts> &DockingPortLocations()const { return image->dockingports;}
 		char DockedOrDocking()const {return docked;}
 		bool IsCleared (const Unit * dockignunit) const;
 		bool isDocked (const Unit *dockingUnit) const;

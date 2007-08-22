@@ -41,24 +41,24 @@ namespace UnitUtil {
   template<typename T> static inline T mymin(T a, T b) { return (a<b)?a:b; }
   template<typename T> static inline T mymax(T a, T b) { return (a<b)?a:b; }
 
-  static const string& getFgDirectiveCR(Unit *my_unit);
+  static const string& getFgDirectiveCR(const Unit *my_unit);
 
-  bool isAsteroid(Unit * my_unit) {
+  bool isAsteroid(const Unit * my_unit) {
 		if (!my_unit)return false;
                 return (my_unit->isUnit()==ASTEROIDPTR||nameIsAsteroid(my_unit->name));
   }
-	bool isCapitalShip(Unit *my_unit){
+	bool isCapitalShip(const Unit *my_unit){
 		if (!my_unit)return false;
 		bool res=false;
                 static unsigned int capitaltypes=ROLES::getCapitalRoles();
                 return ((1<<(unsigned int)my_unit->unitRole())&capitaltypes)!=0;
 	}
-	bool hasDockingUnits(Unit *my_unit) {
+	bool hasDockingUnits(const Unit *my_unit) {
 		if (!my_unit) return false;
 		return (my_unit->DockedOrDocking()&Unit::DOCKING_UNITS)
 			|| (my_unit->hasPendingClearanceRequests());
 	}
-	int getPhysicsPriority (Unit*  un) {
+	int getPhysicsPriority ( Unit*  un) {
 		static const bool FORCE_TOP_PRIORITY=XMLSupport::parse_bool(
 			vs_config->getVariable("physics","priorities","force_top_priority","false") );
 		if (FORCE_TOP_PRIORITY)
@@ -299,11 +299,11 @@ namespace UnitUtil {
 			my_unit->SetOwner(getTopLevelOwner());
 		}
 	}
-	string getFactionName (Unit *my_unit) {
+	string getFactionName (const Unit *my_unit) {
 		if (!my_unit)return "";
 		return FactionUtil::GetFaction(my_unit->faction);
     }
-	int getFactionIndex (Unit *my_unit) {
+	int getFactionIndex (const Unit *my_unit) {
 		if (!my_unit)return 0;
 		return my_unit->faction;
     }
@@ -315,7 +315,7 @@ namespace UnitUtil {
 		if (!my_unit)return;
 		my_unit->SetFaction(FactionUtil::GetFactionIndex(factionname));
     }
-	string getName(Unit *my_unit){
+	string getName(const Unit *my_unit){
 		if (!my_unit)return "";
 		return my_unit->name;
 	}
@@ -327,7 +327,7 @@ namespace UnitUtil {
 		if (!my_unit)return;
 		my_unit->hull=newhull;
 	}
-	float getCredits(Unit *my_unit) {
+	float getCredits(const Unit *my_unit) {
 		if (!my_unit)return 0;
 		Cockpit * tmp;
 		float viret=0;
@@ -336,14 +336,14 @@ namespace UnitUtil {
 		}
 		return viret;
 	}
-	void addCredits(Unit *my_unit,float credits) {
+	void addCredits(const Unit *my_unit,float credits) {
 		if (!my_unit)return;
 		Cockpit * tmp;
 		if ((tmp=_Universe->isPlayerStarship (my_unit))) {
 			tmp->credits+=credits;
 		}
 	}
-    const string& getFlightgroupNameCR(Unit *my_unit)
+    const string& getFlightgroupNameCR(const Unit *my_unit)
 	{
 		static const string empty_string;
 		if (!my_unit) return empty_string;
@@ -352,7 +352,7 @@ namespace UnitUtil {
 			return fg->name; else
 			return empty_string;
 	}
-    string getFlightgroupName(Unit *my_unit)
+    string getFlightgroupName(const Unit *my_unit)
 	{
 		return getFlightgroupNameCR(my_unit);
 	}
@@ -373,11 +373,11 @@ namespace UnitUtil {
 			return false;
 		}
 	}
-	string getFgDirective(Unit *my_unit)
+	string getFgDirective(const Unit *my_unit)
 	{
 		return getFgDirectiveCR(my_unit);
 	}
-	static const string& getFgDirectiveCR(Unit *my_unit){
+	static const string& getFgDirectiveCR(const Unit *my_unit){
 		static string emptystr;
 		static string fgdirdef("b");
 		if (!my_unit)
@@ -492,10 +492,10 @@ namespace UnitUtil {
           my_unit->AddCargo(carg);
 	  return carg.quantity; 
 	}
-	int hasCargo (Unit * my_unit, string mycarg) {
+	int hasCargo (const Unit * my_unit, string mycarg) {
 	  if (!my_unit) return 0;
 		unsigned int i;
-		Cargo * c = my_unit->GetCargo (mycarg,i);
+		const Cargo * c = my_unit->GetCargo (mycarg,i);
 		if (c==NULL)
 			return 0;
 		return c->quantity;
@@ -506,11 +506,11 @@ namespace UnitUtil {
 		else
 			return false;
 	}
-        string getUnitSystemFile (Unit * un) {
+        string getUnitSystemFile (const Unit * un) {
 	  if (!un) {
 	    return _Universe->activeStarSystem()->getFileName();
 	  }
-	  StarSystem * ss = un->getStarSystem();
+	  const StarSystem * ss = un->getStarSystem();
 	  return ss->getFileName();
         }
 	bool incrementCargo(Unit *my_unit,float percentagechange,int quantity){
@@ -545,7 +545,7 @@ namespace UnitUtil {
 
 
   
-	Cargo GetCargoIndex (Unit *my_unit, int index) {
+	Cargo GetCargoIndex (const Unit *my_unit, int index) {
 	  if (my_unit) {
 	    if (index>=0&&(unsigned int)index<my_unit->numCargo()) {
 	      return my_unit->GetCargo(index);
@@ -556,10 +556,10 @@ namespace UnitUtil {
 	  return ret;
 	}
 
-	Cargo GetCargo (Unit *my_unit, std::string cargname) {
+	Cargo GetCargo (const Unit *my_unit, std::string cargname) {
 		if (my_unit) {
 			unsigned int indx=0;
-			Cargo *cargptr=my_unit->GetCargo(cargname,indx);
+			const Cargo *cargptr=my_unit->GetCargo(cargname,indx);
 			if (cargptr&&indx>=0) {
 				return *cargptr;
 			}
@@ -568,7 +568,7 @@ namespace UnitUtil {
 		ret.quantity=0;
 		return ret;
 	}
-	bool isDockableUnit(Unit *my_unit) {
+	bool isDockableUnit(const Unit *my_unit) {
 		if (!my_unit) return false;
 		return 
 			(  
@@ -583,7 +583,7 @@ namespace UnitUtil {
 			)
 			&& (my_unit->DockingPortLocations().size()>0);
 	}
-	bool isCloseEnoughToDock(Unit *my_unit, Unit *un) {
+	bool isCloseEnoughToDock(const Unit *my_unit, const Unit *un) {
 		static bool superdock = XMLSupport::parse_bool(vs_config->getVariable("physics","dock_within_base_shield","false"));
 		float dis = (un->isUnit()==PLANETPTR||superdock)?UnitUtil::getSignificantDistance(my_unit, un):UnitUtil::getDistance(my_unit, un);
 
@@ -592,12 +592,12 @@ namespace UnitUtil {
 		
 		return false;		
 	}
-	float getDistance(Unit *my_unit,Unit *un){
+	float getDistance(const Unit *my_unit,const Unit *un){
 	  if (my_unit==NULL||un==NULL)
 	    return FLT_MAX;
 	  return (my_unit->Position()-un->Position()).Magnitude()-my_unit->rSize()-un->rSize();
 	}
-	float getSignificantDistance (Unit *un, Unit *sig) {
+	float getSignificantDistance (const Unit *un, const Unit *sig) {
 	  if (un==NULL||sig==NULL)
 	    return FLT_MAX;
 	  
@@ -610,7 +610,7 @@ namespace UnitUtil {
 			dist = dist - (un->rSize()*planetpct);
 		return dist;
 	}
-        int isPlayerStarship (Unit * un) {
+        int isPlayerStarship (const Unit * un) {
                 Cockpit * cp = _Universe->isPlayerStarship (un);
                 if (cp==NULL) {
                         return -1;
@@ -622,31 +622,31 @@ namespace UnitUtil {
       my_unit->GetComputerData().set_speed = speed;
     }
   }
-	float maxSpeed (Unit * my_unit) {
+	float maxSpeed (const Unit * my_unit) {
 		if (!my_unit) {
 			return 0;
 		}
-		return my_unit->GetComputerData().max_speed();
+		return my_unit->ViewComputerData().max_speed();
 	}
-	float maxAfterburnerSpeed (Unit * my_unit) {
+	float maxAfterburnerSpeed (const Unit * my_unit) {
 		if (!my_unit) {
 			return 0;
 		}
-		return my_unit->GetComputerData().max_ab_speed();
+		return my_unit->ViewComputerData().max_ab_speed();
 	}
 	void setECM (Unit * my_unit, int NewECM) { //short fix
     if (!my_unit)
       return;
     my_unit->GetImageInformation().ecm = NewECM;
   }
-	int getECM (Unit * my_unit) { //short fix
+	int getECM (const Unit * my_unit) { //short fix
     if (!my_unit)
       return 0;
-    return my_unit->GetImageInformation().ecm;
+    return my_unit->image->ecm;
   }
-	static bool ishere (Unit *par,Unit *look) {
-		Unit *un;
-		for (un_iter uniter=par->getSubUnits();un = *uniter;++uniter) {
+	static bool ishere (const Unit *par,const Unit *look) {
+		const Unit *un;
+		for (un_kiter uniter=par->viewSubUnits();un = *uniter;++uniter) {
 			if (un==look) {
 				return true;
 			}
@@ -656,7 +656,7 @@ namespace UnitUtil {
 		}
 		return false;
 	}
-	Unit *owner (Unit *un) {
+	Unit *owner (const Unit *un) {
 		Unit *found=NULL;
 		Unit *tmp;
 		for (UniverseUtil::PythonUnitIter uniter=UniverseUtil::getUnitList();tmp = *uniter;++uniter) {
