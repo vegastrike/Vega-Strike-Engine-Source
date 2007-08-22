@@ -2739,6 +2739,7 @@ void Unit::UpdateSubunitPhysics(Unit* subunit, const Transformation &trans, cons
 float CalculateNearestWarpUnit (const Unit *thus, float minmultiplier, Unit **nearest_unit, bool count_negative_warp_units) {
 	static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));
 	static float smallwarphack = XMLSupport::parse_float (vs_config->getVariable ("physics","minwarpeffectsize","100"));
+	static float bigwarphack = XMLSupport::parse_float (vs_config->getVariable ("physics","maxwarpeffectsize","10000000"));
 	static float WARPMEMORYEFFECT = XMLSupport::parse_float (vs_config->getVariable ("physics","WarpMemoryEffect","0.9"));
 							 // Pi^2
 	static float warpMultiplierMin=XMLSupport::parse_float(vs_config->getVariable("physics","warpMultiplierMin","9.86960440109"));
@@ -2787,8 +2788,15 @@ float CalculateNearestWarpUnit (const Unit *thus, float minmultiplier, Unit **ne
 		float multipliertemp=1;
 		float minsizeeffect = (planet->rSize()>smallwarphack)?planet->rSize():smallwarphack;
 		float effectiverad = minsizeeffect*(1.0f+UniverseUtil::getPlanetRadiusPercent())+thus->rSize();
+		if(effectiverad>bigwarphack){
+			effectiverad=bigwarphack;
+		}
 		QVector dir=thus->Position()-planet->Position();
 		double udist=dir.Magnitude();
+		float sigdist=UnitUtil::getSignificantDistance((Unit*)thus,planet);
+		if(planet->isPlanet()&&udist<(1<<28)){ // If distance is viable as a float approximation and it's an actual celestial body
+			udist = sigdist;
+		}
 		QVector veldiff=thus->Velocity*thus->graphicOptions.WarpFieldStrength-planet->Velocity*planet->graphicOptions.WarpFieldStrength;
 		double velproj=veldiff.Dot(dir*(1./udist));
 		int itercount=0;
