@@ -128,10 +128,12 @@ class NetServer
   //returns false if unwilling to load star system
 		void			sendLoginUnavailable( ClientPtr clt);
 
-		Cockpit *		loadFromSavegame( ClientPtr clt );
-		Cockpit *		loadFromNewGame( ClientPtr clt, string shipname );
+		// loadCockpit will fail if a cockpit already exists when client state is CONNECTED.
+		Cockpit *		loadCockpit(ClientPtr clt );
+		bool			loadFromSavegame( ClientPtr clt, Cockpit *cp );
+		bool			loadFromNewGame( ClientPtr clt, Cockpit *cp, string shipname );
 		ClientPtr       getClientFromSerial( ObjSerial serial);
-
+		bool			saveAccount(int cpnum );
 	public:
 		NetServer();
 		~NetServer();

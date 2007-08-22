@@ -862,7 +862,13 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 		case CMD_SAVEACCOUNTS:
 			COUT << "Received a save request for "<<
 				clt->callsign<<" ("<<packet_serial<<")..." << endl;
-			// savecct(clt. packet_serial);
+			un = clt->game_unit.GetUnit();
+			if (un) {
+				int cpnum = _Universe->whichPlayerStarship(un);
+				if (cpnum!=-1) {
+					saveAccount(cpnum);
+				}
+			}
 			break;
 		case CMD_RESPAWN :
 			COUT << "Received a respawning request for "<<
@@ -873,7 +879,8 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                           if (oldun==NULL||oldun->GetHull()<=0) {
                             zonemgr->removeClient( clt);
                             if(oldun) oldun->Kill(true,true);
-                            Cockpit* cp = loadFromSavegame(clt);
+							Cockpit *cp = loadCockpit(clt); // Should find existing cp.
+                            loadFromSavegame(clt, cp);
                             //actually cp not used
                             this->addClient( clt);
                           }else {

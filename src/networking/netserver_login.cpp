@@ -97,7 +97,13 @@ bool	NetServer::loginAccept( std::string inetbuf,ClientPtr clt, int newacct, cha
 	}
 	else
 	{
-		loadFromSavegame(clt);
+		Cockpit *cp = loadCockpit(clt);
+		if (cp) {
+			if (loadFromSavegame(clt, cp)) {
+				sendLoginAccept(clt, cp);
+				COUT<<"<<< SENT LOGIN ACCEPT -----------------------------------------------------------------------"<<endl;
+			}
+		}
 	}
 	return true;
 }
@@ -187,7 +193,12 @@ void NetServer::chooseShip(ClientPtr clt, Packet &p) {
 		return;
 	}
 	string fighter = ships[selection];
-	loadFromNewGame(clt, fighter);
+	Cockpit *cp = loadCockpit(clt);
+	if (cp) {
+		if (loadFromNewGame(clt, cp, fighter)) {
+			sendLoginAccept(clt, cp);
+		}
+	}
 }
 
 void NetServer::localLogin( ClientPtr clt, Packet &p) {
@@ -219,15 +230,21 @@ void NetServer::localLogin( ClientPtr clt, Packet &p) {
 	p1.send(CMD_CHOOSESHIP, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(202));
 }
 
-Cockpit * NetServer::loadFromNewGame( ClientPtr clt, string fighter ) {
-	ObjSerial cltserial = getUniqueSerial();
+Cockpit * NetServer::loadCockpit(ClientPtr clt) {
+	Cockpit *cp = NULL;
 	for (int i=0;i<_Universe->numPlayers();i++) {
-		if (_Universe->AccessCockpit(i)->savegame->GetCallsign() == clt->callsign) {
-			sendLoginAlready(clt);
-			return NULL;
+		cp = _Universe->AccessCockpit(i);
+		if (cp->savegame->GetCallsign() == clt->callsign) {
+			if (clt->loginstate==Client::CONNECTED) {
+				sendLoginAlready(clt);
+				return NULL;
+			} else {
+				// already logged in... it *should* already exist.
+				return cp;
+			}
 		}
 	}
-	Cockpit *cp = NULL;
+	cp = NULL;
 	if (!unused_players.empty()) {
 		cp = _Universe->AccessCockpit(unused_players.back());
 		unused_players.pop();
@@ -238,6 +255,11 @@ Cockpit * NetServer::loadFromNewGame( ClientPtr clt, string fighter ) {
 		cp->recreate(clt->callsign);
 	}
 	clt->loginstate = Client::LOGGEDIN;
+	return cp;
+}
+
+bool NetServer::loadFromNewGame( ClientPtr clt, Cockpit *cp, string fighter ) {
+	ObjSerial cltserial = getUniqueSerial();
 	string PLAYER_SHIPNAME = fighter;
 	Mission *mission = NULL;
 	if (active_missions.size()>0) {
@@ -246,7 +268,7 @@ Cockpit * NetServer::loadFromNewGame( ClientPtr clt, string fighter ) {
 	if (!mission) {
 		COUT << "Cannot login player without acctserver: No missions available";
 		sendLoginError(clt);
-		return NULL;
+		return false;
 	}
 	
     int saved_faction = 0; // NETFIXME: Send faction over network too!
@@ -288,7 +310,7 @@ Cockpit * NetServer::loadFromNewGame( ClientPtr clt, string fighter ) {
 		// We can't find the unit saved for player -> send a login error
 		this->sendLoginError( clt );
 		cerr<<"WARNING : Unit file ("<<PLAYER_SHIPNAME<<") not found for "<<clt->callsign<<endl;
-		return cp;
+		return false;
 	}
 
 	COUT<<"\tAFTER UNIT FACTORY WITH XML"<<endl;
@@ -310,35 +332,17 @@ Cockpit * NetServer::loadFromNewGame( ClientPtr clt, string fighter ) {
 		clt->savegame.push_back( savestr);
 		clt->savegame.push_back( xmlstr);
 	}
-	sendLoginAccept(clt, cp);
-	COUT<<"<<< SENT LOGIN ACCEPT -----------------------------------------------------------------------"<<endl;
-	return cp;
+	return true;
 }
 
-Cockpit * NetServer::loadFromSavegame( ClientPtr clt ) {
+bool NetServer::loadFromSavegame( ClientPtr clt, Cockpit *cp ) {
 	ObjSerial cltserial = getUniqueSerial();
 	QVector tmpvec( 0, 0, 0);
 	bool update = true;
 	float credits;
 	vector<string> savedships;
 	string str("");
-	Cockpit *cp = NULL;
-	for (int i=0;i<_Universe->numPlayers();i++) {
-		if (_Universe->AccessCockpit(i)->savegame->GetCallsign() == clt->callsign) {
-			sendLoginAlready(clt);
-			return NULL;
-		}
-	}
-	if (!unused_players.empty()) {
-		cp = _Universe->AccessCockpit(unused_players.back());
-		unused_players.pop();
-	}
-	if (cp == NULL) {
-		cp = _Universe->createCockpit( clt->callsign );
-	} else {
-		cp->recreate(clt->callsign);
-	}
-	clt->loginstate = Client::LOGGEDIN;
+
 	COUT<<"-> LOADING SAVE FROM NETWORK"<<endl;
 	cp->savegame->ParseSaveGame( "", str, "", tmpvec, update, credits, savedships, cltserial, clt->savegame[0], false);
 	// Generate the system we enter in if needed and add the client in it
@@ -402,9 +406,7 @@ Cockpit * NetServer::loadFromSavegame( ClientPtr clt ) {
 	COUT<<"-> COCKPIT AFFECTED TO UNIT"<<endl;
 
 	COUT<<"SHIP -- "<<savedships[0]<<" -- LOCATION: x="<<tmpvec.i<<",y="<<tmpvec.j<<",z="<<tmpvec.k<<endl;
-	sendLoginAccept(clt, cp);
-	COUT<<"<<< SENT LOGIN ACCEPT -----------------------------------------------------------------------"<<endl;
-	return cp;
+	return true;
 }
 
 void	NetServer::sendLoginError( ClientPtr clt )

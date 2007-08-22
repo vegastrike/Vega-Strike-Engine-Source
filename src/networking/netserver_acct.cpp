@@ -135,37 +135,47 @@ void	NetServer::save()
 	// Loop through all clients and write saves
 	for( int i=0; i<_Universe->numPlayers(); i++)
 	{
-		cp = _Universe->AccessCockpit( i);
-		SaveNetUtil::GetSaveStrings( i, savestr, xmlstr);
-		// Write the save and xml unit
-		//FileUtil::WriteSaveFiles( savestr, xmlstr, VSFileSystem::datadir+"/serversaves", cp->savegame->GetCallsign());
-		// SEND THE BUFFERS TO ACCOUNT SERVER
-		if( cp && acctserver && acct_con)
-		{
-			Unit *un=cp->GetParent();
-			std::string snetbuf;
-			bool found = false;
-			// Loop through clients to find the one corresponding to the unit (we need its serial)
-			ClientPtr clt;
-			if (un) {
-				clt=getClientFromSerial( un->GetSerial());
-			}
-			if( !clt || !un )
-			{
-				cerr<<"Error client not found in save process !!!!"<<endl;
-				return;
-			}
-                        addSimpleChar(snetbuf,ACCT_SAVE);
-                        addSimpleString(snetbuf,clt->callsign);
-                        addSimpleString(snetbuf,clt->passwd);
-			addSimpleString(snetbuf, savestr);
-			addSimpleString(snetbuf, xmlstr);
-                        if (!acct_sock->sendstr(snetbuf)) {
-			//buffer = new char[savestr.length() + xmlstr.length() + 2*sizeof( unsigned int)];
-			//SaveNetUtil::GetSaveBuffer( savestr, xmlstr, buffer);
-				COUT<<"ERROR sending SAVE to account server"<<endl;
-                        }
-		}
+		saveAccount(i);
 	}
 }
 
+bool NetServer::saveAccount(int i)
+{
+	string xmlstr, savestr;
+	//unsigned int xmllen, savelen, nxmllen, nsavelen;
+	Cockpit *cp = _Universe->AccessCockpit( i);
+
+	// Write the save and xml unit
+	//FileUtil::WriteSaveFiles( savestr, xmlstr, VSFileSystem::datadir+"/serversaves", cp->savegame->GetCallsign());
+	// SEND THE BUFFERS TO ACCOUNT SERVER
+	if ( cp && acctserver && acct_con)
+	{
+		SaveNetUtil::GetSaveStrings( i, savestr, xmlstr);
+		Unit *un=cp->GetParent();
+		std::string snetbuf;
+		bool found = false;
+		// Loop through clients to find the one corresponding to the unit (we need its serial)
+		ClientPtr clt;
+		if (un) {
+			clt=getClientFromSerial( un->GetSerial());
+		}
+		if( !clt || !un )
+		{
+			cerr<<"Error client/unit for "<<clt->callsign<<" not found in save process !!!!"<<endl;
+			return false;
+		}
+		addSimpleChar(snetbuf,ACCT_SAVE);
+		addSimpleString(snetbuf,clt->callsign);
+		addSimpleString(snetbuf,clt->passwd);
+		addSimpleString(snetbuf, savestr);
+		addSimpleString(snetbuf, xmlstr);
+		if (!acct_sock->sendstr(snetbuf)) {
+			//buffer = new char[savestr.length() + xmlstr.length() + 2*sizeof( unsigned int)];
+			//SaveNetUtil::GetSaveBuffer( savestr, xmlstr, buffer);
+			COUT<<"ERROR sending SAVE to account server for "<<clt->callsign<<" ("<<un->GetSerial()<<")"<<endl;
+			return false;
+		}
+		return true;
+	}
+	return false;
+}

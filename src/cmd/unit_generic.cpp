@@ -1654,7 +1654,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner)
 		}
 	}
 	if (SERVER && !serverUnfireRequests.empty()) {
-		VSServer->BroadcastUnfire( this->serial, missileFireRequests, this->getStarSystem()->GetZone());
+		VSServer->BroadcastUnfire( this->serial, serverUnfireRequests, this->getStarSystem()->GetZone());
 	}
 	// Client missile requests can be grouped because clients only send a boolean, not a serial.
 	if (!SERVER && !missileFireRequests.empty()) {
