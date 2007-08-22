@@ -802,7 +802,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 					blocksize = 8;
 				size = ((width +3)/4) * ((height +3)/4) * blocksize;
 				glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer);
-			} else {
+			} else 
 			glTexImage2D(image2D, 0, internalformat, textures[handle].width, textures[handle].height, 0, textures[handle].textureformat, GL_UNSIGNED_BYTE, buffer);
 		}
 	} else {
