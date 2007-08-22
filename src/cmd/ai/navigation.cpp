@@ -510,7 +510,7 @@ bool useJitteryAutopilot(Unit * parent, Unit*target, float minaccel) {
   }
   float maxspeed=parent->GetComputerData().max_combat_ab_speed;
   static float accel_auto_limit=XMLSupport::parse_float(vs_config->getVariable("physics","max_accel_for_smooth_autopilot","10"));
-  static float speed_auto_limit=XMLSupport::parse_float(vs_config->getVariable("physics","max_over_combat_speed_for_smooth_autopilot","1.3"));
+  static float speed_auto_limit=XMLSupport::parse_float(vs_config->getVariable("physics","max_over_combat_speed_for_smooth_autopilot","2"));
   if (minaccel<accel_auto_limit||parent->Velocity.MagnitudeSquared()>maxspeed*maxspeed*speed_auto_limit*speed_auto_limit) {
     return true;
   }
