@@ -166,7 +166,19 @@ void Unit::SetMaxEnergy( float maxen)
 {
 	maxenergy = maxen;
 }
-
+Vector  Unit::GetWarpVelocity()const {
+  //return(cumulative_velocity*graphicOptions.WarpFieldStrength);
+  Vector vel=cumulative_velocity;
+  float speed=cumulative_velocity.Magnitude();
+  if (speed>0) {
+    Vector veldir=vel*(1./speed);
+    Vector facing=cumulative_transformation_matrix.getR();
+    float ang=facing.Dot(veldir);
+    float warpfield=graphicOptions.WarpFieldStrength;
+    if (ang<0) warpfield=1./warpfield;
+    return ang*facing*(warpfield-1) + vel;
+  }else return Vector(0,0,0);
+}
 
 void Unit::SetPosition(const QVector &pos)
 {
@@ -2813,8 +2825,8 @@ float CalculateNearestWarpUnit (const Unit *thus, float minmultiplier, Unit **ne
 		if(planet->isPlanet()&&udist<(1<<28)){ // If distance is viable as a float approximation and it's an actual celestial body
 			udist = sigdist;
 		}
-		QVector veldiff=thus->Velocity*thus->graphicOptions.WarpFieldStrength-planet->Velocity*planet->graphicOptions.WarpFieldStrength;
-		double velproj=veldiff.Dot(dir*(1./udist));
+		//QVector veldiff=thus->Velocity*thus->graphicOptions.WarpFieldStrength-planet->Velocity*planet->graphicOptions.WarpFieldStrength;
+		//double velproj=veldiff.Dot(dir*(1./udist));OBSOLETE WITH NEW SPEC CALCULATIONS
 		int itercount=0;
 		do {
 							 //+(velproj<0?velproj*SIMULATION_ATOM:0);

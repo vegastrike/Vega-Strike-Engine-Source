@@ -53,7 +53,7 @@ static void ActuallyWarpTo(Unit * parent,const QVector &tarpos, Vector tarvel, U
   vel.Normalize();
   Vector dir = tarpos-parent->Position();
   dir.Normalize();
-  float dirveldot=dir.Dot(vel);
+  float dirveldot=dir.Dot(parent->cumulative_transformation_matrix.getR());
   dir*=-1;
   float chasedot=dir.Dot(tarvel);
   if(dirveldot>mindirveldot){

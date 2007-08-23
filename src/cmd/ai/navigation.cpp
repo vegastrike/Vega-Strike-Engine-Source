@@ -591,12 +591,12 @@ void AutoLongHaul::Execute() {
   float minaccel=mymin(parent->limits.lateral,mymin(parent->limits.vertical,mymin(parent->limits.forward,parent->limits.retro)));
   if (mass) minaccel/=mass;
   if (StraightToTarget&&useJitteryAutopilot(parent,target,minaccel)) {
-	 QVector cvel=parent->cumulative_velocity.Cast();
-	 float speed=cvel.Magnitude();
+         QVector cfacing=parent->cumulative_transformation_matrix.getR();//velocity.Cast();
+	 float speed=cfacing.Magnitude();
 	 if (speed>.01)
-		 cvel=cvel*(1./speed);
+		 cfacing=cfacing*(1./speed);
          static float dotLimit=cos(3.1415926536*XMLSupport::parse_float(vs_config->getVariable("physics","autopilot_spec_lining_up_angle","3"))/180.);
-	 if (cvel.Dot(destinationdirection)<dotLimit) {//if wanting to face target but overshooting.
+	 if (cfacing.Dot(destinationdirection)<dotLimit) {//if wanting to face target but overshooting.
            deactivatewarp=true;//turn off drive
 	 }
   }

@@ -1432,7 +1432,7 @@ static Vector randVector() {
 static void GoTo(AggressiveAI * ai, Unit * parent, const QVector &nav, float creationtime, bool boonies=false, Unit *destUnit=NULL) {
   static bool can_afterburn = XMLSupport::parse_bool(vs_config->getVariable("AI","afterburn_to_no_enemies","true")); 
   Order * mt=new FlyTo(nav,can_afterburn,true,creationtime,boonies?16:6, destUnit);
-  Order * ch=new Orders::ChangeHeading(nav,32,.25f,true);
+  Order * ch=new Orders::ChangeHeading(nav,32,.25f,false);
   ai->eraseType(Order::FACING);
   ai->eraseType(Order::MOVEMENT);
   mt->SetParent(parent);

@@ -807,7 +807,7 @@ class Unit
 		const Vector &GetAngularVelocity() const { return(AngularVelocity); }
 		// Return unit-space velocity
 		const Vector &GetVelocity() const { return(cumulative_velocity); }
-		Vector GetWarpVelocity() const { return(cumulative_velocity*graphicOptions.WarpFieldStrength);}
+		Vector GetWarpVelocity() const;
 		void SetVelocity (const Vector &);
 		void SetAngularVelocity (const Vector &);
 		float GetMoment() const { return(Momentofinertia+fuel); }
