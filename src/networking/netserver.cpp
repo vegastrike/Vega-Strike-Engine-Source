@@ -820,13 +820,23 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                 break;
                 case CMD_TXTMESSAGE:
                   {
+                  if (!clt) break;
 			un = clt->game_unit.GetUnit();
-			p2.bc_create( CMD_TXTMESSAGE, packet_serial,
-                          packet.getData(), packet.getDataLength(), SENDRELIABLE,
+                  if (!un) break;
+			NetBuffer netbuf (packet.getData(), packet.getDataLength());
+			string message = netbuf.getString().substr(0, 160);
+			std::replace(message.begin(),message.end(),'#','$');
+			std::replace(message.begin(),message.end(),'\n',' ');
+			std::replace(message.begin(),message.end(),'\r',' ');
+			netbuf.Reset();
+			netbuf.addString(clt->callsign);
+			netbuf.addString(message);
+			p2.bc_create( CMD_TXTMESSAGE, un->GetSerial(),
+                          netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
                           __FILE__, PSEUDO__LINE__(1293));
 			// Send to concerned clients
-			zonemgr->broadcast( un==NULL?_Universe->activeStarSystem()->GetZone():un->getStarSystem()->GetZone(), packet_serial, &p2, true);
-                        cerr << "Received text message "<<netbuf.getString()<<endl;
+			zonemgr->broadcast( un->getStarSystem()->GetZone(), un->GetSerial(), &p2, true);
+                        COUT << "Received text message from client "<<clt->callsign<<endl;
                     
                   }
                   break;    
@@ -869,6 +879,9 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 					saveAccount(cpnum);
 				}
 			}
+			break;
+		case CMD_KILL:
+			COUT << "CMD_KILL not implented."<<endl;
 			break;
 		case CMD_RESPAWN :
 			COUT << "Received a respawning request for "<<
@@ -1404,7 +1417,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			if (!un) break;
 			// Broadcast sound sample to the clients in the same zone and the have PortAudio support
 			p2.bc_create( packet.getCommand(), packet_serial,
-                          packet.getData(), packet.getDataLength(), SENDRELIABLE,
+                          , SENDRELIABLE,
                           __FILE__, PSEUDO__LINE__(1341));
 			zonemgr->broadcastText( un->getStarSystem()->GetZone(), packet_serial, &p2, clt->comm_freq);
 

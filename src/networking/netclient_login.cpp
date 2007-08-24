@@ -468,7 +468,6 @@ SOCKETALT	NetClient::init( const char* addr, unsigned short port, std::string &e
 /**** packet data.                                        ****/
 /*************************************************************/
 
-#define NUM_TIMES 10 // Number of times to send back and forth and obtain average.
 // NETFIXME: Correctly obtain ping time.
 #include "vs_random.h" // For random ping time.
 
@@ -484,22 +483,33 @@ void NetClient::synchronizeTime(SOCKETALT*udpsock)
 	double timeavg=0.;
 	std::map<double, double> times; // sorted container.
 	double initialTime=queryTime();
-	int clt_port_read = XMLSupport::parse_int(vs_config->getVariable( "network", "udp_listen_port", "6778" ));
-	if (clt_port_read>65535||clt_port_read<0)
+	static int NUM_TIMES = XMLSupport::parse_int(vs_config->getVariable( "network", "servertime_calibration", "5" ));
+	static int UDP_TIMEOUT = XMLSupport::parse_int(vs_config->getVariable( "network", "udp_timeout", "5" ));
+	static int clt_port_read = XMLSupport::parse_int(vs_config->getVariable( "network", "udp_listen_port", "6778" ));
+	if (clt_port_read>65535||clt_port_read<=0)
 		clt_port_read=0;
+	static int clt_port_read_max = XMLSupport::parse_int(vs_config->getVariable( "network", "udp_listen_port_max", "6778" ));
+	if (clt_port_read_max>65535||clt_port_read_max<=0)
+		clt_port_read_max=clt_port_read;
 	unsigned short clt_port=(unsigned short)clt_port_read;
+	unsigned short clt_port_max=(unsigned short)clt_port_read_max;
+	if (clt_port_max<clt_port) {
+		clt_port_max = clt_port;
+	}
 
-	string nettransport;
-	nettransport = vs_config->getVariable( "network", "transport", "udp" );
+	static string nettransport = vs_config->getVariable( "network", "transport", "udp" );
 
 	//std::string addr;
 	unsigned short port=this->_serverport;
 	//getConfigServerAddress(addr, port);
 	
-	if (!(udpsock!=NULL&&udpsock->setRemoteAddress(NetUIBase::lookupHost(this->_serverip.c_str(), port))))
+	if (!(udpsock!=NULL&&udpsock->setRemoteAddress(NetUIBase::lookupHost(this->_serverip.c_str(), port)))) {
+		do {
           *this->clt_udp_sock=NetUIUDP::createSocket( this->_serverip.c_str(), port, clt_port, _sock_set );
-        else
+		} while ((!this->clt_udp_sock->valid()) && (clt_port++));
+	} else {
           this->clt_udp_sock=udpsock;
+	}
 	COUT << "created UDP socket (" << this->_serverip << "," << port << ", listen on " << clt_port << ") -> " << this->clt_udp_sock << endl;
 	
 	if (nettransport=="udp") {
@@ -517,7 +527,7 @@ void NetClient::synchronizeTime(SOCKETALT*udpsock)
 	
 	// Wait for NUM_TIMES (10) successful tries, or 10 consecutive 1-second timeouts
 	// (we use UDP on the response (SENDANDFORGET) to improve timing accuracy).
-	while (i<NUM_TIMES&&timeout<10) {
+	while (i<NUM_TIMES&&timeout<UDP_TIMEOUT) {
 		Packet packet;
 		NetBuffer outData;
 		outData.addShort(clt_port);
@@ -530,13 +540,20 @@ void NetClient::synchronizeTime(SOCKETALT*udpsock)
 		if (recv<=0) {
 			COUT << "synchronizeTime() Timed out" << endl;
 			++timeout;
-			if (timeout>=10&&this->lossy_socket->isTcp()==false) {
-				// no UDP requests made it, fallback to TCP.
-				this->lossy_socket=this->clt_tcp_sock;
-				clt_port=0;
-				timeout=0;
-				COUT << "Setting default lossy transport to TCP (UDP timeout)." << endl;
-				// NETFIXME: We may want to try different UDP ports to allow multiple people behind one firewall.  In that case, keep falling back to a different port, and make sure to set_nonblock or set_block on each one.
+			if (timeout>=UDP_TIMEOUT) {
+				if (this->lossy_socket->isTcp()==false) {
+					if (clt_port<clt_port_max && !udpsock) {
+						NetUIUDP::disconnectSaveUDP(*this->clt_udp_sock); // is disconnectSaveUDP proper???
+						*this->clt_udp_sock=NetUIUDP::createSocket( this->_serverip.c_str(), port, clt_port, _sock_set );
+						clt_port++;
+					} else {
+						// no UDP requests made it, fallback to TCP.
+						this->lossy_socket=this->clt_tcp_sock;
+						clt_port=0;
+					}
+					timeout=0;
+					COUT << "Setting default lossy transport to TCP (UDP timeout)." << endl;
+				}
 			}
 		} else if (packet.getCommand() == CMD_SERVERTIME ) {
 			// NETFIXME: obtain actual ping time

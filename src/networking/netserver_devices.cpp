@@ -107,6 +107,24 @@ void NetServer::sendCredits(ObjSerial serial, float creds) {
                  __FILE__, PSEUDO__LINE__(97) );
 }
 
+void	NetServer::addUnitCargoSnapshot( const Unit *un, NetBuffer &netbuf) {
+	unsigned int numCargo = un->numCargo();
+	if (!numCargo) return;
+	netbuf.addSerial(un->GetSerial());
+	netbuf.addFloat(un->Mass);
+	netbuf.addFloat(un->image->CargoVolume);
+	netbuf.addFloat(un->image->UpgradeVolume);
+	netbuf.addInt32(numCargo);
+	for (unsigned int i=0;i<numCargo;i++) {
+		const Cargo &carg = un->GetCargo(i);
+		netbuf.addInt32(carg.GetQuantity());
+		netbuf.addString(carg.GetContent());
+		netbuf.addFloat(carg.GetPrice());
+		netbuf.addFloat(carg.GetMass());
+		netbuf.addFloat(carg.GetVolume());
+	}
+}
+
 void	NetServer::sendCargoSnapshot( ObjSerial cltser, const UnitCollection &list) {
 	ClientPtr clt = this->getClientFromSerial(cltser);
 	if (!clt) return;
@@ -115,21 +133,7 @@ void	NetServer::sendCargoSnapshot( ObjSerial cltser, const UnitCollection &list)
 	const Unit *un;
 	for (un_kiter iter = list.constIterator(); (un = *iter); ++iter) {
 		if (!un->GetSerial() || un->GetSerial()==cltser) continue;
-		unsigned int numCargo = un->numCargo();
-		if (!numCargo) continue;
-		netbuf.addSerial(un->GetSerial());
-		netbuf.addFloat(un->Mass);
-		netbuf.addFloat(un->image->CargoVolume);
-		netbuf.addFloat(un->image->UpgradeVolume);
-		netbuf.addInt32(numCargo);
-		for (unsigned int i=0;i<numCargo;i++) {
-			const Cargo &carg = un->GetCargo(i);
-			netbuf.addInt32(carg.GetQuantity());
-			netbuf.addString(carg.GetContent());
-			netbuf.addFloat(carg.GetPrice());
-			netbuf.addFloat(carg.GetMass());
-			netbuf.addFloat(carg.GetVolume());
-		}
+		addUnitCargoSnapshot(un, netbuf);
 	}
 	netbuf.addSerial(0);
 	p2.send( CMD_SNAPCARGO, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,

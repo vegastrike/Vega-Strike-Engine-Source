@@ -174,6 +174,36 @@ void	NetClient::unreadyToJump()
 	jumpok = false;
 }
 
+void	NetClient::dieRequest( )
+{
+	// Send a packet with CMD_DOCK with serial and an ObjSerial = unit_to_dock_with_serial
+	Packet p;
+	NetBuffer netbuf;
+	Unit *un = this->game_unit.GetUnit();
+	if (!un) return;
+
+	cerr<<"SENDING A KILL REQUEST FOR PLAYER "<<callsign<<endl;
+	p.send( CMD_KILL, un->GetSerial(),
+            netbuf.getData(), netbuf.getDataLength(),
+            SENDRELIABLE, NULL, *this->clt_tcp_sock,
+            __FILE__, PSEUDO__LINE__(189) );
+}
+
+void	NetClient::saveRequest( )
+{
+	// Send a packet with CMD_DOCK with serial and an ObjSerial = unit_to_dock_with_serial
+	Packet p;
+	NetBuffer netbuf;
+	Unit *un = this->game_unit.GetUnit();
+	if (!un) return;
+
+	cerr<<"SENDING A SAVE REQUEST FOR PLAYER "<<callsign<<endl;
+	p.send( CMD_SAVEACCOUNTS, un->GetSerial(),
+            netbuf.getData(), netbuf.getDataLength(),
+            SENDRELIABLE, NULL, *this->clt_tcp_sock,
+            __FILE__, PSEUDO__LINE__(189) );
+}
+
 void	NetClient::dockRequest( ObjSerial utdw_serial)
 {
 	// Send a packet with CMD_DOCK with serial and an ObjSerial = unit_to_dock_with_serial

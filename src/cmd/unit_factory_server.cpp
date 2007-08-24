@@ -36,12 +36,14 @@ Unit* UnitFactory::createUnit( const char *filename,
 		               Flightgroup *flightgroup,
 		               int         fg_subnumber, string * netxml, ObjSerial netcreate)
 {
+	_Universe->netLock(true);
 	Unit * un = new Unit( filename,
                      SubUnit,
                      faction,
                      customizedUnit,
                      flightgroup,
                      fg_subnumber, netxml);
+	_Universe->netLock(false);
 	
 	if( netcreate)
 	{
@@ -92,11 +94,13 @@ Nebula* UnitFactory::createNebula( const char * unitfile,
                                    Flightgroup* fg,
                                    int fg_snumber, ObjSerial netcreate )
 {
+	_Universe->netLock(true);
     Nebula * neb = new Nebula( unitfile,
         SubU,
 	    faction,
 	    fg,
 	    fg_snumber);
+	_Universe->netLock(false);
 	if( netcreate)
 	{
 
@@ -125,6 +129,7 @@ Missile* UnitFactory::createMissile( const char * filename,
                                      float radmult,
                                      float detonation_radius, ObjSerial netcreate )
 {
+	_Universe->netLock(true);
     Missile * un = new Missile( filename,
          faction,
 	     modifications,
@@ -134,6 +139,7 @@ Missile* UnitFactory::createMissile( const char * filename,
 	     radialeffect,
 	     radmult,
 	     detonation_radius);
+	_Universe->netLock(false);
 	if( netcreate)
 	{
 		un->SetSerial( netcreate);
@@ -173,9 +179,11 @@ Planet* UnitFactory::createPlanet( QVector x,
 				   string fullname ,
 				   bool inside_out, ObjSerial netcreate)
 {
+	_Universe->netLock(true);
     Planet * p = new Planet( x, y, vely, rotvel, pos, gravity, radius,
 		               filename, dest, orbitcent, parent, faction,
 					   fullname, inside_out, 0);
+	_Universe->netLock(false);
 	if( netcreate)
 	{
 		p->SetSerial( netcreate);
@@ -233,7 +241,9 @@ Asteroid* UnitFactory::createAsteroid( const char * filename,
                                        int fg_snumber,
                                        float difficulty, ObjSerial netcreate )
 {
+	_Universe->netLock(true);
     Asteroid * ast = new Asteroid( filename, faction, fg, fg_snumber, difficulty);
+	_Universe->netLock(false);
 	if( netcreate)
 	{
 		// Only allow creating through system files?  Doesn't make sense to be able to dynamically generate these.

@@ -308,6 +308,8 @@ const BaseComputer::WctlTableEntry WctlBase<BaseComputer>::WctlCommandTable[] = 
     BaseComputer::WctlTableEntry ( "ShowJoinAccount", "", &BaseComputer::actionShowAccountMenu ),
     BaseComputer::WctlTableEntry ( "ShowJoinServer", "", &BaseComputer::actionShowServerMenu ),
     BaseComputer::WctlTableEntry ( "JoinGame", "", &BaseComputer::actionJoinGame ),
+    BaseComputer::WctlTableEntry ( "NetworkSaveGame", "", &BaseComputer::actionNetSaveGame ),
+    BaseComputer::WctlTableEntry ( "NetworkDie", "", &BaseComputer::actionNetDie ),
 	BaseComputer::WctlTableEntry ( "DoneComputer", "", &BaseComputer::actionDone ),
 
     BaseComputer::WctlTableEntry ( "", "", NULL )
@@ -5968,11 +5970,21 @@ bool BaseComputer::actionShowAccountMenu(const EventCommandId& command, Control*
 	return true;
 }
 
+bool BaseComputer::actionNetDie(const EventCommandId& command, Control* control) {
+	if (Network!=NULL) {
+		NetActionConfirm *nak = new NetActionConfirm(0, window(), NetActionConfirm::DIE);
+		nak->init();
+		nak->run();
+	}
+	return true;
+}
+
 bool BaseComputer::actionNetSaveGame(const EventCommandId& command, Control* control) {
-	NetActionConfirm *nak = new NetActionConfirm(0, window(), NetActionConfirm::SAVEACCT);
-	nak->init();
-	nak->run();
-	// NETFIXME: Implementme
+	if (Network!=NULL) {
+		NetActionConfirm *nak = new NetActionConfirm(0, window(), NetActionConfirm::SAVEACCT);
+		nak->init();
+		nak->run();
+	}
 	return true;
 }
 

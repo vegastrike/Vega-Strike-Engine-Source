@@ -61,6 +61,7 @@ public:
 	virtual bool finalizeJoinGame(int launchShip=0);
 	virtual bool confirmedJoinGame();
 
+	virtual bool confirmedNetDie();
 	virtual bool confirmedNetSaveGame();
 };
 

@@ -164,6 +164,7 @@ class NetServer
 		void	sendDockDeny( ObjSerial serial, unsigned short zone);
 		void	sendUnDock( ObjSerial serial, ObjSerial utdwserial, unsigned short zone);
 		void	sendCredits( ObjSerial serial, float creds);
+		void	addUnitCargoSnapshot( const Unit *un, NetBuffer &netbuf);
 		void	sendCargoSnapshot( ObjSerial serial, const UnitCollection &unitlist);
 
 		void	addSystem( string & sysname, string & system);

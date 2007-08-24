@@ -75,6 +75,9 @@ public:
   //returns false if impossible (TCP)
         bool setRemoteAddress(const AddressIP&);
 	
+	const AddressIP &getLocalAddress() const;
+	bool setLocalAddress(const AddressIP&);
+	
     /** Required by the download manager achieve a sorting of sockets.
      */
     friend class CompareLt;

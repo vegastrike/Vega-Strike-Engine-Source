@@ -497,8 +497,7 @@ bool NetActionConfirm::processWindowCommand(const EventCommandId& command, Contr
 		confirmedNetSaveGame();
 		window()->close();
 	} else if(command == "Load") {
-		// Not implemented yet.
-		// m_parent->();
+		confirmedNetDie();
 		window()->close();
 	} else if(command == "JoinGame") {
 		confirmedJoinGame();
@@ -546,8 +545,15 @@ void GameMenu::readJoinGameControls(Window *window, string &user, string &pass) 
 }
 
 bool NetActionConfirm::confirmedNetSaveGame() {
-	// Do nothing yet.
-	return false;
+	if (!Network) return false;
+	Network[player].saveRequest();
+	return true;
+}
+
+bool NetActionConfirm::confirmedNetDie() {
+	if (!Network) return false;
+	Network[player].dieRequest();
+	return true;
 }
 
 bool NetActionConfirm::confirmedJoinGame() {
@@ -556,6 +562,8 @@ bool NetActionConfirm::confirmedJoinGame() {
 	GameMenu::readJoinGameControls(m_parent, user, pass);
 	
 	UniverseUtil::showSplashScreen(string());
+	
+	if (!Network) return false;
 	int numships = Network[player].connectLoad(user, pass, err);
 	if (numships) {
 		const vector<string> &shipList = Network[player].shipSelections();
@@ -613,19 +621,24 @@ bool NetActionConfirm::finalizeJoinGame(int launchShip) {
 //	} else {
 //		UniverseUtil::hideSplashScreen();
 //	}
-	if (window()) window()->close();
-	
-	if (m_parent) {
-		m_parent->close();
+	{
+		NetClient *playerClient = &Network[player];
+		Window *parentWin = m_parent;
+		
+		if (window()) window()->close(); // THIS IS DELETED!
+		
+		if (parentWin) {
+			parentWin->close();
+		}
+		
+		globalWindowManager().shutDown();
+		TerminateCurrentBase();  //BaseInterface::CurrentBase->Terminate();
+		
+		playerClient->startGame();
+		UniverseUtil::hideSplashScreen();
+		
+		return true;
 	}
-	
-	globalWindowManager().shutDown();
-	TerminateCurrentBase();  //BaseInterface::CurrentBase->Terminate();
-
-	Network[player].startGame();
-	UniverseUtil::hideSplashScreen();
-	
-	return true;
 }
 
 bool GameMenu::processJoinGameButton(const EventCommandId& command, Control *control) {

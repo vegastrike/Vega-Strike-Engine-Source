@@ -159,6 +159,7 @@ protected:
     bool actionQuitGame(const EventCommandId& command, Control* control);
 
     bool actionNetSaveGame(const EventCommandId& command, Control* control);
+    bool actionNetDie(const EventCommandId& command, Control* control);
     bool actionJoinGame(const EventCommandId& command, Control* control);
     bool actionShowAccountMenu(const EventCommandId& command, Control* control);
     bool actionShowServerMenu(const EventCommandId& command, Control* control);

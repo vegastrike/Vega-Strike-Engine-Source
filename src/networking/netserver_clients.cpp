@@ -171,6 +171,14 @@ void	NetServer::addClient( ClientPtr clt)
 	getZoneInfo(un->activeStarSystem->GetZone(), netbuf);
 	packet3.send( CMD_ENTERCLIENT, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(174) );
 
+	Packet p2;
+	netbuf.Reset();
+	addUnitCargoSnapshot(un, netbuf);
+	netbuf.addSerial(0);
+	p2.bc_create( CMD_SNAPCARGO, 0, netbuf.getData(), netbuf.getDataLength(),
+			SENDRELIABLE, __FILE__, PSEUDO__LINE__(179) );
+	zonemgr->broadcast( un->activeStarSystem->GetZone(), un->GetSerial(), &p2, true ); 
+
 	COUT<<"ADDED client n "<<un->GetSerial()<<" in ZONE "<<un->activeStarSystem->GetZone()<<" at STARDATE "<<_Universe->current_stardate.GetFullTrekDate()<<endl;
         if (active_missions.size()==1) {
           LoadMission("",vs_config->getVariable("server","serverscript","import server;server.server();"),false);

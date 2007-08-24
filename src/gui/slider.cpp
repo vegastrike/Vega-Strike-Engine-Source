@@ -232,7 +232,7 @@ bool Slider::processMouseDrag(const InputEvent& event) {
     //  we know is that some button is down.  This is enough, since we don't get into a specific
     //  mouse state in this control unless we know which mouse button was pressed...
     if(m_mouseState == MOUSE_THUMB_DRAG) {
-        assert(m_thumbLength != NO_THUMB_LENGTH);
+        if (m_thumbLength == NO_THUMB_LENGTH) return true;
 
         const Rect cancelRect = m_rect.copyAndInset(THUMB_DRAG_CANCEL_MARGINS);
         if(!cancelRect.inside(event.loc)) {

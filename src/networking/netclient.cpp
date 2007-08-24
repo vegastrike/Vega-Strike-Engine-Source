@@ -599,7 +599,9 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
                 break;
             case CMD_TXTMESSAGE:
               {
-                UniverseUtil::IOmessage(0,"game","all",netbuf.getString());
+                string sender = netbuf.getString();
+                string message = netbuf.getString();
+                UniverseUtil::IOmessage(0,sender,"all",message);
               }
               break;
 
@@ -1006,7 +1008,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				bool missioncarg=false;
 				
 				unsigned int cargIndex = 0;
-				Cargo *cargptr;
+				Cargo *cargptr=NULL;
 				if (!sender) {
 					break;
 				}
@@ -1042,15 +1044,13 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				}
 				if (upgrade && (seller==sender || buyer==sender)) {
 					double percent; // not used.
-					const Unit *unitCarg = getUnitFromUpgradeName(carg.GetContent(), seller->faction);
-					if (!unitCarg) break; // not an upgrade, and already did cargo transactions.
 					int multAddMode = GetModeFromName(carg.GetContent().c_str());
 					
 					// Now we're sure it's an authentic upgrade...
 					// Wow! So much code just to perform an upgrade!
 					const string unitDir = GetUnitDir(sender->name.get().c_str());
 					string templateName;
-					int faction;
+					int faction=0;
 					if (seller==sender) {
 						templateName = unitDir + ".blank";
 						faction = seller->faction;
@@ -1058,6 +1058,8 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 						faction = buyer->faction;
 						templateName = unitDir + ".template";
 					}
+					const Unit *unitCarg = getUnitFromUpgradeName(carg.GetContent(), faction);
+					if (!unitCarg) break; // not an upgrade, and already did cargo transactions.
 					// Get the "limiter" for the upgrade.  Stats can't increase more than this.
 					const Unit * templateUnit = UnitConstCache::getCachedConst(StringIntKey(templateName,faction));
 					if (!templateUnit) {
@@ -1252,7 +1254,7 @@ SOCKETALT*	NetClient::logout(bool leaveUDP)
 void NetClient::CleanUp() {
 	if (Network) {
 		for (int i=0;i<_Universe->numPlayers();i++) {
-			SOCKETALT *udp = Network[i].logout(true);
+			Network[i].logout(false);
 		}
 		delete [] Network;
 		Network = NULL;

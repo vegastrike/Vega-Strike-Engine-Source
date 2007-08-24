@@ -126,10 +126,15 @@ public:
 	
 	const AddressIP &getRemoteAddress() const { return _remote_ip; }
   virtual  bool setRemoteAddress(const AddressIP&){return false;}
+	
+	// Storage... binding is done in netui for now.
+	const AddressIP &getLocalAddress() const { return _local_ip; }
+  bool setLocalAddress(const AddressIP&lip){ _local_ip = lip; }
     // virtual void ack( ) = 0;
 
 protected:
     AddressIP  _remote_ip; // IP address structure of remote server
+    AddressIP  _local_ip;  // IP address this socket is bind()ed to
 
 private:
     VsnetSocket( );

@@ -180,8 +180,8 @@ class	NetClient
 		// Warn the server we are leaving the game
 		SOCKETALT*	logout(bool leaveUDP);
 		void	Respawn(ObjSerial clientname);
-		void saveRequest();
-		// void dieRequest();
+		void	saveRequest();
+		void	dieRequest();
 		
 		// Check if there are info incoming over the network
 		int		checkMsg( Packet* outpacket );

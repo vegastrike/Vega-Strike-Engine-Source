@@ -1,5 +1,5 @@
 #include <config.h>
-#include <vector>
+#include <map>
 
 #include "networking/const.h"
 #include "netui.h"
@@ -66,6 +66,11 @@ AddressIP NetUIBase::lookupHost(const char* host, unsigned short port)
 int NONBLOCKING_CONNECT=1;
 //#endif
 
+bool bindFd(int fd, const AddressIP &remote_ip)
+{
+	return bind( fd, (sockaddr *)&remote_ip, sizeof(struct sockaddr_in))!=SOCKET_ERROR;
+}
+
 int NetUIBase::createClientSocket(const AddressIP &remote_ip, bool isTCP, bool isHTTP)
 {
     static_initNetwork( );
@@ -109,7 +114,7 @@ int NetUIBase::createClientSocket(const AddressIP &remote_ip, bool isTCP, bool i
        }
     } else {
         // binds socket
-        if( bind( local_fd, (sockaddr *)&remote_ip, sizeof(struct sockaddr_in))==SOCKET_ERROR )
+        if( !bindFd(local_fd, remote_ip) )
         {
             perror( "Can't bind socket" );
             VsnetOSS::close_socket( local_fd );
@@ -223,7 +228,8 @@ ServerSocket* NetUITCP::createServerSocket( unsigned short port, SocketSet& set 
 // Creates and bind the socket designed to receive coms
 // host == NULL -> localhost
 
-std::vector<SOCKETALT> UDP_pool;
+typedef std::map<AddressIP, SOCKETALT> UDP_pool_type;
+UDP_pool_type UDP_pool;
 
 SOCKETALT NetUIUDP::createSocket( const char * host, unsigned short srv_port, unsigned short clt_port, SocketSet& set )
 {
@@ -234,14 +240,16 @@ SOCKETALT NetUIUDP::createSocket( const char * host, unsigned short srv_port, un
     if( srv_port==0 ) srv_port = SERVER_PORT;
     if( clt_port==0 ) clt_port = SERVER_PORT;
     AddressIP remote_ip = NetUIBase::lookupHost(host, srv_port);
-	
-	if (!UDP_pool.empty()) {
-		SOCKETALT ret = UDP_pool.back();
+    AddressIP local_ip = NetUIBase::lookupHost("0.0.0.0", clt_port);
+
+	UDP_pool_type::iterator iter (UDP_pool.find(local_ip));
+	if (iter!=UDP_pool.end()) {
+		SOCKETALT ret ((*iter).second);
+		//bindFd(ret.get_fd(), local_ip); // Don't care if it fails... could be binding on itself.
 		ret.setRemoteAddress(remote_ip);
 		return ret;
 	}
 	
-    AddressIP local_ip = NetUIBase::lookupHost("0.0.0.0", clt_port);
     int       local_fd = NetUIBase::createClientSocket( local_ip, false,false );
 
     if (local_fd == -1) {
@@ -250,7 +258,8 @@ SOCKETALT NetUIUDP::createSocket( const char * host, unsigned short srv_port, un
     }
 
     SOCKETALT ret( local_fd, SOCKETALT::UDP, remote_ip, set );
-
+	ret.setLocalAddress(local_ip);
+	
     if( ret.set_nonblock() == false )
     {
 		COUT << "Could not set socket to nonblocking state";
@@ -279,6 +288,7 @@ SOCKETALT NetUIUDP::createServerSocket( unsigned short port, SocketSet& set )
     }
 
 	SOCKETALT ret( local_fd, SOCKETALT::UDP, local_ip, set );
+	ret.setLocalAddress(local_ip);
 
     if( ret.set_nonblock() == false )
     {
@@ -294,7 +304,7 @@ SOCKETALT NetUIUDP::createServerSocket( unsigned short port, SocketSet& set )
 
 void NetUIUDP::disconnectSaveUDP(SOCKETALT udp) {
 	if (udp.valid()) {
-		UDP_pool.push_back(udp);
+		UDP_pool[udp.getLocalAddress()] = udp;
 	}
 }
 
