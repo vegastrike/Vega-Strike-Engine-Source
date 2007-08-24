@@ -1933,6 +1933,11 @@ void GameCockpit::Draw() {
   GFXDisable(DEPTHTEST);
   GFXDisable(DEPTHWRITE);
   GFXColor4f(1,1,1,1);
+  std::string nav_current=AccessNavSystem()->getCurrentSystem();
+  std::string universe_current=_Universe->activeStarSystem()->getFileName();
+  if(nav_current!=universe_current) {
+    AccessNavSystem()->Setup();
+  }
   static bool draw_any_boxes = XMLSupport::parse_bool (vs_config->getVariable("graphics","hud","DrawTargettingBoxes","true"));
   static bool draw_boxes_inside_only=XMLSupport::parse_bool (vs_config->getVariable("graphics","hud","DrawTargettingBoxesInside","true"));
   if (draw_any_boxes&&screenshotkey==false&&(draw_boxes_inside_only==false||view<CP_CHASE)) {
