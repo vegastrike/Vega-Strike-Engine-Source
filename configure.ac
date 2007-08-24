@@ -375,7 +375,7 @@ AC_MSG_RESULT([${is_freebsd}])
 
 
 if test "x$is_macosx" = "xyes" ; then
-	CXXFLAGS="$CXXFLAGS -I/Developer/SDKs/MacOSX10.2.8sdk/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes -DHAVE_PYTHON=1 -I$PYTHON_INCPATH "
+	CXXFLAGS="$CXXFLAGS -I/Developer/SDKs/MacOSX10.2.8sdk/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes -DHAVE_PYTHON=1 -I$with_python_inc "
 	CPPFLAGS="$CPPFLAGS -Wno-long-double"
     dnl GL_CPPFLAGS="$GL_CPPFLAGS -framework OpenGL"
     dnl GLUT_CPPFLAGS="$GLUT_CPPFLAGS -framework GLUT"
@@ -386,7 +386,7 @@ if test "x$is_macosx" = "xyes" ; then
     with_al_libs="/System/Library/Frameworks/OpenAL.framework/ -L/sw/lib"
 #    PYTHON_LDOPTS="-L/System/Library/Frameworks/Python.framework"
 #    with_python_inc="/System/Library/Frameworks/Python.framework/Headers"
-    VS_LIBS="$VS_LIBS -lobjc -L$PYTHON_LIBPATH "
+    VS_LIBS="$VS_LIBS -lobjc -L$with_python_libs "
 else
     VS_LIBS="$VS_LIBS -lutil"
 fi
@@ -405,7 +405,10 @@ else
     AM_CONDITIONAL([VS_MAKE_SOUNDSERVER], [test "x$have_SDL_mixer" = "xyes"]) 
     
     AC_LANG(C++)
+  if test "x$is_macosx" = "xno" ; then 
+    dnl all macs have openGL  and this test no longer works for mac
     VS_CHECK_GL
+  fi
 fi
 
 dnl --------------------------------------------------------------------------

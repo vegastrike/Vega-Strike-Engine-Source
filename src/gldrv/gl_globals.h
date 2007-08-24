@@ -117,7 +117,7 @@ struct GFXStats{
 #define glClientActiveTextureARB_p glClientActiveTextureARB
 #define glActiveTextureARB_p glActiveTextureARB
 #define glColorTable_p glColorTable
-
+#define glCompressedTexImage2D_p glCompressedTexImage2D
 #if !defined(glLockArraysEXT)||!defined(glUnlockArraysEXT)
 #define NO_COMPILEDVERTEXARRAY_SUPPORT
 #endif
@@ -153,8 +153,9 @@ extern PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB_p;
 extern PFNGLCOLORTABLEEXTPROC glColorTable_p;
 extern PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
 extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
-#endif /* __APPLE_PANTHER_GCC33_CLI__ */
 extern PFNGLCOMPRESSEDTEXIMAGE2DPROC glCompressedTexImage2D_p;
+#endif /* __APPLE_PANTHER_GCC33_CLI__ */
+
 //extern int sharedcolortable;
 #ifdef STATS_QUEUE
 extern queue<GFXStats> statsqueue;

@@ -96,9 +96,9 @@ PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB_p = 0;
 
 PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p = 0;
 PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p = 0;
+PFNGLCOMPRESSEDTEXIMAGE2DPROC glCompressedTexImage2D_p = 0;
 #endif /* __APPLE_PANTHER_GCC33_CLI__ */
 
-PFNGLCOMPRESSEDTEXIMAGE2DPROC glCompressedTexImage2D_p = 0;
 typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))(); 
 #ifdef _WIN32
     typedef char * GET_GL_PTR_TYP;
@@ -214,10 +214,10 @@ void init_opengl_extensions()
         glClientActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureEXT");
     if(!glActiveTextureARB_p)
         glActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureEXT");	
-#endif
-
 	if(!glCompressedTexImage2D_p)
 		glCompressedTexImage2D_p = (PFNGLCOMPRESSEDTEXIMAGE2DPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glCompressedTexImage2D");
+#endif
+
 #ifdef GL_FOG_DISTANCE_MODE_NV
     if (vsExtensionSupported ("GL_NV_fog_distance")) {
       VSFileSystem::vs_fprintf (stderr,"OpenGL::Accurate Fog Distance supported\n");
