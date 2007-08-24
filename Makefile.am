@@ -948,6 +948,7 @@ vegastrike_SOURCES = \
   src/cmd/unit_util.cpp \
   src/cmd/unit_util.h \
   src/cmd/unit.h \
+  src/gldrv/gl_program.cpp \
   src/gldrv/gl_clip.cpp \
   src/gldrv/gl_fog.cpp \
   src/gldrv/gl_globals.cpp \
