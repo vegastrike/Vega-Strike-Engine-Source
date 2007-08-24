@@ -97,6 +97,26 @@ PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB_p = 0;
 PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p = 0;
 PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p = 0;
 PFNGLCOMPRESSEDTEXIMAGE2DPROC glCompressedTexImage2D_p = 0;
+
+ PFNGLGETSHADERIVPROC glGetShaderiv_p=0;
+ PFNGLGETPROGRAMIVPROC glGetProgramiv_p=0;
+ PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog_p=0;
+ PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog_p=0;
+ PFNGLCREATESHADERPROC glCreateShader_p=0;
+ PFNGLSHADERSOURCEPROC glShaderSource_p=0;
+ PFNGLCOMPILESHADERPROC glCompileShader_p=0;
+ PFNGLCREATEPROGRAMPROC glCreateProgram_p=0;
+ PFNGLATTACHSHADERPROC glAttachShader_p=0;
+ PFNGLLINKPROGRAMPROC glLinkProgram_p=0;
+ PFNGLUSEPROGRAMPROC glUseProgram_p=0;
+ PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation_p=0;
+ PFNGLUNIFORM1FPROC glUniform1f_p=0;
+ PFNGLUNIFORM2FPROC glUniform2f_p=0;
+ PFNGLUNIFORM3FPROC glUniform3f_p=0;
+ PFNGLUNIFORM4FPROC glUniform4f_p=0;
+ PFNGLDELETESHADERPROC glDeleteShader_p=0;
+ PFNGLDELETEPROGRAMPROC glDeleteProgram_p=0;
+
 #endif /* __APPLE_PANTHER_GCC33_CLI__ */
 
 typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))(); 
@@ -214,8 +234,46 @@ void init_opengl_extensions()
         glClientActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureEXT");
     if(!glActiveTextureARB_p)
         glActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureEXT");	
-	if(!glCompressedTexImage2D_p)
-		glCompressedTexImage2D_p = (PFNGLCOMPRESSEDTEXIMAGE2DPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glCompressedTexImage2D");
+    if(!glCompressedTexImage2D_p)
+      glCompressedTexImage2D_p = (PFNGLCOMPRESSEDTEXIMAGE2DPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glCompressedTexImage2D");
+
+    if(!glGetShaderiv_p)
+      glGetShaderiv_p = (PFNGLGETSHADERIVPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glGetShaderiv");
+    if(!glGetProgramiv_p)
+      glGetProgramiv_p = (PFNGLGETPROGRAMIVPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glGetProgramiv");
+    if (!glGetShaderInfoLog_p)
+      glGetShaderInfoLog_p=(PFNGLGETSHADERINFOLOGPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glGetShaderInfoLog");
+    if (!glGetProgramInfoLog_p)
+      glGetProgramInfoLog_p=(PFNGLGETPROGRAMINFOLOGPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glGetProgramInfoLog");
+    if (!glCreateShader_p)
+      glCreateShader_p= (PFNGLCREATESHADERPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glCreateShader");
+    if (!glCreateProgram_p)
+      glCreateProgram_p= (PFNGLCREATEPROGRAMPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glCreateProgram");
+    if (!glShaderSource_p)
+      glShaderSource_p=(PFNGLSHADERSOURCEPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glShaderSource");
+    if (!glCompileShader_p)
+      glCompileShader_p=(PFNGLCOMPILESHADERPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glCompileShader");
+    if (!glAttachShader_p) 
+      glAttachShader_p=(PFNGLATTACHSHADERPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glAttachShader");
+    if (!glLinkProgram_p)
+      glLinkProgram_p=(PFNGLLINKPROGRAMPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glLinkProgram");
+    if (!glUseProgram_p)
+      glUseProgram_p=(PFNGLUSEPROGRAMPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glUseProgram");
+    if (!glGetUniformLocation_p)
+      glGetUniformLocation_p=(PFNGLGETUNIFORMLOCATIONPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glGetUniformLocation");
+    if (!glUniform1f_p)
+      glUniform1f_p=(PFNGLUNIFORM1FPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUniform1f");
+    if (!glUniform2f_p)
+      glUniform2f_p=(PFNGLUNIFORM2FPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUniform2f");
+    if (!glUniform3f_p)
+      glUniform3f_p=(PFNGLUNIFORM3FPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUniform3f");
+    if (!glUniform4f_p)
+      glUniform4f_p=(PFNGLUNIFORM4FPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUniform4f");
+    if (!glDeleteShader_p)
+      glDeleteShader_p=(PFNGLDELETESHADERPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glDeleteShader");
+    if (!glDeleteProgram_p)
+      glDeleteProgram_p=(PFNGLDELETEPROGRAMPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glDeleteProgram");
+    //fixme
 #endif
 
 #ifdef GL_FOG_DISTANCE_MODE_NV

@@ -118,6 +118,25 @@ struct GFXStats{
 #define glActiveTextureARB_p glActiveTextureARB
 #define glColorTable_p glColorTable
 #define glCompressedTexImage2D_p glCompressedTexImage2D
+#define glGetShaderiv_p glGetShaderiv
+#define glGetProgramiv_p glGetProgramiv
+#define glGetShaderInfoLog_p glGetShaderInfoLog
+#define glGetProgramInfoLog_p  glGetProgramInfoLog
+#define glCreateShader_p glCreateShader
+#define glShaderSource_p  glShaderSource
+#define glCompileShader_p glCompileShader
+#define glCreateProgram_p glCreateProgram
+#define glAttachShader_p glAttachShader
+#define glLinkProgram_p glLinkProgram
+#define glUseProgram_p glUseProgram
+#define glGetUniformLocation_p glGetUniformLocation
+#define glUniform1f_p glUniform1f
+#define glUniform2f_p glUniform2f
+#define glUniform3f_p glUniform3f
+#define glUniform4f_p glUniform4f
+#define glDeleteShader_p glDeleteShader
+#define glDeleteProgram_p glDeleteProgram
+
 #if !defined(glLockArraysEXT)||!defined(glUnlockArraysEXT)
 #define NO_COMPILEDVERTEXARRAY_SUPPORT
 #endif
@@ -154,6 +173,25 @@ extern PFNGLCOLORTABLEEXTPROC glColorTable_p;
 extern PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
 extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
 extern PFNGLCOMPRESSEDTEXIMAGE2DPROC glCompressedTexImage2D_p;
+extern PFNGLGETSHADERIVPROC glGetShaderiv_p;
+extern PFNGLGETPROGRAMIVPROC glGetProgramiv_p;
+extern PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog_p;
+extern PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog_p;
+extern PFNGLCREATESHADERPROC glCreateShader_p;
+extern PFNGLSHADERSOURCEPROC glShaderSource_p;
+extern PFNGLCOMPILESHADERPROC glCompileShader_p;
+extern PFNGLCREATEPROGRAMPROC glCreateProgram_p;
+extern PFNGLATTACHSHADERPROC glAttachShader_p;
+extern PFNGLLINKPROGRAMPROC glLinkProgram_p;
+extern PFNGLUSEPROGRAMPROC glUseProgram_p;
+extern PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation_p;
+extern PFNGLUNIFORM1FPROC glUniform1f_p;
+extern PFNGLUNIFORM2FPROC glUniform2f_p;
+extern PFNGLUNIFORM3FPROC glUniform3f_p;
+extern PFNGLUNIFORM4FPROC glUniform4f_p;
+extern PFNGLDELETESHADERPROC glDeleteShader_p;
+extern PFNGLDELETEPROGRAMPROC glDeleteProgram_p;
+
 #endif /* __APPLE_PANTHER_GCC33_CLI__ */
 
 //extern int sharedcolortable;
