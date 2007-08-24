@@ -401,5 +401,12 @@ enum GFXTEXTURECOORDMODE{
 };
 void GFXTextureCoordGenMode(int stage, GFXTEXTURECOORDMODE tex, const float params[4],const float paramt[4]);
 
+//program created if necessary and active
+int GFXActivateShader(char *program=NULL/*null for default prog*/);
+void GFXDeactivateShader();
+//return location of named value
+int GFXNamedShaderConstant(char* progID,char *name,float*values);
+int GFXShaderConstant(int name, float*value);
+
 #endif
 
