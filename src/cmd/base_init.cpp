@@ -83,6 +83,7 @@ PYTHON_BEGIN_MODULE(Base)
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::RunScript, "RunScript");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::TextBox, "TextBox");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetTextBoxText, "SetTextBoxText");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::GlobalKeyPython, "GlobalKeyPython");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetLinkArea, "SetLinkArea");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetLinkText, "SetLinkText");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetLinkPython, "SetLinkPython");
