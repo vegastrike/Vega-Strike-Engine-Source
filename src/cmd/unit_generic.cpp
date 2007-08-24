@@ -7274,6 +7274,13 @@ bool Unit::UpgradeSubUnitsWithFactory (const Unit * up, int subunitoffset, bool 
 	return cancompletefully;
 }
 
+static void GCCBugCheckFloat(float *f, int offset) {
+      if (f[offset]>1) {
+        
+        f[offset]=1;//keep it real
+      }
+
+}
 
 bool Unit::canUpgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, const Unit * templ, bool force_change_on_nothing, bool gen_downgrade_list)
 {
@@ -7734,13 +7741,12 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
 		STDUPGRADE(image->CommFunctionalityMax,up->image->CommFunctionalityMax,templ->image->CommFunctionalityMax,(unittable?0:1));
 		STDUPGRADE(image->LifeSupportFunctionality,up->image->LifeSupportFunctionality,templ->image->LifeSupportFunctionality,(unittable?0:1));
 		STDUPGRADE(image->LifeSupportFunctionalityMax,up->image->LifeSupportFunctionalityMax,templ->image->LifeSupportFunctionalityMax,(unittable?0:1));
-
-		for (unsigned int upgr=0;upgr<(UnitImages::NUMGAUGES+1+MAXVDUS)*2;++upgr) {
+		unsigned int upgrmax=(UnitImages::NUMGAUGES+1+MAXVDUS)*2;
+		for (unsigned int upgr=0;upgr<upgrmax;upgr++) {
 			STDUPGRADE(image->cockpit_damage[upgr],up->image->cockpit_damage[upgr],templ->image->cockpit_damage[upgr],(unittable?0:1));
-			if (image->cockpit_damage[upgr]>1) {
-								 //keep it real
-				image->cockpit_damage[upgr]=1;
-			}
+		}
+		for (unsigned int upgr=0;upgr<upgrmax;++upgr) {
+			GCCBugCheckFloat(image->cockpit_damage,upgr);
 		}
 	}
 
