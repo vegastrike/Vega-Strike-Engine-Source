@@ -36,33 +36,30 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 			// Since coms between game servers and account server are TCP
             // the order of request/answers
 			// should be ok and we can use a "queue" for waiting clients
-			if( waitList.size()==0)
-			{
-                          if (p.length()&&getSimpleChar(p)==ACCT_SUCCESS) {
-                            // this is just the webserver response to any post... should be ignored
-                            return;
-                          }else {
-                            cerr<<"Error : trying to remove client on empty waitList"<<" - len="<<p.length()<<endl;
-                            return;
-                          }
-                        }
-                        WaitListEntry entry( waitList.front() );
-			char flags = 0;
-			if( entry.tcp )
-			{
-			    clt = entry.t;
-			    COUT << "Got response for TCP client" << endl;
-			}
-			else
-			{
-			    ipadr = entry.u;
-				COUT << "Got response for client IP : " << ipadr << endl;
-			}
-			waitList.pop();
-                        ObjSerial serial =0;
-
-
-			switch(cmd= getSimpleChar(p))
+			if (!p.empty()) cmd = getSimpleChar(p);
+			if (cmd!=ACCT_SUCCESS && cmd != 0) {
+				string ptemp (p);
+				string username = getSimpleString(ptemp);
+				std::map<std::string, WaitListEntry>::iterator iter = waitList.find(username);
+				if( waitList.end()!=iter)
+				{
+					WaitListEntry entry( (*iter).second );
+					char flags = 0;
+					if( entry.tcp )
+					{
+						clt = entry.t;
+						COUT << "Got response for TCP client" << endl;
+					}
+					else
+					{
+						ipadr = entry.u;
+						COUT << "Got response for client IP : " << ipadr << endl;
+					}
+					waitList.erase(iter);
+					ObjSerial serial =0;
+					
+					
+			switch(cmd)
 			{
 				case ACCT_LOGIN_NEW :
 					COUT << ">>> NEW LOGIN =( serial #"<<serial<<" )= --------------------------------------"<<endl;
@@ -90,6 +87,8 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 				break;
 				default:
 					COUT<<">>> UNKNOWN COMMAND =( "<<(unsigned int)cmd<<" )= --------------------------------------"<<endl<<"Full datastream was:"<<p<<endl;
+			}
+				}
 			}
 		}
 		else
@@ -161,7 +160,7 @@ bool NetServer::saveAccount(int i)
 		}
 		if( !clt || !un )
 		{
-			cerr<<"Error client/unit for "<<clt->callsign<<" not found in save process !!!!"<<endl;
+			cerr<<"Error client/unit for "<<(clt?clt->callsign:"")<<", serial "<<(un?un->GetSerial():0)<<" not found in save process !!!!"<<endl;
 			return false;
 		}
 		addSimpleChar(snetbuf,ACCT_SAVE);

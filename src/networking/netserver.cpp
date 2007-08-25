@@ -744,10 +744,21 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				SOCKETALT tmpsock;
 				const AddressIP* iptmp;
 				WaitListEntry entry;
+				NetBuffer netbuf (packet.getData(),packet.getDataLength());
+				std::string user = netbuf.getString();
+				std::string passwd = netbuf.getString();
 				// This must be a TCP client
 				entry.tcp = true;
 				entry.t   = clt;
-				this->waitList.push( entry );
+				if (user.empty()) {
+					sendLoginError(clt);
+					break;
+				}
+				if (waitList.find(user)!=waitList.end()) {
+					sendLoginAlready(clt);
+					break;
+				}
+				this->waitList[user] = ( entry );
 				iptmp = &clt->cltadr;
 				tmpsock = clt->tcp_sock;
 
@@ -756,9 +767,6 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				<< "*** Packet to copy length : " << packet.getDataLength()<<endl;
 				char redirectcommand[2]={ACCT_LOGIN,'\0'};
 				std::string redirect(redirectcommand);
-				NetBuffer netbuf (packet.getData(),packet.getDataLength());
-				std::string user = netbuf.getString();
-				std::string passwd = netbuf.getString();
 				for (int i=0; i<_Universe->numPlayers(); i++) {
 					Cockpit *cp = _Universe->AccessCockpit(i);
 					if (cp->savegame && cp->savegame->GetCallsign() == user) {
@@ -1303,7 +1311,6 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			zone = unclt->getStarSystem()->GetZone();
 			// NETFIXME: Make sure that serials have 0 allocated for NULL
 			un = zonemgr->getUnit( target_serial, zone);
-			unclt = zonemgr->getUnit( packet.getSerial(), zone);
 			if (unclt) {
 				// It's fine if un is null...
 				unclt->Target(un);

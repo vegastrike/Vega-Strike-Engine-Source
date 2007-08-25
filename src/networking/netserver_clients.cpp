@@ -468,11 +468,11 @@ void	NetServer::posUpdate( ClientPtr clt)
 /**************************************************************/
 /**** Disconnect a client                                  ****/
 /**************************************************************/
-void AddWriteSave(ClientPtr clt, std::string &netbuf, Unit * un, Cockpit * cp){
-  std::string fn=cp->activeStarSystem->getFileName();
-  addSimpleString(netbuf, cp->savegame->WriteSaveGame (fn.c_str(),un->LocalPosition(),cp->credits,cp->unitfilename,-1,FactionUtil::GetFactionName(un->faction), false));
-  addSimpleString(netbuf, un->WriteUnitString());
- 
+void AddWriteSave(std::string &netbuf, int cpnum){
+  string savestr, xmlstr;
+  SaveNetUtil::GetSaveStrings( cpnum, savestr, xmlstr);
+  addSimpleString(netbuf, savestr);
+  addSimpleString(netbuf, xmlstr);
 }
 void AcctLogout(VsnetHTTPSocket* acct_sock,ClientPtr clt) {
   if (acct_sock==NULL) return;
@@ -480,13 +480,14 @@ void AcctLogout(VsnetHTTPSocket* acct_sock,ClientPtr clt) {
     std::string netbuf;
     
     Unit * un = clt->game_unit.GetUnit();
-    Cockpit * cp = un==NULL?NULL:_Universe->isPlayerStarship(un);
+	int cpnum = _Universe->whichPlayerStarship(un);
+    Cockpit * cp = cpnum==-1?NULL:_Universe->AccessCockpit(cpnum);
     bool dosave=(cp!=NULL&&un!=NULL&&_Universe->star_system.size()>0&&cp->activeStarSystem&&clt->jumpok==0);
     addSimpleChar(netbuf,dosave?ACCT_SAVE_LOGOUT:ACCT_LOGOUT);
     addSimpleString(netbuf, clt->callsign );
     addSimpleString(netbuf, clt->passwd );
     if (dosave) {
-      AddWriteSave(clt,netbuf,un,cp);
+      AddWriteSave(netbuf,cpnum);
     }
     if (!acct_sock->sendstr(netbuf)) {
       COUT<<"ERROR sending LOGOUT to account server"<<endl;

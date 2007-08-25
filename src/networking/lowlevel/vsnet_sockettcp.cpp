@@ -75,6 +75,9 @@ VsnetTCPSocket::~VsnetTCPSocket( )
     {
         delete _incomplete_packet;
     }
+	if (valid()&&!_connection_closed&&get_fd()>=0) {
+		close_fd();
+	}
 }
 
 // int VsnetTCPSocket::sendbuf( PacketMem& packet, const AddressIP*, int pcktflags )

@@ -1207,7 +1207,7 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system,
 	}
 	else {
 		// Networking mode
-		if( !SERVER)
+		if( jumppoint )
 			Network->jumpRequest( system, jumppoint->GetSerial());
 	}
 
