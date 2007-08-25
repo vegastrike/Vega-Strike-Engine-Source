@@ -36,6 +36,9 @@
 using std::vector;
 using std::stack;
 static vector<Animation *> far_animationdrawqueue;
+bool AnimationsLeftInFarQueue(){
+  return !far_animationdrawqueue.empty();
+}
 static vector
 <Animation *> animationdrawqueue;
 static const unsigned char ani_up           =0x01;

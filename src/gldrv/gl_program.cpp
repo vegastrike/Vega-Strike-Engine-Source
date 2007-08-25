@@ -36,6 +36,7 @@ int GFXCreateProgram(char*vprogram,char* fprogram) {
   fpfilename+=".fp";
   VSFileSystem::VSError vperr = vf.OpenReadOnly(vpfilename.c_str(), UnknownFile);  
   VSFileSystem::VSError fperr = ff.OpenReadOnly(fpfilename.c_str(), UnknownFile);  
+  if (vperr>Ok&&fperr>Ok) return 0;
   GLint vproghandle=0;
   GLint fproghandle=0;
   GLint sp=glCreateProgram_p();

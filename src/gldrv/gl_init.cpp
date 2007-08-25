@@ -346,23 +346,11 @@ void init_opengl_extensions()
       gl_options.ext_clamp_to_border=false;
       (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::S3TC Texture Clamp-to-Border unsupported\n");
     }
-
-#if defined(CG_SUPPORT)
-	if(! glh_init_extensions(CG_REQUIRED_EXTENSIONS))
-	{
-		cerr << "Necessary OpenGL extensions for Cg were not supported:" << endl
-			 << glh_get_unsupported_extensions() << endl << endl
-			 << "Press <enter> to quit." << endl;
-		char buff[10];
-		cin.getline(buff, 10);
-		winsys_exit(0);
-	}
-
-cloak_cg->vertexProfile = CG_PROFILE_ARBVP1;
-cloak_cg->shaderContext = cgCreateContext();
-cloak_cg->cgLoadMedia("programs/cloaking_effect", "vertex.cg");
-#endif
-
+    if (GFXDefaultShaderSupported) {
+      if (gl_options.Multitexture<16)
+	gl_options.Multitexture=16;//only support shaders on ps_2_0 cards
+    }
+    
 
     
 }
