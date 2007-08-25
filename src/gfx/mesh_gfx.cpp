@@ -788,8 +788,8 @@ void SetupShaders (vector <Texture *> &Decal, unsigned int mat, bool envMap,floa
   }else {
     black->MakeActive(2);
   }
-  SAFEDECAL(GLOW_PASS)->MakeActive(3);
-  SAFEDECAL(4)->MakeActive(4);//normal map
+  SAFEDECAL(GLOW_PASS)->MakeActive(4);
+  SAFEDECAL(4)->MakeActive(3);//normal map
   SAFEDECAL(DAMAGE_PASS)->MakeActive(5);
   GFXToggleTexture(true,0);
   GFXToggleTexture(true,1);
@@ -809,6 +809,23 @@ void SetupShaders (vector <Texture *> &Decal, unsigned int mat, bool envMap,floa
       GFXToggleTexture(true,stage);
     }
   }
+  //for default fprog only
+  static int diffuseMap=GFXNamedShaderConstant(NULL,"diffuseMap",0);
+  GFXShaderConstant(diffuseMap,0);
+  static int envmap=GFXNamedShaderConstant(NULL,"envMap",1);
+  GFXShaderConstant(envmap,1);
+  static int specMap=GFXNamedShaderConstant(NULL,"specMap",2);
+  GFXShaderConstant(specMap,2);
+  static int normalMap=GFXNamedShaderConstant(NULL,"normalMap",3);
+  GFXShaderConstant(normalMap,3);
+  static int glowMap=GFXNamedShaderConstant(NULL,"glowMap",4);
+  GFXShaderConstant(glowMap,4);
+  static int damageMap=GFXNamedShaderConstant(NULL,"damageMap",5);
+  GFXShaderConstant(damageMap,5);
+  static int detail0Map=GFXNamedShaderConstant(NULL,"detail0Map",6);
+  GFXShaderConstant(detail0Map,6);
+  static int detail1Map=GFXNamedShaderConstant(NULL,"detail1Map",7);
+  GFXShaderConstant(detail1Map,7);
 #undef SAFEDECAL
 }
 

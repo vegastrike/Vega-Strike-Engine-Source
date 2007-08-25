@@ -114,6 +114,12 @@ PFNGLCOMPRESSEDTEXIMAGE2DPROC glCompressedTexImage2D_p = 0;
  PFNGLUNIFORM2FPROC glUniform2f_p=0;
  PFNGLUNIFORM3FPROC glUniform3f_p=0;
  PFNGLUNIFORM4FPROC glUniform4f_p=0;
+
+ PFNGLUNIFORM1IPROC glUniform1i_p=0;
+ PFNGLUNIFORM2IPROC glUniform2i_p=0;
+ PFNGLUNIFORM3IPROC glUniform3i_p=0;
+ PFNGLUNIFORM4IPROC glUniform4i_p=0;
+
  PFNGLDELETESHADERPROC glDeleteShader_p=0;
  PFNGLDELETEPROGRAMPROC glDeleteProgram_p=0;
 
@@ -269,6 +275,16 @@ void init_opengl_extensions()
       glUniform3f_p=(PFNGLUNIFORM3FPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUniform3f");
     if (!glUniform4f_p)
       glUniform4f_p=(PFNGLUNIFORM4FPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUniform4f");
+
+    if (!glUniform1i_p)
+      glUniform1i_p=(PFNGLUNIFORM1IPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUniform1i");
+    if (!glUniform2i_p)
+      glUniform2i_p=(PFNGLUNIFORM2IPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUniform2i");
+    if (!glUniform3i_p)
+      glUniform3i_p=(PFNGLUNIFORM3IPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUniform3i");
+    if (!glUniform4i_p)
+      glUniform4i_p=(PFNGLUNIFORM4IPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUniform4i");
+
     if (!glDeleteShader_p)
       glDeleteShader_p=(PFNGLDELETESHADERPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glDeleteShader");
     if (!glDeleteProgram_p)

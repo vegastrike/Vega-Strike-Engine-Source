@@ -120,6 +120,21 @@ int GFXShaderConstant(int name,float*values) {
   }
   return 0;  
 }
+
+
+int GFXShaderConstant(int name,int value) {
+  if (1
+#ifndef __APPLE__
+      &&glUniform1i_p
+#endif
+      ) {
+    glUniform1i_p(name,value);
+    return 1;
+  }
+  return 0;  
+}
+
+
 int GFXNamedShaderConstant(char*progID,char*name,float*values) {
   int programname=defaultprog;
   if(progID)
@@ -131,6 +146,24 @@ int GFXNamedShaderConstant(char*progID,char*name,float*values) {
       ) {
     int varloc=glGetUniformLocation_p(programname,name);
     GFXShaderConstant(varloc,values);
+    return varloc;
+  }
+  return 0;
+}
+
+
+
+int GFXNamedShaderConstant(char*progID,char*name,int value) {
+  int programname=defaultprog;
+  if(progID)
+    programname=loadedprograms[progID];
+  if (1
+#ifndef __APPLE__
+      &&glGetUniformLocation_p
+#endif
+      ) {
+    int varloc=glGetUniformLocation_p(programname,name);
+    GFXShaderConstant(varloc,value);
     return varloc;
   }
   return 0;

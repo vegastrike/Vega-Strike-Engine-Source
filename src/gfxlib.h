@@ -406,7 +406,9 @@ int GFXActivateShader(char *program=NULL/*null for default prog*/);
 void GFXDeactivateShader();
 //return location of named value
 int GFXNamedShaderConstant(char* progID,char *name,float*values);
+int GFXNamedShaderConstant(char* progID,char *name,int value);
 int GFXShaderConstant(int name, float*value);
+int GFXShaderConstant(int name, int value);
 bool GFXDefaultShaderSupported();
 #endif
 
