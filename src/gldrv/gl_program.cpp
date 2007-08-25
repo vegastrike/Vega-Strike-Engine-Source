@@ -28,12 +28,14 @@ int GFXCreateProgram(char*vprogram,char* fprogram) {
     printf ("Error code %s\n",gluErrorString(errCode));
   }
   VSFileSystem::VSFile vf,ff;
-  std::string vpfilename=vprogram;
+  std::string vpfilename="programs/";
+  vpfilename+=vprogram;
   vpfilename+=".vp";
-  std::string fpfilename=fprogram;
+  std::string fpfilename="programs/";
+  fpfilename+=fprogram;
   fpfilename+=".fp";
   VSFileSystem::VSError vperr = vf.OpenReadOnly(vpfilename.c_str(), UnknownFile);  
-  VSFileSystem::VSError fperr = ff.OpenReadOnly(vpfilename.c_str(), UnknownFile);  
+  VSFileSystem::VSError fperr = ff.OpenReadOnly(fpfilename.c_str(), UnknownFile);  
   GLint vproghandle=0;
   GLint fproghandle=0;
   GLint sp=glCreateProgram_p();
@@ -69,8 +71,15 @@ int GFXCreateProgram(char*vprogram,char* fprogram) {
   return sp;
 }
 static int defaultprog=0;
-int GFXActivateShader(char *program) {
+int getDefaultProgram() {
   static int defaultprogram=defaultprog=GFXCreateProgram("default","default");
+  return defaultprogram;
+}
+bool GFXDefaultShaderSupported() {
+  return getDefaultProgram()!=0;
+}
+int GFXActivateShader(char *program) {
+  int defaultprogram=getDefaultProgram();
   int curprogram=defaultprogram;
   if (program) {
     std::map<std::string,int>::iterator where=loadedprograms.find(std::string(program));

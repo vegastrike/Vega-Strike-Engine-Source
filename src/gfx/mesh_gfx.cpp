@@ -428,6 +428,7 @@ static GFXColor getMeshColor () {
 }
 void Mesh::ProcessZFarMeshes (bool nocamerasetup) {
 #ifndef PARTITIONED_Z_BUFFER
+  int defaultprogram=GFXActivateShader(NULL);
   static GFXColor meshcolor (getMeshColor());
   GFXLightContextAmbient(meshcolor);
   if (!nocamerasetup)
@@ -454,6 +455,7 @@ void Mesh::ProcessZFarMeshes (bool nocamerasetup) {
       _Universe->AccessCamera()->UpdateGFX (GFXTRUE, GFXFALSE);
   GFXEnable (DEPTHTEST);
   GFXEnable (DEPTHWRITE);
+  GFXDeactivateShader();
 #endif
 }
 
@@ -468,6 +470,7 @@ template<typename T> inline bool rangesOverlap(T min1, T max1, T min2, T max2) {
 }
 
 void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects,bool nocamerasetup) {
+  int defaultprogram=GFXActivateShader(NULL);
   static GFXColor meshcolor (getMeshColor());
 
   _Universe->activateLightMap();
@@ -600,6 +603,7 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects,bool nocamerasetup) {
       undrawn_logos.clear();
   }
 #endif
+  GFXDeactivateShader();
 }
 void Mesh::RestoreCullFace (int whichdrawqueue) {
   if (blendDst!=ZERO &&whichdrawqueue!=NUM_ZBUF_SEQ||getCullFaceForcedOff()) {

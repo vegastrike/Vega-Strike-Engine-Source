@@ -407,6 +407,6 @@ void GFXDeactivateShader();
 //return location of named value
 int GFXNamedShaderConstant(char* progID,char *name,float*values);
 int GFXShaderConstant(int name, float*value);
-
+bool GFXDefaultShaderSupported();
 #endif
 
