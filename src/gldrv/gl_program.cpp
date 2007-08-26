@@ -174,7 +174,7 @@ int GFXShaderConstantv(int name,unsigned int count, int *value) {
       &&glUniform1i_p
 #endif
       ) {
-    glUniform1iv_p(name,count,value);
+    glUniform1iv_p(name,count,(GLint*)value);
     return 1;
   }
   return 0;  
