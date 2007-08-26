@@ -764,6 +764,7 @@ void SetupShaders (vector <Texture *> &Decal, unsigned int mat, bool envMap,floa
   GFXPushBlendMode();
   
   static bool separatespec = XMLSupport::parse_bool (vs_config->getVariable ("graphics","separatespecularcolor","false"))?GFXTRUE:GFXFALSE;
+  static Texture * blue=new Texture("blue.png");
   GFXSetSeparateSpecularColor(separatespec);
   if (polygon_offset){
     float a,b;
@@ -785,8 +786,18 @@ void SetupShaders (vector <Texture *> &Decal, unsigned int mat, bool envMap,floa
     black->MakeActive(2);
   }
   SAFEDECAL(GLOW_PASS)->MakeActive(4);
-  SAFEDECAL(4)->MakeActive(3);//normal map
-  SAFEDECAL(DAMAGE_PASS)->MakeActive(5);
+  if (Decal.size()>4&&Decal[4]) {
+    Decal[4]->MakeActive(3);//normal map
+  }else {
+    blue->MakeActive(3);
+  }
+  if(Decal.size()>DAMAGE_PASS&&Decal[DAMAGE_PASS])
+    Decal[DAMAGE_PASS]->MakeActive(5);
+  else if (Decal.size()>0&&Decal[0])
+    Decal[0]->MakeActive(5);
+  else
+    white->MakeActive(5);
+    
   GFXToggleTexture(true,0);
   GFXToggleTexture(true,1);
   GFXToggleTexture(true,2);
