@@ -16,7 +16,7 @@
 #endif
 
 extern vector<Logo*> undrawn_logos;
-
+void UpdateShaderConstants(char *program);
 #define Z_PARTITION_HEADROOM 0.1f
 #define MAX_ZRATIO 0.004f
 #define MIN_ZRATIO 0.100f
@@ -430,6 +430,7 @@ static GFXColor getMeshColor () {
 void Mesh::ProcessZFarMeshes (bool nocamerasetup) {
 #ifndef PARTITIONED_Z_BUFFER
   int defaultprogram=GFXActivateShader(NULL);
+  UpdateShaderConstants(NULL);
   static GFXColor meshcolor (getMeshColor());
   GFXLightContextAmbient(meshcolor);
   if (!nocamerasetup)
@@ -760,6 +761,37 @@ bool SetupSpecMapFirstPass (vector <Texture *> &decal, unsigned int mat, bool en
 	
     return retval;
 }
+enum ShaderConstantEnum{
+  kDIFFUSEMAP,kENVMAP,kSPECMAP,kNORMALMAP,kGLOWMAP,kDAMAGEMAP,kDETAIL0MAP,kDETAIL1MAP,kCLOAKING,kDAMAGED,kDETAIL0PLANE,kDETAIL1PLANE,kNUMLIGHTS,kACTIVELIGHTS,NUM_SHADER_CONSTANTS
+};
+struct ShaderConstantLookup{
+  int id;
+  char *name;
+  ShaderConstantLookup(int id, char*name){this->id=id;this->name=name;}
+};
+ShaderConstantLookup shaderConstants[NUM_SHADER_CONSTANTS]={
+  ShaderConstantLookup(-1,"diffuseMap"),
+  ShaderConstantLookup(-1,"envMap"),
+  ShaderConstantLookup(-1,"specMap"),
+  ShaderConstantLookup(-1,"normalMap"),
+  ShaderConstantLookup(-1,"glowMap"),
+  ShaderConstantLookup(-1,"damageMap"),
+  ShaderConstantLookup(-1,"detail0Map"),
+  ShaderConstantLookup(-1,"detail1Map"),
+  ShaderConstantLookup(-1,"cloaking"),
+  ShaderConstantLookup(-1,"damaged"),
+  ShaderConstantLookup(-1,"detail0Plane"),
+  ShaderConstantLookup(-1,"detail1Plane"),
+  ShaderConstantLookup(-1,"max_light_enabled"),
+  ShaderConstantLookup(-1,"light_enabled")
+};
+void UpdateShaderConstants(char *program) {
+  if (GFXShaderReloaded()) {
+    for (int i=0;i<NUM_SHADER_CONSTANTS;++i) {
+      shaderConstants[i].id=GFXNamedShaderConstant(program,shaderConstants[i].name);
+    }
+  }
+}
 void SetupShaders (vector <Texture *> &Decal, unsigned int mat, bool envMap,float polygon_offset,Texture *detailTexture,const vector<Vector> &detailPlanes, Texture*black, Texture*white){
   GFXPushBlendMode();
   
@@ -816,26 +848,31 @@ void SetupShaders (vector <Texture *> &Decal, unsigned int mat, bool envMap,floa
       GFXToggleTexture(true,stage);
     }
   }
-  //for default fprog only
-  //FIXME CACHING OF CONSTANTS SHOULD HAPPEN, change to static
-  int diffuseMap=GFXNamedShaderConstant(NULL,"diffuseMap");
-  GFXShaderConstant(diffuseMap,0);
-  int envmap=GFXNamedShaderConstant(NULL,"envMap");
-  GFXShaderConstant(envmap,1);
-  int specMap=GFXNamedShaderConstant(NULL,"specMap");
-  GFXShaderConstant(specMap,2);
-  int normalMap=GFXNamedShaderConstant(NULL,"normalMap");
-  GFXShaderConstant(normalMap,3);
-  int glowMap=GFXNamedShaderConstant(NULL,"glowMap");
-  GFXShaderConstant(glowMap,4);
-  int damageMap=GFXNamedShaderConstant(NULL,"damageMap");
-  GFXShaderConstant(damageMap,5);
-  int detail0Map=GFXNamedShaderConstant(NULL,"detail0Map");
-  GFXShaderConstant(detail0Map,6);
-  int detail1Map=GFXNamedShaderConstant(NULL,"detail1Map");
-  GFXShaderConstant(detail1Map,7);
+  GFXShaderConstant(shaderConstants[kDIFFUSEMAP].id,0);
+  GFXShaderConstant(shaderConstants[kENVMAP].id,1);
+  GFXShaderConstant(shaderConstants[kSPECMAP].id,2);
+  GFXShaderConstant(shaderConstants[kNORMALMAP].id,3);
+  GFXShaderConstant(shaderConstants[kGLOWMAP].id,4);
+  GFXShaderConstant(shaderConstants[kDAMAGEMAP].id,5);
+  GFXShaderConstant(shaderConstants[kDETAIL0MAP].id,6);
+  GFXShaderConstant(shaderConstants[kDETAIL1MAP].id,7);
+  float shaderPlane0[4]={0,0,0,0};
+  float shaderPlane1[4]={0,0,0,0};
+  if (detailPlanes.size()>0) {
+    shaderPlane0[0]=detailPlanes[0].i;
+    shaderPlane0[1]=detailPlanes[0].j;
+    shaderPlane0[2]=detailPlanes[0].k;
+  }
+  if (detailPlanes.size()>0) {
+    shaderPlane1[0]=detailPlanes[1].i;
+    shaderPlane1[1]=detailPlanes[1].j;
+    shaderPlane1[2]=detailPlanes[1].k;
+  }
+  GFXShaderConstant(shaderConstants[kDETAIL0PLANE].id,shaderPlane0);
+  GFXShaderConstant(shaderConstants[kDETAIL1PLANE].id,shaderPlane1);
 #undef SAFEDECAL
 }
+
 
 void RestoreShaders() {
   GFXPopBlendMode();
@@ -1004,7 +1041,8 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue,float zmin, float z
 #else
 void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
 #endif
-  bool shaders=GFXDefaultShaderSupported();//for now
+  bool shouldsupportshaders=GFXDefaultShaderSupported();
+  bool shaders=Decal.size()>1&&shouldsupportshaders;//for now
   if ((whichpass==ENVSPEC_PASS)||(whichpass==GLOW_PASS)||(whichpass==DAMAGE_PASS)) return;
   if (whichpass!=0&&shaders) return;
   //  assert(draw_queue->size());
@@ -1040,6 +1078,9 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
       if (cull) return;
   }
 #endif
+  if (shouldsupportshaders&&!shaders) {
+    GFXDeactivateShader();
+  }
 
   bool last_pass = !(whichpass < Decal.size());
   int curdqi=0;
@@ -1052,9 +1093,11 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
       if (c->mesh_seq==whichdrawqueue) {
 	float zfar=(_Universe->AccessCamera()->GetPosition()-c->mat.p).Magnitude()/*+this->radialSize*/;
 	if (AnimationsLeftInFarQueue()) {
-	  GFXDeactivateShader();	  
+          if (shaders)
+            GFXDeactivateShader();	  
 	  Animation::ProcessFarDrawQueue (zfar);
-	  int defaultprogram=GFXActivateShader(NULL);	  
+          if (shaders)
+            GFXActivateShader(NULL);	  
 	}
       }
     }
@@ -1179,14 +1222,12 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
               else
                 GFXBlendMode(SRCALPHA,INVSRCALPHA);
             }
-            GFXUploadLightShaderState();
+            GFXUploadLightShaderState(shaderConstants[kNUMLIGHTS].id,shaderConstants[kACTIVELIGHTS].id);
             float cloakdata[4]={c.CloakFX.r,c.CloakFX.a,(c.cloaked&MeshDrawContext::CLOAK)?1.0:0.0,(c.cloaked&MeshDrawContext::GLASSCLOAK)?1.0:0.0};
             float damagedata[4]={(float)c.damage/255.0f,0.0,0.0};
             //FIXME should be made static when done debuging
-            int cloakLocation=GFXNamedShaderConstant(NULL,"cloaking");
-            GFXShaderConstant(cloakLocation,cloakdata);
-            int damageLocation=GFXNamedShaderConstant(NULL,"damaged");
-            GFXShaderConstant(damageLocation,damagedata);                        
+            GFXShaderConstant(shaderConstants[kCLOAKING].id,cloakdata);
+            GFXShaderConstant(shaderConstants[kDAMAGED].id,damagedata);                        
           }
 	  vlist->Draw();
 	  if (c.cloaked&MeshDrawContext::RENORMALIZE)
@@ -1262,6 +1303,9 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
   if (!getLighting()) GFXEnable(LIGHTING);
   if (!write_to_depthmap) GFXEnable(DEPTHWRITE); //risky--for instance logos might be fubar!
   RestoreCullFace(whichdrawqueue);
+  if (shouldsupportshaders&&!shaders) {
+    GFXActivateShader(NULL);
+  }
 }
 void Mesh::CreateLogos(MeshXML * xml , int faction, Flightgroup * fg) {
   numforcelogo=numsquadlogo =0;

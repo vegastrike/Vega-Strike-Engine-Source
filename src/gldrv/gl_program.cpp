@@ -71,11 +71,13 @@ int GFXCreateProgram(char*vprogram,char* fprogram) {
   }
   return sp;
 }
+static int programChanged=false;
 static int defaultprog=0;
 int getDefaultProgram() {
   static bool initted=false;
   if (!initted){
     defaultprog=GFXCreateProgram("default","default");
+    programChanged=true;
     initted=true;
   }
   return defaultprog;
@@ -83,7 +85,13 @@ int getDefaultProgram() {
 void GFXReloadDefaultShader() {
   if (glDeleteProgram_p&&defaultprog)
     glDeleteProgram_p(defaultprog);
+  programChanged=true;
   defaultprog=GFXCreateProgram("default","default");
+}
+bool GFXShaderReloaded() {
+  bool retval=programChanged;
+  programChanged=false;
+  return retval;
 }
 bool GFXDefaultShaderSupported() {
   return getDefaultProgram()!=0;
@@ -91,6 +99,9 @@ bool GFXDefaultShaderSupported() {
 int GFXActivateShader(char *program) {
   int defaultprogram=getDefaultProgram();
   int curprogram=defaultprogram;
+  static char* lastprogram=program;//check for null
+  if (program!=lastprogram) programChanged=true;
+  lastprogram=program;
   if (program) {
     std::map<std::string,int>::iterator where=loadedprograms.find(std::string(program));
     if (where==loadedprograms.end()) {

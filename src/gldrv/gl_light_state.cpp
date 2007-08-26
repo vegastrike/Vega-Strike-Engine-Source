@@ -6,21 +6,9 @@
 
 
 
-void GFXUploadLightShaderState() {
+void GFXUploadLightShaderState(int max_light_location, int active_light_array) {
   int maxlight=0;
-  static int * lightData;
-  static int constantLocations;
-  static bool initialized=false;
-  static int numlightlocation;
-  if (!initialized) {
-    initialized=true;
-    lightData=new int[GFX_MAX_LIGHTS];
-    for(int i=0;i<GFX_MAX_LIGHTS;++i) {
-      lightData[i]=0;
-    }
-    constantLocations=GFXNamedShaderConstant(NULL,"light_enabled");    
-    numlightlocation=GFXNamedShaderConstant(NULL,"max_light_enabled");
-  }
+  static int * lightData=new int[GFX_MAX_LIGHTS];
   int maxval=0;
   for (int i=0;i<GFX_MAX_LIGHTS;++i) {
     lightData[i]=glIsEnabled(GL_LIGHT0+i);
@@ -28,10 +16,8 @@ void GFXUploadLightShaderState() {
   }
 
   //FIXME bottom line is debug only
-  constantLocations=GFXNamedShaderConstant(NULL,"light_enabled");
-  numlightlocation=GFXNamedShaderConstant(NULL,"max_light_enabled");
-  GFXShaderConstantv(constantLocations,GFX_MAX_LIGHTS,lightData);
-  GFXShaderConstant(numlightlocation,maxval);
+  GFXShaderConstantv(active_light_array,GFX_MAX_LIGHTS,lightData);
+  GFXShaderConstant(max_light_location,maxval);
 }
 
 #define GFX_HARDWARE_LIGHTING
