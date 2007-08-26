@@ -1149,7 +1149,8 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
 	  specialfxlight.clear();
 	  GFXLoadMatrixModel ( c.mat);
 	  unsigned char damaged=((whichpass==DAMAGE_PASS)?c.damage:0);
-	  SetupCloakState (c.cloaked,c.CloakFX,specialfxlight,damaged,myMatNum);
+          if (!shaders)
+            SetupCloakState (c.cloaked,c.CloakFX,specialfxlight,damaged,myMatNum);
 	  unsigned int i;
 	  for ( i=0;i<c.SpecialFX->size();i++) {
 	    int ligh;
@@ -1159,10 +1160,24 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
 	  SetupFogState(c.cloaked);
 	  if (c.cloaked&MeshDrawContext::RENORMALIZE)
 	    glEnable(GL_NORMALIZE);
-          GFXUploadLightShaderState();
-	  
+          if (shaders) {
+            if(c.cloaked&MeshDrawContext::CLOAK) {
+              GFXPushBlendMode();
+              if (c.cloaked&MeshDrawContext::GLASSCLOAK)
+                GFXBlendMode(ONE,ONE);
+              else
+                GFXBlendMode(SRCALPHA,INVSRCALPHA);
+            }
+            GFXUploadLightShaderState();
+            float cloakdata[4]={c.CloakFX.r,c.CloakFX.a,(c.cloaked&MeshDrawContext::CLOAK)?1.0:0.0,(c.cloaked&MeshDrawContext::GLASSCLOAK)?1.0:0.0};
+            float damagedata[4]={(float)c.damage/255.0f,0.0,0.0};
+            //FIXME should be made static when done debuging
+            int cloakLocation=GFXNamedShaderConstant(NULL,"cloaking");
+            GFXShaderConstant(cloakLocation,cloakdata);
+            int damageLocation=GFXNamedShaderConstant(NULL,"damaged");
+            GFXShaderConstant(damageLocation,damagedata);                        
+          }
 	  vlist->Draw();
-          
 	  if (c.cloaked&MeshDrawContext::RENORMALIZE)
 	    glDisable(GL_NORMALIZE);
 	  
