@@ -138,6 +138,16 @@ struct GFXStats{
 #define glUniform2i_p glUniform2i
 #define glUniform3i_p glUniform3i
 #define glUniform4i_p glUniform4i
+#define glUniform1fv_p glUniform1fv
+#define glUniform2fv_p glUniform2fv
+#define glUniform3fv_p glUniform3fv
+#define glUniform4fv_p glUniform4fv
+#define glUniform1iv_p glUniform1iv
+#define glUniform2iv_p glUniform2iv
+#define glUniform3iv_p glUniform3iv
+#define glUniform4iv_p glUniform4iv
+
+
 #define glDeleteShader_p glDeleteShader
 #define glDeleteProgram_p glDeleteProgram
 
@@ -198,6 +208,17 @@ extern PFNGLUNIFORM1IPROC glUniform1i_p;
 extern PFNGLUNIFORM2IPROC glUniform2i_p;
 extern PFNGLUNIFORM3IPROC glUniform3i_p;
 extern PFNGLUNIFORM4IPROC glUniform4i_p;
+
+
+extern PFNGLUNIFORM1FVPROC glUniform1fv_p;
+extern PFNGLUNIFORM2FVPROC glUniform2fv_p;
+extern PFNGLUNIFORM3FVPROC glUniform3fv_p;
+extern PFNGLUNIFORM4FVPROC glUniform4fv_p;
+
+extern PFNGLUNIFORM1IVPROC glUniform1iv_p;
+extern PFNGLUNIFORM2IVPROC glUniform2iv_p;
+extern PFNGLUNIFORM3IVPROC glUniform3iv_p;
+extern PFNGLUNIFORM4IVPROC glUniform4iv_p;
 
 extern PFNGLDELETESHADERPROC glDeleteShader_p;
 extern PFNGLDELETEPROGRAMPROC glDeleteProgram_p;

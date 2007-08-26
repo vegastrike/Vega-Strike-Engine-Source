@@ -810,21 +810,22 @@ void SetupShaders (vector <Texture *> &Decal, unsigned int mat, bool envMap,floa
     }
   }
   //for default fprog only
-  static int diffuseMap=GFXNamedShaderConstant(NULL,"diffuseMap",0);
+  //FIXME CACHING OF CONSTANTS SHOULD HAPPEN, change to static
+  int diffuseMap=GFXNamedShaderConstant(NULL,"diffuseMap");
   GFXShaderConstant(diffuseMap,0);
-  static int envmap=GFXNamedShaderConstant(NULL,"envMap",1);
+  int envmap=GFXNamedShaderConstant(NULL,"envMap");
   GFXShaderConstant(envmap,1);
-  static int specMap=GFXNamedShaderConstant(NULL,"specMap",2);
+  int specMap=GFXNamedShaderConstant(NULL,"specMap");
   GFXShaderConstant(specMap,2);
-  static int normalMap=GFXNamedShaderConstant(NULL,"normalMap",3);
+  int normalMap=GFXNamedShaderConstant(NULL,"normalMap");
   GFXShaderConstant(normalMap,3);
-  static int glowMap=GFXNamedShaderConstant(NULL,"glowMap",4);
+  int glowMap=GFXNamedShaderConstant(NULL,"glowMap");
   GFXShaderConstant(glowMap,4);
-  static int damageMap=GFXNamedShaderConstant(NULL,"damageMap",5);
+  int damageMap=GFXNamedShaderConstant(NULL,"damageMap");
   GFXShaderConstant(damageMap,5);
-  static int detail0Map=GFXNamedShaderConstant(NULL,"detail0Map",6);
+  int detail0Map=GFXNamedShaderConstant(NULL,"detail0Map");
   GFXShaderConstant(detail0Map,6);
-  static int detail1Map=GFXNamedShaderConstant(NULL,"detail1Map",7);
+  int detail1Map=GFXNamedShaderConstant(NULL,"detail1Map");
   GFXShaderConstant(detail1Map,7);
 #undef SAFEDECAL
 }
@@ -1153,7 +1154,6 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
 	  GFXLoadMatrixModel ( c.mat);
 	  unsigned char damaged=((whichpass==DAMAGE_PASS)?c.damage:0);
 	  SetupCloakState (c.cloaked,c.CloakFX,specialfxlight,damaged,myMatNum);
-          
 	  unsigned int i;
 	  for ( i=0;i<c.SpecialFX->size();i++) {
 	    int ligh;
@@ -1163,6 +1163,7 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
 	  SetupFogState(c.cloaked);
 	  if (c.cloaked&MeshDrawContext::RENORMALIZE)
 	    glEnable(GL_NORMALIZE);
+          GFXUploadLightShaderState();
 	  
 	  vlist->Draw();
           

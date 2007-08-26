@@ -284,10 +284,15 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
 		  if (jump->name!="LOAD_FAILED") {
 			  anytrue=true;
 			  radius = jump->rSize();
+                          Mesh * shield=jump->meshdata.size()?jump->meshdata.back():NULL;
+                          if (jump->meshdata.size()) jump->meshdata.pop_back();
+                          
 			  while (jump->meshdata.size()) {
 				  this->meshdata.push_back(jump->meshdata.back());
 				  jump->meshdata.pop_back();
 			  }
+                          
+                          jump->meshdata.push_back(shield);
 			  un_iter i;
 			  Unit * su;
 			  for (i=jump->getSubUnits();(su=*i)!=NULL;++i) {
@@ -306,6 +311,7 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
 			  jump=NULL;
 		  }
 	  }
+	  meshdata.push_back(NULL);//shield mesh
 	  wormhole = anytrue;
   }
   if (!wormhole) {

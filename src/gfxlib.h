@@ -405,10 +405,14 @@ void GFXTextureCoordGenMode(int stage, GFXTEXTURECOORDMODE tex, const float para
 int GFXActivateShader(char *program=NULL/*null for default prog*/);
 void GFXDeactivateShader();
 //return location of named value
-int GFXNamedShaderConstant(char* progID,char *name,float*values);
-int GFXNamedShaderConstant(char* progID,char *name,int value);
+int GFXNamedShaderConstant(char* progID,char *name);
 int GFXShaderConstant(int name, float*value);
 int GFXShaderConstant(int name, int value);
+int GFXShaderConstant4v(int name, unsigned int numvals, float*value);
+int GFXShaderConstantv(int name, unsigned int numvals, float*value);
+int GFXShaderConstantv(int name, unsigned int numvals,int *value);
 bool GFXDefaultShaderSupported();
+void GFXReloadDefaultShader();
+void GFXUploadLightShaderState();
 #endif
 

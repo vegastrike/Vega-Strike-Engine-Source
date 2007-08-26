@@ -3,6 +3,37 @@
 #include "gl_globals.h"
 #include "hashtable_3d.h"
 #include "gl_light.h"
+
+
+
+void GFXUploadLightShaderState() {
+  int maxlight=0;
+  static int * lightData;
+  static int constantLocations;
+  static bool initialized=false;
+  static int numlightlocation;
+  if (!initialized) {
+    initialized=true;
+    lightData=new int[GFX_MAX_LIGHTS];
+    for(int i=0;i<GFX_MAX_LIGHTS;++i) {
+      lightData[i]=0;
+    }
+    constantLocations=GFXNamedShaderConstant(NULL,"light_enabled");    
+    numlightlocation=GFXNamedShaderConstant(NULL,"max_light_enabled");
+  }
+  int maxval=0;
+  for (int i=0;i<GFX_MAX_LIGHTS;++i) {
+    lightData[i]=glIsEnabled(GL_LIGHT0+i);
+    if (lightData[i]) maxval=i;
+  }
+
+  //FIXME bottom line is debug only
+  constantLocations=GFXNamedShaderConstant(NULL,"light_enabled");
+  numlightlocation=GFXNamedShaderConstant(NULL,"max_light_enabled");
+  GFXShaderConstantv(constantLocations,GFX_MAX_LIGHTS,lightData);
+  GFXShaderConstant(numlightlocation,maxval);
+}
+
 #define GFX_HARDWARE_LIGHTING
 //table to store local lights, numerical pointers to _llights (eg indices)
 const float atten0scale = 1;
@@ -11,7 +42,6 @@ const float atten2scale = 1./(GFX_SCALE*GFX_SCALE);
 
 int _GLLightsEnabled=0;
 Hashtable3d <LineCollideStar, 20, CTACC, lighthuge> lighttable;
-
 GFXLight gfx_light::operator = (const GFXLight &tmp) {
     memcpy (this,&tmp,sizeof (GFXLight));
     return tmp;

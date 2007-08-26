@@ -120,6 +120,16 @@ PFNGLCOMPRESSEDTEXIMAGE2DPROC glCompressedTexImage2D_p = 0;
  PFNGLUNIFORM3IPROC glUniform3i_p=0;
  PFNGLUNIFORM4IPROC glUniform4i_p=0;
 
+ PFNGLUNIFORM1FVPROC glUniform1fv_p=0;
+ PFNGLUNIFORM2FVPROC glUniform2fv_p=0;
+ PFNGLUNIFORM3FVPROC glUniform3fv_p=0;
+ PFNGLUNIFORM4FVPROC glUniform4fv_p=0;
+
+ PFNGLUNIFORM1IVPROC glUniform1iv_p=0;
+ PFNGLUNIFORM2IVPROC glUniform2iv_p=0;
+ PFNGLUNIFORM3IVPROC glUniform3iv_p=0;
+ PFNGLUNIFORM4IVPROC glUniform4iv_p=0;
+
  PFNGLDELETESHADERPROC glDeleteShader_p=0;
  PFNGLDELETEPROGRAMPROC glDeleteProgram_p=0;
 
@@ -284,6 +294,27 @@ void init_opengl_extensions()
       glUniform3i_p=(PFNGLUNIFORM3IPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUniform3i");
     if (!glUniform4i_p)
       glUniform4i_p=(PFNGLUNIFORM4IPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUniform4i");
+
+
+    if (!glUniform1fv_p)
+      glUniform1fv_p=(PFNGLUNIFORM1FVPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUniform1fv");
+    if (!glUniform2fv_p)
+      glUniform2fv_p=(PFNGLUNIFORM2FVPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUniform2fv");
+    if (!glUniform3fv_p)
+      glUniform3fv_p=(PFNGLUNIFORM3FVPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUniform3fv");
+    if (!glUniform4fv_p)
+      glUniform4fv_p=(PFNGLUNIFORM4FVPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUniform4fv");
+
+    if (!glUniform1iv_p)
+      glUniform1iv_p=(PFNGLUNIFORM1IVPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUniform1iv");
+    if (!glUniform2iv_p)
+      glUniform2iv_p=(PFNGLUNIFORM2IVPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUniform2iv");
+    if (!glUniform3iv_p)
+      glUniform3iv_p=(PFNGLUNIFORM3IVPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUniform3iv");
+    if (!glUniform4iv_p)
+      glUniform4iv_p=(PFNGLUNIFORM4IVPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUniform4iv");
+
+
 
     if (!glDeleteShader_p)
       glDeleteShader_p=(PFNGLDELETESHADERPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glDeleteShader");

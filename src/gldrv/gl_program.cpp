@@ -73,8 +73,17 @@ int GFXCreateProgram(char*vprogram,char* fprogram) {
 }
 static int defaultprog=0;
 int getDefaultProgram() {
-  static int defaultprogram=defaultprog=GFXCreateProgram("default","default");
-  return defaultprogram;
+  static bool initted=false;
+  if (!initted){
+    defaultprog=GFXCreateProgram("default","default");
+    initted=true;
+  }
+  return defaultprog;
+}
+void GFXReloadDefaultShader() {
+  if (glDeleteProgram_p&&defaultprog)
+    glDeleteProgram_p(defaultprog);
+  defaultprog=GFXCreateProgram("default","default");
 }
 bool GFXDefaultShaderSupported() {
   return getDefaultProgram()!=0;
@@ -122,6 +131,30 @@ int GFXShaderConstant(int name,float*values) {
 }
 
 
+int GFXShaderConstantv(int name,int count, float*values) {
+  if (1
+#ifndef __APPLE__
+      &&glUniform1fv_p
+#endif
+      ) {
+    glUniform1fv_p(name,count,values);
+    return 1;
+  }
+  return 0;  
+}
+int GFXShaderConstant4v(int name,int count, float*values) {
+  if (1
+#ifndef __APPLE__
+      &&glUniform4fv_p
+#endif
+      ) {
+    glUniform4fv_p(name,count,values);
+    return 1;
+  }
+  return 0;  
+}
+
+
 int GFXShaderConstant(int name,int value) {
   if (1
 #ifndef __APPLE__
@@ -135,7 +168,20 @@ int GFXShaderConstant(int name,int value) {
 }
 
 
-int GFXNamedShaderConstant(char*progID,char*name,float*values) {
+int GFXShaderConstantv(int name,unsigned int count, int *value) {
+  if (1
+#ifndef __APPLE__
+      &&glUniform1i_p
+#endif
+      ) {
+    glUniform1iv_p(name,count,value);
+    return 1;
+  }
+  return 0;  
+}
+
+
+int GFXNamedShaderConstant(char*progID,char*name) {
   int programname=defaultprog;
   if(progID)
     programname=loadedprograms[progID];
@@ -145,7 +191,6 @@ int GFXNamedShaderConstant(char*progID,char*name,float*values) {
 #endif
       ) {
     int varloc=glGetUniformLocation_p(programname,name);
-    GFXShaderConstant(varloc,values);
     return varloc;
   }
   return 0;

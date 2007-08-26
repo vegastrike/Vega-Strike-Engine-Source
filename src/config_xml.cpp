@@ -95,6 +95,11 @@ void RunPythonPhysicsFrame(const KBData&,KBSTATE);
 void incmusicvol (const KBData&,KBSTATE a);
 void decmusicvol (const KBData&,KBSTATE a);
 bool screenshotkey=false;
+void doReloadShader(const KBData&,KBSTATE a) {
+  if (a==PRESS) {
+    GFXReloadDefaultShader();
+  }
+}
 void doScreenshot(const KBData&, KBSTATE a) {
   if (a==PRESS) {
     screenshotkey=true;
@@ -791,6 +796,6 @@ CommandMap initGlobalCommandMap() {
  commandMap["Flight::Mode::InertialToggle"]=FlyByKeyboard::InertialToggleKey;
 
  commandMap["ConsoleKeys::BringConsole"]=ConsoleKeys::BringConsole;
-
+ commandMap["NewShader"]=doReloadShader;
  return commandMap;
 }
