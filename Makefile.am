@@ -391,7 +391,6 @@ else
 endif
 
 if VS_MAKE_NO_CLIENT
-  VS_MAKE_SOUNDSERVER=
   CLIENT_PROG=
 else
   CLIENT_PROG= \
@@ -399,15 +398,8 @@ else
     base_maker
 endif
 
-if VS_MAKE_SOUNDSERVER
-  MUSIC_PROG= soundserver
-else
-  MUSIC_PROG=
-endif
-
 bin_PROGRAMS = \
   $(CLIENT_PROG) \
-  $(MUSIC_PROG) \
   accountserver \
   asteroidgen \
   mesher \
@@ -653,16 +645,6 @@ libnetlowlevel_a_SOURCES = \
   src/networking/lowlevel/vsnet_thread_sdl.cpp \
   src/networking/lowlevel/vsnet_thread.h
 
-
-soundserver_SOURCES = \
-  $(LIBNET) \
-  src/networking/softvolume.cpp \
-  src/networking/softvolume.h \
-  src/networking/soundserver.cpp
-
-soundserver_LDADD = \
-  $(SDL_LIBS) \
-  $(SDL_MIXER_LIBS)
 
 if !BOOSTSYSTEM
   vegastrike_LDADD = \

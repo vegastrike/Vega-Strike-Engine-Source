@@ -770,11 +770,7 @@ void SetupShaders (vector <Texture *> &Decal, unsigned int mat, bool envMap,floa
     GFXGetPolygonOffset(&a,&b);
     GFXPolygonOffset (a, b-polygon_offset);
   }
-  GFXSelectMaterialHighlights(mat,
-			      GFXColor(1,1,1,1),
-			      GFXColor(1,1,1,1),
-			      GFXColor(0,0,0,0),
-			      GFXColor(0,0,0,0));
+  GFXSelectMaterial(mat);
 #define SAFEDECAL(pass) ((Decal.size()>pass&&Decal[pass])?Decal[pass]:black)
   
   if (Decal.size()>0&&Decal[0]) {
