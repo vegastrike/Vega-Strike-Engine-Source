@@ -273,7 +273,6 @@ void Universe::Generate1( const char * file, const char * jumpback)
   static bool show_loading = XMLSupport::parse_bool(vs_config->getVariable("splash","while_loading_starsystem","false"));
   if (show_loading)
     ss_generating(true);
-  std::string syspath;
   VSFile f;
   VSError err = f.OpenReadOnly( file, SystemFile);
   // If the file is not found we generate a system
@@ -281,10 +280,10 @@ void Universe::Generate1( const char * file, const char * jumpback)
   {
 	MakeStarSystem(file, galaxy,RemoveDotSystem (jumpback),count);
   }
-  if( SERVER && syspath.length()!=0)
+  if( SERVER )
   {
 	string filestr( file);
-	UniverseUtil::ComputeSystemSerials( syspath);
+	UniverseUtil::ComputeSystemSerials( filestr );
   }
 }
 

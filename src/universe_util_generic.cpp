@@ -621,6 +621,9 @@ namespace UniverseUtil
 	bool networked() {
 		return Network!=NULL;
 	}
+	bool isserver() {
+		return SERVER;
+	}
 	int getNumPlayers () {
 		return _Universe->numPlayers();
 	}
@@ -682,6 +685,9 @@ namespace UniverseUtil
 			search_patterns.push_back( "<nebula ");
 			search_patterns.push_back( "<Nebula ");
 			search_patterns.push_back( "<NEBULA ");
+			search_patterns.push_back( "<jump ");
+			search_patterns.push_back( "<Jump ");
+			search_patterns.push_back( "<JUMP ");
 
 			for( std::vector<std::string>::iterator ti=search_patterns.begin(); ti!=search_patterns.end(); ++ti) {
 				std::string search( (*ti));
@@ -727,7 +733,7 @@ namespace UniverseUtil
 		}
 		else {
 			cerr<<"ERROR cannot open system file : "<<systempath<<endl;
-			exit(1);
+			VSExit(1);
 		}
 	}
 

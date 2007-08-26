@@ -50,7 +50,8 @@ StarSystem *	ZoneMgr::addZone( string starsys)
 	// Generate the StarSystem
 	_Universe->netLock(true);
 	string starsysfile = starsys+".system";
-	UniverseUtil::ComputeSystemSerials( starsysfile);
+	// ComputeSystemSerials now done in Universe::Generate1
+	//UniverseUtil::ComputeSystemSerials( starsysfile);
 	//sts = new StarSystem( starsysfile.c_str(), Vector(0,0,0));
 	//_Universe->Generate2( sts);
 	sts = _Universe->GenerateStarSystem (starsysfile.c_str(),"",Vector(0,0,0));

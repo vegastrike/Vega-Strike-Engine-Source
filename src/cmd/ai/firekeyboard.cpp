@@ -1245,9 +1245,10 @@ bool ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
 	while (1) {
 		while (veciter!=vec.end()) {
 			if (((*veciter)!=me)&&((*veciter)->GetHull()>=0)&&typeofunit(me,(*veciter))) {
-				if (Network==NULL) {
+				//if (Network==NULL) {
 					me->Target(*veciter);
-				} else {
+				//} else {
+				if (Network!=NULL) {
 					int player = _Universe->whichPlayerStarship( me);
 					if (player>=0) {
 						Network[player].targetRequest(*veciter);
@@ -1948,7 +1949,7 @@ void FireKeyboard::Execute () {
       if (tmp->owner==getTopLevelOwner())
         sysobj=true;
     ChooseTargets(parent,TargUn,false);
-    if (tmp==parent->Target()&&sysobj&&smart_targetting) {
+    if ((Network==NULL||parent->Target()==NULL) && tmp==parent->Target()&&sysobj&&smart_targetting) {
       ChooseTargets(parent,TargSig,false);
       if (tmp==parent->Target()) {
         ChooseTargets(parent,TargAll,false);

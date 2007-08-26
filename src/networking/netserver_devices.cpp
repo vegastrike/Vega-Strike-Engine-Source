@@ -1,4 +1,5 @@
 #include "networking/netserver.h"
+#include "networking/savenet_util.h"
 #include "networking/lowlevel/vsnet_debug.h"
 #include "networking/lowlevel/netbuffer.h"
 #include "networking/lowlevel/vsnet_debug.h"
@@ -208,8 +209,9 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 void	NetServer::sendJump(Unit * un, Unit * dst,std::string dststr)
 {
   ClientPtr clt = this->getClientFromSerial(un->GetSerial());
-  Cockpit * cp =NULL;
-  if (clt&&(cp=_Universe->isPlayerStarship(un))!=NULL&&un!=NULL) {
+  int cpnum =NULL;
+  if (clt&&(cpnum=_Universe->whichPlayerStarship(un))>=0&&un!=NULL) {
+    Cockpit *cp = _Universe->AccessCockpit(cpnum);
     Packet p2;
     std::string netbuf;
     std::string fn=dststr;
@@ -219,19 +221,25 @@ void	NetServer::sendJump(Unit * un, Unit * dst,std::string dststr)
     }else {
       (*dat)[0]=_Universe->activeStarSystem()->getFileName();
     }
-    std::string savestr= cp->savegame->WriteSaveGame (fn.c_str(),un->LocalPosition(),cp->credits,cp->unitfilename,-1,FactionUtil::GetFactionName(un->faction), false);
+    std::string savestr;
+	std::string csvstr;
+	SaveNetUtil::GetSaveStrings( cpnum, savestr, csvstr);
+	/*
+	savestr = cp->savegame->WriteSaveGame (fn.c_str(),un->LocalPosition(),cp->credits,cp->unitfilename,-1,FactionUtil::GetFactionName(un->faction), false);
+	csvstr = un->WriteUnitString();
+	*/
     std::string::size_type where=savestr.find("^");
-    addSimpleChar(netbuf,ACCT_SAVE);
+    addSimpleChar(netbuf,ACCT_SAVE_LOGOUT);
     
     if (where!=std::string::npos) {
-      if (dststr.substr(0,where)!=savestr) {
+      if (dststr!=savestr.substr(0,where)) {
         savestr=dststr+savestr.substr(where);
       }
     }
     addSimpleString(netbuf, clt->callsign );
     addSimpleString(netbuf, clt->passwd );
     addSimpleString(netbuf,savestr);
-    addSimpleString(netbuf, un->WriteUnitString());
+    addSimpleString(netbuf,csvstr );
     p2.send(CMD_JUMP,0,NULL,0,SENDANDFORGET,NULL,clt->tcp_sock,__FILE__,148);
     clt->jumpok=1;    if (acct_sock)
       acct_sock->sendstr(netbuf);

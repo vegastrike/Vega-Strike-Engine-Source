@@ -354,7 +354,8 @@ bool cockpitfront=true;
   void Inside(const KBData&,KBSTATE newState) {
     {
       static bool back= XMLSupport::parse_bool (vs_config->getVariable ("graphics","background","true"));
-      _Universe->activeStarSystem()->getBackground()->EnableBG(back);
+      if (_Universe->activeStarSystem()&&_Universe->activeStarSystem()->getBackground())
+        _Universe->activeStarSystem()->getBackground()->EnableBG(back);
     }
   static int tmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","cockpit","true"))?1:0);
   static bool switch_to_disabled=XMLSupport::parse_bool(vs_config->getVariable("graphics","disabled_cockpit_allowed","true"));

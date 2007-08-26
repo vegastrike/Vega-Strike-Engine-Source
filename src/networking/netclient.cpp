@@ -1093,7 +1093,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				if (cp) {
 					cp->credits=netbuf.getFloat();
 				}
-				BaseUtil::refreshBaseComputerUI(NULL);
+				//BaseUtil::refreshBaseComputerUI(NULL);
 			break;
 			case CMD_STARTNETCOMM :
 #ifdef NETCOMM

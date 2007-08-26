@@ -832,12 +832,30 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			un = clt->game_unit.GetUnit();
                   if (!un) break;
 			NetBuffer netbuf (packet.getData(), packet.getDataLength());
-			string message = netbuf.getString().substr(0, 160);
+			string message = netbuf.getString();
+			netbuf.Reset();
+			netbuf.addString(clt->callsign);
+			if (message.empty()) break;
+			if (message[0]=='/') {
+				if (clt->cltadr.inaddr()==0x0100007f) {
+					if (message.substr(0,5)=="/quit") {
+						VSExit(1);
+						return;
+					}
+					message="#888800Command accepted";
+				} else {
+					message="#888800Commands must be sent from a trusted client.";
+				}
+				netbuf.addString(message);
+				p2.send( CMD_TXTMESSAGE, un->GetSerial(),
+						netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
+						&clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(847));
+				break;
+			}
+			message = message.substr(0, 160);
 			std::replace(message.begin(),message.end(),'#','$');
 			std::replace(message.begin(),message.end(),'\n',' ');
 			std::replace(message.begin(),message.end(),'\r',' ');
-			netbuf.Reset();
-			netbuf.addString(clt->callsign);
 			netbuf.addString(message);
 			p2.bc_create( CMD_TXTMESSAGE, un->GetSerial(),
                           netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
@@ -1178,30 +1196,36 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			}
 			if (quantity && cargIndex!=-1) {
 				// Guaranteed: buyer, sender, seller, and one cockpit are not null.
+				// Guaranteed: Not a weapon: (weapon && quantity) is disallowed.
 				_Universe->netLock(true);
 				if (buyer == sender && buyer_cpt) {
 					float creds_before = buyer_cpt->credits;
 					float &creds = buyer_cpt->credits;
-					buyer->BuyCargo(cargIndex, quantity, seller, creds);
-					if (seller_cpt) {
-						seller_cpt->credits += (creds_before-creds);
+					if (buyer->BuyCargo(cargIndex, quantity, seller, creds)) {
+						didMoney=true;
+						if (seller_cpt) {
+							seller_cpt->credits += (creds_before-creds);
+						}
 					}
 				} else if (seller == sender && seller_cpt) {
 					float creds_before = seller_cpt->credits;
 					float &creds = seller_cpt->credits;
-					if (carg.GetMissionFlag()) {
-						seller->SellCargo(cargIndex, quantity, creds, carg, buyer);
+					bool success=false;
+					if (!carg.GetMissionFlag()) {
+						success=seller->SellCargo(cargIndex, quantity, creds, carg, buyer);
 					} else {
-						seller->RemoveCargo(cargIndex, quantity, true);
+						success=seller->RemoveCargo(cargIndex, quantity, true);
 					}
-					if (buyer_cpt) {
-						buyer_cpt->credits += (creds_before-creds);
+					didMoney=success;
+					if (success) {
+						if (buyer_cpt) {
+							buyer_cpt->credits += (creds_before-creds);
+						}
 					}
 				}
-				didMoney=true;
 				_Universe->netLock(false);
 			}
-			if (upgrade && (seller==sender || buyer==sender)) {
+			if ((didMoney||weapon) && upgrade && (seller==sender || buyer==sender)) {
 				double percent; // not used.
 				const Unit *unitCarg = getUnitFromUpgradeName(carg.GetContent(), seller->faction);
 				if (!unitCarg) {

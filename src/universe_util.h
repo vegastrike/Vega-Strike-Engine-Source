@@ -233,6 +233,7 @@ namespace UniverseUtil
 	int getNumPlayers ();
 	int maxMissions ();
 	bool networked ();
+	bool isserver ();
 	std::string getVariable(std::string section,std::string name,std::string def);
 	std::string getSubVariable(std::string section,std::string subsection,std::string name,std::string def);
 	double timeofday ();
