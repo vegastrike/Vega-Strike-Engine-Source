@@ -170,13 +170,14 @@ Vector  Unit::GetWarpVelocity()const {
   //return(cumulative_velocity*graphicOptions.WarpFieldStrength);
   Vector vel=cumulative_velocity;
   float speed=cumulative_velocity.Magnitude();
+  //return vel*graphicOptions.WarpFieldStrength;
   if (speed>0) {
     Vector veldir=vel*(1./speed);
     Vector facing=cumulative_transformation_matrix.getR();
     float ang=facing.Dot(veldir);
     float warpfield=graphicOptions.WarpFieldStrength;
     if (ang<0) warpfield=1./warpfield;
-    return (ang*facing*speed*(warpfield-1.)) +  vel;
+    return ang*facing*speed*(warpfield-1) + vel;
   }else return Vector(0,0,0);
 }
 
@@ -2768,7 +2769,6 @@ float CalculateNearestWarpUnit (const Unit *thus, float minmultiplier, Unit **ne
 	static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));
 	static float smallwarphack = XMLSupport::parse_float (vs_config->getVariable ("physics","minwarpeffectsize","100"));
 	static float bigwarphack = XMLSupport::parse_float (vs_config->getVariable ("physics","maxwarpeffectsize","10000000"));
-	static float WARPMEMORYEFFECT = XMLSupport::parse_float (vs_config->getVariable ("physics","WarpMemoryEffect","0.9"));
 							 // Pi^2
 	static float warpMultiplierMin=XMLSupport::parse_float(vs_config->getVariable("physics","warpMultiplierMin","9.86960440109"));
 							 // C
@@ -2859,8 +2859,11 @@ void Unit::AddVelocity(float difficulty)
 								 // for the heck of it.
 	static float compwarprampuptime=XMLSupport::parse_float (vs_config->getVariable ("physics","computerwarprampuptime","10"));
 	static float warprampdowntime=XMLSupport::parse_float (vs_config->getVariable ("physics","warprampdowntime","0.5"));
-	Vector vel=Velocity;
-	float v=1.;
+	Vector v=Velocity;
+        float len=v.Magnitude();
+        float lastWarpField=graphicOptions.WarpFieldStrength;
+        if (len>.01)//only get velocity going in DIRECTIOn of cumulative transformation for warp calc...
+          v=v*(cumulative_transformation_matrix.getR().Dot(v*(1./len)));
 	bool  playa=_Universe->isPlayerStarship(this)?true:false;
 	float warprampuptime=playa?humanwarprampuptime:compwarprampuptime;
 								 // Warp Turning on/off
@@ -2926,21 +2929,22 @@ void Unit::AddVelocity(float difficulty)
 			minmultiplier=1;
 		}
 		v*=minmultiplier;
-		float vmag=v*sqrt(vel.i*vel.i+vel.j*vel.j+vel.k*vel.k);
+		float vmag=sqrt(v.i*v.i+v.j*v.j+v.k*v.k);
 		if(vmag>warpMaxEfVel) {
 			v*=warpMaxEfVel/vmag;// HARD LIMIT
 			minmultiplier*=warpMaxEfVel/vmag;
 		}
-		//graphicOptions.WarpFieldStrength=graphicOptions.WarpFieldStrength*WARPMEMORYEFFECT+(1.0-WARPMEMORYEFFECT)*minmultiplier;
-		graphicOptions.WarpFieldStrength = v; // All scaled operations.
-		//vel *= v;
-		vel = GetWarpVelocity(); // Uses graphicsOptions.WarpFieldStrength
+                graphicOptions.WarpFieldStrength=minmultiplier;
 	}
 	else {
 		graphicOptions.WarpFieldStrength=1;
+                //not any more? lastWarpField=1;
 	}
-	//curr_physical_state.position = curr_physical_state.position +  (v*SIMULATION_ATOM*difficulty).Cast();
-	curr_physical_state.position += (vel*SIMULATION_ATOM*difficulty).Cast();
+        if (graphicOptions.WarpFieldStrength!=1.0)
+          v=GetWarpVelocity();
+	static float WARPMEMORYEFFECT = XMLSupport::parse_float (vs_config->getVariable ("physics","WarpMemoryEffect","0.9"));
+	graphicOptions.WarpFieldStrength=lastWarpField*WARPMEMORYEFFECT+(1.0-WARPMEMORYEFFECT)*graphicOptions.WarpFieldStrength;
+	curr_physical_state.position = curr_physical_state.position +  (v*SIMULATION_ATOM*difficulty).Cast();
 	/*
 	if (!is_null(location)&&activeStarSystem){
 	  location=activeStarSystem->collidemap->changeKey(location,Collidable(this));// do we need this?
