@@ -245,6 +245,9 @@ void BFXMToXmeshOrOBJ(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE 
 			}
                         string textyp;
                         switch (texindex){
+			case 4:
+			  textyp="Normal";
+			  break;
                         case 3:
                           textyp="Ke";
                           break;

@@ -440,10 +440,25 @@ void ObjToXMESH (FILE* obj, FILE * mtl, vector<XML> &xmllist, bool forcenormals)
            cur->textures.push_back(textureholder(cur->textures.size()));
          cur->textures[2]=makeTextureHolder(str,2);
       }
+      if (1==sscanf(buf,"MAP_DAMAGE %s\n",str)) {
+         while (cur->textures.size()<=2)
+           cur->textures.push_back(textureholder(cur->textures.size()));
+         cur->textures[2]=makeTextureHolder(str,2);
+      }
       if (1==sscanf(buf,"MAP_KE %s\n",str)) {
          while (cur->textures.size()<=3)
            cur->textures.push_back(textureholder(cur->textures.size()));         
          cur->textures[3]=makeTextureHolder(str,3);
+      }
+      if (1==sscanf(buf,"MAP_NORMAL %s\n",str)) {
+         while (cur->textures.size()<=4)
+           cur->textures.push_back(textureholder(cur->textures.size()));         
+         cur->textures[4]=makeTextureHolder(str,4);
+      }
+      if (1==sscanf(buf,"MAP_NORMALS %s\n",str)) {
+         while (cur->textures.size()<=4)
+           cur->textures.push_back(textureholder(cur->textures.size()));         
+         cur->textures[4]=makeTextureHolder(str,4);
       }
       if (1==sscanf(buf,"MAP_DETAIL %s\n",str)) {
         cur->detail=makeTextureHolder(str,0);
