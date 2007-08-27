@@ -212,7 +212,7 @@ namespace CockpitKeys {
             if (0&&par) {
               name=getUnitNameAndFgNoBase(par);
             }
-            Network[textmessager].textMessage(name+"> "+gcp->textMessage);
+            Network[textmessager].textMessage(gcp->textMessage);
           }
           /*
             static std::string anglestring=" >";

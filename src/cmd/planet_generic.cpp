@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "universe_util.h"
+#include "lin_time.h"
 
 char * getnoslash (char * inp) {
   char * tmp=inp;
@@ -48,6 +49,8 @@ PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const 
       type = (MOVEMENT);subtype =(SLOCATION);
       AttachOrder (centre);
     }
+	const double div2pi = (1.0/(2.0*PI));
+	theta+=velocity*getNewTime()*div2pi;
 }
 PlanetaryOrbit::~PlanetaryOrbit () {
   parent->SetResolveForces (true);

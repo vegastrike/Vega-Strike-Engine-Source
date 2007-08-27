@@ -176,7 +176,7 @@ Vector  Unit::GetWarpVelocity()const {
     float ang=facing.Dot(veldir);
     float warpfield=graphicOptions.WarpFieldStrength;
     if (ang<0) warpfield=1./warpfield;
-    return ang*facing*(warpfield-1) + vel;
+    return (ang*facing*speed*(warpfield-1.)) +  vel;
   }else return Vector(0,0,0);
 }
 
@@ -2859,7 +2859,8 @@ void Unit::AddVelocity(float difficulty)
 								 // for the heck of it.
 	static float compwarprampuptime=XMLSupport::parse_float (vs_config->getVariable ("physics","computerwarprampuptime","10"));
 	static float warprampdowntime=XMLSupport::parse_float (vs_config->getVariable ("physics","warprampdowntime","0.5"));
-	Vector v=Velocity;
+	Vector vel=Velocity;
+	float v=1.;
 	bool  playa=_Universe->isPlayerStarship(this)?true:false;
 	float warprampuptime=playa?humanwarprampuptime:compwarprampuptime;
 								 // Warp Turning on/off
@@ -2925,17 +2926,21 @@ void Unit::AddVelocity(float difficulty)
 			minmultiplier=1;
 		}
 		v*=minmultiplier;
-		float vmag=sqrt(v.i*v.i+v.j*v.j+v.k*v.k);
+		float vmag=v*sqrt(vel.i*vel.i+vel.j*vel.j+vel.k*vel.k);
 		if(vmag>warpMaxEfVel) {
 			v*=warpMaxEfVel/vmag;// HARD LIMIT
 			minmultiplier*=warpMaxEfVel/vmag;
 		}
-		graphicOptions.WarpFieldStrength=graphicOptions.WarpFieldStrength*WARPMEMORYEFFECT+(1.0-WARPMEMORYEFFECT)*minmultiplier;
+		//graphicOptions.WarpFieldStrength=graphicOptions.WarpFieldStrength*WARPMEMORYEFFECT+(1.0-WARPMEMORYEFFECT)*minmultiplier;
+		graphicOptions.WarpFieldStrength = v; // All scaled operations.
+		//vel *= v;
+		vel = GetWarpVelocity(); // Uses graphicsOptions.WarpFieldStrength
 	}
 	else {
 		graphicOptions.WarpFieldStrength=1;
 	}
-	curr_physical_state.position = curr_physical_state.position +  (v*SIMULATION_ATOM*difficulty).Cast();
+	//curr_physical_state.position = curr_physical_state.position +  (v*SIMULATION_ATOM*difficulty).Cast();
+	curr_physical_state.position += (vel*SIMULATION_ATOM*difficulty).Cast();
 	/*
 	if (!is_null(location)&&activeStarSystem){
 	  location=activeStarSystem->collidemap->changeKey(location,Collidable(this));// do we need this?
