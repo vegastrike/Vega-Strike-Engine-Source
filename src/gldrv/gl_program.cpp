@@ -3,6 +3,7 @@
 #include "vegastrike.h"
 #include "config_xml.h"
 #include "gfxlib.h"
+#include "lin_time.h"
 #include <map>
 std::map<std::string,int> loadedprograms;
 
@@ -73,6 +74,8 @@ int GFXCreateProgram(char*vprogram,char* fprogram) {
 }
 static int programChanged=false;
 static int defaultprog=0;
+static int lowfiprog=0;
+static int hifiprog=0;
 #ifdef __APPLE__
 char * defaultProgramName="mac";
 char * hifiProgramName="mac";
@@ -85,20 +88,117 @@ char * lowfiProgramName="lite";
 int getDefaultProgram() {
   static bool initted=false;
   if (!initted){
-    defaultprog=GFXCreateProgram(defaultProgramName,defaultProgramName);
+    lowfiprog=GFXCreateProgram(lowfiProgramName,lowfiProgramName);
+    hifiprog=GFXCreateProgram(hifiProgramName,hifiProgramName);
+    defaultprog=hifiprog;
     programChanged=true;
     initted=true;
   }
   return defaultprog;
 }
 void GFXReloadDefaultShader() {
-  if (glDeleteProgram_p&&defaultprog)
-    glDeleteProgram_p(defaultprog);
+  bool islow=(lowfiprog==defaultprog);
+  if (glDeleteProgram_p&&defaultprog) {
+    glDeleteProgram_p(lowfiprog);
+    glDeleteProgram_p(hifiprog);
+  }
   programChanged=true;
-  defaultprog=GFXCreateProgram(defaultProgramName,defaultProgramName);
+  if (islow) {
+    hifiprog=GFXCreateProgram(hifiProgramName,hifiProgramName);
+    lowfiprog=GFXCreateProgram(lowfiProgramName,lowfiProgramName);
+    defaultprog=lowfiprog;
+  }else{
+    lowfiprog=GFXCreateProgram(lowfiProgramName,lowfiProgramName);
+    hifiprog=GFXCreateProgram(hifiProgramName,hifiProgramName);
+    defaultprog=hifiprog;
+  }
+}
+enum GameSpeed {
+  JUSTRIGHT,
+  TOOSLOW,
+  TOOFAST
+};
+unsigned int gpdcounter=(1<<30);
+#define NUMFRAMESLOOK 128
+GameSpeed gameplaydata[NUMFRAMESLOOK]={JUSTRIGHT};
+GameSpeed GFXGetFramerate() {
+  GameSpeed retval=JUSTRIGHT;
+  static double lasttime=queryTime();
+  double thistime=queryTime();
+  double framerate=1./(thistime-lasttime);
+  static double toofast=80;
+  static double tooslow=29;
+  static int lim=10;
+  static int penalty=10;
+  static float lowratio=.125;
+  static float highratio=.75;
+  GameSpeed curframe;
+  if (framerate>toofast)curframe=TOOFAST;
+  else if (framerate>tooslow) curframe=JUSTRIGHT;
+  else curframe=TOOSLOW;
+  gameplaydata[((unsigned int)gpdcounter++)%NUMFRAMESLOOK]=curframe;
+  unsigned int i=0;
+  if(!(curframe==JUSTRIGHT||(curframe==TOOFAST&&defaultprog==hifiprog)||(curframe==TOOSLOW&&defaultprog==0))) {
+    for (;i<lim;++i) {
+      if (curframe!=gameplaydata[((unsigned int)(gpdcounter-i))%NUMFRAMESLOOK]) {
+        break;
+      }
+    }
+    if(i==lim) {
+      int correct=0;
+      int incorrect=0;
+      for (unsigned int j=0;j<NUMFRAMESLOOK;++j) {
+        if (gameplaydata[j]==curframe) correct++;
+        if (gameplaydata[j]!=curframe) incorrect++;        
+        if (curframe==TOOFAST&&gameplaydata[j]==TOOSLOW)
+          incorrect+=penalty;
+      }
+      double myratio=(double)correct/(double)(correct+incorrect);
+
+      if (curframe==TOOFAST&&myratio>highratio) {
+        static int toomanyswitches=3;
+        toomanyswitches-=1;
+        if (toomanyswitches>=0)
+          retval=curframe;//only switch back and forth so many times
+      }else if (myratio>lowratio) {
+        retval=curframe;
+      }
+    }
+  }
+  lasttime=thistime;
+  if (retval!=JUSTRIGHT) {
+    for (unsigned int i=0;i<NUMFRAMESLOOK;++i) {
+      gameplaydata[i]=JUSTRIGHT;
+    }
+  }
+  return retval;
 }
 bool GFXShaderReloaded() {
   bool retval=programChanged;
+  switch (GFXGetFramerate()) {
+  case TOOSLOW:
+    if (defaultprog) {
+      retval=true;
+      if (defaultprog==hifiprog) 
+        defaultprog=lowfiprog;
+      else 
+        defaultprog=0;
+      GFXActivateShader(NULL);
+    }
+    break;
+  case TOOFAST:
+    if (defaultprog!=hifiprog){
+      retval=true;
+      if (defaultprog==0)
+        defaultprog=lowfiprog;
+      else
+        defaultprog=hifiprog;
+      GFXActivateShader(NULL);    
+    }
+    break;
+  default:
+    break;
+  }
   programChanged=false;
   return retval;
 }
