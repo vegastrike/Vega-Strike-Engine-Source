@@ -472,7 +472,10 @@ enum TEXTUREFORMAT {
 	DXT1 = 7,
 	DXT1RGBA = 8,
 	DXT3 = 9,
-	DXT5 = 10
+	DXT5 = 10,
+	PNGPALETTE8=11,
+	PNGRGB24=12,
+	PNGRGBA32=13
 };
 /**
  * The following state may be activated/deactivated

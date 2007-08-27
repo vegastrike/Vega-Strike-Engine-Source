@@ -795,7 +795,15 @@ void Texture::Transfer (int maxdimension,GFXBOOL detailtexture)
 	case _8BIT:
 		GFXTransferTexture(data, name,PALETTE8, image_target,maxdimension,detailtexture);
 		//TODO: Do something about this, and put in some code to check that we can actually do 8 bit textures
-
+		break;
+	case _PNG24BIT:
+		GFXTransferTexture(data, name,PNGRGB24,image_target,maxdimension,detailtexture);
+		break;
+	case _PNG32BIT:
+		GFXTransferTexture(data, name,PNGRGBA32,image_target,maxdimension,detailtexture);
+		break;
+	case _PNG8BIT:
+		GFXTransferTexture(data, name,PNGPALETTE8, image_target,maxdimension,detailtexture);
 		break;
 	}
 	
@@ -822,15 +830,18 @@ int Texture::Bind(int maxdimension,GFXBOOL detailtexture)
 			break;
 
 	    case _24BITRGBA:
+		case _PNG32BIT:
 		    //GFXCreateTexture(sizeX, sizeY, RGBA32, &name, NULL, stage);
 		    GFXCreateTexture(sizeX, sizeY, RGBA32, &name, NULL, stage,ismipmapped, texture_target, address_mode);
 		    break;
 	    case _24BIT:
+		case _PNG24BIT:
 		    //not supported by most cards, so i use rgba32
 		    //GFXCreateTexture(sizeX, sizeY, RGB24, &name);
 		    GFXCreateTexture(sizeX, sizeY, RGB24, &name, NULL, stage,ismipmapped,texture_target, address_mode);
 		    break;
 	    case _8BIT:
+		case _PNG8BIT:
 		    GFXCreateTexture(sizeX, sizeY, PALETTE8, &name, (char *)palette, stage,ismipmapped,texture_target, address_mode);
 		    break;
 	    }

@@ -693,17 +693,14 @@ unsigned char *VSImage::ReadDDS()
 				break;
 			case 8: 
 				type = GL_LUMINANCE_ALPHA;
-				this->mode=_8BIT;
 				this->img_alpha = true;
 				break;
 			case 24: 
 				type=GL_RGB;
-				this->mode=_24BIT;
 				this->img_alpha = false;
 				break;
 			case 32: 
 				type=GL_RGBA;
-				this->mode=_24BITRGBA;
 				this->img_alpha = true;
 				break;
 		}
@@ -751,7 +748,7 @@ void	VSImage::AllocatePalette()
 {
 	  //FIXME deal with palettes and grayscale with alpha
 	  if (!(img_color_type&PNG_HAS_COLOR)||(img_color_type&PNG_HAS_PALETTE)) {
-	    mode=_8BIT;
+		mode=_PNG8BIT;
 	    if (!(img_color_type&PNG_HAS_COLOR)){
 	      palette = (unsigned char *) malloc(sizeof(unsigned char)*(256*4+1));
 	      for (unsigned int i =0;i<256;i++) {
@@ -764,9 +761,9 @@ void	VSImage::AllocatePalette()
 	  } 
 	  if (img_color_type&PNG_HAS_COLOR) {
 	    if (img_color_type&PNG_HAS_ALPHA) {
-	      mode=_24BITRGBA;
+	      mode=_PNG32BIT;
 	    } else {
-	      mode=_24BIT;
+	      mode=_PNG24BIT;
 	    }
 	  }
 }

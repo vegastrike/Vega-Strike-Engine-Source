@@ -819,6 +819,16 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 	int logwid=1;
 	int mmap = 1;
 	unsigned char *uncompressed = NULL;
+	bool comptemp = gl_options.compression;
+	if(internformat >= PNGPALETTE8){
+		gl_options.compression = false;
+		if(internformat == PNGRGB24)
+			internformat = RGB24;
+		else if(internformat == PNGRGBA32)
+			internformat = RGBA32;
+		else 
+			internformat = PALETTE8;
+	}
 	if ((textures[handle].mipmapped&(TRILINEAR|MIPMAP))&&(!isPowerOfTwo (textures[handle].width,logwid)|| !isPowerOfTwo (textures[handle].height,logsize))) {
 		static unsigned char NONPOWEROFTWO[1024]= {
 			255,127,127,255,
@@ -886,7 +896,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 #if !defined(GL_COLOR_INDEX8_EXT)
 		if (internformat != PALETTE8) {
 #else
-		if ((internformat != PALETTE8)||gl_options.PaletteExt) {
+		if (internformat != PALETTE8||gl_options.PaletteExt) {
 #endif
 			textures[handle].height = textures[handle].iheight;
 			textures[handle].width  = textures[handle].iwidth;
@@ -894,7 +904,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 			buffer = tempbuf;
 		}
 	}
-	if (internformat!=PALETTE8) {
+	if (internformat!=PALETTE8 && internformat != PNGPALETTE8) {
 		internalformat = GetTextureFormat (internformat);
 		if ((textures[handle].mipmapped&&gl_options.mipmap>=2)||detail_texture) {
 			if (detail_texture) {
@@ -963,6 +973,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 					free(tempbuf);
 				if(uncompressed) 
 					free(uncompressed);
+				gl_options.compression = comptemp;
 				return GFXFALSE;
 			}
 			if ((textures[handle].mipmapped&(MIPMAP|TRILINEAR))&&gl_options.mipmap>=2) {
@@ -977,6 +988,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 					free(tempbuf);
 				if(uncompressed)
 					free(uncompressed);
+				gl_options.compression = comptemp;
 				return GFXFALSE;
 			}
 #endif
@@ -1003,6 +1015,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 		free(tempbuf);
 	if(uncompressed)
 		free(uncompressed);
+	gl_options.compression = comptemp;
 	return GFXTRUE;
 }
 
