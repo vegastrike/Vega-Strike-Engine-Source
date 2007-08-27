@@ -499,6 +499,8 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 		}
     }
 	if (true) { //p1.getDataLength()>0) {
+
+		bool nostarsystem = _Universe->activeStarSystem()==NULL?true:false;
 		
 		_Universe->netLock(true); // Don't bounce any commands back to the server again!
 		
@@ -608,6 +610,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 
             case CMD_SNAPSHOT :
                 {
+					if (nostarsystem) break;
                     // Should update another client's position
                     // Zone hack:
 	                // When receiving a snapshot, packet serial is considered as the
@@ -623,6 +626,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
                 break;
             case CMD_ENTERCLIENT :
 			{
+				if (nostarsystem) break;
 				// Saving 4 bytes for every 50kB saved game isn't worth the bugs that come with it.
 //				if (p1.getSerial()) {
 //					this->enterClient( netbuf, p1.getSerial() );
@@ -632,12 +636,14 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 			}
             break;
             case CMD_EXITCLIENT :
+				if (nostarsystem) break;
                 COUT << ">>> " << local_serial << " >>> EXITING CLIENT =( serial #"
                      << packet_serial << " )= --------------------------------------" << endl;
                 this->removeClient( &p1 );
                 break;
             case CMD_ADDEDYOU :
                 {
+					if (nostarsystem) break;
                     COUT << ">>> " << local_serial << " >>> ADDED IN GAME =( serial #"
                          << packet_serial << " )= --------------------------------------" << endl;
                     //now we have to make the unit if it is null (this would be a respawn)
@@ -662,6 +668,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 //                 break;
 			case CMD_FIREREQUEST :
 			{
+				if (nostarsystem) break;
 				// WE RECEIVED A FIRE NOTIFICATION SO FIRE THE WEAPON
 				float energy = netbuf.getFloat();
 				mis = netbuf.getSerial();
@@ -719,6 +726,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 			}
 			break;
 			case CMD_UNFIREREQUEST :
+				if (nostarsystem) break;
 				// WE RECEIVED AN UNFIRE NOTIFICATION SO DEACTIVATE THE WEAPON
 				mount_num = netbuf.getInt32();
 //				mis = netbuf.getSerial();
@@ -765,6 +773,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 
 			break;
 			case CMD_TARGET:
+				if (nostarsystem) break;
 				un = UniverseUtil::GetUnitFromSerial( packet_serial );
 				if (un) {
 					unsigned short targserial = netbuf.getSerial();
@@ -782,6 +791,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				}
 			break;
 			case CMD_SCAN :
+				if (nostarsystem) break;
 				// We received the target info with the target serial in the packet as an answer to a scanRequest
 
 				// Update info with received buffer
@@ -792,6 +802,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 			break;
 			case CMD_SNAPDAMAGE :
 			{
+				if (nostarsystem) break;
 				// In case we use damage snapshots : we do not call ApplyNetDamage
 				// In fact we trusted the client only for visual FX : Check where they are done !
 				// but the server computes the damage itself
@@ -818,6 +829,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 #if 1
 			case CMD_DAMAGE :
 			{
+				if (nostarsystem) break;
 				float amt = netbuf.getFloat();
 				float ppercentage = netbuf.getFloat();
 				float spercentage = netbuf.getFloat();
@@ -845,6 +857,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 			case CMD_DAMAGE1 :
 			{
 				/*
+			    if (nostarsystem) break;
 				float amt = netbuf.getFloat();
 				float phasedamage = netbuf.getFloat();
 				Vector pnt = netbuf.getVector();
@@ -858,6 +871,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 #endif
 			case CMD_KILL :
 			{
+				if (nostarsystem) break;
 				ClientPtr clt = Clients.get( p1.getSerial());
 				// If it is not a player
 				if( !clt)
@@ -887,6 +901,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 			}
 			break;
 			case CMD_JUMP :
+				if (nostarsystem) break;
 			if (1) {
                           unsigned short port;
                           std::string srvipadr;
@@ -951,6 +966,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 			break;
 			case CMD_SNAPCARGO:
 			{
+				if (nostarsystem) break;
 				ObjSerial ser;
 				Unit *mpl = UnitFactory::getMasterPartList();
 				while ((ser = netbuf.getSerial())!=0) {
@@ -994,6 +1010,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 			break;
 			case CMD_CARGOUPGRADE:
 			{
+				if (nostarsystem) break;
 				ObjSerial buyer_ser = netbuf.getSerial();
 				ObjSerial seller_ser = netbuf.getSerial();
 				int quantity = netbuf.getInt32();
@@ -1175,6 +1192,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 			break;
 			case CMD_DOCK :
 			{
+				if (nostarsystem) break;
 				ObjSerial utdw_serial = netbuf.getSerial();
 				int dockport = netbuf.getInt32();
 				cerr<<"RECEIVED A DOCK AUTHORIZATION for unit "<<p1.getSerial()<<" to unit "<<utdw_serial<<" at docking port #"<<dockport<<endl;
@@ -1186,6 +1204,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 			break;
 			case CMD_UNDOCK :
 			{
+				if (nostarsystem) break;
 				ObjSerial utdw_serial = netbuf.getSerial();
 				cerr<<"RECEIVED A UNDOCK ORDER for unit "<<p1.getSerial()<<" to unit "<<utdw_serial<<endl;
 				un = UniverseUtil::GetUnitFromSerial( utdw_serial);
@@ -1195,6 +1214,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 			break;
 			case CMD_POSUPDATE :
 			{
+				if (nostarsystem) break;
 				// If a client receives that it means the server want to force the client position to be updated
 				// with server data
 				QVector serverpos = netbuf.getQVector();

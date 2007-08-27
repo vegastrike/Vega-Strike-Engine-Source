@@ -428,7 +428,7 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 				totalunits=0;
                 ClientPtr cltk( *k );
 				// If that client is ingame we send to it position info
-				if( cltk->ingame==true)
+				if( true) // cltk->ingame==true)
 				{
 				    int       nbunits=0;
 			        Packet    pckt;
