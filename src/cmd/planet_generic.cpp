@@ -31,7 +31,7 @@ string getCargoUnitName (const char * textname) {
   free(tmp2);
   return retval;
 }
-PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const QVector &x_axis, const QVector &y_axis, const QVector & centre, Unit * targetunit) : Order(MOVEMENT,0), parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 
+PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const QVector &x_axis, const QVector &y_axis, const QVector & centre, Unit * targetunit) : Order(MOVEMENT,0), parent(p), velocity(velocity), theta(initpos), inittheta(initpos), x_size(x_axis), y_size(y_axis) { 
   parent->SetResolveForces(false);
     double delta = x_size.Magnitude() - y_size.Magnitude();
     if(delta == 0) {
@@ -50,7 +50,9 @@ PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const 
       AttachOrder (centre);
     }
 	const double div2pi = (1.0/(2.0*PI));
-	theta+=velocity*getNewTime()*div2pi;
+	if (Network!=NULL || SERVER) {
+		theta = inittheta + velocity*getNewTime()*div2pi;
+	}
 }
 PlanetaryOrbit::~PlanetaryOrbit () {
   parent->SetResolveForces (true);
@@ -82,6 +84,9 @@ void PlanetaryOrbit::Execute() {
   //unuseddouble radius =  sqrt((x_offset - focus).MagnitudeSquared() + (y_offset - focus).MagnitudeSquared());
   const double div2pi = (1.0/(2.0*PI));
   theta+=velocity*SIMULATION_ATOM*div2pi;
+  if (Network!=NULL || SERVER) {
+    theta = inittheta + velocity*getNewTime()*div2pi;
+  }
   
   parent->Velocity =parent->cumulative_velocity= (((origin - focus + x_offset+y_offset-parent->LocalPosition())*div2pi*(1./SIMULATION_ATOM)).Cast());
   //const int Unreasonable_value=(int)(100000/SIMULATION_ATOM);

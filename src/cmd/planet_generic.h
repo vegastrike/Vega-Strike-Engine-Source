@@ -17,6 +17,7 @@ class PlanetaryOrbit : public Order {
   Unit *parent;
   double velocity;
   double theta;
+  double inittheta;
 
   QVector x_size;
   QVector y_size;
