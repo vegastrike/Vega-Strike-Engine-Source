@@ -21,6 +21,8 @@ echo autoconf you want to use is found first.
 echo Alternately, you can explicitly specify the program to be
 echo used for each in the following variables.
 echo '$ACLOCAL, $AUTOMAKE, $AUTOCONF, $AUTOHEADER'
+echo and extra arguments/include paths in these variables:
+echo '$ACLOCALFLAGS, $AUTOMAKEFLAGS, $AUTOCONFFLAGS, $AUTOHEADERFLAGS'
 echo For proper functionality, both aclocal and automake must be the
 echo same version, and autoconf and autoheader should be the same version.
 echo
@@ -133,15 +135,15 @@ fi
 # was designed to do.  Also had some 
 if (test x$vers_ok = xOK) then
 {
-if (echo Running $ACLOCAL && "$ACLOCAL" -I m4scripts) then
-  ( echo Running "$AUTOHEADER" && "$AUTOHEADER" -f && 
-    echo Running "$AUTOCONF" && "$AUTOCONF" -f 
-    echo Running "$AUTOMAKE" && "$AUTOMAKE" -acf && \
+if (echo Running $ACLOCAL && "$ACLOCAL" -I m4scripts $ACLOCALFLAGS) then
+  ( echo Running "$AUTOHEADER" && "$AUTOHEADER" -f $AUTOHEADERFLAGS && \
+    echo Running "$AUTOCONF" && "$AUTOCONF" -f $AUTOCONFFLAGS && \
+    echo Running "$AUTOMAKE" && "$AUTOMAKE" -acf $AUTOMAKEFLAGS && \
     echo "Bootstrap is complete. Run ./configure to configure the build system." ) || \
     echo "An error occurred while running the autotools.  Please correct."
 else
   echo "aclocal execution failed."
-  echo "Try running cvs update -P -d"
+  echo "Try running svn update"
   echo "in the directory that bootstrap-sh is in."
   echo "If this does not fix the problem, please verify that"
   echo "aclocal is at least version $AM_VER_NEEDED"
