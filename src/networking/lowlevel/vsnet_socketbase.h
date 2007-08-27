@@ -129,7 +129,7 @@ public:
 	
 	// Storage... binding is done in netui for now.
 	const AddressIP &getLocalAddress() const { return _local_ip; }
-  bool setLocalAddress(const AddressIP&lip){ _local_ip = lip; }
+  bool setLocalAddress(const AddressIP&lip){ _local_ip = lip;return true; }
     // virtual void ack( ) = 0;
 
 protected:
