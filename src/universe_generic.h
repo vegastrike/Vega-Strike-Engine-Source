@@ -107,13 +107,23 @@ private:
   std::string getGalaxyPropertyDefault (const std::string & sys, const std::string & prop, const std::string def="");
   GalaxyXML::Galaxy* getGalaxy(){return galaxy;}
   bool StillExists(StarSystem * ss);
-  void setActiveStarSystem(StarSystem * ss) {active_star_system.back()=ss;}
+  void setActiveStarSystem(StarSystem * ss) {
+    if (active_star_system.empty())
+      pushActiveStarSystem(ss);
+    else
+      active_star_system.back()=ss;
+  }
   void pushActiveStarSystem(StarSystem * ss) {active_star_system.push_back (ss);}
-  void popActiveStarSystem() {active_star_system.pop_back();}
+  void popActiveStarSystem() {
+    if (!active_star_system.empty())
+      active_star_system.pop_back();
+  }
   void clearAllSystems();
   //void SetActiveCockpit (int whichcockpit);
   //void SetActiveCockpit (Cockpit * which);
-  StarSystem * getActiveStarSystem (unsigned int size) {return active_star_system[size];}
+  StarSystem * getActiveStarSystem (unsigned int size) {
+    return size>=active_star_system.size()?NULL:active_star_system[size];
+  }
   unsigned int getNumActiveStarSystem() {return active_star_system.size();}
   void LoadStarSystem(StarSystem * ss);
   void UnloadStarSystem(StarSystem * ss);

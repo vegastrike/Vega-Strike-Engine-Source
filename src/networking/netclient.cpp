@@ -207,7 +207,8 @@ int		NetClient::checkAcctMsg( )
 					getSimpleString(netbuf);//uname
 					getSimpleString(netbuf);//passwd
 					_serverip = getSimpleString(netbuf);
-					const char *srvport = getSimpleString(netbuf).c_str();
+					string srvportstr = getSimpleString(netbuf);
+					const char *srvport = srvportstr.c_str();
 					int porttemp = atoi(srvport);
 					if (porttemp>65535) porttemp=0;
 					if (porttemp<0) porttemp=0;
@@ -1293,11 +1294,13 @@ void NetClient::Reconnect(std::string srvipadr, std::string port) {
 	int response = Network[k].connectLoad( usernames[k], passwords[k], err);
 	if (response==0) {
 		COUT<<"Network login error: "<<err<<endl;
+		UniverseUtil::startMenuInterface(false, "Jumping to system, but got a login error: "+err);
 		return;
 	}
     vector<string> *loginResp = Network[k].loginSavedGame(0);
 	if (!loginResp) {
 		COUT<<"Failed to get a ship";
+		UniverseUtil::startMenuInterface(false,"Jumping to system, but failed to get a ship");
 		return;
 	}
 	cout<<" logged in !"<<endl;

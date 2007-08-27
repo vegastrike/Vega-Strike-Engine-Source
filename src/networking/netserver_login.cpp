@@ -58,19 +58,6 @@ bool	NetServer::loginAccept( std::string inetbuf,ClientPtr clt, int newacct, cha
 	string serverport = getSimpleString(inetbuf);
         string savestr=getSimpleString(inetbuf);
         string xmlstr=getSimpleString(inetbuf);
-		clt->savegame.resize(0);
-		// Get the save parts in a string array
-		clt->savegame.push_back( savestr);
-		clt->savegame.push_back( xmlstr);
-        if (_Universe->star_system.size()) {
-          std::string system = _Universe->star_system[0]->getFileName();
-          std::string newsystem=savestr.substr(0,savestr.find("^"));
-          if (newsystem!=system) {
-            sendLoginError( clt );
-            return false;
-          }
-          
-        }
     if( !clt )
 	{
 		/*
@@ -83,6 +70,21 @@ bool	NetServer::loginAccept( std::string inetbuf,ClientPtr clt, int newacct, cha
 			return false;
 		/*}*/
 	}
+		clt->savegame.resize(0);
+		// Get the save parts in a string array
+		clt->savegame.push_back( savestr);
+		clt->savegame.push_back( xmlstr);
+		Cockpit *cp = loadCockpit(clt);
+        if (_Universe->star_system.size()) {
+          std::string system = _Universe->star_system[0]->getFileName();
+          std::string newsystem=savestr.substr(0,savestr.find("^"));
+          if (newsystem!=system) {
+            sendLoginError( clt );
+			logout(clt);
+            return false;
+          }
+          
+        }
 //	memcpy( &clt->cltadr, &ipadr, sizeof( AddressIP)); // ipadr is uninitialized... see above.
 
 	clt->callsign = callsign;
@@ -92,12 +94,12 @@ bool	NetServer::loginAccept( std::string inetbuf,ClientPtr clt, int newacct, cha
 	{
 		COUT << "This account has no ship/char so create one" << "(UNIMPLEMENTED)" <<endl;
 		sendLoginError(clt);
+		logout(clt);
 		return false;
 		// Send a command to make the client create a new character/ship
 	}
 	else
 	{
-		Cockpit *cp = loadCockpit(clt);
 		if (cp) {
 			if (loadFromSavegame(clt, cp)) {
 				sendLoginAccept(clt, cp);

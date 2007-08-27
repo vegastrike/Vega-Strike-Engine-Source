@@ -21,18 +21,18 @@ enum NAVITEMTYPES
 
 
 
-#define navsunsize 0.1
-#define navplanetsize 0.06
-#define navplayersize 0.045
-#define navcurrentplayersize 0.045
-#define navstationsize 0.055
-#define navfightersize 0.04
-#define navcapshipsize 0.05
-#define navmissilesize 0.03
-#define navasteroidsize 0.08
-#define navnebulasize 0.1
-#define navjumpsize 0.05
-#define navambiguoussize 0.04
+#define navsunsize 0.03
+#define navplanetsize 0.02
+#define navplayersize 0.01
+#define navcurrentplayersize 0.01
+#define navstationsize 0.015
+#define navfightersize 0.01
+#define navcapshipsize 0.0125
+#define navmissilesize 0.005
+#define navasteroidsize 0.015
+#define navnebulasize 0.03
+#define navjumpsize 0.0125
+#define navambiguoussize 0.01
 
 
 #endif

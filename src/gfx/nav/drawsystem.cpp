@@ -307,19 +307,29 @@ void NavigationSystem::DrawSystem()
 					}
 					else // it moves = capship
 					{
-						if(ThePlayer->InRange((*blah),false,true))	//	only insert if in range
+						if(ThePlayer->InRange((*blah),false,false))	//	only insert if in range
 						{
 							insert_type = navcapship;
 							insert_size = navcapshipsize;
+						}
+						else	// skip unit completely if not in range
+						{
+							++blah;
+							continue;
 						}
 					}
 				}
 				else	//	fighter
 				{
-					if(ThePlayer->InRange((*blah),false,true))	//	only insert if in range
+					if(ThePlayer->InRange((*blah),false,false))	//	only insert if in range
 					{
 						insert_type = navfighter;
 						insert_size = navfightersize;
+					}
+					else	// skip unit completely if not in range
+					{
+						++blah;
+						continue;
 					}
 				}
 			}
