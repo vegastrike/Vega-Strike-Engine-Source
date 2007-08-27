@@ -5,7 +5,6 @@
     #include <GL/glut.h>
     #include <GL/glext.h>
 #endif
-
 #include "cmd/unit_generic.h"
 
 #include "vsfilesystem.h"
@@ -644,7 +643,7 @@ unsigned char *	VSImage::ReadBMP()
 unsigned char *VSImage::ReadDDS()
 {
 	ddsHeader header;
-	GLenum internal = GL_NONE,type = GL_RGB;	
+	unsigned int internal = GL_NONE,type = GL_RGB;	
 	int blockSize = 16;
 	unsigned char *s=NULL;
 	unsigned int inputSize = 0;

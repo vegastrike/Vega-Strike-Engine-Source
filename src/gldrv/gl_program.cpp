@@ -73,10 +73,19 @@ int GFXCreateProgram(char*vprogram,char* fprogram) {
 }
 static int programChanged=false;
 static int defaultprog=0;
+#ifdef __APPLE__
+char * defaultProgramName="mac";
+char * hifiProgramName="mac";
+char * lowfiProgramName="mac";
+#else
+char * defaultProgramName="default";
+char * hifiProgramName="default";
+char * lowfiProgramName="lite";
+#endif
 int getDefaultProgram() {
   static bool initted=false;
   if (!initted){
-    defaultprog=GFXCreateProgram("default","default");
+    defaultprog=GFXCreateProgram(defaultProgramName,defaultProgramName);
     programChanged=true;
     initted=true;
   }
@@ -86,7 +95,7 @@ void GFXReloadDefaultShader() {
   if (glDeleteProgram_p&&defaultprog)
     glDeleteProgram_p(defaultprog);
   programChanged=true;
-  defaultprog=GFXCreateProgram("default","default");
+  defaultprog=GFXCreateProgram(defaultProgramName,defaultProgramName);
 }
 bool GFXShaderReloaded() {
   bool retval=programChanged;
