@@ -224,8 +224,8 @@ public:
 	inline Matrix WarpMatrix ( const Matrix& ctm) const{
 		static float cutoff =XMLSupport::parse_float (vs_config->getVariable( "graphics","warp_stretch_cutoff","500000"))*XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
 		static float cutoffcutoff=  cutoff*cutoff;
-		
-		if (this->GetWarpVelocity().MagnitudeSquared() < cutoffcutoff) {
+                static bool only_stretch_in_warp=XMLSupport::parse_bool(vs_config->getVariable("graphics","only_stretch_in_warp","true"));
+		if (this->GetWarpVelocity().MagnitudeSquared() < cutoffcutoff||(only_stretch_in_warp&&this->graphicOptions.InWarp==0)) {
 			return ctm;
 		}else {
 			Matrix k(ctm);
