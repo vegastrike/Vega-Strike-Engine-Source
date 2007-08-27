@@ -10,7 +10,7 @@ void GFXUploadLightShaderState(int max_light_location, int active_light_array) {
   int maxlight=0;
   static GLint * lightData=new GLint[GFX_MAX_LIGHTS];
   int maxval=0;
-  for (int i=(int)GFX_MAX_LIGHTS-1;i>=0;--i) {
+  for (int i=0;i<(int)GFX_MAX_LIGHTS;++i) {
     lightData[i]=glIsEnabled(GL_LIGHT0+i);
     if (lightData[i]) maxval=i;
   }
