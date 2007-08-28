@@ -220,7 +220,7 @@ void ModifyImage(unsigned int sizex,unsigned int sizey,int img_depth,int img_alp
     for (int i=0;i<sizex;++i) {
       unsigned char *ot=readimg(output,i,j,w);
       float heightval=*readimg(heightmap,i,j,w);
-      float height01=((heightval-minval)/(maxval-minval));
+      float height01=(((maxval-minval)!=0.0f)?((heightval-minval)/(maxval-minval)):.5f);
       
       ot[0]=(unsigned char)(height01*255.0f);
       ot[1]=row_pointers[j][i*stride+1];
