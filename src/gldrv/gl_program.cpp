@@ -79,7 +79,7 @@ static int hifiprog=0;
 #ifdef __APPLE__
 char * defaultProgramName="mac";
 char * hifiProgramName="mac";
-char * lowfiProgramName="mac";
+char * lowfiProgramName="maclite";
 #else
 char * defaultProgramName="default";
 char * hifiProgramName="default";
