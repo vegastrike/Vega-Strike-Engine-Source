@@ -8171,6 +8171,74 @@ int Unit::RepairUpgrade ()
 	return success;
 }
 
+float RepairPrice(float operational, float price) {
+  return .5*price*(1-operational)*g_game.difficulty;
+}
+
+extern bool isWeapon (std::string name);
+
+// item must be non-null... but baseUnit or credits may be NULL.
+bool Unit::RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits) {
+	double itemPrice = baseUnit?baseUnit->PriceCargo(item->content):item->price;
+	if (isWeapon(item->category)) {
+		const Unit * upgrade=getUnitFromUpgradeName(item->content,this->faction);    
+		if (upgrade->GetNumMounts()) {
+			double price = itemPrice; // RepairPrice probably won't work for mounts.
+			if (!credits || price<=(*credits)) {
+				if (credits) (*credits)-=price;
+				const Mount * mnt = &upgrade->mounts[0];
+				unsigned int nummounts=this->GetNumMounts();
+				bool complete=false;
+				for (unsigned int i=0;i<nummounts;++i) {
+					if (mnt->type->weapon_name==this->mounts[i].type->weapon_name) {
+						if (this->mounts[i].status==Mount::DESTROYED){
+							this->mounts[i].status=Mount::INACTIVE;
+							complete=true;
+						}
+						if (this->mounts[i].functionality<1.0f){
+							this->mounts[i].functionality=1.0f;
+							complete=true;
+						}
+						if (this->mounts[i].maxfunctionality<1.0f){
+							this->mounts[i].maxfunctionality=1.0f;
+							complete=true;
+						}
+						if (complete) break;
+					}
+				}
+				return complete;
+			}
+		}
+		return false;
+	} else {
+		Cargo sold;
+		const int quantity=1;
+		bool notadditive=(item->GetContent().find("add_")!=0&&item->GetContent().find("mult_")!=0);
+		if (notadditive||item->GetCategory().find(DamagedCategory)==0) {
+			Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
+			
+			//this->SellCargo(item->content, quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
+			//UnitUtil::RecomputeUnitUpgrades(this);
+			const Unit * un=  getUnitFromUpgradeName(item->content,this->faction);
+			if (un) {
+				double percentage = UnitUtil::PercentOperational(this,item->content,item->category,false);
+				double price = RepairPrice(percentage,itemPrice);
+				if (!credits || price<=(*credits)) {
+					if (credits) (*credits)-=price;
+					if (notadditive)
+						this->Upgrade(un,0,0,0,true,percentage,makeTemplateUpgrade(this->name,this->faction));
+					if (item->GetCategory().find(DamagedCategory)==0) {
+						unsigned int where;
+						Cargo * c=this->GetCargo(item->content,where);
+						if (c) c->category="upgrades/"+c->GetCategory().substr(strlen(DamagedCategory));
+					}
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
 
 /***********************************************************************************/
 /**** UNIT_CARGO STUFF                                                            */

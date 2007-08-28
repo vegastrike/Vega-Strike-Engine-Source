@@ -343,9 +343,8 @@ static double usedValue(double originalValue) {
   return .5*originalValue;
 }
 
-static float RepairPrice(float operational, float price) {
-  return .5*price*(1-operational)*g_game.difficulty;
-}
+extern float RepairPrice(float operational, float price);
+
 static float basicRepairPrice(void) {
     static const float price = XMLSupport::parse_float(vs_config->getVariable("physics","repair_price","5000"));
     return price*g_game.difficulty;
@@ -4119,74 +4118,24 @@ bool BaseComputer::sellUpgrade(const EventCommandId& command, Control* control) 
 // Sell an upgrade on your ship.
 bool BaseComputer::fixUpgrade(const EventCommandId& command, Control* control) {
 	Cargo* item = selectedItem();
-        Unit * playerUnit = m_player.GetUnit();
-        Unit * baseUnit = m_base.GetUnit();
+	Unit * playerUnit = m_player.GetUnit();
+	Unit * baseUnit = m_base.GetUnit();
 	if (baseUnit&&playerUnit&&item) {
-		if (isWeapon(item->category)) {
-		    const Unit * upgrade=getUnitFromUpgradeName(item->content,playerUnit->faction);    
-                    if (upgrade->GetNumMounts()) {
-                      const Mount * mnt = &upgrade->mounts[0];
-                      unsigned int nummounts=playerUnit->GetNumMounts();
-                      for (unsigned int i=0;i<nummounts;++i) {
-                        if (mnt->type->weapon_name==playerUnit->mounts[i].type->weapon_name) {
-                          bool complete=false;
-                          if (playerUnit->mounts[i].status==Mount::DESTROYED){
-                            playerUnit->mounts[i].status=Mount::INACTIVE;
-                            complete=true;
-                          }
-                          if (playerUnit->mounts[i].functionality<1.0f){
-                            playerUnit->mounts[i].functionality=1.0f;
-                            complete=true;
-                          }
-                          if (playerUnit->mounts[i].maxfunctionality<1.0f){
-                            playerUnit->mounts[i].maxfunctionality=1.0f;
-                            complete=true;
-                          }
-                          if (complete) break;
-                        }
-                      }
-                      Cargo itemCopy=*item;
-                      loadUpgradeControls();
-                      updateTransactionControls(itemCopy, true);
-
-                    }                
-                }else {
-			Cargo sold;
-			const int quantity=1;
-                        bool notadditive=(item->GetContent().find("add_")!=0&&item->GetContent().find("mult_")!=0);
-			if (notadditive||item->GetCategory().find(DamagedCategory)==0) {
-				Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
-                                
-				//playerUnit->SellCargo(item->content, quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
-				//UnitUtil::RecomputeUnitUpgrades(playerUnit);
-                                const Unit * un=  getUnitFromUpgradeName(item->content,playerUnit->faction);
-                                if (un) {
-                                  double percentage = UnitUtil::PercentOperational(playerUnit,item->content,item->category,false);
-                                  double price = RepairPrice(percentage,baseUnit->PriceCargo(item->content));
-                                  if (price<=_Universe->AccessCockpit()->credits) {
-                                    _Universe->AccessCockpit()->credits-=price;                                    
-                                    if (notadditive)
-                                      playerUnit->Upgrade(un,0,0,0,true,percentage,makeTemplateUpgrade(playerUnit->name,playerUnit->faction));
-                                    if (item->GetCategory().find(DamagedCategory)==0) {
-                                      unsigned int where;
-                                      Cargo * c=playerUnit->GetCargo(item->content,where);
-                                      if (c) c->category="upgrades/"+c->GetCategory().substr(strlen(DamagedCategory));
-                                      
-                                    }
-                                    if (UnitUtil::PercentOperational(playerUnit,item->content,"upgrades/",false)<1.0) {
-                                      emergency_downgrade_mode="EMERGENCY MODE ";
-                                    }
-                                  }
-                                  
-                                  loadUpgradeControls();
-                                  updateTransactionControls(itemCopy, true);				
-                                }
-			}
-			return true;
+		Cargo itemCopy=*item;
+		float *credits = NULL;
+		Cockpit *cp = _Universe->isPlayerStarship(playerUnit);
+		if (cp) {
+			credits = &(cp->credits);
 		}
+		if (playerUnit->RepairUpgradeCargo(item, baseUnit, credits)) {
+			if (UnitUtil::PercentOperational(playerUnit,item->content,"upgrades/",false)<1.0) {
+				emergency_downgrade_mode="EMERGENCY MODE ";
+			}
+		}
+		loadUpgradeControls();
+		updateTransactionControls(itemCopy, true);
 	}
-
-    return true;
+	return true;
 }
 
 // Change controls to SHIP_DEALER mode.

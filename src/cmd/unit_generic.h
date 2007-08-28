@@ -322,6 +322,7 @@ class Unit
 		int RepairCost();		 //returns how many things need to be repaired--if nothing is damaged it will return 1 for labor.  doesn't assume any given cost on such thigns.
 		int RepairUpgrade();	 //returns how many things were repaired
 								 //returns percentOperational,maxPercentOperational,and whether mount is damaged (1 is damaged, 0 is fine, -1 is invalid mount)
+		bool RepairUpgradeCargo(Cargo *item, Unit *baseUnit, float *credits); // item must not be NULL but baseUnit/credits are only used for pricing.
 		Vector MountPercentOperational(int whichmount);
 		bool ReduceToTemplate();
 		virtual double Upgrade (const std::string &file,int mountoffset, int subunitoffset, bool force, bool loop_through_mounts);

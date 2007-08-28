@@ -153,7 +153,8 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector 
 	mplayTitle->setFont( Font(.07, 2) );
 	mplayTitle->setId("UsernameTitle");
 	serverConnGroup->addChild(mplayTitle);
-	
+
+	string origpass (vs_config->getVariable("player", "password", ""));
 	StaticDisplay* usernameInput = new TextInputDisplay(inputqueue,"\x1b\n\t\r*\\|<>\"^");
 	usernameInput->setRect( Rect(-.6, -.18, 1.2, .15) );
 	usernameInput->setColor( GFXColor(1,.5,0,.1) );
@@ -163,7 +164,7 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector 
 	usernameInput->setTextColor(GUI_OPAQUE_WHITE());
 	usernameInput->setTextMargins(Size(.02,.01));
 	usernameInput->setId("Username");
-	usernameInput->setText(vs_config->getVariable("player", "callsign", ""));
+	if (!origpass.empty()) usernameInput->setText(vs_config->getVariable("player", "callsign", ""));
 	serverConnGroup->addChild(usernameInput);
 	
 	mplayTitle = new StaticDisplay;
@@ -194,7 +195,7 @@ void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector 
 	passwordInput->setTextColor(GUI_OPAQUE_WHITE());
 	passwordInput->setTextMargins(Size(.02,.01));
 	passwordInput->setId("Password");
-	passwordInput->setText(vs_config->getVariable("player", "password", ""));
+	passwordInput->setText(origpass);
 	serverConnGroup->addChild(passwordInput);
 	
 	NewButton *multiStart = new NewButton;

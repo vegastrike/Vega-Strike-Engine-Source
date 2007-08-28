@@ -1041,8 +1041,12 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				}
 				Cargo carg = *cargptr;
 				bool upgrade=false;
+				bool repair=true;
 				if (carg.GetCategory().find("upgrades")==0) {
 					upgrade=true;
+				}
+				if (upgrade && !quantity) {
+					repair=true;
 				}
 				if (!upgrade) {
 					missioncarg = (mountOffset==1 && subunitOffset==1);
@@ -1060,7 +1064,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 						seller->RemoveCargo(cargIndex, quantity, true);
 					}
 				}
-				if (upgrade && (seller==sender || buyer==sender)) {
+				if (upgrade && !repair && (seller==sender || buyer==sender)) {
 					double percent; // not used.
 					int multAddMode = GetModeFromName(carg.GetContent().c_str());
 					
@@ -1103,7 +1107,13 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 						}
 					}
 				}
-				BaseUtil::refreshBaseComputerUI(&carg);
+				if (repair) {
+					sender->RepairUpgradeCargo(&carg, seller, NULL);
+				}
+				Unit *player = game_unit.GetUnit();
+				if (player && ((buyer&&buyer->isDocked(player)) || (seller&&seller->isDocked(player)) || player==buyer || player==seller)) {
+					BaseUtil::refreshBaseComputerUI(&carg);
+				}
 				break;
 			}
 			case CMD_CREDITS:

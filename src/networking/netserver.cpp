@@ -1163,10 +1163,13 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			bool weapon=false;
 			bool didMoney=false;
 			bool didUpgrade=false;
+			bool repair=false;
 			if (carg.GetCategory().find("upgrades")==0) {
 				upgrade=true;
 				if (isWeapon(carg.GetCategory())) {
 					weapon=true;
+				} else if (!quantity && buyer==sender) {
+					repair=true;
 				}
 			}
 			if (weapon && quantity) {
@@ -1180,7 +1183,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				sendCredits(sender->GetSerial(), sender_cpt->credits);
 				break;
 			}
-			if (!weapon && !quantity) {
+			if (!weapon && !quantity && !repair) {
 				sendCredits(sender->GetSerial(), sender_cpt->credits);
 				break;
 			}
@@ -1303,6 +1306,9 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 					}
 				}
 			}
+			if (repair && !didMoney) {
+				didMoney = sender->RepairUpgradeCargo(&carg, seller, sender_cpt?&sender_cpt->credits:NULL);
+			}
 			if (sender_cpt) {
 				// The client always needs to get credits back, no matter what.
 				sendCredits(sender->GetSerial(), sender_cpt->credits);
@@ -1317,7 +1323,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				} else if (didUpgrade) {
 					BroadcastCargoUpgrade(sender->GetSerial(),buyer_ser,seller->GetSerial(),cargoName,
 										  carg.GetPrice(), carg.GetMass(), carg.GetVolume(), false,
-										  weapon?0:1,mountOffset, subunitOffset,zone);
+										  weapon||repair?0:1,mountOffset, subunitOffset,zone);
 				}
 			}
 			// Completed transaction.
