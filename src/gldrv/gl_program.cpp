@@ -21,7 +21,7 @@ void printLog(GLuint obj, bool shader)
  
 int GFXCreateProgram(char*vprogram,char* fprogram) {
 #ifndef __APPLE__
-  if (glGetProgramInfoLog_p==NULL||glCreateShader_p==NULL||glShaderSource_p==NULL||glCompileShader_p==NULL||glAttachShader_p==NULL||glLinkProgram_p==NULL)
+  if (glGetProgramInfoLog_p==NULL||glCreateShader_p==NULL||glShaderSource_p==NULL||glCompileShader_p==NULL||glAttachShader_p==NULL||glLinkProgram_p==NULL||glGetShaderiv_p==NULL||glGetProgramiv_p==NULL)
     return 0;
 #endif
   GLenum errCode;
@@ -49,6 +49,13 @@ int GFXCreateProgram(char*vprogram,char* fprogram) {
     const char *tmp=vertexprg.c_str();
     glShaderSource_p(vproghandle,1,&tmp,NULL);
     glCompileShader_p(vproghandle);
+    GLint successp=0;
+    glGetShaderiv_p(vproghandle,GL_COMPILE_STATUS,&successp);
+    if (successp==0) {
+      fprintf(stderr,"Vertex Program Error: Failed to compile %s\n",vprogram);
+      return 0;
+    }
+          
     printLog(vproghandle,true);
     glAttachShader_p(sp,vproghandle);
   }
@@ -60,12 +67,30 @@ int GFXCreateProgram(char*vprogram,char* fprogram) {
     const char*tmp=fragprg.c_str();
     glShaderSource_p(fproghandle,1,&tmp,NULL);
     glCompileShader_p(fproghandle);
+    GLint successp=0;
+    glGetShaderiv_p(fproghandle,GL_COMPILE_STATUS,&successp);
+    if (successp==0) {
+      fprintf(stderr,"Fragment Program Error: Failed to compile %s\n",fprogram);
+      return 0;
+    }
     printLog(fproghandle,true);
     glAttachShader_p(sp,fproghandle);
   }
   glLinkProgram_p(sp);
   printLog(sp,false);
-  
+  GLint successp=0;
+  glGetProgramiv_p(sp,GL_LINK_STATUS,&successp);
+  if (successp==0) {
+    fprintf(stderr,"Shader Program Error: Failed to link %s to %s\n",vprogram,fprogram);
+    return 0;
+  }
+  /* only for dev work
+  glGetProgramiv_p(sp,GL_VALIDATE_STATUS,&successp);
+  if (successp==0) {
+    fprintf(stderr,"Shader Program Error: Failed to validate %s linking to %s\n",vprogram,fprogram);
+    return 0;
+  }
+  */
   while((errCode=glGetError())!=GL_NO_ERROR) {
     printf ("Error code %s\n",gluErrorString(errCode));
     sp=0;//no proper vertex prog support
@@ -89,7 +114,9 @@ int getDefaultProgram() {
   static bool initted=false;
   if (!initted){
     lowfiprog=GFXCreateProgram(lowfiProgramName,lowfiProgramName);
+    if (lowfiprog==0)lowfiprog=GFXCreateProgram(hifiProgramName,hifiProgramName);
     hifiprog=GFXCreateProgram(hifiProgramName,hifiProgramName);
+    if (hifiprog==0)hifiprog=GFXCreateProgram(lowfiProgramName,lowfiProgramName);
     defaultprog=hifiprog;
     programChanged=true;
     initted=true;
@@ -105,11 +132,15 @@ void GFXReloadDefaultShader() {
   programChanged=true;
   if (islow) {
     hifiprog=GFXCreateProgram(hifiProgramName,hifiProgramName);
+    if (hifiprog==0)hifiprog=GFXCreateProgram(lowfiProgramName,lowfiProgramName);
     lowfiprog=GFXCreateProgram(lowfiProgramName,lowfiProgramName);
+    if (lowfiprog==0)lowfiprog=GFXCreateProgram(hifiProgramName,hifiProgramName);
     defaultprog=lowfiprog;
   }else{
     lowfiprog=GFXCreateProgram(lowfiProgramName,lowfiProgramName);
+    if (lowfiprog==0)lowfiprog=GFXCreateProgram(hifiProgramName,hifiProgramName);
     hifiprog=GFXCreateProgram(hifiProgramName,hifiProgramName);
+    if (hifiprog==0)hifiprog=GFXCreateProgram(lowfiProgramName,lowfiProgramName);
     defaultprog=hifiprog;
   }
 }
