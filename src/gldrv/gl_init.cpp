@@ -393,7 +393,7 @@ void init_opengl_extensions()
       gl_options.ext_clamp_to_border=false;
       (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::S3TC Texture Clamp-to-Border unsupported\n");
     }
-    if (GFXDefaultShaderSupported) {
+    if (GFXDefaultShaderSupported()) {
       if (gl_options.Multitexture<16)
 	gl_options.Multitexture=16;//only support shaders on ps_2_0 cards
     }
