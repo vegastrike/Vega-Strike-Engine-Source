@@ -31,8 +31,8 @@ string getCargoUnitName (const char * textname) {
   free(tmp2);
   return retval;
 }
-PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const QVector &x_axis, const QVector &y_axis, const QVector & centre, Unit * targetunit) : Order(MOVEMENT,0), parent(p), velocity(velocity), theta(initpos), inittheta(initpos), x_size(x_axis), y_size(y_axis) { 
-  parent->SetResolveForces(false);
+PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const QVector &x_axis, const QVector &y_axis, const QVector & centre, Unit * targetunit) : Order(MOVEMENT,0),  velocity(velocity), theta(initpos), inittheta(initpos), x_size(x_axis), y_size(y_axis),orbiting_average(0,0,0) {
+  p->SetResolveForces(false);
     double delta = x_size.Magnitude() - y_size.Magnitude();
     if(delta == 0) {
       focus = QVector(0,0,0);
@@ -53,6 +53,8 @@ PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const 
 	if (Network!=NULL || SERVER) {
 		theta = inittheta + velocity*getNewTime()*div2pi;
 	}
+  this->SetParent(p);
+
 }
 PlanetaryOrbit::~PlanetaryOrbit () {
   parent->SetResolveForces (true);
@@ -61,34 +63,83 @@ extern double saved_interpolation_blend_factor;
 
 double calc_blend_factor(double frac, int priority, int when_it_will_be_simulated, int cur_simulation_frame);
 void PlanetaryOrbit::Execute() {
+  bool mining=parent->rSize()>1444&&parent->rSize()<1445;
   bool done =this->done;
   this->Order::Execute();
   this->done=done;//we ain't done till the cows come home
   if (done) 
     return;
-  QVector x_offset = cos(theta) * x_size;
-  QVector y_offset = sin(theta) * y_size;
+
   QVector origin (targetlocation);
+  unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
+  static float orbit_centroid_averaging=XMLSupport::parse_float(vs_config->getVariable("physics","orbit_averaging","16"));
+  float averaging = (float)orbit_centroid_averaging/(float)(parent->predicted_priority);
+  if (averaging<1.0f) averaging=1.0f;
   if (subtype&SSELF) {
       Unit * unit = group.GetUnit();
       if (unit) {
-		  unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
-          double blend_factor=calc_blend_factor(saved_interpolation_blend_factor,unit->sim_atom_multiplier,unit->cur_sim_queue_slot,cur_sim_frame);
-		  origin+= unit->prev_physical_state.position*(1-blend_factor)+blend_factor*unit->curr_physical_state.position;
+        float my_multiplier=parent->sim_atom_multiplier;
+        if (mining&&0) {
+          printf ("[%.2f %.2f %.2f]->%.2f\n[%.2f %.2f %.2f->]\n",
+                  orbiting_average.i,
+                  orbiting_average.j,
+                  orbiting_average.k,
+                  averaging,
+                  unit->curr_physical_state.position.i,
+                  unit->curr_physical_state.position.j,
+                  unit->curr_physical_state.position.k
+                  );
+        }
+        double blend_factor=calc_blend_factor(saved_interpolation_blend_factor,unit->sim_atom_multiplier,unit->cur_sim_queue_slot,cur_sim_frame);
+        if (1||(orbiting_average.i==0&&
+                orbiting_average.j==0&&
+                orbiting_average.k==0)) {
+          orbiting_average= unit->prev_physical_state.position*(1-blend_factor)+blend_factor*unit->curr_physical_state.position;          
+        }else {
+          QVector desired=unit->prev_physical_state.position*(1-blend_factor)+blend_factor*unit->curr_physical_state.position;          
+          orbiting_average=orbiting_average*((averaging-1.0f)/averaging)+desired*(1.0f/averaging);
+        }
       }else {
-		  done = true;
-		  parent->SetResolveForces(true);
-		  return;
+        done = true;
+        parent->SetResolveForces(true);
+        return;//flung off into space.
       }
   }
   //unuseddouble radius =  sqrt((x_offset - focus).MagnitudeSquared() + (y_offset - focus).MagnitudeSquared());
   const double div2pi = (1.0/(2.0*PI));
   theta+=velocity*SIMULATION_ATOM*div2pi;
   if (Network!=NULL || SERVER) {
-    theta = inittheta + velocity*getNewTime()*div2pi;
+    float truetheta = inittheta + velocity*getNewTime()*div2pi;
+    theta=theta*((averaging-1.0f)/averaging)+truetheta*(1.0f/averaging);    
   }
-  
-  parent->Velocity =parent->cumulative_velocity= (((origin - focus + x_offset+y_offset-parent->LocalPosition())*div2pi*(1./SIMULATION_ATOM)).Cast());
+  QVector x_offset = cos(theta) * x_size;
+  QVector y_offset = sin(theta) * y_size;
+
+  QVector destination=origin - focus + orbiting_average + x_offset+y_offset;
+  double mag=(destination-parent->LocalPosition()).Magnitude();
+  if (mining&&0) {
+    printf ("(%.2f %.2f %.2f)\n(%.2f %.2f %.2f) del %.2f spd %.2f\n",
+            parent->LocalPosition().i,
+            parent->LocalPosition().j,
+            parent->LocalPosition().k,
+            destination.i,
+            destination.j,
+            destination.k,
+            mag,
+            mag*(1./SIMULATION_ATOM)
+            );
+  }
+      
+  parent->Velocity =parent->cumulative_velocity= (((destination-parent->LocalPosition())*(1./SIMULATION_ATOM)).Cast());
+  /*
+  if (parent->rSize()>1440&&parent->rSize()<1450) {//mining base
+    static float lastvelocity=parent->Velocity.Magnitude();
+    float thisvelocity=parent->Velocity.Magnitude();
+    if (fabs(thisvelocity-lastvelocity)>100) {
+      printf ("speed change from %f to %f\n",thisvelocity,lastvelocity)
+    }
+  }
+  */
   //const int Unreasonable_value=(int)(100000/SIMULATION_ATOM);
   static float Unreasonable_value = XMLSupport::parse_float(vs_config->getVariable("physics","planet_ejection_stophack","2000"));
   float v2=parent->Velocity.Dot (parent->Velocity);
@@ -96,7 +147,7 @@ void PlanetaryOrbit::Execute() {
   if (v2>Unreasonable_value*Unreasonable_value/*||v2>uglinesscheck*/) {
     parent->Velocity.Set (0,0,0);
     parent->cumulative_velocity.Set (0,0,0);
-    parent->SetCurPosition (origin-focus+x_offset+y_offset);
+    parent->SetCurPosition (origin-focus+orbiting_average+x_offset+y_offset);
   }
 }
 string GetElMeshName (string name, string faction,char direction)

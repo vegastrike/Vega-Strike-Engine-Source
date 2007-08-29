@@ -14,7 +14,6 @@ class ContinuousTerrain;
 
 class PlanetaryOrbit : public Order {
  private:
-  Unit *parent;
   double velocity;
   double theta;
   double inittheta;
@@ -22,6 +21,7 @@ class PlanetaryOrbit : public Order {
   QVector x_size;
   QVector y_size;
   QVector focus;
+  QVector orbiting_average;
  protected:
   ///A vector containing all lihgts currently activated on current planet
   std::vector <int> lights;

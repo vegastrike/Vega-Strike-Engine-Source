@@ -2942,6 +2942,8 @@ void Unit::AddVelocity(float difficulty)
 	}
         if (graphicOptions.WarpFieldStrength!=1.0)
           v=GetWarpVelocity();
+        else 
+          v=Velocity;
 	static float WARPMEMORYEFFECT = XMLSupport::parse_float (vs_config->getVariable ("physics","WarpMemoryEffect","0.9"));
 	graphicOptions.WarpFieldStrength=lastWarpField*WARPMEMORYEFFECT+(1.0-WARPMEMORYEFFECT)*graphicOptions.WarpFieldStrength;
 	curr_physical_state.position = curr_physical_state.position +  (v*SIMULATION_ATOM*difficulty).Cast();
