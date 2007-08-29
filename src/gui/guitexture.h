@@ -36,7 +36,7 @@ public:
 
 	// Bind image to 2D texture in OpenGL, and make this object represent it.
 	bool bindRawData(unsigned char* data, int width, int height, bool hasAlpha, const std::string& fileName);
-
+	bool bindCompData(unsigned char* data, int width, int height, int mode, const std::string& fileName);
 	// Draw this texture, stretching to fit the rect.
 	void draw(const Rect& rect) const;
 

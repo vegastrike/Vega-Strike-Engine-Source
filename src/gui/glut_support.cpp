@@ -24,46 +24,70 @@
 #include "config_xml.h"
 #include "gfx/vsimage.h"
 #include "vsfilesystem.h"
+#include "gldrv/gl_globals.h"
 using namespace VSFileSystem;
 
 #define isspAce(chr) ((chr=='\t')||(chr=='\n')||(chr=='\v')||(chr=='\f')||(chr=='\r')||(chr==' '))
 
 float colors[] = {1, 1, 1, 1};
 
-GUITexture ReadTex(char *texfile) {
+GUITexture ReadTex(char *texfile) 
+{
 	VSFile file;
 	VSError err;
 	int PNG_HAS_ALPHA=4;
-        GUITexture tex;
-        if (texfile)
-        	if (texfile[0])
-					err=file.OpenReadOnly(texfile,TextureFile);
-		GLuint name=0;
-		unsigned int width=0,height=0;
-		if (err<=Ok) {
-				::VSImage img;
-				int bpp,colortype;
-				unsigned char * palette;
-				unsigned char * image=img.ReadImage( &file);
-						//	readImage(file,bpp,colortype,width,height,palette);
-				bpp = img.Depth();
-				colortype = img.Format();
-				glGenTextures (1,&name);
-				glBindTexture (GL_TEXTURE_2D,name);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-				glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-				glTexImage2D(GL_TEXTURE_2D,0,(colortype&PNG_HAS_ALPHA)?GL_RGBA8:GL_RGB8,img.sizeX,img.sizeY,0,(colortype&PNG_HAS_ALPHA)?GL_RGBA:GL_RGB,GL_UNSIGNED_BYTE,image);
-				file.Close();
+	GUITexture tex;
+	if (texfile)
+		if (texfile[0])
+			err=file.OpenReadOnly(texfile,TextureFile);
+	GLuint name=0;
+	unsigned int width=0,height=0;
+	if (err<=Ok) {
+		::VSImage img;
+		int bpp,colortype;
+		unsigned char * palette;
+		unsigned char * image=img.ReadImage( &file);
+		bpp = img.Depth();
+		colortype = img.Format();
+		glGenTextures (1,&name);
+		glBindTexture (GL_TEXTURE_2D,name);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		if(img.mode >= 2 && img.mode <= 6){
+			unsigned int size = 0;
+			int codec = 0;
+			int blocksize = 16;
+			if(!gl_options.s3tc){
+				int mode = img.mode;
+				unsigned char *data = ddsDecompress(image,img.sizeX,img.sizeY,mode);
+				img.mode = (VSImage::VSImageMode)mode;
+				free(image);
+				glTexImage2D(GL_TEXTURE_2D,0,(colortype&PNG_HAS_ALPHA)?GL_RGBA8:GL_RGB8,img.sizeX,img.sizeY,0,(colortype&PNG_HAS_ALPHA)?GL_RGBA:GL_RGB,GL_UNSIGNED_BYTE,data);
+				free(data);
+			} else {
+				if(img.mode == 3){
+					blocksize = 8;
+					codec = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+				} else if(img.mode == 4)
+					codec = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+				else if (img.mode == 5)
+					codec = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+				else if (img.mode == 6)
+					codec = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+				size = ((img.sizeX+3)/4) * ((img.sizeY+3)/4) * blocksize;
+				glCompressedTexImage2D_p(GL_TEXTURE_2D,0,codec,img.sizeX,img.sizeY,0,size,image);
+			}
+		} else 
+			glTexImage2D(GL_TEXTURE_2D,0,(colortype&PNG_HAS_ALPHA)?GL_RGBA8:GL_RGB8,img.sizeX,img.sizeY,0,(colortype&PNG_HAS_ALPHA)?GL_RGBA:GL_RGB,GL_UNSIGNED_BYTE,image);
+		file.Close();
 		tex.wid = img.sizeX;
 		tex.hei = img.sizeY;
 		tex.name = name;
-
 		free(image);
-	}
-	else {
+	} else {
 		printf("Error opening file: %s\n",texfile);
 		tex.wid = 0;
 		tex.hei = 0;

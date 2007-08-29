@@ -35,14 +35,6 @@
 #define GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT 0x851A
 #endif
 
-
-#ifndef GETL16
-#define GETL16(buf) (((unsigned short )(buf)[0])|((unsigned short)(buf)[1]<<8))
-#endif 
-#ifndef GETL64
-#define GETL64(buf) (((unsigned int)(buf)[0]) | ((unsigned long long)(buf)[1] <<  8) | ((unsigned long long)(buf)[2] << 16) | ((unsigned long long)(buf)[3] << 24) | ((unsigned long long)(buf)[4] << 32) | ((unsigned long long)(buf)[5] << 40) | ((unsigned long long)(buf)[6] << 48) | ((unsigned long long)(buf)[7] << 56))
-#endif
-
 //#define  MAX_TEXTURES 16384
 static GLint MAX_TEXTURE_SIZE=256;
 
@@ -712,104 +704,6 @@ glTexSubImage2D(image2D, 0, x,y,width,height,textures[handle].textureformat,GL_U
 return GFXTRUE;
 }
 
-
-
-/*
-	Software decompression for DDS files, helper functions
-*/
-
-void decode_color_block(unsigned char *dst, unsigned char *src,int w, int h, int rowbytes,TEXTUREFORMAT format)
-{
-	int i, x, y;                                                                            
-	unsigned int indexes, idx;                                                              
-	unsigned char *d;                                                                       
-	unsigned char colors[4][3];                                                             
-	unsigned short c0, c1; 
-	c0 = GETL16(&src[0]);
-	c1 = GETL16(&src[2]);
-	colors[0][0] = ((c0 >> 11) & 0x1f) << 3;
-	colors[0][1] = ((c0 >>  5) & 0x3f) << 2;
-	colors[0][2] = ((c0      ) & 0x1f) << 3;
-	colors[1][0] = ((c1 >> 11) & 0x1f) << 3; 
-	colors[1][1] = ((c1 >>  5) & 0x3f) << 2;
-	colors[1][2] = ((c1      ) & 0x1f) << 3;
-	if((c0 > c1) || (format == DXT5)){
-		for(i = 0; i < 3; ++i) {
-			colors[2][i] = (2 * colors[0][i] + colors[1][i] + 1) / 3;
-			colors[3][i] = (2 * colors[1][i] + colors[0][i] + 1) / 3;
-		}
-	} else {
-		for(i = 0; i < 3; ++i) {
-			colors[2][i] = (colors[0][i] + colors[1][i] + 1) >> 1;
-			colors[3][i] = 255;
-		}
-	}
-	src += 4;
-	for(y = 0; y < h; ++y){
-		d = dst + (y * rowbytes); 
-		indexes = src[y];
-		for(x = 0; x < w; ++x) {
-			idx = indexes & 0x03;
-			d[0] = colors[idx][0];
-			d[1] = colors[idx][1]; 
-			d[2] = colors[idx][2]; 
-			if(format == DXT1||format == DXT1RGBA)
-				d[3] = ((c0 <= c1) && idx == 3) ? 0 : 255;
-			indexes >>= 2;
-			d += 4;
-		}
-	}
-}			
-		
-			
-void decode_dxt3_alpha(unsigned char *dst, unsigned char *src, int w, int h, int rowbytes)
-{
-	int x,y;
-	unsigned char *d;
-	unsigned int bits;
-	
-	for(y = 0; y < h; ++y){
-		d = dst + (y * rowbytes); 
-		bits = GETL16(&src[2 * y]); 
-		bits = GETL16(&src[2 * y]);
-		for(x = 0; x < w; ++x) {
-			d[0] = (bits & 0x0f) * 17; 
-			bits >>= 4;
-			d += 4;
-		}
-	}
-}
-
-void decode_dxt5_alpha(unsigned char *dst, unsigned char *src,int w, int h, int bpp, int rowbytes)
-{
-	int x, y, code; 
-	unsigned char *d,a0 = src[0],a1 = src[1];
-	unsigned long long bits = GETL64(src) >> 16;
-	for(y = 0; y < h; ++y) {
-		d = dst + (y * rowbytes); 
-		for(x = 0; x < w; ++x) {
-			code = ((unsigned int)bits) & 0x07; 
-			if(code == 0)
-				d[0] = a0;
-			else if(code == 1)                                                                
-				d[0] = a1;                                                                     
-			else if(a0 > a1)                                                                  
-				d[0] = ((8 - code) * a0 + (code - 1) * a1) / 7;                                
-			else if(code >= 6)                                                                
-				d[0] = (code == 6) ? 0 : 255;                                                  
-			else 
-				d[0] = ((6 - code) * a0 + (code - 1) * a1) / 5; 
-			bits >>= 3;
-			d += bpp;
-		}
-		if(w < 4)
-			bits >>= (3*(4-w));
-	}
-}
-
-/*  END of software decompression for DDS helper functions */	
-	
-	
 	
 GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TEXTUREFORMAT internformat, enum TEXTURE_IMAGE_TARGET imagetarget,int maxdimension, GFXBOOL detail_texture)
 {
@@ -851,47 +745,23 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 	GLenum image2D=GetImageTarget (imagetarget);
 	glBindTexture(textures[handle].targets, textures[handle].name);
 	if (!gl_options.s3tc) {
-		// We need to check if our texture was read from DDS, 
-		if(internformat == DXT1 || internformat == DXT1RGBA || internformat == DXT3 || internformat == DXT5) {		
-			// We have a compressed texture, but no means to decompress by hardware. 
-			// We will read in the first mipmap in buffer and decompress it
-			// replacing the buffer with the decompressed mipmap. 
-			unsigned char *pos_out=NULL,*pos_in=NULL;
-			int bpp = 4;
-			int height = textures[handle].height;
-			int width = textures[handle].width;
-			unsigned int sx,sy,x,y;
-			sx = (width < 4) ? width: 4;
-			sy = (height < 4) ? width : 4;
-			uncompressed = (unsigned char*)malloc(height*width*bpp);
-			pos_out = uncompressed;
-			pos_in = buffer;
-			for(y = 0;y<height;y+=4){
-				for(x=0;x<width;x+=4){
-					pos_out = uncompressed +(y*width+x)*bpp;
-					if(internformat == DXT3){
-						decode_dxt3_alpha(pos_out+3,pos_in,sx,sy,width*bpp);
-						pos_in+=8;
-					} 
-					else if (internformat == DXT5){
-						decode_dxt5_alpha(pos_out+3,pos_in,sx,sy,bpp,width*bpp);
-						pos_in+=8;
-					}
-					decode_color_block(pos_out,pos_in,sx,sy,width*bpp,internformat);
-					pos_in+= 8;
-				}
-			}
-			// We have our decompresesd image, destroy old compressed data 
-			//free(buffer);
-			buffer = uncompressed;
+		if(internformat >=DXT1 && internformat <= DXT5){
+			int mode;
 			if(internformat == DXT1)
+				mode = 3;
+			else if (internformat == DXT1RGBA)
+				mode = 4;
+			else if (internformat == DXT3)
+				mode = 5;
+			else if (internformat == DXT5)
+				mode = 6;
+			buffer = ddsDecompress(buffer,textures[handle].width,textures[handle].height,mode);
+			if(mode== 1)
 				internformat = RGB24;
 			else
-				internformat = RGB32;
-			// Now we have an uncompressed image and the correct internformat for that image. 
+				internformat = RGBA32;
 		}
 	}
-			
 	if (textures[handle].iwidth>maxdimension||textures[handle].iheight>maxdimension||textures[handle].iwidth>MAX_TEXTURE_SIZE||textures[handle].iheight>MAX_TEXTURE_SIZE) {
 #if !defined(GL_COLOR_INDEX8_EXT)
 		if (internformat != PALETTE8) {
@@ -924,7 +794,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 			float numdivisors = logsize>fullout+blankout?(1./(logsize-fullout-blankout)):1;
 			float detailscale=1;
 			//feenableexcept(0);
-			if(internformat == DXT1 || internformat == DXT1RGBA || internformat == DXT3 || internformat == DXT5) {
+			if(internformat >= DXT1 && internformat <= DXT5){
 				int height = textures[handle].height;
 				int width = textures[handle].width;
 				int size = 0;
@@ -949,7 +819,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 				free(tempbuf);
 			tempbuf=NULL;
 		} else{
-			if(internformat == DXT1 || internformat == DXT1RGBA || internformat == DXT3 || internformat == DXT5) {
+			if(internformat >= DXT1 && internformat <= DXT5){
 				int height = textures[handle].height;
 				int width = textures[handle].width;
 				int size = 0;
