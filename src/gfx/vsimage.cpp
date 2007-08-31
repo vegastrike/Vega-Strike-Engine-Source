@@ -711,7 +711,7 @@ unsigned char *VSImage::ReadDDS()
                   this->img_alpha = true;
                   break;
                 case 0:
-                  cerr <<"VSImage ERROR DDS Pixel Format bpp is 0...recovering gracefully\n";
+                  cerr <<"VSImage ERROR DDS Pixel Format bpp is 0 for "<<img_file->GetFilename()<<"...recovering gracefully\n";
                   useDefaultType=true;
                   break;
                 default:
