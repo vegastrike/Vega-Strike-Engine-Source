@@ -710,7 +710,7 @@ unsigned char *VSImage::ReadDDS()
 				this->img_alpha = true;
 				break;
                 default:
-                  cerr <<"VSImage ERROR : DDS Signature invalid, impossible.  !!" <<header.pixelFormat.bpp<<"!\n";
+                  cerr <<"VSImage ERROR : DDS Pixel Format invalid, impossible. " <<header.pixelFormat.bpp<<"!\n";
                   VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
                   throw(1);
 
@@ -730,7 +730,7 @@ unsigned char *VSImage::ReadDDS()
 				this->mode = _DXT5;
 				break;
                 default:
-                  cerr <<"VSImage ERROR : DDS Signature invalid, impossible.  !!" <<header.pixelFormat.fourcc[0]<<header.pixelFormat.fourcc[1]<<header.pixelFormat.fourcc[2]<<header.pixelFormat.fourcc[3]<<"!\n";
+                  cerr <<"VSImage ERROR : DDS Compression Scheme, impossible.[" <<(int)header.pixelFormat.fourcc[0]<<";"<<(int)header.pixelFormat.fourcc[1]<<";"<<header.pixelFormat.fourcc[2]<<";"<<header.pixelFormat.fourcc[3]<<";!\n";
                   VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
                   throw(1);
 		}
