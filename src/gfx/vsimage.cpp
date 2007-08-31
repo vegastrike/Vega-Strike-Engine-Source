@@ -693,22 +693,26 @@ unsigned char *VSImage::ReadDDS()
 		this->img_depth = header.pixelFormat.bpp;
 		this->sizeX=header.width;
 		this->sizeY=header.height;
+                bool useDefaultType=false;
 		switch(header.pixelFormat.bpp){
-			case 4: 
-				type = GL_LUMINANCE;
-				break;
-			case 8: 
-				type = GL_LUMINANCE_ALPHA;
-				this->img_alpha = true;
-				break;
-			case 24: 
-				type=GL_RGB;
-				this->img_alpha = false;
-				break;
-			case 32: 
-				type=GL_RGBA;
-				this->img_alpha = true;
-				break;
+                case 4: 
+                  type = GL_LUMINANCE;
+                  break;
+                case 8: 
+                  type = GL_LUMINANCE_ALPHA;
+                  this->img_alpha = true;
+                  break;
+                case 24: 
+                  type=GL_RGB;
+                  this->img_alpha = false;
+                  break;
+                case 32: 
+                  type=GL_RGBA;
+                  this->img_alpha = true;
+                  break;
+                case 0:
+                  useDefaultType=true;
+                  break;
                 default:
                   cerr <<"VSImage ERROR : DDS Pixel Format invalid, impossible. " <<header.pixelFormat.bpp<<"!\n";
                   VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
@@ -716,19 +720,31 @@ unsigned char *VSImage::ReadDDS()
 
 		}
 		switch(header.pixelFormat.fourcc[3]){
-			case '1': 
-				if(type==GL_RGB)
-					this->mode = _DXT1;
-				else
-					this->mode = _DXT1RGBA;
-				blockSize = 8;
-				break;
-			case '3': 
-				this->mode = _DXT3;
-				break;
-			case '5': 
-				this->mode = _DXT5;
-				break;
+                case '1': 
+                  if(type==GL_RGB||useDefaultType) {
+                    this->mode = _DXT1;
+                    this->img_alpha=false;
+                    type=GL_RGB;
+                  }else {
+                    this->mode = _DXT1RGBA;
+                    blockSize = 8;
+                    this->img_alpha=true;
+                  }
+                  break;
+                case '3': 
+                  this->mode = _DXT3;
+                  if (useDefaultType){
+                    this->img_alpha=true;
+                    type=GL_RGBA;
+                  }
+                  break;
+                case '5': 
+                  this->mode = _DXT5;
+                  if (useDefaultType) {
+                    this->img_alpha=true;
+                    type=GL_RGBA;
+                  }
+                  break;
                 default:
                   cerr <<"VSImage ERROR : DDS Compression Scheme, impossible.[" <<(int)header.pixelFormat.fourcc[0]<<";"<<(int)header.pixelFormat.fourcc[1]<<";"<<header.pixelFormat.fourcc[2]<<";"<<header.pixelFormat.fourcc[3]<<";!\n";
                   VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
