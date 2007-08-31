@@ -709,6 +709,11 @@ unsigned char *VSImage::ReadDDS()
 				type=GL_RGBA;
 				this->img_alpha = true;
 				break;
+                default:
+                  cerr <<"VSImage ERROR : DDS Signature invalid, impossible.  !!" <<header.pixelFormat.bpp<<"!\n";
+                  VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
+                  throw(1);
+
 		}
 		switch(header.pixelFormat.fourcc[3]){
 			case '1': 
@@ -724,6 +729,10 @@ unsigned char *VSImage::ReadDDS()
 			case '5': 
 				this->mode = _DXT5;
 				break;
+                default:
+                  cerr <<"VSImage ERROR : DDS Signature invalid, impossible.  !!" <<header.pixelFormat.fourcc[0]<<header.pixelFormat.fourcc[1]<<header.pixelFormat.fourcc[2]<<header.pixelFormat.fourcc[3]<<"!\n";
+                  VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
+                  throw(1);
 		}
 		inputSize = 0;
 		width=header.width;
