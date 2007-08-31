@@ -69,6 +69,7 @@ VSImage::VSImage()
   this->sizeY=1;
   this->sizeX=1;
   this->Init();
+  this->mode=_24BIT;
 }
 
 void	VSImage::Init()
@@ -93,6 +94,7 @@ void	VSImage::Init( VSFile * f, textureTransform *t, bool strip, VSFile *f2)
 
 VSImage::VSImage( VSFile * f, textureTransform * t, bool strip, VSFile * f2)
 {
+	this->mode = _24BIT;
 	this->Init( f, t, strip, f2);
 }
 
@@ -394,7 +396,12 @@ unsigned char *	VSImage::ReadPNG()
 #ifdef VSIMAGE_DEBUG
 	   VSFileSystem::vs_fprintf (stderr,"Decompressing Done.\n");
 #endif
-
+	if(img_depth == 8)
+		mode=_PNG8BIT;
+	else if (img_depth == 24)
+		mode=_PNG24BIT;
+	else 
+		mode=_PNG32BIT;		
 	if( result)
 		this->AllocatePalette();
 	return result;
@@ -747,7 +754,6 @@ void	VSImage::AllocatePalette()
 {
 	  //FIXME deal with palettes and grayscale with alpha
 	  if (!(img_color_type&PNG_HAS_COLOR)||(img_color_type&PNG_HAS_PALETTE)) {
-		mode=_PNG8BIT;
 	    if (!(img_color_type&PNG_HAS_COLOR)){
 	      palette = (unsigned char *) malloc(sizeof(unsigned char)*(256*4+1));
 	      for (unsigned int i =0;i<256;i++) {
@@ -758,13 +764,6 @@ void	VSImage::AllocatePalette()
 	      }
 	    }
 	  } 
-	  if (img_color_type&PNG_HAS_COLOR) {
-	    if (img_color_type&PNG_HAS_ALPHA) {
-	      mode=_PNG32BIT;
-	    } else {
-	      mode=_PNG24BIT;
-	    }
-	  }
 }
 
 VSError	VSImage::WriteImage( char * filename, unsigned char * data, VSImageType type, unsigned int width, unsigned int height, bool alpha, char bpp, VSFileType ft, bool flip)

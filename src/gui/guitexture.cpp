@@ -96,7 +96,7 @@ static const GuiTexture* addTextureToCache(const std::string& fileName) {
 			int mode = img.mode;
 			unsigned char *data = ddsDecompress(image,width,height,mode);
 			img.mode = (VSImage::VSImageMode)mode;
-			success = texture.bindRawData(image, width, height, hasAlpha, fileName);
+			success = texture.bindRawData(data, width, height, hasAlpha, fileName);
 			free(image);			// Make sure this gets freed before we return.	
 			free(data);
 		}
