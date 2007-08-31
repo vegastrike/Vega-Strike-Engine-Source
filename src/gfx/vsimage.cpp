@@ -711,6 +711,7 @@ unsigned char *VSImage::ReadDDS()
                   this->img_alpha = true;
                   break;
                 case 0:
+                  cerr <<"VSImage ERROR DDS Pixel Format bpp is 0...recovering gracefully\n";
                   useDefaultType=true;
                   break;
                 default:
@@ -746,7 +747,7 @@ unsigned char *VSImage::ReadDDS()
                   }
                   break;
                 default:
-                  cerr <<"VSImage ERROR : DDS Compression Scheme, impossible.[" <<(int)header.pixelFormat.fourcc[0]<<";"<<(int)header.pixelFormat.fourcc[1]<<";"<<header.pixelFormat.fourcc[2]<<";"<<header.pixelFormat.fourcc[3]<<";!\n";
+                  cerr <<"VSImage ERROR : DDS Compression Scheme, impossible.[" <<(int)header.pixelFormat.fourcc[0]<<";"<<(int)header.pixelFormat.fourcc[1]<<";"<<(int)header.pixelFormat.fourcc[2]<<";"<<(int)header.pixelFormat.fourcc[3]<<";!\n";
                   VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
                   throw(1);
 		}
