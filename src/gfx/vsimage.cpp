@@ -688,6 +688,7 @@ unsigned char *VSImage::ReadDDS()
 		img_file->Read(&header.pixelFormat.fourcc[3],1);
 		img_file->Read(ibuffer,4);
 		header.pixelFormat.bpp=POSH_ReadU32FromLittle(ibuffer);
+		
 		img_file->GoTo(128);
 		// Set VSImage attributes 
 		this->img_depth = header.pixelFormat.bpp;
@@ -723,6 +724,7 @@ unsigned char *VSImage::ReadDDS()
 		switch(header.pixelFormat.fourcc[3]){
                 case '1': 
                   if(type==GL_RGB||useDefaultType) {
+				  	this->img_depth = 24;
                     this->mode = _DXT1;
                     this->img_alpha=false;
                     type=GL_RGB;
@@ -736,6 +738,7 @@ unsigned char *VSImage::ReadDDS()
                   this->mode = _DXT3;
                   if (useDefaultType){
                     this->img_alpha=true;
+					this->img_depth = 32;
                     type=GL_RGBA;
                   }
                   break;
@@ -743,6 +746,7 @@ unsigned char *VSImage::ReadDDS()
                   this->mode = _DXT5;
                   if (useDefaultType) {
                     this->img_alpha=true;
+					this->img_depth=32;
                     type=GL_RGBA;
                   }
                   break;
