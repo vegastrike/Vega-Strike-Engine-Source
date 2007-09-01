@@ -478,6 +478,13 @@ unsigned char *	VSImage::ReadJPEG()
 		this->img_color_type = PNG_COLOR_TYPE_RGB_ALPHA;
 	else if (cinfo.output_components== 2)
 		this->img_color_type = PNG_COLOR_TYPE_GRAY_ALPHA;
+	
+	switch(this->img_color_type) {
+	case PNG_COLOR_TYPE_RGB: this->mode = _24BIT; break;
+	case PNG_COLOR_TYPE_RGB_ALPHA: this->mode = _24BITRGBA; break;
+	case PNG_COLOR_TYPE_GRAY: this->mode = _8BIT; break;
+	case PNG_COLOR_TYPE_GRAY_ALPHA: this->mode = _8BIT; break;
+	}
 
 #ifdef VSIMAGE_DEBUG
 	cerr<<"1. Loading a JPEG file : width="<<sizeX<<", height="<<sizeY<<", img_color="<<img_color_type<<endl;

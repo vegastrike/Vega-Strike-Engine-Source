@@ -40,6 +40,35 @@ static GLint MAX_TEXTURE_SIZE=256;
 
 extern GLenum GetGLTextureTarget(enum TEXTURE_TARGET texture_target);
 
+static bool IsUncompressedTextureFormat (TEXTUREFORMAT textureformat)
+{
+	switch (textureformat) {
+		case RGB24:
+		case RGB32:
+		case RGBA32:
+		case RGBA16:
+		case RGB16:
+		case PALETTE8:
+			return true;
+		default:
+			return false;
+	}
+}
+
+static bool IsDirectColorTextureFormat (TEXTUREFORMAT textureformat)
+{
+	switch (textureformat) {
+		case RGB24:
+		case RGB32:
+		case RGBA32:
+		case RGBA16:
+		case RGB16:
+			return true;
+		default:
+			return false;
+	}
+}
+
 GLenum GetUncompressedTextureFormat (TEXTUREFORMAT textureformat)
 {
 	switch (textureformat) {
@@ -764,9 +793,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 	}
 	if (textures[handle].iwidth>maxdimension||textures[handle].iheight>maxdimension||textures[handle].iwidth>MAX_TEXTURE_SIZE||textures[handle].iheight>MAX_TEXTURE_SIZE) {
 #if !defined(GL_COLOR_INDEX8_EXT)
-		if (internformat != PALETTE8) {
+		if (IsUncompressedTextureFormat(internformat) && (internformat != PALETTE8)) {
 #else
-		if (internformat != PALETTE8||gl_options.PaletteExt) {
+		if (IsUncompressedTextureFormat(internformat) && (internformat != PALETTE8 || gl_options.PaletteExt)) {
 #endif
 			textures[handle].height = textures[handle].iheight;
 			textures[handle].width  = textures[handle].iwidth;
