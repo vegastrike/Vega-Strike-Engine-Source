@@ -63,7 +63,7 @@ GUITexture ReadTex(char *texfile)
 			if(!gl_options.s3tc){
 				int mode = img.mode;
 				unsigned char *data = ddsDecompress(image,img.sizeX,img.sizeY,mode);
-				img.mode = (VSImage::VSImageMode)mode;
+				img.mode = (::VSImage::VSImageMode)mode;
 				free(image);
 				glTexImage2D(GL_TEXTURE_2D,0,(colortype&PNG_HAS_ALPHA)?GL_RGBA8:GL_RGB8,img.sizeX,img.sizeY,0,(colortype&PNG_HAS_ALPHA)?GL_RGBA:GL_RGB,GL_UNSIGNED_BYTE,data);
 				free(data);
