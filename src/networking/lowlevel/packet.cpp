@@ -5,6 +5,13 @@
 #endif
 #include <math.h>
 
+// zlib is required for libpng, so these people must have one.
+#ifndef NO_GFX
+#ifndef HAVE_ZLIB_H
+#define HAVE_ZLIB_H 1
+#endif
+#endif
+
 #ifdef HAVE_ZLIB_H
 #include <zlib.h>
 #endif /* HAVE_ZLIB_H */
@@ -202,6 +209,7 @@ void Packet::create( Cmd cmd, ObjSerial nserial,
     bool packet_filled = false;
 
 #ifdef HAVE_ZLIB_H
+#ifdef USE_COMPRESSED_PACKETS
     if( prio & COMPRESSED )
     {
         size_t sz;   // complicated zlib rules for safety reasons
@@ -250,6 +258,7 @@ void Packet::create( Cmd cmd, ObjSerial nserial,
             _packet = PacketMem( );
         }
     }
+#endif /* USED_COMPRESSED_PACKETS */
 #endif /* HAVE_ZLIB_H */
 
     if( packet_filled == false )

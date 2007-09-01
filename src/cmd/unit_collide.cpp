@@ -479,7 +479,7 @@ bool Unit::Collide (Unit * target) {
   static float NEBULA_SPACE_DRAG=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_space_drag","0.01"));
   if (targetisUnit==NEBULAPTR)
 	  this->Velocity *= (1 - NEBULA_SPACE_DRAG); // why? why not?
-  if (target==this||((targetisUnit!=NEBULAPTR&&thisisUnit!=NEBULAPTR)&&(owner==target||target->owner==this||(owner!=NULL&&target->owner==owner))))
+  if (target==this||((targetisUnit!=NEBULAPTR&&thisisUnit!=NEBULAPTR)&&(owner==target||target->owner==this||(owner!=NULL&&target->owner==owner)))||(Network!=NULL&&_Universe->isPlayerStarship(target)==NULL&&_Universe->isPlayerStarship(this)==NULL))
     return false;
   if (targetisUnit==ASTEROIDPTR&&thisisUnit==ASTEROIDPTR)
     return false;
