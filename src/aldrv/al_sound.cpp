@@ -721,6 +721,18 @@ void AUDAdjustSound (const int sound, const QVector &pos, const Vector &vel){
   }
 #endif
 }
+
+void AUDStreamingSound (const int sound)
+{
+#ifdef HAVE_AL
+    alSource3f(sound, AL_POSITION,        0.0, 0.0, 0.0);
+    alSource3f(sound, AL_VELOCITY,        0.0, 0.0, 0.0);
+    alSource3f(sound, AL_DIRECTION,       0.0, 0.0, 0.0);
+    alSourcef (sound, AL_ROLLOFF_FACTOR,  0.0          );
+    alSourcei (sound, AL_SOURCE_RELATIVE, AL_TRUE      );
+#endif
+}
+
 bool starSystemOK( ) {
 	if (!_Universe || !_Universe->AccessCockpit(0)) {
 		return true; // No Universe yet, so game is loading.

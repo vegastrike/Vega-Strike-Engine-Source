@@ -420,7 +420,7 @@ void Music::_LoadLastSongAsync() {
         if (where!=Muzak::cachedSongs.end()) {
           if (where->second.wave!=NULL) {
             int source = AUDBufferSound(&where->second, true);
-            AUDAdjustSound(source,QVector(0,0,0),Vector(0,0,0));
+            AUDStreamingSound(source);
             music_load_info->wave=NULL;
             if (source!=-1) {
               playingSource.push_back(source);
@@ -480,7 +480,7 @@ void Music::Listen() {
 #ifdef HAVE_AL
 				if (music_load_info->success && music_load_info->wave) {
 					int source = AUDBufferSound(music_load_info, true);
-                                        AUDAdjustSound(source,QVector(0,0,0),Vector(0,0,0));
+					AUDStreamingSound(source);
                                         if (freeWav)
                                           free(music_load_info->wave);
 					music_load_info->wave=NULL;

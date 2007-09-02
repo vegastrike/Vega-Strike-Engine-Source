@@ -33,6 +33,8 @@ void AUDStopAllSounds();
 void AUDDeleteSound (int sound, bool music=false);
 ///Changes the velocity and/or position of a given sound
 void AUDAdjustSound (const int sound, const QVector &pos, const Vector &vel);
+///Setup the sound as a streaming source (this means right now only that it doesn't do 3D positional stuff)
+void AUDStreamingSound (const int sound);
 ///Changes the gain of a loaded sound
 void AUDSoundGain (int sound, float gain, bool music=false);
 ///Is a loaded sound still playing
