@@ -30,12 +30,21 @@
 #include "building.h"
 #include "terrain.h"
 #include "cont_terrain.h"
+
 extern Unit * _masterPartList;
 std::string getMasterPartListUnitName() {
 	static std::string mpl = vs_config->getVariable("data","master_part_list","master_part_list");
 	return mpl;
 }
 
+void KillDuplicateUnits(ObjSerial likeSerial) {
+	Unit *un;
+	for(un_iter it = _Universe->activeStarSystem()->getUnitList().createIterator();un = *it;++it) {
+		if((*it)->GetSerial() == likeSerial) {
+			(*it)->Kill();
+		}
+	}
+}
 
 Unit* UnitFactory::createUnit( )
 {
@@ -55,8 +64,10 @@ Unit* UnitFactory::createUnit( const char *filename,
                      customizedUnit,
                      flightgroup,
                      fg_subnumber, netxml);
-	if( netcreate)
+	if( netcreate) {
+		KillDuplicateUnits( netcreate);
 		un->SetSerial( netcreate);
+	}
 	return un;
 }
 Unit* UnitFactory::createServerSideUnit( const char *filename,
@@ -94,8 +105,10 @@ Nebula* UnitFactory::createNebula( const char * unitfile,
                        faction,
                        fg,
                        fg_snumber );
-	if( netcreate)
+	if( netcreate) {
+		KillDuplicateUnits( netcreate);
 		neb->SetSerial( netcreate);
+	}
 	return neb;
 }
 
@@ -119,8 +132,10 @@ Missile* UnitFactory::createMissile( const char * filename,
                         radialeffect,
                         radmult,
                         detonation_radius );
-	if( netcreate)
+	if( netcreate) {
+		KillDuplicateUnits( netcreate);
 		un->SetSerial( netcreate);
+	}
 	return un;
 //  double endtime= queryTime();
 //  printf ("mcr %f ",endtime-startime);
@@ -166,8 +181,10 @@ Planet* UnitFactory::createPlanet( QVector x,
                        faction,
                        fullname , 
 		       inside_out);
-	if( netcreate)
+	if( netcreate) {
+		KillDuplicateUnits( netcreate);
 		p->SetSerial( netcreate);
+	}
 	return p;
 }
 
@@ -229,8 +246,10 @@ Asteroid* UnitFactory::createAsteroid( const char * filename,
                          fg,
                          fg_snumber,
                          difficulty );
-	if( netcreate)
+	if( netcreate) {
+		KillDuplicateUnits( netcreate);
 		ast->SetSerial( netcreate);
+	}
 	return ast;
 }
 

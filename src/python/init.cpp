@@ -203,6 +203,14 @@ BOOST_PYTHON_MODULE_INIT(Vegastrike)
 }*/
 #endif
 #include "vsfilesystem.h"
+
+#ifdef _WIN32
+// Python 2.5 doesn't seem to like forward-slashes.
+#define PATHSEP "\\"
+#else
+#define PATHSEP "/"
+#endif
+
 void Python::initpaths(){
   /*
   char pwd[2048];
@@ -227,9 +235,9 @@ void Python::initpaths(){
   // Find all the mods dir (ignore homedir)
   for( int i=1; i<VSFileSystem::Rootdir.size(); i++)
   {
-	  modpaths += "r\""+VSFileSystem::Rootdir[i]+"/modules/builtin\",";
-	  modpaths += "r\""+VSFileSystem::Rootdir[i]+"/"+moduledir+"\",";
-	  modpaths += "r\""+VSFileSystem::Rootdir[i]+"/"+basesdir+"\"";
+	  modpaths += "r\""+VSFileSystem::Rootdir[i]+ PATHSEP +moduledir+ PATHSEP "builtin\",";
+	  modpaths += "r\""+VSFileSystem::Rootdir[i]+ PATHSEP +moduledir+"\",";
+	  modpaths += "r\""+VSFileSystem::Rootdir[i]+ PATHSEP +basesdir+"\"";
 	  if( i+1<VSFileSystem::Rootdir.size())
 		  modpaths+= ",";
   }

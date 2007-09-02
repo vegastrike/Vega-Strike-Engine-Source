@@ -280,7 +280,8 @@ static void setup_sdl_video_mode()
 void winsys_init( int *argc, char **argv, char *window_title, 
 		  char *icon_title )
 {
-	Uint32 sdl_flags = SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK;
+	// SDL_INIT_AUDIO|
+	Uint32 sdl_flags = SDL_INIT_VIDEO|SDL_INIT_JOYSTICK;
     g_game.x_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","x_resolution","1024"));     
     g_game.y_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","y_resolution","768"));     
     gl_options.fullscreen = XMLSupport::parse_bool (vs_config->getVariable ("graphics","fullscreen","false"));
@@ -292,14 +293,14 @@ void winsys_init( int *argc, char **argv, char *window_title,
 	VSFileSystem::vs_fprintf( stderr, "Couldn't initialize SDL: %s", SDL_GetError() );
 	exit(1);
     }
+    SDL_EnableUNICODE(1); // supposedly fixes int'l keyboards.
+
     // signal( SIGSEGV, SIG_DFL );
+	SDL_Surface *icon = NULL;
 #if 1
-	{
-	SDL_Surface *tempsurf=SDL_LoadBMP(icon_title);
-	if (tempsurf) {
-		SDL_SetColorKey(tempsurf,SDL_SRCCOLORKEY,((Uint32*)(tempsurf->pixels))[0]);
-		SDL_WM_SetIcon(tempsurf,0);
-	}
+	if (icon_title) icon = SDL_LoadBMP(icon_title);
+	if (icon) {
+		SDL_SetColorKey(icon,SDL_SRCCOLORKEY,((Uint32*)(icon->pixels))[0]);
 	}
 #endif
     /* 
@@ -313,11 +314,10 @@ void winsys_init( int *argc, char **argv, char *window_title,
 #endif
 
     glutInit(argc,argv);
-    setup_sdl_video_mode();
-	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+    SDL_WM_SetCaption( window_title, window_title );
+	if (icon) SDL_WM_SetIcon(icon,0);
 
-    SDL_WM_SetCaption( window_title, icon_title );
-    SDL_EnableUNICODE(1); // supposedly fixes int'l keyboards.
+    setup_sdl_video_mode();
     
 }
 

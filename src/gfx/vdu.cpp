@@ -76,7 +76,10 @@ string getUnitNameAndFgNoBase (Unit * target) {
               
             }
 	  }
-	}	 
+	} else if (Network!=NULL) {
+		std::string retval(reformatName(target->name)+":"+target->getFullname());
+		return retval;
+	}
   }
   
   return reformatName(target->name);

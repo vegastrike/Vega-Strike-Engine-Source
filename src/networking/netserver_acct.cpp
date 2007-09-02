@@ -150,6 +150,10 @@ bool NetServer::saveAccount(int i)
 	if ( cp && acctserver && acct_con)
 	{
 		SaveNetUtil::GetSaveStrings( i, savestr, xmlstr);
+		if (savestr.empty() || xmlstr.empty()) {
+			cerr<<"Unable to generate CSV and Save data for player."<<endl;
+			return false;
+		}
 		Unit *un=cp->GetParent();
 		std::string snetbuf;
 		bool found = false;
