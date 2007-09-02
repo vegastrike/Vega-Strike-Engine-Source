@@ -311,7 +311,8 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
 			  jump=NULL;
 		  }
 	  }
-	  meshdata.push_back(NULL);//shield mesh
+          if (anytrue)
+            meshdata.push_back(NULL);//shield mesh...otherwise is a standard planet
 	  wormhole = anytrue;
   }
   if (!wormhole) {
