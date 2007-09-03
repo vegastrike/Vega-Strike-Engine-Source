@@ -108,6 +108,12 @@ typedef std::vector<OrigMeshContainer> OrigMeshVector;
 #define ENVSPEC_PASS 1
 #define DAMAGE_PASS 2
 #define GLOW_PASS 3
+#define BASE_TEX 0
+#define ENVSPEC_TEX 1
+#define DAMAGE_TEX 2
+#define GLOW_TEX 3
+#define NORMAL_TEX 4
+#define NUM_TEX 5
 const int UNDRAWN_MESHES_SIZE= NUM_MESH_SEQUENCE*NUM_PASSES;
 
 #ifdef PARTITIONED_Z_BUFFER
@@ -762,7 +768,22 @@ bool SetupSpecMapFirstPass (vector <Texture *> &decal, unsigned int mat, bool en
     return retval;
 }
 enum ShaderConstantEnum{
-  kDIFFUSEMAP,kENVMAP,kSPECMAP,kNORMALMAP,kGLOWMAP,kDAMAGEMAP,kDETAIL0MAP,kDETAIL1MAP,kCLOAKING,kDAMAGED,kDETAIL0PLANE,kDETAIL1PLANE,kNUMLIGHTS,kACTIVELIGHTS,NUM_SHADER_CONSTANTS
+  kDIFFUSEMAP,
+  kENVMAP,
+  kSPECMAP,
+  kNORMALMAP,
+  kGLOWMAP,
+  kDAMAGEMAP,
+  kDETAIL0MAP,
+  kDETAIL1MAP,
+  kCLOAKING,
+  kDAMAGED,
+  kDETAIL0PLANE,
+  kDETAIL1PLANE,
+  kNUMLIGHTS,
+  kACTIVELIGHTS,
+  kENVCOLOR,
+  NUM_SHADER_CONSTANTS
 };
 struct ShaderConstantLookup{
   int id;
@@ -783,7 +804,8 @@ ShaderConstantLookup shaderConstants[NUM_SHADER_CONSTANTS]={
   ShaderConstantLookup(-1,"detail0Plane"),
   ShaderConstantLookup(-1,"detail1Plane"),
   ShaderConstantLookup(-1,"max_light_enabled"),
-  ShaderConstantLookup(-1,"light_enabled")
+  ShaderConstantLookup(-1,"light_enabled"),
+  ShaderConstantLookup(-1,"envColor")
 };
 void UpdateShaderConstants(char *program) {
   if (GFXShaderReloaded()) {
@@ -803,32 +825,25 @@ void SetupShaders (vector <Texture *> &Decal, unsigned int mat, bool envMap,floa
     GFXGetPolygonOffset(&a,&b);
     GFXPolygonOffset (a, b-polygon_offset);
   }
-  GFXSelectMaterial(mat);
-#define SAFEDECAL(pass) ((Decal.size()>pass&&Decal[pass])?Decal[pass]:black)
   
-  if (Decal.size()>0&&Decal[0]) {
-    Decal[0]->MakeActive(0);
-  }else {
-    white->MakeActive(0);
-  }
+  GFXSelectMaterial(mat);
+#define SAFEDECAL(pass,deflt) ((Decal.size()>pass&&Decal[pass])?Decal[pass]:deflt)
+
+#define BASE_UNIT 0
+#define ENV_UNIT 1
+#define SPEC_UNIT 2
+#define GLOW_UNIT 4
+#define NORMAL_UNIT 3
+#define DAMAGE_UNIT 5
+#define DETAIL_UNIT_0 6
+#define DETAIL_UNIT_1 7
+  
   _Universe->activeStarSystem()->activateLightMap();
-  if (envMap) {
-    SAFEDECAL(ENVSPEC_PASS)->MakeActive(2);
-  }else {
-    black->MakeActive(2);
-  }
-  SAFEDECAL(GLOW_PASS)->MakeActive(4);
-  if (Decal.size()>4&&Decal[4]) {
-    Decal[4]->MakeActive(3);//normal map
-  }else {
-    blue->MakeActive(3);
-  }
-  if(Decal.size()>DAMAGE_PASS&&Decal[DAMAGE_PASS])
-    Decal[DAMAGE_PASS]->MakeActive(5);
-  else if (Decal.size()>0&&Decal[0])
-    Decal[0]->MakeActive(5);
-  else
-    white->MakeActive(5);
+  SAFEDECAL(BASE_TEX,white)->MakeActive(BASE_UNIT);
+  SAFEDECAL(ENVSPEC_TEX,white)->MakeActive(SPEC_UNIT);
+  SAFEDECAL(GLOW_TEX,black)->MakeActive(GLOW_UNIT);
+  SAFEDECAL(NORMAL_TEX,blue)->MakeActive(NORMAL_UNIT);
+  SAFEDECAL(DAMAGE_TEX,SAFEDECAL(BASE_TEX,white))->MakeActive(DAMAGE_UNIT);
     
   GFXToggleTexture(true,0);
   GFXToggleTexture(true,1);
@@ -848,14 +863,16 @@ void SetupShaders (vector <Texture *> &Decal, unsigned int mat, bool envMap,floa
       GFXToggleTexture(true,stage);
     }
   }
-  GFXShaderConstant(shaderConstants[kDIFFUSEMAP].id,0);
-  GFXShaderConstant(shaderConstants[kENVMAP].id,1);
-  GFXShaderConstant(shaderConstants[kSPECMAP].id,2);
-  GFXShaderConstant(shaderConstants[kNORMALMAP].id,3);
-  GFXShaderConstant(shaderConstants[kGLOWMAP].id,4);
-  GFXShaderConstant(shaderConstants[kDAMAGEMAP].id,5);
-  GFXShaderConstant(shaderConstants[kDETAIL0MAP].id,6);
-  GFXShaderConstant(shaderConstants[kDETAIL1MAP].id,7);
+  GFXShaderConstant(shaderConstants[kDIFFUSEMAP].id,BASE_UNIT);
+  GFXShaderConstant(shaderConstants[kENVMAP].id,ENV_UNIT);
+  GFXShaderConstant(shaderConstants[kSPECMAP].id,SPEC_UNIT);
+  GFXShaderConstant(shaderConstants[kNORMALMAP].id,NORMAL_UNIT);
+  GFXShaderConstant(shaderConstants[kGLOWMAP].id,GLOW_UNIT);
+  GFXShaderConstant(shaderConstants[kDAMAGEMAP].id,DAMAGE_UNIT);
+  GFXShaderConstant(shaderConstants[kDETAIL0MAP].id,DETAIL_UNIT_0);
+  GFXShaderConstant(shaderConstants[kDETAIL1MAP].id,DETAIL_UNIT_1);
+  float grayrgba[4]={0.5,0.5,0.5,1.0};
+  float whitergba[4]={1,1,1,1};
   float shaderPlane0[4]={0,0,0,0};
   float shaderPlane1[4]={0,0,0,0};
   if (detailPlanes.size()>0) {
@@ -870,6 +887,7 @@ void SetupShaders (vector <Texture *> &Decal, unsigned int mat, bool envMap,floa
   }
   GFXShaderConstant(shaderConstants[kDETAIL0PLANE].id,shaderPlane0);
   GFXShaderConstant(shaderConstants[kDETAIL1PLANE].id,shaderPlane1);
+  GFXShaderConstant(shaderConstants[kENVCOLOR].id,envMap?whitergba:grayrgba);
 #undef SAFEDECAL
 }
 
@@ -1042,7 +1060,7 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue,float zmin, float z
 void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
 #endif
   bool shouldsupportshaders=GFXDefaultShaderSupported();
-  bool shaders=Decal.size()>1&&shouldsupportshaders;//for now
+  bool shaders=((Decal.size()>1) || getEnvMap()) && shouldsupportshaders;//for now
   if ((whichpass==ENVSPEC_PASS)||(whichpass==GLOW_PASS)||(whichpass==DAMAGE_PASS)) return;
   if (whichpass!=0&&shaders) return;
   //  assert(draw_queue->size());
