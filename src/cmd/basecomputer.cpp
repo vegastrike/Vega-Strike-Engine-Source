@@ -72,7 +72,6 @@ struct dirent { char d_name[1]; };
 extern const char * DamagedCategory;
 
 int BaseComputer::dirty=0;
-Cargo BaseComputer::dirtyCargo;
 
 static GFXColor UnsaturatedColor(float r, float g, float b, float a=1.0f) {
   GFXColor ret(r,g,b,a);
@@ -2910,17 +2909,31 @@ static void eliminateZeroCargo(Unit * un) {
   
 }
 
+void BaseComputer::refresh() {
+	if (m_player.GetUnit()) {
+		eliminateZeroCargo(m_player.GetUnit());
+		// Reload the UI -- inventory has changed.  Because we reload the UI, we need to 
+		//  find, select, and scroll to the thing we bought.  The item might be gone from the
+		//  list (along with some categories) after the transaction.
+		std::list<std::list<std::string> > list1save, list2save;
+		if (m_transList1.picker)
+			m_transList1.picker->saveOpenCategories(list1save);
+		if (m_transList2.picker)
+			m_transList2.picker->saveOpenCategories(list2save);
+		processWindowCommand(modeInfo[m_currentDisplay].command, NULL);
+		//updateTransactionControls(BaseComputer::dirtyCargo);
+		if (m_transList1.picker)
+			m_transList1.picker->restoreOpenCategories(list1save);
+		if (m_transList2.picker)
+			m_transList2.picker->restoreOpenCategories(list2save);
+        recalcTitle();
+    }
+}
+
 void BaseComputer::draw() {
     if (BaseComputer::dirty && m_player.GetUnit()) {
-		if (BaseComputer::dirty&1) {
-			eliminateZeroCargo(m_player.GetUnit());
-			// Reload the UI -- inventory has changed.  Because we reload the UI, we need to 
-			//  find, select, and scroll to the thing we bought.  The item might be gone from the
-			//  list (along with some categories) after the transaction.
-			processWindowCommand(modeInfo[m_currentDisplay].command, NULL);
-			updateTransactionControls(BaseComputer::dirtyCargo);
-		}
-        recalcTitle();
+		eliminateZeroCargo(m_player.GetUnit());
+		refresh();
     }
 }
 
@@ -2934,7 +2947,7 @@ bool BaseComputer::buySelectedCargo(int requestedQuantity) {
 
     Cargo* item = selectedItem();
     if(item) {
-        Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
+        //Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
 		int quantity = (requestedQuantity <= 0? item->quantity : requestedQuantity);
 		quantity = maxQuantityForPlayer(*item, quantity);
         playerUnit->BuyCargo(item->content, quantity, baseUnit, _Universe->AccessCockpit()->credits);
@@ -2942,8 +2955,8 @@ bool BaseComputer::buySelectedCargo(int requestedQuantity) {
         // Reload the UI -- inventory has changed.  Because we reload the UI, we need to 
         //  find, select, and scroll to the thing we bought.  The item might be gone from the
         //  list (along with some categories) after the transaction.
-        loadCargoControls();        // This will reload master lists.
-        updateTransactionControls(itemCopy);
+        refresh();        // This will reload master lists.
+        //updateTransactionControls(itemCopy);
     }
 
     return true;
@@ -2989,8 +3002,9 @@ bool BaseComputer::sellSelectedCargo(int requestedQuantity) {
         // Reload the UI -- inventory has changed.  Because we reload the UI, we need to 
         //  find, select, and scroll to the thing we bought.  The item might be gone from the
         //  list (along with some categories) after the transaction.
-        loadCargoControls();
-        updateTransactionControls(itemCopy);
+		refresh();        // This will reload master lists.
+		//loadCargoControls();
+        //updateTransactionControls(itemCopy);
     }
 
     return true;
@@ -3291,9 +3305,10 @@ bool BaseComputer::acceptMission(const EventCommandId& command, Control* control
         active_missions[whichmission]->terminateMission();        
         if (tmp==mission)
           mission=active_missions[0];
-        Cargo itemCopy = *item;
-        loadMissionsControls();
-        updateTransactionControls(itemCopy);
+        //Cargo itemCopy = *item;
+        //loadMissionsControls();
+		refresh();
+        //updateTransactionControls(itemCopy);
         return true;
       }      
       return false;
@@ -3327,9 +3342,10 @@ bool BaseComputer::acceptMission(const EventCommandId& command, Control* control
 	}
 
         // Reload the UI.
-        Cargo itemCopy = *item;
-        loadMissionsControls();
-        updateTransactionControls(itemCopy);
+        //Cargo itemCopy = *item;
+        //loadMissionsControls();
+		refresh();
+        //updateTransactionControls(itemCopy);
     }
 
     // We handled the command, whether we successfully accepted the mission or not.
@@ -3566,8 +3582,9 @@ bool BaseComputer::UpgradeOperation::commonInit(void) {
 
 // Update the UI controls after a transaction has been concluded successfully.
 void BaseComputer::UpgradeOperation::updateUI(void) {
-    m_parent.loadUpgradeControls();
-    m_parent.updateTransactionControls(m_selectedItem, true);
+	m_parent.refresh();
+    //m_parent.loadUpgradeControls();
+    //m_parent.updateTransactionControls(m_selectedItem, true);
 }
 
 // Finish this operation.
@@ -4047,13 +4064,14 @@ bool BaseComputer::buyUpgrade(const EventCommandId& command, Control* control) {
 		Unit * playerUnit = m_player.GetUnit();
 		if(item->content == BASIC_REPAIR_NAME) {
 			if (playerUnit) {
-				Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
+				//Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
 				BasicRepair(playerUnit);
 				if (m_selectedList == NULL) {
 					return true;
 				}
-				loadUpgradeControls();
-				updateTransactionControls(itemCopy, true);
+				//loadUpgradeControls();
+				//updateTransactionControls(itemCopy, true);
+				refresh();
 				m_selectedList->picker->selectCell(NULL);       // Turn off selection.
 			}
 			return true;
@@ -4062,7 +4080,7 @@ bool BaseComputer::buyUpgrade(const EventCommandId& command, Control* control) {
 			if (playerUnit) {
 				Unit * baseUnit = m_base.GetUnit();
 				if (baseUnit) {
-					Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
+					//Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
 					const int quantity=1;
 					playerUnit->BuyCargo(item->content, quantity, baseUnit, _Universe->AccessCockpit()->credits);
 					playerUnit->Upgrade(item->content,0,0,true,false);
@@ -4071,9 +4089,10 @@ bool BaseComputer::buyUpgrade(const EventCommandId& command, Control* control) {
                                         double percentage=0;
                                         playerUnit->Upgrade(upgrade,0,0,GetModeFromName(item->content.c_str()),true,percentage,makeTemplateUpgrade(playerUnit->name,playerUnit->faction));                                        
 					*/
-					//UnitUtil::RecomputeUnitUpgrades(playerUnit); //Narfed damage
-					loadUpgradeControls();
-					updateTransactionControls(itemCopy, true);
+					/* UnitUtil::RecomputeUnitUpgrades(playerUnit); //Narfed damage */
+					refresh();
+					//loadUpgradeControls();
+					//updateTransactionControls(itemCopy, true);
 				}
 			}
 			return true;
@@ -4097,11 +4116,12 @@ bool BaseComputer::sellUpgrade(const EventCommandId& command, Control* control) 
 			Unit * playerUnit = m_player.GetUnit();
 			Unit * baseUnit = m_base.GetUnit();
 			if (baseUnit&&playerUnit) {
-				Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
+				//Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
 				playerUnit->SellCargo(item->content, quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
 				UnitUtil::RecomputeUnitUpgrades(playerUnit);
-				loadUpgradeControls();
-				updateTransactionControls(itemCopy, true);				
+				refresh();
+				//loadUpgradeControls();
+				//updateTransactionControls(itemCopy, true);				
 			}
 			return true;
 		}
@@ -4121,7 +4141,7 @@ bool BaseComputer::fixUpgrade(const EventCommandId& command, Control* control) {
 	Unit * playerUnit = m_player.GetUnit();
 	Unit * baseUnit = m_base.GetUnit();
 	if (baseUnit&&playerUnit&&item) {
-		Cargo itemCopy=*item;
+		//Cargo itemCopy=*item;
 		float *credits = NULL;
 		Cockpit *cp = _Universe->isPlayerStarship(playerUnit);
 		if (cp) {
@@ -4132,8 +4152,9 @@ bool BaseComputer::fixUpgrade(const EventCommandId& command, Control* control) {
 				emergency_downgrade_mode="EMERGENCY MODE ";
 			}
 		}
-		loadUpgradeControls();
-		updateTransactionControls(itemCopy, true);
+		refresh();
+		//loadUpgradeControls();
+		//updateTransactionControls(itemCopy, true);
 	}
 	return true;
 }

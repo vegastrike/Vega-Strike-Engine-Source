@@ -43,7 +43,6 @@ class BaseComputer : public WctlBase<BaseComputer>
 public:
 
     static int dirty;
-    static Cargo dirtyCargo;
     
     // The Computer displays that are possible.
     enum DisplayMode {
@@ -191,6 +190,9 @@ protected:
 	
     // Redo the title string.
     void recalcTitle(void);
+
+	// Refresh both picker lists and the title.
+	void refresh(void);
 
     // Return whether or not this transaction is possible for the player now.
     bool isTransactionOK(const Cargo& originalItem, TransactionType transType, int quantity = 1);

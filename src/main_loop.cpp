@@ -931,7 +931,12 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 					cout<<"Creating fighter["<<squadnum<<"] from "<<modifications<<" on Network["<<squadnum<<"] named "<<Network[squadnum].getCallsign()<<endl;
 //				}
 			}
-			else
+		  else if (Network!=NULL)
+			{
+				cout<<"Not CREATING A LOCAL SHIP : "<<fightername<<endl;
+				break;
+			}
+		  else
 			{
 				cout<<"CREATING A LOCAL SHIP : "<<fightername<<endl;
   				fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s);

@@ -464,7 +464,7 @@ namespace BaseUtil {
 		if (carg) {
 			// BaseComputer::draw() used dirty to determine what to recalculate.
 			BaseComputer::dirty=1; // everything.
-			BaseComputer::dirtyCargo=*carg;
+			//BaseComputer::dirtyCargo=*carg;
 		} else {
 			BaseComputer::dirty=2; // only title.
 		}

@@ -31,6 +31,8 @@
 #include "config_xml.h"
 #include "xml_support.h"
 
+#include <list>
+
 // Calculation for indenting children.  Use a factor times total cell height.
 static const float CHILD_INDENT_FACTOR = 0.6;
 
@@ -53,6 +55,67 @@ PickerCell* PickerCells::cellWithId(const std::string& id) {
 
     // Didn't find a cell with the specified id.
     return NULL;
+}
+
+bool PickerCells::saveOpenCategories(std::list<std::list<std::string> >& masterList,
+			const std::list<std::string> &parentHier,
+			PickerCell *selectedCell) const {
+	bool hasSelectedCell=false;
+	for (int i=0; i<count(); i++) {
+		const PickerCell* cell = cellAt(i);
+		if (cell == selectedCell) {
+			hasSelectedCell=true;
+		}
+		if (!cell->hideChildren()) {
+			masterList.push_back(parentHier);
+			std::list<std::string> * newItem = &masterList.back();
+			(*newItem).push_back(cell->id());
+			PickerCells *newCells = cell->children();
+			bool savedCell=false;
+			if (newCells) {
+				savedCell = newCells->saveOpenCategories(masterList, (*newItem), selectedCell);
+			}
+			if (savedCell) {
+				(*newItem).push_back(selectedCell->id());
+			}
+		}
+	}
+	return hasSelectedCell;
+}
+
+void Picker::saveOpenCategories(std::list<std::list<std::string> >& idList) const {
+	std::list<std::string> base;
+	cells()->saveOpenCategories(idList, base, m_selectedCell);
+}
+
+int Picker::restoreOpenCategories(const std::list<std::list<std::string> >& idList) {
+	int numRestored=0;
+	PickerCell *selectedCell = NULL;
+	for (std::list<std::list<std::string> >::const_iterator catIt = idList.begin();
+		 catIt!=idList.end();
+		 ++catIt) {
+		PickerCells *celllist = cells();
+		for (std::list<std::string>::const_iterator travIt = (*catIt).begin();
+			 travIt!=(*catIt).end();
+			 ++travIt) {
+			PickerCell *cell = celllist->cellWithId((*travIt));
+			if (!cell) {
+				break;
+			}
+			celllist = cell->children();
+			if (!celllist || celllist->count() == 0) {
+				selectedCell = cell;
+				break;
+			}
+			cell->setHideChildren(false);
+		}
+	}
+	
+	setMustRecalc();
+	if (selectedCell) {
+		selectCell(selectedCell, true);
+	}
+	return numRestored;
 }
 
 // Draw the picker

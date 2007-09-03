@@ -25,6 +25,8 @@
 #include "control.h"
 #include "painttext.h"
 
+#include <list>
+
 // See cpp file for detailed descriptions of classes, functions, etc.
 
 // FORWARD REFERENCES.
@@ -37,6 +39,7 @@ class Scroller;
 class PickerCell
 {
 public:
+	virtual ~PickerCell() {}
     // The text to be displayed.
     virtual std::string text(void) const = 0;
     // A unique identifier for the cell.
@@ -65,12 +68,22 @@ protected:
 class PickerCells
 {
 public:
+	virtual ~PickerCells() {}
     // Number of cells in this list.
     virtual int count(void) const = 0;
     // Get a particular cell.
     virtual PickerCell* cellAt(int index) = 0;
+    // Get a particular cell (const).
+    virtual const PickerCell* cellAt(int index) const = 0;
     // Find a cell by id.  Returns NULL if not found.
     virtual PickerCell* cellWithId(const std::string& id);
+
+	// Utility functions:
+	// Saves all open children categories in a list.
+	// Returns true if this list directly contains the selectedCell.
+	bool saveOpenCategories(std::list<std::list<std::string> >& masterList,
+			const std::list<std::string> &parentHier,
+			PickerCell *selectedCell) const;
 };
 
 // The Picker class supports a list of items that can be
@@ -80,11 +93,16 @@ public:
 class Picker : public Control
 {
 public:
+
+	void saveOpenCategories(std::list<std::list<std::string> >& idList) const;
+	int restoreOpenCategories(const std::list<std::list<std::string> >& idList);
+	
     // Draw the list.
     virtual void draw(void);
 
     // Get cell collection.
     virtual PickerCells* cells(void) { return m_cells; };
+    virtual const PickerCells* cells(void) const{ return m_cells; };
 
     // Make a cell selected.
     virtual void selectCell(PickerCell* cell, bool scroll = false);

@@ -76,6 +76,7 @@ public:
     virtual int count(void) const { return m_cells.size(); };
     // Get a particular cell.
     virtual PickerCell* cellAt(int index) { return m_cells[index]; };
+    virtual const PickerCell* cellAt(int index) const { return m_cells[index]; };
 
     // Add a new cell to this list.
     virtual void addCell(PickerCell* c) { m_cells.push_back(c); };
