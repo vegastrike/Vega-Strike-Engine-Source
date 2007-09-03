@@ -484,7 +484,7 @@ void NetClient::synchronizeTime(SOCKETALT*udpsock)
 	std::map<double, double> times; // sorted container.
 	double initialTime=queryTime();
 	static int NUM_TIMES = XMLSupport::parse_int(vs_config->getVariable( "network", "servertime_calibration", "10" ));
-	static int UDP_TIMEOUT = XMLSupport::parse_int(vs_config->getVariable( "network", "udp_timeout", "5" ));
+	static int UDP_TIMEOUT = XMLSupport::parse_int(vs_config->getVariable( "network", "udp_timeout", "1" ));
 	static int clt_port_read = XMLSupport::parse_int(vs_config->getVariable( "network", "udp_listen_port", "6778" ));
 	if (clt_port_read>65535||clt_port_read<=0)
 		clt_port_read=0;

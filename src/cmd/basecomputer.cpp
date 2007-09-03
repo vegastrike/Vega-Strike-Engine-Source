@@ -3335,11 +3335,17 @@ bool BaseComputer::acceptMission(const EventCommandId& command, Control* control
     if(finalScript.empty()) {
       return false;
     } else {
-        LoadMission("", finalScript, false);
-	if(active_missions.size() > 0) {
-            // Give the mission a name.
-            active_missions.back()->mission_name = item->category;
-	}
+		if (Network==NULL) {
+			LoadMission("", finalScript, false);
+			if(active_missions.size() > 0) {
+				// Give the mission a name.
+				active_missions.back()->mission_name = item->category;
+			}
+		} else if (m_player.GetUnit()) {
+			int cp=_Universe->whichPlayerStarship(m_player.GetUnit());
+			if (cp<0) cp=0;
+			Network[cp].cargoRequest(m_player.GetUnit()->GetSerial(), 0, qualifiedName, 0, 0, 0);
+		}
 
         // Reload the UI.
         //Cargo itemCopy = *item;
@@ -4072,7 +4078,7 @@ bool BaseComputer::buyUpgrade(const EventCommandId& command, Control* control) {
 				//loadUpgradeControls();
 				//updateTransactionControls(itemCopy, true);
 				refresh();
-				m_selectedList->picker->selectCell(NULL);       // Turn off selection.
+				m_transList1.picker->selectCell(NULL);       // Turn off selection.
 			}
 			return true;
 		}

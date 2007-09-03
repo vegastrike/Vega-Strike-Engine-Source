@@ -514,6 +514,16 @@ else
     GLUT_LDOPTS="-L$with_glut_libs"
 fi
 
+dnl check for glut and prerequesites to the glut-test: libXmu and libXi
+AC_CHECK_LIB([Xmu], [XmuGetHostname], [have_Xmu="yes"], [have_Xmu="no"])
+AC_CHECK_LIB([Xi], [XListInputDevices], [have_Xi="yes"], [have_Xi="no"])
+if test "x$have_Xmu" = "xyes"; then
+    VS_LIBS="$VS_LIBS -lXmu"
+fi
+if test "x$have_Xi" = "xyes"; then
+    VS_LIBS="$VS_LIBS -lXi"
+fi
+
 AC_DEFUN([CHECK_FOR_GLUT_LIB], [
     AC_MSG_CHECKING([for $GLUT_LIB_NAME library])
     if test "x$is_macosx" = "xyes" ; then
@@ -521,8 +531,9 @@ AC_DEFUN([CHECK_FOR_GLUT_LIB], [
     else
 	saved_LDFLAGS=$LDFLAGS
 	LDFLAGS="-L/usr/X11R6/lib $saved_LDFLAGS"
-        LIBS="$saved_LIBS $VS_LIBS $GLUT_LDOPTS -l$GLUT_LIB_NAME -lXi -lXmu"
+        LIBS="$saved_LIBS $VS_LIBS $GLUT_LDOPTS -l$GLUT_LIB_NAME"
     fi
+    echo $LIBS
     AC_TRY_LINK( , , have_glut_lib=yes, have_glut_lib=no )
     AC_MSG_RESULT([$have_glut_lib])
 ])
@@ -540,14 +551,21 @@ for GLUT_LIB_NAME in $GLUT_LIB_LIST ; do
 done
 
 if test "x$have_glut_lib" = "xno" ; then
+    if test "x$have_Xmu" = "xno"; then
+   	AC_MSG_WARN([Glut might fail because of missing libXmu-dev and/or headers!])
+    fi
+    if test "x$have_Xi" = "xno"; then
+   	AC_MSG_WARN([Glut might fail because of missing libXi-dev and/or headers!])
+    fi
     AC_MSG_ERROR([GLUT library not found or too old version. 3.7 (beta) or later required.])
 fi
 
-LIBS="$saved_LIBS -lXi -lXmu"
+LIBS="$saved_LIBS"
 if test "x$is_macosx" = "xyes" ; then
     VS_LIBS="$VS_LIBS $GLUT_LDOPTS -framework GLUT"
 else
-    VS_LIBS="$VS_LIBS $GLUT_LDOPTS -l$GLUT_LIB_NAME  -lXi -lXmu"
+    LIBS="$saved_LIBS -lXi -lXmu"
+    VS_LIBS="$VS_LIBS $GLUT_LDOPTS -l$GLUT_LIB_NAME"
 fi
 
 
