@@ -52,6 +52,7 @@ int GFXCreateProgram(char*vprogram,char* fprogram) {
     GLint successp=0;
     glGetShaderiv_p(vproghandle,GL_COMPILE_STATUS,&successp);
     if (successp==0) {
+      printLog(vproghandle,true);
       fprintf(stderr,"Vertex Program Error: Failed to compile %s\n",vprogram);
       return 0;
     }
@@ -70,6 +71,7 @@ int GFXCreateProgram(char*vprogram,char* fprogram) {
     GLint successp=0;
     glGetShaderiv_p(fproghandle,GL_COMPILE_STATUS,&successp);
     if (successp==0) {
+      printLog(fproghandle,true);
       fprintf(stderr,"Fragment Program Error: Failed to compile %s\n",fprogram);
       return 0;
     }
