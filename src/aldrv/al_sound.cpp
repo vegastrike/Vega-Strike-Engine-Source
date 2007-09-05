@@ -725,11 +725,13 @@ void AUDAdjustSound (const int sound, const QVector &pos, const Vector &vel){
 void AUDStreamingSound (const int sound)
 {
 #ifdef HAVE_AL
-    alSource3f(sound, AL_POSITION,        0.0, 0.0, 0.0);
-    alSource3f(sound, AL_VELOCITY,        0.0, 0.0, 0.0);
-    alSource3f(sound, AL_DIRECTION,       0.0, 0.0, 0.0);
-    alSourcef (sound, AL_ROLLOFF_FACTOR,  0.0          );
-    alSourcei (sound, AL_SOURCE_RELATIVE, AL_TRUE      );
+  if (sound>=0&&sound<(int)sounds.size()&&sounds[sound].source) {
+    alSource3f(sounds[sound].source, AL_POSITION,        0.0, 0.0, 0.0);
+    alSource3f(sounds[sound].source, AL_VELOCITY,        0.0, 0.0, 0.0);
+    alSource3f(sounds[sound].source, AL_DIRECTION,       0.0, 0.0, 0.0);
+    alSourcef (sounds[sound].source, AL_ROLLOFF_FACTOR,  0.0          );
+    alSourcei (sounds[sound].source, AL_SOURCE_RELATIVE, AL_TRUE      );
+  }
 #endif
 }
 
@@ -778,8 +780,8 @@ void AUDStopPlaying (const int sound){
 	if (sounds[sound].source!=0) {
 	  alSourceStop(sounds[sound].source);
           unusedsrcs.push_back (sounds[sound].source);
+          alSourcei(sounds[sound].source,AL_BUFFER,0);//decrement refcount
 	}
-        alSourcei(sounds[sound].source,AL_BUFFER,0);//decrement refcount
         sounds[sound].source=(ALuint)0;
   }
 #endif
