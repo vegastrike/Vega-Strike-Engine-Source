@@ -247,14 +247,14 @@ def _RemoveFGFromFactionList (fgname,faction):
             return 1
     return 0
 */
-  bool CheckFG(std::vector<StringPool::Reference> &data) {
+  bool CheckFG(std::vector<std::string> &data) {
     bool retval=false;
     unsigned int leg = data.size();
     unsigned int totalships=0;
     unsigned int inc=PerShipDataSize();
     for (unsigned int i=ShipListOffset()+1;i+1<leg;i+=inc) {
-      StringPool::Reference *numlanded=&data[i+1];
-      StringPool::Reference*numtotal=&data[i];
+      std::string *numlanded=&data[i+1];
+      std::string*numtotal=&data[i];
       if (*numlanded!=*numtotal) {
         retval=true;
         *numlanded=*numtotal;

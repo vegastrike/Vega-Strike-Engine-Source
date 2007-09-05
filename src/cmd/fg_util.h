@@ -5,7 +5,7 @@ namespace fg_util {
   unsigned int ShipListOffset();
   unsigned int PerShipDataSize();
   bool IsFGKey(const std::string&fgcandidate);
-  bool CheckFG(std::vector<StringPool::Reference> &data);
+  bool CheckFG(std::vector<std::string> &data);
   void PurgeZeroShips (SaveGame*sg, unsigned int faction);
   void PurgeZeroShips (SaveGame*sg);
 

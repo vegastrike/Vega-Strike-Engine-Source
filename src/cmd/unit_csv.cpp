@@ -1685,12 +1685,12 @@ string Unit::WriteUnitString () {
 void UpdateMasterPartList(Unit * ret) {
   for (int i=0;i<_Universe->numPlayers();++i) {
     Cockpit* cp = _Universe->AccessCockpit(i);
-    std::vector<StringPool::Reference>* addedcargoname= &cp->savegame->getMissionStringData("master_part_list_content");
-    std::vector<StringPool::Reference>* addedcargocat= &cp->savegame->getMissionStringData("master_part_list_category");
-    std::vector<StringPool::Reference>* addedcargovol= &cp->savegame->getMissionStringData("master_part_list_volume");
-    std::vector<StringPool::Reference>* addedcargoprice= &cp->savegame->getMissionStringData("master_part_list_price");
-    std::vector<StringPool::Reference>* addedcargomass= &cp->savegame->getMissionStringData("master_part_list_mass");
-    std::vector<StringPool::Reference>* addedcargodesc= &cp->savegame->getMissionStringData("master_part_list_description");
+    std::vector<std::string>* addedcargoname= &cp->savegame->getMissionStringData("master_part_list_content");
+    std::vector<std::string>* addedcargocat= &cp->savegame->getMissionStringData("master_part_list_category");
+    std::vector<std::string>* addedcargovol= &cp->savegame->getMissionStringData("master_part_list_volume");
+    std::vector<std::string>* addedcargoprice= &cp->savegame->getMissionStringData("master_part_list_price");
+    std::vector<std::string>* addedcargomass= &cp->savegame->getMissionStringData("master_part_list_mass");
+    std::vector<std::string>* addedcargodesc= &cp->savegame->getMissionStringData("master_part_list_description");
     for (unsigned int j=0;j<addedcargoname->size();++j) {
       Cargo carg;
       carg.content=(*addedcargoname)[j];

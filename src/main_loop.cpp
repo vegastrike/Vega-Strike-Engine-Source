@@ -870,7 +870,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 					pox = UniverseUtil::SafeEntrancePoint(savedloc[squadnum]);
 				}
 
-                                vector<StringPool::Reference> *dat=&cp->savegame->getMissionStringData("jump_from");
+                                vector<std::string> *dat=&cp->savegame->getMissionStringData("jump_from");
                                 
                                 if (dat->size()) {
                                   std::string srcsys=(*dat)[0];

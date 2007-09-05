@@ -192,9 +192,11 @@ void SaveFileCopy (const char * src, const char * dst) {
   	fprintf(stderr, "WARNING : couldn't find the savegame to copy : %s as SaveFile", src);
   }
 }
+
 class MissionStringDat {
 public:
-  typedef stdext::hash_map<string,vector <StringPool::Reference> >MSD;
+  //typedef stdext::hash_map<string,vector <StringPool::Reference> >MSD;
+  typedef std::map<string,vector <std::string> >MSD;
   MSD m;
 };
 class MissionFloatDat {
@@ -414,7 +416,7 @@ unsigned int SaveGame::getMissionDataLength(const std::string &magic_number) con
   MissionFloatDat::MFD::const_iterator it = missiondata->m.find(magic_number);
   return (it == missiondata->m.end()) ? 0 : it->second.size();
 }
-std::vector<StringPool::Reference> &SaveGame::getMissionStringData(const std::string &magic_number) 
+std::vector<string> &SaveGame::getMissionStringData(const std::string &magic_number) 
 {
   return missionstringdata->m[magic_number];
 }
@@ -541,17 +543,17 @@ void SaveGame::ReadMissionStringData (char * &buf, bool select_data, const std::
 	md_i_size = strtol(buf2,(char **)NULL,10);
     // Put ptr to point after the number we just read
     buf2 +=hopto (buf2,' ','\n',0);
-	vector <StringPool::Reference> * vecstring = 0;
+	vector <string> * vecstring = 0;
 	bool skip=true;
 	if (!select_data || select_data_filter.count(mag_num)) {
-		missionstringdata->m[mag_num] = vector<StringPool::Reference>();
+		missionstringdata->m[mag_num] = vector<string>();
 		vecstring=&missionstringdata->m[mag_num];
 		skip=false;
 	}
     for (int j=0;j<md_i_size;j++) {
 		if (skip)
 			AnyStringSkipInString(buf2); else
-			vecstring->push_back (StringPool::Reference(AnyStringScanInString(buf2)));
+			vecstring->push_back (AnyStringScanInString(buf2));
     }
   }
   buf = buf2;
@@ -690,8 +692,8 @@ void SaveGame::ReadSavedPackets (char * &buf, bool commitfactions, bool skip_new
 
 void SaveGame::LoadSavedMissions() {
   unsigned int i;
-  vector<StringPool::Reference> scripts = getMissionStringData("active_scripts");
-  vector<StringPool::Reference> missions = getMissionStringData("active_missions");
+  vector<string> scripts = getMissionStringData("active_scripts");
+  vector<string> missions = getMissionStringData("active_missions");
   PyRun_SimpleString("import VS\nVS.loading_active_missions=True\nprint \"Loading active missions \"+str(VS.loading_active_missions)\n");
   // kill any leftovers so they don't get loaded twice.
   for (i=active_missions.size()-1;i>0;--i){// don't terminate zeroth mission
@@ -701,7 +703,7 @@ void SaveGame::LoadSavedMissions() {
   
   for (i=0;i<scripts.size()&&i<missions.size();++i) {
     try {
-      LoadMission(missions[i].get().c_str(),scripts[i],false);
+      LoadMission(missions[i].c_str(),scripts[i],false);
     }catch (...) {
       if (PyErr_Occurred()) {
         PyErr_Print();

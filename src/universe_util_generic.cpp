@@ -388,19 +388,19 @@ namespace UniverseUtil
 
 	string GetGalaxyFaction (string sys) {
 		string fac = _Universe->getGalaxyProperty (sys,"faction");
-		vector <StringPool::Reference> * ans = &(_Universe->AccessCockpit(0)->savegame->getMissionStringData(string(DEFAULT_FACTION_SAVENAME)+sys));
+		vector <std::string> * ans = &(_Universe->AccessCockpit(0)->savegame->getMissionStringData(string(DEFAULT_FACTION_SAVENAME)+sys));
 		if (ans->size()) {
 			fac = (*ans)[0];
 		}
 		return fac;
 	}
 	void SetGalaxyFaction (string sys, string fac) {
-		vector <StringPool::Reference> * ans = &(_Universe->AccessCockpit(0)->savegame->getMissionStringData(string(DEFAULT_FACTION_SAVENAME)+sys));
+		vector <std::string> * ans = &(_Universe->AccessCockpit(0)->savegame->getMissionStringData(string(DEFAULT_FACTION_SAVENAME)+sys));
 		if (ans->size()) {
 			(*ans)[0]=fac;
 		}
 		else {
-			ans->push_back(StringPool::Reference(fac));
+			ans->push_back(std::string(fac));
 		}
 	}
 	int GetNumAdjacentSystems (string sysname) {

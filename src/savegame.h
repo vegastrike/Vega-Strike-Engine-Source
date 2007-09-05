@@ -51,7 +51,7 @@ class SaveGame {
   void SetCallsign(const std::string &cs) {callsign=cs;}
   std::vector<float> &getMissionData(const std::string &magic_number);
   unsigned int getMissionDataLength(const std::string &magic_number) const;
-  std::vector<StringPool::Reference> &getMissionStringData(const std::string &magic_number);
+  std::vector<std::string> &getMissionStringData(const std::string &magic_number);
   unsigned int getMissionStringDataLength(const std::string &magic_number) const;
   SaveGame(const std::string &pilotname);
   void PurgeZeroStarships();

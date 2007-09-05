@@ -512,6 +512,7 @@ void base_main_loop() {
 		restore_main_loop();
 	}else {
 		GFXEndScene();
+		micro_sleep(1000);
 	}
 	BaseComputer::dirty = false;
 }

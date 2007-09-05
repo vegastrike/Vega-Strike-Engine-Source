@@ -742,6 +742,7 @@ bool Cockpit::Update () {
 		if (actually_have_save) {
                   DockToSavedBases(whichcp);
                 }
+		UniverseUtil::hideSplashScreen();
 		_Universe->popActiveStarSystem();
                 if (!persistent_on_load) {
                   _Universe->pushActiveStarSystem(ss);
