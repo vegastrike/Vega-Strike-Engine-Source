@@ -25,6 +25,7 @@
 #include "gfx/vsimage.h"
 #include "vsfilesystem.h"
 #include "gldrv/gl_globals.h"
+#include "gldrv/sdds.h"
 using namespace VSFileSystem;
 
 #define isspAce(chr) ((chr=='\t')||(chr=='\n')||(chr=='\v')||(chr=='\f')||(chr=='\r')||(chr==' '))
@@ -56,26 +57,32 @@ GUITexture ReadTex(char *texfile)
 		glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		if(img.mode >= 2 && img.mode <= 6){
+		if(img.mode >= ::VSImage::_DXT1 && img.mode <= ::VSImage::_DXT5){
 			unsigned int size = 0;
 			int codec = 0;
 			int blocksize = 16;
 			if(!gl_options.s3tc){
-				int mode = img.mode;
-				unsigned char *data = ddsDecompress(image,img.sizeX,img.sizeY,mode);
-				img.mode = (::VSImage::VSImageMode)mode;
+				TEXTUREFORMAT format = DXT1;
+				if(img.mode == ::VSImage::_DXT1RGBA)
+					format = DXT1RGBA;
+				else if(img.mode == ::VSImage::_DXT3)
+					format = DXT3;
+				else if(img.mode == ::VSImage::_DXT5)
+					format = DXT5;
+				unsigned char *data = NULL;
+				ddsDecompress(image,data,format,height,width);
 				free(image);
-				glTexImage2D(GL_TEXTURE_2D,0,(colortype&PNG_HAS_ALPHA)?GL_RGBA8:GL_RGB8,img.sizeX,img.sizeY,0,(colortype&PNG_HAS_ALPHA)?GL_RGBA:GL_RGB,GL_UNSIGNED_BYTE,data);
-				free(data);
+				image = data;
+				glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA8,img.sizeX,img.sizeY,0,GL_RGBA,GL_UNSIGNED_BYTE,image);				
 			} else {
-				if(img.mode == 3){
+				if(img.mode == ::VSImage::_DXT1){
 					blocksize = 8;
 					codec = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
-				} else if(img.mode == 4)
+				} else if(img.mode == ::VSImage::_DXT1RGBA)
 					codec = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-				else if (img.mode == 5)
+				else if (img.mode == ::VSImage::_DXT3)
 					codec = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-				else if (img.mode == 6)
+				else if (img.mode == ::VSImage::_DXT5)
 					codec = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 				size = ((img.sizeX+3)/4) * ((img.sizeY+3)/4) * blocksize;
 				glCompressedTexImage2D_p(GL_TEXTURE_2D,0,codec,img.sizeX,img.sizeY,0,size,image);

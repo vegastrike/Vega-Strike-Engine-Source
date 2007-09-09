@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #define GL_EXT_texture_env_combine 1
+#include "gldrv/sdds.h"
 #include "gl_globals.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
@@ -40,42 +41,18 @@ static GLint MAX_TEXTURE_SIZE=256;
 
 extern GLenum GetGLTextureTarget(enum TEXTURE_TARGET texture_target);
 
-static bool IsUncompressedTextureFormat (TEXTUREFORMAT textureformat)
-{
-	switch (textureformat) {
-		case RGB24:
-		case RGB32:
-		case RGBA32:
-		case RGBA16:
-		case RGB16:
-		case PALETTE8:
-			return true;
-		default:
-			return false;
-	}
-}
-
-static bool IsDirectColorTextureFormat (TEXTUREFORMAT textureformat)
-{
-	switch (textureformat) {
-		case RGB24:
-		case RGB32:
-		case RGBA32:
-		case RGBA16:
-		case RGB16:
-			return true;
-		default:
-			return false;
-	}
-}
-
 GLenum GetUncompressedTextureFormat (TEXTUREFORMAT textureformat)
 {
 	switch (textureformat) {
+
 		case RGB24:
 			return GL_RGB;
 		case RGB32:
 			return GL_RGB;
+		case DXT1RGBA:
+		case DXT3:
+		case DXT5:
+		case DXT1:
 		case RGBA32:
 			return GL_RGBA;
 		case RGBA16:
@@ -741,7 +718,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 	int logsize=1;
 	int logwid=1;
 	int mmap = 1;
-	unsigned char *uncompressed = NULL;
+	unsigned char *data = NULL;
 	bool comptemp = gl_options.compression;
 	if(internformat >= PNGPALETTE8){
 		gl_options.compression = false;
@@ -775,38 +752,30 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 	glBindTexture(textures[handle].targets, textures[handle].name);
 	if (!gl_options.s3tc) {
 		if(internformat >=DXT1 && internformat <= DXT5){
-			int mode;
-			if(internformat == DXT1)
-				mode = 3;
-			else if (internformat == DXT1RGBA)
-				mode = 4;
-			else if (internformat == DXT3)
-				mode = 5;
-			else if (internformat == DXT5)
-				mode = 6;
-			buffer = ddsDecompress(buffer,textures[handle].width,textures[handle].height,mode);
-			if(mode== 1)
-				internformat = RGB24;
-			else
-				internformat = RGBA32;
+			ddsDecompress(buffer,data,internformat,textures[handle].height,textures[handle].width);
+			buffer = data;
+			internformat = RGBA32;
 		}
 	}
 	if (textures[handle].iwidth>maxdimension||textures[handle].iheight>maxdimension||textures[handle].iwidth>MAX_TEXTURE_SIZE||textures[handle].iheight>MAX_TEXTURE_SIZE) {
 #if !defined(GL_COLOR_INDEX8_EXT)
-		if (IsUncompressedTextureFormat(internformat) && (internformat != PALETTE8)) {
+		if (internformat != PALETTE8 && (internformat <DXT1 || internformat > DXT5)) {
 #else
-		if (IsUncompressedTextureFormat(internformat) && (internformat != PALETTE8 || gl_options.PaletteExt)) {
+		if (internformat != PALETTE8||gl_options.PaletteExt && (internformat <DXT1 || internformat >DXT5)) {
 #endif
+			//printf("wtf\n");
 			textures[handle].height = textures[handle].iheight;
 			textures[handle].width  = textures[handle].iwidth;
 			DownSampleTexture (&tempbuf,buffer,textures[handle].height,textures[handle].width,(internformat==PALETTE8?1:(internformat==RGBA32?4:3))* sizeof(unsigned char ), handle,maxdimension,maxdimension,1);
-			buffer = tempbuf;
+			buffer = tempbuf;	
 		}
 	}
+	
 	if (internformat!=PALETTE8 && internformat != PNGPALETTE8) {
 		internalformat = GetTextureFormat (internformat);
 		if ((textures[handle].mipmapped&&gl_options.mipmap>=2)||detail_texture) {
 			if (detail_texture) {
+				//printf("in here\n");
 				static FILTER fil = XMLSupport::parse_bool(vs_config->getVariable("graphics","detail_texture_trilinear","true"))?TRILINEAR:MIPMAP;
 				textures[handle].mipmapped=     fil;
 				glTexParameteri (textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -830,7 +799,8 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 				int blocksize = 16;
 				int i = 0;
 				unsigned int offset = 0;
-				if(internformat == DXT1)
+				//printf("shouldn't be here\n");
+				if(internformat == DXT1|| internformat == DXT1RGBA)
 					blocksize = 8;
 				size = ((width +3)/4) * ((height +3)/4) * blocksize;
 				
@@ -842,8 +812,13 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 					size = ((width +3)/4) * ((height +3)/4) * blocksize;
 					++i;
 				}
-			} else
+			} else {
+				//printf("build mipmaps format %d, width %d, height, %d, tformat %d \n",internalformat, textures[handle].width,textures[handle].height,textures[handle].textureformat);
 				gluBuild2DMipmaps(image2D, internalformat, textures[handle].width, textures[handle].height, textures[handle].textureformat, GL_UNSIGNED_BYTE, buffer);
+//				gluBuild2DMipmaps(image2D, GL_RGBA, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+//				glTexImage2D(image2D, 0, internalformat, textures[handle].width, textures[handle].height, 0, textures[handle].textureformat, GL_UNSIGNED_BYTE, buffer);
+				//printf("done\n");
+			}
 			if (tempbuf) 
 				free(tempbuf);
 			tempbuf=NULL;
@@ -870,9 +845,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 			if (error) {
 				if (tempbuf)
 					free(tempbuf);
-				if(uncompressed) 
-					free(uncompressed);
 				gl_options.compression = comptemp;
+				if(data)
+					free(data);
 				return GFXFALSE;
 			}
 			if ((textures[handle].mipmapped&(MIPMAP|TRILINEAR))&&gl_options.mipmap>=2) {
@@ -885,9 +860,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 			if (error) {
 				if (tempbuf)
 					free(tempbuf);
-				if(uncompressed)
-					free(uncompressed);
 				gl_options.compression = comptemp;
+				if(data)
+					free(data);
 				return GFXFALSE;
 			}
 #endif
@@ -912,9 +887,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 	}
 	if (tempbuf)
 		free(tempbuf);
-	if(uncompressed)
-		free(uncompressed);
 	gl_options.compression = comptemp;
+	if(data)
+		free(data);
 	return GFXTRUE;
 }
 

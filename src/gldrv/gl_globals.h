@@ -247,9 +247,6 @@ typedef struct {
 } gl_options_t;
 extern gl_options_t gl_options;
 
-//  DDS software decompressor.
-unsigned char *ddsDecompress(unsigned char *buffer,int width,int height,int &mode);
-
 // Maximum number of things that can be returned in a pick operation
 #define MAX_PICK 2048
 #define GFX_SCALE 1./1024.

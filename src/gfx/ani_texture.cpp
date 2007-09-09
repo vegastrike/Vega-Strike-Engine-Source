@@ -449,15 +449,6 @@ void AnimatedTexture::LoadFrame(int frame) {
   string addrmodestr = XMLSupport::parse_option_value(opt,"addressMode","");
   enum ADDRESSMODE addrmode = parseAddressMode(addrmodestr,defaultAddressMode);
 
-  //Override compression options temporarily
-  //    NOTE: This is ugly, but otherwise we would have to hack Texture way too much,
-  //    or double the code. Until Texture supports overriding compression options,
-  //    let's use this.
-  bool os3tc = gl_options.s3tc;
-  int ocompression = gl_options.compression;
-  gl_options.s3tc = true;
-  gl_options.compression = 1;
-
   //Without this, VSFileSystem won't find the file -- ugly, but it's how it is.
   VSFile f;
   VSError err=f.OpenReadOnly( wrapper_file_path, wrapper_file_type );
@@ -472,9 +463,6 @@ void AnimatedTexture::LoadFrame(int frame) {
       loadSuccess=false;
 
   if (err==Ok) f.Close();
-
-  gl_options.s3tc = os3tc;
-  gl_options.compression = ocompression;
 
   original = NULL;
   loadSuccess = loadSuccess && (*Decal)->LoadSuccess();

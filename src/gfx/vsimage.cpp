@@ -701,7 +701,7 @@ unsigned char *VSImage::ReadDDS()
 		this->img_depth = header.pixelFormat.bpp;
 		this->sizeX=header.width;
 		this->sizeY=header.height;
-                bool useDefaultType=false;
+		bool useDefaultType=false;
 		switch(header.pixelFormat.bpp){
                 case 4: 
                   type = GL_LUMINANCE;
@@ -719,25 +719,24 @@ unsigned char *VSImage::ReadDDS()
                   this->img_alpha = true;
                   break;
                 case 0:
-                  cerr <<"VSImage ERROR DDS Pixel Format bpp is 0 for "<<img_file->GetFilename()<<"...recovering gracefully\n";
                   useDefaultType=true;
                   break;
                 default:
-                  cerr <<"VSImage ERROR : DDS Pixel Format invalid, impossible. " <<header.pixelFormat.bpp<<"!\n";
-                  VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
-                  throw(1);
+               		useDefaultType=true;
+					break;
 
 		}
 		switch(header.pixelFormat.fourcc[3]){
                 case '1': 
+				  blockSize = 8;
                   if(type==GL_RGB||useDefaultType) {
 				  	this->img_depth = 24;
                     this->mode = _DXT1;
                     this->img_alpha=false;
-                    type=GL_RGB;
+                    type=GL_RGBA;
                   }else {
                     this->mode = _DXT1RGBA;
-                    blockSize = 8;
+                    type=GL_RGBA;
                     this->img_alpha=true;
                   }
                   break;

@@ -949,6 +949,8 @@ vegastrike_SOURCES = \
   src/gldrv/gl_quad_list.cpp \
   src/gldrv/gl_sphere_list.cpp \
   src/gldrv/gl_state.cpp \
+  src/gldrv/sdds.cpp \
+  src/gldrv/sdds.h \
   src/gldrv/gl_texture.cpp \
   src/gldrv/gl_vertex_list.cpp \
   src/gldrv/gl_undefined_extensions.h \

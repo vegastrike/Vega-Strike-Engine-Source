@@ -32,7 +32,9 @@
 #include <png.h>
 #include "vsfilesystem.h"
 #include "gfx/vsimage.h"
+#include "gldrv/sdds.h"
 #include "gldrv/gl_globals.h"
+#include "gfxlib_struct.h"
 using namespace VSFileSystem;
 
 
@@ -87,17 +89,24 @@ static const GuiTexture* addTextureToCache(const std::string& fileName) {
 	static const int PNG_HAS_ALPHA = 4;
 	const bool hasAlpha = ( colorType & PNG_HAS_ALPHA );
 	GuiTexture texture;
-	if(img.mode >=3 && img.mode <=6){
+	if(img.mode >= ::VSImage::_DXT1 && img.mode <=::VSImage::_DXT5){
 		// We found a DDS gui texture.
 		if(gl_options.s3tc){
 			success = texture.bindCompData(image,width,height,img.mode,fileName);
 			free(image);
 		} else {
-			int mode = img.mode;
-			unsigned char *data = ddsDecompress(image,width,height,mode);
-			img.mode = (::VSImage::VSImageMode)mode;
-			success = texture.bindRawData(data, width, height, hasAlpha, fileName);
-			free(image);			// Make sure this gets freed before we return.	
+			TEXTUREFORMAT format = DXT1;
+			if(img.mode == ::VSImage::_DXT1RGBA)
+				format = DXT1RGBA;
+			else if(img.mode == ::VSImage::_DXT3)
+				format = DXT3;
+			else if(img.mode == ::VSImage::_DXT5)
+				format = DXT5;
+			unsigned char *data = NULL;
+			ddsDecompress(image,data,format,height,width);
+			free(image);
+			image = data;
+			success = texture.bindRawData(image, width, height, true, fileName);
 			free(data);
 		}
 	} else {	
