@@ -34,24 +34,24 @@ public:
 	// Read a texture from a file and bind it.
 	bool read(const std::string& fileName);
 
-	// Bind image to 2D texture in OpenGL, and make this object represent it.
-	bool bindRawData(unsigned char* data, int width, int height, bool hasAlpha, const std::string& fileName);
-	bool bindCompData(unsigned char* data, int width, int height, int mode, const std::string& fileName);
 	// Draw this texture, stretching to fit the rect.
 	void draw(const Rect& rect) const;
 
     // CONSTRUCTION
 	GuiTexture(void);
-	virtual ~GuiTexture(void) {};
+	~GuiTexture(void);
 
 protected:
     // INTERNAL IMPLEMENTATION
 
 protected:
     // VARIABLES
+	class Texture *m_texture;
+	/*
 	GLuint m_glName;		// Unique ID for this texture used in OpenGL.
 	std::string m_fileName;	// Name of the file this came from.
 	int m_width, m_height;	// Original size of image.
+	*/
 };
 
 #endif   // __GUITEXTURE_H__

@@ -18,14 +18,16 @@
 #include "text_area.h"
 #include "gldrv/winsys.h"
 // Array of textures for the text area
-GUITexture *Images;
+//GUITexture *Images;
 
 // List of images to load. Last element must always be NULL
+/*
 char *LoadImages[] = {  TEXT_AREA_00, TEXT_AREA_01, TEXT_AREA_02, TEXT_AREA_03, TEXT_AREA_04,
                         TEXT_AREA_05, TEXT_AREA_06, TEXT_AREA_07, TEXT_AREA_08, TEXT_AREA_09,
                         TEXT_AREA_10, TEXT_AREA_11, TEXT_AREA_12, TEXT_AREA_13,
                         NULL
 };
+*/
 
 TextArea::~TextArea() {
 
@@ -149,6 +151,7 @@ void TextArea::Refresh(void) {
 
 	// Draw the bars to run across the length
 
+/*
 	// Top Horizontal
 	lx = x;
 	ly = y;
@@ -193,7 +196,7 @@ void TextArea::Refresh(void) {
 	if (button_pressed == 2) {
 		ShowImage(xcoord[2], ycoord[2], width[2], height[2], Images[IMG_HIGHLIGHT_BUTTON_DOWN], 0, 0);
 	}
-
+*/
 	if (has_scrollbar != 0) { DisplayScrollbar(); }
 	RenderText();
 
@@ -225,7 +228,7 @@ void TextArea::RenderText(void) {
 	if (item_count == 0) { return; }
 
 	// There's a bug in glut_support. Can't show a color then text. Have to render an image between colors and text
-	ShowImage(0,0,0,0, Images[0], 0, 0);
+	//ShowImage(0,0,0,0, Images[0], 0, 0);
 	RenderTextItem(ItemList, 0);
 }
 void TextArea::RenderTextItem(TextAreaItem *current, int level) {
@@ -321,11 +324,11 @@ int TextArea::MouseClick(int button, int state, float x, float y) {
 		// Find out if the click is on a button, the scrollbar, or nowhere
 		if (y < ycoord[1] && y > (ycoord[1] - height[1])) {
 			if (state == WS_MOUSE_UP) {
-				ShowImage(xcoord[1], ycoord[1], width[1], height[1], Images[IMG_BUTTON_UP], 0, 0);
+				//ShowImage(xcoord[1], ycoord[1], width[1], height[1], Images[IMG_BUTTON_UP], 0, 0);
 				button_pressed = 0;
 			}
 			else {
-				ShowImage(xcoord[1], ycoord[1], width[1], height[1], Images[IMG_HIGHLIGHT_BUTTON_UP], 0, 0);
+				//ShowImage(xcoord[1], ycoord[1], width[1], height[1], Images[IMG_HIGHLIGHT_BUTTON_UP], 0, 0);
 				button_pressed = 1;
 
 				top_item_number--;
@@ -335,11 +338,11 @@ int TextArea::MouseClick(int button, int state, float x, float y) {
 		}
 		if (y < ycoord[2] && y > (ycoord[2] - height[2])) {
 			if (state == WS_MOUSE_UP) {
-				ShowImage(xcoord[2], ycoord[2], width[2], height[2], Images[IMG_BUTTON_DOWN], 0, 0);
+				//ShowImage(xcoord[2], ycoord[2], width[2], height[2], Images[IMG_BUTTON_DOWN], 0, 0);
 				button_pressed = 0;
 			}
 			else {
-				ShowImage(xcoord[2], ycoord[2], width[2], height[2], Images[IMG_HIGHLIGHT_BUTTON_DOWN], 0, 0);
+				//ShowImage(xcoord[2], ycoord[2], width[2], height[2], Images[IMG_HIGHLIGHT_BUTTON_DOWN], 0, 0);
 				button_pressed = 2;
 
 				top_item_number++;
@@ -416,6 +419,7 @@ int TextArea::Inside(float x, float y, int group) {
 }
 
 void TextArea::LoadTextures(void) {
+	/*
         int cur, max;
 	static int images_loaded = 0;
 	if (images_loaded == 1) { return; }	// We've already loaded the images from a previous TextArea class
@@ -433,6 +437,7 @@ void TextArea::LoadTextures(void) {
                 cout << "\tLoading: #" << cur << ": " << LoadImages[cur] << endl;
 		#endif
         }
+	*/
 }
 
 // Assumes the mouse is in the text area
