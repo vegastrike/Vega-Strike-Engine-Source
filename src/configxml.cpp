@@ -378,11 +378,8 @@ void VegaConfig::getColor(string section, string name, float color[4],bool have_
       color[2] = (*it).second.b;
       color[3] = (*it).second.a;
   } else {
-      if (have_color) {
-          cout << "WARNING: color " << name << " not defined, using default (hexcolor)" << endl;
-      } else {
+      if (!have_color) {
           color[0]=color[1]=color[2]=color[3]=1.0f;
-          cout << "WARNING: color " << name << " not defined, using default (white)" << endl;
       }
   }
 
