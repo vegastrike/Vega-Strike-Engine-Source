@@ -399,7 +399,7 @@ void GameStarSystem::Draw(bool DrawCockpit)
 			if(unit) {
 				interpolation_blend_factor=calc_blend_factor(saved_interpolation_blend_factor,unit->sim_atom_multiplier,unit->cur_sim_queue_slot,cur_sim_frame);
 				SIMULATION_ATOM = backup*unit->sim_atom_multiplier;
-				((GameUnit<Unit> *)unit)->Draw();
+				((GameUnit<Unit> *)unit)->GameUnit<Unit>::Draw();
 			}
 		}
 		interpolation_blend_factor=saved_interpolation_blend_factor;

@@ -419,7 +419,9 @@ void GamePlanet::Draw(const Transformation & quat, const Matrix &m) {
    MatrixToVectors (cumulative_transformation_matrix,p,r,q,c);
    shine->SetOrientation (p,q,r);
    shine->SetPosition (c);
-   shine->Draw ();
+   static int num_shine_drawing=XMLSupport::parse_int(vs_config->getVariable("graphics","num_times_to_draw_shine","2"));
+   for (int i=0;i<num_shine_drawing;++i)
+     shine->Draw ();
  }
 }
 void GamePlanet::ProcessTerrains () {
