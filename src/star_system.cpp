@@ -297,6 +297,12 @@ class UnitDrawer
 	struct empty{};
 	stdext::hash_map<void*,struct empty> gravunits;
 	public:
+		Unit *parent;
+		Unit *parenttarget;
+		UnitDrawer() {
+			parent=NULL;
+			parenttarget=NULL;
+		}
 		bool acquire(Unit * unit, float distance) {
 			if(gravunits.find(unit)==gravunits.end()) {
 				return draw(unit);
@@ -305,7 +311,23 @@ class UnitDrawer
 				return true;
 			}
 		}
+		void drawParents() {
+			if(parent) {
+				draw(parent);
+			}
+			if(parenttarget) {
+				draw(parenttarget);
+			}
+		}
+
+
 		bool draw(Unit* unit) {
+			if(parent==unit) {
+				parent=NULL;
+			}
+			if(parenttarget==unit) {
+				parenttarget=NULL;
+			}
 			float backup=SIMULATION_ATOM;
 			unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
 			interpolation_blend_factor=calc_blend_factor(saved_interpolation_blend_factor,unit->sim_atom_multiplier,unit->cur_sim_queue_slot,cur_sim_frame);
@@ -400,10 +422,14 @@ void GameStarSystem::Draw(bool DrawCockpit)
 	//Ballpark estimate of when an object of configurable size first becomes one pixel
 	static float precull_distance=XMLSupport::parse_float(vs_config->getVariable("graphics","precull_dist","500000000"));
 	QVector drawstartpos=_Universe->AccessCamera()->GetPosition();
+        
 	Collidable key_iterator(0,1,drawstartpos);
 	UnitWithinRangeOfPosition<UnitDrawer> drawer(precull_distance,0,key_iterator);
 	//Need to draw really big stuff (i.e. planets, deathstars, and other mind-bogglingly big things that shouldn't be culled despited extreme distance
 	Unit* unit;
+        if ((drawer.action.parent=_Universe->AccessCockpit()->GetParent())!=NULL) {
+          drawer.action.parenttarget=drawer.action.parent->Target();
+        }
 	for(un_iter iter=this->GravitationalUnits.createIterator();(unit=*iter)!=NULL;++iter) {
 		float distance = (drawstartpos-unit->Position()).Magnitude()-unit->rSize();
 		if(distance < precull_distance) {
@@ -417,6 +443,7 @@ void GameStarSystem::Draw(bool DrawCockpit)
 	// Need to get iterator to approx camera position
 	CollideMap::iterator parent=collidemap[Unit::UNIT_ONLY]->lower_bound(key_iterator);
 	findObjectsFromPosition(this->collidemap[Unit::UNIT_ONLY],parent,&drawer,drawstartpos,0,true);
+        drawer.action.drawParents();//draw units targeted by camera
 	//FIXME  maybe we could do bolts & units instead of unit only--and avoid bolt drawing step
 
 #if 0
