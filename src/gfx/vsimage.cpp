@@ -766,8 +766,10 @@ unsigned char *VSImage::ReadDDS()
 		height= header.height;
 		for(int i = 0;i<header.nmips;++i){
 			inputSize += ((width+3)/4)*((height+3)/4)*blockSize;
-			width >>=1;
-			height >>=1;
+			if(width != 1)
+				width >>=1;
+			if(height != 1)
+				height >>=1;
 		}
 		s = (unsigned char*)malloc(inputSize);
 		// the following is probably not endian-safe

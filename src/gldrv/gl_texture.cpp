@@ -750,32 +750,43 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 	GLenum internalformat;
 	GLenum image2D=GetImageTarget (imagetarget);
 	glBindTexture(textures[handle].targets, textures[handle].name);
-	if (!gl_options.s3tc) {
-		if(internformat >=DXT1 && internformat <= DXT5){
-			ddsDecompress(buffer,data,internformat,textures[handle].height,textures[handle].width);
-			buffer = data;
-			internformat = RGBA32;
+	int block = 16;
+	int offset1 = 0;
+	if(internformat == DXT1)
+		block = 8;	
+	if(internformat >= DXT1 && internformat <= DXT5){
+		while(textures[handle].width > maxdimension || textures[handle].height > maxdimension){
+			offset1 = ((textures[handle].width +3)/4)*((textures[handle].height +3)/4) * block;
+			textures[handle].width >>=1;
+			textures[handle].height >>=1;
+			textures[handle].iwidth >>=1;
+			textures[handle].iheight >>=1;
 		}
 	}
-	if (textures[handle].iwidth>maxdimension||textures[handle].iheight>maxdimension||textures[handle].iwidth>MAX_TEXTURE_SIZE||textures[handle].iheight>MAX_TEXTURE_SIZE) {
+	else if (textures[handle].iwidth>maxdimension||textures[handle].iheight>maxdimension||textures[handle].iwidth>MAX_TEXTURE_SIZE||textures[handle].iheight>MAX_TEXTURE_SIZE) {
 #if !defined(GL_COLOR_INDEX8_EXT)
-		if (internformat != PALETTE8 && (internformat <DXT1 || internformat > DXT5)) {
+		if (internformat != PALETTE8) {
 #else
-		if (internformat != PALETTE8||gl_options.PaletteExt && (internformat <DXT1 || internformat >DXT5)) {
+		if (internformat != PALETTE8||gl_options.PaletteExt) {
 #endif
-			//printf("wtf\n");
 			textures[handle].height = textures[handle].iheight;
 			textures[handle].width  = textures[handle].iwidth;
 			DownSampleTexture (&tempbuf,buffer,textures[handle].height,textures[handle].width,(internformat==PALETTE8?1:(internformat==RGBA32?4:3))* sizeof(unsigned char ), handle,maxdimension,maxdimension,1);
 			buffer = tempbuf;	
 		}
 	}
-	
+	if (!gl_options.s3tc) {
+		if(internformat >=DXT1 && internformat <= DXT5){
+			unsigned char *tmpbuffer = buffer +offset1;
+			ddsDecompress(tmpbuffer,data,internformat,textures[handle].height,textures[handle].width);
+			buffer = data;
+			internformat = RGBA32;
+		}
+	}
 	if (internformat!=PALETTE8 && internformat != PNGPALETTE8) {
 		internalformat = GetTextureFormat (internformat);
 		if ((textures[handle].mipmapped&&gl_options.mipmap>=2)||detail_texture) {
 			if (detail_texture) {
-				//printf("in here\n");
 				static FILTER fil = XMLSupport::parse_bool(vs_config->getVariable("graphics","detail_texture_trilinear","true"))?TRILINEAR:MIPMAP;
 				textures[handle].mipmapped=     fil;
 				glTexParameteri (textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -784,6 +795,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 				} else {
 					glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 				}
+
 			}
 			int width=textures[handle].width,height=textures[handle].height;
 			int count=0;
@@ -803,11 +815,14 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 				if(internformat == DXT1|| internformat == DXT1RGBA)
 					blocksize = 8;
 				size = ((width +3)/4) * ((height +3)/4) * blocksize;
-				
+//				glTexParameteri( image2D, GL_GENERATE_MIPMAP, GL_FALSE );
 				while(width && height){
-					glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset);
-					width >>=1;
-					height >>=1;
+					glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
+					if(width ==1 && height == 1) break;
+					if(width != 1)
+						width >>=1;
+					if(height != 1)
+						height >>=1;
 					offset += size;
 					size = ((width +3)/4) * ((height +3)/4) * blocksize;
 					++i;
@@ -831,7 +846,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 				if(internformat == DXT1)
 					blocksize = 8;
 				size = ((width +3)/4) * ((height +3)/4) * blocksize;
-				glCompressedTexImage2D_p(image2D,0,internalformat,width,height,0,size,buffer);
+				glCompressedTexImage2D_p(image2D,0,internalformat,width,height,0,size,buffer+offset1);
 			} else 
 				glTexImage2D(image2D, 0, internalformat, textures[handle].width, textures[handle].height, 0, textures[handle].textureformat, GL_UNSIGNED_BYTE, buffer);
 		}
@@ -850,10 +865,32 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 					free(data);
 				return GFXFALSE;
 			}
-			if ((textures[handle].mipmapped&(MIPMAP|TRILINEAR))&&gl_options.mipmap>=2) {
-				gluBuild2DMipmaps(image2D, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
+			if(internformat >= DXT1 && internformat <= DXT5){
+				int height = textures[handle].height;
+				int width = textures[handle].width;
+				int size = 0;
+				int blocksize = 16;
+				int i = 0;
+				unsigned int offset = 0;
+				//printf("shouldn't be here\n");
+				if(internformat == DXT1|| internformat == DXT1RGBA)
+					blocksize = 8;
+				size = ((width +3)/4) * ((height +3)/4) * blocksize;
+				
+				while(width && height){
+					glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
+					width >>=1;
+					height >>=1;
+					offset += size;
+					size = ((width +3)/4) * ((height +3)/4) * blocksize;
+					++i;
+				}
 			} else {
-				glTexImage2D(image2D, 0, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, 0, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
+				if ((textures[handle].mipmapped&(MIPMAP|TRILINEAR))&&gl_options.mipmap>=2) {
+					gluBuild2DMipmaps(image2D, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
+				} else {
+					glTexImage2D(image2D, 0, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, 0, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
+				}
 			}
 #if 0
 			error = glGetError();
@@ -869,20 +906,42 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 		} else
 #endif
 		{
-			int nsize = 4*textures[handle].iheight*textures[handle].iwidth;
-			unsigned char * tbuf =(unsigned char *) malloc (sizeof(unsigned char)*nsize);
-			//      textures[handle].texture = tbuf;
-			int j =0;
-			for (int i=0; i< nsize; i+=4) {
-				tbuf[i] = textures[handle].palette[4*buffer[j]];
-				tbuf[i+1] = textures[handle].palette[4*buffer[j]+1];
-				tbuf[i+2] = textures[handle].palette[4*buffer[j]+2];
-				//used to be 255
-				tbuf[i+3]= textures[handle].palette[4*buffer[j]+3];
-				j ++;
+			if(internformat >= DXT1 && internformat <= DXT5){
+				int height = textures[handle].height;
+				int width = textures[handle].width;
+				int size = 0;
+				int blocksize = 16;
+				int i = 0;
+				unsigned int offset = 0;
+				//printf("shouldn't be here\n");
+				if(internformat == DXT1|| internformat == DXT1RGBA)
+					blocksize = 8;
+				size = ((width +3)/4) * ((height +3)/4) * blocksize;
+				
+				while(width && height){
+					glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
+					width >>=1;
+					height >>=1;
+					offset += size;
+					size = ((width +3)/4) * ((height +3)/4) * blocksize;
+					++i;
+				}
+			} else {
+				int nsize = 4*textures[handle].iheight*textures[handle].iwidth;
+				unsigned char * tbuf =(unsigned char *) malloc (sizeof(unsigned char)*nsize);
+				//      textures[handle].texture = tbuf;
+				int j =0;
+				for (int i=0; i< nsize; i+=4) {
+					tbuf[i] = textures[handle].palette[4*buffer[j]];
+					tbuf[i+1] = textures[handle].palette[4*buffer[j]+1];
+					tbuf[i+2] = textures[handle].palette[4*buffer[j]+2];
+					//used to be 255
+					tbuf[i+3]= textures[handle].palette[4*buffer[j]+3];
+					j ++;
+				}
+				GFXTransferTexture(tbuf,handle,RGBA32,imagetarget,maxdimension,detail_texture);
+				free (tbuf);
 			}
-			GFXTransferTexture(tbuf,handle,RGBA32,imagetarget,maxdimension,detail_texture);
-			free (tbuf);
 		}
 	}
 	if (tempbuf)
