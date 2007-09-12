@@ -222,7 +222,7 @@ public:
 	};
 	*/
 	inline Matrix WarpMatrix ( const Matrix& ctm) const{
-		static float cutoff =XMLSupport::parse_float (vs_config->getVariable( "graphics","warp_stretch_cutoff","500000"))*XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
+		static float cutoff =XMLSupport::parse_float (vs_config->getVariable( "graphics","warp_stretch_cutoff","50000"))*XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
 		static float cutoffcutoff=  cutoff*cutoff;
                 static bool only_stretch_in_warp=XMLSupport::parse_bool(vs_config->getVariable("graphics","only_stretch_in_warp","true"));
 		if (this->GetWarpVelocity().MagnitudeSquared() < cutoffcutoff||(only_stretch_in_warp&&this->graphicOptions.InWarp==0)) {
@@ -232,14 +232,19 @@ public:
 			
 			float speed = this->GetWarpVelocity().Magnitude();
 			//Matrix scalar=identity_matrix;
+			static float maxregion0stretch = XMLSupport::parse_float (vs_config->getVariable("graphics","warp_stretch_region0_max","1"));
 			
 			static float maxstretch = XMLSupport::parse_float (vs_config->getVariable("graphics","warp_stretch_max","4"));
 			static float maxspeed = XMLSupport::parse_float (vs_config->getVariable("graphics","warp_stretch_max_speed","1000000"))*XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
-			float stretchlength = maxstretch*(speed-cutoff)/(maxspeed-cutoff);
+			static float maxregion0speed = XMLSupport::parse_float (vs_config->getVariable("graphics","warp_stretch_max_region0_speed","100000"))*XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
+			float stretchregion0length = maxregion0stretch*(speed-cutoff)/(maxregion0speed-cutoff);
+			float stretchlength = (maxstretch-maxregion0stretch)*(speed-maxregion0speed)/(maxspeed-maxregion0speed+.06125)+maxregion0stretch;
 			
 			if (stretchlength>maxstretch)
 				stretchlength= maxstretch;
-			ScaleMatrix(k,Vector(1,1,1+stretchlength));			
+                        if (stretchregion0length>maxregion0stretch)
+                          stretchregion0length= maxregion0stretch;
+			ScaleMatrix(k,Vector(1,1,1+(speed>maxregion0speed?stretchlength:stretchregion0length)));			
 			
 /*			Vector v(Vector(1,1,1)+ctm.getR().Scale(stretchlength).Vabs());
 			
