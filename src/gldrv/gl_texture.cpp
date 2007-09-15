@@ -851,6 +851,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 				glTexImage2D(image2D, 0, internalformat, textures[handle].width, textures[handle].height, 0, textures[handle].textureformat, GL_UNSIGNED_BYTE, buffer);
 		}
 	} else {
+          internalformat = GetTextureFormat (internformat);
 		// IRIX has no GL_COLOR_INDEX8 extension
 #if defined(GL_COLOR_INDEX8_EXT)
 		if (gl_options.PaletteExt) {
