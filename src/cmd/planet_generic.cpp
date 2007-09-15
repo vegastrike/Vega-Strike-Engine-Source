@@ -91,9 +91,9 @@ void PlanetaryOrbit::Execute() {
                   );
         }
         double blend_factor=calc_blend_factor(saved_interpolation_blend_factor,unit->sim_atom_multiplier,unit->cur_sim_queue_slot,cur_sim_frame);
-        if (1||(orbiting_average.i==0&&
-                orbiting_average.j==0&&
-                orbiting_average.k==0)) {
+        if ((orbiting_average.i==0&&
+             orbiting_average.j==0&&
+             orbiting_average.k==0)) {
           orbiting_average= unit->prev_physical_state.position*(1-blend_factor)+blend_factor*unit->curr_physical_state.position;          
         }else {
           QVector desired=unit->prev_physical_state.position*(1-blend_factor)+blend_factor*unit->curr_physical_state.position;          
