@@ -293,7 +293,8 @@ void Universe::Generate2( StarSystem * ss)
   LoadStarSystem (ss);
 
   pushActiveStarSystem(ss);
-  for (int tume=0;tume<=6*SIM_QUEUE_SIZE+1;++tume) {
+  static int num_times_to_simulate_new_star_system=XMLSupport::parse_int(vs_config->getVariable("physics","num_times_to_simulate_new_star_system","20"));
+  for (int tume=0;tume<=num_times_to_simulate_new_star_system*SIM_QUEUE_SIZE+1;++tume) {
 	  //ss->ExecuteUnitAI();
     ss->UpdateUnitPhysics(true);    
   }
