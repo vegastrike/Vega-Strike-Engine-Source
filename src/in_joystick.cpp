@@ -42,12 +42,12 @@
 #endif
 
 // Used for storing the max and min values of the tree Joystick Axes - Okona
-static int maxx=0;
-static int minx=0;
-static int maxy=0;
-static int miny=0;
-static int maxz=0;
-static int minz=0;
+static int maxx=1;
+static int minx=-1;
+static int maxy=1;
+static int miny=-1;
+static int maxz=1;
+static int minz=-1;
 
 JoyStick *joystick[MAX_JOYSTICKS]; // until I know where I place it
 int num_joysticks=0;
