@@ -1240,7 +1240,7 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
               else
                 GFXBlendMode(SRCALPHA,INVSRCALPHA);
             }
-            GFXUploadLightShaderState(shaderConstants[kNUMLIGHTS].id,shaderConstants[kACTIVELIGHTS].id);
+            GFXUploadLightState(shaderConstants[kNUMLIGHTS].id,shaderConstants[kACTIVELIGHTS].id,shaders);
             float cloakdata[4]={c.CloakFX.r,c.CloakFX.a,(c.cloaked&MeshDrawContext::CLOAK)?1.0:0.0,(c.cloaked&MeshDrawContext::GLASSCLOAK)?1.0:0.0};
             float damagedata[4]={(float)c.damage/255.0f,0.0,0.0};
             //FIXME should be made static when done debuging

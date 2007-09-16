@@ -6,7 +6,7 @@
 
 
 
-void GFXUploadLightShaderState(int max_light_location, int active_light_array) {
+void GFXUploadLightState(int max_light_location, int active_light_array, bool shader) {
   int maxlight=0;
   static GLint * lightData=new GLint[GFX_MAX_LIGHTS];
   int maxval=0;
@@ -15,6 +15,15 @@ void GFXUploadLightShaderState(int max_light_location, int active_light_array) {
     if (GLLights[i].options&OpenGLL::GL_ENABLED)
       lightData[i]=1;
     if (lightData[i]) maxval=i;
+  }
+  if (!shader) {//only bother with actual GL state in the event of lack of shaders
+    for (int i=0;i<(int)GFX_MAX_LIGHTS;++i) {
+      int isenabled=glIsEnabled(GL_LIGHT0+i);
+      if (isenabled&&!lightData[i]) 
+        glDisable(GL_LIGHT0+i);
+      else if (lightData[i]&&!isenabled)
+        glEnable(GL_LIGHT0+i);
+    }
   }
   //FIXME bottom line is debug only
   GFXShaderConstantv(active_light_array,GFX_MAX_LIGHTS,(int*)lightData);
