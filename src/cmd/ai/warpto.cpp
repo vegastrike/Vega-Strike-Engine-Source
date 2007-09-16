@@ -18,7 +18,13 @@ bool DistanceWarrantsWarpTo (Unit * parent, float dist, bool following){
   if (timetolive>(5*max_allowable_travel_time())) {
     return true;
   } else if(timetolive>(max_allowable_travel_time())){
-    if(dist-parent->GetWarpVelocity().Magnitude()*SIMULATION_ATOM*1.5<toodamnclose){
+    float mytime=SIMULATION_ATOM*1.5;
+    static bool rampdown=XMLSupport::parse_bool(vs_config->getVariable("physics","autopilot_ramp_warp_down","true"));
+    if (rampdown==false){
+      static float warprampdowntime=XMLSupport::parse_float (vs_config->getVariable ("physics","warprampdowntime","0.5"));      
+      mytime=warprampdowntime;
+    }
+    if(dist-parent->GetWarpVelocity().Magnitude()*mytime<toodamnclose){
 		  return false; // avoid nasty jitter-jumping behavior should eventually have "running away check"
 	  }
 	  return true;
