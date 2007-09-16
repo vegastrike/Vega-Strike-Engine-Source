@@ -127,11 +127,26 @@ void GFXVertexList::RefreshDisplayList () {
 }
 
 void GFXVertexList::BeginDrawState(GFXBOOL lock) {
+  if (!numVertices) 
+    return;//don't do anything if there are no vertices
 #ifndef NO_VBO_SUPPORT
   if (vbo_data) {
+    /*if (gl_error=glGetError()) {
+      printf ("VBO18.5 Error %d\n",gl_error);
+    }*/
+
     BindBuf(vbo_data);
-    if (changed&HAS_INDEX)
+    if (changed&HAS_INDEX) {
+      /*if (gl_error=glGetError()) {
+        printf ("VBO18.5a Error %d\n",gl_error);
+      }*/
+      
       BindInd(display_list);
+      /*if (gl_error=glGetError()) {
+        printf ("VBO18.5b Error %d\n",gl_error);
+      }*/
+
+    }
     if (changed&HAS_COLOR) {
       if (gl_options.Multitexture)
           glClientActiveTextureARB_p(GL_TEXTURE0);
@@ -167,15 +182,37 @@ void GFXVertexList::BeginDrawState(GFXBOOL lock) {
               glClientActiveTextureARB_p(GL_TEXTURE0);
           }
       } else {
-          if (gl_options.Multitexture)
+          if (gl_options.Multitexture) 
               glClientActiveTextureARB_p(GL_TEXTURE0);
+          /*if (gl_error=glGetError()) {
+            printf ("VBO19xx Error %d\n",gl_error);
+          }*/
+
           glInterleavedArrays (GL_T2F_N3F_V3F,sizeof(GFXVertex),&data.vertices[0]);
+          /*if (gl_error=glGetError()) {
+            printf ("VBO19x Error %d\n",gl_error);
+          }*/
+
           if (gl_options.Multitexture) {
               glClientActiveTextureARB_p(GL_TEXTURE1);
+              /*if (gl_error=glGetError()) {
+                printf ("VBO19a Error %d\n",gl_error);
+              }*/
+          
               glTexCoordPointer(2,GL_FLOAT,sizeof(GFXVertex),&data.vertices[0].s);
+              /*if (gl_error=glGetError()) {
+                printf ("VBO19b Error %d\n",gl_error);
+              }*/
+
               glClientActiveTextureARB_p(GL_TEXTURE0);
+              /*if (gl_error=glGetError()) {
+                printf ("VBO19c Error %d\n",gl_error);
+                }*/
+
           }
-          if (gl_error=glGetError()) printf ("VBO19 Error %d\n",gl_error);
+          /*if (gl_error=glGetError()) {
+            printf ("VBO19 Error %d\n",gl_error);
+            }*/
       }
 #ifndef NO_COMPILEDVERTEXARRAY_SUPPORT
       if (lock&&glLockArraysEXT_p)
@@ -192,7 +229,7 @@ void GFXVertexList::EndDrawState(GFXBOOL lock) {
     
   } else {
 #ifndef NO_COMPILEDVERTEXARRAY_SUPPORT
-    if (lock&&glUnlockArraysEXT_p)
+    if (lock&&glUnlockArraysEXT_p&&numVertices)
         (*glUnlockArraysEXT_p) ();
 #endif
   }
