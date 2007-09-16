@@ -18,7 +18,7 @@ bool DistanceWarrantsWarpTo (Unit * parent, float dist, bool following){
   if (timetolive>(5*max_allowable_travel_time())) {
     return true;
   } else if(timetolive>(max_allowable_travel_time())){
-	  if(dist<toodamnclose){
+    if(dist-parent->GetWarpVelocity().Magnitude()*SIMULATION_ATOM*1.5<toodamnclose){
 		  return false; // avoid nasty jitter-jumping behavior should eventually have "running away check"
 	  }
 	  return true;
