@@ -313,19 +313,29 @@ class UnitDrawer
 		}
 		void drawParents() {
 			if(parent) {
-				draw(parent);
+                          if (parent->isSubUnit()) {
+                            parent=UnitUtil::owner(parent);
+                            draw(parent);
+                          }else {
+                            draw(parent);
+                          }
 			}
 			if(parenttarget) {
-				draw(parenttarget);
+                          if (parenttarget->isSubUnit()) {
+                            parenttarget=UnitUtil::owner(parenttarget);
+                            draw(parenttarget);
+                          }else {
+                            draw(parenttarget);
+                          }
 			}
 		}
 
 
 		bool draw(Unit* unit) {
-			if(parent==unit) {
+			if(parent==unit||(parent&&parent->isSubUnit()&&parent->owner==unit)) {
 				parent=NULL;
 			}
-			if(parenttarget==unit) {
+			if(parenttarget==unit||(parenttarget&&parenttarget->isSubUnit()&&parenttarget->owner==unit)) {
 				parenttarget=NULL;
 			}
 			float backup=SIMULATION_ATOM;
@@ -368,7 +378,7 @@ void GameStarSystem::Draw(bool DrawCockpit)
 			//now we can assume world is topps
 			par-> cumulative_transformation = linear_interpolate (par->prev_physical_state,par->curr_physical_state,interpolation_blend_factor);
 			Unit * targ = par->Target();
-			if (targ) {
+			if (targ&&!targ->isSubUnit()) {
 				targ-> cumulative_transformation = linear_interpolate (targ->prev_physical_state,targ->curr_physical_state,interpolation_blend_factor);
 			}
 			_Universe->AccessCockpit()->SetupViewPort(true);
@@ -396,7 +406,7 @@ void GameStarSystem::Draw(bool DrawCockpit)
 		for(int i=0;i<2;++i) {
 			Unit *unit=camunits[i];
 			// Make sure unit is not null;
-			if(unit) {
+			if(unit&&!unit->isSubUnit()) {
 				interpolation_blend_factor=calc_blend_factor(saved_interpolation_blend_factor,unit->sim_atom_multiplier,unit->cur_sim_queue_slot,cur_sim_frame);
 				SIMULATION_ATOM = backup*unit->sim_atom_multiplier;
 				((GameUnit<Unit> *)unit)->GameUnit<Unit>::Draw();

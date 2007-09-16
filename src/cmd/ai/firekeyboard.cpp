@@ -1300,6 +1300,7 @@ void ChooseSubTargets(Unit * me) {
 	for(;tUnit = *uniter;++uniter){
 		if(tUnit == me->Target()){
 			++uniter;
+                        tUnit=*uniter;
 			break;
 		}
 	}
