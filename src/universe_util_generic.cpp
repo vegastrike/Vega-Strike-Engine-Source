@@ -11,6 +11,7 @@
 #include <string>
 #include <set>
 #include "savegame.h"
+#include "save_util.h"
 #include "cmd/unit_csv.h"
 //#include "audiolib.h"
 //#include "gfx/animation.h"
@@ -475,26 +476,50 @@ namespace UniverseUtil
 		return objective;
 	}
 	int addObjective(string objective) {
-		mission->objectives.push_back(Mission::Objective(0,dontBlankOut(objective)));
+		float status = 0;
+		if (SERVER)
+			VSServer->sendSaveData(mission->player_num, Subcmd::Objective|Subcmd::SetValue,
+					mission->objectives.size(), NULL, &objective, &status );
+		mission->objectives.push_back(Mission::Objective(status,dontBlankOut(objective)));
 		return mission->objectives.size()-1;
 	}
 	void setObjective(int which, string newobjective) {
-		if (which<(int)mission->objectives.size()) {
+		if (which<(int)mission->objectives.size() && which>=0) {
+			if (SERVER)
+				VSServer->sendSaveData(mission->player_num, Subcmd::Objective|Subcmd::SetValue,
+							which, NULL, &newobjective, &mission->objectives[which].completeness );
 			mission->objectives[which].objective=dontBlankOut(newobjective);
 		}
 	}
 	void setCompleteness(int which, float completeNess) {
-		if (which<(int)mission->objectives.size()) {
+		if (which<(int)mission->objectives.size() && which>=0) {
+			if (SERVER)
+				VSServer->sendSaveData(mission->player_num, Subcmd::Objective|Subcmd::SetValue,
+							which, NULL, &mission->objectives[which].objective, &completeNess );
 			mission->objectives[which].completeness=completeNess;
 		}
 	}
 	float getCompleteness(int which) {
-		if (which<(int)mission->objectives.size()) {
+		if (which<(int)mission->objectives.size() && which>=0) {
 			return mission->objectives[which].completeness;
 		}
 		else {
 			return 0;
 		}
+	}
+	void eraseObjective(int which) {
+		if (which<(int)mission->objectives.size() && which>=0) {
+			if (SERVER)
+				VSServer->sendSaveData(mission->player_num, Subcmd::Objective|Subcmd::EraseValue,
+							which, NULL, NULL, NULL );
+			mission->objectives.erase(mission->objectives.begin()+which);
+		}
+	}
+	void clearObjectives() {
+		mission->objectives.clear();
+		if (SERVER)
+			VSServer->sendSaveData(mission->player_num, Subcmd::Objective|Subcmd::EraseValue,
+						-1, NULL, NULL, NULL );
 	}
 	void setOwnerII(int which,Unit *owner) {
 		if (which<(int)mission->objectives.size()) {
@@ -515,7 +540,8 @@ namespace UniverseUtil
 	void IOmessage(int delay,string from,string to,string message) {
 		static bool news_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","news_from_cargolist","false"));
 		if (to=="news"&&(!news_from_cargolist))
-			_Universe->AccessCockpit(0)->savegame->getMissionStringData("dynamic_news").push_back(StringPool::Reference(string("#")+message));
+			for (int i=0;i<_Universe->numPlayers();i++)
+				pushSaveString(i, "news", string("#")+message);
 		else
 			mission->msgcenter->add(from,to,message,delay);
 	}

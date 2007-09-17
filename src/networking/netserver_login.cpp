@@ -6,6 +6,8 @@
 #include "cmd/unit_factory.h"
 #include "networking/fileutil.h"
 #include "networking/savenet_util.h"
+#include "load_mission.h"
+//#include "cmd/script/mission.h"
 
 #include "networking/lowlevel/vsnet_sockethttp.h"
 extern string universe_file;
@@ -253,6 +255,15 @@ Cockpit * NetServer::loadCockpit(ClientPtr clt) {
 	}
 	if (cp == NULL) {
 		cp = _Universe->createCockpit( clt->callsign );
+		
+		// Make a mission specially for this cockpit.
+		unsigned int oldcp = _Universe->CurrentCockpit();
+		_Universe->SetActiveCockpit(cp);
+		if (active_missions.size()==1) {
+			active_missions[0]->DirectorInitgame();
+		}
+		LoadMission("",vs_config->getVariable("server","serverscript","import server;my_obj=server.player()"),false);
+		_Universe->SetActiveCockpit(oldcp);
 	} else {
 		cp->recreate(clt->callsign);
 	}

@@ -450,6 +450,7 @@ bool VsnetTCPSocket::lower_selected( int datalen )
 		            _connection_closed = true;
                     close_fd();
                     _set.add_pending( _sq_fd );
+					return true;
 		        }
 		    else if( vsnetEConnAborted() ) {
 			static int i=0;

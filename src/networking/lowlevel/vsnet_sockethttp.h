@@ -27,6 +27,7 @@ class VsnetHTTPSocket : public VsnetSocketBase //VsnetTCPSocket
   bool _send_more_data; // Has the server allowed keep-alive?
   
   std::list<std::string> dataToSend;
+  int sendDataPos;
   std::string dataToReceive;
   AddressIP _remote_ip;
   std::string waitingToReceive;

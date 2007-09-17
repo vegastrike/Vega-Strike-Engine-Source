@@ -168,6 +168,10 @@ class NetServer
 		void	addUnitCargoSnapshot( const Unit *un, NetBuffer &netbuf);
 		void	sendCargoSnapshot( ObjSerial serial, const UnitCollection &unitlist);
 
+		void	sendMessage(string from, string to, string message, float delay);
+		void	sendSaveData( int cp, unsigned short packetType, int pos, string *key,
+							  string *strValue, float *floatValue);
+
 		void	addSystem( string & sysname, string & system);
 		void	getZoneInfo( unsigned short zoneid, NetBuffer & netbuf);
 		int		getZoneNumber()	{ return zonemgr->getZoneNumber(); }

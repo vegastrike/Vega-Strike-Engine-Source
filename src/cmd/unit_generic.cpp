@@ -573,14 +573,23 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 			UniverseUtil::IOmessage(0,"game","all",string("c2")+string(" TFV ")+XMLSupport::tostring(ThisFinalVelocity.Magnitude())+string(" SFV ")+XMLSupport::tostring(SmallerFinalVelocity.Magnitude())+string(" pVF ")+XMLSupport::tostring(Inelastic_vf.Magnitude())+string(" ")+XMLSupport::tostring(ThisElastic_vf.Magnitude())+string(" ")+XMLSupport::tostring(SmallerElastic_vf.Magnitude()));
 		}
 		*/
-		if((smalle->isUnit()!=MISSILEPTR)&&isnotplayerorhasbeenmintime) {
+		if (Network!=NULL) {
+			// Only player units can move in network mode.
+			if (thcp) {
+				this->ApplyForce(thisforce-smforce);
+			} else if (smcp) {
+				smalle->ApplyForce(smforce-thisforce);
+			}
+		} else {
+			if((smalle->isUnit()!=MISSILEPTR)&&isnotplayerorhasbeenmintime) {
 
 								 // for torque... smalllocation
-			smalle->ApplyForce(smforce);
-		}
-		if((this->isUnit()!=MISSILEPTR)&&isnotplayerorhasbeenmintime) {
+				smalle->ApplyForce(smforce);
+			}
+			if((this->isUnit()!=MISSILEPTR)&&isnotplayerorhasbeenmintime) {
 								 // for torque ... biglocation
-			this->ApplyForce (thisforce);
+				this->ApplyForce (thisforce);
+			}
 		}
 		/*    smalle->curr_physical_state = smalle->prev_physical_state;
 			  this->curr_physical_state = this->prev_physical_state;*/
@@ -4963,7 +4972,9 @@ void Unit::Kill(bool erasefromsave, bool quitting)
 				dockedun.push_back (un);
 		}
 		while (!dockedun.empty()) {
+			if (Network) _Universe->netLock(true);
 			dockedun.back()->UnDock(this);
+			if (Network) _Universe->netLock(false);
 			if (rand() <= (UnitUtil::isPlayerStarship(dockedun.back())?i_player_survival:i_survival))
 				dockedun.back()->Kill();
 			dockedun.pop_back();
@@ -6657,7 +6668,7 @@ bool Unit::UnDock (Unit * utdw)
 	}
 
 	cerr<<"Asking to undock"<<endl;
-	if( Network!=NULL && !SERVER) {
+	if( Network!=NULL && !SERVER && !_Universe->netLocked()) {
 		cerr<<"Sending an undock notification"<<endl;
 		int playernum = _Universe->whichPlayerStarship( this);
 		if( playernum>=0)

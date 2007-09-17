@@ -120,7 +120,24 @@ enum Cmd
     CMD_DISCONNECT   ,		// UDP : after a problem (not clean exit) to make
                                     // the client exit if still alive
 
+	CMD_SAVEDATA,
+	
     // CMD_ACK          			// A packet to acknoledge the reception of a packet that was previously sent
+};
+
+class Subcmd {
+public:
+	enum {
+		StringValue = 1<<1,
+		FloatValue  = 1<<2,
+		Objective   = 1<<3,
+	};
+
+	enum {
+		SetValue    = 1<<8,
+		EraseValue  = 1<<9,
+	};
+
 };
 
 std::ostream& operator<<( std::ostream& ostr, Cmd cmd );

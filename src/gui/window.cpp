@@ -178,7 +178,6 @@ Window::~Window(void) {
 extern void	ConditionalCursorDraw(bool);
 // Draw all visible windows.
 void WindowManager::draw() {
-    vector <Window*>::iterator iter;
 
     GFXHudMode(true);              // Load identity matrices.
     GFXColorf(GUI_OPAQUE_WHITE());
@@ -198,11 +197,11 @@ void WindowManager::draw() {
     //  maintained.  First entry is the bottom window, last is the top window.
     // FIXME mbyron -- I think the event manager needs to get involved with window z-order.
     //   (Mouse events should go to windows in zorder, shouldn't they?)
-    for(iter = m_windows.begin() ; iter != m_windows.end() ; iter++ ) {
-        if ((*iter)->controller()) {
-            (*iter)->controller()->draw();
+    for(int i = 0 ; i < m_windows.size() ; i++ ) {
+        if (m_windows[i]->controller()) {
+            m_windows[i]->controller()->draw();
         }
-        (*iter)->draw();
+        if (i<m_windows.size()) m_windows[i]->draw();
     }
 
     // Emulate EndGUIFrame.

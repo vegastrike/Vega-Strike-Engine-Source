@@ -244,7 +244,7 @@ void GameMenu::createControls() {
 	// Base info title.
 	StaticDisplay* baseTitle = new StaticDisplay;
 	baseTitle->setRect( Rect(-.96, .83, 1.9, .1) );
-	baseTitle->setText("Vega Strike version 0.5.0");
+	baseTitle->setText("Vega Strike version 0.5");
 	static GFXColor baseNameColor=getConfigColor("base_name_color",GFXColor(.1,.8,.1));
 	baseTitle->setTextColor(baseNameColor);
 	baseTitle->setColor(GUI_CLEAR);
@@ -259,7 +259,7 @@ void GameMenu::createControls() {
 	mainMenuGroup->addChild(baseTitle);
 	
 	NewButton* singlePlayer = new NewButton;
-	singlePlayer->setRect( Rect(-.75, .5, 1.5, .15) );
+	singlePlayer->setRect( Rect(-.75, .2, 1.5, .15) );
 	singlePlayer->setColor( GFXColor(0,1,1,.1) );
 	singlePlayer->setTextColor( GUI_OPAQUE_WHITE() );
 	singlePlayer->setDownColor( GFXColor(0,1,1,.4) );
@@ -270,25 +270,25 @@ void GameMenu::createControls() {
 	mainMenuGroup->addChild(singlePlayer);
 	
 	NewButton *multiPlayer = new NewButton;
-	multiPlayer->setRect( Rect(-.75, .25, 1.5, .15) );
+	multiPlayer->setRect( Rect(-.50, .7, .37, .09) );
 	multiPlayer->setColor( GFXColor(1,.2,0,.1) );
 	multiPlayer->setTextColor( GUI_OPAQUE_WHITE() );
 	multiPlayer->setDownColor( GFXColor(1,.2,0,.4) );
 	multiPlayer->setDownTextColor( GFXColor(.2,.2,.2) );
 	multiPlayer->setFont( Font(.07, 1) );
 	multiPlayer->setCommand("AcctButton");
-	multiPlayer->setLabel("Multi Player: Play Account");
+	multiPlayer->setLabel("Online Account Server");
 	mainMenuGroup->addChild(multiPlayer);
 	
 	multiPlayer = new NewButton;
-	multiPlayer->setRect( Rect(-.75, 0, 1.5, .15) );
+	multiPlayer->setRect( Rect(.05, .7, .37, .09) );
 	multiPlayer->setColor( GFXColor(1,.2,0,.1) );
 	multiPlayer->setTextColor( GUI_OPAQUE_WHITE() );
 	multiPlayer->setDownColor( GFXColor(1,.2,0,.4) );
 	multiPlayer->setDownTextColor( GFXColor(.2,.2,.2) );
 	multiPlayer->setFont( Font(.07, 1) );
 	multiPlayer->setCommand("HostButton");
-	multiPlayer->setLabel("Multi Player: Connect to Server");
+	multiPlayer->setLabel("Independent Server");
 	mainMenuGroup->addChild(multiPlayer);
 	
 	NewButton *exitGame = new NewButton;

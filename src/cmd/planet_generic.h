@@ -112,17 +112,17 @@ public:
 					++pos;
 				}
 			}
-			inline const un_iter& operator ++()
+			inline PlanetIterator& operator ++()
 			{
 				advance();
+				return *this;
 			}
 			inline Unit* operator *()
 			{
 				return(current());
 			}
-			inline un_iter operator++(int) {abort();}
-			
 		private:
+			inline un_iter operator++(int) {abort();}
 			UnitCollection localCollection;
 			un_iter pos;
 			

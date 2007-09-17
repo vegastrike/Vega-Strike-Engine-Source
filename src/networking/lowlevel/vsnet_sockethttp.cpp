@@ -17,7 +17,8 @@ VsnetHTTPSocket::VsnetHTTPSocket(
                  const std::string&     path,
                  SocketSet&       set )
 		: VsnetSocketBase(-1, "http", set), _path(path), _hostheader(host),
-		  _incompleteheadersection(0), _content_length(0), _send_more_data(false)
+		  _incompleteheadersection(0), _content_length(0), _send_more_data(false),
+		  sendDataPos(0)
 
 		{
 			numRetries = 0;
@@ -139,7 +140,18 @@ void VsnetHTTPSocket::dump( std::ostream& ostr ) const
 }
 
 bool VsnetHTTPSocket::sendstr(const std::string &data) {
-	dataToSend.push_back(data);
+	char endHeaderLen[50];
+	std::string httpData;
+	sprintf(endHeaderLen, "Content-Length: %d\r\n\r\n", data.length() );
+	httpData = "POST " + this->_path + " HTTP/1.1\r\n"
+		"Host: " + this->_hostheader + "\r\n"
+		"User-Agent: Vsnet/1.0\r\n"
+		"Connection: keep-alive\r\n"
+		"Accept: message/x-vsnet-packet\r\n"
+		"Keep-Alive: 300\r\n"
+		"Content-Type: message/x-vsnet-packet\r\n" +
+		endHeaderLen + data;
+	dataToSend.push_back(httpData);
 	return true;
 }
 
@@ -189,21 +201,10 @@ int VsnetHTTPSocket::lower_sendbuf(  )
           this->_fd=-1;
 	}
 
-	std::string dataSending = dataToSend.front();
-	std::string httpData;
-	char endHeaderLen[50];
-	sprintf(endHeaderLen, "Content-Length: %d\r\n\r\n", dataSending.length() );
-	httpData = "POST " + this->_path + " HTTP/1.1\r\n"
-		"Host: " + this->_hostheader + "\r\n"
-		"User-Agent: Vsnet/1.0\r\n"
-		"Connection: keep-alive\r\n"
-		"Accept: message/x-vsnet-packet\r\n"
-		"Keep-Alive: 300\r\n"
-		"Content-Type: message/x-vsnet-packet\r\n" +
-		endHeaderLen + dataSending;
+	std::string httpData = dataToSend.front();
 
 	const char *httpDataStr = httpData.data();
-	int pos = 0;
+	int pos = sendDataPos;
 	int retrycnt = 10;
 	int blockcnt = 10;
 	while (true) {
@@ -217,6 +218,7 @@ int VsnetHTTPSocket::lower_sendbuf(  )
 					continue;
 				} else {
 					// Can't hold up anything trying to wait to send data.
+					sendDataPos=pos;
 					return 0;
 				}
 			}
@@ -225,10 +227,12 @@ int VsnetHTTPSocket::lower_sendbuf(  )
 				// What!?! A HTTP server decided to close the connection? The horror...
 				reopenConnection();
 				if (NONBLOCKING_CONNECT) {
+					sendDataPos=0;
 			
 					return 0;
 				}
 			} else {
+				sendDataPos=0;
 				return 0;
 			}
 			retrycnt --;
@@ -240,6 +244,7 @@ int VsnetHTTPSocket::lower_sendbuf(  )
 	}
 	waitingToReceive = dataToSend.front();
 	dataToSend.pop_front();
+	sendDataPos=0;
 	return 1;
 }
 
@@ -309,6 +314,7 @@ void VsnetHTTPSocket::resendData() {
 	numRetries ++;
 	timeToNextRequest = (int)queryTime() + 2;
     dataToSend.push_front(waitingToReceive);
+	sendDataPos=0;
     waitingToReceive=std::string();
     _header.clear();
     readHeader=false;

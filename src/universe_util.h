@@ -157,7 +157,11 @@ namespace UniverseUtil
 	Unit *getPlayerX(int which);
 	unsigned int getCurrentPlayer();
 	///this gets the number of active players
-	int getNumPlayers ();
+ 	int getNumPlayers ();
+	// Clears all objectives (used for server-side when it's easy to get inconsistent.
+	void clearObjectives();
+	// Erases an objective.
+	void eraseObjective(int which);
 	///this adds an objective for the cockpit to view ("go here and do this)
 	int addObjective(std::string objective);
 	///this sets the objective's completeness (the int was returned by add objective)

@@ -41,8 +41,8 @@ void UnitFactory::addUnitBuffer( NetBuffer & netbuf, const string &filename,
 		netbuf.addString( fullname);
 		netbuf.addChar( SubUnit);
 		netbuf.addInt32( faction);
-		netbuf.addString( customizedUnit);
 		netbuf.addString( flightgroup!=NULL?flightgroup->name:std::string("Object"));
+		netbuf.addString( customizedUnit);
 		netbuf.addInt32( fg_subnumber);
 		netbuf.addTransformation( curr_physical_state);
 }
@@ -70,7 +70,14 @@ Unit *UnitFactory::parseUnitBuffer(NetBuffer &netbuf)
 	cerr<<"NETCREATE UNIT : "<<file<<endl;
 	
 	string facname = FactionUtil::GetFactionName( faction);
-	Flightgroup * fg = mission[0].findFlightgroup( fname, facname);
+	Flightgroup * fg = NULL;
+	if (!fname.empty()) {
+		fg = mission[0].findFlightgroup( fname, facname);
+		if (!fg) {
+			fg = Flightgroup::newFlightgroup (fname,file,facname,
+						  "default",1,1,"","",mission);
+		}
+	}
 	
 	Unit *un = createUnit( file.c_str(), sub, faction, custom, fg, fg_num, NULL, serial);
 	un->curr_physical_state = netbuf.getTransformation();

@@ -9,8 +9,6 @@
 #include "networking/lowlevel/vsnet_sockethttp.h"
 #include "lin_time.h"
 #include "vs_random.h"
-#include "load_mission.h"
-#include "cmd/script/mission.h"
 extern QVector DockToSavedBases( int n);
 extern StarSystem * GetLoadedStarSystem( const char * system);
 
@@ -181,7 +179,6 @@ void	NetServer::addClient( ClientPtr clt)
 
 	COUT<<"ADDED client n "<<un->GetSerial()<<" in ZONE "<<un->activeStarSystem->GetZone()<<" at STARDATE "<<_Universe->current_stardate.GetFullTrekDate()<<endl;
         if (active_missions.size()==1) {
-          LoadMission("",vs_config->getVariable("server","serverscript","import server;server.server();"),false);
         }
 	sendCredits(un->GetSerial(), cp->credits);
 		sendCargoSnapshot(un->GetSerial(), st2->getUnitList());

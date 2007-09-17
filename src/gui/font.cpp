@@ -73,7 +73,7 @@ void Font::calcMetrics(void) {
 		m_horizontalScaling = (m_verticalScaling * g_game.y_resolution) / g_game.x_resolution;
 	} else {
 		// Calculation above seems broken... this seems to work for most sizes with bitmap.
-		m_horizontalScaling = m_verticalScaling / 1.6;
+		m_horizontalScaling = m_verticalScaling / (1.6*g_game.x_resolution/1000);
 	}
 	// The size of a horizontal pixel in reference space.
 	const double horizPixelInRefSpace = REFERENCE_LINE_SPACING / (g_game.x_resolution/2) / size();

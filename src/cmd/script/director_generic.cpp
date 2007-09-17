@@ -18,7 +18,7 @@
 #include <boost/python/detail/extension_class.hpp>
 #endif
 
-
+#include "networking/netserver.h"
 
 #include "pythonmission.h"
 #include "mission.h"
@@ -64,9 +64,10 @@ unsigned int pushSaveData (int whichcp, string key, float val) {
     return 0;
   }
   vector<float> * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
+  if (SERVER) VSServer->sendSaveData(whichcp, Subcmd::FloatValue|Subcmd::SetValue,
+	  ans->size(), &key, NULL, &val);
   ans->push_back (val);
   return ans->size()-1;
-
 }
 
 unsigned int eraseSaveData (int whichcp, string key, unsigned int index) {
@@ -74,6 +75,8 @@ unsigned int eraseSaveData (int whichcp, string key, unsigned int index) {
     return 0;
   }
   vector<float> * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
+  if (SERVER) VSServer->sendSaveData(whichcp, Subcmd::FloatValue|Subcmd::EraseValue,
+	  index, &key, NULL, NULL);
   if (index <ans->size()) {
     ans->erase (ans->begin()+index);
   }
@@ -85,6 +88,8 @@ unsigned int pushSaveString (int whichcp, string key, string value) {
     return 0;
   }
   vector<std::string> * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key)));
+  if (SERVER) VSServer->sendSaveData(whichcp, Subcmd::StringValue|Subcmd::SetValue,
+	  ans->size(), &key, &value, NULL);
   ans->push_back (std::string(value));
   return ans->size()-1;
 }
@@ -95,6 +100,8 @@ void putSaveString (int whichcp, string key, unsigned int num, string val) {
   }
   vector<std::string> *ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key)));
   if (num<ans->size()) {
+    if (SERVER) VSServer->sendSaveData(whichcp, Subcmd::StringValue|Subcmd::SetValue,
+	    num, &key, &val, NULL);
     (*ans)[num]= val;
   }
 }
@@ -105,6 +112,8 @@ void putSaveData (int whichcp, string key, unsigned int num, float val) {
   }
   vector<float> * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
   if (num<ans->size()) {
+    if (SERVER) VSServer->sendSaveData(whichcp, Subcmd::FloatValue|Subcmd::SetValue,
+	    num, &key, NULL, &val);
     (*ans)[num] = val;
   }
 }
@@ -115,6 +124,8 @@ unsigned int eraseSaveString (int whichcp, string key, unsigned int index) {
   }
   vector<std::string> *ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key)));
   if (index <ans->size()) {
+    if (SERVER) VSServer->sendSaveData(whichcp, Subcmd::StringValue|Subcmd::EraseValue,
+	    index, &key, NULL, NULL);
     ans->erase (ans->begin()+index);
   }
   return ans->size();

@@ -79,7 +79,7 @@ static const string LOAD_FAILED = "LOAD_FAILED";
 // Takes in a category of an upgrade or cargo and returns true if it is any type of mountable weapon.
 extern bool isWeapon (std::string name);
 extern Cargo* GetMasterPartList(const char *input_buffer);
-
+extern void ExecuteDirector();
 
 void	getZoneInfoBuffer( unsigned short zoneid, NetBuffer & netbuf)
 {
@@ -372,6 +372,9 @@ void	NetServer::start(int argc, char **argv)
 		// int       nb;
 
 		UpdateTime();
+		if (_Universe->numPlayers()>0) {
+			ExecuteDirector();
+		}
 
 		// Check a key press
 		//keyset.setReadAlwaysTrue( 0);
@@ -829,12 +832,9 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                 case CMD_TXTMESSAGE:
                   {
                   if (!clt) break;
-			un = clt->game_unit.GetUnit();
-                  if (!un) break;
 			NetBuffer netbuf (packet.getData(), packet.getDataLength());
 			string message = netbuf.getString();
 			netbuf.Reset();
-			netbuf.addString(clt->callsign);
 			if (message.empty()) break;
 			if (message[0]=='/') {
 				if (clt->cltadr.inaddr()==0x0100007f) {
@@ -846,16 +846,20 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				} else {
 					message="#888800Commands must be sent from a trusted client.";
 				}
+				netbuf.addString("game");
 				netbuf.addString(message);
-				p2.send( CMD_TXTMESSAGE, un->GetSerial(),
+				p2.send( CMD_TXTMESSAGE, 0,
 						netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
 						&clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(847));
 				break;
 			}
+			un = clt->game_unit.GetUnit();
+			if (!un) break;
 			message = message.substr(0, 160);
 			std::replace(message.begin(),message.end(),'#','$');
 			std::replace(message.begin(),message.end(),'\n',' ');
 			std::replace(message.begin(),message.end(),'\r',' ');
+			netbuf.addString(clt->callsign);
 			netbuf.addString(message);
 			p2.bc_create( CMD_TXTMESSAGE, un->GetSerial(),
                           netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
@@ -907,7 +911,12 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			}
 			break;
 		case CMD_KILL:
-			COUT << "CMD_KILL not implented."<<endl;
+			un = clt->game_unit.GetUnit();
+			if (un) {
+				un->hull = 0;
+				un->Destroy();
+			}
+			//COUT << "CMD_KILL not implented."<<endl;
 			break;
 		case CMD_RESPAWN :
 			COUT << "Received a respawning request for "<<

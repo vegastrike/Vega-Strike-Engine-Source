@@ -141,6 +141,34 @@ void	NetServer::sendCargoSnapshot( ObjSerial cltser, const UnitCollection &list)
 			 NULL, clt->tcp_sock, __FILE__, PSEUDO__LINE__(196) );
 }
 
+void NetServer::sendSaveData( int cp, unsigned short type, int pos, string *key,
+				  string *strValue, float *floatValue) {
+	/* Note to self: This function will do absolutely nothing
+	   until it is implemented. */
+	NetBuffer netbuf;
+	Packet p2;
+	Unit *un = _Universe->AccessCockpit(cp)->GetParent();
+	if (!un) return;
+	ClientPtr clt = this->getClientFromSerial(un->GetSerial());
+	if (!clt) return;
+	
+	netbuf.addShort(type);
+	if ((type&Subcmd::StringValue) ||(type&Subcmd::FloatValue)) {
+		netbuf.addString(*key);
+	}
+	netbuf.addInt32(pos);
+	if (type&Subcmd::SetValue) {
+		if ((type&Subcmd::StringValue) || (type&Subcmd::Objective)) {
+			netbuf.addString(*strValue);
+		}
+		if ((type&Subcmd::FloatValue) || (type&Subcmd::Objective)) {
+			netbuf.addFloat(*floatValue);
+		}
+	}
+	p2.send( CMD_SAVEDATA, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
+			 NULL, clt->tcp_sock, __FILE__, PSEUDO__LINE__(164) );
+}
+
 void	NetServer::sendDamages( ObjSerial serial, unsigned short zone, float hull, const Shield &shield, const Armor &armor,
 				float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color)
 {
@@ -172,6 +200,36 @@ void	NetServer::sendDamages( ObjSerial serial, unsigned short zone, float hull, 
 	// WARNING : WE WILL SEND THE INFO BACK TO THE CLIENT THAT HAS FIRED
 	zonemgr->broadcast( zone, serial, &p, false ); // NETFIXME: Should damages be TCP? NO..we have alternate method to deal with it
   }
+}
+
+void	NetServer::sendMessage( string from, string to, string message, float delay )
+{
+	NetBuffer netbuf;
+	netbuf.addString(from);
+	netbuf.addString(message);
+	Packet p2;
+	
+	const char *tostr (to.c_str());
+	if (to[0]=='p') {
+		int playerto=-1;
+		sscanf(tostr+1,"%d",&playerto);
+		if (playerto!=-1 && playerto<_Universe->numPlayers()) {
+			Cockpit *cp = _Universe->AccessCockpit(playerto);
+			Unit *un = cp->GetParent();
+			if (!un) return;
+			ClientPtr clt = this->getClientFromSerial(un->GetSerial());
+
+			p2.send( CMD_TXTMESSAGE, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
+			 NULL, clt->tcp_sock, __FILE__, PSEUDO__LINE__(223) );
+		}
+	} else {
+		p2.bc_create( CMD_TXTMESSAGE, 0,
+                 netbuf.getData(), netbuf.getDataLength(),
+                 SENDRELIABLE,
+                 __FILE__, PSEUDO__LINE__(229) );
+		for (unsigned int i=0;i<zonemgr->getZoneNumber();i++)
+			zonemgr->broadcast( i, 0, &p2, false );
+	}
 }
 
 void	NetServer::sendKill( ObjSerial serial, unsigned short zone)

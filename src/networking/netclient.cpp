@@ -45,6 +45,7 @@
 #include "cmd/role_bitmask.h"
 #include "cmd/base_util.h"
 #include "gfx/cockpit_generic.h"
+#include "save_util.h"
 
 #include "networking/lowlevel/vsnet_clientstate.h"
 #include "networking/lowlevel/vsnet_debug.h"
@@ -220,7 +221,7 @@ int		NetClient::checkAcctMsg( )
 					COUT<<">>> LOGIN ERROR =( DENIED )= --------------------------------------"<<endl;
                                         lastsave.resize(0);
 					lastsave.push_back( "");
-					lastsave.push_back( "!!! ACCESS DENIED : Account does not exist !!!");
+					lastsave.push_back( "!!! ACCESS DENIED : Account does not exist with this password !!!");
 				break;
 				case ACCT_LOGIN_ALREADY :
 					COUT<<">>> LOGIN ERROR =( ALREADY LOGGED IN )= --------------------------------------"<<endl;
@@ -245,6 +246,7 @@ int		NetClient::checkAcctMsg( )
 				errno
 #endif
 				);
+			cerr<<str;
 //			lastsave.push_back( "");
 //			lastsave.push_back( str);
 			//acct_sock.disconnect( __PRETTY_FUNCTION__, false );
@@ -578,7 +580,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
                 COUT<<">>> LOGIN ERROR =( DENIED )= ------------------------------------------------"<<endl;
                 this->disconnect();
 				lastsave.push_back( "");
-				lastsave.push_back( "!!! ACCESS DENIED : Account does not exist !!!");
+				lastsave.push_back( "!!! ACCESS DENIED : Account does not exist with this password !!!");
                 return -1;
                 break;
 			case LOGIN_UNAVAIL :
@@ -895,8 +897,10 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					}
 					COUT<<"Client #"<<p1.getSerial()<<" killed - now "<<nbclients<<" clients in system"<<endl;
 
-					string msg = clt->callsign+" has died.";
-					UniverseUtil::IOmessage(0,"game","all","#FFFF66"+msg+"#000000");
+					if (!clt->callsign.empty()) {
+						string msg = clt->callsign+" has died.";
+						UniverseUtil::IOmessage(0,"game","all","#FFFF66"+msg+"#000000");
+					}
 				}
 			}
 			break;
@@ -1122,6 +1126,77 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					cp->credits=netbuf.getFloat();
 				}
 				//BaseUtil::refreshBaseComputerUI(NULL);
+			break;
+			case CMD_SAVEDATA:
+			{
+				un = this->game_unit.GetUnit();
+				int cp = _Universe->whichPlayerStarship(un);
+				if (cp==-1) break;
+				
+				unsigned short type = netbuf.getShort();
+				string key;
+				string strValue;
+				float floatValue=0;
+				int pos=0;
+				
+				if ((type&Subcmd::StringValue) ||(type&Subcmd::FloatValue)) {
+					key = netbuf.getString();
+				}
+				pos = netbuf.getInt32();
+				if (type&Subcmd::SetValue) {
+					if (pos<0) break; // -1 is valid for erasing.
+					if ((type&Subcmd::StringValue) || (type&Subcmd::Objective)) {
+						strValue=netbuf.getString();
+					}
+					if ((type&Subcmd::FloatValue) || (type&Subcmd::Objective)) {
+						floatValue=netbuf.getFloat();
+					}
+				}
+				switch (type) {
+				case (Subcmd::FloatValue|Subcmd::SetValue):
+					while (getSaveDataLength(cp, key)<=pos) {
+						pushSaveData(cp, key, 0);
+					}
+					putSaveData(cp, key, pos, floatValue);
+					break;
+				case (Subcmd::FloatValue|Subcmd::EraseValue):
+					if (pos<0) {
+						for (unsigned int i=getSaveDataLength(cp, key); i>0; i--)
+							eraseSaveData(cp, key, (i-1));
+					} else {
+						eraseSaveData(cp, key, pos);
+					}
+					break;
+				case (Subcmd::StringValue|Subcmd::SetValue):
+					while (getSaveStringLength(cp, key)<=pos) {
+						pushSaveString(cp, key, "");
+					}
+					putSaveString(cp, key, pos, strValue);
+					break;
+				case (Subcmd::StringValue|Subcmd::EraseValue):
+					if (pos<0) {
+						for (unsigned int i=getSaveStringLength(cp, key); i>0; i--)
+							eraseSaveString(cp, key, (i-1));
+					} else {
+						eraseSaveString(cp, key, pos);
+					}
+					break;
+				case (Subcmd::Objective|Subcmd::SetValue):
+					while (mission->objectives.size()<=pos) {
+						UniverseUtil::addObjective("");
+					}
+					UniverseUtil::setObjective(pos, strValue);
+					UniverseUtil::setCompleteness(pos, floatValue);
+					break;
+				case (Subcmd::Objective|Subcmd::EraseValue):
+					if (pos<mission->objectives.size() && pos>=0) {
+						mission->objectives.erase(mission->objectives.begin()+pos);
+					} else {
+						UniverseUtil::clearObjectives();
+					}
+					break;
+				}
+			}
 			break;
 			case CMD_STARTNETCOMM :
 #ifdef NETCOMM

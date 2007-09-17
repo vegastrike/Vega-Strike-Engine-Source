@@ -79,6 +79,7 @@ const char* displayCmd( Cmd cmd )
     CASE( CMD_CONNECT      )
     CASE( CMD_CHOOSESHIP   )
 
+	CASE( CMD_SAVEDATA     )
     // CASE( CMD_ACK          )
     default :
         return "CMD_UNKNOWN"; break;

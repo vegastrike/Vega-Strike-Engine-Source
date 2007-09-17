@@ -51,12 +51,26 @@ char pwd[65536];
 VSVolumeType isin_bigvolumes = VSFSNone;
 string curmodpath = "";
 
-ObjSerial	serial_seed = 0;
+ObjSerial	serial_seed = 0; // Server/client serials won't intersect.
+std::map<ObjSerial,bool> usedSerials;
+
+void usedSerial(ObjSerial ser, bool used) {
+	usedSerials[ser]=used;
+}
 ObjSerial	getUniqueSerial()
 {
-	// MAYBE CHANGE TO SOMETHING MORE "RANDOM"
-	serial_seed = (serial_seed+3)%MAXSERIAL;
-	return serial_seed;
+	int offset = (SERVER ? 2 : 1);
+	
+	std::map<ObjSerial,bool>::const_iterator iter;
+	ObjSerial ret;
+	do {
+		serial_seed = (serial_seed+3)%MAXSERIAL;
+		ret = serial_seed+offset;
+	} while ((iter=usedSerials.find(ret))!=usedSerials.end()
+			 && (*iter).second);
+	
+	usedSerial(ret, true);
+	return ret;
 }
 
 extern string GetUnitDir( string filename);

@@ -680,7 +680,13 @@ int NetClient::connectLoad(string username, string passwd, string &error) {
 		bootstrap_draw("#cc66ffNETWORK: Connecting to account server.",NULL);
 		cout << "NETWORK: Connecting to account server."<<endl;
 		init_acct( srvipadr);
-		loginAcctLoop( username, passwd);
+		vector<string> &savetmp = loginAcctLoop( username, passwd);
+		// We don't expect a saved game...
+		if (savetmp.size()>=2 && savetmp[0].empty()) {
+			// But this is the way the acctserver code indicates an error.
+			error = savetmp[1];
+			return 0;
+		}
 		bootstrap_draw("#cc66ffNETWORK: Connecting to VegaServer.",NULL);
 		cout << "NETWORK: Connecting to VegaServer."<<endl;
 		ret = init( NULL,0, error).valid();

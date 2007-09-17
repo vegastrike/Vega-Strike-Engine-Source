@@ -1299,7 +1299,7 @@ void BaseComputer::constructControls(void) {
 			netStatGroup->addChild(numKills);
 			*/
 			NewButton *saveNetGame = new NewButton;
-			saveNetGame->setRect( Rect(-.6, -.6, .4, .13) );
+			saveNetGame->setRect( Rect(-.7, -.65, .4, .13) );
 			saveNetGame->setColor( GFXColor(.2,1,0,.1) );
 			saveNetGame->setTextColor( GUI_OPAQUE_WHITE() );
 			saveNetGame->setDownColor( GFXColor(.2,1,0,.4) );
@@ -1310,7 +1310,7 @@ void BaseComputer::constructControls(void) {
 			netStatGroup->addChild(saveNetGame);
 			
 			NewButton *reloadNet = new NewButton;
-			reloadNet->setRect( Rect(.2, -.6, .4, .13) );
+			reloadNet->setRect( Rect(.3, -.65, .4, .13) );
 			reloadNet->setColor( GFXColor(1,.2,0,.1) );
 			reloadNet->setTextColor( GUI_OPAQUE_WHITE() );
 			reloadNet->setDownColor( GFXColor(1,.2,0,.4) );
@@ -1321,7 +1321,7 @@ void BaseComputer::constructControls(void) {
 			netStatGroup->addChild(reloadNet);
 			
 			NewButton *hideNetStatus = new NewButton;
-			hideNetStatus->setRect( Rect(-.2, -.75, .4, .13) );
+			hideNetStatus->setRect( Rect(-.2, -.65, .4, .13) );
 			hideNetStatus->setColor( GFXColor(.2,.8,1,.1) );
 			hideNetStatus->setTextColor( GUI_OPAQUE_WHITE() );
 			hideNetStatus->setDownColor( GFXColor(.2,.8,1,.4) );
@@ -2931,6 +2931,10 @@ void BaseComputer::refresh() {
 }
 
 void BaseComputer::draw() {
+	if ((!m_player.GetUnit()) || m_player.GetUnit()->hull<=0) {
+		globalWindowManager().shutDown();
+		TerminateCurrentBase();
+	}
     if (BaseComputer::dirty && m_player.GetUnit()) {
 		eliminateZeroCargo(m_player.GetUnit());
 		refresh();
