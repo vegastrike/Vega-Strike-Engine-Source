@@ -871,10 +871,10 @@ void SetupShaders (vector <Texture *> &Decal, unsigned int mat, bool envMap,floa
   GFXShaderConstant(shaderConstants[kDAMAGEMAP].id,DAMAGE_UNIT);
   GFXShaderConstant(shaderConstants[kDETAIL0MAP].id,DETAIL_UNIT_0);
   GFXShaderConstant(shaderConstants[kDETAIL1MAP].id,DETAIL_UNIT_1);
-  float grayrgba[4]={0.5,0.5,0.5,1.0};
-  float whitergba[4]={1,1,1,1};
   float shaderPlane0[4]={0,0,0,0};
   float shaderPlane1[4]={0,0,0,0};
+  float envmaprgba[4]={1,1,1,0};
+  float noenvmaprgba[4]={0.5,0.5,0.5,1.0};
   if (detailPlanes.size()>0) {
     shaderPlane0[0]=detailPlanes[0].i;
     shaderPlane0[1]=detailPlanes[0].j;
@@ -887,7 +887,7 @@ void SetupShaders (vector <Texture *> &Decal, unsigned int mat, bool envMap,floa
   }
   GFXShaderConstant(shaderConstants[kDETAIL0PLANE].id,shaderPlane0);
   GFXShaderConstant(shaderConstants[kDETAIL1PLANE].id,shaderPlane1);
-  GFXShaderConstant(shaderConstants[kENVCOLOR].id,envMap?whitergba:grayrgba);
+  GFXShaderConstant(shaderConstants[kENVCOLOR].id,envMap?envmaprgba:noenvmaprgba);
 #undef SAFEDECAL
 }
 
