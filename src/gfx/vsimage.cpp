@@ -761,15 +761,18 @@ unsigned char *VSImage::ReadDDS()
                   VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
                   throw(1);
 		}
+		cerr << "loading "<<img_file->GetFilename() << endl;
 		inputSize = 0;
 		width=header.width;
 		height= header.height;
 		for(int i = 0;i<header.nmips;++i){
 			inputSize += ((width+3)/4)*((height+3)/4)*blockSize;
-			if(width != 1)
-				width >>=1;
-			if(height != 1)
-				height >>=1;
+			width >>=1;
+			height >>=1;
+			if(width == 1 || height == 1){
+				width =1;
+				height=1;
+			}	
 		}
 		s = (unsigned char*)malloc(inputSize);
 		// the following is probably not endian-safe

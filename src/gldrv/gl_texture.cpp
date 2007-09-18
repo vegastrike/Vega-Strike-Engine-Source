@@ -819,10 +819,12 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 				while(width && height){
 					glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
 					if(width ==1 && height == 1) break;
-					if(width != 1)
-						width >>=1;
-					if(height != 1)
-						height >>=1;
+					width >>=1;
+					height >>=1;
+					if(width == 1 || height == 1){
+						width =1;
+						height = 1;
+					}
 					offset += size;
 					size = ((width +3)/4) * ((height +3)/4) * blocksize;
 					++i;
@@ -880,8 +882,13 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 				
 				while(width && height){
 					glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
+					if(width ==1) break;
 					width >>=1;
 					height >>=1;
+					if(width ==1 || height ==1 ){
+						height = 1;
+						width = 1;
+					}
 					offset += size;
 					size = ((width +3)/4) * ((height +3)/4) * blocksize;
 					++i;
