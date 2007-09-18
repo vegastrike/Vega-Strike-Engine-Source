@@ -73,7 +73,7 @@ void PlanetaryOrbit::Execute() {
   QVector origin (targetlocation);
   unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
   static float orbit_centroid_averaging=XMLSupport::parse_float(vs_config->getVariable("physics","orbit_averaging","16"));
-  float averaging = (float)orbit_centroid_averaging/(float)(parent->predicted_priority);
+  float averaging = (float)orbit_centroid_averaging/(float)(parent->predicted_priority+1.0f);
   if (averaging<1.0f) averaging=1.0f;
   if (subtype&SSELF) {
       Unit * unit = group.GetUnit();
