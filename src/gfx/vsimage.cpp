@@ -761,7 +761,6 @@ unsigned char *VSImage::ReadDDS()
                   VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
                   throw(1);
 		}
-		cerr << "loading "<<img_file->GetFilename() << endl;
 		inputSize = 0;
 		width=header.width;
 		height= header.height;
