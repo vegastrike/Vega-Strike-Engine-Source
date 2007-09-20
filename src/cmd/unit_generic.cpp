@@ -4958,6 +4958,11 @@ void Unit::Kill(bool erasefromsave, bool quitting)
 	}
 	ClearMounts();
 
+	if( SERVER && this->serial ) {
+		VSServer->sendKill( this->serial, this->getStarSystem()->GetZone());
+		this->serial=0;
+	}
+
 	if (docked&(DOCKING_UNITS)) {
 		static float survival = XMLSupport::parse_float( vs_config->getVariable("physics","survival_chance_on_base_death","0.1") );
 		static float player_survival = XMLSupport::parse_float( vs_config->getVariable("physics","player_survival_chance_on_base_death","1.0") );
@@ -5786,7 +5791,7 @@ void Unit::UnFire ()
 		for (int i=0;i<GetNumMounts();++i) {
 			if (mounts[i].status!=Mount::ACTIVE)
 				continue;
-			if (SERVER || Network && mounts[i].processed != Mount::UNFIRED && playernum>=0)
+			if ((SERVER || (Network && playernum>=0)) && mounts[i].processed != Mount::UNFIRED)
 				unFireRequests.push_back(i);
 			mounts[i].UnFire();	 //turns off beams;
 		}
@@ -6124,8 +6129,10 @@ void Unit::Destroy()
 		}
 		// The server send a kill notification to all concerned clients but not if it is an upgrade
 
-		if( SERVER)
+		if( SERVER && this->serial ) {
 			VSServer->sendKill( this->serial, this->getStarSystem()->GetZone());
+			this->serial=0;
+		}
 
 		if (!Explode(false,SIMULATION_ATOM)) {
 

@@ -39,6 +39,7 @@
 #include "python/init.h"
 #include "networking/netserver.h"
 #include "networking/lowlevel/vsnet_serversocket.h"
+#include "networking/lowlevel/vsnet_sockethttp.h"
 #include "networking/lowlevel/vsnet_debug.h"
 #include "networking/savenet_util.h"
 #include "vsfilesystem.h"
@@ -55,7 +56,9 @@
 #include "fileutil.h"
 #include "cmd/unit_const_cache.h"
 
-#include "networking/lowlevel/vsnet_sockethttp.h"
+#include "python/init.h"
+#include <Python.h>
+
 double	clienttimeout;
 double	logintimeout;
 int		acct_con;
@@ -757,11 +760,13 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 					sendLoginError(clt);
 					break;
 				}
+				if (clt->loginstate!=Client::CONNECTED) {
+					break;
+				}
 				if (waitList.find(user)!=waitList.end()) {
 					sendLoginAlready(clt);
 					break;
 				}
-				this->waitList[user] = ( entry );
 				iptmp = &clt->cltadr;
 				tmpsock = clt->tcp_sock;
 
@@ -787,7 +792,11 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 						perror( "FATAL ERROR sending redirected login request to ACCOUNT SERVER : ");
 						COUT<<"SOCKET was : "<<acct_sock<<endl;
 						this->sendLoginUnavailable( clt );
+						break;
 					}
+					this->waitList[user] = ( entry );
+					clt->loginstate=Client::WAITLISTED;
+					
 					getSimpleChar(redirect);
 					clt->callsign=getSimpleString(redirect);
 					clt->passwd=getSimpleString(redirect);
@@ -832,6 +841,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                 case CMD_TXTMESSAGE:
                   {
                   if (!clt) break;
+				  un = clt->game_unit.GetUnit();
 			NetBuffer netbuf (packet.getData(), packet.getDataLength());
 			string message = netbuf.getString();
 			netbuf.Reset();
@@ -842,15 +852,34 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 						VSExit(1);
 						return;
 					}
-					message="#888800Command accepted";
-				} else {
-					message="#888800Commands must be sent from a trusted client.";
+				} else { // colors
+					std::replace(message.begin(),message.end(),'#','$');
 				}
+				int cp = _Universe->whichPlayerStarship(un);
+				char cpstr[20];
+				cpstr[0]='\0';
+				sprintf(cpstr, "%d", cp);
+				std::replace(message.begin(),message.end(),'\'','\"');
+				std::replace(message.begin(),message.end(),'\\','/');
+				std::replace(message.begin(),message.end(),'\n',' ');
+				std::replace(message.begin(),message.end(),'\r',' ');
+				string slashfunc = vs_config->getVariable("server","slashcmdfunc","import server;server.processMessage");
+				string pythonCode = slashfunc + "(" + cpstr + ", " +
+					((clt->cltadr.inaddr()==0x0100007f)?"True":"False") + ", r\'"
+					+ message.substr(1) + "\')\n";
+				COUT << "Executing python command from "<<clt->callsign<<": " << endl;
+				cout << "    " << pythonCode;
+				const char * cpycode = pythonCode.c_str();
+				::Python::reseterrors();
+				PyRun_SimpleString(const_cast<char*>(cpycode));
+				::Python::reseterrors();
+/*				
 				netbuf.addString("game");
 				netbuf.addString(message);
 				p2.send( CMD_TXTMESSAGE, 0,
 						netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
 						&clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(847));
+*/
 				break;
 			}
 			un = clt->game_unit.GetUnit();

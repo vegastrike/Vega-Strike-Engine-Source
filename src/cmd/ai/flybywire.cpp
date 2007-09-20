@@ -257,7 +257,7 @@ void FlyByWire::Accel (float per) {
 
   Unit::Computer *cpu = &parent->GetComputerData(); 
 
-  cpu->set_speed+=per*100*SIMULATION_ATOM;
+  cpu->set_speed+=per*cpu->max_speed()*SIMULATION_ATOM;
 
   if (cpu->set_speed>cpu->max_speed())
 

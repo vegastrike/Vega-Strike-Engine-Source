@@ -5,6 +5,7 @@
 //#include "cmd/unit_interface.h"
 #include "cmd/unit_factory.h"	 //for UnitFactory::getMasterPartList()
 #include "cmd/collection.h"
+#include "networking/netserver.h"
 #include "star_system_generic.h"
 #include <string>
 #include "lin_time.h"
@@ -63,8 +64,24 @@ namespace UniverseUtil
 	void musicLayerSkip(int layer) {}
 	void musicLayerStop(int layer) {}
 	void StopAllSounds(void) {}
-	void loadGame(const string &savename) {}
-	void saveGame(const string &savename) {}
+	void loadGame(const string &savename) {
+		int num=-1;
+		sscanf(savename.c_str(),"%d",&num);
+		if (num>=0 && num<_Universe->numPlayers()) {
+			Unit *un=_Universe->AccessCockpit(num)->GetParent();
+			if (un) {
+				un->hull=0;
+				un->Destroy();
+			}
+		}
+	}
+	void saveGame(const string &savename) {
+		int num=-1;
+		sscanf(savename.c_str(),"%d",&num);
+		if (num>=0 && num<_Universe->numPlayers()) {
+			if (SERVER) VSServer->saveAccount(num);
+		}
+	}
 
 	void showSplashScreen(const string &filename) {}
 	void showSplashMessage(const string &text) {}

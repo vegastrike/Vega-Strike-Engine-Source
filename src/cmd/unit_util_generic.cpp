@@ -611,11 +611,7 @@ namespace UnitUtil {
 		return dist;
 	}
         int isPlayerStarship (const Unit * un) {
-                Cockpit * cp = _Universe->isPlayerStarship (un);
-                if (cp==NULL) {
-                        return -1;
-                }
-                return (cp - _Universe->AccessCockpit(0));
+                return _Universe->whichPlayerStarship (un);
         }
   void setSpeed (Unit * my_unit, float speed) {
     if (my_unit) {

@@ -428,12 +428,13 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 				totalunits=0;
                 ClientPtr cltk( *k );
 				// If that client is ingame we send to it position info
-				if( true) // cltk->ingame==true)
-				{
-				    int       nbunits=0;
-			        Packet    pckt;
-                    NetBuffer netbuf;
-
+				//if( true) { // cltk->ingame==true)
+				un_iter iter = (_Universe->star_system[i]->getUnitList()).createIterator();
+				while (*iter) {
+					int       nbunits=0;
+					Packet    pckt;
+					NetBuffer netbuf;
+					
 //                    COUT << "CLEAN NETBUF" << endl;
 
 					// This also means clients will receive info about themselves
@@ -445,7 +446,11 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 					netbuf.addFloat( cltk->getDeltatime() );
 //                    COUT << "   *** deltatime " << cltk->getDeltatime() << endl;
 					// Clients not ingame are removed from the drawList so it is ok not to test that
-					for(un_iter iter = (_Universe->star_system[i]->getUnitList()).createIterator();unit = *iter;++iter){
+					for(;unit = *iter;++iter){
+						if (netbuf.getOffset()>1200 && (&cltk->tcp_sock == cltk->lossy_socket)) {
+							// Don't want to go over MTU.
+							break;
+						}
                                           ++totalunits;
                                           if (unit->GetSerial()!=0) {
 						// Only send unit that ate UNITPTR and PLANETPTR+NEBULAPTR if update_planets

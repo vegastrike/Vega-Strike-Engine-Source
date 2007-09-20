@@ -78,7 +78,7 @@ public:
 	string			passwd;
 	/* In-game parameters */
 	bool			ingame;
-	enum Loginstate {CONNECTED, LOGGEDIN, SAVEDGAME, INGAME};
+	enum Loginstate {CONNECTED, WAITLISTED, LOGGEDIN, SAVEDGAME, INGAME};
 	int loginstate;
 	
 	char			webcam;

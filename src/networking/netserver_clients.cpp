@@ -509,6 +509,13 @@ void	NetServer::logout( ClientPtr clt )
 	Unit * un = clt->game_unit.GetUnit();
 	std::string callsign = clt->callsign;
 
+	if (clt->loginstate==Client::WAITLISTED) {
+		std::map<std::string, WaitListEntry>::iterator iter = waitList.find(clt->callsign);
+		if( waitList.end()!=iter) {
+			waitList.erase(iter);
+		}
+		clt->loginstate=Client::CONNECTED;
+	}
 	if( acctserver && clt->loginstate >= Client::LOGGEDIN) {
 		AcctLogout(acct_sock,clt);
 	}

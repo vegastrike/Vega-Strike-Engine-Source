@@ -56,6 +56,7 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 						COUT << "Got response for client IP : " << ipadr << endl;
 					}
 					waitList.erase(iter);
+					if (clt) clt->loginstate=Client::CONNECTED;
 					ObjSerial serial =0;
 					
 					

@@ -134,7 +134,6 @@ class NetServer
 		bool			loadFromSavegame( ClientPtr clt, Cockpit *cp );
 		bool			loadFromNewGame( ClientPtr clt, Cockpit *cp, string shipname );
 		ClientPtr       getClientFromSerial( ObjSerial serial);
-		bool			saveAccount(int cpnum );
 	public:
 		NetServer();
 		~NetServer();
@@ -152,6 +151,9 @@ class NetServer
 		void	BroadcastUnfire( ObjSerial serial, const vector<int> &weapon_indicies, unsigned short zone);
 		void	BroadcastFire( ObjSerial serial, const vector<int> &weapon_indicies, ObjSerial missile_serial, float energy, unsigned short zone);
 		//void	sendDamages( ObjSerial serial, int zone, string shields, float recharge, char leak, unsigned short ab, unsigned short af, unsigned short al, unsigned short ar, float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color);
+	
+		bool			saveAccount(int cpnum );
+	
 		void	sendDamages( ObjSerial serial, unsigned short zone, float hull, const Shield &shields, const Armor &armor,
 							float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color);
 		//void	sendDamages( ObjSerial serial, Vector & pnt, Vector & normal, float amt, GFXColor & color, float phasedamage);
