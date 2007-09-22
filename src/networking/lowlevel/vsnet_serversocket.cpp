@@ -52,11 +52,11 @@ bool ServerSocketTCP::lower_selected( int datalen )
     if( sock > 0 )
     {
         COUT << "accepted new sock " << sock  << endl;
-        SOCKETALT newsock( sock, SOCKETALT::TCP, remote_ip, _set );
+        SOCKETALT newsock( sock, SOCKETALT::TCP, remote_ip, *_set );
         _ac_mx.lock( );
 	    _accepted_connections.push( newsock );
         _ac_mx.unlock( );
-        _set.add_pending( get_fd() );
+        if (_set) _set->add_pending( get_fd() );
 		return true;
     }
     else
@@ -94,7 +94,7 @@ SOCKETALT ServerSocketTCP::acceptNewConn( )
     {
         COUT << "No accepted TCP connection" << endl;
         _ac_mx.unlock( );
-        _set.rem_pending( get_fd() );
+        if (_set) _set->rem_pending( get_fd() );
         SOCKETALT ret;
         return ret;
     }
@@ -111,7 +111,7 @@ bool ServerSocketUDP::isActive( )
 
 SOCKETALT ServerSocketUDP::acceptNewConn( )
 {
-    SOCKETALT ret( get_fd(), SOCKETALT::UDP, _srv_ip, _set );
+    SOCKETALT ret( get_fd(), SOCKETALT::UDP, _srv_ip, *_set );
     return ret;
 }
 

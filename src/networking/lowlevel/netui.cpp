@@ -246,6 +246,7 @@ SOCKETALT NetUIUDP::createSocket( const char * host, unsigned short srv_port, un
 	if (iter!=UDP_pool.end()) {
 		SOCKETALT ret ((*iter).second);
 		//bindFd(ret.get_fd(), local_ip); // Don't care if it fails... could be binding on itself.
+		ret.setSet( &set );
 		ret.setRemoteAddress(remote_ip);
 		return ret;
 	}
@@ -306,6 +307,7 @@ void NetUIUDP::disconnectSaveUDP(SOCKETALT udp) {
 	if (udp.valid()) {
 		UDP_pool[udp.getLocalAddress()] = udp;
 	}
+	udp.setSet(NULL);
 }
 
 /*

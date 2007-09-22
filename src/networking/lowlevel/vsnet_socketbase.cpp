@@ -63,7 +63,7 @@ bool VsnetSocket::sameAddress( const VsnetSocket& r) const
 
 VsnetSocketBase::VsnetSocketBase( int fd, const char* socktype, SocketSet& sets )
     : _fd( fd )
-    , _set( sets )
+    , _set( &sets )
     , _noblock( -1 )
 {
     MAKE_VALID
@@ -88,9 +88,15 @@ bool VsnetSocketBase::isReadyToSend(fd_set* write_set_select){
 VsnetSocketBase::~VsnetSocketBase( )
 {
     CHECK_VALID
-    _set.unset( this );
+    if (_set) _set->unset( this );
     delete [] _socktype;
     MAKE_INVALID
+}
+
+void VsnetSocketBase::setSet(SocketSet *set) {
+	if (this->_set) this->_set->unset(this);
+	this->_set = set;
+	if (this->_set) this->_set->set(this);
 }
 
 const char* VsnetSocketBase::get_socktype() const
@@ -159,7 +165,7 @@ void VsnetSocketBase::disconnect( const char *s)
     CHECK_VALID
     if( _fd > 0 )
     {
-        _set.unset( this );
+        if (_set) _set->unset( this );
     }
 
     child_disconnect( s );

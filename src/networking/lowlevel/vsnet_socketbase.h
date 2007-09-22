@@ -70,6 +70,7 @@ public:
     virtual void lower_clean_sendbuf( ) { }
     virtual bool isReadyToSend(fd_set*);//i.e. can call send_lower based on fd_set
 
+	void setSet(SocketSet *set);
 protected:
     virtual void child_disconnect( const char* s ) { }
 
@@ -81,7 +82,7 @@ private:
     /// variable meant to figure out what type of socket triggered select
     char*      _socktype;
 protected:
-    SocketSet& _set;
+    SocketSet* _set; // May be NULL if this isn't part of a socketset.
 
 private:
     // Indicates whether a socket is in blocking or non-blocking mode.

@@ -95,7 +95,7 @@ int VsnetUDPSocket::recvbuf( Packet* p, AddressIP* ipadr )
     if( _cpq.empty() )
     {
         _cpq_mx.unlock( );
-        _set.rem_pending( get_fd() );
+        if (_set) _set->rem_pending( get_fd() );
         return -1;
     }
 
@@ -152,7 +152,7 @@ bool VsnetUDPSocket::lower_selected( int datalen )
         _cpq_mx.lock( );
         _cpq.push( mem );
         _cpq_mx.unlock( );
-        _set.add_pending( get_fd() );
+        if (_set) _set->add_pending( get_fd() );
 		return true;
     }
 	return false;

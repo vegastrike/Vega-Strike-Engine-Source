@@ -70,6 +70,7 @@ public:
     friend bool          operator==( const SOCKETALT& l, const SOCKETALT& r );
 	
 	void addToSet( SocketSet &set );
+	void setSet (SocketSet *set);
 	
 	const AddressIP &getRemoteAddress() const;
   //returns false if impossible (TCP)

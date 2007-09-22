@@ -222,6 +222,11 @@ void SOCKETALT::addToSet( SocketSet &sockset )
 	if ( _sock ) sockset.set( &(*this->_sock) );
 }
 
+void SOCKETALT::setSet (SocketSet *set )
+{
+	if (_sock) _sock->setSet(set);
+}
+
 const AddressIP &SOCKETALT::getRemoteAddress() const {
 	static AddressIP nullAdr;
 	if ( _sock ) {

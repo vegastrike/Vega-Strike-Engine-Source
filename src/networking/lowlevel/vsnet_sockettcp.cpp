@@ -96,7 +96,7 @@ VsnetTCPSocket::~VsnetTCPSocket( )
 //     _sq.push( idx, packet );
 //     _sq_mx.unlock( );
 // 
-//     if( e ) _set.wakeup( );
+//     if( e && _set ) _set->wakeup( );
 //     return packet.len();
 // }
 
@@ -117,7 +117,7 @@ int VsnetTCPSocket::sendbuf( Packet* packet, const AddressIP*, int pcktflags )
     _sq.push( idx, enq );
     _sq_mx.unlock( );
 
-    if( e ) _set.wakeup( );
+    if( e && _set ) _set->wakeup( );
     return packet->getSendBufferLength();
 }
 
@@ -125,7 +125,7 @@ void VsnetTCPSocket::private_nothread_conditional_write( )
 {
 #ifdef USE_NO_THREAD
     if( _connection_closed ) return;
-    _set.waste_time( 0, 0 ); // waste zero time, but check sockets
+    if (_set) _set->waste_time( 0, 0 ); // waste zero time, but check sockets
 #endif
 }
 
@@ -300,7 +300,7 @@ int VsnetTCPSocket::recvbuf( Packet* p, AddressIP* ipadr )
     }
     else if( _connection_closed )
     {
-        _set.rem_pending( _sq_fd );
+        if (_set) _set->rem_pending( _sq_fd );
         _cpq_mx.unlock( );
         close_fd( );
         COUT << __PRETTY_FUNCTION__ << " connection is closed" << endl;
@@ -308,7 +308,7 @@ int VsnetTCPSocket::recvbuf( Packet* p, AddressIP* ipadr )
     }
     else
     {
-        _set.rem_pending( _sq_fd );
+        if (_set) _set->rem_pending( _sq_fd );
         _cpq_mx.unlock( );
         return -1;
     }
@@ -367,7 +367,7 @@ bool VsnetTCPSocket::isActive( )
     }
     else
     {
-        _set.rem_pending( _sq_fd );
+        if (_set) _set->rem_pending( _sq_fd );
     }
     _cpq_mx.unlock( );
 
@@ -407,7 +407,7 @@ bool VsnetTCPSocket::lower_selected( int datalen )
                     COUT << "Connection closed in header" << endl;
                     _connection_closed = true;
                     close_fd();
-                    _set.add_pending( _sq_fd );
+                    if (_set) _set->add_pending( _sq_fd );
 					return true;
 		        }
                 else if( vsnetEWouldBlock() == false )
@@ -449,7 +449,7 @@ bool VsnetTCPSocket::lower_selected( int datalen )
                     COUT << "Connection closed in data" << endl;
 		            _connection_closed = true;
                     close_fd();
-                    _set.add_pending( _sq_fd );
+                    if (_set) _set->add_pending( _sq_fd );
 					return true;
 		        }
 		    else if( vsnetEConnAborted() ) {
@@ -463,7 +463,7 @@ bool VsnetTCPSocket::lower_selected( int datalen )
 			    COUT << "Connection closed in error" << endl;
 			    _connection_closed = true;
 			    close_fd();
-			    _set.add_pending( _sq_fd );					
+			    if (_set) _set->add_pending( _sq_fd );					
 			}
 			return true;
 		    } else if (vsnetEWouldBlock()){
@@ -526,7 +526,7 @@ void VsnetTCPSocket::inner_complete_a_packet( Blob* b )
     _cpq_mx.lock( );
     _cpq.push( ptr );
     _cpq_mx.unlock( );
-    _set.add_pending( _sq_fd );
+    if (_set) _set->add_pending( _sq_fd );
     delete b;
 }
 

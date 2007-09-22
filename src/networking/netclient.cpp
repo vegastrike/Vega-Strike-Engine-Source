@@ -172,8 +172,9 @@ NetClient::~NetClient()
 		delete NetComm;
         NetComm = NULL;
     }
-        delete clt_tcp_sock;
-        delete clt_udp_sock;
+    if (clt_tcp_sock) { delete clt_tcp_sock; }
+	// UDP sockets don't seem to like being deleted.
+	//if (clt_udp_sock) { delete clt_udp_sock; }
 }
 
 /*************************************************************/
