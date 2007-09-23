@@ -143,7 +143,7 @@ void NetServer::sendLoginAccept(ClientPtr clt, Cockpit *cp) {
 		
 	// Generate the starsystem before addclient so that it already contains serials
 	StarSystem * sts = zonemgr->addZone( sysname );
-		
+	
 #ifdef CRYPTO
 	string sysxml;
 	if(!(sysxml=zonemgr->getSystem( relsys)).empty())
@@ -165,6 +165,18 @@ void NetServer::sendLoginAccept(ClientPtr clt, Cockpit *cp) {
 	//netbuf.addString( zonemgr->getSystem(sysname) );
 	
 	packet2.send( LOGIN_ACCEPT, cltserial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(241) );
+
+	// Now that we have a starsystem, we will want to make a mission.
+	if (active_missions.size()==1 && cp == _Universe->AccessCockpit(0)) {
+		active_missions[0]->DirectorInitgame();
+	}
+	if (Mission::getNthPlayerMission(_Universe->whichPlayerStarship(un), 0)==NULL) {
+		// Make a mission specially for this cockpit.
+		unsigned int oldcp = _Universe->CurrentCockpit();
+		_Universe->SetActiveCockpit(cp);
+		LoadMission("",vs_config->getVariable("server","serverscript","import server;my_obj=server.player()"),false);
+		_Universe->SetActiveCockpit(oldcp);
+	}
 }
 
 static void getShipList(vector<string> &ships) {
@@ -255,15 +267,6 @@ Cockpit * NetServer::loadCockpit(ClientPtr clt) {
 	}
 	if (cp == NULL) {
 		cp = _Universe->createCockpit( clt->callsign );
-		
-		// Make a mission specially for this cockpit.
-		unsigned int oldcp = _Universe->CurrentCockpit();
-		_Universe->SetActiveCockpit(cp);
-		if (active_missions.size()==1) {
-			active_missions[0]->DirectorInitgame();
-		}
-		LoadMission("",vs_config->getVariable("server","serverscript","import server;my_obj=server.player()"),false);
-		_Universe->SetActiveCockpit(oldcp);
 	} else {
 		cp->recreate(clt->callsign);
 	}

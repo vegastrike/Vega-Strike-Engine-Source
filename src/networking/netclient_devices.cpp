@@ -220,6 +220,21 @@ void	NetClient::dockRequest( ObjSerial utdw_serial)
             __FILE__, PSEUDO__LINE__(97) );
 }
 
+void	NetClient::missionRequest( unsigned short packetType, string mission, int pos)
+{
+	Packet p;
+	NetBuffer netbuf;
+	Unit *un = this->game_unit.GetUnit();
+	if (!un) return;
+	
+	netbuf.addShort(packetType);
+	netbuf.addString(mission);
+	netbuf.addInt32(pos);
+	
+	p.send(CMD_MISSION, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(),
+		   SENDRELIABLE, NULL, *this->clt_tcp_sock, __FILE__, PSEUDO__LINE__(235));
+}
+
 void	NetClient::undockRequest( ObjSerial utdw_serial)
 {
 	// Send a packet with CMD_UNDOCK with serial and an ObjSerial = unit_to_undock_with_serial

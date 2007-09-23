@@ -121,6 +121,7 @@ enum Cmd
                                     // the client exit if still alive
 
 	CMD_SAVEDATA,
+	CMD_MISSION,
 	
     // CMD_ACK          			// A packet to acknoledge the reception of a packet that was previously sent
 };
@@ -136,6 +137,11 @@ public:
 	enum {
 		SetValue    = 1<<8,
 		EraseValue  = 1<<9,
+	};
+
+	enum {
+		TerminateMission = 1,
+		AcceptMission = 2,
 	};
 
 };

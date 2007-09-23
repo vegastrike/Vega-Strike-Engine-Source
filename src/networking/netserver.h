@@ -172,7 +172,9 @@ class NetServer
 
 		void	sendMessage(string from, string to, string message, float delay);
 		void	sendSaveData( int cp, unsigned short packetType, int pos, string *key,
+							  Mission *miss, // Mission number for objectives.
 							  string *strValue, float *floatValue);
+		void	sendMission( int cp, unsigned short packetType, string mission, int pos);
 
 		void	addSystem( string & sysname, string & system);
 		void	getZoneInfo( unsigned short zoneid, NetBuffer & netbuf);

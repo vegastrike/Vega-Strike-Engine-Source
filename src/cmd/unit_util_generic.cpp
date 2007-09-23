@@ -13,6 +13,7 @@
 #include "gfx/cockpit_generic.h"
 #include "role_bitmask.h"
 #include "lin_time.h"
+#include "networking/netserver.h"
 
 #include "cmd/script/pythonmission.h"
 #ifndef NO_GFX
@@ -341,6 +342,9 @@ namespace UnitUtil {
 		Cockpit * tmp;
 		if ((tmp=_Universe->isPlayerStarship (my_unit))) {
 			tmp->credits+=credits;
+			if (SERVER) {
+				VSServer->sendCredits(my_unit->GetSerial(), tmp->credits);
+			}
 		}
 	}
     const string& getFlightgroupNameCR(const Unit *my_unit)
@@ -609,6 +613,27 @@ namespace UnitUtil {
 		if (un->isPlanet ())
 			dist = dist - (un->rSize()*planetpct);
 		return dist;
+	}
+	bool isSun(const Unit *my_unit){
+		if (!my_unit)return false;
+		bool res=false;
+		res=my_unit->isPlanet();
+		if (res) {
+			res = ((Planet *)my_unit)->hasLights();
+			if (!res) {
+				res = ((my_unit->name.get().find("star")!=std::string::npos) ||
+					   (my_unit->getFullname().find("star")!=std::string::npos));//
+			}
+		}
+		return res;
+	}
+	bool isSignificant(const Unit *my_unit){
+		if (!my_unit)return false;
+		bool res=false;
+		clsptr typ = my_unit->isUnit();
+		const string &s=getFlightgroupNameCR(my_unit);
+		res=(typ==PLANETPTR||typ==ASTEROIDPTR||typ==NEBULAPTR||s=="Base");
+		return res&&!isSun(my_unit);
 	}
         int isPlayerStarship (const Unit * un) {
                 return _Universe->whichPlayerStarship (un);

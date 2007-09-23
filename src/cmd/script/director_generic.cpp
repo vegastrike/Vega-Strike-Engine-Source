@@ -65,7 +65,7 @@ unsigned int pushSaveData (int whichcp, string key, float val) {
   }
   vector<float> * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
   if (SERVER) VSServer->sendSaveData(whichcp, Subcmd::FloatValue|Subcmd::SetValue,
-	  ans->size(), &key, NULL, &val);
+	  ans->size(), &key, NULL, NULL, &val);
   ans->push_back (val);
   return ans->size()-1;
 }
@@ -75,21 +75,35 @@ unsigned int eraseSaveData (int whichcp, string key, unsigned int index) {
     return 0;
   }
   vector<float> * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
-  if (SERVER) VSServer->sendSaveData(whichcp, Subcmd::FloatValue|Subcmd::EraseValue,
-	  index, &key, NULL, NULL);
   if (index <ans->size()) {
+    if (SERVER) VSServer->sendSaveData(whichcp, Subcmd::FloatValue|Subcmd::EraseValue,
+	    index, &key, NULL, NULL, NULL);
     ans->erase (ans->begin()+index);
   }
   return ans->size();
 
 }
+
+unsigned int clearSaveData (int whichcp, string key) {
+  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+    return 0;
+  }
+  vector<float> * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
+  int ret = ans->size();
+  if (!ret) return 0;
+  if (SERVER) VSServer->sendSaveData(whichcp, Subcmd::FloatValue|Subcmd::EraseValue,
+	    -1, &key, NULL, NULL, NULL);
+  ans->clear();
+  return ret;
+}
+
 unsigned int pushSaveString (int whichcp, string key, string value) {
   if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
     return 0;
   }
   vector<std::string> * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key)));
   if (SERVER) VSServer->sendSaveData(whichcp, Subcmd::StringValue|Subcmd::SetValue,
-	  ans->size(), &key, &value, NULL);
+	  ans->size(), &key, NULL, &value, NULL);
   ans->push_back (std::string(value));
   return ans->size()-1;
 }
@@ -101,7 +115,7 @@ void putSaveString (int whichcp, string key, unsigned int num, string val) {
   vector<std::string> *ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key)));
   if (num<ans->size()) {
     if (SERVER) VSServer->sendSaveData(whichcp, Subcmd::StringValue|Subcmd::SetValue,
-	    num, &key, &val, NULL);
+	    num, &key, NULL, &val, NULL);
     (*ans)[num]= val;
   }
 }
@@ -113,7 +127,7 @@ void putSaveData (int whichcp, string key, unsigned int num, float val) {
   vector<float> * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
   if (num<ans->size()) {
     if (SERVER) VSServer->sendSaveData(whichcp, Subcmd::FloatValue|Subcmd::SetValue,
-	    num, &key, NULL, &val);
+	    num, &key, NULL, NULL, &val);
     (*ans)[num] = val;
   }
 }
@@ -125,11 +139,24 @@ unsigned int eraseSaveString (int whichcp, string key, unsigned int index) {
   vector<std::string> *ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key)));
   if (index <ans->size()) {
     if (SERVER) VSServer->sendSaveData(whichcp, Subcmd::StringValue|Subcmd::EraseValue,
-	    index, &key, NULL, NULL);
+	    index, &key, NULL, NULL, NULL);
     ans->erase (ans->begin()+index);
   }
   return ans->size();
 
+}
+
+unsigned int clearSaveString (int whichcp, string key) {
+  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+    return 0;
+  }
+  vector<std::string> *ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key)));
+  int ret = ans->size();
+  if (!ret) return 0;
+  if (SERVER) VSServer->sendSaveData(whichcp, Subcmd::StringValue|Subcmd::EraseValue,
+	    -1, &key, NULL, NULL, NULL);
+  ans->clear();
+  return ret;
 }
 
 vector <string> loadStringList (int playernum,string mykey) {
@@ -199,6 +226,7 @@ PYTHON_END_CLASS(Director,pythonMission)
   PYTHON_DEFINE_GLOBAL(Director,&putSaveData,"putSaveData");
   PYTHON_DEFINE_GLOBAL(Director,&pushSaveData,"pushSaveData");
   PYTHON_DEFINE_GLOBAL(Director,&eraseSaveData,"eraseSaveData");
+  PYTHON_DEFINE_GLOBAL(Director,&clearSaveData,"clearSaveData");
   PYTHON_DEFINE_GLOBAL(Director,&getSaveData,"getSaveData");
   PYTHON_DEFINE_GLOBAL(Director,&getSaveDataLength,"getSaveDataLength");
   PYTHON_DEFINE_GLOBAL(Director,&putSaveString,"putSaveString");
@@ -206,6 +234,7 @@ PYTHON_END_CLASS(Director,pythonMission)
   PYTHON_DEFINE_GLOBAL(Director,&getSaveString,"getSaveString");
   PYTHON_DEFINE_GLOBAL(Director,&getSaveStringLength,"getSaveStringLength");
   PYTHON_DEFINE_GLOBAL(Director,&eraseSaveString,"eraseSaveString");
+  PYTHON_DEFINE_GLOBAL(Director,&clearSaveString,"clearSaveString");
 PYTHON_END_MODULE(Director)
 
 void InitDirector() {
@@ -366,6 +395,7 @@ void Mission::DirectorStart(missionNode *node){
 void Mission::DirectorInitgame(){
 
   this->player_num=_Universe->CurrentCockpit();
+
   if (nextpythonmission) {
 	// CAUSES AN UNRESOLVED EXTERNAL SYMBOL FOR PythonClass::last_instance ?!?!
 #ifndef _WIN32

@@ -446,6 +446,10 @@ class Mission {
   void UnPickle (std::string pickled);//takes in pickeddata
   void AddFlightgroup(Flightgroup * fg);
   void initMission(bool loadscripts=true);
+
+  int getPlayerMissionNumber(); // -1 if not found or invalid player_num.
+  static Mission *getNthPlayerMission(int cp, int num);
+  
   ///alex Please help me make this function...this is called between mission loops
   ~Mission();
   //deletes missions pushed back onto a delete queue at a *safe time*

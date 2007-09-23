@@ -249,10 +249,12 @@ namespace UniverseUtil
 		_Universe->popActiveStarSystem();
 	}
 	string getSystemFile() {
+		if (!activeSys) return "";
 		return activeSys->getFileName();
 	}
 
 	string getSystemName() {
+		if (!activeSys) return "";
 		return activeSys->getName();
 	}
 	///tells the respective flightgroups in this system to start shooting at each other
@@ -479,7 +481,7 @@ namespace UniverseUtil
 		float status = 0;
 		if (SERVER)
 			VSServer->sendSaveData(mission->player_num, Subcmd::Objective|Subcmd::SetValue,
-					mission->objectives.size(), NULL, &objective, &status );
+					mission->objectives.size(), NULL, mission, &objective, &status );
 		mission->objectives.push_back(Mission::Objective(status,dontBlankOut(objective)));
 		return mission->objectives.size()-1;
 	}
@@ -487,7 +489,7 @@ namespace UniverseUtil
 		if (which<(int)mission->objectives.size() && which>=0) {
 			if (SERVER)
 				VSServer->sendSaveData(mission->player_num, Subcmd::Objective|Subcmd::SetValue,
-							which, NULL, &newobjective, &mission->objectives[which].completeness );
+							which, NULL, mission, &newobjective, &mission->objectives[which].completeness );
 			mission->objectives[which].objective=dontBlankOut(newobjective);
 		}
 	}
@@ -495,7 +497,7 @@ namespace UniverseUtil
 		if (which<(int)mission->objectives.size() && which>=0) {
 			if (SERVER)
 				VSServer->sendSaveData(mission->player_num, Subcmd::Objective|Subcmd::SetValue,
-							which, NULL, &mission->objectives[which].objective, &completeNess );
+							which, NULL, mission, &mission->objectives[which].objective, &completeNess );
 			mission->objectives[which].completeness=completeNess;
 		}
 	}
@@ -511,15 +513,17 @@ namespace UniverseUtil
 		if (which<(int)mission->objectives.size() && which>=0) {
 			if (SERVER)
 				VSServer->sendSaveData(mission->player_num, Subcmd::Objective|Subcmd::EraseValue,
-							which, NULL, NULL, NULL );
+							which, NULL, mission, NULL, NULL );
 			mission->objectives.erase(mission->objectives.begin()+which);
 		}
 	}
 	void clearObjectives() {
-		mission->objectives.clear();
-		if (SERVER)
-			VSServer->sendSaveData(mission->player_num, Subcmd::Objective|Subcmd::EraseValue,
-						-1, NULL, NULL, NULL );
+		if (mission->objectives.size()) {
+			mission->objectives.clear();
+			if (SERVER)
+				VSServer->sendSaveData(mission->player_num, Subcmd::Objective|Subcmd::EraseValue,
+						-1, NULL, mission, NULL, NULL );
+		}
 	}
 	void setOwnerII(int which,Unit *owner) {
 		if (which<(int)mission->objectives.size()) {

@@ -3,6 +3,7 @@
 #include "cmd/script/pythonmission.h"
 #include "vs_globals.h"
 //#include "gfxlib.h"
+#include "networking/netserver.h"
 #include "star_system_generic.h"
 #include "vs_globals.h"
 #include "cmd/unit_generic.h"
@@ -14,6 +15,7 @@
 #include "cmd/script/flightgroup.h"
 #include "python/python_class.h"
 #include "savegame.h"
+#include "save_util.h"
 #include "load_mission.h"
 std::string PickledDataSansMissionName (std::string pickled) {
   string::size_type newline = pickled.find ("\n");
@@ -216,6 +218,11 @@ void LoadMission (const char * mn, bool loadFirstUnit) {
 void LoadMission (const char * nission_name, const std::string &script, bool loadFirstUnit) {
 	using namespace VSFileSystem;
 	string mission_name(nission_name);
+	if (nission_name[0]=='#') {
+		// Allows you to title a mission without loading that file.
+		mission_name=string();
+		nission_name++;
+	}
 	if (mission_name.empty()) {
 		static std::string mission_name_def=vs_config->getVariable("general","empty_mission","internal.mission");
 		mission_name=mission_name_def;
@@ -228,8 +235,8 @@ void LoadMission (const char * nission_name, const std::string &script, bool loa
   }
   f.Close();
   if (active_missions.size()) {
-	_Universe->AccessCockpit()->savegame->getMissionStringData("active_scripts").push_back(StringPool::Reference(script));
-    _Universe->AccessCockpit()->savegame->getMissionStringData("active_missions").push_back(StringPool::Reference(nission_name));
+	pushSaveString(_Universe->CurrentCockpit(), "active_scripts", script);
+	pushSaveString(_Universe->CurrentCockpit(), "active_missions", nission_name);
   }
   active_missions.push_back (new Mission(mission_name.c_str(),script));
   
@@ -289,6 +296,19 @@ void LoadMission (const char * nission_name, const std::string &script, bool loa
 	  a++;
 	} // for nr_ships
   } // end of for flightgroups
+  
+  if(active_missions.size() > 0) {
+    // Give the mission a name.
+    active_missions.back()->mission_name = nission_name;
+  }
+  active_missions.back()->player_num = _Universe->CurrentCockpit();
+  if (SERVER) {
+    int num = active_missions.back()->getPlayerMissionNumber();
+    if (num>0) {
+      VSServer->sendMission(_Universe->CurrentCockpit(), Subcmd::AcceptMission,
+      		nission_name, num-1);
+    }
+  }
   
   active_missions.back()->DirectorInitgame();
   mission=active_missions[0];

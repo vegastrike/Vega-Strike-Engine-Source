@@ -868,7 +868,8 @@ void VDU::DrawMessages(GameCockpit* parentcp,Unit *target){
     }
   }
     
-  
+
+  /*
   if (rows_used>=row_lim&&parentcp->editingTextMessage) {
     size_t where=fullstr.find(newline);
     if (where!=string::npos) {
@@ -878,6 +879,7 @@ void VDU::DrawMessages(GameCockpit* parentcp,Unit *target){
       fullstr=fullstr.substr(where+1);
     }
   }
+  */
   if (parentcp->editingTextMessage) {
     fullstr+=textMessage;
     fullstr+=newline;

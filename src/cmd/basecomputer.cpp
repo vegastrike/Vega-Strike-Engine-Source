@@ -3098,7 +3098,7 @@ void BaseComputer::loadNewsControls(void) {
 
     // Load the picker.
     static const bool newsFromCargolist = XMLSupport::parse_bool(vs_config->getVariable("cargo","news_from_cargolist","false"));
-    if(newsFromCargolist) {
+    if(newsFromCargolist && Network==NULL) {
         gameMessage last;
         int i = 0;
         vector<std::string> who;
@@ -3305,13 +3305,21 @@ bool BaseComputer::acceptMission(const EventCommandId& command, Control* control
     if (item->GetCategory().find("Active_Missions")!=string::npos) {
       unsigned int whichmission=atoi(item->GetContent().c_str());
       if (whichmission>0&&whichmission<active_missions.size()) {
-        Mission * tmp=active_missions[whichmission];
-        active_missions[whichmission]->terminateMission();        
-        if (tmp==mission)
-          mission=active_missions[0];
-        //Cargo itemCopy = *item;
-        //loadMissionsControls();
-		refresh();
+        Mission * miss=active_missions[whichmission];
+        if (Network==NULL) {
+          miss->terminateMission();
+          if (miss==mission)
+            mission=active_missions[0];
+          //Cargo itemCopy = *item;
+          //loadMissionsControls();
+          refresh();
+        } else if (m_player.GetUnit()) {
+          int cp=_Universe->whichPlayerStarship(m_player.GetUnit());
+          if (cp<0) cp=0;
+		  int num = miss->getPlayerMissionNumber();
+		  
+          Network[cp].missionRequest(Subcmd::TerminateMission, string(), num);
+        }
         //updateTransactionControls(itemCopy);
         return true;
       }      
@@ -3330,9 +3338,11 @@ bool BaseComputer::acceptMission(const EventCommandId& command, Control* control
     for (unsigned int i=0; i<stringCount; i++) {
 	if (getSaveString(playernum, MISSION_NAMES_LABEL, i) == qualifiedName) {
 	    finalScript = getSaveString(playernum, MISSION_SCRIPTS_LABEL, i);
-	    eraseSaveString(playernum, MISSION_SCRIPTS_LABEL, i);
-	    eraseSaveString(playernum, MISSION_NAMES_LABEL, i);
-	    eraseSaveString(playernum, MISSION_DESC_LABEL, i);
+	    if (Network!=NULL) {
+		eraseSaveString(playernum, MISSION_SCRIPTS_LABEL, i);
+		eraseSaveString(playernum, MISSION_NAMES_LABEL, i);
+		eraseSaveString(playernum, MISSION_DESC_LABEL, i);
+	    }
 	    break;
 	}
     }
@@ -3345,17 +3355,16 @@ bool BaseComputer::acceptMission(const EventCommandId& command, Control* control
 				// Give the mission a name.
 				active_missions.back()->mission_name = item->category;
 			}
+			// Reload the UI.
+			//Cargo itemCopy = *item;
+			//loadMissionsControls();
+			refresh();
+			//updateTransactionControls(itemCopy);
 		} else if (m_player.GetUnit()) {
 			int cp=_Universe->whichPlayerStarship(m_player.GetUnit());
 			if (cp<0) cp=0;
-			Network[cp].cargoRequest(m_player.GetUnit()->GetSerial(), 0, qualifiedName, 0, 0, 0);
+			Network[cp].missionRequest(Subcmd::AcceptMission, qualifiedName, active_missions.size());
 		}
-
-        // Reload the UI.
-        //Cargo itemCopy = *item;
-        //loadMissionsControls();
-		refresh();
-        //updateTransactionControls(itemCopy);
     }
 
     // We handled the command, whether we successfully accepted the mission or not.

@@ -5,6 +5,7 @@
 #include "networking/lowlevel/vsnet_debug.h"
 #include "networking/lowlevel/vsnet_sockethttp.h"
 #include "lin_time.h"
+#include "save_util.h"
 
 extern StarSystem * GetLoadedStarSystem( const char * system);
 
@@ -142,7 +143,7 @@ void	NetServer::sendCargoSnapshot( ObjSerial cltser, const UnitCollection &list)
 }
 
 void NetServer::sendSaveData( int cp, unsigned short type, int pos, string *key,
-				  string *strValue, float *floatValue) {
+				  Mission *miss, string *strValue, float *floatValue) {
 	/* Note to self: This function will do absolutely nothing
 	   until it is implemented. */
 	NetBuffer netbuf;
@@ -157,6 +158,10 @@ void NetServer::sendSaveData( int cp, unsigned short type, int pos, string *key,
 		netbuf.addString(*key);
 	}
 	netbuf.addInt32(pos);
+	if (type&Subcmd::Objective) {
+		int num = miss->getPlayerMissionNumber();
+		netbuf.addInt32(num-1);
+	}
 	if (type&Subcmd::SetValue) {
 		if ((type&Subcmd::StringValue) || (type&Subcmd::Objective)) {
 			netbuf.addString(*strValue);
@@ -167,6 +172,23 @@ void NetServer::sendSaveData( int cp, unsigned short type, int pos, string *key,
 	}
 	p2.send( CMD_SAVEDATA, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
 			 NULL, clt->tcp_sock, __FILE__, PSEUDO__LINE__(164) );
+}
+
+void	NetServer::sendMission( int cp, unsigned short packetType, string mission, int pos)
+{
+	Packet p;
+	NetBuffer netbuf;
+	Unit *un = _Universe->AccessCockpit(cp)->GetParent();
+	if (!un) return;
+	ClientPtr clt = this->getClientFromSerial(un->GetSerial());
+	if (!clt) return;
+	
+	netbuf.addShort(packetType);
+	netbuf.addString(mission);
+	netbuf.addInt32(pos);
+	
+	p.send(CMD_MISSION, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
+		   NULL, clt->tcp_sock, __FILE__, PSEUDO__LINE__(186));
 }
 
 void	NetServer::sendDamages( ObjSerial serial, unsigned short zone, float hull, const Shield &shield, const Armor &armor,
@@ -241,6 +263,17 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 	// Find the client in the udp & tcp client lists in order to set it out of the game (not delete it yet)
 	ClientPtr clt = this->getClientFromSerial( serial);
 
+	// It's the server's responsibility to kill missions in this case.
+	// NETFIXME: Note that the client might not hear the request to terminate missions.
+	int cp = _Universe->whichPlayerStarship(un);
+	if (cp>=0) {
+		// Note 1 not 0 is to avoid killing the player's main mission.
+		Mission *mis;
+		while ((mis = Mission::getNthPlayerMission(cp, 1))) {
+			mis->terminateMission();
+		}
+	}
+	
 	p.bc_create( CMD_KILL, serial,
                  NULL, 0, SENDRELIABLE,
                  __FILE__, PSEUDO__LINE__(1771) );
@@ -273,11 +306,10 @@ void	NetServer::sendJump(Unit * un, Unit * dst,std::string dststr)
     Packet p2;
     std::string netbuf;
     std::string fn=dststr;
-    vector<std::string>*dat=&cp->savegame->getMissionStringData("jump_from");
-    if (dat->empty()) {
-	  dat->push_back(std::string(_Universe->activeStarSystem()->getFileName()));
+    if (getSaveStringLength(cpnum,"jump_from")<1) {
+	  pushSaveString(cpnum, "jump_from", _Universe->activeStarSystem()->getFileName());
     }else {
-      (*dat)[0]=_Universe->activeStarSystem()->getFileName();
+      putSaveString(cpnum, "jump_from", 0, _Universe->activeStarSystem()->getFileName());
     }
     std::string savestr;
 	std::string csvstr;

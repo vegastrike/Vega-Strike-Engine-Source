@@ -9,6 +9,8 @@
 #include "networking/lowlevel/vsnet_sockethttp.h"
 #include "lin_time.h"
 #include "vs_random.h"
+#include "save_util.h"
+
 extern QVector DockToSavedBases( int n);
 extern StarSystem * GetLoadedStarSystem( const char * system);
 
@@ -79,10 +81,9 @@ void	NetServer::addClient( ClientPtr clt)
 	
 // NETFIXME: Dock not yet working!
         bool besafe=true;
-	vector<std::string> *dat=&cp->savegame->getMissionStringData("jump_from");
         
-        if (dat->size()) {
-          std::string srcsys=(*dat)[0];
+        if (getSaveStringLength(player, "jump_from")>0) {
+          std::string srcsys=getSaveString(player, "jump_from", 0);
           Unit * grav;
           for (un_iter ui=st2->gravitationalUnits().createIterator();
                (grav=*ui)!=NULL;
@@ -98,7 +99,7 @@ void	NetServer::addClient( ClientPtr clt)
               }
             }
           }
-          dat->clear();
+          eraseSaveString(player, "jump_from", 0);
         }
 	QVector safevec;//( DockToSavedBases( player));
 	if( true) //safevec == nullVec)
@@ -178,8 +179,6 @@ void	NetServer::addClient( ClientPtr clt)
 	zonemgr->broadcast( un->activeStarSystem->GetZone(), un->GetSerial(), &p2, true ); 
 
 	COUT<<"ADDED client n "<<un->GetSerial()<<" in ZONE "<<un->activeStarSystem->GetZone()<<" at STARDATE "<<_Universe->current_stardate.GetFullTrekDate()<<endl;
-        if (active_missions.size()==1) {
-        }
 	sendCredits(un->GetSerial(), cp->credits);
 		sendCargoSnapshot(un->GetSerial(), st2->getUnitList());
 	//delete cltsbuf;
@@ -479,7 +478,7 @@ void AcctLogout(VsnetHTTPSocket* acct_sock,ClientPtr clt) {
     Unit * un = clt->game_unit.GetUnit();
 	int cpnum = _Universe->whichPlayerStarship(un);
     Cockpit * cp = cpnum==-1?NULL:_Universe->AccessCockpit(cpnum);
-    bool dosave=(cp!=NULL&&un!=NULL&&_Universe->star_system.size()>0&&cp->activeStarSystem&&clt->jumpok==0);
+    bool dosave= false; //(cp!=NULL&&un!=NULL&&_Universe->star_system.size()>0&&cp->activeStarSystem&&clt->jumpok==0);
     addSimpleChar(netbuf,dosave?ACCT_SAVE_LOGOUT:ACCT_LOGOUT);
     addSimpleString(netbuf, clt->callsign );
     addSimpleString(netbuf, clt->passwd );

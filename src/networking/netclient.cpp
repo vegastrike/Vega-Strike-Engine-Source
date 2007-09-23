@@ -40,6 +40,7 @@
 #include "universe_util.h"
 #include "cmd/unit_factory.h"
 #include "gfx/matrix.h"
+#include "load_mission.h"
 #include "lin_time.h"
 #include "vsfilesystem.h"
 #include "cmd/role_bitmask.h"
@@ -1013,6 +1014,37 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				}
 			}
 			break;
+			case CMD_MISSION:
+			{
+				un = this->game_unit.GetUnit();
+				int cp = _Universe->whichPlayerStarship(un);
+				if (cp==-1) break;
+				
+				unsigned short type = netbuf.getShort();
+				string qualname = netbuf.getString();
+				int pos = netbuf.getInt32();
+				if (type == Subcmd::TerminateMission) {
+					Mission *activeMis = Mission::getNthPlayerMission(cp, pos);
+					if (activeMis) {
+						activeMis->terminateMission();
+					} else {
+						fprintf(stderr,"Failed to find and terminate mission %d for player %d\n",pos,cp);
+					}
+				} else if (type == Subcmd::AcceptMission) {
+					// lame duck mission
+					unsigned int oldcp = _Universe->CurrentCockpit();
+					_Universe->SetActiveCockpit(cp);
+					while (!Mission::getNthPlayerMission(cp,pos)) {
+						LoadMission("","import Director; temp=Director.Mission()",false);
+					}
+					string::size_type pos = qualname.find('/');
+					string cat = qualname.substr(0, pos);
+					active_missions.back()->mission_name = cat;
+					_Universe->SetActiveCockpit(oldcp);
+				}
+				BaseUtil::refreshBaseComputerUI(NULL);
+			}
+			break;
 			case CMD_CARGOUPGRADE:
 			{
 				if (nostarsystem) break;
@@ -1139,11 +1171,19 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				string strValue;
 				float floatValue=0;
 				int pos=0;
+				Mission *activeMis=NULL;
+				Mission *origMis=mission;
 				
 				if ((type&Subcmd::StringValue) ||(type&Subcmd::FloatValue)) {
 					key = netbuf.getString();
 				}
 				pos = netbuf.getInt32();
+				if (type&Subcmd::Objective) {
+					int missionnum = netbuf.getInt32();
+					activeMis = Mission::getNthPlayerMission(cp, missionnum);
+				}
+				if (activeMis == NULL) activeMis = mission;
+				
 				if (type&Subcmd::SetValue) {
 					if (pos<0) break; // -1 is valid for erasing.
 					if ((type&Subcmd::StringValue) || (type&Subcmd::Objective)) {
@@ -1183,18 +1223,24 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					}
 					break;
 				case (Subcmd::Objective|Subcmd::SetValue):
+					mission = activeMis;
 					while (mission->objectives.size()<=pos) {
 						UniverseUtil::addObjective("");
 					}
 					UniverseUtil::setObjective(pos, strValue);
 					UniverseUtil::setCompleteness(pos, floatValue);
+					mission = origMis;
+					BaseUtil::refreshBaseComputerUI(NULL); // objectives
 					break;
 				case (Subcmd::Objective|Subcmd::EraseValue):
+					mission = activeMis;
 					if (pos<mission->objectives.size() && pos>=0) {
-						mission->objectives.erase(mission->objectives.begin()+pos);
+						mission->objectives.erase(activeMis->objectives.begin()+pos);
 					} else {
 						UniverseUtil::clearObjectives();
 					}
+					mission = origMis;
+					BaseUtil::refreshBaseComputerUI(NULL); // objetives
 					break;
 				}
 			}
@@ -1346,7 +1392,11 @@ SOCKETALT*	NetClient::logout(bool leaveUDP)
             SENDRELIABLE, NULL, *this->clt_tcp_sock,
             __FILE__, PSEUDO__LINE__(1382) );
 	}
-	clt_tcp_sock->disconnect( "Closing connection to server" );
+	Mission *mis;
+	// Can't figure out how to get cockpit number?
+	while ((mis = Mission::getNthPlayerMission((this - Network), 0))) {
+		mis->terminateMission();
+	}
         if (!leaveUDP) {
           NetUIUDP::disconnectSaveUDP(*clt_udp_sock);
 //          clt_udp_sock->disconnect( "Closing UDP connection to server");

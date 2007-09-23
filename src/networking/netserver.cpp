@@ -33,6 +33,8 @@
 #include "gfx/cockpit_generic.h"
 #include "universe_util.h"
 #include "cmd/unit_factory.h"
+#include "load_mission.h"
+#include "save_util.h"
 #include "networking/client.h"
 #include "networking/lowlevel/packet.h"
 #include "lin_time.h"
@@ -65,6 +67,10 @@ int		acct_con;
 double  DAMAGE_ATOM;
 double	PLANET_ATOM;
 double	SAVE_ATOM;
+
+static const char* const MISSION_SCRIPTS_LABEL = "mission_scripts";
+static const char* const MISSION_NAMES_LABEL = "mission_names";
+static const char* const MISSION_DESC_LABEL = "mission_descriptions";
 
 #define MAXINPUT 1024
 char	input_buffer[MAXINPUT];
@@ -1122,6 +1128,51 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 #ifdef CRYPTO
 			delete server_hash;
 #endif
+		}
+		break;
+		case CMD_MISSION :
+		{
+            Unit *sender = clt->game_unit.GetUnit();
+			if (!sender) break;
+			int playernum = _Universe->whichPlayerStarship(sender);
+			if (playernum<0) break;
+			
+			unsigned short type = netbuf.getShort();
+			string qualname = netbuf.getString();
+			int pos = netbuf.getInt32();
+
+			if (type == Subcmd::TerminateMission) {
+				// Abstracting number of actual missions running on server.
+				// (added 1 for player's main mission).
+				Mission *mis = Mission::getNthPlayerMission(playernum, (pos+1));
+				if (mis) {
+					// Found it!
+					mis->terminateMission();
+				}
+			} else if (type == Subcmd::AcceptMission) {
+				string finalScript;
+				unsigned int stringCount = getSaveStringLength(playernum, MISSION_NAMES_LABEL);
+				unsigned int temp = getSaveStringLength(playernum, MISSION_DESC_LABEL);
+				if (temp<stringCount) stringCount=temp;
+				temp = getSaveStringLength(playernum, MISSION_SCRIPTS_LABEL);
+				if (temp<stringCount) stringCount=temp;
+				for (unsigned int i=0; i<stringCount; i++) {
+					if (getSaveString(playernum, MISSION_NAMES_LABEL, i) == qualname) {
+						finalScript = getSaveString(playernum, MISSION_SCRIPTS_LABEL, i);
+						eraseSaveString(playernum, MISSION_SCRIPTS_LABEL, i);
+						eraseSaveString(playernum, MISSION_NAMES_LABEL, i);
+						eraseSaveString(playernum, MISSION_DESC_LABEL, i);
+						break;
+					}
+				}
+				if (finalScript.empty()) break;
+				
+				unsigned int oldcp = _Universe->CurrentCockpit();
+				_Universe->SetActiveCockpit(playernum);
+				string nission = string("#")+qualname;
+				LoadMission(nission.c_str(), finalScript, false);
+				_Universe->SetActiveCockpit(oldcp);
+			}
 		}
 		break;
 		case CMD_CARGOUPGRADE :

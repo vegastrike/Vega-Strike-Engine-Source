@@ -210,6 +210,7 @@ class	NetClient
 
 		void	cargoRequest( ObjSerial buyer, ObjSerial seller, const std::string &cargo,unsigned int quantity,
 	        int mountOffset, int subunitOffset);
+		void	missionRequest( unsigned short packetType, string mission, int pos);
 
 		void	downloadZoneInfo();
 		void	AddObjects( NetBuffer & netbuf);

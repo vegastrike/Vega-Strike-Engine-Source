@@ -48,6 +48,7 @@
 #endif
 #include "python/python_class.h"
 #include "savegame.h"
+#include "networking/netserver.h"
 //#include "easydom.h"
 
 //#include "msgcenter.h"
@@ -210,16 +211,69 @@ void Mission::wipeDeletedMissions() {
   }
 }
 
+int Mission::getPlayerMissionNumber() {
+	vector<Mission *> *active_missions = ::active_missions.Get();
+	int num=-1;
+	vector<Mission*>::iterator pl = active_missions->begin();
+	if (pl == active_missions->end()) return -1;
+	for (++pl; pl!=active_missions->end(); ++pl) {
+		if ((*pl)->player_num == this->player_num) {
+			num++;
+		}
+		if (*pl == this) {
+			break;
+		}
+	}
+	if (num>=active_missions->size())
+		return -1;
+	return num;
+}
+Mission * Mission::getNthPlayerMission(int cp, int missionnum) {
+	vector<Mission *> *active_missions = ::active_missions.Get();
+	Mission *activeMis = NULL;
+	if (missionnum >= 0) {
+		int num=-1;
+		vector<Mission*>::iterator pl = active_missions->begin();
+		if (pl == active_missions->end()) return NULL;
+		for (++pl; pl!=active_missions->end(); ++pl) {
+			if ((*pl)->player_num == cp) {
+				num++;
+			}
+			if (num == missionnum) {
+				// Found it!
+				activeMis = (*pl);
+				break;
+			}
+		}
+	}
+	return activeMis;
+}
 void Mission::terminateMission(){
 	vector<Mission *> *active_missions = ::active_missions.Get();
 	vector<Mission *>::iterator f = std::find (active_missions->begin(),active_missions->end(),this);
         int queuenum = f-active_missions->begin();
+	
 	if (f!=active_missions->end()) {
+		if ((Network!=NULL || SERVER) && player_num>=0) {
+			int num = getPlayerMissionNumber();
+			if (num>=0) {
+				if (SERVER && num>0) {
+					VSServer->sendMission(player_num, Subcmd::TerminateMission, string(), num-1);
+				}
+				/*
+				// At this point, it's too late!
+				if (Network!=NULL) {
+					Network[(*pl)->player_num]->missionRequest(Subcmd::TerminateMission, string(), num);
+				}
+				*/
+			}
+		}
 		active_missions->erase (f);
 	}
 	if (this!=(*active_missions)[0]) {
 		Mission_delqueue.push_back(this);//only delete if we arent' the base mission
 	}
+	// NETFIXME: This routine does not work properly yet.
         if (queuenum>0) {
           int num=queuenum-1;
           vector<std::string> * scripts = &_Universe->AccessCockpit(player_num)->savegame->getMissionStringData("active_scripts");
