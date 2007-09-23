@@ -715,11 +715,24 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 {
 	if (handle<0)
 		return GFXFALSE;
+	int error = 0;
+	
 	int logsize=1;
 	int logwid=1;
-	int mmap = 1;
 	unsigned char *data = NULL;
+	unsigned char * tempbuf = NULL;
+	GLenum internalformat;
+	GLenum image2D=GetImageTarget (imagetarget);
+	glBindTexture(textures[handle].targets, textures[handle].name);
+	int blocksize = 16;
 	bool comptemp = gl_options.compression;
+	
+	// Read in the number of mipmaps from buffer 
+	int offset1 = 2;
+	char mipmapbuf[2] = {buffer[0],buffer[1]};
+	int mips = atoi(mipmapbuf);
+	
+	// If datatype is png, we aren't compressing it
 	if(internformat >= PNGPALETTE8){
 		gl_options.compression = false;
 		if(internformat == PNGRGB24)
@@ -729,6 +742,8 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 		else 
 			internformat = PALETTE8;
 	}
+	
+	// This code i believe is executed if our texture isn't power of two 
 	if ((textures[handle].mipmapped&(TRILINEAR|MIPMAP))&&(!isPowerOfTwo (textures[handle].width,logwid)|| !isPowerOfTwo (textures[handle].height,logsize))) {
 		static unsigned char NONPOWEROFTWO[1024]= {
 			255,127,127,255,
@@ -742,27 +757,28 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 		//    assert (false);
 	}
 	logsize = logsize>logwid?logsize:logwid;
+	
+	// By default, if we have no limit set, aux_texture sends us a high number 
+	// for the max dimension, so that we know to grep the GL max number.
+	// Otherwise maxdimension is set by some user argument based on quality settings.
 	if (maxdimension==65536) {
 		maxdimension = gl_options.max_texture_dimension;
 	}
-	int error;
-	unsigned char * tempbuf = NULL;
-	GLenum internalformat;
-	GLenum image2D=GetImageTarget (imagetarget);
-	glBindTexture(textures[handle].targets, textures[handle].name);
-	int block = 16;
-	int offset1 = 0;
-	if(internformat == DXT1)
-		block = 8;	
+
+	// If we are DDS, we can scale to max dimension by choosing a pre-made mipmap.
+	if(internformat == DXT1|| internformat == DXT1RGBA)
+		blocksize = 8;
+
 	if(internformat >= DXT1 && internformat <= DXT5){
 		while(textures[handle].width > maxdimension || textures[handle].height > maxdimension){
-			offset1 = ((textures[handle].width +3)/4)*((textures[handle].height +3)/4) * block;
+			offset1 += ((textures[handle].width +3)/4)*((textures[handle].height +3)/4) * blocksize;
 			textures[handle].width >>=1;
 			textures[handle].height >>=1;
 			textures[handle].iwidth >>=1;
 			textures[handle].iheight >>=1;
 		}
 	}
+	// If we're not DDS, we have to generate a scaled version of the image 
 	else if (textures[handle].iwidth>maxdimension||textures[handle].iheight>maxdimension||textures[handle].iwidth>MAX_TEXTURE_SIZE||textures[handle].iheight>MAX_TEXTURE_SIZE) {
 #if !defined(GL_COLOR_INDEX8_EXT)
 		if (internformat != PALETTE8) {
@@ -775,6 +791,12 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 			buffer = tempbuf;	
 		}
 	}
+	int height = textures[handle].height;
+	int width = textures[handle].width;
+	
+	// If s3tc compression is disabled, our DDS files must be software decompressed 
+	// They may later be recompressed upon loading into GL with the native codec
+	// This is going to incur a serious quality hit.
 	if (!gl_options.s3tc) {
 		if(internformat >=DXT1 && internformat <= DXT5){
 			unsigned char *tmpbuffer = buffer +offset1;
@@ -783,6 +805,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 			internformat = RGBA32;
 		}
 	}
+	
 	if (internformat!=PALETTE8 && internformat != PNGPALETTE8) {
 		internalformat = GetTextureFormat (internformat);
 		if ((textures[handle].mipmapped&&gl_options.mipmap>=2)||detail_texture) {
@@ -797,55 +820,62 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 				}
 
 			}
-			int width=textures[handle].width,height=textures[handle].height;
 			int count=0;
 			static int blankout = XMLSupport::parse_int(vs_config->getVariable("graphics","detail_texture_blankout","3"));
 			static int fullout = XMLSupport::parse_int(vs_config->getVariable("graphics","detail_texture_full_color","1"))-1;
 			float numdivisors = logsize>fullout+blankout?(1./(logsize-fullout-blankout)):1;
 			float detailscale=1;
-			//feenableexcept(0);
+			// If we are DDS and we need to generate mipmaps (almost everything gets sent here, even non-3d visuals)
 			if(internformat >= DXT1 && internformat <= DXT5){
-				int height = textures[handle].height;
-				int width = textures[handle].width;
 				int size = 0;
-				int blocksize = 16;
 				int i = 0;
 				unsigned int offset = 0;
-				//printf("shouldn't be here\n");
-				if(internformat == DXT1|| internformat == DXT1RGBA)
-					blocksize = 8;
-				size = ((width +3)/4) * ((height +3)/4) * blocksize;
-//				glTexParameteri( image2D, GL_GENERATE_MIPMAP, GL_FALSE );
-				while(width && height){
+					
+				// The following takes into account C/C++'s catenation of floats to int
+				// by adding 3, we ensure that when width or height is 1, we get a 1 rather than 0
+				// from the division by 4. Because of catenation, all other numbers will result with
+				// the expected number as if the +3 wasn't there. same as max(1,width/4)
+				size = ((width +3)/4) * ((height +3)/4) * blocksize;				
+			
+				for(i = 0;i<mips;++i){
 					glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
-					if(width ==1 && height == 1) break;
+					// We halve width and height until they reach 1, or i == mips
 					if(width != 1)
 						width >>=1;
 					if(height != 1)
 						height >>=1;
-					if(width != 1 && height != 1)
-						offset += size;
+					offset += size;
 					size = ((width +3)/4) * ((height +3)/4) * blocksize;
-					++i;
+				}	
+				// Workaround for DDS files created with nvcompress unpatched
+				// nvcompress didn't like to generate all mipmaps for non-square textures
+				// this means mips will be reached prior to width and height both reaching 1
+				if(width != 1 || height != 1){
+					printf("WARNING !!!!  texture is missing mipmaps, contact forum\n");
+					while(width!=1 || height!=1){
+						if(width != 1)
+							width >>=1;
+						if(height != 1)
+							height >>=1;
+						// this is the workaround: we simply stop incrementing the offset 
+						// We thus, reuse the first N bits from the 
+						// last mipmap to generate the remaining mipmaps. 
+						// This will allow GL to not bug out, but it wont provide the correct 
+						// visuals for those mipmaps. 
+						size = ((width +3)/4) * ((height +3)/4) * blocksize;
+						glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
+						++i;
+					}
 				}
-			} else {
-				//printf("build mipmaps format %d, width %d, height, %d, tformat %d \n",internalformat, textures[handle].width,textures[handle].height,textures[handle].textureformat);
+				// End workaround
+			} else 
 				gluBuild2DMipmaps(image2D, internalformat, textures[handle].width, textures[handle].height, textures[handle].textureformat, GL_UNSIGNED_BYTE, buffer);
-//				gluBuild2DMipmaps(image2D, GL_RGBA, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-//				glTexImage2D(image2D, 0, internalformat, textures[handle].width, textures[handle].height, 0, textures[handle].textureformat, GL_UNSIGNED_BYTE, buffer);
-				//printf("done\n");
-			}
 			if (tempbuf) 
 				free(tempbuf);
 			tempbuf=NULL;
 		} else{
 			if(internformat >= DXT1 && internformat <= DXT5){
-				int height = textures[handle].height;
-				int width = textures[handle].width;
 				int size = 0;
-				int blocksize = 16;
-				if(internformat == DXT1)
-					blocksize = 8;
 				size = ((width +3)/4) * ((height +3)/4) * blocksize;
 				glCompressedTexImage2D_p(image2D,0,internalformat,width,height,0,size,buffer+offset1);
 			} else 
@@ -868,30 +898,33 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 				return GFXFALSE;
 			}
 			if(internformat >= DXT1 && internformat <= DXT5){
-				int height = textures[handle].height;
-				int width = textures[handle].width;
 				int size = 0;
-				int blocksize = 16;
 				int i = 0;
 				unsigned int offset = 0;
-				//printf("shouldn't be here\n");
-				if(internformat == DXT1|| internformat == DXT1RGBA)
-					blocksize = 8;
 				size = ((width +3)/4) * ((height +3)/4) * blocksize;
-				
-				while(width && height){
+				for(i = 0;i<mips;++i){
 					glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
-					if(width ==1) break;
 					if(width != 1)
 						width >>=1;
 					if(height != 1)
 						height >>=1;
-						
-					if(width !=1 && height !=1 )
-						offset += size;
+					offset += size;
 					size = ((width +3)/4) * ((height +3)/4) * blocksize;
-					++i;
+				}	
+				// Workaround for DDS files created with nvocmpress unpatched
+				if(width != 1 || height != 1){
+					printf("WARNING !!!!  texture is missing mipmaps, contact forum\n");
+					while(width!=1 || height!=1){
+						if(width != 1)
+							width >>=1;
+						if(height != 1)
+							height >>=1;
+						size = ((width +3)/4) * ((height +3)/4) * blocksize;
+						glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
+						++i;
+					}
 				}
+				// End workaround
 			} else {
 				if ((textures[handle].mipmapped&(MIPMAP|TRILINEAR))&&gl_options.mipmap>=2) {
 					gluBuild2DMipmaps(image2D, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
@@ -914,25 +947,33 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 #endif
 		{
 			if(internformat >= DXT1 && internformat <= DXT5){
-				int height = textures[handle].height;
-				int width = textures[handle].width;
 				int size = 0;
-				int blocksize = 16;
 				int i = 0;
 				unsigned int offset = 0;
-				//printf("shouldn't be here\n");
-				if(internformat == DXT1|| internformat == DXT1RGBA)
-					blocksize = 8;
 				size = ((width +3)/4) * ((height +3)/4) * blocksize;
-				
-				while(width && height){
+				for(i = 0;i<mips;++i){
 					glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
-					width >>=1;
-					height >>=1;
+					if(width != 1)
+						width >>=1;
+					if(height != 1)
+						height >>=1;
 					offset += size;
 					size = ((width +3)/4) * ((height +3)/4) * blocksize;
-					++i;
+				}	
+				// Workaround for DDS files created with nvocmpress unpatched
+				if(width != 1 || height != 1){
+					printf("WARNING !!!!  texture is missing mipmaps, contact forum\n");
+					while(width!=1 || height!=1){					
+						if(width != 1)
+							width >>=1;
+						if(height != 1)
+							height >>=1;
+						size = ((width +3)/4) * ((height +3)/4) * blocksize;
+						glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
+						++i;
+					}
 				}
+				// End workaround				
 			} else {
 				int nsize = 4*textures[handle].iheight*textures[handle].iwidth;
 				unsigned char * tbuf =(unsigned char *) malloc (sizeof(unsigned char)*nsize);

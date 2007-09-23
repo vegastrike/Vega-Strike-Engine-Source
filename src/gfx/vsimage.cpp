@@ -771,11 +771,11 @@ unsigned char *VSImage::ReadDDS()
 			if(height != 1)
 				height >>=1;
 		}
-		s = (unsigned char*)malloc(inputSize);
-		// the following is probably not endian-safe
-		img_file->Read(s,inputSize);   
+		s = (unsigned char*)malloc(inputSize+2);
+		sprintf((char*)s,"%i",header.nmips);
+		img_file->Read(s+2,inputSize);   
 		// At the end of execution what we have is the following
-		// s contains the main texture and all it's mipmaps 
+		// s contains the number of mipmaps then the main texture and all it's mipmaps 
 		// sizeY is the height of the initial texture, sizeX is the width.
 		// mode is the compressed format of the texture. It is assumed to be rgba
 		// depth is the depth of the uncompressed image. not sure where this is used
