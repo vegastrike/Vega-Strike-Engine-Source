@@ -845,7 +845,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 						width >>=1;
 					if(height != 1)
 						height >>=1;
-					if(height == 1 && width == 1 && i != mips -1)
+					if(i < mips -1)
 						offset += size;
 					size = ((width +3)/4) * ((height +3)/4) * blocksize;
 				}	
@@ -910,7 +910,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 						width >>=1;
 					if(height != 1)
 						height >>=1;
-					if(height == 1 && width == 1 && i != mips -1)
+					if(i < mips -1)
 						offset += size;
 					size = ((width +3)/4) * ((height +3)/4) * blocksize;
 				}	
@@ -960,7 +960,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 						width >>=1;
 					if(height != 1)
 						height >>=1;
-					if(height == 1 && width == 1 && i != mips -1)
+					if(i < mips -1)
 						offset += size;
 					size = ((width +3)/4) * ((height +3)/4) * blocksize;
 				}	
