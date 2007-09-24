@@ -96,7 +96,8 @@ VsnetHTTPSocket::VsnetHTTPSocket(
                  const std::string& uri,
                  SocketSet&       set )
 		: VsnetSocketBase(-1, "http", set),
-		  _incompleteheadersection(0), _content_length(0), _send_more_data(false)
+		  _incompleteheadersection(0), _content_length(0), _send_more_data(false),
+		  sendDataPos(0)
 {
   numRetries = 0;
   timeToNextRequest = 0;

@@ -964,7 +964,7 @@ namespace VSFileSystem
 			file = filename+1;
 		else
 			file = filename;
-		const char * rootsep = (root=="")?"":"/";
+		const char * rootsep = (root==""||root=="/")?"":"/";
 
 		if( !UseVolumes[type] || !lookinvolume)
 		{
@@ -1424,9 +1424,11 @@ namespace VSFileSystem
 				// We look in the current_path or for a full relative path to either homedir or datadir
 				if( current_path.back()!="")
 				{
-					filestr = current_directory.back()+"/"+current_subdirectory.back()+"/"+string( file);
-					if( (found = FileExists( current_path.back(),filestr))<0 )
-						failed += "\t"+current_path.back()+"/"+filestr+" NOT FOUND !\n";
+					string filestr1 = current_directory.back()+
+							"/"+current_subdirectory.back()+"/"+string( file);
+					filestr = current_path.back() + "/" + filestr1;
+					if( (found = FileExists( current_path.back(),filestr1))<0 )
+						failed += "\t"+filestr+" NOT FOUND !\n";
 				}
 				if( found<0)
 				{
@@ -1444,15 +1446,15 @@ namespace VSFileSystem
 						filestr = Rootdir[ij]+"/"+file;
 						found = FileExists( Rootdir[ij], file);
 						if( found<0)
-							failed += "\tRootdir : "+Rootdir[ij]+"/"+file+" NOT FOUND !\n";
+							failed += "\tRootdir : "+filestr+" NOT FOUND !\n";
 					}
 					// Look for relative (to datadir) or absolute named file
 					if( found<0)
 					{
-						filestr = string( file);
-						if( (found=FileExists( "", file))<0)
+						filestr = file;
+						if( (found=FileExists( "", filestr))<0)
 						{
-							failed += "\tAbs or rel : "+string(file)+" NOT FOUND !\n";
+							failed += "\tAbs or rel : "+filestr+" NOT FOUND !\n";
 						}
 					}
 				}
