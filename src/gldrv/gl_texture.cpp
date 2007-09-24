@@ -729,9 +729,11 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 	
 	// Read in the number of mipmaps from buffer 
 	int offset1 = 2;
-	char mipmapbuf[2] = {buffer[0],buffer[1]};
-	int mips = atoi(mipmapbuf);
-	
+	char mipmapbuf[3] = {buffer[0],buffer[1],'\0'};
+//	printf("mipmaps char form : %s \n",mipmapbuf);
+	int mips =  0;
+	if(internformat >= DXT1 && internformat <= DXT5)
+		mips = atoi(mipmapbuf);
 	// If datatype is png, we aren't compressing it
 	if(internformat >= PNGPALETTE8){
 		gl_options.compression = false;
@@ -836,7 +838,6 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 				// from the division by 4. Because of catenation, all other numbers will result with
 				// the expected number as if the +3 wasn't there. same as max(1,width/4)
 				size = ((width +3)/4) * ((height +3)/4) * blocksize;				
-			
 				for(i = 0;i<mips;++i){
 					glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
 					// We halve width and height until they reach 1, or i == mips
@@ -844,7 +845,8 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 						width >>=1;
 					if(height != 1)
 						height >>=1;
-					offset += size;
+					if(height == 1 && width == 1 && i != mips -1)
+						offset += size;
 					size = ((width +3)/4) * ((height +3)/4) * blocksize;
 				}	
 				// Workaround for DDS files created with nvcompress unpatched
@@ -853,6 +855,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 				if(width != 1 || height != 1){
 					printf("WARNING !!!!  texture is missing mipmaps, contact forum\n");
 					while(width!=1 || height!=1){
+						glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
 						if(width != 1)
 							width >>=1;
 						if(height != 1)
@@ -863,7 +866,6 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 						// This will allow GL to not bug out, but it wont provide the correct 
 						// visuals for those mipmaps. 
 						size = ((width +3)/4) * ((height +3)/4) * blocksize;
-						glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
 						++i;
 					}
 				}
@@ -908,19 +910,20 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 						width >>=1;
 					if(height != 1)
 						height >>=1;
-					offset += size;
+					if(height == 1 && width == 1 && i != mips -1)
+						offset += size;
 					size = ((width +3)/4) * ((height +3)/4) * blocksize;
 				}	
 				// Workaround for DDS files created with nvocmpress unpatched
 				if(width != 1 || height != 1){
 					printf("WARNING !!!!  texture is missing mipmaps, contact forum\n");
 					while(width!=1 || height!=1){
+						glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
 						if(width != 1)
 							width >>=1;
 						if(height != 1)
 							height >>=1;
 						size = ((width +3)/4) * ((height +3)/4) * blocksize;
-						glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
 						++i;
 					}
 				}
@@ -957,19 +960,20 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 						width >>=1;
 					if(height != 1)
 						height >>=1;
-					offset += size;
+					if(height == 1 && width == 1 && i != mips -1)
+						offset += size;
 					size = ((width +3)/4) * ((height +3)/4) * blocksize;
 				}	
 				// Workaround for DDS files created with nvocmpress unpatched
 				if(width != 1 || height != 1){
 					printf("WARNING !!!!  texture is missing mipmaps, contact forum\n");
 					while(width!=1 || height!=1){					
+						glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
 						if(width != 1)
 							width >>=1;
 						if(height != 1)
 							height >>=1;
 						size = ((width +3)/4) * ((height +3)/4) * blocksize;
-						glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
 						++i;
 					}
 				}

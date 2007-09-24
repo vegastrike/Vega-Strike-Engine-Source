@@ -771,7 +771,7 @@ unsigned char *VSImage::ReadDDS()
 			if(height != 1)
 				height >>=1;
 		}
-		s = (unsigned char*)malloc(inputSize+2);
+		s = (unsigned char*)malloc(inputSize+3);
 		sprintf((char*)s,"%i",header.nmips);
 		img_file->Read(s+2,inputSize);   
 		// At the end of execution what we have is the following
