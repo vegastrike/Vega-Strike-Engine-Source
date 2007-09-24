@@ -128,18 +128,18 @@ enum Cmd
 
 class Subcmd {
 public:
-	enum {
+	enum SaveDataTypes {
 		StringValue = 1<<1,
 		FloatValue  = 1<<2,
 		Objective   = 1<<3,
 	};
 
-	enum {
+	enum SaveDataActions {
 		SetValue    = 1<<8,
 		EraseValue  = 1<<9,
 	};
 
-	enum {
+	enum MissionActions {
 		TerminateMission = 1,
 		AcceptMission = 2,
 	};

@@ -1078,7 +1078,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				}
 				Cargo carg = *cargptr;
 				bool upgrade=false;
-				bool repair=true;
+				bool repair=false;
 				if (carg.GetCategory().find("upgrades")==0) {
 					upgrade=true;
 				}

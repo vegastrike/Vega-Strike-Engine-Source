@@ -6,6 +6,7 @@
 #include "networking/lowlevel/vsnet_sockethttp.h"
 #include "lin_time.h"
 #include "save_util.h"
+#include "universe_util.h"
 
 extern StarSystem * GetLoadedStarSystem( const char * system);
 
@@ -262,7 +263,11 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 	cerr<<"SENDING A KILL for serial "<<serial<<" in zone "<<zone<<endl;
 	// Find the client in the udp & tcp client lists in order to set it out of the game (not delete it yet)
 	ClientPtr clt = this->getClientFromSerial( serial);
-
+	if (clt) {
+		un = clt->game_unit.GetUnit();
+	} else {
+		un = zonemgr->getUnit(serial, zone);
+	}
 	// It's the server's responsibility to kill missions in this case.
 	// NETFIXME: Note that the client might not hear the request to terminate missions.
 	int cp = _Universe->whichPlayerStarship(un);
