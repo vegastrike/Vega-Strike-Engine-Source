@@ -40,6 +40,28 @@ Music * muzak=NULL;
 int muzak_count=0;
 int muzak_cross_index=0;
 
+static void print_check_err(int errorcode, const char *str) {
+#ifdef _WIN32
+	// errorcode is actually just a return value.
+	/*
+	  // Whatever
+	int err = GetLastError();
+	if (err) {
+		fprintf(stderr, "WIN32 ERROR IN %s: %d (returned %d)\n", std, err, errorcode);
+	}
+	*/
+#else
+	if (errorcode) {
+		char *err = strerror(errorcode);
+		if (!err) err="Unknown error";
+		fprintf(stderr, "ERROR IN PTHREAD FUNCTION %s: %s (%d)\n", str, err, errorcode);
+	}
+#endif
+}
+
+// where func is the evaluation of func, and #func is the string form.
+#define checkerr(func) print_check_err((func), #func)
+
 bool soundServerPipes() {
     static bool ret=  XMLSupport::parse_bool(vs_config->getVariable("audio","pierce_firewall","true"));
     return ret;
@@ -57,11 +79,21 @@ Music::Music (Unit *parent):random(false), p(parent),song(-1),thread_initialized
   
 #ifdef _WIN32
   musicinfo_mutex = CreateMutex(NULL, TRUE, NULL);
-#else
-  pthread_mutex_init(&musicinfo_mutex, NULL);
+#else // _WIN32
+
+#define ERRORCHECK_MUTEX
+#ifdef ERRORCHECK_MUTEX
+  pthread_mutexattr_t checkme;
+  pthread_mutexattr_init(&checkme);
+  pthread_mutexattr_settype(&checkme, PTHREAD_MUTEX_ERRORCHECK);
+  checkerr(pthread_mutex_init(&musicinfo_mutex, &checkme));
+#else // ERRORCHECK_MUTEX
+  checkerr(pthread_mutex_init(&musicinfo_mutex, NULL));
+#endif // !ERRORCHECK_MUTEX
+  
   // Lock it immediately, since the loader will want to wait for its first data upon creation.
-  pthread_mutex_lock(&musicinfo_mutex);
-#endif
+  checkerr(pthread_mutex_lock(&musicinfo_mutex));
+#endif // !_WIN32
   if (!g_game.music_enabled)
 	  return;
   lastlist=PEACELIST;
@@ -362,7 +394,7 @@ PVOID
 #ifdef _WIN32
 		WaitForSingleObject(me->musicinfo_mutex, INFINITE);
 #else
-		pthread_mutex_lock(&me->musicinfo_mutex);
+		checkerr(pthread_mutex_lock(&me->musicinfo_mutex));
 #endif
 		if (me->killthread) break;
 		me->music_loaded = false;
@@ -383,7 +415,7 @@ PVOID
 #ifdef _WIN32
 		ReleaseMutex(me->musicinfo_mutex);
 #else
-		pthread_mutex_unlock(&me->musicinfo_mutex);
+		checkerr(pthread_mutex_unlock(&me->musicinfo_mutex));
 #endif
 		{
                   me->freeWav=true;
@@ -439,7 +471,7 @@ void Music::_LoadLastSongAsync() {
 #ifdef _WIN32
 	ReleaseMutex(musicinfo_mutex);
 #else
-	pthread_mutex_unlock(&musicinfo_mutex);
+	checkerr(pthread_mutex_unlock(&musicinfo_mutex));
 #endif
 }
 
@@ -469,10 +501,13 @@ void Music::Listen() {
 #ifdef _WIN32
 				if (WaitForSingleObject(musicinfo_mutex, 0)==WAIT_TIMEOUT) {
 #else
-				if (pthread_mutex_trylock(&musicinfo_mutex)==EBUSY) {
+				int trylock_ret = pthread_mutex_trylock(&musicinfo_mutex);
+				if (trylock_ret==EBUSY) {
 #endif
 					fprintf(stderr,"Failed to lock music loading mutex despite loaded flag being set...\n");
 					return;
+				} else {
+					checkerr(trylock_ret);
 				}
 				music_loaded = false; // once the loading thread sees this, it will try to grab a lock and wait.
 				// The lock will only be achieved once the next song is put in the queue.
@@ -569,10 +604,11 @@ void Music::_GotoSong (std::string mus) {
 				fprintf(stderr, "Error creating music load thread: %d\n", GetLastError());
 			}
 #else
-			if (pthread_create(&a_thread, NULL, Muzak::readerThread, this)==0) {
+			int thread_create_ret = pthread_create(&a_thread, NULL, Muzak::readerThread, this);
+			if (thread_create_ret==0) {
 				thread_initialized = true;
 			} else {
-				perror("Error creating music load thread");
+				checkerr(thread_create_ret);
 			}
 #endif
 		}
@@ -699,7 +735,7 @@ Music::~Music()
 #ifdef _WIN32
 		ReleaseMutex(musicinfo_mutex);
 #else
-		pthread_mutex_unlock(&musicinfo_mutex);
+		checkerr(pthread_mutex_unlock(&musicinfo_mutex));
 #endif
 		int spindown = 50; // Thread has 5 seconds to close down.
 		while (threadalive&&(spindown-- > 0)) micro_sleep(100000);
