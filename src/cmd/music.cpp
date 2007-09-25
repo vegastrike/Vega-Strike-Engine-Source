@@ -70,6 +70,8 @@ Music::Music (Unit *parent):random(false), p(parent),song(-1),thread_initialized
   loopsleft=0;
   socketw=socketr=-1;
   music_load_info = NULL;
+  music_loaded = false;
+  music_loading = false;
   killthread=0;
   threadalive=0;
   freeWav=true;
@@ -249,6 +251,8 @@ Music::Music (Unit *parent):random(false), p(parent),song(-1),thread_initialized
 
 void Music::ChangeVolume(float inc,int layer) 
 {
+    if (!g_game.music_enabled)
+        return;
     if (muzak) {
         if (layer<0) {
           for (int i=0; i<muzak_count; i++){
@@ -263,6 +267,8 @@ static float tmpmin(float a, float b) {return a<b?a:b;}
 static float tmpmax(float a, float b) {return a<b?b:a;}
 
 void Music::_SetVolume (float vol,bool hardware,float latency_override) {
+  if (!g_game.music_enabled)
+    return;
 /*
     vol = tmpmax(0.0f,tmpmin((hardware?1.0f:2.0f),vol));
 	char tempbuf [100];
@@ -289,6 +295,8 @@ void Music::_SetVolume (float vol,bool hardware,float latency_override) {
 
 bool Music::LoadMusic (const char *file) {
 	using namespace VSFileSystem;
+  if (!g_game.music_enabled)
+    return true;
 	// Loads a playlist so try to open a file in datadir or homedir
   VSFile f;
   VSError err = f.OpenReadOnly(file, UnknownFile);
@@ -342,6 +350,8 @@ static int randInt (int max) {
 }
 
 int Music::SelectTracks(int layer) {
+  if (!g_game.music_enabled)
+    return 0;
   static bool random=XMLSupport::parse_bool(vs_config->getVariable("audio","shuffle_songs","true"));
   static int maxrecent=XMLSupport::parse_int(vs_config->getVariable("audio","shuffle_songs.history_depth",MAX_RECENT_HISTORY));
   static std::string dj_script = vs_config->getVariable("sound","dj_script","modules/dj.py");
@@ -397,6 +407,8 @@ PVOID
 		checkerr(pthread_mutex_lock(&me->musicinfo_mutex));
 #endif
 		if (me->killthread) break;
+		//fprintf(stderr,"readerThread: LOADING set TRUE, LOADED set FALSE\n");
+		me->music_loading = true;
 		me->music_loaded = false;
 		me->music_load_info->success=false;
                 size_t len=me->music_load_info->hashname.length();
@@ -423,7 +435,7 @@ PVOID
                     *me->music_load_info=wherecache->second;
                     me->freeWav=false;
                   }else if (!AUDLoadSoundFile(songname, me->music_load_info, true)) {
-                    fprintf(stderr, "Failed to load song %s\n", songname);
+                    //fprintf(stderr, "Failed to load song %s\n", songname);
                   }
 		}
 
@@ -432,10 +444,13 @@ PVOID
                   wherecache->second=*me->music_load_info;
                 }
                 free(songname);
+		//fprintf(stderr,"readerThread: LOADED set TRUE\n");
 		me->music_loaded = true;
 		while (me->music_loaded) {
 			micro_sleep(10000); // 10ms of busywait for now... wait until end of frame.
 		}
+		//fprintf(stderr,"readerThread: LOADED is now FALSE\n");
+
 	}
 	me->threadalive=0;
 	return NULL;
@@ -445,7 +460,15 @@ PVOID
 
 void Music::_LoadLastSongAsync() {
 #ifdef HAVE_AL
+  if (!g_game.music_enabled)
+	  return;
 	if (!music_load_info) return;
+	if (music_loading) {
+		//fprintf(stderr,"Loading is TRUE\n");
+
+		// No touching anything here!
+		return;
+	}
 	std::string song = music_load_list.back();
 
         std::map<std::string, AUDSoundProperties>::iterator where=Muzak::cachedSongs.find(song);
@@ -468,6 +491,8 @@ void Music::_LoadLastSongAsync() {
         }
 	music_load_info->hashname = song;
 #endif
+	//fprintf(stderr,"Loading set to true\n");
+	music_loading = true;
 #ifdef _WIN32
 	ReleaseMutex(musicinfo_mutex);
 #else
@@ -498,6 +523,7 @@ void Music::Listen() {
 		*/
 		if (!music_load_list.empty()) {
 			if (music_loaded) {
+				//fprintf(stderr,"LOADED is true\n");
 #ifdef _WIN32
 				if (WaitForSingleObject(musicinfo_mutex, 0)==WAIT_TIMEOUT) {
 #else
@@ -509,6 +535,8 @@ void Music::Listen() {
 				} else {
 					checkerr(trylock_ret);
 				}
+				//fprintf(stderr,"LOADED set to false, LOADING set false\n");
+				music_loading = false;
 				music_loaded = false; // once the loading thread sees this, it will try to grab a lock and wait.
 				// The lock will only be achieved once the next song is put in the queue.
 				
@@ -559,6 +587,8 @@ void Music::Listen() {
 
 void Music::GotoSong (std::string mus,int layer)
 {
+    if (!g_game.music_enabled)
+        return;
     static bool cross = XMLSupport::parse_bool( vs_config->getVariable("audio","cross_fade_music","true") );
     if (cross && (muzak_count>=2)) {
         if (layer<0) {
@@ -656,6 +686,8 @@ void Music::SkipRandSong(int whichlist, int layer)
 }
 
 void Music::_SkipRandSong(int whichlist, int layer) {
+	if (!g_game.music_enabled)
+		return;
 	if (this!=NULL) {
 	  if (whichlist!=NOLIST&&whichlist>=0&&whichlist<(int)playlist.size()){
 	    lastlist = whichlist;
@@ -673,6 +705,8 @@ void Music::_SkipRandSong(int whichlist, int layer) {
 
 void Music::SkipRandList(int layer) 
 {
+    if (!g_game.music_enabled)
+    	return;
     if (muzak) {
         if (layer<0) {
             if (muzak_count>=2)
@@ -685,6 +719,8 @@ void Music::SkipRandList(int layer)
 }
 
 void Music::_SkipRandList(int layer) {
+	if (!g_game.music_enabled)
+		return;
 	for (unsigned int i=0;i<playlist.size();i++) {
           static bool random=XMLSupport::parse_bool(vs_config->getVariable("audio","shuffle_songs","true"));
           if (!playlist[i].empty())
@@ -694,6 +730,8 @@ void Music::_SkipRandList(int layer) {
 
 int Music::Addlist(std::string listfile)
 {
+    if (!g_game.music_enabled)
+    	return -1;
     int res=-1;
     if (muzak) res=muzak->_Addlist(listfile);
     if (muzak) for (int i=1; i<muzak_count; i++) muzak[i]._Addlist(listfile);
@@ -701,6 +739,8 @@ int Music::Addlist(std::string listfile)
 }
 
 int Music::_Addlist (std::string listfile) {
+	if (!g_game.music_enabled)
+		return -1;
 	bool retval=LoadMusic(listfile.c_str());
 	if (retval) {
 	  return playlist.size()-1;
@@ -711,6 +751,8 @@ int Music::_Addlist (std::string listfile) {
 
 void Music::Skip(int layer) 
 {
+    if (!g_game.music_enabled)
+    	return;
     if (muzak) {
         if (layer<0) {
             if (muzak_count>=2)
@@ -875,6 +917,8 @@ void Music::Mute(bool mute, int layer)
 {
     static vector<float> saved_vol;
     saved_vol.resize(muzak_count,-1);
+    if (!g_game.music_enabled)
+    	return;
 
     if (muzak) {
         static float muting_fadeout = XMLSupport::parse_float( vs_config->getVariable ("audio","music_muting_fadeout","0.2") );
@@ -907,6 +951,8 @@ void Music::Mute(bool mute, int layer)
 
 void Music::SetLoops(int numloops, int layer)
 {
+    if (!g_game.music_enabled)
+    	return;
     if (muzak) {
         if (layer<0) {
             //This only will apply to the crossfading channel (layers 0 && 1)
