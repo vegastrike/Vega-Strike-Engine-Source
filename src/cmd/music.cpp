@@ -525,6 +525,7 @@ void Music::Listen() {
 			if (music_loaded) {
 				//fprintf(stderr,"LOADED is true\n");
 #ifdef _WIN32
+				int trylock_ret=0;
 				if (WaitForSingleObject(musicinfo_mutex, 0)==WAIT_TIMEOUT) {
 #else
 				int trylock_ret = pthread_mutex_trylock(&musicinfo_mutex);
