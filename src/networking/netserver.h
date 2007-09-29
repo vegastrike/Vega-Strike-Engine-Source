@@ -48,6 +48,8 @@ using std::vector;
 // typedef list<Client *>::iterator LI;
 typedef vector<Account *>::iterator VI;
 
+extern ObjSerial SERVER_NETVERSION;
+
 struct ServerSocket;
 class SocketSet;
 

@@ -76,7 +76,20 @@ int VsnetUDPSocket::sendbuf( Packet* packet, const AddressIP* to, int pcktflags 
     if( dest == NULL ) dest = &_remote_ip;
 
     assert( dest != NULL );
-
+	
+	if (packet->getSendBufferLength()>=512) {
+		int *x=NULL;
+		COUT << "Trying to send UDP " << packet->getCommand() << " of invalid size " <<
+			packet->getSendBufferLength() << "(>=512)" << endl;
+		packet->display(__FILE__,__LINE__);
+		cout << flush;
+		cerr << flush;
+#ifndef NO_CRASH_INVALID_UDP
+		(*x)=1; // Cause crash.
+#endif
+		return -1;
+	}
+	
     numsent = sendto( get_fd(),
                       packet->getSendBuffer(), packet->getSendBufferLength(),
                       0, (sockaddr*) dest, sizeof(struct sockaddr_in));

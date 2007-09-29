@@ -247,13 +247,15 @@ void LoadMission (const char * nission_name, const std::string &script, bool loa
   vector<Flightgroup *>::const_iterator siter;
   vector<Flightgroup *> fg=active_missions.back()->flightgroups;
   Unit * fighter;
+  if (Network!=NULL) {
   for(siter= fg.begin() ; siter!=fg.end() ; siter++){
     Flightgroup *fg=*siter;
     string fg_name=fg->name;
     string fullname=fg->type;
     //    int fg_terrain = fg->terrain_nr;
     //    bool isvehicle = (fg->unittype==Flightgroup::VEHICLE);
-    strcpy(fightername,fullname.c_str());
+    strncpy(fightername,fullname.c_str(),1023);
+	fightername[1023]='\0';
     int a=0;
     int tmptarget=0;
     string ainame=fg->ainame;
@@ -296,6 +298,7 @@ void LoadMission (const char * nission_name, const std::string &script, bool loa
 	  a++;
 	} // for nr_ships
   } // end of for flightgroups
+  }
   
   if(active_missions.size() > 0) {
     // Give the mission a name.

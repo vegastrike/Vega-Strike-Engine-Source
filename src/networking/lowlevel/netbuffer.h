@@ -22,6 +22,7 @@ class NetBuffer
 		char *	buffer;
 		unsigned int	offset;
 		unsigned int	size;
+		ObjSerial ver;
 	
 	public :
 		NetBuffer();
@@ -30,6 +31,8 @@ class NetBuffer
 		~NetBuffer();
 
 		void			Reset();
+		ObjSerial		version();
+		void			setVersion(ObjSerial ver);
 		char *			getData();
 		unsigned int getOffset()const {return offset;} //useful to see if it's at the end of data
 		// Extends the buffer if we exceed its size
@@ -51,6 +54,8 @@ class NetBuffer
 		Quaternion		getQuaternion();
 		void			addTransformation( Transformation trans);
 		Transformation	getTransformation();
+	
+	/*
 		void			addWeaponInfo( weapon_info wi)
 		{
 			wi.netswap();
@@ -62,6 +67,8 @@ class NetBuffer
 			offset += wi_size;
 			delete buf;
 		}
+	*/
+	/*
 		weapon_info	getWeaponInfo()
 		{
 			int wisize=0;
@@ -70,6 +77,7 @@ class NetBuffer
 			offset += wisize;
 			return tmp;
 		}
+	*/
 		void		addShield( const Shield &shield);
 		Shield		getShield();
 		void		addArmor( const Armor &armor);
@@ -79,6 +87,8 @@ class NetBuffer
 		ObjSerial		getSerial();
 		void			addFloat( float f);
 		float			getFloat();
+		void			addFloat8( float f);
+		float			getFloat8();
 		void			addDouble( double d);
 		double			getDouble();
 		void			addShort( unsigned short s);

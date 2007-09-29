@@ -60,6 +60,8 @@ using std::string;
 extern vector<ObjSerial>	localSerials;
 extern bool isLocalSerial( ObjSerial sernum);
 
+extern ObjSerial CLIENT_NETVERSION;
+
 class	NetClient
 {
     class ClientsMap
@@ -82,7 +84,7 @@ class	NetClient
         VsnetHTTPSocket*			acct_sock;		// Connection socket for account server
         SocketSet           _sock_set;      // Encapsulates select()
         SaveGame			save;
-		ObjSerial			server_netversion;
+		ObjSerial			netversion;
 	public:
         ObjSerial			serial;			// Serial # of client
 	private:
@@ -121,6 +123,7 @@ class	NetClient
         boost::shared_ptr<VsnetDownload::Client::Manager> _downloadManagerClient;
         static const char*                                _downloadSearchPaths[];
 
+		void	versionBuf(NetBuffer &buf) const; // Sets the netbuffer to this version.
 		void	createChar();
 		int		recvMsg( Packet* outpacket, timeval *timeout = NULL );
 		void	disconnect();

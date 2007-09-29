@@ -1,6 +1,7 @@
 #include "client.h"
 #include "lowlevel/vsnet_debug.h"
 #include "networking/prediction.h"
+#include "lowlevel/netbuffer.h"
 
 void Client::Init()
 {
@@ -61,6 +62,10 @@ void Client::setUDP(SOCKETALT *udpSock, AddressIP &udpadr) {
 void Client::setTCP() {
 	this->lossy_socket=&this->tcp_sock;
 	this->cltudpadr=this->cltadr;
+}
+
+void Client::versionBuf(NetBuffer &buf) const {
+	buf.setVersion(netversion);
 }
 
 void Client::setLatestTimestamp( unsigned int ts )

@@ -106,7 +106,8 @@ public:
     unsigned int getLatestTimestamp( ) const;
     double       getDeltatime( ) const;
 	double       getNextDeltatime( ) const;
-
+	void         versionBuf(NetBuffer &buf) const; // Sets the netbuffer to this version.
+	
 	friend std::ostream& operator<<( std::ostream& ostr, const Client& c );
 
 private:

@@ -434,6 +434,7 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 					int       nbunits=0;
 					Packet    pckt;
 					NetBuffer netbuf;
+					cltk->versionBuf(netbuf);
 					
 //                    COUT << "CLEAN NETBUF" << endl;
 
@@ -447,12 +448,12 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 //                    COUT << "   *** deltatime " << cltk->getDeltatime() << endl;
 					// Clients not ingame are removed from the drawList so it is ok not to test that
 					for(;unit = *iter;++iter){
-						if (netbuf.getOffset()>1200 && (&cltk->tcp_sock == cltk->lossy_socket)) {
-							// Don't want to go over MTU.
+						if (netbuf.getOffset()>450 && (&cltk->tcp_sock != cltk->lossy_socket)) {
+							// Don't want to go over MTU. 512 is UDP maximum and you lose 8 for header.
 							break;
 						}
-                                          ++totalunits;
-                                          if (unit->GetSerial()!=0) {
+					  ++totalunits;
+					  if (unit->GetSerial()!=0 && unit != cltk->game_unit.GetUnit()) {
 						// Only send unit that ate UNITPTR and PLANETPTR+NEBULAPTR if update_planets
 						if( (unit->isUnit()==UNITPTR || unit->isUnit()==ASTEROIDPTR || unit->isUnit()==MISSILEPTR) || ((unit->isUnit()==PLANETPTR || unit->isUnit()==NEBULAPTR) && update_planets) )
 						{
@@ -503,11 +504,36 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 
 			// Clients not ingame are removed from the drawList so it is ok not to test that
 			for(un_iter iter = (_Universe->star_system[i]->getUnitList()).createIterator();unit = *iter;++iter){
-				unit->damages = Unit::NO_DAMAGE;
-
 				if (vsrandom.genrand_int31()%(totalunits*10+1) == 1) {
 					unit->damages = 0xffff;
 				}
+				if (unit->damages) {
+					for( i=0; i<zone_list.size(); i++)
+					{
+						// Check if system contains player(s)
+						if( zone_clients[i]>0)
+						{
+							for( k=zone_list[i]->begin(); k!=zone_list[i]->end(); k++)
+							{
+								// Each damage sent in a separate UDP packet.
+								NetBuffer netbuf;
+								ClientPtr cltk( *k );
+								cltk->versionBuf(netbuf);
+								netbuf.addFloat( cltk->getDeltatime() );
+								netbuf.addChar(ZoneMgr::DamageUpdate);
+								netbuf.addShort(unit->GetSerial());
+								addDamage(netbuf, unit);
+								Packet pckt;
+								pckt.send( CMD_SNAPSHOT, 1,
+										netbuf.getData(), netbuf.getDataLength(),
+										SENDANDFORGET, &(cltk->cltudpadr), *cltk->lossy_socket,
+										__FILE__, PSEUDO__LINE__(522) );
+								
+							}
+						}
+					}
+				}
+				unit->damages = Unit::NO_DAMAGE;
 			}
 		}
 	}
@@ -528,6 +554,8 @@ bool Nearby(ClientPtr clt, Unit * un) {
 }
 bool ZoneMgr::addPosition( ClientPtr client, NetBuffer & netbuf, Unit * un, ClientState & un_cs)
 {
+	bool dodamage=false; // Now done in separate packets in broadcastSnapshots.
+	
 	// This test may be wrong for server side units -> may cause more traffic than needed
 	if( 1 /* !(un->old_state.getPosition()==un->curr_physical_state.position) ||
              !(un->old_state.getOrientation()==un->curr_physical_state.orientation) */ )
@@ -544,9 +572,11 @@ bool ZoneMgr::addPosition( ClientPtr client, NetBuffer & netbuf, Unit * un, Clie
 			if( un->damages||Nearby(client, un) /* ratio > XX client not too far */)
 			{
 				unsigned char type = ZoneMgr::FullUpdate;
-				if (un->damages) {
+				
+				if (dodamage && un->damages) {
 					type |= ZoneMgr::DamageUpdate;
 				}
+				
 //                COUT << "   *** FullUpdate ser=" << un->GetSerial() << " cs=" << un_cs << endl;
 				// Mark as position+orientation+velocity update
 				netbuf.addChar( type );
@@ -556,7 +586,8 @@ bool ZoneMgr::addPosition( ClientPtr client, NetBuffer & netbuf, Unit * un, Clie
 				// Throw in some other cheap but useful info.
 				netbuf.addFloat (un->energy);
 				// Increment the number of clients we send full info about
-				if (un->damages) {
+				
+				if (dodamage && un->damages) {
 					addDamage( netbuf, un );
 				}
 			}
@@ -631,6 +662,8 @@ void	ZoneMgr::broadcastDamage( )
 				int nbunits = 0;
 				totalunits = 0;
                 ClientPtr cp( *k );
+				cp->versionBuf(netbuf);
+				
 				if( cp->ingame )
 				{
 					Unit * unit;
@@ -681,7 +714,14 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 
 		// Add the damage flag
 		unsigned short damages = un->damages;
-		netbuf.addShort( damages);
+		if ((damages & Unit::COMPUTER_DAMAGED) && (damages & Unit::LIMITS_DAMAGED)) {
+			damages &= (~Unit::MOUNT_DAMAGED);
+		}
+		if (netbuf.version() < 4500 && (damages & Unit::LIMITS_DAMAGED)) {
+			// Makes it too big with a bunch of 32-bit floats.
+			damages &= (~Unit::COMPUTER_DAMAGED);
+		}
+		netbuf.addShort( damages );
 		cout << "Sent damage " <<damages<<" for unit "<<un->GetSerial()<<" ("<<un->name<<")"<<endl;
 		// Put the altered stucts after the damage enum flag
 		if( damages & Unit::SHIELD_DAMAGED)
@@ -705,7 +745,7 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 			char c = 1+UnitImages::NUMGAUGES+MAXVDUS;
 			netbuf.addChar(c);
 			for( it = 0; it<c; it++)
-				netbuf.addFloat( un->image->cockpit_damage[it]);
+				netbuf.addFloat8( un->image->cockpit_damage[it]);
 		}
 		if( damages & Unit::MOUNT_DAMAGED)
 		{

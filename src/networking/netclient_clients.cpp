@@ -361,7 +361,7 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 	// We don't want to consider a late snapshot
 //	cout << "netSnapshot ";
 	static bool debugPos = XMLSupport::parse_bool(vs_config->getVariable("network", "debug_position_interpolation", "false"));
-	if( latest_timestamp < int_ts)
+	if( latest_timestamp <= int_ts)
 	{
         if (debugPos) COUT << "   *** SNAPSHOT is not late - evaluating" << endl;
 
@@ -371,8 +371,9 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 		// Loop throught received snapshot
         int i = 0;
         int j = 0;
+        int k = 0;
         int offset=netbuf.getOffset();
-		while( (i+j)<numUnits )
+		while( (i+j+k)<numUnits )
 		{
             ObjSerial       sernum = 0;
             unsigned char   cmd;
@@ -500,7 +501,8 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 					if (debugPos) cerr<<" IGNORING LOCAL PLAYER"<<endl;
                 }
 				j++;
-			}
+			} else
+				k++;
 			if ( cmd & ZoneMgr::DamageUpdate ) {
 				cout << "Received damage info for client "<< serial << endl;
 				receiveUnitDamage( netbuf, un );
@@ -553,7 +555,7 @@ void NetClient::receiveUnitDamage( NetBuffer &netbuf, Unit *un ) {
 		SETNOTNULL(un,un->computer.radar.maxrange, netbuf.getFloat());
 		int numvdus=(int)netbuf.getChar();
 		for( it = 0; it<numvdus; it++) {
-			float dam=netbuf.getFloat();
+			float dam=netbuf.getFloat8();
 			if (un && it<1+UnitImages::NUMGAUGES+MAXVDUS) {
 				un->image->cockpit_damage[it] = dam;
 			}

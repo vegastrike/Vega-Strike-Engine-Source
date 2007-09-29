@@ -68,6 +68,8 @@ double  DAMAGE_ATOM;
 double	PLANET_ATOM;
 double	SAVE_ATOM;
 
+ObjSerial SERVER_NETVERSION = 4950;
+
 static const char* const MISSION_SCRIPTS_LABEL = "mission_scripts";
 static const char* const MISSION_NAMES_LABEL = "mission_names";
 static const char* const MISSION_DESC_LABEL = "mission_descriptions";
@@ -714,6 +716,9 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 
     Packet p2;
 	NetBuffer netbuf( packet.getData(), packet.getDataLength());
+	if (clt) {
+		clt->versionBuf(netbuf);
+	}
 	int mount_num;
 	unsigned short zone;
 	char mis;
@@ -727,10 +732,14 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
     {
 		case CMD_CONNECT:
 		{
+			if (!clt) break;
 			clt->netversion = packet_serial;
+			if (clt->netversion > SERVER_NETVERSION) {
+				clt->netversion = SERVER_NETVERSION;
+			}
 			Packet psend;
 			NetBuffer netnewbuf;
-			netnewbuf.addSerial(clt->netversion);
+			netnewbuf.addSerial(SERVER_NETVERSION);
 			netnewbuf.addString(clt->cltadr.ipadr());
 			psend.send(CMD_CONNECT, 0, netnewbuf.getData(), netnewbuf.getDataLength(), SENDRELIABLE,
 					&ipadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(656));

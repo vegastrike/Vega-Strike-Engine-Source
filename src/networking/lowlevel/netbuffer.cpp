@@ -84,6 +84,10 @@ void	NetBuffer::Reset()
 
 char *	NetBuffer::getData() { return buffer;}
 
+void	NetBuffer::setVersion(ObjSerial newver) { ver = newver; }
+
+ObjSerial NetBuffer::version() { return ver; }
+
 		// Extends the buffer if we exceed its size
 void	NetBuffer::resizeBuffer( unsigned int newsize)
 		{
@@ -492,6 +496,29 @@ float	NetBuffer::getFloat()
 			offset+=sizeof(s);
 			return s;
 		}
+void	NetBuffer::addFloat8( float f)
+{
+	if (version()<4500) {
+		addFloat(f);
+	} else {
+		unsigned char ch;
+		if (f>1.0) ch=255;
+		else if (f<0.0) ch=0;
+		else ch=(unsigned char)(f*255);
+		char sch (ch);
+		addChar(sch);
+	}
+}
+float	NetBuffer::getFloat8()
+{
+	if (version() < 4500) {
+		return getFloat();
+	} else {
+		char sch (getChar());
+		unsigned char ch (sch);
+		return ((float)ch)/255.0;
+	}
+}
 void	NetBuffer::addDouble( double d)
 		{
 			ADD_NB(NB_DOUBLE);

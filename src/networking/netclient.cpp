@@ -65,6 +65,8 @@ using std::cout;
 using std::endl;
 using std::cin;
 
+ObjSerial CLIENT_NETVERSION = 4950;
+
 double NETWORK_ATOM;
 
 extern vector<unorigdest *> pendingjump;
@@ -320,6 +322,11 @@ void	NetClient::checkKey()
 // do so.
 // For now, it is always time to receive network messages
 
+void NetClient::versionBuf(NetBuffer &buf) const {
+	buf.setVersion(this->netversion);
+}
+
+
 int		NetClient::isTime()
 {
 	int ret=0;
@@ -509,6 +516,8 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 		_Universe->netLock(true); // Don't bounce any commands back to the server again!
 		
 		NetBuffer netbuf( p1.getData(), p1.getDataLength());
+		versionBuf(netbuf);
+		
 	    if( outpacket )
 	    {
 	        *outpacket = p1;
@@ -522,10 +531,17 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
             // Login accept
             case CMD_CONNECT:
 			{
-				this->server_netversion = netbuf.getSerial();
+				ObjSerial server_netversion = netbuf.getSerial();
+				this->netversion = server_netversion;
 				string ipaddress = netbuf.getString();
-				cout<< "Successful connection to VegaServer version " <<
-					this->server_netversion << "from address " << ipaddress << endl;
+				cout<< "Connection by "<<CLIENT_NETVERSION<<" to " <<
+					"VegaServer " << server_netversion << "from address " << ipaddress << endl;
+				if (server_netversion > CLIENT_NETVERSION) {
+				    cout << "Using old client... setting version to " << CLIENT_NETVERSION << endl;
+					this->netversion = CLIENT_NETVERSION;
+				} else if (server_netversion < CLIENT_NETVERSION) {
+					cout << "Connected to an old server.  Setting version to " << server_netversion << endl;
+				}
 			}
 				break;
             case CMD_CHOOSESHIP :

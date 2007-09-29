@@ -386,7 +386,7 @@ SOCKETALT	NetClient::init( const char* addr, unsigned short port, std::string &e
 	if (clt_tcp_sock && clt_tcp_sock->valid()) clt_tcp_sock->disconnect("NC_init_tcp");
 	if (clt_udp_sock && clt_udp_sock->valid()) NetUIUDP::disconnectSaveUDP(*clt_udp_sock);
 	lastsave.clear();
-	server_netversion = 0;
+	netversion = 0;
 	if (addr==NULL) {
 		addr=_serverip.c_str();
 		port=_serverport;
@@ -419,7 +419,7 @@ SOCKETALT	NetClient::init( const char* addr, unsigned short port, std::string &e
 	}
 	*/
 	Packet join;
-	join.send(CMD_CONNECT, 4395, "", 0, SENDRELIABLE, NULL,
+	join.send(CMD_CONNECT, CLIENT_NETVERSION, "", 0, SENDRELIABLE, NULL,
 		*this->clt_tcp_sock, __FILE__, PSEUDO__LINE__(407));
 	this->enabled = 1;
 
@@ -445,11 +445,11 @@ SOCKETALT	NetClient::init( const char* addr, unsigned short port, std::string &e
 				);
 			error = str;
 			timeout = 1;
-		} else if (this->server_netversion) {
+		} else if (this->netversion) {
 			break;
 		}
 	}
-	if (!this->server_netversion) {
+	if (!this->netversion) {
 		if (error.empty())
 			error = "Unable to receive a valid version from this server.";
 		timeout = 1;
