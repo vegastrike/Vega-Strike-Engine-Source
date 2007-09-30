@@ -180,10 +180,11 @@ void AUDListenerOrientation (const Vector & p, const Vector & q, const Vector & 
 void AUDSoundGain (int sound, float gain, bool music) {
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()) {
+    sounds[sound].music=music;
     float val=gain*(music?1.0f:mylistener.gain);
     if (sounds[sound].source) 
       alSourcef(sounds[sound].source,AL_GAIN,val<=1./16384?0:val);
-    sounds[sound].gain=val;
+    sounds[sound].gain=gain;
     //    alSourcefv(sounds[sound].source,AL_VELOCITY,v);
   }
 #endif
@@ -194,10 +195,12 @@ void AUDListenerGain (const float ggain) {
   float gain=ggain;
   if (gain<=0) gain=1./16384;
   
-  for (  unsigned int i=0,ie=sounds.size();i<ie;++i) {
-    AUDSoundGain(i,sounds[i].gain*(gain/mylistener.gain),true);
-  }
   mylistener.gain = gain;
+  for (  unsigned int i=0,ie=sounds.size();i<ie;++i) {
+    if (!sounds[i].music) {
+      AUDSoundGain(i,sounds[i].gain,false);
+    }
+  }
   if (g_game.sound_enabled) {
     alListenerf (AL_GAIN,1.0);	
   }

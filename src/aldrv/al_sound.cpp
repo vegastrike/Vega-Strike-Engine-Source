@@ -845,7 +845,7 @@ void AUDStartPlaying (const int sound){
       printf("AUDStartPlaying sound %d source:%d buffer:%d\n",sound,sounds[sound].source,sounds[sound].buffer);
 #endif
       AUDAdjustSound (sound, sounds[sound].pos, sounds[sound].vel);
-      alSourcef(sounds[sound].source,AL_GAIN,sounds[sound].gain);
+	  AUDSoundGain(sound, sounds[sound].gain, sounds[sound].music);
       alSourcePlay( sounds[sound].source );
     }
   }
@@ -869,7 +869,7 @@ void AUDPlay (const int sound, const QVector &pos, const Vector & vel, const flo
     if (AUDReclaimSource (sound,pos==QVector(0,0,0))) {
       //ALfloat p [3] = {pos.i,pos.j,pos.k};
       AUDAdjustSound (sound,pos,vel);
-      alSourcef(sounds[sound].source,AL_GAIN,gain);    
+	  AUDSoundGain(sound, gain, sounds[sound].music);
       if (tmp!=2){
 #ifdef SOUND_DEBUG
         printf("AUDPlay sound %d %d\n",sounds[sound].source,sounds[sound].buffer);
