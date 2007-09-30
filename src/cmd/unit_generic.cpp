@@ -3779,7 +3779,7 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn)
 		warpenergy-=afterburnenergy*GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;
 	if (afterburntype == 1) {	 // fuel-burning overdrive - uses afterburner efficiency
 								 //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-		fuel-=afterburnenergy*GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;
+		fuel-=GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;
 #ifndef __APPLE__
 		if (ISNAN(fuel)) {
 			fprintf(stderr,"Fuel is NAN A\n");
