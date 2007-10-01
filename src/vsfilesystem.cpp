@@ -219,6 +219,7 @@ namespace VSFileSystem
 	string sharedanims;
 	string sharedsprites;
 	string savedunitpath;
+	string modname;
 	string moddir;
 	string datadir;
 	string homedir;
@@ -574,6 +575,7 @@ namespace VSFileSystem
 		weapon_list = "weapon_list.xml";
 		if( subdir!="")
 		{
+			modname=subdir;
 			
 			if( DirectoryExists( homedir+"/mods/"+subdir))
 			{
@@ -652,10 +654,10 @@ namespace VSFileSystem
 				}
 			}
 		}else if (subdir!="") {
-                  printf ("\nUsing Mod Directory %s",moddir.c_str());
+                  printf ("Using Mod Directory %s\n",moddir.c_str());
                   CreateDirectoryHome( "mods");
                   CreateDirectoryHome("mods/"+subdir);
-                  datadir = moddir+"/"+subdir;
+                  //datadir = moddir+"/"+subdir;
                   homedir = homedir+"/mods/"+subdir;
                 }
 
@@ -696,9 +698,12 @@ namespace VSFileSystem
 		{
 			while( ret--)
 			{
-				curpath = moddir+"/"+dirlist[ret]->d_name;
-				cout<<"Adding mod path : "<<curpath<<endl;
-				Rootdir.push_back( curpath);
+				string dname (dirlist[ret]->d_name);
+				if (dname == modname) {
+					curpath = moddir+"/"+dname;
+					cout<<"Adding mod path : "<<curpath<<endl;
+					Rootdir.push_back( curpath);
+				}
 			}
 		}
 		free( dirlist);
@@ -711,9 +716,12 @@ namespace VSFileSystem
 		{
 			while( ret--)
 			{
-				curpath = curmodpath+dirlist[ret]->d_name;
-				cout<<"Adding mod path : "<<curpath<<endl;
-				Rootdir.push_back( curpath);
+				string dname (dirlist[ret]->d_name);
+				if (dname == modname) {
+					curpath = curmodpath+dname;
+					cout<<"Adding mod path : "<<curpath<<endl;
+					Rootdir.push_back( curpath);
+				}
 			}
 		}
 		free( dirlist);

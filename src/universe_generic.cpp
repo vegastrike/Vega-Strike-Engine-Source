@@ -364,15 +364,11 @@ int	Universe::StarSystemIndex( StarSystem * ss)
 
 void InitUnitTables () {
 	VSFile allUnits;
+	VSError err;
 
-	VSError err = allUnits.OpenReadOnly("units.csv",UnitFile);
-	if (err<=Ok) {
-		unitTables.push_back(new CSVTable(allUnits,allUnits.GetRoot()));
-		allUnits.Close();
-	}
 	static string unitdata= vs_config->getVariable("data","UnitCSV","modunits.csv");
 	while (unitdata.length()!=0) {
-		string::size_type  where=unitdata.find(" ");
+		string::size_type  where=unitdata.find(" "), where2=where;
 		if (where==string::npos)
 			where=unitdata.length();
 		string tmp = unitdata.substr(0,where);     
@@ -381,6 +377,15 @@ void InitUnitTables () {
 			unitTables.push_back(new CSVTable(allUnits,allUnits.GetRoot()));
 			allUnits.Close();
 		}
-		unitdata=unitdata.substr(where,unitdata.length());
+		if (where2==string::npos) break;
+		unitdata=unitdata.substr(where+1,unitdata.length());
 	}
+
+	// Now include units.csv at the end.
+	err = allUnits.OpenReadOnly("units.csv",UnitFile);
+	if (err<=Ok) {
+		unitTables.push_back(new CSVTable(allUnits,allUnits.GetRoot()));
+		allUnits.Close();
+	}
+
 }
