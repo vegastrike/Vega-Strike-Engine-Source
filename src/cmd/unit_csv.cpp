@@ -404,6 +404,7 @@ void AddDocks (Unit* thus, Unit::XML &xml, const string &docks) {
 }
 void AddLights (Unit * thus, Unit::XML &xml, const string &lights) 
 {
+  static float default_halo_activation=XMLSupport::parse_float(vs_config->getVariable("graphics","default_engine_activation",".00048828125"));
   string::size_type where,when;
   string::size_type ofs=0;
   while ((where=lights.find('{',ofs))!=string::npos) {
@@ -423,7 +424,7 @@ void AddLights (Unit * thus, Unit::XML &xml, const string &lights)
       halocolor.g=nextElementFloat(lights,elemstart,elemend,1);
       halocolor.b=nextElementFloat(lights,elemstart,elemend,1);
       halocolor.a=nextElementFloat(lights,elemstart,elemend,1);
-      double act_speed=nextElementFloat(lights,elemstart,elemend);
+      double act_speed=nextElementFloat(lights,elemstart,elemend,default_halo_activation);
 
       thus->addHalo(filename.c_str(),pos*xml.unitscale,scale.Cast(),halocolor,"",act_speed);
     } else ofs=string::npos;
