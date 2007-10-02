@@ -19,7 +19,8 @@ void printLog(GLuint obj, bool shader)
     fprintf(stderr,"%s\n", infoLog);
 }
  
-int GFXCreateProgram(char*vprogram,char* fprogram) {
+int GFXCreateProgramConst(const char*vprogram,const char* fprogram) {
+  if (vprogram[0]=='\0'&&fprogram[0]=='\0') return 0;
 #ifndef __APPLE__
   if (glGetProgramInfoLog_p==NULL||glCreateShader_p==NULL||glShaderSource_p==NULL||glCompileShader_p==NULL||glAttachShader_p==NULL||glLinkProgram_p==NULL||glGetShaderiv_p==NULL||glGetProgramiv_p==NULL)
     return 0;
@@ -99,26 +100,36 @@ int GFXCreateProgram(char*vprogram,char* fprogram) {
   }
   return sp;
 }
+int GFXCreateProgram(char*vprogram,char* fprogram) {
+  return GFXCreateProgramConst(vprogram,fprogram);
+}
 static int programChanged=false;
 static int defaultprog=0;
 static int lowfiprog=0;
 static int hifiprog=0;
 #ifdef __APPLE__
-char * defaultProgramName="mac";
-char * hifiProgramName="mac";
-char * lowfiProgramName="maclite";
+std::string hifiProgramName="mac";
+std::string lowfiProgramName="maclite";
 #else
-char * defaultProgramName="default";
-char * hifiProgramName="default";
-char * lowfiProgramName="lite";
+std::string hifiProgramName="default";
+std::string lowfiProgramName="lite";
 #endif
 int getDefaultProgram() {
   static bool initted=false;
   if (!initted){
-    lowfiprog=GFXCreateProgram(lowfiProgramName,lowfiProgramName);
-    if (lowfiprog==0)lowfiprog=GFXCreateProgram(hifiProgramName,hifiProgramName);
-    hifiprog=GFXCreateProgram(hifiProgramName,hifiProgramName);
-    if (hifiprog==0)hifiprog=GFXCreateProgram(lowfiProgramName,lowfiProgramName);
+#ifdef __APPLE__
+    hifiProgramName=vs_config->getVariable("graphics","mac_shader_name","mac");
+#else
+    hifiProgramName=vs_config->getVariable("graphics","shader_name","default");
+#endif
+    if (hifiProgramName.length()==0) {
+      lowfiprog=hifiprog=0;
+    }else {
+      lowfiprog=GFXCreateProgramConst(lowfiProgramName.c_str(),lowfiProgramName.c_str());
+      if (lowfiprog==0)lowfiprog=GFXCreateProgramConst(hifiProgramName.c_str(),hifiProgramName.c_str());
+      hifiprog=GFXCreateProgramConst(hifiProgramName.c_str(),hifiProgramName.c_str());
+      if (hifiprog==0)hifiprog=GFXCreateProgramConst(lowfiProgramName.c_str(),lowfiProgramName.c_str());
+    }
     defaultprog=hifiprog;
     programChanged=true;
     initted=true;
@@ -133,16 +144,16 @@ void GFXReloadDefaultShader() {
   }
   programChanged=true;
   if (islow) {
-    hifiprog=GFXCreateProgram(hifiProgramName,hifiProgramName);
-    if (hifiprog==0)hifiprog=GFXCreateProgram(lowfiProgramName,lowfiProgramName);
-    lowfiprog=GFXCreateProgram(lowfiProgramName,lowfiProgramName);
-    if (lowfiprog==0)lowfiprog=GFXCreateProgram(hifiProgramName,hifiProgramName);
+    hifiprog=GFXCreateProgramConst(hifiProgramName.c_str(),hifiProgramName.c_str());
+    if (hifiprog==0)hifiprog=GFXCreateProgramConst(lowfiProgramName.c_str(),lowfiProgramName.c_str());
+    lowfiprog=GFXCreateProgramConst(lowfiProgramName.c_str(),lowfiProgramName.c_str());
+    if (lowfiprog==0)lowfiprog=GFXCreateProgramConst(hifiProgramName.c_str(),hifiProgramName.c_str());
     defaultprog=lowfiprog;
   }else{
-    lowfiprog=GFXCreateProgram(lowfiProgramName,lowfiProgramName);
-    if (lowfiprog==0)lowfiprog=GFXCreateProgram(hifiProgramName,hifiProgramName);
-    hifiprog=GFXCreateProgram(hifiProgramName,hifiProgramName);
-    if (hifiprog==0)hifiprog=GFXCreateProgram(lowfiProgramName,lowfiProgramName);
+    lowfiprog=GFXCreateProgramConst(lowfiProgramName.c_str(),lowfiProgramName.c_str());
+    if (lowfiprog==0)lowfiprog=GFXCreateProgramConst(hifiProgramName.c_str(),hifiProgramName.c_str());
+    hifiprog=GFXCreateProgramConst(hifiProgramName.c_str(),hifiProgramName.c_str());
+    if (hifiprog==0)hifiprog=GFXCreateProgramConst(lowfiProgramName.c_str(),lowfiProgramName.c_str());
     defaultprog=hifiprog;
   }
 }
@@ -208,29 +219,32 @@ GameSpeed GFXGetFramerate() {
 }
 bool GFXShaderReloaded() {
   bool retval=programChanged;
-  switch (GFXGetFramerate()) {
-  case TOOSLOW:
-    if (defaultprog) {
-      retval=true;
-      if (defaultprog==hifiprog) 
-        defaultprog=lowfiprog;
-      else 
-        defaultprog=0;
-      GFXActivateShader(NULL);
+  static bool framerate_changes_shader=XMLSupport::parse_bool(vs_config->getVariable("graphics","framerate_changes_shader","false"));
+  if (framerate_changes_shader) {
+    switch (GFXGetFramerate()) {
+    case TOOSLOW:
+      if (defaultprog) {
+        retval=true;
+        if (defaultprog==hifiprog) 
+          defaultprog=lowfiprog;
+        else 
+          defaultprog=0;
+        GFXActivateShader(NULL);
+      }
+      break;
+    case TOOFAST:
+      if (defaultprog!=hifiprog){
+        retval=true;
+        if (defaultprog==0)
+          defaultprog=lowfiprog;
+        else
+          defaultprog=hifiprog;
+        GFXActivateShader(NULL);    
+      }
+      break;
+    default:
+      break;
     }
-    break;
-  case TOOFAST:
-    if (defaultprog!=hifiprog){
-      retval=true;
-      if (defaultprog==0)
-        defaultprog=lowfiprog;
-      else
-        defaultprog=hifiprog;
-      GFXActivateShader(NULL);    
-    }
-    break;
-  default:
-    break;
   }
   programChanged=false;
   return retval;
@@ -247,7 +261,7 @@ int GFXActivateShader(char *program) {
   if (program) {
     std::map<std::string,int>::iterator where=loadedprograms.find(std::string(program));
     if (where==loadedprograms.end()) {
-      curprogram=GFXCreateProgram(program,program);
+      curprogram=GFXCreateProgramConst(program,program);
       loadedprograms[program]=curprogram;
     }else {
       curprogram=where->second;
