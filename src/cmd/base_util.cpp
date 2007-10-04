@@ -188,7 +188,10 @@ namespace BaseUtil {
 			case 'd': case 'D': mask |= BaseInterface::Room::Link::DownEvent; break;
 			case 'e': case 'E': mask |= BaseInterface::Room::Link::EnterEvent; break;
 			case 'l': case 'L': mask |= BaseInterface::Room::Link::LeaveEvent; break;
-			case 'm': case 'M': mask |= BaseInterface::Room::Link::MoveEvent; break;
+			case 'm': case 'M':
+				fprintf(stderr,"%s: WARNING: Ignoring request for movement event mask.\n", __FILE__);
+				//mask |= BaseInterface::Room::Link::MoveEvent;
+				break;
 			}
 		} 
 

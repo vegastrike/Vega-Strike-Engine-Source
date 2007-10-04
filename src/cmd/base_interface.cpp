@@ -1189,11 +1189,18 @@ void BaseInterface::Room::Link::Click (BaseInterface *base,float x, float y, int
 
 void BaseInterface::Room::Link::MouseMove (::BaseInterface* base,float x, float y, int buttonmask)
 {
+	// Compiling Python code each mouse movement == Bad idea!!!
+	// If this support is needed we will need to use Python-C++ inheritance.
+	// Like the Execute() method of AI and Mission classes.
+	
+	// Even better idea: Rewrite the entire BaseInterface python interface.
+	
 	if (eventMask & MoveEvent) {
 		static std::string evtype("move");
 		BaseUtil::SetMouseEventData(evtype,x,y,buttonmask);
 		RunPython(this->pythonfile.c_str());
 	}
+	
 }
 
 void BaseInterface::Room::Link::MouseEnter (::BaseInterface* base,float x, float y, int buttonmask)
