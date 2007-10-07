@@ -3338,7 +3338,7 @@ bool BaseComputer::acceptMission(const EventCommandId& command, Control* control
     for (unsigned int i=0; i<stringCount; i++) {
 	if (getSaveString(playernum, MISSION_NAMES_LABEL, i) == qualifiedName) {
 	    finalScript = getSaveString(playernum, MISSION_SCRIPTS_LABEL, i);
-	    if (Network!=NULL) {
+	    if (Network==NULL) {
 		eraseSaveString(playernum, MISSION_SCRIPTS_LABEL, i);
 		eraseSaveString(playernum, MISSION_NAMES_LABEL, i);
 		eraseSaveString(playernum, MISSION_DESC_LABEL, i);
