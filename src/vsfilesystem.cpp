@@ -617,7 +617,7 @@ namespace VSFileSystem
 				else
 				{
 					cout<<"ERROR : coudn't find a mod named '"<<subdir<<"' in datadir/mods"<<endl;
-					exit(1);
+					// exit(1);
 				}
 			//}
 		}
