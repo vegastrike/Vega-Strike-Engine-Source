@@ -750,7 +750,7 @@ int AUDHighestSoundPlaying() {
   int retval=-1;
 	unsigned int s = ::sounds.size();
   for (unsigned int i=0;i < s;++i) {    
-    if (false==::sounds[i].music && AUDIsPlaying(i)) {
+    if (false==::sounds[i].music && AUDIsPlaying(i) && false==::sounds[i].looping) {
       retval=i;
     }
   }
