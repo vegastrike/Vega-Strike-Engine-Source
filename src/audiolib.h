@@ -28,7 +28,8 @@ int AUDCreateSound (int sound,const bool LOOP=false);
 int AUDCreateSound (const std::string &,const bool LOOP=false);
 ///guesses the type of sound by extension
 int AUDCreateMusic (const std::string &,const bool LOOP=false);
-void AUDStopAllSounds();
+void AUDStopAllSounds(int except_this_one=-1);
+int AUDHighestSoundPlaying();
 ///deletes a given sound
 void AUDDeleteSound (int sound, bool music=false);
 ///Changes the velocity and/or position of a given sound

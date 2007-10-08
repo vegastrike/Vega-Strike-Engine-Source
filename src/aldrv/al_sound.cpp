@@ -745,12 +745,24 @@ bool starSystemOK( ) {
 	return playa->getStarSystem()==_Universe->activeStarSystem();
 
 }
-void AUDStopAllSounds () {
+int AUDHighestSoundPlaying() {
+#ifdef HAVE_AL
+  int retval=-1;
+	unsigned int s = ::sounds.size();
+  for (unsigned int i=0;i < s;++i) {    
+    if (false==::sounds[i].music && AUDIsPlaying(i)) {
+      retval=i;
+    }
+  }
+  return retval;
+#endif
+}
+void AUDStopAllSounds (int except_this_one) {
 #ifdef HAVE_AL
 	unsigned int s = ::sounds.size();
 	for (unsigned int i=0;i < s;++i) {
-		if (!::sounds[i].music && AUDIsPlaying(i))
-			AUDStopPlaying(i);
+          if ((int)i!=except_this_one&&false==::sounds[i].music && AUDIsPlaying(i))
+            AUDStopPlaying(i);
 	}
 #endif
 }

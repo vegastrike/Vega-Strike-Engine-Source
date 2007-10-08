@@ -61,7 +61,7 @@ static void biModifyMouseSensitivity(int &x, int &y, bool invert){
   }
 }
 static bool createdbase=false;
-
+static int createdmusic=-1;
 void ModifyMouseSensitivity(int &x, int &y) {
   biModifyMouseSensitivity(x,y,false);
 }
@@ -506,7 +506,7 @@ void base_main_loop() {
           //		if (i++%4==3) {
                   createdbase=false;
                   //		}
-		AUDStopAllSounds();
+		AUDStopAllSounds(createdmusic);
 	}        
 	if (!RefreshGUI()) {
 		restore_main_loop();
@@ -927,6 +927,7 @@ BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
 	CallComp=false;
 	lastmouseindex=0;
         createdbase=true;
+        createdmusic=-1;
 	caller=un;
         curroom=0;
 	curlinkindex=0;
@@ -944,7 +945,9 @@ BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
         std::string fac = base ? FactionUtil::GetFaction(base->faction) : "neutral";
         if (base && fac=="neutral")
           fac  = UniverseUtil::GetGalaxyFaction(UnitUtil::getUnitSystemFile(base));
+        //AUDStopAllSounds();
 	Load(basefile, compute_time_of_day(base,un),fac.c_str());
+        createdmusic=AUDHighestSoundPlaying();
 	if (base && un) {
 		vector <string> vec;
 		vec.push_back(base->name);
