@@ -475,7 +475,6 @@ void Music::_LoadLastSongAsync() {
         if (where!=Muzak::cachedSongs.end()) {
           if (where->second.wave!=NULL) {
             int source = AUDBufferSound(&where->second, true);
-            AUDStreamingSound(source);
             music_load_info->wave=NULL;
             if (source!=-1) {
               playingSource.push_back(source);
@@ -483,7 +482,7 @@ void Music::_LoadLastSongAsync() {
             if (playingSource.size()==1) { // Start playing if first in list.
               _StopNow();
               AUDStartPlaying(playingSource.front());
-              // FIXME FIXME FIXME Presumed race condition or somesuch -- AUDSoundGain here breaks windows music -- temporary hack, actual fix later
+              AUDStreamingSound(source);
               AUDSoundGain(playingSource.front(),vol,true);
             }
             return;
@@ -544,7 +543,6 @@ void Music::Listen() {
 #ifdef HAVE_AL
 				if (music_load_info->success && music_load_info->wave) {
 					int source = AUDBufferSound(music_load_info, true);
-					AUDStreamingSound(source);
                                         if (freeWav)
                                           free(music_load_info->wave);
 					music_load_info->wave=NULL;
@@ -556,7 +554,7 @@ void Music::Listen() {
 				if (playingSource.size()==1) { // Start playing if first in list.
                                   _StopNow();
                                   AUDStartPlaying(playingSource.front());
-                                  // FIXME FIXME FIXME Presumed race condition or somesuch -- AUDSoundGain here breaks windows music -- temporary hack, actual fix later
+                                  AUDStreamingSound(source);
                                   AUDSoundGain(playingSource.front(),vol,true);
 				}
 				music_load_list.pop_back();
