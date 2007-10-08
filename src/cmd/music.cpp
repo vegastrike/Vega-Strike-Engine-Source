@@ -554,7 +554,7 @@ void Music::Listen() {
 				if (playingSource.size()==1) { // Start playing if first in list.
                                   _StopNow();
                                   AUDStartPlaying(playingSource.front());
-                                  AUDStreamingSound(source);
+                                  AUDStreamingSound(playingSource.front());
                                   AUDSoundGain(playingSource.front(),vol,true);
 				}
 				music_load_list.pop_back();
