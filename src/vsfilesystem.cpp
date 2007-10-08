@@ -75,27 +75,34 @@ ObjSerial	getUniqueSerial()
 
 extern string GetUnitDir( string filename);
 
+string selectcurrentdir;
+
 #if defined (__FreeBSD__) || defined(__APPLE__)
 int	selectdirs( struct dirent * entry)
 #else
 int	selectdirs( const struct dirent * entry)
 #endif
 {
-#if defined(_WIN32)
+	if (string( entry->d_name)=="." && string( entry->d_name)=="..") {
+		return 0;
+	}
 	// Have to check if we have the full path or just relative (which would be a problem)
-	cerr<<"Read directory entry : "<<(curmodpath+entry->d_name)<<endl;
+	std::string tmp=selectcurrentdir+'/'+entry->d_name;
+	//cerr<<"Read directory entry : "<< tmp <<endl;
 	struct stat s;
-	std::string tmp=curmodpath+entry->d_name;
 	if( stat( tmp.c_str(), &s)<0)
-		return false;
-	if( (s.st_mode & S_IFDIR) && string( entry->d_name)!="." && string( entry->d_name)!="..")
+		return 0;
+	if( (s.st_mode & S_IFDIR))
 	{
 		return 1;
 	}
+	/*
+	  // Everything shows up as DT_UNKNOWN (0) on Linux since it's just that cool.
 #else
-	if( entry->d_type==DT_DIR && string( entry->d_name)!="." && string( entry->d_name)!="..")
+	if( entry->d_type==DT_DIR) 
 		return 1;
 #endif
+	*/
 	return 0;
 }
 
@@ -691,7 +698,8 @@ namespace VSFileSystem
 		string curpath;
 		struct dirent ** dirlist;
 		// Scan for mods in specified subdir
-		int ret = scandir( moddir.c_str(), &dirlist, selectdirs, 0);
+		selectcurrentdir = moddir;
+		int ret = scandir( selectcurrentdir.c_str(), &dirlist, selectdirs, 0);
 		if( ret <0)
 			return;
 		else
@@ -709,7 +717,8 @@ namespace VSFileSystem
 		free( dirlist);
 		// Scan for mods with standard data subtree
 		curmodpath = homedir+"/mods/";
-		ret = scandir( curmodpath.c_str(), &dirlist, selectdirs, 0);
+		selectcurrentdir = curmodpath;
+		ret = scandir( selectcurrentdir.c_str(), &dirlist, selectdirs, 0);
 		if( ret <0)
 			return;
 		else
