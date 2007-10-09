@@ -402,7 +402,9 @@ else
     VS_CHECK_SDL
     
     dnl Only build soundserver if we have SDL Mixer (this is defined in CHECK_SDL)
-    AM_CONDITIONAL([VS_MAKE_SOUNDSERVER], [test "x$have_SDL_mixer" = "xyes"]) 
+    dnl AM_CONDITIONAL([VS_MAKE_SOUNDSERVER], [test "x$have_SDL_mixer" = "xyes"]) 
+    dnl soundserver not used any more.
+    AM_CONDITIONAL([VS_MAKE_SOUNDSERVER], [false]) 
     
     AC_LANG(C++)
   if test "x$is_macosx" = "xno" ; then 

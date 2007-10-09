@@ -34,22 +34,22 @@ AC_ARG_ENABLE(sdl-windowing, AC_HELP_STRING([--disable-sdl-windowing], [Disable 
 		echo "Using GLUT Windowing System"
 	fi
 dnl Check for SDL_mixer
-    AC_CHECK_LIB( SDL_mixer, Mix_OpenAudio, 
-                  have_SDL_mixer=yes, have_SDL_mixer=no )
-
-    if test "x$have_SDL_mixer" = "xyes" ; then 
-        AC_DEFINE(HAVE_SDL_MIXER,1,[Can we use the SDL mixer])
-	SDL_MIXER_LIBS="-lSDL_mixer"
-    else
-        echo "*** SDL_mixer not found.  Configuring without audio support."
-    fi
-    AC_SUBST(SDL_MIXER_LIBS)
+dnl    AC_CHECK_LIB( SDL_mixer, Mix_OpenAudio, 
+dnl                  have_SDL_mixer=yes, have_SDL_mixer=no )
+dnl
+dnl    if test "x$have_SDL_mixer" = "xyes" ; then 
+dnl        AC_DEFINE(HAVE_SDL_MIXER,1,[Can we use the SDL mixer])
+dnl	SDL_MIXER_LIBS="-lSDL_mixer"
+dnl    else
+dnl        echo "*** SDL_mixer not found.  Configuring without audio support."
+dnl    fi
+dnl    AC_SUBST(SDL_MIXER_LIBS)
 
     LIBS="$saved_LIBS"
 else
-    echo "*** SDL not found.  Configuring without audio or joystick support."
+    echo "*** SDL not found.  Configuring without joystick support."
 fi
 else
-    echo "*** SDL disabled. Configuring without audio or joystick support."
+    echo "*** SDL disabled. Configuring without joystick support."
 fi
 ])
