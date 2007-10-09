@@ -241,6 +241,7 @@ void	NetServer::sendMessage( string from, string to, string message, float delay
 			Unit *un = cp->GetParent();
 			if (!un) return;
 			ClientPtr clt = this->getClientFromSerial(un->GetSerial());
+			if (!clt) return;
 
 			p2.send( CMD_TXTMESSAGE, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
 			 NULL, clt->tcp_sock, __FILE__, PSEUDO__LINE__(223) );

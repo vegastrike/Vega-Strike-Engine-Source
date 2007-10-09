@@ -897,12 +897,12 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				if( !clt)
 				{
 					un = UniverseUtil::GetUnitFromSerial( p1.getSerial());
-					if( un)
-					{
+					if (un) {
 						un->Destroy();
-					}
-					else
+						un->Kill(true,true);
+					} else {
 						COUT<<"!!! Problem -> CANNOT KILL UNIT NOT FOUND !!!"<<endl;
+					}
 				}
 				else
 				{
@@ -912,6 +912,12 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					Clients.remove(p1.getSerial());
 					if (un) {
 						un->Destroy();
+					} else {
+						un = UniverseUtil::GetUnitFromSerial( p1.getSerial());
+						if (un) {
+							un->Destroy();
+							un->Kill(true,true);
+						}
 					}
 					COUT<<"Client #"<<p1.getSerial()<<" killed - now "<<nbclients<<" clients in system"<<endl;
 
@@ -1017,7 +1023,12 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 						unsigned int quantity = netbuf.getInt32();
 						string str=netbuf.getString();
 						if (un) {
-							carg = *mpl->GetCargo(str.c_str(), mplind);
+							Cargo *foundcarg = mpl->GetCargo(str.c_str(), mplind);
+							if (foundcarg) {
+								carg = *foundcarg;
+							} else {
+							    COUT << "Server sent bad cargo '"<<str<<"' for unit serial "<<ser<<endl;
+							}
 						}
 						carg.SetQuantity(quantity);
 						carg.SetPrice(netbuf.getFloat());
