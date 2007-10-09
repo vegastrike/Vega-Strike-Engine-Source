@@ -12,19 +12,35 @@ extern StarSystem * GetLoadedStarSystem( const char * system);
 
 // WEAPON STUFF
 
-void	NetServer::BroadcastTarget( ObjSerial serial, ObjSerial target, unsigned short zone)
+void	NetServer::BroadcastTarget( ObjSerial serial, ObjSerial oldtarget, ObjSerial target, unsigned short zone)
 {
-	Packet p;
-	NetBuffer netbuf;
+	Packet p1;
+	NetBuffer netbuf1;
+	netbuf1.addSerial( target);
+	ClientPtr clt = this->getClientFromSerial(target);
+	if (clt) {
+		p1.send( CMD_TARGET, serial, netbuf1.getData(), netbuf1.getDataLength(), SENDRELIABLE,
+			 NULL, clt->tcp_sock, __FILE__, PSEUDO__LINE__(24) );
+	}
 
+	Packet p2;
+	NetBuffer netbuf2;
+	netbuf2.addSerial( 0 );
+	clt = this->getClientFromSerial(oldtarget);
+	if (clt) {
+		p2.send( CMD_TARGET, serial, netbuf2.getData(), netbuf2.getDataLength(), SENDRELIABLE,
+				 NULL, clt->tcp_sock, __FILE__, PSEUDO__LINE__(34));
+	}
+	
+	
+	/*
 	netbuf.addSerial( target);
-
-	//p.send( CMD_UNFIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
 	p.bc_create( CMD_TARGET, serial,
                  netbuf.getData(), netbuf.getDataLength(),
                  SENDRELIABLE,
                  __FILE__, PSEUDO__LINE__(26) );
 	zonemgr->broadcast( zone, serial, &p, true ); // NETFIXME: Should unfire be TCP?
+	*/
 }
 
 void	NetServer::BroadcastUnfire( ObjSerial serial, const vector<int> &weapon_indicies, unsigned short zone)

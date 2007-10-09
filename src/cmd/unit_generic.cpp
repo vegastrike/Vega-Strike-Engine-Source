@@ -5645,17 +5645,18 @@ void Unit::LockTarget(bool myboo)
 
 void Unit::Target (Unit *targ)
 {
-	if (Network && !SERVER) {
-		return;					 // Client only targets upon server request.
-	}
 	if (targ==this) {
 		return;
+	}
+	ObjSerial oldtarg=0;
+	if (computer.target.GetUnit()) {
+		oldtarg = computer.target.GetUnit()->GetSerial();
 	}
 
 	if (!(activeStarSystem==NULL||activeStarSystem==_Universe->activeStarSystem())) {
 
 		if (SERVER&&computer.target.GetUnit()!=NULL)
-			VSServer->BroadcastTarget(GetSerial(), 0, this->getStarSystem()->GetZone());
+			VSServer->BroadcastTarget(GetSerial(), oldtarg, 0, this->getStarSystem()->GetZone());
 		computer.target.SetUnit(NULL);
 		return;
 		/*
@@ -5671,7 +5672,7 @@ void Unit::Target (Unit *targ)
 					mounts[i].time_to_lock = mounts[i].type->LockTime;
 				}
 				if (SERVER&&computer.target.GetUnit()!=targ)
-					VSServer->BroadcastTarget(GetSerial(), targ->GetSerial(), this->getStarSystem()->GetZone());
+					VSServer->BroadcastTarget(GetSerial(), oldtarg, targ->GetSerial(), this->getStarSystem()->GetZone());
 				computer.target.SetUnit(targ);
 				LockTarget(false);
 			}
@@ -5696,14 +5697,14 @@ void Unit::Target (Unit *targ)
 			}
 			else {
 				if (SERVER&&computer.target.GetUnit()!=NULL)
-					VSServer->BroadcastTarget(GetSerial(), 0, this->getStarSystem()->GetZone());
+					VSServer->BroadcastTarget(GetSerial(), oldtarg, 0, this->getStarSystem()->GetZone());
 				computer.target.SetUnit(NULL);
 			}
 		}
 	}
 	else {
 		if (SERVER&&computer.target.GetUnit()!=NULL)
-			VSServer->BroadcastTarget(GetSerial(), 0, this->getStarSystem()->GetZone());
+			VSServer->BroadcastTarget(GetSerial(), oldtarg, 0, this->getStarSystem()->GetZone());
 		computer.target.SetUnit(NULL);
 	}
 }

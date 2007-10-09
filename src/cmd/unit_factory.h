@@ -202,7 +202,7 @@ public:
 	
 	static void endBuffer(NetBuffer &netbuf); // Tells the client that we are done sending units... is this necessary?
 
-	static void broadcastUnit(const Unit *un, unsigned short zone);
+	static void broadcastUnit(Unit *un, unsigned short zone);
 };
 
 #endif /* _UNIT_FACTORY_H_ */

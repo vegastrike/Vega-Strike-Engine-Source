@@ -508,6 +508,8 @@ void	NetServer::start(int argc, char **argv)
 		  */
 #endif
 
+		sendNewUnitQueue();
+		  
 		// Check for automatic server status save time (in seconds)
 		//curtime = getNewTime();
 		//if( curtime - savetime > period*60)

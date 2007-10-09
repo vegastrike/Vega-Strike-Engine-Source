@@ -38,7 +38,7 @@ ClientPtr NetServer::getClientFromSerial( ObjSerial serial)
 	}
 	if (!found)
 	{
-		cerr<<"   WARNING client not found in getClientFromSerial !!!!"<<endl;
+		//cerr<<"   WARNING client not found in getClientFromSerial !!!!"<<endl;
 		clt.reset();
 	}
 

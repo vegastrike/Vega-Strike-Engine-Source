@@ -253,7 +253,7 @@ Asteroid* UnitFactory::createAsteroid( const char * filename,
 	return ast;
 }
 
-void UnitFactory::broadcastUnit(const Unit *un, unsigned short zone) {
+void UnitFactory::broadcastUnit(Unit *un, unsigned short zone) {
 }
 
 Terrain*	UnitFactory::createTerrain( const char * file, Vector scale, float position, float radius, Matrix & t)

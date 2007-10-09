@@ -85,6 +85,9 @@ class NetServer
 		timeval				srvtimeout;			// timer
 		std::queue<int>			unused_players;
 
+		// queue of units added to system but not sent to clients yet.
+		std::vector<UnitContainer> newUnits;
+
 //		vector<Account *>	Cltacct;			// Client accounts
         ClientList          allClients;         // Active TCP and UDP client connections
 		ClientList          discList;			// Client connections to be disconnected
@@ -145,11 +148,13 @@ class NetServer
 
 		void	broadcast( NetBuffer & netbuf, ObjSerial serial, unsigned short zone, Cmd command, bool isTcp );
 
+		void	broadcastUnit( Unit* un, unsigned short zone);
+		void	sendNewUnitQueue();
 		// WEAPON STUFF
 		void	BroadcastCargoUpgrade( ObjSerial sender, ObjSerial buyer, ObjSerial seller, const std::string &cargo,
 							float price, float mass, float volume, bool mission, unsigned int quantity,
 							int mountOffset, int subunitOffset, unsigned short zone);
-		void	BroadcastTarget( ObjSerial serial, ObjSerial target, unsigned short zone);
+		void	BroadcastTarget( ObjSerial serial, ObjSerial oldtarg, ObjSerial target, unsigned short zone);
 		void	BroadcastUnfire( ObjSerial serial, const vector<int> &weapon_indicies, unsigned short zone);
 		void	BroadcastFire( ObjSerial serial, const vector<int> &weapon_indicies, ObjSerial missile_serial, float energy, unsigned short zone);
 		//void	sendDamages( ObjSerial serial, int zone, string shields, float recharge, char leak, unsigned short ab, unsigned short af, unsigned short al, unsigned short ar, float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color);

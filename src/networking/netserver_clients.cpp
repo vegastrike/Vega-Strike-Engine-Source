@@ -31,6 +31,39 @@ ClientPtr NetServer::addNewClient( SOCKETALT &sock )
     return newclt;
 }
 
+void NetServer::broadcastUnit(Unit *un, unsigned short zone) {
+	newUnits.push_back(un);
+}
+void NetServer::sendNewUnitQueue() {
+	for (unsigned short zone=0;zone<zonemgr->getZoneNumber();zone++) {
+		NetBuffer netbuf;
+		bool added=false;
+		for (std::vector<UnitContainer>::iterator iter=newUnits.begin();
+				 iter!=newUnits.end();
+				 ++iter) {
+			Unit *un = (*iter).GetUnit();
+			if (un) {
+				StarSystem *sys = un->getStarSystem();
+				if (sys) {
+					unsigned short unzone = sys->GetZone();
+					if (unzone == zone) {
+						added=true;
+						UnitFactory::addBuffer(netbuf, un, true);
+					}
+				}
+			} else {
+				COUT << "New Unit already killed before being sent!!!" << endl;
+			}
+		}
+		if (added) {
+			UnitFactory::endBuffer(netbuf);
+			VSServer->broadcast( netbuf, 0, zone, CMD_ENTERCLIENT, true);
+			VSServer->invalidateSnapshot();
+		}
+	}
+	newUnits.clear();
+}
+
 /**************************************************************/
 /**** Add a client in the game                             ****/
 /**************************************************************/

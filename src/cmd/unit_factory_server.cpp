@@ -272,13 +272,9 @@ ContinuousTerrain*	UnitFactory::createContinuousTerrain( const char * file, Vect
 	  return NULL;
 }
 
-void UnitFactory::broadcastUnit(const Unit *unit, unsigned short zone) {
+void UnitFactory::broadcastUnit(Unit *unit, unsigned short zone) {
 	if (!_Universe->netLocked() && unit->GetSerial()) {
-		NetBuffer netbuf;
-		addBuffer(netbuf, unit, true);
-		endBuffer(netbuf);
-		VSServer->broadcast( netbuf, 0, zone, CMD_ENTERCLIENT, true);
-		VSServer->invalidateSnapshot();
+		if (SERVER) VSServer->broadcastUnit(unit, zone);
 	}
 }
 

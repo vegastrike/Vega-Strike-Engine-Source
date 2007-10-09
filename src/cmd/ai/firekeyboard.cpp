@@ -1213,16 +1213,13 @@ bool getNearestTargetUnit (Unit *me, int iType) {
   if (targ == NULL)
 	  return false;
 
-  if (Network==NULL)
-  {
-	  me->Target(targ);
-	  return true;
+  me->Target(targ);
+
+  if (Network!=NULL) {
+    int player = _Universe->whichPlayerStarship( me);
+    if (player>=0) 
+      Network[player].targetRequest(targ);
   }
-
-  int player = _Universe->whichPlayerStarship( me);
-  if (player>=0) 
-	  Network[player].targetRequest(targ);
-
   return true;
 
 }
@@ -1245,9 +1242,7 @@ bool ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
 	while (1) {
 		while (veciter!=vec.end()) {
 			if (((*veciter)!=me)&&((*veciter)->GetHull()>=0)&&typeofunit(me,(*veciter))) {
-				//if (Network==NULL) {
-					me->Target(*veciter);
-				//} else {
+				me->Target(*veciter);
 				if (Network!=NULL) {
 					int player = _Universe->whichPlayerStarship( me);
 					if (player>=0) {
