@@ -345,7 +345,7 @@ bool NetServer::loadFromNewGame( ClientPtr clt, Cockpit *cp, string fighter ) {
 		clt->savegame.resize(0);
 		// Get the save parts in a string array
 		cp->activeStarSystem = zonemgr->addZone( cp->savegame->GetStarSystem() ); // Needed for GetSaveStrings.
-		SaveNetUtil::GetSaveStrings( clt, savestr, xmlstr);
+		SaveNetUtil::GetSaveStrings( clt, savestr, xmlstr, true);
 		clt->savegame.push_back( savestr);
 		clt->savegame.push_back( xmlstr);
 	}

@@ -128,7 +128,6 @@ VegaConfig * createVegaConfig( char * file)
 	return new GameVegaConfig( file);
 }
 
-extern QVector DockToSavedBases (int playernum);
 extern bool soundServerPipes();
 std::string ParseCommandLine(int argc, char ** CmdLine);
 void VSExit( int code)
@@ -673,7 +672,8 @@ void bootstrap_main_loop () {
 	// Never dock on load in networking if it was said so in the save file NETFIXME--this may change
 	if (Network==NULL && mission->getVariable("savegame","").length()!=0&&XMLSupport::parse_bool(vs_config->getVariable("AI","dockOnLoad","true"))) {
 		for (int i=0;i<_Universe->numPlayers();i++) {
-			DockToSavedBases(i);
+			QVector vec;
+			DockToSavedBases(i, vec);
 		}
 	}
 	cout<<"Loading completed, now network init"<<endl;

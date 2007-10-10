@@ -335,7 +335,7 @@ void	NetServer::sendJump(Unit * un, Unit * dst,std::string dststr)
     }
     std::string savestr;
 	std::string csvstr;
-	SaveNetUtil::GetSaveStrings( cpnum, savestr, csvstr);
+	SaveNetUtil::GetSaveStrings( cpnum, savestr, csvstr, true);
 	/*
 	savestr = cp->savegame->WriteSaveGame (fn.c_str(),un->LocalPosition(),cp->credits,cp->unitfilename,-1,FactionUtil::GetFactionName(un->faction), false);
 	csvstr = un->WriteUnitString();
@@ -446,6 +446,26 @@ void	NetServer::sendDockDeny( ObjSerial serial, unsigned short zone)
 	// In fact do nothing
 }
 
+void	NetServer::sendForcePosition( ClientPtr clt )
+{
+	Unit *un = clt->game_unit.GetUnit();
+	if (!un)
+		return;
+	
+	ClientState cs (un);
+
+	Packet p;
+	NetBuffer netbuf;
+	if (clt->netversion<4951) {
+		netbuf.addQVector(cs.getPosition());
+	} else {
+		netbuf.addClientState(cs);
+	}
+	
+	p.send(CMD_POSUPDATE, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
+		   NULL, clt->tcp_sock, __FILE__, PSEUDO__LINE__(457));
+}
+
 void	NetServer::sendUnDock( ObjSerial serial, ObjSerial utdwserial, unsigned short zone)
 {
 	// Set client ingame
@@ -469,6 +489,8 @@ void	NetServer::sendUnDock( ObjSerial serial, ObjSerial utdwserial, unsigned sho
 	p.bc_create( CMD_UNDOCK, serial,
                  netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
                  __FILE__, PSEUDO__LINE__(134) );
-	zonemgr->broadcastNoSelf( zone, serial, &p, true );
+	zonemgr->broadcast( zone, serial, &p, true );
+
+	sendForcePosition(clt);
 }
 

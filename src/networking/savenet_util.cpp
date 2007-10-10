@@ -7,7 +7,7 @@
 
 using std::string;
 
-void	SaveNetUtil::GetSaveStrings( ClientPtr clt, string & savestr, string & xmlstr)
+void	SaveNetUtil::GetSaveStrings( ClientPtr clt, string & savestr, string & xmlstr, bool detail)
 {
 	if (!clt) return;
 	Unit * un = clt->game_unit.GetUnit();
@@ -23,10 +23,10 @@ void	SaveNetUtil::GetSaveStrings( ClientPtr clt, string & savestr, string & xmls
 	*/
 	int cpnum = _Universe->whichPlayerStarship(un);
 	if (cpnum<0) return;
-	GetSaveStrings( cpnum, savestr, xmlstr );
+	GetSaveStrings( cpnum, savestr, xmlstr, detail );
 }
 
-void	SaveNetUtil::GetSaveStrings( int numplayer, string & savestr, string & xmlstr)
+void	SaveNetUtil::GetSaveStrings( int numplayer, string & savestr, string & xmlstr, bool savevars)
 {
 	Cockpit * cp;
 	Unit * un;
@@ -40,7 +40,7 @@ void	SaveNetUtil::GetSaveStrings( int numplayer, string & savestr, string & xmls
 			savestr = cp->savegame->WriteSaveGame (fname.c_str(), un->LocalPosition(), cp->credits, cp->unitfilename, numplayer,
 						FactionUtil::GetFactionName( cp->GetParent()->faction), false);
 			// Only get the player data, the dynamic universe part is separated
-			//savestr = cp->savegame->WritePlayerData ( POS, cp->unitfilename, fname.c_str(), cp->credits, FactionUtil::GetFactionName( cp->GetParent()->faction));
+			savestr = cp->savegame->WritePlayerData ( POS, cp->unitfilename, fname.c_str(), cp->credits, FactionUtil::GetFactionName( cp->GetParent()->faction));
 		}
 	}
 }

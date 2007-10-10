@@ -1,5 +1,6 @@
 #include "networking/lowlevel/vsnet_debug.h"
 #include "vsfilesystem.h"
+#include "networking/savenet_util.h"
 #include "networking/netclient.h"
 #include "cmd/unit_generic.h"
 #include "networking/lowlevel/netbuffer.h"
@@ -202,6 +203,12 @@ void	NetClient::saveRequest( )
             netbuf.getData(), netbuf.getDataLength(),
             SENDRELIABLE, NULL, *this->clt_tcp_sock,
             __FILE__, PSEUDO__LINE__(189) );
+
+	int cpnum = _Universe->whichPlayerStarship(un);
+	if (cpnum>=0 && lastsave.size()>=2) {
+		SaveNetUtil::GetSaveStrings(cpnum, lastsave[0], lastsave[1], true);
+	}
+	
 }
 
 void	NetClient::dockRequest( ObjSerial utdw_serial)

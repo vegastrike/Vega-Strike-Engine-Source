@@ -61,14 +61,15 @@
 #include "python/init.h"
 #include <Python.h>
 
+#include "netversion.h"
+ObjSerial SERVER_NETVERSION = NETWORK_VERSION;
+
 double	clienttimeout;
 double	logintimeout;
 int		acct_con;
 double  DAMAGE_ATOM;
 double	PLANET_ATOM;
 double	SAVE_ATOM;
-
-ObjSerial SERVER_NETVERSION = 4950;
 
 static const char* const MISSION_SCRIPTS_LABEL = "mission_scripts";
 static const char* const MISSION_NAMES_LABEL = "mission_names";
@@ -1573,8 +1574,15 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			{
 				docking_unit->RequestClearance(un);
 				int dockport = un->Dock( docking_unit) - 1; // For some reason Unit::Dock adds 1.
-				if( dockport>=0)
+				if( dockport>=0) {
 					this->sendDockAuthorize( un->GetSerial(), utdwserial, dockport, zonenum);
+					int cpt=UnitUtil::isPlayerStarship(un);
+					if (cpt>=0) {
+						vector <string> vec;
+						vec.push_back(docking_unit->name);
+						saveStringList(cpt,mission_key,vec);
+					}
+				}
 				else
 					this->sendDockDeny( un->GetSerial(), zonenum );
 			}
@@ -1594,8 +1602,15 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			if( docking_unit)
 			{
 				bool undocked = un->UnDock( docking_unit);
-				if( undocked )
+				if( undocked ) {
+					int cpt=UnitUtil::isPlayerStarship(un);
+					if (un&&cpt>=0) {
+						vector <string> vec;
+						vec.push_back(string());
+						saveStringList(cpt,mission_key,vec);
+					}
 					this->sendUnDock( un->GetSerial(), utdwserial, zonenum);
+				}
 			}
 			else
 				cerr<<"!!! ERROR : cannot dock with unit serial="<<utdwserial<<endl;

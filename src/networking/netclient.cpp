@@ -60,12 +60,13 @@
 #include "networking/prediction.h"
 #include "fileutil.h"
 
+#include "netversion.h"
+ObjSerial CLIENT_NETVERSION = NETWORK_VERSION;
+
 
 using std::cout;
 using std::endl;
 using std::cin;
-
-ObjSerial CLIENT_NETVERSION = 4950;
 
 double NETWORK_ATOM;
 
@@ -78,6 +79,7 @@ extern const Unit* getUnitFromUpgradeName(const string& upgradeName, int myUnitF
 extern int GetModeFromName(const char *);  // 1=add, 2=mult, 0=neither.
 static const string LOAD_FAILED = "LOAD_FAILED";
 extern Cargo* GetMasterPartList(const char *input_buffer);
+extern bool isWeapon (std::string name);
 
 /*************************************************************/
 /**** Tool functions                                      ****/
@@ -138,7 +140,6 @@ void NetClient::Reinitialize() {
 
 }
 NetClient::NetClient()
-  : save("")
 {
   keeprun=1;
   clt_tcp_sock=new SOCKETALT;
@@ -1106,11 +1107,14 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				Cargo carg = *cargptr;
 				bool upgrade=false;
 				bool repair=false;
+				bool weapon=false;
 				if (carg.GetCategory().find("upgrades")==0) {
 					upgrade=true;
-				}
-				if (upgrade && !quantity) {
-					repair=true;
+					if (isWeapon(carg.GetCategory())) {
+						weapon=true;
+					} else if (!quantity && buyer==sender) {
+						repair=true;
+					}
 				}
 				if (!upgrade) {
 					missioncarg = (mountOffset==1 && subunitOffset==1);
@@ -1376,12 +1380,13 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				if (nostarsystem) break;
 				// If a client receives that it means the server want to force the client position to be updated
 				// with server data
-				QVector serverpos = netbuf.getQVector();
+				ClientState serverpos = netbuf.getClientState();
 				un = this->game_unit.GetUnit();
 				if (!un)
 					break;
-				un->old_state.setPosition( serverpos);
-				un->curr_physical_state.position = serverpos;
+				un->old_state = serverpos;
+				serverpos.setUnitState(un);
+				un->BackupState();
 			}
 			break;
 			case CMD_SERVERTIME:

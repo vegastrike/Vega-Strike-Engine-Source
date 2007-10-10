@@ -342,7 +342,7 @@ void FlyByWire::Execute () {
   }
   static double collidepanic = XMLSupport::parse_float (vs_config->getVariable("physics","collision_inertial_time","1.25"));
   Cockpit * tempcp = _Universe->isPlayerStarship (parent);
-  if (((sheltonslide||inertial_flight_model||!controltype)&&(!desireThrust))||(tempcp&&((getNewTime()-tempcp->TimeOfLastCollision)<collidepanic))) {
+  if (((sheltonslide||inertial_flight_model||!controltype)&&(!desireThrust))||(tempcp&&Network==NULL&&((getNewTime()-tempcp->TimeOfLastCollision)<collidepanic))) {
     MatchAngularVelocity::Execute(); //only match turning
     if (inertial_flight_model)
         parent->Thrust(DirectThrust,afterburn);

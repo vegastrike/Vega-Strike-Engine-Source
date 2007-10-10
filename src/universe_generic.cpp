@@ -37,12 +37,13 @@ Cockpit * Universe::createCockpit( std::string player)
 	return cp;
 }
 
-QVector DockToSavedBases (int playernum) {
+Unit * DockToSavedBases (int playernum, QVector &safevec) {
 	static string _str=vs_config->getVariable("AI","startDockedTo","MiningBase");
     string str = _str;
 	Unit *plr=_Universe->AccessCockpit(playernum)->GetParent();
 	if (!plr) {
-		return QVector( 0, 0, 0);
+		safevec = QVector( 0, 0, 0);
+		return NULL;
 	}
 	vector <string> strs=loadStringList(playernum,mission_key);
 	if (strs.size()) {
@@ -71,7 +72,8 @@ QVector DockToSavedBases (int playernum) {
 		int i;
 		for (i=0;;i++) {
 			if (i>=dprt.size()) {
-				return QVector( 0, 0, 0);
+				safevec = QVector( 0, 0, 0);
+				return NULL;
 			}
 			if (!dprt[i].used) {
 				break;
@@ -86,7 +88,8 @@ QVector DockToSavedBases (int playernum) {
             _Universe->AccessCockpit(playernum)->retry_dock=128;
           else _Universe->AccessCockpit(playernum)->retry_dock-=1;
         }
-	return dock_position;
+	safevec = dock_position;
+	return (closestUnit && closestUnit->isDocked(plr))?closestUnit:NULL;
 }
 
 using namespace std;

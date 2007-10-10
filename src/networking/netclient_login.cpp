@@ -227,7 +227,7 @@ void	NetClient::loginAccept( Packet & p1)
 	COUT << ">>> LOGIN ACCEPTED =( serial #" << serial << " )= --------------------------------------" << endl;
 	{
 		char msg[100];
-		sprintf(msg, "#cc66ffNETWORK: Login Accepted.  Serial number is %d.\nDownloading system file...",serial);
+		sprintf(msg, "#cc66ffNETWORK: Login Accepted.  Serial number is %d.  Downloading system file...",serial);
 		bootstrap_draw(msg,NULL);
 	}
 	// Should receive player's data (savegame) from server if there is a save
@@ -543,16 +543,17 @@ void NetClient::synchronizeTime(SOCKETALT*udpsock)
 			if (timeout>=UDP_TIMEOUT) {
 				if (this->lossy_socket->isTcp()==false) {
 					if (clt_port<clt_port_max && !udpsock) {
-						NetUIUDP::disconnectSaveUDP(*this->clt_udp_sock); // is disconnectSaveUDP proper???
+						NetUIUDP::disconnectSaveUDP(*this->clt_udp_sock);
 						*this->clt_udp_sock=NetUIUDP::createSocket( this->_serverip.c_str(), port, clt_port, _sock_set );
 						clt_port++;
+						COUT << "Trying UDP port " << clt_port << "." << endl;
 					} else {
 						// no UDP requests made it, fallback to TCP.
 						this->lossy_socket=this->clt_tcp_sock;
 						clt_port=0;
+						COUT << "Setting default lossy transport to TCP (UDP timeout)." << endl;
 					}
 					timeout=0;
-					COUT << "Setting default lossy transport to TCP (UDP timeout)." << endl;
 				}
 			}
 		} else if (packet.getCommand() == CMD_SERVERTIME ) {
@@ -611,6 +612,10 @@ void NetClient::synchronizeTime(SOCKETALT*udpsock)
 	double newTime=timeavg+queryTime()-initialTime;
 	COUT << "Setting time to: New time: " << newTime << endl;
 	setNewTime(newTime);
+	for (unsigned int cpnum=0;cpnum<_Universe->numPlayers();cpnum++) {
+		// Seems like a bad idea... shouldn't this rely on SIMULATION_ATOM?
+		_Universe->AccessCockpit(cpnum)->TimeOfLastCollision = -200;
+	}
         cur_time=newTime;
 }
 
@@ -741,7 +746,10 @@ void NetClient::startGame() {
 	
 	bootstrap_draw("#cc66ffNETWORK: Loading player ship.",NULL);
 	cout<<"NETWORK: Loading player ship."<<endl;
-	save.ParseSaveGame ("",mysystem,"",pos,setplayerXloc,credits,savedships,0, lastsave[0], false);
+	if (_Universe->numPlayers()==0) {
+		_Universe->createCockpit(callsign);
+	}
+	_Universe->AccessCockpit(0)->savegame->ParseSaveGame ("",mysystem,"",pos,setplayerXloc,credits,savedships,0, lastsave[0], false);
 	
 	ss.push_back (_Universe->Init (mysystem,Vector(0,0,0),string()));
 	

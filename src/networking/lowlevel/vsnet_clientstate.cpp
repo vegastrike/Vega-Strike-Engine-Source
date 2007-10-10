@@ -26,6 +26,14 @@ ClientState::ClientState( Unit * un)
 	//this->accel = un->GetAcceleration();
         this->angveloc=un->AngularVelocity;
 }
+
+void ClientState::setUnitState( Unit * un)
+{
+	un->curr_physical_state = this->pos;
+	un->Velocity = this->veloc;
+	un->AngularVelocity = this->angveloc;
+}
+
 ClientState::ClientState( ObjSerial serial)
 {
 	this->client_serial = serial;

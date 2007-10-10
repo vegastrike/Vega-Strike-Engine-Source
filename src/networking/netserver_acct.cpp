@@ -150,9 +150,9 @@ bool NetServer::saveAccount(int i)
 	// SEND THE BUFFERS TO ACCOUNT SERVER
 	if ( cp && acctserver && acct_con)
 	{
-		SaveNetUtil::GetSaveStrings( i, savestr, xmlstr);
+		SaveNetUtil::GetSaveStrings( i, savestr, xmlstr, true);
 		if (savestr.empty() || xmlstr.empty()) {
-			cerr<<"Unable to generate CSV and Save data for player."<<endl;
+			//cerr<<"Unable to generate CSV and Save data for player."<<endl;
 			return false;
 		}
 		Unit *un=cp->GetParent();
@@ -168,6 +168,11 @@ bool NetServer::saveAccount(int i)
 			cerr<<"Error client/unit for "<<(clt?clt->callsign:"")<<", serial "<<(un?un->GetSerial():0)<<" not found in save process !!!!"<<endl;
 			return false;
 		}
+		// Fix CMD_RESPAWN.  I expect the client to do the same thing here.
+		clt->savegame.clear();
+		clt->savegame.push_back(savestr);
+		clt->savegame.push_back(xmlstr);
+		
 		addSimpleChar(snetbuf,ACCT_SAVE);
 		addSimpleString(snetbuf,clt->callsign);
 		addSimpleString(snetbuf,clt->passwd);

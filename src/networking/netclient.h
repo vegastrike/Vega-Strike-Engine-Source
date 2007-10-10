@@ -83,7 +83,7 @@ class	NetClient
 		SOCKETALT *			lossy_socket;	// Usually points to the UDP socket, unless behind firewall... do not free this one
         VsnetHTTPSocket*			acct_sock;		// Connection socket for account server
         SocketSet           _sock_set;      // Encapsulates select()
-        SaveGame			save;
+        //SaveGame			save;
 		ObjSerial			netversion;
 	public:
         ObjSerial			serial;			// Serial # of client

@@ -166,6 +166,7 @@ class NetServer
 		//void	sendDamages( ObjSerial serial, Vector & pnt, Vector & normal, float amt, GFXColor & color, float phasedamage);
 		void	sendKill( ObjSerial serial, unsigned short zone);
 		void	sendJump( Unit * src, Unit *jumppoint,std::string destination);
+		void	sendForcePosition( ClientPtr clt );
 
 		void	invalidateSnapshot( ) { snapchanged = 1; }
 

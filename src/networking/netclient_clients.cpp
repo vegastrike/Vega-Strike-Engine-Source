@@ -62,6 +62,7 @@ void	NetClient::enterClient( NetBuffer &netbuf, ObjSerial cltserial )
 					savestr=this->lastsave[0];
 				}
 			}
+			SaveGame save ("");
 			save.ParseSaveGame( "", starsys, "", pos, update, creds, savedships, 0, savestr, false);
                   
 			PLAYER_FACTION_STRING= save.GetPlayerFaction();
@@ -439,9 +440,7 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 						// Backup old state
 						un->BackupState();
 						// Update concerned client with predicted position directly in network client list
-						un->curr_physical_state.position = cs.getPosition();
-						un->curr_physical_state.orientation = cs.getOrientation();
-						un->Velocity = cs.getVelocity();
+						cs.setUnitState(un);
 						if (clt) {
 							if(clt->last_packet.getPosition()==QVector(0,0,0)) {
 								// Position previously uninitialized...

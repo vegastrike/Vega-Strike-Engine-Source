@@ -6692,6 +6692,11 @@ bool Unit::UnDock (Unit * utdw)
 			Velocity=utdw->Velocity;
 			static float launch_speed=XMLSupport::parse_float(vs_config->getVariable("physics","launch_speed","-1"));
 			static bool auto_turn_towards =XMLSupport::parse_bool(vs_config->getVariable ("physics","undock_turn_away","true"));
+			if (Network||SERVER) {
+				auto_turn_towards = false;
+				launch_speed = -1;
+			}
+			
 			if (launch_speed>0)
 				computer.set_speed=launch_speed;
 			if (auto_turn_towards) {

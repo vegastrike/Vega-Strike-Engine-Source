@@ -112,8 +112,9 @@ void	NetServer::addClient( ClientPtr clt)
 	// Try to see if the player is docked on start
 
 	
-// NETFIXME: Dock not yet working!
         bool besafe=true;
+	QVector safevec; // ( DockToSavedBases( player));
+	Unit *dockedUnit = NULL;
         
         if (getSaveStringLength(player, "jump_from")>0) {
           std::string srcsys=getSaveString(player, "jump_from", 0);
@@ -133,9 +134,10 @@ void	NetServer::addClient( ClientPtr clt)
             }
           }
           eraseSaveString(player, "jump_from", 0);
-        }
-	QVector safevec;//( DockToSavedBases( player));
-	if( true) //safevec == nullVec)
+        } else {
+			dockedUnit = DockToSavedBases(player, safevec);
+		}
+	if( !dockedUnit ) //safevec == nullVec)
 	{
           if (besafe) {
 		safevec = UniverseUtil::SafeStarSystemEntrancePoint( st2, cp->savegame->GetPlayerLocation(), clt->game_unit.GetUnit()->radial_size);
@@ -146,8 +148,8 @@ void	NetServer::addClient( ClientPtr clt)
 		clt->ingame   = true;
 	}
 	else
-		cerr<<"PLAYER DOCKED - STARTING DOCKED AT POSITION : x="<<safevec.i<<",y="<<safevec.j<<",z="<<safevec.k<<endl;
-	COUT<<"\tposition : x="<<safevec.i<<" y="<<safevec.j<<" z="<<safevec.k<<endl;
+		cerr<<"PLAYER DOCKED TO " << dockedUnit->getFullname() << " - STARTING DOCKED AT POSITION : x="<<safevec.i<<",y="<<safevec.j<<",z="<<safevec.k<<endl;
+	//COUT<<"\tposition : x="<<safevec.i<<" y="<<safevec.j<<" z="<<safevec.k<<endl;
 	cp->savegame->SetPlayerLocation( safevec);
 	
 	cp->credits = (cp->savegame->GetSavedCredits());
@@ -170,7 +172,7 @@ void	NetServer::addClient( ClientPtr clt)
 		netbuf.addSerial( un->GetSerial() );
 		
 		netbuf.addString( clt->callsign);
-		SaveNetUtil::GetSaveStrings( clt, savestr, xmlstr);
+		SaveNetUtil::GetSaveStrings( clt, savestr, xmlstr, false);
 		netbuf.addString( savestr);
 		netbuf.addString( xmlstr);
 		netbuf.addTransformation( un->curr_physical_state );
@@ -213,7 +215,22 @@ void	NetServer::addClient( ClientPtr clt)
 
 	COUT<<"ADDED client n "<<un->GetSerial()<<" in ZONE "<<un->activeStarSystem->GetZone()<<" at STARDATE "<<_Universe->current_stardate.GetFullTrekDate()<<endl;
 	sendCredits(un->GetSerial(), cp->credits);
-		sendCargoSnapshot(un->GetSerial(), st2->getUnitList());
+	sendCargoSnapshot(un->GetSerial(), st2->getUnitList());
+	if (dockedUnit) {
+		int dockport=-1;
+		for (unsigned int i=0;i<dockedUnit->image->dockedunits.size();++i) {
+			Unit * tempun;
+			if ((tempun=dockedUnit->image->dockedunits[i]->uc.GetUnit())!=NULL) {
+				if (tempun==un) {
+					dockport=i;
+				}
+			}
+		}
+		if (dockport>=0) {
+			this->sendDockAuthorize( un->GetSerial(), dockedUnit->GetSerial(), dockport, un->activeStarSystem->GetZone());
+		}
+	}
+
 	//delete cltsbuf;
 	//COUT<<"<<< SENT ADDED YOU -----------------------------------------------------------------------"<<endl;
 }
@@ -499,7 +516,7 @@ void	NetServer::posUpdate( ClientPtr clt)
 /**************************************************************/
 void AddWriteSave(std::string &netbuf, int cpnum){
   string savestr, xmlstr;
-  SaveNetUtil::GetSaveStrings( cpnum, savestr, xmlstr);
+  SaveNetUtil::GetSaveStrings( cpnum, savestr, xmlstr, true);
   addSimpleString(netbuf, savestr);
   addSimpleString(netbuf, xmlstr);
 }
@@ -607,7 +624,7 @@ void  NetServer::getZoneInfo( unsigned short zoneid, NetBuffer & netbuf)
 			Unit *un = kp->game_unit.GetUnit();
 			if (!un)
 				continue;
-			SaveNetUtil::GetSaveStrings( kp, savestr, xmlstr);
+			SaveNetUtil::GetSaveStrings( kp, savestr, xmlstr, false);
 			// Add the ClientState at the beginning of the buffer -> NO THIS IS IN THE SAVE !!
 			//netbuf.addClientState( ClientState( kp->game_unit.GetUnit()));
 			// Add the callsign and save and xml strings

@@ -10,8 +10,8 @@ namespace SaveNetUtil
 {
 	//void	SaveFiles( Cockpit * cp, string savestr, string xmlstr, string path);
 	void	GetSaveBuffer( string savestr, string xmlstr, char * buffer);
-	void	GetSaveStrings( int numplayer, string & savestr, string & xmlstr);
-	void	GetSaveStrings( ClientPtr clt, string & savestr, string & xmlstr);
+	void	GetSaveStrings( int numplayer, string & savestr, string & xmlstr, bool savevars);
+	void	GetSaveStrings( ClientPtr clt, string & savestr, string & xmlstr, bool savevars);
 }
 
 #endif

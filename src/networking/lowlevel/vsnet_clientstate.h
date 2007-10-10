@@ -54,6 +54,8 @@ class	ClientState
   //NO longer supported--wasn't indicative of actual aggregated accel		Vector		getAcceleration() const { retu //rn if you change this, change setAcceleration too, and all consturctor this->accel;}
                 void		setAcceleration( Vector acc) { }
 
+		void setUnitState(Unit *un);
+	
 		ObjSerial	getSerial() const { return this->client_serial;}
 		//float		getDelay() const { return this->delay;}
 		//void		setDelay( float del) { this->delay = del;}

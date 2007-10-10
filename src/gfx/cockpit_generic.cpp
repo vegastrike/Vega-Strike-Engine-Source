@@ -28,6 +28,7 @@
 //#include "in_mouse.h"
 //#include "gui/glut_support.h"
 #include "networking/netclient.h"
+#include "save_util.h"
 extern float rand01();
 #define SWITCH_CONST .9
 
@@ -377,7 +378,6 @@ void Cockpit::UpdAutoPilot()
 }
 
 extern void DoCockpitKeys();
-extern QVector DockToSavedBases (int playernum);
 static float dockingdistance (Unit* port, Unit * un) {
 	vector<DockingPorts>::const_iterator i =port->GetImageInformation().dockingports.begin();
 	vector<DockingPorts>::const_iterator end =port->GetImageInformation().dockingports.end();
@@ -444,10 +444,10 @@ void Cockpit::updateAttackers() {
   }
 
 }
-extern QVector DockToSavedBases(int);
 bool Cockpit::Update () {
   if (retry_dock) {
-    DockToSavedBases(_Universe->CurrentCockpit());
+    QVector vec;
+    DockToSavedBases(_Universe->CurrentCockpit(), vec);
   }
   if (jumpok) {
 		jumpok++;
@@ -740,7 +740,8 @@ bool Cockpit::Update () {
 		savegame->ReloadPickledData();
                 savegame->LoadSavedMissions();
 		if (actually_have_save) {
-                  DockToSavedBases(whichcp);
+                  QVector vec;
+                  DockToSavedBases(whichcp, vec);
                 }
 		UniverseUtil::hideSplashScreen();
 		_Universe->popActiveStarSystem();

@@ -1034,9 +1034,18 @@ void BaseInterface::Room::Launch::Click (BaseInterface *base,float x, float y, i
 	static int numtimes = 0;
 	if (state==WS_MOUSE_UP) {
 	  Link::Click(base,x,y,button,state);
-	  static bool auto_undock = XMLSupport::parse_bool(vs_config->getVariable("physics","AutomaticUnDock","true"));
+	  static bool auto_undock_var = XMLSupport::parse_bool(vs_config->getVariable("physics","AutomaticUnDock","true"));
+	  bool auto_undock = auto_undock_var;
 	  Unit * bas = base->baseun.GetUnit();
 	  Unit * playa = base->caller.GetUnit();
+	  if (Network!=NULL && auto_undock && playa && bas) {
+		  cerr<<"Sending an undock notification"<<endl;
+		  int playernum = _Universe->whichPlayerStarship( playa );
+		  if( playernum>=0) {
+			  Network[playernum].undockRequest( bas->GetSerial());
+			  auto_undock = false;
+		  }
+	  }
           if (playa&&bas) {
               if (((playa->name=="eject") || (playa->name == "ejecting") || (playa->name == "pilot") || (playa->name == "Pilot") || (playa->name == "Eject")) && (bas->faction==playa->faction)) {
                   playa->name = "return_to_cockpit";
