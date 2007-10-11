@@ -562,9 +562,9 @@ void ObjToXMESH (FILE* obj, FILE * mtl, vector<XML> &xmllist, bool forcenormals)
    int totface=0;
    for (map<string,vector<FACE> >::iterator it=facelistlist.begin(); it!=facelistlist.end(); it++) {
      XML xml;
-
+     
      string mat=(*it).first;
-
+     xml.sharevert=true;
      xml.vertices.clear();
      xml.tris.clear();
      xml.quads.clear();
@@ -609,6 +609,6 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile,bool forcenormals)
 
    int textnum=0;
    for (vector<XML>::iterator it=xmllist.begin(); it!=xmllist.end(); ++it,++textnum) {
-     xmeshToBFXM(*it,outputFile,textnum==0?'c':'a',forcenormals);
+       xmeshToBFXM(*it,outputFile,textnum==0?'c':'a',forcenormals,true);
    }
 }

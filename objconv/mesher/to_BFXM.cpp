@@ -897,17 +897,17 @@ XML LoadXML(const char *filename, float32bit unitscale) {
   return xml;
 }
 
-void xmeshToBFXM(XML memfile,FILE* Outputfile,char mode,bool forcenormals){//converts input file to BFXM creates new, or appends record based on mode
+void xmeshToBFXM(XML memfile,FILE* Outputfile,char mode,bool forcenormals, bool force_shared_vertex){//converts input file to BFXM creates new, or appends record based on mode
   unsigned int32bit intbuf;
   
   bool append=(mode=='a');
   
   int32bit runningbytenum=0;
   if(!append){
-	runningbytenum+=writesuperheader(memfile,Outputfile); // Write superheader
+      runningbytenum+=writesuperheader(memfile,Outputfile,force_shared_vertex); // Write superheader
   }
   fseek(Outputfile,0,SEEK_END);
-  runningbytenum+=appendrecordfromxml(memfile,Outputfile,forcenormals); //Append one record
+  runningbytenum+=appendrecordfromxml(memfile,Outputfile,forcenormals,force_shared_vertex); //Append one record
 
   rewind(Outputfile);
   fseek(Outputfile,4+7*sizeof(int32bit),SEEK_SET);
@@ -927,7 +927,7 @@ void xmeshToBFXM(XML memfile,FILE* Outputfile,char mode,bool forcenormals){//con
   fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Correct number of bytes for total file
 }
 extern float transx,transy,transz;
-int32bit writesuperheader(XML memfile, FILE* Outputfile){
+int32bit writesuperheader(XML memfile, FILE* Outputfile, bool force_shared){
   unsigned int32bit intbuf;
   int32bit versionnumber=VSSwapHostIntToLittle(20);
   char8bit bytebuf;
@@ -950,9 +950,9 @@ int32bit writesuperheader(XML memfile, FILE* Outputfile){
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);// Number of bytes in Superheader
   intbuf=VSSwapHostIntToLittle(8);//Number of fields per vertex
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//
-  intbuf=VSSwapHostIntToLittle(1);//Number of fields per polygon structure
+  intbuf=VSSwapHostIntToLittle(force_shared?0:1);//Number of fields per polygon structure
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);// 
-  intbuf=VSSwapHostIntToLittle(3);//Number of fields per referenced vertex
+  intbuf=VSSwapHostIntToLittle(force_shared?1:3);//Number of fields per referenced vertex
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);// 
   intbuf=VSSwapHostIntToLittle(1);//Number of fields per referenced animation
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);// 
@@ -963,7 +963,7 @@ int32bit writesuperheader(XML memfile, FILE* Outputfile){
   return runningbytenum;
 }
 
-int32bit appendrecordfromxml(XML memfile, FILE* Outputfile,bool forcenormals){
+int32bit appendrecordfromxml(XML memfile, FILE* Outputfile,bool forcenormals, bool force_shared_vertex){
   unsigned int32bit intbuf;
   int32bit runningbytenum=0;
   //Record Header
@@ -974,7 +974,7 @@ int32bit appendrecordfromxml(XML memfile, FILE* Outputfile,bool forcenormals){
   intbuf=VSSwapHostIntToLittle(1+memfile.LODs.size()+memfile.animframes.size());//Number of meshes = 1 + numLODs + numAnims. 
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);// Number of meshes
   
-  runningbytenum+=appendmeshfromxml(memfile,Outputfile,forcenormals); // write top level mesh
+  runningbytenum+=appendmeshfromxml(memfile,Outputfile,forcenormals,force_shared_vertex); // write top level mesh
   int32bit mesh;
   for(mesh=0;mesh<memfile.LODs.size();mesh++){ //write all LOD meshes
 	string LODname="";
@@ -982,7 +982,7 @@ int32bit appendrecordfromxml(XML memfile, FILE* Outputfile,bool forcenormals){
          LODname+=memfile.LODs[mesh].name[i];
 	}
 	XML submesh=LoadXML(LODname.c_str(),1);
-	runningbytenum+=appendmeshfromxml(submesh,Outputfile,forcenormals);
+	runningbytenum+=appendmeshfromxml(submesh,Outputfile,forcenormals,force_shared_vertex);
   }
   for(mesh=0;mesh<memfile.animframes.size();mesh++){ //write all Animation Frames
 	string animname="";
@@ -990,7 +990,7 @@ int32bit appendrecordfromxml(XML memfile, FILE* Outputfile,bool forcenormals){
          animname+=memfile.animframes[mesh].name[i];
 	}
 	XML submesh=LoadXML(animname.c_str(),1);
-	runningbytenum+=appendmeshfromxml(submesh,Outputfile,forcenormals);
+	runningbytenum+=appendmeshfromxml(submesh,Outputfile,forcenormals,force_shared_vertex);
   }
   
   fseek(Outputfile,(-1*(runningbytenum))+4,SEEK_CUR);
@@ -1018,7 +1018,7 @@ void NormalizeMaterial(GFXMaterial &m) {
   NormalizeProperty(m.sr,m.sg,m.sb,m.sa);
   NormalizeProperty(m.er,m.eg,m.eb,m.ea);
 }
-int32bit appendmeshfromxml(XML memfile, FILE* Outputfile,bool forcenormals){
+int32bit appendmeshfromxml(XML memfile, FILE* Outputfile,bool forcenormals, bool force_shared_vertex){
   unsigned int32bit intbuf;
   float32bit floatbuf;
   char8bit bytebuf;
@@ -1035,7 +1035,7 @@ int32bit appendmeshfromxml(XML memfile, FILE* Outputfile,bool forcenormals){
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//reverse flag
   intbuf= VSSwapHostIntToLittle(memfile.force_texture);
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Force texture flag
-  intbuf= VSSwapHostIntToLittle(memfile.sharevert);
+  intbuf= VSSwapHostIntToLittle(memfile.sharevert||force_shared_vertex);
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Share vertex flag
   floatbuf= VSSwapHostFloatToLittle(memfile.polygon_offset);
   runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Polygon offset
@@ -1260,59 +1260,75 @@ int32bit appendmeshfromxml(XML memfile, FILE* Outputfile,bool forcenormals){
   intbuf= VSSwapHostIntToLittle(memfile.lines.size());
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of lines
   for(int32bit lines=0;lines<memfile.lines.size();lines++){
+      if (!force_shared_vertex) {
 	intbuf= VSSwapHostIntToLittle(memfile.lines[lines].flatshade);
 	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Flatshade flag
-	for(int32bit tmpcounter=0;tmpcounter<2;tmpcounter++){
-		intbuf= VSSwapHostIntToLittle(memfile.lines[lines].indexref[tmpcounter]);
-		runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//point index
-		floatbuf= VSSwapHostFloatToLittle(memfile.lines[lines].s[tmpcounter]);
-		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
-		floatbuf= VSSwapHostFloatToLittle(memfile.lines[lines].t[tmpcounter]);
-		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
-	}
+      }
+      for(int32bit tmpcounter=0;tmpcounter<2;tmpcounter++){
+	  intbuf= VSSwapHostIntToLittle(memfile.lines[lines].indexref[tmpcounter]);
+	  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//point index
+	  if (!force_shared_vertex) {
+	      floatbuf= VSSwapHostFloatToLittle(memfile.lines[lines].s[tmpcounter]);
+	      runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
+	      floatbuf= VSSwapHostFloatToLittle(memfile.lines[lines].t[tmpcounter]);
+	      runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
+	  }
+      }
   }
   intbuf= VSSwapHostIntToLittle(memfile.tris.size());
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of triangles
   for(int32bit tris=0;tris<memfile.tris.size();tris++){
+      if (!force_shared_vertex) {
 	intbuf= VSSwapHostIntToLittle(memfile.tris[tris].flatshade);
 	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Flatshade flag
-	for(int32bit tmpcounter=0;tmpcounter<3;tmpcounter++){
-		intbuf= VSSwapHostIntToLittle(memfile.tris[tris].indexref[tmpcounter]);
-		runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//point index
-		floatbuf= VSSwapHostFloatToLittle(memfile.tris[tris].s[tmpcounter]);
-		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
-		floatbuf= VSSwapHostFloatToLittle(memfile.tris[tris].t[tmpcounter]);
-		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
-	}
+      }
+      for(int32bit tmpcounter=0;tmpcounter<3;tmpcounter++){
+	  intbuf= VSSwapHostIntToLittle(memfile.tris[tris].indexref[tmpcounter]);
+	  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//point index
+	  if (!force_shared_vertex) {
+	      floatbuf= VSSwapHostFloatToLittle(memfile.tris[tris].s[tmpcounter]);
+	      runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
+	      floatbuf= VSSwapHostFloatToLittle(memfile.tris[tris].t[tmpcounter]);
+	      runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
+	  }
+      }
   }
   intbuf= VSSwapHostIntToLittle(memfile.quads.size());
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of Quads
   for(int32bit quads=0;quads<memfile.quads.size();quads++){
-	intbuf= VSSwapHostIntToLittle(memfile.quads[quads].flatshade);
-	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Flatshade flag
-	for(int32bit tmpcounter=0;tmpcounter<4;tmpcounter++){
-		intbuf= VSSwapHostIntToLittle(memfile.quads[quads].indexref[tmpcounter]);
-		runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//point index
+      if (!force_shared_vertex) {
+	  intbuf= VSSwapHostIntToLittle(memfile.quads[quads].flatshade);
+	  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Flatshade flag
+      }
+      for(int32bit tmpcounter=0;tmpcounter<4;tmpcounter++){
+	  intbuf= VSSwapHostIntToLittle(memfile.quads[quads].indexref[tmpcounter]);
+	  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//point index
+	  if (!force_shared_vertex) {
 		floatbuf= VSSwapHostFloatToLittle(memfile.quads[quads].s[tmpcounter]);
 		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
 		floatbuf= VSSwapHostFloatToLittle(memfile.quads[quads].t[tmpcounter]);
 		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
-	}
+	  }
+      }
   }
   intbuf= VSSwapHostIntToLittle(memfile.linestrips.size());
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of linestrips
   for(int32bit ls=0;ls<memfile.linestrips.size();ls++){
 	intbuf= VSSwapHostIntToLittle(memfile.linestrips[ls].points.size());
 	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of elements in current linestrip
-	intbuf= VSSwapHostIntToLittle(memfile.linestrips[ls].flatshade);
-	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Flatshade flag
+	if (!force_shared_vertex) {
+	    intbuf= VSSwapHostIntToLittle(memfile.linestrips[ls].flatshade);
+	    runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Flatshade flag
+	}
 	for(int32bit tmpcounter=0;tmpcounter<memfile.linestrips[ls].points.size();tmpcounter++){
 		intbuf= VSSwapHostIntToLittle(memfile.linestrips[ls].points[tmpcounter].indexref);
 		runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//point index
-		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[ls].points[tmpcounter].s);
-		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
-		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[ls].points[tmpcounter].t);
-		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
+		if (!force_shared_vertex) {
+		    floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[ls].points[tmpcounter].s);
+		    runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
+		    floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[ls].points[tmpcounter].t);
+		    runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
+		}
 	}
   }
   intbuf= VSSwapHostIntToLittle(memfile.tristrips.size());
@@ -1320,15 +1336,19 @@ int32bit appendmeshfromxml(XML memfile, FILE* Outputfile,bool forcenormals){
   for(int32bit ts=0;ts<memfile.tristrips.size();ts++){
 	intbuf= VSSwapHostIntToLittle(memfile.tristrips[ts].points.size());
 	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of elements in current tristrip
-	intbuf= VSSwapHostIntToLittle(memfile.tristrips[ts].flatshade);
-	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Flatshade flag
+	if (!force_shared_vertex) {
+	    intbuf= VSSwapHostIntToLittle(memfile.tristrips[ts].flatshade);
+	    runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Flatshade flag
+	}
 	for(int32bit tmpcounter=0;tmpcounter<memfile.tristrips[ts].points.size();tmpcounter++){
 		intbuf= VSSwapHostIntToLittle(memfile.tristrips[ts].points[tmpcounter].indexref);
 		runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//point index
-		floatbuf= VSSwapHostFloatToLittle(memfile.tristrips[ts].points[tmpcounter].s);
-		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
-		floatbuf= VSSwapHostFloatToLittle(memfile.tristrips[ts].points[tmpcounter].t);
-		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
+		if (!force_shared_vertex) {
+		    floatbuf= VSSwapHostFloatToLittle(memfile.tristrips[ts].points[tmpcounter].s);
+		    runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
+		    floatbuf= VSSwapHostFloatToLittle(memfile.tristrips[ts].points[tmpcounter].t);
+		    runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
+		}
 	}
   }
   intbuf= VSSwapHostIntToLittle(memfile.trifans.size());
@@ -1336,15 +1356,19 @@ int32bit appendmeshfromxml(XML memfile, FILE* Outputfile,bool forcenormals){
   for(int32bit tf=0;tf<memfile.trifans.size();tf++){
 	intbuf= VSSwapHostIntToLittle(memfile.trifans[tf].points.size());
 	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of elements in current trifan
-	intbuf= VSSwapHostIntToLittle(memfile.trifans[tf].flatshade);
-	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Flatshade flag
+	if (!force_shared_vertex) {
+	    intbuf= VSSwapHostIntToLittle(memfile.trifans[tf].flatshade);
+	    runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Flatshade flag
+	}
 	for(int32bit tmpcounter=0;tmpcounter<memfile.trifans[tf].points.size();tmpcounter++){
 		intbuf= VSSwapHostIntToLittle(memfile.trifans[tf].points[tmpcounter].indexref);
 		runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//point index
-		floatbuf= VSSwapHostFloatToLittle(memfile.trifans[tf].points[tmpcounter].s);
-		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
-		floatbuf= VSSwapHostFloatToLittle(memfile.trifans[tf].points[tmpcounter].t);
-		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
+		if (!force_shared_vertex) {
+		    floatbuf= VSSwapHostFloatToLittle(memfile.trifans[tf].points[tmpcounter].s);
+		    runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
+		    floatbuf= VSSwapHostFloatToLittle(memfile.trifans[tf].points[tmpcounter].t);
+		    runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
+		}
 	}
   }
   intbuf= VSSwapHostIntToLittle(memfile.quadstrips.size());
@@ -1352,15 +1376,19 @@ int32bit appendmeshfromxml(XML memfile, FILE* Outputfile,bool forcenormals){
   for(int32bit qs=0;qs<memfile.quadstrips.size();qs++){
 	intbuf= VSSwapHostIntToLittle(memfile.quadstrips[qs].points.size());
 	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of elements in current quadstrip
-	intbuf= VSSwapHostIntToLittle(memfile.quadstrips[qs].flatshade);
-	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Flatshade flag
+	if (!force_shared_vertex) {
+	    intbuf= VSSwapHostIntToLittle(memfile.quadstrips[qs].flatshade);
+	    runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Flatshade flag
+	}
 	for(int32bit tmpcounter=0;tmpcounter<memfile.quadstrips[qs].points.size();tmpcounter++){
 		intbuf= VSSwapHostIntToLittle(memfile.quadstrips[qs].points[tmpcounter].indexref);
 		runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//point index
-		floatbuf= VSSwapHostFloatToLittle(memfile.quadstrips[qs].points[tmpcounter].s);
-		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
-		floatbuf= VSSwapHostFloatToLittle(memfile.quadstrips[qs].points[tmpcounter].t);
-		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
+		if (!force_shared_vertex) {
+		    floatbuf= VSSwapHostFloatToLittle(memfile.quadstrips[qs].points[tmpcounter].s);
+		    runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
+		    floatbuf= VSSwapHostFloatToLittle(memfile.quadstrips[qs].points[tmpcounter].t);
+		    runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
+		}
 	}
   }
   //END GEOMETRY

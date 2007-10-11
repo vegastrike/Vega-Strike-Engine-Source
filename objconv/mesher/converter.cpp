@@ -136,11 +136,11 @@ int main (int argc, char** argv) {
 	Outputfile=fopen(argv[2],"rb+"); //append to end, but not append, which doesn't do what you want it to.
 	fseek(Outputfile, 0, SEEK_END);
 	XML memfile=(LoadXML(argv[1],1));
-    xmeshToBFXM(memfile,Outputfile,'a',forcenormals);
+    xmeshToBFXM(memfile,Outputfile,'a',forcenormals,false);
   }else if(createBFXMfromxmesh){
 	Outputfile=fopen(argv[2],"wb+"); //create file for BFXM output
 	XML memfile=(LoadXML(argv[1],1));
-    xmeshToBFXM(memfile,Outputfile,'c',forcenormals);
+    xmeshToBFXM(memfile,Outputfile,'c',forcenormals,false);
   } else if(createxmeshesfromBFXM){
 	FILE* Inputfile=fopen(argv[1],"rb");
 	Outputfile=fopen(argv[2],"w+"); //create file for text output
