@@ -93,7 +93,7 @@ fi
 vers_ok=OK
 
 # AUTOMAKE Programs
-ver_needed=1.5
+ver_needed=1.6
 
 AM_VER_NEEDED=$ver_needed
 "$ACLOCAL" --version|checkversion && "$AUTOMAKE" --version|checkversion
