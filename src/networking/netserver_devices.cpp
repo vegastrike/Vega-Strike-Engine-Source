@@ -14,21 +14,29 @@ extern StarSystem * GetLoadedStarSystem( const char * system);
 
 void	NetServer::BroadcastTarget( ObjSerial serial, ObjSerial oldtarget, ObjSerial target, unsigned short zone)
 {
-	Packet p1;
-	NetBuffer netbuf1;
-	netbuf1.addSerial( target);
+	Packet p;
+	NetBuffer netbuf;
+	netbuf.addSerial( target);
 	ClientPtr clt = this->getClientFromSerial(target);
 	if (clt) {
-		p1.send( CMD_TARGET, serial, netbuf1.getData(), netbuf1.getDataLength(), SENDRELIABLE,
+		p.send( CMD_TARGET, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
 			 NULL, clt->tcp_sock, __FILE__, PSEUDO__LINE__(24) );
 	}
 
-	Packet p2;
-	NetBuffer netbuf2;
-	netbuf2.addSerial( 0 );
+	netbuf.Reset();
+	netbuf.addSerial( 0 );
 	clt = this->getClientFromSerial(oldtarget);
 	if (clt) {
-		p2.send( CMD_TARGET, serial, netbuf2.getData(), netbuf2.getDataLength(), SENDRELIABLE,
+		p.send( CMD_TARGET, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
+				 NULL, clt->tcp_sock, __FILE__, PSEUDO__LINE__(34));
+	}
+
+	clt = this->getClientFromSerial(serial);
+	if (clt && clt->netversion < 4951) {
+		// Old clients needed confirmation to target...
+		netbuf.Reset();
+		netbuf.addSerial( target);
+		p.send( CMD_TARGET, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
 				 NULL, clt->tcp_sock, __FILE__, PSEUDO__LINE__(34));
 	}
 	

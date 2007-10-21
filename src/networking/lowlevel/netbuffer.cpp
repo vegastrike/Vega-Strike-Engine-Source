@@ -4,6 +4,8 @@
 #include "networking/const.h"
 #include "posh.h"
 #include "gfxlib_struct.h"
+#include "networking/netversion.h"
+
 std::string getSimpleString(std::string &input){
   int len=getSimpleInt(input);
   if (len>=0&&(unsigned int)len<=input.length()){
@@ -47,6 +49,7 @@ NetBuffer::NetBuffer()
 			size = MAXBUFFER;
 			memset( buffer, 0x20, size);
 			this->buffer[size-1] = 0;
+			ver = NETWORK_VERSION;
 		}
 NetBuffer::NetBuffer( int bufsize)
 		{
@@ -55,6 +58,7 @@ NetBuffer::NetBuffer( int bufsize)
 			size = bufsize;
 			memset( buffer, 0x20, size);
 			this->buffer[size-1] = 0;
+			ver = NETWORK_VERSION;
 		}
 
 /** If there is a platform where b in the call VsnetOSS::memcpy(a,b,c) must be char*
@@ -65,11 +69,13 @@ NetBuffer::NetBuffer( int bufsize)
 NetBuffer::NetBuffer( const char * buf, int bufsize)
 		{
 			offset = 0;
+			ver = 
 			size=bufsize+1;
 			this->buffer = new char[size];
 			memset( buffer, 0x20, size);
 			VsnetOSS::memcpy( buffer, buf, bufsize);
 			this->buffer[size-1] = 0;
+			ver = NETWORK_VERSION;
 		}
 NetBuffer::~NetBuffer()
 		{

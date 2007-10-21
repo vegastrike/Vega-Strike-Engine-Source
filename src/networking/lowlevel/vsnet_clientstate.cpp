@@ -17,7 +17,7 @@ ClientState::ClientState()
         this->angveloc.Set(0,0,0);
 }
 
-ClientState::ClientState( Unit * un)
+ClientState::ClientState( const Unit * un)
 {
 	this->client_serial = un->GetSerial();
 	this->pos.position = un->curr_physical_state.position;
@@ -27,7 +27,7 @@ ClientState::ClientState( Unit * un)
         this->angveloc=un->AngularVelocity;
 }
 
-void ClientState::setUnitState( Unit * un)
+void ClientState::setUnitState( Unit * un) const
 {
 	un->curr_physical_state = this->pos;
 	un->Velocity = this->veloc;

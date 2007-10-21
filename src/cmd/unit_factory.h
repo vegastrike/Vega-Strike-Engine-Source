@@ -140,7 +140,7 @@ public:
 		               bool        SubUnit,
 		               int         faction,
 		               std::string customizedUnit,
-		               const Transformation &curr_physical_state,
+		               const ClientState &curr_state,
 		               Flightgroup *flightgroup,
 		               int         fg_subnumber, string * netxml, ObjSerial netcreate);
 	static void addUnitBuffer( NetBuffer & netbuf, const Unit *un, string *netxml=NULL);
@@ -180,7 +180,7 @@ public:
                                      const string &fullname,
                                      int faction,
                                      const string &modifications,
-                                     const Transformation &curr_physical_state,
+                                     const ClientState &curr_state,
                                      const float damage,
                                      float phasedamage,
                                      float time,

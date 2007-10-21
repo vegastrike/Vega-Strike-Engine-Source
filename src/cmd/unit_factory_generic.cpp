@@ -30,7 +30,7 @@ void UnitFactory::addUnitBuffer( NetBuffer & netbuf, const string &filename,
 		               bool        SubUnit,
 		               int         faction,
 		               std::string customizedUnit,
-		               const Transformation &curr_physical_state,
+		               const ClientState &curr_state,
 		               Flightgroup *flightgroup,
 		               int         fg_subnumber, string * netxml, ObjSerial netcreate)
 {
@@ -44,13 +44,17 @@ void UnitFactory::addUnitBuffer( NetBuffer & netbuf, const string &filename,
 		netbuf.addString( flightgroup!=NULL?flightgroup->name:std::string("Object"));
 		netbuf.addString( customizedUnit);
 		netbuf.addInt32( fg_subnumber);
-		netbuf.addTransformation( curr_physical_state);
+		if (netbuf.version()<=4951) {
+			netbuf.addTransformation(curr_state.getTransformation());
+		} else {
+			netbuf.addClientState(curr_state);
+		}
 }
 
 void UnitFactory::addUnitBuffer( NetBuffer & netbuf, const Unit *un, string *netxml)
 {
 	addUnitBuffer( netbuf, un->getFilename(), un->name.get(), un->fullname, un->isSubUnit(), un->faction,
-		"" /* Not sure... maybe netxml will take care of this? */, un->curr_physical_state,
+		"" /* Not sure... maybe netxml will take care of this? */, ClientState(un),
 	   un->getFlightgroup(), un->getFgSubnumber(), netxml /*For ENTERCLIENT, will generate a saved game netxml*/, un->GetSerial());
 }
 								
@@ -80,7 +84,11 @@ Unit *UnitFactory::parseUnitBuffer(NetBuffer &netbuf)
 	}
 	
 	Unit *un = createUnit( file.c_str(), sub, faction, custom, fg, fg_num, NULL, serial);
-	un->curr_physical_state = netbuf.getTransformation();
+	if (netbuf.version()<=4951) {
+		un->curr_physical_state = netbuf.getTransformation();
+	} else {
+		netbuf.getClientState().setUnitState(un);
+	}
 	un->name = name;
 	un->fullname = fullname;
 	return un;
@@ -219,7 +227,7 @@ void UnitFactory::addMissileBuffer( NetBuffer & netbuf, const string &filename,
 		               const string &fullname,
                                      int faction,
                                      const string &modifications,
-		                             const Transformation &curr_physical_state,
+                                     const ClientState &curr_state,
                                      const float damage,
                                      float phasedamage,
                                      float time,
@@ -241,12 +249,16 @@ void UnitFactory::addMissileBuffer( NetBuffer & netbuf, const string &filename,
 		netbuf.addFloat( radialeffect);
 		netbuf.addFloat( radmult);
 		netbuf.addFloat( detonation_radius);
-		netbuf.addTransformation( curr_physical_state);
+		if (netbuf.version()<=4951) {
+			netbuf.addTransformation(curr_state.getTransformation());
+		} else {
+			netbuf.addClientState(curr_state);
+		}
 }
 
 void UnitFactory::addMissileBuffer( NetBuffer & netbuf, const Missile *mis) {
 	addMissileBuffer( netbuf, mis->getFilename().c_str(), mis->name, mis->getFullname(), mis->faction,
-		"" /* modifications */, mis->curr_physical_state, mis->damage, mis->phasedamage, mis->time,
+		"" /* modifications */, ClientState(static_cast<const Unit*>(mis)), mis->damage, mis->phasedamage, mis->time,
 		mis->radial_effect, mis->radial_multiplier, mis->detonation_radius, mis->GetSerial());
 }
 
@@ -270,7 +282,11 @@ Missile *UnitFactory::parseMissileBuffer(NetBuffer &netbuf)
 	cerr<<"NETCREATE MISSILE : "<<file<<endl;
 
 	Missile *mis = createMissile( file.c_str(), faction, modifs, damage, phasedamage, time, radialeffect, radmult, detonation_radius, serial);
-	mis->curr_physical_state = netbuf.getTransformation();
+	if (netbuf.version()<=4951) {
+		mis->curr_physical_state = netbuf.getTransformation();
+	} else {
+		netbuf.getClientState().setUnitState(mis);
+	}
 	mis->name = name;
 	mis->fullname = fullname;
 	return mis;

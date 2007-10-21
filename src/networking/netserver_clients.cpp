@@ -35,30 +35,38 @@ void NetServer::broadcastUnit(Unit *un, unsigned short zone) {
 	newUnits.push_back(un);
 }
 void NetServer::sendNewUnitQueue() {
+	unsigned short vers[4]={0,4951,4952,65535};
 	for (unsigned short zone=0;zone<zonemgr->getZoneNumber();zone++) {
-		NetBuffer netbuf;
-		bool added=false;
-		for (std::vector<UnitContainer>::iterator iter=newUnits.begin();
-				 iter!=newUnits.end();
-				 ++iter) {
-			Unit *un = (*iter).GetUnit();
-			if (un) {
-				StarSystem *sys = un->getStarSystem();
-				if (sys) {
-					unsigned short unzone = sys->GetZone();
-					if (unzone == zone) {
-						added=true;
-						UnitFactory::addBuffer(netbuf, un, true);
+		for (int verind = 0; verind<4; verind+=2) {
+			unsigned short minver=vers[verind], maxver=vers[verind+1];
+			NetBuffer netbuf;
+			if (maxver!=65535) netbuf.setVersion(maxver);
+			bool added=false;
+			for (std::vector<UnitContainer>::iterator iter=newUnits.begin();
+					 iter!=newUnits.end();
+					 ++iter) {
+				Unit *un = (*iter).GetUnit();
+				if (un) {
+					StarSystem *sys = un->getStarSystem();
+					if (sys) {
+						unsigned short unzone = sys->GetZone();
+						if (unzone == zone) {
+							added=true;
+							UnitFactory::addBuffer(netbuf, un, true);
+						}
 					}
+				} else {
+					COUT << "New Unit already killed before being sent!!!" << endl;
 				}
-			} else {
-				COUT << "New Unit already killed before being sent!!!" << endl;
 			}
-		}
-		if (added) {
-			UnitFactory::endBuffer(netbuf);
-			VSServer->broadcast( netbuf, 0, zone, CMD_ENTERCLIENT, true);
-			VSServer->invalidateSnapshot();
+			if (added) {
+				UnitFactory::endBuffer(netbuf);
+				Packet p2;
+				p2.bc_create(CMD_ENTERCLIENT, 0, netbuf.getData(), netbuf.getDataLength(),
+							 SENDRELIABLE, __FILE__, PSEUDO__LINE__(66));
+				zonemgr->broadcast( zone, 0, &p2, true, minver, maxver);
+				invalidateSnapshot();
+			}
 		}
 	}
 	newUnits.clear();
@@ -184,7 +192,7 @@ void	NetServer::addClient( ClientPtr clt)
                            SENDRELIABLE,
                            __FILE__, PSEUDO__LINE__(1311));
 		COUT<<"<<< SEND ENTERCLIENT("<<un->GetSerial()<<") TO OTHER CLIENT IN THE ZONE------------------------------------------"<<endl;
-		zonemgr->broadcast( clt, &packet2, true ); // , &NetworkToClient );
+		zonemgr->broadcast( clt, &packet2, true);
 		COUT<<"Serial : "<<un->GetSerial()<<endl;
 	}
 	// In all case set the zone and send the client the zone which it is in
@@ -192,6 +200,7 @@ void	NetServer::addClient( ClientPtr clt)
 	un->activeStarSystem->SetZone( zoneid);
 	Packet pp;
 	netbuf.Reset();
+	netbuf.setVersion(clt->netversion);
 	//netbuf.addShort( zoneid);
 	//netbuf.addString( _Universe->current_stardate.GetFullTrekDate());
 	un->BackupState();

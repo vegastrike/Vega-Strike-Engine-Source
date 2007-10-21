@@ -108,8 +108,8 @@ class ZoneMgr
 
 		StarSystem *	addClient( ClientPtr clt, string starsys, unsigned short & num_zone);
 		void	removeClient( ClientPtr clt );
-		void    broadcast( ClientPtr clt, Packet * pckt, bool isTcp );
-        void    broadcast( int zone, ObjSerial serial, Packet * pckt, bool isTcp );
+		void    broadcast( ClientPtr clt, Packet * pckt, bool isTcp, unsigned short minVer=0, unsigned short maxVer=65535 );
+        void    broadcast( int zone, ObjSerial serial, Packet * pckt, bool isTcp, unsigned short minVer=0, unsigned short maxVer=65535 );
         void    broadcastNoSelf( int zone, ObjSerial serial, Packet * pckt, bool isTcp );
         void    broadcastSample( int zone, ObjSerial serial, Packet * pckt, float frequency );
         void    broadcastText( int zone, ObjSerial serial, Packet * pckt, float frequency );

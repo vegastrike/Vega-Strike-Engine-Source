@@ -45,16 +45,17 @@ class	ClientState
 		ClientState( ObjSerial serial, QVector posit, Quaternion orientat, Vector velocity, Vector acc, Vector angvel);
 		ClientState( ObjSerial serial, QVector posit, Quaternion orientat, Vector velocity, Vector acc, Vector angvel, unsigned int del);
 		ClientState( ObjSerial serial, Transformation trans, Vector velocity, Vector acc, Vector angvel, unsigned int del);
-		ClientState( Unit * un);
+		ClientState( const Unit * un);
 
-		QVector		getPosition() const { return this->pos.position;}
-		Quaternion	getOrientation() const { return this->pos.orientation;}
-		Vector		getVelocity() const { return this->veloc;}
-		Vector		getAngularVelocity() const { return this->angveloc;}
+		const QVector & getPosition() const { return this->pos.position;}
+		const Quaternion & getOrientation() const { return this->pos.orientation;}
+		const Transformation & getTransformation() const { return this->pos; }
+		const Vector & getVelocity() const { return this->veloc;}
+		const Vector & getAngularVelocity() const { return this->angveloc;}
   //NO longer supported--wasn't indicative of actual aggregated accel		Vector		getAcceleration() const { retu //rn if you change this, change setAcceleration too, and all consturctor this->accel;}
                 void		setAcceleration( Vector acc) { }
 
-		void setUnitState(Unit *un);
+		void setUnitState(Unit *un) const;
 	
 		ObjSerial	getSerial() const { return this->client_serial;}
 		//float		getDelay() const { return this->delay;}

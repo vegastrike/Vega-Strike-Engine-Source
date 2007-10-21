@@ -235,7 +235,7 @@ void	ZoneMgr::removeClient( ClientPtr clt )
 /************************************************************************************************/
 
 // Broadcast a packet to a client's zone clients
-void ZoneMgr::broadcast( ClientPtr fromcltw, Packet * pckt, bool isTcp  )
+void ZoneMgr::broadcast( ClientPtr fromcltw, Packet * pckt, bool isTcp, unsigned short minver, unsigned short maxver  )
 {
     ClientPtr fromclt( fromcltw );
 	Unit * un = fromclt->game_unit.GetUnit();
@@ -264,7 +264,8 @@ void ZoneMgr::broadcast( ClientPtr fromcltw, Packet * pckt, bool isTcp  )
         ClientPtr clt(*i);
 		Unit * un2 = clt->game_unit.GetUnit();
         // Broadcast to other clients
-        if( (isTcp || clt->ingame) && ((un2==NULL) || (un->GetSerial() != un2->GetSerial())))
+        if( (isTcp || clt->ingame) && clt->netversion>=minver && clt->netversion<=maxver &&
+			((un2==NULL) || (un->GetSerial() != un2->GetSerial())))
         {
             COUT << "BROADCASTING " << pckt->getCommand()
                  << " to client #";
@@ -287,7 +288,7 @@ void ZoneMgr::broadcast( ClientPtr fromcltw, Packet * pckt, bool isTcp  )
 /************************************************************************************************/
 
 // Broadcast a packet to a zone clients with its serial as argument
-void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt, bool isTcp )
+void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt, bool isTcp, unsigned short minver, unsigned short maxver )
 {
 	if (zone >= zone_list.size()) {
 		return;
@@ -301,7 +302,8 @@ void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt, bool isTcp )
         ClientPtr clt( *i );
 		// Broadcast to all clients including the one who did a request
 		// Allow packets to non-ingame clients to get lost if requested UDP.
-		if( (isTcp || clt->ingame) /*&& un->GetSerial() != un2->GetSerial()*/ )
+		if( (isTcp || clt->ingame)  && clt->netversion>=minver && clt->netversion<=maxver
+			/*&& un->GetSerial() != un2->GetSerial()*/ )
 		{
 //			COUT<<endl;
 			if (isTcp) {
