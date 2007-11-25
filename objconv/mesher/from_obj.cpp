@@ -51,9 +51,11 @@ struct MTL:public GFXMaterial {
     blend_src=ONE;
     blend_dst=ZERO;
     reflect=false;
+    alphatest=-1;
   }  
   bool usenormals;
   bool reflect;
+  float alphatest;
    int blend_src;int blend_dst;
    vector<textureholder> textures;
    textureholder detail;   
@@ -378,9 +380,11 @@ void ObjToXMESH (FILE* obj, FILE * mtl, vector<XML> &xmllist, bool forcenormals)
         if (tmpblend==1) {
           cur->blend_src = ONE;
           cur->blend_dst = ONE;
-        }else if (tmpblend==.5) {
+        }else if (tmpblend<1&&tmpblend>0) {
           cur->blend_src = SRCALPHA;
           cur->blend_dst = INVSRCALPHA;
+          cur->alphatest=tmpblend;
+          if (tmpblend<.01)cur->alphatest=0; 
         }else {
           cur->blend_src=ONE;
           cur->blend_dst=ZERO;
@@ -587,6 +591,8 @@ void ObjToXMESH (FILE* obj, FILE * mtl, vector<XML> &xmllist, bool forcenormals)
      xml.blend_src = mtls[mat].blend_src;
      xml.blend_dst = mtls[mat].blend_dst;
      xml.reflect=mtls[mat].reflect;
+     if (mtls[mat].alphatest!=-1)
+       xml.alphatest=mtls[mat].alphatest;
      if(forcenormals) 
          mtls[mat].usenormals=true;
      xml.usenormals=mtls[mat].usenormals;
