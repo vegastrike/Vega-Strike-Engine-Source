@@ -5115,27 +5115,27 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		}
 		static float non_combat_mode_mult = XMLSupport::parse_float (vs_config->getVariable ("physics","combat_speed_boost","100"));
 		if(!mode){
-			PRETTY_ADDU(statcolor+"Max combat speed: #-c",uc.max_speed()*3.6,0,"km/h");
-			PRETTY_ADDU(statcolor+"Max overdrive combat speed: #-c",uc.max_ab_speed()*3.6,0,"km/h");
-			PRETTY_ADDU(statcolor+"Max non-combat speed: #-c",uc.max_speed()*3.6*non_combat_mode_mult,0,"km/h");
+			PRETTY_ADDU(statcolor+"Max combat speed: #-c",uc.max_speed(),0,"m/s");
+			PRETTY_ADDU(statcolor+"Max overdrive combat speed: #-c",uc.max_ab_speed(),0,"m/s");
+			PRETTY_ADDU(statcolor+"Max non-combat speed: #-c",uc.max_speed()*non_combat_mode_mult,0,"m/s");
 		} else {
 			switch(replacement_mode){
 				case 0: // Replacement or new Module
 					if(uc.max_speed()!=buc.max_speed()){
-						PRETTY_ADDU(statcolor+"Sets max combat speed governor to: #-c",uc.max_speed()*3.6,0,"km/h");
-						PRETTY_ADDU(statcolor+"Sets max non-combat speed governor to: #-c",uc.max_speed()*3.6*non_combat_mode_mult,0,"km/h");
+						PRETTY_ADDU(statcolor+"Sets max combat speed governor to: #-c",uc.max_speed(),0,"m/s");
+						PRETTY_ADDU(statcolor+"Sets max non-combat speed governor to: #-c",uc.max_speed()*non_combat_mode_mult,0,"m/s");
 					}
 					if(uc.max_ab_speed()!=buc.max_ab_speed()){
-						PRETTY_ADDU(statcolor+"Sets max overdrive combat speed governor to: #-c",uc.max_ab_speed()*3.6,0,"km/h");
+						PRETTY_ADDU(statcolor+"Sets max overdrive combat speed governor to: #-c",uc.max_ab_speed(),0,"m/s");
 					}
 					break;
 				case 1: // Additive
 					if(uc.max_speed()!=buc.max_speed()){
-						PRETTY_ADDU(statcolor+"Increases max combat speed governor setting by: #-c",uc.max_speed()*3.6,0,"km/h");
-						PRETTY_ADDU(statcolor+"Increases max non-combat speed governor setting by: #-c",uc.max_speed()*3.6*non_combat_mode_mult,0,"km/h");
+						PRETTY_ADDU(statcolor+"Increases max combat speed governor setting by: #-c",uc.max_speed(),0,"m/s");
+						PRETTY_ADDU(statcolor+"Increases max non-combat speed governor setting by: #-c",uc.max_speed()*non_combat_mode_mult,0,"m/s");
 					}
 					if(uc.max_ab_speed()!=buc.max_ab_speed()){
-						PRETTY_ADDU(statcolor+"Increases max overdrive combat speed governor setting by: #-c",uc.max_ab_speed()*3.6,0,"km/h");
+						PRETTY_ADDU(statcolor+"Increases max overdrive combat speed governor setting by: #-c",uc.max_ab_speed(),0,"m/s");
 					}
 					break;
 				case 2: // multiplicative
