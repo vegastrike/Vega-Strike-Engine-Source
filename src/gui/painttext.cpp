@@ -25,6 +25,7 @@
 
 #include "vs_globals.h"
 #include "config_xml.h"
+#include "gldrv/gl_globals.h"
 const int PaintText::END_LINE = 1000000;           // Draw to the end.
 extern bool useStroke();
 // This function allows a number of formatting characters.  Here are the rules:
@@ -232,7 +233,10 @@ void PaintText::drawLines(int start, int count) const {
 
     // Initialize the graphics state.
     GFXToggleTexture(false,0);
-    glEnable(GL_LINE_SMOOTH);
+    if(gl_options.smooth_lines)
+    {
+	    glEnable(GL_LINE_SMOOTH);
+    }
     GFXPushBlendMode();
     GFXBlendMode(SRCALPHA,INVSRCALPHA);
     glPushMatrix();
@@ -279,7 +283,10 @@ void PaintText::drawLines(int start, int count) const {
     glRasterPos2f(0,0);
     // Undo graphics state
     GFXPopBlendMode();
-    glDisable(GL_LINE_SMOOTH);
+    if(gl_options.smooth_lines)
+    {
+	    glDisable(GL_LINE_SMOOTH);
+    }
     glPopMatrix();
     GFXToggleTexture(true,0);
 }

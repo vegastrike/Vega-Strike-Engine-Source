@@ -82,7 +82,10 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
 
 	glDisable(GL_TEXTURE_2D);
         glLoadIdentity();
-        glEnable(GL_LINE_SMOOTH);
+	if(gl_options.smooth_lines)
+	{
+		glEnable(GL_LINE_SMOOTH);
+	}
 	glLineWidth(wid);
 	float page_wid=wid/rescale_font;
 	glTranslatef(x,y,0);
@@ -103,7 +106,10 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
 		  }else {
 		    width=0;
 		    glLoadIdentity();
-		    glEnable(GL_LINE_SMOOTH);
+		    if(gl_options.smooth_lines)
+		    {
+			    glEnable(GL_LINE_SMOOTH);
+		    }
 		    glLineWidth(wid);
 		    glTranslatef(x,y-(++h)*font_size_float,0);
 		    glScalef(font_size,font_size,1);
@@ -115,7 +121,10 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
 		  glutStrokeCharacter(GLUT_STROKE_ROMAN, str[cur]);
         }
 	glLoadIdentity();
-	glDisable(GL_LINE_SMOOTH);
+	if(gl_options.smooth_lines)
+	{
+		glDisable(GL_LINE_SMOOTH);
+	}
 }
 
 float WidthOfChar(char chr) {

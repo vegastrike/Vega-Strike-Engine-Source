@@ -449,6 +449,10 @@ void GFXInit (int argc, char ** argv){
     gl_options.mipmap = XMLSupport::parse_int (vs_config->getVariable ("graphics","mipmapdetail","2"));     
     gl_options.compression = XMLSupport::parse_int (vs_config->getVariable ("graphics","texture_compression","0"));
     gl_options.Multitexture = XMLSupport::parse_bool (vs_config->getVariable ("graphics","reflection","true"));
+    gl_options.smooth_lines = XMLSupport::parse_bool( vs_config->getVariable("graphics/mesh","smooth_lines","true") );
+    gl_options.smooth_points= XMLSupport::parse_bool( vs_config->getVariable("graphics/mesh","smooth_points","true") ); 
+
+
     gl_options.display_lists = XMLSupport::parse_bool (vs_config->getVariable ("graphics","displaylists","false"));
     gl_options.s3tc = XMLSupport::parse_bool (vs_config->getVariable ("graphics","s3tc","true"));
     gl_options.ext_clamp_to_edge = XMLSupport::parse_bool (vs_config->getVariable ("graphics","ext_clamp_to_edge","true"));

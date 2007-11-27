@@ -136,9 +136,15 @@ void /*GFXDRVAPI*/ GFXEnable (const STATE state)
 	  glEnable(GL_CULL_FACE);
 	  break;
 	case SMOOTH:
-		glEnable (GL_LINE_SMOOTH);
-        glEnable (GL_POINT_SMOOTH);
-		break;
+	if(gl_options.smooth_lines)
+	{
+		glEnable(GL_LINE_SMOOTH);
+	}
+	if(gl_options.smooth_points)
+	{
+		glEnable (GL_POINT_SMOOTH);
+	}
+	break;
     case STENCIL:
         glEnable(GL_STENCIL);
         break;
@@ -213,8 +219,14 @@ void /*GFXDRVAPI*/ GFXDisable (const STATE state)
 	  glDisable(GL_CULL_FACE);
 	  break;
 	case SMOOTH:
-		glDisable (GL_LINE_SMOOTH);
-        glDisable (GL_POINT_SMOOTH);
+		if(gl_options.smooth_lines)
+		{
+			glDisable(GL_LINE_SMOOTH);
+		}
+		if(gl_options.smooth_points)
+		{
+			glDisable (GL_POINT_SMOOTH);
+		}
 		break;
     case STENCIL:
         glDisable(GL_STENCIL);

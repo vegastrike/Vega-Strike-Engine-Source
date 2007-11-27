@@ -31,6 +31,8 @@
 #include "cmd/base.h"
 //#include "glut.h"
 
+#include "gldrv/gl_globals.h"
+
 static bool isInside() {
   if (BaseInterface::CurrentBase) return true;
   return false;
@@ -233,10 +235,16 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
   glLineWidth (1);
   if (!use_bit&&font_antialias) {
     GFXBlendMode (SRCALPHA,INVSRCALPHA);
-    glEnable(GL_LINE_SMOOTH);
+	if(gl_options.smooth_lines)
+	{
+		glEnable(GL_LINE_SMOOTH);
+	}
   }else {
 	GFXBlendMode (SRCALPHA,INVSRCALPHA);
-    glDisable (GL_LINE_SMOOTH);
+	if(gl_options.smooth_lines)
+	{
+		glDisable(GL_LINE_SMOOTH);
+	}
   }
   GFXColorf(this->col);
 
@@ -355,7 +363,10 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
     }
     text_it++;
   }
-  glDisable(GL_LINE_SMOOTH);
+  if(gl_options.smooth_lines)
+  {
+	  glDisable(GL_LINE_SMOOTH);
+  }
   glPopMatrix();
 
   

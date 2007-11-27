@@ -244,6 +244,8 @@ typedef struct {
   bool s3tc;
   bool ext_clamp_to_edge;
   bool ext_clamp_to_border;
+  bool smooth_lines;
+  bool smooth_points;
 } gl_options_t;
 extern gl_options_t gl_options;
 

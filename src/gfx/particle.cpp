@@ -154,7 +154,10 @@ void ParticleTrail::DrawAndUpdate (){
   }
   GFXEnd();
 #ifdef USE_POINTS  
-  glDisable(GL_POINT_SMOOTH);
+  if(gl_options.smooth_points)
+  {
+	  glDisable (GL_POINT_SMOOTH);
+  }
   GFXPointSize(1);
 #else
   GFXDisable(DEPTHWRITE);

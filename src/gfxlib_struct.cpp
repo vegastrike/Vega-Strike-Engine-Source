@@ -33,8 +33,6 @@ static void BindInd(unsigned int element_data) {
 #endif
 void GFXVertexList::RefreshDisplayList () {
   static bool use_vbo=XMLSupport::parse_bool(vs_config->getVariable("graphics","vbo","false"));
-  static bool smooth_lines = XMLSupport::parse_bool( vs_config->getVariable("graphics/mesh","smooth_lines","true") );
-  static bool smooth_points= XMLSupport::parse_bool( vs_config->getVariable("graphics/mesh","smooth_points","true") ); 
 
 #ifndef NO_VBO_SUPPORT
   if (use_vbo&&!vbo_data) {
@@ -279,8 +277,7 @@ void GFXVertexList::Draw()
 }
 extern void GFXCallList(int list);
 void GFXVertexList::Draw (enum POLYTYPE *mode,const INDEX index, const int numlists, const int *offsets) {
-  static bool smooth_lines = XMLSupport::parse_bool( vs_config->getVariable("graphics","smooth_lines","true") );
-  static bool smooth_points= XMLSupport::parse_bool( vs_config->getVariable("graphics","smooth_points","false") );  //Hardware support for this seems... sketchy
+ //Hardware support for this seems... sketchy
 
   if(vbo_data==0&&display_list!=0) {
       //Big issue: display lists cannot discriminate between lines/points/triangles,
@@ -292,7 +289,7 @@ void GFXVertexList::Draw (enum POLYTYPE *mode,const INDEX index, const int numli
       case GFXLINESTRIP:
       case GFXPOLY:
       case GFXPOINT:
-          if (((*mode==GFXPOINT)&&smooth_points)||((*mode!=GFXPOINT)&&smooth_lines)) {
+          if (((*mode==GFXPOINT)&&gl_options.smooth_points)||((*mode!=GFXPOINT)&&gl_options.smooth_lines)) {
               BLENDFUNC src,dst;
               GFXGetBlendMode(src,dst);
               if ((dst!=ZERO)&&((src==ONE)||(src==SRCALPHA))) {
@@ -346,7 +343,7 @@ void GFXVertexList::Draw (enum POLYTYPE *mode,const INDEX index, const int numli
           case GFXLINESTRIP:
           case GFXPOLY:
           case GFXPOINT:
-              if (((mode[i]==GFXPOINT)&&smooth_points)||((mode[i]!=GFXPOINT)&&smooth_lines)) {
+              if (((mode[i]==GFXPOINT)&&gl_options.smooth_points)||((mode[i]!=GFXPOINT)&&gl_options.smooth_lines)) {
                   BLENDFUNC src,dst;
                   GFXGetBlendMode(src,dst);
                   if ((dst!=ZERO)&&((src==ONE)||(src==SRCALPHA))) {
