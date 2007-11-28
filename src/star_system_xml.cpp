@@ -747,7 +747,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 			++xml->unitlevel;
 			blendSrc=SRCALPHA;
 			blendDst=INVSRCALPHA;
-                        inside_out=false;
+                        bool inside_out=false;
 			Unit  * p = (Unit *)xml->moons.back()->GetTopPlanet(xml->unitlevel-1);
 			if (p!=NULL)
 			if (p->isUnit()==PLANETPTR) {
