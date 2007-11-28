@@ -41,7 +41,7 @@ public:
   virtual ~GamePlanet();
   virtual void AddFog (const std::vector <AtmosphericFogMesh> &, bool optical_illusion);
   Vector AddSpaceElevator (const std::string &name, const std::string & faction, char direction);
-  void AddAtmosphere (const std::string &texture, float radius, BLENDFUNC blendSrc, BLENDFUNC blendDst);
+  void AddAtmosphere (const std::string &texture, float radius, BLENDFUNC blendSrc, BLENDFUNC blendDst,bool inside_out);
   void AddRing (const std::string &texture,float iradius,float oradius, const QVector &r,const QVector &s, int slices, int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst);
   void AddCity (const std::string &texture,float radius,int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst, bool inside_out=false, bool reverse_normals=true);
   void DisableLights ();

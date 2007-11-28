@@ -747,6 +747,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 			++xml->unitlevel;
 			blendSrc=SRCALPHA;
 			blendDst=INVSRCALPHA;
+                        inside_out=false;
 			Unit  * p = (Unit *)xml->moons.back()->GetTopPlanet(xml->unitlevel-1);
 			if (p!=NULL)
 			if (p->isUnit()==PLANETPTR) {
@@ -768,13 +769,16 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 						case VARVALUE:
 							varvalue=parse_float((*iter).value);
 							break;
+						case INSIDEOUT:
+							inside_out=parse_bool((*iter).value);
+							break;
 
 						default:
 							break;
 					}
 				}
 				if (ConfigAllows(varname,varvalue)) {
-					((Planet *)p)->AddAtmosphere (myfile,radius,blendSrc,blendDst);
+                                  ((Planet *)p)->AddAtmosphere (myfile,radius,blendSrc,blendDst,inside_out);
 				}
 			}
 			break;

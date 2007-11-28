@@ -209,14 +209,14 @@ void GamePlanet::AddCity (const std::string &texture,float radius,int numwrapx, 
 Vector GamePlanet::AddSpaceElevator(const std::string &name, const std::string &faction,char direction) {//direction is udrlfb//up down right left front ack
 	return Planet::AddSpaceElevator (name,faction,direction);
 }
-void GamePlanet::AddAtmosphere(const std::string & texture, float radius, BLENDFUNC blendSrc, BLENDFUNC blendDst) {
+void GamePlanet::AddAtmosphere(const std::string & texture, float radius, BLENDFUNC blendSrc, BLENDFUNC blendDst, bool inside_out) {
   if (meshdata.empty()) {
     meshdata.push_back(NULL);
   }
   Mesh * shield = meshdata.back();
   meshdata.pop_back();
   static int stacks=XMLSupport::parse_int(vs_config->getVariable ("graphics","planet_detail","24"));
-  meshdata.push_back(new SphereMesh(radius, stacks, stacks, texture.c_str(), NULL,false,blendSrc,blendDst));  
+  meshdata.push_back(new SphereMesh(radius, stacks, stacks, texture.c_str(), NULL,inside_out,blendSrc,blendDst));  
   if (meshdata.back()) {
       //By klauss - this needs to be done for most atmospheres
       GFXMaterial a = {0,0,0,0,
