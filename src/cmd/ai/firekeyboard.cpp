@@ -1480,9 +1480,16 @@ static bool TryDock(Unit * parent, Unit * targ, unsigned char playa, int severit
 static bool ExecuteRequestClearenceKey(Unit * parent, Unit * endt) {
   bool tmp=endt->RequestClearance(parent);
   if (endt->getRelation(parent)>=0) {
-    if (endt->graphicOptions.InWarp)
-      endt->graphicOptions.WarpRamping=1;
-    endt->graphicOptions.InWarp=0;
+	if (endt->graphicOptions.InWarp){
+		endt->graphicOptions.WarpRamping=1;
+	}
+	endt->graphicOptions.InWarp=0;
+	static float clearencetime=(XMLSupport::parse_float (vs_config->getVariable ("general","dockingtime","20")));
+	endt->EnqueueAIFirst (new ExecuteFor (new Orders::MatchVelocity (Vector(0,0,0),
+		Vector(0,0,0),
+		true,
+		false,
+		true),clearencetime));
   }
   return tmp;
 }
