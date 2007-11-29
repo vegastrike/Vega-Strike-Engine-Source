@@ -3726,6 +3726,7 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn)
 	static bool WCfuelhack = XMLSupport::parse_bool(vs_config->getVariable("physics","fuel_equals_warp","false"));
 	static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".4"));
 	static float staticabfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelAfterburn",".1"));
+	static bool finegrainedFuelEfficiency = XMLSupport::parse_bool(vs_config->getVariable("physics","VariableFuelConsumption","false"));
 
 	if (WCfuelhack) {
 		//	  fuel = fuel <? warpenergy;
@@ -3746,6 +3747,10 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn)
 	}
 	if ((afterburntype == 2) && warpenergy<0) {
 		warpenergy = 0;
+		afterburn=false;
+	}
+
+	if(3==afterburntype){ // no afterburner -- we should really make these types an enum :-/
 		afterburn=false;
 	}
 
@@ -3774,12 +3779,14 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn)
 	static float FMEC_factor=XMLSupport::parse_float (vs_config->getVariable("physics","FMEC_factor","0.000000008"));
 								 // 1/5,000,000 m/s
 	static float FMEC_exit_vel_inverse=XMLSupport::parse_float (vs_config->getVariable("physics","FMEC_exit_vel","0.0000002"));
-	if (afterburntype == 2)		 // Energy-consuming afterburner
+
+	if (afterburntype == 2){		 // Energy-consuming afterburner
 								 //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
 		warpenergy-=afterburnenergy*GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;
-	if (afterburntype == 1) {	 // fuel-burning overdrive - uses afterburner efficiency
+	}
+	if (3 == afterburntype || afterburntype == 1) {	 // fuel-burning overdrive - uses afterburner efficiency. In NO_AFTERBURNER case, "afterburn" will always be false, so can reuse code.
 								 //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-		fuel-=GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;
+		fuel-=((afterburn&&finegrainedFuelEfficiency)?afterburnenergy:GetFuelUsage(afterburn))*SIMULATION_ATOM*Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;
 #ifndef __APPLE__
 		if (ISNAN(fuel)) {
 			fprintf(stderr,"Fuel is NAN A\n");

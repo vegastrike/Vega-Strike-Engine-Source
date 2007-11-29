@@ -1145,7 +1145,7 @@ shield.range[1].   rhomax=r90;
   jump.insysenergy=stof(OPTIM_GET(row,table,Warp_Usage_Cost));
   if (WCfuelhack) fuel=warpenergy=warpenergy+jump.energy*0.1f; //this is required to make sure we don't trigger the "globally out of fuel" if we use all warp charges -- save some afterburner for later!!!
   afterburnenergy=stof(OPTIM_GET(row,table,Afterburner_Usage_Cost),32767);
-  afterburntype = stoi(OPTIM_GET(row,table,Afterburner_Type)); //type 1 == "use fuel", type 0 == "use reactor energy", type 2 ==(hopefully) "use jump fuel"
+  afterburntype = stoi(OPTIM_GET(row,table,Afterburner_Type)); //type 1 == "use fuel", type 0 == "use reactor energy", type 2 ==(hopefully) "use jump fuel" 3: NO AFTERBURNER
   limits.yaw=stof(OPTIM_GET(row,table,Maneuver_Yaw))*VS_PI/180.;
   limits.pitch=stof(OPTIM_GET(row,table,Maneuver_Pitch))*VS_PI/180.;
   limits.roll=stof(OPTIM_GET(row,table,Maneuver_Roll))*VS_PI/180.;
