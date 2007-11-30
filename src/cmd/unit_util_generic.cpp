@@ -616,6 +616,9 @@ namespace UnitUtil {
 	}
 	bool isSun(const Unit *my_unit){
 		if (!my_unit)return false;
+		if (my_unit->isJumppoint()){
+			return false;
+		}
 		bool res=false;
 		res=my_unit->isPlanet();
 		if (res) {
