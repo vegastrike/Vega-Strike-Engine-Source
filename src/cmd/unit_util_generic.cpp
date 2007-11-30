@@ -623,10 +623,6 @@ namespace UnitUtil {
 		res=my_unit->isPlanet();
 		if (res) {
 			res = ((Planet *)my_unit)->hasLights();
-			if (!res) {
-				res = ((my_unit->name.get().find("star")!=std::string::npos) ||
-					   (my_unit->getFullname().find("star")!=std::string::npos));//
-			}
 		}
 		return res;
 	}
