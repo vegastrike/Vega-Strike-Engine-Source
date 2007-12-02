@@ -7025,7 +7025,7 @@ std::string getTurretSize (const std::string &size)
 			return tokens[i];
 		}
 	}
-	return "capitol";
+	return "capital";
 }
 
 
@@ -9288,7 +9288,7 @@ std::string Unit::subunitSerializer (const XMLType &input, void * mythis)
 			return su->name;
 		}
 	}
-	return string("destroyed_turret");
+	return string("destroyed_blank");
 }
 
 
