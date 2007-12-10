@@ -69,14 +69,15 @@ public:
     this->d = d;
   }
   bool operator < (const OrigMeshContainer & b) const {
-    if(orig->Decal[0]==NULL || b.orig->Decal[0]==NULL){
-      std::cout << "DEcal is nulll" << std::endl;
-      return b.orig->Decal[0]!=NULL;
-    }
-    return ((*orig->Decal[0]) < (*b.orig->Decal[0]));
+    return (orig->Decal.size() < b.orig->Decal.size())
+        ||(  (orig->Decal.size() == b.orig->Decal.size())
+           &&(orig->Decal.size() > 0)
+           &&(orig->Decal[0] < b.orig->Decal[0])  );
   }
   bool operator == (const OrigMeshContainer &b) const {
-    return (*orig->Decal[0])==*b.orig->Decal[0];
+    return (orig->Decal.size() == b.orig->Decal.size())
+        && (  (orig->Decal.size() == 0)
+            ||(orig->Decal[0] == b.orig->Decal[0])  );
   }
 };
 
@@ -356,13 +357,9 @@ void Mesh::Draw(float lod, const Matrix &m, float toofar, int cloak, float nebdi
 #ifndef PARTITIONED_Z_BUFFER
   if(!(origmesh->will_be_drawn&(1<<c.mesh_seq))) {
     origmesh->will_be_drawn |= (1<<c.mesh_seq);
-    //    VSFileSystem::vs_fprintf (stderr,"origmesh %x",origmesh);
-	for (unsigned int i=0;i<origmesh->Decal.size()&& i < NUM_PASSES;++i) {
-		if (origmesh->Decal[i]&&(i!=ENVSPEC_PASS)&&(i!=DAMAGE_PASS)&&(i!=GLOW_PASS)) {
-			undrawn_meshes[c.mesh_seq][i].push_back(OrigMeshContainer(origmesh,toofar-rSize()));//FIXME will not work if many of hte same mesh are blocking each other
-		}
-		
-	}
+    //FIXME will not work if many of hte same mesh are blocking each other
+    //Sequence 0 already does all other passes
+    undrawn_meshes[c.mesh_seq][0].push_back(OrigMeshContainer(origmesh,toofar-rSize()));
   }
 #else
   undrawn_meshes.push_back(OrigMeshContainer(origmesh,c.zmin,c.zmax,c.mesh_seq));//FIXME will not work if many of hte same mesh are blocking each other
@@ -411,11 +408,11 @@ void Mesh::DrawNow(float lod,  bool centered, const Matrix &m, int cloak, float 
   if (blendSrc!=SRCALPHA&&blendDst!=ZERO) 
     GFXDisable(DEPTHWRITE);
   GFXBlendMode(blendSrc, blendDst);
-  if (o->Decal[0])
-    o->Decal[0]->MakeActive();
+  if (o->Decal.size() && o->Decal[0])
+    o->Decal[0]->MakeActive(); 
   GFXTextureEnv(0,GFXMODULATETEXTURE); //Default diffuse mode
   GFXTextureEnv(1,GFXADDTEXTURE);      //Default envmap mode
-  GFXToggleTexture(true,0);
+  GFXToggleTexture(bool(o->Decal.size() && o->Decal[0]) ,0);
   o->vlist->DrawOnce();
   if (centered) {
     GFXCenterCamera(false);
@@ -748,10 +745,14 @@ bool SetupSpecMapFirstPass (vector <Texture *> &decal, unsigned int mat, bool en
         if (decal[0]) {
             decal[0]->MakeActive(0);
             GFXToggleTexture(true,0);
+        } else {
+            GFXToggleTexture(false,0);
         }
-    } else if (decal.size()&&decal[0]) {
+    } else if (decal.size() && decal[0]) {
         GFXToggleTexture(true,0);
         decal[0]->MakeActive(0);
+    } else {
+        GFXToggleTexture(false,0);
     }
 	if (detailTexture&&(gl_options.Multitexture>detailoffset)) {
 			for (unsigned int i=1;i<detailPlanes.size();i+=2) {
@@ -1051,6 +1052,7 @@ void RestoreSpecMapState(bool envMap, bool write_to_depthmap, float polygonoffse
     if (write_to_depthmap) {
         GFXEnable(DEPTHWRITE);
     }
+    GFXEnable(TEXTURE0);
 	GFXPopBlendMode(); 	
 }
 extern bool AnimationsLeftInFarQueue();
@@ -1065,17 +1067,17 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
   if (whichpass!=0&&shaders) return;
   //  assert(draw_queue->size());
   if (!shaders) {
-    if (whichpass>=(int)Decal.size()) {
+    if (whichpass && (whichpass>=(int)Decal.size())) {
       static bool thiserrdone=false; //Avoid filling up stderr.txt with this thing (it would be output at least once per frame)
       if (!thiserrdone) VSFileSystem::vs_fprintf (stderr,"Fatal error: drawing ship that has a nonexistant tex");
       thiserrdone=true;
       return;
     }
-    if (Decal[whichpass]==NULL) {
+    if ((whichpass < Decal.size()) && (Decal[whichpass]==NULL)) {
       static bool thiserrdone=false; //Avoid filling up stderr.txt with this thing (it would be output at least once per frame)
       if (!thiserrdone) VSFileSystem::vs_fprintf (stderr,"Less Fatal error: drawing ship that has a nonexistant tex");
       thiserrdone=true;
-      return;
+      //return; // the code can handle this
     }
   }
   if (draw_queue[whichdrawqueue].empty()) {
@@ -1084,7 +1086,7 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
     thiserrdone=true;
     return;
   }
-
+  
 #ifdef PARTITIONED_Z_BUFFER
   //Early Z-Cull && S-Cull
   {
@@ -1141,14 +1143,12 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
     GFXAlphaTest(GEQUAL,alphatest/255.0);
   static Texture *white=new Texture("white.png");
   static Texture *black=new Texture("blackclear.png");
-  if(Decal[0])
+  if(Decal.size() && Decal[0])
     Decal[0]->MakeActive();
-  else 
-    white->MakeActive();
   GFXTextureEnv(0,GFXMODULATETEXTURE); //Default diffuse mode
   GFXTextureEnv(1,GFXADDTEXTURE);      //Default envmap mode
   
-  GFXToggleTexture(true,0);
+  GFXToggleTexture(bool(Decal.size()>0),0);
   if(getEnvMap()) {
     GFXEnable(TEXTURE1);
     _Universe->activateLightMap();
@@ -1176,12 +1176,12 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
       nomultienv = true;
   }
 
-  while (shaders||((nomultienv&&(whichpass == ENVSPEC_PASS))||(whichpass < Decal.size()))) {
+  while (shaders||((nomultienv&&(whichpass == ENVSPEC_PASS)) || !whichpass || (whichpass < Decal.size()))) {
       if ((whichpass==GLOW_PASS)&&skipglowpass) {
           whichpass++;
           continue;
       }
-      if (shaders || (nomultienv&&whichpass==ENVSPEC_PASS) || SAFEDECAL(whichpass)) {
+      if (shaders || (nomultienv&&whichpass==ENVSPEC_PASS) || !whichpass || SAFEDECAL(whichpass)) {
 	if (shaders) {
 	  SetupShaders(Decal,myMatNum,getEnvMap(),polygon_offset,detailTexture,detailPlanes,black,white);//eventually pass in shader ID for unique shaders
 	}else switch (whichpass) {
