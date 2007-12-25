@@ -392,6 +392,8 @@ void SocketSet::private_test_dump_active_sets( int           maxfd,
                                                const fd_set& write_before,
                                                const fd_set& write_after )
 {
+#if 0
+ // Causes compile errors and I'm too lazy to figure it out at the moment.
     std::ostringstream str_r;
     std::ostringstream str_w;
     str_r << "   *** read set: ";
@@ -463,6 +465,7 @@ void SocketSet::private_test_dump_active_sets( int           maxfd,
          << str_w.str() << endl
          << ostr_r.str() << endl
          << ostr_w.str() << endl;
+#endif
 }
 #endif /* VSNET_DEBUG */
 
