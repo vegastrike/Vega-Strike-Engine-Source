@@ -190,7 +190,7 @@ void	NetServer::start(int argc, char **argv)
           CONFIGFILE=argv[1];
         }else {
           CONFIGFILE = new char[42];
-          strcpy( CONFIGFILE, "vegaserver.config");
+          strcpy( CONFIGFILE, "vegastrike.config");
         }
 	cout<<"Loading server config...";
 	VSFileSystem::InitPaths( CONFIGFILE);
@@ -222,7 +222,10 @@ void	NetServer::start(int argc, char **argv)
 	UpdateTime();
 	savetime = getNewTime();
 	reconnect_time = getNewTime()+periodrecon;
-        std::string configport=vs_config->getVariable( "network", "serverport", "6777");
+        std::string configport=vs_config->getVariable( "network", "server_port", "6777");
+		if (configport.empty()) {
+			configport=vs_config->getVariable( "network", "serverport", "6777");
+		}
         if (serverport==NULL) {
           serverport=configport.c_str();
         }
@@ -248,7 +251,10 @@ void	NetServer::start(int argc, char **argv)
     }
 
 	COUT << "done." << endl;
-        std::string acctsrv = vs_config->getVariable( "network", "accountsrv", "");
+        std::string acctsrv = vs_config->getVariable( "network", "account_server_url", "");
+		if (acctsrv.empty()) {
+			acctsrv = vs_config->getVariable( "network", "accountsrv", "");
+		}
 
 	if( !acctserver)
 	{
@@ -1489,21 +1495,6 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			// Add distance
 			//netbuf.addFloat( distance);
 		}
-		break;
-		// NETFIXME: SHOULD NOT RECEIVE CMD_CAMSHOT SINCE COMM SESSIONS ARE HANDLED IN A CLIENT-TO-CLIENT WAY
-		/*
-		case CMD_CAMSHOT :
-		{
-			un = clt->game_unit.GetUnit();
-			if (!un)
-				break;
-			p2.bc_create( packet.getCommand(), packet.getSerial(),
-                          packet.getData(), packet.getDataLength(), SENDANDFORGET,
-                          __FILE__, PSEUDO__LINE__(1281));
-			// Send to concerned clients
-			zonemgr->broadcast_camshots( un->activeStarSystem->GetZone(), clt->serial, &p2);
-		}
-		*/
 		break;
 		case CMD_STARTNETCOMM :
 		{
