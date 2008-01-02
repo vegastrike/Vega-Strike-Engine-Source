@@ -628,7 +628,16 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
                 UniverseUtil::IOmessage(0,sender,"all",message);
               }
               break;
-
+            case CMD_CUSTOM:
+              {
+                un = this->game_unit.GetUnit();
+                int cp = _Universe->whichPlayerStarship(un);
+                string cmd = netbuf.getString();
+                string args = netbuf.getString();
+                string id = netbuf.getString();
+                UniverseUtil::receivedCustom(cp, true, cmd, args, id);
+              }
+              break;
             case CMD_SNAPSHOT :
                 {
 					if (nostarsystem) break;

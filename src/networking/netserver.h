@@ -161,6 +161,7 @@ class NetServer
 	
 		bool			saveAccount(int cpnum );
 	
+		void	sendCustom( int cp, string cmd, string args, string id);
 		void	sendDamages( ObjSerial serial, unsigned short zone, float hull, const Shield &shields, const Armor &armor,
 							float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color);
 		//void	sendDamages( ObjSerial serial, Vector & pnt, Vector & normal, float amt, GFXColor & color, float phasedamage);

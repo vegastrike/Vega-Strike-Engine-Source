@@ -213,6 +213,18 @@ namespace CockpitKeys {
               name=getUnitNameAndFgNoBase(par);
             }
             Network[textmessager].textMessage(gcp->textMessage);
+          } else if (gcp->textMessage[0]=='/') {
+			  string cmd;
+			  string args;
+			  std::string::size_type space = gcp->textMessage.find(' ');
+			  if (space) {
+				  cmd = gcp->textMessage.substr(0, space);
+				  args = gcp->textMessage.substr(space+1);
+			  } else {
+				  cmd = gcp->textMessage;
+			  }
+			  // Send custom message to itself.
+			  UniverseUtil::receivedCustom(textmessager, true, cmd, args, string());
           }
           /*
             static std::string anglestring=" >";

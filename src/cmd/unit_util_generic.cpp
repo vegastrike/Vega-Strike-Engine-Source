@@ -468,8 +468,8 @@ namespace UnitUtil {
           if (!my_unit)return -1;
           int maxmount=my_unit->mounts.size();
           int max=maxmount+mountoffset;
-          for (int i=mountoffset;i<max;++i) {
-            int index=i%maxmount;
+          for (int loopi=mountoffset;loopi<max;++loopi) {
+            int i=loopi%maxmount;
             if (my_unit->mounts[i].type->weapon_name==weapon_name&&(my_unit->mounts[i].status==Mount::ACTIVE||my_unit->mounts[i].status==Mount::INACTIVE)) {
               my_unit->mounts[i].status=Mount::UNCHOSEN;
               return i;

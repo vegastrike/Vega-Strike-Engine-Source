@@ -48,9 +48,13 @@
 #include "cmd/unit_generic.h"
 #include "mission.h"
 
+PYTHON_BEGIN_MODULE(Base)
+// Nothing here, but keeps those files that do a "import Base" happy.
+PYTHON_END_MODULE(Base)
+
 void InitBase() {
 	Python::reseterrors();
-	//PYTHON_INIT_MODULE(Base);
+	PYTHON_INIT_MODULE(Base);
 	Python::reseterrors();
 }
 void InitBriefing() {

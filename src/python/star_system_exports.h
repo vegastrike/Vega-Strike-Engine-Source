@@ -90,6 +90,9 @@ EXPORT_UTIL(getNewGameSaveName,"")
 voidEXPORT_UTIL(loadGame)
 voidEXPORT_UTIL(saveGame)
 
+voidEXPORT_UTIL(sendCustom)
+voidEXPORT_UTIL(receivedCustom)
+
 voidEXPORT_UTIL(showSplashScreen)
 voidEXPORT_UTIL(showSplashMessage)
 voidEXPORT_UTIL(showSplashProgress)

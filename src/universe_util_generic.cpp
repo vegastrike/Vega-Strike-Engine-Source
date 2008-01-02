@@ -27,6 +27,10 @@
 #include "linecollide.h"
 #include "cmd/unit_collide.h"
 #include "cmd/unit_find.h"
+
+#include "python/init.h"
+#include <Python.h>
+
 //extern class Music *muzak;
 //extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );
 extern Unit&GetUnitMasterPartList();
@@ -653,6 +657,36 @@ namespace UniverseUtil
 	}
 	bool isserver() {
 		return SERVER;
+	}
+	void securepythonstr(string &message) {
+		std::replace(message.begin(),message.end(),'\'','\"');
+		std::replace(message.begin(),message.end(),'\\','/');
+		std::replace(message.begin(),message.end(),'\n',' ');
+		std::replace(message.begin(),message.end(),'\r',' ');
+	}
+	void receivedCustom(int cp, bool trusted, string cmd, string args, string id) {
+		int cp_orig = _Universe->CurrentCockpit();
+		_Universe->SetActiveCockpit(cp);
+		securepythonstr(cmd);
+		securepythonstr(args);
+		securepythonstr(id);
+		string slashfunc = vs_config->getVariable("general","custompython","import custom;custom.processMessage");
+		string pythonCode = slashfunc + "(" + (trusted?"True":"False") +
+			", r\'" + cmd + "\', r\'" + args + "\', r\'" + id + "\')\n";
+		COUT << "Executing python command: " << endl;
+		cout << "    " << pythonCode;
+		const char * cpycode = pythonCode.c_str();
+		::Python::reseterrors();
+		PyRun_SimpleString(const_cast<char*>(cpycode));
+		::Python::reseterrors();
+		_Universe->SetActiveCockpit(cp_orig);
+/*				
+				netbuf.addString("game");
+				netbuf.addString(message);
+				p2.send( CMD_TXTMESSAGE, 0,
+						netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
+						&clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(847));
+*/
 	}
 	int getNumPlayers () {
 		return _Universe->numPlayers();

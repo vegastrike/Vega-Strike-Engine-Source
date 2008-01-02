@@ -866,44 +866,23 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                   {
                   if (!clt) break;
 				  un = clt->game_unit.GetUnit();
-			NetBuffer netbuf (packet.getData(), packet.getDataLength());
 			string message = netbuf.getString();
 			netbuf.Reset();
 			if (message.empty()) break;
 			if (message[0]=='/') {
-				if (clt->cltadr.inaddr()==0x0100007f) {
-					if (message.substr(0,5)=="/quit") {
-						VSExit(1);
-						return;
-					}
-				} else { // colors
-					std::replace(message.begin(),message.end(),'#','$');
-				}
+				string cmd, args;
+				//std::replace(message.begin(),message.end(),'#','$');
 				int cp = _Universe->whichPlayerStarship(un);
-				char cpstr[20];
-				cpstr[0]='\0';
-				sprintf(cpstr, "%d", cp);
-				std::replace(message.begin(),message.end(),'\'','\"');
-				std::replace(message.begin(),message.end(),'\\','/');
 				std::replace(message.begin(),message.end(),'\n',' ');
 				std::replace(message.begin(),message.end(),'\r',' ');
-				string slashfunc = vs_config->getVariable("server","slashcmdfunc","import server;server.processMessage");
-				string pythonCode = slashfunc + "(" + cpstr + ", " +
-					((clt->cltadr.inaddr()==0x0100007f)?"True":"False") + ", r\'"
-					+ message.substr(1) + "\')\n";
-				COUT << "Executing python command from "<<clt->callsign<<": " << endl;
-				cout << "    " << pythonCode;
-				const char * cpycode = pythonCode.c_str();
-				::Python::reseterrors();
-				PyRun_SimpleString(const_cast<char*>(cpycode));
-				::Python::reseterrors();
-/*				
-				netbuf.addString("game");
-				netbuf.addString(message);
-				p2.send( CMD_TXTMESSAGE, 0,
-						netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
-						&clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(847));
-*/
+				string::size_type first_space = message.find(' ');
+				if (first_space==string::npos) {
+					cmd = message;
+				} else {
+					cmd = message.substr(1, first_space-1);
+					args = message.substr(first_space+1);
+				}
+				UniverseUtil::receivedCustom(cp, (clt->cltadr.inaddr()==0x0100007f), cmd, args, string());
 				break;
 			}
 			un = clt->game_unit.GetUnit();
@@ -929,6 +908,18 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			logoutList.push_back( clt );
 			COUT<<"<<< LOGOUT REQUEST -----------------------------------------------------------------"<<endl;
 			break;
+		case CMD_CUSTOM:
+		{
+			if (!clt) break;
+			un = clt->game_unit.GetUnit();
+			int cp = _Universe->whichPlayerStarship(un);
+			bool trusted = (clt->cltadr.inaddr()==0x0100007f);
+			string cmd = netbuf.getString();
+			string args = netbuf.getString();
+			string id = netbuf.getString();
+			UniverseUtil::receivedCustom(cp, trusted, cmd, args, id);
+			break;
+		}
 // 		case CMD_ACK :
 // 			/*** RECEIVED AN ACK FOR A PACKET : comparison on packet timestamp and the client serial in it ***/
 // 			/*** We must make sure those 2 conditions are enough ***/

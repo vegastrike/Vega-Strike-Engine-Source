@@ -7,6 +7,7 @@
 #include "cmd/collection.h"
 #include "star_system.h"
 #include <string>
+#include "networking/netclient.h"
 #include "cmd/music.h"
 #include "audiolib.h"
 #include "gfx/animation.h"
@@ -156,6 +157,18 @@ namespace UniverseUtil
 
 	bool isSplashScreenShowing() {
 		return GetStarSystemLoading();
+	}
+
+	void sendCustom(int cp, string cmd, string args, string id) {
+		if (cp<0 || cp>=_Universe->numPlayers()) {
+			fprintf(stderr, "sendCustom %s with invalid player %d\n", cmd, cp);
+			return;
+		}
+		if (Network!=NULL) {
+			Network[cp].sendCustom(cmd, args, id);
+		} else {
+			receivedCustom(cp, true, cmd, args, id);
+		}
 	}
 }
 

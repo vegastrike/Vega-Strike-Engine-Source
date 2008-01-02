@@ -249,6 +249,28 @@ void	NetServer::sendDamages( ObjSerial serial, unsigned short zone, float hull, 
   }
 }
 
+void	NetServer::sendCustom( int cp, string command, string args, string id)
+{
+	Packet p2;
+	NetBuffer netbuf;
+
+	Unit *un = _Universe->AccessCockpit(cp)->GetParent();
+	if (!un) {
+		fprintf(stderr, "Attempt to sendCustom NULL player %d ; CMD %s %s ; ID %s\n",
+				cp, command, args, id);
+		return;
+	}
+	ClientPtr clt = this->getClientFromSerial(un->GetSerial());
+	if (!clt) return;
+	
+	netbuf.addString(command);
+	netbuf.addString(args);
+	netbuf.addString(id);
+	
+	p2.send ( CMD_CUSTOM, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
+			  NULL, clt->tcp_sock, __FILE__, __LINE__ );
+}
+
 void	NetServer::sendMessage( string from, string to, string message, float delay )
 {
 	NetBuffer netbuf;

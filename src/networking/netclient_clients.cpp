@@ -330,7 +330,6 @@ void	NetClient::sendPosition( const ClientState* cs )
 	if (!un)
 		return;
 	// Serial in ClientState is updated in UpdatePhysics code at ClientState creation (with pos, veloc...)
-	Packet pckt;
 	NetBuffer netbuf;
 	static bool debugPos = XMLSupport::parse_bool(vs_config->getVariable("network", "debug_position_interpolation", "false"));
 
@@ -346,10 +345,7 @@ void	NetClient::sendPosition( const ClientState* cs )
           netbuf.addVector((targ->Position()-cs->getPosition()).Cast());
           netbuf.addVector(targ->Velocity);
         }
-	pckt.send( CMD_POSUPDATE, un->GetSerial(),
-               netbuf.getData(), netbuf.getDataLength(),
-               SENDANDFORGET, NULL, *this->lossy_socket,
-               __FILE__, PSEUDO__LINE__(218) );
+	send ( CMD_POSUPDATE, netbuf, SENDANDFORGET, __FILE__, __LINE__ );
 }
 
 /**************************************************************/
@@ -629,18 +625,17 @@ void NetClient::receiveUnitDamage( NetBuffer &netbuf, Unit *un ) {
 
 void	NetClient::inGame()
 {
-	Packet    packet2;
 	NetBuffer netbuf;
     char      flags = 0;
 	Unit    * un = this->game_unit.GetUnit();
+	if (!un) {
+		cout<<"Trying to ingame dead unit";
+	}
 
 	//ClientState cs( this->serial, un->curr_physical_state, un->Velocity, Vector(0,0,0), 0);
 	// HERE SEND INITIAL CLIENTSTATE !! NOT NEEDED ANYMORE -> THE SERVER ALREADY KNOWS
 	//netbuf.addClientState( cs);
-	packet2.send( CMD_ADDCLIENT, this->serial,
-                  netbuf.getData(), netbuf.getDataLength(),
-                  SENDRELIABLE, NULL, *this->clt_tcp_sock,
-                  __FILE__, PSEUDO__LINE__(392) );
+	send ( CMD_ADDCLIENT, netbuf, SENDRELIABLE, __FILE__, __LINE__ );
 	un->SetSerial( this->serial);
 	COUT << "Sending ingame with serial #" << this->serial << endl;
 	this->ingame = true;

@@ -59,7 +59,7 @@ namespace UniverseUtil
 	void playAnimationGrow(string aniName, QVector loc, float size, float growpercent) {
 	}
 	unsigned int getCurrentPlayer() {
-		return 0;
+		return _Universe->CurrentCockpit();
 	}
 	void musicLayerSkip(int layer) {}
 	void musicLayerStop(int layer) {}
@@ -93,6 +93,13 @@ namespace UniverseUtil
 		printf("GAME ERROR: %s\n",error.c_str());
 	}
 
+	void sendCustom(int cp, string cmd, string args, string id) {
+		if (cp<0 || cp>=_Universe->numPlayers()) {
+			fprintf(stderr, "sendCustom %s with invalid player %d\n", cmd, cp);
+			return;
+		}
+		VSServer->sendCustom(cp, cmd, args, id);
+	}
 }
 
 

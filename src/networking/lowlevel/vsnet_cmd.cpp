@@ -60,7 +60,6 @@ const char* displayCmd( Cmd cmd )
     CASE( CMD_JUMP         )
     CASE( CMD_ASKFILE      )
     CASE( CMD_DOWNLOAD     )
-    CASE( CMD_CAMSHOT      )
     CASE( CMD_SOUNDSAMPLE  )
     CASE( CMD_TXTMESSAGE   )
     CASE( CMD_SECSNDSAMPLE )
@@ -81,6 +80,7 @@ const char* displayCmd( Cmd cmd )
 
 	CASE( CMD_SAVEDATA     )
 	CASE( CMD_MISSION      )
+	CASE( CMD_CUSTOM       )
     // CASE( CMD_ACK          )
     default :
         return "CMD_UNKNOWN"; break;

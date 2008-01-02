@@ -189,6 +189,9 @@ class	NetClient
 		// Check if there are info incoming over the network
 		int		checkMsg( Packet* outpacket );
 		// Send a position update
+	
+		void	send (Cmd cmd, NetBuffer& netbuf, bool mode, const char* file, int line);
+		void	sendCustom(string cmd, string args, string id);
 		void	sendPosition( const ClientState* cs );
 		void	sendCloak( bool engage );
 		// Send a PING-like packet to say we are still alive (UDP)

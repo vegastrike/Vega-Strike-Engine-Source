@@ -238,6 +238,11 @@ namespace UniverseUtil
 	int maxMissions ();
 	bool networked ();
 	bool isserver ();
+	// Forwards this request onto the server if this is a client, or send back to client.
+	void sendCustom (int cp, string cmd, string args, string id);
+	// Executes a python script
+	void receivedCustom (int cp, bool trusted, string cmd, string args, string id);
+	
 	std::string getVariable(std::string section,std::string name,std::string def);
 	std::string getSubVariable(std::string section,std::string subsection,std::string name,std::string def);
 	double timeofday ();
