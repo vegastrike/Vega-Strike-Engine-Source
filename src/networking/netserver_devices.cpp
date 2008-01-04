@@ -257,7 +257,7 @@ void	NetServer::sendCustom( int cp, string command, string args, string id)
 	Unit *un = _Universe->AccessCockpit(cp)->GetParent();
 	if (!un) {
 		fprintf(stderr, "Attempt to sendCustom NULL player %d ; CMD %s %s ; ID %s\n",
-				cp, command, args, id);
+				cp, command.c_str(), args.c_str(), id.c_str());
 		return;
 	}
 	ClientPtr clt = this->getClientFromSerial(un->GetSerial());
@@ -297,8 +297,13 @@ void	NetServer::sendMessage( string from, string to, string message, float delay
                  netbuf.getData(), netbuf.getDataLength(),
                  SENDRELIABLE,
                  __FILE__, PSEUDO__LINE__(229) );
-		for (unsigned int i=0;i<zonemgr->getZoneNumber();i++)
-			zonemgr->broadcast( i, 0, &p2, false );
+		if (to == "broadcast") {
+			for (ZoneMap::const_iterator iter=zonemgr->zones.begin();
+				 iter!=zonemgr->zones.end();++iter)
+				zonemgr->broadcast( (*iter).first, 0, &p2, false );
+		} else {
+			zonemgr->broadcast( _Universe->activeStarSystem()->GetZone(), 0, &p2, false);
+		}
 	}
 }
 
@@ -349,13 +354,24 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 	}
 }
 
+void    NetServer::sendJumpFinal(ClientPtr clt) {
+    Packet p2;
+	p2.send(CMD_JUMP,0,NULL,0,SENDANDFORGET,NULL,clt->tcp_sock,__FILE__,148);
+	if (clt&&0/*dont discon until client requests it*/)
+		logoutList.push_back(clt);
+}
+
 void	NetServer::sendJump(Unit * un, Unit * dst,std::string dststr)
 {
   ClientPtr clt = this->getClientFromSerial(un->GetSerial());
-  int cpnum =NULL;
+  if (!clt) return;
+  int cpnum = -1;
   if (clt&&(cpnum=_Universe->whichPlayerStarship(un))>=0&&un!=NULL) {
+    WaitListEntry entry;
+    if (waitList.find(clt->callsign)!=waitList.end()) {
+      return;
+    }
     Cockpit *cp = _Universe->AccessCockpit(cpnum);
-    Packet p2;
     std::string netbuf;
     std::string fn=dststr;
     if (getSaveStringLength(cpnum,"jump_from")<1) {
@@ -382,14 +398,18 @@ void	NetServer::sendJump(Unit * un, Unit * dst,std::string dststr)
     addSimpleString(netbuf, clt->passwd );
     addSimpleString(netbuf,savestr);
     addSimpleString(netbuf,csvstr );
-    p2.send(CMD_JUMP,0,NULL,0,SENDANDFORGET,NULL,clt->tcp_sock,__FILE__,148);
-    clt->jumpok=1;    if (acct_sock)
+    clt->jumpok=1;
+
+	entry.type = WaitListEntry::JUMPING;
+	entry.t = clt;
+	entry.tcp = true;
+	waitList[clt->callsign] = entry;
+	clt->loginstate = Client::LOGGEDIN;
+	
+    if (acct_sock)
       acct_sock->sendstr(netbuf);
 
-    if (clt&&0/*dont discon until client requests it*/)
-      logoutList.push_back(clt);
-
-  }else {
+   }else {
     // do something intelligent for NPCs
     
   }

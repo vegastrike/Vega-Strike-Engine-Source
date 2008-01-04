@@ -16,6 +16,8 @@
 
 extern StarSystem * GetLoadedStarSystem( const char * system);
 
+unsigned short ZoneInfo::next_zonenum = 0;
+
 ZoneMgr::ZoneMgr()
 {
 }
@@ -63,6 +65,10 @@ StarSystem *	ZoneMgr::addZone( string starsys)
 			break;
 		}
 	}
+	if (newSystem) {
+		printf("newSystem is somehow true!!!");
+	}
+	/*
 	while (newSystem||i>=zone_list.size()) {
 		newSystem=false;
 		ClientList* lst = new ClientList;
@@ -73,7 +79,10 @@ StarSystem *	ZoneMgr::addZone( string starsys)
 		//zone_units.push_back( 0);
 		COUT<<"<<< NEW ZONE ADDED - # OF ZONES = "<<_Universe->star_system.size()<<endl;
 	}
-	sts->SetZone( _Universe->StarSystemIndex( sts));
+	*/
+	unsigned short zone = ZoneInfo::next_zonenum;
+	zones.insert(ZoneMap::value_type(zone, ZoneInfo(sts)));
+	sts->SetZone( zone );
 	_Universe->netLock(false);
 	return sts;
 }
@@ -83,9 +92,25 @@ StarSystem *	ZoneMgr::addZone( string starsys)
 /************************************************************************************************/
 
 // Return the client list that are in the zone # serial
+ZoneInfo* ZoneMgr::GetZoneInfo( int serial )
+{
+	ZoneMap::iterator iter = zones.find(serial);
+	if (iter == zones.end()) {
+		return NULL;
+	} else {
+		return &((*iter).second);
+	}
+}
+
+// Return the client list that are in the zone # serial
 ClientList* ZoneMgr::GetZone( int serial )
 {
-	return zone_list[serial];
+	ZoneInfo *zi = GetZoneInfo(serial);
+	if (zi) {
+		return &zi->zone_list;
+	} else {
+		return NULL;
+	}
 }
 
 // Adds a client to the zone # serial
@@ -135,10 +160,12 @@ void	ZoneMgr::removeUnit( Unit * un, int zone)
 // Returns NULL if no corresponding Unit was found
 Unit *	ZoneMgr::getUnit( ObjSerial unserial, unsigned short zone)
 {
+	ZoneInfo *zi = GetZoneInfo(zone);
+	if (!zi) return NULL;
+	
 	Unit * un = NULL;
-
 	// Clients not ingame are removed from the drawList so it is ok not to test that
-	for(un_iter iter = (_Universe->star_system[zone]->getUnitList()).createIterator();un = *iter;++iter){
+	for(un_iter iter = (zi->getSystem()->getUnitList()).createIterator();(un = *iter)!=NULL;++iter){
 		if( un->GetSerial() == unserial)
 			break;
 	}
@@ -158,18 +185,18 @@ StarSystem *	ZoneMgr::addClient( ClientPtr cltw, string starsys, unsigned short 
 	sts = this->addZone( starsys);
 	
 	// Get the index of the existing star_system as it represents the zone number
-	num_zone = _Universe->StarSystemIndex( sts);
+	num_zone = sts->GetZone();
 
 	COUT<<">> ADDING CLIENT IN ZONE # "<<num_zone<<endl;
 	// Adds the client in the zone
 
-    ClientList* lst = zone_list[num_zone];
-    if( lst == NULL )
-        zone_list[num_zone] = lst = new ClientList;
+	ZoneInfo *zi = GetZoneInfo(num_zone);
+    ClientList* lst = &zi->zone_list;
+	
 	lst->push_back( cltw );
     ClientPtr clt(cltw);
-	zone_clients[num_zone]++;
-	cerr<<zone_clients[num_zone]<<" clients now in zone "<<num_zone<<endl;
+	zi->zone_clients++;
+	cerr<<zi->zone_clients<<" clients now in zone "<<num_zone<<endl;
 
 	//QVector safevec;
 	Unit *addun = clt->game_unit.GetUnit();
@@ -191,37 +218,41 @@ void	ZoneMgr::removeClient( ClientPtr clt )
 {
 	StarSystem * sts;
 	Unit * un = clt->game_unit.GetUnit();
-	unsigned int zonenum = 0;
+	int zonenum = -1;
+	/*
 	if (un && un->activeStarSystem)
 		zonenum = un->activeStarSystem->GetZone();
-	for (; zonenum < zone_list.size(); ++zonenum) {
+	else {
+	*/
+	for (ZoneMap::iterator iter = zones.begin(); iter != zones.end(); ++iter) {
 		bool found=false;
-		ClientList* lst = zone_list[zonenum];
+		ClientList* lst = &((*iter).second.zone_list);
 		
-		for (ClientList::iterator q = lst->begin();
-			 q!=lst->end();) {
-				ClientPtr cwp = *q;
-				ClientPtr ocwp (clt);
-				if ((!(cwp<ocwp))&&!(ocwp<cwp)) {
-					q=lst->erase(q);
-					found=true;
-					break;
-				} else {
-					++q;
-				}
+		for (ClientList::iterator q = lst->begin(); q!=lst->end();) {
+			ClientPtr cwp = *q;
+			ClientPtr ocwp (clt);
+			if ((!(cwp<ocwp))&&!(ocwp<cwp)) {
+				q=lst->erase(q);
+				zonenum = (*iter).first;
+				found=true;
+				break;
+			} else {
+				++q;
+			}
 		}
 		if (found)
 			break;
 	}
-	if (zonenum>=zone_list.size()) {
+	if (zonenum<0) {
 		cerr<<"Client "<<clt->callsign<<" not found in any zone when attempting to remove it"<<endl;
 		return;
 	}
-	zone_clients[zonenum]--;
-	cerr<<zone_clients[zonenum]<<" clients left in zone "<<zonenum<<endl;
+	ZoneInfo *zi = GetZoneInfo(zonenum);
+	zi->zone_clients--;
+	cerr<<zi->zone_clients<<" clients left in zone "<<zonenum<<endl;
 	if (!un)
 		return;
-	sts = _Universe->star_system[zonenum];
+	sts = zi->star_system;
         if (un->GetHull()<0)
           un->Kill(true,true);
         else
@@ -239,19 +270,12 @@ void ZoneMgr::broadcast( ClientPtr fromcltw, Packet * pckt, bool isTcp, unsigned
 {
     ClientPtr fromclt( fromcltw );
 	Unit * un = fromclt->game_unit.GetUnit();
-	if (!un) {
+	if (!un || !un->getStarSystem()) {
 		cerr<<"Trying to broadcast information with dead client unit" << pckt->getCommand() << endl;
 		return;
 	}
 	unsigned short zonenum = un->getStarSystem()->GetZone();
-    if( zonenum >= zone_list.size() )
-    {
-        cerr<<"Trying to send update to nonexistant zone " << zonenum << pckt->getCommand() << endl;
-        return;
-    }
-
-    // cout<<"Sending update to "<<(zone_list[zonenum].size()-1)<<" clients"<<endl;
-    ClientList* lst = zone_list[zonenum];
+    ClientList* lst = GetZone(zonenum);
     if( lst == NULL )
     {
         cerr<<"Trying to send update to nonexistant zone " << zonenum << pckt->getCommand() << endl;
@@ -290,10 +314,7 @@ void ZoneMgr::broadcast( ClientPtr fromcltw, Packet * pckt, bool isTcp, unsigned
 // Broadcast a packet to a zone clients with its serial as argument
 void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt, bool isTcp, unsigned short minver, unsigned short maxver )
 {
-	if (zone >= zone_list.size()) {
-		return;
-	}
-    ClientList* lst = zone_list[zone];
+    ClientList* lst = GetZone(zone);
     if( lst == NULL ) return;
 
 	for( LI i=lst->begin(); i!=lst->end(); i++)
@@ -318,8 +339,7 @@ void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt, bool isTcp, 
 // Broadcast a packet to a zone clients with its serial as argument but not to the originating client
 void	ZoneMgr::broadcastNoSelf( int zone, ObjSerial serial, Packet * pckt, bool isTcp )
 {
-	if (zone >= zone_list.size()) return;
-    ClientList* lst = zone_list[zone];
+    ClientList* lst = GetZone(zone);
     if( lst == NULL ) return;
 
 	for( LI i=lst->begin(); i!=lst->end(); i++)
@@ -347,8 +367,7 @@ void	ZoneMgr::broadcastNoSelf( int zone, ObjSerial serial, Packet * pckt, bool i
 // NETFIXME: Should this be always TCP?
 void	ZoneMgr::broadcastSample( int zone, ObjSerial serial, Packet * pckt, float frequency )
 {
-	if (zone >= zone_list.size()) return;
-    ClientList* lst = zone_list[zone];
+    ClientList* lst = GetZone(zone);
 	Unit * un;
     if( lst == NULL ) return;
 
@@ -376,8 +395,7 @@ void	ZoneMgr::broadcastSample( int zone, ObjSerial serial, Packet * pckt, float 
 // Always TCP.
 void	ZoneMgr::broadcastText( int zone, ObjSerial serial, Packet * pckt, float frequency )
 {
-	if (zone >= zone_list.size()) return;
-    ClientList* lst = zone_list[zone];
+    ClientList* lst = GetZone(zone);
 	Unit * un;
     if( lst == NULL ) return;
 
@@ -407,31 +425,27 @@ void	ZoneMgr::broadcastText( int zone, ObjSerial serial, Packet * pckt, float fr
 // NETFIXME:  May be too big for UDP if there are too many ships.  We may want to split these up into reasonable sizes.
 void	ZoneMgr::broadcastSnapshots( bool update_planets)
 {
-	unsigned int i=0;
 	LI k;
-
-	for( i=0; i<_Universe->star_system.size(); i++)
-	{
-
-	}
+	
 	//COUT<<"Sending snapshot for ";
 	//int h_length = Packet::getHeaderLength();
 	// Loop for all systems/zones
-	for( i=0; i<zone_list.size(); i++)
+	for( ZoneMap::iterator iter = zones.begin(); iter != zones.end(); ++iter)
 	{
 		int totalunits=0;
 		// Check if system contains player(s)
-		if( zone_clients[i]>0)
+		if( true)
 		{
+			ZoneInfo *zi = &(*iter).second;
 //			COUT << "BROADCAST SNAPSHOTS = "<<zone_clients[i]<<" clients in zone "<<i<<" time now: "<<queryTime()<<"; frame time: "<<getNewTime() << endl;
 			// Loop for all the zone's clients
-			for( k=zone_list[i]->begin(); k!=zone_list[i]->end(); k++)
+			for( k=zi->zone_list.begin(); k!=zi->zone_list.end(); ++k)
 			{
 				totalunits=0;
                 ClientPtr cltk( *k );
 				// If that client is ingame we send to it position info
 				//if( true) { // cltk->ingame==true)
-				un_iter iter = (_Universe->star_system[i]->getUnitList()).createIterator();
+				un_iter iter = (zi->star_system->getUnitList()).createIterator();
 				while (*iter) {
 					int       nbunits=0;
 					Packet    pckt;
@@ -449,7 +463,7 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 					netbuf.addFloat( cltk->getDeltatime() );
 //                    COUT << "   *** deltatime " << cltk->getDeltatime() << endl;
 					// Clients not ingame are removed from the drawList so it is ok not to test that
-					for(;unit = *iter;++iter){
+					for(;(unit = *iter)!=NULL;++iter){
 						if (netbuf.getOffset()>450 && (&cltk->tcp_sock != cltk->lossy_socket)) {
 							// Don't want to go over MTU. 512 is UDP maximum and you lose 8 for header.
 							break;
@@ -500,39 +514,29 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
                                   }
                                 }
                         }
-                }
-		{
 			Unit * unit;
 
 			// Clients not ingame are removed from the drawList so it is ok not to test that
-			for(un_iter iter = (_Universe->star_system[i]->getUnitList()).createIterator();unit = *iter;++iter){
+			for(un_iter iter = (zi->star_system->getUnitList()).createIterator();(unit = *iter)!=NULL;++iter){
 				if (vsrandom.genrand_int31()%(totalunits*10+1) == 1) {
 					unit->damages = 0xffff;
 				}
 				if (unit->damages) {
-					for( i=0; i<zone_list.size(); i++)
+					for( k=zi->zone_list.begin(); k!=zi->zone_list.end(); k++)
 					{
-						// Check if system contains player(s)
-						if( zone_clients[i]>0)
-						{
-							for( k=zone_list[i]->begin(); k!=zone_list[i]->end(); k++)
-							{
-								// Each damage sent in a separate UDP packet.
-								NetBuffer netbuf;
-								ClientPtr cltk( *k );
-								cltk->versionBuf(netbuf);
-								netbuf.addFloat( cltk->getDeltatime() );
-								netbuf.addChar(ZoneMgr::DamageUpdate);
-								netbuf.addShort(unit->GetSerial());
-								addDamage(netbuf, unit);
-								Packet pckt;
-								pckt.send( CMD_SNAPSHOT, 1,
-										netbuf.getData(), netbuf.getDataLength(),
-										SENDANDFORGET, &(cltk->cltudpadr), *cltk->lossy_socket,
-										__FILE__, PSEUDO__LINE__(522) );
-								
-							}
-						}
+						// Each damage sent in a separate UDP packet.
+						NetBuffer netbuf;
+						ClientPtr cltk( *k );
+						cltk->versionBuf(netbuf);
+						netbuf.addFloat( cltk->getDeltatime() );
+						netbuf.addChar(ZoneMgr::DamageUpdate);
+						netbuf.addShort(unit->GetSerial());
+						addDamage(netbuf, unit);
+						Packet pckt;
+						pckt.send( CMD_SNAPSHOT, 1,
+								netbuf.getData(), netbuf.getDataLength(),
+								SENDANDFORGET, &(cltk->cltudpadr), *cltk->lossy_socket,
+								__FILE__, PSEUDO__LINE__(522) );
 					}
 				}
 				unit->damages = Unit::NO_DAMAGE;
@@ -637,19 +641,19 @@ bool ZoneMgr::addPosition( ClientPtr client, NetBuffer & netbuf, Unit * un, Clie
 // NETFIXME:  May be too big for UDP.
 void	ZoneMgr::broadcastDamage( )
 {
-	unsigned int i=0;
 	LI k;
 	NetBuffer netbuf;
 
 	//COUT<<"Sending snapshot for ";
 	//int h_length = Packet::getHeaderLength();
 	// Loop for all systems/zones
-	for( i=0; i<zone_list.size(); i++)
+	for( ZoneMap::iterator iter=zones.begin(); iter!=zones.end(); ++iter)
 	{
-		int totalunits=0; 
+		int totalunits=0;
 		// Check if system is non-empty
-		if( zone_clients[i]>0)
+		if( true)
 		{
+			ZoneInfo *zi = &(*iter).second;
 			/************* Second method : send independently to each client a buffer of its zone  ***************/
 			// It allows to check (for a given client) if other clients are far away (so we can only
 			// send position, not orientation and stuff) and if other clients are visible to the given
@@ -659,7 +663,7 @@ void	ZoneMgr::broadcastDamage( )
 
 			//cerr<<"BROADCAST DAMAGE = "<<zone_clients[i]<<" clients in zone "<<i<<endl;
 			// Loop for all the zone's clients
-			for( k=zone_list[i]->begin(); k!=zone_list[i]->end(); k++)
+			for( k=zi->zone_list.begin(); k!=zi->zone_list.end(); k++)
 			{
 				int nbunits = 0;
 				totalunits = 0;
@@ -671,8 +675,8 @@ void	ZoneMgr::broadcastDamage( )
 					Unit * unit;
 
 					// Clients not ingame are removed from the drawList so it is ok not to test that
-					for(un_iter iter = (_Universe->star_system[i]->getUnitList()).createIterator();unit = *iter;++iter){
-                                          if (unit->GetSerial()!=0) {
+					for(un_iter iter = (zi->star_system->getUnitList()).createIterator();(unit = *iter)!=NULL;++iter){
+					  if (unit->GetSerial()!=0) {
 						if( unit->damages)
 						{
 							// Add the client serial
@@ -682,7 +686,7 @@ void	ZoneMgr::broadcastDamage( )
 						}
 						++totalunits;
 
-                                          }
+					  }
 					}
 					// NETFIXME: Should damage updates be UDP or TCP?
 					// Send snapshot to client k
@@ -695,17 +699,18 @@ void	ZoneMgr::broadcastDamage( )
 					}
 				}
 			}
-		}
-		{
+
+		  {
 			Unit * unit;
 
 			// Clients not ingame are removed from the drawList so it is ok not to test that
-			for(un_iter iter = (_Universe->star_system[i]->getUnitList()).createIterator();unit = *iter;++iter){
+			for(un_iter iter = (zi->star_system->getUnitList()).createIterator();(unit = *iter)!=NULL;++iter){
 				unit->damages = Unit::NO_DAMAGE;
 				if (vsrandom.genrand_int31()%(totalunits*10+1) == 1) {
 					unit->damages = 0xffff&(~Unit::COMPUTER_DAMAGED);
 				}
 			}
+		  }
 		}
 	}
 }
@@ -744,7 +749,7 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 			netbuf.addFloat( un->computer.radar.lockcone);
 			netbuf.addFloat( un->computer.radar.trackingcone);
 			netbuf.addFloat( un->computer.radar.maxrange);
-			char c = 1+UnitImages::NUMGAUGES+MAXVDUS;
+			unsigned char c = 1+UnitImages::NUMGAUGES+MAXVDUS;
 			netbuf.addChar(c);
 			for( it = 0; it<c; it++)
 				netbuf.addFloat8( un->image->cockpit_damage[it]);
@@ -827,13 +832,13 @@ double	ZoneMgr::isVisible( Quaternion orient, QVector src_pos, QVector tar_pos)
 
 void	ZoneMgr::displayStats()
 {
-	unsigned int i;
 	cout<<"\tStar system stats"<<endl;
 	cout<<"\t-----------------"<<endl;
-	for( i=0; i<zone_list.size(); i++)
+	for( ZoneMap::const_iterator iter = zones.begin(); iter!=zones.end(); ++iter)
 	{
-		cout<<"\t\tStar system "<<i<<" = \"<<_Universe->star_system[i]->getName()"<<"\""<<endl;
-		cout<<"\t\t\tNumber of clients :\t"<<zone_clients[i]<<endl;
+		const ZoneInfo *zi = &((*iter).second);
+		cout<<"\t\tStar system "<<(zi->zonenum)<<" = "<<zi->star_system->getName()<<endl;
+		cout<<"\t\t\tNumber of clients :\t"<<zi->zone_clients<<endl;
 		//cout<<"\t\t\tNumber of units :\t"<<zone_units[i]<<endl;
 	}
 }
@@ -844,6 +849,7 @@ void	ZoneMgr::displayStats()
 
 int		ZoneMgr::displayMemory()
 {
+	/*
 	unsigned int i;
 	int memory_use=0;
 	int memclient=0, memunit=0, memvars=0;
@@ -861,7 +867,12 @@ int		ZoneMgr::displayMemory()
 		cout<<"\t\t\tMemory for variables :\t"<<(memvars/1024)<<" KB ("<<memvars<<" bytes)"<<endl;
 		memory_use += (memclient+memunit+memvars);
 	}
+	
 	return memory_use;
+	*/
+	
+	// Not bothering to fix up this function at the moment -Patrick
+	return -1;
 }
 
 

@@ -536,7 +536,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				this->netversion = server_netversion;
 				string ipaddress = netbuf.getString();
 				cout<< "Connection by "<<CLIENT_NETVERSION<<" to " <<
-					"VegaServer " << server_netversion << "from address " << ipaddress << endl;
+					"VegaServer " << server_netversion << " from address " << ipaddress << endl;
 				if (server_netversion > CLIENT_NETVERSION) {
 				    cout << "Using old client... setting version to " << CLIENT_NETVERSION << endl;
 					this->netversion = CLIENT_NETVERSION;
@@ -1420,18 +1420,25 @@ void	NetClient::disconnect()
 {
 	keeprun = 0;
 	// Disconnection is handled in the VSExit(1) function for each player
+	// Or, if you don't actually want to exit(1), you can logout with:
+	logout(true);
 }
 
 SOCKETALT*	NetClient::logout(bool leaveUDP)
 {
 	keeprun = 0;
 	Packet p;
-	Unit *un = this->game_unit.GetUnit();
-	if (un) {
-		p.send( CMD_LOGOUT, un->GetSerial(),
-            (char *)NULL, 0,
-            SENDRELIABLE, NULL, *this->clt_tcp_sock,
-            __FILE__, PSEUDO__LINE__(1382) );
+	if ( clt_tcp_sock->valid() && clt_tcp_sock->get_fd()!=-1 ) {
+		Unit *un = this->game_unit.GetUnit();
+		if (un) {
+			p.send( CMD_LOGOUT, un->GetSerial(),
+				(char *)NULL, 0,
+				SENDRELIABLE, NULL, *this->clt_tcp_sock,
+				__FILE__, PSEUDO__LINE__(1382) );
+			timeval tv = {10, 0};
+			recvMsg(&p, &tv);
+		}
+		clt_tcp_sock->disconnect("Closing connection to server");
 	}
 	Mission *mis;
 	// Can't figure out how to get cockpit number?

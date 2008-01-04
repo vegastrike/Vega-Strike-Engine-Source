@@ -37,29 +37,29 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
             // the order of request/answers
 			// should be ok and we can use a "queue" for waiting clients
 			if (!p.empty()) cmd = getSimpleChar(p);
-			if (cmd!=ACCT_SUCCESS && cmd != 0) {
-				string ptemp (p);
-				string username = getSimpleString(ptemp);
-				std::map<std::string, WaitListEntry>::iterator iter = waitList.find(username);
-				if( waitList.end()!=iter)
+			string ptemp (p);
+			string username = getSimpleString(ptemp);
+			std::map<std::string, WaitListEntry>::iterator iter = waitList.find(username);
+			if( waitList.end()!=iter)
+			{
+				WaitListEntry entry( (*iter).second );
+				char flags = 0;
+				if( entry.tcp )
 				{
-					WaitListEntry entry( (*iter).second );
-					char flags = 0;
-					if( entry.tcp )
-					{
-						clt = entry.t;
-						COUT << "Got response for TCP client" << endl;
-					}
-					else
-					{
-						ipadr = entry.u;
-						COUT << "Got response for client IP : " << ipadr << endl;
-					}
-					waitList.erase(iter);
-					if (clt) clt->loginstate=Client::CONNECTED;
-					ObjSerial serial =0;
+					clt = entry.t;
+					COUT << "Got response for TCP client" << endl;
+				}
+				else
+				{
+					ipadr = entry.u;
+					COUT << "Got response for client IP : " << ipadr << endl;
+				}
 					
+			if (entry.type == WaitListEntry::CONNECTING && cmd!=ACCT_SUCCESS && cmd != 0) {
+				waitList.erase(iter);
 					
+				if (clt) clt->loginstate=Client::CONNECTED;
+				ObjSerial serial =0;
 			switch(cmd)
 			{
 				case ACCT_LOGIN_NEW :
@@ -89,6 +89,9 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 				default:
 					COUT<<">>> UNKNOWN COMMAND =( "<<(unsigned int)cmd<<" )= --------------------------------------"<<endl<<"Full datastream was:"<<p<<endl;
 			}
+				} else if (entry.type == WaitListEntry::JUMPING) {
+					waitList.erase(iter);
+					sendJumpFinal(clt);
 				}
 			}
 		}
@@ -150,15 +153,7 @@ bool NetServer::saveAccount(int i)
 	// SEND THE BUFFERS TO ACCOUNT SERVER
 	if ( cp && acctserver && acct_con)
 	{
-		SaveNetUtil::GetSaveStrings( i, savestr, xmlstr, true);
-		if (savestr.empty() || xmlstr.empty()) {
-			//cerr<<"Unable to generate CSV and Save data for player."<<endl;
-			return false;
-		}
 		Unit *un=cp->GetParent();
-		std::string snetbuf;
-		bool found = false;
-		// Loop through clients to find the one corresponding to the unit (we need its serial)
 		ClientPtr clt;
 		if (un) {
 			clt=getClientFromSerial( un->GetSerial());
@@ -168,6 +163,17 @@ bool NetServer::saveAccount(int i)
 			cerr<<"Error client/unit for "<<(clt?clt->callsign:"")<<", serial "<<(un?un->GetSerial():0)<<" not found in save process !!!!"<<endl;
 			return false;
 		}
+		if (clt->loginstate < Client::INGAME) {
+			return false; // Cannot save at this point.
+		}
+		SaveNetUtil::GetSaveStrings( i, savestr, xmlstr, true);
+		if (savestr.empty() || xmlstr.empty()) {
+			//cerr<<"Unable to generate CSV and Save data for player."<<endl;
+			return false;
+		}
+		std::string snetbuf;
+		bool found = false;
+		// Loop through clients to find the one corresponding to the unit (we need its serial)
 		// Fix CMD_RESPAWN.  I expect the client to do the same thing here.
 		clt->savegame.clear();
 		clt->savegame.push_back(savestr);

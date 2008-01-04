@@ -109,7 +109,7 @@ StarSystem::StarSystem()
 	//AddStarsystemToUniverse(filename);
 	time = 0;
 	//_Universe->popActiveStarSystem ();
-	zone = 0;
+	zone = NULL;
 	this->current_sim_location=0;
 }
 

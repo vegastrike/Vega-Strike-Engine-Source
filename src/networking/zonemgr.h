@@ -41,6 +41,33 @@ typedef std::map<std::string,std::string>::iterator  SystemIt;
 class NetUI;
 class NetBuffer;
 
+class ZoneInfo
+{
+	friend class ZoneMgr;
+	ClientList		zone_list;
+	int				zone_clients;
+
+	int zonenum;
+	static unsigned short next_zonenum;
+	StarSystem *star_system;
+	
+	ZoneInfo(StarSystem *parent) {
+		this->zonenum = next_zonenum;
+		this->zone_clients = 0;
+		this->star_system = parent;
+		next_zonenum ++;
+	}
+public:
+	unsigned short getZoneNum() {
+		return zonenum;
+	}
+	StarSystem *getSystem() {
+		return star_system;
+	}
+};
+
+typedef std::map<unsigned short, ZoneInfo> ZoneMap;
+
 class ZoneMgr
 {
     public:
@@ -72,8 +99,8 @@ class ZoneMgr
     private:
 		//vector<StarSystem *> starsystems;
 		// List of clients in zones
-		vector<ClientList*>		zone_list;
-		vector<int>				zone_clients;
+		//vector<ClientList*>		zone_list;
+		//vector<int>				zone_clients;
 		// List of units in zones (but not Clients)
 		//vector<list<Unit *> >	zone_unitlist;
 		//vector<int>				zone_units;
@@ -93,6 +120,7 @@ class ZoneMgr
 		bool	addPosition( ClientPtr k, NetBuffer & netbuf, Unit * un, ClientState & un_cs);
 
 	public:
+		ZoneMap zones;
 
 		ZoneMgr();
 		//ZoneMgr( int nbzones);
@@ -101,6 +129,7 @@ class ZoneMgr
 		void	addSystem( string & sysname, string & system);
 		string	getSystem( string & name);
 		StarSystem* addZone( string starsys);
+		ZoneInfo* GetZoneInfo( int serial);
 		ClientList* GetZone( int serial);
 		//void	addUnit( Unit * un, int zone);
 		//void	removeUnit( Unit *un, int zone);
@@ -116,8 +145,6 @@ class ZoneMgr
         void    broadcastSnapshots( bool update_planets=false);
 		void	broadcastDamage();
 		double	isVisible( Quaternion orient, QVector src_pos, QVector tar_pos);
-		ClientList * getZoneList( unsigned int id) { assert( id<zone_list.size()); return zone_list[id]; }
-		int		getZoneNumber() { return zone_list.size(); }
 
 		void	displayStats();
 		int		displayMemory();

@@ -77,6 +77,7 @@ bool	NetServer::loginAccept( std::string inetbuf,ClientPtr clt, int newacct, cha
 		clt->savegame.push_back( savestr);
 		clt->savegame.push_back( xmlstr);
 		Cockpit *cp = loadCockpit(clt);
+		/*
         if (_Universe->star_system.size()) {
           std::string system = _Universe->star_system[0]->getFileName();
           std::string newsystem=savestr.substr(0,savestr.find("^"));
@@ -87,6 +88,7 @@ bool	NetServer::loginAccept( std::string inetbuf,ClientPtr clt, int newacct, cha
           }
           
         }
+		*/
 //	memcpy( &clt->cltadr, &ipadr, sizeof( AddressIP)); // ipadr is uninitialized... see above.
 
 	clt->callsign = callsign;
@@ -361,6 +363,7 @@ bool NetServer::loadFromSavegame( ClientPtr clt, Cockpit *cp ) {
 	string str("");
 
 	COUT<<"-> LOADING SAVE FROM NETWORK"<<endl;
+	cp->savegame->SetStarSystem(string());
 	cp->savegame->ParseSaveGame( "", str, "", tmpvec, update, credits, savedships, cltserial, clt->savegame[0], false);
 	// Generate the system we enter in if needed and add the client in it
 

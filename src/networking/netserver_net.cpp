@@ -122,7 +122,7 @@ void	NetServer::recvMsg_tcp( ClientPtr clt )
 			if (clt->game_unit.GetUnit())
 				cout << clt->game_unit.GetUnit()->GetSerial();
 			if (!clt->ingame)
-				cout << " (not ingame!!!)";
+				cout << " (docked)";
 			cout << endl;
 		}
         if( clt )

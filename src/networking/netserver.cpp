@@ -779,6 +779,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				std::string passwd = netbuf.getString();
 				// This must be a TCP client
 				entry.tcp = true;
+				entry.type = WaitListEntry::CONNECTING;
 				entry.t   = clt;
 				if (user.empty()) {
 					sendLoginError(clt);
@@ -903,10 +904,12 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                   }
                   break;    
 		case CMD_LOGOUT:
+		  if (clt->loginstate >= Client::LOGGEDIN ) {
 			COUT<<">>> LOGOUT REQUEST =( serial #"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 			// Client wants to quit the game
 			logoutList.push_back( clt );
 			COUT<<"<<< LOGOUT REQUEST -----------------------------------------------------------------"<<endl;
+		  }
 			break;
 		case CMD_CUSTOM:
 		{
@@ -1124,6 +1127,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 						// In the meantime we create the star system if it isn't loaded yet
 						// The starsystem maybe loaded for nothing if the client has not enough warp energy to jump
 						// but that's no big deal since they all will be loaded finally
+						/*
 						if( !(sts = _Universe->getStarSystem( newsystem+".system")))
 							zonemgr->addZone( newsystem);
 
@@ -1132,6 +1136,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 							clt->jumpok = 1;
 						else
 							clt->jumpok = 2;
+						*/
 					}
 			}	
 #ifdef CRYPTO

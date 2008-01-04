@@ -36,7 +36,9 @@ void NetServer::broadcastUnit(Unit *un, unsigned short zone) {
 }
 void NetServer::sendNewUnitQueue() {
 	unsigned short vers[4]={0,4951,4952,65535};
-	for (unsigned short zone=0;zone<zonemgr->getZoneNumber();zone++) {
+	for (ZoneMap::const_iterator zoneiter=zonemgr->zones.begin();
+		 zoneiter!=zonemgr->zones.end();++zoneiter) {
+		unsigned short zone = (*zoneiter).first;
 		for (int verind = 0; verind<4; verind+=2) {
 			unsigned short minver=vers[verind], maxver=vers[verind+1];
 			NetBuffer netbuf;
@@ -532,12 +534,15 @@ void AddWriteSave(std::string &netbuf, int cpnum){
 void AcctLogout(VsnetHTTPSocket* acct_sock,ClientPtr clt) {
   if (acct_sock==NULL) return;
   if (clt) {
+      
     std::string netbuf;
     
     Unit * un = clt->game_unit.GetUnit();
 	int cpnum = _Universe->whichPlayerStarship(un);
     Cockpit * cp = cpnum==-1?NULL:_Universe->AccessCockpit(cpnum);
     bool dosave= false; //(cp!=NULL&&un!=NULL&&_Universe->star_system.size()>0&&cp->activeStarSystem&&clt->jumpok==0);
+    if (clt->loginstate < Client::INGAME)
+      dosave = false;
     addSimpleChar(netbuf,dosave?ACCT_SAVE_LOGOUT:ACCT_LOGOUT);
     addSimpleString(netbuf, clt->callsign );
     addSimpleString(netbuf, clt->passwd );
@@ -574,7 +579,7 @@ void	NetServer::logout( ClientPtr clt )
 		}
 		clt->loginstate=Client::CONNECTED;
 	}
-	if( acctserver && clt->loginstate >= Client::LOGGEDIN) {
+	if( acctserver && clt->loginstate>=Client::LOGGEDIN && !clt->jumpok) {
 		AcctLogout(acct_sock,clt);
 	}
 
@@ -617,7 +622,7 @@ void  NetServer::getZoneInfo( unsigned short zoneid, NetBuffer & netbuf)
 
 	// Loop through client in the same zone to send their current_state and save and xml to "clt"
         std::set<ObjSerial> activeObjects;
-        ClientList* lst = zonemgr->getZoneList(zoneid);
+        ClientList* lst = zonemgr->GetZone(zoneid);
         if( lst == NULL )
         {
           COUT << "\t>>> WARNING: Did not send info about " << nbclients << " other ships because of empty (inconsistent?) zone" << endl;

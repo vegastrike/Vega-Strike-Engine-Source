@@ -749,6 +749,8 @@ void NetClient::startGame() {
 	if (_Universe->numPlayers()==0) {
 		_Universe->createCockpit(callsign);
 	}
+	_Universe->clearAllSystems();
+	_Universe->AccessCockpit(0)->savegame->SetStarSystem(string());
 	_Universe->AccessCockpit(0)->savegame->ParseSaveGame ("",mysystem,"",pos,setplayerXloc,credits,savedships,0, lastsave[0], false);
 	
 	ss.push_back (_Universe->Init (mysystem,Vector(0,0,0),string()));

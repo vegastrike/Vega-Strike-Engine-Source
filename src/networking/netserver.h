@@ -95,6 +95,7 @@ class NetServer
 
 	    struct WaitListEntry
 	    {
+			enum {CONNECTING, JUMPING} type;
 	        bool tcp;
 	        ClientPtr t; // Client connections waiting for login response
 		    AddressIP u; // Client addresses waiting for login response
@@ -167,6 +168,7 @@ class NetServer
 		//void	sendDamages( ObjSerial serial, Vector & pnt, Vector & normal, float amt, GFXColor & color, float phasedamage);
 		void	sendKill( ObjSerial serial, unsigned short zone);
 		void	sendJump( Unit * src, Unit *jumppoint,std::string destination);
+		void	sendJumpFinal( ClientPtr clt );
 		void	sendForcePosition( ClientPtr clt );
 
 		void	invalidateSnapshot( ) { snapchanged = 1; }
@@ -187,7 +189,6 @@ class NetServer
 
 		void	addSystem( string & sysname, string & system);
 		void	getZoneInfo( unsigned short zoneid, NetBuffer & netbuf);
-		int		getZoneNumber()	{ return zonemgr->getZoneNumber(); }
 		friend class ZoneMgr;
 
 		void			closeAllSockets();				// Disconnect all clients for shutdown
