@@ -145,22 +145,27 @@ void	NetServer::addClient( ClientPtr clt)
           }
           eraseSaveString(player, "jump_from", 0);
         } else {
-			dockedUnit = DockToSavedBases(player, safevec);
-		}
+            //un->curr_physical_state.position = cp->savegame->GetPlayerLocation();
+            dockedUnit = DockToSavedBases(player, safevec);
+        }
 	if( !dockedUnit ) //safevec == nullVec)
 	{
           if (besafe) {
-		safevec = UniverseUtil::SafeStarSystemEntrancePoint( st2, cp->savegame->GetPlayerLocation(), clt->game_unit.GetUnit()->radial_size);
+		safevec = UniverseUtil::SafeStarSystemEntrancePoint( st2, cp->savegame->GetPlayerLocation(), un->radial_size);
           }else{
             safevec=cp->savegame->GetPlayerLocation();
           }
 		cerr<<"PLAYER NOT DOCKED - STARTING AT POSITION : x="<<safevec.i<<",y="<<safevec.j<<",z="<<safevec.k<<endl;
 		clt->ingame   = true;
 	}
-	else
+	else {
 		cerr<<"PLAYER DOCKED TO " << dockedUnit->getFullname() << " - STARTING DOCKED AT POSITION : x="<<safevec.i<<",y="<<safevec.j<<",z="<<safevec.k<<endl;
+	}
 	//COUT<<"\tposition : x="<<safevec.i<<" y="<<safevec.j<<" z="<<safevec.k<<endl;
 	cp->savegame->SetPlayerLocation( safevec);
+	un->SetPosAndCumPos(safevec);
+	
+	
 	
 	cp->credits = (cp->savegame->GetSavedCredits());
 	

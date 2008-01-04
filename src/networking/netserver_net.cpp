@@ -61,6 +61,7 @@ void	NetServer::checkTimedoutClients_udp()
 			    // side -> when timestamp has grown enough to became bigger than what an u_int can store
 
 			    //if( cl->ingame && deltatmp > clienttimeout && deltatmp < (0xFFFFFFFF*0.9) )
+#ifdef TIMEOUT_USING_UDP_EVEN_THOUGH_THEY_USE_TCP
 			    if( cl->ingame==true && deltatmp > clienttimeout)
 			    {
 	                Unit * un;
@@ -80,6 +81,7 @@ void	NetServer::checkTimedoutClients_udp()
                                       discList.push_back( cl );
 					// NETFIXME: Should we actually disconnect them in a UDP timeout or should we just fallback to TCP?
 			    }
+#endif
 		    }
         }
 	}

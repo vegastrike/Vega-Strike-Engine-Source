@@ -418,6 +418,7 @@ bool NetServer::loadFromSavegame( ClientPtr clt, Cockpit *cp ) {
 	clt->game_unit.SetUnit( un);
 	// Assign its serial to client*
 	un->SetSerial( cltserial);
+	un->SetPosAndCumPos(cp->savegame->GetPlayerLocation());
 
 	// Affect the created unit to the cockpit
 	COUT<<"-> UNIT LOADED"<<endl;

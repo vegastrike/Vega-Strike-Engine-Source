@@ -445,7 +445,7 @@ void Cockpit::updateAttackers() {
 
 }
 bool Cockpit::Update () {
-  if (retry_dock) {
+  if (retry_dock && !SERVER && Network==NULL) {
     QVector vec;
     DockToSavedBases(_Universe->CurrentCockpit(), vec);
   }
@@ -739,7 +739,7 @@ bool Cockpit::Update () {
 		_Universe->pushActiveStarSystem(ss);
 		savegame->ReloadPickledData();
                 savegame->LoadSavedMissions();
-		if (actually_have_save) {
+		if (actually_have_save && !SERVER && Network==NULL) {
                   QVector vec;
                   DockToSavedBases(whichcp, vec);
                 }

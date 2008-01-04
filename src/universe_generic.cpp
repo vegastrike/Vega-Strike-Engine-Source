@@ -41,7 +41,7 @@ Unit * DockToSavedBases (int playernum, QVector &safevec) {
 	static string _str=vs_config->getVariable("AI","startDockedTo","MiningBase");
     string str = _str;
 	Unit *plr=_Universe->AccessCockpit(playernum)->GetParent();
-	if (!plr) {
+	if (!plr || !plr->activeStarSystem) {
 		safevec = QVector( 0, 0, 0);
 		return NULL;
 	}
@@ -53,8 +53,8 @@ Unit * DockToSavedBases (int playernum, QVector &safevec) {
 	float lastdist=0;
 	float dist=0;
 	Unit *un;
-	QVector dock_position( 0, 0, 0);
-	for(un_iter iter=_Universe->activeStarSystem()->getUnitList().createIterator();un = *iter;++iter){
+	QVector dock_position( plr->curr_physical_state.position);
+	for(un_iter iter=plr->activeStarSystem->getUnitList().createIterator();un = *iter;++iter){
 		if (un->name==str||un->getFullname()==str) {
 			dist=UnitUtil::getSignificantDistance(plr,un);
 			if (closestUnit==NULL||dist<lastdist) {
@@ -65,9 +65,11 @@ Unit * DockToSavedBases (int playernum, QVector &safevec) {
 	}
 	if (closestUnit) {
 		if (UnitUtil::getSignificantDistance(plr,closestUnit)>0&&closestUnit->isUnit()!=PLANETPTR) {
-			dock_position = UniverseUtil::SafeEntrancePoint(closestUnit->Position(),plr->rSize());
-			plr->SetPosAndCumPos(dock_position);
+			dock_position = closestUnit->Position();
 		}
+		dock_position = UniverseUtil::SafeEntrancePoint(dock_position,plr->rSize());
+		plr->SetPosAndCumPos(dock_position);
+		
 		vector <DockingPorts> dprt=closestUnit->image->dockingports;
 		int i;
 		for (i=0;;i++) {
