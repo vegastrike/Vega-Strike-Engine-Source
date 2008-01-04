@@ -102,7 +102,7 @@ def getLoginInfo(conn, user, passwd, dologin):
 	p = Packet(conn)
 	result = conn.get_login_info(user, passwd)
 	if result:
-		if 0 and dologin and result['logged_in_server']:
+		if False and dologin and result['logged_in_server']:
 			#server doesn't support LOGIN_ALREADY very well.
 			p.addChar(ACCT_LOGIN_ALREADY)
 			p.addStringField('username', user)
@@ -148,7 +148,15 @@ def getLoginInfo(conn, user, passwd, dologin):
 # PATH_INFO (extra path info after CGI script [/cgi-bin/accountserver/test/blah => /test/blah])
 get_form=False
 post_form=False
-def execute(conn,url,post):
+
+def printACCT_SUCCESS(conn, username):
+	p = Packet(conn)
+	p.addChar(ACCT_SUCCESS)
+	#p.addStringField('username', '')
+	p.addStringField('username', str(username))
+	print p
+
+def execute(conn,get,post):
 	print '\r'
     # Can't write to stderr since on IIS it is concatenated with stdout.
 	#sys.stderr.write('Executing post query: '+post+'\n')
@@ -156,8 +164,13 @@ def execute(conn,url,post):
 		packet = Packet(conn, post) #if it crashes we dont care..this is python
 		command = packet.getChar()
 	except:
+		print "<!-- There was an error in your account request."
+		print "  If you are running a VegaServer, please report this.\n"
+		print "EXCEPTION: "+str(get)+"\n"+str(post);
+		print "\nIf you are running this in a browser, then: -->"
+		print " You probably want to <a href=\"register.py?"+get+"\">";
+		print "register or update</a> your account."
 		command='UNKNOWN'
-		print "EXCEPTION: "+str(url)+"\n"+str(post);
 		packet = Packet(conn, '')
 	if command==ACCT_LOGIN:
 		username=packet.getCheckedString()
@@ -173,7 +186,7 @@ def execute(conn,url,post):
 		# Unimplemented?
 		#if conn.check_password(conn,username,password,True):
 		#	conn.modify_account()
-		print ACCT_SUCCESS
+		printACCT_SUCCESS(conn, username)
 	elif command==ACCT_RESYNC:
 		pass
 	elif command==ACCT_SAVE:
@@ -183,7 +196,7 @@ def execute(conn,url,post):
 		xml=packet.getString()
 		if conn.check_password(username, password):
 			conn.save_account(username,save,xml)
-		print ACCT_SUCCESS
+		printACCT_SUCCESS(conn, username)
 	elif command==ACCT_SAVE_LOGOUT:
 		username=packet.getCheckedString()
 		password=packet.getCheckedString()
@@ -192,27 +205,40 @@ def execute(conn,url,post):
 		if conn.check_password(username, password):
 			conn.save_account(username,save,xml)
 			conn.set_connected(username, False)
-		print ACCT_SUCCESS
+		printACCT_SUCCESS(conn, username)
 	elif command==ACCT_LOGOUT:
 		username=packet.getCheckedString()
 		password=packet.getCheckedString()
 		if conn.check_password(username, password):
 			conn.set_connected(username, False)
-		print ACCT_SUCCESS
+		printACCT_SUCCESS(conn, username)
 	else:
 		if command==ACCT_NEWCHAR:
 			pass
-		print "UNKNOWN"
+		print "\n<!-- UNKNOWN COMMAND -->"
 	
 if __name__=='__main__':
 	sys.stdout.write("Content-Type: text/html\r\n");
 	cgitb.enable()
 	get_args = os.environ.get('QUERY_STRING','')
-	conn = db.connect(settings.dbconfig, get_args)
-	post_args = ''
-	if os.environ.get('REQUEST_METHOD','GET') == 'POST':
-		leng = os.environ['CONTENT_LENGTH']
-		post_args = sys.stdin.read(int(leng))
-	#get_args = db.urlDecode(get_args)
-	execute(conn, get_args, post_args)
-
+	try:
+		conn = db.connect(settings.dbconfig, get_args)
+		post_args = ''
+		if os.environ.get('REQUEST_METHOD','GET') == 'POST':
+			leng = os.environ['CONTENT_LENGTH']
+			post_args = sys.stdin.read(int(leng))
+		#get_args = db.urlDecode(get_args)
+		execute(conn, get_args, post_args)
+	except db.DBInputError, errmessage:
+		p = Packet(conn)
+		p.addChar(ACCT_LOGIN_ERROR)
+		#p.addStringField('username', '')
+		p.addStringField('message', str(errmessage))
+		print p
+	except db.DBError, message:
+		print '<h1>Database error!</h1>'
+		print 'GET query: '+str(get_args)
+		print '<p>You sent me:</p><pre>'
+		print str(post_args)
+		print '</pre>'
+	

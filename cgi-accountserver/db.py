@@ -30,7 +30,7 @@ def urlDecode(args):
 		argsp= arg.split('=')
 		name = urllib.unquote(argsp[0])
 		if len(argsp)>1:
-			value = urllib.unquote(argsp[1])
+			value = urllib.unquote(argsp[1].replace('+',' '))
 		else:
 			value = ''
 		arglist[name] = value
@@ -40,11 +40,15 @@ class DBError(RuntimeError):
 	def __init__(self, args):
 		RuntimeError.__init__(self, args)
 
+# Catch this error for problems with input.
+class DBInputError(DBError):
+	def __init__(self, args):
+		DBError.__init__(self, args)
 
 class DBBase:
 	def __init__(self, mod):
 		if mod not in settings.mods:
-			raise DBError,"Invalid mod '"+mod+"'"
+			raise DBInputError,"Invalid mod '"+mod+"'"
 		self.moddata = settings.mods[mod]
 		self.mod = self.moddata['path']
 		self.modkey = mod
@@ -74,11 +78,12 @@ class DBBase:
 	
 	def check_string(self, s):
 		if not s:
-			raise DBError, "All fields must be non-empty."
+			return "" # Should return something at least.
+			#raise DBInputError, "All fields must be non-empty."
 		for c in s:
 			oc = ord(c)
 			if oc < 32 or oc >= 127:
-				raise DBError, "Invalid character "+str(oc)+" in field."
+				raise DBInputError, "Invalid character "+str(oc)+" in field."
 		return s
 	
 	def get_server(self, system):
@@ -194,14 +199,14 @@ class FileDB(DBBase):
 	# Checks a string for valid username characters.
 	def check_string(self, s):
 		if not s:
-			raise DBError, "You must fill out all fields"
+			raise DBInputError, "You must fill out all fields"
 		
 		for c in s:
 			if not (c.isalnum() or c=='_' or c=='-' or c=='.' or c=='$'):
-				raise DBError, "Invalid character "+c+" in input "+s
+				raise DBInputError, "Invalid character "+c+" in input "+s
 		
 		if s.find("..")!=-1 or s.find(".xml")!= -1 or s.find(".save")!=-1 or s.find("accounts")!=-1 or s.find("default")!=-1:
-			raise DBError, "Invalid character . in input "+s
+			raise DBInputError, "Invalid character . in input "+s
 		
 		return s
 	
@@ -254,10 +259,30 @@ class FileDB(DBBase):
 			f.write("1")
 		f.close()#empty file
 
+class debugcursor:
+	def __init__(self,curs):
+		self.curs=curs
+	def execute(self,query,tup):
+		fp = open('/tmp/persistent/vegastrike_forum/debugacct.txt','at')
+		try:
+			fp.write(str(query%tup))
+		except:
+			fp.write('Error: '+repr(query)+' % '+repr(tup))
+		fp.close()
+		self.curs.execute(query,tup)
+	def fetchone(self):
+		return self.curs.fetchone()
+
+class debugconn:
+	def __init__(self,db):
+		self.db=db
+	def cursor(self,*args):
+		return debugcursor(self.db.cursor(*args))
+
 class MysqlDB(DBBase):
 	def __init__(self, config, mod):
 		DBBase.__init__(self, mod)
-		try:
+		if 1: #try:
 			import MySQLdb
 			self.conn = MySQLdb.connect(
 				host   = config['host'],
@@ -266,7 +291,7 @@ class MysqlDB(DBBase):
 				user   = config['user'],
 				db     = config['db'])
 			self.dict_cursor = MySQLdb.cursors.DictCursor
-		except:
+		else: #except:
 			self.conn = None
 			self.dict_cursor = None
 		self.user_table = config.get('user_table', 'accounts')
@@ -278,6 +303,7 @@ class MysqlDB(DBBase):
 			self.create_user = False
 	
 	def check_password(self, username, password, can_create=False):
+		username=username.replace(' ','_')
 		c = self.conn.cursor() #self.dict_cursor
 		c.execute('SELECT user_id, user_password FROM ' + 
 			self.user_table + ' WHERE username=%s',
@@ -301,8 +327,15 @@ class MysqlDB(DBBase):
 				return False
 	
 	def save_account(self, username, save, csv):
+		#print save
+		#print csv
+		if not save:
+			raise DBError('Empty save file')
+		elif not csv:
+			raise DBError('Empty csv file')
 		c = self.conn.cursor()
 		whereadd=''
+		username=username.replace(' ','_')
 		if self.user_table != self.account_table:
 			c.execute('SELECT logged_in_server FROM '+self.account_table +
 				' WHERE username=%s AND modname=%s',
@@ -311,9 +344,12 @@ class MysqlDB(DBBase):
 			if not row:
 				c.execute('INSERT INTO '+self.account_table +
 					' (username, modname, csv, savegame, logged_in_server)'+
-					' VALUES (%s, %s, %s, %s, 1)',
+					' VALUES (%s, %s, %s, %s, 0)',
 					(username, self.modkey, csv, save))
 			else:
+				#print ('UPDATE ' + self.account_table +
+				#	' SET savegame=%s, csv=%s WHERE username=%s AND modname=%s' %
+				#	(save, csv, username, self.modkey))
 				c.execute('UPDATE ' + self.account_table +
 					' SET savegame=%s, csv=%s WHERE username=%s AND modname=%s',
 					(save, csv, username, self.modkey))
@@ -323,13 +359,19 @@ class MysqlDB(DBBase):
 				(save, csv, username))
 	
 	def get_login_info(self, username, password):
+		username=username.replace(' ','_')
 		c = self.conn.cursor(self.dict_cursor)
 		if self.user_table != self.account_table:
 			if self.check_password(username, password, False):
 				c.execute('SELECT logged_in_server, savegame, csv FROM ' +
 					self.account_table + ' WHERE username=%s AND modname=%s',
 					(username,self.modkey))
-				return c.fetchone()
+				ret = c.fetchone()
+				if not ret:
+					return {'savegame':None,
+						'csv': None,
+						'logged_in_server':None}
+				return ret
 		else:
 			c.execute('SELECT logged_in_server, user_password, savegame, csv FROM ' +
 				self.user_table + ' WHERE username=%s',
@@ -341,12 +383,17 @@ class MysqlDB(DBBase):
 		return None
 	
 	def set_connected(self, user, isconnected):
+		user=user.replace(' ','_')
 		c = self.conn.cursor()
 		logged_in_str = '0'
 		if isconnected:
 			logged_in_str = '1'
-		c.execute('UPDATE '+self.user_table+' SET logged_in_server='+
-			logged_in_str+' WHERE username=%s', (user,) )
+		if self.user_table != self.account_table:
+			c.execute('UPDATE '+self.account_table+' SET logged_in_server='+
+				logged_in_str+' WHERE username=%s', (user,) )
+		else:
+			c.execute('UPDATE '+self.user_table+' SET logged_in_server='+
+				logged_in_str+' WHERE username=%s', (user,) )
 
 def connect(config, mod):
 	if config['type'] == 'file':

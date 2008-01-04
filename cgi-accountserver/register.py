@@ -40,7 +40,9 @@ def type_select(filedb):
     print '<td align= "right">Which type?</td>'
     print '<td><select name="type" size="1">'
     type_dat = filedb.get_default_csv(None)
-    for line in type_dat[2:]:
+    units = type_dat[2:]
+    units.sort()
+    for line in units:
         
         if (len(line) and line.find("turret")==-1):
            name=""

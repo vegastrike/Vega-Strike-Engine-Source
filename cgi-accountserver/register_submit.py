@@ -54,10 +54,11 @@ def execute(dbconn, mod, form):
 	print '<br>'
 	if success:
 		url = 'vsconfig.py?username='+username+'&password='+password+'&mod='+mod
-		print 'Download a functional'
-		print '<a href="'+url+'" title="Download config file">vegastrike.config</a>'
-		print 'to put in your vegastrike folder that has your appropriate login and password<br>'
-		print 'Or, <a href="'+url+'&action=view">view the config file</a> in your browser.<br>'
+		print "To play, start up the game, click on 'Multiplayer', type in your login and password, and then click 'Join Game'"
+		#print 'Download a functional'
+		#print '<a href="'+url+'" title="Download config file">vegastrike.config</a>'
+		#print 'to put in your vegastrike folder that has your appropriate login and password<br>'
+		#print 'Or, <a href="'+url+'&action=view">view the config file</a> in your browser.<br>'
 	else:
 		print '<b>Registration Error</b>: ' + str(failed_error)
 		print errorvar
