@@ -668,6 +668,9 @@ CPPFLAGS="$saved_CPPFLAGS"
 VS_CPPFLAGS="${VS_CPPFLAGS} ${EXPAT_CPPFLAGS}"
 
 
+if test "x$build_client" = "xno"; then
+    echo "Not checking for audio or image libraries."
+else
 
 dnl --------------------------------------------------------------------------
 dnl Check for png library
@@ -741,9 +744,6 @@ VS_CPPFLAGS="${VS_CPPFLAGS} ${PNG_CPPFLAGS}"
 
 VS_CHECK_JPEG
 
-if test "x$build_client" = "xno"; then
-    echo "Not checking for audio libraries."
-else
     VS_CHECK_OPENAL
     
     VS_CHECK_VORBIS
