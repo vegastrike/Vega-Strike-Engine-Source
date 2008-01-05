@@ -95,10 +95,11 @@ class NetServer
 
 	    struct WaitListEntry
 	    {
-			enum {CONNECTING, JUMPING} type;
-	        bool tcp;
-	        ClientPtr t; // Client connections waiting for login response
-		    AddressIP u; // Client addresses waiting for login response
+              enum EntryTypes{CONNECTING, JUMPING};
+              EntryTypes type;
+              bool tcp;
+              ClientPtr t; // Client connections waiting for login response
+              AddressIP u; // Client addresses waiting for login response
 	    };
 
         std::map<string, WaitListEntry> waitList;
