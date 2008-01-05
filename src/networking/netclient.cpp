@@ -1366,9 +1366,19 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 			{
 				if (nostarsystem) break;
 				ObjSerial utdw_serial = netbuf.getSerial();
-				int dockport = netbuf.getInt32();
-				cerr<<"RECEIVED A DOCK AUTHORIZATION for unit "<<p1.getSerial()<<" to unit "<<utdw_serial<<" at docking port #"<<dockport<<endl;
 				un = UniverseUtil::GetUnitFromSerial( utdw_serial);
+				//int dockport = netbuf.getInt32();
+				int dockport;
+				for (dockport=0; dockport< un->image->dockingports.size(); dockport++) {
+					if (!un->image->dockingports[dockport].used)
+						break;
+				}
+				if (dockport > un->image->dockingports.size()) {
+					cerr << "CMD_DOCK: All docking ports used up! Kicking out port 0!" << endl;
+					dockport = 0;
+					un->image->dockingports[0].used = false;
+				}
+				cerr<<"RECEIVED A DOCK AUTHORIZATION for unit "<<p1.getSerial()<<" to unit "<<utdw_serial<<" at docking port #"<<dockport<<endl;
 				Unit * un2 = UniverseUtil::GetUnitFromSerial( p1.getSerial());
 				un->RequestClearance(un2);
 				un2->ForceDock( un, dockport);

@@ -41,7 +41,7 @@ Unit * DockToSavedBases (int playernum, QVector &safevec) {
 	static string _str=vs_config->getVariable("AI","startDockedTo","MiningBase");
     string str = _str;
 	Unit *plr=_Universe->AccessCockpit(playernum)->GetParent();
-	if (!plr || !plr->activeStarSystem) {
+	if (!plr || !plr->getStarSystem()) {
 		safevec = QVector( 0, 0, 0);
 		return NULL;
 	}
@@ -54,7 +54,7 @@ Unit * DockToSavedBases (int playernum, QVector &safevec) {
 	float dist=0;
 	Unit *un;
 	QVector dock_position( plr->curr_physical_state.position);
-	for(un_iter iter=plr->activeStarSystem->getUnitList().createIterator();un = *iter;++iter){
+	for(un_iter iter=plr->getStarSystem()->getUnitList().createIterator();un = *iter;++iter){
 		if (un->name==str||un->getFullname()==str) {
 			dist=UnitUtil::getSignificantDistance(plr,un);
 			if (closestUnit==NULL||dist<lastdist) {

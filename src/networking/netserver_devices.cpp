@@ -479,7 +479,7 @@ void	NetServer::sendDockAuthorize( ObjSerial serial, ObjSerial utdw_serial, int 
 	Packet p;
 	// Send a CMD_DOCK with serial, an ObjSerial = unit_to_dock_with_serial and an int = docking port num
 	netbuf.addSerial( utdw_serial);
-	netbuf.addInt32( docknum);
+	netbuf.addInt32( 0); //docknum);
 	p.bc_create( CMD_DOCK, serial,
                  netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
                  __FILE__, PSEUDO__LINE__(118) );

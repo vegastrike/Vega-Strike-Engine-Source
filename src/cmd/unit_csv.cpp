@@ -379,10 +379,15 @@ static void AddSubUnits (Unit *thus, Unit::XML &xml, const std::string &subunits
 void AddDocks (Unit* thus, Unit::XML &xml, const string &docks) {
   string::size_type where,when;
   string::size_type ofs=0;
-  {   
+  int overlap = 1;
+  if (SERVER ) {
+    // NETFIXME: Shouldn't need to know this option on client side, but server references docking port by absolute number.
+    overlap = XMLSupport::parse_int(vs_config->getVariable("server", "players_per_docking_port", "10"));
+  }
+  {
       int nelem=0;
       while ((ofs=docks.find('{',ofs))!=string::npos) nelem++,ofs++;
-      thus->image->dockingports.reserve(nelem+thus->image->dockingports.size());
+      thus->image->dockingports.reserve(nelem*overlap+thus->image->dockingports.size());
       ofs=0;
   }
   while ((where=docks.find('{',ofs))!=string::npos) {
@@ -398,7 +403,9 @@ void AddDocks (Unit* thus, Unit::XML &xml, const string &docks) {
       double size=nextElementFloat(docks,elemstart,elemend);
       double minsize=nextElementFloat(docks,elemstart,elemend);
 
-      thus->image->dockingports.push_back (DockingPorts(pos.Cast()*xml.unitscale,size*xml.unitscale,minsize*xml.unitscale,internal));
+      for (int i=0; i<overlap; i++) {
+        thus->image->dockingports.push_back (DockingPorts(pos.Cast()*xml.unitscale,size*xml.unitscale,minsize*xml.unitscale,internal));
+      }
     } else ofs=string::npos;
   }
 }
