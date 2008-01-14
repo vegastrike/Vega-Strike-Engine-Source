@@ -169,10 +169,10 @@ void NetServer::sendLoginAccept(ClientPtr clt, Cockpit *cp) {
 	packet2.send( LOGIN_ACCEPT, cltserial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(241) );
 
 	// Now that we have a starsystem, we will want to make a mission.
-	if (active_missions.size()==1 && cp == _Universe->AccessCockpit(0)) {
-		active_missions[0]->DirectorInitgame();
-	}
 	if (Mission::getNthPlayerMission(_Universe->whichPlayerStarship(un), 0)==NULL) {
+		if (active_missions.size()==1 && cp == _Universe->AccessCockpit(1)) {
+			active_missions[0]->DirectorInitgame();
+		}
 		// Make a mission specially for this cockpit.
 		unsigned int oldcp = _Universe->CurrentCockpit();
 		_Universe->SetActiveCockpit(cp);
@@ -250,7 +250,7 @@ void NetServer::localLogin( ClientPtr clt, Packet &p) {
 
 Cockpit * NetServer::loadCockpit(ClientPtr clt) {
 	Cockpit *cp = NULL;
-	for (int i=0;i<_Universe->numPlayers();i++) {
+	for (int i=1;i<_Universe->numPlayers();i++) {
 		cp = _Universe->AccessCockpit(i);
 		if (cp->savegame->GetCallsign() == clt->callsign) {
 			if (clt->loginstate==Client::CONNECTED) {
@@ -261,6 +261,10 @@ Cockpit * NetServer::loadCockpit(ClientPtr clt) {
 				return cp;
 			}
 		}
+	}
+	if (_Universe->numPlayers()==0) {
+		fprintf(stderr,"======= Creating Cockpit 0 for universe save data! =======\n");
+		_Universe->createCockpit(""); // create computer player (universe save data)
 	}
 	cp = NULL;
 	if (!unused_players.empty()) {

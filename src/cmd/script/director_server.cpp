@@ -52,6 +52,10 @@ PYTHON_BEGIN_MODULE(Base)
 // Nothing here, but keeps those files that do a "import Base" happy.
 PYTHON_END_MODULE(Base)
 
+PYTHON_BEGIN_MODULE(Briefing)
+// Nothing here, but keeps those files that do a "import Briefing" happy.
+PYTHON_END_MODULE(Briefing)
+
 void InitBase() {
 	Python::reseterrors();
 	PYTHON_INIT_MODULE(Base);
@@ -59,7 +63,7 @@ void InitBase() {
 }
 void InitBriefing() {
 	Python::reseterrors();
-	//PYTHON_INIT_MODULE(Briefing);
+	PYTHON_INIT_MODULE(Briefing);
 	Python::reseterrors();
 }
 

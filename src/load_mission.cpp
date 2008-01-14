@@ -60,7 +60,14 @@ struct delayed_mission {
 };
 vector <delayed_mission> delayed_missions;
 int num_delayed_missions(){
-  return delayed_missions.size();
+  int cp = _Universe->CurrentCockpit();
+  int number = 0;
+  for (unsigned int i=0; i< delayed_missions.size();i++) {
+    if (delayed_missions[i].player == cp)
+      ++number;
+  }
+  //return delayed_missions.size(); // Ignores that there can be more than one player.
+  return number;
 }
 
 void processDelayedMissions() {

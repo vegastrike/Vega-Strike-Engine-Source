@@ -543,7 +543,14 @@ namespace UniverseUtil
 		}
 	}
 	int numActiveMissions() {
-		return active_missions.size()+::num_delayed_missions();
+		int num = 0;
+		int cp = _Universe->CurrentCockpit();
+		for (unsigned int i=0; i<active_missions.size(); ++i) {
+			if (active_missions[i]->player_num == cp) {
+				num++;
+			}
+		}
+		return num + ::num_delayed_missions();
 	}
 	void IOmessage(int delay,string from,string to,string message) {
 		static bool news_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","news_from_cargolist","false"));
