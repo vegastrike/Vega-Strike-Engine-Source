@@ -970,8 +970,11 @@ public:
 			static bool untarget_out_cone=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","untarget_beyond_cone","false"));
 			static bool autolanding_enable=XMLSupport::parse_bool(vs_config->getVariable("physics","AutoLandingEnable","false"));
 
-			if (autolanding_enable)
+			if (autolanding_enable) {
+				GFXEnd();
 				DoAutoLanding(parent,un,target);
+				GFXBegin(GFXPOINT);
+			}
 
 			if (!un->InRange (target,dist,makeBigger==target&&untarget_out_cone,true,true)) {
 				if (makeBigger==target) {
