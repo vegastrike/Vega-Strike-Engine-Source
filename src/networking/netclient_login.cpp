@@ -150,7 +150,7 @@ vector<string>	&NetClient::loginAcctLoop( string str_callsign, string str_passwd
 	addSimpleString(netbuf, str_callsign);
 	addSimpleString(netbuf, str_passwd);
 
-	COUT << "Buffering to send with LOGIN_DATA: " <<netbuf<< endl;
+	COUT << "Buffering to send with LOGIN_DATA for " <<str_callsign<< endl;
 	//PacketMem m( netbuf.getData(), netbuf.getDataLength(), PacketMem::LeaveOwnership );
         //	m.dump( cerr, 3 );
         acct_sock->sendstr(netbuf);
@@ -160,10 +160,6 @@ vector<string>	&NetClient::loginAcctLoop( string str_callsign, string str_passwd
                   SENDRELIABLE, NULL, this->acct_sock,
                   __FILE__, PSEUDO__LINE__(378) );
         */
-	COUT << "Sent ACCOUNT SERVER login for player <" << str_callsign << ">:<" << str_passwd
-		 << ">" << endl
-	     << "   - buffer length : " << netbuf.length() << endl
-	     << "   - buffer: " << netbuf << endl;
 	// Now the loop
 	int timeout=0, recv=0;
 	// int ret=0;

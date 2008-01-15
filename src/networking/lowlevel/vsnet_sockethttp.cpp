@@ -357,8 +357,8 @@ bool VsnetHTTPSocket::lower_selected( int datalen )
 		}
 		cout<<" Reading "<<dataToRead<<" characters...";
 		int ret = VsnetOSS::recv( get_fd(), &rcvbuf, dataToRead, 0 );
-		if (ret>0) cout<<"got "<<std::string(rcvbuf, ret)<<endl; // DELETEME!
-		else cout << "recv returned " << ret << endl;
+		//if (ret>0) cout<<"got "<<std::string(rcvbuf, ret)<<endl; // DELETEME!
+		if (ret<=0) cout << "recv returned " << ret << endl;
 		if (ret==0) {
 			//It is not an error if closed without a Content-Length header.
 			if (_content_length>=0&&( (readHeader==false /*set to false on success return*/&&dataToReceive.length()==0)||readHeader==true)) {
