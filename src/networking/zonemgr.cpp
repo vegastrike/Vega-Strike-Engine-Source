@@ -257,6 +257,9 @@ void	ZoneMgr::removeClient( ClientPtr clt )
           un->Kill(true,true);
         else
           sts->RemoveUnit( un);
+	clt->ingame = false;
+	if (clt->loginstate > Client::LOGGEDIN)
+		clt->loginstate = Client::LOGGEDIN;
 	// SHIP MAY NOT HAVE BEEN KILLED BUT JUST CHANGED TO ANOTHER STAR SYSTEM -> NO KILL
 	//un->Kill();
 }

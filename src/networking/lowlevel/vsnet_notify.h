@@ -220,6 +220,13 @@ public:
 		  VSFileSystem::VSFileType ft,
           NotifyPtr          notify = NotifyPtr() );
 
+    File( const std::string& destfile,
+          SOCKETALT          sock,
+          const std::string& filename,
+          std::string        localbasepath,
+		  VSFileSystem::VSFileType ft,
+          NotifyPtr          notify = NotifyPtr() );
+
     virtual ~File( );
 
 protected:
@@ -227,6 +234,7 @@ protected:
     virtual void childAppend( unsigned char* buffer, int bufsize );
 
 private:
+    std::string    _destfile;
     std::string    _localbasepath;
     VSFileSystem::VSFile * _of;
     int            _len;
@@ -252,6 +260,10 @@ public:
 			  VSFileSystem::VSFileType ft,
               std::string        localbasepath );
     NoteFile( SOCKETALT          sock,
+              const std::string& filename,
+			  VSFileSystem::VSFileType ft );
+    NoteFile( const std::string& destfile,
+              SOCKETALT          sock,
               const std::string& filename,
 			  VSFileSystem::VSFileType ft );
 

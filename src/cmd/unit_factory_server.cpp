@@ -182,7 +182,7 @@ Planet* UnitFactory::createPlanet( QVector x,
 	_Universe->netLock(true);
     Planet * p = new Planet( x, y, vely, rotvel, pos, gravity, radius,
 		               filename, dest, orbitcent, parent, faction,
-					   fullname, inside_out, 0);
+					   fullname, inside_out, ligh.size());
 	_Universe->netLock(false);
 	if( netcreate)
 	{

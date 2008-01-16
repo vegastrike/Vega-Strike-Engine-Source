@@ -5012,6 +5012,10 @@ void Unit::Kill(bool erasefromsave, bool quitting)
 	for(un_iter iter = getSubUnits();un = *iter;++iter){
 		un->Kill();
 	}
+	if (isUnit()!=MISSILEPTR) {
+		printf("UNIT HAS DIED: %s %s (file %s)\n",name.get().c_str(),
+				fullname.c_str(), filename.get().c_str());
+	}
 	if (ucref==0) {
 		Unitdeletequeue.push_back(this);
 		if (flightgroup) {

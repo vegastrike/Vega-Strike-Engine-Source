@@ -100,6 +100,8 @@ void	NetServer::addClient( ClientPtr clt)
 		return;
 	cerr<<"ADDING Player number "<<player<<endl;
 	Cockpit * cp = _Universe->AccessCockpit(player);
+	unsigned int oldcp = _Universe->CurrentCockpit();
+	_Universe->SetActiveCockpit(cp);
 	string starsys = cp->savegame->GetStarSystem();
 
 	unsigned short zoneid;
@@ -161,6 +163,7 @@ void	NetServer::addClient( ClientPtr clt)
 	else {
 		cerr<<"PLAYER DOCKED TO " << dockedUnit->getFullname() << " - STARTING DOCKED AT POSITION : x="<<safevec.i<<",y="<<safevec.j<<",z="<<safevec.k<<endl;
 	}
+	clt->loginstate = Client::INGAME;
 	//COUT<<"\tposition : x="<<safevec.i<<" y="<<safevec.j<<" z="<<safevec.k<<endl;
 	cp->savegame->SetPlayerLocation( safevec);
 	un->SetPosAndCumPos(safevec);
@@ -232,6 +235,9 @@ void	NetServer::addClient( ClientPtr clt)
 	COUT<<"ADDED client n "<<un->GetSerial()<<" in ZONE "<<un->activeStarSystem->GetZone()<<" at STARDATE "<<_Universe->current_stardate.GetFullTrekDate()<<endl;
 	sendCredits(un->GetSerial(), cp->credits);
 	sendCargoSnapshot(un->GetSerial(), st2->getUnitList());
+	
+	cp->savegame->LoadSavedMissions(); // loads stuff in active_missions.
+	
 	if (dockedUnit) {
 		int dockport=-1;
 		for (unsigned int i=0;i<dockedUnit->image->dockedunits.size();++i) {
@@ -246,6 +252,7 @@ void	NetServer::addClient( ClientPtr clt)
 			this->sendDockAuthorize( un->GetSerial(), dockedUnit->GetSerial(), dockport, un->activeStarSystem->GetZone());
 		}
 	}
+	_Universe->SetActiveCockpit(oldcp);
 
 	//delete cltsbuf;
 	//COUT<<"<<< SENT ADDED YOU -----------------------------------------------------------------------"<<endl;

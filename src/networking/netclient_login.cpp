@@ -273,12 +273,13 @@ void	NetClient::loginAccept( Packet & p1)
 	bool downloadsystem=true;
 	bool autogen;
 	string fullsys = VSFileSystem::GetCorrectStarSysPath(sysfile, autogen);
+	if (fullsys.empty()) fullsys = sysfile;
 	digest_length = netbuf.getShort();
 	COUT<<"Initial system = "<<fullsys;
 	if (digest_length) {
 		digest = netbuf.getBuffer( digest_length );
 #ifdef CRYPTO
-		cout<<" - File Hash = "<<digest;
+		cerr<<" - File Hash = "<<digest;
 		if( FileUtil::HashCompare( fullsys, digest, SystemFile))
 		{
 			downloadsystem=false;
@@ -290,8 +291,8 @@ void	NetClient::loginAccept( Packet & p1)
 	
 	// Did the hash compare fail?
 	if (downloadsystem) {
-		cout<<": Downloading system from server...";
-		VsnetDownload::Client::NoteFile f( *this->clt_tcp_sock, sysfile, VSFileSystem::SystemFile);
+		cerr<<": Downloading system from server..."<<endl;
+		VsnetDownload::Client::NoteFile f( fullsys, *this->clt_tcp_sock, sysfile, VSFileSystem::SystemFile);
 		_downloadManagerClient->addItem( &f);
 		timeval timeout={10,0};
 		while( !f.done()) {

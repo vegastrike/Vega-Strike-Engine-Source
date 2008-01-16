@@ -241,7 +241,8 @@ void LoadMission (const char * nission_name, const std::string &script, bool loa
     return;
   }
   f.Close();
-  if (active_missions.size()) {
+  if (Mission::getNthPlayerMission(_Universe->CurrentCockpit(), 0)==NULL
+	    && nission_name[0]!='\0') {
 	pushSaveString(_Universe->CurrentCockpit(), "active_scripts", script);
 	pushSaveString(_Universe->CurrentCockpit(), "active_missions", nission_name);
   }

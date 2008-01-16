@@ -541,6 +541,9 @@ void	NetServer::sendUnDock( ObjSerial serial, ObjSerial utdwserial, unsigned sho
                  __FILE__, PSEUDO__LINE__(134) );
 	zonemgr->broadcast( zone, serial, &p, true );
 
-	sendForcePosition(clt);
+	static bool autolanding_enable=XMLSupport::parse_bool(vs_config->getVariable("physics","AutoLandingEnable","false"));
+	if (!autolanding_enable) {
+		sendForcePosition(clt);
+	}
 }
 

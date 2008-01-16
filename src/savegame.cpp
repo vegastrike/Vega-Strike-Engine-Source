@@ -696,14 +696,17 @@ void SaveGame::LoadSavedMissions() {
   vector<string> missions = getMissionStringData("active_missions");
   PyRun_SimpleString("import VS\nVS.loading_active_missions=True\nprint \"Loading active missions \"+str(VS.loading_active_missions)\n");
   // kill any leftovers so they don't get loaded twice.
+  Mission *ignoreMission = Mission::getNthPlayerMission(_Universe->CurrentCockpit(), 0);
   for (i=active_missions.size()-1;i>0;--i){// don't terminate zeroth mission
-    if (active_missions[i]->player_num==_Universe->CurrentCockpit())
+    if (active_missions[i]->player_num==_Universe->CurrentCockpit() &&
+        active_missions[i]!=ignoreMission)
       active_missions[i]->terminateMission();
   }
   
   for (i=0;i<scripts.size()&&i<missions.size();++i) {
     try {
-      LoadMission(missions[i].c_str(),scripts[i],false);
+      if (!missions[i].empty()) // Built-in/networking missions
+        LoadMission(missions[i].c_str(),scripts[i],false);
     }catch (...) {
       if (PyErr_Occurred()) {
         PyErr_Print();

@@ -152,6 +152,22 @@ File::File( SOCKETALT     sock,
     , _of( NULL )
     , _len( 0 )
     , _offset( 0 )
+    , _destfile( filename )
+{
+}
+
+File::File( const string& destfile,
+            SOCKETALT     sock,
+            const string& filename,
+            string        localbasepath,
+			VSFileSystem::VSFileType ft,
+            NotifyPtr     notify )
+    : Item( sock, filename, ft, notify )
+    , _localbasepath( localbasepath )
+    , _of( NULL )
+    , _len( 0 )
+    , _offset( 0 )
+    , _destfile( destfile )
 {
 }
 
@@ -167,10 +183,10 @@ File::~File( )
 void File::childSetSize( int len )
 {
 	// string filename = _localbasepath + "/" + getFilename();
-	string filename = getFilename();
+	// string filename = getFilename();
 
     _of = new VSFileSystem::VSFile;
-	VSFileSystem::VSError err = _of->OpenCreateWrite( filename.c_str(), this->_filetype );
+	VSFileSystem::VSError err = _of->OpenCreateWrite( _destfile.c_str(), this->_filetype );
     if( err>Ok )
     {
         delete _of;
@@ -215,6 +231,16 @@ NoteFile::NoteFile( SOCKETALT          sock,
                     const std::string& filename,
 					VSFileSystem::VSFileType ft )
     : File( sock, filename, VSFileSystem::homedir, ft, NotifyPtr() )
+    , _me( new NotifyMe )
+{
+    protected_replace_notifier( _me );
+}
+
+NoteFile::NoteFile( const std::string& destfile,
+                    SOCKETALT          sock,
+                    const std::string& filename,
+					VSFileSystem::VSFileType ft )
+    : File( destfile, sock, filename, VSFileSystem::homedir, ft, NotifyPtr() )
     , _me( new NotifyMe )
 {
     protected_replace_notifier( _me );
