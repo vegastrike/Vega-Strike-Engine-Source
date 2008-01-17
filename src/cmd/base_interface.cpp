@@ -818,17 +818,17 @@ static void base_keyboard_cb( unsigned int  ch,unsigned int mod, bool release, i
 	amods |= (mod&(WSK_MOD_LCTRL |WSK_MOD_RCTRL )) ? KB_MOD_CTRL  : 0;
 	amods |= (mod&(WSK_MOD_LALT  |WSK_MOD_RALT  )) ? KB_MOD_ALT   : 0;
 	setActiveModifiers(amods);
-
+	unsigned int shiftedch = ((WSK_MOD_LSHIFT==(mod&WSK_MOD_LSHIFT))||(WSK_MOD_RSHIFT==(mod&WSK_MOD_RSHIFT)))?shiftup(ch):ch;
 	if (BaseInterface::CurrentBase && !BaseInterface::CurrentBase->CallComp) {
 		// Flush buffer
 		if (base_keyboard_queue.size())
 			BaseInterface::ProcessKeyboardBuffer();
 		// Send directly to base interface handlers
-		BaseInterface::CurrentBase->Key(ch,amods,release,x,y);
+		BaseInterface::CurrentBase->Key(shiftedch,amods,release,x,y);
 	} else {
 		// Queue keystroke
 		if (!release)
-			base_keyboard_queue.push_back (((WSK_MOD_LSHIFT==(mod&WSK_MOD_LSHIFT))||(WSK_MOD_RSHIFT==(mod&WSK_MOD_RSHIFT)))?shiftup(ch):ch);
+			base_keyboard_queue.push_back (shiftedch);
 	}
 }
 void BaseInterface::InitCallbacks () {
