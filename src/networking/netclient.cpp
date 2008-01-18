@@ -1071,12 +1071,14 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					// lame duck mission
 					unsigned int oldcp = _Universe->CurrentCockpit();
 					_Universe->SetActiveCockpit(cp);
+					_Universe->pushActiveStarSystem(_Universe->AccessCockpit()->activeStarSystem);
 					while (!Mission::getNthPlayerMission(cp,pos)) {
 						LoadMission("","import Director; temp=Director.Mission()",false);
 					}
 					string::size_type pos = qualname.find('/');
 					string cat = qualname.substr(0, pos);
 					active_missions.back()->mission_name = cat;
+					_Universe->popActiveStarSystem();
 					_Universe->SetActiveCockpit(oldcp);
 				}
 				BaseUtil::refreshBaseComputerUI(NULL);

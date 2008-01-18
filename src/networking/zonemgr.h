@@ -130,10 +130,13 @@ class ZoneMgr
 		string	getSystem( string & name);
 		StarSystem* addZone( string starsys);
 		ZoneInfo* GetZoneInfo( int serial);
+
 		ClientList* GetZone( int serial);
 		//void	addUnit( Unit * un, int zone);
 		//void	removeUnit( Unit *un, int zone);
 		Unit *	getUnit( ObjSerial unserial, unsigned short zone);
+	
+		void	getZoneBuffer( unsigned short zoneid, NetBuffer & netbuf);
 
 		StarSystem *	addClient( ClientPtr clt, string starsys, unsigned short & num_zone);
 		void	removeClient( ClientPtr clt );

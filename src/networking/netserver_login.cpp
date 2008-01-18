@@ -170,13 +170,15 @@ void NetServer::sendLoginAccept(ClientPtr clt, Cockpit *cp) {
 
 	// Now that we have a starsystem, we will want to make a mission.
 	if (Mission::getNthPlayerMission(_Universe->whichPlayerStarship(un), 0)==NULL) {
-		if (active_missions.size()==1 && cp == _Universe->AccessCockpit(1)) {
+		if (active_missions.size()==1) {
 			active_missions[0]->DirectorInitgame();
 		}
 		// Make a mission specially for this cockpit.
 		unsigned int oldcp = _Universe->CurrentCockpit();
 		_Universe->SetActiveCockpit(cp);
+		_Universe->pushActiveStarSystem(_Universe->AccessCockpit()->activeStarSystem);
 		LoadMission("",vs_config->getVariable("server","serverscript","import server;my_obj=server.player()"),false);
+		_Universe->popActiveStarSystem();
 		_Universe->SetActiveCockpit(oldcp);
 	}
 }

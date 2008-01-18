@@ -95,7 +95,7 @@ extern void ExecuteDirector();
 
 void	getZoneInfoBuffer( unsigned short zoneid, NetBuffer & netbuf)
 {
-	VSServer->getZoneInfo( zoneid, netbuf);
+	VSServer->zonemgr->getZoneBuffer( zoneid, netbuf);
 }
 
 /**************************************************************/
@@ -1183,8 +1183,10 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				
 				unsigned int oldcp = _Universe->CurrentCockpit();
 				_Universe->SetActiveCockpit(playernum);
+				_Universe->pushActiveStarSystem(_Universe->AccessCockpit()->activeStarSystem);
 				string nission = string("#")+qualname;
 				LoadMission(nission.c_str(), finalScript, false);
+				_Universe->popActiveStarSystem();
 				_Universe->SetActiveCockpit(oldcp);
 			}
 		}

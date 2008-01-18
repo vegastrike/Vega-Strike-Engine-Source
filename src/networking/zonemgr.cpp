@@ -4,6 +4,7 @@
 #include "universe_util.h"
 #include "star_system_generic.h"
 #include "cmd/unit_generic.h"
+#include "cmd/unit_factory.h"
 #include "gfx/cockpit_generic.h"
 #include "networking/lowlevel/packet.h"
 #include "networking/savenet_util.h"
@@ -34,6 +35,68 @@ void			ZoneMgr::addSystem( string & sysname, string & system)
 string			ZoneMgr::getSystem( string & name)
 {
 	return Systems.get( name);
+}
+/************************************************************************************************/
+/**** getZoneBuffer : returns a buffer containing zone info                                *****/
+/************************************************************************************************/
+
+// Send one by one a CMD_ADDLCIENT to the client for every ship in the star system we enter
+void  ZoneMgr::getZoneBuffer( unsigned short zoneid, NetBuffer & netbuf)
+{
+	LI k;
+	int nbclients=0;
+	Packet packet2;
+	string savestr, xmlstr;
+
+	// Loop through client in the same zone to send their current_state and save and xml to "clt"
+	std::set<ObjSerial> activeObjects;
+	ZoneInfo *zi = GetZoneInfo(zoneid);
+	if( zi == NULL )
+	{
+		COUT << "\t>>> WARNING: Did not send info about " << nbclients << " other ships because of empty (inconsistent?) zone" << endl;
+	} else {
+	  ClientList* lst = &zi->zone_list;
+	  for( k=lst->begin(); k!=lst->end(); k++)
+	  {
+        ClientPtr kp( *k );
+
+		// Test if *k is the same as clt in which case we don't need to send info
+		if( true ) // kp->ingame)
+		{
+			Unit *un = kp->game_unit.GetUnit();
+			if (!un)
+				continue;
+			SaveNetUtil::GetSaveStrings( kp, savestr, xmlstr, false);
+			// Add the ClientState at the beginning of the buffer -> NO THIS IS IN THE SAVE !!
+			//netbuf.addClientState( ClientState( kp->game_unit.GetUnit()));
+			// Add the callsign and save and xml strings
+			netbuf.addChar( ZoneMgr::AddClient);
+			netbuf.addSerial( un->GetSerial());
+			netbuf.addString( kp->callsign);
+			netbuf.addString( savestr);
+			netbuf.addString( xmlstr);
+			netbuf.addTransformation(kp->game_unit.GetUnit()->curr_physical_state);
+                        activeObjects.insert(un->GetSerial());
+			nbclients++;
+		}
+	  }
+	  {
+		Unit *un;
+        for (un_iter ui=zi->star_system->getUnitList().createIterator();
+             (un=*ui)!=NULL;
+             ++ui) {
+          ObjSerial ser=un->GetSerial();
+          if (activeObjects.find(ser)==activeObjects.end()) {
+            UnitFactory::addBuffer(netbuf, un, false);
+            activeObjects.insert(un->GetSerial());
+            nbclients++;
+       
+          }
+        }
+        netbuf.addChar( ZoneMgr::End);
+	  }
+	  COUT<<"\t>>> GOT INFO ABOUT "<<nbclients<<" OTHER SHIPS"<<endl;
+	}
 }
 
 StarSystem *	ZoneMgr::addZone( string starsys)

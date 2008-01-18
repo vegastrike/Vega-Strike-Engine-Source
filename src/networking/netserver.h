@@ -70,7 +70,6 @@ class NetServer
 		Packet			packeta;				// Network data packet for account server
 
 		SaveGame*		globalsave;				// Savegame class used to save dynamic universe
-		ZoneMgr			*zonemgr;				// Zones/star systems Manager
 		int				nbclients;				// Active client connections number
 		int				nbaccts;				// Number of registered accounts
 
@@ -107,6 +106,10 @@ class NetServer
         boost::shared_ptr<VsnetDownload::Server::Manager> _downloadManagerServer;
         static const char*                                _downloadSearchDirs[];
 
+	public:
+		ZoneMgr			*zonemgr;				// Zones/star systems Manager
+	private:
+	
 		bool			updateTimestamps( ClientPtr clt, Packet & p);
 		//void			loadConfig();					// Loads configuration from server.xml
 		void			posUpdate( ClientPtr clt);		// Update a client position
@@ -189,7 +192,6 @@ class NetServer
 		void	sendMission( int cp, unsigned short packetType, string mission, int pos);
 
 		void	addSystem( string & sysname, string & system);
-		void	getZoneInfo( unsigned short zoneid, NetBuffer & netbuf);
 		friend class ZoneMgr;
 
 		void			closeAllSockets();				// Disconnect all clients for shutdown

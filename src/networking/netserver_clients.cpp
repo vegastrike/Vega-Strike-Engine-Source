@@ -120,6 +120,7 @@ void	NetServer::addClient( ClientPtr clt)
 	// On server side this is not done in Cockpit::SetParent()
 	cp->activeStarSystem = st2;
 	un->activeStarSystem = st2;
+	_Universe->pushActiveStarSystem(st2);
 	// Cannot use sts pointer since it may be NULL if the system was just created
 	// Try to see if the player is docked on start
 
@@ -221,7 +222,7 @@ void	NetServer::addClient( ClientPtr clt)
 	netbuf.addTransformation(un->curr_physical_state);
 	pp.send( CMD_ADDEDYOU, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(170) );
 	netbuf.Reset();
-	getZoneInfo(un->activeStarSystem->GetZone(), netbuf);
+	zonemgr->getZoneBuffer(un->activeStarSystem->GetZone(), netbuf);
 	packet3.send( CMD_ENTERCLIENT, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(174) );
 
 	Packet p2;
@@ -252,6 +253,7 @@ void	NetServer::addClient( ClientPtr clt)
 			this->sendDockAuthorize( un->GetSerial(), dockedUnit->GetSerial(), dockport, un->activeStarSystem->GetZone());
 		}
 	}
+	_Universe->popActiveStarSystem();
 	_Universe->SetActiveCockpit(oldcp);
 
 	//delete cltsbuf;
@@ -618,65 +620,4 @@ void	NetServer::logout( ClientPtr clt )
 	clt.reset( );
 	COUT << allClients.size() <<" clients left"<<endl;
 	nbclients--;
-}
-
-/************************************************************************************************/
-/**** getZoneClients : returns a buffer containing zone info                                *****/
-/************************************************************************************************/
-
-// Send one by one a CMD_ADDLCIENT to the client for every ship in the star system we enter
-void  NetServer::getZoneInfo( unsigned short zoneid, NetBuffer & netbuf)
-{
-	LI k;
-	int nbclients=0;
-	Packet packet2;
-	string savestr, xmlstr;
-
-	// Loop through client in the same zone to send their current_state and save and xml to "clt"
-        std::set<ObjSerial> activeObjects;
-        ClientList* lst = zonemgr->GetZone(zoneid);
-        if( lst == NULL )
-        {
-          COUT << "\t>>> WARNING: Did not send info about " << nbclients << " other ships because of empty (inconsistent?) zone" << endl;
-        }
-        else
-	for( k=lst->begin(); k!=lst->end(); k++)
-	{
-        ClientPtr kp( *k );
-
-		// Test if *k is the same as clt in which case we don't need to send info
-		if( true ) // kp->ingame)
-		{
-			Unit *un = kp->game_unit.GetUnit();
-			if (!un)
-				continue;
-			SaveNetUtil::GetSaveStrings( kp, savestr, xmlstr, false);
-			// Add the ClientState at the beginning of the buffer -> NO THIS IS IN THE SAVE !!
-			//netbuf.addClientState( ClientState( kp->game_unit.GetUnit()));
-			// Add the callsign and save and xml strings
-			netbuf.addChar( ZoneMgr::AddClient);
-			netbuf.addSerial( un->GetSerial());
-			netbuf.addString( kp->callsign);
-			netbuf.addString( savestr);
-			netbuf.addString( xmlstr);
-			netbuf.addTransformation(kp->game_unit.GetUnit()->curr_physical_state);
-                        activeObjects.insert(un->GetSerial());
-			nbclients++;
-		}
-	}
-        Unit *un;
-        for (un_iter ui=_Universe->star_system[zoneid]->getUnitList().createIterator();
-             (un=*ui)!=NULL;
-             ++ui) {
-          ObjSerial ser=un->GetSerial();
-          if (activeObjects.find(ser)==activeObjects.end()) {
-            UnitFactory::addBuffer(netbuf, un, false);
-            activeObjects.insert(un->GetSerial());
-            nbclients++;
-       
-          }
-        }
-        netbuf.addChar( ZoneMgr::End);
-          
-	COUT<<"\t>>> GOT INFO ABOUT "<<nbclients<<" OTHER SHIPS"<<endl;
 }

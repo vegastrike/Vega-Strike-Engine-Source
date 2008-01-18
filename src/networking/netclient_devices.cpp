@@ -203,6 +203,7 @@ void	NetClient::dockRequest( ObjSerial utdw_serial)
 	cerr<<"SENDING A DOCK REQUEST FOR UNIT "<<utdw_serial<<endl;
 	netbuf.addSerial( utdw_serial);
 	send( CMD_DOCK, netbuf, SENDRELIABLE, __FILE__, __LINE__ );
+	saveRequest();
 }
 
 void	NetClient::missionRequest( unsigned short packetType, string mission, int pos)

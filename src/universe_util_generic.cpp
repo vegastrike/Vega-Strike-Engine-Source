@@ -674,6 +674,7 @@ namespace UniverseUtil
 	void receivedCustom(int cp, bool trusted, string cmd, string args, string id) {
 		int cp_orig = _Universe->CurrentCockpit();
 		_Universe->SetActiveCockpit(cp);
+		_Universe->pushActiveStarSystem(_Universe->AccessCockpit()->activeStarSystem);
 		securepythonstr(cmd);
 		securepythonstr(args);
 		securepythonstr(id);
@@ -686,6 +687,7 @@ namespace UniverseUtil
 		::Python::reseterrors();
 		PyRun_SimpleString(const_cast<char*>(cpycode));
 		::Python::reseterrors();
+		_Universe->popActiveStarSystem();
 		_Universe->SetActiveCockpit(cp_orig);
 /*				
 				netbuf.addString("game");
