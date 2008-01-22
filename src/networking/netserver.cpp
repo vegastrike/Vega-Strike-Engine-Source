@@ -474,17 +474,19 @@ void	NetServer::start(int argc, char **argv)
 
 		
 		  unsigned int i;
+		  /*
 		  static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
 		  static unsigned int numrunningsystems = XMLSupport::parse_int (vs_config->getVariable ("physics","NumRunningSystems","4"));
 		  float systime=nonactivesystemtime;
+		  */
 		  
-		  for (i=0;i<_Universe->star_system.size()&&i<numrunningsystems;i++) {
+		  for (i=0;i<_Universe->star_system.size();i++) {
 
 
 // NETFIXME: No Director for you!
 
 
-                    _Universe->star_system[i]->Update((i==0)?1:systime/i,true/*need to run python serverside*/);
+                    _Universe->star_system[i]->Update(1,true/*need to run python serverside*/);
 		  }
 		  StarSystem::ProcessPendingJumps();
 		/****************************** VS STUFF TO DO ************************************/
@@ -916,6 +918,8 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			if (!clt) break;
 			un = clt->game_unit.GetUnit();
 			int cp = _Universe->whichPlayerStarship(un);
+			// NETFIXME: CMD_CUSTOM should work with a dead unit.
+			if (!cp) break; // You died or something... too bad.
 			bool trusted = (clt->cltadr.inaddr()==0x0100007f);
 			string cmd = netbuf.getString();
 			string args = netbuf.getString();

@@ -190,7 +190,7 @@ class	NetClient
 		int		checkMsg( Packet* outpacket );
 		// Send a position update
 	
-		void	send (Cmd cmd, NetBuffer& netbuf, bool mode, const char* file, int line);
+		void	send (Cmd cmd, NetBuffer& netbuf, int mode, const char* file, int line);
 		void	sendCustom(string cmd, string args, string id);
 		void	sendPosition( const ClientState* cs );
 		void	sendCloak( bool engage );

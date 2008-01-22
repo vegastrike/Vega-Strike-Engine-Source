@@ -144,7 +144,7 @@ void	NetServer::addUnitCargoSnapshot( const Unit *un, NetBuffer &netbuf) {
 	netbuf.addInt32(numCargo);
 	for (unsigned int i=0;i<numCargo;i++) {
 		const Cargo &carg = un->GetCargo(i);
-		netbuf.addInt32(carg.GetQuantity());
+		netbuf.addInt32(carg.GetQuantity() * (carg.GetMissionFlag()?-1:1));
 		netbuf.addString(carg.GetContent());
 		netbuf.addFloat(carg.GetPrice());
 		netbuf.addFloat(carg.GetMass());

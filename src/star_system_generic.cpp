@@ -1157,8 +1157,17 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system,
 		StarSystem * ss = star_system_table.Get(system);
 		if( SERVER && !ss) {
 			// On server side the system must have been generated before a JumpTo call !
-			cout<<"!!! ERROR = StarSystem not found"<<endl;
+			cout<<"!!! ERROR = Jumping to StarSystem "<<system<<" not yet loaded"<<endl;
+			fflush(stdout);
+			
+			{ // Crash incase this happens, to get a stacktrace!
+				int *p = NULL;
+				printf("%d\n",(*p));
+			}
+			/*
+			  // Generally servers are not supposed to exit on a whim...
 			exit(1);
+			*/
 		}
 		std::string ssys (system+".system");
 		if (!ss) {

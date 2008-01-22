@@ -170,7 +170,7 @@ void NavigationSystem::Setup()
 
     static int time_to_helpscreen = XMLSupport::parse_int(vs_config->getVariable("general","times_to_show_help_screen","3"));
 	buttonstates = 0;
-	if (getSaveData(0,"436457r1K3574r7uP71m35",0)<=1+time_to_helpscreen) {
+	if (getSaveData(0,"436457r1K3574r7uP71m35",0)<=time_to_helpscreen) {
 		whattodraw=0;
 	} else {
 		whattodraw = (1|2);

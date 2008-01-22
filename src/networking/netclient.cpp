@@ -1026,7 +1026,12 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 						un->image->CargoVolume = cargvol;
 						un->image->UpgradeVolume = upgvol;
 					}
-					unsigned int numcargo = netbuf.getInt32();
+					int numcargo = netbuf.getInt32();
+					bool mission = false;
+					if (numcargo<0) {
+						mission = true;
+						numcargo = -numcargo;
+					}
 					Cargo carg;
 					for (i=0;i<numcargo;i++) {
 						unsigned int mplind;
@@ -1038,6 +1043,8 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 								carg = *foundcarg;
 							} else {
 							    COUT << "Server sent bad cargo '"<<str<<"' for unit serial "<<ser<<endl;
+								carg = Cargo();
+								carg.SetContent(str);
 							}
 						}
 						carg.SetQuantity(quantity);

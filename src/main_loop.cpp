@@ -932,8 +932,12 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 		  // In networking mode we name the ship save with .xml as they are xml files
 		  if( Network!=NULL && squadnum<(int)fighter0name.size()) {
 //				if (backupcp==NULL) {
-					cout<<"CREATING A NETWORK PLAYER : "<<fightername<<endl;
 					//modifications = modifications+".xml";
+					if (Network[squadnum].getCallsign() != modifications) {
+						cout<<"Not CREATING A NETWORK PLAYER "<<fightername<<" FOR "<<modifications<<endl;
+						break;
+					}
+					cout<<"CREATING A NETWORK PLAYER : "<<fightername<<endl;
 					fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],"",fg,s, &savefiles[squadnum][1]);
 					// Set the faction we have in the save file instead of the mission file (that is to be ignored in networking mode)
 					fighters[a]->faction = FactionUtil::GetFactionIndex( cp->savegame->GetPlayerFaction());

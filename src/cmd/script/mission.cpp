@@ -224,6 +224,7 @@ int Mission::getPlayerMissionNumber() {
 			break;
 		}
 	}
+	if (pl == active_missions->end()) return -1;
 	if (num>=active_missions->size())
 		return -1;
 	return num;
@@ -251,11 +252,12 @@ Mission * Mission::getNthPlayerMission(int cp, int missionnum) {
 void Mission::terminateMission(){
 	vector<Mission *> *active_missions = ::active_missions.Get();
 	vector<Mission *>::iterator f = std::find (active_missions->begin(),active_missions->end(),this);
-        int queuenum = f-active_missions->begin();
+	int queuenum = -1;
 	
 	if (f!=active_missions->end()) {
+		queuenum = getPlayerMissionNumber();
 		if ((Network!=NULL || SERVER) && player_num>=0) {
-			int num = getPlayerMissionNumber();
+			int num = queuenum;
 			if (num>=0) {
 				if (SERVER && num>0) {
 					VSServer->sendMission(player_num, Subcmd::TerminateMission, string(), num-1);
@@ -270,7 +272,7 @@ void Mission::terminateMission(){
 		}
 		active_missions->erase (f);
 	}
-	if (this!=(*active_missions)[0]) {
+	if (this!=(*active_missions)[0]) { // Shouldn't this always be true?
 		Mission_delqueue.push_back(this);//only delete if we arent' the base mission
 	}
 	// NETFIXME: This routine does not work properly yet.

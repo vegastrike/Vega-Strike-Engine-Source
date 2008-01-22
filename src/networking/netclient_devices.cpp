@@ -8,7 +8,7 @@
 #include "networking/lowlevel/packet.h"
 #include "networking/fileutil.h"
 
-void NetClient::send( Cmd cmd, NetBuffer &netbuf, bool mode, const char *file, int line) {
+void NetClient::send( Cmd cmd, NetBuffer &netbuf, int mode, const char *file, int line) {
 	Unit *un = this->game_unit.GetUnit();
 	int serial = 0;
 	if (un)
@@ -17,7 +17,7 @@ void NetClient::send( Cmd cmd, NetBuffer &netbuf, bool mode, const char *file, i
 	p.send( cmd, serial,
 			netbuf.getData(), netbuf.getDataLength(),
 			mode, NULL,
-			*(mode==SENDANDFORGET?this->lossy_socket:this->clt_tcp_sock),
+			*((mode&SENDANDFORGET)?this->lossy_socket:this->clt_tcp_sock),
 			file, line);
 }
 
@@ -203,7 +203,6 @@ void	NetClient::dockRequest( ObjSerial utdw_serial)
 	cerr<<"SENDING A DOCK REQUEST FOR UNIT "<<utdw_serial<<endl;
 	netbuf.addSerial( utdw_serial);
 	send( CMD_DOCK, netbuf, SENDRELIABLE, __FILE__, __LINE__ );
-	saveRequest();
 }
 
 void	NetClient::missionRequest( unsigned short packetType, string mission, int pos)
