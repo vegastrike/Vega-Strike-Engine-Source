@@ -287,6 +287,9 @@ class Unit
 		float gunspeed;
 		float gunrange;
 		float missilerange;
+		bool inertialmode;
+		char turretstatus;
+		bool autopilotactive;
 		class graphic_options
 		{
 			public:

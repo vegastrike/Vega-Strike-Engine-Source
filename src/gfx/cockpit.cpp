@@ -1351,6 +1351,112 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
     }
 	if( fpsval)
    	 return 1./fpsval;
+  case UnitImages::AUTOPILOT_MODAL:
+	  if(target->autopilotactive){
+		  return (float)UnitImages::ACTIVE;
+	  } else {
+		  return (float)UnitImages::OFF;
+	  } 
+  case UnitImages::SPEC_MODAL:
+	  if(target->graphicOptions.WarpRamping){
+		  return (float)UnitImages::SWITCHING;
+	  } else if (target->graphicOptions.InWarp){
+		  return (float)UnitImages::ACTIVE;
+	  } else {
+		  return (float)UnitImages::OFF;
+	  }
+  case UnitImages::FLIGHTCOMPUTER_MODAL:
+	  if(target->inertialmode){
+		  return (float)UnitImages::OFF;
+	  } else {
+		  return (float)UnitImages::ON;
+	  } 
+  case UnitImages::TURRETCONTROL_MODAL:
+	  if(0==target->turretstatus){
+		  return (float)UnitImages::NOTAPPLICABLE;
+	  } else if(2==target->turretstatus){ //FIXME -- need to check if turrets are active
+		  return (float)UnitImages::ACTIVE;
+	  } else if (3==target->turretstatus){ //FIXME -- need to check if turrets are in FireAtWill state
+		  return (float)UnitImages::FAW;
+	  } else {
+		  return (float)UnitImages::OFF;
+	  }
+  case UnitImages::ECM_MODAL: 
+	  if(target->GetImageInformation().ecm<0){
+		  return (float)UnitImages::READY;
+	  } else if (target->GetImageInformation().ecm>0){ 
+		  return (float)UnitImages::ACTIVE;
+	  } else {
+		  return (float)UnitImages::NOTAPPLICABLE;
+	  }
+  case UnitImages::CLOAK_MODAL:
+	  if(-1==target->cloaking){
+		  return (float)UnitImages::NOTAPPLICABLE;
+	  } else if(((int)(-2147483647)-1)==target->cloaking){
+		  return (float)UnitImages::READY;
+	  } else if (target->cloaking==target->cloakmin){
+		  return (float)UnitImages::ACTIVE;
+	  } else {
+		  return (float)UnitImages::SWITCHING;
+	  }
+  case UnitImages::TRAVELMODE_MODAL:
+	  if(target->CombatMode()){
+		  return (float)UnitImages::MANEUVER;
+	  } else {
+		  return (float)UnitImages::TRAVEL;
+	  } 
+  case UnitImages::RECIEVINGFIRE_MODAL:
+	  if(!target){ //FIXME
+		  return (float)UnitImages::WARNING;
+	  } else {
+		  return (float)UnitImages::NOMINAL;
+	  } 
+  case UnitImages::RECEIVINGMISSILES_MODAL:
+	  if(!target){ //FIXME
+		  return (float)UnitImages::WARNING;
+	  } else {
+		  return (float)UnitImages::NOMINAL;
+	  } 
+  case UnitImages::RECEIVINGMISSILELOCK_MODAL:
+	  if(!target){ //FIXME
+		  return (float)UnitImages::WARNING;
+	  } else {
+		  return (float)UnitImages::NOMINAL;
+	  } 
+  case UnitImages::RECEIVINGTARGETLOCK_MODAL:
+	  if(!target){ //FIXME
+		  return (float)UnitImages::WARNING;
+	  } else {
+		  return (float)UnitImages::NOMINAL;
+	  } 
+  case UnitImages::COLLISIONWARNING_MODAL:
+	  if(!target){ //FIXME
+		  return (float)UnitImages::WARNING;
+	  } else {
+		  return (float)UnitImages::NOMINAL;
+	  } 
+  case UnitImages::CANJUMP_MODAL:
+	  if(-2==target->GetJumpStatus().drive){
+		  return (float)UnitImages::NODRIVE;
+	  } else if(target->GetWarpEnergy()<target->GetJumpStatus().energy){
+		  return (float)UnitImages::NOTENOUGHENERGY;
+	  } else if (target->graphicOptions.InWarp){ //FIXME
+		  return (float)UnitImages::OFF;
+	  } else if(jumpok){
+		  return (float)UnitImages::READY;
+	  } else {
+		  return (float)UnitImages::TOOFAR;
+	  }
+  case UnitImages::CANDOCK_MODAL:
+	  if(!target){ //FIXME
+		  return (float)UnitImages::READY;
+	  } else if(!target){ //FIXME
+		  return (float)UnitImages::TOOFAR;
+	  } else if(target->graphicOptions.InWarp){
+		  return (float)UnitImages::OFF;
+	  } else {
+		  return (float)UnitImages::NOMINAL;
+	  }
   }
   return 1;
 }
@@ -1388,7 +1494,7 @@ void GameCockpit::DrawGauges(Unit * un) {
 	  return;
   text->SetSize (2,-2);
   GFXColorf (textcol);
-  for (i=UnitImages::KPS;i<UnitImages::NUMGAUGES;i++) {
+  for (i=UnitImages::KPS;i<UnitImages::AUTOPILOT_MODAL;i++) {
     if (gauges[i]) {
       float sx,sy,px,py;
       gauges[i]->GetSize (sx,sy);
@@ -1408,6 +1514,115 @@ void GameCockpit::DrawGauges(Unit * un) {
 	  }
       GFXColorf (textcol);
       text->Draw (string (ourchar));
+    }
+  }
+  TextPlane text2(GFXColor(1,1,1,1), GFXColor(0,0,0,.0625));
+  text2.SetSize(1.2, -2);
+  for (i=UnitImages::AUTOPILOT_MODAL;i<UnitImages::NUMGAUGES;i++) {
+    if (gauges[i]) {
+      float sx,sy,px,py;
+      gauges[i]->GetSize (sx,sy);
+      gauges[i]->GetPosition (px,py);
+      text->SetCharSize (sx,sy);
+      text->SetPos (px,py);
+      float tmp = LookupTargetStat (i,un);
+	  int ivalue=(int)tmp;
+	  std::string modename;
+	  std::string modevalue;
+	  switch(i){
+		case UnitImages::AUTOPILOT_MODAL:
+			modename="AUTO:";
+			break;
+		case UnitImages::SPEC_MODAL:
+			modename="SPEC:";
+			break;
+		case UnitImages::FLIGHTCOMPUTER_MODAL:
+			modename="FCMP:";
+			break;
+		case UnitImages::TURRETCONTROL_MODAL:
+			modename="TCNT:";
+			break;
+		case UnitImages::ECM_MODAL:
+			modename="ECM :";
+			break;
+		case UnitImages::CLOAK_MODAL:
+			modename="CLK :";
+			break;
+		case UnitImages::TRAVELMODE_MODAL:
+			modename="GCNT:";
+			break;
+		case UnitImages::RECIEVINGFIRE_MODAL:
+			modename="RFIR:";
+			break;
+		case UnitImages::RECEIVINGMISSILES_MODAL:
+			modename="RMIS:";
+			break;
+		case UnitImages::RECEIVINGMISSILELOCK_MODAL:
+			modename="RML :";
+			break;
+		case UnitImages::RECEIVINGTARGETLOCK_MODAL:
+			modename="RTL :";
+			break;
+		case UnitImages::COLLISIONWARNING_MODAL:
+			modename="COL :";
+			break;
+		case UnitImages::CANJUMP_MODAL:
+			modename="JUMP:";
+			break;
+		case UnitImages::CANDOCK_MODAL:
+			modename="DOCK:";
+			break;
+		default:
+			modename="UNK :";
+	  }
+	  switch(ivalue){
+		case UnitImages::OFF:
+			modevalue="OFF";
+			break;
+		case UnitImages::ON:
+			modevalue="ON";
+			break;
+		case UnitImages::SWITCHING:
+			modevalue="<>";
+			break;
+		case UnitImages::ACTIVE:
+			modevalue="ACTIVE";
+			break;
+		case UnitImages::FAW:
+			modevalue="FAW";
+			break;
+		case UnitImages::MANEUVER:
+			modevalue="MANEUVER";
+			break;
+		case UnitImages::TRAVEL:
+			modevalue="TRAVEL";
+			break;
+		case UnitImages::NOTAPPLICABLE:
+			modevalue="N / A";
+			break;
+		case UnitImages::READY:
+			modevalue="READY";
+			break;
+		case UnitImages::NODRIVE:
+			modevalue="NO DRIVE";
+			break;
+		case UnitImages::TOOFAR:
+			modevalue="TOO FAR";
+			break;
+		case UnitImages::NOTENOUGHENERGY:
+			modevalue="LOW ENERGY";
+			break;
+		case UnitImages::WARNING:
+			modevalue="WARNING!";
+			break;
+		case UnitImages::NOMINAL:
+			modevalue=" - ";
+			break;
+		default:
+			modevalue="MALFUNCTION!";
+	  }
+	  GFXColorf (textcol);
+      text->Draw (modename+modevalue);
     }
   }
   GFXColor4f (1,1,1,1);

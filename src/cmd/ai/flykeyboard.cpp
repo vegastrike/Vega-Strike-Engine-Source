@@ -250,6 +250,7 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
 	if(FlyByKeyboard::inauto){
 		this->eraseType(FACING|MOVEMENT);
 		FlyByKeyboard::inauto=false;
+		parent->autopilotactive=FlyByKeyboard::inauto;
 		if(parent->graphicOptions.InWarp){
 		  parent->graphicOptions.InWarp=0;
 		  parent->graphicOptions.WarpRamping=1;
@@ -259,6 +260,7 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
 		temp->SetParent(parent);
 		Order::EnqueueOrderFirst(temp);
 		FlyByKeyboard::inauto=true;
+		parent->autopilotactive=FlyByKeyboard::inauto;
     }
   }
   bool enteredautopilot=false;

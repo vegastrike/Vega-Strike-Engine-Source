@@ -1068,7 +1068,9 @@ void Unit::Init()
 
 	graphicOptions.RecurseIntoSubUnitsOnCollision=false;
 	graphicOptions.WarpFieldStrength=1;
-
+	inertialmode=false;
+	turretstatus=0;
+	autopilotactive=false;
 	this->unit_role=this->attack_preference=ROLES::getRole("INERT");
 	this->computer.combat_mode=true;
 #ifdef CONTAINER_DEBUG
@@ -2280,6 +2282,7 @@ void Unit::ReTargetFg(int which_target)
 
 void Unit::SetTurretAI ()
 {
+	turretstatus=2;
 	static bool talkinturrets = XMLSupport::parse_bool(vs_config->getVariable("AI","independent_turrets","false"));
 	if (talkinturrets) {
 		Unit * un;
@@ -2309,6 +2312,7 @@ void Unit::SetTurretAI ()
 
 void Unit::DisableTurretAI ()
 {
+	turretstatus=1;
 	Unit * un;
 	for(un_iter iter = getSubUnits();un = *iter;++iter){
 		if (un->aistate) {
@@ -8447,6 +8451,7 @@ inline QVector randVector (float min, float max)
 
 void Unit::TurretFAW()
 {
+	turretstatus=3;
 	Unit * un;
 	for(un_iter iter = getSubUnits();un = *iter;++iter){
 		if (!CheckAccessory(un)) {

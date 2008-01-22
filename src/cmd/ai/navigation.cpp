@@ -526,6 +526,7 @@ void AutoLongHaul::Execute() {
   if (target==NULL){
     group.SetUnit(parent->Target());
     done = finish;
+	parent->autopilotactive=false;
     return;
   }
   static bool compensate_for_interdiction=XMLSupport::parse_bool(vs_config->getVariable("phyics","autopilot_compensate_for_interdiction","false"));
@@ -634,8 +635,10 @@ void AutoLongHaul::Execute() {
       stopnow=true;
   }
   
-  if (do_auto_finish&&(stopnow||dis<distance_to_stop||(target->Target()==parent&&dis<enemy_distance_to_stop))) 
+  if (do_auto_finish&&(stopnow||dis<distance_to_stop||(target->Target()==parent&&dis<enemy_distance_to_stop))){
+	parent->autopilotactive=false;
     done=true;
+  }
 }
 
 

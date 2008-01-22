@@ -366,6 +366,7 @@ FlyByWire::~FlyByWire () {
 
 void FlyByWire::InertialFlight (bool onoff) {
     inertial_flight_model = onoff;
+	parent->inertialmode=onoff;
 }
 
 bool FlyByWire::InertialFlight () const {

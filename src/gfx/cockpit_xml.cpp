@@ -122,7 +122,21 @@ namespace CockpitXML {
     EnumMap::Pair ("Auto", UnitImages::AUTOPILOT),
 	EnumMap::Pair ("Collision", UnitImages::COLLISION),
     EnumMap::Pair ("FPS", UnitImages::COCKPIT_FPS),
-    EnumMap::Pair ("WarpFieldStrength", UnitImages::WARPFIELDSTRENGTH)
+    EnumMap::Pair ("WarpFieldStrength", UnitImages::WARPFIELDSTRENGTH),
+	EnumMap::Pair ("MAUTO", UnitImages::AUTOPILOT_MODAL),
+    EnumMap::Pair ("MSPEC", UnitImages::SPEC_MODAL),
+    EnumMap::Pair ("MFLIGHTCOMP",  UnitImages::FLIGHTCOMPUTER_MODAL),
+    EnumMap::Pair ("MTURRET",  UnitImages::TURRETCONTROL_MODAL),
+    EnumMap::Pair ("MECM",  UnitImages::ECM_MODAL),
+    EnumMap::Pair ("MCLOAK",  UnitImages::CLOAK_MODAL),
+	EnumMap::Pair ("MTRAVEL",  UnitImages::TRAVELMODE_MODAL),
+    EnumMap::Pair ("MRECFIRE",  UnitImages::RECIEVINGFIRE_MODAL),
+    EnumMap::Pair ("MRECMISSILE",  UnitImages::RECEIVINGMISSILES_MODAL),
+    EnumMap::Pair ("MRECMLOCK",  UnitImages::RECEIVINGMISSILELOCK_MODAL),
+    EnumMap::Pair ("MRECTLOCK",  UnitImages::RECEIVINGTARGETLOCK_MODAL),
+    EnumMap::Pair ("MCOLLISIONWARNING",  UnitImages::COLLISIONWARNING_MODAL),
+    EnumMap::Pair ("MJUMP",  UnitImages::CANJUMP_MODAL),
+    EnumMap::Pair ("MDOCK",  UnitImages::CANDOCK_MODAL)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -320,6 +334,20 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
   case UnitImages::COLLISION:
   case UnitImages::COCKPIT_FPS:
   case UnitImages::WARPFIELDSTRENGTH:
+  case UnitImages::AUTOPILOT_MODAL:
+  case UnitImages::SPEC_MODAL:
+  case UnitImages::FLIGHTCOMPUTER_MODAL:
+  case UnitImages::TURRETCONTROL_MODAL:
+  case UnitImages::ECM_MODAL:
+  case UnitImages::CLOAK_MODAL:
+  case UnitImages::TRAVELMODE_MODAL:
+  case UnitImages::RECIEVINGFIRE_MODAL:
+  case UnitImages::RECEIVINGMISSILES_MODAL:
+  case UnitImages::RECEIVINGMISSILELOCK_MODAL:
+  case UnitImages::RECEIVINGTARGETLOCK_MODAL:
+  case UnitImages::COLLISIONWARNING_MODAL:
+  case UnitImages::CANJUMP_MODAL:
+  case UnitImages::CANDOCK_MODAL:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
       switch (attribute_map.lookup((*iter).name)) {
       case XFILE:
