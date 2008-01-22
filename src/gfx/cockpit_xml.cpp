@@ -123,6 +123,7 @@ namespace CockpitXML {
 	EnumMap::Pair ("Collision", UnitImages::COLLISION),
     EnumMap::Pair ("FPS", UnitImages::COCKPIT_FPS),
     EnumMap::Pair ("WarpFieldStrength", UnitImages::WARPFIELDSTRENGTH),
+	EnumMap::Pair ("MASSEFFECT", UnitImages::MASSEFFECT),
 	EnumMap::Pair ("MAUTO", UnitImages::AUTOPILOT_MODAL),
     EnumMap::Pair ("MSPEC", UnitImages::SPEC_MODAL),
     EnumMap::Pair ("MFLIGHTCOMP",  UnitImages::FLIGHTCOMPUTER_MODAL),
@@ -334,6 +335,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
   case UnitImages::COLLISION:
   case UnitImages::COCKPIT_FPS:
   case UnitImages::WARPFIELDSTRENGTH:
+  case UnitImages::MASSEFFECT:
   case UnitImages::AUTOPILOT_MODAL:
   case UnitImages::SPEC_MODAL:
   case UnitImages::FLIGHTCOMPUTER_MODAL:

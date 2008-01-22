@@ -47,6 +47,7 @@
 #include "main_loop.h"
 #include <set>
 #include <string>
+#include "cmd/unit_const_cache.h"
 
 static float mymin(float a, float b)
 {
@@ -1301,7 +1302,15 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
 	        return value/game_speed; else
 		    return display_in_meters?value:value*3.6; //JMS 6/28/05 - converted back to raw meters/second
     }
-
+  case UnitImages::MASSEFFECT:
+	  {
+		  float basemass = atof(UniverseUtil::LookupUnitStat(target->name,"","Mass").c_str());
+		  if(basemass>0){
+			return 100*target->Mass/basemass;
+		  } else {
+			return 0;
+		  }
+	  }
   case UnitImages::AUTOPILOT:
     {
     static int wasautopilot=0;
@@ -1503,7 +1512,7 @@ void GameCockpit::DrawGauges(Unit * un) {
       text->SetPos (px,py);
       float tmp = LookupTargetStat (i,un);
 	  float tmp2=0;
-      char ourchar[32];
+      char ourchar[64];
 	  sprintf (ourchar,"%.0f", tmp);
 	  if (i==UnitImages::KPS) {
 		  float c=300000000.0f;
@@ -1511,6 +1520,9 @@ void GameCockpit::DrawGauges(Unit * un) {
 			tmp2=tmp/c;
 		    sprintf (ourchar,"%.2f C", tmp2);
 		  }
+	  }
+	  if (i==UnitImages::MASSEFFECT){
+		  sprintf (ourchar,"MASS:%.0f%% (base)", tmp);
 	  }
       GFXColorf (textcol);
       text->Draw (string (ourchar));
