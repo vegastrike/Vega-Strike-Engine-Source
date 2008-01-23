@@ -1447,13 +1447,23 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			if (!unclt) {
 				break;
 			}
-			zone = unclt->getStarSystem()->GetZone();
+			{
+				StarSystem *ss = unclt->getStarSystem();
+				if (!ss) {
+					COUT << "StarSystem for client "<<clt->callsign<<
+						", "<<unclt->GetSerial()<<" not found!"<<endl;
+					break;
+				}
+				_Universe->pushActiveStarSystem(ss);
+				zone = ss->GetZone();
+			}
 			// NETFIXME: Make sure that serials have 0 allocated for NULL
 			un = zonemgr->getUnit( target_serial, zone);
 			if (unclt) {
 				// It's fine if un is null...
 				unclt->Target(un);
 			}
+			_Universe->popActiveStarSystem();
 			break;
 		case CMD_CLOAK :
                   {
