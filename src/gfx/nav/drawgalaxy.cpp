@@ -65,8 +65,9 @@ static void DrawNodeDescription(string text, float x_, float y_, float size_x, f
 		displayname.SetCharSize(size_x, size_y);		
 		
 	  GFXColor tpbg=displayname.bgcol;
-	  displayname.bgcol=GFXColor(0,0,0,background_alpha);
-	  displayname.Draw();
+	  bool automatte=(0==tpbg.a);
+	  if(automatte){displayname.bgcol=GFXColor(0,0,0,background_alpha);}
+	  displayname.Draw(text,0,true,false,automatte);
 	  displayname.bgcol=tpbg;
 	} else {
 		float new_y = screenoccupation->findfreesector(x_, y_);
@@ -74,8 +75,9 @@ static void DrawNodeDescription(string text, float x_, float y_, float size_x, f
 		displayname.SetText(text);
 		displayname.SetCharSize(size_x, size_y);
 	  GFXColor tpbg=displayname.bgcol;
-	  displayname.bgcol=GFXColor(0,0,0,background_alpha);
-	  displayname.Draw();
+	  bool automatte=(0==tpbg.a);
+	  if(automatte){displayname.bgcol=GFXColor(0,0,0,background_alpha);}
+	  displayname.Draw(text,0,true,false,automatte);
 	  displayname.bgcol=tpbg;
 		
 	}

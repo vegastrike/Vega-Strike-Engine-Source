@@ -274,8 +274,9 @@ void drawdescription (string text, float x_, float y_, float size_x, float size_
 	}
 	static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
 	  GFXColor tpbg=displayname.bgcol;
-	  displayname.bgcol=GFXColor(0,0,0,background_alpha);
-	  displayname.Draw();
+	  bool automatte=(0==tpbg.a);
+	  if(automatte){displayname.bgcol=GFXColor(0,0,0,background_alpha);}
+	  displayname.Draw(text,0,true,false,automatte);
 	  displayname.bgcol=tpbg;
 }
 

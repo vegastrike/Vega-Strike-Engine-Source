@@ -740,8 +740,9 @@ void VDU::DrawTarget(GameCockpit *cp, Unit * parent, Unit * target) {
   }
   static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
   GFXColor tpbg=tp->bgcol;
-  tp->bgcol=GFXColor(0,0,0,background_alpha);
-  tp->Draw (MangleString (unitandfg,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true,false,true);
+  bool automatte=(0==tpbg.a);
+  if(automatte){tp->bgcol=GFXColor(0,0,0,background_alpha);}
+  tp->Draw (MangleString (unitandfg,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true,false,automatte);
   tp->bgcol=tpbg;
   static float auto_message_lim=XMLSupport::parse_float (vs_config->getVariable("graphics","auto_message_time_lim","5"));
   float delautotime=UniverseUtil::GetGameTime()-cp->autoMessageTime;
@@ -764,8 +765,9 @@ void VDU::DrawTarget(GameCockpit *cp, Unit * parent, Unit * target) {
   newst+=qr.str;
   static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
   GFXColor tpbg=tp->bgcol;
-  tp->bgcol=GFXColor(0,0,0,background_alpha);
-  tp->Draw (MangleString (newst,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true,false,true);  
+  bool automatte=(0==tpbg.a);
+  if(automatte){tp->bgcol=GFXColor(0,0,0,background_alpha);}
+  tp->Draw (MangleString (newst,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true,false,automatte);  
   tp->bgcol=tpbg;
 
   static float ishieldcolor[4]={.4,.4,1,1};
@@ -792,11 +794,12 @@ void VDU::DrawTarget(GameCockpit *cp, Unit * parent, Unit * target) {
   }else {
 	   static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
 	  GFXColor tpbg=tp->bgcol;
-	  tp->bgcol=GFXColor(0,0,0,background_alpha);
+	  bool automatte=(0==tpbg.a);
+	  if(automatte){tp->bgcol=GFXColor(0,0,0,background_alpha);}
     if (draw_auto_message) {
-      tp->Draw (MangleString (std::string("\n")+cp->autoMessage,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true,false,true);      
+      tp->Draw (MangleString (std::string("\n")+cp->autoMessage,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true,false,automatte);      
     }else {
-      tp->Draw (MangleString ("\n[OutOfRange]",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true,false,true);      
+      tp->Draw (MangleString ("\n[OutOfRange]",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true,false,automatte);      
     }
 	tp->bgcol=tpbg;
   }
@@ -899,8 +902,9 @@ void VDU::DrawMessages(GameCockpit* parentcp,Unit *target){
   fullstr=targetstr+fullstr;
   static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
   GFXColor tpbg=tp->bgcol;
-  tp->bgcol=GFXColor(0,0,0,background_alpha);
-  tp->Draw(message_prefix + MangleString (fullstr,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true,false,true);
+  bool automatte=(0==tpbg.a);
+  if(automatte){tp->bgcol=GFXColor(0,0,0,background_alpha);}
+  tp->Draw(message_prefix + MangleString (fullstr,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true,false,automatte);
   tp->bgcol=tpbg;
 }
 
@@ -956,8 +960,9 @@ void VDU::DrawNav (GameCockpit *cp, Unit* you, Unit*targ, const Vector & nav) {
   msg=std::string("\n\n#ffff00     ")+msg;
   static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
   GFXColor tpbg=tp->bgcol;
-  tp->bgcol=GFXColor(0,0,0,background_alpha);
-  tp->Draw (MangleString (navdata+(draw_auto_message?msg:std::string()),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true,true,true);  
+  bool automatte=(0==tpbg.a);
+  if(automatte){tp->bgcol=GFXColor(0,0,0,background_alpha);}
+  tp->Draw (MangleString (navdata+(draw_auto_message?msg:std::string()),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true,true,automatte);  
   tp->bgcol=tpbg;
 
 }
@@ -990,8 +995,9 @@ void VDU::DrawComm () {
 	static string message_prefix = XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","message_prefix",""));
 	static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
 	GFXColor tpbg=tp->bgcol;
-	tp->bgcol=GFXColor(0,0,0,background_alpha);
-    tp->Draw (message_prefix + MangleString (_Universe->AccessCockpit()->communication_choices.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true,false,true);  
+	bool automatte=(0==tpbg.a);
+	if(automatte){tp->bgcol=GFXColor(0,0,0,background_alpha);}
+    tp->Draw (message_prefix + MangleString (_Universe->AccessCockpit()->communication_choices.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true,false,automatte);  
 	tp->bgcol=tpbg;
   }
 }
@@ -1011,8 +1017,9 @@ void VDU::DrawManifest (Unit * parent, Unit * target) {	//	zadeVDUmanifest
   }
   static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
   GFXColor tpbg=tp->bgcol;
-  tp->bgcol=GFXColor(0,0,0,background_alpha);
-  tp->Draw (MangleString (retval,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true,false,true);
+  bool automatte=(0==tpbg.a);
+  if(automatte){tp->bgcol=GFXColor(0,0,0,background_alpha);}
+  tp->Draw (MangleString (retval,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true,false,automatte);
   tp->bgcol=tpbg;
 }
 static void DrawGun (Vector  pos, float w, float h, weapon_info::MOUNT_SIZE sz) {
@@ -1206,8 +1213,9 @@ void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
     retval+=ecmstatus;
 	static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
   GFXColor tpbg=tp->bgcol;
-  tp->bgcol=GFXColor(0,0,0,background_alpha);
-    tp->Draw (MangleString (retval,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true,false,true);     
+  bool automatte=(0==tpbg.a);
+  if(automatte){tp->bgcol=GFXColor(0,0,0,background_alpha);}
+    tp->Draw (MangleString (retval,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true,false,automatte);     
 	tp->bgcol=tpbg;
     //*******************************************************
 }
@@ -1257,8 +1265,9 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
   }
 static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
   GFXColor tpbg=tp->bgcol;
-  tp->bgcol=GFXColor(0,0,0,background_alpha);
-  tp->Draw(MangleString (buf,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true,false,true);
+  bool automatte=(0==tpbg.a);
+  if(automatte){tp->bgcol=GFXColor(0,0,0,background_alpha);}
+  tp->Draw(MangleString (buf,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true,false,automatte);
 tp->bgcol=tpbg;
   if (inrange) {  
     int i=0;
@@ -1271,8 +1280,9 @@ tp->bgcol=tpbg;
     strcat(st,"Range: ");
     strcat (st,qr.str);
   GFXColor tpbg=tp->bgcol;
-  tp->bgcol=GFXColor(0,0,0,background_alpha);
-    tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true,false,true);  
+  bool automatte=(0==tpbg.a);
+  if(automatte){tp->bgcol=GFXColor(0,0,0,background_alpha);}
+    tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true,false,automatte);  
 	tp->bgcol=tpbg;
     GFXColor4f (.4,.4,1,1);
     GetPosition (x,y);
@@ -1310,8 +1320,9 @@ tp->bgcol=tpbg;
 	  if (target){
 		  static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
 		  GFXColor tpbg=tp->bgcol;
-          tp->bgcol=GFXColor(0,0,0,background_alpha);
-          tp->Draw (MangleString ("\n[OutOfRange]",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);      
+		  bool automatte=(0==tpbg.a);
+		  if(automatte){tp->bgcol=GFXColor(0,0,0,background_alpha);}
+          tp->Draw (MangleString ("\n[OutOfRange]",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true,false,automatte);      
 	      tp->bgcol=tpbg;
 	  }
   }
@@ -1415,8 +1426,9 @@ void VDU::DrawWeapon (Unit * parent) {
   }
   static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
   GFXColor tpbg=tp->bgcol;
-  tp->bgcol=GFXColor(0,0,0,background_alpha);
-  tp->Draw (buf,0,true,false,true);
+  bool automatte=(0==tpbg.a);
+  if(automatte){tp->bgcol=GFXColor(0,0,0,background_alpha);}
+  tp->Draw (buf,0,true,false,automatte);
   tp->bgcol=tpbg;
 
 }
@@ -1492,8 +1504,9 @@ void DrawObjectivesTextPlane(TextPlane *tp, int scrolloffset, Unit *parent) {
   }
   static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
   GFXColor tpbg=tp->bgcol;
-  tp->bgcol=GFXColor(0,0,0,background_alpha);
-  tp->Draw(rez,scrolloffset,false,false,true);
+  bool automatte=(0==tpbg.a);
+  if(automatte){tp->bgcol=GFXColor(0,0,0,background_alpha);}
+  tp->Draw(rez,scrolloffset,false,false,automatte);
   tp->bgcol=tpbg;
 }
 
@@ -1629,8 +1642,9 @@ void VDU::Draw (GameCockpit*parentcp,Unit * parent, const GFXColor & color) {
 		str += "SD: "+_Universe->current_stardate.GetFullTrekDate();
 		static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
   GFXColor tpbg=tp->bgcol;
-  tp->bgcol=GFXColor(0,0,0,background_alpha);
-  		tp->Draw(MangleString (str,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true,false,true);
+  bool automatte=(0==tpbg.a);
+  if(automatte){tp->bgcol=GFXColor(0,0,0,background_alpha);}
+  		tp->Draw(MangleString (str,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true,false,automatte);
 		tp->bgcol=tpbg;
 
 	}

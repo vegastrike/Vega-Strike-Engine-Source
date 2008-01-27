@@ -823,8 +823,9 @@ void NavigationSystem::DrawShip()
 	displayname.SetCharSize (1,1);
 	static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
 	GFXColor tpbg=displayname.bgcol;
-	displayname.bgcol=GFXColor(0,0,0,background_alpha);
-	displayname.Draw();
+	bool automatte=(0==tpbg.a);
+	if(automatte){displayname.bgcol=GFXColor(0,0,0,background_alpha);}
+	displayname.Draw(writethis,0,true,false,automatte);
 	displayname.bgcol=tpbg;
 
 //	factionlist.drawdescription(writethis, (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 1, GFXColor(1,1,1,1));
@@ -1358,8 +1359,9 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
         if (nav_button_labels) {
 		static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
 		  GFXColor tpbg=a_label.bgcol;
-	      a_label.bgcol=GFXColor(0,0,0,background_alpha);
-          a_label.Draw();
+		  bool automatte=(0==tpbg.a);
+		  if(automatte){a_label.bgcol=GFXColor(0,0,0,background_alpha);}
+          a_label.Draw(label,0,true,false,automatte);
 		  a_label.bgcol=tpbg;
         }
 	//!!! DEPRESS !!!

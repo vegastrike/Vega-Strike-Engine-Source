@@ -357,9 +357,9 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
       glutBitmapCharacter (fnt,' ');
     } else {
       if (use_bit) {
-	      col+=glutBitmapWidth (fnt,*text_it)/(float)(.5*g_game.x_resolution);;
+		  col+=glutBitmapWidth (fnt,(*text_it!='_')?*text_it:' ')/(float)(.5*g_game.x_resolution); // need to use myc -- could have transformed '_' to ' '
       }else {
-		  col+=myFontMetrics.i*glutStrokeWidth(GLUT_STROKE_ROMAN,*text_it)/std_wid;
+		  col+=myFontMetrics.i*glutStrokeWidth(GLUT_STROKE_ROMAN,(*text_it!='_')?*text_it:' ')/std_wid;
       }
     }
     if(doNewLine(text_it,newText.end(),col,myDims.i, myFontMetrics.i,row-rowheight<=myDims.j)){

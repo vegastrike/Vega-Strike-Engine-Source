@@ -277,8 +277,9 @@ void BaseInterface::Room::Draw (BaseInterface *base) {
 						text_marker.SetPos(text_pos_x, text_pos_y);
 						if(text_marker.GetText().find("XXX")!=0){
 							GFXColor tmpbg=text_marker.bgcol;
-							text_marker.bgcol=GFXColor(0,0,0,base_text_background_alpha);
-							text_marker.Draw();
+							bool automatte=(0==tmpbg.a);
+							if(automatte){text_marker.bgcol=GFXColor(0,0,0,base_text_background_alpha);}
+							text_marker.Draw(text_marker.GetText(),0,true,false,automatte);
 							text_marker.bgcol=tmpbg;
 						}
 						GFXEnable(TEXTURE0);
@@ -322,8 +323,9 @@ void BaseInterface::Room::Draw (BaseInterface *base) {
 					
 					GFXDisable(TEXTURE0);
 					GFXColor tmpbg=text_marker.bgcol;
-					text_marker.bgcol=GFXColor(0,0,0,base_text_background_alpha);
-					text_marker.Draw();
+					bool automatte=(0==tmpbg.a);
+					if(automatte){text_marker.bgcol=GFXColor(0,0,0,base_text_background_alpha);}
+					text_marker.Draw(text_marker.GetText(),0,true,false,automatte);
 					text_marker.bgcol=tmpbg;
 					GFXEnable(TEXTURE0);
 				}
@@ -368,8 +370,9 @@ void BaseInterface::Room::BaseText::Draw (BaseInterface *base) {
   }
   static float base_text_background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","base_text_background_alpha","0.0625"));
   GFXColor tmpbg=text.bgcol;
-  text.bgcol=GFXColor(0,0,0,base_text_background_alpha);
-  text.Draw();
+  bool automatte=(0==tmpbg.a);
+  if(automatte){text.bgcol=GFXColor(0,0,0,base_text_background_alpha);}
+  text.Draw(text.GetText(),0,true,false,automatte);
   text.bgcol=tmpbg;
   g_game.x_resolution=tmpx;
   g_game.y_resolution=tmpy;
@@ -1310,16 +1313,18 @@ void BaseInterface::Draw () {
 //		GFXColor4f(1,.333333,0,1);
         if (curtext.GetText().find("XXX")!=0) {
 			GFXColor tmpbg=curtext.bgcol;
-            curtext.bgcol=GFXColor(0,0,0,base_text_background_alpha);
-            curtext.Draw();
+			bool automatte=(0==tmpbg.a);
+			if(automatte){curtext.bgcol=GFXColor(0,0,0,base_text_background_alpha);}
+            curtext.Draw(curtext.GetText(),0,true,false,automatte);
 	        curtext.bgcol=tmpbg;
         }
         othtext.SetPos(-.99,1);
 //	GFXColor4f(0,.5,1,1);
 		if (othtext.GetText().length()!=0){
 			GFXColor tmpbg=othtext.bgcol;
-            othtext.bgcol=GFXColor(0,0,0,base_text_background_alpha);
-			othtext.Draw();
+			bool automatte=(0==tmpbg.a);
+			if(automatte){othtext.bgcol=GFXColor(0,0,0,base_text_background_alpha);}
+			othtext.Draw(othtext.GetText(),0,true,false,automatte);
 			othtext.bgcol=tmpbg;
 		}
         SetupViewport();

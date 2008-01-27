@@ -1506,7 +1506,8 @@ void GameCockpit::DrawGauges(Unit * un) {
   GFXColor origbgcol=text->bgcol;
   static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
   static float textwidthapproxHACK=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","textwidthapproxHACK","0.0175"));
-  text->bgcol=GFXColor(0,0,0,background_alpha);
+  bool automatte=(0==origbgcol.a);
+  if(automatte){text->bgcol=GFXColor(0,0,0,background_alpha);}
   for (i=UnitImages::KPS;i<UnitImages::AUTOPILOT_MODAL;i++) {
     if (gauges[i]) {
       float sx,sy,px,py;
@@ -1531,7 +1532,7 @@ void GameCockpit::DrawGauges(Unit * un) {
       GFXColorf (textcol);
 	  //text->SetSize (px+textwidthapproxHACK*(float)len,-2);
 	  text->SetSize (2,-2);
-      text->Draw(string (ourchar),0,false,false,true);
+      text->Draw(string (ourchar),0,false,false,automatte);
     }
   }
   for (i=UnitImages::AUTOPILOT_MODAL;i<UnitImages::NUMGAUGES;i++) {
@@ -1640,7 +1641,7 @@ void GameCockpit::DrawGauges(Unit * un) {
 	  GFXColorf (textcol);
 	  //text->SetSize(px+textwidthapproxHACK*(modename.size()+modevalue.size()), -2);
 	  text->SetSize(2,-2);
-      text->Draw (modename+modevalue,0,false,false,true);
+      text->Draw (modename+modevalue,0,false,false,automatte);
     }
   }
   text->bgcol=origbgcol;

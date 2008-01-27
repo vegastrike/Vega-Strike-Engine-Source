@@ -72,8 +72,9 @@ void NavigationSystem::DrawSystem()
 //	systemname.SetCharSize(1, 1);
 	static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
 	GFXColor tpbg=systemname.bgcol;
-	systemname.bgcol=GFXColor(0,0,0,background_alpha);
-	systemname.Draw();
+	bool automatte=(0==tpbg.a);
+	if(automatte){systemname.bgcol=GFXColor(0,0,0,background_alpha);}
+	systemname.Draw(systemnamestring,0,true,false,automatte);
 	systemname.bgcol=tpbg;
 	//***************************
 
