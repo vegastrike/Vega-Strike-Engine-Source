@@ -70,7 +70,11 @@ void NavigationSystem::DrawSystem()
 	systemname.SetPos( (((screenskipby4[0]+screenskipby4[1])/2)-offset) , screenskipby4[3]);
 	systemname.SetText(systemnamestring);
 //	systemname.SetCharSize(1, 1);
+	static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
+	GFXColor tpbg=systemname.bgcol;
+	systemname.bgcol=GFXColor(0,0,0,background_alpha);
 	systemname.Draw();
+	systemname.bgcol=tpbg;
 	//***************************
 
 

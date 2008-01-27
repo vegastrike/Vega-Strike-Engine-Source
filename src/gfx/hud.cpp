@@ -121,7 +121,7 @@ TextPlane::TextPlane(const GFXColor & c, const GFXColor & bgcol) {
 TextPlane::~TextPlane () {
 }
 int TextPlane::Draw (int offset) {
-  return Draw (myText,offset,true);
+  return Draw (myText,offset,true,false,true);
 }
 
 static unsigned int * CreateLists() {
@@ -346,7 +346,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
 	  if(automatte){
 	    float shadowlen=glutBitmapWidth(fnt,' ')*5./(.5*g_game.x_resolution);
 		GFXColorf(this->bgcol);
-		DrawSquare(0,shadowlen,-rowheight*.25,rowheight*.75);
+		DrawSquare(col-origcol,col-origcol+shadowlen*5/(.5*g_game.x_resolution),-rowheight*.25/scaley,rowheight*.75/scaley);
 		GFXColorf(this->col);
 	  }
       col+=glutBitmapWidth (fnt,' ')*5./(.5*g_game.x_resolution);;

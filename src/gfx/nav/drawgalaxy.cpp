@@ -56,20 +56,28 @@ static void DrawNodeDescription(string text, float x_, float y_, float size_x, f
 		return;
 	TextPlane displayname;	//	will be used to display shits names
 	displayname.col = col;
-	
+	static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
 	int length = text.size();
 	float offset = (float(length)*0.005);
 	if(ignore_occupied_areas) {
 		displayname.SetPos((x_-offset), y_);
 		displayname.SetText(text);
-		displayname.SetCharSize(size_x, size_y);
-		displayname.Draw();
+		displayname.SetCharSize(size_x, size_y);		
+		
+	  GFXColor tpbg=displayname.bgcol;
+	  displayname.bgcol=GFXColor(0,0,0,background_alpha);
+	  displayname.Draw();
+	  displayname.bgcol=tpbg;
 	} else {
 		float new_y = screenoccupation->findfreesector(x_, y_);
 		displayname.SetPos((x_-offset), new_y);
 		displayname.SetText(text);
 		displayname.SetCharSize(size_x, size_y);
-		displayname.Draw();
+	  GFXColor tpbg=displayname.bgcol;
+	  displayname.bgcol=GFXColor(0,0,0,background_alpha);
+	  displayname.Draw();
+	  displayname.bgcol=tpbg;
+		
 	}
 }
 

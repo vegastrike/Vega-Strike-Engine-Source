@@ -262,7 +262,6 @@ void drawdescription (string text, float x_, float y_, float size_x, float size_
 		displayname.SetPos((x_-offset), y_);
 		displayname.SetText(text);
 		displayname.SetCharSize(size_x, size_y);
-		displayname.Draw();
 	}
 
 
@@ -272,8 +271,12 @@ void drawdescription (string text, float x_, float y_, float size_x, float size_
 		displayname.SetPos((x_-offset), new_y);
 		displayname.SetText(text);
 		displayname.SetCharSize(size_x, size_y);
-		displayname.Draw();
 	}
+	static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
+	  GFXColor tpbg=displayname.bgcol;
+	  displayname.bgcol=GFXColor(0,0,0,background_alpha);
+	  displayname.Draw();
+	  displayname.bgcol=tpbg;
 }
 
 
