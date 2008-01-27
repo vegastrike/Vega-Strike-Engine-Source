@@ -201,7 +201,7 @@ bool doNewLine(string::const_iterator begin,
   }
   return cur_pos+((begin+1!=end)?charWidth(*begin,metrics):0)>=end_pos;
 }
-int TextPlane::Draw(const string & newText, int offset,bool startlower, bool force_highquality)
+int TextPlane::Draw(const string & newText, int offset,bool startlower, bool force_highquality, bool automatte)
 {
   int retval=1;
   bool drawbg = (bgcol.a!=0);
@@ -225,7 +225,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
   GetPos(row,origcol);
   float rowheight=use_bit?getFontHeight():myFontMetrics.j;
   myFontMetrics.j=rowheight;
-
+  
 	  
   if (startlower) {
       row -= rowheight;
@@ -258,7 +258,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
 
   glPushMatrix();
   glLoadIdentity();
-  if (drawbg) {
+  if (!automatte&&drawbg) {
 	GFXColorf(this->bgcol);
 	DrawSquare(col,this->myDims.i,row-rowheight*.25,row+rowheight);
   }
@@ -314,20 +314,41 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
       if (myc=='_') {
         myc = ' ';
       }
+	  if (use_bit){
+		   if(automatte){
+			float shadowlen=(float)glutBitmapWidth(fnt,myc)/scalex;
+			GFXColorf(this->bgcol);
+			DrawSquare(col-origcol,col-origcol+shadowlen/(.5*g_game.x_resolution),-rowheight*.25/scaley,rowheight*.75/scaley);
+			GFXColorf(this->col);
+		  }
+	  } else if(automatte){
+		     float shadowlen=(float)glutStrokeWidth(fnt,myc)/scalex;
+			 GFXColorf(this->bgcol);
+			 DrawSquare(col-origcol,col-origcol+shadowlen/(.5*g_game.x_resolution),-rowheight*.25/scaley,rowheight*.75/scaley);
+			 GFXColorf(this->col);
+	  }
       //glutStrokeCharacter (GLUT_STROKE_ROMAN,*text_it);
       retval+=potentialincrease;
       potentialincrease=0;
       int lists = display_lists[myc+(isInside()?128:0)];
       if (lists) {
-	GFXCallList(lists);
-      }else{
-	if (use_bit)
-	  glutBitmapCharacter (fnt,myc);
-	else
-	  glutStrokeCharacter (GLUT_STROKE_ROMAN,myc);
+	    GFXCallList(lists);
+	  }else{
+		 if (use_bit){
+	        glutBitmapCharacter (fnt,myc);
+		  }
+		 else{
+           glutStrokeCharacter (GLUT_STROKE_ROMAN,myc);
+		 }
       }
-    }
+	}
     if(*text_it=='\t') {
+	  if(automatte){
+	    float shadowlen=glutBitmapWidth(fnt,' ')*5./(.5*g_game.x_resolution);
+		GFXColorf(this->bgcol);
+		DrawSquare(0,shadowlen,-rowheight*.25,rowheight*.75);
+		GFXColorf(this->col);
+	  }
       col+=glutBitmapWidth (fnt,' ')*5./(.5*g_game.x_resolution);;
       glutBitmapCharacter (fnt,' ');
       glutBitmapCharacter (fnt,' ');
@@ -336,7 +357,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
       glutBitmapCharacter (fnt,' ');
     } else {
       if (use_bit) {
-	col+=glutBitmapWidth (fnt,*text_it)/(float)(.5*g_game.x_resolution);;
+	      col+=glutBitmapWidth (fnt,*text_it)/(float)(.5*g_game.x_resolution);;
       }else {
 		  col+=myFontMetrics.i*glutStrokeWidth(GLUT_STROKE_ROMAN,*text_it)/std_wid;
       }
@@ -348,7 +369,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
       glPopMatrix();
       glPushMatrix ();
       glLoadIdentity();
-	  if (drawbg) {
+	  if (!automatte&&drawbg) {
 		GFXColorf(this->bgcol);
 		DrawSquare(col,this->myDims.i,row-rowheight*.25,row+rowheight*.75);
 		GFXColorf(this->col);
@@ -360,7 +381,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
       glScalef(scalex,scaley,1);
       glRasterPos2f(0,0);
       potentialincrease++;
-    }
+	}
     text_it++;
   }
   if(gl_options.smooth_lines)

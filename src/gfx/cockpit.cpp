@@ -1501,8 +1501,12 @@ void GameCockpit::DrawGauges(Unit * un) {
   }
   if (!text)
 	  return;
-  text->SetSize (2,-2);
+  
   GFXColorf (textcol);
+  GFXColor origbgcol=text->bgcol;
+  static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
+  static float textwidthapproxHACK=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","textwidthapproxHACK","0.0175"));
+  text->bgcol=GFXColor(0,0,0,background_alpha);
   for (i=UnitImages::KPS;i<UnitImages::AUTOPILOT_MODAL;i++) {
     if (gauges[i]) {
       float sx,sy,px,py;
@@ -1513,23 +1517,23 @@ void GameCockpit::DrawGauges(Unit * un) {
       float tmp = LookupTargetStat (i,un);
 	  float tmp2=0;
       char ourchar[64];
-	  sprintf (ourchar,"%.0f", tmp);
+	  int len=sprintf (ourchar,"%.0f", tmp);
 	  if (i==UnitImages::KPS) {
 		  float c=300000000.0f;
 		  if (tmp>c/10){
 			tmp2=tmp/c;
-		    sprintf (ourchar,"%.2f C", tmp2);
+		    len=sprintf (ourchar,"%.2f C", tmp2);
 		  }
 	  }
 	  if (i==UnitImages::MASSEFFECT){
-		  sprintf (ourchar,"MASS:%.0f%% (base)", tmp);
+		  len=sprintf (ourchar,"MASS:%.0f%% (base)", tmp);
 	  }
       GFXColorf (textcol);
-      text->Draw (string (ourchar));
+	  //text->SetSize (px+textwidthapproxHACK*(float)len,-2);
+	  text->SetSize (2,-2);
+      text->Draw(string (ourchar),0,false,false,true);
     }
   }
-  TextPlane text2(GFXColor(1,1,1,1), GFXColor(0,0,0,.0625));
-  text2.SetSize(1.2, -2);
   for (i=UnitImages::AUTOPILOT_MODAL;i<UnitImages::NUMGAUGES;i++) {
     if (gauges[i]) {
       float sx,sy,px,py;
@@ -1634,9 +1638,12 @@ void GameCockpit::DrawGauges(Unit * un) {
 			modevalue="MALFUNCTION!";
 	  }
 	  GFXColorf (textcol);
-      text->Draw (modename+modevalue);
+	  //text->SetSize(px+textwidthapproxHACK*(modename.size()+modevalue.size()), -2);
+	  text->SetSize(2,-2);
+      text->Draw (modename+modevalue,0,false,false,true);
     }
   }
+  text->bgcol=origbgcol;
   GFXColor4f (1,1,1,1);
 }
 void GameCockpit::Init (const char * file) {

@@ -64,7 +64,7 @@ public:
 	  myDims.j = y;
 	}
 	int Draw(int offset=0);//returns number of lines
-	int Draw (const std::string &text, int offset=0, bool start_one_line_lower=false, bool force_highquality=false);
+	int Draw (const std::string &text, int offset=0, bool start_one_line_lower=false, bool force_highquality=false, bool automatte=false);
 	void SetText(const std::string &newText) {
 		myText = newText;
 	}
