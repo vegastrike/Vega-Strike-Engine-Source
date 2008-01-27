@@ -601,6 +601,7 @@ void AutoLongHaul::Execute() {
            deactivatewarp=true;//turn off drive
 	 }
   }
+  static bool rampdown=XMLSupport::parse_bool(vs_config->getVariable("physics","autopilot_ramp_warp_down","true"));
   if (DistanceWarrantsWarpTo(parent,UnitUtil::getSignificantDistance(parent,target),false)&&deactivatewarp==false) {\
 	  if (parent->graphicOptions.InWarp==0) {
 		parent->graphicOptions.InWarp=1;
@@ -609,7 +610,6 @@ void AutoLongHaul::Execute() {
   }else {
 	  if (parent->graphicOptions.InWarp==1) {
 		parent->graphicOptions.InWarp=0;
-                static bool rampdown=XMLSupport::parse_bool(vs_config->getVariable("physics","autopilot_ramp_warp_down","true"));
                 if (rampdown)
                   parent->graphicOptions.WarpRamping=1;
 	  }
@@ -637,6 +637,12 @@ void AutoLongHaul::Execute() {
   
   if (do_auto_finish&&(stopnow||dis<distance_to_stop||(target->Target()==parent&&dis<enemy_distance_to_stop))){
 	parent->autopilotactive=false;
+	if (parent->graphicOptions.InWarp==1) {
+	  parent->graphicOptions.InWarp=0;
+	  if (rampdown){
+        parent->graphicOptions.WarpRamping=1;
+	  }
+	}
     done=true;
   }
 }
