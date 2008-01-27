@@ -345,7 +345,7 @@ void DrawSquare(float left,float right, float top, float bot) {
 
 	glEnd ();
 }
-int TextPlane::Draw(const string & newText, int offset,bool startlower, bool force_highquality)
+int TextPlane::Draw(const string & newText, int offset,bool startlower, bool force_highquality, bool automatte)
 {
   int retval=1;
   bool drawbg = (bgcol.a!=0);
