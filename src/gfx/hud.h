@@ -55,13 +55,17 @@ public:
 	  x = myFontMetrics.i;
 	  y = myFontMetrics.j;
 	}
-	void GetPos (float &x, float &y) {
-	  x = myFontMetrics.k;
-	  y = myDims.k;
+	void GetPos (float &y, float &x) {
+	  y = myFontMetrics.k;
+	  x = myDims.k;
 	}
 	void SetSize (float x, float y) {
 	  myDims.i = x;
 	  myDims.j = y;
+	}
+	void GetSize (float &x, float &y) {
+	  x = myDims.i;
+	  y = myDims.j;
 	}
 	int Draw(int offset=0);//returns number of lines
 	int Draw (const std::string &text, int offset=0, bool start_one_line_lower=false, bool force_highquality=false, bool automatte=false);

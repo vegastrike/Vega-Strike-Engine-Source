@@ -356,7 +356,11 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 
 void    NetServer::sendJumpFinal(ClientPtr clt) {
     Packet p2;
-	p2.send(CMD_JUMP,0,NULL,0,SENDANDFORGET,NULL,clt->tcp_sock,__FILE__,148);
+	NetBuffer buf;
+	buf.addString(clt->server_ip);
+	buf.addShort(clt->server_port);
+	
+	p2.send(CMD_JUMP,0,buf.getData(),buf.getDataLength(),SENDRELIABLE,NULL,clt->tcp_sock,__FILE__,148);
 	if (clt&&0/*dont discon until client requests it*/)
 		logoutList.push_back(clt);
 }

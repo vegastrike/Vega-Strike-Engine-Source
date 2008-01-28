@@ -275,7 +275,7 @@ void BaseInterface::Room::Draw (BaseInterface *base) {
 						}
 						text_marker.col = GFXColor(text_color_r, text_color_g, text_color_b, links[i]->alpha);
 						text_marker.SetPos(text_pos_x, text_pos_y);
-						if(text_marker.GetText().find("XXX")!=0){
+						if(links[i]->pythonfile != "#" && text_marker.GetText().find("XXX")!=0){
 							GFXColor tmpbg=text_marker.bgcol;
 							bool automatte=(0==tmpbg.a);
 							if(automatte){text_marker.bgcol=GFXColor(0,0,0,base_text_background_alpha);}
@@ -368,6 +368,20 @@ void BaseInterface::Room::BaseText::Draw (BaseInterface *base) {
     if (base_max_height<tmpy)
       g_game.y_resolution=base_max_height;
   }
+  if (text.GetText().empty()) {
+    float posx,posy,wid,hei;
+	text.GetPos(posy,posx);
+	text.GetSize(wid,hei);
+	
+    GFXColorf(text.bgcol);
+    GFXBegin(GFXQUAD);
+    GFXVertex3f(posx,hei,0.0f);
+    GFXVertex3f(wid,hei,0.0f);
+    GFXVertex3f(wid,posy,0.0f);
+    GFXVertex3f(posx,posy,0.0f);
+    GFXEnd();
+	return;
+  }
   static float base_text_background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","base_text_background_alpha","0.0625"));
   GFXColor tmpbg=text.bgcol;
   bool automatte=(0==tmpbg.a);
@@ -383,7 +397,7 @@ void RunPython(const char *filnam) {
 	printf("Run python:\n%s\n", filnam);
 #endif
 	if (filnam[0]) {
-		if (filnam[0]=='#') {
+		if (filnam[0]=='#' and filnam[1]!='\0') {
 			::Python::reseterrors();
 			PyRun_SimpleString(const_cast<char*>(filnam));
 			::Python::reseterrors();
@@ -670,17 +684,20 @@ void BaseInterface::MouseOver (int xbeforecalc, int ybeforecalc) {
 	if (link)
 		link->MouseMove(this,x,y,getMouseButtonMask());
 	lastmouseindex = i;
-
+	
+	static float overcolor[4]={1,.666666667,0,1};
+	static bool donecolor1=(vs_config->getColor("default","base_mouse_over",overcolor,true),true);
+	static float inactivecolor[4]={0,1,0,1};
+	static bool donecolor2=(vs_config->getColor("default","base_mouse_passive",inactivecolor,true),true);
 	if (link) {
-          float overcolor[4]={1,.666666667,0,1};
-          static bool donecolor=(vs_config->getColor("default","base_mouse_over",overcolor,true),true);
           curtext.SetText(link->text);
+	} else {
+          curtext.SetText(rooms[curroom]->deftext);
+	}
+	if (link && link->pythonfile!="#") {
           curtext.col=GFXColor(overcolor[0],overcolor[1],overcolor[2],overcolor[3]);
           drawlinkcursor=true;
 	} else {
-          float inactivecolor[4]={0,1,0,1};
-          static bool donecolor=(vs_config->getColor("default","base_mouse_passive",inactivecolor,true),true);
-          curtext.SetText(rooms[curroom]->deftext);
           curtext.col=GFXColor(inactivecolor[0],inactivecolor[1],inactivecolor[2],inactivecolor[3]);
           drawlinkcursor=false;
 	}

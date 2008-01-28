@@ -1082,7 +1082,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 		break;
 		case CMD_JUMP :
 		{
-			if (clt) {
+			if (clt && clt->loginstate>Client::LOGGEDIN) {
 				un = clt->game_unit.GetUnit();
 				if (un) {
 					// Do Magic.

@@ -76,6 +76,11 @@ public:
 	string			callsign;
 	string			name;
 	string			passwd;
+
+	/* Accountserver sends this info to us. */
+	string			server_ip;
+	unsigned short	server_port;
+	
 	/* In-game parameters */
 	bool			ingame;
 	enum Loginstate {CONNECTED, WAITLISTED, LOGGEDIN, SAVEDGAME, INGAME};
