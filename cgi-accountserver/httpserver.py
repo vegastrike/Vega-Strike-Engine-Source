@@ -1,5 +1,9 @@
 #!/usr/bin/python
 
+# Run the server with "python httpserver.py"
+
+# This file is not executable for safety if these files are placed in a real cgi-bin directory.
+
 import os
 import sys
 if __name__=='__main__' and 'REQUEST_METHOD' in os.environ:
@@ -121,6 +125,6 @@ def httpServer(port=8080, host=''):
 	httpd.serve_forever()
 
 if __name__=='__main__':
-	connect_db()
+	connect_db(port=settings.http_port)
 	httpServer()
 

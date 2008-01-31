@@ -1,6 +1,6 @@
 
 # Full path to the directing holding data.
-data_path='/path/to/cgi-bin'
+data_path='/path/to/vegastrike/data4.x'
 
 mods = {
 	# Default
@@ -8,18 +8,16 @@ mods = {
 		'path': '', #root directory
 		'name': 'Vega Strike main',
 		'servers':{
-			'Crucible/Cephid_17': '171.67.76.67:6777',
+			'': '1.2.3.4:6777',
 			}
 		},
-	# Test server
+	# Test server -- Mod example
 	'test'   : {
 		'path': 'test',
-		'name': 'Vega Strike Test Servers',
+		'name': 'Vega Strike Test Server',
 		'servers':{
-			'Crucible/Cephid_17': '127.0.0.1:6778',
-			'testsystems/absolutelynothing': '127.0.0.1:6777',
 			'Sol': '127.0.0.1:6779',
-			'': '127.0.0.1:6780',
+			'': '127.0.0.1:6778',
 			}
 		},
 	}
@@ -43,4 +41,4 @@ mysql_dbconfig = {
 
 dbconfig = file_dbconfig
 
-
+http_port = 8080 # Port number for httpserver.py

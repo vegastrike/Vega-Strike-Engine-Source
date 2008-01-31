@@ -96,12 +96,18 @@ class DBBase:
 	
 	def get_default_save(self, shiptype='', faction=''):
 		try:
-			f=self.open_default_file("default.save")
+		 f=self.open_default_file("network.save")
 		except IOError:
-			try:
-				f=self.open_default_file("accounts/default.save")
-			except:
-				raise DBError, "Not able to open the default saved game."
+		 try:
+		  f=self.open_default_file("New_Game")
+		 except IOError:
+		  try:
+		   f=self.open_default_file("accounts/default.save")
+		  except IOError:
+		   try:
+		    f=self.open_default_file("default.save")
+		   except:
+		    raise DBError, "Not able to open the default saved game."
 		s = f.read()
 		f.close()
 		if not shiptype:
