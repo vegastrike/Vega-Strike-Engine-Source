@@ -19,3 +19,8 @@ Step 5.
 For each 'mod', you can make a folder inside the units/ folder containing
 a copy of units.csv, factions.xml and New_Game, with custom mod settings.
 
+================
+To start up a server, you need python installed.
+Then from the cgi-accountserver directory run:
+    python httpserver.py
+
