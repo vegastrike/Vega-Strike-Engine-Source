@@ -397,7 +397,7 @@ void RunPython(const char *filnam) {
 	printf("Run python:\n%s\n", filnam);
 #endif
 	if (filnam[0]) {
-		if (filnam[0]=='#' and filnam[1]!='\0') {
+		if (filnam[0]=='#' && filnam[1]!='\0') {
 			::Python::reseterrors();
 			PyRun_SimpleString(const_cast<char*>(filnam));
 			::Python::reseterrors();
