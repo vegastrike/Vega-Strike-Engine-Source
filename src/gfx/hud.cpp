@@ -286,6 +286,21 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
   glScalef (scalex,scaley,1);
   bool firstThroughLoop=true;
   while(text_it != newText.end() && (firstThroughLoop||row>myDims.j-rowheight*.25)) {
+    unsigned char myc = *text_it;
+    if (myc=='_') {
+      myc = ' ';
+    }
+    float shadowlen = 0;
+    if(myc=='\t') {
+      shadowlen=glutBitmapWidth(fnt,' ')*5./(.5*g_game.x_resolution);
+    } else {
+      if (use_bit) {
+        shadowlen = glutBitmapWidth (fnt,myc)/(float)(.5*g_game.x_resolution); // need to use myc -- could have transformed '_' to ' '
+      } else {
+        shadowlen = myFontMetrics.i*glutStrokeWidth(GLUT_STROKE_ROMAN,myc)/std_wid;
+      }
+    }
+    
     if (*text_it=='#') {
       if (newText.end()-text_it>6) {
 	float r,g,b;
@@ -310,22 +325,10 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
       text_it++;
       continue;
     }else if(*text_it>=32) {//always true
-      unsigned char myc = *text_it;
-      if (myc=='_') {
-        myc = ' ';
-      }
-	  if (use_bit){
-		   if(automatte){
-			float shadowlen=(float)glutBitmapWidth(fnt,myc)/scalex;
-			GFXColorf(this->bgcol);
-			DrawSquare(col-origcol,col-origcol+shadowlen/(.5*g_game.x_resolution),-rowheight*.25/scaley,rowheight*.75/scaley);
-			GFXColorf(this->col);
-		  }
-	  } else if(automatte){
-		     float shadowlen=(float)glutStrokeWidth(fnt,myc)/scalex;
-			 GFXColorf(this->bgcol);
-			 DrawSquare(col-origcol,col-origcol+shadowlen/(.5*g_game.x_resolution),-rowheight*.25/scaley,rowheight*.75/scaley);
-			 GFXColorf(this->col);
+	  if(automatte){
+		GFXColorf(this->bgcol);
+		DrawSquare(col-origcol,col-origcol+shadowlen/scalex,-rowheight*.25/scaley,rowheight*.75/scaley);
+		GFXColorf(this->col);
 	  }
       //glutStrokeCharacter (GLUT_STROKE_ROMAN,*text_it);
       retval+=potentialincrease;
@@ -344,23 +347,18 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
 	}
     if(*text_it=='\t') {
 	  if(automatte){
-	    float shadowlen=glutBitmapWidth(fnt,' ')*5./(.5*g_game.x_resolution);
 		GFXColorf(this->bgcol);
 		DrawSquare(col-origcol,col-origcol+shadowlen*5/(.5*g_game.x_resolution),-rowheight*.25/scaley,rowheight*.75/scaley);
 		GFXColorf(this->col);
 	  }
-      col+=glutBitmapWidth (fnt,' ')*5./(.5*g_game.x_resolution);;
+      col+=shadowlen;
       glutBitmapCharacter (fnt,' ');
       glutBitmapCharacter (fnt,' ');
       glutBitmapCharacter (fnt,' ');
       glutBitmapCharacter (fnt,' ');
       glutBitmapCharacter (fnt,' ');
     } else {
-      if (use_bit) {
-		  col+=glutBitmapWidth (fnt,(*text_it!='_')?*text_it:' ')/(float)(.5*g_game.x_resolution); // need to use myc -- could have transformed '_' to ' '
-      }else {
-		  col+=myFontMetrics.i*glutStrokeWidth(GLUT_STROKE_ROMAN,(*text_it!='_')?*text_it:' ')/std_wid;
-      }
+      col+=shadowlen;
     }
     if(doNewLine(text_it,newText.end(),col,myDims.i, myFontMetrics.i,row-rowheight<=myDims.j)){
       GetPos (tmp,col);
