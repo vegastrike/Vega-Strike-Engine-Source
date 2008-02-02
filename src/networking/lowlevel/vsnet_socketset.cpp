@@ -387,10 +387,10 @@ void SocketSet::run( )
 
 #if defined(VSNET_DEBUG) || defined(__APPLE__)
 void SocketSet::private_test_dump_active_sets( int           maxfd,
-                                               const fd_set& read_before,
-                                               const fd_set& read_after,
-                                               const fd_set& write_before,
-                                               const fd_set& write_after )
+                                               fd_set& read_before,
+                                               fd_set& read_after,
+                                               fd_set& write_before,
+                                               fd_set& write_after )
 {
 #if 0
  // Causes compile errors and I'm too lazy to figure it out at the moment.

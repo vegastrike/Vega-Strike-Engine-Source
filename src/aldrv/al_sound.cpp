@@ -181,7 +181,7 @@ ALsizei *size,ALsizei *freq, ALboolean *loop)
 #ifdef __APPLE__
 #include <al.h>
 #include <alc.h>
-#include <alut.h>
+//#include <alut.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>

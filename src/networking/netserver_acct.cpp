@@ -55,7 +55,7 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 					COUT << "Got response for client IP : " << ipadr << endl;
 				}
 					
-			if (entry.type == WaitListEntry::CONNECTING && cmd!=ACCT_SUCCESS && cmd != 0) {
+				if (entry.type == (int)WaitListEntry::CONNECTING && cmd!=ACCT_SUCCESS && cmd != 0) {
 				waitList.erase(iter);
 					
 				if (clt) clt->loginstate=Client::CONNECTED;
@@ -89,7 +89,7 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 				default:
 					COUT<<">>> UNKNOWN COMMAND =( "<<(unsigned int)cmd<<" )= --------------------------------------"<<endl<<"Full datastream was:"<<p<<endl;
 			}
-				} else if (entry.type == WaitListEntry::JUMPING) {
+			} else if (entry.type == (int)WaitListEntry::JUMPING) {
 					waitList.erase(iter);
 					sendJumpFinal(clt);
 				}

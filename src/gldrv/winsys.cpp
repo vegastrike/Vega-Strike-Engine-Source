@@ -232,6 +232,9 @@ static void setup_sdl_video_mode()
       SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, zs );
       SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );      
     };
+#if SDL_VERSION_ATLEAST(1,2,10)
+    SDL_GL_SetAttribute( SDL_GL_ACCELERATED_VISUAL, 1);
+#endif
     width = g_game.x_resolution;
     height =g_game.y_resolution  ;
 

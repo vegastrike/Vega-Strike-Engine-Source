@@ -113,10 +113,10 @@ private:
 
 #if defined(VSNET_DEBUG) || defined(__APPLE__)
     void private_test_dump_active_sets( int           maxfd,
-                                        const fd_set& read_before,
-                                        const fd_set& read_after,
-                                        const fd_set& write_before,
-                                        const fd_set& write_after );
+                                        fd_set& read_before,
+                                        fd_set& read_after,
+                                        fd_set& write_before,
+                                        fd_set& write_after );
 #endif
 #ifdef VSNET_DEBUG
     void private_test_dump_request_sets( timeval* timeout );

@@ -147,6 +147,7 @@ void NetServer::sendLoginAccept(ClientPtr clt, Cockpit *cp) {
 	StarSystem * sts = zonemgr->addZone( sysname );
 	
 #ifdef CRYPTO
+	unsigned char * digest = new unsigned char[FileUtil::Hash.DigestSize()];
 	string sysxml;
 	if(!(sysxml=zonemgr->getSystem( relsys)).empty())
 		FileUtil::HashStringCompute( sysxml, digest);
