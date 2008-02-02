@@ -285,6 +285,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
   }
   glScalef (scalex,scaley,1);
   bool firstThroughLoop=true;
+  GFXColor currentCol (this->col);
   while(text_it != newText.end() && (firstThroughLoop||row>myDims.j-rowheight*.25)) {
     unsigned char myc = *text_it;
     if (myc=='_') {
@@ -305,16 +306,14 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
       if (newText.end()-text_it>6) {
 	float r,g,b;
 	r = TwoCharToFloat (*(text_it+1),*(text_it+2));
-	g=TwoCharToFloat (*(text_it+3),*(text_it+4));
-	b=TwoCharToFloat (*(text_it+5),*(text_it+6));
+	g = TwoCharToFloat (*(text_it+3),*(text_it+4));
+	b = TwoCharToFloat (*(text_it+5),*(text_it+6));
 	if (r==0&&g==0&&b==0) {
-	  GFXColorf(this->col);
+		currentCol = this->col;
 	}else {
-	  GFXColor4f(r,
-		     g,
-		     b,
-		     this->col.a);
+		currentCol = GFXColor(r, g, b, this->col.a);
 	}
+	GFXColorf(currentCol);
         static bool setRasterPos= XMLSupport::parse_bool(vs_config->getVariable("graphics","set_raster_text_color","true"));
         if (use_bit&&setRasterPos)
           glRasterPos2f(col-origcol,0);
@@ -328,7 +327,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
 	  if(automatte){
 		GFXColorf(this->bgcol);
 		DrawSquare(col-origcol,col-origcol+shadowlen/scalex,-rowheight*.25/scaley,rowheight*.75/scaley);
-		GFXColorf(this->col);
+		GFXColorf(currentCol);
 	  }
       //glutStrokeCharacter (GLUT_STROKE_ROMAN,*text_it);
       retval+=potentialincrease;
@@ -349,7 +348,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
 	  if(automatte){
 		GFXColorf(this->bgcol);
 		DrawSquare(col-origcol,col-origcol+shadowlen*5/(.5*g_game.x_resolution),-rowheight*.25/scaley,rowheight*.75/scaley);
-		GFXColorf(this->col);
+		GFXColorf(currentCol);
 	  }
       col+=shadowlen;
       glutBitmapCharacter (fnt,' ');
@@ -370,11 +369,11 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
 	  if (!automatte&&drawbg) {
 		GFXColorf(this->bgcol);
 		DrawSquare(col,this->myDims.i,row-rowheight*.25,row+rowheight*.75);
-		GFXColorf(this->col);
 	  }
       if (*text_it=='\n') {
-		GFXColorf(this->col);
+	    currentCol = this->col;
       }
+	  GFXColorf(currentCol);
       glTranslatef (col,row,0);
       glScalef(scalex,scaley,1);
       glRasterPos2f(0,0);
