@@ -125,7 +125,7 @@ void PhysicsSystem::ApplyForce (const Vector &Vforce, float time) {
 
 		ActiveForces[NumActiveForces].F = Vforce;
 		ActiveForces[NumActiveForces].t = time;
-		NumActiveForces++;
+		++NumActiveForces;
 	}
 }
 
@@ -135,7 +135,7 @@ void PhysicsSystem::ApplyTorque (const Vector &Vforce, const Vector &Location, f
 	{		
 		ActiveTorques[NumActiveTorques].F = (Location.Cast()-*pos).Cast().Cross (Vforce);
 		ActiveTorques[NumActiveTorques].t = time;
-		NumActiveTorques++;
+		++NumActiveTorques;
 	}
 }
 
@@ -145,7 +145,7 @@ void PhysicsSystem::ApplyLocalTorque (const Vector &Vforce, const Vector &Locati
 	{		
 		ActiveTorques[NumActiveTorques].F = Location.Cross (Vforce);
 		ActiveTorques[NumActiveTorques].t = time;
-		NumActiveTorques++;
+		++NumActiveTorques;
 	}
 }
 
@@ -154,22 +154,22 @@ void PhysicsSystem::ApplyBalancedLocalTorque (const Vector &Vforce, const Vector
 	{		
 		ActiveTorques[NumActiveTorques].F = Location.Cross (Vforce);
 		ActiveTorques[NumActiveTorques].t = time;
-		NumActiveTorques++;
+		++NumActiveTorques;
 	}
 }
 void PhysicsSystem::ApplyImpulses (float Time) {
 	Vector temptorque = Time*NetTorque;
 	Vector tempforce = Time*NetForce;
 	int i;
-	for ( i = 0; i<NumActiveTorques; i++)
+	for ( i = 0; i<NumActiveTorques; ++i)
 	{
 		if (Time>=ActiveTorques[i].t)
 		{
 			temptorque += ActiveTorques[i].t*ActiveTorques[i].F;
 			ActiveTorques[i].F = ActiveTorques[NumActiveTorques-1].F;
 			ActiveTorques[i].t = ActiveTorques[NumActiveTorques-1].t;
-			NumActiveTorques--;
-			i--;//so the loop goes through the active force that was just switched places with
+			--NumActiveTorques;
+			--i;//so the loop goes through the active force that was just switched places with
 		}
 		else
 		{
@@ -177,7 +177,7 @@ void PhysicsSystem::ApplyImpulses (float Time) {
 			ActiveTorques[i].t -= Time;
 		}
 	}
-	for (i=0; i<NumActiveForces; i++)
+	for (i=0; i<NumActiveForces; ++i)
 	{
 		if (Time>=ActiveForces[i].t)
 		{
