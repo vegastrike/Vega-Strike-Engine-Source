@@ -771,6 +771,9 @@ AM_CONDITIONAL(BOOSTSYSTEM,test "x$ACENABLE" != "xno")
 dnl Turn use of stencil buffer on/off
 AC_ARG_ENABLE(stencil-buffer, AC_HELP_STRING([--enable-stencil-buffer], [Use if your hardware has a stencil buffer]),VS_CPPFLAGS="${VS_CPPFLAGS} -DUSE_STENCIL_BUFFER=1")
 
+AC_ARG_ENABLE(OPCODE_Collider,    AC_HELP_STRING([--enable-opcode],[Build with new collider OPCODE]),[ACENABLE=$enableval], [ACENABLE=$enableval], [ACENABLE=; OPCODE_Collider=yes])
+AM_CONDITIONAL([OPCODE], [test "x$OPCODE_Collider" == "xyes"])
+
 AC_ARG_ENABLE(nvidia-cg, AC_HELP_STRING([--enable-nvidia-cg], 
 	[Use if you have the NVidia SDK and CG compiler or compatible to get shader support (very experimental)]))
 if test "x$nvidia-cg" = "xyes"; then

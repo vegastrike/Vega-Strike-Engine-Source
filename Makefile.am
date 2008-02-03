@@ -324,6 +324,119 @@ LIBCOLLIDE = \
   src/cmd/collide/csgeom/box.h \
   src/cmd/collide/csgeom/transfrm.h
 
+libcollide2_a_CXXFLAGS = \
+   -Isrc/cmd/collide2 
+if OPCODE 
+libcollide2_a_SOURCES = \
+  src/cmd/collide2/Ice/IceAABB.cpp \
+  src/cmd/collide2/Ice/IceAABB.h \
+  src/cmd/collide2/Ice/IceAxes.h \
+  src/cmd/collide2/Ice/IceBoundingSphere.h \
+  src/cmd/collide2/Ice/IceContainer.cpp \
+  src/cmd/collide2/Ice/IceContainer.h \
+  src/cmd/collide2/Ice/IceFPU.h \
+  src/cmd/collide2/Ice/IceHPoint.cpp \
+  src/cmd/collide2/Ice/IceHPoint.h \
+  src/cmd/collide2/Ice/IceIndexedTriangle.cpp \
+  src/cmd/collide2/Ice/IceIndexedTriangle.h \
+  src/cmd/collide2/Ice/IceLSS.h \
+  src/cmd/collide2/Ice/IceMatrix3x3.cpp \
+  src/cmd/collide2/Ice/IceMatrix3x3.h \
+  src/cmd/collide2/Ice/IceMatrix4x4.cpp \
+  src/cmd/collide2/Ice/IceMatrix4x4.h \
+  src/cmd/collide2/Ice/IceMemoryMacros.h \
+  src/cmd/collide2/Ice/IceOBB.cpp \
+  src/cmd/collide2/Ice/IceOBB.h \
+  src/cmd/collide2/Ice/IcePairs.h \
+  src/cmd/collide2/Ice/IcePlane.cpp \
+  src/cmd/collide2/Ice/IcePlane.h \
+  src/cmd/collide2/Ice/IcePoint.cpp \
+  src/cmd/collide2/Ice/IcePoint.h \
+  src/cmd/collide2/Ice/IcePreprocessor.h \
+  src/cmd/collide2/Ice/IceRandom.cpp \
+  src/cmd/collide2/Ice/IceRandom.h \
+  src/cmd/collide2/Ice/IceRay.cpp \
+  src/cmd/collide2/Ice/IceRay.h \
+  src/cmd/collide2/Ice/IceRevisitedRadix.h \
+  src/cmd/collide2/Ice/IceSegment.cpp \
+  src/cmd/collide2/Ice/IceSegment.h \
+  src/cmd/collide2/Ice/IceTriangle.cpp \
+  src/cmd/collide2/Ice/IceTriangle.h \
+  src/cmd/collide2/Ice/IceTrilist.h \
+  src/cmd/collide2/Ice/IceTypes.h \
+  src/cmd/collide2/Ice/IceUtils.cpp \
+  src/cmd/collide2/Ice/IceUtils.h \
+  src/cmd/collide2/Ice/Stdafx.h \
+  src/cmd/collide2/Stdafx.h \
+  src/cmd/collide2/Opcode.h \
+  src/cmd/collide2/cssysdef.h \
+  src/cmd/collide2/cstypes.h \
+  src/cmd/collide2/csextern.h \
+  src/cmd/collide2/csgeom/box.cpp \
+  src/cmd/collide2/csgeom/box.h \
+  src/cmd/collide2/csgeom/matrix3.cpp \
+  src/cmd/collide2/csgeom/matrix3.h \
+  src/cmd/collide2/csgeom/vector3.cpp \
+  src/cmd/collide2/csgeom/vector.h \
+  src/cmd/collide2/csgeom/transfrm.h \
+  src/cmd/collide2/OPC_AABBCollider.cpp \
+  src/cmd/collide2/OPC_AABBCollider.h \
+  src/cmd/collide2/OPC_AABBTree.cpp \
+  src/cmd/collide2/OPC_AABBTree.h \
+  src/cmd/collide2/OPC_BaseModel.cpp \
+  src/cmd/collide2/OPC_BaseModel.h \
+  src/cmd/collide2/OPC_BoxBoxOverlap.h \
+  src/cmd/collide2/OPC_BoxPruning.cpp \
+  src/cmd/collide2/OPC_BoxPruning.h \
+  src/cmd/collide2/OPC_Collider.cpp \
+  src/cmd/collide2/OPC_Collider.h \
+  src/cmd/collide2/OPC_Common.cpp \
+  src/cmd/collide2/OPC_Common.h \
+  src/cmd/collide2/OPC_IceHook.h \
+  src/cmd/collide2/OPC_HybridModel.cpp \
+  src/cmd/collide2/OPC_HybridModel.h \
+  src/cmd/collide2/OPC_LSSAABBOverlap.h \
+  src/cmd/collide2/OPC_LSSCollider.cpp \
+  src/cmd/collide2/OPC_LSSCollider.h \
+  src/cmd/collide2/OPC_LSSTriOverlap.h \
+  src/cmd/collide2/OPC_MeshInterface.cpp \
+  src/cmd/collide2/OPC_MeshInterface.h \
+  src/cmd/collide2/OPC_Model.cpp \
+  src/cmd/collide2/OPC_Model.h \
+  src/cmd/collide2/OPC_OBBCollider.cpp \
+  src/cmd/collide2/OPC_OBBCollider.h \
+  src/cmd/collide2/OPC_OptimizedTree.cpp \
+  src/cmd/collide2/OPC_OptimizedTree.h \
+  src/cmd/collide2/OPC_Picking.cpp \
+  src/cmd/collide2/OPC_Picking.h \
+  src/cmd/collide2/OPC_PlanesAABBOverlap.h \
+  src/cmd/collide2/OPC_PlanesCollider.cpp \
+  src/cmd/collide2/OPC_PlanesCollider.h \
+  src/cmd/collide2/OPC_PlanesTriOverlap.h \
+  src/cmd/collide2/OPC_RayAABBOverlap.h \
+  src/cmd/collide2/OPC_RayCollider.cpp \
+  src/cmd/collide2/OPC_RayCollider.h \
+  src/cmd/collide2/OPC_RayTriOverlap.h \
+  src/cmd/collide2/OPC_Settings.h \
+  src/cmd/collide2/OPC_SphereAABBOverlap.h \
+  src/cmd/collide2/OPC_SphereCollider.cpp \
+  src/cmd/collide2/OPC_SphereCollider.h \
+  src/cmd/collide2/OPC_SphereTriOverlap.h \
+  src/cmd/collide2/OPC_SweepAndPrune.cpp \
+  src/cmd/collide2/OPC_SweepAndPrune.h \
+  src/cmd/collide2/OPC_TreeBuilders.cpp \
+  src/cmd/collide2/OPC_TreeBuilders.h \
+  src/cmd/collide2/OPC_TreeCollider.cpp \
+  src/cmd/collide2/OPC_TreeCollider.h \
+  src/cmd/collide2/OPC_TriBoxOverlap.h \
+  src/cmd/collide2/OPC_TriTriOverlap.h \
+  src/cmd/collide2/OPC_VolumeCollider.cpp \
+  src/cmd/collide2/OPC_VolumeCollider.h \
+  src/cmd/collide2/CSopcodecollider.cpp \
+  src/cmd/collide2/CSopcodecollider.h 
+else
+libcollide2_a_SOURCES = 
+endif
 
 LIBCMD = \
   src/cmd/alphacurve.cpp \
@@ -416,10 +529,12 @@ bin_PROGRAMS = \
 if !BOOSTSYSTEM
 noinst_LIBRARIES=\
   libboost_python.a \
-  libnetlowlevel.a
+  libnetlowlevel.a \
+  libcollide2.a
 else
 noinst_LIBRARIES= \
-  libnetlowlevel.a
+  libnetlowlevel.a \
+  libcollide2.a 
 endif 
 
 LIBCMDSERVER = \
@@ -650,10 +765,12 @@ if !BOOSTSYSTEM
   vegastrike_LDADD = \
   libboost_python.a \
   libnetlowlevel.a \
+  libcollide2.a \
   -lz  
 else
   vegastrike_LDADD = \
   libnetlowlevel.a \
+  libcollide2.a \
   -lboost_python-st \
   -lz
 endif  
@@ -661,20 +778,24 @@ endif
 if !BOOSTSYSTEM 
   vegastrike_DEPENDENCIES = \
   libboost_python.a \
-  libnetlowlevel.a
+  libnetlowlevel.a \
+  libcollide2.a 
 else
   vegastrike_DEPENDENCIES = \
-    libnetlowlevel.a
+    libnetlowlevel.a \
+    libcollide2.a
 endif
 
 if !BOOSTSYSTEM
 vegaserver_LDADD = \
   libboost_python.a \
+  libcollide2.a \
   libnetlowlevel.a \
   -lz
 else
 vegaserver_LDADD = \
   libnetlowlevel.a \
+  libcollide2.a \
   -lboost_python-st \
   -lz
 endif
@@ -682,10 +803,12 @@ endif
 if !BOOSTSYSTEM
 vegaserver_DEPENDENCIES = \
   libboost_python.a \
-  libnetlowlevel.a
+  libnetlowlevel.a \
+  libcollide2.a 
 else
 vegaserver_DEPENDENCIES = \
-  libnetlowlevel.a
+  libnetlowlevel.a \
+  libcollide2.a 
 endif
 
 
