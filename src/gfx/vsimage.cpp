@@ -113,6 +113,9 @@ unsigned char *	VSImage::ReadImage( VSFile * f, textureTransform * t, bool strip
 	CheckFormat( img_file);
 	switch( this->img_type)
 	{
+		case DdsImage :
+			ret = this->ReadDDS();
+		break;
 		case PngImage :
 			ret = this->ReadPNG();
 		break;
@@ -122,11 +125,7 @@ unsigned char *	VSImage::ReadImage( VSFile * f, textureTransform * t, bool strip
 		case BmpImage :
 			ret = this->ReadBMP();
 		break;
-		case DdsImage :
-			ret = this->ReadDDS();
-		break;
 		default :
-			this->img_type = Unrecognized;
 			cerr<<"::VSImage ERROR : Unknown image format"<<endl;
 			VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
 			ret = NULL;
@@ -206,38 +205,38 @@ VSError VSImage::CheckDDSSignature(VSFile * file)
 
 void	VSImage::CheckFormat( VSFile * file)
 {
+	if( this->CheckDDSSignature(file) == Ok)
+	{
+#ifdef VSIMAGE_DEBUG
+		cerr<<"\tFound a DDS file"<<endl;
+#endif
+		this->img_type = DdsImage;
+		return;
+	}	
 	if( this->CheckPNGSignature(file)==Ok)
 	{
-	#ifdef VSIMAGE_DEBUG
+#ifdef VSIMAGE_DEBUG
 		cerr<<"\tFound a PNG file"<<endl;
-	#endif
+#endif
 		this->img_type = PngImage;
 		return;
 	}
 	if( this->CheckBMPSignature(file)==Ok)
 	{
-	#ifdef VSIMAGE_DEBUG
+#ifdef VSIMAGE_DEBUG
 		cerr<<"\tFound a BMP file"<<endl;
-	#endif
+#endif
 		this->img_type = BmpImage;
 		return;
 	}
 	if( this->CheckJPEGSignature(file)==Ok)
 	{
-	#ifdef VSIMAGE_DEBUG
+#ifdef VSIMAGE_DEBUG
 		cerr<<"\tFound a JPEG file"<<endl;
-	#endif
+#endif
 		this->img_type = JpegImage;
 		return;
 	}
-	if( this->CheckDDSSignature(file) == Ok)
-	{
-	#ifdef VSIMAGE_DEBUG
-		cerr<<"\tFound a DDS file"<<endl;
-	#endif
-		this->img_type = DdsImage;
-		return;
-	}	
 }
 
 
@@ -339,10 +338,10 @@ unsigned char *	VSImage::ReadPNG()
 #ifdef VSIMAGE_DEBUG
 	cerr<<"1. Loading a PNG file : width="<<sizeX<<", height="<<sizeY<<", depth="<<img_depth<<", img_color="<<img_color_type<<", interlace="<<interlace_type<<endl;
 #endif
-	# if __BYTE_ORDER != __BIG_ENDIAN
+# if __BYTE_ORDER != __BIG_ENDIAN
 	if (this->img_depth==16)
 		png_set_swap (png_ptr);
-	#endif
+#endif
 
 	if (this->img_depth==16&&strip_16)
 		png_set_strip_16(png_ptr);
@@ -664,15 +663,9 @@ unsigned char *VSImage::ReadDDS()
 	int width=0;
 	int height=0;
     try {	
-	// Probably redundent, we already check this in CheckFormat
-		if( CheckDDSSignature( img_file)!=Ok){
-			cerr <<"VSImage ERROR : DDS Signature invalid, impossible.  !!!\n";
-			VSIMAGE_FAILURE(1,img_file->GetFilename().c_str());
-			throw(1);
-		}
 		// Skip what we already know. 
 		img_file->GoTo(4);
-		// Read in bytes to header.   Probably not endian-safe
+		// Read in bytes to header. Not sure if just reading to struct is endian-safe.
                 char ibuffer[4];                
 		img_file->Read(ibuffer,4);
                 header.size=POSH_ReadU32FromLittle(ibuffer);
@@ -701,15 +694,9 @@ unsigned char *VSImage::ReadDDS()
 		this->img_depth = header.pixelFormat.bpp;
 		this->sizeX=header.width;
 		this->sizeY=header.height;
+		
 		bool useDefaultType=false;
-		switch(header.pixelFormat.bpp){
-                case 4: 
-                  type = GL_LUMINANCE;
-                  break;
-                case 8: 
-                  type = GL_LUMINANCE_ALPHA;
-                  this->img_alpha = true;
-                  break;
+		switch(this->img_depth){
                 case 24: 
                   type=GL_RGB;
                   this->img_alpha = false;
@@ -718,42 +705,48 @@ unsigned char *VSImage::ReadDDS()
                   type=GL_RGBA;
                   this->img_alpha = true;
                   break;
-                case 0:
+                case 4: 
+                  type = GL_LUMINANCE;
+                  break;
+                case 8: 
+                  type = GL_LUMINANCE_ALPHA;
+                  this->img_alpha = true;
+                  break;
+		case 0:
                   useDefaultType=true;
                   break;
                 default:
-               		useDefaultType=true;
-					break;
-
+		  useDefaultType=true;
+		  break;
 		}
 		switch(header.pixelFormat.fourcc[3]){
                 case '1': 
-				  blockSize = 8;
+		  blockSize = 8;
                   if(type==GL_RGB||useDefaultType) {
-				  	this->img_depth = 24;
-                    this->mode = _DXT1;
-                    this->img_alpha=false;
-                    type=GL_RGBA;
-                  }else {
-                    this->mode = _DXT1RGBA;
-                    type=GL_RGBA;
-                    this->img_alpha=true;
+		  	this->img_depth = 24;
+			this->mode = _DXT1;
+			this->img_alpha=false;
+			type=GL_RGBA;
+                  } else {
+			this->mode = _DXT1RGBA;
+			type=GL_RGBA;
+			this->img_alpha=true;
                   }
                   break;
                 case '3': 
                   this->mode = _DXT3;
                   if (useDefaultType){
-                    this->img_alpha=true;
-					this->img_depth = 32;
-                    type=GL_RGBA;
+			this->img_alpha=true;
+			this->img_depth = 32;
+			type=GL_RGBA;
                   }
                   break;
                 case '5': 
                   this->mode = _DXT5;
                   if (useDefaultType) {
-                    this->img_alpha=true;
-					this->img_depth=32;
-                    type=GL_RGBA;
+			this->img_alpha=true;
+			this->img_depth=32;
+			type=GL_RGBA;
                   }
                   break;
                 default:
@@ -774,7 +767,7 @@ unsigned char *VSImage::ReadDDS()
 		s = (unsigned char*)malloc(inputSize+3);
 		sprintf((char*)s,"%i",header.nmips);
 		img_file->Read(s+2,inputSize);   
-		// At the end of execution what we have is the following
+		// At the end of execution what we have is the following:
 		// s contains the number of mipmaps then the main texture and all it's mipmaps 
 		// sizeY is the height of the initial texture, sizeX is the width.
 		// mode is the compressed format of the texture. It is assumed to be rgba
