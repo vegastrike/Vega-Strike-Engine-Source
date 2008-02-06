@@ -333,6 +333,12 @@ void NetClient::GetCurrentServerAddress( string &addr, unsigned short &port)
 	port = this->_serverport;
 }
 	
+void NetClient::SetCurrentServerAddress( string addr, unsigned short port)
+{
+	this->_serverip = addr;
+	this->_serverport = port;
+}
+	
 void NetClient::SetConfigServerAddress( string &addr, unsigned short &port)
 {
 	bool use_acctserver = XMLSupport::parse_bool(vs_config->getVariable("network","use_account_server", "false"));
@@ -675,7 +681,7 @@ int NetClient::connectLoad(string username, string passwd, string &error) {
 	unsigned short port;
 	bool ret = false;
 	// Are we using the directly account server to identify us ?
-	SetConfigServerAddress(srvipadr, port);
+	GetCurrentServerAddress(srvipadr, port);
 	
 	if( !port ){ // using account server.
 		string srvipadr = vs_config->getVariable("network", "account_server_url", "http://localhost/cgi-bin/accountserver.py");

@@ -592,6 +592,11 @@ void bootstrap_main_loop () {
 	  if( Network!=NULL)
 	  {
 		string err;
+		string srvipadr;
+		unsigned short port;
+		// Are we using the directly account server to identify us ?
+		Network[k].SetConfigServerAddress(srvipadr, port); // Sets from the config vars.
+	
         if (!Network[k].connectLoad(pname, ppasswd, err)) {
 			cout<<"error while connecting: "<<err<<endl;
 			VSExit(1);

@@ -94,7 +94,7 @@ namespace XMLSupport {
   }
   inline string tostring (float num) {
 	char tmp[256];
-	sprintf (tmp,"%f",num);
+	sprintf (tmp,"%g",num);
 	return string(tmp);
   }
   inline string floattostringh (float f) {

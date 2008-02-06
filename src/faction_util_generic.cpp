@@ -128,7 +128,7 @@ unsigned int FactionUtil::GetNumFactions () {
 void FactionUtil::SerializeFaction(FILE * fp) {
   for (unsigned int i=0;i<factions.size();i++) {
     for (unsigned int j=0;j<factions[i]->faction.size();j++) {
-      VSFileSystem::vs_fprintf (fp,"%f ",factions[i]->faction[j].relationship);
+      VSFileSystem::vs_fprintf (fp,"%g ",factions[i]->faction[j].relationship);
     }
     VSFileSystem::vs_fprintf(fp,"\n");
   }
@@ -138,7 +138,7 @@ string FactionUtil::SerializeFaction() {
   string ret("");
   for (unsigned int i=0;i<factions.size();i++) {
     for (unsigned int j=0;j<factions[i]->faction.size();j++) {
-      sprintf (temp,"%f ",factions[i]->faction[j].relationship);
+      sprintf (temp,"%g ",factions[i]->faction[j].relationship);
 	  ret += string( temp);
     }
     sprintf(temp,"\n");

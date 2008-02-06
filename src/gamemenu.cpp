@@ -565,6 +565,12 @@ bool NetActionConfirm::confirmedJoinGame() {
 	UniverseUtil::showSplashScreen(string());
 	
 	if (!Network) return false;
+	
+	string srvipadr;
+	unsigned short port;
+	// Are we using the directly account server to identify us ?
+	Network[player].SetConfigServerAddress(srvipadr, port); // Sets from the config vars.
+	
 	int numships = Network[player].connectLoad(user, pass, err);
 	if (numships) {
 		const vector<string> &shipList = Network[player].shipSelections();

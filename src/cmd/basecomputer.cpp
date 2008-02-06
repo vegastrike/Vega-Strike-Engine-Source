@@ -3206,8 +3206,11 @@ void BaseComputer::loadMissionsMasterList(TransactionList& tlist) {
     }
 
     // Number of strings to look at.  And make sure they match!
-    const int stringCount = getSaveStringLength(playerNum, MISSION_SCRIPTS_LABEL);
-    assert(stringCount == getSaveStringLength(playerNum, MISSION_NAMES_LABEL));
+    const int stringCount = getSaveStringLength(playerNum, MISSION_NAMES_LABEL);
+	if (Network==NULL) {
+		// these aren't sent over the network.
+		assert(stringCount == getSaveStringLength(playerNum, MISSION_SCRIPTS_LABEL));
+	}
     assert(stringCount == getSaveStringLength(playerNum, MISSION_DESC_LABEL));
 
     // Make sure we have different names for all the missions.
@@ -3230,9 +3233,11 @@ void BaseComputer::loadMissionsMasterList(TransactionList& tlist) {
         CargoColor c;
 
         // Take any categories out of the name and put them in the cargo.category.
-        const string finalScript = getSaveString(playerNum, MISSION_SCRIPTS_LABEL, i);
-        if (finalScript[0]=='#') {
-          continue; // Ignore any missions with comments. (those are fixer missions.)
+	    if (Network == NULL) {
+	      const string finalScript = getSaveString(playerNum, MISSION_SCRIPTS_LABEL, i);
+	      if (finalScript[0]=='#') {
+	        continue; // Ignore any missions with comments. (those are fixer missions.)
+	      }
         }
 		
         const string originalName = getSaveString(playerNum, MISSION_NAMES_LABEL, i);
@@ -3327,7 +3332,9 @@ bool BaseComputer::acceptMission(const EventCommandId& command, Control* control
     }
     const int playernum = UnitUtil::isPlayerStarship(playerUnit);
     const int stringCount = getSaveStringLength(playernum, MISSION_NAMES_LABEL);
-    assert(stringCount == getSaveStringLength(playernum, MISSION_SCRIPTS_LABEL));
+    if (Network==NULL) {
+      assert(stringCount == getSaveStringLength(playernum, MISSION_SCRIPTS_LABEL));
+    }
     string qualifiedName;
     if(item->GetCategory().empty()) {
         qualifiedName = item->content;
@@ -3337,11 +3344,13 @@ bool BaseComputer::acceptMission(const EventCommandId& command, Control* control
     string finalScript;
     for (unsigned int i=0; i<stringCount; i++) {
 	if (getSaveString(playernum, MISSION_NAMES_LABEL, i) == qualifiedName) {
-	    finalScript = getSaveString(playernum, MISSION_SCRIPTS_LABEL, i);
 	    if (Network==NULL) {
+	    finalScript = getSaveString(playernum, MISSION_SCRIPTS_LABEL, i);
 		eraseSaveString(playernum, MISSION_SCRIPTS_LABEL, i);
 		eraseSaveString(playernum, MISSION_NAMES_LABEL, i);
 		eraseSaveString(playernum, MISSION_DESC_LABEL, i);
+	    } else {
+	      finalScript="#";
 	    }
 	    break;
 	}

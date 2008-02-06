@@ -845,8 +845,8 @@ m_justification(RIGHT_JUSTIFY),
 m_widthExceeded(ELLIPSIS),
 m_needLayout(true),
 m_layoutVersion(0),
-m_verticalScaling(1.0),
-m_horizontalScaling(1.0)
+m_verticalScaling(0.7),
+m_horizontalScaling(0.7)
 {
 }
 
@@ -861,8 +861,8 @@ m_justification(j),
 m_widthExceeded(w),
 m_needLayout(true),
 m_layoutVersion(0),
-m_verticalScaling(1.0),
-m_horizontalScaling(1.0)
+m_verticalScaling(0.7),
+m_horizontalScaling(0.7)
 {
     setText(t);     // Do conversion if necessary.
 }

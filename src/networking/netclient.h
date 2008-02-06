@@ -148,8 +148,10 @@ class	NetClient
 		void startGame(); // Third half of loading process.
 	
 		/**** netclient_login.cpp stuff ****/
-		void SetConfigServerAddress( string & host, unsigned short &port );
+		void SetConfigServerAddress( string & host, unsigned short &port ); // reads config vars, sets address/port and returns them.
+	
 		void GetCurrentServerAddress( string & host, unsigned short &port );
+		void SetCurrentServerAddress( string host, unsigned short port );
 
 		// Returns the list of valid ships to use upon logging in.
 		const vector<string>& shipSelections () { return ship_select_list; }
@@ -253,7 +255,7 @@ class	NetClient
 		void	sendTextMessage( string message);
 		bool	IsNetcommActive() const;
 		bool	IsNetcommSecured() const;
-                static void Reconnect(std::string srvipaddr, std::string port);
+                static void Reconnect(std::string srvipaddr, unsigned short port);
                 static void CleanUp();
     private:
         NetClient( const NetClient& );

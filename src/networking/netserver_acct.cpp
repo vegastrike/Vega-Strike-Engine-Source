@@ -39,6 +39,11 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 			if (!p.empty()) cmd = getSimpleChar(p);
 			string ptemp (p);
 			string username = getSimpleString(ptemp);
+			string server, port;
+			if (cmd == ACCT_SUCCESS) {
+				server = getSimpleString(ptemp);
+				port = getSimpleString(ptemp);
+			}
 			std::map<std::string, WaitListEntry>::iterator iter = waitList.find(username);
 			if( waitList.end()!=iter)
 			{
@@ -91,7 +96,7 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 			}
 			} else if (entry.type == (int)WaitListEntry::JUMPING) {
 					waitList.erase(iter);
-					sendJumpFinal(clt);
+					sendJumpFinal(clt, server, (unsigned short)(atoi(port.c_str())));
 				}
 			}
 		}

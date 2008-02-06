@@ -941,10 +941,10 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 			case CMD_JUMP :
 				if (nostarsystem) break;
 			if (1) {
-                          unsigned short port;
-                          std::string srvipadr;
-                          SetConfigServerAddress(srvipadr,port);
-                          Reconnect(srvipadr,XMLSupport::tostring((unsigned int)port));
+                          std::string srvipadr (netbuf.getString());
+                          unsigned short port (netbuf.getShort());
+                          //SetConfigServerAddress(srvipadr,port);
+                          Reconnect(srvipadr,port);
                         }else{//this is the old way of doing it
 				StarSystem * sts;
 				string newsystem = netbuf.getString();
@@ -1485,7 +1485,7 @@ void NetClient::CleanUp() {
 	}
 }
 
-void NetClient::Reconnect(std::string srvipadr, std::string port) {
+void NetClient::Reconnect(std::string srvipadr, unsigned short port) {
   vector<string> usernames;
   vector<string> passwords;
   vector <SOCKETALT*> udp;
@@ -1514,6 +1514,11 @@ void NetClient::Reconnect(std::string srvipadr, std::string port) {
   for (unsigned int k=0;k<_Universe->numPlayers();++k) {
     bool ret = false;
 	string err;
+	if (!srvipadr.empty()) {
+		Network[k].SetCurrentServerAddress(srvipadr, port);
+	} else {
+		Network[k].SetConfigServerAddress(srvipadr, port);
+	}
 	int response = Network[k].connectLoad( usernames[k], passwords[k], err);
 	if (response==0) {
 		COUT<<"Network login error: "<<err<<endl;

@@ -180,6 +180,9 @@ void NetServer::sendSaveData( int cp, unsigned short type, int pos, string *key,
 	
 	netbuf.addShort(type);
 	if ((type&Subcmd::StringValue) ||(type&Subcmd::FloatValue)) {
+		if (*key == "active_scripts" || *key == "mission_scripts") {
+			return; // Don't send these to clients since they are huge.
+		}
 		netbuf.addString(*key);
 	}
 	netbuf.addInt32(pos);
@@ -354,11 +357,11 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 	}
 }
 
-void    NetServer::sendJumpFinal(ClientPtr clt) {
+void    NetServer::sendJumpFinal(ClientPtr clt, string server_ip, unsigned short server_port) {
     Packet p2;
 	NetBuffer buf;
-	buf.addString(clt->server_ip);
-	buf.addShort(clt->server_port);
+	buf.addString(server_ip);
+	buf.addShort(server_port);
 	
 	p2.send(CMD_JUMP,0,buf.getData(),buf.getDataLength(),SENDRELIABLE,NULL,clt->tcp_sock,__FILE__,148);
 	if (clt&&0/*dont discon until client requests it*/)

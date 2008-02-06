@@ -51,11 +51,11 @@ bool	NetServer::loginAccept( std::string inetbuf,ClientPtr clt, int newacct, cha
     COUT << "enter " << __PRETTY_FUNCTION__ << endl;
 
     string callsign;
-    string passwd;
+    string unused;
     NetBuffer netbuf;
 	ObjSerial cltserial;
 	callsign = getSimpleString(inetbuf);
-	passwd = getSimpleString(inetbuf);
+	unused = getSimpleString(inetbuf);
 	string serverip = getSimpleString(inetbuf);
 	string serverport = getSimpleString(inetbuf);
         string savestr=getSimpleString(inetbuf);
@@ -91,8 +91,8 @@ bool	NetServer::loginAccept( std::string inetbuf,ClientPtr clt, int newacct, cha
 		*/
 //	memcpy( &clt->cltadr, &ipadr, sizeof( AddressIP)); // ipadr is uninitialized... see above.
 
-	clt->callsign = callsign;
-	clt->passwd = passwd;
+	//clt->callsign = callsign;
+	//clt->passwd = passwd;
 	COUT << "LOGIN REQUEST SUCCESS for <" << callsign << ">" << endl;
 	if( newacct)
 	{
@@ -373,6 +373,17 @@ bool NetServer::loadFromSavegame( ClientPtr clt, Cockpit *cp ) {
 	cp->savegame->SetStarSystem(string());
 	cp->savegame->ParseSaveGame( "", str, "", tmpvec, update, credits, savedships, cltserial, clt->savegame[0], false);
 	// Generate the system we enter in if needed and add the client in it
+
+	if (savedships.empty()) {
+		COUT<< "There are no saved ships... corrupted save file for "<<clt->callsign<<endl; 
+		std::string logoutnetbuf;
+		addSimpleChar(logoutnetbuf,ACCT_LOGOUT);
+		addSimpleString( logoutnetbuf,clt->callsign);
+		addSimpleString(logoutnetbuf,clt->passwd);
+		// We can't find the unit saved for player -> send a login error
+		this->logout( clt );
+		return false;
+	}
 
 	COUT<<"\tcredits = "<<credits<<endl;
 	COUT<<"\tfaction = "<<cp->savegame->GetPlayerFaction()<<endl;

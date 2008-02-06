@@ -1081,7 +1081,7 @@ void restore_main_loop() {
   GFXLoop (main_loop);
 
 }
-volatile int restarting=0;
+
 void main_loop() {
   // Evaluate number of loops per second each XX loops
   if( loop_count==500)
@@ -1100,9 +1100,6 @@ void main_loop() {
  	loop_count=-1;
  }
   loop_count++;
-  if (restarting) {
-    NetClient::Reconnect("127.0.0.1","6777");
-  }
   //  SuicideKey (std::string(),PRESS);
 
   //  Cockpit::Respawn (std::string(),PRESS);

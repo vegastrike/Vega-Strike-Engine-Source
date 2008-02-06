@@ -608,9 +608,14 @@ void SaveGame::WriteMissionStringData (std::vector <char> & ret) {
   RemoveEmpty<MissionStringDat::MSD> (missionstringdata->m);
   PushBackUInt(missionstringdata->m.size(),ret);
   for( MissionStringDat::MSD::iterator i=missionstringdata->m.begin();i!=missionstringdata->m.end();i++) {
+    const string &key = (*i).first;
+    if (key == "mission_descriptions" || key == "mission_scripts" || key == "mission_vars" || key == "mission_names") {
+		// *** BLACKLIST ***
+		continue; // Don't bother to write these out since they waste a lot of space and are rewritten at each dock.
+	}
     unsigned int siz = (*i).second.size();
 	PushBackChars("\n",ret);
-	PushBackString((*i).first,ret);
+	PushBackString(key,ret);
 	PushBackUInt(siz,ret);
 	PushBackChars(" ",ret);
     for (unsigned int j=0;j<siz;j++) {
