@@ -119,7 +119,7 @@ def getLoginInfo(conn, user, passwd, dologin):
 			conn.set_connected(user,True)
 			p.addChar(ACCT_LOGIN_ACCEPT)
 			p.addStringField('username',user)
-			p.addStringField('password',passwd)
+			p.addStringField('unused','') # Used to display password for some reason.
 			p.addStringField('serverip',serverstrings[0])
 			p.addStringField('serverport',serverstrings[1])
 			p.addStringField('savegame', result['savegame'])
@@ -127,7 +127,7 @@ def getLoginInfo(conn, user, passwd, dologin):
 		else:
 			p.addChar(ACCT_LOGIN_DATA)
 			p.addStringField('username',user)
-			p.addStringField('password',passwd)
+			p.addStringField('unused','')
 			p.addStringField('serverip',serverstrings[0])
 			p.addStringField('serverport',serverstrings[1])
 		print p
@@ -149,11 +149,17 @@ def getLoginInfo(conn, user, passwd, dologin):
 get_form=False
 post_form=False
 
-def printACCT_SUCCESS(conn, username):
+def printACCT_SUCCESS(conn, username, save=''):
 	p = Packet(conn)
 	p.addChar(ACCT_SUCCESS)
 	#p.addStringField('username', '')
 	p.addStringField('username', str(username))
+	if save:
+		serverstrings=conn.get_server(getSystem(save)).split(":")
+	else:
+		serverstrings=('','')
+	p.addStringField('serverip',serverstrings[0])
+	p.addStringField('serverport',serverstrings[1])
 	print p
 
 def execute(conn,get,post):
@@ -196,7 +202,7 @@ def execute(conn,get,post):
 		xml=packet.getString()
 		if conn.check_password(username, password):
 			conn.save_account(username,save,xml)
-		printACCT_SUCCESS(conn, username)
+		printACCT_SUCCESS(conn, username, save)
 	elif command==ACCT_SAVE_LOGOUT:
 		username=packet.getCheckedString()
 		password=packet.getCheckedString()
@@ -205,7 +211,7 @@ def execute(conn,get,post):
 		if conn.check_password(username, password):
 			conn.save_account(username,save,xml)
 			conn.set_connected(username, False)
-		printACCT_SUCCESS(conn, username)
+		printACCT_SUCCESS(conn, username, save)
 	elif command==ACCT_LOGOUT:
 		username=packet.getCheckedString()
 		password=packet.getCheckedString()
