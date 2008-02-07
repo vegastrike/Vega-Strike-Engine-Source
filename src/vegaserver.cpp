@@ -46,6 +46,7 @@ int main( int argc, char **argv)
   //#endif
 	
 	// Stupid static variable somewhere, so need to initialize it twice.
+	InitTime();
 	setNewTime(0);
 	setNewTime(((double)time(NULL))-VEGA_EPOCH);
 	VSServer = new NetServer;
