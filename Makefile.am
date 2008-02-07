@@ -526,16 +526,16 @@ bin_PROGRAMS = \
   $(GTKUTILS_PROG)
 
 
-if !BOOSTSYSTEM
 noinst_LIBRARIES=\
-  libboost_python.a \
-  libnetlowlevel.a \
+  libnetlowlevel.a
+if !BOOSTSYSTEM
+noinst_LIBRARIES+=\
+  libboost_python.a
+endif
+if OPCODE
+noinst_LIBRARIES+=\
   libcollide2.a
-else
-noinst_LIBRARIES= \
-  libnetlowlevel.a \
-  libcollide2.a 
-endif 
+endif
 
 LIBCMDSERVER = \
   src/cmd/atmosphere_server.cpp \
@@ -765,15 +765,17 @@ if !BOOSTSYSTEM
   vegastrike_LDADD = \
   libboost_python.a \
   libnetlowlevel.a \
-  libcollide2.a \
   -lz  
 else
   vegastrike_LDADD = \
   libnetlowlevel.a \
-  libcollide2.a \
   -lboost_python-st \
   -lz
 endif  
+if OPCODE
+  vegastrike_LDADD += \
+  libcollide2.a
+endif
 
 if !BOOSTSYSTEM 
   vegastrike_DEPENDENCIES = \
