@@ -513,7 +513,6 @@ endif
 
 bin_PROGRAMS = \
   $(CLIENT_PROG) \
-  accountserver \
   asteroidgen \
   mesher \
   mesh_xml \
@@ -695,18 +694,6 @@ LIBGFXSERVER = \
   src/gfx/background_server.cpp
 
 
-
-LIBNETACCT = \
-  src/networking/clientptr.h \
-  src/networking/const.h \
-  src/networking/accountsxml.cpp \
-  src/networking/accountsxml.h \
-  src/networking/acctserver.h \
-  src/networking/fileutil.h \
-  src/networking/fileutil.cpp \
-  src/networking/acctserver.cpp \
-  src/networking/acctserver.h
-
 libnetlowlevel_a_SOURCES = \
   src/networking/lowlevel/GCPtr.h \
   src/networking/lowlevel/netbuffer.cpp \
@@ -761,66 +748,29 @@ libnetlowlevel_a_SOURCES = \
   src/networking/lowlevel/vsnet_thread.h
 
 
+vegastrike_LDADD = $(noinst_LIBRARIES)
 if !BOOSTSYSTEM
-  vegastrike_LDADD = \
-  libboost_python.a \
-  libnetlowlevel.a \
-  -lz  
-else
-  vegastrike_LDADD = \
-  libnetlowlevel.a \
-  -lboost_python-st \
-  -lz
-endif  
-if OPCODE
   vegastrike_LDADD += \
-  libcollide2.a
-endif
-
-if !BOOSTSYSTEM 
-  vegastrike_DEPENDENCIES = \
-  libboost_python.a \
-  libnetlowlevel.a \
-  libcollide2.a 
+    -lz  
 else
-  vegastrike_DEPENDENCIES = \
-    libnetlowlevel.a \
-    libcollide2.a
-endif
+  vegastrike_LDADD += \
+    -lboost_python-st \
+    -lz
+endif  
 
+vegastrike_DEPENDENCIES = $(noinst_LIBRARIES)
+
+vegaserver_LDADD = $(noinst_LIBRARIES)
 if !BOOSTSYSTEM
-vegaserver_LDADD = \
-  libboost_python.a \
-  libcollide2.a \
-  libnetlowlevel.a \
-  -lz
+  vegaserver_LDADD += \
+    -lz  
 else
-vegaserver_LDADD = \
-  libnetlowlevel.a \
-  libcollide2.a \
-  -lboost_python-st \
-  -lz
-endif
+  vegaserver_LDADD += \
+    -lboost_python-st \
+    -lz
+endif  
 
-if !BOOSTSYSTEM
-vegaserver_DEPENDENCIES = \
-  libboost_python.a \
-  libnetlowlevel.a \
-  libcollide2.a 
-else
-vegaserver_DEPENDENCIES = \
-  libnetlowlevel.a \
-  libcollide2.a 
-endif
-
-
-accountserver_LDADD = \
-  libnetlowlevel.a \
-  -lz
-
-accountserver_DEPENDENCIES = \
-  libnetlowlevel.a
-
+vegaserver_DEPENDENCIES = $(noinst_LIBRARIES)
 
 
 librootclient = \
@@ -962,27 +912,6 @@ vegaserver_SOURCES = \
   src/gldrv/gl_vertex_list.cpp \
   src/gldrv/gl_sphere_list_server.cpp
 
-accountserver_SOURCES = \
-  $(LIBNETACCT) \
-  src/accountserver.cpp \
-  src/configxml.cpp \
-  src/configxml.h \
-  src/easydom.cpp \
-  src/easydom.h \
-  src/endianness.cpp \
-  src/endianness.h \
-  src/libserver.cpp \
-  src/lin_time.cpp \
-  src/lin_time.h \
-  src/pk3.cpp \
-  src/pk3.h \
-  src/posh.cpp \
-  src/vsfilesystem.cpp \
-  src/vsfilesystem.h \
-  src/xml_support.cpp \
-  src/xml_support.h \
-  src/SharedPool.h
-
 vegastrike_SOURCES = \
   $(LIBENGINE_COMMON) \
   $(LIBGUI) \
@@ -1094,11 +1023,11 @@ EXTRA_DIST += $(pkgdata_DATA)
 
 
 
-base_maker_CXXFLAGS = -I../.. -I../../src $(BOOST_CPPFLAGS) -g 
+#base_maker_CXXFLAGS += -I../.. -I../../src $(BOOST_CPPFLAGS) -g 
 # ToDo: Fix so -L/usr/... is found in configure  
 #base_maker_LDFLAGS = -lGL -lGLU -lSDL -lglut -ljpeg -lpng \
-base_maker_LDFLAGS = -lGL -lGLU -lglut -ljpeg -lpng \
-  -lpthread -L/usr/X11R6/lib -lXi -lXmu
+#base_maker_LDFLAGS = -lGL -lGLU -lglut -ljpeg -lpng \
+#  -lpthread -L/usr/X11R6/lib -lXi -lXmu
 base_maker_SOURCES = \
   objconv/basemaker/base_maker.cpp \
   objconv/basemaker/base_maker_texture.cpp \
