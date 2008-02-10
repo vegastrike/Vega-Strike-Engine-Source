@@ -38,7 +38,7 @@
 //	#define OPC_USE_TREE_COHERENCE
 
 	//! Use callbacks or direct pointers. Using callbacks might be a bit slower (but probably not much)
-//	#define OPC_USE_CALLBACKS
+	#define OPC_USE_CALLBACKS
 
 	//! Support triangle and vertex strides or not. Using strides might be a bit slower (but probably not much)
 //	#define OPC_USE_STRIDE

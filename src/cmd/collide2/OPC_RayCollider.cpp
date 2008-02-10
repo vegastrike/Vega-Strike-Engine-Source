@@ -470,7 +470,7 @@ bool RayCollider::Collide(const Ray& world_ray, const AABBTree* tree, Container&
 	// This is typically called for a scene tree, full of -AABBs-, not full of triangles.
 	// So we don't really have "primitives" to deal with. Hence it doesn't work with
 	// "FirstContact" + "TemporalCoherence".
-	ASSERT( !(FirstContactEnabled() && TemporalCoherenceEnabled()) );
+	OPASSERT( !(FirstContactEnabled() && TemporalCoherenceEnabled()) );
 
 	// Checkings
 	if(!tree)					return false;

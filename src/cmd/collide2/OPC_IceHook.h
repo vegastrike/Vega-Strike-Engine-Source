@@ -19,16 +19,16 @@
 	#include <float.h>
 	#include <math.h>
 
-	#ifndef ASSERT
-		#define	ASSERT(exp)	{}
+	#ifndef OPASSERT
+		#define	OPASSERT(exp)	{}
 	#endif
 	#define ICE_COMPILE_TIME_ASSERT(exp)	extern char ICE_Dummy[ (exp) ? 1 : -1 ]
 
-	extern void Opcode_Log (const char* msg, ...);
-	#define	Log			Opcode_Log
+//	extern void Opcode_Log (const char* msg, ...);
+//	#define	Log			Opcode_Log
 	//#define	Log				{}
-	extern bool Opcode_Err (const char* msg, ...);
-	#define	SetIceError		Opcode_Err
+//	extern bool Opcode_Err (const char* msg, ...);
+//	#define	SetIceError		Opcode_Err
 	#define	EC_OUTOFMEMORY	"Out of memory"
 
 	#include "Ice/IcePreprocessor.h"
@@ -39,8 +39,8 @@
 	#include "Ice/IceTypes.h"
 	#include "Ice/IceFPU.h"
 	#include "Ice/IceMemoryMacros.h"
-
-	namespace IceCore
+#define ICEMATHS_API	OPCODE_API
+/*	namespace IceCore
 	{
 		#include "Ice/IceUtils.h"
 		#include "Ice/IceContainer.h"
@@ -50,8 +50,8 @@
 	}
 	using namespace IceCore;
 
-	#define ICEMATHS_API	OPCODE_API
-	namespace IceMaths
+	
+    namespace IceMaths
 	{
 		#include "Ice/IceAxes.h"
 		#include "Ice/IcePoint.h"
@@ -70,3 +70,4 @@
 		#include "Ice/IceLSS.h"
 	}
 	using namespace IceMaths;
+*/

@@ -7,15 +7,27 @@
 #include "unit_collide.h"
 #include "physics.h"
 #include "gfx/bsp.h"
+
+#ifndef OPCODE_COLLIDER
 #include "collide/rapcol.h"
 #include "collide/csgeom/transfrm.h"
 #include "collide/collider.h"
+#else
+#include "collide2/CSopcodecollider.h"
+#include "collide2/csgeom/transfrm.h"
+#include "collide2/collider.h"
+#endif 
+
 #include "hashtable.h"
 #include <string>
 #include "vs_globals.h"
 #include "configxml.h"
 static Hashtable <std::string,collideTrees,127> unitColliders;
+#ifndef OPCODE_COLLIDER
 collideTrees::collideTrees (const std::string &hk, BSPTree *bT, BSPTree *bS, csRapidCollider *cT, csRapidCollider *cS): hash_key(hk),bspTree(bT), bspShield(bS), colShield(cS) {
+#else
+collideTrees::collideTrees (const std::string &hk, BSPTree *bT, BSPTree *bS, csOPCODECollider *cT, csOPCODECollider *cS): hash_key(hk),bspTree(bT), bspShield(bS), colShield(cS) {
+#endif
 	for (int i=0;i<collideTreesMaxTrees;++i) {
 		rapidColliders[i]=NULL;
 	}
@@ -25,7 +37,12 @@ collideTrees::collideTrees (const std::string &hk, BSPTree *bT, BSPTree *bS, csR
 	unitColliders.Put (hash_key,this);
 }
 float loge2 = log(2.f);
+
+#ifndef OPCODE_COLLIDER
 csRapidCollider * collideTrees::colTree(Unit * un, const Vector & othervelocity) {
+#else
+csOPCODECollider * collideTrees::colTree(Unit * un, const Vector & othervelocity) {
+#endif
 	const float const_factor=1;
 	float magsqr = un->GetVelocity().MagnitudeSquared();
 	float newmagsqr = (un->GetVelocity()-othervelocity).MagnitudeSquared();	

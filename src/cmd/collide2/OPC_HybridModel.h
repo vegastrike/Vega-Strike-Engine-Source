@@ -40,7 +40,7 @@
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		inline_	udword	GetTriangleIndex()				const	{ return Data>>4;												}
-		inline_	void	SetData(udword nb, udword index)		{ ASSERT(nb>0 && nb<=16);	nb--;	Data = (index<<4)|(nb&15);	}
+		inline_	void	SetData(udword nb, udword index)		{ OPASSERT(nb>0 && nb<=16);	nb--;	Data = (index<<4)|(nb&15);	}
 	};
 
 	class OPCODE_API HybridModel : public BaseModel

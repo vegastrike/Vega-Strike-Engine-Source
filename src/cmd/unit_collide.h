@@ -274,21 +274,46 @@ bool TableLocationChanged (const LineCollide &, const QVector &, const QVector &
 void KillCollideTable (LineCollide* lc, StarSystem * ss);
 bool EradicateCollideTable (LineCollide* lc, StarSystem * ss);
 
+#ifndef OPCODE_COLLIDER
 class csRapidCollider;
+#else
+class csOPCODECollider;
+#endif 
+
+
 class BSPTree;
 const int collideTreesMaxTrees=8;
 struct collideTrees {
   std::string hash_key;
   ///The bsp tree of this unit (used when shields down/unit-unit collisions)
   BSPTree *bspTree;
-  BSPTree *bspShield;	
+  BSPTree *bspShield;
+
+#ifndef OPCODE_COLLIDER
   csRapidCollider *rapidColliders[collideTreesMaxTrees];
+#else
+  csOPCODECollider *rapidColliders[collideTreesMaxTrees];
+#endif
+
   bool usingColTree()const {return rapidColliders[0]!=NULL;}
+
+#ifndef OPCODE_COLLIDER
   csRapidCollider *colTree(Unit *un, const Vector & othervelocity);//gets the appropriately scaled unit collide tree
   ///The bsp tree of the shields of this unit (used for beams)
   csRapidCollider *colShield;
+#else
+  csOPCODECollider *colTree(Unit *un, const Vector & othervelocity);//gets the appropriately scaled unit collide tree	
+  ///The bsp tree of the shields of this unit (used for beams)
+  csOPCODECollider *colShield;
+#endif 
+
   int refcount;
+  
+#ifndef OPCODE_COLLIDER
   collideTrees (const std::string &hk, BSPTree *bT, BSPTree *bS, csRapidCollider *cT, csRapidCollider *cS);
+#else
+  collideTrees (const std::string &hk, BSPTree *bT, BSPTree *bS, csOPCODECollider *cT, csOPCODECollider *cS);  
+#endif
   void Inc () {refcount++;}
   void Dec ();
   static collideTrees * Get(const std::string &hash_key);

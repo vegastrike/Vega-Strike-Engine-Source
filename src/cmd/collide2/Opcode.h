@@ -27,10 +27,36 @@
 
 	#define ICE_NO_DLL
 	#define ICE_DONT_CHECK_COMPILER_OPTIONS
+
 	#include "OPC_IceHook.h"
+	#include "Ice/IceRandom.h" 
+	#include "Ice/IceRevisitedRadix.h" 
+    #include "Ice/IceUtils.h" 
+	#include "Ice/IceContainer.h" 
+	#include "Ice/IcePairs.h" 
 
 	namespace Opcode
 	{
+
+
+
+										
+        #include "Ice/IceAxes.h" 
+		#include "Ice/IcePoint.h" 
+		#include "Ice/IceHPoint.h" 
+		#include "Ice/IceMatrix3x3.h" 
+		#include "Ice/IceMatrix4x4.h" 
+		#include "Ice/IcePlane.h" 
+		#include "Ice/IceRay.h" 
+		#include "Ice/IceIndexedTriangle.h" 
+		#include "Ice/IceTriangle.h" 
+		#include "Ice/IceTrilist.h" 
+		#include "Ice/IceAABB.h" 
+		#include "Ice/IceOBB.h" 
+		#include "Ice/IceBoundingSphere.h" 
+		#include "Ice/IceSegment.h" 
+		#include "Ice/IceLSS.h" 
+																														
 		// Bulk-of-the-work
 		#include "OPC_Settings.h"
 		#include "OPC_Common.h"

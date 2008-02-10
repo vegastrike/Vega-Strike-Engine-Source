@@ -244,7 +244,7 @@ void SAP_PairData::AddPair(udword id1, udword id2)
 	// Order the ids
 	Sort(id1, id2);
 
-	ASSERT(id1<mNbObjects);
+	OPASSERT(id1<mNbObjects);
 	if(id1>=mNbObjects)	return;
 
 	// Select the right list from "mArray".
@@ -330,7 +330,7 @@ void SAP_PairData::DumpPairs(Pairs& pairs) const
 		SAP_Element* Current = mArray[i];
 		while(Current)
 		{
-			ASSERT(Current->mID<mNbObjects);
+			OPASSERT(Current->mID<mNbObjects);
 
 			pairs.AddPair(i, Current->mID);
 			Current = Current->mNext;
@@ -348,7 +348,7 @@ void SAP_PairData::DumpPairs(PairCallback callback, void* user_data) const
 		SAP_Element* Current = mArray[i];
 		while(Current)
 		{
-			ASSERT(Current->mID<mNbObjects);
+			OPASSERT(Current->mID<mNbObjects);
 
 			if(!(callback)(i, Current->mID, user_data))	return;
 			Current = Current->mNext;
@@ -442,7 +442,7 @@ bool SweepAndPrune::Init(udword nb_objects, const AABB** boxes)
 			float SortedCoord	= Data[SortedIndex];
 			udword BoxIndex		= SortedIndex>>1;
 
-			ASSERT(BoxIndex<nb_objects);
+			OPASSERT(BoxIndex<nb_objects);
 
 			SAP_EndPoint* CurrentEndPoint = &mList[Axis][SortedIndex];
 			CurrentEndPoint->Value		= SortedCoord;
@@ -482,7 +482,7 @@ bool SweepAndPrune::Init(udword nb_objects, const AABB** boxes)
 			{
 				mPairs.AddPair(id0, id1);
 			}
-			else ASSERT(0);
+			else OPASSERT(0);
 		}
 	}
 
@@ -506,18 +506,18 @@ bool SweepAndPrune::CheckListsIntegrity()
 
 			if(Previous)
 			{
-				ASSERT(Previous->Value <= Current->Value);
+				OPASSERT(Previous->Value <= Current->Value);
 				if(Previous->Value > Current->Value)	return false;
 			}
 
-			ASSERT(Current->Previous==Previous);
+			OPASSERT(Current->Previous==Previous);
 			if(Current->Previous!=Previous)	return false;
 
 			Previous = Current;
 			Current = Current->Next;
 		}
 
-		ASSERT(Nb==mNbObjects*2);
+		OPASSERT(Nb==mNbObjects*2);
 	}
 	return true;
 }
@@ -542,7 +542,7 @@ bool SweepAndPrune::UpdateObject(udword i, const AABB& box)
 		// Update min
 		{
 			SAP_EndPoint* const CurrentMin = mBoxes[i].Min[Axis];
-			ASSERT(!CurrentMin->IsMax());
+			OPASSERT(!CurrentMin->IsMax());
 
 			const float Limit = box.GetMin(Axis);
 			if(Limit == CurrentMin->Value)
@@ -554,7 +554,7 @@ bool SweepAndPrune::UpdateObject(udword i, const AABB& box)
 
 				// Min is moving left:
 				SAP_EndPoint* NewPos = CurrentMin;
-				ASSERT(NewPos);
+				OPASSERT(NewPos);
 
 				SAP_EndPoint* tmp;
 				while((tmp = NewPos->Previous) && tmp->Value > Limit)
@@ -580,7 +580,7 @@ bool SweepAndPrune::UpdateObject(udword i, const AABB& box)
 
 				// Min is moving right:
 				SAP_EndPoint* NewPos = CurrentMin;
-				ASSERT(NewPos);
+				OPASSERT(NewPos);
 
 				SAP_EndPoint* tmp;
 				while((tmp = NewPos->Next) && tmp->Value < Limit)
@@ -604,7 +604,7 @@ bool SweepAndPrune::UpdateObject(udword i, const AABB& box)
 		// Update max
 		{
 			SAP_EndPoint* const CurrentMax = mBoxes[i].Max[Axis];
-			ASSERT(CurrentMax->IsMax());
+			OPASSERT(CurrentMax->IsMax());
 
 			const float Limit = box.GetMax(Axis);
 			if(Limit == CurrentMax->Value)
@@ -616,7 +616,7 @@ bool SweepAndPrune::UpdateObject(udword i, const AABB& box)
 
 				// Max is moving right:
 				SAP_EndPoint* NewPos = CurrentMax;
-				ASSERT(NewPos);
+				OPASSERT(NewPos);
 
 				SAP_EndPoint* tmp;
 				while((tmp = NewPos->Next) && tmp->Value < Limit)
@@ -641,7 +641,7 @@ bool SweepAndPrune::UpdateObject(udword i, const AABB& box)
 
 				// Max is moving left:
 				SAP_EndPoint* NewPos = CurrentMax;
-				ASSERT(NewPos);
+				OPASSERT(NewPos);
 
 				SAP_EndPoint* tmp;
 				while((tmp = NewPos->Previous) && tmp->Value > Limit)

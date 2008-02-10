@@ -52,7 +52,7 @@ To do:
 #include "Stdafx.h"
 
 
-using namespace IceCore;
+using namespace Opcode;
 
 #define INVALIDATE_RANKS	mCurrentSize|=0x80000000
 #define VALIDATE_RANKS		mCurrentSize&=0x7fffffff

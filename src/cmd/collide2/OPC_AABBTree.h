@@ -51,6 +51,7 @@
 		/* Constructor / Destructor */																					\
 									base_class();																		\
 									~base_class();																		\
+
 		/* Data access */																								\
 		inline_	const volume*		Get##volume()	const	{ return &mBV;							}					\
 		/* Clear the last bit */																						\

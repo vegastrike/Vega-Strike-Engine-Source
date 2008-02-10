@@ -36,7 +36,7 @@
 #include "Stdafx.h"
 
 
-using namespace IceMaths;
+using namespace Opcode;
 
 // Cast operator
 Matrix3x3::operator Matrix4x4() const

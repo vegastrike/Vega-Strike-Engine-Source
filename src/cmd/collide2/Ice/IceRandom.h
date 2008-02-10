@@ -12,8 +12,8 @@
 #ifndef __ICERANDOM_H__
 #define __ICERANDOM_H__
 
-	FUNCTION ICECORE_API	void	SRand(udword seed);
-	FUNCTION ICECORE_API	udword	Rand();
+	ICECORE_API	void	SRand(udword seed);
+	 udword	Rand();
 
 	//! Returns a unit random floating-point value
 	inline_ float UnitRandomFloat()	{ return float(Rand()) * ONE_OVER_RAND_MAX;	}

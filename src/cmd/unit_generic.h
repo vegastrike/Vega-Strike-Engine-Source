@@ -965,7 +965,11 @@ class Unit
 		/***************************************************************************************/
 
 	public:
+#ifndef OPCODE_COLLIDER
 		class csRapidCollider * getCollideTree(const Vector &scale=Vector(1,1,1),const std::vector<struct bsp_polygon> * = NULL);
+#else
+		class csOPCODECollider * getCollideTree(const Vector &scale=Vector(1,1,1),const std::vector<struct bsp_polygon> * = NULL);		
+#endif
 		// Because accessing in daughter classes member function from Unit * instances
 		Order *aistate;
 		Order *getAIState() const{return aistate;}

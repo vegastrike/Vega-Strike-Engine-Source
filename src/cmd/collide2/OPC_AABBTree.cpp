@@ -291,8 +291,8 @@ bool AABBTreeNode::Subdivide(AABBTreeBuilder* builder)
 		AABBTreeNode* Pool = (AABBTreeNode*)builder->mNodeBase;
 		udword Count = builder->GetCount() - 1;	// Count begins to 1...
 		// Set last bit to tell it shouldn't be freed ### pretty ugly, find a better way. Maybe one bit in mNbPrimitives
-		ASSERT(!(uintptr_t(&Pool[Count+0])&1));
-		ASSERT(!(uintptr_t(&Pool[Count+1])&1));
+		OPASSERT(!(uintptr_t(&Pool[Count+0])&1));
+		OPASSERT(!(uintptr_t(&Pool[Count+1])&1));
 		mPos = uintptr_t(&Pool[Count+0])|1;
 #ifndef OPC_NO_NEG_VANILLA_TREE
 		mNeg = uintptr_t(&Pool[Count+1])|1;
@@ -442,7 +442,7 @@ bool AABBTree::Build(AABBTreeBuilder* builder)
 	mTotalNbNodes	= builder->GetCount();
 
 	// For complete trees, check the correct number of nodes has been created [Opcode 1.3]
-	if(mPool)	ASSERT(mTotalNbNodes==builder->mNbPrimitives*2 - 1);
+	if(mPool)	OPASSERT(mTotalNbNodes==builder->mNbPrimitives*2 - 1);
 
 	return true;
 }
@@ -517,7 +517,7 @@ bool AABBTree::Refit2(AABBTreeBuilder* builder)
 	// Checkings
 	if(!builder)	return false;
 
-	ASSERT(mPool);
+	OPASSERT(mPool);
 
 	// Bottom-up update
 	Point Min,Max;

@@ -181,9 +181,9 @@
 		inline_	BOOL			IsNotEmpty()					const	{ return mCurNbEntries;					}	//!< Checks the container is empty
 
 		//! Read-access as an array
-		inline_	udword			operator[](udword i)			const	{ ASSERT(i>=0 && i<mCurNbEntries); return mEntries[i];	}
+		inline_	udword			operator[](udword i)			const	{ OPASSERT(i>=0 && i<mCurNbEntries); return mEntries[i];	}
 		//! Write-access as an array
-		inline_	udword&			operator[](udword i)					{ ASSERT(i>=0 && i<mCurNbEntries); return mEntries[i];	}
+		inline_	udword&			operator[](udword i)					{ OPASSERT(i>=0 && i<mCurNbEntries); return mEntries[i];	}
 
 		// Stats
 				udword			GetUsedRam()					const;

@@ -27,9 +27,10 @@
 -------------------------------------------------------------------------
 */
 
-#include "cssysdef.h"
+#include "Stdafx.h"
 #include "qsqrt.h"
 #include "qint.h"
+#include "garray.h"
 //#include "csutil/dirtyaccessarray.h"
 #include "csgeom/transfrm.h"
 #include "csgeom/tri.h"
@@ -37,11 +38,17 @@
 //#include "igeom/polymesh.h"
 //#include "igeom/trimesh.h"
 #include "collider.h"
-#include "gfx/mesh.h"
-#include "OPC_TreeBuilders.h"
+//#include "gfx/mesh.h"
+//#include "OPC_TreeBuilders.h"
 
 
 using namespace Opcode;
+
+
+static CS_DECLARE_GROWING_ARRAY_REF (pairs,csCollisionPair);
+
+//int csOPCODECollider::numHits = 0;
+
 
 /*csOPCODECollider::csOPCODECollider (iTriangleMesh* mesh) 
 {
@@ -78,7 +85,9 @@ csOPCODECollider::csOPCODECollider (const std::vector <bsp_polygon> &polygons)
   m_pCollisionModel = 0;
   indexholder = 0;
   vertholder = 0;
-
+  TreeCollider.SetFirstContact(false);
+  TreeCollider.SetFullBoxBoxTest(false);
+  TreeCollider.SetTemporalCoherence(true);
   opcMeshInt.SetCallback (&MeshCallback, this);
 
   GeometryInitialize (polygons);
@@ -174,13 +183,14 @@ void csOPCODECollider::GeometryInitialize (const std::vector <bsp_polygon> &poly
 	tmp.MaxZ ()- tmp.MinZ ());
 
     int index = 0;
-/*    for (i = 0 ; i < tri_count ; i++)
+    for (i = 0 ; i < tri_count ; i++)
     {
-      indexholder[index++] = polygons[i].v[0];
-      indexholder[index++] = polygons[i].v[1];
-      indexholder[index++] = polygons[i].v[2];
+	  
+      indexholder[index++] = 0 + i*3;
+      indexholder[index++] = 1 + i*3;
+      indexholder[index++] = 2 + i*3;
     }
-*/
+
     opcMeshInt.SetNbTriangles (tri_count);
     opcMeshInt.SetNbVertices (tri_count * 3);
 
@@ -260,12 +270,12 @@ bool csOPCODECollider::Collide( csOPCODECollider &otherCollider,
 	csMatrix3 m2;
 	if (trans2) m2 = trans2->GetT2O ();
 	csVector3 u;
-	IceMaths::Matrix4x4 transform1;
+	Matrix4x4 transform1;
   	transform1.m[0][3] = 0;
     transform1.m[1][3] = 0;
 	transform1.m[2][3] = 0;
 	transform1.m[3][3] = 1;
-	IceMaths::Matrix4x4 transform2;
+	Matrix4x4 transform2;
 	transform2.m[0][3] = 0;
 	transform2.m[1][3] = 0;
 	transform2.m[2][3] = 0;
@@ -309,9 +319,112 @@ bool csOPCODECollider::Collide( csOPCODECollider &otherCollider,
 	if (TreeCollider.Collide (ColCache, &transform1, &transform2)) { 
 		bool status = (TreeCollider.GetContactStatus () != FALSE); 
 		if (status)  { 
-//			CopyCollisionPairs (this, col2); 
+			CopyCollisionPairs (this, col2); 
+//			++csOPCODECollider::numHits;
 		} 
 		return(status); 
 	} else 
 		return(false);
+}
+
+csCollisionPair* csOPCODECollider::GetCollisions()
+{
+	return(pairs.GetArray());
+}
+
+size_t csOPCODECollider::GetCollisionPairCount()
+{
+	return(pairs.Length());
+}
+
+void csOPCODECollider::ResetCollisionPairs()
+{
+	pairs.SetLength(0);
+}
+
+void csOPCODECollider::SetOneHitOnly(bool on)
+{
+	TreeCollider.SetFirstContact(on);
+}
+bool csOPCODECollider::GetOneHitOnly()
+{
+	return(TreeCollider.FirstContactEnabled() != FALSE);
+}
+
+Vector csOPCODECollider::getVertex(unsigned int which) const 
+{
+	const MeshInterface *tmp = m_pCollisionModel->GetMeshInterface();
+	VertexPointers vertp;
+	tmp->GetTriangle(vertp,0);
+	const Point *tmpPoint = vertp.Vertex[which];
+	const float f[3] = {tmpPoint->x,tmpPoint->y,tmpPoint->z};
+	return(Vector(f[0],f[1],f[2]));
+}
+
+/*Vector csOPCODECollider::getVertex(unsigned int which) const {
+	// Access mesh interface, send which to get correct vertex, 
+	unsigned int k = which / 3;
+	const MeshInterface *tmp = m_pCollisionModel->GetMeshInterface();
+	unsigned int tmp3 = tmp->GetNbTriangles();
+	if(!tmp3){
+		return(Vector(0,0,0));
+	}
+	if(k>=tmp3)
+		k = tmp3 - 1;
+	const IndexedTriangle  *a = tmp->GetTris();
+	csVector3 b(a[k].mVRef[0],a[k].mVRef[1],a[k].mVRef[2]);
+	return(Vector(b.x,b.y,b.z));
+	
+	switch (which%3){
+		case 0:
+			return b.p1;
+		case 1:
+			return b.p2;
+		default:
+			return b.p3;
+	}
+}
+*/
+
+void csOPCODECollider::CopyCollisionPairs(csOPCODECollider* col1, 
+										  csOPCODECollider* col2)
+{
+  int size = (int) (udword(TreeCollider.GetNbPairs ()));
+  if (size == 0) return;
+  int N_pairs = size;
+  const Pair* colPairs=TreeCollider.GetPairs ();
+  Point* vertholder0 = col1->vertholder;
+  if (!vertholder0) return;
+  Point* vertholder1 = col2->vertholder;
+  if (!vertholder1) return;
+  if (!vertholder1) return;
+  udword* indexholder0 = col1->indexholder;
+  if (!indexholder0) return;
+  udword* indexholder1 = col2->indexholder;
+  if (!indexholder1) return;
+  Point* current;
+  int i, j;
+  size_t oldlen = pairs.Length ();
+  pairs.SetLength (oldlen + N_pairs);
+
+
+  for (i = 0 ; i < N_pairs ; i++){
+    j = 3 * colPairs[i].id0;
+	current = &vertholder0[indexholder0[j]];
+	pairs[oldlen].a1 = csVector3 (current->x, current->y, current->z);
+    current = &vertholder0[indexholder0[j + 1]];
+	pairs[oldlen].b1 = csVector3 (current->x, current->y, current->z);
+	current = &vertholder0[indexholder0[j + 2]];
+	pairs[oldlen].c1 = csVector3 (current->x, current->y, current->z);
+	
+	j = 3 * colPairs[i].id1;
+	current = &vertholder1[indexholder1[j]];
+	pairs[oldlen].a2 = csVector3 (current->x, current->y, current->z);
+	current = &vertholder1[indexholder1[j + 1 ]];
+	pairs[oldlen].b2 = csVector3 (current->x, current->y, current->z);
+	current = &vertholder1[indexholder1[j + 2 ]];
+	pairs[oldlen].c2 = csVector3 (current->x, current->y, current->z);
+	
+	++oldlen;			
+  }
 }

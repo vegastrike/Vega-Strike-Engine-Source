@@ -56,7 +56,7 @@ public:
 
   csTerraFormerCollider (iTerraFormer* terraformer, iObjectRegistry* object_reg);
   float SampleFloat (float x, float z);
-  csColliderType GetColliderType () {return CS_TERRAFORMER_COLLIDER;}
+//  csColliderType GetColliderType () {return CS_TERRAFORMER_COLLIDER;}
   virtual ~csTerraFormerCollider ();
 
   static void MeshCallback (udword triangle_index, 

@@ -159,7 +159,7 @@ bool HybridModel::Build(const OPCODECREATE& create)
 
 	// Look for degenerate faces.
 	udword NbDegenerate = create.mIMesh->CheckTopology();
-	if(NbDegenerate)	Log("OPCODE WARNING: found %lu degenerate faces in model! Collision might report wrong results!\n", NbDegenerate);
+//	if(NbDegenerate)	Log("OPCODE WARNING: found %lu degenerate faces in model! Collision might report wrong results!\n", NbDegenerate);
 	// We continue nonetheless.... 
 
 	Release();	// Make sure previous tree has been discarded
@@ -311,7 +311,7 @@ udword HybridModel::GetUsedBytes() const
 	return UsedBytes;
 }
 
-inline_ void ComputeMinMax(Point& min, Point& max, const VertexPointers& vp)
+inline_ void OPComputeMinMax(Point& min, Point& max, const VertexPointers& vp)
 {
 	// Compute triangle's AABB = a leaf box
 #ifdef OPC_USE_FCOMI	// a 15% speedup on my machine, not much
@@ -381,7 +381,7 @@ bool HybridModel::Refit()
 				while(NbTris--)
 				{
 					mIMesh->GetTriangle(VP, *T++);
-					ComputeMinMax(TmpMin, TmpMax, VP);
+					OPComputeMinMax(TmpMin, TmpMax, VP);
 					Min.Min(TmpMin);
 					Max.Max(TmpMax);
 				}
@@ -394,7 +394,7 @@ bool HybridModel::Refit()
 				while(NbTris--)
 				{
 					mIMesh->GetTriangle(VP, BaseIndex++);
-					ComputeMinMax(TmpMin, TmpMax, VP);
+					OPComputeMinMax(TmpMin, TmpMax, VP);
 					Min.Min(TmpMin);
 					Max.Max(TmpMax);
 				}
@@ -426,7 +426,7 @@ bool HybridModel::Refit()
 				while(NbTris--)
 				{
 					mIMesh->GetTriangle(VP, *T++);
-					ComputeMinMax(TmpMin, TmpMax, VP);
+					OPComputeMinMax(TmpMin, TmpMax, VP);
 					Min_.Min(TmpMin);
 					Max_.Max(TmpMax);
 				}
@@ -439,7 +439,7 @@ bool HybridModel::Refit()
 				while(NbTris--)
 				{
 					mIMesh->GetTriangle(VP, BaseIndex++);
-					ComputeMinMax(TmpMin, TmpMax, VP);
+					OPComputeMinMax(TmpMin, TmpMax, VP);
 					Min_.Min(TmpMin);
 					Max_.Max(TmpMax);
 				}

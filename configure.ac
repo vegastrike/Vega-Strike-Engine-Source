@@ -778,6 +778,10 @@ AC_ARG_ENABLE(opcode,    AC_HELP_STRING([--enable-opcode],
 													   *) AC_MSG_ERROR(bad value ${enableval} for --enable-opcode) ;;
 													   esac],[opcode=false])
 AM_CONDITIONAL(OPCODE, test x$opcode = xtrue)
+if test "x$opcode" = "xtrue"; then 
+CXXFLAGS="${CXXFLAGS} -DOPCODE_COLLIDER=1 -I./src/cmd/collide2 -I./cmd/collide2 -I./collide2 "
+fi
+
 
 AC_ARG_ENABLE(nvidia-cg, AC_HELP_STRING([--enable-nvidia-cg], 
 	[Use if you have the NVidia SDK and CG compiler or compatible to get shader support (very experimental)]))
@@ -816,7 +820,7 @@ VS_CONFIG_GTKUTILS
 AC_LANG(C++)
 
 # The boost include must come first to override includes from elsewhere
-CPPFLAGS="${BOOST_CPPFLAGS} ${CPPFLAGS} ${VS_CPPFLAGS} ${PYTHON_CPPFLAGS} ${CG_CPPFLAGS} ${CXXFLAGS} "' -I$(top_srcdir)/src '
+CPPFLAGS="${BOOST_CPPFLAGS} ${CPPFLAGS} ${VS_CPPFLAGS} ${PYTHON_CPPFLAGS} ${CG_CPPFLAGS} "' -I$(top_srcdir)/src '
 CXXFLAGS="${CXXFLAGS} ${VS_CXXFLAGS} ${PTHREAD_CXXFLAGS}"
 
 LIBS="${LDFLAGS} ${LIBS} ${VS_LIBS} ${PYTHON_LIBS} ${PTHREAD_LIBS} ${CG_LIBS}"

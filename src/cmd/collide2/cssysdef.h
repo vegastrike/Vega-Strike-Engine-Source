@@ -2,7 +2,7 @@
 #define CS_COMPAT_H_
 #define SCF_DECLARE_IBASE
 
-#define OPC_USE_CALLBACKS 1
+//#define OPC_USE_CALLBACKS 1
 
 #ifndef CS_FORCEINLINE 
 # ifdef CS_COMPILER_GCC 
@@ -97,7 +97,7 @@ struct iBase {
 #define SCF_VERSION(a,b,c,d)
 
 
-#define CS_DECLARE_GROWING_ARRAY_REF(a,b) std::vector<b> a
+//#define CS_DECLARE_GROWING_ARRAY_REF(a,b) std::vector<b> a
 
 #define SCF_IMPLEMENT_IBASE(csblah)
 #define SCF_IMPLEMENTS_INTERFACE(collideblah)

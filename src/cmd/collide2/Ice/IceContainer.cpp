@@ -25,7 +25,7 @@
 #include "Stdafx.h"
 
 
-using namespace IceCore;
+using namespace Opcode;
 
 // Static members
 #ifdef CONTAINER_STATS

@@ -71,6 +71,7 @@
 
 using namespace Opcode;
 
+
 //! Compilation flag:
 //! - true to fix quantized boxes (i.e. make sure they enclose the original ones)
 //! - false to see the effects of quantization errors (faster, but wrong results in some cases)
@@ -108,7 +109,7 @@ static void _BuildCollisionTree(AABBCollisionNode* linear, const udword box_id, 
 	if(current_node->IsLeaf())
 	{
 		// The input tree must be complete => i.e. one primitive/leaf
-		ASSERT(current_node->GetNbPrimitives()==1);
+		OPASSERT(current_node->GetNbPrimitives()==1);
 		// Get the primitive index from the input tree
 		udword PrimitiveIndex = current_node->GetPrimitives()[0];
 		// Setup box data as the primitive index, marked as leaf
@@ -122,7 +123,7 @@ static void _BuildCollisionTree(AABBCollisionNode* linear, const udword box_id, 
 		// Setup box data as the forthcoming new P pointer
 		linear[box_id].mData = (uintptr_t)&linear[PosID];
 		// Make sure it's not marked as leaf
-		ASSERT(!(linear[box_id].mData&1));
+		OPASSERT(!(linear[box_id].mData&1));
 		// Recurse with new IDs
 		_BuildCollisionTree(linear, PosID, current_id, current_node->GetPos());
 		_BuildCollisionTree(linear, NegID, current_id, current_node->GetNeg());
@@ -153,8 +154,8 @@ static void _BuildNoLeafTree(AABBNoLeafNode* linear, const udword box_id, udword
 	const AABBTreeNode* P = current_node->GetPos();
 	const AABBTreeNode* N = current_node->GetNeg();
 	// Leaf nodes here?!
-	ASSERT(P);
-	ASSERT(N);
+	OPASSERT(P);
+	OPASSERT(N);
 	// Internal node => keep the box
 	current_node->GetAABB()->GetCenter(linear[box_id].mAABB.mCenter);
 	current_node->GetAABB()->GetExtents(linear[box_id].mAABB.mExtents);
@@ -162,7 +163,7 @@ static void _BuildNoLeafTree(AABBNoLeafNode* linear, const udword box_id, udword
 	if(P->IsLeaf())
 	{
 		// The input tree must be complete => i.e. one primitive/leaf
-		ASSERT(P->GetNbPrimitives()==1);
+		OPASSERT(P->GetNbPrimitives()==1);
 		// Get the primitive index from the input tree
 		udword PrimitiveIndex = P->GetPrimitives()[0];
 		// Setup prev box data as the primitive index, marked as leaf
@@ -175,7 +176,7 @@ static void _BuildNoLeafTree(AABBNoLeafNode* linear, const udword box_id, udword
 		// Setup box data
 		linear[box_id].mPosData = (uintptr_t)&linear[PosID];
 		// Make sure it's not marked as leaf
-		ASSERT(!(linear[box_id].mPosData&1));
+		OPASSERT(!(linear[box_id].mPosData&1));
 		// Recurse
 		_BuildNoLeafTree(linear, PosID, current_id, P);
 	}
@@ -183,7 +184,7 @@ static void _BuildNoLeafTree(AABBNoLeafNode* linear, const udword box_id, udword
 	if(N->IsLeaf())
 	{
 		// The input tree must be complete => i.e. one primitive/leaf
-		ASSERT(N->GetNbPrimitives()==1);
+		OPASSERT(N->GetNbPrimitives()==1);
 		// Get the primitive index from the input tree
 		udword PrimitiveIndex = N->GetPrimitives()[0];
 		// Setup prev box data as the primitive index, marked as leaf
@@ -196,7 +197,7 @@ static void _BuildNoLeafTree(AABBNoLeafNode* linear, const udword box_id, udword
 		// Setup box data
 		linear[box_id].mNegData = (uintptr_t)&linear[NegID];
 		// Make sure it's not marked as leaf
-		ASSERT(!(linear[box_id].mNegData&1));
+		OPASSERT(!(linear[box_id].mNegData&1));
 		// Recurse
 		_BuildNoLeafTree(linear, NegID, current_id, N);
 	}
@@ -249,7 +250,7 @@ bool AABBCollisionTree::Build(AABBTree* tree)
 	// Build the tree
 	udword CurID = 1;
 	_BuildCollisionTree(mNodes, 0, CurID, tree);
-	ASSERT(CurID==mNbNodes);
+	OPASSERT(CurID==mNbNodes);
 
 	return true;
 }
@@ -263,7 +264,7 @@ bool AABBCollisionTree::Build(AABBTree* tree)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool AABBCollisionTree::Refit(const MeshInterface* /*mesh_interface*/)
 {
-	ASSERT(!"Not implemented since AABBCollisionTrees have twice as more nodes to refit as AABBNoLeafTrees!");
+	OPASSERT(!"Not implemented since AABBCollisionTrees have twice as more nodes to refit as AABBNoLeafTrees!");
 	return false;
 }
 
@@ -344,12 +345,12 @@ bool AABBNoLeafTree::Build(AABBTree* tree)
 	// Build the tree
 	udword CurID = 1;
 	_BuildNoLeafTree(mNodes, 0, CurID, tree);
-	ASSERT(CurID==mNbNodes);
+	OPASSERT(CurID==mNbNodes);
 
 	return true;
 }
 
-inline_ void ComputeMinMax(Point& min, Point& max, const VertexPointers& vp)
+inline_ void OPComputeMinMax(Point& min, Point& max, const VertexPointers& vp)
 {
 	// Compute triangle's AABB = a leaf box
 #ifdef OPC_USE_FCOMI	// a 15% speedup on my machine, not much
@@ -395,7 +396,7 @@ bool AABBNoLeafTree::Refit(const MeshInterface* mesh_interface)
 		if(Current.HasPosLeaf())
 		{
 			mesh_interface->GetTriangle(VP, Current.GetPosPrimitive());
-			ComputeMinMax(Min, Max, VP);
+			OPComputeMinMax(Min, Max, VP);
 		}
 		else
 		{
@@ -407,7 +408,7 @@ bool AABBNoLeafTree::Refit(const MeshInterface* mesh_interface)
 		if(Current.HasNegLeaf())
 		{
 			mesh_interface->GetTriangle(VP, Current.GetNegPrimitive());
-			ComputeMinMax(Min_, Max_, VP);
+			OPComputeMinMax(Min_, Max_, VP);
 		}
 		else
 		{
@@ -644,7 +645,7 @@ bool AABBQuantizedTree::Build(AABBTree* tree)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool AABBQuantizedTree::Refit(const MeshInterface* /*mesh_interface*/)
 {
-	ASSERT(!"Not implemented since requantizing is painful !");
+	OPASSERT(!"Not implemented since requantizing is painful !");
 	return false;
 }
 
@@ -723,7 +724,7 @@ bool AABBQuantizedNoLeafTree::Build(AABBTree* tree)
 	// Build the tree
 	udword CurID = 1;
 	_BuildNoLeafTree(Nodes, 0, CurID, tree);
-	ASSERT(CurID==mNbNodes);
+	OPASSERT(CurID==mNbNodes);
 
 	// Quantize
 	{
@@ -761,7 +762,7 @@ bool AABBQuantizedNoLeafTree::Build(AABBTree* tree)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool AABBQuantizedNoLeafTree::Refit(const MeshInterface* /*mesh_interface*/)
 {
-	ASSERT(!"Not implemented since requantizing is painful !");
+	OPASSERT(!"Not implemented since requantizing is painful !");
 	return false;
 }
 

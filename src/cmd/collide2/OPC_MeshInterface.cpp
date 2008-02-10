@@ -211,8 +211,8 @@ udword MeshInterface::CheckTopology()	const
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool MeshInterface::SetCallback(RequestCallback callback, void* user_data)
 {
-	if(!callback)	return SetIceError("MeshInterface::SetCallback: callback pointer is null");
-
+//	if(!callback)	return SetIceError("MeshInterface::SetCallback: callback pointer is null");
+	if(!callback) return(false);
 	mObjCallback	= callback;
 	mUserData		= user_data;
 	return true;
@@ -228,8 +228,9 @@ bool MeshInterface::SetCallback(RequestCallback callback, void* user_data)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool MeshInterface::SetPointers(const IndexedTriangle* tris, const Point* verts)
 {
-	if(!tris || !verts)	return SetIceError("MeshInterface::SetPointers: pointer is null", null);
-
+//	if(!tris || !verts)	return SetIceError("MeshInterface::SetPointers: pointer is null", null);
+	if(!tris || !verts) return(false);
+		
 	mTris	= tris;
 	mVerts	= verts;
 	return true;

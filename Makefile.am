@@ -305,29 +305,9 @@ LIBAI = \
   src/cmd/ai/warpto.cpp \
   src/cmd/ai/warpto.h
 
-LIBCOLLIDE = \
-  src/cmd/collide/box.cpp \
-  src/cmd/collide/collider.h \
-  src/cmd/collide/cs_compat.h \
-  src/cmd/collide/garray.h \
-  src/cmd/collide/matrix3.cpp \
-  src/cmd/collide/pbuild.cpp \
-  src/cmd/collide/peigen.cpp \
-  src/cmd/collide/prapid.cpp \
-  src/cmd/collide/prapid.h \
-  src/cmd/collide/qint.h \
-  src/cmd/collide/qsqrt.h \
-  src/cmd/collide/rapcol.h \
-  src/cmd/collide/vector3.cpp \
-  src/cmd/collide/csgeom/matrix3.h \
-  src/cmd/collide/csgeom/vector3.h \
-  src/cmd/collide/csgeom/box.h \
-  src/cmd/collide/csgeom/transfrm.h
 
-libcollide2_a_CXXFLAGS = \
-   -Isrc/cmd/collide2 
 if OPCODE 
-libcollide2_a_SOURCES = \
+libcollide2= \
   src/cmd/collide2/Ice/IceAABB.cpp \
   src/cmd/collide2/Ice/IceAABB.h \
   src/cmd/collide2/Ice/IceAxes.h \
@@ -357,6 +337,7 @@ libcollide2_a_SOURCES = \
   src/cmd/collide2/Ice/IceRandom.h \
   src/cmd/collide2/Ice/IceRay.cpp \
   src/cmd/collide2/Ice/IceRay.h \
+  src/cmd/collide2/Ice/IceRevisitedRadix.cpp \
   src/cmd/collide2/Ice/IceRevisitedRadix.h \
   src/cmd/collide2/Ice/IceSegment.cpp \
   src/cmd/collide2/Ice/IceSegment.h \
@@ -434,8 +415,28 @@ libcollide2_a_SOURCES = \
   src/cmd/collide2/OPC_VolumeCollider.h \
   src/cmd/collide2/CSopcodecollider.cpp \
   src/cmd/collide2/CSopcodecollider.h 
+LIBCOLLIDE = 
 else
-libcollide2_a_SOURCES = 
+LIBCOLLIDE = \
+  src/cmd/collide/box.cpp \
+  src/cmd/collide/collider.h \
+  src/cmd/collide/cs_compat.h \
+  src/cmd/collide/garray.h \
+  src/cmd/collide/matrix3.cpp \
+  src/cmd/collide/pbuild.cpp \
+  src/cmd/collide/peigen.cpp \
+  src/cmd/collide/prapid.cpp \
+  src/cmd/collide/prapid.h \
+  src/cmd/collide/qint.h \
+  src/cmd/collide/qsqrt.h \
+  src/cmd/collide/rapcol.h \
+  src/cmd/collide/vector3.cpp \
+  src/cmd/collide/csgeom/matrix3.h \
+  src/cmd/collide/csgeom/vector3.h \
+  src/cmd/collide/csgeom/box.h \
+  src/cmd/collide/csgeom/transfrm.h
+
+libcollide2 = 
 endif
 
 LIBCMD = \
@@ -530,10 +531,6 @@ noinst_LIBRARIES=\
 if !BOOSTSYSTEM
 noinst_LIBRARIES+=\
   libboost_python.a
-endif
-if OPCODE
-noinst_LIBRARIES+=\
-  libcollide2.a
 endif
 
 LIBCMDSERVER = \
@@ -893,6 +890,7 @@ LIBENGINE_COMMON = \
   $(LIBAI) \
   $(LIBCMD) \
   $(LIBCOLLIDE) \
+  $(libcollide2) \
   $(LIBNET) \
   $(LIBPYTHON) \
   $(librootgeneric) \

@@ -25,7 +25,7 @@
 #include "Stdafx.h"
 
 
-using namespace IceMaths;
+using namespace Opcode;
 
 float Segment::SquareDistance(const Point& point, float* t)	const
 {

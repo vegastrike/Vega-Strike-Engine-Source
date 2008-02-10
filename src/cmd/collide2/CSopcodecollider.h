@@ -31,13 +31,14 @@
 #define __CS_OPCODECOL_H__
 
 //#include "csgeom/math3d.h"
+//#include "csutil/scf_implementation.h"
+#include "Stdafx.h"
 #include "csgeom/matrix3.h"
 #include "csgeom/vector3.h"
 #include "csgeom/box.h"
 #include "csgeom/tri.h"
-//#include "csutil/scf_implementation.h"
+
 #include "collider.h"
-#include "Opcode.h"
 #include "gfx/mesh.h"
 class csReversibleTransform;
 
@@ -58,7 +59,7 @@ public:
   /// The internal model object.
   Opcode::Model* m_pCollisionModel;
   unsigned int* indexholder;
-  Point *vertholder;
+  Opcode::Point *vertholder;
 
   Opcode::MeshInterface opcMeshInt;
 
@@ -72,6 +73,7 @@ private:
 	void GeometryInitialize (const std::vector <bsp_polygon> &polygons);
   static void MeshCallback (udword triangle_index, 
     Opcode::VertexPointers& triangle, void* user_data);
+ 
 public:
   /// Create a collider based on geometry.
 //  csOPCODECollider (iPolygonMesh* mesh);
@@ -83,8 +85,12 @@ public:
   Opcode::AABBTreeCollider TreeCollider;
   Opcode::BVTCache ColCache;
   
-  csColliderType GetColliderType () {return CS_MESH_COLLIDER;}
-
+//  csColliderType GetColliderType () {return CS_MESH_COLLIDER;}
+//  static int numHits;
+/*  static int GetnumHits() { int tmp = csOPCODECollider::numHits;
+  							csOPCODECollider::numHits = 0;
+							return(tmp);}
+*/
   /**
    * Check if this collider collides with pOtherCollider.
    * Returns true if collision detected and adds the pair to the collisions
@@ -98,16 +104,18 @@ public:
 
   /// Query the array with collisions (and their count).
   static csCollisionPair *GetCollisions ();
-
-  static void CollideReset ();
-  static void SetFirstHit (bool fh);
-  static bool GetFirstHit ();
-  static int Report (csOPCODECollider **id1, csOPCODECollider **id2);
+  static void ResetCollisionPairs ();
+  static size_t GetCollisionPairCount();
+  
+  void SetOneHitOnly (bool fh);
+  bool GetOneHitOnly ();
   float GetRadius () {return radius;};
   
   void CopyCollisionPairs (csOPCODECollider* col1,
       csOPCODECollider* col2);
-  
+	  
+  Vector getVertex (unsigned int which) const;
+  unsigned int getNumVertex() { return(m_pCollisionModel->GetMeshInterface()->GetNbVertices());}
 };
 
 #endif // __CS_OPCODECOL_H__

@@ -20,17 +20,17 @@
 #ifndef __IENGINE_COLLIDER_H__
 #define __IENGINE_COLLIDER_H__
 
-#include "cssysdef.h"
+#include "Stdafx.h"
 //struct iPolygonMesh;
 class csReversibleTransform;
 
-enum csColliderType
+/*enum csColliderType
 {
   CS_MESH_COLLIDER = 0,
   CS_TERRAFORMER_COLLIDER,
   CS_TERRAIN_COLLIDER
 };
-	  
+*/	  
 	  
 
 /**
@@ -108,7 +108,7 @@ struct iCollideSystem : public iBase
    * For CD systems that support one hit only this will always return true.
    */
   virtual bool GetOneHitOnly () = 0;
-
+	
   /**
    * Test if an object can move to a new position. The new position
    * vector will be modified to reflect the maximum new position that the
@@ -135,6 +135,11 @@ struct iCollideSystem : public iBase
 	int num_colliders,
 	iCollider** colliders,
 	csReversibleTransform** transforms) = 0;
+
+
+//	virtual csColliderType GetColliderType() = 0;
+	
+
 };
 
 #endif // __IENGINE_COLLIDER_H__

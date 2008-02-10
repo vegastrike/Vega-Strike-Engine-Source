@@ -130,7 +130,7 @@
 		return true;
 	}
 
-	#define CHECK_VALID_FLOAT(x)	ASSERT(IsValidFloat(x));
+	#define CHECK_VALID_FLOAT(x)	OPASSERT(IsValidFloat(x));
 
 #if WEIRDNESS
 /*

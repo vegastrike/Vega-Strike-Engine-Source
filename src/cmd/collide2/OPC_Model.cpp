@@ -143,11 +143,11 @@ bool Model::Build(const OPCODECREATE& create)
 	if(!create.mIMesh || !create.mIMesh->IsValid())	return false;
 
 	// For this model, we only support complete trees
-	if(create.mSettings.mLimit!=1)	return SetIceError ("OPCODE WARNING: supports complete trees only! Use mLimit = 1.", null);
-
+//	if(create.mSettings.mLimit!=1)	return SetIceError ("OPCODE WARNING: supports complete trees only! Use mLimit = 1.", null);
+	if(create.mSettings.mLimit!=1) return(false);
 	// Look for degenerate faces.
 	udword NbDegenerate = create.mIMesh->CheckTopology();
-	if(NbDegenerate)	Log ("OPCODE WARNING: found %lu degenerate faces in model! Collision might report wrong results!", NbDegenerate);
+//	if(NbDegenerate)	Log ("OPCODE WARNING: found %lu degenerate faces in model! Collision might report wrong results!", NbDegenerate);
 	// We continue nonetheless.... 
 
 	Release();	// Make sure previous tree has been discarded [Opcode 1.3, thanks Adam]

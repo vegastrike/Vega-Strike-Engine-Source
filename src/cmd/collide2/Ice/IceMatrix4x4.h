@@ -449,7 +449,8 @@
 		dest.z = source.x * rot.m[0][2] + source.y * rot.m[1][2] + source.z * rot.m[2][2];
 	}
 
-	ICEMATHS_API void InvertPRMatrix(Matrix4x4& dest, const Matrix4x4& src);
+	
+	void InvertPRMatrix(Matrix4x4& dest, const Matrix4x4& src);
 
 #endif // __ICEMATRIX4X4_H__
 

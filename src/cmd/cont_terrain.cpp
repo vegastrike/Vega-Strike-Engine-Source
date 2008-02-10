@@ -5,9 +5,17 @@
 #include "vegastrike.h"
 #include "gfx/mesh.h"
 #include "unit_generic.h"
+#ifndef OPCODE_COLLIDER
 #include "collide/rapcol.h"
 #include "collide/csgeom/transfrm.h"
 #include "collide/collider.h"
+#else
+#include "collide2/Stdafx.h"
+#include "collide2/CSopcodecollider.h"
+#include "collide2/csgeom/transfrm.h"
+#include "collide2/collider.h"
+#endif 
+
 #include "unit_collide.h"
 #include "vs_globals.h"
 #include "config_xml.h"
@@ -44,7 +52,11 @@ ContinuousTerrain::ContinuousTerrain (const char * filename, const Vector & Scal
 	  md[i].mesh->GetPolys(polies);
 	  sizeX=md[i].mesh->corner_max().i-md[i].mesh->corner_min().i;
 	  sizeZ=md[i].mesh->corner_max().k-md[i].mesh->corner_min().k;
+#ifndef OPCODE_COLLIDER
 	  md[i].collider = new csRapidCollider (polies);
+#else
+	  md[i].collider = new csOPCODECollider (polies);
+#endif
 	  
 	}
 	if (tmp[k]=='\0')
@@ -311,8 +323,14 @@ void ContinuousTerrain::Collide (Unit * un, Matrix t) {
 	if (un->colTrees->colTree(un,Vector(0,0,0))->Collide (*md[i].collider,
 					    &smalltransform,
 					    &bigtransform)) {
+#ifndef OPCODE_COLLIDER
 	  csCollisionPair * mycollide = csRapidCollider::GetCollisions();
 	  int numHits = csRapidCollider::numHits;
+#else
+	  csCollisionPair * mycollide = csOPCODECollider::GetCollisions();
+	  unsigned int numHits = csOPCODECollider::GetCollisionPairCount();
+#endif
+	  
 	  if (numHits) {
 
 	    smallpos.Set((mycollide[0].a1.x+mycollide[0].b1.x+mycollide[0].c1.x)/3,  

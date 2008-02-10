@@ -23,7 +23,13 @@
 #include "unit_generic.h"
 #include "gfx/sphere.h"
 #include "role_bitmask.h"
+#ifndef OPCODE_COLLIDER
 #include "cmd/collide/rapcol.h"
+#else
+#include "cmd/collide2/Stdafx.h"
+#include "cmd/collide2/CSopcodecollider.h"
+#endif
+
 #include "networking/netclient.h"
 #define VS_PI 3.1415926536
 
@@ -2087,8 +2093,13 @@ void Unit::LoadXML(VSFileSystem::VSFile & f, const char * modifications, string 
   }
   BSPTree * bspTree=NULL;
   BSPTree * bspShield=NULL;
+#ifndef OPCODE_COLLIDER
   csRapidCollider *colShield=NULL;
   csRapidCollider *colTree=NULL;
+#else
+  csOPCODECollider *colShield=NULL;
+  csOPCODECollider *colTree=NULL;
+#endif
   if (xml->shieldmesh) {
     meshdata.back() = xml->shieldmesh;
     if (!this->colTrees) {
@@ -2100,7 +2111,11 @@ void Unit::LoadXML(VSFileSystem::VSFile & f, const char * modifications, string 
       }
       if (meshdata.back()) {
 	meshdata.back()->GetPolys(polies);
+#ifndef OPCODE_COLLIDER
 	colShield = new csRapidCollider (polies);
+#else
+	colShield = new csOPCODECollider (polies);
+#endif
       }
     }
   }
@@ -2111,7 +2126,11 @@ void Unit::LoadXML(VSFileSystem::VSFile & f, const char * modifications, string 
       tmp= new SphereMesh (rSize(),8,8,vs_config->getVariable("graphics","shield_texture","shield.bmp").c_str(), NULL, false,ONE, ONE);///shield not used right now for collisions
       tmp->GetPolys (polies);
       if (xml->hasColTree)
+#ifndef OPCODE_COLLIDER
 	colShield = new csRapidCollider (polies);
+#else
+	colShield = new csOPCODECollider (polies);
+#endif
       else
 #endif
 	colShield=NULL;
@@ -2140,7 +2159,11 @@ void Unit::LoadXML(VSFileSystem::VSFile & f, const char * modifications, string 
 	if (xml->rapidmesh) {
 		xml->rapidmesh->GetPolys(polies);
 	}
+#ifndef OPCODE_COLLIDER
 	csRapidCollider * csrc=NULL;
+#else
+	csOPCODECollider * csrc=NULL;
+#endif
 	if (xml->hasColTree) {
 		csrc=getCollideTree(Vector(1,1,1),
 							xml->rapidmesh?
@@ -2171,7 +2194,11 @@ void Unit::LoadXML(VSFileSystem::VSFile & f, const char * modifications, string 
 #endif
   delete xml;
 }
+#ifndef OPCODE_COLLIDER
 csRapidCollider * Unit::getCollideTree (const Vector & scale, const std::vector<bsp_polygon> * pol) {
+#else
+csOPCODECollider * Unit::getCollideTree (const Vector & scale, const std::vector<bsp_polygon> * pol) {
+#endif
 	vector <bsp_polygon> polies;
 	if (!pol) {
 		for (int j=0;j<nummesh();j++) {
@@ -2189,5 +2216,9 @@ csRapidCollider * Unit::getCollideTree (const Vector & scale, const std::vector<
 			}
 		}
 	}
+#ifndef OPCODE_COLLIDER
 	return new csRapidCollider (polies);
+#else
+	return new csOPCODECollider (polies);
+#endif
 }

@@ -159,7 +159,7 @@
 	*/
 	inline_ float	FeedbackFilter(float val, float& memory, float sharpness)
 	{
-		ASSERT(sharpness>=0.0f && sharpness<=1.0f && "Invalid sharpness value in feedback filter");
+		OPASSERT(sharpness>=0.0f && sharpness<=1.0f && "Invalid sharpness value in feedback filter");
 				if(sharpness<0.0f)	sharpness = 0.0f;
 		else	if(sharpness>1.0f)	sharpness = 1.0f;
 		return memory = val * sharpness + memory * (1.0f - sharpness);
