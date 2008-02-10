@@ -174,9 +174,9 @@ void csOPCODECollider::GeometryInitialize (const std::vector <bsp_polygon> &poly
       tmp.AddBoundingVertex (p->v[0]);
 	  tmp.AddBoundingVertex (p->v[1]);
 	  tmp.AddBoundingVertex (p->v[2]);
-	  vertholder[0].Set (p->v[0].i , p->v[0].j , p->v[0].k);
-	  vertholder[1].Set (p->v[1].i , p->v[1].j , p->v[1].k);
-	  vertholder[2].Set (p->v[2].i , p->v[2].j , p->v[2].k);
+	  vertholder[0+i*3].Set (p->v[0].i , p->v[0].j , p->v[0].k);
+	  vertholder[1+i*3].Set (p->v[1].i , p->v[1].j , p->v[1].k);
+	  vertholder[2+i*3].Set (p->v[2].i , p->v[2].j , p->v[2].k);
     }
 
     radius = max3 (tmp.MaxX ()- tmp.MinX (), tmp.MaxY ()- tmp.MinY (),
@@ -353,10 +353,15 @@ bool csOPCODECollider::GetOneHitOnly()
 
 Vector csOPCODECollider::getVertex(unsigned int which) const 
 {
+	unsigned int k = which / 3;
+	unsigned int nt = 0;
 	const MeshInterface *tmp = m_pCollisionModel->GetMeshInterface();
 	VertexPointers vertp;
-	tmp->GetTriangle(vertp,0);
-	const Point *tmpPoint = vertp.Vertex[which];
+	if( (nt = tmp->GetNbTriangles()) == 0)
+		return(Vector(0,0,0));
+	if(k >= nt ) k = nt-1;
+	tmp->GetTriangle(vertp,k);
+	const Point *tmpPoint = vertp.Vertex[which%3];
 	const float f[3] = {tmpPoint->x,tmpPoint->y,tmpPoint->z};
 	return(Vector(f[0],f[1],f[2]));
 }
