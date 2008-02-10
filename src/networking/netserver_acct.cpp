@@ -195,6 +195,13 @@ bool NetServer::saveAccount(int i)
 			COUT<<"ERROR sending SAVE to account server for "<<clt->callsign<<" ("<<un->GetSerial()<<")"<<endl;
 			return false;
 		}
+		{
+			// Tell client that we saved the game.
+			Packet p1;
+			NetBuffer netbuf;
+			p1.send(CMD_SAVEACCOUNTS, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(),
+				SENDRELIABLE, NULL, clt->tcp_sock, __FILE__, __LINE__);
+		}
 		return true;
 	}
 	return false;

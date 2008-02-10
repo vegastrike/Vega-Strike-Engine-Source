@@ -46,6 +46,7 @@
 #include "cmd/role_bitmask.h"
 #include "cmd/base_util.h"
 #include "gfx/cockpit_generic.h"
+#include "savenet_util.h"
 #include "save_util.h"
 
 #include "networking/lowlevel/vsnet_clientstate.h"
@@ -938,6 +939,17 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				}
 			}
 			break;
+			case CMD_SAVEACCOUNTS:
+			{
+			  Unit *un = this->game_unit.GetUnit();
+			  if (un) {
+				int cpnum = _Universe->whichPlayerStarship(un);
+				if (cpnum>=0 && this->lastsave.size()>=2) {
+					SaveNetUtil::GetSaveStrings(cpnum, lastsave[0], lastsave[1], true);
+				}
+			  }
+			  break;
+			}
 			case CMD_JUMP :
 				if (nostarsystem) break;
 			if (1) {

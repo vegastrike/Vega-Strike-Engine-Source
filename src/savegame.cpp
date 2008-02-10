@@ -609,11 +609,12 @@ void SaveGame::WriteMissionStringData (std::vector <char> & ret) {
   PushBackUInt(missionstringdata->m.size(),ret);
   for( MissionStringDat::MSD::iterator i=missionstringdata->m.begin();i!=missionstringdata->m.end();i++) {
     const string &key = (*i).first;
+    unsigned int siz = (*i).second.size();
     if (key == "mission_descriptions" || key == "mission_scripts" || key == "mission_vars" || key == "mission_names") {
 		// *** BLACKLIST ***
-		continue; // Don't bother to write these out since they waste a lot of space and are rewritten at each dock.
+		// Don't bother to write these out since they waste a lot of space and aren't used.
+		siz = 0; // Not writing them out altogether will cause saved games to break.
 	}
-    unsigned int siz = (*i).second.size();
 	PushBackChars("\n",ret);
 	PushBackString(key,ret);
 	PushBackUInt(siz,ret);

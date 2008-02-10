@@ -189,7 +189,7 @@ void	NetClient::saveRequest( )
 	send( CMD_SAVEACCOUNTS, netbuf, SENDRELIABLE, __FILE__, __LINE__ );
 
 	int cpnum = _Universe->whichPlayerStarship(un);
-	if (cpnum>=0 && lastsave.size()>=2) {
+	if (cpnum>=0 && lastsave.size()>=2 && this->netversion < 4960) {
 		SaveNetUtil::GetSaveStrings(cpnum, lastsave[0], lastsave[1], true);
 	}
 	
