@@ -3132,14 +3132,16 @@ static int	nodirs( struct dirent * entry)
 static int	nodirs( const struct dirent * entry)
 #endif	
 {
-#if defined(_WIN32)
-	// Have to check if we have the full path or just relative (which would be a problem)
-	struct stat s;
-	std::string tmp=VSFileSystem::homedir+"/save/"+entry->d_name;
+  /*
         std::string autosave=_Universe->AccessCockpit()->savegame->GetCallsign()+mission[0].getVariable("savegame","");
         //printf ("savegame %s matches %s\n",autosave.c_str(), entry->d_name);
         if (strstr(entry->d_name,autosave.c_str()))
           return 0;
+  */
+#if defined(_WIN32)
+	// Have to check if we have the full path or just relative (which would be a problem)
+	std::string tmp=VSFileSystem::homedir+"/save/"+entry->d_name;
+	struct stat s;
 	if( stat( tmp.c_str(), &s)<0)
 		return string( entry->d_name)!="." && string( entry->d_name)!="..";
 	if( (s.st_mode & S_IFDIR)==0 && string( entry->d_name)!="." && string( entry->d_name)!="..")
@@ -3153,6 +3155,19 @@ static int	nodirs( const struct dirent * entry)
 	return 0;
 }
 
+static int datesort ( const void *v1, const void *v2 ) {
+	const struct dirent *d1=*(const struct dirent**)v1;
+	const struct dirent *d2=*(const struct dirent**)v2;
+	struct stat s1, s2;
+	std::string tmp=VSFileSystem::homedir+"/save/"+d1->d_name;
+	if (stat(tmp.c_str(), &s1))
+		return 0;
+	tmp=VSFileSystem::homedir+"/save/"+d2->d_name;
+	if (stat(tmp.c_str(), &s2))
+		return 0;
+	
+	return s1.st_mtime - s2.st_mtime;
+}
 
 // Load the controls for the News display.
 void BaseComputer::loadLoadSaveControls(void) {
@@ -3166,7 +3181,7 @@ void BaseComputer::loadLoadSaveControls(void) {
 		const int playerNum=UnitUtil::isPlayerStarship(playerUnit);
 		struct dirent ** dirlist;
 		std::string savedir = VSFileSystem::homedir+"/save/";
-		int ret = scandir (savedir.c_str(),&dirlist,nodirs,0);
+		int ret = scandir (savedir.c_str(),&dirlist,nodirs,&datesort);
 		while( ret-->0) {
 			picker->addCell(new SimplePickerCell(dirlist[ret]->d_name));
 		}		

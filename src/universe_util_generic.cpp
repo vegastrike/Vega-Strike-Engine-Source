@@ -1,4 +1,5 @@
 #include <math.h>
+#include <sys/stat.h>
 #include "lin_time.h"
 #include "cmd/script/mission.h"
 #include "universe_util.h"
@@ -877,7 +878,15 @@ namespace UniverseUtil
 		savegame.ParseSaveGame(filename,system,"",pos,updatepos,creds,Ships,_Universe->CurrentCockpit(),"",true,false,quickmode,true,true,campaign_score_vars);
 		UniverseUtil::setCurrentSaveGame(sillytemp);
 		string text;
+		text += filename;
 		text="Savegame: "+text+lf+"_________________"+lf;
+		{
+			struct stat attrib;
+			if (0==stat((getSaveDir()+filename).c_str(), &attrib)) {
+				text+="Saved on: ";
+				text+=ctime(&attrib.st_mtime)+lf;
+			}
+		}
 		text+="Credits: "+XMLSupport::tostring((unsigned int)creds)+"."+XMLSupport::tostring(((unsigned int)(creds*100))%100)+lf;
 		text+=simplePrettySystem(system)+lf;
 		if (Ships.size()) {
