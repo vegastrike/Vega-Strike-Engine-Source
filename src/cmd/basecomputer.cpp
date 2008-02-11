@@ -3169,6 +3169,12 @@ static int datesort ( const void *v1, const void *v2 ) {
 	return s1.st_mtime - s2.st_mtime;
 }
 
+#ifdef _WIN32
+typedef int (*scancompare) ( const struct dirent **v1, const struct dirent **v2 );
+#else
+typedef int (*scancompare) ( const void *v1, const void *v2 );
+#endif
+
 // Load the controls for the News display.
 void BaseComputer::loadLoadSaveControls(void) {
     SimplePicker* picker = static_cast<SimplePicker*>( window()->findControlById("LoadSavePicker") );
@@ -3181,7 +3187,7 @@ void BaseComputer::loadLoadSaveControls(void) {
 		const int playerNum=UnitUtil::isPlayerStarship(playerUnit);
 		struct dirent ** dirlist;
 		std::string savedir = VSFileSystem::homedir+"/save/";
-		int ret = scandir (savedir.c_str(),&dirlist,nodirs,&datesort);
+		int ret = scandir (savedir.c_str(),&dirlist,nodirs,(scancompare)&datesort);
 		while( ret-->0) {
 			picker->addCell(new SimplePickerCell(dirlist[ret]->d_name));
 		}		
