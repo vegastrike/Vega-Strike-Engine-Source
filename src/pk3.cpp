@@ -42,6 +42,7 @@
  */
 
 #include "pk3.h"
+#include <cstdlib>
 #include <iostream>
 #include "posh.h"
 using std::cerr;

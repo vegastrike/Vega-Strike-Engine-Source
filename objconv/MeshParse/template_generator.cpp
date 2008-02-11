@@ -1,4 +1,5 @@
 #include <string>
+#include <cstring>
 #include <vector>
 ///Stores all the load-time vertex info in the XML struct FIXME light calculations
 #include <expat.h>

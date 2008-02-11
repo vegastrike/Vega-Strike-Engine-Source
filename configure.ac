@@ -226,6 +226,11 @@ VS_CXXFLAGS=${VS_CXXFLAGS#-O2}
 CFLAGS=${CFLAGS#-g}
 CFLAGS=${CFLAGS#-O2}
 
+AC_ARG_ENABLE(permissive,    AC_HELP_STRING([--disable-permissive], [Build code without -fpermissive flag]),[ACENABLE=$enableval], [ACENABLE=yes])
+if test $ACENABLE = yes ; then
+	VS_CXXFLAGS="$VS_CXXFLAGS -fpermissive"
+fi
+
 AC_ARG_ENABLE(ggdb3, AC_HELP_STRING([--enable-ggdb3], [Add the -ggdb3 compiler flag.]), 
 	if test $enableval = yes ; then
 		DEBUG_FLAGS="-O0 -ggdb3"

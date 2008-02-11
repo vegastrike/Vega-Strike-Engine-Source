@@ -1,5 +1,4 @@
 #include "hashtable.h"
-#include <GL/gl.h>
 #include "base_maker_texture.h"
 #include <stdio.h>
 #include <png.h>

@@ -2,7 +2,7 @@
  * ...
  */
 #define BASE_MAKER
-#include <string>
+#include <cstring>
 #include <vector>
 #include <queue>
 #include <iostream>
@@ -14,7 +14,6 @@
 #include "gfx/hud.h"
 #include "vs_globals.h"
 
-#include <GL/glut.h>
 #include <time.h>
 #ifdef _WIN32
 #include <direct.h>

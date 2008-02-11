@@ -3,7 +3,7 @@
 using namespace std;
 
 #include <time.h>
-
+#include <cstring>
 #if !defined(_WIN32)
 #include <sys/time.h>
 #else

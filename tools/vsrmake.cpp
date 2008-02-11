@@ -31,7 +31,7 @@
 #include "vsrtools.h"
 #include "common.h"
 #include <stdlib.h>
-#include <string>
+#include <cstring>
 #include <vector>
 #include <algorithm>
 #include <sys/types.h>

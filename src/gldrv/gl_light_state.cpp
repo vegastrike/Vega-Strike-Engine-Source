@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <cstring>
 //#include <vegastrike.h>
 #include "gl_globals.h"
 #include "hashtable_3d.h"

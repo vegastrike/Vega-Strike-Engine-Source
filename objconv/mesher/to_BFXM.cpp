@@ -1,6 +1,6 @@
 #include "mesh_io.h"
 #include "to_BFXM.h"
-
+#include <cstring>
 
 //#define fprintf aprintf
 int32bit aprintf(...) {

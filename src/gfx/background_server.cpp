@@ -1,3 +1,4 @@
+#include <cstring>
 #include <string>
 #include "background.h"
 Background::Background(const char *, int, float, std::string) {

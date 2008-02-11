@@ -1,5 +1,6 @@
 #include "from_obj.h"
 #include "from_BFXM.h"
+#include <cstring>
 #ifdef HAVE_OGRE
 #include "to_OgreMesh.h"
 #endif
