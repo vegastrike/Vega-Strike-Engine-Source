@@ -1144,7 +1144,7 @@ void SumNormals (int trimax, int t3vert,
 			 vertices[triind[a+((j+1)%t3vert)]].y,
 			 vertices[triind[a+((j+1)%t3vert)]].z)-Cur);
 	const float eps = .00001;
-	if (fabs(Cur.i)>eps||fabs(Cur.j)>eps||fabs(Cur.k)<eps) {
+	if (fabs(Cur.i)>eps||fabs(Cur.j)>eps||fabs(Cur.k)>eps) {
 	  Normalize(Cur);	 
 	  //Cur = Cur*(1.00F/xml->vertexcount[a+j]);
 	  vertices[triind[a+j]].i+=Cur.i;
