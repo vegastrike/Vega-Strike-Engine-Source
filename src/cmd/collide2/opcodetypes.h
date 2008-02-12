@@ -28,6 +28,14 @@
 
 #include <float.h>
 // Hack
+#if defined(_WIN32) && !defined(__CYGWIN__) // _MSC_VER
+#define CS_COMPILER_MSVC 1
+#define CS_PROCESSOR_SIZE 64
+#define CS_HAVE_INTPTR_T 1
+#define CS_HAVE_WCHAR_H 1
+#define CS_HAVE_WCTYPE_H 1
+#else
+
 #define CS_HAVE_STDINT_H 1
 #define CS_HAVE_INTTYPES_H 1
 #define CS_COMPILER_GCC 1
@@ -35,6 +43,8 @@
 #define CS_HAVE_INTPTR_T 1
 #define CS_HAVE_WCHAR_H 1
 #define CS_HAVE_WCTYPE_H 1
+
+#endif
 // End Hack
 
 

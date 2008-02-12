@@ -3169,7 +3169,7 @@ static int datesort ( const void *v1, const void *v2 ) {
 	return s1.st_mtime - s2.st_mtime;
 }
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__CYGWIN__)
 typedef int (*scancompare) ( const struct dirent **v1, const struct dirent **v2 );
 #else
 typedef int (*scancompare) ( const void *v1, const void *v2 );
