@@ -231,7 +231,8 @@ void	NetServer::start(int argc, char **argv)
         }
 	string tmp;
 	unsigned short tmpport = ACCT_PORT;
-	acctserver = XMLSupport::parse_bool(vs_config->getVariable( "server", "useaccountserver", "true"));
+	acctserver = XMLSupport::parse_bool(vs_config->getVariable( "server", "useaccountserver", 
+		vs_config->getVariable("network","use_account_server","false")));
 
 	// Create and bind sockets
 	COUT << "Initializing TCP server ..." << endl;

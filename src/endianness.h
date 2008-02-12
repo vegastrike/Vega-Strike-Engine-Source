@@ -32,7 +32,8 @@ double DONTUSE__NXSwapBigDoubleToLittleEndian(double x);
     # define le64_to_cpu(x) (x)
     #endif
 #else
-    #if defined(IRIX)
+    #if defined(IRIX) || (defined (__SVR4) && defined (__sun))
+    #include <sys/types.h>
     # if BYTE_ORDER == BIG_ENDIAN	/* depends on MIPSEB or MIPSEL and SGIAPI */
     #  define le32_to_cpu(x) (((x) << 24) | \
                             (((x) << 8) & 0x00FF0000) | \

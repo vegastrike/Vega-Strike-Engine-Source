@@ -19,7 +19,7 @@ else
 dnl the stuff between [ ] is treated as a string by autoconf
 dnl and placed verbatim into the configure script, where we want it.
 [BOOSTDIR=`grep '^BOOSTDIR=' Makefile.am|awk 'BEGIN{FS="="}{print $(2)}'`
-with_boost_ver=`echo $with_boost|awk '{gsub("[.]", "_"); print}'`
+with_boost_ver=`echo $with_boost|sed -e s/[.]/_/`
 BOOST_CPPFLAGS='-I$(top_srcdir)/$(BOOSTDIR)/'$with_boost_ver]
 AC_MSG_NOTICE([Using Boost Version ${with_boost}.])
 fi

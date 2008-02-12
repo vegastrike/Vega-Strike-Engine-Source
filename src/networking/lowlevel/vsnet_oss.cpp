@@ -8,6 +8,11 @@
 #if !defined(_WIN32) || defined(__CYGWIN__)
 #include <sys/ioctl.h>
 #endif
+
+#if defined(__SVR4) && defined(__sun)
+#include <sys/filio.h>
+#endif
+
 #include <iostream>
 
 #include "vsnet_oss.h"

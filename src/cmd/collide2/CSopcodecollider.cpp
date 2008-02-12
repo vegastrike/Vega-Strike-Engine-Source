@@ -31,8 +31,9 @@
 #include "opcodeqsqrt.h"
 #include "opcodeqint.h"
 #include "opcodegarray.h"
+#define _X 1000
 #include "CSopcodecollider.h"
-
+#undef _X
 
 using namespace Opcode;
 

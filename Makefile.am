@@ -526,11 +526,13 @@ bin_PROGRAMS = \
   $(GTKUTILS_PROG)
 
 
-noinst_LIBRARIES=\
+noinst_LIBRARIES_1=\
   libnetlowlevel.a
 if !BOOSTSYSTEM
-noinst_LIBRARIES+=\
+noinst_LIBRARIES=$(noinst_LIBRARIES_1)\
   libboost_python.a
+else
+noinst_LIBRARIES=$(noinst_LIBRARIES_1)
 endif
 
 LIBCMDSERVER = \
@@ -745,26 +747,24 @@ libnetlowlevel_a_SOURCES = \
   src/networking/lowlevel/vsnet_thread.h
 
 
-vegastrike_LDADD = $(noinst_LIBRARIES)
-if !BOOSTSYSTEM
-  vegastrike_LDADD += \
-    -lz  
+vegastrike_LDADD_1 = $(noinst_LIBRARIES) \
+	-lz
+if BOOSTSYSTEM
+  vegastrike_LDADD = $(vegastrike_LDADD_1) \
+    -lboost_python-st
 else
-  vegastrike_LDADD += \
-    -lboost_python-st \
-    -lz
+  vegastrike_LDADD = $(vegastrike_LDADD_1)
 endif  
 
 vegastrike_DEPENDENCIES = $(noinst_LIBRARIES)
 
-vegaserver_LDADD = $(noinst_LIBRARIES)
-if !BOOSTSYSTEM
-  vegaserver_LDADD += \
-    -lz  
+vegaserver_LDADD_1 = $(noinst_LIBRARIES) \
+	-lz
+if BOOSTSYSTEM
+  vegaserver_LDADD = $(vegaserver_LDADD_1) \
+    -lboost_python-st
 else
-  vegaserver_LDADD += \
-    -lboost_python-st \
-    -lz
+  vegaserver_LDADD = $(vegaserver_LDADD_1)
 endif  
 
 vegaserver_DEPENDENCIES = $(noinst_LIBRARIES)

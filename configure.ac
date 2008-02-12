@@ -79,12 +79,43 @@ case $target in
     bsdthread=no
     ;;
   *)
+    AC_MSG_CHECKING([for -pthread])
     saved_CXXFLAGS="${CXXFLAGS}"
     CXXFLAGS="-Werror -pthread"
     AC_TRY_COMPILE(, , [bsdthread=yes], [bsdthread=no])
+    if test "x$bsdthread" = "xyes"; then
+        $CXX $CXXFLAGS 2>&1 | grep 'unrecognized option' > /dev/null
+        if test $? = 0 ; then # Match found.
+            bsdthread=no # WTF does gcc return 0 with -Werror if there is one of these.
+        fi
+    fi
     CXXFLAGS="${saved_CXXFLAGS}"
+    AC_MSG_RESULT(${bsdthread})
     ;;
 esac
+
+AC_MSG_CHECKING([for libsocket])
+saved_LIBS="${LIBS}"
+LIBS="-lnsl -lresolv -lsocket"
+AC_TRY_LINK(, , [neednetlibs=yes], [neednetlibs=no])
+if test "x$neednetlibs" = "xyes"; then
+    true
+else
+    LIBS="${saved_LIBS}"
+fi
+AC_MSG_RESULT(${neednetlibs})
+
+AC_MSG_CHECKING([for libutil])
+saved_LIBS="${LIBS}"
+LIBS="-lutil"
+AC_TRY_LINK(, , [needutil=yes], [needutil=no])
+if test "x$needutil" = "xyes"; then
+    true
+else
+    LIBS="${saved_LIBS}"
+fi
+AC_MSG_RESULT(${needutil})
+
 
 
 # Checks for header files.
@@ -169,9 +200,8 @@ PTHREAD_CXXFLAGS="-pthread"
 PTHREAD_LIBS="-pthread"
 else
 PTHREAD_CXXFLAGS="-D_REENTRANT"
-PTHREADS_LIBS="-lpthread"
+PTHREAD_LIBS="-lpthread"
 fi
-
 AC_ARG_ENABLE(flags, AC_HELP_STRING([--enable-flags=opts], [Set specific flags for the compiler]), userflags=${enableval})
 
 
@@ -392,8 +422,6 @@ if test "x$is_macosx" = "xyes" ; then
 #    PYTHON_LDOPTS="-L/System/Library/Frameworks/Python.framework"
 #    with_python_inc="/System/Library/Frameworks/Python.framework/Headers"
     VS_LIBS="$VS_LIBS -lobjc -L$with_python_libs "
-else
-    VS_LIBS="$VS_LIBS -lutil"
 fi
 
 

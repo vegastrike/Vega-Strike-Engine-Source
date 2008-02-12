@@ -104,9 +104,9 @@ then
 	    echo "$i/libpython${PYTHON_SHORT}.so yes"
 	    PYTHON_CXXFLAGS="-I${PYTHON_incdir}"
 	    if test "x$is_macosx" = "xyes" ; then
-	    	    PYTHON_LIBS="-L$i -lpython${PYTHON_SHORT} --export-dynamic"
+	    	    PYTHON_LIBS="-L$i -lpython${PYTHON_SHORT}"
 	    else
-		    PYTHON_LIBS="-L$i -lpython${PYTHON_SHORT} -Xlinker -export-dynamic"
+		    PYTHON_LIBS="-L$i -lpython${PYTHON_SHORT}"
 	    fi
             FOUND_LIBPYTHON_SO=yes
             break
@@ -116,9 +116,9 @@ then
             echo "$i/libpython${PYTHON_SHORT}.a yes"
     	    PYTHON_CXXFLAGS="-I${PYTHON_incdir}"
 	    if test "x$is_macosx" = "xyes" ; then
-	    	    PYTHON_LIBS="$i/libpython${PYTHON_SHORT}.a --export-dynamic"
+	    	    PYTHON_LIBS="$i/libpython${PYTHON_SHORT}.a"
 	    else
-	    	    PYTHON_LIBS="$i/libpython${PYTHON_SHORT}.a  -Xlinker -export-dynamic"
+	    	    PYTHON_LIBS="$i/libpython${PYTHON_SHORT}.a"
 	    fi
             FOUND_LIBPYTHON_SO=yes
 	    break
@@ -127,7 +127,7 @@ then
 	    then
     	      PYTHON_CXXFLAGS="-I${PYTHON_incdir}"
               echo "$i/libpython${PYTHON_SHORT}.dll.a yes"
-	      PYTHON_LIBS="$i/libpython${PYTHON_SHORT}.dll.a  -Xlinker -export-dynamic"
+	      PYTHON_LIBS="$i/libpython${PYTHON_SHORT}.dll.a"
               FOUND_LIBPYTHON_SO=yes
             else
               echo "$i/libpython${PYTHON_SHORT}.so no"
@@ -136,6 +136,25 @@ then
         fi
     done
 fi
+
+AC_MSG_CHECKING([for --export-dynamic])
+saved_LIBS="${LIBS}"
+LIBS="$saved_LIBS --export-dynamic"
+AC_TRY_LINK(, , [export_dynamic_1=yes], [export_dynamic_1=no])
+AC_MSG_RESULT(${export_dynamic_1})
+if test "x$export_dynamic_1" = "xyes"; then
+    PYTHON_LIBS="$PYTHON_LIBS --export-dynamic"
+else
+    AC_MSG_CHECKING([for -export-dynamic])
+    LIBS="$saved_LIBS -Xlinker -export-dynamic"
+    AC_TRY_LINK(, , [export_dynamic_2=yes], [export_dynamic_2=no])
+    AC_MSG_RESULT(${export_dynamic_2})
+    if test "x$export_dynamic_2" = "xyes"; then
+        PYTHON_LIBS="$PYTHON_LIBS -Xlinker -export-dynamic"
+    fi
+fi
+LIBS="${saved_LIBS}"
+
 
 dnl if test "x${FOUND_LIBPYTHON_SO}" = "xyes";
 dnl then

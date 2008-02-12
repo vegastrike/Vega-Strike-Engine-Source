@@ -40,7 +40,7 @@ checkversion()
       ver_ok=OK
     fi
   fi
-  while read; do
+  while read TEMP; do
     true;
   done
   if (test x$ver_ok = xOK) then

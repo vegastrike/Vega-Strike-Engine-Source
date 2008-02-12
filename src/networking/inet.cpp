@@ -6,9 +6,9 @@
 #define SOCKET_ERROR -1
 #include <sys/time.h>
 #include <sys/types.h>
-#if !defined(__APPLE__) && !defined(__CYGWIN__) && !defined(BSD) && !defined(__FreeBSD__) && !defined(SOLARIS)
-#include <error.h>
-#endif
+// #if !defined(__APPLE__) && !defined(__CYGWIN__) && !defined(BSD) && !defined(__FreeBSD__) && !defined(SOLARIS)
+// #include <error.h>
+// #endif
 #include <netdb.h>
 #include <string.h>
 #include <sys/socket.h>

@@ -10,9 +10,9 @@
 #endif
 #include <sys/time.h>
 #include <sys/types.h>
-#if !defined(__APPLE__) && !defined(__CYGWIN__) && !defined(BSD)
-#include <error.h>
-#endif
+// #if !defined(__APPLE__) && !defined(__CYGWIN__) && !defined(BSD)
+// #include <error.h>
+// #endif
 #include <netdb.h>
 #include <string.h>
 #include <sys/socket.h>
