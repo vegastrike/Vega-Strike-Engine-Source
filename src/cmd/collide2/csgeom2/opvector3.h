@@ -20,11 +20,7 @@
 #ifndef __CS_VECTOR3_H__
 #define __CS_VECTOR3_H__
 
-#ifndef __CS_CSSYSDEFS_H__
-//#error "cssysdef.h must be included in EVERY source file!"
-#endif
-#include "cssysdef.h"
-//#include "csgeom/math3d_d.h"
+#include "opcodesysdef.h"
 
 /**
  * A 3D vector.

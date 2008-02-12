@@ -26,7 +26,7 @@
  * \addtogroup geom_utils
  * @{ */
 
-#include "csextern.h"
+#include "opcodeextern.h"
 
 namespace CS
 {

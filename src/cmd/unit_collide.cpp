@@ -14,8 +14,8 @@
 #include "collide/collider.h"
 #else
 #include "collide2/CSopcodecollider.h"
-#include "collide2/csgeom/transfrm.h"
-#include "collide2/collider.h"
+#include "collide2/csgeom2/optransfrm.h"
+#include "collide2/basecollider.h"
 #endif
 
 #include "hashtable.h"
@@ -307,7 +307,7 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
 	csCollisionPair * mycollide = csRapidCollider::GetCollisions();
 	int numHits = csRapidCollider::numHits;
 #else
-	csCollisionPair * mycollide = csOPCODECollider::GetCollisions();
+	csCollisionPair *mycollide = csOPCODECollider::GetCollisions();
 	unsigned int numHits = csOPCODECollider::GetCollisionPairCount();
 	// maybe we should access the collider directly.
 #endif	
@@ -435,7 +435,7 @@ Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, Q
       csCollisionPair * mycollide = csRapidCollider::GetCollisions();
 	  int numHits = csRapidCollider::numHits;
 #else
-      csCollisionPair * mycollide = csOPCODECollider::GetCollisions();
+      csCollisionPair  *mycollide = csOPCODECollider::GetCollisions();
       int numHits = csOPCODECollider::GetCollisionPairCount();
 #endif
       if (numHits) {

@@ -19,9 +19,9 @@
 
 #include <math.h>
 #include <float.h>
-#include "cssysdef.h"
-#include "qint.h"
-#include "csgeom/matrix3.h"
+#include "opcodesysdef.h"
+#include "opcodeqint.h"
+#include "csgeom2/opmatrix3.h"
 #include "gfx/quaternion.h"
 
 //---------------------------------------------------------------------------

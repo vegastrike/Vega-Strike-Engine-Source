@@ -21,7 +21,7 @@
 #define __CS_BOX_H__
 
 
-#include "csgeom/vector3.h"
+#include "opvector3.h"
 
 
 class csPlane3;

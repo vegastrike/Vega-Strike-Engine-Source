@@ -350,16 +350,16 @@ libcollide2= \
   src/cmd/collide2/Ice/Stdafx.h \
   src/cmd/collide2/Stdafx.h \
   src/cmd/collide2/Opcode.h \
-  src/cmd/collide2/cssysdef.h \
-  src/cmd/collide2/cstypes.h \
-  src/cmd/collide2/csextern.h \
-  src/cmd/collide2/csgeom/box.cpp \
-  src/cmd/collide2/csgeom/box.h \
-  src/cmd/collide2/csgeom/matrix3.cpp \
-  src/cmd/collide2/csgeom/matrix3.h \
-  src/cmd/collide2/csgeom/vector3.cpp \
-  src/cmd/collide2/csgeom/vector.h \
-  src/cmd/collide2/csgeom/transfrm.h \
+  src/cmd/collide2/opcodesysdef.h \
+  src/cmd/collide2/opcodetypes.h \
+  src/cmd/collide2/opcodeextern.h \
+  src/cmd/collide2/csgeom2/opbox.cpp \
+  src/cmd/collide2/csgeom2/opbox.h \
+  src/cmd/collide2/csgeom2/opmatrix3.cpp \
+  src/cmd/collide2/csgeom2/opmatrix3.h \
+  src/cmd/collide2/csgeom2/opvector3.cpp \
+  src/cmd/collide2/csgeom2/opvector.h \
+  src/cmd/collide2/csgeom2/optransfrm.h \
   src/cmd/collide2/OPC_AABBCollider.cpp \
   src/cmd/collide2/OPC_AABBCollider.h \
   src/cmd/collide2/OPC_AABBTree.cpp \

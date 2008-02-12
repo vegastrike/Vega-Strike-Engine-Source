@@ -17,20 +17,16 @@
     Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __IENGINE_COLLIDER_H__
-#define __IENGINE_COLLIDER_H__
+#ifndef __IENGINE_COLLIDER2_H__
+#define __IENGINE_COLLIDER2_H__
 
-#include "Stdafx.h"
-//struct iPolygonMesh;
+//#include "Stdafx.h"
 class csReversibleTransform;
 
-/*enum csColliderType
-{
-  CS_MESH_COLLIDER = 0,
-  CS_TERRAFORMER_COLLIDER,
-  CS_TERRAIN_COLLIDER
-};
-*/	  
+#define CS_MESH_COLLIDER   0
+#define CS_TERRAFORMER_COLLIDER  1
+#define CS_TERRAIN_COLLIDER 2
+
 	  
 
 /**
@@ -42,16 +38,12 @@ struct csCollisionPair
   csVector3 a2, b2, c2;	// Second triangle
 };
 
-//SCF_VERSION (iCollider, 0, 2, 0);
-
 /**
  * A collider.
  */
 struct iCollider : public iBase
 {
 };
-
-//SCF_VERSION (iCollideSystem, 0, 0, 2);
 
 /**
  * This is the Collide plug-in. This plugin is a factory for creating
@@ -63,7 +55,6 @@ struct iCollideSystem : public iBase
 {
   /// Create an iCollider for the given geometry.
 //  virtual iCollider* CreateCollider (iPolygonMesh* mesh) = 0;
-
   /**
    * Test collision between two colliders.
    * This is only supported for iCollider objects created by
@@ -137,7 +128,7 @@ struct iCollideSystem : public iBase
 	csReversibleTransform** transforms) = 0;
 
 
-//	virtual csColliderType GetColliderType() = 0;
+	virtual int GetColliderType() = 0;
 	
 
 };

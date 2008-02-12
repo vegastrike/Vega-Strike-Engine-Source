@@ -11,7 +11,7 @@
 #define ICE_NO_DLL
 #define CS_PROCESSOR_X86
 //#define __GNUC__ 4
-#include "cstypes.h"
-#include "cssysdef.h"
+#include "opcodetypes.h"
+#include "opcodesysdef.h"
 #include "Opcode.h"
 #endif

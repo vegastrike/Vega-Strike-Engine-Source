@@ -14,8 +14,8 @@
 #include "collide/collider.h"
 #else
 #include "collide2/CSopcodecollider.h"
-#include "collide2/csgeom/transfrm.h"
-#include "collide2/collider.h"
+#include "collide2/csgeom2/optransfrm.h"
+#include "collide2/basecollider.h"
 #endif 
 
 #include "hashtable.h"

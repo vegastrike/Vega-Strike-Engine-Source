@@ -40,34 +40,3 @@
 	#include "Ice/IceFPU.h"
 	#include "Ice/IceMemoryMacros.h"
 #define ICEMATHS_API	OPCODE_API
-/*	namespace IceCore
-	{
-		#include "Ice/IceUtils.h"
-		#include "Ice/IceContainer.h"
-		#include "Ice/IcePairs.h"
-		#include "Ice/IceRevisitedRadix.h"
-		#include "Ice/IceRandom.h"
-	}
-	using namespace IceCore;
-
-	
-    namespace IceMaths
-	{
-		#include "Ice/IceAxes.h"
-		#include "Ice/IcePoint.h"
-		#include "Ice/IceHPoint.h"
-		#include "Ice/IceMatrix3x3.h"
-		#include "Ice/IceMatrix4x4.h"
-		#include "Ice/IcePlane.h"
-		#include "Ice/IceRay.h"
-		#include "Ice/IceIndexedTriangle.h"
-		#include "Ice/IceTriangle.h"
-		#include "Ice/IceTrilist.h"
-		#include "Ice/IceAABB.h"
-		#include "Ice/IceOBB.h"
-		#include "Ice/IceBoundingSphere.h"
-		#include "Ice/IceSegment.h"
-		#include "Ice/IceLSS.h"
-	}
-	using namespace IceMaths;
-*/

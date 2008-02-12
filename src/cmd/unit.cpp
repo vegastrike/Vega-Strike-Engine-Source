@@ -43,7 +43,11 @@
 #include "main_loop.h"
 #include "script/mission.h"
 #include "script/flightgroup.h"
+#ifndef OPCODE_COLLIDER
 #include "collide/rapcol.h"
+#else
+
+#endif
 #include "savegame.h"
 #include "xml_serializer.h"
 #include "python/python_class.h"

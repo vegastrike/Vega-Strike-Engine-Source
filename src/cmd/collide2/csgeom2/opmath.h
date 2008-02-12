@@ -28,7 +28,7 @@
 
 #include <math.h>
 #include <float.h>
-#include "algorithms.h"
+#include "opcodealgorithms.h"
 /*
 inline bool isfinited (float x) {return((x) >= -DBL_MAX && (x) <= DBL_MAX);}
 inline bool isfinitef (float x) {return((x) >= -FLT_MAX && (x) <= FLT_MAX);}

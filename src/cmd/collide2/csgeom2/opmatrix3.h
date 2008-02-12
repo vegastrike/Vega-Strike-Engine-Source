@@ -20,11 +20,8 @@
 #ifndef __CS_MATRIX3_H__
 #define __CS_MATRIX3_H__
 
-#ifndef __CS_CSSYSDEFS_H__
-//#error "cssysdef.h must be included in EVERY source file!"
-#endif
 
-#include "csgeom/vector3.h"
+#include "opvector3.h"
 
 struct Quaternion;
 

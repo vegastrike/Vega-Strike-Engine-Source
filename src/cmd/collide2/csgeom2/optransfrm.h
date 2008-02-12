@@ -20,7 +20,7 @@
 #ifndef __CS_TRANSFORM_H__
 #define __CS_TRANSFORM_H__
 
-#include "csgeom/matrix3.h"
+#include "opmatrix3.h"
 
 class csReversibleTransform;
 

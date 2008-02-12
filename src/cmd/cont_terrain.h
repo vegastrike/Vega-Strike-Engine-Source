@@ -1,4 +1,6 @@
-#ifdef OPCODE_COLLIDER
+#ifndef OPCODE_COLLIDER
+
+#else
 #include "cmd/collide2/Stdafx.h"
 #include "cmd/collide2/CSopcodecollider.h"
 #endif

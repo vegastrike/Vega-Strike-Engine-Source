@@ -1,1 +1,1 @@
-#include "../Stdafx.h"
+#include "cmd/collide2/Stdafx.h"
