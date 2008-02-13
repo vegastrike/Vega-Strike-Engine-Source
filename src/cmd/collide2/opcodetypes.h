@@ -28,18 +28,24 @@
 
 #include <float.h>
 // Hack
-#if defined(_WIN32) && !defined(__CYGWIN__) // _MSC_VER
+
+#if defined(_WIN32) && !defined(__CYGWIN__) // && defined(_MSC_VER)
 #define CS_COMPILER_MSVC 1
-#define CS_PROCESSOR_SIZE 64
+#ifdef _WIN64
+#  define CS_PROCESSOR_SIZE 64 /* Only used if intptr_t is not found. */
+#else
+#  define CS_PROCESSOR_SIZE 32 /* Only used if intptr_t is not found. (cough VC6 cough) */
+#endif
 #define CS_HAVE_INTPTR_T 1
 #define CS_HAVE_WCHAR_H 1
 #define CS_HAVE_WCTYPE_H 1
-#else
+
+#else /* GCC or other platform */
 
 #define CS_HAVE_STDINT_H 1
 #define CS_HAVE_INTTYPES_H 1
 #define CS_COMPILER_GCC 1
-#define CS_PROCESSOR_SIZE 64
+#define CS_PROCESSOR_SIZE 64 /* Upper limit on pointer size, only used it intptr_t is not found. */
 #define CS_HAVE_INTPTR_T 1
 #define CS_HAVE_WCHAR_H 1
 #define CS_HAVE_WCTYPE_H 1
