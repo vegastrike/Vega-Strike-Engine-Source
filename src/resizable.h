@@ -1,3 +1,4 @@
+#include<cstdlib>
 template <class ITEM> class Resizable {
   unsigned int num;
   unsigned int alloc;

@@ -256,7 +256,7 @@ VS_CXXFLAGS=${VS_CXXFLAGS#-O2}
 CFLAGS=${CFLAGS#-g}
 CFLAGS=${CFLAGS#-O2}
 
-AC_ARG_ENABLE(permissive,    AC_HELP_STRING([--disable-permissive], [Build code without -fpermissive flag]),[ACENABLE=$enableval], [ACENABLE=yes])
+AC_ARG_ENABLE(permissive,    AC_HELP_STRING([--enable-permissive], [Build code with -fpermissive flag]),[ACENABLE=$enableval], [ACENABLE=no])
 if test $ACENABLE = yes ; then
 	VS_CXXFLAGS="$VS_CXXFLAGS -fpermissive"
 fi

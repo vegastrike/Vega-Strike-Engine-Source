@@ -17,6 +17,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include <cstdlib>
 #ifdef FUNCTORS_INC
 #else
 #define FUNCTORS_INC 1
@@ -239,5 +240,6 @@ template <class TClass> class Functor : public TFunctor
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
+
 
 
