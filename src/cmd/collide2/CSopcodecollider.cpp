@@ -63,48 +63,60 @@ void csOPCODECollider::GeometryInitialize (const std::vector <bsp_polygon> &poly
 {
   OPCODECREATE OPCC;
   size_t i;
-  int  tri_count = (int)polygons.size();
-
-  if (tri_count>=1)
+  int  tri_count = 0;(int)polygons.size();
+  int  vert_count = 0;
+  for(i = 0; i <(int)polygons.size();++i){
+  	tri_count += polygons[i].v.size() - 2;
+  }
+  vert_count = tri_count + 2 * (int)polygons.size();
+  
+  if (tri_count)
   {
     m_pCollisionModel = new Opcode::Model;
     if (!m_pCollisionModel)
       return;
 
+	// The following garbage will be cleaned up prior to release.
     vertholder = new Point [3*tri_count];
     indexholder = new unsigned int[3*tri_count];
 
     csBox3 tmp;
     tmp.StartBoundingBox ();
-    for (i = 0; i < tri_count; ++i)
+	int last = 0;
+	int index = 0;
+	
+    for (i = 0; i < (int)polygons.size(); ++i)
     {
 	  const bsp_polygon *p = (&polygons[i]);
       tmp.AddBoundingVertex (p->v[0]);
-	  tmp.AddBoundingVertex (p->v[1]);
-	  tmp.AddBoundingVertex (p->v[2]);
-	  vertholder[0+i*3].Set (p->v[0].i , p->v[0].j , p->v[0].k);
-	  vertholder[1+i*3].Set (p->v[1].i , p->v[1].j , p->v[1].k);
-	  vertholder[2+i*3].Set (p->v[2].i , p->v[2].j , p->v[2].k);
+	  vertholder[last++].Set (p->v[0].i , p->v[0].j , p->v[0].k);
+	  indexholder[index] = index;
+	  ++index;
+      tmp.AddBoundingVertex (p->v[1]);
+	  vertholder[last++].Set (p->v[1].i , p->v[1].j , p->v[1].k);
+	  indexholder[index] = index;
+      ++index;
+      tmp.AddBoundingVertex (p->v[2]);
+	  vertholder[last++].Set (p->v[2].i , p->v[2].j , p->v[2].k);
+	  indexholder[index] = index;
+	  ++index;
+
+	  for(int j = 3;j < p->v.size();++j){
+      	tmp.AddBoundingVertex (p->v[j]);
+		vertholder[last++].Set (p->v[j-2].i , p->v[j-2].j , p->v[j-2].k);
+		vertholder[last++].Set (p->v[j-1].i , p->v[j-1].j , p->v[j-1].k);
+	    vertholder[last++].Set (p->v[j].i , p->v[j].j , p->v[j].k);
+		indexholder[index] = index-2;
+		indexholder[index+1] = index-1;
+		indexholder[index+2] = index;
+		index += 3;
+	  }
     }
 
     radius = max3 (tmp.MaxX ()- tmp.MinX (), tmp.MaxY ()- tmp.MinY (),
 	tmp.MaxZ ()- tmp.MinZ ());
-
-    int index1;
-	int index2;
-	int index3;
-    for (i = 0 ; i < tri_count ; i++)
-    {
-	  index1 = 0 + i*3;
-	  index2 = 1 + i*3;
-	  index3 = 2 + i*3;
-      indexholder[index1] = index1;
-      indexholder[index2] = index2;
-      indexholder[index3] = index3;
-    }
-
-    opcMeshInt.SetNbTriangles (tri_count);
-    opcMeshInt.SetNbVertices (tri_count * 3);
+    opcMeshInt.SetNbTriangles (index/3);
+    opcMeshInt.SetNbVertices (vert_count);
 
     // Mesh data
     OPCC.mIMesh = &opcMeshInt;
