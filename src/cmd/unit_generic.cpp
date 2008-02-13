@@ -481,8 +481,8 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 			m2+=(float)1.0e-7;
 		}
 		//Compute linear velocity of points of impact by taking into account angular velocities
-		Vector small_velocity=smalle->GetVelocity()+smalle->GetAngularVelocity().Cross(smalllocation-smalle->Position());
-		Vector big_velocity=GetVelocity()+GetAngularVelocity().Cross(biglocation-Position());
+		Vector small_velocity=smalle->GetVelocity()-smalle->GetAngularVelocity().Cross(smalllocation-smalle->Position());
+		Vector big_velocity=GetVelocity()-GetAngularVelocity().Cross(biglocation-Position());
 		//Compute reference frame conversions to align along force normals (newZ)(currently using bignormal - will experiment to see if both are needed for sufficient approximation)
 		Vector orthoz=bignormal;
 		Vector orthox=MakeNonColinearVector(bignormal);
@@ -505,7 +505,6 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 		Vector SmallerElastic_vf =Transform(fromNewRef,small_velocity_aligned);
 		Vector ThisElastic_vf = Transform(fromNewRef,big_velocity_aligned);
 
-		// Make bounce along opposite normals (what we really want to do? no, I think we want application of force, not forced direction along the opposite normals)
 		// HACK ALERT:
 		// following code referencing minvel and time between collisions attempts
 		// to alleviate ping-pong problems due to collisions being detected
@@ -583,12 +582,14 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 		} else {
 			if((smalle->isUnit()!=MISSILEPTR)&&isnotplayerorhasbeenmintime) {
 
-								 // for torque... smalllocation
-				smalle->ApplyForce(smforce);
+								 // for torque... smalllocation -- approximation hack of MR^2 for rotational inertia (moment of inertia currently just M)
+				smalle->ApplyTorque(smforce/(smalle->radial_size*smalle->radial_size),smalllocation);
+				smalle->ApplyForce(smforce-(smforce/(smalle->radial_size*smalle->radial_size)));
 			}
 			if((this->isUnit()!=MISSILEPTR)&&isnotplayerorhasbeenmintime) {
-								 // for torque ... biglocation
-				this->ApplyForce (thisforce);
+								 // for torque ... biglocation -- approximation hack of MR^2 for rotational inertia
+				this->ApplyTorque (thisforce/(radial_size*radial_size),biglocation);
+				this->ApplyForce(thisforce-(thisforce/(radial_size*radial_size)));
 			}
 		}
 		/*    smalle->curr_physical_state = smalle->prev_physical_state;
@@ -4208,10 +4209,11 @@ Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat)
 	if (NetTorque.i||NetTorque.j||NetTorque.k) {
 		temp1 += InvTransformNormal(transmat,NetTorque);
 	}
-	if (GetMoment())
+	if (GetMoment()){ 
 		temp1=temp1/GetMoment();
-	else
+	} else{
 		VSFileSystem::vs_fprintf (stderr,"zero moment of inertia %s\n",name.get().c_str());
+	}
 	Vector temp (temp1*SIMULATION_ATOM);
 	/*  //FIXME  does this shit happen!
 		if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) */
@@ -4219,7 +4221,19 @@ Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat)
 		if (!FINITE(temp.i)||FINITE (temp.j)||FINITE(temp.k)) {
 
 		}
-		AngularVelocity += temp;
+		AngularVelocity += temp; 
+		static float maxplayerrotationrate=XMLSupport::parse_float(vs_config->getVariable("physics","maxplayerrot","24"));
+		static float maxnonplayerrotationrate=XMLSupport::parse_float(vs_config->getVariable("physics","maxNPCrot","360"));
+		float caprate;
+		if(_Universe->isPlayerStarship (this)){ // clamp to avoid vomit-comet effects
+			caprate=maxplayerrotationrate;
+		} else {
+			caprate=maxnonplayerrotationrate;
+		}
+		if(AngularVelocity.MagnitudeSquared()>caprate*caprate){
+			AngularVelocity=AngularVelocity.Normalize()*caprate;
+		}
+		
 	}
 								 //acceleration
 	Vector temp2 = (NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r );
