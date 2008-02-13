@@ -130,7 +130,7 @@ enum Cmd
 	CMD_MISSION      = 0x32,
 
 	CMD_CUSTOM       = 0x33,        // Used for python scripts to communicate between client and server.
-	
+	CMD_SHIPDEALER   = 0x34,		// C->S: Request to purchase ship, S->C: Unimplemented
     // CMD_ACK          			// A packet to acknoledge the reception of a packet that was previously sent
 };
 
@@ -152,6 +152,11 @@ public:
 		AcceptMission = 2,
 	};
 
+	enum ShipActions {
+		BuyShip = 1,
+		SellShip = 2,
+		SwitchShip = 3,
+	};
 };
 
 std::ostream& operator<<( std::ostream& ostr, Cmd cmd );

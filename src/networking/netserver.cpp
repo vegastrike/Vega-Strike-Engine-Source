@@ -988,6 +988,43 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                           }
                         }
 			break;
+		case CMD_SHIPDEALER :
+		{
+			std::string cargoName = netbuf.getString();
+			int type = netbuf.getChar();
+
+			Unit *docked = NULL;
+			Unit *player = clt->game_unit.GetUnit();
+			if (!player) break;
+			int cpnum = _Universe->whichPlayerStarship(player);
+			if (cpnum==-1) break;
+			Cockpit *cp = _Universe->AccessCockpit(cpnum);
+			{
+				const Unit *un;
+				for (un_kiter ui = player->getStarSystem()->getUnitList().constIterator(); (un = *ui); ++ui) {
+					if (un->isDocked(player)) {
+						docked = const_cast<Unit*>(un); // Stupid STL.
+						break;
+					}
+				}
+			}
+			if (!docked) break;
+			if (type == Subcmd::BuyShip) {
+				unsigned int cargIndex = -1;
+				Cargo *cargptr = docked->GetCargo(cargoName, cargIndex);
+				if (cargIndex == -1 || !cargptr) break;
+				if (cargptr->price > cp->credits) break;
+				/* // Do the transaction.
+					cp->credits -= cargptr->price;
+					sendCredits(player->GetSerial(), cp->credits);
+					...
+				*/
+				saveAccount(cpnum);
+				player->hull = 0;
+				player->Destroy();
+			}
+			break;
+		}
         case CMD_DOWNLOAD :
 			COUT<<">>> CMD DOWNLOAD =( serial #"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
             if( _downloadManagerServer )

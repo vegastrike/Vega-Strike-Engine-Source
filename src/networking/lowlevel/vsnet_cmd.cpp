@@ -81,6 +81,7 @@ const char* displayCmd( Cmd cmd )
 	CASE( CMD_SAVEDATA     )
 	CASE( CMD_MISSION      )
 	CASE( CMD_CUSTOM       )
+	CASE( CMD_SHIPDEALER   )
     // CASE( CMD_ACK          )
     default :
         return "CMD_UNKNOWN"; break;

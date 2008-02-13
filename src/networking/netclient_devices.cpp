@@ -124,6 +124,14 @@ void	NetClient::cargoRequest( ObjSerial buyer, ObjSerial seller, const std::stri
 	send( CMD_CARGOUPGRADE, netbuf, SENDRELIABLE, __FILE__, __LINE__ );
 }
 
+void	NetClient::shipRequest( const std::string &cargo, unsigned char type ) {
+	NetBuffer netbuf;
+	netbuf.addString(cargo);
+	netbuf.addChar(type);
+	send( CMD_SHIPDEALER, netbuf, SENDRELIABLE, __FILE__, __LINE__ );
+}
+
+
 bool	NetClient::jumpRequest( string newsystem, ObjSerial jumpserial)
 {
 	NetBuffer netbuf;

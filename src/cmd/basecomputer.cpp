@@ -4439,8 +4439,13 @@ bool sellShip(Unit * baseUnit, Unit * playerUnit, std::string shipname, BaseComp
     }
     if (shipCargo) {
       //now we can actually do the selling
-      for(int i=1; i < cockpit->unitfilename.size(); i+=2) {      
+      for(int i=1; i < cockpit->unitfilename.size(); i+=2) {
         if (cockpit->unitfilename[i]==shipname) {
+          if (Network && !_Universe->netLocked()) {
+            Network[0].shipRequest(shipname, Subcmd::SellShip);
+            return false;
+          }
+
           float xtra=0;
           if(cockpit->unitfilename[i+1] == _Universe->activeStarSystem()->getFileName()) {
             static const float shipping_price = XMLSupport::parse_float (vs_config->getVariable ("physics","sellback_shipping_price","6000"));
@@ -4503,6 +4508,10 @@ bool buyShip(Unit * baseUnit, Unit * playerUnit, std::string content, bool myfle
 
     if(shipCargo) {
         if (shipCargo->price < _Universe->AccessCockpit()->credits) {
+			if (Network && !_Universe->netLocked()) {
+				Network[0].shipRequest(content, myfleet?Subcmd::SwitchShip:Subcmd::BuyShip);
+				return false;
+			}
             Flightgroup* flightGroup = playerUnit->getFlightgroup();
             int fgsNumber = 0;
             if (flightGroup != NULL) {
