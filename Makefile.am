@@ -499,7 +499,7 @@ LIBCMD = \
   src/cmd/weapon_xml.h
 
 if VS_MAKE_GTKUTILS
-  GTKUTILS_PROG=vssetup vslauncher
+  GTKUTILS_PROG=vssetup
 else
   GTKUTILS_PROG=
 endif
@@ -1097,12 +1097,13 @@ vsrextract_SOURCES= \
   tools/vsrtools.h
 
 vssetup_LDFLAGS = $(GTK_LIBS)
-vssetup_CXXFLAGS= $(GTK_CFLAGS) -DGTK
+vssetup_CXXFLAGS= $(GTK_CFLAGS)
 vssetup_SOURCES = \
     setup/src/c/setup.cpp \
     setup/src/include/central.cpp \
     setup/src/include/central.h \
     setup/src/include/display_gtk.cpp \
+    setup/src/include/display_dialog.cpp \
     setup/src/include/display.h \
     setup/src/include/file.cpp \
     setup/src/include/file.h \
@@ -1111,14 +1112,14 @@ vssetup_SOURCES = \
     src/common/common.cpp \
     src/common/common.h
 
-vslauncher_LDFLAGS = $(GTK_LIBS)
-vslauncher_CXXFLAGS= $(GTK_CFLAGS)
-vslauncher_SOURCES= \
-    launcher/saveinterface.cpp \
-    launcher/general.cpp \
-    launcher/general.h \
-    src/common/common.cpp \
-    src/common/common.h
+#vslauncher_LDFLAGS = $(GTK_LIBS)
+#vslauncher_CXXFLAGS= $(GTK_CFLAGS)
+#vslauncher_SOURCES= \
+#    launcher/saveinterface.cpp \
+#    launcher/general.cpp \
+#    launcher/general.h \
+#    src/common/common.cpp \
+#    src/common/common.h
 
 #src/cmd/script/c_alike/c_alike.tab.cpp: src/cmd/script/c_alike/c_alike.yacc
 
