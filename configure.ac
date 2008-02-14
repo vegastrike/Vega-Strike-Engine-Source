@@ -803,13 +803,13 @@ AM_CONDITIONAL(BOOSTSYSTEM,test "x$ACENABLE" != "xno")
 
 dnl Turn use of stencil buffer on/off
 AC_ARG_ENABLE(stencil-buffer, AC_HELP_STRING([--enable-stencil-buffer], [Use if your hardware has a stencil buffer]),VS_CPPFLAGS="${VS_CPPFLAGS} -DUSE_STENCIL_BUFFER=1")
-AC_ARG_ENABLE(opcode,    AC_HELP_STRING([--disable-opcode],
-                                                 [Build with old Rapid Collider]),
-												 [case "${enableval}" in 
-												       yes) opcode=false ;;
-													   no)  opcode=true ;;
-													   *) AC_MSG_ERROR(bad value ${enableval} for --disable-opcode) ;;
-													   esac],[opcode=true])
+AC_ARG_ENABLE(opcode, AC_HELP_STRING([--disable-opcode], [Build with old Rapid Collider]), [
+	case "${enableval}" in 
+		yes) opcode=true ;;
+		no)  opcode=false ;;
+		*) AC_MSG_ERROR(bad value ${enableval} for --disable-opcode) ;;
+	esac],[opcode=true])
+
 AM_CONDITIONAL(OPCODE, test "x$opcode" = "xtrue")
 if test "x$opcode" = "xtrue"; then 
 CXXFLAGS="-DOPCODE_COLLIDER -I./src/cmd/collide2 ${CXXFLAGS}"
