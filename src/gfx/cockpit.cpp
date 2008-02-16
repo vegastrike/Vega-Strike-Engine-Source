@@ -2501,7 +2501,7 @@ void GameCockpit::Draw() {
 
                   GFXEnable(TEXTURE0);
                   vdu_ani.DrawAsVSSprite(vdu[vd]);	
-                  
+ 
                 }
               } else {
                 if (cockpit_time>((1-(-vdu_time[vd]))+(damage))) {
@@ -2545,19 +2545,25 @@ void GameCockpit::Draw() {
     if (_Universe->CurrentCockpit()<univmap.size()) {
       univmap[_Universe->CurrentCockpit()].Draw();
     }
+
     // Draw the arrow to the target.
     static bool drawarrow = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_arrow_to_target","true"));
-    
+    static bool drawarrow_on_pancam = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_arrow_on_pancam","false"));
+    static bool drawarrow_on_pantgt = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_arrow_on_pantgt","false"));
     {
+      //printf("view: %i\n",view);
       Unit * parent=NULL;
       if (drawarrow&&(parent=this->parent.GetUnit())) {
-        DrawArrowToTarget(parent, parent->Target());
-        if (draw_star_destination_arrow&&(destination_system_location.i||destination_system_location.j||destination_system_location.k)) {
-          GFXColorf(destination_system_color);
-          DrawArrowToTarget(parent,parent->ToLocalCoordinates(destination_system_location));
-        }
+      if ((view==CP_PAN&&!drawarrow_on_pancam)||(view==CP_PANTARGET&&!drawarrow_on_pantgt)) { }
+      else {
+         DrawArrowToTarget(parent, parent->Target());
+         if (draw_star_destination_arrow&&(destination_system_location.i||destination_system_location.j||destination_system_location.k)) {
+            GFXColorf(destination_system_color);
+            DrawArrowToTarget(parent,parent->ToLocalCoordinates(destination_system_location));
+         }
       }
-    }
+      }
+    } // end: draw arrow
   }
   GFXColor4f(1,1,1,1);
   if (QuitAllow||getTimeCompression()<.5) {
@@ -2601,7 +2607,7 @@ void GameCockpit::Draw() {
           playr[0]='p';
           playr[1]='0'+_Universe->CurrentCockpit();
           playr[2]='\0';
-          
+ 
 
         }
         GFXColorf (textcol);
@@ -2611,7 +2617,7 @@ void GameCockpit::Draw() {
         }
         GFXColor4f (1,1,1,1);
 
-        
+ 
         static float min_die_time= XMLSupport::parse_float(vs_config->getVariable("graphics","death_scene_time","4"));
         if (dietime>min_die_time) {
           static std::string death_menu_script = vs_config->getVariable("graphics","death_menu_script","");
@@ -2648,20 +2654,19 @@ void GameCockpit::Draw() {
   GFXAlphaTest (ALWAYS,0);  
   static bool mouseCursor = XMLSupport::parse_bool (vs_config->getVariable ("joystick","mouse_cursor","false"));
   if (mouseCursor&&screenshotkey==false) {  
-    GFXBlendMode (SRCALPHA,INVSRCALPHA);
-    GFXColor4f (1,1,1,1);
-    GFXEnable(TEXTURE0);
-    //    GFXDisable (DEPTHTEST);
-    //    GFXDisable(TEXTURE1);
-    static int revspr = XMLSupport::parse_bool (vs_config->getVariable ("joystick","reverse_mouse_spr","true"))?1:-1;
-    static string blah = vs_config->getVariable("joystick","mouse_crosshair","crosshairs.spr");
-    static int num=printf ("CROSS %f\n",crossceny);
-    static VSSprite MouseVSSprite (blah.c_str(),BILINEAR,GFXTRUE);
-    MouseVSSprite.SetPosition ((-1+float(mousex)/(.5*g_game.x_resolution))*(1-fabs(crosscenx))+crosscenx,(-revspr+float(revspr*mousey)/(.5*g_game.y_resolution))*(1-fabs(crossceny))+crossceny);
-    
-    MouseVSSprite.Draw();
-    //    DrawGlutMouse(mousex,mousey,&MouseVSSprite);
-    //    DrawGlutMouse(mousex,mousey,&MouseVSSprite);
+      GFXBlendMode (SRCALPHA,INVSRCALPHA);
+      GFXColor4f (1,1,1,1);
+      GFXEnable(TEXTURE0);
+      //    GFXDisable (DEPTHTEST);
+      //    GFXDisable(TEXTURE1);
+      static int revspr = XMLSupport::parse_bool (vs_config->getVariable ("joystick","reverse_mouse_spr","true"))?1:-1;
+      static string blah = vs_config->getVariable("joystick","mouse_crosshair","crosshairs.spr");
+      static int num=printf ("CROSS %f\n",crossceny);
+      static VSSprite MouseVSSprite (blah.c_str(),BILINEAR,GFXTRUE);
+      MouseVSSprite.SetPosition ((-1+float(mousex)/(.5*g_game.x_resolution))*(1-fabs(crosscenx))+crosscenx,(-revspr+float(revspr*mousey)/(.5*g_game.y_resolution))*(1-fabs(crossceny))+crossceny);
+      MouseVSSprite.Draw();
+      //    DrawGlutMouse(mousex,mousey,&MouseVSSprite);
+      //    DrawGlutMouse(mousex,mousey,&MouseVSSprite);
   }
   if (view<CP_CHASE&&damage_flash_first==false&&getNewTime()-shake_time<damage_flash_length) {
     DrawDamageFlash(shake_type);
@@ -3141,7 +3146,6 @@ void GameCockpit::DrawArrowToTarget(Unit *un, Unit *target) {
 void GameCockpit::DrawArrowToTarget(Unit *un, Vector localcoord) {
   float s, t, s_normalized, t_normalized, inv_len;
   Vector p1, p2, p_n;
-
 
   // Project target position on k.
   inv_len = 1 / fabs(localcoord.k);
