@@ -596,7 +596,7 @@ void VDU::DrawVDUShield (Unit * parent) {
   h=fabs (h*.6);
   w=fabs (w*.6);
   static bool invert_friendly_shields = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","invert_friendly_shields","false"));
-  DrawShieldArmor(parent,StartArmor,x,y,w,h,invert_friendly_shields);
+  //DrawShieldArmor(parent,StartArmor,x,y,w,h,invert_friendly_shields);
   GFXColor4f (1,parent->GetHullPercent(),parent->GetHullPercent(),1);
   GFXEnable (TEXTURE0);
   GFXColor4f (1,parent->GetHullPercent(),parent->GetHullPercent(),1);
