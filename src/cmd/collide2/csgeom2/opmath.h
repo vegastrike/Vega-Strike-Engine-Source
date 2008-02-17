@@ -20,12 +20,10 @@
 #define __CS_MATH_H__
 
 
-#define CS_HAVE_ISFINITE 1
-#define CS_HAVE_ISNAN 1  
-#define CS_HAVE_ISNORMAL 1  
+#define HAVE_ISNORMAL 1  
 
 
-
+#include "config.h"
 #include <math.h>
 #include <float.h>
 #include "opcodealgorithms.h"
@@ -140,15 +138,15 @@ T csSquare (const T& x)
 /// Checks if a floating point value is finite.
 CS_FORCEINLINE bool csFinite (float f)
 {
-#if defined (CS_HAVE_FINITEF)
+#if defined (HAVE_FINITEF)
   return finitef (f);
-#elif defined (CS_HAVE_STD__ISFINITE)
+#elif defined (HAVE_STD__ISFINITE)
   return std::isfinite (f);
-#elif defined(CS_HAVE_ISFINITE)
+#elif defined(HAVE_ISFINITE)
   return (isfinite (f));
-#elif defined (CS_HAVE_FINITE)
+#elif defined (HAVE_FINITE)
   return finite (f);
-#elif defined (CS_HAVE__FINITE)
+#elif defined (HAVE__FINITE)
   return _finite (f) != 0;
 #else
 #error Your platform has no isfinite()-alike function!
@@ -157,13 +155,13 @@ CS_FORCEINLINE bool csFinite (float f)
 /// Checks if a double-precision floating point value is finite.
 CS_FORCEINLINE bool csFinite (double d)
 {
-#if defined (CS_HAVE_STD__ISFINITE)
+#if defined (HAVE_STD__ISFINITE)
   return std::isfinite (d);
-#elif defined(CS_HAVE_ISFINITE)
+#elif defined(HAVE_ISFINITE)
   return isfinite (d);
-#elif defined (CS_HAVE_FINITE)
+#elif defined (HAVE_FINITE)
   return finite (d);
-#elif defined (CS_HAVE__FINITE)
+#elif defined (HAVE__FINITE)
   return _finite (d) != 0;
 #else
 #error Your platform has no isfinite()-alike function!
@@ -173,13 +171,13 @@ CS_FORCEINLINE bool csFinite (double d)
 /// Checks if a floating point value is not-a-number.
 CS_FORCEINLINE bool csNaN (float f)
 {
-#if defined (CS_HAVE_NANF)
+#if defined (HAVE_NANF)
   return isnanf (f);
-#elif defined (CS_HAVE_STD__ISNAN)
+#elif defined (HAVE_STD__ISNAN)
   return std::isnan (f);
-#elif defined(CS_HAVE_ISNAN)
+#elif defined(HAVE_ISNAN)
   return isnan (f);
-#elif defined (CS_HAVE__ISNAN)
+#elif defined (HAVE__ISNAN)
   return _isnan (f) != 0;
 #else
 #error Your platform has no isnan()-alike function!
@@ -188,11 +186,11 @@ CS_FORCEINLINE bool csNaN (float f)
 /// Checks if a double-precision floating point value is not-a-number.
 CS_FORCEINLINE bool csNaN (double d)
 {
-#if defined (CS_HAVE_STD__ISNAN)
+#if defined (HAVE_STD__ISNAN)
   return std::isnan (d);
-#elif defined(CS_HAVE_ISNAN)
+#elif defined(HAVE_ISNAN)
   return isnan (d);
-#elif defined (CS_HAVE__ISNAN)
+#elif defined (HAVE__ISNAN)
   return _isnan (d) != 0;
 #else
 #error Your platform has no isnan()-alike function!
@@ -202,11 +200,11 @@ CS_FORCEINLINE bool csNaN (double d)
 /// Checks if a floating point value is normal (not infinite or nan).
 CS_FORCEINLINE bool csNormal (float f)
 {
-#if defined (CS_HAVE_NORMALF)
+#if defined (HAVE_NORMALF)
   return normalf (f);
-#elif defined (CS_HAVE_STD__ISNORMAL)
+#elif defined (HAVE_STD__ISNORMAL)
   return std::isnormal (f);
-#elif defined(CS_HAVE_ISNORMAL)
+#elif defined(HAVE_ISNORMAL)
   return isnormal (f);
 #else
   return csFinite(f) && !csNaN(f);
@@ -215,9 +213,9 @@ CS_FORCEINLINE bool csNormal (float f)
 /// Checks if a double-precision floating point value is normal.
 CS_FORCEINLINE bool csNormal (double d)
 {
-#if defined (CS_HAVE_STD__ISNORMAL)
+#if defined (HAVE_STD__ISNORMAL)
   return std::isnormal (d);
-#elif defined(CS_HAVE_ISNORMAL)
+#elif defined(HAVE_ISNORMAL)
   return isnormal (d);
 #else
   return csFinite(d) && !csNaN(d);

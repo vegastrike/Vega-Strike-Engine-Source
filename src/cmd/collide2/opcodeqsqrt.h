@@ -27,8 +27,9 @@
 
 #ifndef __QSQRT_H__
 #define __QSQRT_H__
+#include "Stdafx.h"
 
-#if (!defined (CS_NO_QSQRT)) && defined (PROC_X86) && defined (COMP_GCC)
+#if (!defined (CS_NO_QSQRT)) && defined (CS_PROCESSOR_X86) && defined (CS_COMPILER_GCC)
 
 /*
   NB: Single-precision floating-point format (32 bits):
@@ -125,7 +126,7 @@ static inline float qisqrt (float x)
   return ret;
 }
 
-#elif (!defined (CS_NO_QSQRT)) && defined (PROC_POWERPC) && defined (COMP_GCC)
+#elif (!defined (CS_NO_QSQRT)) && defined (PROC_POWERPC) && defined (CS_COMPILER_GCC)
 
 /**
  * Use the PowerPC fsqrte to get an estimate of 1/sqrt(x) Then apply two

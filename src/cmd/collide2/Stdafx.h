@@ -10,6 +10,7 @@
 #define __STDAFX_H__
 #define ICE_NO_DLL
 #define CS_PROCESSOR_X86
+#define CS_NO_QSQRT
 //#define __GNUC__ 4
 #include "opcodetypes.h"
 #include "opcodesysdef.h"

@@ -49,7 +49,6 @@ class csOPCODECollider : public iCollider
 			Opcode::VertexPointers& triangle, void* user_data);
 		float radius;
 		Opcode::Model* m_pCollisionModel;
-		unsigned int* indexholder;
 		Opcode::Point *vertholder;
 		Opcode::MeshInterface opcMeshInt;
 

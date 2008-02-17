@@ -19,13 +19,8 @@
 #ifndef __CS_CSTYPES_H__
 #define __CS_CSTYPES_H__
 
-/**\file
- * Commonly used types and macros.
- */
-/**\addtogroup util
- * @{
- */
-
+// config.h is the VS ./configure determined header.
+#include "config.h" 
 #include <float.h>
 // Hack
 
@@ -37,24 +32,18 @@
 #  define CS_PROCESSOR_SIZE 32 /* Only used if intptr_t is not found. (cough VC6 cough) */
 #endif
 #define CS_HAVE_INTPTR_T 1
-#define CS_HAVE_WCHAR_H 1
-#define CS_HAVE_WCTYPE_H 1
 
 #else /* GCC or other platform */
 
-#define CS_HAVE_STDINT_H 1
-#define CS_HAVE_INTTYPES_H 1
 #define CS_COMPILER_GCC 1
 #define CS_PROCESSOR_SIZE 64 /* Upper limit on pointer size, only used it intptr_t is not found. */
 #define CS_HAVE_INTPTR_T 1
-#define CS_HAVE_WCHAR_H 1
-#define CS_HAVE_WCTYPE_H 1
 
 #endif
 // End Hack
 
 
-#if defined(CS_HAVE_STDINT_H)
+#if defined(HAVE_STDINT_H)
 #ifndef __STDC_CONSTANT_MACROS
 #define __STDC_CONSTANT_MACROS
 #endif
@@ -64,7 +53,7 @@
 #include <stdint.h>
 #endif
 
-#if defined(CS_HAVE_INTTYPES_H)
+#if defined(HAVE_INTTYPES_H)
 #ifndef __STDC_FORMAT_MACROS
 #define __STDC_FORMAT_MACROS
 #endif
@@ -79,7 +68,7 @@
  * types. Use the explicitly-sized types sparingly.
  * @{ */
 
-#if !defined(CS_HAVE_STDINT_H) && !defined(CS_HAVE_INTTYPES_H)
+#if !defined(HAVE_STDINT_H) && !defined(HAVE_INTTYPES_H)
 /// unsigned 8-bit integer (0..255)
 typedef unsigned char uint8;
 /// signed 8-bit integer (-128..127)
@@ -201,10 +190,10 @@ typedef uint64 uintmax_t;
 // fake up these types on our own. glibc also #defines _WINT_T when wint_t is
 // available, so we double-check that, as well.
 #include <stddef.h>
-#if defined(CS_HAVE_WCHAR_H)
+#if defined(HAVE_WCHAR_H)
 #include <wchar.h>
 #endif
-#if defined(CS_HAVE_WCTYPE_H)
+#if defined(HAVE_WCTYPE_H)
 #include <wctype.h>
 #endif
 #if !defined(CS_HAVE_WCHAR_T) && !defined(_WCHAR_T_DEFINED)
@@ -239,7 +228,7 @@ typedef uint64 ulonglong;
 typedef int64 longlong;
 typedef uint64 ulonglong;
 #else
-#ifdef CS_HAVE_STDINT_H
+#ifdef HAVE_STDINT_H
 typedef int_least64_t longlong;
 typedef uint_least64_t ulonglong;
 #else 

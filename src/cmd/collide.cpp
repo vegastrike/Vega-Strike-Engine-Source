@@ -147,32 +147,6 @@ bool Bolt::Collide (Collidable::CollideRef index) {
     //Collidable updated(**location);
     //updated.SetPosition(.5*(prev_position+cur_position));
     return _Universe->activeStarSystem()->collidemap[Unit::UNIT_BOLT]->CheckCollisions(this,**location);
-  }else {
-#ifdef OLD_COLLIDE_SYSTEM
-    UnitCollection *candidates[2];  
-    bool use_huge_list=usehuge_table();
-    _Universe->activeStarSystem()->collidetable->c.Get (cur_position,candidates,use_huge_list);
-    LineCollide minimaxi;//might as well have this so we can utilize common function
-    minimaxi.Mini= ( prev_position.Min (cur_position));
-    minimaxi.Maxi= ( prev_position.Max (cur_position));
-    for (unsigned int j=0;j<2;j++) {
-      Unit * un;
-      for (un_iter i=candidates[j]->createIterator();(un=*i)!=NULL;++i) {
-        
-        if (lcwithin (minimaxi,(un)->GetCollideInfo ())) {
-          if (this->Collide (un)) {
-            if (j==0&&use_huge_list) {
-              _Universe->activeStarSystem()->collidetable->c.AddHugeToActive(un);
-            }
-            Destroy(nondecal_index(index));
-            return true;
-          }
-          
-        }
-      }
-
-    }
-#endif
   }
   return false;
 }
@@ -259,44 +233,7 @@ void Beam::CollideHuge (const LineCollide & lc, Unit * targetToCollideWith, Unit
       }
     
     }
-  }else {
-#ifdef OLD_COLLIDE_SYSTEM
-  UnitCollection *colQ [tablehuge+1];
-  bool use_huge_list = usehuge_table();
-  if (!lc.hhuge) {
-    int sizecolq = _Universe->activeStarSystem()->collidetable->c.Get (&lc,colQ,use_huge_list);
-    for (int j=0;j<sizecolq;j++) {
-      Unit *un;
-      for (un_iter i=colQ[j]->createIterator();(un=(*i))!=NULL;++i) {
-
-	if (lcwithin(lc,(un)->GetCollideInfo())) {
-	  if (this->Collide (un,firer,superunit)) {
-	    if (j==0&&use_huge_list) {
-	      _Universe->activeStarSystem()->collidetable->c.AddHugeToActive(un);
-	    }
-	  }
-	}
-      }
-    }
-  }else {
-    if (targetToCollideWith&&(!use_huge_list)) {
-      this->Collide(targetToCollideWith,firer,superunit);
-    }else {
-      un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
-      Unit *un;
-      for (;(un=*i)!=NULL;++i) {
-	if (lcwithin (lc,(un)->GetCollideInfo())) {
-	  this->Collide(un,firer,superunit);
-	  if ((un!=targetToCollideWith)&&targetToCollideWith!=NULL) {
-	    ListenToOwner(false);
-	  }
-	}
-      }
-    }
   }
-#endif
-  }
-
 }
 
 

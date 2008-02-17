@@ -42,12 +42,11 @@ static CS_DECLARE_GROWING_ARRAY_REF (pairs,csCollisionPair);
 csOPCODECollider::csOPCODECollider (const std::vector <bsp_polygon> &polygons)
 {
 	m_pCollisionModel = 0;
-	indexholder = 0;
 	vertholder = 0;
 	pairs.IncRef();
 	TreeCollider.SetFirstContact(false);
-	TreeCollider.SetFullBoxBoxTest(false);
-	TreeCollider.SetTemporalCoherence(true);
+	TreeCollider.SetFullBoxBoxTest(true);
+	TreeCollider.SetTemporalCoherence(false);
 	opcMeshInt.SetCallback (&MeshCallback, this);
 
 	GeometryInitialize (polygons);
@@ -74,18 +73,15 @@ void csOPCODECollider::GeometryInitialize (const std::vector <bsp_polygon> &poly
 			return;
 
 		vertholder = new Point [vert_count];
-		indexholder = new unsigned int[vert_count];
 
 		csBox3 tmp;
 		tmp.StartBoundingBox ();
 		int last = 0;
-		int index = 0;
 		for (int i = 0; i < (int)polygons.size(); ++i) {
 			const bsp_polygon *p = (&polygons[i]);
-			for(int j = 0; j < (int)p->v.size();++j) {
+			for(int j = 0; j < (int) p->v.size();++j) {
 				vertholder[last++].Set (p->v[j].i , p->v[j].j , p->v[j].k);
 				tmp.AddBoundingVertex (p->v[j]);
-				indexholder[index++] = last-1;
 			}
 		}
 		radius = max3 (tmp.MaxX ()- tmp.MinX (), tmp.MaxY ()- tmp.MinY (),
@@ -98,8 +94,6 @@ void csOPCODECollider::GeometryInitialize (const std::vector <bsp_polygon> &poly
 		OPCC.mSettings.mRules = SPLIT_SPLATTER_POINTS | SPLIT_GEOM_CENTER;
 		OPCC.mNoLeaf = true;
 		OPCC.mQuantized = true;
-		OPCC.mKeepOriginal = false;
-		OPCC.mCanRemap = false;
 	} else
 	return;
 
@@ -115,7 +109,6 @@ csOPCODECollider::~csOPCODECollider ()
 		m_pCollisionModel = 0;
 	}
 	pairs.DecRef();
-	delete[] indexholder;
 	delete[] vertholder;
 }
 
@@ -125,13 +118,11 @@ VertexPointers& triangle,
 void* user_data)
 {
 	csOPCODECollider* collider = (csOPCODECollider*)user_data;
-
-	udword *tri_array = collider->indexholder;
 	Point *vertholder = collider->vertholder;
 	int index = 3 * triangle_index;
-	triangle.Vertex[0] = &vertholder [tri_array[index]] ;
-	triangle.Vertex[1] = &vertholder [tri_array[index + 1]];
-	triangle.Vertex[2] = &vertholder [tri_array[index + 2]];
+	triangle.Vertex[0] = &vertholder [index] ;
+	triangle.Vertex[1] = &vertholder [index + 1];
+	triangle.Vertex[2] = &vertholder [index + 2];
 }
 
 
@@ -201,7 +192,7 @@ const csReversibleTransform *trans2)
 		}
 		return(status);
 	} else
-	return(false);
+		return(false);
 }
 
 
@@ -267,27 +258,25 @@ csOPCODECollider* col2)
 	const Pair* colPairs=TreeCollider.GetPairs ();
 	Point* vertholder0 = col1->vertholder;
 	Point* vertholder1 = col2->vertholder;
-	udword* indexholder0 = col1->indexholder;
-	udword* indexholder1 = col2->indexholder;
 	Point* current;
-	int i, j;
+	int j;
 	size_t oldlen = pairs.Length ();
 	pairs.SetLength (oldlen + N_pairs);
 
-	for (i = 0 ; i < N_pairs ; ++i) {
+	for (int i = 0 ; i < N_pairs ; ++i) {
 		j = 3 * colPairs[i].id0;
-		current = &vertholder0[indexholder0[j]];
+		current = &vertholder0[j];
 		pairs[oldlen].a1 = csVector3 (current->x, current->y, current->z);
-		current = &vertholder0[indexholder0[j + 1]];
+		current = &vertholder0[j + 1];
 		pairs[oldlen].b1 = csVector3 (current->x, current->y, current->z);
-		current = &vertholder0[indexholder0[j + 2]];
+		current = &vertholder0[j + 2];
 		pairs[oldlen].c1 = csVector3 (current->x, current->y, current->z);
 		j = 3 * colPairs[i].id1;
-		current = &vertholder1[indexholder1[j]];
+		current = &vertholder1[j];
 		pairs[oldlen].a2 = csVector3 (current->x, current->y, current->z);
-		current = &vertholder1[indexholder1[j + 1 ]];
+		current = &vertholder1[j + 1];
 		pairs[oldlen].b2 = csVector3 (current->x, current->y, current->z);
-		current = &vertholder1[indexholder1[j + 2 ]];
+		current = &vertholder1[j + 2 ];
 		pairs[oldlen].c2 = csVector3 (current->x, current->y, current->z);
 		++oldlen;
 	}

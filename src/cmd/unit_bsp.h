@@ -3,22 +3,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifndef PROPHECY
+
 #include "vsfilesystem.h"
 #include "gfx/mesh.h"
 //#include "unit.h"
-#else
-#include <vector>
-using std::vector;
-struct Vector {
-  double i,j,k;
-};
 
-struct bsp_polygon {
-  vector <bsp_vector> v;
-};
-
-#endif
+// This is defined elsewhere, i'm sure.
 #define TRUE 1
 #define FALSE 0
 
@@ -111,20 +101,11 @@ bool Cross (const bsp_polygon &x, bsp_tree &result);
 void bsp_stats (bsp_tree * tree);
 void write_bsp_tree (bsp_tree *tree,int level=0);//assume open file
 //
-#ifdef PROPHECY
 
-long getsize (char * name);
-void load (vector <bsp_polygon> &tri);
-#endif
 enum INTERSECT_TYPE where_is_poly(const bsp_tree & temp_node,const bsp_polygon & temp_poly3);
 
-#ifdef PROPHECY
-#include <vector>
-#else
-#include "unit_bsp.h"
+
 #include "configxml.h"
 #include "vs_globals.h"
-#endif
 
 #endif
-
