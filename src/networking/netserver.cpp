@@ -881,7 +881,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				std::replace(message.begin(),message.end(),'\r',' ');
 				string::size_type first_space = message.find(' ');
 				if (first_space==string::npos) {
-					cmd = message;
+					cmd = message.substr(1);
 				} else {
 					cmd = message.substr(1, first_space-1);
 					args = message.substr(first_space+1);

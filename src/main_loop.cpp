@@ -218,10 +218,10 @@ namespace CockpitKeys {
 			  string args;
 			  std::string::size_type space = gcp->textMessage.find(' ');
 			  if (space) {
-				  cmd = gcp->textMessage.substr(0, space);
+				  cmd = gcp->textMessage.substr(1, space-1);
 				  args = gcp->textMessage.substr(space+1);
 			  } else {
-				  cmd = gcp->textMessage;
+				  cmd = gcp->textMessage.substr(1);
 			  }
 			  // Send custom message to itself.
 			  UniverseUtil::receivedCustom(textmessager, true, cmd, args, string());
