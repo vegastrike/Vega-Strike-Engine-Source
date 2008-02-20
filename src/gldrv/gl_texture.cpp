@@ -766,12 +766,23 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 	if (maxdimension==65536) {
 		maxdimension = gl_options.max_texture_dimension;
 	}
+
     if(maxdimension == 512){
 	    detail_texture = 0;
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			
+		maxdimension = 256;
+		if(internformat == DXT1|| internformat == DXT1RGBA)
+			blocksize = 8;
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);			
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		 maxdimension = 256;
+		 if(internformat >= DXT1 && internformat <= DXT5){
+		 	if(textures[handle].width > 8 && textures[handle].height > 8){
+		 		offset1 += ((textures[handle].width +3)/4)*((textures[handle].height +3)/4) * blocksize;
+				textures[handle].width >>=1;
+				textures[handle].height >>=1;
+				textures[handle].iwidth >>=1;
+				textures[handle].iheight >>=1;
+			}
+		}
 	}
 	// If we are DDS, we can scale to max dimension by choosing a pre-made mipmap.
 	if(internformat == DXT1|| internformat == DXT1RGBA)
@@ -876,8 +887,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 					}
 				}
 				// End workaround
-			} else 
+			} else {
 				gluBuild2DMipmaps(image2D, internalformat, textures[handle].width, textures[handle].height, textures[handle].textureformat, GL_UNSIGNED_BYTE, buffer);
+			}
 			if (tempbuf) 
 				free(tempbuf);
 			tempbuf=NULL;
