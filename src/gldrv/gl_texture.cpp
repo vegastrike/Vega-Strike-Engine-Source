@@ -894,14 +894,19 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 				free(tempbuf);
 			tempbuf=NULL;
 		} else{
+		// WE HAVE NO MIPMAPS HERE
 			if(internformat >= DXT1 && internformat <= DXT5){
 				int size = 0;
 				size = ((width +3)/4) * ((height +3)/4) * blocksize;
-				glCompressedTexImage2D_p(image2D,0,internalformat,width,height,0,size,buffer+offset1);
+				// force GL to only display our one texture (just in case)
+				glTexParameteri (textures[handle].targets, GL_TEXTURE_BASE_LEVEL, 0);
+				glTexParameteri (textures[handle].targets, GL_TEXTURE_MAX_LEVEL, 0);
+				glCompressedTexImage2D_p(image2D,0,internalformat,width,height,0,size,buffer+offset1);				
 			} else 
 				glTexImage2D(image2D, 0, internalformat, textures[handle].width, textures[handle].height, 0, textures[handle].textureformat, GL_UNSIGNED_BYTE, buffer);
 		}
 	} else {
+	// THIS IS 8bpp LAND
           internalformat = GetTextureFormat (internformat);
 		// IRIX has no GL_COLOR_INDEX8 extension
 #if defined(GL_COLOR_INDEX8_EXT)
@@ -917,102 +922,30 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 					free(data);
 				return GFXFALSE;
 			}
-			if(internformat >= DXT1 && internformat <= DXT5){
-				int size = 0;
-				int i = 0;
-				unsigned int offset = 0;
-				size = ((width +3)/4) * ((height +3)/4) * blocksize;
-				for(i = 0;i<mips;++i){
-					glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
-					if(width != 1)
-						width >>=1;
-					if(height != 1)
-						height >>=1;
-					if(i < mips -1)
-						offset += size;
-					size = ((width +3)/4) * ((height +3)/4) * blocksize;
-				}	
-				// Workaround for DDS files created with nvocmpress unpatched
-				if(width != 1 || height != 1){
-					printf("WARNING !!!!  texture is missing mipmaps, contact forum\n");
-					while(width!=1 || height!=1){
-						glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
-						if(width != 1)
-							width >>=1;
-						if(height != 1)
-							height >>=1;
-						size = ((width +3)/4) * ((height +3)/4) * blocksize;
-						++i;
-					}
-				}
-				// End workaround
+			if ((textures[handle].mipmapped&(MIPMAP|TRILINEAR))&&gl_options.mipmap>=2) {
+				gluBuild2DMipmaps(image2D, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
 			} else {
-				if ((textures[handle].mipmapped&(MIPMAP|TRILINEAR))&&gl_options.mipmap>=2) {
-					gluBuild2DMipmaps(image2D, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
-				} else {
-					glTexImage2D(image2D, 0, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, 0, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
-				}
+				glTexImage2D(image2D, 0, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, 0, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
 			}
-#if 0
-			error = glGetError();
-			if (error) {
-				if (tempbuf)
-					free(tempbuf);
-				gl_options.compression = comptemp;
-				if(data)
-					free(data);
-				return GFXFALSE;
-			}
-#endif
 		} else
 #endif
 		{
-			if(internformat >= DXT1 && internformat <= DXT5){
-				int size = 0;
-				int i = 0;
-				unsigned int offset = 0;
-				size = ((width +3)/4) * ((height +3)/4) * blocksize;
-				for(i = 0;i<mips;++i){
-					glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
-					if(width != 1)
-						width >>=1;
-					if(height != 1)
-						height >>=1;
-					if(i < mips -1)
-						offset += size;
-					size = ((width +3)/4) * ((height +3)/4) * blocksize;
-				}	
-				// Workaround for DDS files created with nvocmpress unpatched
-				if(width != 1 || height != 1){
-					printf("WARNING !!!!  texture is missing mipmaps, contact forum\n");
-					while(width!=1 || height!=1){					
-						glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
-						if(width != 1)
-							width >>=1;
-						if(height != 1)
-							height >>=1;
-						size = ((width +3)/4) * ((height +3)/4) * blocksize;
-						++i;
-					}
-				}
-				// End workaround				
-			} else {
-				int nsize = 4*textures[handle].iheight*textures[handle].iwidth;
-				unsigned char * tbuf =(unsigned char *) malloc (sizeof(unsigned char)*nsize);
-				//      textures[handle].texture = tbuf;
-				int j =0;
-				for (int i=0; i< nsize; i+=4) {
-					tbuf[i] = textures[handle].palette[4*buffer[j]];
-					tbuf[i+1] = textures[handle].palette[4*buffer[j]+1];
-					tbuf[i+2] = textures[handle].palette[4*buffer[j]+2];
-					//used to be 255
-					tbuf[i+3]= textures[handle].palette[4*buffer[j]+3];
-					j ++;
-				}
-				GFXTransferTexture(tbuf,handle,RGBA32,imagetarget,maxdimension,detail_texture);
-				free (tbuf);
+			int nsize = 4*textures[handle].iheight*textures[handle].iwidth;
+			unsigned char * tbuf =(unsigned char *) malloc (sizeof(unsigned char)*nsize);
+			//      textures[handle].texture = tbuf;
+			int j =0;
+			for (int i=0; i< nsize; i+=4) {
+				tbuf[i] = textures[handle].palette[4*buffer[j]];
+				tbuf[i+1] = textures[handle].palette[4*buffer[j]+1];
+				tbuf[i+2] = textures[handle].palette[4*buffer[j]+2];
+				//used to be 255
+				tbuf[i+3]= textures[handle].palette[4*buffer[j]+3];
+				j ++;
 			}
+			GFXTransferTexture(tbuf,handle,RGBA32,imagetarget,maxdimension,detail_texture);
+			free (tbuf);
 		}
+		
 	}
 	if (tempbuf)
 		free(tempbuf);

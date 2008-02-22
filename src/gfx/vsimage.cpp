@@ -757,6 +757,10 @@ unsigned char *VSImage::ReadDDS()
 		inputSize = 0;
 		width=header.width;
 		height= header.height;
+		// Some DDS files may not have mipmaps
+		if(header.nmips == 0){
+			inputSize = ((width+3)/4)*((height+3)/4)*blockSize;
+		}
 		for(int i = 0;i<header.nmips;++i){
 			inputSize += ((width+3)/4)*((height+3)/4)*blockSize;
 			if(width != 1)

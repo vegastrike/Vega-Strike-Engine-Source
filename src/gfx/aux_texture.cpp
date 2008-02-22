@@ -210,6 +210,13 @@ Texture::Texture(VSFile * f, int stage, enum FILTER mipmap, enum TEXTURE_TARGET 
 
 	if (data)
 	{
+		if(mode >= _DXT1 && mode <= _DXT5){
+			if((int)data[0] == 0){
+				detailtexture = NEAREST;
+				ismipmapped = NEAREST;
+			}
+		}
+
 		Bind(maxdimension,detailtexture);
 		free(data);
 		data = NULL;
@@ -280,16 +287,6 @@ void Texture::Load(const char * FileName, int stage, enum FILTER mipmap, enum TE
 	  if (FileName[0])
 	    err = f.OpenReadOnly (FileName, TextureFile);
 	bool shared = (err==Shared);
-	//modold (texfilename,shared,texfilename);
-	/*
-	if (shared) {
-	  if (FileName)
-	    if (FileName[0]) {
-	      //string tmp =VSFileSystem::GetSharedTexturePath (FileName);
-	      err = f.OpenReadOnly (FileName,TextureFile);
-	    }
-	}
-	*/
 	free ( t);
 	if (err<=Ok&&g_game.use_textures==0&&!force_load) {
 	  f.Close();
@@ -317,115 +314,14 @@ void Texture::Load(const char * FileName, int stage, enum FILTER mipmap, enum TE
 		data = this->ReadImage( &f, NULL, true, NULL);
 	else
 		data = this->ReadImage( &f, NULL, true, &f2);
-	/*
-	data = readImage (f,bpp,format,sizeX,sizeY,palette,NULL,true);
-	if (data) {
-	  //FIXME deal with palettes and grayscale with alpha
-	  if (!(format&PNG_HAS_COLOR)||(format&PNG_HAS_PALETTE)) {
-	    mode=_8BIT;
-	    if (!(format&PNG_HAS_COLOR)){
-	      palette = (unsigned char *) malloc(sizeof(unsigned char)*(256*4+1));
-	      for (unsigned int i =0;i<256;i++) {
-		palette[i*4]=i;
-		palette[i*4+1]=i;
-		palette[i*4+2]=i;
-		palette[i*4+3]=255;
-	      }
-	    }
-	  } 
-	  if (format&PNG_HAS_COLOR) {
-	    if (format&PNG_HAS_ALPHA) {
-	      mode=_24BITRGBA;
-	    } else {
-	      mode=_24BIT;
-	    }
-	  }
-	}else {
-	  char head1;
-	  char head2;
-	  f.Begin();
-	  f.Read (&head1, 1);
-	  f.Read(&head2,1);
-	  if (toupper(head1)!='B'||toupper (head2)!='M') {
-		FileNotFound(texfilename);
-		f.Close();
-		if (err2<=Ok) {
-			f2.Close();
-		}
-		return;
-	  }
-	  //seek back to beginning
-	  f.GoTo(SIZEOF_BITMAPFILEHEADER);
-	  //long temp;
-	  BITMAPINFOHEADER info;
-	  f.Read(&info, SIZEOF_BITMAPINFOHEADER);
-	  sizeX = le32_to_cpu(info.biWidth);	
-	  sizeY = le32_to_cpu(info.biHeight);
-	  
-	  
-	  //while(1);
-	  
-	  if(le16_to_cpu(info.biBitCount) == 24)
-	    {
-	      mode = _24BITRGBA;
-	      if(err2<=Ok)
-		mode = _24BITRGBA;
-	      data = NULL;
-	      data= (unsigned char *)malloc (sizeof(unsigned char)*4*sizeY*sizeX); // all bitmap data needs to be 32 bits
-	      if (!data)
-		return;
-	      for (int i=sizeY-1; i>=0;i--)
-		{
-		  int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
-		  for (unsigned int j=0; j<sizeX;j++)
-		    {
-		      if(err2<=Ok)
-					f2.Read(data+3, sizeof(unsigned char));
-		      else
-			*(data+3) = 0xff; // default alpha = 1
-		      for (int k=2; k>=0;k--)
-			{
-					f.Read (data+k+4*j+itimes4width,sizeof (unsigned char));
-			}
-		      
-		    }
-		}
-	    }
-	  else if(le16_to_cpu(info.biBitCount) == 8)
-	    {
-	      mode = _8BIT;
-	      data = NULL;
-	      data= (unsigned char *)malloc(sizeof(unsigned char)*sizeY*sizeX);
-	      palette = (unsigned char *)malloc(sizeof(unsigned char)* (256*4+1));
-	      memset (palette,0,(256*4+1)*sizeof(unsigned char));
-	      unsigned char *paltemp = palette;
-	      unsigned char ctemp;
-		for(int palcount = 0; palcount < 256; palcount++)
-		  {
-		    f.Read(paltemp, SIZEOF_RGBQUAD);
-		    ctemp = paltemp[0];
-		    paltemp[0] = paltemp[2];
-		    paltemp[2] = ctemp;
-		    paltemp+=4; // pal size
-		  }
-		if (!data)
-		  return;
-		for (int i=sizeY-1; i>=0;i--)
-		  {
-		    for (unsigned int j=0; j<sizeX;j++)
-		      {
-				f.Read(data+ j + i * sizeX,sizeof (unsigned char));
-		      }
-		  }
-	    }
-	}
-	//VSFileSystem::vs_fprintf (stderr,"Bind... ");
- 	f.Close();
-	if (err2<=Ok)
-	  f2.Close();
-	*/
 	if (data)
 	{
+		if(mode >= _DXT1 && mode <= _DXT5){
+			if((int)data[0] == 0){
+				detailtexture = NEAREST;
+				ismipmapped = NEAREST;
+			}
+		}
 		Bind(maxdimension,detailtexture);
 		free(data);
 		data = NULL;
@@ -505,9 +401,6 @@ void Texture::Load (const char * FileNameRGB, const char *FileNameA, int stage, 
                  {
                     data = NULL;
                     FileNameA = NULL;
-                    //VSFileSystem::vs_close(fp);
-                    //*this = Texture(FileNameRGB, NULL);
-                    //return;
                  }
            }else FileNameA=0;
 	}
@@ -515,207 +408,14 @@ void Texture::Load (const char * FileNameRGB, const char *FileNameA, int stage, 
 		data = this->ReadImage( &f, NULL, true, NULL);
 	else
 		data = this->ReadImage( &f, NULL, true, &f1);
-	/*
-	if (data) {
-	  //FIXME deal with palettes and grayscale with alpha
-	  if (!(format&PNG_HAS_COLOR)||(format&PNG_HAS_PALETTE)) {
-	    mode=_8BIT;
-	    if (!(format&PNG_HAS_COLOR)){
-	      palette = (unsigned char *)malloc (sizeof(unsigned char)*(256*4+1));
-	      for (unsigned int i =0;i<256;i++) {
-		palette[i*4]=i;
-		palette[i*4+1]=i;
-		palette[i*4+2]=i;
-		palette[i*4+3]=255;
-	      }
-	    }
-
-	  } 
-	  if (format&PNG_HAS_COLOR) {
-	    if (format&PNG_HAS_ALPHA) {
-	      mode=_24BITRGBA;
-	    } else {
-	      mode=_24BIT;
-	    }
-	  }
-	}else {
-	  char head1;
-	  char head2;
-	  f.Begin();
-	  f.Read(&head1,1);
-	  f.Read(&head2,1);
-	  if (toupper(head1)!='B'||toupper (head2)!='M') {
-		FileNotFound(texfilename);
-		f.Close();
-		if (err1<=Ok) {
-			f1.Close();
-		}
-		return;
-	  }
-	  ///seek back to the beginning
-	  f.GoTo(SIZEOF_BITMAPFILEHEADER);
-	  //long temp;
-	  BITMAPINFOHEADER info;
-	  f.Read(&info, SIZEOF_BITMAPINFOHEADER);
-	  sizeX = le32_to_cpu(info.biWidth);
-	  sizeY = le32_to_cpu(info.biHeight);
-	  BITMAPINFOHEADER info1;
-	  
-	  if (FileNameA)
-	  {
-	    std::string tmp;
-		f1.OpenReadOnly( FileNameA, TextureFile);
-	     
-		shared = (err1==Shared);
-	    if (err1>Ok)
-		{
-		  data = NULL;
-		  FileNameA = NULL;
-		  //VSFileSystem::vs_close(fp);
-		  // *this = Texture(FileNameRGB, NULL);
-		  //return;
-		}
-	    else
-		{
-		  f1.GoTo(SIZEOF_BITMAPFILEHEADER);
-		  
-		  f1.Read(&info1,SIZEOF_BITMAPINFOHEADER);
-		  if (sizeX != (unsigned int) le32_to_cpu(info1.biWidth)||sizeY!=(unsigned int)le32_to_cpu(info1.biHeight))
-		    {
-		      data = NULL;
-		      f1.Close();
-		      if (err<=Ok) 
-				f.Close();
-		      return;
-		    }
-		  RGBQUAD ptemp1;	
-		  if (le16_to_cpu(info1.biBitCount) == 8)
-		    {
-		      for (int i=0; i<256; i++)
-				f1.Read(&ptemp1, sizeof(RGBQUAD)); //get rid of the palette for a b&w greyscale alphamap
-		      
-		    }
-		}
-	    }
-	  if(le16_to_cpu(info.biBitCount) == 24) {
-	    mode = _24BITRGBA;
-	    data= (unsigned char *)malloc( sizeof (unsigned char)*4*sizeY*sizeX);
-	    for (int i=sizeY-1; i>=0;i--)
-	      {
-		int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
-		for (unsigned int j=0; j<sizeX;j++)
-		  {
-		    for (int k=2; k>=0;k--) {
-		      f.Read(data+k+4*j+itimes4width,sizeof (unsigned char));
-		    }
-		    if (FileNameA){
-		      if (le16_to_cpu(info1.biBitCount)==24)
-		      for (int k=2; k>=0;k--) {
-				f1.Read(data+3+4*j+itimes4width,sizeof (unsigned char));
-			// *(data+3+4*j+itimes4width) = 30;
-		      } else {
-				f1.Read(data+3+4*j+itimes4width,sizeof (unsigned char));
-		      }
-		    }
-		    else {
-		      if (!data[4*j+itimes4width]&&!data[4*j+itimes4width+1]&&!data[4*j+itimes4width+2])
-			data[4*j+itimes4width+3] = 0;
-		      else
-			data[4*j+itimes4width+3] = 255;
-		    }
-		    // *(data+3+4*j+itimes4width) = 30;
-		    
-		    
-		  }
-	      }
-	  }
-	  else if(le16_to_cpu(info.biBitCount) == 8) {
-	    unsigned char index = 0;
-	    mode = _24BITRGBA;
-	    data = NULL;
-	    data= (unsigned char *)malloc(sizeof(unsigned char)*4*sizeY*sizeX);
-	    palette = (unsigned char *)malloc (sizeof (unsigned char)*(256*4+1));
-	    unsigned char *paltemp = palette;
-	    unsigned char ctemp;
-	    for(int palcount = 0; palcount < 256; palcount++) {
-	      f.Read(paltemp, sizeof(RGBQUAD));
-	      ctemp = paltemp[0];
-	      paltemp[0] = paltemp[2];
-	      paltemp[2] = ctemp;
-	      paltemp+=4;
-	    }
-	    if (!data) {
-	      if (err<=Ok)
-			f.Close();
-	      if (err1<=Ok)
-			f1.Close();
-	      return;
-	    }
-		//FIXME VEGASTRIKE???		int k=0;
-	    for (int i=sizeY-1; i>=0;i--) {
-	      for (unsigned int j=0; j<sizeX;j++)
-		{
-		  f.Read(&index,sizeof (unsigned char));
-		  data [4*(i*sizeX+j)] = palette[((short)index)*4];	
-		  data [4*(i*sizeX+j)+1] = palette[((short)index)*4+1];
-		  data [4*(i*sizeX+j)+2] = palette[((short)index)*4+2];
-		}
-	    }
-	    delete [] palette;
-	    palette = NULL;
-	    if (FileNameA)
-	      {
-		for (int i=sizeY-1; i>=0;i--)
-		  {
-		    int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
-		    for (unsigned int j=0; j<sizeX;j++) {
-		      if (le16_to_cpu(info1.biBitCount)==24)
-			for (int k=2; k>=0;k--) {
-			  f1.Read(data+3+4*j+itimes4width,sizeof (unsigned char));
-			}
-		      else {
-				f1.Read(data+3+4*j+itimes4width,sizeof (unsigned char));
-		      }
-		    }
-		  }
-	      } else{
-		for (unsigned int i=0; i<sizeY;i++) {
-		  int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
-		  for (unsigned int j=0; j<sizeX;j++){
-		    if (!data[4*j+itimes4width]&&!data[4*j+itimes4width+1]&&!data[4*j+itimes4width+2])
-		      data[4*j+itimes4width+3]=0;
-		    else
-		      data[4*j+itimes4width+3]=255;
-		  }
-		}
-		
-	      }
-	  }
-	  
-	  if (alpha!=1) {
-	    float tmpclamp;
-	    for (unsigned int i=0; i<sizeY;i++) {
-	      int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
-	      for (unsigned int j=0; j<sizeX;j++){
-		tmpclamp = data[4*j+itimes4width+3];
-		if (tmpclamp>zeroval) {
-		  tmpclamp /=255.;
-		  tmpclamp =pow (tmpclamp,alpha);
-		  tmpclamp *=255;
-		if (tmpclamp>255)
-		  tmpclamp = 255;
-		data[4*j+itimes4width+3]= (unsigned char)tmpclamp;
-		
-		}
-	    }
-	    }
-	    
-	  }
-	}
-	//VSFileSystem::vs_fprintf (stderr,"Bind... ");
-	*/
 	if (data)
 	{
+		if(mode >= _DXT1 && mode <= _DXT5){
+			if((int)data[0] == 0){
+				detailtexture = NEAREST;
+				ismipmapped = NEAREST;
+			}
+		}
 	  Bind(maxdimension,detailtexture);
 	  free(data);
 	  data = NULL;
@@ -770,6 +470,7 @@ void Texture::Transfer (int maxdimension,GFXBOOL detailtexture)
 	//Implement this in D3D
 	//if(mode == _8BIT)
 	//	glColorTable(GL_SHARED_TEXTURE_PALETTE_EXT, GL_RGB8, 256, GL_RGB, GL_UNSIGNED_BYTE, palette);
+	
 
 	switch (mode)
 	{
