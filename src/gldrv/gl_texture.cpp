@@ -566,43 +566,6 @@ static void DownSampleTexture (unsigned char **newbuf,const unsigned char * oldb
 			}
 		}
 	};
-	/*
-	// Original downsampling code -- begin
-	*newbuf = (unsigned char*)malloc(newheight*newwidth*pixsize*sizeof(unsigned char));
-	float *temp = (float *)malloc (pixsize*sizeof(float));
-	for (i=0;i<newheight;i++) {
-	  for (j=0;j<newwidth;j++) {
-		for (m=0;m<pixsize;m++) {
-	  temp[m]=0;
-		}
-		float xshift = width*(float)j/(float)newwidth;
-		float yshift = height*(float)i/(float)newheight;
-		int x =(int)xshift;
-		int y =(int)yshift;
-		yshift-=y;
-		xshift-=x;
-		xshift+=.5;
-		yshift+=.5;
-		if (xshift>1)xshift=1;
-		if (yshift>1)yshift=1;
-		x=x<width?x:width-1;
-		y=y<height?y:height-1;
-		int xpp = x+1<width?x+1:x;
-		int ypp = y+1<height?y+1:y;
-		for (m=0;m<pixsize;++m) {
-		  temp[m] += (1-yshift)*(1-xshift)*oldbuf[(x+y*width)*pixsize+m];
-		  temp[m] += (1-yshift)*xshift*oldbuf[(xpp+y*width)*pixsize+m];
-		  temp[m] += yshift*(1-xshift)*oldbuf[(x+ypp*width)*pixsize+m];
-		  temp[m] += yshift*xshift*oldbuf[(xpp+ypp*width)*pixsize+m];
-		}
-		for (m=0;m<pixsize;m++) {
-	  (*newbuf)[m+pixsize*(j+i*newwidth)] = (unsigned char)((1-newfade)*128+temp[m]*newfade);
-		}
-	  }
-	}
-	free (temp);
-	//Original downsampling code -- end
-	*/
 
 	width = newwidth;
 	height= newheight;
@@ -816,12 +779,18 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 	// If s3tc compression is disabled, our DDS files must be software decompressed 
 	// They may later be recompressed upon loading into GL with the native codec
 	// This is going to incur a serious quality hit.
-	if (!gl_options.s3tc) {
-		if(internformat >=DXT1 && internformat <= DXT5){
-			unsigned char *tmpbuffer = buffer +offset1;
-			ddsDecompress(tmpbuffer,data,internformat,textures[handle].height,textures[handle].width);
-			buffer = data;
-			internformat = RGBA32;
+	if(internformat == DXT5 || (!gl_options.s3tc&& internformat >= DXT1 && internformat <= DXT5)){
+		std::string glversion = (const char *) glGetString(GL_VERSION);
+		std::string::size_type loc = glversion.find( "NVIDIA 169", 0 );
+	   	if( loc != string::npos || !gl_options.s3tc) {
+			glversion  = (const char *) glGetString(GL_RENDERER);
+			std::string::size_type loc2 = glversion.find( "6600", 0 );
+			if( loc2 != string::npos || !gl_options.s3tc) {
+				unsigned char *tmpbuffer = buffer +offset1;
+				ddsDecompress(tmpbuffer,data,internformat,textures[handle].height,textures[handle].width);
+				buffer = data;
+				internformat = RGBA32;
+			}
 		}
 	}
 	
