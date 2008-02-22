@@ -854,8 +854,9 @@ void SaveGame::SetSavedCredits (float c) {
 void SaveGame::SetOutputFileName(const string &filename)
 {
 	if (!filename.empty())
-		outputsavegame = callsign + string("_") + filename; else
-		outputsavegame = filename;
+		outputsavegame = string("Autosave-") + filename;
+	else
+		outputsavegame = string("Autosave"); // empty name?
 }
 
 void SaveGame::ParseSaveGame (const string &filename_p, string &FSS, const string &originalstarsystem, QVector &PP, bool & shouldupdatepos, float &credits, vector <string> &savedstarship, int player_num, const string &save_contents, bool read, bool commitfaction, bool quick_read, bool skip_news, bool select_data, const std::set<std::string> &select_data_filter) 
@@ -864,16 +865,21 @@ void SaveGame::ParseSaveGame (const string &filename_p, string &FSS, const strin
 	char *tempfullbuf=0;
 	int tempfulllength=2048;
 	string filename;
+	/*
+	// Formerly: filename = callsign + "_"
 	if (!filename_p.empty())
-		filename = callsign + string("_") + filename;
+		filename = filename_p;
+	*/
+	// Now leave filename empty, use the default name regardless...
+	
 	shouldupdatepos=!(PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX);
 	// WE WILL ALWAYS SAVE THE CURRENT SAVEGAME IN THE MISSION SAVENAME (IT WILL BE COPIED TO THE SPECIFIED SAVENAME)
-	outputsavegame=filename;
+	SetOutputFileName(filename);
 	VSFile f;
 	VSError err=FileNotFound;
 	if( read)
 	{
-		if (filename.length()>0) {
+		 {
 				// TRY TO GET THE SPECIFIED SAVENAME TO LOAD
 				string plsave = GetReadPlayerSaveGame(player_num);
 				if (plsave.length()) {
@@ -882,7 +888,7 @@ void SaveGame::ParseSaveGame (const string &filename_p, string &FSS, const strin
 						// Try as an UnknownFile to get a datadir saved game, like New_Game.
 						err = f.OpenReadOnly( plsave, UnknownFile);
 					}
-				}else {
+				}else if (filename.length()>0) {
 					// IF NONE SIMPLY LOAD THE MISSION DEFAULT ONE
 					err = f.OpenReadOnly( filename, SaveFile);
 				}
