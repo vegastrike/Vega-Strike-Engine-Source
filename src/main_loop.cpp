@@ -62,13 +62,48 @@ using namespace std;
 extern std::string global_username;
 #define KEYDOWN(name,key) (name[key] & 0x80)
 
+static Texture *tmpcockpittexture;
 Unit **fighters;
-  void SuicideKey(const KBData&,KBSTATE newState);
+Unit *carrier=NULL;
+Unit *fighter=NULL;
+Unit *fighter2=NULL;
+Unit *midway = NULL;
+//Cockpit *cockpit;
+void SuicideKey(const KBData&,KBSTATE newState);
 //  void Respawn(const KBData&,KBSTATE newState);
-
-
- GFXBOOL capture;
+GFXBOOL capture;
 GFXBOOL quit = GFXFALSE;
+bool _Slew = true;
+bool QuitAllow=false;
+extern bool cleanexit;
+//  extern int allexcept;
+#ifndef _WIN32
+int allexcept=FE_DIVBYZERO;//|FE_INVALID;//|FE_OVERFLOW|FE_UNDERFLOW;
+#else
+int allexcept=0;
+#endif
+int shiftup(int);
+string getUnitNameAndFgNoBase(Unit * target);
+const Unit * loadUnitByCache(std::string name,int faction);
+ContinuousTerrain * myterrain;
+int numf = 0;
+CoordinateSelect *locSel=NULL;
+//Background * bg = NULL;
+SphereMesh *bg2=NULL;
+ClickList *shipList =NULL;
+//const float timek = .001;
+
+void VolUp(const KBData&,KBSTATE newState) {
+   if(newState==PRESS){
+     float gain=AUDGetListenerGain();
+     if (gain<1) {
+       gain+=.0625;
+       if (gain>1) gain=1;
+       AUDListenerGain (gain);
+       Music::ChangeVolume(0);
+     }
+   }
+ }
 
 /*11-7-98
  *Cool shit happened when a position rotation matrix from a unit was used for the drawing of the background... not very useful though
@@ -102,20 +137,7 @@ public:
 };
 */
 
-const float timek = .001;
-bool _Slew = true;
- void VolUp(const KBData&,KBSTATE newState) {
-   if(newState==PRESS){
-     float gain=AUDGetListenerGain();
-     if (gain<1) {
-       gain+=.0625;
-       if (gain>1) gain=1;
-       AUDListenerGain (gain);
-       Music::ChangeVolume(0);
-     }
-   }
- }
- void VolDown(const KBData&,KBSTATE newState) {
+void VolDown(const KBData&,KBSTATE newState) {
    if(newState==PRESS){
      float gain=AUDGetListenerGain();
      if (gain>0) {       
@@ -126,9 +148,8 @@ bool _Slew = true;
      }
    }
  }
-bool QuitAllow=false;
-extern bool cleanexit;
-  static void SwitchVDUTo(VDU::VDU_MODE v) {
+
+static void SwitchVDUTo(VDU::VDU_MODE v) {
     int i;
     static int whichvdu=1; 
     for (int j=0;j<3;++j) {
@@ -156,6 +177,7 @@ extern bool cleanexit;
       }
     }
   }
+
 void ExamineWhenTargetKey() {
   static bool reallySwitch=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","switchToTargetModeOnKey","true"));
   if (reallySwitch) {
@@ -175,20 +197,12 @@ void ExamineWhenTargetKey() {
    
   }
 }
-//  extern int allexcept;
-#ifndef _WIN32
-int allexcept=FE_DIVBYZERO;//|FE_INVALID;//|FE_OVERFLOW|FE_UNDERFLOW;
-#else
-int allexcept=0;
-#endif
-int shiftup(int);
-string getUnitNameAndFgNoBase(Unit * target);
-  const Unit * loadUnitByCache(std::string name,int faction);
 
 namespace CockpitKeys {
   unsigned int textmessager=0;
   static bool waszero=false;
-  void TextMessageCallback(unsigned int ch, unsigned int mod, bool release, int x, int y){
+
+  void TextMessageCallback(unsigned int ch, unsigned int mod, bool release, int x, int y) {
     GameCockpit *gcp=static_cast<GameCockpit*>(_Universe->AccessCockpit(textmessager));
     gcp->editingTextMessage=true;
     if ((release&&(waszero||ch==WSK_KP_ENTER||ch==WSK_ESCAPE))||(release==false&&(ch==']'||ch=='['))){
@@ -244,13 +258,14 @@ namespace CockpitKeys {
       gcp->editingTextMessage=false;
     }
   }
+
   void TextMessageKey(const KBData&,KBSTATE newState) {
     if(newState==PRESS){
       winsys_set_keyboard_func(TextMessageCallback);
       textmessager=_Universe->CurrentCockpit();
     }
   }
-  void QuitNow () {
+      void QuitNow () {
     {
 	  static bool writeSaveOnQuit = XMLSupport::parse_bool(vs_config->getVariable("general","write_savegame_on_exit","true"));
       cleanexit=true;
@@ -267,7 +282,8 @@ namespace CockpitKeys {
     }
     
   }
- void SkipMusicTrack(const KBData&,KBSTATE newState) {
+ 
+   void SkipMusicTrack(const KBData&,KBSTATE newState) {
    if(newState==PRESS){
      printf("skipping\n");
     muzak->Skip();
@@ -275,6 +291,7 @@ namespace CockpitKeys {
  }
 
  void PitchDown(const KBData&,KBSTATE newState) {
+      static float panspeed=XMLSupport::parse_float(vs_config->getVariable("graphics","camera_pan_speed","0.0001"));
 	static Vector Q;
 	static Vector R;
 	for (int i=0;i<NUM_CAM;i++) {
@@ -284,7 +301,7 @@ namespace CockpitKeys {
 	  }
 		Q = _Universe->AccessCockpit()->AccessCamera(i)->Q;
 		R = _Universe->AccessCockpit()->AccessCamera(i)->R;
-		_Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-Q, R,timek);
+		_Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-Q, R, panspeed);
 		//a =1;
 	}
 	if (_Slew&&newState==RELEASE) {
@@ -294,7 +311,7 @@ namespace CockpitKeys {
 }
 
  void PitchUp(const KBData&,KBSTATE newState) {
-	
+      static float panspeed=XMLSupport::parse_float(vs_config->getVariable("graphics","camera_pan_speed","0.0001"));
 	static Vector Q;
 	static Vector R;
 	for (int i=0;i<NUM_CAM;i++) {
@@ -302,7 +319,7 @@ namespace CockpitKeys {
 
 		Q = _Universe->AccessCockpit()->AccessCamera(i)->Q;
 		R = _Universe->AccessCockpit()->AccessCamera(i)->R;
-		_Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(Q, R,timek);
+		_Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(Q, R, panspeed);
 		
 	}
 	if (_Slew&&newState==RELEASE) {
@@ -311,7 +328,7 @@ namespace CockpitKeys {
 	}}
 
   void YawLeft(const KBData&,KBSTATE newState) {
-	
+      static float panspeed=XMLSupport::parse_float(vs_config->getVariable("graphics","camera_pan_speed","0.0001"));
 	static Vector P;
 	static Vector R;
 	for (int i=0;i<NUM_CAM;i++) {
@@ -319,7 +336,7 @@ namespace CockpitKeys {
 
 		P = _Universe->AccessCockpit()->AccessCamera(i)->P;
 		R = _Universe->AccessCockpit()->AccessCamera(i)->R;
-		_Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-P, R,timek);
+		_Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-P, R, panspeed);
 		
 	}
 	if (_Slew&&newState==RELEASE) {
@@ -329,19 +346,20 @@ namespace CockpitKeys {
 }
 
   void YawRight(const KBData&,KBSTATE newState) {
-		for (int i=0;i<NUM_CAM;i++) {
-	static Vector P;
-	static Vector R;
-	if(newState==PRESS) {
-		P = _Universe->AccessCockpit()->AccessCamera(i)->P;
-		R = _Universe->AccessCockpit()->AccessCamera(i)->R;
-		_Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(P, R,timek);
-	
+	for (int i=0;i<NUM_CAM;i++) {
+      static float panspeed=XMLSupport::parse_float(vs_config->getVariable("graphics","camera_pan_speed","0.0001"));
+	   static Vector P;
+	   static Vector R;
+	   if(newState==PRESS) {
+		   P = _Universe->AccessCockpit()->AccessCamera(i)->P;
+		   R = _Universe->AccessCockpit()->AccessCamera(i)->R;
+		   _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(P, R, panspeed);
+	   
+	   }
+	   if (_Slew&&newState==RELEASE) {
+	   _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0,0,0));
+	   }
 	}
-	if (_Slew&&newState==RELEASE) {
-	  _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0,0,0));
-	}
-		}
 }
 
   void Quit(const KBData&,KBSTATE newState) {
@@ -689,16 +707,7 @@ bool cockpitfront=true;
 }
 
 using namespace CockpitKeys;
-ContinuousTerrain * myterrain;
-Unit *carrier=NULL;
-Unit *fighter = NULL;
-Unit *fighter2=NULL;
-int numf = 0;
-CoordinateSelect *locSel=NULL;
-//Background * bg = NULL;
-SphereMesh *bg2=NULL;
-ClickList *shipList =NULL;
-Unit *midway = NULL;
+
 /*
 int oldx =0;
 int  oldy=0;
@@ -739,8 +748,6 @@ void InitializeInput() {
 	BindKey(27,0,0, Quit,KBData()); // always have quit on esc
 }
 
-//Cockpit *cockpit;
-
 void IncrementStartupVariable () {
 	if (mission->getVariable ("savegame","").length()==0)
 		return;
@@ -759,7 +766,6 @@ void IncrementStartupVariable () {
 	}
 }
 
-static Texture *tmpcockpittexture;
 void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSystem *> &ssys, std::vector <QVector>& savedloc, vector<vector<std::string> > &savefiles) {
   vector <std::string> fighter0mods;
   vector <int> fighter0indices;
@@ -1037,6 +1043,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
   mission->DirectorInitgame();
   IncrementStartupVariable();
 }
+
 void AddUnitToSystem (const SavedUnits *su) {
   Unit * un=NULL;
   switch (su->type) {
@@ -1057,6 +1064,7 @@ void AddUnitToSystem (const SavedUnits *su) {
   _Universe->activeStarSystem()->AddUnit(un);
 
 }
+
 void destroyObjects() {  
   if (myterrain)
     delete myterrain;
@@ -1066,8 +1074,6 @@ void destroyObjects() {
   delete [] fighters;
   delete locSel;
 }
-
-
 
 int getmicrosleep () {
   static int microsleep = XMLSupport::parse_int (vs_config->getVariable ("audio","threadtime","1"));
@@ -1126,4 +1132,3 @@ void main_loop() {
 	  }
   }
 }
-
