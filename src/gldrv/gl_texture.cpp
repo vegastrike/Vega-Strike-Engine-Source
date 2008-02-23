@@ -780,6 +780,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 	// They may later be recompressed upon loading into GL with the native codec
 	// This is going to incur a serious quality hit.
 	if(internformat == DXT5 || (!gl_options.s3tc&& internformat >= DXT1 && internformat <= DXT5)){
+		/* HACK */
+		// We add to the DXT5 blacklist by adding .find strings 
+		// Currently only Nvidia 6600 series cards using driver 169.x are added
 		std::string glversion = (const char *) glGetString(GL_VERSION);
 		std::string::size_type loc = glversion.find( "NVIDIA 169", 0 );
 	   	if( loc != string::npos || !gl_options.s3tc) {
@@ -792,6 +795,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 				internformat = RGBA32;
 			}
 		}
+		/* END HACK */
 	}
 	
 	if (internformat!=PALETTE8 && internformat != PNGPALETTE8) {
@@ -835,28 +839,23 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 						offset += size;
 					size = ((width +3)/4) * ((height +3)/4) * blocksize;
 				}	
-				// Workaround for DDS files created with nvcompress unpatched
-				// nvcompress didn't like to generate all mipmaps for non-square textures
-				// this means mips will be reached prior to width and height both reaching 1
-				if(width != 1 || height != 1){
-					printf("WARNING !!!!  texture is missing mipmaps, contact forum\n");
-					while(width!=1 || height!=1){
-						glCompressedTexImage2D_p(image2D,i,internalformat,width,height,0,size,buffer+offset1+offset);
-						if(width != 1)
-							width >>=1;
-						if(height != 1)
-							height >>=1;
-						// this is the workaround: we simply stop incrementing the offset 
-						// We thus, reuse the first N bits from the 
-						// last mipmap to generate the remaining mipmaps. 
-						// This will allow GL to not bug out, but it wont provide the correct 
-						// visuals for those mipmaps. 
-						size = ((width +3)/4) * ((height +3)/4) * blocksize;
-						++i;
-					}
+				/* HACK */
+				// This is a workaround for ani_texture which hates not having 
+				// mipmaps. 
+				if(mips == 0){
+					size = ((width +3)/4) * ((height +3)/4) * blocksize;
+					textures[handle].mipmapped= NEAREST;
+					// We need to reverse some parameters that are set cuz 
+					// we're supposed to have mipmaps here.  But ani_texture hates us.
+					glTexParameteri (textures[handle].targets, GL_TEXTURE_BASE_LEVEL, 0);
+					glTexParameteri (textures[handle].targets, GL_TEXTURE_MAX_LEVEL, 0);
+					glTexParameteri (textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+					glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+					glCompressedTexImage2D_p(image2D,0,internalformat,width,height,0,size,buffer+offset1);				
 				}
-				// End workaround
+				/* END HACK */
 			} else {
+				// We want mipmaps but we have uncompressed data 
 				gluBuild2DMipmaps(image2D, internalformat, textures[handle].width, textures[handle].height, textures[handle].textureformat, GL_UNSIGNED_BYTE, buffer);
 			}
 			if (tempbuf) 
