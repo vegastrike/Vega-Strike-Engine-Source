@@ -464,6 +464,7 @@ class Unit
 				UnitContainer threat;
 				// Unit that it should match velocity with (not speed) if null, matches velocity with universe frame (star)
 				UnitContainer velocity_ref;
+				bool force_velocity_ref;
 				// The threat level that was calculated from attacking unit's threat
 				float threatlevel;
 				// The speed the flybywire system attempts to maintain

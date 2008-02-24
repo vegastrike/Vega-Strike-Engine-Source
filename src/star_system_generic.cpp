@@ -110,6 +110,7 @@ StarSystem::StarSystem()
 	time = 0;
 	//_Universe->popActiveStarSystem ();
 	zone = NULL;
+	sigIter = drawList.createIterator();
 	this->current_sim_location=0;
 }
 
@@ -136,6 +137,7 @@ StarSystem::StarSystem(const char * filename, const Vector & centr,const float t
 	LoadXML(filename,centr,timeofyear);
 	if (!name)
 		name =strdup (filename);
+	sigIter = drawList.createIterator();
 	AddStarsystemToUniverse(filename);
 	//  primaries[0]->SetPosition(0,0,0);
 	//iter = primaries->createIterator();
@@ -821,6 +823,9 @@ void ExecuteDirector ()
 
 }
 
+Unit *StarSystem::nextSignificantUnit() {
+	return sigIter.current();
+}
 
 void StarSystem::Update( float priority)
 {
@@ -943,6 +948,16 @@ void StarSystem::Update(float priority , bool executeDirector)
 		}
 		_Universe->SetActiveCockpit(i);
 	}
+
+	if (sigIter.isDone()) {
+		sigIter = drawList.createIterator();
+	} else {
+		sigIter.advance();
+	}
+	while (!sigIter.isDone() && !UnitUtil::isSignificant(sigIter.current())) {
+		sigIter.advance();
+	}
+	// If it is done, leave it NULL for this frame then.
 
 	//WARNING cockpit does not get here...
 	SIMULATION_ATOM =  normal_simulation_atom;

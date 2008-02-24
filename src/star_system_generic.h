@@ -116,6 +116,7 @@ class StarSystem
 		///system name
 		char * name;
 		std::string filename;
+		un_iter sigIter;
 		///Process global clicks for input/output
 		//InputDFA * systemInputDFA;
 		///to track the next given physics frame
@@ -179,6 +180,7 @@ class StarSystem
 		///Loads the star system from an XML file
 		UnitCollection& getUnitList() {return drawList;}
 		UnitCollection& gravitationalUnits() {return GravitationalUnits;}
+		Unit *nextSignificantUnit();
 		/// returns xy sorted bounding spheres of all units in current view
 		///Adds to draw list
 		void AddUnit(Unit *unit);

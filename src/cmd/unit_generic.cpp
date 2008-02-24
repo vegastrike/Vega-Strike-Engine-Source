@@ -2538,6 +2538,21 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 		if (TargetPos.k>computer.radar.lockcone)
 			increase_locking=true;
 	}
+	/* Update the velocity reference to the nearer significant unit/planet. */
+	if (!computer.force_velocity_ref && activeStarSystem) {
+		Unit *nextVelRef = activeStarSystem->nextSignificantUnit();
+		if (nextVelRef) {
+			if (computer.velocity_ref.GetUnit()) {
+				double dist = UnitUtil::getSignificantDistance(this, computer.velocity_ref.GetUnit());
+				double next_dist = UnitUtil::getSignificantDistance(this, nextVelRef);
+				if (next_dist < dist) {
+					computer.velocity_ref = nextVelRef;
+				}
+			} else {
+				computer.velocity_ref = nextVelRef;
+			}
+		}
+	}
 }
 
 
@@ -5020,6 +5035,7 @@ void Unit::Kill(bool erasefromsave, bool quitting)
 	//God I can't believe this next line cost me 1 GIG of memory until I added it
 	computer.threat.SetUnit (NULL);
 	computer.velocity_ref.SetUnit(NULL);
+	computer.force_velocity_ref = true;
 
 	if(aistate) {
 		aistate->ClearMessages();
@@ -5741,6 +5757,7 @@ void Unit::Target (Unit *targ)
 
 void Unit::VelocityReference (Unit *targ)
 {
+	computer.force_velocity_ref = !!targ;
 	computer.velocity_ref.SetUnit(targ);
 }
 
