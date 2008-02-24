@@ -1063,33 +1063,6 @@ void BaseComputer::constructControls(void) {
 		GFXColor color=getColorForGroup("NetworkGroup");
 		
 		GameMenu::createNetworkControls(netJoinGroup, &base_keyboard_queue);
-		// Account Server button.
-        NewButton* joinAcct = new NewButton;
-        joinAcct->setRect( Rect(-.50, .7, .37, .09) );
-        joinAcct->setLabel("Online Account Server");
-        joinAcct->setCommand("ShowJoinAccount");
-        
-		joinAcct->setColor( GFXColor(color.r,color.g,color.b,.25) );
-		joinAcct->setTextColor( GUI_OPAQUE_WHITE() );
-		joinAcct->setDownColor( GFXColor(color.r,color.g,color.b,.5) );
-		joinAcct->setDownTextColor( GUI_OPAQUE_BLACK() );
-		joinAcct->setHighlightColor( GFXColor(color.r,color.g,color.b,.4) );
-        joinAcct->setFont(Font(.07));
-        netJoinGroup->addChild(joinAcct);
-
-        // Ship Stats button.
-        NewButton* joinServer = new NewButton;
-        joinServer->setRect( Rect(.05, .7, .37, .09) );
-        joinServer->setLabel("Independent Server");
-        joinServer->setCommand("ShowJoinServer");
-		joinServer->setColor( GFXColor(color.r,color.g,color.b,.25) );
-		joinServer->setTextColor( GUI_OPAQUE_WHITE() );
-		joinServer->setDownColor( GFXColor(color.r,color.g,color.b,.5) );
-		joinServer->setDownTextColor( GUI_OPAQUE_BLACK() );
-		joinServer->setHighlightColor( GFXColor(color.r,color.g,color.b,.4) );
-        joinServer->setFont(Font(.07));
-        netJoinGroup->addChild(joinServer);
-
 		if (Network) {
 			NetClient &nc = Network[0]; // Hack?: Assume 0th player.
 			netStatGroup->setHidden(false);
@@ -5983,8 +5956,8 @@ bool BaseComputer::actionLoadGame(const EventCommandId& command, Control* contro
 }
 
 void BaseComputer::loadNetworkControls() {
-	window()->findControlById("MultiPlayerAccountServer")->setHidden(false);
-	window()->findControlById("MultiPlayerHostPort")->setHidden(true);
+	//window()->findControlById("MultiPlayerAccountServer")->setHidden(false);
+	//window()->findControlById("MultiPlayerHostPort")->setHidden(true);
 }
 
 bool BaseComputer::actionShowServerMenu(const EventCommandId& command, Control* control) {

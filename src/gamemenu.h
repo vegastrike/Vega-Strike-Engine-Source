@@ -19,6 +19,7 @@ protected:
 	bool processSinglePlayerButton(const EventCommandId& command, Control *control);
 	bool processMultiPlayerHostButton(const EventCommandId& command, Control *control);
 	bool processMultiPlayerAcctButton(const EventCommandId& command, Control *control);
+	bool processMultiPlayerButton(const EventCommandId& command, Control *control);
 	bool processExitGameButton(const EventCommandId& command, Control *control);
 	bool processJoinGameButton(const EventCommandId& command, Control *control);
 	bool processMainMenuButton(const EventCommandId& command, Control *control);

@@ -24,8 +24,9 @@ vector<unsigned int > gamemenu_keyboard_queue;
 template <>
 const GameMenu::WctlTableEntry WctlBase<GameMenu>::WctlCommandTable[] = {
 	GameMenu::WctlTableEntry ( "SinglePlayer", "", &GameMenu::processSinglePlayerButton ),
-	GameMenu::WctlTableEntry ( "HostButton", "", &GameMenu::processMultiPlayerHostButton ),
-	GameMenu::WctlTableEntry ( "AcctButton", "", &GameMenu::processMultiPlayerAcctButton ),
+	GameMenu::WctlTableEntry ( "ShowJoinServer", "", &GameMenu::processMultiPlayerHostButton ),
+	GameMenu::WctlTableEntry ( "ShowJoinAccount", "", &GameMenu::processMultiPlayerAcctButton ),
+	GameMenu::WctlTableEntry ( "ShowMultiPlayer", "", &GameMenu::processMultiPlayerButton ),
 	GameMenu::WctlTableEntry ( "ExitGame", "", &GameMenu::processExitGameButton ),
 	GameMenu::WctlTableEntry ( "JoinGame", "", &GameMenu::processJoinGameButton ),
 	GameMenu::WctlTableEntry ( "ReturnMainMenu", "", &GameMenu::processMainMenuButton ),
@@ -69,14 +70,46 @@ void gamemenu_draw() {
 
 //static
 void GameMenu::createNetworkControls(GroupControl *serverConnGroup, std::vector <unsigned int> *inputqueue) {
+
+	GFXColor color(1,.5,0,.1);
+		// Account Server button.
+        NewButton* joinAcct = new NewButton;
+        joinAcct->setRect( Rect(-.50, .7, .37, .09) );
+        joinAcct->setLabel("Online Account Server");
+        joinAcct->setCommand("ShowJoinAccount");
+        
+		joinAcct->setColor( GFXColor(color.r,color.g,color.b,.25) );
+		joinAcct->setTextColor( GUI_OPAQUE_WHITE() );
+		joinAcct->setDownColor( GFXColor(color.r,color.g,color.b,.5) );
+		joinAcct->setDownTextColor( GUI_OPAQUE_BLACK() );
+		joinAcct->setHighlightColor( GFXColor(color.r,color.g,color.b,.4) );
+        joinAcct->setFont(Font(.07));
+        serverConnGroup->addChild(joinAcct);
+
+        // Ship Stats button.
+        NewButton* joinServer = new NewButton;
+        joinServer->setRect( Rect(.05, .7, .37, .09) );
+        joinServer->setLabel("Independent Server");
+        joinServer->setCommand("ShowJoinServer");
+		joinServer->setColor( GFXColor(color.r,color.g,color.b,.25) );
+		joinServer->setTextColor( GUI_OPAQUE_WHITE() );
+		joinServer->setDownColor( GFXColor(color.r,color.g,color.b,.5) );
+		joinServer->setDownTextColor( GUI_OPAQUE_BLACK() );
+		joinServer->setHighlightColor( GFXColor(color.r,color.g,color.b,.4) );
+        joinServer->setFont(Font(.07));
+        serverConnGroup->addChild(joinServer);
+
+	
+	bool useacctserver = XMLSupport::parse_bool(vs_config->getVariable("network", "use_account_server", "true"));
+	
 	GroupControl *acctConnGroup = new GroupControl;
 	acctConnGroup->setId("MultiPlayerAccountServer");
-	acctConnGroup->setHidden(true);
+	acctConnGroup->setHidden(!useacctserver);
 	serverConnGroup->addChild(acctConnGroup);
 
 	GroupControl *hostConnGroup = new GroupControl;
 	hostConnGroup->setId("MultiPlayerHostPort");
-	hostConnGroup->setHidden(true);
+	hostConnGroup->setHidden(useacctserver);
 	serverConnGroup->addChild(hostConnGroup);
 	StaticDisplay *mplayTitle = new StaticDisplay;
 	mplayTitle->setRect( Rect(-.7, .6, 1, .1) );
@@ -221,6 +254,8 @@ namespace UniverseUtil {
 	gm->init();
 	gm->run();
 	if (!error.empty()) {
+		gm->window()->findControlById("MainMenu")->setHidden(true);
+		gm->window()->findControlById("MultiPlayerMenu")->setHidden(false);
 		showAlert(error);
 	}
 	
@@ -244,7 +279,7 @@ void GameMenu::createControls() {
 	// Base info title.
 	StaticDisplay* baseTitle = new StaticDisplay;
 	baseTitle->setRect( Rect(-.96, .83, 1.9, .1) );
-	baseTitle->setText("Vega Strike version 0.5");
+	baseTitle->setText("Vega Strike menu");
 	static GFXColor baseNameColor=getConfigColor("base_name_color",GFXColor(.1,.8,.1));
 	baseTitle->setTextColor(baseNameColor);
 	baseTitle->setColor(GUI_CLEAR);
@@ -266,29 +301,18 @@ void GameMenu::createControls() {
 	singlePlayer->setDownTextColor( GFXColor(.2,.2,.2) );
 	singlePlayer->setFont( Font(.07, 1) );
 	singlePlayer->setCommand("SinglePlayer");
-	singlePlayer->setLabel("Single Player");
+	singlePlayer->setLabel("Single Player Game");
 	mainMenuGroup->addChild(singlePlayer);
 	
 	NewButton *multiPlayer = new NewButton;
-	multiPlayer->setRect( Rect(-.50, .7, .37, .09) );
+	multiPlayer->setRect( Rect(-.75, 0, 1.5, .15) );
 	multiPlayer->setColor( GFXColor(1,.2,0,.1) );
 	multiPlayer->setTextColor( GUI_OPAQUE_WHITE() );
 	multiPlayer->setDownColor( GFXColor(1,.2,0,.4) );
 	multiPlayer->setDownTextColor( GFXColor(.2,.2,.2) );
 	multiPlayer->setFont( Font(.07, 1) );
-	multiPlayer->setCommand("AcctButton");
-	multiPlayer->setLabel("Online Account Server");
-	mainMenuGroup->addChild(multiPlayer);
-	
-	multiPlayer = new NewButton;
-	multiPlayer->setRect( Rect(.05, .7, .37, .09) );
-	multiPlayer->setColor( GFXColor(1,.2,0,.1) );
-	multiPlayer->setTextColor( GUI_OPAQUE_WHITE() );
-	multiPlayer->setDownColor( GFXColor(1,.2,0,.4) );
-	multiPlayer->setDownTextColor( GFXColor(.2,.2,.2) );
-	multiPlayer->setFont( Font(.07, 1) );
-	multiPlayer->setCommand("HostButton");
-	multiPlayer->setLabel("Independent Server");
+	multiPlayer->setCommand("ShowMultiPlayer");
+	multiPlayer->setLabel("MultiPlayer");
 	mainMenuGroup->addChild(multiPlayer);
 	
 	NewButton *exitGame = new NewButton;
@@ -317,17 +341,29 @@ void GameMenu::createControls() {
 	mplayTitle->setId("GameTitle");
 	// Put it on the window.
 	serverConnGroup->addChild(mplayTitle);
-	
+
 	NewButton *returnMainMenu = new NewButton;
-	returnMainMenu->setRect( Rect(0, .81, .75, .1) );
+	returnMainMenu->setRect( Rect(.7, .81, .25, .1) );
 	returnMainMenu->setColor( GFXColor(1,.2,0,.1) );
 	returnMainMenu->setTextColor( GUI_OPAQUE_WHITE() );
 	returnMainMenu->setDownColor( GFXColor(1,.2,0,.4) );
 	returnMainMenu->setDownTextColor( GFXColor(.2,.2,.2) );
 	returnMainMenu->setFont( Font(.07, 1) );
 	returnMainMenu->setCommand("ReturnMainMenu");
-	returnMainMenu->setLabel("<-- Back to Main Menu");
+	returnMainMenu->setLabel("Done");
 	serverConnGroup->addChild(returnMainMenu);
+
+	exitGame = new NewButton;
+	exitGame->setRect( Rect(-.95, -.91, .3, .1) );
+	exitGame->setColor( GFXColor(.7,0,1,.1) );
+	exitGame->setTextColor( GUI_OPAQUE_WHITE() );
+	exitGame->setDownColor( GFXColor(.7,0,1,.4) );
+	exitGame->setDownTextColor( GFXColor(.2,.2,.2) );
+	exitGame->setFont( Font(.07, 1) );
+	exitGame->setCommand("ExitGame");
+	exitGame->setLabel("Quit Game");
+	serverConnGroup->addChild(exitGame);
+	
 	
 	createNetworkControls(serverConnGroup, &gamemenu_keyboard_queue);
 
@@ -395,6 +431,12 @@ bool GameMenu::processMultiPlayerAcctButton(const EventCommandId& command, Contr
 	window()->findControlById("MultiPlayerMenu")->setHidden(false);
 	window()->findControlById("MultiPlayerAccountServer")->setHidden(false);
 	window()->findControlById("MultiPlayerHostPort")->setHidden(true);
+	return true;
+}
+
+bool GameMenu::processMultiPlayerButton(const EventCommandId& command, Control *control) {
+	window()->findControlById("MainMenu")->setHidden(true);
+	window()->findControlById("MultiPlayerMenu")->setHidden(false);
 	return true;
 }
 
