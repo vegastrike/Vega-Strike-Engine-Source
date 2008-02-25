@@ -22,6 +22,7 @@
 // config.h is the VS ./configure determined header.
 #include "config.h" 
 #include <float.h>
+#include <wchar.h> /* Beats me why this wasn't included first. */
 // Hack
 
 #if defined(_WIN32) && !defined(__CYGWIN__) // && defined(_MSC_VER)
