@@ -22,10 +22,10 @@
 // config.h is the VS ./configure determined header.
 #include "config.h" 
 #include <float.h>
-#include <wchar.h> /* Beats me why this wasn't included first. */
-// Hack
 
 #if defined(_WIN32) && !defined(__CYGWIN__) // && defined(_MSC_VER)
+#include <wchar.h> /* Beats me why this wasn't included first. */
+// Hack
 #define CS_COMPILER_MSVC 1
 #ifdef _WIN64
 #  define CS_PROCESSOR_SIZE 64 /* Only used if intptr_t is not found. */
