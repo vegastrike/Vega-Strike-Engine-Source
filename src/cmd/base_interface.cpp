@@ -357,6 +357,7 @@ BaseInterface::Room::BaseTalk::BaseTalk (const std::string & msg,const std::stri
 	active_talks.push_back(this);
 }
 
+
 void BaseInterface::Room::BaseText::Draw (BaseInterface *base) {
   int tmpx=g_game.x_resolution;
   int tmpy=g_game.y_resolution;
@@ -368,11 +369,18 @@ void BaseInterface::Room::BaseText::Draw (BaseInterface *base) {
     if (base_max_height<tmpy)
       g_game.y_resolution=base_max_height;
   }
-  if (text.GetText().empty()) {
+  
+  static float base_text_background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","base_text_background_alpha","0.0625"));
+  GFXColor tmpbg=text.bgcol;
+  bool automatte=(0==tmpbg.a);
+  if(automatte){
+	text.bgcol=GFXColor(0,0,0,base_text_background_alpha);
+  }
+  if (!automatte && text.GetText().empty()) {
     float posx,posy,wid,hei;
-	text.GetPos(posy,posx);
-	text.GetSize(wid,hei);
-	
+    text.GetPos(posy,posx);
+    text.GetSize(wid,hei);
+
     GFXColorf(text.bgcol);
     GFXBegin(GFXQUAD);
     GFXVertex3f(posx,hei,0.0f);
@@ -380,13 +388,9 @@ void BaseInterface::Room::BaseText::Draw (BaseInterface *base) {
     GFXVertex3f(wid,posy,0.0f);
     GFXVertex3f(posx,posy,0.0f);
     GFXEnd();
-	return;
+  } else {
+    text.Draw(text.GetText(),0,true,false,automatte);
   }
-  static float base_text_background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","base_text_background_alpha","0.0625"));
-  GFXColor tmpbg=text.bgcol;
-  bool automatte=(0==tmpbg.a);
-  if(automatte){text.bgcol=GFXColor(0,0,0,base_text_background_alpha);}
-  text.Draw(text.GetText(),0,true,false,automatte);
   text.bgcol=tmpbg;
   g_game.x_resolution=tmpx;
   g_game.y_resolution=tmpy;
