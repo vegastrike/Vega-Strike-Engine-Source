@@ -869,14 +869,22 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                 case CMD_TXTMESSAGE:
                   {
                   if (!clt) break;
-				  un = clt->game_unit.GetUnit();
+			un = clt->game_unit.GetUnit();
 			string message = netbuf.getString();
 			netbuf.Reset();
 			if (message.empty()) break;
 			if (message[0]=='/') {
 				string cmd, args;
+				bool local = (clt->cltadr.inaddr()==0x0100007f);
 				//std::replace(message.begin(),message.end(),'#','$');
 				int cp = _Universe->whichPlayerStarship(un);
+				if (cp < 0) {
+					if (local) {
+						cp = 0;
+					} else {
+						break;
+					}
+				}
 				std::replace(message.begin(),message.end(),'\n',' ');
 				std::replace(message.begin(),message.end(),'\r',' ');
 				string::size_type first_space = message.find(' ');
@@ -886,10 +894,9 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 					cmd = message.substr(1, first_space-1);
 					args = message.substr(first_space+1);
 				}
-				UniverseUtil::receivedCustom(cp, (clt->cltadr.inaddr()==0x0100007f), cmd, args, string());
+				UniverseUtil::receivedCustom(cp, local, cmd, args, string());
 				break;
 			}
-			un = clt->game_unit.GetUnit();
 			if (!un) break;
 			message = message.substr(0, 160);
 			std::replace(message.begin(),message.end(),'#','$');
@@ -920,8 +927,14 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			un = clt->game_unit.GetUnit();
 			int cp = _Universe->whichPlayerStarship(un);
 			// NETFIXME: CMD_CUSTOM should work with a dead unit.
-			if (!cp) break; // You died or something... too bad.
 			bool trusted = (clt->cltadr.inaddr()==0x0100007f);
+			if (cp<0) {
+				if (trusted) {
+					cp = 0;
+				} else {
+					break; // You died or something... too bad.
+				}
+			}
 			string cmd = netbuf.getString();
 			string args = netbuf.getString();
 			string id = netbuf.getString();

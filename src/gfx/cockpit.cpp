@@ -2628,6 +2628,7 @@ void GameCockpit::Draw() {
             DieSprite.Draw();
           } else {
             BaseUtil::LoadBaseInterface(death_menu_script);
+			dietime = 0;
           }
         }
 	dietime +=GetElapsedTime();

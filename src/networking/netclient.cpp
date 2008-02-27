@@ -425,6 +425,7 @@ void NetClient::Respawn( ObjSerial newserial) {
   cp->SetView(CP_FRONT);
   _Universe->SetActiveCockpit(oldcp);
   _Universe->popActiveStarSystem();
+  UniverseUtil::hideSplashScreen();
   
 }
 /**************************************************************/

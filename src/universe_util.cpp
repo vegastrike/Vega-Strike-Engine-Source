@@ -115,16 +115,25 @@ namespace UniverseUtil
 		Cockpit *cockpit = _Universe->AccessCockpit();
 		Unit *player = cockpit->GetParent();
 		UniverseUtil::setCurrentSaveGame(savename);
-		if (player)
-			player->Kill();
+		if (player) {
+			if (Network) {
+				Network[_Universe->CurrentCockpit()].dieRequest();
+			} else {
+				player->Kill();
+			}
+		}
 		RespawnNow(cockpit);
 		globalWindowManager().shutDown();
 		TerminateCurrentBase();
 	}
 
 	void saveGame(const string &savename) {
-		UniverseUtil::setCurrentSaveGame(savename);
-		WriteSaveGame(_Universe->AccessCockpit(), false);
+		if (Network) {
+			Network[_Universe->CurrentCockpit()].saveRequest();
+		} else {
+			UniverseUtil::setCurrentSaveGame(savename);
+			WriteSaveGame(_Universe->AccessCockpit(), false);
+		}
 	}
 
 	void showSplashScreen(const string &filename) {
