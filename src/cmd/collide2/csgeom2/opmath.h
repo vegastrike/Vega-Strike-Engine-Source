@@ -26,7 +26,7 @@
 #include "config.h"
 #include <math.h>
 #include <float.h>
-#include "opcodealgorithms.h"
+#include "cmd/collide2/opcodealgorithms.h"
 /*
 inline bool isfinited (float x) {return((x) >= -DBL_MAX && (x) <= DBL_MAX);}
 inline bool isfinitef (float x) {return((x) >= -FLT_MAX && (x) <= FLT_MAX);}

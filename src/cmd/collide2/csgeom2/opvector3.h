@@ -20,7 +20,7 @@
 #ifndef __CS_VECTOR3_H__
 #define __CS_VECTOR3_H__
 
-#include "opcodesysdef.h"
+#include "cmd/collide2/opcodesysdef.h"
 
 /**
  * A 3D vector.

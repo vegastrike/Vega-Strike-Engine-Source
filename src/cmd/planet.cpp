@@ -17,11 +17,7 @@
 #include "gfx/planetary_transform.h"
 #endif
 
-#ifndef OPCODE_COLLIDER
-#include "collide/rapcol.h"
-#else
 #include "collide2/CSopcodecollider.h"
-#endif
 #include "images.h"
 #include "gfx/halo.h"
 #include "gfx/animation.h"

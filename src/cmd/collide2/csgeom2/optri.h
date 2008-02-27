@@ -26,7 +26,7 @@
  * \addtogroup geom_utils
  * @{ */
 
-#include "opcodeextern.h"
+#include "cmd/collide2/opcodeextern.h"
 
 namespace CS
 {

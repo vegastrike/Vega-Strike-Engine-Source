@@ -306,7 +306,6 @@ LIBAI = \
   src/cmd/ai/warpto.h
 
 
-if OPCODE 
 libcollide2= \
   src/cmd/collide2/Ice/IceAABB.cpp \
   src/cmd/collide2/Ice/IceAABB.h \
@@ -415,29 +414,6 @@ libcollide2= \
   src/cmd/collide2/OPC_VolumeCollider.h \
   src/cmd/collide2/CSopcodecollider.cpp \
   src/cmd/collide2/CSopcodecollider.h 
-LIBCOLLIDE = 
-else
-LIBCOLLIDE = \
-  src/cmd/collide/box.cpp \
-  src/cmd/collide/collider.h \
-  src/cmd/collide/cs_compat.h \
-  src/cmd/collide/garray.h \
-  src/cmd/collide/matrix3.cpp \
-  src/cmd/collide/pbuild.cpp \
-  src/cmd/collide/peigen.cpp \
-  src/cmd/collide/prapid.cpp \
-  src/cmd/collide/prapid.h \
-  src/cmd/collide/qint.h \
-  src/cmd/collide/qsqrt.h \
-  src/cmd/collide/rapcol.h \
-  src/cmd/collide/vector3.cpp \
-  src/cmd/collide/csgeom/matrix3.h \
-  src/cmd/collide/csgeom/vector3.h \
-  src/cmd/collide/csgeom/box.h \
-  src/cmd/collide/csgeom/transfrm.h
-
-libcollide2 = 
-endif
 
 LIBCMD = \
   src/cmd/alphacurve.cpp \
@@ -889,7 +865,6 @@ librootserver = \
 LIBENGINE_COMMON = \
   $(LIBAI) \
   $(LIBCMD) \
-  $(LIBCOLLIDE) \
   $(libcollide2) \
   $(LIBNET) \
   $(LIBPYTHON) \

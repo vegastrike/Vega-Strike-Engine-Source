@@ -8,15 +8,9 @@
 #include "physics.h"
 #include "gfx/bsp.h"
 
-#ifndef OPCODE_COLLIDER
-#include "collide/rapcol.h"
-#include "collide/csgeom/transfrm.h"
-#include "collide/collider.h"
-#else
 #include "collide2/CSopcodecollider.h"
 #include "collide2/csgeom2/optransfrm.h"
 #include "collide2/basecollider.h"
-#endif
 
 #include "hashtable.h"
 
@@ -192,11 +186,7 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
 	if (hull<0) return false;
 	if (smaller->colTrees->usingColTree()==false||this->colTrees->usingColTree()==false)
 		return false;
-#ifndef OPCODE_COLLIDER
-	csRapidCollider::CollideReset();
-#else
 	csOPCODECollider::ResetCollisionPairs();
-#endif
 	//    printf ("Col %s %s\n",name.c_str(),smaller->name.c_str());
 	Unit * bigger =this;
 
@@ -210,14 +200,9 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
 	&bigtransform)) {
 		//static int crashcount=0;
 		//      VSFileSystem::vs_fprintf (stderr,"%s Crashez to %s %d\n", bigger->name.c_str(), smaller->name.c_str(),crashcount++);
-#ifndef OPCODE_COLLIDER
-		csCollisionPair * mycollide = csRapidCollider::GetCollisions();
-		int numHits = csRapidCollider::numHits;
-#else
 		csCollisionPair *mycollide = csOPCODECollider::GetCollisions();
 		unsigned int numHits = csOPCODECollider::GetCollisionPairCount();
 		// maybe we should access the collider directly.
-#endif
 		if (numHits) {
 //			printf ("%s hit %s\n",smaller->name.c_str(),bigger->name.c_str());
 			smallpos.Set((mycollide[0].a1.x+mycollide[0].b1.x+mycollide[0].c1.x)/3,
@@ -312,11 +297,7 @@ Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, Q
 	QVector q;
 	ScaledCrossProduct(r,p,q);
 	ScaledCrossProduct(q,r,p);
-#ifndef OPCODE_COLLIDER
-	csRapidCollider::CollideReset();
-#else
 	csOPCODECollider::ResetCollisionPairs();
-#endif
 	//    printf ("Col %s %s\n",name.c_str(),smaller->name.c_str());
 	const csReversibleTransform bigtransform (cumulative_transformation_matrix);
 	Matrix smallerMat(p.Cast(),q.Cast(),r.Cast());
@@ -329,24 +310,15 @@ Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, Q
 	tri.v.push_back(Vector(mag/1024,0,0));
 	vector <bsp_polygon> mesh;
 	mesh.push_back(tri);
-#ifndef OPCODE_COLLIDER
-	csRapidCollider smallColTree(mesh);
-#else
 	csOPCODECollider smallColTree(mesh);
-#endif
 	if (smallColTree.Collide (*(this->colTrees)->colTree(this,Vector(0,0,0)),
 		&smalltransform,
 	&bigtransform)) {
 		static int crashcount=0;
 
 		//            VSFileSystem::vs_fprintf (stderr,"%s Beam Crashez %d\n", name.get().c_str(),crashcount++);
-#ifndef OPCODE_COLLIDER
-		csCollisionPair * mycollide = csRapidCollider::GetCollisions();
-		int numHits = csRapidCollider::numHits;
-#else
 		csCollisionPair  *mycollide = csOPCODECollider::GetCollisions();
 		int numHits = csOPCODECollider::GetCollisionPairCount();
-#endif
 		if (numHits) {
 			//	printf ("num hits %d",numHits);
 			/*

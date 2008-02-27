@@ -730,7 +730,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 		maxdimension = gl_options.max_texture_dimension;
 	}
 
-    if(maxdimension == 512){
+    if(maxdimension == 44){
 	    detail_texture = 0;
 		maxdimension = 256;
 		if(internformat == DXT1|| internformat == DXT1RGBA)
@@ -738,7 +738,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);			
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		 if(internformat >= DXT1 && internformat <= DXT5){
-		 	if(textures[handle].width > 8 && textures[handle].height > 8){
+		 	if(textures[handle].width > 8 && textures[handle].height > 8 && mips > 0){
 		 		offset1 += ((textures[handle].width +3)/4)*((textures[handle].height +3)/4) * blocksize;
 				textures[handle].width >>=1;
 				textures[handle].height >>=1;
@@ -752,7 +752,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 		blocksize = 8;
 
 	if(internformat >= DXT1 && internformat <= DXT5){
-		while(textures[handle].width > maxdimension || textures[handle].height > maxdimension){
+		while((textures[handle].width > maxdimension || textures[handle].height > maxdimension) && mips > 0){
 			offset1 += ((textures[handle].width +3)/4)*((textures[handle].height +3)/4) * blocksize;
 			textures[handle].width >>=1;
 			textures[handle].height >>=1;

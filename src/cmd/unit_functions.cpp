@@ -12,11 +12,7 @@
 #include "gfx/bsp.h"
 #include "gfx/sprite.h"
 #include "audiolib.h"
-#ifndef OPCODE_COLLIDER
-#include "collide/rapcol.h"
-#else
 #include "collide2/CSopcodecollider.h"
-#endif
 #include "unit_collide.h"
 #include <string>
 #include <set>

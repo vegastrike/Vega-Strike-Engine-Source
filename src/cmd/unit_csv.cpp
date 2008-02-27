@@ -4,13 +4,8 @@
 #include "xml_serializer.h"
 #include "gfx/sphere.h"
 #include "unit_collide.h"
-#ifndef OPCODE_COLLIDER
-#include "collide/cs_compat.h"
-#include "collide/rapcol.h"
-#else
 #include "collide2/Stdafx.h"
 #include "collide2/CSopcodecollider.h"
-#endif
 #include "gfx/bsp.h"
 #include "unit_factory.h"
 #include "audiolib.h"
@@ -1286,13 +1281,8 @@ shield.range[1].   rhomax=r90;
     }
     BSPTree * bspTree=NULL;
     BSPTree * bspShield=NULL;
-#ifndef OPCODE_COLLIDER
-    csRapidCollider *colShield=NULL;
-    csRapidCollider *colTree=NULL;
-#else
 	csOPCODECollider *colShield=NULL;
 	csOPCODECollider *colTree=NULL;
-#endif
     string tmpname = row[0];//key
     if (!this->colTrees) {
       string val;
@@ -1313,11 +1303,7 @@ shield.range[1].   rhomax=r90;
         }
         if (meshdata.back()) {
           meshdata.back()->GetPolys(polies);
-#ifndef OPCODE_COLLIDER
-          colShield = new csRapidCollider (polies);
-#else
 		  colShield = new csOPCODECollider (polies);
-#endif
         }
       }
       if (xml.rapidmesh_str.length())
@@ -1343,11 +1329,7 @@ shield.range[1].   rhomax=r90;
       if (xml.rapidmesh) {
         xml.rapidmesh->GetPolys(polies);
       }
-#ifndef OPCODE_COLLIDER
-      csRapidCollider * csrc=NULL;
-#else
 	  csOPCODECollider * csrc=NULL;
-#endif
       if (xml.hasColTree) {
         csrc=getCollideTree(Vector(1,1,1),
                             xml.rapidmesh?

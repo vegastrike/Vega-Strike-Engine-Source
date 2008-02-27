@@ -19,7 +19,7 @@
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #include <math.h>
-#include "opcodesysdef.h"
+#include "cmd/collide2/opcodesysdef.h"
 #include "opbox.h"
 
 //---------------------------------------------------------------------------

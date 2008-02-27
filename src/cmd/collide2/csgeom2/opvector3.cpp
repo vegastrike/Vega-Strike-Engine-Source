@@ -19,9 +19,9 @@
 
 #include <math.h>
 #include <float.h>
-#include "opcodesysdef.h"
-#include "opcodeqint.h"
-#include "opcodeqsqrt.h"
+#include "cmd/collide2/opcodesysdef.h"
+#include "cmd/collide2/opcodeqint.h"
+#include "cmd/collide2/opcodeqsqrt.h"
 #include "opvector3.h"
 
 //---------------------------------------------------------------------------

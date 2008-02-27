@@ -1,19 +1,11 @@
-#ifndef OPCODE_COLLIDER
-
-#else
 #include "cmd/collide2/Stdafx.h"
 #include "cmd/collide2/CSopcodecollider.h"
-#endif
 #include "terrain.h"
 class StarSystem;
 const int numcontterr=4;
 struct MeshDat {
   class Mesh * mesh;
-#ifndef OPCODE_COLLIDER
-  class csRapidCollider * collider;
-#else
   class csOPCODECollider * collider;
-#endif
   Matrix mat;
 };
 class ContinuousTerrain {

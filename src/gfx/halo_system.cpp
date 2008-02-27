@@ -16,11 +16,7 @@
 #include "lin_time.h"
 #include "animation.h"
 #include "car_assist.h"
-#ifndef OPCODE_COLLIDER
-#include "cmd/collide/rapcol.h"
-#else
 #include "cmd/collide2/CSopcodecollider.h"
-#endif 
 
 #include "cmd/unit_collide.h"
 
@@ -68,11 +64,7 @@ void LaunchOneParticle (const Matrix &mat,const Vector &vel,unsigned int seed, U
           collideTrees * colTrees=mush->colTrees;
           if (colTrees) {
             if (colTrees->usingColTree()) {            
-#ifndef OPCODE_COLLIDER
-              csRapidCollider * colTree=colTrees->rapidColliders[0];
-#else
 			  csOPCODECollider * colTree=colTrees->rapidColliders[0];
-#endif
               unsigned int numvert=colTree->getNumVertex();
               if (numvert) {
                 unsigned int whichvert = seed%numvert;
