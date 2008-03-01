@@ -77,7 +77,7 @@ static void Lighting (RGBColor &Col, const Vector &Norm)
 
 
 }
-const int lmwid =512;
+const int lmwid =1024;
 const int lmwido2=lmwid/2;
 const float ooWIDTHo2 = 2./lmwid;
 const float PIoWIDTHo2 = 2*3.1415926535/lmwid;
@@ -438,6 +438,7 @@ static void GenerateSphereMap()
 		}	
 	}
 	Spherize (TexCoord,gluSphereCoord,LightMap);	
+/*  We dont use this crap anymore.  png backgrounds, not bitmap
 	BITMAPFILEHEADER bmfh;
 	BITMAPINFOHEADER info;
 	bmfh.bfType=19778;
@@ -456,7 +457,7 @@ static void GenerateSphereMap()
 	info.biYPelsPerMeter=2834;
 	info.biClrUsed=0;
 	info.biClrImportant=0;
-
+*/
 	::VSImage image;
 	image.WriteImage( (char *)OutputName, LightMap, PngImage, lmwid, lmwid, false, 8, TextureFile);
  

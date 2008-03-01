@@ -184,8 +184,11 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
 	if (smaller->colTrees==NULL||this->colTrees==NULL)
 		return false;
 	if (hull<0) return false;
+
 	if (smaller->colTrees->usingColTree()==false||this->colTrees->usingColTree()==false)
 		return false;
+
+
 	csOPCODECollider::ResetCollisionPairs();
 	//    printf ("Col %s %s\n",name.c_str(),smaller->name.c_str());
 	Unit * bigger =this;
@@ -272,26 +275,23 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
 
 Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, QVector & pos, Vector &norm, double &distance)
 {
-	QVector r (end-start);
+	QVector r (end-start);	
 	double mag = r.Magnitude();
 	if (mag>0) {
 		r = r*(1./mag);
 	}
-	{
-		bool temp=true;
-		if (this->colTrees==NULL) {
-			temp=true;
-		}
-		else if (this->colTrees->colTree(this,Vector(0,0,0))==NULL) {
-			temp=true;
-		}
-		if (temp) {
-			float dis=distance;
-			Unit * ret= queryBSP(start,end,norm,dis);
-			distance=dis;
-			pos=start+r*distance;
-			return ret;
-		}
+	bool temp=true;
+	if (this->colTrees==NULL) {
+		temp=true;
+	} else if (this->colTrees->colTree(this,Vector(0,0,0))==NULL) {
+		temp=true;
+	}
+	if (temp) {
+		float dis=distance;
+		Unit * ret= queryBSP(start,end,norm,dis);
+		distance=dis;
+		pos=start+r*distance;
+		return ret;
 	}
 	QVector p(-r.k,r.i,-r.j);
 	QVector q;
@@ -369,7 +369,10 @@ bool Unit::Collide (Unit * target)
 	if (targetisUnit==ASTEROIDPTR&&thisisUnit==ASTEROIDPTR)
 		return false;
 	std::multimap<Unit*,Unit*>* last_collisions=&_Universe->activeStarSystem()->last_collisions;
-	std::multimap<Unit*,Unit*>::iterator iter;
+
+// The following code was commented out to investigate it's effect on falling into textures 
+// where we dont want to when a unit is resting on it.
+/*	std::multimap<Unit*,Unit*>::iterator iter;
 	iter=last_collisions->find(target);
 	for (;iter!=last_collisions->end()&&iter->first==target;++iter) {
 		if (iter->second==this) {
@@ -377,14 +380,13 @@ bool Unit::Collide (Unit * target)
 			return false;
 		}
 	}
+*/
 	last_collisions->insert(std::pair<Unit*,Unit*>(this,target));
 	//unit v unit? use point sampling?
 	if ((this->DockedOrDocking()&(DOCKED_INSIDE|DOCKED))||(target->DockedOrDocking()&(DOCKED_INSIDE|DOCKED))) {
 		return false;
 	}
 	//now do some serious checks
-	Vector normal(-1,-1,-1);
-	float dist;
 	Unit * bigger;
 	Unit * smaller;
 	if (radial_size<target->radial_size) {
@@ -406,16 +408,14 @@ bool Unit::Collide (Unit * target)
 				bigger->reactToCollision (smaller,bigpos, bigNormal,smallpos,smallNormal, 10   );
 			} else return false;
 		} else return false;
-	}
-	else {
+	} else {
+		Vector normal(-1,-1,-1);
+		float dist = 0.0;
 		if (bigger->Inside(smaller->Position(),smaller->rSize(),normal,dist)) {
 			if (!bigger->isDocked(smaller)&&!smaller->isDocked(bigger)) {
 				bigger->reactToCollision (smaller,bigger->Position(), normal,smaller->Position(), -normal, dist);
 			}else return false;
-		}
-		else {
-			return false;
-		}
+		} else return false;
 	}
 	//UNUSED BUT GOOD  float elast = .5*(smallcsReversibleTransform (cumulative_transformation_matrix),er->GetElasticity()+bigger->GetElasticity());
 	//BAD  float speedagainst = (normal.Dot (smaller->GetVelocity()-bigger->GetVelocity()));
