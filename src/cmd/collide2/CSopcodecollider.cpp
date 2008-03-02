@@ -71,12 +71,15 @@ void csOPCODECollider::GeometryInitialize (const std::vector <bsp_polygon> &poly
 		m_pCollisionModel = new Opcode::Model;
 		if (!m_pCollisionModel)
 			return;
-
+			
 		vertholder = new Point [vert_count];
 
 		csBox3 tmp;
 		tmp.StartBoundingBox ();
 		int last = 0;
+		
+		/* Copies the Vector's in bsp_polygon to Point's in vertholder.
+		* This sucks but i dont see anyway around it */
 		for (int i = 0; i < (int)polygons.size(); ++i) {
 			const bsp_polygon *p = (&polygons[i]);
 			for(int j = 0; j < (int) p->v.size();++j) {
@@ -92,12 +95,13 @@ void csOPCODECollider::GeometryInitialize (const std::vector <bsp_polygon> &poly
 		// Mesh data
 		OPCC.mIMesh = &opcMeshInt;
 		OPCC.mSettings.mRules = SPLIT_SPLATTER_POINTS | SPLIT_GEOM_CENTER;
+		/* NoLeaf and quantized creates an optimized, both in organization and 
+		* memory overhead, tree.*/
 		OPCC.mNoLeaf = true;
 		OPCC.mQuantized = true;
 	} else
 	return;
 
-	// this should create the OPCODE model
 	bool status = m_pCollisionModel->Build (OPCC);
 }
 
@@ -114,8 +118,8 @@ csOPCODECollider::~csOPCODECollider ()
 
 
 void csOPCODECollider::MeshCallback (udword triangle_index,
-VertexPointers& triangle,
-void* user_data)
+									VertexPointers& triangle,
+									void* user_data)
 {
 	csOPCODECollider* collider = (csOPCODECollider*)user_data;
 	Point *vertholder = collider->vertholder;
@@ -127,8 +131,8 @@ void* user_data)
 
 
 bool csOPCODECollider::Collide( csOPCODECollider &otherCollider,
-const csReversibleTransform *trans1,
-const csReversibleTransform *trans2)
+								const csReversibleTransform *trans1,
+								const csReversibleTransform *trans2)
 {
 	csOPCODECollider* col2 = (csOPCODECollider*) &otherCollider;
 
@@ -184,7 +188,6 @@ const csReversibleTransform *trans2)
 	transform2.m[3][0] = u.x;
 	transform2.m[3][1] = u.y;
 	transform2.m[3][2] = u.z;
-	//	ResetCollisionPairs();
 	if (TreeCollider.Collide (ColCache, &transform1, &transform2)) {
 		bool status = (TreeCollider.GetContactStatus () != FALSE);
 		if (status) {
@@ -196,21 +199,19 @@ const csReversibleTransform *trans2)
 }
 
 
-csCollisionPair *csOPCODECollider::GetCollisions()
+void csOPCODECollider::ResetCollisionPairs()
+{
+	pairs.SetLength(0);
+}
+
+csCollisionPair* csOPCODECollider::GetCollisions() 
 {
 	return(pairs.GetArray());
 }
 
-
 size_t csOPCODECollider::GetCollisionPairCount()
 {
 	return(pairs.Length());
-}
-
-
-void csOPCODECollider::ResetCollisionPairs()
-{
-	pairs.SetLength(0);
 }
 
 
@@ -220,35 +221,17 @@ void csOPCODECollider::SetOneHitOnly(bool on)
 }
 
 
-bool csOPCODECollider::GetOneHitOnly()
-{
-	return(TreeCollider.FirstContactEnabled() != FALSE);
-}
-
-
 Vector csOPCODECollider::getVertex(unsigned int which) const
 {
 	// This function is used to position the damage particles
-	// Turning this off for now so it doesn't affect perf
-	return(Vector(0,0,0));
-	/*
-		unsigned int k = which / 3;
-		unsigned int nt = 0;
-		const MeshInterface *tmp = m_pCollisionModel->GetMeshInterface();
-		VertexPointers vertp;
-		if( (nt = tmp->GetNbTriangles()) == 0)
-			return(Vector(0,0,0));
-		if(k >= nt ) k = nt-1;
-		tmp->GetTriangle(vertp,k);
-		const Point *tmpPoint = vertp.Vertex[which%3];
-		const float f[3] = {tmpPoint->x,tmpPoint->y,tmpPoint->z};
-		return(Vector(f[0],f[1],f[2]));
-	*/
+	if(!vertholder)
+		return(Vector(0,0,0));
+	return(Vector(vertholder[which].x,vertholder[which].y,vertholder[which].z));
 }
 
 
 void csOPCODECollider::CopyCollisionPairs(csOPCODECollider* col1,
-csOPCODECollider* col2)
+										csOPCODECollider* col2)
 {
 	if(!col1 || !col2) return;
 
@@ -258,26 +241,20 @@ csOPCODECollider* col2)
 	const Pair* colPairs=TreeCollider.GetPairs ();
 	Point* vertholder0 = col1->vertholder;
 	Point* vertholder1 = col2->vertholder;
-	Point* current;
 	int j;
 	size_t oldlen = pairs.Length ();
 	pairs.SetLength (oldlen + N_pairs);
-
+	
 	for (int i = 0 ; i < N_pairs ; ++i) {
 		j = 3 * colPairs[i].id0;
-		current = &vertholder0[j];
-		pairs[oldlen].a1 = csVector3 (current->x, current->y, current->z);
-		current = &vertholder0[j + 1];
-		pairs[oldlen].b1 = csVector3 (current->x, current->y, current->z);
-		current = &vertholder0[j + 2];
-		pairs[oldlen].c1 = csVector3 (current->x, current->y, current->z);
+		pairs[oldlen].a1 = vertholder0[j];
+		pairs[oldlen].b1 = vertholder0[j+1];
+		pairs[oldlen].c1 = vertholder0[j+2];
 		j = 3 * colPairs[i].id1;
-		current = &vertholder1[j];
-		pairs[oldlen].a2 = csVector3 (current->x, current->y, current->z);
-		current = &vertholder1[j + 1];
-		pairs[oldlen].b2 = csVector3 (current->x, current->y, current->z);
-		current = &vertholder1[j + 2 ];
-		pairs[oldlen].c2 = csVector3 (current->x, current->y, current->z);
+		pairs[oldlen].a2 = vertholder1[j];
+		pairs[oldlen].b2 = vertholder1[j+1];
+		pairs[oldlen].c2 = vertholder1[j+2];
 		++oldlen;
 	}
+
 }

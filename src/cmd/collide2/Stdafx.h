@@ -9,9 +9,10 @@
 #ifndef __STDAFX_H__
 #define __STDAFX_H__
 #define ICE_NO_DLL
+/* CS_PROCESSOR_X86 is an assumption that we're running on an x86 cpu
+* This should be something set in ./configure but so far nobody's complained*/
 #define CS_PROCESSOR_X86
 #define CS_NO_QSQRT
-//#define __GNUC__ 4
 #include "opcodetypes.h"
 #include "opcodesysdef.h"
 #include "Opcode.h"

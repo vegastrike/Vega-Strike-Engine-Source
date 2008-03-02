@@ -19,7 +19,7 @@
 
 #ifndef __CS_VECTOR3_H__
 #define __CS_VECTOR3_H__
-
+#include "cmd/collide2/Stdafx.h"
 #include "cmd/collide2/opcodesysdef.h"
 
 /**
@@ -82,6 +82,13 @@ public:
 
   /// Take cross product of two vectors and put result in this vector.
   void Cross (const csVector3 & px, const csVector3 & py)
+  {
+    x = px.y*py.z - px.z*py.y;
+    y = px.z*py.x - px.x*py.z;
+    z = px.x*py.y - px.y*py.x;
+  }
+
+  inline void Cross (const Opcode::Point & px, const Opcode::Point & py)
   {
     x = px.y*py.z - px.z*py.y;
     y = px.z*py.x - px.x*py.z;
