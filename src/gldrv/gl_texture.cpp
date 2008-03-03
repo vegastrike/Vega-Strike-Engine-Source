@@ -792,7 +792,10 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 				unsigned char *tmpbuffer = buffer +offset1;
 				ddsDecompress(tmpbuffer,data,internformat,textures[handle].height,textures[handle].width);
 				buffer = data;
-				internformat = RGBA32;
+				if(internformat != DXT1)
+					internformat = RGBA32;
+				else
+					internformat = RGB24;
 			}
 		}
 		/* END HACK */
