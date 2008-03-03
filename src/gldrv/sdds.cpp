@@ -105,6 +105,8 @@ void ddsDecompress(unsigned char *&buffer, unsigned char *&data,TEXTUREFORMAT in
 {
 	unsigned char *pos_out=NULL,*pos_in=NULL;
 	int bpp = 4;
+	if(internformat == DXT1)
+		bpp = 3;
 	unsigned int sx,sy,x,y; 	
 	
 	sx = (width < 4) ? width: 4;

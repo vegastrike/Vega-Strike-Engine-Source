@@ -8,6 +8,7 @@
 #include "vsfilesystem.h"
 #include "vsimage.h"
 #include "aux_texture.h"
+#include "gldrv/sdds.h"
 #ifndef WIN32
 #else
 #include <windows.h>
@@ -77,7 +78,7 @@ static void Lighting (RGBColor &Col, const Vector &Norm)
 
 
 }
-const int lmwid =1024;
+const int lmwid =512;
 const int lmwido2=lmwid/2;
 const float ooWIDTHo2 = 2./lmwid;
 const float PIoWIDTHo2 = 2*3.1415926535/lmwid;
@@ -187,100 +188,54 @@ using namespace VSFileSystem;
 	unsigned char * data = tex.ReadImage( &f, texTransform, true);
 	int bpp = tex.Depth();
 	int format = tex.Format();
-	bpp/=8;
-	if (format&PNG_HAS_ALPHA) {
-	  bpp*=4;
-	}else {
-	  bpp*=3;
-	}
-	/*
-	unsigned char * data = readImage (fp,bpp,format,*(unsigned long*)&sizeX,*(unsigned long*)&sizeY,palette,texTransform,true);
-	bpp/=8;
-	if (format&PNG_HAS_ALPHA) {
-	  bpp*=4;
-	}else {
-	  bpp*=3;
-	}
-	}else {
-	  VSFileSystem::vs_fseek (fp,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
-	  //long temp;
-	  BITMAPINFOHEADER info;
-	  VSFileSystem::vs_read(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
-	  sizeX = le32_to_cpu(info.biWidth);
-	  sizeY = le32_to_cpu(info.biHeight);
 
-	  if(le16_to_cpu(info.biBitCount) == 24)
-	    {
-	      data = NULL;
-	      data= (unsigned char *)malloc(3*sizeY*sizeX);
-	      if (!data)
-		return false;
-	      for (int i=sizeY-1; i>=0;i--)
-		{
-		  int itimes3width= 3*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
-		  for (int j=0; j<sizeX;j++)
-		    {
-				//for (int k=2; k>=0;k--)
-				//{
-		      VSFileSystem::vs_read (data+3*j+itimes3width,sizeof (unsigned char)*3,1,fp);
-		      unsigned char tmp = data[3*j+itimes3width];
-		      data[3*j+itimes3width]= data[3*j+itimes3width+2];
-		      data[3*j+itimes3width+2]=tmp;
-				//}
-		      
-		    }
+	unsigned char *buffer= NULL;
+	bpp/=8;	
+	// 999 is the code for DDS file, we must decompress them.
+	if(format == 999){
+		unsigned char *tmpbuffer = data + 2;
+		TEXTUREFORMAT internformat;
+		bpp = 1;
+		// Make sure we are reading a DXT1 file. All backgrounds 
+		// should be DXT1
+		switch(tex.mode){
+			case VSImage::_DXT1:
+				internformat = DXT1;
+				break;
+			default:
+				return(false);
 		}
-	    }
-	  else if(le16_to_cpu(info.biBitCount) == 8)
-	    {
-	      data = NULL;
-	      data= (unsigned char *)malloc(sizeY*sizeX*3);
-	      unsigned char palette[256*3+1];
-	      unsigned char * paltemp = palette;
-	      
-		for(int palcount = 0; palcount < 256; palcount++)
-		  {
-		    VSFileSystem::vs_read(paltemp, sizeof(RGBQUAD), 1, fp);
-		    //			ctemp = paltemp[0];//don't reverse
-		    //			paltemp[0] = paltemp[2];
-		    //			paltemp[2] = ctemp;
-		    paltemp+=3;
-		  }
-		if (!data)
-		  return false;
-		//int k=0;
-		for (int i=sizeY-1; i>=0;i--)
-		  {
-			for (int j=0; j<sizeX;j++)
-			  {
-			    VSFileSystem::vs_read (&ctemp,sizeof (unsigned char),1,fp);
-			    data [3*(i*sizeX+j)+2] = palette[((short)ctemp)*3];	
-			    data [3*(i*sizeX+j)+1] = palette[((short)ctemp)*3+1];
-			    data [3*(i*sizeX+j)] = palette[((short)ctemp)*3+2];
-			  }
-		  }
-	    }
-	  float scaledconstX = sizeX/lmwid;
-	  float scaledconstY = sizeY/lmwid;
-	  for (int t=0; t<lmwid; t++)
-	    {
-	      int ii = (t*sizeY)/lmwid;
-	      for (int s=0; s<lmwid;s++)
-		{
-		  int jj =(s*sizeX)/lmwid;
-		  int bpp = 3;
-		  int index = (ii*sizeX+jj)*bpp;
-		  
-		  
-		  scdata[t][s][0] = data[index];
-		  scdata[t][s][1] = data[index+1];
-		  scdata[t][s][2] = data[index+2];
-		  
-		  
+		// we could hardware decompress, but that involves more
+		// pollution of gl in gfx. 
+		ddsDecompress(tmpbuffer,buffer,internformat, tex.sizeY,tex.sizeX);
+		// We are done with the DDS file data.  Remove it. 
+		free(data);
+		data = buffer;
+		
+		// stride and row_pointers are used for the texTransform 
+		unsigned long stride = 3 * sizeof(unsigned char) * bpp;
+		unsigned char **row_pointers = (unsigned char**)malloc(sizeof(unsigned char*)*tex.sizeY);
+		for(unsigned int i = 0;i < tex.sizeY;++i){
+			row_pointers[i] = &data[i*stride*tex.sizeX];
 		}
-	    }
+		// texTransform demands that the first argument (bpp) be 8. So we abide
+		int tmp = 8;
+		buffer = texTransform(tmp,PNG_HAS_COLOR,tex.sizeX,tex.sizeY,row_pointers);
+		// We're done with row_pointers, free it
+		free(row_pointers);
+		row_pointers = NULL;
+		// We're done with the decompressed dds data, free it
+		free(data);
+		// We set data to the transformed image data 
+		data = buffer;
+		buffer = NULL;
+		// it's 3 because 24/8
+		bpp =  3;
+	} else if (format&PNG_HAS_ALPHA) {
+	  bpp*=4;
+	}else {
+	  bpp*=3;
 	}
-	*/
 	if (data) {
 	  int ii;
 	  int jj;

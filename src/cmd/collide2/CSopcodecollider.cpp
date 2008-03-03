@@ -18,12 +18,9 @@
 
 /*
 -------------------------------------------------------------------------
-*
-*           OPCODE collision detection plugin for CrystalSpace
-*
 *           OPCODE library was written by Pierre Terdiman
 *                  ported to CS by Charles Quarra
-*
+*                  ported to VS from CS by Ed Sweetman
 -------------------------------------------------------------------------
 */
 
@@ -235,7 +232,7 @@ void csOPCODECollider::CopyCollisionPairs(csOPCODECollider* col1,
 {
 	if(!col1 || !col2) return;
 
-	int N_pairs = (int) (udword(TreeCollider.GetNbPairs ()));
+	int N_pairs = (int) TreeCollider.GetNbPairs ();
 	if (N_pairs == 0) return;
 
 	const Pair* colPairs=TreeCollider.GetPairs ();

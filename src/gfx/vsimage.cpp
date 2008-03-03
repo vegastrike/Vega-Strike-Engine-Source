@@ -777,6 +777,7 @@ unsigned char *VSImage::ReadDDS()
 		// mode is the compressed format of the texture. It is assumed to be rgba
 		// depth is the depth of the uncompressed image. not sure where this is used
 		// nmaps is the number of mipmaps
+		this->img_color_type = 999;  // DDS file
 		return(s);
     } catch(...) {
 		if(s) free(s);
