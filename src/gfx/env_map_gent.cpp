@@ -213,7 +213,7 @@ using namespace VSFileSystem;
 		data = buffer;
 		
 		// stride and row_pointers are used for the texTransform 
-		unsigned long stride = 3 * sizeof(unsigned char) * bpp;
+		unsigned long stride = 3 * sizeof(unsigned char);
 		unsigned char **row_pointers = (unsigned char**)malloc(sizeof(unsigned char*)*tex.sizeY);
 		for(unsigned int i = 0;i < tex.sizeY;++i){
 			row_pointers[i] = &data[i*stride*tex.sizeX];

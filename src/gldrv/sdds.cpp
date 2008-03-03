@@ -47,7 +47,7 @@ void decode_color_block(unsigned char *dst, unsigned char *src,int w, int h, int
 			d[0] = colors[idx][0];
 			d[1] = colors[idx][1]; 
 			d[2] = colors[idx][2]; 
-			if(format == DXT1||format == DXT1RGBA)
+			if(format == DXT1RGBA)
 				d[3] = ((c0 <= c1) && idx == 3) ? 0 : 255;
 			indexes >>= 2;
 			d += 4;
@@ -107,6 +107,7 @@ void ddsDecompress(unsigned char *&buffer, unsigned char *&data,TEXTUREFORMAT in
 	int bpp = 4;
 	if(internformat == DXT1)
 		bpp = 3;
+
 	unsigned int sx,sy,x,y; 	
 	
 	sx = (width < 4) ? width: 4;
