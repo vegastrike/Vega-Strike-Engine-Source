@@ -213,14 +213,15 @@ using namespace VSFileSystem;
 		data = buffer;
 		
 		// stride and row_pointers are used for the texTransform 
-		unsigned long stride = 3 * sizeof(unsigned char);
+		unsigned long stride = 4 * sizeof(unsigned char);
 		unsigned char **row_pointers = (unsigned char**)malloc(sizeof(unsigned char*)*tex.sizeY);
 		for(unsigned int i = 0;i < tex.sizeY;++i){
 			row_pointers[i] = &data[i*stride*tex.sizeX];
 		}
 		// texTransform demands that the first argument (bpp) be 8. So we abide
 		int tmp = 8;
-		buffer = texTransform(tmp,PNG_HAS_COLOR,tex.sizeX,tex.sizeY,row_pointers);
+		int tmp2 = PNG_HAS_COLOR + PNG_HAS_ALPHA;
+		buffer = texTransform(tmp,tmp2,tex.sizeX,tex.sizeY,row_pointers);
 		// We're done with row_pointers, free it
 		free(row_pointers);
 		row_pointers = NULL;
@@ -230,7 +231,7 @@ using namespace VSFileSystem;
 		data = buffer;
 		buffer = NULL;
 		// it's 3 because 24/8
-		bpp =  3;
+		bpp =  4;
 	} else if (format&PNG_HAS_ALPHA) {
 	  bpp*=4;
 	}else {
