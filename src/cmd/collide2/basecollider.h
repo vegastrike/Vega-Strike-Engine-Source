@@ -5,7 +5,7 @@
 #define CS_TERRAFORMER_COLLIDER  1
 #define CS_TERRAIN_COLLIDER 2
 
-#include "src/cmd/collide2/Stdafx.h"
+#include "cmd/collide2/Stdafx.h"
 
 /**
  * A structure used to return collision pairs.
