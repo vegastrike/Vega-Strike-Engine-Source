@@ -225,10 +225,11 @@ void LoadMission (const char * mn, bool loadFirstUnit) {
 void LoadMission (const char * nission_name, const std::string &script, bool loadFirstUnit) {
 	using namespace VSFileSystem;
 	string mission_name(nission_name);
+	const char *friendly_mission_name = nission_name;
 	if (nission_name[0]=='#') {
 		// Allows you to title a mission without loading that file.
 		mission_name=string();
-		nission_name++;
+		friendly_mission_name++;
 	}
 	if (mission_name.empty()) {
 		static std::string mission_name_def=vs_config->getVariable("general","empty_mission","internal.mission");
@@ -241,8 +242,7 @@ void LoadMission (const char * nission_name, const std::string &script, bool loa
     return;
   }
   f.Close();
-  if (Mission::getNthPlayerMission(_Universe->CurrentCockpit(), 0)!=NULL
-	    && nission_name[0]!='\0') {
+  if (Mission::getNthPlayerMission(_Universe->CurrentCockpit(), 0)!=NULL) {
 	pushSaveString(_Universe->CurrentCockpit(), "active_scripts", script);
 	pushSaveString(_Universe->CurrentCockpit(), "active_missions", nission_name);
   }
@@ -310,14 +310,14 @@ void LoadMission (const char * nission_name, const std::string &script, bool loa
   
   if(active_missions.size() > 0) {
     // Give the mission a name.
-    active_missions.back()->mission_name = nission_name;
+    active_missions.back()->mission_name = friendly_mission_name;
   }
   active_missions.back()->player_num = _Universe->CurrentCockpit();
   if (SERVER) {
     int num = active_missions.back()->getPlayerMissionNumber();
     if (num>0) {
       VSServer->sendMission(_Universe->CurrentCockpit(), Subcmd::AcceptMission,
-      		nission_name, num-1);
+      		friendly_mission_name, num-1);
     }
   }
   

@@ -216,7 +216,7 @@ int Mission::getPlayerMissionNumber() {
 	int num=-1;
 	vector<Mission*>::iterator pl = active_missions->begin();
 	if (pl == active_missions->end()) return -1;
-	for (++pl; pl!=active_missions->end(); ++pl) {
+	for (; pl!=active_missions->end(); ++pl) {
 		if ((*pl)->player_num == this->player_num) {
 			num++;
 		}
@@ -236,7 +236,7 @@ Mission * Mission::getNthPlayerMission(int cp, int missionnum) {
 		int num=-1;
 		vector<Mission*>::iterator pl = active_missions->begin();
 		if (pl == active_missions->end()) return NULL;
-		for (++pl; pl!=active_missions->end(); ++pl) {
+		for (; pl!=active_missions->end(); ++pl) {
 			if ((*pl)->player_num == cp) {
 				num++;
 			}
@@ -276,7 +276,7 @@ void Mission::terminateMission(){
 		Mission_delqueue.push_back(this);//only delete if we arent' the base mission
 	}
 	// NETFIXME: This routine does not work properly yet.
-        if (queuenum>0) {
+        if (queuenum>=0) {
           int num=queuenum-1;
           vector<std::string> * scripts = &_Universe->AccessCockpit(player_num)->savegame->getMissionStringData("active_scripts");
           if (num<scripts->size()) {

@@ -1081,7 +1081,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				string qualname = netbuf.getString();
 				int pos = netbuf.getInt32();
 				if (type == Subcmd::TerminateMission) {
-					Mission *activeMis = Mission::getNthPlayerMission(cp, pos);
+					Mission *activeMis = Mission::getNthPlayerMission(cp, pos+1);
 					if (activeMis) {
 						activeMis->terminateMission();
 					} else {
@@ -1092,7 +1092,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					unsigned int oldcp = _Universe->CurrentCockpit();
 					_Universe->SetActiveCockpit(cp);
 					_Universe->pushActiveStarSystem(_Universe->AccessCockpit()->activeStarSystem);
-					while (!Mission::getNthPlayerMission(cp,pos)) {
+					while (!Mission::getNthPlayerMission(cp,pos+1)) {
 						LoadMission("","import Director; temp=Director.Mission()",false);
 					}
 					string::size_type pos = qualname.find('/');
@@ -1242,7 +1242,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				pos = netbuf.getInt32();
 				if (type&Subcmd::Objective) {
 					int missionnum = netbuf.getInt32();
-					activeMis = Mission::getNthPlayerMission(cp, missionnum);
+					activeMis = Mission::getNthPlayerMission(cp, missionnum+1);
 				}
 				if (activeMis == NULL) activeMis = mission;
 				

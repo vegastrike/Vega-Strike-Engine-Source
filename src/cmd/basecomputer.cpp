@@ -3353,11 +3353,14 @@ bool BaseComputer::acceptMission(const EventCommandId& command, Control* control
       return false;
     } else {
 		if (Network==NULL) {
-			LoadMission("", finalScript, false);
+			LoadMission(("#"+item->category).c_str(),
+				finalScript, false);
+			/*
 			if(active_missions.size() > 0) {
 				// Give the mission a name.
 				active_missions.back()->mission_name = item->category;
 			}
+			*/
 			// Reload the UI.
 			//Cargo itemCopy = *item;
 			//loadMissionsControls();
