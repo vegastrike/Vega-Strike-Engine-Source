@@ -103,10 +103,6 @@ void Texture::modold (const string &s, bool shared, string & hashname) {
   texHashTable.Put(hashname, oldtex);
   original = oldtex;
 }
-Texture::Texture () 
-{
-  InitTexture();
-}
 
 void Texture::InitTexture()
 {
@@ -194,6 +190,17 @@ void Texture::setbad( const string & s)
 	if( VSFileSystem::current_path.back()!="")
 		badtexHashTable.Put( VSFileSystem::GetHashName(s), b);
 	badtexHashTable.Put( VSFileSystem::GetSharedTextureHashName(s), b);
+}
+
+Texture::Texture(int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, enum ADDRESSMODE address_mode)
+{
+  InitTexture();
+  data = NULL;
+  ismipmapped  = mipmap;
+  palette = NULL;
+  texture_target =target;
+  image_target=imagetarget;
+  this->stage = stage;
 }
 
 Texture::Texture(VSFile * f, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load, int maxdimension,GFXBOOL detailtexture,GFXBOOL nocache,enum ADDRESSMODE address_mode)

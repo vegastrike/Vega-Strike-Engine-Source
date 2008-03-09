@@ -1,5 +1,7 @@
 #include "aux_texture.h"
 #include "vsfilesystem.h"
+#include "vid_file.h"
+
 #include <stdio.h>
 #include "../SharedPool.h"
 
@@ -15,19 +17,24 @@ class AnimatedTexture: public Texture {
   bool detailTex;
   enum FILTER ismipmapped;
   int texstage;
+  int timeSource;
 
   vector<StringPool::Reference> frames; //Filenames for each frame
   vector<Vector> frames_maxtc; //Maximum tcoords for each frame
   vector<Vector> frames_mintc; //Minimum tcoords for each frame
+  
+  VideoFile *vidSource;
+  
   StringPool::Reference wrapper_file_path;
   VSFileSystem::VSFileType wrapper_file_type;
-
+  
   //Options
   enum optionenum { 
       optInterpolateFrames=0x01, 
       optInterpolateTCoord=0x02,
       optLoopInterp=0x04,
-      optLoop=0x08
+      optLoop=0x08,
+      optSoundTiming=0x10
   };
   unsigned char options;
 
@@ -55,9 +62,12 @@ class AnimatedTexture: public Texture {
   virtual bool canMultiPass() const{return true;} 
   virtual bool constFrameRate() const{return constframerate;}
   AnimatedTexture ();
+  AnimatedTexture (int stage, enum FILTER imm, bool detailtexture=false);
   AnimatedTexture (const char * file, int stage, enum FILTER imm, bool detailtexture=false);
   AnimatedTexture (VSFileSystem::VSFile &openedfile, int stage, enum FILTER imm,bool detailtexture=false);
   void Load(VSFileSystem::VSFile & f, int stage, enum FILTER ismipmapped, bool detailtex=false);
+  void LoadAni(VSFileSystem::VSFile & f, int stage, enum FILTER ismipmapped, bool detailtex=false);
+  void LoadVideoSource(VSFileSystem::VSFile & f);
   virtual void LoadFrame(int num); //For video mode
   void Destroy();
   virtual Texture *Original();
@@ -76,10 +86,28 @@ class AnimatedTexture: public Texture {
   bool GetInterpolateTCoord() const { return (options&optInterpolateTCoord)!=0; }
   bool GetLoopInterp() const { return (options&optLoopInterp)!=0; }
   bool GetLoop() const { return (options&optLoop)!=0; }
+  int GetTimeSource() const { return (options&optSoundTiming) ? timeSource : 0; }
+  void SetTimeSource(int source) 
+  { 
+    timeSource = source;
+    if (source)
+        options |= optSoundTiming; else
+        options &= ~optSoundTiming;
+  }
   static void UpdateAllPhysics();
   static void UpdateAllFrame();
   //resets the animation to beginning
   void Reset();
   bool Done();
   virtual bool LoadSuccess ();
+  
+  // Some useful factory methods
+  static AnimatedTexture* CreateVideoTexture(const std::string &fname, int stage=TEXTURE2D, enum FILTER ismipmapped=BILINEAR, bool detailtex=false)
+  {
+    AnimatedTexture *rv = new AnimatedTexture(stage, ismipmapped, detailtex);
+    VSFileSystem::VSFile f;
+    f.OpenReadOnly(fname, VSFileSystem::VideoFile);
+    rv->LoadVideoSource(f);
+    return rv;
+  }
 };

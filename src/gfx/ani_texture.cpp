@@ -1,5 +1,6 @@
 #include "cmd/unit_generic.h"
 #include "ani_texture.h"
+#include "audiolib.h"
 
 #include <vector>
 #include <stdio.h>
@@ -63,13 +64,28 @@ void AnimatedTexture::MakeActive (int stage, int pass) {
                     Decal[active%numframes]->MakeActive(stage); else
                     ActivateWhite(stage);
             };
-        } else {
+        } else if(!vidSource) {
             // No frame interpolation anything supported
             if (Decal&&*Decal) {
                 if (active != activebound)
                     LoadFrame(active%numframes);
                 (*Decal)->MakeActive(stage);
             }
+        } else {
+            try {
+                // vidSource leaves frame data in its framebuffer, and our image data is initialized
+                // to point to that framebuffer, so all we need to do is transfer it to the GL.
+                if (vidSource->seek(curtime))
+                    Transfer( 65535, GFXFALSE );
+            } catch(::VideoFile::EndOfStreamException e) {
+                if (curtime > 0) {
+                    setTime(0);
+                    MakeActive(stage,pass);
+                }
+            } catch(::VideoFile::Exception e) {
+                VSFileSystem::vs_fprintf(stderr, "\nVideoFile exception: %s\n", e.what());
+            }
+            Texture::MakeActive(stage, pass);
         }
         break;
     case 1:
@@ -111,8 +127,11 @@ void AnimatedTexture::UpdateAllPhysics() {
 }
 void AnimatedTexture::UpdateAllFrame() {
   double elapsed = GetElapsedTime();
-    for (set<AnimatedTexture *>::iterator iter=anis.begin(); iter!=anis.end(); iter++)
-      (*iter)->setTime((*iter)->curTime()+elapsed);
+  for (set<AnimatedTexture *>::iterator iter=anis.begin(); iter!=anis.end(); iter++) {
+    if ( (*iter)->GetTimeSource() )
+        (*iter)->setTime( AUDGetCurrentPosition( (*iter)->GetTimeSource() ) ); else
+        (*iter)->setTime( (*iter)->curTime()+elapsed );
+  }
 }
 
 bool AnimatedTexture::Done() {
@@ -130,8 +149,9 @@ static unsigned int intmax(unsigned int a, unsigned int b){
   return a<b?b:a;
 }
 void AnimatedTexture::setTime (double tim) {
-	curtime=tim;
-    if (timeperframe) {
+    curtime=tim;
+    
+    if (timeperframe && !vidSource) {
       unsigned int numframes=numFrames();
       unsigned int active=((unsigned int)(curtime/timeperframe));
       if (GetLoop()) 
@@ -168,9 +188,9 @@ void AnimatedTexture::setTime (double tim) {
               }
           }
       }
+      
+      active = ((unsigned int)(curtime/timeperframe))%numframes;
     }
-
-	active = ((unsigned int)(curtime/timeperframe))%numframes;
 }
 using namespace VSFileSystem;
 
@@ -212,6 +232,7 @@ void AnimatedTexture::AniInit() {
   ismipmapped=BILINEAR;
   detailTex=false;
   vidMode=false;
+  vidSource=0;
   constframerate=true;
   options=optLoop;
   defaultAddressMode=DEFAULT_ADDRESS_MODE;
@@ -227,24 +248,40 @@ AnimatedTexture::AnimatedTexture (VSFileSystem::VSFile &fp, int stage, enum FILT
   Load (fp,stage,imm,detailtex);
 }
 
+AnimatedTexture::AnimatedTexture (int stage, enum FILTER imm, bool detailtex) :
+    Texture(stage, imm)
+{
+  AniInit();
+}
+
 Texture *AnimatedTexture::Original(){
   return Decal?Decal[active]->Original():this;
 }
 
 Texture *AnimatedTexture::Clone () {
+  AnimatedTexture * retval = new AnimatedTexture ();
+  *retval = *this;
+  retval->name = 0;
+  retval->bound = false;
+  
   if (Decal) {
-    AnimatedTexture * retval = new AnimatedTexture ();
-    *retval = *this;
     int nf=vidMode?1:numframes;
     retval->Decal = new Texture * [nf];
     for (int i=0;i<nf;i++) {
       retval->Decal[i]= Decal[i]->Clone ();
     }
-    anis.insert(retval);
-    return retval;
-  }else {
-    return new AnimatedTexture();
   }
+  
+  if (vidSource) {
+    VSFileSystem::VSFile f;
+    f.OpenReadOnly(wrapper_file_path, wrapper_file_type);
+    retval->LoadVideoSource(f);
+  } else {
+    // LoadVideoSource adds to anis, otherwise we'll have to add ourselves
+    anis.insert(retval);
+  }
+  
+  return retval;
 }
 
 AnimatedTexture::~AnimatedTexture () {
@@ -258,13 +295,18 @@ AnimatedTexture::AnimatedTexture () {
 }
 
 void AnimatedTexture::Destroy() {
-  int i,nf;
+  anis.erase(this);
+  
+  if (vidSource) {
+    delete vidSource;
+    vidSource = 0;
+  }
+  
   if (Decal) {
-    anis.erase(this);
+    int i,nf;
     nf = vidMode?1:numframes;
-    for (i=0;i<nf;i++) {
+    for (i=0;i<nf;i++)
       delete Decal[i];
-    }
     delete []Decal;
     Decal=NULL;
   }
@@ -275,38 +317,6 @@ void AnimatedTexture::Reset () {
   activebound=-1;
   physicsactive = numframes*timeperframe;
 }
-/*
-void AnimatedTexture::Load( char * buffer, int length, int nframe, enum FILTER ismipmapped,bool detailtex)
-{
-	myvec.push_back (this);
-	numframes = nframe;
-	timeperframe = 100;
-	curtime=0;
-	int i=0;
-	Reset();
-
-	active=0;
-	Decal = new Texture * [numframes];
-  bool loadall=true;
-  if (g_game.use_animations==0||(g_game.use_animations!=0&&g_game.use_textures==0)) {
-    loadall=false;
-  }
-  for (;i<numframes;i++) {
-	Decal[i]=new Texture (buffer,length,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_animations)?GFXTRUE:GFXFALSE,65536,detailtex?GFXTRUE:GFXFALSE);
-  }
-  if (!loadall) {
-    Texture * dec = Decal[numframes/2];
-    timeperframe*=numframes;
-    numframes=1;
-    if (Decal) {
-      delete [] Decal;
-    }
-    Decal = new Texture * [1];
-    Decal[0]=dec;
-  }
-  original = NULL;
-}
-*/
 
 static void alltrim(string &str)
 {
@@ -323,16 +333,61 @@ static void alltrim(char *_str)
     strcpy(_str,str.c_str());
 }
 
-void AnimatedTexture::Load(VSFileSystem::VSFile & f, int stage, enum FILTER ismipmapped, bool detailtex) {
+void AnimatedTexture::Load(VSFileSystem::VSFile & f, int stage, enum FILTER ismipmapped, bool detailtex) 
+{
+    curtime=0;
+    frames.clear();
+    frames_maxtc.clear();
+    frames_mintc.clear();
+
+    if (f.GetType() == VSFileSystem::VideoFile) {
+        LoadVideoSource(f);
+    } else {
+        LoadAni(f, stage, ismipmapped, detailtex);
+    }
+}
+
+void AnimatedTexture::LoadVideoSource(VSFileSystem::VSFile & f)
+{
+    wrapper_file_path = f.GetFilename();
+    wrapper_file_type = f.GetType();
+    f.Close();
+    
+    Reset();
+    
+    vidMode = true;
+    
+    try {
+        vidSource = new ::VideoFile();
+        vidSource->open(wrapper_file_path);
+        
+        physicsactive = vidSource->getDuration();
+        timeperframe = 1.0 / vidSource->getFrameRate();
+        numframes = (unsigned int)(physicsactive * timeperframe);
+        
+        loadSuccess = true;
+    } catch(::VideoFile::Exception e) {
+        loadSuccess = false;
+    }
+    
+    if (loadSuccess) {
+        sizeX = vidSource->getWidth();
+        sizeY = vidSource->getHeight();
+        mode  = _PNG24BIT;
+        data  = (unsigned char*)vidSource->getFrameBuffer();
+        Bind(65535, GFXFALSE);
+        
+        anis.insert(this);
+    }
+}
+
+void AnimatedTexture::LoadAni(VSFileSystem::VSFile & f, int stage, enum FILTER ismipmapped, bool detailtex) {
   char options[1024]; 
   f.Fscanf("%d %f",&numframes,&timeperframe);
   f.ReadLine(options,sizeof(options)-sizeof(*options)); options[sizeof(options)/sizeof(*options)-1]=0;
   alltrim(options);
-  curtime=0;
+  
   Reset();
-  frames.clear();
-  frames_maxtc.clear();
-  frames_mintc.clear();
 
   vidMode = XMLSupport::parse_option_ispresent(options,"video");
   SetInterpolateFrames(XMLSupport::parse_option_ispresent(options,"interpolateFrames"));
@@ -377,19 +432,19 @@ void AnimatedTexture::Load(VSFileSystem::VSFile & f, int stage, enum FILTER ismi
   for (;i<numframes;i++) if (loadall||(i==midframe)) { //if() added by Klauss
     int numgets=0;
     while (numgets<=0&&!f.Eof()) {
-		if (f.ReadLine(temp,511)==Ok) {
-			temp[511]='\0';
-			file[0]='z';file[1]='\0';
-			alp[0]='z';alp[1]='\0';//windows crashes on null
+        if (f.ReadLine(temp,511)==Ok) {
+            temp[511]='\0';
+            file[0]='z';file[1]='\0';
+            alp[0]='z';alp[1]='\0';//windows crashes on null
             opt[0]='z';opt[1]='\0';
-  
-			numgets = sscanf (temp,"%s %s %[^\r\n]",file,alp,opt);
+
+            numgets = sscanf (temp,"%s %s %[^\r\n]",file,alp,opt);
             if ((numgets<2)||(strcmp(alp,"-")==0)) alp[0]='\0';
             alltrim(opt);
-		}else break;
+        } else break;
     }
     if (vidMode) {
-		frames.push_back(StringPool::Reference(string(temp)));
+        frames.push_back(StringPool::Reference(string(temp)));
         frames_mintc.push_back(Vector(
             XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"mins",defms)),
             XMLSupport::parse_float(XMLSupport::parse_option_value(opt,"mint",defmt)),

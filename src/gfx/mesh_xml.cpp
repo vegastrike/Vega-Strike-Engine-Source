@@ -1636,8 +1636,7 @@ void Mesh::PostProcessLoading(MeshXML * xml,const vector<string> &textureOverrid
 
   while (Decal.size()<xml->decals.size())
       Decal.push_back(NULL);
-  Decal[0]=(TempGetTexture(xml, 0,factionname));
-  {for (unsigned int i=1;i<xml->decals.size();i++) {
+  {for (unsigned int i=0;i<xml->decals.size();i++) {
       Decal[i]=(TempGetTexture(xml, i,factionname));
   }}
   while (Decal.back()==NULL&&Decal.size()>1) {

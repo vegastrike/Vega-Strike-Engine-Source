@@ -40,28 +40,71 @@ class VSSprite {
 	float rotation;
 
 	Texture *surface;
+    bool isAnimation;
 
 	// For private use only
 	VSSprite() : surface(0) {}
 
 public:
+    /**
+     * Construct a sprite out of a spritefile
+     */
 	VSSprite (const char *file, enum FILTER texturefilter=BILINEAR, GFXBOOL force=GFXFALSE);
+    
+    /**
+     * Construct a sprite out of a preloaded texture
+     *
+     * @Note will take ownership of 'surface'
+     */
+    VSSprite (Texture *surface, float xcenter, float ycenter, float width, float height, float s=0.f, float t=0.f);
+    VSSprite (const VSSprite& source);
+    
 	~VSSprite();
+    
+    /**
+     * Return true if sprite was loaded successfully
+     */
 	bool LoadSuccess()const {return surface!=NULL;}
+    
+    /**
+     * Draw
+     */
 	void Draw();
+    
+    /**
+     * Draw at specified coordinates given by 4 endpoints.
+     *
+     * @param ll lower-left corner
+     * @param lr lower-right corner
+     * @param ur upper-right corner
+     * @param ul upper-left corner
+     * @note Disregards sprite position but not maxs/maxt coordinates.
+     */
 	void DrawHere (Vector &ll, Vector &lr, Vector &ur, Vector &ul);
+    
+    /** Add specified rotation to an already-rotated sprite */
 	void Rotate(const float &rad){ rotation += rad;};
+    void SetRotation(const float &rot);
+    void GetRotation(float &rot);
+    
+    /** 
+     * Loads the sprite's texture from the given file 
+     * @deprecated Unused?
+     */
+    void ReadTexture( VSFileSystem::VSFile * f);
+    
+    void GetST (float &s, float &t);
 	void SetST (const float s, const float t);
     void SetTime (double newtime);
 	void SetPosition(const float &x1, const float &y1);
 	void GetPosition(float &x1, float &y1);
-        void SetSize (float s1, float s2);
-        void GetSize (float &x1, float &y1);
-	void SetRotation(const float &rot);
-	void GetRotation(float &rot);
-	void ReadTexture( VSFileSystem::VSFile * f);
+    void SetSize (float s1, float s2);
+    void GetSize (float &x1, float &y1);
+    void SetTimeSource(int source);
+    int  GetTimeSource();
 	//float &Rotation(){return rotation;};
 	Texture * getTexture(){return surface;}
+    const Texture * getTexture() const {return surface;}
 };
 
 #endif

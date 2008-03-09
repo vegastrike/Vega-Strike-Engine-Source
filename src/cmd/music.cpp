@@ -475,6 +475,8 @@ void Music::_LoadLastSongAsync() {
         if (where!=Muzak::cachedSongs.end()) {
           if (where->second.wave!=NULL) {
             int source = AUDBufferSound(&where->second, true);
+            AUDStreamingSound(source);
+            
             music_load_info->wave=NULL;
             if (source!=-1) {
               playingSource.push_back(source);
@@ -482,7 +484,6 @@ void Music::_LoadLastSongAsync() {
             if (playingSource.size()==1) { // Start playing if first in list.
               _StopNow();
               AUDStartPlaying(playingSource.front());
-              AUDStreamingSound(source);
               AUDSoundGain(playingSource.front(),vol,true);
             }
             return;

@@ -61,6 +61,24 @@ static void cacheInsert(const char *file, VSSprite *spr)
 	sprite_cache.insert(std::pair<std::string,VSSprite*>(hashName,spr));
 }
 
+VSSprite::VSSprite(Texture *_surface, float _xcenter, float _ycenter, float _width, float _height, float _s, float _t) :
+    xcenter(_xcenter),
+    ycenter(_ycenter),
+    widtho2(_width/2),
+    heighto2(_height/2),
+    maxs(_s),
+    maxt(_t)
+{
+    surface = _surface;
+}
+
+VSSprite::VSSprite(const VSSprite &source)
+{
+    *this = source;
+    if (surface != NULL)
+        surface = surface->Clone();
+}
+
 VSSprite::VSSprite(const char *file, enum FILTER texturefilter,GFXBOOL force) 
 {
   VSCONSTRUCT2('S')
@@ -69,6 +87,7 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter,GFXBOOL force)
   rotation = 0;
   surface = NULL;
   maxs = maxt = 0;
+  isAnimation = false;
 
 	// Check cache
 	{
@@ -105,10 +124,13 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter,GFXBOOL force)
       int len=strlen(texture);
       if (len>4&&texture[len-1]=='i'&&texture[len-2]=='n'&&texture[len-3]=='a'&&texture[len-4]=='.') {
         surface = new AnimatedTexture(f,0,texturefilter,GFXFALSE);
+        isAnimation = true;
       } else if (texturea[0]=='0') {
         surface = new Texture(texture,0,texturefilter,TEXTURE2D,TEXTURE_2D,GFXTRUE,65536,GFXFALSE);
+        isAnimation = false;
       } else {
         surface = new Texture(texture,texturea,0,texturefilter,TEXTURE2D,TEXTURE_2D,1,0,GFXTRUE,65536,GFXFALSE);    
+        isAnimation = false;
       }
       
       if (!surface->LoadSuccess()) {
@@ -157,6 +179,11 @@ VSSprite::~VSSprite()
 void VSSprite::SetST (const float s, const float t) {
   maxs = s;
   maxt = t;
+}
+
+void VSSprite::GetST (float &s, float &t) {
+  s = maxs;
+  t = maxt;
 }
 
 void VSSprite::SetTime(double newtime) {
@@ -253,3 +280,15 @@ void VSSprite::GetRotation(float &rot) {
   rot = rotation;
 }
 
+void VSSprite::SetTimeSource(int source) 
+{ 
+    if (isAnimation) 
+        ((AnimatedTexture*)surface)->SetTimeSource(source); 
+}
+
+int VSSprite::GetTimeSource() 
+{ 
+    if (isAnimation) 
+        return ((AnimatedTexture*)surface)->GetTimeSource(); else
+        return 0;
+}

@@ -898,6 +898,13 @@ void AUDPlay (const int sound, const QVector &pos, const Vector & vel, const flo
 #endif
 }
 
+float AUDGetCurrentPosition(const int sound)
+{
+	ALfloat rv;
+	alGetSourcef(sound, AL_SEC_OFFSET, &rv);
+	return float(rv);
+}
+
 void AUDPausePlaying (const int sound){
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()) {

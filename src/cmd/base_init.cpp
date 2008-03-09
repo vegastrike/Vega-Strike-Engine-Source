@@ -71,6 +71,8 @@ PYTHON_BEGIN_MODULE(Base)
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::EraseLink,"EraseLink");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Ship,"Ship");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Texture,"Texture");
+    PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Video,"Video");
+    PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::VideoStream,"VideoStream");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetTexture,"SetTexture");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetTextureSize,"SetTextureSize");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetTexturePos,"SetTexturePos");

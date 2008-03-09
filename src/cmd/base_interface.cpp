@@ -126,6 +126,9 @@ static FILTER BlurBases() {
 BaseInterface::Room::BaseVSSprite::BaseVSSprite (const std::string &spritefile, const std::string &ind) 
   : BaseObj(ind),spr(spritefile.c_str(),BlurBases(),GFXTRUE) {}
 
+BaseInterface::Room::BaseVSMovie::BaseVSMovie(const std::string &moviefile, const std::string &ind) 
+  : BaseVSSprite(ind, VSSprite(AnimatedTexture::CreateVideoTexture(moviefile), 0, 0, 2, 2)) {}
+
 void BaseInterface::Room::BaseVSSprite::SetSprite (const std::string &spritefile)
 {
 	// Destroy SPR
@@ -136,6 +139,30 @@ void BaseInterface::Room::BaseVSSprite::SetSprite (const std::string &spritefile
 	// PS: I hope it doesn't break many compilers ;) 
 	//	(if it does, spr will have to become a pointer)
 	new(&spr)VSSprite(spritefile.c_str(),BlurBases(),GFXTRUE);
+}
+
+void BaseInterface::Room::BaseVSMovie::SetMovie(const std::string &moviefile)
+{
+    // Get sprite position and size so that we can preserve them
+    float x,y,w,h,rot;
+    spr.GetPosition(x,y);
+    spr.GetSize(w,h);
+    spr.GetRotation(rot);
+    
+    // See notes above
+    spr.~VSSprite();
+    new(&spr)VSSprite( AnimatedTexture::CreateVideoTexture(moviefile), x,y,w,h );
+    spr.SetRotation(rot);
+}
+
+float BaseInterface::Room::BaseVSMovie::GetTime() const
+{
+    return spr.getTexture()->curTime();
+}
+
+void BaseInterface::Room::BaseVSMovie::SetTime(float t)
+{
+    spr.getTexture()->setTime(t);
 }
 
 void BaseInterface::Room::BaseVSSprite::Draw (BaseInterface *base) {

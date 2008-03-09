@@ -80,7 +80,10 @@ protected:
   void UnBind();
   ///Transfers this texture to GFX library
   void Transfer(int maxdimension,GFXBOOL detailtexture);
-  public:
+  
+public:
+  ///Creates an unbounded texture. Set data and dimensions before binding. Or explicitly load a file.
+  Texture(int stage=0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, enum ADDRESSMODE address_mode=DEFAULT_ADDRESS_MODE);
   ///Creates a texture with a single bitmap as color data and another grayscale .bmp as alpha data
   Texture(const char *,const char *, int stage = 0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE,GFXBOOL nocache=false,enum ADDRESSMODE address_mode=DEFAULT_ADDRESS_MODE);
   ///Creates a texture with only color data as a single bitmap
@@ -94,8 +97,6 @@ protected:
   //  Texture (Texture *t);
   ///Destructor for texture
   virtual ~Texture();
-  ///Do not use! For inheritors only
-  Texture();
   virtual unsigned int numFrames() const{return 1;} // Number of frames in an animated texture (or, rather, keyframes)
   virtual double curTime() const{return 0;} // Current time of an animated texture
   virtual void setTime(double tim) {} 
@@ -104,6 +105,12 @@ protected:
   virtual unsigned int numPasses() const{return 1;} // Number of passes when on multipass rendering.
   virtual bool canMultiPass() const{return true;} // True, if full functionality can be achieved after multipass rendering. If false, fallback rendering must be possible by multipass (or singlepass) rendering. True, also, if texturing units are sufficient for singlepass rendering.
   virtual bool constFrameRate() const{return true;} // If frames advance at a regular rate - keyframe based animations would return false.
+  
+  int getStage() const {return stage; }
+  int getFilter() const { return ismipmapped; }
+  int getTarget() const { return texture_target; }
+  int getImageTarget() const { return image_target; }
+  
   ///Whether or not the string exists as a texture
   static Texture * Exists (std::string s);
   ///Whether or not the color and alpha data already exist

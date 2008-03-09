@@ -801,7 +801,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 	
 	if (internformat!=PALETTE8 && internformat != PNGPALETTE8) {
 		internalformat = GetTextureFormat (internformat);
-		if ((textures[handle].mipmapped&&gl_options.mipmap>=2)||detail_texture) {
+		if (((textures[handle].mipmapped&(TRILINEAR|MIPMAP))&&gl_options.mipmap>=2)||detail_texture) {
 			if (detail_texture) {
 				static FILTER fil = XMLSupport::parse_bool(vs_config->getVariable("graphics","detail_texture_trilinear","true"))?TRILINEAR:MIPMAP;
 				textures[handle].mipmapped=     fil;

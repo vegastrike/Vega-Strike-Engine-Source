@@ -2,6 +2,7 @@
 #include "python/python_class.h"
 #include <string>
 #include <stdlib.h>
+#include "audiolib.h"
 #include "base.h"
 #include "base_util.h"
 #include "universe_util.h"
@@ -52,8 +53,36 @@ namespace BaseUtil {
 		if (addspritepos)
 			((BaseInterface::Room::BaseVSSprite*)newroom->objs.back())->spr.GetPosition(tx,ty);
                 
-		((BaseInterface::Room::BaseVSSprite*)newroom->objs.back())->spr.SetPosition(x+tx,y+ty);
+		dynamic_cast<BaseInterface::Room::BaseVSSprite*>(newroom->objs.back())->spr.SetPosition(x+tx,y+ty);
 	}
+    void Video(int room, std::string index, std::string vfile, std::string afile, float x, float y) {
+        BaseInterface::Room *newroom=CheckRoom(room);
+        if (!newroom) return;
+        
+        Texture(room, index, vfile, x, y);
+        
+        int sndstream = AUDCreateMusic(afile);
+        dynamic_cast<BaseInterface::Room::BaseVSSprite*>(newroom->objs.back())->spr.SetTimeSource(sndstream);
+    }
+    void VideoStream(int room, std::string index, std::string streamfile, float x, float y, float w, float h) {
+        BaseInterface::Room *newroom=CheckRoom(room);
+        if (!newroom) return;
+        
+        static bool addspritepos = XMLSupport::parse_bool(vs_config->getVariable("graphics","offset_sprites_by_pos","true"));
+        float tx=0, ty=0;
+        
+        BaseInterface::Room::BaseVSSprite *newobj = new BaseInterface::Room::BaseVSMovie(streamfile, index);
+        if (addspritepos)
+            newobj->spr.GetPosition(tx,ty);
+        newobj->spr.SetPosition(x+tx,y+ty);
+        newobj->spr.SetSize(w,h);
+        
+#ifdef BASE_MAKER
+        newobj->texfile=file;
+#endif
+        
+        newroom->objs.push_back(newobj);
+    }
 	void SetTexture(int room, std::string index, std::string file)
 	{
 		BaseInterface::Room *newroom=CheckRoom(room);
@@ -93,6 +122,21 @@ namespace BaseUtil {
 			}
 		}
 	}
+    void PlayVideo(int room, std::string index)
+    {
+        BaseInterface::Room *newroom=CheckRoom(room);
+        if (!newroom) return;
+        for (int i=0;i<newroom->objs.size();i++) {
+            if (newroom->objs[i]) {
+                if (newroom->objs[i]->index==index) {
+                    // FIXME: Will crash if not a Sprite object.
+                    int snd = dynamic_cast<BaseInterface::Room::BaseVSSprite*>(newroom->objs[i])->spr.GetTimeSource();
+                    if (snd)
+                        AUDStartPlaying(snd);
+                }
+            }
+        }
+    }
 	void Ship (int room, std::string index,QVector pos,Vector Q, Vector R) {
 		BaseInterface::Room *newroom=CheckRoom(room);
 		if (!newroom) return;

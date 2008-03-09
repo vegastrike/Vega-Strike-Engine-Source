@@ -163,6 +163,7 @@ namespace VSFileSystem
 			CASE( VSFileSystem::AiFile)
 			CASE( VSFileSystem::SaveFile)
 			CASE( VSFileSystem::AnimFile)
+                        CASE( VSFileSystem::VideoFile)
 			CASE( VSFileSystem::VSSpriteFile)
 			CASE( VSFileSystem::MissionFile)
 			CASE( VSFileSystem::BSPFile)
@@ -222,8 +223,9 @@ namespace VSFileSystem
 	string sharedsectors;
 	string sharedcockpits;
 	string shareduniverse;
-        string aidir;
+    string aidir;
 	string sharedanims;
+    string sharedvideos;
 	string sharedsprites;
 	string savedunitpath;
 	string modname;
@@ -786,6 +788,7 @@ namespace VSFileSystem
 		sharedcockpits = vs_config->getVariable( "data", "cockpits", "cockpits");
 		shareduniverse = vs_config->getVariable( "data", "universe_path", "universe");
 		sharedanims = vs_config->getVariable( "data", "animations", "animations");
+        sharedvideos = vs_config->getVariable( "data", "movies", "movies");
 		sharedsprites = vs_config->getVariable( "data", "sprites", "sprites");
 		savedunitpath = vs_config->getVariable ("data","serialized_xml","serialized_xml");
 		sharedtextures = vs_config->getVariable ("data","sharedtextures","textures");
@@ -829,6 +832,7 @@ namespace VSFileSystem
 		Directories[SoundFile] = sharedsounds;
 		Directories[CockpitFile] = sharedcockpits;
 		Directories[AnimFile] = sharedanims;
+                Directories[VideoFile] = sharedvideos;
 		Directories[VSSpriteFile] = sharedsprites;
 
 		Directories[AiFile] = aidir;
@@ -918,6 +922,11 @@ namespace VSFileSystem
 				UseVolumes[AnimFile] = 1;
 				cout<<"Using volume file "<<(datadir+"/animations")<<".pk3"<<endl;
 			}
+                        if( FileExists( datadir,"/movies."+volume_format)>=0)
+                        {
+                                UseVolumes[VideoFile] = 1;
+                                cout<<"Using volume file "<<(datadir+"/movies")<<".pk3"<<endl;
+                        }
 			if( FileExists( datadir,"/communications."+volume_format)>=0)
 			{
 				UseVolumes[CommFile] = 1;
@@ -1204,7 +1213,7 @@ namespace VSFileSystem
 		unsigned int i=0, j=0;
 
                 for (int LC=0;LC<2&&found<0;(LC+=(extra==""?2:1)),extra="") {
-		if( current_path.back()!="" && (type==TextureFile || type==MeshFile || type==VSSpriteFile || type==AnimFile))
+		if( current_path.back()!="" && (type==TextureFile || type==MeshFile || type==VSSpriteFile || type==AnimFile || type==VideoFile))
 		{
 			curpath = current_path.back();
 			subdir = current_subdirectory.back();

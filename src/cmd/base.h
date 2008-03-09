@@ -186,7 +186,21 @@ public:
 			void SetPos (float posx, float posy) { spr.SetPosition(posx,posy); }
 			void SetSize (float wid, float hei) { spr.SetSize(wid,hei); }
 			void SetTime (float t) { spr.SetTime(t); }
+            
+        protected:
+            BaseVSSprite(const std::string &ind, const VSSprite &sprite) : BaseObj(ind), spr(sprite) {}
 		};
+        
+        class BaseVSMovie : public BaseVSSprite {
+        public:
+            virtual ~BaseVSMovie() {}
+            BaseVSMovie (const std::string &moviefile, const std::string & ind);
+            void SetMovie(const std::string &moviefile);
+            
+            float GetTime() const;
+            void SetTime(float t);
+        };
+        
 		class BaseTalk : public BaseObj {
 		public:
 			static bool hastalked;

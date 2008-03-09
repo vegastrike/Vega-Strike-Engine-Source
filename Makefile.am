@@ -560,7 +560,9 @@ LIBGFX = \
   src/gfx/sphere_generic.cpp \
   src/gfx/vec.cpp \
   src/gfx/vec.h \
-  src/gfx/vertex.h
+  src/gfx/vertex.h \
+  src/gfx/vid_file.h \
+  src/gfx/vid_file.cpp
 
 
 LIBGFXCLIENT = \
@@ -1121,3 +1123,4 @@ headers:
 .PHONY: clean-local
 clean-local:
 	rm -f `find . -name '*.h.gch'`
+noinst_HEADERS = src/gfx/vid_file.h

@@ -53,6 +53,8 @@ void AUDChangeVolume (float volume);
 float AUDGetVolume();
 ///changes the scale used for doppler...generally between 0 for off or .01 and 10
 void AUDChangeDoppler(float doppler);
+///Gets the current playback position in seconds (precision is system&driver-dependant)
+float AUDGetCurrentPosition(const int sound);
 ///Gets current doppler val
 float AUDGetDoppler();
 //#define PERFRAMESOUND

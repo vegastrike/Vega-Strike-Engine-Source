@@ -21,9 +21,12 @@ namespace BaseUtil {
 
 	int Room (std::string text);
 	void Texture(int room, std::string index, std::string file, float x, float y);
+    void Video(int room, std::string index, std::string vfile, std::string afile, float x, float y);
+    void VideoStream(int room, std::string index, std::string streamfile, float x, float y, float w, float h);
 	void SetTexture(int room, std::string index, std::string file);
 	void SetTextureSize(int room, std::string index, float w, float h);
 	void SetTexturePos(int room, std::string index, float x, float y);
+    void PlayVideo(int room, std::string index);
 	void Ship (int room, std::string index,QVector pos,Vector R, Vector Q);
 	void LinkPython (int room, std::string index,std::string pythonfile, float x, float y, float wid, float hei, std::string text, int to);
 	void LaunchPython (int room, std::string index,std::string pythonfile, float x, float y, float wid, float hei, std::string text);
