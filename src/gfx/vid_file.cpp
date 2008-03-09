@@ -4,16 +4,26 @@
 
 #include "vid_file.h"
 #include "vsfilesystem.h"
+#include "config.h"
 
 #include <string.h>
 #include <math.h>
 #include <utility>
 
+#ifdef HAVE_FFMPEG
+
 extern "C" {
+    #ifdef HAVE_FFMPEG_SWSCALE_H // Not sure how many people have swscale.
+        #include <ffmpeg/swscale.h>
+    #else
+        #define DEPRECATED_IMG_CONVERT 1
+    #endif
     #include <ffmpeg/avcodec.h>
     #include <ffmpeg/avformat.h>
     #include <ffmpeg/avio.h>
 }
+
+#endif
 
 // define a 128k buffer for video streamers
 #define BUFFER_SIZE 128*(1<<10)
@@ -21,6 +31,11 @@ extern "C" {
 #ifndef ENOENT
 #define ENOENT 2
 #endif
+
+
+/* FOLLOWING CODE IS ONLY INCLUDED IF YOU HAVE FFMPEG */
+/* ******************************************** */
+#ifdef HAVE_FFMPEG
 
 using namespace VSFileSystem;
 
@@ -94,6 +109,10 @@ private:
     uint8_t *packetBuffer;
     size_t packetBufferSize;
     AVPacket packet;
+	
+#ifndef DEPRECATED_IMG_CONVERT
+    SwsContext *pSWSCtx;
+#endif
     
     uint64_t fbPTS;
     uint64_t sizePTS;
@@ -111,10 +130,15 @@ private:
     void convertFrame()
     {
         if (frameReady) {
+#ifdef DEPRECATED_IMG_CONVERT
             img_convert(
                 (AVPicture*)pFrameRGB, PIX_FMT_RGB24, 
                 (AVPicture*)pNextFrameYUV, pCodecCtx->pix_fmt, 
                 pCodecCtx->width, pCodecCtx->height);
+#else
+            sws_scale(pSWSCtx, pNextFrameYUV->data, pNextFrameYUV->linesize, 0,
+                      pCodecCtx->height, pFrameRGB->data, pFrameRGB->linesize);
+#endif
             fbPTS = pNextFrameYUV->pts;
             
             std::swap(pNextFrameYUV, pFrameYUV);
@@ -210,13 +234,19 @@ public:
         if (pNextFrameYUV)
             av_free(pNextFrameYUV);
         
+#ifndef DEPRECATED_IMG_CONVERT
+        if (pSWSCtx) {
+            sws_freeContext(pSWSCtx);
+        }
+#endif
+    
         // Close the codec
         if (pCodecCtx)
             avcodec_close(pCodecCtx);
         
         // Close the file
         if (pFormatCtx)
-            av_close_input_stream(pFormatCtx);
+            av_close_input_file(pFormatCtx);
     }
     
     void open(const std::string& path) throw(VideoFile::Exception)
@@ -285,6 +315,12 @@ public:
         
         // Initialize timebase counter
         fbPTS = pFrameYUV->pts = 0;
+        
+#ifndef DEPRECATED_IMG_CONVERT
+        pSWSCtx = sws_getContext(pCodecCtx->width, pCodecCtx->height, pCodecCtx->pix_fmt,
+                                 width, height, PIX_FMT_RGB24, SWS_BICUBIC, NULL, NULL, NULL);
+#endif
+    
     }
     
     bool seek(float time)
@@ -320,35 +356,55 @@ public:
     }
 };
 
+#else /* !HAVE_FFMPEG */
+class VideoFileImpl {
+private:
+	// Compile error.
+	VideoFileImpl() {}
+public:
+	// Avoid having to put ifdef's everywhere.
+	float frameRate, duration;
+	int width, height;
+	void *frameBuffer;
+	int frameBufferStride;
+	bool seek(float time) {return false;}
+};
+
+#endif /* !HAVE_FFMPEG */
+/* ************************************ */
 
 VideoFile::VideoFile() throw()
-    : impl(0)
+    : impl(NULL)
 {
 }
 
 VideoFile::~VideoFile()
 {
-    delete impl;
+    if (impl)
+        delete impl;
 }
 
 bool VideoFile::isOpen() const throw()
 {
-    return impl != 0;
+    return impl != NULL;
 }
 
 void VideoFile::open(const std::string& path) throw(Exception)
 {
+#ifdef HAVE_FFMPEG
     if (!impl)
         impl = new VideoFileImpl();
     if (impl)
-        impl->open(path); else
-        throw(Exception("Internal error"));
+        impl->open(path);
+#endif
 }
 
 void VideoFile::close() throw()
 {
-    delete impl;
-    impl = 0;
+    if (impl) {
+        delete impl;
+        impl = 0;
+    }
 }
 
 float VideoFile::getFrameRate() const throw()

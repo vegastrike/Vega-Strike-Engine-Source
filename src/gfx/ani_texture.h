@@ -101,13 +101,6 @@ class AnimatedTexture: public Texture {
   bool Done();
   virtual bool LoadSuccess ();
   
-  // Some useful factory methods
-  static AnimatedTexture* CreateVideoTexture(const std::string &fname, int stage=TEXTURE2D, enum FILTER ismipmapped=BILINEAR, bool detailtex=false)
-  {
-    AnimatedTexture *rv = new AnimatedTexture(stage, ismipmapped, detailtex);
-    VSFileSystem::VSFile f;
-    f.OpenReadOnly(fname, VSFileSystem::VideoFile);
-    rv->LoadVideoSource(f);
-    return rv;
-  }
+  // Some useful factory methods -- also defined in ani_texture.cpp
+  static AnimatedTexture* CreateVideoTexture(const std::string &fname, int stage=TEXTURE2D, enum FILTER ismipmapped=BILINEAR, bool detailtex=false);
 };

@@ -560,10 +560,7 @@ LIBGFX = \
   src/gfx/sphere_generic.cpp \
   src/gfx/vec.cpp \
   src/gfx/vec.h \
-  src/gfx/vertex.h \
-  src/gfx/vid_file.h \
-  src/gfx/vid_file.cpp
-
+  src/gfx/vertex.h
 
 LIBGFXCLIENT = \
   src/gfx/ani_texture.cpp \
@@ -655,6 +652,8 @@ LIBGFXCLIENT = \
   src/gfx/tex_transform.cpp \
   src/gfx/vdu.cpp \
   src/gfx/vdu.h \
+  src/gfx/vid_file.h \
+  src/gfx/vid_file.cpp \
   src/gfx/vsbox.cpp \
   src/gfx/vsbox.h \
   src/gfx/vsimage.cpp \

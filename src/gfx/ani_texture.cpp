@@ -381,6 +381,19 @@ void AnimatedTexture::LoadVideoSource(VSFileSystem::VSFile & f)
     }
 }
 
+AnimatedTexture* AnimatedTexture::CreateVideoTexture(const std::string &fname, int stage, enum FILTER ismipmapped, bool detailtex)
+{
+    AnimatedTexture *rv = new AnimatedTexture(stage, ismipmapped, detailtex);
+    VSFileSystem::VSFile f;
+    VSError err=f.OpenReadOnly(fname, VSFileSystem::VideoFile);
+    if (err <= Ok) {
+      rv->LoadVideoSource(f);
+    } else {
+      fprintf(stderr, "CreateVideoTexture could not find %s\n", fname.c_str());
+    }
+    return rv;
+}
+
 void AnimatedTexture::LoadAni(VSFileSystem::VSFile & f, int stage, enum FILTER ismipmapped, bool detailtex) {
   char options[1024]; 
   f.Fscanf("%d %f",&numframes,&timeperframe);
