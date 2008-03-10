@@ -898,6 +898,11 @@ void AUDPlay (const int sound, const QVector &pos, const Vector & vel, const flo
 #endif
 }
 
+#ifndef AL_SEC_OFFSET
+/* Supported on Windows, but the headers might be out of date. */
+#define AL_SEC_OFFSET                             0x1024
+#endif
+
 float AUDGetCurrentPosition(const int sound)
 {
 	ALfloat rv;
