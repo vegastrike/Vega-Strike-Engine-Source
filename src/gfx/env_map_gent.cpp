@@ -199,7 +199,7 @@ using namespace VSFileSystem;
 		// Make sure we are reading a DXT1 file. All backgrounds 
 		// should be DXT1
 		switch(tex.mode){
-			case VSImage::_DXT1:
+			case ::VSImage::_DXT1:
 				internformat = DXT1;
 				break;
 			default:

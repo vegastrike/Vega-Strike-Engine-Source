@@ -125,6 +125,6 @@ def httpServer(port=8080, host=''):
 	httpd.serve_forever()
 
 if __name__=='__main__':
-	connect_db(port=settings.http_port)
-	httpServer()
+	connect_db()
+	httpServer(port=settings.http_port)
 
