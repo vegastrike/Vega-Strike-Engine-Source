@@ -567,6 +567,11 @@ namespace UniverseUtil
 	void LoadMission (string missionname) {
 		::LoadMission (missionname.c_str(),"",false);
 	}
+	
+	void LoadNamedMissionScript (string title, string missionscript) {
+		::LoadMission (("#"+title).c_str(),missionscript,false);
+	}
+
 	void LoadMissionScript (string missionscript) {
 		::LoadMission ("nothing.mission",missionscript,false);
 	}

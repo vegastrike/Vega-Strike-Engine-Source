@@ -190,6 +190,7 @@ namespace UniverseUtil
 	void SetAutoStatus (int global_auto, int player_auto);
 	void LoadMission (std::string missionname);
 	void LoadMissionScript (std::string scriptcontents);
+	void LoadNamedMissionScript (std::string missiontitle, std::string scriptcontents);
 	QVector SafeEntrancePoint (QVector,float radial_size=-1);
 	QVector SafeStarSystemEntrancePoint (StarSystem *sts, QVector,float radial_size=-1);
 	float getPlanetRadiusPercent ();

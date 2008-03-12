@@ -529,7 +529,7 @@ void AutoLongHaul::Execute() {
 	parent->autopilotactive=false;
     return;
   }
-  static bool compensate_for_interdiction=XMLSupport::parse_bool(vs_config->getVariable("phyics","autopilot_compensate_for_interdiction","false"));
+  static bool compensate_for_interdiction=XMLSupport::parse_bool(vs_config->getVariable("physics","autopilot_compensate_for_interdiction","false"));
   static float enough_warp_for_cruise=XMLSupport::parse_float(vs_config->getVariable("physics","enough_warp_for_cruise","1000"));
   static float go_perpendicular_speed=XMLSupport::parse_float(vs_config->getVariable("physics","warp_perpendicular","80"));
   static float min_warp_orbit_radius=XMLSupport::parse_float(vs_config->getVariable("physics","min_warp_orbit_radius","100000000"));
