@@ -78,9 +78,10 @@ void AnimatedTexture::MakeActive (int stage, int pass) {
                 if (vidSource->seek(curtime))
                     Transfer( 65535, GFXFALSE );
             } catch(::VideoFile::EndOfStreamException e) {
-                if (curtime > 0) {
+                if (GetLoop() && curtime > 0) {
                     setTime(0);
                     MakeActive(stage,pass);
+                    return;
                 }
             } catch(::VideoFile::Exception e) {
                 VSFileSystem::vs_fprintf(stderr, "\nVideoFile exception: %s\n", e.what());
@@ -359,7 +360,7 @@ void AnimatedTexture::LoadVideoSource(VSFileSystem::VSFile & f)
     
     try {
         vidSource = new ::VideoFile();
-        vidSource->open(wrapper_file_path);
+        vidSource->open(wrapper_file_path, gl_options.max_movie_dimension);
         
         physicsactive = vidSource->getDuration();
         timeperframe = 1.0 / vidSource->getFrameRate();

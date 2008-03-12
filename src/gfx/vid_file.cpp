@@ -109,6 +109,9 @@ private:
     uint8_t *packetBuffer;
     size_t packetBufferSize;
     AVPacket packet;
+    
+    /** Framebuffer dimensions limit, useful for bandwidth-limited GPUs */
+    size_t fbDimensionLimit;
 	
 #ifndef DEPRECATED_IMG_CONVERT
     SwsContext *pSWSCtx;
@@ -206,7 +209,7 @@ public:
     size_t width;
     size_t height;
 
-    VideoFileImpl() :
+    VideoFileImpl(size_t maxDimensions) :
         pFormatCtx(0),
         pCodecCtx(0),
         pCodec(0),
@@ -217,7 +220,8 @@ public:
         frameBuffer(0),
         packetBuffer(0),
         packetBufferSize(0),
-        frameReady(false)
+        frameReady(false),
+        fbDimensionLimit(maxDimensions)
     {
         packet.data = 0;
     }
@@ -297,6 +301,10 @@ public:
         duration = float(pStream->duration * pStream->time_base.num) / float(pStream->time_base.den);
         width = pCodecCtx->width;
         height = pCodecCtx->height;
+        while ( (width > fbDimensionLimit) || (height > fbDimensionLimit) ) {
+            width /= 2;
+            height /= 2;
+        }
         
         // Allocate RGB frame buffer
         pFrameRGB = avcodec_alloc_frame();
@@ -318,7 +326,7 @@ public:
         
 #ifndef DEPRECATED_IMG_CONVERT
         pSWSCtx = sws_getContext(pCodecCtx->width, pCodecCtx->height, pCodecCtx->pix_fmt,
-                                 width, height, PIX_FMT_RGB24, SWS_BICUBIC, NULL, NULL, NULL);
+                                 width, height, PIX_FMT_RGB24, SWS_LANCZOS, NULL, NULL, NULL);
 #endif
     
     }
@@ -335,8 +343,6 @@ public:
             if ( targetPTS < fbPTS ) {
                 // frame backwards
                 av_seek_frame(pFormatCtx, videoStreamIndex, targetPTS, AVSEEK_FLAG_BACKWARD);
-                nextFrame();
-                convertFrame();
                 nextFrame();
             }
             
@@ -389,11 +395,11 @@ bool VideoFile::isOpen() const throw()
     return impl != NULL;
 }
 
-void VideoFile::open(const std::string& path) throw(Exception)
+void VideoFile::open(const std::string& path, size_t maxDimension) throw(Exception)
 {
 #ifdef HAVE_FFMPEG
     if (!impl)
-        impl = new VideoFileImpl();
+        impl = new VideoFileImpl(maxDimension);
     if (impl)
         impl->open(path);
 #endif
