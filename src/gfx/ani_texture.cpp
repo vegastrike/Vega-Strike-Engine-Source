@@ -261,23 +261,25 @@ Texture *AnimatedTexture::Original(){
 
 Texture *AnimatedTexture::Clone () {
   AnimatedTexture * retval = new AnimatedTexture ();
-  *retval = *this;
-  retval->name = 0;
-  retval->bound = false;
   
   if (Decal) {
+    *retval = *this;
     int nf=vidMode?1:numframes;
     retval->Decal = new Texture * [nf];
     for (int i=0;i<nf;i++) {
       retval->Decal[i]= Decal[i]->Clone ();
     }
+  } else if (vidSource) {
+    *retval = *this;
   }
   
   if (vidSource) {
+    retval->name = -1;
+    retval->bound = false;
     VSFileSystem::VSFile f;
     f.OpenReadOnly(wrapper_file_path, wrapper_file_type);
     retval->LoadVideoSource(f);
-  } else {
+  } else if (Decal) {
     // LoadVideoSource adds to anis, otherwise we'll have to add ourselves
     anis.insert(retval);
   }
