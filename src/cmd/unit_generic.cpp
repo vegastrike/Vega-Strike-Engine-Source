@@ -8149,7 +8149,7 @@ int Unit::RepairUpgrade ()
 	const Unit * temprate = makeFinalBlankUpgrade (name,faction);
 	int success=0;
 	double pct=0;
-	if (temprate->name!=string("LOAD_FAILED")) {
+	if (temprate&&temprate->name!=string("LOAD_FAILED")) {
 		success = Upgrade(temprate,-1,-1,0,false,pct,NULL,false)?1:0;
 		if (pct>0)
 			success=1;
