@@ -57,11 +57,11 @@ class configNodeFactory : public easyDomFactory<configNode> {
 class VegaConfig {
  public:
 
-#define MAX_AXIS 4
+#define MAX_AXIS 32
   int axis_axis[MAX_AXIS];
   int axis_joy[MAX_AXIS];
   bool axis_inverse[MAX_AXIS];
-#define MAX_HATSWITCHES 4
+#define MAX_HATSWITCHES 16
 #define MAX_VALUES 12
   float hatswitch[MAX_HATSWITCHES][MAX_VALUES];
   float hatswitch_margin[MAX_HATSWITCHES];
