@@ -484,8 +484,8 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 		Vector small_velocity=smalle->GetVelocity()-smalle->GetAngularVelocity().Cross(smalllocation-smalle->Position());
 		Vector big_velocity=GetVelocity()-GetAngularVelocity().Cross(biglocation-Position());
 		//Compute reference frame conversions to align along force normals (newZ)(currently using bignormal - will experiment to see if both are needed for sufficient approximation)
-		Vector orthoz=bignormal;
-		Vector orthox=MakeNonColinearVector(bignormal);
+		Vector orthoz=(bignormal-smallnormal).Normalize();
+		Vector orthox=MakeNonColinearVector(orthoz);
 		Vector orthoy(0,0,0);
 		//need z and non-colinear x to compute new basis trio. destroys x,y, preserves z.
 		Orthogonize(orthox,orthoy,orthoz);
