@@ -164,6 +164,7 @@ protected:
   virtual void SelectCamera(int) {}
   ///GFXLoadMatrix proper camera
   virtual void SetViewport() {}
+  virtual void visitSystem(std::string systemName);
   virtual bool SetDrawNavSystem(bool){return false;}
   virtual bool CanDrawNavSystem() {return false;}
   virtual bool DrawNavSystem() {return false;}

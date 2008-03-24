@@ -757,6 +757,24 @@ bool Cockpit::Update () {
   return false;
 }
 
+void visitSystemHelp (Cockpit * cp, string systemname,float num) {
+	string key (string("visited_")+systemname);
+	vector<float> *v = &cp->savegame->getMissionData(key);
+	if (v->empty()){
+		v->push_back (num);
+	} else if ((*v)[0]!=1.0&&num==1) {
+		(*v)[0]=num;
+	}
+	
+}
+void Cockpit::visitSystem ( string systemname ) {
+	visitSystemHelp (this,systemname,1.0);
+	int adj = UniverseUtil::GetNumAdjacentSystems(systemname);
+	for (int i=0;i<adj;++i) {
+		visitSystemHelp (this,UniverseUtil::GetAdjacentSystem(systemname,i),0.0);
+	}
+}
+
 Cockpit::~Cockpit () {
   Delete();
   if( savegame!=NULL)

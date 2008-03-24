@@ -14,7 +14,6 @@
 #define MAXZOOM 10
 
 
-void visitSystem (class Cockpit * cp, std::string systemname) ;
 void Beautify (string systemfile, string & sector, string & system);
 class NavigationSystem
 {
@@ -129,6 +128,7 @@ public:
 
 
 
+PathManager * pathman;
 private:
 friend class NavComputer;
 friend class CurrentPathNode;
@@ -138,9 +138,7 @@ friend class CriteriaContains;
 friend class CriteriaOwnedBy;
 friend class CriteriaSector;
 friend class NavPath;
-friend void visitSystemHelp (Cockpit * cp, string systemname,float num);
 NavComputer * navcomp;
-PathManager * pathman;
 unsigned currentsystemindex;
 unsigned focusedsystemindex;
 unsigned destinationsystemindex;

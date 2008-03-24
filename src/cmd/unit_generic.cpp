@@ -9461,6 +9461,14 @@ bool Unit::TransferUnitToSystem (StarSystem * Current)
 		this->Target(NULL);
 		Current->AddUnit (this);
 
+		Cockpit * an_active_cockpit = _Universe->isPlayerStarship(this);
+		if (an_active_cockpit!=NULL) {
+			an_active_cockpit->activeStarSystem=Current;
+			an_active_cockpit->visitSystem (Current->getFileName());
+			//	vector<float> *v = &an_active_cockpit->savegame->getMissionData(string("visited_")+pendingjump[kk]->dest->getFileName());
+			//	if (v->empty())v->push_back (1.0);else (*v)[0]=1.0;
+		}
+
 		activeStarSystem = Current;
 		return true;
 	}

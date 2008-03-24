@@ -1846,6 +1846,17 @@ bool GameCockpit::CanDrawNavSystem() {
   return ThisNav.CheckDraw();
 }
 
+void GameCockpit::visitSystem ( string systemname ) {
+	Cockpit::visitSystem(systemname);
+	if(AccessNavSystem()) {
+		static bool AlwaysUpdateNavMap=XMLSupport::parse_bool(vs_config->getVariable("graphics","update_nav_after_jump","false"));//causes occasional crash--only may have tracked it down
+		if(AlwaysUpdateNavMap)
+			AccessNavSystem()->pathman->updatePaths();
+		AccessNavSystem()->setCurrentSystem(systemname);
+	}
+}
+
+
 bool GameCockpit::DrawNavSystem() {
 
   

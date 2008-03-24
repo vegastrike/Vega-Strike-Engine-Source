@@ -1170,20 +1170,6 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system,
 		VSFileSystem::vs_fprintf (stderr,"jumping to %s.  ",system.c_str());
 #endif
 		StarSystem * ss = star_system_table.Get(system);
-		if( SERVER && !ss) {
-			// On server side the system must have been generated before a JumpTo call !
-			cout<<"!!! ERROR = Jumping to StarSystem "<<system<<" not yet loaded"<<endl;
-			fflush(stdout);
-			
-			{ // Crash incase this happens, to get a stacktrace!
-				int *p = NULL;
-				printf("%d\n",(*p));
-			}
-			/*
-			  // Generally servers are not supposed to exit on a whim...
-			exit(1);
-			*/
-		}
 		std::string ssys (system+".system");
 		if (!ss) {
 			ss = star_system_table.Get (ssys);
@@ -1192,6 +1178,7 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system,
 		if (!ss) {
 			justloaded=true;
 			ss = _Universe->GenerateStarSystem (ssys.c_str(),filename.c_str(),Vector (0,0,0));
+			// NETFIXME: Do we want to generate the system if an AI unit jumps?
 		}
 		if(ss&&!isJumping(pendingjump,un)) {
 #ifdef JUMP_DEBUG

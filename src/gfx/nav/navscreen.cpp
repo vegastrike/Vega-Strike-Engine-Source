@@ -94,8 +94,7 @@ void NavigationSystem::mouseClick (int button, int state, int x, int y){
 
 void NavigationSystem::Setup()
 {
-	visitSystem(_Universe->AccessCockpit(),
-		    _Universe->activeStarSystem()->getFileName());
+	_Universe->AccessCockpit()->visitSystem(_Universe->activeStarSystem()->getFileName());
 
 	configmode = 0;
 
@@ -423,29 +422,6 @@ void NavigationSystem::Setup()
 
 
 
-
-void visitSystemHelp (Cockpit * cp, string systemname,float num) {
-	string key (string("visited_")+systemname);
-	vector<float> *v = &_Universe->AccessCockpit()->savegame->getMissionData(key);
-	if (v->empty()){
-		v->push_back (num);
-                static bool AlwaysUpdateNavMap=XMLSupport::parse_bool(vs_config->getVariable("graphics","update_nav_after_jump","false"));//causes occasional crash--only may have tracked it down
-		if(AlwaysUpdateNavMap&&_Universe->AccessCockpit()->AccessNavSystem())
-		        _Universe->AccessCockpit()->AccessNavSystem()->pathman->updatePaths();
-	} else if ((*v)[0]!=1.0&&num==1) {
-		(*v)[0]=num;
-	}
-	
-}
-void visitSystem (Cockpit * cp , string systemname ) {
-	visitSystemHelp (cp,systemname,1.0);
-	int adj = UniverseUtil::GetNumAdjacentSystems(systemname);
-	for (int i=0;i<adj;++i) {
-		visitSystemHelp (cp,UniverseUtil::GetAdjacentSystem(systemname,i),0.0);
-	}
-	if(_Universe->AccessCockpit()->AccessNavSystem())
-	  _Universe->AccessCockpit()->AccessNavSystem()->setCurrentSystem(systemname);		
-}
 
 //	This is the main draw loop for the nav screen
 //	**********************************

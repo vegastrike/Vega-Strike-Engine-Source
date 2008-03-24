@@ -185,5 +185,6 @@ private:
   virtual bool CanDrawNavSystem();
   virtual bool DrawNavSystem();
   virtual bool CheckCommAnimation(Unit *un);
+  virtual void visitSystem(std::string systemName);
 };
 #endif
