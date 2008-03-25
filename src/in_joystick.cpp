@@ -201,7 +201,7 @@ JoyStick::JoyStick(int which): mouse(which==MOUSE_JOYSTICK) {
 
   static bool def_debug_digital_hatswitch=XMLSupport::parse_bool(vs_config->getVariable("joystick","debug_digital_hatswitch","false"));
   static float def_joy_deadzone=XMLSupport::parse_float(vs_config->getVariable("joystick","deadband","0.05"));
-  static float def_mouse_deadzone=XMLSupport::parse_float (vs_config->getVariable("joystick","mouse_deadband","0"));
+  static float def_mouse_deadzone=XMLSupport::parse_float (vs_config->getVariable("joystick","mouse_deadband","0.025")); // also defined cockpit.cpp:2700
 
   player=which;//by default bind players to whichever joystick it is
   debug_digital_hatswitch=def_debug_digital_hatswitch;
@@ -326,13 +326,18 @@ void JoyStick::GetMouse (float &x, float &y, float &z, int &buttons) {
     fdy=float(valy)/joystickblur;
     //printf (" x:%.2f y:%.2f %d ",fdx,fdy,avg);
   }
-  joy_axis[0]=x = fdx/(g_game.x_resolution*def_mouse_sens/mouse_sensitivity);
-  joy_axis[1]=y = fdy/(g_game.y_resolution*def_mouse_sens/mouse_sensitivity);
+  joy_axis[0]= fdx/(g_game.x_resolution*def_mouse_sens/mouse_sensitivity);
+  joy_axis[1]= fdy/(g_game.y_resolution*def_mouse_sens/mouse_sensitivity);
 
+  if (warp_pointer==false) {
+    modifyDeadZone(this);
+  }
+  
   joy_axis[0]*=mouse_exp;
   joy_axis[1]*=mouse_exp;
-  x*=mouse_exp;
-  y*=mouse_exp;
+
+  x = joy_axis[0];
+  y = joy_axis[1];
  
   joy_axis[2]=z=0;
   buttons = getMouseButtonStatus();

@@ -2698,12 +2698,27 @@ void GameCockpit::Draw() {
          GFXEnable(TEXTURE0);
          //    GFXDisable (DEPTHTEST);
          //    GFXDisable(TEXTURE1);
+         static float deadband=XMLSupport::parse_float (vs_config->getVariable("joystick","mouse_deadband","0.025"));
          static int revspr = XMLSupport::parse_bool (vs_config->getVariable ("joystick","reverse_mouse_spr","true"))?1:-1;
          static string blah = vs_config->getVariable("joystick","mouse_crosshair","crosshairs.spr");
          static int num=printf ("CROSS %f\n",crossceny);
          static VSSprite MouseVSSprite (blah.c_str(),BILINEAR,GFXTRUE);
-         MouseVSSprite.SetPosition ((-1+float(mousex)/(.5*g_game.x_resolution))*(1-fabs(crosscenx))+crosscenx,(-revspr+float(revspr*mousey)/(.5*g_game.y_resolution))*(1-fabs(crossceny))+crossceny);
+		 float xcoord=(-1+float(mousex)/(.5*g_game.x_resolution));
+		 float ycoord=(-revspr+float(revspr*mousey)/(.5*g_game.y_resolution));
+         MouseVSSprite.SetPosition (xcoord*(1-fabs(crosscenx))+crosscenx,ycoord*(1-fabs(crossceny))+crossceny);
+		 float xs,ys;
+		 MouseVSSprite.GetSize(xs,ys);
+		 if (xcoord<deadband && ycoord<deadband && xcoord>-deadband && ycoord>-deadband) {
+			 // The other option would be to place it in the center.
+			 // but it's sometimes useful to know where the mouse actually is.
+			 MouseVSSprite.SetSize(xs/2,ys/2);
+		 } else if (xcoord<deadband && xcoord>-deadband) {
+			 MouseVSSprite.SetSize(xs/2,ys*5/6);
+		 } else if (ycoord<deadband && ycoord>-deadband) {
+			 MouseVSSprite.SetSize(xs*5/6,ys/2);
+		 }
          MouseVSSprite.Draw();
+		 MouseVSSprite.SetSize(xs,ys);
          //    DrawGlutMouse(mousex,mousey,&MouseVSSprite);
          //    DrawGlutMouse(mousex,mousey,&MouseVSSprite);
       }
