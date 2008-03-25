@@ -139,6 +139,9 @@ int NetUIBase::createServerSocket(const AddressIP &local_ip, bool isTCP)
         return -1;
     }
 
+    int newval = 1;
+    setsockopt(local_fd, SOL_SOCKET, SO_REUSEADDR, &newval, sizeof(int));
+
     // binds socket
     COUT << "Bind on " << ntohl(local_ip.sin_addr.s_addr) << ", port "
          << ntohs( local_ip.sin_port) << std::endl;
