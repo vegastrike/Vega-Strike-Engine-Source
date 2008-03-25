@@ -370,29 +370,48 @@ using namespace std;
   for (unsigned int i=0;i<factions.size();i++) {
     for (unsigned int j=0;j<factions[i]->faction.size();j++) {
       Faction * fact=factions[i];
-      string fname=fact->factionname;
-
+      string myname=fact->factionname;
+	  string jointname=myname+"to"+factions[j]->factionname;
+	  string fname;
       if (fact->faction[j].conversation==NULL){
-		  
+		 
+		  /* THE FOLLOWING APPEARS TO BE DEAD CODE -- COMMENTING OUT FOR NOW
 		  //if (factions[i]->faction[j].stats.index != 0)	  {
 		  if (0) {//we just want OUR faction to use that file when communicating with ANYONE  -- if we want certain factions to have *special* comm info for each other, then we can specify the conversation flag
 			  fname = factions[factions[i]->faction[j].stats.index]->factionname;
 		  }else {
 			  fname = factions[i]->factionname;
 		  }
+		 */
 
           //Looking for a file is somewhat expensive - a cache speeds up a lot this N^2 loop.
           //  I know... not a great improvement... but bare with me - I hate N^2 loops.
-          bool res;
-		  stdext::hash_map<string,bool>::iterator it = cache.find(fname);
+          bool foundjointname=false;
+		  bool foundmyname=false;
+		  stdext::hash_map<string,bool>::iterator it = cache.find(myname);
           if (it != cache.end()) {
-              res = it->second;
+              foundmyname = it->second;
           } else {
-              string f=fname+".xml";
-              res = (VSFileSystem::LookForFile(f, CommFile)<=Ok);
-              cache.insert(pair<string,bool>(fname,res));
+              string f=myname+".xml";
+              foundmyname = (VSFileSystem::LookForFile(f, CommFile)<=Ok);
+              cache.insert(pair<string,bool>(myname,foundmyname));
           }
-          if (!res) fname="neutral";
+		  it = cache.find(jointname);
+          if (it != cache.end()) {
+              foundjointname = it->second;
+          } else {
+              string f=jointname+".xml";
+              foundjointname = (VSFileSystem::LookForFile(f, CommFile)<=Ok);
+              cache.insert(pair<string,bool>(jointname,foundjointname));
+          }
+		  if(foundjointname){
+			fname=jointname;
+		  }else if(foundmyname){
+			fname=myname;
+		  }else {
+		    fname="neutral";	
+		  }
+          
 		  factions[i]->faction[j].conversation=getFSM (/*"communications/" +*/ fname + ".xml");
       }else{
         //printf ("Already have converastion for %s with %s\n",fname.c_str(),factions[j]->factionname);
