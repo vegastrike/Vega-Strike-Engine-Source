@@ -1,4 +1,5 @@
 #include <string>
+#include <sstream>
 #include <stdlib.h>
 //#include <strstream.h>
 #include <ctype.h>
@@ -76,17 +77,25 @@ namespace XMLSupport {
   }
   double parse_float(const string &str) 
   {
-    return(atof (str.c_str()));
+  	double ret = 0.0f;
+  	std::stringstream ss(str);
+  	ss >> ret;
+    return(ret);
   }
   
   float parse_floatf(const string &str) 
   {
-    // was: strtof, but this function is non-portable (only in C99)
-    return (float)(atof (str.c_str()));
+	float ret = 0.0f;
+	std::stringstream ss(str);
+	ss >> ret;
+	return(ret);
   }
   
   int parse_int(const string &str) {
-    return atoi (str.c_str());
+  	int ret = 0;
+  	std::stringstream ss(str);
+  	ss >> ret;
+  	return(ret);
   }
   string::size_type parse_option_find(const string &str, const string &opt, const string &sep, const string &vsep) {
     bool ini=true;

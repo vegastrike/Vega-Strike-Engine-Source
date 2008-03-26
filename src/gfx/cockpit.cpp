@@ -50,6 +50,8 @@
 #include "cmd/unit_const_cache.h"
 #include "options.h"
 
+extern vs_options game_options;
+
 static float mymin(float a, float b) {
 	return (a<b) ? a : b;
 }

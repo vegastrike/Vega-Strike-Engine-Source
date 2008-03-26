@@ -107,6 +107,5 @@ class vs_options
 		std::string getCallsign(int);
 };
 
-extern vs_options game_options;
 
 #endif
