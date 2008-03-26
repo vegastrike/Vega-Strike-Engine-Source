@@ -188,7 +188,7 @@ void PlanetaryOrbit::Execute() {
     for (int o = 0; o < limit; o++) {
       sum_orbiting_average+=orbiting_average[o];
     }
-    sum_orbiting_average*=1./(limit);
+    sum_orbiting_average*=1./(limit==0?1:limit);
   }
   //unuseddouble radius =  sqrt((x_offset - focus).MagnitudeSquared() + (y_offset - focus).MagnitudeSquared());
   const double div2pi = (1.0/(2.0*PI));
