@@ -21,7 +21,12 @@ class PlanetaryOrbit : public Order {
   QVector x_size;
   QVector y_size;
   QVector focus;
-  QVector orbiting_average;
+#define ORBIT_PRIORITY 4
+#define NUM_ORBIT_AVERAGE (SIM_QUEUE_SIZE/ORBIT_PRIORITY)
+  QVector orbiting_average[NUM_ORBIT_AVERAGE];
+  float orbiting_last_simatom;
+  int current_orbit_frame;
+  bool orbit_list_filled;
  protected:
   ///A vector containing all lihgts currently activated on current planet
   std::vector <int> lights;

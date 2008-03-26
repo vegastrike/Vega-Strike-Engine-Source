@@ -31,7 +31,11 @@ string getCargoUnitName (const char * textname) {
   free(tmp2);
   return retval;
 }
-PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const QVector &x_axis, const QVector &y_axis, const QVector & centre, Unit * targetunit) : Order(MOVEMENT,0),  velocity(velocity), theta(initpos), inittheta(initpos), x_size(x_axis), y_size(y_axis),orbiting_average(0,0,0) {
+PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const QVector &x_axis, const QVector &y_axis, const QVector & centre, Unit * targetunit) : Order(MOVEMENT,0),  velocity(velocity), theta(initpos), inittheta(initpos), x_size(x_axis), y_size(y_axis), current_orbit_frame(0) {
+	for (int t=0;t<NUM_ORBIT_AVERAGE;t++) {
+		orbiting_average[t]=QVector(0,0,0);
+	}
+	orbiting_last_simatom = SIMULATION_ATOM;
   p->SetResolveForces(false);
     double delta = x_size.Magnitude() - y_size.Magnitude();
     if(delta == 0) {
@@ -61,8 +65,15 @@ PlanetaryOrbit::~PlanetaryOrbit () {
 }
 extern double saved_interpolation_blend_factor;
 
+#ifndef _WIN32
+#include <fenv.h>
+#endif
+
 double calc_blend_factor(double frac, int priority, int when_it_will_be_simulated, int cur_simulation_frame);
 void PlanetaryOrbit::Execute() {
+#ifndef _WIN32
+  feenableexcept(FE_DIVBYZERO|FE_INVALID);
+#endif
   bool mining=parent->rSize()>1444&&parent->rSize()<1445;
   bool done =this->done;
   this->Order::Execute();
@@ -79,6 +90,7 @@ void PlanetaryOrbit::Execute() {
       Unit * unit = group.GetUnit();
       if (unit) {
         float my_multiplier=parent->sim_atom_multiplier;
+		/*
         if (mining&&0) {
           printf ("[%.2f %.2f %.2f]->%.2f\n[%.2f %.2f %.2f->]\n",
                   orbiting_average.i,
@@ -90,20 +102,93 @@ void PlanetaryOrbit::Execute() {
                   unit->curr_physical_state.position.k
                   );
         }
+		*/
         double blend_factor=calc_blend_factor(saved_interpolation_blend_factor,unit->sim_atom_multiplier,unit->cur_sim_queue_slot,cur_sim_frame);
-        if ((orbiting_average.i==0&&
-             orbiting_average.j==0&&
-             orbiting_average.k==0)) {
-          orbiting_average= unit->prev_physical_state.position*(1-blend_factor)+blend_factor*unit->curr_physical_state.position;          
+        int o = current_orbit_frame++;
+		current_orbit_frame %= NUM_ORBIT_AVERAGE;
+		if (current_orbit_frame==0)
+			orbit_list_filled = true;
+        QVector desired=unit->prev_physical_state.position;// + unit->Velocity*SIMULATION_ATOM;
+		//*(1-blend_factor)+blend_factor*unit->curr_physical_state.position;
+		/*
+        if ((orbiting_average[o].i==0&&
+             orbiting_average[o].j==0&&
+             orbiting_average[o].k==0)) {
+          orbiting_average[o]= desired;
         }else {
-          QVector desired=unit->prev_physical_state.position*(1-blend_factor)+blend_factor*unit->curr_physical_state.position;          
-          orbiting_average=orbiting_average*((averaging-1.0f)/averaging)+desired*(1.0f/averaging);
+          orbiting_average[o]=orbiting_average*((averaging-1.0f)/averaging)+desired*(1.0f/averaging);
         }
+		*/
+		if (orbiting_average[o].i==0 && orbiting_average[o].j==0 && orbiting_average[o].k==0) {
+			// clear all of them.
+			for (o=0; o<NUM_ORBIT_AVERAGE; o++) {
+				orbiting_average[o] = desired;
+			}
+			orbiting_last_simatom = SIMULATION_ATOM;
+			current_orbit_frame = 2;
+			orbit_list_filled = false;
+		} else {
+			if (SIMULATION_ATOM != orbiting_last_simatom) {
+				QVector sum_diff(0,0,0);
+				QVector sum_position;
+				int limit;
+				if (orbit_list_filled) {
+					sum_position = orbiting_average[o];
+					limit = NUM_ORBIT_AVERAGE -1;
+					o = (o+1)%NUM_ORBIT_AVERAGE;
+				} else {
+					sum_position = orbiting_average[0];
+					limit = o;
+					o = 1;
+				}
+				for (int i=0;i<limit;i++) {
+					sum_diff += (orbiting_average[o] - orbiting_average[(o+NUM_ORBIT_AVERAGE-1)%NUM_ORBIT_AVERAGE]);
+					sum_position += orbiting_average[o];
+					o = (o+1)%NUM_ORBIT_AVERAGE;
+				}
+				if (limit != 0)
+					sum_diff *= (1./(limit));
+				sum_position *= (1./(limit+1));
+
+				float ratio_simatom = (SIMULATION_ATOM/orbiting_last_simatom);
+				sum_diff *= ratio_simatom;
+				int number_to_fill;
+				number_to_fill = (int)((NUM_ORBIT_AVERAGE/ratio_simatom)+.99);
+				if (number_to_fill > NUM_ORBIT_AVERAGE) number_to_fill = NUM_ORBIT_AVERAGE;
+				if (ratio_simatom <= 1) {
+					number_to_fill = NUM_ORBIT_AVERAGE;
+				}
+				// subtract it so the average remains the same.
+				sum_position += (sum_diff * (number_to_fill/-2.)); 
+				for (o=0;o<number_to_fill;o++) {
+					orbiting_average[o] = sum_position;
+					sum_position += sum_diff;
+				}
+				orbit_list_filled = (o >= NUM_ORBIT_AVERAGE-1);
+				o %= NUM_ORBIT_AVERAGE;
+				current_orbit_frame = (o+1) % NUM_ORBIT_AVERAGE;
+				orbiting_last_simatom = SIMULATION_ATOM;
+			}
+			orbiting_average[o] = desired;
+		}
       }else {
         done = true;
         parent->SetResolveForces(true);
         return;//flung off into space.
       }
+  }
+  QVector sum_orbiting_average(0,0,0);
+  {
+    int limit;
+    if (orbit_list_filled)
+      limit = NUM_ORBIT_AVERAGE;
+    else
+      limit = current_orbit_frame;
+    
+    for (int o = 0; o < limit; o++) {
+      sum_orbiting_average+=orbiting_average[o];
+    }
+    sum_orbiting_average*=1./(limit);
   }
   //unuseddouble radius =  sqrt((x_offset - focus).MagnitudeSquared() + (y_offset - focus).MagnitudeSquared());
   const double div2pi = (1.0/(2.0*PI));
@@ -115,7 +200,7 @@ void PlanetaryOrbit::Execute() {
   QVector x_offset = cos(theta) * x_size;
   QVector y_offset = sin(theta) * y_size;
 
-  QVector destination=origin - focus + orbiting_average + x_offset+y_offset;
+  QVector destination=origin - focus + sum_orbiting_average + x_offset+y_offset;
   double mag=(destination-parent->LocalPosition()).Magnitude();
   if (mining&&0) {
     printf ("(%.2f %.2f %.2f)\n(%.2f %.2f %.2f) del %.2f spd %.2f\n",
@@ -147,8 +232,11 @@ void PlanetaryOrbit::Execute() {
   if (v2>Unreasonable_value*Unreasonable_value/*||v2>uglinesscheck*/) {
     parent->Velocity.Set (0,0,0);
     parent->cumulative_velocity.Set (0,0,0);
-    parent->SetCurPosition (origin-focus+orbiting_average+x_offset+y_offset);
+    parent->SetCurPosition (origin-focus+sum_orbiting_average+x_offset+y_offset);
   }
+#ifndef _WIN32
+  fedisableexcept(FE_DIVBYZERO|FE_INVALID);
+#endif
 }
 string GetElMeshName (string name, string faction,char direction)
 {

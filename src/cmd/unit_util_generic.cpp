@@ -78,7 +78,11 @@ namespace UnitUtil {
 		float cpdist=FLT_MAX;
 		float tooclose=0;
         unsigned int np = _Universe->numPlayers();
-		Cockpit* cockpit=_Universe->AccessCockpit();
+        Cockpit* cockpit=_Universe->AccessCockpit();
+        static bool fixed_system_orbit_priorities=XMLSupport::parse_bool(vs_config->getVariable("physics","fixed_system_orbit_priorities","true"));
+        if (un->owner==getTopLevelOwner()) {
+            return SIM_QUEUE_SIZE/ORBIT_PRIORITY;
+        }
         for (unsigned int i=0;i<np;++i) {			
 			Unit * player=_Universe->AccessCockpit(i)->GetParent();
 			if (player) {
@@ -122,91 +126,91 @@ namespace UnitUtil {
                (0&&_Universe->AccessCockpit(i)->GetSaveParent()==un)) {                    
                return PLAYER_PRIORITY;                    
             }
-		}
-		if (untype==MISSILEPTR)
-			return MISSILE_PRIORITY;
-		if (hasDockingUnits(un))
-			return DOCKABLE_PRIORITY;
-
-		static const int ASTEROID_PARENT_PRIORITY=XMLSupport::parse_int(
-			vs_config->getVariable("physics","priorities","asteroid_parent","1") );
-        static const int ASTEROID_HIGH_PRIORITY=XMLSupport::parse_int(
-			vs_config->getVariable("physics","priorities","asteroid_high","2") );
-        static const int ASTEROID_LOW_PRIORITY=XMLSupport::parse_int(
-			vs_config->getVariable("physics","priorities","asteroid.low","32") );
-		
-		static const int TOP_PRIORITY=XMLSupport::parse_int(
-			vs_config->getVariable("physics","priorities","top","1") );
-		static const int HIGH_PRIORITY=XMLSupport::parse_int(
-			vs_config->getVariable("physics","priorities","high",SERVER?"1":"2") );
-		static const int MEDIUMHIGH_PRIORITY=XMLSupport::parse_int(
-			vs_config->getVariable("physics","priorities","mediumhigh","4") );
-		static const int MEDIUM_PRIORITY=XMLSupport::parse_int(
-			vs_config->getVariable("physics","priorities","medium","8") );
-		static const int MEDIUMLOW_PRIORITY=XMLSupport::parse_int(
-			vs_config->getVariable("physics","priorities","mediumlow","16") );
-		static const int LOW_PRIORITY=XMLSupport::parse_int(
-			vs_config->getVariable("physics","priorities","low","32") );
+        }
+        if (untype==MISSILEPTR)
+            return MISSILE_PRIORITY;
+        if (hasDockingUnits(un))
+            return DOCKABLE_PRIORITY;
         
-		static const int NOT_VISIBLE_COMBAT_HIGH=XMLSupport::parse_int(
-			vs_config->getVariable("physics","priorities","notvisible_combat_high","10") );
-		static const int NOT_VISIBLE_COMBAT_MEDIUM=XMLSupport::parse_int(
-			vs_config->getVariable("physics","priorities","notvisible_combat_medium","20") );
-		static const int NOT_VISIBLE_COMBAT_LOW=XMLSupport::parse_int(
-			vs_config->getVariable("physics","priorities","notvisible_combat_low","40") );
-
-		static const int NO_ENEMIES=XMLSupport::parse_int(
-			vs_config->getVariable("physics","priorities","no_enemies","64") );
-		static const int INERT_PRIORITY=XMLSupport::parse_int(
-			vs_config->getVariable("physics","priorities","inert","64") );
-
-		static const float _PLAYERTHREAT_DISTANCE_FACTOR=XMLSupport::parse_float(
-			vs_config->getVariable("physics","priorities","playerthreat_distance_factor","2") );
-		static const float _THREAT_DISTANCE_FACTOR=XMLSupport::parse_float(
-			vs_config->getVariable("physics","priorities","threat_distance_factor","1") );
-
-		static const bool DYNAMIC_THROTTLE_ENABLE=XMLSupport::parse_bool(
-			vs_config->getVariable("physics","priorities","dynamic_throttle.enable","true") );
-		static const float DYNAMIC_THROTTLE_MINFACTOR=XMLSupport::parse_float(
-			vs_config->getVariable("physics","priorities","dynamic_throttle.mindistancefactor","0.25") );
-		static const float DYNAMIC_THROTTLE_MAXFACTOR=XMLSupport::parse_float(
-			vs_config->getVariable("physics","priorities","dynamic_throttle.maxdistancefactor","4") );
-		static const float DYNAMIC_THROTTLE_TARGETFPS=XMLSupport::parse_float(
-			vs_config->getVariable("physics","priorities","dynamic_throttle.targetfps","30") );
-		static const float DYNAMIC_THROTTLE_TARGETELAPSEDTIME = 1.f/DYNAMIC_THROTTLE_TARGETFPS;
-
-		static float DYNAMIC_THROTTLE_FACTOR=1.f;
-		static float lastThrottleAdjust=0;
-
-		if (UniverseUtil::GetGameTime() != lastThrottleAdjust) {
-			lastThrottleAdjust = UniverseUtil::GetGameTime();
-			float newfactor = DYNAMIC_THROTTLE_FACTOR * DYNAMIC_THROTTLE_TARGETELAPSEDTIME / GetElapsedTime();
-			newfactor = mymax(DYNAMIC_THROTTLE_MINFACTOR,mymin(DYNAMIC_THROTTLE_MAXFACTOR,newfactor));
-			DYNAMIC_THROTTLE_FACTOR = (newfactor * GetElapsedTime() + DYNAMIC_THROTTLE_FACTOR) / (1.0+GetElapsedTime());
-		}
-
-		const float PLAYERTHREAT_DISTANCE_FACTOR = _PLAYERTHREAT_DISTANCE_FACTOR * DYNAMIC_THROTTLE_FACTOR;
-		const float THREAT_DISTANCE_FACTOR = _THREAT_DISTANCE_FACTOR * DYNAMIC_THROTTLE_FACTOR;
-
-		// Here we assume that SIM_QUEUE_SIZE is >=64
-		const int LOWEST_PRIORITY=SIM_QUEUE_SIZE;
-		
-		
-
-		Unit * parent=cockpit->GetParent();
-
-
-		float gun_range=0;
-		float missile_range=0;
-		float dist=cpdist;
-		if (parent) {
-			float speed=0;
-			parent->getAverageGunSpeed(speed,gun_range,missile_range);
-		}
-		static int cargofac=FactionUtil::GetFactionIndex("cargo");
-		int upfac=FactionUtil::GetUpgradeFaction();
-		int neutral=FactionUtil::GetNeutralFaction();
-		
+        static const int ASTEROID_PARENT_PRIORITY=XMLSupport::parse_int(
+            vs_config->getVariable("physics","priorities","asteroid_parent","1") );
+        static const int ASTEROID_HIGH_PRIORITY=XMLSupport::parse_int(
+            vs_config->getVariable("physics","priorities","asteroid_high","2") );
+        static const int ASTEROID_LOW_PRIORITY=XMLSupport::parse_int(
+            vs_config->getVariable("physics","priorities","asteroid.low","32") );
+        
+        static const int TOP_PRIORITY=XMLSupport::parse_int(
+            vs_config->getVariable("physics","priorities","top","1") );
+        static const int HIGH_PRIORITY=XMLSupport::parse_int(
+            vs_config->getVariable("physics","priorities","high",SERVER?"1":"2") );
+        static const int MEDIUMHIGH_PRIORITY=XMLSupport::parse_int(
+            vs_config->getVariable("physics","priorities","mediumhigh","4") );
+        static const int MEDIUM_PRIORITY=XMLSupport::parse_int(
+            vs_config->getVariable("physics","priorities","medium","8") );
+        static const int MEDIUMLOW_PRIORITY=XMLSupport::parse_int(
+            vs_config->getVariable("physics","priorities","mediumlow","16") );
+        static const int LOW_PRIORITY=XMLSupport::parse_int(
+            vs_config->getVariable("physics","priorities","low","32") );
+        
+        static const int NOT_VISIBLE_COMBAT_HIGH=XMLSupport::parse_int(
+            vs_config->getVariable("physics","priorities","notvisible_combat_high","10") );
+        static const int NOT_VISIBLE_COMBAT_MEDIUM=XMLSupport::parse_int(
+            vs_config->getVariable("physics","priorities","notvisible_combat_medium","20") );
+        static const int NOT_VISIBLE_COMBAT_LOW=XMLSupport::parse_int(
+            vs_config->getVariable("physics","priorities","notvisible_combat_low","40") );
+        
+        static const int NO_ENEMIES=XMLSupport::parse_int(
+            vs_config->getVariable("physics","priorities","no_enemies","64") );
+        static const int INERT_PRIORITY=XMLSupport::parse_int(
+            vs_config->getVariable("physics","priorities","inert","64") );
+        
+        static const float _PLAYERTHREAT_DISTANCE_FACTOR=XMLSupport::parse_float(
+            vs_config->getVariable("physics","priorities","playerthreat_distance_factor","2") );
+        static const float _THREAT_DISTANCE_FACTOR=XMLSupport::parse_float(
+            vs_config->getVariable("physics","priorities","threat_distance_factor","1") );
+        
+        static const bool DYNAMIC_THROTTLE_ENABLE=XMLSupport::parse_bool(
+            vs_config->getVariable("physics","priorities","dynamic_throttle.enable","true") );
+        static const float DYNAMIC_THROTTLE_MINFACTOR=XMLSupport::parse_float(
+            vs_config->getVariable("physics","priorities","dynamic_throttle.mindistancefactor","0.25") );
+        static const float DYNAMIC_THROTTLE_MAXFACTOR=XMLSupport::parse_float(
+            vs_config->getVariable("physics","priorities","dynamic_throttle.maxdistancefactor","4") );
+        static const float DYNAMIC_THROTTLE_TARGETFPS=XMLSupport::parse_float(
+            vs_config->getVariable("physics","priorities","dynamic_throttle.targetfps","30") );
+        static const float DYNAMIC_THROTTLE_TARGETELAPSEDTIME = 1.f/DYNAMIC_THROTTLE_TARGETFPS;
+        
+        static float DYNAMIC_THROTTLE_FACTOR=1.f;
+        static float lastThrottleAdjust=0;
+        
+        if (UniverseUtil::GetGameTime() != lastThrottleAdjust) {
+            lastThrottleAdjust = UniverseUtil::GetGameTime();
+            float newfactor = DYNAMIC_THROTTLE_FACTOR * DYNAMIC_THROTTLE_TARGETELAPSEDTIME / GetElapsedTime();
+            newfactor = mymax(DYNAMIC_THROTTLE_MINFACTOR,mymin(DYNAMIC_THROTTLE_MAXFACTOR,newfactor));
+            DYNAMIC_THROTTLE_FACTOR = (newfactor * GetElapsedTime() + DYNAMIC_THROTTLE_FACTOR) / (1.0+GetElapsedTime());
+        }
+        
+        const float PLAYERTHREAT_DISTANCE_FACTOR = _PLAYERTHREAT_DISTANCE_FACTOR * DYNAMIC_THROTTLE_FACTOR;
+        const float THREAT_DISTANCE_FACTOR = _THREAT_DISTANCE_FACTOR * DYNAMIC_THROTTLE_FACTOR;
+        
+        // Here we assume that SIM_QUEUE_SIZE is >=64
+        const int LOWEST_PRIORITY=SIM_QUEUE_SIZE;
+	
+	
+        
+        Unit * parent=cockpit->GetParent();
+        
+        
+        float gun_range=0;
+        float missile_range=0;
+        float dist=cpdist;
+        if (parent) {
+            float speed=0;
+            parent->getAverageGunSpeed(speed,gun_range,missile_range);
+        }
+        static int cargofac=FactionUtil::GetFactionIndex("cargo");
+        int upfac=FactionUtil::GetUpgradeFaction();
+        int neutral=FactionUtil::GetNeutralFaction();
+	
         if (un->schedule_priority != Unit::scheduleDefault) {
             //Asteroids do scheduling themselves within subunits, so...
             //...only one caveat: units with their own internal scheduling
