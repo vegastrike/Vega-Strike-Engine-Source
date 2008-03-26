@@ -45,7 +45,7 @@ public:
   void FormUp(QVector pos);
   void FormUpToOwner(QVector pos);
   void FaceDirection (float distToMatchFacing, bool finish);
-  void XMLScript (string script);
+  void XMLScript (std::string script);
   void LastPythonScript();
 
   virtual void SetParent (Unit * parent) {

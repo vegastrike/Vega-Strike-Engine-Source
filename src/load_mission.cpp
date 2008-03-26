@@ -17,6 +17,10 @@
 #include "savegame.h"
 #include "save_util.h"
 #include "load_mission.h"
+
+#include "options.h"
+
+extern vs_options game_options;
 std::string PickledDataSansMissionName (std::string pickled) {
   string::size_type newline = pickled.find ("\n");
   if (newline!=string::npos)
@@ -232,8 +236,7 @@ void LoadMission (const char * nission_name, const std::string &script, bool loa
 		friendly_mission_name++;
 	}
 	if (mission_name.empty()) {
-		static std::string mission_name_def=vs_config->getVariable("general","empty_mission","internal.mission");
-		mission_name=mission_name_def;
+		mission_name=game_options.empty_mission;;
 	}
   printf("%s",script.c_str());
   VSFile f;

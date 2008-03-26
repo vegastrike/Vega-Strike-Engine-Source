@@ -96,7 +96,7 @@ namespace FactionUtil {
     extern int planetfac;
 		std::vector <class Animation *>* GetRandCommAnimation(int faction, Unit * unit, unsigned char &sex);
 		void SerializeFaction (FILE * file);
-		string SerializeFaction();
+		std::string SerializeFaction();
 		void LoadSerializedFaction (FILE * file);
 		void LoadSerializedFaction( char * &buf);
 		int numnums (const char * str);
@@ -110,7 +110,7 @@ namespace FactionUtil {
 		* 1 is happy. 0 is neutral (btw 1 and 0 will not attack)
 		* -1 is mad. <0 will attack
 		*/
-		int GetFactionIndex(string name);
+		int GetFactionIndex(std::string name);
 		inline int GetUpgradeFaction(){return upgradefac;}
 		inline int GetNeutralFaction(){return neutralfac;}
 		inline int GetPlanetFaction(){return planetfac;}
@@ -118,12 +118,12 @@ namespace FactionUtil {
                    return factions[myfaction]->faction[theirfaction].relationship;
                 }
 
-		float GetRelation (string myfaction, string theirfaction);
-		string GetFactionName(int index);
+		float GetRelation (std::string myfaction, std::string theirfaction);
+		std::string GetFactionName(int index);
 		bool isCitizenInt(int index);
 		bool isCitizen(std::string name);
 		void AdjustIntRelation (const int myfaction, const int theirfaction, const float factor, const float rank);
-		void AdjustRelation(string myfaction,string theirfaction, float factor, float rank);
+		void AdjustRelation(std::string myfaction,std::string theirfaction, float factor, float rank);
 		int GetPlaylist (const int myfaction);
 		const float* GetSparkColor (const int myfaction);
 		unsigned int GetNumFactions();

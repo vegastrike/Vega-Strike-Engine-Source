@@ -41,6 +41,10 @@
 #endif
 #endif
 
+#include "options.h"
+
+extern vs_options game_options;
+
 // Used for storing the max and min values of the tree Joystick Axes - Okona
 static int maxx=1;
 static int minx=-1;
@@ -66,10 +70,9 @@ void modifyDeadZone(JoyStick * j) {
     }
 }
 void modifyExponent(JoyStick * j) {
-    static float joy_exp = XMLSupport::parse_float(vs_config->getVariable ("joystick","joystick_exponent","1.0"));
-    if ((joy_exp != 1.0)&&(joy_exp > 0)) {
+    if ((game_options.joystick_exponent != 1.0)&&(game_options.joystick_exponent > 0)) {
         for(int a=0;a<j->nr_of_axes;a++) 
-            j->joy_axis[a]=((j->joy_axis[a]<0)?-pow(-j->joy_axis[a],joy_exp):pow(j->joy_axis[a],joy_exp));
+            j->joy_axis[a]=((j->joy_axis[a]<0)?-pow(-j->joy_axis[a],game_options.joystick_exponent):pow(j->joy_axis[a],game_options.joystick_exponent));
     }
 }
 static bool JoyStickToggle=true;
@@ -119,10 +122,7 @@ JoyStick::JoyStick () {
     joy_buttons=0;
 }
 int JoystickPollingRate () {
-    static int i=XMLSupport::parse_int (vs_config->getVariable("joystick",
-                                                               "polling_rate",
-                                                               "0"));
-    return i;
+    return (game_options.polling_rate);
 }
 void InitJoystick(){
   int i;
@@ -154,8 +154,7 @@ void InitJoystick(){
   printf("The names of the joysticks are:\n");
 #else
   //use glut
-  static bool force_use_of_joystick = XMLSupport::parse_bool(vs_config->getVariable("joystick","force_use_of_joystick","false"));
-  if (glutDeviceGet(GLUT_HAS_JOYSTICK)||force_use_of_joystick) {
+  if (glutDeviceGet(GLUT_HAS_JOYSTICK)||game_options.force_use_of_joystick) {
           printf ("setting joystick functionality:: joystick online");
           glutJoystickFunc (myGlutJoystickCallback,JoystickPollingRate());
           num_joysticks=1;
@@ -199,15 +198,11 @@ JoyStick::JoyStick(int which): mouse(which==MOUSE_JOYSTICK) {
   }
   joy_buttons=0;
 
-  static bool def_debug_digital_hatswitch=XMLSupport::parse_bool(vs_config->getVariable("joystick","debug_digital_hatswitch","false"));
-  static float def_joy_deadzone=XMLSupport::parse_float(vs_config->getVariable("joystick","deadband","0.05"));
-  static float def_mouse_deadzone=XMLSupport::parse_float (vs_config->getVariable("joystick","mouse_deadband","0.025")); // also defined cockpit.cpp:2700
-
   player=which;//by default bind players to whichever joystick it is
-  debug_digital_hatswitch=def_debug_digital_hatswitch;
+  debug_digital_hatswitch=game_options.debug_digital_hatswitch;
   if (which!=MOUSE_JOYSTICK)
-      deadzone=def_joy_deadzone; else
-	  deadzone=def_mouse_deadzone;
+      deadzone=game_options.deadband; else
+	  deadzone=game_options.mouse_deadband;;
   joy_available = 0;
   joy_x=joy_y=joy_z=0;
   if (which==MOUSE_JOYSTICK) {
@@ -269,10 +264,7 @@ struct mouseData{
 };
 extern void GetMouseXY(int &mousex,int &mousey);
 void JoyStick::GetMouse (float &x, float &y, float &z, int &buttons) {
-  static bool warp_pointer = XMLSupport::parse_bool(vs_config->getVariable ("joystick","warp_mouse","false"));
   int def_mouse_sens = 1;
-  static float mouse_sensitivity = XMLSupport::parse_float(vs_config->getVariable ("joystick","mouse_sensitivity","50"));
-  static float mouse_exp = XMLSupport::parse_float(vs_config->getVariable ("joystick","mouse_exponent","3"));
   int _dx, _dy;
   float fdx,fdy;
   int _mx,_my;
@@ -280,16 +272,15 @@ void JoyStick::GetMouse (float &x, float &y, float &z, int &buttons) {
   GetMouseDelta (_dx,_dy);
   if (0&&(_dx||_dy))
     printf ("x:%d y:%d\n",_dx,_dy);
-  if (warp_pointer==false) {
+  if (!game_options.warp_mouse) {
     fdx=(float)(_dx = _mx-g_game.x_resolution/2);
     def_mouse_sens=25;
     fdy=(float)(_dy = _my-g_game.y_resolution/2);
   }else {
-    static float joystickblur=XMLSupport::parse_float(vs_config->getVariable("joystick","mouse_blur",".025"));
     static std::list <mouseData> md;
     std::list<mouseData>::iterator i=md.begin();
     float ttime=getNewTime();
-    float lasttime=ttime-joystickblur;
+    float lasttime=ttime-game_options.mouse_blur;
     int avg=(_dx||_dy)?1:0;
     float valx=_dx;
     float valy=_dy;
@@ -322,20 +313,19 @@ void JoyStick::GetMouse (float &x, float &y, float &z, int &buttons) {
       _dx=float_to_int(valx/avg);
       _dy=float_to_int(valy/avg);
     }
-    fdx=float(valx)/joystickblur;
-    fdy=float(valy)/joystickblur;
+    fdx=float(valx)/game_options.mouse_blur;
+    fdy=float(valy)/game_options.mouse_blur;
     //printf (" x:%.2f y:%.2f %d ",fdx,fdy,avg);
   }
-  joy_axis[0]= fdx/(g_game.x_resolution*def_mouse_sens/mouse_sensitivity);
-  joy_axis[1]= fdy/(g_game.y_resolution*def_mouse_sens/mouse_sensitivity);
+  joy_axis[0] = fdx/(g_game.x_resolution*def_mouse_sens/game_options.mouse_sensitivity);
+  joy_axis[1] = fdy/(g_game.y_resolution*def_mouse_sens/game_options.mouse_sensitivity);
 
-  if (warp_pointer==false) {
-    modifyDeadZone(this);
+  if(!game_options.warp_mouse){
+  	modifyDeadZone(this);
   }
   
-  joy_axis[0]*=mouse_exp;
-  joy_axis[1]*=mouse_exp;
-
+  joy_axis[0]*=game_options.mouse_exponent;
+  joy_axis[1]*=game_options.mouse_exponent;
   x = joy_axis[0];
   y = joy_axis[1];
  

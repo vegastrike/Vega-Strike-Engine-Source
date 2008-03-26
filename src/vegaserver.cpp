@@ -25,13 +25,15 @@
 #include "cmd/script/mission.h"
 #include "force_feedback.h"
 #include "lin_time.h"
-
+#include "options.h"
 //#ifndef _WIN32
 //#include <fenv.h>
 //#endif
 char SERVER = 1;
 Universe * _Universe;
 LeakVector<Mission *> active_missions;
+
+vs_options game_options;
 
 void	VSExit( int code)
 {

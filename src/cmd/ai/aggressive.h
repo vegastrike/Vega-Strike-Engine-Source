@@ -1,7 +1,7 @@
 #ifndef __AGGRESSIVE_AI_H
 #define __AGGRESSIVE_AI_H
-
 #include "fire.h"
+
 class Flightgroup;
 namespace Orders {
 class AggressiveAI: public FireAt {
@@ -23,7 +23,7 @@ protected:
   bool ProcessLogicItem (const AIEvents::AIEvresult & item);
   bool ExecuteLogicItem (const AIEvents::AIEvresult & item);
   bool ProcessLogic(AIEvents::ElemAttrMap &logic, bool inter);//returns if found anything
-  string last_directive;
+  std::string last_directive;
 
   void ReCommandWing(Flightgroup* fg);
   bool ProcessCurrentFgDirective(Flightgroup *fg);
@@ -33,7 +33,7 @@ public:
   AggressiveAI (const char *file, Unit * target=NULL);
   void ExecuteNoEnemies();
   void Execute ();
-  virtual string getOrderDescription() { return "aggressive"; };
+  virtual std::string getOrderDescription() { return "aggressive"; };
   void AfterburnerJumpTurnTowards(Unit * target);
   float Fshield_prev;
   float Fshield_rate_old;

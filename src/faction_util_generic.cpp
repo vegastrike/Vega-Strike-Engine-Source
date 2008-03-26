@@ -6,6 +6,11 @@
 #include "vs_globals.h"
 #include "gfx/cockpit_generic.h"
 #include "cmd/unit_generic.h"
+
+#include "options.h"
+
+extern vs_options game_options;
+
 using namespace FactionUtil;
 int FactionUtil::upgradefac=0;
 int FactionUtil::planetfac=0;
@@ -86,22 +91,19 @@ void FactionUtil::AdjustIntRelation(const int Myfaction, const int TheirFaction,
     if (strcmp (factions[Myfaction]->factionname,"upgrades")!=0) {
       if (strcmp (factions[TheirFaction]->factionname,"neutral")!=0) {
 	if (strcmp (factions[TheirFaction]->factionname,"upgrades")!=0) {
-          static bool allow_civil_war= XMLSupport::parse_bool(vs_config->getVariable("AI","AllowCivilWar","false"));
-          static bool capped= XMLSupport::parse_bool(vs_config->getVariable("AI","CappedFactionRating","true"));
-          static bool allow_nonplayer_adjustments=XMLSupport::parse_bool(vs_config->getVariable("AI","AllowNonplayerFactionChange","false"));
-          if (isPlayerFaction(TheirFaction)||allow_nonplayer_adjustments) {
-            if (allow_civil_war||Myfaction!=TheirFaction) {
+
+          if (isPlayerFaction(TheirFaction)|| game_options.AllowNonplayerFactionChange) {
+            if (game_options.AllowCivilWar||Myfaction!=TheirFaction) {
               
               factions[Myfaction]->faction[TheirFaction].relationship+=factor*rank;            
               
-              if (factions[Myfaction]->faction[TheirFaction].relationship>1&&capped) {
+              if (factions[Myfaction]->faction[TheirFaction].relationship>1 && game_options.CappedFactionRating) {
                 factions[Myfaction]->faction[TheirFaction].relationship=1;
               }
-              static float min_relationship = XMLSupport::parse_float(vs_config->getVariable("AI","min_relationship","-20"));
-              if (factions[Myfaction]->faction[TheirFaction].relationship<min_relationship) {
-                factions[Myfaction]->faction[TheirFaction].relationship=min_relationship;
+              if (factions[Myfaction]->faction[TheirFaction].relationship<game_options.min_relationship) {
+                factions[Myfaction]->faction[TheirFaction].relationship=game_options.min_relationship;
               }
-              if (!allow_nonplayer_adjustments) {
+              if (!game_options.AllowNonplayerFactionChange) {
                 factions[TheirFaction]->faction[Myfaction].relationship=factions[Myfaction]->faction[TheirFaction].relationship;//reflect if player
               }
             }

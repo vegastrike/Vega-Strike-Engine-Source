@@ -69,8 +69,13 @@
 #if defined(CG_SUPPORT)
 #include "cg_global.h"
 #endif
+
+#include "options.h"
+
 extern std::string global_username;
 extern std::string global_password;
+
+vs_options game_options;
 
 int nadanixnuthin() {
   float a=0;
@@ -269,7 +274,7 @@ printf ("Windows version %d %d\n",osvi.dwMajorVersion,osvi.dwMinorVersion);
       // Specify the config file and the possible mod subdir to play
       VSFileSystem::InitPaths( CONFIGFILE, subdir);
     }
-
+    game_options.init();
     //can use the vegastrike config variable to read in the default mission
     if (XMLSupport::parse_bool(vs_config->getVariable ("network","force_client_connect","false"))) {
       ignore_network=false;

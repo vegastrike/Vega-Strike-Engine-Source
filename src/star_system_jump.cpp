@@ -16,11 +16,15 @@
 #include <string>
 #include <vector>
 
+#include "options.h"
+
+extern vs_options game_options;
+
 extern Unit ** fighters;
 extern Hashtable<std::string, StarSystem, 127> star_system_table;
 void CacheJumpStar (bool destroy)
 {
-	static Animation * cachedani=new Animation (vs_config->getVariable ("graphics","jumpgate","warp.ani").c_str(),true,.1,MIPMAP,false);
+	static Animation * cachedani=new Animation (game_options.jumpgate.c_str(),true,.1,MIPMAP,false);
 	if (destroy)
 		delete cachedani;
 }
@@ -73,17 +77,14 @@ unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile
 
 static unsigned int AddJumpAnimation (const QVector & pos, const float size, bool mvolatile=false)
 {
-	static std::string jumpgate = vs_config->getVariable("graphics","jumpgate","warp.ani");
-	return AddAnimation (pos,size,mvolatile,jumpgate,.95);
+	return AddAnimation (pos,size,mvolatile,game_options.jumpgate,.95);
 }
 
 
 void GameStarSystem::VolitalizeJumpAnimation (const int ani)
 {
 	if (ani !=-1) {
-		static float VolAnimationPer = XMLSupport::parse_float (vs_config->getVariable ("graphics","jumpanimationshrink",".95"));
-		VolatileJumpAnimations.push_back (ResizeAni(JumpAnimations[ani].a,VolAnimationPer));
-
+		VolatileJumpAnimations.push_back (ResizeAni(JumpAnimations[ani].a,game_options.jumpanimationshrink));
 		JumpAnimations[ani].a=NULL;
 		AnimationNulls.push_back (ani);
 	}
@@ -102,8 +103,7 @@ void GameStarSystem::DrawJumpStars()
 
 				JumpAnimations[k].a->SetPosition (un->Position()+r.Cast()*un->rSize()*(pendingjump[kk]->delay+.25));
 				JumpAnimations[k].a->SetOrientation (p,q,r);
-				static float JumpStarSize = XMLSupport::parse_float (vs_config->getVariable ("graphics","jumpgatesize","1.75"));
-				float dd = un->rSize()*JumpStarSize*(un->GetJumpStatus().delay-pendingjump[kk]->delay)/(float)un->GetJumpStatus().delay;
+				float dd = un->rSize()*game_options.jumpgatesize*(un->GetJumpStatus().delay-pendingjump[kk]->delay)/(float)un->GetJumpStatus().delay;
 				JumpAnimations[k].a->SetDimensions (dd,dd);
 			}
 		}
@@ -133,10 +133,9 @@ void GameStarSystem::DrawJumpStars()
 
 void GameStarSystem::DoJumpingComeSightAndSound (Unit * un)
 {
-	static float JumpStarSize = XMLSupport::parse_float (vs_config->getVariable ("graphics","jumpgatesize","1.75"));
 	Vector p,q,r;
 	un->GetOrientation (p,q,r);
-	unsigned int myani = AddJumpAnimation (un->LocalPosition(),un->rSize()*JumpStarSize,true);
+	unsigned int myani = AddJumpAnimation (un->LocalPosition(),un->rSize()*game_options.jumpgatesize,true);
 	VolatileJumpAnimations[myani].a->SetOrientation (p,q,r);
 }
 
@@ -147,7 +146,7 @@ int GameStarSystem::DoJumpingLeaveSightAndSound (Unit * un)
 	Vector p,q,r;
 	un->GetOrientation (p,q,r);
 	ani = AddJumpAnimation (un->Position()+r.Cast()*un->rSize()*(un->GetJumpStatus().delay+.25), 10*un->rSize());
-	static int jumpleave=AUDCreateSound(vs_config->getVariable ("unitaudio","jumpleave", "sfx43.wav"),false);
+	static int jumpleave=AUDCreateSound(game_options.jumpleave,false);
 	AUDPlay (jumpleave,un->LocalPosition(),un->GetVelocity(),1);
 	return ani;
 }

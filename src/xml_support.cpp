@@ -1,9 +1,12 @@
-#include <string.h>
+#include <string>
 #include <stdlib.h>
 //#include <strstream.h>
 #include <ctype.h>
 #include <assert.h>
 #include "xml_support.h"
+
+using std::string;
+
 
 string strtoupper(const string &foo) 
 {
@@ -71,9 +74,16 @@ namespace XMLSupport {
 		return false;
 	}
   }
-  double parse_float(const string &str) {
-    return atof (str.c_str());
+  double parse_float(const string &str) 
+  {
+    return(atof (str.c_str()));
   }
+  
+  float parse_floatf(const string &str) 
+  {
+    return(strtof(str.c_str(),NULL));
+  }
+  
   int parse_int(const string &str) {
     return atoi (str.c_str());
   }

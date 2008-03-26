@@ -17,6 +17,9 @@
 #include "vs_globals.h"
 #include "gfx/particle.h"
 #include "cmd/base.h"
+#include "options.h"
+
+extern vs_options game_options;
 
 extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );
 extern void RespawnNow (Cockpit * cp);
@@ -41,8 +44,7 @@ namespace UniverseUtil
 {
 
 	void playVictoryTune () {
-		static string newssong=vs_config->getVariable("audio","missionvictorysong","../music/victory.ogg");
-		muzak->GotoSong(newssong);
+		muzak->GotoSong(game_options.missionvictorysong);
 	}
 	int musicAddList(string str) {
 		return muzak->Addlist(str.c_str());
@@ -101,8 +103,7 @@ namespace UniverseUtil
 		return _Universe->CurrentCockpit();
 	}
 	int maxMissions () {
-		static const int max_missions = XMLSupport::parse_int (vs_config->getVariable ("physics","max_missions","4"));
-		return max_missions;
+		return(game_options.max_missions);
 	}
 	void addParticle (QVector loc, Vector velocity, Vector color, float size) {
 		ParticlePoint p;
@@ -144,7 +145,7 @@ namespace UniverseUtil
 			curSplash = new Animation(filename.c_str(),0);
 		}
 		else if (!curSplash && !GetSplashScreen()) {
-			static std::vector<std::string> s = ParseDestinations(vs_config->getVariable ("graphics","splash_screen","vega_splash.ani"));
+			static std::vector<std::string> s = ParseDestinations(game_options.splash_screen);
 			int snum=time(NULL)%s.size();
 			curSplash = new Animation(s[snum].c_str(),0);
 		}

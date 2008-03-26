@@ -853,7 +853,9 @@ librootgeneric = \
   src/xml_serializer.cpp \
   src/xml_serializer.h \
   src/xml_support.cpp \
-  src/xml_support.h
+  src/xml_support.h \
+  src/options.cpp \
+  src/options.h
 
 librootserver = \
   src/faction_util_server.cpp \

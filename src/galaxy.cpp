@@ -9,6 +9,10 @@
 #include "xml_support.h"
 #include "lin_time.h"
 #include "star_system_generic.h"
+
+#include "options.h"
+
+extern vs_options game_options;
 using namespace XMLSupport;
 using namespace GalaxyXML;
 string RemoveDotSystem (const char *input) {
@@ -40,10 +44,10 @@ string RemoveDotSystem (const char *input) {
   return retval;
 }
 
-string getUniversePath () {
-  static string datapath = vs_config->getVariable ("data","universe_path", "universe");
+string getUniversePath () 
+{
   char del[]= {'/','\0'};
-  return datapath+string(del);
+  return game_options.universe_path+string(del);
 }
 
 string getVarEitherSectionOrSub (Galaxy *galaxy, string section, string subsection, string variable, string defaultst) {
@@ -190,8 +194,7 @@ void MakeStarSystem (string file, Galaxy *galaxy, string origin, int forcerandom
   si.backgrounds=getVarEitherSectionOrSub(galaxy,si.sector,si.name,"backgroundlist",Ave.backgrounds);
   si.force=parse_bool (getVarEitherSectionOrSub(galaxy,si.sector,si.name,"force",Ave.force?"true":"false"));
   
-  static bool always_force = XMLSupport::parse_float(vs_config->getVariable("galaxy","PushValuesToMean","true"));
-  if (always_force)
+  if (game_options.PushValuesToMean)
 	  si.force=true;
   string dest = galaxy->getVariable (si.sector,si.name,"jumps","");
   if (dest.length()) 

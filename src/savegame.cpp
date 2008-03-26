@@ -15,16 +15,20 @@
 #include "networking/const.h"
 #include "vsfilesystem.h"
 #include "cmd/fg_util.h"
+
+#include "options.h"
+
+extern vs_options game_options;
+
 using namespace std;
 using namespace VSFileSystem;
 std::string CurrentSaveGameName="";
 std::string GetHelperPlayerSaveGame (int num)
 {
-	static bool rememberSave = XMLSupport::parse_bool(vs_config->getVariable("general","remember_savegame","true"));
 	if( Network==NULL)
 	{
 		if (CurrentSaveGameName.length()>0){
-			if (rememberSave) {
+			if (game_options.remember_savegame) {
 				VSFile f;
 				VSError err = f.OpenCreateWrite( "save.4.x.txt", UnknownFile);
 				if (err<=Ok) {
@@ -49,8 +53,7 @@ std::string GetHelperPlayerSaveGame (int num)
 		  // IF save.4.x.txt DOES NOT EXIST WE CREATE ONE WITH "default" AS SAVENAME
 		  err = f.OpenCreateWrite( "save.4.x.txt", UnknownFile);
 		  if (err<=Ok) {
-			static string NewGameSave = vs_config->getVariable("general","new_game_save_name","New_Game");
-			f.Write(NewGameSave.c_str(),NewGameSave.length());
+			f.Write(game_options.new_game_save_name.c_str(),game_options.new_game_save_name.length());
 			f.Write("\n",1);
 			f.Close();
 		  }
@@ -108,7 +111,7 @@ std::string GetHelperPlayerSaveGame (int num)
 		}
 		f.Close();
 	#endif
-		if (rememberSave && !res->empty())
+		if (game_options.remember_savegame && !res->empty())
 		{
 		  // Set filetype to Unknown so that it is searched in homedir/
 		  if (*res->begin()=='~')
@@ -400,9 +403,9 @@ void SaveGame::ReadNewsData (char * &buf, bool just_skip) {
     }
   }
 }
-void SaveGame::AddUnitToSave (const char * filename, int type, const char * faction, long address) {
-  static string s = vs_config->getVariable ("physics","Drone","drone");
-  if (0==strcmp (s.c_str(),filename)/*||type==ENHANCEMENTPTR*/) {
+void SaveGame::AddUnitToSave (const char * filename, int type, const char * faction, long address) 
+{
+  if(game_options.Drone.compare(filename)){
     RemoveUnitFromSave (address);
     //    savedunits->Put (address,new SavedUnits (filename,type,faction));//not no more
   }
@@ -896,10 +899,9 @@ void SaveGame::ParseSaveGame (const string &filename_p, string &FSS, const strin
 		if( err<=Ok)
 		{
 			if (quick_read) {
-				static int buflen = XMLSupport::parse_int( vs_config->getVariable("general","quick_savegame_summaries_buffer","16384") );
-				char *buf = (char*)malloc(buflen+1);
-				buf[buflen]='\0';
-				err = f.ReadLine(buf,buflen);
+				char *buf = (char*)malloc(game_options.quick_savegame_summaries_buffer+1);
+				buf[game_options.quick_savegame_summaries_buffer]='\0';
+				err = f.ReadLine(buf,game_options.quick_savegame_summaries_buffer);
 				savestring = buf;
 				free(buf);
 			} else {

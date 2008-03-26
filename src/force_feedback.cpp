@@ -31,7 +31,9 @@
 
 #include "config_xml.h"
 #include "cmd/script/mission.h"
+#include "options.h"
 
+extern vs_options game_options;
 
 #define FF_DOIT 1
 
@@ -212,18 +214,15 @@ void ForceFeedback::stopEffect(unsigned int eff_nr){
 }
 
 
-void ForceFeedback::init(){
-  static have_ff=XMLSupport::parse_bool(vs_config->getVariable("joystick","force_feedback","false"));
-
-  if(!have_ff){
+void ForceFeedback::init()
+{
+  if(!game_options.force_feedback){
     printf("force feedback disabled in config file\n");
     return;
   }
-
-  static device_nr=atoi(vs_config->getVariable("joystick","ff_device","0").c_str());
-
+  
   char devname[200];
-  sprintf(devname,"/dev/input/event%d",device_nr);
+  sprintf(devname,"/dev/input/event%d",game_options.ff_device);
 
   ff_fd=open(devname,O_RDWR);
   if(ff_fd==-1){

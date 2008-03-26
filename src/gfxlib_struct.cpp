@@ -6,6 +6,10 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 
+#include "options.h"
+
+extern vs_options game_options;
+
 
 //#define GFX_BUFFER_MAP_UNMAP
 static GLenum gl_error;
@@ -31,13 +35,13 @@ static void BindInd(unsigned int element_data) {
     (*glBindBufferARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB,element_data);
 }
 #endif
-void GFXVertexList::RefreshDisplayList () {
-  static bool use_vbo=XMLSupport::parse_bool(vs_config->getVariable("graphics","vbo","false"));
+void GFXVertexList::RefreshDisplayList () 
+{
 
 #ifndef NO_VBO_SUPPORT
-  if (use_vbo&&!vbo_data) {
+  if (game_options.vbo&&!vbo_data) {
     if (glGenBuffersARB_p==0||glBindBufferARB_p==0||glBufferDataARB_p==0||glMapBufferARB_p==0||glUnmapBufferARB_p==0) {
-      use_vbo=0;
+      game_options.vbo=0;
     }else {
       (*glGenBuffersARB_p)(1,(GLuint *)&vbo_data);
       if (changed&HAS_INDEX){

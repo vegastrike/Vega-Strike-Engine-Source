@@ -44,6 +44,11 @@ extern Vector mouseline;
 //static SphereMesh *foo;
 //static Unit *earth;
 
+#include "options.h"
+
+extern vs_options game_options;
+
+
 extern string RemoveDotSystem (const char *input);
 /*
 GameStarSystem::GameStarSystem(): StarSystem()
@@ -219,8 +224,7 @@ void GameStarSystem::modelGravity(bool lastframe) {
 */
 void ConditionalCursorDraw(bool tf)
 {
-	static bool hardware_cursor = XMLSupport::parse_bool (vs_config->getVariable("graphics","hardware_cursor","false"));
-	if (hardware_cursor) {
+	if (game_options.hardware_cursor) {
 		winsys_show_cursor(tf);
 	}
 }
@@ -229,59 +233,12 @@ void ConditionalCursorDraw(bool tf)
 void GameStarSystem::SwapIn ()
 {
 	GFXSetLightContext (lightcontext);
-
-	/*
-	for (un_iter un_i=drawList.createIterator();NULL!= (un=*un_i);++un_i) {
-	  un->SwapInHalos();
-
-	}
-	Iterator *iter = drawList->createIterator();
-	Unit *unit;
-	while((unit = iter->current())!=NULL) {
-	  if (unit->isUnit()==PLANETPTR) {
-		((Planet *)unit)->EnableLights();
-	  }
-	  iter->advance();
-	}
-	delete iter;
-	unsigned int i;
-	for (i=0;i<terrains.size();++i) {
-		gotta push this shit somehow
-		terrains[i]->EnableDraw();
-	}
-	for (i=0;i<contterrains.size();++i) {
-		contterrains[i]->EnableDraw();
-	}
-	*/
 }
 
 
 void GameStarSystem::SwapOut ()
 {
-	/*
-	AUDStopAllSounds();
-	for (un_iter un_i=drawList.createIterator();NULL!= (un=*un_i);++un_i) {
-	  un->SwapOutHalos();
-	  Halo::ProcessDrawQueue();
-
-	}
-	Iterator *iter = drawList->createIterator();
-	Unit *unit;
-	while((unit = iter->current())!=NULL) {
-	  if (unit->isUnit()==PLANETPTR) {
-		((Planet *)unit)->DisableLights();
-	  }
-	  iter->advance();
-	}
-	delete iter;
-	unsigned int i;
-	for (i=0;i<terrains.size();++i) {
-		terrains[i]->DisableDraw();
-	}
-	for (i=0;i<contterrains.size();++i) {
-		contterrains[i]->DisableDraw();
-	}
-*/
+;
 }
 
 
@@ -387,9 +344,6 @@ void GameStarSystem::Draw(bool DrawCockpit)
 
 	}
 	double setupdrawtime=queryTime();
-
-	static bool always_make_smooth=XMLSupport::parse_bool(vs_config->getVariable("graphics","always_make_smooth_cam","false"));
-
 	{
 		cam_setup_phase=true;
 
@@ -430,11 +384,11 @@ void GameStarSystem::Draw(bool DrawCockpit)
 	double maxdrawtime=0;
 
 	//Ballpark estimate of when an object of configurable size first becomes one pixel
-	static float precull_distance=XMLSupport::parse_float(vs_config->getVariable("graphics","precull_dist","500000000"));
+
 	QVector drawstartpos=_Universe->AccessCamera()->GetPosition();
         
 	Collidable key_iterator(0,1,drawstartpos);
-	UnitWithinRangeOfPosition<UnitDrawer> drawer(precull_distance,0,key_iterator);
+	UnitWithinRangeOfPosition<UnitDrawer> drawer(game_options.precull_dist,0,key_iterator);
 	//Need to draw really big stuff (i.e. planets, deathstars, and other mind-bogglingly big things that shouldn't be culled despited extreme distance
 	Unit* unit;
         if ((drawer.action.parent=_Universe->AccessCockpit()->GetParent())!=NULL) {
@@ -442,7 +396,7 @@ void GameStarSystem::Draw(bool DrawCockpit)
         }
 	for(un_iter iter=this->GravitationalUnits.createIterator();(unit=*iter)!=NULL;++iter) {
 		float distance = (drawstartpos-unit->Position()).Magnitude()-unit->rSize();
-		if(distance < precull_distance) {
+		if(distance < game_options.precull_dist) {
 			drawer.action.grav_acquire(unit);
 		}
 		else {
@@ -486,10 +440,9 @@ void GameStarSystem::Draw(bool DrawCockpit)
 	GFXColor tmpcol (0,0,0,1);
 	GFXGetLightContextAmbient(tmpcol);
 	double processmesh=queryTime();
-	static bool DrawNearStarsLast =XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_near_stars_in_front_of_planets","false"));
-	if (!DrawNearStarsLast) stars->Draw();
+	if (!game_options.draw_near_stars_in_front_of_planets) stars->Draw();
 	Mesh::ProcessZFarMeshes();
-	if (DrawNearStarsLast) stars->Draw();
+	if (game_options.draw_near_stars_in_front_of_planets) stars->Draw();
 
 	GFXEnable (DEPTHTEST);
 	GFXEnable (DEPTHWRITE);
@@ -597,9 +550,7 @@ void    GameStarSystem::createBackground( StarSystem::StarXML * xml)
 	LightMap[0] = new Texture(bgfile.c_str(), 1,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE);
 #endif
 
-	static bool starblend = XMLSupport::parse_bool(vs_config->getVariable ("graphics","starblend","true"));
-
 	bg = new Background(xml->backgroundname.c_str(),xml->numstars,g_game.zfar*.9,filename);
 	stars = new Stars (xml->numnearstars, xml->starsp);
-	stars->SetBlend (starblend, starblend);
+	stars->SetBlend (game_options.starblend, game_options.starblend);
 }
