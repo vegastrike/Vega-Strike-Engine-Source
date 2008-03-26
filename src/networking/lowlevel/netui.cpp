@@ -140,7 +140,8 @@ int NetUIBase::createServerSocket(const AddressIP &local_ip, bool isTCP)
     }
 
     int newval = 1;
-    setsockopt(local_fd, SOL_SOCKET, SO_REUSEADDR, &newval, sizeof(int));
+    char *buf = (char*)&newval;
+    setsockopt(local_fd, SOL_SOCKET, SO_REUSEADDR, buf, sizeof(int));
 
     // binds socket
     COUT << "Bind on " << ntohl(local_ip.sin_addr.s_addr) << ", port "

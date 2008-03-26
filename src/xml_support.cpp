@@ -81,7 +81,8 @@ namespace XMLSupport {
   
   float parse_floatf(const string &str) 
   {
-    return(strtof(str.c_str(),NULL));
+    // was: strtof, but this function is non-portable (only in C99)
+    return (float)(atof (str.c_str()));
   }
   
   int parse_int(const string &str) {

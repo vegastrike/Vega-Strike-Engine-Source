@@ -68,16 +68,16 @@ class vs_options
 		std::string callsign;
 		
 		/* Joystick Options */
-		double joystick_exponent;
+		float joystick_exponent; // joystick axes are 32-bit floats.
 		int polling_rate;
 		bool force_use_of_joystick;
 		bool debug_digital_hatswitch;
-		double deadband;
-		double mouse_deadband;
+		float deadband;
+		float mouse_deadband;
 		bool warp_mouse;
-		double mouse_sensitivity;
-		double mouse_exponent;
-		double mouse_blur;
+		float mouse_sensitivity;
+		float mouse_exponent;
+		float mouse_blur;
 		bool force_feedback;
 		int ff_device;
 		
@@ -107,6 +107,6 @@ class vs_options
 		std::string getCallsign(int);
 };
 
-
+extern vs_options game_options;
 
 #endif

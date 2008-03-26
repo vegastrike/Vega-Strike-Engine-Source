@@ -48,6 +48,7 @@
 #include <set>
 #include <string>
 #include "cmd/unit_const_cache.h"
+#include "options.h"
 
 static float mymin(float a, float b) {
 	return (a<b) ? a : b;
@@ -2698,7 +2699,7 @@ void GameCockpit::Draw() {
          GFXEnable(TEXTURE0);
          //    GFXDisable (DEPTHTEST);
          //    GFXDisable(TEXTURE1);
-         static float deadband=XMLSupport::parse_float (vs_config->getVariable("joystick","mouse_deadband","0.025"));
+         static float deadband=game_options.mouse_deadband;
          static int revspr = XMLSupport::parse_bool (vs_config->getVariable ("joystick","reverse_mouse_spr","true"))?1:-1;
          static string blah = vs_config->getVariable("joystick","mouse_crosshair","crosshairs.spr");
          static int num=printf ("CROSS %f\n",crossceny);
