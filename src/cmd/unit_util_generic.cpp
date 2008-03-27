@@ -79,9 +79,11 @@ namespace UnitUtil {
 		float tooclose=0;
         unsigned int np = _Universe->numPlayers();
         Cockpit* cockpit=_Universe->AccessCockpit();
-        static bool fixed_system_orbit_priorities=XMLSupport::parse_bool(vs_config->getVariable("physics","fixed_system_orbit_priorities","true"));
-        if (un->owner==getTopLevelOwner()) {
-            return SIM_QUEUE_SIZE/ORBIT_PRIORITY;
+        //static bool fixed_system_orbit_priorities=XMLSupport::parse_bool(vs_config->getVariable("physics","fixed_system_orbit_priorities","true"));
+        static float fixed_system_orbit_priorities=XMLSupport::parse_float(vs_config->getVariable("physics","fixed_system_priority_velocity_cutoff","50"));
+        bool system_installation=un->owner==getTopLevelOwner();
+        if (system_installation&&un->Velocity.MagnitudeSquared()>fixed_system_orbit_priorities*fixed_system_orbit_priorities) {
+            return 3;//
         }
         for (unsigned int i=0;i<np;++i) {			
 			Unit * player=_Universe->AccessCockpit(i)->GetParent();
@@ -258,10 +260,15 @@ namespace UnitUtil {
 		return LOW_PRIORITY;
 	    }//else defer decision	    
 	}
-	if (un->owner==getTopLevelOwner()||un->faction==cargofac||un->faction==upfac||un->faction==neutral) {
-            if (dist<tooclose)
-                return MEDIUM_PRIORITY; else
+	if (system_installation||un->faction==cargofac||un->faction==upfac||un->faction==neutral) {
+            if (dist<tooclose) {
+                return MEDIUM_PRIORITY;
+            } else {
+                if(system_installation) {
+                    return SIM_QUEUE_SIZE/ORBIT_PRIORITY;//so that the averaging can still keep track of parent jumps
+                }
                 return INERT_PRIORITY;
+            }
 	}
 	const string &obj = UnitUtil::getFgDirective(un);
 	if (!(obj.length()==0||(obj.length()>=1&&obj[0]=='b'))) {

@@ -21,7 +21,7 @@ class PlanetaryOrbit : public Order {
   QVector x_size;
   QVector y_size;
   QVector focus;
-#define ORBIT_PRIORITY 4
+#define ORBIT_PRIORITY 8
 #define NUM_ORBIT_AVERAGE (SIM_QUEUE_SIZE/ORBIT_PRIORITY)
   QVector orbiting_average[NUM_ORBIT_AVERAGE];
   float orbiting_last_simatom;
