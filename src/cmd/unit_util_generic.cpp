@@ -81,29 +81,35 @@ namespace UnitUtil {
         Cockpit* cockpit=_Universe->AccessCockpit();
         //static bool fixed_system_orbit_priorities=XMLSupport::parse_bool(vs_config->getVariable("physics","fixed_system_orbit_priorities","true"));
         static float fixed_system_orbit_priorities=XMLSupport::parse_float(vs_config->getVariable("physics","fixed_system_priority_velocity_cutoff","50"));
+        static const int SYSTEM_INSTALLATION_PRIORITY=XMLSupport::parse_int(
+            vs_config->getVariable("physics","priorities","system_installation","3") );
         bool system_installation=un->owner==getTopLevelOwner();
+        bool force_system_installation_priority=false;
         if (system_installation&&un->Velocity.MagnitudeSquared()>fixed_system_orbit_priorities*fixed_system_orbit_priorities) {
-            return 3;//
+            force_system_installation_priority=true;
         }
         for (unsigned int i=0;i<np;++i) {			
 			Unit * player=_Universe->AccessCockpit(i)->GetParent();
 			if (player) {
-				if (un==player->Target())
-					return PLAYER_PRIORITY;
-				float tmpdist = UnitUtil::getDistance(un,player);
-				if (tmpdist<cpdist) {
-					QVector relvel = un->GetVelocity() - player->GetVelocity();
-					QVector relpos = un->Position() - player->Position();
-					cockpit=_Universe->AccessCockpit(i);
-					cpdist=tmpdist;
-					float lowest_priority_time=SIM_QUEUE_SIZE*SIMULATION_ATOM;
-					if (relpos.Dot(relvel) >= 0) {
-						// No need to be wary if they're getting away
-						tooclose = 
-							2*(un->radial_size+player->radial_size)
-							+ relvel.Magnitude() * lowest_priority_time;
-					}
-				}
+                            if (force_system_installation_priority&&player->activeStarSystem==un->activeStarSystem)
+                                return SYSTEM_INSTALLATION_PRIORITY;
+
+                            if (un==player->Target())
+                                return PLAYER_PRIORITY;
+                            float tmpdist = UnitUtil::getDistance(un,player);
+                            if (tmpdist<cpdist) {
+                                QVector relvel = un->GetVelocity() - player->GetVelocity();
+                                QVector relpos = un->Position() - player->Position();
+                                cockpit=_Universe->AccessCockpit(i);
+                                cpdist=tmpdist;
+                                float lowest_priority_time=SIM_QUEUE_SIZE*SIMULATION_ATOM;
+                                if (relpos.Dot(relvel) >= 0) {
+                                    // No need to be wary if they're getting away
+                                    tooclose = 
+                                        2*(un->radial_size+player->radial_size)
+                                        + relvel.Magnitude() * lowest_priority_time;
+                                }
+                            }
 			}
 #ifndef NO_GFX
 			Camera * cam = _Universe->AccessCockpit(i)->AccessCamera();
