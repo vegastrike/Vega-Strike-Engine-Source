@@ -65,15 +65,8 @@ PlanetaryOrbit::~PlanetaryOrbit () {
 }
 extern double saved_interpolation_blend_factor;
 
-#ifndef _WIN32
-#include <fenv.h>
-#endif
-
 double calc_blend_factor(double frac, int priority, int when_it_will_be_simulated, int cur_simulation_frame);
 void PlanetaryOrbit::Execute() {
-#ifndef _WIN32
-  feenableexcept(FE_DIVBYZERO|FE_INVALID);
-#endif
   bool mining=parent->rSize()>1444&&parent->rSize()<1445;
   bool done =this->done;
   this->Order::Execute();
@@ -234,9 +227,6 @@ void PlanetaryOrbit::Execute() {
     parent->cumulative_velocity.Set (0,0,0);
     parent->SetCurPosition (origin-focus+sum_orbiting_average+x_offset+y_offset);
   }
-#ifndef _WIN32
-  fedisableexcept(FE_DIVBYZERO|FE_INVALID);
-#endif
 }
 string GetElMeshName (string name, string faction,char direction)
 {
