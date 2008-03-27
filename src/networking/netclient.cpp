@@ -879,6 +879,9 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					un->shield=sh;
 					un->armor=ar;
 					un->hull=hul;
+					if (un->hull<0) {
+						un->Destroy();
+					}
 				}
 				else
 					COUT<<"!!! Problem -> CANNOT APPLY DAMAGE UNIT NOT FOUND !!!"<<endl;
@@ -1055,7 +1058,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 							if (foundcarg) {
 								carg = *foundcarg;
 							} else {
-							    COUT << "Server sent bad cargo '"<<str<<"' for unit serial "<<ser<<endl;
+								//COUT << "Server sent bad cargo '"<<str<<"' for unit serial "<<ser<<endl;
 								carg = Cargo();
 								carg.SetContent(str);
 							}
@@ -1595,8 +1598,6 @@ Transformation	NetClient::Interpolate( Unit * un, double addtime)
 //		cerr << "  *** INTERPOLATE (" << un->curr_physical_state.position.i << ", " << un->curr_physical_state.position.j << ", " << un->curr_physical_state.position.k << "): next deltatime=" << clt->getNextDeltatime() << ", deltatime=" << clt->getDeltatime() << ", this-deltatime=" << this->deltatime << ", elapsed since packet=" << clt->elapsed_since_packet << "\n        =>        (" << trans.position.i << ", " << trans.position.j << ", " << trans.position.k << ")        Vel =    (" << un->Velocity.i << ", " << un->Velocity.j << ", " << un->Velocity.k << ")" << std::endl;
 	} else {
 		trans=un->curr_physical_state;
-                if (rand()<RAND_MAX/5000)
-                  cerr << "  *** Interpolate with NULL CLIENT serial " << un->GetSerial() << "!  Unit fullname=" << un->getFullname() << ";  name=" << un->name.get() << endl;
 	}
 	return trans;
 }

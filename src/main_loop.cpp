@@ -265,6 +265,9 @@ namespace CockpitKeys {
 
   void TextMessageKey(const KBData&,KBSTATE newState) {
     if(newState==PRESS){
+      static bool chat_only_in_network = XMLSupport::parse_bool(vs_config->getVariable("network","chat_only_in_network","false"));
+      if ((Network==NULL) && chat_only_in_network)
+        return;
       winsys_set_keyboard_func(TextMessageCallback);
       textmessager=_Universe->CurrentCockpit();
     }

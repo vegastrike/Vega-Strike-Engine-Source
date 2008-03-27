@@ -28,7 +28,7 @@ void DoEnterExitAni(QVector pos, float size, bool enter) {
   }
 
 }
-void	NetClient::enterClient( NetBuffer &netbuf, ObjSerial cltserial )
+Unit *	NetClient::enterClient( NetBuffer &netbuf, ObjSerial cltserial )
 {
 	// Should receive the name
 	string cltname = netbuf.getString();
@@ -40,7 +40,7 @@ void	NetClient::enterClient( NetBuffer &netbuf, ObjSerial cltserial )
 	//NETFIXME could be slow--but alas
 	if (NULL!=shouldbenull) {
 		cout << " not adding unit with serial number "<< cltserial<<" named " <<shouldbenull->name.get()<<" to system .";
-		return;//already exists
+		return shouldbenull;//already exists
 	}
 	if( !isLocalSerial( cltserial)) {
 
@@ -74,7 +74,7 @@ void	NetClient::enterClient( NetBuffer &netbuf, ObjSerial cltserial )
 				cerr<<"savedships is empty!!!"<<endl;
 				cerr<<"SAVEGAME: "<<endl<<savestr<<"-------"<<endl;
 				cerr<<"SHIPCSV: "<<endl<<xmlstr<<"-------"<<endl;
-				return;
+				return NULL;
 			} else {
 				cerr<<"Found saveship[0] = "<<savedships[0]<<endl;
 			}
@@ -123,7 +123,9 @@ void	NetClient::enterClient( NetBuffer &netbuf, ObjSerial cltserial )
 			string msg = clt->callsign+" entered the system";
 			UniverseUtil::IOmessage(0,"game","all","#FFFF66"+msg+"#000000");
 		}
+		return un;
 	}
+	return NULL;
 }
 
 ClientPtr NetClient::AddClientObject( Unit *un, ObjSerial cltserial)
@@ -131,9 +133,14 @@ ClientPtr NetClient::AddClientObject( Unit *un, ObjSerial cltserial)
 	if (!cltserial)
 		cltserial=un->GetSerial();
 
-	COUT << " >>> ENTERING CLIENT =( serial #"
-		<< cltserial << " )= --------------------------------------" << endl;
-
+	{
+		Flightgroup *fg;
+		fg = un->getFlightgroup();
+		string fgname;
+		if (fg) fgname = ", fg "+fg->name;
+		COUT << " >>> ENTERING CLIENT =( " << cltserial
+			 << fgname << " )= -----------------" << endl;
+	}
 	ClientPtr clt = Clients.get(cltserial);
 	if( clt)
 	{
@@ -230,14 +237,14 @@ void	NetClient::AddObjects( NetBuffer & netbuf)
                   break;
                 }
                 offset=noffset;// to make sure we aren't at end of truncated buf
-		Unit * newunit;
-		ObjSerial serial;
+		Unit * newunit = NULL;
+		ObjSerial serial=0;
 		switch( subcmd)
 		{
 			case ZoneMgr::AddClient :
 				serial = netbuf.getSerial();
 //				enteredSerials.insert(serial);
-				this->enterClient( netbuf, serial);
+				newunit = this->enterClient( netbuf, serial);
 				break;
 			case ZoneMgr::AddUnit :
 				newunit = UnitFactory::parseUnitBuffer(netbuf);
@@ -267,6 +274,10 @@ void	NetClient::AddObjects( NetBuffer & netbuf)
 			default :
 				cerr<<"WARNING : Unknown sub "<<(int)subcmd<< " command in AddObjects"<<endl;
 				break;
+		}
+		if (newunit) {
+			serial = newunit->GetSerial();
+			cerr << "  *** Adding Unit " << serial << " " << UnitUtil::getFactionName(newunit) << " " << newunit->getFullname() << "; " << newunit->name.get() << endl;
 		}
 	}
 	// NETFIXME: What is the point of killing off all non-networked units all the time?
@@ -499,7 +510,6 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 			} else
 				k++;
 			if ( cmd & ZoneMgr::DamageUpdate ) {
-				cout << "Received damage info for client "<< serial << endl;
 				receiveUnitDamage( netbuf, un );
 			}
             
@@ -526,8 +536,6 @@ void NetClient::receiveUnitDamage( NetBuffer &netbuf, Unit *un ) {
 
 	if (!un) {
 		cerr<< "Received Damage Update for null unit"<<endl;
-	} else {
-		cout << "Received damage " <<damages<<" for unit "<<un->GetSerial()<<" ("<<un->name<<")"<<endl;
 	}
 	
 	if( damages & Unit::SHIELD_DAMAGED)
@@ -538,6 +546,9 @@ void NetClient::receiveUnitDamage( NetBuffer &netbuf, Unit *un ) {
 	{
 		SETNOTNULL(un,un->armor, netbuf.getArmor());
 		SETNOTNULL(un,un->hull, netbuf.getFloat());
+		if (un && un->hull<0) {
+		  un->Destroy(); // show nice explosion effects until receive CMD_KILL
+		}
 	}
 	if( damages & Unit::COMPUTER_DAMAGED)
 	{

@@ -135,7 +135,7 @@ class	NetClient
                                   unsigned int timestamp,
                                   NetBuffer&   netbuf,
                                   double       deltat );
-		void	enterClient( NetBuffer & netbuf, ObjSerial ser );
+		Unit *	enterClient( NetBuffer & netbuf, ObjSerial ser );
 		void	removeClient( const Packet* packet );
 
 	public:

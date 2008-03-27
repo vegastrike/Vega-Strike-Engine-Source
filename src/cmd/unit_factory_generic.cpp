@@ -35,6 +35,7 @@ void UnitFactory::addUnitBuffer( NetBuffer & netbuf, const string &filename,
 		               int         fg_subnumber, string * netxml, ObjSerial netcreate)
 {
 		netbuf.addChar(ZoneMgr::AddUnit);
+		assert(netcreate != 0); // crash if we are doing something stupid :)
 		netbuf.addSerial( netcreate);
 		netbuf.addString( filename);
 		netbuf.addString( name);

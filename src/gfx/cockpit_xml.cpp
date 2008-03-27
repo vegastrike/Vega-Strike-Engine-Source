@@ -45,6 +45,7 @@ namespace CockpitXML {
       BACK,
       LEFT,
       RIGHT,
+      NETWORK,
 //    use the UnitImages enum for the gauge values instead!
 /*    KARMORF,
       KARMORB,
@@ -157,6 +158,7 @@ namespace CockpitXML {
     EnumMap::Pair ("Bottom", BOTY),
     EnumMap::Pair ("ViewOffset", VIEWOFFSET),
     EnumMap::Pair ("CockpitOffset", COCKPITOFFSET),
+    EnumMap::Pair ("network", NETWORK),
     EnumMap::Pair ("GaugeUp",G_UP),
     EnumMap::Pair ("GaugeDown",G_DOWN),
     EnumMap::Pair ("GaugeLeft",G_LEFT),
@@ -355,6 +357,11 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
       case XFILE:
 	gaugename = (*iter).value;
 	break;
+      case NETWORK:
+        if ((Network!=NULL)!=XMLSupport::parse_bool((*iter).value)) {
+          return; // Don't show if not in multiplayer (or single if false)
+        }
+        break;
       case TOPY:
 	topy = XMLSupport::parse_float ((*iter).value);
 	break;
@@ -395,7 +402,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
     tmpdir = Gauge::GAUGE_TIME;
 	break;
       }
-    }
+    };
     gauges[elem] = new Gauge (gaugename.c_str(), tmpdir);
     if (xsize!=-1) {
       gauges[elem]->SetSize (xsize,ysize);
@@ -454,6 +461,11 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
   loadsprite:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
       switch (attribute_map.lookup((*iter).name)) {
+      case NETWORK:
+        if ((Network!=NULL)!=XMLSupport::parse_bool((*iter).value)) {
+          return; // Don't show if not in multiplayer (or single if false)
+        }
+        break;
       case XFILE:
 	if (newsprite) {
           std::string tmp=getRes((*iter).value);
