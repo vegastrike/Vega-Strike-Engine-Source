@@ -58,6 +58,7 @@ class ZoneInfo
 		next_zonenum ++;
 	}
 public:
+	void	display();
 	unsigned short getZoneNum() {
 		return zonenum;
 	}
@@ -149,6 +150,7 @@ class ZoneMgr
 		void	broadcastDamage();
 		double	isVisible( Quaternion orient, QVector src_pos, QVector tar_pos);
 
+		void	displayNPCs();
 		void	displayStats();
 		int		displayMemory();
 };

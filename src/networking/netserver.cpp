@@ -40,6 +40,7 @@
 #include "lin_time.h"
 #include "python/init.h"
 #include "networking/netserver.h"
+#include "networking/zonemgr.h"
 #include "networking/lowlevel/vsnet_serversocket.h"
 #include "networking/lowlevel/vsnet_sockethttp.h"
 #include "networking/lowlevel/vsnet_debug.h"
@@ -526,10 +527,10 @@ void	NetServer::start(int argc, char **argv)
 		  if( (curtime - savetime)>SAVE_ATOM)
 		{
 			// Not implemented
-			cout<<">>> Saving server status... ";
+			cout<<">>> Saving server status... Time="<<curtime<<endl;
 			this->save();
 			savetime = curtime;
-			cout<<"done."<<endl;
+			cout<<"<<< Finished saving."<<endl;
 		}
 
 

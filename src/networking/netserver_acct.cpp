@@ -1,4 +1,5 @@
 #include "networking/netserver.h"
+#include "networking/zonemgr.h"
 #include "networking/lowlevel/vsnet_debug.h"
 #include "vsfilesystem.h"
 #include "networking/savenet_util.h"
@@ -140,11 +141,7 @@ void	NetServer::save()
 		f.Close();
 	}
 
-	// Loop through all clients and write saves
-	for( int i=0; i<_Universe->numPlayers(); i++)
-	{
-		saveAccount(i);
-	}
+	zonemgr->displayNPCs();
 }
 
 bool NetServer::saveAccount(int i)

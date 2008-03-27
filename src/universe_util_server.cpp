@@ -78,8 +78,12 @@ namespace UniverseUtil
 	void saveGame(const string &savename) {
 		int num=-1;
 		sscanf(savename.c_str(),"%d",&num);
-		if (num>=0 && num<_Universe->numPlayers()) {
+		if (num>0 && num<_Universe->numPlayers()) {
 			if (SERVER) VSServer->saveAccount(num);
+		} else if (num==0 && SERVER) {
+			cout<<">>> Manually Saving server status..."<<endl;
+			VSServer->save();
+			cout<<"<<< Finished saving."<<endl;
 		}
 	}
 

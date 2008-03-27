@@ -1,4 +1,5 @@
 #include "networking/netserver.h"
+#include "networking/zonemgr.h"
 #include "networking/lowlevel/vsnet_debug.h"
 #include "networking/lowlevel/netbuffer.h"
 #include "universe_util.h"
@@ -31,6 +32,9 @@ ClientPtr NetServer::addNewClient( SOCKETALT &sock )
     return newclt;
 }
 
+// zonemgr.cpp
+extern void displayUnitInfo(Unit *un, const string callsign, const char *type);
+
 void NetServer::broadcastUnit(Unit *un, unsigned short zone) {
 	newUnits.push_back(un);
 }
@@ -55,6 +59,9 @@ void NetServer::sendNewUnitQueue() {
 						if (unzone == zone) {
 							added=true;
 							UnitFactory::addBuffer(netbuf, un, true);
+							if (verind==0)
+								displayUnitInfo(un, string(),
+										(" * CREATED "+un->getStarSystem()->getFileName()).c_str());
 						}
 					}
 				} else {
@@ -253,6 +260,8 @@ void	NetServer::addClient( ClientPtr clt)
 			this->sendDockAuthorize( un->GetSerial(), dockedUnit->GetSerial(), dockport, un->activeStarSystem->GetZone());
 		}
 	}
+	cp->visitSystem(un->activeStarSystem->getFileName());
+	
 	_Universe->popActiveStarSystem();
 	_Universe->SetActiveCockpit(oldcp);
 

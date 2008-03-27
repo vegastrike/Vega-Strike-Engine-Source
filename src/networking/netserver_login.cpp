@@ -1,4 +1,5 @@
 #include "networking/netserver.h"
+#include "networking/zonemgr.h"
 #include "networking/clientptr.h"
 #include "networking/lowlevel/vsnet_debug.h"
 #include "networking/lowlevel/netbuffer.h"

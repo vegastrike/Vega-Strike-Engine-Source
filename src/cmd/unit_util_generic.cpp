@@ -62,7 +62,7 @@ namespace UnitUtil {
 	int getPhysicsPriority ( Unit*  un) {
 		static const bool FORCE_TOP_PRIORITY=XMLSupport::parse_bool(
 			vs_config->getVariable("physics","priorities","force_top_priority","false") );
-		if (FORCE_TOP_PRIORITY)
+		if (FORCE_TOP_PRIORITY || SERVER || Network)
 			return 1;
 		
         //Some other comment mentions these need special treatment for subunit scheduling

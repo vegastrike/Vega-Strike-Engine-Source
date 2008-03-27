@@ -1,4 +1,5 @@
 #include "networking/netserver.h"
+#include "networking/zonemgr.h"
 #include "networking/savenet_util.h"
 #include "networking/lowlevel/vsnet_debug.h"
 #include "networking/lowlevel/netbuffer.h"
@@ -310,12 +311,15 @@ void	NetServer::sendMessage( string from, string to, string message, float delay
 	}
 }
 
+// zonemgr.cpp
+extern void displayUnitInfo(Unit *un, const string callsign, const char *type);
+
 void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 {
 	Packet p;
 	Unit * un;
 
-	cerr<<"SENDING A KILL for serial "<<serial<<" in zone "<<zone<<endl;
+	//cerr<<"SENDING A KILL for serial "<<serial<<" in zone "<<zone<<endl;
 	// Find the client in the udp & tcp client lists in order to set it out of the game (not delete it yet)
 	ClientPtr clt = this->getClientFromSerial( serial);
 	if (clt) {
@@ -342,7 +346,7 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 
 	if( !clt )
 	{
-		COUT<<"Killed a non client Unit = "<<serial<<endl;
+		displayUnitInfo(un,string()," *** KILLED a npc ");
 		/*
 		un = zonemgr->getUnit( serial, zone);
 		if (un) {
@@ -352,7 +356,6 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 	}
 	else
 	{
-		COUT<<"Killed client serial = "<<serial<<endl;
 		zonemgr->removeClient( clt );
 	}
 }

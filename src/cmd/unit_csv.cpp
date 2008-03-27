@@ -334,6 +334,9 @@ static vector<SubUnitStruct> GetSubUnits(const std::string &subunits) {
   return ret;
 }
 static void AddSubUnits (Unit *thus, Unit::XML &xml, const std::string &subunits, int faction, const std::string &modification) {
+  if (SERVER || Network) {
+    return; // subvert all subunits in MP
+  }
   vector<SubUnitStruct> su=GetSubUnits(subunits);
   xml.units.reserve(subunits.size()+xml.units.size());
   for (vector<SubUnitStruct>::iterator i=su.begin();i!=su.end();++i) {

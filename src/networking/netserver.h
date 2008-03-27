@@ -35,11 +35,15 @@
 #include "configxml.h"
 #include "networking/accountsxml.h"
 #include "networking/const.h"
+#include "networking/lowlevel/packet.h"
 #include "networking/lowlevel/netui.h"
-#include "networking/zonemgr.h"
-#include "networking/client.h"
-#include "savegame.h"
 #include "networking/lowlevel/vsnet_socketset.h"
+#include "networking/client.h"
+#include "networking/clientptr.h"
+#include "gfx/quaternion.h"
+#include "cmd/unit_generic.h"
+#include "boost/smart_ptr.hpp"
+
 struct GFXColor;
 
 extern VegaConfig *vs_config;
@@ -107,7 +111,7 @@ class NetServer
         static const char*                                _downloadSearchDirs[];
 
 	public:
-		ZoneMgr			*zonemgr;				// Zones/star systems Manager
+		class ZoneMgr		*zonemgr;				// Zones/star systems Manager
 	private:
 	
 		bool			updateTimestamps( ClientPtr clt, Packet & p);

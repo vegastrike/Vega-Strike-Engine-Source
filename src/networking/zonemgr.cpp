@@ -40,6 +40,25 @@ string			ZoneMgr::getSystem( string & name)
 /**** getZoneBuffer : returns a buffer containing zone info                                *****/
 /************************************************************************************************/
 
+void displayUnitInfo(Unit *un, const string callsign, const char *type) {
+	cout << type;
+	if (!un) {
+		cout << "\'" << callsign << "\' (dead)" << endl;
+	} else {
+		{
+			char tmp[10];
+			sprintf(tmp,"% 5d ",un->GetSerial());
+			cout << tmp;
+		}
+		cout << UnitUtil::getFactionName(un) << " " <<un->getFullname() << " ("<<un->name<<")";
+		Flightgroup *fg = un->getFlightgroup();
+		if (fg) cout << ", \'" << fg->name<<"\' "<<un->getFgSubnumber();
+		if (!callsign.empty() && (!fg || callsign!=fg->name))
+			cout << ", callsign \'"<< callsign <<"\'";
+		cout << endl;
+	}
+}
+
 // Send one by one a CMD_ADDLCIENT to the client for every ship in the star system we enter
 void  ZoneMgr::getZoneBuffer( unsigned short zoneid, NetBuffer & netbuf)
 {
@@ -266,6 +285,7 @@ StarSystem *	ZoneMgr::addClient( ClientPtr cltw, string starsys, unsigned short 
 	if (addun) {
 		_Universe->netLock(true);
 		sts->AddUnit( addun );
+		displayUnitInfo(addun, clt->callsign, "ENTERING NEW CLIENT: ");
 		_Universe->netLock(false);
 	} else
 		cerr << "dead client attempted to be added to system: refusing\n";
@@ -306,8 +326,11 @@ void	ZoneMgr::removeClient( ClientPtr clt )
 		if (found)
 			break;
 	}
+	displayUnitInfo(un, clt->callsign, " *** REMOVING client: ");
 	if (zonenum<0) {
 		cerr<<"Client "<<clt->callsign<<" not found in any zone when attempting to remove it"<<endl;
+		// NETFIXME CRASH
+		
 		return;
 	}
 	ZoneInfo *zi = GetZoneInfo(zonenum);
@@ -584,7 +607,8 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 
 			// Clients not ingame are removed from the drawList so it is ok not to test that
 			for(un_iter iter = (zi->star_system->getUnitList()).createIterator();(unit = *iter)!=NULL;++iter){
-				if (vsrandom.genrand_int31()%(totalunits*10+1) == 1) {
+				clsptr typ = unit->isUnit();
+				if ((typ==UNITPTR || typ==MISSILEPTR) && vsrandom.genrand_int31()%(totalunits*10+1) == 1) {
 					unit->damages = 0xffff;
 				}
 				if (unit->damages) {
@@ -772,7 +796,8 @@ void	ZoneMgr::broadcastDamage( )
 			// Clients not ingame are removed from the drawList so it is ok not to test that
 			for(un_iter iter = (zi->star_system->getUnitList()).createIterator();(unit = *iter)!=NULL;++iter){
 				unit->damages = Unit::NO_DAMAGE;
-				if (vsrandom.genrand_int31()%(totalunits*10+1) == 1) {
+				clsptr typ = unit->isUnit();
+				if ((typ==UNITPTR || typ==MISSILEPTR) && vsrandom.genrand_int31()%(totalunits*10+1) == 1) {
 					unit->damages = 0xffff&(~Unit::COMPUTER_DAMAGED);
 				}
 			}
@@ -795,7 +820,7 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 			damages &= (~Unit::COMPUTER_DAMAGED);
 		}
 		netbuf.addShort( damages );
-		cout << "Sent damage " <<damages<<" for unit "<<un->GetSerial()<<" ("<<un->name<<")"<<endl;
+		//cout << "Sent damage " <<damages<<" for unit "<<un->GetSerial()<<" ("<<un->name<<")"<<endl;
 		// Put the altered stucts after the damage enum flag
 		if( damages & Unit::SHIELD_DAMAGED)
 		{
@@ -892,6 +917,48 @@ double	ZoneMgr::isVisible( Quaternion orient, QVector src_pos, QVector tar_pos)
 	return dotp;
 }
 
+void ZoneInfo::display() {
+	cout << star_system->getFileName() << "(zone "<<zonenum<<")"<<endl;
+	for (ClientList::iterator ci = zone_list.begin(); ci!=zone_list.end();++ci) {
+		Client *clt = (*ci).get();
+		if (!clt) continue;
+		Unit *un = clt->game_unit.GetUnit();
+		if (un && _Universe->isPlayerStarship(un)==NULL) {
+			displayUnitInfo(un,clt->callsign," CltNPC ");
+		}
+	}
+	un_iter iter = (star_system->getUnitList()).createIterator();
+	while (Unit *un=*iter) {
+		char name[15] = "    NPC ";
+		string callsign;
+		int cp;
+		if ((cp=_Universe->whichPlayerStarship(un))!=-1) {
+			sprintf(name,"*Plr% 3d ",cp);
+			callsign = _Universe->AccessCockpit(cp)->savegame->GetCallsign();
+		}
+		displayUnitInfo(un,callsign,name);
+		++iter;
+	}
+}
+void	ZoneMgr::displayNPCs() {
+	cout << "----- Active Systems:" << endl;
+	for (ZoneMap::iterator iter = zones.begin(); iter!=zones.end(); ++iter) {
+		ZoneInfo *zi = &((*iter).second);
+		StarSystem *ss = zi->star_system;
+		for( int i=0; i<_Universe->numPlayers(); i++) {
+			Cockpit *cp = _Universe->AccessCockpit(i);
+			if (cp->activeStarSystem != ss)
+				continue;
+			Unit *un;
+			char name[15];
+			if (!cp->GetParent()) {
+				sprintf(name, "*Plr% 3d ",i);
+				displayUnitInfo(NULL,cp->savegame->GetCallsign(),name);
+			}
+		}
+		zi->display();
+	}
+}
 /************************************************************************************************/
 /****  displayStats                                                                         *****/
 /************************************************************************************************/
