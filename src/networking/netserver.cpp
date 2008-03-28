@@ -26,6 +26,8 @@
 	#include <io.h>
 #endif
 
+extern class vs_options game_options;
+
 #include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
 #include "cmd/weapon_xml.h"
@@ -46,6 +48,7 @@
 #include "networking/lowlevel/vsnet_debug.h"
 #include "networking/savenet_util.h"
 #include "vsfilesystem.h"
+#include "options.h"
 #include "networking/lowlevel/netbuffer.h"
 #include "networking/lowlevel/vsnet_dloadmgr.h"
 #include "cmd/ai/script.h"
@@ -195,6 +198,9 @@ void	NetServer::start(int argc, char **argv)
         }
 	cout<<"Loading server config...";
 	VSFileSystem::InitPaths( CONFIGFILE);
+    
+	game_options.init();
+	
 	InitUnitTables(); // universe_generic.cpp
 	// Here we say we want to only handle activity in all starsystems
 	run_only_player_starsystem=false;

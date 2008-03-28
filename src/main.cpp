@@ -274,7 +274,11 @@ printf ("Windows version %d %d\n",osvi.dwMajorVersion,osvi.dwMinorVersion);
       // Specify the config file and the possible mod subdir to play
       VSFileSystem::InitPaths( CONFIGFILE, subdir);
     }
+
+	// This should be put into some common function...
+	// Keep in mind that initialization must also go into networking/netserver.cpp
     game_options.init();
+
     //can use the vegastrike config variable to read in the default mission
     if (XMLSupport::parse_bool(vs_config->getVariable ("network","force_client_connect","false"))) {
       ignore_network=false;

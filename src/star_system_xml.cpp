@@ -602,6 +602,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 		}
 
 		case FOG:
+			++xml->unitlevel;
 			if (!game_options.usePlanetFog)
 				break;
 			xml->fogopticalillusion=true;
@@ -613,12 +614,11 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 						break;
 				}
 			}
-			++xml->unitlevel;
 			break;
 		case FOGELEMENT:
+			++xml->unitlevel;
 			if (!game_options.usePlanetFog)
 				break;
-			++xml->unitlevel;
 
 			xml->fog.push_back(AtmosphericFogMesh());
 			xml->fog.back().scale=1.1-.075+.075*xml->fog.size();
@@ -733,10 +733,10 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 		break;
 		case ATMOSPHERE:
 		{
+			++xml->unitlevel;
 			if (!game_options.usePlanetAtmosphere)
 				break;
 			string myfile("sol/earthcloudmaptrans.png");
-			++xml->unitlevel;
 			blendSrc=SRCALPHA;
 			blendDst=INVSRCALPHA;
                         bool inside_out=false;
@@ -1363,9 +1363,9 @@ void StarSystem::endElement(const string &name)
 	switch(elem) {
 		case FOG:
 		{
+			--xml->unitlevel;
 			if (!game_options.usePlanetFog)
 				break;
-			--xml->unitlevel;
 			Unit  * p = (Unit *)xml->moons.back()->GetTopPlanet(xml->unitlevel);
 			if (p!=NULL) {
 				if (p->isUnit()==PLANETPTR) {
