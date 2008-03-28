@@ -1297,8 +1297,30 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
 		static bool use_relative_velocity=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","display_relative_velocity","true"));
         float value;
         switch (stat) {
-            case UnitImages::KPS:            value=target->GetVelocity().Magnitude()*target->graphicOptions.WarpFieldStrength; if (use_relative_velocity&&target->computer.velocity_ref.GetUnit()) value= (target->GetVelocity()*target->graphicOptions.WarpFieldStrength-target->computer.velocity_ref.GetUnit()->GetVelocity()*target->computer.velocity_ref.GetUnit()->graphicOptions.WarpFieldStrength).Magnitude() ;
-				break;
+            case UnitImages::KPS:            
+              if (target->graphicOptions.WarpFieldStrength!=1.0) {
+                  if (use_relative_velocity&&target->computer.velocity_ref.GetUnit()) {
+                      if (target->computer.velocity_ref.GetUnit()->graphicOptions.WarpFieldStrength!=1.0) {
+                          value=(target->GetWarpVelocity()-target->computer.velocity_ref.GetUnit()->GetWarpVelocity()).Magnitude();
+                      }else{
+                          value=(target->GetWarpVelocity()-target->computer.velocity_ref.GetUnit()->cumulative_velocity).Magnitude();
+                      }
+                  }else {
+                      value=target->GetWarpVelocity().Magnitude();;
+                  }
+              }else {
+                  if (use_relative_velocity&&target->computer.velocity_ref.GetUnit()) {
+                      if (target->computer.velocity_ref.GetUnit()->graphicOptions.WarpFieldStrength!=1.0) {
+                          value=(target->cumulative_velocity-target->computer.velocity_ref.GetUnit()->GetWarpVelocity()).Magnitude();
+                      }else{
+                          value=(target->cumulative_velocity-target->computer.velocity_ref.GetUnit()->cumulative_velocity).Magnitude();
+                      }
+                  }else {
+                      value=target->cumulative_velocity.Magnitude();
+                  }
+
+              }             
+              break;
             case UnitImages::SETKPS:         value=target->GetComputerData().set_speed; break;
             case UnitImages::MAXKPS:         value=target->GetComputerData().max_speed(); break;
             case UnitImages::MAXCOMBATKPS:   value=target->GetComputerData().max_combat_speed; break;
