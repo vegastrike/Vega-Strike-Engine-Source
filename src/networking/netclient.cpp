@@ -28,6 +28,8 @@
 #endif
 #include <config.h>
 
+#include "gfx/background.h" //Background::BackgroundCache
+
 #include "vs_globals.h"
 #include "endianness.h"
 #include "cmd/unit_generic.h"
@@ -401,7 +403,16 @@ void NetClient::Respawn( ObjSerial newserial) {
   cp->savegame->SetStarSystem(mysystem);
   cp->savegame->ParseSaveGame ("",mysystem,"",pos,setplayerXloc,cp->credits,cp->unitfilename,whichcp, lastsave[0], false);
   string fullsysname=mysystem+".system";
-  StarSystem * ss = _Universe->GenerateStarSystem(fullsysname.c_str(),"",Vector(0,0,0));
+  StarSystem * ss;
+  
+  {
+    Background::BackgroundClone savedtextures={{NULL,NULL,NULL,NULL,NULL,NULL,NULL}};
+    Background *tmp=_Universe->activeStarSystem()->getBackground();
+    savedtextures=tmp->Cache();
+    _Universe->clearAllSystems();
+    ss = _Universe->GenerateStarSystem(fullsysname.c_str(),"",Vector(0,0,0));
+    savedtextures.FreeClone();
+  }
   _Universe->pushActiveStarSystem(ss);
   unsigned int oldcp=_Universe->CurrentCockpit();
   _Universe->SetActiveCockpit(cp);
@@ -423,6 +434,7 @@ void NetClient::Respawn( ObjSerial newserial) {
   AddClientObject(un,newserial);
   SwitchUnits2(un);
   cp->SetView(CP_FRONT);
+  cp->activeStarSystem = _Universe->activeStarSystem();
   _Universe->SetActiveCockpit(oldcp);
   _Universe->popActiveStarSystem();
   UniverseUtil::hideSplashScreen();
@@ -675,6 +687,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
                 break;
             case CMD_ADDEDYOU :
                 {
+					UniverseUtil::hideSplashScreen();
 					if (nostarsystem) break;
                     COUT << ">>> " << local_serial << " >>> ADDED IN GAME =( serial #"
                          << packet_serial << " )= --------------------------------------" << endl;

@@ -87,5 +87,6 @@ public:
 
 // Get the global instance of the event manager
 EventManager& globalEventManager(void);
+bool hasGlobalEventManager(void);
 
 #endif   // __EVENTMANAGER_H__

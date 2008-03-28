@@ -122,5 +122,7 @@ m_commandTarget(NULL)
 EventResponder::~EventResponder(void)
 {
     // Make sure this responder is not in the event chain.
-    globalEventManager().removeResponder(this);
+	if (hasGlobalEventManager()) {
+		globalEventManager().removeResponder(this);
+	}
 }

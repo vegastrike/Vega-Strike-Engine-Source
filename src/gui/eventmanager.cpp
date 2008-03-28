@@ -47,6 +47,9 @@ EventManager& globalEventManager(void) {
     return *globalEventManagerPtr;
 }
 
+bool hasGlobalEventManager(void) {
+	return (globalEventManagerPtr != NULL);
+}
 
 // STATIC: Initialize the event manager.  This starts the event loop, etc.
 // This may be called more than once -- it does nothing after the

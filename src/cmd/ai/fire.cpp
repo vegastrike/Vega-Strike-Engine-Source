@@ -670,7 +670,7 @@ using std::string;
 void FireAt::PossiblySwitchTarget(bool unused) {
 //  static float targetswitchprobability = XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","TargetSwitchProbability",".01"));
   static float targettime = XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","TimeUntilSwitch","20"));
-  if (vsrandom.uniformInc(0,1)<SIMULATION_ATOM/targettime) {
+  if ((targettime<=0) || (vsrandom.uniformInc(0,1)<SIMULATION_ATOM/targettime)) {
 	  bool ct= true;
 	  Flightgroup * fg;	  
 	  if ((fg = parent->getFlightgroup())) {

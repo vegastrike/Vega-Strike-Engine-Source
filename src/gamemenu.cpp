@@ -673,18 +673,19 @@ bool NetActionConfirm::finalizeJoinGame(int launchShip) {
 	{
 		NetClient *playerClient = &Network[player];
 		Window *parentWin = m_parent;
-		
+
+		/*
 		if (window()) window()->close(); // THIS IS DELETED!
 		
 		if (parentWin) {
 			parentWin->close();
 		}
+		*/
 		
 		globalWindowManager().shutDown();
 		TerminateCurrentBase();  //BaseInterface::CurrentBase->Terminate();
 		
 		playerClient->startGame();
-		UniverseUtil::hideSplashScreen();
 		
 		return true;
 	}
