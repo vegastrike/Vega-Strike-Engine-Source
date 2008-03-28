@@ -76,6 +76,11 @@ struct GFXStats{
 #if defined(__APPLE__) || defined(MACOSX)
     #include <GLUT/glut.h>
 //#if defined( GL_INIT_CPP) || defined( GL_MISC_CPP) || defined( GL_STATE_CPP)
+#if defined(GL_ARB_vertex_program) && defined(GL_ARB_fragment_program)
+#define OSX_AT_LEAST_10_4
+#else
+#define OSX_LOWER_THAN_10_4
+#endif
 #define GL_GLEXT_PROTOTYPES
 //#endif
     #include <OpenGL/glext.h>
@@ -118,6 +123,7 @@ struct GFXStats{
 #define glActiveTextureARB_p glActiveTextureARB
 #define glColorTable_p glColorTable
 #define glCompressedTexImage2D_p glCompressedTexImage2D
+#ifndef OSX_LOWER_THAN_10_4
 #define glGetShaderiv_p glGetShaderiv
 #define glGetProgramiv_p glGetProgramiv
 #define glGetShaderInfoLog_p glGetShaderInfoLog
@@ -150,7 +156,41 @@ struct GFXStats{
 
 #define glDeleteShader_p glDeleteShader
 #define glDeleteProgram_p glDeleteProgram
+#else
+#define glGetShaderiv_p(a,b,c)
+#define glGetProgramiv_p(a,b,c)
+#define glGetShaderInfoLog_p(a,b,c,d)
+#define glGetProgramInfoLog_p(a,b,c,d)
+#define glCreateShader_p(a) 0
+#define glShaderSource_p(a,b,c,d)
+#define glCompileShader_p(a)
+#define glCreateProgram_p() 0
+#define glAttachShader_p(a,b)
+#define glLinkProgram_p(a)
+#define glUseProgram_p(a)
+#define glGetUniformLocation_p(a,b) 0
+#define glUniform1f_p(a,b)
+#define glUniform2f_p(a,b,c)
+#define glUniform3f_p(a,b,c,d)
+#define glUniform4f_p(a,b,c,d,e)
+#define glUniform1i_p(a,b)
+#define glUniform2i_p(a,b,c)
+#define glUniform3i_p(a,b,c,d)
+#define glUniform4i_p(a,b,c,d,e)
+#define glUniform1fv_p(a,b,c)
+#define glUniform2fv_p(a,b,c)
+#define glUniform3fv_p(a,b,c)
+#define glUniform4fv_p(a,b,c)
+#define glUniform1iv_p(a,b,c)
+#define glUniform2iv_p(a,b,c)
+#define glUniform3iv_p(a,b,c)
+#define glUniform4iv_p(a,b,c)
 
+
+
+#define glDeleteProgram_p glIsTexture
+
+#endif
 #if !defined(glLockArraysEXT)||!defined(glUnlockArraysEXT)
 #define NO_COMPILEDVERTEXARRAY_SUPPORT
 #endif

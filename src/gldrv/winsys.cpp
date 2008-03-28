@@ -1,17 +1,17 @@
-/* 
- * Tux Racer 
+/*
+ * Tux Racer
  * Copyright (C) 1999-2001 Jasmin F. Patry
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -52,20 +52,20 @@ static bool redisplay = false;
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Requests that the screen be redrawn
   \author  jfpatry
   \date    Created:  2000-10-19
   \date    Modified: 2000-10-19
 */
-void winsys_post_redisplay() 
+void winsys_post_redisplay()
 {
     redisplay = true;
 }
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Sets the display callback
   \author  jfpatry
   \date    Created:  2000-10-19
@@ -78,7 +78,7 @@ void winsys_set_display_func( winsys_display_func_t func )
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Sets the idle callback
   \author  jfpatry
   \date    Created:  2000-10-19
@@ -91,7 +91,7 @@ void winsys_set_idle_func( winsys_idle_func_t func )
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Sets the reshape callback
   \author  jfpatry
   \date    Created:  2000-10-19
@@ -104,7 +104,7 @@ void winsys_set_reshape_func( winsys_reshape_func_t func )
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Sets the keyboard callback
   \author  jfpatry
   \date    Created:  2000-10-19
@@ -117,7 +117,7 @@ void winsys_set_keyboard_func( winsys_keyboard_func_t func )
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Sets the mouse button-press callback
   \author  jfpatry
   \date    Created:  2000-10-19
@@ -130,7 +130,7 @@ void winsys_set_mouse_func( winsys_mouse_func_t func )
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Sets the mouse motion callback (when a mouse button is pressed)
   \author  jfpatry
   \date    Created:  2000-10-19
@@ -143,7 +143,7 @@ void winsys_set_motion_func( winsys_motion_func_t func )
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Sets the mouse motion callback (when no mouse button is pressed)
   \author  jfpatry
   \date    Created:  2000-10-19
@@ -157,7 +157,7 @@ void winsys_set_passive_motion_func( winsys_motion_func_t func )
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Copies the OpenGL back buffer to the front buffer
   \author  jfpatry
   \date    Created:  2000-10-19
@@ -170,7 +170,7 @@ void winsys_swap_buffers()
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Moves the mouse pointer to (x,y)
   \author  jfpatry
   \date    Created:  2000-10-19
@@ -183,7 +183,7 @@ void winsys_warp_pointer( int x, int y )
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Sets up the SDL OpenGL rendering context
   \author  jfpatry
   \date    Created:  2000-10-20
@@ -191,7 +191,7 @@ void winsys_warp_pointer( int x, int y )
 */
 static void setup_sdl_video_mode()
 {
-    Uint32 video_flags = SDL_OPENGL; 
+    Uint32 video_flags = SDL_OPENGL;
     int bpp = 0;
     int width, height;
 
@@ -204,7 +204,7 @@ static void setup_sdl_video_mode()
     }
 
     bpp = gl_options.color_depth;
-    
+
     int rs,gs,bs,zs; rs=gs=bs=(bpp==16)?5:8;
     string rgbfmt = vs_config->getVariable("graphics","rgb_pixel_format",((bpp==16)?"555":"888"));
     zs = XMLSupport::parse_int( vs_config->getVariable("graphics","z_pixel_format","24") );
@@ -230,7 +230,7 @@ static void setup_sdl_video_mode()
       SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, gs );
       SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, bs );
       SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, zs );
-      SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );      
+      SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
     };
 #if SDL_VERSION_ATLEAST(1,2,10)
     SDL_GL_SetAttribute( SDL_GL_ACCELERATED_VISUAL, 1);
@@ -238,27 +238,27 @@ static void setup_sdl_video_mode()
     width = g_game.x_resolution;
     height =g_game.y_resolution  ;
 
-    if ( ( screen = SDL_SetVideoMode( width, height, bpp, video_flags ) ) == 
-	 NULL ) 
+    if ( ( screen = SDL_SetVideoMode( width, height, bpp, video_flags ) ) ==
+	 NULL )
     {
-	VSFileSystem::vs_fprintf( stderr, "Couldn't initialize video: %s", 
+	VSFileSystem::vs_fprintf( stderr, "Couldn't initialize video: %s",
 		 SDL_GetError() );
         for (int counter=0;screen==NULL&&counter<2;++counter) {
           for (int bpd=4;bpd>1;--bpd) {
-            SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, bpd*8 );      
-            if ( ( screen = SDL_SetVideoMode( width, height, bpp, video_flags|SDL_ANYFORMAT ) ) == 
+            SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, bpd*8 );
+            if ( ( screen = SDL_SetVideoMode( width, height, bpp, video_flags|SDL_ANYFORMAT ) ) ==
                  NULL )
-            { 
-              VSFileSystem::vs_fprintf( stderr, "Couldn't initialize video bpp %d depth %d: %s\n", 
+            {
+              VSFileSystem::vs_fprintf( stderr, "Couldn't initialize video bpp %d depth %d: %s\n",
                                         bpp,bpd*8,SDL_GetError() );
             }else {
               break;
             }
           }
           if (screen==NULL) {
-            SDL_GL_SetAttribute( SDL_GL_RED_SIZE, otherattributes );   
-            SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, otherattributes );   
-            SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, otherattributes );             
+            SDL_GL_SetAttribute( SDL_GL_RED_SIZE, otherattributes );
+            SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, otherattributes );
+            SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, otherattributes );
             gl_options.color_depth=bpp=otherbpp;
           }
         }
@@ -272,21 +272,21 @@ static void setup_sdl_video_mode()
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
-  Initializes the OpenGL rendering context, and creates a window (or 
+/*!
+  Initializes the OpenGL rendering context, and creates a window (or
   sets up fullscreen mode if selected)
   \author  jfpatry
   \date    Created:  2000-10-19
   \date    Modified: 2000-10-19
 */
 
-void winsys_init( int *argc, char **argv, char *window_title, 
+void winsys_init( int *argc, char **argv, char *window_title,
 		  char *icon_title )
 {
 	// SDL_INIT_AUDIO|
 	Uint32 sdl_flags = SDL_INIT_VIDEO|SDL_INIT_JOYSTICK;
-    g_game.x_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","x_resolution","1024"));     
-    g_game.y_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","y_resolution","768"));     
+    g_game.x_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","x_resolution","1024"));
+    g_game.y_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","y_resolution","768"));
     gl_options.fullscreen = XMLSupport::parse_bool (vs_config->getVariable ("graphics","fullscreen","false"));
     gl_options.color_depth = XMLSupport::parse_int (vs_config->getVariable ("graphics","colordepth","32"));
     /*
@@ -306,8 +306,8 @@ void winsys_init( int *argc, char **argv, char *window_title,
 		SDL_SetColorKey(icon,SDL_SRCCOLORKEY,((Uint32*)(icon->pixels))[0]);
 	}
 #endif
-    /* 
-     * Init video 
+    /*
+     * Init video
      */
     SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
@@ -316,17 +316,17 @@ void winsys_init( int *argc, char **argv, char *window_title,
     SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8 );
 #endif
 
-    glutInit(argc,argv);
     SDL_WM_SetCaption( window_title, window_title );
 	if (icon) SDL_WM_SetIcon(icon,0);
 
     setup_sdl_video_mode();
-    
+    glutInit(argc,argv);
+
 }
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Deallocates resources in preparation for program termination
   \author  jfpatry
   \date    Created:  2000-10-19
@@ -342,9 +342,9 @@ void winsys_shutdown()
 }
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Enables/disables key repeat messages from being generated
-  \return  
+  \return
   \author  jfpatry
   \date    Created:  2000-10-19
   \date    Modified: 2000-10-19
@@ -361,7 +361,7 @@ void winsys_enable_key_repeat( bool enabled )
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Shows/hides mouse cursor
   \author  jfpatry
   \date    Created:  2000-10-19
@@ -377,7 +377,7 @@ void winsys_show_cursor( bool visible )
 }
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Processes and dispatches events.  This function never returns.
   \return  No.
   \author  jfpatry
@@ -391,7 +391,7 @@ extern int shiftup(int);
 
 void winsys_process_events()
 {
-    SDL_Event event; 
+    SDL_Event event;
     unsigned int key;
     int x, y;
     bool state;
@@ -431,7 +431,7 @@ void winsys_process_events()
 		    // Ugly hack: prevent shiftup/shiftdown screwups on intl keyboard
 		    // Note: Thank god we'll have OIS for 0.5.x
 		    bool shifton = event.key.keysym.mod&(KMOD_LSHIFT|KMOD_RSHIFT|KMOD_CAPS);
-		    if (   shifton && is_unicode 
+		    if (   shifton && is_unicode
 				&& shiftup(shiftdown(event.key.keysym.unicode)) != event.key.keysym.unicode)
 			{
 		        event.key.keysym.mod = SDLMod(event.key.keysym.mod & ~(KMOD_LSHIFT|KMOD_RSHIFT|KMOD_CAPS));
@@ -440,9 +440,9 @@ void winsys_process_events()
 			// Choose unicode or symbolic, depending on whether ther is or not a unicode code
 			// (unicode codes must be postprocessed to make sure application of the shiftup
 			// modifier does not destroy it)
-		    key = is_unicode ? 
+		    key = is_unicode ?
 		          ( (shifton) ?
-			        shiftdown(event.key.keysym.unicode) 
+			        shiftdown(event.key.keysym.unicode)
 			      : event.key.keysym.unicode
 			  ) : event.key.keysym.sym;
 			// Send the event
@@ -517,7 +517,7 @@ void winsys_process_events()
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Sets the function to be called when program ends.  Note that this
   function should only be called once.
   \author  jfpatry
@@ -537,7 +537,7 @@ void winsys_atexit( winsys_atexit_func_t func )
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Exits the program
   \author  jfpatry
   \date    Created:  2000-10-20
@@ -549,7 +549,7 @@ void winsys_exit( int code )
     if ( atexit_func ) {
 	  (*atexit_func)();
     }
-    
+
     exit( code );
 }
 
@@ -567,20 +567,20 @@ static bool redisplay = false;
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Requests that the screen be redrawn
   \author  jfpatry
   \date    Created:  2000-10-19
   \date    Modified: 2000-10-19
 */
-void winsys_post_redisplay() 
+void winsys_post_redisplay()
 {
     redisplay = true;
 }
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Sets the display callback
   \author  jfpatry
   \date    Created:  2000-10-19
@@ -593,7 +593,7 @@ void winsys_set_display_func( winsys_display_func_t func )
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Sets the idle callback
   \author  jfpatry
   \date    Created:  2000-10-19
@@ -606,7 +606,7 @@ void winsys_set_idle_func( winsys_idle_func_t func )
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Sets the reshape callback
   \author  jfpatry
   \date    Created:  2000-10-19
@@ -621,7 +621,7 @@ char AdjustKeyCtrl(char ch) {
   if (ch=='\0') {
     ch='2';
   }else if (ch>='0'&&ch<='9'){
-    
+
   }else if (ch>=27&&ch<=31){
     ch=ch+'0'-24;
   }else if (ch==127) {
@@ -632,9 +632,9 @@ char AdjustKeyCtrl(char ch) {
   return ch;
 }
 /* Keyboard callbacks */
-static void glut_keyboard_cb( unsigned char ch, int x, int y ) 
+static void glut_keyboard_cb( unsigned char ch, int x, int y )
 {
-  
+
     if ( keyboard_func ) {
       int gm = glutGetModifiers();
       if (gm) {
@@ -644,19 +644,19 @@ static void glut_keyboard_cb( unsigned char ch, int x, int y )
         ch=AdjustKeyCtrl(ch);
       }
       (*keyboard_func)( ch, gm, false, x, y );
-      
+
     }
 }
 
-static void glut_special_cb( int key, int x, int y ) 
+static void glut_special_cb( int key, int x, int y )
 {
     if ( keyboard_func ) {
-      
+
 	(*keyboard_func)( key+128, glutGetModifiers(), false, x, y );
     }
 }
 
-static void glut_keyboard_up_cb( unsigned char ch, int x, int y ) 
+static void glut_keyboard_up_cb( unsigned char ch, int x, int y )
 {
     if ( keyboard_func ) {
       int gm = glutGetModifiers();
@@ -665,12 +665,12 @@ static void glut_keyboard_up_cb( unsigned char ch, int x, int y )
       }
       if (gm&GLUT_ACTIVE_CTRL) {
         ch=AdjustKeyCtrl(ch);
-      }      
+      }
       (*keyboard_func)( ch, gm, true, x, y );
     }
 }
 
-static void glut_special_up_cb( int key, int x, int y ) 
+static void glut_special_up_cb( int key, int x, int y )
 {
     if ( keyboard_func ) {
 	(*keyboard_func)( key+128, glutGetModifiers(), true, x, y );
@@ -679,7 +679,7 @@ static void glut_special_up_cb( int key, int x, int y )
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Sets the keyboard callback
   \author  jfpatry
   \date    Created:  2000-10-19
@@ -692,7 +692,7 @@ void winsys_set_keyboard_func( winsys_keyboard_func_t func )
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Sets the mouse button-press callback
   \author  jfpatry
   \date    Created:  2000-10-19
@@ -705,7 +705,7 @@ void winsys_set_mouse_func( winsys_mouse_func_t func )
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Sets the mouse motion callback (when a mouse button is pressed)
   \author  jfpatry
   \date    Created:  2000-10-19
@@ -718,7 +718,7 @@ void winsys_set_motion_func( winsys_motion_func_t func )
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Sets the mouse motion callback (when no mouse button is pressed)
   \author  jfpatry
   \date    Created:  2000-10-19
@@ -732,7 +732,7 @@ void winsys_set_passive_motion_func( winsys_motion_func_t func )
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Copies the OpenGL back buffer to the front buffer
   \author  jfpatry
   \date    Created:  2000-10-19
@@ -745,7 +745,7 @@ void winsys_swap_buffers()
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Moves the mouse pointer to (x,y)
   \author  jfpatry
   \date    Created:  2000-10-19
@@ -758,20 +758,20 @@ void winsys_warp_pointer( int x, int y )
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
-  Initializes the OpenGL rendering context, and creates a window (or 
+/*!
+  Initializes the OpenGL rendering context, and creates a window (or
   sets up fullscreen mode if selected)
   \author  jfpatry
   \date    Created:  2000-10-19
   \date    Modified: 2000-10-19
 */
-void winsys_init( int *argc, char **argv, char *window_title, 
+void winsys_init( int *argc, char **argv, char *window_title,
 		  char *icon_title )
 {
     int width, height;
     int glutWindow;
-    g_game.x_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","x_resolution","1024"));     
-    g_game.y_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","y_resolution","768"));     
+    g_game.x_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","x_resolution","1024"));
+    g_game.y_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","y_resolution","768"));
     gl_options.fullscreen = XMLSupport::parse_bool (vs_config->getVariable ("graphics","fullscreen","false"));
     gl_options.color_depth = XMLSupport::parse_int (vs_config->getVariable ("graphics","colordepth","32"));
     glutInit( argc, argv );
@@ -797,7 +797,7 @@ void winsys_init( int *argc, char **argv, char *window_title,
     }
 
     char str [1024];
-    sprintf (str, "%dx%d:%d@60",g_game.x_resolution,g_game.y_resolution,gl_options.color_depth); 
+    sprintf (str, "%dx%d:%d@60",g_game.x_resolution,g_game.y_resolution,gl_options.color_depth);
     glutGameModeString(str);
     fprintf (stderr,"Game Mode Params %dx%d at depth %d @ %d Hz\n",glutGameModeGet( GLUT_GAME_MODE_WIDTH ),glutGameModeGet( GLUT_GAME_MODE_WIDTH ),glutGameModeGet( GLUT_GAME_MODE_PIXEL_DEPTH ),glutGameModeGet( GLUT_GAME_MODE_REFRESH_RATE ));
 
@@ -822,7 +822,7 @@ void winsys_init( int *argc, char **argv, char *window_title,
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Deallocates resources in preparation for program termination
   \author  jfpatry
   \date    Created:  2000-10-19
@@ -840,9 +840,9 @@ void winsys_shutdown()
 }
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Enables/disables key repeat messages from being generated
-  \return  
+  \return
   \author  jfpatry
   \date    Created:  2000-10-19
   \date    Modified: 2000-10-19
@@ -853,7 +853,7 @@ void winsys_enable_key_repeat( bool enabled )
 }
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Shows/hides mouse cursor
   \author  jfpatry
   \date    Created:  2000-10-19
@@ -876,7 +876,7 @@ void winsys_show_cursor( bool visible )
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Processes and dispatches events.  This function never returns.
   \return  No.
   \author  jfpatry
@@ -895,7 +895,7 @@ void winsys_process_events()
 }
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Sets the function to be called when program ends.  Note that this
   function should only be called once.
   \author  jfpatry
@@ -915,7 +915,7 @@ void winsys_atexit( winsys_atexit_func_t func )
 
 
 /*---------------------------------------------------------------------------*/
-/*! 
+/*!
   Exits the program
   \author  jfpatry
   \date    Created:  2000-10-20

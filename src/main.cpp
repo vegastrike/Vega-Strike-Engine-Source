@@ -195,7 +195,6 @@ char mission_name[1024];
 
 void bootstrap_main_loop();
 void bootstrap_first_loop();
-
 #if defined(WITH_MACOSX_BUNDLE)
 //WTF! this causes windowed creation to fail... please justify yourself ;-)  #undef main
 #endif
@@ -207,6 +206,7 @@ extern void InitUnitTables();
 bool isVista=false;
 int main( int argc, char *argv[] ) 
 {
+
 #if defined(WITH_MACOSX_BUNDLE)||defined(_WIN32)
   {
     char *parentdir;

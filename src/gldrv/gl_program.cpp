@@ -24,6 +24,10 @@ int GFXCreateProgramConst(const char*vprogram,const char* fprogram) {
 #ifndef __APPLE__
   if (glGetProgramInfoLog_p==NULL||glCreateShader_p==NULL||glShaderSource_p==NULL||glCompileShader_p==NULL||glAttachShader_p==NULL||glLinkProgram_p==NULL||glGetShaderiv_p==NULL||glGetProgramiv_p==NULL)
     return 0;
+#else
+#ifdef OSX_LOWER_THAN_10_4
+    return 0;
+#endif
 #endif
   GLenum errCode;
   while((errCode=glGetError())!=GL_NO_ERROR) {

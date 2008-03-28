@@ -1,8 +1,13 @@
 #include <string>
+#if BOOST_VERSION != 102800
+#include <boost/python/object.hpp>
 #include <boost/python/dict.hpp>
+#else
+#include <boost/python/objects.hpp>
+#endif
 
 #if defined(HAVE_PYTHON)
-//	namespace boost { namespace python { class dict; } }
+	namespace boost { namespace python { class dict; } }
 #else
 	#include <map>
 #endif

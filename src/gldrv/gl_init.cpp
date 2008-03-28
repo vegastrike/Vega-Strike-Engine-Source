@@ -1,19 +1,19 @@
-/* 
+/*
  * Vega Strike
  * Copyright (C) 2001-2002 Daniel Horn
- * 
+ *
  * http://vegastrike.sourceforge.net/
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -135,7 +135,7 @@ PFNGLCOMPRESSEDTEXIMAGE2DPROC glCompressedTexImage2D_p = 0;
 
 #endif /* __APPLE_PANTHER_GCC33_CLI__ */
 
-typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))(); 
+typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))();
 #ifdef _WIN32
     typedef char * GET_GL_PTR_TYP;
 #define GET_GL_PROC wglGetProcAddress
@@ -149,7 +149,7 @@ typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))();
 CG_Cloak *cloak_cg = new CG_Cloak();
 #endif
 /* CENTRY */
-int 
+int
 vsExtensionSupported(const char *extension)
 {
   static const GLubyte *extensions = NULL;
@@ -206,13 +206,13 @@ void init_opengl_extensions()
 #endif
 #endif /*__APPLE_PANTHER_GCC33_CLI__*/
 #else
-	glLockArraysEXT_p = (PFNGLLOCKARRAYSEXTPROC) 
+	glLockArraysEXT_p = (PFNGLLOCKARRAYSEXTPROC)
 	    GET_GL_PROC( (GET_GL_PTR_TYP) "glLockArraysEXT" );
-	glUnlockArraysEXT_p = (PFNGLUNLOCKARRAYSEXTPROC) 
-	    GET_GL_PROC( (GET_GL_PTR_TYP) "glUnlockArraysEXT" );	
+	glUnlockArraysEXT_p = (PFNGLUNLOCKARRAYSEXTPROC)
+	    GET_GL_PROC( (GET_GL_PTR_TYP) "glUnlockArraysEXT" );
 #endif
 	(void) VSFileSystem::vs_fprintf(stderr, "OpenGL::GL_EXT_compiled_vertex_array supported\n");
-    } else {    
+    } else {
 #ifdef __APPLE__
 #ifndef __APPLE_PANTHER_GCC33_CLI__
 		glLockArraysEXT_p = 0;
@@ -228,7 +228,7 @@ void init_opengl_extensions()
 	glColorTable_p = glColorTableEXT;
 	glMultiTexCoord2fARB_p = glMultiTexCoord2fARB;
 	glClientActiveTextureARB_p = glClientActiveTextureARB;
-	glActiveTextureARB_p = glActiveTextureARB;		
+	glActiveTextureARB_p = glActiveTextureARB;
 #endif /*__APPLE_PANTHER_GCC33_CLI__*/
 #else
 #ifndef NO_VBO_SUPPORT
@@ -237,19 +237,19 @@ void init_opengl_extensions()
     glDeleteBuffersARB_p=(PFNGLDELETEBUFFERSARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glDeleteBuffers");	;
     glBufferDataARB_p=(PFNGLBUFFERDATAARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glBufferData");	;
     glMapBufferARB_p=(PFNGLMAPBUFFERARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glMapBuffer");	;
-    glUnmapBufferARB_p=(PFNGLUNMAPBUFFERARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUnmapBuffer");	
+    glUnmapBufferARB_p=(PFNGLUNMAPBUFFERARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUnmapBuffer");
 #endif
 
     glColorTable_p = (PFNGLCOLORTABLEEXTPROC ) GET_GL_PROC((GET_GL_PTR_TYP)"glColorTableEXT");
     glMultiTexCoord2fARB_p = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fARB");
     glClientActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureARB");
     glActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureARB");
-    if(!glMultiTexCoord2fARB_p) 
+    if(!glMultiTexCoord2fARB_p)
         glMultiTexCoord2fARB_p = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fEXT");
     if(!glClientActiveTextureARB_p)
         glClientActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureEXT");
     if(!glActiveTextureARB_p)
-        glActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureEXT");	
+        glActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureEXT");
     if(!glCompressedTexImage2D_p)
       glCompressedTexImage2D_p = (PFNGLCOMPRESSEDTEXIMAGE2DPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glCompressedTexImage2D");
 
@@ -269,7 +269,7 @@ void init_opengl_extensions()
       glShaderSource_p=(PFNGLSHADERSOURCEPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glShaderSource");
     if (!glCompileShader_p)
       glCompileShader_p=(PFNGLCOMPILESHADERPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glCompileShader");
-    if (!glAttachShader_p) 
+    if (!glAttachShader_p)
       glAttachShader_p=(PFNGLATTACHSHADERPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glAttachShader");
     if (!glLinkProgram_p)
       glLinkProgram_p=(PFNGLLINKPROGRAMPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glLinkProgram");
@@ -339,7 +339,7 @@ void init_opengl_extensions()
 	break;
       }
     }else {
-#endif    
+#endif
       VSFileSystem::vs_fprintf (stderr,"OpenGL::Accurate Fog Distance unsupported\n");
 #ifdef GL_FOG_DISTANCE_MODE_NV
     }
@@ -377,7 +377,7 @@ void init_opengl_extensions()
       (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::TextureCubeMapExt supported\n");
     } else {
       gl_options.cubemap = 0;
-      (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::TextureCubeMapExt unsupported\n"); 
+      (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::TextureCubeMapExt unsupported\n");
     }
     if (vsExtensionSupported ("GL_EXT_texture_edge_clamp")||vsExtensionSupported ("GL_SGIS_texture_edge_clamp")) {
       (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::S3TC Texture Clamp-to-Edge supported\n");
@@ -397,9 +397,9 @@ void init_opengl_extensions()
       if (gl_options.Multitexture<16)
 	gl_options.Multitexture=16;//only support shaders on ps_2_0 cards
     }
-    
 
-    
+
+
 }
 
  static void initfov () {
@@ -433,7 +433,7 @@ static void Reshape (int x, int y) {
   g_game.x_resolution = x;
   g_game.y_resolution = y;
   VSFileSystem::vs_fprintf (stderr,"Reshaping %d %d", x,y);
-  
+
 }
 extern void GFXInitTextureManager();
 void GFXInit (int argc, char ** argv){
@@ -443,15 +443,15 @@ void GFXInit (int argc, char ** argv){
 
     glViewport (0, 0, g_game.x_resolution,g_game.y_resolution);
     float clearcol[4];
-    gl_options.wireframe = XMLSupport::parse_bool (vs_config->getVariable ("graphics","use_wireframe","0"));     
-    gl_options.max_texture_dimension= XMLSupport::parse_int (vs_config->getVariable ("graphics","max_texture_dimension","65536"));     
-    gl_options.max_movie_dimension= XMLSupport::parse_int (vs_config->getVariable ("graphics","max_movie_dimension","65536"));     
-    gl_options.smooth_shade = XMLSupport::parse_bool (vs_config->getVariable ("graphics","SmoothShade","true"));     
-    gl_options.mipmap = XMLSupport::parse_int (vs_config->getVariable ("graphics","mipmapdetail","2"));     
+    gl_options.wireframe = XMLSupport::parse_bool (vs_config->getVariable ("graphics","use_wireframe","0"));
+    gl_options.max_texture_dimension= XMLSupport::parse_int (vs_config->getVariable ("graphics","max_texture_dimension","65536"));
+    gl_options.max_movie_dimension= XMLSupport::parse_int (vs_config->getVariable ("graphics","max_movie_dimension","65536"));
+    gl_options.smooth_shade = XMLSupport::parse_bool (vs_config->getVariable ("graphics","SmoothShade","true"));
+    gl_options.mipmap = XMLSupport::parse_int (vs_config->getVariable ("graphics","mipmapdetail","2"));
     gl_options.compression = XMLSupport::parse_int (vs_config->getVariable ("graphics","texture_compression","0"));
     gl_options.Multitexture = XMLSupport::parse_bool (vs_config->getVariable ("graphics","reflection","true"));
     gl_options.smooth_lines = XMLSupport::parse_bool( vs_config->getVariable("graphics/mesh","smooth_lines","true") );
-    gl_options.smooth_points= XMLSupport::parse_bool( vs_config->getVariable("graphics/mesh","smooth_points","true") ); 
+    gl_options.smooth_points= XMLSupport::parse_bool( vs_config->getVariable("graphics/mesh","smooth_points","true") );
 
 
     gl_options.display_lists = XMLSupport::parse_bool (vs_config->getVariable ("graphics","displaylists","false"));
@@ -516,7 +516,7 @@ void GFXInit (int argc, char ** argv){
 
 
 			// Spherical texture coordinate generation
-			if (i==1) {			
+			if (i==1) {
 #ifdef NV_CUBE_MAP
                 GFXToggleTexture(true,1,CUBEMAP);
                 GFXTextureCoordGenMode(1,CUBE_MAP_GEN,NULL,NULL);
@@ -533,7 +533,7 @@ void GFXInit (int argc, char ** argv){
     glEnable (GL_BLEND);
     glDisable (GL_ALPHA_TEST);
     GFXBlendMode (ONE, ZERO);
-    
+
     glColor3f(0,0,0);
     glMatrixMode (GL_MODELVIEW);
     glLoadIdentity();
@@ -543,7 +543,7 @@ void GFXInit (int argc, char ** argv){
     glLoadIdentity();
 
     glEnable(GL_LIGHTING);
-    
+
     glDisable(GL_NORMALIZE);
     int con;
     GFXCreateLightContext(con);
@@ -623,4 +623,3 @@ void GFXShutdown () {
     winsys_shutdown();
   }
 }
-
