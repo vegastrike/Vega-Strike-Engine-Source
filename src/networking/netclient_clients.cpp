@@ -169,11 +169,9 @@ ClientPtr NetClient::AddClientObject( Unit *un, ObjSerial cltserial)
 		un->SetNetworkMode( true);
 		un->SetSerial( cltserial);
 		//COUT<<"Addclient 4"<<endl;
-		un->SetPosition( QVector(0,0,0) );
-		un->curr_physical_state=Transformation();
 		un->BackupState();
 		clt->last_packet=un->old_state;
-//		clt->prediction->InitInterpolation(un, un->old_state, 0, this->deltatime);
+		clt->prediction->InitInterpolation(un, un->old_state, 0, this->deltatime);
 		_Universe->activeStarSystem()->AddUnit( un);
 	
 	} else {

@@ -12,6 +12,7 @@
 
 Prediction::Prediction():
 		A0(0,0,0),B(0,0,0),A1(0,0,0),A2(0,0,0),A3(0,0,0),VA(0,0,0),VB(0,0,0),AA(0,0,0),AB(0,0,0),OA(),OB() {
+	this->deltatime = 0.0;
 }
 Prediction::~Prediction()
 {

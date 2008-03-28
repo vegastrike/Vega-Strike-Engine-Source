@@ -2488,6 +2488,8 @@ void GameCockpit::Draw() {
 		radar_ani.DrawAsVSSprite(Radar);	
 	}*/
 	float damage =(un->GetImageInformation().cockpit_damage[0]);
+	if (un->GetComputerData().radar.maxrange<1.)
+	  damage = damage<0.25?damage:0.25;
 	if (damage<.985) {
       if (radar_time>=0) {
         if (damage>.001&&(cockpit_time>radar_time+(1-damage))) {
