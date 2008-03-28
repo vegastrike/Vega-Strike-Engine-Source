@@ -1873,6 +1873,14 @@ bool CloseEnoughToAutotrack (Unit * me, Unit * targ, float &cone)
 	return false;
 }
 
+// Caps at +/- 1 so as to account for floating point inaccuracies.
+static inline float safeacos(float mycos) {
+	if (mycos>1.)
+		mycos=1.;
+	if (mycos<-1.)
+		mycos=-1;
+	return acos(mycos);
+}
 
 float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range, bool turnmargin) const
 {
@@ -1888,8 +1896,8 @@ float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range, bool
 	// Trial code
 	float turnlimit = tmpmax(tmpmax(computer.max_yaw_left,computer.max_yaw_right),tmpmax(computer.max_pitch_up,computer.max_pitch_down));
 	float turnangle = SIMULATION_ATOM*tmpmax(turnlimit,tmpmax(SIMULATION_ATOM*.5*(limits.yaw+limits.pitch),sqrtf(AngularVelocity.i*AngularVelocity.i+AngularVelocity.j*AngularVelocity.j)));
-	float ittsangle = acos(Normal.Cast().Dot(totarget.Normalize()));
-	float radangle  = acos((cumulative_transformation_matrix.getP().Normalize()*targ->rSize()+totarget).Cast().Normalize().Dot(totarget.Normalize()));
+	float ittsangle = safeacos(Normal.Cast().Dot(totarget.Normalize()));
+	float radangle  = safeacos((cumulative_transformation_matrix.getP().Normalize()*targ->rSize()+totarget).Cast().Normalize().Dot(totarget.Normalize()));
 	float rv        = ittsangle - radangle - (turnmargin?turnangle:0);
 
 	float rsize = targ->rSize()+rSize();

@@ -1279,7 +1279,10 @@ static Unit * ChooseNavPoint(Unit * parent, Unit **otherdest, float *lurk_on_arr
     }
   }
   
-  bool asteroidhide = (secondRand < stats->enemycount/(float)stats->friendlycount)&&(secondRand<num_ships_per_roid*stats->navs[2].size()/(float)stats->enemycount);
+  bool asteroidhide = false;
+  if (stats->friendlycount > 0 && stats->enemycount > 0) {
+    asteroidhide = (secondRand < stats->enemycount/(float)stats->friendlycount)&&(secondRand<num_ships_per_roid*stats->navs[2].size()/(float)stats->enemycount);
+  }
   bool siege=stats->enemycount>2*stats->friendlycount;//rough approx
   int whichlist=1;//friendly
   std::string fgname=UnitUtil::getFlightgroupName(parent);

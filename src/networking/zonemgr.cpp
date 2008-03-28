@@ -644,7 +644,14 @@ bool Nearby(ClientPtr clt, Unit * un) {
     if (un==parent) return true;
     double mm;
     if (!parent->InRange(un,mm,false,false,true)) {
-      return false;
+      static double always_send_range = XMLSupport::parse_float(vs_config->getVariable("server","visible_send_range","1000"));
+      if (parent->computer.radar.maxrange>=always_send_range)
+        return false;
+      {
+        QVector dist = (un->Position()-parent->Position());
+        if (dist.Dot(dist) >= always_send_range*always_send_range)
+          return false;
+      }
     }
     static double maxrange=XMLSupport::parse_float(vs_config->getVariable("server","max_send_range","1e21"));
     if (mm>maxrange)
@@ -707,8 +714,10 @@ bool ZoneMgr::addPosition( ClientPtr client, NetBuffer & netbuf, Unit * un, Clie
 			}
             else
             {
-		    COUT << "PosUpdate not sent (too far away) " << un->name<< " #"<<un->GetSerial() << endl;
-                return false;
+		    static int i=0;
+		    if ((i++)%8192 == 0)
+		      COUT << "PosUpdate not sent (too far away) " << un->name<< " #"<<un->GetSerial() << endl;
+                  return false;
             }
 		}
         else
