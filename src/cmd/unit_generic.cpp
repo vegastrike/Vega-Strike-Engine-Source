@@ -167,9 +167,16 @@ void Unit::SetMaxEnergy( float maxen)
 	maxenergy = maxen;
 }
 Vector  Unit::GetWarpVelocity()const {
+  Vector VelocityRef(0,0,0);
+  {
+      Unit * vr=const_cast<UnitContainer*>(&computer.velocity_ref)->GetUnit();
+      if (vr) 
+          VelocityRef=vr->cumulative_velocity;
+  }
+
   //return(cumulative_velocity*graphicOptions.WarpFieldStrength);
-  Vector vel=cumulative_velocity;
-  float speed=cumulative_velocity.Magnitude();
+  Vector vel=cumulative_velocity-VelocityRef;
+  float speed=vel.Magnitude();
   //return vel*graphicOptions.WarpFieldStrength;
   if (speed>0) {
     Vector veldir=vel*(1./speed);
@@ -177,8 +184,8 @@ Vector  Unit::GetWarpVelocity()const {
     float ang=facing.Dot(veldir);
     float warpfield=graphicOptions.WarpFieldStrength;
     if (ang<0) warpfield=1./warpfield;
-    return ang*facing*speed*(warpfield-1) + vel;
-  }else return Vector(0,0,0);
+    return ang*facing*speed*(warpfield-1) + vel+VelocityRef;
+  }else return VelocityRef;
 }
 
 void Unit::SetPosition(const QVector &pos)
@@ -2891,12 +2898,18 @@ float CalculateNearestWarpUnit (const Unit *thus, float minmultiplier, Unit **ne
 
 void Unit::AddVelocity(float difficulty)
 {
-								 // for the heck of it.
+    Vector VelocityRef(0,0,0);
+    {
+        Unit * vr=computer.velocity_ref.GetUnit();
+        if (vr) 
+            VelocityRef=vr->cumulative_velocity;
+    }
+						 // for the heck of it.
 	static float humanwarprampuptime=XMLSupport::parse_float (vs_config->getVariable ("physics","warprampuptime","5"));
 								 // for the heck of it.
 	static float compwarprampuptime=XMLSupport::parse_float (vs_config->getVariable ("physics","computerwarprampuptime","10"));
 	static float warprampdowntime=XMLSupport::parse_float (vs_config->getVariable ("physics","warprampdowntime","0.5"));
-	Vector v=Velocity;
+	Vector v=Velocity-VelocityRef;
         float len=v.Magnitude();
         float lastWarpField=graphicOptions.WarpFieldStrength;
         if (len>.01)//only get velocity going in DIRECTIOn of cumulative transformation for warp calc...
