@@ -13,6 +13,9 @@
 #ifdef HAVE_FFMPEG
 
 extern "C" {
+#ifdef _WIN32
+#define HAVE_FFMPEG_SWSCALE_H
+#endif
     #ifdef HAVE_FFMPEG_SWSCALE_H // Not sure how many people have swscale.
         #include <ffmpeg/swscale.h>
     #else
