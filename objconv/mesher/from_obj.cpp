@@ -27,6 +27,12 @@
  */
 
 /* Renamed to get rid of namespace collisions */
+extern float transx;
+extern float transy;
+extern float transz;
+extern float scalex;
+extern float scaley;
+extern float scalez;
 using namespace std;
 class TObj_Vector {
  public:
@@ -83,8 +89,21 @@ struct IntRef {
       return false;
   };
 };
+float vtx_xmin=1.0e38;
+float vtx_ymin=1.0e38;
+float vtx_zmin=1.0e38;
+float vtx_xmax=-1.0e38;
+float vtx_ymax=-1.0e38;
+float vtx_zmax=-1.0e38;
 struct VTX {
-  VTX(float _x, float _y, float _z) : x(_x),y(_y),z(_z) {};
+  VTX(float _x, float _y, float _z) : x(_x),y(_y),z(_z) {
+    if (x<vtx_xmin) vtx_xmin=x;
+    if (y<vtx_ymin) vtx_ymin=y;
+    if (z<vtx_zmin) vtx_zmin=z;
+    if (x>vtx_xmax) vtx_xmax=x;
+    if (y>vtx_ymax) vtx_ymax=y;
+    if (z>vtx_zmax) vtx_zmax=z;
+  };
   VTX() : x(0),y(0),z(0) {};
 
   bool operator==(const VTX& o) const { return (x==o.x && y==o.y && z==o.z); };
@@ -230,12 +249,24 @@ static int AddElement(XML &xml, const IntRef &r, map<IntRef,int> &elements, cons
     } else 
         return (*e).second;
 }
-
+extern float gminx,gminy,gminz,gmaxx,gmaxy,gmaxz;
+bool Vok (const VTX& vtx) {
+  return vtx.x>=gminx&&vtx.x<=gmaxx&&
+    vtx.y>=gminy&&vtx.y<=gmaxy&&
+    vtx.z>=gminz&&vtx.z<=gmaxz;
+}
 static void ObjToXML(XML &xml, const vector <VTX> &vtxlist, const vector <TEX> &txclist, const vector <NORMAL> &normallist, const vector <FACE> &facelist)
 {
     map<IntRef,int> elements;
 
     for (vector<FACE>::const_iterator fiter = facelist.begin(); fiter!=facelist.end(); fiter++) {
+      if (((*fiter).num>=1&&Vok(vtxlist[fiter->r1.v]))||
+          ((*fiter).num>=2&&Vok(vtxlist[fiter->r2.v]))||
+          ((*fiter).num>=3&&Vok(vtxlist[fiter->r3.v]))||
+          ((*fiter).num>=4&&Vok(vtxlist[fiter->r4.v]))) {
+      }else {
+        continue;//not within bounding box
+      }
         int e1=(((*fiter).num>=1)?AddElement(xml,(*fiter).r1,elements,vtxlist,txclist,normallist):-1);
         int e2=(((*fiter).num>=2)?AddElement(xml,(*fiter).r2,elements,vtxlist,txclist,normallist):-1);
         int e3=(((*fiter).num>=3)?AddElement(xml,(*fiter).r3,elements,vtxlist,txclist,normallist):-1);
@@ -243,6 +274,7 @@ static void ObjToXML(XML &xml, const vector <VTX> &vtxlist, const vector <TEX> &
         switch ((*fiter).num) {
         case 2: 
             //Line...
+
             xml.lines.push_back(line(e1,e2,xml.vertices[e1].s,xml.vertices[e1].t,xml.vertices[e2].s,xml.vertices[e2].t));
             break;
         case 3: 
@@ -345,7 +377,7 @@ string ObjGetMtl (FILE* obj, string objpath) {
 }
 
 extern bool flips,flipt,flipn;
-
+extern bool flip,flop;
 void ObjToXMESH (FILE* obj, FILE * mtl, vector<XML> &xmllist, bool forcenormals) 
 {
    fseek (obj,0,SEEK_END);
@@ -509,12 +541,15 @@ void ObjToXMESH (FILE* obj, FILE * mtl, vector<XML> &xmllist, bool forcenormals)
       if (3==sscanf(buf,"v %f %f %f\n",&v.x,&v.y,&v.z)) {
         //xml.vertices.push_back(v);
         //xml.num_vertex_references.push_back(0);
-        vtxlist.push_back(VTX(v.x,v.y,v.z));
-		continue;
+        if (flop)
+          vtxlist.push_back(VTX(v.x,v.z,v.y));
+        else
+          vtxlist.push_back(VTX(v.x,v.y,v.z));
+        continue;
       }
       if (3==sscanf(buf,"vn %f %f %f\n",&v.i,&v.j,&v.k)) {
         //Sharing is loussy in .obj files... so lets merge a little
-        NORMAL n(v.i,v.j,v.k);
+        NORMAL n(v.i,flop?v.k:v.j,flop?v.j:v.k);
         if (flipn) v.i=-v.i, v.j=-v.j, v.k=-v.k;
         map<NORMAL,int>::iterator mi = normalmap.find(n);
         if (mi==normalmap.end()) {
@@ -613,7 +648,7 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile,bool forcenormals)
    vector<XML> xmllist;
 
    ObjToXMESH(obj,mtl,xmllist,forcenormals);
-
+   printf ("Min [%.3f %.3f %.3f] Max [%.3f %.3f %.3f]\n",vtx_xmin,vtx_ymin,vtx_zmin,vtx_xmax,vtx_ymax,vtx_zmax);
    int textnum=0;
    for (vector<XML>::iterator it=xmllist.begin(); it!=xmllist.end(); ++it,++textnum) {
        xmeshToBFXM(*it,outputFile,textnum==0?'c':'a',forcenormals,true);

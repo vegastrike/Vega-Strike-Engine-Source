@@ -927,6 +927,7 @@ void xmeshToBFXM(XML memfile,FILE* Outputfile,char mode,bool forcenormals, bool 
   fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Correct number of bytes for total file
 }
 extern float transx,transy,transz;
+extern float scalex,scaley,scalez;
 int32bit writesuperheader(XML memfile, FILE* Outputfile, bool force_shared){
   unsigned int32bit intbuf;
   int32bit versionnumber=VSSwapHostIntToLittle(20);
@@ -1232,7 +1233,7 @@ int32bit appendmeshfromxml(XML memfile, FILE* Outputfile,bool forcenormals, bool
   intbuf= VSSwapHostIntToLittle(memfile.vertices.size());
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of vertices
   for(int32bit verts=0;verts<memfile.vertices.size();verts++){
-	  floatbuf=VSSwapHostFloatToLittle(memfile.vertices[verts].x+transx);
+    floatbuf=VSSwapHostFloatToLittle(scalex*(memfile.vertices[verts].x+transx));
           float normallen = sqrt(memfile.vertices[verts].i*memfile.vertices[verts].i+
                                  memfile.vertices[verts].j*memfile.vertices[verts].j+
                                  memfile.vertices[verts].k*memfile.vertices[verts].k);
@@ -1242,9 +1243,9 @@ int32bit appendmeshfromxml(XML memfile, FILE* Outputfile,bool forcenormals, bool
             memfile.vertices[verts].k/=normallen;
           }
 	  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//vertex #vert:x
-	  floatbuf=VSSwapHostFloatToLittle(memfile.vertices[verts].y+transy);
+	  floatbuf=VSSwapHostFloatToLittle(scaley*(memfile.vertices[verts].y+transy));
 	  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//vertex #vert:y
-	  floatbuf=VSSwapHostFloatToLittle(memfile.vertices[verts].z+transz);
+	  floatbuf=VSSwapHostFloatToLittle(scalez*(memfile.vertices[verts].z+transz));
 	  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//vertex #vert:z
 	  floatbuf=VSSwapHostFloatToLittle(memfile.vertices[verts].i);
 	  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//vertex #vert:i

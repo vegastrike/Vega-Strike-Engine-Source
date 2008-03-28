@@ -1,3 +1,4 @@
+#include <float.h>
 #include "from_obj.h"
 #include "from_BFXM.h"
 #include <cstring>
@@ -19,6 +20,15 @@ bool autotangent=false;
 float transx=0;
 float transy=0;
 float transz=0;
+float scalex=1;
+float scaley=1;
+float scalez=1;
+float gminx=-FLT_MAX;
+float gmaxx=FLT_MAX;
+float gminy=-FLT_MAX;
+float gmaxy=FLT_MAX;
+float gminz=-FLT_MAX;
+float gmaxz=FLT_MAX;
 const char* basepath="";
 static bool forcenormals=true;
 bool dims=false;
@@ -35,6 +45,32 @@ int main (int argc, char** argv) {
   { 
 	for (int i=0;i<argc;++i) {
     bool match=false;
+    if (strncmp(argv[i],"-minx",5)==0) {
+      gminx=atof(argv[i]+5);
+      match=true;
+    }
+    if (strncmp(argv[i],"-miny",5)==0) {
+      gminy=atof(argv[i]+5);
+      match=true;
+    }
+    if (strncmp(argv[i],"-minz",5)==0) {
+      gminz=atof(argv[i]+5);
+      match=true;
+    }
+
+    if (strncmp(argv[i],"-maxx",5)==0) {
+      gmaxx=atof(argv[i]+5);
+      match=true;
+    }
+    if (strncmp(argv[i],"-maxy",5)==0) {
+      gmaxy=atof(argv[i]+5);
+      match=true;
+    }
+    if (strncmp(argv[i],"-maxz",5)==0) {
+      gmaxz=atof(argv[i]+5);
+      match=true;
+    }
+
     if (strcmp(argv[i],"-flip")==0) {
       match=true;
       flip=true;
@@ -80,9 +116,9 @@ int main (int argc, char** argv) {
 		dims=true;
     }
 
-	if (strncmp(argv[i],"-x",2)==0) {
-		sscanf(argv[i]+2,"%f",&transx);
-		match=true;
+        if (strncmp(argv[i],"-x",2)==0) {
+          sscanf(argv[i]+2,"%f",&transx);
+          match=true;
     }
     if (strncmp(argv[i],"-y",2)==0) {
 		sscanf(argv[i]+2,"%f",&transy);
@@ -92,6 +128,20 @@ int main (int argc, char** argv) {
 		sscanf(argv[i]+2,"%f",&transz);
 		match=true;
     }
+
+        if (strncmp(argv[i],"-sx",3)==0) {
+          sscanf(argv[i]+3,"%f",&scalex);
+          match=true;
+    }
+    if (strncmp(argv[i],"-sy",3)==0) {
+		sscanf(argv[i]+3,"%f",&scaley);
+		match=true;
+    }
+    if (strncmp(argv[i],"-sz",3)==0) {
+		sscanf(argv[i]+3,"%f",&scalez);
+		match=true;
+    }
+
     if(match) {
       for (int j=i;j+1<argc;++j) {
         argv[j]=argv[j+1];
