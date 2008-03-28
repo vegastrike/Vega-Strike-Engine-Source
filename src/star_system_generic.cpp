@@ -354,6 +354,7 @@ void StarSystem::AddUnit(Unit *unit)
 	}
 
 	drawList.prepend(unit);
+	unit->activeStarSystem = this; // otherwise set at next physics frame...
 	UnitFactory::broadcastUnit(unit, GetZone());
 	unsigned int priority=UnitUtil::getPhysicsPriority(unit);
 	// Do we need the +1 here or not - need to look at when current_sim_location is changed relative to this function

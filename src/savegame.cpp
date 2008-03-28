@@ -234,7 +234,8 @@ void SaveGame::SetPlayerLocation (const QVector &v) {
   if ((FINITE (v.i)&&FINITE(v.j)&&FINITE(v.k))) {
     PlayerLocation =v;
   }else {
-    VSFileSystem::vs_fprintf (stderr,"ERROR saving unit");
+    VSFileSystem::vs_fprintf (stderr,"NaN ERROR saving unit\n");
+    assert(FINITE (v.i)&&FINITE(v.j)&&FINITE(v.k));
     PlayerLocation.Set(1,1,1);
   }
 }

@@ -83,8 +83,9 @@ void  ZoneMgr::getZoneBuffer( unsigned short zoneid, NetBuffer & netbuf)
 		if( true ) // kp->ingame)
 		{
 			Unit *un = kp->game_unit.GetUnit();
-			if (!un)
+			if (un->hull<0 || !un)
 				continue;
+			assert(un->GetSerial() != 0);
 			SaveNetUtil::GetSaveStrings( kp, savestr, xmlstr, false);
 			// Add the ClientState at the beginning of the buffer -> NO THIS IS IN THE SAVE !!
 			//netbuf.addClientState( ClientState( kp->game_unit.GetUnit()));
@@ -95,7 +96,7 @@ void  ZoneMgr::getZoneBuffer( unsigned short zoneid, NetBuffer & netbuf)
 			netbuf.addString( savestr);
 			netbuf.addString( xmlstr);
 			netbuf.addTransformation(kp->game_unit.GetUnit()->curr_physical_state);
-                        activeObjects.insert(un->GetSerial());
+			activeObjects.insert(un->GetSerial());
 			nbclients++;
 		}
 	  }
@@ -104,7 +105,10 @@ void  ZoneMgr::getZoneBuffer( unsigned short zoneid, NetBuffer & netbuf)
         for (un_iter ui=zi->star_system->getUnitList().createIterator();
              (un=*ui)!=NULL;
              ++ui) {
+          if (un->hull<0) // no point sending a zombie.
+            continue;
           ObjSerial ser=un->GetSerial();
+          assert(ser != 0);
           if (activeObjects.find(ser)==activeObjects.end()) {
             UnitFactory::addBuffer(netbuf, un, false);
             activeObjects.insert(un->GetSerial());
@@ -703,9 +707,7 @@ bool ZoneMgr::addPosition( ClientPtr client, NetBuffer & netbuf, Unit * un, Clie
 			}
             else
             {
-                static int i=0;
-		if (i++%16384==0)
-		    COUT << "Client counted but not sent because of ratio: " << un->name<<endl;
+		    COUT << "PosUpdate not sent (too far away) " << un->name<< " #"<<un->GetSerial() << endl;
                 return false;
             }
 		}
