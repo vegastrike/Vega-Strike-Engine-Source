@@ -452,7 +452,7 @@ ClientState aim_assist(ClientState cs, ClientState ocs/*old*/,
       printf ("Using orientation aim rot %f deg\n",orientaimtheta*180/M_PI);
     return OrientationAim;
   }
-  printf("Using raw aim\n");
+  fprintf(stderr,"Got non-finite result for aim_assist (client sent bad info?)\n");
   return cs;
 }
 ClientState aim_assist(ClientState cs, ClientState ocs/*old*/,
@@ -512,6 +512,11 @@ void	NetServer::posUpdate( ClientPtr clt)
   // Update client position in client list : should be enough like it is below
   cs2 = netbuf.getClientState();
   ClientState cs(cs2);
+  if (!FINITE(cs.getPosition().i) || !FINITE(cs.getPosition().j) || !FINITE(cs.getPosition().k)) {
+    cerr << "Unit "<<clt_serial<<" sent me an invalid position"<<endl;
+    cs = un->old_state;
+    sendForcePosition(clt);
+  }
   static bool do_aim_assist=XMLSupport::parse_bool(vs_config->getVariable("network","aim_assist","true"));
   if (do_aim_assist&&netbuf.getSize()>netbuf.getOffset()+2) {
     ObjSerial target_serial=netbuf.getSerial();
@@ -521,7 +526,27 @@ void	NetServer::posUpdate( ClientPtr clt)
       Vector rel_target_position=netbuf.getVector();
       QVector target_position=cs.getPosition()+rel_target_position;
       Vector target_velocity=netbuf.getVector();
-      if (target) {
+      if (!FINITE(target_position.i) || !FINITE(target_position.j) || !FINITE(target_position.k)) {
+        cerr << "Unit "<<clt_serial<<" sent me an invalid target position for aim assist, targ="<<target_serial<<endl;
+        if (target) {
+          NetBuffer netbuf;
+          clt->versionBuf(netbuf);
+          netbuf.addFloat(clt->getDeltatime());
+          ClientState cst( target);
+
+          // copied and pasted from zonemgr.cpp:addPosition
+          netbuf.addChar( ZoneMgr::FullUpdate );
+          netbuf.addShort( target->GetSerial());
+          netbuf.addClientState( cst);
+          netbuf.addFloat (target->energy);
+
+          Packet pckt;
+          pckt.send( CMD_SNAPSHOT, 1,
+                     netbuf.getData(), netbuf.getDataLength(),
+                     SENDRELIABLE, &(clt->cltadr), clt->tcp_sock,
+                     __FILE__, PSEUDO__LINE__(547) );
+        }
+      } else if (target) {
         cs=aim_assist(cs,clt->last_packet,target,rel_target_position,target_velocity);
       }
     }

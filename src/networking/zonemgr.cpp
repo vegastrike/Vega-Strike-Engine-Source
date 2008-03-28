@@ -105,7 +105,8 @@ void  ZoneMgr::getZoneBuffer( unsigned short zoneid, NetBuffer & netbuf)
         for (un_iter ui=zi->star_system->getUnitList().createIterator();
              (un=*ui)!=NULL;
              ++ui) {
-          if (un->hull<0) // no point sending a zombie.
+          // NETFIXME Asteroids are disabled for now!
+          if (un->hull<0 || un->isUnit()==ASTEROIDPTR) // no point sending a zombie.
             continue;
           ObjSerial ser=un->GetSerial();
           assert(ser != 0);

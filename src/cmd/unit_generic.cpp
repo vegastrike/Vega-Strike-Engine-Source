@@ -5459,7 +5459,8 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
 					}
 					else {// DISABLING WEAPON CODE HERE
 						static float disabling_constant=XMLSupport::parse_float(vs_config->getVariable("physics","disabling_weapon_constant","1"));
-						image->LifeSupportFunctionality+=disabling_constant*damage/hull;
+						if (hull>0)
+							image->LifeSupportFunctionality+=disabling_constant*damage/hull;
 						if (image->LifeSupportFunctionality<0) {
 							image->LifeSupportFunctionalityMax+=image->LifeSupportFunctionality;
 							image->LifeSupportFunctionality=0;

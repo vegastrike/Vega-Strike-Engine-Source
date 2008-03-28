@@ -117,8 +117,6 @@ class ZoneMgr
 	    };
 		Systems			Systems;
 
-		void	addDamage( NetBuffer & netbuf, Unit * un);
-		bool	addPosition( ClientPtr k, NetBuffer & netbuf, Unit * un, ClientState & un_cs);
 
 	public:
 		ZoneMap zones;
@@ -147,6 +145,8 @@ class ZoneMgr
         void    broadcastSample( int zone, ObjSerial serial, Packet * pckt, float frequency );
         void    broadcastText( int zone, ObjSerial serial, Packet * pckt, float frequency );
         void    broadcastSnapshots( bool update_planets=false);
+		void	addDamage( NetBuffer & netbuf, Unit * un);
+		bool	addPosition( ClientPtr k, NetBuffer & netbuf, Unit * un, ClientState & un_cs);
 		void	broadcastDamage();
 		double	isVisible( Quaternion orient, QVector src_pos, QVector tar_pos);
 
