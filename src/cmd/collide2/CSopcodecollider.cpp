@@ -41,9 +41,9 @@ csOPCODECollider::csOPCODECollider (const std::vector <bsp_polygon> &polygons)
 	m_pCollisionModel = 0;
 	vertholder = 0;
 	pairs.IncRef();
-	TreeCollider.SetFirstContact(false);
-	TreeCollider.SetFullBoxBoxTest(true);
-	TreeCollider.SetTemporalCoherence(false);
+	TreeCollider.SetFirstContact(true);
+	TreeCollider.SetFullBoxBoxTest(false);
+	TreeCollider.SetTemporalCoherence(true);
 	opcMeshInt.SetCallback (&MeshCallback, this);
 
 	GeometryInitialize (polygons);

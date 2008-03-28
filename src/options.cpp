@@ -12,6 +12,11 @@ void vs_options::init()
 	new_game_save_name = vs_config->getVariable("general","new_game_save_name","New_Game");
 	quick_savegame_summaries_buffer = XMLSupport::parse_int(vs_config->getVariable("general","quick_savegame_summaries_buffer","16384"));
 	empty_mission = vs_config->getVariable("general","empty_mission","internal.mission");
+	custompython = vs_config->getVariable("general","custompython","import custom;custom.processMessage");
+	quick_savegame_summaries = XMLSupport::parse_bool( vs_config->getVariable("general","quick_savegame_summaries","true"));
+	garbagecollectfrequency = XMLSupport::parse_int(vs_config->getVariable ("general","garbagecollectfrequency","20"));
+	numoldsystems = XMLSupport::parse_int(vs_config->getVariable ("general","numoldsystems","6"));
+	deleteoldsystems = XMLSupport::parse_bool (vs_config->getVariable ("general","deleteoldsystems","true"));
 	
 	/* Audio Options */
 	threadtime = XMLSupport::parse_int(vs_config->getVariable("audio","threadtime","1"));
@@ -25,6 +30,12 @@ void vs_options::init()
 	view = vs_config->getVariable("cockpitaudio","view","vdu_b");
 	repair = vs_config->getVariable("cockpitaudio","repair","vdu_a");
 	manifest = vs_config->getVariable("cockpitaudio","manifest","vdu_a");
+	compress_max = XMLSupport::parse_int(vs_config->getVariable("cockpitaudio","compress_max","3"));
+	compress_loop = vs_config->getVariable("cockpitaudio","compress_loop","compress_loop");
+	compress_change = vs_config->getVariable("cockpitaudio","compress_change","compress_burst");
+	compress_stop = vs_config->getVariable("cockpitaudio","compress_stop","compress_end");
+	compress_interval = XMLSupport::parse_int(vs_config->getVariable("cockpitaudio","compress_interval","3"));
+	
 	
 	/* Unit Audio Options */
 	jumpleave = vs_config->getVariable("unitaudio","jumpleave","sfx43.wav");
@@ -94,13 +105,23 @@ void vs_options::init()
 	YearScale = XMLSupport::parse_float (vs_config->getVariable ("physics","YearScale","10.0"));
 	game_speed_affects_autogen_systems = XMLSupport::parse_bool(vs_config->getVariable ("physics","game_speed_affects_autogen_systems","false"));
 	star_system_scale = XMLSupport::parse_float(vs_config->getVariable("physics","star_system_scale","1.0"));
+	respawn_unit_size = XMLSupport::parse_float (vs_config->getVariable ("physics","respawn_unit_size","400.0"));
+	auto_pilot_planet_radius_percent = XMLSupport::parse_floatf (vs_config->getVariable ("physics","auto_pilot_planet_radius_percent",".75"));
+	campaigns = vs_config->getVariable("physics","campaigns","privateer_campaign vegastrike_campaign"); // WRONG SECTION   change after 0.5
+	NumRunningSystems = XMLSupport::parse_int (vs_config->getVariable ("physics","NumRunningSystems","4"));
+	InactiveSystemTime = XMLSupport::parse_floatf (vs_config->getVariable ("physics","InactiveSystemTime","0.3"));
+	
+	
 	
 	/* Data Options */
 	universe_path = vs_config->getVariable ("data","universe_path", "universe");
+	sectors = vs_config->getVariable("data","sectors","sectors");  // Not Used 
 	
 	/* Galaxy Options */
 	PushValuesToMean = XMLSupport::parse_bool(vs_config->getVariable("galaxy","PushValuesToMean","true"));
 	
+	/* Cargo Options */
+	news_from_cargolist = XMLSupport::parse_bool(vs_config->getVariable("cargo","news_from_cargolist","false"));
 	
 }
 

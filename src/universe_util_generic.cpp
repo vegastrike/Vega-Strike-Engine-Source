@@ -31,6 +31,9 @@
 
 #include "python/init.h"
 #include <Python.h>
+#include "options.h"
+
+extern vs_options game_options;
 
 //extern class Music *muzak;
 //extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );
@@ -554,8 +557,7 @@ namespace UniverseUtil
 		return num + ::num_delayed_missions();
 	}
 	void IOmessage(int delay,string from,string to,string message) {
-		static bool news_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","news_from_cargolist","false"));
-		if (to=="news"&&(!news_from_cargolist))
+		if (to=="news"&&(!game_options.news_from_cargolist))
 			for (int i=0;i<_Universe->numPlayers();i++)
 				pushSaveString(i, "news", string("#")+message);
 		else
@@ -597,11 +599,11 @@ namespace UniverseUtil
 			mission->player_autopilot = Mission::AUTO_NORMAL;
 		}
 	}
-	QVector SafeStarSystemEntrancePoint (StarSystem* sts,QVector pos, float radial_size) {
+	QVector SafeStarSystemEntrancePoint (StarSystem* sts,QVector pos, float radial_size) 
+	{
 
-		static double def_un_size = XMLSupport::parse_float (vs_config->getVariable ("physics","respawn_unit_size","400"));
 		if (radial_size<0)
-			radial_size = def_un_size;
+			radial_size = game_options.respawn_unit_size;
 
 		for (unsigned int k=0;k<10;++k) {
 			Unit * un;
@@ -684,8 +686,7 @@ namespace UniverseUtil
 		securepythonstr(cmd);
 		securepythonstr(args);
 		securepythonstr(id);
-		string slashfunc = vs_config->getVariable("general","custompython","import custom;custom.processMessage");
-		string pythonCode = slashfunc + "(" + (trusted?"True":"False") +
+		string pythonCode = game_options.custompython + "(" + (trusted?"True":"False") +
 			", r\'" + cmd + "\', r\'" + args + "\', r\'" + id + "\')\n";
 		COUT << "Executing python command: " << endl;
 		cout << "    " << pythonCode;
@@ -713,8 +714,7 @@ namespace UniverseUtil
 		return _Universe->AccessCockpit(which)->GetParent();
 	}
 	float getPlanetRadiusPercent () {
-		static float planet_rad_percent =  XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_radius_percent",".75"));
-		return planet_rad_percent;
+		return game_options.auto_pilot_planet_radius_percent;
 	}
 	std::string getVariable(std::string section,std::string name,std::string def) {
 		return vs_config->getVariable(section,name,def);
@@ -819,7 +819,6 @@ namespace UniverseUtil
 	void    ComputeGalaxySerials( std::vector<std::string> & stak) {
 		cout<<"Going through "<<stak.size()<<" sectors"<<endl;
 		cout<<"Generating random serial numbers :"<<endl;
-		static string sysdir = vs_config->getVariable("data","sectors","sectors");
 		for( ;!stak.empty();) {
 			string sys( stak.back()+".system");
 			stak.pop_back();
@@ -828,7 +827,6 @@ namespace UniverseUtil
 			string relpath( universe_path+sysdir+"/"+sysfilename);
 			string systempath( datadir+relpath);
 			*/
-
 			ComputeSystemSerials( sys);
 		}
 		cout<<"Computing done."<<endl;
@@ -858,15 +856,15 @@ namespace UniverseUtil
 		static SaveGame savegame("");
 		static set<string> campaign_score_vars;
 		static bool campaign_score_vars_init=false;
-		static bool quickmode = XMLSupport::parse_bool( vs_config->getVariable("general","quick_savegame_summaries","true") );
+
 		if (!campaign_score_vars_init) {
 			string campaign_score = vs_config->getVariable("physics","campaigns","privateer_campaign vegastrike_campaign");
 
-			string::size_type where=0, when=campaign_score.find(' ');
+			string::size_type where=0, when=game_options.campaigns.find(' ');
 			while (where != string::npos) {
-				campaign_score_vars.insert(campaign_score.substr(where,((when==string::npos)?when:when-where)));
+				campaign_score_vars.insert(game_options.campaigns.substr(where,((when==string::npos)?when:when-where)));
 				where = (when==string::npos)?when:when+1;
-				when = campaign_score.find(' ',where);
+				when = game_options.campaigns.find(' ',where);
 			}
 
 			campaign_score_vars_init = true;
@@ -880,7 +878,7 @@ namespace UniverseUtil
 		vector<std::string> Ships;
 		std::string sillytemp=UniverseUtil::setCurrentSaveGame(filename);
 		savegame.SetStarSystem("");
-		savegame.ParseSaveGame(filename,system,"",pos,updatepos,creds,Ships,_Universe->CurrentCockpit(),"",true,false,quickmode,true,true,campaign_score_vars);
+		savegame.ParseSaveGame(filename,system,"",pos,updatepos,creds,Ships,_Universe->CurrentCockpit(),"",true,false,game_options.quick_savegame_summaries,true,true,campaign_score_vars);
 		UniverseUtil::setCurrentSaveGame(sillytemp);
 		string text;
 		text += filename;
@@ -903,7 +901,7 @@ namespace UniverseUtil
 				}
 			}
 		}
-		if (!quickmode) {
+		if (!game_options.quick_savegame_summaries) {
 			bool hit=false;
 			for (set<string>::const_iterator it=campaign_score_vars.begin(); it!=campaign_score_vars.end(); ++it) {
 				string var = *it;

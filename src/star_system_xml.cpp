@@ -268,7 +268,7 @@ static bool ConfigAllows(string var, float val)
 		var=var.substr(1);
 		invert=true;
 	}
-	float x = XMLSupport::parse_float(vs_config->getVariable("graphics",var,"0.0"));
+	float x = XMLSupport::parse_floatf(vs_config->getVariable("graphics",var,"0.0"));
 	if (var.length()==0)
 		return true;
 	return invert?-x>=val:x>=val;
@@ -411,8 +411,6 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	bool isdest=false;
 
 	xml->cursun.k=0;
-								 //XMLSupport::parse_float (vs_config->getVariable ("physics","DayScale","10"));
-	static float dayscale = game_options.YearScale;
 	GFXMaterial ourmat;
 	GFXGetMaterial (0,ourmat);
 	vs_config->getColor ("planet_mat_ambient",&ourmat.ar);
@@ -431,7 +429,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	QVector S(0,0,0), R(0,0,0);
 	QVector  pos(0,0,0);
 	Names elem = (Names)element_map.lookup(name);
-	float radius=1;
+	float radius=1.0f;
 	AttributeList::const_iterator iter;
 	switch(elem) {
 		case UNKNOWN:
@@ -490,8 +488,8 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 				int wrapx = 1;
 				int wrapy = 1;
 				int numslices=8;
-				float iradius = p->rSize()*1.25;
-				float oradius = p->rSize()*1.75;
+				float iradius = p->rSize()*1.25f;
+				float oradius = p->rSize()*1.75f;
 				R.Set(1,0,0);
 				S.Set(0,1,0);
 				for(iter = attributes.begin(); iter!=attributes.end(); ++iter) {
@@ -503,10 +501,10 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 							parse_dual_alpha ((*iter).value.c_str(),blendSrc,blendDst);
 							break;
 						case INNERRADIUS:
-							iradius = parse_float ((*iter).value)*xml->scale;
+							iradius = parse_floatf((*iter).value)*xml->scale;
 							break;
 						case OUTERRADIUS:
-							oradius = parse_float ((*iter).value)*xml->scale;
+							oradius = parse_floatf ((*iter).value)*xml->scale;
 							break;
 						case NUMSLICES:
 							numslices = parse_int ((*iter).value);
@@ -539,7 +537,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 							varname=(*iter).value;
 							break;
 						case VARVALUE:
-							varvalue=parse_float((*iter).value);
+							varvalue=parse_floatf((*iter).value);
 							break;
 						default:
 							break;
@@ -576,7 +574,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 							varname=(*iter).value;
 							break;
 						case VARVALUE:
-							varvalue=parse_float((*iter).value);
+							varvalue=parse_floatf((*iter).value);
 							break;
 
 						case DIRECTION:
@@ -1097,7 +1095,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 						break;
 					case DAY:
 						if (fabs (parse_float ((*iter).value))>.00001) {
-							rotvel = 2*M_PI/(dayscale*parse_float ((*iter).value));
+							rotvel = 2.0f*M_PI/(game_options.YearScale*parse_floatf((*iter).value));
 						}
 						break;
 					case YEAR:
@@ -1221,23 +1219,23 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 						break;
 
 					case PPOSITION:
-						position=parse_float((*iter).value);
+						position=parse_floatf((*iter).value);
 						break;
 					case DAY:
-						if (fabs (parse_float ((*iter).value))>.00001) {
-							rotvel = 2*M_PI/(dayscale*parse_float ((*iter).value));
+						if (fabs (parse_floatf ((*iter).value))>.00001) {
+							rotvel = 2.0f*M_PI/(game_options.YearScale*parse_floatf((*iter).value));
 						}
 						break;
 					case YEAR:
-						if (fabs (parse_float ((*iter).value))>.00001) {
-							velocity=2*M_PI/(game_options.YearScale*parse_float((*iter).value));
+						if (fabs (parse_floatf ((*iter).value))>.00001) {
+							velocity=2.0f*M_PI/(game_options.YearScale*parse_floatf((*iter).value));
 						}
 						break;
 					case VARNAME:
 						varname=(*iter).value;
 						break;
 					case VARVALUE:
-						varvalue=parse_float((*iter).value);
+						varvalue=parse_floatf((*iter).value);
 						break;
 
 				}

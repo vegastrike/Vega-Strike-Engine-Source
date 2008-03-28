@@ -50,10 +50,14 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+
+#include "options.h"
+
 ///Decides whether to toast the jump star from the cache
 using std::string;
 using std::vector;
 using std::find;
+extern vs_options game_options;
 extern void CacheJumpStar (bool);
 extern void SortStarSystems (vector <StarSystem *> &ss, StarSystem * drawn);
 StarSystem * GameUniverse::Init (string systemfile, const Vector & centr,const string planetname)
@@ -247,27 +251,22 @@ inline void loadsounds(const string &str,const int max,soundArray& snds,bool loo
 static void UpdateTimeCompressionSounds()
 {
 	static int lasttimecompress=0;
-	static int numsnd=XMLSupport::parse_int(vs_config->getVariable("cockpitaudio","compress_max","3"));
-	if ((timecount!=lasttimecompress)&&(numsnd>0)) {
+	if ((timecount!=lasttimecompress)&&(game_options.compress_max>0)) {
 		static bool inittimecompresssounds=false;
 		static soundArray loop_snds;
 		static soundArray burst_snds;
 		static soundArray end_snds;
 		if (inittimecompresssounds==false) {
-			static string addonloop=vs_config->getVariable("cockpitaudio","compress_loop","compress_loop");
-			static string addonburst=vs_config->getVariable("cockpitaudio","compress_change","compress_burst");
-			static string addonend=vs_config->getVariable("cockpitaudio","compress_stop","compress_end");
-			loadsounds(addonloop,numsnd,loop_snds,true);
-			loadsounds(addonend,numsnd,end_snds);
-			loadsounds(addonburst,numsnd,burst_snds);
+			loadsounds(game_options.compress_loop,game_options.compress_max,loop_snds,true);
+			loadsounds(game_options.compress_stop,game_options.compress_max,end_snds);
+			loadsounds(game_options.compress_change,game_options.compress_max,burst_snds);
 			inittimecompresssounds=true;
 		}
-		static int compressinterval=XMLSupport::parse_int(vs_config->getVariable("cockpitaudio","compress_interval","3"));
-		int soundfile=(timecount-1)/compressinterval;
-		int lastsoundfile=(lasttimecompress-1)/compressinterval;
+		int soundfile=(timecount-1)/game_options.compress_interval;
+		int lastsoundfile=(lasttimecompress-1)/game_options.compress_interval;
 		if (timecount>0&&lasttimecompress>=0) {
-			if ((soundfile+1)>=numsnd) {
-				burst_snds.ptr[numsnd-1].playsound();
+			if ((soundfile+1)>=game_options.compress_max) {
+				burst_snds.ptr[game_options.compress_max-1].playsound();
 			}
 			else {
 				if (lasttimecompress>0&&loop_snds.ptr[lastsoundfile].sound>=0&&AUDIsPlaying(loop_snds.ptr[lastsoundfile].sound))
@@ -277,12 +276,12 @@ static void UpdateTimeCompressionSounds()
 			}
 		}
 		else if (lasttimecompress>0&&timecount==0) {
-			for (int i=0;i<numsnd;++i) {
+			for (int i=0;i<game_options.compress_max;++i) {
 				if (loop_snds.ptr[i].sound>=0&&AUDIsPlaying(loop_snds.ptr[i].sound))
 					AUDStopPlaying(loop_snds.ptr[i].sound);
 			}
-			if (lastsoundfile>=numsnd) {
-				end_snds.ptr[numsnd-1].playsound();
+			if (lastsoundfile>=game_options.compress_max) {
+				end_snds.ptr[game_options.compress_max-1].playsound();
 			}
 			else {
 				end_snds.ptr[lastsoundfile].playsound();
@@ -325,13 +324,10 @@ void GameUniverse::StartDraw()
 	}
 	UpdateTime();
 	UpdateTimeCompressionSounds();
-	static unsigned int numrunningsystems = XMLSupport::parse_int (vs_config->getVariable ("physics","NumRunningSystems","4"));
-	static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
-	float systime=nonactivesystemtime;
 	_Universe->SetActiveCockpit (((int)(rand01()*cockpit.size()))%cockpit.size());
 
-	for (i=0;i<star_system.size()&&i<numrunningsystems;++i) {
-		star_system[i]->Update((i==0)?1:systime/i,true);
+	for (i=0;i<star_system.size()&&i<game_options.NumRunningSystems;++i) {
+		star_system[i]->Update((i==0)?1:game_options.InactiveSystemTime/i,true);
 	}
 	StarSystem::ProcessPendingJumps();
 	for (i=0;i<cockpit.size();++i) {
@@ -352,15 +348,12 @@ void GameUniverse::StartDraw()
 
 	//remove systems not recently visited?
 	static int sorttime=0;
-	static int howoften = XMLSupport::parse_int(vs_config->getVariable ("general","garbagecollectfrequency","20"));
-	if (howoften!=0) {
+	if (game_options.garbagecollectfrequency!=0) {
 								 //don't want to delete something when there is something pending to jump therexo
 		if (PendingJumpsEmpty()) {
-			if ((++sorttime)%howoften==1) {
+			if ((++sorttime)%game_options.garbagecollectfrequency==1) {
 				SortStarSystems(star_system,active_star_system.back());
-				static unsigned int numrunningsystems = XMLSupport::parse_int(vs_config->getVariable ("general","numoldsystems","6"));
-				static bool deleteoldsystems = XMLSupport::parse_bool (vs_config->getVariable ("general","deleteoldsystems","true"));
-				if (star_system.size()>numrunningsystems&&deleteoldsystems) {
+				if (star_system.size() > game_options.numoldsystems && game_options.deleteoldsystems) {
 					if (std::find (active_star_system.begin(),active_star_system.end(),star_system.back())==active_star_system.end()) {
 						delete star_system.back();
 						star_system.pop_back();
