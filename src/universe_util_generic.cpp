@@ -517,6 +517,12 @@ namespace UniverseUtil
 			return 0;
 		}
 	}
+    void setTargetLabel(std::string label) {
+		_Universe->AccessCockpit()->setTargetLabel(label);
+	}
+    std::string getTargetLabel() {
+		return _Universe->AccessCockpit()->getTargetLabel();
+	}
 	void eraseObjective(int which) {
 		if (which<(int)mission->objectives.size() && which>=0) {
 			if (SERVER)

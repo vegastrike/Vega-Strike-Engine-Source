@@ -68,6 +68,10 @@ private:
   VSSprite *Radar[2];
   ///Video Display Units (may need more than 2 in future)
   std::vector <VDU *> vdu;
+  /// An information string displayed in the VDU.
+  std::string targetLabel;
+  /// Comparison pointer to clear the label when the target changes. 
+  void *labeledTargetUnit;
   ///Color of cockpit default text
   GFXColor textcol;
   ///The font that the entire cockpit will use. Currently without color
@@ -130,6 +134,8 @@ private:
   bool editingTextMessage;
   std::string autoMessage;
   float autoMessageTime;
+  virtual void setTargetLabel(const string &msg);
+  virtual string getTargetLabel();
   void	ReceivedTargetInfo();
   static void NavScreen (const KBData&,KBSTATE k); // scheherazade
   static string getsoundending(int which=0);

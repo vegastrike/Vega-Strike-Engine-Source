@@ -94,6 +94,8 @@ protected:
   unsigned int retry_dock;
   double TimeOfLastCollision;
   char jumpok;
+  virtual void setTargetLabel(const string &msg) {}
+  virtual string getTargetLabel() {return string();}
   void updateAttackers();
   static bool tooManyAttackers();// checks config file and declares if too many folks are attacking any of the players (to avoid expensive tests where unnecessary).
   virtual void	ReceivedTargetInfo() {}

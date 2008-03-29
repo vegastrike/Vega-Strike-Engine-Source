@@ -2999,6 +2999,24 @@ void GameCockpit::SetCommAnimation (Animation * ani,Unit*un) {
   }
 }
 
+string GameCockpit::getTargetLabel() {
+  Unit *par = GetParent();
+  if ((!targetLabel.empty()) &&
+      (!par || ((void*)par->Target()) != labeledTargetUnit)) {
+    targetLabel = string();
+    if (par)
+      labeledTargetUnit = par->Target();
+  }
+  return targetLabel;
+}
+
+void GameCockpit::setTargetLabel(const string &newLabel) {
+  if (GetParent()) {
+    targetLabel=newLabel;
+    labeledTargetUnit = GetParent()->Target();
+  }
+}
+
 void GameCockpit::RestoreViewPort() {
   _Universe->AccessCamera()->RestoreViewPort(0,0);
 }

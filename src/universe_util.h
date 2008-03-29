@@ -159,6 +159,8 @@ namespace UniverseUtil
 	///this gets the number of active players
  	int getNumPlayers ();
 	// Clears all objectives (used for server-side when it's easy to get inconsistent.
+    void setTargetLabel(std::string label);
+    std::string getTargetLabel();
 	void clearObjectives();
 	// Erases an objective.
 	void eraseObjective(int which);
