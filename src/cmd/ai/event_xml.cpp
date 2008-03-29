@@ -175,8 +175,8 @@ namespace AIEvents {
         printf("ai file again %s again not found\n",full_filename.c_str());
         err = f.OpenReadOnly ("default.agg.xml", AiFile);
         if (err>Ok) {
-          printf("ai file again default.agg.xml again not found\n");
-          
+          fprintf(stderr,"ai file again default.agg.xml again not found\n");
+          return; // Who knows what will happen now? Crash?
         }
       }
     }	

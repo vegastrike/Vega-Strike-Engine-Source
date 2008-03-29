@@ -36,6 +36,7 @@ PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const 
 		orbiting_average[t]=QVector(0,0,0);
 	}
 	orbiting_last_simatom = SIMULATION_ATOM;
+	orbit_list_filled = false;
   p->SetResolveForces(false);
     double delta = x_size.Magnitude() - y_size.Magnitude();
     if(delta == 0) {

@@ -407,11 +407,16 @@ void NetClient::Respawn( ObjSerial newserial) {
   
   {
     Background::BackgroundClone savedtextures={{NULL,NULL,NULL,NULL,NULL,NULL,NULL}};
-    Background *tmp=_Universe->activeStarSystem()->getBackground();
-    savedtextures=tmp->Cache();
+    Background *tmp=NULL;
+    if (_Universe->activeStarSystem()) {
+      tmp =_Universe->activeStarSystem()->getBackground();
+      savedtextures=tmp->Cache();
+    }
     _Universe->clearAllSystems();
     ss = _Universe->GenerateStarSystem(fullsysname.c_str(),"",Vector(0,0,0));
-    savedtextures.FreeClone();
+    if (tmp) {
+      savedtextures.FreeClone();
+    }
   }
   _Universe->pushActiveStarSystem(ss);
   unsigned int oldcp=_Universe->CurrentCockpit();

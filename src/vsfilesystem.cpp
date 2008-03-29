@@ -1756,6 +1756,9 @@ namespace VSFileSystem
 
 	string  VSFile::ReadFull()
 	{
+		if (this->Size()<0) {
+			cerr<<"Attempt to call ReadFull on a bad file "<<this->filename<<endl;
+		}
 		if( !UseVolumes[alt_type] || this->volume_type==VSFSNone)
 		{
 			char * content = new char[this->Size()+1];
@@ -1763,9 +1766,12 @@ namespace VSFileSystem
 			int readsize = fread( content, 1, this->Size(), this->fp);
 			if( this->Size()!=readsize)
 			{
-				cerr<<"Read "<<readsize<<" bytes and "<<this->Size()<<" were to be read"<<endl;
+				cerr<<"Only read "<<readsize<<" out of "<<this->Size()<<" bytes of "<<this->filename<<endl;
 				GetError("ReadFull");
-				VSExit(1);
+				if (readsize<=0)
+					return string();
+				else
+					content[readsize]='\0';
 			}
 			string res( content);
 			delete []content;
