@@ -80,7 +80,7 @@ namespace UnitUtil {
         unsigned int np = _Universe->numPlayers();
         Cockpit* cockpit=_Universe->AccessCockpit();
         //static bool fixed_system_orbit_priorities=XMLSupport::parse_bool(vs_config->getVariable("physics","fixed_system_orbit_priorities","true"));
-        static float fixed_system_orbit_priorities=XMLSupport::parse_float(vs_config->getVariable("physics","fixed_system_priority_velocity_cutoff","50"));
+        static float fixed_system_orbit_priorities=XMLSupport::parse_float(vs_config->getVariable("physics","fixed_system_priority_velocity_cutoff","500"));
         static const int SYSTEM_INSTALLATION_PRIORITY=XMLSupport::parse_int(
             vs_config->getVariable("physics","priorities","system_installation","3") );
         bool system_installation=un->owner==getTopLevelOwner();
