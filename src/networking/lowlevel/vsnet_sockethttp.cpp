@@ -141,18 +141,7 @@ void VsnetHTTPSocket::dump( std::ostream& ostr ) const
 }
 
 bool VsnetHTTPSocket::sendstr(const std::string &data) {
-	char endHeaderLen[50];
-	std::string httpData;
-	sprintf(endHeaderLen, "Content-Length: %d\r\n\r\n", data.length() );
-	httpData = "POST " + this->_path + " HTTP/1.1\r\n"
-		"Host: " + this->_hostheader + "\r\n"
-		"User-Agent: Vsnet/1.0\r\n"
-		"Connection: keep-alive\r\n"
-		"Accept: message/x-vsnet-packet\r\n"
-		"Keep-Alive: 300\r\n"
-		"Content-Type: message/x-vsnet-packet\r\n" +
-		endHeaderLen + data;
-	dataToSend.push_back(httpData);
+	dataToSend.push_back(data);
 	return true;
 }
 
@@ -202,7 +191,20 @@ int VsnetHTTPSocket::lower_sendbuf(  )
           this->_fd=-1;
 	}
 
-	std::string httpData = dataToSend.front();
+	std::string data = dataToSend.front();
+	char endHeaderLen[50];
+	std::string httpData;
+	
+	// Have to regenerate this in case the request was forwarded (301).
+	sprintf(endHeaderLen, "Content-Length: %d\r\n\r\n", data.length() );
+	httpData = "POST " + this->_path + " HTTP/1.1\r\n"
+		"Host: " + this->_hostheader + "\r\n"
+		"User-Agent: Vsnet/1.0\r\n"
+		"Connection: keep-alive\r\n"
+		"Accept: message/x-vsnet-packet\r\n"
+		"Keep-Alive: 300\r\n"
+		"Content-Type: message/x-vsnet-packet\r\n" +
+		endHeaderLen + data;
 
 	const char *httpDataStr = httpData.data();
 	int pos = sendDataPos;
@@ -398,21 +400,38 @@ bool VsnetHTTPSocket::lower_selected( int datalen )
 						iter = _header.find("Status");
 						
 						if (iter == _header.end()) {
-                                                  COUT<<"Missing status, resending\n";
-                                                  resendData();
-                                                  return false;
-                                                }
-                                                if((*iter).second.find("100")!=std::string::npos) {                                                  
-                                                  _content_length=0;
-                                                  _header.clear();
-												  printf ("100 found in header at marker %d... rest of string looks like:%s\n",bufpos,rcvbuf+bufpos);
-                                                  continue;
-                                                
-                                                  
-                                                }else if((*iter).second.find("200")==std::string::npos) {
-                                                  COUT << "Received HTTP error: status is "+ (*iter).second << std::endl;
-                                                  resendData();
-                                                  return false;
+							COUT<<"Missing status, resending\n";
+							resendData();
+							return false;
+						}
+						if((*iter).second.find("100")!=std::string::npos) {                                                  
+							_content_length=0;
+							_header.clear();
+							printf ("100 found in header at marker %d... rest of string looks like:%s\n",bufpos,rcvbuf+bufpos);
+							continue;
+						}else if((*iter).second.find("200")==std::string::npos) {
+							if ((*iter).second.find("301")!=std::string::npos ||
+							      (*iter).second.find("302")!=std::string::npos ||
+							      (*iter).second.find("303")!=std::string::npos ||
+							      (*iter).second.find("307")!=std::string::npos) {
+								// Redirect (permanent == 301, temporary == 302,303,307).
+								iter = _header.find("Location");
+								if (iter == _header.end()) {
+									COUT << "Failed to find a Location header after a 3xx message";
+								} else {
+									std::string dummy;
+									unsigned short port;
+									this->_remote_ip=remoteIPFromURI((*iter).second);
+									hostFromURI((*iter).second, dummy, this->_hostheader, this->_path, port);
+									resendData();
+									return false;
+								}
+								
+							} else {
+								COUT << "Received HTTP error: status is "+ (*iter).second << std::endl;
+								resendData();
+								return false;
+							}
 						}
 	
 						iter = _header.find("Content-Length");
