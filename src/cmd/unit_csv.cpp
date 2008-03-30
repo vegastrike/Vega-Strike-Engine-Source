@@ -335,7 +335,11 @@ static vector<SubUnitStruct> GetSubUnits(const std::string &subunits) {
 }
 static void AddSubUnits (Unit *thus, Unit::XML &xml, const std::string &subunits, int faction, const std::string &modification) {
   if (SERVER || Network) {
-    return; // subvert all subunits in MP
+    // Semihack: Keep loading if thus is already a subunit...
+    // A planet can have a wormhole subunit, which itself has more subunits.
+    if (!thus->graphicOptions.SubUnit) {
+      return; // subvert all subunits in MP
+    }
   }
   vector<SubUnitStruct> su=GetSubUnits(subunits);
   xml.units.reserve(subunits.size()+xml.units.size());
