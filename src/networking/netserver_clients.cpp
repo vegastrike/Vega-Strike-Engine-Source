@@ -512,6 +512,10 @@ void	NetServer::posUpdate( ClientPtr clt)
   // Update client position in client list : should be enough like it is below
   cs2 = netbuf.getClientState();
   ClientState cs(cs2);
+  bool inSpec = 0;
+  if (clt->netversion > 4960) {
+    inSpec = netbuf.getChar() ? 0 : 1;
+  }
   if (!FINITE(cs.getPosition().i) || !FINITE(cs.getPosition().j) || !FINITE(cs.getPosition().k)) {
     cerr << "Unit "<<clt_serial<<" sent me an invalid position"<<endl;
     cs = un->old_state;
@@ -557,6 +561,10 @@ void	NetServer::posUpdate( ClientPtr clt)
   un->curr_physical_state.orientation = cs.getOrientation();
   un->Velocity = cs.getVelocity();
   un->AngularVelocity=cs.getAngularVelocity();
+  
+  un->graphicOptions.WarpRamping = (inSpec != un->graphicOptions.InWarp);
+  un->graphicOptions.InWarp = inSpec;
+  
   assert( clt->prediction );
   clt->prediction->InitInterpolation( un, clt->last_packet, clt->getDeltatime(), clt->getNextDeltatime());
   //	un->curr_physical_state.position = clt->prediction->InterpolatePosition( un, 0);

@@ -39,6 +39,9 @@ class	ClientState
 	Vector			veloc;
   //NO longer supproted--wasnt indicative of actual accel	Vector			accel;
 	Vector			angveloc;
+
+	float			SPECRampCounter; // negative means ramping down
+	float			SPECWarpMultiplier; // =1.0 and RampCounter=0 means !InWarp
 	public:
 		ClientState();
 		ClientState( ObjSerial serial);
@@ -52,6 +55,8 @@ class	ClientState
 		const Transformation & getTransformation() const { return this->pos; }
 		const Vector & getVelocity() const { return this->veloc;}
 		const Vector & getAngularVelocity() const { return this->angveloc;}
+		float  getSpecRamp() const { return this->SPECRampCounter; }
+		float  getSpecMult() const { return this->SPECWarpMultiplier; }
   //NO longer supported--wasn't indicative of actual aggregated accel		Vector		getAcceleration() const { retu //rn if you change this, change setAcceleration too, and all consturctor this->accel;}
                 void		setAcceleration( Vector acc) { }
 
@@ -65,11 +70,13 @@ class	ClientState
 		void		setOrientation( Quaternion orient) { this->pos.orientation = orient;}
 		void		setVelocity( Vector vel) { this->veloc = vel;}
 		void		setAngularVelocity( Vector vel) { this->angveloc = vel;}
+		void		setSpecRamp(float rc) { this->SPECRampCounter = rc; }
+		void		setSpecMult(float wfm) { this->SPECWarpMultiplier = wfm; }
 
 		void	display( std::ostream& ostr ) const;
 		void	display() const;
 		int		operator==( const ClientState & ctmp) const;
-		void	netswap();
+		//void	netswap();
 
 		friend	class NetBuffer;
 };

@@ -331,9 +331,6 @@ void	NetClient::removeClient( const Packet* packet )
 
 void	NetClient::sendPosition( const ClientState* cs )
 {
-// NETFIXME: POSUPDATE's need to happen much more often, and should send info more onften about closer units than farther ones.
-
-
 
 	Unit *un = this->game_unit.GetUnit();
 	if (!un)
@@ -347,12 +344,18 @@ void	NetClient::sendPosition( const ClientState* cs )
 	if (debugPos) (*cs).display();
 	netbuf.addSerial( cs->getSerial());
 	netbuf.addClientState( (*cs));
+	if (netversion > 4960) {
+		netbuf.addChar(cs->getSpecMult()>1.0 ? 1 : 0);
+	}
+	
         static bool aim_assist = XMLSupport::parse_bool(vs_config->getVariable("network","aim_assist","true"));
         Unit * targ;
         if ((targ=un->Target())!=NULL&&aim_assist&&un->Target()->GetSerial()!=0/*networked unit*/) {
-          netbuf.addSerial(targ->GetSerial());
-          netbuf.addVector((targ->Position()-cs->getPosition()).Cast());
-          netbuf.addVector(targ->Velocity);
+          if (un->InRange(targ) && !targ->graphicOptions.InWarp && !un->graphicOptions.InWarp) {
+            netbuf.addSerial(targ->GetSerial());
+            netbuf.addVector((targ->Position()-cs->getPosition()).Cast());
+            netbuf.addVector(targ->Velocity);
+          }
         }
 	send ( CMD_POSUPDATE, netbuf, SENDANDFORGET, __FILE__, __LINE__ );
 }
@@ -433,6 +436,10 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 				// Tell we received the ClientState so we can convert byte order from network to host
 				cs = netbuf.getClientState();
 				newEnergy = netbuf.getFloat();
+				if (cmd & ZoneMgr::SPECUpdate) {
+					cs.setSpecRamp(netbuf.getFloat());
+					cs.setSpecMult(netbuf.getFloat());
+				}
                 if (debugPos) COUT << "   *** cs=" << cs << endl;
 
 // NETFIXME: Why not set local player? It can't hurt...

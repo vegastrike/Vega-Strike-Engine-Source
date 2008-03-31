@@ -558,7 +558,7 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 //                    COUT << "   *** deltatime " << cltk->getDeltatime() << endl;
 					// Clients not ingame are removed from the drawList so it is ok not to test that
 					for(;(unit = *iter)!=NULL;++iter){
-						if (netbuf.getOffset()>450 && (&cltk->tcp_sock != cltk->lossy_socket)) {
+						if (netbuf.getOffset()>(504-108) && (&cltk->tcp_sock != cltk->lossy_socket)) {
 							// Don't want to go over MTU. 512 is UDP maximum and you lose 8 for header.
 							break;
 						}
@@ -684,6 +684,13 @@ bool ZoneMgr::addPosition( ClientPtr client, NetBuffer & netbuf, Unit * un, Clie
 				if (dodamage && un->damages) {
 					type |= ZoneMgr::DamageUpdate;
 				}
+
+				// Always send spec info for now...
+				if (client->netversion > 4960) {
+					if (un_cs.getSpecMult() >= 1.0) {
+						type |= ZoneMgr::SPECUpdate;
+					}
+				}
 				
 //                COUT << "   *** FullUpdate ser=" << un->GetSerial() << " cs=" << un_cs << endl;
 				// Mark as position+orientation+velocity update
@@ -695,6 +702,10 @@ bool ZoneMgr::addPosition( ClientPtr client, NetBuffer & netbuf, Unit * un, Clie
 				netbuf.addFloat (un->energy);
 				// Increment the number of clients we send full info about
 				
+				if (type & ZoneMgr::SPECUpdate) {
+					netbuf.addFloat(un_cs.getSpecRamp());
+					netbuf.addFloat(un_cs.getSpecMult());
+				}
 				if (dodamage && un->damages) {
 					addDamage( netbuf, un );
 				}

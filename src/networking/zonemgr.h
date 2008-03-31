@@ -85,6 +85,7 @@ class ZoneMgr
             FullUpdate=2,// On client side (recv) : receive full update
                        // info for a ship
             DamageUpdate=8, // On client side (recv) : update changed damages.
+			SPECUpdate=16, // On client side (recv) : send SPEC mult and ramp.
         };
         enum AddClientId
         {

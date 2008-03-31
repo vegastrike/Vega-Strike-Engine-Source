@@ -110,7 +110,7 @@ void PacketMem::inner_set( void* buffer, size_t size, bool own )
 void PacketMem::dump( ostream& ostr, size_t indent_depth ) const
 {
     CHECK_VALID
-    static const size_t LEN = 15;
+    static const size_t LEN = 16;
 
     char x[LEN];
     char* buf  = _buffer.get();
