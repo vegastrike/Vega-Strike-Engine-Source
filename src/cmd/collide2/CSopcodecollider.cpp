@@ -133,7 +133,8 @@ bool csOPCODECollider::Collide( csOPCODECollider &otherCollider,
 {
 	csOPCODECollider* col2 = (csOPCODECollider*) &otherCollider;
 
-	if (XMLSupport::parse_bool(vs_config->getVariable("physics","opcode_invalidate_cache","false"))) {
+	static bool temp_opcode_debug = XMLSupport::parse_bool(vs_config->getVariable("physics","opcode_invalidate_cache","false"));
+	if (temp_opcode_debug) {
 		ColCache.ResetCache();
 		ColCache.id0 = 0xcfed8ba9; // Junk data
 		ColCache.id1 = 0xdfb97531;
