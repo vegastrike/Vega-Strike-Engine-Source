@@ -40,6 +40,8 @@ csOPCODECollider * collideTrees::colTree(Unit * un, const Vector & othervelocity
 	}
 	if (rapidColliders[0]==NULL)
 		return NULL;
+	if (un->rSize()<=0.) // Shouldn't happen bug I've seen this for asteroid fields...
+		return NULL;
 	float movement = sqrtf (speedsquared)*SIMULATION_ATOM;
 
 	// Force pow to 0 in order to avoid nan problems...

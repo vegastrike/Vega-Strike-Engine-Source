@@ -514,7 +514,7 @@ void	NetServer::posUpdate( ClientPtr clt)
   ClientState cs(cs2);
   bool inSpec = 0;
   if (clt->netversion > 4960) {
-    inSpec = netbuf.getChar() ? 0 : 1;
+    inSpec = netbuf.getChar() ? 1 : 0;
   }
   if (!FINITE(cs.getPosition().i) || !FINITE(cs.getPosition().j) || !FINITE(cs.getPosition().k)) {
     cerr << "Unit "<<clt_serial<<" sent me an invalid position"<<endl;
