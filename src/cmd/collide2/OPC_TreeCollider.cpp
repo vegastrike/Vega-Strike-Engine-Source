@@ -283,8 +283,10 @@ bool AABBTreeCollider::CheckTemporalCoherence(Pair* cache)
 	// Test previously colliding primitives first
 	if(TemporalCoherenceEnabled() && FirstContactEnabled())
 	{
+            if (cache->id0<mIMesh0->GetNbTriangles()&&cache->id1<mIMesh1->GetNbTriangles()) {
 		PrimTest(cache->id0, cache->id1);
 		if(GetContactStatus())	return true;
+            }
 	}
 	return false;
 }

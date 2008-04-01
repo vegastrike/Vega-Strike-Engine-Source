@@ -105,6 +105,7 @@ void csOPCODECollider::GeometryInitialize (const std::vector <bsp_polygon> &poly
 
 csOPCODECollider::~csOPCODECollider ()
 {
+
 	if (m_pCollisionModel) {
 		delete m_pCollisionModel;
 		m_pCollisionModel = 0;
@@ -133,14 +134,6 @@ bool csOPCODECollider::Collide( csOPCODECollider &otherCollider,
 {
 	csOPCODECollider* col2 = (csOPCODECollider*) &otherCollider;
 
-	static bool temp_opcode_debug = XMLSupport::parse_bool(vs_config->getVariable("physics","opcode_invalidate_cache","false"));
-	if (temp_opcode_debug) {
-		ColCache.ResetCache();
-		ColCache.id0 = 0xcfed8ba9; // Junk data
-		ColCache.id1 = 0xdfb97531;
-	}
-	ColCache.Model0 = this->m_pCollisionModel;
-	ColCache.Model1 = col2->m_pCollisionModel;
 
 	csMatrix3 m1;
 	if (trans1) m1 = trans1->GetT2O ();
