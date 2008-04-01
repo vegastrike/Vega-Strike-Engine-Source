@@ -41,7 +41,9 @@ csOPCODECollider * collideTrees::colTree(Unit * un, const Vector & othervelocity
 	if (rapidColliders[0]==NULL)
 		return NULL;
 	float movement = sqrtf (speedsquared)*SIMULATION_ATOM;
-	int pow =(int)ceil(log (movement/un->rSize())/loge2);
+
+	// Force pow to 0 in order to avoid nan problems...
+	int pow = 0; //(int)ceil(log (movement/un->rSize())/loge2);
 //	pow=collideTreesMaxTrees-1;
 	if (pow<0)
 		pow=0;
@@ -51,7 +53,6 @@ csOPCODECollider * collideTrees::colTree(Unit * un, const Vector & othervelocity
 	
 	int val = 1<<pow;
 	//VSFileSystem::vs_fprintf (stderr,"%s %d %d\n",un->name.c_str(),pow,val);
-
 	if (rapidColliders[pow]==NULL) {
 		rapidColliders[pow]=un->getCollideTree(Vector(1,1,val));
 	}
