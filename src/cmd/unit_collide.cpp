@@ -70,8 +70,7 @@ void Unit::RemoveFromSystem()
 			set_null(this->location[locind]);
 		}
 	}
-	int j;
-	for (j=0;j<GetNumMounts();j++) {
+	for (int j=0;j<GetNumMounts();++j) {
 		if (mounts[j].type->type==weapon_info::BEAM) {
 			if (mounts[j].ref.gun) {
 				mounts[j].ref.gun->RemoveFromSystem(true);
@@ -87,8 +86,7 @@ void Unit::UpdateCollideQueue (StarSystem * ss, CollideMap::iterator hint[NUM_CO
 	if (activeStarSystem==NULL) {
 		activeStarSystem = ss;
 
-	}
-	else {
+	} else {
 		assert (activeStarSystem==ss);
 	}
 	for (unsigned int locind=0;locind<NUM_COLLIDE_MAPS;++locind) {
@@ -110,8 +108,6 @@ void Unit::CollideAll()
 
 	if (isSubUnit()||killed||noUnitCollisions)
 		return;
-	static bool newUnitCollisions=XMLSupport::parse_bool(vs_config->getVariable("physics","new_collisions","true"));
-	if (newUnitCollisions) {
 		for (unsigned int locind=0;locind<NUM_COLLIDE_MAPS;++locind) {
 			if (is_null(this->location[locind])) {
 				this->location[locind]=this->getStarSystem()->collidemap[locind]->insert(Collidable(this));
@@ -119,7 +115,6 @@ void Unit::CollideAll()
 		}
 		CollideMap *cm=this->getStarSystem()->collidemap[Unit::UNIT_BOLT];
 		cm->CheckCollisions(this,*this->location[Unit::UNIT_BOLT]);
-	}
 }
 
 
@@ -131,6 +126,7 @@ Vector Vabs (const Vector &in)
 }
 
 
+//Slated for removal 0.5
 Matrix WarpMatrixForCollisions (Unit * un, const Matrix& ctm)
 {
 	if (un->GetWarpVelocity().MagnitudeSquared()*SIMULATION_ATOM*SIMULATION_ATOM<un->rSize()*un->rSize()) {
@@ -208,13 +204,13 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
 		// maybe we should access the collider directly.
 		if (numHits) {
 //			printf ("%s hit %s\n",smaller->name.c_str(),bigger->name.c_str());
-			smallpos.Set((mycollide[0].a1.x+mycollide[0].b1.x+mycollide[0].c1.x)/3,
-				(mycollide[0].a1.y+mycollide[0].b1.y+mycollide[0].c1.y)/3,
-				(mycollide[0].a1.z+mycollide[0].b1.z+mycollide[0].c1.z)/3);
+			smallpos.Set((mycollide[0].a1.x+mycollide[0].b1.x+mycollide[0].c1.x)/3.0f,
+				(mycollide[0].a1.y+mycollide[0].b1.y+mycollide[0].c1.y)/3.0f,
+				(mycollide[0].a1.z+mycollide[0].b1.z+mycollide[0].c1.z)/3.0f);
 			smallpos = Transform (smaller->cumulative_transformation_matrix,smallpos);
-			bigpos.Set((mycollide[0].a2.x+mycollide[0].b2.x+mycollide[0].c2.x)/3,
-				(mycollide[0].a2.y+mycollide[0].b2.y+mycollide[0].c2.y)/3,
-				(mycollide[0].a2.z+mycollide[0].b2.z+mycollide[0].c2.z)/3);
+			bigpos.Set((mycollide[0].a2.x+mycollide[0].b2.x+mycollide[0].c2.x)/3.0f,
+				(mycollide[0].a2.y+mycollide[0].b2.y+mycollide[0].c2.y)/3.0f,
+				(mycollide[0].a2.z+mycollide[0].b2.z+mycollide[0].c2.z)/3.0f);
 			bigpos = Transform (bigger->cumulative_transformation_matrix,bigpos);
 			csVector3 sn, bn;
 			sn.Cross (mycollide[0].b1-mycollide[0].a1,mycollide[0].c1-mycollide[0].a1);
@@ -304,10 +300,10 @@ Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, Q
 	smallerMat.p = start;
 	const csReversibleTransform smalltransform (smallerMat);
 	bsp_polygon tri;
-	tri.v.push_back(Vector(-mag/1024,0,0));
-	tri.v.push_back(Vector(-mag/1024,0,mag));
-	tri.v.push_back(Vector(mag/1024,0,mag));
-	tri.v.push_back(Vector(mag/1024,0,0));
+	tri.v.push_back(Vector(-mag/1024.0f,0,0));
+	tri.v.push_back(Vector(-mag/1024.0f,0,mag));
+	tri.v.push_back(Vector(mag/1024.0f,0,mag));
+	tri.v.push_back(Vector(mag/1024.0f,0,0));
 	vector <bsp_polygon> mesh;
 	mesh.push_back(tri);
 	csOPCODECollider smallColTree(mesh);
@@ -327,9 +323,9 @@ Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, Q
 					 (mycollide[0].a1.z+mycollide[0].b1.z+mycollide[0].c1.z)/3);
 			pos = Transform (smaller->cumulative_transformation_matrix,smallpos);
 			*/
-			pos.Set((mycollide[0].a2.x+mycollide[0].b2.x+mycollide[0].c2.x)/3,
-				(mycollide[0].a2.y+mycollide[0].b2.y+mycollide[0].c2.y)/3,
-				(mycollide[0].a2.z+mycollide[0].b2.z+mycollide[0].c2.z)/3);
+			pos.Set((mycollide[0].a2.x+mycollide[0].b2.x+mycollide[0].c2.x)/3.0f,
+				(mycollide[0].a2.y+mycollide[0].b2.y+mycollide[0].c2.y)/3.0f,
+				(mycollide[0].a2.z+mycollide[0].b2.z+mycollide[0].c2.z)/3.0f);
 			pos = Transform (cumulative_transformation_matrix,pos);
 			csVector3 sn, bn;
 			sn.Cross (mycollide[0].b1-mycollide[0].a1,mycollide[0].c1-mycollide[0].a1);
@@ -434,13 +430,13 @@ float globQueryShell (QVector st, QVector dir, float radius)
 	double a,b,c;
 	c = st.Dot (st);
 	c = c - temp1*temp1;
-	b = 2 * (dir.Dot (st));
+	b = 2.0f * (dir.Dot (st));
 	a = dir.Dot(dir);
 	//b^2-4ac
-	c = b*b - 4*a*c;
+	c = b*b - 4.0f*a*c;
 	if (c<0||a==0)
-		return 0;
-	a *=2;
+		return 0.0f;
+	a *=2.0f;
 
 	float tmp = (-b + sqrt (c))/a;
 	c = (-b - sqrt (c))/a;
@@ -450,7 +446,7 @@ float globQueryShell (QVector st, QVector dir, float radius)
 	else if (c>0&&c<=1) {
 		return c;
 	}
-	return 0;
+	return 0.0f;
 }
 
 
@@ -459,7 +455,7 @@ float globQuerySphere (QVector start, QVector end, QVector pos, float radius)
 
 	QVector st = start-pos;
 	if (st.MagnitudeSquared()<radius*radius)
-		return 1.0e-6;
+		return(1.0e-6f);
 	return globQueryShell(st,end-start,radius);
 }
 
@@ -686,7 +682,7 @@ bool Unit::querySphere (const QVector &pnt, float err) const
 #ifdef VARIABLE_LENGTH_PQR
 			SizeScaleFactor*
 #endif
-			2*err*radial_size
+			2.0f*err*radial_size
 			)
 			return true;
 	}
@@ -703,7 +699,7 @@ bool Unit::querySphere (const QVector &pnt, float err) const
 #ifdef VARIABLE_LENGTH_PQR
 				SizeScaleFactor*
 #endif
-				2*err*meshdata[i]->rSize()
+				2.0f*err*meshdata[i]->rSize()
 				)
 				return true;
 		}
@@ -766,16 +762,16 @@ float Unit::querySphereNoRecurse (const QVector & start, const QVector & end, fl
 #ifdef VARIABLE_LENGTH_PQR
 		c *= SizeScaleFactor*SizeScaleFactor;
 #endif
-		b = 2 * (dir.Dot (st));
+		b = 2.0f * (dir.Dot (st));
 		a = dir.Dot(dir);
 		//b^2-4ac
 		if( min_radius!=-FLT_MAX)
-			c = b*b - 4*a*c;
+			c = b*b - 4.0f*a*c;
 		else
 			c = FLT_MAX;
 		if (c<0||a==0)
 			continue;
-		a *=2;
+		a *=2.0f;
 
 		tmp = (-b + sqrt (c))/a;
 		c = (-b - sqrt (c))/a;
@@ -787,6 +783,6 @@ float Unit::querySphereNoRecurse (const QVector & start, const QVector & end, fl
 		}
 	}
 
-	return 0;
+	return 0.0f;
 	//return (bestd==-FLT_MAX)?0:(bestd/sqrt(beammsqr));
 }

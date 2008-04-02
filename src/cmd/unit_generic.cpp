@@ -342,7 +342,7 @@ void Unit::BuildBSPTree(const char *filename, bool vplane, Mesh * hull)
 		}
 		// Calculate 'd'
 		temp_node.d = (double) ((temp_node.a*tri[i].v[0].i)+(temp_node.b*tri[i].v[0].j)+(temp_node.c*tri[i].v[0].k));
-		temp_node.d*=-1.0;
+		temp_node.d*=-1.0f;
 		triplane.push_back(temp_node);
 		//                bsp=put_plane_in_tree3(bsp,&temp_node,&temp_poly3);
 	}
@@ -471,8 +471,6 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 	}
 	//don't bounce if you can Juuuuuuuuuuuuuump
 	if (!jumpReactToCollision(smalle)) {
-#ifdef NOBOUNCECOLLISION
-#else
 		static float bouncepercent = XMLSupport::parse_float (vs_config->getVariable ("physics","BouncePercent",".1"));
 		static float kilojoules_per_damage = XMLSupport::parse_float (vs_config->getVariable ("physics","kilojoules_per_unit_damage","5400"));
 		static float collision_scale_factor=XMLSupport::parse_float(vs_config->getVariable("physics","collision_damage_scale","1.0"));
@@ -481,11 +479,11 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 		static float minvel = XMLSupport::parse_float (vs_config->getVariable ("physics","minimum_collision_velocity","5"));
 
 		float m1=smalle->GetMass(),m2=GetMass();
-		if (m1<1e-6||m2<1e-6) {
-			if (m1<=0)m1=0;
-			if (m2<=0)m2=0;
-			m1+=(float)1.0e-7;
-			m2+=(float)1.0e-7;
+		if (m1<1e-6f||m2<1e-6f) {
+			if (m1<=0)m1=0.0f;
+			if (m2<=0)m2=0.0f;
+			m1+=1.0e-7f;
+			m2+=1.0e-7f;
 		}
 		//Compute linear velocity of points of impact by taking into account angular velocities
 		Vector small_velocity=smalle->GetVelocity()-smalle->GetAngularVelocity().Cross(smalllocation-smalle->Position());
@@ -507,8 +505,8 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 								 // doesn't need aligning (I think)
 		Vector Inelastic_vf = (m1/(m1+m2))*small_velocity + (m2/(m1+m2))*big_velocity;
 		// compute along aligned dimension, then return to previous reference frame
-		small_velocity_aligned.k= (small_velocity_aligned.k*(m1-m2)/(m1+m2)+(2*m2/(m1+m2))*big_velocity_aligned.k);
-		big_velocity_aligned.k=(big_velocity_aligned.k*(m2-m1)/(m1+m2)+(2*m1/(m1+m2))*small_velocity_aligned.k);
+		small_velocity_aligned.k= (small_velocity_aligned.k*(m1-m2)/(m1+m2)+(2.0f*m2/(m1+m2))*big_velocity_aligned.k);
+		big_velocity_aligned.k=(big_velocity_aligned.k*(m2-m1)/(m1+m2)+(2.0f*m1/(m1+m2))*small_velocity_aligned.k);
 		Vector SmallerElastic_vf =Transform(fromNewRef,small_velocity_aligned);
 		Vector ThisElastic_vf = Transform(fromNewRef,big_velocity_aligned);
 
@@ -528,20 +526,20 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 
 		//ThisElastic_vf=((ThisElastic_vf.Magnitude()>minvel||!thcp)?ThisElastic_vf.Magnitude():minvel)*smallnormal;
 		//SmallerElastic_vf=((SmallerElastic_vf.Magnitude()>minvel||!smcp)?SmallerElastic_vf.Magnitude():minvel)*bignormal;
-		Vector ThisFinalVelocity=inelastic_scale*Inelastic_vf+(1-inelastic_scale)*ThisElastic_vf;
-		Vector SmallerFinalVelocity=inelastic_scale*Inelastic_vf+(1-inelastic_scale)*SmallerElastic_vf;
+		Vector ThisFinalVelocity=inelastic_scale*Inelastic_vf+(1.0f-inelastic_scale)*ThisElastic_vf;
+		Vector SmallerFinalVelocity=inelastic_scale*Inelastic_vf+(1.0f-inelastic_scale)*SmallerElastic_vf;
 
 		//float LargeKE = (0.5)*m2*GetVelocity().MagnitudeSquared();
 		//float SmallKE = (0.5)*m1*smalle->GetVelocity().MagnitudeSquared();
 		//float FinalInelasticKE = Inelastic_vf.MagnitudeSquared()*(0.5)*(m1+m2);
 		//float InelasticDeltaKE = LargeKE +SmallKE - FinalInelasticKE;
 								 // 1/2Mass*deltavfromnoenergyloss^2
-		float LargeDeltaE=(0.5)*m2*(ThisFinalVelocity-ThisElastic_vf).MagnitudeSquared();
+		float LargeDeltaE=(0.5f)*m2*(ThisFinalVelocity-ThisElastic_vf).MagnitudeSquared();
 								 // 1/2Mass*deltavfromnoenergyloss^2
-		float SmallDeltaE=(0.5)*m1*(SmallerFinalVelocity-SmallerElastic_vf).MagnitudeSquared();
+		float SmallDeltaE=(0.5f)*m1*(SmallerFinalVelocity-SmallerElastic_vf).MagnitudeSquared();
 		//Damage distribution (NOTE: currently arbitrary - no known good model for calculating how much energy object endures as a result of the collision)
-		float large_damage=(0.25*SmallDeltaE+0.75*LargeDeltaE)/kilojoules_per_damage*collision_scale_factor;
-		float small_damage=(0.25*LargeDeltaE+0.75*SmallDeltaE)/kilojoules_per_damage*collision_scale_factor;
+		float large_damage=(0.25f*SmallDeltaE+0.75f*LargeDeltaE)/kilojoules_per_damage*collision_scale_factor;
+		float small_damage=(0.25f*LargeDeltaE+0.75f*SmallDeltaE)/kilojoules_per_damage*collision_scale_factor;
 
 		//Vector ThisDesiredVelocity = ThisElastic_vf*(1-inelastic_scale/2)+Inelastic_vf*inelastic_scale/2;
 		//Vector SmallerDesiredVelocity = SmallerElastic_vf*(1-inelastic_scale)+Inelastic_vf*inelastic_scale;
@@ -613,7 +611,7 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 			
 			if (thcp==NULL&&smcp==NULL) {
 				if (smallmag>collision_hack_distance+this->rSize()&&thismag>collision_hack_distance) {
-					static float front_collision_hack_angle=cos(3.1415926536*XMLSupport::parse_float(vs_config->getVariable("physics","front_collision_avoidance_hack_angle","40"))/180.);
+					static float front_collision_hack_angle=cos(3.1415926536f*XMLSupport::parse_float(vs_config->getVariable("physics","front_collision_avoidance_hack_angle","40"))/180.0f);
 
 					if (smalldelta.Dot(_Universe->AccessCamera()->GetR())<smallmag*front_collision_hack_angle&&thisdelta.Dot(_Universe->AccessCamera()->GetR())<thismag*front_collision_hack_angle) {
 						if (smallmag>front_collision_hack_distance+this->rSize()&&thismag>front_collision_hack_distance) {
@@ -640,7 +638,6 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 		//OLDE METHODE
 		//    smalle->ApplyDamage (biglocation.Cast(),bignormal,.33*g_game.difficulty*(  .5*fabs((smalle->GetVelocity()-this->GetVelocity()).MagnitudeSquared())*this->mass*SIMULATION_ATOM),smalle,GFXColor(1,1,1,2),NULL);
 		//    this->ApplyDamage (smalllocation.Cast(),smallnormal, .33*g_game.difficulty*(.5*fabs((smalle->GetVelocity()-this->GetVelocity()).MagnitudeSquared())*smalle->mass*SIMULATION_ATOM),this,GFXColor(1,1,1,2),NULL);
-#endif
 		//each mesh with each mesh? naw that should be in one way collide
 	}
 }

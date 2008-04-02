@@ -130,25 +130,16 @@ bool usehuge_table() {
   return seed<(M/100);
 }
 size_t nondecal_index(Collidable::CollideRef b);
-bool Bolt::Collide (Collidable::CollideRef index) {
-  static bool New_Collide_System=XMLSupport::parse_bool(vs_config->getVariable("physics","new_collisions","true"));
-  if (New_Collide_System) {
-    //Collidable updated(**location);
-    //updated.SetPosition(.5*(prev_position+cur_position));
+bool Bolt::Collide (Collidable::CollideRef index) 
+{
     return _Universe->activeStarSystem()->collidemap[Unit::UNIT_BOLT]->CheckCollisions(this,**location);
-  }
-  return false;
 }
 static bool beamCheckCollision (QVector pos, float len, const Collidable & un) {
   
   return (un.GetPosition()-pos).MagnitudeSquared()<=len*len+2*len*un.radius+un.radius*un.radius;
 }
-void Beam::CollideHuge (const LineCollide & lc, Unit * targetToCollideWith, Unit * firer, Unit * superunit) {
-  static bool newUnitCollisions=XMLSupport::parse_bool(vs_config->getVariable("physics","new_collisions","true"));  
-
-
-
-  if (newUnitCollisions) {
+void Beam::CollideHuge (const LineCollide & lc, Unit * targetToCollideWith, Unit * firer, Unit * superunit) 
+{
     QVector x0=center;
     QVector v=direction*curlength;
     if (is_null(superunit->location[Unit::UNIT_ONLY])&&curlength) {
@@ -222,7 +213,6 @@ void Beam::CollideHuge (const LineCollide & lc, Unit * targetToCollideWith, Unit
       }
     
     }
-  }
 }
 
 

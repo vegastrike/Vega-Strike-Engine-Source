@@ -8,7 +8,7 @@ void GFXSphereVertexList::Draw() {
   glEnable(GL_NORMALIZE);  
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
-  glScalef(radius/100000.,radius/100000.,radius/100000.);
+  glScalef(radius/100000.0f,radius/100000.0f,radius/100000.0f);
   sphere->Draw();
   glPopMatrix();
   glDisable(GL_NORMALIZE);
@@ -19,7 +19,7 @@ void GFXSphereVertexList::Draw(enum POLYTYPE *poly, const INDEX index, const int
   glEnable(GL_NORMALIZE);
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
-  glScalef(radius/100000.,radius/100000.,radius/100000.);
+  glScalef(radius/100000.0f,radius/100000.0f,radius/100000.0f);
   sphere->Draw(poly,index,numLists,offsets);
   glPopMatrix();
   glDisable(GL_NORMALIZE);
@@ -70,10 +70,10 @@ GFXSphereVertexList::GFXSphereVertexList(float radius, int detail, bool Insideou
       stacks-=2;
       slices-=2;
     }
-    float rho_max = 3.1415926536;
-    float rho_min=0;
-    float theta_min=0.0;
-    float theta_max=2*3.1415926536;
+    float rho_max = 3.1415926536f;
+    float rho_min=0.0f;
+    float theta_min=0.0f;
+    float theta_max=2.0f*3.1415926536f;
     float drho, dtheta;
     float x, y, z;
     float s, t, ds, dt;
@@ -86,9 +86,9 @@ GFXSphereVertexList::GFXSphereVertexList(float radius, int detail, bool Insideou
     drho = (rho_max-rho_min)/ (float) stacks;
     dtheta = (theta_max-theta_min)/ (float) slices;
     
-    ds = 1.0 / slices;
-    dt = 1.0 / stacks;
-      t = 1.0;			/* because loop now runs from 0 */
+    ds = 1.0f / slices;
+    dt = 1.0f / stacks;
+      t = 1.0f;			/* because loop now runs from 0 */
       
       imin = 0;
       imax = stacks;

@@ -226,14 +226,14 @@ bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon> &tri, vector <bsp_tree> 
 
 static int select_plane (const vector <bsp_polygon> &tri, const vector <bsp_tree> &triplane) {
   assert (triplane.size()==tri.size());
-  double splits=0;
+  double splits=0.0f;
   int front = 0;
   int back = 0;
   unsigned int retval= 0;
-  double least_penalty = 10000000000.;
-  const double size_factor = .3333333;
-  const double balance_factor = 1;
-  const double  split_factor = .1;
+  double least_penalty = 10000000000.0f;
+  const double size_factor = .3333333f;
+  const double balance_factor = 1.0f;
+  const double  split_factor = .1f;
   const unsigned int toobig=100;
   const int RANDOM_BSP = 0;
   const unsigned int samplesize = 10;
@@ -241,7 +241,7 @@ static int select_plane (const vector <bsp_polygon> &tri, const vector <bsp_tree
   unsigned int jj;
   for (unsigned int i=0;i<triplane.size();i++) {
     splits = front = back =0;
-    splits = size_factor*(-((double)tri[i].v.size())+3);//start off somewhat negative
+    splits = size_factor*(-((double)tri[i].v.size())+3.0f);//start off somewhat negative
     if (tri[i].v.size()>toobig) {
       return i;
     }
