@@ -9,6 +9,10 @@
 #include "save_util.h"
 #include "universe_util.h"
 
+#include "cmd/pilot.h"
+#include "cmd/ai/communication.h"
+#include "cmd/ai/order.h"
+
 extern StarSystem * GetLoadedStarSystem( const char * system);
 
 // WEAPON STUFF
@@ -309,6 +313,43 @@ void	NetServer::sendMessage( string from, string to, string message, float delay
 			zonemgr->broadcast( _Universe->activeStarSystem()->GetZone(), 0, &p2, false);
 		}
 	}
+}
+
+void NetServer::sendCommunication(Unit *from, Unit *to, const class CommunicationMessage *c) {
+	NetBuffer netbuf;
+	Client *clt = this->getClientFromSerial(to->GetSerial()).get();
+	if (!clt) return;
+	
+	if (c) {
+		netbuf.addInt32(c->curstate);
+	} else {
+		netbuf.addInt32(-1); // don't actually say anything...
+	}
+	netbuf.addFloat(FactionUtil::GetIntRelation(from->faction,to->faction));
+	netbuf.addFloat(FactionUtil::GetIntRelation(to->faction,from->faction));
+	if (from->pilot) {
+		Pilot::relationmap::iterator i=from->pilot->effective_relationship.find(to);
+		if (i==from->pilot->effective_relationship.end()) {
+			netbuf.addFloat(0.0);
+		} else {
+			netbuf.addFloat((*i).second);
+		}
+	} else {
+		netbuf.addFloat(0.0);
+	}
+	if (to->pilot) {
+		Pilot::relationmap::iterator i=to->pilot->effective_relationship.find(to);
+		if (i==to->pilot->effective_relationship.end()) {
+			netbuf.addFloat(0.0);
+		} else {
+			netbuf.addFloat((*i).second);
+		}
+	} else {
+		netbuf.addFloat(0.0);
+	}
+	Packet p2;
+	p2.send( CMD_COMM, from->GetSerial(), netbuf.getData(), netbuf.getDataLength(),
+			 SENDRELIABLE, NULL, clt->tcp_sock, __FILE__, __LINE__ );
 }
 
 // zonemgr.cpp

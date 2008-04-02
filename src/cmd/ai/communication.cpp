@@ -234,7 +234,7 @@ void CommunicationMessage::Init (Unit * send, Unit * recv) {
   fsm = FactionUtil::GetConversation (send->faction,recv->faction);
   sender.SetUnit (send);
   this->prevstate=this->curstate = fsm->getDefaultState(send->getRelation(recv));
-
+  this->edgenum = -1;
 }
 float myround (float i) {
 	float j= floor(i);
@@ -279,7 +279,8 @@ CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, int messag
   Init (send,recv);
   prevstate=fsm->getDefaultState (send->getRelation (recv));
   if (fsm->nodes[prevstate].edges.size()) {
-    curstate = fsm->nodes[prevstate].edges[messagechoice%fsm->nodes[prevstate].edges.size()];
+    this->edgenum = messagechoice%fsm->nodes[prevstate].edges.size();
+    curstate = fsm->nodes[prevstate].edges[this->edgenum];
   }
   SetAnimation(ani,sex);
   assert (this->curstate>=0);
@@ -303,7 +304,8 @@ CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, const Comm
   Init (send,recv);
   this->prevstate = prevstate.curstate;
   if (fsm->nodes[this->prevstate].edges.size()) {
-    this->curstate = fsm->nodes[this->prevstate].edges[curstate%fsm->nodes[this->prevstate].edges.size()];
+    this->edgenum = curstate%fsm->nodes[this->prevstate].edges.size();
+    this->curstate = fsm->nodes[this->prevstate].edges[edgenum];
   }
   SetAnimation(ani,sex);
   assert (this->curstate>=0);

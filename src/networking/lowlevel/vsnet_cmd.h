@@ -131,7 +131,7 @@ enum Cmd
 
 	CMD_CUSTOM       = 0x33,        // Used for python scripts to communicate between client and server.
 	CMD_SHIPDEALER   = 0x34,		// C->S: Request to purchase ship, S->C: Unimplemented
-    // CMD_ACK          			// A packet to acknoledge the reception of a packet that was previously sent
+	CMD_COMM         = 0x35,		// C->S: Send a Comm message to target, S->C: Say something to player
 };
 
 class Subcmd {

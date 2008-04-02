@@ -256,6 +256,8 @@ void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob)
 }
 
 void CommunicatingAI::AdjustRelationTo (Unit * un, float factor) {
+  if (Network)
+    return; // Server will handle this.
   Order::AdjustRelationTo(un,factor);
 
   //now we do our magik  insert 0 if nothing's there... and add on our faction

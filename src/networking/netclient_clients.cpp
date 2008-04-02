@@ -130,6 +130,7 @@ Unit *	NetClient::enterClient( NetBuffer &netbuf, ObjSerial cltserial )
 
 ClientPtr NetClient::AddClientObject( Unit *un, ObjSerial cltserial)
 {
+	un->PrimeOrders(); // Allow you to communicate with it.
 	if (!cltserial)
 		cltserial=un->GetSerial();
 

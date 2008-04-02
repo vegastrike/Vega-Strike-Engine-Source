@@ -220,7 +220,7 @@ class	NetClient
 	        int mountOffset, int subunitOffset);
 		void	shipRequest( const std::string &cargo, unsigned char type );
 		void	missionRequest( unsigned short packetType, string mission, int pos);
-
+		void	communicationRequest( const class CommunicationMessage &c, ObjSerial sendTo);
 		void	downloadZoneInfo();
 		void	AddObjects( NetBuffer & netbuf);
 		ClientPtr	AddClientObject( Unit *un, ObjSerial cltserial=0);

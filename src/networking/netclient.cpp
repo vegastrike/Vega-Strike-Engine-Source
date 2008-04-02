@@ -51,6 +51,10 @@
 #include "savenet_util.h"
 #include "save_util.h"
 
+#include "cmd/pilot.h"
+#include "cmd/ai/communication.h"
+#include "cmd/ai/order.h"
+
 #include "networking/lowlevel/vsnet_clientstate.h"
 #include "networking/lowlevel/vsnet_debug.h"
 #include "networking/lowlevel/vsnet_dloadmgr.h"
@@ -62,6 +66,7 @@
 #include "posh.h"
 #include "networking/prediction.h"
 #include "fileutil.h"
+#include "faction_generic.h"
 
 #include "netversion.h"
 ObjSerial CLIENT_NETVERSION = NETWORK_VERSION;
@@ -1125,6 +1130,51 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				BaseUtil::refreshBaseComputerUI(NULL);
 			}
 			break;
+			case CMD_COMM:
+			{
+				if (nostarsystem) break;
+				Unit *from = UniverseUtil::GetUnitFromSerial(packet_serial);
+				Unit *to = game_unit.GetUnit();
+				int curstate = netbuf.getInt32();
+				if (!from) {
+				  COUT << "Received invalid comm message " << curstate << " from "<<packet_serial << endl;
+				  break;
+				}
+				if (!to) {
+				  COUT << "Received comm message while dead." << endl;
+				  break;
+				}
+				FSM *fsm =FactionUtil::GetConversation (to->faction,from->faction);
+				if (curstate >= 0 && curstate < fsm->nodes.size()) {
+					unsigned char sex = 0;
+					if (from->pilot)
+						sex = from->pilot->getGender();
+					CommunicationMessage c (from, game_unit.GetUnit(), NULL, sex);
+					c.SetCurrentState(curstate, NULL, sex);
+					Order * oo = to->getAIState();
+					if (oo)
+						oo->Communicate (c);
+				}
+				// if not a valid new node (-1)
+				
+				factions[from->faction]->faction[to->faction].relationship = netbuf.getFloat();
+				factions[to->faction]->faction[from->faction].relationship = netbuf.getFloat();
+				float relfrompilot = netbuf.getFloat();
+				float reltopilot = netbuf.getFloat();
+				if (from->pilot) {
+					Pilot::relationmap::iterator i=from->pilot->effective_relationship.find(to);
+					if (i!=from->pilot->effective_relationship.end()) {
+						(*i).second = relfrompilot;
+					}
+				}
+				if (to->pilot) {
+					Pilot::relationmap::iterator i=to->pilot->effective_relationship.find(from);
+					if (i!=to->pilot->effective_relationship.end()) {
+						(*i).second = reltopilot;
+					}
+				}
+				break;
+			}
 			case CMD_CARGOUPGRADE:
 			{
 				if (nostarsystem) break;

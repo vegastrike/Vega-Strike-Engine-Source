@@ -3,6 +3,7 @@
 #include "networking/savenet_util.h"
 #include "networking/netclient.h"
 #include "cmd/unit_generic.h"
+#include "cmd/ai/firekeyboard.h"
 #include "networking/lowlevel/netbuffer.h"
 #include "networking/networkcomm.h"
 #include "networking/lowlevel/packet.h"
@@ -223,6 +224,25 @@ void	NetClient::missionRequest( unsigned short packetType, string mission, int p
 	
 	send( CMD_MISSION, netbuf, SENDRELIABLE, __FILE__, __LINE__ );
 }
+
+void	NetClient::communicationRequest( const CommunicationMessage &c, ObjSerial sendTo)
+{
+	FSM::Node *myNode = c.getCurrentState();
+	NetBuffer netbuf;
+	netbuf.addSerial(sendTo);
+	int edge = c.edgenum;
+	if (edge>127) {
+		edge = -1;
+	}
+	netbuf.addChar(edge);
+	if (edge == -1) {
+		netbuf.addInt32(c.curstate);
+	} else {
+		netbuf.addInt32(c.prevstate);
+	}
+	send( CMD_COMM, netbuf, SENDRELIABLE, __FILE__, __LINE__ );
+}
+
 
 void	NetClient::undockRequest( ObjSerial utdw_serial)
 {

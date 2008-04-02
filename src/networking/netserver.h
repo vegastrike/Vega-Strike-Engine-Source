@@ -190,6 +190,7 @@ class NetServer
 		void	sendCargoSnapshot( ObjSerial serial, const UnitCollection &unitlist);
 
 		void	sendMessage(string from, string to, string message, float delay);
+		void	sendCommunication(Unit *from, Unit *to, const class CommunicationMessage *c);
 		void	sendSaveData( int cp, unsigned short packetType, int pos, string *key,
 							  Mission *miss, // Mission number for objectives.
 							  string *strValue, float *floatValue);

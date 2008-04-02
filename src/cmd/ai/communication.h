@@ -59,13 +59,14 @@ class CommunicationMessage {
   unsigned char sex;//which sound should play
   int prevstate;
   int curstate;
+  int edgenum; // useful for server validation, -1 = did not move via an edge.
   UnitContainer sender;
   CommunicationMessage(Unit * send, Unit * recv, std::vector <class Animation *>* ani, unsigned char sex);
   CommunicationMessage(Unit * send, Unit * recv, int curstate, std::vector <class Animation *>* ani,unsigned char sex);
   CommunicationMessage(Unit * send, Unit * recv, int prevvstate, int curstate, std::vector <class Animation *>* ani,unsigned char sex);
   CommunicationMessage(Unit * send, Unit * recv, const  CommunicationMessage &prevsvtate, int curstate, std::vector <class Animation *>* ani,unsigned char sex);
   void SetCurrentState(int message, std::vector <class Animation *> *ani,unsigned char sex);
-  FSM::Node * getCurrentState() {if (curstate<(int)fsm->nodes.size()) return &fsm->nodes[curstate]; else return &fsm->nodes[fsm->getDefaultState(0)];}
+  FSM::Node * getCurrentState() const {if (curstate<(int)fsm->nodes.size()) return &fsm->nodes[curstate]; else return &fsm->nodes[fsm->getDefaultState(0)];}
   const vector <FSM::Node> &GetPossibleState () const;
   float getDeltaRelation()const {return fsm->getDeltaRelation (prevstate,curstate);}
 };

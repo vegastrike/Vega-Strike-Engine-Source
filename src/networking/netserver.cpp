@@ -56,10 +56,13 @@ extern class vs_options game_options;
 #include "cmd/ai/fire.h"
 #include "cmd/ai/fireall.h"
 #include "cmd/ai/flybywire.h"
+#include "cmd/ai/communication.h"
+#include "cmd/pilot.h"
 #include "cmd/role_bitmask.h"
 #include "gfxlib_struct.h"
 #include "posh.h"
 #include "fileutil.h"
+#include "faction_generic.h"
 #include "cmd/unit_const_cache.h"
 
 #include "python/init.h"
@@ -1253,6 +1256,44 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			}
 		}
 		break;
+		case CMD_COMM :
+		{
+			ObjSerial send_to = netbuf.getSerial();
+			Unit *targ = UniverseUtil::GetUnitFromSerial(send_to);
+			if (!targ)
+				break;
+			char newEdge = netbuf.getChar();
+			int node = netbuf.getInt32();
+			Unit *parent = clt->game_unit.GetUnit();
+			if (!parent)
+				break;
+			FSM *fsm =FactionUtil::GetConversation (parent->faction,targ->faction);
+			int oldNode;
+			int newNode;
+			
+			if (newEdge < 0) {
+				oldNode = fsm->getDefaultState(parent->getRelation(targ));
+				if (node<0 || node >= fsm->nodes.size())
+					break;
+				newNode = node; // fixme make sure it's a default node, or go to a special one.
+			} else {
+				
+				oldNode = node; // fixme validate
+				if (oldNode<0 || node >= fsm->nodes.size())
+					break;
+				if (newEdge >= fsm->nodes[oldNode].edges.size())
+					break;
+				newNode = fsm->nodes[oldNode].edges[newEdge];
+			}
+			unsigned char sex = 0;
+			if (parent->pilot)
+				sex = parent->pilot->getGender();
+			CommunicationMessage c(parent, targ, oldNode, newNode, NULL, sex);
+			Order * oo = targ->getAIState();
+			if (oo)
+				oo->Communicate (c);
+			break;
+		}
 		case CMD_CARGOUPGRADE :
 		{
 			ObjSerial buyer_ser = netbuf.getSerial();

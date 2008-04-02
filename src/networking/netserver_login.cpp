@@ -343,6 +343,7 @@ bool NetServer::loadFromNewGame( ClientPtr clt, Cockpit *cp, string fighter ) {
 	clt->game_unit.SetUnit( un);
 	// Assign its serial to client*
 	un->SetSerial( cltserial);
+	un->PrimeOrders(); // Accept Comm messages
 
 	// Affect the created unit to the cockpit
 	COUT<<"-> UNIT LOADED"<<endl;
