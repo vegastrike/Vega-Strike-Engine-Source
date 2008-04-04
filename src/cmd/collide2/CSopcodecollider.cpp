@@ -133,8 +133,6 @@ bool csOPCODECollider::Collide( csOPCODECollider &otherCollider,
 								const csReversibleTransform *trans2)
 {
 	csOPCODECollider* col2 = (csOPCODECollider*) &otherCollider;
-
-	ColCache.ResetCache();
 	ColCache.Model0 = this->m_pCollisionModel;
 	ColCache.Model1 = col2->m_pCollisionModel;
 	csMatrix3 m1;
