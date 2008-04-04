@@ -134,7 +134,9 @@ bool csOPCODECollider::Collide( csOPCODECollider &otherCollider,
 {
 	csOPCODECollider* col2 = (csOPCODECollider*) &otherCollider;
 
-
+	ColCache.ResetCache();
+	ColCache.Model0 = this->m_pCollisionModel;
+	ColCache.Model1 = col2->m_pCollisionModel;
 	csMatrix3 m1;
 	if (trans1) m1 = trans1->GetT2O ();
 	csMatrix3 m2;
