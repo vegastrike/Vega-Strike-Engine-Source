@@ -1663,6 +1663,7 @@ Transformation	NetClient::Interpolate( Unit * un, double addtime)
 	if (clt) {
 		clt->elapsed_since_packet += addtime;
 		trans=clt->prediction->Interpolate( un, clt->elapsed_since_packet);
+//		cerr << "  *** interpolate "<<un->getFullname()<<","<<un->GetSerial()<<" (" << trans.position.i << ", " << trans.position.j << ", " << trans.position.k << ")"<<endl;
 //		cerr << "  *** INTERPOLATE (" << un->curr_physical_state.position.i << ", " << un->curr_physical_state.position.j << ", " << un->curr_physical_state.position.k << "): next deltatime=" << clt->getNextDeltatime() << ", deltatime=" << clt->getDeltatime() << ", this-deltatime=" << this->deltatime << ", elapsed since packet=" << clt->elapsed_since_packet << "\n        =>        (" << trans.position.i << ", " << trans.position.j << ", " << trans.position.k << ")        Vel =    (" << un->Velocity.i << ", " << un->Velocity.j << ", " << un->Velocity.k << ")" << std::endl;
 	} else {
 		trans=un->curr_physical_state;

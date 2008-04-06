@@ -967,6 +967,9 @@ void Unit::ZeroAll( )
 	net_accel.i      = 0;
 	net_accel.j      = 0;
 	net_accel.k      = 0;
+	SavedAccel.i     = 0;
+	SavedAccel.j     = 0;
+	SavedAccel.k     = 0;
 	// old_state has a constructor
 	damages          = NO_DAMAGE;
 	// SubUnits has a constructor

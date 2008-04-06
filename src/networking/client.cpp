@@ -68,6 +68,7 @@ void Client::versionBuf(NetBuffer &buf) const {
 	buf.setVersion(netversion);
 }
 
+
 void Client::setLatestTimestamp( unsigned int ts )
 {
 //    COUT << "set latest client timestamp " << ts << " (old=" << _old_timestamp << ")" << endl;
@@ -76,10 +77,13 @@ void Client::setLatestTimestamp( unsigned int ts )
 
     // Compute the deltatime in seconds that is time between packet_timestamp
     // in ms and the old_timestamp in ms
-    _deltatime = ((double)(ts - _old_timestamp))/1000;
-	_next_deltatime = .33*_deltatime+.67*_next_deltatime;
-//    cerr<<"DELTATIME = "<<(_deltatime*1000)<<" ms --------------------"<<endl;
-//    cerr<<"NEXTDELTATIME = "<<(_deltatime*1000)<<" ms --------------------"<<endl;
+
+	// If the timestamp values are precicely 0 then that means we don't have any good data yet.
+	if (_old_timestamp!=0 && ts != 0) {
+	  _deltatime = ((double)(ts - _old_timestamp))/1000;
+	  _next_deltatime = .33*_deltatime+.67*_next_deltatime;
+	  //cerr<<"Unit "<<(game_unit.GetUnit()?game_unit.GetUnit()->GetSerial():-1)<<" has DELTATIME = "<<(_deltatime)<<", NEXT = "<<(_next_deltatime)<<" s ------"<<endl;
+	}
 }
 
 void Client::clearLatestTimestamp( )
@@ -87,6 +91,7 @@ void Client::clearLatestTimestamp( )
 	_latest_timestamp = 0;
 	_old_timestamp    = 0;
     _deltatime        = 0;
+	//cerr << "Clearing deltatime for "<<(game_unit.GetUnit()?game_unit.GetUnit()->GetSerial():1)<<", next="<<_next_deltatime<<endl;
 }
 
 unsigned int Client::getLatestTimestamp( ) const

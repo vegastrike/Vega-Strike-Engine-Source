@@ -42,10 +42,12 @@ void		Prediction::InitInterpolation( Unit * un, const ClientState &last_packet_s
 	B = un->curr_physical_state.position;
 	OA = un->old_state.getOrientation();
 	OB = un->curr_physical_state.orientation;
-	VA = un->old_state.getVelocity();
-	VB = un->Velocity;
+	VA = un->old_state.getVelocity() * un->old_state.getSpecMult();
+	VB = un->Velocity * un->graphicOptions.WarpFieldStrength;
 	if (elapsed_since_last_packet>0.) {
-		AB = (last_packet_state.getVelocity()-VB)/((float)elapsed_since_last_packet);
+		AB = (last_packet_state.getVelocity()*last_packet_state.getSpecMult()-VB) /
+			((float)elapsed_since_last_packet);
+		//cerr<<"lastvel=("<<last_packet_state.getVelocity().i<<",,"<<last_packet_state.getVelocity().k<<")"<<endl;
 	} else {
 		AB = un->GetAcceleration();
 	}
@@ -60,6 +62,8 @@ void		Prediction::InitInterpolation( Unit * un, const ClientState &last_packet_s
 	// A2 = new_position + new_velocity 
 	A3 = A2 + (VB + AB*delay);
 	/////////// NETFIXME: Formerly, A3 = final position and A2 = A3-1 velocity unit.
+	//cerr<<" *** InitInterpolation "<<un->getFullname()<<","<<un->GetSerial()<<"       ";
+	//cerr << un->old_state<<", B="<<B.i<<",,"<<B.k<<", VB="<<VB.i<<",,"<<VB.k<<", delay="<<delay<<", ACCEL="<<AB.i<<","<<AB.j<<","<<AB.k<<endl;
 }
 
 Transformation Prediction::Interpolate( Unit * un, double deltatime) const
@@ -107,10 +111,12 @@ Transformation LinearPrediction::Interpolate( Unit * un, double deltatime) const
   }
 	if (deltatime>this->deltatime||this->deltatime==0) {
 		double delay=deltatime-this->deltatime;
+		//cerr << "Using new Pos "<<un->GetSerial()<<": A2=("<<A2.i<<",,"<<A2.k<<"), VB=("<<VB.i<<",,"<<VB.k<<"), delay="<<delay<<endl;
 		return Transformation(OB, A2+ VB*delay);
 	} else {
 		const Transformation old_pos( OA, A0);//un->curr_physical_state);
 		const Transformation new_pos( OB, A2);
+		//cerr << "Using OLD Pos "<<un->GetSerial()<<": A2=("<<A2.i<<",,"<<A2.k<<"), delay="<<(deltatime/this->deltatime)<<", A0=("<<A0.i<<",,"<<A0.k<<")"<<endl;
 		return (linear_interpolate_uncapped(  old_pos, new_pos, deltatime/this->deltatime));
 	}
 }

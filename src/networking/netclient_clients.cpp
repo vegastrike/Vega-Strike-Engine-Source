@@ -505,7 +505,7 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 								clt->getNextDeltatime());
 						clt->last_packet=un->old_state;
 						clt->last_packet.setPosition(pos);
-						un->curr_physical_state.position = clt->prediction->InterpolatePosition( un, 0);
+						un->curr_physical_state = clt->prediction->Interpolate( un, 0);
 					}
 				}
 				else if( localplayer)
