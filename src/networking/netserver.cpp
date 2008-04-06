@@ -219,6 +219,8 @@ void	NetServer::start(int argc, char **argv)
 	strlogintimeout = vs_config->getVariable( "server", "logintimeout", "60");
 	logintimeout = atoi( strlogintimeout.c_str());
 
+	this->server_password = vs_config->getVariable( "server", "server_password", "");
+
 	strnetatom = vs_config->getVariable( "network", "network_atom", "0.2");
 	NETWORK_ATOM = (double) atof( strnetatom.c_str());
 	strnetatom = vs_config->getVariable( "network", "damage_atom", "1");
@@ -886,6 +888,10 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			if (message[0]=='/') {
 				string cmd, args;
 				bool local = (clt->cltadr.inaddr()==0x0100007f);
+				if (!acctserver) {
+					// NETFIXME: Trusted always true in deathmatch!
+					local = true;
+				}
 				//std::replace(message.begin(),message.end(),'#','$');
 				int cp = _Universe->whichPlayerStarship(un);
 				if (cp < 0) {
@@ -938,6 +944,11 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			int cp = _Universe->whichPlayerStarship(un);
 			// NETFIXME: CMD_CUSTOM should work with a dead unit.
 			bool trusted = (clt->cltadr.inaddr()==0x0100007f);
+			
+			if (!acctserver) {
+				// NETFIXME: Trusted always true in deathmatch!
+				trusted = true;
+			}
 			if (cp<0) {
 				if (trusted) {
 					cp = 0;
