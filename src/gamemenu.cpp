@@ -454,12 +454,22 @@ bool GameMenu::processExitGameButton(const EventCommandId& command, Control *con
 
 class ShipSelectorCallback: public ModalDialogCallback {
 	NetActionConfirm *nac;
+	bool onlyMessage;
 public:
-    ShipSelectorCallback(NetActionConfirm *nac) : nac(nac) {}
+    ShipSelectorCallback(NetActionConfirm *nac, bool onlyMessage)
+			: nac(nac), onlyMessage(onlyMessage) {}
     virtual void modalDialogResult(
             const std::string& id,
             int result,
             WindowController& controller) {
+		if (onlyMessage) {
+			// The result is slightly different (OK=1 and Cancel=0)
+			if (result == YES_ANSWER)
+				result = 0;
+			else
+				result = -1;
+		}
+		// Ship = 0 or above, Cancel = -1
 		nac->finalizeJoinGame(result);
     }
 	virtual ~ShipSelectorCallback() {}
@@ -618,15 +628,24 @@ bool NetActionConfirm::confirmedJoinGame() {
 		const vector<string> &shipList = Network[player].shipSelections();
 		if (shipList.size()>1) {
 			UniverseUtil::hideSplashScreen();
-			showListQuestion("Select a ship to fly", shipList,
-				new ShipSelectorCallback(this), "ShipSelected" );
+			//if (!err.empty()) err+="\n";
+			showListQuestion(err + "  Select a ship to fly, or hit cancel  ", shipList,
+				new ShipSelectorCallback(this,false), "ShipSelected" );
 		} else {
-			finalizeJoinGame(0);
+			if (err.empty()) {
+				finalizeJoinGame(0);
+			} else {
+				showYesNoQuestion("Warning: " + err + "\n\nDo you want to join to this server?",
+					new ShipSelectorCallback(this,true), "ServerWarning");
+			}
 		}
 	} else {
 		UniverseUtil::hideSplashScreen();
 		if (window()) window()->close();
-		showAlert("Error when joining game!\n\n"+err);
+		if (!err.empty()) {
+			err = "\nThe server said: "+err;
+		}
+		showAlert("Error when joining game!\n"+err);
 		NetClient::CleanUp();
 		return false;
 	}
@@ -636,11 +655,16 @@ bool NetActionConfirm::confirmedJoinGame() {
 // Caller is responsible for closing the window afterwards. (?)
 //static
 bool NetActionConfirm::finalizeJoinGame(int launchShip) {
+	if (launchShip == -1) {
+		if (window()) window()->close();
+		NetClient::CleanUp();
+		return false;
+	}
+	
 	if (!UniverseUtil::isSplashScreenShowing()) {
 		UniverseUtil::showSplashScreen("");
 		UniverseUtil::showSplashMessage("#cc66ffNETWORK: Loading saved game.");
 	}
-
 	if (!Network[player].loginSavedGame(launchShip)) {
 		showAlert("Error when logging into game with this ship!");
 		if (window()) window()->close();

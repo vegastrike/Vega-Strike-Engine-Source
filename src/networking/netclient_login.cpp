@@ -142,7 +142,8 @@ int NetClient::loginLoop(string &error) {
 vector<string>	&NetClient::loginAcctLoop( string str_callsign, string str_passwd)
 {
 	COUT << "enter " << "NetClient::loginAcctLoop" << endl;
-
+	
+	this->error_message = string();
 
 	std::string netbuf;
         addSimpleChar(netbuf,ACCT_LOGIN_DATA);
@@ -709,6 +710,10 @@ int NetClient::connectLoad(string username, string passwd, string &error) {
 	{
 		// If network initialization fails, exit
 		if (error.empty()) error = "Network connection error";
+		if (!this->error_message.empty()) {
+			error += "\n" + this->error_message;
+		}
+		cout << "Error: "<<error << endl;
 		return 0;
 	}
 	cout << "Successfully connected!";
@@ -716,6 +721,13 @@ int NetClient::connectLoad(string username, string passwd, string &error) {
 	cout<<"Waiting for player "<<username<<": login response..."<<endl;
 	bootstrap_draw("#cc66ffNETWORK: Successful connection! Waiting to log in.",NULL);
 	int loggedin = loginAuth( username, passwd, error);
+	if (!this->error_message.empty()) {
+		cout << "Warning: " << this->error_message << endl;
+		if (!error.empty()) {
+			error += "\n";
+		}
+		error += this->error_message;
+	}
 	return loggedin;
 }
 vector<string>* NetClient::loginSavedGame(int ship) {

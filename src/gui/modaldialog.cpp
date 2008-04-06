@@ -248,7 +248,15 @@ void QuestionDialog::init(const std::string& title) {
 
     StaticDisplay* titleControl = static_cast<StaticDisplay*>( window()->findControlById("Title") );
     assert(titleControl != NULL);
-    titleControl->setText(title);
+	std::string fixedTitle;
+	std::string::size_type lastpos = 0, pos;
+	for (pos=title.find('\n'); pos!=std::string::npos; pos=title.find('\n',lastpos)) {
+		fixedTitle.append(title, lastpos, pos-lastpos);
+		fixedTitle.append("#n#");
+		lastpos=pos+1;
+	}
+	fixedTitle.append(title, lastpos, std::string::npos);
+    titleControl->setText(fixedTitle);
 
 	ModalDialog::init();
 }

@@ -210,8 +210,9 @@ int		NetClient::checkAcctMsg( )
 		if(acct_sock->recvstr( packeta )!=false&&packeta.length() )
 		{
 			ret = 1;
-                        std::string netbuf=packeta;
-                        
+			std::string netbuf=packeta;
+			std::string warning;
+			
 			switch( getSimpleChar(netbuf)) 
 			{
 				case ACCT_LOGIN_DATA :
@@ -219,7 +220,8 @@ int		NetClient::checkAcctMsg( )
 					COUT << ">>> LOGIN DATA --------------------------------------"<<endl;
 					// We received game server info (the one we should connect to)
 					getSimpleString(netbuf);//uname
-					getSimpleString(netbuf);//passwd
+					string warning = getSimpleString(netbuf);//message
+					this->error_message = warning;
 					_serverip = getSimpleString(netbuf);
 					string srvportstr = getSimpleString(netbuf);
 					const char *srvport = srvportstr.c_str();
@@ -233,14 +235,26 @@ int		NetClient::checkAcctMsg( )
 				case ACCT_LOGIN_ERROR :
 					COUT<<">>> LOGIN ERROR =( DENIED )= --------------------------------------"<<endl;
                                         lastsave.resize(0);
+					getSimpleString(netbuf);//uname
+					warning = getSimpleString(netbuf);//message
 					lastsave.push_back( "");
-					lastsave.push_back( "!!! ACCESS DENIED : Account does not exist with this password !!!");
+					if (!warning.empty()) {
+						lastsave.push_back( warning );
+					} else {
+						lastsave.push_back( "Failed to login with this password!");
+					}
 				break;
 				case ACCT_LOGIN_ALREADY :
 					COUT<<">>> LOGIN ERROR =( ALREADY LOGGED IN )= --------------------------------------"<<endl;
                                         lastsave.resize(0);
+					getSimpleString(netbuf);//uname
+					warning = getSimpleString(netbuf);//message
 					lastsave.push_back( "");
-					lastsave.push_back( "!!! ACCESS DENIED : Account already logged in !!!");
+					if (!warning.empty()) {
+						lastsave.push_back( warning );
+					} else {
+						lastsave.push_back( "The account is already logged in to a server!");
+					}
 				break;
 				default:
 					COUT<<">>> UNKNOWN COMMAND =( "<<std::hex<<packeta<<std::dec<<" )= --------------------------------------"<<std::endl;
@@ -895,13 +909,15 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				float hul = netbuf.getFloat();
 				Shield sh = netbuf.getShield();
 				Armor ar = netbuf.getArmor();
-				if( un)
+				if( un )
 				{
-					// Apply the damage
-					un->ApplyNetDamage( pnt, normal, amt, ppercentage, spercentage, col);
-					un->shield=sh;
-					un->armor=ar;
-					un->hull=hul;
+					if (un->hull >= 0) {
+						// Apply the damage
+						un->ApplyNetDamage( pnt, normal, amt, ppercentage, spercentage, col);
+						un->shield=sh;
+						un->armor=ar;
+						un->hull=hul;
+					}
 					if (un->hull<0) {
 						un->Destroy();
 					}
@@ -1605,14 +1621,14 @@ void NetClient::Reconnect(std::string srvipadr, unsigned short port) {
 	}
 	int response = Network[k].connectLoad( usernames[k], passwords[k], err);
 	if (response==0) {
-		COUT<<"Network login error: "<<err<<endl;
-		UniverseUtil::startMenuInterface(false, "Jumping to system, but got a login error: "+err);
+		COUT<<"Network login error: \n"<<err<<endl;
+		UniverseUtil::startMenuInterface(false, "Jumping to system, but got a login error: \n\n"+err);
 		return;
 	}
     vector<string> *loginResp = Network[k].loginSavedGame(0);
 	if (!loginResp) {
 		COUT<<"Failed to get a ship";
-		UniverseUtil::startMenuInterface(false,"Jumping to system, but failed to get a ship");
+		UniverseUtil::startMenuInterface(false,"Jumping to system, but failed to get a ship!");
 		return;
 	}
 	cout<<" logged in !"<<endl;

@@ -4606,7 +4606,7 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
 	if( SERVER || Network==NULL) {
 		armor_damage=(ApplyLocalDamage(localpnt, localnorm, amt,affectedUnit,color,phasedamage)==2);
 	}
-	if (!SERVER && cp) {
+	if (!Network && cp) {
 		static int MadnessForShieldDamage=XMLSupport::parse_bool(vs_config->getVariable("AI","ShieldDamageAnger","1"));
 		static int MadnessForHullDamage=XMLSupport::parse_bool(vs_config->getVariable("AI","HullDamageAnger","10"));
 		int howmany= armor_damage?MadnessForHullDamage:MadnessForShieldDamage;
@@ -4619,7 +4619,7 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
 								 //the dark danger is real!
 		Threaten (reinterpret_cast<Unit*>(ownerDoNotDereference),10);
 	}
-	else {
+	else if (!Network) {
 								 // if only the damage contained which faction it belonged to
 		pilot->DoHit(this,ownerDoNotDereference,FactionUtil::GetNeutralFaction());
 	}

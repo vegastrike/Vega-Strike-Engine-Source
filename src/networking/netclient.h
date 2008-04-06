@@ -96,7 +96,8 @@ class	NetClient
 		vector<string>			ship_select_list;
 		int				selected_ship;
   
-        vector<string> lastsave;
+        vector<string> lastsave;            // If [0] is empty, [1] will contain a login error message.
+        string         error_message;       // Errors when logging in
 
         ClientsMap 			Clients;		// Clients in the same zone
 

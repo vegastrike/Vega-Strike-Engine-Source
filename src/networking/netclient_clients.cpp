@@ -543,6 +543,11 @@ void NetClient::receiveUnitDamage( NetBuffer &netbuf, Unit *un ) {
 	if (!un) {
 		cerr<< "Received Damage Update for null unit"<<endl;
 	}
+	if (un && un->hull <= 0) {
+		cerr<< "Received Damage Update for dead unit "<<un->GetSerial()<<endl;
+		un->Destroy();
+		un=NULL; // Assume it is dead for the purposes of this function.
+	}
 	
 	if( damages & Unit::SHIELD_DAMAGED)
 	{
