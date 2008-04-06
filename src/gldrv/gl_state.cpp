@@ -219,14 +219,8 @@ void /*GFXDRVAPI*/ GFXDisable (const STATE state)
 	  glDisable(GL_CULL_FACE);
 	  break;
 	case SMOOTH:
-		if(gl_options.smooth_lines)
-		{
-			glDisable(GL_LINE_SMOOTH);
-		}
-		if(gl_options.smooth_points)
-		{
-			glDisable (GL_POINT_SMOOTH);
-		}
+		glDisable(GL_LINE_SMOOTH);
+		glDisable (GL_POINT_SMOOTH);
 		break;
     case STENCIL:
         glDisable(GL_STENCIL);

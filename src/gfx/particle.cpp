@@ -103,8 +103,12 @@ void ParticleTrail::DrawAndUpdate (){
   static float psiz=XMLSupport::parse_float (vs_config->getVariable ("graphics","sparkesize","1.5"));
   
   GFXPointSize(psiz);
-  static bool psmooth=XMLSupport::parse_bool (vs_config->getVariable ("graphics","sparkesmooth","false"));  
-  glEnable(psmooth);
+  
+  static bool psmooth=XMLSupport::parse_bool (vs_config->getVariable ("graphics","sparkesmooth","false"));
+  if (psmooth && gl_options.smooth_points) {
+    glEnable(GL_POINT_SMOOTH);
+  }
+  
 #else
   GFXEnable(TEXTURE0);
   GFXDisable(TEXTURE1);
@@ -154,10 +158,7 @@ void ParticleTrail::DrawAndUpdate (){
   }
   GFXEnd();
 #ifdef USE_POINTS  
-  if(gl_options.smooth_points)
-  {
-	  glDisable (GL_POINT_SMOOTH);
-  }
+  glDisable (GL_POINT_SMOOTH);
   GFXPointSize(1);
 #else
   GFXDisable(DEPTHWRITE);
