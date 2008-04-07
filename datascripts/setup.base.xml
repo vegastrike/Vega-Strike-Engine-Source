@@ -1,0 +1,67 @@
+<?xml version="1.0" standalone="yes"?>
+<install product="vegastrike" desc="Vegastrike Space Simulator" version="0.4.3" binarypath="/usr/local/bin" url="documentation/Vega_Strike_Players_Guide.pdf" localurl="documentation/Vega_Strike_Players_Guide.pdf"
+         promptbinaries="yes" express="no" splashpos="top">
+  <eula>
+   COPYING
+  </eula>
+  <readme>
+   README
+  </readme>
+
+  <component name="Base" version="0.4.3" default="yes">
+
+    <option required="true">
+      Base Data (the Vegastrike Universe)
+      <help>This contains the required binaries and data to play Vegastrike.</help>
+      <binary play="no" binpath="bin/vegastrike" keepdirs="yes">
+        bin/vegastrike
+      </binary>
+      <binary play="no" binpath="bin/soundserver" keepdirs="yes">
+        bin/soundserver
+      </binary>
+      <binary symlink="vegastrike" icon="vegastrike.xpm" name="Vegastrike" play="no" binpath="bin/vegastrike.sh" keepdirs="yes">
+        bin/vegastrike.sh
+      </binary>
+      <binary play="no" binpath="bin/setup" keepdirs="yes">
+        bin/setup
+      </binary>
+      <binary play="no" binpath="bin/vsinstall.sh" keepdirs="yes">
+        bin/vsinstall.sh
+      </binary>
+      <script message="Configuring Data Path">
+          echo 'cd '$SETUP_INSTALLPATH'/bin' >> $SETUP_INSTALLPATH/bin/vegastrike.sh
+          echo 'sh vsinstall.sh $SETUPARG' >> $SETUP_INSTALLPATH/bin/vegastrike.sh
+      </script>
+      <files>
+        .vegastrike.4.x/*
+        ai/*
+        animations/*
+        bases/*
+        cockpits/*
+        communications/*
+        documentation/*
+        history/*
+        meshes/*
+        mission/*
+        modules/*
+        sectors/*
+        sounds/*
+        sprites/*
+        stats/*
+        textures/*
+        units/*
+        universe/*
+        Version.txt
+        cursor1.cur
+        factions.xml
+        master_part_list.csv
+        setup.config
+        vegastrike.config
+        weapon_list.xml
+        vegastrike.xpm
+      </files>
+    </option>
+
+  </component>
+  
+</install>

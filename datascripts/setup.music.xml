@@ -1,0 +1,17 @@
+<?xml version="1.0" standalone="yes"?>
+<install product="vegastrike" desc="Vegastrike Space Simulator" version="0.4.3" binarypath="/usr/local/bin"
+         express="no" splashpos="top" component="Music" postinstall="setup.data/m3uloki_add.sh">
+  <eula keepdirs="yes">
+   music/COPYING
+  </eula>
+
+  <option required="yes">
+    Music
+    <help>The musical score to your adventures.</help>
+    <files>
+      music/*.ogg
+      music/AUTHORS
+    </files>
+  </option>
+    
+</install>

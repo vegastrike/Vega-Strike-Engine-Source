@@ -1,0 +1,121 @@
+
+.PHONY: python bases modules pk3 install install_pk3 install_python install_modules install_bases uninstall dist
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = $(INSTALL)
+INSTALL_DATA = ${INSTALL} -m 644
+prefix := @prefix@
+datadir := @datadir@
+bindir := @bindir@
+
+HIDDENDIR := .@HOMEDIR@
+ROOTFILES := Version.txt cursor1.cur factions.xml master_part_list.csv \
+				setup.config vegastrike.config weapon_list.xml vegastrike.xpm
+
+
+filesearch = $(shell find $(1) -name "$(2)" | xargs echo)
+psearch = $(foreach filetype,$(2),$(call filesearch,$(1),$(filetype)))
+
+format_names = $(subst !@$(1)/,,$(addprefix !@,$(2)))
+
+package = cd $(1)/; @ZIP@ -@PK3@ ../$@ $(call format_names,$(1),$(2))
+
+install_files = for FILE in $(1) ; do \
+					$(INSTALL_DATA) -D $$FILE $(DESTDIR)$(datadir)/games/@PACKAGE_TARNAME@/$$FILE ; \
+				done
+
+image_formats := *.bmp *.alp *.png *.jpg
+sound_formats := *.ogg *.wav *.WAV
+
+all : python pk3
+
+clean :
+	rm -f *.pk3
+	rm -f $(call psearch,bases/,*.pyo)
+	rm -f $(call psearch,modules/,*.pyo)
+
+install : all install_pk3 install_python
+	mkdir -p $(DESTDIR)$(datadir)/games/@PACKAGE_TARNAME@/$(HIDDENDIR)/
+	$(INSTALL_DATA) -D .@PACKAGE_TARNAME@/*.m3u $(DESTDIR)$(datadir)/games/@PACKAGE_TARNAME@/$(HIDDENDIR)/
+	$(INSTALL_DATA) -D $(ROOTFILES) $(DESTDIR)$(datadir)/games/@PACKAGE_TARNAME@/
+	$(INSTALL_PROGRAM) -D vegastrike.sh $(DESTDIR)$(datadir)/games/@PACKAGE_TARNAME@/bin/vegastrike.sh
+	echo 'cd '$(datadir)/games/@PACKAGE_TARNAME@'/bin' >> $(DESTDIR)$(datadir)/games/@PACKAGE_TARNAME@/bin/vegastrike.sh
+	echo 'sh vsinstall.sh $SETUPARG' >> $(DESTDIR)$(datadir)/games/@PACKAGE_TARNAME@/bin/vegastrike.sh
+	echo $(HIDDENDIR) > $(DESTDIR)$(datadir)/games/@PACKAGE_TARNAME@/Version.txt
+	ln -s $(DESTDIR)$(datadir)/games/@PACKAGE_TARNAME@/bin/vegastrike.sh $(DESTDIR)$(bindir)/@PACKAGE_TARNAME@
+
+install_pk3 : *.pk3
+	$(call install_files,$^)
+
+install_python : install_modules install_bases
+
+install_bases : $(call psearch,bases/,*.pyo)
+	$(call install_files,$^)
+
+install_modules : $(call psearch,modules/,*.pyo)
+	$(call install_files,$^)
+
+uninstall :
+	rm -rf $(DESTDIR)$(datadir)/games/@PACKAGE_TARNAME@/
+	rm -f $(bindir)/@PACKAGE_TARNAME@
+
+dist : all
+	mkdir -p @PACKAGE_TARNAME@-@PACKAGE_VERSION@/$(HIDDENDIR)/
+	$(INSTALL_DATA) .@PACKAGE_TARNAME@/*.m3u @PACKAGE_TARNAME@-@PACKAGE_VERSION@/$(HIDDENDIR)/
+	for FILE in $(ROOTFILES) ; do $(INSTALL_DATA) -D $$FILE @PACKAGE_TARNAME@-@PACKAGE_VERSION@/$$FILE ; done
+	for FILE in *.pk3 ; do $(INSTALL_DATA) -D $$FILE @PACKAGE_TARNAME@-@PACKAGE_VERSION@/$$FILE ; done
+	for FILE in $(call psearch,bases/,*.pyo) ; do $(INSTALL_DATA) -D $$FILE @PACKAGE_TARNAME@-@PACKAGE_VERSION@/$$FILE ; done
+	for FILE in $(call psearch,modules/,*.pyo) ; do $(INSTALL_DATA) -D $$FILE @PACKAGE_TARNAME@-@PACKAGE_VERSION@/$$FILE ; done
+	echo $(HIDDENDIR) > @PACKAGE_TARNAME@-@PACKAGE_VERSION@/Version.txt
+	$(INSTALL_PROGRAM) -D vegastrike.sh @PACKAGE_TARNAME@-@PACKAGE_VERSION@/bin/vegastrike.sh
+	tar -cvf @PACKAGE_TARNAME@-@PACKAGE_VERSION@.tar @PACKAGE_TARNAME@-@PACKAGE_VERSION@/
+
+distclean : clean
+	rm -rf @PACKAGE_TARNAME@-@PACKAGE_VERSION@/
+	rm -f @PACKAGE_TARNAME@-@PACKAGE_VERSION@.tar
+
+pk3 : ai.pk3 animations.pk3 cockpits.pk3 communications.pk3 meshes.pk3 mission.pk3 sectors.pk3 sounds.pk3 sprites.pk3 textures.pk3 units.pk3 universe.pk3
+
+python : bases modules
+
+bases : $(call psearch,bases/,*.py)
+	python -OO -c 'import compileall; compileall.compile_dir("bases")'
+
+modules : $(call psearch,modules/,*.py)
+	python -OO -c 'import compileall; compileall.compile_dir("modules")'
+
+ai.pk3 : $(call psearch,ai/,*.csv *.xml *.xai)
+	$(call package,ai,$^)
+
+animations.pk3 : $(call psearch,animations/,*.ani $(image_formats))
+	$(call package,animations,$^)
+
+cockpits.pk3 : $(call psearch,cockpits/,*.spr $(image_formats) *.bfxm)
+	$(call package,cockpits,$^)
+
+communications.pk3 : $(call psearch,communications/,*.xml)
+	$(call package,communications,$^)
+
+meshes.pk3 : $(call psearch,meshes/,*.bfxm)
+	$(call package,meshes,$^)
+
+mission.pk3 : $(call psearch,mission/,*.mission)
+	$(call package,mission,$^)
+
+sectors.pk3 : $(call psearch,sectors/,*.system)
+	$(call package,sectors,$^)
+
+sounds.pk3 : $(call psearch,sounds/,$(sound_formats))
+	$(call package,sounds,$^)
+
+sprites.pk3 : $(call psearch,sprites/,*.spr $(image_formats))
+	$(call package,sprites,$^)
+
+textures.pk3 : $(call psearch,textures/,$(image_formats))
+	$(call package,textures,$^)
+
+units.pk3 : $(call psearch,units/,*.bfxm $(image_formats))
+	$(call package,units,$^)
+
+universe.pk3 : $(call psearch,universe/,*.xml *.txt)
+	$(call package,universe,$^)
