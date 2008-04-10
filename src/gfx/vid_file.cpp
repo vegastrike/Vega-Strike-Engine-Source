@@ -45,14 +45,14 @@ using namespace VSFileSystem;
 extern "C" int _url_open(URLContext *h, const char *filename, int flags)
 {
     if (strncmp(filename,"vsfile:",7)!=0)
-        return AVERROR_NOENT;
+        return AVERROR(ENOENT);
         
     std::string path = filename+7;
     
     VSFile *f = new VSFile();
     if (f->OpenReadOnly(path, VSFileSystem::VideoFile) > VSFileSystem::Ok) {
         delete f;
-        return AVERROR_NOENT;
+        return AVERROR(ENOENT);
     } else {
         h->priv_data = f;
         return 0;
