@@ -139,8 +139,11 @@ if (echo Running $ACLOCAL && "$ACLOCAL" -I m4scripts $ACLOCALFLAGS) then
   ( echo Running "$AUTOHEADER" && "$AUTOHEADER" -f $AUTOHEADERFLAGS && \
     echo Running "$AUTOCONF" && "$AUTOCONF" -f $AUTOCONFFLAGS && \
     echo Running "$AUTOMAKE" && "$AUTOMAKE" -acf $AUTOMAKEFLAGS && \
-    echo "Bootstrap is complete. Run ./configure to configure the build system." ) || \
-    echo "An error occurred while running the autotools.  Please correct."
+    echo "Bootstrap is complete. Run ./configure to configure the build system." ) || { 
+      echo "An error occurred while running the autotools.  Please correct."
+      exit 1
+  }
+  
 else
   echo "aclocal execution failed."
   echo "Try running svn update"
