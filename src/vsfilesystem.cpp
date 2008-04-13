@@ -2072,21 +2072,30 @@ namespace VSFileSystem
 		this->offset = 0;
 		this->file_index = -1;
 	}
+    
+    static void pathAppend(string &dest, string &suffix)
+    {
+        if (suffix.empty())
+            return;
+        if (suffix[0] != '/' && !dest.empty() && dest[dest.length()-1]!='/')
+            dest += "/";
+        dest += suffix;
+    }
 
 	string	VSFile::GetFullPath()
 	{
         string tmp=this->rootname;
-        tmp += (((tmp[tmp.length()-1]=='/')||(tmp[tmp.length()-1]=='/'))?"":"/")+this->directoryname;
-        tmp += (((tmp[tmp.length()-1]=='/')||(tmp[tmp.length()-1]=='/'))?"":"/")+this->subdirectoryname;
-        tmp += (((tmp[tmp.length()-1]=='/')||(tmp[tmp.length()-1]=='/'))?"":"/")+this->filename;
+        pathAppend(tmp, this->directoryname);
+        pathAppend(tmp, this->subdirectoryname);
+        pathAppend(tmp, this->filename);
         return tmp;
 	}
 
    	string	VSFile::GetAbsPath()
 	{
         string tmp=this->directoryname;
-        tmp += (((tmp[tmp.length()-1]=='/')||(tmp[tmp.length()-1]=='/'))?"":"/")+this->subdirectoryname;
-        tmp += (((tmp[tmp.length()-1]=='/')||(tmp[tmp.length()-1]=='/'))?"":"/")+this->filename;
+        pathAppend(tmp, this->subdirectoryname);
+        pathAppend(tmp, this->filename);
         return tmp;
 	}
 

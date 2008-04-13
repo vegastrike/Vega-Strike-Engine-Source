@@ -520,20 +520,27 @@ void AnimatedTexture::LoadFrame(int frame) {
   string addrmodestr = XMLSupport::parse_option_value(opt,"addressMode","");
   enum ADDRESSMODE addrmode = parseAddressMode(addrmodestr,defaultAddressMode);
 
+  //Override compression options temporarily
+  //    NOTE: This is ugly, but otherwise we would have to hack Texture way too much,
+  //    or double the code. Let's use this then.
+  int ocompression = gl_options.compression;
+  gl_options.compression = 0;
+   
   //Without this, VSFileSystem won't find the file -- ugly, but it's how it is.
   VSFile f;
   VSError err=f.OpenReadOnly( wrapper_file_path, wrapper_file_type );
-
+  
   //Override mipmaping for video mode - too much overhead in generating the mipmamps.
-//  enum FILTER ismip2 = ((ismipmapped==BILINEAR)||(ismipmapped==TRILINEAR)||(ismipmapped==MIPMAP))?BILINEAR:NEAREST;
-	enum FILTER ismip2 = ismipmapped;
+  enum FILTER ismip2 = ((ismipmapped==BILINEAR)||(ismipmapped==TRILINEAR)||(ismipmapped==MIPMAP))?BILINEAR:NEAREST;
   loadSuccess=true;
   if (alp[0]!='\0')
       (*Decal)->Load(file,alp,texstage,ismip2,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_videos)?GFXTRUE:GFXFALSE,65536,(detailTex?GFXTRUE:GFXFALSE),GFXTRUE,addrmode); else if (numgets==1)
       (*Decal)->Load(file,texstage,ismip2,TEXTURE2D,TEXTURE_2D,(g_game.use_videos)?GFXTRUE:GFXFALSE,65536,(detailTex?GFXTRUE:GFXFALSE),GFXTRUE,addrmode); else
       loadSuccess=false;
 
-  if (err==Ok) f.Close();
+  if (err<=Ok) f.Close();
+  
+  gl_options.compression = ocompression;
 
   original = NULL;
   loadSuccess = loadSuccess && (*Decal)->LoadSuccess();

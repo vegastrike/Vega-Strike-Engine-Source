@@ -361,58 +361,64 @@ Animation* GetSplashScreen()
 	return SplashScreen;
 }
 void bootstrap_draw (const std::string &message, Animation * newSplashScreen) {
-
-  static Animation *ani=NULL;
-  if (!BootstrapMyStarSystemLoading) {
-    return;
-  }
-  Music::MuzakCycle(); // Allow for loading music...
-  if(SplashScreen==NULL&&newSplashScreen==NULL){
-    // if there's no splashscreen, we don't draw on it
-    // this happens, when the splash screens texture is loaded
-    return;
-  }
-
-  if (newSplashScreen!=NULL) {
-    ani = newSplashScreen;
-  }
-  UpdateTime();
-
-  Matrix tmp;
-  Identity (tmp);
-  BootstrapMyStarSystemLoading=false;
-  static Texture dummy ("white.bmp",0,MIPMAP,TEXTURE2D,TEXTURE_2D, 1 );
-  BootstrapMyStarSystemLoading=true;
-  dummy.MakeActive();
-  GFXDisable(LIGHTING);
-  GFXDisable(DEPTHTEST);
-  GFXBlendMode (ONE,ZERO);
-  GFXEnable (TEXTURE0);
-  GFXDisable (TEXTURE1);
-  GFXColor4f (1,1,1,1);
-  GFXClear (GFXTRUE);
-  GFXLoadIdentity (PROJECTION);
-  GFXLoadIdentity(VIEW);
-  GFXLoadMatrixModel (tmp);
-  GFXBeginScene();
-
-  bs_tp->SetPos (-.99,-.97); // Leave a little bit of room for the bottoms of characters.
-  bs_tp->SetCharSize (.4,.8);
-  ScaleMatrix (tmp,Vector (6500,6500,0));
-  GFXLoadMatrixModel (tmp);
-  GFXHudMode (GFXTRUE);
-  if (ani) {
-    if (GetElapsedTime()<10) ani->UpdateAllFrame();
-    ani->DrawNow(tmp);
-  }
-
-  static std::string defaultbootmessage=vs_config->getVariable("graphics","default_boot_message","");
-  static std::string initialbootmessage=vs_config->getVariable("graphics","initial_boot_message","Loading...");
-  bs_tp->Draw (defaultbootmessage.length()>0?defaultbootmessage:message.length()>0?message:initialbootmessage);
-
-  GFXHudMode (GFXFALSE);
-  GFXEndScene();
-
+    
+    static Animation *ani=NULL;
+    static bool reentryWatchdog = false;
+    
+    if (!BootstrapMyStarSystemLoading || reentryWatchdog)
+        return;
+  
+    Music::MuzakCycle(); // Allow for loading music...
+    
+    if(SplashScreen==NULL && newSplashScreen==NULL) {
+        // if there's no splashscreen, we don't draw on it
+        // this happens, when the splash screens texture is loaded
+        return;
+    }
+    
+    reentryWatchdog = true;
+    
+    if (newSplashScreen!=NULL)
+        ani = newSplashScreen;
+    
+    UpdateTime();
+    
+    Matrix tmp;
+    Identity (tmp);
+    BootstrapMyStarSystemLoading=false;
+    static Texture dummy ("white.bmp",0,MIPMAP,TEXTURE2D,TEXTURE_2D, 1 );
+    BootstrapMyStarSystemLoading=true;
+    dummy.MakeActive();
+    GFXDisable(LIGHTING);
+    GFXDisable(DEPTHTEST);
+    GFXBlendMode (ONE,ZERO);
+    GFXEnable (TEXTURE0);
+    GFXDisable (TEXTURE1);
+    GFXColor4f (1,1,1,1);
+    GFXClear (GFXTRUE);
+    GFXLoadIdentity (PROJECTION);
+    GFXLoadIdentity(VIEW);
+    GFXLoadMatrixModel (tmp);
+    GFXBeginScene();
+    
+    bs_tp->SetPos (-.99,-.97); // Leave a little bit of room for the bottoms of characters.
+    bs_tp->SetCharSize (.4,.8);
+    ScaleMatrix (tmp,Vector (6500,6500,0));
+    GFXLoadMatrixModel (tmp);
+    GFXHudMode (GFXTRUE);
+    if (ani) {
+        if (GetElapsedTime()<10) ani->UpdateAllFrame();
+        ani->DrawNow(tmp);
+    }
+    
+    static std::string defaultbootmessage=vs_config->getVariable("graphics","default_boot_message","");
+    static std::string initialbootmessage=vs_config->getVariable("graphics","initial_boot_message","Loading...");
+    bs_tp->Draw (defaultbootmessage.length()>0?defaultbootmessage:message.length()>0?message:initialbootmessage);
+    
+    GFXHudMode (GFXFALSE);
+    GFXEndScene();
+    
+    reentryWatchdog = false;
 }
 extern Unit **fighters;
 
