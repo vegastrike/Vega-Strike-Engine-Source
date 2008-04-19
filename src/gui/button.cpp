@@ -17,6 +17,9 @@
 
 #include "button.h"
 #include "gldrv/winsys.h"
+#include <cstdlib>
+#include <cstring>
+
 //Button::Button(float x, float y, float wid, float hei, char *name) { ; }
 Button::Button(float x, float y, float wid, float hei, const char *name) {
 

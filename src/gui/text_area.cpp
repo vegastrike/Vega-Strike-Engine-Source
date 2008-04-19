@@ -17,6 +17,9 @@
 
 #include "text_area.h"
 #include "gldrv/winsys.h"
+#include <cstdlib>
+#include <cstring>
+
 // Array of textures for the text area
 //GUITexture *Images;
 

@@ -36,11 +36,16 @@ int main (int argc, char** argv) {
 
   // executable's path
   std::string rootpath=argv[0];
+  std::string::size_type pathpos;
 #if defined(_WIN32)&&!defined(__CYGWIN__)
-  rootpath.erase(rootpath.rfind('\\'));
+  pathpos = rootpath.rfind('\\');
 #else
-  rootpath.erase(rootpath.rfind('/'));
+  pathpos = rootpath.rfind('/');
 #endif
+  if (pathpos == std::string::npos)
+    rootpath=".";
+  else
+    rootpath.erase(pathpos);
 
   { 
 	for (int i=0;i<argc;++i) {
