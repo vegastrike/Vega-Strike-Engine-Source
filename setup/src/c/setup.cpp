@@ -26,9 +26,9 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <sys/types.h>
-#include <vector>
 
 #endif
+#include <vector>
 #include <string>
 using std::string;
 using std::vector;
