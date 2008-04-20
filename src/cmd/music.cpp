@@ -36,6 +36,8 @@
 
 #define MAX_RECENT_HISTORY "5"
 
+// #define USE_SOUNDSERVER
+
 Music * muzak=NULL;
 int muzak_count=0;
 int muzak_cross_index=0;
@@ -78,7 +80,8 @@ Music::Music (Unit *parent):random(false), p(parent),song(-1),thread_initialized
 #ifdef HAVE_AL
   music_load_info = new AUDSoundProperties;
 #endif
-  
+
+#ifndef USE_SOUNDSERVER
 #ifdef _WIN32
   musicinfo_mutex = CreateMutex(NULL, TRUE, NULL);
 #else // _WIN32
@@ -96,6 +99,7 @@ Music::Music (Unit *parent):random(false), p(parent),song(-1),thread_initialized
   // Lock it immediately, since the loader will want to wait for its first data upon creation.
   checkerr(pthread_mutex_lock(&musicinfo_mutex));
 #endif // !_WIN32
+#endif // !USE_SOUNDSERVER
   if (!g_game.music_enabled)
 	  return;
   lastlist=PEACELIST;
@@ -111,7 +115,7 @@ Music::Music (Unit *parent):random(false), p(parent),song(-1),thread_initialized
     LoadMusic(vs_config->getVariable ("audio",listvars[i],deflistvars[i]).c_str());
   }
 
-/*
+#ifdef USE_SOUNDSERVER
 #if !defined( _WIN32)
   if (g_game.music_enabled&&!soundServerPipes()) {
     int pid=fork();
@@ -230,16 +234,17 @@ Music::Music (Unit *parent):random(false), p(parent),song(-1),thread_initialized
   if (socketw==-1||socketr==-1) {
 	  g_game.music_enabled=false;
   } else {
-*/
+
     string data=string("i")+vs_config->getVariable("audio","music_fadein","0")+"\n"
 		"o"+vs_config->getVariable("audio","music_fadeout","0")+"\n";
-/*
+
     if (soundServerPipes()) {
         fNET_Write(socketw,data.size(),data.c_str());
     }else {
         INET_Write(socketw,data.size(),data.c_str());
     }
-*/
+  }
+#endif /* USE_SOUNDSERVER */
     soft_vol_up_latency  = XMLSupport::parse_float(vs_config->getVariable("audio","music_volume_up_latency","15"));
     soft_vol_down_latency= XMLSupport::parse_float(vs_config->getVariable("audio","music_volume_down_latency","2"));
     //Hardware volume = 1
@@ -269,7 +274,7 @@ static float tmpmax(float a, float b) {return a<b?b:a;}
 void Music::_SetVolume (float vol,bool hardware,float latency_override) {
   if (!g_game.music_enabled)
     return;
-/*
+#ifdef USE_SOUNDSERVER
     vol = tmpmax(0.0f,tmpmin((hardware?1.0f:2.0f),vol));
 	char tempbuf [100];
     if (  (hardware&&(this->vol==vol))
@@ -284,13 +289,14 @@ void Music::_SetVolume (float vol,bool hardware,float latency_override) {
     if (soundServerPipes()) 
         fNET_Write(socketw,strlen(tempbuf),tempbuf); else
         INET_Write(socketw,strlen(tempbuf),tempbuf);
-*/
+#else
   if (vol<0)vol=0;
   this->vol=vol;
   this->soft_vol=vol;//for now fixme for fading
   for (std::list<int>::const_iterator iter = playingSource.begin() ; iter != playingSource.end(); iter++ ) {
     AUDSoundGain(*iter, soft_vol,true);
   }
+#endif
 }
 
 bool Music::LoadMusic (const char *file) {
@@ -384,7 +390,12 @@ int Music::SelectTracks(int layer) {
 }
 
 namespace Muzak {
+#ifndef USE_SOUNDSERVER
   std::map<std::string, AUDSoundProperties> cachedSongs;
+#endif
+
+
+
 #ifndef _WIN32
 void * 
 #else
@@ -400,6 +411,17 @@ PVOID
     Music *me = (Music*)input;
 	int socketr = me->socketr;
     me->threadalive=1;
+#ifdef USE_SOUNDSERVER
+	while(!me->killthread) {
+		printf ("Reading from socket %d\n",socketr);
+		char data=fNET_fgetc(socketr);
+		printf ("Got data from socket %c\n",data);
+		if (data=='e')
+            me->moredata=1;
+		micro_sleep(100000);
+	}
+#else /* USE_SOUNDSERVER */
+	
 	while(!me->killthread) {
 #ifdef _WIN32
 		WaitForSingleObject(me->musicinfo_mutex, INFINITE);
@@ -452,6 +474,7 @@ PVOID
 		//fprintf(stderr,"readerThread: LOADED is now FALSE\n");
 
 	}
+#endif /* !USE_SOUNDSERVER */
 	me->threadalive=0;
 	return NULL;
 }
@@ -459,6 +482,7 @@ PVOID
 }
 
 void Music::_LoadLastSongAsync() {
+#ifndef USE_SOUNDSERVER
 #ifdef HAVE_AL
   if (!g_game.music_enabled)
 	  return;
@@ -498,13 +522,15 @@ void Music::_LoadLastSongAsync() {
 #else
 	checkerr(pthread_mutex_unlock(&musicinfo_mutex));
 #endif
+#endif
 }
 
 void Music::Listen() {
 	if (g_game.music_enabled) {
-          
-		/*
-            if (soundServerPipes()) {
+#ifdef USE_SOUNDSERVER
+	  if (soundServerPipes()) {
+                killthread=0;
+                threadalive=0;
                 if (!thread_initialized) {
 #ifdef _WIN32
                     a_thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)Muzak::readerThread, (PVOID)this, 0, NULL);
@@ -519,8 +545,23 @@ void Music::Listen() {
             cur_song_file = "";
             _Skip();
 		}
-            }else {
-		*/
+	  }else {
+		int bytes = INET_BytesToRead(socketr);
+		if (bytes) {
+			char data;
+			while (bytes) {
+				data = INET_fgetc(socketr);
+				bytes--;
+			}
+			if (data=='e') {
+				cur_song_file = "";
+				_Skip();
+			} else {
+				g_game.music_enabled=false;
+			}
+		}
+	  }
+#else /* USE_SOUNDSERVER */
 		if (!music_load_list.empty()) {
 			if (music_loaded) {
 				//fprintf(stderr,"LOADED is true\n");
@@ -582,6 +623,7 @@ void Music::Listen() {
                         _Skip();
 			
 		}
+#endif /* !USE_SOUNDSERVER */
 	}
 }
 
@@ -622,6 +664,7 @@ void Music::_GotoSong (std::string mus) {
         if (mus==cur_song_file||mus.length()==0) return;
         cur_song_file = mus;
 
+#ifndef USE_SOUNDSERVER
 		_StopLater(); // Kill all our currently playing songs.
 		
 		music_load_list = rsplit(mus,"|"); // reverse order.
@@ -643,12 +686,13 @@ void Music::_GotoSong (std::string mus) {
 #endif
 		}
 		_LoadLastSongAsync();
-	/*
+#else /* !USE_SOUNDSERVER */
+        string data=string("p")+mus+string("\n");
         if (soundServerPipes())
             fNET_Write(socketw,data.size(),data.c_str());
 		else
             INET_Write(socketw,data.size(),data.c_str());
-	*/
+#endif
 	}
 }
 
@@ -772,6 +816,28 @@ void Music::_Skip(int layer)
 
 Music::~Music() 
 {
+#ifdef USE_SOUNDSERVER
+	char send[2]={'t','\n'};
+	if (socketw != -1) {
+		if (soundServerPipes()) {
+			if (threadalive&&thread_initialized) {
+				killthread=1;
+				int spindown = 50; // Thread has 5 seconds to close down.
+				while (threadalive&&(spindown-- > 0)) micro_sleep(100000);
+			}
+			
+			fNET_Write(socketw,2,send);
+			fNET_close(socketw);
+			//fNET_close(socketr);
+			fNET_cleanup();
+		}else {
+			INET_Write(socketw,2,send);
+			INET_close(socketw);
+			INET_cleanup();
+		}
+		socketw=-1;
+	}
+#else /* USE_SOUNDSERVER */
 	if (threadalive&&thread_initialized) {
 		killthread=1;
 #ifdef _WIN32
@@ -794,8 +860,9 @@ Music::~Music()
 			threadalive=false;
 		}
 	}
-	
 	// Kill the thread.
+#endif /* !USE_SOUNDSERVER */
+
 }
 void incmusicvol (const KBData&, KBSTATE a) 
 {
@@ -848,56 +915,53 @@ void Music::Stop(int layer)
 }
 void Music::_StopNow() {
     if (g_game.music_enabled) {
-		/*
-        cur_song_file="";
-	    char send[1]={'s'};
-        if (soundServerPipes())
-            fNET_Write(socketw,1,send); else
-            INET_Write(socketw,1,send);
-		*/
+#ifdef USE_SOUNDSERVER
+		_Stop();
+#else
 		for (std::vector<int>::const_iterator iter = sounds_to_stop.begin(); iter!=sounds_to_stop.end(); iter++) {
 			int sound = *iter;
 			AUDStopPlaying(sound);
 			AUDDeleteSound(sound,true);
 		}
                 sounds_to_stop.clear();
+#endif
 	}
 
 }
 void Music::_StopLater() 
 {
     if (g_game.music_enabled) {
-		/*
-        cur_song_file="";
-	    char send[1]={'s'};
-        if (soundServerPipes())
-            fNET_Write(socketw,1,send); else
-            INET_Write(socketw,1,send);
-		*/
+#ifdef USE_SOUNDSERVER
+		_Stop();
+#else
 		for (std::list<int>::const_iterator iter = playingSource.begin(); iter!=playingSource.end(); iter++) {
 			int sound = *iter;
                         sounds_to_stop.push_back(sound);
 		}
 		playingSource.clear();
+#endif
 	}
 }
 
 void Music::_Stop() 
 {
     if (g_game.music_enabled) {
-		/*
-        cur_song_file="";
-	    char send[1]={'s'};
-        if (soundServerPipes())
-            fNET_Write(socketw,1,send); else
-            INET_Write(socketw,1,send);
-		*/
+#ifdef USE_SOUNDSERVER
+		cur_song_file="";
+		char send[1]={'s'};
+		if (soundServerPipes())
+			fNET_Write(socketw,1,send);
+		else
+			INET_Write(socketw,1,send);
+#else
+	
 		for (std::list<int>::const_iterator iter = playingSource.begin(); iter!=playingSource.end(); iter++) {
 			int sound = *iter;
 			AUDStopPlaying(sound);
 			AUDDeleteSound(sound,true);
 		}
 		playingSource.clear();
+#endif
 	}
 }
 

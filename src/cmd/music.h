@@ -112,6 +112,7 @@ private:
 #endif
 
   int thread_initialized;
+  volatile bool moredata;
   volatile bool music_loaded;
   volatile bool killthread;
   volatile bool threadalive;

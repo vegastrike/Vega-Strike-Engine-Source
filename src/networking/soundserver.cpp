@@ -44,6 +44,11 @@ typedef int Mix_Music;
 #include <sys/file.h>
 #endif
 #include "softvolume.h"
+
+#ifndef MIX_CHANNEL_POST
+#define MIX_CHANNEL_POST -2
+#endif
+
 int fadeout=0, fadein=0;
 Mix_SoftVolume_Shape fadeshape=MIX_SV_SHAPE_EASED;
 float volume=0;
@@ -391,7 +396,7 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int 
 	FileNameCharType argvc;
 	FileNameCharType *argv= &argvc;
 	GetModuleFileName(NULL, argvc, 65534);
-	mystdout=fopen("soundserver_stdout.txt", "w");
+	mystdout=fopen("soundserver_log.txt", "w");
 	int pipes[2]={-1,-1};
 	getPipes(lpCmdLine,&pipes);
 	if (mystdout) {
