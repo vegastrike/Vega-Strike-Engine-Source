@@ -887,7 +887,9 @@ void Music::InitMuzak()
 void Music::CleanupMuzak()
 {
     if (muzak) {
-//        delete[] muzak;
+#ifdef USE_SOUNDSERVER
+        delete[] muzak;
+#endif
 		// Multithreading issues... don't care to waste time here waiting to get the lock back.
 		// Let the OS clean up this mess!
         muzak=NULL;
