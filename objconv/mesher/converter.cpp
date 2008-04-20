@@ -190,16 +190,32 @@ int main (int argc, char** argv) {
   FILE * Outputfile;
   if(appendxmeshtobfxm){
 	Outputfile=fopen(argv[2],"rb+"); //append to end, but not append, which doesn't do what you want it to.
+	if (!Outputfile) {
+		perror(argv[2]);
+		return 1;
+	}
 	fseek(Outputfile, 0, SEEK_END);
 	XML memfile=(LoadXML(argv[1],1));
     xmeshToBFXM(memfile,Outputfile,'a',forcenormals,false);
   }else if(createBFXMfromxmesh){
 	Outputfile=fopen(argv[2],"wb+"); //create file for BFXM output
+	if (!Outputfile) {
+		perror(argv[2]);
+		return 1;
+	}
 	XML memfile=(LoadXML(argv[1],1));
     xmeshToBFXM(memfile,Outputfile,'c',forcenormals,false);
   } else if(createxmeshesfromBFXM){
 	FILE* Inputfile=fopen(argv[1],"rb");
+	if (!Inputfile) {
+		perror(argv[1]);
+		return 1;
+	}
 	Outputfile=fopen(argv[2],"w+"); //create file for text output
+	if (!Outputfile) {
+		perror(argv[2]);
+		return 1;
+	}
 	FILE * OutputObj=NULL;
 	FILE * OutputMtl=NULL;
 	string tmp = argv[2];
@@ -208,21 +224,46 @@ int main (int argc, char** argv) {
 	BFXMToXmeshOrOBJ(Inputfile,Outputfile,OutputObj,OutputMtl,tmp,'x');
   }else if (createBFXMfromOBJ) {
      FILE* Inputfile=fopen(argv[1],"r");
+     if (!Inputfile) {
+         perror(argv[1]);
+         return 1;
+     }
      Outputfile=fopen(argv[2],"wb+"); //create file for text output
+     if (!Outputfile) {
+         perror(argv[2]);
+         return 1;
+     }
      string tmp = argv[1];
      int where=where=tmp.find_last_of(".");
      tmp = tmp.substr(0,where);
      string mtl = ObjGetMtl(Inputfile,argv[2]);
      FILE * InputMtl = fopen (mtl.c_str(),"r");
+     if (!InputMtl) {
+         perror(mtl.c_str());
+         fprintf(stderr,"(Check the .obj and make sure it references a .mtl file)\n");
+         return 1;
+     }
      ObjToBFXM(Inputfile, InputMtl,Outputfile,forcenormals);
   } else if(createOBJfromBFXM){
 	  FILE* Inputfile=fopen(argv[1],"rb");
+	  if (!Inputfile) {
+	    perror(argv[1]);
+	    return 1;
+	  }
 	  FILE* OutputObj=fopen(argv[2],"w+"); //create file for text output
+	  if (!OutputObj) {
+	    perror(argv[2]);
+	    return 1;
+	  }
 	  string tmp = argv[2];
       int where=where=tmp.find_last_of(".");
       tmp = tmp.substr(0,where);
       string mtl = tmp+".mtl";
       FILE * OutputMtl = fopen (mtl.c_str(),"w");
+	  if (!OutputMtl) {
+	    perror(mtl.c_str());
+	    return 1;
+	  }
 	  Outputfile=NULL;
 	BFXMToXmeshOrOBJ(Inputfile,Outputfile,OutputObj,OutputMtl,tmp,'o');
   } else if(createOBJfromxmesh||createxmeshesfromOBJ){
@@ -258,8 +299,17 @@ int main (int argc, char** argv) {
           case 'o':
               {
                   FILE* Inputfile=fopen(argv[1],"r");
+                  if (!Inputfile) {
+                    perror(argv[1]);
+                    return 1;
+                  }
                   string mtl = ObjGetMtl(Inputfile,argv[2]);
                   FILE * InputMtl = fopen (mtl.c_str(),"r");
+                  if (!InputMtl) {
+                    perror(mtl.c_str());
+                    fprintf(stderr,"(Check the .obj and make sure it references a .mtl file)\n");
+                    return 1;
+                  }
 
                   vector<XML> xmls;
                   ObjToXMESH(Inputfile, InputMtl, xmls, forcenormals);
