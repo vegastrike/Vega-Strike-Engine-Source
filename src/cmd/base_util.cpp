@@ -59,7 +59,7 @@ namespace BaseUtil {
         BaseInterface::Room *newroom=CheckRoom(room);
         if (!newroom) return;
         
-        Texture(room, index, vfile, x, y);
+        BaseUtil::Texture(room, index, vfile, x, y);
         
         int sndstream = AUDCreateMusic(afile);
         dynamic_cast<BaseInterface::Room::BaseVSSprite*>(newroom->objs.back())->spr.SetTimeSource(sndstream);

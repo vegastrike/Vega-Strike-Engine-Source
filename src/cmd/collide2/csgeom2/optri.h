@@ -27,7 +27,7 @@
  * @{ */
 
 #include "cmd/collide2/opcodeextern.h"
-
+#if 0
 namespace CS
 {
   /**
@@ -120,6 +120,6 @@ struct csTriangle : public CS::TriangleT<int>
 };
 
 /** @} */
-
+#endif
 #endif // __CS_TRIANGLE_H__
 

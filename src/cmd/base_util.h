@@ -1,9 +1,12 @@
 #include <string>
+#include <boost/version.hpp>
 #if BOOST_VERSION != 102800
 #include <boost/python/object.hpp>
 #include <boost/python/dict.hpp>
+typedef boost::python::dict BoostPythonDictionary ;
 #else
 #include <boost/python/objects.hpp>
+typedef boost::python::dictionary BoostPythonDictionary ;
 #endif
 
 #if defined(HAVE_PYTHON)

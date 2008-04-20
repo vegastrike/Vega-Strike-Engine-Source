@@ -1,5 +1,6 @@
 ///A single OpenGL texture
 #include "gldrv/gl_globals.h"
+#include <string>
 #include <stdio.h>
 class Texture {
 public:
