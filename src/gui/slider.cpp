@@ -85,11 +85,11 @@ void Slider::setThumbLength(float len) {
 
     // Make sure the thumb is at least an absolute size.
     if(m_vertical) {
-        if(realLen*m_rect.size.height < ABSOLUTE_MIN_THUMB_LENGTH) {
+        if(realLen*m_rect.size.height < ABSOLUTE_MIN_THUMB_LENGTH && m_rect.size.height>0) {
             realLen = ABSOLUTE_MIN_THUMB_LENGTH / m_rect.size.height;
         }
     } else {
-        if(realLen*m_rect.size.width < ABSOLUTE_MIN_THUMB_LENGTH) {
+        if(realLen*m_rect.size.width < ABSOLUTE_MIN_THUMB_LENGTH && m_rect.size.height>0) {
             realLen = ABSOLUTE_MIN_THUMB_LENGTH / m_rect.size.width;
         }
    }

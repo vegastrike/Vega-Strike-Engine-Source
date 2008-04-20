@@ -75,7 +75,7 @@ void Scroller::setRangeValues(int max, int visible, int min) {
 
         Slider* slider = static_cast<Slider*>(childAt(SLIDER_INDEX));
         slider->setMaxMin(newMax, min);
-        const float thumbLength = (float)visible / (max-min+1);
+        const float thumbLength = (max > min) ? (float)visible / (max-min+1) : -1.;
         // Note that impossible thumb lengths turn off the thumb.
         slider->setThumbLength(thumbLength);
         slider->setPageSize(guiMax(1,visible-1));
