@@ -124,7 +124,7 @@ int double_to_int (double a) {
   if (a<0) return minint;
   return 0;
 }
-#if 0
+#ifdef WITH_MACOSX_BUNDLE
 #if defined(__APPLE__) || defined(MACOSX)
 extern "C" {
   char * ctermid_r(char *buf) {
@@ -143,32 +143,73 @@ extern "C" {
       return ret;
     }
   }
-}
 
-float sqrtf(float v)
-{
+  float acosf(float a) {
+    return acos(a);
+  }
+  float asinf(float a) {
+    return asin(a);
+  }
+  long lrintf(float a) {
+    return (long)round(a);
+  }
+  long lrint(double a) {
+    return (long)round(a);
+  }
+  long long llrintf(float a) {
+    return (long)round(a);
+  }
+  long long llrint(double a) {
+    return (long)round(a);
+  }
+  long long llrintl(long double a) {
+    return (long)round(a);
+  }
+  
+  float sqrtf(float v)
+  {
     return (float) sqrt((double)v);
-}
-
-float cosf (float v)
-{
+  }
+  
+  float cosf (float v)
+  {
     return (float) cos((double)v);
-}
-
-float sinf (float v)
-{
+  }
+  
+  float sinf (float v)
+  {
     return (float) sin((double)v);
-}
-
-float tanf (float v)
-{
+  }
+  
+  float tanf (float v)
+  {
     return (float) tan((double)v);
-}
-
-float powf (float v, float p)
-{
+  }
+  
+  float powf (float v, float p)
+  {
     return (float) pow((double)v, (double) p);
+  }
+  long long atoll(const char *a) {
+    long long retval=0;
+    bool negatory=false;
+    if (a[0]=='-') negatory=true;
+    ++a;
+    while (*a) {
+      retval*=10;
+      retval+=*a-'0';
+      ++a;
+    }
+    return retval;
+  }
+#define sockaddr void
+#define socklen_t size_t
+#define restrict 
+  int getnameinfo(const sockaddr *restrict sa, socklen_t salen,
+                  char *restrict node, socklen_t nodelen, char *restrict service,
+                  socklen_t servicelen, int flags) {
+    return 1;
+  }
 }
-
 #endif
 #endif
