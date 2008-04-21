@@ -919,6 +919,8 @@ void RestoreFirstPassState(Texture * detailTexture, const vector<Vector> & detai
     }
 }
 void SetupEnvmapPass(Texture * decal, unsigned int mat, int passno) {
+    assert(passno >= 0 && passno <= 2);
+
     //This is only used when there's no multitexturing... so don't use multitexturing
     GFXPushBlendMode();
     GFXSelectMaterialHighlights(mat,
@@ -1159,15 +1161,16 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
 
   const GFXMaterial &mat=GFXGetMaterial(myMatNum);
   static bool wantsplitpass1 = XMLSupport::parse_bool( vs_config->getVariable("graphics","specmap_with_reflection","false") );
-  bool splitpass1 = (wantsplitpass1&&getEnvMap()&&((mat.sa!=0)&&((mat.sr!=0)||(mat.sg!=0)||(mat.sb!=0)))) || (getEnvMap()&&!gl_options.Multitexture&&(ENVSPEC_PASS<Decal.size())&&(Decal[ENVSPEC_PASS]==NULL)); //For now, no PPL reflections with no multitexturing - There is a way, however, doing it before the diffuse texture (odd, I know). If you see this, remind me to do it (Klauss).
+  bool splitpass1 = (wantsplitpass1&&getEnvMap()&&((mat.sr!=0)||(mat.sg!=0)||(mat.sb!=0))) || (getEnvMap()&&!gl_options.Multitexture&&(ENVSPEC_PASS<Decal.size())&&(Decal[ENVSPEC_PASS]==NULL)); //For now, no PPL reflections with no multitexturing - There is a way, however, doing it before the diffuse texture (odd, I know). If you see this, remind me to do it (Klauss).
   bool skipglowpass = false;
   bool nomultienv = false;
   int nomultienv_passno = 0;
 
 #define SAFEDECAL(pass) ((Decal.size()>pass)?Decal[pass]:black)
+#define HASDECAL(pass) ((Decal.size()>pass)&&Decal[pass])
 
   if (!gl_options.Multitexture&&getEnvMap()&&(whichpass==BASE_PASS)) {
-      if (SAFEDECAL(ENVSPEC_PASS)) {
+      if (HASDECAL(ENVSPEC_PASS)) {
           whichpass = ENVSPEC_PASS;
           nomultienv_passno = 0;
       } else {
@@ -1181,16 +1184,16 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
           whichpass++;
           continue;
       }
-      if (shaders || (nomultienv&&whichpass==ENVSPEC_PASS) || !whichpass || SAFEDECAL(whichpass)) {
+      if (shaders || (nomultienv&&whichpass==ENVSPEC_PASS) || !whichpass || HASDECAL(whichpass)) {
 	if (shaders) {
 	  SetupShaders(Decal,myMatNum,getEnvMap(),polygon_offset,detailTexture,detailPlanes,black,white);//eventually pass in shader ID for unique shaders
 	}else switch (whichpass) {
 	case BASE_PASS:
-	  SetupSpecMapFirstPass (Decal,myMatNum,getEnvMap(),polygon_offset,detailTexture,detailPlanes,skipglowpass,nomultienv&&SAFEDECAL(ENVSPEC_PASS));
+	  SetupSpecMapFirstPass (Decal,myMatNum,getEnvMap(),polygon_offset,detailTexture,detailPlanes,skipglowpass,nomultienv&&HASDECAL(ENVSPEC_PASS));
 	  break;
 	case ENVSPEC_PASS: 
 	  if (!nomultienv)
-	    SetupSpecMapSecondPass(SAFEDECAL(ENVSPEC_PASS),myMatNum,blendSrc,(splitpass1?false:getEnvMap()), GFXColor(1,1,1,1),polygon_offset); else
+	    SetupSpecMapSecondPass(SAFEDECAL(ENVSPEC_PASS),myMatNum,blendSrc,(splitpass1?false:getEnvMap()), (splitpass1?GFXColor(1,1,1,1):GFXColor(0,0,0,0)),polygon_offset); else
 	    SetupEnvmapPass(SAFEDECAL(ENVSPEC_PASS),myMatNum,nomultienv_passno);
 	  break;
 	case DAMAGE_PASS:
@@ -1287,22 +1290,24 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
       }
       switch (whichpass) {
       case BASE_PASS:
-          if (Decal.size()>(whichpass=((nomultienv&&SAFEDECAL(ENVSPEC_PASS))?DAMAGE_PASS:ENVSPEC_PASS))) {
-              if ((nomultienv&&whichpass==ENVSPEC_PASS)||SAFEDECAL(whichpass)) break;
+          if (Decal.size()>(whichpass=((nomultienv&&HASDECAL(ENVSPEC_PASS))?DAMAGE_PASS:ENVSPEC_PASS))) {
+              if ((nomultienv&&whichpass==ENVSPEC_PASS)||HASDECAL(whichpass)) break;
           } else break;
       case ENVSPEC_PASS:
-          if (!nomultienv) {
-              if (splitpass1) { 
-                  splitpass1=false; 
-                  break;
-              } else if (Decal.size()>(whichpass=DAMAGE_PASS)) {
-                  if (Decal[whichpass]) break;
-              } else break;
-          } else {
-              nomultienv_passno++;
-              if (nomultienv_passno>(2-((splitpass1||!SAFEDECAL(ENVSPEC_PASS))?0:1)))
-                  whichpass=SAFEDECAL(ENVSPEC_PASS)?BASE_PASS:GLOW_PASS;
-              break;
+          if (whichpass == ENVSPEC_PASS) { // Might come from BASE_PASS and want to go to DAMAGE_PASS
+            if (!nomultienv) {
+                if (splitpass1) { 
+                    splitpass1=false; 
+                    break;
+                } else if (Decal.size()>(whichpass=DAMAGE_PASS)) {
+                    if (Decal[whichpass]) break;
+                } else break;
+            } else {
+                nomultienv_passno++;
+                if (nomultienv_passno>(2-((splitpass1||!HASDECAL(ENVSPEC_PASS))?0:1)))
+                    whichpass=HASDECAL(ENVSPEC_PASS)?BASE_PASS:GLOW_PASS;
+                break;
+            }
           }
       case DAMAGE_PASS:
           if (Decal.size()>(whichpass=GLOW_PASS)) {
@@ -1315,6 +1320,7 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
   draw_queue[whichdrawqueue].clear();
 
 #undef SAFEDECAL
+#undef HASDECAL
 
   if (alphatest) GFXAlphaTest(ALWAYS,0); // Are you sure it was supposed to be after vlist->EndDrawState()? It makes more sense to put it here...
 
