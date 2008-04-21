@@ -72,9 +72,14 @@ Unit *UnitFactory::parseUnitBuffer(NetBuffer &netbuf)
 	string custom( netbuf.getString());
 	int fg_num = netbuf.getInt32();
 
-	cerr<<"NETCREATE UNIT : "<<file<<endl;
+	cerr<<"NETCREATE UNIT : "<<file<< " ("<<serial<<")"<<endl;
 	
 	string facname = FactionUtil::GetFactionName( faction);
+	if (facname.empty()) {
+		// Got an invalid faction number...
+		cerr<< "    Unit has an invalid faction "<<faction<< endl;
+		faction = 0;
+	}
 	Flightgroup * fg = NULL;
 	if (!fname.empty()) {
 		fg = mission[0].findFlightgroup( fname, facname);
@@ -179,6 +184,13 @@ Planet *UnitFactory::parsePlanetBuffer(NetBuffer &netbuf)
 		lights.push_back( netbuf.getGFXLightLocal());
 
 	int faction = netbuf.getInt32();
+
+	string facname = FactionUtil::GetFactionName( faction);
+	if (facname.empty()) {
+		// Got an invalid faction number...
+		cerr<< "    Planet "<<file<<" has an invalid faction "<<faction<< endl;
+		faction = 0;
+	}
 	string fullname( netbuf.getString());
 	char insideout = netbuf.getChar();
 
@@ -219,6 +231,11 @@ Nebula *UnitFactory::parseNebulaBuffer(NetBuffer &netbuf)
 	cerr<<"NETCREATE NEBULA : "<<file<<endl;
 
 	string facname = FactionUtil::GetFactionName( faction);
+	if (facname.empty()) {
+		// Got an invalid faction number...
+		cerr<< "    Nebula has an invalid faction "<<faction<< endl;
+		faction = 0;
+	}
 	Flightgroup * fg = mission[0].findFlightgroup( fname, facname);
 	return UnitFactory::createNebula( file.c_str(), sub, faction, fg, fg_num, serial);
 }
@@ -280,7 +297,14 @@ Missile *UnitFactory::parseMissileBuffer(NetBuffer &netbuf)
 	float detonation_radius = netbuf.getFloat();
 	const string modifs( mods);
 
-	cerr<<"NETCREATE MISSILE : "<<file<<endl;
+	cerr<<"NETCREATE MISSILE : "<<file<<" ("<<serial<<")"<<endl;
+
+	string facname = FactionUtil::GetFactionName( faction);
+	if (facname.empty()) {
+		// Got an invalid faction number...
+		cerr<< "    Missile has an invalid faction "<<faction<< endl;
+		faction = 0;
+	}
 
 	Missile *mis = createMissile( file.c_str(), faction, modifs, damage, phasedamage, time, radialeffect, radmult, detonation_radius, serial);
 	if (netbuf.version()<=4951) {
@@ -326,6 +350,11 @@ Asteroid *UnitFactory::parseAsteroidBuffer(NetBuffer &netbuf)
 	cerr<<"NETCREATE ASTEROID : "<<file<<endl;
 
 	string facname = FactionUtil::GetFactionName( faction);
+	if (facname.empty()) {
+		// Got an invalid faction number...
+		cerr<< "    Asteroid has an invalid faction "<<faction<< endl;
+		faction = 0;
+	}
 	Flightgroup * fg = mission[0].findFlightgroup( fname, facname);
 	
 	return UnitFactory::createAsteroid( file.c_str(), faction, fg, fg_snumber, diff, serial);
