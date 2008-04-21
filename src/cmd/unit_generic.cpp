@@ -623,6 +623,15 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 				}
 			}
 		}
+		if (!_Universe->isPlayerStarship(this) && !_Universe->isPlayerStarship(smalle)) {
+			if (this->isUnit()!=MISSILEPTR && smalle->isUnit()!=MISSILEPTR) {
+				static bool collisionDamageToAI = XMLSupport::parse_bool(vs_config->getVariable("physics","collisionDamageToAI","false"));
+				if (!collisionDamageToAI) {
+					// HACK: Stupid AI ships always crash into each other.
+					dealdamage=false;
+				}
+			}
+		}
 		if (dealdamage) {
 			if (faction!=upgradefac)
 				smalle->ApplyDamage (biglocation.Cast(),bignormal,small_damage,smalle,GFXColor(1,1,1,2),this->owner!=NULL?this->owner:this);
