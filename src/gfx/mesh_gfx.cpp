@@ -1180,6 +1180,14 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
   }
 
   while (shaders||((nomultienv&&(whichpass == ENVSPEC_PASS)) || !whichpass || (whichpass < Decal.size()))) {
+	  if (!(nomultienv_passno >= 0 && nomultienv_passno <= 2)) {
+		  static int errcount=0;
+		  errcount++;
+		  if (errcount<100) 
+		    fprintf(stderr,"Nomultienvpassno failure %s!\n",hash_name.c_str());
+		  return;
+		 // (*(int*)whichpass)=5; /* Crash for debugging*/
+	  }
       if ((whichpass==GLOW_PASS)&&skipglowpass) {
           whichpass++;
           continue;
