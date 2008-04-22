@@ -585,16 +585,42 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 				smalle->ApplyForce(smforce-thisforce);
 			}
 		} else {
+			static float maxTorqueMultiplier = XMLSupport::parse_float(vs_config->getVariable("physics","maxCollisionTorqueMultiplier",".67"));
+			static float maxForceMultiplier = XMLSupport::parse_float(vs_config->getVariable("physics","maxCollisionForceMultiplier","5"));
 			if((smalle->isUnit()!=MISSILEPTR)&&isnotplayerorhasbeenmintime) {
 
 								 // for torque... smalllocation -- approximation hack of MR^2 for rotational inertia (moment of inertia currently just M)
-				smalle->ApplyTorque(smforce/(smalle->radial_size*smalle->radial_size),smalllocation);
-				smalle->ApplyForce(smforce-(smforce/(smalle->radial_size*smalle->radial_size)));
+				Vector torque = smforce/(smalle->radial_size*smalle->radial_size);
+				Vector force = smforce-torque;
+				
+				float maxForce = maxForceMultiplier * (smalle->limits.forward+smalle->limits.retro+
+						smalle->limits.lateral+smalle->limits.vertical);
+				float maxTorque = maxTorqueMultiplier * (smalle->limits.yaw+
+						smalle->limits.pitch+smalle->limits.roll);
+				float tMag = torque.Magnitude();
+				float fMag = force.Magnitude();
+				if (tMag > maxTorque)
+					torque *= (maxTorque/tMag);
+				if (fMag > maxForce)
+					force *= (maxForce/fMag);
+				smalle->ApplyTorque(torque,smalllocation);
+				smalle->ApplyForce(force);
 			}
 			if((this->isUnit()!=MISSILEPTR)&&isnotplayerorhasbeenmintime) {
 								 // for torque ... biglocation -- approximation hack of MR^2 for rotational inertia
-				this->ApplyTorque (thisforce/(radial_size*radial_size),biglocation);
-				this->ApplyForce(thisforce-(thisforce/(radial_size*radial_size)));
+				Vector torque=thisforce/(radial_size*radial_size);
+				Vector force = thisforce-torque;
+				float maxForce = maxForceMultiplier * (limits.forward+limits.retro+
+						limits.lateral+limits.vertical);
+				float maxTorque = maxTorqueMultiplier * (limits.yaw+limits.pitch+limits.roll);
+				float tMag = torque.Magnitude();
+				float fMag = force.Magnitude();
+				if (tMag > maxTorque)
+					torque *= (maxTorque/tMag);
+				if (fMag > maxForce)
+					force *= (maxForce/fMag);
+				this->ApplyTorque (torque,biglocation);
+				this->ApplyForce(force);
 			}
 		}
 		/*    smalle->curr_physical_state = smalle->prev_physical_state;
