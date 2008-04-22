@@ -26,9 +26,9 @@ void ShowMain();
 
 #define GET_TITLE char title[1000]="VegaStrike Configurator"; \
   if (strlen(CONFIG.program_name)+strlen(VERSION)<800) { \
-    sprintf(title, "Program Configuration - %s - Version 0.4.0", CONFIG.program_name); \
+    sprintf(title, "Program Configuration - %s - Version 0.5.0", CONFIG.program_name); \
   }
 
-#define GET_STATIC_TEXT char static_text[1000]="Vega Strike requires the latest drivers for your video card.\nIf you run into problems please upgrade your video drivers."
+#define GET_STATIC_TEXT char static_text[1000]="Vega Strike requires the latest drivers for your video card.\nIf you run into problems please upgrade your video drivers.\n\nTo adjust volume levels in-game, use F9/F10 for sound and F11/F12 for music."
 
 #endif    //DISPLAY_H
