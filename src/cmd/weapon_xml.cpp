@@ -225,8 +225,8 @@ namespace BeamXML {
   void beginElementXML_Char(void *userData, const XML_Char *name, const XML_Char **atts) {
     beginElement(userData,(const XML_Char*)name,(const XML_Char**)atts);
   }
-  #define color_step() 49
-  #define Gamma_Needed(gamma,count,depth) (!((count/(100*depth*gamma))%((6*color_step()##depth/gamma-1)/3)-100))
+  #define color_step 49
+  #define Gamma_Needed(gamma,count,depth) (!((count/(100*depth*gamma))%((6*(color_step*100+depth)/gamma-1)/3)-100))
   void beginElement (void *userData, const char *name, const char **atts) {
     static float game_speed=XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed","1"));
     static bool adj_gun_speed=XMLSupport::parse_bool (vs_config->getVariable ("physics","gun_speed_adjusted_game_speed","false"));
@@ -347,10 +347,10 @@ namespace BeamXML {
       }
       if ((gamma > 0) && Gamma_Needed(gamma,counts,32)) {
         //approximate the color func
-        tmpweapon.b = (tmpweapon.b + color_step()*5)/255.;
-        tmpweapon.g = (tmpweapon.g + color_step()/5)/255.;
-        tmpweapon.r = (tmpweapon.r + color_step()*2)/255.;
-        //tmpweapon.a = (tmpweapon.a + color_step()*5)/255.;
+        tmpweapon.b = (tmpweapon.b + color_step*5)/255.;
+        tmpweapon.g = (tmpweapon.g + color_step/5)/255.;
+        tmpweapon.r = (tmpweapon.r + color_step*2)/255.;
+        //tmpweapon.a = (tmpweapon.a + color_step*5)/255.;
       }
       break;
     case ENERGY:
