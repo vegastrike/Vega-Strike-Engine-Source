@@ -6,8 +6,9 @@
 #include "config_xml.h"
 #include "camera.h"
 #include "aux_texture.h"
+#include "gldrv/gl_globals.h"
 using namespace std;
-//#define USE_POINTS
+
 ParticleTrail particleTrail(500);
 void ParticleTrail::ChangeMax (unsigned int max ) {
   this->maxparticles = max;
@@ -17,6 +18,7 @@ bool ParticlePoint::Draw(const Vector & vel,const double time, Vector p, Vector 
   static float pgrow=XMLSupport::parse_float (vs_config->getVariable ("graphics","sparkegrowrate","200.0")); // 200x size when disappearing
   static float adj = XMLSupport::parse_float (vs_config->getVariable("graphics","sparklefade","0.1"));
   static float trans=XMLSupport::parse_float (vs_config->getVariable("graphics","sparklealpha","2.5")); // NOTE: It's the base transparency, before surface attenuation, so it needn't be within the [0-1] range.
+  static bool use_points = XMLSupport::parse_bool(vs_config->getVariable("graphics","point_sparkles","false"));
 
 
   float size = this->size*(pgrow*(1-col.a)+col.a);
@@ -27,10 +29,10 @@ bool ParticlePoint::Draw(const Vector & vel,const double time, Vector p, Vector 
   GFXColorf(col*(col.a*trans*(minsize/((maxsize>0)?maxsize:1.f)))); 
 
   {
-    QVector loc= this->loc-_Universe->AccessCamera()->GetPosition();
-#ifdef USE_POINTS
+  QVector loc= this->loc-_Universe->AccessCamera()->GetPosition();
+  if (use_points) {
     GFXVertexf(loc);
-#else
+  } else {
   #if 0
     q*=size;
     p*=size;  
@@ -78,7 +80,7 @@ bool ParticlePoint::Draw(const Vector & vel,const double time, Vector p, Vector 
     GFXEnd();
     GFXBegin(GFXQUAD);
 #endif
-#endif
+  }
   }
 
   loc+=(vel*time).Cast();
@@ -86,6 +88,7 @@ bool ParticlePoint::Draw(const Vector & vel,const double time, Vector p, Vector 
   return (col.a != 0);
 }
 void ParticleTrail::DrawAndUpdate (){
+  static bool use_points = XMLSupport::parse_bool(vs_config->getVariable("graphics","point_sparkles","false"));
   Vector P,Q;
   {
 	  Vector R;
@@ -97,43 +100,42 @@ void ParticleTrail::DrawAndUpdate (){
 
   vector<Vector>::iterator v=particleVel.begin();
   vector<ParticlePoint>::iterator p=particle.begin();
-#ifdef USE_POINTS
-  GFXDisable(TEXTURE0);
-  GFXDisable(CULLFACE);
-  static float psiz=XMLSupport::parse_float (vs_config->getVariable ("graphics","sparkesize","1.5"));
-  
-  GFXPointSize(psiz);
-  
-  static bool psmooth=XMLSupport::parse_bool (vs_config->getVariable ("graphics","sparkesmooth","false"));
-  if (psmooth && gl_options.smooth_points) {
-    glEnable(GL_POINT_SMOOTH);
+  if (use_points) {
+    GFXDisable(TEXTURE0);
+    GFXDisable(CULLFACE);
+    static float psiz=XMLSupport::parse_float (vs_config->getVariable ("graphics","sparkesize","1.5"));
+    
+    GFXPointSize(psiz);
+    
+    static bool psmooth=XMLSupport::parse_bool (vs_config->getVariable ("graphics","sparkesmooth","false"));
+    if (psmooth && gl_options.smooth_points) {
+      glEnable(GL_POINT_SMOOTH);
+    }
+  } else {
+    GFXEnable(TEXTURE0);
+    GFXDisable(TEXTURE1);
+    GFXDisable(DEPTHWRITE);
+    GFXDisable(CULLFACE);
+    static string s = vs_config->getVariable("graphics","sparkletexture","supernova.bmp");
+    static Texture * t = new Texture (s.c_str());
+    
+    t->MakeActive();
   }
-  
-#else
-  GFXEnable(TEXTURE0);
-  GFXDisable(TEXTURE1);
-  GFXDisable(DEPTHWRITE);
-  GFXDisable(CULLFACE);
-  static string s = vs_config->getVariable("graphics","sparkletexture","supernova.bmp");
-  static Texture * t = new Texture (s.c_str());
-  
-  t->MakeActive();
-#endif
   GFXDisable(LIGHTING);
   GFXLoadIdentity(MODEL);
   GFXTranslateModel(_Universe->AccessCamera()->GetPosition());
   static bool pblend=XMLSupport::parse_bool (vs_config->getVariable ("graphics","sparkeblend","false"));
   //GFXBlendMode(ONE,ZERO);
-#ifdef USE_POINTS
-  if (pblend)
-	  GFXBlendMode(SRCALPHA,INVSRCALPHA);
-  else
-	  GFXBlendMode(ONE,ZERO);
-  GFXBegin (GFXPOINT);
-#else
-  GFXBlendMode(ONE,ONE);
-  GFXBegin (GFXQUAD);
-#endif
+  if (use_points) {
+    if (pblend)
+      GFXBlendMode(SRCALPHA,INVSRCALPHA);
+    else
+      GFXBlendMode(ONE,ZERO);
+    GFXBegin (GFXPOINT);
+  } else {
+    GFXBlendMode(ONE,ONE);
+    GFXBegin (GFXQUAD);
+  }
   
   double mytime= GetElapsedTime();
   while (p!=particle.end()) {
@@ -157,13 +159,13 @@ void ParticleTrail::DrawAndUpdate (){
     }
   }
   GFXEnd();
-#ifdef USE_POINTS  
-  glDisable (GL_POINT_SMOOTH);
-  GFXPointSize(1);
-#else
-  GFXDisable(DEPTHWRITE);
-  GFXDisable(CULLFACE);
-#endif
+  if (use_points) {  
+    glDisable (GL_POINT_SMOOTH);
+    GFXPointSize(1);
+  } else {
+    GFXDisable(DEPTHWRITE);
+    GFXDisable(CULLFACE);
+  }
   GFXLoadIdentity(MODEL);
 }
 

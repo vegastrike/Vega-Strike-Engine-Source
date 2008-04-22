@@ -11,18 +11,12 @@
 #include "vsfilesystem.h"
 #include "role_bitmask.h"
 #include "endianness.h"
-/*
-weapon_info& weapon_info::operator = (const weapon_info &tmp){
-  size = tmp.size;
-  type = tmp.type;
-  file = tmp.file;
-  r = tmp.r;g=tmp.g;b=tmp.b;a=tmp.a;
-  Speed=tmp.Speed;PulseSpeed=tmp.PulseSpeed;RadialSpeed=tmp.RadialSpeed;Range=tmp.Range;Radius=tmp.Radius;Length=tmp.Length;volume = tmp.volume;
-  Damage=tmp.Damage;Stability=tmp.Stability;Longrange=tmp.Longrange;
-  EnergyRate=tmp.EnergyRate;EnergyConsumption=tmp.EnergyConsumption;Refire=tmp.Refire;
-  return *this;
-}
-*/
+#if (defined(__APPLE__) == POSH_BIG_ENDIAN) || !defined(INTEL_X86)
+//pre-optimization bug with "gcc 3.1 (20021003) prerelease"
+int counts = time( NULL );
+#else
+int counts = 0;
+#endif
 
 weapon_info	getWeaponInfoFromBuffer( char * netbuf, int & size)
 {
@@ -231,10 +225,13 @@ namespace BeamXML {
   void beginElementXML_Char(void *userData, const XML_Char *name, const XML_Char **atts) {
     beginElement(userData,(const XML_Char*)name,(const XML_Char**)atts);
   }
+  #define color_step() 49
+  #define Gamma_Needed(gamma,count,depth) (!((count/(100*depth*gamma))%((6*color_step()##depth/gamma-1)/3)-100))
   void beginElement (void *userData, const char *name, const char **atts) {
     static float game_speed=XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed","1"));
     static bool adj_gun_speed=XMLSupport::parse_bool (vs_config->getVariable ("physics","gun_speed_adjusted_game_speed","false"));
     static float gun_speed= XMLSupport::parse_float (vs_config->getVariable("physics","gun_speed","1"))*(adj_gun_speed?game_speed:1);
+	static int gamma = (int)(20*XMLSupport::parse_float(vs_config->getVariable("graphics","weapon_gamma", "1.35")));
     AttributeList attributes (atts);
     //weapon_info * debugtmp = &tmpweapon;
     enum weapon_info::WEAPON_TYPE weaptyp;
@@ -303,6 +300,7 @@ namespace BeamXML {
     case APPEARANCE:
       //      assert (level==1);
       level++;
+      counts++;
       for (iter= attributes.begin(); iter!=attributes.end();iter++) {
 	switch (attribute_map.lookup ((*iter).name)) {
 	case UNKNOWN:
@@ -346,7 +344,14 @@ namespace BeamXML {
           //	  assert (0);
 	  break;
 	}
-      }      
+      }
+      if ((gamma > 0) && Gamma_Needed(gamma,counts,32)) {
+        //approximate the color func
+        tmpweapon.b = (tmpweapon.b + color_step()*5)/255.;
+        tmpweapon.g = (tmpweapon.g + color_step()/5)/255.;
+        tmpweapon.r = (tmpweapon.r + color_step()*2)/255.;
+        //tmpweapon.a = (tmpweapon.a + color_step()*5)/255.;
+      }
       break;
     case ENERGY:
       //      assert (level==1);
