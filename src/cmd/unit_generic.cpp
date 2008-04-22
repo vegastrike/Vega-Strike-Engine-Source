@@ -585,8 +585,9 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 				smalle->ApplyForce(smforce-thisforce);
 			}
 		} else {
-			static float maxTorqueMultiplier = XMLSupport::parse_float(vs_config->getVariable("physics","maxCollisionTorqueMultiplier",".67"));
-			static float maxForceMultiplier = XMLSupport::parse_float(vs_config->getVariable("physics","maxCollisionForceMultiplier","5"));
+			//Collision force caps primarily for AI-AI collisions. Once the AIs get a real collision avoidance system, we can turn damage for AI-AI collisions back on, and then we can remove these caps.
+			static float maxTorqueMultiplier = XMLSupport::parse_float(vs_config->getVariable("physics","maxCollisionTorqueMultiplier",".67")); // value, in seconds of desired maximum recovery time
+			static float maxForceMultiplier = XMLSupport::parse_float(vs_config->getVariable("physics","maxCollisionForceMultiplier","5")); // value, in seconds of desired maximum recovery time
 			if((smalle->isUnit()!=MISSILEPTR)&&isnotplayerorhasbeenmintime) {
 
 								 // for torque... smalllocation -- approximation hack of MR^2 for rotational inertia (moment of inertia currently just M)
@@ -597,6 +598,9 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 						smalle->limits.lateral+smalle->limits.vertical);
 				float maxTorque = maxTorqueMultiplier * (smalle->limits.yaw+
 						smalle->limits.pitch+smalle->limits.roll);
+				//Convert from frames to seconds, so that the specified value is meaningful
+				maxForce=maxForce/(smalle->sim_atom_multiplier*SIMULATION_ATOM);
+				maxTorque=maxTorque/(smalle->sim_atom_multiplier*SIMULATION_ATOM);
 				float tMag = torque.Magnitude();
 				float fMag = force.Magnitude();
 				if (tMag > maxTorque)
@@ -604,7 +608,7 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 				if (fMag > maxForce)
 					force *= (maxForce/fMag);
 				smalle->ApplyTorque(torque,smalllocation);
-				smalle->ApplyForce(force);
+				smalle->ApplyForce(force-torque);
 			}
 			if((this->isUnit()!=MISSILEPTR)&&isnotplayerorhasbeenmintime) {
 								 // for torque ... biglocation -- approximation hack of MR^2 for rotational inertia
@@ -613,6 +617,9 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 				float maxForce = maxForceMultiplier * (limits.forward+limits.retro+
 						limits.lateral+limits.vertical);
 				float maxTorque = maxTorqueMultiplier * (limits.yaw+limits.pitch+limits.roll);
+				//Convert from frames to seconds, so that the specified value is meaningful
+				maxForce=maxForce/(this->sim_atom_multiplier*SIMULATION_ATOM);
+				maxTorque=maxTorque/(this->sim_atom_multiplier*SIMULATION_ATOM);
 				float tMag = torque.Magnitude();
 				float fMag = force.Magnitude();
 				if (tMag > maxTorque)
@@ -620,7 +627,7 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 				if (fMag > maxForce)
 					force *= (maxForce/fMag);
 				this->ApplyTorque (torque,biglocation);
-				this->ApplyForce(force);
+				this->ApplyForce(force-torque);
 			}
 		}
 		/*    smalle->curr_physical_state = smalle->prev_physical_state;
