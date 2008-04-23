@@ -1,6 +1,8 @@
 #include <macosx_math.h>
 #include <string>
-#ifdef __APPLE__
+#include "posh.h"
+#if defined (__APPLE__)
+//these stuffs are included in OSX 10.4 and above--so just check for x86
 #include <stdio.h>
   	#include <string.h>
   	#include <assert.h>
@@ -125,7 +127,7 @@ int double_to_int (double a) {
   return 0;
 }
 #ifdef WITH_MACOSX_BUNDLE
-#if defined(__APPLE__) || defined(MACOSX)
+#if (defined(__APPLE__) || defined(MACOSX)) && !defined(POSH_LITTLE_ENDIAN)
 extern "C" {
   char * ctermid_r(char *buf) {
     if (buf) {
