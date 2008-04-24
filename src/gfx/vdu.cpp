@@ -328,8 +328,8 @@ void VDU::DrawTargetSpr (VSSprite *s, float per, float &sx, float &sy, float &w,
 void VDU::Scroll (int howmuch) {
   scrolloffset+=howmuch;
 }
-
-static std::string MangleString (std::string in, float probability) {
+#define MangleString(a,b) (a)
+static std::string MangleStrung (std::string in, float probability) {//fails with ppc
   vector <char> str;
   for (int i=0;i<(int)in.length();i++) {
     if (in[i]!='\n') {
