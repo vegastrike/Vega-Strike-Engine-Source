@@ -155,10 +155,14 @@ template <class UnitType>
 void GameUnit<UnitType>::ArmorDamageSound( const Vector &pnt)
 {
   if (!_Universe->isPlayerStarship(this)) {
-    if (!AUDIsPlaying (this->sound->armor))
-      AUDPlay (this->sound->armor,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity,1);
-    else
-      AUDAdjustSound (this->sound->armor,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity);
+      static bool ai_sound=XMLSupport::parse_bool(vs_config->getVariable("audio","ai_sound","true"));
+      if (!AUDIsPlaying (this->sound->armor)) {
+          if (ai_sound) {
+              AUDPlay (this->sound->armor,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity,1);
+          }
+      }else {
+          AUDAdjustSound (this->sound->armor,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity);
+      }
   }else {
     static int playerarmorsound = AUDCreateSoundWAV(vs_config->getVariable("unitaudio","player_armor_hit","bigarmor.wav"));
     int sound = playerarmorsound!=-1?playerarmorsound:this->sound->armor;
@@ -171,10 +175,14 @@ template <class UnitType>
 void GameUnit<UnitType>::HullDamageSound( const Vector &pnt)
 {
   if (!_Universe->isPlayerStarship(this)) {
-    if (!AUDIsPlaying (this->sound->hull))
-      AUDPlay (this->sound->hull,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity,1);
-    else
-      AUDAdjustSound (this->sound->hull,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity);
+      static bool ai_sound=XMLSupport::parse_bool(vs_config->getVariable("audio","ai_sound","true"));
+      if (!AUDIsPlaying (this->sound->hull)) {
+          if (ai_sound) {
+              AUDPlay (this->sound->hull,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity,1);
+          }
+      } else {
+          AUDAdjustSound (this->sound->hull,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity);
+      }
   }else {
     static int playerhullsound = AUDCreateSoundWAV(vs_config->getVariable("unitaudio","player_hull_hit","bigarmor.wav"));
     int sound = playerhullsound!=-1?playerhullsound:this->sound->hull;
@@ -188,15 +196,20 @@ template <class UnitType>
 float GameUnit<UnitType>::DealDamageToShield (const Vector &pnt, float &damage) {
   float percent = UnitType::DealDamageToShield( pnt, damage);
   if (!_Universe->isPlayerStarship(this)) {
-    if (percent&&!AUDIsPlaying (this->sound->shield))
-      AUDPlay (this->sound->shield,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity,1);
-    else
-      AUDAdjustSound (this->sound->shield,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity);
+      static bool ai_sound=XMLSupport::parse_bool(vs_config->getVariable("audio","ai_sound","true"));
+      if (percent) {
+          if (!AUDIsPlaying (this->sound->shield)) {
+              if (ai_sound) {
+                  AUDPlay (this->sound->shield,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity,1);
+              }
+          }else {
+              AUDAdjustSound (this->sound->shield,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity);
+          }
+      }
   }else {
     static int playerhullsound = AUDCreateSoundWAV(vs_config->getVariable("unitaudio","player_shield_hit","shieldhit.wav"));
     int sound = playerhullsound!=-1?playerhullsound:this->sound->hull;
-
-    if (!AUDIsPlaying (sound))
+    if (percent&&!AUDIsPlaying (sound))
       AUDPlay (sound,QVector(0,0,0),Vector(0,0,0),1);
   }
   return percent;
