@@ -8,7 +8,7 @@ UninstPage uninstConfirm
 UninstPage components
 UninstPage instfiles
 SetDatablockOptimize on ;off ;fark.. 50 minutes to compile down to 2
-SetCompressor lzma
+SetCompressor /SOLID lzma
 
   Name "VegaStrike 0.5.0"        ; caption in titlebar
   OutFile "vegastrike-050.exe"	; installer file to create
@@ -54,17 +54,18 @@ SetCompressor lzma
 ;third install option - adds the shortcuts to the start menu. optional.
   Section "Start Menu Shortcuts"
     CreateDirectory "$SMPROGRAMS\Vega Strike 0.5.0"
-    CreateShortCut "$SMPROGRAMS\Vega Strike 0.5.0\Vega Strike Story.lnk" "$INSTDIR\Vegastrike-0.5.0\documentation\IntroMonologue.txt" "" "$INSTDIR\Vegastrike-0.5.0\documentation\IntroMonologue.txt" 0
-;    CreateShortCut "$SMPROGRAMS\Vega Strike 0.5.0\Vega Strike Manual.lnk" "$INSTDIR\Vegastrike-0.5.0\documentation\Vega_Strike_Players_Guide.pdf" "" "$INSTDIR\Vegastrike-0.5.0\documentation\Vega_Strike_Players_Guide.pdf" 0
-    CreateShortCut "$SMPROGRAMS\Vega Strike 0.5.0\Vega Strike Readme.lnk" "$INSTDIR\Vegastrike-0.5.0\documentation\readme.txt" "" "$INSTDIR\Vegastrike-0.5.0\documentation\readme.txt" 0
     CreateShortCut "$SMPROGRAMS\Vega Strike 0.5.0\Screenshots.lnk" "explorer.exe" "$INSTDIR\Vegastrike-0.5.0\.vegastrike-0.5.0\textures" "c:\windows\explorer.exe" 0
+    CreateShortCut "$SMPROGRAMS\Vega Strike 0.5.0\Read Player's Guide.lnk" "$INSTDIR\Vegastrike-0.5.0\documentation\Vega_Strike_Players_Guide.pdf" "" "$INSTDIR\Vegastrike-0.5.0\documentation\Vega_Strike_Players_Guide.pdf" 0
+    CreateShortCut "$SMPROGRAMS\Vega Strike 0.5.0\Read Story.lnk" "$INSTDIR\Vegastrike-0.5.0\documentation\IntroMonologue.txt" "" "$INSTDIR\Vegastrike-0.5.0\documentation\IntroMonologue.txt" 0
     CreateShortCut "$SMPROGRAMS\Vega Strike 0.5.0\Vega Strike.lnk" "$INSTDIR\Vegastrike-0.5.0\bin\vegastrike.exe" "" "$INSTDIR\Vegastrike-0.5.0\bin\vegastrike.exe" 0
-    CreateShortCut "$SMPROGRAMS\Vega Strike 0.5.0\Vega Strike Setup.lnk" "$INSTDIR\Vegastrike-0.5.0\bin\setup.exe" "" "$INSTDIR\Vegastrike-0.5.0\bin\setup.exe" 0
     CreateShortCut "$SMPROGRAMS\Vega Strike 0.5.0\Vega Strike Server.lnk" "$INSTDIR\Vegastrike-0.5.0\bin\vegaserver.exe" "" "$INSTDIR\Vegastrike-0.5.0\bin\vegaserver.exe" 0
+    CreateShortCut "$SMPROGRAMS\Vega Strike 0.5.0\Vega Strike Setup.lnk" "$INSTDIR\Vegastrike-0.5.0\bin\setup.exe" "" "$INSTDIR\Vegastrike-0.5.0\bin\setup.exe" 0
     CreateShortCut "$SMPROGRAMS\Vega Strike 0.5.0\Vega Strike Uninstall.lnk" "$INSTDIR\Vegastrike-0.5.0\uninstall.exe" "" "$INSTDIR\Vegastrike-0.5.0\uninstall.exe" 0
+    CreateShortCut "$SMPROGRAMS\Vega Strike 0.5.0\View Readme.lnk" "$INSTDIR\Vegastrike-0.5.0\documentation\readme.txt" "" "$INSTDIR\Vegastrike-0.5.0\documentation\readme.txt" 0
   SectionEnd
 
 
+; Enable Cancel button.
 Section -PreInstall
 GetDlgItem $0 $HWNDPARENT 2
 EnableWindow $0 1
@@ -161,12 +162,9 @@ lbl_copy:
 lbl_avoid_copy:
 ;        ExecWait $INSTDIR/Vegastrike-0.5.0/bin/OpenALwEAX.exe
       ExecWait $INSTDIR/Vegastrike-0.5.0/bin/SETUP.EXE 
-      MessageBox MB_YESNO "Installation Successful. View Manual?" IDNO NoReadme
-         ExecShell "open" $INSTDIR\Vegastrike-0.5.0\documentation\Vega_Strike_Players_Guide.pdf
+      MessageBox MB_YESNO "Installation Successful. Read the Player's Guide now?" IDNO NoReadme
+         ExecShell "open" "$INSTDIR\Vegastrike-0.5.0\documentation\Vega_Strike_Players_Guide.pdf"
          NoReadme:
-      MessageBox MB_YESNO "Would you like to view the story behind Vega Strike?" IDNO NoStory
-         ExecShell "open" "$INSTDIR\Vegastrike-0.5.0\history\a brief history in time and space.pdf"
-         NoStory:
       MessageBox MB_OK "Vega Strike has been installed.$\r$\nVisit our forums at http://vegastrike.sourceforge.net/forums/"  
   FunctionEnd
 
