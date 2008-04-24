@@ -1,5 +1,5 @@
 <?xml version="1.0" standalone="yes"?>
-<install product="vegastrike" desc="Vegastrike Space Simulator" version="0.4.3" binarypath="/usr/local/bin" url="documentation/Vega_Strike_Players_Guide.pdf" localurl="documentation/Vega_Strike_Players_Guide.pdf"
+<install product="vegastrike" desc="Vegastrike Space Simulator" version="0.5.0" binarypath="/usr/local/bin" url="documentation/Vega_Strike_Players_Guide.pdf" localurl="documentation/Vega_Strike_Players_Guide.pdf"
          promptbinaries="yes" express="no" splashpos="top">
   <eula>
    COPYING
@@ -8,7 +8,7 @@
    README
   </readme>
 
-  <component name="Base" version="0.4.3" default="yes">
+  <component name="Base" version="0.5.0" default="yes">
 
     <option required="true">
       Base Data (the Vegastrike Universe)
@@ -33,10 +33,11 @@
           echo 'sh vsinstall.sh $SETUPARG' >> $SETUP_INSTALLPATH/bin/vegastrike.sh
       </script>
       <files>
-        .vegastrike.4.x/*
+        .vegastrike-0.5.0/*
         ai/*
         animations/*
         bases/*
+        cgi-accountserver/*
         cockpits/*
         communications/*
         documentation/*
@@ -44,10 +45,12 @@
         meshes/*
         mission/*
         modules/*
+        movies/*
+        music/*
+        programs/*
         sectors/*
         sounds/*
         sprites/*
-        stats/*
         textures/*
         units/*
         universe/*
@@ -55,7 +58,10 @@
         cursor1.cur
         factions.xml
         master_part_list.csv
+        New_Game
+        README.txt
         setup.config
+        vega-license.txt
         vegastrike.config
         weapon_list.xml
         vegastrike.xpm

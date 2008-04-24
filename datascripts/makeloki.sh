@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Make a Loki Install Binary for Vegastrike
+#83;40003;0c Make a Loki Install Binary for Vegastrike
 #
 #
 # Instructions:
@@ -39,15 +39,15 @@
 # 
 # \/ \/ \/ \/ \/ \/ \/ \/ \/
 
-OLDVERSIONTEXT="vegastrike" # The hidden folder in the data dir, with the m3us
-NEWVERSIONTEXT="vegastrike.4.x" # What you want the hidden folder to be called
+OLDVERSIONTEXT="vegastrike-0.5.0" # The hidden folder in the data dir, with the m3us
+NEWVERSIONTEXT="vegastrike-0.5.0" # What you want the hidden folder to be called
 
 DATAMODULE="data4.x" # The folder with the data in it
-MUSICMODULE="music" # The folder with the (high quality) music
+MUSICMODULE="xmusic" # The folder with the (high quality) music
 
 DESTRUCTIVE=0 # Move music/binaries/data ... or just copy
-REPOSITORY="CVS" # Either CVS or .svn
-CLEANREPOSITORY=0 # Strip this info from the folders?
+REPOSITORY=".svn" # Either CVS or .svn
+CLEANREPOSITORY=1 # Strip this info from the folders?
 
 # /\ /\ /\ /\ /\ /\ /\ /\ /\
 #
@@ -65,7 +65,7 @@ MUSICDIR=$CURPWD/../vegastrike-music
 
 if [ $SETUPARG = "prepare" ] || [ $SETUPARG = "release" ]; then
   
-  for BINFILE in $CURPWD/../vegastrike/src/vegastrike $CURPWD/../vegastrike/src/networking/soundserver $CURPWD/../vssetup/src/bin/setup $CURPWD/vsinstall.sh $CURPWD/vegastrike.sh $CURPWD/fixmusic.sh ; do
+  for BINFILE in $CURPWD/../vegastrike/vegastrike $CURPWD/../vegastrike/vegaserver $CURPWD/../vegastrike/soundserver $CURPWD/../vegastrike/vssetup $CURPWD/vsinstall.sh $CURPWD/vegastrike.sh ; do
     {
     if [ \! -s $BINFILE ]; then
       echo Binary $BINFILE not built.
@@ -95,23 +95,23 @@ if [ $SETUPARG = "organise" ] || [ $SETUPARG = "release" ]; then
   fi
 
   echo "Cleaning Base Package"
-  find $BASEDIR -type d -name CVS -exec /bin/rm -r {} \; #Removes CVS dirs
+  find $BASEDIR -type d -name .svn -exec /bin/rm -r {} \; #Removes CVS dirs
   echo "Cleaning Music Package"
-  find $MUSICDIR -type d -name CVS -exec /bin/rm -r {} \; #Removes CVS dirs
+  find $MUSICDIR -type d -name .svn -exec /bin/rm -r {} \; #Removes CVS dirs
 
   mkdir -p $BASEDIR/.$NEWVERSIONTEXT
 
   if [ $DESTRUCTIVE = 1 ] ; then
 # Move the vegastrike data, but not this script!
-    mv $CURPWD/../$DATAMODULE/m3uloki_add.sh $MUSICDIR/setup.data/
-    mv $CURPWD/../$DATAMODULE/m3uloki_remove.sh $MUSICDIR/setup.data/
+#    mv $CURPWD/../$DATAMODULE/m3uloki_add.sh $MUSICDIR/setup.data/
+#    mv $CURPWD/../$DATAMODULE/m3uloki_remove.sh $MUSICDIR/setup.data/
     mv $CURPWD/../$DATAMODULE/* $BASEDIR/
     mv $BASEDIR/makeloki.sh $CURPWD/
     mv $CURPWD/../$DATAMODULE/.$OLDVERSIONTEXT/*.m3u $BASEDIR/.$NEWVERSIONTEXT/
   else
 # Copy the vegastrike data
-    cp $CURPWD/../$DATAMODULE/m3uloki_add.sh $MUSICDIR/setup.data/
-    cp $CURPWD/../$DATAMODULE/m3uloki_remove.sh $MUSICDIR/setup.data/
+#    cp $CURPWD/../$DATAMODULE/m3uloki_add.sh $MUSICDIR/setup.data/
+#    cp $CURPWD/../$DATAMODULE/m3uloki_remove.sh $MUSICDIR/setup.data/
     cp -r $CURPWD/../$DATAMODULE/* $BASEDIR/
     cp $CURPWD/../$DATAMODULE/.$OLDVERSIONTEXT/*.m3u $BASEDIR/.$NEWVERSIONTEXT/
   fi
@@ -146,7 +146,7 @@ if [ $SETUPARG = "organise" ] || [ $SETUPARG = "release" ]; then
 # Copy the vegastrike binaries
   mkdir -p $BASEDIR/bin
   
-  for BINFILE in $CURPWD/../vegastrike/src/vegastrike $CURPWD/../vegastrike/src/networking/soundserver $CURPWD/../vssetup/src/bin/setup $CURPWD/vsinstall.sh $CURPWD/vegastrike.sh $CURPWD/fixmusic.sh ; do
+  for BINFILE in $CURPWD/../vegastrike/vegastrike $CURPWD/../vegastrike/vegaserver $CURPWD/../vegastrike/soundserver $CURPWD/../vegastrike/vssetup $CURPWD/vsinstall.sh $CURPWD/vegastrike.sh ; do
     if [ $DESTRUCTIVE = 1 ] ; then
       mv $BINFILE $BASEDIR/bin/
     else
@@ -175,8 +175,8 @@ if [ $SETUPARG = "package" ] || [ $SETUPARG = "release" ]; then
 # Create the packages
   cd $CURPWD/../loki_setup/makeself/
   echo "Making the Base Installer"
-  sh makeself.sh --bzip2 $BASEDIR $CURPWD/../vegastrike-0.4.3-base.run.bz2.sh "Vegastrike Space Simulator 0.4.3 - Base" sh setup.sh
+  sh makeself.sh --bzip2 $BASEDIR $CURPWD/../vegastrike-0.5.0-base.run.bz2.sh "Vegastrike Space Simulator 0.5.0 - Base" sh setup.sh
   echo "Making the Music Installer"
-  sh makeself.sh --bzip2 $MUSICDIR $CURPWD/../vegastrike-0.4.3-music.run.bz2.sh "Vegastrike Space Simulator 0.4.3 - Music" sh setup.sh
+  sh makeself.sh --bzip2 $MUSICDIR $CURPWD/../vegastrike-0.5.0-music.run.bz2.sh "Vegastrike Space Simulator 0.5.0 - Music" sh setup.sh
   cd $CURPWD
 fi
