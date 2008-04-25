@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="yes"?>
-<install product="vegastrike" desc="Vegastrike Space Simulator" version="0.5.0" binarypath="/usr/local/bin" url="documentation/Vega_Strike_Players_Guide.pdf" localurl="documentation/Vega_Strike_Players_Guide.pdf"
-         promptbinaries="yes" express="no" splashpos="top">
+<install product="vegastrike" desc="Vegastrike Space Simulator" version="0.5.0" binarypath="/usr/local/bin" url="file:///tmp/Vega_Strike_Players_Guide.pdf"
+         promptbinaries="yes" express="no" splashpos="top" postinstall="cp $1/documentation/Vega_Strike_Players_Guide.pdf /tmp/" >
   <eula>
    COPYING
   </eula>
@@ -19,6 +19,9 @@
       <binary play="no" binpath="bin/soundserver" keepdirs="yes">
         bin/soundserver
       </binary>
+      <binary play="no" binpath="bin/vegaserver" keepdirs="yes">
+        bin/soundserver
+      </binary>
       <binary symlink="vegastrike" icon="vegastrike.xpm" name="Vegastrike" play="no" binpath="bin/vegastrike.sh" keepdirs="yes">
         bin/vegastrike.sh
       </binary>
@@ -33,7 +36,7 @@
           echo 'sh vsinstall.sh $SETUPARG' >> $SETUP_INSTALLPATH/bin/vegastrike.sh
       </script>
       <files>
-        .vegastrike-0.5.0/*
+       .vegastrike-0.5.0/*
         ai/*
         animations/*
         bases/*
@@ -45,7 +48,6 @@
         meshes/*
         mission/*
         modules/*
-        movies/*
         music/*
         programs/*
         sectors/*

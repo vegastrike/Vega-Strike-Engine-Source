@@ -152,6 +152,9 @@ if [ $SETUPARG = "organise" ] || [ $SETUPARG = "release" ]; then
     else
       cp $BINFILE $BASEDIR/bin
     fi ; done
+mv $BASEDIR/bin/vssetup $BASEDIR/bin/setup
+#cant call it that in source directory cus there is a dir by that name
+
 
 # Move the required files to their expected positions for Base
   mv $BASEDIR/setup.base.xml $BASEDIR/setup.data/setup.xml
