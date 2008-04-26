@@ -201,43 +201,21 @@ void bootstrap_first_loop();
 void nothinghappens (unsigned int, unsigned int, bool,int,int) {
 
 }
+
 //int allexcept=FE_DIVBYZERO|FE_INVALID;//|FE_OVERFLOW|FE_UNDERFLOW;
 extern void InitUnitTables();
 bool isVista=false;
 int main( int argc, char *argv[] ) 
 {
-
-#if defined(WITH_MACOSX_BUNDLE)||defined(_WIN32)
-  {
-    char *parentdir;
-    int pathlen=strlen(argv[0]);
-    parentdir=new char[pathlen+1];
-    char *c;
-    strncpy ( parentdir, argv[0], pathlen+1 );
-    c = (char*) parentdir;
-    while (*c != '\0')     /* go to end */
-      c++;
-    
-    while ((*c != '/')&&(*c != '\\')&&c>parentdir)      /* back up to parent */
-      c--;
-    
-    *c = '\0';             /* cut off last part (binary name) */
-    if (strlen (parentdir)>0) {  
-      chdir (parentdir);/* chdir to the binary app's parent */
-    }
-    delete []parentdir;
-  }    
-#endif
+	VSFileSystem::ChangeToProgramDirectory(argv[0]);
 	CONFIGFILE=0;
 	mission_name[0]='\0';
-#if defined (WITH_MACOSX_BUNDLE)
         {
-          //chdir("../Resources");
           char pwd[8192]="";
           getcwd(pwd,8191);
+          pwd[8191]='\0';
           printf (" In path %s\n",pwd);
         }
-#endif
 #ifdef _WIN32
 	    OSVERSIONINFO osvi;
     ZeroMemory(&osvi, sizeof(OSVERSIONINFO));

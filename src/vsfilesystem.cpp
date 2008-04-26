@@ -77,6 +77,9 @@ extern string GetUnitDir( string filename);
 
 string selectcurrentdir;
 
+
+
+
 #if defined (__FreeBSD__) || defined(__APPLE__)
 int	selectdirs( struct dirent * entry)
 #else
@@ -132,6 +135,65 @@ int	selectbigpk3s( const struct dirent * entry)
 
 namespace VSFileSystem
 {
+
+std::string vegastrike_cwd;
+
+	void ChangeToProgramDirectory(char *argv0) {
+		{
+			char pwd[8192];
+			pwd[0]='\0';
+			getcwd(pwd,8191);
+			pwd[8191]='\0';
+			vegastrike_cwd = pwd;
+		}
+		int ret = -1; /* Should it use argv[0] directly? */
+		char *program = argv0;
+#ifndef _WIN32
+		char buf[65536];
+		{
+			char linkname[128]; /* /proc/<pid>/exe */
+			linkname[0]='\0';
+			pid_t pid;
+	
+			/* Get our PID and build the name of the link in /proc */
+			pid = getpid();
+	
+			sprintf(linkname, "/proc/%d/exe", pid);
+			ret = readlink(linkname, buf, 65535);
+			if (ret <= 0) {
+				sprintf(linkname, "/proc/%d/file", pid);
+				ret = readlink(linkname, buf, 65535);
+			}
+			if (ret <= 0) {
+				ret = readlink(program, buf, 65535);
+			}
+			if (ret > 0) {
+				buf[ret]='\0';
+				/* Ensure proper NUL termination */
+				program = buf;
+			}
+		}
+#endif
+
+		char *parentdir;
+		int pathlen=strlen(program);
+		parentdir=new char[pathlen+1];
+		char *c;
+		strncpy ( parentdir, program, pathlen+1 );
+		c = (char*) parentdir;
+		while (*c != '\0')     /* go to end */
+			c++;
+    
+		while ((*c != '/')&&(*c != '\\')&&c>parentdir)      /* back up to parent */
+			c--;
+    
+		*c = '\0';             /* cut off last part (binary name) */
+		if (strlen (parentdir)>0) {
+			chdir (parentdir);/* chdir to the binary app's parent */
+		}
+		delete []parentdir;
+	}
+	
 	VSError CachedFileLookup(FileLookupCache &cache, const string& file, VSFileType type)
 	{
 		string hashName = GetHashName(file);
@@ -494,9 +556,23 @@ namespace VSFileSystem
 	void	InitDataDirectory()
 	{
 		vector<string>	data_paths;
+
+		/* DATA_DIR should no longer be necessary--it will either use the path
+		 to the binary, or the current directory. */
 #ifdef DATA_DIR
 		data_paths.push_back( DATA_DIR);
 #endif
+		if (!vegastrike_cwd.empty()) {
+			data_paths.push_back( vegastrike_cwd );
+			data_paths.push_back( vegastrike_cwd+"/..");
+			data_paths.push_back( vegastrike_cwd+"/../data4.x");
+			data_paths.push_back( vegastrike_cwd+"/../../data4.x");
+			data_paths.push_back( vegastrike_cwd+"/data4.x");
+			data_paths.push_back( vegastrike_cwd+"/data");
+			data_paths.push_back( vegastrike_cwd+"/../data");
+			data_paths.push_back( vegastrike_cwd+"/../Resources");
+		}
+		
 		data_paths.push_back( ".");
 		data_paths.push_back( "..");
 		data_paths.push_back( "../data4.x");
@@ -505,6 +581,8 @@ namespace VSFileSystem
 		data_paths.push_back( "../../data");
 		data_paths.push_back( "../Resources");
 		data_paths.push_back( "../Resources/data");
+		data_paths.push_back( "../Resources/data4.x");
+/*
 		data_paths.push_back( "/usr/share/local/vegastrike/data");
 		data_paths.push_back( "/usr/local/share/vegastrike/data");
 		data_paths.push_back( "/usr/local/vegastrike/data");
@@ -512,7 +590,6 @@ namespace VSFileSystem
 		data_paths.push_back( "/usr/local/games/vegastrike/data");
 		data_paths.push_back( "/usr/games/vegastrike/data");
 		data_paths.push_back( "/opt/share/vegastrike/data");
-		data_paths.push_back( "../Resources/data4.x");
 		data_paths.push_back( "/usr/share/local/vegastrike/data4.x");
 		data_paths.push_back( "/usr/local/share/vegastrike/data4.x");
 		data_paths.push_back( "/usr/local/vegastrike/data4.x");
@@ -520,6 +597,7 @@ namespace VSFileSystem
 		data_paths.push_back( "/usr/local/games/vegastrike/data4.x");
 		data_paths.push_back( "/usr/games/vegastrike/data4.x");
 		data_paths.push_back( "/opt/share/vegastrike/data4.x");
+*/
 		
 		// Win32 data should be "."
 		char tmppath[16384];

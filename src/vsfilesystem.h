@@ -223,6 +223,7 @@ namespace VSFileSystem
 	void	InitHomeDirectory();
 	void	LoadConfig( string subdir="");
 	void	InitMods();
+	void	ChangeToProgramDirectory(char *argv0);
 
 	// Create a directory
 	void	CreateDirectoryAbs( const char * filename);

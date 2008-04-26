@@ -46,6 +46,7 @@ int main( int argc, char **argv)
   //#ifndef _WIN32
   //  feenableexcept(FE_DIVBYZERO|FE_INVALID);//|FE_OVERFLOW|FE_UNDERFLOW)
   //#endif
+	VSFileSystem::ChangeToProgramDirectory(argv[0]);
 	
 	// Stupid static variable somewhere, so need to initialize it twice.
 	InitTime();
