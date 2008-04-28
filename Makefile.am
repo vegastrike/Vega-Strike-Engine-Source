@@ -91,6 +91,8 @@ endif !BOOST1_33
 
 endif 
 
+PRECOMPILED = src/precompiled.h
+
 EXTRA_DIST = \
   src/cmd/unit.cpp \
   src/cmd/unit_click.cpp \
@@ -654,6 +656,8 @@ LIBGFXCLIENT = \
   src/gfx/vdu.h \
   src/gfx/vid_file.h \
   src/gfx/vid_file.cpp \
+  src/ffmpeg_init.h \
+  src/ffmpeg_init.cpp \
   src/gfx/vsbox.cpp \
   src/gfx/vsbox.h \
   src/gfx/vsimage.cpp \
@@ -865,7 +869,28 @@ librootserver = \
   src/libserver.cpp \
   src/universe_util_server.cpp 
 
+LIBAUDIO = \
+  src/audio/CodecRegistry.cpp \
+  src/audio/CodecRegistry.h \
+  src/audio/Exceptions.h \
+  src/audio/Format.h \
+  src/audio/Stream.h \
+  src/audio/Stream.cpp \
+  src/audio/codecs/Codec.cpp \
+  src/audio/codecs/Codec.h \
+  src/audio/codecs/FFStream.cpp \
+  src/audio/codecs/FFStream.h \
+  src/audio/codecs/OggStream.cpp \
+  src/audio/codecs/OggStream.h \
+  src/audio/codecs/OggData.cpp \
+  src/audio/codecs/OggData.h \
+  src/audio/codecs/OggCodec.cpp \
+  src/audio/codecs/OggCodec.h \
+  src/audio/codecs/FFCodec.cpp \
+  src/audio/codecs/FFCodec.h
+
 LIBENGINE_COMMON = \
+  $(PRECOMPILED) \
   $(LIBAI) \
   $(LIBCMD) \
   $(libcollide2) \
@@ -888,12 +913,14 @@ vegaserver_SOURCES = \
   src/gldrv/gl_vertex_list.cpp \
   src/gldrv/gl_sphere_list_server.cpp
 
+vegastrike_CXXFLAGS = -include $(PRECOMPILED)
 vegastrike_SOURCES = \
   $(LIBENGINE_COMMON) \
   $(LIBGUI) \
   $(LIBNETCLIENT) \
   $(librootclient) \
   $(LIBGFXCLIENT) \
+  $(LIBAUDIO) \
   src/aldrv/al_globals.cpp \
   src/aldrv/al_globals.h \
   src/aldrv/al_init.cpp \
@@ -1115,7 +1142,10 @@ done
 endif
 
 %.h.gch: %.h
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $<
+	$(CXXCOMPILE) -o $@ $<
+
+.PHONY: precompiled
+precompiled: $(PRECOMPILED).gch
 
 .PHONY: headers
 headers:

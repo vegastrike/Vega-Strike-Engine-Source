@@ -35,67 +35,14 @@ extern "C" {
 #define ENOENT 2
 #endif
 
+#include "ffmpeg_init.h"
+
 
 /* FOLLOWING CODE IS ONLY INCLUDED IF YOU HAVE FFMPEG */
 /* ******************************************** */
 #ifdef HAVE_FFMPEG
 
 using namespace VSFileSystem;
-
-extern "C" int _url_open(URLContext *h, const char *filename, int flags)
-{
-    if (strncmp(filename,"vsfile:",7)!=0)
-        return AVERROR(ENOENT);
-        
-    std::string path = filename+7;
-    
-    VSFile *f = new VSFile();
-    if (f->OpenReadOnly(path, VSFileSystem::VideoFile) > VSFileSystem::Ok) {
-        delete f;
-        return AVERROR(ENOENT);
-    } else {
-        h->priv_data = f;
-        return 0;
-    }
-}
-
-extern "C" int _url_close(URLContext *h)
-{
-    delete (VSFile*)(h->priv_data);
-    return 0;
-}
-
-extern "C" int _url_read(URLContext *h, unsigned char *buf, int size)
-{
-    return ((VSFile*)(h->priv_data))->Read(buf, size);
-} 
-
-extern "C" int _url_write(URLContext *h, unsigned char *buf, int size)
-{
-    // read-only please
-    return 0;
-} 
-
-extern "C" offset_t _url_seek(URLContext *h, offset_t pos, int whence)
-{
-    if (whence != AVSEEK_SIZE) {
-        ((VSFile*)(h->priv_data))->GoTo(long(pos));
-        return ((VSFile*)(h->priv_data))->GetPosition();
-    } else {
-        return ((VSFile*)(h->priv_data))->Size();
-    }
-}
-
-    
-struct URLProtocol vsFileProtocol = {
-    "vsfile",
-    _url_open,
-    _url_read,
-    _url_write,
-    _url_seek,
-    _url_close,
-};
-
 
 class VideoFileImpl {
 private:
@@ -123,16 +70,6 @@ private:
     uint64_t fbPTS;
     uint64_t sizePTS;
 
-    void initLibraries()
-    {
-        static bool initted = false;
-        if (!initted) {
-            initted = true;
-            av_register_all();
-            register_protocol(&vsFileProtocol);
-        }
-    }
-    
     void convertFrame()
     {
         if (frameReady) {
@@ -262,10 +199,10 @@ public:
             throw VideoFile::Exception("Already open");
         
         // Initialize libavcodec/libavformat if necessary
-        initLibraries();
+        FFMpeg::initLibraries();
         
         // Open file
-        std::string npath = std::string(vsFileProtocol.name) + ":" + path;
+        std::string npath = std::string("vsfile:") + path;
         std::string errbase = std::string("Cannot open URL \"") + npath + "\"";
         
         if (  (0 != av_open_input_file(&pFormatCtx, npath.c_str(), NULL, BUFFER_SIZE, NULL))
