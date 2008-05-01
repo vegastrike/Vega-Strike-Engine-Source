@@ -144,7 +144,7 @@ namespace Audio {
             
                 // Initialize sample buffer
                 sampleBufferBase = malloc(sampleSize * BUFFER_SIZE + BUFFER_ALIGNMENT);
-                int offs = (*((int*)sampleBufferBase) & *(((int*)BUFFER_ALIGNMENT)-1));
+                int offs = ((reinterpret_cast<int>(sampleBufferBase)) & (BUFFER_ALIGNMENT-1));
                 sampleBufferAligned = ((char*)sampleBufferBase) + BUFFER_ALIGNMENT - offs;
                 sampleBufferAlloc = sampleSize * BUFFER_SIZE;
                 sampleBuffer = 0;
