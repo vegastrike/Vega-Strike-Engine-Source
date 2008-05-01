@@ -376,7 +376,7 @@ void AnimatedTexture::LoadVideoSource(VSFileSystem::VSFile & f)
     if (loadSuccess) {
         sizeX = vidSource->getWidth();
         sizeY = vidSource->getHeight();
-        mode  = _PNG24BIT;
+        mode  = _24BIT;
         data  = (unsigned char*)vidSource->getFrameBuffer();
         Bind(65535, GFXFALSE);
         

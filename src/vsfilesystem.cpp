@@ -784,15 +784,32 @@ std::string vegastrike_cwd;
 	{
 		string curpath;
 		struct dirent ** dirlist;
-		// Scan for mods in specified subdir
+		// new config program should insert hqtextures variable 
+		// with value "hqtextures" in data section. 
+		string hq = vs_config->getVariable("data","hqtextures","");
+		if(hq != ""){
+			// HQ Texture dir sits alongside data dir. 
+			selectcurrentdir = datadir+"/..";
+			int ret = scandir( selectcurrentdir.c_str(), &dirlist, selectdirs, 0);
+			if(ret >=0){
+				while( ret--) {
+					string dname (dirlist[ret]->d_name);
+					if (dname == hq) {
+						curpath = selectcurrentdir+"/"+dname;
+						cout<< "\n\nAdding HQ Textures Pack\n\n";
+						Rootdir.push_back( curpath);
+					}
+				}
+			}
+			free( dirlist);
+		}
+		
 		selectcurrentdir = moddir;
 		int ret = scandir( selectcurrentdir.c_str(), &dirlist, selectdirs, 0);
 		if( ret <0)
 			return;
 		else
-		{
-			while( ret--)
-			{
+			while( ret--) {
 				string dname (dirlist[ret]->d_name);
 				if (dname == modname) {
 					curpath = moddir+"/"+dname;
@@ -800,7 +817,6 @@ std::string vegastrike_cwd;
 					Rootdir.push_back( curpath);
 				}
 			}
-		}
 		free( dirlist);
 		// Scan for mods with standard data subtree
 		curmodpath = homedir+"/mods/";
@@ -809,9 +825,7 @@ std::string vegastrike_cwd;
 		if( ret <0)
 			return;
 		else
-		{
-			while( ret--)
-			{
+			while( ret--) {
 				string dname (dirlist[ret]->d_name);
 				if (dname == modname) {
 					curpath = curmodpath+dname;
@@ -819,7 +833,6 @@ std::string vegastrike_cwd;
 					Rootdir.push_back( curpath);
 				}
 			}
-		}
 		free( dirlist);
 	}
 

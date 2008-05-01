@@ -185,7 +185,7 @@ class VSImage
 		 * Position 3 and greater of VSImageMode are helper modes to differentiate the correct modes of DDS and PNG files.
 		 * DDS files are assumed to be 24 or 32 bit.  
 		 */
-		enum VSImageMode {_8BIT, _24BIT, _24BITRGBA,_DXT1,_DXT1RGBA,_DXT3,_DXT5,_PNG8BIT,_PNG24BIT,_PNG32BIT} mode;
+		enum VSImageMode {_8BIT, _24BIT, _24BITRGBA,_DXT1,_DXT1RGBA,_DXT3,_DXT5} mode;
 		
 		///the dimensions of the texture
 		unsigned long		sizeX;

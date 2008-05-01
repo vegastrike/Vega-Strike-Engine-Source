@@ -693,20 +693,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 	// Read in the number of mipmaps from buffer 
 	int offset1 = 2;
 	char mipmapbuf[3] = {buffer[0],buffer[1],'\0'};
-//	printf("mipmaps char form : %s \n",mipmapbuf);
 	int mips =  0;
 	if(internformat >= DXT1 && internformat <= DXT5)
 		mips = atoi(mipmapbuf);
-	// If datatype is png, we aren't compressing it
-	if(internformat >= PNGPALETTE8){
-		gl_options.compression = false;
-		if(internformat == PNGRGB24)
-			internformat = RGB24;
-		else if(internformat == PNGRGBA32)
-			internformat = RGBA32;
-		else 
-			internformat = PALETTE8;
-	}
 	
 	// This code i believe is executed if our texture isn't power of two 
 	if ((textures[handle].mipmapped&(TRILINEAR|MIPMAP))&&(!isPowerOfTwo (textures[handle].width,logwid)|| !isPowerOfTwo (textures[handle].height,logsize))) {
@@ -777,26 +766,12 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 	int width = textures[handle].width;
 	
 	// If s3tc compression is disabled, our DDS files must be software decompressed 
-	// They may later be recompressed upon loading into GL with the native codec
-	// This is going to incur a serious quality hit.
-	if(internformat == DXT5 || (!gl_options.s3tc&& internformat >= DXT1 && internformat <= DXT5)){
-		/* HACK */
-		// We add to the DXT5 blacklist by adding .find strings 
-		// Currently only Nvidia 6600 series cards using driver 169.x are added
-		std::string glversion = (const char *) glGetString(GL_VERSION);
-		std::string::size_type loc = glversion.find( "NVIDIA 169", 0 );
-	   	if( loc != string::npos || !gl_options.s3tc) {
-			glversion  = (const char *) glGetString(GL_RENDERER);
-			std::string::size_type loc2 = glversion.find( "6600", 0 );
-			if( loc2 != string::npos || !gl_options.s3tc) {
-				unsigned char *tmpbuffer = buffer +offset1;
-				ddsDecompress(tmpbuffer,data,internformat,textures[handle].height,textures[handle].width);
-				buffer = data;
-				internformat = RGBA32;
-				textures[handle].textureformat = GL_RGBA;
-			}
-		}
-		/* END HACK */
+	if(internformat >= DXT1 && internformat <= DXT5 && !gl_options.s3tc){
+		unsigned char *tmpbuffer = buffer +offset1;
+		ddsDecompress(tmpbuffer,data,internformat,textures[handle].height,textures[handle].width);
+		buffer = data;
+		internformat = RGBA32;
+		textures[handle].textureformat = GL_RGBA;
 	}
 	
 	if (internformat!=PALETTE8 && internformat != PNGPALETTE8) {

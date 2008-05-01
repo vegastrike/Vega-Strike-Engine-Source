@@ -395,12 +395,6 @@ unsigned char *	VSImage::ReadPNG()
 #ifdef VSIMAGE_DEBUG
 	   VSFileSystem::vs_fprintf (stderr,"Decompressing Done.\n");
 #endif
-	if(numchan == 1)
-		mode=_PNG8BIT;
-	else if (numchan == 3)
-		mode=_PNG24BIT;
-	else 
-		mode=_PNG32BIT;		
 	if( result)
 		this->AllocatePalette();
 	return result;
