@@ -114,8 +114,11 @@ namespace Audio {
                 candidates.begin(), 
                 candidates.end(), 
                 MappedComparator<CodecPriority,Codec*>(codecPriority));
-            
-            for (std::vector<Codec*>::const_reverse_iterator it = candidates.rbegin(); it != candidates.rend(); ++it)
+
+			// Why do we need an explicit cast *to* const?
+			// See http://www.mpi-inf.mpg.de/~hitoshi/otherprojects/tips/cpp-memo.shtml
+            for (std::vector<Codec*>::const_reverse_iterator it = candidates.rbegin();
+				    it != reinterpret_cast<const std::vector<Codec*> &>(candidates).rend(); ++it)
                 if ((*it)->canHandle(path, true, type))
                     return *it;
         }

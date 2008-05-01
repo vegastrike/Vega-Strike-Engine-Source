@@ -35,7 +35,10 @@ protected:
     {
         if (_singletonInstance != 0)
             delete _singletonInstance;
-        _singletonInstance = (INIT())();
+        
+        // GCC 3.3 errors out if you do '(INIT())()'
+        INIT singletonConstructor;
+        _singletonInstance = singletonConstructor();
     }
     
     static void deinitializeSingleton()

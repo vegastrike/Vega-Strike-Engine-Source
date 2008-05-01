@@ -249,12 +249,9 @@ else
 fi
 
 # Remove these flags beforehand... this should not remove functionality.
-CXXFLAGS=${CXXFLAGS#-g}
-CXXFLAGS=${CXXFLAS#-O2}
-VS_CXXFLAGS=${VS_CXXFLAGS#-g}
-VS_CXXFLAGS=${VS_CXXFLAGS#-O2}
-CFLAGS=${CFLAGS#-g}
-CFLAGS=${CFLAGS#-O2}
+CXXFLAGS=["`echo $CXXFLAGS | sed -e 's/-g[^[:space:]]*//g' | sed -e 's/-O[^[:space:]]//g'`"]
+CFLAGS=["`echo $CFLAGS | sed -e 's/-g[^[:space:]]*//g' | sed -e 's/-O[^[:space:]]//g'`"]
+VS_CXXFLAGS=["`echo $VS_CXXFLAGS | sed -e 's/-g[^[:space:]]*//g' | sed -e 's/-O[^[:space:]]//g'`"]
 
 AC_ARG_ENABLE(permissive,    AC_HELP_STRING([--enable-permissive], [Build code with -fpermissive flag]),[ACENABLE=$enableval], [ACENABLE=no])
 if test $ACENABLE = yes ; then
@@ -571,8 +568,8 @@ AC_DEFUN([CHECK_FOR_GLUT_LIB], [
     echo $LIBS
     AC_TRY_LINK( , , have_glut_lib=yes, have_glut_lib=no )
     AC_MSG_RESULT([$have_glut_lib])
+    LDFLAGS="$saved_LDFLAGS"
 ])
-LDFLAGS="$saved_LDFLAGS"
 saved_LIBS="$LIBS"
 
 GLUT_LIB_LIST="glut32 glut"
