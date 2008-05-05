@@ -1681,7 +1681,7 @@ void Arrested (Unit * parent) {
 		}
 	}
 	if (attack) {
-	static std::string prison_system = vs_config->getVariable ("galaxy","PrisonSystem","enigma_sector/prison");
+	static std::string prison_system = vs_config->getVariable ("galaxy","PrisonSystem","Sol/Nu_Pheonix");
 	std::string psys = prison_system+"_"+fac;
 	if (UnitUtil::getUnitSystemFile(parent)!=psys) {
 		UnitUtil::JumpTo(parent,psys);
