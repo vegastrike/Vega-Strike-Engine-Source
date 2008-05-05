@@ -41,7 +41,8 @@ class Unit;
          virtual std::string greet() const { return "Hello from " + country; }
          virtual ~hello(){VSFileSystem::vs_fprintf (stderr,"NO HELLO %d",this);} // Good practice 
      };
-	 struct hello_callback : hello
+
+     struct hello_callback : hello
      {
          // hello constructor storing initial self_ parameter
          hello_callback(PyObject* self_, const std::string& x) // 2
@@ -61,6 +62,7 @@ class Unit;
       private:
          PyObject* self; // 1
      };
+
 class MyBaseClass {
 private:
 protected:
@@ -236,8 +238,11 @@ void Python::initpaths(){
   for( int i=1; i<VSFileSystem::Rootdir.size(); i++)
   {
 	  modpaths += "r\""+VSFileSystem::Rootdir[i]+ PATHSEP +moduledir+ PATHSEP "builtin\",";
-	  modpaths += "r\""+VSFileSystem::Rootdir[i]+ PATHSEP +moduledir+"\",";
-	  modpaths += "r\""+VSFileSystem::Rootdir[i]+ PATHSEP +basesdir+"\"";
+      modpaths += "r\""+VSFileSystem::Rootdir[i]+ PATHSEP +moduledir+ PATHSEP "quests\",";
+      modpaths += "r\""+VSFileSystem::Rootdir[i]+ PATHSEP +moduledir+ PATHSEP "missions\",";
+      modpaths += "r\""+VSFileSystem::Rootdir[i]+ PATHSEP +moduledir+ PATHSEP "ai\",";
+      modpaths += "r\""+VSFileSystem::Rootdir[i]+ PATHSEP +moduledir+"\",";
+      modpaths += "r\""+VSFileSystem::Rootdir[i]+ PATHSEP +basesdir+"\"";
 	  if( i+1<VSFileSystem::Rootdir.size())
 		  modpaths+= ",";
   }
@@ -314,6 +319,7 @@ static void QVector_construct(PyObject* source, boost::python::converter::rvalue
 	data->convertible = storage;
 }
 #endif
+
 void Python::init() {
 
   static bool isinit=false;
@@ -341,6 +347,7 @@ void Python::init() {
 	InitBase ();
 //  InitVegastrike();
 }
+
 void Python::test() {
 
 	/* initialize vegastrike module so that 
@@ -427,4 +434,3 @@ PyObject* Py_CompileString(char *str, char *filename, int start)
 }
 
 #endif
-
