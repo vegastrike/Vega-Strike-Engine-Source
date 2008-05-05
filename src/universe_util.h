@@ -47,7 +47,7 @@ namespace UniverseUtil
 	Unit * GetUnitFromSerial( ObjSerial serial);
 	///this gets a unit with 1 of each cargo type in it
 	Unit *GetMasterPartList ();
-	///this function sets the "current" system to be "name"  where name may be something like "sol_sector/sol"  or "vega_sector/vega"   this function may take some time if the system has not been loaded before
+	///this function sets the "current" system to be "name"  where name may be something like "Sol/Sol" or "Crucible/Cephid_17"  this function may take some time if the system has not been loaded before
 
 	void pushSystem (std::string name);
 	bool systemInMemory(std::string name);

@@ -379,7 +379,7 @@ const string& SGalaxy::getVariable(const string &section, const string &subsecti
 #ifdef WRITEGALAXYCOORDS
 	static bool  blah = false;
 	if (!blah) {
-		processGalaxy("sol_sector/sol");
+		processGalaxy("Sol/Sol");
 		writeGalaxy("/tmp/outputgalaxy");
 		blah = true;
 	}
