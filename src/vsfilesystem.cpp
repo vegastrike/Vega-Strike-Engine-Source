@@ -567,6 +567,7 @@ std::string vegastrike_cwd;
 			data_paths.push_back( vegastrike_cwd+"/..");
 			data_paths.push_back( vegastrike_cwd+"/../data4.x");
 			data_paths.push_back( vegastrike_cwd+"/../../data4.x");
+			data_paths.push_back( vegastrike_cwd+"/../../data");
 			data_paths.push_back( vegastrike_cwd+"/data4.x");
 			data_paths.push_back( vegastrike_cwd+"/data");
 			data_paths.push_back( vegastrike_cwd+"/../data");
@@ -1244,7 +1245,7 @@ std::string vegastrike_cwd;
 	int		FileExistsHome( const char * filename, VSFileType type) { return FileExists( homedir, filename, type); }
 	int		FileExistsHome( const string &filename, VSFileType type) { return FileExists( homedir, filename, type); }
 
-	VSError GetError( char * str)
+	VSError GetError( const char * str)
 	{
 			cerr<<"!!! ERROR/WARNING VSFile : ";
 			if( str)

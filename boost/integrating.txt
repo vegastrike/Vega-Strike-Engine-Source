@@ -3,30 +3,17 @@ python integrtion library to the Vega Strike build system.
 Assuming that the version of boost works with Vega Strike, very little
 developer time should be required.
 
-1.  Get new version of boost.
-    The boost libraries are available at www.boost.org.  Please download a UNIX
-    version of the library (.bz2 or .gz ending).  Do not use the .exe or .zip.
-    This probably means that initial integration of boost should be done by a
-    UNIX based developer.
+1.  Create new directory under /boost of $VER, where $Ver has the . replaced with underscore.
 
-2.  Extract the files into a directory seperate from your VegaStrike development
-    sandbox.
-    
-3.  Make a new directory under boost called ${VER}, where ${VER}
-    is the version number of the boost library being integrated, with periods
-    replaced with underscores.
-    For instance, if you are integrating boost 1.31, the directory should be
-    1_31
-    
-4.  Move the boost subdirectory from the boost download into the directory
-    created in 3.
+2.  Add new dir to svn.   Run propedit svn:externals to point boost to desired release 
+    For example,   boost http://svn.boost.org/svn/boost/tags/release/Boost_1_35_0/boost
+    commit. 
 
-5.  Move the libs/python/src folder into the directory created in 3.
+3.  svn copy src dir from last /boost/$VER to new /boost/$VER
+    Use remote urls. 
 
-6.  In the boost directory, execute the update script.
-    (./update)
 
-7.  Modify m4scripts/VS_WITH_BOOST.m4
+4.  Modify m4scripts/VS_WITH_BOOST.m4
     a)  Modify the help string to show the new version.
     b)  Modify the case to treat the new version as valid
     c)  Copy one of the existing AM_CONDITIONAL lines and modify the
@@ -37,21 +24,11 @@ developer time should be required.
         the m4scripts/VS_WITH_BOOST.m4 file and remove the directory
         containing the obsolete version.
         useful commands:  
-          find ${VER} -name CVS -prune , -type f exec rm "{}"
-          cvs remove ${VER}               
-8.  Test new boost sources.
+        
+5.  Test new boost sources.
     a)  in vegastrike root directory, run autotools.
         (./bootstrap-sh --with-boost=${DOTTEDVER})
     b)  correct any errors seen in a) and repeat as necessary.
     c)  run make
     d)  correct any errors seen in c) and repeat as necessary.
 
-9.  Run cvsadd script, using version number in place of ${VER}.
-    (./update ${VER})  Get a coffee, this will take a while.  :)
-
-10. Commit your changes.  Go get another coffee, this will take a while  :)
-
-Unfortunately, adding that many new files and directories to CVS takes a
-while.  My first test of this process created 425 directories (3 boost
-versions), generating a LOT of mail traffic in the vegastrike CVS user list.
-The number of files will be considerably greater.

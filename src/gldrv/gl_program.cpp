@@ -352,7 +352,7 @@ int GFXShaderConstantv(int name,unsigned int count, int *value) {
 }
 
 
-int GFXNamedShaderConstant(char*progID,char*name) {
+int GFXNamedShaderConstant(char*progID,const char*name) {
   int programname=defaultprog;
   if(progID)
     programname=loadedprograms[progID];
@@ -368,7 +368,8 @@ int GFXNamedShaderConstant(char*progID,char*name) {
 }
 
 
-
+/* This function is not used  */
+#if 0
 int GFXNamedShaderConstant(char*progID,char*name,int value) {
   int programname=defaultprog;
   if(progID)
@@ -384,3 +385,4 @@ int GFXNamedShaderConstant(char*progID,char*name,int value) {
   }
   return 0;
 }
+#endif 

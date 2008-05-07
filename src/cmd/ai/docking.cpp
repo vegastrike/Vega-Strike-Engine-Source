@@ -1,4 +1,3 @@
-#include <string>
 #include "python/python_compile.h"
 #include "docking.h"
 #include "xml_support.h"
@@ -6,7 +5,7 @@
 #include "cmd/unit_generic.h"
 #include "warpto.h"
 #include "universe_util.h"
-
+#include <string>
 static void DockedScript(Unit * docker, Unit * base) {
   static string script = vs_config->getVariable("AI","DockedToScript","");
   if (script.length()>0) {

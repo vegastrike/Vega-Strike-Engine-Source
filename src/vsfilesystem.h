@@ -250,7 +250,7 @@ namespace VSFileSystem
 	int		FileExistsData( const char * filename, VSFileType type=UnknownFile);
 	int		FileExistsData( const string &filename, VSFileType type=UnknownFile);
 
-	VSError	GetError(char * str=NULL);
+	VSError	GetError(const char * str=NULL);
 
 	VSError	LookForFile( VSFile & f, VSFileType type, VSFileMode mode=ReadOnly);
 	VSError	LookForFile( const string & filename, VSFileType type, VSFileMode mode=ReadOnly);

@@ -22,9 +22,8 @@
 // config.h is the VS ./configure determined header.
 #include "config.h" 
 #include <float.h>
-
+#include <wchar.h>
 #if defined(_WIN32) && !defined(__CYGWIN__) // && defined(_MSC_VER)
-#include <wchar.h> /* Beats me why this wasn't included first. */
 // Hack
 #define CS_COMPILER_MSVC 1
 #ifdef _WIN64
@@ -191,16 +190,8 @@ typedef uint64 uintmax_t;
 // fake up these types on our own. glibc also #defines _WINT_T when wint_t is
 // available, so we double-check that, as well.
 #include <stddef.h>
-#if defined(HAVE_WCHAR_H)
-#include <wchar.h>
-#endif
 #if defined(HAVE_WCTYPE_H)
 #include <wctype.h>
-#endif
-#if !defined(CS_HAVE_WCHAR_T) && !defined(_WCHAR_T_DEFINED)
-typedef uint16 wchar_t;
-#define _WCHAR_T_DEFINED
-#define CS_WCHAR_T_SIZE 2
 #endif
 #if !defined(CS_HAVE_WINT_T) && !defined(_WCTYPE_T_DEFINED) && \
     !defined(_WINT_T)

@@ -528,7 +528,7 @@ void commandI::pcommands() {
 }
 // }}}
 // {{{ addCommand - Add a command to the interpreter
-void commandI::addCommand(TFunctor *com, char *name){
+void commandI::addCommand(TFunctor *com, const char *name){
 	std::cout << "Adding command: " << name << std::endl;
 	coms *newOne = new coms(com); 
 	// See the very bottom of this file for comments about possible optimization

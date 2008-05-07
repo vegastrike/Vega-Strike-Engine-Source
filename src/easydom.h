@@ -130,10 +130,9 @@ domNodeType *LoadXML(const char *filename) {
   topnode=NULL;
   // Not really nice but should do its job
   unsigned int length = strlen( filename);
-  assert( length > 8);
   VSFile f;
   VSError err=FileNotFound;
-  if( !memcmp( (filename+length-7), "mission", 7)) {
+  if( length > 8 && !memcmp( (filename+length-7), "mission", 7)) {
   	err = f.OpenReadOnly( filename, MissionFile);
   }
   if (err>Ok) {

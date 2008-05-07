@@ -788,8 +788,8 @@ enum ShaderConstantEnum{
 };
 struct ShaderConstantLookup{
   int id;
-  char *name;
-  ShaderConstantLookup(int id, char*name){this->id=id;this->name=name;}
+  const char *name;
+  ShaderConstantLookup(int id, const char*name){this->id=id;this->name=name;}
 };
 ShaderConstantLookup shaderConstants[NUM_SHADER_CONSTANTS]={
   ShaderConstantLookup(-1,"diffuseMap"),

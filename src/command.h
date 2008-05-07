@@ -106,7 +106,7 @@ class commandI : public RText {
                 //if args is not supplied it assumes your function
                 //has no arguements (not even a void)
 		void help(std::string &d); //help command, should read a help file
-                void addCommand(TFunctor *com, char *name); //add a downcasted Functor
+                void addCommand(TFunctor *com, const char *name); //add a downcasted Functor
 		void remCommand(char *name);
 		void remCommand(TFunctor *com); //use this now if possible		
                 void dummy(std::vector<std::string *> *d);// {return;}; //first thing to be added to the vecto

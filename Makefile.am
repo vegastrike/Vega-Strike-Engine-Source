@@ -2,6 +2,7 @@ ACLOCAL_AMFLAGS = -I m4scripts
 
 
 
+
 #BOOST_BEGIN -- Data between the BOOST_AUTO and BOOST_END tags auto generated.
 if !BOOSTSYSTEM
 BOOSTDIR=boost
@@ -30,57 +31,41 @@ BOOSTSOURCES = \
   boost/1_33/src/converter/builtin_converters.cpp \
   boost/1_33/src/converter/type_id.cpp \
   boost/1_33/src/tuple.cpp 
-
-else !BOOST1_33
-if BOOST1_31
+else 
+if BOOST1_35
+BOOSTSOURCES_CXXFLAGS = -DBOOST_PYTHON_NO_PY_SIGNATURES -DBOOST_PYTHON_STATIC_LIB
 BOOSTSOURCES = \
-  boost/1_31/src/list.cpp \
-  boost/1_31/src/module.cpp \
-  boost/1_31/src/aix_init_module.cpp \
-  boost/1_31/src/object_protocol.cpp \
-  boost/1_31/src/dict.cpp \
-  boost/1_31/src/numeric.cpp \
-  boost/1_31/src/errors.cpp \
-  boost/1_31/src/str.cpp \
-  boost/1_31/src/object_operators.cpp \
-  boost/1_31/src/long.cpp \
-  boost/1_31/src/object/pickle_support.cpp \
-  boost/1_31/src/object/life_support.cpp \
-  boost/1_31/src/object/inheritance.cpp \
-  boost/1_31/src/object/class.cpp \
-  boost/1_31/src/object/enum.cpp \
-  boost/1_31/src/object/function.cpp \
-  boost/1_31/src/object/iterator.cpp \
-  boost/1_31/src/converter/from_python.cpp \
-  boost/1_31/src/converter/registry.cpp \
-  boost/1_31/src/converter/arg_to_python_base.cpp \
-  boost/1_31/src/converter/builtin_converters.cpp \
-  boost/1_31/src/converter/type_id.cpp \
-  boost/1_31/src/tuple.cpp 
-
-else !BOOST1_31
-if BOOST1_28
-BOOSTSOURCES = \
-  boost/1_28/src/module.cpp \
-  boost/1_28/src/cross_module.cpp \
-  boost/1_28/src/types.cpp \
-  boost/1_28/src/extension_class.cpp \
-  boost/1_28/src/errors.cpp \
-  boost/1_28/src/functions.cpp \
-  boost/1_28/src/init_function.cpp \
-  boost/1_28/src/module_builder.cpp \
-  boost/1_28/src/objects.cpp \
-  boost/1_28/src/object/life_support.cpp \
-  boost/1_28/src/object/function.cpp \
-  boost/1_28/src/converter/callback.cpp \
-  boost/1_28/src/classes.cpp \
-  boost/1_28/src/conversions.cpp 
-else !BOOST1_28
+  boost/1_35/src/list.cpp \
+  boost/1_35/src/module.cpp \
+  boost/1_35/src/object_protocol.cpp \
+  boost/1_35/src/dict.cpp \
+  boost/1_35/src/numeric.cpp \
+  boost/1_35/src/errors.cpp \
+  boost/1_35/src/exec.cpp \
+  boost/1_35/src/str.cpp \
+  boost/1_35/src/import.cpp \
+  boost/1_35/src/wrapper.cpp \
+  boost/1_35/src/object_operators.cpp \
+  boost/1_35/src/long.cpp \
+  boost/1_35/src/object/pickle_support.cpp \
+  boost/1_35/src/object/life_support.cpp \
+  boost/1_35/src/object/inheritance.cpp \
+  boost/1_35/src/object/function_doc_signature.cpp \
+  boost/1_35/src/object/stl_iterator.cpp \
+  boost/1_35/src/object/class.cpp \
+  boost/1_35/src/object/enum.cpp \
+  boost/1_35/src/object/function.cpp \
+  boost/1_35/src/object/iterator.cpp \
+  boost/1_35/src/converter/from_python.cpp \
+  boost/1_35/src/converter/registry.cpp \
+  boost/1_35/src/converter/arg_to_python_base.cpp \
+  boost/1_35/src/converter/builtin_converters.cpp \
+  boost/1_35/src/converter/type_id.cpp \
+  boost/1_35/src/tuple.cpp 
+else 
 BOOSTSOURCES=
-endif !BOOST1_28
-endif !BOOST1_31
-endif !BOOST1_33
-#BOOST_END -- Data between the BOOST_AUTO and BOOST_END tags auto generated.
+endif
+endif 
 
 #This was in the acct server and networking library stuff
 #if MACOSX
@@ -673,7 +658,6 @@ LIBGFXSERVER = \
   src/gfx/mesh_server.cpp \
   src/gfx/background_server.cpp
 
-
 libnetlowlevel_a_SOURCES = \
   src/networking/lowlevel/GCPtr.h \
   src/networking/lowlevel/netbuffer.cpp \
@@ -899,7 +883,6 @@ LIBENGINE_COMMON = \
   $(librootgeneric) \
   $(LIBSCRIPT) \
   $(LIBGFX)
-
 vegaserver_SOURCES = \
   $(LIBENGINE_COMMON) \
   $(LIBCMDSERVER) \
@@ -913,7 +896,7 @@ vegaserver_SOURCES = \
   src/gldrv/gl_vertex_list.cpp \
   src/gldrv/gl_sphere_list_server.cpp
 
-vegastrike_CXXFLAGS = -include $(PRECOMPILED)
+#vegastrike_CXXFLAGS = -include $(PRECOMPILED)
 vegastrike_SOURCES = \
   $(LIBENGINE_COMMON) \
   $(LIBGUI) \
