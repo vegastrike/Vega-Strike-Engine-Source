@@ -4,10 +4,10 @@ AC_DEFUN([VS_WITH_BOOST],
 #Choosing Version of Boost Python library to use
 #--------------------------------------------------------------------------
 AC_ARG_WITH(boost, AC_HELP_STRING([[--with-boost[=VERSION]]], 
-[Currently supported versions are 1.33,1.35, and system]))
+[Currently supported versions are 1.28,1.35, and system]))
 case "$with_boost" in
-   "") with_boost=1.33 ;;
-   "1.33" | "1.35" | "system") ;;
+   "") with_boost=1.28 ;;
+   "1.28" | "1.35" | "system") ;;
    *) AC_MSG_ERROR([${with_boost} is not a valid boost version]) ;;
 esac
 
@@ -32,7 +32,7 @@ AC_MSG_NOTICE([Using Boost Version ${with_boost}.])
 fi
 fi
 AC_SUBST(BOOST_CPPFLAGS)
-AM_CONDITIONAL([BOOST1_33], [test x$with_boost = x1.33])
+AM_CONDITIONAL([BOOST1_28], [test x$with_boost = x1.28])
 AM_CONDITIONAL([BOOST1_35], [test x$with_boost = x1.35])
 AM_CONDITIONAL([BOOSTSYSTEM], [test x$with_boost = xsystem])
 ])

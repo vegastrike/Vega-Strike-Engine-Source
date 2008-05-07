@@ -6,31 +6,22 @@ ACLOCAL_AMFLAGS = -I m4scripts
 #BOOST_BEGIN -- Data between the BOOST_AUTO and BOOST_END tags auto generated.
 if !BOOSTSYSTEM
 BOOSTDIR=boost
-if BOOST1_33
+if BOOST1_28
 BOOSTSOURCES = \
-  boost/1_33/src/list.cpp \
-  boost/1_33/src/module.cpp \
-  boost/1_33/src/aix_init_module.cpp \
-  boost/1_33/src/object_protocol.cpp \
-  boost/1_33/src/dict.cpp \
-  boost/1_33/src/numeric.cpp \
-  boost/1_33/src/errors.cpp \
-  boost/1_33/src/str.cpp \
-  boost/1_33/src/object_operators.cpp \
-  boost/1_33/src/long.cpp \
-  boost/1_33/src/object/pickle_support.cpp \
-  boost/1_33/src/object/life_support.cpp \
-  boost/1_33/src/object/inheritance.cpp \
-  boost/1_33/src/object/class.cpp \
-  boost/1_33/src/object/enum.cpp \
-  boost/1_33/src/object/function.cpp \
-  boost/1_33/src/object/iterator.cpp \
-  boost/1_33/src/converter/from_python.cpp \
-  boost/1_33/src/converter/registry.cpp \
-  boost/1_33/src/converter/arg_to_python_base.cpp \
-  boost/1_33/src/converter/builtin_converters.cpp \
-  boost/1_33/src/converter/type_id.cpp \
-  boost/1_33/src/tuple.cpp 
+	boost/1_28/src/module.cpp \
+	boost/1_28/src/cross_module.cpp \
+	boost/1_28/src/types.cpp \
+	boost/1_28/src/extension_class.cpp \
+	boost/1_28/src/errors.cpp \
+	boost/1_28/src/functions.cpp \
+	boost/1_28/src/init_function.cpp \
+	boost/1_28/src/module_builder.cpp \
+	boost/1_28/src/objects.cpp \
+	boost/1_28/src/object/life_support.cpp \
+	boost/1_28/src/object/function.cpp \
+	boost/1_28/src/converter/callback.cpp \
+	boost/1_28/src/classes.cpp \
+	boost/1_28/src/conversions.cpp
 else 
 if BOOST1_35
 BOOSTSOURCES_CXXFLAGS = -DBOOST_PYTHON_NO_PY_SIGNATURES -DBOOST_PYTHON_STATIC_LIB
