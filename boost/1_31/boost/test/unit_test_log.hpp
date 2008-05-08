@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision$
+//  Version     : $Revision: 9977 $
 //
 //  Description : defines singleton class unit_test_log and all manipulators.
 //  unit_test_log has output stream like interface. It's implementation is

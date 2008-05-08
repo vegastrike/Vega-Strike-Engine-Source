@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision$
+//  Version     : $Revision: 9977 $
 //
 //  Description : support for automated test cases registration mechanism
 //                for simple function based test cases

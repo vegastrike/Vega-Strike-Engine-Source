@@ -13,7 +13,7 @@
 
 // Author: Dietmar Kuehl dietmar.kuehl@claas-solutions.de 
 // Title:  STL container support, including support for built-in arrays
-// Version: $Id$
+// Version: $Id: array_traits.hpp 9977 2005-11-27 04:18:48Z balloyd1 $
 
 // Dec 4, 2000  Added some more typedefs to array_traits including
 //              an iterator type to supersede iter_type. -J.Siek

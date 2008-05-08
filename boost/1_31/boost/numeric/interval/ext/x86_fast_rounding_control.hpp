@@ -10,7 +10,7 @@
  * representation about the suitability of this software for any
  * purpose. It is provided "as is" without express or implied warranty.
  *
- * $Id$
+ * $Id: x86_fast_rounding_control.hpp 9977 2005-11-27 04:18:48Z balloyd1 $
  */
 
 #ifndef BOOST_NUMERIC_INTERVAL_EXT_X86_FAST_ROUNDING_CONTROL_HPP

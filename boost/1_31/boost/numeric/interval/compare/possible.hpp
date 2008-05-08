@@ -10,7 +10,7 @@
  * suitability of this software for any purpose. It is provided "as
  * is" without express or implied warranty.
  *
- * $Id$
+ * $Id: possible.hpp 9977 2005-11-27 04:18:48Z balloyd1 $
  */
 
 #ifndef BOOST_NUMERIC_INTERVAL_COMPARE_POSSIBLE_HPP

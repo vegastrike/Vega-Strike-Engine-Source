@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision$
+//  Version     : $Revision: 9977 $
 //
 //  Description : defines specific version of execution monitor used to run unit 
 //  test cases. Translates executioin exception into error level

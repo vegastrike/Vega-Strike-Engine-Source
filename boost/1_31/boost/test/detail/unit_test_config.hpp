@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision$
+//  Version     : $Revision: 9977 $
 //
 //  Description : contains workarounds and works as a central place for configurable types
 // ***************************************************************************

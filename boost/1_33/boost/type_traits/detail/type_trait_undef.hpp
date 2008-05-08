@@ -8,8 +8,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 // $Source$
-// $Date$
-// $Revision$
+// $Date: 2005-11-26 23:18:48 -0500 (Sat, 26 Nov 2005) $
+// $Revision: 9977 $
 
 #undef BOOST_TT_AUX_TYPE_TRAIT_DEF1
 #undef BOOST_TT_AUX_TYPE_TRAIT_SPEC1

@@ -10,7 +10,7 @@
  * software for any purpose. It is provided "as is" without express or
  * implied warranty.
  *
- * $Id$
+ * $Id: nondet_random.hpp 9977 2005-11-27 04:18:48Z balloyd1 $
  *
  * Revision history
  *  2000-02-18  Portability fixes (thanks to Beman Dawes)

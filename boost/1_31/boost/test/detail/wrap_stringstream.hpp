@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision$
+//  Version     : $Revision: 9977 $
 //
 //  Description : wraps strstream and stringstream (depends with one is present )
 //                to prodive the unified interface

@@ -11,7 +11,7 @@
  * representation about the suitability of this software for any
  * purpose. It is provided "as is" without express or implied warranty.
  *
- * $Id$
+ * $Id: sparc_rounding_control.hpp 9977 2005-11-27 04:18:48Z balloyd1 $
  */
 
 /* The basic code in this file was kindly provided by Jeremy Siek. */

@@ -31,7 +31,7 @@
  *  interpreted as representing official policies, either expressed or 
  *  implied, of the LibPK3 Project or Viktor Liehr alias picard.
  *
- *  $Id$
+ *  $Id: pk3.cpp 11819 2008-02-11 01:37:56Z ace123 $
  *
  */
 

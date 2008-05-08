@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision$
+//  Version     : $Revision: 9977 $
 //
 //  Description : simple facility that mimmic notion of read-only read-write 
 //  properties in C++ classes. Original idea by Henrik Ravn.

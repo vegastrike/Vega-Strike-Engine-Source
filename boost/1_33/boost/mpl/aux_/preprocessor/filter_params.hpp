@@ -11,8 +11,8 @@
 // See http://www.boost.org/libs/mpl for documentation.
 
 // $Source$
-// $Date$
-// $Revision$
+// $Date: 2005-11-26 23:18:48 -0500 (Sat, 26 Nov 2005) $
+// $Revision: 9977 $
 
 #define BOOST_MPL_PP_FILTER_PARAMS_0(p1,p2,p3,p4,p5,p6,p7,p8,p9) 
 #define BOOST_MPL_PP_FILTER_PARAMS_1(p1,p2,p3,p4,p5,p6,p7,p8,p9) p1

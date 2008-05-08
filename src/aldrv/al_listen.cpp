@@ -11,6 +11,7 @@
 #include "al_globals.h"
 #include "vs_globals.h"
 #include "vsfilesystem.h"
+#include "config_xml.h"
 using std::vector;
 struct Listener {
   Vector pos;
@@ -52,6 +53,10 @@ char AUDQueryAudability (const int sound, const Vector &pos, const Vector & vel,
     t=Vector(0,0,0);
     mag=0;
     return 1;
+  }
+  static float max_cutoff=XMLSupport::parse_float(vs_config->getVariable("audio","audio_cutoff_distance","1000000"));
+  if (!(mag<max_cutoff*max_cutoff)) {
+      return 0;
   }
   int hashed = hash_sound (sounds[sound].buffer);
 

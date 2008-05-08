@@ -12,7 +12,7 @@
  *
  * See http://www.boost.org for most recent version including documentation.
  *
- * $Id$
+ * $Id: poisson_distribution.hpp 9977 2005-11-27 04:18:48Z balloyd1 $
  *
  */
 

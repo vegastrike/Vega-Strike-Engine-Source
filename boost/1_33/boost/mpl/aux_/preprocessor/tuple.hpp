@@ -11,8 +11,8 @@
 // See http://www.boost.org/libs/mpl for documentation.
 
 // $Source$
-// $Date$
-// $Revision$
+// $Date: 2005-11-26 23:18:48 -0500 (Sat, 26 Nov 2005) $
+// $Revision: 9977 $
 
 #define BOOST_MPL_PP_TUPLE_11_ELEM_0(e0,e1,e2,e3,e4,e5,e6,e7,e8,e9,e10) e0
 #define BOOST_MPL_PP_TUPLE_11_ELEM_1(e0,e1,e2,e3,e4,e5,e6,e7,e8,e9,e10) e1

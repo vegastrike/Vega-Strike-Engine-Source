@@ -6,7 +6,7 @@
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE-1.0 or http://www.boost.org/LICENSE-1.0)
  * Author: Jeff Garland 
- * $Date$
+ * $Date: 2005-11-26 23:18:48 -0500 (Sat, 26 Nov 2005) $
  */
 
 #include "boost/date_time/gregorian/greg_weekday.hpp"

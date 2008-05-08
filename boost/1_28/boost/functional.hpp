@@ -14,7 +14,7 @@
 // purpose.  It is provided "as is" without express or implied
 // warranty.
 // ------------------------------------------------------------------------------
-// $Id$
+// $Id: functional.hpp 9977 2005-11-27 04:18:48Z balloyd1 $
 // ------------------------------------------------------------------------------
 
 #ifndef BOOST_FUNCTIONAL_HPP
