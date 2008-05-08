@@ -197,7 +197,6 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 	chdir (pwent->pw_dir);
-	chdir (HOMESUBDIR.c_str());
 
 	mkdir(HOMESUBDIR.c_str()
 #ifndef _WIN32
@@ -206,8 +205,8 @@ int main(int argc, char *argv[]) {
 		);
 
 #endif
-#ifdef GTK
-#endif    //GTK
+	chdir (HOMESUBDIR.c_str());
+	
 	Start(&argc,&argv);
 #if defined(_WINDOWS)&&defined(_WIN32)
 	delete []argv0;
