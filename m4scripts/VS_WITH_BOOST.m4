@@ -6,7 +6,7 @@ AC_DEFUN([VS_WITH_BOOST],
 AC_ARG_WITH(boost, AC_HELP_STRING([[--with-boost[=VERSION]]], 
 [Currently supported versions are 1.28,1.35, and system]))
 case "$with_boost" in
-   "") with_boost=1.28 ;;
+   "") with_boost=1.35 ;;
    "1.28" | "1.35" | "system") ;;
    *) AC_MSG_ERROR([${with_boost} is not a valid boost version]) ;;
 esac
