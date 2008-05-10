@@ -367,7 +367,15 @@ unsigned char *	VSImage::ReadPNG()
 		numchan =1;
 	if (this->img_color_type&PNG_COLOR_MASK_ALPHA)
 		numchan++;
-	unsigned long stride = numchan*sizeof (unsigned char)*this->img_depth/8;
+    
+    if(numchan == 1)
+        mode=_8BIT;
+    else if (numchan == 3)
+        mode=_24BIT;
+    else
+        mode=_24BITRGBA;
+
+    unsigned long stride = numchan*sizeof (unsigned char)*this->img_depth/8;
 #ifdef VSIMAGE_DEBUG
 	cerr<<"3. Allocating image buffer of size="<<(stride*sizeX*sizeY)<<endl;
 #endif

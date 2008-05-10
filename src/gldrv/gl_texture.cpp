@@ -609,8 +609,10 @@ static GLenum RGBACompressed (GLenum internalformat)
 GLenum GetTextureFormat (TEXTUREFORMAT textureformat)
 {
 	switch(textureformat) {
+        case PNGRGB24:
 		case RGB32:
 			return RGBCompressed (GL_RGB);
+        case PNGRGBA32:
 		case RGBA32:
 			return RGBACompressed(GL_RGBA);
 		case RGBA16:
