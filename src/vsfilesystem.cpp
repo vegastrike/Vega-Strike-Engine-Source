@@ -1097,7 +1097,6 @@ std::string vegastrike_cwd;
 				fullpath = root+rootsep+file;
 			else
 				fullpath = root+rootsep+Directories[type]+"/"+file;
-
 			struct stat s;
                         //cache doesn't work because we *do* create files....
                         //and this is too lowlevel to know which files need to be created... *sigh*
@@ -1297,7 +1296,8 @@ std::string vegastrike_cwd;
             break;
         case AnimFile:
             // Animations are always in subdir named like the anim itself
-			extra = "/"+string( f.GetFilename());
+            extra =  "/" + current_subdirectory.back();
+			extra += "/" + f.GetFilename();
             break;
         }
 
@@ -1307,12 +1307,13 @@ std::string vegastrike_cwd;
                 for (int LC=0;LC<2&&found<0;(LC+=(extra==""?2:1)),extra="") {
 		if( current_path.back()!="" && (type==TextureFile || type==MeshFile || type==VSSpriteFile || type==AnimFile || type==VideoFile))
 		{
-			curpath = current_path.back();
+		for( i=0; found<0 && i<Rootdir.size(); i++)
+		{
+			curpath = Rootdir[i];
 			subdir = current_subdirectory.back();
 			if( extra!="")
 				subdir += extra;
 			curtype = current_type.back();
-
 			found = FileExists( curpath, (subdir+"/"+f.GetFilename()).c_str(), curtype);
 			if( found>=0)
 			{
@@ -1322,11 +1323,12 @@ std::string vegastrike_cwd;
 			else
 			{
 				// Set curtype back to original type if we didn't find the file in the current dir
+				
 				curtype = type;
 				shared = true;
 			}
 		}
-
+		}
 		// FIRST LOOK IN HOMEDIR FOR A STANDARD FILE, SO WHEN USING VOLUME WE DO NOT LOOK FIRST IN VOLUMES
 		if( found<0 && UseVolumes[curtype])
 		{
@@ -1341,7 +1343,6 @@ std::string vegastrike_cwd;
 				subdir = SubDirectories[curtype][j];
 				if( extra!="")
 					subdir += extra;
-
 				found = FileExists( curpath, (subdir+"/"+f.GetFilename()).c_str(), curtype, false);
 				f.SetVolume( VSFSNone);
 			}
@@ -1354,8 +1355,7 @@ std::string vegastrike_cwd;
 			subdir = f.GetSubDirectory();
 			if( extra!="")
 				subdir += extra;
-			found = FileExists( curpath, (subdir+"/"+f.GetFilename()).c_str(), type);
-
+			found = FileExists( curpath, (subdir+"/"+f.GetFilename()).c_str(), curtype);
 			for( j=0; found<0 && j<SubDirectories[curtype].size(); j++)
 			{
 				curpath = Rootdir[i];
@@ -1665,6 +1665,7 @@ std::string vegastrike_cwd;
                                   DisplayType( type);
                                   cerr<<endl;
                                 }
+                
 			}
 		}
 	}

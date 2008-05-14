@@ -27,10 +27,10 @@
 
 #ifndef __QSQRT_H__
 #define __QSQRT_H__
-#include "Stdafx.h"
+
 
 #if (!defined (CS_NO_QSQRT)) && defined (CS_PROCESSOR_X86) && defined (CS_COMPILER_GCC)
-
+#include "Stdafx.h"
 /*
   NB: Single-precision floating-point format (32 bits):
 	SEEEEEEE.EMMMMMMM.MMMMMMMM.MMMMMMMM

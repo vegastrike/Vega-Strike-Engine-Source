@@ -25,9 +25,8 @@
 */
 
 #ifndef __VS_OPCODECOL_H__
-#define __VS_OPCODECOL_H__
-
 #include "Stdafx.h"
+#define __VS_OPCODECOL_H__
 #include "csgeom2/opmatrix3.h"
 #include "csgeom2/opvector3.h"
 #include "csgeom2/opbox.h"

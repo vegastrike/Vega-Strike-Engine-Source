@@ -4,6 +4,11 @@
 
 //#define OPC_USE_CALLBACKS 1
 
+#define ICE_NO_DLL
+#define CS_PROCESSOR_X86
+#define CS_NO_QSQRT
+
+
 #ifndef CS_FORCEINLINE 
 # ifdef CS_COMPILER_GCC 
 #  define CS_FORCEINLINE inline __attribute__((always_inline)) 
