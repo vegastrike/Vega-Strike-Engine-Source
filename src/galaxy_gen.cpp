@@ -652,7 +652,7 @@ void MakeJump(float radius, bool forceRS=false, Vector R=Vector (0,0,0), Vector 
     *(thisname.begin()+8)=toupper(*(thisname.begin()+8));
   }
   Tab();
-  f.Fprintf ("<Jump name=\"%s\" file=\"%s\" ",thisname.c_str(),"jump.png");
+  f.Fprintf ("<Jump name=\"%s\" file=\"%s\" ",thisname.c_str(),"jump.texture");
   f.Fprintf ("ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",RR.i,RR.j,RR.k,SS.i,SS.j,SS.k);
   f.Fprintf ("radius=\"%f\" ",radius);
   f.Fprintf ("x=\"%f\" y=\"%f\" z=\"%f\" ",center.i,center.j,center.k);
