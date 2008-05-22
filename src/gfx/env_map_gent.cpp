@@ -269,9 +269,9 @@ static void Spherize (CubeCoord Tex [lmwid][lmwid],CubeCoord gluSph [lmwid][lmwi
 	if (!Data) 
 	  return;//borken down and down Data[5], right Data[3]
 	char *tmp= (char *)malloc (strlen (InputName)+60);;
-	if (!(LoadTex (strcat (strcpy(tmp,InputName),"_front.bmp"),Data[0].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_back.bmp"),Data[1].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_left.bmp"),Data[2].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_right.bmp"),Data[3].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_up.bmp"),Data[4].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_down.bmp"),Data[5].D))) {
-	  if (!LoadTex (strcat (strcpy(tmp,InputName),"_sphere.bmp"),Data[0].D )) {
-	    LoadTex (strcat (strcpy(tmp,InputName),".bmp"),Data[0].D);
+	if (!(LoadTex (strcat (strcpy(tmp,InputName),"_front.image"),Data[0].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_back.image"),Data[1].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_left.image"),Data[2].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_right.image"),Data[3].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_up.image"),Data[4].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_down.image"),Data[5].D))) {
+	  if (!LoadTex (strcat (strcpy(tmp,InputName),"_sphere.image"),Data[0].D )) {
+	    LoadTex (strcat (strcpy(tmp,InputName),".image"),Data[0].D);
 	  }
 	  sphere=true;
 	  Tex = gluSph;
@@ -429,12 +429,12 @@ void EnvironmentMapGeneratorMain(const char * inpt, const char *outpt, float a, 
     char * tmp = (char *) malloc (size);
     strcpy (tmp,inpt);
 	VSFile f;
-	VSError err = f.OpenReadOnly( strcat (tmp,"_sphere.bmp"), TextureFile);
+	VSError err = f.OpenReadOnly( strcat (tmp,"_sphere.image"), TextureFile);
     if (err>Ok)
 	{
 	  memset( tmp, 0, size);
 	  strcpy( tmp, inpt);
-	  err = f.OpenReadOnly( strcat (tmp,"_up.bmp"), TextureFile);
+	  err = f.OpenReadOnly( strcat (tmp,"_up.image"), TextureFile);
 	}
     //bool share = false;
     std::string s;
@@ -524,7 +524,7 @@ static void GenerateLightMap ()
 	char tmp [lmwid];
 	assert (0);
 	strcpy (tmp,OutputName);
-	png_write (strcat (tmp,"1.bmp"),LightMap, lmwid,lmwid,false,8);
+	png_write (strcat (tmp,"1.image"),LightMap, lmwid,lmwid,false,8);
 }
 
 static void GenerateTexMap ()//DEPRECATED
@@ -599,7 +599,7 @@ static void GenerateTexMap ()//DEPRECATED
 	char tmp [256]="";
 	strcpy (tmp,OutputName);
 	VSFile f;
-	VSError err = f.OpenCreateWrite( strcat (tmp,".bmp"), TextureFile);
+	VSError err = f.OpenCreateWrite( strcat (tmp,".image"), TextureFile);
 	f.Write (Disc,256*256*3);
 	f.Close();
 	delete [] Disc;	

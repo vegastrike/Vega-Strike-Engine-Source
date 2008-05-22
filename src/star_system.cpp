@@ -89,7 +89,7 @@ GameStarSystem::GameStarSystem(const char * filename, const Vector & centr,const
 	// Calculate movement arcs; set behavior of primaries to follow these arcs
 	//Iterator *primary_iterator = primaries->createIterator();
 	//primaries->SetPosition(0,0,5);
-	//foo = new SphereMesh(1,5,5,"moon.bmp");
+	//foo = new SphereMesh(1,5,5,"moon.image");
 	//cam[1].SetProjectionType(Camera::PARALLEL);
 	//cam[1].SetZoom(1);
 	//cam[1].SetPosition(Vector(0,0,0));
@@ -529,16 +529,16 @@ void    GameStarSystem::createBackground( StarSystem::StarXML * xml)
 {
 #ifdef NV_CUBE_MAP
 	printf("using NV_CUBE_MAP\n");
-	LightMap[0]=new Texture ((xml->backgroundname+"_right_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_X);
-	LightMap[1]=new Texture ((xml->backgroundname+"_left_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_X);
-	LightMap[2]=new Texture ((xml->backgroundname+"_up_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Y);
-	LightMap[3]=new Texture ((xml->backgroundname+"_down_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Y);
-	LightMap[4]=new Texture ((xml->backgroundname+"_front_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Z);
-	LightMap[5]=new Texture ((xml->backgroundname+"_back_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Z);
+	LightMap[0]=new Texture ((xml->backgroundname+"_right_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_X);
+	LightMap[1]=new Texture ((xml->backgroundname+"_left_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_X);
+	LightMap[2]=new Texture ((xml->backgroundname+"_up_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Y);
+	LightMap[3]=new Texture ((xml->backgroundname+"_down_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Y);
+	LightMap[4]=new Texture ((xml->backgroundname+"_front_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Z);
+	LightMap[5]=new Texture ((xml->backgroundname+"_back_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Z);
 #else
-	//string bglight= VSFileSystem::sharedtextures+"/"+xml->backgroundname+"_light.bmp";
-	string bglight= xml->backgroundname+"_light.bmp";
-	string bgfile = xml->backgroundname+"_light.bmp";
+	//string bglight= VSFileSystem::sharedtextures+"/"+xml->backgroundname+"_light.image";
+	string bglight= xml->backgroundname+"_light.image";
+	string bgfile = xml->backgroundname+"_light.image";
 	VSFile f;
 	VSError err = f.OpenReadOnly(bgfile,TextureFile);
 	if (err>Ok) {
