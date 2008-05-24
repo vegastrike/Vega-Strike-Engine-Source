@@ -844,41 +844,40 @@ void MakePlanet(float radius, int entitytype, string texturename, int texturenum
   if (entitytype==PLANET) {
     float ringrand = grand();
     if (ringrand<ringprob) {
-      string ringname = getRandName(rings);
-      static float innerRingRadMin = XMLSupport::parse_float (vs_config->getVariable ("galaxy","InnerRingRadius","1.5"));
-      static float outerRingRadMin = XMLSupport::parse_float (vs_config->getVariable ("galaxy","OuterRingRadius","2.5"));
-      double inner_rad= (innerRingRadMin*(1+grand()*.5))*radius;
-      double outer_rad = inner_rad+(outerRingRadMin*grand())*radius;
-      int wrapx=1;
-      int wrapy=1;
-      if (ringname.empty()) {
-          static std::string defringname = vs_config->getVariable ("galaxy","DefaultRingTexture","planets/ring.pngwrapx36wrapy2");
-          ringname = defringname;
-      }
-      ringname = GetWrapXY(ringname,wrapx,wrapy);
-      if (ringrand<(1-dualringprob)) {
-		  Tab();f.Fprintf ("<Ring file=\"%s\" innerradius=\"%f\" outerradius=\"%f\"  wrapx=\"%d\" wrapy=\"%d\" />\n",ringname.c_str(),inner_rad,outer_rad,wrapx, wrapy);
-      }
-      if (ringrand<dualringprob||ringrand>=(ringprob-dualringprob)){
-	Vector r,s;
-	makeRS(r,s,1,false);
-	float rmag = r.Mag();
-	if (rmag>.001) {
-	  r.i/=rmag;  r.j/=rmag;  r.k/=rmag;
-	  
-	}
-	float smag = s.Mag();
-	if (smag>.001){
-	  s.i/=smag;  s.j/=smag;  s.k/=smag;
-	}
-	double movable = grand();
-	static float second_ring_move = XMLSupport::parse_float (vs_config->getVariable ("galaxy","SecondRingDifference",".4"));
-	inner_rad *= (1-.5*second_ring_move)+second_ring_move*movable;
-	outer_rad *= (1-.5*second_ring_move)+second_ring_move*movable;
+        string ringname = getRandName(rings);
+        static float innerRingRadMin = XMLSupport::parse_float (vs_config->getVariable ("galaxy","InnerRingRadius","1.5"));
+        static float outerRingRadMin = XMLSupport::parse_float (vs_config->getVariable ("galaxy","OuterRingRadius","2.5"));
+        double inner_rad= (innerRingRadMin*(1+grand()*.5))*radius;
+        double outer_rad = inner_rad+(outerRingRadMin*grand())*radius;
+        int wrapx=1;
+        int wrapy=1;
+        if (ringname.empty()) {
+            static std::string defringname = vs_config->getVariable ("galaxy","DefaultRingTexture","planets/ring.pngwrapx36wrapy2");
+            ringname = defringname;
+        }
+        ringname = GetWrapXY(ringname,wrapx,wrapy);
+        Vector r,s;
+        makeRS(r,s,1,false);
+        float rmag = r.Mag();
+        if (rmag>.001) {
+        r.i/=rmag;  r.j/=rmag;  r.k/=rmag;
 
-	Tab();f.Fprintf ("<Ring file=\"%s\" ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" innerradius=\"%f\" outerradius=\"%f\" wrapx=\"%d\" wrapy=\"%d\" />\n",ringname.c_str(),r.i,r.j,r.k,s.i,s.j,s.k,inner_rad,outer_rad, wrapx, wrapy);
-      }
-    }
+        }
+        float smag = s.Mag();
+        if (smag>.001){
+        s.i/=smag;  s.j/=smag;  s.k/=smag;
+        }
+        if (ringrand<(1-dualringprob)) {
+            Tab();f.Fprintf ("<Ring file=\"%s\" ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" innerradius=\"%f\" outerradius=\"%f\" wrapx=\"%d\" wrapy=\"%d\" />\n",ringname.c_str(),r.i,r.j,r.k,s.i,s.j,s.k,inner_rad,outer_rad, wrapx, wrapy);
+        }
+        if (ringrand<dualringprob||ringrand>=(ringprob-dualringprob)){
+            double movable = grand();
+            static float second_ring_move = XMLSupport::parse_float (vs_config->getVariable ("galaxy","SecondRingDifference",".4"));
+            inner_rad = outer_rad * (1+.1*(second_ring_move+second_ring_move*movable));
+            outer_rad = inner_rad*(outerRingRadMin*movable);
+            Tab();f.Fprintf ("<Ring file=\"%s\" ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" innerradius=\"%f\" outerradius=\"%f\" wrapx=\"%d\" wrapy=\"%d\" />\n",ringname.c_str(),r.i,r.j,r.k,s.i,s.j,s.k,inner_rad,outer_rad, wrapx, wrapy);
+        }
+  }
     //    WriteUnit ("unit","","planetary-ring",Vector (0,0,0), Vector (0,0,0), Vector (0,0,0), string (""), string (""),false);
   }
   for (int i=0;i<numberofstarbases;i++) {
