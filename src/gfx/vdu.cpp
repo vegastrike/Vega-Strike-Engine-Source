@@ -799,9 +799,9 @@ void VDU::DrawTarget(GameCockpit *cp, Unit * parent, Unit * target) {
 	  bool automatte=(0==tpbg.a);
 	  if(automatte){tp->bgcol=GFXColor(0,0,0,background_alpha);}
     if (draw_auto_message) {
-      tp->Draw (MangleString (std::string("\n")+cp->autoMessage,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true,false,automatte);      
+      tp->Draw (MangleString (std::string("\n")+cp->autoMessage,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true,false,automatte);
     }else {
-      tp->Draw (MangleString ("\n[OutOfRange]",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true,false,automatte);      
+      tp->Draw (MangleString ("\n[OutOfRange]",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true,false,automatte);
     }
 	tp->bgcol=tpbg;
   }
@@ -948,7 +948,8 @@ void VDU::DrawNav (GameCockpit *cp, Unit* you, Unit*targ, const Vector & nav) {
   if (targ)
 	  nam= reformatName(targ->name);
 
-  std::string navdata=std::string("#ff0000System:\n     #ffff00")+_Universe->activeStarSystem()->getName()+"\n\n#ff0000Destination:\n  #ffff00"+(targ?getUnitNameAndFgNoBase(targ):std::string("Nowhere"))+"\n\n#ff0000Range: #ffff00"+std::string(PrettyDistanceString(((you&&targ)?DistanceTwoTargets(you,targ):0.0)).str);
+  int faction=FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction(_Universe->activeStarSystem()->getFileName()));
+  std::string navdata=std::string("#ff0000System:\n     #ffff00")+_Universe->activeStarSystem()->getName()+" ("+FactionUtil::GetFactionName(faction)+")\n\n#ff0000Destination:\n  #ffff00"+(targ?getUnitNameAndFgNoBase(targ):std::string("Nowhere"))+"\n\n#ff0000Range: #ffff00"+std::string(PrettyDistanceString(((you&&targ)?DistanceTwoTargets(you,targ):0.0)).str);
   static float auto_message_lim=XMLSupport::parse_float (vs_config->getVariable("graphics","auto_message_time_lim","5"));
   float delautotime=UniverseUtil::GetGameTime()-cp->autoMessageTime;
   
