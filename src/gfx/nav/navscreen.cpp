@@ -682,6 +682,7 @@ void NavigationSystem::DrawMission()
         static string disallowedFactions=vs_config->getVariable("graphics","unprintable_factions","");
         static string disallowedExtension=vs_config->getVariable("graphics","unprintable_faction_extension","citizen");
         int totkills=0;
+        int fac_loc_before=0, fac_loc=0, fac_loc_after=0;
 	for(;i < numfactions;++i)
 	{
 		factionname = FactionUtil::GetFactionName(i);
@@ -693,8 +694,21 @@ void NavigationSystem::DrawMission()
                     continue;                 
                   }
 
-                  if (disallowedFactions.find(factionname)!=string::npos) {
-                    continue;                 
+                  fac_loc_after = 0;
+                  fac_loc = disallowedFactions.find(factionname, fac_loc_after);
+                  while ( fac_loc != string::npos ) {
+                    fac_loc_before = fac_loc - 1;
+                    if (fac_loc_before < 0) {
+                      fac_loc_before = 0;
+                    }
+                    fac_loc_after = fac_loc + factionname.size();
+                    if ((fac_loc == 0||disallowedFactions[fac_loc_before]==' '||disallowedFactions[fac_loc_before]=='\t')&&(disallowedFactions[fac_loc_after]==' '||disallowedFactions[fac_loc_after]=='\t'||disallowedFactions[fac_loc_after]=='\0')) {
+                      break;
+                    }
+                    fac_loc = disallowedFactions.find(factionname, fac_loc_after);
+                  }
+                  if (fac_loc != string::npos) {
+                    continue;
                   }
                   relation = 	FactionUtil::GetIntRelation(i, ( UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()) )->faction );
 

@@ -4653,6 +4653,7 @@ bool BaseComputer::showPlayerInfo(const EventCommandId& command, Control* contro
     int i = 0;
     static string disallowedFactions=vs_config->getVariable("graphics","unprintable_factions","");
     int totkills=0;
+    int fac_loc_before=0, fac_loc=0, fac_loc_after=0;
     for(; i<numFactions; i++) {
 		Unit *currentplayer=UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer());
 		float relation=0;
