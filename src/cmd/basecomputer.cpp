@@ -4661,13 +4661,27 @@ bool BaseComputer::showPlayerInfo(const EventCommandId& command, Control* contro
                 int planets = FactionUtil::GetPlanetFaction();
                 static int privateer = FactionUtil::GetFactionIndex("privateer");
                 int neutral = FactionUtil::GetNeutralFaction();
-                
+
                 if (i < killList->size()&&i!=upgrades&&i!=planets&&i!=neutral&&i!=privateer) {
                   totkills+=(int)(*killList)[i];
-                }          
+                }
 
-                if (disallowedFactions.find(FactionUtil::GetFactionName(i))!=string::npos) {
-                  continue;                 
+                string factionname = FactionUtil::GetFactionName(i);
+                fac_loc_after = 0;
+                fac_loc = disallowedFactions.find(factionname, fac_loc_after);
+                while ( fac_loc != string::npos ) {
+                  fac_loc_before = fac_loc - 1;
+                  if (fac_loc_before < 0) {
+                    fac_loc_before = 0;
+                  }
+                  fac_loc_after = fac_loc + factionname.size();
+                  if ((fac_loc == 0||disallowedFactions[fac_loc_before]==' '||disallowedFactions[fac_loc_before]=='\t')&&(disallowedFactions[fac_loc_after]==' '||disallowedFactions[fac_loc_after]=='\t'||disallowedFactions[fac_loc_after]=='\0')) {
+                    break;
+                  }
+                  fac_loc = disallowedFactions.find(factionname, fac_loc_after);
+                }
+                if (fac_loc != string::npos) {
+                  continue;
                 }
 
 		if (currentplayer) {
@@ -4922,7 +4936,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		*/	
 		PRETTY_ADDU(statcolor+"Mass: #-c",playerUnit->GetMass(),0,"metric tons");
 		// Irrelevant to player as is proportional to mass in our physics system.
-		// PRETTY_ADDU("Moment of inertia: ",playerUnit->GetMoment(),2,"tons.m²");
+		// PRETTY_ADDU("Moment of inertia: ",playerUnit->GetMoment(),2,"tons.mï¿½");
 	
 	}	
 	
