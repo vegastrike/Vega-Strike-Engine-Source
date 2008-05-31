@@ -138,7 +138,11 @@ namespace CockpitXML {
     EnumMap::Pair ("MRECTLOCK",  UnitImages::RECEIVINGTARGETLOCK_MODAL),
     EnumMap::Pair ("MCOLLISIONWARNING",  UnitImages::COLLISIONWARNING_MODAL),
     EnumMap::Pair ("MJUMP",  UnitImages::CANJUMP_MODAL),
-    EnumMap::Pair ("MDOCK",  UnitImages::CANDOCK_MODAL)
+    EnumMap::Pair ("MDOCK",  UnitImages::CANDOCK_MODAL),
+    EnumMap::Pair ("TargetShieldF", UnitImages::TARGETSHIELDF),
+    EnumMap::Pair ("TargetShieldB", UnitImages::TARGETSHIELDB),
+    EnumMap::Pair ("TargetShieldR", UnitImages::TARGETSHIELDR),
+    EnumMap::Pair ("TargetShieldL", UnitImages::TARGETSHIELDL)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -326,6 +330,10 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
   case UnitImages::SHIELDL:
   case UnitImages::SHIELDR:
   case UnitImages::SHIELDB:
+  case UnitImages::TARGETSHIELDF:
+  case UnitImages::TARGETSHIELDB:
+  case UnitImages::TARGETSHIELDR:
+  case UnitImages::TARGETSHIELDL:
   case UnitImages::ENERGY:
   case UnitImages::WARPENERGY:
   case UnitImages::EJECT:

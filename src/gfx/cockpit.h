@@ -123,7 +123,9 @@ private:
   void DrawBlips(Unit * un);
   ///Draws all teh blips on the radar in Elite-style
   void DrawEliteBlips(Unit * un);
-  ///Draws gauges
+  ///Draws target gauges
+  void DrawTargetGauges(Unit * target);
+  ///Draws unit gauges
   void DrawGauges(Unit * un);
   NavigationSystem ThisNav;
   // Draw the arrow pointing to the target.
@@ -149,6 +151,8 @@ private:
   ~GameCockpit();
   ///Looks up a particular Gauge stat on target unit
   float LookupTargetStat (int stat, Unit *target);
+  ///Looks up a particular Gauge stat on unit
+  float LookupUnitStat (int stat, Unit *target);
   ///Loads cockpit info...just as constructor
   void Init (const char * file);
   ///Draws Cockpit then restores viewport

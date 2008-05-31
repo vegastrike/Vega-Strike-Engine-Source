@@ -1153,8 +1153,21 @@ void GameCockpit::DrawEliteBlips (Unit * un) {
   GFXEnable (TEXTURE0);
 }
 
-
 float GameCockpit::LookupTargetStat (int stat, Unit *target) {
+  switch (stat) {
+    case UnitImages::TARGETSHIELDF:
+        return target->FShieldData();
+    case UnitImages::TARGETSHIELDR:
+        return target->RShieldData();
+    case UnitImages::TARGETSHIELDL:
+        return target->LShieldData();
+    case UnitImages::TARGETSHIELDB:
+        return target->BShieldData();
+  }
+  return 1;
+}
+
+float GameCockpit::LookupUnitStat (int stat, Unit *target) {
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
   static bool display_in_meters = XMLSupport::parse_bool (vs_config->getVariable("physics","display_in_meters","true"));
   static bool lie=XMLSupport::parse_bool (vs_config->getVariable("physics","game_speed_lying","true"));
@@ -1167,18 +1180,18 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
   Unit * tmpunit;
   if (shield8) {
     switch (stat) {
-    case UnitImages::SHIELDF:
-    case UnitImages::SHIELDR:
-    case UnitImages::SHIELDL:
-    case UnitImages::SHIELDB:
-    case UnitImages::SHIELD4:
-    case UnitImages::SHIELD5:
-    case UnitImages::SHIELD6:
-    case UnitImages::SHIELD7:
-      if (target->shield.shield.max[stat-UnitImages::SHIELDF]) {
-        return target->shield.shield.cur[stat-UnitImages::SHIELDF]/target->shield.shield.max[stat-UnitImages::SHIELDF];
-      }else return 0;
-    default:break;
+        case UnitImages::SHIELDF:
+        case UnitImages::SHIELDR:
+        case UnitImages::SHIELDL:
+        case UnitImages::SHIELDB:
+        case UnitImages::SHIELD4:
+        case UnitImages::SHIELD5:
+        case UnitImages::SHIELD6:
+        case UnitImages::SHIELD7:
+        if (target->shield.shield.max[stat-UnitImages::SHIELDF]) {
+            return target->shield.shield.cur[stat-UnitImages::SHIELDF]/target->shield.shield.max[stat-UnitImages::SHIELDF];
+        } else return 0;
+        default:break;
     }
   }
   switch (stat) {
@@ -1358,7 +1371,6 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
                     }
 		}
 
-                
     }
 	if (abletoautopilot!=wasautopilot) {
 		if (abletoautopilot==0) {
@@ -1499,12 +1511,25 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
   return 1;
 }
 
+void GameCockpit::DrawTargetGauges(Unit * target) {
+  int i;
+  //printf ("(debug)UNIT NAME:%s\n",UnitUtil::getName(target).c_str());
+  //printf ("(debug)TARGETSHIELDF:%1.2f\n",target->FShieldData());
+  for (i=UnitImages::TARGETSHIELDF;i<UnitImages::KPS;i++) {
+    if (gauges[i]) {
+      gauges[i]->Draw(LookupTargetStat (i,target));
+    }
+  }
+  if (!text)
+      return;
+}
+
 void GameCockpit::DrawGauges(Unit * un) {
 
   int i;
-  for (i=0;i<UnitImages::KPS;i++) {
+  for (i=0;i<UnitImages::TARGETSHIELDF;i++) {
     if (gauges[i]) {
-      gauges[i]->Draw(LookupTargetStat (i,un));
+      gauges[i]->Draw(LookupUnitStat (i,un));
 /*      if (rand01()>un->GetImageInformation().cockpit_damage[0]) {
         static Animation gauge_ani("static.ani",true,.1,BILINEAR);
         gauge_ani.DrawAsVSSprite(Radar);
@@ -1516,7 +1541,7 @@ void GameCockpit::DrawGauges(Unit * un) {
             gauge_time[i]=-cockpit_time;
           }
         } else {
-          static string gauge_static = vs_config->getVariable("graphics","gauge_static","static.ani");          
+          static string gauge_static = vs_config->getVariable("graphics","gauge_static","static.ani");
           static Animation vdu_ani(gauge_static.c_str(),true,.1,BILINEAR);
           vdu_ani.DrawAsVSSprite(gauges[i]);	
         }
@@ -1527,11 +1552,11 @@ void GameCockpit::DrawGauges(Unit * un) {
           }
         }
       }
-    }
-  }
+    } // if gauges
+  } //for
   if (!text)
 	  return;
-  
+
   GFXColorf (textcol);
   GFXColor origbgcol=text->bgcol;
   static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
@@ -1545,7 +1570,7 @@ void GameCockpit::DrawGauges(Unit * un) {
       gauges[i]->GetPosition (px,py);
       text->SetCharSize (sx,sy);
       text->SetPos (px,py);
-      float tmp = LookupTargetStat (i,un);
+      float tmp = LookupUnitStat (i,un);
 	  float tmp2=0;
       char ourchar[64];
 	  int len=sprintf (ourchar,"%.0f", tmp);
@@ -1572,7 +1597,7 @@ void GameCockpit::DrawGauges(Unit * un) {
       gauges[i]->GetPosition (px,py);
       text->SetCharSize (sx,sy);
       text->SetPos (px,py);
-      float tmp = LookupTargetStat (i,un);
+      float tmp = LookupUnitStat (i,un);
 	  int ivalue=(int)tmp;
 	  std::string modename;
 	  std::string modevalue;
@@ -1880,7 +1905,6 @@ void GameCockpit::visitSystem ( string systemname ) {
 		AccessNavSystem()->setCurrentSystem(systemname);
 	}
 }
-
 
 bool GameCockpit::DrawNavSystem() {
 
@@ -2340,9 +2364,9 @@ void GameCockpit::Draw() {
 	    theta+=shake_speed*GetElapsedTime()*sqrt(fabs(shakin))/10; //For small shakes, slower shakes
        wtheta+=warp_shake_speed*GetElapsedTime(); //SPEC-related shaking
 
-       float self_kps = ((GetParent()!=NULL)?LookupTargetStat(UnitImages::KPS,GetParent()):0);
-       float self_setkps = max(1.0f,((GetParent()!=NULL)?LookupTargetStat(UnitImages::SETKPS,GetParent()):0));
-       float warp_strength = max(0.0f,min(max(0.0f,min(1.0f,self_kps/self_setkps)),((GetParent()!=NULL)?LookupTargetStat(UnitImages::WARPFIELDSTRENGTH,GetParent()):0.0f) / warp_shake_ref));
+       float self_kps = ((GetParent()!=NULL)?LookupUnitStat(UnitImages::KPS,GetParent()):0);
+       float self_setkps = max(1.0f,((GetParent()!=NULL)?LookupUnitStat(UnitImages::SETKPS,GetParent()):0));
+       float warp_strength = max(0.0f,min(max(0.0f,min(1.0f,self_kps/self_setkps)),((GetParent()!=NULL)?LookupUnitStat(UnitImages::WARPFIELDSTRENGTH,GetParent()):0.0f) / warp_shake_ref));
 
        if (shakin>shake_limit) shakin=shake_limit;
 	    headtrans.front().p.i=shake_mag*shakin*cos(theta)*cockpitradial/100;//AccessCamera()->GetPosition().i+shakin*cos(theta);
@@ -2493,6 +2517,18 @@ void GameCockpit::Draw() {
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXColor4f(1,1,1,1);
   bool die=true;
+
+  char str[200]; // don't make the sprintf format too big... :-P
+  string name;
+  // draw target gauges
+  if ((un = parent.GetUnit())) {
+    Unit *target = parent.GetUnit()->Target();
+    if (target!=NULL)
+    if (view==CP_FRONT||(view==CP_CHASE&&drawChaseVDU)||(view==CP_PAN&&drawPanVDU)||(view==CP_TARGET&&drawTgtVDU)||(view==CP_VIEWTARGET&&drawPadVDU)) //{ //only draw crosshairs for front view
+      if (!UnitUtil::isSignificant(target)&&!UnitUtil::isSun(target)||UnitUtil::isCapitalShip(target)) //{
+        DrawTargetGauges(target);
+  }
+  // draw unit gauges
   if ((un = parent.GetUnit())) {
     if (view==CP_FRONT||(view==CP_CHASE&&drawChaseVDU)||(view==CP_PAN&&drawPanVDU)||(view==CP_TARGET&&drawTgtVDU)||(view==CP_VIEWTARGET&&drawPadVDU)) {//only draw crosshairs for front view
       DrawGauges(un);
@@ -2531,7 +2567,7 @@ void GameCockpit::Draw() {
         }
       }
 	}
-      }
+      } //radar
 
       GFXColor4f(1,1,1,1);
       for (unsigned int vd=0;vd<vdu.size();vd++) {
@@ -2648,7 +2684,7 @@ void GameCockpit::Draw() {
       }
     }
     if (die) {
-      
+ 
       if (text) {
         GFXColor4f (1,1,1,1);
         text->SetSize(1,-1);
@@ -2833,7 +2869,7 @@ string GameCockpit::getsoundfile(string sound) {
 	}
 }
 
-void	SetStartupView(Cockpit*);
+void SetStartupView(Cockpit*);
 
 void GameCockpit::UpdAutoPilot() {
   static bool autopan = XMLSupport::parse_bool (vs_config->getVariable ("graphics","pan_on_auto","true"));
@@ -3191,9 +3227,9 @@ void GameCockpit::SetupViewPort (bool clip) {
         if (stable_lowarpref==stable_hiwarpref) stable_hiwarpref = stable_lowarpref+1;
         if (shake_lowarpref ==shake_hiwarpref ) shake_hiwarpref  = shake_lowarpref+1;
 
-        float warpfieldstrength=LookupTargetStat(UnitImages::WARPFIELDSTRENGTH,un);
-        float refkps=(refkpsoverride>0)?refkpsoverride:LookupTargetStat(UnitImages::MAXCOMBATABKPS,un); //This one is stable, as opposed to SETKPS - for full stability, use the override (user override of governor settings will create weird behaviour if done under SPEC)
-        float kps=LookupTargetStat(UnitImages::KPS,un);
+        float warpfieldstrength=LookupUnitStat(UnitImages::WARPFIELDSTRENGTH,un);
+        float refkps=(refkpsoverride>0)?refkpsoverride:LookupUnitStat(UnitImages::MAXCOMBATABKPS,un); //This one is stable, as opposed to SETKPS - for full stability, use the override (user override of governor settings will create weird behaviour if done under SPEC)
+        float kps=LookupUnitStat(UnitImages::KPS,un);
         float st_warpfieldstrength=pow((max(stable_lowarpref,min(stable_asymptotic?FLT_MAX:stable_hiwarpref,warpfieldstrength))-stable_lowarpref)/(stable_hiwarpref-stable_lowarpref),stable_refexp);
         float sh_warpfieldstrength=pow((max(shake_lowarpref,min(shake_asymptotic?FLT_MAX:shake_hiwarpref,warpfieldstrength))-shake_lowarpref)/(shake_hiwarpref-shake_lowarpref),shake_refexp);
         float costheta = cos(theta);
