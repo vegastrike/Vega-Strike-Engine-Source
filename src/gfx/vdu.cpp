@@ -12,6 +12,7 @@
 #include "xml_support.h"
 #include "gfx/animation.h"
 #include "gfx/vsimage.h"
+#include "galaxy_gen.h"
 
 template<typename T> inline T mymin(T a, T b) { return (a<b)?a:b; };
 template<typename T> inline T mymax(T a, T b) { return (a>b)?a:b; };
@@ -983,10 +984,13 @@ void VDU::DrawNav (GameCockpit *cp, Unit* you, Unit*targ, const Vector & nav) {
 	  nam= reformatName(targ->name);
 
   int faction=FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction(_Universe->activeStarSystem()->getFileName()));
-  std::string navdata=std::string("#ff0000System:\n     #ffff00")+_Universe->activeStarSystem()->getName()+" ("+FactionUtil::GetFactionName(faction)+")\n\n#ff0000Destination:\n  #ffff00"+(targ?getUnitNameAndFgNoBase(targ):std::string("Nowhere"))+"\n\n#ff0000Range: #ffff00"+std::string(PrettyDistanceString(((you&&targ)?DistanceTwoTargets(you,targ):0.0)).str);
+  //std::string systemname = _Universe->activeStarSystem()->getFileName(); // as Sector/System
+  //string sectorname = getStarSystemSector(systemname);
+  //printf ("(debug) Sector: %s\n", sectorname.c_str());
+  std::string navdata=std::string("#ff0000Sector:\n     #ffff00"+getStarSystemSector(_Universe->activeStarSystem()->getFileName())+"\n\n#ff0000System:\n     #ffff00")+_Universe->activeStarSystem()->getName()+" ("+FactionUtil::GetFactionName(faction)+")\n\n#ff0000Target:\n  #ffff00"+(targ?getUnitNameAndFgNoBase(targ):std::string("Nothing"))+"\n\n#ff0000Range: #ffff00"+std::string(PrettyDistanceString(((you&&targ)?DistanceTwoTargets(you,targ):0.0)).str);
   static float auto_message_lim=XMLSupport::parse_float (vs_config->getVariable("graphics","auto_message_time_lim","5"));
   float delautotime=UniverseUtil::GetGameTime()-cp->autoMessageTime;
-  
+
   bool draw_auto_message=(delautotime<auto_message_lim&&cp->autoMessage.length()!=0);
   std::string msg=cp->autoMessage;
   std::string::size_type where=msg.find("#");
@@ -1349,11 +1353,11 @@ tp->bgcol=tpbg;
         static bool marmorcolorloaded=(vs_config->getColor("default","middle_shield_color",mshieldcolor,true),true);
         static bool oarmorcolorloaded=(vs_config->getColor("default","outer_shield_color",oshieldcolor,true),true);
 */ // uncomment if these are ever actually used
-        static bool invert_view_shields = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","invert_view_shields","false"));
+/*        static bool invert_view_shields = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","invert_view_shields","false"));
         DrawShield(target->FShieldData(),target->RShieldData(),target->LShieldData(),target->BShieldData(),x,y,w,h,invert_view_shields,
             GFXColor(ishieldcolor[0],ishieldcolor[1],ishieldcolor[2],ishieldcolor[3]),
             GFXColor(mshieldcolor[0],mshieldcolor[1],mshieldcolor[2],mshieldcolor[3]),
-            GFXColor(oshieldcolor[0],oshieldcolor[1],oshieldcolor[2],oshieldcolor[3]));
+            GFXColor(oshieldcolor[0],oshieldcolor[1],oshieldcolor[2],oshieldcolor[3])); */
       }
     }
     GFXColor4f (1,1,1,1);
@@ -1647,7 +1651,6 @@ void VDU::Draw (GameCockpit*parentcp, Unit * parent, const GFXColor & color) {
       parentcp->autoMessageTime-=auto_switch_lim*1.125;
     }
   }
-
   switch (thismode.back()) {
   case NETWORK:
   {

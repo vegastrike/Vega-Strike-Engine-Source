@@ -2518,15 +2518,16 @@ void GameCockpit::Draw() {
   GFXColor4f(1,1,1,1);
   bool die=true;
 
-  char str[200]; // don't make the sprintf format too big... :-P
-  string name;
   // draw target gauges
-  if ((un = parent.GetUnit())) {
-    Unit *target = parent.GetUnit()->Target();
-    if (target!=NULL)
-    if (view==CP_FRONT||(view==CP_CHASE&&drawChaseVDU)||(view==CP_PAN&&drawPanVDU)||(view==CP_TARGET&&drawTgtVDU)||(view==CP_VIEWTARGET&&drawPadVDU)) //{ //only draw crosshairs for front view
-      if (!UnitUtil::isSignificant(target)&&!UnitUtil::isSun(target)||UnitUtil::isCapitalShip(target)) //{
-        DrawTargetGauges(target);
+  for (unsigned int vd=0;vd<vdu.size();vd++) {
+    if (vdu[vd]->getMode()==VDU::TARGET)
+    if ((un = parent.GetUnit())) {
+      Unit *target = parent.GetUnit()->Target();
+      if (target!=NULL)
+      if (view==CP_FRONT||(view==CP_CHASE&&drawChaseVDU)||(view==CP_PAN&&drawPanVDU)||(view==CP_TARGET&&drawTgtVDU)||(view==CP_VIEWTARGET&&drawPadVDU)) //{ //only draw crosshairs for front view
+        //if (!UnitUtil::isSignificant(target)&&!UnitUtil::isSun(target)||UnitUtil::isCapitalShip(target)) //{
+          DrawTargetGauges(target);
+    }
   }
   // draw unit gauges
   if ((un = parent.GetUnit())) {
