@@ -33,8 +33,6 @@
 #include "math.h"
 #include "save_util.h"
 #include "gfx/vdu.h"
-
-
 #include "navscreen.h"
 #include "gfx/masks.h"
 #include "navgetxmldata.h"
@@ -44,7 +42,6 @@
 #include "navpath.h"
 
 //	This sets up the items in the navscreen
-
 //	**********************************
 
 NavigationSystem::NavigationSystem() {
@@ -126,19 +123,13 @@ void NavigationSystem::Setup()
         static bool start_sys_ortho=XMLSupport::parse_bool(vs_config->getVariable("graphics","system_map_ortho_view","false"));
         static bool start_sec_ortho=XMLSupport::parse_bool(vs_config->getVariable("graphics","sector_map_ortho_view","false"));
 	system_view = start_sys_ortho?VIEW_ORTHO:VIEW_2D;
-        
 	galaxy_view = start_sec_ortho?VIEW_ORTHO:VIEW_2D;
 	system_multi_dimensional = 1;
 	galaxy_multi_dimensional = 1;
 
 	zshiftmultiplier = 2.5;	//	shrink the output
 	item_zscalefactor = 1.0;	//	camera distance prespective multiplier for affecting item sizes
-
-
-
 	system_item_scale = 1.0;
-
-
 	mouse_previous_state[0] = 0;	//	could have used a loop, but this way the system uses immediate instead of R type.
 	mouse_previous_state[1] = 0;
 	mouse_previous_state[2] = 0;
@@ -165,7 +156,6 @@ void NavigationSystem::Setup()
 	destinationsystemindex=0;
 	currentsystemindex=0;
 	setFocusedSystemIndex(0);
-
 
     static int time_to_helpscreen = XMLSupport::parse_int(vs_config->getVariable("general","times_to_show_help_screen","3"));
 	buttonstates = 0;
@@ -202,18 +192,9 @@ void NavigationSystem::Setup()
 	for( p=0; p < NAVTOTALMESHCOUNT; p++)
 		meshcoordinate_z_delta[p] = 0.0;
 
-
 	//	select target
 	//	NAV/MISSION toggle
 	//	
-
-
-
-
-
-
-
-
 
 //	HERE GOES THE PARSING
 
@@ -412,17 +393,6 @@ void NavigationSystem::Setup()
 
 //	**********************************
 
-
-
-
-
-
-
-
-
-
-
-
 //	This is the main draw loop for the nav screen
 //	**********************************
 void NavigationSystem::Draw()
@@ -614,36 +584,6 @@ void NavigationSystem::Draw()
 }
 //	**********************************
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //	This is the mission info screen
 //	**********************************
 void NavigationSystem::DrawMission()
@@ -776,8 +716,6 @@ void NavigationSystem::DrawMission()
 	GFXEnable(TEXTURE0);
 }
 //	**********************************
-
-
 
 //	This is the mission info screen
 //	**********************************
@@ -1005,9 +943,6 @@ void NavigationSystem::DrawSectorList()
 }
 
 
-
-
-
 void NavigationSystem::DrawObjectives()
 {
 	if (checkbit(whattodraw, 4)) {
@@ -1015,9 +950,6 @@ void NavigationSystem::DrawObjectives()
 		DrawObjectivesTextPlane(&screen_objectives, scrolloffset, _Universe->AccessCockpit()->GetParent());
 	}
 }
-
-
-
 
 //	this sets weather to draw the screen or not
 //	**********************************
@@ -1036,14 +968,6 @@ void NavigationSystem::SetDraw(bool n)
 }
 //	**********************************
 
-
-
-
-
-
-
-
-
 //	this gets rid of states that could be damaging
 //	**********************************
 void NavigationSystem::ClearPriorities()
@@ -1058,15 +982,6 @@ void NavigationSystem::ClearPriorities()
 //	rz_s = 0.0;
 }
 //	**********************************
-
-
-
-
-
-
-
-
-
 
 //	This will set a wentdown and wentup flag just for the event of mouse button going down or up
 //	this is an FF test. not a state test.
@@ -1122,27 +1037,6 @@ void NavigationSystem::SetMouseFlipStatus()
 
 //	**********************************
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //	returns a modified vector rotated by x y z radians
 //	**********************************
 QVector NavigationSystem::dxyz(QVector vector, double x_, double y_, double z_)
@@ -1193,12 +1087,6 @@ QVector NavigationSystem::dxyz(QVector vector, double x_, double y_, double z_)
 }
 
 //	**********************************
-
-
-
-
-
-
 
 void NavigationSystem::setCurrentSystem(string newSystem) {
         for(unsigned i=0;i<systemIter.size();++i)
@@ -1257,12 +1145,6 @@ std::string NavigationSystem::getFocusedSystem() {
   
   return systemIter[focusedsystemindex].GetName();
 }
-
-
-
-
-
-
 
 
 //	Passes a draw button command, with colour
@@ -1580,13 +1462,6 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 }
 //	**********************************
 
-
-
-
-
-
-
-
 //	Draws the actual button outline
 //	**********************************
 void NavigationSystem::DrawButtonOutline(float &x1, float &x2, float &y1, float &y2, const GFXColor &col)
@@ -1611,9 +1486,6 @@ void NavigationSystem::DrawButtonOutline(float &x1, float &x2, float &y1, float 
 	GFXEnable(TEXTURE0);
 }
 //	**********************************
-
-
-
 
 template <class T> static inline bool intersect(T x0,T y0,T x1,T y1,T sx0,T sy0,T sx1,T sy1,T & ansx, T & ansy)
 {
@@ -1676,9 +1548,6 @@ template <class T> static inline bool intersect(T x0,T y0,T x1,T y1,T sx0,T sy0,
 	return false;
 }
 
-
-
-
 void NavigationSystem::IntersectBorder(float & x, float & y, const float & x1, const float & y1) const
 {
 	float ansx;
@@ -1691,9 +1560,6 @@ void NavigationSystem::IntersectBorder(float & x, float & y, const float & x1, c
 		y=ansy;
 	}
 }
-
-	
-
 
 //	tests if given are in the range
 //	**********************************

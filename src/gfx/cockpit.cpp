@@ -1537,14 +1537,14 @@ void GameCockpit::DrawGauges(Unit * un) {
       float damage = un->GetImageInformation().cockpit_damage[(1+MAXVDUS+i)%(MAXVDUS+1+UnitImages::NUMGAUGES)];
       if (gauge_time[i]>=0) {
         if (damage>.0001&&(cockpit_time>(gauge_time[i]+(1-damage)))) {
-	  if (rand01()>SWITCH_CONST) {
+	      if (rand01()>SWITCH_CONST) {
             gauge_time[i]=-cockpit_time;
           }
-        } else {
+        } /*else {
           static string gauge_static = vs_config->getVariable("graphics","gauge_static","static.ani");
           static Animation vdu_ani(gauge_static.c_str(),true,.1,BILINEAR);
           vdu_ani.DrawAsVSSprite(gauges[i]);	
-        }
+        }*/
       } else {
         if (cockpit_time>(((1-(-gauge_time[i]))+damage))) {
 	      if (rand01()>SWITCH_CONST) {
@@ -2583,7 +2583,7 @@ void GameCockpit::Draw() {
                   if (rand01()>SWITCH_CONST) {
                     vdu_time[vd]=-cockpit_time;
                   }
-                } else {
+                } /*else {
                   static string vdustatic=vs_config->getVariable("graphics","vdu_static","static.ani");
                   static Animation vdu_ani(vdustatic.c_str(),true,.1,BILINEAR);
                   static soundContainer ejectstopsound;
@@ -2598,7 +2598,7 @@ void GameCockpit::Draw() {
                   GFXEnable(TEXTURE0);
                   vdu_ani.DrawAsVSSprite(vdu[vd]);	
  
-                }
+                }*/
               } else {
                 if (cockpit_time>((1-(-vdu_time[vd]))+(damage))) {
                   if (rand01()>SWITCH_CONST) {
@@ -2667,14 +2667,14 @@ void GameCockpit::Draw() {
     if (QuitAllow){ 
       if (!die){
         static VSSprite QuitSprite("quit.spr",BILINEAR,GFXTRUE);
-        
+
         GFXEnable(TEXTURE0);
         QuitSprite.Draw();	  
       }
     }else {
-      static VSSprite PauseSprite("pause.spr",BILINEAR,GFXTRUE);          
+      static VSSprite PauseSprite("pause.spr",BILINEAR,GFXTRUE);
       GFXEnable(TEXTURE0);
-      PauseSprite.Draw();	        
+      PauseSprite.Draw();
     }
   }
   static float dietime = 0;

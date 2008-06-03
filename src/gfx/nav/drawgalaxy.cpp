@@ -31,25 +31,17 @@
 #include "cmd/unit_util.h"
 #include "math.h"
 #include "hashtable.h"
-
-
 #include "navscreen.h"
 #include "gfx/masks.h"
 #include "navscreenoccupied.h"
+
 using std::string;
 using std::vector;
 
-float SYSTEM_DEFAULT_SIZE=.05;
+float SYSTEM_DEFAULT_SIZE=0.02;
 const int systemambiguous=0;
-
-
-
 static GFXColor GrayColor(.5,.5,.5,.5);
-
-
 float GrayColorArray[4]={.5,.5,.5,.5};
-
-
 
 static void DrawNodeDescription(string text, float x_, float y_, float size_x, float size_y, bool ignore_occupied_areas, const GFXColor &col, navscreenoccupied * screenoccupation) {	//	take the head and stick it in the back
 	if(text.size() == 0)
@@ -178,7 +170,6 @@ public:
 	
 };
 
-
 typedef vector <systemdrawnode> systemdrawlist;
 //typedef Hashtable <std::string, const systemdrawnode, 127> systemdrawhashtable;
 
@@ -198,9 +189,11 @@ NavigationSystem::SystemIterator::SystemIterator (string current_system, unsigne
 	which=0;
 	
 }
+
 bool NavigationSystem::SystemIterator::done ()const {
 	return which>=vstack.size();
 }
+
 QVector NavigationSystem::SystemIterator::Position () {
 	
 	if (done())
@@ -225,11 +218,13 @@ QVector NavigationSystem::SystemIterator::Position () {
 		return QVector(ratio*cos(locatio*2*3.1415926536),ratio*sin(locatio*2*3.1415926536),0)*screensmash;
 	}
 }
+
 string NavigationSystem::SystemIterator::operator * () {
 	if (which<vstack.size())
 		return vstack[which];
 	return "-";
 }
+
 NavigationSystem::SystemIterator & NavigationSystem::SystemIterator::next () {
 	return ++(*this);
 }
@@ -247,6 +242,7 @@ bool checkedVisited(const std::string &n) {
 		return false;
 	}
 }
+
 NavigationSystem::SystemIterator & NavigationSystem::SystemIterator::operator ++ () {
 	which +=1;
 	if (which>=vstack.size()) {
@@ -307,7 +303,6 @@ NavigationSystem::CachedSystemIterator::SystemInfo::SystemInfo(const string &nam
         }
 }
 
-
 //Create a placeholder to avoid the problem described above
 NavigationSystem::CachedSystemIterator::SystemInfo::SystemInfo(const string &name)
   : name(name), part_of_path(false) {}
@@ -332,8 +327,6 @@ void NavigationSystem::CachedSystemIterator::SystemInfo::loadData(map<string, un
 		}
 	}
 }
-
-
 
 void NavigationSystem::CachedSystemIterator::init (string current_system, unsigned max_systems) {
 	systems.clear();
@@ -369,9 +362,10 @@ NavigationSystem::CachedSystemIterator::CachedSystemIterator () {}
 NavigationSystem::CachedSystemIterator::CachedSystemIterator (string current_system, unsigned max_systems) {
 	init(current_system, max_systems);
 }
+
 NavigationSystem::CachedSystemIterator::CachedSystemIterator(const CachedSystemIterator &other)
 	: systems(other.systems),
-	  currentPosition(other.currentPosition) {
+	currentPosition(other.currentPosition) {
 }
 
 bool NavigationSystem::CachedSystemIterator::seek(unsigned position) {
@@ -382,16 +376,21 @@ bool NavigationSystem::CachedSystemIterator::seek(unsigned position) {
 		return false;
 	}
 }
+
 unsigned NavigationSystem::CachedSystemIterator::getIndex() const{
 	return currentPosition;
 }
+
 unsigned NavigationSystem::CachedSystemIterator::size() const{
 	return systems.size();
 }
+
 bool NavigationSystem::CachedSystemIterator::done ()const {
 	return currentPosition>=systems.size();
 }
+
 static NavigationSystem::CachedSystemIterator::SystemInfo nullPair ("-", QVector(0,0,0), std::vector<std::string> (),NULL);
+
 NavigationSystem::CachedSystemIterator::SystemInfo& NavigationSystem::CachedSystemIterator::operator[] (unsigned pos) {
 	if (pos>=size())
 		return nullPair;
@@ -402,26 +401,31 @@ const NavigationSystem::CachedSystemIterator::SystemInfo& NavigationSystem::Cach
 		return nullPair;
 	return systems[pos];
 }
+
 NavigationSystem::CachedSystemIterator::SystemInfo &NavigationSystem::CachedSystemIterator::operator* () {
 	if (done())
 		return nullPair;
 	return systems[currentPosition];
 }
+
 const NavigationSystem::CachedSystemIterator::SystemInfo &NavigationSystem::CachedSystemIterator::operator* () const{
 	if (done())
 		return nullPair;
 	return systems[currentPosition];
 }
+
 NavigationSystem::CachedSystemIterator::SystemInfo *NavigationSystem::CachedSystemIterator::operator-> () {
 	if (done())
 		return &nullPair;
 	return &systems[currentPosition];
 }
+
 const NavigationSystem::CachedSystemIterator::SystemInfo *NavigationSystem::CachedSystemIterator::operator-> () const{
 	if (done())
 		return &nullPair;
 	return &systems[currentPosition];
 }
+
 string &NavigationSystem::CachedSystemIterator::SystemInfo::GetName () {
 	return name;
 }
@@ -462,10 +466,12 @@ GFXColor NavigationSystem::CachedSystemIterator::SystemInfo::GetColor() {
 NavigationSystem::CachedSystemIterator & NavigationSystem::CachedSystemIterator::next () {
 	return ++(*this);
 }
+
 NavigationSystem::CachedSystemIterator& NavigationSystem::CachedSystemIterator::operator ++ () {
 	++currentPosition;
 	return *this;
 }
+
 NavigationSystem::CachedSystemIterator NavigationSystem::CachedSystemIterator::operator ++ (int) {
 	NavigationSystem::CachedSystemIterator iter(*this);
 	++(*this);
@@ -506,6 +512,7 @@ NavigationSystem::CachedSectorIterator::CachedSectorIterator () {}
 NavigationSystem::CachedSectorIterator::CachedSectorIterator (CachedSystemIterator &systemIter) {
 	init(systemIter);
 }
+
 void NavigationSystem::CachedSectorIterator::init (CachedSystemIterator &systemIter) {
 	map<string, unsigned> index_table;
 	sectors.clear();
@@ -526,6 +533,7 @@ void NavigationSystem::CachedSectorIterator::init (CachedSystemIterator &systemI
 		++systemIter;
 	}
 }
+
 NavigationSystem::CachedSectorIterator::CachedSectorIterator(const CachedSectorIterator &other)
 	: sectors(other.sectors),
 	  currentPosition(other.currentPosition) {
@@ -539,15 +547,19 @@ bool NavigationSystem::CachedSectorIterator::seek(unsigned position) {
 		return false;
 	}
 }
+
 unsigned NavigationSystem::CachedSectorIterator::getIndex() const{
 	return currentPosition;
 }
+
 unsigned NavigationSystem::CachedSectorIterator::size() const{
 	return sectors.size();
 }
+
 bool NavigationSystem::CachedSectorIterator::done ()const {
 	return currentPosition>=sectors.size();
 }
+
 static NavigationSystem::CachedSectorIterator::SectorInfo nullSectorPair ("-");
 
 NavigationSystem::CachedSectorIterator::SectorInfo& NavigationSystem::CachedSectorIterator::operator[] (unsigned pos) {
@@ -555,38 +567,46 @@ NavigationSystem::CachedSectorIterator::SectorInfo& NavigationSystem::CachedSect
 		return nullSectorPair;
 	return sectors[pos];
 }
+
 const NavigationSystem::CachedSectorIterator::SectorInfo& NavigationSystem::CachedSectorIterator::operator[] (unsigned pos) const{
 	if (pos>=size())
 		return nullSectorPair;
 	return sectors[pos];
 }
+
 NavigationSystem::CachedSectorIterator::SectorInfo &NavigationSystem::CachedSectorIterator::operator* () {
 	if (done())
 		return nullSectorPair;
 	return sectors[currentPosition];
 }
+
 const NavigationSystem::CachedSectorIterator::SectorInfo &NavigationSystem::CachedSectorIterator::operator* () const{
 	if (done())
 		return nullSectorPair;
 	return sectors[currentPosition];
 }
+
 NavigationSystem::CachedSectorIterator::SectorInfo *NavigationSystem::CachedSectorIterator::operator-> () {
 	if (done())
 		return &nullSectorPair;
 	return &sectors[currentPosition];
 }
+
 const NavigationSystem::CachedSectorIterator::SectorInfo *NavigationSystem::CachedSectorIterator::operator-> () const{
 	if (done())
 		return &nullSectorPair;
 	return &sectors[currentPosition];
 }
+
 NavigationSystem::CachedSectorIterator & NavigationSystem::CachedSectorIterator::next () {
 	return ++(*this);
 }
+
 NavigationSystem::CachedSectorIterator& NavigationSystem::CachedSectorIterator::operator ++ () {
 	++currentPosition;
 	return *this;
 }
+
 NavigationSystem::CachedSectorIterator NavigationSystem::CachedSectorIterator::operator ++ (int) {
 	NavigationSystem::CachedSectorIterator iter(*this);
 	++(*this);
@@ -598,8 +618,7 @@ float vsmax(float x, float y) {
 	return x>y?x:y;
 }
 
-void NavigationSystem::DrawGalaxy()
-{
+void NavigationSystem::DrawGalaxy() {
 //	systemdrawlist mainlist;//(0, screenoccupation, factioncolours);	//	lists of items to draw that are in mouse range
 	
 	systemdrawlist mouselist;//(1, screenoccupation, factioncolours);	//	lists of items to draw that are in mouse range

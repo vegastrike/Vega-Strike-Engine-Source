@@ -32,17 +32,11 @@
 #include "cmd/unit_util.h"
 #include "math.h"
 #include "save_util.h"
-
-
-
 #include "navscreen.h"
 #include "gfx/masks.h"
-
+#include "galaxy_gen.h"
 
 //	**********************************
-
-
-
 //	Main function for drawing a CURRENT system
 //	works :
 //		scans all items, records min + max coords of the system, for relevant items
@@ -50,6 +44,7 @@
 //			-	items with mouse over them will go into a mouselist.
 //		draws the draw lists, with the mouse lists cycled 'n' times (according to kliks)
 //	**********************************
+
 void NavigationSystem::DrawSystem()
 {
 	UniverseUtil::PythonUnitIter bleh = UniverseUtil::getUnitList(); 
@@ -59,15 +54,17 @@ void NavigationSystem::DrawSystem()
 //	string mystr ("3d "+XMLSupport::tostring (system_view)); 
 //	UniverseUtil::IOmessage (0,"game","all",mystr);
 
-
 	//what's my name
 	//***************************
 	TextPlane systemname;	//	will be used to display shits names
-	string systemnamestring = "Current System : " + _Universe->activeStarSystem()->getName();
-	int length = systemnamestring.size();
-	float offset = (float(length)*0.005);
-	systemname.col = GFXColor(1, 1, .7, 1);
-	systemname.SetPos( (((screenskipby4[0]+screenskipby4[1])/2)-offset) , screenskipby4[3]);
+    int faction=FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction(_Universe->activeStarSystem()->getFileName()));
+    //GFXColor factioncolor = factioncolours[faction];
+    string systemnamestring = "#ff0000Sector: #ffff00" + getStarSystemSector(_Universe->activeStarSystem()->getFileName()) + "  #ff0000Current System: #ffff00" + _Universe->activeStarSystem()->getName()+" ("+FactionUtil::GetFactionName(faction)+"#ffff00)";
+	//int length = systemnamestring.size();
+	//float offset = (float(length)*0.001);
+	//systemname.SetPos( (((screenskipby4[0]+screenskipby4[1])/2)-offset) , screenskipby4[3]); // middle position
+    systemname.SetPos( screenskipby4[0]+0.03 , screenskipby4[3]+0.02); // left position
+    systemname.col = GFXColor(1, 1, .7, 1);
 	systemname.SetText(systemnamestring);
 //	systemname.SetCharSize(1, 1);
 	static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
@@ -77,7 +74,6 @@ void NavigationSystem::DrawSystem()
 	systemname.Draw(systemnamestring,0,true,false,automatte);
 	systemname.bgcol=tpbg;
 	//***************************
-
 
 //	navdrawlist mainlist(0, screenoccupation, factioncolours);		//	lists of items to draw
 //	mainlist.unselectedalpha = unselectedalpha;
@@ -92,7 +88,6 @@ void NavigationSystem::DrawSystem()
 
 	Adjust3dTransformation(system_view==VIEW_3D, 1);
 
-
 	//	Set up first item to compare to + centres
 	//	**********************************
 	while( (*bleh) && (_Universe->AccessCockpit()->GetParent() != (*bleh)) &&(UnitUtil::isSun(*bleh) || !UnitUtil::isSignificant (*bleh))  )	//	no sun's in initial setup
@@ -103,14 +98,11 @@ void NavigationSystem::DrawSystem()
 	if(!(*bleh))	//	nothing there that's significant, just do it all
 		bleh = UniverseUtil::getUnitList();
 
-
 	//GET THE POSITION
 	//*************************
 	pos = (*bleh)->Position();
 	ReplaceAxes(pos);
 	//*************************
-
-
 
 	//Modify by old rotation amount
 	//*************************
@@ -121,7 +113,6 @@ void NavigationSystem::DrawSystem()
 //	}
 	//*************************
 
-	
 	float max_x = (float)pos.i;
 	float min_x = (float)pos.i;
 	float max_y = (float)pos.j;
@@ -136,7 +127,6 @@ void NavigationSystem::DrawSystem()
 	float center_nav_y = ((screenskipby4[2] + screenskipby4[3]) / 2);
 	//	**********************************
 
-
 	//Retrieve unit data min/max
 	//**********************************
 	while (*bleh)	//	this goes through one time to get the major components locations, and scales its output appropriately
@@ -147,9 +137,6 @@ void NavigationSystem::DrawSystem()
 			continue;
 		}
 		string temp = (*bleh)->name;
-
-
-
 		pos = (*bleh)->Position();
 		ReplaceAxes(pos);
 		
@@ -162,7 +149,6 @@ void NavigationSystem::DrawSystem()
 //		}
 		//*************************
 		//*************************
-		
 
 		if( (UnitUtil::isSignificant (*bleh)) || (_Universe->AccessCockpit()->GetParent() == (*bleh)) )
 		{
@@ -173,8 +159,6 @@ void NavigationSystem::DrawSystem()
 		++bleh;
 	} 
 	//**********************************
-
-	
 
 	//Find Centers
 	//**********************************
@@ -196,10 +180,8 @@ void NavigationSystem::DrawSystem()
 //	themaxvalue = sqrt(themaxvalue*themaxvalue + themaxvalue*themaxvalue + themaxvalue*themaxvalue);
 //	themaxvalue = SQRT3*themaxvalue;
 
-
 	//Set Camera Distance
 	//**********************************
-
 //	{
 		float half_x=(max_x - min_x);
 		float half_y=(max_y - min_y);
@@ -216,33 +198,25 @@ void NavigationSystem::DrawSystem()
 
 	DrawOriginOrientationTri(center_nav_x, center_nav_y, 1);
 
-
 /*
 	string mystr ("max x "+XMLSupport::tostring (max_x)); 
 	UniverseUtil::IOmessage (0,"game","all",mystr);
 
-
 	string mystr2 ("min x "+XMLSupport::tostring (min_x)); 
 	UniverseUtil::IOmessage (0,"game","all",mystr2);
-
 
 	string mystr3 ("max y "+XMLSupport::tostring (max_y)); 
 	UniverseUtil::IOmessage (0,"game","all",mystr3);
 
-
 	string mystr4 ("min y "+XMLSupport::tostring (min_y)); 
 	UniverseUtil::IOmessage (0,"game","all",mystr4);
-
 
 	string mystrcx ("center x "+XMLSupport::tostring (center_x)); 
 	UniverseUtil::IOmessage (0,"game","all",mystrcx);
 
-
 	string mystrcy ("center y "+XMLSupport::tostring (center_y)); 
 	UniverseUtil::IOmessage (0,"game","all",mystrcy);
 */
-
-
 
 	Unit* ThePlayer = ( UniverseUtil::getPlayerX( UniverseUtil::getCurrentPlayer() ) );
 
@@ -255,8 +229,6 @@ void NavigationSystem::DrawSystem()
 		//	Retrieve unit data
 		//	**********************************
 		string temp = (*blah)->name;
-			
-
 
 		pos = (*blah)->Position();
 		ReplaceAxes(pos);
@@ -273,22 +245,17 @@ void NavigationSystem::DrawSystem()
 			}
 		//**********************************
 
-
 		//	Now starts the test that determines the type of things and inserts
 		//	|
 		//	|
 		//	\/
 
-
 		float insert_size = 0.0;
 		int insert_type = navambiguous;
 
-			
-
-
 		if(	(*blah)->isUnit()==UNITPTR )	//	unit
 		{
-			if(UnitUtil::isPlayerStarship(*blah) > -1)	//	is a PLAYER SHIP
+			/*if(UnitUtil::isPlayerStarship(*blah) > -1)	//	is a PLAYER SHIP
 			{
 				if (UnitUtil::isPlayerStarship (*blah)==UniverseUtil::getCurrentPlayer()) //	is THE PLAYER
 				{
@@ -302,7 +269,7 @@ void NavigationSystem::DrawSystem()
 				}
 			}
 			else	//	is a non player ship
-			{
+			{*/
 				if(UnitUtil::isSignificant (*blah))	//	capship or station
 				{
 					if((*blah)->GetComputerData().max_speed()==0)		//	is this item STATIONARY?
@@ -326,7 +293,7 @@ void NavigationSystem::DrawSystem()
 				}
 				else	//	fighter
 				{
-					if(ThePlayer->InRange((*blah),false,false))	//	only insert if in range
+					/*if(ThePlayer->InRange((*blah),false,false))	//	only insert if in range
 					{
 						insert_type = navfighter;
 						insert_size = navfightersize;
@@ -335,11 +302,20 @@ void NavigationSystem::DrawSystem()
 					{
 						++blah;
 						continue;
-					}
-				}
-			}
+					}*/
+                    if (UnitUtil::isPlayerStarship (*blah) > -1) // is THE PLAYER
+                    {
+                        insert_type = navfighter;
+                        insert_size = navfightersize;
+                    }
+                    else    // skip unit completely if not in range
+                    {
+                        ++blah;
+                        continue;
+                    }
+                }
+			//}
 		}
-
 
 		else if((*blah)->isUnit()==PLANETPTR  )	//	is it a PLANET?
 		{
@@ -348,7 +324,6 @@ void NavigationSystem::DrawSystem()
 				insert_type = navsun;
 				insert_size = navsunsize;
 			}				
-				
 
 			else if (!((*blah)->GetDestinations().empty()))	//	is a jump point (has destinations)
 			{
@@ -364,14 +339,12 @@ void NavigationSystem::DrawSystem()
 			}
 		}
 		
-		
 		else if((*blah)->isUnit()==MISSILEPTR)
 		{
 			//	a missile
 			insert_type = navmissile;
 			insert_size = navmissilesize;
 		}
-
 
 		else if((*blah)->isUnit()==ASTEROIDPTR)
 		{
@@ -380,14 +353,12 @@ void NavigationSystem::DrawSystem()
 			insert_size = navasteroidsize;
 		}
 
-
 		else if((*blah)->isUnit()==NEBULAPTR)
 		{
 			//	a nebula
 			insert_type = navnebula;
 			insert_size = navnebulasize;
 		}
-		
 
 		else	//	undefined non unit
 		{
@@ -432,10 +403,7 @@ void NavigationSystem::DrawSystem()
 		else
 			drawlistitem(insert_type, insert_size, the_x, the_y, myunit, screenoccupation, false, (*blah)?true:false, unselectedalpha, factioncolours);
 
-
-
 	}
-
 	//	**********************************	//	done enlisting items and attributes
 
 
