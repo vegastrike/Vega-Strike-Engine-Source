@@ -64,9 +64,6 @@ bool FactionUtil::isCitizenInt(int faction) {
 bool FactionUtil::isCitizen(std::string name) {
   return isCitizenInt(GetFactionIndex(name));
 }
-float FactionUtil::GetRelation (string myfaction, string theirfaction){
-	return GetIntRelation(GetFactionIndex(myfaction),GetFactionIndex(theirfaction));
-}
 string FactionUtil::GetFactionName(int index) {
 	const char * tmp=GetFaction(index);
 	if (tmp) return tmp;
@@ -114,10 +111,6 @@ void FactionUtil::AdjustIntRelation(const int Myfaction, const int TheirFaction,
 
   }
 }
-void FactionUtil::AdjustRelation(string myfaction,string theirfaction, float factor, float rank) {
-	AdjustIntRelation(GetFactionIndex(myfaction),GetFactionIndex(theirfaction), factor, rank);
-}
-
 int FactionUtil::GetPlaylist (const int myfaction) {
 	return factions[myfaction]->playlist;//can be -1
 }

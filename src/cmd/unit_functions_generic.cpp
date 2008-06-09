@@ -102,17 +102,32 @@ void SetShieldZero(Unit * un) {
 //un scored a faction kill
 void ScoreKill (Cockpit * cp, Unit * un, Unit * killedUnit) {
   if (un->isUnit()!=UNITPTR||killedUnit->isUnit()!=UNITPTR)
-	return;
+    return;
   static float KILL_FACTOR=-XMLSupport::parse_float(vs_config->getVariable("AI","kill_factor",".2"));
-  int faction= killedUnit->faction;
-  FactionUtil::AdjustIntRelation(faction,un->faction,KILL_FACTOR,1);
+  int killedCp = _Universe->whichPlayerStarship(killedUnit);
+  int killerCp = killedCp;
+  if (killedCp!=-1) {
+    UniverseUtil::adjustRelationModifierInt(killedCp,un->faction,KILL_FACTOR);
+  } else {
+    killerCp = _Universe->whichPlayerStarship(un);
+    if (killerCp!=-1) {
+      UniverseUtil::adjustRelationModifierInt(killerCp,killedUnit->faction,KILL_FACTOR);
+    }
+  }
+  int faction = killedUnit->faction;
   static float FRIEND_FACTOR=-XMLSupport::parse_float(vs_config->getVariable("AI","friend_factor",".1"));  
   for (unsigned int i=0;i<FactionUtil::GetNumFactions();i++) {
     float relation;
     if (faction!=(int)i&&un->faction!=(int)i) {
       relation=FactionUtil::GetIntRelation(i,faction);
-      if (relation)
-        FactionUtil::AdjustIntRelation(i,un->faction,FRIEND_FACTOR*relation,1);
+      if (killedCp!=-1) {
+        relation+=UniverseUtil::getRelationModifierInt(i,faction);
+      }
+      if (relation) {
+        if (killerCp!=-1) {
+          UniverseUtil::adjustRelationModifierInt(killerCp,i,FRIEND_FACTOR*relation);
+        }
+      }
     }
   }
   int upgrades = FactionUtil::GetUpgradeFaction();
@@ -128,7 +143,7 @@ void ScoreKill (Cockpit * cp, Unit * un, Unit * killedUnit) {
       (*killlist)[faction]++;
     }
     killlist->back()++;
-  }else if (FactionUtil::GetIntRelation(un->faction,faction)<0&&faction!=upgrades&&faction!=planets) {
+  }else if (UnitUtil::getRelationToFaction(un,faction)<0&&faction!=upgrades&&faction!=planets) {
     int whichcp= rand()%_Universe->numPlayers();
     Unit * whichrecv = _Universe->AccessCockpit(whichcp)->GetParent();
     if (whichrecv!=NULL) {

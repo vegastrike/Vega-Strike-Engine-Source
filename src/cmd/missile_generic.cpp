@@ -103,7 +103,7 @@ Unit * getNearestTarget (Unit *me) {
          }
 		 if (un->hull<0)
 			 continue;
-		 if (FactionUtil::GetIntRelation(me->faction,un->faction)>=0) {
+		 if (UnitUtil::getFactionRelation(me,un)>=0) {
 			 continue;
 		 }
          double temp= (un->Position()-pos).Magnitude()-un->rSize();

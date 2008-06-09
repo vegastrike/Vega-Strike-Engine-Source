@@ -1160,10 +1160,10 @@ class Unit
 		bool isJumppoint() const { return(GetDestinations().size()!=0); }
 
 		// Uses Universe stuff -> maybe only needed in Unit class
-		bool isEnemy(Unit *other) const { return (FactionUtil::GetIntRelation(faction,other->faction)<0.0); }
-		bool isFriend(Unit *other) const { return (FactionUtil::GetIntRelation(faction,other->faction)>0.0); }
-		bool isNeutral(Unit *other) const { return (FactionUtil::GetIntRelation(faction,other->faction)==0.0); }
-		float getRelation(Unit *other) const;
+	bool isEnemy(const Unit *other) const { return (getRelation(other)<0.0); }
+		bool isFriend(const Unit *other) const { return (getRelation(other)>0.0); }
+		bool isNeutral(const Unit *other) const { return (getRelation(other)==0.0); }
+		float getRelation(const Unit *other) const;
 
 		void TurretFAW();
 };

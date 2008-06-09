@@ -161,6 +161,18 @@ namespace UniverseUtil
 	// Clears all objectives (used for server-side when it's easy to get inconsistent.
     void setTargetLabel(std::string label);
     std::string getTargetLabel();
+
+
+	float getRelationModifierInt(int which_cp, int faction);
+	float getRelationModifier(int which_cp, string faction);
+	float getFGRelationModifier(int which_cp, string fg);
+	void adjustRelationModifierInt(int which_cp, int faction, float delta);
+	void adjustRelationModifier(int which_cp, string faction, float delta);
+	void adjustFGRelationModifier(int which_cp, string fg, float delta);
+	
+	void AdjustRelation(std::string myfaction,std::string theirfaction, float factor, float rank);
+	float GetRelation(std::string myfaction,std::string theirfaction);
+
 	void clearObjectives();
 	// Erases an objective.
 	void eraseObjective(int which);

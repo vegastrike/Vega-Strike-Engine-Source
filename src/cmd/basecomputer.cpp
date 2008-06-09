@@ -4685,7 +4685,7 @@ bool BaseComputer::showPlayerInfo(const EventCommandId& command, Control* contro
                 }
 
 		if (currentplayer) {
-	        relation = FactionUtil::GetIntRelation(i, currentplayer->faction );
+	        relation = UnitUtil::getRelationFromFaction(currentplayer, i );
 		}
                 if (relation<-1) relation=-1;
                 if (relation>1) relation=1;

@@ -118,12 +118,12 @@ namespace FactionUtil {
                    return factions[myfaction]->faction[theirfaction].relationship;
                 }
 
-		float GetRelation (std::string myfaction, std::string theirfaction);
+		//float GetRelation (std::string myfaction, std::string theirfaction);
 		std::string GetFactionName(int index);
 		bool isCitizenInt(int index);
 		bool isCitizen(std::string name);
 		void AdjustIntRelation (const int myfaction, const int theirfaction, const float factor, const float rank);
-		void AdjustRelation(std::string myfaction,std::string theirfaction, float factor, float rank);
+		//void AdjustRelation(std::string myfaction,std::string theirfaction, float factor, float rank);
 		int GetPlaylist (const int myfaction);
 		const float* GetSparkColor (const int myfaction);
 		unsigned int GetNumFactions();

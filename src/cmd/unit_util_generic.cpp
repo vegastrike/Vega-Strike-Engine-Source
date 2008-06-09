@@ -333,6 +333,41 @@ namespace UnitUtil {
 		if (!my_unit)return;
 		my_unit->SetFaction(FactionUtil::GetFactionIndex(factionname));
     }
+	
+	float getFactionRelation (const Unit *my_unit, const Unit *their_unit) {
+		float relation = FactionUtil::GetIntRelation(my_unit->faction, their_unit->faction);
+		int my_cp = _Universe->whichPlayerStarship(my_unit);
+		int their_cp = _Universe->whichPlayerStarship(their_unit);
+		if (my_cp!=-1) {
+			relation += UniverseUtil::getRelationModifierInt(my_cp, their_unit->faction);
+		}
+		else if (their_cp!=-1) { /* The question is: use an else? */
+			relation += UniverseUtil::getRelationModifierInt(their_cp, my_unit->faction);
+		}
+		return relation;
+	}
+	/*
+	void adjustFactionRelation (Unit *my_unit, Unit *their_unit, float delta) {
+		//
+	}
+	*/
+	float getRelationToFaction (const Unit *my_unit, int other_faction) {
+		float relation = FactionUtil::GetIntRelation(my_unit->faction, other_faction);
+		int my_cp = _Universe->whichPlayerStarship(my_unit);
+		if (my_cp!=-1) {
+			relation += UniverseUtil::getRelationModifierInt(my_cp, other_faction);
+		}
+		return relation;
+	}
+	float getRelationFromFaction (const Unit *their_unit, int my_faction) {
+		float relation = FactionUtil::GetIntRelation(my_faction, their_unit->faction);
+		int their_cp = _Universe->whichPlayerStarship(their_unit);
+		if (their_cp!=-1) {
+			relation += UniverseUtil::getRelationModifierInt(their_cp, my_faction);
+		}
+		return relation;
+	}
+	
 	string getName(const Unit *my_unit){
 		if (!my_unit)return "";
 		return my_unit->name;

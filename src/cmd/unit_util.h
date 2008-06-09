@@ -12,6 +12,9 @@ namespace UnitUtil {
 	void setFactionIndex (Unit *my_unit,int factionname);
 	void RecomputeUnitUpgrades(Unit *my_unit);
 	void setFactionName (Unit *my_unit,string factionname);
+	float getFactionRelation (const Unit *my_unit, const Unit *their_unit);
+	float getRelationToFaction (const Unit *my_unit, int other_faction);
+	float getRelationFromFaction (const Unit *their_unit, int my_faction);
 	string getName(const Unit *my_unit);
 	void setName(Unit *my_unit,string name);
 	void SetHull(Unit *my_unit,float hull);

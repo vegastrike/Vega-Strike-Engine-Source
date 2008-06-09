@@ -321,6 +321,78 @@ namespace UniverseUtil
 		}
 		return false;
 	}
+
+	float GetRelation(std::string myfaction,std::string theirfaction) {
+		int myfac = FactionUtil::GetFactionIndex(myfaction);
+		int theirfac = FactionUtil::GetFactionIndex(theirfaction);
+		int cp = _Universe->CurrentCockpit();
+		Unit *un = _Universe->AccessCockpit()->GetParent();
+		if (!un) return FactionUtil::GetIntRelation(myfac,theirfac);
+
+		if (myfac == theirfac)
+			return 0;
+		else if (myfac == un->faction)
+			return getRelationModifierInt(cp, theirfac);
+		else if (theirfac == un->faction)
+			return getRelationModifierInt(cp, myfac);
+		else
+			return FactionUtil::GetIntRelation(myfac, theirfac);
+	}
+	void AdjustRelation(std::string myfaction,std::string theirfaction, float factor, float rank) {
+		int myfac = FactionUtil::GetFactionIndex(myfaction);
+		int theirfac = FactionUtil::GetFactionIndex(theirfaction);
+		float realfactor = factor*rank;
+		int cp = _Universe->CurrentCockpit();
+		Unit *un = _Universe->AccessCockpit()->GetParent();
+		if (!un) return;
+		
+		if (myfac == theirfac)
+			return;
+		else if (myfac == un->faction) {
+			return adjustRelationModifierInt(cp, theirfac, realfactor);
+		} else if (theirfac == un->faction) {
+			return adjustRelationModifierInt(cp, myfac, realfactor);
+		}
+		
+	}
+	
+	
+	float getRelationModifierInt(int which_cp, int faction) {
+ 		string saveVar = "Relation_to_" + FactionUtil::GetFactionName(faction);
+		if (getSaveDataLength(which_cp, saveVar)==0) {
+			return 0.;
+		}
+		return getSaveData(which_cp, saveVar, 0);
+	}
+	float getRelationModifier(int which_cp, string faction) {
+		getRelationModifierInt(which_cp, FactionUtil::GetFactionIndex(faction));
+	}
+	float getFGRelationModifier(int which_cp, string fg) {
+		fg = "FG_Relation_" + fg;
+		if (getSaveDataLength(which_cp, fg)==0) {
+			return 0.;
+		}
+		return getSaveData(which_cp, fg, 0);
+	}
+	void adjustRelationModifierInt(int which_cp, int faction, float delta) {
+ 		string saveVar = "Relation_to_" + FactionUtil::GetFactionName(faction);
+		if (getSaveDataLength(which_cp, saveVar)==0) {
+			pushSaveData(which_cp, saveVar, delta);
+		}
+		return putSaveData(which_cp, saveVar, 0, getSaveData(which_cp, saveVar, 0)+delta);
+	}
+	void adjustRelationModifier(int which_cp, string faction, float delta) {
+		adjustRelationModifierInt(which_cp, FactionUtil::GetFactionIndex(faction),delta);
+	}
+	void adjustFGRelationModifier(int which_cp, string fg, float delta) {
+		fg = "FG_Relation_" + fg;
+		if (getSaveDataLength(which_cp, fg)==0) {
+			pushSaveData(which_cp, fg, delta);
+			return;
+		}
+		putSaveData(which_cp, fg, 0, getSaveData(which_cp, fg, 0)+delta);
+	}
+	
 	void setMissionOwner(int whichplayer) {
 		mission->player_num=whichplayer;
 	}

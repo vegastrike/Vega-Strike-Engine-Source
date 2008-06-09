@@ -325,8 +325,8 @@ void NetServer::sendCommunication(Unit *from, Unit *to, const class Communicatio
 	} else {
 		netbuf.addInt32(-1); // don't actually say anything...
 	}
-	netbuf.addFloat(FactionUtil::GetIntRelation(from->faction,to->faction));
-	netbuf.addFloat(FactionUtil::GetIntRelation(to->faction,from->faction));
+	netbuf.addFloat(UnitUtil::getFactionRelation(from,to));
+	netbuf.addFloat(UnitUtil::getFactionRelation(to,from));
 	if (from->pilot) {
 		Pilot::relationmap::iterator i=from->pilot->effective_relationship.find(to);
 		if (i==from->pilot->effective_relationship.end()) {

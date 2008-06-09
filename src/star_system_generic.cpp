@@ -515,7 +515,7 @@ void StarSystem::Statistics::CheckVitals(StarSystem * ss)
 		Collidable* collide=&ss->collidemap[Unit::UNIT_ONLY]->sorted[checkIter];
 		if (collide->radius>0) {
 			Unit * un=collide->ref.unit;
-			float rel=FactionUtil::GetIntRelation(sysfac,un->faction);
+			float rel=UnitUtil::getRelationFromFaction(un,sysfac);
 			if (FactionUtil::isCitizenInt(un->faction)) {
 				++newcitizencount;
 			}
@@ -548,7 +548,7 @@ void StarSystem::Statistics::CheckVitals(StarSystem * ss)
 }
 void StarSystem::Statistics::AddUnit(Unit * un)
 {
-	float rel=FactionUtil::GetIntRelation(system_faction,un->faction);
+	float rel=UnitUtil::getRelationFromFaction(un,system_faction);
 	if (FactionUtil::isCitizenInt(un->faction)) {
 		++citizencount;
 	}
@@ -580,7 +580,7 @@ void StarSystem::Statistics::AddUnit(Unit * un)
 
 void StarSystem::Statistics::RemoveUnit(Unit * un)
 {
-	float rel=FactionUtil::GetIntRelation(system_faction,un->faction);
+	float rel=UnitUtil::getRelationFromFaction(un,system_faction);
 	if (FactionUtil::isCitizenInt(un->faction)) {
 		--citizencount;
 	}

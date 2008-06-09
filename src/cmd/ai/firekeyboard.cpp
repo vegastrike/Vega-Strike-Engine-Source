@@ -710,7 +710,7 @@ void HelpOut (bool crit, std::string conv) {
     for (un_iter ui = _Universe->activeStarSystem()->getUnitList().createIterator();
 	 (par = (*ui));
 	 ++ui) {
-      if ((crit&&FactionUtil::GetIntRelation(par->faction,un->faction)>0)||par->faction==un->faction) {
+      if ((crit&&UnitUtil::getFactionRelation(par,un)>0)||par->faction==un->faction) {
 	Unit * threat = GetThreat (par,un);
 	CommunicationMessage c(par,un,NULL,0);
 	if (threat) {
@@ -869,7 +869,7 @@ void FireKeyboard::ChooseNearTargets(bool turret,bool reverse) {
     Vector t;
     bool tmp = parent->InRange (un);
     t = parent->LocalCoordinates (un);
-    if (tmp&&t.Dot(t)<range&&t.k>0&&FactionUtil::GetIntRelation(parent->faction,un->faction)<0) {
+    if (tmp&&t.Dot(t)<range&&t.k>0&&parent->isEnemy(un)) {
       range = t.Dot(t);
       if (turret)
 	parent->TargetTurret(un);
@@ -1165,18 +1165,18 @@ bool getNearestTargetUnit (Unit *me, int iType) {
 	  
 	  if ((iType == 0) &&
 		  ((un->isUnit()!=UNITPTR) ||
-		  (FactionUtil::GetIntRelation(me->faction,un->faction)>=0)))
+		   !me->isEnemy(un)))
 		  continue;
 
 	  if ((iType == 1) &&
 		  ((un->isUnit()!=UNITPTR) || 
-		  ((FactionUtil::GetIntRelation(me->faction,un->faction)>=0) &&
-		  (un->Target() != me))))
+		   (!me->isEnemy(un) &&
+			(un->Target() != me))))
 		  continue;
 
 	  if ((iType == 2) &&
 		  ((un->isUnit()!=UNITPTR) ||
-		  (FactionUtil::GetIntRelation(me->faction,un->faction)<0) ||
+		  me->isEnemy(un) ||
 		  (UnitUtil::getFlightgroupName(un) == "Base")))
 		  continue;
 
@@ -1648,7 +1648,7 @@ void Arrested (Unit * parent) {
 	static string po = vs_config->getVariable("galaxy","police_faction","homeland-security");
 	int police= FactionUtil::GetFactionIndex(po);
 	int police2= FactionUtil::GetFactionIndex(po+"_"+fac);
-	float ownrel=FactionUtil::GetIntRelation(own,parent->faction);
+	float ownrel=UnitUtil::getRelationFromFaction(parent,own);
 	bool attack = ownrel<0;
 	if (!attack) {
 		Unit * contra =FactionUtil::GetContraband(own);
@@ -1673,7 +1673,10 @@ void Arrested (Unit * parent) {
 			 ++i) {
 			if (un->faction==own||un->faction==police||un->faction==police2) {
 				if (un->Target()==parent||un->getRelation(parent)<0) {
-					FactionUtil::AdjustRelation(fac,FactionUtil::GetFactionName(parent->faction),-ownrel-.1,1);
+					int parentCp = _Universe->whichPlayerStarship(parent);
+					if (parentCp!=-1) {
+						UniverseUtil::adjustRelationModifier(parentCp, fac, -ownrel-.1);
+					}
 					attack=true;
 					break;
 				}
@@ -1712,7 +1715,8 @@ void Arrested (Unit * parent) {
 				parent->RemoveCargo (i,parent->GetCargo((unsigned int)i).quantity,true);
 			}
 			UniverseUtil::IOmessage(0,"game","all",parent->name+", your cargo has been confiscated and scanned. Here your ship will be kept until you complete your reintegration into society through our reprogramming pod(tm) system.");
-			FactionUtil::AdjustIntRelation(own,parent->faction,-FactionUtil::GetIntRelation(own,parent->faction),1);
+			int whichCp = _Universe->whichPlayerStarship(parent);
+			UniverseUtil::adjustRelationModifierInt(whichCp,own,-UnitUtil::getRelationToFaction(parent,own));
 		}
 	}
 	}

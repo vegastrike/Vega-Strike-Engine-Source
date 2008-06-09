@@ -17,10 +17,10 @@ public:
   typedef stdext::hash_map<const void*,float> relationmap;//non dereferencable Unit to float
   relationmap effective_relationship;
   std::vector <Animation *> *comm_face;
-  float getAnger (const Unit * un)const;
+  float getAnger (const Unit *parent, const Unit * un)const;
   std::vector <Animation *> *getCommFaces(unsigned char &sex){sex=gender;return comm_face;}
-  float GetEffectiveRelationship (const Unit * target)const ;
+  float GetEffectiveRelationship (const Unit * parent, const Unit * target) const ;
   Animation * getCommFace(Unit * parent, float moon, unsigned char &gender);
-  void adjustSpecificRelationship(Unit * parent, void* aggressor, float value, int guessedFaction/*pass in neutral otherwise*/);
+  float adjustSpecificRelationship(Unit * parent, void* aggressor, float value, int guessedFaction/*pass in neutral otherwise*/);
   void DoHit(Unit* parent, void * aggressor, int guessedFaction/*pass in neutral otherwise*/);
 };

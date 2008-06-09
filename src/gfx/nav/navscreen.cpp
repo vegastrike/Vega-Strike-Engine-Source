@@ -650,7 +650,7 @@ void NavigationSystem::DrawMission()
                   if (fac_loc != string::npos) {
                     continue;
                   }
-                  relation = 	FactionUtil::GetIntRelation(i, ( UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()) )->faction );
+                  relation = 	UnitUtil::getRelationFromFaction(UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()), i );
 
 		//	draw faction name
 		const float *colors=FactionUtil::GetSparkColor(i);

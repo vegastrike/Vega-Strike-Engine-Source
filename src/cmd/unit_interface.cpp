@@ -1382,7 +1382,7 @@ std::string GetNumKills(Unit *un) {
 	while(i < numfactions)
 	{
 		factionname = FactionUtil::GetFactionName(i);
-		relation = 	FactionUtil::GetIntRelation(i, ( UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()) )->faction );
+		relation =  UnitUtil::getRelationFromFaction( UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()), i );
 
 		//	draw faction name
 		text+=FactionUtil::GetFactionName(i)+"  ";

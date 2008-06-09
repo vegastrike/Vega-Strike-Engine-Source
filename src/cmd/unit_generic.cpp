@@ -2284,9 +2284,9 @@ void Unit::getAverageGunSpeed (float & speed, float & range, float &mmrange) con
 }
 
 
-float Unit::getRelation (Unit * targ) const
+float Unit::getRelation (const Unit * targ) const
 {
-	return pilot->GetEffectiveRelationship (targ);
+	return pilot->GetEffectiveRelationship (this, targ);
 }
 
 
@@ -6707,7 +6707,7 @@ inline bool insideDock (const DockingPorts &dock, const QVector & pos, float rad
 
 int Unit::CanDockWithMe(Unit * un, bool force)
 {
-	//  if (_Universe->GetRelation(faction,un->faction)>=0) {//already clearneed
+	//  don't need to check relation: already cleared.
 	for (unsigned int i=0;i<image->dockingports.size();++i) {
 		if (un->image->dockingports.size()) {
 			for (unsigned int j=0;j<un->image->dockingports.size();++j) {

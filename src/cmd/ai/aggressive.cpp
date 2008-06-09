@@ -1240,7 +1240,7 @@ static Unit * ChooseNavPoint(Unit * parent, Unit **otherdest, float *lurk_on_arr
   StarSystem::Statistics *stats=&ss->stats;
   
 
-  float sysrel=FactionUtil::GetIntRelation(stats->system_faction,parent->faction);          
+  float sysrel=UnitUtil::getRelationFromFaction(parent, stats->system_faction);
   static float lurk_time = XMLSupport::parse_float(vs_config->getVariable("AI","lurk_time","600"));
   static float select_time = XMLSupport::parse_float(vs_config->getVariable("AI","fg_nav_select_time","120"));
   static float hostile_select_time = XMLSupport::parse_float(vs_config->getVariable("AI","pirate_nav_select_time","400"));

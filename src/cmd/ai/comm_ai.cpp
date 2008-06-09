@@ -11,6 +11,7 @@
 #include "vs_random.h"
 #include "cmd/unit_find.h"
 #include "cmd/pilot.h"
+#include "universe_util.h"
 CommunicatingAI::CommunicatingAI (int ttype, int stype,  float mood, float anger,float appeas,  float moodswingyness, float randomresp) :Order (ttype,stype),anger(anger), appease(appeas), moodswingyness(moodswingyness),randomresponse (randomresp),mood(mood) {
   if (appease>665&&appease<667) {
     static float appeas = XMLSupport::parse_float(vs_config->getVariable ("AI","EaseToAppease",".5"));
@@ -59,7 +60,7 @@ int CommunicatingAI::selectCommunicationMessageMood (CommunicationMessage &c, fl
   float relationship=0;
 
   if (targ) {
-    relationship= parent->pilot->GetEffectiveRelationship(targ);
+    relationship= parent->pilot->GetEffectiveRelationship(parent,targ);
     if (targ==parent->Target()&&relationship>-1.0)
       relationship=-1.0;
     mood+=(1-randomresponse)*relationship;
@@ -89,14 +90,19 @@ void GetMadAt(Unit* un, Unit * parent, int numhits=0) {
 void AllUnitsCloseAndEngage(Unit * un, int faction) {
 	Unit * ally;
 	static float contraband_assist_range = XMLSupport::parse_float (vs_config->getVariable("physics","contraband_assist_range","50000"));
-        float relation=0;
-        static float minrel = XMLSupport::parse_float (vs_config->getVariable("AI","max_faction_contraband_relation","-.05"));
-        static float adj = XMLSupport::parse_float (vs_config->getVariable("AI","faction_contraband_relation_adjust","-.025"));
-        if ((relation=FactionUtil::GetIntRelation(faction,un->faction))>minrel) {
-          FactionUtil::AdjustIntRelation(faction,un->faction,minrel-relation,1);
+	float relation=0;
+	static float minrel = XMLSupport::parse_float (vs_config->getVariable("AI","max_faction_contraband_relation","-.05"));
+	static float adj = XMLSupport::parse_float (vs_config->getVariable("AI","faction_contraband_relation_adjust","-.025"));
+	float delta;
+	int cp = _Universe->whichPlayerStarship(un);
+	if (cp != -1) {
+        if ((relation=UnitUtil::getRelationFromFaction(un,faction))>minrel) {
+			delta = minrel-relation;
         }else {
-          FactionUtil::AdjustIntRelation(faction,un->faction,adj,1);
+			delta = adj;
         }
+		UniverseUtil::adjustRelationModifierInt(cp, faction, minrel-relation);
+	}
 	for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
 		(ally = *i)!=NULL;
 		++i) {
@@ -260,21 +266,41 @@ void CommunicatingAI::AdjustRelationTo (Unit * un, float factor) {
     return; // Server will handle this.
   Order::AdjustRelationTo(un,factor);
 
-  //now we do our magik  insert 0 if nothing's there... and add on our faction
-  Pilot::relationmap::iterator i=parent->pilot->effective_relationship.insert (pair<const void*,float>(un,0)).first;
-  bool abovezero=(*i).second+FactionUtil::GetIntRelation (parent->faction,un->faction)>=0;
-  if (!abovezero) {
-    static float slowrel=XMLSupport::parse_float (vs_config->getVariable ("AI","SlowDiplomacyForEnemies",".25"));
-    factor *=slowrel;
+  float newrel = parent->pilot->adjustSpecificRelationship(parent, un, factor, un->faction);
+
+  {
+    int whichCp = _Universe->whichPlayerStarship(parent);
+    Flightgroup *toFg;
+    int toFaction;
+    float oRlyFactor = factor;
+    if (whichCp!=-1) {
+      toFg = un->getFlightgroup();
+      toFaction = un->faction;
+    } else {
+      /* Instead use the Aggressor's cockpit? */
+      whichCp = _Universe->whichPlayerStarship(un);
+      toFg = parent->getFlightgroup();
+      toFaction = parent->faction;
+    }
+    if (whichCp!=-1) {
+      if (toFg && un->faction != parent->faction) {
+        oRlyFactor = factor*0.5;
+      }
+      if (toFg) {
+        UniverseUtil::adjustFGRelationModifier (whichCp,toFg->name,oRlyFactor*parent->pilot->getRank());
+      }
+      if (un->faction != parent->faction) {
+        UniverseUtil::adjustRelationModifierInt (whichCp,toFaction,oRlyFactor*parent->pilot->getRank());
+      }
+    }
   }
-  FactionUtil::AdjustIntRelation (parent->faction,un->faction,factor,parent->pilot->getRank());  
-  (*i).second+=factor;
-  if ((*i).second<anger||(parent->Target()==NULL&&(*i).second+FactionUtil::GetIntRelation(parent->faction,un->faction)<0)) {
+  
+  if (newrel<anger||(parent->Target()==NULL&&newrel+UnitUtil::getFactionRelation(parent,un)<0)) {
 	  if (parent->Target()==NULL||(parent->getFlightgroup()==NULL||parent->getFlightgroup()->directive.find(".")==string::npos)){
 		  parent->Target(un);//he'll target you--even if he's friendly
 		  parent->TargetTurret(un);//he'll target you--even if he's friendly
 	  }
-  } else if ((*i).second>appease) {
+  } else if (newrel>appease) {
     if (parent->Target()==un) {
 		if (parent->getFlightgroup()==NULL||parent->getFlightgroup()->directive.find(".")==string::npos) {
 			parent->Target(NULL);
@@ -362,7 +388,7 @@ int CommunicatingAI::selectCommunicationMessage (CommunicationMessage &c,Unit * 
     static float moodmul = XMLSupport::parse_float(vs_config->getVariable ("AI","MoodAffectsRespose","0"));
     static float angermul = XMLSupport::parse_float(vs_config->getVariable ("AI","AngerAffectsRespose","1"));
     static float staticrelmul = XMLSupport::parse_float(vs_config->getVariable ("AI","StaticRelationshipAffectsResponse","1"));
-    return selectCommunicationMessageMood (c,moodmul*mood+angermul*parent->pilot->getAnger (un)+staticrelmul*FactionUtil::GetIntRelation(parent->faction,un->faction));
+    return selectCommunicationMessageMood (c,moodmul*mood+angermul*parent->pilot->getAnger (parent,un)+staticrelmul*UnitUtil::getFactionRelation(parent,un));
   }
 }
 
