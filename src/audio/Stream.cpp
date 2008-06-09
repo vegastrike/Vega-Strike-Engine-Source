@@ -6,6 +6,7 @@
 #include "config.h"
 
 #include <utility>
+#include <cstring>
 
 using namespace std;
 
