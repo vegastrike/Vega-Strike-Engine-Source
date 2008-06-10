@@ -130,24 +130,8 @@ else (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
     )
     gtk2_debug_message("GTK2_GTKGL_INCLUDE_DIR is ${GTK2_GTKGL_INCLUDE_DIR}")
 
-	pkg_check_modules(glade2.0 REQUIRED libglade-2.0)
-	SET(_GLADEIncDir ${glade2.0_INCLUDE_DIRS})
-	SET(_GLADELinkDir ${glade2.0_LIBRARY_DIRS})
-	SET(_GLADELinkFlags ${glade2.0_LDFLAGS})
-	SET(_GLADECflags ${glade2.0_CFLAGS})
 	
 
-    find_path(GTK2_GLADE_INCLUDE_DIR
-      NAMES
-        glade/glade.h
-      PATHS
-        ${_GLADEIncDir}
-        /opt/gnome/include/libglade-2.0
-        /usr/include/libglade-2.0
-        /opt/include/libglade-2.0
-        /sw/include/libglade-2.0
-    )
-    gtk2_debug_message("GTK2_GLADE_INCLUDE_DIR is ${GTK2_GLADE_INCLUDE_DIR}")
 
     pkg_check_modules(Pango REQUIRED pango)
     SET(_PANGOIncDir ${Pango_INCLUDE_DIRS})
@@ -330,20 +314,6 @@ else (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
     )
     gtk2_debug_message("GTK2_GTKGL_LIBRARY is ${GTK2_GTKGL_LIBRARY}")
 
-    find_library(GTK2_GLADE_LIBRARY
-      NAMES
-        glade-2.0
-      PATHS
-        ${_GLADELinkDir}
-        /usr/lib
-        /usr/local/lib
-        /usr/openwin/lib
-        /usr/X11R6/lib
-        /opt/gnome/lib
-        /opt/lib
-        /sw/lib
-    )
-    gtk2_debug_message("GTK2_GLADE_LIBRARY is ${GTK2_GLADE_LIBRARY}")
 
     find_library(GTK2_PANGO_LIBRARY
       NAMES
@@ -395,7 +365,6 @@ else (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
       ${GTK2_GLIBCONFIG_INCLUDE_DIR}
       ${GTK2_GLIB_INCLUDE_DIR}
       ${GTK2_GDK_INCLUDE_DIR}
-      ${GTK2_GLADE_INCLUDE_DIR}
       ${GTK2_PANGO_INCLUDE_DIR}
       ${GTK2_CAIRO_INCLUDE_DIR}
       ${GTK2_ATK_INCLUDE_DIR}
@@ -406,7 +375,6 @@ else (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
         if (GTK2_GMODULE_LIBRARY)
           if (GTK2_GTHREAD_LIBRARY)
             if (GTK2_GOBJECT_LIBRARY)
-              if (GTK2_GLADE_LIBRARY AND GTK2_GLADE_INCLUDE_DIR)
                 if (GTK2_PANGO_LIBRARY AND GTK2_PANGO_INCLUDE_DIR)
                   if (GTK2_CAIRO_LIBRARY AND GTK2_CAIRO_INCLUDE_DIR)
                     if (GTK2_ATK_LIBRARY AND GTK2_ATK_INCLUDE_DIR)
@@ -419,7 +387,6 @@ else (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
                         ${GTK2_GMODULE_LIBRARY}
                         ${GTK2_GTHREAD_LIBRARY}
                         ${GTK2_GOBJECT_LIBRARY}
-                        ${GTK2_GLADE_LIBRARY}
                         ${GTK2_PANGO_LIBRARY}
                         ${GTK2_CAIRO_LIBRARY}
                         ${GTK2_ATK_LIBRARY}
@@ -449,9 +416,6 @@ else (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
                 else (GTK2_PANGO_LIBRARY AND GTK2_PANGO_INCLUDE_DIR)
                   message(SEND_ERROR "Could not find PANGO")
                 endif (GTK2_PANGO_LIBRARY AND GTK2_PANGO_INCLUDE_DIR)
-              else (GTK2_GLADE_LIBRARY AND GTK2_GLADE_INCLUDE_DIR)
-                message(SEND_ERROR "Could not find GLADE")
-              endif (GTK2_GLADE_LIBRARY AND GTK2_GLADE_INCLUDE_DIR)
             else (GTK2_GOBJECT_LIBRARY)
               message(SEND_ERROR "Could not find GOBJECT")
             endif (GTK2_GOBJECT_LIBRARY)
