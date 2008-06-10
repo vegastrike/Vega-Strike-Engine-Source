@@ -1,3 +1,4 @@
+#include "config.h"
 #include <Python.h>
 #include <vector>
 #include <string>

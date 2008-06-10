@@ -1,4 +1,4 @@
-#include <config.h>
+#include "config.h"
 
 #include "vsfilesystem.h"
 #include "vs_globals.h"

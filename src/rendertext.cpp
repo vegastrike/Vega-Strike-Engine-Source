@@ -1,9 +1,8 @@
 // rendertext.cpp: based on Don's gl_text.cpp
 // Based on Aardarples rendertext 
-#include "command.h"
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
+#include "command.h"
+
 #include "vegastrike.h"
 #include "cg_global.h"
 #ifdef HAVE_SDL

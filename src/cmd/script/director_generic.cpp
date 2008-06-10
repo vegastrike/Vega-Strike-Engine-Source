@@ -1,8 +1,10 @@
+#include "config.h"
+
 #ifdef HAVE_PYTHON
-
 #include <Python.h>
-
 #endif
+
+
 #include "cmd/unit_generic.h"
 #include "cmd/ai/order.h"
 

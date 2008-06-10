@@ -1,0 +1,30 @@
+#ifndef _CONFIG_H_
+#define _CONFIG_H_
+#cmakedefine HAVE_WCHAR_H 1
+#cmakedefine HAVE_FLOAT_H  1
+#cmakedefine HAVE_WCTYPE_H 1
+#cmakedefine HAVE_INTTYPES_H 1
+#cmakedefine HAVE_FFMPEG_SWSCALE_H 1
+#cmakedefine HAVE_ZLIB_H 1
+#cmakedefine HAVE_MATH_H 1
+#cmakedefine HAVE_GLXGETPROCADDRESSARB 1
+#cmakedefine HAVE_ISNAN 1
+#cmakedefine HAVE__ISNAN 1
+#cmakedefine HAVE_FINITE 1
+#cmakedefine HAVE__FINITE 1
+#cmakedefine HAVE_LSTAT 1
+#cmakedefine HAVE_PYTHON 1
+#cmakedefine _GNU_SOURCE 1
+#cmakedefine HAVE_OGG 1
+#cmakedefine HAVE_SDL 1
+#cmakedefine SDL_WINDOWING 1
+#cmakedefine HAVE_AL 1
+#cmakedefine HAVE_FFMPEG 1
+#define HAVE_CONFIG_H 1
+#define ${HOSTOS} 1
+#cmakedefine UNIX 1
+#cmakedefine USE_NET_THREAD_NONE 1
+#cmakedefine USE_NET_THREAD_POSIX 1
+#endif
+
+

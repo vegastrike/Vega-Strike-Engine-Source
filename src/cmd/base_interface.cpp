@@ -1,3 +1,4 @@
+#include "config.h"
 #include <Python.h>
 #include "base.h"
 #include "gldrv/winsys.h"

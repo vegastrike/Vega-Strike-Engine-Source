@@ -1,6 +1,6 @@
 #ifndef __VS_GLOBALS_H_
 #define __VS_GLOBALS_H_
-
+#include "config.h"
 #include <vector>
 
 #include "universe_generic.h"

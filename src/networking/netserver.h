@@ -21,7 +21,7 @@
 #ifndef __NETSERVER_H
 #define __NETSERVER_H
 
-#include <config.h> // for HAVE_ZLIB
+#include "config.h" // for HAVE_ZLIB
 
 #include <vector>
 #include <list>

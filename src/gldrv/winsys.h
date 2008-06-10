@@ -18,7 +18,7 @@
  */
 #ifndef WINSYS_H
 #define WINSYS_H 1
-
+#include "config.h"
 #ifndef UCHAR_MAX
 #define UCHAR_MAX 255
 #endif

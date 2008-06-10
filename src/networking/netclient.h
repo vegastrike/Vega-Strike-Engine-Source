@@ -21,7 +21,7 @@
 #ifndef __NetClient_H
 #define __NetClient_H
 
-#include <config.h> // for NETCOMM & ZLIB
+#include "config.h" // for NETCOMM & ZLIB
 
 #include <string>
 #include <vector>

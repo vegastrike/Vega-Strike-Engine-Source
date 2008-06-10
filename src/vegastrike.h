@@ -33,9 +33,9 @@ extern float simulation_atom_var;
 #define SIMULATION_ATOM (simulation_atom_var)
 #endif
 
-#ifdef HAVE_CONFIG_H
-#   include <config.h>
-#endif
+
+#include <config.h>
+
 
 #include "macosx_math.h"
 #include <math.h>

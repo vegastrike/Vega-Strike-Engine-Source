@@ -17,8 +17,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 //#include <fenv.h>
-#include <Python.h>
 #include "config.h"
+#include <Python.h>
+
 #if defined(HAVE_SDL)
 #include <SDL/SDL.h>
 #endif

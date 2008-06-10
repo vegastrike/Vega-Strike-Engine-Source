@@ -22,7 +22,7 @@
 /*
   xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
 */
-
+#include "config.h"
 #include "python/python_class.h"
 #include <stdlib.h>
 #include <stdio.h>

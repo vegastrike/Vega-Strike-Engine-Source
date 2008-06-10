@@ -1,3 +1,4 @@
+#include "config.h"
 #include <string>
 #include <boost/version.hpp>
 #if BOOST_VERSION != 102800

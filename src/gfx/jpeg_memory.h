@@ -1,6 +1,6 @@
 #include <stdio.h>
 #define JPEG_SUPPORT
-#ifdef JPEG_SUPPORT
+#ifdef JPEG_SUPPORT   /* Always true? */
 #ifndef __JPEG_MEMORY_H
 #define __JPEG_MEMORY_H
 #include <string.h>

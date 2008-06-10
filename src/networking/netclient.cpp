@@ -17,7 +17,7 @@
 /*
   NetClient - Network Client Interface - written by Stephane Vaxelaire <svax@free.fr>
 */
-
+#include "config.h"
 #include "networking/netclient.h"
 #include "networking/lowlevel/netui.h"
 
@@ -26,7 +26,7 @@
 #if !defined(WIN32)
 #include <unistd.h>
 #endif
-#include <config.h>
+
 
 #include "gfx/background.h" //Background::BackgroundCache
 

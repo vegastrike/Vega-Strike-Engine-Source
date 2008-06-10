@@ -22,6 +22,7 @@
 /*
   Joystick support written by Alexander Rawass <alexannika@users.sourceforge.net>
 */
+#include "config.h"
 #include "in_kb_data.h"
 #ifndef _JOYSTICK_H_
 #define _JOYSTICK_H_

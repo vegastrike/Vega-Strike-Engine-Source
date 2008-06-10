@@ -26,7 +26,7 @@
 	#include <io.h>
 #endif
 
-extern class vs_options game_options;
+
 
 #include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
@@ -70,6 +70,8 @@ extern class vs_options game_options;
 
 #include "netversion.h"
 ObjSerial SERVER_NETVERSION = NETWORK_VERSION;
+
+extern class vs_options game_options;
 
 double	clienttimeout;
 double	logintimeout;

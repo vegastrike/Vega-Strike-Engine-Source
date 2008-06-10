@@ -22,6 +22,7 @@
 /*
   xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
 */
+#include "config.h"
 #ifdef HAVE_PYTHON
 #include <Python.h>
 #endif

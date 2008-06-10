@@ -1,3 +1,4 @@
+#include "config.h"
 #include "cmd/unit_generic.h"
 #include "networking/networkcomm.h"
 #include "vsfilesystem.h"
