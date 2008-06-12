@@ -6,7 +6,7 @@
 # ccmake will let you set the Build type (debug,release,basic)
 # the CMAKE_CXX_FLAGS line directly below is a hack. 
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.4)
 
 project (vsUTCS)
 
@@ -455,15 +455,15 @@ include (CheckIncludeFiles)
 # Let cmake find our in-tree modules
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${vsUTCS_SOURCE_DIR})
 
-# Find Python 
+
 find_package(PythonLibs REQUIRED)
-IF(PYTHONLIBS_FOUND)
-	SET(TST_INCLUDES ${PYTHON_INCLUDE_PATH})
-	SET(TST_LIBS ${PYTHON_LIBRARIES})
-	SET(HAVE_PYTHON 1)
-ELSE(PYTHONLIBS_FOUND)
-	message(FATAL_ERROR "Can't find python dammit")
-ENDIF(PYTHONLIBS_FOUND)
+IF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_PATH)
+    SET(TST_INCLUDES ${PYTHON_INCLUDE_PATH})
+    SET(TST_LIBS ${PYTHON_LIBRARIES})
+    SET(HAVE_PYTHON 1)
+ELSE(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_PATH)
+    message(FATAL_ERROR "Can't find python")
+ENDIF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_PATH)
 
 # Find Boost with boost_python library
 find_package(Boost COMPONENTS python)

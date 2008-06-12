@@ -1,4 +1,4 @@
-set_property(DIRECTORY PROPERTY INCLUDE_DIRECTORIES "")
+#set_property(DIRECTORY PROPERTY INCLUDE_DIRECTORIES "")
 SET(VSSETUP_SOURCES src/c/setup.cpp
                     src/include/central.cpp
                     src/include/display_gtk.cpp

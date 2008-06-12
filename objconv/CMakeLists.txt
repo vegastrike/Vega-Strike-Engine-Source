@@ -1,4 +1,4 @@
-set_property(DIRECTORY PROPERTY INCLUDE_DIRECTORIES "")
+#set_property(DIRECTORY PROPERTY INCLUDE_DIRECTORIES "")
 include_directories("..")
 SET(TRISORT_SOURCES trisort.cpp)
 add_executable(trisort ${TRISORT_SOURCES})
