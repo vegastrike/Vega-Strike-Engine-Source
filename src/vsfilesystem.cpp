@@ -1296,7 +1296,6 @@ std::string vegastrike_cwd;
             break;
         case AnimFile:
             // Animations are always in subdir named like the anim itself
-            extra =  "/" + current_subdirectory.back();
 			extra += "/" + f.GetFilename();
             break;
         }
