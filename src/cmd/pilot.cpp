@@ -127,7 +127,7 @@ float Pilot::getAnger(const Unit *parent, const Unit * target)const {
 }
 
 float Pilot::GetEffectiveRelationship(const Unit *parent, const Unit * target)  const {
-    float relation = getAnger(parent,target)+UnitUtil::getFactionRelation(parent,target);
+    return getAnger(parent,target)+UnitUtil::getFactionRelation(parent,target);
 }
 
 extern float myroundclamp(float i);

@@ -365,7 +365,7 @@ namespace UniverseUtil
 		return getSaveData(which_cp, saveVar, 0);
 	}
 	float getRelationModifier(int which_cp, string faction) {
-		getRelationModifierInt(which_cp, FactionUtil::GetFactionIndex(faction));
+		return getRelationModifierInt(which_cp, FactionUtil::GetFactionIndex(faction));
 	}
 	float getFGRelationModifier(int which_cp, string fg) {
 		fg = "FG_Relation_" + fg;
