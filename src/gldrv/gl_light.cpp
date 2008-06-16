@@ -90,7 +90,7 @@ GFXLight::GFXLight (const bool enabled,const GFXColor &vect, const GFXColor &dif
 }
 void GFXLight::disable () {options &= (~GFX_LIGHT_ENABLED);}
 void GFXLight::enable (){options |= GFX_LIGHT_ENABLED;}
-bool GFXLight::attenuated() {return (attenuate[0]!=1)||(attenuate[1]!=0)||(attenuate[2]!=0); }
+bool GFXLight::attenuated() const {return (attenuate[0]!=1)||(attenuate[1]!=0)||(attenuate[2]!=0); }
 void GFXLight::apply_attenuate (bool attenuated) {
   options = attenuated
     ? (options|GFX_ATTENUATED)

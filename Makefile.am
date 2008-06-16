@@ -628,6 +628,8 @@ LIBGFXCLIENT = \
   src/gfx/stream_texture.cpp \
   src/gfx/stream_texture.h \
   src/gfx/tex_transform.cpp \
+  src/gfx/technique.h \
+  src/gfx/technique.cpp \
   src/gfx/vdu.cpp \
   src/gfx/vdu.h \
   src/gfx/vid_file.h \
@@ -851,6 +853,30 @@ LIBAUDIO = \
   src/audio/Format.h \
   src/audio/Stream.h \
   src/audio/Stream.cpp \
+  src/audio/Sound.h \
+  src/audio/Sound.cpp \
+  src/audio/Source.h \
+  src/audio/Source.cpp \
+  src/audio/Types.h \
+  src/audio/Vector.h \
+  src/audio/SourceTemplate.h \
+  src/audio/SourceTemplate.cpp \
+  src/audio/SceneManager.h \
+  src/audio/SceneManager.cpp \
+  src/audio/Renderer.h \
+  src/audio/Renderer.cpp \
+  src/audio/utils.h \
+  src/audio/utils.cpp \
+  src/audio/RenderableSource.h \
+  src/audio/RenderableSource.cpp \
+  src/audio/Listener.h \
+  src/audio/Listener.cpp \
+  src/audio/Scene.h \
+  src/audio/Scene.cpp \
+  src/audio/SimpleSource.h \
+  src/audio/SimpleSource.cpp \
+  src/audio/SimpleScene.h \
+  src/audio/SimpleScene.cpp \
   src/audio/codecs/Codec.cpp \
   src/audio/codecs/Codec.h \
   src/audio/codecs/FFStream.cpp \
@@ -873,7 +899,11 @@ LIBENGINE_COMMON = \
   $(LIBPYTHON) \
   $(librootgeneric) \
   $(LIBSCRIPT) \
-  $(LIBGFX)
+  $(LIBGFX) \
+  src/XMLDocument.h \
+  src/XMLDocument.cpp \
+  src/VSFileXMLSerializer.h \
+  src/VSFileXMLSerializer.cpp
 vegaserver_SOURCES = \
   $(LIBENGINE_COMMON) \
   $(LIBCMDSERVER) \
@@ -1013,18 +1043,28 @@ base_maker_SOURCES = \
 mesher_CXXFLAGS = $(OGRE_CFLAGS) -I../../src -I../..
 mesher_LDFLAGS = $(OGRE_LIBS)
 mesher_SRC = \
-  objconv/mesher/converter.cpp \
+  objconv/mesher/Converter.cpp \
   objconv/mesher/expat.h  \
   objconv/mesher/from_BFXM.cpp \
   objconv/mesher/from_BFXM.h \
   objconv/mesher/from_obj.cpp \
   objconv/mesher/from_obj.h \
-  objconv/mesher/mesh_io.h  \
+  src/gfx/mesh_io.h \
   objconv/mesher/mesh.h  \
   objconv/mesher/to_BFXM.cpp \
   objconv/mesher/to_BFXM.h \
   objconv/mesher/to_obj.cpp \
   objconv/mesher/to_obj.h \
+  objconv/mesher/main.cpp \
+  objconv/mesher/PrecompiledHeaders/Converter.cpp \
+  objconv/mesher/PrecompiledHeaders/Converter.h \
+  objconv/mesher/Modules/BFXM_to_Wavefront.cpp \
+  objconv/mesher/Modules/Wavefront_to_BFXM.cpp \
+  objconv/mesher/Modules/BFXM_to_XMesh.cpp \
+  objconv/mesher/Modules/XMesh_to_BFXM.cpp \
+  objconv/mesher/Modules/Convert.cpp \
+  objconv/mesher/Modules/Dims.cpp \
+  objconv/mesher/Modules/OldSyntax.cpp \
   src/endianness.h \
   src/hashtable.cpp \
   src/hashtable.h \
@@ -1090,6 +1130,14 @@ vssetup_SOURCES = \
     setup/src/include/general.h \
     src/common/common.cpp \
     src/common/common.h
+
+if USE_PRECOMPILED_HEADERS
+PRECOMPILED_FLAGS = -include $(PRECOMPILED)
+else
+PRECOMPILED_FLAGS =
+endif
+
+AM_CXXFLAGS = $(PRECOMPILED_FLAGS)
 
 #vslauncher_LDFLAGS = $(GTK_LIBS)
 #vslauncher_CXXFLAGS= $(GTK_CFLAGS)

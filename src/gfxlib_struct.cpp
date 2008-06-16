@@ -8,6 +8,8 @@
 
 #include "options.h"
 
+#include <vector>
+
 extern vs_options game_options;
 
 
@@ -83,7 +85,7 @@ void GFXVertexList::RefreshDisplayList ()
       if (changed&HAS_INDEX) {
 	    for(a=0; a<offsets[i]; a++) {
           const GFXColorVertex& vtx=data.colors[GetIndex(offset+a)];
-          GFXTexCoord4f(vtx.s,vtx.t,vtx.s,vtx.t);
+          GFXTexCoord224f(vtx.s,vtx.t,vtx.s,vtx.t,vtx.tx,vtx.ty,vtx.tz,vtx.tw);
 	      glColor4fv (&vtx.r);
 	      glNormal3fv(&vtx.i);
 	      glVertex3fv(&vtx.x);	
@@ -91,7 +93,7 @@ void GFXVertexList::RefreshDisplayList ()
       }else {
 	    for(a=0; a<offsets[i]; a++) {
           const GFXColorVertex& vtx=data.colors[offset+a];
-          GFXTexCoord4f(vtx.s,vtx.t,vtx.s,vtx.t);
+          GFXTexCoord224f(vtx.s,vtx.t,vtx.s,vtx.t,vtx.tx,vtx.ty,vtx.tz,vtx.tw);
 	      glColor4fv (&vtx.r);
 	      glNormal3fv(&vtx.i);
 	      glVertex3fv(&vtx.x);
@@ -107,14 +109,14 @@ void GFXVertexList::RefreshDisplayList ()
 	    for(a=0; a<offsets[i]; a++) {
           const GFXVertex& vtx=data.vertices[GetIndex(offset+a)];
 	      glNormal3fv(&vtx.i);
-          GFXTexCoord4f(vtx.s,vtx.t,vtx.s,vtx.t);
+          GFXTexCoord224f(vtx.s,vtx.t,vtx.s,vtx.t,vtx.tx,vtx.ty,vtx.tz,vtx.tw);
 	      glVertex3fv(&vtx.x);
 	    }
       }else {
 	    for(a=0; a<offsets[i]; a++) {
           const GFXVertex& vtx=data.vertices[offset+a];
 	      glNormal3fv(&vtx.i);
-          GFXTexCoord4f(vtx.s,vtx.t,vtx.s,vtx.t);
+          GFXTexCoord224f(vtx.s,vtx.t,vtx.s,vtx.t,vtx.tx,vtx.ty,vtx.tz,vtx.tw);
 	      glVertex3fv(&vtx.x);
 	    }
       }
@@ -155,7 +157,11 @@ void GFXVertexList::BeginDrawState(GFXBOOL lock) {
       glInterleavedArrays (GL_T2F_C4F_N3F_V3F,sizeof(GFXColorVertex),0);
       if (gl_options.Multitexture) {
           glClientActiveTextureARB_p(GL_TEXTURE1);
-          glTexCoordPointer(2,GL_FLOAT,sizeof(GFXColorVertex),&data.colors[0].s);
+          glTexCoordPointer(2,GL_FLOAT,sizeof(GFXColorVertex),(void*)((char*)&data.colors[0].s - (char*)data.vertices));
+          glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+          glClientActiveTextureARB_p(GL_TEXTURE2);
+          glTexCoordPointer(4,GL_FLOAT,sizeof(GFXColorVertex),(void*)((char*)&data.colors[0].tx - (char*)data.vertices));
+          glEnableClientState(GL_TEXTURE_COORD_ARRAY);
           glClientActiveTextureARB_p(GL_TEXTURE0);
       }
     } else {
@@ -164,7 +170,11 @@ void GFXVertexList::BeginDrawState(GFXBOOL lock) {
       glInterleavedArrays (GL_T2F_N3F_V3F,sizeof(GFXVertex),0);
       if (gl_options.Multitexture) {
           glClientActiveTextureARB_p(GL_TEXTURE1);
-          glTexCoordPointer(2,GL_FLOAT,sizeof(GFXVertex),&data.vertices[0].s);
+          glTexCoordPointer(2,GL_FLOAT,sizeof(GFXVertex),(void*)((char*)&data.vertices[0].s - (char*)data.vertices));
+          glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+          glClientActiveTextureARB_p(GL_TEXTURE2);
+          glTexCoordPointer(4,GL_FLOAT,sizeof(GFXVertex),(void*)((char*)&data.vertices[0].tx - (char*)data.vertices));
+          glEnableClientState(GL_TEXTURE_COORD_ARRAY);
           glClientActiveTextureARB_p(GL_TEXTURE0);
       }
     }
@@ -181,40 +191,25 @@ void GFXVertexList::BeginDrawState(GFXBOOL lock) {
           if (gl_options.Multitexture) {
               glClientActiveTextureARB_p(GL_TEXTURE1);
               glTexCoordPointer(2,GL_FLOAT,sizeof(GFXColorVertex),&data.colors[0].s);
+              glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+              glClientActiveTextureARB_p(GL_TEXTURE2);
+              glTexCoordPointer(4,GL_FLOAT,sizeof(GFXColorVertex),&data.colors[0].tx);
+              glEnableClientState(GL_TEXTURE_COORD_ARRAY);
               glClientActiveTextureARB_p(GL_TEXTURE0);
           }
       } else {
           if (gl_options.Multitexture) 
               glClientActiveTextureARB_p(GL_TEXTURE0);
-          /*if (gl_error=glGetError()) {
-            printf ("VBO19xx Error %d\n",gl_error);
-          }*/
-
           glInterleavedArrays (GL_T2F_N3F_V3F,sizeof(GFXVertex),&data.vertices[0]);
-          /*if (gl_error=glGetError()) {
-            printf ("VBO19x Error %d\n",gl_error);
-          }*/
-
           if (gl_options.Multitexture) {
               glClientActiveTextureARB_p(GL_TEXTURE1);
-              /*if (gl_error=glGetError()) {
-                printf ("VBO19a Error %d\n",gl_error);
-              }*/
-          
               glTexCoordPointer(2,GL_FLOAT,sizeof(GFXVertex),&data.vertices[0].s);
-              /*if (gl_error=glGetError()) {
-                printf ("VBO19b Error %d\n",gl_error);
-              }*/
-
+              glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+              glClientActiveTextureARB_p(GL_TEXTURE2);
+              glTexCoordPointer(4,GL_FLOAT,sizeof(GFXVertex),&data.vertices[0].tx);
+              glEnableClientState(GL_TEXTURE_COORD_ARRAY);
               glClientActiveTextureARB_p(GL_TEXTURE0);
-              /*if (gl_error=glGetError()) {
-                printf ("VBO19c Error %d\n",gl_error);
-                }*/
-
           }
-          /*if (gl_error=glGetError()) {
-            printf ("VBO19 Error %d\n",gl_error);
-            }*/
       }
 #ifndef NO_COMPILEDVERTEXARRAY_SUPPORT
       if (lock&&glLockArraysEXT_p)
@@ -313,61 +308,133 @@ void GFXVertexList::Draw (enum POLYTYPE *mode,const INDEX index, const int numli
           GFXDisable(SMOOTH);
       }
   } else {
-      int totoffset=0;
-      if (changed&HAS_INDEX) {
-	char stride = changed&HAS_INDEX;
-	GLenum indextype = (changed & INDEX_BYTE)
-	  ?GL_UNSIGNED_BYTE
-	  : ((changed & INDEX_SHORT) 
-	     ? GL_UNSIGNED_SHORT 
-	     : GL_UNSIGNED_INT);
+    int totoffset=0;
+    if (changed&HAS_INDEX) {
+        char stride = changed&HAS_INDEX;
+        GLenum indextype = (changed & INDEX_BYTE)
+                            ?GL_UNSIGNED_BYTE
+                            : ((changed & INDEX_SHORT) 
+                                ? GL_UNSIGNED_SHORT 
+                                : GL_UNSIGNED_INT);
+        bool use_vbo;
         if (vbo_data&&memcmp(&index,&this->index,sizeof(INDEX))==0) {
-#ifndef NO_VBO_SUPPORT
-          BindInd(display_list);            
-#endif
-          for (int i=0;i<numlists;i++) {
-            glDrawElements (PolyLookup(mode[i]),offsets[i], indextype, (void*)(stride*totoffset));//changed&INDEX_BYTE == stride!
-            totoffset +=offsets[i];
-          }
-        }else{
-#ifndef NO_VBO_SUPPORT
-          if (vbo_data)
-            BindInd(0);
-#endif
-          for (int i=0;i<numlists;i++) {
-            glDrawElements (PolyLookup(mode[i]),offsets[i], indextype, &index.b[stride*totoffset]);//changed&INDEX_BYTE == stride!
-            totoffset +=offsets[i];
-          }
+            #ifndef NO_VBO_SUPPORT
+            BindInd(display_list);
+            #endif
+            use_vbo = true;
+        } else {
+            #ifndef NO_VBO_SUPPORT
+            if (vbo_data)
+                BindInd(0);
+            #endif
+            use_vbo = false;
+        }
+        if (glMultiDrawElements_p) {
+            static std::vector<bool> drawn;
+            static std::vector<const GLvoid*> glindices;
+            static std::vector<GLsizei> glcounts;
+            
+            drawn.clear();
+            drawn.resize(numlists,false);
+            for (int i=0; i<numlists; totoffset += offsets[i++]) if (!drawn[i]) {
+                glindices.clear();
+                glcounts.clear();
+                
+                for (int j=i, offs=totoffset; j<numlists; offs += offsets[j++]) if(!drawn[j] && (mode[j]==mode[i])) {
+                    glindices.push_back(use_vbo ? (GLvoid*)(stride*offs)
+                                                : (GLvoid*)&index.b[stride*offs]);
+                    glcounts.push_back(offsets[j]);
+                    drawn[j] = true;
+                }
+                
+                if (glindices.size() == 1)
+                    glDrawElements(PolyLookup(mode[i]), glcounts[0], indextype, glindices[0]); else
+                    glMultiDrawElements_p(PolyLookup(mode[i]), &glcounts[0], indextype, &glindices[0], glindices.size());
+            }
+        } else {
+            for (int i=0;i<numlists;i++) {
+                glDrawElements (PolyLookup(mode[i]),offsets[i], indextype, 
+                    use_vbo ? (void*)(stride*totoffset)
+                            : &index.b[stride*totoffset] );//changed&INDEX_BYTE == stride!
+                totoffset += offsets[i];
+            }
         }
       } else {
-	    for (int i=0;i<numlists;i++) {
-          bool blendchange=false;
-          switch (mode[i]) {
-          case GFXLINE:
-          case GFXLINESTRIP:
-          case GFXPOLY:
-          case GFXPOINT:
-              if (((mode[i]==GFXPOINT)&&gl_options.smooth_points)||((mode[i]!=GFXPOINT)&&gl_options.smooth_lines)) {
-                  BLENDFUNC src,dst;
-                  GFXGetBlendMode(src,dst);
-                  if ((dst!=ZERO)&&((src==ONE)||(src==SRCALPHA))) {
-                      GFXPushBlendMode();
-                      GFXBlendMode(SRCALPHA,dst);
-                      GFXEnable(SMOOTH);
-                      blendchange=true;
-                  }
-              }
-              break;
-          }
-
-	      glDrawArrays(PolyLookup(mode[i]), totoffset, offsets[i]);
-	      totoffset += offsets[i];
-
-          if (blendchange) {
-              GFXPopBlendMode();
-              GFXDisable(SMOOTH);
-          }
-	    }
+        if (glMultiDrawArrays_p) {
+            static std::vector<bool> drawn;
+            static std::vector<GLint> gloffsets;
+            static std::vector<GLsizei> glcounts;
+            
+            drawn.clear();
+            drawn.resize(numlists,false);
+            for (int i=0; i<numlists; totoffset += offsets[i++]) if (!drawn[i]) {
+                gloffsets.clear();
+                glcounts.clear();
+                
+                for (int j=i, offs=totoffset; j<numlists; offs += offsets[j++]) if(!drawn[j] && (mode[j]==mode[i])) {
+                    gloffsets.push_back(offs);
+                    glcounts.push_back(offsets[j]);
+                    drawn[j] = true;
+                }
+                
+                bool blendchange=false;
+                switch (mode[i]) {
+                case GFXLINE:
+                case GFXLINESTRIP:
+                case GFXPOLY:
+                case GFXPOINT:
+                    if (((mode[i]==GFXPOINT)&&gl_options.smooth_points)||((mode[i]!=GFXPOINT)&&gl_options.smooth_lines)) {
+                        BLENDFUNC src,dst;
+                        GFXGetBlendMode(src,dst);
+                        if ((dst!=ZERO)&&((src==ONE)||(src==SRCALPHA))) {
+                            GFXPushBlendMode();
+                            GFXBlendMode(SRCALPHA,dst);
+                            GFXEnable(SMOOTH);
+                            blendchange=true;
+                        }
+                    }
+                    break;
+                }
+                
+                if (gloffsets.size() == 1)
+                    glDrawArrays(PolyLookup(mode[i]), gloffsets[0], glcounts[0]); else
+                    glMultiDrawArrays_p(PolyLookup(mode[i]), &gloffsets[0], &glcounts[0], gloffsets.size());
+        
+                if (blendchange) {
+                    GFXPopBlendMode();
+                    GFXDisable(SMOOTH);
+                }
+            }
+        } else { 
+            for (int i=0;i<numlists;i++) {
+                bool blendchange=false;
+                switch (mode[i]) {
+                case GFXLINE:
+                case GFXLINESTRIP:
+                case GFXPOLY:
+                case GFXPOINT:
+                    if (((mode[i]==GFXPOINT)&&gl_options.smooth_points)||((mode[i]!=GFXPOINT)&&gl_options.smooth_lines)) {
+                        BLENDFUNC src,dst;
+                        GFXGetBlendMode(src,dst);
+                        if ((dst!=ZERO)&&((src==ONE)||(src==SRCALPHA))) {
+                            GFXPushBlendMode();
+                            GFXBlendMode(SRCALPHA,dst);
+                            GFXEnable(SMOOTH);
+                            blendchange=true;
+                        }
+                    }
+                    break;
+                }
+        
+                glDrawArrays(PolyLookup(mode[i]), totoffset, offsets[i]);
+                totoffset += offsets[i];
+        
+                if (blendchange) {
+                    GFXPopBlendMode();
+                    GFXDisable(SMOOTH);
+                }
+            }
+        }
       }
   }
 }

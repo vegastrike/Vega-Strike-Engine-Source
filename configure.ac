@@ -320,6 +320,14 @@ AC_ARG_ENABLE(macosx_bundle, AC_HELP_STRING([--enable-macosx-bundle], [Produce a
 		AC_MSG_NOTICE(Producing a MacOSX bundle executable)
 		VS_CPPFLAGS="${VS_CPPFLAGS} -DWITH_MACOSX_BUNDLE=1"
 	fi)
+	
+AC_ARG_ENABLE(precompiled, AC_HELP_STRING([--enable-precompiled], [Use precompiled headers during build - remember to 'make precompiled' first]),
+	[case "$enableval" in
+	yes)	precompiled=true ;;
+	no)	precompiled=false ;;
+	*)	AC_MSG_ERROR(Bad value $enableval for --enable-precompiled) ;;
+	esac], [precompiled=false])
+AM_CONDITIONAL(USE_PRECOMPILED_HEADERS, test x$precompiled = xtrue)
 
 if test "x${build_client}" = "xno" ; then
     VS_CXXFLAGS="${VS_CXXFLAGS} -DNO_GFX"

@@ -93,10 +93,13 @@ PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB_p=0;
 PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB_p=0;
 PFNGLCOLORTABLEEXTPROC glColorTable_p=0;
 PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB_p = 0;
+PFNGLMULTITEXCOORD4FARBPROC glMultiTexCoord4fARB_p = 0;
 
 PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p = 0;
 PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p = 0;
 PFNGLCOMPRESSEDTEXIMAGE2DPROC glCompressedTexImage2D_p = 0;
+PFNGLMULTIDRAWARRAYSEXTPROC glMultiDrawArrays_p = 0;
+PFNGLMULTIDRAWELEMENTSEXTPROC glMultiDrawElements_p = 0;
 
  PFNGLGETSHADERIVPROC glGetShaderiv_p=0;
  PFNGLGETPROGRAMIVPROC glGetProgramiv_p=0;
@@ -223,10 +226,24 @@ void init_opengl_extensions()
     }
 #endif
 
+    if (vsExtensionSupported( "GL_EXT_multi_draw_arrays")) {
+        glMultiDrawArrays_p = (PFNGLMULTIDRAWARRAYSEXTPROC)
+            GET_GL_PROC( (GET_GL_PTR_TYP) "glMultiDrawArraysEXT" );
+        glMultiDrawElements_p = (PFNGLMULTIDRAWELEMENTSEXTPROC)
+            GET_GL_PROC( (GET_GL_PTR_TYP) "glMultiDrawElementsEXT" );
+        VSFileSystem::vs_fprintf(stderr, "OpenGL::GL_EXT_multi_draw_arrays supported\n");
+    } else {
+        glMultiDrawArrays_p = 0;
+        glMultiDrawElements_p = 0;
+        VSFileSystem::vs_fprintf(stderr, "OpenGL::GL_EXT_multi_draw_arrays unsupported\n");
+    }
+
+
 #ifdef __APPLE__
 #ifndef __APPLE__
 	glColorTable_p = glColorTableEXT;
 	glMultiTexCoord2fARB_p = glMultiTexCoord2fARB;
+    glMultiTexCoord4fARB_p = glMultiTexCoord4fARB;
 	glClientActiveTextureARB_p = glClientActiveTextureARB;
 	glActiveTextureARB_p = glActiveTextureARB;
 #endif /*__APPLE_PANTHER_GCC33_CLI__*/
@@ -242,10 +259,13 @@ void init_opengl_extensions()
 
     glColorTable_p = (PFNGLCOLORTABLEEXTPROC ) GET_GL_PROC((GET_GL_PTR_TYP)"glColorTableEXT");
     glMultiTexCoord2fARB_p = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fARB");
+    glMultiTexCoord4fARB_p = (PFNGLMULTITEXCOORD4FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord4fARB");
     glClientActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureARB");
     glActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureARB");
     if(!glMultiTexCoord2fARB_p)
         glMultiTexCoord2fARB_p = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fEXT");
+    if(!glMultiTexCoord4fARB_p)
+        glMultiTexCoord4fARB_p = (PFNGLMULTITEXCOORD4FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord4fEXT");
     if(!glClientActiveTextureARB_p)
         glClientActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureEXT");
     if(!glActiveTextureARB_p)
@@ -358,7 +378,7 @@ void init_opengl_extensions()
       gl_options.s3tc=false;
       (void) VSFileSystem::vs_fprintf(stderr, "OpenGL::S3TC Texture Compression unsupported\n");
     }
-    if (  (glMultiTexCoord2fARB_p&&glClientActiveTextureARB_p&&glActiveTextureARB_p)
+    if (  (glMultiTexCoord2fARB_p&&glMultiTexCoord4fARB_p&&glClientActiveTextureARB_p&&glActiveTextureARB_p)
         &&(vsExtensionSupported ("GL_ARB_multitexture")||vsExtensionSupported ("GL_EXT_multitexture"))  ) {
       GLint multitex=gl_options.Multitexture;
       glGetIntegerv(GL_MAX_TEXTURE_UNITS,&multitex);

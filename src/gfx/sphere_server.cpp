@@ -1,9 +1,9 @@
 #include "sphere.h"
 
-void SphereMesh::ProcessDrawQueue(int,int whichdrawqueue) {
+void SphereMesh::ProcessDrawQueue(int,int whichdrawqueue, bool zsort, const QVector &sortctr) {
 }
-void CityLights::SelectCullFace (int whichdrawqueue) {
+void SphereMesh::SelectCullFace (int whichdrawqueue) {
 }
 
-void CityLights::ProcessDrawQueue(int,int whichdrawqueue) {
+void CityLights::ProcessDrawQueue(int,int whichdrawqueue, bool zsort, const QVector &sortctr) {
 }

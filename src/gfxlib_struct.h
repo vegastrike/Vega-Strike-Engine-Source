@@ -48,20 +48,31 @@ extern void /*GFXDRVAPI*/ GFXDeleteList (int list);
 /// Vertex, Normal, Texture, and (deprecated) Environment Mapping T2F_N3F_V3F format
 struct GFXVertex 
 {
+  // Texcoord
   float s;
   float t;
+  
+  // Normal
   float i;
   float j;
   float k;
+  
+  // Position
   float x;
   float y;
   float z;
+  
+  // Tangent
+  float tx;
+  float ty;
+  float tz;
+  float tw;
   
   GFXVertex(){}
   GFXVertex(const QVector & vert, const Vector & norm, float s, float t) {
     SetVertex(vert.Cast());
     SetNormal(norm);
-    SetTexCoord(s, t);    
+    SetTexCoord(s, t);
   }
   GFXVertex(const Vector &vert, const Vector &norm, float s, float t){
     SetVertex(vert);
@@ -69,12 +80,16 @@ struct GFXVertex
     SetTexCoord(s, t);
   }
   GFXVertex (float x, float y, float z, float i, float j, float k, float s, float t) {this->x=x;this->y=y;this->z=z;this->i=i;this->j=j;this->k=k;this->s=s;this->t=t;}
-  GFXVertex &SetTexCoord(float s, float t) {this->s = s; this->t = t; return *this;}
-  GFXVertex &SetNormal(const Vector &norm) {i = norm.i; j = norm.j; k = norm.k; return *this;}
-  GFXVertex &SetVertex(const Vector &vert) {x = vert.i; y = vert.j; z = vert.k; return *this;}
-  Vector GetVertex () {return Vector (x,y,z);}
+  GFXVertex& SetTexCoord(float s, float t) {this->s = s; this->t = t; return *this;}
+  GFXVertex& SetNormal(const Vector &norm) {i = norm.i; j = norm.j; k = norm.k; return *this;}
+  GFXVertex& SetVertex(const Vector &vert) {x = vert.i; y = vert.j; z = vert.k; return *this;}
+  GFXVertex& SetTangent(const Vector &tgt, float parity = 1.f) { tx = tgt.x; ty = tgt.y; tz = tgt.z; tw = parity; return *this; }
+  Vector GetVertex () const { return Vector (x,y,z); }
   const Vector & GetConstVertex () const {return (*((Vector *)&x));}
-  Vector GetNormal () {return Vector (i,j,k);}
+  Vector GetNormal () const { return Vector (i,j,k); }
+  Vector GetPosition () const { return Vector (x,y,z); }
+  Vector GetTangent () const { return Vector (tx, ty, tz); }
+  float GetTangentParity () const { return tw; }
 };
 
 //Stores a color (or any 4 valued vector)
@@ -133,18 +148,31 @@ inline GFXColor operator-(const GFXColor&c0, const GFXColor&c1) {
 
 ///This vertex is used for the interleaved array argument for color based arrays T2F_C4F_N3F_V3F 
 struct GFXColorVertex  {
+  // Texcoord
   float s;
   float t;
+  
+  // Color
   float r;
   float g;
   float b;
   float a;
+  
+  // Normal
   float i;
   float j;
   float k;
+  
+  // Position
   float x;
   float y;
   float z;
+  
+  // Tangent
+  float tx;
+  float ty;
+  float tz;
+  float tw;
   
   GFXColorVertex(){}
   GFXColorVertex(const Vector &vert, const Vector &norm, const GFXColor &rgba, float s, float t){
@@ -154,12 +182,17 @@ struct GFXColorVertex  {
     SetTexCoord(s, t);
   }
   GFXColorVertex (float x, float y, float z, float i, float j, float k, float r, float g, float b, float a, float s, float t) {this->x=x;this->y=y;this->z=z;this->i=i;this->j=j;this->k=k;this->r = r; this->g = g; this->b=b;this->a=a;this->s=s;this->t=t;}
-  GFXColorVertex &SetTexCoord(float s, float t) {this->s = s; this->t = t; return *this;}
-  GFXColorVertex &SetNormal(const Vector &norm) {i = norm.i; j = norm.j; k = norm.k; return *this;}
-  GFXColorVertex &SetVertex(const Vector &vert) {x = vert.i; y = vert.j; z = vert.k; return *this;}
-  GFXColorVertex &SetColor (const GFXColor &col) {r = col.r;g=col.g;b=col.b;a=col.a; return *this;}
-  Vector GetNormal () {return Vector (i,j,k);}
+  GFXColorVertex& SetTexCoord(float s, float t) {this->s = s; this->t = t; return *this;}
+  GFXColorVertex& SetNormal(const Vector &norm) {i = norm.i; j = norm.j; k = norm.k; return *this;}
+  GFXColorVertex& SetVertex(const Vector &vert) {x = vert.i; y = vert.j; z = vert.k; return *this;}
+  GFXColorVertex& SetColor (const GFXColor &col) {r = col.r;g=col.g;b=col.b;a=col.a; return *this;}
+  GFXColorVertex& SetTangent(const Vector &tgt, float parity = 1.f) { tx = tgt.x; ty = tgt.y; tz = tgt.z; tw = parity; return *this; }
+  Vector GetNormal () const {return Vector (i,j,k);}
+  Vector GetPosition () const {return Vector (x,y,z);}
   void SetVtx (const GFXVertex & vv) {s = vv.s;t=vv.t;i=vv.i;j=vv.j;k=vv.k;x=vv.x;y=vv.y;z=vv.z;}
+
+  Vector GetTangent () const { return Vector (tx, ty, tz); }
+  float GetTangentParity () const { return tw; }
 };
 
 
@@ -210,7 +243,7 @@ class GFXLight {
   GFXColor GetProperties (enum LIGHT_TARGET) const;
   void disable ();
   void enable ();
-  bool attenuated ();
+  bool attenuated () const;
   void apply_attenuate (bool attenuated);
 };
 ///Contains 4 texture coordinates (deprecated)
@@ -244,6 +277,18 @@ enum POLYTYPE {
   GFXLINESTRIP,
   GFXPOLY,
   GFXPOINT
+};
+
+enum POLYMODE {
+  GFXPOINTMODE,
+  GFXLINEMODE,
+  GFXFILLMODE
+};
+
+enum POLYFACE {
+  GFXFRONT,
+  GFXBACK,
+  GFXFRONTANDBACK
 };
 
 /**
@@ -486,6 +531,7 @@ enum STATE {
 	LIGHTING,
 	DEPTHTEST,
 	DEPTHWRITE,
+    COLORWRITE,
 	TEXTURE0,
 	TEXTURE1,
 	CULLFACE,

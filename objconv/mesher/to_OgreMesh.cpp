@@ -1,17 +1,14 @@
+#include "PrecompiledHeaders/Ogre.h"
+
 #include "to_OgreMesh.h"
-#include "Ogre.h"
-#include "OgreConfigFile.h"
-#include "OgreMeshSerializer.h"
-#include "OgreMaterialSerializer.h"
-#include "OgreSkeletonSerializer.h"
+
+#ifdef HAVE_OGRE
+
 #include "OgreDefaultHardwareBufferManager.h"
 
 
 #include "xml_support.h"
 
-#include <vector>
-#include <map>
-#include <set>
 #include <limits>
 
 using namespace Ogre;
@@ -461,6 +458,14 @@ namespace OgreMeshConverter {
         vars["SCENE_BLEND_DST"] = dstblend;
     }
 
+	void ReplaceInvalidMatnameChars(string &matname)
+	{
+		static const string invalid_chars(":\t\r\n{} ");
+		for (string::size_type pos=0, len=matname.length(); pos<len; ++pos)
+			if (invalid_chars.find(matname[pos])!=string::npos)
+				matname[pos]='_';
+	}
+
     // Returns material name
     static string AddMaterial(void* outputcontext, const XML &xml)
     {
@@ -479,7 +484,7 @@ namespace OgreMeshConverter {
                     &&(xml.textures[i].index<(sizeof(tex)/sizeof(tex[0])))
                     &&(xml.textures[i].type != UNKNOWN)
                     &&(xml.textures[i].name.size()>0)  )
-                    tex[xml.textures[i].index]=i;
+                    tex[xml.textures[i].index]=int(i);
             } }
 
             // Kay... let's load the template...
@@ -503,6 +508,11 @@ namespace OgreMeshConverter {
                     "\t\t\t$(DIFFUSE)\n"
                     "\t\t\t$(SPECULAR)\n"
                     "\t\t\t$(EMISSIVE)\n"
+					"\n"
+					"\t\t\ttexture_unit\n"
+					"\t\t\t{\n"
+					"\t\t\t\ttexture $(TEXTURE_DIF_FILE=white.png) $(TEXTURE_DIF_TYPE=2d)\n"
+					"\t\t\t}\n"
                     "\t\t}\n"
                     "\t}\n"
                     "}\n\n";
@@ -512,6 +522,7 @@ namespace OgreMeshConverter {
             string matname;
             do {
                 matname = "mesher-auto-material("+tplnam+"?"+ctxt->basepath+ctxt->name+"#"+getMatID()+")";
+				ReplaceInvalidMatnameChars(matname);
             } while (ctxt->predefined_materials.count(matname) > 0);
 
             // Hm... setup the variable map... ugly...
@@ -776,9 +787,9 @@ namespace OgreMeshConverter {
             vertices.push_back(origvertices[idx]);
             vertices.back().s = s;
             vertices.back().t = t;
-            vertexmap.insert(pair<unsigned int,unsigned int>(idx,vertices.size()-1));
-            return (vertices.size()-1);
-        } else return it->second;
+            vertexmap.insert(pair<unsigned int,unsigned int>(idx,(unsigned int)vertices.size()-1));
+            return (unsigned int)(vertices.size()-1);
+        } else return (unsigned int)it->second;
     }
 
     static void  AddMesh(void* outputcontext, const XML &xml, const string& matname, bool texcoord, bool normals)
@@ -792,15 +803,15 @@ namespace OgreMeshConverter {
         if (xml.lines.size()) numprimgroups++;
         if (xml.tris.size()) numprimgroups++;
         if (xml.quads.size()) numprimgroups++;
-        if (xml.linestrips.size()) numprimgroups+=xml.linestrips.size();
-        if (xml.tristrips.size()) numprimgroups+=xml.tristrips.size();
-        if (xml.trifans.size()) numprimgroups+=xml.trifans.size();
-        if (xml.quadstrips.size()) numprimgroups+=xml.quadstrips.size();
+        if (xml.linestrips.size()) numprimgroups+=int(xml.linestrips.size());
+        if (xml.tristrips.size()) numprimgroups+=int(xml.tristrips.size());
+        if (xml.trifans.size()) numprimgroups+=int(xml.trifans.size());
+        if (xml.quadstrips.size()) numprimgroups+=int(xml.quadstrips.size());
 
         //bool useSharedVert = (numprimgroups>1);
         bool useSharedVert = false; // Not worth it... too difficult to support the 'append' command with this thing
         if (useSharedVert) {
-            idxbase = ctxt->sharedvert.size();
+            idxbase = (unsigned int)ctxt->sharedvert.size();
             AddSharedVertexData(outputcontext, xml, texcoord, normals);
         }
 
@@ -1016,6 +1027,27 @@ namespace OgreMeshConverter {
         AddMesh(outputcontext, memfile, AddMaterial(outputcontext, memfile), MaterialHasTextures(memfile), true);
     }
 
+	static void AutoOrganiseBuffers(VertexData *data, MeshPtr mesh)
+	{
+#if (OGRE_VERSION_MAJOR == 1) && (OGRE_VERSION_MINOR < 1)
+        VertexDeclaration* newDcl = 
+            data->vertexDeclaration->getAutoOrganisedDeclaration(
+                mesh->hasSkeleton());
+#else
+        VertexDeclaration* newDcl = 
+            data->vertexDeclaration->getAutoOrganisedDeclaration(
+                mesh->hasSkeleton(), mesh->hasVertexAnimation() || (mesh->getPoseCount()>0));
+#endif
+        if (*newDcl != *(data->vertexDeclaration))
+        {
+            // Usages don't matter here since we're onlly exporting
+            BufferUsageList bufferUsages;
+            for (size_t u = 0; u <= newDcl->getMaxSource(); ++u)
+                bufferUsages.push_back(HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+            data->reorganiseBuffers(newDcl, bufferUsages);
+        }
+	}
+
     void  Optimize(void* outputcontext)
     {
         struct outputContext *ctxt = (struct outputContext *)outputcontext;
@@ -1023,20 +1055,7 @@ namespace OgreMeshConverter {
 
         // Shared geometry
         if (newMesh->sharedVertexData)
-        {
-            // Automatic
-            VertexDeclaration* newDcl = 
-                newMesh->sharedVertexData->vertexDeclaration->getAutoOrganisedDeclaration(
-                    newMesh->hasSkeleton());
-            if (*newDcl != *(newMesh->sharedVertexData->vertexDeclaration))
-            {
-                // Usages don't matter here since we're onlly exporting
-                BufferUsageList bufferUsages;
-                for (size_t u = 0; u <= newDcl->getMaxSource(); ++u)
-                    bufferUsages.push_back(HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-                newMesh->sharedVertexData->reorganiseBuffers(newDcl, bufferUsages);
-            }
-        }
+			AutoOrganiseBuffers(newMesh->sharedVertexData,newMesh);
 
         // Dedicated geometry
         Mesh::SubMeshIterator smIt = newMesh->getSubMeshIterator();
@@ -1045,20 +1064,7 @@ namespace OgreMeshConverter {
         {
             SubMesh* sm = smIt.getNext();
             if (!sm->useSharedVertices)
-            {
-                // Automatic
-                VertexDeclaration* newDcl = 
-                    sm->vertexData->vertexDeclaration->getAutoOrganisedDeclaration(
-                        newMesh->hasSkeleton());
-                if (*newDcl != *(sm->vertexData->vertexDeclaration))
-                {
-                    // Usages don't matter here since we're onlly exporting
-                    BufferUsageList bufferUsages;
-                    for (size_t u = 0; u <= newDcl->getMaxSource(); ++u)
-                        bufferUsages.push_back(HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-                    sm->vertexData->reorganiseBuffers(newDcl, bufferUsages);
-                }
-            }
+				AutoOrganiseBuffers(sm->vertexData,newMesh);
         }
     }
 
@@ -1161,3 +1167,5 @@ namespace OgreMeshConverter {
     }
 
 }
+
+#endif//HAVE_OGRE

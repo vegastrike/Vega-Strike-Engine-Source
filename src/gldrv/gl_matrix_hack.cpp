@@ -444,8 +444,15 @@ void GFXFrustum(float * m,float *i,
    y = (((float)2.0)*nearval) / (top-bottom);
    a = (right+left) / (right-left);
    b = (top+bottom) / (top-bottom);
-   c = -(farval+nearval) / ( farval-nearval);
-   d = -(((float)2.0)*farval*nearval) / (farval-nearval);  /* error? */
+   
+   // If farval == 0, we'll build an infinite-farplane projection matrix.
+   if (farval == 0) {
+     c = -1.0;
+     d = -1.99*nearval; // -2*nearval, but using exactly -2 might create artifacts
+   } else {
+     c = -(farval+nearval) / ( farval-nearval);
+     d = -(((float)2.0)*farval*nearval) / (farval-nearval);
+   }
 
 #define M(row,col)  m[col*4+row]
    M(0,0) = x;     M(0,1) = 0.0F;  M(0,2) = a;      M(0,3) = 0.0F;

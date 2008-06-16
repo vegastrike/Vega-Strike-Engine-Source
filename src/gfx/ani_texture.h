@@ -70,6 +70,7 @@ class AnimatedTexture: public Texture {
   void LoadVideoSource(VSFileSystem::VSFile & f);
   virtual void LoadFrame(int num); //For video mode
   void Destroy();
+  virtual const Texture *Original() const;
   virtual Texture *Original();
   ~AnimatedTexture();
   virtual Texture * Clone ();

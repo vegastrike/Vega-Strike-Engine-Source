@@ -63,7 +63,6 @@ void vs_options::init()
 	draw_near_stars_in_front_of_planets = XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_near_stars_in_front_of_planets","false"));
 	starblend = XMLSupport::parse_bool(vs_config->getVariable ("graphics","starblend","true"));
 	
-	
 	/* Terrain Options */
 	xscale = XMLSupport::parse_float(vs_config->getVariable("terrain","xscale","1.0"));
 	yscale = XMLSupport::parse_float(vs_config->getVariable("terrain","yscale","1.0"));

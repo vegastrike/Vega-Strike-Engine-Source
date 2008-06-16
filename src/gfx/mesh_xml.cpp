@@ -90,6 +90,7 @@ const EnumMap::Pair MeshXML::attribute_names[] = {
   EnumMap::Pair("Blend",MeshXML::BLENDMODE),
   EnumMap::Pair("alphatest",MeshXML::ALPHATEST),
   EnumMap::Pair("texture", MeshXML::TEXTURE),
+  EnumMap::Pair("technique", MeshXML::TECHNIQUE),
   EnumMap::Pair("alphamap", MeshXML::ALPHAMAP),
   EnumMap::Pair("sharevertex", MeshXML::SHAREVERT),
   EnumMap::Pair("red", MeshXML::RED),
@@ -121,6 +122,7 @@ const EnumMap::Pair MeshXML::attribute_names[] = {
   EnumMap::Pair ("CullFace",MeshXML::CULLFACE),
   EnumMap::Pair ("ForceTexture",MeshXML::FORCETEXTURE),
   EnumMap::Pair ("UseNormals",MeshXML::USENORMALS),
+  EnumMap::Pair ("UseTangents",MeshXML::USETANGENTS),
   EnumMap::Pair ("PolygonOffset",MeshXML::POLYGONOFFSET),
   EnumMap::Pair ("DetailTexture",MeshXML::DETAILTEXTURE),
   EnumMap::Pair ("FramesPerSecond",MeshXML::FRAMESPERSECOND)
@@ -306,6 +308,9 @@ void Mesh::beginElement(MeshXML * xml, const string &name, const AttributeList &
 			case MeshXML::USENORMALS:
 			  xml->usenormals = XMLSupport::parse_bool (iter->value);
 			  break;
+            case MeshXML::USETANGENTS:
+              xml->usetangents = XMLSupport::parse_bool (iter->value);
+              break;
 		    case MeshXML::POWER:
 		      xml->material.power=XMLSupport::parse_float((*iter).value);
 		      break;
@@ -446,6 +451,9 @@ void Mesh::beginElement(MeshXML * xml, const string &name, const AttributeList &
           else xml->mesh->alphatest=0;
 	}
 	break;
+      case MeshXML::TECHNIQUE:
+          xml->technique = iter->value;
+          break;
 	  case MeshXML::DETAILTEXTURE:
 		  if (use_detail_texture)
 			  detailTexture = TempGetTexture(xml, iter->value,FactionUtil::GetFaction(xml->faction),GFXTRUE);
@@ -1107,58 +1115,6 @@ void Mesh::endElement(MeshXML* xml, const string &name) {
 
 
 
-void SumNormals (int trimax, int t3vert, 
-		 vector <GFXVertex> &vertices,
-		 vector <int> &triind,
-		 vector <int> &vertexcount,
-		 bool * vertrw ) {
-  int a=0;
-  int i=0;
-  int j=0;
-  if (t3vert==2) {//oh man we have a line--what to do, what to do!
-    for (i=0;i<trimax;i++,a+=t3vert) {
-      Vector Cur (vertices[triind[a]].x-vertices[triind[a+1]].x,
-		  vertices[triind[a]].y-vertices[triind[a+1]].y,
-		  vertices[triind[a]].z-vertices[triind[a+1]].z);
-      Normalize (Cur);
-      vertices[triind[a+1]].i += Cur.i/vertexcount[triind[a+1]];
-      vertices[triind[a+1]].j += Cur.j/vertexcount[triind[a+1]];
-      vertices[triind[a+1]].k += Cur.k/vertexcount[triind[a+1]];
-
-      vertices[triind[a]].i -= Cur.i/vertexcount[triind[a]];
-      vertices[triind[a]].j -= Cur.j/vertexcount[triind[a]];
-      vertices[triind[a]].k -= Cur.k/vertexcount[triind[a]];
-    }
-    return; //bye bye mrs american pie 
-  }
-  for (i=0;i<trimax;i++,a+=t3vert) {
-    for (j=0;j<t3vert;j++) {
-      if (vertrw[triind[a+j]]) {
-	Vector Cur (vertices[triind[a+j]].x,
-		    vertices[triind[a+j]].y,
-		    vertices[triind[a+j]].z);
-	Cur = (Vector (vertices[triind[a+((j+2)%t3vert)]].x,
-		       vertices[triind[a+((j+2)%t3vert)]].y,
-		       vertices[triind[a+((j+2)%t3vert)]].z)-Cur)
-	  .Cross(Vector (vertices[triind[a+((j+1)%t3vert)]].x,
-			 vertices[triind[a+((j+1)%t3vert)]].y,
-			 vertices[triind[a+((j+1)%t3vert)]].z)-Cur);
-	const float eps = .00001;
-	if (fabs(Cur.i)>eps||fabs(Cur.j)>eps||fabs(Cur.k)>eps) {
-	  Normalize(Cur);	 
-	  //Cur = Cur*(1.00F/xml->vertexcount[a+j]);
-	  vertices[triind[a+j]].i+=Cur.i;
-	  vertices[triind[a+j]].j+=Cur.j;
-	  vertices[triind[a+j]].k+=Cur.k;
-	}else {
-	  if (vertexcount[triind[a+j]]>1) {
-	    vertexcount[triind[a+j]]--;
-	  }
-	}
-      }
-    }
-  }
-}
 void updateMax (Vector &mn, Vector & mx, const GFXVertex &ver) {
     mn.i = min(ver.x, mn.i);
     mx.i = max(ver.x, mx.i);
@@ -1376,6 +1332,7 @@ void Mesh::LoadXML( VSFileSystem::VSFile & f, const Vector & scale, int faction,
   xml->mesh = this;
   xml->fg = fg;
   xml->usenormals=false;
+  xml->usetangents=false;
   xml->force_texture=false;
   xml->reverse=false;
   xml->sharevert=false;
@@ -1432,83 +1389,375 @@ void Mesh::LoadXML( VSFileSystem::VSFile & f, const Vector & scale, int faction,
 
   delete xml;
 }
+
+static void SumNormal (
+        vector <GFXVertex> &vertices,
+        int i1, int i2, int i3,
+        vector <float> &weights) 
+{
+    Vector v1( vertices[i2].x - vertices[i1].x,
+               vertices[i2].y - vertices[i1].y,
+               vertices[i2].z - vertices[i1].z );
+    Vector v2( vertices[i3].x - vertices[i1].x,
+               vertices[i3].y - vertices[i1].y,
+               vertices[i3].z - vertices[i1].z );
+    v1.Normalize();
+    v2.Normalize();
+    Vector N = v1.Cross(v2);
+    float w = 1.f - 0.9 * fabsf( v1.Dot(v2) );
+    N *= w;
+    
+    vertices[i1].i += N.i;
+    vertices[i1].j += N.j;
+    vertices[i1].k += N.k;
+    weights[i1] += w;
+
+    vertices[i2].i += N.i;
+    vertices[i2].j += N.j;
+    vertices[i2].k += N.k;
+    weights[i2] += w;
+
+    vertices[i3].i += N.i;
+    vertices[i3].j += N.j;
+    vertices[i3].k += N.k;
+    weights[i3] += w;
+}
+
+static void SumLineNormal (
+        vector <GFXVertex> &vertices,
+        int i1, int i2,
+        vector <float> &weights) 
+{
+    Vector v1( vertices[i2].x - vertices[i1].x,
+               vertices[i2].y - vertices[i1].y,
+               vertices[i2].z - vertices[i1].z );
+    static Vector v2( 0.3408, 0.9401, 0.0005 );
+    v1.Normalize();
+    Vector N = v1.Cross(v2);
+    
+    vertices[i1].i += N.i;
+    vertices[i1].j += N.j;
+    vertices[i1].k += N.k;
+    weights[i1] += 1;
+
+    vertices[i2].i += N.i;
+    vertices[i2].j += N.j;
+    vertices[i2].k += N.k;
+    weights[i2] += 1;
+}
+
+static void SumNormals (
+        vector <GFXVertex> &vertices,
+        vector <int> &indices,
+        size_t begin, 
+        size_t end,
+        POLYTYPE polytype,
+        vector <float> &weights) 
+{
+    int flip=0;
+    size_t i;
+    
+    switch(polytype) {
+    case GFXTRI:
+        if (end <= 2)
+            break;
+        end -= 2;
+        for (; begin < end; begin += 3) {
+            SumNormal(vertices, indices[begin], indices[begin+1], indices[begin+2], weights);
+        }
+        break;
+    case GFXQUAD:
+        if (end <= 3)
+            break;
+        end -= 3;
+        for (; begin < end; begin += 4) {
+            SumNormal(vertices, indices[begin], indices[begin+1], indices[begin+2], weights);
+            SumNormal(vertices, indices[begin], indices[begin+2], indices[begin+3], weights);
+        }
+        break;
+    case GFXTRISTRIP:
+    case GFXQUADSTRIP:
+        if (end <= 2)
+            break;
+        end -= 2;
+        for (; begin < end; ++begin, flip ^= 1) {
+            SumNormal(vertices, indices[begin], indices[begin+1+flip], indices[begin+2-flip], weights);
+        }
+        break;
+    case GFXTRIFAN:
+        if (end <= 2)
+            break;
+        end -= 2;
+        for (i=begin; begin < end; ++begin) {
+            SumNormal(vertices, indices[i], indices[begin+1], indices[begin+2], weights);
+        }
+        break;
+    case GFXLINESTRIP:
+        if (end <= 1)
+            break;
+        end -= 1;
+        for (i=begin; begin < end; ++begin) {
+            SumLineNormal(vertices, indices[begin], indices[begin+1], weights);
+        }
+    case GFXLINE:
+        if (end <= 1)
+            break;
+        end -= 1;
+        for (i=begin; begin < end; begin += 2) {
+            SumLineNormal(vertices, indices[begin], indices[begin+1], weights);
+        }
+    }
+}
+
+static void ClearTangents(vector <GFXVertex> &vertices)
+{
+    for (vector<GFXVertex>::iterator it=vertices.begin(); it != vertices.end(); ++it)
+        it->SetTangent(Vector(0,0,0),0);
+}
+
+static void ClearNormals(vector <GFXVertex> &vertices)
+{
+    for (vector<GFXVertex>::iterator it=vertices.begin(); it != vertices.end(); ++it)
+        it->SetNormal(Vector(0,0,0));
+}
+
+static float faceTSPolarity(const Vector &T, const Vector &B, const Vector &N)
+{
+    if (T.Cross(B).Dot(N) >= 0.f)
+        return -1.f;
+    else
+        return 1.f;
+}
+
+static float faceTSWeight (vector <GFXVertex> &vertices, int i1, int i2, int i3)
+{
+    Vector v1( vertices[i2].x - vertices[i1].x,
+               vertices[i2].y - vertices[i1].y,
+               vertices[i2].z - vertices[i1].z );
+    Vector v2( vertices[i3].x - vertices[i1].x,
+               vertices[i3].y - vertices[i1].y,
+               vertices[i3].z - vertices[i1].z );
+    return 1.f - fabsf( v1.Dot(v2) );
+}
+
+static void computeTangentspace (
+    vector <GFXVertex> &vertices, 
+    int i1, int i2, int i3,
+    Vector &T, Vector &B, Vector &N)
+{
+    //compute deltas. I think that the fact we use (*2-*1) and (*3-*1) is arbitrary, but I could be wrong
+    Vector p0( vertices[i1].x, vertices[i1].y, vertices[i1].z );
+    Vector p1( vertices[i2].x, vertices[i2].y, vertices[i2].z );
+    Vector p2( vertices[i3].x, vertices[i3].y, vertices[i3].z );
+    p1 -= p0;
+    p2 -= p0;
+    
+    float s1, t1;
+    float s2, t2;
+    s1 = vertices[i2].s - vertices[i1].s;
+    s2 = vertices[i3].s - vertices[i1].s;
+    t1 = vertices[i2].t - vertices[i1].t;
+    t2 = vertices[i3].t - vertices[i1].t;
+    
+    //and now a myracle happens...
+    T = t2*p1 - t1*p2;
+    B = s1*p2 - s2*p1;
+    N = p1.Cross(p2);
+    
+    //normalize
+    T.Normalize();
+    B.Normalize();
+    N.Normalize();
+}
+
+static Vector computeTangent (
+    vector <GFXVertex> &vertices,
+    int i1, int i2, int i3,
+    float &polarity)
+{
+    Vector T, B, N;
+    computeTangentspace(vertices, i1, i2, i3, T, B, N);
+    polarity = faceTSPolarity(T, B, N);
+    return T;
+}
+
+static void SumTangent (
+        vector <GFXVertex> &vertices,
+        int i1, int i2, int i3,
+        vector <float> &weights) 
+{
+    float w = faceTSWeight(vertices, i1, i2, i3);
+    Vector T, B, N;
+    computeTangentspace(vertices, i1, i2, i3, T, B, N);
+    
+    float p = faceTSPolarity(T,B,N) * w;
+    T *= w;
+    
+    vertices[i1].tx += T.x;
+    vertices[i1].ty += T.y;
+    vertices[i1].tz += T.z;
+    vertices[i1].tw += p;
+    weights[i1] += w;
+    
+    vertices[i2].tx += T.x;
+    vertices[i2].ty += T.y;
+    vertices[i2].tz += T.z;
+    vertices[i2].tw += p;
+    weights[i2] += w;
+    
+    vertices[i3].tx += T.x;
+    vertices[i3].ty += T.y;
+    vertices[i3].tz += T.z;
+    vertices[i3].tw += p;
+    weights[i3] += w;
+}
+
+static void SumTangents (
+        vector <GFXVertex> &vertices,
+        vector <int> &indices,
+        size_t begin, 
+        size_t end,
+        POLYTYPE polytype,
+        vector <float> &weights) 
+{
+    int flip=0;
+    size_t i;
+    
+    switch(polytype) {
+    case GFXTRI:
+        if (end <= 2)
+            break;
+        end -= 2;
+        for (; begin < end; begin += 3) {
+            SumTangent(vertices, indices[begin], indices[begin+1], indices[begin+2], weights);
+        }
+        break;
+    case GFXQUAD:
+        if (end <= 3)
+            break;
+        end -= 3;
+        for (; begin < end; begin += 4) {
+            SumTangent(vertices, indices[begin], indices[begin+1], indices[begin+2], weights);
+            SumTangent(vertices, indices[begin], indices[begin+2], indices[begin+3], weights);
+        }
+        break;
+    case GFXTRISTRIP:
+    case GFXQUADSTRIP:
+        if (end <= 2)
+            break;
+        end -= 2;
+        for (; begin < end; ++begin, flip ^= 1) {
+            SumTangent(vertices, indices[begin], indices[begin+1+flip], indices[begin+2-flip], weights);
+        }
+        break;
+    case GFXTRIFAN:
+        if (end <= 2)
+            break;
+        end -= 2;
+        for (i=begin; begin < end; ++begin) {
+            SumTangent(vertices, indices[i], indices[begin+1], indices[begin+2], weights);
+        }
+        break;
+    }
+}
+
+static void NormalizeTangents (
+        vector <GFXVertex> &vertices,
+        vector <float> &weights) 
+{
+    for (size_t i=0, n=vertices.size(); i<n; ++i) {
+        if (weights[i] > 0) {
+            // Average (shader will normalize)
+            float iw = (weights[i] < 0.001) ? 0.f : (1.f / weights[i]);
+            vertices[i].tx *= iw;
+            vertices[i].ty *= iw;
+            vertices[i].tz *= iw;
+            vertices[i].tw *= iw;
+        }
+    }
+}
+
+static void NormalizeNormals(
+        vector <GFXVertex> &vertices,
+        vector <float> &weights) 
+{
+    for (size_t i=0, n=vertices.size(); i<n; ++i) {
+        if (weights[i] > 0) {
+            // Renormalize
+            float mag = vertices[i].GetNormal().Magnitude();
+            if (mag < 0.001)
+                mag = 0.f; else
+                mag = 1.f / mag;
+            vertices[i].i *= mag;
+            vertices[i].j *= mag;
+            vertices[i].k *= mag;
+        }
+    }
+}
+
 void Mesh::PostProcessLoading(MeshXML * xml,const vector<string> &textureOverride) {
   unsigned int i; unsigned int a=0;
   unsigned int j;
   //begin vertex normal calculations if necessary
-  if (!xml->usenormals/*USE_RECALC_NORM||xml->recalc_norm*/) {//fixme!
-
-
-    bool *vertrw = new bool [xml->vertices.size()]; 
-    for (i=0;i<xml->vertices.size();i++) {
-      if (xml->vertices[i].i==0&&
-	  xml->vertices[i].j==0&&
-	  xml->vertices[i].k==0) {
-	vertrw[i]=true;
-      }else {
-	vertrw[i]=USE_RECALC_NORM;
-      }
-    }
-    SumNormals (xml->tris.size()/3,3,xml->vertices, xml->triind,xml->vertexcount, vertrw);
-    SumNormals (xml->quads.size()/4,4,xml->vertices, xml->quadind,xml->vertexcount, vertrw);
-    SumNormals (xml->lines.size()/2,2,xml->vertices,xml->lineind,xml->vertexcount,vertrw);
-    SumNormals (xml->nrmltristrip.size()/3,3,xml->vertices, xml->nrmltristrip,xml->vertexcount, vertrw);
-    SumNormals (xml->nrmltrifan.size()/3,3,xml->vertices, xml->nrmltrifan,xml->vertexcount, vertrw);
-    SumNormals (xml->nrmlquadstrip.size()/4,4,xml->vertices, xml->nrmlquadstrip,xml->vertexcount, vertrw);
-    SumNormals (xml->nrmllinstrip.size()/2,2,xml->vertices, xml->nrmllinstrip,xml->vertexcount, vertrw);
-    delete []vertrw;
-    for (i=0;i<xml->vertices.size();i++) {
-      GFXVertex &v=xml->vertices[i];
-      float dis = (v.i*v.i + v.j*v.j + v.k*v.k);
-      if (dis==1.0f) continue;
-      dis = sqrtf(dis);
-      if (dis!=0) {
-        v.i/=dis;//renormalize
-        v.j/=dis;
-        v.k/=dis;
-      }else {
-        v.i=v.x;
-        v.j=v.y;
-        v.k=v.z;
-        dis = sqrtf (v.i*v.i + v.j*v.j + v.k*v.k);
-        if (dis!=0) {
-          v.i/=dis;//renormalize
-          v.j/=dis;
-          v.k/=dis;	  
-        }else {
-          v.i=0;
-          v.j=0;
-          v.k=1;	  
-        }
-      } 
+  if (!xml->usenormals) 
+  {
+    ClearTangents(xml->vertices);
+    
+    vector<float> weights;
+    weights.resize(xml->vertices.size(), 0.f);
+    
+    size_t i,j,n;
+    
+    SumNormals(xml->vertices, xml->triind, 0, xml->triind.size(), GFXTRI, weights);
+    SumNormals(xml->vertices, xml->quadind, 0, xml->quadind.size(), GFXQUAD, weights);
+    SumNormals(xml->vertices, xml->lineind, 0, xml->lineind.size(), GFXLINE, weights);
+    for (i=j=0, n=xml->tristrips.size(); i<n; j += xml->tristrips[i++].size())
+        SumNormals(xml->vertices, xml->tristripind, j, j+xml->tristrips[i].size(), GFXTRISTRIP, weights);
+    for (i=j=0, n=xml->quadstrips.size(); i<n; j += xml->quadstrips[i++].size())
+        SumNormals(xml->vertices, xml->quadstripind, j, j+xml->quadstrips[i].size(), GFXQUADSTRIP, weights);
+    for (i=j=0, n=xml->trifans.size(); i<n; j += xml->trifans[i++].size())
+        SumNormals(xml->vertices, xml->trifanind, j, j+xml->trifans[i].size(), GFXTRIFAN, weights);
+    for (i=j=0, n=xml->linestrips.size(); i<n; j += xml->linestrips[i++].size())
+        SumNormals(xml->vertices, xml->linestripind, j, j+xml->linestrips[i].size(), GFXTRIFAN, weights);
+    
+    NormalizeNormals(xml->vertices, weights);
+  } else {
+    // Flip normals - someone thought VS should flips normals, ask him why.
+    for (i=0; i<xml->vertices.size(); ++i) {
+      GFXVertex &v = xml->vertices[i];
+      v.i *= -1;
+      v.j *= -1;
+      v.k *= -1;
     }
   }
-    a=0;
+  
+  a=0;
   std::vector <unsigned int> ind;
     for (a=0;a<xml->tris.size();a+=3) {
       for (j=0;j<3;j++) {
-	ind.push_back (xml->triind[a+j]);
-	xml->tris[a+j].i = xml->vertices[xml->triind[a+j]].i;
-	xml->tris[a+j].j = xml->vertices[xml->triind[a+j]].j;
-	xml->tris[a+j].k = xml->vertices[xml->triind[a+j]].k;
+        int ix = xml->triind[a+j];
+        ind.push_back (ix);
+        xml->tris[a+j].SetNormal ( xml->vertices[ix].GetNormal() );
+        xml->tris[a+j].SetTangent( xml->vertices[ix].GetTangent(), 
+                                   xml->vertices[ix].GetTangentParity() );
       }
     }
     a=0;
     for (a=0;a<xml->quads.size();a+=4) {
       for (j=0;j<4;j++) {
-	ind.push_back (xml->quadind[a+j]);
-	xml->quads[a+j].i=xml->vertices[xml->quadind[a+j]].i;
-	xml->quads[a+j].j=xml->vertices[xml->quadind[a+j]].j;
-	xml->quads[a+j].k=xml->vertices[xml->quadind[a+j]].k;
+        int ix = xml->quadind[a+j];
+        ind.push_back (ix);
+        xml->quads[a+j].SetNormal ( xml->vertices[ix].GetNormal() );
+        xml->quads[a+j].SetTangent( xml->vertices[ix].GetTangent(), 
+                                    xml->vertices[ix].GetTangentParity() );
       }
     }
     a=0;
     for (a=0;a<xml->lines.size();a+=2) {
       for (j=0;j<2;j++) {
-	ind.push_back (xml->lineind[a+j]);
-	xml->lines[a+j].i=xml->vertices[xml->lineind[a+j]].i;
-	xml->lines[a+j].j=xml->vertices[xml->lineind[a+j]].j;
-	xml->lines[a+j].k=xml->vertices[xml->lineind[a+j]].k;
+        int ix = xml->lineind[a+j];
+        ind.push_back (ix);
+        xml->lines[a+j].SetNormal ( xml->vertices[ix].GetNormal() );
       }
     }
 
@@ -1518,34 +1767,36 @@ void Mesh::PostProcessLoading(MeshXML * xml,const vector<string> &textureOverrid
     unsigned int l=0;
     for (l=a=0;a<xml->tristrips.size();a++) {
       for (k=0;k<xml->tristrips[a].size();k++,l++) {
-	ind.push_back (xml->tristripind[l]);
-	xml->tristrips[a][k].i = xml->vertices[xml->tristripind[l]].i;
-	xml->tristrips[a][k].j = xml->vertices[xml->tristripind[l]].j;
-	xml->tristrips[a][k].k = xml->vertices[xml->tristripind[l]].k;
+        int ix = xml->tristripind[l];
+        ind.push_back (ix);
+        xml->tristrips[a][k].SetNormal ( xml->vertices[ix].GetNormal() );
+        xml->tristrips[a][k].SetTangent( xml->vertices[ix].GetTangent(), 
+                                         xml->vertices[ix].GetTangentParity() );
       }
     }
     for (l=a=0;a<xml->trifans.size();a++) {
       for (k=0;k<xml->trifans[a].size();k++,l++) {
-	ind.push_back (xml->trifanind[l]);
-	xml->trifans[a][k].i = xml->vertices[xml->trifanind[l]].i;
-	xml->trifans[a][k].j = xml->vertices[xml->trifanind[l]].j;
-	xml->trifans[a][k].k = xml->vertices[xml->trifanind[l]].k;
+        int ix = xml->trifanind[l];
+        ind.push_back (ix);
+        xml->trifans[a][k].SetNormal ( xml->vertices[ix].GetNormal() );
+        xml->trifans[a][k].SetTangent( xml->vertices[ix].GetTangent(), 
+                                       xml->vertices[ix].GetTangentParity() );
       }
     }
     for (l=a=0;a<xml->quadstrips.size();a++) {
       for (k=0;k<xml->quadstrips[a].size();k++,l++) {
-	ind.push_back (xml->quadstripind[l]);
-	xml->quadstrips[a][k].i = xml->vertices[xml->quadstripind[l]].i;
-	xml->quadstrips[a][k].j = xml->vertices[xml->quadstripind[l]].j;
-	xml->quadstrips[a][k].k = xml->vertices[xml->quadstripind[l]].k;
+        int ix = xml->quadstripind[l];
+        ind.push_back (ix);
+        xml->quadstrips[a][k].SetNormal ( xml->vertices[ix].GetNormal() );
+        xml->quadstrips[a][k].SetTangent( xml->vertices[ix].GetTangent(), 
+                                          xml->vertices[ix].GetTangentParity() );
       }
     }
     for (l=a=0;a<xml->linestrips.size();a++) {
       for (k=0;k<xml->linestrips[a].size();k++,l++) {
-	ind.push_back (xml->linestripind[l]);
-	xml->linestrips[a][k].i = xml->vertices[xml->linestripind[l]].i;
-	xml->linestrips[a][k].j = xml->vertices[xml->linestripind[l]].j;
-	xml->linestrips[a][k].k = xml->vertices[xml->linestripind[l]].k;
+        int ix = xml->linestripind[l];
+        ind.push_back (ix);
+        xml->linestrips[a][k].SetNormal ( xml->vertices[ix].GetNormal() );
       }
     }
 
@@ -1562,25 +1813,11 @@ void Mesh::PostProcessLoading(MeshXML * xml,const vector<string> &textureOverrid
       for (i=0;i<trimax;i++,a+=3) {
           if (FLAT_SHADE||xml->trishade[i]==1) {
               for (j=0;j<3;j++) {
-                  Vector Cur (xml->vertices[xml->triind[a+j]].x,
-                              xml->vertices[xml->triind[a+j]].y,
-                              xml->vertices[xml->triind[a+j]].z);
-                  Cur = (Vector (xml->vertices[xml->triind[a+((j+2)%3)]].x,
-                                 xml->vertices[xml->triind[a+((j+2)%3)]].y,
-                                 xml->vertices[xml->triind[a+((j+2)%3)]].z)-Cur)
-                      .Cross(Vector (xml->vertices[xml->triind[a+((j+1)%3)]].x,
-                                     xml->vertices[xml->triind[a+((j+1)%3)]].y,
-                                     xml->vertices[xml->triind[a+((j+1)%3)]].z)-Cur);
+                  Vector Cur = xml->vertices[xml->triind[a+j]].GetPosition();
+                  Cur =     (xml->vertices[xml->triind[a+((j+1)%3)]].GetPosition() - Cur)
+                      .Cross(xml->vertices[xml->triind[a+((j+2)%3)]].GetPosition() - Cur);
                   Normalize(Cur);
-                  //Cur = Cur*(1.00F/xml->vertexcount[a+j]);
-                  xml->tris[a+j].i=Cur.i;
-                  xml->tris[a+j].j=Cur.j;
-                  xml->tris[a+j].k=Cur.k;
-#if 0
-                  xml->tris[a+j].i=Cur.i/xml->vertexcount[xml->triind[a+j]];
-                  xml->tris[a+j].j=Cur.j/xml->vertexcount[xml->triind[a+j]];
-                  xml->tris[a+j].k=Cur.k/xml->vertexcount[xml->triind[a+j]];
-#endif
+                  xml->tris[a+j].SetNormal(Cur);
               }
           }
       }
@@ -1589,26 +1826,11 @@ void Mesh::PostProcessLoading(MeshXML * xml,const vector<string> &textureOverrid
       for (i=0;i<trimax;i++,a+=4) {
           if (xml->quadshade[i]==1||(FLAT_SHADE)) {
               for (j=0;j<4;j++) {
-                  Vector Cur (xml->vertices[xml->quadind[a+j]].x,
-                              xml->vertices[xml->quadind[a+j]].y,
-                              xml->vertices[xml->quadind[a+j]].z);
-                  Cur = (Vector (xml->vertices[xml->quadind[a+((j+2)%4)]].x,
-                                 xml->vertices[xml->quadind[a+((j+2)%4)]].y,
-                                 xml->vertices[xml->quadind[a+((j+2)%4)]].z)-Cur)
-                      .Cross(Vector (xml->vertices[xml->quadind[a+((j+1)%4)]].x,
-                                     xml->vertices[xml->quadind[a+((j+1)%4)]].y,
-                                     xml->vertices[xml->quadind[a+((j+1)%4)]].z)-Cur);
+                  Vector Cur = xml->vertices[xml->quadind[a+j]].GetPosition();
+                  Cur =     (xml->vertices[xml->quadind[a+((j+1)%4)]].GetPosition() - Cur)
+                      .Cross(xml->vertices[xml->quadind[a+((j+2)%4)]].GetPosition() - Cur);
                   Normalize(Cur);
-                  //Cur = Cur*(1.00F/xml->vertexcount[a+j]);
-                  xml->quads[a+j].i=Cur.i;//xml->vertexcount[xml->quadind[a+j]];
-                  xml->quads[a+j].j=Cur.j;//xml->vertexcount[xml->quadind[a+j]];
-                  xml->quads[a+j].k=Cur.k;//xml->vertexcount[xml->quadind[a+j]];
-                  
-#if 0
-                  xml->quads[a+j].i=Cur.i/xml->vertexcount[xml->quadind[a+j]];
-                  xml->quads[a+j].j=Cur.j/xml->vertexcount[xml->quadind[a+j]];
-                  xml->quads[a+j].k=Cur.k/xml->vertexcount[xml->quadind[a+j]];
-#endif
+                  xml->quads[a+j].SetNormal(Cur);
               }
           }
       }
@@ -1642,7 +1864,9 @@ void Mesh::PostProcessLoading(MeshXML * xml,const vector<string> &textureOverrid
   while (Decal.back()==NULL&&Decal.size()>1) {
       Decal.pop_back();
   }
-
+  
+  initTechnique(xml->technique);
+  
   unsigned int index = 0;
 
   unsigned int totalvertexsize = xml->tris.size()+xml->quads.size()+xml->lines.size();
@@ -1660,7 +1884,7 @@ void Mesh::PostProcessLoading(MeshXML * xml,const vector<string> &textureOverrid
   }
 
   index =0;
-  GFXVertex *vertexlist = new GFXVertex[totalvertexsize];
+  vector<GFXVertex> vertexlist(totalvertexsize);
 
   mn = Vector (FLT_MAX,FLT_MAX,FLT_MAX);
   mx = Vector (-FLT_MAX,-FLT_MAX,-FLT_MAX);
@@ -1686,68 +1910,66 @@ void Mesh::PostProcessLoading(MeshXML * xml,const vector<string> &textureOverrid
     poly_offsets[o_index]=xml->lines.size();
     o_index++;
   }
-  /*
-  if (xml->lines.size())
-    polytypes[o_index]=GFXLINE;
-    poly_offsets[o_index]=xml->lines.size()*2;  
-    o_index++;
-  */
-
-  for(a=0; a<xml->tris.size(); a++, index++) {
+  for(a=0; a<xml->tris.size(); a++, index++)
     vertexlist[index] = xml->tris[a];		
-    updateMax (mn,mx,vertexlist[index]);
-  }
-  for(a=0; a<xml->quads.size(); a++, index++) {
+  for(a=0; a<xml->quads.size(); a++, index++)
     vertexlist[index] = xml->quads[a];
-    updateMax (mn,mx,vertexlist[index]);
-  }
-  for(a=0; a<xml->lines.size(); a++, index++) {
+  for(a=0; a<xml->lines.size(); a++, index++)
     vertexlist[index] = xml->lines[a];		
-    updateMax (mn,mx,vertexlist[index]);
-  }
 
   for (a=0;a<xml->tristrips.size();a++) {
-
-    for (unsigned int m=0;m<xml->tristrips[a].size();m++,index++) {
+    for (unsigned int m=0;m<xml->tristrips[a].size();m++,index++)
       vertexlist[index] = xml->tristrips[a][m];
-    updateMax (mn,mx,vertexlist[index]);
-    }
     polytypes[o_index]= GFXTRISTRIP;
     poly_offsets[o_index]=xml->tristrips[a].size();
     o_index++;
   }
   for (a=0;a<xml->trifans.size();a++) {
-    for (unsigned int m=0;m<xml->trifans[a].size();m++,index++) {
+    for (unsigned int m=0;m<xml->trifans[a].size();m++,index++)
       vertexlist[index] = xml->trifans[a][m];
-    updateMax (mn,mx,vertexlist[index]);
-    }
     polytypes[o_index]= GFXTRIFAN;
     poly_offsets[o_index]=xml->trifans[a].size();
-
     o_index++;
   }
   for (a=0;a<xml->quadstrips.size();a++) {
-    for (unsigned int m=0;m<xml->quadstrips[a].size();m++,index++) {
+    for (unsigned int m=0;m<xml->quadstrips[a].size();m++,index++)
       vertexlist[index] = xml->quadstrips[a][m];
-    updateMax (mn,mx,vertexlist[index]);
-    }
     polytypes[o_index]= GFXQUADSTRIP;
     poly_offsets[o_index]=xml->quadstrips[a].size();
     o_index++;
   }
   for (a=0;a<xml->linestrips.size();a++) {
-
-    for (unsigned int m=0;m<xml->linestrips[a].size();m++,index++) {
+    for (unsigned int m=0;m<xml->linestrips[a].size();m++,index++)
       vertexlist[index] = xml->linestrips[a][m];
-      updateMax (mn,mx,vertexlist[index]);
-    }
     polytypes[o_index]= GFXLINESTRIP;
     poly_offsets[o_index]=xml->linestrips[a].size();
     o_index++;
   }
-  if (mn.i==FLT_MAX&&mn.j==FLT_MAX&&mn.k==FLT_MAX) {
-	  mx.i=mx.j=mx.k=mn.i=mn.j=mn.k=0;
+  for (i=0; i<index; ++i)
+    updateMax (mn,mx,vertexlist[i]);
+  
+  //begin tangent calculations if necessary
+  if (!xml->usetangents) {
+    ClearTangents(vertexlist);
+    
+    vector<float> weights;
+    vector<int> indices(vertexlist.size()); // Oops, someday we'll use real indices
+    weights.resize(vertexlist.size(), 0.f);
+    
+    size_t i,j,n;
+    
+    for (i=0, n=vertexlist.size(); i<n; ++i)
+        indices[i] = i;
+    
+    for (i=j=0, n=polytypes.size(); i<n; j += poly_offsets[i++])
+        SumTangents(vertexlist, indices, j, j+poly_offsets[i], polytypes[i], weights);
+    
+    NormalizeTangents(vertexlist, weights);
   }
+  
+  
+  if (mn.i==FLT_MAX&&mn.j==FLT_MAX&&mn.k==FLT_MAX)
+    mx.i=mx.j=mx.k=mn.i=mn.j=mn.k=0;
   mn.i *=xml->scale.i;
   mn.j *=xml->scale.j;
   mn.k *=xml->scale.k;
@@ -1762,35 +1984,13 @@ void Mesh::PostProcessLoading(MeshXML * xml,const vector<string> &textureOverrid
     vertexlist[a].x*=xml->scale.i;//FIXME
     vertexlist[a].y*=xml->scale.j;
     vertexlist[a].z*=xml->scale.k;
-    vertexlist[a].i*=-1;
-    vertexlist[a].j*=-1;
-    vertexlist[a].k*=-1;
-
-    /*
-    vertexlist[a].x -= x_center;
-    vertexlist[a].y -= y_center;
-    vertexlist[a].z -= z_center;
-    */
   }
   for (a=0;a<xml->vertices.size();a++) {
     xml->vertices[a].x*=xml->scale.i;//FIXME
     xml->vertices[a].y*=xml->scale.j;
     xml->vertices[a].z*=xml->scale.k;
     xml->vertices[a].i*=-1;    xml->vertices[a].k*=-1;    xml->vertices[a].j*=-1;
-    /*
-    xml->vertices[a].x -= x_center;
-    xml->vertices[a].y -= y_center;
-    xml->vertices[a].z -= z_center; //BSP generation and logos require the vertices NOT be centered!
-    */
   }
-  /*** NOW MIN/MAX size should NOT be centered for fast bounding queries
-  minSizeX -= x_center;
-  maxSizeX -= x_center;
-  minSizeY -= y_center;
-  maxSizeY -= y_center;
-  minSizeZ -= z_center;
-  maxSizeZ -= z_center;
-  ***/
   if( o_index || index)
  	 radialSize = .5*(mx-mn).Magnitude();
 
@@ -1801,52 +2001,36 @@ void Mesh::PostProcessLoading(MeshXML * xml,const vector<string> &textureOverrid
 		  (xml->vertices.size()?&xml->vertices[0]:0), o_index,
 		  (poly_offsets.size()?&poly_offsets[0]:0), false, 
 		  (ind.size()?&ind[0]:0)  );
-  }else {
+  } else {
     static bool usopttmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","OptimizeVertexArrays","false")));
     static float optvertexlimit= (XMLSupport::parse_float (vs_config->getVariable ("graphics", "OptimizeVertexCondition","1.0")));
     bool cachunk=false;
-    if (usopttmp) {
-      int numopt =totalvertexsize;      
-      GFXVertex * newv;
-      unsigned int * ind;
-      GFXOptimizeList (vertexlist,totalvertexsize,&newv,&numopt,&ind);
-      if (numopt < totalvertexsize*optvertexlimit) {
-	vlist = new GFXVertexList (
-		(polytypes.size()?&polytypes[0]:0), 
-		numopt,newv,o_index,
-		(poly_offsets.size()?&poly_offsets[0]:0), false, 
-		ind  );
-	cachunk = true;
-      }
-      free (ind);
-      free (newv);
+    if (usopttmp && (vertexlist.size() > 0)) {
+        int numopt =totalvertexsize;
+        GFXVertex * newv;
+        unsigned int * ind;
+        GFXOptimizeList (&vertexlist[0],totalvertexsize,&newv,&numopt,&ind);
+        if (numopt < totalvertexsize*optvertexlimit) {
+            vlist = new GFXVertexList (
+                (polytypes.size()?&polytypes[0]:0), 
+                numopt,newv,o_index,
+                (poly_offsets.size()?&poly_offsets[0]:0), false, 
+                ind  );
+            cachunk = true;
+        }
+        free (ind);
+        free (newv);
     }
     if (!cachunk) {
-      vlist= new GFXVertexList(
-		  (polytypes.size()?&polytypes[0]:0), 
-		  totalvertexsize,vertexlist,o_index,
-		  (poly_offsets.size()?&poly_offsets[0]:0)  ); 
+		if (vertexlist.size() == 0)
+			vertexlist.resize(1);
+        vlist= new GFXVertexList(
+            (polytypes.size()?&polytypes[0]:0), 
+            totalvertexsize,&vertexlist[0],o_index,
+            (poly_offsets.size()?&poly_offsets[0]:0)  ); 
     }
   }
-  /*
-  vlist[GFXQUAD]= new GFXVertexList(GFXQUAD,xml->quads.size(),vertexlist+xml->tris.size());
-  index = xml->tris.size()+xml->quads.size();
-  numQuadstrips = xml->tristrips.size()+xml->trifans.size()+xml->quadstrips.size();
-  quadstrips = new GFXVertexList* [numQuadstrips];
-  unsigned int tmpind =0;
-  for (a=0;a<xml->tristrips.size();a++,tmpind++) {
-    quadstrips[tmpind]= new GFXVertexList (GFXTRISTRIP,xml->tristrips[a].size(),vertexlist+index);
-    index+= xml->tristrips[a].size();
-  }
-  for (a=0;a<xml->trifans.size();a++,tmpind++) {
-    quadstrips[tmpind]= new GFXVertexList (GFXTRIFAN,xml->trifans[a].size(),vertexlist+index);
-    index+= xml->trifans[a].size();
-  }
-  for (a=0;a<xml->quadstrips.size();a++,tmpind++) {
-    quadstrips[tmpind]= new GFXVertexList (GFXQUADSTRIP,xml->quadstrips[a].size(),vertexlist+index);
-    index+= xml->quadstrips[a].size();
-  }
-  */
+  
   CreateLogos(xml,xml->faction,xml->fg);
   // Calculate bounding sphere
   
@@ -1856,8 +2040,5 @@ void Mesh::PostProcessLoading(MeshXML * xml,const vector<string> &textureOverrid
   }
 
   GFXSetMaterial (myMatNum,xml->material);
-
-  delete [] vertexlist;
-
 }
 

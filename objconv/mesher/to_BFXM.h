@@ -153,8 +153,8 @@ struct textureholder{ // Holds 1 texture entry
 	int type;
 	int index;
 	vector<unsigned char> name;
-    textureholder() : index(0),type(UNKNOWN) { };
-    textureholder(int _index) : index(_index),type(UNKNOWN) {};
+    textureholder() : index(0) { };
+    textureholder(int _index) : index(_index) {};
 };
 
 
@@ -205,6 +205,7 @@ struct XML {
     LIGHTINGON,
     FLATSHADE,
     TEXTURE,
+    TECHNIQUE,
     FORCETEXTURE,
     ALPHAMAP,
     SHAREVERT,
@@ -346,10 +347,10 @@ struct XML {
   };
 
 XML LoadXML(const char *filename, float unitscale);
-void xmeshToBFXM(XML memfile,FILE* Outputfile,char mode,bool forcenormals, bool force_shared_vertex); //converts input file to BFXM creates new, or appends record based on mode
-int writesuperheader(XML memfile, FILE* Outputfile, bool force_shared_vertex); //Writes superheader to file Outputfile
-int appendrecordfromxml(XML memfile, FILE* Outputfile,bool forcenormals, bool force_shared_vertex); // Append a record specified in memfile to the output file and return number of bytes written. Assumes Outputfile is appropriately positioned at the end of the file.
-int appendmeshfromxml(XML memfile, FILE* Outputfile,bool forcenormals, bool force_shared_vertex); // Append a mesh specified in memfile to the output file and return number of bytes written. Assumes Outputfile is appropriately positioned at the end of the file.
+void xmeshToBFXM(XML memfile,FILE* Outputfile,char mode,bool forcenormals); //converts input file to BFXM creates new, or appends record based on mode
+int writesuperheader(XML memfile, FILE* Outputfile); //Writes superheader to file Outputfile
+int appendrecordfromxml(XML memfile, FILE* Outputfile,bool forcenormals); // Append a record specified in memfile to the output file and return number of bytes written. Assumes Outputfile is appropriately positioned at the end of the file.
+int appendmeshfromxml(XML memfile, FILE* Outputfile,bool forcenormals); // Append a mesh specified in memfile to the output file and return number of bytes written. Assumes Outputfile is appropriately positioned at the end of the file.
 void AddNormal (GFXVertex &outp,
                 const GFXVertex &inp);
 void SetNormal (GFXVertex &outp,

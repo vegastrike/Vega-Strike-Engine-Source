@@ -216,6 +216,7 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
 	  lodsize*=1.5;
 	}
       }
+      initTechnique("");
       oldmesh[l]=*this;
       refcount =0;
       orig = oldorig;
@@ -235,7 +236,7 @@ void SphereMesh::Draw(float lod,  bool centered, const Matrix &m) {
   } 
 }
 
-void CityLights::RestoreCullFace (int whichdrawqueue) {
+void SphereMesh::RestoreCullFace (int whichdrawqueue) {
   //always right
 }
 

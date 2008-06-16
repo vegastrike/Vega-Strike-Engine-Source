@@ -91,6 +91,7 @@ public:
   Texture(VSFileSystem::VSFile * f, int stage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE,GFXBOOL nocache=false,enum ADDRESSMODE address_mode=DEFAULT_ADDRESS_MODE);
   void Load(const char *,const char *, int stage = 0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE,GFXBOOL nocache=false,enum ADDRESSMODE address_mode=DEFAULT_ADDRESS_MODE);
   void Load(const char * FileName, int stage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE,GFXBOOL nocache=false,enum ADDRESSMODE address_mode=DEFAULT_ADDRESS_MODE);
+  virtual const Texture * Original() const;
   virtual Texture * Original();
   virtual Texture * Clone ();
   ///Texture copy constructor that increases appropriate refcounts
@@ -116,9 +117,9 @@ public:
   ///Whether or not the color and alpha data already exist
   static Texture * Exists (std::string s, std::string a);
   ///A way to sort the texture by the original address (to make sure like textures stick togehter
-  bool operator < (Texture &b);
+  bool operator < (const Texture &b) const;
   ///A way to test if the texture is equal to another based on original values
-  bool operator == (Texture &b);
+  bool operator == (const Texture &b) const;
   ///Make this instance a reference of "other"
   void setReference(Texture *other);
   ///Binds the texture in the GFX library

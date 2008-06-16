@@ -28,13 +28,26 @@ inline XVector operator* (const XVector &lval, const QFLOAT obj);
 inline XVector operator* (const QFLOAT obj, const XVector &rval);
 
 inline XVector operator+= (XVector &lval, const XVector &obj);
+inline XVector operator-= (XVector &lval, const XVector &obj);
 
 inline QFLOAT DotProduct (const XVector &a, const XVector &b);
 inline void Normalize(XVector &r);
 class YVector;
 class XVector {
  public:
-  QFLOAT i,j,k;
+  union {
+    QFLOAT i;
+    QFLOAT x;
+  };
+  union {
+    QFLOAT j;
+    QFLOAT y;
+  };
+  union {
+    QFLOAT k;
+    QFLOAT z;
+  };
+  
   XVector () {}
  private:
   friend class Quadsquare;
@@ -104,6 +117,7 @@ class XVector {
 inline XVector operator/ (const XVector &lval, const QFLOAT obj) {XVector retval(lval.i / obj, lval.j / obj, lval.k / obj); return retval;}
 
 inline XVector operator+= (XVector &lval, const XVector &obj) {lval.i += obj.i; lval.j += obj.j; lval.k += obj.k; return lval;}
+inline XVector operator-= (XVector &lval, const XVector &obj) {lval.i -= obj.i; lval.j -= obj.j; lval.k -= obj.k; return lval;}
 
 inline XVector operator*= (XVector &lval, const QFLOAT &obj) {lval.i *= obj; lval.j *= obj, lval.k *= obj; return lval;}
 

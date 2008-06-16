@@ -77,6 +77,10 @@ GFXBOOL /*GFXDRVAPI*/ GFXLightContextAmbient (const GFXColor &amb);
 GFXBOOL /*GFXDRVAPI*/ GFXGetLightContextAmbient (GFXColor &amb);
 ///picks and activates local lights near to "center"
 void /*GFXDRVAPI*/ GFXPickLights(const Vector &center, const float radius);
+///picks and does not activate local lights near to "center"
+void /*GFXDRVAPI*/ GFXPickLights(const Vector &center, const float radius, vector<int> &lights, const int maxlights);
+///activates local lights picked by GFXPickLight
+void /*GFXDRVAPI*/ GFXPickLights(vector<int>::const_iterator begin, vector<int>::const_iterator end);
 ///Sets the light model to have separate specular color (if available)
 GFXBOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor (const GFXBOOL spec);
 ///Sets the intensity cutoff before picked lights are ignored
@@ -334,6 +338,10 @@ bool GFXMultiTexAvailable();
 ///Sets Depth Offset for polgyons
 void /*GFXDRVAPI*/ GFXPolygonOffset (float factor, float units);
 void GFXGetPolygonOffset (float *factor, float *units);
+///Sets the polygon rasterization mode
+void /*GFXDRVAPI*/ GFXPolygonMode (const enum POLYMODE);
+///Sets the facecull mode
+void /*GFXDRVAPI*/ GFXCullFace (const enum POLYFACE);
 ///Begins a polytype
 void /*GFXDRVAPI*/ GFXBegin(const enum POLYTYPE);
 
@@ -351,6 +359,8 @@ void /*GFXDRVAPI*/ GFXTexCoord2f(const float s, const float t);
 
 ///Specifies four texture coordinates for a given vertex (2 textures)
 void /*GFXDRVAPI*/ GFXTexCoord4f(const float s, const float t, const float u, const float v);
+///Specifies four texture coordinates for a given vertex (3 textures)
+void /*GFXDRVAPI*/ GFXTexCoord224f(const float s, const float t, const float s2, const float t2, const float s3, const float t3, const float u3, const float v3);
 /// Specifies a normal with 3 floats
 void /*GFXDRVAPI*/ GFXNormal3f(const float i, const float j, const float k);
 ///Specifies a notmal with 1 vector
@@ -401,16 +411,23 @@ enum GFXTEXTURECOORDMODE{
 };
 void GFXTextureCoordGenMode(int stage, GFXTEXTURECOORDMODE tex, const float params[4],const float paramt[4]);
 
+int GFXCreateProgram(const char *vertex, const char *fragment);
 //program created if necessary and active
-int GFXActivateShader(char *program=NULL/*null for default prog*/);
+int GFXActivateShader(const char *program = NULL/*null for default prog*/);
+int GFXActivateShader(int program);
 void GFXDeactivateShader();
 //return location of named value
 int GFXNamedShaderConstant(char* progID,const char *name);
-int GFXShaderConstant(int name, float*value);
-int GFXShaderConstant(int name, int value);
-int GFXShaderConstant4v(int name, unsigned int numvals, float*value);
-int GFXShaderConstantv(int name, unsigned int numvals, float*value);
-int GFXShaderConstantv(int name, unsigned int numvals,int *value);
+int GFXNamedShaderConstant(int progID, const char *name);
+int GFXShaderConstant(int name, Vector value);
+int GFXShaderConstant(int name, GFXColor value);
+int GFXShaderConstant(int name, const float* value);
+int GFXShaderConstanti(int name, int value);
+int GFXShaderConstant(int name, float v1, float v2, float v3, float v4);
+int GFXShaderConstant(int name, float v1);
+int GFXShaderConstant4v(int name, unsigned int numvals, const float*value);
+int GFXShaderConstantv(int name, unsigned int numvals, const float*value);
+int GFXShaderConstantv(int name, unsigned int numvals, const int *value);
 bool GFXDefaultShaderSupported();
 void GFXReloadDefaultShader();
 void GFXUploadLightState(int max_light_location, int active_light_array, bool shader);

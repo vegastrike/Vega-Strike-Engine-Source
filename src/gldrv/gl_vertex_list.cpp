@@ -44,57 +44,33 @@ static bool iseq (float a, float b) {
   const float eps=.001;
   return (fabs(a-b) <eps);
 }
-static GFXBOOL GFXCompareVertex (GFXVertex *old, GFXVertex * n) {
-  return (old->x==n->x&&old->y==n->y&&old->z==n->z&&iseq(old->s,n->s)&&iseq (old->t,n->t)&&((old->i*n->i+old->j*n->j+old->k*n->k)>=0));
-}
-static void GFXUpdateVertex (GFXVertex *old, GFXVertex *n, unsigned int *ijk) {
-  //  old->i*=ijk;
-  //  old->j*=ijk;
-  //  old->k*=ijk;
-  old->i+=n->i;
-  old->j+=n->j;
-  old->k+=n->k;
-  ijk++;
-  //  old->i/=ijk;
-  //  old->j/=ijk;
-  //  old->k/=ijk;
-}
 
-void GFXNormalizeVert (GFXVertex *v) {
-  float mag =sqrtf( v->i*v->i+v->j*v->j+v->k*v->k);
-  if (mag>0) {
-    v->i/=mag;
-    v->j/=mag;
-    v->k/=mag;
-  }
-}
+struct VertexCompare {
+    bool operator()(const GFXVertex *a, const GFXVertex *b) const {
+        return memcmp(a,b,sizeof(GFXVertex)) < 0;
+    }
+};
+
+#include <map>
 
 void GFXOptimizeList (GFXVertex * old, int numV, GFXVertex ** nw, int * nnewV, unsigned int **ind) {
-  unsigned int *ijk = (unsigned int *)malloc (sizeof (unsigned int)*numV);
+  std::map<GFXVertex*, int, VertexCompare> vtxcache;
+
   *ind = (unsigned int *)malloc (sizeof (unsigned int) * numV);
   *nw = (GFXVertex *)malloc (numV*sizeof (GFXVertex));
   *nnewV = 0;
   int i;
   for (i=0;i<numV;i++) {
     int j;
-    for (j=0;j<(*nnewV);j++) {
-      if (GFXCompareVertex ((*nw)+j,old+i)==GFXTRUE) {
-	GFXUpdateVertex ((*nw)+j,old+i,ijk+j);
-	(*ind)[i]=j;
-	break;
-      }
-    }
-    if (j==(*nnewV)) {
-      ijk[*nnewV]=1;
+    std::map<GFXVertex*, int, VertexCompare>::const_iterator it = vtxcache.find(old+i);
+    if (it != vtxcache.end()) {
+        (*ind)[i] = it->second;
+    } else {
       memcpy ((*nw)+(*nnewV),old+i,sizeof (GFXVertex));
-      ((*ind)[i])=(*nnewV);
+      vtxcache[old+i]=((*ind)[i])=(*nnewV);
       (*nnewV)=(*nnewV)+1;
     }
   }
-  for (i=0;i<*nnewV;i++) {
-    GFXNormalizeVert ((*nw)+i);
-  }
-  free (ijk);  
 }
 
 
@@ -251,7 +227,8 @@ void GFXVertexList::ColVtxCopy (GFXVertexList * thus, GFXVertex *dst, int offset
     dst[i].
       SetTexCoord (thus->data.colors[i+offset].s,thus->data.colors[i+offset].t).
       SetNormal (Vector (thus->data.colors[i+offset].i,thus->data.colors[i+offset].j,thus->data.colors[i+offset].k)).
-      SetVertex (Vector (thus->data.colors[i+offset].x,thus->data.colors[i+offset].y,thus->data.colors[i+offset].z));
+      SetVertex (Vector (thus->data.colors[i+offset].x,thus->data.colors[i+offset].y,thus->data.colors[i+offset].z)).
+      SetTangent(Vector (thus->data.colors[i+offset].tx,thus->data.colors[i+offset].ty,thus->data.colors[i+offset].tz), thus->data.colors[i+offset].tw);
   }
 }
 
@@ -308,7 +285,8 @@ void GFXVertexList::ColIndVtxCopy (GFXVertexList * thus, GFXVertex *dst, int off
     dst[i].
       SetTexCoord (thus->data.colors[j].s,thus->data.colors[j].t).
       SetNormal (Vector (thus->data.colors[j].i,thus->data.colors[j].j,thus->data.colors[j].k)).
-      SetVertex (Vector (thus->data.colors[j].x,thus->data.colors[j].y,thus->data.colors[j].z));
+      SetVertex (Vector (thus->data.colors[j].x,thus->data.colors[j].y,thus->data.colors[j].z)).
+      SetTangent(Vector (thus->data.colors[j].tx,thus->data.colors[j].ty,thus->data.colors[j].tz), thus->data.colors[j].tw);
   }
 }
 void GFXVertexList::IndVtxCopy (GFXVertexList * thus, GFXVertex *dst, int offset, int howmany) {
@@ -317,7 +295,8 @@ void GFXVertexList::IndVtxCopy (GFXVertexList * thus, GFXVertex *dst, int offset
     dst[i].
       SetTexCoord (thus->data.vertices[j].s,thus->data.vertices[j].t).
       SetNormal (Vector (thus->data.vertices[j].i,thus->data.vertices[j].j,thus->data.vertices[j].k)).
-      SetVertex (Vector (thus->data.vertices[j].x,thus->data.vertices[j].y,thus->data.vertices[j].z));
+      SetVertex (Vector (thus->data.vertices[j].x,thus->data.vertices[j].y,thus->data.vertices[j].z)).
+      SetTangent(Vector (thus->data.vertices[j].tx,thus->data.vertices[j].ty,thus->data.vertices[j].tz), thus->data.vertices[j].tw);
   }
 }
 bool GFXVertexList::hasColor()const {
@@ -367,30 +346,21 @@ void GFXVertexList::GetPolys (GFXVertex **vert, int *numpolys, int *numtris) {
     case GFXTRIFAN:
     case GFXPOLY:
       for (j=1;j<offsets[i]-1;j++) {
-	(*vtxcpy) (this,&res[curtri],cur,1);
-	curtri++;
-	(*vtxcpy) (this,&res[curtri],(cur+j),1);
-	curtri++;
-	(*vtxcpy) (this,&res[curtri],(cur+j+1),1);
-	curtri++;
+        (*vtxcpy) (this,&res[curtri++],cur,1);
+        (*vtxcpy) (this,&res[curtri++],(cur+j),1);
+        (*vtxcpy) (this,&res[curtri++],(cur+j+1),1);
       }	    
       break;
     case GFXTRISTRIP:
       for (j=2;j<offsets[i];j+=2) {
-	(*vtxcpy) (this,&res[curtri],(cur+j-2),1);
-	curtri++;
-	(*vtxcpy) (this,&res[curtri],(cur+j-1),1);
-	curtri++;
-	(*vtxcpy) (this,&res[curtri],(cur+j),1);
-	curtri++;
-	if (j+1<offsets[i]) {//copy reverse
-	  (*vtxcpy) (this,&res[curtri],(cur+j),1);
-	  curtri++;
-	  (*vtxcpy) (this,&res[curtri],(cur+j-1),1);
-	  curtri++;
-	  (*vtxcpy) (this,&res[curtri],(cur+j+1),1);
-	  curtri++;
-	}
+        (*vtxcpy) (this,&res[curtri++],(cur+j-2),1);
+        (*vtxcpy) (this,&res[curtri++],(cur+j-1),1);
+        (*vtxcpy) (this,&res[curtri++],(cur+j),1);
+        if (j+1<offsets[i]) {//copy reverse
+            (*vtxcpy) (this,&res[curtri++],(cur+j),1);
+            (*vtxcpy) (this,&res[curtri++],(cur+j-1),1);
+            (*vtxcpy) (this,&res[curtri++],(cur+j+1),1);
+        }
       }	    
       break;
     case GFXQUAD:
@@ -399,14 +369,10 @@ void GFXVertexList::GetPolys (GFXVertex **vert, int *numpolys, int *numtris) {
 	    break;
     case GFXQUADSTRIP:
       for (j=2;j<offsets[i]-1;j+=2) {
-	(*vtxcpy) (this,&res[curquad],(cur+j-2),1);
-	curquad++;
-	(*vtxcpy) (this,&res[curquad],(cur+j-1),1);
-	curquad++;
-	(*vtxcpy) (this,&res[curquad],(cur+j+1),1);
-	curquad++;
-	(*vtxcpy) (this,&res[curquad],(cur+j),1);
-	curquad++;
+        (*vtxcpy) (this,&res[curquad++],(cur+j-2),1);
+        (*vtxcpy) (this,&res[curquad++],(cur+j-1),1);
+        (*vtxcpy) (this,&res[curquad++],(cur+j+1),1);
+        (*vtxcpy) (this,&res[curquad++],(cur+j),1);
       }
       break;
     default:

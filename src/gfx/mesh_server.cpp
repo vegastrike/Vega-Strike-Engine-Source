@@ -95,13 +95,16 @@ void Mesh::ProcessZFarMeshes (bool) {
 
 void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects,bool) {
 }
-void Mesh::ProcessDrawQueue(int,int whichdrawqueue) {
+void Mesh::ProcessDrawQueue(int, int, bool, const QVector &) {
 }
 
 void Mesh::EnableSpecialFX() {
 }
 
 void Mesh::AddDamageFX(class Vector const &,class Vector const &,float,struct GFXColor const &) {
+}
+
+void Mesh::initTechnique(const std::string&) {
 }
 
 void AddWarp (Unit * un, QVector, float) {}

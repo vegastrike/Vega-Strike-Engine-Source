@@ -42,6 +42,7 @@
 #include "sphere.h"
 #include "lin_time.h"
 #include "mesh_xml.h"
+#include "gfx/technique.h"
 #include <float.h>
 #include <algorithm>
 
@@ -99,6 +100,8 @@ void Mesh::InitUnit() {
 	draw_queue = NULL;
 	will_be_drawn = GFXFALSE;
 	draw_sequence = 0;
+    
+    initTechnique("fixed");
 }
 Mesh::Mesh()
 {

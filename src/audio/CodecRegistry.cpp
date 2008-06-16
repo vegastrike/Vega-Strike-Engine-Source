@@ -128,6 +128,13 @@ namespace Audio {
             std::string("No registered codec can handle the file \"") + path + "\"");
     }
     
+    Stream* CodecRegistry::open(const std::string& path, VSFileSystem::VSFileType type) const 
+        throw(Exception)
+    {
+        Codec *codec = findByFile(path, type);
+		return codec->open(path, type);
+    }
+    
     CodecRegistration::CodecRegistration(Codec* _codec, int priority) throw()
         : codec(_codec)
     {

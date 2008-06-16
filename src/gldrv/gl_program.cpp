@@ -5,7 +5,15 @@
 #include "gfxlib.h"
 #include "lin_time.h"
 #include <map>
-std::map<std::string,int> loadedprograms;
+
+typedef std::map<std::pair<std::string,std::string>,int> ProgramCache;
+
+static ProgramCache programCache;
+
+static ProgramCache::key_type cacheKey(const std::string &vp, const std::string &fp)
+{
+    return std::pair<std::string,std::string>(vp,fp);
+}
 
 void printLog(GLuint obj, bool shader)
 {
@@ -19,8 +27,9 @@ void printLog(GLuint obj, bool shader)
     fprintf(stderr,"%s\n", infoLog);
 }
  
-int GFXCreateProgramConst(const char*vprogram,const char* fprogram) {
+static int GFXCreateProgramNoCache(const char* vprogram, const char* fprogram) {
   if (vprogram[0]=='\0'&&fprogram[0]=='\0') return 0;
+
 #ifndef __APPLE__
   if (glGetProgramInfoLog_p==NULL||glCreateShader_p==NULL||glShaderSource_p==NULL||glCompileShader_p==NULL||glAttachShader_p==NULL||glLinkProgram_p==NULL||glGetShaderiv_p==NULL||glGetProgramiv_p==NULL)
     return 0;
@@ -42,7 +51,13 @@ int GFXCreateProgramConst(const char*vprogram,const char* fprogram) {
   fpfilename+=".fp";
   VSFileSystem::VSError vperr = vf.OpenReadOnly(vpfilename.c_str(), UnknownFile);  
   VSFileSystem::VSError fperr = ff.OpenReadOnly(fpfilename.c_str(), UnknownFile);  
-  if (vperr>Ok&&fperr>Ok) return 0;
+  if ((vperr>Ok)||(fperr>Ok)) {
+    if (vperr>Ok)
+        fprintf(stderr,"Vertex Program Error: Failed to open file %s\n",vpfilename.c_str());
+    if (fperr>Ok)
+        fprintf(stderr,"Fragment Program Error: Failed to open file %s\n",fpfilename.c_str());
+    return 0;
+  }
   GLint vproghandle=0;
   GLint fproghandle=0;
   GLint sp=glCreateProgram_p();
@@ -104,8 +119,19 @@ int GFXCreateProgramConst(const char*vprogram,const char* fprogram) {
   }
   return sp;
 }
+
+int GFXCreateProgram(const char* vprogram, const char* fprogram)
+{
+  ProgramCache::key_type key = cacheKey(vprogram, fprogram);
+  ProgramCache::const_iterator it = programCache.find( key );
+  if (it != programCache.end())
+    return it->second;
+  
+  return programCache[key] = GFXCreateProgramNoCache(vprogram, fprogram);
+}
+ 
 int GFXCreateProgram(char*vprogram,char* fprogram) {
-  return GFXCreateProgramConst(vprogram,fprogram);
+  return GFXCreateProgram((const char*)vprogram, (const char*)fprogram);
 }
 static int programChanged=false;
 static int defaultprog=0;
@@ -129,10 +155,10 @@ int getDefaultProgram() {
     if (hifiProgramName.length()==0) {
       lowfiprog=hifiprog=0;
     }else {
-      lowfiprog=GFXCreateProgramConst(lowfiProgramName.c_str(),lowfiProgramName.c_str());
-      if (lowfiprog==0)lowfiprog=GFXCreateProgramConst(hifiProgramName.c_str(),hifiProgramName.c_str());
-      hifiprog=GFXCreateProgramConst(hifiProgramName.c_str(),hifiProgramName.c_str());
-      if (hifiprog==0)hifiprog=GFXCreateProgramConst(lowfiProgramName.c_str(),lowfiProgramName.c_str());
+      lowfiprog=GFXCreateProgram(lowfiProgramName.c_str(),lowfiProgramName.c_str());
+      if (lowfiprog==0)lowfiprog=GFXCreateProgram(hifiProgramName.c_str(),hifiProgramName.c_str());
+      hifiprog=GFXCreateProgram(hifiProgramName.c_str(),hifiProgramName.c_str());
+      if (hifiprog==0)hifiprog=GFXCreateProgram(lowfiProgramName.c_str(),lowfiProgramName.c_str());
     }
     defaultprog=hifiprog;
     programChanged=true;
@@ -148,16 +174,16 @@ void GFXReloadDefaultShader() {
   }
   programChanged=true;
   if (islow) {
-    hifiprog=GFXCreateProgramConst(hifiProgramName.c_str(),hifiProgramName.c_str());
-    if (hifiprog==0)hifiprog=GFXCreateProgramConst(lowfiProgramName.c_str(),lowfiProgramName.c_str());
-    lowfiprog=GFXCreateProgramConst(lowfiProgramName.c_str(),lowfiProgramName.c_str());
-    if (lowfiprog==0)lowfiprog=GFXCreateProgramConst(hifiProgramName.c_str(),hifiProgramName.c_str());
+    hifiprog=GFXCreateProgram(hifiProgramName.c_str(),hifiProgramName.c_str());
+    if (hifiprog==0)hifiprog=GFXCreateProgram(lowfiProgramName.c_str(),lowfiProgramName.c_str());
+    lowfiprog=GFXCreateProgram(lowfiProgramName.c_str(),lowfiProgramName.c_str());
+    if (lowfiprog==0)lowfiprog=GFXCreateProgram(hifiProgramName.c_str(),hifiProgramName.c_str());
     defaultprog=lowfiprog;
   }else{
-    lowfiprog=GFXCreateProgramConst(lowfiProgramName.c_str(),lowfiProgramName.c_str());
-    if (lowfiprog==0)lowfiprog=GFXCreateProgramConst(hifiProgramName.c_str(),hifiProgramName.c_str());
-    hifiprog=GFXCreateProgramConst(hifiProgramName.c_str(),hifiProgramName.c_str());
-    if (hifiprog==0)hifiprog=GFXCreateProgramConst(lowfiProgramName.c_str(),lowfiProgramName.c_str());
+    lowfiprog=GFXCreateProgram(lowfiProgramName.c_str(),lowfiProgramName.c_str());
+    if (lowfiprog==0)lowfiprog=GFXCreateProgram(hifiProgramName.c_str(),hifiProgramName.c_str());
+    hifiprog=GFXCreateProgram(hifiProgramName.c_str(),hifiProgramName.c_str());
+    if (hifiprog==0)hifiprog=GFXCreateProgram(lowfiProgramName.c_str(),lowfiProgramName.c_str());
     defaultprog=hifiprog;
   }
 }
@@ -233,7 +259,7 @@ bool GFXShaderReloaded() {
           defaultprog=lowfiprog;
         else 
           defaultprog=0;
-        GFXActivateShader(NULL);
+        GFXActivateShader((char*)NULL);
       }
       break;
     case TOOFAST:
@@ -243,7 +269,7 @@ bool GFXShaderReloaded() {
           defaultprog=lowfiprog;
         else
           defaultprog=hifiprog;
-        GFXActivateShader(NULL);    
+        GFXActivateShader((char*)NULL);    
       }
       break;
     default:
@@ -256,53 +282,68 @@ bool GFXShaderReloaded() {
 bool GFXDefaultShaderSupported() {
   return getDefaultProgram()!=0;
 }
-int GFXActivateShader(char *program) {
-  int defaultprogram=getDefaultProgram();
-  int curprogram=defaultprogram;
-  static char* lastprogram=program;//check for null
-  if (program!=lastprogram) programChanged=true;
-  lastprogram=program;
-  if (program) {
-    std::map<std::string,int>::iterator where=loadedprograms.find(std::string(program));
-    if (where==loadedprograms.end()) {
-      curprogram=GFXCreateProgramConst(program,program);
-      loadedprograms[program]=curprogram;
-    }else {
-      curprogram=where->second;
-    }
-  }
-  if(1
+int GFXActivateShader(int program) {
+  static int lastprogram = 0;
+  if (program != lastprogram) 
+    programChanged=true;
+  if( program != lastprogram
 #ifndef __APPLE__
      &&glUseProgram_p
 #endif
      )
-    glUseProgram_p(curprogram);
+  {
+    glUseProgram_p(program);
+    lastprogram = program;
+  }
   else return 0;
-  return curprogram;
+  return program;
   
 }
-void GFXDeactivateShader() {
-  if(1
-#ifndef __APPLE__
-     &&glUseProgram_p
-#endif
-     )
-    glUseProgram_p(0);
+int GFXActivateShader(const char *program) {
+  int defaultprogram=getDefaultProgram();
+  int curprogram=defaultprogram;
+  if (program) {
+    curprogram=GFXCreateProgram(program,program);
+  }
+  return GFXActivateShader(curprogram);
 }
-int GFXShaderConstant(int name,float*values) {
+void GFXDeactivateShader() {
+  GFXActivateShader((int)0);
+}
+int GFXShaderConstant(int name, float v1, float v2, float v3, float v4) {
   if (1
 #ifndef __APPLE__
       &&glUniform4f_p
 #endif
       ) {
-    glUniform4f_p(name,values[0],values[1],values[2],values[3]);
+    glUniform4f_p(name,v1,v2,v3,v4);
+    return 1;
+  }
+  return 0;  
+}
+int GFXShaderConstant(int name, const float* values) {
+  return GFXShaderConstant(name, values[0], values[1], values[2], values[3]);
+}
+int GFXShaderConstant(int name, GFXColor v) {
+  return GFXShaderConstant(name, v.r, v.g, v.b, v.a);
+}
+int GFXShaderConstant(int name, Vector v) {
+  return GFXShaderConstant(name, v.i, v.j, v.k, 0);
+}
+int GFXShaderConstant(int name, float v1) {
+  if (1
+#ifndef __APPLE__
+      &&glUniform1f_p
+#endif
+      ) {
+    glUniform1f_p(name, v1);
     return 1;
   }
   return 0;  
 }
 
 
-int GFXShaderConstantv(int name,int count, float*values) {
+int GFXShaderConstantv(int name,int count, const float* values) {
   if (1
 #ifndef __APPLE__
       &&glUniform1fv_p
@@ -313,7 +354,7 @@ int GFXShaderConstantv(int name,int count, float*values) {
   }
   return 0;  
 }
-int GFXShaderConstant4v(int name,int count, float*values) {
+int GFXShaderConstant4v(int name,int count, const float* values) {
   if (1
 #ifndef __APPLE__
       &&glUniform4fv_p
@@ -326,7 +367,7 @@ int GFXShaderConstant4v(int name,int count, float*values) {
 }
 
 
-int GFXShaderConstant(int name,int value) {
+int GFXShaderConstanti(int name,int value) {
   if (1
 #ifndef __APPLE__
       &&glUniform1i_p
@@ -339,7 +380,7 @@ int GFXShaderConstant(int name,int value) {
 }
 
 
-int GFXShaderConstantv(int name,unsigned int count, int *value) {
+int GFXShaderConstantv(int name,unsigned int count, const int *value) {
   if (1
 #ifndef __APPLE__
       &&glUniform1i_p
@@ -351,38 +392,23 @@ int GFXShaderConstantv(int name,unsigned int count, int *value) {
   return 0;  
 }
 
+int GFXNamedShaderConstant(int progID, const char*name) {
+  if (1
+#ifndef __APPLE__
+      &&glGetUniformLocation_p
+#endif
+      ) {
+    int varloc=glGetUniformLocation_p(progID, name);
+    return varloc;
+  }
+  return -1; // varloc cound be 0
+}
 
 int GFXNamedShaderConstant(char*progID,const char*name) {
   int programname=defaultprog;
   if(progID)
-    programname=loadedprograms[progID];
-  if (1
-#ifndef __APPLE__
-      &&glGetUniformLocation_p
-#endif
-      ) {
-    int varloc=glGetUniformLocation_p(programname,name);
-    return varloc;
-  }
-  return 0;
+    programname=programCache[cacheKey(progID,progID)];
+  return GFXNamedShaderConstant(programname, name);
 }
 
 
-/* This function is not used  */
-#if 0
-int GFXNamedShaderConstant(char*progID,char*name,int value) {
-  int programname=defaultprog;
-  if(progID)
-    programname=loadedprograms[progID];
-  if (1
-#ifndef __APPLE__
-      &&glGetUniformLocation_p
-#endif
-      ) {
-    int varloc=glGetUniformLocation_p(programname,name);
-    GFXShaderConstant(varloc,value);
-    return varloc;
-  }
-  return 0;
-}
-#endif 

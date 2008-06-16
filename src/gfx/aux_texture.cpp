@@ -53,11 +53,11 @@ Texture * Texture::Exists (string s) {
   return tmp;
 }
 
-bool Texture::operator < (Texture & b) {
+bool Texture::operator < (const Texture & b) const {
   return Original()<b.Original();
 }
 
-bool Texture::operator == (Texture & b) {
+bool Texture::operator == (const Texture & b) const {
   return Original()==b.Original();
 }
 
@@ -124,6 +124,13 @@ void Texture::setold()
   //memcpy (original, this, sizeof (Texture));
 	original->original = NULL;
 	original->refcount++;
+}
+const Texture * Texture::Original() const {
+  if (original) {
+    return original->Original();
+  }else {
+    return this;
+  }
 }
 Texture * Texture::Original() {
   if (original) {

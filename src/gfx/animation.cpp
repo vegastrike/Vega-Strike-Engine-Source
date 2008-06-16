@@ -143,9 +143,6 @@ void Animation::ProcessFarDrawQueue (float farval) {
   GFXEnable(TEXTURE0);
   GFXDisable(TEXTURE1);
 
-  GFXDisable (DEPTHWRITE);	
-  GFXDisable (DEPTHTEST);	
-
   ProcessDrawQueue (far_animationdrawqueue, farval);
 }
 void Animation::ProcessDrawQueue (std::vector <Animation *> &animationdrawqueue,float limit) {

@@ -32,6 +32,7 @@ struct MeshXML {
       LIGHTINGON,
       FLATSHADE,
       TEXTURE,
+      TECHNIQUE,
       FORCETEXTURE,
       ALPHAMAP,
       SHAREVERT,
@@ -56,6 +57,7 @@ struct MeshXML {
       OFFSET,
       ANIMATEDTEXTURE,
       USENORMALS,
+      USETANGENTS,
       REVERSE,
       POLYGONOFFSET,
       DETAILTEXTURE,
@@ -117,6 +119,7 @@ struct MeshXML {
     vector<Names> state_stack;
     bool sharevert;
     bool usenormals;
+    bool usetangents;
     bool reverse;
     bool force_texture;
     int load_stage;
@@ -125,6 +128,7 @@ struct MeshXML {
 	Vector scale;
     Vector lodscale;
     vector <ZeTexture> decals;
+    string technique;
     bool recalc_norm;
     int num_vertices;
     vector<GFXVertex> vertices;

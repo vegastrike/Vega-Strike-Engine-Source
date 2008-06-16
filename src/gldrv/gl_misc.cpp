@@ -82,14 +82,41 @@ void /*GFXDRVAPI*/ GFXPolygonOffset (float factor, float units) {
   last_units=units;
   if (!factor&&!units) {
     glDisable (GL_POLYGON_OFFSET_FILL);
+    glDisable (GL_POLYGON_OFFSET_POINT);
+    glDisable (GL_POLYGON_OFFSET_LINE);
     glPolygonOffset (0,0);
   } else {
     glPolygonOffset (factor,units);
     glEnable (GL_POLYGON_OFFSET_FILL);
+    glEnable (GL_POLYGON_OFFSET_POINT);
+    glEnable (GL_POLYGON_OFFSET_LINE);
   }
-
-
 }
+
+void /*GFXDRVAPI*/ GFXPolygonMode (const enum POLYMODE polymode)
+{
+    GLenum mode;
+    switch (polymode) {
+    default:
+    case GFXFILLMODE:  mode = GL_FILL; break;
+    case GFXLINEMODE:  mode = GL_LINE; break;
+    case GFXPOINTMODE: mode = GL_POINT; break;
+    };
+    glPolygonMode(GL_FRONT_AND_BACK, mode);
+}
+
+void /*GFXDRVAPI*/ GFXCullFace (const enum POLYFACE polyface)
+{
+    GLenum face;
+    switch (polyface) {
+    case GFXFRONT:        face = GL_FRONT; break;
+    default:
+    case GFXBACK:         face = GL_BACK; break;
+    case GFXFRONTANDBACK: face = GL_FRONT_AND_BACK; break;
+    };
+    glCullFace(face);
+}
+
 void GFXPointSize (const float size) {
   glPointSize (size);
 }
@@ -173,6 +200,22 @@ void /*GFXDRVAPI*/ GFXTexCoord4f(const float s, const float t, const float u, co
 	{
 		glTexCoord2f(s,t);
 	}
+}
+
+void /*GFXDRVAPI*/ GFXTexCoord224f(const float s, const float t, const float s2, const float t2, const float s3, const float t3, const float u3, const float v3)
+{
+#if !defined(IRIX)
+    if(gl_options.Multitexture)
+    {
+        glMultiTexCoord2fARB_p(GL_TEXTURE0_ARB, s,t);
+        glMultiTexCoord2fARB_p(GL_TEXTURE1_ARB, s2,t2);
+        glMultiTexCoord4fARB_p(GL_TEXTURE2_ARB, s3,t3,u3,v3);
+    }
+    else
+#endif
+    {
+        glTexCoord2f(s,t);
+    }
 }
 
 void /*GFXDRVAPI*/ GFXNormal3f(const float i, const float j, const float k)

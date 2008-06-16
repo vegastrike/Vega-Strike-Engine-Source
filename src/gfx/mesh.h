@@ -30,6 +30,8 @@
 #include "gfxlib_struct.h"
 #include "vsfilesystem.h"
 #include "cmd/unit_generic.h"
+#include "gfx/technique.h"
+
 using std::vector;
 using std::string;
 class Planet;
@@ -77,9 +79,6 @@ public:
 struct MeshDrawContext {
   ///The matrix in world space
   Matrix mat;
-#ifdef PARTITIONED_Z_BUFFER
-  float zmin,zmax;
-#endif
   ///The special FX vector pointing to all active special FX
   vector <MeshFX> *SpecialFX;
   GFXColor CloakFX;
@@ -88,9 +87,6 @@ struct MeshDrawContext {
   char mesh_seq;
   unsigned char damage;//0 is perfect 255 is dead
   MeshDrawContext(const Matrix & m):mat(m),CloakFX(1,1,1,1),cloaked(NONE),damage(0)
-#ifdef PARTITIONED_Z_BUFFER
-      ,zmin(0),zmax(0) 
-#endif
   { }
 };
 using XMLSupport::EnumMap;
@@ -121,7 +117,6 @@ private:
   ///Loads XML data into this mesh.
   void LoadXML(const char *filename, const Vector & scale, int faction, class Flightgroup * fg, bool orig,const vector<string> &overrideTexture);
   void LoadXML(VSFileSystem::VSFile & f, const Vector & scale, int faction, class Flightgroup * fg, bool orig, const vector<string> &overrideTexture);
-  void PostProcessLoading(struct MeshXML *xml,const vector<string> &overrideTexture);
   ///loads binary data into this mesh
   void LoadBinary (const char * filename, int faction);
   ///Creates all logos with given XML data info
@@ -131,8 +126,14 @@ private:
   
   void beginElement(struct MeshXML *xml, const string &name, const AttributeList &attributes);
   void endElement(struct MeshXML *xml, const string &name);
+  
+protected:
+  void PostProcessLoading(struct MeshXML *xml,const vector<string> &overrideTexture);
+  void initTechnique(const string &technique);
+  
 private:
   Mesh( const char *filename, const Vector & scalex,int faction,class Flightgroup * fg, bool orig, const std::vector<std::string> &textureOverride=std::vector<std::string>());
+
 protected:
   // only may be called from subclass. orig request may be denied if unit was in past usage. (not likely in the case where a unit must be constructed in orig)
   Mesh( std::string filename, const Vector & scalex,int faction,class Flightgroup * fg, bool orig=false);
@@ -165,6 +166,8 @@ protected:
   GFXVertexList *vlist;
   ///The number of the appropriate material for this mesh (default 0)
   unsigned int myMatNum;
+  ///The technique used to render this mesh
+  TechniquePtr technique;
   ///The decal relevant to this mesh
   vector <Texture *> Decal;
   Texture * detailTexture;
@@ -189,13 +192,20 @@ protected:
   void InitUnit();
   ///Needs to have access to our class
   friend class OrigMeshContainer;
-#ifdef PARTITIONED_Z_BUFFER
-  friend class Meshvs_decalsort;
-#endif
   ///The enabled light effects on this mesh
   vector <MeshFX> LocalFX;
   ///Returing the mesh relevant to "size" pixels LOD of this mesh
   Mesh *getLOD (float lod, bool bBypassDamping=false);
+
+private:
+  ///Implement fixed-function draw queue processing (the referenced pass must be of Fixed type) - internal usage
+  void ProcessFixedDrawQueue(int whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr);
+  
+  ///Implement programmable draw queue processing (the referenced pass must be of Shader type) - internal usage
+  void ProcessShaderDrawQueue(int whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr);
+  
+  ///Activate a texture unit - internal usage
+  void activateTextureUnit(const Technique::Pass::TextureUnit &tu, bool deflt = false);
 
 public:
   Mesh();
@@ -249,13 +259,8 @@ public:
   void Draw(float lod, const Matrix &m = identity_matrix, float toofar=1, int cloak=-1, float nebdist=0, unsigned char damage=0,bool renormalize_normals=false); //short fix
   ///Draws lod pixels wide, mesh at Transformation NOW. If centered, then will center on camera and disable cull
   void DrawNow(float lod, bool centered, const Matrix &m= identity_matrix, int cloak=-1,float nebdist=0); //short fix
-#ifdef PARTITIONED_Z_BUFFER
   ///Will draw all undrawn meshes of this type
-  virtual void ProcessDrawQueue(int whichpass, int whichdrawqueue, float zmin, float zmax);
-#else
-  ///Will draw all undrawn meshes of this type
-  virtual void ProcessDrawQueue(int whichpass, int whichdrawqueue);
-#endif
+  virtual void ProcessDrawQueue(int whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr);
   ///Will draw all undrawn far meshes beyond the range of zbuffer (better be convex).
   virtual void SelectCullFace (int whichdrawqueue);
   virtual void RestoreCullFace (int whichdrawqueue);

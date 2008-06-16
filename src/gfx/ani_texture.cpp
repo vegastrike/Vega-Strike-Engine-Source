@@ -258,6 +258,9 @@ AnimatedTexture::AnimatedTexture (int stage, enum FILTER imm, bool detailtex) :
 Texture *AnimatedTexture::Original(){
   return Decal?Decal[active]->Original():this;
 }
+const Texture *AnimatedTexture::Original() const{
+  return Decal?Decal[active]->Original():this;
+}
 
 Texture *AnimatedTexture::Clone () {
   AnimatedTexture * retval = new AnimatedTexture ();

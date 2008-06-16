@@ -279,7 +279,7 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
                   if (alphatest<=1&&alphatest>=0) {
                     mesh->alphatest=(unsigned char)(alphatest*255.0);
                   }else if (alphatest>1){
-                    mesh->alphatest=1;
+                    mesh->alphatest=255;
                   }else mesh->alphatest=0;
                   mesh->polygon_offset=polygonoffset;
                   mesh->SetBlendMode((BLENDFUNC)bsrc,(BLENDFUNC)bdst);
@@ -348,31 +348,38 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 			case TEXTURE:
 				bxmfprintf(Outputfile," texture");
 				break;
+            case TECHNIQUE:
+                bxmfprintf(Outputfile," technique");
+                break;
 			}
 			if(texindex){
 				bxmfprintf(Outputfile,"%d",texindex);
 			}
 			bxmfprintf(Outputfile,"=\"%s\" ",texname.c_str());
-                        while (mesh->Decal.size()<=texindex){
-                          mesh->Decal.push_back (0);
-                        }
-                        while (xml.decals.size()<=texindex){
-                          MeshXML::ZeTexture z;
-                          xml.decals.push_back(z);
-                        }
-                        switch(textype) {
-                        case ALPHAMAP:
-                          xml.decals[texindex].alpha_name=texname;
-                          break;
-                        case TEXTURE:
-                          //mesh->Decal[texindex]=LoadTexture (texname);
-                          xml.decals[texindex].decal_name=texname;
-                          break;
-                        case ANIMATION:
-                          //mesh->Decal[texindex]=LoadAnimation(texname);
-                          xml.decals[texindex].animated_name=texname;
-                          break;
-                        }
+            if (textype == TECHNIQUE) {
+                xml.technique = texname;
+            } else {
+                while (mesh->Decal.size()<=texindex){
+                    mesh->Decal.push_back (0);
+                }
+                while (xml.decals.size()<=texindex){
+                    MeshXML::ZeTexture z;
+                    xml.decals.push_back(z);
+                }
+                switch(textype) {
+                case ALPHAMAP:
+                    xml.decals[texindex].alpha_name=texname;
+                    break;
+                case TEXTURE:
+                    //mesh->Decal[texindex]=LoadTexture (texname);
+                    xml.decals[texindex].decal_name=texname;
+                    break;
+                case ANIMATION:
+                    //mesh->Decal[texindex]=LoadAnimation(texname);
+                    xml.decals[texindex].animated_name=texname;
+                    break;
+                }
+            }
 		  }
                   /*
                   for (int LC=0;LC<overrideTextures.size();++LC) {

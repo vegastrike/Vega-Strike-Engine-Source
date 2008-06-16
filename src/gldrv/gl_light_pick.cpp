@@ -1,4 +1,5 @@
 #include "gl_light.h"
+#include "options.h"
 #include <queue>
 #include <list>
 #include "vsfilesystem.h"
@@ -10,9 +11,9 @@ using std::priority_queue;
 //using std::list;
 using std::vector;
  //optimization globals
-float intensity_cutoff=.06;//something that would normally round down
-float optintense=.2;
-float optsat = .95;
+float intensity_cutoff=0.06;//something that would normally round down
+float optintense=0.2;
+float optsat = 0.95;
 
 
 struct light_key {
@@ -69,13 +70,50 @@ void unpicklights () {
   newpicked->clear();
 }
 
-static inline bool picklight (const LineCollide& light, const Vector & center, const float rad, const int lightsenabled);
+static float attenuatedIntensity(const gfx_light &light, const Vector& center, const float rad)
+{
+    float intensity = (1.0/3.0) * (
+        light.diffuse[0] + light.specular[0] +
+        light.diffuse[1] + light.specular[1] +
+        light.diffuse[2] + light.specular[2] );
+    float distance = float((Vector(light.vect[0], light.vect[1], light.vect[2]) - center).Magnitude()) - rad;
+    float cf = light.attenuate[0]; // constant factor
+    float lf = light.attenuate[1]; // linear factor
+    float qf = light.attenuate[2]; // quadratic factor
+    float att = (cf + lf*distance + qf*distance*distance);
+
+    if ((distance <= 0) || (att <= 0))
+        return 1.f; else 
+        return ((intensity/att) >= light.cutoff);
+}
+
+static bool picklight (const LineCollide& lightcollide, const Vector & center, const float rad, const int lightsenabled, const int lightindex) 
+{
+  const gfx_light &light = (*_llights)[lightindex];
+  return   !light.attenuated() 
+        || (attenuatedIntensity(light, center, rad) >= light.cutoff);
+}
+
+struct lightsort {
+    Vector center;
+    float rad;
+
+    lightsort(const Vector &_center, const float _rad) : center(_center), rad(_rad) {}
+    
+    bool operator()(const int a, const int b) const 
+    {
+        const gfx_light &lighta = (*_llights)[a];
+        const gfx_light &lightb = (*_llights)[b];
+        return attenuatedIntensity(lighta, center, rad) > attenuatedIntensity(lightb, center, rad);
+    }
+};
+
 typedef vector <LineCollideStar> veclinecol;
-void GFXPickLights (const Vector & center, const float radius) {
+
+void GFXPickLights (const Vector & center, const float radius, vector<int> &lights, const int maxlights) {
     QVector tmp;
-	// Beware if re-using rndvar !! Because rand returns an int and on 64 bits archs sizeof( void*) != sizeof( int) !!!
+    // Beware if re-using rndvar !! Because rand returns an int and on 64 bits archs sizeof( void*) != sizeof( int) !!!
     // void * rndvar = (void *)rand();
-    const int sizeget=2;
     int lightsenabled = _GLLightsEnabled;
     LineCollide tmpcollide;
     tmp = QVector(radius,radius,radius);
@@ -84,15 +122,14 @@ void GFXPickLights (const Vector & center, const float radius) {
     tmpcollide.hhuge=false;//fixme!! may well be hhuge...don't have enough room in tmppickt
     tmpcollide.object.i=0;//FIXME, should this be -1?
     tmpcollide.type=LineCollide::UNIT;
-    swappicked();
     //FIXMESPEEDHACK    veclinecol *tmppickt[lighthuge+1];
     //FIXMESPEEDHACK    if (radius < CTACC) {
-    veclinecol *tmppickt[sizeget];
+    veclinecol *tmppickt[2];
     lighttable.Get (center.Cast(), tmppickt);
 	//FIXMESPEEDHACK} else {
 	//FIXMESPEEDHACKsizeget = lighttable.Get (&tmpcollide, tmppickt); 
 	//FIXMESPEEDHACK}
-    for (int j=0;j<sizeget;j++) {
+    for (int j=0;j<2;j++) {
 
 	  veclinecol::iterator i;
 	  //VSFileSystem::vs_fprintf (stderr,"pixked size %d",tmppickt[j]->size());
@@ -100,20 +137,30 @@ void GFXPickLights (const Vector & center, const float radius) {
 	//warning::duplicates may Exist
 	//FIXMESPEEDHACKif (i->lc->lastchecked!=rndvar) {
 	//FIXMESPEEDHACKi->lc->lastchecked = rndvar;
-	  if (picklight (*i->lc,center,radius,lightsenabled)) {
-	    newpicked->push_back (i->GetIndex());
+	  if (picklight (*i->lc,center,radius,lightsenabled,i->GetIndex())) {
+	    lights.push_back (i->GetIndex());
 	    lightsenabled++;
 	  }
 	  //FIXMESPEEDHACK}
       }
     }
+    std::sort(lights.begin(), lights.end(), lightsort(center, radius));
+}
+
+void GFXPickLights(const Vector &center, const float radius)
+{
+    swappicked();
+    GFXPickLights(center, radius, *newpicked, 8);
     gfx_light::dopickenables ();  
 }
 
-static inline bool picklight (const LineCollide& light, const Vector & center, const float rad, const int lightsenabled) {
-  return true;
-
+void GFXPickLights(vector<int>::const_iterator begin, vector<int>::const_iterator end)
+{
+    swappicked();
+    newpicked->insert(newpicked->end(), begin, end);
+    gfx_light::dopickenables();
 }
+
 
 void gfx_light::dopickenables () {
   //sort it to find minimum num lights changed from last time.

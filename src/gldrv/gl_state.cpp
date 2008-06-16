@@ -86,8 +86,11 @@ void /*GFXDRVAPI*/ GFXEnable (const STATE state)
 	  //glDepthFunc (GL_ALWAYS);
 	  break;
 	case DEPTHWRITE:
-	  glDepthMask(1);
+	  glDepthMask(GL_TRUE);
 	  break;
+    case COLORWRITE:
+      glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+      break;
 	case TEXTURE0:
       /*if (bTex[0] != GL_TEXTURE_2D) {
 	      GFXActiveTexture(0);
@@ -177,8 +180,11 @@ void /*GFXDRVAPI*/ GFXDisable (const STATE state)
 	  glDisable(GL_DEPTH_TEST);
 	  break;
 	case DEPTHWRITE:
-	  glDepthMask(0);
+	  glDepthMask(GL_FALSE);
 	  break;
+    case COLORWRITE:
+      glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+      break;
 	case TEXTURE0:
       /*if (bTex[0]) {
 	      GFXActiveTexture(0);	

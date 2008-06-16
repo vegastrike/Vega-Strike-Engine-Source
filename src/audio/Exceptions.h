@@ -105,6 +105,24 @@ namespace Audio {
         explicit ResourceNotLoadedException(const std::string &message) : Exception(message) {}
     };
     
+    /**
+     * Attempted to create an object that already existed
+     */
+    class DuplicateObjectException : public Exception {
+    public:
+        explicit DuplicateObjectException(const std::string &name) : 
+            Exception(std::string("Object with name \"") + name + "\" already existed") {}
+    };
+    
+    /**
+     * Seeked object did not exist
+     */
+    class NotFoundException : public Exception {
+    public:
+        explicit NotFoundException(const std::string &name) : 
+            Exception(std::string("Object with name \"") + name + "\" does not exist") {}
+    };
+    
 };
 
 #endif//__AUDIO_EXCEPTIONS_H__INCLUDED__

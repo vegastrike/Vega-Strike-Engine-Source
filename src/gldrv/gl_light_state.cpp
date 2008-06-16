@@ -27,8 +27,10 @@ void GFXUploadLightState(int max_light_location, int active_light_array, bool sh
     }
   }
   //FIXME bottom line is debug only
-  GFXShaderConstantv(active_light_array,GFX_MAX_LIGHTS,(int*)lightData);
-  GFXShaderConstant(max_light_location,maxval);
+  if (active_light_array >= 0)
+    GFXShaderConstantv(active_light_array,GFX_MAX_LIGHTS,(int*)lightData);
+  if (max_light_location >= 0)
+    GFXShaderConstanti(max_light_location,maxval);
 }
 
 #define GFX_HARDWARE_LIGHTING

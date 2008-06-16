@@ -1,9 +1,9 @@
+#include "PrecompiledHeaders/Converter.h"
 #include "from_obj.h"
-#include <map>
-#include <set>
-#include <vector>
-#include <cstring>
-#include <assert.h>
+
+#include <utility>
+
+using namespace std;
 
 /*
  * Vega Strike
@@ -27,13 +27,6 @@
  */
 
 /* Renamed to get rid of namespace collisions */
-extern float transx;
-extern float transy;
-extern float transz;
-extern float scalex;
-extern float scaley;
-extern float scalez;
-using namespace std;
 class TObj_Vector {
  public:
   float i,j,k;
@@ -58,11 +51,10 @@ struct MTL:public GFXMaterial {
     blend_src=ONE;
     blend_dst=ZERO;
     reflect=false;
-    alphatest=-1;
+	usenormals=true;
   }  
   bool usenormals;
   bool reflect;
-  float alphatest;
    int blend_src;int blend_dst;
    vector<textureholder> textures;
    textureholder detail;   
@@ -89,21 +81,8 @@ struct IntRef {
       return false;
   };
 };
-float vtx_xmin=1.0e38;
-float vtx_ymin=1.0e38;
-float vtx_zmin=1.0e38;
-float vtx_xmax=-1.0e38;
-float vtx_ymax=-1.0e38;
-float vtx_zmax=-1.0e38;
 struct VTX {
-  VTX(float _x, float _y, float _z) : x(_x),y(_y),z(_z) {
-    if (x<vtx_xmin) vtx_xmin=x;
-    if (y<vtx_ymin) vtx_ymin=y;
-    if (z<vtx_zmin) vtx_zmin=z;
-    if (x>vtx_xmax) vtx_xmax=x;
-    if (y>vtx_ymax) vtx_ymax=y;
-    if (z>vtx_zmax) vtx_zmax=z;
-  };
+  VTX(float _x, float _y, float _z) : x(_x),y(_y),z(_z) {};
   VTX() : x(0),y(0),z(0) {};
 
   bool operator==(const VTX& o) const { return (x==o.x && y==o.y && z==o.z); };
@@ -141,29 +120,8 @@ struct FACE {
   IntRef r1,r2,r3,r4;
 };
 
-// For stripifying, but not worth it now that we're switching to OGRE...
-struct TRISORT : public std::binary_function<FACE,FACE,bool> {
-    bool operator()(const FACE& a, const FACE& b) {
-        assert(a.num==3 && b.num==3);
-        if (a.r1<b.r1) 
-            return true; else if (a.r1==b.r1)
-            return (a.r2<b.r2); else
-            return false;
-    }
-};
-
-struct QUADSORT : public std::binary_function<FACE,FACE,bool> {
-    bool operator()(const FACE& a, const FACE& b) {
-        assert(a.num==4 && b.num==4);
-        if (a.r1<b.r1) 
-            return true; else if (a.r1==b.r1)
-            return (a.r2<b.r2); else
-            return false;
-    }
-};
-
 vector<string> splitWhiteSpace(string inp) {
-  int where;
+  string::size_type where;
   vector<string> ret;
   while ((where=inp.find_first_of("\t "))!=string::npos) {
     if (where!=0)
@@ -182,19 +140,19 @@ IntRef parsePoly(string inp) {
     return ret;
   }
   if (2==sscanf(st,"%d/%d/",&ret.v,&ret.t)) {
-    ret.v-=1;ret.t-=1;
+    ret.v-=1;ret.t-=1;ret.n=-1;
     return ret;
   }
   if (2==sscanf(st,"%d/%d",&ret.v,&ret.t)) {
-    ret.v-=1;ret.t-=1;
+    ret.v-=1;ret.t-=1;ret.n=-1;
     return ret;
   }
   if (2==sscanf(st,"%d//%d",&ret.v,&ret.n)) {
-    ret.v-=1;ret.n-=1;
+    ret.v-=1;ret.n-=1;ret.t=-1;
     return ret;
   }
   sscanf(st,"%d",&ret.v);
-    ret.v-=1;
+  ret.v-=1; ret.t=-1; ret.n=-1;
   return ret;  
 }
 void charstoupper(char *buf){
@@ -221,12 +179,17 @@ textureholder makeTextureHolder(std::string str, int which) {
       ret.name.push_back((unsigned char)*it);
   return ret;
 }
+textureholder makeTechniqueHolder(std::string str) {
+  textureholder ret = makeTextureHolder(str, 0);
+  ret.type=TECHNIQUE;
+  return ret;
+}
 
 static int AddElement(XML &xml, const IntRef &r, map<IntRef,int> &elements, const vector <VTX> &vtxlist, const vector <TEX> &txclist, const vector <NORMAL> &normallist)
 {
     map<IntRef,int>::iterator e = elements.find(r);
     if (e==elements.end()) {
-        pair<IntRef,int> elem = pair<IntRef,int>(r,xml.vertices.size());
+        pair<IntRef,int> elem = pair<IntRef,int>(r,int(xml.vertices.size()));
         elements.insert(elem);
         GFXVertex v;
         if (r.n>=0) {
@@ -249,24 +212,12 @@ static int AddElement(XML &xml, const IntRef &r, map<IntRef,int> &elements, cons
     } else 
         return (*e).second;
 }
-extern float gminx,gminy,gminz,gmaxx,gmaxy,gmaxz;
-bool Vok (const VTX& vtx) {
-  return vtx.x>=gminx&&vtx.x<=gmaxx&&
-    vtx.y>=gminy&&vtx.y<=gmaxy&&
-    vtx.z>=gminz&&vtx.z<=gmaxz;
-}
+
 static void ObjToXML(XML &xml, const vector <VTX> &vtxlist, const vector <TEX> &txclist, const vector <NORMAL> &normallist, const vector <FACE> &facelist)
 {
     map<IntRef,int> elements;
 
     for (vector<FACE>::const_iterator fiter = facelist.begin(); fiter!=facelist.end(); fiter++) {
-      if (((*fiter).num>=1&&Vok(vtxlist[fiter->r1.v]))||
-          ((*fiter).num>=2&&Vok(vtxlist[fiter->r2.v]))||
-          ((*fiter).num>=3&&Vok(vtxlist[fiter->r3.v]))||
-          ((*fiter).num>=4&&Vok(vtxlist[fiter->r4.v]))) {
-      }else {
-        continue;//not within bounding box
-      }
         int e1=(((*fiter).num>=1)?AddElement(xml,(*fiter).r1,elements,vtxlist,txclist,normallist):-1);
         int e2=(((*fiter).num>=2)?AddElement(xml,(*fiter).r2,elements,vtxlist,txclist,normallist):-1);
         int e3=(((*fiter).num>=3)?AddElement(xml,(*fiter).r3,elements,vtxlist,txclist,normallist):-1);
@@ -274,46 +225,11 @@ static void ObjToXML(XML &xml, const vector <VTX> &vtxlist, const vector <TEX> &
         switch ((*fiter).num) {
         case 2: 
             //Line...
-
             xml.lines.push_back(line(e1,e2,xml.vertices[e1].s,xml.vertices[e1].t,xml.vertices[e2].s,xml.vertices[e2].t));
             break;
         case 3: 
             //Triangle...
             xml.tris.push_back(triangle(e1,e2,e3,xml.vertices[e1].s,xml.vertices[e1].t,xml.vertices[e2].s,xml.vertices[e2].t,xml.vertices[e3].s,xml.vertices[e3].t));
-            //Tri-to-quad
-            /*if (xml.tris.size()>=2) {
-                const triangle &t1 = xml.tris[xml.tris.size()-2];
-                const triangle &t2 = xml.tris[xml.tris.size()-1];
-                if (  (t1.indexref[0] == t2.indexref[0])
-                    &&(t1.indexref[2] == t2.indexref[1])  ) {
-                    //Quad?
-                    TObj_Vector v11 = xml.vertices[t1.indexref[0]];
-                    TObj_Vector v12 = xml.vertices[t1.indexref[1]];
-                    TObj_Vector v13 = xml.vertices[t1.indexref[2]];
-                    TObj_Vector v21 = xml.vertices[t2.indexref[0]];
-                    TObj_Vector v22 = xml.vertices[t2.indexref[1]];
-                    TObj_Vector v23 = xml.vertices[t2.indexref[2]];
-                    TObj_Vector n1  = (v12-v11).Cross(v13-v11);
-                    TObj_Vector n2  = (v22-v21).Cross(v23-v21);
-                    n1.Normalize();
-                    n2.Normalize();
-                    if (n1==n2) {
-                        //Good enough - it's a quad.
-                        xml.quads.push_back(quad(
-                            t1.indexref[0],
-                            t1.indexref[1],
-                            t1.indexref[2],
-                            t2.indexref[2],
-                            xml.vertices[t1.indexref[0]].s,xml.vertices[t1.indexref[0]].t,
-                            xml.vertices[t1.indexref[1]].s,xml.vertices[t1.indexref[1]].t,
-                            xml.vertices[t1.indexref[2]].s,xml.vertices[t1.indexref[2]].t,
-                            xml.vertices[t2.indexref[2]].s,xml.vertices[t2.indexref[2]].t
-                            ));
-                        xml.tris.pop_back();
-                        xml.tris.pop_back();
-                    }
-                }
-            }*/
             break;
         case 4: 
             //Quad...
@@ -376,10 +292,13 @@ string ObjGetMtl (FILE* obj, string objpath) {
     return ret;
 }
 
-extern bool flips,flipt,flipn;
-extern bool flip,flop;
 void ObjToXMESH (FILE* obj, FILE * mtl, vector<XML> &xmllist, bool forcenormals) 
 {
+   bool  flips  = atoi(Converter::getNamedOption("flips").c_str()) != 0;
+   bool  flipt  = atoi(Converter::getNamedOption("flipt").c_str()) != 0;
+   bool  flipn  = atoi(Converter::getNamedOption("flipn").c_str()) != 0;
+   bool  noopt  = atoi(Converter::getNamedOption("no-optimize").c_str()) != 0;
+
    fseek (obj,0,SEEK_END);
    int osize=ftell(obj);
    fseek (obj,0,SEEK_SET);
@@ -409,15 +328,14 @@ void ObjToXMESH (FILE* obj, FILE * mtl, vector<XML> &xmllist, bool forcenormals)
       }
       wordtoupper(buf);
       float tmpblend;
+      int tmpint;
       if (1==sscanf(buf,"BLEND %f\n",&tmpblend)) {
         if (tmpblend==1) {
           cur->blend_src = ONE;
           cur->blend_dst = ONE;
-        }else if (tmpblend<1&&tmpblend>0) {
+        }else if (tmpblend==.5) {
           cur->blend_src = SRCALPHA;
           cur->blend_dst = INVSRCALPHA;
-          cur->alphatest=tmpblend;
-          if (tmpblend<.01)cur->alphatest=0; 
         }else {
           cur->blend_src=ONE;
           cur->blend_dst=ZERO;
@@ -437,8 +355,7 @@ void ObjToXMESH (FILE* obj, FILE * mtl, vector<XML> &xmllist, bool forcenormals)
       }
       if (1==sscanf(buf,"NORMALS %f\n",&tmpblend)) {
         if (tmpblend!=0)
-          cur->usenormals=true;
-      
+          cur->usenormals=true;      
         else 
           cur->usenormals=false;
       }
@@ -463,43 +380,29 @@ void ObjToXMESH (FILE* obj, FILE * mtl, vector<XML> &xmllist, bool forcenormals)
          cur->eb=floate;
       }
       if (1==sscanf(buf,"MAP_KD %s\n",str)) {
-         if (cur->textures.empty())
-           cur->textures.push_back(textureholder(0));
-         cur->textures[0]=makeTextureHolder(str,0);
+         cur->textures.push_back(makeTextureHolder(str,0));
       }
       if (1==sscanf(buf,"MAP_KS %s\n",str)) {
-         while (cur->textures.size()<=1)
-           cur->textures.push_back(textureholder(cur->textures.size()));         
-         cur->textures[1]=makeTextureHolder(str,1);
+         cur->textures.push_back(makeTextureHolder(str,1));
       }
-      if (1==sscanf(buf,"MAP_KA %s\n",str)) {
-         while (cur->textures.size()<=2)
-           cur->textures.push_back(textureholder(cur->textures.size()));
-         cur->textures[2]=makeTextureHolder(str,2);
-      }
-      if (1==sscanf(buf,"MAP_DAMAGE %s\n",str)) {
-         while (cur->textures.size()<=2)
-           cur->textures.push_back(textureholder(cur->textures.size()));
-         cur->textures[2]=makeTextureHolder(str,2);
+      if ((1==sscanf(buf,"MAP_KA %s\n",str)) || (1==sscanf(buf,"MAP_DAMAGE %s\n",str))) {
+         cur->textures.push_back(makeTextureHolder(str,2));
       }
       if (1==sscanf(buf,"MAP_KE %s\n",str)) {
-         while (cur->textures.size()<=3)
-           cur->textures.push_back(textureholder(cur->textures.size()));         
-         cur->textures[3]=makeTextureHolder(str,3);
+         cur->textures.push_back(makeTextureHolder(str,3));
       }
       if (1==sscanf(buf,"MAP_NORMAL %s\n",str)) {
-         while (cur->textures.size()<=4)
-           cur->textures.push_back(textureholder(cur->textures.size()));         
-         cur->textures[4]=makeTextureHolder(str,4);
-      }
-      if (1==sscanf(buf,"MAP_NORMALS %s\n",str)) {
-         while (cur->textures.size()<=4)
-           cur->textures.push_back(textureholder(cur->textures.size()));         
-         cur->textures[4]=makeTextureHolder(str,4);
+         cur->textures.push_back(makeTextureHolder(str,4));
       }
       if (1==sscanf(buf,"MAP_DETAIL %s\n",str)) {
-        cur->detail=makeTextureHolder(str,0);
-      }      
+         cur->detail=makeTextureHolder(str,0);
+      }
+      if (2==sscanf(buf,"MAP_%d %s\n",&tmpint,str)) {
+         cur->textures.push_back(makeTextureHolder(str,tmpint));
+      }
+      if (1==sscanf(buf,"TECHNIQUE %s\n",str)) {
+         cur->textures.push_back(makeTechniqueHolder(str));
+      }
    }
    bool changemat=false;
 
@@ -541,20 +444,17 @@ void ObjToXMESH (FILE* obj, FILE * mtl, vector<XML> &xmllist, bool forcenormals)
       if (3==sscanf(buf,"v %f %f %f\n",&v.x,&v.y,&v.z)) {
         //xml.vertices.push_back(v);
         //xml.num_vertex_references.push_back(0);
-        if (flop)
-          vtxlist.push_back(VTX(v.x,v.z,v.y));
-        else
-          vtxlist.push_back(VTX(v.x,v.y,v.z));
-        continue;
+        vtxlist.push_back(VTX(v.x,v.y,v.z));
+		continue;
       }
       if (3==sscanf(buf,"vn %f %f %f\n",&v.i,&v.j,&v.k)) {
         //Sharing is loussy in .obj files... so lets merge a little
-        NORMAL n(v.i,flop?v.k:v.j,flop?v.j:v.k);
         if (flipn) v.i=-v.i, v.j=-v.j, v.k=-v.k;
-        map<NORMAL,int>::iterator mi = normalmap.find(n);
+        NORMAL n(v.i,v.j,v.k);
+		map<NORMAL,int>::iterator mi = (noopt?normalmap.end():normalmap.find(n));
         if (mi==normalmap.end()) {
-            normalmap_ii.push_back(normallist.size());
-            normalmap.insert(pair<NORMAL,int>(n,normallist.size()));
+            normalmap_ii.push_back(int(normallist.size()));
+            normalmap.insert(pair<NORMAL,int>(n,int(normallist.size())));
             normallist.push_back(n);
         } else {
             normalmap_ii.push_back((*mi).second);
@@ -564,11 +464,11 @@ void ObjToXMESH (FILE* obj, FILE * mtl, vector<XML> &xmllist, bool forcenormals)
       if (2==sscanf(buf,"vt %f %f\n",&v.s,&v.t)) {
         //tex.push_back(pair<float,float>(v.s,v.t)); 
         //Sharing is loussy in .obj files... so lets merge a little
-        TEX t((flips?1.0f-v.s:v.s),(flipt?v.t:1.0f-v.t));
-        map<TEX,int>::iterator mi = txcmap.find(t);
+        TEX t((flips?(1.0f-v.s):v.s),(flipt?v.t:(1.0f-v.t)));
+		map<TEX,int>::iterator mi = (noopt?txcmap.end():txcmap.find(t));
         if (mi==txcmap.end()) {
-            txcmap_ii.push_back(txclist.size());
-            txcmap.insert(pair<TEX,int>(t,txclist.size()));
+            txcmap_ii.push_back(int(txclist.size()));
+            txcmap.insert(pair<TEX,int>(t,int(txclist.size())));
             txclist.push_back(t);
         } else {
             txcmap_ii.push_back((*mi).second);
@@ -602,9 +502,9 @@ void ObjToXMESH (FILE* obj, FILE * mtl, vector<XML> &xmllist, bool forcenormals)
    int totface=0;
    for (map<string,vector<FACE> >::iterator it=facelistlist.begin(); it!=facelistlist.end(); it++) {
      XML xml;
-     
+
      string mat=(*it).first;
-     xml.sharevert=true;
+
      xml.vertices.clear();
      xml.tris.clear();
      xml.quads.clear();
@@ -627,8 +527,6 @@ void ObjToXMESH (FILE* obj, FILE * mtl, vector<XML> &xmllist, bool forcenormals)
      xml.blend_src = mtls[mat].blend_src;
      xml.blend_dst = mtls[mat].blend_dst;
      xml.reflect=mtls[mat].reflect;
-     if (mtls[mat].alphatest!=-1)
-       xml.alphatest=mtls[mat].alphatest;
      if(forcenormals) 
          mtls[mat].usenormals=true;
      xml.usenormals=mtls[mat].usenormals;
@@ -638,7 +536,7 @@ void ObjToXMESH (FILE* obj, FILE * mtl, vector<XML> &xmllist, bool forcenormals)
 
      printf("%d_0: %d faces, %d vertices, %d lines, %d tris, %d quads\n",textnum,(*it).second.size(),xml.vertices.size(),xml.lines.size(),xml.tris.size(),xml.quads.size());
      textnum++;
-     totface += (*it).second.size();
+     totface += int((*it).second.size());
    }
    printf("Total faces: %d\n",totface);
 }
@@ -648,9 +546,9 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile,bool forcenormals)
    vector<XML> xmllist;
 
    ObjToXMESH(obj,mtl,xmllist,forcenormals);
-   printf ("Min [%.3f %.3f %.3f] Max [%.3f %.3f %.3f]\n",vtx_xmin,vtx_ymin,vtx_zmin,vtx_xmax,vtx_ymax,vtx_zmax);
+
    int textnum=0;
    for (vector<XML>::iterator it=xmllist.begin(); it!=xmllist.end(); ++it,++textnum) {
-       xmeshToBFXM(*it,outputFile,textnum==0?'c':'a',forcenormals,true);
+     xmeshToBFXM(*it,outputFile,textnum==0?'c':'a',forcenormals);
    }
 }

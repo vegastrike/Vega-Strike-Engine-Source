@@ -1,5 +1,5 @@
 //
-// C++ Interface: Audio::Codec
+// C++ Interface: Audio::CodecRegistry
 //
 #ifndef __AUDIO_CODECREGISTRY_H__INCLUDED__
 #define __AUDIO_CODECREGISTRY_H__INCLUDED__
@@ -17,6 +17,7 @@ namespace Audio {
     // The registry needs not know what it's managing... right?
     // At least not its interface.
     class Codec;
+    class Stream;
 
     /**
      * Codec registry class.
@@ -83,6 +84,12 @@ namespace Audio {
          *      an CodecNotFound exception is risen.
          */
         Codec* findByFile(const std::string& path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) const throw(CodecNotFoundException);
+        
+        /**
+         * Open the specified file with a suitable codec.
+         * @see findByFile
+         */
+        Stream* open(const std::string& path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) const throw(Exception);
         
     };
     
