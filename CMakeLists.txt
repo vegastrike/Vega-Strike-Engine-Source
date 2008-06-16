@@ -281,6 +281,7 @@ SET(LIBGFXCLIENT_SOURCES src/gfx/ani_texture.cpp
 						 src/gfx/sprite.cpp 
 						 src/gfx/star.cpp
 						 src/gfx/stream_texture.cpp
+						 src/gfx/technique.cpp
 						 src/gfx/tex_transform.cpp
 						 src/gfx/vdu.cpp
 						 src/gfx/vid_file.cpp
@@ -319,8 +320,10 @@ SET(LIBROOTGENERIC_SOURCES src/configxml.cpp
 						   src/universe_util_generic.cpp
 						   src/vs_globals.cpp
 						   src/vsfilesystem.cpp
+						   src/VSFileXMLSerializer.cpp
 						   src/xml_serializer.cpp
 						   src/xml_support.cpp
+						   src/XMLDocument.cpp
 						   src/options.cpp )
 
 SET(LIBROOTCLIENT_SOURCES src/cg_global.cpp
