@@ -565,6 +565,10 @@ void GFXInit (int argc, char ** argv){
     glEnable(GL_LIGHTING);
 
     glDisable(GL_NORMALIZE);
+    
+    glDisable(GL_LINE_SMOOTH);
+    glDisable(GL_POINT_SMOOTH);
+    
     int con;
     GFXCreateLightContext(con);
     //    glutSetCursor(GLUT_CURSOR_NONE);
