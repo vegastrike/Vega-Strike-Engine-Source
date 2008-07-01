@@ -1,6 +1,15 @@
 #ifndef _GNUHASH_H_
 #define _GNUHASH_H_
 #include "config.h"
+// The following block is to only use tr1 from at least 4.3 since 4.2 apparently bugs out.
+#ifdef HAVE_TR1_UNORDERED_MAP
+#ifndef WIN32
+#if __GNUC__ < 4 || __GNUC_MINOR__ < 3
+#undef HAVE_TR1_UNORDERED_MAP
+#endif
+#endif
+#endif
+
 #ifdef HAVE_TR1_UNORDERED_MAP
 #define vsUMap std::tr1::unordered_map
 #define vsHashComp std::tr1::hash_compare
