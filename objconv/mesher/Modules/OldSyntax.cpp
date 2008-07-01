@@ -1,6 +1,8 @@
 #include "../PrecompiledHeaders/Converter.h"
 #include "../Converter.h"
 
+#include <cstdlib> // Needed for atoi 
+
 using namespace std;
 using namespace Converter;
 

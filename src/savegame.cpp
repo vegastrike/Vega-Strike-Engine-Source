@@ -198,13 +198,13 @@ void SaveFileCopy (const char * src, const char * dst) {
 
 class MissionStringDat {
 public:
-  //typedef stdext::hash_map<string,vector <StringPool::Reference> >MSD;
+  //typedef vsUMap<string,vector <StringPool::Reference> >MSD;
   typedef std::map<string,vector <std::string> >MSD;
   MSD m;
 };
 class MissionFloatDat {
 public:
-  typedef stdext::hash_map<string,vector <float> >MFD;
+  typedef vsUMap<string,vector <float> >MFD;
   MFD m;
 };
 SaveGame::SaveGame(const std::string &pilot) {

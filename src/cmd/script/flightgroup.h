@@ -1,6 +1,6 @@
 #ifndef _FLIGHTGROUP_H_
 #define _FLIGHTGROUP_H_
-
+#include "config.h"
 #include "cmd/container.h"
 #include "mission.h"
 #include <string>
@@ -27,8 +27,7 @@ public:
   QVector pos;
   int nr_ships_left;
   int nr_waves_left;
-
-  stdext::hash_map<std::string,std::string> ordermap;
+  vsUMap<std::string,std::string> ordermap;
   std::vector <class varInst *> *orderlist;
   //removes a ship from the flightgroup below
   void Decrement(Unit * trashed) {

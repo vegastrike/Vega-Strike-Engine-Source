@@ -24,10 +24,8 @@ struct dirent { char d_name[1]; };
 #include "galaxy_gen.h"
 #include "pk3.h"
 
-#include <gnuhash.h>
+#include "gnuhash.h"
 
-
-using stdext::hash_map;
 
 using VSFileSystem::VSVolumeType;
 using VSFileSystem::VSFSNone;
@@ -314,7 +312,7 @@ std::string vegastrike_cwd;
 	string failed;
 
 	// Map of the currently opened PK3 volume/resource files
-	stdext::hash_map<string, CPK3 *>	pk3_opened_files;
+	vsUMap<string, CPK3 *>	pk3_opened_files;
 
 	/************************************************************************************************/
 	/**** vs_path functions                                                                      ****/
@@ -1100,8 +1098,8 @@ std::string vegastrike_cwd;
 			struct stat s;
                         //cache doesn't work because we *do* create files....
                         //and this is too lowlevel to know which files need to be created... *sigh*
-			//static stdext::hash_map<std::string,bool> fileExistsCache;
-			//stdext::hash_map<std::string,bool>::iterator iter;
+			//static vsUMap<std::string,bool> fileExistsCache;
+			//vsUMap<std::string,bool>::iterator iter;
 			//iter=fileExistsCache.find(fullpath);
 			//if (iter!=fileExistsCache.end()) {
 			//    if (iter->second) {
@@ -1138,7 +1136,7 @@ std::string vegastrike_cwd;
 				// TRY TO OPEN A DATA.VOLFORMAT FILE IN THE ROOT DIRECTORY PASSED AS AN ARG
 				filestr = Directories[type]+"/"+file;
 				fullpath = root+rootsep+"data."+volume_format;
-				stdext::hash_map<string, CPK3 *>::iterator it;
+				vsUMap<string, CPK3 *>::iterator it;
 				it = pk3_opened_files.find( fullpath);
 				failed+="Looking for file in VOLUME : "+fullpath+"... ";
 				if( it==pk3_opened_files.end())
@@ -1496,7 +1494,7 @@ std::string vegastrike_cwd;
 				{
 					full_vol_path = this->rootname+"/"+Directories[this->alt_type]+"."+volume_format;
 				}
-				stdext::hash_map<string, CPK3*>::iterator it;
+				vsUMap<string, CPK3*>::iterator it;
 				it = pk3_opened_files.find( full_vol_path);
 				if( it==pk3_opened_files.end())
 				{

@@ -1,7 +1,22 @@
 #ifndef _GNUHASH_H_
 #define _GNUHASH_H_
+#include "config.h"
+#ifdef HAVE_TR1_UNORDERED_MAP
+#define vsUMap std::tr1::unordered_map
+#define vsHashComp std::tr1::hash_compare
+#define vsHash std::tr1::hash
+#else
+#define vsUMap stdext::hash_map
+#define vsHashComp stdext::hash_compare
+#define vsHash stdext::hash
+#endif
+
 #ifdef _WIN32
+#ifdef HAVE_TR1_UNORDERED_MAP
+#include <unordered_map>  // MSVC doesn't use tr1 dirs
+#else
 #include <hash_map>
+#endif
 #else
 #if __GNUC__ == 2
 #include <map>
@@ -18,11 +33,21 @@ namespace stdext {
 
 #include "hashtable.h"
 #else
+#ifdef HAVE_TR1_UNORDERED_MAP
+#include <tr1/unordered_map>
+#include "hashtable.h"
+class Unit;
+namespace std{ 
+namespace tr1{
+#else
 #include <ext/hash_map>
 #define stdext __gnu_cxx
 #include "hashtable.h"
+
 class Unit;
 namespace stdext{
+
+
   template<> class hash<std::string> {
   public:
     size_t operator () (const std::string&key) const{
@@ -39,7 +64,7 @@ namespace stdext{
       return k;   
     }
   };
-
+#endif
   template<> class hash<void *> {
     hash<size_t> a;
   public:
@@ -79,7 +104,11 @@ namespace stdext{
 		static const size_t min_buckets = 8;
 	};
 
+#ifdef HAVE_TR1_UNORDERED_MAP
 }
+#endif
+}
+
 #endif
 #endif
 #endif

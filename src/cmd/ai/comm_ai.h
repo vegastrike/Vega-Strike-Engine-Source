@@ -2,7 +2,7 @@
 #define __COMM_AI_H
 
 #include "order.h"
-#include <gnuhash.h>
+//#include <gnuhash.h>
 
 #include <vector>
 /// this class is meant to be inherited by AI wishing to process comm messages

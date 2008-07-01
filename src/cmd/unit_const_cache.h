@@ -1,9 +1,9 @@
 #ifndef __UNIT_CONST_CACHE_H
 #define __UNIT_CONST_CACHE_H
-
+#include "config.h"
 #include <string>
 #include <gnuhash.h>
-#ifndef _WIN32
+#ifndef WIN32
 class ConstHasher;
 #endif
 class StringIntKey {
@@ -30,19 +30,19 @@ public:
 class ConstHasher {
 public:
   template <class T> size_t operator () (const T&key)const{
-    return stdext::hash<T>()(key);
+    return vsHash<T>()(key);
   }
   size_t operator () (const StringIntKey &key)const{
-    return stdext::hash<std::string>()(key.key)^stdext::hash<size_t>()((size_t)key.fac);
+    return vsHash<std::string>()(key.key)^vsHash<size_t>()((size_t)key.fac);
   }
 };
 #endif
 
 template <class Typ,class Key> class ClassCache {
 #if !defined(_WIN32) && __GNUC__!=2
-  static stdext::hash_map<Key, Typ *, ConstHasher> unit_cache;
+  static vsUMap<Key, Typ *, ConstHasher> unit_cache;
 #else
-  static stdext::hash_map<Key, Typ *> unit_cache;
+  static vsUMap<Key, Typ *> unit_cache;
 #endif
  public:
   static const Typ *getCachedConst (Key k) {
@@ -50,9 +50,9 @@ template <class Typ,class Key> class ClassCache {
   }
   static Typ *getCachedMutable (const Key &k) {
 #if !defined(_WIN32) && __GNUC__!=2
-    typename stdext::hash_map<Key,Typ *,ConstHasher>::iterator i=unit_cache.find(k);
+    typename vsUMap<Key,Typ *,ConstHasher>::iterator i=unit_cache.find(k);
 #else
-	typename stdext::hash_map<Key,Typ *>::iterator i=unit_cache.find(k);
+	typename vsUMap<Key,Typ *>::iterator i=unit_cache.find(k);
 #endif
     if (i!=unit_cache.end())
       return (*i).second;
@@ -66,7 +66,7 @@ template <class Typ,class Key> class ClassCache {
     return setCachedMutable (k,un);
   }
   static void purgeCache(void (*Kill) (Typ * un)) {
-    typename stdext::hash_map<Key,Typ *,ConstHasher>::iterator i=unit_cache.begin();
+    typename vsUMap<Key,Typ *,ConstHasher>::iterator i=unit_cache.begin();
     for (;i!=unit_cache.end();++i) {
       (*Kill) ((*i).second);
     }
@@ -75,7 +75,7 @@ template <class Typ,class Key> class ClassCache {
 };
 
 #if (defined(__GNUC__)&& ((__GNUC__ == 3 && __GNUC_MINOR__ >= 4)|| __GNUC__>3))
-template <class Typ,class Key> stdext::hash_map<Key,Typ*,ConstHasher> ClassCache<Typ,Key>::unit_cache;
+template <class Typ,class Key> vsUMap<Key,Typ*,ConstHasher> ClassCache<Typ,Key>::unit_cache;
 #endif
 
 typedef ClassCache<Unit,StringIntKey> UnitConstCache;

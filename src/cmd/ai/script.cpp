@@ -12,7 +12,7 @@
 #include "universe_util.h"
 
 
-typedef stdext::hash_map<string,CCScript *> HardCodedMap;
+typedef vsUMap<string,CCScript *> HardCodedMap;
 static HardCodedMap MakeHardCodedScripts() {
   HardCodedMap tmp;
   typedef std::pair<std::string, CCScript *> MyPair;

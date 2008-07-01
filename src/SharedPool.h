@@ -1,6 +1,6 @@
 #ifndef __STRINGPOOL_H__INCLUDED__
 #define __STRINGPOOL_H__INCLUDED__
-
+#include "config.h"
 #include <string>
 #include "gnuhash.h"
 
@@ -9,9 +9,9 @@
 #endif
 
 // Need reference counted strings, or we'll eat memory like crazy
-template<class T, class RefcounterTraits=stdext::hash_compare<T> > class SharedPool {
+template<class T, class RefcounterTraits=vsHashComp<T> > class SharedPool {
 public:
-	typedef stdext::hash_map<T,unsigned int> ReferenceCounter;
+	typedef vsUMap<T,unsigned int> ReferenceCounter;
 	typedef SharedPool<T,RefcounterTraits> PoolType;
 
 private:
@@ -178,7 +178,7 @@ public:
 	friend class PoolType::Reference;
 };
 
-class StringpoolTraits : public stdext::hash_compare<std::string>
+class StringpoolTraits : public vsHashComp<std::string>
 {
 public:
 	enum { min_buckets = INITIAL_STRINGPOOL_SIZE };

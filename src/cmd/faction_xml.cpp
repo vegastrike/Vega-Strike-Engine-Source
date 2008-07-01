@@ -10,17 +10,13 @@
 #include <assert.h>
 #include "ai/communication.h"
 #include "unit_factory.h"
-#include "hashtable.h"
 #include "cmd/music.h"
 #include "faction_generic.h"
 //#include "faction_util.h"
 static int unitlevel;
 using namespace XMLSupport;
-using XMLSupport::EnumMap;
-using XMLSupport::Attribute;
-using XMLSupport::AttributeList;
 //using std::sort;
-using stdext::hash_map;
+
 
 static FSM * getFSM (const std::string & value) {
   static Hashtable <std::string, FSM, 17> fsms;
@@ -38,8 +34,8 @@ static FSM * getFSM (const std::string & value) {
 }
 #if 0
 static FSM * getFSM (const std::string &value) {
-	static stdext::hash_map<const std::string, FSM *> fsms;
-  stdext::hash_map<const std::string,FSM*>::iterator i = fsms.find (value);
+	static vsUMap<const std::string, FSM *> fsms;
+  vsUMap<const std::string,FSM*>::iterator i = fsms.find (value);
   if (i!=fsms.end()) {
     return (*i).second;
   }else {
@@ -366,7 +362,7 @@ using namespace std;
   }
   XML_ParserFree (parser);
   ParseAllAllies();
-  stdext::hash_map<string,bool> cache;
+  vsUMap<string,bool> cache;
   for (unsigned int i=0;i<factions.size();i++) {
     for (unsigned int j=0;j<factions[i]->faction.size();j++) {
       Faction * fact=factions[i];
@@ -388,7 +384,7 @@ using namespace std;
           //  I know... not a great improvement... but bare with me - I hate N^2 loops.
           bool foundjointname=false;
 		  bool foundmyname=false;
-		  stdext::hash_map<string,bool>::iterator it = cache.find(myname);
+		  vsUMap<string,bool>::iterator it = cache.find(myname);
           if (it != cache.end()) {
               foundmyname = it->second;
           } else {

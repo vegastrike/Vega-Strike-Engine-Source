@@ -1,4 +1,4 @@
-
+#include "config.h"
 #include <set>
 #include "configxml.h"
 #include "audiolib.h"
@@ -43,7 +43,7 @@
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
-#include "config.h"
+
 #include "unit_find.h"
 #include "pilot.h"
 //cannot seem to get min and max working properly across win and lin without using namespace std
@@ -1103,7 +1103,7 @@ void Unit::Init()
 	last_processed_sqs=0;
 	do_subunit_scheduling=false;
 	/*
-	static stdext::hash_map<Unit *, bool> m;
+	static vsUMap<Unit *, bool> m;
 	if (m[this]) {
 	  VSFileSystem::vs_fprintf (stderr,"already called this");
 	}else {
@@ -2425,7 +2425,7 @@ static std::string NearestSystem (std::string currentsystem,QVector pos)
 	std::string closest_system;
 	GalaxyXML::Galaxy * gal=_Universe->getGalaxy();
 	GalaxyXML::SubHeirarchy * sectors= &gal->getHeirarchy();
-	stdext::hash_map<std::string,class GalaxyXML::SGalaxy>::iterator j,i =sectors->begin();
+	vsUMap<std::string,class GalaxyXML::SGalaxy>::iterator j,i =sectors->begin();
 
 	for (;i!=sectors->end();++i) {
 		GalaxyXML::SubHeirarchy * systems=&i->second.getHeirarchy();
@@ -7526,12 +7526,12 @@ double Unit::Upgrade (const std::string &file, int mountoffset, int subunitoffse
 }
 
 
-stdext::hash_map<int, DoubleName> downgrademap;
+vsUMap<int, DoubleName> downgrademap;
 int curdowngrademapoffset = 5*sizeof (Unit);
-bool AddToDowngradeMap (std::string name,double value, int unitoffset,stdext::hash_map<int,DoubleName> &tempdowngrademap)
+bool AddToDowngradeMap (std::string name,double value, int unitoffset,vsUMap<int,DoubleName> &tempdowngrademap)
 {
-	using stdext::hash_map;
-	stdext::hash_map<int,DoubleName>::iterator i =downgrademap.find (unitoffset);
+	using vsUMap;
+	vsUMap<int,DoubleName>::iterator i =downgrademap.find (unitoffset);
 	if (i!=downgrademap.end()) {
 		if ((*i).second.d<=value) {
 			tempdowngrademap[unitoffset] = DoubleName (name,value);
@@ -7554,8 +7554,8 @@ void ClearDowngradeMap ()
 
 std::set<std::string> GetListOfDowngrades ()
 {
-	using stdext::hash_map;
-	stdext::hash_map<int,DoubleName>::iterator i =downgrademap.begin();
+	using vsUMap;
+	vsUMap<int,DoubleName>::iterator i =downgrademap.begin();
 	std::set<std::string> retval;
 	for (;i!=downgrademap.end();++i) {
 		retval.insert ((*i).second.s);
@@ -7566,8 +7566,8 @@ std::set<std::string> GetListOfDowngrades ()
 }
 
 
-typedef stdext::hash_map<const char*,bool> UnitHasRecursiveData;
-typedef stdext::hash_map<std::string,UnitHasRecursiveData> FactionHasRecursiveData;
+typedef vsUMap<const char*,bool> UnitHasRecursiveData;
+typedef vsUMap<std::string,UnitHasRecursiveData> FactionHasRecursiveData;
 typedef std::vector<FactionHasRecursiveData> HasRecursiveData;
 
 static HasRecursiveData has_recursive_data;
@@ -7653,7 +7653,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
 	adder Adder;
 	comparer Comparer;
 	percenter Percenter;
-	stdext::hash_map<int, DoubleName> tempdownmap;
+	vsUMap<int, DoubleName> tempdownmap;
 	if (cancompletefully&&cancompletefully1&&downgrade) {
 		if (percentage>0)
 			AddToDowngradeMap (up->name,1,curdowngrademapoffset++,tempdownmap);
@@ -8129,7 +8129,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
 	if (gen_downgrade_list) {
 		float MyPercentMin = ComputeMinDowngradePercent();
 		if (downgrade && percentage > MyPercentMin) {
-			for (stdext::hash_map<int,DoubleName>::iterator i = tempdownmap.begin();i!=tempdownmap.end();++i) {
+			for (vsUMap<int,DoubleName>::iterator i = tempdownmap.begin();i!=tempdownmap.end();++i) {
 				downgrademap[(*i).first]=(*i).second;
 			}
 		}

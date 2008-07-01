@@ -25,7 +25,7 @@
 
 #ifndef _EASYDOM_H_
 #define _EASYDOM_H_
-
+#include "config.h"
 #include <expat.h>
 #include <string>
 #include <vector>
@@ -72,16 +72,14 @@ class easyDomNode {
  private:
   easyDomNode *parent;
   AttributeList *attributes;
-
-  stdext::hash_map<string,string> attribute_map;
-
+  vsUMap<string,string> attribute_map;
   //vector<string> att_name;
   //vector<string> att_value;
 
   string name;
 };
 
-typedef stdext::hash_map<string,int> tagMap;
+typedef vsUMap<string,int> tagMap;
 
 class tagDomNode : public easyDomNode {
  public:

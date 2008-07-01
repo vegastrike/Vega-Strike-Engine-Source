@@ -1,6 +1,6 @@
 #ifndef _GENERICSYSTEM_H_
 #define _GENERICSYSTEM_H_
-
+#include "config.h"
 #include <expat.h>
 #include <string>
 #include <vector>
@@ -76,7 +76,7 @@ class StarSystem
 		{
 								 //neutral, friendly, enemy
 			std::vector<UnitContainer> navs[3];
-			stdext::hash_map <std::string, UnitContainer> jumpPoints;
+			vsUMap<std::string, UnitContainer> jumpPoints;
 			int system_faction;
 			int newfriendlycount;
 			int newenemycount;

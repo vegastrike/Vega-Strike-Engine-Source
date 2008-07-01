@@ -25,7 +25,7 @@
 
 #ifndef _MISSION_H_
 #define _MISSION_H_
-
+#include "config.h"
 #include <gnuhash.h>
 
 #include <expat.h>
@@ -63,7 +63,7 @@ using XMLSupport::AttributeList;
 class varInst;
 
 typedef vector<varInst *> olist_t;
-typedef stdext::hash_map<string,varInst *> omap_t;
+typedef vsUMap<string,varInst *> omap_t;
 std::string varToString (varInst * s);
 class Flightgroup;
 #ifndef VS_MIS_SEL
@@ -331,8 +331,7 @@ class varInstVec : public vector<varInst *>{
     return index;
   }
 };
-
-class varInstMap : public stdext::hash_map<string,varInst *> {
+class varInstMap : public vsUMap<string,varInst *> {
  public:
   varInstVec varVec;
 };
@@ -395,7 +394,7 @@ class missionNode : public tagDomNode {
     enum var_type vartype; // defvar,script
     string initval;
     missionNode *context_block_node; // defvar
-	stdext::hash_map<string,missionNode *> scripts; // module
+	vsUMap<string,missionNode *> scripts; // module
     missionNode *exec_node; // exec, return
     int nr_arguments; // script
     missionNode *argument_node; //script
@@ -535,10 +534,10 @@ public:
   struct Runtime {
     vector<missionThread *> threads;
 	PythonMissionBaseClass * pymissions;
-	stdext::hash_map<string,missionNode *> modules;
+	vsUMap<string,missionNode *> modules;
     int thread_nr;
     missionThread *cur_thread;
-	stdext::hash_map<string,missionNode *> global_variables;
+	vsUMap<string,missionNode *> global_variables;
     varInstVec global_varvec;
     //    vector<const void *()> callbacks;
   } runtime;
@@ -550,15 +549,15 @@ private:
   missionNode *current_script;
 
   vector<string> import_stack;
+  vsUMap<string,callback_module_string_type> module_string_map;
+  vsUMap<string,callback_module_omap_type> module_omap_map;
+  vsUMap<string,callback_module_olist_type> module_olist_map;
+  vsUMap<string,callback_module_order_type> module_order_map;
+  vsUMap<string,callback_module_unit_type> module_unit_map;
+  vsUMap<string,callback_module_std_type> module_std_map;
+  vsUMap<string,callback_module_briefing_type> module_briefing_map;
+  vsUMap<string,callback_module_type> module_map;
 
-  stdext::hash_map<string,callback_module_string_type> module_string_map;
-  stdext::hash_map<string,callback_module_omap_type> module_omap_map;
-  stdext::hash_map<string,callback_module_olist_type> module_olist_map;
-  stdext::hash_map<string,callback_module_order_type> module_order_map;
-  stdext::hash_map<string,callback_module_unit_type> module_unit_map;
-  stdext::hash_map<string,callback_module_std_type> module_std_map;
-  stdext::hash_map<string,callback_module_briefing_type> module_briefing_map;
-  stdext::hash_map<string,callback_module_type> module_map;
 
   void saveVariables(const ostream& out);
   void initTagMap();

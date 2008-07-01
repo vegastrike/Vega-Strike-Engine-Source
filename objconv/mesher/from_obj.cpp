@@ -3,6 +3,8 @@
 
 #include <utility>
 
+#include <cstring>  // We are using C style string functions here
+
 using namespace std;
 
 /*
@@ -44,8 +46,6 @@ class TObj_Vector {
 };
 
 
-using std::map;
-using std::vector;
 struct MTL:public GFXMaterial {
   MTL() {
     blend_src=ONE;

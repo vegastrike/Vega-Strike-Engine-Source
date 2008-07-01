@@ -1,6 +1,7 @@
 #ifndef _XML_SUPPORT_H_
-
 #define _XML_SUPPORT_H_
+
+#include "config.h"
 #include <stdio.h>
 #include <string>
 #ifndef WIN32

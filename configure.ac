@@ -133,6 +133,8 @@ fi
 
 AC_CHECK_FUNCS([vfscanf lstat])
 
+#check if we have tr1 headers or not
+AC_CHECK_HEADERS([tr1/unordered_map],have_unordered_map=yes,have_unordered_map=no) 
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL

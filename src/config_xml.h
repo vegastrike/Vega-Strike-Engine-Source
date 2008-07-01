@@ -25,7 +25,7 @@
 
 #ifndef _VEGACONFIG_H_
 #define _VEGACONFIG_H_
-
+#include "config.h"
 #include <expat.h>
 #include <string>
 #include <gnuhash.h>
@@ -39,8 +39,8 @@ using std::string;
 
 using XMLSupport::AttributeList;
 
-typedef stdext::hash_map<string,KBHandler> CommandMap;
-typedef stdext::hash_map<string,int> KeyMap;
+typedef vsUMap<string,KBHandler> CommandMap;
+typedef vsUMap<string,int> KeyMap;
 
 class GameVegaConfig: public VegaConfig {
  public:

@@ -1,3 +1,4 @@
+#include "config.h"
 #include "gnuhash.h"
 #include <vector>
 class Animation;
@@ -14,7 +15,7 @@ public:
   float getReactionTime() {return reaction_time;}
   unsigned char getGender() {return gender;}
   float getRank(){return rank;}//man it's rank in here
-  typedef stdext::hash_map<const void*,float> relationmap;//non dereferencable Unit to float
+  typedef vsUMap<const void*,float> relationmap;//non dereferencable Unit to float
   relationmap effective_relationship;
   std::vector <Animation *> *comm_face;
   float getAnger (const Unit *parent, const Unit * un)const;

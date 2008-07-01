@@ -307,7 +307,7 @@ CSVRow::CSVRow(CSVTable * parent, unsigned int i) {
 const string& CSVRow::operator [] (const string &col) const
 {
 	static std::string empty_string;
-	stdext::hash_map<string,int>::iterator i = parent->columns.find(col);
+	vsUMap<string,int>::iterator i = parent->columns.find(col);
 	if (i==parent->columns.end()) 
 		return empty_string; else
 		return parent->table[iter+(*i).second];
@@ -321,14 +321,14 @@ const string& CSVRow::getKey(unsigned int which) const
 	return parent->key[which];
 }
 bool CSVTable::RowExists(string name, unsigned int &where) {
-	stdext::hash_map<string,int>::iterator i = rows.find(name);
+	vsUMap<string,int>::iterator i = rows.find(name);
    if (i==rows.end())
       return false;
    where = (*i).second;
    return true;
 }
 bool CSVTable::ColumnExists(string name, unsigned int &where) {
-	stdext::hash_map<string,int>::iterator i = columns.find(name);
+	vsUMap<string,int>::iterator i = columns.find(name);
    if (i==columns.end())
       return false;
    where = (*i).second;

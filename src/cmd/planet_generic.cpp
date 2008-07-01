@@ -535,7 +535,7 @@ Planet::Planet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,f
 
 }
 
-extern stdext::hash_map<std::string,std::string> readPlanetTypes(std::string filename);
+extern vsUMap<std::string,std::string> readPlanetTypes(std::string filename);
 
 string Planet::getHumanReadablePlanetType () const{
   //static std::map<std::string, std::string> planetTypes (readPlanetTypes("planet_types.xml"));

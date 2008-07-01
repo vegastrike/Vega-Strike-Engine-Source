@@ -252,7 +252,7 @@ extern bool debugPerformance();
 class UnitDrawer
 {
 	struct empty{};
-	stdext::hash_map<void*,struct empty> gravunits;
+	vsUMap<void*,struct empty> gravunits;
 	public:
 		Unit *parent;
 		Unit *parenttarget;

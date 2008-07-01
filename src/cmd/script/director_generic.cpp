@@ -25,6 +25,8 @@
 #include "pythonmission.h"
 #include "mission.h"
 #include "savegame.h"
+#include "gnuhash.h"
+
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -381,7 +383,7 @@ void Mission::DirectorStart(missionNode *node){
 
   doModule(node,SCRIPT_PARSE);
 
-  stdext::hash_map<string,missionNode *>::iterator iter;
+  vsUMap<string,missionNode *>::iterator iter;
   //=runtime.modules.begin()
 
   for(iter=runtime.modules.begin();iter!=runtime.modules.end();iter++){

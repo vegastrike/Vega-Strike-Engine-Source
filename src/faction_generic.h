@@ -1,9 +1,8 @@
 #ifndef __FACTIONGENERIC_H
 #define __FACTIONGENERIC_H
-
+#include "config.h"
 #include <string>
-
-#include <gnuhash.h>
+//#include <gnuhash.h>
 
 #include "xml_support.h"
 
@@ -11,7 +10,7 @@ class FSM;
 class Animation;
 class Unit;
 class Texture;
-typedef stdext::hash_map<std::string, float> MapStringFloat;
+typedef vsUMap<std::string, float> MapStringFloat;
   class Faction {
 
   public:

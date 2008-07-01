@@ -803,7 +803,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
   GFXEnable(TEXTURE0);
   GFXEnable(TEXTURE1);
 
-  stdext::hash_map<string,int> targetmap;
+  vsUMap<string,int> targetmap;
 
 
   char fightername [1024]="hornet.xunit";

@@ -10,7 +10,7 @@ cmake_minimum_required(VERSION 2.4)
 
 project (vsUTCS)
 
-SET(CMAKE_CXX_FLAGS "-include config.h -pipe -O2")
+
 
 include_directories(${vsUTCS_SOURCE_DIR}/src 
 					${vsUTCS_SOURCE_DIR}/src/cmd
@@ -357,6 +357,17 @@ SET(LIBROOTSERVER_SOURCES  src/faction_util_server.cpp
 						   
 SET(LIBAUDIO_SOURCES src/audio/CodecRegistry.cpp
 					 src/audio/Stream.cpp
+					 src/audio/Sound.cpp
+					 src/audio/Source.cpp
+					 src/audio/SourceTemplate.cpp
+					 src/audio/SceneManager.cpp
+					 src/audio/Renderer.cpp
+					 src/audio/utils.cpp
+					 src/audio/RenderableSource.cpp
+					 src/audio/Listener.cpp
+					 src/audio/Scene.cpp
+					 src/audio/SimpleSource.cpp
+					 src/audio/SimpleScene.cpp
 					 src/audio/codecs/Codec.cpp
 					 src/audio/codecs/FFStream.cpp
 					 src/audio/codecs/OggStream.cpp
@@ -446,14 +457,17 @@ SET(VEGASERVER_SOURCES ${LIBCMDSERVER_SOURCES}
 					   src/gldrv/gl_vertex_list.cpp
 					   src/gldrv/gl_sphere_list_server.cpp)
 					   
-
+if(COMMAND cmake_policy)					   
+	cmake_policy(SET CMP0003 OLD) 
+endif(COMMAND cmake_policy)
 
 add_executable(vegastrike ${VEGASTRIKE_SOURCES})
 add_executable(vegaserver ${VEGASERVER_SOURCES})
 
 
 
-include (CheckIncludeFiles)
+include (CheckIncludeFile)
+include (CheckIncludeFileCXX)
 
 # Let cmake find our in-tree modules
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${vsUTCS_SOURCE_DIR})
@@ -622,12 +636,16 @@ endif(NOT USE_NET_THREAD_POSIX)
 #config.h generation
 INCLUDE(CheckFunctionExists)
 INCLUDE (CheckSymbolExists)
-CHECK_INCLUDE_FILES(wchar.h HAVE_WCHAR_H)
-CHECK_INCLUDE_FILES(float.h HAVE_FLOAT_H)
-CHECK_INCLUDE_FILES(wctype.h HAVE_WCTYPE_H)
-CHECK_INCLUDE_FILES(inttypes.h HAVE_INTTYPES_H)
-CHECK_INCLUDE_FILES(zlib.h HAVE_ZLIB_H)
-CHECK_INCLUDE_FILES(math.h HAVE_MATH_H)
+CHECK_INCLUDE_FILE(wchar.h HAVE_WCHAR_H)
+CHECK_INCLUDE_FILE(float.h HAVE_FLOAT_H)
+CHECK_INCLUDE_FILE(wctype.h HAVE_WCTYPE_H)
+CHECK_INCLUDE_FILE(inttypes.h HAVE_INTTYPES_H)
+CHECK_INCLUDE_FILE(zlib.h HAVE_ZLIB_H)
+CHECK_INCLUDE_FILE(math.h HAVE_MATH_H)
+
+CHECK_INCLUDE_FILE_CXX(tr1/unordered_map HAVE_TR1_UNORDERED_MAP)
+
+
 if(HAVE_MATH_H)
 	CHECK_FUNCTION_EXISTS(isnan HAVE_ISNAN)
 	if(NOT HAVE_ISNAN)	
@@ -662,6 +680,7 @@ endif(UNIX)
 CONFIGURE_FILE(${vsUTCS_SOURCE_DIR}/cmake-config.h.in ${vsUTCS_BINARY_DIR}/config.h)
 
 #end config.h generation 
+SET(CMAKE_CXX_FLAGS "-include config.h -pipe -O2")
 
 #Setup shared lib and include listings for vegastrike and vegaserver.
 SET(TST_LIBS ${TST_LIBS} engine_com OPcollide netgeneric netlowlevel)

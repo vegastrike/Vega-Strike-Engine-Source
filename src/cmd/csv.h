@@ -1,3 +1,4 @@
+#include "config.h"
 #include <string>
 #include <vector>
 #include <gnuhash.h>
@@ -16,8 +17,8 @@ private:
     void Init (std::string data);
 public:
     std::string rootdir;
-    stdext::hash_map<std::string,int> columns;
-    stdext::hash_map<std::string,int> rows;
+    vsUMap<std::string,int> columns;
+    vsUMap<std::string,int> rows;
     std::vector<std::string> key;
     std::vector<std::string> table;
 

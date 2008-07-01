@@ -6,7 +6,6 @@
 #include "config_xml.h"
 #include "vsfilesystem.h"
 #include "csv.h"
-using stdext::hash_map;
 using std::string;
 using std::pair;
 using namespace VSFileSystem;
@@ -34,16 +33,16 @@ namespace ROLES {
 		}
 		return getAllRolePriorities()[rolerow];
 	}
-	stdext::hash_map<string,int> rolemap;
+	vsUMap<string,int> rolemap;
 	unsigned char InternalGetRole (const std::string &s) {
-		stdext::hash_map<string,int>::iterator i = rolemap.find (strtoupper (s));
+		vsUMap<string,int>::iterator i = rolemap.find (strtoupper (s));
 		if (i!=rolemap.end()) {
 			return (*i).second;
 		}
 		return 0;
 	}
 	std::string InternalGetStrRole (unsigned char c) {
-	   stdext::hash_map<string,int>::iterator i = rolemap.begin();
+	   vsUMap<string,int>::iterator i = rolemap.begin();
 	   for (;i!=rolemap.end();++i) {
               if ((*i).second==c)
                  return (*i).first;
@@ -150,7 +149,7 @@ namespace ROLES {
                         }
                         for (int k=0;k<2;++k) {
                           for (i=0;i<tmpnamelist.size();++i) {
-                            stdext::hash_map<string,int>::iterator iter=rolemap.find(tmpnamelist[i]);
+                            vsUMap<string,int>::iterator iter=rolemap.find(tmpnamelist[i]);
                             int j=-1;
                             if (iter!=rolemap.end()) {
                               if (k==0)

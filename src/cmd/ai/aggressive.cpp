@@ -1,3 +1,4 @@
+#include "config.h"
 #include "aggressive.h"
 #include "event_xml.h"
 #include "script.h"
@@ -26,7 +27,6 @@
 #include "faction_generic.h"
 #include "docking.h"
 using namespace Orders;
-using stdext::hash_map;
 const EnumMap::Pair element_names[] = {
   EnumMap::Pair ("AggressiveAI" , AggressiveAI::AGGAI),
   EnumMap::Pair ("UNKNOWN", AggressiveAI::UNKNOWN),
@@ -56,7 +56,8 @@ const EnumMap::Pair element_names[] = {
 };
 const EnumMap AggressiveAIel_map(element_names, 25);
 using std::pair;
-stdext::hash_map<string,AIEvents::ElemAttrMap *> logic;
+
+vsUMap<string,AIEvents::ElemAttrMap *> logic;
 
 extern bool CheckAccessory (Unit *tur);
 //extern void TurretFAW(Unit *parent); /*
@@ -74,13 +75,13 @@ static void TurretFAW(Unit * parent) {
   
 }
 
-static stdext::hash_map<string,string> getAITypes() {
-	stdext::hash_map<string,string> ret;
+static vsUMap<string,string> getAITypes() {
+	vsUMap<string,string> ret;
   VSFileSystem::VSFile f;
   VSError err = f.OpenReadOnly( "VegaPersonalities.csv", AiFile);
   if (err<=Ok) {
     CSVTable table(f,f.GetRoot());
-	stdext::hash_map<std::string,int>::iterator browser=table.rows.begin();
+	vsUMap<std::string,int>::iterator browser=table.rows.begin();
     for (;browser!=table.rows.end();++browser) {
       string rowname = (*browser).first;
       CSVRow row(&table,rowname);
@@ -125,10 +126,10 @@ static string select_from_space_list(string inp,unsigned int seed) {
   }
   return inp;
 }
-static AIEvents::ElemAttrMap* getLogicOrInterrupt (string name,int faction, string unittype, stdext::hash_map<string,AIEvents::ElemAttrMap *> &mymap, int personalityseed) {
+static AIEvents::ElemAttrMap* getLogicOrInterrupt (string name,int faction, string unittype, vsUMap<string,AIEvents::ElemAttrMap *> &mymap, int personalityseed) {
   string append="agg";
-  static stdext::hash_map<string,string>myappend=getAITypes();
-  stdext::hash_map<string,string>::iterator iter;
+  static vsUMap<string,string>myappend=getAITypes();
+  vsUMap<string,string>::iterator iter;
   string factionname= FactionUtil::GetFaction(faction);
   if ((iter=myappend.find(factionname+"%"+unittype))!=myappend.end()) {    
     append = select_from_space_list((*iter).second,personalityseed);
@@ -137,7 +138,7 @@ static AIEvents::ElemAttrMap* getLogicOrInterrupt (string name,int faction, stri
   }
   if (append.length()==0) append="agg";
   string hashname = name +"."+append;
-  stdext::hash_map<string,AIEvents::ElemAttrMap *>::iterator i = mymap.find (hashname);
+  vsUMap<string,AIEvents::ElemAttrMap *>::iterator i = mymap.find (hashname);
   if (i==mymap.end()) {
     AIEvents::ElemAttrMap * attr = new AIEvents::ElemAttrMap(AggressiveAIel_map);
     string filename (name+"."+append+".xml");
@@ -1338,7 +1339,7 @@ static Unit * ChooseNavPoint(Unit * parent, Unit **otherdest, float *lurk_on_arr
         srcdst[1]=srcdst[0];      
       size_t rand8=thirdRand%8;
       if (thirdRand<2) {
-        stdext::hash_map <std::string, UnitContainer>::iterator i=stats->jumpPoints.find(srcdst[thirdRand]);
+        vsUMap <std::string, UnitContainer>::iterator i=stats->jumpPoints.find(srcdst[thirdRand]);
         if (i!=stats->jumpPoints.end()) {
           Unit * un=i->second.GetUnit();
           if (un) {

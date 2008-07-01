@@ -43,7 +43,7 @@ static float *mview = NULL;
 
 using namespace VSFileSystem;
 
-typedef stdext::hash_map<std::string, VSSprite*> VSSpriteCache;
+typedef vsUMap<std::string, VSSprite*> VSSpriteCache;
 static VSSpriteCache sprite_cache;
 
 static std::pair<bool,VSSprite*> cacheLookup(const char *file)

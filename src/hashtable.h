@@ -21,7 +21,7 @@
 
 #ifndef _HASHTABLE_H_
 #define _HASHTABLE_H_
-
+#include "config.h"
 #include "gnuhash.h"
 #include <math.h>
 #include <string>
@@ -33,13 +33,10 @@
 #define HASH_SALT_1 0x9B
 class Unit;
 //const int hashsize = 1001;
-
-//Hashtable doesn't grow
-template<class KEY, class VALUE, int SIZ> class Hashtable :public stdext::hash_map<KEY,VALUE*> {
-
+//Hashtable doesn't grow	
+template<class KEY, class VALUE, int SIZ> class Hashtable :public vsUMap <KEY,VALUE*> {
   typedef std::pair<KEY,VALUE*> HashElement;
-  typedef ::stdext::hash_map<KEY,VALUE* > supertype;
-  
+  typedef vsUMap<KEY,VALUE* > supertype;
 public:
 	static int hash(const int key) {
 		unsigned int k = key;

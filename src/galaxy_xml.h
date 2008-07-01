@@ -87,7 +87,7 @@ class Galaxy: public SGalaxy {
 
 };
 
-class SubHeirarchy : public stdext::hash_map<std::string,class SGalaxy> {};
+class SubHeirarchy : public vsUMap<std::string,class SGalaxy> {};
 
 }
 

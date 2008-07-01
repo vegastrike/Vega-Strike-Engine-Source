@@ -1,6 +1,6 @@
 #ifndef __VSFILESYS_H
 #define __VSFILESYS_H
-
+#include "config.h"
 #include <stdio.h>
 #include <string>
 #include <vector>
@@ -13,7 +13,6 @@ using std::vector;
 #include "pk3.h"
 #include <gnuhash.h>
 
-using stdext::hash_map;
 
 class VegaConfig;
 class VSImage;
@@ -76,7 +75,7 @@ namespace VSFileSystem
 
 	int		GetReadBytes( char * fmt, va_list ap);
 
-	typedef hash_map<string,VSError> FileLookupCache;
+	typedef vsUMap<string,VSError> FileLookupCache;
 	VSError CachedFileLookup(FileLookupCache &cache, const string& file, VSFileType type);
 
 	/************************************************************************************************/
@@ -123,9 +122,7 @@ namespace VSFileSystem
 															// 2 tells it uses a big data volume
 
 	extern string failed;
-
-	extern stdext::hash_map<string, CPK3 *>	pk3_opened_files; 			// Map of the currently opened PK3 volume/resource files
-
+	extern vsUMap<string, CPK3 *>	pk3_opened_files; 			// Map of the currently opened PK3 volume/resource files
 	/************************************************************************************************/
 	/**** VSFileSystem wrappers to stdio calls                                                   ****/
 	/************************************************************************************************/

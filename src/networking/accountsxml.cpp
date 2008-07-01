@@ -100,7 +100,7 @@ namespace accountXML
   Account tmpacct;
   //  Account acct;
   int level=-1;
-  stdext::hash_map <string, Account*> accounttable;
+  vsUMap <string, Account*> accounttable;
   int nbaccounts = 0;
  
   void beginElement (void *userData, const XML_Char *name, const XML_Char **atts)
@@ -191,7 +191,7 @@ using namespace accountXML;
 
 vector<Account *> getAllAccounts() {
   vector<Account*>retval;
-  for (stdext::hash_map<string,Account*>::iterator iter=accounttable.begin();
+  for (vsUMap<string,Account*>::iterator iter=accounttable.begin();
        iter!=accounttable.end();
        ++iter) {
     if(iter->second)
@@ -203,7 +203,7 @@ vector<Account *> getAllAccounts() {
 
 Account*getAcctSerial(ObjSerial ser) {
 
-  for (stdext::hash_map<string,Account*>::iterator iter=accounttable.begin();
+  for (vsUMap<string,Account*>::iterator iter=accounttable.begin();
        iter!=accounttable.end();
        ++iter) {
     if (iter->second) {
@@ -218,7 +218,7 @@ Account*getAcctSerial(ObjSerial ser) {
 
 Account*getAcctAddress(SOCKETALT ser) {
 
-  for (stdext::hash_map<string,Account*>::iterator iter=accounttable.begin();
+  for (vsUMap<string,Account*>::iterator iter=accounttable.begin();
        iter!=accounttable.end();
        ++iter) {
     if (iter->second) {

@@ -9,6 +9,8 @@
 #include "navcomputer.h"
 #include "navpath.h"
 #include "gfx/hud.h"
+#include "gnuhash.h"
+
 
 #define NAVTOTALMESHCOUNT 8	//	same as the button count, 1 mesh for screen and 1 per button(1+7)
 #define MAXZOOM 10
@@ -23,7 +25,7 @@ public:
 		unsigned int which;
 		unsigned int count;
 		unsigned int maxcount;
-		stdext::hash_map<string,bool>visited;
+		vsUMap<string,bool>visited;
 
 	public:
 

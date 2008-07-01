@@ -20,6 +20,7 @@
 #cmakedefine SDL_WINDOWING 1
 #cmakedefine HAVE_AL 1
 #cmakedefine HAVE_FFMPEG 1
+#cmakedefine HAVE_TR1_UNORDERED_MAP 1
 #define HAVE_CONFIG_H 1
 #define ${HOSTOS} 1
 #cmakedefine UNIX 1
