@@ -2,9 +2,10 @@
 #define _GNUHASH_H_
 #include "config.h"
 // The following block is to only use tr1 from at least 4.3 since 4.2 apparently bugs out.
+// Windows is untested at the moment. 
 #ifdef HAVE_TR1_UNORDERED_MAP
 #ifndef WIN32
-#if __GNUC__ < 4 || __GNUC_MINOR__ < 3
+#if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 3)
 #undef HAVE_TR1_UNORDERED_MAP
 #endif
 #endif

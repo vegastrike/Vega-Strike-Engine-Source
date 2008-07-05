@@ -857,6 +857,11 @@ LIBS="${LDFLAGS} ${LIBS} ${VS_LIBS} ${PYTHON_LIBS} ${PTHREAD_LIBS} ${CG_LIBS}"
 AC_MSG_NOTICE([Compiling with CPPFLAGS: ${CPPFLAGS}.])
 AC_MSG_NOTICE([Compiling with CXXFLAGS: ${CXXFLAGS}.])
 AC_MSG_NOTICE([Compiling with LIBS: ${LIBS}.])
+AH_TOP([#ifndef _VSCONFIG_H_])
+AH_TOP([#define _VSCONFIG_H_])
+AH_BOTTOM([#endif])
+
+
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT()
