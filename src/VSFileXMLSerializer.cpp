@@ -24,6 +24,7 @@ namespace XMLDOM {
             parse(buffer, rode);
         
         file.Close();
+		return true;
     }
 
     bool VSFileXMLSerializer::exportXML(std::ostream &stream)

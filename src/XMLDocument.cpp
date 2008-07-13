@@ -654,7 +654,7 @@ bool XMLSerializer::initialise(const char* encoding, XMLDocument *doc, XMLElemen
     // Create Expat parser, and initialize
     ctxt->parser = XML_ParserCreate((const XML_Char*)encoding);
     XML_SetUserData(ctxt->parser,ctxt);
-    XML_SetStartDoctypeDeclHandler(ctxt->parser,&ExpatHandlers::Doctype);
+    //XML_SetStartDoctypeDeclHandler(ctxt->parser,&ExpatHandlers::Doctype);
     XML_SetElementHandler(ctxt->parser,&ExpatHandlers::StartElement,&ExpatHandlers::EndElement);
     XML_SetCharacterDataHandler(ctxt->parser,&ExpatHandlers::CData);
     XML_SetProcessingInstructionHandler(ctxt->parser,&ExpatHandlers::PI);
