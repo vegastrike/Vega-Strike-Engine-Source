@@ -777,7 +777,7 @@ void FireKeyboard::HelpMeOutCrit (const KBData&,KBSTATE k) {
 
 void FireKeyboard::DockWithMe (const KBData&,KBSTATE k) {
   if (k==PRESS) {
-    LeadMe ("g","Get in front of me and prepare to be tractored in.", false);
+    LeadMe ("l","Get in front of me and prepare to be tractored in.", false);
 
   }
 }

@@ -657,7 +657,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
           leaderowner = leader->owner?leader->owner:leader;
 
 		
-		if (fg->directive.find("k")!=string::npos||fg->directive.find("k")!=string::npos) {
+	if (fg->directive.find("k")!=string::npos||fg->directive.find("K")!=string::npos) {
     	Unit * targ = fg->target.GetUnit();
 		bool callme = false;
 	if (targ && (targ->faction != parent->faction)) {
