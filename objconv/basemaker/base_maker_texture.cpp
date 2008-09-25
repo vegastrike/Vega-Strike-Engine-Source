@@ -277,7 +277,11 @@ void Texture::loadTexture (FILE *file, TextureTransform tt) {
 		handle=(unsigned int)-1;
 		return;
 	}
+#ifdef __APPLE__
+	glGenTextures (1,(GLuint*)&handle);
+#else
 	glGenTextures (1,&handle);
+#endif
 	glBindTexture (GL_TEXTURE_2D,handle);
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);

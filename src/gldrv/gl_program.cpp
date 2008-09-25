@@ -320,6 +320,11 @@ int GFXShaderConstant(int name, float v1, float v2, float v3, float v4) {
     return 1;
   }
   return 0;  
+  for (int i=7;i>=2;--i) {
+    GFXActiveTexture(i);
+    glDisable(GL_TEXTURE_2D);
+  }
+
 }
 int GFXShaderConstant(int name, const float* values) {
   return GFXShaderConstant(name, values[0], values[1], values[2], values[3]);

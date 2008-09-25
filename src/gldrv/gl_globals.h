@@ -118,6 +118,9 @@ struct GFXStats{
 #endif
 
 #if defined(__APPLE__)
+#define glMultiDrawElements_p glMultiDrawElements
+#define glMultiDrawArrays_p glMultiDrawArrays
+#define glMultiTexCoord4fARB_p glMultiTexCoord4fARB
 #define glMultiTexCoord2fARB_p glMultiTexCoord2fARB
 #define glClientActiveTextureARB_p glClientActiveTextureARB
 #define glActiveTextureARB_p glActiveTextureARB

@@ -225,7 +225,7 @@ void init_opengl_extensions()
 		(void) VSFileSystem::vs_fprintf(stderr, "OpenGL::GL_EXT_compiled_vertex_array unsupported\n");
     }
 #endif
-
+#ifndef __APPLE__
     if (vsExtensionSupported( "GL_EXT_multi_draw_arrays")) {
         glMultiDrawArrays_p = (PFNGLMULTIDRAWARRAYSEXTPROC)
             GET_GL_PROC( (GET_GL_PTR_TYP) "glMultiDrawArraysEXT" );
@@ -237,7 +237,7 @@ void init_opengl_extensions()
         glMultiDrawElements_p = 0;
         VSFileSystem::vs_fprintf(stderr, "OpenGL::GL_EXT_multi_draw_arrays unsupported\n");
     }
-
+#endif
 
 #ifdef __APPLE__
 #ifndef __APPLE__

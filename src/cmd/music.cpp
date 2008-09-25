@@ -36,7 +36,7 @@
 
 #define MAX_RECENT_HISTORY "5"
 
-// #define USE_SOUNDSERVER
+//#define USE_SOUNDSERVER
 
 Music * muzak=NULL;
 int muzak_count=0;

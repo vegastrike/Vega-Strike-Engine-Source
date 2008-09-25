@@ -146,7 +146,16 @@ bool AUDInit () {
 #ifdef _WIN32
 	dev = alcOpenDevice ((ALubyte*)"DirectSound3D");
 #else
+#ifdef __APPLE__
+
+	dev = alcOpenDevice( "sdl" );
+	if( dev == NULL ) {
+		dev=alcOpenDevice( NULL );
+	}
+
+#else
 	dev = alcOpenDevice( NULL );
+#endif
 #endif
 	if( dev == NULL ) {
 		return false;

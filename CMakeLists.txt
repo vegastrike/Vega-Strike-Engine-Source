@@ -491,9 +491,9 @@ IF(Boost_FOUND)
 ELSE(Boost_FOUND)
 	message("-- Using Internal Boost !")
 	IF(APPLE)
-		SET(TST_INCLUDES ${TST_INCLUDES} ${vsUTCS_SOURCE_DIR}/boost/1_28)
+		SET(TST_INCLUDES ${TST_INCLUDES} ${vsUTCS_SOURCE_DIR}/boost/1_33)
 		include_directories(${TST_INCLUDES})
-		add_subdirectory(boost/1_28)
+		add_subdirectory(boost/1_33)
 		SET(TST_LIBS ${TST_LIBS} boost_python)
 	ELSE(APPLE)
 		SET(TST_INCLUDES ${TST_INCLUDES} ${vsUTCS_SOURCE_DIR}/boost/1_35)
@@ -504,21 +504,6 @@ ELSE(Boost_FOUND)
 	add_dependencies(vegastrike boost_python)
 	add_dependencies(vegaserver boost_python)
 ENDIF(Boost_FOUND)
-
-#Find FFMpeg
-
-find_package(FFMPEG)
-IF(FFMPEG_FOUND)
-	SET(TST_INCLUDES ${TST_INCLUDES} ${FFMPEG_INCLUDE_DIRS})
-	SET(TST_LIBS ${TST_LIBS} ${FFMPEG_LIBRARIES})
-	add_definitions(${FFMPEG_DEFINITIONS})
-	SET(HAVE_FFMPEG 1 )
-	IF(swscale1_FOUND)
-		SET(HAVE_FFMPEG_SWSCALE_H 1)
-	ENDIF(swscale1_FOUND)
-ELSE(FFMPEG_FOUND)
-	message("What the hell, no FFMpeg")
-ENDIF(FFMPEG_FOUND)
 
 
 #Find GL
@@ -620,6 +605,20 @@ ELSE(MATH_FOUND)
 	message("Without math we have nothing")
 ENDIF(MATH_FOUND)
 
+#Find FFMpeg
+
+find_package(FFMPEG)
+IF(FFMPEG_FOUND)
+	SET(TST_INCLUDES ${TST_INCLUDES} ${FFMPEG_INCLUDE_DIRS})
+	SET(TST_LIBS ${TST_LIBS} ${FFMPEG_LIBRARIES})
+	add_definitions(${FFMPEG_DEFINITIONS})
+	SET(HAVE_FFMPEG 1 )
+	IF(swscale1_FOUND)
+		SET(HAVE_FFMPEG_SWSCALE_H 1)
+	ENDIF(swscale1_FOUND)
+ELSE(FFMPEG_FOUND)
+	message("What the hell, no FFMpeg")
+ENDIF(FFMPEG_FOUND)
 
 
 # Still need to add CEGUI and OGRE find packages
@@ -656,7 +655,7 @@ if(HAVE_MATH_H)
 		CHECK_FUNCTION_EXISTS(_finite HAVE__finite)
 	endif(NOT HAVE_FINITE)
 endif(HAVE_MATH_H)
-CHECK_INCLUDE_FILES(sys/stat.h HAVE_STAT_H)
+CHECK_INCLUDE_FILE(sys/stat.h HAVE_STAT_H)
 if(HAVE_STAT_H)
 	CHECK_FUNCTION_EXISTS(lstat HAVE_LSTAT)
 endif(HAVE_STAT_H)
@@ -683,8 +682,8 @@ CONFIGURE_FILE(${vsUTCS_SOURCE_DIR}/cmake-config.h.in ${vsUTCS_BINARY_DIR}/confi
 SET(CMAKE_CXX_FLAGS "-include config.h -pipe -O2")
 
 #Setup shared lib and include listings for vegastrike and vegaserver.
-SET(TST_LIBS ${TST_LIBS} engine_com OPcollide netgeneric netlowlevel)
-SET(TST_SERVER_LIBS ${TST_LIBS} netgeneric engine_com netlowlevel OPcollide)
+SET(TST_LIBS engine_com OPcollide netgeneric netlowlevel ${TST_LIBS})
+SET(TST_SERVER_LIBS netgeneric engine_com netlowlevel OPcollide ${TST_LIBS})
 include_directories(${TST_INCLUDES})	
 
 
@@ -702,7 +701,7 @@ get_directory_property(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
 # End Debug Crap 
 
 # Vssetup Sub build file  
-add_subdirectory(setup)
+#add_subdirectory(setup)
 
 # Add other utilies here
 add_subdirectory(objconv)
