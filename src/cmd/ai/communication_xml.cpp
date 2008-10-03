@@ -143,6 +143,7 @@ void FSM::LoadXML(const char * filename) {
   VSFile f;
   VSError err = f.OpenReadOnly( filename, CommFile);
   if(err>Ok) {
+	fprintf(stderr, "Failed to open Communications file '%s' -- aborting!\n", filename);
 	assert(0);
 	return;
   }
