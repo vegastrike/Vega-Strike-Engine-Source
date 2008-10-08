@@ -274,6 +274,73 @@ public:
 		}
 	}
 };
+
+
+
+
+class FacePerpendicular: public Orders::FaceTargetITTS{
+	Orders::MoveToParent m;
+	float qq;
+	float pp;
+	Vector rr;// place to go for @ end
+	bool afterburn;
+	bool force_afterburn;
+public:
+	FacePerpendicular(bool afterburn, bool force_afterburn, int seed):FaceTargetITTS(false,3),m(false,2,false) {
+		VSRandom vsr(seed);
+		this->afterburn=afterburn;
+		this->force_afterburn=force_afterburn;
+
+        static float loopdis=XMLSupport::parse_float (vs_config->getVariable("AI","loop_around_distance","1"));
+		qq=pp=0;
+		static float loopdisd=XMLSupport::parse_float (vs_config->getVariable("AI","loop_around_destination_distance","10.0"));
+		static float loopdisv=XMLSupport::parse_float (vs_config->getVariable("AI","loop_around_destination_vertical","4.0"));
+		static float loopdisl=XMLSupport::parse_float (vs_config->getVariable("AI","loop_around_destination_lateral","4.0"));
+		rr.Set(loopdisl*vsr.uniformInc(-1,1),loopdisv*vsr.uniformInc(-1,1),1.0+loopdisd*vsr.uniformInc(0,1));
+		if (vsr.rand()<VS_RAND_MAX/2) {
+			qq = vsr.uniformInc(-1,1);
+			rr.j=qq;
+			if (qq>0)
+				qq+=loopdis;
+			if (qq<0)
+				qq-=loopdis;
+		}else {
+			pp = vsr.uniformInc(-1,1);
+			rr.i=pp;
+			if (pp>0)
+				pp+=loopdis;
+			if (pp<0)
+				pp-=loopdis;
+		}
+	}
+	void Execute(){
+		Unit * targ = parent->Target();
+		if (targ) {
+			Vector relloc = parent->Position()-targ->Position();
+			Vector r =targ->cumulative_transformation_matrix.getR();
+			bool afterburn = useAfterburner()&&this->afterburn;
+            bool ab_needed=force_afterburn||targ->GetVelocity().MagnitudeSquared()>parent->GetComputerData().max_speed();
+			if (r.Dot(relloc) <0) {
+				FaceTargetITTS::Execute();
+				m.SetAfterburn (afterburn&&ab_needed);
+				m.Execute(parent,targ->Position()-r.Scale(rr.k*parent->rSize()+targ->rSize())+targ->cumulative_transformation_matrix.getP()*(rr.i*parent->rSize())+targ->cumulative_transformation_matrix.getQ()*(rr.j*parent->rSize()));
+			}else {
+				done=false;
+				if (afterburn)
+					m.SetAfterburn (ab_needed);
+				else
+					m.SetAfterburn(0);
+				Vector scala=targ->cumulative_transformation_matrix.getR().Cross(parent->cumulative_transformation_matrix.getQ())*parent->rSize()*100.;
+				QVector dest =parent->Position()+scala;
+                SetDest(dest);					
+                ChangeHeading::Execute();
+				m.Execute(parent,dest+scala);
+			}
+		}
+	}
+};
+
+
 }
 void LoopAround(Order* aisc, Unit * un) {
 	Order* broll = new Orders::LoopAround(false,true,false,(int)(size_t)un);
@@ -305,6 +372,24 @@ void RollRightHard(Order *aisc, Unit* un) {
 }
 void LoopAroundFast(Order* aisc, Unit * un) {
 	Order* broll = new Orders::LoopAround(false,true,true,(int)(size_t)un);
+	AddOrd(aisc,un,broll);
+	
+}
+
+
+
+void FacePerpendicularFast(Order* aisc, Unit * un) {
+	Order* broll = new Orders::FacePerpendicular(true,true,(int)(size_t)un);
+	AddOrd(aisc,un,broll);
+	
+}
+void FacePerpendicular(Order* aisc, Unit * un) {
+	Order* broll = new Orders::FacePerpendicular(true,false,(int)(size_t)un);
+	AddOrd(aisc,un,broll);
+	
+}
+void FacePerpendicularSlow(Order* aisc, Unit * un) {
+	Order* broll = new Orders::FacePerpendicular(false,false,(int)(size_t)un);
 	AddOrd(aisc,un,broll);
 	
 }

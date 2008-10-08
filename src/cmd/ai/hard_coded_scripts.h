@@ -48,6 +48,9 @@ CCScript EvadeLeftRight;
 CCScript EvadeUpDown;
 CCScript AfterburnEvadeLeftRight;
 CCScript AfterburnEvadeUpDown;
+CCScript FacePerpendicularFast;
+CCScript FacePerpendicular;
+CCScript FacePerpendicularSlow;
 #endif
 
 

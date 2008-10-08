@@ -63,6 +63,9 @@ static HardCodedMap MakeHardCodedScripts() {
   tmp.insert (MyPair ("evade up down",&EvadeUpDown));   
   tmp.insert (MyPair ("afterburn evade left right",&AfterburnEvadeLeftRight));   
   tmp.insert (MyPair ("afterburn evade up down",&AfterburnEvadeUpDown));   
+  tmp.insert (MyPair ("face perpendicular",&FacePerpendicular));   
+  tmp.insert (MyPair ("face perpendicular slow",&FacePerpendicularSlow));   
+  tmp.insert (MyPair ("face perpendicular fast",&FacePerpendicularFast));   
   return tmp;
 }
 
