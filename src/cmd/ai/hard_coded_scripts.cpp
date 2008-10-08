@@ -9,6 +9,7 @@
 #include "fire.h"
 #include "order.h"
 #include "vs_random.h"
+#include "unit_util.h"
 using Orders::FireAt;
 
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
@@ -279,14 +280,18 @@ public:
 
 
 class FacePerpendicular: public Orders::FaceTargetITTS{
-	Orders::MoveToParent m;
+	Orders::MatchLinearVelocity m;
 	float qq;
 	float pp;
 	Vector rr;// place to go for @ end
 	bool afterburn;
 	bool force_afterburn;
 public:
-	FacePerpendicular(bool afterburn, bool force_afterburn, int seed):FaceTargetITTS(false,3),m(false,2,false) {
+    void SetParent(Unit * parent1) {
+        FaceTargetITTS::SetParent(parent1);
+        m.SetParent(parent1);
+    }
+	FacePerpendicular(bool afterburn, bool force_afterburn, int seed):FaceTargetITTS(false,3),m(Vector(0,0,1000),true,afterburn,false) {
 		VSRandom vsr(seed);
 		this->afterburn=afterburn;
 		this->force_afterburn=force_afterburn;
@@ -320,10 +325,16 @@ public:
 			Vector r =targ->cumulative_transformation_matrix.getR();
 			bool afterburn = useAfterburner()&&this->afterburn;
             bool ab_needed=force_afterburn||targ->GetVelocity().MagnitudeSquared()>parent->GetComputerData().max_speed();
+            m.SetDesiredVelocity(Vector(0,0,afterburn&&ab_needed?parent->GetComputerData().max_ab_speed():parent->GetComputerData().max_speed()),true);
+            float speed,grange=0,mrange=0;
+            parent->getAverageGunSpeed(speed,grange,mrange);
 			if (r.Dot(relloc) <0) {
 				FaceTargetITTS::Execute();
+                float dist=UnitUtil::getDistance(parent,targ);
+                if (dist<grange||grange==0&&dist<mrange)
+                    m.SetDesiredVelocity(Vector(0,0,targ->cumulative_velocity.Magnitude()),true);
 				m.SetAfterburn (afterburn&&ab_needed);
-				m.Execute(parent,targ->Position()-r.Scale(rr.k*parent->rSize()+targ->rSize())+targ->cumulative_transformation_matrix.getP()*(rr.i*parent->rSize())+targ->cumulative_transformation_matrix.getQ()*(rr.j*parent->rSize()));
+				m.Execute();
 			}else {
 				done=false;
 				if (afterburn)
@@ -334,7 +345,7 @@ public:
 				QVector dest =parent->Position()+scala;
                 SetDest(dest);					
                 ChangeHeading::Execute();
-				m.Execute(parent,dest+scala);
+				m.Execute();
 			}
 		}
 	}
