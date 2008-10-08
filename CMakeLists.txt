@@ -460,6 +460,84 @@ SET(VEGASERVER_SOURCES ${LIBCMDSERVER_SOURCES}
 if(COMMAND cmake_policy)					   
 	cmake_policy(SET CMP0003 OLD) 
 endif(COMMAND cmake_policy)
+SET(CMAKE_CXX_FLAGS_DEBUG " -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
+    "Flags used by the C++ compiler during debug builds."
+    FORCE )
+SET( CMAKE_C_FLAGS_DEBUG " -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
+    "Flags used by the C compiler during debug builds."
+    FORCE )
+
+
+SET(CMAKE_CXX_FLAGS_RELEASE " -include config.h -pipe -O3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+    "Flags used by the C++ compiler during release builds."
+    FORCE )
+SET( CMAKE_C_FLAGS_RELEASE " -include config.h -pipe -O3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+    "Flags used by the C compiler during release builds."
+    FORCE )
+
+SET(CMAKE_CXX_FLAGS_REWITHDEBINFO " -include config.h -pipe -O2 -g3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+    "Flags used by the C++ compiler during release builds."
+    FORCE )
+SET( CMAKE_C_FLAGS_RELWITHDEBINFO " -include config.h -pipe -O2 -g3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+    "Flags used by the C compiler during release builds."
+    FORCE )
+
+
+
+# Setup maintainer mode flags
+SET(CMAKE_CXX_FLAGS_MAINTAINER " -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
+    "Flags used by the C++ compiler during maintainer builds."
+    FORCE )
+SET( CMAKE_C_FLAGS_MAINTAINER " -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
+    "Flags used by the C compiler during maintainer builds."
+    FORCE )
+SET( CMAKE_EXE_LINKER_FLAGS_MAINTAINER
+    "" CACHE STRING
+    "Flags used for linking binaries during maintainer builds."
+    FORCE )
+SET( CMAKE_SHARED_LINKER_FLAGS_MAINTAINER
+    "" CACHE STRING
+    "Flags used by the shared libraries linker during maintainer builds."
+    FORCE )
+MARK_AS_ADVANCED(
+    CMAKE_CXX_FLAGS_MAINTAINER
+    CMAKE_C_FLAGS_MAINTAINER
+    CMAKE_EXE_LINKER_FLAGS_MAINTAINER
+    CMAKE_SHARED_LINKER_FLAGS_MAINTAINER )
+
+
+# Setup profiler mode flags
+SET(CMAKE_CXX_FLAGS_PROFILER "-pg -g2 -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -O3" CACHE STRING
+    "Flags used by the C++ compiler during profiler builds."
+    FORCE )
+SET( CMAKE_C_FLAGS_PROFILER "-pg -g2 -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -O3" CACHE STRING
+    "Flags used by the C compiler during profiler builds."
+    FORCE )
+SET( CMAKE_EXE_LINKER_FLAGS_PROFILER
+    "" CACHE STRING
+    "Flags used for linking binaries during profiler builds."
+    FORCE )
+SET( CMAKE_SHARED_LINKER_FLAGS_PROFILER
+    "" CACHE STRING
+    "Flags used by the shared libraries linker during profiler builds."
+    FORCE )
+MARK_AS_ADVANCED(
+    CMAKE_CXX_FLAGS_PROFILER
+    CMAKE_C_FLAGS_PROFILER
+    CMAKE_EXE_LINKER_FLAGS_PROFILER
+    CMAKE_SHARED_LINKER_FLAGS_PROFILER )
+
+
+# Set the default build type to maintainer
+IF(NOT CMAKE_BUILD_TYPE)
+  SET(CMAKE_BUILD_TYPE Maintainer CACHE STRING
+      "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Maintainer Profiler."
+      FORCE)
+ENDIF(NOT CMAKE_BUILD_TYPE)
+
+IF(CMAKE_BUILD_TYPE MATCHES "[Mm][Aa][Ii][Nn][Tt][Aa][Ii][Nn][Ee][Rr]")
+  ADD_DEFINITIONS(-DGCC_HASVISIBILITY)
+ENDIF(CMAKE_BUILD_TYPE MATCHES "[Mm][Aa][Ii][Nn][Tt][Aa][Ii][Nn][Ee][Rr]")
 
 add_executable(vegastrike ${VEGASTRIKE_SOURCES})
 add_executable(vegaserver ${VEGASERVER_SOURCES})
@@ -679,7 +757,7 @@ endif(UNIX)
 CONFIGURE_FILE(${vsUTCS_SOURCE_DIR}/cmake-config.h.in ${vsUTCS_BINARY_DIR}/config.h)
 
 #end config.h generation 
-SET(CMAKE_CXX_FLAGS "-include config.h -pipe -O2")
+#SET(CMAKE_CXX_FLAGS "-include config.h;-pipe;"${CMAKE_CXX_FLAGS})
 
 #Setup shared lib and include listings for vegastrike and vegaserver.
 SET(TST_LIBS engine_com OPcollide netgeneric netlowlevel ${TST_LIBS})
@@ -695,7 +773,7 @@ set_target_properties(vegaserver PROPERTIES LINK_FLAGS "-L/usr/lib -L${vsUTCS_BI
 
 # Debug crap 
 get_directory_property(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
-#message("Building with CFLAGS: ${CMAKE_CXX_FLAGS}")
+message("Building with CFLAGS: ${CMAKE_CXX_FLAGS}")
 #message("Linking with : ${TST_LIBS}")
 #message("including : ${TEMP_DIRECTORY}")
 # End Debug Crap 
