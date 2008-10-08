@@ -1945,9 +1945,10 @@ float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range, bool
 	// Trial code
 	float turnlimit = tmpmax(tmpmax(computer.max_yaw_left,computer.max_yaw_right),tmpmax(computer.max_pitch_up,computer.max_pitch_down));
 	float turnangle = SIMULATION_ATOM*tmpmax(turnlimit,tmpmax(SIMULATION_ATOM*.5*(limits.yaw+limits.pitch),sqrtf(AngularVelocity.i*AngularVelocity.i+AngularVelocity.j*AngularVelocity.j)));
-	float ittsangle = safeacos(Normal.Cast().Dot(totarget.Normalize()));
-	float radangle  = safeacos((cumulative_transformation_matrix.getP().Normalize()*targ->rSize()+totarget).Cast().Normalize().Dot(totarget.Normalize()));
-	float rv        = ittsangle - radangle - (turnmargin?turnangle:0);
+	float ittsangle = safeacos(Normal.Cast().Dot(totarget.Scale(1./totarget.Magnitude())));
+    QVector edgeLocation=(targ->cumulative_transformation_matrix.getP()*targ->rSize()+totarget);
+    float radangle  = safeacos(edgeLocation.Cast().Scale(1./edgeLocation.Magnitude()).Dot(totarget.Normalize()));
+	float rv        = ittsangle-radangle - (turnmargin?turnangle:0);
 
 	float rsize = targ->rSize()+rSize();
 	if ((!targ->GetDestinations().empty()&&jump.drive>=0)||(targ->faction==faction))
