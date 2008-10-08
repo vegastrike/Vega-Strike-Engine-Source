@@ -4,7 +4,7 @@
 # run make ...or build your project files
 # valid targets are vegastrike, vssetup, and vegaserver (though it's broken right now)
 # ccmake will let you set the Build type (debug,release,basic)
-# the CMAKE_CXX_FLAGS line directly below is a hack. 
+
 
 cmake_minimum_required(VERSION 2.4)
 
@@ -460,35 +460,35 @@ SET(VEGASERVER_SOURCES ${LIBCMDSERVER_SOURCES}
 if(COMMAND cmake_policy)					   
 	cmake_policy(SET CMP0003 OLD) 
 endif(COMMAND cmake_policy)
-SET(CMAKE_CXX_FLAGS_DEBUG " -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_DEBUG " -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during debug builds."
     FORCE )
-SET( CMAKE_C_FLAGS_DEBUG " -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
+SET( CMAKE_C_FLAGS_DEBUG " -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during debug builds."
     FORCE )
 
 
-SET(CMAKE_CXX_FLAGS_RELEASE " -include config.h -pipe -O3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_RELEASE " -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during release builds."
     FORCE )
-SET( CMAKE_C_FLAGS_RELEASE " -include config.h -pipe -O3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET( CMAKE_C_FLAGS_RELEASE " -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during release builds."
     FORCE )
 
-SET(CMAKE_CXX_FLAGS_REWITHDEBINFO " -include config.h -pipe -O2 -g3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_REWITHDEBINFO " -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -g3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during release builds."
     FORCE )
-SET( CMAKE_C_FLAGS_RELWITHDEBINFO " -include config.h -pipe -O2 -g3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET( CMAKE_C_FLAGS_RELWITHDEBINFO " -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -g3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during release builds."
     FORCE )
 
 
 
 # Setup maintainer mode flags
-SET(CMAKE_CXX_FLAGS_MAINTAINER " -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_MAINTAINER " -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during maintainer builds."
     FORCE )
-SET( CMAKE_C_FLAGS_MAINTAINER " -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
+SET( CMAKE_C_FLAGS_MAINTAINER " -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during maintainer builds."
     FORCE )
 SET( CMAKE_EXE_LINKER_FLAGS_MAINTAINER
@@ -507,10 +507,10 @@ MARK_AS_ADVANCED(
 
 
 # Setup profiler mode flags
-SET(CMAKE_CXX_FLAGS_PROFILER "-pg -g2 -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -O3" CACHE STRING
+SET(CMAKE_CXX_FLAGS_PROFILER "-pg -g2 -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -O3" CACHE STRING
     "Flags used by the C++ compiler during profiler builds."
     FORCE )
-SET( CMAKE_C_FLAGS_PROFILER "-pg -g2 -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -O3" CACHE STRING
+SET( CMAKE_C_FLAGS_PROFILER "-pg -g2 -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -O3" CACHE STRING
     "Flags used by the C compiler during profiler builds."
     FORCE )
 SET( CMAKE_EXE_LINKER_FLAGS_PROFILER
@@ -563,10 +563,12 @@ ENDIF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_PATH)
 # Find Boost with boost_python library
 find_package(Boost COMPONENTS python)
 IF(Boost_FOUND)
+    SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
 	SET(TST_INCLUDES ${TST_INCLUDES} ${Boost_INCLUDE_DIRS})
 	SET(TST_LIBS ${TST_LIBS} ${Boost_LIBRARIES})
 	include_directories(${TST_INCLUDES})
 ELSE(Boost_FOUND)
+    SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
 	message("-- Using Internal Boost !")
 	IF(APPLE)
 		SET(TST_INCLUDES ${TST_INCLUDES} ${vsUTCS_SOURCE_DIR}/boost/1_33)
