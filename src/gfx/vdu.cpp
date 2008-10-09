@@ -842,6 +842,13 @@ void VDU::DrawTarget(GameCockpit *cp, Unit * parent, Unit * target) {
 }
 
 void VDU::DrawMessages(GameCockpit* parentcp,Unit *target){
+  static bool network_draw_messages=XMLSupport::parse_bool(vs_config->getVariable("graphics","network_chat_text","true"));
+  static bool draw_messages=XMLSupport::parse_bool(vs_config->getVariable("graphics","chat_text","true"));
+  if (Network!=NULL&&network_draw_messages==false)
+	  return;
+  if (Network==NULL&&draw_messages==false)
+	  return;
+
   string fullstr;
   double nowtime=mission->getGametime();
 

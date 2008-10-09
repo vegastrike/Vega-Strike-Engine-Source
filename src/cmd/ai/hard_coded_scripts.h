@@ -51,6 +51,9 @@ CCScript AfterburnEvadeUpDown;
 CCScript FacePerpendicularFast;
 CCScript FacePerpendicular;
 CCScript FacePerpendicularSlow;
+CCScript RollFacePerpendicularFast;
+CCScript RollFacePerpendicular;
+CCScript RollFacePerpendicularSlow;
 #endif
 
 

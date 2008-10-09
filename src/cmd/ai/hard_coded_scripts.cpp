@@ -9,7 +9,7 @@
 #include "fire.h"
 #include "order.h"
 #include "vs_random.h"
-#include "unit_util.h"
+#include "cmd/unit_util.h"
 using Orders::FireAt;
 
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
@@ -363,13 +363,15 @@ class FacePerpendicular: public Orders::FaceTargetITTS{
 	float pp;
 	Vector rr;// place to go for @ end1111
 	bool afterburn;
+	bool aggressive;
 	bool force_afterburn;
 public:
     void SetParent(Unit * parent1) {
         FaceTargetITTS::SetParent(parent1);
         m.SetParent(parent1);
     }
-	FacePerpendicular(bool afterburn, bool force_afterburn, int seed):FaceTargetITTS(false,3),m(Vector(0,0,1000),true,afterburn,false) {
+	FacePerpendicular(bool aggressive, bool afterburn, bool force_afterburn, int seed):FaceTargetITTS(false,3),m(Vector(0,0,1000),true,afterburn,false) {
+		this->aggressive=aggressive;
 		VSRandom vsr(seed);
 		this->afterburn=afterburn;
 		this->force_afterburn=force_afterburn;
@@ -422,7 +424,7 @@ public:
 					m.SetAfterburn (ab_needed);
 				else
 					m.SetAfterburn(0);
-				Vector scala=targ->cumulative_transformation_matrix.getR().Cross(parent->cumulative_transformation_matrix.getQ())*parent->rSize()*100.;
+				Vector scala=targ->cumulative_transformation_matrix.getR().Cross(aggressive?parent->cumulative_transformation_matrix.getQ():Vector(.01,.99,-.001))*parent->rSize()*100.;
 				QVector dest =parent->Position()+scala;
                 SetDest(dest);					
                 ChangeHeading::Execute();
@@ -471,20 +473,39 @@ void LoopAroundFast(Order* aisc, Unit * un) {
 
 
 void FacePerpendicularFast(Order* aisc, Unit * un) {
-	Order* broll = new Orders::FacePerpendicular(true,true,(int)(size_t)un);
+	Order* broll = new Orders::FacePerpendicular(false,true,true,(int)(size_t)un);
 	AddOrd(aisc,un,broll);
 	
 }
 void FacePerpendicular(Order* aisc, Unit * un) {
-	Order* broll = new Orders::FacePerpendicular(true,false,(int)(size_t)un);
+	Order* broll = new Orders::FacePerpendicular(false,true,false,(int)(size_t)un);
 	AddOrd(aisc,un,broll);
 	
 }
 void FacePerpendicularSlow(Order* aisc, Unit * un) {
-	Order* broll = new Orders::FacePerpendicular(false,false,(int)(size_t)un);
+	Order* broll = new Orders::FacePerpendicular(false,false,false,(int)(size_t)un);
 	AddOrd(aisc,un,broll);
 	
 }
+
+
+void RollFacePerpendicularFast(Order* aisc, Unit * un) {
+	Order* broll = new Orders::FacePerpendicular(true,true,true,(int)(size_t)un);
+	AddOrd(aisc,un,broll);
+	
+}
+void RollFacePerpendicular(Order* aisc, Unit * un) {
+	Order* broll = new Orders::FacePerpendicular(true,true,false,(int)(size_t)un);
+	AddOrd(aisc,un,broll);
+	
+}
+void RollFacePerpendicularSlow(Order* aisc, Unit * un) {
+	Order* broll = new Orders::FacePerpendicular(true,false,false,(int)(size_t)un);
+	AddOrd(aisc,un,broll);
+	
+}
+
+
 void AggressiveLoopAroundFast(Order* aisc, Unit * un) {
 	Order* broll = new Orders::LoopAroundAgro(true,true,true,(int)(size_t)un);
 	AddOrd(aisc,un,broll);
