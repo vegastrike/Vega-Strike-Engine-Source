@@ -2595,6 +2595,9 @@ SimplePickerCell* BaseComputer::createCategoryCell(SimplePickerCells& cells, con
     }
 
     SimplePickerCell* parentCell = static_cast<SimplePickerCell*>(cells.cellAt(cells.count()-1));   // Last cell in list.
+    static bool showDefault = XMLSupport::parse_bool(vs_config->getVariable("graphics","open_picker_categories","false"));
+    parentCell->setHideChildren(!showDefault);
+
     if(loc == string::npos) {
         // This is a simple category -- we are done.
         return parentCell;
