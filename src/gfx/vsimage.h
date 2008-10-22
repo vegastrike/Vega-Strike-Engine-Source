@@ -96,6 +96,8 @@ typedef struct
 	int depth;
 	int nmips;
 	pxlformat pixelFormat;
+	int dcaps1;
+	int dcaps2;
 } ddsHeader;
 // End DDS header	
 

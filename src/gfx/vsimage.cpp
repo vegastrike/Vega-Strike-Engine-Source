@@ -690,7 +690,10 @@ unsigned char *VSImage::ReadDDS()
 		img_file->Read(&header.pixelFormat.fourcc[3],1);
 		img_file->Read(ibuffer,4);
 		header.pixelFormat.bpp=POSH_ReadU32FromLittle(ibuffer);
-		
+		img_file->Read(ibuffer,4);
+		header.dcaps1=POSH_ReadU32FromLittle(ibuffer);
+		img_file->Read(ibuffer,4);
+		header.dcaps2=POSH_ReadU32FromLittle(ibuffer);
 		img_file->GoTo(128);
 		// Set VSImage attributes 
 		this->img_depth = header.pixelFormat.bpp;
@@ -770,8 +773,15 @@ unsigned char *VSImage::ReadDDS()
 			if(height != 1)
 				height >>=1;
 		}
+		if(header.dcaps2 & DDS_CUBEMAP ) {
+			inputSize = inputSize * 6;
+			this->img_color_type = 998; // Cubemap'd dds
+		}
+		else
+			this->img_color_type = 999; // Regular DDS 
+		
 		s = (unsigned char*)malloc(inputSize+3);
-		sprintf((char*)s,"%i",header.nmips);
+		sprintf((char*)s,"%i",header.nmips);  // if cubemap, mips per face
 		img_file->Read(s+2,inputSize);   
 		// At the end of execution what we have is the following:
 		// s contains the number of mipmaps then the main texture and all it's mipmaps 
@@ -779,7 +789,6 @@ unsigned char *VSImage::ReadDDS()
 		// mode is the compressed format of the texture. It is assumed to be rgba
 		// depth is the depth of the uncompressed image. not sure where this is used
 		// nmaps is the number of mipmaps
-		this->img_color_type = 999;  // DDS file
 		return(s);
     } catch(...) {
 		if(s) free(s);
