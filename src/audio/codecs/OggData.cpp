@@ -3,7 +3,8 @@
 //
 
 #ifdef HAVE_OGG
-
+#include <sys/types.h>
+#include <stdint.h>
 #include "OggData.h"
 #include "config.h"
 #include "../Format.h"

@@ -29,6 +29,10 @@ typedef int INT32;
 #endif
 #endif
 
+#ifndef DDS_CUBEMAP
+#define DDS_CUBEMAP 0x00000200L
+#endif
+
 #if defined(__CYGWIN__)
 #define XMD_H
 #endif
