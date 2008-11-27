@@ -36,11 +36,20 @@ extern "C" {
 #endif
 
 #include "ffmpeg_init.h"
+#include <sys/types.h>
 
 
 /* FOLLOWING CODE IS ONLY INCLUDED IF YOU HAVE FFMPEG */
 /* ******************************************** */
 #ifdef HAVE_FFMPEG
+
+#ifndef offset_t
+    #if LIBAVCODEC_VERSION_MAJOR >= 52
+        typedef int64_t offset_t;
+    #else
+        typedef int offset_t;
+    #endif
+#endif
 
 using namespace VSFileSystem;
 

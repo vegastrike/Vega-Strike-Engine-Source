@@ -127,12 +127,16 @@ namespace Audio {
                 case SAMPLE_FMT_S16: fmt.bitsPerSample = 16;
                                      fmt.signedSamples = 1;
                                      break;
+                #ifdef SAMPLE_FMT_S24
                 case SAMPLE_FMT_S24: fmt.bitsPerSample = 24;
                                      fmt.signedSamples = 1;
                                      break;
+                #endif
+                #ifdef SAMPLE_FMT_S32
                 case SAMPLE_FMT_S32: fmt.bitsPerSample = 32;
                                      fmt.signedSamples = 1;
                                      break;
+                #endif
                 default:             throw CodecNotFoundException(errbase + " (unsupported audio format)");
                 }
                 sampleSize = (fmt.bitsPerSample + 7) / 8 * fmt.channels;

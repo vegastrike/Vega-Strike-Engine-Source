@@ -38,6 +38,14 @@ extern "C" {
 /* ******************************************** */
 #ifdef HAVE_FFMPEG
 
+#ifndef offset_t
+    #if LIBAVCODEC_VERSION_MAJOR >= 52
+        typedef int64_t offset_t;
+    #else
+        typedef int offset_t;
+    #endif
+#endif
+
 using namespace VSFileSystem;
 
 extern "C" int _url_open(URLContext *h, const char *filename, int flags)
