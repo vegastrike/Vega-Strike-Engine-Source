@@ -196,12 +196,20 @@ void getInverseProjection (float *& inv) {
  * I'm not good with matrix math...tell me if I should ret 1/xs+c/d instead
  * for test cases I can think of, it doesn't matter--- */
 float GFXGetZPerspective (const float z) {
-  float left,right,bottom,top,nearval,farval;
-  GFXGetFrustumVars(true,&left,&right,&bottom,&top,&nearval,&farval);
-   float c = (farval+nearval) / ( farval-nearval);
-   float d = (farval*(right-left)) / (farval-nearval);  /* error? */
-   //return c*z+d;
-   return z;
+   float left,right,bottom,top,nearval,farval;
+   GFXGetFrustumVars(true,&left,&right,&bottom,&top,&nearval,&farval);
+   
+   printf("nearval: %f, left: %f, right: %f, z: %f\n", nearval, left, right, z);
+   
+   float xs = 2*nearval / (right-left);
+   float a  = (right+left) / (right-left);
+   
+   // Compute homogeneus x,w for (1,0,z,0)
+   float hx = xs + z * a;
+   float hw = -z;
+  
+   // Translate into euclidean coordinates and return euclidean x
+   return hx / hw;
 }
 float GFXGetXInvPerspective () {
   return /*invprojection[11]*  */invprojection[0];//invprojection[15];//should be??  c/d == invproj[15]

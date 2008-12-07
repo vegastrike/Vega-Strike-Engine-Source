@@ -284,21 +284,20 @@ Mesh * Mesh::getLOD (float lod, bool bBypassDamping) {
 	  setCurrentFrame(getCurrentFrame()+adv);
 	  return &orig[(*animFrames)[which%animFrames->size()]%getNumLOD()];
   }else {
-	  int maxlodsize=float_to_int(retval?retval->lodsize:0.0f);
+	  float maxlodsize=retval?retval->lodsize:0.0f;
 	  for (int i=1;i<numlods;i++) {
-		  int lodoffs=0;
+		  float lodoffs=0;
 		  if (!bBypassDamping) {
 		      if (lod<orig[i].lodsize) 
-			  lodoffs = float_to_int((i<numlods-1)?(orig[i+1].lodsize-orig[i].lodsize)/LOD_HYSTHERESIS_DIVIDER:0.0f); else
-			  lodoffs = float_to_int((i>0)?(orig[i-1].lodsize-orig[i].lodsize)/LOD_HYSTHERESIS_DIVIDER:0.0f);
-              int maxenlargement = float_to_int((orig[i].lodsize*LOD_HYSTHERESIS_MAXENLARGEMENT_FACTOR)-orig[i].lodsize);
+			     lodoffs = ((i<numlods-1)?(orig[i+1].lodsize-orig[i].lodsize)/LOD_HYSTHERESIS_DIVIDER:0.0f); 
+              else
+			     lodoffs = ((i>0)?(orig[i-1].lodsize-orig[i].lodsize)/LOD_HYSTHERESIS_DIVIDER:0.0f);
+              float maxenlargement = ((orig[i].lodsize*LOD_HYSTHERESIS_MAXENLARGEMENT_FACTOR)-orig[i].lodsize);
               if ((lodoffs>0)&&(lodoffs>maxenlargement)) lodoffs=maxenlargement; //Avoid excessive enlargement of low-detail LOD levels, when LOD levels are far apart.
 		  };
-		  if ((lod<(orig[i].lodsize+lodoffs))&&(lod>maxlodsize)) {
-		      maxlodsize = float_to_int(orig[i].lodsize);
+		  if ((lod<(orig[i].lodsize+lodoffs))&&(lod<maxlodsize)) {
+		      maxlodsize = orig[i].lodsize;
 		      retval = &orig[i];
-		  } else {
-		      break;
 		  }
 	  }
   }

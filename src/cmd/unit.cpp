@@ -93,6 +93,15 @@ GameUnit<UnitType>::GameUnit( int /*dummy*/ ) : sparkle_accum(0) {
 
 extern void UncheckUnit (Unit * un);
 
+static float perspectiveFactor(float d)
+{
+    if (d > 0)
+        return g_game.x_resolution * GFXGetZPerspective(d);
+    else
+        return 1.f;
+}
+
+
 /*
 template <class UnitType>
 void GameUnit<UnitType>::Init()
@@ -300,7 +309,8 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
 		  mountLocation.to_matrix(mmat);
           if (GFXSphereInFrustum(mountLocation.position,gun->rSize()*vlpqrScaleFactor) > 0) {
               float d = (mountLocation.position-_Universe->AccessCamera()->GetPosition()).Magnitude();
-              float lod = g_game.detaillevel*g_game.x_resolution*2*gun->rSize()/GFXGetZPerspective((d-gun->rSize()<g_game.znear)?g_game.znear:d-gun->rSize());
+              float lod = gun->rSize() * g_game.detaillevel * perspectiveFactor(
+                    (d-gun->rSize()<g_game.znear)?g_game.znear:d-gun->rSize());
 		      ScaleMatrix(mmat,Vector(mahnt->xyscale,mahnt->xyscale,mahnt->zscale));
 		      gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));
 		      gun->Draw(lod,mmat,d,cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,chardamage,true);//cloakign and nebula
@@ -419,11 +429,14 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
               
               //      VSFileSystem::vs_fprintf (stderr,"%s %d ",name.c_str(),i);
               double d = GFXSphereInFrustum(TransformedPosition,minmeshradius+this->meshdata[i]->clipRadialSize()*vlpqrScaleFactor);
-              double lod;
               //      VSFileSystem::vs_fprintf (stderr,"\n");
               if (d) {  //d can be used for level of detail shit
                   d = (TransformedPosition-_Universe->AccessCamera()->GetPosition()).Magnitude();
-                  if ((lod =g_game.detaillevel*g_game.x_resolution*2*this->meshdata[i]->rSize()/GFXGetZPerspective((d-this->meshdata[i]->rSize()<g_game.znear)?g_game.znear:d-this->meshdata[i]->rSize()))>=g_game.detaillevel) {//if the radius is at least half a pixel (detaillevel is the scalar... so you gotta make sure it's above that
+                  double rd = d - this->meshdata[i]->rSize();
+                  double pixradius = this->meshdata[i]->rSize() * perspectiveFactor(
+                            (rd<g_game.znear) ? g_game.znear : rd );
+                  double lod = pixradius * g_game.detaillevel;
+                  if (lod>=0.5 && pixradius>=0.5) { // if the radius is at least half a pixel at detail 1 (equivalent to pixradius >= 0.5 / detail)
                       float currentFrame = this->meshdata[i]->getCurrentFrame();
                       this->meshdata[i]->Draw(lod,this->WarpMatrix(*ctm),d,i==this->meshdata.size()-1?-1:cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,chardamage);//cloakign and nebula		
                       On_Screen=true;
@@ -507,7 +520,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 		  mountLocation.to_matrix(mat);
           if (GFXSphereInFrustum(mountLocation.position,gun->rSize()*vlpqrScaleFactor) > 0) {
               float d = (mountLocation.position-_Universe->AccessCamera()->GetPosition()).Magnitude();
-              float lod = g_game.detaillevel*g_game.x_resolution*2*gun->rSize()/GFXGetZPerspective((d-gun->rSize()<g_game.znear)?g_game.znear:d-gun->rSize());
+              float lod = gun->rSize() * g_game.detaillevel * perspectiveFactor((d-gun->rSize()<g_game.znear)?g_game.znear:d-gun->rSize());
 		      ScaleMatrix(mat,Vector(mahnt->xyscale,mahnt->xyscale,mahnt->zscale));
 		      gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));
 		      gun->Draw(lod,mat,d,cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,chardamage,true);//cloakign and nebula

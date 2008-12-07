@@ -287,24 +287,32 @@ void /*GFXDRVAPI*/ GFXCalculateFrustum (double frustum[6][4], const Matrix &modl
 }
 
 /**
- * GFXGetXPerspective () returns the number that x/z is multiplied by to 
- * land a pixel on the screen.  
- * | xs 0  a 0 |[x]   [xs + az]          [1/xs 0   0  a/xs][x]   [x/xs+ aw/xs]
- * | 0  ys b 0 |[y] = [ys + bz]    ^-1   [ 0  1/ys 0  b/ys][y] = [y/ys+ bw/ys]
- * | 0  0  c d |[z]   [cz + dw]          [ 0   0   0  -1  ][z]   [0          ]
- * | 0  0 -1 0 |[w]   [-z     ]          [ 0   0  1/d c/d ][w]   [z/d + cw/d ]
- * therefore   return 1/(xs *d) and 1/(ys * d) 
- * I'm not good with matrix math...tell me if I should ret 1/xs+c/d instead
- * for test cases I can think of, it doesn't matter--- */
-float GFXGetZPerspective (const float z) {
-#if 0
-  float left,right,bottom,top,nearval,farval;
-  GFXGetFrustumVars(true,&left,&right,&bottom,&top,&nearval,&farval);
-   float c = (farval+nearval) / ( farval-nearval);
-   float d = (farval*(right-left)) / (farval-nearval);  /* error? */
-   //return c*z+d;
-#endif
-   return z;
+ * GFXGetZPerspective () returns the relative scale of an object placed
+ *      at distance z from the camera with the current projection matrix.
+ */
+float GFXGetZPerspective (const float z) 
+{
+   /*
+    *
+    * | xs 0  a 0 |[x]   [xs + az]          [1/xs 0   0  a/xs][x]   [x/xs+ aw/xs]
+    * | 0  ys b 0 |[y] = [ys + bz]    ^-1   [ 0  1/ys 0  b/ys][y] = [y/ys+ bw/ys]
+    * | 0  0  c d |[z]   [cz + dw]          [ 0   0   0  -1  ][z]   [0          ]
+    * | 0  0 -1 0 |[w]   [-z     ]          [ 0   0  1/d c/d ][w]   [z/d + cw/d ]
+    *
+    */
+   
+   float left,right,bottom,top,nearval,farval;
+   GFXGetFrustumVars(true,&left,&right,&bottom,&top,&nearval,&farval);
+   
+   float xs = 2*nearval / (right-left);
+   float a  = (right+left) / (right-left);
+   
+   // Compute homogeneus x,w for (1,0,z,0)
+   float hx = xs + z * a;
+   float hw = -z;
+   
+   // Translate into euclidean coordinates and return euclidean x
+   return fabs(hx / hw);
 }
 
 

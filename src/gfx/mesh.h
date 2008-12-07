@@ -195,7 +195,7 @@ protected:
   ///The enabled light effects on this mesh
   vector <MeshFX> LocalFX;
   ///Returing the mesh relevant to "size" pixels LOD of this mesh
-  Mesh *getLOD (float lod, bool bBypassDamping=false);
+  Mesh *getLOD (float lod, bool bBypassDamping=true);
 
 private:
   ///Implement fixed-function draw queue processing (the referenced pass must be of Fixed type) - internal usage
