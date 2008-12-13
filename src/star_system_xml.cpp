@@ -22,6 +22,8 @@
 #include "options.h"
 extern vs_options game_options;
 
+#include <stdlib.h>
+
 /*
 #include "cmd/cont_terrain.h"
 #include "gfx/aux_texture.h"
@@ -143,7 +145,9 @@ namespace StarXML
 		,OPTICALILLUSION,
 		SERIAL,
 		VARNAME,
-		VARVALUE
+		VARVALUE,
+        CONDITION,
+        EXPRESSION
 	};
 
 	const EnumMap::Pair element_names[] = {
@@ -169,7 +173,8 @@ namespace StarXML
 		EnumMap::Pair ("citylights",CITYLIGHTS),
 		EnumMap::Pair ("SpaceElevator",SPACEELEVATOR),
 		EnumMap::Pair ("Fog",FOG),
-		EnumMap::Pair ("FogElement",FOGELEMENT)
+		EnumMap::Pair ("FogElement",FOGELEMENT),
+        EnumMap::Pair ("Condition",CONDITION)
 	};
 	const EnumMap::Pair attribute_names[] = {
 		EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -238,8 +243,9 @@ namespace StarXML
 		EnumMap::Pair ("OpticalIllusion",OPTICALILLUSION),
 		EnumMap::Pair ("serial", SERIAL),
 		EnumMap::Pair ("VarName",VARNAME),
-		EnumMap::Pair ("VarValue",VARVALUE)
-
+		EnumMap::Pair ("VarValue",VARVALUE),
+        EnumMap::Pair ("Condition",CONDITION),
+        EnumMap::Pair ("expression",EXPRESSION)
 	};
 
 								 //By Klauss - more flexible this way
@@ -258,6 +264,76 @@ extern Flightgroup *getStaticStarFlightgroup (int faction);
 extern Flightgroup *getStaticNebulaFlightgroup (int faction);
 extern Flightgroup *getStaticAsteroidFlightgroup (int faction);
 extern Flightgroup *getStaticUnknownFlightgroup (int faction);
+
+template<typename T>
+static bool EvalCondition(const char *op, const T& left, const T& right)
+{
+    switch(op[0]) {
+    case '>':
+        switch(op[1]) {
+        case 0  : return left > right;
+        case '=': return left >= right;
+        default : return false;
+        }
+    case '=':
+        switch(op[1]) {
+        case 0  : 
+        case '=': return left == right;
+        default : return false;
+        }
+    case '<':
+        switch(op[1]) {
+        case 0  : return left < right;
+        case '=': return left <= right;
+        default : return false;
+        }
+    case '!':
+        switch(op[1]) {
+        case '=': return left != right;
+        default : return false;
+        }
+    default:
+        return false;
+    }
+}
+
+static bool ConfigCondition(const string &cond)
+{
+    if (cond.empty())
+        return true;
+
+    char varname[64];
+    char op[3];
+    char varval[64];
+    
+    bool ok = 3 == sscanf(cond.c_str(), "%63[-a-zA-Z_0-9] %2[<>=!] %63[-0-9.Ee]",
+           varname,
+           op,
+           varval);
+    
+    if (!ok)
+        return false;
+    
+    // finalize character strings, for security
+    varname[sizeof(varname)/sizeof(*varname)-1] = 0;
+    op[sizeof(op)/sizeof(*op)-1] = 0;
+    varval[sizeof(varval)/sizeof(*varval)-1] = 0;
+    
+    // try to parse varval - if not parseable as float, assume it's a string
+    char* endptr = 0;
+    float fval = strtof(varval, &endptr);
+    bool rv;
+    if (endptr == varval) {
+        string sval = vs_config->getVariable("graphics",varname,"0.0");
+        rv = EvalCondition<string>(op, sval, varval);
+    } else {
+        float fval = XMLSupport::parse_floatf(vs_config->getVariable("graphics",varname,"0.0"));
+        float fref = XMLSupport::parse_floatf(varval);
+        rv = EvalCondition<float>(op, fval, fref);
+    }
+    return rv;
+}
+
 static bool ConfigAllows(string var, float val)
 {
 	bool invert=false;
@@ -388,7 +464,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	string myfile;
 	vector <GFXLightLocal> curlights;
 	xml->cursun.i=0;
-	string varname;
+	string varname, condition;
 	float varvalue=0;
 	GFXColor tmpcol(0,0,0,1);
 	LIGHT_TARGET tmptarg= POSITION;
@@ -1132,6 +1208,19 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 			}
 			delete []filename;
 			break;
+        case CONDITION:
+            for(iter = attributes.begin(); iter!=attributes.end(); ++iter) {
+                switch(attribute_map.lookup((*iter).name)) {
+                case EXPRESSION:
+                    condition = (*iter).value;
+                    break;
+                }
+            }
+            xml->conditionStack.push_back(
+                (!xml->conditionStack.size() || xml->conditionStack.back())
+                && ConfigCondition(condition)
+            );
+            break;
 		case UNIT:
 		case BUILDING:
 		case VEHICLE:
@@ -1237,11 +1326,16 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 					case VARVALUE:
 						varvalue=parse_floatf((*iter).value);
 						break;
-
+                    case CONDITION:
+                        condition=(*iter).value;
+                        break;
 				}
 
 			}
-			if (ConfigAllows(varname,varvalue)) {
+			if (   (!xml->conditionStack.size() || xml->conditionStack.back()) 
+                && ConfigAllows(varname,varvalue) 
+                && ConfigCondition(condition)  ) 
+            {
 				if (((elem==UNIT||elem==NEBULA||elem==ENHANCEMENT||elem==ASTEROID)||(xml->ct==NULL&&xml->parentterrain==NULL))&&(xml->unitlevel>2)) {
 					assert(xml->moons.size()!=0);
 					Unit * un;
@@ -1386,6 +1480,10 @@ void StarSystem::endElement(const string &name)
 			xml->parentterrain=NULL;
 			--xml->unitlevel;
 			break;
+        case CONDITION:
+            if (xml->conditionStack.size())
+                xml->conditionStack.pop_back();
+            break;
 		default:
 			--xml->unitlevel;
 			break;
