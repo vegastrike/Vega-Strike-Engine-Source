@@ -227,7 +227,7 @@ void GameCockpit::DrawNavigationSymbol (const Vector &Loc, const Vector & P, con
   if (1) {
     static float crossthick = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","NavCrossLineThickness","1")); //1.05;
     GFXLineWidth(crossthick);
-    size = .125*GFXGetZPerspective (size);
+    size = .125*size;
     GFXBlendMode (SRCALPHA,INVSRCALPHA);
     GFXEnable (SMOOTH);
     GFXBegin (GFXLINE);
