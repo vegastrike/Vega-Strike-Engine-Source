@@ -321,7 +321,7 @@ static bool ConfigCondition(const string &cond)
     
     // try to parse varval - if not parseable as float, assume it's a string
     char* endptr = 0;
-    float fval = strtof(varval, &endptr);
+    float fval = (float)(strtod(varval, &endptr)); // VC++ does not have strtof.
     bool rv;
     if (endptr == varval) {
         string sval = vs_config->getVariable("graphics",varname,"0.0");
