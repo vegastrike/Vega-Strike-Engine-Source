@@ -1,3 +1,7 @@
+/// Draws VDU parts
+/// Draws shield, armor, comm strings and animation, messages, manifest, 
+/// target info, and objectives
+
 #include "vdu.h"
 #include "cmd/unit_generic.h"
 #include "hud.h"
@@ -1051,7 +1055,7 @@ void VDU::DrawComm () {
   }
 }
 
-void VDU::DrawManifest (Unit * parent, Unit * target) {	//	zadeVDUmanifest
+void VDU::DrawManifest (Unit * parent, Unit * target) { // zadeVDUmanifest
   static string manifest_heading = XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","manifest_heading","Manifest\n"));
   string retval(manifest_heading);
   if (target!=parent) {
@@ -1059,11 +1063,42 @@ void VDU::DrawManifest (Unit * parent, Unit * target) {	//	zadeVDUmanifest
   }else {
     retval+=string ("--------\nCredits: ")+tostring((int)_Universe->AccessCockpit()->credits)+/*string(".")+tostring (((int)(_Universe->AccessCockpit()->credits*100))%100) +*/string("\n");
   }
+  unsigned int load = 0;
+  unsigned int cred = 0;
+  unsigned int vol  = 0;
   unsigned int numCargo =target->numCargo();
-  for (unsigned int i=0;i<numCargo;i++) {
-    if ((target->GetCargo(i).GetCategory().find("upgrades/")!=0)&&(target->GetCargo(i).quantity>0))
-      retval+=target->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (target->GetCargo(i).quantity)+string (")\n");
-  }
+  unsigned int maxCargo = 16;
+  string lastCat;
+  for (unsigned int i=0;i<numCargo;i++)
+    if ((target->GetCargo(i).GetCategory().find("upgrades/")!=0)
+    && (target->GetCargo(i).quantity>0)) {
+      Cargo  ca = target->GetCargo(i);
+      int    cq = ca.quantity;
+      float  cm = ca.mass;
+      float  cv = ca.volume;
+      float  cp = ca.price;
+      string cc = ca.GetCategory();
+      load += cq*(int)cm;
+      cred += cq*(int)cp;
+      vol  += cq*(int)cv;
+      if (((target == parent) || (maxCargo + i >= numCargo) ||  lastCat.compare(cc)) && (maxCargo > 0)) {
+        maxCargo--;
+        lastCat = cc;
+        // retval+=tostring(maxCargo)+string(" ");
+        // retval+=cc+string(" ");
+        if (target==parent)
+          if (cm > cv)
+            retval += tostring(cq*(int)cm)+string("t ");
+          else
+            retval += tostring(cq*(int)cv)+string("m^2 ");
+            retval += target->GetManifest (i,parent,parent->GetVelocity())
+            + string(" ") + tostring(((target==parent)?cq:1)*(int)cp)
+            + string("Cr.\n");
+      }
+    }
+  if (target==parent)
+    retval += string("Load: ") + tostring(load) + string("t ")
+    + tostring(vol)+string("m^2 ") + tostring(cred)+string("Cr.\n");
   static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
   GFXColor tpbg=tp->bgcol;
   bool automatte=(0==tpbg.a);

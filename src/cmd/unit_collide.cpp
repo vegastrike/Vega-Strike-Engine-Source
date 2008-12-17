@@ -1,3 +1,6 @@
+/// Unit mesh collision detection
+/// Provides various functions for collision detection
+
 #include "vegastrike.h"
 //#include "unit.h"
 #include "beam.h"
@@ -194,9 +197,9 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
 	smalltransform.SetO2TTranslation(csVector3(smaller->cumulative_transformation_matrix.p-bigger->cumulative_transformation_matrix.p));
 	bigtransform.SetO2TTranslation(csVector3(0,0,0));
 	//we're only gonna lerp the positions for speed here... gahh!
-	if (smaller->colTrees->colTree(smaller,bigger->GetWarpVelocity())->Collide (*bigger->colTrees->colTree(bigger,smaller->GetWarpVelocity()),
-		&smalltransform,
-	&bigtransform)) {
+  csOPCODECollider *tmpCol = smaller->colTrees->colTree(smaller,bigger->GetWarpVelocity());
+  if (tmpCol &&
+      (tmpCol->Collide (*bigger->colTrees->colTree(bigger,smaller->GetWarpVelocity()), &smalltransform, &bigtransform))) {
 		//static int crashcount=0;
 		//      VSFileSystem::vs_fprintf (stderr,"%s Crashez to %s %d\n", bigger->name.c_str(), smaller->name.c_str(),crashcount++);
 		csCollisionPair *mycollide = csOPCODECollider::GetCollisions();
