@@ -1,3 +1,6 @@
+/// Various universe and star system helper functions
+/// 
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <algorithm>
@@ -30,6 +33,7 @@ void Universe::clearAllSystems() {
   active_star_system.clear();
   script_system=NULL;
 }
+
 Cockpit * Universe::createCockpit( std::string player)
 {
 	Cockpit * cp = new Cockpit ("",NULL,player);
@@ -172,18 +176,19 @@ void Universe::Init( const char * gal)
 }
 
 Universe::Universe(int argc, char** argv, const char * galaxy_str, bool server)
-    : galaxy( NULL )
-    , current_cockpit( 0 )
-    , script_system( NULL )
+  : galaxy( NULL )
+  , current_cockpit( 0 )
+  , script_system( NULL )
 {
 	this->Init( galaxy_str);
 	network_lock = false;
 	is_server = server;
 }
+
 Universe::Universe()
-    : galaxy( NULL )
-    , current_cockpit( 0 )
-    , script_system( NULL )
+  : galaxy( NULL )
+  , current_cockpit( 0 )
+  , script_system( NULL )
 {
 	is_server = false;
 }
@@ -234,7 +239,6 @@ StarSystem * Universe::Init (string systemfile, const Vector & centr,const strin
 }
 
 extern void micro_sleep (unsigned int howmuch);
-
 
 StarSystem *Universe::getStarSystem(string name){
 
@@ -307,10 +311,10 @@ void Universe::Generate2( StarSystem * ss)
   StarSystem *old_script_system=script_system;
 
   script_system=ss;
-  VSFileSystem::vs_fprintf (stderr,"Loading Star System %s",ss->getFileName().c_str());
+  VSFileSystem::vs_fprintf (stderr,"Loading Star System %s\n",ss->getFileName().c_str());
   const vector <std::string> &adjacent = getAdjacentStarSystems(ss->getFileName());
   for (unsigned int i=0;i<adjacent.size();i++) {
-    VSFileSystem::vs_fprintf (stderr,"\n Next To: %s",adjacent[i].c_str());
+    VSFileSystem::vs_fprintf (stderr," Next To: %s\n",adjacent[i].c_str());
     const vector <std::string> &adj = getAdjacentStarSystems(adjacent[i]);
   }
   static bool first=true;

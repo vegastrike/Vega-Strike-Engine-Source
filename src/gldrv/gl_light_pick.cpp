@@ -54,9 +54,9 @@ static void swappicked () {
 void unpicklights () {
 	for (std::vector <int>::iterator i=newpicked->begin();i!=newpicked->end();i++) {
 	  if (GLLights[(*_llights)[*i].Target()].index!=*i) {
-	    	    VSFileSystem::vs_fprintf (stderr,"uh oh");
+	    //VSFileSystem::vs_fprintf (stderr,"uh oh");
 	    (*_llights)[*i].Target()=-1;
-	    continue;//a lengthy operation... Since picked lights may have been smashed    
+	    continue;//a lengthy operation... Since picked lights may have been smashed
 	  }
     int targ =(*_llights)[*i].Target(); 
     if (GLLights[targ].options&OpenGLL::GL_ENABLED) {

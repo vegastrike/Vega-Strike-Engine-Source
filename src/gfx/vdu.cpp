@@ -800,7 +800,8 @@ void VDU::DrawTarget(GameCockpit *cp, Unit * parent, Unit * target) {
     else
       if (dist < target->rSize())
         newst += string("\nDocking: ") + string(PrettyDistanceString(dist).str);
-  }  static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
+  }
+  static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
   GFXColor tpbg=tp->bgcol;
   bool automatte=(0==tpbg.a);
   if(automatte){tp->bgcol=GFXColor(0,0,0,background_alpha);}
@@ -1089,7 +1090,7 @@ void VDU::DrawManifest (Unit * parent, Unit * target) { // zadeVDUmanifest
         maxCargo--;
         lastCat = cc;
         if (target==parent)
-          retval += string("(") + tostring(cq)+string(") "); // show quantity
+          //retval += string("(") + tostring(cq)+string(") "); // show quantity
           if (cm >= cv)
             retval += tostring((int)((float)cq*cm))+string("t ");
           else

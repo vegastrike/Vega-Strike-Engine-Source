@@ -52,6 +52,8 @@ namespace UniverseUtil
 	void musicMute(bool stopSound){}
 	void playSound(string soundName, QVector loc, Vector speed) {
 	}
+  void playSoundCockpit(string soundName) {
+  }
 	void cacheAnimation(string aniName) {
 	}
 	void playAnimation(string aniName, QVector loc, float size) {
