@@ -1,3 +1,5 @@
+/// Parses functions for python modules
+///
 /* 
  * Vega Strike
  * Copyright (C) 2001-2002 Daniel Horn
@@ -146,7 +148,7 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
       vi->float_val=g_game.difficulty;
     }
     else if (method_id==CMT_STD_setDifficulty) {
-      float diff= getFloatArg(node,mode,0);     
+      float diff= getFloatArg(node,mode,0);
       if (mode==SCRIPT_RUN) {
 	g_game.difficulty=diff;
       }
@@ -163,16 +165,16 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
       vi=call_terminateMission(node,mode);
     }
     else if (method_id==CMT_STD_playSound) {
-      std::string soundName= getStringArgument(node,mode,0);     
+      std::string soundName= getStringArgument(node,mode,0);
       QVector loc;
-      loc.i= getFloatArg(node,mode,1);     
-      loc.j= getFloatArg(node,mode,2);     
-      loc.k= getFloatArg(node,mode,3);     
+      loc.i= getFloatArg(node,mode,1);
+      loc.j= getFloatArg(node,mode,2);
+      loc.k= getFloatArg(node,mode,3);
       Vector speed(0,0,0);
       if (node->subnodes.size()>6) {
-	speed.i= getFloatArg(node,mode,4);     
-	speed.j= getFloatArg(node,mode,5);     
-	speed.k= getFloatArg(node,mode,6);           
+	speed.i= getFloatArg(node,mode,4);
+	speed.j= getFloatArg(node,mode,5);
+	speed.k= getFloatArg(node,mode,6);
       }
 	  /*
       if (mode==SCRIPT_RUN) {
@@ -185,12 +187,16 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
  	*/
      vi = newVarInst (VI_TEMP);
       vi->type=VAR_VOID;
-    }else if (method_id==CMT_STD_playAnimation) {
-      std::string aniName= getStringArgument(node,mode,0);     
+    }
+  else if (method_id==CMT_STD_playSoundCockpit) {
+    std::string soundName= getStringArgument(node,mode,0);
+  }
+  else if (method_id==CMT_STD_playAnimation) {
+      std::string aniName= getStringArgument(node,mode,0);
       QVector loc(0,0,0);
-      loc.i= getFloatArg(node,mode,1);     
-      loc.j= getFloatArg(node,mode,2);     
-      loc.k= getFloatArg(node,mode,3);     
+      loc.i= getFloatArg(node,mode,1);
+      loc.j= getFloatArg(node,mode,2);
+      loc.k= getFloatArg(node,mode,3);
       float size = getFloatArg(node,mode,4);
 	  /*
       if (mode==SCRIPT_RUN) {
@@ -401,6 +407,7 @@ varInst *Mission::callResetTimeCompression(missionNode *node,int mode){
   }
   return vi;
 }
+
 varInst *Mission::callGetSystemName(missionNode *node,int mode){
   varInst *vi=newVarInst(VI_TEMP);
   vi->type=VAR_OBJECT;
@@ -414,6 +421,7 @@ varInst *Mission::callGetSystemName(missionNode *node,int mode){
   }
   return vi;
 }
+
 varInst *Mission::callGetSystemFile (missionNode *node,int mode, StarSystem * ss) {
   varInst *vi=newVarInst(VI_TEMP);
   vi->type=VAR_OBJECT;
@@ -429,6 +437,7 @@ varInst *Mission::callGetSystemFile (missionNode *node,int mode, StarSystem * ss
   }
   return vi;
 }
+
 varInst *Mission::callGetAdjacentSystem (missionNode *node,int mode) {
   varInst *vi=newVarInst(VI_TEMP);
   vi->type=VAR_OBJECT;
@@ -456,6 +465,7 @@ varInst *Mission::callGetGalaxyProperty (missionNode *node,int mode) {
   }
   return vi;
 }
+
 varInst *Mission::callGetNumAdjacentSystems (missionNode *node,int mode) {
 
   string sysname = getStringArgument (node,mode,0);
@@ -974,6 +984,7 @@ void Mission::initCallbackMaps(){
   module_std_map["getDifficulty"]=CMT_STD_getDifficulty;
   module_std_map["setDifficulty"]=CMT_STD_setDifficulty;
   module_std_map["playSound"]=CMT_STD_playSound;
+  module_std_map["playSoundCockpit"]=CMT_STD_playSoundCockpit;
   module_std_map["terminateMission"]=CMT_STD_terminateMission;
   module_std_map["playAnimation"]=CMT_STD_playAnimation ;
   module_std_map["musicAddList"]=CMT_STD_musicAddList;

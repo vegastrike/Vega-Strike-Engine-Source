@@ -1,3 +1,6 @@
+/// Exports functions for python modules
+///
+
 voidEXPORT_UTIL(StopAllSounds)
 EXPORT_UTIL(getNumUnits,0)
 EXPORT_UTIL(GetRelation,0.)
@@ -80,6 +83,7 @@ voidEXPORT_UTIL(musicSetSoftVolume)
 voidEXPORT_UTIL(musicSetHardVolume)
 
 voidEXPORT_UTIL(playSound)
+voidEXPORT_UTIL(playSoundCockpit)
 voidEXPORT_UTIL(cacheAnimation)
 voidEXPORT_UTIL(playAnimation)
 voidEXPORT_UTIL(playAnimationGrow)

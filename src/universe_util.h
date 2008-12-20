@@ -1,3 +1,5 @@
+/// Headers for python modules
+///
 #ifndef _UNIVERSE_UTILGENERIC_H__
 #define _UNIVERSE_UTILGENERIC_H__
 #include "cmd/collection.h"
@@ -141,6 +143,8 @@ namespace UniverseUtil
 	void SetDifficulty (float diff);
 	///this plays a sound at a location...if the sound has dual channels it will play in the center
 	void playSound(std::string soundName, QVector loc, Vector speed);
+  ///this plays a sound at full volume in the cockpit
+  void playSoundCockpit(std::string soundName);
 	///this plays an image (explosion or warp animation) at a location
 	void playAnimation(std::string aniName, QVector loc, float size);
 	void playAnimationGrow(std::string aniName, QVector loc, float size,float growpercent);

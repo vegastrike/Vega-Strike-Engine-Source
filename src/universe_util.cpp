@@ -1,3 +1,5 @@
+/// Functions for python modules
+///
 #include "cmd/script/mission.h"
 #include "universe_util.h"
 #include "universe.h"
@@ -86,6 +88,11 @@ namespace UniverseUtil
 		AUDStartPlaying (sound);
 		AUDDeleteSound(sound);
 	}
+  void playSoundCockpit(string soundName) {
+    int sound = AUDCreateSoundWAV (soundName,false);
+    AUDStartPlaying (sound);
+    AUDDeleteSound(sound);
+  }
 	void StopAllSounds(void) {
 		AUDStopAllSounds();
 	}

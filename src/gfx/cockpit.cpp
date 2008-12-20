@@ -1,3 +1,6 @@
+/// Draws cockpit parts
+/// Draws gauges, info strings, radar, ...
+
 #include <boost/version.hpp>
 
 #if BOOST_VERSION != 102800
@@ -1498,7 +1501,7 @@ float GameCockpit::LookupUnitStat (int stat, Unit *target) {
 		  return (float)UnitImages::TOOFAR;
 	  }
   case UnitImages::CANDOCK_MODAL:
-	  if(!target){ //FIXME
+	  /*if(!target){ //FIXME
 		  return (float)UnitImages::READY;
 	  } else if(!target){ //FIXME
 		  return (float)UnitImages::TOOFAR;
@@ -1506,8 +1509,14 @@ float GameCockpit::LookupUnitStat (int stat, Unit *target) {
 		  return (float)UnitImages::OFF;
 	  } else {
 		  return (float)UnitImages::NOMINAL;
-	  }
-  }
+	  }*/
+    Unit *todock = target->Target();
+    if (todock && (todock->CanDockWithMe(target,1) != -1))
+      return (todock->CanDockWithMe(target,0) != -1) ?
+      (float)UnitImages::READY
+    : (float)UnitImages::TOOFAR;
+    return (float)UnitImages::NOMINAL;
+}
   return 1;
 }
 
@@ -2666,13 +2675,13 @@ void GameCockpit::Draw() {
   if (QuitAllow||getTimeCompression()<.5) {
     if (QuitAllow){ 
       if (!die){
-        static VSSprite QuitSprite("quit.spr",BILINEAR,GFXTRUE);
+        static VSSprite QuitSprite("quit.sprite",BILINEAR,GFXTRUE);
 
         GFXEnable(TEXTURE0);
         QuitSprite.Draw();	  
       }
     }else {
-      static VSSprite PauseSprite("pause.spr",BILINEAR,GFXTRUE);
+      static VSSprite PauseSprite("pause.sprite",BILINEAR,GFXTRUE);
       GFXEnable(TEXTURE0);
       PauseSprite.Draw();
     }
@@ -2719,7 +2728,7 @@ void GameCockpit::Draw() {
         if (dietime>min_die_time) {
           static std::string death_menu_script = vs_config->getVariable("graphics","death_menu_script","");
           if (death_menu_script.empty()) {
-            static VSSprite DieSprite("died.spr",BILINEAR,GFXTRUE);
+            static VSSprite DieSprite("died.sprite",BILINEAR,GFXTRUE);
             GFXBlendMode(SRCALPHA,INVSRCALPHA);
             GFXEnable(TEXTURE0);
             DieSprite.Draw();

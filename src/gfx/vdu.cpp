@@ -628,22 +628,22 @@ VSSprite * getTargetDualShield () {
 }
 
 VSSprite * getJumpImage () {
-  static VSSprite s("jump-hud.spr");
+  static VSSprite s("jump-hud.sprite");
   return &s;
 }
 
 VSSprite * getSunImage () {
-  static VSSprite s("sun-hud.spr");
+  static VSSprite s("sun-hud.sprite");
   return &s;
 }
 
 VSSprite * getPlanetImage () {
-  static VSSprite s("planet-hud.spr");
+  static VSSprite s("planet-hud.sprite");
   return &s;
 }
 
 VSSprite * getNavImage () {
-  static VSSprite s("nav-hud.spr");
+  static VSSprite s("nav-hud.sprite");
   return &s;
 }
 
@@ -783,7 +783,7 @@ void VDU::DrawTarget(GameCockpit *cp, Unit * parent, Unit * target) {
   int i=0;
   char st[1024];
   memset(st,'\n',1023);
-  int tmplim=rows-1;
+  int tmplim=rows-3;
   if (draw_auto_message==true)
     tmplim--;
   st[tmplim]='\0';
@@ -791,10 +791,16 @@ void VDU::DrawTarget(GameCockpit *cp, Unit * parent, Unit * target) {
   if (draw_auto_message){
     newst+=cp->autoMessage+"\n";
   }
-  retString128 qr=PrettyDistanceString(DistanceTwoTargets(parent,target));
-  newst+="Range: ";
-  newst+=qr.str;
-  static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
+  double dist = DistanceTwoTargets(parent,target);
+  newst+=string("Range: ") + string(PrettyDistanceString(dist).str);
+  if ((target->isUnit()==PLANETPTR) && (target->CanDockWithMe(parent,1) != -1)) {
+    dist -= target->rSize() * UniverseUtil::getPlanetRadiusPercent();
+    if (dist < 0)
+      newst += string("\nDocking: Ready");
+    else
+      if (dist < target->rSize())
+        newst += string("\nDocking: ") + string(PrettyDistanceString(dist).str);
+  }  static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
   GFXColor tpbg=tp->bgcol;
   bool automatte=(0==tpbg.a);
   if(automatte){tp->bgcol=GFXColor(0,0,0,background_alpha);}
@@ -879,11 +885,11 @@ void VDU::DrawMessages(GameCockpit* parentcp,Unit *target){
 */
   string targetstr;
   int msglen=targetstr.size();
-  
+
   int rows_needed=0;//msglen/(cols>0?cols:1);
 
   MessageCenter *mc=mission->msgcenter;
-  
+
   int rows_used=rows_needed;
   vector <std::string> whoNOT;
   whoNOT.push_back ("briefing");
@@ -895,30 +901,30 @@ void VDU::DrawMessages(GameCockpit* parentcp,Unit *target){
   gameMessage lastmsg;
   int row_lim=((scrolloffset<0||num_messages>rows)?rows:num_messages);
   for(int i=scrolloffset<0?-scrolloffset-1:0;rows_used<row_lim&&mc->last(i,lastmsg,message_people,whoNOT);i++){
-      char timebuf[100];
-      double sendtime=lastmsg.time;
-      if (scrolloffset>=0&&sendtime<nowtime-oldtime*4){
-        break;
-      }
-      if(sendtime<=nowtime&&(sendtime>nowtime-oldtime||scrolloffset<0)){
-		  int sendtime_mins=(int)(sendtime/60.0);
-		  int sendtime_secs=(int)(sendtime - sendtime_mins*60);
-		  
-		  sprintf(timebuf,"%d.%02d",sendtime_mins,sendtime_secs);
-		  string mymsg;
-		  if (lastmsg.from!="game") {
-			  mymsg=lastmsg.from+" ("+timebuf+"): "+lastmsg.message;
-		  } else {
-			  mymsg=string(timebuf)+": "+lastmsg.message;
-		  }
-		  int msglen=mymsg.size();
-		  int rows_needed=(int)(msglen/(1.6*cols));
-		  fullstr=mymsg+"\n"+fullstr;
-		  //fullstr=fullstr+mymsg+"\n";
-		  
-		  rows_used+=rows_needed+1;
-		  //      cout << "nav  " << mymsg << " rows " << rows_needed << endl;
-      }
+    char timebuf[100];
+    double sendtime=lastmsg.time;
+    if (scrolloffset>=0&&sendtime<nowtime-oldtime*4){
+      break;
+    }
+    if(sendtime<=nowtime&&(sendtime>nowtime-oldtime||scrolloffset<0)){
+    int sendtime_mins=(int)(sendtime/60.0);
+    int sendtime_secs=(int)(sendtime - sendtime_mins*60);
+
+    sprintf(timebuf,"%d.%02d",sendtime_mins,sendtime_secs);
+    string mymsg;
+    if (lastmsg.from!="game") {
+      mymsg=lastmsg.from+" ("+timebuf+"): "+lastmsg.message;
+    } else {
+      mymsg=string(timebuf)+": "+lastmsg.message;
+    }
+    int msglen=mymsg.size();
+    int rows_needed=(int)(msglen/(1.6*cols));
+    fullstr=mymsg+"\n"+fullstr;
+    //fullstr=fullstr+mymsg+"\n";
+
+    rows_used+=rows_needed+1;
+    //      cout << "nav  " << mymsg << " rows " << rows_needed << endl;
+    }
   }
   static std::string newline("\n");
   std::string textMessage=parentcp->textMessage;
@@ -928,8 +934,6 @@ void VDU::DrawMessages(GameCockpit* parentcp,Unit *target){
       textMessage+="]";
     }
   }
-    
-
   /*
   if (rows_used>=row_lim&&parentcp->editingTextMessage) {
     size_t where=fullstr.find(newline);
@@ -1044,7 +1048,7 @@ void VDU::DrawComm () {
     GFXDisable (TEXTURE0);
 
 
-  }else {
+  } else {
 	static string message_prefix = XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","message_prefix",""));
 	static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
 	GFXColor tpbg=tp->bgcol;
@@ -1061,7 +1065,7 @@ void VDU::DrawManifest (Unit * parent, Unit * target) { // zadeVDUmanifest
   if (target!=parent) {
     retval+=string ("Tgt: ")+reformatName(target->name)+string("\n");
   }else {
-    retval+=string ("--------\nCredits: ")+tostring((int)_Universe->AccessCockpit()->credits)+/*string(".")+tostring (((int)(_Universe->AccessCockpit()->credits*100))%100) +*/string("\n");
+    retval+=string ("--------\nCredits: ")+tostring((int)_Universe->AccessCockpit()->credits)+string("\n");
   }
   unsigned int load = 0;
   unsigned int cred = 0;
@@ -1078,26 +1082,25 @@ void VDU::DrawManifest (Unit * parent, Unit * target) { // zadeVDUmanifest
       float  cv = ca.volume;
       float  cp = ca.price;
       string cc = ca.GetCategory();
-      load += cq*(int)cm;
       cred += cq*(int)cp;
-      vol  += cq*(int)cv;
+      vol  += (int)((float)cq*cv);
+      load += (int)((float)cq*cm);
       if (((target == parent) || (maxCargo + i >= numCargo) ||  lastCat.compare(cc)) && (maxCargo > 0)) {
         maxCargo--;
         lastCat = cc;
-        // retval+=tostring(maxCargo)+string(" ");
-        // retval+=cc+string(" ");
         if (target==parent)
-          if (cm > cv)
-            retval += tostring(cq*(int)cm)+string("t ");
+          retval += string("(") + tostring(cq)+string(") "); // show quantity
+          if (cm >= cv)
+            retval += tostring((int)((float)cq*cm))+string("t ");
           else
-            retval += tostring(cq*(int)cv)+string("m^2 ");
-            retval += target->GetManifest (i,parent,parent->GetVelocity())
-            + string(" ") + tostring(((target==parent)?cq:1)*(int)cp)
-            + string("Cr.\n");
+            retval += tostring((int)((float)cq*cv))+string("m^2 ");
+        retval += target->GetManifest (i,parent,parent->GetVelocity())
+        + string(" ") + tostring(((target==parent)?cq:1)*(int)cp)
+        + string("Cr.\n");
       }
     }
   if (target==parent)
-    retval += string("Load: ") + tostring(load) + string("t ")
+    retval += string("--------\nLoad: ") + tostring(load) + string("t ")
     + tostring(vol)+string("m^2 ") + tostring(cred)+string("Cr.\n");
   static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
   GFXColor tpbg=tp->bgcol;
@@ -1157,7 +1160,7 @@ static void DrawGun (Vector  pos, float w, float h, weapon_info::MOUNT_SIZE sz) 
       GFXVertex3d (pos.i+oox,pos.j+h/6+ooy*2,0);
       GFXVertex3d (pos.i-2*oox,pos.j+h/6+ooy*4,0);
       GFXVertex3d (pos.i+2*oox,pos.j+h/6+ooy*4,0);
-    }  
+    }
     GFXEnd ();
   }else if (sz==weapon_info::SPECIAL||sz==weapon_info::SPECIALMISSILE) {
     GFXPointSize (4);
@@ -1165,14 +1168,14 @@ static void DrawGun (Vector  pos, float w, float h, weapon_info::MOUNT_SIZE sz) 
     GFXVertexf (pos);
     GFXEnd ();
     GFXPointSize (1);//classified...  FIXME    
-  }else if (sz<weapon_info::HEAVYMISSILE) {
+  } else if (sz<weapon_info::HEAVYMISSILE) {
     GFXBegin (GFXLINE);
     GFXVertex3d (pos.i,pos.j-h/8,0);
     GFXVertex3d (pos.i,pos.j+h/8,0);
     GFXVertex3d (pos.i+2*oox,pos.j-h/8+2*ooy,0);
     GFXVertex3d (pos.i-2*oox,pos.j-h/8+2*ooy,0);
     GFXEnd();
-  }else if (sz<=weapon_info::CAPSHIPHEAVYMISSILE) {
+  } else if (sz<=weapon_info::CAPSHIPHEAVYMISSILE) {
     GFXBegin (GFXLINE);
     GFXVertex3d (pos.i,pos.j-h/6,0);
     GFXVertex3d (pos.i,pos.j+h/6,0);
@@ -1184,7 +1187,7 @@ static void DrawGun (Vector  pos, float w, float h, weapon_info::MOUNT_SIZE sz) 
     GFXVertex3d (pos.i-oox,pos.j+h/9,0);
     GFXEnd();
   }
-  
+
 }
 
 extern const char * DamagedCategory;
@@ -1493,16 +1496,16 @@ void VDU::DrawWeapon (Unit * parent) {
     average.g+=mntcolor.g;
     average.b+=mntcolor.b;
     average.a+=mntcolor.a;
-    
+
     if(i+1<nummounts&&parent->mounts[i].bank){
       //nothing
     }else if (parent->mounts[i].status==Mount::ACTIVE||parent->mounts[i].status==Mount::DESTROYED) {
       GFXColor mountcolor(average.r/numave,average.g/numave,average.b/numave,average.a/numave);
       if (parent->mounts[i].type->size<weapon_info::LIGHTMISSILE) {
-        
+
 	buf+=((buf.length()==(unsigned int)len)?string(""):string(","))+((count++%1==0)?"\n":"")+string(colToString(mountcolor).str)+parent->mounts[i].type->weapon_name+ammo;
       }else {
-        
+
 	mbuf+=((mbuf.length()==(unsigned int)mlen)?string(""):string(","))+((mcount++%1==0)?"\n":"")+string(colToString(mountcolor).str)+parent->mounts[i].type->weapon_name+ammo;;
       }
       numave=0;
