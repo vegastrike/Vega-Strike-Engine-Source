@@ -25,13 +25,13 @@ int main (int argc,char**argv) {
         }else if (strncmp(argv[i],"-scaley",7)==0) {
             scaley = (float)atof(argv[i]+7);
         }else if (strncmp(argv[i],"-scalez",7)==0) {
-            scalez = (int)atof(argv[i]+7);
+            scalez = (float)atof(argv[i]+7);
         }else if (strncmp(argv[i],"-transx",7)==0) {
-            transx = (int)atof(argv[i]+7);
+            transx = (float)atof(argv[i]+7);
         }else if (strncmp(argv[i],"-transy",7)==0) {
-            transy = (int)atof(argv[i]+7);
+            transy = (float)atof(argv[i]+7);
         }else if (strncmp(argv[i],"-transz",7)==0) {
-            transz = (int)atof(argv[i]+7);
+            transz = (float)atof(argv[i]+7);
         }else{
             match=0;
         }
