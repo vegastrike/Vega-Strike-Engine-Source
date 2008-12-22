@@ -47,9 +47,8 @@ int main (int argc,char**argv) {
     FILE * out=fopen(argv[2],"wb");
     char line[16384];    
     while (fgets(line,16384,in)) {
-        if (line[0]=='v') {
-            double x=0,y=0,z=0;
-            sscanf(line,"v %lf %lf %lf",&x,&y,&z);
+        double x=0,y=0,z=0;
+        if (3==sscanf(line,"v %lf %lf %lf",&x,&y,&z)) {
             if (x<minx)
                 minx=x;
             if (y<miny)
