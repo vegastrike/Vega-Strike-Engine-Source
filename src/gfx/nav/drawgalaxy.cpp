@@ -1,3 +1,6 @@
+/// Nav computer functions
+/// Draws in-system map, and  galaxy map of known sectors and systems
+
 #include <algorithm>
 #include "vs_globals.h"
 #include "vegastrike.h"
@@ -86,7 +89,7 @@ static char GetSystemColor(string source) {
 	return 'v';
 }
 
-static void DrawNode(int type,float size,float x, float y, std::string source,navscreenoccupied * screenoccupation, bool moused, GFXColor race, bool mouseover=false, bool willclick=false) {
+static void DrawNode(int type,float size,float x, float y, std::string source,navscreenoccupied * screenoccupation, bool moused, GFXColor race, bool mouseover=false, bool willclick=false, string insector="") {
 	char color=GetSystemColor(source);
 	if (moused)
 		return;
@@ -124,16 +127,16 @@ static void DrawNode(int type,float size,float x, float y, std::string source,na
 			race.b+=.75;
 		}
 	}
-//		race=GFXColor (1,1,1,1);
 	NavigationSystem::DrawCircle(x, y, size, race);
 	if ((!mouseover)||(willclick)) {
+    string tsector,nam;
+    Beautify (source,tsector,nam);
 		if (willclick) {
 			race=highlighted_tail_text;
-		}
-		string blah,nam;
-		Beautify (source,blah,nam);
-			
-		DrawNodeDescription (nam,x,y,1.0,1.0,0,race,screenoccupation);
+      nam = tsector+" / "+nam;
+    }
+    if (willclick || !(insector.compare("")) || !(insector.compare(tsector)))
+      DrawNodeDescription (nam,x,y,1.0,1.0,0,race,screenoccupation);
 	}
 }
 
@@ -396,6 +399,7 @@ NavigationSystem::CachedSystemIterator::SystemInfo& NavigationSystem::CachedSyst
 		return nullPair;
 	return systems[pos];
 }
+
 const NavigationSystem::CachedSystemIterator::SystemInfo& NavigationSystem::CachedSystemIterator::operator[] (unsigned pos) const{
 	if (pos>=size())
 		return nullPair;
@@ -865,25 +869,12 @@ void NavigationSystem::DrawGalaxy() {
 		}
 
 		bool moused = false;
-		if(isPath) {
-		  isPath=true;
-		  DrawNode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),screenoccupation,moused,pathcol);
-		  DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, 0);
-		  
-		  if (TestIfInRangeRad(the_x, the_y, insert_size, mouse_x_current, mouse_y_current) ) {
-		    mouselist.push_back(systemdrawnode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),systemIter.getIndex(),screenoccupation,false, pathcol));
-		    moused=true;
-		  }
-		}
-		
-		if(!isPath) {
-		  DrawNode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),screenoccupation,moused,col);
-		  DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, 0);
+      DrawNode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),screenoccupation,moused,isPath ? pathcol : col,false,false,isPath ? "" : csector);
+      DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, 0);
 
-		  if (TestIfInRangeRad(the_x, the_y, insert_size, mouse_x_current, mouse_y_current) ) {
-		    mouselist.push_back(systemdrawnode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),systemIter.getIndex(),screenoccupation,false, col));
-		    moused=true;
-		  }
+      if (TestIfInRangeRad(the_x, the_y, insert_size, mouse_x_current, mouse_y_current) ) {
+        mouselist.push_back(systemdrawnode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),systemIter.getIndex(),screenoccupation,false, isPath ? pathcol : col));
+      moused=true;
 		}
 
 		unsigned destsize=systemIter->GetDestinationSize();
