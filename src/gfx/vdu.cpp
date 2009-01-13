@@ -536,9 +536,13 @@ static void DrawShieldArmor(Unit * parent, const float StartArmor[8], float x, f
   static float mBarmorcolor[4]={.75,.45,.1,1};
   static float oBarmorcolor[4]={.75,.45,.1,1};
   
-  static bool iarmorcolorloaded=(vs_config->getColor("default","inner_shield_color",ishieldcolor,true),true);
-  static bool marmorcolorloaded=(vs_config->getColor("default","middle_shield_color",mshieldcolor,true),true);
-  static bool oarmorcolorloaded=(vs_config->getColor("default","outer_shield_color",oshieldcolor,true),true);
+  static bool iarmorcolorloaded=(vs_config->getColor("default","inner_armor_color",iarmorcolor,true),true);
+  static bool marmorcolorloaded=(vs_config->getColor("default","middle_armor_color",marmorcolor,true),true);
+  static bool oarmorcolorloaded=(vs_config->getColor("default","outer_armor_color",oarmorcolor,true),true);
+
+  static bool iBarmorcolorloaded=(vs_config->getColor("default","inner_bottom_armor_color",iBarmorcolor,true),true);
+  static bool mBarmorcolorloaded=(vs_config->getColor("default","middle_bottom_armor_color",mBarmorcolor,true),true);
+  static bool oBarmorcolorloaded=(vs_config->getColor("default","outer_bottom_armor_color",oBarmorcolor,true),true);
 
   GFXDisable (TEXTURE0);
   DrawShield (fs,rs,ls,bs,x,y,w,h,invertfrontback,
@@ -814,19 +818,14 @@ void VDU::DrawTarget(GameCockpit *cp, Unit * parent, Unit * target) {
   static bool ishieldcolorloaded=(vs_config->getColor("default","inner_shield_color",ishieldcolor,true),true);
   static bool mshieldcolorloaded=(vs_config->getColor("default","middle_shield_color",mshieldcolor,true),true);
   static bool oshieldcolorloaded=(vs_config->getColor("default","outer_shield_color",oshieldcolor,true),true);
-/*
-  static float iarmorcolor[4]={1,.6,0,1};
-  static float marmorcolor[4]={1,.6,0,1};
-  static float oarmorcolor[4]={1,.6,0,1};
-  static bool iarmorcolorloaded=(vs_config->getColor("default","inner_shield_color",ishieldcolor,true),true);
-  static bool marmorcolorloaded=(vs_config->getColor("default","middle_shield_color",mshieldcolor,true),true);
-  static bool oarmorcolorloaded=(vs_config->getColor("default","outer_shield_color",oshieldcolor,true),true);
-*/ // uncomment if these are ever actually used
-  /* code replaced by target shields defined in cockpit.cpt files
+  
+  // code replaced by target shields defined in cockpit.cpt files, preserve for mods
+  static bool builtin_shields=XMLSupport::parse_bool(vs_config->getVariable("graphics","vdu_builtin_shields","false"));
+  if (builtin_shields)
     DrawShield (fs,rs,ls,bs,x,y,w,h,invert_target_shields,
       GFXColor(ishieldcolor[0],ishieldcolor[1],ishieldcolor[2],ishieldcolor[3]),
       GFXColor(mshieldcolor[0],mshieldcolor[1],mshieldcolor[2],mshieldcolor[3]),
-      GFXColor(oshieldcolor[0],oshieldcolor[1],oshieldcolor[2],oshieldcolor[3]));*/
+      GFXColor(oshieldcolor[0],oshieldcolor[1],oshieldcolor[2],oshieldcolor[3]));
 
     // this is a possibility to draw target shields but without gauging
     // the gauging method is implemented in cockpit.cpp
