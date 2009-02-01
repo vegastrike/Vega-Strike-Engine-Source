@@ -1,5 +1,7 @@
 #include <stdio.h>
-#include <iostream.h>
+#include <string.h>
+#include <stdlib.h>
+#include <iostream>
 #include <map>
 #include <vector>
 #include <string>
@@ -17,6 +19,7 @@ public:
   }
   Averaging& operator +=(int a) {
     samples.push_back(a);
+    return *this;
   }
   float spread() {
     int min=-1;

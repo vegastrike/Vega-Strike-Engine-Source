@@ -22,3 +22,4 @@ ENDIF(GTK2_FOUND)
 add_definitions(${GTK_CFLAGS})
 include_directories(${vsUTCS_SOURCE_DIR}/setup/src/include ${vsUTCS_SOURCE_DIR}/src/common ${vsUTCS_BINARY_DIR} ${GTK2_INCLUDE_DIRS})
 target_link_libraries(vssetup ${GTK_LIBS})
+
