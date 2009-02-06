@@ -346,55 +346,58 @@ Mesh::~Mesh()
 }
 void Mesh::Draw(float lod, const Matrix &m, float toofar, int cloak, float nebdist,unsigned char hulldamage, bool renormalize) //short fix
 {
-  //  Vector pos (local_pos.Transform(m));
-  MeshDrawContext c(m);
-  UpdateFX(GetElapsedTime());
-  c.SpecialFX = &LocalFX;
-  c.damage=hulldamage;
-
-  c.mesh_seq=((toofar+rSize())>g_game.zfar)?NUM_ZBUF_SEQ:draw_sequence;
-  c.cloaked=MeshDrawContext::NONE;
-  if (nebdist<0) {
-    c.cloaked|=MeshDrawContext::FOG;
-  }
-  if (renormalize) {
-	  c.cloaked|=MeshDrawContext::RENORMALIZE;
-  }
-  if (cloak>=0) {
-    c.cloaked|=MeshDrawContext::CLOAK;
-    if ((cloak&0x1)) {
-      c.cloaked |= MeshDrawContext::GLASSCLOAK;
-      c.mesh_seq=MESH_SPECIAL_FX_ONLY;//draw near the end with lights
-    } else {
-      c.mesh_seq =2;
-    }
-    if (cloak<=2147483647/2) {
-      c.cloaked|=MeshDrawContext::NEARINVIS;
-    }
-    float tmp = ((float)cloak)/2147483647;
-    c.CloakFX.r = (c.cloaked&MeshDrawContext::GLASSCLOAK)?tmp:1;
-    c.CloakFX.g = (c.cloaked&MeshDrawContext::GLASSCLOAK)?tmp:1;
-    c.CloakFX.b = (c.cloaked&MeshDrawContext::GLASSCLOAK)?tmp:1;
-    c.CloakFX.a = tmp;
-    /*
-    c.CloakNebFX.ambient[0]=((float)cloak)/2147483647;
-    c.CloakNebFX.ag=((float)cloak)/2147483647;
-    c.CloakNebFX.ab=((float)cloak)/2147483647;
-    c.CloakNebFX.aa=((float)cloak)/2147483647;
-    */
-    ///all else == defaults, only ambient
-  } 
-  //  c.mat[12]=pos.i;
-  //  c.mat[13]=pos.j;
-  //  c.mat[14]=pos.k;//to translate to local_pos which is now obsolete!
   Mesh *origmesh = getLOD (lod);
-  origmesh->draw_queue[c.mesh_seq].push_back(c);
-  if(!(origmesh->will_be_drawn&(1<<c.mesh_seq))) {
-    origmesh->will_be_drawn |= (1<<c.mesh_seq);
-    for (int passno = 0, npasses = origmesh->technique->getNumPasses(); passno < npasses; ++passno)
-        undrawn_meshes[c.mesh_seq].push_back(OrigMeshContainer(origmesh,toofar-rSize(),passno));
+  if (origmesh->rSize() > 0) {
+    //  Vector pos (local_pos.Transform(m));
+    MeshDrawContext c(m);
+    UpdateFX(GetElapsedTime());
+    c.SpecialFX = &LocalFX;
+    c.damage=hulldamage;
+    
+    c.mesh_seq=((toofar+rSize())>g_game.zfar)?NUM_ZBUF_SEQ:draw_sequence;
+    c.cloaked=MeshDrawContext::NONE;
+    if (nebdist<0) {
+        c.cloaked|=MeshDrawContext::FOG;
+    }
+    if (renormalize) {
+        c.cloaked|=MeshDrawContext::RENORMALIZE;
+    }
+    if (cloak>=0) {
+        c.cloaked|=MeshDrawContext::CLOAK;
+        if ((cloak&0x1)) {
+        c.cloaked |= MeshDrawContext::GLASSCLOAK;
+        c.mesh_seq=MESH_SPECIAL_FX_ONLY;//draw near the end with lights
+        } else {
+        c.mesh_seq =2;
+        }
+        if (cloak<=2147483647/2) {
+        c.cloaked|=MeshDrawContext::NEARINVIS;
+        }
+        float tmp = ((float)cloak)/2147483647;
+        c.CloakFX.r = (c.cloaked&MeshDrawContext::GLASSCLOAK)?tmp:1;
+        c.CloakFX.g = (c.cloaked&MeshDrawContext::GLASSCLOAK)?tmp:1;
+        c.CloakFX.b = (c.cloaked&MeshDrawContext::GLASSCLOAK)?tmp:1;
+        c.CloakFX.a = tmp;
+        /*
+        c.CloakNebFX.ambient[0]=((float)cloak)/2147483647;
+        c.CloakNebFX.ag=((float)cloak)/2147483647;
+        c.CloakNebFX.ab=((float)cloak)/2147483647;
+        c.CloakNebFX.aa=((float)cloak)/2147483647;
+        */
+        ///all else == defaults, only ambient
+    } 
+    //  c.mat[12]=pos.i;
+    //  c.mat[13]=pos.j;
+    //  c.mat[14]=pos.k;//to translate to local_pos which is now obsolete!
+  
+    origmesh->draw_queue[c.mesh_seq].push_back(c);
+    if(!(origmesh->will_be_drawn&(1<<c.mesh_seq))) {
+        origmesh->will_be_drawn |= (1<<c.mesh_seq);
+        for (int passno = 0, npasses = origmesh->technique->getNumPasses(); passno < npasses; ++passno)
+            undrawn_meshes[c.mesh_seq].push_back(OrigMeshContainer(origmesh,toofar-rSize(),passno));
+    }
+    will_be_drawn |= (1<<c.mesh_seq);
   }
-  will_be_drawn |= (1<<c.mesh_seq);
 }
 void Mesh::DrawNow(float lod,  bool centered, const Matrix &m, int cloak, float nebdist) { //short fix
   Mesh *o = getLOD (lod);
