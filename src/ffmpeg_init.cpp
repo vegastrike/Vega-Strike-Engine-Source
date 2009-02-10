@@ -22,6 +22,7 @@ extern "C" {
     #include <ffmpeg/avcodec.h>
     #include <ffmpeg/avformat.h>
     #include <ffmpeg/avio.h>
+
 }
 
 #endif
@@ -37,9 +38,12 @@ extern "C" {
 /* FOLLOWING CODE IS ONLY INCLUDED IF YOU HAVE FFMPEG */
 /* ******************************************** */
 #ifdef HAVE_FFMPEG
+#ifdef _WIN32
+#define offset_t xoffset_t
+#endif
 
 #ifndef offset_t
-    #if (LIBAVCODEC_VERSION_MAJOR >= 52) || (LIBAVCODEC_VERSION_INT >= ((51<<16)+(49<<8)+0))
+    #if (LIBAVCODEC_VERSION_MAJOR >= 52) || (LIBAVCODEC_VERSION_INT >= ((51<<16)+(49<<8)+0))  ||   defined(__amd64__) || defined(_M_AMD64)   ||   defined(__x86_64) || defined(__x86_64__)
         typedef int64_t offset_t;
     #else
         typedef int offset_t;
