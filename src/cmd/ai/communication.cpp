@@ -217,6 +217,10 @@ int FSM::getDefaultState (float relationship) const{
 }
 std::string FSM::GetEdgesString (int curstate) {
   std::string retval="\n";
+  if (nodes.size()>=curstate) {
+      fprintf(stderr,"Error with faction relationship due to %d not being in range of faction\n",curstate);
+      return "\n1. Transmit Error\n2. Transmit Error\n3. Transmit Error\n";
+  }
   for (unsigned int i=0;i<nodes[curstate].edges.size();i++) {
     retval+= tostring ((int)((i+1)%10))+"."+nodes[nodes[curstate].edges[i]].messages[0]+"\n";
   }
@@ -226,7 +230,11 @@ std::string FSM::GetEdgesString (int curstate) {
   return retval;
 }
 float FSM::getDeltaRelation (int prevstate, int current_state) const{
-  return nodes[current_state].messagedelta;
+    if (nodes.size()>=current_state) {
+        fprintf(stderr,"Error with faction relationship due to %d not being in range of faction\n",current_state);
+        return 0;
+    }
+    return nodes[current_state].messagedelta;
 }
 
 void CommunicationMessage::Init (Unit * send, Unit * recv) {
