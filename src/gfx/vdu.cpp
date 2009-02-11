@@ -795,16 +795,18 @@ void VDU::DrawTarget(GameCockpit *cp, Unit * parent, Unit * target) {
   if (draw_auto_message){
     newst+=cp->autoMessage+"\n";
   }
+  newst+='\n';
   double dist = DistanceTwoTargets(parent,target);
-  newst+=string("Range: ") + string(PrettyDistanceString(dist).str);
+  double actual_range=dist;
   if ((target->isUnit()==PLANETPTR) && (target->CanDockWithMe(parent,1) != -1)) {
     dist -= target->rSize() * UniverseUtil::getPlanetRadiusPercent();
     if (dist < 0)
-      newst += string("\nDocking: Ready");
+      newst += string("Docking: Ready");
     else
       if (dist < target->rSize())
-        newst += string("\nDocking: ") + string(PrettyDistanceString(dist).str);
+        newst += string("Docking: ") + string(PrettyDistanceString(dist).str);
   }
+  newst+=string("\nRange: ") + string(PrettyDistanceString(actual_range).str);
   static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
   GFXColor tpbg=tp->bgcol;
   bool automatte=(0==tpbg.a);
