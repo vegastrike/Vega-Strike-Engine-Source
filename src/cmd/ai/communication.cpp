@@ -176,7 +176,7 @@ int FSM::getCommMessageMood (int curstate, float mood, float randomresponse,floa
 			b.push_back(i);
 		}
 	}
-	if(((g.size()!=0)&&relationship>0)||(b.size()==0)) {
+	if(g.size()!=0&&(relationship>0||(b.size()==0))) {
 		choice=g[(rand()%g.size())];
 	}else {
 		if (b.size()) {
