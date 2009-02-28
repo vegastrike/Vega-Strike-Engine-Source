@@ -539,7 +539,10 @@ IF(CMAKE_BUILD_TYPE MATCHES "[Mm][Aa][Ii][Nn][Tt][Aa][Ii][Nn][Ee][Rr]")
   ADD_DEFINITIONS(-DGCC_HASVISIBILITY)
 ENDIF(CMAKE_BUILD_TYPE MATCHES "[Mm][Aa][Ii][Nn][Tt][Aa][Ii][Nn][Ee][Rr]")
 
-add_executable(vegastrike ${VEGASTRIKE_SOURCES})
+IF(NOT DISABLE_CLIENT)
+	add_executable(vegastrike ${VEGASTRIKE_SOURCES})
+ENDIF(NOT DISABLE_CLIENT)
+
 add_executable(vegaserver ${VEGASERVER_SOURCES})
 
 
@@ -581,10 +584,13 @@ ELSE(Boost_FOUND)
 		add_subdirectory(boost/1_35)
 		SET(TST_LIBS ${TST_LIBS} boost_python)
 	ENDIF(APPLE)
-	add_dependencies(vegastrike boost_python)
+	IF(NOT DISABLE_CLIENT)
+		add_dependencies(vegastrike boost_python)
+	ENDIF(NOT DISABLE_CLIENT)
 	add_dependencies(vegaserver boost_python)
 ENDIF(Boost_FOUND)
 
+IF(NOT DISABLE_CLIENT) ##########
 
 #Find GL
 find_package(OpenGL REQUIRED)
@@ -618,24 +624,6 @@ ELSE(OPENAL_FOUND)
 	message("We aint got no sound")
 ENDIF(OPENAL_FOUND)
 
-#Find JPEG
-find_package(JPEG REQUIRED)
-IF(JPEG_FOUND)
-	SET(TST_INCLUDES ${TST_INCLUDES} ${JPEG_INCLUDE_DIR})
-	SET(TST_LIBS ${TST_LIBS} ${JPEG_LIBRARIES})
-ELSE(JPEG_FOUND)
-	message("How are we gonna open jpegs?")
-ENDIF(JPEG_FOUND)
-
-#Find PNG
-find_package(PNG REQUIRED)
-IF(PNG_FOUND)
-	SET(TEST_INCLUDES ${TST_INCLUDES} ${PNG_INCLUDE_DIRS})
-	SET(TST_LIBS ${TST_LIBS} ${PNG_LIBRARIES})
-ELSE(PNG_FOUND)
-	message("Can't find PNG lib")
-ENDIF(PNG_FOUND)
-
 #Find SDL
 find_package(SDL)
 IF(SDL_FOUND)
@@ -657,6 +645,26 @@ IF(Vorbis_FOUND)
 ELSE(Vorbis_FOUND)
 	message("Can't find Vorbis libs")
 ENDIF(Vorbis_FOUND)
+
+ENDIF(NOT DISABLE_CLIENT) ##########
+
+#Find JPEG
+find_package(JPEG REQUIRED)
+IF(JPEG_FOUND)
+	SET(TST_INCLUDES ${TST_INCLUDES} ${JPEG_INCLUDE_DIR})
+	SET(TST_LIBS ${TST_LIBS} ${JPEG_LIBRARIES})
+ELSE(JPEG_FOUND)
+	message("How are we gonna open jpegs?")
+ENDIF(JPEG_FOUND)
+
+#Find PNG
+find_package(PNG REQUIRED)
+IF(PNG_FOUND)
+	SET(TEST_INCLUDES ${TST_INCLUDES} ${PNG_INCLUDE_DIRS})
+	SET(TST_LIBS ${TST_LIBS} ${PNG_LIBRARIES})
+ELSE(PNG_FOUND)
+	message("Can't find PNG lib")
+ENDIF(PNG_FOUND)
 
 #find Zlib
 find_package(ZLIB REQUIRED)
@@ -724,7 +732,7 @@ CHECK_INCLUDE_FILE(math.h HAVE_MATH_H)
 
 CHECK_INCLUDE_FILE_CXX(tr1/unordered_map HAVE_TR1_UNORDERED_MAP)
 
-
+CHECK_FUNCTION_EXISTS(gettimeofday HAVE_GETTIMEOFDAY)
 if(HAVE_MATH_H)
 	CHECK_FUNCTION_EXISTS(isnan HAVE_ISNAN)
 	if(NOT HAVE_ISNAN)	
@@ -766,9 +774,10 @@ SET(TST_LIBS engine_com OPcollide netgeneric netlowlevel ${TST_LIBS})
 SET(TST_SERVER_LIBS netgeneric engine_com netlowlevel OPcollide ${TST_LIBS})
 include_directories(${TST_INCLUDES})	
 
-
-target_link_libraries(vegastrike ${TST_LIBS})
-set_target_properties(vegastrike PROPERTIES LINK_FLAGS "-L/usr/lib")
+IF(NOT DISABLE_CLIENT)
+	target_link_libraries(vegastrike ${TST_LIBS})
+	set_target_properties(vegastrike PROPERTIES LINK_FLAGS "-L/usr/lib")
+ENDIF(NOT DISABLE_CLIENT)
 
 target_link_libraries(vegaserver ${TST_SERVER_LIBS})
 set_target_properties(vegaserver PROPERTIES LINK_FLAGS "-L/usr/lib -L${vsUTCS_BINARY_DIR}")

@@ -12,6 +12,7 @@
 #cmakedefine HAVE__ISNAN 1
 #cmakedefine HAVE_FINITE 1
 #cmakedefine HAVE__FINITE 1
+#cmakedefine HAVE_GETTIMEOFDAY 1
 #cmakedefine HAVE_LSTAT 1
 #cmakedefine HAVE_PYTHON 1
 #cmakedefine _GNU_SOURCE 1
