@@ -646,8 +646,6 @@ ELSE(Vorbis_FOUND)
 	message("Can't find Vorbis libs")
 ENDIF(Vorbis_FOUND)
 
-ENDIF(NOT DISABLE_CLIENT) ##########
-
 #Find JPEG
 find_package(JPEG REQUIRED)
 IF(JPEG_FOUND)
@@ -665,6 +663,8 @@ IF(PNG_FOUND)
 ELSE(PNG_FOUND)
 	message("Can't find PNG lib")
 ENDIF(PNG_FOUND)
+
+ENDIF(NOT DISABLE_CLIENT) ##########
 
 #find Zlib
 find_package(ZLIB REQUIRED)
@@ -708,6 +708,10 @@ ELSE(FFMPEG_FOUND)
 	message("What the hell, no FFMpeg")
 ENDIF(FFMPEG_FOUND)
 
+FIND_LIBRARY(DL_LIB dl)
+FIND_LIBRARY(UTIL_LIB util)
+
+SET(TST_LIBS ${TST_LIBS} ${DL_LIB} ${UTIL_LIB})
 
 # Still need to add CEGUI and OGRE find packages
 
