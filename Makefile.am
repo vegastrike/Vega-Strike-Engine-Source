@@ -790,6 +790,8 @@ librootgeneric = \
   src/easydom.h \
   src/endianness.cpp \
   src/endianness.h \
+  src/event_manager.h \
+  src/event_manager.cpp \
   src/macosx_math.cpp \
   src/macosx_math.h \
   src/faction_generic.cpp \
@@ -1073,7 +1075,8 @@ mesher_SRC = \
 if HAVE_OGRE
 mesher_SOURCES = $(mesher_SRC) \
   objconv/mesher/to_OgreMesh.cpp \
-  objconv/mesher/to_OgreMesh.h 
+  objconv/mesher/Modules/XMesh_to_Ogre.cpp \
+  objconv/mesher/to_OgreMesh.h
 else
 mesher_SOURCES = $(mesher_SRC)
 endif

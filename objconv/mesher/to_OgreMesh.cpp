@@ -1,9 +1,9 @@
-#include "PrecompiledHeaders/Ogre.h"
+#include <Ogre.h>
+#define HAVE_OGRE 1
 
 #include "to_OgreMesh.h"
 
 #ifdef HAVE_OGRE
-
 #include "OgreDefaultHardwareBufferManager.h"
 
 
@@ -12,7 +12,7 @@
 #include <limits>
 
 using namespace Ogre;
-
+using namespace std;
 // Crappy globals
 // NB some of these are not directly used, but are required to
 //   instantiate the singletons used in the dlls
@@ -1125,9 +1125,10 @@ namespace OgreMeshConverter {
     void  AutoTangents(void *outputcontext)
     {
         struct outputContext *ctxt = (struct outputContext *)outputcontext;
+        Ogre::VertexElementSemantic oves;
         unsigned short src, dest;
-        ctxt->top->suggestTangentVectorBuildParams(src, dest);
-        ctxt->top->buildTangentVectors(src, dest);
+        ctxt->top->suggestTangentVectorBuildParams(oves, src, dest);
+        ctxt->top->buildTangentVectors(oves, src, dest);
     }
 
     void  Dump(void* outputcontext, const char* outputfile, const char* materialfile)

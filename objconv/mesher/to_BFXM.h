@@ -165,7 +165,8 @@ enum polytype{
 	LINESTRIP,
     TRISTRIP,
     TRIFAN,
-    QUADSTRIP
+    QUADSTRIP,
+    UNKNOWN
 };
 
 struct XML {

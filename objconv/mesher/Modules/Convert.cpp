@@ -128,7 +128,7 @@ namespace Converter {
 			} else if (command == "-c" || command == "--convert") {
 				if (params.size() < 3) {
 					cerr << "Fatal: " << command << " needs three arguments:\n"
-						 << "\tmesher <...> " << command << " (inputFormat) (outputFormat) (operationCode)\n"
+						 << "\tmesher <...> " << command << " {XMesh|BFXM|Wavefront} (XMesh|BFXM|Wafefront|Ogre) (create|append|optimize)\n"
 						 << "\n"
 						 << "Do \"mesher --help convert\" for details" << endl;
 					return 1;
@@ -139,8 +139,9 @@ namespace Converter {
 					} else if (phase == 1) {
 						ConversionImplList& registry = getRegistry();
 						ConversionImpl::RetCodeEnum rc = ConversionImpl::RC_NOT_IMPLEMENTED;
-						for (ConversionImplList::iterator cit=registry.begin(); (rc == ConversionImpl::RC_NOT_IMPLEMENTED)&&(cit!=registry.end()); ++cit)
+						for (ConversionImplList::iterator cit=registry.begin(); (rc == ConversionImpl::RC_NOT_IMPLEMENTED)&&(cit!=registry.end()); ++cit) {
 							rc = cit->second->convert(params[0],params[1],params[2]);
+						}
 						if (rc == ConversionImpl::RC_NOT_IMPLEMENTED) {
 							cerr << "Error: " << params[2] << " from " << params[0] << " to " << params[1] << " unimplemneted" << endl;
 							return ConversionImpl::RC_NOT_IMPLEMENTED;

@@ -16,5 +16,12 @@ if (test x$no_ogre = x1); then
     [AC_MSG_RESULT([no])
     no_ogre=1])
 [fi]
-AM_CONDITIONAL([HAVE_OGRE], [test x$no_ogre = 0])
+AM_CONDITIONAL([HAVE_OGRE], [test x$no_ogre = x0])
+echo HAVE_OGRE is:
+if test x$no_ogre = x0; then
+	echo "no_ogre is 0"
+	echo DID_CONDITIONAL
+else
+	echo "no_ogre is $no_ogre"
+fi
 ])
