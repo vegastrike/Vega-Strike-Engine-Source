@@ -790,8 +790,6 @@ librootgeneric = \
   src/easydom.h \
   src/endianness.cpp \
   src/endianness.h \
-  src/event_manager.h \
-  src/event_manager.cpp \
   src/macosx_math.cpp \
   src/macosx_math.h \
   src/faction_generic.cpp \
