@@ -2765,7 +2765,21 @@ UpdateSubunitPhysics(cumulative_transformation,cumulative_transformation_matrix,
 								 // can a unit get to another system without jumping?.
 static bool warp_is_interstellar=XMLSupport::parse_bool (vs_config->getVariable ("physics","warp_is_interstellar","false"));
 if (warp_is_interstellar&&(curr_physical_state.position.MagnitudeSquared()>howFarToJump()*howFarToJump()&&!isSubUnit())) {
-	_Universe->activeStarSystem()->JumpTo(this,NULL,NearestSystem(_Universe->activeStarSystem()->getFileName(),curr_physical_state.position),true,true);
+	static bool direct=XMLSupport::parse_bool (vs_config->getVariable ("physics","direct_interstellar_journey","true"));
+	bool jumpDirect = false;
+	if (direct) {
+		Cockpit *cp = _Universe->isPlayerStarship(this);
+		if (NULL!=cp) {
+			std::string sys = cp->GetNavSelectedSystem();
+			if (!sys.empty()) {
+				jumpDirect = true;
+				_Universe->activeStarSystem()->JumpTo(this,NULL,sys,true,true);
+			}
+		}
+	}
+	if (!jumpDirect) {
+		_Universe->activeStarSystem()->JumpTo(this,NULL,NearestSystem(_Universe->activeStarSystem()->getFileName(),curr_physical_state.position),true,true);
+	}
 }
 
 
