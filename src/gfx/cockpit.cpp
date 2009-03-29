@@ -2676,14 +2676,24 @@ void GameCockpit::Draw() {
     if (QuitAllow){ 
       if (!die){
         static VSSprite QuitSprite("quit.sprite",BILINEAR,GFXTRUE);
+        static VSSprite QuitCompatSprite("quit.spr",BILINEAR,GFXTRUE);
 
         GFXEnable(TEXTURE0);
-        QuitSprite.Draw();	  
+        if (QuitSprite.LoadSuccess()) {
+          QuitSprite.Draw();	  
+        } else {
+          QuitCompatSprite.Draw();
+        }
       }
     }else {
       static VSSprite PauseSprite("pause.sprite",BILINEAR,GFXTRUE);
+      static VSSprite PauseCompatSprite("pause.spr",BILINEAR,GFXTRUE);
       GFXEnable(TEXTURE0);
-      PauseSprite.Draw();
+      if (PauseSprite.LoadSuccess()) {
+        PauseSprite.Draw();
+      } else {
+        PauseCompatSprite.Draw();
+      }
     }
   }
   static float dietime = 0;
@@ -2729,9 +2739,14 @@ void GameCockpit::Draw() {
           static std::string death_menu_script = vs_config->getVariable("graphics","death_menu_script","");
           if (death_menu_script.empty()) {
             static VSSprite DieSprite("died.sprite",BILINEAR,GFXTRUE);
+            static VSSprite DieCompatSprite("died.spr",BILINEAR,GFXTRUE);
             GFXBlendMode(SRCALPHA,INVSRCALPHA);
             GFXEnable(TEXTURE0);
-            DieSprite.Draw();
+	    if (DieSprite.LoadSuccess()) {
+              DieSprite.Draw();
+	    } else {
+              DieCompatSprite.Draw();
+	    }
           } else {
             BaseUtil::LoadBaseInterface(death_menu_script);
 			dietime = 0;

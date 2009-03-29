@@ -621,34 +621,38 @@ void VDU::DrawVDUShield (Unit * parent) {
 
 }
 
+#define RETURN_STATIC_SPRITE(name) \
+  static VSSprite s(name ".sprite"); \
+  static VSSprite sCompat(name ".spr"); \
+  if (s.LoadSuccess()) { \
+    return &s; \
+  } else { \
+    return &sCompat; \
+  }
+
+
 VSSprite * getTargetQuadShield () {
-  static VSSprite s("shield_quad.sprite");
-  return &s;
+  RETURN_STATIC_SPRITE("shield_quad");
 }
 
 VSSprite * getTargetDualShield () {
-  static VSSprite s("shield_dual.sprite");
-  return &s;
+  RETURN_STATIC_SPRITE("shield_dual");
 }
 
 VSSprite * getJumpImage () {
-  static VSSprite s("jump-hud.sprite");
-  return &s;
+  RETURN_STATIC_SPRITE("jump-hud");
 }
 
 VSSprite * getSunImage () {
-  static VSSprite s("sun-hud.sprite");
-  return &s;
+  RETURN_STATIC_SPRITE("sun-hud");
 }
 
 VSSprite * getPlanetImage () {
-  static VSSprite s("planet-hud.sprite");
-  return &s;
+  RETURN_STATIC_SPRITE("planet-hud");
 }
 
 VSSprite * getNavImage () {
-  static VSSprite s("nav-hud.sprite");
-  return &s;
+  RETURN_STATIC_SPRITE("nav-hud");
 }
 
 double DistanceTwoTargets(Unit *parent, Unit *target) {
