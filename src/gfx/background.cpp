@@ -43,12 +43,26 @@ Background::Background(const char *file, int numstars, float spread,std::string 
         }
 	up = left = down = front=right=back=NULL;
 	static int max_cube_size =XMLSupport::parse_int (vs_config->getVariable("graphics","max_cubemap_size","1024"));
+        string suffix = ".image";
 	temp = string(file)+"_up.image";
 	up = new Texture(temp.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size);
+	if (!up->LoadSuccess()) {
+	  temp = string(file)+"_up.bmp";
+	  delete up;
+	  up = new Texture(temp.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size);
+	  if (up->LoadSuccess()) {
+	    suffix = ".bmp"; // backwards compatibility
+	  }
+	}
 	SphereBackground = NULL;
-	
+
 	if (!up->LoadSuccess()) {
 	  temp = string(file)+"_sphere.image";
+	  if (VSFileSystem::LookForFile(temp, VSFileSystem::TextureFile) > VSFileSystem::Ok) {
+	    // > Ok means failed to load.
+	    temp = string(file)+"_sphere.bmp";
+	    suffix=".bmp"; // backwards compatibility
+	  }
 	  SphereBackground = new SphereMesh (20,8,8,temp.c_str(),NULL,true);
 	  //SphereBackground->Pitch(PI*.5);//that's the way prophecy's textures are set up
 	  //SphereBackground->SetOrientation(Vector(1,0,0),
@@ -60,27 +74,27 @@ Background::Background(const char *file, int numstars, float spread,std::string 
 	//up->Clamp();
 	//up->Filter();
 
-	temp = string(file)+"_left.image";
+	temp = string(file)+"_left"+suffix;
 	left = new Texture(temp.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size );
 	//left->Clamp();
 	//left->Filter();
 
-	temp = string(file)+"_front.image";
+	temp = string(file)+"_front"+suffix;
 	front = new Texture(temp.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size );
 	//front->Clamp();
 	//front->Filter();
 
-	temp = string(file)+"_right.image";
+	temp = string(file)+"_right"+suffix;
 	right = new Texture(temp.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size);
 	//right->Clamp();
 	//right->Filter();
 
-	temp = string(file)+"_back.image";
+	temp = string(file)+"_back"+suffix;
 	back = new Texture(temp.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size);
 	//back->Clamp();
 	//back->Filter();
 
-	temp = string(file)+"_down.image";
+	temp = string(file)+"_down"+suffix;
 	down = new Texture(temp.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size);
 	//down->Clamp();
 	//down->Filter();

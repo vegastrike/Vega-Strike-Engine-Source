@@ -261,6 +261,9 @@ struct Texmp
 {
 	unsigned char D [lmwid][lmwid][3];
 };
+static char *makebgname(char *tmp, char *InputName, char *add, char *suffix) {
+	return strcat(strcat (strcpy(tmp,InputName),add),suffix);
+}
 static void Spherize (CubeCoord Tex [lmwid][lmwid],CubeCoord gluSph [lmwid][lmwid],unsigned char Col[])
 {
 	Texmp * Data = NULL;
@@ -268,10 +271,23 @@ static void Spherize (CubeCoord Tex [lmwid][lmwid],CubeCoord gluSph [lmwid][lmwi
 	Data = new Texmp[6];
 	if (!Data) 
 	  return;//borken down and down Data[5], right Data[3]
-	char *tmp= (char *)malloc (strlen (InputName)+60);;
-	if (!(LoadTex (strcat (strcpy(tmp,InputName),"_front.image"),Data[0].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_back.image"),Data[1].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_left.image"),Data[2].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_right.image"),Data[3].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_up.image"),Data[4].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_down.image"),Data[5].D))) {
-	  if (!LoadTex (strcat (strcpy(tmp,InputName),"_sphere.image"),Data[0].D )) {
-	    LoadTex (strcat (strcpy(tmp,InputName),".image"),Data[0].D);
+	char *tmp= (char *)malloc (strlen (InputName)+60);
+	char *suffix=".image";
+	{
+	  std::string temp (InputName);
+	  if (VSFileSystem::LookForFile(temp+"_up.image", TextureFile) > VSFileSystem::Ok) {
+	    // greater than Ok means failed to load.
+	    if (VSFileSystem::LookForFile(temp+"_sphere.image", TextureFile) > VSFileSystem::Ok) {
+	      if (VSFileSystem::LookForFile(temp+".image", TextureFile) > VSFileSystem::Ok) {
+	        suffix = ".bmp"; // backwards compatibility
+	      }
+	    }
+	  }
+	}
+	;
+	if (!(LoadTex (makebgname(tmp,InputName,"_front",suffix),Data[0].D)&&LoadTex (makebgname(tmp,InputName,"_back",suffix),Data[1].D)&&LoadTex (makebgname(tmp,InputName,"_left",suffix),Data[2].D)&&LoadTex (makebgname(tmp,InputName,"_right",suffix),Data[3].D)&&LoadTex (makebgname(tmp,InputName,"_up",suffix),Data[4].D)&&LoadTex (makebgname(tmp,InputName,"_down",suffix),Data[5].D))) {
+	  if (!LoadTex (makebgname(tmp,InputName,"_sphere",suffix),Data[0].D )) {
+	    LoadTex (makebgname(tmp,InputName,"",suffix),Data[0].D);
 	  }
 	  sphere=true;
 	  Tex = gluSph;
@@ -432,9 +448,15 @@ void EnvironmentMapGeneratorMain(const char * inpt, const char *outpt, float a, 
 	VSError err = f.OpenReadOnly( strcat (tmp,"_sphere.image"), TextureFile);
     if (err>Ok)
 	{
-	  memset( tmp, 0, size);
-	  strcpy( tmp, inpt);
-	  err = f.OpenReadOnly( strcat (tmp,"_up.image"), TextureFile);
+	  err = f.OpenReadOnly( strcat (tmp,"_sphere.bmp"), TextureFile);
+	  if (err>Ok) {
+	    memset( tmp, 0, size);
+	    strcpy( tmp, inpt);
+	    err = f.OpenReadOnly( strcat (tmp,"_up.image"), TextureFile);
+	    if (err>Ok) {
+	      err = f.OpenReadOnly( strcat (tmp,"_up.bmp"), TextureFile);
+	    }
+	  }
 	}
     //bool share = false;
     std::string s;
