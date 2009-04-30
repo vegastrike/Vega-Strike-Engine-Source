@@ -23,11 +23,6 @@
 #define BUFFER_ALIGNMENT 0x20
 #endif
 
-extern "C" {
-    #include <ffmpeg/avcodec.h>
-    #include <ffmpeg/avformat.h>
-}
-
 #include "ffmpeg_init.h"
 
 using namespace std;

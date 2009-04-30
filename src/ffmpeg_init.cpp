@@ -4,28 +4,10 @@
 
 #include "vsfilesystem.h"
 #include "config.h"
+#include "ffmpeg_init.h"
 
 #include <string.h>
 #include <utility>
-
-#ifdef HAVE_FFMPEG
-
-extern "C" {
-#ifdef _WIN32
-#define HAVE_FFMPEG_SWSCALE_H
-#endif
-    #ifdef HAVE_FFMPEG_SWSCALE_H // Not sure how many people have swscale.
-        #include <ffmpeg/swscale.h>
-    #else
-        #define DEPRECATED_IMG_CONVERT 1
-    #endif
-    #include <ffmpeg/avcodec.h>
-    #include <ffmpeg/avformat.h>
-    #include <ffmpeg/avio.h>
-
-}
-
-#endif
 
 // define a 128k buffer for video streamers
 #define BUFFER_SIZE 128*(1<<10)

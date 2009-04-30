@@ -12,6 +12,9 @@ if (test x$no_ffmpeg = x1); then
   AC_MSG_RESULT([no (Disabled)])
 [else]
   AC_CHECK_HEADERS([ffmpeg/avcodec.h ffmpeg/avformat.h ffmpeg/avio.h], no_ffmpeg=0, no_ffmpeg=1)
+  if (test x$no_ffmpeg = x1); then
+    AC_CHECK_HEADERS([libavcodec/avcodec.h libavformat/avformat.h libavformat/avio.h], no_ffmpeg=0, no_ffmpeg=1)
+  fi
   if (test x$no_ffmpeg = x0); then
     AC_MSG_CHECKING([for libavcodec and libavformat])
     NEW_LIBS="-lavcodec -lavformat"
@@ -34,6 +37,9 @@ if (test x$no_ffmpeg = x1); then
       
       if test "x$haveswscale" = "xyes"; then
         AC_CHECK_HEADERS([ffmpeg/swscale.h], haveswscale=yes, haveswscale=no)
+        if test "x$haveswscale" = "xno"; then
+          AC_CHECK_HEADERS([libswscale/swscale.h], haveswscale=yes, haveswscale=no)
+        fi
       fi
       if test "x$haveswscale" = "xyes"; then
         VS_LIBS="${VS_LIBS} ${NEW_LIBS}"
