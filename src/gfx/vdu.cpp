@@ -1067,8 +1067,9 @@ void VDU::DrawComm () {
 
 void VDU::DrawManifest (Unit * parent, Unit * target) { // zadeVDUmanifest
   static string manifest_heading = XMLSupport::escaped_string(vs_config->getVariable("graphics","hud","manifest_heading","Manifest\n"));
+  static bool simple_manifest = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","simple_manifest","false"));
   string retval(manifest_heading);
-  if (target!=parent) {
+  if (target!=parent&&simple_manifest==false) {
     retval+=string ("Tgt: ")+reformatName(target->name)+string("\n");
   }else {
     retval+=string ("--------\nCredits: ")+tostring((int)_Universe->AccessCockpit()->credits)+string("\n");
@@ -1094,18 +1095,23 @@ void VDU::DrawManifest (Unit * parent, Unit * target) { // zadeVDUmanifest
       if (((target == parent) || (maxCargo + i >= numCargo) ||  lastCat.compare(cc)) && (maxCargo > 0)) {
         maxCargo--;
         lastCat = cc;
-        if (target==parent)
+        if (target==parent&&!simple_manifest) {
           //retval += string("(") + tostring(cq)+string(") "); // show quantity
           if (cm >= cv)
             retval += tostring((int)((float)cq*cm))+string("t ");
           else
-            retval += tostring((int)((float)cq*cv))+string("m^2 ");
-        retval += target->GetManifest (i,parent,parent->GetVelocity())
-        + string(" ") + tostring(((target==parent)?cq:1)*(int)cp)
-        + string("Cr.\n");
+              retval += tostring((int)((float)cq*cv))+string("m^2 ");
+        }else {
+            retval += tostring((int)cq)+" ";
+        }
+        retval += target->GetManifest (i,parent,parent->GetVelocity());
+        if (!simple_manifest)
+            retval+= string(" ") + tostring(((target==parent)?cq:1)*(int)cp)
+                + string("Cr.");
+        retval+="\n";
       }
     }
-  if (target==parent)
+  if (target==parent&&!simple_manifest)
     retval += string("--------\nLoad: ") + tostring(load) + string("t ")
     + tostring(vol)+string("m^2 ") + tostring(cred)+string("Cr.\n");
   static float background_alpha=XMLSupport::parse_float(vs_config->getVariable("graphics","hud","text_background_alpha","0.0625"));
