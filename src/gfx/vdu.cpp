@@ -1839,6 +1839,7 @@ void UpdateViewstyle (VIEWSTYLE &vs) {
 void VDU::SwitchMode( Unit * parent) {
   if (!posmodes)
     return;
+  scrolloffset=0;
   // If we switch from SCANNING VDU VIEW_MODE we loose target info
   if( thismode.back()==SCANNING && Network!=NULL)
 		got_target_info = false;
