@@ -676,7 +676,7 @@ return GFXTRUE;
 }
 
 	
-GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TEXTUREFORMAT internformat, enum TEXTURE_IMAGE_TARGET imagetarget,int maxdimension, GFXBOOL detail_texture)
+GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle, int inWidth, int inHeight, TEXTUREFORMAT internformat, enum TEXTURE_IMAGE_TARGET imagetarget,int maxdimension, GFXBOOL detail_texture, unsigned int pageIndex)
 {
 	if (handle<0)
 		return GFXFALSE;
@@ -694,10 +694,18 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 	
 	// Read in the number of mipmaps from buffer 
 	int offset1 = 2;
-	char mipmapbuf[3] = {buffer[0],buffer[1],'\0'};
-	int mips =  0;
-	if(internformat >= DXT1 && internformat <= DXT5)
-		mips = atoi(mipmapbuf);
+	int offset2;
+	int mips = 0;
+	if(internformat >= DXT1 && internformat <= DXT5) {
+	    mips = 0;
+	    if (buffer[0]) mips = mips*10 + (buffer[0] - '0');
+	    if (buffer[1]) mips = mips*10 + (buffer[1] - '0');
+    }
+	
+	if (inWidth > 0)
+	   textures[handle].iwidth = textures[handle].width = inWidth;
+    if (inHeight > 0)
+	   textures[handle].iheight = textures[handle].height = inHeight;
 	
 	// This code i believe is executed if our texture isn't power of two 
 	if ((textures[handle].mipmapped&(TRILINEAR|MIPMAP))&&(!isPowerOfTwo (textures[handle].width,logwid)|| !isPowerOfTwo (textures[handle].height,logsize))) {
@@ -721,6 +729,15 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 		maxdimension = gl_options.max_texture_dimension;
 	}
 
+    VSFileSystem::vs_fprintf(stderr, "Transferring %dx%d texture, page %d (eff: %dx%d - limited at %d)\n", 
+        textures[handle].iwidth,
+        textures[handle].iheight,
+        pageIndex,
+        textures[handle].width,
+        textures[handle].height,
+        maxdimension
+        );
+
     if(maxdimension == 44){
 	    detail_texture = 0;
 		maxdimension = 256;
@@ -742,7 +759,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 	if(internformat == DXT1|| internformat == DXT1RGBA)
 		blocksize = 8;
 
-	if(internformat >= DXT1 && internformat <= DXT5){
+	if(internformat >= DXT1 && internformat <= DXT5) {
 		while((textures[handle].width > maxdimension || textures[handle].height > maxdimension) && mips > 0){
 			offset1 += ((textures[handle].width +3)/4)*((textures[handle].height +3)/4) * blocksize;
 			textures[handle].width >>=1;
@@ -750,20 +767,63 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 			textures[handle].iwidth >>=1;
 			textures[handle].iheight >>=1;
 		}
-	}
-	// If we're not DDS, we have to generate a scaled version of the image 
-	else if (textures[handle].iwidth>maxdimension||textures[handle].iheight>maxdimension||textures[handle].iwidth>MAX_TEXTURE_SIZE||textures[handle].iheight>MAX_TEXTURE_SIZE) {
+	    offset2 = offset1;
+	    int w = textures[handle].width;
+	    int h = textures[handle].height;
+		for (int i=0; i<mips; ++i) {
+			offset2 += ((w+3)/4)*((h+3)/4) * blocksize;
+			w >>= 1;
+			h >>= 1;
+        }
+	} else {
+	
+        // If we're not DDS, we have to generate a scaled version of the image 
+        if (textures[handle].iwidth>maxdimension||textures[handle].iheight>maxdimension||textures[handle].iwidth>MAX_TEXTURE_SIZE||textures[handle].iheight>MAX_TEXTURE_SIZE) {
 #if !defined(GL_COLOR_INDEX8_EXT)
-		if (internformat != PALETTE8) {
+            if (internformat != PALETTE8) {
 #else
-		if (internformat != PALETTE8||gl_options.PaletteExt) {
+            if (internformat != PALETTE8||gl_options.PaletteExt) {
 #endif
-			textures[handle].height = textures[handle].iheight;
-			textures[handle].width  = textures[handle].iwidth;
-			DownSampleTexture (&tempbuf,buffer,textures[handle].height,textures[handle].width,(internformat==PALETTE8?1:(internformat==RGBA32?4:3))* sizeof(unsigned char ), handle,maxdimension,maxdimension,1);
-			buffer = tempbuf;	
-		}
-	}
+                textures[handle].height = textures[handle].iheight;
+                textures[handle].width  = textures[handle].iwidth;
+                DownSampleTexture (&tempbuf,buffer,textures[handle].height,textures[handle].width,(internformat==PALETTE8?1:(internformat==RGBA32?4:3))* sizeof(unsigned char ), handle,maxdimension,maxdimension,1);
+                buffer = tempbuf;	
+                VSFileSystem::vs_fprintf(stderr, "Downsampled %dx%d texture (target: %dx%d - limited at %d)\n", 
+                    textures[handle].iwidth,
+                    textures[handle].iheight,
+                    textures[handle].width,
+                    textures[handle].height,
+                    maxdimension
+                    );
+            }
+            
+            offset2 = 2;
+        } else {
+            offset2 = offset1;
+            int w = textures[handle].width;
+            int h = textures[handle].height;
+            switch(internformat) {
+            case PALETTE8      : offset2 += (w*h); break;
+            case RGB16         : 
+            case RGBA16        : offset2 += (w*h)*2; break;
+            case RGB24         : offset2 += (w*h)*3; break;
+            case RGBA32        :
+            case RGB32         : offset2 += (w*h)*4; break;
+            case DXT1          :
+            case DXT1RGBA      : offset2 += (((w+3)/4)*((h+3)/4))*8; break;
+            case DXT3          :
+            case DXT5          : offset2 += (((w+3)/4)*((h+3)/4))*16; break;
+            case PNGPALETTE8   : offset2 += (w*h); break;
+            case PNGRGB24      : offset2 += (w*h)*3; break;
+            case PNGRGBA32     : offset2 += (w*h)*4; break;
+            default            : offset2 = 2;
+            }
+        }
+    }
+    
+    // skip to desired page
+    offset1 += pageIndex * (offset2 - 2);
+	
 	int height = textures[handle].height;
 	int width = textures[handle].width;
 	
@@ -888,7 +948,10 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 				tbuf[i+3]= textures[handle].palette[4*buffer[j]+3];
 				j ++;
 			}
-			GFXTransferTexture(tbuf,handle,RGBA32,imagetarget,maxdimension,detail_texture);
+			GFXTransferTexture(
+			     tbuf,handle,
+			     textures[handle].iwidth, textures[handle].iheight, 
+			     RGBA32,imagetarget,maxdimension,detail_texture);
 			free (tbuf);
 		}
 		

@@ -75,8 +75,10 @@ void AnimatedTexture::MakeActive (int stage, int pass) {
             try {
                 // vidSource leaves frame data in its framebuffer, and our image data is initialized
                 // to point to that framebuffer, so all we need to do is transfer it to the GL.
-                if (vidSource->seek(curtime))
+                if (vidSource->seek(curtime)) {
+                    VSFileSystem::vs_fprintf(stderr, "Transferring video frame\n");
                     Transfer( 65535, GFXFALSE );
+                }
             } catch(::VideoFile::EndOfStreamException e) {
                 if (GetLoop() && curtime > 0) {
                     setTime(0);
@@ -321,6 +323,7 @@ void AnimatedTexture::Reset () {
   curtime=0;
   active=0;
   activebound=-1;
+  img_sides = SIDE_SINGLE;
   physicsactive = numframes*timeperframe;
 }
 

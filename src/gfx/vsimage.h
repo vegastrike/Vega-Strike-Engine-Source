@@ -139,10 +139,27 @@ class VSImage
 
 		int				img_depth;
 		int				img_color_type;
-		bool				img_alpha;
-		bool				strip_16;
-                bool				flip;
+		bool			img_alpha;
+		bool			strip_16;
+        bool			flip;
 
+    protected:
+
+		enum CubeSides {
+            SIDE_SINGLE = 0,
+            SIDE_POS_X = 0x01,
+            SIDE_NEG_X = 0x02,
+            SIDE_POS_Y = 0x04,
+            SIDE_NEG_Y = 0x08,
+            SIDE_POS_Z = 0x10,
+            SIDE_NEG_Z = 0x20
+        };
+        
+        char            img_sides;
+		int             img_nmips;
+
+    private:
+    
 		void	Init();
 		void	Init( VSFileSystem::VSFile * f, textureTransform * t=NULL, bool strip=false, 
 				VSFileSystem::VSFile * f2 = NULL);
@@ -157,6 +174,7 @@ class VSImage
 		 * Sets img_type to correct type.
 		 */
 		void	CheckFormat( VSFileSystem::VSFile * file);
+		
 
 		/*
 		 * The following are format specific read functions called by ReadImage().  
@@ -211,8 +229,10 @@ class VSImage
 		VSFileSystem::VSError	WriteImage( VSFileSystem::VSFile * pf, unsigned char * data, VSImageType type, unsigned int width, unsigned int height,
 								bool alpha=1, char bpp=16, bool flip=false);
 
-		const int		Depth() const { return this->img_depth; }
-		const int		Format() const { return this->img_color_type; }
+		int		Depth() const { return this->img_depth; }
+		int		Format() const { return this->img_color_type; }
+		char    Sides() const { return this->img_sides; }
+		bool    isCube() const { return this->img_sides != SIDE_SINGLE; }
 };
 
 #endif

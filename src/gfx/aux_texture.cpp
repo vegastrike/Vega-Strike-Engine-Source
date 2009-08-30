@@ -485,33 +485,31 @@ void Texture::Transfer (int maxdimension,GFXBOOL detailtexture)
 	//if(mode == _8BIT)
 	//	glColorTable(GL_SHARED_TEXTURE_PALETTE_EXT, GL_RGB8, 256, GL_RGB, GL_UNSIGNED_BYTE, palette);
 	
-
-	switch (mode)
-	{
-	// send DXT1,DXT3,DXT5 ...need to have the function call other glcompressedTexImage2D function 
-	case _DXT1:
-			GFXTransferTexture(data, name,DXT1,image_target,maxdimension,detailtexture);
-			break;
-	case _DXT1RGBA:
-			GFXTransferTexture(data, name,DXT1RGBA,image_target,maxdimension,detailtexture);
-			break;
-	case _DXT3:
-			GFXTransferTexture(data, name,DXT3,image_target,maxdimension,detailtexture);
-			break;
-	case _DXT5:
-			GFXTransferTexture(data, name,DXT5,image_target,maxdimension,detailtexture);
-			break;			
-	case _24BITRGBA:
-		GFXTransferTexture(data, name,RGBA32,image_target,maxdimension,detailtexture);
-		break;
-	case _24BIT:
-		GFXTransferTexture(data, name,RGB24,image_target,maxdimension,detailtexture);
-		break;
-	case _8BIT:
-		GFXTransferTexture(data, name,PALETTE8, image_target,maxdimension,detailtexture);
-		//TODO: Do something about this, and put in some code to check that we can actually do 8 bit textures
-		break;
-	}
+	TEXTUREFORMAT internformat;
+	
+    switch (mode)
+    {
+    // send DXT1,DXT3,DXT5 ...need to have the function call other glcompressedTexImage2D function 
+    case _DXT1:     internformat = DXT1; break;
+    case _DXT1RGBA: internformat = DXT1RGBA; break;
+    case _DXT3:     internformat = DXT3; break;
+    case _DXT5:     internformat = DXT5; break;
+    case _24BITRGBA:internformat = RGBA32; break;
+    case _24BIT:    internformat = RGB24; break;
+    case _8BIT:     internformat = PALETTE8; break;
+    default: return;
+    };
+	
+	if (img_sides == SIDE_SINGLE) {
+        GFXTransferTexture(data, name, sizeX, sizeY, internformat, image_target, maxdimension, detailtexture);
+    } else {
+        GFXTransferTexture(data, name, sizeX, sizeY, internformat, CUBEMAP_POSITIVE_X, maxdimension, detailtexture, 0);
+        GFXTransferTexture(data, name, sizeX, sizeY, internformat, CUBEMAP_NEGATIVE_X, maxdimension, detailtexture, 1);
+        GFXTransferTexture(data, name, sizeX, sizeY, internformat, CUBEMAP_POSITIVE_Y, maxdimension, detailtexture, 2);
+        GFXTransferTexture(data, name, sizeX, sizeY, internformat, CUBEMAP_NEGATIVE_Y, maxdimension, detailtexture, 3);
+        GFXTransferTexture(data, name, sizeX, sizeY, internformat, CUBEMAP_POSITIVE_Z, maxdimension, detailtexture, 4);
+        GFXTransferTexture(data, name, sizeX, sizeY, internformat, CUBEMAP_NEGATIVE_Z, maxdimension, detailtexture, 5);
+    }
 	
 }
 int Texture::Bind(int maxdimension,GFXBOOL detailtexture)

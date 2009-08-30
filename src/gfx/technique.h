@@ -111,8 +111,27 @@ public:
                 Detail
             };
             
+            enum Kind {
+                /** Nothing - blank */
+                TexDefault,
+                
+                /** Normal, 2D texture */
+                Tex2D,
+                
+                /** 3D DDS texture */
+                Tex3D,
+                
+                /** Packed cube texture */
+                TexCube,
+                
+                /** Separated cube texture */
+                TexSepCube
+            };
+            
             SourceType sourceType;
             SourceType defaultType;
+            
+            Kind texKind;
             
             int sourceIndex;
             int defaultIndex;
@@ -244,7 +263,7 @@ public:
          *      bound to this texture unit.
          * @remarks [type] may be either Decal or File, mapping to equally named SourceType s
          */
-        void addTextureUnit(const std::string &source, int target, const std::string &deflt, const std::string &paramName);
+        void addTextureUnit(const std::string &source, int target, const std::string &deflt, const std::string &paramName, Technique::Pass::TextureUnit::Kind texKind);
         
         /** Add a constant shader param
          * @param name A string defining the shader's parameter name.

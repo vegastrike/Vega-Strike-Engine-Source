@@ -38,9 +38,9 @@ PipelinedTexture::PipelinedTexture (unsigned int width, unsigned int height, uns
   GFXCreateTexture (sizeX,sizeY,(mode==_24BITRGBA)?RGBA32:((mode==_8BIT)?PALETTE8:RGB32),&this->current,NULL,(stage==1)?0:1);
   GFXCreateTexture (sizeX,sizeY,(mode==_24BITRGBA)?RGBA32:((mode==_8BIT)?PALETTE8:RGB32),&this->last,NULL,(stage==1)?0:1);
   if (current)
-    GFXTransferTexture (current,this->current,(mode==_24BITRGBA)?RGBA32:((mode==_8BIT)?PALETTE8:RGB32),TEXTURE_2D);
+    GFXTransferTexture (current,this->current,sizeX,sizeY,(mode==_24BITRGBA)?RGBA32:((mode==_8BIT)?PALETTE8:RGB32),TEXTURE_2D);
   if (last)
-    GFXTransferTexture (last,this->last,(mode==_24BITRGBA)?RGBA32:((mode==_8BIT)?PALETTE8:RGB32),TEXTURE_2D);	
+    GFXTransferTexture (last,this->last,sizeX,sizeY,(mode==_24BITRGBA)?RGBA32:((mode==_8BIT)?PALETTE8:RGB32),TEXTURE_2D);	
 }
 
 void PipelinedTexture::MakeActive () {
@@ -75,7 +75,7 @@ Texture * PipelinedTexture::Clone () {
   retval->data = new unsigned char [sizeX*sizeY*bpp];
   memcpy (retval->data,data,bpp*sizeof(unsigned char)*sizeX*sizeY);
   GFXCreateTexture (sizeX,sizeY,(mode==_24BITRGBA)?RGBA32:((mode==_8BIT)?PALETTE8:RGB32),&name,NULL,(stage==1)?0:1,BILINEAR,TEXTURE2D);
-  GFXTransferTexture (retval->data,name,(mode==_24BITRGBA)?RGBA32:((mode==_8BIT)?PALETTE8:RGB32),TEXTURE_2D);
+  GFXTransferTexture (retval->data,name,sizeX,sizeY,(mode==_24BITRGBA)?RGBA32:((mode==_8BIT)?PALETTE8:RGB32),TEXTURE_2D);
   return retval;
 }
 

@@ -29,7 +29,7 @@ StreamTexture::StreamTexture(int width, int height, enum FILTER filtertype, unsi
   this->mutabledata = (unsigned char*)malloc(sizeof(unsigned char )*width*height*4);
   if (origdata) {
     memcpy(this->mutabledata,origdata,sizeof(unsigned char)*width*height*4);
-    GFXTransferTexture(mutabledata,name,RGBA32);
+    GFXTransferTexture(mutabledata,name,sizeX,sizeY,RGBA32);
   }
 }
 unsigned char * StreamTexture::Map() {
@@ -38,7 +38,7 @@ unsigned char * StreamTexture::Map() {
 void StreamTexture::UnMap(bool changed){
   if (changed) {
     MakeActive(0);
-    GFXTransferTexture(mutabledata,name,RGBA32);    
+    GFXTransferTexture(mutabledata,name,sizeX,sizeY,RGBA32);    
   }
 }
 StreamTexture::~StreamTexture() {

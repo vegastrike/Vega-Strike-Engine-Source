@@ -529,12 +529,19 @@ void    GameStarSystem::createBackground( StarSystem::StarXML * xml)
 {
 #ifdef NV_CUBE_MAP
 	printf("using NV_CUBE_MAP\n");
-	LightMap[0]=new Texture ((xml->backgroundname+"_right_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_X);
-	LightMap[1]=new Texture ((xml->backgroundname+"_left_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_X);
-	LightMap[2]=new Texture ((xml->backgroundname+"_up_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Y);
-	LightMap[3]=new Texture ((xml->backgroundname+"_down_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Y);
-	LightMap[4]=new Texture ((xml->backgroundname+"_front_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Z);
-	LightMap[5]=new Texture ((xml->backgroundname+"_back_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Z);
+	LightMap[0]=new Texture ((xml->backgroundname+"_light.cube").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_X);
+	if (lightMap[0]->LoadSuccess() && LightMap[0]->isCube()) {
+	    LightMap[1] = LightMap[2] = LightMap[3] =
+	    LightMap[4] = LightMap[5] = 0;
+    } else {
+        delete LightMap[0];
+        LightMap[0]=new Texture ((xml->backgroundname+"_right_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_X);
+        LightMap[1]=new Texture ((xml->backgroundname+"_left_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_X);
+        LightMap[2]=new Texture ((xml->backgroundname+"_up_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Y);
+        LightMap[3]=new Texture ((xml->backgroundname+"_down_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Y);
+        LightMap[4]=new Texture ((xml->backgroundname+"_front_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Z);
+        LightMap[5]=new Texture ((xml->backgroundname+"_back_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Z);
+    }
 #else
 	//string bglight= VSFileSystem::sharedtextures+"/"+xml->backgroundname+"_light.image";
 	string bglight= xml->backgroundname+"_light.image";

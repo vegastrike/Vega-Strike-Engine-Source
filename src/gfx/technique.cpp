@@ -81,6 +81,19 @@ namespace __impl {
         return parseEnum(s.substr(0,sep = s.find_first_of(':')), enumMap, Technique::Pass::TextureUnit::None);
     }
     
+    static Technique::Pass::TextureUnit::Kind parseTexKind(const string &s)
+    {
+        static map<string, Technique::Pass::TextureUnit::Kind> enumMap;
+        if (enumMap.empty()) {
+            enumMap["default"]       = Technique::Pass::TextureUnit::TexDefault;
+            enumMap["2d"]            = Technique::Pass::TextureUnit::Tex2D;
+            enumMap["3d"]            = Technique::Pass::TextureUnit::Tex3D;
+            enumMap["cube"]          = Technique::Pass::TextureUnit::TexCube;
+            enumMap["separatedCube"] = Technique::Pass::TextureUnit::TexSepCube;
+        }
+        return parseEnum(s, enumMap, Technique::Pass::TextureUnit::TexDefault);
+    }
+    
     static Technique::Pass::Type parsePassType(const std::string &s)
     {
         static map<string, Technique::Pass::Type> enumMap;
@@ -263,7 +276,7 @@ void Technique::Pass::setProgram(const string &vertex, const string &fragment)
     program = 0;
 }
 
-void Technique::Pass::addTextureUnit(const string &source, int target, const string &deflt, const string &paramName)
+void Technique::Pass::addTextureUnit(const string &source, int target, const string &deflt, const string &paramName, Technique::Pass::TextureUnit::Kind texKind)
 {
     textureUnits.resize(textureUnits.size()+1);
     TextureUnit &newTU = textureUnits.back();
@@ -274,6 +287,7 @@ void Technique::Pass::addTextureUnit(const string &source, int target, const str
     newTU.targetIndex = target;
     newTU.targetParamName = paramName;
     newTU.targetParamId = -1;
+    newTU.texKind = texKind;
     
     switch(newTU.sourceType) {
     case TextureUnit::Decal: 
@@ -469,7 +483,8 @@ Technique::Technique(const string &nam) :
                                 el->getAttributeValue("src", ""),
                                 target,
                                 el->getAttributeValue("default", ""),
-                                el->getAttributeValue("name", "") );
+                                el->getAttributeValue("name", ""),
+                                parseTexKind( el->getAttributeValue("kind", "") ) );
                         } else if (el->tagName() == paramTag) {
                             float value[4];
                             parseFloat4( el->getAttributeValue("value",""), value);

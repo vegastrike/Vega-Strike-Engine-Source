@@ -30,7 +30,16 @@ typedef int INT32;
 #endif
 
 #ifndef DDS_CUBEMAP
-#define DDS_CUBEMAP 0x00000200L
+#define DDS_CUBEMAP                        0x00000200L
+#define DDS_CUBEMAP_POSITIVEX              0x00000400L
+#define DDS_CUBEMAP_NEGATIVEX              0x00000800L
+#define DDS_CUBEMAP_POSITIVEY              0x00001000L
+#define DDS_CUBEMAP_NEGATIVEY              0x00002000L
+#define DDS_CUBEMAP_POSITIVEZ              0x00004000L
+#define DDS_CUBEMAP_NEGATIVEZ              0x00008000L
+#define DDS_CUBEMAP_ALLFACES ( DDS_CUBEMAP_POSITIVEX | DDS_CUBEMAP_NEGATIVEX |\
+                               DDS_CUBEMAP_POSITIVEY | DDS_CUBEMAP_NEGATIVEY |\
+                               DDS_CUBEMAP_POSITIVEZ | DDS_CUBEMAP_NEGATIVEZ )
 #endif
 
 #if defined(__CYGWIN__)
@@ -338,7 +347,13 @@ unsigned char *	VSImage::ReadPNG()
 	   VSFileSystem::vs_fprintf (stderr,"Loading Done. Decompressing\n");
 #endif
 	png_read_info(png_ptr, info_ptr);  /* read all PNG info up to image data */
-	this->sizeX=1;this->sizeY=1;this->img_depth=8;png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&this->sizeX, (png_uint_32 *)&this->sizeY, &this->img_depth, &this->img_color_type, &interlace_type, NULL, NULL);
+	this->sizeX=1;
+	this->sizeY=1;
+	this->img_depth=8;
+	this->img_nmips = 0;
+	this->img_sides = SIDE_SINGLE;
+	
+	png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&this->sizeX, (png_uint_32 *)&this->sizeY, &this->img_depth, &this->img_color_type, &interlace_type, NULL, NULL);
 #ifdef VSIMAGE_DEBUG
 	cerr<<"1. Loading a PNG file : width="<<sizeX<<", height="<<sizeY<<", depth="<<img_depth<<", img_color="<<img_color_type<<", interlace="<<interlace_type<<endl;
 #endif
@@ -473,6 +488,8 @@ unsigned char *	VSImage::ReadJPEG()
 	(void) jpeg_read_header(&cinfo, TRUE);
 	this->sizeX = cinfo.image_width;
 	this->sizeY = cinfo.image_height;
+	this->img_nmips = 0;
+	this->img_sides = SIDE_SINGLE;
 
 	(void) jpeg_start_decompress(&cinfo);
 
@@ -553,6 +570,8 @@ unsigned char *	VSImage::ReadBMP()
 	img_file->Read(&info, SIZEOF_BITMAPINFOHEADER);
 	this->sizeX = le32_to_cpu(info.biWidth);	
 	this->sizeY = le32_to_cpu(info.biHeight);
+	this->img_sides = SIDE_SINGLE;
+	this->img_nmips = 0;
 
 	/*
 	if (img_file2!=NULL)
@@ -688,12 +707,10 @@ unsigned char *VSImage::ReadDDS()
 		img_file->Read(ibuffer,4);
 		header.nmips=POSH_ReadU32FromLittle(ibuffer);
 		img_file->GoTo(84);
-		img_file->Read(&header.pixelFormat.fourcc[0],1);
-		img_file->Read(&header.pixelFormat.fourcc[1],1);
-		img_file->Read(&header.pixelFormat.fourcc[2],1);
-		img_file->Read(&header.pixelFormat.fourcc[3],1);
+		img_file->Read(header.pixelFormat.fourcc,4);
 		img_file->Read(ibuffer,4);
 		header.pixelFormat.bpp=POSH_ReadU32FromLittle(ibuffer);
+		img_file->GoTo(108);
 		img_file->Read(ibuffer,4);
 		header.dcaps1=POSH_ReadU32FromLittle(ibuffer);
 		img_file->Read(ibuffer,4);
@@ -766,6 +783,8 @@ unsigned char *VSImage::ReadDDS()
 		inputSize = 0;
 		width=header.width;
 		height= header.height;
+		img_sides = SIDE_SINGLE;
+		img_nmips = header.nmips;
 		// Some DDS files may not have mipmaps
 		if(header.nmips == 0){
 			inputSize = ((width+3)/4)*((height+3)/4)*blockSize;
@@ -777,8 +796,13 @@ unsigned char *VSImage::ReadDDS()
 			if(height != 1)
 				height >>=1;
 		}
-		if(header.dcaps2 & DDS_CUBEMAP ) {
+		if(header.dcaps2 & (DDS_CUBEMAP | DDS_CUBEMAP_ALLFACES) ) {
+		    fprintf(stderr, "Reading Cubemap %s\n", img_file->GetFilename().c_str());
 			inputSize = inputSize * 6;
+			this->img_sides = 
+			     SIDE_POS_X | SIDE_NEG_X |
+			     SIDE_POS_Y | SIDE_NEG_Y |
+			     SIDE_POS_Z | SIDE_NEG_Z; // all sides, we don't support partial DDS files
 			this->img_color_type = 998; // Cubemap'd dds
 		}
 		else
