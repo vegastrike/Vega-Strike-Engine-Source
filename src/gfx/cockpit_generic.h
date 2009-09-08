@@ -90,6 +90,7 @@ protected:
   bool going_to_dock_screen;
   int partial_number_of_attackers;
  public:
+  double secondsWithZeroEnergy;
   int number_of_attackers;
   unsigned int retry_dock;
   double TimeOfLastCollision;
