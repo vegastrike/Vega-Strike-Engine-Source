@@ -101,7 +101,7 @@ void AllUnitsCloseAndEngage(Unit * un, int faction) {
         }else {
 			delta = adj;
         }
-		UniverseUtil::adjustRelationModifierInt(cp, faction, minrel-relation);
+		UniverseUtil::adjustRelationModifierInt(cp, faction, delta);
 	}
 	for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
 		(ally = *i)!=NULL;
