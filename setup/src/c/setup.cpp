@@ -198,14 +198,11 @@ int main(int argc, char *argv[]) {
 	}
 	chdir (pwent->pw_dir);
 
-	mkdir(HOMESUBDIR.c_str()
-#ifndef _WIN32
-		, 0755
-#endif
-		);
+	mkdir(HOMESUBDIR.c_str(), 0755);
+	chdir (HOMESUBDIR.c_str());
 
 #endif
-	chdir (HOMESUBDIR.c_str());
+
 	
 	Start(&argc,&argv);
 #if defined(_WINDOWS)&&defined(_WIN32)
