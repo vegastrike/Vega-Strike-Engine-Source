@@ -827,22 +827,29 @@ string SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float
 
 	savestring += WritePlayerData( FP, unitname, systemname, credits, fact);
 	savestring += WriteDynamicUniverse();
-  if (outputsavegame.length()!=0) {
-    if( write){
-	VSFile f;
-	VSError err = f.OpenCreateWrite( outputsavegame, SaveFile);
-	// WRITE THE SAVEGAME TO THE MISSION SAVENAME
-	f.Write( savestring.c_str(), savestring.length());
-	f.Close();
-	if (player_num!=-1) {
-			// AND THEN COPY IT TO THE SPECIFIED SAVENAME (from save.4.x.txt)
-          last_pickled_data =last_written_pickled_data;
-          string sg =GetWritePlayerSaveGame(player_num);
-          SaveFileCopy (outputsavegame.c_str(),sg.c_str());
-          
-	}
-    }
-
+  if (outputsavegame.length()!=0) 
+  {
+    if( write)
+	{
+		VSFile f;
+		VSError err = f.OpenCreateWrite( outputsavegame, SaveFile);
+		if(err > Ok)
+		{// check
+			// WRITE THE SAVEGAME TO THE MISSION SAVENAME
+			f.Write( savestring.c_str(), savestring.length());
+			f.Close();
+			if (player_num!=-1)
+			{// AND THEN COPY IT TO THE SPECIFIED SAVENAME (from save.4.x.txt)
+				last_pickled_data =last_written_pickled_data;
+				string sg =GetWritePlayerSaveGame(player_num);
+				SaveFileCopy (outputsavegame.c_str(),sg.c_str());     
+			}
+		}
+		else
+		{// error occured while opening file
+			cerr<<"occured while opening file: "<<outputsavegame<<endl;
+		}
+	}	
   }
   return savestring;
 }

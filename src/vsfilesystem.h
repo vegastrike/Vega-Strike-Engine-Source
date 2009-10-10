@@ -33,7 +33,7 @@ namespace VSFileSystem
 
 	// VSErrors that can be return by various functions
 	enum VSError	{	Shared, Ok, SocketError, FileNotFound, LocalPermissionDenied, RemotePermissionDenied, DownloadInterrupted,
-						IncompleteWrite, IncompleteRead, EndOfFile, IsDirectory, BadFormat, Unspecified };
+						IncompleteWrite, IncompleteRead, EndOfFile, IsDirectory, BadFormat, Unspecified };// Failure condition when result > Ok
 
 	// The mode of an opened file
 	enum VSFileMode {	ReadOnly, ReadWrite, CreateWrite };
