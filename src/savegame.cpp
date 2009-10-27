@@ -833,7 +833,7 @@ string SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float
 	{
 		VSFile f;
 		VSError err = f.OpenCreateWrite( outputsavegame, SaveFile);
-		if(err > Ok)
+		if(err <= Ok)
 		{// check
 			// WRITE THE SAVEGAME TO THE MISSION SAVENAME
 			f.Write( savestring.c_str(), savestring.length());
