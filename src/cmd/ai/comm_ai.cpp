@@ -169,6 +169,8 @@ static int InList (std::string item, Unit * un) {
 }
 
 void CommunicatingAI::UpdateContrabandSearch () {
+ static unsigned int contraband_search_batch_update=XMLSupport::parse_int(vs_config->getVariable("AI","num_contraband_scans_per_search","10"));
+ for (int rep=0;rep<contraband_search_batch_update;++rep) {
   Unit * u = contraband_searchee.GetUnit();
   if (u && (u->faction != parent->faction)) { // don't scan your buddies
     if (which_cargo_item<(int)u->numCargo()) {
@@ -214,6 +216,7 @@ void CommunicatingAI::UpdateContrabandSearch () {
       
     }
   }
+ }
 }
 static bool isDockedAtAll(Unit * un) {
   return (un->docked&(Unit::DOCKED_INSIDE|Unit::DOCKED))!=0;

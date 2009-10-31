@@ -1703,7 +1703,7 @@ void VDU::Draw (GameCockpit*parentcp, Unit * parent, const GFXColor & color) {
   static float auto_switch_lim=XMLSupport::parse_float (vs_config->getVariable("graphics","auto_message_nav_switch_time_lim",".15"));
 
   if (delautotime<auto_switch_lim&&parentcp->autoMessage.length()!=0) {
-    if (thismode.back()!=COMM) {
+    if (thismode.back()!=COMM&&(posmodes&NAV!=0)) {
       thismode.back()=NAV;
       parentcp->autoMessageTime-=auto_switch_lim*1.125;
     }
