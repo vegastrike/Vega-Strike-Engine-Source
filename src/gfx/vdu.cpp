@@ -1587,7 +1587,8 @@ void DrawObjectivesTextPlane(TextPlane *tp, int scrolloffset, Unit *parent) {
   for (unsigned int i=0;i<active_missions.size();++i){
     if (!active_missions[i]->objectives.empty()) {
 	rez+="#FFFFFF";
-	if (active_missions[i]->mission_name.empty()) {
+    static bool force_anonymous_missions=XMLSupport::parse_bool(vs_config->getVariable("general","force_anonymous_mission_names","true"));
+	if (active_missions[i]->mission_name.empty()||force_anonymous_missions) {
 	  rez+="Mission "+XMLSupport::tostring((int)i)+"\n";
 	}else {
 	  rez+=active_missions[i]->mission_name+"\n";
