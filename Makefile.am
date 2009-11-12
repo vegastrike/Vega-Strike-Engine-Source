@@ -1164,6 +1164,11 @@ dist-hook:
 done
 endif
 
+all: boost_patched_gcc44
+
+boost_patched_gcc44: boost_gcc44.patch
+	patch -N -p0 < boost_gcc44.patch || true
+
 %.h.gch: %.h
 	$(CXXCOMPILE) -o $@ $<
 

@@ -1,0 +1,159 @@
+Index: boost/1_35/boost/mpl/aux_/numeric_op.hpp
+===================================================================
+--- boost/1_35/boost/mpl/aux_/numeric_op.hpp	(revision 54830)
++++ boost/1_35/boost/mpl/aux_/numeric_op.hpp	(working copy)
+@@ -287,7 +287,8 @@
+ 
+ ///// iteration, depth == 1
+ 
+-#elif BOOST_PP_ITERATION_DEPTH() == 1
++#else //BOOST_PP_ITERATION_DEPTH() == 1
++#if BOOST_PP_ITERATION_DEPTH() == 1
+ 
+ #   define i_ BOOST_PP_FRAME_ITERATION(1)
+ 
+@@ -308,4 +309,5 @@
+ 
+ #   undef i_
+ 
++#endif //BOOST_PP_ITERATION_DEPTH
+ #endif // BOOST_PP_IS_ITERATING
+Index: boost/1_35/boost/mpl/aux_/advance_backward.hpp
+===================================================================
+--- boost/1_35/boost/mpl/aux_/advance_backward.hpp	(revision 54830)
++++ boost/1_35/boost/mpl/aux_/advance_backward.hpp	(working copy)
+@@ -79,7 +79,8 @@
+ 
+ ///// iteration, depth == 1
+ 
+-#elif BOOST_PP_ITERATION_DEPTH() == 1
++#else // BOOST_PP_ITERATION_DEPTH()
++#if BOOST_PP_ITERATION_DEPTH() == 1
+ #define i_ BOOST_PP_FRAME_ITERATION(1)
+ 
+ template<>
+@@ -121,4 +122,5 @@
+ #   undef AUX778076_ITER_1
+ #   undef AUX778076_ITER_0
+ 
++#endif // BOOST_PP_ITERATION_DEPTH()
+ #endif // BOOST_PP_IS_ITERATING
+Index: boost/1_35/boost/mpl/aux_/full_lambda.hpp
+===================================================================
+--- boost/1_35/boost/mpl/aux_/full_lambda.hpp	(revision 54830)
++++ boost/1_35/boost/mpl/aux_/full_lambda.hpp	(working copy)
+@@ -227,7 +227,8 @@
+ 
+ ///// iteration, depth == 1
+ 
+-#elif BOOST_PP_ITERATION_DEPTH() == 1
++#else
++#if BOOST_PP_ITERATION_DEPTH() == 1
+ #define i_ BOOST_PP_FRAME_ITERATION(1)
+ 
+ #if i_ > 0
+@@ -347,4 +348,5 @@
+ };
+ 
+ #undef i_
++#endif
+ #endif // BOOST_PP_IS_ITERATING
+Index: boost/1_35/boost/mpl/aux_/advance_forward.hpp
+===================================================================
+--- boost/1_35/boost/mpl/aux_/advance_forward.hpp	(revision 54830)
++++ boost/1_35/boost/mpl/aux_/advance_forward.hpp	(working copy)
+@@ -79,7 +79,8 @@
+ 
+ ///// iteration, depth == 1
+ 
+-#elif BOOST_PP_ITERATION_DEPTH() == 1
++#else //BOOST_PP_ITERATION_DEPTH()
++#if BOOST_PP_ITERATION_DEPTH() == 1
+ #define i_ BOOST_PP_FRAME_ITERATION(1)
+ 
+ template<>
+@@ -120,4 +121,5 @@
+ #   undef AUX778076_ITER_1
+ #   undef AUX778076_ITER_0
+ 
++#endif //BOOST_PP_ITERATION_DEPTH
+ #endif // BOOST_PP_IS_ITERATING
+Index: boost/1_35/boost/mpl/bind.hpp
+===================================================================
+--- boost/1_35/boost/mpl/bind.hpp	(revision 54830)
++++ boost/1_35/boost/mpl/bind.hpp	(working copy)
+@@ -361,7 +361,8 @@
+ 
+ ///// iteration, depth == 1
+ 
+-#elif BOOST_PP_ITERATION_DEPTH() == 1
++#else
++#if BOOST_PP_ITERATION_DEPTH() == 1
+ 
+ #   define i_ BOOST_PP_FRAME_ITERATION(1)
+ 
+@@ -528,7 +529,8 @@
+ 
+ ///// iteration, depth == 2
+ 
+-#elif BOOST_PP_ITERATION_DEPTH() == 2
++#else
++#if BOOST_PP_ITERATION_DEPTH() == 2
+ 
+ #   define j_ BOOST_PP_FRAME_ITERATION(2)
+ #   if !defined(BOOST_MPL_CFG_NO_UNNAMED_PLACEHOLDER_SUPPORT)
+@@ -543,5 +545,6 @@
+ 
+ #   endif
+ #   undef j_
+-
++#endif
++#endif
+ #endif // BOOST_PP_IS_ITERATING
+Index: boost/1_35/boost/mpl/apply.hpp
+===================================================================
+--- boost/1_35/boost/mpl/apply.hpp	(revision 54830)
++++ boost/1_35/boost/mpl/apply.hpp	(working copy)
+@@ -135,7 +135,8 @@
+ 
+ ///// iteration, depth == 1
+ 
+-#elif BOOST_PP_ITERATION_DEPTH() == 1
++#else
++#if BOOST_PP_ITERATION_DEPTH() == 1
+ 
+ #   define i_ BOOST_PP_FRAME_ITERATION(1)
+ 
+@@ -221,5 +222,5 @@
+ #   endif // BOOST_MPL_CFG_NO_APPLY_TEMPLATE
+ 
+ #   undef i_
+-
++#endif
+ #endif // BOOST_PP_IS_ITERATING
+Index: boost/1_35/boost/mpl/apply_wrap.hpp
+===================================================================
+--- boost/1_35/boost/mpl/apply_wrap.hpp	(revision 54830)
++++ boost/1_35/boost/mpl/apply_wrap.hpp	(working copy)
+@@ -78,7 +78,8 @@
+ 
+ ///// iteration, depth == 1
+ 
+-#elif BOOST_PP_ITERATION_DEPTH() == 1
++#else //BOOST_PP_ITERATION_DEPTH()
++#if BOOST_PP_ITERATION_DEPTH() == 1
+ 
+ #   define i_ BOOST_PP_FRAME_ITERATION(1)
+ 
+@@ -197,4 +198,5 @@
+ 
+ #   undef j_
+ 
++#endif // BOOST_PP_ITERATION_DEPTH
+ #endif // BOOST_PP_IS_ITERATING
+Index: boost_patched_gcc44
+===================================================================
+--- /dev/null
++++ boost_patched_gcc44
+@@ -0,0 +1,1 @@
++success
