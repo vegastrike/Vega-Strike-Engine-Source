@@ -783,16 +783,6 @@ IF(NOT DISABLE_CLIENT)
 	set_target_properties(vegastrike PROPERTIES LINK_FLAGS "-L/usr/lib")
 ENDIF(NOT DISABLE_CLIENT)
 
-target_link_libraries(vegaserver ${TST_SERVER_LIBS})
-set_target_properties(vegaserver PROPERTIES LINK_FLAGS "-L/usr/lib -L${vsUTCS_BINARY_DIR}")
-
-# Debug crap 
-get_directory_property(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
-message("Building with CFLAGS: ${CMAKE_CXX_FLAGS}")
-#message("Linking with : ${TST_LIBS}")
-#message("including : ${TEMP_DIRECTORY}")
-# End Debug Crap 
-
 # Vssetup Sub build file  
 add_subdirectory(setup)
 
@@ -802,4 +792,16 @@ add_subdirectory(setup)
 add_subdirectory(objconv)
 
 #ADD_CUSTOM_TARGET(mesher DEPENDS objconv/mesher COMMAND ln -fs ${vsUTCS_BINARY_DIR}/objconv/mesher mesher || true)
+
+
+target_link_libraries(vegaserver ${TST_SERVER_LIBS})
+set_target_properties(vegaserver PROPERTIES LINK_FLAGS "-L/usr/lib -L${vsUTCS_BINARY_DIR}")
+add_dependencies(vegaserver mesh_tool)
+add_dependencies(vegaserver vssetup)
+# Debug crap 
+get_directory_property(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
+message("Building with CFLAGS: ${CMAKE_CXX_FLAGS}")
+#message("Linking with : ${TST_LIBS}")
+#message("including : ${TEMP_DIRECTORY}")
+# End Debug Crap 
 
