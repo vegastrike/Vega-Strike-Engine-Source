@@ -36,7 +36,7 @@ SET(MESHER_SOURCES
 	mesher/Modules/XMesh_to_BFXM.cpp
 )
 
-include_directories(${MSH_INCLUDES} mesh_tool)
+include_directories(${MSH_INCLUDES} mesher)
 add_executable(mesh_tool ${MESHER_SOURCES})
 target_link_libraries(mesh_tool ${MSH_LIBS})
 
