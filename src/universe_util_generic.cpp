@@ -362,7 +362,9 @@ namespace UniverseUtil
 		if (getSaveDataLength(which_cp, saveVar)==0) {
 			return 0.;
 		}
-		return getSaveData(which_cp, saveVar, 0);
+        float val=getSaveData(which_cp, saveVar, 0);
+        if (val>1) val=1;
+		return val;
 	}
 	float getRelationModifier(int which_cp, string faction) {
 		return getRelationModifierInt(which_cp, FactionUtil::GetFactionIndex(faction));
@@ -375,11 +377,14 @@ namespace UniverseUtil
 		return getSaveData(which_cp, fg, 0);
 	}
 	void adjustRelationModifierInt(int which_cp, int faction, float delta) {
+        if (delta>1)delta=1;
  		string saveVar = "Relation_to_" + FactionUtil::GetFactionName(faction);
 		if (getSaveDataLength(which_cp, saveVar)==0) {
 			pushSaveData(which_cp, saveVar, delta);
 		}
-		return putSaveData(which_cp, saveVar, 0, getSaveData(which_cp, saveVar, 0)+delta);
+        float val=getSaveData(which_cp, saveVar, 0)+delta;
+        if (val>1) val=1;
+		return putSaveData(which_cp, saveVar, 0, val);
 	}
 	void adjustRelationModifier(int which_cp, string faction, float delta) {
 		adjustRelationModifierInt(which_cp, FactionUtil::GetFactionIndex(faction),delta);
