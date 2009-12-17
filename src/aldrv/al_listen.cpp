@@ -22,14 +22,14 @@ struct Listener {
   Listener():pos(0,0,0),vel(0,0,0),p(1,0,0),q(0,1,0),r(0,0,1),gain(1),rsize(1){}
 } mylistener;
 unsigned int totalplaying=0;
-const int hashsize = 47;
+const unsigned int hashsize = 47;
 struct ApproxSound {
   int soundname;
 };
 typedef std::vector<ApproxSound> ApproxSoundVec;
 static ApproxSoundVec playingbuffers [hashsize];
-int hash_sound (const int buffer) {
-  return buffer%hashsize;
+int hash_sound (unsigned int buffer) {
+    return buffer%hashsize;
 }
 float AUDDistanceSquared(const int sound) {
 #ifdef HAVE_AL
