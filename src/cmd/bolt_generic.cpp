@@ -179,7 +179,7 @@ bool Bolt::CollideAnon(Collidable::CollideRef b, Unit *un) {
   }
   return false;
 }
-union Collidable::CollideRef;
+// union Collidable::CollideRef;  Perhaps not needed?
 Collidable::CollideRef Bolt::BoltIndex(int index, int decal, bool isBall) {
   Collidable::CollideRef temp;
   temp.bolt_index=index;
@@ -189,7 +189,7 @@ Collidable::CollideRef Bolt::BoltIndex(int index, int decal, bool isBall) {
   return temp;  
 }
 
-void BoltDestroyGeneric (Bolt * whichbolt, int index, int decal, bool isBall) {
+void BoltDestroyGeneric (Bolt * whichbolt, unsigned int index, int decal, bool isBall) {
   VSDESTRUCT2
   bolt_draw *q = _Universe->activeStarSystem()->bolts;
   vector <vector <Bolt> > *target;
@@ -201,7 +201,7 @@ void BoltDestroyGeneric (Bolt * whichbolt, int index, int decal, bool isBall) {
   vector<Bolt> * vec=&(*target)[decal];
   int fsize=vec->size();
   if (&(*vec)[index]==whichbolt) {
-    int tsize=vec->size();
+    unsigned int tsize=vec->size();
     CollideMap*cm=_Universe->activeStarSystem()->collidemap[Unit::UNIT_BOLT];
     cm->UpdateBoltInfo(vec->back().location,(*(*vec)[index].location)->ref);
     

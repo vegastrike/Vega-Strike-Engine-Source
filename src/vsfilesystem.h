@@ -266,7 +266,7 @@ namespace VSFileSystem
 			CPK3 *			pk3_file;
 			char *			pk3_extracted_file;
 			int				file_index;
-			int				offset;
+			unsigned int				offset;
 
 			void			checkExtracted();
 
@@ -281,7 +281,7 @@ namespace VSFileSystem
 			string			directoryname;
 			string			rootname;
 
-			long			size;
+			unsigned long			size;
 			bool			valid;
 
         public:
@@ -322,7 +322,7 @@ namespace VSFileSystem
 #if 0
 			int		Fscanf( const char * format, ...);
 #endif
-			void	GoAfterEOL( int length);
+			void	GoAfterEOL( unsigned int length);
 			void	GoAfterEOL();
 
 			template<class A>

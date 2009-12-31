@@ -395,10 +395,10 @@ bool VsnetTCPSocket::lower_selected( int datalen )
 	        ( _incomplete_header == 0 && _incomplete_packet == 0 ) )
 	    {
 	        assert( _incomplete_packet == 0 );   // we expect a len, can not have data yet
-	        assert( _incomplete_header < sizeof(Header) ); // len is coded in sizeof(Header) bytes
-	        int len = sizeof(Header) - _incomplete_header;
+	        assert( (unsigned int)_incomplete_header < sizeof(Header) ); // len is coded in sizeof(Header) bytes
+	        unsigned int len = sizeof(Header) - _incomplete_header;
             char* b = (char*)&_header;
-	        int ret = VsnetOSS::recv( get_fd(), &b[_incomplete_header], len, 0 );
+	        unsigned int ret = VsnetOSS::recv( get_fd(), &b[_incomplete_header], len, 0 );
 	        assert( ret <= len );
 	        if( ret <= 0 )
 	        {

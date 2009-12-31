@@ -58,7 +58,7 @@ Unit * DockToSavedBases (int playernum, QVector &safevec) {
 	float dist=0;
 	Unit *un;
 	QVector dock_position( plr->curr_physical_state.position);
-	for(un_iter iter=plr->getStarSystem()->getUnitList().createIterator();un = *iter;++iter){
+	for(un_iter iter=plr->getStarSystem()->getUnitList().createIterator();(un = *iter);++iter){
 		if (un->name==str||un->getFullname()==str) {
 			dist=UnitUtil::getSignificantDistance(plr,un);
 			if (closestUnit==NULL||dist<lastdist) {
@@ -75,7 +75,7 @@ Unit * DockToSavedBases (int playernum, QVector &safevec) {
 		plr->SetPosAndCumPos(dock_position);
 		
 		vector <DockingPorts> dprt=closestUnit->image->dockingports;
-		int i;
+		unsigned int i;
 		for (i=0;;i++) {
 			if (i>=dprt.size()) {
 				safevec = QVector( 0, 0, 0);
@@ -303,7 +303,7 @@ void Universe::Generate2( StarSystem * ss)
 
   pushActiveStarSystem(ss);
   static int num_times_to_simulate_new_star_system=XMLSupport::parse_int(vs_config->getVariable("physics","num_times_to_simulate_new_star_system","20"));
-  for (int tume=0;tume<=num_times_to_simulate_new_star_system*SIM_QUEUE_SIZE+1;++tume) {
+  for (unsigned int tume=0;tume<=num_times_to_simulate_new_star_system*SIM_QUEUE_SIZE+1;++tume) {
 	  //ss->ExecuteUnitAI();
     ss->UpdateUnitPhysics(true);    
   }
@@ -351,11 +351,9 @@ StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpb
 
 void Universe::Update()
 {
-
-  int i;
-  static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
+  static float nonactivesystemtime = XMLSupport::parse_floatf (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
   float systime=nonactivesystemtime;
-  for (i=0;i<star_system.size();i++) {
+  for (unsigned int i=0;i<star_system.size();++i) {
 	// Calls the update function for server
     star_system[i]->Update((i==0)?1:systime/i);
   }
@@ -363,7 +361,7 @@ void Universe::Update()
 
 int	Universe::StarSystemIndex( StarSystem * ss)
 {
-	for (int i=0; i<star_system.size(); i++)
+	for (unsigned int i=0; i<star_system.size(); i++)
 	{
 		if( star_system[i]==ss)
 			return i;

@@ -349,7 +349,7 @@ public:
         //,(parentparent?un->getRelation(parentparent):rel0) 
       };
       float relationship = rel0;
-      for (int i=1; i<sizeof(rel)/sizeof(*rel); i++) 
+      for (unsigned int i=1; i<sizeof(rel)/sizeof(*rel); i++) 
           if (rel[i]<relationship) 
               relationship=rel[i];
       char rp=31;
@@ -443,8 +443,8 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   Unit * su=NULL;
   un_iter subun = parent->getSubUnits();
   for (;(su = *subun)!=NULL;++subun) {
-	  static int inert = ROLES::getRole ("INERT");
-	  static int pointdef = ROLES::getRole("POINTDEF");
+	  static unsigned int inert = ROLES::getRole ("INERT");
+	  static unsigned int pointdef = ROLES::getRole("POINTDEF");
 	  static bool assignpointdef = XMLSupport::parse_bool(vs_config->getVariable("AI","Targetting","AssignPointDef","true"));
 	  if ((su->attackPreference()!=pointdef)||assignpointdef) {
 		if (su->attackPreference()!=inert) {

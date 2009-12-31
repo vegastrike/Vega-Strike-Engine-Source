@@ -202,7 +202,7 @@ void MakeRVector (Vector &p,Vector &q, Vector &r) {
 //Makes a non-colinear vector q to given r. assumes magnitude of r is nonzero, does not check
 Vector MakeNonColinearVector(const Vector &p){
 	Vector q(p);
-	if(p.i==p.j==0){
+	if((p.i==p.j) == 0){
 		q.i=p.k;
 		q.j=p.i;
 		q.k=p.j;

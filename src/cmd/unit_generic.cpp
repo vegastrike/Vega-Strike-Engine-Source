@@ -111,7 +111,7 @@ void Unit::SetNebula(Nebula *neb)
 	if (!SubUnits.empty()) {
 		un_fiter iter =SubUnits.fastIterator();
 		Unit * un;
-		while (un = *iter) {
+		while ((un = *iter)) {
 			un->SetNebula(neb);
 			++iter;
 		}
@@ -1265,7 +1265,7 @@ void Unit::Init()
 
 	// No cockpit reference here
 	if (!image->cockpit_damage) {
-		int numg= (1+MAXVDUS+UnitImages::NUMGAUGES)*2;
+		unsigned int numg= (1+MAXVDUS+UnitImages::NUMGAUGES)*2;
 		image->cockpit_damage=(float*)malloc((numg)*sizeof(float));
 		for (unsigned int damageiterator=0;damageiterator<numg;++damageiterator) {
 			image->cockpit_damage[damageiterator]=1;
@@ -1515,7 +1515,7 @@ void Unit::calculate_extent(bool update_collide_queue)
 		corner_max = corner_max.Max(meshdata[a]->corner_max());
 	}							 /* have subunits now in table*/
 	const Unit * un;
-	for(un_kiter iter = SubUnits.constIterator();un = *iter;++iter){
+	for(un_kiter iter = SubUnits.constIterator();(un = *iter);++iter){
 		corner_min = corner_min.Min(un->LocalPosition().Cast()+un->corner_min);
 		corner_max = corner_max.Max(un->LocalPosition().Cast()+un->corner_max);
 	}
@@ -2258,7 +2258,7 @@ void Unit::ExecuteAI()
 	if (!SubUnits.empty()) {
 		un_iter iter =getSubUnits();
 		Unit * un;
-		while (un = *iter) {
+		while ((un = *iter)) {
 			un->ExecuteAI();	 //like dubya
 			++iter;
 		}
@@ -2345,7 +2345,7 @@ void Unit::SetTurretAI ()
 	static bool talkinturrets = XMLSupport::parse_bool(vs_config->getVariable("AI","independent_turrets","false"));
 	if (talkinturrets) {
 		Unit * un;
-		for(un_iter iter = getSubUnits();un = *iter;++iter){
+		for(un_iter iter = getSubUnits();(un = *iter);++iter){
 			if (!CheckAccessory(un)) {
 				un->EnqueueAIFirst (new Orders::FireAt(15.0f));
 				un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
@@ -2355,7 +2355,7 @@ void Unit::SetTurretAI ()
 	}
 	else {
 		Unit * un;
-		for(un_iter iter = getSubUnits();un = *iter;++iter){
+		for(un_iter iter = getSubUnits();(un = *iter);++iter){
 			if (!CheckAccessory(un)) {
 				if (un->aistate) {
 					un->aistate->Destroy();
@@ -2373,7 +2373,7 @@ void Unit::DisableTurretAI ()
 {
 	turretstatus=1;
 	Unit * un;
-	for(un_iter iter = getSubUnits();un = *iter;++iter){
+	for(un_iter iter = getSubUnits();(un = *iter);++iter){
 		if (un->aistate) {
 			un->aistate->Destroy();
 		}
@@ -2819,7 +2819,7 @@ void Unit::UpdateSubunitPhysics (const Transformation &trans, const Matrix &tran
 		float backup=SIMULATION_ATOM;
 		float basesimatom=(this->sim_atom_multiplier?backup/(float)this->sim_atom_multiplier:backup);
 		unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
-		for(un_iter iter = getSubUnits();su = *iter;++iter){
+		for(un_iter iter = getSubUnits();(su = *iter);++iter){
 			if (this->sim_atom_multiplier&&su->sim_atom_multiplier) {
 				//This ugly thing detects skipped frames.
 				//This shouldn't happen during normal execution, as the interpolation will not be correct
@@ -3472,11 +3472,9 @@ bool Unit::jumpReactToCollision (Unit * smalle)
 			return false;
 		}
 		//  ActivateAnimation(smalle);
-		if (!SPEC_interference&&((GetJumpStatus().drive>=0&&
-			(warpenergy>=GetJumpStatus().energy
-			||(ai_jump_cheat&&cp==NULL)
-			)))
-		||smalle->image->forcejump) {
+		if ((!SPEC_interference && (GetJumpStatus().drive>=0 &&
+			(warpenergy>=GetJumpStatus().energy || (ai_jump_cheat && cp==NULL))
+			)) || smalle->image->forcejump) {
 			warpenergy-=GetJumpStatus().energy;
 			DeactivateJumpDrive();
 			Unit * jumppoint = smalle;
@@ -4902,12 +4900,12 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 		else if (randnum>=cargo_damage_prob) {
 			//Do something NASTY to the cargo
 			if (image->cargo.size()>0) {
-				int i=0;
+				unsigned int i=0;
 				unsigned int cargorand_o=rand();
 				unsigned int cargorand;
 				do {
 					cargorand=(cargorand_o+i)%image->cargo.size();
-				} while ((image->cargo[cargorand].quantity==0||image->cargo[cargorand].mission)&&++i<image->cargo.size());
+				} while ((image->cargo[cargorand].quantity==0||image->cargo[cargorand].mission)&&(++i)<image->cargo.size());
 				image->cargo[cargorand].quantity*=float_to_int(dam);
 			}
 		}
@@ -5121,7 +5119,7 @@ void Unit::Kill(bool erasefromsave, bool quitting)
 	}
 	aistate=NULL;
 	Unit *un;
-	for(un_iter iter = getSubUnits();un = *iter;++iter){
+	for(un_iter iter = getSubUnits();(un = *iter);++iter){
 		un->Kill();
 	}
 	if (isUnit()!=MISSILEPTR) {
@@ -5576,11 +5574,11 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
 				}
 			}
 			static unsigned int max_dump_cargo=XMLSupport::parse_int(vs_config->getVariable("physics","max_dumped_cargo","15"));
-			int dumpedcargo=0;
+			unsigned int dumpedcargo=0;
 			if (SERVER||Network==NULL)
 			if (faction!=neutralfac&&faction!=upgradesfac) {
 				for (unsigned int i=0;i<numCargo();++i) {
-					if (rand()<(RAND_MAX*cargoejectpercent)&&dumpedcargo++<max_dump_cargo) {
+					if (vsrandom.rand()<(VS_RAND_MAX*cargoejectpercent)&&dumpedcargo++<max_dump_cargo) {
 						EjectCargo(i);
 					}
 				}
@@ -5733,7 +5731,7 @@ void Unit::TargetTurret (Unit * targ)
 		Unit * su;
 		bool inrange = (targ!=NULL)?InRange(targ):true;
 		if (inrange) {
-			for(un_iter iter = getSubUnits();su = *iter;++iter){
+			for(un_iter iter = getSubUnits();(su = *iter);++iter){
 				su->Target (targ);
 				su->TargetTurret(targ);
 			}
@@ -6211,7 +6209,7 @@ void Unit::SetRecursiveOwner(Unit *target)
 {
 	owner=target;
 	Unit * su;
-	for(un_iter iter = getSubUnits();su = *iter;++iter)
+	for(un_iter iter = getSubUnits();(su = *iter);++iter)
 		su->SetRecursiveOwner (target);
 }
 
@@ -6304,7 +6302,7 @@ double Unit::getMinDis (const QVector &pnt)
 		}
 	}
 	Unit * su;
-	for(un_iter ui = getSubUnits();su = *ui;++ui){
+	for(un_iter ui = getSubUnits();(su = *ui);++ui){
 		tmpvar = su->getMinDis (pnt);
 		if (tmpvar<minsofar) {
 			minsofar=tmpvar;
@@ -6379,7 +6377,7 @@ float Unit::querySphereClickList (const QVector &st, const QVector &dir, float e
 		}
 	}
 	const Unit * su;
-	for(un_kiter ui = viewSubUnits();su = *ui;++ui){
+	for(un_kiter ui = viewSubUnits();(su = *ui);++ui){
 		float tmp=su->querySphereClickList (st,dir,err);
 		if (tmp==0) {
 			continue;
@@ -6417,7 +6415,7 @@ bool Unit::queryBoundingBox (const QVector &pnt, float err)
 		delete bbox;
 	}
 	Unit * su;
-	for(un_iter ui = getSubUnits();su = *ui;++ui){
+	for(un_iter ui = getSubUnits();(su = *ui);++ui){
 		if ((su)->queryBoundingBox (pnt,err)) {
 			return true;
 		}
@@ -6445,7 +6443,7 @@ int Unit::queryBoundingBox (const QVector &origin, const Vector &direction, floa
 		}
 	}
 	Unit  * su;
-	for(un_iter iter = getSubUnits();su = *iter;++iter){
+	for(un_iter iter = getSubUnits();(su = *iter);++iter){
 		switch (su->queryBoundingBox (origin,direction,err)) {
 			case 1:
 				return 1;
@@ -6590,7 +6588,7 @@ bool Unit::RefillWarpEnergy()
 
 
 void      UpdateMasterPartList(Unit*);
-int Unit::ForceDock (Unit * utdw, int whichdockport)
+int Unit::ForceDock (Unit * utdw, unsigned int whichdockport)
 {
 	if (utdw->image->dockingports.size()<=whichdockport)
 		return 0;
@@ -6615,7 +6613,7 @@ int Unit::ForceDock (Unit * utdw, int whichdockport)
 		//_Universe->AccessCockpit()->RestoreGodliness();
 	}
 	UpdateMasterPartList(UniverseUtil::GetMasterPartList());
-	int cockpit=UnitUtil::isPlayerStarship(this);
+	unsigned int cockpit=UnitUtil::isPlayerStarship(this);
 
 	static float MinimumCapacityToRefuelOnLand = XMLSupport::parse_float (vs_config->getVariable ("physics","MinimumWarpCapToRefuelDockeesAutomatically","0"));
 	float capdata = utdw->WarpCapData();
@@ -7163,7 +7161,7 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 			
 			if (up->mounts[i].type->weapon_name.find("_UPGRADE") == string::npos) { //check for capability increase rather than actual weapon upgrade
 								 //only look at this mount if it can fit in the rack
-				if (up->mounts[i].type->size==(up->mounts[i].type->size&mounts[jmod].size)) {
+				if ((unsigned int)(up->mounts[i].type->size)==(up->mounts[i].type->size&mounts[jmod].size)) {
 					if (up->mounts[i].type->weapon_name!=mounts[jmod].type->weapon_name || mounts[jmod].status==Mount::DESTROYED || mounts[jmod].status==Mount::UNCHOSEN) {
 						// If missile, can upgrade directly, if other type of ammo, needs actual gun to be present.
 						if(isammo&&!ismissiletype){
@@ -7519,7 +7517,9 @@ double Unit::Upgrade (const std::string &file, int mountoffset, int subunitoffse
 	if (up->name!="LOAD_FAILED") {
 
 		for  (int i=0;percentage==0;++i ) {
-			if (!this->Unit::Upgrade(up,mountoffset+i, subunitoffset+i, GetModeFromName(file.c_str()),force, percentage,(templ->name=="LOAD_FAILED")?NULL:templ),false,false) {
+			if (!this->Unit::Upgrade(up,mountoffset+i, subunitoffset+i, 
+					GetModeFromName(file.c_str()),force, percentage,((templ->name=="LOAD_FAILED")?NULL:templ),
+					false,false)) {
 				percentage=0;
 			}
 			if (!loop_through_mounts||(i+1>=this->GetNumMounts ())||percentage>0) {
@@ -7588,7 +7588,7 @@ typedef std::vector<FactionHasRecursiveData> HasRecursiveData;
 static HasRecursiveData has_recursive_data;
 static std::string upgradeString("Upgrades");
 
-static bool cell_has_recursive_data(const string &name, int fac, const char*key)
+static bool cell_has_recursive_data(const string &name, unsigned int fac, const char*key)
 {
 	if (fac<has_recursive_data.size()) {
 		FactionHasRecursiveData::const_iterator iter=has_recursive_data[fac].find(name);
@@ -7780,7 +7780,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
 				if (_Universe->getNumActiveStarSystem()&&!ss) ss=_Universe->activeStarSystem();
 				if (ss) {
 					Unit * un;
-					for (un_iter i = ss->gravitationalUnits().createIterator();un=*i;++i) {	
+					for (un_iter i = ss->gravitationalUnits().createIterator();(un=*i);++i) {	
 						if (un==this){
 							i.remove();
 							// NOTE: I think we can only be in here once
@@ -8105,14 +8105,16 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
 		// NOTE: Afterburner type 1 (gas)
 		// NOTE: Afterburner type 0 (pwr)
 
-		if ((afterburnenergy>up->afterburnenergy||(afterburntype!=up->afterburntype&&up->afterburnenergy!=32767))&&up->afterburnenergy>0||force_change_on_nothing) {
+		if (((afterburnenergy>up->afterburnenergy ||
+		       (afterburntype!=up->afterburntype && up->afterburnenergy!=32767))
+		       && up->afterburnenergy>0) || force_change_on_nothing) {
 			++numave;
 			if (touchme) afterburnenergy=up->afterburnenergy, afterburntype=up->afterburntype;
 		}
 		else if (afterburnenergy<=up->afterburnenergy&&afterburnenergy>=0&&up->afterburnenergy>0&&up->afterburnenergy<32767) {
 			cancompletefully=false;
 		}
-		if (jump.drive==-2&&up->jump.drive>=-1||force_change_on_nothing) {
+		if ((jump.drive==-2&&up->jump.drive>=-1)||force_change_on_nothing) {
 			if (touchme) {jump.drive = up->jump.drive;jump.damage=0;}
 			++numave;
 		}
@@ -8177,7 +8179,7 @@ bool Unit::ReduceToTemplate()
 
 Vector Unit::MountPercentOperational (int whichmount)
 {
-	if (whichmount<0||whichmount>=mounts.size()) return Vector(-1,-1,-1);
+	if (whichmount<0||(unsigned int)whichmount>=mounts.size()) return Vector(-1,-1,-1);
 	return Vector(mounts[whichmount].functionality,
 		mounts[whichmount].maxfunctionality,
 		((mounts[whichmount].status==Mount::ACTIVE||mounts[whichmount].status==Mount::INACTIVE)?0.0:(Mount::UNCHOSEN?2.0:1.0)));
@@ -8563,7 +8565,7 @@ void Unit::TurretFAW()
 {
 	turretstatus=3;
 	Unit * un;
-	for(un_iter iter = getSubUnits();un = *iter;++iter){
+	for(un_iter iter = getSubUnits();(un = *iter);++iter){
 		if (!CheckAccessory(un)) {
 			un->EnqueueAIFirst (new Orders::FireAt(15.0f));
 			un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
@@ -8576,6 +8578,10 @@ void Unit::TurretFAW()
 
 extern int SelectDockPort(Unit *, Unit*parent);
 //extern unsigned int current_cockpit;
+
+// index in here is unsigned, UINT_MAX and UINT_MAX-1 seem to be 
+// special states.  This means the total amount of cargo any ship can have
+// is UINT_MAX -3   which is 65532 for 32bit machines. 
 void Unit::EjectCargo (unsigned int index)
 {
 	Cargo * tmp=NULL;
@@ -8587,7 +8593,7 @@ void Unit::EjectCargo (unsigned int index)
 	//  if (index==((unsigned int)-2)) { is ejecting for eject-dock
 
 	Cockpit * cp = NULL;
-	if (index==((unsigned int)-2)) {
+	if (index==(UINT_MAX - 1)) {
 		int pilotnum = _Universe->CurrentCockpit();
 								 // this calls the unit's existence, by the way.
 		name = "return_to_cockpit";
@@ -8603,7 +8609,7 @@ void Unit::EjectCargo (unsigned int index)
 		dockedPilot.volume=1;
 		tmp = &dockedPilot;
 	}
-	if (index==((unsigned int)-1)) {
+	if (index==UINT_MAX) {
 		int pilotnum = _Universe->CurrentCockpit();
 		name = "Pilot";
 		if (NULL!=(cp = _Universe->isPlayerStarship (this))) {
@@ -8815,7 +8821,8 @@ void Unit::EjectCargo (unsigned int index)
 
 					static float eject_cargo_offset=XMLSupport::parse_float(vs_config->getVariable("physics","eject_distance","20"));
 					QVector loc (Transform (this->GetTransformation(),this->DockingPortLocations()[0].pos.Cast()));
-					loc += tmpvel*1.5*rSize() + randVector(-.5*rSize()+(index==-1?eject_cargo_offset/2:0), .5*rSize()+(index==-1?eject_cargo_offset:0));
+					// index is always > -1 because it's unsigned.  Lets use the correct terms, -1 in Uint is UINT_MAX
+					loc += tmpvel*1.5*rSize() + randVector(-.5*rSize()+(index==UINT_MAX?eject_cargo_offset/2:0), .5*rSize()+(index==UINT_MAX?eject_cargo_offset:0));
 					cargo->SetPosAndCumPos (loc);
 					Vector p,q,r;
 					this->GetOrientation(p,q,r);
@@ -9013,7 +9020,7 @@ float Unit::getEmptyUpgradeVolume(void) const
 float Unit::getCargoVolume(void) const
 {
 	float result = 0.0;
-	for(int i=0; i<image->cargo.size(); ++i) {
+	for(unsigned int i=0; i<image->cargo.size(); ++i) {
 		if (!cargoIsUpgrade(image->cargo[i]))
 			result += image->cargo[i].quantity*image->cargo[i].volume;
 	}
@@ -9025,7 +9032,7 @@ float Unit::getCargoVolume(void) const
 float Unit::getUpgradeVolume(void) const
 {
 	float result = 0.0;
-	for(int i=0; i<image->cargo.size(); ++i) {
+	for(unsigned int i=0; i<image->cargo.size(); ++i) {
 		if (cargoIsUpgrade(image->cargo[i]))
 			result += image->cargo[i].quantity*image->cargo[i].volume;
 	}
@@ -9399,7 +9406,7 @@ std::string Unit::subunitSerializer (const XMLType &input, void * mythis)
 	int index=input.w.hardint;
 	Unit *su;
 	int i=0;
-	for (un_iter ui=un->getSubUnits();su=*ui;++ui,++i) {
+	for (un_iter ui=un->getSubUnits();(su=*ui);++ui,++i) {
 		if (i==index) {
 			if (su->image->unitwriter) {
 				return su->image->unitwriter->getName();

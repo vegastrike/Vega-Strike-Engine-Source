@@ -249,6 +249,8 @@ bool Mount::PhysicsAlignedFire(Unit * caller, const Transformation &Cumulative, 
     }
     time_to_lock = type->LockTime;
 			switch (type->type) {
+			case weapon_info::UNKNOWN:
+				break;
 			case weapon_info::BEAM:
 				if (ref.gun)
 					ref.gun->Init(Transformation(orient,pos.Cast()),*type,owner,caller);

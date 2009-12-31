@@ -215,7 +215,7 @@ int FSM::getDefaultState (float relationship) const{
   }// (0,relationship,.01)
   return nodes[0].edges[choice];
 }
-std::string FSM::GetEdgesString (int curstate) {
+std::string FSM::GetEdgesString (unsigned int curstate) {
   std::string retval="\n";
   if (nodes.size()<=curstate) {
       fprintf(stderr,"Error with faction relationship due to %d not being in range of faction\n",curstate);
@@ -229,7 +229,7 @@ std::string FSM::GetEdgesString (int curstate) {
     retval+= "0. Request Docking Clearence";
   return retval;
 }
-float FSM::getDeltaRelation (int prevstate, int current_state) const{
+float FSM::getDeltaRelation (int prevstate, unsigned int current_state) const{
     if (nodes.size()<=current_state) {
         fprintf(stderr,"Error with faction relationship due to %d not being in range of faction\n",current_state);
         return 0;

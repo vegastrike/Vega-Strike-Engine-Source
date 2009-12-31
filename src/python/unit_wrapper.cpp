@@ -194,7 +194,7 @@ static std::string ParseSizeFlags(int size)
 		std::pair<int,std::string>(weapon_info::AUTOTRACKING," AUTOTRACKING")
 	};
 	std::string rv;
-	for (int i=0; i<sizeof(masks)/sizeof(*masks); ++i)
+	for (unsigned int i=0; i<sizeof(masks)/sizeof(*masks); ++i)
 		if (size & masks[i].first)
 			rv += masks[i].second;
 	if (!rv.empty())
@@ -250,7 +250,7 @@ static BoostPythonDictionary GatherWeaponInfo(const weapon_info *wi)
 BoostPythonDictionary UnitWrapper::GetMountInfo(int index) const
 {
 	BoostPythonDictionary rv;
-	if ((index>=0) && (index<unit->mounts.size())) {
+	if ((index>=0) && ((unsigned)index<unit->mounts.size())) {
 		Mount &mnt = unit->mounts[index];
 
 		Vector pos = mnt.GetMountLocation();

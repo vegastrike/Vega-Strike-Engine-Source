@@ -42,7 +42,7 @@ using XMLSupport::AttributeList;
  * Scene management for a star system
  * Per-Frame Drawing & Physics simulation
  **/
-const int SIM_QUEUE_SIZE=128;
+const unsigned int SIM_QUEUE_SIZE=128;
 class StarSystem
 {
 	protected:
@@ -196,5 +196,5 @@ class StarSystem
 		virtual void  createBackground( StarSystem::StarXML * xml) {}
 };
 bool PendingJumpsEmpty();
-double calc_blend_factor(double frac, int priority, int when_it_will_be_simulated, int cur_simulation_frame);
+double calc_blend_factor(double frac, int priority, unsigned int when_it_will_be_simulated, int cur_simulation_frame);
 #endif

@@ -156,7 +156,7 @@ class	NetClient
 
 		// Returns the list of valid ships to use upon logging in.
 		const vector<string>& shipSelections () { return ship_select_list; }
-		bool	selectShip(int ship);
+		bool	selectShip(unsigned int ship);
 	
 		int				authenticate();
 		int loginAuth( string str_callsign, string str_passwd, string &error); // Loops until receiving login response

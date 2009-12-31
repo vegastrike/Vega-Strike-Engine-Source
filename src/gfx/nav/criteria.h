@@ -170,8 +170,7 @@ class CriteriaLeaf : public CriteriaNode {
 
   virtual CriteriaNode* clone() const =0;
   CriteriaLeaf(CriteriaParent *parent, std::string value)
-    : m_value(value),
-    CriteriaNode(parent) {}
+    : CriteriaNode(parent), m_value(value) {}
     
   virtual ~CriteriaLeaf() {}
     

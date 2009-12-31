@@ -314,8 +314,8 @@ void SwitchUnits (Unit * ol, Unit * nw) {
   bool pointingtool=false;
   bool pointingtonw=false;
 
-  for (int i=0;i<_Universe->numPlayers();i++) {
-    if (i!=(int)_Universe->CurrentCockpit()) {
+  for (unsigned int i=0;i<_Universe->numPlayers();++i) {
+    if (i!=_Universe->CurrentCockpit()) {
       if (_Universe->AccessCockpit(i)->GetParent()==ol)
 	pointingtool=true;
       if (_Universe->AccessCockpit(i)->GetParent()==nw)
@@ -352,7 +352,7 @@ static void SwitchUnitsTurret (Unit *ol, Unit *nw) {
 Unit * GetFinalTurret(Unit * baseTurret) {
   Unit * un = baseTurret;
   Unit * tur;
-  for(un_iter uj= un->getSubUnits();tur = *uj;++uj){
+  for(un_iter uj= un->getSubUnits();(tur = *uj);++uj){
     SwitchUnits (NULL,tur);
     un = GetFinalTurret (tur);
   }
@@ -555,7 +555,7 @@ bool Cockpit::Update () {
 		  
 	tmpgot=true;
 	Unit * un;
-	for(un_iter ui = par->getSubUnits();un = *ui;){
+	for(un_iter ui = par->getSubUnits();(un = *ui);){
 		if (_Universe->isPlayerStarship(un)){
 			++ui;
 			continue;
@@ -599,8 +599,10 @@ bool Cockpit::Update () {
 		if (targ->isUnit()!=PLANETPTR||targ->GetDestinations().empty()) {
 			RequestClearence(par,targ,0);//sex is always 0... don't know how to	 get it.
 		}
-    } else if (((par->IsCleared(targ)||targ->IsCleared(par)&&(!(par->isDocked(targ)||targ->isDocked(par)))))&&
-			   ((targ->isUnit()==PLANETPTR&&UnitUtil::getSignificantDistance(par,targ)>0)||(targ->isUnit()!=PLANETPTR&&UnitUtil::getSignificantDistance(par,targ)>(targ->rSize()+par->rSize()))&&(doubled>=autopilot_term_distance))) {
+    } else if ((par->IsCleared(targ)||targ->IsCleared(par)) && (!(par->isDocked(targ))||targ->isDocked(par)) &&
+				((targ->isUnit()==PLANETPTR && UnitUtil::getSignificantDistance(par,targ) > 0) || 
+				((targ->isUnit()!=PLANETPTR && UnitUtil::getSignificantDistance(par,targ) > (targ->rSize()+par->rSize())) &&
+				(doubled>=autopilot_term_distance)))) {
 		if (targ->isUnit()!=PLANETPTR||targ->GetDestinations().empty()) {
 			par->EndRequestClearance(targ);
 			targ->EndRequestClearance(par);
@@ -625,7 +627,7 @@ bool Cockpit::Update () {
     bool found=false;
     int i=0;
 
-	for(un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();un = *ui;++ui){
+	for(un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();(un = *ui);++ui){
       if (un->faction==this->unitfaction) {
 
 	
@@ -717,7 +719,7 @@ bool Cockpit::Update () {
 		parentturret.SetUnit(NULL);
 		respawnunit[_Universe->CurrentCockpit()]=0;
 		std::string savegamefile =mission->getVariable ("savegame","");
-		int k;
+		unsigned int k;
 		for ( k=0;k<_Universe->numPlayers();++k) {
 		  if (_Universe->AccessCockpit(k)==this)
 		  break;
@@ -729,7 +731,7 @@ bool Cockpit::Update () {
                       active_missions[i]->terminateMission();
                   }
                 }
-                int whichcp=k;
+                unsigned int whichcp=k;
 		string newsystem;QVector pos; bool setplayerXloc;
                 savegame->SetStarSystem("");
                 QVector tmpoldpos=savegame->GetPlayerLocation();

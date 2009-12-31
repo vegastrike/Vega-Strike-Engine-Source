@@ -166,7 +166,7 @@ private:
   ///Accessor to cockpit
   //unsigned int CurrentCockpit(){return current_cockpit;}
   //Cockpit *AccessCockpit() {return cockpit[current_cockpit];}
-  int numPlayers () {return cockpit.size();}
+  unsigned int numPlayers () { return (cockpit.size());}
   //Cockpit *AccessCockpit (int i) {return cockpit[i];}
   ///Wrapper function for Star System
   /*

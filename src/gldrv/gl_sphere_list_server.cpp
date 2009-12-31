@@ -35,7 +35,7 @@ GFXSphereVertexList::GFXSphereVertexList(float radius, int detail, bool Insideou
   radius=100000.0f;
   static vector<GFXVertexList*>vlists[4];
   int which=(Insideout?1:0)+(reverse_normals?2:0);
-  while (detail>=vlists[which].size()) {
+  while ((unsigned int)detail>=vlists[which].size()) {
     vlists[which].insert(vlists[which].end(),1+detail-vlists[which].size(),NULL);
   }
   if (vlists[which][detail]==0) {

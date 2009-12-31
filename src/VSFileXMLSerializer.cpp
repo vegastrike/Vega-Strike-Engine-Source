@@ -20,7 +20,7 @@ namespace XMLDOM {
         char buffer[4096];
         size_t rode;
         
-        while (rode = file.Read(buffer, 4096)) 
+        while ((rode = file.Read(buffer, 4096))) 
             parse(buffer, rode);
         
         file.Close();

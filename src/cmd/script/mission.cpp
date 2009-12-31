@@ -214,7 +214,7 @@ void Mission::wipeDeletedMissions() {
 
 int Mission::getPlayerMissionNumber() {
 	vector<Mission *> *active_missions = ::active_missions.Get();
-	int num=-1;
+	unsigned int num= 0;
 	vector<Mission*>::iterator pl = active_missions->begin();
 	if (pl == active_missions->end()) return -1;
 	for (; pl!=active_missions->end(); ++pl) {
@@ -225,9 +225,11 @@ int Mission::getPlayerMissionNumber() {
 			break;
 		}
 	}
+	if(num == 0 ) return (-1);
+	else --num;  // We previously assumed num started at -1
 	if (pl == active_missions->end()) return -1;
 	if (num>=active_missions->size())
-		return -1;
+		return -1; 
 	return num;
 }
 Mission * Mission::getNthPlayerMission(int cp, int missionnum) {
@@ -238,7 +240,7 @@ Mission * Mission::getNthPlayerMission(int cp, int missionnum) {
 		vector<Mission*>::iterator pl = active_missions->begin();
 		if (pl == active_missions->end()) return NULL;
 		for (; pl!=active_missions->end(); ++pl) {
-			if ((*pl)->player_num == cp) {
+			if ((*pl)->player_num == (unsigned int)cp) {
 				num++;
 			}
 			if (num == missionnum) {
@@ -256,7 +258,7 @@ void Mission::terminateMission(){
 	int queuenum = -1;
 	
 	if (f!=active_missions->end()) {
-		queuenum = getPlayerMissionNumber();
+		queuenum = getPlayerMissionNumber();  // -1 used as error code
 		if ((Network!=NULL || SERVER) && player_num>=0) {
 			int num = queuenum;
 			if (num>=0) {
@@ -278,7 +280,8 @@ void Mission::terminateMission(){
 	}
 	// NETFIXME: This routine does not work properly yet.
         if (queuenum>=0) {
-          int num=queuenum-1;
+//          int num=queuenum-1;  Why? we do this in GetPlayerMissionNumber()
+			unsigned int num = queuenum;
           vector<std::string> * scripts = &_Universe->AccessCockpit(player_num)->savegame->getMissionStringData("active_scripts");
           if (num<scripts->size()) {
             scripts->erase(scripts->begin()+num);

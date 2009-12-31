@@ -1462,9 +1462,7 @@ string Unit::WriteUnitString () {
       if (unitTables[i]->RowExists(csvRow,where)) {
         CSVRow row(unitTables[i],where);        
 		vsUMap<string,string> unit;        
-        for (int jj=0;
-             jj<row.size();
-             ++jj) {
+        for (unsigned int jj=0; jj<row.size();++jj) {
           if (jj!=0)
             unit[row.getKey(jj)]=row[jj];
         }
@@ -1476,7 +1474,7 @@ string Unit::WriteUnitString () {
         string mountstr;
         double unitScale=  stof(unit["Unit_Scale"],1);
         {//mounts
-          for (int j=0;j<mounts.size();++j) {
+          for (unsigned int j=0;j<mounts.size();++j) {
             char mnt[1024];
             Matrix m;
             Transformation tr(mounts[j].GetMountOrientation(),
@@ -1698,7 +1696,7 @@ string Unit::WriteUnitString () {
   return ret;
 }
 void UpdateMasterPartList(Unit * ret) {
-  for (int i=0;i<_Universe->numPlayers();++i) {
+  for (unsigned int i=0;i<_Universe->numPlayers();++i) {
     Cockpit* cp = _Universe->AccessCockpit(i);
     std::vector<std::string>* addedcargoname= &cp->savegame->getMissionStringData("master_part_list_content");
     std::vector<std::string>* addedcargocat= &cp->savegame->getMissionStringData("master_part_list_category");

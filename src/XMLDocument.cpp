@@ -22,9 +22,9 @@ namespace XMLDOM {
 
 XMLElement::XMLElement() :
     mType(XET_CDATA),
+    mAttributes(),
     mParent(0),
     mDocument(0),
-    mAttributes(),
     mIdAttribute(mAttributes.end()),
     mNameAttribute(mAttributes.end())
 {
@@ -32,10 +32,10 @@ XMLElement::XMLElement() :
 
 XMLElement::XMLElement(const std::string& cdata) :
     mType(XET_CDATA),
-    mParent(0),
-    mDocument(0),
     mContents(cdata),
     mAttributes(),
+    mParent(0),
+    mDocument(0),
     mIdAttribute(mAttributes.end()),
     mNameAttribute(mAttributes.end())
 {
@@ -43,10 +43,10 @@ XMLElement::XMLElement(const std::string& cdata) :
 
 XMLElement::XMLElement(Type type, const std::string& data) :
     mType(type),
-    mParent(0),
-    mDocument(0),
     mContents((type==XET_CDATA||type==XET_COMMENT)?data:std::string()),
     mAttributes(),
+    mParent(0),
+    mDocument(0),
     mIdAttribute(mAttributes.end()),
     mNameAttribute(mAttributes.end())
 {
@@ -54,10 +54,10 @@ XMLElement::XMLElement(Type type, const std::string& data) :
 
 XMLElement::XMLElement(const char* tagName, const char* const* attrValuePairList, unsigned int nAttr) :
     mType(XET_TAG),
-    mParent(0),
-    mDocument(0),
     mTagName(tagName),
     mAttributes(),
+    mParent(0),    
+    mDocument(0),
     mIdAttribute(mAttributes.end()),
     mNameAttribute(mAttributes.end())
 {
@@ -67,10 +67,10 @@ XMLElement::XMLElement(const char* tagName, const char* const* attrValuePairList
 
 XMLElement::XMLElement(const char* tagName, const char* const* attrValuePairList) :
     mType(XET_TAG),
-    mParent(0),
-    mDocument(0),
     mTagName(tagName),
     mAttributes(),
+    mParent(0),
+    mDocument(0),
     mIdAttribute(mAttributes.end()),
     mNameAttribute(mAttributes.end())
 {
@@ -80,10 +80,10 @@ XMLElement::XMLElement(const char* tagName, const char* const* attrValuePairList
 
 XMLElement::XMLElement(const std::string& tagName, const std::vector<std::string> &attrValuePairList) :
     mType(XET_TAG),
-    mParent(0),
-    mDocument(0),
     mTagName(tagName),
     mAttributes(),
+    mParent(0),
+    mDocument(0),
     mIdAttribute(mAttributes.end()),
     mNameAttribute(mAttributes.end())
 {
@@ -93,10 +93,10 @@ XMLElement::XMLElement(const std::string& tagName, const std::vector<std::string
 
 XMLElement::XMLElement(const std::string& tagName, const std::map<std::string,std::string> &attrValuePairList) :
     mType(XET_TAG),
-    mParent(0),
-    mDocument(0),
     mTagName(tagName),
     mAttributes(attrValuePairList),
+    mParent(0),
+    mDocument(0),
     mIdAttribute(mAttributes.find("id")),
     mNameAttribute(mAttributes.find("name"))
 {
@@ -490,8 +490,7 @@ namespace ExpatHandlers {
 
 
 XMLSerializer::XMLSerializer(const char* encoding, XMLDocument *doc, XMLElement *elem) :
-    internals(0),
-    options(OPT_DEFAULT)
+    options(OPT_DEFAULT), internals(0)
 {
     initialise(encoding,doc,elem);
 }

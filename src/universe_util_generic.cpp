@@ -53,7 +53,7 @@ namespace UniverseUtil
 	Unit* PythonUnitIter::current() 
 	{
 		Unit *ret = NULL;
-		while(ret = **this){
+		while((ret = **this)){
 			if(ret->hull > 0)
 				return (ret);
 			advance();
@@ -143,7 +143,7 @@ namespace UniverseUtil
 		if (serial==0)
 			return NULL;
 		// Find the unit
-		for(un_iter it = UniverseUtil::getUnitList();un = *it;++it) {
+		for(un_iter it = UniverseUtil::getUnitList();(un = *it);++it) {
 			if((*it)->GetSerial() == serial)
 				break;
 		}
@@ -631,7 +631,7 @@ namespace UniverseUtil
 	}
 	int numActiveMissions() {
 		int num = 0;
-		int cp = _Universe->CurrentCockpit();
+		unsigned int cp = _Universe->CurrentCockpit();
 		for (unsigned int i=0; i<active_missions.size(); ++i) {
 			if (active_missions[i]->player_num == cp) {
 				num++;
@@ -641,7 +641,7 @@ namespace UniverseUtil
 	}
 	void IOmessage(int delay,string from,string to,string message) {
 		if (to=="news"&&(!game_options.news_from_cargolist))
-			for (int i=0;i<_Universe->numPlayers();i++)
+			for (unsigned int i=0;i<_Universe->numPlayers();i++)
 				pushSaveString(i, "news", string("#")+message);
 		else
 			mission->msgcenter->add(from,to,message,delay);
@@ -979,7 +979,7 @@ namespace UniverseUtil
 			text+="Starship: "+simplePrettyShip(Ships[0])+lf;
 			if (Ships.size()>2) {
 				text+="Fleet:"+lf;
-				for (int i=2;i<Ships.size();i+=2) {
+				for (unsigned int i=2;i<Ships.size();i+=2) {
 					text+=" "+simplePrettyShip(Ships[i-1])+lf+"  Located At:"+lf+"  "+simplePrettySystem(Ships[i])+lf;
 				}
 			}

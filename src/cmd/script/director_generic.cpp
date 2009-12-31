@@ -32,7 +32,7 @@ using std::cerr;
 using std::endl;
 PYTHON_INIT_INHERIT_GLOBALS(Director,PythonMissionBaseClass);
 float getSaveData (int whichcp, string key, unsigned int num) {
-  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+  if (whichcp < 0|| (unsigned int)whichcp >= _Universe->numPlayers()) {
     return 0;
   }
   vector<float> * ans =&(_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key));
@@ -42,7 +42,7 @@ float getSaveData (int whichcp, string key, unsigned int num) {
   return (*ans)[num];
 }
 string getSaveString (int whichcp, string key, unsigned int num) {
-  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+  if (whichcp < 0|| (unsigned int)whichcp >= _Universe->numPlayers()) {
     return "";
   }
   vector<std::string> * ans = &(_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key));
@@ -52,19 +52,19 @@ string getSaveString (int whichcp, string key, unsigned int num) {
   return (*ans)[num];  
 }
 unsigned int getSaveDataLength (int whichcp, string key) {
-  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+  if (whichcp < 0|| (unsigned int)whichcp >= _Universe->numPlayers()) {
     return 0;
   }
   return (_Universe->AccessCockpit(whichcp)->savegame->getMissionDataLength(key));
 }
 unsigned int getSaveStringLength (int whichcp, string key) {
-  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+  if (whichcp < 0|| (unsigned int)whichcp >= _Universe->numPlayers()) {
     return 0;
   }
   return (_Universe->AccessCockpit(whichcp)->savegame->getMissionStringDataLength(key));
 }
 unsigned int pushSaveData (int whichcp, string key, float val) {
-  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+  if (whichcp < 0|| (unsigned int)whichcp >= _Universe->numPlayers()) {
     return 0;
   }
   vector<float> * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
@@ -75,7 +75,7 @@ unsigned int pushSaveData (int whichcp, string key, float val) {
 }
 
 unsigned int eraseSaveData (int whichcp, string key, unsigned int index) {
-  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+  if (whichcp < 0|| (unsigned int)whichcp >= _Universe->numPlayers()) {
     return 0;
   }
   vector<float> * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
@@ -89,7 +89,7 @@ unsigned int eraseSaveData (int whichcp, string key, unsigned int index) {
 }
 
 unsigned int clearSaveData (int whichcp, string key) {
-  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+  if (whichcp < 0|| (unsigned int)whichcp >= _Universe->numPlayers()) {
     return 0;
   }
   vector<float> * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
@@ -102,7 +102,7 @@ unsigned int clearSaveData (int whichcp, string key) {
 }
 
 unsigned int pushSaveString (int whichcp, string key, string value) {
-  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+  if (whichcp < 0|| (unsigned int)whichcp >= _Universe->numPlayers()) {
     return 0;
   }
   vector<std::string> * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key)));
@@ -113,7 +113,7 @@ unsigned int pushSaveString (int whichcp, string key, string value) {
 }
 
 void putSaveString (int whichcp, string key, unsigned int num, string val) {
-  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+  if (whichcp < 0|| (unsigned int)whichcp >= _Universe->numPlayers()) {
     return;
   }
   vector<std::string> *ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key)));
@@ -125,7 +125,7 @@ void putSaveString (int whichcp, string key, unsigned int num, string val) {
 }
 
 void putSaveData (int whichcp, string key, unsigned int num, float val) {
-  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+  if (whichcp < 0|| (unsigned int)whichcp >= _Universe->numPlayers()) {
     return;
   }
   vector<float> * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
@@ -137,7 +137,7 @@ void putSaveData (int whichcp, string key, unsigned int num, float val) {
 }
 
 unsigned int eraseSaveString (int whichcp, string key, unsigned int index) {
-  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+  if (whichcp < 0|| (unsigned int)whichcp >= _Universe->numPlayers()) {
     return 0;
   }
   vector<std::string> *ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key)));
@@ -151,7 +151,7 @@ unsigned int eraseSaveString (int whichcp, string key, unsigned int index) {
 }
 
 unsigned int clearSaveString (int whichcp, string key) {
-  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+  if (whichcp < 0|| (unsigned int)whichcp >= _Universe->numPlayers()) {
     return 0;
   }
   vector<std::string> *ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key)));
@@ -164,7 +164,7 @@ unsigned int clearSaveString (int whichcp, string key) {
 }
 
 vector <string> loadStringList (int playernum,string mykey) {
-	if (playernum<0||playernum>=_Universe->numPlayers()) {
+	if (playernum<0|| (unsigned int)playernum>=_Universe->numPlayers()) {
 		return vector<string> ();
 	}
 	vector<float> * ans =&((_Universe->AccessCockpit(playernum)->savegame->getMissionData (mykey)));
@@ -187,7 +187,7 @@ vector <string> loadStringList (int playernum,string mykey) {
 	return rez;
 }
 void saveStringList (int playernum,string mykey,vector<string> names) {
-	if (playernum<0||playernum>=_Universe->numPlayers()) {
+	if (playernum<0|| (unsigned int)playernum>=_Universe->numPlayers()) {
 		return;
 	}
 	vector <float>* ans =&((_Universe->AccessCockpit(playernum)->savegame->getMissionData (mykey)));

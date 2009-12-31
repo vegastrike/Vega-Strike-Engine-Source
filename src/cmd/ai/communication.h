@@ -28,8 +28,8 @@ class FSM {
   void beginElement(const string &name, const AttributeList attributes);
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
-  std::string GetEdgesString (int curstate);
-  float getDeltaRelation (int prevstate, int curstate) const;
+  std::string GetEdgesString (unsigned int curstate);
+  float getDeltaRelation (int prevstate, unsigned int curstate) const;
   int getCommMessageMood(int curstate, float mood, float randomresponsefactor,float relationship) const;
   int getDefaultState (float relationship) const;
   int GetUnDockNode()const ;

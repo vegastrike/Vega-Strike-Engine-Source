@@ -379,9 +379,7 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 		this->deltatime        = delta_t;
 
 		// Loop throught received snapshot
-        int i = 0;
-        int j = 0;
-        int k = 0;
+        unsigned int i=0,j=0,k=0;
         int offset=netbuf.getOffset();
 		while( (i+j+k)<numUnits )
 		{
@@ -536,7 +534,7 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 #define SETNOTNULL(un, param, val) if (un) param=val; else val
 
 void NetClient::receiveUnitDamage( NetBuffer &netbuf, Unit *un ) {
-	int it=0;
+	unsigned int it=0;
 	unsigned short damages;
 	damages = netbuf.getShort();
 
@@ -570,8 +568,8 @@ void NetClient::receiveUnitDamage( NetBuffer &netbuf, Unit *un ) {
 		SETNOTNULL(un,un->computer.radar.lockcone, netbuf.getFloat());
 		SETNOTNULL(un,un->computer.radar.trackingcone, netbuf.getFloat());
 		SETNOTNULL(un,un->computer.radar.maxrange, netbuf.getFloat());
-		int numvdus=(int)netbuf.getChar();
-		for( it = 0; it<numvdus; it++) {
+		unsigned int numvdus=(unsigned int)netbuf.getChar();
+		for( it = 0; it<numvdus; ++it) {
 			float dam=netbuf.getFloat8();
 			if (un && it<1+UnitImages::NUMGAUGES+MAXVDUS) {
 				un->image->cockpit_damage[it] = dam;
@@ -581,8 +579,8 @@ void NetClient::receiveUnitDamage( NetBuffer &netbuf, Unit *un ) {
 	if( damages & Unit::MOUNT_DAMAGED)
 	{
 		SETNOTNULL(un,un->image->ecm, netbuf.getShort());
-		int nummounts=(int)netbuf.getShort();
-		for( it=0; it<nummounts; it++)
+		unsigned int nummounts=(unsigned int)netbuf.getShort();
+		for( it=0; it<nummounts; ++it)
 		{
 			Mount::STATUS tmpstatus=( Mount::STATUS) netbuf.getChar();
 			int ammo = netbuf.getInt32();

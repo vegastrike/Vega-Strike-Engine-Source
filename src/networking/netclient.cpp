@@ -111,7 +111,7 @@ bool isLocalSerial( ObjSerial sernum)
 
 Unit * getNetworkUnit( ObjSerial cserial)
 {
-	for( int i=0; i<_Universe->numPlayers(); i++)
+	for( unsigned int i=0; i<_Universe->numPlayers(); i++)
 	{
 		if( Network[i].getUnit()->GetSerial() == cserial)
 			return Network[i].getUnit();
@@ -483,7 +483,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 	
     // Receive data
 	Unit * un = NULL;
-	int mount_num;
+	unsigned int mount_num;
 	ObjSerial mis=0;
 	ObjSerial local_serial=0;
 	if( this->game_unit.GetUnit() != NULL)
@@ -754,7 +754,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 						::iterator i = un->mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
                                         if (mount_num>un->mounts.size())
                                           mount_num=un->mounts.size();
-					int j;
+					unsigned int j;
 					
 					un->energy = energy; // It's important to set energy before firing.
 					
@@ -769,9 +769,9 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					}
                                         Cockpit *ps = _Universe->isPlayerStarship(un);
 					for (j=0;j<mount_num;++j) {
-						int mnt = netbuf.getInt32();
+						unsigned int mnt = netbuf.getInt32();
 						if (mnt<un->mounts.size()&&mnt>=0) {
-                                                  if (ps==NULL||!preEmptiveClientFire(un->mounts[mnt].type)) {
+                           if (ps==NULL||!preEmptiveClientFire(un->mounts[mnt].type)) {
 							un->mounts[mnt].processed=Mount::ACCEPTED;
 							un->mounts[mnt].status=Mount::ACTIVE;
 							// Store the missile id in the mount that should fire a missile
@@ -806,7 +806,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					// Set the concerned mount as ACTIVE and others as INACTIVE
 					vector <Mount>
 						::iterator i = un->mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
-					int j;
+					unsigned int j;
                                         if (mount_num>un->mounts.size())
                                           mount_num=un->mounts.size();
 
@@ -821,7 +821,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					}
 					
 					for (j=0;j<mount_num;++j) {
-						int mnt = netbuf.getInt32();
+						unsigned int mnt = netbuf.getInt32();
 						if (mnt<un->mounts.size()&&mnt>=0) {
 							un->mounts[mnt].processed=Mount::UNFIRED;
 							un->mounts[mnt].status=Mount::ACTIVE;
@@ -877,10 +877,10 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				// but the server computes the damage itself
 
 				// SHOULD READ THE DAMAGE SNAPSHOT HERE !
-				int nbupdates = packet_serial;
+				unsigned int nbupdates = packet_serial;
 				ObjSerial serial;
                                 int offset=netbuf.getOffset();
-				for( int i=0; i<nbupdates; i++)
+				for( unsigned int i=0; i<nbupdates; i++)
 				{
                                   
 					serial = netbuf.getSerial();
@@ -1081,7 +1081,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 						un->image->CargoVolume = cargvol;
 						un->image->UpgradeVolume = upgvol;
 					}
-					int numcargo = netbuf.getInt32();
+					unsigned int numcargo = netbuf.getInt32();
 					bool mission = false;
 					if (numcargo<0) {
 						mission = true;
@@ -1151,7 +1151,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				if (nostarsystem) break;
 				Unit *from = UniverseUtil::GetUnitFromSerial(packet_serial);
 				Unit *to = game_unit.GetUnit();
-				int curstate = netbuf.getInt32();
+				unsigned int curstate = netbuf.getInt32();
 				if (!from) {
 				  COUT << "Received invalid comm message " << curstate << " from "<<packet_serial << endl;
 				  break;
@@ -1344,7 +1344,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				}
 				switch (type) {
 				case (Subcmd::FloatValue|Subcmd::SetValue):
-					while (getSaveDataLength(cp, key)<=pos) {
+					while (getSaveDataLength(cp, key)<=(unsigned int)pos && (unsigned int)pos != UINT_MAX) {
 						pushSaveData(cp, key, 0);
 					}
 					putSaveData(cp, key, pos, floatValue);
@@ -1358,7 +1358,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					}
 					break;
 				case (Subcmd::StringValue|Subcmd::SetValue):
-					while (getSaveStringLength(cp, key)<=pos) {
+					while (getSaveStringLength(cp, key)<=(unsigned int)pos && (unsigned int)pos != UINT_MAX) {
 						pushSaveString(cp, key, "");
 					}
 					putSaveString(cp, key, pos, strValue);
@@ -1373,7 +1373,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					break;
 				case (Subcmd::Objective|Subcmd::SetValue):
 					mission = activeMis;
-					while (mission->objectives.size()<=pos) {
+					while (mission->objectives.size()<=(unsigned int)pos && (unsigned int)pos != UINT_MAX) {
 						UniverseUtil::addObjective("");
 					}
 					UniverseUtil::setObjective(pos, strValue);
@@ -1383,7 +1383,7 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 					break;
 				case (Subcmd::Objective|Subcmd::EraseValue):
 					mission = activeMis;
-					if (pos<mission->objectives.size() && pos>=0) {
+					if ((unsigned int)pos<mission->objectives.size() && (unsigned int)pos>=0 && (unsigned int)pos != UINT_MAX) {
 						mission->objectives.erase(activeMis->objectives.begin()+pos);
 					} else {
 						UniverseUtil::clearObjectives();
@@ -1477,8 +1477,8 @@ int NetClient::recvMsg( Packet* outpacket, timeval *timeout )
 				ObjSerial utdw_serial = netbuf.getSerial();
 				un = UniverseUtil::GetUnitFromSerial( utdw_serial);
 				//int dockport = netbuf.getInt32();
-				int dockport;
-				for (dockport=0; dockport< un->image->dockingports.size(); dockport++) {
+				unsigned int dockport;
+				for (dockport=0; dockport< un->image->dockingports.size(); ++dockport) {
 					if (!un->image->dockingports[dockport].used)
 						break;
 				}
@@ -1577,7 +1577,7 @@ SOCKETALT*	NetClient::logout(bool leaveUDP)
 
 void NetClient::CleanUp() {
 	if (Network) {
-		for (int i=0;i<_Universe->numPlayers();i++) {
+		for (unsigned int i=0;i<_Universe->numPlayers();++i) {
 			Network[i].logout(false);
 		}
 		delete [] Network;

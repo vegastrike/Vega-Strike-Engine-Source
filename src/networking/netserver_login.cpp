@@ -233,7 +233,7 @@ void NetServer::localLogin( ClientPtr clt, Packet &p) {
 		this->sendLoginError(clt);
 		return;
 	}
-	for (int i=0; i<_Universe->numPlayers(); i++) {
+	for (unsigned int i=0; i<_Universe->numPlayers(); i++) {
 		Cockpit *cp = _Universe->AccessCockpit(i);
 		if (cp->savegame && cp->savegame->GetCallsign() == clt->callsign) {
 			COUT << "Cannot login player "<<clt->callsign<<": already exists on this server!";
@@ -254,7 +254,7 @@ void NetServer::localLogin( ClientPtr clt, Packet &p) {
 
 Cockpit * NetServer::loadCockpit(ClientPtr clt) {
 	Cockpit *cp = NULL;
-	for (int i=1;i<_Universe->numPlayers();i++) {
+	for (unsigned int i=1;i<_Universe->numPlayers();i++) {
 		cp = _Universe->AccessCockpit(i);
 		if (cp->savegame->GetCallsign() == clt->callsign) {
 			if (clt->loginstate==Client::CONNECTED) {

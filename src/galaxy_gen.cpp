@@ -914,7 +914,7 @@ void MakeMoons (float callingradius, int callingentitytype) {
 void beginStar () {
   float radius=starradius[staroffset];
   Vector r,s;
-  int i;
+  unsigned int i;
   Vector center=generateAndUpdateRS (r,s,radius,false);//WTF why was this commented out--that means all stars start on top of each other
   planetoffset=0;
 
@@ -940,7 +940,7 @@ void beginStar () {
   static float planet_size_compared_to_sun = XMLSupport::parse_float (vs_config->getVariable ("galaxy","RockyRelativeToPrimary",".05"));
 //  static float gas_size_compared_to_sun = XMLSupport::parse_float (vs_config->getVariable ("galaxy","GasRelativeToPrimary",".2"));
   xmllevel++;
-  int numu;
+  unsigned int numu;
   if (numstarentities) {
     numu= numnaturalphenomena/(numstarentities-staroffset)+(grand()<float(numnaturalphenomena%(numstarentities-staroffset))/(numstarentities-staroffset));
   } else {
@@ -949,10 +949,10 @@ void beginStar () {
   if ((int)staroffset==(int)(numstarentities-staroffset)-1) {
     numu=numnaturalphenomena;
   }
-  for (i=0;i<numu;i++) {
+  for (i=0;i<numu;++i) {
     MakeBigUnit(STAR);
   }
-  for (i=0;i<stars[staroffset].numstarbases;i++) {
+  for (i=0;i<stars[staroffset].numstarbases;++i) {
     MakeSmallUnit ();
   }
   MakeJumps (100+grand()*300,STAR,stars[staroffset].numjumps);

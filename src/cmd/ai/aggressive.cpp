@@ -203,7 +203,7 @@ unsigned int DoSpeech (Unit * un, Unit *player_un, const FSM::Node &node) {
 void LeadMe (Unit * un, string directive, string speech, bool changetarget) { 
 
   if (un!=NULL) {
-    for (int i=0;i<_Universe->numPlayers();i++) {
+    for (unsigned int i=0;i<_Universe->numPlayers();i++) {
       Unit * pun =_Universe->AccessCockpit(i)->GetParent();
       if (pun) {
 	if (pun->getFlightgroup()==un->getFlightgroup()){

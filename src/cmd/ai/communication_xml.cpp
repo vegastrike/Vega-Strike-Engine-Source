@@ -87,7 +87,7 @@ using namespace CommXML;
                   }else {
                     
                     string tmp = strtoupper((*iter).name);
-                    int num=0;
+                    unsigned int num=0;
                     if (1==sscanf(tmp.c_str(),"TEXT%d",&num)||tmp=="TEXT") {
                       while (!(num<messages.size())) {
                         messages.push_back(string());

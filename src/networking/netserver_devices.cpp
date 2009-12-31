@@ -290,7 +290,7 @@ void	NetServer::sendMessage( string from, string to, string message, float delay
 	if (to[0]=='p') {
 		int playerto=-1;
 		sscanf(tostr+1,"%d",&playerto);
-		if (playerto!=-1 && playerto<_Universe->numPlayers()) {
+		if (playerto!=-1 && playerto<(int)_Universe->numPlayers()) {
 			Cockpit *cp = _Universe->AccessCockpit(playerto);
 			Unit *un = cp->GetParent();
 			if (!un) return;

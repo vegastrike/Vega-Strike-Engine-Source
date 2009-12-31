@@ -32,7 +32,7 @@ string getCargoUnitName (const char * textname) {
   return retval;
 }
 PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const QVector &x_axis, const QVector &y_axis, const QVector & centre, Unit * targetunit) : Order(MOVEMENT,0),  velocity(velocity), theta(initpos), inittheta(initpos), x_size(x_axis), y_size(y_axis), current_orbit_frame(0) {
-	for (int t=0;t<NUM_ORBIT_AVERAGE;t++) {
+	for (unsigned int t=0;t<NUM_ORBIT_AVERAGE;++t) {
 		orbiting_average[t]=QVector(0,0,0);
 	}
 	orbiting_last_simatom = SIMULATION_ATOM;
@@ -98,7 +98,7 @@ void PlanetaryOrbit::Execute() {
         }
 		*/
         double blend_factor=calc_blend_factor(saved_interpolation_blend_factor,unit->sim_atom_multiplier,unit->cur_sim_queue_slot,cur_sim_frame);
-        int o = current_orbit_frame++;
+        unsigned int o = current_orbit_frame++;
 		current_orbit_frame %= NUM_ORBIT_AVERAGE;
 		if (current_orbit_frame==0)
 			orbit_list_filled = true;
@@ -146,7 +146,7 @@ void PlanetaryOrbit::Execute() {
 
 				float ratio_simatom = (SIMULATION_ATOM/orbiting_last_simatom);
 				sum_diff *= ratio_simatom;
-				int number_to_fill;
+				unsigned int number_to_fill;
 				number_to_fill = (int)((NUM_ORBIT_AVERAGE/ratio_simatom)+.99);
 				if (number_to_fill > NUM_ORBIT_AVERAGE) number_to_fill = NUM_ORBIT_AVERAGE;
 				if (ratio_simatom <= 1) {
@@ -437,7 +437,7 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
   //this->faction = neutralfaction;
   killed=false;
   bool destempty=dest.empty();
-  for (int i=0; i<dest.size(); ++i) AddDestination(dest[i]);
+  for (unsigned int i=0; i<dest.size(); ++i) AddDestination(dest[i]);
   //name = "Planet - ";
   //name += textname;
   name=fullname;

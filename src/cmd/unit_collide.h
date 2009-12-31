@@ -200,7 +200,7 @@ public:
     bool ret=false;
     un_iter removal = myvector.createIterator();
     Unit * un;
-    while (un=*removal) {
+    while ((un=*removal)) {
       if (un==objectToKill) {
 	ret = true;
 	removal.remove();

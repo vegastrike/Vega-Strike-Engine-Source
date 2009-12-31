@@ -246,7 +246,7 @@ void Mission::call_olist_set(missionNode *node,int mode,varInst *ovi,int index,v
   olist_t *olist=getOListObject(node,mode,ovi);
   	if(((unsigned int)index)>=olist->size()){
 	  char buffer[200];
-	  sprintf(buffer,"olist.set: index out of range size=%d, index=%d\n",olist->size(),index);
+	  sprintf(buffer,"olist.set: index out of range size=%u, index=%u\n",(unsigned int)olist->size(),index);
 	  fatalError(node,mode,buffer);
 	  assert(0);
 	}
@@ -263,7 +263,7 @@ varInst *Mission::call_olist_at(missionNode *node,int mode,varInst *ovi,int inde
   olist_t *olist=getOListObject(node,mode,ovi);
   	if(((unsigned int)index)>=olist->size()){
 	  char buffer[200];
-	  sprintf(buffer,"olist.at: index out of range size=%d, index=%d\n",olist->size(),index);
+	  sprintf(buffer,"olist.at: index out of range size=%u, index=%u\n",(unsigned int)olist->size(),index);
 	  fatalError(node,mode,buffer);
 	  assert(0);
 	}

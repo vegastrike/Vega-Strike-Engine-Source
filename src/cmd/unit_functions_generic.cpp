@@ -163,14 +163,14 @@ void ScoreKill (Cockpit * cp, Unit * un, Unit * killedUnit) {
 //From unit_physics.cpp
 signed char  ComputeAutoGuarantee ( Unit * un) {
   Cockpit * cp;
-  int cpnum=-1;
+  unsigned int cpnum=0;
   if ((cp =_Universe->isPlayerStarship (un))) {
     cpnum = cp-_Universe->AccessCockpit(0);
   }else {
     return Mission::AUTO_ON;
   }
   unsigned int i;
-  for (i=0;i<active_missions.size();i++) {
+  for (i=0;i<active_missions.size();++i) {
     if(active_missions[i]->player_num==cpnum&&active_missions[i]->player_autopilot!=Mission::AUTO_NORMAL) {
       return active_missions[i]->player_autopilot;
     }
@@ -305,7 +305,7 @@ void DealPossibleJumpDamage (Unit *un) {
 
 void Enslave (Unit* parent, bool enslave) {
   bool free=!enslave;
-  int i;
+  unsigned int i;
   vector<Cargo> ToBeChanged;
   unsigned int numcargo=parent->numCargo();
   for (i=numcargo-1;i>=0;--i) {

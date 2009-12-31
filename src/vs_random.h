@@ -44,7 +44,7 @@
 
 class VSRandom {
 #define NN_CONSTANT 624
-  static const int N() {
+  static const unsigned int N() {
     return NN_CONSTANT;
   }
   static const int M() {
@@ -61,7 +61,7 @@ class VSRandom {
   }
   unsigned int mt[NN_CONSTANT]; /* the array for the state vector  */
 #undef NN_CONSTANT
-  int mti; /* mti==N+1 means mt[N] is not initialized */
+  unsigned int mti; /* mti==N+1 means mt[N] is not initialized */
 /* initializes mt[N] with a seed */
 public:
   VSRandom(unsigned int s):mti(N()+1) {
@@ -84,7 +84,7 @@ public:
 /* init_key is the array for initializing keys */
 /* key_length is its length */
   VSRandom(unsigned int init_key[], unsigned int key_length):mti(N()+1) {
-    int i, j, k;
+    unsigned int i, j, k;
     init_genrand(19650218UL);
     i=1; j=0;
     k = (N()>key_length ? N() : key_length);
@@ -94,7 +94,7 @@ public:
         mt[i] &= 0xffffffffUL; /* for WORDSIZE > 32 machines */
         i++; j++;
         if (i>=N()) { mt[0] = mt[N()-1]; i=1; }
-        if (j>=(int)key_length) j=0;
+        if (j>=key_length) j=0;
     }
     for (k=N()-1; k; k--) {
         mt[i] = (mt[i] ^ ((mt[i-1] ^ (mt[i-1] >> 30)) * 1566083941UL))
@@ -111,7 +111,7 @@ public:
     static unsigned int mag01[2]={0x0UL, MATRIX_A()};
     /* mag01[x] = x * MATRIX_A  for x=0,1 */
     if (mti >= N()) { /* generate N words at one time */
-        int kk;
+        unsigned int kk;
         if (mti == N()+1)   /* if init_genrand() has not been called, */
             init_genrand(5489UL); /* a default initial seed is used */
         for (kk=0;kk<N()-M();kk++) {
@@ -139,7 +139,7 @@ public:
   int genrand_int31(void) {
     return (int)(genrand_int32()>>1);
   }
-  int rand() {
+  unsigned int rand() {
 	  return genrand_int31();
   }
 /* generates a random number on [0,1]-real-interval */

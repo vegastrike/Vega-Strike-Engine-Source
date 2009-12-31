@@ -646,7 +646,7 @@ void NetClient::receiveLocations( const Packet* )
 /*************************************************************/
 /**** Create a new character                              ****/
 /*************************************************************/
-bool	NetClient::selectShip(int ship)
+bool	NetClient::selectShip(unsigned int ship)
 {
 	if(lastsave.empty() || lastsave[0]=="") {
 		NetBuffer netbuf;

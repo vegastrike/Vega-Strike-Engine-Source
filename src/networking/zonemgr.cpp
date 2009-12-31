@@ -968,7 +968,7 @@ void	ZoneMgr::displayNPCs() {
 	for (ZoneMap::iterator iter = zones.begin(); iter!=zones.end(); ++iter) {
 		ZoneInfo *zi = &((*iter).second);
 		StarSystem *ss = zi->star_system;
-		for( int i=0; i<_Universe->numPlayers(); i++) {
+		for( unsigned int i=0; i<_Universe->numPlayers(); ++i) {
 			Cockpit *cp = _Universe->AccessCockpit(i);
 			if (cp->activeStarSystem != ss)
 				continue;

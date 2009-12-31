@@ -201,8 +201,8 @@ void Bolt::Draw () {
   GFXColor4f(1,1,1,1);
 }
 
-extern void BoltDestroyGeneric(Bolt * whichbolt, int index, int decal, bool isBall);
-void Bolt::Destroy (int index) {
+extern void BoltDestroyGeneric(Bolt * whichbolt, unsigned int index, int decal, bool isBall);
+void Bolt::Destroy (unsigned int index) {
   VSDESTRUCT2
   bolt_draw *q = _Universe->activeStarSystem()->bolts;
   bool isBall=true;

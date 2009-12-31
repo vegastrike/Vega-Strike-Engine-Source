@@ -64,9 +64,9 @@ struct delayed_mission {
 };
 vector <delayed_mission> delayed_missions;
 int num_delayed_missions(){
-  int cp = _Universe->CurrentCockpit();
+  unsigned int cp = _Universe->CurrentCockpit();
   int number = 0;
-  for (unsigned int i=0; i< delayed_missions.size();i++) {
+  for (unsigned int i=0; i< delayed_missions.size();++i) {
     if (delayed_missions[i].player == cp)
       ++number;
   }
@@ -165,7 +165,7 @@ int ReadIntSpace (char * &buf) {
   bool toggle=false;
   while (*buf!=0) {
     char c[2]={0,0};
-    if (c[0]=*buf) {
+    if ((c[0]=*buf)) {
       if (c[0]!=' ') {
 		toggle=true;
 		myint+=c;

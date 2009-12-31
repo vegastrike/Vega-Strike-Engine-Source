@@ -21,7 +21,7 @@
 #include "vsnet_socket.h"
 #include "vsnet_socketset.h"
 
-class VSFileSystem::VSFile;
+// class VSFileSystem::VSFile;   Not needed?
 
 using std::map;
 using std::string;

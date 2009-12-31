@@ -49,7 +49,7 @@ int Bolt::AddAnimation(bolt_draw *q, std::string file, QVector cur_position) {
 
 void Bolt::Draw () {
 }
-extern void BoltDestroyGeneric(Bolt * whichbolt, int index, int decal, bool isBall);
-void Bolt::Destroy(int index) {
+extern void BoltDestroyGeneric(Bolt * whichbolt, unsigned int index, int decal, bool isBall);
+void Bolt::Destroy(unsigned int index) {
   BoltDestroyGeneric(this,index,decal,type->type!=weapon_info::BOLT);
 }

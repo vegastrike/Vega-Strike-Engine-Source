@@ -196,7 +196,7 @@ int VsnetHTTPSocket::lower_sendbuf(  )
 	std::string httpData;
 	
 	// Have to regenerate this in case the request was forwarded (301).
-	sprintf(endHeaderLen, "Content-Length: %d\r\n\r\n", data.length() );
+	sprintf(endHeaderLen, "Content-Length: %u\r\n\r\n", (unsigned int)data.length() );
 	httpData = "POST " + this->_path + " HTTP/1.1\r\n"
 		"Host: " + this->_hostheader + "\r\n"
 		"User-Agent: Vsnet/1.0\r\n"
@@ -207,7 +207,7 @@ int VsnetHTTPSocket::lower_sendbuf(  )
 		endHeaderLen + data;
 
 	const char *httpDataStr = httpData.data();
-	int pos = sendDataPos;
+	unsigned int pos = sendDataPos;
 	int retrycnt = 10;
 	int blockcnt = 10;
 	while (true) {

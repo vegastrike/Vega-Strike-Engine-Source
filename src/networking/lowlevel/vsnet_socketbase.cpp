@@ -71,7 +71,7 @@ VsnetSocketBase::VsnetSocketBase( int fd, const char* socktype, SocketSet& sets 
     char buf[100];
 
     sprintf( buf, "%d", fd );
-    int len = strlen(socktype) + strlen(buf) + 4;
+    unsigned int len = strlen(socktype) + strlen(buf) + 4;
     _socktype = new char[len];
 
     sprintf( _socktype, "%s (%s)", buf, socktype );

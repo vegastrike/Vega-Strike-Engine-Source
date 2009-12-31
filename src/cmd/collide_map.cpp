@@ -113,7 +113,7 @@ void CollideArray::flatten () {
   RadiusUpdate<-1,true> collideUpdate(this);
   for (ptrdiff_t i=len;i>=0;i--) {
     Collidable * tmp;
-    if (i<len&&(tmp=&unsorted[i])->radius!=0.0f) {
+    if (i<(int)len&&(tmp=&unsorted[i])->radius!=0.0f) {
       sorted[--index]=*tmp;
       collideUpdate(*tmp,index);
     }
@@ -196,7 +196,7 @@ void CollideArray::flatten (CollideArray &hint) {
 				tmpcount+=(hint.sorted[ii].radius>0?1:0);
 			}
 			if (count!=tmpcount)
-				printf ("Actual count is %d, local count is %d\n",count,tmpcount);
+				printf ("Actual count is %u, local count is %u\n",(unsigned int)count,(unsigned int)tmpcount);
 		}
 		for_each(toflattenhints.begin(),toflattenhints.end(),resizezero());
 		toflattenhints.resize(count+1);

@@ -95,7 +95,7 @@ public:
   ResizableArray sorted;
   ResizableArray unsorted;
   std::vector<std::list<CollidableBackref> >toflattenhints;
-  int count;
+  unsigned int count;
   void UpdateBoltInfo(iterator iter,Collidable::CollideRef ref);
   void flatten();
   void flatten(CollideArray &example);//maybe it has some xtra bolts

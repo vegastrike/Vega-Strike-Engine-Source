@@ -222,7 +222,7 @@ static bool isDockedAtAll(Unit * un) {
   return (un->docked&(Unit::DOCKED_INSIDE|Unit::DOCKED))!=0;
 }
 void CommunicatingAI::Destroy(){    
-	for ( int i=0;i<_Universe->numPlayers();++i) {
+	for ( unsigned int i=0;i<_Universe->numPlayers();++i) {
 		Unit * target = _Universe->AccessCockpit(i)->GetParent();
 		if (target) {
 			FSM * fsm = FactionUtil::GetConversation(this->parent->faction,target->faction);	

@@ -118,8 +118,8 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
 
       float rhol[2];
       float thetal[2];
-#define g_rho(i) rhol[i&1]
-#define g_theta(i) thetal[i&1]
+#define g_rho(i) rhol[(i)&1]
+#define g_theta(i) thetal[(i)&1]
       
       g_rho(0) = rho_min;
       for (i = imin; i < imax; i++) {
@@ -179,7 +179,7 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
     }
       SetBlendMode (a,b);
       string inputtex = texture;
-      int count=0;
+      unsigned int count=0;
       if (Decal.empty())
 	Decal.push_back(NULL);
       while (inputtex.length()) {

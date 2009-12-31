@@ -745,7 +745,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 	if (clt) {
 		clt->versionBuf(netbuf);
 	}
-	int mount_num;
+	unsigned int mount_num;
 	unsigned short zone;
 	char mis;
 	// Find the unit
@@ -817,7 +817,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				<< "*** Packet to copy length : " << packet.getDataLength()<<endl;
 				char redirectcommand[2]={ACCT_LOGIN,'\0'};
 				std::string redirect(redirectcommand);
-				for (int i=0; i<_Universe->numPlayers(); i++) {
+				for (unsigned int i=0; i<_Universe->numPlayers(); i++) {
 					Cockpit *cp = _Universe->AccessCockpit(i);
 					if (cp->savegame && cp->savegame->GetCallsign() == user) {
 						COUT << "Cannot login player "<<user<<": already exists on this server!";
@@ -1046,9 +1046,9 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			}
 			if (!docked) break;
 			if (type == Subcmd::BuyShip) {
-				unsigned int cargIndex = -1;
+				unsigned int cargIndex = UINT_MAX;
 				Cargo *cargptr = docked->GetCargo(cargoName, cargIndex);
-				if (cargIndex == -1 || !cargptr) break;
+				if (cargIndex == UINT_MAX || !cargptr) break;
 				if (cargptr->price > cp->credits) break;
 				/* // Do the transaction.
 					cp->credits -= cargptr->price;
@@ -1080,7 +1080,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			}
 			zone = un->getStarSystem()->GetZone();
 			mis = netbuf.getChar();
-			mount_num = netbuf.getInt32();
+			mount_num = netbuf.getUInt32();
 			// Find the unit
 			// Set the concerned mount as ACTIVE and others as INACTIVE
 			un = zonemgr->getUnit( target_serial, zone);
@@ -1101,8 +1101,8 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                                   printf ("%.1f, ",(*i).time_to_lock);
                                   (*i).status=Mount::INACTIVE;
                                 }
-				for (int j=0;j<mount_num;++j) {
-					int mnt = netbuf.getInt32();
+				for (unsigned int j=0;j<mount_num;++j) {
+					unsigned int mnt = netbuf.getUInt32();
 					if (mnt<un->mounts.size()&&mnt>=0) {
 						un->mounts[mnt].status=Mount::ACTIVE;
 					} else {
@@ -1120,7 +1120,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 		break;
 		case CMD_UNFIREREQUEST :
 			target_serial = netbuf.getSerial();
-			mount_num = netbuf.getInt32();
+			mount_num = netbuf.getUInt32();
 			un = clt->game_unit.GetUnit();
 			if (!un) {
 				COUT<<"ERROR --> Received an unfire order for dead UNIT"<<endl;
@@ -1142,8 +1142,8 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                                 }
 				for (;i!=un->mounts.end();++i)
 					(*i).status=Mount::INACTIVE;
-				for (int j=0;j<mount_num;j++) {
-					int mnt = netbuf.getInt32();
+				for (unsigned int j=0;j<mount_num;j++) {
+					unsigned int mnt = netbuf.getInt32();
 					if (mnt<un->mounts.size()&&mnt>=0) {
 						un->mounts[mnt].status=Mount::ACTIVE;
 					} else {
@@ -1286,15 +1286,15 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			
 			if (newEdge < 0) {
 				oldNode = fsm->getDefaultState(parent->getRelation(targ));
-				if (node<0 || node >= fsm->nodes.size())
+				if (node<0 || (unsigned int)node >= fsm->nodes.size())
 					break;
 				newNode = node; // fixme make sure it's a default node, or go to a special one.
 			} else {
 				
 				oldNode = node; // fixme validate
-				if (oldNode<0 || node >= fsm->nodes.size())
+				if (oldNode<0 || (unsigned int)node >= fsm->nodes.size())
 					break;
-				if (newEdge >= fsm->nodes[oldNode].edges.size())
+				if ((unsigned int)newEdge >= fsm->nodes[oldNode].edges.size())
 					break;
 				newNode = fsm->nodes[oldNode].edges[newEdge];
 			}
@@ -1323,7 +1323,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			
 			zone = sender->getStarSystem()->GetZone();
 			
-			unsigned int cargIndex = -1;
+			unsigned int cargIndex = UINT_MAX;
 			
 			Unit *seller = zonemgr->getUnit( seller_ser, zone);
 			Unit *buyer = zonemgr->getUnit( buyer_ser, zone);
@@ -1367,7 +1367,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				cargptr = seller->GetCargo(cargoName, cargIndex);
 			}
 			if (!cargptr) {
-				cargIndex=-1;
+				cargIndex=UINT_MAX;
 				cargptr = GetMasterPartList(cargoName.c_str());
 				sellerEmpty=true;
 				if (!cargptr) {
@@ -1414,11 +1414,11 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			}
 			// Guaranteed: seller, sender, sender_cpt are not NULL.
 			if (buyer == NULL) {
-				if (cargIndex!=-1)
+				if (cargIndex!=UINT_MAX)
 					seller->EjectCargo(cargIndex);
 				quantity=0; // So that the cargo won't be bought/sold again.
 			}
-			if (quantity && cargIndex!=-1) {
+			if (quantity && cargIndex!=UINT_MAX) {
 				// Guaranteed: buyer, sender, seller, and one cockpit are not null.
 				// Guaranteed: Not a weapon: (weapon && quantity) is disallowed.
 				_Universe->netLock(true);
@@ -1514,7 +1514,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 								buyer_cpt->credits -= carg.GetPrice();
 								didMoney=true;
 							}
-							if (seller && didMoney && cargIndex!=-1) {
+							if (seller && didMoney && cargIndex!=UINT_MAX) {
 								seller->RemoveCargo(cargIndex, 1, true);
 							}
 						}

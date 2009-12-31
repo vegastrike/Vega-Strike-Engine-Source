@@ -554,9 +554,9 @@ void Mesh::beginElement(MeshXML * xml, const string &name, const AttributeList &
 	assert(0);
       }
     }
-    assert(xml->point_state & (MeshXML::P_X |
+    assert((xml->point_state & (MeshXML::P_X |
 			       MeshXML::P_Y |
-			       MeshXML::P_Z) == 
+			       MeshXML::P_Z)) == 
 	   (MeshXML::P_X |
 	    MeshXML::P_Y |
 	    MeshXML::P_Z) );
@@ -587,9 +587,9 @@ void Mesh::beginElement(MeshXML * xml, const string &name, const AttributeList &
 	assert(0);
       }
     }
-    if (xml->point_state & (MeshXML::P_I |
+    if ((xml->point_state & (MeshXML::P_I |
 			       MeshXML::P_J |
-			       MeshXML::P_K) != 
+			       MeshXML::P_K)) != 
 	   (MeshXML::P_I |
 	    MeshXML::P_J |
 	    MeshXML::P_K) ) {
@@ -844,9 +844,9 @@ void Mesh::beginElement(MeshXML * xml, const string &name, const AttributeList &
 	assert(0);
      }
     }
-    assert(xml->vertex_state & (MeshXML::V_POINT|
+    assert((xml->vertex_state & (MeshXML::V_POINT|
 				MeshXML::V_S|
-				MeshXML::V_T) == 
+				MeshXML::V_T)) == 
 	   (MeshXML::V_POINT|
 	    MeshXML::V_S|
 	    MeshXML::V_T) );
@@ -920,10 +920,10 @@ void Mesh::beginElement(MeshXML * xml, const string &name, const AttributeList &
      }
     }
 
-    assert(xml->vertex_state & (MeshXML::V_TYPE|
+    assert((xml->vertex_state & (MeshXML::V_TYPE|
 				MeshXML::V_ROTATE|
 				MeshXML::V_SIZE|
-				MeshXML::V_OFFSET) == 
+				MeshXML::V_OFFSET)) == 
 	   (MeshXML::V_TYPE|
 	    MeshXML::V_ROTATE|
 	    MeshXML::V_SIZE|
@@ -992,12 +992,12 @@ void Mesh::endElement(MeshXML* xml, const string &name) {
     VSFileSystem::vs_fprintf (stderr,"Unknown element end tag '%s' detected\n",name.c_str());
     break;
   case MeshXML::POINT:
-    assert(xml->point_state & (MeshXML::P_X | 
+    assert((xml->point_state & (MeshXML::P_X | 
 			       MeshXML::P_Y | 
 			       MeshXML::P_Z |
 			       MeshXML::P_I |
 			       MeshXML::P_J |
-			       MeshXML::P_K) == 
+			       MeshXML::P_K)) == 
 	   (MeshXML::P_X | 
 	    MeshXML::P_Y | 
 	    MeshXML::P_Z |
@@ -1174,7 +1174,7 @@ void CopyFile (VSFile &src, VSFile &dst) {
   size_t hm;
   size_t srcstruct;
   size_t * srcptr = &srcstruct;
-  while (hm = src.Read(srcptr,sizeof(srcstruct))) {
+  while ((hm = src.Read(srcptr,sizeof(srcstruct)))) {
     dst.Write(srcptr,hm);
   }
 }
@@ -1233,7 +1233,7 @@ Mesh * Mesh::LoadMesh (const char * filename, const Vector & scale, int faction,
     return 0;
   }
   if (m.size()>1) {
-    fprintf (stderr,"Mesh %s has %d subcomponents. Only first used!\n",filename,m.size());
+    fprintf (stderr,"Mesh %s has %u subcomponents. Only first used!\n",filename,(unsigned int)m.size());
     for (unsigned int i=1;i<m.size();++i) {
       delete m[i];
     }
@@ -1506,6 +1506,10 @@ static void SumNormals (
         for (i=begin; begin < end; begin += 2) {
             SumLineNormal(vertices, indices[begin], indices[begin+1], weights);
         }
+    case GFXPOLY:
+    case GFXPOINT:
+    	break;
+
     }
 }
 
@@ -1658,6 +1662,12 @@ static void SumTangents (
             SumTangent(vertices, indices[i], indices[begin+1], indices[begin+2], weights);
         }
         break;
+    case GFXLINE:
+    case GFXLINESTRIP:
+    case GFXPOLY:
+    case GFXPOINT:
+    	break;
+
     }
 }
 
@@ -1838,7 +1848,7 @@ void Mesh::PostProcessLoading(MeshXML * xml,const vector<string> &textureOverrid
   }
   string factionname = FactionUtil::GetFaction(xml->faction);
   
-  for (int LC=0;LC<textureOverride.size();++LC) {
+  for (unsigned int LC=0;LC<textureOverride.size();++LC) {
     if (textureOverride[LC]!="") {
       while (xml->decals.size()<=LC) {
         MeshXML::ZeTexture z;

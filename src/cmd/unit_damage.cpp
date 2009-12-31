@@ -353,7 +353,7 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
 			if (!BaseInterface::CurrentBase) {
 				static float lasttime = 0;
 				float newtime=getNewTime();
-                if (newtime-lasttime>timelapse||_Universe->isPlayerStarship(this)&&this->isUnit()!=MISSILEPTR&&this->faction!=upgradesfaction) { //No victory for missiles or spawned explosions
+                if (newtime-lasttime>timelapse||(_Universe->isPlayerStarship(this)&&this->isUnit()!=MISSILEPTR&&this->faction!=upgradesfaction)) { //No victory for missiles or spawned explosions
 					if (rel>goodrel) {
 						lasttime=newtime;
 						muzak->SkipRandSong(Music::LOSSLIST);

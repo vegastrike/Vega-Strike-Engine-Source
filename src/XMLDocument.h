@@ -299,7 +299,7 @@ namespace XMLDOM {
         XMLElement root;
 
     public:
-        XMLDocument() : root(XMLElement::XET_ROOT), dirty(false) {}
+        XMLDocument() : dirty(false), root(XMLElement::XET_ROOT) {}
         ~XMLDocument() {}
 
     public:

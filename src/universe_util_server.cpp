@@ -67,9 +67,9 @@ namespace UniverseUtil
 	void musicLayerStop(int layer) {}
 	void StopAllSounds(void) {}
 	void loadGame(const string &savename) {
-		int num=-1;
-		sscanf(savename.c_str(),"%d",&num);
-		if (num>=0 && num<_Universe->numPlayers()) {
+		unsigned int num=0;
+		sscanf(savename.c_str(),"%u",&num);
+		if (num!= UINT_MAX && num<_Universe->numPlayers()) {
 			Unit *un=_Universe->AccessCockpit(num)->GetParent();
 			if (un) {
 				un->hull=0;
@@ -78,9 +78,9 @@ namespace UniverseUtil
 		}
 	}
 	void saveGame(const string &savename) {
-		int num=-1;
-		sscanf(savename.c_str(),"%d",&num);
-		if (num>0 && num<_Universe->numPlayers()) {
+		unsigned int num=0;
+		sscanf(savename.c_str(),"%u",&num);
+		if (num!= UINT_MAX && num<_Universe->numPlayers()) {
 			if (SERVER) VSServer->saveAccount(num);
 		} else if (num==0 && SERVER) {
 			cout<<">>> Manually Saving server status..."<<endl;
@@ -100,7 +100,7 @@ namespace UniverseUtil
 	}
 
 	void sendCustom(int cp, string cmd, string args, string id) {
-		if (cp<0 || cp>=_Universe->numPlayers()) {
+		if (cp< 0 || (unsigned int)cp >= _Universe->numPlayers()) {
 			fprintf(stderr, "sendCustom %s with invalid player %d\n", cmd.c_str(), cp);
 			return;
 		}

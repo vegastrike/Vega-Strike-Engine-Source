@@ -445,7 +445,7 @@ std::string vegastrike_cwd;
 		}
 		return 0;
 	}
-
+	
 	size_t	vs_write( const void *ptr, size_t size, size_t nmemb, FILE * fp)
 	{
 		if( !use_volumes)
@@ -1296,6 +1296,26 @@ std::string vegastrike_cwd;
             // Animations are always in subdir named like the anim itself
 			extra += "/" + f.GetFilename();
             break;
+        case UniverseFile:
+        case SystemFile:
+        case UnitSaveFile:
+        case TextureFile:
+        case SoundFile:
+        case PythonFile:
+        case MeshFile:
+        case CommFile:
+        case AiFile:
+        case SaveFile:
+        case VideoFile:
+        case VSSpriteFile:
+        case MissionFile:
+        case BSPFile:
+        case MusicFile:
+        case AccountFile:
+        case ZoneBuffer:
+        case JPEGBuffer:
+        case UnknownFile:
+        	break;
         }
 
 		// This test lists all the VSFileType that should be looked for in the current directory
@@ -1429,7 +1449,7 @@ std::string vegastrike_cwd;
 	void VSFile::private_init()
 	{
 		fp = NULL;
-		size = -1;
+		size = 0;
 		pk3_file           = NULL;
 		pk3_extracted_file = NULL;
 		offset = 0;
@@ -1563,7 +1583,7 @@ std::string vegastrike_cwd;
 						found = FileExists( datadir, file);
 					}
 					*/
-					for( int ij=0; ij<Rootdir.size()&&found<0; ij++)
+					for(unsigned  int ij=0; ij<Rootdir.size()&&found<0; ij++)
 					{
 						filestr = Rootdir[ij]+"/"+file;
 						found = FileExists( Rootdir[ij], file);
@@ -1635,7 +1655,7 @@ std::string vegastrike_cwd;
 				}
 				// Test if we have found a file in another FileType's dir and if it doesn't use volumes
 				// If so we open the file as a normal one
-				if( this->volume_type==VSFSNone || this->alt_type!=this->file_type && !UseVolumes[this->alt_type])
+				if( this->volume_type==VSFSNone || (this->alt_type!=this->file_type && !UseVolumes[this->alt_type]))
 				{
 					filestr = this->GetFullPath();
 					this->fp = fopen( filestr.c_str(), "rb");
@@ -1808,7 +1828,7 @@ std::string vegastrike_cwd;
 				ret = (char *) ptr;
 
 				bool nl_found = false;
-				int i=0;
+				unsigned int i=0;
 				if (VSFS_DEBUG()>1) {
 					cerr<<"READLINE STARTING OFFSET="<<offset;
 				}
@@ -2025,7 +2045,7 @@ std::string vegastrike_cwd;
 
 	long  VSFile::Size()
 	{
-		if( size == -1)
+		if( size == 0)
 		{
 			if( !UseVolumes[alt_type] || this->volume_type==VSFSNone || file_mode!=ReadOnly)
 			{
@@ -2201,9 +2221,9 @@ std::string vegastrike_cwd;
 	bool	VSFile::UseVolume()
 	{ return (UseVolumes[alt_type] && volume_type!=VSFSNone); }
 
-	void	VSFile::GoAfterEOL( int length)
+	void	VSFile::GoAfterEOL(unsigned  int length)
 	{
-		while( this->offset<length && this->offset<this->size && (this->pk3_extracted_file[offset]=='\r' || this->pk3_extracted_file[offset]=='\n'))
+		while( this->offset < length && this->offset < this->size && (this->pk3_extracted_file[offset]=='\r' || this->pk3_extracted_file[offset]=='\n'))
 		{
                   /*			if( pk3_extracted_file[offset]=='\n')
 				cerr<<"\\n ";

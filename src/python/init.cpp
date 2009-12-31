@@ -235,7 +235,7 @@ void Python::initpaths(){
    */
   std::string modpaths("");
   // Find all the mods dir (ignore homedir)
-  for( int i=1; i<VSFileSystem::Rootdir.size(); i++)
+  for( unsigned int i=1; i<VSFileSystem::Rootdir.size(); i++)
   {
 	  modpaths += "r\""+VSFileSystem::Rootdir[i]+ PATHSEP +moduledir+ PATHSEP "builtin\",";
       modpaths += "r\""+VSFileSystem::Rootdir[i]+ PATHSEP +moduledir+ PATHSEP "quests\",";

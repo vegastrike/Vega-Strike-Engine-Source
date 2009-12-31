@@ -359,10 +359,10 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
             if (textype == TECHNIQUE) {
                 xml.technique = texname;
             } else {
-                while (mesh->Decal.size()<=texindex){
+                while (mesh->Decal.size()<=(unsigned int)texindex){
                     mesh->Decal.push_back (0);
                 }
-                while (xml.decals.size()<=texindex){
+                while (xml.decals.size()<=(unsigned int)texindex){
                     MeshXML::ZeTexture z;
                     xml.decals.push_back(z);
                 }
@@ -421,7 +421,7 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
                   mesh->myMatNum=xml.material;
 #endif
 
-		  for(int32bit detplane=0;detplane<Detailplanes.size();detplane++){
+		  for(int32bit detplane=0;(unsigned int)detplane<Detailplanes.size();detplane++){
 			  bxmfprintf(Outputfile,"<DetailPlane x=\"%f\" y=\"%f\" z=\"%f\" />\n",Detailplanes[detplane].x,Detailplanes[detplane].y,Detailplanes[detplane].z);
                           mesh->detailPlanes.push_back(Vector(Detailplanes[detplane].x,
                                                               Detailplanes[detplane].y,

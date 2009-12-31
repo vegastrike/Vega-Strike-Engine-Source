@@ -157,6 +157,12 @@ namespace accountXML
         }
       }
       break;
+      case NAME:
+      case PASSWORD:
+      case SERIAL:
+      case SERVERIP:
+      case SERVERPORT:
+		break;
     }
     
   }

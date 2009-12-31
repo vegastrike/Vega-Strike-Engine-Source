@@ -150,7 +150,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 
     if(mode==SCRIPT_RUN){
       int j=0;
-      for (unsigned int i=0;(int)i<_Universe->numPlayers();i++) {
+      for (unsigned int i=0;i<_Universe->numPlayers();++i) {
 	Unit * un;
 	if (NULL!=(un=_Universe->AccessCockpit(i)->GetParent())) {
 	  if (j==which) {
@@ -1290,7 +1290,7 @@ void Mission::findNextEnemyTarget(Unit *my_unit){
       un_iter uiter(ssystem->getUnitList().createIterator());
 	  Unit *unit;
       Unit *target_unit=NULL;
-	  for(; unit = *uiter;++uiter){
+	  for(; (unit = *uiter);++uiter){
 		if(my_unit->getRelation(unit)<0.0){
 			target_unit = *uiter;
 			break;
@@ -1303,7 +1303,7 @@ void Mission::findNextEnemyTarget(Unit *my_unit){
 
 static Unit * getIthUnit (un_iter uiter, int unit_nr) {
   Unit *unit = NULL;
-  for(int i = 0;unit = *uiter;++uiter,++i){
+  for(int i = 0;(unit = *uiter);++uiter,++i){
   	if(i == unit_nr)
 		return (unit);
   }

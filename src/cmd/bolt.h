@@ -36,7 +36,7 @@ private:
       &&prev_position==b.prev_position;
   }
   Bolt(const weapon_info *type, const Matrix &orientationpos, const Vector & ShipSpeed, void *owner, CollideMap::iterator hint);//makes a bolt
-  void Destroy(int index);
+  void Destroy(unsigned int index);
   static void Draw();
   bool Update(Collidable::CollideRef index);
   bool Collide(Collidable::CollideRef index);

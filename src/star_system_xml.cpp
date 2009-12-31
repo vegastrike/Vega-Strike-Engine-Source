@@ -393,7 +393,7 @@ extern BLENDFUNC parse_alpha (const char *);
 static void SetSubunitRotation(Unit*un, float difficulty)
 {
 	Unit *unit;
-	for(un_iter iter = un->getSubUnits();unit = *iter;++iter) {
+	for(un_iter iter = un->getSubUnits();(unit = *iter);++iter) {
 		float x=2*difficulty*((float)rand())/RAND_MAX -difficulty;
 		float y=2*difficulty*((float)rand())/RAND_MAX-difficulty;
 		float z=2*difficulty*((float)rand())/RAND_MAX-difficulty;
@@ -1360,7 +1360,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 						plan->AddSatellite (un=UnitFactory::createEnhancement (filename,faction,string("")));
 						un->SetSerial( serial);
 					}
-					{ for (int i=0; i<dest.size(); ++i) un->AddDestination(dest[i]); dest.clear(); }
+					{ for (unsigned int i=0; i<dest.size(); ++i) un->AddDestination(dest[i]); dest.clear(); }
 					un->SetAI(new PlanetaryOrbit (un,velocity,position,R,S, QVector (0,0,0), plan));
 
 					//     xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,NULL,vector <char *>(),xml->unitlevel-((xml->parentterrain==NULL&&xml->ct==NULL)?1:2),ourmat,curlights,true,faction);
@@ -1382,7 +1382,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 						b->SetPosAndCumPos (xml->cursun.Cast()+xml->systemcentroid.Cast());
 						b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml"));
 						AddUnit (b);
-						{ for (int i=0; i<dest.size(); ++i) b->AddDestination(dest[i]); dest.clear(); }
+						{ for (unsigned int i=0; i<dest.size(); ++i) b->AddDestination(dest[i]); dest.clear(); }
 
 					}
 					else if ((elem==BUILDING||elem==VEHICLE)&&xml->ct!=NULL) {
@@ -1394,7 +1394,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 						b->SetTurretAI ();
 						b->EnqueueAI(new Orders::FireAt (15));
 						AddUnit (b);
-						{ for (int i=0; i<dest.size(); ++i) b->AddDestination(dest[i]); dest.clear(); }
+						{ for (unsigned int i=0; i<dest.size(); ++i) b->AddDestination(dest[i]); dest.clear(); }
 					}
 					else {
 						if (elem==UNIT) {
@@ -1419,7 +1419,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 							xml->moons.push_back (enh=(Planet *)UnitFactory::createEnhancement (filename,faction,string("")));
 							enh->SetSerial( serial);
 						}
-						{ Unit *un = xml->moons.back(); for (int i=0; i<dest.size(); ++i) un->AddDestination(dest[i]); dest.clear(); }
+						{ Unit *un = xml->moons.back(); for (unsigned int i=0; i<dest.size(); ++i) un->AddDestination(dest[i]); dest.clear(); }
 						xml->moons.back()->SetAI(new PlanetaryOrbit(xml->moons[xml->moons.size()-1],velocity,position,R,S,xml->cursun.Cast()+xml->systemcentroid.Cast(), NULL));
 
 						xml->moons.back()->SetPosAndCumPos(R+S+xml->cursun.Cast()+xml->systemcentroid.Cast());
@@ -1558,7 +1558,7 @@ void StarSystem::LoadXML(const char *filename, const Vector & centroid, const fl
 	for (i =0;i<xml->moons.size();++i) {
 		if (xml->moons[i]->isUnit()==PLANETPTR) {
 			Unit * un = NULL;
-			for(Planet::PlanetIterator iter((Planet*)xml->moons[i]);un = *iter;iter.advance())
+			for(Planet::PlanetIterator iter((Planet*)xml->moons[i]);(un = *iter);iter.advance())
 				AddUnit(un);
 		}
 		else {

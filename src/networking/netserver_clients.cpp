@@ -650,7 +650,7 @@ void	NetServer::logout( ClientPtr clt )
 		un->Kill( true, true);
 
 	if (clt->loginstate >= Client::LOGGEDIN) {
-		for (int i=0;i<_Universe->numPlayers();i++) {
+		for (unsigned int i=0;i<_Universe->numPlayers();i++) {
 			Cockpit *cp = _Universe->AccessCockpit(i);
 			if (cp->savegame && cp->savegame->GetCallsign() == callsign) {
 				cp->savegame->SetCallsign("");

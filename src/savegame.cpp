@@ -304,7 +304,7 @@ string createPipedString(vector <string> s) {
 }
 void CopySavedShips(std::string filename, int player_num, const std::vector<std::string> &starships, bool load) {
   Cockpit * cp = _Universe->AccessCockpit(player_num);
-  for (int i=0;i<starships.size();i+=2) {
+  for (unsigned int i=0;i<starships.size();i+=2) {
     if (i==2) i=1;
     VSFile src,dst;
     string srcnam=filename;//cp->GetUnitModifications();
@@ -342,7 +342,7 @@ void CopySavedShips(std::string filename, int player_num, const std::vector<std:
 void WriteSaveGame (Cockpit * cp,bool auto_save) {
   
   int player_num= 0;
-  for (int kk=0;kk<_Universe->numPlayers();++kk) {
+  for (unsigned int kk=0;kk<_Universe->numPlayers();++kk) {
     if (_Universe->AccessCockpit(kk)==cp)
       player_num=kk;
   }
@@ -370,7 +370,7 @@ int hopto (char *buf,char endln, char endln2,int readlen) {
     }
   }
   for(; buf[readlen]!=0&&buf[readlen]!=endln&&buf[readlen]!=endln2; readlen++) ;
-  if (buf[readlen]&&buf[readlen]==endln||buf[readlen]==endln2)
+  if ((buf[readlen]&&buf[readlen]==endln)||buf[readlen]==endln2)
     readlen++;
   return readlen;
 }

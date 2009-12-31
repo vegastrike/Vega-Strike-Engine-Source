@@ -211,7 +211,7 @@ StarSystem::~StarSystem()
 
 	Unit *unit;
 	//  VSFileSystem::vs_fprintf (stderr,"|t%f i%lf|",GetElapsedTime(),interpolation_blend_factor);
-	for(un_iter iter = drawList.createIterator();unit = *iter;++iter)
+	for(un_iter iter = drawList.createIterator();(unit = *iter);++iter)
 		unit->Kill(false);
 	//if the next line goes ANYWHERE else Vega Strike will CRASH!!!!!
 								 //DO NOT MOVE THIS LINE! IT MUST STAY
@@ -376,7 +376,7 @@ bool StarSystem::RemoveUnit(Unit *un)
 	}
 	bool removed2=false;
 	Unit *unit;
-	for(un_iter iter = gravitationalUnits().createIterator();unit = *iter;++iter) {
+	for(un_iter iter = gravitationalUnits().createIterator();(unit = *iter);++iter) {
 		if (unit==un) {
 			iter.remove();
 			removed2 =true;
@@ -386,7 +386,7 @@ bool StarSystem::RemoveUnit(Unit *un)
 	// NOTE: not sure why if(1) was here, but safemode removed it
 	bool removed =false;
 	if(1) {
-	for(un_iter iter = drawList.createIterator();unit = *iter;++iter) {
+	for(un_iter iter = drawList.createIterator();(unit = *iter);++iter) {
 		if (unit==un) {
 			iter.remove();
 			removed =true;
@@ -395,9 +395,9 @@ bool StarSystem::RemoveUnit(Unit *un)
 	}
 	}
 	if (removed) {
-		for (int i=0;i<=SIM_QUEUE_SIZE;++i) {
+		for (unsigned int i=0;i<=SIM_QUEUE_SIZE;++i) {
 			Unit *unit;
-			for(un_iter iter = physics_buffer[i].createIterator();unit = *iter;++iter) {
+			for(un_iter iter = physics_buffer[i].createIterator();(unit = *iter);++iter) {
 				if (unit==un) {
 					iter.remove();
 					removed =true;
@@ -419,7 +419,7 @@ void StarSystem::ExecuteUnitAI ()
 	try
 	{
 		Unit * unit=NULL;
-		for(un_iter iter = getUnitList().createIterator();unit = *iter;++iter) {
+		for(un_iter iter = getUnitList().createIterator();(unit = *iter);++iter) {
 			unit->ExecuteAI();
 			unit->ResetThreatLevel();
 		}
@@ -532,7 +532,7 @@ void StarSystem::Statistics::CheckVitals(StarSystem * ss)
 			}
 		}
 	}
-	if (checkIter>=sortedsize&&sortedsize>(enemycount+neutralcount+friendlycount+citizencount)/4/*suppose at least 1/4 survive a given frame*/) {
+	if (checkIter>=sortedsize && sortedsize>(unsigned int)(enemycount+neutralcount+friendlycount+citizencount)/4/*suppose at least 1/4 survive a given frame*/) {
 	citizencount=newcitizencount;
 	newcitizencount=0;
 	enemycount=newenemycount;
@@ -639,7 +639,7 @@ void StarSystem::RequestPhysics(Unit *un, unsigned int queue)
 		++iter;
 	if (unit == un) {
 		un->predicted_priority = 0;
-		int newloc=(current_sim_location+1)%SIM_QUEUE_SIZE;
+		unsigned int newloc=(current_sim_location+1)%SIM_QUEUE_SIZE;
 		if (newloc!=queue)
 			iter.moveBefore(this->physics_buffer[newloc]);
 	}
@@ -675,7 +675,7 @@ void StarSystem::UpdateUnitPhysics (bool firstframe)
 			try
 			{
 				Unit * unit=NULL;
-				for(un_iter iter = physics_buffer[current_sim_location].createIterator();unit = *iter;++iter) {
+				for(un_iter iter = physics_buffer[current_sim_location].createIterator();(unit = *iter);++iter) {
 					int priority=UnitUtil::getPhysicsPriority(unit);
 					// Doing spreading here and only on priority changes, so as to make AI easier
 					int predprior=unit->predicted_priority;
@@ -728,12 +728,12 @@ void StarSystem::UpdateUnitPhysics (bool firstframe)
 			}
 			flattentime=queryTime()-fl0;
 			Unit * unit;
-			for(un_iter iter = physics_buffer[current_sim_location].createIterator();unit = *iter;) {
+			for(un_iter iter = physics_buffer[current_sim_location].createIterator();(unit = *iter);) {
 				int priority=unit->sim_atom_multiplier;
 				float backup=SIMULATION_ATOM;
 				SIMULATION_ATOM*=priority;
 
-				int newloc=(current_sim_location+priority)%SIM_QUEUE_SIZE;
+				unsigned int newloc=(current_sim_location+priority)%SIM_QUEUE_SIZE;
 				unit->CollideAll();
 				SIMULATION_ATOM=backup;
 				if (newloc==current_sim_location) {
@@ -762,7 +762,7 @@ void StarSystem::UpdateUnitPhysics (bool firstframe)
 	}
 	else {
 		Unit * unit=NULL;
-		for(un_iter iter = getUnitList().createIterator();unit = *iter;++iter) {
+		for(un_iter iter = getUnitList().createIterator();(unit = *iter);++iter) {
 			unit->ExecuteAI();
 			last_collisions.clear();
 			unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits(),unit);
@@ -807,7 +807,7 @@ void ExecuteDirector ()
 					++i;
 				}
 				else {
-					int w=active_missions.size();
+					unsigned int w=active_missions.size();
 					active_missions[i]->terminateMission();
 					if (w==active_missions.size()) {
 						printf ("MISSION NOT ERASED\n");
@@ -845,7 +845,7 @@ void StarSystem::Update( float priority)
 			Unit::ProcessDeleteQueue();
 			current_stage=MISSION_SIMULATION;
 			collidetable->Update();
-			for(un_iter iter = drawList.createIterator();unit = *iter;++iter)
+			for(un_iter iter = drawList.createIterator();(unit = *iter);++iter)
 				unit->SetNebula(NULL);
 
 			UpdateMissiles();	 //do explosions
@@ -871,7 +871,7 @@ void StarSystem::Update(float priority , bool executeDirector)
 	double beginss=queryTime();
 	double pythontime=0;
 	///this makes it so systems without players may be simulated less accurately
-	for (int k=0;k<_Universe->numPlayers();++k) {
+	for (unsigned int k=0;k<_Universe->numPlayers();++k) {
 		if (_Universe->AccessCockpit(k)->activeStarSystem==this) {
 			priority=1;
 		}
@@ -934,7 +934,7 @@ void StarSystem::Update(float priority , bool executeDirector)
 		}
 
 		unsigned int i=_Universe->CurrentCockpit();
-		for (int j=0;j<_Universe->numPlayers();++j) {
+		for (unsigned int j=0;j<_Universe->numPlayers();++j) {
 			if (_Universe->AccessCockpit(j)->activeStarSystem==this) {
 				_Universe->SetActiveCockpit(j);
 				_Universe->AccessCockpit(j)->updateAttackers();
@@ -1048,7 +1048,7 @@ void StarSystem::ProcessPendingJumps()
 		}
 		int playernum = _Universe->whichPlayerStarship( un);
 		// In non-networking mode or in networking mode or a netplayer wants to jump and is ready or a non-player jump
-		if( Network==NULL || playernum<0 || Network!=NULL && playernum>=0 &&  Network[playernum].readyToJump()) {
+		if( Network==NULL || playernum<0 || (Network!=NULL && playernum>=0 &&  Network[playernum].readyToJump())) {
 			Unit * un=pendingjump[kk]->un.GetUnit();
 
 			StarSystem * savedStarSystem = _Universe->activeStarSystem();
@@ -1091,7 +1091,7 @@ void StarSystem::ProcessPendingJumps()
 }
 
 
-double calc_blend_factor(double frac, int priority, int when_it_will_be_simulated, int cur_simulation_frame)
+double calc_blend_factor(double frac, int priority, unsigned int when_it_will_be_simulated, int cur_simulation_frame)
 {
 	/*	bool is_at_end=when_it_will_be_simulated==SIM_QUEUE_SIZE;
 	  if (cur_simulation_frame>when_it_will_be_simulated) {

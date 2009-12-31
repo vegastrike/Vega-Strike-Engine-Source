@@ -225,6 +225,8 @@ namespace UnitUtil {
             //must have constant priority... otherwise, big mess when changing
             //priorities. I'll think of one way to overcome this...
             switch (un->schedule_priority) {
+            case Unit::scheduleDefault:
+            	break;
             case Unit::scheduleAField:
                 return ASTEROID_PARENT_PRIORITY;
             case Unit::scheduleRoid:
@@ -718,7 +720,7 @@ namespace UnitUtil {
   }
 	static bool ishere (const Unit *par,const Unit *look) {
 		const Unit *un;
-		for (un_kiter uniter=par->viewSubUnits();un = *uniter;++uniter) {
+		for (un_kiter uniter=par->viewSubUnits();(un = *uniter);++uniter) {
 			if (un==look) {
 				return true;
 			}
@@ -731,7 +733,7 @@ namespace UnitUtil {
 	Unit *owner (const Unit *un) {
 		Unit *found=NULL;
 		Unit *tmp;
-		for (UniverseUtil::PythonUnitIter uniter=UniverseUtil::getUnitList();tmp = *uniter;++uniter) {
+		for (UniverseUtil::PythonUnitIter uniter=UniverseUtil::getUnitList();(tmp = *uniter);++uniter) {
 			if (tmp==un||ishere(tmp,un)) {
 				found=tmp;
 				break;
