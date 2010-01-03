@@ -3,7 +3,7 @@
 using namespace std;
 
 
-static string::size_type findQuot(string s,string chr, int offset=0){
+static string::size_type findQuot(string s,string chr,unsigned int offset=0){
 	if (offset>=s.length())
           return string::npos;
 	string::size_type quot=s.substr(offset).find(chr);
@@ -20,6 +20,7 @@ static string elimiQuote(string s, string delim="\"\"\""){
           ret+=s[i++]; else if (s[i]!='\"')
           ret+=s[i];
   }
+  return(ret);
   /*
   string ret;
   string::size_type where=findQuot(s,delim);
@@ -41,7 +42,7 @@ static string elimiQuote(string s, string delim="\"\"\""){
   return ret;
   */
 }
-vector <std::string> readCSV (std::string s,std::string delim) {
+vector <string> readCSV (string s,string delim) {
     // Proposed readCSV code -- begin
     //   Working this way should be much more efficient, and
     //   also allows flexibility in separators (if you specify
@@ -49,10 +50,10 @@ vector <std::string> readCSV (std::string s,std::string delim) {
     //   is a delimiter. Doing so and using ; as delimiter provides
     //   both excel and current file compatibility.
     //   Sadly, addQuote has to change in an incompatible way...
-	vector <std::string> l;
-    std::string as;
-    int spos=0,epos=0,i=0;
-    int sl=s.length();
+	vector <string> l;
+    string as;
+    unsigned int spos=0,epos=0,i=0;
+    unsigned int sl=s.length();
     bool insert;
     bool quote=false;
     char ddelim=0;
@@ -63,13 +64,13 @@ vector <std::string> readCSV (std::string s,std::string delim) {
                 if ((epos+1<sl)&&(s[epos+1]=='\"')) 
                     epos++; else 
                     quote=insert=false;
-            };
+            }
         } else {
             bool ep;
             if (!ddelim) {
-                int dp=delim.find(s[epos]);
-                if (dp != std::string::npos) ddelim=delim[dp];
-                ep = (dp != std::string::npos);
+                size_t dp=delim.find(s[epos]);
+                if (dp != string::npos) ddelim=delim[dp];
+                ep = (dp != string::npos);
             } else ep = s[epos]==ddelim;
             if (ep) {
                 insert=false;
@@ -78,14 +79,15 @@ vector <std::string> readCSV (std::string s,std::string delim) {
             } else {
                 if (s[epos]=='\"') {
                     if ((epos+1<sl)&&(s[epos+1]=='\"')) 
-                        epos++; else 
+                        epos++; 
+                    else 
                         insert=!(quote=true);
-                };
-            };
-        };
+                }
+            }
+        }
         if (insert&&(epos<sl)) as += s[epos];
         epos++;
-    };
+    }
     if (!as.empty()) l.push_back(as);
 	return l;
     // Proposed readCSV code -- end
@@ -154,12 +156,12 @@ vector <std::string> readCSV (std::string s,std::string delim) {
     // Original readCSV code -- end
     */
 }
-static std::string addQuote(std::string s, string delim=",;") {
+static string addQuote(string s, string delim=",;") {
   // Proposed addQuote code -- begin
   if (s.find_first_of(delim+"\"")!=string::npos) {
       if (s.find('\"')!=string::npos) {
           //Replace " by ""
-          std::string as;
+          string as;
           int sl = s.length();
           as.reserve(2*sl);
           for (int i=0; i<sl; i++) if (s[i]!='\"') as += s[i]; else as += "\"\"";
@@ -186,10 +188,10 @@ static std::string addQuote(std::string s, string delim=",;") {
   // Original addQuote code -- end
   */
 }
-std::string writeCSV(const vector<string> &key, const vector<string> &table, std::string delim){
+string writeCSV(const vector<string> &key, const vector<string> &table, string delim){
   unsigned int i;
   unsigned int wid = key.size();
-  std::string ret;
+  string ret;
   for (i=0;i<wid;++i) {
     ret+=addQuote(key[i],delim);
     if (i+1<wid)
@@ -205,18 +207,18 @@ std::string writeCSV(const vector<string> &key, const vector<string> &table, std
   }
   return ret;
 }
-void CSVTable::Init (std::string data) {
+void CSVTable::Init (string data) {
    // Clear optimizer
    optimizer_setup = false;
    optimizer_keys.clear();
    optimizer_indexes.clear();
    optimizer_type = ~0;
    // Proposed Init code -- begin
-   const std::string delim(",;");
+   const string delim(",;");
    const char *cdata = data.c_str();
    const char *csep = strchr(cdata,'\n');
    if (csep==NULL) return;
-   std::string buffer(cdata,csep-cdata);
+   string buffer(cdata,csep-cdata);
    cdata = csep+1;
    key = readCSV(buffer,delim);
    for (unsigned int i=0;i<key.size();i++) columns[key[i]]=i;
@@ -281,7 +283,7 @@ void CSVTable::Init (std::string data) {
    // Original Init code -- end
    */
 }
-CSVTable::CSVTable(std::string data,std::string root) {
+CSVTable::CSVTable(string data,string root) {
 	this->rootdir=root;
 	Init(data);
 //   VSFileSystem::VSFile f;
@@ -292,11 +294,11 @@ CSVTable::CSVTable(std::string data,std::string root) {
 //   }
 }
 
-CSVTable::CSVTable(VSFileSystem::VSFile & f,std::string root) {
+CSVTable::CSVTable(VSFileSystem::VSFile & f,string root) {
 	this->rootdir = root;
 	Init(f.ReadFull());
 }
-CSVRow::CSVRow(CSVTable * parent, std::string key) {
+CSVRow::CSVRow(CSVTable * parent, string key) {
    this->parent=parent;
    iter=parent->rows[key]*parent->key.size();
 }
@@ -306,7 +308,7 @@ CSVRow::CSVRow(CSVTable * parent, unsigned int i) {
 }
 const string& CSVRow::operator [] (const string &col) const
 {
-	static std::string empty_string;
+	static string empty_string;
 	vsUMap<string,int>::iterator i = parent->columns.find(col);
 	if (i==parent->columns.end()) 
 		return empty_string; else
@@ -341,11 +343,11 @@ string CSVRow::getRoot()  {
   fprintf (stderr,"Error getting root for unit\n");
   return "";
 }
-void CSVTable::SetupOptimizer(std::vector<std::string> keys, unsigned int type) 
+void CSVTable::SetupOptimizer(vector<string> keys, unsigned int type) 
 {
     optimizer_setup = true;
     optimizer_type = type;
     optimizer_keys = keys;
     optimizer_indexes.resize(keys.size(),CSVTable::optimizer_undefined);
-    for (int i=0; i<keys.size(); i++) ColumnExists(keys[i],optimizer_indexes[i]);
+    for (unsigned int i=0; i<keys.size(); ++i) ColumnExists(keys[i],optimizer_indexes[i]);
 }

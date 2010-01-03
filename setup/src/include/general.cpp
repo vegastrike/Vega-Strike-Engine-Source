@@ -289,7 +289,7 @@ void SetString(GString **ptr, char *line) {
 
 #endif
 
-char *NewString(char *line) {
+char *NewString(const char *line) {
 	char *new_str;
 	new_str = (char *)malloc(strlen(line)+1);
 	if (new_str == 0) { fprintf(stderr, "Out of Memory\n"); exit(-1); }

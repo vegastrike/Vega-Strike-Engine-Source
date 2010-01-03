@@ -1205,16 +1205,14 @@ struct Unit::XML
 
 inline Unit* UnitContainer::GetUnit()
 {
-	if (unit==NULL)
-		return NULL;
+	if (unit!=NULL){
 #ifdef CONTAINER_DEBUG
-	CheckUnit(unit);
+		CheckUnit(unit);
 #endif
-	if (unit->Killed())
-	{
-		unit->UnRef();
-		unit = NULL;
-		return NULL;
+		if (unit->Killed()){
+			unit->UnRef();
+			unit = NULL;
+		}
 	}
 	return unit;
 }

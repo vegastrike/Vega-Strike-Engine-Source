@@ -77,7 +77,7 @@ void btoa(char *dest, char *string);
 char *GetString(GString *line);
 void SetString(GString **ptr, char *line);
 #endif    //GLIB
-char *NewString(char *string);
+char *NewString(const char *string);
 #endif    //GENERAL_H
 
 char *xml_pre_chomp_comment(char *string);

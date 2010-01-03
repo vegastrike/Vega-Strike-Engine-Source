@@ -728,8 +728,8 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle, int
 	if (maxdimension==65536) {
 		maxdimension = gl_options.max_texture_dimension;
 	}
-
-    VSFileSystem::vs_fprintf(stderr, "Transferring %dx%d texture, page %d (eff: %dx%d - limited at %d)\n", 
+	// ED: We need to create a debug flag to output extranious info. 
+    /*VSFileSystem::vs_fprintf(stderr, "Transferring %dx%d texture, page %d (eff: %dx%d - limited at %d)\n", 
         textures[handle].iwidth,
         textures[handle].iheight,
         pageIndex,
@@ -737,7 +737,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle, int
         textures[handle].height,
         maxdimension
         );
-
+	*/
     if(maxdimension == 44){
 	    detail_texture = 0;
 		maxdimension = 256;

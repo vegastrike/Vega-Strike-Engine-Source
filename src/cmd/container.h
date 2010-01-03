@@ -26,6 +26,6 @@ class UnitContainer {
   bool operator!= (const UnitContainer oth) const {return unit!=oth.unit;}
   ~UnitContainer();
   void SetUnit (Unit *);
-  inline Unit * GetUnit();
+  Unit * GetUnit();
 };
 #endif

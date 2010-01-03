@@ -44,7 +44,7 @@ bool MatchingMood(const CommunicationMessage& c,float mood, float randomresponse
   static float neg_limit =XMLSupport::parse_float(vs_config->getVariable ("AI",
                                                                           "LowestNegativeCommChoice",
                                                                           "-.00001"));
-  const FSM::Node *n = c.curstate<c.fsm->nodes.size()?(&c.fsm->nodes[c.curstate]):(&c.fsm->nodes[c.fsm->getDefaultState(relationship)]);
+  const FSM::Node *n = (unsigned int)c.curstate<c.fsm->nodes.size()?(&c.fsm->nodes[c.curstate]):(&c.fsm->nodes[c.fsm->getDefaultState(relationship)]);
   std::vector<unsigned int>::const_iterator iend= n->edges.end();
   for (std::vector<unsigned int>::const_iterator i=n->edges.begin();i!=iend;++i) {
     if (c.fsm->nodes[*i].messagedelta>=pos_limit&&relationship>=0)
@@ -170,7 +170,7 @@ static int InList (std::string item, Unit * un) {
 
 void CommunicatingAI::UpdateContrabandSearch () {
  static unsigned int contraband_search_batch_update=XMLSupport::parse_int(vs_config->getVariable("AI","num_contraband_scans_per_search","10"));
- for (int rep=0;rep<contraband_search_batch_update;++rep) {
+ for (unsigned int rep=0;rep<contraband_search_batch_update;++rep) {
   Unit * u = contraband_searchee.GetUnit();
   if (u && (u->faction != parent->faction)) { // don't scan your buddies
     if (which_cargo_item<(int)u->numCargo()) {

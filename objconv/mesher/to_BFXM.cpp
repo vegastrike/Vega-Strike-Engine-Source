@@ -792,6 +792,8 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 	}
 	xml->animframes.push_back(xml->animframetemp);
 	break;
+	default:
+		break;
   }
     
 }

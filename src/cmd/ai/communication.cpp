@@ -135,7 +135,7 @@ void FSM::Node::AddSound (int sounde, unsigned char sex) {
 }
 
 int FSM::getCommMessageMood (int curstate, float mood, float randomresponse,float relationship) const{
-  const FSM::Node *n = curstate<nodes.size()?(&nodes[curstate]):(&nodes[getDefaultState(relationship)]);
+  const FSM::Node *n = (unsigned int)curstate<nodes.size()?(&nodes[curstate]):(&nodes[getDefaultState(relationship)]);
   mood+=-randomresponse+2*randomresponse*((float)rand())/RAND_MAX;
   
   int choice=0;

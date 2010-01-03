@@ -531,7 +531,7 @@ void write_bsp_tree (bsp_tree *tree,int level)//assume open file
 static bsp_tree * put_plane_in_tree(bsp_tree * bsp,bsp_tree * temp_node,bsp_polygon * temp_poly3)
 {
     enum INTERSECT_TYPE flag;
-    bsp_tree * aux, *temp;
+    bsp_tree * aux = NULL, *temp = NULL;
     
     aux = bsp;
     
