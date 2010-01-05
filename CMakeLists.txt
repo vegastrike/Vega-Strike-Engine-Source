@@ -74,7 +74,6 @@ SET(LIBGUI_SOURCES src/gui/button.cpp
 				   src/gui/eventmanager.cpp
 				   src/gui/eventresponder.cpp 
 				   src/gui/font.cpp
-				   src/gui/general.cpp
 				   src/gui/glut_support.cpp
 				   src/gui/groupcontrol.cpp
 				   src/gui/guidefs.cpp

@@ -82,7 +82,7 @@ static void clearDeleteQueue () {
 	while (deleteQueue.size()) {
 		std::vector<EventResponder *> queue (deleteQueue);
 		deleteQueue.clear();
-		for (int i=0; i<queue.size();i++) {
+		for (size_t i=0; i<queue.size();i++) {
 			delete queue[i];
 		}
 	}
@@ -142,39 +142,42 @@ void EventManager::sendInputEvent(const InputEvent& event) {
 		case MOUSE_DRAG_EVENT:
 			m_mouseLoc = event.loc;
 			break;
+		default: 
+			m_mouseLoc = event.loc;
+			break;
+			
 	}
 
 	// Loop through the event chain, starting at the end.
 	// WARNING:  The functions in this loop can change the responders list.
 	//  Iterate through the list carefully!
-	for(int i = m_responders.size()-1 ; i >= 0 ; i-- ) {
+	for(size_t i = m_responders.size() ; i > 0 ; i-- ) {
         bool result = false;
-		if(i < m_responders.size()) {			// Check this in case responders get deleted.
+		if(i < m_responders.size()+1) {			// Check this in case responders get deleted.
 			switch(event.type) {
 				case KEY_DOWN_EVENT:
-					result = m_responders[i]->processKeyDown(event);
+					result = m_responders[i-1]->processKeyDown(event);
 					break;
 				case KEY_UP_EVENT:
-					result = m_responders[i]->processKeyUp(event);
+					result = m_responders[i-1]->processKeyUp(event);
 					break;
 				case MOUSE_DOWN_EVENT:
-					result = m_responders[i]->processMouseDown(event);
+					result = m_responders[i-1]->processMouseDown(event);
 					break;
 				case MOUSE_UP_EVENT:
-					result = m_responders[i]->processMouseUp(event);
+					result = m_responders[i-1]->processMouseUp(event);
 					break;
 				case MOUSE_MOVE_EVENT:
-					result = m_responders[i]->processMouseMove(event);
+					result = m_responders[i-1]->processMouseMove(event);
 					break;
 				case MOUSE_DRAG_EVENT:
-					result = m_responders[i]->processMouseDrag(event);
+					result = m_responders[i-1]->processMouseDrag(event);
 					break;
 				default:
 					// Event responder dispatch doesn't handle this type of input event!
 					assert(false);
-					break;
+					break;			
 			}
-
 			if(result) {
 				// Somebody handled it!
 				break;

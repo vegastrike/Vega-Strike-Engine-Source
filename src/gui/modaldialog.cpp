@@ -363,7 +363,7 @@ void showListQuestion(const std::string& title, const std::vector<std::string>& 
     // Fill the picker with the choices supplied by the caller.
     SimplePicker* picker = dialog->getPicker();
     assert(picker != NULL);
-    for(int i=0; i<options.size(); i++) {
+    for(size_t i=0; i<options.size(); i++) {
         picker->addCell(new SimplePickerCell(options[i]));
     }
 

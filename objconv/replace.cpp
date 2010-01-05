@@ -29,15 +29,15 @@ bool findit (const char * argv, string replace) {
 }
 void replaceit(const char * argv, string fin,string rep) {
   string file = FileToString(argv);
-  int curpos = 0;
+  unsigned int curpos = 0;
   FILE * fp = fopen (argv,"wb");
   if (fp) {
   while (curpos < file.length()) {
-    int where = file.find (fin,curpos);
+    size_t where = file.find (fin,curpos);
     if (where==string::npos) {
       fwrite (file.data()+curpos,file.length()-curpos,1,fp);
       break;
-    }else {
+    } else {
       where-=curpos;
       if (where>0) {
 	fwrite (file.data()+curpos,where,1,fp);

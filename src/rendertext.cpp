@@ -125,9 +125,8 @@ void RText::renderconsole()// render buffer
 void RText::conline(std::string &sf, bool highlight)        // add a line to the console buffer
 {
 	{
-		// std::string::npos could be negative, and comparing to unsigned int wont fly
-		int search =0;
-		unsigned int lastsearch = 0;
+		size_t search =0;
+		size_t lastsearch = 0;
 		for(; (search = sf.find("/r"))!=std::string::npos ; ) {
 			sf.replace(lastsearch, search-lastsearch, "");
 			lastsearch = search;

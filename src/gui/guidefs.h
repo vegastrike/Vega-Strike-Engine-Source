@@ -140,11 +140,11 @@ typedef unsigned int EventKeyCode;
 typedef EventKeyCode EventButton;
 
 // Mouse button constants
-static const int LEFT_MOUSE_BUTTON = WS_LEFT_BUTTON;
-static const int MIDDLE_MOUSE_BUTTON = WS_MIDDLE_BUTTON;
-static const int RIGHT_MOUSE_BUTTON = WS_RIGHT_BUTTON;
-static const int WHEELUP_MOUSE_BUTTON = WS_WHEEL_UP;
-static const int WHEELDOWN_MOUSE_BUTTON = WS_WHEEL_DOWN;
+static const unsigned int LEFT_MOUSE_BUTTON = WS_LEFT_BUTTON;
+static const unsigned int MIDDLE_MOUSE_BUTTON = WS_MIDDLE_BUTTON;
+static const unsigned int RIGHT_MOUSE_BUTTON = WS_RIGHT_BUTTON;
+static const unsigned int WHEELUP_MOUSE_BUTTON = WS_WHEEL_UP;
+static const unsigned int WHEELDOWN_MOUSE_BUTTON = WS_WHEEL_DOWN;
 
 
 /* This describes an event from an input device: mouse, keyboard, etc.

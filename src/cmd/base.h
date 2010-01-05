@@ -135,7 +135,7 @@ public:
 			virtual void EndXML(FILE *fp);
 #endif
 			virtual ~BasePython () {}
-			BasePython (const std::string & ind, const std::string & python, float time) : BaseObj(ind), pythonfile(python), maxtime(time), timeleft(0) {}
+			BasePython (const std::string & ind, const std::string & python, float time) : BaseObj(ind), pythonfile(python), timeleft(0), maxtime(time) {}
 			virtual void Relink(const std::string & python);
 		};
 		class BaseText : public BaseObj{

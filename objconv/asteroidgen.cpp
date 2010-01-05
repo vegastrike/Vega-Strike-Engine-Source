@@ -204,7 +204,7 @@ void generateTet (vector <Vector> &v, vector <Tri> & p, const float minr, const 
   p.push_back (Tri(4,2,1));//ECB
   p.push_back (Tri(1,5,4));//BFE
 }
-void generateNTet (vector <Vector> &v, vector <Tri> & p, const float minr, const float maxr,int stacks, int slices) {
+void generateNTet (vector <Vector> &v, vector <Tri> & p, const float minr, const float maxr,unsigned int stacks, unsigned int slices) {
   for (unsigned int i=0;i<stacks+2;i++) {
     float tempR = getR (minr,maxr);
     for (unsigned int j=0;j<slices;j++) {
@@ -292,7 +292,8 @@ void write_mesh (FILE * fp, vector <asteroid> &field) {
       field[i].polygon[j].Write (fp);
     }
   }
-  fprintf (fp,"</Polygons>\n<Material reflect=\"%d\">\n<Specular red=\"%f\" green=\"%f\" blue=\"%f\" alpha=\"%f\"/>\n</Material>\n</Mesh>\n",0,0,0,0,1);
+  //ED: Not sure what the following printf is supposed to mean. 
+  //fprintf (fp,"</Polygons>\n<Material reflect=\"%d\">\n<Specular red=\"%f\" green=\"%f\" blue=\"%f\" alpha=\"%f\"/>\n</Material>\n</Mesh>\n",0,0,0,0,1);
 }
 
 
@@ -396,7 +397,7 @@ Vector randVecInCube (float BoxSize, float x, float y, float z) {
 #endif
 
 #ifdef RAND
-void write_unit (FILE *fp, char *astFile, int num_cubes, float innerRadius, float outerRadius, float BoxSize) {
+void write_unit (FILE *fp, const char *astFile, int num_cubes, float innerRadius, float outerRadius, float BoxSize) {
 	fprintf(fp,"<Unit>");
 	if (!innerRadius) {
 		num_cubes--;
@@ -411,7 +412,7 @@ void write_unit (FILE *fp, char *astFile, int num_cubes, float innerRadius, floa
 		fprintf(fp,"\n\t<SubUnit file=\"%s\" x=\"%f\" y=\"%f\" z=\"%f\" />",astFile,vec.i,vec.j,vec.k);
 	}
 #else
-void write_unit (FILE *fp, char *astFile, float offset, float innerRadius, float outerRadius, float BoxSize) {
+void write_unit (FILE *fp, const char *astFile, float offset, float innerRadius, float outerRadius, float BoxSize) {
 	fprintf(fp,"<Unit>");
 	for (float x=-outerRadius;x<outerRadius;x+=offset) {
 		for (float y=-outerRadius;y<outerRadius;y+=offset) {
@@ -458,7 +459,7 @@ int main (int argc, char ** argv) {
       if (argc>=11) {
 	sscanf (argv[10],"%d",&randomseed);
 	if (argc>=15) {
-      sscanf (argv[11],"%s",&unitfilename);
+      sscanf (argv[11],"%s",unitfilename);
 #ifdef RAND
       sscanf (argv[12],"%d",&num_cubes);
 #else
@@ -487,12 +488,12 @@ int main (int argc, char ** argv) {
     printf ("Enter size of safety zone (0 to disable)\n");  
     scanf ("%f",&safety_zone);
     printf ("Enter random seed (0 to use clock\n");
-    scanf ("%f",&randomseed);
+    scanf ("%d",&randomseed);
     printf ("Do you want a unit file? (y/n)\n");
-    scanf("%c",num_cubes);
-    if (num_cubes=='y') {
+    scanf("%c",(char*)&num_cubes);
+    if ((char)num_cubes=='y') {
       printf ("Enter Output Unit File:\n");
-      scanf ("%s",&unitfilename);
+      scanf ("%s",unitfilename);
 #ifdef RAND
       printf ("Enter number of cubes?\n");
       scanf ("%d",&num_cubes);
@@ -525,7 +526,7 @@ int main (int argc, char ** argv) {
   write_mesh (fp,field);
   fclose (fp);
   if (num_cubes||offset) {
-    char *newfilename="asteroids";
+    const char *newfilename="asteroids";
     fp= fopen (unitfilename,"w");
 #ifdef RAND
     write_unit(fp,newfilename,num_cubes,innerRadius,outerRadius,cube_sides.i);
