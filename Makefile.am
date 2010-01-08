@@ -165,8 +165,6 @@ LIBGUI = \
   src/gui/eventresponder.h \
   src/gui/font.cpp \
   src/gui/font.h \
-  src/gui/general.cpp \
-  src/gui/general.h \
   src/gui/glut_support.cpp \
   src/gui/glut_support.h \
   src/gui/groupcontrol.cpp \
