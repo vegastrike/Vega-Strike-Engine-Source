@@ -664,6 +664,23 @@ GLenum GetImageTarget (TEXTURE_IMAGE_TARGET imagetarget)
 	return image2D;
 }
 
+const char* GetImageTargetName(TEXTURE_IMAGE_TARGET imagetarget)
+{
+    GLenum image2D;
+    switch (imagetarget) {
+        case TEXTURE_1D:            return "TEXTURE_1D";
+        case TEXTURE_2D:            return "TEXTURE_2D";
+        case TEXTURE_3D:            return "TEXTURE_3D";
+        case CUBEMAP_POSITIVE_X:    return "CUBEMAP_POSITIVE_X";
+        case CUBEMAP_NEGATIVE_X:    return "CUBEMAP_NEGATIVE_X";
+        case CUBEMAP_POSITIVE_Y:    return "CUBEMAP_POSITIVE_Y";
+        case CUBEMAP_NEGATIVE_Y:    return "CUBEMAP_NEGATIVE_Y";
+        case CUBEMAP_POSITIVE_Z:    return "CUBEMAP_POSITIVE_Z";
+        case CUBEMAP_NEGATIVE_Z:    return "CUBEMAP_NEGATIVE_Z";
+        default:                    return "UNK";
+    }
+}
+
 
 GFXBOOL /*GFXDRVAPI*/ GFXTransferSubTexture (unsigned char * buffer, int handle, int x, int y, unsigned int width, unsigned int height, enum TEXTURE_IMAGE_TARGET imagetarget) {
 GLenum image2D=GetImageTarget (imagetarget);
@@ -728,16 +745,18 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle, int
 	if (maxdimension==65536) {
 		maxdimension = gl_options.max_texture_dimension;
 	}
-	// ED: We need to create a debug flag to output extranious info. 
-    /*VSFileSystem::vs_fprintf(stderr, "Transferring %dx%d texture, page %d (eff: %dx%d - limited at %d)\n", 
+
+    VSFileSystem::vs_fprintf(stderr, "Transferring %dx%d texture, page %d (eff: %dx%d - limited at %d - %d mips), onto name %d (%s)\n", 
         textures[handle].iwidth,
         textures[handle].iheight,
         pageIndex,
         textures[handle].width,
         textures[handle].height,
-        maxdimension
+        maxdimension,
+        mips,
+        textures[handle].name,
+        GetImageTargetName(imagetarget)
         );
-	*/
     if(maxdimension == 44){
 	    detail_texture = 0;
 		maxdimension = 256;

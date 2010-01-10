@@ -870,18 +870,60 @@ void Mesh::activateTextureUnit(const Technique::Pass::TextureUnit &tu, bool defl
     switch (sourceType) {
     case Technique::Pass::TextureUnit::File:
         // Direct file sources go in tu.texture
-        tu.texture->MakeActive(targetIndex);
-        GFXToggleTexture(true, targetIndex, TEXTURE2D);
+        switch (tu.texKind) {
+        case Technique::Pass::TextureUnit::TexDefault:
+        case Technique::Pass::TextureUnit::Tex2D:
+        case Technique::Pass::TextureUnit::Tex3D:
+        case Technique::Pass::TextureUnit::TexCube:
+            tu.texture->MakeActive(targetIndex);
+            break;
+        case Technique::Pass::TextureUnit::TexSepCube:
+        default:
+            throw Exception("Texture Unit for technique of unhandled kind");
+        }
+        
+        switch (tu.texKind) {
+        case Technique::Pass::TextureUnit::TexDefault:
+        case Technique::Pass::TextureUnit::Tex2D:
+            GFXToggleTexture(true, targetIndex, TEXTURE2D);
+            break;
+        case Technique::Pass::TextureUnit::Tex3D:
+            GFXToggleTexture(true, targetIndex, TEXTURE3D);
+            break;
+        case Technique::Pass::TextureUnit::TexCube:
+        case Technique::Pass::TextureUnit::TexSepCube:
+            GFXToggleTexture(true, targetIndex, CUBEMAP);
+            break;
+        default:
+            throw Exception("Texture Unit for technique of unhandled kind");
+        }
         break;
     case Technique::Pass::TextureUnit::Environment:
         _Universe->activateLightMap(targetIndex);
         #ifdef NV_CUBE_MAP
+            if (   tu.texKind != Technique::Pass::TextureUnit::TexDefault
+                && tu.texKind != Technique::Pass::TextureUnit::TexCube
+                && tu.texKind != Technique::Pass::TextureUnit::TexSepCube)
+            {
+                throw Exception("Environment Texture Unit for technique must be a cube map");
+            }
             GFXToggleTexture(true, targetIndex, CUBEMAP);
         #else
+            if (   tu.texKind != Technique::Pass::TextureUnit::TexDefault
+                && tu.texKind != Technique::Pass::TextureUnit::Tex2D)
+            {
+                throw Exception("Environment Texture Unit for technique must be a 2D spheremap");
+            }
             GFXToggleTexture(true, targetIndex, TEXTURE2D);
         #endif
         break;
     case Technique::Pass::TextureUnit::Detail:
+        if (   tu.texKind != Technique::Pass::TextureUnit::TexDefault
+            && tu.texKind != Technique::Pass::TextureUnit::Tex2D)
+        {
+            throw Exception("Detail Texture Unit for technique must be 2D");
+        }
+        
         if (detailTexture) {
             detailTexture->MakeActive(targetIndex);
         } else if (!deflt) {
@@ -899,7 +941,23 @@ void Mesh::activateTextureUnit(const Technique::Pass::TextureUnit &tu, bool defl
         } else {
             throw MissingTexture("Texture Unit for technique requested a missing texture (decal default given that cannot be found)");
         }
-        GFXToggleTexture(true, targetIndex, TEXTURE2D);
+        
+        switch (tu.texKind) {
+        case Technique::Pass::TextureUnit::TexDefault:
+        case Technique::Pass::TextureUnit::Tex2D:
+            GFXToggleTexture(true, targetIndex, TEXTURE2D);
+            break;
+        case Technique::Pass::TextureUnit::Tex3D:
+            GFXToggleTexture(true, targetIndex, TEXTURE3D);
+            break;
+        case Technique::Pass::TextureUnit::TexCube:
+        case Technique::Pass::TextureUnit::TexSepCube:
+            GFXToggleTexture(true, targetIndex, CUBEMAP);
+            break;
+        default:
+            throw Exception("Texture Unit for technique of unhandled kind");
+        }
+        
         break;
     }
     

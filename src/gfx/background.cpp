@@ -29,6 +29,7 @@
 #include "vs_globals.h"
 #include "../gldrv/gl_globals.h"
 #include "config_xml.h"
+#include "universe_util.h"
 #include <float.h>
 	const float size = 100;
 Background::Background(const char *file, int numstars, float spread,std::string filename):Enabled (true),stars(NULL) {
@@ -42,6 +43,10 @@ Background::Background(const char *file, int numstars, float spread,std::string 
           stars= new SpriteStarVlist(numstars,200/*spread*/,XMLSupport::parse_bool (vs_config->getVariable("graphics","use_star_coords","true"))?filename:"",starspritetextures,starspritesize);
         }
 	up = left = down = front=right=back=NULL;
+    
+    SphereBackground = NULL;
+    
+#ifndef NV_CUBE_MAP
 	static int max_cube_size =XMLSupport::parse_int (vs_config->getVariable("graphics","max_cubemap_size","1024"));
         string suffix = ".image";
 	temp = string(file)+"_up.image";
@@ -54,7 +59,6 @@ Background::Background(const char *file, int numstars, float spread,std::string 
 	    suffix = ".bmp"; // backwards compatibility
 	  }
 	}
-	SphereBackground = NULL;
 
 	if (!up->LoadSuccess()) {
 	  temp = string(file)+"_sphere.image";
@@ -99,12 +103,14 @@ Background::Background(const char *file, int numstars, float spread,std::string 
 	//down->Clamp();
 	//down->Filter();
 	}
+#endif
 }
 void Background::EnableBG(bool tf) {
   Enabled = tf;
 }
 Background::~Background()
 {
+#ifndef NV_CUBE_MAP
   if (up) 
     delete up;
   if (left) 
@@ -117,6 +123,8 @@ Background::~Background()
     delete back;
   if (down)
     delete down;
+#endif
+
   if (SphereBackground)
     delete SphereBackground;
   if (stars)
@@ -124,6 +132,7 @@ Background::~Background()
 }
 Background::BackgroundClone Background::Cache() {
   BackgroundClone ret;
+#ifndef NV_CUBE_MAP
   ret.backups[0]=up?up->Clone():NULL;
   ret.backups[1]=down?down->Clone():NULL;
   ret.backups[2]=left?left->Clone():NULL;
@@ -136,15 +145,18 @@ Background::BackgroundClone Background::Cache() {
       ret.backups[(i+6)%7]=SphereBackground->texture(i)->Clone();
     }
   }
+#endif
   return ret;
 }
 void Background::BackgroundClone::FreeClone() {
+#ifndef NV_CUBE_MAP
     for (int i=0;i<7;++i) {
       if (backups[i]) {
         delete backups[i];
         backups[i]=NULL;
       }
     }
+#endif
 }
 void Background::Draw()
 {
@@ -180,8 +192,46 @@ void Background::Draw()
       static struct skybox_rendering_record {
           Texture *tex;
           float vertices[4][3]; //will be *= size
-          unsigned char tcoord[4][4]; //S-T-S-T: 0 >= min, 1 => max
+          char tcoord[4][4]; //S-T-S-T: 0 >= min, 1 => max
       } skybox_rendering_sequence[6] = {
+#ifdef NV_CUBE_MAP
+
+          // For rendering with a single cube map as texture
+          
+          {   // up
+              NULL,
+              { {-1,+1,+1},{-1,+1,-1},{+1,+1,-1},{+1,+1,+1} },
+              { {-1,+1,+1,0},{-1,+1,-1,0},{+1,+1,-1,0},{+1,+1,+1,0} },
+          },
+          {   // left
+              NULL,
+              { {-1,+1,-1},{-1,+1,+1},{-1,-1,+1},{-1,-1,-1} },
+              { {-1,+1,-1,0},{-1,+1,+1,0},{-1,-1,+1,0},{-1,-1,-1,0} },
+          },
+          {   // front
+              NULL,
+              { {-1,+1,+1},{+1,+1,+1},{+1,-1,+1},{-1,-1,+1} },
+              { {-1,+1,+1,0},{+1,+1,+1,0},{+1,-1,+1,0},{-1,-1,+1,0} },
+          },
+          {   // right
+              NULL,
+              { {+1,+1,+1},{+1,+1,-1},{+1,-1,-1},{+1,-1,+1} },
+              { {+1,+1,+1,0},{+1,+1,-1,0},{+1,-1,-1,0},{+1,-1,+1,0} },
+          },
+          {   // back
+              NULL,
+              { {+1,+1,-1},{-1,+1,-1},{-1,-1,-1},{+1,-1,-1} },
+              { {+1,+1,-1,0},{-1,+1,-1,0},{-1,-1,-1,0},{+1,-1,-1,0} },
+          },
+          {   // down
+              NULL,
+              { {-1,-1,+1},{+1,-1,+1},{+1,-1,-1},{-1,-1,-1} },
+              { {-1,-1,+1,0},{+1,-1,+1,0},{+1,-1,-1,0},{-1,-1,-1,0} },
+          }
+
+#else
+          // For rendering with multiple 2D texture faces
+
           {   // up
               NULL,
               { {-1,+1,+1},{-1,+1,-1},{+1,+1,-1},{+1,+1,+1} },
@@ -210,8 +260,9 @@ void Background::Draw()
           {   // down
               NULL,
               { {-1,-1,+1},{+1,-1,+1},{+1,-1,-1},{-1,-1,-1} },
-              { {0,1,0,1},{1,1,1,1},{1,0,1,0},{0,0,0,0} }
+              { {1,0,1,0},{0,0,0,0},{0,1,0,1},{1,1,1,1} }
           }
+#endif
       };
       skybox_rendering_sequence[0].tex = up;
       skybox_rendering_sequence[1].tex = left;
@@ -223,6 +274,21 @@ void Background::Draw()
       for (int skr=0; skr<sizeof(skybox_rendering_sequence)/sizeof(skybox_rendering_sequence[0]); skr++) {
           Texture *tex=skybox_rendering_sequence[skr].tex;
           int lyr;
+          
+#ifdef NV_CUBE_MAP
+          const int numlayers=1;
+          const bool multitex=true;
+          const int numpasses=1;
+          const float ms=0.f,Ms=1.f;
+          const float mt=0.f,Mt=1.f;
+          const float _stca[]={-Ms,ms,Ms},_ttca[]={-Mt,mt,Mt};
+          const float *stca=_stca+1, *ttca=_ttca+1;
+
+          GFXColor4f(1.00F, 1.00F, 1.00F, 1.00F);
+
+          _Universe->activateLightMap(0);
+          GFXToggleTexture(true,0,CUBEMAP);
+#else
           int numlayers=tex->numLayers();
           bool multitex=(numlayers>1);
           int numpasses=tex->numPasses();
@@ -235,56 +301,68 @@ void Background::Draw()
           float stca[]={ms,Ms},ttca[]={mt,Mt};
 
           GFXColor4f(1.00F, 1.00F, 1.00F, 1.00F);
+          
           for (lyr=0; (lyr<gl_options.Multitexture)||(lyr<numlayers); lyr++) {
-              GFXToggleTexture((lyr<numlayers),lyr);
-              if (lyr<numlayers) GFXTextureCoordGenMode(lyr,NO_GEN,NULL,NULL);
+              GFXToggleTexture((lyr<numlayers),lyr, TEXTURE_2D);
+              if (lyr<numlayers) 
+                  GFXTextureCoordGenMode(lyr,NO_GEN,NULL,NULL);
           }
-          for (int pass=0; pass<numpasses; pass++) if (tex->SetupPass(pass,0,ONE,ZERO)) {
-              tex->MakeActive(0,pass);
-              GFXActiveTexture(0);
+#endif
+
+          for (int pass=0; pass<numpasses; pass++) if (!tex || tex->SetupPass(pass,0,ONE,ZERO)) {
+              if (tex)
+                  tex->MakeActive(0,pass);
+
+              //GFXActiveTexture(0);
               GFXTextureAddressMode(CLAMP);
               GFXTextureEnv(0,GFXMODULATETEXTURE);
+              GFXTextureCoordGenMode(0,NO_GEN,NULL,NULL);
 
               float s1,t1,s2,t2;
+              
+#ifdef NV_CUBE_MAP
+              #define VERTEX(i) \
+              s1 = stca[skybox_rendering_sequence[skr].tcoord[i][0]]; \
+              t1 = ttca[skybox_rendering_sequence[skr].tcoord[i][1]]; \
+              s2 = stca[skybox_rendering_sequence[skr].tcoord[i][2]]; \
+              glTexCoord3f(s1, t1, s2);  \
+              GFXVertex3f(skybox_rendering_sequence[skr].vertices[i][0]*size, \
+                          skybox_rendering_sequence[skr].vertices[i][1]*size, \
+                          skybox_rendering_sequence[skr].vertices[i][2]*size); 
+#else
+              #define VERTEX(i) \
+              s1 = stca[skybox_rendering_sequence[skr].tcoord[i][0]]; \
+              t1 = ttca[skybox_rendering_sequence[skr].tcoord[i][1]]; \
+              s2 = stca[skybox_rendering_sequence[skr].tcoord[i][2]]; \
+              t2 = ttca[skybox_rendering_sequence[skr].tcoord[i][3]]; \
+              if (!multitex) GFXTexCoord2f(s1, t1); else GFXTexCoord4f(s1, t1, s2, t2);  \
+              GFXVertex3f(skybox_rendering_sequence[skr].vertices[i][0]*size, \
+                          skybox_rendering_sequence[skr].vertices[i][1]*size, \
+                          skybox_rendering_sequence[skr].vertices[i][2]*size); 
+#endif
 
               GFXBegin(GFXQUAD);
-              s1 = stca[skybox_rendering_sequence[skr].tcoord[0][0]&1];
-              t1 = ttca[skybox_rendering_sequence[skr].tcoord[0][1]&1];
-              s2 = stca[skybox_rendering_sequence[skr].tcoord[0][2]&1];
-              t2 = ttca[skybox_rendering_sequence[skr].tcoord[0][3]&1];
-              if (!multitex) GFXTexCoord2f(s1, t1); else GFXTexCoord4f(s1, t1, s2, t2);
-              GFXVertex3f(skybox_rendering_sequence[skr].vertices[0][0]*size,
-                          skybox_rendering_sequence[skr].vertices[0][1]*size,
-                          skybox_rendering_sequence[skr].vertices[0][2]*size);
-              s1 = stca[skybox_rendering_sequence[skr].tcoord[1][0]&1];
-              t1 = ttca[skybox_rendering_sequence[skr].tcoord[1][1]&1];
-              s2 = stca[skybox_rendering_sequence[skr].tcoord[1][2]&1];
-              t2 = ttca[skybox_rendering_sequence[skr].tcoord[1][3]&1];
-              if (!multitex) GFXTexCoord2f(s1, t1); else GFXTexCoord4f(s1, t1, s2, t2);
-              GFXVertex3f(skybox_rendering_sequence[skr].vertices[1][0]*size,
-                          skybox_rendering_sequence[skr].vertices[1][1]*size,
-                          skybox_rendering_sequence[skr].vertices[1][2]*size);
-              s1 = stca[skybox_rendering_sequence[skr].tcoord[2][0]&1];
-              t1 = ttca[skybox_rendering_sequence[skr].tcoord[2][1]&1];
-              s2 = stca[skybox_rendering_sequence[skr].tcoord[2][2]&1];
-              t2 = ttca[skybox_rendering_sequence[skr].tcoord[2][3]&1];
-              if (!multitex) GFXTexCoord2f(s1, t1); else GFXTexCoord4f(s1, t1, s2, t2);
-              GFXVertex3f(skybox_rendering_sequence[skr].vertices[2][0]*size,
-                          skybox_rendering_sequence[skr].vertices[2][1]*size,
-                          skybox_rendering_sequence[skr].vertices[2][2]*size);
-              s1 = stca[skybox_rendering_sequence[skr].tcoord[3][0]&1];
-              t1 = ttca[skybox_rendering_sequence[skr].tcoord[3][1]&1];
-              s2 = stca[skybox_rendering_sequence[skr].tcoord[3][2]&1];
-              t2 = ttca[skybox_rendering_sequence[skr].tcoord[3][3]&1];
-              if (!multitex) GFXTexCoord2f(s1, t1); else GFXTexCoord4f(s1, t1, s2, t2);      
-              GFXVertex3f(skybox_rendering_sequence[skr].vertices[3][0]*size,
-                          skybox_rendering_sequence[skr].vertices[3][1]*size,
-                          skybox_rendering_sequence[skr].vertices[3][2]*size);
+              VERTEX(0);
+              VERTEX(1);
+              VERTEX(2);
+              VERTEX(3);
               GFXEnd();
+              
+              #undef VERTEX
+              
           }
-          for (lyr=0; lyr<numlayers; lyr++) 
-              GFXToggleTexture(false,lyr);
-          tex->SetupPass(-1,0,ONE,ZERO);
+          
+#ifdef NV_CUBE_MAP
+          GFXToggleTexture(false,0,CUBEMAP);
+#else
+          for (lyr=0; lyr<numlayers; lyr++) {
+              GFXToggleTexture(false,lyr,TEXTURE_2D);
+              if (lyr<numlayers) GFXTextureCoordGenMode(lyr,NO_GEN,NULL,NULL);
+          }
+          
+          if (tex)
+              tex->SetupPass(-1,0,ONE,ZERO);
+#endif
       }
 
       GFXActiveTexture(0);

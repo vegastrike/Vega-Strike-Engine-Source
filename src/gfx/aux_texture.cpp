@@ -210,7 +210,7 @@ Texture::Texture(int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum
   this->stage = stage;
 }
 
-Texture::Texture(VSFile * f, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load, int maxdimension,GFXBOOL detailtexture,GFXBOOL nocache,enum ADDRESSMODE address_mode)
+Texture::Texture(VSFile * f, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load, int maxdimension,GFXBOOL detailtexture,GFXBOOL nocache,enum ADDRESSMODE address_mode, Texture *main)
 {
 
   data = NULL;
@@ -231,7 +231,11 @@ Texture::Texture(VSFile * f, int stage, enum FILTER mipmap, enum TEXTURE_TARGET 
 			}
 		}
 
-		Bind(maxdimension,detailtexture);
+        if (main)
+		  Bind(main,maxdimension,detailtexture);
+        else
+          Bind(maxdimension,detailtexture);
+        
 		free(data);
 		data = NULL;
 		if (!nocache) setold();
@@ -240,13 +244,13 @@ Texture::Texture(VSFile * f, int stage, enum FILTER mipmap, enum TEXTURE_TARGET 
 		FileNotFound(texfilename);
 }
 
-Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load, int maxdimension,GFXBOOL detailtexture,GFXBOOL nocache,enum ADDRESSMODE address_mode)
+Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load, int maxdimension,GFXBOOL detailtexture,GFXBOOL nocache,enum ADDRESSMODE address_mode,Texture *main)
 {
     InitTexture();
-    Load(FileName,stage,mipmap,target,imagetarget,force_load,maxdimension,detailtexture,nocache,address_mode);
+    Load(FileName,stage,mipmap,target,imagetarget,force_load,maxdimension,detailtexture,nocache,address_mode,main);
 }
 
-void Texture::Load(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load, int maxdimension,GFXBOOL detailtexture,GFXBOOL nocache,enum ADDRESSMODE address_mode)
+void Texture::Load(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load, int maxdimension,GFXBOOL detailtexture,GFXBOOL nocache,enum ADDRESSMODE address_mode,Texture *main)
 {
   if (data) free(data);
   if (palette) free(palette);
@@ -336,7 +340,12 @@ void Texture::Load(const char * FileName, int stage, enum FILTER mipmap, enum TE
 				ismipmapped = NEAREST;
 			}
 		}
-		Bind(maxdimension,detailtexture);
+        
+        if (main)
+          Bind(main,maxdimension,detailtexture);
+        else
+          Bind(maxdimension,detailtexture);
+        
 		free(data);
 		data = NULL;
 		if (!nocache) setold();
@@ -349,13 +358,13 @@ void Texture::Load(const char * FileName, int stage, enum FILTER mipmap, enum TE
 	//VSFileSystem::vs_fprintf (stderr," Load Success\n");
 }
 
-Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, enum FILTER  mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval, GFXBOOL force_load, int maxdimension,GFXBOOL detailtexture,GFXBOOL nocache,enum ADDRESSMODE address_mode)
+Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, enum FILTER  mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval, GFXBOOL force_load, int maxdimension,GFXBOOL detailtexture,GFXBOOL nocache,enum ADDRESSMODE address_mode,Texture *main)
 {
     InitTexture();
-    Load(FileNameRGB, FileNameA, stage, mipmap, target, imagetarget, alpha, zeroval, force_load, maxdimension, detailtexture, nocache,address_mode);
+    Load(FileNameRGB, FileNameA, stage, mipmap, target, imagetarget, alpha, zeroval, force_load, maxdimension, detailtexture, nocache,address_mode,main);
 }
 
-void Texture::Load (const char * FileNameRGB, const char *FileNameA, int stage, enum FILTER  mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval, GFXBOOL force_load, int maxdimension,GFXBOOL detailtexture,GFXBOOL nocache,enum ADDRESSMODE address_mode)
+void Texture::Load (const char * FileNameRGB, const char *FileNameA, int stage, enum FILTER  mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval, GFXBOOL force_load, int maxdimension,GFXBOOL detailtexture,GFXBOOL nocache,enum ADDRESSMODE address_mode,Texture *main)
 {
   if (data) free(data);
   if (palette) free(palette);
@@ -430,8 +439,13 @@ void Texture::Load (const char * FileNameRGB, const char *FileNameA, int stage, 
 				ismipmapped = NEAREST;
 			}
 		}
-	  Bind(maxdimension,detailtexture);
-	  free(data);
+	  
+      if (main)
+        Bind(main,maxdimension,detailtexture);
+      else
+        Bind(maxdimension,detailtexture);
+      
+      free(data);
 	  data = NULL;
 	  if (!nocache) setold();
 	}
@@ -557,6 +571,36 @@ int Texture::Bind(int maxdimension,GFXBOOL detailtexture)
 	return name;
 
 }
+
+int Texture::Bind(Texture *other, int maxdimension, GFXBOOL detailtexture)
+{
+    UnBind();
+    
+    boundSizeX=other->boundSizeX;
+    boundSizeY=other->boundSizeY;
+    boundMode=other->boundMode;
+    bound=other->bound;
+    name=other->name;
+
+    Transfer(maxdimension,detailtexture);
+
+    return name;
+}
+
+int Texture::Bind(const Texture *parent, int maxdimension,GFXBOOL detailtexture)
+{
+    UnBind();
+    bound = parent->bound;
+    boundSizeX = parent->boundSizeX;
+    boundSizeY = parent->boundSizeY;
+    boundMode = parent->boundMode;
+    name = parent->name;
+    
+    Transfer(maxdimension,detailtexture);
+    
+    return name;
+}
+
 void Texture::Prioritize (float priority) {
   GFXPrioritizeTexture (name, priority);
 }

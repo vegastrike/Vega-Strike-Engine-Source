@@ -249,7 +249,8 @@ else
 	    DEBUG_FLAGS="-O0 -g"
     fi
 fi
-
+DEBUG_NOOPT="-O0 -g"
+CUBEMAP_FLAGS="-DNV_CUBE_MAP"
 # Remove these flags beforehand... this should not remove functionality.
 CXXFLAGS=["`echo $CXXFLAGS | sed -e 's/-g[^[:space:]]*//g' | sed -e 's/-O[^[:space:]]//g'`"]
 CFLAGS=["`echo $CFLAGS | sed -e 's/-g[^[:space:]]*//g' | sed -e 's/-O[^[:space:]]//g'`"]
@@ -270,6 +271,19 @@ AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug], [Produce an executable wit
 		AC_MSG_NOTICE(Enabling debug mode with $DEBUG_FLAGS)
 		VS_CXXFLAGS="${VS_CXXFLAGS} ${DEBUG_FLAGS}"
 	fi)
+
+AC_ARG_ENABLE(debug-nooptimization, AC_HELP_STRING([--enable-debug-nooptimization], [Produce an executable with debugging symbols without optimization]), 
+	if test $enableval = yes ; then
+		AC_MSG_NOTICE(Enabling debug mode with $DEBUG_NOOPT)
+		VS_CXXFLAGS="${VS_CXXFLAGS} ${DEBUG_NOOPT}"
+	fi)
+
+AC_ARG_ENABLE(cubemap, AC_HELP_STRING([--enable-cubemap], [Produce an executable with that uses dds environment mapping]), 
+	if test $enableval = yes ; then
+		AC_MSG_NOTICE(Enabling dds cubmap support with $CUBEMAP_FLAGS)
+		VS_CXXFLAGS="${VS_CXXFLAGS} ${CUBEMAP_FLAGS}"
+	fi)
+
 
 AC_ARG_ENABLE(release, AC_HELP_STRING([--enable-release=LEVEL], [Produce an executable with optimizations (LEVEL=2)]), 
 	if test $enableval = no -o $enableval = 0; then

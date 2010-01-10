@@ -158,11 +158,18 @@ void GameStarSystem::activateLightMap(int stage)
 	GFXActiveTexture (stage);
 #ifdef NV_CUBE_MAP
 	LightMap[0]->MakeActive(stage);
-	LightMap[1]->MakeActive(stage);
-	LightMap[2]->MakeActive(stage);
-	LightMap[3]->MakeActive(stage);
-	LightMap[4]->MakeActive(stage);
-	LightMap[5]->MakeActive(stage);
+    /*
+	if (LightMap[1])
+	   LightMap[1]->MakeActive(stage);
+	if (LightMap[2])
+	   LightMap[2]->MakeActive(stage);
+	if (LightMap[3])
+	   LightMap[3]->MakeActive(stage);
+	if (LightMap[4])
+	   LightMap[4]->MakeActive(stage);
+	if (LightMap[5])
+	   LightMap[5]->MakeActive(stage);
+    */
 #else
 	LightMap[0]->MakeActive(stage);
 #endif
@@ -529,18 +536,28 @@ void    GameStarSystem::createBackground( StarSystem::StarXML * xml)
 {
 #ifdef NV_CUBE_MAP
 	printf("using NV_CUBE_MAP\n");
-	LightMap[0]=new Texture ((xml->backgroundname+"_light.cube").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_X);
-	if (lightMap[0]->LoadSuccess() && LightMap[0]->isCube()) {
+	LightMap[0]=new Texture ((xml->backgroundname+"_light.cube").c_str(),1,TRILINEAR,CUBEMAP,CUBEMAP_POSITIVE_X);
+	if (LightMap[0]->LoadSuccess() && LightMap[0]->isCube()) {
 	    LightMap[1] = LightMap[2] = LightMap[3] =
 	    LightMap[4] = LightMap[5] = 0;
     } else {
         delete LightMap[0];
-        LightMap[0]=new Texture ((xml->backgroundname+"_right_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_X);
-        LightMap[1]=new Texture ((xml->backgroundname+"_left_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_X);
-        LightMap[2]=new Texture ((xml->backgroundname+"_up_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Y);
-        LightMap[3]=new Texture ((xml->backgroundname+"_down_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Y);
-        LightMap[4]=new Texture ((xml->backgroundname+"_front_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Z);
-        LightMap[5]=new Texture ((xml->backgroundname+"_back_light.image").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Z);
+        LightMap[0]=new Texture ((xml->backgroundname+"_right.image").c_str(),1,TRILINEAR,CUBEMAP,CUBEMAP_POSITIVE_X);
+        LightMap[1]=new Texture ((xml->backgroundname+"_left.image").c_str(),1,TRILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_X,
+            GFXFALSE, 65536,GFXFALSE,GFXFALSE,DEFAULT_ADDRESS_MODE,
+            LightMap[0]);
+        LightMap[2]=new Texture ((xml->backgroundname+"_up.image").c_str(),1,TRILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Y,
+            GFXFALSE, 65536,GFXFALSE,GFXFALSE,DEFAULT_ADDRESS_MODE,
+            LightMap[0]);
+        LightMap[3]=new Texture ((xml->backgroundname+"_down.image").c_str(),1,TRILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Y,
+            GFXFALSE, 65536,GFXFALSE,GFXFALSE,DEFAULT_ADDRESS_MODE,
+            LightMap[0]);
+        LightMap[4]=new Texture ((xml->backgroundname+"_front.image").c_str(),1,TRILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Z,
+            GFXFALSE, 65536,GFXFALSE,GFXFALSE,DEFAULT_ADDRESS_MODE,
+            LightMap[0]);
+        LightMap[5]=new Texture ((xml->backgroundname+"_back.image").c_str(),1,TRILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Z,
+            GFXFALSE, 65536,GFXFALSE,GFXFALSE,DEFAULT_ADDRESS_MODE,
+            LightMap[0]);
     }
 #else
 	//string bglight= VSFileSystem::sharedtextures+"/"+xml->backgroundname+"_light.image";

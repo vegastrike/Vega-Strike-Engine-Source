@@ -82,15 +82,20 @@ protected:
   void Transfer(int maxdimension,GFXBOOL detailtexture);
   
 public:
+  ///Binds this texture to the same name as the given texture - for multipart textures
+  int Bind(Texture *other, int maxdimension = 65536, GFXBOOL detailtexture = GFXFALSE);
+  
+  
+public:
   ///Creates an unbounded texture. Set data and dimensions before binding. Or explicitly load a file.
   Texture(int stage=0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, enum ADDRESSMODE address_mode=DEFAULT_ADDRESS_MODE);
   ///Creates a texture with a single bitmap as color data and another grayscale .bmp as alpha data
-  Texture(const char *,const char *, int stage = 0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE,GFXBOOL nocache=false,enum ADDRESSMODE address_mode=DEFAULT_ADDRESS_MODE);
+  Texture(const char *,const char *, int stage = 0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE,GFXBOOL nocache=false,enum ADDRESSMODE address_mode=DEFAULT_ADDRESS_MODE,Texture *main=0);
   ///Creates a texture with only color data as a single bitmap
-  Texture(const char * FileName, int stage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE,GFXBOOL nocache=false,enum ADDRESSMODE address_mode=DEFAULT_ADDRESS_MODE);
-  Texture(VSFileSystem::VSFile * f, int stage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE,GFXBOOL nocache=false,enum ADDRESSMODE address_mode=DEFAULT_ADDRESS_MODE);
-  void Load(const char *,const char *, int stage = 0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE,GFXBOOL nocache=false,enum ADDRESSMODE address_mode=DEFAULT_ADDRESS_MODE);
-  void Load(const char * FileName, int stage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE,GFXBOOL nocache=false,enum ADDRESSMODE address_mode=DEFAULT_ADDRESS_MODE);
+  Texture(const char * FileName, int stage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE,GFXBOOL nocache=false,enum ADDRESSMODE address_mode=DEFAULT_ADDRESS_MODE,Texture *main=0);
+  Texture(VSFileSystem::VSFile * f, int stage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE,GFXBOOL nocache=false,enum ADDRESSMODE address_mode=DEFAULT_ADDRESS_MODE,Texture *main=0);
+  void Load(const char *,const char *, int stage = 0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE,GFXBOOL nocache=false,enum ADDRESSMODE address_mode=DEFAULT_ADDRESS_MODE,Texture *main=0);
+  void Load(const char * FileName, int stage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE,GFXBOOL nocache=false,enum ADDRESSMODE address_mode=DEFAULT_ADDRESS_MODE,Texture *main=0);
   virtual const Texture * Original() const;
   virtual Texture * Original();
   virtual Texture * Clone ();
@@ -106,6 +111,9 @@ public:
   virtual unsigned int numPasses() const{return 1;} // Number of passes when on multipass rendering.
   virtual bool canMultiPass() const{return true;} // True, if full functionality can be achieved after multipass rendering. If false, fallback rendering must be possible by multipass (or singlepass) rendering. True, also, if texturing units are sufficient for singlepass rendering.
   virtual bool constFrameRate() const{return true;} // If frames advance at a regular rate - keyframe based animations would return false.
+  
+  ///Binds this texture to the specified parent texture (use for cubemaps and multi-element textures)
+  int Bind(const Texture *parent, int maxdimension = 65536, GFXBOOL detailtexture = GFXFALSE);
   
   int getStage() const {return stage; }
   int getFilter() const { return ismipmapped; }
