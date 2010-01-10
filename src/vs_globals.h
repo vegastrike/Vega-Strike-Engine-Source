@@ -55,6 +55,7 @@ typedef struct {
   float fov ;
   float aspect ;
   float difficulty;
+  char vsdebug;
 } game_data_t;
 
 extern game_data_t g_game;

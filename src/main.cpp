@@ -724,6 +724,7 @@ const char helpmessage[] =
 " -H -h     High resolution (1024x768)\n"
 " -V -v     Super high resolution (1280x1024)\n"
 " --net     Networking Enabled (Experimental)\n"
+" --debug[=#] Enable debugging output, 1 major warnings, 2 medium, 3 developer notes\n"
 "\n";
 std::string ParseCommandLine(int argc, char ** lpCmdLine) {
   std::string st;
@@ -821,6 +822,16 @@ std::string ParseCommandLine(int argc, char ** lpCmdLine) {
         else if(strcmp(lpCmdLine[i], "--help")==0) {
           cout << helpmessage;
           exit(0);
+        }
+        else if(strncmp(lpCmdLine[i], "--debug",7)==0){
+        	if(lpCmdLine[i][7] == 0) {
+        		g_game.vsdebug = 1;
+        	} else if(lpCmdLine[i][8] == 0){
+        		cout << helpmessage;
+        		exit(0);
+        	}
+        	g_game.vsdebug = lpCmdLine[i][8];
+        	++i;
         }
       }
     }

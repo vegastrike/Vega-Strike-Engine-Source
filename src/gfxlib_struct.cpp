@@ -299,6 +299,8 @@ void GFXVertexList::Draw (enum POLYTYPE *mode,const INDEX index, const int numli
               }
           }
           break;
+      default:
+      		break;
       }
       
       GFXCallList(display_list);
@@ -394,6 +396,8 @@ void GFXVertexList::Draw (enum POLYTYPE *mode,const INDEX index, const int numli
                         }
                     }
                     break;
+                default: 
+                		break;
                 }
                 
                 if (gloffsets.size() == 1)
@@ -424,6 +428,8 @@ void GFXVertexList::Draw (enum POLYTYPE *mode,const INDEX index, const int numli
                         }
                     }
                     break;
+                default:
+                        break;
                 }
         
                 glDrawArrays(PolyLookup(mode[i]), totoffset, offsets[i]);

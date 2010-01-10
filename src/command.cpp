@@ -7,11 +7,13 @@
 #include "main_loop.h"
 #include "vs_random.h"
 #include "python/python_class.h"
+#include <vector>
+#include <string>
 
 #ifdef HAVE_SDL
 #   include <SDL/SDL.h>
 #endif
-
+using namespace std;
 // Introduction Comments {{{
 // The {{{ and }}} symbols are VIM Fold Markers.
 // They FOLD up the page so a user only needs to see a general outline of the entire huge file
@@ -332,26 +334,26 @@ why:
 			procs(const procs &in) {
 				procs *blah = const_cast<procs *>(&in);
 				proc = blah->proc;
-				for(std::vector<coms>::iterator iter = blah->rc.begin(); iter < blah->rc.end(); iter++) rc.push_back((*(iter)));
+				for(vector<coms>::iterator iter = blah->rc.begin(); iter < blah->rc.end(); iter++) rc.push_back((*(iter)));
 			}
 			~procs() {
 				while(rc.size() > 0) rc.pop_back();
 			}
 			commandI *proc;
-			std::vector<coms> rc;
+			vector<coms> rc;
 		};
 		HoldCommands() {
 			
 			if(rcCMD != 0x0) {
-				std::cout << "Error, there shouldn't be 2 holdCommands objects!\n";
+				cout << "Error, there shouldn't be 2 holdCommands objects!\n";
 			}
 			rcCMD = this;
 			finishmeoff = false;
 		}
-		std::vector<procs> cmds; //for multiple command processors.
+		vector<procs> cmds; //for multiple command processors.
 		void addCMD(coms &commandin, commandI *proc2use) {
 			bool found = false;
-			for(std::vector<procs>::iterator iter = cmds.begin(); iter < cmds.end(); iter++) {
+			for(vector<procs>::iterator iter = cmds.begin(); iter < cmds.end(); iter++) {
 				if((*(iter)).proc == proc2use) {
 					found = true;
 					(*(iter)).rc.insert((*(iter)).rc.begin(), commandin);
@@ -364,7 +366,7 @@ why:
 			}
 		}
 		void popProc(commandI *proc2use) {
-			for(std::vector<procs>::iterator iter = cmds.begin(); iter < cmds.end(); iter++ )
+			for(vector<procs>::iterator iter = cmds.begin(); iter < cmds.end(); iter++ )
 			{
 				if(proc2use == (*(iter)).proc) {
 					cmds.erase(iter);
@@ -373,7 +375,7 @@ why:
 			if(cmds.size() == 0) finishmeoff = true;
 		}
 		procs *getProc(commandI *in) {
-			for(std::vector<procs>::iterator iter = cmds.begin(); iter < cmds.end(); iter++) {
+			for(vector<procs>::iterator iter = cmds.begin(); iter < cmds.end(); iter++) {
 				if(in == (*(iter)).proc) return (&(*(iter)));
 			}
 			return NULL;
@@ -391,7 +393,7 @@ why:
 
 // {{{ command interpretor constructor
 commandI::commandI() {
-	std::cout << "Command Interpretor Created\n\r";
+	cout << "Command Interpretor Created\n\r";
 	// {{{ add some base commands 
 
 	Functor<commandI> *dprompt = new Functor<commandI>(this, &commandI::prompt);
@@ -459,8 +461,8 @@ menu::~menu() {
 // }}}
 
 // {{{ UNFINISHED HELP COMMAND
-void commandI::help(std::string &helponthis) {
-        std::string buf;
+void commandI::help(string &helponthis) {
+        string buf;
         buf.append("Sorry, there is no help system yet\n\r ");
 	buf.append("But most commands are self supporting, just type them to see what they do.\n\r");
 //        conoutf(this, &buf);
@@ -469,16 +471,16 @@ void commandI::help(std::string &helponthis) {
 // }}}
 // {{{ send prompt ONLY when 0 charactors are sent with a newline
 void commandI::prompt() {
-	std::string l;
+	string l;
 	l.append("Wooooooooooo\n");
 	conoutf(l);
 //	std::cout << "Prompt called :)\n";
 };
 // }}}
 // {{{ dummy function
-void commandI::dummy(std::vector<std::string *> *d) {
+void commandI::dummy(vector<string *> *d) {
     // {{{
-	std::string outs;
+	string outs;
 	int rand = vsrandom.genrand_int32();
 	if(rand % 2 == 0) {
 		outs.append("Wtf?\n\r");
@@ -492,22 +494,22 @@ void commandI::dummy(std::vector<std::string *> *d) {
 #include <iomanip>
 void commandI::pcommands() {
 	int x = 0;
-	std::ostringstream cmd;
+	ostringstream cmd;
 	cmd << "\n\rCommands available:\n\r";
-	std::vector<coms>::iterator iter;
+	vector<coms>::iterator iter;
 
 	HoldCommands::procs *commands = rcCMD->getProc(this);
 	for(iter = commands->rc.begin(); iter < commands->rc.end(); iter++) {
 		if(!(*(iter)).functor->attribs.hidden && !(*(iter)).functor->attribs.webbcmd) {
 			if((*(iter)).functor->attribs.immcmd == true) {
 				if(immortal) {
-					if(x != 5)  cmd << std::setiosflags(std::ios::left) <<std::setw(19);
+					if(x != 5)  cmd << setiosflags(ios::left) <<setw(19);
 					cmd << (*(iter)).Name.c_str() ;
 
 					x++;
 				} //we don't want to add the command if we arn't immortal
 			} else {
-				if(x != 5) cmd << std::setiosflags(std::ios::left) <<std::setw(10);
+				if(x != 5) cmd << setiosflags(ios::left) <<setw(10);
 
 				cmd <<(*(iter)).Name.c_str();
 				x++;
@@ -522,21 +524,21 @@ void commandI::pcommands() {
 	if(x != 5) {
 			cmd << "\n\r";
 	}
-	std::string cmd2;
+	string cmd2;
 	cmd2.append(cmd.str());
 	conoutf(cmd2);
 }
 // }}}
 // {{{ addCommand - Add a command to the interpreter
 void commandI::addCommand(TFunctor *com, const char *name){
-	std::cout << "Adding command: " << name << std::endl;
+	cout << "Adding command: " << name << endl;
 	coms *newOne = new coms(com); 
 	// See the very bottom of this file for comments about possible optimization
 	newOne->Name.append(name);
 	//push the new command back the vector.
 	if(!rcCMDEXISTS && rcCMD == 0x0) {
 		if(rcCMD != 0x0) {
-			std::cout << "Apparently rcCMD is not 0x0.. \n";
+			cout << "Apparently rcCMD is not 0x0.. \n";
 		}
 		rcCMD = new HoldCommands(); 
 		rcCMDEXISTS = true; 
@@ -549,28 +551,28 @@ void commandI::addCommand(TFunctor *com, const char *name){
 void commandI::remCommand(char *name){ 
 	HoldCommands::procs *findme = rcCMD->getProc(this);
 	if(findme->rc.size() < 1) return;
-	for(std::vector<coms>::iterator iter = findme->rc.begin(); iter < findme->rc.end();iter++) { 
+	for(vector<coms>::iterator iter = findme->rc.begin(); iter < findme->rc.end();iter++) { 
 		if((*(iter)).Name.compare(name) == 0) {
-			std::cout << "Removing: " << name << std::endl;
+			cout << "Removing: " << name << endl;
 			delete (*(iter)).functor;
 			findme->rc.erase(iter);
 			return;
 		}
 	}
-	std::cout << "Error, command " << name << " not removed, try using the TFunctor *com version instead. Also, this is case sensitive ;)\n";
+	cout << "Error, command " << name << " not removed, try using the TFunctor *com version instead. Also, this is case sensitive ;)\n";
 }
 void  commandI::remCommand(TFunctor *com) {
 	HoldCommands::procs *findme = rcCMD->getProc(this);
     if(findme->rc.size() < 1) return;
-    for(std::vector<coms>::iterator iter = findme->rc.begin(); iter < findme->rc.end();iter++) { 
+    for(vector<coms>::iterator iter = findme->rc.begin(); iter < findme->rc.end();iter++) { 
         if((*(iter)).functor == com) {
-			std::cout << "Removing: " << (*(iter)).Name << std::endl;
+			cout << "Removing: " << (*(iter)).Name << endl;
             delete (*(iter)).functor;
             findme->rc.erase(iter);
             return;
         }
     }
-	std::cout << "Error, couldn't find the command that owns the memory area: " << com << std::endl;
+	cout << "Error, couldn't find the command that owns the memory area: " << com << endl;
 }
 // }}}
 // {{{ Find a command in the command interpretor 
@@ -578,24 +580,24 @@ coms *commandI::findCommand(const char *comm, int &sock_in) {
 	HoldCommands::procs *findme = rcCMD->getProc(this);
 	if(findme->rc.size() < 1) throw "Error, commands vector empty, this shouldn't happen!\n";
 	
-	std::ostringstream in_s;
+	ostringstream in_s;
 
 	if(!comm) ;
 	else in_s << comm;//this is actually a hack
 	//comm shouldn't ever be null if it gets this far.
 	//but for some fucking reason it is sometimes..
-	std::string name;
+	string name;
 	name.append(in_s.str());
 	size_t x;
 
 // remove \n and \r's (4 possible network input) {{{
-	for(x = name.find(' '); x != std::string::npos; x = name.find(' ', x+1)) name.erase(name.begin()+x);
-	for(x = name.find('\n'); x != std::string::npos; x = name.find('\n', x+1)) name.erase(name.begin()+x);
-	for(x = name.find('\r'); x != std::string::npos; x = name.find('\r', x+1)) name.erase(name.begin()+x);
+	for(x = name.find(' '); x != string::npos; x = name.find(' ', x+1)) name.erase(name.begin()+x);
+	for(x = name.find('\n'); x != string::npos; x = name.find('\n', x+1)) name.erase(name.begin()+x);
+	for(x = name.find('\r'); x != string::npos; x = name.find('\r', x+1)) name.erase(name.begin()+x);
 // }}}
 //if the input is less than one return prompt function{{{
 	if(name.size() < 1) {
-		std::vector<coms>::iterator iter = findme->rc.begin();
+		vector<coms>::iterator iter = findme->rc.begin();
 	    bool breaker = true;
 	    while(breaker == true) {
 	        if(iter >= findme->rc.end()) {iter--; breaker = false;continue;}
@@ -608,18 +610,18 @@ coms *commandI::findCommand(const char *comm, int &sock_in) {
 //transform name (the word in) to lowercase {{{
 	bool golower = true;
 	if(golower)
-		std::transform(name.begin(), name.end(), name.begin(),static_cast < int(*)(int) > (tolower));
+		transform(name.begin(), name.end(), name.begin(),static_cast < int(*)(int) > (tolower));
 // }}}
 // Start testing command names against the command entered {{{
 	coms *fuzzymatch = NULL;
-	std::vector<coms>::iterator iter;
+	vector<coms>::iterator iter;
 	for(iter = findme->rc.begin();iter < findme->rc.end(); iter++) {
 	//set the test variable to the iterator of something in the command vector
 		coms &testCom = ((*(iter)));
 		//clear the temporary buffer used for holding the name of this command
-		std::string temp;
+		string temp;
 		//define a string to possibly print something to the user
-		std::string printer;
+		string printer;
 		//if the length of the commands name is larger than what was entered {{{
 		if(testCom.Name.length() >= name.length() ) {
 			//append the size of the command entered of the test commands name
@@ -628,7 +630,7 @@ coms *commandI::findCommand(const char *comm, int &sock_in) {
 			//transform the partial name to lowercase
 			bool golower = true;
 			if(golower)
-				std::transform(temp.begin(), temp.end(), temp.begin(),static_cast < int(*)(int) > (tolower));
+				transform(temp.begin(), temp.end(), temp.begin(),static_cast < int(*)(int) > (tolower));
 			//compare them
 			if(temp.compare(name) == 0 && name.size() > 0) {
 				//they match {{{
@@ -664,11 +666,11 @@ coms *commandI::findCommand(const char *comm, int &sock_in) {
 		//try fuzzy match
 		} else if(testCom.Name.length() < name.length() && testCom.Name.length() >= name.length()-1 ) {
 			temp.append(testCom.Name);
-			std::string commandentered2; 
+			string commandentered2; 
 			commandentered2.append(name, 0, testCom.Name.size());
 			//transform them to lowercase
-			std::transform(temp.begin(), temp.end(), temp.begin(),static_cast <int(*)(int) > (tolower));
-			std::transform(commandentered2.begin(), commandentered2.end(), commandentered2.begin(),static_cast <int(*)(int) > (tolower));
+			transform(temp.begin(), temp.end(), temp.begin(),static_cast <int(*)(int) > (tolower));
+			transform(commandentered2.begin(), commandentered2.end(), commandentered2.begin(),static_cast <int(*)(int) > (tolower));
 			if(temp.compare(commandentered2) == 0) {
                 //they match {{{
                 //If it is an immortal command
@@ -711,45 +713,45 @@ coms *commandI::findCommand(const char *comm, int &sock_in) {
 //then tries to execute the member function.
 //If one is not found, it will call commandI::dummy() .
 // {{{ Main execute entrace, all input comes in here, this sends it to the menusystem, then in the return at the very last line executes the fexecute function which actually parses and finds commands, if the menusystem allows. This way the menusystem can manipulate user input, ie insert command names into the input to make it go to any function.
-bool commandI::execute(std::string *incommand, bool isDown, int sock_in)
+bool commandI::execute(string *incommand, bool isDown, int sock_in)
 {
 	int socket = sock_in;
 	//use the menusystem ONLY if the sock_in is the same as socket{{{
 	{
 		if(menumode && sock_in == socket) {
-			std::string l;
-			std::string y;
+			string l;
+			string y;
 			size_t x = incommand->find(" ");
-			if(x < std::string::npos) {
+			if(x < string::npos) {
 				l.append(incommand->substr(0, x));
 			} else {
 				l.append(incommand->c_str());
 			}
-			std::string t;
+			string t;
 			t.append((*(incommand)));
-			if(x < std::string::npos)
+			if(x < string::npos)
 				y.append(incommand->substr(x, incommand->size()-1));
 			else 
 				y.append(incommand->c_str());
 			if(l.compare("\r\n") == 0) ;
 			else {
 				size_t lv = l.find("\r");
-				while(lv < std::string::npos) {
+				while(lv < string::npos) {
 					l.replace(lv, 1, "");
 					lv = l.find("\r");
 				}
 	            lv = l.find("\n");
-	            while(lv < std::string::npos) {
+	            while(lv < string::npos) {
 	                l.replace(lv, 1, "");
 	                lv = l.find("\n");
 	            }
 	            lv = y.find("\r");
-	            while(lv < std::string::npos) {
+	            while(lv < string::npos) {
 	                y.replace(lv, 1, "");
 	                lv = y.find("\r");
 	            }
 	            lv = y.find("\n");
-    	        while(lv < std::string::npos) {
+    	        while(lv < string::npos) {
 	                y.replace(lv, 1, "");
 	                lv = y.find("\n");
 	            }
@@ -758,7 +760,7 @@ bool commandI::execute(std::string *incommand, bool isDown, int sock_in)
 			char *name_out = NULL;
 			if(l.size() > 0) name_out = (char *)l.c_str();
 			if(callMenu(name_out, (char *)y.c_str(), t) ) return false;
-			*incommand=std::string();
+			*incommand=string();
 			incommand->append(t); //t may have changed if we got this far
 		}
 
@@ -772,7 +774,7 @@ bool commandI::execute(std::string *incommand, bool isDown, int sock_in)
 //it's broken up so the menusystem can call fexecute themself at the right
 //time
 //Main Execute Function {{{
-bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
+bool commandI::fexecute(string *incommand, bool isDown, int sock_in) {
 	size_t ls, y;
 	bool breaker = false;
 // ************
@@ -784,10 +786,10 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 			incommand->replace(ls, 1, "");
 		}
 	}
-	for(y = incommand->find("\r\n"); y != std::string::npos; y = incommand->find("\r\n", y+1)) {
+	for(y = incommand->find("\r\n"); y != string::npos; y = incommand->find("\r\n", y+1)) {
                 incommand->replace(y, 2, "");
         }
-	for(y = incommand->find("  "); y != std::string::npos; y = incommand->find("  ", y+1)) {
+	for(y = incommand->find("  "); y != string::npos; y = incommand->find("  ", y+1)) {
 		incommand->replace(y, 1, "");
 	}
 
@@ -818,7 +820,7 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 //				}
 			} else if(console) printit = true;
 			if(printit) {
-				std::string webout;
+				string webout;
 				webout.append(incommand->c_str());
 				webout.append("\n\r");
 				conoutf(webout);
@@ -827,12 +829,12 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 // }}}
 	//replace \r\n with a space {{{
 
-	for(y = incommand->find("\r\n"); y != std::string::npos; y = incommand->find("\r\n", y+1)) {
+	for(y = incommand->find("\r\n"); y != string::npos; y = incommand->find("\r\n", y+1)) {
         incommand->replace(y, 2, " ");
     }
 	// }}}
 	// remove multiple spaces {{{
-	for(y = incommand->find("  "); y != std::string::npos; y = incommand->find("  ", y+1)) {
+	for(y = incommand->find("  "); y != string::npos; y = incommand->find("  ", y+1)) {
 		incommand->replace(y, 1, "");
 	}
 	// }}}
@@ -855,20 +857,20 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 	breaker = false; //reset our exit bool 
     
 	//done with formatting
-	//now make what our std::vector<std::string> {{{
-	std::vector<std::string> strvec; //to replace newincommand
+	//now make what our vector<string> {{{
+	vector<string> strvec; //to replace newincommand
 								// to reduce data replication by one;
     {
-	std::string::const_iterator scroller = incommand->begin();
+	string::const_iterator scroller = incommand->begin();
 	size_t last = 0, next = 0;
 	bool quote = false;
 	bool escape = false;
 	next=incommand->find(" ");
-	for(next = incommand->find("\"\"", 0); (next=incommand->find("\"\"",last),(last!=std::string::npos)); last=(next!=std::string::npos)?next+1:std::string::npos) {
-		if(next < std::string::npos)
+	for(next = incommand->find("\"\"", 0); (next=incommand->find("\"\"",last),(last!=string::npos)); last=(next!=string::npos)?next+1:string::npos) {
+		if(next < string::npos)
 			incommand->replace(next, 2, "\" \""); //replace "" with " "
 	}
-	std::string starter("");
+	string starter("");
 	strvec.push_back(starter);
 	for(scroller = incommand->begin(); scroller < incommand->end(); scroller++)
 	{
@@ -899,7 +901,7 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
     // }}}
     {
 		// if the last argument is a space, erase it. {{{
-        std::vector<std::string>::iterator iter = strvec.end();
+        vector<string>::iterator iter = strvec.end();
         iter--;
         if((*(iter)).compare(" ") == 0) {
             strvec.erase(iter);
@@ -915,7 +917,7 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 //methods of accessing it.) 
 		if(theCommand.Name.compare("dummy") != 0) {	
 			size_t x = incommand->find_first_of(strvec[0]);
-			if(x != std::string::npos) {
+			if(x != string::npos) {
 				strvec[0].erase();strvec[0].append( theCommand.Name);
 			}
 		
@@ -930,33 +932,33 @@ bool commandI::fexecute(std::string *incommand, bool isDown, int sock_in) {
 			theCommand.functor->Call(strvec, sock_in, &isDown);
 		//try to catch any errors that occured while executing
 		} catch(const char *in) {
-			std::string l;
+			string l;
 			l.append(in);
 			conoutf(l); //print the error to the console
-		}catch (std::exception e) {
-			std::string l; 
+		}catch (exception e) {
+			string l; 
 			l.append("Command processor: Exception occured: ");
 			l.append(e.what());
 			l.append("\n\r");
-			std::cout << l;
+			cout << l;
 			conoutf(l);
 		} catch (...) {
-			std::string y;
+			string y;
 			y.append("Command processor: exception occurered: Unknown, most likely cause: Wrong Arg_type arguement sent with addCommand.\n\r");
-			std::cout << y;
+			cout << y;
 			conoutf(y);
 		}
         
     // }}}
 	} catch(const char *in) { //catch findCommand error
-		std::cout << in;
+		cout << in;
 	}
 	return true;
 }	
 
 // }}}
 
-std::string commandI::display(std::string &in) {
+string commandI::display(string &in) {
 	//If the menusystem has a value to display, eg:
 	//	Editing User 
 	//	1) Change Username - Current Name: XXX
@@ -965,7 +967,7 @@ std::string commandI::display(std::string &in) {
 	// then display does:
 	// if(in.compare(uname) == 0) return current_mob_editing.Name;
 	// The value to pass to display is set when creating a menuitem
-	std::string f;
+	string f;
 	f.append("FAKE");
 	return f;
 };
@@ -1004,18 +1006,18 @@ bool commandI::addMenu(menu *menu_in) {
 };
 // }}}
 // {{{ display menu function
-std::string commandI::displaymenu() {
+string commandI::displaymenu() {
     if(menumode) {
-        std::ostringstream ps;
+        ostringstream ps;
 		ps << menu_in->Display << "\n";
-        for(std::vector<mItem *>::iterator iter = menu_in->items.begin();
+        for(vector<mItem *>::iterator iter = menu_in->items.begin();
             iter < menu_in->items.end(); iter++) {
             ps << (*(iter))->Name << " " << (*(iter))->display;
 			if((*(iter))->predisplay.size() > 0)
 					 ps << " " << display((*(iter))->predisplay);
 			ps << "\n";
         }
-        std::string buf;
+        string buf;
         buf.append(ps.str());
 		if(menu_in->autoselect == true) {
 			if(menu_in->selected == true) {
@@ -1038,7 +1040,7 @@ std::string commandI::displaymenu() {
 		return buf;
 //		conoutf(buf);
 	}
-	std::string buf;
+	string buf;
 	buf.append("Error, not in menumode!");
 	return buf;
 };
@@ -1052,7 +1054,7 @@ bool commandI::addMenuItem(mItem *mi, menu *menuin) {
 	else 
 		menu2use = menu_in;
 	//if the command isn't found it will return dummy or prompt.
-	for(std::vector<menu *>::iterator iter = menus.begin(); iter < menus.end(); iter++) {
+	for(vector<menu *>::iterator iter = menus.begin(); iter < menus.end(); iter++) {
 		if(menu2use == (*(iter))) {
 			menu2use->items.push_back(mi); //doh! :)
 			return true;
@@ -1062,9 +1064,9 @@ return false;
 };
 // }}}
 //call a menu with arguements {{{
-bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
+bool commandI::callMenu(char *name_in, char *args_in, string &d) {
 	//if there is a menu operation return true;
-	std::string name;
+	string name;
 	if(name_in != NULL)
 	name.append(name_in);
 //	bool freturnfalse = false; //force return false
@@ -1077,7 +1079,7 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 				if(!menu_in->noescape) {
 					if(name.compare(menu_in->escape) == 0) {
 						if(menustack.size() > 0 ) {
-							std::vector<menu *>::iterator iter = menustack.end();
+							vector<menu *>::iterator iter = menustack.end();
 							iter--;
 							menu_in = (*(iter));
 							menustack.pop_back();
@@ -1097,11 +1099,11 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 			// Input mode 1  {{{
 			if(menu_in->iselected->inputbit == true && menu_in->iselected->inputbit2 == false) {
 				menu_in->selected = false;
-				std::string arg;
+				string arg;
 				arg.append(menu_in->iselected->action);
-				std::string funcn;
+				string funcn;
 				funcn.append(menu_in->iselected->func2call);
-				std::string dreplace;
+				string dreplace;
 				dreplace.append(d);
 				d.erase();
 				d.append(funcn);
@@ -1111,8 +1113,8 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 				d.append(dreplace);
 			//setMenus {{{
 				if(funcn.compare("setMenu") == 0) {
-					std::string l;
-					l.append(setMenu((char *)arg.c_str()));
+					string l;
+					l.append(setMenu(arg));
 					conoutf(l);
 					return true;
 				}
@@ -1120,14 +1122,14 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 				size_t ylast = 0, xasd = 0;
 				//login function {{{
 				if(funcn.compare("loginfunc") == 0) {
-					std::vector<std::string *> d_out;
+					vector<string *> d_out;
 					d.append(" ");
-					for(size_t x = d.find("\r\n"); x < std::string::npos; x = d.find("\r\n", x+3)) {
+					for(size_t x = d.find("\r\n"); x < string::npos; x = d.find("\r\n", x+3)) {
 						d.replace(x, 1, " \r\n");
 					}
 					for(size_t iter= 0; iter < d.size();iter++) {
 						if(d[iter]==32) {
-							std::string *xs = new std::string();
+							string *xs = new string();
 							xs->append(d.substr(ylast, xasd-ylast));
 							ylast = xasd;
 							d_out.push_back(xs);
@@ -1135,9 +1137,9 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 						xasd++;
 					}
 //					loginfunc(&d_out); //login function 
-					std::vector<std::string *>::iterator itera = d_out.begin();
+					vector<string *>::iterator itera = d_out.begin();
 					while(d_out.size() > 0 ) {
-						std::string *s = (*(itera));
+						string *s = (*(itera));
 						delete s;
 						d_out.erase(itera);
 						itera=d_out.begin();
@@ -1148,7 +1150,7 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 			//autoreprint {{{
 				if(menu_in->iselected->autoreprint == true) {
 						fexecute(&d, true, 0);
-						std::string x;
+						string x;
 						x.append(displaymenu());
 						conoutf(x);
 						return true;
@@ -1162,9 +1164,9 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 				//wait until we find an escape seqence alone {{{
 				if( name.compare(menu_in->escape) == 0 ) {
 					menu_in->selected = false;
-					std::string arg;
+					string arg;
 					arg.append(menu_in->iselected->action);
-					std::string funcn;
+					string funcn;
 					funcn.append(menu_in->iselected->func2call);
 					d.erase();
 					d.append(funcn);
@@ -1174,7 +1176,7 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 					{ 
 						size_t l = 0;
 						bool y = false;
-						for(size_t x = menu_in->iselected->menubuf.find("\r\n"); x < std::string::npos; x = menu_in->iselected->menubuf.find("\r\n", x+1)) {
+						for(size_t x = menu_in->iselected->menubuf.find("\r\n"); x < string::npos; x = menu_in->iselected->menubuf.find("\r\n", x+1)) {
 							menu_in->iselected->menubuf.replace(x, 2, "<BR>");
 							l = x;
 							y = true;
@@ -1187,21 +1189,21 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 					menu_in->iselected->menubuf.erase();
 									
 					if(funcn.compare("setMenu") == 0) {
-						std::string buf;
-						buf.append(setMenu((char *)arg.c_str()));
+						string buf;
+						buf.append(setMenu(arg));
 						conoutf(buf);
 						return true;
 	                }
 					if(funcn.compare("loginfunc") == 0) {
-						std::vector<std::string *> d_out;
+						vector<string *> d_out;
 						d.append(" ");
-						for(size_t x = d.find("\r\n"); x < std::string::npos; x = d.find("\r\n", x+1)) {
+						for(size_t x = d.find("\r\n"); x < string::npos; x = d.find("\r\n", x+1)) {
 							d.replace(x, 2, "<BR>");
 						}
 						size_t ylast = 0, xasd = 0;
 						for(size_t iter= 0; iter < d.size();iter++) {
 							if(d[iter]==32) {
-								std::string *xs = new std::string();
+								string *xs = new string();
 								xs->append(d.substr(ylast, xasd-ylast));
 								ylast = xasd;
 								d_out.push_back(xs);
@@ -1209,9 +1211,9 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 						xasd++;
 						}
 //						loginfunc(&d_out); //login function
-						std::vector<std::string *>::iterator itera = d_out.begin();
+						vector<string *>::iterator itera = d_out.begin();
 						while(d_out.size() > 0 ) {
-						 	std::string *s = (*(itera));
+						 	string *s = (*(itera));
 							delete s;
 							d_out.erase(itera);
 							itera=d_out.begin();
@@ -1220,7 +1222,7 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 					}
                     if(menu_in->iselected->autoreprint == true) {
 						fexecute(&d, true, 0);
-                        std::string x;
+                        string x;
                         x.append(displaymenu());
                         conoutf(x);
 						return true;
@@ -1241,7 +1243,7 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 
 		// if we don't have anything selected, select one.. {{{
 		if(!menu_in->selected) {
-			for(std::vector<mItem*>::iterator iter = menu_in->items.begin();
+			for(vector<mItem*>::iterator iter = menu_in->items.begin();
 			iter < menu_in->items.end(); iter++)  {
 				if((*(iter))->Name.compare(name) == 0) {
 					menu_in->selected = true;
@@ -1250,7 +1252,7 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 //						display(menu_in->iselected->predisplay);
 //					}
 					if(menu_in->iselected->inputbit2) {
-						std::string buf;
+						string buf;
 						buf.append(menu_in->iselected->selectstring);
 						buf.append("\n\r");
 						buf.append("Use: ");
@@ -1262,7 +1264,7 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 
 						conoutf(buf);
 					} else if(menu_in->iselected->inputbit) {
- 						std::string buf;
+ 						string buf;
 						buf.append(menu_in->iselected->selectstring);
 						buf.append(": ");
 						conoutf(buf);
@@ -1273,21 +1275,21 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 				if(!menu_in->iselected->inputbit && !menu_in->iselected->inputbit2) 
 				{
 					menu_in->selected = false;
-					std::string arg;
+					string arg;
 					arg.append(menu_in->iselected->action);
-                    std::string funcn;
+                    string funcn;
 					funcn.append(menu_in->iselected->func2call);
-					std::string dreplace;
+					string dreplace;
 					dreplace.append(d);
-					d=std::string();
+					d=string();
 					d.append(funcn);
 					d.append(" ");
 					d.append(arg);
 					d.append(" ");
 					d.append(dreplace);
 					if(funcn.compare("setMenu") == 0) {
-						std::string l;
-						l.append(setMenu((char *)arg.c_str()));
+						string l;
+						l.append(setMenu(arg));
 						conoutf(l);
 						return true;
 					}
@@ -1307,7 +1309,7 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 	}
 	if(menumode && !menu_in->selected) {
 		//we're in a menu but don't have anything selected {{{
-		std::string y;
+		string y;
 		y.append(displaymenu());
 		conoutf(y);
 		return true;
@@ -1318,11 +1320,11 @@ bool commandI::callMenu(char *name_in, char *args_in, std::string &d) {
 // }}}
 
 // set a menu {{{
-std::string commandI::setMenu(char *name_in) {
-	std::string name;
+string commandI::setMenu(string name_in) {
+	string name;
 	name.append(name_in);
 	if(name[0] == 32) name.replace(0, 1, "");
-	for(std::vector<menu *>::iterator iter = menus.begin();
+	for(vector<menu *>::iterator iter = menus.begin();
 		iter < menus.end(); iter++ ){
 		if((*(iter))->Name.compare(name) == 0) {
 			if(!menumode) {
@@ -1362,8 +1364,8 @@ RegisterPythonWithCommandInterpreter::RegisterPythonWithCommandInterpreter(comma
 }
 
 //run a python string
-void RegisterPythonWithCommandInterpreter::runPy(std::string &argsin) {
-	std::string pyRunString;
+void RegisterPythonWithCommandInterpreter::runPy(string &argsin) {
+	string pyRunString;
 	pyRunString.append(argsin); //append the arguments in to the string to run
 	size_t x = pyRunString.find("python "); //strip out the name of the command
 	//and the first space
@@ -1373,7 +1375,7 @@ void RegisterPythonWithCommandInterpreter::runPy(std::string &argsin) {
 	//now replace <BR> with \r\n
 	{
 		size_t x = pyRunString.find("<BR>");
-		while(x != std::string::npos) {
+		while(x != string::npos) {
 			pyRunString.replace(x, 4, "\r\n");
 			x = pyRunString.find("<BR>");
 		}
@@ -1405,7 +1407,7 @@ void commandI::keypress(int code, int modifiers, bool isDown, int x, int y) {
 			return;
 		};
 		if(code==WSK_RETURN && isDown) {
-			std::string commandBuf = CommandInterpretor->getcurcommand();
+			string commandBuf = CommandInterpretor->getcurcommand();
 			commandBuf.append("\r\n"); 
 			CommandInterpretor->execute(&commandBuf, isDown, 0); //execute console on enter
 			//don't return so the return get's processed by
@@ -1423,7 +1425,7 @@ void commandI::keypress(int code, int modifiers, bool isDown, int x, int y) {
 	// one to read a keymap file and one to re-map a single key
 	// (and the keymap file would have to be read at startup)
 	// struct keym { int code; char * name; char * action; }; or so
-	std::vector<KeyMapObject>::iterator iter = keyMapVector.begin();
+	vector<KeyMapObject>::iterator iter = keyMapVector.begin();
         while(iter < keyMapVector.end()) {
             keym *tester = &(*(iter));
             if(tester->code == code){

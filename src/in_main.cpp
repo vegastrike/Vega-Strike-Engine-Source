@@ -59,7 +59,7 @@ void RemoveListener(InputListener *il) {
 	listeners.remove(il);
 }
 
-void ProcessInput(int whichplayer) {
+void ProcessInput(size_t whichplayer) {
   ProcessKB(whichplayer);
   ProcessMouse();
   for (int i=0;i<MAX_JOYSTICKS;i++) {

@@ -1,3 +1,7 @@
+#include <string>
+#include <vector>
+#include <sstream>
+
 
 class RText {
 	private:
@@ -31,7 +35,7 @@ class RText {
 		void conoutf(char *);
 		virtual void conoutf(std::string &s, int a = 0, int b = 0, int c = 0);
 		//add a line to the console(Use this one.)
-		void saycommand(char *init); //actually does the appending of
+		void saycommand(const char *init); //actually does the appending of
 			//the string to the commandbuf, and seperates entries
 		void ConsoleKeyboardI(int code, bool isdown);
 			//interpret keyboard input to the console

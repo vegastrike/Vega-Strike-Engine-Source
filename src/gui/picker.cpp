@@ -136,7 +136,7 @@ void Picker::draw(void)
     rect.origin.y += m_rect.size.height - cellHeight;
     rect.size.height = cellHeight;
 
-    for(int i=m_scrollPosition; i<m_displayCells.size() && rect.origin.y > m_rect.origin.y; i++) {
+    for(vector<DisplayCell>::size_type  i=m_scrollPosition; i<m_displayCells.size() && rect.origin.y > m_rect.origin.y; i++) {
         DisplayCell& display = m_displayCells[i];
         const PickerCell* cell = display.cell;      // Get the next cell.
 
@@ -205,7 +205,7 @@ int Picker::selectedItem(void) {
 // Find the cell for a mouse point.
 PickerCell* Picker::cellForMouse(const Point& point) {
     if(m_rect.inside(point)) {
-        const int index = float_to_int((m_rect.top() - point.y) / totalCellHeight() + m_scrollPosition);
+        const vector<DisplayCell>::size_type index = float_to_int((m_rect.top() - point.y) / totalCellHeight() + m_scrollPosition);
         if(index < m_displayCells.size()) {
             // It's within the cells we are displaying.
             return m_displayCells[index].cell;
@@ -313,7 +313,7 @@ void Picker::scrollToCell(const PickerCell* cell, bool middle) {
         recalcDisplay();
     }
 
-    for(int i=0; i<m_displayCells.size(); i++) {
+    for(vector<DisplayCell>::size_type i=0; i<m_displayCells.size(); i++) {
         if(cell == m_displayCells[i].cell) {
             const int visibleCells = float_to_int(m_rect.size.height / totalCellHeight());
 			if(middle) {

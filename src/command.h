@@ -50,7 +50,7 @@ class mItem {
 class menu {
 	public:
 	menu() { selected = false; noescape = false; autoselect = false; defaultInput = false;};
-	menu(char *n_in, char *d_in, char *e_in) {
+	menu(std::string n_in, char *d_in, char *e_in) {
 		selected = false;
 		noescape = false;
 		autoselect = false;
@@ -127,7 +127,7 @@ class commandI : public RText {
 		//the args added at addMenu are appended when the
 		//menuitem is called
 		bool callMenu(char *name, char *args, std::string &s2manip);
-		std::string setMenu(char *name); //force a menu set.
+		std::string setMenu(std::string name); //force a menu set.
 		std::string displaymenu(); //utility to display the current menu
 		void breakmenu(); //utility to force a break from all menus
 		virtual std::string display(std::string &s); // build parts

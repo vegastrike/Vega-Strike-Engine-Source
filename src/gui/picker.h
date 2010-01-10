@@ -206,14 +206,17 @@ protected:
     GFXColor m_highlightColor;          // Highlighted cell background color.
     GFXColor m_highlightTextColor;      // Highlighted cell text color.
     float m_extraCellHeight;            // Extra height to be added to each cell. 1.0 for whole cell height.
-    PickerCell* m_cellPressed;          // Item that mouse-down came on.
-    PickerCell* m_selectedCell;         // Cell that is currently selected.
-    const PickerCell* m_highlightedCell;// Cell that mouse is currently over.
-    bool m_needRecalcDisplay;           // True = Need to recalculate the displayed cells.
     Size m_textMargins;                 // Inset area where no text appears.
-    std::vector<DisplayCell> m_displayCells;    // Array of cells currently displayed.
-    int m_scrollPosition;               // Index of first display cell shown.
+    PickerCell* m_cellPressed;          // Item that mouse-down came on.
+    const PickerCell* m_highlightedCell;// Cell that mouse is currently over.
+    PickerCell* m_selectedCell;         // Cell that is currently selected.
     Scroller* m_scroller;
+    size_t m_scrollPosition;               // Index of first display cell shown.
+    bool m_needRecalcDisplay;           // True = Need to recalculate the displayed cells.
+    std::vector<DisplayCell> m_displayCells;    // Array of cells currently displayed.
+    
+    
+
 };
 
 #endif   // __PICKER_H__

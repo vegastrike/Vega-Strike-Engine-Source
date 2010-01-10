@@ -77,7 +77,7 @@ class JoyStick {
 #endif
     int nr_of_axes,nr_of_buttons,nr_of_hats;
     int hat_margin;
-    int player;
+    size_t player;
 #define MAX_AXES 32
     bool axis_inverse[MAX_AXES];
     int axis_axis[MAX_AXES];

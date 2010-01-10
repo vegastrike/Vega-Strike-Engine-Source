@@ -484,6 +484,17 @@ std::string vegastrike_cwd;
 		return 0;
 	}
 
+	void		vs_dprintf(char level, const char * format, ...)
+	{
+		if( !use_volumes && level <= g_game.vsdebug ){
+			va_list ap;
+			va_start( ap, format);
+			vfprintf( stderr, format, ap);
+		}
+	}
+
+
+
 #if 0
 	int		vs_fscanf( FILE * fp, const char * format, ...)
 	{

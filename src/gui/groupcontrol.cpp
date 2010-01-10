@@ -211,7 +211,7 @@ bool GroupControl::processMouseDrag(const InputEvent& event) {
 
 
 GroupControl::~GroupControl() {
-    for(int i=0; i < m_controls.size(); i++) {
+    for(vector<Control*>::size_type i=0; i < m_controls.size(); ++i) {
 		EventManager::addToDeleteQueue(m_controls[i]);
     }
 }
