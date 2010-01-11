@@ -257,7 +257,10 @@ printf ("Windows version %d %d\n",osvi.dwMajorVersion,osvi.dwMinorVersion);
 	// This should be put into some common function...
 	// Keep in mind that initialization must also go into networking/netserver.cpp
     game_options.init();
-
+    // If no debug argument is supplied, set to what the config file has. 
+    if(g_game.vsdebug == '0'){
+    	g_game.vsdebug = game_options.vsdebug;
+    }
     //can use the vegastrike config variable to read in the default mission
     if (XMLSupport::parse_bool(vs_config->getVariable ("network","force_client_connect","false"))) {
       ignore_network=false;
@@ -730,6 +733,7 @@ std::string ParseCommandLine(int argc, char ** lpCmdLine) {
   std::string st;
   std::string retstr;
   std::string datatmp;
+  g_game.vsdebug = '0';
   QVector PlayerLocation;
   for (int i=1;i<argc;i++) {
     if(lpCmdLine[i][0]=='-') {

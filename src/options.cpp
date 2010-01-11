@@ -17,6 +17,7 @@ void vs_options::init()
 	garbagecollectfrequency = XMLSupport::parse_int(vs_config->getVariable ("general","garbagecollectfrequency","20"));
 	numoldsystems = XMLSupport::parse_int(vs_config->getVariable ("general","numoldsystems","6"));
 	deleteoldsystems = XMLSupport::parse_bool (vs_config->getVariable ("general","deleteoldsystems","true"));
+	vsdebug = vs_config->getVariable("general","verbose_output","0").c_str()[0];
 	
 	/* Audio Options */
 	threadtime = XMLSupport::parse_int(vs_config->getVariable("audio","threadtime","1"));

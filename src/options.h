@@ -22,6 +22,7 @@ class vs_options
 		int garbagecollectfrequency;
 		int numoldsystems;
 		bool deleteoldsystems;
+		char vsdebug;
 		
 		/* Audio Options */
 		int threadtime;

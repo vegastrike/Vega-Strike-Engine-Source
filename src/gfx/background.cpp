@@ -303,7 +303,7 @@ void Background::Draw()
           GFXColor4f(1.00F, 1.00F, 1.00F, 1.00F);
           
           for (lyr=0; (lyr<gl_options.Multitexture)||(lyr<numlayers); lyr++) {
-              GFXToggleTexture((lyr<numlayers),lyr, TEXTURE_2D);
+              GFXToggleTexture((lyr<numlayers),lyr);
               if (lyr<numlayers) 
                   GFXTextureCoordGenMode(lyr,NO_GEN,NULL,NULL);
           }
@@ -356,7 +356,7 @@ void Background::Draw()
           GFXToggleTexture(false,0,CUBEMAP);
 #else
           for (lyr=0; lyr<numlayers; lyr++) {
-              GFXToggleTexture(false,lyr,TEXTURE_2D);
+              GFXToggleTexture(false,lyr);
               if (lyr<numlayers) GFXTextureCoordGenMode(lyr,NO_GEN,NULL,NULL);
           }
           
