@@ -112,9 +112,6 @@ public:
   virtual bool canMultiPass() const{return true;} // True, if full functionality can be achieved after multipass rendering. If false, fallback rendering must be possible by multipass (or singlepass) rendering. True, also, if texturing units are sufficient for singlepass rendering.
   virtual bool constFrameRate() const{return true;} // If frames advance at a regular rate - keyframe based animations would return false.
   
-  ///Binds this texture to the specified parent texture (use for cubemaps and multi-element textures)
-  int Bind(const Texture *parent, int maxdimension = 65536, GFXBOOL detailtexture = GFXFALSE);
-  
   int getStage() const {return stage; }
   int getFilter() const { return ismipmapped; }
   int getTarget() const { return texture_target; }

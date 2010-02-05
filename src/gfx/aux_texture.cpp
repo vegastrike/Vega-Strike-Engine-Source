@@ -587,20 +587,6 @@ int Texture::Bind(Texture *other, int maxdimension, GFXBOOL detailtexture)
     return name;
 }
 
-int Texture::Bind(const Texture *parent, int maxdimension,GFXBOOL detailtexture)
-{
-    UnBind();
-    bound = parent->bound;
-    boundSizeX = parent->boundSizeX;
-    boundSizeY = parent->boundSizeY;
-    boundMode = parent->boundMode;
-    name = parent->name;
-    
-    Transfer(maxdimension,detailtexture);
-    
-    return name;
-}
-
 void Texture::Prioritize (float priority) {
   GFXPrioritizeTexture (name, priority);
 }
