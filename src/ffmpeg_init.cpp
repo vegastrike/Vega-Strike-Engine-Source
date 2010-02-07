@@ -104,6 +104,23 @@ namespace FFMpeg {
 
 };
 
+
+
+
+
+// Workaround for a missing export in libavcodec 52.47.0
+#if (LIBAVCODEC_VERSION_MAJOR == 52 && LIBAVCODEC_VERSION_MINOR == 47 && LIBAVCODEC_VERSION_MICRO == 0)
+extern "C" {
+    void av_free_packet(AVPacket *pkt)
+    {
+        if (pkt) {
+            if (pkt->destruct) pkt->destruct(pkt);
+            pkt->data = NULL; pkt->size = 0;
+        }
+    } 
+}
+#endif
+
 #else // No FFMPEG
 
 namespace FFMpeg {
