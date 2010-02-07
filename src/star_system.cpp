@@ -153,6 +153,11 @@ GameStarSystem::GameStarSystem(const char * filename, const Vector & centr,const
 }
 
 
+Texture* GameStarSystem::getLightMap()
+{
+    return LightMap[0];
+}
+
 void GameStarSystem::activateLightMap(int stage)
 {
 	GFXActiveTexture (stage);

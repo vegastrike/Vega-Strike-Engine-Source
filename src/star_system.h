@@ -39,6 +39,7 @@ class GameStarSystem: public StarSystem
 		Background* getBackground() {return bg;}
 		///activates the light map texture
 		void activateLightMap(int stage=1);
+        Texture* getLightMap();
 		static void DrawJumpStars();
 		Terrain * getTerrain (unsigned int which) {return terrains[which];}
 		unsigned int numTerrain () {return terrains.size();}

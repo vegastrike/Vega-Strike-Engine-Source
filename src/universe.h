@@ -57,6 +57,7 @@ class GameUniverse: public Universe
 		void WriteSaveGame(bool auto_save);
 		void SetupCockpits (std::vector <std::string> players);
 		void activateLightMap(int stage=1);
+        Texture* getLightMap();
 		///inits graphics with args
 		GameUniverse(int argc, char **argv, const char * galaxy);
 		GameUniverse();

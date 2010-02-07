@@ -32,6 +32,7 @@
 class Cockpit;
 class Camera;
 class Unit;
+class Texture;
 
 /**
  * Class Universe Deals with universal constants. It is a global,
@@ -98,6 +99,7 @@ private:
   virtual void WriteSaveGame(bool auto_save) {}
   virtual void SetupCockpits (std::vector <std::string> players);
   virtual void activateLightMap(int stage=1) {}
+  virtual Texture* getLightMap() { return NULL; }
   virtual void SelectCamera(int cam) {}
   //virtual unsigned int CurrentCockpit(){return 0;}
   Cockpit * createCockpit( std::string player);

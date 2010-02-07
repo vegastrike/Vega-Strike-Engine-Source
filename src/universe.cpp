@@ -140,6 +140,11 @@ void GameUniverse::activateLightMap(int stage)
 	getActiveStarSystem(0)->activateLightMap(stage);
 }
 
+Texture* GameUniverse::getLightMap()
+{
+    return getActiveStarSystem(0)->getLightMap();
+}
+
 
 void GameUniverse::StartGFX()
 {

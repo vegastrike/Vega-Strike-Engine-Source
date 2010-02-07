@@ -19,6 +19,7 @@ class Terrain;
 class ContinuousTerrain;
 class Universe;
 class CollideMap;
+class Texture;
 //class TextPlane;
 struct AtmosphericFogMesh
 {
@@ -149,6 +150,7 @@ class StarSystem
 		///Requeues the unit so that it is simulated ASAP.
 		void RequestPhysics(Unit *un, unsigned int queue);
 		virtual void activateLightMap(int stage=1) {}
+        virtual Texture* getLightMap() { return NULL; }
 		///activates the light map texture
 		virtual unsigned int numTerrain () {return 0;}
 		virtual unsigned int numContTerrain () {return 0;}
