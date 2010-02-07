@@ -117,6 +117,8 @@ class vs_options
 		/* Data Options */
 		std::string universe_path;
 		std::string sectors;  // Not Used 
+        std::string techniquesBasePath;
+        std::string techniquesSubPath;
 		
 		/* Galaxy Options */
 		bool PushValuesToMean;
@@ -127,5 +129,6 @@ class vs_options
 		std::string getCallsign(int);
 };
 
+extern vs_options game_options;
 
 #endif

@@ -17,6 +17,8 @@
 
 #include "xml_support.h"
 
+#include "options.h"
+
 using namespace std;
 using namespace XMLDOM;
 
@@ -416,7 +418,10 @@ Technique::Technique(const string &nam) :
     VSFileXMLSerializer serializer;
     serializer.options = 0; // only tags interest us
     serializer.initialise();
-    serializer.importXML("techniques/" + name + ".technique");
+    serializer.importXML(
+        game_options.techniquesBasePath + "/" + 
+        game_options.techniquesSubPath + "/" + 
+        name + ".technique");
     
 	auto_ptr<XMLDOM::XMLDocument> doc(serializer.close());
     
