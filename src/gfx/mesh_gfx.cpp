@@ -1056,6 +1056,8 @@ void Mesh::ProcessShaderDrawQueue(int whichpass, int whichdrawqueue, bool zsort,
     case Technique::Pass::AlphaBlend: GFXBlendMode(SRCALPHA, INVSRCALPHA); break;
     case Technique::Pass::Decal:      GFXBlendMode(ONE, ZERO); break;
     case Technique::Pass::Multiply:   GFXBlendMode(DESTCOLOR, ZERO); break;
+    case Technique::Pass::PremultAlphaBlend: 
+                                      GFXBlendMode(ONE, INVSRCALPHA); break;
     case Technique::Pass::Default:
     default:                          GFXBlendMode(blendSrc, blendDst); break;
     }

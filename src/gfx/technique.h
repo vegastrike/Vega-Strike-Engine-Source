@@ -66,7 +66,10 @@ public:
             AlphaBlend,
             
             /** Blend function ONE ZERO */
-            Decal
+            Decal,
+            
+            /** Blend function ONE INVSRCALPHA */
+            PremultAlphaBlend
         };
         
         enum DepthFunction {

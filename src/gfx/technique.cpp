@@ -134,6 +134,7 @@ namespace __impl {
             enumMap["multiply"]    = Technique::Pass::Multiply;
             enumMap["alpha_blend"] = Technique::Pass::AlphaBlend;
             enumMap["decal"]       = Technique::Pass::Decal;
+            enumMap["premult_alpha"]=Technique::Pass::PremultAlphaBlend;
         }
         return parseEnum(s, enumMap);
     }
