@@ -64,6 +64,7 @@ struct OrigMeshLoader
         num = 0;
     }
 };
+
 //#define DLIST
 
 #ifdef DLIST
@@ -303,8 +304,8 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
     int    fac = faction;
     FILE  *Outputfile   = 0;
     vector< Mesh* >output;
-#endif
 
+#endif
 
     vector< OrigMeshLoader >meshes;
     int32bit intbuf;

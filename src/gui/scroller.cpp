@@ -20,9 +20,7 @@
  */
 
 #include "vegastrike.h"
-
 #include "scroller.h"
-
 #include "newbutton.h"
 #include "slider.h"
 
@@ -131,7 +129,6 @@ class ScrollerButton : public NewButton
 public:
 //Draw the button.
     virtual void draw( void );
-
 //Which way the arrow points.
     enum ButtonArrow
     {
@@ -140,17 +137,14 @@ public:
         UP_ARROW,
         DOWN_ARROW
     };
-
 //Set the direction the arrow points.
     void setArrowType( ButtonArrow arrow )
     {
         m_arrowType = arrow;
     }
-
 //CONSTRUCTION
 public: ScrollerButton() : m_arrowType( LEFT_ARROW ) {}
     virtual ~ScrollerButton( void ) {}
-
 //VARIABLES
 protected:
     ButtonArrow m_arrowType;    //Direction the arrow points.
@@ -162,11 +156,9 @@ void ScrollerButton::draw( void )
     //Draw the other stuff first, so our stuff goes on top.
     assert( label().empty() );          //We are assuming it won't paint text on itself.
     NewButton::draw();
-
     static const float ARROW_POINT = .012;      //From center to point of arrow.
     static const float ARROW_WIDTH = .01;       //From center to side points.
     static const float ARROW_BACK  = .01;      //From center back to "bottom" of arrow.
-
     Point center = m_rect.center();
     vector< Point >    coords( 3 );     //3-element vector.
     switch (m_arrowType)

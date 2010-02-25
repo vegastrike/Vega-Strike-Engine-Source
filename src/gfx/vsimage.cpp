@@ -440,9 +440,11 @@ unsigned char* VSImage::ReadPNG()
         return result;
     }
     catch (...) {
-        if (image) free( image );
+        if (image)
+            free( image );
         image = NULL;
-        if (row_pointers) free( row_pointers );
+        if (row_pointers)
+            free( row_pointers );
         row_pointers = NULL;
         return NULL;
     }
@@ -832,7 +834,6 @@ unsigned char* VSImage::ReadDDS()
         if (s) free( s );
         return NULL;
     }
-    ;
 }
 
 void VSImage::AllocatePalette()

@@ -19,9 +19,9 @@
 #undef _POSIX_C_SOURCE
 #endif
 
-#endif
-
 #include <boost/python/class.hpp>
+
+#endif
 
 #endif
 

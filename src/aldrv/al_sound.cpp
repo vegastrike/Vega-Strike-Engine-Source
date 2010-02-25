@@ -59,6 +59,7 @@ typedef struct                                   /* WAV Chunk-header */
     ALubyte Id[4];
     ALuint  Size;
 } WAVChunkHdr_Struct;
+
 void SwapWords( unsigned int *puint )
 {
     unsigned int tempint = POSH_LittleU32( *puint );
@@ -70,6 +71,7 @@ void SwapBytes( unsigned short *pshort )
     unsigned short tempshort = POSH_LittleU16( *pshort );
     *pshort = tempshort;
 }
+
 void blutLoadWAVMemory( ALbyte *memory, ALenum
                         *format, ALvoid **data, ALsizei *size, ALsizei *freq, ALboolean *loop )
 {
@@ -183,6 +185,7 @@ static void convertToLittle( unsigned int tmp, char *data )
     data[2] = (char) ( (tmp/65536)%256 );
     data[3] = (char) ( (tmp/65536)/256 );
 }
+
 #ifdef HAVE_OGG
 struct fake_file
 {
@@ -190,6 +193,7 @@ struct fake_file
     size_t size;
     size_t loc;
 };
+
 size_t mem_read( void *ptr, size_t size, size_t nmemb, void *datasource )
 {
     fake_file *fp = (fake_file*) datasource;
@@ -205,6 +209,7 @@ size_t mem_read( void *ptr, size_t size, size_t nmemb, void *datasource )
         return size;
     }
 }
+
 int mem_close( void* )
 {
     return 0;
@@ -215,10 +220,12 @@ long mem_tell( void *datasource )
     fake_file *fp = (fake_file*) datasource;
     return (long) fp->loc;
 }
+
 int cant_seek( void *datasource, ogg_int64_t offset, int whence )
 {
     return -1;
 }
+
 int mem_seek( void *datasource, ogg_int64_t offset, int whence )
 {
     fake_file *fp = (fake_file*) datasource;
@@ -256,7 +263,9 @@ int mem_seek( void *datasource, ogg_int64_t offset, int whence )
     }
     return -1;
 }
+
 #endif
+
 static void ConvertFormat( vector< char > &ogg )
 {
     vector< char >converted;
@@ -383,6 +392,7 @@ static void ConvertFormat( vector< char > &ogg )
         }
     }
 }
+
 static int LoadSound( ALuint buffer, bool looping, bool music )
 {
     static bool  verbose_debug = XMLSupport::parse_bool( vs_config->getVariable( "data", "verbose_debug", "false" ) );
@@ -410,6 +420,7 @@ static int LoadSound( ALuint buffer, bool looping, bool music )
     //alSourcei(sounds[i].source, AL_LOOPING, looping ?AL_TRUE:AL_FALSE);
     return i;
 }
+
 #endif
 
 using namespace VSFileSystem;
@@ -495,6 +506,7 @@ ALuint
 unsigned int
 #endif
 nil_wavebuf = 0;
+
 int AUDCreateSoundWAV( const std::string &s, const bool music, const bool LOOP )
 {
 #ifdef HAVE_AL
@@ -539,10 +551,12 @@ int AUDCreateSoundWAV( const std::string &s, const bool music, const bool LOOP )
 #endif
     return -1;
 }
+
 int AUDCreateSoundWAV( const std::string &s, const bool LOOP )
 {
     return AUDCreateSoundWAV( s, false, LOOP );
 }
+
 int AUDCreateMusicWAV( const std::string &s, const bool LOOP )
 {
     return AUDCreateSoundWAV( s, true, LOOP );
@@ -596,10 +610,12 @@ int AUDCreateSoundMP3( const std::string &s, const bool LOOP )
 {
     return AUDCreateSoundMP3( s, false, LOOP );
 }
+
 int AUDCreateMusicMP3( const std::string &s, const bool LOOP )
 {
     return AUDCreateSoundMP3( s, true, LOOP );
 }
+
 int AUDCreateSound( const std::string &s, const bool LOOP )
 {
     if ( s.end()-1 >= s.begin() ) {
@@ -610,6 +626,7 @@ int AUDCreateSound( const std::string &s, const bool LOOP )
     }
     return -1;
 }
+
 int AUDCreateMusic( const std::string &s, const bool LOOP )
 {
     if ( s.end()-1 >= s.begin() ) {
@@ -632,6 +649,7 @@ int AUDCreateSound( int sound, const bool LOOP /*=false*/ )
 #endif
     return -1;
 }
+
 extern std::vector< int >soundstodelete;
 void AUDDeleteSound( int sound, bool music )
 {
@@ -676,6 +694,7 @@ void AUDDeleteSound( int sound, bool music )
     }
 #endif
 }
+
 void AUDAdjustSound( const int sound, const QVector &pos, const Vector &vel )
 {
 #ifdef HAVE_AL
@@ -721,6 +740,7 @@ bool starSystemOK()
         return false;
     return playa->getStarSystem() == _Universe->activeStarSystem();
 }
+
 int AUDHighestSoundPlaying()
 {
 #ifdef HAVE_AL
@@ -732,6 +752,7 @@ int AUDHighestSoundPlaying()
     return retval;
 #endif
 }
+
 void AUDStopAllSounds( int except_this_one )
 {
 #ifdef HAVE_AL
@@ -741,6 +762,7 @@ void AUDStopAllSounds( int except_this_one )
             AUDStopPlaying( i );
 #endif
 }
+
 bool AUDIsPlaying( const int sound )
 {
 #ifdef HAVE_AL
@@ -759,6 +781,7 @@ bool AUDIsPlaying( const int sound )
 #endif
     return false;
 }
+
 void AUDStopPlaying( const int sound )
 {
 #ifdef HAVE_AL
@@ -775,6 +798,7 @@ void AUDStopPlaying( const int sound )
     }
 #endif
 }
+
 static bool AUDReclaimSource( const int sound, bool high_priority = false )
 {
 #ifdef HAVE_AL
@@ -819,6 +843,7 @@ static bool AUDReclaimSource( const int sound, bool high_priority = false )
 #endif
     return false;     //silly
 }
+
 void AUDStartPlaying( const int sound )
 {
 #ifdef SOUND_DEBUG

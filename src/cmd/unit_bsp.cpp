@@ -308,6 +308,7 @@ enum INTERSECT_TYPE where_is_poly( const bsp_tree &temp_node, const bsp_polygon 
     }
     return last;
 }
+
 static unsigned int maxheight;
 static unsigned int minheight;
 static double average_height;
@@ -456,6 +457,7 @@ static void wrtf( float f )
     t.ival = le32_to_cpu( t.ival );
     fo.Write( &t.fval, sizeof t.fval );
 }
+
 static void wrtb( const bool b )
 {
     fo.Write( &b, sizeof (bool) );

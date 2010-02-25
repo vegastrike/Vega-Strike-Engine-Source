@@ -33,6 +33,7 @@ bool GFXMultiTexAvailable()
 {
     return gl_options.Multitexture != 0;
 }
+
 void GFXCircle( float x, float y, float wid, float hei )
 {
     static float aaccuracy = XMLSupport::parse_float( vs_config->getVariable( "graphics", "circle_accuracy", "0.1" ) );
@@ -73,13 +74,16 @@ GFXBOOL /*GFXDRVAPI*/ GFXCapture( char *filename )
 {
     return GFXFALSE;
 }
+
 static float last_factor = 0;
 static float last_units  = 0;
+
 void GFXGetPolygonOffset( float *factor, float *units )
 {
     *factor = last_factor;
     *units  = last_units;
 }
+
 void /*GFXDRVAPI*/ GFXPolygonOffset( float factor, float units )
 {
     last_factor = factor;
@@ -139,10 +143,12 @@ void GFXPointSize( const float size )
 {
     glPointSize( size );
 }
+
 void GFXLineWidth( const float size )
 {
     glLineWidth( size );
 }
+
 void /*GFXDRVAPI*/ GFXBegin( const enum POLYTYPE ptype )
 {
     GLenum mode;
@@ -178,16 +184,19 @@ void /*GFXDRVAPI*/ GFXBegin( const enum POLYTYPE ptype )
     }
     glBegin( mode );
 }
+
 void /*GFXDRVAPI*/ GFXColorf( const GFXColor &col )
 {
     glColor4fv( &col.r );
 }
+
 GFXColor GFXColorf()
 {
     float col[4];
     glGetFloatv( GL_CURRENT_COLOR, col );     //It's best this way, we don't use it much, anyway.
     return GFXColor( col[0], col[1], col[2], col[3] );
 }
+
 #if 0
 //HELL slow on the TNT...we can't have it
 void /*GFXDRVAPI*/ GFXBlendColor( const GFXColor &col )
@@ -256,22 +265,27 @@ void /*GFXDRVAPI*/ GFXVertex3f( const float x, const float y, const float z )
 {
     glVertex3f( x, y, z );
 }
+
 void /*GFXDRVAPI*/ GFXVertex3f( const double x, const double y, const double z )
 {
     glVertex3d( x, y, z );
 }
+
 void /*GFXDRVAPI*/ GFXVertex3d( const double x, const double y, const double z )
 {
     glVertex3d( x, y, z );
 }
+
 void GFXVertexf( const Vector &v )
 {
     glVertex3f( v.i, v.j, v.k );
 }
+
 void GFXVertexf( const QVector &v )
 {
     glVertex3d( v.i, v.j, v.k );
 }
+
 void /*GFXDRVAPI*/ GFXEnd()
 {
     glEnd();

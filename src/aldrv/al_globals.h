@@ -11,7 +11,9 @@
 #endif
 #include <string>
 #include <vector>
+
 class Vector;
+
 struct OurSound
 {
     ALuint    source;
@@ -29,6 +31,7 @@ struct OurSound
             gain   = 1.0f;
     }
 };
+
 extern float scalepos;
 extern float scalevel;
 template < typename a, typename b, int c >

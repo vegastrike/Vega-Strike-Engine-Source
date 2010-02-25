@@ -83,9 +83,9 @@ void FSM::beginElement( const string &name, const AttributeList attributes )
         return;
 
     case NODE:
-        unitlevel++;
         {
-            vector< string >messages;
+            unitlevel++;
+            vector< string > messages;
             for (iter = attributes.begin(); iter != attributes.end(); iter++) {
                 if (strtoupper( (*iter).name ) == "RELATIONSHIP") {
                     val = parse_float( (*iter).value );
@@ -106,8 +106,8 @@ void FSM::beginElement( const string &name, const AttributeList attributes )
                 }
             }
             nodes.push_back( Node( messages, val ) );
+            break;
         }
-        break;
     case EDGE:
         unitlevel++;
         for (iter = attributes.begin(); iter != attributes.end(); iter++)

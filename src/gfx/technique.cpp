@@ -30,6 +30,8 @@ using namespace XMLDOM;
 
 namespace __impl
 {
+//
+
 class Exception : public std::exception
 {
 private:
@@ -244,6 +246,8 @@ static void parseFloat4( const std::string &s, float value[4] )
     while (i < 4)
         value[i++] = 0;
 }
+
+//end namespace
 };
 
 using namespace __impl;
@@ -379,7 +383,8 @@ void Technique::Pass::compile()
             if (!tit->targetParamName.empty() && tit->targetParamId < 0) {
                 tit->targetParamId = GFXNamedShaderConstant( prog, tit->targetParamName.c_str() );
                 if (tit->targetParamId < 0) {
-                    if (tit->targetIndex >= 0) throw ProgramCompileError(
+                    if (tit->targetIndex >= 0)
+                        throw ProgramCompileError(
                             "Cannot resolve shader constant \""+tit->targetParamName+"\"" );
                 } else {
                     if (tit->targetIndex < 0)
@@ -500,8 +505,10 @@ Technique::Technique( const string &nam ) :
                     }
                 }
                 if (pass.type == Pass::ShaderPass) {
-                    if ( vp.empty() ) throw InvalidParameters( "Missing vertex program reference in technique \""+name+"\"" );
-                    if ( fp.empty() ) throw InvalidParameters( "Missing fragment program reference in technique \""+name+"\"" );
+                    if ( vp.empty() )
+                        throw InvalidParameters( "Missing vertex program reference in technique \""+name+"\"" );
+                    if ( fp.empty() )
+                        throw InvalidParameters( "Missing fragment program reference in technique \""+name+"\"" );
                     pass.setProgram( vp, fp );
                 }
             } else {
@@ -512,7 +519,8 @@ Technique::Technique( const string &nam ) :
 }
 
 Technique::~Technique()
-{}
+{
+}
 
 void Technique::compile()
 {
@@ -553,7 +561,8 @@ TechniquePtr Technique::getTechnique( const std::string &name )
         }
         if ( ptr->isCompiled() )
             techniqueCache[name] = ptr;
-        else throw InvalidParameters( "Could not compile any technique for \""+name+"\"" );
+        else
+            throw InvalidParameters( "Could not compile any technique for \""+name+"\"" );
         return ptr;
     }
 }

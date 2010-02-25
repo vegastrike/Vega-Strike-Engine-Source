@@ -595,6 +595,7 @@ char AdjustKeyCtrl( char ch )
     }
     return ch;
 }
+
 /* Keyboard callbacks */
 static void glut_keyboard_cb( unsigned char ch, int x, int y )
 {

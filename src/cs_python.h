@@ -18,9 +18,15 @@
 #undef _POSIX_C_SOURCE
 #endif
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wwrite-strings" 
+#endif
+#include <Python.h>
+#ifdef __GNUC__
+#pragma GCC diagnostic error "-Wwrite-strings" 
 #endif
 
-#include <Python.h>
+#endif
 
 #endif
 

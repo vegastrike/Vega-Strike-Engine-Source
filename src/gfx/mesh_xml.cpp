@@ -31,6 +31,7 @@
 #ifdef max
 #undef max
 #endif
+
 static inline float max( float x, float y )
 {
     if (x > y) return x;
@@ -252,6 +253,7 @@ bool shouldreflect( string r )
             return true;
     return false;
 }
+
 void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &attributes )
 {
     static bool use_detail_texture = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "use_detail_texture", "true" ) );
@@ -500,7 +502,6 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
                         }
                         if (texindex == 0)
                             texture_found = true;
-                        ;
                     }
                     break;
                 }
@@ -974,7 +975,6 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
 void Mesh::endElement( MeshXML *xml, const string &name )
 {
     //cerr << "End tag: " << name << endl;
-
     MeshXML::Names elem = (MeshXML::Names) MeshXML::element_map.lookup( name );
     assert( *xml->state_stack.rbegin() == elem );
     xml->state_stack.pop_back();
@@ -1002,7 +1002,6 @@ void Mesh::endElement( MeshXML *xml, const string &name )
         break;
     case MeshXML::POINTS:
         xml->load_stage = 3;
-
         /*
          *  cerr << xml->vertices.size() << " vertices\n";
          *  for(int a=0; a<xml->vertices.size(); a++) {
@@ -1098,11 +1097,10 @@ void Mesh::endElement( MeshXML *xml, const string &name )
         break;
     case MeshXML::MESH:
         //assert(xml->load_stage==4);//4 is done with poly, 5 is done with Logos
-
         xml->load_stage = 5;
         break;
     default:
-        ;
+        break;
     }
 }
 
@@ -1117,6 +1115,7 @@ void updateMax( Vector &mn, Vector &mx, const GFXVertex &ver )
 }
 
 using namespace VSFileSystem;
+
 void LaunchConverter( const char *input, const char *output, const char *args = "obc" )
 {
     string intmp  = string( "\"" )+input+string( "\"" );
@@ -1153,6 +1152,7 @@ void LaunchConverter( const char *input, const char *output, const char *args = 
     }
 #endif
 }
+
 bool isBFXM( VSFile &f )
 {
     char bfxm[4];
@@ -1163,6 +1163,7 @@ bool isBFXM( VSFile &f )
     f.GoTo( 0 );
     return bfxm[0] == 'B' && bfxm[1] == 'F' && bfxm[2] == 'X' && bfxm[3] == 'M';
 }
+
 void CopyFile( VSFile &src, VSFile &dst )
 {
     size_t  hm;
@@ -1171,6 +1172,7 @@ void CopyFile( VSFile &src, VSFile &dst )
     while ( ( hm = src.Read( srcptr, sizeof (srcstruct) ) ) )
         dst.Write( srcptr, hm );
 }
+
 bool loadObj( VSFile &f, std::string str )
 {
     string fullpath = f.GetFullPath();
@@ -1219,8 +1221,10 @@ bool loadObj( VSFile &f, std::string str )
     }
     return false;
 }
+
 const bool USE_RECALC_NORM = true;
 const bool FLAT_SHADE = true;
+
 Mesh* Mesh::LoadMesh( const char *filename,
                       const Vector &scale,
                       int faction,
@@ -1314,6 +1318,7 @@ vector< Mesh* >Mesh::LoadMeshes( const char *filename,
         return ret;
     }
 }
+
 void Mesh::LoadXML( const char *filename,
                     const Vector &scale,
                     int faction,

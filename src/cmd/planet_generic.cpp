@@ -28,6 +28,7 @@ string getCargoUnitName( const char *textname )
     free( tmp2 );
     return retval;
 }
+
 PlanetaryOrbit::PlanetaryOrbit( Unit *p,
                                 double velocity,
                                 double initpos,
@@ -68,13 +69,15 @@ PlanetaryOrbit::PlanetaryOrbit( Unit *p,
         theta = inittheta+velocity * getNewTime()*div2pi;
     this->SetParent( p );
 }
+
 PlanetaryOrbit::~PlanetaryOrbit()
 {
     parent->SetResolveForces( true );
 }
-extern double saved_interpolation_blend_factor;
 
+extern double saved_interpolation_blend_factor;
 double calc_blend_factor( double frac, int priority, int when_it_will_be_simulated, int cur_simulation_frame );
+
 void PlanetaryOrbit::Execute()
 {
     bool mining = parent->rSize() > 1444 && parent->rSize() < 1445;
@@ -236,6 +239,7 @@ void PlanetaryOrbit::Execute()
         parent->SetCurPosition( origin-focus+sum_orbiting_average+x_offset+y_offset );
     }
 }
+
 string GetElMeshName( string name, string faction, char direction )
 {
     using namespace VSFileSystem;
@@ -310,7 +314,9 @@ Vector Planet::AddSpaceElevator( const std::string &name, const std::string &fac
     }
     return dir;
 }
+
 void Planet::endElement() {}
+
 Planet* Planet::GetTopPlanet( int level )
 {
     if (level > 2) {
@@ -326,6 +332,7 @@ Planet* Planet::GetTopPlanet( int level )
         return this;
     }
 }
+
 void Planet::gravitate( UnitCollection *uc )
 {
     /*
@@ -373,13 +380,16 @@ void Planet::gravitate( UnitCollection *uc )
      *  delete iter;
      **/
 }
+
 void Planet::AddSatellite( Unit *orbiter )
 {
     satellites.prepend( orbiter );
     orbiter->SetOwner( this );
 }
+
 extern float ScaleJumpRadius( float );
 extern Flightgroup * getStaticBaseFlightgroup( int faction );
+
 Unit* Planet::beginElement( QVector x,
                             QVector y,
                             float vely,
@@ -626,6 +636,7 @@ string Planet::getHumanReadablePlanetType() const
     //return planetTypes[getCargoUnitName()];
     return _Universe->getGalaxy()->getPlanetNameFromTexture( getCargoUnitName() );
 }
+
 Planet::~Planet()
 {
     if (terraintrans) {

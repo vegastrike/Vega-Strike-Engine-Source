@@ -390,12 +390,7 @@ bool AggressiveAI::ProcessLogicItem( const AIEvents::AIEvresult &item )
                 Fshield_prev = parent->graphicOptions.InWarp ? 1 : parent->FShieldData();
             } else {
                 value = Fshield_rate_old;
-//if(value != 0.0)
             }
-            //{
-//string mystr ("Fshield "+XMLSupport::tostring (value));
-//UniverseUtil::IOmessage (0,"game","all",mystr);
-//}
             break;
         }
     case BSHIELD_HEAL_RATE:
@@ -410,12 +405,7 @@ bool AggressiveAI::ProcessLogicItem( const AIEvents::AIEvresult &item )
                 Bshield_prev = parent->graphicOptions.InWarp ? 1 : parent->BShieldData();
             } else {
                 value = Bshield_rate_old;
-//if(value != 0.0)
             }
-            //{
-//string mystr ("Fshield "+XMLSupport::tostring (value));
-//UniverseUtil::IOmessage (0,"game","all",mystr);
-//}
             break;
         }
     case LSHIELD_HEAL_RATE:
@@ -430,12 +420,7 @@ bool AggressiveAI::ProcessLogicItem( const AIEvents::AIEvresult &item )
                 Lshield_prev = parent->graphicOptions.InWarp ? 1 : parent->LShieldData();
             } else {
                 value = Lshield_rate_old;
-//if(value != 0.0)
             }
-            //{
-//string mystr ("Fshield "+XMLSupport::tostring (value));
-//UniverseUtil::IOmessage (0,"game","all",mystr);
-//}
             break;
         }
     case RSHIELD_HEAL_RATE:
@@ -450,12 +435,7 @@ bool AggressiveAI::ProcessLogicItem( const AIEvents::AIEvresult &item )
                 Rshield_prev = parent->graphicOptions.InWarp ? 1 : parent->RShieldData();
             } else {
                 value = Rshield_rate_old;
-//if(value != 0.0)
             }
-            //{
-//string mystr ("Fshield "+XMLSupport::tostring (value));
-//UniverseUtil::IOmessage (0,"game","all",mystr);
-//}
             break;
         }
     case FARMOR_HEAL_RATE:
@@ -482,12 +462,7 @@ bool AggressiveAI::ProcessLogicItem( const AIEvents::AIEvresult &item )
                 Hull_prev      = parent->GetHullPercent();
             } else {
                 value = Hull_rate_old;
-//if(value != 0.0)
             }
-            //{
-//string mystr ("Fshield "+XMLSupport::tostring (value));
-//UniverseUtil::IOmessage (0,"game","all",mystr);
-//}
             break;
         }
     case TARGET_FACES_YOU:

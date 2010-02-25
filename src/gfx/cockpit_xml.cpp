@@ -6,14 +6,18 @@
 #include "hud.h"
 #include "vdu.h"
 #include "mesh.h"
+
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 using XMLSupport::parse_float;
 using XMLSupport::parse_bool;
 using XMLSupport::parse_int;
+
 namespace CockpitXML
 {
+//
+
 enum Names
 {
     UNKNOWN=UnitImages< void >::NUMGAUGES,
@@ -208,6 +212,7 @@ string getRes( string inp )
     else
         return inp.substr( 0, where )+"_"+rez+".spr";
 }
+
 void GameCockpit::beginElement( const string &name, const AttributeList &attributes )
 {
     static bool cockpit_smooth   =
@@ -570,9 +575,13 @@ loadsprite:
         break;
     }
 }
-void GameCockpit::endElement( const string &name ) {}
+
+void GameCockpit::endElement( const string &name )
+{
+}
 
 using namespace VSFileSystem;
+
 void GameCockpit::LoadXML( const char *filename )
 {
     const int chunk_size = 16384;

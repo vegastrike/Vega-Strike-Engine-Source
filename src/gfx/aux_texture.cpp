@@ -38,11 +38,12 @@ using namespace VSFileSystem;
 ///holds all the textures in a huge hash table
 Hashtable< string, Texture, 4007 >texHashTable;
 Hashtable< string, bool, 4007 >   badtexHashTable;
-///returns if a texture exists
+
 Texture* Texture::Exists( string s, string a )
 {
     return Texture::Exists( s+a );
 }
+
 Texture* Texture::Exists( string s )
 {
     Texture *tmp = texHashTable.Get( VSFileSystem::GetHashName( s ) );
@@ -95,6 +96,7 @@ GFXBOOL Texture::checkold( const string &s, bool shared, string &hashname )
         return GFXFALSE;
     }
 }
+
 void Texture::modold( const string &s, bool shared, string &hashname )
 {
     hashname = shared ? VSFileSystem::GetSharedTextureHashName( s ) : VSFileSystem::GetHashName( s );
@@ -130,6 +132,7 @@ void Texture::setold()
     original->original = NULL;
     original->refcount++;
 }
+
 const Texture* Texture::Original() const
 {
     if (original)
@@ -137,6 +140,7 @@ const Texture* Texture::Original() const
     else
         return this;
 }
+
 Texture* Texture::Original()
 {
     if (original)
@@ -161,6 +165,7 @@ Texture* Texture::Clone()
     return retval;
     //assert (!original->original);
 }
+
 void Texture::FileNotFound( const string &texfilename )
 {
     //We may need to remove from texHashTable if we found the file but it is a bad one
@@ -509,6 +514,7 @@ void Texture::Load( const char *FileNameRGB,
         f1.Close();
     //VSFileSystem::vs_fprintf (stderr,"Load Success\n");
 }
+
 Texture::~Texture()
 {
     if (original == NULL) {
@@ -587,6 +593,7 @@ void Texture::Transfer( int maxdimension, GFXBOOL detailtexture )
         GFXTransferTexture( data, name, sizeX, sizeY, internformat, CUBEMAP_NEGATIVE_Z, maxdimension, detailtexture, 5 );
     }
 }
+
 int Texture::Bind( int maxdimension, GFXBOOL detailtexture )
 {
     if ( !bound || (boundSizeX != sizeX) || (boundSizeY != sizeY) || (boundMode != mode) ) {
@@ -625,9 +632,7 @@ int Texture::Bind( int maxdimension, GFXBOOL detailtexture )
     boundSizeY = sizeY;
     boundMode  = mode;
     bound = true;
-
     Transfer( maxdimension, detailtexture );
-
     return name;
 }
 
@@ -640,9 +645,7 @@ int Texture::Bind( Texture *other, int maxdimension, GFXBOOL detailtexture )
     boundMode  = other->boundMode;
     bound = other->bound;
     name  = other->name;
-
     Transfer( maxdimension, detailtexture );
-
     return name;
 }
 
@@ -650,12 +653,14 @@ void Texture::Prioritize( float priority )
 {
     GFXPrioritizeTexture( name, priority );
 }
+
 static void ActivateWhite( int stage )
 {
     static Texture *white = new Texture( "white.bmp", 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1 );
     if ( white->LoadSuccess() )
         white->MakeActive( stage );
 }
+
 void Texture::MakeActive( int stag, int pass )
 {
     static bool missing = false;

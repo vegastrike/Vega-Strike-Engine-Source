@@ -46,8 +46,9 @@ public: Exception() {}
 
 class MissingTexture : public Exception
 {
-public: MissingTexture() {}
-    MissingTexture( const string &msg ) : Exception( msg ) {}
+public:
+    explicit MissingTexture( const string &msg ) : Exception( msg ) {}
+    MissingTexture() {}
 };
 
 class OrigMeshContainer
@@ -954,7 +955,6 @@ void Mesh::ProcessDrawQueue( int whichpass, int whichdrawqueue, bool zsort, cons
     const Technique::Pass &pass = technique->getPass( whichpass );
     if (pass.type == Technique::Pass::ShaderPass)
         ProcessShaderDrawQueue( whichpass, whichdrawqueue, zsort, sortctr );
-
     else
         ProcessFixedDrawQueue( whichpass, whichdrawqueue, zsort, sortctr );
     //Restore texture units
@@ -1118,7 +1118,6 @@ void Mesh::ProcessShaderDrawQueue( int whichpass, int whichdrawqueue, bool zsort
         }
         GFXDepthFunc( func );
     }
-
     {
         POLYMODE mode;
         switch (pass.polyMode)

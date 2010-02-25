@@ -27,6 +27,7 @@ char * LoadString( const char *filename )
     VSFileSystem::vs_close( fp );
     return retval;
 }
+
 std::string getCompilingName( const std::string &name )
 {
     std::string compiling_name = VSFileSystem::homedir+DELIMSTR+name;
@@ -44,6 +45,7 @@ void InterpretPython( const std::string &name )
     }
     free( temp );
 }
+
 PyCodeObject * CompilePython( const std::string &name )
 {
     Python::reseterrors();
@@ -104,6 +106,7 @@ PyObject * CreateTuple( const std::vector< PythonBasicType > &values )
     }
     return retval;
 }
+
 static void pySetScratchVector( const KBSTATE k )
 {
     switch (k)
@@ -124,6 +127,7 @@ static void pySetScratchVector( const KBSTATE k )
         break;
     }
 }
+
 void RunPythonPress( const KBData &s, KBSTATE k )
 {
     if ( k == PRESS && s.data.length() ) {
@@ -132,6 +136,7 @@ void RunPythonPress( const KBData &s, KBSTATE k )
         UniverseUtil::setScratchVector( Vector( 0, 0, 0 ) );
     }
 }
+
 void RunPythonRelease( const KBData &s, KBSTATE k )
 {
     if ( k == RELEASE && s.data.length() ) {
@@ -140,6 +145,7 @@ void RunPythonRelease( const KBData &s, KBSTATE k )
         UniverseUtil::setScratchVector( Vector( 0, 0, 0 ) );
     }
 }
+
 void RunPythonToggle( const KBData &s, KBSTATE k )
 {
     if ( (k == RELEASE || k == PRESS) && s.data.length() ) {
@@ -148,6 +154,7 @@ void RunPythonToggle( const KBData &s, KBSTATE k )
         UniverseUtil::setScratchVector( Vector( 0, 0, 0 ) );
     }
 }
+
 void RunPythonPhysicsFrame( const KBData &s, KBSTATE k )
 {
     if ( (k == DOWN || k == UP) && s.data.length() ) {

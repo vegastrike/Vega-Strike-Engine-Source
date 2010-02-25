@@ -81,8 +81,10 @@ static GFXColor UnsaturatedColor( float r, float g, float b, float a = 1.0f )
     GFXColor ret( r, g, b, a );
     return ret;
 }
+
 std::string emergency_downgrade_mode;
 extern std::string CurrentSaveGameName;
+
 std::vector< std::string >getWeapFilterVec()
 {
     std::vector< std::string >weapfiltervec;
@@ -101,6 +103,7 @@ bool upgradeNotAddedToCargo( std::string category )
             return true;
     return false;
 }
+
 extern vector< unsigned int >base_keyboard_queue;
 std::string getDisplayCategory( const Cargo &cargo )
 {
@@ -161,6 +164,7 @@ static GFXColor ITEM_DESTROYED_COLOR()
     static GFXColor IDC = getConfigColor( "upgrade_item_destroyed", GFXColor( 0.2, 0.2, 0.2, 1 ) );
     return IDC;
 }
+
 //Color of the text of a category.
 static GFXColor CATEGORY_TEXT_COLOR()
 {
@@ -172,6 +176,7 @@ static GFXColor MISSION_COLOR()
     static GFXColor MiC = getConfigColor( "base_mission_color", GFXColor( .66, .2, 0, 1 ) );
     return MiC;
 }
+
 //Space between mode buttons.
 static const float MODE_BUTTON_SPACE = 0.03;
 //Default color in CargoColor.
@@ -187,11 +192,13 @@ static GFXColor MOUNT_POINT_NO_SELECT()
 {
     return GFXColor( 1, .7, .7 );
 }
+
 //Empty mount point.
 static GFXColor MOUNT_POINT_EMPTY()
 {
     return GFXColor( .2, 1, .2 );
 }
+
 //Mount point that contains weapon.
 static GFXColor MOUNT_POINT_FULL()
 {
@@ -246,10 +253,12 @@ int basecargoassets( Unit *base, string cargoname );
 
 //"Basic Repair" item that is added to Buy UPGRADE mode.
 const string BASIC_REPAIR_NAME = "Basic Repair";
+
 const GFXColor BASIC_REPAIR_TEXT_COLOR()
 {
     return GFXColor( 0, 1, 1 );
 }
+
 const string BASIC_REPAIR_DESC =
     "Hire starship mechanics to examine and assess any wear and tear on your craft. They will replace any damaged components on your vessel with the standard components of the vessel you initially purchased.  Further upgrades above and beyond the original will not be replaced free of charge.  The total assessment and repair cost applies if any components are damaged or need servicing (fuel, wear and tear on jump drive, etc...) If such components are damaged you may save money by repairing them on your own.";
 //Repair price is a config variable.
@@ -267,6 +276,7 @@ struct ModeInfo
         ,  command( c )
         ,  groupId( g ) {}
 };
+
 static const ModeInfo modeInfo[] = {
     ModeInfo( "Cargo Dealer  ",  "Cargo",          "CargoMode",         "CargoGroup" ),
     ModeInfo( "Ship Upgrades  ", "Upgrades",       "UpgradeMode",       "UpgradeGroup" ),
@@ -536,7 +546,6 @@ void BaseComputer::constructControls( void )
     mode->setId( "ModeButton" );
     //Put the button on the window.
     window()->addControl( mode );
-
     {
         //CARGO group control.
         GroupControl *cargoGroup = new GroupControl;
@@ -707,7 +716,6 @@ void BaseComputer::constructControls( void )
         cargoGroup->addChild( descScroller );           //Want this "over" the description.
         cargoGroup->addChild( picture );
     }
-
     {
         //UPGRADE group control.
         GroupControl *upgradeGroup = new GroupControl;
@@ -844,7 +852,6 @@ void BaseComputer::constructControls( void )
         upgradeGroup->addChild( descScroller );         //Want this "over" description box.
         upgradeGroup->addChild( picture );
     }
-
     {
         //NEWS group control.
         GroupControl *newsGroup    = new GroupControl;
@@ -979,8 +986,8 @@ void BaseComputer::constructControls( void )
         inputText->setScroller( inputTextScroller );
         loadSaveGroup->addChild( inputText );
 
-        loadSaveGroup->addChild( inputTextScroller );         //Want scroller "over" description box.
-//Accept button.
+        loadSaveGroup->addChild( inputTextScroller ); //Want scroller "over" description box.
+        //Accept button.
         if (!Network) {
             //no save in network mode!
             NewButton *buy10 = new NewButton;
@@ -1355,7 +1362,6 @@ void BaseComputer::constructControls( void )
             networkGroup->addChild( quit );
         }
     }
-
     {
         //MISSIONS group control.
         GroupControl *missionsGroup = new GroupControl;
@@ -1517,7 +1523,6 @@ void BaseComputer::constructControls( void )
         sell->setId( "Commit10" );
         shipDealerGroup->addChild( sell );
     }
-
     {
         //INFO group control.
         GroupControl   *infoGroup = new GroupControl;
@@ -2218,11 +2223,11 @@ void BaseComputer::updateTransactionControlsForSelection( TransactionList *tlist
         {
         case BUY_CARGO:
             if (item.GetDescription() == "" || item.GetDescription()[0] != '@') {
-                buildShipDescription( item, descriptiontexture );                 //Check for ship
-                item.description = buildCargoDescription( item );                 //do first, so can override default image, if so desired
+                buildShipDescription( item, descriptiontexture ); //Check for ship
+                item.description = buildCargoDescription( item ); //do first, so can override default image, if so desired
                 string temp;
                 temp += item.description;
-                if ( ( string::npos != temp.find( '@' ) ) && ("" != descriptiontexture) )                  //not already pic-annotated, has non-null ship pic
+                if ( ( string::npos != temp.find( '@' ) ) && ("" != descriptiontexture) ) //not already pic-annotated, has non-null ship pic
                     item.description = "@"+descriptiontexture+"@"+item.description;
             }
             if (item.GetCategory().find( "My_Fleet" ) != string::npos) {
@@ -2281,11 +2286,11 @@ void BaseComputer::updateTransactionControlsForSelection( TransactionList *tlist
             break;
         case SELL_CARGO:
             if (item.GetDescription() == "" || item.GetDescription()[0] != '@') {
-                buildShipDescription( item, descriptiontexture );                 //Check for ship
-                item.description = buildCargoDescription( item );                 //do first, so can override default image, if so desired
+                buildShipDescription( item, descriptiontexture ); //Check for ship
+                item.description = buildCargoDescription( item ); //do first, so can override default image, if so desired
                 string temp;
                 temp += item.description;
-                if ( ( string::npos != temp.find( '@' ) ) && ("" != descriptiontexture) )                  //not already pic-annotated, has non-null ship pic
+                if ( ( string::npos != temp.find( '@' ) ) && ("" != descriptiontexture) ) //not already pic-annotated, has non-null ship pic
                     item.description = "@"+descriptiontexture+"@"+item.description;
             }
             if (item.mission)
@@ -2394,6 +2399,7 @@ bool BaseComputer::pickerChangedSelection( const EventCommandId &command, Contro
     }
     return true;
 }
+
 bool UpgradeAllowed( const Cargo &item, Unit *playerUnit )
 {
     std::string prohibited_upgrades =
@@ -2441,6 +2447,7 @@ bool UpgradeAllowed( const Cargo &item, Unit *playerUnit )
     }
     return true;
 }
+
 //Return whether or not the current item and quantity can be "transacted".
 bool BaseComputer::isTransactionOK( const Cargo &originalItem, TransactionType transType, int quantity )
 {
@@ -2484,7 +2491,10 @@ bool BaseComputer::isTransactionOK( const Cargo &originalItem, TransactionType t
                 else
                     color_insufficient_space_flag = true;
             }
-        } else {return true; } break;
+        } else {
+            return true;
+        }
+        break;
     case BUY_SHIP:
         //Either you are buying this ship for your fleet, or you already own the
         //ship and it will be transported to you.
@@ -2715,6 +2725,7 @@ void BaseComputer::loadCargoControls( void )
     //Make the title right.
     recalcTitle();
 }
+
 //Need this class to sort CargoColor's.
 class CargoColorSort
 {
@@ -2762,8 +2773,6 @@ void BaseComputer::loadMasterList( Unit *un,
                 if (col.cargo.category == "")
                     col.cargo.category = "#c.5:1:.3#Uncategorized Cargo";
                 items->push_back( col );
-//if (!un->GetCargo(i).mission) {
-//}
             }
         }
     }
@@ -2983,10 +2992,12 @@ bool BaseComputer::newsPickerChangedSelection( const EventCommandId &command, Co
 //}
     return true;
 }
+
 static std::string GarnerInfoFromSaveGame( const string &filename )
 {
     return UniverseUtil::getSaveInfo( filename, true );
 }
+
 //The selection in the News picker changed.
 bool BaseComputer::loadSavePickerChangedSelection( const EventCommandId &command, Control *control )
 {
@@ -3043,6 +3054,7 @@ void BaseComputer::loadNewsControls( void )
     //Make the title right.
     recalcTitle();
 }
+
 #if defined (__FreeBSD__) || defined (__APPLE__)
 static int nodirs( struct dirent *entry )
 #else
@@ -3528,7 +3540,10 @@ bool BaseComputer::UpgradeOperation::commonInit( void )
     if (selectedItem) {
         m_selectedItem = *selectedItem;
         return true;
-    } else {return false; }}
+    } else {
+        return false;
+    }
+}
 
 //Update the UI controls after a transaction has been concluded successfully.
 void BaseComputer::UpgradeOperation::updateUI( void )
@@ -4273,6 +4288,7 @@ string buildCargoDescription( Cargo &item )
      */
     return item.description;
 }
+
 //Load the controls for the SHIP_DEALER display.
 void BaseComputer::loadShipDealerControls( void )
 {
@@ -4303,6 +4319,7 @@ void BaseComputer::loadShipDealerControls( void )
     //Make the title right.
     recalcTitle();
 }
+
 bool sellShip( Unit *baseUnit, Unit *playerUnit, std::string shipname, BaseComputer *bcomputer )
 {
     Cockpit     *cockpit = _Universe->isPlayerStarship( playerUnit );
@@ -4340,6 +4357,7 @@ bool sellShip( Unit *baseUnit, Unit *playerUnit, std::string shipname, BaseCompu
     }
     return false;
 }
+
 bool BaseComputer::sellShip( const EventCommandId &command, Control *control )
 {
     Unit    *playerUnit = m_player.GetUnit();
@@ -5941,6 +5959,7 @@ bool BaseComputer::actionConfirmedQuitGame()
     CockpitKeys::QuitNow();
     return true;
 }
+
 bool BaseComputer::actionQuitGame( const EventCommandId &command, Control *control )
 {
     LoadSaveQuitConfirm *saver = new LoadSaveQuitConfirm( this, "Quit", "Are you sure that you want to quit?" );
@@ -5986,6 +6005,7 @@ bool BaseComputer::actionConfirmedSaveGame()
     }
     return true;
 }
+
 bool BaseComputer::actionSaveGame( const EventCommandId &command, Control *control )
 {
     Unit *player = m_player.GetUnit();
@@ -6051,12 +6071,14 @@ bool BaseComputer::actionConfirmedLoadGame()
     }
     return true;
 }
+
 bool BaseComputer::actionNewGame( const EventCommandId &command, Control *control )
 {
     StaticDisplay *desc = static_cast< StaticDisplay* > ( window()->findControlById( "InputText" ) );
     desc->setText( UniverseUtil::getNewGameSaveName() );
     return this->actionLoadGame( command, control );
 }
+
 bool BaseComputer::actionLoadGame( const EventCommandId &command, Control *control )
 {
     Unit *player = m_player.GetUnit();
@@ -6093,6 +6115,7 @@ bool BaseComputer::actionShowServerMenu( const EventCommandId &command, Control 
     window()->findControlById( "MultiPlayerHostPort" )->setHidden( false );
     return true;
 }
+
 bool BaseComputer::actionShowAccountMenu( const EventCommandId &command, Control *control )
 {
     window()->findControlById( "MultiPlayerAccountServer" )->setHidden( false );

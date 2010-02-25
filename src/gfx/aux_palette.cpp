@@ -20,6 +20,7 @@
  */
 #include <math.h>
 #define UNDEFINED -99999
+
 double Maximum( double r, double g, double b )
 {
     if (r > g && r > b)
@@ -28,6 +29,7 @@ double Maximum( double r, double g, double b )
         return b;
     return g;
 }
+
 double Minimum( double r, double g, double b )
 {
     if (r < g && r < b)
@@ -36,6 +38,7 @@ double Minimum( double r, double g, double b )
         return b;
     return g;
 }
+
 void RGB_To_HSV( double r, double g, double b, double *h, double *s, double *v )
 {
 /*
@@ -126,6 +129,7 @@ void HSV_To_RGB( double *r, double *g, double *b, double h, double s, double v )
         }
     }     /*Chromatic case */
 }
+
 //desired: h in [0,360), s and v in [0,1] except if s = 0 then h = undefined
 void ShiftPalette( unsigned char Palette[769], double DH, double DS, double DV, double DsH, double DsS, double DsV )
 {

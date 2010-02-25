@@ -128,6 +128,7 @@ void AnimatedTexture::MakeActive( int stage, int pass )
         } else {ActivateWhite( stage ); } break;
     }
 }
+
 bool AnimatedTexture::SetupPass( int pass, int stage, const enum BLENDFUNC src, const enum BLENDFUNC dst )
 {
     switch (pass)
@@ -147,11 +148,13 @@ bool AnimatedTexture::SetupPass( int pass, int stage, const enum BLENDFUNC src, 
         return true;
     }
 }
+
 void AnimatedTexture::UpdateAllPhysics()
 {
     for (set< AnimatedTexture* >::iterator iter = anis.begin(); iter != anis.end(); iter++)
         (*iter)->physicsactive -= SIMULATION_ATOM;
 }
+
 void AnimatedTexture::UpdateAllFrame()
 {
     double elapsed = GetElapsedTime();
@@ -173,14 +176,17 @@ bool AnimatedTexture::Done()
     //If I'm wrong, and the above line is crucial, well... feel free to fix it.
     return curtime >= numframes*timeperframe;
 }
+
 static unsigned int intmin( unsigned int a, unsigned int b )
 {
     return a < b ? a : b;
 }
+
 static unsigned int intmax( unsigned int a, unsigned int b )
 {
     return a < b ? b : a;
 }
+
 void AnimatedTexture::setTime( double tim )
 {
     curtime = tim;
@@ -222,6 +228,7 @@ void AnimatedTexture::setTime( double tim )
         active = ( (unsigned int) (curtime/timeperframe) )%numframes;
     }
 }
+
 using namespace VSFileSystem;
 
 AnimatedTexture::AnimatedTexture( const char *file, int stage, enum FILTER imm, bool detailtex )
@@ -247,6 +254,7 @@ AnimatedTexture::AnimatedTexture( const char *file, int stage, enum FILTER imm, 
          */
     }
 }
+
 void AnimatedTexture::AniInit()
 {
     numframes     = 1;
@@ -290,6 +298,7 @@ Texture* AnimatedTexture::Original()
 {
     return Decal ? Decal[active]->Original() : this;
 }
+
 const Texture* AnimatedTexture::Original() const
 {
     return Decal ? Decal[active]->Original() : this;
@@ -327,6 +336,7 @@ AnimatedTexture::~AnimatedTexture()
     active  = 0;
     palette = NULL;
 }
+
 AnimatedTexture::AnimatedTexture()
 {
     AniInit();
@@ -348,6 +358,7 @@ void AnimatedTexture::Destroy()
         Decal = NULL;
     }
 }
+
 void AnimatedTexture::Reset()
 {
     curtime = 0;
@@ -650,13 +661,16 @@ unsigned int AnimatedTexture::numLayers() const
     else
         return 1;
 }
+
 unsigned int AnimatedTexture::numPasses() const
 {
     if ( GetInterpolateFrames() && (active != nextactive) ) {
         if ( gl_options.Multitexture && ( (texstage+1) < gl_options.Multitexture ) )
             return 1;
-
         else
             return 2;
-    } else {return 1; }}
+    } else {
+        return 1;
+    }
+}
 

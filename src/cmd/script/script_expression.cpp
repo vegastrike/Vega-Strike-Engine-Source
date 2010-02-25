@@ -644,34 +644,22 @@ varInst* Mission::checkExpression( missionNode *node, int mode )
             ret = newVarInst( VI_TEMP );
             ret->type     = VAR_BOOL;
             ret->bool_val = res;
-            return ret;
-
             break;
         }
     case DTAG_CONST:
         ret = doConst( node, mode );
-        return ret;
-
         break;
     case DTAG_VAR_EXPR:
         ret = doVariable( node, mode );
-        return ret;
-
         break;
     case DTAG_FMATH:
         ret = doMath( node, mode );
-        return ret;
-
         break;
     case DTAG_CALL:
         ret = doCall( node, mode );
-        return ret;
-
         break;
     case DTAG_EXEC:
         ret = doExec( node, mode );
-        return ret;
-
         break;
     default:
         fatalError( node, mode, "no such expression" );

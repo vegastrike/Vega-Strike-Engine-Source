@@ -132,10 +132,12 @@ int GFXCreateProgram( char *vprogram, char *fprogram )
 {
     return GFXCreateProgram( (const char*) vprogram, (const char*) fprogram );
 }
+
 static int  programChanged = false;
 static int  defaultprog    = 0;
 static int  lowfiprog = 0;
 static int  hifiprog  = 0;
+
 #ifdef __APPLE__
 std::string hifiProgramName  = "mac";
 std::string lowfiProgramName = "maclite";
@@ -143,6 +145,7 @@ std::string lowfiProgramName = "maclite";
 std::string hifiProgramName  = "default";
 std::string lowfiProgramName = "lite";
 #endif
+
 int getDefaultProgram()
 {
     static bool initted = false;
@@ -166,6 +169,7 @@ int getDefaultProgram()
     }
     return defaultprog;
 }
+
 void GFXReloadDefaultShader()
 {
     bool islow = (lowfiprog == defaultprog);
@@ -188,15 +192,18 @@ void GFXReloadDefaultShader()
         defaultprog = hifiprog;
     }
 }
+
 enum GameSpeed
 {
     JUSTRIGHT,
     TOOSLOW,
     TOOFAST
 };
+
 unsigned int gpdcounter = (1<<30);
 #define NUMFRAMESLOOK 128
 GameSpeed    gameplaydata[NUMFRAMESLOOK] = {JUSTRIGHT};
+
 GameSpeed GFXGetFramerate()
 {
     GameSpeed     retval    = JUSTRIGHT;
@@ -247,6 +254,7 @@ GameSpeed GFXGetFramerate()
             gameplaydata[i] = JUSTRIGHT;
     return retval;
 }
+
 bool GFXShaderReloaded()
 {
     bool retval = programChanged;
@@ -282,10 +290,12 @@ bool GFXShaderReloaded()
     programChanged = false;
     return retval;
 }
+
 bool GFXDefaultShaderSupported()
 {
     return getDefaultProgram() != 0;
 }
+
 int GFXActivateShader( int program )
 {
     static int lastprogram = 0;
@@ -300,6 +310,7 @@ int GFXActivateShader( int program )
         lastprogram = program;
     } else {return 0; } return program;
 }
+
 int GFXActivateShader( const char *program )
 {
     int defaultprogram = getDefaultProgram();
@@ -308,10 +319,12 @@ int GFXActivateShader( const char *program )
         curprogram = GFXCreateProgram( program, program );
     return GFXActivateShader( curprogram );
 }
+
 void GFXDeactivateShader()
 {
     GFXActivateShader( (int) 0 );
 }
+
 int GFXShaderConstant( int name, float v1, float v2, float v3, float v4 )
 {
     if (1
@@ -328,18 +341,22 @@ int GFXShaderConstant( int name, float v1, float v2, float v3, float v4 )
         glDisable( GL_TEXTURE_2D );
     }
 }
+
 int GFXShaderConstant( int name, const float *values )
 {
     return GFXShaderConstant( name, values[0], values[1], values[2], values[3] );
 }
+
 int GFXShaderConstant( int name, GFXColor v )
 {
     return GFXShaderConstant( name, v.r, v.g, v.b, v.a );
 }
+
 int GFXShaderConstant( int name, Vector v )
 {
     return GFXShaderConstant( name, v.i, v.j, v.k, 0 );
 }
+
 int GFXShaderConstant( int name, float v1 )
 {
     if (1
@@ -365,6 +382,7 @@ int GFXShaderConstantv( int name, int count, const float *values )
     }
     return 0;
 }
+
 int GFXShaderConstant4v( int name, int count, const float *values )
 {
     if (1

@@ -5039,12 +5039,14 @@ float Unit::FShieldData() const
     {
     case 2:
         {
-            if (shield.shield2fb.frontmax != 0) return shield.shield2fb.front/shield.shield2fb.frontmax;
+            if (shield.shield2fb.frontmax != 0)
+                return shield.shield2fb.front/shield.shield2fb.frontmax;
             break;
         }
     case 4:
         {
-            if (shield.shield4fbrl.frontmax != 0) return (shield.shield4fbrl.front)/shield.shield4fbrl.frontmax;
+            if (shield.shield4fbrl.frontmax != 0)
+                return (shield.shield4fbrl.front)/shield.shield4fbrl.frontmax;
             break;
         }
     case 8:
@@ -5069,12 +5071,14 @@ float Unit::BShieldData() const
     {
     case 2:
         {
-            if (shield.shield2fb.backmax != 0) return shield.shield2fb.back/shield.shield2fb.backmax;
+            if (shield.shield2fb.backmax != 0)
+                return shield.shield2fb.back/shield.shield2fb.backmax;
             break;
         }
     case 4:
         {
-            if (shield.shield4fbrl.backmax != 0) return (shield.shield4fbrl.back)/shield.shield4fbrl.backmax;
+            if (shield.shield4fbrl.backmax != 0)
+                return (shield.shield4fbrl.back)/shield.shield4fbrl.backmax;
             break;
         }
     case 8:
@@ -5102,7 +5106,8 @@ float Unit::LShieldData() const
 
     case 4:
         {
-            if (shield.shield4fbrl.leftmax != 0) return (shield.shield4fbrl.left)/shield.shield4fbrl.leftmax;
+            if (shield.shield4fbrl.leftmax != 0)
+                return (shield.shield4fbrl.left)/shield.shield4fbrl.leftmax;
             break;
         }
     case 8:
@@ -5130,7 +5135,8 @@ float Unit::RShieldData() const
 
     case 4:
         {
-            if (shield.shield4fbrl.rightmax != 0) return (shield.shield4fbrl.right)/shield.shield4fbrl.rightmax;
+            if (shield.shield4fbrl.rightmax != 0)
+                return (shield.shield4fbrl.right)/shield.shield4fbrl.rightmax;
             break;
         }
     case 8:
@@ -5487,8 +5493,6 @@ bool Unit::ShieldUp( const Vector &pnt ) const
     {
     case 2:
         return ( (pnt.k > 0) ? (shield.shield2fb.front) : (shield.shield2fb.back) ) > shieldmin;
-
-        break;
     case 8:
         if (pnt.i > 0) {
             if (pnt.j > 0) {
@@ -8220,13 +8224,15 @@ bool Unit::RepairUpgradeCargo( Cargo *item, Unit *baseUnit, float *credits )
                 double percentage = UnitUtil::PercentOperational( this, item->content, item->category, false );
                 double price = RepairPrice( percentage, itemPrice );
                 if ( !credits || price <= (*credits) ) {
-                    if (credits) (*credits) -= price;
+                    if (credits)
+                        (*credits) -= price;
                     if (notadditive)
                         this->Upgrade( un, 0, 0, 0, true, percentage, makeTemplateUpgrade( this->name, this->faction ) );
                     if (item->GetCategory().find( DamagedCategory ) == 0) {
                         unsigned int where;
                         Cargo *c = this->GetCargo( item->content, where );
-                        if (c) c->category = "upgrades/"+c->GetCategory().substr( strlen( DamagedCategory ) );
+                        if (c)
+                            c->category = "upgrades/"+c->GetCategory().substr( strlen( DamagedCategory ) );
                     }
                     return true;
                 }
@@ -8321,7 +8327,8 @@ vector< CargoColor >& Unit::FilterDowngradeList( vector< CargoColor > &mylist, b
                                                                           faction ),
                                                            UnitFactory::createUnit( templnam.c_str(), true, this->faction ) );
                     }
-                    if ( templ->name == std::string( "LOAD_FAILED" ) ) templ = NULL;
+                    if ( templ->name == std::string( "LOAD_FAILED" ) )
+                        templ = NULL;
                 } else {
                     downgradelimit = UnitConstCache::getCachedConst( StringIntKey( limiternam, faction ) );
                     if (downgradelimit == NULL) {
@@ -8330,7 +8337,8 @@ vector< CargoColor >& Unit::FilterDowngradeList( vector< CargoColor > &mylist, b
                                                                         UnitFactory::createUnit( limiternam.c_str(), true,
                                                                                                  this->faction ) );
                     }
-                    if ( downgradelimit->name == std::string( "LOAD_FAILED" ) ) downgradelimit = NULL;
+                    if ( downgradelimit->name == std::string( "LOAD_FAILED" ) )
+                        downgradelimit = NULL;
                 }
                 free( unitdir );
                 for (int m = 0; m < maxmountcheck; ++m) {
@@ -9072,9 +9080,9 @@ void Unit::ImportPartList( const std::string &category, float price, float price
             c.price     = ( c.price+(baseprice*aveweight) )/(aveweight+1);
             if (c.quantity <= 0) {
                 c.quantity = 0;
-            } else
+            }
             //quantity more than zero
-            if (maxprice > minprice+.01) {
+            else if (maxprice > minprice+.01) {
                 float renormprice = (baseprice-minprice)/(maxprice-minprice);
                 static float maxpricequantadj =
                     XMLSupport::parse_float( vs_config->getVariable( "cargo", "max_price_quant_adj", "5" ) );
@@ -9178,12 +9186,13 @@ std::string Unit::subunitSerializer( const XMLType &input, void *mythis )
     int   index = input.w.hardint;
     Unit *su;
     int   i     = 0;
-    for (un_iter ui = un->getSubUnits(); (su = *ui); ++ui, ++i)
+    for (un_iter ui = un->getSubUnits(); (su = *ui); ++ui, ++i) {
         if (i == index) {
             if (su->pImage->unitwriter)
                 return su->pImage->unitwriter->getName();
             return su->name;
         }
+    }
     return string( "destroyed_blank" );
 }
 
@@ -9281,7 +9290,6 @@ std::string Unit::cargoSerializer( const XMLType &input, void *mythis )
         }
         retval += string( "\t\t</Category>\n\t\t<Category file=\"nothing" );
     } else {
-        //nothing
         retval = string( "nothing" );
     }
     return retval;
@@ -9469,7 +9477,10 @@ enum Unit::tractorHow Unit::getTractorability() const
                 tractorability_mask |= tractorPush;
             if (stractorability_mask.find_first_of( "iI" ) != string::npos)
                 tractorability_mask |= tractorIn;
-        } else {tractorability_mask = tractorPush; } tractorability_mask_init = true;
+        } else {
+            tractorability_mask = tractorPush;
+        }
+        tractorability_mask_init = true;
     }
     unsigned char tflags;
     if (_Universe->isPlayerStarship( this ) != NULL)

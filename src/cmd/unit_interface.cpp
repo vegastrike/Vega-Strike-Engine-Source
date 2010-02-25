@@ -20,9 +20,11 @@
 #include "configxml.h"
 #include "unit_util.h"
 #include "load_mission.h"
+
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
+
 extern int GetModeFromName( const char* );
 extern void ModifyMouseSensitivity( int&, int& );
 extern unsigned int getSaveStringLength( int whichcp, string key );

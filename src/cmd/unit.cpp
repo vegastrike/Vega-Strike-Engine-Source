@@ -506,7 +506,7 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                                 this->meshdata[i]->setCurrentFrame( currentFrame );                                 //dont' budge
                             }
                         }
-                    } else {}
+                    }
                 }
             }
         }

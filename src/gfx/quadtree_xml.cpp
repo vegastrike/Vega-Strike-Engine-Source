@@ -48,6 +48,8 @@ using   XMLSupport::EnumMap;
 
 namespace TerrainXML
 {
+//
+
 enum Names
 {
     UNKNOWN,
@@ -83,6 +85,7 @@ enum Names
     RADIUS,
     ANIMATIONFILE
 };
+
 const EnumMap::Pair element_names[] = {
     EnumMap::Pair( "UNKNOWN",  UNKNOWN ),
     EnumMap::Pair( "Terrain",  TERRAIN ),
@@ -94,6 +97,7 @@ const EnumMap::Pair element_names[] = {
     EnumMap::Pair( "Specular", TERRAINSPECULAR ),
     EnumMap::Pair( "Emissive", TERRAINEMISSIVE )
 };
+
 const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair( "UNKNOWN",      UNKNOWN ),
     EnumMap::Pair( "Detail",       DETAIL ),
@@ -120,8 +124,11 @@ const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair( "SphereWidth",  SPHERESIZEX ),
     EnumMap::Pair( "SphereHeight", SPHERESIZEZ )
 };
+
 const EnumMap element_map( element_names, 9 );
 const EnumMap attribute_map( attribute_names, 24 );
+
+//end namespace
 }
 
 using XMLSupport::EnumMap;

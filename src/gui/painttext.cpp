@@ -159,7 +159,6 @@ void PaintText::setWidthExceeded( WidthExceeded w )
 int PaintText::lineCount( void ) const
 {
     calcLayoutIfNeeded();
-
     return m_lines.size();
 }
 
@@ -167,7 +166,6 @@ int PaintText::lineCount( void ) const
 int PaintText::visibleLineCountStartingWith( int lineNumber, float vertInterval ) const
 {
     calcLayoutIfNeeded();
-
     int   result = 0;
     float currentHeight = vertInterval;
     for (vector< TextLine >::size_type i = lineNumber; i < m_lines.size(); ++i) {
@@ -185,7 +183,6 @@ int PaintText::visibleLineCountStartingWith( int lineNumber, float vertInterval 
 int PaintText::layoutVersion( void ) const
 {
     calcLayoutIfNeeded();
-
     return m_layoutVersion;
 }
 
@@ -232,10 +229,8 @@ void PaintText::drawLines( size_t start, size_t count ) const
     GFXPushBlendMode();
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
     glPushMatrix();
-
     //Keep track of line position.
     float lineTop    = m_rect.top();
-
     //Figure ending line index.
     const size_t end = guiMin( start+count, m_lines.size() );
     //Loop through the display list lines.
@@ -327,7 +322,6 @@ static void parseFormatColor( const string &str, //String.
                             )
 {
     *formatSuccess = false;
-
     string::size_type curPos = startPos;
     parseFormatFloat( str, curPos, endPos, formatSuccess, &color.r, &curPos, DT_FORMAT_COLOR_SEP );
     if (!formatSuccess || str[curPos-1] == DT_FORMAT_CHAR) return;
@@ -352,12 +346,9 @@ void PaintText::parseFormat( string::size_type startPos, //Location of beginning
                            )
 {
     const string::size_type endPos = m_text.size();
-
     //Default return value.
     *endLine = false;
-
     bool formatSuccess = false;
-
     string::size_type curPos = startPos;
     if (curPos < endPos) {
         //Make sure we have some chars to process.
@@ -445,7 +436,6 @@ void PaintText::addFragment( TextLine &line, //Line descriptor.
                            )
 {
     string::size_type curPos = startPos;
-
     const Font &font = m_layout.fontStack.back();
     //Loop through the characters until we run out of room.
     while (curPos < endPos) {
@@ -485,7 +475,6 @@ void PaintText::parseFragmentsWithCharBreak( TextLine &line, //Line descriptor.
 {
     string::size_type curPos = startPos;          //Beginning of current part of the string we are working on.
     double curWidth     = maxWidth;     //The width left to work with.
-
     bool   forceEndLine = false;    //True = end-of-line through format.  False = char width.
     while (curPos < endPos) {
         //Is there a format char left in this string?
@@ -585,7 +574,6 @@ void PaintText::parseFragmentsWithCharBreak( TextLine &line, //Line descriptor.
     }
     //Set the width of this line.
     line.width = maxWidth-curWidth;
-
     //And make sure we know how far we got in the string.
     *resultPos = curPos;
 }
@@ -600,10 +588,8 @@ void PaintText::parseFragmentsWithWordBreak( TextLine &line, //Line descriptor.
     string::size_type curPos = startPos;          //Beginning of current part of the string we are working on.
     double curWidth        = maxWidth;     //The width left to work with.
     const string::size_type endPos = m_text.size();     //One past the end of the string.
-
     bool   forceEndLine    = false;   //True = end-of-line through format.  False = char width.
     LayoutState origLayout = m_layout;     //The original layout state before we start the line.
-
     string::size_type wordBreakPos = endPos;      //Previous word break location in text.
     //In this loop we just measure the width.  We find the end of the current line in m_text,
     //then call parseFragmentsWithCharBreak once we know how far to go.
@@ -635,7 +621,6 @@ void PaintText::parseFragmentsWithWordBreak( TextLine &line, //Line descriptor.
             break;
         }
         assert( curPos == formatPos );         //Other other case: we ran into a format command.
-
         //Interpret the format command.
         assert( m_text[curPos] == DT_FORMAT_CHAR );
         curPos++;         //Look at the command char.
@@ -690,10 +675,8 @@ void PaintText::calcLayout( void )
 {
     //Clear the old layout.
     m_lines.clear();
-
     //Make sure the version number changes.
     m_layoutVersion++;
-
     //Make sure we don't call this again unless we need to.
     m_needLayout = false;
     if ( m_text.empty() )
@@ -701,19 +684,15 @@ void PaintText::calcLayout( void )
     //Scaling factors.
     m_verticalScaling   = m_font.verticalScaling();
     m_horizontalScaling = m_font.horizontalScaling();
-
     //Max line width in character reference space.
     static float font_width_hack = XMLSupport::parse_float( vs_config->getVariable( "graphics", "font_width_hack", "0.925" ) );
     const float  maxLineWidth    = m_rect.size.width*font_width_hack/m_horizontalScaling;
-
     //The temporary global state for the layout operation.
     //Make sure this gets initialized at the beginning of an operation.
     m_layout = LayoutState( 1.0, 1.0 );
-
     //Keep track of switches in fonts/colors.
     m_layout.fontStack.push_back( m_font );
     m_layout.colorStack.push_back( m_color );
-
     //Create the current line.
     m_lines.reserve( LINES_RESERVE );
     m_lines.resize( 1 );
@@ -789,7 +768,8 @@ PaintText::PaintText( void ) :
     , m_layoutVersion( 0 )
     , m_verticalScaling( 0.7 )
     , m_horizontalScaling( 0.7 )
-{}
+{
+}
 
 PaintText::PaintText( const Rect &r, const std::string &t, const Font &f, const GFXColor &c, Justification j,
                       WidthExceeded w ) :

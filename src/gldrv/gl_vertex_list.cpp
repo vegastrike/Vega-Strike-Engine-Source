@@ -207,6 +207,7 @@ int GFXVertexList::numTris() const
     }
     return tot;
 }
+
 int GFXVertexList::numQuads() const
 {
     int tot = 0;
@@ -230,6 +231,7 @@ void GFXVertexList::VtxCopy( GFXVertexList *thus, GFXVertex *dst, int offset, in
 {
     memcpy( dst, &thus->data.vertices[offset], sizeof (GFXVertex)*howmany );
 }
+
 void GFXVertexList::ColVtxCopy( GFXVertexList *thus, GFXVertex *dst, int offset, int howmany )
 {
     for (int i = 0; i < howmany; i++)
@@ -279,6 +281,7 @@ void GFXVertexList::RenormalizeNormals()
         }
     }
 }
+
 unsigned int GFXVertexList::GetIndex( int offset ) const
 {
     return ( changed&sizeof (unsigned char) )
@@ -287,6 +290,7 @@ unsigned int GFXVertexList::GetIndex( int offset ) const
               ? (unsigned int) (index.s[offset])
               : index.i[offset] );
 }
+
 void GFXVertexList::ColIndVtxCopy( GFXVertexList *thus, GFXVertex *dst, int offset, int howmany )
 {
     for (int i = 0; i < howmany; i++) {
@@ -300,6 +304,7 @@ void GFXVertexList::ColIndVtxCopy( GFXVertexList *thus, GFXVertex *dst, int offs
                             thus->data.colors[j].tz ), thus->data.colors[j].tw );
     }
 }
+
 void GFXVertexList::IndVtxCopy( GFXVertexList *thus, GFXVertex *dst, int offset, int howmany )
 {
     for (int i = 0; i < howmany; i++) {
@@ -313,14 +318,17 @@ void GFXVertexList::IndVtxCopy( GFXVertexList *thus, GFXVertex *dst, int offset,
                             thus->data.vertices[j].tz ), thus->data.vertices[j].tw );
     }
 }
+
 bool GFXVertexList::hasColor() const
 {
     return (changed&HAS_COLOR) != 0;
 }
+
 const GFXVertex* GFXVertexList::GetVertex( int index ) const
 {
     return data.vertices+index;
 }
+
 const GFXColorVertex* GFXVertexList::GetColorVertex( int index ) const
 {
     return data.colors+index;
@@ -401,5 +409,8 @@ void GFXVertexList::GetPolys( GFXVertex **vert, int *numpolys, int *numtris )
     }
     this->UnMap();
 }
-void GFXVertexList::LoadDrawState() {}
+
+void GFXVertexList::LoadDrawState()
+{
+}
 

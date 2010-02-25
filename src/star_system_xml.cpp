@@ -804,7 +804,6 @@ void StarSystem::beginElement( const string &name, const AttributeList &attribut
                 }
             }
             break;
-            break;
         }
     case ATMOSPHERE:
         {
@@ -851,7 +850,7 @@ void StarSystem::beginElement( const string &name, const AttributeList &attribut
             }
             break;
         }
-        {
+/*      {              THIS SEEMS LIKE DEAD CODE; COMMENTING OUT --chuck_starchaser
             Atmosphere::Parameters params;
             //NOTHING NEED TO RECODE
             params.low_color[0] = GFXColor( 0, 0.5, 0.0 );
@@ -883,7 +882,7 @@ void StarSystem::beginElement( const string &name, const AttributeList &attribut
                 }
             }
         }
-        break;
+        break;          */
     case TERRAIN:
     case CONTTERRAIN:
         ++xml->unitlevel;
@@ -1296,7 +1295,6 @@ addlightprop:
                         faction = ownerfaction;
                     }
                 }
-
                 break;
             case RI:
                 R.i = parse_float( (*iter).value )*xml->scale*ScaleOrbitDist( xml->fade );
@@ -1318,17 +1316,13 @@ addlightprop:
                 break;
             case X:
                 xml->cursun.i = parse_float( (*iter).value )*xml->scale*ScaleOrbitDist( xml->fade );
-
                 break;
             case Y:
                 xml->cursun.j = parse_float( (*iter).value )*xml->scale*ScaleOrbitDist( xml->fade );
-
                 break;
             case Z:
                 xml->cursun.k = parse_float( (*iter).value )*xml->scale*ScaleOrbitDist( xml->fade );
-
                 break;
-
             case PPOSITION:
                 position = parse_floatf( (*iter).value );
                 break;
@@ -1467,9 +1461,7 @@ addlightprop:
         delete[] filename;
         delete[] nebfile;
         break;
-
     default:
-
         break;
     }
 }
@@ -1491,7 +1483,6 @@ void StarSystem::endElement( const string &name )
                     ( (Planet*) p )->AddFog( xml->fog, xml->fogopticalillusion );
             break;
         }
-
     case UNKNOWN:
         --xml->unitlevel;
         //cerr << "Unknown element end tag '" << name << "' detected " << endl;
@@ -1535,7 +1526,6 @@ void StarSystem::LoadXML( const char *filename, const Vector &centroid, const fl
     err = f.OpenReadOnly( file, SystemFile );
     if (err > Ok) {
         printf( "StarSystem: file not found %s\n", file.c_str() );
-
         return;
     }
     /*
@@ -1551,7 +1541,6 @@ void StarSystem::LoadXML( const char *filename, const Vector &centroid, const fl
     //xml->scale*=parse_float (vs_config->getVariable("physics","game_speed","1"));
     //}
     xml->scale *= game_options.star_system_scale;
-
     xml->parentterrain = NULL;
     xml->ct     = NULL;
     xml->systemcentroid = centroid;

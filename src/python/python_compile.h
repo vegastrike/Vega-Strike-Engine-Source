@@ -1,14 +1,18 @@
 #ifndef _PYTHON_COMPILE_H_
 #define _PYTHON_COMPILE_H_
+
 //Resets variable for use by python config.h
 #ifdef _POSIX_C_SOURCE
 #undef _POSIX_C_SOURCE
 #endif
+
 #include "cs_python.h"
 #include "hashtable.h"
 #include <string>
 #include <compile.h>
+
 extern Hashtable< std::string, PyCodeObject, 1023 >compiled_python;
+
 class PythonBasicType
 {
 public:
@@ -47,6 +51,7 @@ public:
         return NULL;
     }
 };
+
 void InterpretPython( const std::string &filename );
 PyCodeObject * CompilePython( const std::string &filename );
 void CompileRunPython( const std::string &filename );

@@ -31,7 +31,6 @@ void GFXFogMode( const FOGMODE fog )
             glDisable( GL_FOG );
             GFXFogState.enabled = false;
             return;
-
         case FOG_EXP:
             glFogi( GL_FOG_MODE, GL_EXP );
             break;
@@ -48,6 +47,7 @@ void GFXFogMode( const FOGMODE fog )
     GFXFogState.enabled = true;
     //glHint (GL_FOG_HINT,GL_NICEST );
 }
+
 void GFXFogDensity( const float fogdensity )
 {
     if (fogdensity != GFXFogState.density) {
@@ -55,6 +55,7 @@ void GFXFogDensity( const float fogdensity )
         GFXFogState.density = fogdensity;
     }
 }
+
 void GFXFogLimits( const float fognear, const float fogfar )
 {
     if (GFXFogState.nnear != fognear || GFXFogState.ffar != fogfar) {
@@ -64,6 +65,7 @@ void GFXFogLimits( const float fognear, const float fogfar )
         glFogf( GL_FOG_END, fogfar );
     }
 }
+
 void GFXFogColor( GFXColor c )
 {
     if (c.r != GFXFogState.c.r || c.g != GFXFogState.c.g || c.b != GFXFogState.c.b || c.a != GFXFogState.c.a) {
@@ -71,6 +73,7 @@ void GFXFogColor( GFXColor c )
         GFXFogState.c = c;
     }
 }
+
 void GFXFogIndex( const int index )
 {
     if (GFXFogState.index != index) {

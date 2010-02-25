@@ -103,6 +103,7 @@ bool SOCKETALT::setLocalAddress( const AddressIP &inp )
         return r;
     }
 }
+
 bool SOCKETALT::setRemoteAddress( const AddressIP &inp )
 {
     if (!_sock) {
@@ -112,6 +113,7 @@ bool SOCKETALT::setRemoteAddress( const AddressIP &inp )
         return r;
     }
 }
+
 bool SOCKETALT::isActive()
 {
     if (!_sock) {
@@ -129,6 +131,7 @@ int SOCKETALT::sendbuf( Packet *packet, const AddressIP *to, int pcktflags )
     else
         return _sock->sendbuf( packet, to, pcktflags );
 }
+
 //int SOCKETALT::sendbuf( PacketMem& packet, const AddressIP* to, int pcktflags )
 //{
 //return ( !_sock ? -1 : _sock->sendbuf( packet, to, pcktflags ) );
@@ -199,6 +202,7 @@ const AddressIP& SOCKETALT::getRemoteAddress() const
     else
         return nullAdr;          //just in case.
 }
+
 const AddressIP& SOCKETALT::getLocalAddress() const
 {
     static AddressIP nullAdr;

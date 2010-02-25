@@ -38,9 +38,9 @@ void GFXUploadLightState( int max_light_location, int active_light_array, bool s
 const float atten0scale = 1;
 const float atten1scale = 1./GFX_SCALE;
 const float atten2scale = 1./(GFX_SCALE*GFX_SCALE);
-
 int _GLLightsEnabled    = 0;
 Hashtable3d< LineCollideStar, 20, CTACC, lighthuge >lighttable;
+
 GFXLight gfx_light::operator=( const GFXLight &tmp )
 {
     memcpy( this, &tmp, sizeof (GFXLight) );
@@ -83,6 +83,7 @@ static int findGlobalClobberable()
     }
     return (clobberdisabled == -1) ? clobberlocal : clobberdisabled;
 }
+
 bool gfx_light::Create( const GFXLight &temp, bool global )
 {
     int foundclobberable = 0;
@@ -103,6 +104,7 @@ bool gfx_light::Create( const GFXLight &temp, bool global )
     }
     return (foundclobberable != -1) || ( !enabled() );
 }
+
 void gfx_light::Kill()
 {
     Disable();     //first disables it...which _will_ remove it from the light table.
@@ -190,10 +192,10 @@ void gfx_light::ClobberGLLight( const int target )
 #endif
     ContextSwitchClobberLight( GL_LIGHT0+target, GLLights[target].index );
 #ifdef GFX_HARDWARE_LIGHTING
-} else
-    FinesseClobberLight( GL_LIGHT0+target, GLLights[target].index );
+    } else {
+        FinesseClobberLight( GL_LIGHT0+target, GLLights[target].index );
+    }
 #endif
-
     this->target = target;
     //VSFileSystem::Fprintf (stderr,"Target %d had light %d",target, GLLights[target].index);
     GLLights[target].index    = lightNum();
@@ -278,6 +280,7 @@ void gfx_light::TrashFromGLLights()
     GLLights[target].options = OpenGLL::GLL_LOCAL;
     target = -1;
 }
+
 void gfx_light::AddToTable()
 {
     LineCollideStar tmp;
@@ -288,6 +291,7 @@ void gfx_light::AddToTable()
     tmp.lc = coltarg;
     lighttable.Put( coltarg, tmp );
 }
+
 bool gfx_light::RemoveFromTable( bool shouldremove, const GFXLight &t )
 {
     LineCollideStar tmp;
@@ -336,6 +340,7 @@ void gfx_light::Enable()
         enable();
     }
 }
+
 //unimplemented
 void gfx_light::Disable()
 {
@@ -385,10 +390,11 @@ LineCollide gfx_light::CalculateBounds( bool &error )
     *( (int*) (&retval.object) ) = lightNum();       //put in a lightNum
     return retval;
 }
+
 void light_rekey_frame()
 {
     unpicklights();     //picks doubtless changed position
-    for (int i = 0; i < GFX_MAX_LIGHTS; i++)
+    for (int i = 0; i < GFX_MAX_LIGHTS; i++) {
         if (GLLights[i].options&OpenGLL::GL_ENABLED) {
             if (GLLights[i].index >= 0) {
                 if ( (*_llights)[GLLights[i].index].Target() == i ) {
@@ -407,5 +413,6 @@ void light_rekey_frame()
                 GLLights[i].options &= (~OpenGLL::GL_ENABLED);
             }
         }
+    }
 }
 

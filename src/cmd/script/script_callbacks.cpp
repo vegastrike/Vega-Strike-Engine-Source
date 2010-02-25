@@ -54,6 +54,7 @@
 using std::cout;
 using std::cerr;
 using std::endl;
+
 string varToString( varInst *vi )
 {
     switch (vi->type)
@@ -290,6 +291,7 @@ varInst* Mission::call_setNull( missionNode *node, int mode )
     deleteVarInst( ovi );
     return viret;
 }
+
 varInst* Mission::call_terminateMission( missionNode *node, int mode )
 {
     //varInst *ovi=getObjectArg(node,mode);
@@ -300,6 +302,7 @@ varInst* Mission::call_terminateMission( missionNode *node, int mode )
     viret->type = VAR_VOID;
     return viret;
 }
+
 varInst* Mission::call_float_cast( missionNode *node, int mode )
 {
     missionNode *snode = getArgument( node, mode, 0 );
@@ -312,6 +315,7 @@ varInst* Mission::call_float_cast( missionNode *node, int mode )
 
     return viret;
 }
+
 varInst* Mission::call_int_cast( missionNode *node, int mode )
 {
     missionNode *snode = getArgument( node, mode, 0 );
@@ -475,6 +479,7 @@ varInst* Mission::call_io_message( missionNode *node, int mode )
 
     return viret;
 }
+
 #if 1
 string Mission::replaceNewline( string origstr )
 {
@@ -811,11 +816,13 @@ bool Mission::getBoolArg( missionNode *node, int mode, int arg_nr )
     bool res = checkBoolExpr( val_node, mode );
     return res;
 }
+
 double Mission::getFloatArg( missionNode *node, int mode, int arg_nr )
 {
     missionNode *val_node = getArgument( node, mode, arg_nr );
     return checkFloatExpr( val_node, mode );
 }
+
 int Mission::getIntArg( missionNode *node, int mode, int arg_nr )
 {
     missionNode *val_node = getArgument( node, mode, arg_nr );
@@ -840,6 +847,7 @@ Unit* Mission::getUnitArg( missionNode *node, int mode, int arg_nr )
     deleteVarInst( unit_vi );
     return ret;
 }
+
 QVector Mission::getVec3Arg( missionNode *node, int mode, int arg_nr )
 {
     missionNode *pos_node = getArgument( node, mode, arg_nr );

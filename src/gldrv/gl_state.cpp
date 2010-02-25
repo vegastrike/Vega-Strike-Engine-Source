@@ -82,6 +82,7 @@ static inline bool _GFXActiveTextureValid()
 }
 
 extern GFXBOOL GFXLIGHTING;
+
 void /*GFXDRVAPI*/ GFXEnable( const STATE state )
 {
     switch (state)
@@ -159,6 +160,7 @@ void /*GFXDRVAPI*/ GFXEnable( const STATE state )
         break;
     }
 }
+
 void GFXToggleTexture( bool enable, int whichstage, enum TEXTURE_TARGET target )
 {
     if ( (whichstage < gl_options.Multitexture) || (whichstage == 0) ) {
@@ -176,6 +178,7 @@ void GFXToggleTexture( bool enable, int whichstage, enum TEXTURE_TARGET target )
         }
     }
 }
+
 void /*GFXDRVAPI*/ GFXDisable( const STATE state )
 {
     switch (state)
@@ -293,6 +296,7 @@ struct BlendMode
     }
 }
 currBlendMode;
+
 using std::stack;
 stack< BlendMode >blendstack;
 

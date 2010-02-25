@@ -74,6 +74,7 @@ void MatrixToDoubles( double t[], const Matrix &m )
     t[14] = (m.p.k);
     t[15] = 1;
 }
+
 inline void ViewToModel()
 {
     double t[16];
@@ -97,11 +98,13 @@ inline void ViewToModel()
     glMatrixMode( GL_MODELVIEW );
     glLoadMatrixd( t );
 }
+
 static void IdentityFloat( float id[] )
 {
     id[0] = id[5] = id[10] = id[15] = 1;
     id[1] = id[2] = id[3] = id[4] = id[6] = id[7] = id[8] = id[9] = id[11] = id[12] = id[13] = id[14] = 0;
 }
+
 void MultFloatMatrix( float dest[], const float m1[], const Matrix &m2 )
 {
     dest[0]  = m1[0]*m2.r[0]+m1[4]*m2.r[1]+m1[8]*m2.r[2];
@@ -147,6 +150,7 @@ static void RotateFloatMatrix( float dest[], const float m1[], const Matrix &m2 
     dest[14] = m1[14];
     dest[15] = m1[15];
 }
+
 static void InvRotateFloatMatrix( float dest[], const float m1[], const Matrix &m2 )
 {
     dest[0]  = m1[0]*m2.r[0]+m1[4]*m2.r[3]+m1[8]*m2.r[6];
@@ -193,6 +197,7 @@ void /*GFXDRVAPI*/ GFXTranslateModel( const QVector &a )
     model.p += TransformNormal( model, a );
     ViewToModel();
 }
+
 void /*GFXDRVAPI*/ GFXTranslateProjection( const Vector &a )
 {
     projection[12] += a.i*projection[0]+a.j*projection[4]+a.k*projection[8];
@@ -208,8 +213,10 @@ void /*GFXDRVAPI*/ GFXMultMatrixModel( const Matrix &matrix )
     CopyMatrix( model, t );
     ViewToModel();
 }
+
 //Matrix *mm = model;
 //Matrix *vv = view;
+
 void GFXLoadMatrixView( const Matrix &matrix )
 {
     CopyMatrix( view, matrix );
@@ -247,6 +254,7 @@ void /*GFXDRVAPI*/ GFXCenterCamera( bool Enter )
         GFXLoadIdentity( MODEL );
     }
 }
+
 void GFXRestoreHudMode()
 {
     glMatrixMode( GL_MODELVIEW );
@@ -254,6 +262,7 @@ void GFXRestoreHudMode()
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
 }
+
 void GFXHudMode( const bool Enter )
 {
     if (Enter) {
@@ -270,6 +279,7 @@ void GFXHudMode( const bool Enter )
         glPopMatrix();
     }
 }
+
 void /*GFXDRVAPI*/ GFXLoadIdentity( const MATRIXMODE mode )
 {
     switch (mode)
@@ -362,6 +372,7 @@ void GFXFrustum( float *m, float *i, float left, float right, float bottom, floa
     M( 3, 3 ) = (float) c/d;
 #undef M
 }
+
 void /*GFXDRVAPI*/ GFXPerspective( float fov, float aspect, float znear, float zfar, float cockpit_offset )
 {
     znear *= GFX_SCALE;
@@ -411,7 +422,6 @@ void /*GFXDRVAPI*/ GFXParallel( float left, float right, float bottom, float top
     M( 3, 3 ) = 1.0F;
 #undef M
     GFXLoadMatrixProjection( projection );
-
     GFXGetFrustumVars( false, &left, &right, &bottom, &top, &nearval, &farval );
 }
 

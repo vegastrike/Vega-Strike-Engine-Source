@@ -1090,7 +1090,7 @@ void GameCockpit::DrawBlips( Unit *un )
     int   numradar = 0;
     GFXDisable( TEXTURE0 );
     GFXDisable( LIGHTING );
-    for (int i = 0; i < 2; ++i)
+    for (int i = 0; i < 2; ++i) {
         if (Radar[numradar]) {
             Radar[numradar]->GetSize( xsize[numradar], ysize[numradar] );
             xsize[numradar] = fabs( xsize[numradar] );
@@ -1101,6 +1101,7 @@ void GameCockpit::DrawBlips( Unit *un )
             reardar[numradar] = i ? true : false;
             numradar++;
         }
+    }
     GFXPointSize( 2 );
     GFXBegin( GFXPOINT );
     static float unitRad =
@@ -1383,8 +1384,6 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
             static double collidepanic =
                 XMLSupport::parse_float( vs_config->getVariable( "physics", "collision_inertial_time", "1.25" ) );
             return (getNewTime()-TimeOfLastCollision) < collidepanic;
-
-            break;
         }
     case UnitImages< void >::ECM:
         return target->GetImageInformation().ecm != 0 ? 1 : 0;
@@ -1454,7 +1453,6 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
             }
             if (lie)
                 return value/game_speed;
-
             else
                 return display_in_meters ? value : value*3.6;          //JMS 6/28/05 - converted back to raw meters/second
         }
@@ -2087,7 +2085,12 @@ class UnivMap
     VSSprite *ur;
     VSSprite *ll;
     VSSprite *lr;
-public: UnivMap( VSSprite *ull, VSSprite *url, VSSprite *lll, VSSprite *lrl )
+public:
+    bool isNull()
+    {
+        return ul == NULL;
+    }
+    UnivMap( VSSprite *ull, VSSprite *url, VSSprite *lll, VSSprite *lrl )
     {
         ul = ull;
         ur = url;
@@ -2110,10 +2113,6 @@ public: UnivMap( VSSprite *ull, VSSprite *url, VSSprite *lll, VSSprite *lrl )
             ll->Draw();
         if (lr)
             lr->Draw();
-    }
-    bool isNull()
-    {
-        return ul == NULL;
     }
 };
 

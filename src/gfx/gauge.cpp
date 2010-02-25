@@ -7,6 +7,7 @@ Gauge::Gauge( const char *file, DIRECTION up ) : VSSprite( file )
     VSSprite::GetSize( sx, sy );
     SetSize( -sx, -sy );
 }
+
 void Gauge::SetSize( float x, float y )
 {
     if (dir == GAUGE_UP)
@@ -15,6 +16,7 @@ void Gauge::SetSize( float x, float y )
         x = -x;
     VSSprite::SetSize( x, y );
 }
+
 void Gauge::GetSize( float &x, float &y )
 {
     VSSprite::GetSize( x, y );

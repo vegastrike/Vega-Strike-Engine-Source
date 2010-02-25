@@ -53,6 +53,7 @@ using std::list;
 Hashtable< std::string, Mesh, 503 >Mesh::meshHashTable;
 Hashtable< std::string, std::vector< int >, 503 >Mesh::animationSequences;
 Vector mouseline;
+
 int Mesh::getNumAnimationFrames( string which ) const
 {
     if ( which.empty() ) {
@@ -273,18 +274,22 @@ int Mesh::getNumLOD() const
 {
     return numlods;
 }
+
 void Mesh::setCurrentFrame( float which )
 {
     framespersecond = which;
 }
+
 float Mesh::getCurrentFrame() const
 {
     return framespersecond;
 }
+
 float Mesh::getFramesPerSecond() const
 {
     return orig ? orig->framespersecond : framespersecond;
 }
+
 Mesh* Mesh::getLOD( float lod, bool bBypassDamping )
 {
     if (!orig)
@@ -346,6 +351,7 @@ void Mesh::SetBlendMode( BLENDFUNC src, BLENDFUNC dst, bool lodcascade )
         }
     }
 }
+
 enum EX_EXCLUSION {EX_X, EX_Y, EX_Z};
 inline bool OpenWithin( const QVector &query,
                         const Vector &mn,
@@ -366,6 +372,7 @@ inline bool OpenWithin( const QVector &query,
         return (query.j >= mn.j-err) && (query.i >= mn.i-err) && (query.j <= mx.j+err) && (query.i <= mx.i+err);
     }
 }
+
 bool Mesh::queryBoundingBox( const QVector &eye, const QVector &end, const float err ) const
 {
     QVector slope( end-eye );
@@ -406,11 +413,13 @@ bool Mesh::queryBoundingBox( const QVector &eye, const QVector &end, const float
     }
     return false;
 }
+
 bool Mesh::queryBoundingBox( const QVector &start, const float err ) const
 {
     return start.i >= mn.i-err && start.j >= mn.j-err && start.k >= mn.k-err
            && start.i <= mx.i+err && start.j <= mx.j+err && start.k <= mx.k+err;
 }
+
 BoundingBox* Mesh::getBoundingBox()
 {
     BoundingBox *tbox = new BoundingBox( QVector( mn.i, 0, 0 ), QVector( mx.i, 0, 0 ),

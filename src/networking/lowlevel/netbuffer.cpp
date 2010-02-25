@@ -16,12 +16,14 @@ std::string getSimpleString( std::string &input )
     }
     return "";
 }
+
 char getSimpleChar( std::string &input )
 {
     char retval = input[0];
     input = input.substr( 1 );
     return retval;
 }
+
 int getSimpleInt( std::string &input )
 {
     std::string::size_type where = input.find( " " );
@@ -33,16 +35,19 @@ int getSimpleInt( std::string &input )
     }
     return 0;
 }
+
 void addSimpleString( std::string &input, const std::string adder )
 {
     addSimpleInt( input, adder.length() );
     input += adder;
 }
+
 void addSimpleChar( std::string &input, const char adder )
 {
     char add[2] = {adder, '\0'};
     input += std::string( add, 1 );
 }
+
 void addSimpleInt( std::string &input, const int adder )
 {
     input += XMLSupport::tostring( adder )+" ";
@@ -57,6 +62,7 @@ NetBuffer::NetBuffer()
     this->buffer[size-1] = 0;
     ver    = NETWORK_VERSION;
 }
+
 NetBuffer::NetBuffer( int bufsize )
 {
     buffer = new char[bufsize];
@@ -83,11 +89,13 @@ NetBuffer::NetBuffer( const char *buf, int bufsize )
     this->buffer[size-1] = 0;
     ver = NETWORK_VERSION;
 }
+
 NetBuffer::~NetBuffer()
 {
     if (buffer != NULL)
         delete[] buffer;
 }
+
 void NetBuffer::Reset()
 {
     memset( buffer, 0x20, size );
@@ -121,6 +129,7 @@ void NetBuffer::resizeBuffer( unsigned int newsize )
         size   = newsize+1;
     }
 }
+
 //Check the buffer to see if we can still get info from it
 bool NetBuffer::checkBuffer( int len, const char *fun )
 {
@@ -161,10 +170,13 @@ enum NBType
     NB_GFXLIGHT,
     NB_GFXLIGHTLOCAL,
 };
+
 #define NB_CASE( a ) \
 case a:              \
-    return #a; break;
+    return #a; break
+    
 char typeerrbuf[32];
+
 const char * getTypeStr( unsigned char c )
 {
     switch (c)
@@ -203,6 +215,7 @@ void NetBuffer::addType( unsigned char c )
     VsnetOSS::memcpy( buffer+offset, &c, sizeof (c) );
     offset += tmpsize;
 }
+
 unsigned char NetBuffer::getType()
 {
     unsigned char c;
@@ -275,6 +288,7 @@ void NetBuffer::addVector( Vector v )
     this->addFloat( v.j );
     this->addFloat( v.k );
 }
+
 Vector NetBuffer::getVector()
 {
     CHECK_NB( NB_VECTOR );
@@ -285,6 +299,7 @@ Vector NetBuffer::getVector()
 
     return v;
 }
+
 void NetBuffer::addQVector( QVector v )
 {
     ADD_NB( NB_QVECTOR );
@@ -292,6 +307,7 @@ void NetBuffer::addQVector( QVector v )
     this->addDouble( v.j );
     this->addDouble( v.k );
 }
+
 QVector NetBuffer::getQVector()
 {
     CHECK_NB( NB_QVECTOR );
@@ -299,9 +315,9 @@ QVector NetBuffer::getQVector()
     v.i = this->getDouble();
     v.j = this->getDouble();
     v.k = this->getDouble();
-
     return v;
 }
+
 void NetBuffer::addColor( GFXColor col )
 {
     ADD_NB( NB_COLOR );
@@ -310,6 +326,7 @@ void NetBuffer::addColor( GFXColor col )
     this->addFloat( col.b );
     this->addFloat( col.a );
 }
+
 GFXColor NetBuffer::getColor()
 {
     CHECK_NB( NB_COLOR );
@@ -318,9 +335,9 @@ GFXColor NetBuffer::getColor()
     col.g = this->getFloat();
     col.b = this->getFloat();
     col.a = this->getFloat();
-
     return col;
 }
+
 void NetBuffer::addMatrix( Matrix m )
 {
     ADD_NB( NB_MATRIX );
@@ -335,7 +352,6 @@ Matrix NetBuffer::getMatrix()
     for (int i = 0; i < 9; i++)
         m.r[i] = this->getFloat();
     m.p = this->getQVector();
-
     return m;
 }
 void NetBuffer::addQuaternion( Quaternion quat )
@@ -348,10 +364,8 @@ Quaternion NetBuffer::getQuaternion()
 {
     CHECK_NB( NB_QUATERNION );
     Quaternion q;
-
     q.s = this->getFloat();
     q.v = this->getVector();
-
     return q;
 }
 void NetBuffer::addTransformation( Transformation trans )
@@ -366,7 +380,6 @@ Transformation NetBuffer::getTransformation()
     Transformation t;
     t.orientation = this->getQuaternion();
     t.position    = this->getQVector();
-
     return t;
 }
 
@@ -462,6 +475,7 @@ Shield NetBuffer::getShield()
     }
     return shield;
 }
+
 void NetBuffer::addArmor( const Armor &armor )
 {
     ADD_NB( NB_ARMOR );
@@ -474,6 +488,7 @@ void NetBuffer::addArmor( const Armor &armor )
     this->addFloat( armor.frontleftbottom );
     this->addFloat( armor.backleftbottom );
 }
+
 Armor NetBuffer::getArmor()
 {
     CHECK_NB( NB_ARMOR );
@@ -495,11 +510,13 @@ void NetBuffer::addSerial( ObjSerial serial )
     ADD_NB( NB_SERIAL );
     this->addShort( serial );
 }
+
 ObjSerial NetBuffer::getSerial()
 {
     CHECK_NB( NB_SERIAL );
     return this->getShort();
 }
+
 void NetBuffer::addFloat( float f )
 {
     ADD_NB( NB_FLOAT );
@@ -509,6 +526,7 @@ void NetBuffer::addFloat( float f )
     *( (posh_u32_t*) (this->buffer+offset) ) = bits;
     offset += tmpsize;
 }
+
 float NetBuffer::getFloat()
 {
     CHECK_NB( NB_FLOAT );
@@ -520,6 +538,7 @@ float NetBuffer::getFloat()
     offset += sizeof (s);
     return s;
 }
+
 void NetBuffer::addFloat8( float f )
 {
     if (version() < 4500) {
@@ -534,6 +553,7 @@ void NetBuffer::addFloat8( float f )
         addChar( sch );
     }
 }
+
 float NetBuffer::getFloat8()
 {
     if (version() < 4500) {
@@ -544,6 +564,7 @@ float NetBuffer::getFloat8()
         return ( (float) ch )/255.0;
     }
 }
+
 void NetBuffer::addDouble( double d )
 {
     ADD_NB( NB_DOUBLE );
@@ -552,6 +573,7 @@ void NetBuffer::addDouble( double d )
     POSH_DoubleBits( d, (posh_byte_t*) this->buffer+offset );
     offset += tmpsize;
 }
+
 double NetBuffer::getDouble()
 {
     CHECK_NB( NB_DOUBLE );
@@ -562,6 +584,7 @@ double NetBuffer::getDouble()
     offset += sizeof (s);
     return s;
 }
+
 void NetBuffer::addShort( unsigned short s )
 {
     ADD_NB( NB_SHORT );
@@ -570,6 +593,7 @@ void NetBuffer::addShort( unsigned short s )
     POSH_WriteU16ToBig( this->buffer+offset, s );
     offset += tmpsize;
 }
+
 unsigned short NetBuffer::getShort()
 {
     CHECK_NB( NB_SHORT );
@@ -581,6 +605,7 @@ unsigned short NetBuffer::getShort()
     offset += sizeof (s);
     return s;
 }
+
 void NetBuffer::addInt32( int i )
 {
     ADD_NB( NB_INT32 );
@@ -589,6 +614,7 @@ void NetBuffer::addInt32( int i )
     POSH_WriteS32ToBig( this->buffer+offset, i );
     offset += tmpsize;
 }
+
 int NetBuffer::getInt32()
 {
     CHECK_NB( NB_INT32 );
@@ -599,6 +625,7 @@ int NetBuffer::getInt32()
     offset += sizeof (s);
     return s;
 }
+
 void NetBuffer::addUInt32( unsigned int i )
 {
     ADD_NB( NB_UINT32 );
@@ -607,6 +634,7 @@ void NetBuffer::addUInt32( unsigned int i )
     POSH_WriteU32ToBig( this->buffer+offset, i );
     offset += tmpsize;
 }
+
 unsigned int NetBuffer::getUInt32()
 {
     CHECK_NB( NB_UINT32 );
@@ -617,6 +645,7 @@ unsigned int NetBuffer::getUInt32()
     offset += sizeof (s);
     return s;
 }
+
 void NetBuffer::addChar( char c )
 {
     ADD_NB( NB_CHAR );
@@ -625,6 +654,7 @@ void NetBuffer::addChar( char c )
     VsnetOSS::memcpy( buffer+offset, &c, sizeof (c) );
     offset += tmpsize;
 }
+
 char NetBuffer::getChar()
 {
     CHECK_NB( NB_CHAR );
@@ -635,6 +665,7 @@ char NetBuffer::getChar()
     offset += sizeof (c);
     return c;
 }
+
 void NetBuffer::addBuffer( const unsigned char *buf, int bufsize )
 {
     ADD_NB( NB_BUFFER );
@@ -642,6 +673,7 @@ void NetBuffer::addBuffer( const unsigned char *buf, int bufsize )
     VsnetOSS::memcpy( buffer+offset, buf, bufsize );
     offset += bufsize;
 }
+
 unsigned char* NetBuffer::extAddBuffer( int bufsize )
 {
     ADD_NB( NB_BUFFER );
@@ -662,6 +694,7 @@ unsigned char* NetBuffer::getBuffer( int offt )
     offset += offt;
     return tmp;
 }
+
 //Add and get a string with its length before the char * buffer part
 void NetBuffer::addString( const string &str )
 {
@@ -739,7 +772,6 @@ GFXMaterial NetBuffer::getGFXMaterial()
     mat.ea    = this->getFloat();
 
     mat.power = this->getFloat();
-
     return mat;
 }
 
@@ -820,10 +852,8 @@ GFXLightLocal NetBuffer::getGFXLightLocal()
 {
     CHECK_NB( NB_GFXLIGHTLOCAL );
     GFXLightLocal light;
-
     light.ligh    = this->getGFXLight();
     light.islocal = this->getChar();
-
     return light;
 }
 
@@ -838,6 +868,7 @@ unsigned int NetBuffer::getDataLength()
 {
     return offset;
 }
+
 unsigned int NetBuffer::getSize()
 {
     return size;

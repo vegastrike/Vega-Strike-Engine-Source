@@ -829,9 +829,10 @@ int lstat( const char *name, struct stat *buf )
 #endif /* HAVE_LSTAT */
 
 using namespace VsnetDownload::Client;
+
 #define CASE( a ) \
 case a:           \
-    return #a; break;
+    return #a; break
 
 const char * getState( State s )
 {

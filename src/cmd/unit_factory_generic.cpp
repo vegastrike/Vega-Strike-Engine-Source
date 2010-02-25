@@ -381,10 +381,12 @@ void UnitFactory::addBuffer( NetBuffer &netbuf, const Unit *un, bool allowSystem
      *       break;
      */
     case NEBULAPTR:
-        if (allowSystemTypes) addNebulaBuffer( netbuf, static_cast< const Nebula* > (un) );
+        if (allowSystemTypes)
+            addNebulaBuffer( netbuf, static_cast< const Nebula* > (un) );
         break;
     case ASTEROIDPTR:
-        if (allowSystemTypes) addAsteroidBuffer( netbuf, static_cast< const Asteroid* > (un) );
+        if (allowSystemTypes)
+            addAsteroidBuffer( netbuf, static_cast< const Asteroid* > (un) );
         break;
     default:
         break;

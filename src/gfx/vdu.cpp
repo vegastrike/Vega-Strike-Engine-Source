@@ -1300,6 +1300,7 @@ static void DrawGun( Vector pos, float w, float h, weapon_info::MOUNT_SIZE sz )
 }
 
 extern const char *DamagedCategory;
+
 void VDU::DrawDamage( Unit *parent )
 {
     //VDUdamage
@@ -1392,11 +1393,11 @@ void VDU::DrawDamage( Unit *parent )
                                  (chdamaged[1]*percent_working)+( cdamaged[1]*(1.0-percent_working) ),
                                  (chdamaged[2]*percent_working)+( cdamaged[2]*(1.0-percent_working) ),
                                  (chdamaged[3]*percent_working)+( cdamaged[3]*(1.0-percent_working) ) );
-            if (percent_working == 0.0) final_color = GFXColor( cdestroyed[0], cdestroyed[1], cdestroyed[2], cdestroyed[3] );               //dead = grey
+            if (percent_working == 0.0)
+                final_color = GFXColor( cdestroyed[0], cdestroyed[1], cdestroyed[2], cdestroyed[3] ); //dead = grey
             std::string trailer;
             if (percent_working < 1.0)
                 retval += colToString( final_color ).str;
-
             else
                 retval += fpstring.str;
             trailer = fpstring.str;
@@ -1413,7 +1414,8 @@ void VDU::DrawDamage( Unit *parent )
         XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "text_background_alpha", "0.0625" ) );
     GFXColor     tpbg = tp->bgcol;
     bool automatte    = (0 == tpbg.a);
-    if (automatte) tp->bgcol = GFXColor( 0, 0, 0, background_alpha );
+    if (automatte)
+        tp->bgcol = GFXColor( 0, 0, 0, background_alpha );
     tp->Draw( MangleString( retval,
                             _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0 ), scrolloffset, true, false, automatte );
     tp->bgcol = tpbg;
@@ -1514,7 +1516,7 @@ void VDU::DrawStarSystemAgain( float x, float y, float w, float h, VIEWSTYLE vie
  *       static bool iarmorcolorloaded=(vs_config->getColor("default","inner_shield_color",ishieldcolor,true),true);
  *       static bool marmorcolorloaded=(vs_config->getColor("default","middle_shield_color",mshieldcolor,true),true);
  *       static bool oarmorcolorloaded=(vs_config->getColor("default","outer_shield_color",oshieldcolor,true),true);
- */                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       //uncomment if these are ever actually used
+*/                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       //uncomment if these are ever actually used
 /*        static bool invert_view_shields = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","invert_view_shields","false"));
  *       DrawShield(target->FShieldData(),target->RShieldData(),target->LShieldData(),target->BShieldData(),x,y,w,h,invert_view_shields,
  *           GFXColor(ishieldcolor[0],ishieldcolor[1],ishieldcolor[2],ishieldcolor[3]),
@@ -1563,20 +1565,15 @@ static GFXColor MountColor( Mount *mnt )
     {
     case Mount::ACTIVE:
         return mountcolor;
-
-        goto drawme;
     case Mount::DESTROYED:
         mountcolor = GFXColor( 1, 0, 0, 1 );
         return mountcolor;
-
 drawme:
     case Mount::INACTIVE:
         mountcolor = GFXColor( 1, 1, 1, 1 );
         return mountcolor;
-
     case Mount::UNCHOSEN:
         return GFXColor( 1, 1, 1, 1 );
-
     case 127:
         return GFXColor( 0, .2, 0, 1 );
     }
@@ -1587,7 +1584,6 @@ void VDU::DrawWeapon( Unit *parent )
 {
     static bool drawweapsprite =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "draw_weapon_sprite", "false" ) );
-
     float  x, y, w, h;
     const float percent = .6;
     string buf( "#00ff00WEAPONS\n\n#ffffffGuns:#000000" );
@@ -1613,7 +1609,6 @@ void VDU::DrawWeapon( Unit *parent )
         }
         string   ammo     =
             (parent->mounts[i].ammo >= 0) ? string( "(" )+tostring( parent->mounts[i].ammo )+string( ")" ) : string( "" );
-
         GFXColor mntcolor = MountColor( &parent->mounts[i] );
         numave    += 1;
         average.r += mntcolor.r;

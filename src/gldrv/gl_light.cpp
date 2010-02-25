@@ -40,6 +40,7 @@ vector< gfx_light > *_llights = NULL;
 OpenGLLights *GLLights        = NULL; //{-1,-1,-1,-1,-1,-1,-1,-1};
 static stack< bool* >   GlobalEffects;
 static stack< GFXColor >GlobalEffectsAmbient;
+
 void /*GFXDRVAPI*/ GFXPushGlobalEffects()
 {
     bool *tmp = new bool[GFX_MAX_LIGHTS];
@@ -54,6 +55,7 @@ void /*GFXDRVAPI*/ GFXPushGlobalEffects()
     GlobalEffectsAmbient.push( _ambient_light[_currentContext] );
     GFXLightContextAmbient( GFXColor( 0, 0, 0, 1 ) );
 }
+
 GFXBOOL /*GFXDRVAPI*/ GFXPopGlobalEffects()
 {
     if ( GlobalEffects.empty() )
@@ -95,18 +97,22 @@ GFXLight::GFXLight( const bool enabled,
     else
         this->disable();
 }
+
 void GFXLight::disable()
 {
     options &= (~GFX_LIGHT_ENABLED);
 }
+
 void GFXLight::enable()
 {
     options |= GFX_LIGHT_ENABLED;
 }
+
 bool GFXLight::attenuated() const
 {
     return (attenuate[0] != 1) || (attenuate[1] != 0) || (attenuate[2] != 0);
 }
+
 void GFXLight::apply_attenuate( bool attenuated )
 {
     options = attenuated
@@ -194,11 +200,13 @@ GFXBOOL /*GFXDRVAPI*/ GFXSetCutoff( const float ttcutoff )
     intensity_cutoff = ttcutoff;
     return GFXTRUE;
 }
+
 void /*GFXDRVAPI*/ GFXSetOptimalIntensity( const float intensity, const float saturate )
 {
     optintense = intensity;
     optsat     = saturate;
 }
+
 GFXBOOL /*GFXDRVAPI*/ GFXSetOptimalNumLights( const int numLights )
 {
     if (numLights > GFX_MAX_LIGHTS || numLights < 0)
@@ -234,6 +242,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXLightContextAmbient( const GFXColor &amb )
     glLightModelfv( GL_LIGHT_MODEL_AMBIENT, tmp );
     return GFXTRUE;
 }
+
 GFXBOOL /*GFXDRVAPI*/ GFXGetLightContextAmbient( GFXColor &amb )
 {
     if ( _currentContext >= _ambient_light.size() )

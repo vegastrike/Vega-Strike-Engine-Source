@@ -19,6 +19,7 @@ extern Texture * createTexture( char const *ccc,
                                 int j = 0,
                                 unsigned char c = GFXFALSE,
                                 int i = 65536 );
+
 extern Logo * createLogo( int numberlogos,
                           Vector *center,
                           Vector *normal,
@@ -27,6 +28,7 @@ extern Logo * createLogo( int numberlogos,
                           float offset,
                           Texture *Dec,
                           Vector *Ref );
+
 #ifdef __cplusplus
 extern "C"
 {

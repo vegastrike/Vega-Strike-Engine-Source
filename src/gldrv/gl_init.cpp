@@ -150,6 +150,7 @@ typedef GLubyte*GET_GL_PTR_TYP;
 #if defined (CG_SUPPORT)
 CG_Cloak *cloak_cg = new CG_Cloak();
 #endif
+
 /* CENTRY */
 int vsExtensionSupported( const char *extension )
 {
@@ -184,6 +185,7 @@ int vsExtensionSupported( const char *extension )
     }
     return 0;
 }
+
 void init_opengl_extensions()
 {
     const unsigned char *extensions = glGetString( GL_EXTENSIONS );
@@ -348,9 +350,9 @@ void init_opengl_extensions()
         }
     } else {
 #endif
-    VSFileSystem::vs_fprintf( stderr, "OpenGL::Accurate Fog Distance unsupported\n" );
+      VSFileSystem::vs_fprintf( stderr, "OpenGL::Accurate Fog Distance unsupported\n" );
 #ifdef GL_FOG_DISTANCE_MODE_NV
-}
+    }
 #endif
     if ( vsExtensionSupported( "GL_ARB_texture_compression" ) ) {
         VSFileSystem::vs_fprintf( stderr, "OpenGL::Generic Texture Compression supported\n" );
@@ -434,13 +436,16 @@ static void initfov()
      *  }
      */
 }
+
 static void Reshape( int x, int y )
 {
     g_game.x_resolution = x;
     g_game.y_resolution = y;
     VSFileSystem::vs_fprintf( stderr, "Reshaping %d %d", x, y );
 }
+
 extern void GFXInitTextureManager();
+
 void GFXInit( int argc, char **argv )
 {
     winsys_init( &argc, argv, "Vega Strike", "vega.ico" );

@@ -62,6 +62,7 @@ void EventManager::initializeEventManager( void )
 }
 
 static std::vector< EventResponder* >deleteQueue;
+
 void EventManager::addToDeleteQueue( EventResponder *controlToDelete )
 {
     if ( controlToDelete == NULL || find( deleteQueue.begin(), deleteQueue.end(), controlToDelete ) != deleteQueue.end() ) {
@@ -189,7 +190,8 @@ void EventManager::sendInputEvent( const InputEvent &event )
 //Constructor isn't public.  Use initializeEventManager.
 EventManager::EventManager( void ) :
     m_mouseLoc( 0.0, 0.0 )
-{}
+{
+}
 
 //Destructor.
 EventManager::~EventManager( void ) {}
@@ -225,6 +227,7 @@ static float MouseXTo2dX( int x )
     //Result in float to round-off at the end.  Gets prettier numbers. :-)
     return ( 2.0*( (double) x+0.5 ) )/g_game.x_resolution-1.0;
 }
+
 static float MouseYTo2dY( int y )
 {
     //See explanation of x.

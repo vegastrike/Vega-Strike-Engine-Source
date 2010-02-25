@@ -176,7 +176,9 @@ void evaluateViews()
     //VSFileSystem::Fprintf (stderr,"trans %f,%f,%f",transview[3],transview[7],transview[11]);
 #undef M
 }
+
 Vector eye, center, up;
+
 void getInverseProjection( float* &inv )
 {
     inv = invprojection;
@@ -209,6 +211,7 @@ float GFXGetZPerspective( const float z )
     //Translate into euclidean coordinates and return euclidean x
     return hx/hw;
 }
+
 float GFXGetXInvPerspective()
 {
     return /*invprojection[11]*  */ invprojection[0];     //invprojection[15];//should be??  c/d == invproj[15]
@@ -418,6 +421,7 @@ static void gl_Frustum( float left, float right, float bottom, float top, float 
     GFXGetFrustumVars( false, &left, &right, &bottom, &top, &nearval, &farval );
     GFXFrustum( projection, invprojection, left, right, bottom, top, nearval, farval );
 }
+
 void GFXGetFrustumVars( bool retr, float *l, float *r, float *b, float *t, float *n, float *f )
 {
     static float nnear, ffar, left, right, bot, top;     //Visual C++ reserves near and far
@@ -491,16 +495,13 @@ void GFXFrustum( float *m, float *i, float left, float right, float bottom, floa
     M( 3, 3 ) = (float) c/d;
 #undef M
 }
+
 void /*GFXDRVAPI*/ GFXPerspective( float fov, float aspect, float znear, float zfar, float cockpit_offset )
 {
     //gluPerspective (fov,aspect,znear,zfar);
-
     float xmin, xmax, ymin, ymax;
-
     ymax  = znear*tanf( fov*M_PI/( (float) 360.0 ) );       //78.0 --> 4.7046
-
     ymin  = -ymax;     //-4.7046
-
     xmin  = (ymin-cockpit_offset/2)*aspect;       //-6.2571
     xmax  = (ymax+cockpit_offset/2)*aspect;       //6.2571
     ymin -= cockpit_offset;
@@ -518,7 +519,6 @@ void /*GFXDRVAPI*/ GFXParallel( float left, float right, float bottom, float top
     tx = -(right+left)/(right-left);
     ty = -(top+bottom)/(top-bottom);
     tz = -(farval+nearval)/(farval-nearval);
-
 #define M( row, col ) m[col*4+row]
     M( 0, 0 ) = x;
     M( 0, 1 ) = 0.0F;
@@ -538,7 +538,6 @@ void /*GFXDRVAPI*/ GFXParallel( float left, float right, float bottom, float top
     M( 3, 3 ) = 1.0F;
 #undef M
     GFXLoadMatrix( PROJECTION, projection );
-
     GFXGetFrustumVars( false, &left, &right, &bottom, &top, &nearval, &farval );
 }
 
@@ -555,9 +554,7 @@ static void LookAtHelper( float eyex,
     float m[16];
     float x[3], y[3], z[3];
     float mag;
-
     /* Make rotation matrix */
-
     /* Z vector */
     z[0] = eyex-centerx;
     z[1] = eyey-centery;
@@ -573,7 +570,6 @@ static void LookAtHelper( float eyex,
     y[0] = upx;
     y[1] = upy;
     y[2] = upz;
-
     /* X vector = Y cross Z */
     //x[0] =  z[1]*y[2] - z[2]*y[1];
     //x[1] = -z[0]*y[2] + z[2]*y[0];
@@ -581,7 +577,6 @@ static void LookAtHelper( float eyex,
     x[0] = y[1]*z[2]-y[2]*z[1];
     x[1] = -y[0]*z[2]+y[2]*z[0];
     x[2] = y[0]*z[1]-y[1]*z[0];
-
     /* Recompute Y = Z cross X */
     //y[0] =  x[1]*z[2] - x[2]*z[1];
     //y[1] = -x[0]*z[2] + x[2]*z[0];
@@ -589,12 +584,10 @@ static void LookAtHelper( float eyex,
     y[0] = z[1]*x[2]-z[2]*x[1];
     y[1] = -z[0]*x[2]+z[2]*x[0];
     y[2] = z[0]*x[1]-z[1]*x[0];
-
     /* mpichler, 19950515 */
     /* cross product gives area of parallelogram, which is < 1.0 for
      * non-perpendicular unit-length vectors; so normalize x, y here
      */
-
     mag = sqrtf( x[0]*x[0]+x[1]*x[1]+x[2]*x[2] );
     if (mag) {
         x[0] /= mag;
@@ -624,16 +617,13 @@ static void LookAtHelper( float eyex,
     M( 3, 1 ) = 0.0;
     M( 3, 2 ) = 0.0;
     M( 3, 3 ) = 1.0;
-
     float tm[16];
 #ifdef WIN32
     ZeroMemory( tm, sizeof (tm) );
 #else
     bzero( tm, sizeof (tm) );
 #endif
-
 #undef M
-
 #define M( row, col ) tm[col*4+row]
     M( 0, 0 ) = 1.0;
     M( 0, 3 ) = -eyex;
@@ -643,9 +633,7 @@ static void LookAtHelper( float eyex,
     M( 2, 3 ) = -eyez;
     M( 3, 3 ) = 1.0;
 #undef M
-
     MultMatrix( view, m, tm );
-
 /***
  *   float dis = sqrtf(upx*upx+upy*upy);
  *  Identity (tm);
@@ -661,7 +649,6 @@ static void LookAtHelper( float eyex,
  *  M(3,3) = 1.0;
  * #undef M
  ***/                                                                                                                                                                                                                                                                                                    //old hack to twiddle the texture in the xy plane
-
 #ifdef NV_CUBE_MAP
     //FIXME--ADD CAMERA MATRICES
     //the texture matrix must be used to rotate the texgen-computed
@@ -674,7 +661,6 @@ static void LookAtHelper( float eyex,
     GFXActiveTexture( 1 );
     glMatrixMode( GL_TEXTURE );
     glLoadIdentity();
-
     //Vector (centerx,centery,centerz).Cross (Vector (1,0,0));  DID NOT TRANSFORM THE ORIENTATION VECTOR TO REVERSE CAMERASPACE
     Vector axis( centerx, centery, centerz );
     Vector cubemapincamspace( eyex, eyey, eyez );
@@ -686,7 +672,6 @@ static void LookAtHelper( float eyex,
     glRotatef( theta, axis.i, axis.j, axis.k );
     //ok do matrix math to rotate by theta on axis  those ..
     GFXActiveTexture( 0 );
-
 #else
     /*	glTranslatef(.5f,.5f,.4994f);
      *    glMultMatrixf(tm);
@@ -708,11 +693,14 @@ void /*GFXDRVAPI*/ GFXLookAt( Vector eye, Vector center, Vector up )
     centerz = center.k;
     GFXLoadMatrix( VIEW, view );
 }
+
 float frust[6][4];
+
 float /*GFXDRVAPI*/ GFXSphereInFrustum( const Vector &Cnt, float radius )
 {
     return GFXSphereInFrustum( frust, Cnt, radius );
 }
+
 float /*GFXDRVAPI*/ GFXSphereInFrustum( float f[6][4], const Vector &Cnt, float radius )
 {
     int   p;
@@ -730,6 +718,7 @@ void /*GFXDRVAPI*/ GFXGetFrustum( float f[6][4] )
 {
     f = frust;
 }
+
 void /*GFXDRVAPI*/ GFXCalculateFrustum()
 {
     GFXCalculateFrustum( frust, view, projection );

@@ -32,6 +32,7 @@ static void TerrainMakeDeactive( const TerrainTexture text )
 
 typedef std::vector< TextureIndex >  vecTextureIndex;
 typedef std::vector< TerrainTexture >vecTextureStar;
+
 /**
  * Draws the heightfield represented by this tree
  * Returns teh number of triangles rendered (not including multipass

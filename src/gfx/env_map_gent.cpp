@@ -36,12 +36,14 @@ struct RGBColor
 {
     float r, b, g;
 };
+
 struct Light
 {
     Vector   Dir;
     RGBColor Ambient;
     RGBColor Intensity;
 };
+
 struct Material
 {
     RGBColor Ka;
@@ -52,6 +54,7 @@ struct Material
 
 static Light    L[NumLights];
 static Material M;
+
 static float Power( float A, int B )
 {
     float res = 1.;
@@ -59,6 +62,7 @@ static float Power( float A, int B )
         res *= A;
     return res;
 }
+
 static void Lighting( RGBColor &Col, const Vector &Norm )
 {
     static float OONL = 1./NumLights;
@@ -77,24 +81,27 @@ static void Lighting( RGBColor &Col, const Vector &Norm )
         if (Col.g < 0) Col.g = 0;
     }
 }
+
 const int   lmwid      = 512;
 const int   lmwido2    = lmwid/2;
 const float ooWIDTHo2  = 2./lmwid;
 const float PIoWIDTHo2 = 2*3.1415926535/lmwid;
-
 const char  bytepp     = 3;
+
 struct CubeCoord
 {
     float s;
     float t;
     char  TexMap;    //0 = front, 1=back,2=right,3=left,4=up,5=down
 };
+
 static float abso( float x )
 {
     if (x > 0)
         return x;
     else return -x;
 }
+
 static void gluSphereMap( CubeCoord &Tex, Vector Normal, float Theta )
 {
     Tex.TexMap = 0;
@@ -107,6 +114,7 @@ static void gluSphereMap( CubeCoord &Tex, Vector Normal, float Theta )
         Tex.s = Theta;
     }
 }
+
 static void TexMap( CubeCoord &Tex, Vector Normal )
 {
     float r[6];
@@ -168,6 +176,7 @@ static void TexMap( CubeCoord &Tex, Vector Normal )
         break;
     }
 }
+
 static bool LoadTex( char *FileName, unsigned char scdata[lmwid][lmwid][3] )
 {
     using namespace VSFileSystem;
@@ -370,6 +379,7 @@ static void Spherize( CubeCoord Tex[lmwid][lmwid], CubeCoord gluSph[lmwid][lmwid
         }
     delete[] Data;
 }
+
 static void GenerateSphereMap()
 {
     //float SinPhi;
@@ -427,6 +437,7 @@ static void GenerateSphereMap()
     ::VSImage image;
     image.WriteImage( (char*) OutputName, LightMap, PngImage, lmwid, lmwid, false, 8, TextureFile );
 }
+
 void EnvironmentMapGeneratorMain( const char *inpt, const char *outpt, float a, float m, float p, bool w )
 {
     affine   = a;
