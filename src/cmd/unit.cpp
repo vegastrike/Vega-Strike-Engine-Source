@@ -19,10 +19,23 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
+#ifdef VEGASERVER_COMPILING
+#ifndef __UNIT_CPP__
+#define __UNIT_CPP__
+#endif
+#else
+#include "unit.h"
+#endif
+
+#ifndef __UNIT_CPP__
+
 #include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "file_main.h"
 #include "gfx/halo.h"
+#include "gfx/halo_system.h"
+#include "gfx/quaternion.h"
+#include "gfx/matrix.h"
 
 #include "unit_factory.h"
 
@@ -37,7 +50,7 @@
 #include "gfx/cockpit.h"
 #include "config_xml.h"
 #include "images.h"
-#include "gfx/planetary_transform.h"
+//#include "gfx/planetary_transform.h"
 ///for saving features
 #include "main_loop.h"
 #include "script/mission.h"
@@ -52,11 +65,14 @@
 //#include "unit_template.h"
 //#include "gfx/animation.h"
 #include "gfx/point_to_cam.h"
+
+#include "unit_bsp.h"
+//these .cpp files should be renamed to .h; they contain template functions...
+//--some of them GameUnit<> member functions, at that --chuck_starchaser
 #include "unit_jump.cpp"
 #include "unit_customize.cpp"
 #include "unit_damage.cpp"
 #include "unit_physics.cpp"
-#include "unit_bsp.h"
 #include "unit_click.cpp"
 #include "base_util.h"
 
@@ -74,6 +90,52 @@ extern bool   cam_setup_phase;
 /**** MOVED FROM BASE_INTERFACE.CPP ****/
 extern string getCargoUnitName( const char *name );
 
+template < class UnitType >GameUnit< UnitType >::GameUnit( int ) : sparkle_accum( 0 )
+    , phalos( new HaloSystem() )
+{
+    this->Unit::Init();
+}
+
+template < class UnitType >GameUnit< UnitType >::GameUnit( std::vector< Mesh* > &meshes, bool SubU, int fact ) :
+    UnitType( meshes, SubU, fact )
+    , sparkle_accum( 0 )
+    , phalos( new HaloSystem() )
+{}
+
+template < class UnitType >GameUnit< UnitType >::GameUnit( const char *filename,
+                                                           bool SubU,
+                                                           int faction,
+                                                           std::string unitModifications,
+                                                           Flightgroup *flightgrp,
+                                                           int fg_subnumber,
+                                                           string *netxml ) : sparkle_accum( 0 )
+    , phalos( new HaloSystem() )
+{
+    Unit::Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber, netxml );
+}
+
+template < class UnitType >GameUnit< UnitType >::~GameUnit()
+{
+/*    if (this->pImage->pHudImage)
+ *       delete this->pImage->pHudImage;
+ *   if (this->pImage->explosion) {
+ *       delete this->pImage->explosion;
+ *       this->pImage->explosion = NULL;
+ *   }*/
+    //VSFileSystem::vs_fprintf (stderr,"Freeing Unit %s\n",name.c_str());
+    for (unsigned int meshcount = 0; meshcount < this->meshdata.size(); meshcount++)
+        if (this->meshdata[meshcount])
+            delete this->meshdata[meshcount];
+    this->meshdata.clear();
+    //delete phalos;
+}
+
+template < class UnitType >
+int GameUnit< UnitType >::nummesh() const
+{
+    return ( (int) this->meshdata.size() )-1;
+}
+
 template < class UnitType >
 void GameUnit< UnitType >::UpgradeInterface( Unit *baseun )
 {
@@ -83,21 +145,16 @@ void GameUnit< UnitType >::UpgradeInterface( Unit *baseun )
     BaseUtil::LoadBaseInterfaceAtDock( basename, baseun, this );
 }
 
-template < class UnitType >GameUnit< UnitType >::GameUnit( int /*dummy*/ ) : sparkle_accum( 0 )
-{
-    this->Unit::Init();
-}
-
 #define PARANOIA .4
 
 extern void UncheckUnit( Unit *un );
 
-static float perspectiveFactor( float d )
+inline static float perspectiveFactor( float d )
 {
     if (d > 0)
         return g_game.x_resolution*GFXGetZPerspective( d );
     else
-        return 1.f;
+        return 1.0f;
 }
 
 /*
@@ -130,23 +187,22 @@ static float perspectiveFactor( float d )
 template < class UnitType >
 VSSprite*GameUnit< UnitType >::getHudImage() const
 {
-    return this->image->hudImage;
+    return this->pImage->pHudImage;
 }
 
-template < class UnitType >GameUnit< UnitType >::GameUnit( std::vector< Mesh* > &meshes, bool SubU,
-                                                           int fact ) : UnitType( meshes, SubU, fact )
-    , sparkle_accum( 0 ) {}
-extern void update_ani_cache();
-template < class UnitType >GameUnit< UnitType >::GameUnit( const char *filename,
-                                                           bool SubU,
-                                                           int faction,
-                                                           std::string unitModifications,
-                                                           Flightgroup *flightgrp,
-                                                           int fg_subnumber,
-                                                           string *netxml ) : sparkle_accum( 0 )
+template < class UnitType >
+void GameUnit< UnitType >::addHalo( const char *filename,
+                                    const QVector &loc,
+                                    const Vector &size,
+                                    const GFXColor &col,
+                                    std::string halo_type,
+                                    float halo_speed )
 {
-    Unit::Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber, netxml );
+    phalos->AddHalo( filename, loc, size, col, halo_type, halo_speed );
 }
+
+extern void update_ani_cache();
+
 template < class UnitType >
 void GameUnit< UnitType >::Cloak( bool engage )
 {
@@ -159,20 +215,6 @@ void GameUnit< UnitType >::Cloak( bool engage )
     } else {
         UnitType::Cloak( engage );         //client side unit
     }
-}
-template < class UnitType >GameUnit< UnitType >::~GameUnit()
-{
-    if (this->image->hudImage)
-        delete this->image->hudImage;
-    if (this->image->explosion) {
-        delete this->image->explosion;
-        this->image->explosion = NULL;
-    }
-    //VSFileSystem::vs_fprintf (stderr,"Freeing Unit %s\n",name.c_str());
-    for (unsigned int meshcount = 0; meshcount < this->meshdata.size(); meshcount++)
-        if (this->meshdata[meshcount])
-            delete this->meshdata[meshcount];
-    this->meshdata.clear();
 }
 
 template < class UnitType >
@@ -222,11 +264,13 @@ void GameUnit< UnitType >::UpdateHudMatrix( int whichcam )
     _Universe->AccessCamera( whichcam )->SetOrientation( tmp, q, r );
 
     _Universe->AccessCamera( whichcam )->SetPosition( Transform( ctm,
-                                                                this->image->CockpitCenter.Cast() ),
+                                                                this->pImage->CockpitCenter.Cast() ),
                                                      this->GetWarpVelocity(), this->GetAngularVelocity(), this->GetAcceleration() );
 }
+
 extern bool flickerDamage( Unit *un, float hullpercent );
 extern int cloakVal( int cloakint, int cloakminint, int cloakrateint, bool cloakglass ); //short fix?
+
 template < class UnitType >
 void GameUnit< UnitType >::DrawNow( const Matrix &mato, float lod )
 {
@@ -243,7 +287,6 @@ void GameUnit< UnitType >::DrawNow( const Matrix &mato, float lod )
 #else
     const float  vlpqrScaleFactor = 1.f;
 #endif
-
     unsigned int i;
     Matrix mat( mato );
     if (this->graphicOptions.FaceCamera) {
@@ -256,7 +299,7 @@ void GameUnit< UnitType >::DrawNow( const Matrix &mato, float lod )
     }
     int cloak = this->cloaking;
     if (this->cloaking > this->cloakmin)
-        cloak = cloakVal( cloak, this->cloakmin, this->image->cloakrate, this->image->cloakglass );
+        cloak = cloakVal( cloak, this->cloakmin, this->pImage->cloakrate, this->pImage->cloakglass );
     for (i = 0; (int) i < this->nummesh(); i++) {
         //NOTE LESS THAN OR EQUALS...to cover shield mesh
         if (this->meshdata[i] == NULL)
@@ -281,7 +324,7 @@ void GameUnit< UnitType >::DrawNow( const Matrix &mato, float lod )
         haloalpha = ( (float) cloak )/2147483647;
     float  enginescale = this->GetVelocity().MagnitudeSquared();
 #ifdef CAR_SIM
-    Vector Scale( 1, image->ecm, computer.set_speed );
+    Vector Scale( 1, pImage->ecm, computer.set_speed );
 #else
     float  cmas = this->computer.max_ab_speed()*this->computer.max_ab_speed();
     if (cmas == 0)
@@ -296,7 +339,7 @@ void GameUnit< UnitType >::DrawNow( const Matrix &mato, float lod )
     for (i = 0; (int) i < nummounts; i++) {
         static bool draw_mounts = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "draw_weapons", "false" ) );
         Mount *mahnt = &this->mounts[i];
-        if (draw_mounts) {
+        if (draw_mounts)
 //Mesh * gun = WeaponMeshCache::getCachedMutable (mounts[i]->type->weapon_name);
             if (mahnt->xyscale != 0 && mahnt->zscale != 0) {
                 Mesh *gun = mahnt->type->gun;
@@ -326,13 +369,13 @@ void GameUnit< UnitType >::DrawNow( const Matrix &mato, float lod )
                     }
                 }
             }
-        }
     }
     Vector accel    = this->GetAcceleration();
     float  maxaccel = this->GetMaxAccelerationInDirectionOf( mat.getR(), true );
     Vector velocity = this->GetVelocity();
-    if ( halos.ShouldDraw( mat, velocity, accel, maxaccel, cmas ) && !( this->docked&(UnitType::DOCKED|UnitType::DOCKED_INSIDE) ) )
-        halos.Draw( mat, Scale, cloak, 0, this->GetHullPercent(), velocity, accel, maxaccel, cmas, this->faction );
+    if ( phalos->ShouldDraw( mat, velocity, accel, maxaccel,
+                             cmas ) && !( this->docked&(UnitType::DOCKED|UnitType::DOCKED_INSIDE) ) )
+        phalos->Draw( mat, Scale, cloak, 0, this->GetHullPercent(), velocity, accel, maxaccel, cmas, this->faction );
     if (rootunit == (const void*) this) {
         Mesh::ProcessZFarMeshes();
         Mesh::ProcessUndrawnMeshes();
@@ -340,7 +383,14 @@ void GameUnit< UnitType >::DrawNow( const Matrix &mato, float lod )
     }
 }
 
+template < class UnitType >
+void GameUnit< UnitType >::DrawNow()
+{
+    DrawNow( identity_matrix, 1000000000 );
+}
+
 extern double calc_blend_factor( double frac, int priority, int when_it_will_be_simulated, int cur_simulation_frame );
+
 template < class UnitType >
 void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &parentMatrix )
 {
@@ -350,13 +400,11 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
      *  bool topparent = _Universe->AccessCockpit()->GetParent()&&(_Universe->AccessCockpit()->GetParent()->owner == NULL);
      *  if (cam_setup_phase&&!ormygrampa&&(topparent||UnitType::SubUnits.empty()))
      *   return;*/
-
 #ifdef VARIABLE_LENGTH_PQR
     const float     vlpqrScaleFactor = SizeScaleFactor;
 #else
     const float     vlpqrScaleFactor = 1.f;
 #endif
-
     Matrix         *ctm;
     Matrix invview;
     Transformation *ct;
@@ -379,7 +427,6 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
         CalculateOrientation( pos, p, q, r, wid, hei, 0, false, ctm );
         VectorAndPositionToMatrix( invview, p*magp, q*magq, r*magr, ctm->p );
 //_Universe->AccessCamera()->GetView(invview);
-
         ctm = &invview;
     }
 #ifdef PERFRAMESOUND
@@ -387,8 +434,8 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
 #endif
     int cloak = this->cloaking;
     if (this->cloaking > this->cloakmin) {
-        cloak = (int) (this->cloaking-interpolation_blend_factor*this->image->cloakrate*SIMULATION_ATOM);
-        cloak = cloakVal( cloak, this->cloakmin, this->image->cloakrate, this->image->cloakglass );
+        cloak = (int) (this->cloaking-interpolation_blend_factor*this->pImage->cloakrate*SIMULATION_ATOM);
+        cloak = cloakVal( cloak, this->cloakmin, this->pImage->cloakrate, this->pImage->cloakglass );
     }
     unsigned int i;
     if ( (this->hull < 0) && (!cam_setup_phase) )
@@ -427,7 +474,6 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                 if ( (d == 0) != (tmp == 0) )
                     VSFileSystem::vs_fprintf( stderr, "Mismatch for %s with Box being %d", name.c_str(), tmp );
 #endif
-
                 //VSFileSystem::vs_fprintf (stderr,"%s %d ",name.c_str(),i);
                 double d = GFXSphereInFrustum( TransformedPosition,
                                                minmeshradius+this->meshdata[i]->clipRadialSize()*vlpqrScaleFactor );
@@ -485,7 +531,7 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
         if (this->selected) {
             //static bool doInputDFA=XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
             //if (doInputDFA)
-            //image->selectionBox->Draw(g_game.x_resolution,*ctm);
+            //pImage->selectionBox->Draw(g_game.x_resolution,*ctm);
         }
     } else {
         _Universe->AccessCockpit()->SetupViewPort();         ///this is the final, smoothly calculated cam
@@ -511,7 +557,7 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
     for (i = 0; (int) i < nummounts; i++) {
         static bool draw_mounts = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "draw_weapons", "false" ) );
         Mount *mahnt = &this->mounts[i];
-        if (draw_mounts && On_Screen) {
+        if (draw_mounts && On_Screen)
 //Mesh * gun = WeaponMeshCache::getCachedMutable (mounts[i]->type->weapon_name);
             if (mahnt->xyscale != 0 && mahnt->zscale != 0) {
                 Mesh *gun = mahnt->type->gun;
@@ -541,26 +587,23 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                     }
                 }
             }
-        }
-        if (this->mounts[i].type->type == weapon_info::BEAM) {
-            if (this->mounts[i].ref.gun) {
+        if (this->mounts[i].type->type == weapon_info::BEAM)
+            if (this->mounts[i].ref.gun)
                 this->mounts[i].ref.gun->Draw( *ct, this->WarpMatrix( *ctm ),
                                                ( (this->mounts[i].size&weapon_info::AUTOTRACKING)
                                                 && this->mounts[i].time_to_lock
                                                 <= 0 ) ? Unit::Target() : NULL, this->computer.radar.trackingcone );
-            }
-        }
     }
     float haloalpha = 1;
     if (cloak >= 0)
         haloalpha = ( (float) cloak )/2147483647;
-    if ( On_Screen && (halos.NumHalos() > 0) && !( this->docked&(UnitType::DOCKED|UnitType::DOCKED_INSIDE) ) ) {
+    if ( On_Screen && (phalos->NumHalos() > 0) && !( this->docked&(UnitType::DOCKED|UnitType::DOCKED_INSIDE) ) ) {
         Vector accel    = this->GetAcceleration();
         float  maxaccel = this->GetMaxAccelerationInDirectionOf( this->WarpMatrix( *ctm ).getR(), true );
         Vector velocity = this->GetVelocity();
         //float enginescale = this->GetVelocity().MagnitudeSquared();
 #ifdef CAR_SIM
-        Vector Scale( 1, image->ecm, computer.set_speed );
+        Vector Scale( 1, pImage->ecm, computer.set_speed );
 #else
         float  cmas = this->computer.max_ab_speed()*this->computer.max_ab_speed();
         if (cmas == 0)
@@ -572,11 +615,10 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
 #endif
         //WARNING: cmas is not a valid maximum speed for the upcoming multi-direction thrusters,
         //nor is maxaccel. Instead, each halo should have its own limits specified in units.csv
-        if ( halos.ShouldDraw( this->WarpMatrix( *ctm ), velocity, accel, maxaccel, cmas ) ) {
-            halos.Draw( this->WarpMatrix( *ctm ), Scale, cloak,
-                        (_Universe->AccessCamera()->GetNebula() == this->nebula && this->nebula != NULL) ? -1 : 0,
-                        this->GetHull() > 0 ? damagelevel : 1.0, velocity, accel, maxaccel, cmas, this->faction );
-        }
+        if ( phalos->ShouldDraw( this->WarpMatrix( *ctm ), velocity, accel, maxaccel, cmas ) )
+            phalos->Draw( this->WarpMatrix( *ctm ), Scale, cloak,
+                          (_Universe->AccessCamera()->GetNebula() == this->nebula && this->nebula != NULL) ? -1 : 0,
+                          this->GetHull() > 0 ? damagelevel : 1.0, velocity, accel, maxaccel, cmas, this->faction );
     }
     if ( On_Screen && !UnitType::graphicOptions.NoDamageParticles
         && !( this->docked&(UnitType::DOCKED|UnitType::DOCKED_INSIDE) ) ) {
@@ -608,6 +650,62 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
         }
     }
 }
+
+template < class UnitType >
+void GameUnit< UnitType >::Draw( const Transformation &quat )
+{
+    Draw( quat, identity_matrix );
+}
+
+template < class UnitType >
+void GameUnit< UnitType >::Draw()
+{
+    Draw( identity_transformation, identity_matrix );
+}
+
+template < class UnitType >
+Matrix GameUnit< UnitType >::WarpMatrix( const Matrix &ctm ) const
+{
+    static float cutoff =
+        XMLSupport::parse_float( vs_config->getVariable( "graphics", "warp_stretch_cutoff",
+                                                         "50000" ) )*XMLSupport::parse_float(
+            vs_config->getVariable( "physics", "game_speed", "1" ) );
+    static float cutoffcutoff = cutoff*cutoff;
+    static bool  only_stretch_in_warp =
+        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "only_stretch_in_warp", "true" ) );
+    if ( this->GetWarpVelocity().MagnitudeSquared() < cutoffcutoff
+        || (only_stretch_in_warp && this->graphicOptions.InWarp == 0) ) {
+        return ctm;
+    } else {
+        Matrix k( ctm );
+
+        float  speed = this->GetWarpVelocity().Magnitude();
+        //Matrix scalar=identity_matrix;
+        static float maxregion0stretch =
+            XMLSupport::parse_float( vs_config->getVariable( "graphics", "warp_stretch_region0_max", "1" ) );
+
+        static float maxstretch = XMLSupport::parse_float( vs_config->getVariable( "graphics", "warp_stretch_max", "4" ) );
+        static float maxspeed   =
+            XMLSupport::parse_float( vs_config->getVariable( "graphics", "warp_stretch_max_speed",
+                                                             "1000000" ) )
+            *XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
+        static float maxregion0speed =
+            XMLSupport::parse_float( vs_config->getVariable( "graphics", "warp_stretch_max_region0_speed",
+                                                             "100000" ) )
+            *XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
+        float stretchregion0length = maxregion0stretch*(speed-cutoff)/(maxregion0speed-cutoff);
+        float stretchlength =
+            (maxstretch
+             -maxregion0stretch)*(speed-maxregion0speed)/(maxspeed-maxregion0speed+.06125)+maxregion0stretch;
+        if (stretchlength > maxstretch)
+            stretchlength = maxstretch;
+        if (stretchregion0length > maxregion0stretch)
+            stretchregion0length = maxregion0stretch;
+        ScaleMatrix( k, Vector( 1, 1, 1+(speed > maxregion0speed ? stretchlength : stretchregion0length) ) );
+        return k;
+    }
+}
+
 using Orders::FireAt;
 
 #if 0
@@ -628,5 +726,51 @@ void GameUnit< UnitType >::SwapInHalos()
         //halos[i]->SetDimensions (x*(1024),y*(1024));
     }
 }
+#endif
+
+/////////////////////////////////////////////////////
+//explicit instantiations, added by chuck_starchaser:
+
+#ifndef VEGASERVER_COMPILING
+
+ #include "cmd/asteroid_generic.h"
+template class GameUnit< Asteroid >;
+
+ #include "cmd/building_generic.h"
+template class GameUnit< Building >;
+
+ #include "cmd/planet_generic.h"
+template class GameUnit< Planet >;
+
+ #include "cmd/unit_generic.h"
+template class GameUnit< Unit >;
+
+ #include "cmd/missile_generic.h"
+template class GameUnit< Missile >;
+
+ #include "cmd/nebula.h"
+template class GameUnit< Nebula >;
+
+ #include "cmd/enhancement.h"
+template class GameUnit< Enhancement >;
+
+//The unit types below don't compile; --probably they don't inherit from Unit.
+
+//#include "gfx/mesh.h"
+//template class GameUnit< Mesh >;
+
+//#include "cmd/script/flightgroup.h"
+//template class GameUnit< Flightgroup >;
+
+//#include "cmd/terrain.h"
+//template class GameUnit< Terrain >;
+
+//#include "cmd/cont_terrain.h"
+//template class GameUnit< ContinuousTerrain >;
+
+#endif
+
+/////////////////////////////////////////////////////
+
 #endif
 

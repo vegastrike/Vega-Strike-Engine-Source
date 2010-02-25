@@ -250,9 +250,9 @@ void NetServer::addClient( ClientPtr clt )
     cp->savegame->LoadSavedMissions();     //loads stuff in active_missions.
     if (dockedUnit) {
         int dockport = -1;
-        for (unsigned int i = 0; i < dockedUnit->image->dockedunits.size(); ++i) {
+        for (unsigned int i = 0; i < dockedUnit->pImage->dockedunits.size(); ++i) {
             Unit *tempun;
-            if ( ( tempun = dockedUnit->image->dockedunits[i]->uc.GetUnit() ) != NULL )
+            if ( ( tempun = dockedUnit->pImage->dockedunits[i]->uc.GetUnit() ) != NULL )
                 if (tempun == un)
                     dockport = i;
         }

@@ -2,7 +2,7 @@
 #include <string>
 #include <boost/version.hpp>
 #if BOOST_VERSION != 102800
-#include <boost/python/object.hpp>
+#include "cs_boostpythonobj.h"
 #include <boost/python/dict.hpp>
 typedef boost::python::dict       BoostPythonDictionary;
 #else

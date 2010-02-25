@@ -73,7 +73,7 @@ Unit * DockToSavedBases( int playernum, QVector &safevec )
         dock_position = UniverseUtil::SafeEntrancePoint( dock_position, plr->rSize() );
         plr->SetPosAndCumPos( dock_position );
 
-        vector< DockingPorts >dprt = closestUnit->image->dockingports;
+        vector< DockingPorts >dprt = closestUnit->pImage->dockingports;
         unsigned int i;
         for (i = 0;; i++) {
             if ( i >= dprt.size() ) {
@@ -84,7 +84,7 @@ Unit * DockToSavedBases( int playernum, QVector &safevec )
                 break;
         }
         plr->ForceDock( closestUnit, i );
-        closestUnit->image->clearedunits.push_back( plr );
+        closestUnit->pImage->clearedunits.push_back( plr );
         closestUnit->RequestPhysics();
         _Universe->AccessCockpit( playernum )->retry_dock = 0;
     } else {
@@ -164,7 +164,10 @@ void Universe::Init( const char *gal )
     this->galaxy = new GalaxyXML::Galaxy( gal );
     static bool firsttime = false;
     if (!firsttime) {
+//this #ifndef hack below by chuck_starchaser, to get around missing faction_util.o in vegaserver make list
+#ifndef VEGASERVER_COMPILING
         LoadFactionXML( "factions.xml" );
+#endif
         firsttime = true;
     }
     script_system = NULL;

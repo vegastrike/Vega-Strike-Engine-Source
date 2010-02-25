@@ -17,32 +17,42 @@ string inverseblend[16] = {
     "DESTALPHA",  "INVDESTALPHA",  "DESTCOLOR",   "INVDESTCOLOR",   "SRCALPHASAT",     "CONSTALPHA", "INVCONSTALPHA",
     "CONSTCOLOR", "INVCONSTCOLOR"
 };
+
 void fcloseInput( FILE *fp )
 {
     fclose( fp );
 }
+
 int aprintf( ... )
 {
     return 0;
 }
+
 FILE * aopen( ... )
 {
     return NULL;
 }
+
 #ifndef STANDALONE
+
 #define fprintf aprintf
 #define fopen aopen
 #define fclose aopen
+
 #else
+
 Texture * LoadTexture( string nam )
 {
     return new Texture( nam );
 }
+
 Texture * LoadAnimation( string Name )
 {
     return new Animation( Name );
 }
+
 #endif
+
 struct OrigMeshLoader
 {
     Mesh *m;
@@ -57,134 +67,200 @@ struct OrigMeshLoader
 //#define DLIST
 
 #ifdef DLIST
-#define GL_TRIANGLE 0
-#define GL_QUAD 0
-#define DLISTBEGINSTATE( stat )                                                \
-    if ( stat && (laststate != stat) ) {if (laststate != GL_COMPILE) glEnd();  \
-                                        glBegin( stat ); laststate = stat; }
-#define DLISTENDSTATE( stat ) if ( stat && (laststate != GL_COMPILE) ) {glEnd(); laststate = GL_COMPILE; }
-#define DLISTDOVERTEX( num )                                                                        \
-    glTexCoord2f( vtx.s, vtx.t ); glNormal3f( vtx.i, vtx.j, vtx.k ); glVertex3f( vtx.x*xml.scale.i, \
-                                                                                 vtx.y*xml.scale.j, \
-                                                                                 vtx.z*xml.scale.k );
+
+#define GL_TRIANGLE (0)
+#define GL_QUAD (0)
+#define DLISTBEGINSTATE( stat )                    \
+    do {                                           \
+        if ( stat && (laststate != stat) ) {       \
+            if (laststate != GL_COMPILE) glEnd();  \
+            glBegin( stat );                       \
+            laststate = stat;                      \
+        }                                          \
+    }                                              \
+    while (0)
+
+#define DLISTENDSTATE( stat )                      \
+    do {                                           \
+        if ( stat && (laststate != GL_COMPILE) ) { \
+            glEnd();                               \
+            laststate = GL_COMPILE;                \
+        }                                          \
+    }                                              \
+    while (0)
+
+#define DLISTDOVERTEX( num )               \
+    do {                                   \
+        glTexCoord2f( vtx.s, vtx.t );      \
+        glNormal3f( vtx.i, vtx.j, vtx.k ); \
+        glVertex3f( vtx.x*xml.scale.i,     \
+                    vtx.y*xml.scale.j,     \
+                    vtx.z*xml.scale.k      \
+                  );                       \
+    }                                      \
+    while (0)
+
 #else
+
 #define DLISTBEGINSTATE( stat )
 #define DLISTDOVERTEX( num )
 #define DLISTENDSTATE( stat )
+
 #endif
 
 //sets up the appropriate lists for the below functions to utilize
-#define BEGIN_GL_LINES( expectitems )                                               \
-    xml.active_list = &xml.lines; xml.active_ind = &xml.lineind; xml.num_vertices = \
-        2; xml.active_list->reserve( 2*expectitems ); xml.active_ind->reserve( 2*expectitems );
-#define BEGIN_GL_TRIANGLES( expectitems )                                            \
-    xml.active_list = &xml.tris; xml.active_ind = &xml.triind; xml.num_vertices = 3; \
-    xml.active_list->reserve( 3*expectitems ); xml.active_ind->reserve( 3*expectitems );
-#define BEGIN_GL_TRIANGLE( expectitems ) xml.trishade.push_back( flatshade );
-#define BEGIN_GL_QUADS( expectitems )                                               \
-    xml.active_list = &xml.quads; xml.active_ind = &xml.quadind; xml.num_vertices = \
-        4; xml.active_list->reserve( 4*expectitems ); xml.active_ind->reserve( 4*expectitems );
-#define BEGIN_GL_QUAD( expectitems ) xml.quadshade.push_back( flatshade );
-#define BEGIN_GL_TRIANGLE_FAN( expectitems )                                                                                \
-    xml.trifans.push_back( std::vector< GFXVertex > () ); xml.active_list =                                                 \
-        &xml.trifans.back(); xml.tfancnt = xml.trifanind.size(); xml.active_ind = &xml.trifanind; xml.active_list->reserve( \
-        expectitems ); xml.active_ind->reserve( expectitems );
-#define BEGIN_GL_QUAD_STRIP( expectitems )                                                                                \
-    xml.num_vertices = 4; xml.quadstrips.push_back( vector< GFXVertex > () );                                             \
-    xml.active_list  = &xml.quadstrips.back(); xml.qstrcnt = xml.quadstripind.size(); xml.active_ind = &xml.quadstripind; \
-    xml.active_list->reserve( expectitems ); xml.active_ind->reserve( expectitems );
-#define BEGIN_GL_TRIANGLE_STRIP( expectitems )                                                                        \
-    xml.num_vertices = 3; xml.tristrips.push_back( vector< GFXVertex > () );                                          \
-    xml.tstrcnt = xml.tristripind.size(); xml.active_ind = &xml.tristripind; xml.active_list->reserve( expectitems ); \
-    xml.active_ind->reserve( expectitems );
-#define BEGIN_GL_LINE_STRIP( expectitems )                                                                                  \
-    xml.num_vertices = 2; xml.linestrips.push_back( vector< GFXVertex > () );                                               \
-    xml.active_list  = &xml.linestrips.back(); xml.lstrcnt = xml.linestripind.size();   xml.active_ind = &xml.linestripind; \
-    xml.active_list->reserve( expectitems ); xml.active_ind->reserve( expectitems );
+#define BEGIN_GL_LINES( expectitems )                                                               \
+    do {                                                                                            \
+        xml.active_list = &xml.lines; xml.active_ind = &xml.lineind; xml.num_vertices =             \
+            2; xml.active_list->reserve( 2*expectitems ); xml.active_ind->reserve( 2*expectitems ); \
+    }                                                                                               \
+    while (0)
+
+#define BEGIN_GL_TRIANGLES( expectitems )                                                    \
+    do {                                                                                     \
+        xml.active_list = &xml.tris; xml.active_ind = &xml.triind; xml.num_vertices = 3;     \
+        xml.active_list->reserve( 3*expectitems ); xml.active_ind->reserve( 3*expectitems ); \
+    }                                                                                        \
+    while (0)
+
+#define BEGIN_GL_TRIANGLE( expectitems )       \
+    do {xml.trishade.push_back( flatshade ); } \
+    while (0)
+
+#define BEGIN_GL_QUADS( expectitems )                                                               \
+    do {                                                                                            \
+        xml.active_list = &xml.quads; xml.active_ind = &xml.quadind; xml.num_vertices =             \
+            4; xml.active_list->reserve( 4*expectitems ); xml.active_ind->reserve( 4*expectitems ); \
+    }                                                                                               \
+    while (0)
+
+#define BEGIN_GL_QUAD( expectitems )            \
+    do {xml.quadshade.push_back( flatshade ); } \
+    while (0)
+
+#define BEGIN_GL_TRIANGLE_FAN( expectitems )                                                                                    \
+    do {                                                                                                                        \
+        xml.trifans.push_back( std::vector< GFXVertex > () ); xml.active_list =                                                 \
+            &xml.trifans.back(); xml.tfancnt = xml.trifanind.size(); xml.active_ind = &xml.trifanind; xml.active_list->reserve( \
+            expectitems ); xml.active_ind->reserve( expectitems );                                                              \
+    }                                                                                                                           \
+    while (0)
+
+#define BEGIN_GL_QUAD_STRIP( expectitems )                                                                                    \
+    do {                                                                                                                      \
+        xml.num_vertices = 4; xml.quadstrips.push_back( vector< GFXVertex > () );                                             \
+        xml.active_list  = &xml.quadstrips.back(); xml.qstrcnt = xml.quadstripind.size(); xml.active_ind = &xml.quadstripind; \
+        xml.active_list->reserve( expectitems ); xml.active_ind->reserve( expectitems );                                      \
+    }                                                                                                                         \
+    while (0)
+
+#define BEGIN_GL_TRIANGLE_STRIP( expectitems )                                                                            \
+    do {                                                                                                                  \
+        xml.num_vertices = 3; xml.tristrips.push_back( vector< GFXVertex > () );                                          \
+        xml.tstrcnt = xml.tristripind.size(); xml.active_ind = &xml.tristripind; xml.active_list->reserve( expectitems ); \
+        xml.active_ind->reserve( expectitems );                                                                           \
+    }                                                                                                                     \
+    while (0)
+
+#define BEGIN_GL_LINE_STRIP( expectitems )                                                                                      \
+    do {                                                                                                                        \
+        xml.num_vertices = 2; xml.linestrips.push_back( vector< GFXVertex > () );                                               \
+        xml.active_list  = &xml.linestrips.back(); xml.lstrcnt = xml.linestripind.size();   xml.active_ind = &xml.linestripind; \
+        xml.active_list->reserve( expectitems ); xml.active_ind->reserve( expectitems );                                        \
+    }                                                                                                                           \
+    while (0)
 
 #define END_GL_LINES
 #define END_GL_TRIANGLES
 #define END_GL_TRIANGLE
 #define END_GL_QUADS
 #define END_GL_QUAD
-#define END_GL_TRIANGLE_FAN                                                                                                  \
-    {xml.nrmltrifan.reserve( xml.trifanind.size()*3 ); for (unsigned int i = xml.tfancnt+2; i < xml.trifanind.size(); i++) { \
-         xml.nrmltrifan.push_back( xml.trifanind[xml.tfancnt] );                                                             \
-         xml.nrmltrifan.push_back( xml.trifanind[i-1] );                                                                     \
-         xml.nrmltrifan.push_back( xml.trifanind[i] );                                                                       \
-     }                                                                                                                       \
-    }
-#define END_GL_QUAD_STRIP                                                                             \
-    {xml.nrmlquadstrip.reserve( xml.quadstripind.size()*(4/2) ); for (unsigned int i = xml.qstrcnt+3; \
-                                                                      i < xml.quadstripind.size();    \
-                                                                      i += 2) {                       \
-         xml.nrmlquadstrip.push_back( xml.quadstripind[i-3] );                                        \
-         xml.nrmlquadstrip.push_back( xml.quadstripind[i-2] );                                        \
-         xml.nrmlquadstrip.push_back( xml.quadstripind[i] );                                          \
-         xml.nrmlquadstrip.push_back( xml.quadstripind[i-1] );                                        \
-     }                                                                                                \
-    }
-#define END_GL_TRIANGLE_STRIP                                                \
-    {xml.nrmltristrip.reserve( xml.tristripind.size()*3 );                   \
-     for (unsigned int i = xml.tstrcnt+2; i < xml.tristripind.size(); i++) { \
-         if ( (i-xml.tstrcnt)%2 ) {                                          \
-             xml.nrmltristrip.push_back( xml.tristripind[i-2] );             \
-             xml.nrmltristrip.push_back( xml.tristripind[i-1] );             \
-             xml.nrmltristrip.push_back( xml.tristripind[i] );               \
-         }                                                                   \
-         else {                                                              \
-             xml.nrmltristrip.push_back( xml.tristripind[i-1] );             \
-             xml.nrmltristrip.push_back( xml.tristripind[i-2] );             \
-             xml.nrmltristrip.push_back( xml.tristripind[i] );               \
-         }                                                                   \
-     }                                                                       \
-    }
-#define END_GL_LINE_STRIP                                                                        \
-    {xml.nrmllinstrip.reserve( xml.linestripind.size()*2 ); for (unsigned int i = xml.lstrcnt+1; \
-                                                                 i < xml.linestripind.size();    \
-                                                                 i++) {                          \
-         xml.nrmllinstrip.push_back( xml.linestripind[i-1] );                                    \
-         xml.nrmllinstrip.push_back( xml.linestripind[i] );                                      \
-     }                                                                                           \
-    }
+
+#define END_GL_TRIANGLE_FAN                                                   \
+    do {xml.nrmltrifan.reserve( xml.trifanind.size()*3 );                     \
+        for (unsigned int i = xml.tfancnt+2; i < xml.trifanind.size(); i++) { \
+            xml.nrmltrifan.push_back( xml.trifanind[xml.tfancnt] );           \
+            xml.nrmltrifan.push_back( xml.trifanind[i-1] );                   \
+            xml.nrmltrifan.push_back( xml.trifanind[i] );                     \
+        }                                                                     \
+    }                                                                         \
+    while (0)
+
+#define END_GL_QUAD_STRIP                                                           \
+    do {xml.nrmlquadstrip.reserve( xml.quadstripind.size()*(4/2) );                 \
+        for (unsigned int i = xml.qstrcnt+3; i < xml.quadstripind.size(); i += 2) { \
+            xml.nrmlquadstrip.push_back( xml.quadstripind[i-3] );                   \
+            xml.nrmlquadstrip.push_back( xml.quadstripind[i-2] );                   \
+            xml.nrmlquadstrip.push_back( xml.quadstripind[i] );                     \
+            xml.nrmlquadstrip.push_back( xml.quadstripind[i-1] );                   \
+        }                                                                           \
+    }                                                                               \
+    while (0)
+
+#define END_GL_TRIANGLE_STRIP                                                   \
+    do {xml.nrmltristrip.reserve( xml.tristripind.size()*3 );                   \
+        for (unsigned int i = xml.tstrcnt+2; i < xml.tristripind.size(); i++) { \
+            if ( (i-xml.tstrcnt)%2 ) {                                          \
+                xml.nrmltristrip.push_back( xml.tristripind[i-2] );             \
+                xml.nrmltristrip.push_back( xml.tristripind[i-1] );             \
+                xml.nrmltristrip.push_back( xml.tristripind[i] );               \
+            }                                                                   \
+            else {                                                              \
+                xml.nrmltristrip.push_back( xml.tristripind[i-1] );             \
+                xml.nrmltristrip.push_back( xml.tristripind[i-2] );             \
+                xml.nrmltristrip.push_back( xml.tristripind[i] );               \
+            }                                                                   \
+        }                                                                       \
+    }                                                                           \
+    while (0)
+
+#define END_GL_LINE_STRIP                                                        \
+    do {                                                                         \
+        xml.nrmllinstrip.reserve( xml.linestripind.size()*2 );                   \
+        for (unsigned int i = xml.lstrcnt+1; i < xml.linestripind.size(); i++) { \
+            xml.nrmllinstrip.push_back( xml.linestripind[i-1] );                 \
+            xml.nrmllinstrip.push_back( xml.linestripind[i] );                   \
+        }                                                                        \
+    }                                                                            \
+    while (0)
 
 #define END_GL_COMPILE
 
-#define READSTRING( inmemfile, word32index, stringlen, stringvar )                              \
-    {     /* By Klauss - Much more efficient than the preceding code, and yet still portable */ \
-        char8bit *inmemstring = (char8bit*) (inmemfile+word32index);                            \
-        char8bit  oc = inmemstring[stringlen]; inmemstring[stringlen] = 0;                      \
-        stringvar    = (const char*) inmemstring;                                               \
-        inmemstring[stringlen] = oc;                                                            \
-        word32index += (stringlen+3)/4;                                                         \
-    }
+#define READSTRING( inmemfile, word32index, stringlen, stringvar )                                 \
+    do {     /* By Klauss - Much more efficient than the preceding code, and yet still portable */ \
+        char8bit *inmemstring = (char8bit*) (inmemfile+word32index);                               \
+        char8bit  oc = inmemstring[stringlen]; inmemstring[stringlen] = 0;                         \
+        stringvar    = (const char*) inmemstring;                                                  \
+        inmemstring[stringlen] = oc;                                                               \
+        word32index += (stringlen+3)/4;                                                            \
+    }                                                                                              \
+    while (0)
 
-#define BEGINSTATE( stat, expectitems ) BEGIN_##stat( expectitems ); DLISTBEGINSTATE( stat )
-#define ENDSTATE( stat ) END_##stat; DLISTENDSTATE( stat )
-#define DOVERTEX( num )                                         \
-    vtx = xml.vertices[ind##num];                               \
-    if (!xml.sharevert) {                                       \
-        vtx.s = s##num; vtx.t = t##num;                         \
-    }                                                           \
-    xml.vertex = vtx;                                           \
-    xml.vertexcount[ind##num] += 1;                             \
-    if ( (!vtx.i) && (!vtx.j) && (!vtx.k) && !xml.recalc_norm ) \
-        xml.recalc_norm = true;                                 \
-    xml.active_list->push_back( xml.vertex );                   \
-    xml.active_ind->push_back( ind##num );                      \
-    /*if (xml.reverse) { \
-     *  unsigned int i; \
-     *  for (i=xml.active_ind->size()-1;i>0;i--) { \
-     *    (*xml.active_ind)[i]=(*xml.active_ind)[i-1]; \
-     *  } \
-     *  (*xml.active_ind)[0]=ind##num; \
-     *  for ( i=xml.active_list->size()-1;i>0;i--) { \
-     *    (*xml.active_list)[i]=(*xml.active_list)[i-1]; \
-     *  } \
-     *  (*xml.active_list)[0]=xml.vertex; \
-     *  }*/             \
-    xml.num_vertices--; \
-    DLISTDOVERTEX( stat )
+#define BEGINSTATE( stat, expectitems )                         \
+    do {BEGIN_##stat( expectitems ); DLISTBEGINSTATE( stat ); } \
+    while (0)
+
+#define ENDSTATE( stat )                     \
+    do {END_##stat; DLISTENDSTATE( stat ); } \
+    while (0)
+
+#define DOVERTEX( num )                                             \
+    do {                                                            \
+        vtx = xml.vertices[ind##num];                               \
+        if (!xml.sharevert) {                                       \
+            vtx.s = s##num;                                         \
+            vtx.t = t##num;                                         \
+        }                                                           \
+        xml.vertex = vtx;                                           \
+        xml.vertexcount[ind##num] += 1;                             \
+        if ( (!vtx.i) && (!vtx.j) && (!vtx.k) && !xml.recalc_norm ) \
+            xml.recalc_norm = true;                                 \
+        xml.active_list->push_back( xml.vertex );                   \
+        xml.active_ind->push_back( ind##num );                      \
+        xml.num_vertices--;                                         \
+        DLISTDOVERTEX( stat );                                      \
+    }                                                               \
+    while (0)
 
 template < typename T >
 void reverse_vector( vector< T > &vec )
@@ -196,19 +272,26 @@ void reverse_vector( vector< T > &vec )
 }
 
 #ifdef STANDALONE
+
   #define bxmfprintf fprintf
   #define bxmfopen fopen
+
 void Mesh::BFXMToXmesh( FILE *Inputfile, FILE *Outputfile, vector< Mesh* > &output, Vector overallscale, int fac )
 {
     Flightgroup *fg = 0;
+
 #else
+
 static inline void fignoref( FILE *f, ... ) {}
+
 static inline FILE * fignorefopen( const char*, const char* )
 {
     return 0;
 }
+
   #define bxmfprintf fignoref
   #define bxmfopen fignorefopen
+
 vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
                                  const Vector &scalex,
                                  int faction,
@@ -221,6 +304,8 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
     FILE  *Outputfile   = 0;
     vector< Mesh* >output;
 #endif
+
+
     vector< OrigMeshLoader >meshes;
     int32bit intbuf;
     int32bit word32index = 0;
@@ -235,7 +320,7 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
 #ifdef STANDALONE
     printf( "Loading Mesh File: %s\n", Inputfile.GetFilename().c_str() );
     fseek( Inputfile, 4+sizeof (int32bit), SEEK_SET );
-    fread( &intbuf, sizeof (int32bit), 1, Inputfile );      //Length of Inputfile
+    fread( &intbuf, sizeof (int32bit), 1, Inputfile );              //Length of Inputfile
     int32bit Inputlength = VSSwapHostIntToLittle( intbuf );
     inmemfile = (chunk32*) malloc( Inputlength+1 );
     if (!inmemfile) {
@@ -261,22 +346,22 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
     int32bit version = VSSwapHostIntToLittle( inmemfile[word32index].i32val );
     word32index += 2;
     int32bit Superheaderlength  = VSSwapHostIntToLittle( inmemfile[word32index].i32val );
-    int32bit NUMFIELDSPERVERTEX = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );     //Number of fields per vertex:integer (8)
-    int32bit NUMFIELDSPERPOLYGONSTRUCTURE    = VSSwapHostIntToLittle( inmemfile[word32index+2].i32val );     //Number of fields per polygon structure: integer (1)
-    int32bit NUMFIELDSPERREFERENCEDVERTEX    = VSSwapHostIntToLittle( inmemfile[word32index+3].i32val );     //Number of fields per referenced vertex: integer (3)
-    int32bit NUMFIELDSPERREFERENCEDANIMATION = VSSwapHostIntToLittle( inmemfile[word32index+4].i32val );     //Number of fields per referenced animation: integer (1)
-    int32bit numrecords = VSSwapHostIntToLittle( inmemfile[word32index+5].i32val );     //Number of records: integer
-    int32bit NUMFIELDSPERANIMATIONDEF = VSSwapHostIntToLittle( inmemfile[word32index+6].i32val );     //Number of fields per animationdef: integer (1)
-    word32index = (Superheaderlength/4);       //Go to first record
+    int32bit NUMFIELDSPERVERTEX = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );             //Number of fields per vertex:integer (8)
+    int32bit NUMFIELDSPERPOLYGONSTRUCTURE    = VSSwapHostIntToLittle( inmemfile[word32index+2].i32val );             //Number of fields per polygon structure: integer (1)
+    int32bit NUMFIELDSPERREFERENCEDVERTEX    = VSSwapHostIntToLittle( inmemfile[word32index+3].i32val );             //Number of fields per referenced vertex: integer (3)
+    int32bit NUMFIELDSPERREFERENCEDANIMATION = VSSwapHostIntToLittle( inmemfile[word32index+4].i32val );             //Number of fields per referenced animation: integer (1)
+    int32bit numrecords = VSSwapHostIntToLittle( inmemfile[word32index+5].i32val );             //Number of records: integer
+    int32bit NUMFIELDSPERANIMATIONDEF = VSSwapHostIntToLittle( inmemfile[word32index+6].i32val );             //Number of fields per animationdef: integer (1)
+    word32index = (Superheaderlength/4);               //Go to first record
     //For each record
     for (int32bit recordindex = 0; recordindex < numrecords; recordindex++) {
         int32bit recordbeginword    = word32index;
         //Extract Record Header
-        int32bit recordheaderlength = VSSwapHostIntToLittle( inmemfile[word32index].i32val );         //length of record header in bytes
+        int32bit recordheaderlength = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                 //length of record header in bytes
         word32index += 1;
-        int32bit recordlength = VSSwapHostIntToLittle( inmemfile[word32index].i32val );         //length of record in bytes
+        int32bit recordlength = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                 //length of record in bytes
         word32index += 1;
-        int32bit nummeshes    = VSSwapHostIntToLittle( inmemfile[word32index].i32val );         //Number of meshes in the current record
+        int32bit nummeshes    = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                 //Number of meshes in the current record
         word32index  = recordbeginword+(recordheaderlength/4);
         meshes.push_back( OrigMeshLoader() );
         meshes.back().num     = nummeshes;
@@ -290,54 +375,54 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             xml.fg = fg;
             xml.faction = fac;
             if (recordindex > 0 || meshindex > 0) {
-                char     filenamebuf[56];             //Is more than enough characters - int can't be this big in decimal
+                char     filenamebuf[56];                     //Is more than enough characters - int can't be this big in decimal
                 int32bit error    = sprintf( filenamebuf, "%d_%d.xmesh", recordindex, meshindex );
-                if (error == -1)                  //if wasn't enough characters - something is horribly wrong.
+                if (error == -1)                          //if wasn't enough characters - something is horribly wrong.
                     exit( error );
                 string   filename = string( filenamebuf );
                 Outputfile = bxmfopen( filename.c_str(), "w+" );
             }
             //Extract Mesh Header
             int32bit   meshbeginword    = word32index;
-            int32bit   meshheaderlength = VSSwapHostIntToLittle( inmemfile[word32index].i32val );           //length of record header in bytes
+            int32bit   meshheaderlength = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                   //length of record header in bytes
             word32index += 1;
-            int32bit   meshlength    = VSSwapHostIntToLittle( inmemfile[word32index].i32val );           //length of record in bytes
-            float32bit scale = VSSwapHostFloatToLittle( inmemfile[meshbeginword+2].f32val );             //scale
-            int32bit   reverse       = VSSwapHostIntToLittle( inmemfile[meshbeginword+3].i32val );           //reverse flag if
-            int32bit   forcetexture  = VSSwapHostIntToLittle( inmemfile[meshbeginword+4].i32val );           //force texture flag
-            int32bit   sharevert     = VSSwapHostIntToLittle( inmemfile[meshbeginword+5].i32val );           //share vertex flag
-            float32bit polygonoffset = VSSwapHostFloatToLittle( inmemfile[meshbeginword+6].f32val );             //polygonoffset
-            int32bit   bsrc       = VSSwapHostIntToLittle( inmemfile[meshbeginword+7].i32val );           //Blendmode source
-            int32bit   bdst       = VSSwapHostIntToLittle( inmemfile[meshbeginword+8].i32val );           //Blendmode destination
-            float32bit power      = VSSwapHostFloatToLittle( inmemfile[meshbeginword+9].f32val );             //Specular: power
-            float32bit ar         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+10].f32val );             //Ambient: red
-            float32bit ag         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+11].f32val );             //Ambient: green
-            float32bit ab         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+12].f32val );             //Ambient: blue
-            float32bit aa         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+13].f32val );             //Ambient: Alpha
-            float32bit dr         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+14].f32val );             //Diffuse: red
-            float32bit dg         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+15].f32val );             //Diffuse: green
-            float32bit db         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+16].f32val );             //Diffuse: blue
-            float32bit da         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+17].f32val );             //Diffuse: Alpha
-            float32bit er         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+18].f32val );             //Emmissive: red
-            float32bit eg         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+19].f32val );             //Emmissive: green
-            float32bit eb         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+20].f32val );             //Emmissive: blue
-            float32bit ea         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+21].f32val );             //Emmissive: Alpha
-            float32bit sr         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+22].f32val );             //Specular: red
-            float32bit sg         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+23].f32val );             //Specular: green
-            float32bit sb         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+24].f32val );             //Specular: blue
-            float32bit sa         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+25].f32val );             //Specular: Alpha
-            int32bit   cullface   = VSSwapHostIntToLittle( inmemfile[meshbeginword+26].i32val );           //CullFace
-            int32bit   lighting   = VSSwapHostIntToLittle( inmemfile[meshbeginword+27].i32val );           //lighting
-            int32bit   reflect    = VSSwapHostIntToLittle( inmemfile[meshbeginword+28].i32val );           //reflect
-            int32bit   usenormals = VSSwapHostIntToLittle( inmemfile[meshbeginword+29].i32val );           //usenormals
+            int32bit   meshlength    = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                   //length of record in bytes
+            float32bit scale = VSSwapHostFloatToLittle( inmemfile[meshbeginword+2].f32val );                     //scale
+            int32bit   reverse       = VSSwapHostIntToLittle( inmemfile[meshbeginword+3].i32val );                   //reverse flag if
+            int32bit   forcetexture  = VSSwapHostIntToLittle( inmemfile[meshbeginword+4].i32val );                   //force texture flag
+            int32bit   sharevert     = VSSwapHostIntToLittle( inmemfile[meshbeginword+5].i32val );                   //share vertex flag
+            float32bit polygonoffset = VSSwapHostFloatToLittle( inmemfile[meshbeginword+6].f32val );                     //polygonoffset
+            int32bit   bsrc       = VSSwapHostIntToLittle( inmemfile[meshbeginword+7].i32val );                   //Blendmode source
+            int32bit   bdst       = VSSwapHostIntToLittle( inmemfile[meshbeginword+8].i32val );                   //Blendmode destination
+            float32bit power      = VSSwapHostFloatToLittle( inmemfile[meshbeginword+9].f32val );                     //Specular: power
+            float32bit ar         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+10].f32val );                     //Ambient: red
+            float32bit ag         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+11].f32val );                     //Ambient: green
+            float32bit ab         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+12].f32val );                     //Ambient: blue
+            float32bit aa         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+13].f32val );                     //Ambient: Alpha
+            float32bit dr         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+14].f32val );                     //Diffuse: red
+            float32bit dg         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+15].f32val );                     //Diffuse: green
+            float32bit db         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+16].f32val );                     //Diffuse: blue
+            float32bit da         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+17].f32val );                     //Diffuse: Alpha
+            float32bit er         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+18].f32val );                     //Emmissive: red
+            float32bit eg         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+19].f32val );                     //Emmissive: green
+            float32bit eb         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+20].f32val );                     //Emmissive: blue
+            float32bit ea         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+21].f32val );                     //Emmissive: Alpha
+            float32bit sr         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+22].f32val );                     //Specular: red
+            float32bit sg         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+23].f32val );                     //Specular: green
+            float32bit sb         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+24].f32val );                     //Specular: blue
+            float32bit sa         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+25].f32val );                     //Specular: Alpha
+            int32bit   cullface   = VSSwapHostIntToLittle( inmemfile[meshbeginword+26].i32val );                   //CullFace
+            int32bit   lighting   = VSSwapHostIntToLittle( inmemfile[meshbeginword+27].i32val );                   //lighting
+            int32bit   reflect    = VSSwapHostIntToLittle( inmemfile[meshbeginword+28].i32val );                   //reflect
+            int32bit   usenormals = VSSwapHostIntToLittle( inmemfile[meshbeginword+29].i32val );                   //usenormals
             float32bit alphatest  = 0;
             if (meshheaderlength > 30*4)
-                alphatest = VSSwapHostFloatToLittle( inmemfile[meshbeginword+30].f32val );                  //Alpha Testing Values
+                alphatest = VSSwapHostFloatToLittle( inmemfile[meshbeginword+30].f32val );                          //Alpha Testing Values
             //End Header
             //Go to Arbitrary Length Attributes section
             word32index  = meshbeginword+(meshheaderlength/4);
             int32bit VSAbeginword = word32index;
-            int32bit LengthOfArbitraryLengthAttributes = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //Length of Arbitrary length attributes section in bytes
+            int32bit LengthOfArbitraryLengthAttributes = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //Length of Arbitrary length attributes section in bytes
             word32index += 1;
             bxmfprintf(
                 Outputfile,
@@ -364,7 +449,7 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             mesh->SetBlendMode( (BLENDFUNC) bsrc, (BLENDFUNC) bdst );
 
             string   detailtexturename    = "";
-            int32bit detailtexturenamelen = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //detailtexture name length
+            int32bit detailtexturenamelen = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //detailtexture name length
             word32index += 1;
             int32bit stringindex = 0;
             /*int32bit namebound=(detailtexturenamelen+3)/4;
@@ -384,27 +469,27 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             } else {
                 mesh->detailTexture = 0;
             }
-            vector< Mesh_vec3f >Detailplanes;             //store detail planes until finish printing mesh attributes
-            int32bit numdetailplanes = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //number of detailplanes
+            vector< Mesh_vec3f >Detailplanes;                     //store detail planes until finish printing mesh attributes
+            int32bit numdetailplanes = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of detailplanes
             word32index += 1;
             for (int32bit detailplane = 0; detailplane < numdetailplanes; detailplane++) {
-                float32bit x = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                 //x-coord
-                float32bit y = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                 //y-coord
-                float32bit z = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                 //z-coord
+                float32bit x = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                         //x-coord
+                float32bit y = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //y-coord
+                float32bit z = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //z-coord
                 word32index += 3;
                 Mesh_vec3f temp;
                 temp.x = x;
                 temp.y = y;
                 temp.z = z;
                 Detailplanes.push_back( temp );
-            }             //End detail planes
-                          //Textures
-            int32bit numtextures = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //number of textures
+            }                     //End detail planes
+                                  //Textures
+            int32bit numtextures = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of textures
             word32index += 1;
             for (int32bit tex = 0; tex < numtextures; tex++) {
-                int32bit textype    = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                 //texture type
-                int32bit texindex   = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                 //texture index
-                int32bit texnamelen = VSSwapHostIntToLittle( inmemfile[word32index+2].i32val );                 //texture name length
+                int32bit textype    = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                         //texture type
+                int32bit texindex   = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                         //texture index
+                int32bit texnamelen = VSSwapHostIntToLittle( inmemfile[word32index+2].i32val );                         //texture name length
                 word32index += 3;
                 string   texname    = "";
                 /*int32bit namebound=(texnamelen+3)/4;
@@ -525,13 +610,13 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
                                                       Detailplanes[detplane].z ) );
             }
             //Logos
-            int32bit numlogos = VSSwapHostIntToLittle( inmemfile[word32index++].i32val );             //number of logos
+            int32bit numlogos = VSSwapHostIntToLittle( inmemfile[word32index++].i32val );                     //number of logos
             for (int32bit logo = 0; logo < numlogos; logo++) {
-                float32bit size     = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                 //size
-                float32bit offset   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                 //offset
-                float32bit rotation = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                 //rotation
-                int32bit   type     = VSSwapHostIntToLittle( inmemfile[word32index+3].i32val );               //type
-                int32bit   numrefs  = VSSwapHostIntToLittle( inmemfile[word32index+4].i32val );               //number of reference points
+                float32bit size     = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                         //size
+                float32bit offset   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //offset
+                float32bit rotation = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //rotation
+                int32bit   type     = VSSwapHostIntToLittle( inmemfile[word32index+3].i32val );                       //type
+                int32bit   numrefs  = VSSwapHostIntToLittle( inmemfile[word32index+4].i32val );                       //number of reference points
                 bxmfprintf( Outputfile,
                             "<Logo type=\"%d\" rotate=\"%f\" size=\"%f\" offset=\"%f\">\n",
                             type,
@@ -544,15 +629,15 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
                 l.size   = size;
                 l.offset = offset;
                 xml.logos.push_back( l );
-                xml.logos.back().type   = type;                 //and again!
+                xml.logos.back().type   = type;                         //and again!
                 xml.logos.back().rotate = rotation;
                 xml.logos.back().size   = size;
                 xml.logos.back().offset = offset;
 
                 word32index += 5;
                 for (int32bit ref = 0; ref < numrefs; ref++) {
-                    int32bit   refnum = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                   //Logo ref
-                    float32bit weight = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                     //reference weight
+                    int32bit   refnum = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                           //Logo ref
+                    float32bit weight = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                             //reference weight
                     bxmfprintf( Outputfile, "\t<Ref point=\"%d\" weight=\"%f\"/>\n", refnum, weight );
                     xml.logos.back().refpnt.push_back( refnum );
                     xml.logos.back().refweight.push_back( weight );
@@ -562,18 +647,18 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             }
             //End logos
             //LODs
-            int32bit numLODs = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //number of LODs
+            int32bit numLODs = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of LODs
             word32index += 1;
             for (int32bit LOD = 0; LOD < numLODs; LOD++) {
-                float32bit    size  = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );              //Size
-                int32bit      index = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );            //Mesh index
+                float32bit    size  = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                      //Size
+                int32bit      index = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                    //Mesh index
                 bxmfprintf( Outputfile, "<LOD size=\"%f\" meshfile=\"%d_%d.xmesh\"/>\n", size, recordindex, index );
                 meshes.back().sizes[LOD] = size;
                 word32index += 2;
             }
             //End LODs
             //AnimationDefinitions
-            int32bit numanimdefs = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //number of animation definitions
+            int32bit numanimdefs = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of animation definitions
             word32index += 1;
 #ifndef STANDALONE
             if (meshindex == 0)
@@ -581,20 +666,20 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
                     bxmfprintf( Outputfile, "<Frame FrameMeshName=\"%d_%d.xmesh\"/>\n", recordindex, framecount );
 #endif
             for (int32bit anim = 0; anim < numanimdefs; anim++) {
-                int32bit animnamelen = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                 //length of name
+                int32bit animnamelen = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                         //length of name
                 word32index += 1;
                 string animname;
                 READSTRING( inmemfile, word32index, animnamelen, animname );
-                float32bit     FPS = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );             //FPS
+                float32bit     FPS = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                     //FPS
                 bxmfprintf( Outputfile, "<AnimationDefinition AnimationName=\"%s\" FPS=\"%f\">\n", animname.c_str(), FPS );
 
                 vector< int > *framerefs    = new vector< int >;
                 mesh->framespersecond = FPS;
                 word32index += NUMFIELDSPERANIMATIONDEF;
-                int32bit       numframerefs = VSSwapHostIntToLittle( inmemfile[word32index].i32val );           //number of animation frame references
+                int32bit       numframerefs = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                   //number of animation frame references
                 word32index += 1;
                 for (int32bit fref = 0; fref < numframerefs; fref++) {
-                    int32bit ref = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of animation frame references
+                    int32bit ref = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                             //number of animation frame references
                     word32index += NUMFIELDSPERREFERENCEDANIMATION;
                     bxmfprintf( Outputfile, "<AnimationFrameIndex AnimationMeshIndex=\"%d\"/>\n", ref-1-numLODs );
                     framerefs->push_back( ref );
@@ -608,17 +693,17 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             word32index = VSAbeginword+(LengthOfArbitraryLengthAttributes/4);
             //Vertices
             bxmfprintf( Outputfile, "<Points>\n" );
-            int32bit numvertices = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //number of vertices
+            int32bit numvertices = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
             word32index += 1;
             xml.vertices.reserve( xml.vertices.size()+numvertices );
             xml.vertexcount.reserve( xml.vertexcount.size()+numvertices );
             for (int32bit vert = 0; vert < numvertices; vert++) {
-                float32bit x = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                 //x
-                float32bit y = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                 //y
-                float32bit z = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                 //z
-                float32bit i = VSSwapHostFloatToLittle( inmemfile[word32index+3].f32val );                 //i
-                float32bit j = VSSwapHostFloatToLittle( inmemfile[word32index+4].f32val );                 //j
-                float32bit k = VSSwapHostFloatToLittle( inmemfile[word32index+5].f32val );                 //k
+                float32bit x = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                         //x
+                float32bit y = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //y
+                float32bit z = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //z
+                float32bit i = VSSwapHostFloatToLittle( inmemfile[word32index+3].f32val );                         //i
+                float32bit j = VSSwapHostFloatToLittle( inmemfile[word32index+4].f32val );                         //j
+                float32bit k = VSSwapHostFloatToLittle( inmemfile[word32index+5].f32val );                         //k
                 if (i == 0 && j == 0 && k == 0) {
                     i = x;
                     j = y;
@@ -635,8 +720,8 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
                         k = 1;
                     }
                 }
-                float32bit s = VSSwapHostFloatToLittle( inmemfile[word32index+6].f32val );                 //s
-                float32bit t = VSSwapHostFloatToLittle( inmemfile[word32index+7].f32val );                 //t
+                float32bit s = VSSwapHostFloatToLittle( inmemfile[word32index+6].f32val );                         //s
+                float32bit t = VSSwapHostFloatToLittle( inmemfile[word32index+7].f32val );                         //t
                 word32index += NUMFIELDSPERVERTEX;
                 bxmfprintf(
                     Outputfile,
@@ -663,19 +748,19 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             glNewList( mesh->vlist, GL_COMPILE );
 #endif
             bxmfprintf( Outputfile, "<Polygons>\n" );
-            int32bit numlines = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //number of vertices
+            int32bit numlines = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
             word32index += 1;
             BEGINSTATE( GL_LINES, numlines );
             for (int32bit rvert = 0; rvert < numlines; rvert++) {
-                int32bit   flatshade = VSSwapHostIntToLittle( inmemfile[word32index].i32val );               //flatshade
+                int32bit   flatshade = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //flatshade
                 word32index += NUMFIELDSPERPOLYGONSTRUCTURE;
-                int32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );               //index 1
-                float32bit s1   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                 //s
-                float32bit t1   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                 //t
+                int32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 1
+                float32bit s1   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //s
+                float32bit t1   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //t
                 word32index += NUMFIELDSPERREFERENCEDVERTEX;
-                int32bit   ind2 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );               //index 2
-                float32bit s2   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                 //s
-                float32bit t2   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                 //t
+                int32bit   ind2 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 2
+                float32bit s2   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //s
+                float32bit t2   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //t
                 word32index += NUMFIELDSPERREFERENCEDVERTEX;
                 bxmfprintf(
                     Outputfile,
@@ -694,23 +779,23 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             ENDSTATE( GL_LINES );
             //End Lines
             //Triangles
-            int32bit numtris = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //number of vertices
+            int32bit numtris = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
             word32index += 1;
             BEGINSTATE( GL_TRIANGLES, numtris );
             for (int32bit rtvert = 0; rtvert < numtris; rtvert++) {
-                int32bit   flatshade = VSSwapHostIntToLittle( inmemfile[word32index].i32val );               //flatshade
+                int32bit   flatshade = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //flatshade
                 word32index += NUMFIELDSPERPOLYGONSTRUCTURE;
-                int32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );               //index 1
-                float32bit s1   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                 //s
-                float32bit t1   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                 //t
+                int32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 1
+                float32bit s1   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //s
+                float32bit t1   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //t
                 word32index += NUMFIELDSPERREFERENCEDVERTEX;
-                int32bit   ind2 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );               //index 2
-                float32bit s2   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                 //s
-                float32bit t2   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                 //t
+                int32bit   ind2 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 2
+                float32bit s2   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //s
+                float32bit t2   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //t
                 word32index += NUMFIELDSPERREFERENCEDVERTEX;
-                int32bit   ind3 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );               //index 3
-                float32bit s3   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                 //s
-                float32bit t3   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                 //t
+                int32bit   ind3 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 3
+                float32bit s3   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //s
+                float32bit t3   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //t
                 word32index += NUMFIELDSPERREFERENCEDVERTEX;
                 bxmfprintf(
                     Outputfile,
@@ -735,27 +820,27 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             ENDSTATE( GL_TRIANGLES );
             //End Triangles
             //Quads
-            int32bit numquads = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //number of vertices
+            int32bit numquads = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
             word32index += 1;
             BEGINSTATE( GL_QUADS, numquads );
             for (int32bit rqvert = 0; rqvert < numquads; rqvert++) {
-                int32bit   flatshade = VSSwapHostIntToLittle( inmemfile[word32index].i32val );               //flatshade
+                int32bit   flatshade = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //flatshade
                 word32index += NUMFIELDSPERPOLYGONSTRUCTURE;
-                int32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );               //index 1
-                float32bit s1   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                 //s
-                float32bit t1   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                 //t
+                int32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 1
+                float32bit s1   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //s
+                float32bit t1   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //t
                 word32index += NUMFIELDSPERREFERENCEDVERTEX;
-                int32bit   ind2 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );               //index 2
-                float32bit s2   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                 //s
-                float32bit t2   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                 //t
+                int32bit   ind2 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 2
+                float32bit s2   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //s
+                float32bit t2   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //t
                 word32index += NUMFIELDSPERREFERENCEDVERTEX;
-                int32bit   ind3 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );               //index 3
-                float32bit s3   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                 //s
-                float32bit t3   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                 //t
+                int32bit   ind3 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 3
+                float32bit s3   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //s
+                float32bit t3   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //t
                 word32index += NUMFIELDSPERREFERENCEDVERTEX;
-                int32bit   ind4 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );               //index 3
-                float32bit s4   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                 //s
-                float32bit t4   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                 //t
+                int32bit   ind4 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 3
+                float32bit s4   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //s
+                float32bit t4   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //t
                 word32index += NUMFIELDSPERREFERENCEDVERTEX;
                 bxmfprintf(
                     Outputfile,
@@ -784,85 +869,85 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             ENDSTATE( GL_QUADS );
             //End Quads
             //Linestrips
-            int32bit numlinestrips = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //number of vertices
+            int32bit numlinestrips = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
             word32index += 1;
             for (int32bit lstrip = 0; lstrip < numlinestrips; lstrip++) {
-                int32bit numstripelements = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                 //number of vertices
-                int32bit flatshade = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                 //flatshade
+                int32bit numstripelements = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                         //number of vertices
+                int32bit flatshade = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                         //flatshade
                 bxmfprintf( Outputfile, "\t<Linestrip flatshade=\"%d\">\n", flatshade );
 
                 BEGINSTATE( GL_LINE_STRIP, numstripelements );
                 word32index += 1+NUMFIELDSPERPOLYGONSTRUCTURE;
                 for (int32bit elem = 0; elem < numstripelements; elem++) {
-                    int32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                   //index 1
-                    float32bit s1   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                     //s
-                    float32bit t1   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                     //t
+                    int32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                           //index 1
+                    float32bit s1   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                             //s
+                    float32bit t1   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                             //t
                     word32index += NUMFIELDSPERREFERENCEDVERTEX;
                     bxmfprintf( Outputfile, "\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n", ind1, s1, t1 );
-                    DOVERTEX( 1 )
+                    DOVERTEX( 1 );
                 }
                 bxmfprintf( Outputfile, "\t</Linestrip>" );
                 ENDSTATE( GL_LINE_STRIP );
             }
             //End Linestrips
             //Tristrips
-            int32bit numtristrips = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //number of vertices
+            int32bit numtristrips = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
             word32index += 1;
             for (int32bit tstrip = 0; tstrip < numtristrips; tstrip++) {
-                int32bit numstripelements = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                 //number of vertices
-                int32bit flatshade = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                 //flatshade
+                int32bit numstripelements = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                         //number of vertices
+                int32bit flatshade = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                         //flatshade
                 bxmfprintf( Outputfile, "\t<Tristrip flatshade=\"%d\">\n", flatshade );
                 BEGINSTATE( GL_TRIANGLE_STRIP, numstripelements );
                 word32index += 1+NUMFIELDSPERPOLYGONSTRUCTURE;
                 for (int32bit elem = 0; elem < numstripelements; elem++) {
-                    int32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                   //index 1
-                    float32bit s1   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                     //s
-                    float32bit t1   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                     //t
+                    int32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                           //index 1
+                    float32bit s1   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                             //s
+                    float32bit t1   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                             //t
                     word32index += NUMFIELDSPERREFERENCEDVERTEX;
                     bxmfprintf( Outputfile, "\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n", ind1, s1, t1 );
-                    DOVERTEX( 1 )
+                    DOVERTEX( 1 );
                 }
                 bxmfprintf( Outputfile, "\t</Tristrip>" );
                 ENDSTATE( GL_TRIANGLE_STRIP );
             }
             //End Tristrips
             //Trifans
-            int32bit numtrifans = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //number of vertices
+            int32bit numtrifans = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
             word32index += 1;
             for (int32bit tfan = 0; tfan < numtrifans; tfan++) {
-                int32bit numstripelements = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                 //number of vertices
-                int32bit flatshade = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                 //flatshade
+                int32bit numstripelements = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                         //number of vertices
+                int32bit flatshade = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                         //flatshade
                 bxmfprintf( Outputfile, "\t<Trifan flatshade=\"%d\">\n", flatshade );
                 BEGINSTATE( GL_TRIANGLE_FAN, numstripelements );
                 word32index += 1+NUMFIELDSPERPOLYGONSTRUCTURE;
                 for (int32bit elem = 0; elem < numstripelements; elem++) {
-                    int32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                   //index 1
-                    float32bit s1   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                     //s
-                    float32bit t1   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                     //t
+                    int32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                           //index 1
+                    float32bit s1   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                             //s
+                    float32bit t1   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                             //t
                     word32index += NUMFIELDSPERREFERENCEDVERTEX;
                     bxmfprintf( Outputfile, "\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n", ind1, s1, t1 );
-                    DOVERTEX( 1 )
+                    DOVERTEX( 1 );
                 }
                 bxmfprintf( Outputfile, "\t</Trifan>" );
                 ENDSTATE( GL_TRIANGLE_FAN );
             }
             //End Trifans
             //Quadstrips
-            int32bit numquadstrips = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //number of vertices
+            int32bit numquadstrips = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
             word32index += 1;
             for (int32bit qstrip = 0; qstrip < numquadstrips; qstrip++) {
-                int32bit numstripelements = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                 //number of vertices
-                int32bit flatshade = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                 //flatshade
+                int32bit numstripelements = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                         //number of vertices
+                int32bit flatshade = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                         //flatshade
                 bxmfprintf( Outputfile, "\t<Quadstrip flatshade=\"%d\">\n", flatshade );
                 BEGINSTATE( GL_QUAD_STRIP, numstripelements );
                 word32index += 1+NUMFIELDSPERPOLYGONSTRUCTURE;
                 for (int32bit elem = 0; elem < numstripelements; elem++) {
-                    int32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                   //index 1
-                    float32bit s1   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                     //s
-                    float32bit t1   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                     //t
+                    int32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                           //index 1
+                    float32bit s1   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                             //s
+                    float32bit t1   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                             //t
                     word32index += NUMFIELDSPERREFERENCEDVERTEX;
                     bxmfprintf( Outputfile, "\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n", ind1, s1, t1 );
-                    DOVERTEX( 1 )
+                    DOVERTEX( 1 );
                 }
                 bxmfprintf( Outputfile, "\t</Quadstrip>" );
                 ENDSTATE( GL_QUAD_STRIP );
@@ -903,7 +988,7 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
         //go to next record
         word32index    = recordbeginword+(recordlength/4);
         output.push_back( new Mesh() );
-        *output.back() = *meshes.back().m;         //use builtin
+        *output.back() = *meshes.back().m;                 //use builtin
         output.back()->orig    = meshes.back().m;
         for (int i = 0; i < (int) meshes.back().sizes.size()-1; ++i)
             output.back()->orig[i+1].lodsize = meshes.back().sizes[i];

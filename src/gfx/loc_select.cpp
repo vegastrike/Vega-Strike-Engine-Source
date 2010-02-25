@@ -99,9 +99,11 @@ LocationSelect::~LocationSelect()
     UnbindMouse( 1 );
 }
 
-#define POSITION_GFXVertex( x, y,                                                                                    \
-                            z ) ( GFXVertex3f( LocalPosition.i+CrosshairSize*(x), LocalPosition.j+CrosshairSize*(y), \
-                                              LocalPosition.k+CrosshairSize*(z) ) )
+#define POSITION_GFXVertex( x, y, z )                \
+    (GFXVertex3f( LocalPosition.i+CrosshairSize*(x), \
+                 LocalPosition.j+CrosshairSize*(y),  \
+                 LocalPosition.k+CrosshairSize*(z) ) \
+    )
 
 void LocationSelect::Draw()
 {

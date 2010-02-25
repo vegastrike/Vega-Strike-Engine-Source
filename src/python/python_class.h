@@ -8,7 +8,7 @@
 #ifdef _POSIX_C_SOURCE
 #undef _POSIX_C_SOURCE
 #endif
-#include <Python.h>
+#include "cs_python.h"
 /*namespace boost{namespace python{
 template <class T> struct type;
 }}
@@ -25,7 +25,7 @@ class Unit *from_python(PyObject *p,boost::python::type<class Unit *>);
 #include "boost/python/object.hpp"
 #include "boost/python/class.hpp"
 #include "boost/python/call_method.hpp"
-#include "boost/python.hpp"///module.hpp>
+#include "cs_boostpython.h"///module.hpp>
 #if defined (_MSC_VER) && _MSC_VER<=1200
 #undef Vector
 #endif
@@ -175,107 +175,141 @@ boost::python::class_builder <SuperClass, NewClass, boost::noncopyable > Class (
       boost::python::class_builder <SuperClass> TempClass (name,"SuperClass"); */
 
 
-template <class SuperClass> class PythonClass:public SuperClass {
+template <class SuperClass> 
+class PythonClass:public SuperClass 
+{
  protected:
   PyObject * self;
-  virtual void Destructor() {
+  virtual void Destructor() 
+  {
     Py_XDECREF(self);
   }
  public:
   static PythonClass< SuperClass > * last_instance;
-  PythonClass (PyObject * self_):SuperClass() {
+  PythonClass (PyObject * self_):SuperClass() 
+  {
     self = self_;
     Py_XINCREF(self);
     last_instance=this;
   }
-  static PythonClass * LastPythonClass(){
+  static PythonClass * LastPythonClass()
+  {
     PythonClass * myclass = last_instance;
     last_instance=NULL;
     return myclass;
   }
-  virtual void callFunction (std::string str) {
+  virtual void callFunction (std::string str) 
+  {
     PYTHONCALLBACK(void, self, str.c_str());
   }
-  static PythonClass * Factory(const std::string &file) {
+  static PythonClass * Factory(const std::string &file) 
+  {
     CompileRunPython (file);
     return LastPythonClass();
   }
-  static PythonClass * FactoryString(char * code) {
-	Python::reseterrors();
-	PyRun_SimpleString (code); //For some reason, PyRun_SimpleString() takes in a char *, not a const char *
-	Python::reseterrors();
-	return LastPythonClass();
+  static PythonClass * FactoryString(char * code) 
+  {
+	  Python::reseterrors();
+	  PyRun_SimpleString (code); //For some reason, PyRun_SimpleString() takes in a char *, not a const char *
+	  Python::reseterrors();
+	  return LastPythonClass();
   }
-  virtual ~PythonClass(){
+  virtual ~PythonClass()
+  {
     fprintf (stderr,"Destruct called. If called from C++ this is death %ld (0x%lx)",(unsigned long)this,(unsigned long)this);
   }
 };
-template <class SuperClass> class PythonAI: public PythonClass <SuperClass> {
+
+template <class SuperClass> 
+class PythonAI: public PythonClass <SuperClass> 
+{
 public:
-  PythonAI (PyObject * self_):PythonClass<SuperClass>(self_) {
+  PythonAI (PyObject * self_):PythonClass<SuperClass>(self_) 
+  {
   }
-  virtual void Execute () {
+  virtual void Execute () 
+  {
     PYTHONCALLBACK(void, this->self, "Execute");
   }
-  virtual void ChooseTarget () {
+  virtual void ChooseTarget () 
+  {
     PYTHONCALLBACK(void, this->self, "ChooseTarget");
   }
-  virtual void SetParent (Unit * parent) {
+  virtual void SetParent (Unit * parent) 
+  {
     SuperClass::SetParent (parent);
     PYTHONCALLBACK2(void, this->self, "init", parent);
   }
-  static void default_Execute(SuperClass & self_) {
+  static void default_Execute(SuperClass & self_) 
+  {
     (self_).SuperClass::Execute();
   }
-  static void default_ChooseTarget(SuperClass & self_) {
+  static void default_ChooseTarget(SuperClass & self_) 
+  {
     (self_).SuperClass::ChooseTarget();
   }
-  static void default_SetParent (SuperClass &self_, Unit * parent) {
+  static void default_SetParent (SuperClass &self_, Unit * parent) 
+  {
   }
-  static PythonClass<SuperClass> * LastPythonClass () {
+  static PythonClass<SuperClass> * LastPythonClass () 
+  {
 	  return PythonClass<SuperClass>::LastPythonClass();	  
   }
-  static PythonClass<SuperClass> * Factory (const std::string &file) {
+  static PythonClass<SuperClass> * Factory (const std::string &file) 
+  {
 	  return PythonClass<SuperClass>::Factory(file);
   }
-  static PythonClass<SuperClass> * FactoryString (char *code) {
+  static PythonClass<SuperClass> * FactoryString (char *code) 
+  {
 	  return PythonClass<SuperClass>::FactoryString(code);
   }
 };
 
-class pythonMission: public PythonClass <PythonMissionBaseClass> {
+class pythonMission: public PythonClass <PythonMissionBaseClass> 
+{
 public:
-  pythonMission (PyObject * self_):PythonClass<PythonMissionBaseClass>(self_) {
+  pythonMission (PyObject * self_):PythonClass<PythonMissionBaseClass>(self_) 
+  {
   }
-  virtual void Execute () {
+  virtual void Execute () 
+  {
     PYTHONCALLBACK(void, self, "Execute");
     Python::reseterrors();
   }
-  virtual std::string Pickle() {
+  virtual std::string Pickle() 
+  {
     Python::reseterrors();
     std::string ret=PYTHONCALLBACK(std::string, self, "Pickle");
     Python::reseterrors();
     return ret;
   }
-  virtual void UnPickle(std::string s)  {
+  virtual void UnPickle(std::string s)  
+  {
     Python::reseterrors();
     PYTHONCALLBACK2(void, self, "UnPickle",s);
     Python::reseterrors();
   }
-  static void default_Execute(PythonMissionBaseClass & self_) {
+  static void default_Execute(PythonMissionBaseClass & self_) 
+  {
     (self_).PythonMissionBaseClass::Execute();
   }
-  static std::string default_Pickle(PythonMissionBaseClass & self_) {
+  static std::string default_Pickle(PythonMissionBaseClass & self_) 
+  {
     return (self_).PythonMissionBaseClass::Pickle();
   }
-  static void default_UnPickle(PythonMissionBaseClass & self_, std::string str) {
+  static void default_UnPickle(PythonMissionBaseClass & self_, std::string str) 
+  {
     (self_).PythonMissionBaseClass::UnPickle(str);
   }
-  static PythonClass<PythonMissionBaseClass> * Factory (const std::string &file) {
+  static PythonClass<PythonMissionBaseClass> * Factory (const std::string &file) 
+  {
 	  return PythonClass<PythonMissionBaseClass>::Factory(file);
   }  
-  static PythonClass<PythonMissionBaseClass> * FactoryString (char *code) {
+  static PythonClass<PythonMissionBaseClass> * FactoryString (char *code)
+  {
 	  return PythonClass<PythonMissionBaseClass>::FactoryString(code);
   }
 };
+
 #endif
+

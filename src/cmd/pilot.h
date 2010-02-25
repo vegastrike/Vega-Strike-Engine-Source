@@ -10,8 +10,11 @@ class Pilot
     float reaction_time;
     float rank;
     int   faction; //duplicate data...any way round this??
-public: Pilot( int faction );
+public:
+    explicit Pilot( int faction );
+    virtual ~Pilot() {}
     void SetComm( Unit *comm_unit ); //so we can specialize base sort of people
+    Animation * getCommFace( Unit *parent, float moon, unsigned char &gender );
     float getReactionTime()
     {
         return reaction_time;
@@ -34,7 +37,6 @@ public: Pilot( int faction );
         return comm_face;
     }
     float GetEffectiveRelationship( const Unit *parent, const Unit *target ) const;
-    Animation * getCommFace( Unit *parent, float moon, unsigned char &gender );
     float adjustSpecificRelationship( Unit *parent, void *aggressor, float value, int guessedFaction /*pass in neutral otherwise*/ );
     void DoHit( Unit *parent, void *aggressor, int guessedFaction /*pass in neutral otherwise*/ );
 };

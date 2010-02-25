@@ -29,8 +29,10 @@
 #include "lin_time.h"
 
 #include <assert.h>     //needed for assert() calls
-#include "planetary_transform.h"
+//#include "planetary_transform.h"  commented out by chuck_starchaser; --never used
+
 //const float PI=3.1415926536;
+
 Camera::Camera( ProjectionType proj ) : projectionType( proj )
     , myPhysics( 0.1, 0.075, &Coord, &P, &Q, &R )
 {
@@ -42,7 +44,7 @@ Camera::Camera( ProjectionType proj ) : projectionType( proj )
     velocity = angular_velocity = Vector( 0, 0, 0 );
     lastpos.Set( 0, 0, 0 );
     cockpit_offset = 0;
-    SetPlanetaryTransform( NULL );
+    //////////////////////////////////////////SetPlanetaryTransform( NULL );
     changed = GFXTRUE;
     //SetPosition();
     //SetOrientation();
@@ -137,6 +139,7 @@ void Camera::UpdateCameraSounds()
     AUDListenerOrientation( P, Q, R );
 #endif
 }
+
 #ifdef OLDUPDATEPLANEGFX
 /**
  *  Vector c (planet->InvTransform (Coord));
@@ -155,40 +158,33 @@ void Camera::UpdateCameraSounds()
  *  q = q-q.Dot (r)*r;
  *  q.Normalize();
  */
-
 #endif
 
 void Camera::GetView( Matrix &vw )
 {
     GFXGetMatrixView( vw );
 }
+
 void Camera::SetNebula( Nebula *neb )
 {
     nebula.SetUnit( (Unit*) neb );
 }
-Nebula* Camera::GetNebula()
+
+Nebula * Camera::GetNebula() //this function can't be const, as it must return a non-const ptr
 {
-    return (Nebula*) nebula.GetUnit();
+    return reinterpret_cast<Nebula*>( nebula.GetUnit() ); //changed by chuck from (Nebula*) cast
 }
 
 void Camera::UpdatePlanetGFX()
 {
-    if (planet) {
-        Matrix t;
-        Matrix inv;
-        planet->InvTransformBasis( planetview, P, Q, R, Coord );
-
-        InvertMatrix( inv, planetview );
-        VectorAndPositionToMatrix( t, P, Q, R, Coord );
-        MultMatrix( planetview, t, inv );
-    } else {
-        Identity( planetview );
-    }
+    Identity( planetview );
 }
+
 void Camera::RestoreViewPort( float xoffset, float yoffset )
 {
     GFXSubwindow( x+xoffset, y+yoffset, xsize, ysize );
 }
+
 void Camera::UpdateGLCenter()
 {
 #define ITISDEPRECATED 0
@@ -286,7 +282,7 @@ void Camera::SetZoom( float z )
     zoom = z;
 }
 
-float Camera::GetZoom()
+float Camera::GetZoom() const
 {
     return zoom;
 }
@@ -296,7 +292,7 @@ void Camera::SetFov( float f )
     fov = f;
 }
 
-float Camera::GetFov()
+float Camera::GetFov() const
 {
     return fov;
 }
@@ -306,26 +302,31 @@ void Camera::Yaw( float rad )
     ::Yaw( rad, P, Q, R );
     changed = GFXTRUE;
 }
+
 void Camera::Pitch( float rad )
 {
     ::Pitch( rad, P, Q, R );
     changed = GFXTRUE;
 }
+
 void Camera::Roll( float rad )
 {
     ::Roll( rad, P, Q, R );
     changed = GFXTRUE;
 }
+
 void Camera::XSlide( float factor )
 {
     Coord  += (P*factor).Cast();
     changed = GFXTRUE;
 }
+
 void Camera::YSlide( float factor )
 {
     Coord  += (Q*factor).Cast();
     changed = GFXTRUE;
 }
+
 void Camera::ZSlide( float factor )
 {
     Coord  += (R*factor).Cast();

@@ -48,12 +48,14 @@ inline Vector QVector::operator=( const Vector &a )
     k = a.k;
     return a;
 }
+
 inline QVector::QVector( const Vector &a )
 {
     i = a.i;
     j = a.j;
     k = a.k;
 }
+
 inline QVector Vector::operator=( const QVector &a )
 {
     i = a.i;
@@ -61,16 +63,19 @@ inline QVector Vector::operator=( const QVector &a )
     k = a.k;
     return a;
 }
+
 inline Vector::Vector( const QVector &a )
 {
     i = a.i;
     j = a.j;
     k = a.k;
 }
+
 inline QVector Vector::Cast() const
 {
     return QVector( i, j, k );
 }
+
 inline Vector QVector::Cast() const
 {
     return Vector( i, j, k );

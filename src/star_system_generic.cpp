@@ -48,7 +48,7 @@
 #define Vector Vactor
 #endif
 
-#include <boost/python.hpp>
+#include "cs_boostpython.h"
 
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 

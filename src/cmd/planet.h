@@ -22,7 +22,8 @@ class Texture;
 class Atmosphere;
 
 class ContinuousTerrain;
-class PlanetaryTransform;
+//class PlanetaryTransform; commented out by chuck_starchaser --never used
+
 class GamePlanet : public GameUnit< class Planet >
 {
 private:

@@ -3,7 +3,7 @@ using std::string;
 static const char *error = "\nERROR: NULL Unit used in Python script; returning default value...";
 #define CHECKME \
     }           \
-    Unit *me = GetUnit(); if (!me) {fprintf( stderr, error ); return
+    Unit *me = GetUnit(); if (!me) {fprintf( stderr, "%s", error ); return
 #define WRAPPED0( type, name, def ) \
     type name() {                   \
         {CHECKME def; }             \

@@ -1,4 +1,7 @@
-//#include "unit.h"
+#ifndef __UNIT_CUSTOMIZE_CPP__
+#define __UNIT_CUSTOMIZE_CPP__
+
+#include "unit.h"
 //#include "unit_template.h"
 #include "unit_factory.h"
 #include "images.h"
@@ -33,7 +36,9 @@ bool GameUnit< UnitType >::UpgradeSubUnits( const Unit *up,
         this->DisableTurretAI();
     return bl;
 }
+
 extern char * GetUnitDir( const char* );
+
 template < class UnitType >
 double GameUnit< UnitType >::Upgrade( const std::string &file,
                                       int mountoffset,
@@ -43,4 +48,6 @@ double GameUnit< UnitType >::Upgrade( const std::string &file,
 {
     return Unit::Upgrade( file, mountoffset, subunitoffset, force, loop_through_mounts );
 }
+
+#endif
 

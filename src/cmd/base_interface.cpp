@@ -1417,8 +1417,8 @@ void BaseInterface::Draw()
     if ( un && (!base) ) {
         VSFileSystem::vs_fprintf( stderr, "Error: Base NULL" );
         mission->msgcenter->add( "game", "all", "[Computer] Docking unit destroyed. Emergency launch initiated." );
-        for (int i = 0; i < un->image->dockedunits.size(); i++)
-            if (un->image->dockedunits[i]->uc.GetUnit() == base)
+        for (int i = 0; i < un->pImage->dockedunits.size(); i++)
+            if (un->pImage->dockedunits[i]->uc.GetUnit() == base)
                 un->FreeDockingPort( i );
         Terminate();
     }

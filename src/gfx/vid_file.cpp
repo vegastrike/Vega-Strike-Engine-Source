@@ -12,15 +12,15 @@
 #include <utility>
 
 //define a 128k buffer for video streamers
-#define BUFFER_SIZE 128*(1<<10)
+#define BUFFER_SIZE ( 128*(1<<10) )
 
 #ifndef ENOENT
-#define ENOENT 2
+#define ENOENT (2)
 #endif
 #include <sys/types.h>
 
 #ifdef _WIN32
-#define offset_t xoffset_t
+#define offset_t (xoffset_t)
 #endif
 #include "ffmpeg_init.h"
 
@@ -39,7 +39,7 @@ typedef int     offset_t;
 #endif
 using namespace VSFileSystem;
 
-class VideoFileImpl
+class VidFileImpl
 {
 private:
     AVFormatContext *pFormatCtx;
@@ -84,7 +84,7 @@ private:
         }
     }
 
-    void nextFrame() throw (VideoFile::Exception)
+    void nextFrame() throw (VidFile::Exception)
     {
         int bytesDecoded;
         int frameFinished;
@@ -97,7 +97,7 @@ private:
                     pCodecCtx, pNextFrameYUV, &frameFinished,
                     packetBuffer, packetBufferSize );
                 //Was there an error?
-                if (bytesDecoded < 0) throw VideoFile::FrameDecodeException( "Error decoding frame" );
+                if (bytesDecoded < 0) throw VidFile::FrameDecodeException( "Error decoding frame" );
                 //Crappy ffmpeg!
                 if (bytesDecoded > packetBufferSize)
                     bytesDecoded = packetBufferSize;
@@ -118,7 +118,7 @@ private:
                 if (packet.data != NULL)
                     av_free_packet( &packet );
                 //Read new packet
-                if (av_read_frame( pFormatCtx, &packet ) < 0) throw VideoFile::EndOfStreamException();
+                if (av_read_frame( pFormatCtx, &packet ) < 0) throw VidFile::EndOfStreamException();
             } while (packet.stream_index != videoStreamIndex);
             packetBufferSize = packet.size;
             packetBuffer     = packet.data;
@@ -135,7 +135,7 @@ public:
     size_t   width;
     size_t   height;
 
-    VideoFileImpl( size_t maxDimensions ) :
+    VidFileImpl( size_t maxDimensions ) :
         pFormatCtx( 0 )
         , pCodecCtx( 0 )
         , pCodec( 0 )
@@ -152,7 +152,7 @@ public:
         packet.data = 0;
     }
 
-    ~VideoFileImpl()
+    ~VidFileImpl()
     {
         //Free framebuffer
         if (frameBuffer)
@@ -175,9 +175,9 @@ public:
             av_close_input_file( pFormatCtx );
     }
 
-    void open( const std::string &path ) throw (VideoFile::Exception)
+    void open( const std::string &path ) throw (VidFile::Exception)
     {
-        if (pCodecCtx != 0) throw VideoFile::Exception( "Already open" );
+        if (pCodecCtx != 0) throw VidFile::Exception( "Already open" );
         //Initialize libavcodec/libavformat if necessary
         FFMpeg::initLibraries();
 
@@ -185,7 +185,7 @@ public:
         std::string npath   = std::string( "vsfile:" )+path;
         std::string errbase = std::string( "Cannot open URL \"" )+npath+"\"";
         if ( ( 0 != av_open_input_file( &pFormatCtx, npath.c_str(), NULL, BUFFER_SIZE, NULL ) )
-            || ( 0 > av_find_stream_info( pFormatCtx ) ) ) throw VideoFile::FileOpenException( errbase+" (wrong format or)" );
+            || ( 0 > av_find_stream_info( pFormatCtx ) ) ) throw VidFile::FileOpenException( errbase+" (wrong format or)" );
         //Dump format info in case we want to know...
         #ifdef VS_DEBUG
         dump_format( pFormatCtx, 0, npath.c_str(), false );
@@ -197,14 +197,14 @@ public:
         for (int i = 0; (pCodecCtx == 0) && (i < pFormatCtx->nb_streams); ++i)
             if (pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO)
                 pCodecCtx = (pStream = pFormatCtx->streams[videoStreamIndex = i])->codec;
-        if (pCodecCtx == 0) throw VideoFile::FileOpenException( errbase+" (no video stream)" );
+        if (pCodecCtx == 0) throw VidFile::FileOpenException( errbase+" (no video stream)" );
         //Find codec for video stream and open it
         pCodec        = avcodec_find_decoder( pCodecCtx->codec_id );
-        if (pCodec == 0) throw VideoFile::UnsupportedCodecException( errbase+" (unsupported codec)" );
-        if (avcodec_open( pCodecCtx, pCodec ) < 0) throw VideoFile::UnsupportedCodecException( errbase+" (unsupported codec)" );
+        if (pCodec == 0) throw VidFile::UnsupportedCodecException( errbase+" (unsupported codec)" );
+        if (avcodec_open( pCodecCtx, pCodec ) < 0) throw VidFile::UnsupportedCodecException( errbase+" (unsupported codec)" );
         pFrameYUV     = avcodec_alloc_frame();
         pNextFrameYUV = avcodec_alloc_frame();
-        if ( (pFrameYUV == 0) || (pNextFrameYUV == 0) ) throw VideoFile::Exception(
+        if ( (pFrameYUV == 0) || (pNextFrameYUV == 0) ) throw VidFile::Exception(
                 "Problem during YUV framebuffer initialization" );
         //Get some info
         frameRate = float(pStream->r_frame_rate.num)/float(pStream->r_frame_rate.den);
@@ -217,10 +217,10 @@ public:
         }
         //Allocate RGB frame buffer
         pFrameRGB         = avcodec_alloc_frame();
-        if (pFrameRGB == 0) throw VideoFile::Exception( "Problem during RGB framebuffer initialization" );
+        if (pFrameRGB == 0) throw VidFile::Exception( "Problem during RGB framebuffer initialization" );
         frameBufferSize   = avpicture_get_size( PIX_FMT_RGB24, width, height );
         _frameBuffer      = new uint8_t[frameBufferSize];
-        if (_frameBuffer == 0) throw VideoFile::Exception( "Problem during RGB framebuffer initialization" );
+        if (_frameBuffer == 0) throw VidFile::Exception( "Problem during RGB framebuffer initialization" );
         avpicture_fill( (AVPicture*) pFrameRGB, _frameBuffer, PIX_FMT_RGB24, width, height );
         frameBuffer       = pFrameRGB->data[0];
         frameBufferSize   = pFrameRGB->linesize[0]*height;
@@ -255,7 +255,7 @@ public:
                 convertFrame();
                 nextFrame();
             }
-            catch (VideoFile::EndOfStreamException e) {
+            catch (VidFile::EndOfStreamException e) {
                 sizePTS = fbPTS+1; throw e;
             }
 
@@ -265,11 +265,11 @@ public:
 };
 
 #else /* !HAVE_FFMPEG */
-class VideoFileImpl
+class VidFileImpl
 {
 private:
 //Compile error.
-    VideoFileImpl() {}
+    VidFileImpl() {}
 public:
 //Avoid having to put ifdef's everywhere.
     float frameRate, duration;
@@ -285,32 +285,32 @@ public:
 #endif /* !HAVE_FFMPEG */
 /* ************************************ */
 
-VideoFile::VideoFile() throw () :
+VidFile::VidFile() throw () :
     impl( NULL )
 {}
 
-VideoFile::~VideoFile()
+VidFile::~VidFile()
 {
     if (impl)
         delete impl;
 }
 
-bool VideoFile::isOpen() const throw ()
+bool VidFile::isOpen() const throw ()
 {
     return impl != NULL;
 }
 
-void VideoFile::open( const std::string &path, size_t maxDimension ) throw (Exception)
+void VidFile::open( const std::string &path, size_t maxDimension ) throw (Exception)
 {
 #ifdef HAVE_FFMPEG
     if (!impl)
-        impl = new VideoFileImpl( maxDimension );
+        impl = new VidFileImpl( maxDimension );
     if (impl)
         impl->open( path );
 #endif
 }
 
-void VideoFile::close() throw ()
+void VidFile::close() throw ()
 {
     if (impl) {
         delete impl;
@@ -318,37 +318,37 @@ void VideoFile::close() throw ()
     }
 }
 
-float VideoFile::getFrameRate() const throw ()
+float VidFile::getFrameRate() const throw ()
 {
     return impl ? impl->frameRate : 0;
 }
 
-float VideoFile::getDuration() const throw ()
+float VidFile::getDuration() const throw ()
 {
     return impl ? impl->duration : 0;
 }
 
-int VideoFile::getWidth() const throw ()
+int VidFile::getWidth() const throw ()
 {
     return impl ? impl->width : 0;
 }
 
-int VideoFile::getHeight() const throw ()
+int VidFile::getHeight() const throw ()
 {
     return impl ? impl->height : 0;
 }
 
-void* VideoFile::getFrameBuffer() const throw ()
+void* VidFile::getFrameBuffer() const throw ()
 {
     return impl ? impl->frameBuffer : 0;
 }
 
-int VideoFile::getFrameBufferStride() const throw ()
+int VidFile::getFrameBufferStride() const throw ()
 {
     return impl ? impl->frameBufferStride : 0;
 }
 
-bool VideoFile::seek( float time ) throw (Exception)
+bool VidFile::seek( float time ) throw (Exception)
 {
     return (impl != 0) && impl->seek( time );
 }

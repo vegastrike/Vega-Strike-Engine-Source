@@ -1,3 +1,6 @@
+#ifndef QUADSQUARE_H
+#define QUADSQUARE_H
+
 /**
  *
  * Data structures for quadtree terrain storage.
@@ -9,14 +12,14 @@
  * Rewritten and adapted to Vegastrike by Daniel Horn
  */
 
-#ifndef QUADTREE_H
-#define QUADTREE_H
 #include "vec.h"
 #include "gfxlib.h"
 #include <vector>
 #include "resizable.h"
 #include "nonlinear_transform.h"
+
 class Texture;
+
 struct TerrainTexture
 {
     BLENDFUNC    blendSrc;
@@ -42,6 +45,7 @@ struct TerrainTexture
             blendDst = ZERO;
     }
 };
+
 typedef int (updateparity)( int );
 updateparity identityparity;
 updateparity sideparityodd;
@@ -56,13 +60,14 @@ struct HeightMapInfo
     unsigned long XSize, ZSize;
     unsigned int RowWidth;
     int    Scale;
-
     float  Sample( int x, int z, float &texture ) const;
 };
+
 /**
  * This has 4 lists of indices, one for "numbers of corners" a triangle may be filled
  * If the trianlge has 0 vertices filled, it is a nonblended one with all 4 filled
  */
+
 struct TextureIndex
 {
     Resizable< unsigned int >  q;
@@ -79,7 +84,6 @@ struct  VertInfo
     unsigned short Y;
     unsigned char  Tex;
     unsigned char  Rem;
-
     unsigned int   vertindex;
     void SetTex( float );
     unsigned short GetTex() const;
@@ -110,7 +114,6 @@ class quadsquare
 {
 public:
     quadsquare    *Child[4];
-
     VertInfo       Vertex[5];           //center, e, n, w, s
     unsigned short Error[6];            //e, s, children: ne, nw, sw, se
     unsigned short MinY, MaxY;          //Bounds for frustum culling and error testing.
@@ -118,8 +121,6 @@ public:
     unsigned char  SubEnabledCount[2];          //e, s enabled reference counts.
     bool Static;
     bool Dirty;         //Set when vertex data has changed, but error/enabled data has not been recalculated.
-
-//public:
     quadsquare( quadcornerdata *pcd );
     ~quadsquare();
 ///Createsa  lookup table for the terrain texture
@@ -127,7 +128,7 @@ public:
     void AddHeightMapAux( const quadcornerdata &cd, const HeightMapInfo &hm );
     void StaticCullData( const quadcornerdata &cd, float ThresholdDetail );
     float RecomputeErrorAndLighting( const quadcornerdata &cd );
-    int CountNodes();
+    int CountNodes() const;
 ///Make sure to translate into Quadtree Space
     void Update( const quadcornerdata &cd,
                  const Vector &ViewerLocation,
@@ -136,8 +137,7 @@ public:
                  unsigned short whichstage,
                  updateparity *whichordertoupdate );
     int Render( const quadcornerdata &cd, const Vector &camera );
-
-    float GetHeight( const quadcornerdata &cd, float x, float z, Vector &normal );
+    float GetHeight( const quadcornerdata &cd, float x, float z, Vector &normal ); // const;
     static Vector MakeLightness( float xslope, float zslope, const Vector &loc );
     static void SetCurrentTerrain( unsigned int *VertexAllocated,
                                    unsigned int *VertexCount,
@@ -147,7 +147,6 @@ public:
                                    std::vector< TerrainTexture > *texturelist,
                                    const Vector &NormalScale,
                                    quadsquare*neighbor[4] );
-
 private:
     static void tri( unsigned int Aind,
                      unsigned short Atex,
@@ -161,15 +160,12 @@ private:
     quadsquare*EnableDescendant( int count, int stack[], const quadcornerdata &cd );
     void EnableChild( int index, const quadcornerdata &cd );
     void NotifyChildDisable( const quadcornerdata &cd, int index );
-
     void ResetTree();
     void StaticCullAux( const quadcornerdata &cd, float ThresholdDetail, int TargetLevel );
-
-    quadsquare * GetNeighbor( int dir, const quadcornerdata &cd );
-    quadsquare * GetFarNeighbor( int dir, const quadcornerdata &cd );
+    quadsquare * GetNeighbor( int dir, const quadcornerdata &cd ) const;
+    quadsquare * GetFarNeighbor( int dir, const quadcornerdata &cd ) const;
     void CreateChild( int index, const quadcornerdata &cd );
     void SetupCornerData( quadcornerdata *q, const quadcornerdata &pd, int ChildIndex );
-
     void UpdateAux( const quadcornerdata &cd, const Vector &ViewerLocation, float CenterError, unsigned int pipelinemask );
     void RenderAux( const quadcornerdata &cd, CLIPSTATE vis );
     void SetStatic( const quadcornerdata &cd );
@@ -186,5 +182,5 @@ private:
     static quadsquare *neighbor[4];
 };
 
-#endif //QUADTREE_HPP
+#endif //QUADSQUARE_H
 

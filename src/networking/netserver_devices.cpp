@@ -148,8 +148,8 @@ void NetServer::addUnitCargoSnapshot( const Unit *un, NetBuffer &netbuf )
     if (!numCargo) return;
     netbuf.addSerial( un->GetSerial() );
     netbuf.addFloat( un->Mass );
-    netbuf.addFloat( un->image->CargoVolume );
-    netbuf.addFloat( un->image->UpgradeVolume );
+    netbuf.addFloat( un->pImage->CargoVolume );
+    netbuf.addFloat( un->pImage->UpgradeVolume );
     netbuf.addInt32( numCargo );
     for (unsigned int i = 0; i < numCargo; i++) {
         const Cargo &carg = un->GetCargo( i );

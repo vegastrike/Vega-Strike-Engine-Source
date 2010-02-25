@@ -6,7 +6,7 @@
 #include "vsfilesystem.h"
 #include "xml_support.h"
 #ifndef M_PI
-#define M_PI 3.1415926536F
+#define M_PI (3.1415926536F)
 #endif
 #include "gfx/camera.h"
 

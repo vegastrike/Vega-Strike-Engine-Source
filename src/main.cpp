@@ -18,7 +18,7 @@
  */
 //#include <fenv.h>
 #include "config.h"
-#include <Python.h>
+#include "cs_python.h"
 
 #if defined (HAVE_SDL)
 #include <SDL/SDL.h>
@@ -208,7 +208,8 @@ int main( int argc, char *argv[] )
     mission_name[0] = '\0';
     {
         char pwd[8192] = "";
-        getcwd( pwd, 8191 );
+        static char *bogus_return; //added by chuck_starchaser to squash a warning
+        bogus_return = getcwd( pwd, 8191 );
         pwd[8191] = '\0';
         printf( " In path %s\n", pwd );
     }
@@ -342,6 +343,7 @@ void bootstrap_draw( const std::string &message, Animation *newSplashScreen )
         //this happens, when the splash screens texture is loaded
         return;
     }
+    
     reentryWatchdog = true;
     if (newSplashScreen != NULL)
         ani = newSplashScreen;
@@ -372,7 +374,9 @@ void bootstrap_draw( const std::string &message, Animation *newSplashScreen )
     GFXHudMode( GFXTRUE );
     if (ani) {
         if (GetElapsedTime() < 10) ani->UpdateAllFrame();
-        ani->DrawNow( tmp );
+        {
+        ani->DrawNow( tmp ); //VSFileSystem::vs_fprintf( stderr, "(new?) splash screen ('animation'?) %d.  ", (long long)ani ); //temporary, by chuck
+        }
     }
     static std::string defaultbootmessage = vs_config->getVariable( "graphics", "default_boot_message", "" );
     static std::string initialbootmessage = vs_config->getVariable( "graphics", "initial_boot_message", "Loading..." );

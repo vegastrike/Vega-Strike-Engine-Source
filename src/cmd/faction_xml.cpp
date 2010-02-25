@@ -30,6 +30,7 @@ static FSM * getFSM( const std::string &value )
     }
     return NULL;
 }
+
 #if 0
 static FSM * getFSM( const std::string &value )
 {
@@ -419,6 +420,7 @@ void Faction::LoadXML( const char *filename, char *xmlbuffer, int buflength )
 
     FactionUtil::LoadSerializedFaction( munull );
 }
+
 void FactionUtil::LoadContrabandLists()
 {
     for (unsigned int i = 0; i < factions.size() && i < contrabandlists.size(); i++)

@@ -32,7 +32,6 @@ private:
     unsigned int posmodes;
 ///The current mode (VDU_MODE) that this unit is in is in back of this vector
     std::vector< unsigned int >thismode;
-
 ///Rows and columns of text this VDU can display
     short rows, cols;
     bool  got_target_info;
@@ -71,8 +70,8 @@ public:
     {
         got_target_info = true;
     }
-    bool staticable();
-    unsigned int getMode()
+    bool staticable() const;
+    unsigned int getMode() const
     {
         return thismode.back();
     }
@@ -92,7 +91,7 @@ public:
     void Scroll( int howmuch );
     bool SetCommAnimation( Animation *ani, Unit *unit, bool force );
     Unit * GetCommunicating();
-    bool CheckCommAnimation( Unit *un ); //returns true if unit is talkin or uninterruptable going on
+    bool CheckCommAnimation( Unit *un ) const; //returns true if unit is talkin or uninterruptable going on
 };
 
 int parse_vdu_type( const char *s );

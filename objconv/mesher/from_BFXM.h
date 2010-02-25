@@ -6,5 +6,6 @@ using std::vector;
 #include <stdlib.h>
 #include <stdio.h>
 
-void BFXMToXmeshOrOBJ(FILE* Inputfile, FILE* Outputfile,FILE * outputObj,FILE * mtl, std::string meshname,char hackaroundhack); //Translate BFXM file Inputfile to text file Outputfile
-void BFXMtoBoxDims(FILE *Inputfile, const char* name); // computes box dimensions given a bfxm
+void BFXMToXmeshOrOBJ( FILE *Inputfile, FILE *Outputfile, FILE *outputObj, FILE *mtl, std::string meshname, char hackaroundhack ); //Translate BFXM file Inputfile to text file Outputfile
+void BFXMtoBoxDims( FILE *Inputfile, const char *name ); //computes box dimensions given a bfxm
+

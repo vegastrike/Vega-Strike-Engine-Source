@@ -27,7 +27,7 @@
 #include "cmd/collide2/CSopcodecollider.h"
 
 #include "networking/netclient.h"
-#define VS_PI 3.1415926536
+#define VS_PI (3.1415926536)
 
 /*ADDED FOR extensible use of unit pretty print and unit load */
 UNITLOADTYPE current_unit_load_mode = DEFAULT;
@@ -40,6 +40,7 @@ string KillQuadZeros( string inp )
         inp = inp.substr( 0, text )+inp.substr( text+7 );
     return inp;
 }
+
 string MakeUnitXMLPretty( string str, Unit *un )
 {
     string writestr;
@@ -102,7 +103,9 @@ int GetModeFromName( const char *input_buffer )
     }
     return 0;
 }
+
 extern bool CheckAccessory( Unit* );
+
 void Unit::beginElement( void *userData, const XML_Char *name, const XML_Char **atts )
 {
     ( (Unit*) userData )->beginElement( name, AttributeList( atts ) );
@@ -112,6 +115,7 @@ void Unit::endElement( void *userData, const XML_Char *name )
 {
     ( (Unit*) userData )->endElement( name );
 }
+
 namespace UnitXML
 {
 enum Names
@@ -309,6 +313,7 @@ const EnumMap::Pair element_names[38] = {
     EnumMap::Pair( "Upgrade",       UPGRADE ),
     EnumMap::Pair( "Description",   DESCRIPTION ),
 };
+
 const EnumMap::Pair attribute_names[120] = {
     EnumMap::Pair( "UNKNOWN",                 UNKNOWN ),
     EnumMap::Pair( "missing",                 MISSING ),
@@ -434,7 +439,8 @@ const EnumMap::Pair attribute_names[120] = {
 
 const EnumMap element_map( element_names, 38 );
 const EnumMap attribute_map( attribute_names, 120 );
-}
+} //end of namespace
+
 std::string delayucharStarHandler( const XMLType &input, void *mythis )
 {
     static int    jumpdelaymult = XMLSupport::parse_int( vs_config->getVariable( "physics", "jump_delay_multiplier", "5" ) );
@@ -463,14 +469,17 @@ void addShieldMesh( Unit::XML *xml, const char *filename, const float scale, int
         xml->shieldmesh->setLighting( true, true );
     }
 }
+
 void addRapidMesh( Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg )
 {
     xml->rapidmesh = Mesh::LoadMesh( filename, Vector( scale, scale, scale ), faction, fg );
 }
+
 void addBSPMesh( Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg )
 {
     xml->bspmesh = Mesh::LoadMesh( filename, Vector( scale, scale, scale ), faction, fg );
 }
+
 void pushMesh( std::vector< Mesh* > &meshes,
                float &randomstartframe,
                float &randomstartseconds,
@@ -520,13 +529,30 @@ Mount * createMount( const std::string &name, int ammo, int volume, float xyscal
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
+
 extern int GetModeFromName( const char* );
+
 extern int parseMountSizes( const char *str );
 
 static unsigned int CLAMP_UINT( float x )
 {
     return (unsigned int) ( ( (x) > 4294967295.0 ) ? (unsigned int) 4294967295U : ( (x) < 0 ? 0 : (x) ) );
 }                                                                                                                             //short fix
+
+#define ADDTAGNAME( a ) do {pImage->unitwriter->AddTag( a );} \
+    while (0)
+#define ADDTAG do {pImage->unitwriter->AddTag( name );} \
+    while (0)
+#define ADDELEMNAME( a, b, c ) do {pImage->unitwriter->AddElement( a, b, c );} \
+    while (0)
+#define ADDELEM( b, c ) do {pImage->unitwriter->AddElement( (*iter).name, b, c );} \
+    while (0)
+#define ADDDEFAULT do {pImage->unitwriter->AddElement( (*iter).name, stringHandler, XMLType( (*iter).value ) );} \
+    while (0)
+#define ADDELEMI( b ) do {ADDELEM( intStarHandler, XMLType( &b ) );} \
+    while (0)
+#define ADDELEMF( b ) do {ADDELEM( floatStarHandler, XMLType( &b ) );} \
+    while (0)
 
 void Unit::beginElement( const string &name, const AttributeList &attributes )
 {
@@ -553,13 +579,6 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
     int     mntsiz = weapon_info::NOWEAP;
     string  light_type;
     Names   elem   = (Names) element_map.lookup( name );
-#define ADDTAGNAME( a ) image->unitwriter->AddTag( a )
-#define ADDTAG image->unitwriter->AddTag( name )
-#define ADDELEMNAME( a, b, c ) image->unitwriter->AddElement( a, b, c )
-#define ADDELEM( b, c ) image->unitwriter->AddElement( (*iter).name, b, c )
-#define ADDDEFAULT image->unitwriter->AddElement( (*iter).name, stringHandler, XMLType( (*iter).value ) )
-#define ADDELEMI( b ) ADDELEM( intStarHandler, XMLType( &b ) )
-#define ADDELEMF( b ) ADDELEM( floatStarHandler, XMLType( &b ) )
     switch (elem)
     {
     case SHIELDMESH:
@@ -632,15 +651,15 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case VOLUME:
-                ADDELEM( floatStarHandler, XMLType( &image->CargoVolume ) );
-                ADDELEM( floatStarHandler, XMLType( &image->UpgradeVolume ) );
-                image->UpgradeVolume = image->CargoVolume = parse_float( (*iter).value );
+                ADDELEM( floatStarHandler, XMLType( &pImage->CargoVolume ) );
+                ADDELEM( floatStarHandler, XMLType( &pImage->UpgradeVolume ) );
+                pImage->UpgradeVolume = pImage->CargoVolume = parse_float( (*iter).value );
                 break;
             }
         }
-        image->unitwriter->AddTag( "Category" );
-        image->unitwriter->AddElement( "file", Unit::cargoSerializer, XMLType( (int) 0 ) );
-        image->unitwriter->EndTag( "Category" );
+        pImage->unitwriter->AddTag( "Category" );
+        pImage->unitwriter->AddElement( "file", Unit::cargoSerializer, XMLType( (int) 0 ) );
+        pImage->unitwriter->EndTag( "Category" );
         break;
     case IMPORT:
         Q.i = Q.k = 0;
@@ -841,11 +860,11 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             }
         }
         if (Q.i == FLT_MAX || Q.j == FLT_MAX || Q.k == FLT_MAX || R.i == FLT_MAX || R.j == FLT_MAX || R.k == FLT_MAX) {
-            image->dockingports.push_back( DockingPorts( pos.Cast(), P.i, 0, tempbool ) );
+            pImage->dockingports.push_back( DockingPorts( pos.Cast(), P.i, 0, tempbool ) );
         } else {
             QVector tQ = Q.Min( R );
             QVector tR = R.Max( Q );
-            image->dockingports.push_back( DockingPorts( tQ.Cast(), tR.Cast(), 0, tempbool ) );
+            pImage->dockingports.push_back( DockingPorts( tQ.Cast(), tR.Cast(), 0, tempbool ) );
         }
         break;
     case MESHLIGHT:
@@ -1075,8 +1094,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         xml->units[indx]->limits.structurelimits = R.Cast();
         xml->units[indx]->limits.limitmin = fbrltb[0];
         xml->units[indx]->name = filename;
-        if (xml->units[indx]->image->unitwriter != NULL)
-            xml->units[indx]->image->unitwriter->setName( filename );
+        if (xml->units[indx]->pImage->unitwriter != NULL)
+            xml->units[indx]->pImage->unitwriter->setName( filename );
         CheckAccessory( xml->units[indx] );         //turns on the ceerazy rotation for the turret
         break;
     case COCKPITDAMAGE:
@@ -1085,7 +1104,7 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case DAMAGE:
-                image->cockpit_damage[xml->damageiterator++] = parse_float( (*iter).value );
+                pImage->cockpit_damage[xml->damageiterator++] = parse_float( (*iter).value );
                 break;
             }
         }
@@ -1168,8 +1187,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
                     break;
                 case WORMHOLE:
                     //serialization covered in LoadXML
-                    image->forcejump = parse_bool( (*iter).value );
-                    if (image->forcejump)
+                    pImage->forcejump = parse_bool( (*iter).value );
+                    if (pImage->forcejump)
                         jump.drive = -2;
                     break;
                 }
@@ -1272,9 +1291,9 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         //serialization covered elsewhere
         assert( xml->unitlevel == 2 );
         xml->unitlevel++;
-        image->cloakrate   = (int) ( .2*(2147483647) );           //short fix
+        pImage->cloakrate   = (int) ( .2*(2147483647) );           //short fix
         cloakmin = 1;
-        image->cloakenergy = 0;
+        pImage->cloakenergy = 0;
         cloaking = INT_MIN;         //lowest negative number  //short fix
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
             switch ( attribute_map.lookup( (*iter).name ) )
@@ -1290,21 +1309,21 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
                 break;
             case CLOAKGLASS:
                 //serialization covered in LoadXML
-                image->cloakglass = parse_bool( (*iter).value );
+                pImage->cloakglass = parse_bool( (*iter).value );
                 break;
             case CLOAKRATE:
                 //serialization covered in LoadXML
-                image->cloakrate = (int) ( (2147483647)*parse_float( (*iter).value ) );                     //short fix
+                pImage->cloakrate = (int) ( (2147483647)*parse_float( (*iter).value ) );                     //short fix
                 break;
             case CLOAKENERGY:
                 //serialization covered in LoadXML
-                image->cloakenergy = parse_float( (*iter).value );
+                pImage->cloakenergy = parse_float( (*iter).value );
                 break;
             }
         }
-        if ( (cloakmin&0x1) && !image->cloakglass )
+        if ( (cloakmin&0x1) && !pImage->cloakglass )
             cloakmin -= 1;
-        if ( (cloakmin&0x1) == 0 && image->cloakglass )
+        if ( (cloakmin&0x1) == 0 && pImage->cloakglass )
             cloakmin += 1;
         break;
     case ARMOR:
@@ -1486,6 +1505,7 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             case FUEL:
                 fuel = Mass*60*getFuelConversion();
                 //FIXME! This is a hack until we get csv support
+                //FIXME FIXME FIXME got support a long time ago! --chuck_starchaser
                 break;
             }
         }
@@ -1581,7 +1601,7 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
                 break;
             }
         }
-        image->unitwriter->AddTag( "Radar" );
+        pImage->unitwriter->AddTag( "Radar" );
         ADDELEMNAME( "itts", boolStarHandler, XMLType( &computer.itts ) );
         ADDELEMNAME( "color", charStarHandler, XMLType( &computer.radar.iff ) );
         ADDELEMNAME( "mintargetsize", charStarHandler, XMLType( &computer.radar.mintargetsize ) );
@@ -1589,7 +1609,7 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         ADDELEMNAME( "maxcone", floatStarHandler, XMLType( &computer.radar.maxcone ) );
         ADDELEMNAME( "TrackingCone", floatStarHandler, XMLType( &computer.radar.trackingcone ) );
         ADDELEMNAME( "lockcone", floatStarHandler, XMLType( &computer.radar.lockcone ) );
-        image->unitwriter->EndTag( "Radar" );
+        pImage->unitwriter->EndTag( "Radar" );
         break;
     case RADAR:
         //handled above
@@ -1755,20 +1775,20 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case XFILE:
-                image->cockpitImage = (*iter).value;
-                ADDELEM( stringStarHandler, XMLType( &image->cockpitImage ) );
+                pImage->cockpitImage = (*iter).value;
+                ADDELEM( stringStarHandler, XMLType( &pImage->cockpitImage ) );
                 break;
             case X:
-                image->CockpitCenter.i = xml->unitscale*parse_float( (*iter).value );
-                ADDELEM( scaledFloatStarHandler, XMLType( tostring( xml->unitscale ), &image->CockpitCenter.i ) );
+                pImage->CockpitCenter.i = xml->unitscale*parse_float( (*iter).value );
+                ADDELEM( scaledFloatStarHandler, XMLType( tostring( xml->unitscale ), &pImage->CockpitCenter.i ) );
                 break;
             case Y:
-                image->CockpitCenter.j = xml->unitscale*parse_float( (*iter).value );
-                ADDELEM( scaledFloatStarHandler, XMLType( tostring( xml->unitscale ), &image->CockpitCenter.j ) );
+                pImage->CockpitCenter.j = xml->unitscale*parse_float( (*iter).value );
+                ADDELEM( scaledFloatStarHandler, XMLType( tostring( xml->unitscale ), &pImage->CockpitCenter.j ) );
                 break;
             case Z:
-                image->CockpitCenter.k = xml->unitscale*parse_float( (*iter).value );
-                ADDELEM( scaledFloatStarHandler, XMLType( tostring( xml->unitscale ), &image->CockpitCenter.k ) );
+                pImage->CockpitCenter.k = xml->unitscale*parse_float( (*iter).value );
+                ADDELEM( scaledFloatStarHandler, XMLType( tostring( xml->unitscale ), &pImage->CockpitCenter.k ) );
                 break;
             }
         }
@@ -1781,25 +1801,25 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             {
             case HUDIMAGE:
                 if ( (*iter).value.length() ) {
-                    image->hudImage = createVSSprite( (*iter).value.c_str() );
-                    xml->hudimage   = (*iter).value;
+                    pImage->pHudImage = createVSSprite( (*iter).value.c_str() );
+                    xml->hudimage     = (*iter).value;
                 }
                 break;
             case EXPLOSIONANI:
                 if ( (*iter).value.length() ) {
-                    image->explosion_type = (*iter).value;
+                    pImage->explosion_type = (*iter).value;
                     {
-                        cache_ani( image->explosion_type );
+                        cache_ani( pImage->explosion_type );
                     }
                 }
                 break;
             case REPAIRDROID:
-                image->repair_droid = (unsigned char) parse_float( (*iter).value );
+                pImage->repair_droid = (unsigned char) parse_float( (*iter).value );
                 break;
             case ECM:
 
-                image->ecm = (int) ( ( (-1) > 1 )*parse_float( (*iter).value ) );                     //short fix
-                image->ecm = image->ecm > 0 ? -image->ecm : image->ecm;
+                pImage->ecm = (int) ( ( (-1) > 1 )*parse_float( (*iter).value ) );                     //short fix
+                pImage->ecm = pImage->ecm > 0 ? -pImage->ecm : pImage->ecm;
                 break;
             default:
                 break;
@@ -1841,13 +1861,20 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         xml->unitlevel++;
         break;
     }
-#undef ADDELEM
 }
+
+#undef  ADDELEMF
+#undef  ADDELEMI
+#undef  ADDDEFAULT
+#undef  ADDELEM
+#undef  ADDELEMNAME
+#undef  ADDTAG
+#undef  ADDTAGNAME
 
 void Unit::endElement( const string &name )
 {
     using namespace UnitXML;
-    image->unitwriter->EndTag( name );
+    pImage->unitwriter->EndTag( name );
     Names elem = (Names) element_map.lookup( name );
     switch (elem)
     {
@@ -1877,6 +1904,7 @@ using namespace VSFileSystem;
 
 void Unit::LoadXML( const char *filename, const char *modifications, string *xmlbuffer )
 {}
+
 void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *xmlbuffer )
 {
     shield.number = 0;
@@ -1888,116 +1916,116 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
     //std::cout<<std::endl;
     //cout<<"Loading XML unit : "<<filename<<" in "<<curdir[0]<<endl;
     //std::cout<<std::endl;
-    image->unitwriter = new XMLSerializer( name.get().c_str(), modifications, this );
-    image->unitwriter->AddTag( "Unit" );
-    string *myhudim = &image->unitwriter->randomdata[0];
-    float  *myscale = &image->unitscale;
-    image->unitwriter->AddElement( "scale", floatStarHandler, XMLType( myscale ) );
+    pImage->unitwriter = new XMLSerializer( name.get().c_str(), modifications, this );
+    pImage->unitwriter->AddTag( "Unit" );
+    string *myhudim = &pImage->unitwriter->randomdata[0];
+    float  *myscale = &pImage->unitscale;
+    pImage->unitwriter->AddElement( "scale", floatStarHandler, XMLType( myscale ) );
     {
-        image->unitwriter->AddTag( "Jump" );
-        image->unitwriter->AddElement( "missing", lessNeg1Handler, XMLType( &jump.drive ) );
-        image->unitwriter->AddElement( "warpDriveRating", floatStarHandler, XMLType( &jump.warpDriveRating ) );
-        image->unitwriter->AddElement( "jumpenergy", floatStarHandler, XMLType( &jump.energy ) );         //short fix
-        image->unitwriter->AddElement( "insysenergy", floatStarHandler, XMLType( &jump.insysenergy ) );         //short fix
-        image->unitwriter->AddElement( "delay", delayucharStarHandler, XMLType( &jump.delay ) );
-        image->unitwriter->AddElement( "damage", ucharStarHandler, XMLType( &jump.damage ) );
-        image->unitwriter->AddElement( "wormhole", ucharStarHandler, XMLType( &image->forcejump ) );
-        image->unitwriter->EndTag( "Jump" );
+        pImage->unitwriter->AddTag( "Jump" );
+        pImage->unitwriter->AddElement( "missing", lessNeg1Handler, XMLType( &jump.drive ) );
+        pImage->unitwriter->AddElement( "warpDriveRating", floatStarHandler, XMLType( &jump.warpDriveRating ) );
+        pImage->unitwriter->AddElement( "jumpenergy", floatStarHandler, XMLType( &jump.energy ) );         //short fix
+        pImage->unitwriter->AddElement( "insysenergy", floatStarHandler, XMLType( &jump.insysenergy ) );         //short fix
+        pImage->unitwriter->AddElement( "delay", delayucharStarHandler, XMLType( &jump.delay ) );
+        pImage->unitwriter->AddElement( "damage", ucharStarHandler, XMLType( &jump.damage ) );
+        pImage->unitwriter->AddElement( "wormhole", ucharStarHandler, XMLType( &pImage->forcejump ) );
+        pImage->unitwriter->EndTag( "Jump" );
     }
     {
         unsigned int i;
-        for (i = 0; i <= (UnitImages::NUMGAUGES+MAXVDUS); i++) {
-            image->unitwriter->AddTag( "CockpitDamage" );
-            image->unitwriter->AddElement( "damage", floatStarHandler, XMLType( &image->cockpit_damage[i] ) );
-            image->unitwriter->EndTag( "CockpitDamage" );
+        for (i = 0; i <= (UnitImages< void >::NUMGAUGES+MAXVDUS); i++) {
+            pImage->unitwriter->AddTag( "CockpitDamage" );
+            pImage->unitwriter->AddElement( "damage", floatStarHandler, XMLType( &pImage->cockpit_damage[i] ) );
+            pImage->unitwriter->EndTag( "CockpitDamage" );
         }
     }
 
     {
-        image->unitwriter->AddTag( "Defense" );
-        image->unitwriter->AddElement( "HudImage", stringStarHandler, XMLType( myhudim ) );
-        if ( image->explosion_type.get().length() )
-            image->unitwriter->AddElement( "ExplosionAni", stringStarHandler, XMLType( &image->explosion_type ) );
-        image->unitwriter->AddElement( "RepairDroid", ucharStarHandler, XMLType( &image->repair_droid ) );
-        image->unitwriter->AddElement( "ECM", intToFloatHandler, XMLType( &image->ecm ) );         //short fix
+        pImage->unitwriter->AddTag( "Defense" );
+        pImage->unitwriter->AddElement( "HudImage", stringStarHandler, XMLType( myhudim ) );
+        if ( pImage->explosion_type.get().length() )
+            pImage->unitwriter->AddElement( "ExplosionAni", stringStarHandler, XMLType( &pImage->explosion_type ) );
+        pImage->unitwriter->AddElement( "RepairDroid", ucharStarHandler, XMLType( &pImage->repair_droid ) );
+        pImage->unitwriter->AddElement( "ECM", intToFloatHandler, XMLType( &pImage->ecm ) );         //short fix
         {
-            image->unitwriter->AddTag( "Cloak" );
-            image->unitwriter->AddElement( "missing", cloakHandler, XMLType( &cloaking ) );
-            image->unitwriter->AddElement( "cloakmin", intToFloatHandler, XMLType( &cloakmin ) );             //short fix
-            image->unitwriter->AddElement( "cloakglass", ucharStarHandler, XMLType( &image->cloakglass ) );
-            image->unitwriter->AddElement( "cloakrate", intToFloatHandler, XMLType( &image->cloakrate ) );             //short fix
-            image->unitwriter->AddElement( "cloakenergy", floatStarHandler, XMLType( &image->cloakenergy ) );
-            image->unitwriter->EndTag( "Cloak" );
+            pImage->unitwriter->AddTag( "Cloak" );
+            pImage->unitwriter->AddElement( "missing", cloakHandler, XMLType( &cloaking ) );
+            pImage->unitwriter->AddElement( "cloakmin", intToFloatHandler, XMLType( &cloakmin ) );             //short fix
+            pImage->unitwriter->AddElement( "cloakglass", ucharStarHandler, XMLType( &pImage->cloakglass ) );
+            pImage->unitwriter->AddElement( "cloakrate", intToFloatHandler, XMLType( &pImage->cloakrate ) );             //short fix
+            pImage->unitwriter->AddElement( "cloakenergy", floatStarHandler, XMLType( &pImage->cloakenergy ) );
+            pImage->unitwriter->EndTag( "Cloak" );
         }
         {
-            image->unitwriter->AddTag( "Armor" );
-            image->unitwriter->AddElement( "frontrighttop", floatStarHandler, XMLType( &armor.frontrighttop ) );             //short fix
-            image->unitwriter->AddElement( "backrighttop", floatStarHandler, XMLType( &armor.backrighttop ) );             //short fix
-            image->unitwriter->AddElement( "frontlefttop", floatStarHandler, XMLType( &armor.frontlefttop ) );             //short fix
-            image->unitwriter->AddElement( "backlefttop", floatStarHandler, XMLType( &armor.backlefttop ) );             //short fix
-            image->unitwriter->AddElement( "frontrightbottom", floatStarHandler, XMLType( &armor.frontrightbottom ) );             //short fix
-            image->unitwriter->AddElement( "backrightbottom", floatStarHandler, XMLType( &armor.backrightbottom ) );             //short fix
-            image->unitwriter->AddElement( "frontleftbottom", floatStarHandler, XMLType( &armor.frontleftbottom ) );             //short fix
-            image->unitwriter->AddElement( "backleftbottom", floatStarHandler, XMLType( &armor.backleftbottom ) );             //short fix
-            image->unitwriter->EndTag( "Armor" );
+            pImage->unitwriter->AddTag( "Armor" );
+            pImage->unitwriter->AddElement( "frontrighttop", floatStarHandler, XMLType( &armor.frontrighttop ) );             //short fix
+            pImage->unitwriter->AddElement( "backrighttop", floatStarHandler, XMLType( &armor.backrighttop ) );             //short fix
+            pImage->unitwriter->AddElement( "frontlefttop", floatStarHandler, XMLType( &armor.frontlefttop ) );             //short fix
+            pImage->unitwriter->AddElement( "backlefttop", floatStarHandler, XMLType( &armor.backlefttop ) );             //short fix
+            pImage->unitwriter->AddElement( "frontrightbottom", floatStarHandler, XMLType( &armor.frontrightbottom ) );             //short fix
+            pImage->unitwriter->AddElement( "backrightbottom", floatStarHandler, XMLType( &armor.backrightbottom ) );             //short fix
+            pImage->unitwriter->AddElement( "frontleftbottom", floatStarHandler, XMLType( &armor.frontleftbottom ) );             //short fix
+            pImage->unitwriter->AddElement( "backleftbottom", floatStarHandler, XMLType( &armor.backleftbottom ) );             //short fix
+            pImage->unitwriter->EndTag( "Armor" );
         }
         {
-            image->unitwriter->AddTag( "Shields" );
-            image->unitwriter->AddElement( "front", shieldSerializer, XMLType( (void*) &shield ) );
-            image->unitwriter->AddElement( "recharge", floatStarHandler, XMLType( &shield.recharge ) );
-            image->unitwriter->AddElement( "leak", charStarHandler, XMLType( &shield.leak ) );
+            pImage->unitwriter->AddTag( "Shields" );
+            pImage->unitwriter->AddElement( "front", shieldSerializer, XMLType( (void*) &shield ) );
+            pImage->unitwriter->AddElement( "recharge", floatStarHandler, XMLType( &shield.recharge ) );
+            pImage->unitwriter->AddElement( "leak", charStarHandler, XMLType( &shield.leak ) );
 
-            image->unitwriter->EndTag( "Shields" );
+            pImage->unitwriter->EndTag( "Shields" );
         }
         {
-            image->unitwriter->AddTag( "Hull" );
-            image->unitwriter->AddElement( "strength", floatStarHandler, XMLType( &hull ) );
-            image->unitwriter->AddElement( "maximum", floatStarHandler, XMLType( &maxhull ) );
-            image->unitwriter->EndTag( "Hull" );
+            pImage->unitwriter->AddTag( "Hull" );
+            pImage->unitwriter->AddElement( "strength", floatStarHandler, XMLType( &hull ) );
+            pImage->unitwriter->AddElement( "maximum", floatStarHandler, XMLType( &maxhull ) );
+            pImage->unitwriter->EndTag( "Hull" );
         }
 
-        image->unitwriter->EndTag( "Defense" );
+        pImage->unitwriter->EndTag( "Defense" );
     }
     {
-        image->unitwriter->AddTag( "Energy" );
-        image->unitwriter->AddElement( "afterburnenergy", floatStarHandler, XMLType( &afterburnenergy ) );         //short fix
-        image->unitwriter->AddTag( "Reactor" );
-        image->unitwriter->AddElement( "recharge", floatStarHandler, XMLType( &recharge ) );
-        image->unitwriter->AddElement( "limit", floatStarHandler, XMLType( &maxenergy ) );
-        image->unitwriter->AddElement( "warpenergy", floatStarHandler, XMLType( &maxwarpenergy ) );         //short fix
-        image->unitwriter->EndTag( "Reactor" );
+        pImage->unitwriter->AddTag( "Energy" );
+        pImage->unitwriter->AddElement( "afterburnenergy", floatStarHandler, XMLType( &afterburnenergy ) );         //short fix
+        pImage->unitwriter->AddTag( "Reactor" );
+        pImage->unitwriter->AddElement( "recharge", floatStarHandler, XMLType( &recharge ) );
+        pImage->unitwriter->AddElement( "limit", floatStarHandler, XMLType( &maxenergy ) );
+        pImage->unitwriter->AddElement( "warpenergy", floatStarHandler, XMLType( &maxwarpenergy ) );         //short fix
+        pImage->unitwriter->EndTag( "Reactor" );
 
-        image->unitwriter->EndTag( "Energy" );
+        pImage->unitwriter->EndTag( "Energy" );
     }
 
     {
-        image->unitwriter->AddTag( "Stats" );
-        image->unitwriter->AddElement( "mass", massSerializer, XMLType( &Mass ) );
-        image->unitwriter->AddElement( "momentofinertia", floatStarHandler, XMLType( &Momentofinertia ) );
-        image->unitwriter->AddElement( "fuel", floatStarHandler, XMLType( &fuel ) );
-        image->unitwriter->EndTag( "Stats" );
-        image->unitwriter->AddTag( "Thrust" );
+        pImage->unitwriter->AddTag( "Stats" );
+        pImage->unitwriter->AddElement( "mass", massSerializer, XMLType( &Mass ) );
+        pImage->unitwriter->AddElement( "momentofinertia", floatStarHandler, XMLType( &Momentofinertia ) );
+        pImage->unitwriter->AddElement( "fuel", floatStarHandler, XMLType( &fuel ) );
+        pImage->unitwriter->EndTag( "Stats" );
+        pImage->unitwriter->AddTag( "Thrust" );
         {
-            image->unitwriter->AddTag( "Maneuver" );
-            image->unitwriter->AddElement( "yaw", angleStarHandler, XMLType( &limits.yaw ) );
-            image->unitwriter->AddElement( "pitch", angleStarHandler, XMLType( &limits.pitch ) );
-            image->unitwriter->AddElement( "roll", angleStarHandler, XMLType( &limits.roll ) );
-            image->unitwriter->EndTag( "Maneuver" );
+            pImage->unitwriter->AddTag( "Maneuver" );
+            pImage->unitwriter->AddElement( "yaw", angleStarHandler, XMLType( &limits.yaw ) );
+            pImage->unitwriter->AddElement( "pitch", angleStarHandler, XMLType( &limits.pitch ) );
+            pImage->unitwriter->AddElement( "roll", angleStarHandler, XMLType( &limits.roll ) );
+            pImage->unitwriter->EndTag( "Maneuver" );
         }
         {
-            image->unitwriter->AddTag( "Engine" );
-            image->unitwriter->AddElement( "forward", accelStarHandler, XMLType( &limits.forward ) );
-            image->unitwriter->AddElement( "retro", accelStarHandler, XMLType( &limits.retro ) );
-            image->unitwriter->AddElement( "left", accelStarHandler, XMLType( &limits.lateral ) );
-            image->unitwriter->AddElement( "right", accelStarHandler, XMLType( &limits.lateral ) );
-            image->unitwriter->AddElement( "top", accelStarHandler, XMLType( &limits.vertical ) );
-            image->unitwriter->AddElement( "bottom", accelStarHandler, XMLType( &limits.vertical ) );
-            image->unitwriter->AddElement( "afterburner", accelStarHandler, XMLType( &limits.afterburn ) );
-            image->unitwriter->EndTag( "Engine" );
+            pImage->unitwriter->AddTag( "Engine" );
+            pImage->unitwriter->AddElement( "forward", accelStarHandler, XMLType( &limits.forward ) );
+            pImage->unitwriter->AddElement( "retro", accelStarHandler, XMLType( &limits.retro ) );
+            pImage->unitwriter->AddElement( "left", accelStarHandler, XMLType( &limits.lateral ) );
+            pImage->unitwriter->AddElement( "right", accelStarHandler, XMLType( &limits.lateral ) );
+            pImage->unitwriter->AddElement( "top", accelStarHandler, XMLType( &limits.vertical ) );
+            pImage->unitwriter->AddElement( "bottom", accelStarHandler, XMLType( &limits.vertical ) );
+            pImage->unitwriter->AddElement( "afterburner", accelStarHandler, XMLType( &limits.afterburn ) );
+            pImage->unitwriter->EndTag( "Engine" );
         }
-        image->unitwriter->EndTag( "Thrust" );
+        pImage->unitwriter->EndTag( "Thrust" );
     }
-    image->CockpitCenter.Set( 0, 0, 0 );
+    pImage->CockpitCenter.Set( 0, 0, 0 );
 
     /*
      *  if( Network!=NULL)
@@ -2052,7 +2080,7 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
     //f.Close();
     XML_ParserFree( parser );
     //Load meshes into subunit
-    image->unitwriter->EndTag( "Unit" );
+    pImage->unitwriter->EndTag( "Unit" );
     meshdata   = xml->meshes;
     meshdata.push_back( NULL );
     corner_min = Vector( FLT_MAX, FLT_MAX, FLT_MAX );
@@ -2091,7 +2119,7 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
     if ( !isSubUnit() ) {
         //UpdateCollideQueue();
     }
-    image->unitscale = xml->unitscale;
+    pImage->unitscale = xml->unitscale;
     string tmpname( filename );
 #ifndef PLEASEDONTCOMMENTRANDOMTHINGSOUT
     vector< bsp_polygon >polies;
@@ -2174,6 +2202,7 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
 #endif
     delete xml;
 }
+
 csOPCODECollider* Unit::getCollideTree( const Vector &scale, const std::vector< bsp_polygon > *pol )
 {
     vector< bsp_polygon >polies;

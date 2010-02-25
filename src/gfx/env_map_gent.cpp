@@ -249,14 +249,17 @@ static bool LoadTex( char *FileName, unsigned char scdata[lmwid][lmwid][3] )
     f.Close();
     return true;
 }
+
 struct Texmp
 {
     unsigned char D[lmwid][lmwid][3];
 };
-static char * makebgname( char *tmp, char *InputName, char *add, char *suffix )
+
+static char * makebgname( char *tmp, char const *InputName, char const *add, char const *suffix )
 {
     return strcat( strcat( strcpy( tmp, InputName ), add ), suffix );
 }
+
 static void Spherize( CubeCoord Tex[lmwid][lmwid], CubeCoord gluSph[lmwid][lmwid], unsigned char Col[] )
 {
     Texmp *Data   = NULL;
@@ -266,14 +269,16 @@ static void Spherize( CubeCoord Tex[lmwid][lmwid], CubeCoord gluSph[lmwid][lmwid
         return;          //borken down and down Data[5], right Data[3]
 
     char *tmp    = (char*) malloc( strlen( InputName )+60 );
-    char *suffix = ".image";
+    static char const dot_image[8] = ".image";
+    static char const dot_bmp[8] = ".bmp";
+    char const *suffix = dot_image;
     {
         std::string temp( InputName );
         if (VSFileSystem::LookForFile( temp+"_up.image", TextureFile ) > VSFileSystem::Ok) {
             //greater than Ok means failed to load.
             if (VSFileSystem::LookForFile( temp+"_sphere.image", TextureFile ) > VSFileSystem::Ok)
                 if (VSFileSystem::LookForFile( temp+".image", TextureFile ) > VSFileSystem::Ok)
-                    suffix = ".bmp";
+                    suffix = dot_bmp;
         }
         //backwards compatibility
     }

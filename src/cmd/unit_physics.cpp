@@ -1,3 +1,6 @@
+#ifndef __UNIT_PHYSICS_CPP__
+#define __UNIT_PHYSICS_CPP__
+
 /*
  * Vega Strike
  * Copyright (C) 2001-2002 Daniel Horn
@@ -20,7 +23,7 @@
  */
 
 #include "gfx/mesh.h"
-//#include "unit.h"
+#include "unit.h"
 //#include "unit_template.h"
 #include "lin_time.h"
 //#include "physics.h"
@@ -223,35 +226,39 @@ Vector GameUnit< UnitType >::ResolveForces( const Transformation &trans, const M
     return Unit::ResolveForces( trans, transmat );
 }
 
-template < class UnitType >
-void GameUnit< UnitType >::SetPlanetOrbitData( PlanetaryTransform *t )
-{
-#ifdef FIX_TERRAIN
-    if (isUnit() != BUILDINGPTR)
-        return;
-    if (!planet) {
-        planet = (PlanetaryOrbitData*) malloc( sizeof (PlanetaryOrbitData) );
-    } else if (!t) {
-        free( planet );
-        planet = NULL;
-    }
-    if (t) {
-        planet->trans = t;
-        planet->dirty = true;
-    }
-#endif
-}
+/*  commented out by chuck_starchaser; --never used
+ *  template < class UnitType >
+ *  void GameUnit< UnitType >::SetPlanetOrbitData( PlanetaryTransform *t )
+ *  {
+ * #ifdef FIX_TERRAIN
+ *   if (isUnit() != BUILDINGPTR)
+ *       return;
+ *   if (!planet) {
+ *       planet = (PlanetaryOrbitData*) malloc( sizeof (PlanetaryOrbitData) );
+ *   } else if (!t) {
+ *       free( planet );
+ *       planet = NULL;
+ *   }
+ *   if (t) {
+ *       planet->trans = t;
+ *       planet->dirty = true;
+ *   }
+ * #endif
+ *  }
+ *
+ *  template < class UnitType >
+ *  PlanetaryTransform * GameUnit< UnitType >::GetPlanetOrbit() const
+ *  {
+ * #ifdef FIX_TERRAIN
+ *   if (planet == NULL)
+ *       return NULL;
+ *   return planet->trans;
+ *
+ * #else
+ *   return NULL;
+ * #endif
+ *  }
+ */
 
-template < class UnitType >
-PlanetaryTransform*GameUnit< UnitType >::GetPlanetOrbit() const
-{
-#ifdef FIX_TERRAIN
-    if (planet == NULL)
-        return NULL;
-    return planet->trans;
-
-#else
-    return NULL;
 #endif
-}
 

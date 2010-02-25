@@ -9,6 +9,7 @@
 #include "vsfilesystem.h"
 #include "role_bitmask.h"
 #include "endianness.h"
+
 #if (defined (__APPLE__) == POSH_BIG_ENDIAN) || !defined (INTEL_X86)
 //pre-optimization bug with "gcc 3.1 (20021003) prerelease"
 int counts = time( NULL );
@@ -168,6 +169,7 @@ enum Names
     //PITCH,
     //ROLL
 };
+
 const EnumMap::Pair element_names[] = {
     EnumMap::Pair( "UNKNOWN",    UNKNOWN ),   //don't add anything until below missile so it maps to enum WEAPON_TYPE
     EnumMap::Pair( "Beam",       BEAM ),
@@ -181,6 +183,7 @@ const EnumMap::Pair element_names[] = {
     EnumMap::Pair( "Damage",     DAMAGE ),
     EnumMap::Pair( "Distance",   DISTANCE )
 };
+
 const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair( "UNKNOWN",         UNKNOWN ),
     EnumMap::Pair( "Name",            NAME ),
@@ -215,19 +218,30 @@ const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair( "AntiRole",        ANTIROLE ),
     EnumMap::Pair( "TextureStretch",  TEXTURESTRETCH )
 };
+
 const EnumMap element_map( element_names, 10 );
 const EnumMap attribute_map( attribute_names, 32 );
 Hashtable< string, weapon_info, 257 >lookuptable;
 string curname;
 weapon_info tmpweapon( weapon_info::BEAM );
 int    level = -1;
+
 void beginElementXML_Char( void *userData, const XML_Char *name, const XML_Char **atts )
 {
     beginElement( userData, (const XML_Char*) name, (const XML_Char**) atts );
 }
-  #define color_step 49
-  #define Gamma_Needed( gamma, count, \
-                        depth ) ( !( ( count/(100*depth*gamma) )%( (6*(color_step*100+depth)/gamma-1)/3 )-100 ) )
+
+#define color_step (49)
+
+#define Gamma_Needed( gamma, count, depth )           \
+    (                                                 \
+        !(                                            \
+            ( count/(100*depth*gamma) )               \
+            %( (6*(color_step*100+depth)/gamma-1)/3 ) \
+            -100                                      \
+         )                                            \
+    )
+
 void beginElement( void *userData, const char *name, const char **atts )
 {
     static float  game_speed    = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
@@ -519,11 +533,13 @@ void endElement( void *userData, const XML_Char *name )
         break;
     }
 }
-}
+} //namespace BeamXML
 
 using namespace BeamXML;
 using namespace VSFileSystem;
+
 extern string strtolower( const string &foo );
+
 weapon_info * getTemplate( const string &kkey )
 {
     weapon_info *wi = lookuptable.Get( strtoupper( kkey ) );
@@ -578,6 +594,7 @@ void LoadWeapons( const char *filename )
     f.Close();
     XML_ParserFree( parser );
 }
+
 float weapon_info::Refire() const
 {
     unsigned int len = weapon_name.length();
@@ -588,5 +605,6 @@ float weapon_info::Refire() const
     static float three = XMLSupport::parse_float( vs_config->getVariable( "physics", "refire_difficutly_scaling", "3.0" ) );
     return this->RefireRate*( three/(1.0f+(three-1.0f)*g_game.difficulty) );
 }
+
 extern enum weapon_info::MOUNT_SIZE lookupMountSize( const char *str );
 

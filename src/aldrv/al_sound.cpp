@@ -433,7 +433,8 @@ bool AUDLoadSoundFile( const char *s, struct AUDSoundProperties *info, bool use_
             size_t siz = ftell( f );
             fseek( f, 0, SEEK_SET );
             dat.resize( siz );
-            fread( &dat[0], 1, siz, f );
+            size_t bogus_return_var; //added by chuck_starchaser to get rid of warning
+            bogus_return_var = fread( &dat[0], 1, siz, f );
             info->hashname = s;
             info->shared   = false;
             fclose( f );

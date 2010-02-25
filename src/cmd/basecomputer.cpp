@@ -2916,10 +2916,10 @@ bool BaseComputer::sellSelectedCargo( int requestedQuantity )
         Cargo     sold;
         const int quantity = (requestedQuantity <= 0 ? item->quantity : requestedQuantity);
         if (item->mission) {
-            vector< Cargo >::iterator mycargo = std::find( playerUnit->image->cargo.begin(),
-                                                           playerUnit->image->cargo.end(), *item );
-            if ( mycargo != playerUnit->image->cargo.end() )
-                playerUnit->RemoveCargo( mycargo-playerUnit->image->cargo.begin(), quantity, true );
+            vector< Cargo >::iterator mycargo = std::find( playerUnit->pImage->cargo.begin(),
+                                                           playerUnit->pImage->cargo.end(), *item );
+            if ( mycargo != playerUnit->pImage->cargo.end() )
+                playerUnit->RemoveCargo( mycargo-playerUnit->pImage->cargo.begin(), quantity, true );
         } else {
             playerUnit->SellCargo( item->content, quantity, _Universe->AccessCockpit()->credits, sold, baseUnit );
         }
@@ -4185,20 +4185,20 @@ string buildShipDescription( Cargo &item, std::string &texturedescription )
     Unit  *newPart   = UnitFactory::createUnit( item.GetContent().c_str(), false, 0, newModifications,
                                                 flightGroup, fgsNumber );
     current_unit_load_mode = DEFAULT;
-    string hudimage;
-    string image;
+    string sHudImage;
+    string sImage;
     if ( newPart->getHudImage() ) {
         if ( newPart->getHudImage()->getTexture() ) {
-            hudimage = newPart->getHudImage()->getTexture()->texfilename;
-            string::size_type delim = hudimage.find( '|' );             //cut off alpha texture
+            sHudImage = newPart->getHudImage()->getTexture()->texfilename;
+            string::size_type delim = sHudImage.find( '|' );             //cut off alpha texture
             if (delim != string::npos) {
-                image    = hudimage.substr( delim+1 );
-                hudimage = hudimage.substr( 0, delim-image.length() );                 //assumes RGBname == Alphaname for ships
+                sImage    = sHudImage.substr( delim+1 );
+                sHudImage = sHudImage.substr( 0, delim-sImage.length() );                 //assumes RGBname == Alphaname for ships
             }
-            delim = hudimage.rfind( '.' );             //cut off mangled base directory
+            delim = sHudImage.rfind( '.' );             //cut off mangled base directory
             if (delim != string::npos)
-                hudimage = hudimage.substr( delim+2 );
-            texturedescription = "../units/"+hudimage+"/"+image;
+                sHudImage = sHudImage.substr( delim+2 );
+            texturedescription = "../units/"+sHudImage+"/"+sImage;
         }
     }
     std::string str;
@@ -5573,7 +5573,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     if (playerUnit->cloaking != -1) {
         if (!mode) {
             PRETTY_ADDU( statcolor+"Cloaking device available, energy usage: #-c",
-                         playerUnit->image->cloakenergy*RSconverter*Wconv,
+                         playerUnit->pImage->cloakenergy*RSconverter*Wconv,
                          0,
                          "MJ/s" );
         } else {
@@ -5581,7 +5581,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
             {
             case 0:                     //Replacement or new Module
                 PRETTY_ADDU( statcolor+"Installs a cloaking device.#n#  Activated energy usage: #-c",
-                             playerUnit->image->cloakenergy*RSconverter*Wconv,
+                             playerUnit->pImage->cloakenergy*RSconverter*Wconv,
                              0,
                              "MJ/s" );
                 break;

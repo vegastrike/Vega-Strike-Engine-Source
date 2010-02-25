@@ -75,12 +75,12 @@ void Mesh::LoadBinary( const char *filename, int faction )
     vb = new float[NumPoints*6];
     int ii, jj, kk;
 
-#define x( i ) vb[i*6]
-#define y( i ) vb[i*6+1]
-#define z( i ) vb[i*6+2]
-#define i( i ) vb[i*6+3]
-#define j( i ) vb[i*6+4]
-#define k( i ) vb[i*6+5]
+#define x( i ) (vb[i*6])
+#define y( i ) (vb[i*6+1])
+#define z( i ) (vb[i*6+2])
+#define i( i ) (vb[i*6+3])
+#define j( i ) (vb[i*6+4])
+#define k( i ) (vb[i*6+5])
 
     readf( fp, vb, NumPoints*6 );
     for (ii = jj = 0; jj < NumPoints; ii += 6, jj++) {

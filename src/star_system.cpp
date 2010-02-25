@@ -297,7 +297,7 @@ public:
                                                         unit->cur_sim_queue_slot,
                                                         cur_sim_frame );
         SIMULATION_ATOM = backup*unit->sim_atom_multiplier;
-        ( (GameUnit< Unit >*)unit )->Draw();
+        (/*(GameUnit< Unit >*)*/ unit)->Draw();
         interpolation_blend_factor = saved_interpolation_blend_factor;
         SIMULATION_ATOM = backup;
         return true;

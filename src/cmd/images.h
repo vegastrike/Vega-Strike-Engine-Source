@@ -6,6 +6,8 @@
 #include "gfx/vec.h"
 #include "container.h"
 #include "../SharedPool.h"
+#include "gfx/sprite.h"
+#include "gfx/animation.h"
 
 struct DockingPorts
 {
@@ -42,6 +44,7 @@ struct DockingPorts
         this->minsize  = minradius;
     }
 };
+
 struct DockedUnits
 {
     UnitContainer uc;
@@ -56,7 +59,6 @@ public:
     StringPool::Reference content;
     StringPool::Reference category;
     StringPool::Reference description;
-
     int   quantity;
     float price;
     float mass;
@@ -193,26 +195,33 @@ public:
         return (category == other.category) ? (content < other.content) : (category < other.category);
     }
 };
+
 class Box;
 class VSSprite;
 class Animation;
 
+template < typename BOGUS >
+//added by chuck starchaser, to try to break dependency to VSSprite in vegaserver
 struct UnitImages
 {
-    UnitImages()
-    {
-        VSCONSTRUCT1( 'i' )
-    }
-    ~UnitImages()
-    {
-        VSDESTRUCT1
-    }
+    UnitImages();
+/*    {
+*       VSCONSTRUCT1( 'i' )
+*  //        pHudImage = NULL;
+*       pExplosion = NULL;
+*   }*/
+    virtual ~UnitImages();
+/*    {
+*       delete pExplosion;
+*  //        delete pHudImage;
+*       VSDESTRUCT1
+*   }*/
     StringPool::Reference cockpitImage;
     StringPool::Reference explosion_type;
     Vector CockpitCenter;
-    VSSprite     *hudImage;
+    VSSprite     *pHudImage;
     ///The explosion starts at null, when activated time explode is incremented and ends at null
-    Animation    *explosion;
+    Animation    *pExplosion;
     float timeexplode;
     //Box *selectionBox;
     float        *cockpit_damage;     //0 is radar, 1 to MAXVDU is vdus and >MAXVDU is gauges
@@ -242,7 +251,7 @@ struct UnitImages
     std::vector< DockedUnits* >dockedunits;
     UnitContainer DockedTo;
     float unitscale;     //for output
-    class XMLSerializer*unitwriter;
+    class XMLSerializer *unitwriter;
     float fireControlFunctionality;
     float fireControlFunctionalityMax;
     float SPECDriveFunctionality;

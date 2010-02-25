@@ -522,12 +522,12 @@ void NetClient::receiveUnitDamage( NetBuffer &netbuf, Unit *un )
         unsigned int numvdus = (unsigned int) netbuf.getChar();
         for (it = 0; it < numvdus; ++it) {
             float dam = netbuf.getFloat8();
-            if (un && it < 1+UnitImages::NUMGAUGES+MAXVDUS)
-                un->image->cockpit_damage[it] = dam;
+            if (un && it < 1+UnitImages< void >::NUMGAUGES+MAXVDUS)
+                un->pImage->cockpit_damage[it] = dam;
         }
     }
     if (damages&Unit::MOUNT_DAMAGED) {
-        SETNOTNULL( un, un->image->ecm, netbuf.getShort() );
+        SETNOTNULL( un, un->pImage->ecm, netbuf.getShort() );
         unsigned int nummounts = (unsigned int) netbuf.getShort();
         for (it = 0; it < nummounts; ++it) {
             Mount::STATUS  tmpstatus = (Mount::STATUS) netbuf.getChar();
@@ -551,11 +551,11 @@ void NetClient::receiveUnitDamage( NetBuffer &netbuf, Unit *un )
         if (un) un->SetAfterBurn( netbuf.getFloat() );
 
         else netbuf.getFloat();
-        SETNOTNULL( un, un->image->CargoVolume, netbuf.getFloat() );
-        SETNOTNULL( un, un->image->UpgradeVolume, netbuf.getFloat() );
+        SETNOTNULL( un, un->pImage->CargoVolume, netbuf.getFloat() );
+        SETNOTNULL( un, un->pImage->UpgradeVolume, netbuf.getFloat() );
         //NRTFIXME: cargo unimplented.
-//for( it=0; it<un->image->cargo.size(); it++)
-//un->image->cargo[it].quantity = netbuf.getInt32();
+//for( it=0; it<un->pImage->cargo.size(); it++)
+//un->pImage->cargo[it].quantity = netbuf.getInt32();
     }
     if (damages&Unit::JUMP_DAMAGED) {
         SETNOTNULL( un, un->shield.leak, netbuf.getChar() );
@@ -568,13 +568,13 @@ void NetClient::receiveUnitDamage( NetBuffer &netbuf, Unit *un )
         else netbuf.getFloat();
         SETNOTNULL( un, un->jump.energy, netbuf.getFloat() );
         SETNOTNULL( un, un->jump.damage, netbuf.getChar() );
-        SETNOTNULL( un, un->image->repair_droid, netbuf.getChar() );
+        SETNOTNULL( un, un->pImage->repair_droid, netbuf.getChar() );
     }
     if (damages&Unit::CLOAK_DAMAGED) {
         SETNOTNULL( un, un->cloaking, netbuf.getInt32() );
-        SETNOTNULL( un, un->image->cloakenergy, netbuf.getFloat() );
+        SETNOTNULL( un, un->pImage->cloakenergy, netbuf.getFloat() );
         SETNOTNULL( un, un->cloakmin, netbuf.getInt32() );
-        SETNOTNULL( un, un->image->cloakrate, netbuf.getInt32() );
+        SETNOTNULL( un, un->pImage->cloakrate, netbuf.getInt32() );
     }
     if (damages&Unit::LIMITS_DAMAGED) {
         SETNOTNULL( un, un->computer.max_pitch_down, netbuf.getFloat() );

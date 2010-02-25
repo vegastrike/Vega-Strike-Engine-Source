@@ -1,3 +1,6 @@
+#ifndef __UNIT_GENERIC_H__
+#define __UNIT_GENERIC_H__
+
 /*
  * Vega Strike
  * Copyright (C) 2001-2002 Daniel Horn
@@ -59,6 +62,7 @@ void UncheckUnit( class Unit*un );
 extern char * GetUnitDir( const char *filename );
 extern float capship_size;
 
+//A stupid struct that is only for grouping 2 different types of variables together in one return value
 class CargoColor
 {
 public:
@@ -66,7 +70,7 @@ public:
     GFXColor color;
     CargoColor() : cargo()
         , color( 1, 1, 1, 1 ) {}
-};                                                               //A stupid struct that is only for grouping 2 different types of variables together in one return value
+};
 
 class PlanetaryOrbit;
 class UnitCollection;
@@ -81,7 +85,6 @@ class Box;
 class StarSystem;
 struct colTrees;
 class Pilot;
-#include "images.h"
 
 /**
  * Currently the only inheriting function is planet
@@ -196,10 +199,14 @@ public:
 };
 
 class VDU;
-struct UnitImages;
 struct UnitSounds;
+//template
+//struct UnitImages< void >;
+template < typename BOGUS >
+struct UnitImages;
 class Cargo;
 class Mesh;
+struct PlanetaryOrbitData;
 
 /**
  * Unit contains any physical object that may collide with something
@@ -208,8 +215,7 @@ class Mesh;
  * Units may have any number of weapons which, themselves may be units
  * the aistate indicates how the unit will behave in the upcoming phys frame
  */
-class PlanetaryTransform;
-struct PlanetaryOrbitData;
+//class PlanetaryTransform; commented out by chuck_starchaser; --never used
 class Unit
 {
 protected:
@@ -500,11 +506,11 @@ public:
         return ( (int) meshdata.size() )-1;
     }
 //Uses planet stuff
-    virtual void SetPlanetOrbitData( PlanetaryTransform *trans ) {}
-    virtual PlanetaryTransform * GetPlanetOrbit() const
-    {
-        return NULL;
-    }
+//virtual void SetPlanetOrbitData( PlanetaryTransform *trans ) {} commented out by chuck_starchaser; --never used
+/*    virtual PlanetaryTransform * GetPlanetOrbit() const commented out by chuck_starchaser; --never used
+ *   {
+ *       return NULL;
+ *   }*/
 /* Updates the collide Queue with any possible change in sectors
  *  Split this mesh with into 2^level submeshes at arbitrary planes
  *  Uses Mesh so only in Unit and maybe in NetUnit */
@@ -754,7 +760,7 @@ public:
     Vector AngularVelocity;
     Vector Velocity;
 //The image that will appear on those screens of units targetting this unit
-    UnitImages *image;
+    UnitImages< void > *pImage;
 //positive for the multiplier applied to nearby spec starships (1 = planetary/inert effects) 0 is default (no effect), -X means 0 but able to be enabled
     float  specInterdiction;
 //mass of this unit (may change with cargo)
@@ -1396,10 +1402,7 @@ public:
     int ForceDock( Unit *utdw, unsigned int whichdockport );
     void PerformDockingOperations();
     void FreeDockingPort( unsigned int whichport );
-    const std::vector< struct DockingPorts >& DockingPortLocations() const
-    {
-        return image->dockingports;
-    }
+    const std::vector< struct DockingPorts >& DockingPortLocations() const;
     char DockedOrDocking() const
     {
         return docked;
@@ -1489,7 +1492,7 @@ public:
     void UnRef();
 //0 in additive is reaplce  1 is add 2 is mult
 //Put that in NetUnit & AcctUnit with string and with Unit
-    UnitImages& GetImageInformation();
+    UnitImages< void >& GetImageInformation();
 
 //sets the full name/fgid for planets
     bool isStarShip() const
@@ -1582,5 +1585,7 @@ inline void UnitCollection::UnitIterator::GetNextValidUnit()
 
 extern std::set< std::string >GetListOfDowngrades();
 extern void ClearDowngradeMap();
+#endif
+
 #endif
 

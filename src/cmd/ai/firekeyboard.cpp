@@ -25,6 +25,9 @@
 #include "cmd/pilot.h"
 //for getatmospheric
 #include "cmd/role_bitmask.h"
+#include "cmd/script/pythonmission.h"
+#include "networking/netclient.h"
+#include "universe_util.h"
 
 FireKeyboard::FireKeyboard( unsigned int whichplayer, unsigned int whichjoystick ) : Order( WEAPON, 0 )
 {

@@ -25,9 +25,10 @@
 
 #ifndef _CAMERA_H_
 #define _CAMERA_H_
-class PlanetaryTransform;
+//class PlanetaryTransform; commented out by chuck_starchaser --never used
 #include "cmd/container.h"
 class Nebula;
+
 class Camera
 {
     QVector Coord;
@@ -57,11 +58,9 @@ public:
         PARALLEL,
         PERSPECTIVE
     };
-
 private:
     ProjectionType projectionType;
-    PlanetaryTransform *planet;
-
+//    PlanetaryTransform *planet; commented out by chuck_starchaser; --never used
 private:
 //Last GFX Update, for partial updates
     struct LastGFXUpdateStruct
@@ -73,24 +72,23 @@ private:
         float   overrideZNear, overrideZFar;
     }
     lastGFXUpdate;
-
 public:
+    explicit Camera( ProjectionType proj = PERSPECTIVE );
     void LookDirection( const Vector &forevec, const Vector &up );
     Vector P, Q, R;
     void SetNebula( Nebula *neb );
-    Nebula * GetNebula();
-    PlanetaryTransform * GetPlanetaryTransform()
+    Nebula * GetNebula(); //this function can't be const, as it must return a non-const ptr --chuck_starchaser
+/*    PlanetaryTransform const * GetPlanetaryTransform() const   commented out by chuck_starchaser; --never used
     {
         return planet;
     }
     void SetPlanetaryTransform( PlanetaryTransform *t )
     {
         planet = t;
-    }
+    }*/
     PhysicsSystem myPhysics;
 ///This function updates the sound if sound is not updated on a per frame basis
     void UpdateCameraSounds();
-    Camera( ProjectionType proj = PERSPECTIVE );
     void GetView( Matrix& );
     const Vector& GetR()
     {
@@ -133,7 +131,6 @@ public:
     void UpdatePlanetGFX();    //clip true, frustum true at all times
     Matrix * GetPlanetGFX();
     void UpdateGLCenter();
-
     void SetPosition( const QVector &origin, const Vector &velocity, const Vector &angular_velocity, const Vector &acceleration );
     void GetPosition( QVector &vect )
     {
@@ -157,23 +154,21 @@ public:
         q = Q;
         r = R;
     }
-    const QVector& GetPosition()
+    const QVector& GetPosition() const
     {
         return Coord;
     }
-
     float GetZDist( const Vector &v ) const
     {
         return ::DotProduct( QVector( v )-Coord, QVector( R ) );
     }
-
     void SetOrientation( const Vector &p, const Vector &q, const Vector &r );
     void SetSubwindow( float x, float y, float xsize, float ysize );
     void SetProjectionType( ProjectionType t );
     void SetZoom( float z );
-    float GetZoom();
+    float GetZoom() const;
     void SetFov( float f );
-    float GetFov();
+    float GetFov() const;
     void Yaw( float rad );
     void Pitch( float rad );
     void Roll( float rad );

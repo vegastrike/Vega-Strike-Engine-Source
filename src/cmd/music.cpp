@@ -53,15 +53,16 @@ static void print_check_err( int errorcode, const char *str )
      */
 #else
     if (errorcode) {
-        char *err = strerror( errorcode );
-        if (!err) err = "Unknown error";
+        static char const unknown_error[16] = "Unknown error"; //added by chuck_starchaser to get rid of warning
+        char const *err = strerror( errorcode );
+        if (!err) err = unknown_error;
         fprintf( stderr, "ERROR IN PTHREAD FUNCTION %s: %s (%d)\n", str, err, errorcode );
     }
 #endif
 }
 
 //where func is the evaluation of func, and #func is the string form.
-#define checkerr( func ) print_check_err( (func), #func )
+#define checkerr(func) do{print_check_err(((func)),#func);}while(0)
 
 bool soundServerPipes()
 {

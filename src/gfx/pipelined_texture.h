@@ -1,3 +1,6 @@
+#ifndef __PIPELINED_TEXTURE_H__INCLUDED_
+#define __PIPELINED_TEXTURE_H__INCLUDED_
+
 #include "aux_texture.h"
 
 class PipelinedTexture : public Texture
@@ -27,4 +30,6 @@ public:
     void MakeActive();
     void MakeLastActive();
 };
+
+#endif
 

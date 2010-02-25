@@ -156,7 +156,8 @@ void FactionUtil::LoadSerializedFaction( FILE *fp )
 {
     for (unsigned int i = 0; i < factions.size(); i++) {
         char *tmp  = new char[24*factions[i]->faction.size()];
-        fgets( tmp, 24*factions[i]->faction.size()-1, fp );
+        static char *bogus_return; //added by chuck_starchaser to squash a warning
+        bogus_return = fgets( tmp, 24*factions[i]->faction.size()-1, fp );
         char *tmp2 = tmp;
         if (numnums( tmp ) == 0) {
             i--;

@@ -3,8 +3,10 @@
 #include "enhancement_generic.h"
 #include "cmd/unit.h"
 #include "savegame.h"
+
 class GameEnhancement : public GameUnit< Enhancement >
 {
+    friend class UnitFactory;
 protected:
 /// constructor only to be called by UnitFactory
     GameEnhancement( const char *filename,
@@ -17,9 +19,6 @@ protected:
         string file( filename );
         this->filename = filename;
     }
-
-    friend class UnitFactory;
-
 private:
 /// default constructor forbidden
     GameEnhancement();

@@ -1,6 +1,6 @@
 #include "mesh.h"
 #include "lin_time.h"
-#define MAXLOCALFX 6
+#define MAXLOCALFX (6)
 static float startpotency = 20;
 static float endpotency   = 4;
 static float flickertime  = 3.5;

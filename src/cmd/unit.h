@@ -20,21 +20,39 @@
  */
 #ifndef _GAMEUNIT_H_
 #define _GAMEUNIT_H_
+
 #ifdef VS_DEBUG
 #define CONTAINER_DEBUG
 #endif
-struct GFXColor;
 
-#include "gfx/matrix.h"
-#include "gfx/quaternion.h"
+//struct GFXColor;
+
 #include <string>
-//#include "gfx/vdu.h"
-#include "gfx/cockpit.h"
-#include "gfx/halo_system.h"
-#include "script/flightgroup.h"
-#include "unit_generic.h"
-using std::string;
-#include "gfxlib.h"
+#include <vector>
+#include <memory>
+class HaloSystem;
+class GFXColor;
+class QVector;
+class Transformation;
+class Matrix;
+class Vector;
+
+//#include "gfx/matrix.h"
+//#include "gfx/cockpit.h"
+//#include "script/flightgroup.h"
+//#include "unit_generic.h"
+//#include "gfxlib.h"
+
+class Mesh;
+class Flightgroup;
+template < typename BOGUS >
+struct UnitImages;
+class Unit;
+class VSSprite;
+class Camera;
+class UnitCollection;
+
+//using std::string;
 
 /**
  * GameUnit contains any physical object that may collide with something
@@ -46,65 +64,39 @@ using std::string;
 template < class UnitType >
 class GameUnit : public UnitType
 {
-public:
-
-    UnitImages& GetImageInformation();
-
+    friend class UnitFactory;
+protected:
+//Default constructor. This is just to figure out where default
+//constructors are used. The useless argument will be removed
+//again later.
+public: GameUnit( int dummy );
+//Constructor that creates aa mesh with meshes as submeshes (number
+//of them) as either as subunit with faction faction
+    GameUnit( std::vector< Mesh* > &meshes, bool Subunit, int faction );
+//Constructor that creates a mesh from an XML file If it is a
+//customizedUnit, it will check in that directory in the home dir for
+//the unit.
+    GameUnit( const char *filename, bool SubUnit, int faction, std::string customizedUnit = std::string(
+                  "" ), Flightgroup *flightgroup = NULL, int fg_subnumber = 0, std::string *netxml = NULL );
+    virtual ~GameUnit();
+    int nummesh() const;
+///fils in corner_min,corner_max and radial_size
+//void calculate_extent(bool update_collide_queue);
+///returns -1 if unit cannot dock, otherwise returns which dock it can dock at
+    UnitImages< void >& GetImageInformation();
     bool RequestClearance( Unit *dockingunit );
-
 ///Loads a user interface for the user to upgrade his ship
     void UpgradeInterface( Unit *base );
 ///The name (type) of this unit shouldn't be public
-
-protected:
-/*
- **************************************************************************************
- **** CONSTRUCTORS / DESCTRUCTOR                                                    ***
- **************************************************************************************
- */
-/** Default constructor. This is just to figure out where default
- *  constructors are used. The useless argument will be removed
- *  again later.
- */
-    GameUnit( int dummy );
-
-/** Constructor that creates aa mesh with meshes as submeshes (number
- *  of them) as either as subunit with faction faction
- */
-    GameUnit( std::vector< Mesh* > &meshes, bool Subunit, int faction );
-
-/** Constructor that creates a mesh from an XML file If it is a
- *  customizedUnit, it will check in that directory in the home dir for
- *  the unit.
- */
-    GameUnit( const char *filename, bool SubUnit, int faction, std::string customizedUnit = string(
-                  "" ), Flightgroup *flightgroup = NULL, int fg_subnumber = 0, string *netxml = NULL );
-
-    ~GameUnit();
-
-    friend class UnitFactory;
-
-public:
     virtual void Cloak( bool cloak );
 /*
  **************************************************************************************
  **** GFX/MESHES STUFF                                                              ***
  **************************************************************************************
  */
-
-public:
-    HaloSystem halos;
-    double     sparkle_accum;
-
-protected:
-    int nummesh() const
-    {
-        return ( (int) this->meshdata.size() )-1;
-    }
-
-public:
-
-//vector <Mesh *> StealMeshes();
+    std::auto_ptr< HaloSystem >phalos;
+    double sparkle_accum;
+///vector <Mesh *> StealMeshes();
 ///Process all meshes to be deleted
 ///Split this mesh with into 2^level submeshes at arbitrary planes
     void Split( int level );
@@ -114,8 +106,11 @@ public:
 ///What's the HudImage of this unit
     VSSprite * getHudImage() const;
 ///Draws this unit with the transformation and matrix (should be equiv) separately
-    virtual void Draw( const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix );
-    virtual void DrawNow( const Matrix &m = identity_matrix, float lod = 1000000000 );
+    virtual void Draw( const Transformation &quat, const Matrix &m );
+    virtual void Draw( const Transformation &quat );
+    virtual void Draw();
+    virtual void DrawNow( const Matrix &m, float lod = 1000000000 );
+    virtual void DrawNow();
 ///Deprecated
 //virtual void ProcessDrawQueue() {}
     void addHalo( const char *filename,
@@ -123,66 +118,43 @@ public:
                   const Vector &size,
                   const GFXColor &col,
                   std::string halo_type,
-                  float halo_speed )
-    {
-        halos.AddHalo( filename, loc, size, col, halo_type, halo_speed );
-    }
-
+                  float halo_speed );
 /*
  **************************************************************************************
  **** STAR SYSTEM STUFF                                                             ***
  **************************************************************************************
  */
-
-public:
-    void SetPlanetOrbitData( PlanetaryTransform *trans );
-    PlanetaryTransform * GetPlanetOrbit() const;
+//void SetPlanetOrbitData( PlanetaryTransform *trans ); commented out by chuck_starchaser; --never used
+//PlanetaryTransform * GetPlanetOrbit() const; commented out by chuck_starchaser; --never used
 //bool TransferUnitToSystem (StarSystem *NewSystem);
     bool TransferUnitToSystem( unsigned int whichJumpQueue, class StarSystem*&previouslyActiveStarSystem, bool DoSightAndSound );
 ///Begin and continue explosion
     bool Explode( bool draw, float timeit );
-
 /*
  **************************************************************************************
  **** COLLISION STUFF                                                               ***
  **************************************************************************************
  */
-
-protected:
-///fils in corner_min,corner_max and radial_size
-//void calculate_extent(bool update_collide_queue);
-///returns -1 if unit cannot dock, otherwise returns which dock it can dock at
-
-public:
 ///Updates the collide Queue with any possible change in sectors
 ///Queries if this unit is within a given frustum
     bool queryFrustum( double frustum[6][4] ) const;
-
-/**
- * *Queries bounding box with a point, radius err
- */
+/// Queries bounding box with a point, radius err
     bool queryBoundingBox( const QVector &pnt, float err );
-/**
- * *Queries the bounding box with a ray.  1 if ray hits in front... -1 if ray
- * hits behind.
- * 0 if ray misses
- */
+///Queries the bounding box with a ray.  1 if ray hits in front... -1 if ray
+///hits behind.  0 if ray misses
     int queryBoundingBox( const QVector &origin, const Vector &direction, float err );
-/**Queries the bounding sphere with a duo of mouse coordinates that project
- * to the center of a ship and compare with a sphere...pretty fast*/
+///Queries the bounding sphere with a duo of mouse coordinates that project
+///to the center of a ship and compare with a sphere...pretty fast*/
     bool querySphereClickList( int, int, float err, Camera *activeCam );
 //virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist);
 ///returns true if jump possible even if not taken
 //bool jumpReactToCollision (Unit *smaller);
-
 /*
  **************************************************************************************
  **** PHYSICS STUFF
  **************************************************************************************
  */
-
 //bool AutoPilotTo(Unit * un, bool ignore_friendlies=false);
-
 ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
     virtual void UpdatePhysics2( const Transformation &trans,
                                  const Transformation &old_physical_state,
@@ -202,22 +174,18 @@ public:
     virtual void HullDamageSound( const Vector &pnt );
 ///applies damage from the given pnt to the shield, and returns % damage applied and applies lighitn
     float DealDamageToShield( const Vector &pnt, float &Damage );
-
 /*
  **************************************************************************************
  **** CUSTOMIZE/UPGRADE STUFF
  **************************************************************************************
  */
-
     bool UpgradeSubUnits( const Unit *up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage );
     double Upgrade( const std::string &file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts );
-
 /*
  *******************************************
  **** XML struct
  *******************************************
  */
-
 ///Holds temporary values for inter-function XML communication Saves deprecated restr info
 /*
  *     struct XML {
@@ -244,61 +212,7 @@ public:
  *       int damageiterator;
  *     };
  */
-    inline Matrix WarpMatrix( const Matrix &ctm ) const
-    {
-        static float cutoff =
-            XMLSupport::parse_float( vs_config->getVariable( "graphics", "warp_stretch_cutoff",
-                                                             "50000" ) )*XMLSupport::parse_float(
-                vs_config->getVariable( "physics", "game_speed", "1" ) );
-        static float cutoffcutoff = cutoff*cutoff;
-        static bool  only_stretch_in_warp =
-            XMLSupport::parse_bool( vs_config->getVariable( "graphics", "only_stretch_in_warp", "true" ) );
-        if ( this->GetWarpVelocity().MagnitudeSquared() < cutoffcutoff
-            || (only_stretch_in_warp && this->graphicOptions.InWarp == 0) ) {
-            return ctm;
-        } else {
-            Matrix k( ctm );
-
-            float  speed = this->GetWarpVelocity().Magnitude();
-            //Matrix scalar=identity_matrix;
-            static float maxregion0stretch =
-                XMLSupport::parse_float( vs_config->getVariable( "graphics", "warp_stretch_region0_max", "1" ) );
-
-            static float maxstretch = XMLSupport::parse_float( vs_config->getVariable( "graphics", "warp_stretch_max", "4" ) );
-            static float maxspeed   =
-                XMLSupport::parse_float( vs_config->getVariable( "graphics", "warp_stretch_max_speed",
-                                                                 "1000000" ) )
-                *XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
-            static float maxregion0speed =
-                XMLSupport::parse_float( vs_config->getVariable( "graphics", "warp_stretch_max_region0_speed",
-                                                                 "100000" ) )
-                *XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
-            float stretchregion0length = maxregion0stretch*(speed-cutoff)/(maxregion0speed-cutoff);
-            float stretchlength =
-                (maxstretch
-                 -maxregion0stretch)*(speed-maxregion0speed)/(maxspeed-maxregion0speed+.06125)+maxregion0stretch;
-            if (stretchlength > maxstretch)
-                stretchlength = maxstretch;
-            if (stretchregion0length > maxregion0stretch)
-                stretchregion0length = maxregion0stretch;
-            ScaleMatrix( k, Vector( 1, 1, 1+(speed > maxregion0speed ? stretchlength : stretchregion0length) ) );
-
-/*			Vector v(Vector(1,1,1)+ctm.getR().Scale(stretchlength).Vabs());
- *
- *                       k.r[0]*=v.i;
- *                       k.r[1]*=v.j;
- *                       k.r[2]*=v.k;
- *
- *                       k.r[3]*=v.i;
- *                       k.r[4]*=v.j;
- *                       k.r[5]*=v.k;
- *
- *                       k.r[6]*=v.i;
- *                       k.r[7]*=v.j;
- *                       k.r[8]*=v.k;		*/
-            return k;
-        }
-    }
+    Matrix WarpMatrix( const Matrix &ctm ) const;
 };
 
 /*
@@ -307,7 +221,48 @@ public:
  **** .cpp files in unit.h to avoid problems with some compilers         ***
  ***************************************************************************
  */
+
+//#include "unit.cpp" --chuck_starchaser commenting out the root of all evil
+#ifdef VEGASERVER_COMPILING
 #include "unit.cpp"
+#endif
+
+/////////////////////////////////////////////////////
+//forward declarations of explicit instantiations, added by chuck_starchaser:
+
+#ifndef VEGASERVER_COMPILING
+
+class Asteroid;
+template < class Asteroid >
+class GameUnit;
+
+class Building;
+template < class Building >
+class GameUnit;
+
+class Planet;
+template < class Planet >
+class GameUnit;
+
+class Unit;
+template < class Unit >
+class GameUnit;
+
+class Missile;
+template < class Missile >
+class GameUnit;
+
+class Nebula;
+template < class Nebula >
+class GameUnit;
+
+class Enhancement;
+template < class Enhancement >
+class GameUnit;
+
+#endif
+
+/////////////////////////////////////////////////////
 
 #endif
 

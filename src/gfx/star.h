@@ -15,7 +15,9 @@ protected:
     Vector camr;
     Vector camq;
     double lasttime;
-public: StarVlist( float spread );
+public:
+    virtual void Draw( bool, int whichtex ) {}
+    StarVlist( float spread );
     void UpdateGraphics();
     virtual ~StarVlist() {}
     virtual bool BeginDrawState( const QVector &center,
@@ -27,7 +29,6 @@ public: StarVlist( float spread );
     {
         return false;
     }
-    virtual void Draw( bool, int whichtex ) {}
     virtual void EndDrawState( bool, int whichtex ) {}
     virtual int NumTextures()
     {
@@ -62,6 +63,7 @@ public: PointStarVlist( int num, float spread, const std::string &our_system_nam
 };
 
 #define NUM_ACTIVE_ANIMATIONS 8
+
 class SpriteStarVlist : public StarVlist
 {
     GFXVertexList *vlist[NUM_ACTIVE_ANIMATIONS];

@@ -28,7 +28,7 @@ public:
     virtual void UpdatePhysics2( const Transformation &trans,
                                  const Transformation &oldtranssmat,
                                  const Vector&,
-                                 float,
+                                 float difficulty,
                                  const Matrix&,
                                  const Vector &CumulativeVelocity,
                                  bool ResolveLast,

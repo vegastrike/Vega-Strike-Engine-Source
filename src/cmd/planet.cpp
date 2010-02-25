@@ -25,6 +25,9 @@
 #include "gfx/ring.h"
 #include "alphacurve.h"
 #include "gfx/vsimage.h"
+#include "vsfilesystem.h"
+#include "gfx/camera.h"
+
 extern string getCargoUnitName( const char *name );
 
 GamePlanet::GamePlanet() :
@@ -74,6 +77,7 @@ Mesh * MakeFogMesh( const AtmosphericFogMesh &f, float radius )
         }
         //Writing in the homedir texture directory
         ::VSImage image;
+        using VSFileSystem::TextureFile;
         image.WriteImage( (char*) nam.c_str(), &tex[0], PngImage, rez, 1, true, 8, TextureFile );
     }
     vector< string >override;
@@ -476,7 +480,7 @@ void GamePlanet::Draw( const Transformation &quat, const Matrix &m )
 }
 void GamePlanet::ProcessTerrains()
 {
-    _Universe->AccessCamera()->SetPlanetaryTransform( NULL );
+    //_Universe->AccessCamera()->SetPlanetaryTransform( NULL ); commented out by chuck_starchaser; --never used
     while ( !PlanetTerrainDrawQueue.empty() ) {
         Planet *pl = (Planet*) PlanetTerrainDrawQueue.back()->GetUnit();
         pl->DrawTerrain();
@@ -488,7 +492,7 @@ void GamePlanet::ProcessTerrains()
 
 void GamePlanet::DrawTerrain()
 {
-    _Universe->AccessCamera()->SetPlanetaryTransform( terraintrans );
+    //_Universe->AccessCamera()->SetPlanetaryTransform( terraintrans ); commented out by chuck_starchaser; --never used
     inside = true;
     if (terrain)
         terrain->EnableUpdate();

@@ -23,34 +23,37 @@
  *	\author		Pierre Terdiman
  *	\version	1.3
  *	\date		December, 28, 2002
-*/
+ */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Precompiled Header
+//Precompiled Header
 #include "Stdafx.h"
-
 
 using namespace Opcode;
 
 #include "OPC_LSSAABBOverlap.h"
 #include "OPC_LSSTriOverlap.h"
 
-#define SET_CONTACT(prim_index, flag)									\
-	/* Set contact status */											\
-	mFlags |= flag;														\
-	mTouchedPrimitives->Add(prim_index);
+/* Set contact status */
+#define SET_CONTACT( prim_index, flag )        \
+    do {                                       \
+        mFlags |= flag;                        \
+        mTouchedPrimitives->Add( prim_index ); \
+    }                                          \
+    while( 0 )
 
 //! LSS-triangle overlap test
-#define LSS_PRIM(prim_index, flag)										\
-	/* Request vertices from the app */									\
-	VertexPointers VP;	mIMesh->GetTriangle(VP, prim_index);			\
-																		\
-	/* Perform LSS-tri overlap test */									\
-	if(LSSTriOverlap(*VP.Vertex[0], *VP.Vertex[1], *VP.Vertex[2]))		\
-	{																	\
-		SET_CONTACT(prim_index, flag)									\
-	}
+
+/* Request vertices from the app */
+#define LSS_PRIM( prim_index, flag )                                       \
+    do {                                                                   \
+        VertexPointers VP;                                                 \
+        mIMesh->GetTriangle( VP, prim_index );                             \
+        if( LSSTriOverlap( *VP.Vertex[0], *VP.Vertex[1], *VP.Vertex[2] ) ) \
+            SET_CONTACT( prim_index, flag );                               \
+    }                                                                      \
+    while( 0 )
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -59,8 +62,8 @@ using namespace Opcode;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 LSSCollider::LSSCollider()
 {
-//	mCenter.Zero();
-//	mRadius2 = 0.0f;
+//mCenter.Zero();
+//mRadius2 = 0.0f;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -69,8 +72,7 @@ LSSCollider::LSSCollider()
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 LSSCollider::~LSSCollider()
-{
-}
+{}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -88,62 +90,59 @@ LSSCollider::~LSSCollider()
  *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool LSSCollider::Collide(LSSCache& cache, const LSS& lss, const Model& model, const Matrix4x4* worldl, const Matrix4x4* worldm)
+bool LSSCollider::Collide( LSSCache &cache,
+                           const LSS &lss,
+                           const Model &model,
+                           const Matrix4x4 *worldl,
+                           const Matrix4x4 *worldm )
 {
-	// Checkings
-	if(!Setup(&model))	return false;
+    //Checkings
+    if( !Setup( &model ) ) return false;
+    //Init collision query
+    if( InitQuery( cache, lss, worldl, worldm ) ) return true;
+    if( !model.HasLeafNodes() )
+    {
+        if( model.IsQuantized() )
+        {
+            const AABBQuantizedNoLeafTree *Tree = (const AABBQuantizedNoLeafTree*) model.GetTree();
 
-	// Init collision query
-	if(InitQuery(cache, lss, worldl, worldm))	return true;
+            //Setup dequantization coeffs
+            mCenterCoeff  = Tree->mCenterCoeff;
+            mExtentsCoeff = Tree->mExtentsCoeff;
+            //Perform collision query
+            if( SkipPrimitiveTests() ) _CollideNoPrimitiveTest( Tree->GetNodes() );
+            else _Collide( Tree->GetNodes() );
+        }
+        else
+        {
+            const AABBNoLeafTree *Tree = (const AABBNoLeafTree*) model.GetTree();
+            //Perform collision query
+            if( SkipPrimitiveTests() ) _CollideNoPrimitiveTest( Tree->GetNodes() );
+            else _Collide( Tree->GetNodes() );
+        }
+    }
+    else
+    {
+        if( model.IsQuantized() )
+        {
+            const AABBQuantizedTree *Tree = (const AABBQuantizedTree*) model.GetTree();
 
-	if(!model.HasLeafNodes())
-	{
-		if(model.IsQuantized())
-		{
-			const AABBQuantizedNoLeafTree* Tree = (const AABBQuantizedNoLeafTree*)model.GetTree();
-
-			// Setup dequantization coeffs
-			mCenterCoeff	= Tree->mCenterCoeff;
-			mExtentsCoeff	= Tree->mExtentsCoeff;
-
-			// Perform collision query
-			if(SkipPrimitiveTests())	_CollideNoPrimitiveTest(Tree->GetNodes());
-			else						_Collide(Tree->GetNodes());
-		}
-		else
-		{
-			const AABBNoLeafTree* Tree = (const AABBNoLeafTree*)model.GetTree();
-
-			// Perform collision query
-			if(SkipPrimitiveTests())	_CollideNoPrimitiveTest(Tree->GetNodes());
-			else						_Collide(Tree->GetNodes());
-		}
-	}
-	else
-	{
-		if(model.IsQuantized())
-		{
-			const AABBQuantizedTree* Tree = (const AABBQuantizedTree*)model.GetTree();
-
-			// Setup dequantization coeffs
-			mCenterCoeff	= Tree->mCenterCoeff;
-			mExtentsCoeff	= Tree->mExtentsCoeff;
-
-			// Perform collision query
-			if(SkipPrimitiveTests())	_CollideNoPrimitiveTest(Tree->GetNodes());
-			else						_Collide(Tree->GetNodes());
-		}
-		else
-		{
-			const AABBCollisionTree* Tree = (const AABBCollisionTree*)model.GetTree();
-
-			// Perform collision query
-			if(SkipPrimitiveTests())	_CollideNoPrimitiveTest(Tree->GetNodes());
-			else						_Collide(Tree->GetNodes());
-		}
-	}
-
-	return true;
+            //Setup dequantization coeffs
+            mCenterCoeff  = Tree->mCenterCoeff;
+            mExtentsCoeff = Tree->mExtentsCoeff;
+            //Perform collision query
+            if( SkipPrimitiveTests() ) _CollideNoPrimitiveTest( Tree->GetNodes() );
+            else _Collide( Tree->GetNodes() );
+        }
+        else
+        {
+            const AABBCollisionTree *Tree = (const AABBCollisionTree*) model.GetTree();
+            //Perform collision query
+            if( SkipPrimitiveTests() ) _CollideNoPrimitiveTest( Tree->GetNodes() );
+            else _Collide( Tree->GetNodes() );
+        }
+    }
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -161,127 +160,118 @@ bool LSSCollider::Collide(LSSCache& cache, const LSS& lss, const Model& model, c
  *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool LSSCollider::InitQuery(LSSCache& cache, const LSS& lss, const Matrix4x4* worldl, const Matrix4x4* worldm)
+bool LSSCollider::InitQuery( LSSCache &cache, const LSS &lss, const Matrix4x4 *worldl, const Matrix4x4 *worldm )
 {
-	// 1) Call the base method
-	VolumeCollider::InitQuery();
+    //1) Call the base method
+    VolumeCollider::InitQuery();
 
-	// 2) Compute LSS in model space:
-	// - Precompute R^2
-	mRadius2 = lss.mRadius * lss.mRadius;
-	// - Compute segment
-	mSeg.mP0 = lss.mP0;
-	mSeg.mP1 = lss.mP1;
-	// -> to world space
-	if(worldl)
-	{
-		mSeg.mP0 *= *worldl;
-		mSeg.mP1 *= *worldl;
-	}
-	// -> to model space
-	if(worldm)
-	{
-		// Invert model matrix
-		Matrix4x4 InvWorldM;
-		InvertPRMatrix(InvWorldM, *worldm);
+    //2) Compute LSS in model space:
+    //- Precompute R^2
+    mRadius2 = lss.mRadius*lss.mRadius;
+    //- Compute segment
+    mSeg.mP0 = lss.mP0;
+    mSeg.mP1 = lss.mP1;
+    //-> to world space
+    if( worldl )
+    {
+        mSeg.mP0 *= *worldl;
+        mSeg.mP1 *= *worldl;
+    }
+    //-> to model space
+    if( worldm )
+    {
+        //Invert model matrix
+        Matrix4x4 InvWorldM;
+        InvertPRMatrix( InvWorldM, *worldm );
 
-		mSeg.mP0 *= InvWorldM;
-		mSeg.mP1 *= InvWorldM;
-	}
+        mSeg.mP0 *= InvWorldM;
+        mSeg.mP1 *= InvWorldM;
+    }
+    //3) Setup destination pointer
+    mTouchedPrimitives = &cache.TouchedPrimitives;
+    //4) Special case: 1-triangle meshes [Opcode 1.3]
+    if( mCurrentModel && mCurrentModel->HasSingleNode() )
+    {
+        if( !SkipPrimitiveTests() )
+        {
+            //We simply perform the BV-Prim overlap test each time. We assume single triangle has index 0.
+            mTouchedPrimitives->Reset();
 
-	// 3) Setup destination pointer
-	mTouchedPrimitives = &cache.TouchedPrimitives;
+            //Perform overlap test between the unique triangle and the LSS (and set contact status if needed)
+            LSS_PRIM( udword( 0 ), OPC_CONTACT );
 
-	// 4) Special case: 1-triangle meshes [Opcode 1.3]
-	if(mCurrentModel && mCurrentModel->HasSingleNode())
-	{
-		if(!SkipPrimitiveTests())
-		{
-			// We simply perform the BV-Prim overlap test each time. We assume single triangle has index 0.
-			mTouchedPrimitives->Reset();
+            //Return immediately regardless of status
+            return TRUE;
+        }
+    }
+    //5) Check temporal coherence :
+    if( TemporalCoherenceEnabled() )
+    {
+        //Here we use temporal coherence
+        //=> check results from previous frame before performing the collision query
+        if( FirstContactEnabled() )
+        {
+            //We're only interested in the first contact found => test the unique previously touched face
+            if( mTouchedPrimitives->GetNbEntries() )
+            {
+                //Get index of previously touched face = the first entry in the array
+                udword PreviouslyTouchedFace = mTouchedPrimitives->GetEntry( 0 );
 
-			// Perform overlap test between the unique triangle and the LSS (and set contact status if needed)
-			LSS_PRIM(udword(0), OPC_CONTACT)
+                //Then reset the array:
+                //- if the overlap test below is successful, the index we'll get added back anyway
+                //- if it isn't, then the array should be reset anyway for the normal query
+                mTouchedPrimitives->Reset();
 
-			// Return immediately regardless of status
-			return TRUE;
-		}
-	}
+                //Perform overlap test between the cached triangle and the LSS (and set contact status if needed)
+                LSS_PRIM( PreviouslyTouchedFace, OPC_TEMPORAL_CONTACT );
+                //Return immediately if possible
+                if( GetContactStatus() ) return TRUE;
+            }
+            //else no face has been touched during previous query
+            //=> we'll have to perform a normal query
+        }
+        else
+        {
+            //We're interested in all contacts =>test the new real LSS N(ew) against the previous fat LSS P(revious):
 
-	// 5) Check temporal coherence :
-	if(TemporalCoherenceEnabled())
-	{
-		// Here we use temporal coherence
-		// => check results from previous frame before performing the collision query
-		if(FirstContactEnabled())
-		{
-			// We're only interested in the first contact found => test the unique previously touched face
-			if(mTouchedPrimitives->GetNbEntries())
-			{
-				// Get index of previously touched face = the first entry in the array
-				udword PreviouslyTouchedFace = mTouchedPrimitives->GetEntry(0);
+            //### rewrite this
 
-				// Then reset the array:
-				// - if the overlap test below is successful, the index we'll get added back anyway
-				// - if it isn't, then the array should be reset anyway for the normal query
-				mTouchedPrimitives->Reset();
+            LSS Test( mSeg, lss.mRadius );              //in model space
+            LSS Previous( cache.Previous, sqrtf( cache.Previous.mRadius ) );
+//if(cache.Previous.Contains(Test))
+            if( IsCacheValid( cache ) && Previous.Contains( Test ) )
+            {
+                //- if N is included in P, return previous list
+                //=> we simply leave the list (mTouchedFaces) unchanged
+                //Set contact status if needed
+                if( mTouchedPrimitives->GetNbEntries() ) mFlags |= OPC_TEMPORAL_CONTACT;
+                //In any case we don't need to do a query
+                return TRUE;
+            }
+            else
+            {
+                //- else do the query using a fat N
 
-				// Perform overlap test between the cached triangle and the LSS (and set contact status if needed)
-				LSS_PRIM(PreviouslyTouchedFace, OPC_TEMPORAL_CONTACT)
+                //Reset cache since we'll about to perform a real query
+                mTouchedPrimitives->Reset();
 
-				// Return immediately if possible
-				if(GetContactStatus())	return TRUE;
-			}
-			// else no face has been touched during previous query
-			// => we'll have to perform a normal query
-		}
-		else
-		{
-			// We're interested in all contacts =>test the new real LSS N(ew) against the previous fat LSS P(revious):
+                //Make a fat sphere so that coherence will work for subsequent frames
+                mRadius2 *= cache.FatCoeff;
+//mRadius2 = (lss.mRadius * cache.FatCoeff)*(lss.mRadius * cache.FatCoeff);
 
-			// ### rewrite this
-
-			LSS Test(mSeg, lss.mRadius);	// in model space
-			LSS Previous(cache.Previous, sqrtf(cache.Previous.mRadius));
-
-//			if(cache.Previous.Contains(Test))
-			if(IsCacheValid(cache) && Previous.Contains(Test))
-			{
-				// - if N is included in P, return previous list
-				// => we simply leave the list (mTouchedFaces) unchanged
-
-				// Set contact status if needed
-				if(mTouchedPrimitives->GetNbEntries())	mFlags |= OPC_TEMPORAL_CONTACT;
-
-				// In any case we don't need to do a query
-				return TRUE;
-			}
-			else
-			{
-				// - else do the query using a fat N
-
-				// Reset cache since we'll about to perform a real query
-				mTouchedPrimitives->Reset();
-
-				// Make a fat sphere so that coherence will work for subsequent frames
-				mRadius2 *= cache.FatCoeff;
-//				mRadius2 = (lss.mRadius * cache.FatCoeff)*(lss.mRadius * cache.FatCoeff);
-
-
-				// Update cache with query data (signature for cached faces)
-				cache.Previous.mP0 = mSeg.mP0;
-				cache.Previous.mP1 = mSeg.mP1;
-				cache.Previous.mRadius = mRadius2;
-			}
-		}
-	}
-	else
-	{
-		// Here we don't use temporal coherence => do a normal query
-		mTouchedPrimitives->Reset();
-	}
-
-	return FALSE;
+                //Update cache with query data (signature for cached faces)
+                cache.Previous.mP0     = mSeg.mP0;
+                cache.Previous.mP1     = mSeg.mP1;
+                cache.Previous.mRadius = mRadius2;
+            }
+        }
+    }
+    else
+    {
+        //Here we don't use temporal coherence => do a normal query
+        mTouchedPrimitives->Reset();
+    }
+    return FALSE;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -293,23 +283,20 @@ bool LSSCollider::InitQuery(LSSCache& cache, const LSS& lss, const Matrix4x4* wo
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool LSSCollider::Collide(LSSCache& cache, const LSS& lss, const AABBTree* tree)
+bool LSSCollider::Collide( LSSCache &cache, const LSS &lss, const AABBTree *tree )
 {
-	// This is typically called for a scene tree, full of -AABBs-, not full of triangles.
-	// So we don't really have "primitives" to deal with. Hence it doesn't work with
-	// "FirstContact" + "TemporalCoherence".
-	OPASSERT( !(FirstContactEnabled() && TemporalCoherenceEnabled()) );
+    //This is typically called for a scene tree, full of -AABBs-, not full of triangles.
+    //So we don't really have "primitives" to deal with. Hence it doesn't work with
+    //"FirstContact" + "TemporalCoherence".
+    OPASSERT( !( FirstContactEnabled() && TemporalCoherenceEnabled() ) );
+    //Checkings
+    if( !tree ) return false;
+    //Init collision query
+    if( InitQuery( cache, lss ) ) return true;
+    //Perform collision query
+    _Collide( tree );
 
-	// Checkings
-	if(!tree)	return false;
-
-	// Init collision query
-	if(InitQuery(cache, lss))	return true;
-
-	// Perform collision query
-	_Collide(tree);
-
-	return true;
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -320,20 +307,20 @@ bool LSSCollider::Collide(LSSCache& cache, const LSS& lss, const AABBTree* tree)
  *	\return		true if the LSS contains the whole box
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-inline_ bool LSSCollider::LSSContainsBox(const Point& /*bc*/, const Point& /*be*/)
+inline_ bool LSSCollider::LSSContainsBox( const Point& /*bc*/, const Point& /*be*/ )
 {
-	// Not implemented
-	return FALSE;
+    //Not implemented
+    return FALSE;
 }
 
-#define TEST_BOX_IN_LSS(center, extents)	\
-	if(LSSContainsBox(center, extents))		\
-	{										\
-		/* Set contact status */			\
-		mFlags |= OPC_CONTACT;				\
-		_Dump(node);						\
-		return;								\
-	}
+#define TEST_BOX_IN_LSS( center, extents )  \
+    if( LSSContainsBox( center, extents ) ) \
+    {                                       \
+        /* Set contact status */            \
+        mFlags |= OPC_CONTACT;              \
+        _Dump( node );                      \
+        return;                             \
+    }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -341,25 +328,21 @@ inline_ bool LSSCollider::LSSContainsBox(const Point& /*bc*/, const Point& /*be*
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void LSSCollider::_Collide(const AABBCollisionNode* node)
+void LSSCollider::_Collide( const AABBCollisionNode *node )
 {
-	// Perform LSS-AABB overlap test
-	if(!LSSAABBOverlap(node->mAABB.mCenter, node->mAABB.mExtents))	return;
-
-	TEST_BOX_IN_LSS(node->mAABB.mCenter, node->mAABB.mExtents)
-
-	if(node->IsLeaf())
-	{
-		LSS_PRIM(node->GetPrimitive(), OPC_CONTACT)
-	}
-	else
-	{
-		_Collide(node->GetPos());
-
-		if(ContactFound()) return;
-
-		_Collide(node->GetNeg());
-	}
+    //Perform LSS-AABB overlap test
+    if( !LSSAABBOverlap( node->mAABB.mCenter, node->mAABB.mExtents ) ) return;
+    TEST_BOX_IN_LSS( node->mAABB.mCenter, node->mAABB.mExtents )
+    if( node->IsLeaf() )
+    {
+        LSS_PRIM( node->GetPrimitive(), OPC_CONTACT );
+    }
+    else
+    {
+        _Collide( node->GetPos() );
+        if( ContactFound() ) return;
+        _Collide( node->GetNeg() );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -368,25 +351,21 @@ void LSSCollider::_Collide(const AABBCollisionNode* node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void LSSCollider::_CollideNoPrimitiveTest(const AABBCollisionNode* node)
+void LSSCollider::_CollideNoPrimitiveTest( const AABBCollisionNode *node )
 {
-	// Perform LSS-AABB overlap test
-	if(!LSSAABBOverlap(node->mAABB.mCenter, node->mAABB.mExtents))	return;
-
-	TEST_BOX_IN_LSS(node->mAABB.mCenter, node->mAABB.mExtents)
-
-	if(node->IsLeaf())
-	{
-		SET_CONTACT(node->GetPrimitive(), OPC_CONTACT)
-	}
-	else
-	{
-		_CollideNoPrimitiveTest(node->GetPos());
-
-		if(ContactFound()) return;
-
-		_CollideNoPrimitiveTest(node->GetNeg());
-	}
+    //Perform LSS-AABB overlap test
+    if( !LSSAABBOverlap( node->mAABB.mCenter, node->mAABB.mExtents ) ) return;
+    TEST_BOX_IN_LSS( node->mAABB.mCenter, node->mAABB.mExtents )
+    if( node->IsLeaf() )
+    {
+        SET_CONTACT( node->GetPrimitive(), OPC_CONTACT );
+    }
+    else
+    {
+        _CollideNoPrimitiveTest( node->GetPos() );
+        if( ContactFound() ) return;
+        _CollideNoPrimitiveTest( node->GetNeg() );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -395,30 +374,29 @@ void LSSCollider::_CollideNoPrimitiveTest(const AABBCollisionNode* node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void LSSCollider::_Collide(const AABBQuantizedNode* node)
+void LSSCollider::_Collide( const AABBQuantizedNode *node )
 {
-	// Dequantize box
-	const QuantizedAABB& Box = node->mAABB;
-	const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x, float(Box.mCenter[1]) * mCenterCoeff.y, float(Box.mCenter[2]) * mCenterCoeff.z);
-	const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x, float(Box.mExtents[1]) * mExtentsCoeff.y, float(Box.mExtents[2]) * mExtentsCoeff.z);
-
-	// Perform LSS-AABB overlap test
-	if(!LSSAABBOverlap(Center, Extents))	return;
-
-	TEST_BOX_IN_LSS(Center, Extents)
-
-	if(node->IsLeaf())
-	{
-		LSS_PRIM(node->GetPrimitive(), OPC_CONTACT)
-	}
-	else
-	{
-		_Collide(node->GetPos());
-
-		if(ContactFound()) return;
-
-		_Collide(node->GetNeg());
-	}
+    //Dequantize box
+    const QuantizedAABB &Box = node->mAABB;
+    const Point Center( float(Box.mCenter[0])*mCenterCoeff.x,
+                        float(Box.mCenter[1])*mCenterCoeff.y,
+                        float(Box.mCenter[2])*mCenterCoeff.z );
+    const Point Extents( float(Box.mExtents[0])*mExtentsCoeff.x,
+                         float(Box.mExtents[1])*mExtentsCoeff.y,
+                         float(Box.mExtents[2])*mExtentsCoeff.z );
+    //Perform LSS-AABB overlap test
+    if( !LSSAABBOverlap( Center, Extents ) ) return;
+    TEST_BOX_IN_LSS( Center, Extents )
+    if( node->IsLeaf() )
+    {
+        LSS_PRIM( node->GetPrimitive(), OPC_CONTACT );
+    }
+    else
+    {
+        _Collide( node->GetPos() );
+        if( ContactFound() ) return;
+        _Collide( node->GetNeg() );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -427,30 +405,29 @@ void LSSCollider::_Collide(const AABBQuantizedNode* node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void LSSCollider::_CollideNoPrimitiveTest(const AABBQuantizedNode* node)
+void LSSCollider::_CollideNoPrimitiveTest( const AABBQuantizedNode *node )
 {
-	// Dequantize box
-	const QuantizedAABB& Box = node->mAABB;
-	const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x, float(Box.mCenter[1]) * mCenterCoeff.y, float(Box.mCenter[2]) * mCenterCoeff.z);
-	const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x, float(Box.mExtents[1]) * mExtentsCoeff.y, float(Box.mExtents[2]) * mExtentsCoeff.z);
-
-	// Perform LSS-AABB overlap test
-	if(!LSSAABBOverlap(Center, Extents))	return;
-
-	TEST_BOX_IN_LSS(Center, Extents)
-
-	if(node->IsLeaf())
-	{
-		SET_CONTACT(node->GetPrimitive(), OPC_CONTACT)
-	}
-	else
-	{
-		_CollideNoPrimitiveTest(node->GetPos());
-
-		if(ContactFound()) return;
-
-		_CollideNoPrimitiveTest(node->GetNeg());
-	}
+    //Dequantize box
+    const QuantizedAABB &Box = node->mAABB;
+    const Point Center( float(Box.mCenter[0])*mCenterCoeff.x,
+                        float(Box.mCenter[1])*mCenterCoeff.y,
+                        float(Box.mCenter[2])*mCenterCoeff.z );
+    const Point Extents( float(Box.mExtents[0])*mExtentsCoeff.x,
+                         float(Box.mExtents[1])*mExtentsCoeff.y,
+                         float(Box.mExtents[2])*mExtentsCoeff.z );
+    //Perform LSS-AABB overlap test
+    if( !LSSAABBOverlap( Center, Extents ) ) return;
+    TEST_BOX_IN_LSS( Center, Extents )
+    if( node->IsLeaf() )
+    {
+        SET_CONTACT( node->GetPrimitive(), OPC_CONTACT );
+    }
+    else
+    {
+        _CollideNoPrimitiveTest( node->GetPos() );
+        if( ContactFound() ) return;
+        _CollideNoPrimitiveTest( node->GetNeg() );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -459,20 +436,18 @@ void LSSCollider::_CollideNoPrimitiveTest(const AABBQuantizedNode* node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void LSSCollider::_Collide(const AABBNoLeafNode* node)
+void LSSCollider::_Collide( const AABBNoLeafNode *node )
 {
-	// Perform LSS-AABB overlap test
-	if(!LSSAABBOverlap(node->mAABB.mCenter, node->mAABB.mExtents))	return;
-
-	TEST_BOX_IN_LSS(node->mAABB.mCenter, node->mAABB.mExtents)
-
-	if(node->HasPosLeaf())	{ LSS_PRIM(node->GetPosPrimitive(), OPC_CONTACT) }
-	else					_Collide(node->GetPos());
-
-	if(ContactFound()) return;
-
-	if(node->HasNegLeaf())	{ LSS_PRIM(node->GetNegPrimitive(), OPC_CONTACT) }
-	else					_Collide(node->GetNeg());
+    //Perform LSS-AABB overlap test
+    if( !LSSAABBOverlap( node->mAABB.mCenter, node->mAABB.mExtents ) ) return;
+    TEST_BOX_IN_LSS( node->mAABB.mCenter, node->mAABB.mExtents )
+    if( node->HasPosLeaf() )
+        LSS_PRIM( node->GetPosPrimitive(), OPC_CONTACT );
+        else _Collide( node->GetPos() );
+    if( ContactFound() ) return;
+    if( node->HasNegLeaf() )
+        LSS_PRIM( node->GetNegPrimitive(), OPC_CONTACT );
+    else _Collide( node->GetNeg() );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -481,20 +456,18 @@ void LSSCollider::_Collide(const AABBNoLeafNode* node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void LSSCollider::_CollideNoPrimitiveTest(const AABBNoLeafNode* node)
+void LSSCollider::_CollideNoPrimitiveTest( const AABBNoLeafNode *node )
 {
-	// Perform LSS-AABB overlap test
-	if(!LSSAABBOverlap(node->mAABB.mCenter, node->mAABB.mExtents))	return;
-
-	TEST_BOX_IN_LSS(node->mAABB.mCenter, node->mAABB.mExtents)
-
-	if(node->HasPosLeaf())	{ SET_CONTACT(node->GetPosPrimitive(), OPC_CONTACT) }
-	else					_CollideNoPrimitiveTest(node->GetPos());
-
-	if(ContactFound()) return;
-
-	if(node->HasNegLeaf())	{ SET_CONTACT(node->GetNegPrimitive(), OPC_CONTACT) }
-	else					_CollideNoPrimitiveTest(node->GetNeg());
+    //Perform LSS-AABB overlap test
+    if( !LSSAABBOverlap( node->mAABB.mCenter, node->mAABB.mExtents ) ) return;
+    TEST_BOX_IN_LSS( node->mAABB.mCenter, node->mAABB.mExtents )
+    if( node->HasPosLeaf() )
+        SET_CONTACT( node->GetPosPrimitive(), OPC_CONTACT );
+        else _CollideNoPrimitiveTest( node->GetPos() );
+    if( ContactFound() ) return;
+    if( node->HasNegLeaf() )
+        SET_CONTACT( node->GetNegPrimitive(), OPC_CONTACT );
+        else _CollideNoPrimitiveTest( node->GetNeg() );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -503,25 +476,26 @@ void LSSCollider::_CollideNoPrimitiveTest(const AABBNoLeafNode* node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void LSSCollider::_Collide(const AABBQuantizedNoLeafNode* node)
+void LSSCollider::_Collide( const AABBQuantizedNoLeafNode *node )
 {
-	// Dequantize box
-	const QuantizedAABB& Box = node->mAABB;
-	const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x, float(Box.mCenter[1]) * mCenterCoeff.y, float(Box.mCenter[2]) * mCenterCoeff.z);
-	const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x, float(Box.mExtents[1]) * mExtentsCoeff.y, float(Box.mExtents[2]) * mExtentsCoeff.z);
-
-	// Perform LSS-AABB overlap test
-	if(!LSSAABBOverlap(Center, Extents))	return;
-
-	TEST_BOX_IN_LSS(Center, Extents)
-
-	if(node->HasPosLeaf())	{ LSS_PRIM(node->GetPosPrimitive(), OPC_CONTACT) }
-	else					_Collide(node->GetPos());
-
-	if(ContactFound()) return;
-
-	if(node->HasNegLeaf())	{ LSS_PRIM(node->GetNegPrimitive(), OPC_CONTACT) }
-	else					_Collide(node->GetNeg());
+    //Dequantize box
+    const QuantizedAABB &Box = node->mAABB;
+    const Point Center( float(Box.mCenter[0])*mCenterCoeff.x,
+                        float(Box.mCenter[1])*mCenterCoeff.y,
+                        float(Box.mCenter[2])*mCenterCoeff.z );
+    const Point Extents( float(Box.mExtents[0])*mExtentsCoeff.x,
+                         float(Box.mExtents[1])*mExtentsCoeff.y,
+                         float(Box.mExtents[2])*mExtentsCoeff.z );
+    //Perform LSS-AABB overlap test
+    if( !LSSAABBOverlap( Center, Extents ) ) return;
+    TEST_BOX_IN_LSS( Center, Extents )
+    if( node->HasPosLeaf() )
+        LSS_PRIM( node->GetPosPrimitive(), OPC_CONTACT );
+        else _Collide( node->GetPos() );
+    if( ContactFound() ) return;
+    if( node->HasNegLeaf() )
+        LSS_PRIM( node->GetNegPrimitive(), OPC_CONTACT );
+    else _Collide( node->GetNeg() );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -530,25 +504,26 @@ void LSSCollider::_Collide(const AABBQuantizedNoLeafNode* node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void LSSCollider::_CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode* node)
+void LSSCollider::_CollideNoPrimitiveTest( const AABBQuantizedNoLeafNode *node )
 {
-	// Dequantize box
-	const QuantizedAABB& Box = node->mAABB;
-	const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x, float(Box.mCenter[1]) * mCenterCoeff.y, float(Box.mCenter[2]) * mCenterCoeff.z);
-	const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x, float(Box.mExtents[1]) * mExtentsCoeff.y, float(Box.mExtents[2]) * mExtentsCoeff.z);
-
-	// Perform LSS-AABB overlap test
-	if(!LSSAABBOverlap(Center, Extents))	return;
-
-	TEST_BOX_IN_LSS(Center, Extents)
-
-	if(node->HasPosLeaf())	{ SET_CONTACT(node->GetPosPrimitive(), OPC_CONTACT) }
-	else					_CollideNoPrimitiveTest(node->GetPos());
-
-	if(ContactFound()) return;
-
-	if(node->HasNegLeaf())	{ SET_CONTACT(node->GetNegPrimitive(), OPC_CONTACT) }
-	else					_CollideNoPrimitiveTest(node->GetNeg());
+    //Dequantize box
+    const QuantizedAABB &Box = node->mAABB;
+    const Point Center( float(Box.mCenter[0])*mCenterCoeff.x,
+                        float(Box.mCenter[1])*mCenterCoeff.y,
+                        float(Box.mCenter[2])*mCenterCoeff.z );
+    const Point Extents( float(Box.mExtents[0])*mExtentsCoeff.x,
+                         float(Box.mExtents[1])*mExtentsCoeff.y,
+                         float(Box.mExtents[2])*mExtentsCoeff.z );
+    //Perform LSS-AABB overlap test
+    if( !LSSAABBOverlap( Center, Extents ) ) return;
+    TEST_BOX_IN_LSS( Center, Extents )
+    if( node->HasPosLeaf() )
+        SET_CONTACT( node->GetPosPrimitive(), OPC_CONTACT );
+        else _CollideNoPrimitiveTest( node->GetPos() );
+    if( ContactFound() ) return;
+    if( node->HasNegLeaf() )
+        SET_CONTACT( node->GetNegPrimitive(), OPC_CONTACT );
+        else _CollideNoPrimitiveTest( node->GetNeg() );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -557,30 +532,24 @@ void LSSCollider::_CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode* node)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void LSSCollider::_Collide(const AABBTreeNode* node)
+void LSSCollider::_Collide( const AABBTreeNode *node )
 {
-	// Perform LSS-AABB overlap test
-	Point Center, Extents;
-	node->GetAABB()->GetCenter(Center);
-	node->GetAABB()->GetExtents(Extents);
-	if(!LSSAABBOverlap(Center, Extents))	return;
-
-	if(node->IsLeaf() || LSSContainsBox(Center, Extents))
-	{
-		mFlags |= OPC_CONTACT;
-		mTouchedPrimitives->Add(node->GetPrimitives(), node->GetNbPrimitives());
-	}
-	else
-	{
-		_Collide(node->GetPos());
-		_Collide(node->GetNeg());
-	}
+    //Perform LSS-AABB overlap test
+    Point Center, Extents;
+    node->GetAABB()->GetCenter( Center );
+    node->GetAABB()->GetExtents( Extents );
+    if( !LSSAABBOverlap( Center, Extents ) ) return;
+    if( node->IsLeaf() || LSSContainsBox( Center, Extents ) )
+    {
+        mFlags |= OPC_CONTACT;
+        mTouchedPrimitives->Add( node->GetPrimitives(), node->GetNbPrimitives() );
+    }
+    else
+    {
+        _Collide( node->GetPos() );
+        _Collide( node->GetNeg() );
+    }
 }
-
-
-
-
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -588,8 +557,7 @@ void LSSCollider::_Collide(const AABBTreeNode* node)
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 HybridLSSCollider::HybridLSSCollider()
-{
-}
+{}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -597,131 +565,121 @@ HybridLSSCollider::HybridLSSCollider()
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 HybridLSSCollider::~HybridLSSCollider()
+{}
+
+bool HybridLSSCollider::Collide( LSSCache &cache,
+                                 const LSS &lss,
+                                 const HybridModel &model,
+                                 const Matrix4x4 *worldl,
+                                 const Matrix4x4 *worldm )
 {
-}
+    //We don't want primitive tests here!
+    mFlags |= OPC_NO_PRIMITIVE_TESTS;
+    //Checkings
+    if( !Setup( &model ) ) return false;
+    //Init collision query
+    if( InitQuery( cache, lss, worldl, worldm ) ) return true;
+    //Special case for 1-leaf trees
+    if( mCurrentModel && mCurrentModel->HasSingleNode() )
+    {
+        //Here we're supposed to perform a normal query, except our tree has a single node, i.e. just a few triangles
+        udword Nb = mIMesh->GetNbTriangles();
+        //Loop through all triangles
+        for( udword i = 0; i < Nb; i++ )
+            LSS_PRIM( i, OPC_CONTACT );
+        return true;
+    }
+    //Override destination array since we're only going to get leaf boxes here
+    mTouchedBoxes.Reset();
+    mTouchedPrimitives = &mTouchedBoxes;
+    //Now, do the actual query against leaf boxes
+    if( !model.HasLeafNodes() )
+    {
+        if( model.IsQuantized() )
+        {
+            const AABBQuantizedNoLeafTree *Tree = (const AABBQuantizedNoLeafTree*) model.GetTree();
 
-bool HybridLSSCollider::Collide(LSSCache& cache, const LSS& lss, const HybridModel& model, const Matrix4x4* worldl, const Matrix4x4* worldm)
-{
-	// We don't want primitive tests here!
-	mFlags |= OPC_NO_PRIMITIVE_TESTS;
+            //Setup dequantization coeffs
+            mCenterCoeff  = Tree->mCenterCoeff;
+            mExtentsCoeff = Tree->mExtentsCoeff;
 
-	// Checkings
-	if(!Setup(&model))	return false;
+            //Perform collision query - we don't want primitive tests here!
+            _CollideNoPrimitiveTest( Tree->GetNodes() );
+        }
+        else
+        {
+            const AABBNoLeafTree *Tree = (const AABBNoLeafTree*) model.GetTree();
 
-	// Init collision query
-	if(InitQuery(cache, lss, worldl, worldm))	return true;
+            //Perform collision query - we don't want primitive tests here!
+            _CollideNoPrimitiveTest( Tree->GetNodes() );
+        }
+    }
+    else
+    {
+        if( model.IsQuantized() )
+        {
+            const AABBQuantizedTree *Tree = (const AABBQuantizedTree*) model.GetTree();
 
-	// Special case for 1-leaf trees
-	if(mCurrentModel && mCurrentModel->HasSingleNode())
-	{
-		// Here we're supposed to perform a normal query, except our tree has a single node, i.e. just a few triangles
-		udword Nb = mIMesh->GetNbTriangles();
+            //Setup dequantization coeffs
+            mCenterCoeff  = Tree->mCenterCoeff;
+            mExtentsCoeff = Tree->mExtentsCoeff;
 
-		// Loop through all triangles
-		for(udword i=0;i<Nb;i++)
-		{
-			LSS_PRIM(i, OPC_CONTACT)
-		}
-		return true;
-	}
+            //Perform collision query - we don't want primitive tests here!
+            _CollideNoPrimitiveTest( Tree->GetNodes() );
+        }
+        else
+        {
+            const AABBCollisionTree *Tree = (const AABBCollisionTree*) model.GetTree();
 
-	// Override destination array since we're only going to get leaf boxes here
-	mTouchedBoxes.Reset();
-	mTouchedPrimitives = &mTouchedBoxes;
+            //Perform collision query - we don't want primitive tests here!
+            _CollideNoPrimitiveTest( Tree->GetNodes() );
+        }
+    }
+    //We only have a list of boxes so far
+    if( GetContactStatus() )
+    {
+        //Reset contact status, since it currently only reflects collisions with leaf boxes
+        Collider::InitQuery();
 
-	// Now, do the actual query against leaf boxes
-	if(!model.HasLeafNodes())
-	{
-		if(model.IsQuantized())
-		{
-			const AABBQuantizedNoLeafTree* Tree = (const AABBQuantizedNoLeafTree*)model.GetTree();
+        //Change dest container so that we can use built-in overlap tests and get collided primitives
+        cache.TouchedPrimitives.Reset();
+        mTouchedPrimitives = &cache.TouchedPrimitives;
 
-			// Setup dequantization coeffs
-			mCenterCoeff	= Tree->mCenterCoeff;
-			mExtentsCoeff	= Tree->mExtentsCoeff;
+        //Read touched leaf boxes
+        udword Nb = mTouchedBoxes.GetNbEntries();
+        const udword *Touched   = mTouchedBoxes.GetEntries();
 
-			// Perform collision query - we don't want primitive tests here!
-			_CollideNoPrimitiveTest(Tree->GetNodes());
-		}
-		else
-		{
-			const AABBNoLeafTree* Tree = (const AABBNoLeafTree*)model.GetTree();
+        const LeafTriangles *LT = model.GetLeafTriangles();
+        const udword *Indices   = model.GetIndices();
+        //Loop through touched leaves
+        while( Nb-- )
+        {
+            const LeafTriangles &CurrentLeaf = LT[*Touched++];
 
-			// Perform collision query - we don't want primitive tests here!
-			_CollideNoPrimitiveTest(Tree->GetNodes());
-		}
-	}
-	else
-	{
-		if(model.IsQuantized())
-		{
-			const AABBQuantizedTree* Tree = (const AABBQuantizedTree*)model.GetTree();
-
-			// Setup dequantization coeffs
-			mCenterCoeff	= Tree->mCenterCoeff;
-			mExtentsCoeff	= Tree->mExtentsCoeff;
-
-			// Perform collision query - we don't want primitive tests here!
-			_CollideNoPrimitiveTest(Tree->GetNodes());
-		}
-		else
-		{
-			const AABBCollisionTree* Tree = (const AABBCollisionTree*)model.GetTree();
-
-			// Perform collision query - we don't want primitive tests here!
-			_CollideNoPrimitiveTest(Tree->GetNodes());
-		}
-	}
-
-	// We only have a list of boxes so far
-	if(GetContactStatus())
-	{
-		// Reset contact status, since it currently only reflects collisions with leaf boxes
-		Collider::InitQuery();
-
-		// Change dest container so that we can use built-in overlap tests and get collided primitives
-		cache.TouchedPrimitives.Reset();
-		mTouchedPrimitives = &cache.TouchedPrimitives;
-
-		// Read touched leaf boxes
-		udword Nb = mTouchedBoxes.GetNbEntries();
-		const udword* Touched = mTouchedBoxes.GetEntries();
-
-		const LeafTriangles* LT = model.GetLeafTriangles();
-		const udword* Indices = model.GetIndices();
-
-		// Loop through touched leaves
-		while(Nb--)
-		{
-			const LeafTriangles& CurrentLeaf = LT[*Touched++];
-
-			// Each leaf box has a set of triangles
-			udword NbTris = CurrentLeaf.GetNbTriangles();
-			if(Indices)
-			{
-				const udword* T = &Indices[CurrentLeaf.GetTriangleIndex()];
-
-				// Loop through triangles and test each of them
-				while(NbTris--)
-				{
-					udword TriangleIndex = *T++;
-					LSS_PRIM(TriangleIndex, OPC_CONTACT)
-				}
-			}
-			else
-			{
-				udword BaseIndex = CurrentLeaf.GetTriangleIndex();
-
-				// Loop through triangles and test each of them
-				while(NbTris--)
-				{
-					udword TriangleIndex = BaseIndex++;
-					LSS_PRIM(TriangleIndex, OPC_CONTACT)
-				}
-			}
-		}
-	}
-
-	return true;
+            //Each leaf box has a set of triangles
+            udword NbTris = CurrentLeaf.GetNbTriangles();
+            if( Indices )
+            {
+                const udword *T = &Indices[CurrentLeaf.GetTriangleIndex()];
+                //Loop through triangles and test each of them
+                while( NbTris-- )
+                {
+                    udword TriangleIndex = *T++;
+                    LSS_PRIM( TriangleIndex, OPC_CONTACT );
+                }
+            }
+            else
+            {
+                udword BaseIndex = CurrentLeaf.GetTriangleIndex();
+                //Loop through triangles and test each of them
+                while( NbTris-- )
+                {
+                    udword TriangleIndex = BaseIndex++;
+                    LSS_PRIM( TriangleIndex, OPC_CONTACT );
+                }
+            }
+        }
+    }
+    return true;
 }
 

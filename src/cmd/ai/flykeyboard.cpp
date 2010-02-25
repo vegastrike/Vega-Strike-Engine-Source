@@ -8,6 +8,7 @@
 #include "gfx/cockpit.h"
 #include "networking/netclient.h"
 #include "lin_time.h"
+
 struct StarShipControlKeyboard
 {
     bool switchmode;
@@ -69,79 +70,15 @@ struct StarShipControlKeyboard
     bool switchjoybank;
     void UnDirty()
     {
-        sheltonpress = sheltonrelease = uppress = uprelease = downpress = downrelease =
-                                                                              leftpress = leftrelease = rightpress =
-                                                                                                            rightrelease      =
-                                                                                                                ABpress       =
-                                                                                                                    ABrelease =
-                                                                                                                        accelpress
-                                                                                                                              =
-                                                                                                                                accelrelease
-                                                                                                                                    =
-                                                                                                                                        decelpress
-                                                                                                                                            =
-                                                                                                                                                decelrelease
-                                                                                                                                                    =
-                                                                                                                                                        rollrightpress
-                                                                                                                                                            =
-                                                                                                                                                                rollrightrelease
-                                                                                                                                                                    =
-                                                                                                                                                                        rollleftpress
-                                                                                                                                                                            =
-                                                                                                                                                                                rollleftrelease
-                                                                                                                                                                                    =
-                                                                                                                                                                                        joyinertialxypress
-                                                                                                                                                                                            =
-                                                                                                                                                                                                joyinertialxyrelease
-                                                                                                                                                                                                    =
-                                                                                                                                                                                                        joyinertialxzpress
-                                                                                                                                                                                                            =
-                                                                                                                                                                                                                joyinertialxzrelease
-                                                                                                                                                                                                                    =
-                                                                                                                                                                                                                        joyrollpress
-                                                                                                                                                                                                                            =
-                                                                                                                                                                                                                                joyrollrelease
-                                                                                                                                                                                                                                    =
-                                                                                                                                                                                                                                        joybankpress
-                                                                                                                                                                                                                                            =
-                                                                                                                                                                                                                                                joybankrelease
-                                                                                                                                                                                                                                                    =
-                                                                                                                                                                                                                                                        inertialflightpress
-                                                                                                                                                                                                                                                            =
-                                                                                                                                                                                                                                                                inertialflightrelease
-                                                                                                                                                                                                                                                                    =
-                                                                                                                                                                                                                                                                        0;
-        jumpkey = startpress = stoppress = autopilot = dirty = switch_combat_mode = terminateauto =
-                                                                                        setunvel = switchmode = setnulvel =
-                                                                                                                    realauto
-                                                                                                                        =
-                                                                                                                            matchspeed
-                                                                                                                                =
-                                                                                                                                    ASAP
-                                                                                                                                        =
-                                                                                                                                            switchinertialflight
-                                                                                                                                                =
-                                                                                                                                                    commchanged
-                                                                                                                                                        =
-                                                                                                                                                            startcomm
-                                                                                                                                                                =
-                                                                                                                                                                    switchwebcam
-                                                                                                                                                                        =
-                                                                                                                                                                            switchsecured
-                                                                                                                                                                                =
-                                                                                                                                                                                    freq_increase
-                                                                                                                                                                                        =
-                                                                                                                                                                                            freq_decrease
-                                                                                                                                                                                                =
-                                                                                                                                                                                                    switchjoyinertialxy
-                                                                                                                                                                                                        =
-                                                                                                                                                                                                            switchjoyinertialxz
-                                                                                                                                                                                                                =
-                                                                                                                                                                                                                    switchjoyroll
-                                                                                                                                                                                                                        =
-                                                                                                                                                                                                                            switchjoybank
-                                                                                                                                                                                                                                =
-                                                                                                                                                                                                                                    false;
+        sheltonpress   = sheltonrelease = uppress = uprelease = downpress = downrelease = leftpress = leftrelease = 0;
+        rightpress     = rightrelease = ABpress = ABrelease = accelpress = accelrelease = decelpress = decelrelease = 0;
+        rollrightpress = rollrightrelease = rollleftpress = rollleftrelease = joyinertialxypress = 0;
+        joyinertialxyrelease = joyinertialxzpress = joyinertialxzrelease = joyrollpress = joyrollrelease = 0;
+        joybankpress   = joybankrelease = inertialflightpress = inertialflightrelease = 0;
+        jumpkey = startpress = stoppress = autopilot = dirty = switch_combat_mode = terminateauto = false;
+        setunvel = switchmode = setnulvel = realauto = matchspeed = ASAP = switchinertialflight = false;
+        commchanged    = startcomm = switchwebcam = switchsecured = freq_increase = freq_decrease = false;
+        switchjoyinertialxy = switchjoyinertialxz = switchjoyroll = switchjoybank = false;
         axial = vertical = horizontal = 0;
     }
     StarShipControlKeyboard()
@@ -149,7 +86,9 @@ struct StarShipControlKeyboard
         UnDirty();
     }
 };
+
 static vector< StarShipControlKeyboard >starshipcontrolkeys;
+
 static StarShipControlKeyboard& g()
 {
     while ( starshipcontrolkeys.size() <= (unsigned int) _Universe->CurrentCockpit() )
@@ -185,6 +124,7 @@ FlyByKeyboard::FlyByKeyboard( unsigned int whichplayer ) : FlyByWire()
     else if (initialJoyMode == "bank")
         joy_mode = joyModeBank;
 }
+
 float FlyByKeyboard::clamp_axis( float v )
 {
     static int axis_scale = XMLSupport::parse_int( vs_config->getVariable( "physics", "slide_start", "3" ) );
@@ -200,6 +140,7 @@ float FlyByKeyboard::clamp_axis( float v )
     }
     return v;
 }
+
 float FlyByKeyboard::reduce_axis( float v )
 {
     static int axis_scale = XMLSupport::parse_int( vs_config->getVariable( "physics", "slide_end", "2" ) );
@@ -216,13 +157,16 @@ float FlyByKeyboard::reduce_axis( float v )
     }
     return v;
 }
+
 void FlyByKeyboard::Destroy()
 {
     if (autopilot)
         autopilot->Destroy();
     Order::Destroy();
 }
+
 FlyByKeyboard::~FlyByKeyboard() {}
+
 void FlyByKeyboard::KeyboardUp( float v )
 {
     if (v == 0) {
@@ -235,6 +179,7 @@ void FlyByKeyboard::KeyboardUp( float v )
     }
     Up( clamp_axis( axis_key.i ) );
 }
+
 void FlyByKeyboard::KeyboardRight( float v )
 {
     if (v == 0) {
@@ -247,6 +192,7 @@ void FlyByKeyboard::KeyboardRight( float v )
     }
     Right( clamp_axis( axis_key.j ) );
 }
+
 void FlyByKeyboard::KeyboardRollRight( float v )
 {
     if (v == 0) {
@@ -259,7 +205,9 @@ void FlyByKeyboard::KeyboardRollRight( float v )
     }
     RollRight( clamp_axis( axis_key.k ) );
 }
+
 #define FBWABS( m ) (m >= 0 ? m : -m)
+
 void FlyByKeyboard::Execute()
 {
     FlyByKeyboard::Execute( true );
@@ -267,7 +215,7 @@ void FlyByKeyboard::Execute()
 
 void FlyByKeyboard::Execute( bool resetangvelocity )
 {
-#define SSCK starshipcontrolkeys[whichplayer]
+#define SSCK (starshipcontrolkeys[whichplayer])
     if (Network != NULL && !SSCK.startcomm && SSCK.commchanged && whichplayer == 0) {
         printf( "Stopping a NETCOMM\n" );
         Network[whichplayer].stopCommunication();

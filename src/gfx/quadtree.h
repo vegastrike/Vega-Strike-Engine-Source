@@ -3,13 +3,15 @@
 #include "quadsquare.h"
 #include "xml_support.h"
 #include "matrix.h"
+
 class Texture;
+struct TerraXML;
+
 /**
  * This class is a wrapper class for quadsquare
  * It takes care of activating textures, having possession of the vlist
  * and having posession of the static vars that get set
  */
-struct TerraXML;
 class QuadTree
 {
     int minX;
@@ -45,37 +47,37 @@ public: QuadTree( const char *filename, const Vector &scales, const float Radius
                      Vector &normal,
                      const Matrix &transform,
                      float TotalTerrainSizeX = 0,
-                     float TotalTerrainSizeZ = 0 );
+                     float TotalTerrainSizeZ = 0 ) const;
     static void beginElement( void *userData, const XML_Char *name, const XML_Char **atts );
     static void endElement( void *userData, const XML_Char *name );
     void beginElement( const std::string &name, const XMLSupport::AttributeList &attributes );
     void endElement( const std::string &name );
-    float getminX()
+    float getminX() const
     {
         return 0;
     }
-    float getminZ()
+    float getminZ() const
     {
         return 0;
     }
-    float getmaxX()
+    float getmaxX() const
     {
         return minX+(float) maxX;
     }
-    float getmaxZ()
+    float getmaxZ() const
     {
         return minZ+(float) maxZ;
     }
-    float getSizeX()
+    float getSizeX() const
     {
         return maxX;
     }
-    float getSizeZ()
+    float getSizeZ() const
     {
         return maxZ;
     }
     void StaticCullData( const float detail );
-    bool GetGroundPos( QVector &Location, Vector &norm, float TTSX = 0, float TTSZ = 0 )
+    bool GetGroundPos( QVector &Location, Vector &norm, float TTSX = 0, float TTSZ = 0 ) const
     {
         return GetGroundPos( Location, norm, transformation, TTSX, TTSZ );
     }
@@ -83,8 +85,8 @@ public: QuadTree( const char *filename, const Vector &scales, const float Radius
                        Vector &norm,
                        const Matrix &trans,
                        float TotalTerrainSizeX = 0,
-                       float TotalTerrainSizeZ = 0 );
-    Vector GetNormal( const Vector &position, const Vector &requestednorm );
+                       float TotalTerrainSizeZ = 0 ) const;
+    Vector GetNormal( const Vector &position, const Vector &requestednorm ) const;
 };
 
 #endif

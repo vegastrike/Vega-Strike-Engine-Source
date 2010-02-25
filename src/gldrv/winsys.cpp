@@ -271,7 +271,7 @@ static void setup_sdl_video_mode()
  *  \date    Modified: 2000-10-19
  */
 
-void winsys_init( int *argc, char **argv, char *window_title, char *icon_title )
+void winsys_init( int *argc, char **argv, char const *window_title, char const *icon_title )
 {
     //SDL_INIT_AUDIO|
     Uint32 sdl_flags = SDL_INIT_VIDEO|SDL_INIT_JOYSTICK;

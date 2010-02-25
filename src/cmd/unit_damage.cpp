@@ -1,4 +1,7 @@
-//#include "unit.h"
+#ifndef __UNIT_DAMAGE_CPP__
+#define __UNIT_DAMAGE_CPP__
+
+#include "unit.h"
 //#include "unit_template.h"
 #include "unit_factory.h"
 #include "ai/order.h"
@@ -28,6 +31,7 @@
 #include "unit_csv.h"
 //#define DESTRUCTDEBUG
 #include "base.h"
+
 extern unsigned int apply_float_to_unsigned_int( float tmp );  //Short fix
 extern std::vector< Mesh* >MakeMesh( unsigned int mysize );
 
@@ -124,7 +128,7 @@ void GameUnit< UnitType >::Split( int level )
         splitsub->hull = 1000;
         splitsub->name = "debris";
         splitsub->Mass = debrismassmult*splitsub->Mass/level;
-        splitsub->image->timeexplode = .1;
+        splitsub->pImage->timeexplode = .1;
         if (splitsub->meshdata[0]) {
             Vector loc  = splitsub->meshdata[0]->Position();
             static float explosion_force = XMLSupport::parse_float( vs_config->getVariable( "graphics", "explosionforce", ".5" ) );             //10 seconds for auto to kick in;
@@ -269,19 +273,20 @@ extern unsigned int AddAnimation( const QVector&, const float, bool, const std::
 extern Animation * getRandomCachedAni();
 extern std::string getRandomCachedAniString();
 extern void disableSubUnits( Unit *un );
+
 template < class UnitType >
 bool GameUnit< UnitType >::Explode( bool drawit, float timeit )
 {
-    if (this->image->explosion == NULL && this->image->timeexplode == 0) {
+    if (this->pImage->pExplosion == NULL && this->pImage->timeexplode == 0) {
         //no explosion in unit data file && explosions haven't started yet
 
         //notify the director that a ship got destroyed
         mission->DirectorShipDestroyed( this );
         disableSubUnits( this );
-        this->image->timeexplode = 0;
+        this->pImage->timeexplode = 0;
         static std::string expani = vs_config->getVariable( "graphics", "explosion_animation", "explosion_orange.ani" );
 
-        string bleh = this->image->explosion_type;
+        string bleh = this->pImage->explosion_type;
         if ( bleh.empty() )
             FactionUtil::GetRandExplosionAnimation( this->faction, bleh );
         if ( bleh.empty() ) {
@@ -292,11 +297,11 @@ bool GameUnit< UnitType >::Explode( bool drawit, float timeit )
         }
         static bool explosion_face_player =
             XMLSupport::parse_bool( vs_config->getVariable( "graphics", "explosion_face_player", "true" ) );
-        this->image->explosion = new Animation( bleh.c_str(), explosion_face_player, .1, BILINEAR, true );
-        this->image->explosion->SetDimensions( this->ExplosionRadius(), this->ExplosionRadius() );
+        this->pImage->pExplosion = new Animation( bleh.c_str(), explosion_face_player, .1, BILINEAR, true );
+        this->pImage->pExplosion->SetDimensions( this->ExplosionRadius(), this->ExplosionRadius() );
         Vector p, q, r;
         this->GetOrientation( p, q, r );
-        this->image->explosion->SetOrientation( p, q, r );
+        this->pImage->pExplosion->SetOrientation( p, q, r );
         if (this->isUnit() != MISSILEPTR) {
             static float expdamagecenter =
                 XMLSupport::parse_float( vs_config->getVariable( "physics", "explosion_damage_center", "1" ) );
@@ -310,13 +315,12 @@ bool GameUnit< UnitType >::Explode( bool drawit, float timeit )
         QVector exploc = this->cumulative_transformation.position;
         bool    sub    = this->isSubUnit();
         Unit   *un     = NULL;
-        if (!sub) {
+        if (!sub)
             if ( un = _Universe->AccessCockpit( 0 )->GetParent() ) {
                 static float explosion_closeness =
                     XMLSupport::parse_float( vs_config->getVariable( "audio", "explosion_closeness", ".8" ) );
                 exploc = un->Position()*explosion_closeness+exploc*(1-explosion_closeness);
             }
-        }
         AUDPlay( this->sound->explode, exploc, this->Velocity, 1 );
         if (!sub) {
             un = _Universe->AccessCockpit()->GetParent();
@@ -381,29 +385,29 @@ bool GameUnit< UnitType >::Explode( bool drawit, float timeit )
     }
     static float timebeforeexplodedone = XMLSupport::parse_float( vs_config->getVariable( "physics", "debris_time", "500" ) );
     bool timealldone =
-        ( this->image->timeexplode > timebeforeexplodedone || this->isUnit() == MISSILEPTR
+        ( this->pImage->timeexplode > timebeforeexplodedone || this->isUnit() == MISSILEPTR
          || _Universe->AccessCockpit()->GetParent() == this || this->SubUnits.empty() );
-    if (this->image->explosion) {
-        this->image->timeexplode += timeit;
+    if (this->pImage->pExplosion) {
+        this->pImage->timeexplode += timeit;
         //Translate (tmp,meshdata[i]->Position());
         //MultMatrix (tmp2,cumulative_transformation_matrix,tmp);
-        this->image->explosion->SetPosition( this->Position() );
+        this->pImage->pExplosion->SetPosition( this->Position() );
         Vector p, q, r;
         this->GetOrientation( p, q, r );
-        this->image->explosion->SetOrientation( p, q, r );
-        if (this->image->explosion->Done() && timealldone) {
-            delete this->image->explosion;
-            this->image->explosion = NULL;
+        this->pImage->pExplosion->SetOrientation( p, q, r );
+        if (this->pImage->pExplosion->Done() && timealldone) {
+            delete this->pImage->pExplosion;
+            this->pImage->pExplosion = NULL;
         }
-        if (drawit && this->image->explosion)
-            this->image->explosion->Draw();              //puts on draw queue... please don't delete
+        if (drawit && this->pImage->pExplosion)
+            this->pImage->pExplosion->Draw();              //puts on draw queue... please don't delete
     }
-    bool alldone = this->image->explosion ? !this->image->explosion->Done() : false;
+    bool alldone = this->pImage->pExplosion ? !this->pImage->pExplosion->Done() : false;
     if ( !this->SubUnits.empty() ) {
         Unit *su;
         for (un_iter ui = this->getSubUnits(); su = *ui; ++ui) {
             bool temp = su->Explode( drawit, timeit );
-            if (su->GetImageInformation().explosion)
+            if (su->GetImageInformation().pExplosion)
                 alldone |= temp;
         }
     }
@@ -416,4 +420,6 @@ bool GameUnit< UnitType >::Explode( bool drawit, float timeit )
     }
     return alldone || (!timealldone);
 }
+
+#endif
 

@@ -175,7 +175,7 @@ Unit* navdrawlist::gettailunit()
     return tail->source;
 }
 
-#define INIT_COL_ARRAY( col, r, g, b, a ) col[0] = r; col[1] = g; col[2] = b; col[3] = a
+#define INIT_COL_ARRAY( col, r, g, b, a ) do{ col[0] = r; col[1] = g; col[2] = b; col[3] = a; }while(0)
 
 static GFXColor getUnitTypeColor( std::string name, bool text, float col[4], float unselectedalpha )
 {

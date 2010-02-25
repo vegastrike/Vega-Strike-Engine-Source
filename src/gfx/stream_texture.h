@@ -1,4 +1,5 @@
 #include "aux_texture.h"
+
 class StreamTexture : public Texture
 {
     unsigned char *mutabledata;

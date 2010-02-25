@@ -45,7 +45,7 @@ class GFXQuadstrip;
 struct GFXMaterial;
 class BoundingBox;
 
-#define MESH_HASTHABLE_SIZE 503
+#define MESH_HASTHABLE_SIZE (503)
 
 ///Struct vertex format returned by GetPolys
 ///Struct polygon format returned by GetPolys
@@ -106,9 +106,9 @@ struct MeshDrawContext
 using XMLSupport::EnumMap;
 using XMLSupport::AttributeList;
 
-#define NUM_MESH_SEQUENCE 5
-#define NUM_ZBUF_SEQ 4
-#define MESH_SPECIAL_FX_ONLY 3
+#define NUM_MESH_SEQUENCE (5)
+#define NUM_ZBUF_SEQ (4)
+#define MESH_SPECIAL_FX_ONLY (3)
 
 /**
  * Mesh is the basic textured drawable
@@ -243,24 +243,24 @@ public: Mesh();
     void setCurrentFrame( float );
     int getNumAnimationFrames( string which = "" ) const;
     int getNumLOD() const;
-    int getNumTextureFrames();
-    float getTextureFramesPerSecond();
-    double getTextureCumulativeTime();
+    int getNumTextureFrames() const;
+    float getTextureFramesPerSecond() const;
+    double getTextureCumulativeTime() const;
     void setTextureCumulativeTime( double );
     bool getConvex() const
     {
         return this->convex;
     }
     void setConvex( bool b );
-    virtual int MeshType()
+    virtual int MeshType() const
     {
         return 0;
     }
-    BLENDFUNC getBlendSrc()
+    BLENDFUNC getBlendSrc() const
     {
         return blendSrc;
     }
-    BLENDFUNC getBlendDst()
+    BLENDFUNC getBlendDst() const
     {
         return blendDst;
     }
@@ -280,17 +280,17 @@ public: Mesh();
 ///Destructor... kills orig if refcount of orig becomes zero
     virtual ~Mesh();
 ///Gets number of specialFX
-    unsigned int numFX()
+    unsigned int numFX() const
     {
         return LocalFX.size();
     }
 ///Turns on SpecialFX
     void EnableSpecialFX();
-    unsigned int numTextures()
+    unsigned int numTextures() const
     {
         return Decal.size();
     }
-    Texture * texture( int i )
+    Texture * texture( int i ) const
     {
         return Decal[i];
     }
@@ -300,9 +300,9 @@ public: Mesh();
 ///Sets the material of this mesh to mat (affects original as well)
     void SetMaterial( const GFXMaterial &mat );
 //Gets the material back from the mesh.
-    const GFXMaterial& GetMaterial();
+    const GFXMaterial& GetMaterial() const;
 ///If it has already been drawn this frame
-    GFXBOOL HasBeenDrawn()
+    GFXBOOL HasBeenDrawn() const
     {
         return will_be_drawn;
     }
@@ -312,7 +312,7 @@ public: Mesh();
         will_be_drawn = GFXFALSE;
     }
 ///Returns center of this mesh
-    Vector& Position()
+    Vector const & Position() const
     {
         return local_pos;
     }
@@ -340,11 +340,11 @@ public: Mesh();
         if (newValue) envMapAndLit = ( envMapAndLit&~(0x8|0x4) );
         if (!newValue) envMapAndLit = ( envMapAndLit&~(0x4|0x8) );
     }
-    GFXBOOL getCullFaceForcedOn()
+    GFXBOOL getCullFaceForcedOn() const
     {
         return (envMapAndLit&0x4) != 0;
     }
-    GFXBOOL getCullFaceForcedOff()
+    GFXBOOL getCullFaceForcedOff() const
     {
         return (envMapAndLit&0x8) != 0;
     }
@@ -355,7 +355,7 @@ public: Mesh();
             for (int i = 0; i < numlods; i++)
                 orig[i].setEnvMap( newValue );
     }
-    GFXBOOL getEnvMap()
+    GFXBOOL getEnvMap() const
     {
         return (envMapAndLit&0x1) != 0;
     }
@@ -366,7 +366,7 @@ public: Mesh();
             for (int i = 0; i < numlods; i++)
                 orig[i].setLighting( newValue );
     }
-    GFXBOOL getLighting()
+    GFXBOOL getLighting() const
     {
         return (envMapAndLit&0x2) != 0;
     }
@@ -382,15 +382,15 @@ public: Mesh();
 ///Returns a physical boudning box in 3space instead of in current unit space
     BoundingBox * getBoundingBox();
 ///queries this bounding box with a vector and radius
-    bool queryBoundingBox( const QVector &start, const float err );
+    bool queryBoundingBox( const QVector &start, const float err ) const;
 ///Queries bounding box with a ray
-    bool queryBoundingBox( const QVector &start, const QVector &end, const float err );
+    bool queryBoundingBox( const QVector &start, const QVector &end, const float err ) const;
 ///returns the radial size of this
-    float rSize()
+    float rSize() const
     {
         return radialSize;
     }
-    virtual float clipRadialSize()
+    virtual float clipRadialSize() const
     {
         return radialSize;
     }

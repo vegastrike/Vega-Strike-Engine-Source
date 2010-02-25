@@ -7,6 +7,8 @@
 #include <sys/stat.h>
 #include "xml_support.h"
 #include "gfx/mesh.h"
+#include "gfx/cockpit.h"
+
 #undef BOOST_NO_CWCHAR
 
 using XMLSupport::EnumMap;

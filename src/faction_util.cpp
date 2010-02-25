@@ -61,6 +61,7 @@ std::vector< Animation* >* FactionUtil::GetAnimation( int faction, int n, unsign
     sex = factions[faction]->comm_face_sex[n];
     return &factions[faction]->comm_faces[n].animations;
 }
+
 std::vector< Animation* >* FactionUtil::GetRandCommAnimation( int faction, Unit *un, unsigned char &sex )
 {
     bool dockable = UnitUtil::isDockableUnit( un );
@@ -92,6 +93,7 @@ std::vector< Animation* >* FactionUtil::GetRandCommAnimation( int faction, Unit 
         return NULL;
     }
 }
+
 Animation* FactionUtil::GetRandExplosionAnimation( int whichfaction, std::string &which )
 {
     if ( whichfaction < (int) factions.size() ) {

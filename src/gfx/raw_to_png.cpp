@@ -98,12 +98,9 @@ void Wwrite( const char *myfile, unsigned short *data )
     png_write_image( png_ptr, row_pointers );
     png_write_end( png_ptr, info_ptr );
     png_destroy_write_struct( &png_ptr, &info_ptr );
-
     //png_write_flush(png_ptr);
-
     VSFileSystem::vs_close( fp );
     free( data );
-
     delete[] row_pointers;
 }
 

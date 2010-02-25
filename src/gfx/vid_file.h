@@ -8,9 +8,9 @@
 #include <vsfilesystem.h>
 #include <exception>
 
-class VideoFileImpl;
+class VidFileImpl;
 
-class VideoFile
+class VidFile
 {
 public:
     class Exception : public std::exception
@@ -34,18 +34,21 @@ public: UnsupportedCodecException() {}
         UnsupportedCodecException( const UnsupportedCodecException &other ) : Exception( other ) {}
         explicit UnsupportedCodecException( const std::string &message ) : Exception( message ) {}
     };
+
     class FileOpenException : public Exception
     {
 public: FileOpenException() {}
         FileOpenException( const FileOpenException &other ) : Exception( other ) {}
         explicit FileOpenException( const std::string &message ) : Exception( message ) {}
     };
+
     class FrameDecodeException : public Exception
     {
 public: FrameDecodeException() {}
         FrameDecodeException( const FrameDecodeException &other ) : Exception( other ) {}
         explicit FrameDecodeException( const std::string &message ) : Exception( message ) {}
     };
+
     class EndOfStreamException : public Exception
     {
 public: EndOfStreamException() {}
@@ -53,8 +56,8 @@ public: EndOfStreamException() {}
         explicit EndOfStreamException( const std::string &message ) : Exception( message ) {}
     };
 
-public: VideoFile() throw ();
-    ~VideoFile();
+public: VidFile() throw ();
+    ~VidFile();
 
     bool isOpen() const throw ();
 
@@ -76,7 +79,7 @@ public: VideoFile() throw ();
     int getFrameBufferStride() const throw ();
 
 private:
-    VideoFileImpl *impl;
+    VidFileImpl *impl;
 };
 
 #endif //__VID_FILE_H__INCLUDED__

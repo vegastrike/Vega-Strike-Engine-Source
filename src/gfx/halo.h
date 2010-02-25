@@ -5,6 +5,9 @@
 #include "vec.h"
 #include "quaternion.h"
 
+#define TranslucentWhite ( GFXColor( 1, 1, 1, .5 ) )
+#define ZeroQvector ( QVector( 0, 0, 0 ) )
+
 class Halo
 {
     QVector position;
@@ -12,13 +15,12 @@ class Halo
     float   sizey;
     int     decal;
     int     quadnum;
-//static enum BLENDFUNC blendSrc;
-//static enum BLENDFUNC blendDst;
-public: Halo( const char *texture, const GFXColor &col = GFXColor( 1, 1, 1, .5 ), const QVector &pos = QVector( 0,
-                                                                                                                0,
-                                                                                                                0 ),
-              float sizx = 1, float sizy = 1 );
-    ~Halo();
+public: ~Halo();
+    Halo( const char *texture,
+          const GFXColor &col = TranslucentWhite,
+          const QVector &pos = ZeroQvector,
+          float sizx = 1,
+          float sizy = 1 );
     void Draw( const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix, float alpha = -1 );
     static void ProcessDrawQueue();
     void SetDimensions( float wid, float hei )

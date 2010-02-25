@@ -18,6 +18,7 @@ static void TerrainMakeActive( const TerrainTexture &text )
         GFXDisable( TEXTURE1 );
     GFXSelectMaterial( text.material );
 }
+
 static void TerrainMakeClearActive( const TerrainTexture &text )
 {
     TerrainMakeActive( text );
@@ -40,10 +41,8 @@ int quadsquare::Render( const quadcornerdata &cd, const Vector &camvec )
     quadsquare::camerapos = camvec;
     vertices->LoadDrawState();
     vertices->BeginDrawState( GFXFALSE );
-
     int totsize = 0;
     RenderAux( cd, GFX_PARTIALLY_VISIBLE );
-
     vecTextureIndex::iterator i = indices.begin();
     vecTextureStar::iterator  k;
     for (k = textures->begin(); k != textures->end(); i++, k++) {
@@ -80,6 +79,7 @@ int quadsquare::Render( const quadcornerdata &cd, const Vector &camvec )
     }
     return totsize;
 }
+
 //#define DONOTDRAWBLENDEDQUADS
 inline void RotateTriRight( unsigned int &aa,
                             unsigned short &ta,
@@ -126,6 +126,7 @@ inline void RotateTriLeft( unsigned int &aa,
     aa   = baki;
     ta   = baks;
 }
+
 void quadsquare::tri( unsigned int aa,
                       unsigned short ta,
                       unsigned int bb,
@@ -134,7 +135,6 @@ void quadsquare::tri( unsigned int aa,
                       unsigned short tc )
 {
     assert( 0 );     //see below #if VERTEX_LIST functions... this whole contraption sorely needs a rewrite
-
 #ifdef DONOTDRAWBLENDEDQUADS
     if (ta == tb && tb == tc) {
         indices[ta]->q.push_back( aa, bb, cc );
@@ -304,7 +304,6 @@ void quadsquare::SetupCornerData( quadcornerdata *q, const quadcornerdata &cd, i
 //| | |
 //+-4-+
     int half = 1<<cd.Level;
-
     q->Parent     = &cd;
     q->Square     = Child[ChildIndex];
     q->Level      = cd.Level-1;
@@ -320,7 +319,6 @@ void quadsquare::SetupCornerData( quadcornerdata *q, const quadcornerdata &cd, i
         q->Verts[2] = Vertex[0];
         q->Verts[3] = Vertex[1];
         break;
-
     case 1:
         q->xorg     = cd.xorg;
         q->zorg     = cd.zorg;
@@ -329,7 +327,6 @@ void quadsquare::SetupCornerData( quadcornerdata *q, const quadcornerdata &cd, i
         q->Verts[2] = Vertex[3];
         q->Verts[3] = Vertex[0];
         break;
-
     case 2:
         q->xorg     = cd.xorg;
         q->zorg     = cd.zorg+half;
@@ -338,7 +335,6 @@ void quadsquare::SetupCornerData( quadcornerdata *q, const quadcornerdata &cd, i
         q->Verts[2] = cd.Verts[2];
         q->Verts[3] = Vertex[4];
         break;
-
     case 3:
         q->xorg     = cd.xorg+half;
         q->zorg     = cd.zorg+half;

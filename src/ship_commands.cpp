@@ -30,7 +30,13 @@ class ShipCommands
     bool bright;
     bool bup;
     bool bdown;
-public: ShipCommands()
+public:
+    virtual ~ShipCommands()
+    {
+        CommandInterpretor->remCommand( cpymenu );
+        CommandInterpretor->remCommand( csetkps );
+    }
+    ShipCommands()
     {
         //create some functors, register them with the command interp {{{
         cpymenu = new Functor< ShipCommands > ( this, &ShipCommands::pymenu );
@@ -47,7 +53,9 @@ public: ShipCommands()
         //}}}
         //a test menu {{{
         {
-            menu *m = new menu( "python test", "This is a test of the menusystem", "\r\n" );
+            static char const python_test[20] = "python test";
+            static char const test_string[40] = "This is a test of the menusystem";
+            menu *m = new menu( python_test, test_string, "\r\n" );
             CommandInterpretor->addMenu( m );
             {
                 mItem *mi = new mItem;
@@ -59,7 +67,6 @@ public: ShipCommands()
                 mi->inputbit = true;                         //set single-line input mode
                 mi->selectstring.append( "Type a single line of Python" );                       //call function "Display" with this string
 //mi->predisplay.append("Python");
-
                 CommandInterpretor->addMenuItem( mi );
             }
             {
@@ -77,11 +84,6 @@ public: ShipCommands()
             }
         }
         //}}}
-    }
-    ~ShipCommands()
-    {
-        CommandInterpretor->remCommand( cpymenu );
-        CommandInterpretor->remCommand( csetkps );
     }
     void pymenu();
     void left( bool *isKeyDown );

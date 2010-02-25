@@ -21,10 +21,11 @@
 #define __OPC_COMMON_H__
 
 // [GOTTFRIED]: Just a small change for readability.
+
 #ifdef OPC_CPU_COMPARE
-	#define GREATER(x, y)	AIR(x) > IR(y)
+	#define GREATER(x, y)	((AIR(x) > IR(y)))
 #else
-	#define GREATER(x, y)	fabsf(x) > (y)
+	#define GREATER(x, y)	((fabsf(x) > (y)))
 #endif
 
 	class OPCODE_API CollisionAABB

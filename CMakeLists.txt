@@ -290,6 +290,8 @@ SET(LIBGFXCLIENT_SOURCES src/gfx/ani_texture.cpp
 						 src/gfx/warptrail.cpp )
 
 SET(LIBGFXSERVER_SOURCES src/gfx/sphere_server.cpp
+					   src/gfx/halo_system.cpp
+					   src/gfx/camera.cpp
 						 src/gfx/vsbox_server.cpp
 						 src/gfx/mesh_server.cpp 
 						 src/gfx/background_server.cpp )
@@ -421,6 +423,7 @@ SET(VEGASTRIKE_SOURCES ${LIBGUI_SOURCES}
 					   src/cmd/script/script_call_briefing.cpp
 					   src/cmd/script/script_call_unit.cpp
 					   src/cmd/terrain.cpp
+					   src/cmd/unit.cpp 
 					   src/cmd/unit_factory.cpp 
 					   src/cmd/unit_functions.cpp 
 					   src/cmd/unit_interface.cpp

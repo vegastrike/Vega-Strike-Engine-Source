@@ -29,6 +29,7 @@ std::vector< TerrainTexture >*quadsquare::textures;
 Vector quadsquare::    normalscale;
 Vector quadsquare::    camerapos;
 quadsquare*quadsquare::neighbor[4] = {NULL, NULL, NULL, NULL};
+
 unsigned int quadsquare::SetVertices( GFXVertex *vertexs, const quadcornerdata &pcd )
 {
     unsigned int half = 1<<pcd.Level;
@@ -71,11 +72,8 @@ static void InterpolateTextures( VertInfo res[5], VertInfo in[4], const quadcorn
     //const float epsilon;
     res[0].SetTex( 0.25*( ( ( (float) in[0].Rem )+in[1].Rem+in[2].Rem+in[3].Rem )/256.+in[0].Tex+in[1].Tex+in[2].Tex+in[3].Tex ) );
     res[1].SetTex( 0.5*( ( ( (float) in[0].Rem )+in[3].Rem )/256.+(in[3].Tex)+in[0].Tex ) );
-
     res[2].SetTex( 0.5*( ( ( (float) in[0].Rem )+in[1].Rem )/256.+(in[0].Tex)+in[1].Tex ) );
-
     res[3].SetTex( 0.5*( ( ( (float) in[1].Rem )+in[2].Rem )/256.+(in[1].Tex)+in[2].Tex ) );
-
     res[4].SetTex( 0.5*( ( ( (float) in[2].Rem )+in[3].Rem )/256.+(in[2].Tex)+in[3].Tex ) );
     /*
      *     float pos[5];
@@ -98,16 +96,15 @@ static void InterpolateTextures( VertInfo res[5], VertInfo in[4], const quadcorn
     res[3].Y = (unsigned short) ( 0.5*( ( (float) in[1].Y )+in[2].Y ) );
     res[4].Y = (unsigned short) ( 0.5*( ( (float) in[2].Y )+in[3].Y ) );
 }
+
 quadsquare::quadsquare( quadcornerdata *pcd )
 {
     pcd->Square = this;
-
     //Set static to true if/when this node contains real data, and
     //not just interpolated values.  When static == false, a node
     //can be deleted by the Update() function if none of its
     //vertices or children are enabled.
     Static = false;
-
     int i;
     for (i = 0; i < 4; i++)
         Child[i] = NULL;
@@ -193,7 +190,7 @@ void quadsquare::SetStatic( const quadcornerdata &cd )
     }
 }
 
-int quadsquare::CountNodes()
+int quadsquare::CountNodes() const
 {
 //Debugging function.  Counts the number of nodes in this subtree.
     int count = 1;              //Count ourself.
@@ -202,17 +199,16 @@ int quadsquare::CountNodes()
         if (Child[i]) count += Child[i]->CountNodes();
     return count;
 }
+
 /**
  * Returns the height of the heightfield at the specified x,z coordinates.
  * Can be used for collision detection
  */
-float quadsquare::GetHeight( const quadcornerdata &cd, float x, float z, Vector &normal )
+float quadsquare::GetHeight( const quadcornerdata &cd, float x, float z, Vector &normal ) //const
 {
     int   half = 1<<cd.Level;
-
     float lx   = (x-cd.xorg)/float(half);
     float lz   = (z-cd.zorg)/float(half);
-
     int   ix   = (int) floor( lx );
     int   iz   = (int) floor( lz );
     //Clamp.
@@ -268,7 +264,7 @@ float quadsquare::GetHeight( const quadcornerdata &cd, float x, float z, Vector 
     return (s00*(1-lx)+s01*lx)*(1-lz)+(s10*(1-lx)+s11*lx)*lz;
 }
 
-quadsquare* quadsquare::GetFarNeighbor( int dir, const quadcornerdata &cd )
+quadsquare* quadsquare::GetFarNeighbor( int dir, const quadcornerdata &cd ) const
 {
 //Traverses the tree in search of the quadsquare neighboring this square to the
 //specified direction.  0-3 --> { E, N, W, S }.
@@ -280,7 +276,6 @@ quadsquare* quadsquare::GetFarNeighbor( int dir, const quadcornerdata &cd )
         return neighbor[dir];
     //Find the parent and the child-index of the square we want to locate or create.
     quadsquare *p   = 0;
-
     int  index      = cd.ChildIndex^1^( (dir&1)<<1 );
     bool SameParent = ( (dir-cd.ChildIndex)&2 ) ? true : false;
     if (SameParent) {
@@ -290,10 +285,10 @@ quadsquare* quadsquare::GetFarNeighbor( int dir, const quadcornerdata &cd )
         if (p == 0) return 0;
     }
     quadsquare *n = p->Child[index];
-
     return n;
 }
-quadsquare* quadsquare::GetNeighbor( int dir, const quadcornerdata &cd )
+
+quadsquare* quadsquare::GetNeighbor( int dir, const quadcornerdata &cd ) const
 {
 //Traverses the tree in search of the quadsquare neighboring this square to the
 //specified direction.  0-3 --> { E, N, W, S }.
@@ -304,7 +299,6 @@ quadsquare* quadsquare::GetNeighbor( int dir, const quadcornerdata &cd )
     if (cd.Parent == 0) return NULL;
     //Find the parent and the child-index of the square we want to locate or create.
     quadsquare *p   = 0;
-
     int  index      = cd.ChildIndex^1^( (dir&1)<<1 );
     bool SameParent = ( (dir-cd.ChildIndex)&2 ) ? true : false;
     if (SameParent) {
@@ -314,7 +308,6 @@ quadsquare* quadsquare::GetNeighbor( int dir, const quadcornerdata &cd )
         if (p == 0) return 0;
     }
     quadsquare *n = p->Child[index];
-
     return n;
 }
 
@@ -359,6 +352,7 @@ void quadsquare::SetCurrentTerrain( unsigned int *VertexAllocated,
 }
 
 static unsigned char texturelookup[256];
+
 void quadsquare::AddHeightMap( const quadcornerdata &cd, const HeightMapInfo &hm )
 {
     unsigned int i;
@@ -367,6 +361,7 @@ void quadsquare::AddHeightMap( const quadcornerdata &cd, const HeightMapInfo &hm
         texturelookup[(*textures)[i].color] = i;
     AddHeightMapAux( cd, hm );
 }
+
 void quadsquare::AddHeightMapAux( const quadcornerdata &cd, const HeightMapInfo &hm )
 {
 //Sets the height of all samples within the specified rectangular
@@ -382,9 +377,7 @@ void quadsquare::AddHeightMapAux( const quadcornerdata &cd, const HeightMapInfo 
         return;
     if (cd.Parent && cd.Parent->Square)
         cd.Parent->Square->EnableChild( cd.ChildIndex, *cd.Parent );            //causes parent edge verts to be enabled, possibly causing neighbor blocks to be created.
-
     int i;
-
     int half = 1<<cd.Level;
     //Create and update child nodes.
     for (i = 0; i < 4; i++) {
@@ -455,13 +448,10 @@ float HeightMapInfo::Sample( int x, int z, float &texture ) const
 //between sample points are bilinearly interpolated from surrounding points.
 //xxx deal with edges: either force to 0 or over-size the query region....
 {
-    //Break coordinates into grid-relative coords (ix,iz) and remainder (rx,rz).
-
+    //Break coordinates into grid-relative coords (ix,iz) and remainder (rx,rz)
     int ix   = (x-XOrigin)>>Scale;
     int iz   = (z-ZOrigin)>>Scale;
-
     int mask = (1<<Scale)-1;
-
     int rx   = (x-XOrigin)&mask;
     int rz   = (z-ZOrigin)&mask;
     int ixpp = ix+1;
@@ -484,19 +474,16 @@ float HeightMapInfo::Sample( int x, int z, float &texture ) const
     }
     float fx  = float(rx)/(mask+1);
     float fz  = float(rz)/(mask+1);
-
     float s00 = Data[ix+iz*RowWidth];
     float s01 = Data[(ixpp)+iz*RowWidth];
     float s10 = Data[ix+(izpp)*RowWidth];
     float s11 = Data[(ixpp)+(izpp)*RowWidth];
-
     float t00 = texturelookup[terrainmap[ix+iz*RowWidth]];
     float t01 = texturelookup[terrainmap[(ixpp)+iz*RowWidth]];
     float t10 = texturelookup[terrainmap[ix+(izpp)*RowWidth]];
     float t11 = texturelookup[terrainmap[(ixpp)+(izpp)*RowWidth]];
     texture = (t00*(1-fx)+t01*fx)*(1-fz)
               +(t10*(1-fx)+t11*fx)*fz;
-
     return (s00*(1-fx)+s01*fx)*(1-fz)
            +(s10*(1-fx)+s11*fx)*fz;
 }

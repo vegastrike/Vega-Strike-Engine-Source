@@ -25,15 +25,13 @@
 
 #include <expat.h>
 #include "xml_support.h"
-
 //#include "vegastrike.h"
 #include <assert.h>
-
 #include "configxml.h"
 #include "easydom.h"
-
 //#include "vs_globals.h"
 //#include "vegastrike.h"
+
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -43,17 +41,14 @@ using std::endl;
 VegaConfig::VegaConfig( const char *configfile )
 {
     configNodeFactory *domf = new configNodeFactory();
-
     configNode *top = (configNode*) domf->LoadXML( configfile );
     if (top == NULL) {
         cout<<"Panic exit - no configuration"<<endl;
         exit( 0 );
     }
     //top->walk(0);
-
     variables = NULL;
     colors    = NULL;
-
     checkConfig( top );
 }
 

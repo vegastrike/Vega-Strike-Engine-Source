@@ -236,7 +236,13 @@ bool Animation::CalculateOrientation( Matrix &result )
 }
 void Animation::DrawNow( const Matrix &final_orientation )
 {
-    if (g_game.use_animations == 0 && g_game.use_textures == 0) {} else if ( !Done() || (options&ani_repeat) ) {
+//  if (g_game.use_animations == 0 && g_game.use_textures == 0)
+//  {
+//  }
+//  else if ( !Done() || (options&ani_repeat) )
+//  {  //chuck_starchaser simplifying...
+    if ( (g_game.use_animations || g_game.use_textures) && (!Done() || (options&ani_repeat)) )
+    {
         GFXLoadMatrixModel( final_orientation );
         int lyr;
         int numlayers = numLayers();
@@ -248,31 +254,37 @@ void Animation::DrawNow( const Matrix &final_orientation )
         GFXGetBlendMode( src, dst );
         for (lyr = 0; (lyr < gl_options.Multitexture) || (lyr < numlayers); lyr++) {
             GFXToggleTexture( (lyr < numlayers), lyr );
-            if (lyr < numlayers) GFXTextureCoordGenMode( lyr, NO_GEN, NULL, NULL );
+            if (lyr < numlayers)
+                GFXTextureCoordGenMode( lyr, NO_GEN, NULL, NULL );
         }
-        for (int pass = 0; pass < numpasses; pass++)
+        for (int pass = 0; pass < numpasses; pass++) {
             if ( SetupPass( pass, 0, src, dst ) ) {
                 MakeActive( 0, pass );
                 GFXTextureEnv( 0, GFXMODULATETEXTURE );
                 GFXBegin( GFXQUAD );
-                if (!multitex) GFXTexCoord2f( ms, Mt );
-
-                else GFXTexCoord4f( ms, Mt, ms, Mt );
+                if (!multitex)
+                    GFXTexCoord2f( ms, Mt );
+                else
+                    GFXTexCoord4f( ms, Mt, ms, Mt );
                 GFXVertex3f( -width, -height, 0.0f );                 //lower left
-                if (!multitex) GFXTexCoord2f( Ms, Mt );
-
-                else GFXTexCoord4f( Ms, Mt, Ms, Mt );
+                if (!multitex)
+                    GFXTexCoord2f( Ms, Mt );
+                else
+                    GFXTexCoord4f( Ms, Mt, Ms, Mt );
                 GFXVertex3f( width, -height, 0.0f );                 //upper left
-                if (!multitex) GFXTexCoord2f( Ms, mt );
-
-                else GFXTexCoord4f( Ms, mt, Ms, mt );
+                if (!multitex)
+                    GFXTexCoord2f( Ms, mt );
+                else
+                    GFXTexCoord4f( Ms, mt, Ms, mt );
                 GFXVertex3f( width, height, 0.0f );                 //upper right
-                if (!multitex) GFXTexCoord2f( ms, mt );
-
-                else GFXTexCoord4f( ms, mt, ms, mt );
+                if (!multitex)
+                    GFXTexCoord2f( ms, mt );
+                else
+                    GFXTexCoord4f( ms, mt, ms, mt );
                 GFXVertex3f( -width, height, 0.0f );                 //lower right
                 GFXEnd();
             }
+        }
         for (lyr = 0; lyr < numlayers; lyr++)
             GFXToggleTexture( false, lyr );
         SetupPass( -1, 0, src, dst );

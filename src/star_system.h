@@ -30,8 +30,9 @@ private:
 ///The Light Map corresponding for the BP for spheremapping
     Texture    *LightMap[6];
 //vector <class MissileEffect *> dischargedMissiles;
-public: GameStarSystem( const char *filename, const Vector &centr = Vector( 0, 0, 0 ), const float timeofyear = 0 );
-    ~GameStarSystem();
+public:
+    virtual ~GameStarSystem();
+    GameStarSystem( const char *filename, const Vector &centr = Vector( 0, 0, 0 ), const float timeofyear = 0 );
 //void UpdateUnitPhysics(bool firstframe);
 //class CollideTable *collidetable;
 //class bolt_draw *bolts;

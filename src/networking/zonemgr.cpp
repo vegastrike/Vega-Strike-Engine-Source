@@ -802,13 +802,13 @@ void ZoneMgr::addDamage( NetBuffer &netbuf, Unit *un )
         netbuf.addFloat( un->computer.radar.lockcone );
         netbuf.addFloat( un->computer.radar.trackingcone );
         netbuf.addFloat( un->computer.radar.maxrange );
-        unsigned char c = 1+UnitImages::NUMGAUGES+MAXVDUS;
+        unsigned char c = 1+UnitImages< void >::NUMGAUGES+MAXVDUS;
         netbuf.addChar( c );
         for (it = 0; it < c; it++)
-            netbuf.addFloat8( un->image->cockpit_damage[it] );
+            netbuf.addFloat8( un->pImage->cockpit_damage[it] );
     }
     if (damages&Unit::MOUNT_DAMAGED) {
-        netbuf.addShort( un->image->ecm );
+        netbuf.addShort( un->pImage->ecm );
         netbuf.addShort( un->mounts.size() );
         for (it = 0; it < un->mounts.size(); it++) {
             netbuf.addChar( (char) un->mounts[it].status );
@@ -821,10 +821,10 @@ void ZoneMgr::addDamage( NetBuffer &netbuf, Unit *un )
     if (damages&Unit::CARGOFUEL_DAMAGED) {
         netbuf.addFloat( un->FuelData() );
         netbuf.addFloat( un->AfterburnData() );
-        netbuf.addFloat( un->image->CargoVolume );
-        netbuf.addFloat( un->image->UpgradeVolume );
-//for( it=0; it<un->image->cargo.size(); it++)
-//netbuf.addInt32( un->image->cargo[it].quantity);
+        netbuf.addFloat( un->pImage->CargoVolume );
+        netbuf.addFloat( un->pImage->UpgradeVolume );
+//for( it=0; it<un->pImage->cargo.size(); it++)
+//netbuf.addInt32( un->pImage->cargo[it].quantity);
     }
     if (damages&Unit::JUMP_DAMAGED) {
         netbuf.addChar( un->shield.leak );
@@ -833,13 +833,13 @@ void ZoneMgr::addDamage( NetBuffer &netbuf, Unit *un )
         netbuf.addFloat( un->MaxEnergyData() );
         netbuf.addFloat( un->jump.energy );                //NETFIXME: Add insys energy too?
         netbuf.addChar( un->jump.damage );
-        netbuf.addChar( un->image->repair_droid );
+        netbuf.addChar( un->pImage->repair_droid );
     }
     if (damages&Unit::CLOAK_DAMAGED) {
         netbuf.addInt32( un->cloaking );
-        netbuf.addFloat( un->image->cloakenergy );
+        netbuf.addFloat( un->pImage->cloakenergy );
         netbuf.addInt32( un->cloakmin );
-        netbuf.addInt32( un->image->cloakrate );
+        netbuf.addInt32( un->pImage->cloakrate );
     }
     if (damages&Unit::LIMITS_DAMAGED) {
         netbuf.addFloat( un->computer.max_pitch_down );

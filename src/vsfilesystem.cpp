@@ -129,6 +129,10 @@ int selectbigpk3s( const struct dirent * entry )
     return 0;
 }
 
+//added by chuck_starchaser (dan_w):
+static char *bogus; //to receive ignored return value of getcwd(), to stop the warnings
+static int   bogus2; //to receive return of chdir, to stop warnings
+
 namespace VSFileSystem
 {
 std::string vegastrike_cwd;
@@ -138,7 +142,7 @@ void ChangeToProgramDirectory( char *argv0 )
     {
         char pwd[8192];
         pwd[0]    = '\0';
-        getcwd( pwd, 8191 );
+        bogus = getcwd( pwd, 8191 );
         pwd[8191] = '\0';
         vegastrike_cwd = pwd;
     }
@@ -182,7 +186,7 @@ void ChangeToProgramDirectory( char *argv0 )
         c--;
     *c = '\0';                         /* cut off last part (binary name) */
     if (strlen( parentdir ) > 0)
-        chdir( parentdir );               /* chdir to the binary app's parent */
+        bogus2 = chdir( parentdir );               /* chdir to the binary app's parent */
     delete[] parentdir;
 }
 
@@ -597,7 +601,7 @@ void InitDataDirectory()
         //Test if the dir exist and contains config_file
         if (FileExists( (*vsit), config_file ) >= 0) {
             cerr<<"Found data in "<<(*vsit)<<endl;
-            getcwd( tmppath, 16384 );
+            bogus = getcwd( tmppath, 16384 );
             if ( (*vsit).substr( 0, 1 ) == "." )
                 datadir = string( tmppath )+"/"+(*vsit);
             else
@@ -606,7 +610,7 @@ void InitDataDirectory()
                 cerr<<"Error changing to datadir"<<endl;
                 exit( 1 );
             }
-            getcwd( tmppath, 16384 );
+            bogus = getcwd( tmppath, 16384 );
             datadir = string( tmppath );
 
             cerr<<"Using "<<datadir<<" as data directory"<<endl;

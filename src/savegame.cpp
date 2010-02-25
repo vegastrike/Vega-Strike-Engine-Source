@@ -1,4 +1,4 @@
-#include <Python.h>
+#include "cs_python.h"
 #include "cmd/unit_generic.h"
 #include "hashtable.h"
 #include <float.h>

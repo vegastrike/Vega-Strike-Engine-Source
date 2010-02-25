@@ -2,15 +2,16 @@
 #define _ENHANCERGENERIC_H_
 #include "cmd/unit_generic.h"
 #include "savegame.h"
+
 class Enhancement : public Unit
 {
+    friend class UnitFactory;
 protected:
     std::string filename;
     virtual enum clsptr isUnit() const
     {
         return ENHANCEMENTPTR;
     }
-
 /// constructor only to be called by UnitFactory
     Enhancement( const char *filename,
                  int faction,
@@ -19,9 +20,6 @@ protected:
                  int fg_subnumber = 0 ) :
         Unit( filename, false, faction, modifications, flightgrp, fg_subnumber )
         , filename( filename ) {}
-
-    friend class UnitFactory;
-
 public:
     virtual void reactToCollision( Unit *smaller,
                                    const QVector &biglocation,
@@ -44,7 +42,6 @@ public:
             _Universe->AccessCockpit()->savegame->AddUnitToSave( fn.c_str(), ENHANCEMENTPTR, fac.c_str(), (long) this );
         }
     }
-
 protected:
 /// default constructor forbidden
     Enhancement() {}

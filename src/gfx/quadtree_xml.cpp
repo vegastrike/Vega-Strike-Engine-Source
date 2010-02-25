@@ -18,6 +18,7 @@ struct TerrainData
     std::string file;
     std::string terrainfile;
 };
+
 struct TerraXML
 {
     float scales;
@@ -122,14 +123,13 @@ const EnumMap::Pair attribute_names[] = {
 const EnumMap element_map( element_names, 9 );
 const EnumMap attribute_map( attribute_names, 24 );
 }
+
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 using XMLSupport::parse_bool;
 using XMLSupport::parse_int;
-
 using XMLSupport::parse_float;
-
 using namespace TerrainXML;
 
 void QuadTree::beginElement( const string &name, const AttributeList &attributes )
@@ -328,6 +328,7 @@ void QuadTree::SetXSizes( int mX, unsigned int maxX )
     if (maxX > this->maxX)
         this->maxX = maxX;
 }
+
 void QuadTree::SetZSizes( int mZ, unsigned int maxZ )
 {
     if (mZ < minZ)
@@ -357,9 +358,7 @@ void QuadTree::LoadXML( const char *filename, const Vector &Scales, const float 
     XML_Parser parser = XML_ParserCreate( NULL );
     XML_SetUserData( parser, this );
     XML_SetElementHandler( parser, &QuadTree::beginElement, &QuadTree::endElement );
-
     XML_Parse( parser, ( f.ReadFull() ).c_str(), f.Size(), 1 );
-
     /*
      *  do {
      * #ifdef BIDBG
@@ -475,7 +474,6 @@ void QuadTree::LoadXML( const char *filename, const Vector &Scales, const float 
                                  nonlinear_transform->TransformT( zmax, xml->scalet ) );
                 Norm0 = ( nonlinear_transform->TransformNormal( v[3].GetConstVertex(), Vector( 0, 1, 0 ) ) );
                 v[3].SetNormal( Vector( Norm0.i*Scales.i, Norm0.j*Scales.j, Norm0.k*Scales.k ) );
-
                 vertices.EndMutate();
                 quadsquare::SetCurrentTerrain( &VertexAllocated,
                                                &VertexCount,

@@ -3,7 +3,7 @@
 #include "macosx_math.h"
 #include <math.h>
 #ifndef M_PI
-#define M_PI 3.1415926536
+#define M_PI (3.1415926536)
 #endif
 /**
  * We could make it virtual and ahve a sphere-map or cube-map version of this

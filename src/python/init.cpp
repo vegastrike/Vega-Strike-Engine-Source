@@ -349,6 +349,7 @@ static void * Vector_convertible( PyObject *p )
     return PyTuple_Check( p ) ? p : 0;
 }
 
+
 static void Vector_construct( PyObject *source, boost::python::converter::rvalue_from_python_stage1_data *data )
 {
     void*const storage = ( (boost::python::converter::rvalue_from_python_storage< Vector >*)data )->storage.bytes;
@@ -356,7 +357,8 @@ static void Vector_construct( PyObject *source, boost::python::converter::rvalue
     //Fill in QVector values from source tuple here
     //details left to reader.
     Vector *vec = (Vector*) storage;
-    PyArg_ParseTuple( source, "fff", &vec->i, &vec->j, &vec->k );
+    static char fff[4] = "fff"; //added by chuck_starchaser, to kill a warning
+    PyArg_ParseTuple( source, fff, &vec->i, &vec->j, &vec->k );
     data->convertible = storage;
 }
 
@@ -367,7 +369,8 @@ static void QVector_construct( PyObject *source, boost::python::converter::rvalu
     //Fill in QVector values from source tuple here
     //details left to reader.
     QVector *vec = (QVector*) storage;
-    PyArg_ParseTuple( source, "ddd", &vec->i, &vec->j, &vec->k );
+    static char ddd[4] = "ddd"; //added by chuck_starchaser, to kill a warning
+    PyArg_ParseTuple( source, ddd, &vec->i, &vec->j, &vec->k );
     data->convertible = storage;
 }
 #endif

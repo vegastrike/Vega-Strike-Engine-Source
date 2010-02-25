@@ -9,31 +9,40 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
 #ifdef _WIN32
 #include <wtypes.h>
 #else
 typedef int DWORD;
 #endif
-#define FP_BITS( fp ) ( *(DWORD*) &(fp) )
-#define FP_ABS_BITS( fp ) (FP_BITS( fp )&0x7FFFFFFF)
-#define FP_SIGN_BIT( fp ) (FP_BITS( fp )&0x80000000)
-#define FP_ONE_BITS 0x3F800000
+
+#define FP_BITS( fp ) ( ( *(DWORD*) &(fp) ) )
+#define FP_ABS_BITS( fp ) ( (FP_BITS( fp )&0x7FFFFFFF) )
+#define FP_SIGN_BIT( fp ) ( (FP_BITS( fp )&0x80000000) )
+#define FP_ONE_BITS ( (0x3F800000) )
 #define __forceinline inline
+
 //r = 1/p
+
 #define FP_INV( r, p )                       \
-    {                                        \
+    do {                                     \
         int _i = 2*FP_ONE_BITS-*(int*) &(p); \
         r = *(float*) &_i;                   \
         r = r*(2.0f-(p)*r);                  \
-    }
+    }                                        \
+    while (0)
+
 /////////////////////////////////////////////////
+
 //The following comes from Vincent Van Eeckhout
 //Thanks for sending us the code!
 //It's the same thing in assembly but without this C-needed line:
 //r = *(float *)&_i;
+
 float two = 2.0f;
+
 #define FP_INV2( r, p )                \
-    {                                  \
+    do {                               \
         __asm {mov eax, 0x7F000000};   \
         __asm {sub eax, dword ptr[p]}; \
         __asm {mov dword ptr[r], eax}; \
@@ -42,40 +51,50 @@ float two = 2.0f;
         __asm {fsubr[two]};            \
         __asm {fmul dword ptr[r]};     \
         __asm {fstp dword ptr[r]};     \
-    }
+    }                                  \
+    while (0)
+
 /////////////////////////////////////////////////
+
 #define FP_EXP( e, p )                            \
-    {                                             \
+    do {                                          \
         int _i;                                   \
         e  = -1.44269504f*(float) 0x00800000*(p); \
         _i = (int) e+0x3F800000;                  \
         e  = *(float*) &_i;                       \
-    }
+    }                                             \
+    while (0)
+
 #define FP_NORM_TO_BYTE( i, p )         \
-    {                                   \
+    do {                                \
         float _n = (p)+1.0f;            \
         i = *(int*) &_n;                \
         if (i >= 0x40000000) i = 0xFF;  \
         else if (i <= 0x3F800000)       \
             i = 0;                      \
         else i = ( (i)>>15 )&0xFF;      \
-    }
+    }                                   \
+    while (0)
+
 inline unsigned long FP_NORM_TO_BYTE2( float p )
 {
     float fpTmp = p+1.0f;
     return ( (*(unsigned*) &fpTmp)>>15 )&0xFF;
 }
+
 inline unsigned long FP_NORM_TO_BYTE3( float p )
 {
     float ftmp = p+12582912.0f;
     return (*(unsigned long*) &ftmp)&0xFF;
 }
+
 static unsigned int fast_sqrt_table[0x10000];  //declare table of square roots
 typedef union FastSqrtUnion
 {
     float f;
     unsigned int i;
 } FastSqrtUnion;
+
 void build_sqrt_table()
 {
     unsigned int  i;
@@ -101,6 +120,7 @@ void build_sqrt_table()
         fast_sqrt_table[i] = (s.i&0x7FFFFF);
     }
 }
+
 inline float fastsqrt( float n )
 {
     if (FP_BITS( n ) == 0)
@@ -110,12 +130,14 @@ inline float fastsqrt( float n )
 
     return n;
 }
+
 //At the assembly level the recommended workaround for the second FIST bug is the same for the first;
 //inserting the FRNDINT instruction immediately preceding the FIST instruction.
 __forceinline void FloatToInt( int *int_pointer, float f )
 {
     *int_pointer = f;
 }
+
 int Stupodmain( int argc, char *argv[] )
 {
     float t, it, test_sqrt;
@@ -132,6 +154,7 @@ int Stupodmain( int argc, char *argv[] )
     printf( "ftol expected %d  actual %d %08X\n", (int) t, i, i );
     return 0;
 }
+
 /////////////////////////////////////////////////////////////////////
 //3D and geometry ops /////////////////////////////////////////////
 //-----------------------------------------------------------------------------
@@ -163,12 +186,14 @@ int Stupodmain( int argc, char *argv[] )
 //Return:  distance squared from cylinder axis if point is inside.
 //
 //-----------------------------------------------------------------------------
+
 struct Vec3
 {
     float x;
     float y;
     float z;
 };
+
 float CylTest_CapsFirst( const Vec3 &pt1, const Vec3 &pt2, float lengthsq, float radius_sq, const Vec3 &testpt )
 {
     float dx, dy, dz;           //vector d  from line segment point 1 to point 2

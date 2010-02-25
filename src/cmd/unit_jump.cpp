@@ -1,4 +1,8 @@
+#ifndef __UNIT_JUMP_CPP__
+#define __UNIT_JUMP_CPP__
+
 //#include "unit_template.h"
+#include "unit.h"
 #include "audiolib.h"
 #include "star_system_generic.h"
 #include "cmd/images.h"
@@ -14,6 +18,7 @@ inline bool CompareDest( Unit *un, StarSystem *origin )
             return true;
     return false;
 }
+
 inline std::vector< Unit* >ComparePrimaries( Unit *primary, StarSystem *origin )
 {
     std::vector< Unit* >myvec;
@@ -35,6 +40,7 @@ inline std::vector< Unit* >ComparePrimaries( Unit *primary, StarSystem *origin )
      */
     return myvec;
 }
+
 extern void DealPossibleJumpDamage( Unit *un );
 extern void ActivateAnimation( Unit* );
 void WarpPursuit( Unit *un, StarSystem *sourcess, std::string destination );
@@ -63,13 +69,12 @@ bool GameUnit< UnitType >::TransferUnitToSystem( unsigned int kk, StarSystem* &s
                     }
                 } else {
                     Flightgroup *ff = unit->getFlightgroup();
-                    if (ff) {
+                    if (ff)
                         if ( this == ff->leader.GetUnit() && (ff->directive == "f" || ff->directive == "F") ) {
                             unit->Target( pendingjump[kk]->jumppoint.GetUnit() );
                             unit->getFlightgroup()->directive = "F";
                             unit->ActivateJumpDrive( 0 );
                         }
-                    }
                 }
             }
             if ( this == _Universe->AccessCockpit()->GetParent() ) {
@@ -84,16 +89,15 @@ bool GameUnit< UnitType >::TransferUnitToSystem( unsigned int kk, StarSystem* &s
             Unit *primary;
             if (pendingjump[kk]->final_location.i == 0
                 && pendingjump[kk]->final_location.j == 0
-                && pendingjump[kk]->final_location.k == 0) {
+                && pendingjump[kk]->final_location.k == 0)
                 for (un_iter iter = pendingjump[kk]->dest->getUnitList().createIterator(); primary = *iter; ++iter) {
                     vector< Unit* >tmp;
                     tmp = ComparePrimaries( primary, pendingjump[kk]->orig );
                     if ( !tmp.empty() )
                         possibilities.insert( possibilities.end(), tmp.begin(), tmp.end() );
                 }
-            } else {
+            else
                 this->SetCurPosition( pendingjump[kk]->final_location );
-            }
             if ( !possibilities.empty() ) {
                 static int jumpdest = 235034;
                 Unit *jumpnode = possibilities[jumpdest%possibilities.size()];
@@ -117,11 +121,10 @@ bool GameUnit< UnitType >::TransferUnitToSystem( unsigned int kk, StarSystem* &s
             for (unsigned int jjj = 0; jjj < 2; ++jjj)
                 for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();
                      (tester = *i) != NULL; ++i)
-                    if (tester->isUnit() == UNITPTR && tester != this) {
+                    if (tester->isUnit() == UNITPTR && tester != this)
                         if ( ( this->LocalPosition()-tester->LocalPosition() ).Magnitude() < this->rSize()+tester->rSize() )
                             SetCurPosition( this->LocalPosition()+this->cumulative_transformation_matrix.getR()
                                            *( 4*( this->rSize()+tester->rSize() ) ) );
-                    }
             DealPossibleJumpDamage( this );
             static int jumparrive = AUDCreateSound( vs_config->getVariable( "unitaudio", "jumparrive", "sfx43.wav" ), false );
             if (dosightandsound)
@@ -131,15 +134,14 @@ bool GameUnit< UnitType >::TransferUnitToSystem( unsigned int kk, StarSystem* &s
             VSFileSystem::vs_fprintf( stderr, "Unit FAILED remove from star system\n" );
 #endif
         }
-        if (this->docked&UnitType::DOCKING_UNITS) {
-            for (unsigned int i = 0; i < this->image->dockedunits.size(); i++) {
+        if (this->docked&UnitType::DOCKING_UNITS)
+            for (unsigned int i = 0; i < this->pImage->dockedunits.size(); i++) {
                 Unit *unut;
-                if ( NULL != ( unut = this->image->dockedunits[i]->uc.GetUnit() ) )
+                if ( NULL != ( unut = this->pImage->dockedunits[i]->uc.GetUnit() ) )
                     unut->TransferUnitToSystem( kk, savedStarSystem, dosightandsound );
             }
-        }
         if ( this->docked&(UnitType::DOCKED|UnitType::DOCKED_INSIDE) ) {
-            Unit *un = this->image->DockedTo.GetUnit();
+            Unit *un = this->pImage->DockedTo.GetUnit();
             if (!un) {
                 this->docked &= ( ~(UnitType::DOCKED|UnitType::DOCKED_INSIDE) );
             } else {
@@ -158,4 +160,6 @@ bool GameUnit< UnitType >::TransferUnitToSystem( unsigned int kk, StarSystem* &s
     }
     return ret;
 }
+
+#endif
 

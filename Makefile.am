@@ -414,8 +414,6 @@ LIBCMD = \
   src/cmd/csv.cpp \
   src/cmd/csv.h \
   src/cmd/enhancement_generic.h \
-  src/cmd/faction_xml.cpp \
-  src/cmd/images.h \
   src/cmd/iterator.h \
   src/cmd/key_mutable_set.h \
   src/cmd/missile_generic.cpp \
@@ -441,8 +439,6 @@ LIBCMD = \
   src/cmd/unit_generic.h \
   src/cmd/fg_util.cpp \
   src/cmd/fg_util.h \
-  src/cmd/pilot.cpp \
-  src/cmd/pilot.h \
   src/cmd/unit_util_generic.cpp \
   src/cmd/unit_util.h \
   src/cmd/unit_xml.cpp \
@@ -524,7 +520,6 @@ LIBGFX = \
   src/gfx/matrix.h \
   src/gfx/mesh_bxm.cpp \
   src/gfx/mesh_bxm.h \
-  src/gfx/mesh_bin.cpp \
   src/gfx/mesh_io.h \
   src/gfx/mesh_poly.cpp \
   src/gfx/mesh_xml.cpp \
@@ -575,6 +570,7 @@ LIBGFXCLIENT = \
   src/gfx/loc_select.h \
   src/gfx/masks.cpp \
   src/gfx/masks.h \
+  src/gfx/mesh_bin.cpp \
   src/gfx/mesh_fx.cpp \
   src/gfx/mesh_fx.h \
   src/gfx/mesh_gfx.cpp \
@@ -837,7 +833,6 @@ librootgeneric = \
   src/options.h
 
 librootserver = \
-  src/faction_util_server.cpp \
   src/force_feedback_server.cpp \
   src/gfxlib_struct_server.cpp \
   src/libaudioserver.cpp \
@@ -902,6 +897,10 @@ LIBENGINE_COMMON = \
   src/XMLDocument.cpp \
   src/VSFileXMLSerializer.h \
   src/VSFileXMLSerializer.cpp
+
+#VEGASERVER_COMPILING added by chuck_starchaser, to switch between
+# unit.cpp including unit.h, and unit.h including unit.cpp
+#vegaserver_CXXFLAGS = -D VEGASERVER_COMPILING
 vegaserver_SOURCES = \
   $(LIBENGINE_COMMON) \
   $(LIBCMDSERVER) \
@@ -911,6 +910,13 @@ vegaserver_SOURCES = \
   $(LIBSCRIPTSERVER) \
   $(LIBGFXSERVER) \
   src/vegaserver.cpp \
+  src/cmd/unit_server.cpp \
+  src/cmd/pilot_server.cpp \
+  src/cmd/pilot.h \
+  src/cmd/images_server.cpp \
+  src/cmd/images.h \
+  src/cmd/faction_xml_server.cpp \
+  src/gfx/mesh_bin_server.cpp \
   src/cmd/script/director_server.cpp \
   src/gldrv/gl_vertex_list.cpp \
   src/gldrv/gl_sphere_list_server.cpp
@@ -925,6 +931,8 @@ vegastrike_SOURCES = \
   $(LIBAUDIO) \
   src/aldrv/al_globals.cpp \
   src/aldrv/al_globals.h \
+  src/cmd/images.cpp \
+  src/cmd/images.h \
   src/aldrv/al_init.cpp \
   src/aldrv/al_listen.cpp \
   src/aldrv/al_sound.cpp \
@@ -962,11 +970,14 @@ vegastrike_SOURCES = \
   src/cmd/cont_terrain.cpp \
   src/cmd/cont_terrain.h \
   src/cmd/enhancement.h \
+  src/cmd/faction_xml.cpp \
   src/cmd/missile.h \
   src/cmd/music.cpp \
   src/cmd/music.h \
   src/cmd/nebula.cpp \
   src/cmd/nebula.h \
+  src/cmd/pilot.cpp \
+  src/cmd/pilot.h \
   src/cmd/planet.cpp \
   src/cmd/planet.h \
   src/cmd/script/c_alike/c_alike.tab.cpp \
@@ -988,6 +999,7 @@ vegastrike_SOURCES = \
   src/cmd/unit_template.h \
   src/cmd/unit_util.cpp \
   src/cmd/unit_util.h \
+  src/cmd/unit.cpp \
   src/cmd/unit.h \
   src/gldrv/gl_program.cpp \
   src/gldrv/gl_clip.cpp \

@@ -44,6 +44,7 @@ typedef struct
     WORD  bfReserved2;
     DWORD bfOffBits;
 } BITMAPFILEHEADER;
+
 /**
  *  The color data of a bitmap
  */
@@ -88,6 +89,7 @@ typedef struct
     char fourcc[4];
     int  bpp;
 } pxlformat;
+
 typedef struct
 {
     int size;

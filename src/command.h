@@ -1,26 +1,28 @@
 #ifndef COMMANDINTERP
 #define COMMANDINTERP
+
 #include <iostream>
 #include <string>
 #include <vector>
 #include "functors.h"
 #include "rendertext.h" //menusystem
 #include "in.h"
-//
+
 //#include "areas.h" //must be at the bottom
 
 //this class is ONLY used by commandI.
 //it encapsulates a function pointer, with a name and an ARG_TYPE.
 class coms
 {
-public: coms( TFunctor *t_in );
+public:
+    virtual ~coms();
+    coms( TFunctor *t_in );
     coms( coms *oldCom );
     coms( const coms &in );
-    ~coms();
-
     std::string Name;
     TFunctor   *functor;
 };
+
 //hmm so how do we do menus. Should they be done right in here?
 //two classes, menu class, menuitem class, and a vector of menu's.
 //and a vector of menuitems on the menu class.
@@ -28,7 +30,9 @@ class mItem
 {
 //no destructor is made for this item, there do not need to be ANY
 //pointers here.
-public: mItem()
+public:
+//~mItem(){}
+    mItem()
     {
         inputbit    = false;
         inputbit2   = false;
@@ -52,16 +56,19 @@ public: mItem()
     std::string predisplay;     //call virtual function Display(std::string &)
                                 //using this string, IF it's larger than 0.
 };
+
 class menu
 {
-public: menu()
+public:
+    virtual ~menu();
+    menu()
     {
         selected     = false;
         noescape     = false;
         autoselect   = false;
         defaultInput = false;
     }
-    menu( std::string n_in, char *d_in, char *e_in )
+    menu( const std::string n_in, char const *d_in, char const *e_in )
     {
         selected     = false;
         noescape     = false;
@@ -71,7 +78,6 @@ public: menu()
         Display.append( d_in );
         escape.append( e_in );
     }
-    ~menu();
     std::string Name;     //menuname
     std::string Display;     //display string.
     std::vector< mItem* >items;     //items on the menu.
@@ -103,17 +109,15 @@ private:
     bool  menumode;
 //object *player; -- player object
     std::string lastcommand;
-public: commandI();
+public:
+    virtual ~commandI();
+    commandI();
 //commandI(mud *mud_in);
 //commandI(mud *mud_in, object *player_in);
-    virtual ~commandI();
-
     bool console;
     bool immortal;
-
     static void keypress( int code, int modifiers, bool isDown, int x, int y );
-
-    bool getmenumode()
+    bool getmenumode() const
     {
         return menumode;
     }
@@ -128,9 +132,7 @@ public: commandI();
     void prompt();
     void pcommands();            //lists all the commands to the socket
 //commands.at(0), returned by findcommand if nothing els                       //is found.
-
     bool execute( std::string *incommand, bool isDown, int sock_in = 0 );
-
     bool fexecute( std::string *incommand, bool isDown, int sock_in = 0 );
 //so far ONLY void XXX:XXX(bool *) is called even if isDown
 //is false. Everything else is only called when isDown is true.
@@ -151,7 +153,8 @@ public: commandI();
 
 class RegisterPythonWithCommandInterpreter
 {
-public: RegisterPythonWithCommandInterpreter( commandI *cI );
+public:
+    explicit RegisterPythonWithCommandInterpreter( commandI *cI );
     void runPy( std::string &argsin );
 };
 

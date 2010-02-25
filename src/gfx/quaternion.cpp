@@ -5,13 +5,9 @@ Quaternion Quaternion::from_vectors( const Vector &v1, const Vector &v2, const V
     float T = v1.i+v2.j+v3.k+1, S, W, X, Y, Z;
     if (T > 0) {
         S = 0.5/sqrtf( T );
-
         W = 0.25/S;
-
         X = (v3.j-v2.k)*S;
-
         Y = (v1.k-v3.i)*S;
-
         Z = (v2.i-v1.j)*S;
     } else {
         int max = (v1.i > v2.j) ? 1 : 2;
@@ -92,7 +88,6 @@ Quaternion Quaternion::from_axis_angle( const Vector &axis, float angle )
 {
     float sin_a = sin( angle/2 );
     float cos_a = cos( angle/2 );
-
     return Quaternion( cos_a, Vector( axis.i*sin_a,
                                       axis.j*sin_a,
                                       axis.k*sin_a ) );

@@ -76,7 +76,8 @@ void CompileRunPython( const std::string &filename )
         Python::reseterrors();
         if (CompiledProgram) {
             PyObject *m, *d;
-            if ( ( m = PyImport_AddModule( "__main__" ) ) != NULL ) {
+            static char main_str[16] = "__main__"; //by chuck_starchaser, to squash a warning
+            if ( ( m = PyImport_AddModule( main_str ) ) != NULL ) {
                 PyObject *localdict = PyDict_New();
                 if ( ( d = PyModule_GetDict( m ) ) != NULL ) {
                     PyObject *exe = PyEval_EvalCode( CompiledProgram, d, localdict );

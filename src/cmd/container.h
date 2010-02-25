@@ -1,6 +1,8 @@
-#include "debug_vs.h"
 #ifndef _UNITCONTAINER_H_
 #define _UNITCONTAINER_H_
+
+#include "debug_vs.h"
+
 class Unit;
 
 class UnitContainer
@@ -15,7 +17,6 @@ public: UnitContainer();
         unit = 0;
         SetUnit( un.unit );
     }
-
     const UnitContainer& operator=( const UnitContainer &a )
     {
         SetUnit( a.unit );
@@ -41,5 +42,6 @@ public: UnitContainer();
     void SetUnit( Unit* );
     Unit * GetUnit();
 };
+
 #endif
 

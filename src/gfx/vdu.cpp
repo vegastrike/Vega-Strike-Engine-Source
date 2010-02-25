@@ -3,7 +3,7 @@
 /// target info, and objectives
 
 #include "vdu.h"
-#include "cmd/unit_generic.h"
+#include "cmd/unit_util.h"
 #include "hud.h"
 #include "vs_globals.h"
 #include "cockpit.h"
@@ -12,24 +12,29 @@
 #include "cmd/script/msgcenter.h"
 #include "cmd/images.h"
 #include "cmd/planet.h"
+#include "cmd/beam.h"
 #include "config_xml.h"
 #include "xml_support.h"
 #include "gfx/animation.h"
 #include "gfx/vsimage.h"
 #include "galaxy_gen.h"
+#include "universe_util.h"
+#include "networking/netclient.h"
+#include "vsfilesystem.h"
 
 template < typename T >
 inline T mymin( T a, T b )
 {
     return (a < b) ? a : b;
 }
+
 template < typename T >
 inline T mymax( T a, T b )
 {
     return (a > b) ? a : b;
 }
 
-bool VDU::staticable()
+bool VDU::staticable() const
 {
     unsigned int thismode = getMode();
     static bool  only_scanner_modes_static =
@@ -370,6 +375,7 @@ void VDU::Scroll( int howmuch )
 }
 
 #define MangleString( a, b ) (a)
+
 static std::string MangleStrung( std::string in, float probability )
 {
     //fails with ppc
@@ -680,15 +686,16 @@ void VDU::DrawVDUShield( Unit *parent )
                    parent->GetHullPercent(), true, invert_friendly_sprite );
 }
 
-#define RETURN_STATIC_SPRITE( name )        \
-    static VSSprite s( name ".sprite" );    \
-    static VSSprite sCompat( name ".spr" ); \
-    if ( s.LoadSuccess() ) {                \
-        return &s;                          \
-    }                                       \
-    else {                                  \
-        return &sCompat;                    \
-    }
+#define RETURN_STATIC_SPRITE( name )            \
+    do {                                        \
+        static VSSprite s( name ".sprite" );    \
+        static VSSprite sCompat( name ".spr" ); \
+        if ( s.LoadSuccess() )                  \
+            return &s;                          \
+        else                                    \
+            return &sCompat;                    \
+    }                                           \
+    while (0)
 
 VSSprite * getTargetQuadShield()
 {
@@ -797,13 +804,11 @@ static float TwoOfFour( float a, float b, float c, float d )
 void VDU::DrawTarget( GameCockpit *cp, Unit *parent, Unit *target )
 {
     float x, y, w, h;
-
     float fs = target->FShieldData();
     float rs = target->RShieldData();
     float ls = target->LShieldData();
     float bs = target->BShieldData();
     GFXEnable( TEXTURE0 );
-
     static bool invert_target_sprite  =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "invert_target_sprite", "false" ) );
     static bool invert_target_shields =
@@ -859,7 +864,6 @@ void VDU::DrawTarget( GameCockpit *cp, Unit *parent, Unit *target )
     tp->bgcol = tpbg;
     static float auto_message_lim = XMLSupport::parse_float( vs_config->getVariable( "graphics", "auto_message_time_lim", "5" ) );
     float delautotime = UniverseUtil::GetGameTime()-cp->autoMessageTime;
-
     bool  draw_auto_message = (delautotime < auto_message_lim && cp->autoMessage.length() != 0);
     if (inrange) {
         int  i = 0;
@@ -890,14 +894,12 @@ void VDU::DrawTarget( GameCockpit *cp, Unit *parent, Unit *target )
         if (automatte) tp->bgcol = GFXColor( 0, 0, 0, background_alpha );
         tp->Draw( MangleString( newst, _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0 ), 0, true, false, automatte );
         tp->bgcol = tpbg;
-
         static float ishieldcolor[4]    = {.4, .4, 1, 1};
         static float mshieldcolor[4]    = {.4, .4, 1, 1};
         static float oshieldcolor[4]    = {.4, .4, 1, 1};
         static bool  ishieldcolorloaded = (vs_config->getColor( "default", "inner_shield_color", ishieldcolor, true ), true);
         static bool  mshieldcolorloaded = (vs_config->getColor( "default", "middle_shield_color", mshieldcolor, true ), true);
         static bool  oshieldcolorloaded = (vs_config->getColor( "default", "outer_shield_color", oshieldcolor, true ), true);
-
         //code replaced by target shields defined in cockpit.cpt files, preserve for mods
         static bool  builtin_shields    =
             XMLSupport::parse_bool( vs_config->getVariable( "graphics", "vdu_builtin_shields", "false" ) );
@@ -941,8 +943,7 @@ void VDU::DrawMessages( GameCockpit *parentcp, Unit *target )
     if (Network == NULL && draw_messages == false)
         return;
     string fullstr;
-    double nowtime = mission->getGametime();
-
+    double nowtime     = mission->getGametime();
     /*
      *  char st[256];
      *  //  sprintf (st,"\n%s",target->name.c_str());
@@ -965,13 +966,10 @@ void VDU::DrawMessages( GameCockpit *parentcp, Unit *target )
      *  }
      */
     string targetstr;
-    int    msglen = targetstr.size();
-
+    int    msglen      = targetstr.size();
     int    rows_needed = 0;  //msglen/(cols>0?cols:1);
-
     MessageCenter *mc  = mission->msgcenter;
-
-    int rows_used = rows_needed;
+    int    rows_used   = rows_needed;
     vector< std::string >whoNOT;
     whoNOT.push_back( "briefing" );
     whoNOT.push_back( "news" );
@@ -1099,9 +1097,8 @@ void VDU::DrawNav( GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav )
                                                   str );
     static float auto_message_lim = XMLSupport::parse_float( vs_config->getVariable( "graphics", "auto_message_time_lim", "5" ) );
     float delautotime = UniverseUtil::GetGameTime()-cp->autoMessageTime;
-
-    bool  draw_auto_message = (delautotime < auto_message_lim && cp->autoMessage.length() != 0);
-    std::string msg   = cp->autoMessage;
+    bool draw_auto_message = (delautotime < auto_message_lim && cp->autoMessage.length() != 0);
+    std::string  msg  = cp->autoMessage;
     std::string::size_type where = msg.find( "#" );
     while (where != std::string::npos) {
         msg   = msg.substr( 0, where )+msg.substr( where+7 );
@@ -1331,15 +1328,9 @@ void VDU::DrawDamage( Unit *parent )
     ecmstatus[0] = '\0';
     static bool print_ecm = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "print_ecm_status", "true" ) );
     if (print_ecm) {
-        if (parent->GetImageInformation().ecm > 0) {
+        if (parent->GetImageInformation().ecm != 0) { //ecm is unsigned --chuck_starchaser
             GFXColor4f( 0, 1, 0, .5 );
             strcpy( ecmstatus, "ECM Active" );
-        }
-        if ( ( (parent->GetImageInformation().ecm < 0) ) ) {
-            GFXColor4f( .6, .6, .6, .5 );
-            strcpy( ecmstatus, "ECM Inactive" );
-        }
-        if (parent->GetImageInformation().ecm > 0) {
             static float s = 0;
             s += .125*SIMULATION_ATOM;
             if (s > 1)
@@ -1439,7 +1430,6 @@ void VDU::DrawStarSystemAgain( float x, float y, float w, float h, VIEWSTYLE vie
 #ifdef CAR_SIM
     viewStyle = CP_BACK;
 #endif
-
     GFXEnable( DEPTHTEST );
     GFXEnable( DEPTHWRITE );
     VIEWSTYLE which     = viewStyle;
@@ -1460,7 +1450,6 @@ void VDU::DrawStarSystemAgain( float x, float y, float w, float h, VIEWSTYLE vie
     _Universe->AccessCockpit()->SelectProperCamera();
     _Universe->AccessCockpit()->SetupViewPort( true );     ///this is the final, smoothly calculated cam
     GFXRestoreHudMode();
-
     GFXBlendMode( ONE, ZERO );
     GFXDisable( TEXTURE1 );
     GFXDisable( TEXTURE0 );
@@ -1678,14 +1667,16 @@ char printHex( unsigned int hex )
     return hex-10+'A';
 }
 
-static char suc_col_str[8] = "#000000";
+static char suc_col_str[8]     = "#000000";
+static char suc_gt_plusone[8]  = "#00FF00";
+static char suc_gt_minusone[8] = "#FF0000";
 
 inline char * GetColorFromSuccess( float suc )
 {
     if (suc >= 1)
-        return "#00FF00";
+        return suc_gt_plusone;
     if (suc <= -1)
-        return "#FF0000";
+        return suc_gt_minusone;
     suc += 1.;
     suc *= 128;
     unsigned int tmp2 = (unsigned int) suc;
@@ -1763,6 +1754,7 @@ bool VDU::SetWebcamAnimation()
 
 void VDU::DrawWebcam( Unit *parent )
 {
+    using VSFileSystem::JPEGBuffer;
     int   length;
     char *netcam;
     int   playernum = _Universe->whichPlayerStarship( parent );
@@ -1814,8 +1806,14 @@ void VDU::Draw( GameCockpit *parentcp, Unit *parent, const GFXColor &color )
     //tp->SetCharSize (fabs(w/cols),fabs(h/rows));
     float csx, csy;
     tp->GetCharSize( csx, csy );
-    cols = abs( (int) ceil( w/csx ) );
-    rows = abs( (int) ceil( h/csy ) );
+    //This was as below:
+    //cols = abs( (int) ceil( w/csx ) );
+    //rows = abs( (int) ceil( h/csy ) );
+    //I'm changing it to as below, which avoids abs blues with visual studio, and is
+    //also faster, as computing the abs of a float amounts to setting the sign bit;
+    //though I'm less than 100% entirely sure of the correctness of the change... --chuck_starchaser
+    cols = int(fabs(ceil(w/csx)));
+    rows = int(fabs(ceil(h/csy)));
 
     Unit *targ;
     h    = fabs( h/2 );
@@ -1998,7 +1996,7 @@ void VDU::SwitchMode( Unit *parent )
     }
 }
 
-bool VDU::CheckCommAnimation( Unit *un )
+bool VDU::CheckCommAnimation( Unit *un ) const
 {
     if (comm_ani && comm_ani->Done() == false)
         if (communicating == un || communicating == NULL)

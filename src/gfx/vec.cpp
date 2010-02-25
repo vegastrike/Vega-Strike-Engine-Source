@@ -28,12 +28,12 @@
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 #define Vector Vactor
 #endif
-#include <boost/python/class.hpp>
+#include "cs_boostpythonclass.h"
 #include <boost/python/to_python_converter.hpp>
 #include <boost/python/to_python_indirect.hpp>
 #include <boost/python/to_python_value.hpp>
 #include <boost/python/converter/builtin_converters.hpp>
-#include <boost/python.hpp>
+#include "cs_boostpython.h"
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 #undef Vector
 #endif
@@ -41,7 +41,7 @@
 #include <boost/python/detail/extension_class.hpp>
 #endif
 //#include "glob_externs.h"
-#define _CZ 761.465325527
+#define _CZ (761.465325527)
 //extern Vector	_LightVector;
 //extern float _LVRed;
 //extern float _LVGreen;
@@ -56,13 +56,16 @@
 Vector::Vector( PyObject *p )
 {
     Vector vec( 0, 0, 0 );
-    PyArg_ParseTuple( p, "fff", &vec.i, &vec.j, &vec.k );
+    static char fff[4] = "fff";
+    PyArg_ParseTuple( p, fff, &vec.i, &vec.j, &vec.k );
     *this = vec;
 }
+
 QVector::QVector( PyObject *p )
 {
     QVector vec( 0, 0, 0 );
-    PyArg_ParseTuple( p, "ddd", &vec.i, &vec.j, &vec.k );
+    static char ddd[4] = "ddd";
+    PyArg_ParseTuple( p, ddd, &vec.i, &vec.j, &vec.k );
     *this = vec;
 }
 
@@ -159,6 +162,7 @@ void Pitch( float rad, Vector &p, Vector &q, Vector &r )
     q = temp2;
     r = temp3;
 }
+
 void Roll( float rad, Vector &p, Vector &q, Vector &r )
 {
     Vector temp1, temp2, temp3;
@@ -179,6 +183,7 @@ void Roll( float rad, Vector &p, Vector &q, Vector &r )
     p = temp2;
     q = temp3;
 }
+
 void ResetVectors( Vector &p, Vector &q, Vector &r )
 {
     p.i = q.j = r.k = 1;

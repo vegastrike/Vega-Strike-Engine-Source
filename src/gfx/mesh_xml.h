@@ -1,3 +1,6 @@
+#ifndef __MESH_XML_H__INCLUDED_
+#define __MESH_XML_H__INCLUDED_
+
 struct MeshXML
 {
     enum Names
@@ -176,4 +179,7 @@ struct MeshXML
     int faction;
     Mesh *mesh;
 };
+
+#endif
+
 

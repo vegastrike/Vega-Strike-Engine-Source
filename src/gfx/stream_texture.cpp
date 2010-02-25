@@ -34,10 +34,12 @@ StreamTexture::StreamTexture( int width, int height, enum FILTER filtertype, uns
         GFXTransferTexture( mutabledata, name, sizeX, sizeY, RGBA32 );
     }
 }
+
 unsigned char* StreamTexture::Map()
 {
     return mutabledata;
 }
+
 void StreamTexture::UnMap( bool changed )
 {
     if (changed) {
@@ -45,6 +47,7 @@ void StreamTexture::UnMap( bool changed )
         GFXTransferTexture( mutabledata, name, sizeX, sizeY, RGBA32 );
     }
 }
+
 StreamTexture::~StreamTexture()
 {
     GFXDeleteTexture( name );
@@ -53,6 +56,7 @@ StreamTexture::~StreamTexture()
         free( this->mutabledata );
     this->mutabledata = NULL;
 }
+
 void StreamTexture::MakeActive( int stage )
 {
     GFXSelectTexture( name, stage );

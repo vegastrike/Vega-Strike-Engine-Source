@@ -41,7 +41,7 @@ public: RingMesh() : Mesh() {}
     {
         InitRing( iradius, oradius, slices, texture, r, s, texwrapx, texwrapy, a, b, envMap, theta_min, theta_max, mipmap );
     }
-    virtual float clipRadialSize();
+    virtual float clipRadialSize() const;
 };
 #endif
 

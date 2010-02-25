@@ -178,7 +178,7 @@ void NetServer::sendLoginAccept( ClientPtr clt, Cockpit *cp )
 static void getShipList( vector< string > &ships )
 {
     Unit *mpl = &GetUnitMasterPartList();
-    for (vector< Cargo >::const_iterator iter = mpl->image->cargo.begin(); iter != mpl->image->cargo.end(); iter++)
+    for (vector< Cargo >::const_iterator iter = mpl->pImage->cargo.begin(); iter != mpl->pImage->cargo.end(); iter++)
         if ( (*iter).GetCategory().substr( 0, 10 ) == "starships/" ) {
             std::string content = (*iter).GetContent();
             std::string::size_type dot = content.find( '.' );

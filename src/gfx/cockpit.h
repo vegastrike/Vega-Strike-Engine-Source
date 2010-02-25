@@ -88,7 +88,7 @@ private:
     GFXColor   textcol;
 ///The font that the entire cockpit will use. Currently without color
     TextPlane *text;
-    Gauge     *gauges[UnitImages::NUMGAUGES];
+    Gauge     *gauges[UnitImages < void > ::NUMGAUGES];
 ///holds misc panels.  Panel[0] is always crosshairs (and adjusted to be in center of view screen, not cockpit)
     std::vector< VSSprite* >Panel;
 ///flag to decide whether to draw all target boxes

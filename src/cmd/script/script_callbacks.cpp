@@ -532,7 +532,7 @@ varInst* Mission::call_io_sprintf( missionNode *node, int mode )
 
         string beforestring = endstring.substr( 0, breakpos );
 
-        //printf("beforestr=-%s-",beforestring.c_str());
+        //printf("beforestr=-%s-","%s", beforestring.c_str());
 
         string breakstring = endstring.substr( breakpos, 2 );
         //printf("breakstr=-%s-\n",breakstring.c_str());
@@ -541,7 +541,7 @@ varInst* Mission::call_io_sprintf( missionNode *node, int mode )
             missionNode *anode = getArgument( node, mode, current_arg );
             double res = checkFloatExpr( anode, mode );
             if (mode == SCRIPT_RUN) {
-                sprintf( outbuffer, beforestring.c_str() );
+                sprintf( outbuffer, "%s", beforestring.c_str() );
                 outstring += outbuffer;
                 sprintf( outbuffer, "%f", res );
                 outstring += outbuffer;
@@ -550,7 +550,7 @@ varInst* Mission::call_io_sprintf( missionNode *node, int mode )
             missionNode *anode = getArgument( node, mode, current_arg );
             int res = checkIntExpr( anode, mode );
             if (mode == SCRIPT_RUN) {
-                sprintf( outbuffer, beforestring.c_str() );
+                sprintf( outbuffer, "%s", beforestring.c_str() );
                 outstring += outbuffer;
                 sprintf( outbuffer, "%d", res );
                 outstring += outbuffer;
@@ -565,7 +565,7 @@ varInst* Mission::call_io_sprintf( missionNode *node, int mode )
                 }
                 string *strptr = (string*) res_vi->object;
 
-                sprintf( outbuffer, beforestring.c_str() );
+                sprintf( outbuffer, "%s", beforestring.c_str() );
                 outstring += outbuffer;
                 sprintf( outbuffer, "%s", strptr->c_str() );
                 outstring += outbuffer;
@@ -580,7 +580,7 @@ varInst* Mission::call_io_sprintf( missionNode *node, int mode )
         current_arg++;
     }     //while
     if (mode == SCRIPT_RUN) {
-        sprintf( outbuffer, endstring.c_str() );
+        sprintf( outbuffer, "%s", endstring.c_str() );
         outstring   += outbuffer;
         (*outstrptr) = outstring;
     }
@@ -625,7 +625,7 @@ varInst* Mission::call_io_printf( missionNode *node, int mode )
 
         string beforestring = endstring.substr( 0, breakpos );
 
-        //printf("beforestr=-%s-",beforestring.c_str());
+        //printf("beforestr=-%s-","%s", beforestring.c_str());
 
         string breakstring = endstring.substr( breakpos, 2 );
         //printf("breakstr=-%s-\n",breakstring.c_str());
@@ -634,21 +634,21 @@ varInst* Mission::call_io_printf( missionNode *node, int mode )
             missionNode *anode = getArgument( node, mode, current_arg );
             double res = checkFloatExpr( anode, mode );
             if (mode == SCRIPT_RUN) {
-                printf( beforestring.c_str() );
+                printf( "%s", beforestring.c_str() );
                 printf( "%f", res );
             }
         } else if (breakstring[1] == 'd') {
             missionNode *anode = getArgument( node, mode, current_arg );
             int res = checkIntExpr( anode, mode );
             if (mode == SCRIPT_RUN) {
-                printf( beforestring.c_str() );
+                printf( "%s", beforestring.c_str() );
                 printf( "%d", res );
             }
         } else if (breakstring[1] == 'b') {
             missionNode *anode = getArgument( node, mode, current_arg );
             bool res = checkBoolExpr( anode, mode );
             if (mode == SCRIPT_RUN) {
-                printf( beforestring.c_str() );
+                printf( "%s", beforestring.c_str() );
                 if (res == true)
                     printf( "true" );
                 else
@@ -664,7 +664,7 @@ varInst* Mission::call_io_printf( missionNode *node, int mode )
                 }
                 string *strptr = (string*) res_vi->object;
 
-                printf( beforestring.c_str() );
+                printf( "%s", beforestring.c_str() );
                 printf( "%s", strptr->c_str() );
             }
             deleteVarInst( res_vi );
@@ -677,7 +677,7 @@ varInst* Mission::call_io_printf( missionNode *node, int mode )
         current_arg++;
     }     //while
     if (mode == SCRIPT_RUN)
-        printf( endstring.c_str() );
+        printf( "%s", endstring.c_str() );
     //printf("--end==\n");
     varInst *viret = newVarInst( VI_TEMP );
     viret->type = VAR_VOID;

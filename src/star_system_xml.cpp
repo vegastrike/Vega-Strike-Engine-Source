@@ -1411,7 +1411,7 @@ addlightprop:
                 } else if ( (elem == BUILDING || elem == VEHICLE) && xml->ct != NULL ) {
                     Unit *b = UnitFactory::createBuilding( xml->ct, elem == VEHICLE, filename, false, faction );
                     b->SetSerial( serial );
-                    b->SetPlanetOrbitData( (PlanetaryTransform*) xml->parentterrain );
+                    //b->SetPlanetOrbitData( (PlanetaryTransform*) xml->parentterrain ); commented out by chuck_starchaser; --never used
                     b->SetPosAndCumPos( xml->cursun.Cast()+xml->systemcentroid.Cast() );
                     b->EnqueueAI( new Orders::AggressiveAI( "default.agg.xml" ) );
                     b->SetTurretAI();

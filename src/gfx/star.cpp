@@ -8,11 +8,13 @@
 #include "config_xml.h"
 #include "lin_time.h"
 #include "galaxy_xml.h"
+
 #if defined (__APPLE__) || defined (MACOSX)
     #include <OpenGL/gl.h>
 #else
     #include <GL/gl.h>
 #endif
+
 //#include "cmd/unit.h"
 #define SINX 1
 #define SINY 2
@@ -27,11 +29,17 @@ unsigned int NumStarsInGalaxy()
         count += (*i).second.getHeirarchy().size();
     return count;
 }
+
 class StarIter
 {
     vsUMap< std::string, GalaxyXML::SGalaxy >::iterator sector;
     vsUMap< std::string, GalaxyXML::SGalaxy >::iterator system;
-public: StarIter()
+public:
+    bool Done() const
+    {
+        return sector == _Universe->getGalaxy()->getHeirarchy().end();
+    }
+    StarIter()
     {
         sector = _Universe->getGalaxy()->getHeirarchy().begin();
         if ( !Done() ) {
@@ -51,25 +59,21 @@ public: StarIter()
                 system = (*sector).second.getHeirarchy().begin();
         }
     }
-    bool Done() const
-    {
-        return sector == _Universe->getGalaxy()->getHeirarchy().end();
-    }
-    GalaxyXML::SGalaxy * Get()
+    GalaxyXML::SGalaxy * Get() const
     {
         if ( !Done() )
             return &(*system).second;
         else
             return NULL;
     }
-    std::string GetSystem()
+    std::string GetSystem() const
     {
         if ( !Done() )
             return (*system).first;
         else
             return "Nowhere";
     }
-    std::string GetSector()
+    std::string GetSector() const
     {
         if ( !Done() )
             return (*sector).first;
@@ -77,6 +81,7 @@ public: StarIter()
             return "NoSector";
     }
 };
+
 //bool shouldwedraw
 static void saturate( float &r, float &g, float &b )
 {
@@ -92,6 +97,7 @@ static void saturate( float &r, float &g, float &b )
     g = pow( g, colorpower );
     b = pow( b, colorpower );
 }
+
 bool computeStarColor( float &r, float &g, float &b, Vector luminmax, float distance, float maxdistance )
 {
     saturate( r, g, b );
@@ -116,10 +122,12 @@ bool computeStarColor( float &r, float &g, float &b, Vector luminmax, float dist
     }
     return lum > starcolorcutoff;
 }
+
 namespace StarSystemGent
 {
 extern GFXColor getStarColorFromRadius( float radius );
 }
+
 StarVlist::StarVlist( float spread )
 {
     lasttime     = 0;
@@ -128,6 +136,7 @@ StarVlist::StarVlist( float spread )
     newcamq      = camq;
     this->spread = spread;
 }
+
 static GFXColorVertex * AllocVerticesForSystem( std::string our_system_name, float spread, int *num, int repetition )
 {
     static float  staroverlap    = XMLSupport::parse_float( vs_config->getVariable( "graphics", "star_overlap", "1" ) );
@@ -279,6 +288,7 @@ static GFXColorVertex * AllocVerticesForSystem( std::string our_system_name, flo
     *num = j;
     return tmpvertex;
 }
+
 PointStarVlist::PointStarVlist( int num, float spread, const std::string &sysnam ) : StarVlist( spread )
 {
     smoothstreak = 0;
@@ -293,6 +303,7 @@ PointStarVlist::PointStarVlist( int num, float spread, const std::string &sysnam
     //}
     delete[] tmpvertex;
 }
+
 void StarVlist::UpdateGraphics()
 {
     double time = getNewTime();
@@ -304,6 +315,7 @@ void StarVlist::UpdateGraphics()
         lasttime = time;
     }
 }
+
 bool PointStarVlist::BeginDrawState( const QVector &center,
                                      const Vector &velocity,
                                      const Vector &torque,
@@ -370,6 +382,7 @@ bool PointStarVlist::BeginDrawState( const QVector &center,
     }
     return ret;
 }
+
 void PointStarVlist::Draw( bool stretch, int whichTexture )
 {
     if (stretch) {
@@ -379,6 +392,7 @@ void PointStarVlist::Draw( bool stretch, int whichTexture )
         nonstretchvlist->Draw();
     }
 }
+
 void PointStarVlist::EndDrawState( bool stretch, int whichTexture )
 {
     if (stretch)
@@ -387,11 +401,13 @@ void PointStarVlist::EndDrawState( bool stretch, int whichTexture )
         nonstretchvlist->EndDrawState();
     GFXColorMaterial( 0 );
 }
+
 PointStarVlist::~PointStarVlist()
 {
     delete vlist;
     delete nonstretchvlist;
 }
+
 Stars::Stars( int num, float spread ) : vlist( NULL )
     , spread( spread )
 {
@@ -405,11 +421,13 @@ Stars::Stars( int num, float spread ) : vlist( NULL )
     fade = blend = true;
     ResetPosition( QVector( 0, 0, 0 ) );
 }
+
 void Stars::SetBlend( bool blendit, bool fadeit )
 {
     blend = true;     //blendit;
     fade  = true;     //fadeit;
 }
+
 void Stars::Draw()
 {
     static bool   stars_dont_move = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "stars_dont_move", "false" ) );
@@ -491,6 +509,7 @@ void Stars::Draw()
     }
     GFXLoadIdentity( MODEL );
 }
+
 static void upd( double &a,
                  double &b,
                  double &c,
@@ -539,6 +558,7 @@ void Stars::ResetPosition( const QVector &cent )
                 pos[i*9+j*3+k] += cent;
             }
 }
+
 void Stars::UpdatePosition( const QVector &cp )
 {
     if (fabs( pos[0].i-cp.i ) > 3*spread || fabs( pos[0].j-cp.j ) > 3*spread || fabs( pos[0].k-cp.k ) > 3*spread) {
@@ -557,14 +577,17 @@ void Stars::UpdatePosition( const QVector &cp )
     upd( pos[1].k, pos[4].k, pos[7].k, pos[10].k, pos[13].k, pos[16].k, pos[19].k, pos[22].k, pos[25].k, cp.k, spread );
     upd( pos[2].k, pos[5].k, pos[8].k, pos[11].k, pos[14].k, pos[17].k, pos[20].k, pos[23].k, pos[26].k, cp.k, spread );
 }
+
 Stars::~Stars()
 {
     delete vlist;
 }
+
 static Vector GetConstVertex( const GFXColorVertex &c )
 {
     return Vector( c.x, c.y, c.z );
 }
+
 SpriteStarVlist::SpriteStarVlist( int num, float spread, std::string sysnam, std::string texturenames,
                                   float size ) : StarVlist( spread )
 {
@@ -683,6 +706,7 @@ SpriteStarVlist::SpriteStarVlist( int num, float spread, std::string sysnam, std
     }
     delete[] tmpvertex;
 }
+
 int SpriteStarVlist::NumTextures()
 {
     return NUM_ACTIVE_ANIMATIONS;
@@ -712,7 +736,9 @@ void SpriteStarVlist::EndDrawState( bool stretch, int whichTex )
     GFXEnable( CULLFACE );
     GFXColorMaterial( 0 );
 }
+
 extern bool isVista;
+
 void SpriteStarVlist::Draw( bool strertch, int whichTexture )
 {
     static bool force_draw = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "vista_draw_stars", "false" ) );

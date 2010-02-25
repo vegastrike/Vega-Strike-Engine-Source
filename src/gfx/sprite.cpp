@@ -33,12 +33,15 @@
 #include <assert.h>
 #include <math.h>
 #include "gnuhash.h"
+
 #ifdef _WIN32
 #include <direct.h>
 #endif
+
 #ifndef M_PI_2
-# define M_PI_2 1.57079632679489661923          /* pi/2 */
+# define M_PI_2 (1.57079632679489661923)
 #endif
+
 static float *mview = NULL;
 
 using namespace VSFileSystem;
@@ -52,7 +55,6 @@ static std::pair< bool, VSSprite* >cacheLookup( const char *file )
     VSSpriteCache::iterator it = sprite_cache.find( hashName );
     if ( it != sprite_cache.end() )
         return std::pair< bool, VSSprite* > ( true, it->second );
-
     else
         return std::pair< bool, VSSprite* > ( false, 0 );
 }
@@ -223,6 +225,7 @@ void VSSprite::DrawHere( Vector &ll, Vector &lr, Vector &ur, Vector &ul )
         ul = Vector( xcenter-widtho2, ycenter-heighto2, 0.00f );
     }
 }
+
 void VSSprite::Draw()
 {
     if (surface) {
@@ -235,7 +238,6 @@ void VSSprite::Draw()
         float mt = surface->mintcoord.j, Mt = surface->maxtcoord.j;
         ms = (Ms-ms)*maxs+ms;
         mt = (Mt-mt)*maxt+mt;
-
         GFXDisable( CULLFACE );
         Vector    ll, lr, ur, ul;
         DrawHere( ll, lr, ur, ul );
@@ -250,21 +252,25 @@ void VSSprite::Draw()
                 surface->MakeActive( 0, pass );
                 GFXTextureEnv( 0, GFXMODULATETEXTURE );
                 GFXBegin( GFXQUAD );
-                if (!multitex) GFXTexCoord2f( ms, Mt );
-
-                else GFXTexCoord4f( ms, Mt, ms, Mt );
+                if (!multitex)
+                    GFXTexCoord2f( ms, Mt );
+                else
+                    GFXTexCoord4f( ms, Mt, ms, Mt );
                 GFXVertexf( ll );
-                if (!multitex) GFXTexCoord2f( Ms, Mt );
-
-                else GFXTexCoord4f( Ms, Mt, Ms, Mt );
+                if (!multitex)
+                    GFXTexCoord2f( Ms, Mt );
+                else
+                    GFXTexCoord4f( Ms, Mt, Ms, Mt );
                 GFXVertexf( lr );
-                if (!multitex) GFXTexCoord2f( Ms, mt );
-
-                else GFXTexCoord4f( Ms, mt, Ms, mt );
+                if (!multitex)
+                    GFXTexCoord2f( Ms, mt );
+                else
+                    GFXTexCoord4f( Ms, mt, Ms, mt );
                 GFXVertexf( ur );
-                if (!multitex) GFXTexCoord2f( ms, mt );
-
-                else GFXTexCoord4f( ms, mt, ms, mt );
+                if (!multitex)
+                    GFXTexCoord2f( ms, mt );
+                else
+                    GFXTexCoord4f( ms, mt, ms, mt );
                 GFXVertexf( ul );
                 GFXEnd();
             }
@@ -286,11 +292,13 @@ void VSSprite::GetPosition( float &x1, float &y1 )
     x1 = xcenter;
     y1 = ycenter;
 }
+
 void VSSprite::SetSize( float x1, float y1 )
 {
     widtho2  = x1/2;
     heighto2 = y1/2;
 }
+
 void VSSprite::GetSize( float &x1, float &y1 )
 {
     x1 = widtho2*2;
@@ -313,11 +321,10 @@ void VSSprite::SetTimeSource( int source )
         ( (AnimatedTexture*) surface )->SetTimeSource( source );
 }
 
-int VSSprite::GetTimeSource()
+int VSSprite::GetTimeSource() const
 {
     if (isAnimation)
         return ( (AnimatedTexture*) surface )->GetTimeSource();
-
     else
         return 0;
 }

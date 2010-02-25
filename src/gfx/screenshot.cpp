@@ -6,7 +6,9 @@
 #else
 #include <GLUT/glut.h>
 #endif
+
 using namespace VSFileSystem;
+
 void Screenshot( const KBData&, KBSTATE state )
 {
     if (state == PRESS) {
@@ -18,7 +20,6 @@ void Screenshot( const KBData&, KBSTATE state )
         //memset(tmp,0x7f,xywh[2]*xywh[3]*4*sizeof(char));
         glPixelStorei( GL_PACK_ALIGNMENT, 1 );
         glPixelStorei( GL_PACK_ROW_LENGTH, xywh[2] );
-
         glFinish();
         glReadPixels( 0, 0, xywh[2], xywh[3], GL_RGB, GL_UNSIGNED_BYTE, tmp );
         glPixelStorei( GL_PACK_ROW_LENGTH, 0 );

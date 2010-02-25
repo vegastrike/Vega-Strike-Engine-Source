@@ -187,7 +187,7 @@ struct Music
 #ifdef _WIN32
 #include <direct.h>
 #include <windows.h>
-#define sleep( sec ) Sleep( sec*1000 );
+#define sleep( sec ) do{Sleep( sec*1000 );}while(0)
 #else
 #include <unistd.h>
 #include <stdio.h>

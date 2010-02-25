@@ -188,6 +188,8 @@ CPK3::CPK3( const char *filename )
     Open( filename );
 }
 
+static size_t bogus_sizet; //added by chuck_starchaser to squash some warnings
+
 bool CPK3::CheckPK3( FILE *f )
 {
     if (f == NULL)
@@ -199,7 +201,7 @@ bool CPK3::CheckPK3( FILE *f )
     long dhOffset = ftell( f );
     memset( &dh, 0, sizeof (dh) );
 
-    fread( &dh, sizeof (dh), 1, f );
+    bogus_sizet = fread( &dh, sizeof (dh), 1, f );
     dh.correctByteOrder();
     //Check
     if (dh.sig != TZipDirHeader::SIGNATURE) {
@@ -218,7 +220,7 @@ bool CPK3::CheckPK3( FILE *f )
         return false;
     }
     memset( m_pDirData, 0, dh.dirSize+dh.nDirEntries*sizeof (*m_papDir) );
-    fread( m_pDirData, dh.dirSize, 1, f );
+    bogus_sizet = fread( m_pDirData, dh.dirSize, 1, f );
 
     //Now process each entry.
     char *pfh = m_pDirData;
@@ -436,7 +438,7 @@ bool CPK3::ReadFile( int i, void *pBuf )
     TZipLocalHeader h;
 
     memset( &h, 0, sizeof (h) );
-    fread( &h, sizeof (h), 1, this->f );
+    bogus_sizet = fread( &h, sizeof (h), 1, this->f );
     h.correctByteOrder();
     if (h.sig != TZipLocalHeader::SIGNATURE) {
         cerr<<"PK3 - BAD LOCAL HEADER SIGNATURE !!!"<<endl;
@@ -446,7 +448,7 @@ bool CPK3::ReadFile( int i, void *pBuf )
     fseek( this->f, h.fnameLen+h.xtraLen, SEEK_CUR );
     if (h.compression == TZipLocalHeader::COMP_STORE) {
         //Simply read in raw stored data.
-        fread( pBuf, h.cSize, 1, this->f );
+        bogus_sizet = fread( pBuf, h.cSize, 1, this->f );
         return true;
     } else if (h.compression != TZipLocalHeader::COMP_DEFLAT) {
         cerr<<"BAD Compression level, found="<<h.compression<<" - expected="<<TZipLocalHeader::COMP_DEFLAT<<endl;
@@ -459,7 +461,7 @@ bool CPK3::ReadFile( int i, void *pBuf )
         return false;
     }
     memset( pcData, 0, h.cSize );
-    fread( pcData, h.cSize, 1, this->f );
+    bogus_sizet = fread( pcData, h.cSize, 1, this->f );
 
     bool     ret = true;
 

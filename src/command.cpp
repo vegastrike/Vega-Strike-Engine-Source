@@ -1,6 +1,6 @@
 #include "command.h"
 #include <sstream>
-#include <Python.h>
+#include "cs_python.h"
 #include <pyerrors.h>
 #include <pythonrun.h>
 #include "gldrv/winsys.h"
@@ -13,7 +13,9 @@
 #ifdef HAVE_SDL
 #   include <SDL/SDL.h>
 #endif
+
 using namespace std;
+
 //Introduction Comments {{{
 //The {{{ and }}} symbols are VIM Fold Markers.
 //They FOLD up the page so a user only needs to see a general outline of the entire huge file
@@ -263,30 +265,36 @@ using namespace std;
 //}}}
 
 //Coms object {{{
+
 coms::coms( TFunctor *t_in )
 {
     functor = t_in;
 }
+
 coms::coms( coms *oldCom )
 {
     if (oldCom->Name.size() > 0)
         Name.append( oldCom->Name );
     functor = oldCom->functor;
 }
+
 coms::coms( const coms &in )
 {
     if (in.Name.size() > 0)
         Name.append( in.Name );
     functor = in.functor;
 }
+
 coms::~coms()
 {
 //std::cout << "Destroying coms object\n";
 }
+
 //}}}
 class HoldCommands;
 HoldCommands *rcCMD = 0x0;
 bool  rcCMDEXISTS   = false; //initialize to false
+
 class HoldCommands   //Hold the commands here{{{
 {
 /*
@@ -334,7 +342,13 @@ class HoldCommands   //Hold the commands here{{{
     bool finishmeoff;
     class procs
     {
-public: procs( commandI *processor, coms *initcmd )
+public:
+        virtual ~procs()
+        {
+            while (rc.size() > 0)
+                rc.pop_back();
+        }
+        procs( commandI *processor, coms *initcmd )
         {
             proc = processor;
             rc.push_back( initcmd );
@@ -345,11 +359,6 @@ public: procs( commandI *processor, coms *initcmd )
             proc = blah->proc;
             for (vector< coms >::iterator iter = blah->rc.begin(); iter < blah->rc.end(); iter++)
                 rc.push_back( ( *(iter) ) );
-        }
-        ~procs()
-        {
-            while (rc.size() > 0)
-                rc.pop_back();
         }
         commandI     *proc;
         vector< coms >rc;
@@ -392,6 +401,7 @@ public: procs( commandI *processor, coms *initcmd )
         return NULL;
     }
 };
+
 //mmoc initclientobject;
 
 //Formerly RegisterPythonWithCommandInterp f***ingsonofat***w***lioness;
@@ -403,6 +413,7 @@ public: procs( commandI *processor, coms *initcmd )
 //}}}
 
 //{{{ command interpretor constructor
+
 commandI::commandI()
 {
     cout<<"Command Interpretor Created\n\r";
@@ -430,8 +441,10 @@ commandI::commandI()
     new RegisterPythonWithCommandInterpreter( this );     //mem leak - not cleaned up at end of program.
     //}}}
 }
+
 //}}}
 //{{{ command interpretor destructor
+
 commandI::~commandI()
 {
     {
@@ -461,8 +474,10 @@ commandI::~commandI()
         }
     }
 }
+
 //}}}
 //{{{ Menu object destructor
+
 menu::~menu()
 {
     for (mItem *iter;
@@ -472,9 +487,11 @@ menu::~menu()
         items.pop_back();
     }
 }
+
 //}}}
 
 //{{{ UNFINISHED HELP COMMAND
+
 void commandI::help( string &helponthis )
 {
     string buf;
@@ -482,8 +499,10 @@ void commandI::help( string &helponthis )
     buf.append( "But most commands are self supporting, just type them to see what they do.\n\r" );
 //conoutf(this, &buf);
 }
+
 //}}}
 //{{{ send prompt ONLY when 0 charactors are sent with a newline
+
 void commandI::prompt()
 {
     string l;
@@ -491,8 +510,10 @@ void commandI::prompt()
     conoutf( l );
 //std::cout << "Prompt called :)\n";
 }
+
 //}}}
 //{{{ dummy function
+
 void commandI::dummy( vector< string* > *d )
 {
     //{{{
@@ -505,8 +526,10 @@ void commandI::dummy( vector< string* > *d )
     conoutf( outs );
     //}}}
 }
+
 //}}}
 //list all the commands {{{
+
 #include <iomanip>
 void commandI::pcommands()
 {
@@ -514,7 +537,6 @@ void commandI::pcommands()
     ostringstream cmd;
     cmd<<"\n\rCommands available:\n\r";
     vector< coms >::iterator iter;
-
     HoldCommands::procs     *commands = rcCMD->getProc( this );
     for (iter = commands->rc.begin(); iter < commands->rc.end(); iter++)
         if (!( *(iter) ).functor->attribs.hidden && !( *(iter) ).functor->attribs.webbcmd) {
@@ -522,7 +544,6 @@ void commandI::pcommands()
                 if (immortal) {
                     if (x != 5) cmd<<setiosflags( ios::left )<<setw( 19 );
                     cmd<<( *(iter) ).Name.c_str();
-
                     x++;
                 }                 //we don't want to add the command if we arn't immortal
             } else {
@@ -541,8 +562,10 @@ void commandI::pcommands()
     cmd2.append( cmd.str() );
     conoutf( cmd2 );
 }
+
 //}}}
 //{{{ addCommand - Add a command to the interpreter
+
 void commandI::addCommand( TFunctor *com, const char *name )
 {
     cout<<"Adding command: "<<name<<endl;
@@ -559,8 +582,10 @@ void commandI::addCommand( TFunctor *com, const char *name )
     rcCMD->addCMD( *newOne, this );
 //rcCMD->rc.push_back(newOne);
 }
+
 //}}}
 //{{{ Remove a command remCommand(char *name)
+
 void commandI::remCommand( char *name )
 {
     HoldCommands::procs *findme = rcCMD->getProc( this );
@@ -575,6 +600,7 @@ void commandI::remCommand( char *name )
     cout<<"Error, command "<<name
         <<" not removed, try using the TFunctor *com version instead. Also, this is case sensitive ;)\n";
 }
+
 void commandI::remCommand( TFunctor *com )
 {
     HoldCommands::procs *findme = rcCMD->getProc( this );
@@ -588,8 +614,10 @@ void commandI::remCommand( TFunctor *com )
         }
     cout<<"Error, couldn't find the command that owns the memory area: "<<com<<endl;
 }
+
 //}}}
 //{{{ Find a command in the command interpretor
+
 coms* commandI::findCommand( const char *comm, int &sock_in )
 {
     HoldCommands::procs *findme = rcCMD->getProc( this );
@@ -717,6 +745,7 @@ coms* commandI::findCommand( const char *comm, int &sock_in )
     //shouldn't get here.
     return NULL;
 }
+
 /// }}}
 //strips up command, extracts the first word and runs
 //findCommand on it,
@@ -774,12 +803,14 @@ bool commandI::execute( string *incommand, bool isDown, int sock_in )
     //}}}
     return fexecute( incommand, isDown, sock_in );
 }
+
 //}}}
 //broken up into two execute functions
 //the one below is the real execute, the one above uses the menusystem
 //it's broken up so the menusystem can call fexecute themself at the right
 //time
 //Main Execute Function {{{
+
 bool commandI::fexecute( string *incommand, bool isDown, int sock_in )
 {
     size_t ls, y;
@@ -1312,9 +1343,11 @@ bool commandI::callMenu( char *name_in, char *args_in, string &d )
     //}}}
     return false;
 }
+
 //}}}
 
 //set a menu {{{
+
 string commandI::setMenu( string name_in )
 {
     string name;
@@ -1337,7 +1370,9 @@ string commandI::setMenu( string name_in )
         }
     return displaymenu();
 }
+
 //}}}
+
 void commandI::breakmenu()
 {
     while (menustack.size() > 0)
@@ -1345,6 +1380,7 @@ void commandI::breakmenu()
     menu_in  = NULL;
     menumode = false;
 }
+
 //}}}
 
 commandI *CommandInterpretor = NULL;
@@ -1416,6 +1452,8 @@ void commandI::keypress( int code, int modifiers, bool isDown, int x, int y )
         restore_main_loop();
         return;
     }
+}
+
 /* Proposed (Would need a couple commands inserted into the command processor
  *       // one to read a keymap file and one to re-map a single key
  *       // (and the keymap file would have to be read at startup)
@@ -1436,7 +1474,6 @@ void commandI::keypress( int code, int modifiers, bool isDown, int x, int y )
  *
  *
  */
-}
 
 /* ***************************************************************
 *   Possible Optimizations:

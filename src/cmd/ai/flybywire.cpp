@@ -19,32 +19,35 @@ using Orders::MatchVelocity;
 
 using Orders::MatchAngularVelocity;
 
-//#define MATCHLINVELSETUP()   Vector desired (desired_velocity);  /* cout << "desired= " << desired << endl; */ if (!(desired.i==-2 && desired.j==0 && desired.k==0) && !LocalVelocity) {     desired = parent->ToLocalCoordinates (desired);   }   Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
+//Careful with this macro!!! I can't wrap it in do{...}while(0) because it declares variables that are then
+//used by code that follows. Be sure it's never instantiated like a single statement body of a conditional
+//or loop, or the formatter might remove the braces and then you'll be in a heap of trouble looking for the
+//bug... --chuck_starchaser.
+#define MATCHLINVELSETUP()                                                                                                      \
+        Unit *match = parent->VelocityReference(); Vector desired( desired_velocity );  Vector FrameOfRef( 0,                   \
+                                                                                                           0,                   \
+                                                                                                           0 );                 \
+        if (match != NULL) {float dif1, dif2; match->GetVelocityDifficultyMult( dif1 ); dif1 *=                                 \
+                                match->graphicOptions.WarpFieldStrength;                                                        \
+                            parent->GetVelocityDifficultyMult( dif2 );                                                          \
+                            if (match->graphicOptions.WarpFieldStrength > 1) {dif2 *= parent->graphicOptions.WarpFieldStrength; \
+                            }                                                                                                   \
+                            FrameOfRef =                                                                                        \
+                                parent->ToLocalCoordinates( match->GetWarpVelocity()*dif1                                       \
+                                                            /dif2 ); }                                                          \
+        if (!LocalVelocity) {desired = parent->ToLocalCoordinates(                                                              \
+                                 desired ); }                                                                                   \
+        Vector velocity(                                                                                                        \
+            parent->UpCoordinateLevel( parent->GetVelocity() ) )
 
-//#define MATCHLINVELEXECUTE()  if(!(desired.i==-2 && desired.j==0 && desired.k==0)){ parent->Thrust ( (parent->GetMass()*(desired-velocity)/SIMULATION_ATOM), afterburn); }
-
-#define MATCHLINVELSETUP()                                                                                                  \
-    Unit*match = parent->VelocityReference(); Vector desired( desired_velocity );  Vector FrameOfRef( 0,                    \
-                                                                                                      0,                    \
-                                                                                                      0 );                  \
-    if (match != NULL) {float dif1, dif2; match->GetVelocityDifficultyMult( dif1 ); dif1 *=                                 \
-                            match->graphicOptions.WarpFieldStrength;                                                        \
-                        parent->GetVelocityDifficultyMult( dif2 );                                                          \
-                        if (match->graphicOptions.WarpFieldStrength > 1) {dif2 *= parent->graphicOptions.WarpFieldStrength; \
-                        }                                                                                                   \
-                        FrameOfRef =                                                                                        \
-                            parent->ToLocalCoordinates( match->GetWarpVelocity()*dif1                                       \
-                                                        /dif2 ); }                                                          \
-    if (!LocalVelocity) {desired = parent->ToLocalCoordinates(                                                              \
-                             desired ); }                                                                                   \
-    Vector velocity(                                                                                                        \
-        parent->UpCoordinateLevel( parent->GetVelocity() ) );
-
-#define MATCHLINVELEXECUTE()                                                                      \
-    {parent->Thrust( (parent->GetMass()                                                           \
-                      *(parent->ClampVelocity( desired,                                           \
-                                               afterburn )+FrameOfRef-velocity)/SIMULATION_ATOM), \
-                    afterburn ); }
+#define MATCHLINVELEXECUTE()                                                                         \
+    do {                                                                                             \
+        parent->Thrust( (parent->GetMass()                                                           \
+                         *(parent->ClampVelocity( desired,                                           \
+                                                  afterburn )+FrameOfRef-velocity)/SIMULATION_ATOM), \
+                       afterburn );                                                                  \
+    }                                                                                                \
+    while (0)
 
 /**
  *
@@ -61,7 +64,7 @@ void MatchLinearVelocity::Execute()
         if (i++%1000 == 0)
             VSFileSystem::vs_fprintf( stderr, "cannot execute suborders as Linear Velocity Matcher" );              //error printout just in case
     }
-    MATCHLINVELSETUP()
+    MATCHLINVELSETUP();
     if (willfinish) {
         if ( (done = fabs( desired.i+FrameOfRef.i-velocity.i ) < VELTHRESHOLD && fabs( desired.j+FrameOfRef.j-velocity.j )
                      < VELTHRESHOLD && fabs( desired.k+FrameOfRef.k-velocity.k ) < VELTHRESHOLD) )
@@ -91,23 +94,6 @@ void Orders::MatchRoll::Execute()
     parent->ApplyLocalTorque( parent->GetMoment()*Vector( 0, 0, desired_roll-angvel.k )/SIMULATION_ATOM );
     parent->ApplyLocalTorque( parent->GetMoment()*Vector( 0, 0, desired_roll-angvel.k )/SIMULATION_ATOM );
 }
-/*  //deprecated: now inherits from MatchAngVelocity and uses LinVel macros
- *
- * #define MATCHANGVELOCITYSETUP() \
- *
- *  Vector desired (desired_ang_velocity); \
- *
- *  Vector angvel(parent->UpCoordinateLevel(parent->GetAngularVelocity())); \
- *
- *  if (!LocalAng)\
- *
- *   desired = parent->ToLocalCoordinates (desired);
- *
- * #define MATCHANGVELOCITYEXECUTE() \
- *
- *  parent->ApplyLocalTorque (parent->GetMoment()*(desired-parent->UpCoordinateLevel(parent->GetAngularVelocity()))/SIMULATION_ATOM);
- *
- */
 
 void MatchAngularVelocity::Execute()
 {
@@ -140,7 +126,7 @@ void MatchVelocity::Execute()
 {
     MatchAngularVelocity::Execute();
 
-    MATCHLINVELSETUP()
+    MATCHLINVELSETUP();
     if (willfinish) {
         if ( (done = done && fabs( desired.i-velocity.i ) < VELTHRESHOLD && fabs( desired.j-velocity.j ) < VELTHRESHOLD
                      && fabs( desired.k-velocity.k ) < VELTHRESHOLD) )
@@ -156,6 +142,7 @@ MatchVelocity::~MatchVelocity()
     fflush( stderr );
 #endif
 }
+
 static bool getControlType()
 {
     static bool control = XMLSupport::parse_bool( vs_config->getVariable( "physics", "CarControl",
@@ -167,6 +154,7 @@ static bool getControlType()
                                                                         ) );
     return control;
 }
+
 FlyByWire::FlyByWire() : MatchVelocity( Vector( 0, 0, 0 ), Vector( 0, 0, 0 ), true, false, false )
     , sheltonslide( false )
     , controltype( !getControlType() )
@@ -273,26 +261,32 @@ void FlyByWire::Accel( float per )
 }
 
 #define FBWABS( m ) (m >= 0 ? m : -m)
+
 void FlyByWire::ThrustRight( float percent )
 {
     DesiredShiftVelocity.i = parent->GetComputerData().max_speed()*percent;
 }
+
 void FlyByWire::ThrustUp( float percent )
 {
     DesiredShiftVelocity.j = parent->GetComputerData().max_speed()*percent;
 }
+
 void FlyByWire::ThrustFront( float percent )
 {
     DesiredShiftVelocity.k = parent->GetComputerData().max_speed()*percent;
 }
+
 void FlyByWire::DirectThrustRight( float percent )
 {
     DirectThrust.i = parent->Limits().lateral*percent;
 }
+
 void FlyByWire::DirectThrustUp( float percent )
 {
     DirectThrust.j = parent->Limits().vertical*percent;
 }
+
 void FlyByWire::DirectThrustFront( float percent )
 {
     if (percent > 0)
@@ -300,6 +294,7 @@ void FlyByWire::DirectThrustFront( float percent )
     else
         DirectThrust.k = parent->Limits().retro*percent;
 }
+
 void FlyByWire::Execute()
 {
     bool   desireThrust = false;

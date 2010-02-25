@@ -25,10 +25,8 @@
 
 #include <expat.h>
 #include "xml_support.h"
-
 #include "vegastrike.h"
 #include <assert.h>
-
 #include "config_xml.h"
 #include "easydom.h"
 #include "cmd/ai/flykeyboard.h"
@@ -47,6 +45,7 @@
 using std::cout;
 using std::endl;
 using std::cerr;
+
 /* *********************************************************** */
 
 GameVegaConfig::GameVegaConfig( const char *configfile ) : VegaConfig( configfile )
@@ -81,6 +80,7 @@ GameVegaConfig::GameVegaConfig( const char *configfile ) : VegaConfig( configfil
 /* *********************************************************** */
 
 #if 1
+
 const float volinc = 1;
 const float dopinc = .1;
 void RunPythonPress( const KBData &, KBSTATE );
@@ -90,16 +90,19 @@ void RunPythonPhysicsFrame( const KBData &, KBSTATE );
 void incmusicvol( const KBData&, KBSTATE a );
 void decmusicvol( const KBData&, KBSTATE a );
 bool screenshotkey = false;
+
 void doReloadShader( const KBData&, KBSTATE a )
 {
     if (a == PRESS)
         GFXReloadDefaultShader();
 }
+
 void doScreenshot( const KBData&, KBSTATE a )
 {
     if (a == PRESS)
         screenshotkey = true;
 }
+
 void incvol( const KBData&, KBSTATE a )
 {
 #ifdef HAVE_AL
@@ -115,6 +118,7 @@ void decvol( const KBData&, KBSTATE a )
         AUDChangeVolume( AUDGetVolume()-volinc );
 #endif
 }
+
 void mute( const KBData&, KBSTATE a )
 {
 #ifdef HAVE_AL
@@ -137,7 +141,8 @@ void decdop( const KBData&, KBSTATE a )
         AUDChangeDoppler( AUDGetDoppler()-dopinc );
 #endif
 }
-#endif
+
+#endif //1
 /* *********************************************************** */
 
 void GameVegaConfig::initKeyMap()
@@ -190,12 +195,10 @@ void GameVegaConfig::initKeyMap()
     key_map["left-alt"]        = WSK_LALT;
     key_map["right-meta"]      = WSK_RMETA;
     key_map["left-meta"]       = WSK_LMETA;
-
     key_map["cursor-left"]     = WSK_LEFT;
     key_map["cursor-up"]       = WSK_UP;
     key_map["cursor-right"]    = WSK_RIGHT;
     key_map["cursor-down"]     = WSK_DOWN;
-
     key_map["cursor-pageup"]   = WSK_PAGEUP;
     key_map["cursor-pagedown"] = WSK_PAGEDOWN;
     key_map["cursor-home"]     = WSK_HOME;
@@ -204,8 +207,8 @@ void GameVegaConfig::initKeyMap()
     key_map["backspace"]       = WSK_BACKSPACE;
     key_map["capslock"]        = WSK_CAPSLOCK;
     key_map["cursor-delete"]   = WSK_DELETE;
-    key_map["tab"] = WSK_TAB;
-    key_map["esc"] = WSK_ESCAPE;
+    key_map["tab"]             = WSK_TAB;
+    key_map["esc"]             = WSK_ESCAPE;
     key_map["break"]           = WSK_BREAK;
     key_map["pause"]           = WSK_PAUSE;
 }
@@ -249,6 +252,7 @@ static void ComposeFunctions( const KBData &composition, KBSTATE k )
             (*i).second( args, k );
     }
 }
+
 static void ComposeFunctionsToggle( const KBData &composition, KBSTATE k )
 {
     if (k == PRESS || k == RELEASE)
@@ -356,16 +360,13 @@ void GameVegaConfig::checkHatswitch( int nr, configNode *node )
         return;
     }
     string strval = node->attr_value( "value" );
-
     float  val    = atof( strval.c_str() );
     if (val > 1.0 || val < -1.0) {
         cout<<"only hatswitch values from -1.0 to 1.0 allowed"<<endl;
         return;
     }
     hatswitch[nr][hs_value_index] = val;
-
     cout<<"setting hatswitch nr "<<nr<<" "<<hs_value_index<<" = "<<val<<endl;
-
     hs_value_index++;
 }
 
@@ -499,7 +500,6 @@ void GameVegaConfig::checkBind( configNode *node )
             return;
         }
         BindDigitalHatswitchKey( joy_nr, hsw_nr, dir_index, handler, KBData( additional_data ) );
-
         cout<<"Bound joy "<<joy_nr<<" hatswitch "<<hsw_nr<<" dir_index "<<dir_index<<" to command "<<cmdstr<<endl;
     }
 #if 1
@@ -750,6 +750,7 @@ CommandMap initGlobalCommandMap()
 
     commandMap["ConsoleKeys::BringConsole"]        = ConsoleKeys::BringConsole;
     commandMap["NewShader"]                        = doReloadShader;
+    
     return commandMap;
 }
 

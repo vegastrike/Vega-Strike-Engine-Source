@@ -1,5 +1,6 @@
 #ifndef _QUATERNION_H_
 #define _QUATERNION_H_
+
 #include "vec.h"
 #include "matrix.h"
 
@@ -72,6 +73,7 @@ struct Quaternion
         float zz = v.k*zw;
 
 #define M( B, A ) mat.r[B*3+A]
+
         M( 0, 0 ) = 1-(yy+zz);
         M( 1, 0 ) = (xy+sz);
         M( 2, 0 ) = (xz-sy);
@@ -87,6 +89,7 @@ struct Quaternion
         //M(3,3) = 1;
 
 #undef M
+
     }
 };
 
@@ -94,6 +97,7 @@ inline Quaternion operator-( const Quaternion &a, const Quaternion &b )
 {
     return Quaternion( a.s-b.s, a.v-b.v );
 }
+
 inline Quaternion operator+( const Quaternion &a, const Quaternion &b )
 {
     return Quaternion( a.s+b.s, a.v+b.v );

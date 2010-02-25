@@ -5,7 +5,9 @@
 #include "vsfilesystem.h"
 #include "xml_support.h"
 #include "ani_texture.h"
+
 extern int pixelscalesize; //from sphere.cpp
+
 void RingMesh::InitRing( float iradius,
                          float oradius,
                          int slices,
@@ -31,12 +33,10 @@ void RingMesh::InitRing( float iradius,
     ab[0]     = a+'0';
     hash_name = string( "@@Ring" )+"#"+texture+"#"+XMLSupport::tostring( slices )+ab+"#"+XMLSupport::tostring( theta_min )+"#"
                 +XMLSupport::tostring( theta_max );
-    if ( LoadExistant( hash_name, Vector( iradius, iradius, iradius ), 0 ) ) {
+    if ( LoadExistant( hash_name, Vector( iradius, iradius, iradius ), 0 ) )
         return;
-    } else {}
     oldmesh = AllocNewMeshesEachInSizeofMeshSpace( numspheres );     //FIXME::RISKY::MIGHT HAVE DIFFERENT SIZES!! DON"T YOU DARE ADD XTRA VARS TO SphereMesh calsshave to!
     numlods = numspheres;
-
     meshHashTable.Put( hash_name = VSFileSystem::GetSharedMeshHashName( hash_name, Vector( iradius,
                                                                                            iradius,
                                                                                            iradius ), 0 ), oldmesh );
@@ -62,11 +62,10 @@ void RingMesh::InitRing( float iradius,
         /* Code below adapted from gluSphere */
         dtheta = (theta_max-theta_min)/(GLfloat) slices;
         ds     = 1.0/slices;
-        int numQuadstrips = 2;
+        int numQuadstrips    = 2;
         imin   = 0;
         imax   = numQuadstrips;
-
-        int numvertex = (slices+1)*4;
+        int numvertex        = (slices+1)*4;
         GFXVertex     *vertexlist = new GFXVertex[numvertex];
         GFXVertex     *vl    = vertexlist;
         enum POLYTYPE *modes = new enum POLYTYPE[numQuadstrips];
@@ -79,7 +78,6 @@ void RingMesh::InitRing( float iradius,
                 theta = j*dtheta+theta_min;
                 QVector unitpos( R.Scale( -sin( theta ) )+S.Scale( -cos( theta ) ) );
                 QVector up = R.Cross( S )*( 1-(2*fir) );
-
                 vertexlist[j*2+fir].i = up.i;
                 vertexlist[j*2+fir].k = up.j;
                 vertexlist[j*2+fir].j = up.k;
@@ -90,7 +88,6 @@ void RingMesh::InitRing( float iradius,
                 vertexlist[j*2+fir].y = unitpos.k*iradius;
                 mn = vertexlist[j*2+fir].GetVertex().Min( mn );
                 mx = vertexlist[j*2+fir].GetVertex().Max( mx );
-
                 vertexlist[j*2+sec].i = unitpos.i;
                 vertexlist[j*2+sec].k = unitpos.j;
                 vertexlist[j*2+sec].j = unitpos.k;
@@ -130,7 +127,6 @@ void RingMesh::InitRing( float iradius,
             Decal[0] = new Texture( texture, 0, mipmap, TEXTURE2D, TEXTURE_2D, g_game.use_planet_textures ? GFXTRUE : GFXFALSE );
         }
         setEnvMap( envMapping );
-
         Mesh *oldorig = orig;
         refcount = 1;
         orig     = NULL;
@@ -150,7 +146,8 @@ void RingMesh::InitRing( float iradius,
     }
     draw_queue = odq;
 }
-float RingMesh::clipRadialSize()
+
+float RingMesh::clipRadialSize() const
 {
     return /*mx.Magnitude()*.33+*/ rSize();
 }

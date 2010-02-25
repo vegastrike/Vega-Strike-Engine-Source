@@ -272,7 +272,7 @@ inline const Vector Vector::Transform( const class Matrix &m1 ) const
 //these vectors are going to be just normals...
 inline Vector InvTransformNormal( const Matrix &t, const Vector &v )
 {
-#define M( A, B ) t.r[B*3+A]
+#define M( A, B ) (t.r[B*3+A])
     return Vector( v.i*M( 0, 0 )+v.j*M( 1, 0 )+v.k*M( 2, 0 ),
                   v.i*M( 0, 1 )+v.j*M( 1, 1 )+v.k*M( 2, 1 ),
                   v.i*M( 0, 2 )+v.j*M( 1, 2 )+v.k*M( 2, 2 ) );
@@ -281,7 +281,7 @@ inline Vector InvTransformNormal( const Matrix &t, const Vector &v )
 }
 inline QVector InvTransformNormal( const Matrix &t, const QVector &v )
 {
-#define M( A, B ) t.r[B*3+A]
+#define M( A, B ) (t.r[B*3+A])
     return QVector( v.i*M( 0, 0 )+v.j*M( 1, 0 )+v.k*M( 2, 0 ),
                    v.i*M( 0, 1 )+v.j*M( 1, 1 )+v.k*M( 2, 1 ),
                    v.i*M( 0, 2 )+v.j*M( 1, 2 )+v.k*M( 2, 2 ) );

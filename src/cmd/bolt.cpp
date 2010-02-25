@@ -12,6 +12,8 @@
 #include "unit.h"
 #include "audiolib.h"
 #include "config_xml.h"
+#include "gfx/camera.h"
+
 using std::vector;
 using std::string;
 GFXVertexList*bolt_draw::boltmesh = NULL;

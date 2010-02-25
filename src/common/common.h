@@ -20,6 +20,7 @@
 
 #ifndef _WIN32
 #include <string>
+
 //Returns where the data directory is. Returns the cwd if it can't find the data dir.
 //Note: When it returns it has already changed dir to where the data directory is
 std::string getdatadir();

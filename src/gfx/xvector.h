@@ -57,7 +57,7 @@ private:
     friend class QuadTree;
     friend class CoordinateSelect;
     friend class AIScript;
-    friend class PlanetaryTransform;
+    //friend class PlanetaryTransform;
     friend class SphericalTransform;
     inline YVector operator=( const YVector& );
 public:

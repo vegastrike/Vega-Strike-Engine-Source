@@ -5,9 +5,9 @@
 #endif
 #include <float.h>
 #include <assert.h>
-#define PBEHIND -1
-#define PFRONT 1
-#define PUNK 0
+#define PBEHIND (-1)
+#define PFRONT (1)
+#define PUNK (0)
 
 #define WHICHSID( v ) ( ( (v.x*a+v.y*b+v.z*c+d) > 0 )*2-1 )
 

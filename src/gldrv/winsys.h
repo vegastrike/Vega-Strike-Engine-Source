@@ -318,8 +318,8 @@ void winsys_enable_key_repeat( bool enabled );
 void winsys_warp_pointer( int x, int y );
 void winsys_show_cursor( bool visible );
 
-void winsys_init( int *argc, char **argv, char *window_title,
-		  char *icon_title );
+void winsys_init( int *argc, char **argv, char const *window_title,
+		  char const *icon_title );
 void winsys_shutdown();
 
 void winsys_process_events(); /* Never returns */

@@ -16,19 +16,15 @@ class Technique
     std::string name;
     std::string fallback;
     bool compiled;
-
 public:
     class Pass
     {
 /** Compiled and linked program */
         int program;
-
 /** Vertex Program file before compilation */
         std::string vertexProgram;
-
 /** Fragment Program file before compilation */
         std::string fragmentProgram;
-
 public:
         enum Tristate
         {
@@ -48,7 +44,6 @@ public:
              * It is rendered using the fixed function pipeline.
              */
             FixedPass,
-
             /** A shader pass is a configurable pass that uses shaders to do everything.
              * Vertex and fragment programs must be specified.
              */
@@ -59,19 +54,14 @@ public:
         {
             /** Whatever the mesh specifies as blend mode */
             Default,
-
             /** Blend function ONE ONE */
             Add,
-
             /** Blend function SRCCOLOR ZERO */
             Multiply,
-
             /** Blend function ALPHA INVSRCALPHA */
             AlphaBlend,
-
             /** Blend function ONE ZERO */
             Decal,
-            
             /** Blend function ONE INVSRCALPHA */
             PremultAlphaBlend
         };
@@ -109,16 +99,12 @@ public:
             {
                 /** Nothing - blank */
                 None,
-
                 /** The mesh's Decal with specified numeric index */
                 Decal,
-
                 /** The texture specified with a path */
                 File,
-
                 /** The current environment cubemap */
                 Environment,
-
                 /** The mesh's detail texture (if there are more than one, it can be indexed) */
                 Detail
             };
@@ -127,16 +113,12 @@ public:
             {
                 /** Nothing - blank */
                 TexDefault,
-
                 /** Normal, 2D texture */
                 Tex2D,
-
                 /** 3D DDS texture */
                 Tex3D,
-
                 /** Packed cube texture */
                 TexCube,
-
                 /** Separated cube texture */
                 TexSepCube
             };
@@ -331,7 +313,7 @@ public:
         void compile();
 
 /** Return whether the pass has been compiled or not */
-        bool isCompiled();
+        bool isCompiled() const;
     };
 
 protected:

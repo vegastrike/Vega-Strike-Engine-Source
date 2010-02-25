@@ -300,9 +300,9 @@ Vector Planet::AddSpaceElevator( const std::string &name, const std::string &fac
         else
             ElevatorLoc.p.Set( -dir.i*mn.i, -dir.j*mn.j, -dir.k*mn.k );
         Unit *un = UnitFactory::createUnit( name.c_str(), true, FactionUtil::GetFactionIndex( faction ), "", NULL );
-        if (image->dockingports.back().pos.MagnitudeSquared() < 10)
-            image->dockingports.clear();
-        image->dockingports.push_back( DockingPorts( ElevatorLoc.p, un->rSize()*1.5, 0, true ) );
+        if (pImage->dockingports.back().pos.MagnitudeSquared() < 10)
+            pImage->dockingports.clear();
+        pImage->dockingports.push_back( DockingPorts( ElevatorLoc.p, un->rSize()*1.5, 0, true ) );
         un->SetRecursiveOwner( this );
         un->SetOrientation( ElevatorLoc.getQ(), ElevatorLoc.getR() );
         un->SetPosition( ElevatorLoc.p );
@@ -523,7 +523,7 @@ void Planet::InitPlanet( QVector x,
             float dock = radius*planetdockportsize;
             if (dock-radius < planetdockportminsize)
                 dock = radius+planetdockportminsize;
-            image->dockingports.push_back( DockingPorts( Vector( 0, 0, 0 ), dock, 0, true ) );
+            pImage->dockingports.push_back( DockingPorts( Vector( 0, 0, 0 ), dock, 0, true ) );
         }
     }
     string tempname = ( ::getCargoUnitName( filename ) );
@@ -536,13 +536,13 @@ void Planet::InitPlanet( QVector x,
 
     static bool smartplanets = XMLSupport::parse_bool( vs_config->getVariable( "physics", "planets_can_have_subunits", "false" ) );
     if ( un->name != string( "LOAD_FAILED" ) ) {
-        image->cargo = un->GetImageInformation().cargo;
-        image->CargoVolume   = un->GetImageInformation().CargoVolume;
-        image->UpgradeVolume = un->GetImageInformation().UpgradeVolume;
-        VSSprite *tmp = image->hudImage;
-        image->hudImage = un->GetImageInformation().hudImage;
-        un->GetImageInformation().hudImage = tmp;
-        maxwarpenergy   = un->WarpCapData();
+        pImage->cargo = un->GetImageInformation().cargo;
+        pImage->CargoVolume   = un->GetImageInformation().CargoVolume;
+        pImage->UpgradeVolume = un->GetImageInformation().UpgradeVolume;
+        VSSprite *tmp = pImage->pHudImage;
+        pImage->pHudImage     = un->GetImageInformation().pHudImage;
+        un->GetImageInformation().pHudImage = tmp;
+        maxwarpenergy = un->WarpCapData();
         if (smartplanets) {
             SubUnits.prepend( un );
             un->SetRecursiveOwner( this );

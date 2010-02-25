@@ -4,7 +4,7 @@
 #ifdef _POSIX_C_SOURCE
 #undef _POSIX_C_SOURCE
 #endif
-#include <Python.h>
+#include "cs_python.h"
 #include "hashtable.h"
 #include <string>
 #include <compile.h>

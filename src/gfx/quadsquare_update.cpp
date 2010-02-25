@@ -12,11 +12,9 @@ void quadsquare::EnableEdgeVertex( int index, bool IncrementCount, const quadcor
     if ( IncrementCount == true && (index == 0 || index == 3) )
         SubEnabledCount[index&1]++;
     //Now we need to enable the opposite edge vertex of the adjacent square (i.e. the alias vertex).
-
     //This is a little tricky, since the desired neighbor node may not exist, in which
     //case we have to create it, in order to prevent cracks.  Creating it may in turn cause
     //further edge vertices to be enabled, propagating updates through the tree.
-
     //The sticking point is the quadcornerdata list, which
     //conceptually is just a linked list of activation structures.
     //In this function, however, we will introduce branching into
@@ -24,7 +22,6 @@ void quadsquare::EnableEdgeVertex( int index, bool IncrementCount, const quadcor
     //of obscure and hard to explain in words, but basically what
     //it means is that our implementation has to be properly
     //recursive.
-
     //Travel upwards through the tree, looking for the parent in common with our desired neighbor.
     //Remember the path through the tree, so we can travel down the complementary path to get to the neighbor.
     quadsquare *p = this;
@@ -50,7 +47,6 @@ void quadsquare::EnableEdgeVertex( int index, bool IncrementCount, const quadcor
     //Get a pointer to our neighbor (create if necessary), by walking down
     //the quadtree from our shared ancestor.
     p      = p->EnableDescendant( ct, stack, *pcd );
-
     //Finally: enable the vertex on the opposite edge of our neighbor, the alias of the original vertex.
     index ^= 2;
     p->EnabledFlags |= (1<<index);
@@ -82,7 +78,6 @@ void quadsquare::CreateChild( int index, const quadcornerdata &cd )
     if (Child[index] == 0) {
         quadcornerdata q;
         SetupCornerData( &q, cd, index );
-
         Child[index] = new quadsquare( &q );
     }
 }
@@ -108,7 +103,6 @@ void quadsquare::NotifyChildDisable( const quadcornerdata &cd, int index )
 //if it isn't static.
     //Clear enabled flag for the child.
     EnabledFlags &= ~(16<<index);
-
     //Update child enabled counts for the affected edge verts.
     quadsquare *s;
     if (index&2) s = this;
@@ -203,10 +197,12 @@ static unsigned int transformstage( unsigned int stage, updateparity *updateorde
     }
     return transformedstage;
 }
+
 int identityparity( int i )
 {
     return i;
 }
+
 int sideparityodd( int i )
 {
     switch (i)
@@ -225,6 +221,7 @@ int sideparityodd( int i )
     }
     return 0;
 }
+
 int upparityodd( int i )
 {
     switch (i)
@@ -243,6 +240,7 @@ int upparityodd( int i )
     }
     return 0;
 }
+
 int sideupparityodd( int i )
 {
     switch (i)
@@ -291,15 +289,14 @@ void quadsquare::UpdateAux( const quadcornerdata &cd,
         && VertexTest( cd.xorg+(half<<1), Vertex[1].Y, cd.zorg+half, Error[0], ViewerLocation ) == true ) {
         EnableEdgeVertex(
             0,
-            false,
-            cd );                                                                                                                                                       //East vert.
+            false, cd );             //East vert.
     }
     if ( (EnabledFlags&8) == 0
         && VertexTest( cd.xorg+half, Vertex[4].Y, cd.zorg+(half<<1), Error[1], ViewerLocation ) == true ) {
         EnableEdgeVertex(
             3,
             false,
-            cd );                                                                                                                                                       //South vert.
+            cd );             //South vert.
     }
     if (cd.Level > 0) {
         if ( (EnabledFlags&32) == 0 )
@@ -314,7 +311,6 @@ void quadsquare::UpdateAux( const quadcornerdata &cd,
         if ( (EnabledFlags&128) == 0 )
             if (BoxTest( cd.xorg+half, cd.zorg+half, half, MinY, MaxY, Error[5], ViewerLocation ) == true) EnableChild( 3, cd );
         //se child.
-
         //Recurse into child quadrants as necessary.
         quadcornerdata q;
         if (whichChildren) {
@@ -379,6 +375,7 @@ inline Vector Normalise( const Vector &vec, const float scale )
 {
     return vec*( scale/vec.Magnitude() );
 }
+
 Vector quadsquare::MakeLightness( float xslope, float zslope, const Vector &loc )
 {
     Vector tmp( nonlinear_trans->TransformNormal( loc.Cast(), QVector( -xslope, 1, -zslope ) ).Cast() );
@@ -395,10 +392,8 @@ Vector quadsquare::MakeLightness( float xslope, float zslope, const Vector &loc 
 float quadsquare::RecomputeErrorAndLighting( const quadcornerdata &cd )
 {
     int   i;
-
     //Measure error of center and edge vertices.
     float maxerror = 0;
-
     //Compute error of center vert.
     float e;
     if (cd.ChildIndex&1)
@@ -419,7 +414,6 @@ float quadsquare::RecomputeErrorAndLighting( const quadcornerdata &cd )
     e = fabs( Vertex[1].Y-(cd.Verts[0].Y+cd.Verts[3].Y)*0.5 );
     if (e > maxerror) maxerror = e;
     Error[0] = (unsigned short) e;
-
     e = fabs( Vertex[4].Y-(cd.Verts[2].Y+cd.Verts[3].Y)*0.5 );
     if (e > maxerror) maxerror = e;
     Error[1] = (unsigned short) e;
@@ -449,55 +443,52 @@ float quadsquare::RecomputeErrorAndLighting( const quadcornerdata &cd )
     //
     //Compute quickie demo lighting.
     //
-
     float OneOverSize  = 1.0/(2<<cd.Level);
     GFXVertex *vertexs = vertices->BeginMutate( 0 )->vertices;
     GFXVertex *V = &vertexs[Vertex[0].vertindex];
     V->SetNormal( MakeLightness( (Vertex[1].Y-Vertex[3].Y)*OneOverSize,
                                 (Vertex[4].Y-Vertex[2].Y)*OneOverSize,
                                 V->GetConstVertex() ) );
-
     float v;
     quadsquare *s = GetFarNeighbor( 0, cd );
-    if (s) v = s->Vertex[0].Y;
-
-    else v = Vertex[1].Y;
+    if (s)
+        v = s->Vertex[0].Y;
+    else
+        v = Vertex[1].Y;
     V = &vertexs[Vertex[1].vertindex];
     V->SetNormal( MakeLightness( (v-Vertex[0].Y)*OneOverSize,
                                 (cd.Verts[3].Y-cd.Verts[0].Y)*OneOverSize,
                                 V->GetConstVertex() ) );
-
     s = GetFarNeighbor( 1, cd );
-    if (s) v = s->Vertex[0].Y;
-
-    else v = Vertex[2].Y;
+    if (s)
+        v = s->Vertex[0].Y;
+    else
+        v = Vertex[2].Y;
     V = &vertexs[Vertex[2].vertindex];
     V->SetNormal( MakeLightness( (cd.Verts[0].Y-cd.Verts[1].Y)*OneOverSize,
                                 (Vertex[0].Y-v)*OneOverSize,
                                 V->GetConstVertex() ) );
-
     s = GetFarNeighbor( 2, cd );
-    if (s) v = s->Vertex[0].Y;
-
-    else v = Vertex[3].Y;
+    if (s)
+        v = s->Vertex[0].Y;
+    else
+        v = Vertex[3].Y;
     V = &vertexs[Vertex[3].vertindex];
     V->SetNormal( MakeLightness( (Vertex[0].Y-v)*OneOverSize,
                                 (cd.Verts[2].Y-cd.Verts[1].Y)*OneOverSize,
                                 V->GetConstVertex() ) );
-
     s = GetFarNeighbor( 3, cd );
-    if (s) v = s->Vertex[0].Y;
-
-    else v = Vertex[4].Y;
+    if (s)
+        v = s->Vertex[0].Y;
+    else
+        v = Vertex[4].Y;
     V = &vertexs[Vertex[4].vertindex];
     V->SetNormal( MakeLightness( (cd.Verts[3].Y-cd.Verts[2].Y)*OneOverSize,
                                 (v-Vertex[0].Y)*OneOverSize,
                                 V->GetConstVertex() ) );
     vertices->EndMutate();
-
     //The error, MinY/MaxY, and lighting values for this node and descendants are correct now.
     Dirty = false;
-
     return maxerror;
 }
 

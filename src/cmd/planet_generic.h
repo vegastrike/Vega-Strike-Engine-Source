@@ -8,6 +8,7 @@
 //#include "gfx/planetary_transform.h"
 #include "gfxlib_struct.h"
 #include "images.h"
+
 class Atmosphere;
 class PlanetaryTransform;
 class ContinuousTerrain;

@@ -34,11 +34,11 @@ class Exception : public std::exception
 {
 private:
     std::string _message;
-
-public: Exception() {}
+public:
+    virtual ~Exception() throw () {}
+    Exception() {}
     Exception( const Exception &other ) : _message( other._message ) {}
     explicit Exception( const std::string &message ) : _message( message ) {}
-    virtual ~Exception() throw () {}
     virtual const char * what() const throw ()
     {
         return _message.c_str();
@@ -63,7 +63,6 @@ static T parseEnum( const string &s, const map< string, T > &enumMap )
     typename map< string, T >::const_iterator it = enumMap.find( s );
     if ( it != enumMap.end() )
         return it->second;
-
     else throw InvalidParameters( "Enumerated value \""+s+"\" not recognized" );
 }
 
@@ -73,7 +72,6 @@ static T parseEnum( const string &s, const map< string, T > &enumMap, T deflt )
     typename map< string, T >::const_iterator it = enumMap.find( s );
     if ( it != enumMap.end() )
         return it->second;
-
     else
         return deflt;
 }
@@ -131,17 +129,18 @@ static Technique::Pass::Tristate parseTristate( const std::string &s )
     return parseEnum( s, enumMap );
 }
 
-static Technique::Pass::BlendMode parseBlendMode( const std::string &s )
+static Technique::Pass::BlendMode parseBlendMode(const std::string &s)
 {
-    static map< string, Technique::Pass::BlendMode >enumMap;
-    if ( enumMap.empty() ) {
+    static map<string, Technique::Pass::BlendMode> enumMap;
+    if (enumMap.empty()) {
         enumMap["default"]     = Technique::Pass::Default;
         enumMap["add"]         = Technique::Pass::Add;
         enumMap["multiply"]    = Technique::Pass::Multiply;
         enumMap["alpha_blend"] = Technique::Pass::AlphaBlend;
         enumMap["decal"]       = Technique::Pass::Decal;
+        enumMap["premult_alpha"]=Technique::Pass::PremultAlphaBlend;
     }
-    return parseEnum( s, enumMap );
+    return parseEnum(s, enumMap);
 }
 
 static Technique::Pass::Face parseFace( const std::string &s )
@@ -183,9 +182,9 @@ static Technique::Pass::DepthFunction parseDepthFunction( const std::string &s )
         }
         return parseEnum(s, enumMap);
     }
-    return parseEnum( s, enumMap );
+    return parseEnum(s, enumMap);
 }
-
+    
 static Technique::Pass::ShaderParam::Semantic parseAutoParamSemantic( const std::string &s )
 {
     static map< string, Technique::Pass::ShaderParam::Semantic >enumMap;
@@ -394,7 +393,7 @@ void Technique::Pass::compile()
 }
 
 /** Return whether the pass has been compiled or not */
-bool Technique::Pass::isCompiled()
+bool Technique::Pass::isCompiled() const
 {
     return (type != ShaderPass) || (program != 0);
 }
@@ -475,7 +474,6 @@ Technique::Technique( const string &nam ) :
                             int target;
                             if (pass.type == Pass::ShaderPass)
                                 target = parseInt( el->getAttributeValue( "target", "" ), -1 );
-
                             else
                                 target = parseInt( el->getAttributeValue( "target", "" ) );
                             pass.addTextureUnit(
@@ -549,14 +547,12 @@ TechniquePtr Technique::getTechnique( const std::string &name )
                                          e.what() );
                 if (!fallback.empty() && fallback != name)
                     ptr = getTechnique( fallback );
-
                 else
                     break;
             }
         }
         if ( ptr->isCompiled() )
             techniqueCache[name] = ptr;
-
         else throw InvalidParameters( "Could not compile any technique for \""+name+"\"" );
         return ptr;
     }

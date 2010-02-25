@@ -17,6 +17,7 @@
 #include "lin_time.h"
 #include "unit_const_cache.h"
 #define VS_PI 3.1415926535897931
+
 CSVRow LookupUnitRow( const string &unitname, const string &faction )
 {
     string hashname = unitname+"__"+faction;
@@ -30,7 +31,7 @@ CSVRow LookupUnitRow( const string &unitname, const string &faction )
     }
     return CSVRow();
 }
-using namespace std;
+
 extern int GetModeFromName( const char *input_buffer );
 extern void pushMesh( std::vector< Mesh* >&mesh,
                       float &randomstartframe,
@@ -57,6 +58,7 @@ static vector< string >parseSemicolon( string inp )
     ret.push_back( inp.substr( ofs ) );
     return ret;
 }
+
 static vector< vector< string > >parseBracketSemicolon( string inp )
 {
     vector< vector< string > >ret;
@@ -149,7 +151,8 @@ void AddMeshes( std::vector< Mesh* > &xmeshes,
         if (counts) counts->push_back( xmeshes.size()-s );
     }
 }
-static pair< string::size_type, string::size_type >nextElementRange( const string &inp,
+
+static std::pair< string::size_type, string::size_type >nextElementRange( const string &inp,
                                                                      string::size_type &start,
                                                                      string::size_type end )
 {
@@ -157,16 +160,16 @@ static pair< string::size_type, string::size_type >nextElementRange( const strin
     start = inp.find( ';', start );
     if ( start != string::npos && ( start != end && (end == string::npos || start < end) ) ) {
         ++start;
-        return pair< string::size_type, string::size_type > ( ostart, start-1 );
+        return std::pair< string::size_type, string::size_type > ( ostart, start-1 );
     } else {
         start = end;
-        return pair< string::size_type, string::size_type > ( ostart, end );
+        return std::pair< string::size_type, string::size_type > ( ostart, end );
     }
 }
 
 static string nextElementString( const string &inp, string::size_type &start, string::size_type end )
 {
-    pair< string::size_type, string::size_type >rng = nextElementRange( inp, start, end );
+    std::pair< string::size_type, string::size_type >rng = nextElementRange( inp, start, end );
     if (rng.second == string::npos)
         return inp.substr( rng.first );
 
@@ -176,19 +179,19 @@ static string nextElementString( const string &inp, string::size_type &start, st
 
 static int nextElementInt( const string &inp, string::size_type &start, string::size_type end, int def = 0 )
 {
-    pair< string::size_type, string::size_type >rng = nextElementRange( inp, start, end );
+    std::pair< string::size_type, string::size_type >rng = nextElementRange( inp, start, end );
     return (rng.first == rng.second) ? def : atoi( inp.c_str()+rng.first );
 }
 
 static double nextElementFloat( const string &inp, string::size_type &start, string::size_type end, double def = 0 )
 {
-    pair< string::size_type, string::size_type >rng = nextElementRange( inp, start, end );
+    std::pair< string::size_type, string::size_type >rng = nextElementRange( inp, start, end );
     return (rng.first == rng.second) ? def : atof( inp.c_str()+rng.first );
 }
 
 static double nextElementBool( const string &inp, string::size_type &start, string::size_type end, bool def = false )
 {
-    pair< string::size_type, string::size_type >rng = nextElementRange( inp, start, end );
+    std::pair< string::size_type, string::size_type >rng = nextElementRange( inp, start, end );
     return (rng.first
             == rng.second) ? def : XMLSupport::parse_bool( inp.substr( rng.first,
                                                                       ( (rng.second
@@ -199,7 +202,7 @@ static double nextElementBool( const string &inp, string::size_type &start, stri
 static string nextElement( string &inp )
 {
     string::size_type start = 0;
-    pair< string::size_type, string::size_type >rng = nextElementRange( inp, start, string::npos );
+    std::pair< string::size_type, string::size_type >rng = nextElementRange( inp, start, string::npos );
     string ret = inp.substr( rng.first, ( (rng.second == string::npos) ? string::npos : (rng.second-rng.first) ) );
     inp.erase( 0, ( (rng.second == string::npos) ? string::npos : (rng.second+1) ) );
     return ret;
@@ -211,20 +214,25 @@ static bool stob( const string &inp, bool defaul )
         return XMLSupport::parse_bool( inp );
     return defaul;
 }
+
 static double stof( const string &inp, double def = 0 )
 {
     if (inp.length() != 0)
         return XMLSupport::parse_float( inp );
     return def;
 }
+
 static int stoi( const string &inp, int def = 0 )
 {
     if (inp.length() != 0)
         return XMLSupport::parse_int( inp );
     return def;
 }
+
 extern bool CheckAccessory( Unit* );
+
 extern int parseMountSizes( const char *str );
+
 static Mount * createMount( const std::string &name,
                             int ammo,
                             int volume,
@@ -321,6 +329,7 @@ static void AddMounts( Unit *thus, Unit::XML &xml, const std::string &mounts )
                 printf( "Sound error\n" );
     }
 }
+
 struct SubUnitStruct
 {
     string  filename;
@@ -337,6 +346,7 @@ struct SubUnitStruct
         restricted = res;
     }
 };
+
 static vector< SubUnitStruct >GetSubUnits( const std::string &subunits )
 {
     string::size_type where, when, ofs = 0;
@@ -368,9 +378,13 @@ static vector< SubUnitStruct >GetSubUnits( const std::string &subunits )
             double restricted = cos( nextElementFloat( subunits, elemstart, elemend, 180 )*VS_PI/180.0 );
 
             ret.push_back( SubUnitStruct( filename, pos, Q, R, restricted ) );
-        } else {ofs = string::npos; }}
+        } else {
+            ofs = string::npos; 
+        }
+    }
     return ret;
 }
+
 static void AddSubUnits( Unit *thus, Unit::XML &xml, const std::string &subunits, int faction, const std::string &modification )
 {
     if (SERVER || Network) {
@@ -406,8 +420,8 @@ static void AddSubUnits( Unit *thus, Unit::XML &xml, const std::string &subunits
         xml.units.back()->limits.structurelimits = R.Cast();
         xml.units.back()->limits.limitmin = restricted;
         xml.units.back()->name = filename;
-        if (xml.units.back()->image->unitwriter != NULL)
-            xml.units.back()->image->unitwriter->setName( filename );
+        if (xml.units.back()->pImage->unitwriter != NULL)
+            xml.units.back()->pImage->unitwriter->setName( filename );
         CheckAccessory( xml.units.back() );         //turns on the ceerazy rotation for the turr
     }
     for (int a = xml.units.size()-1; a >= 0; a--) {
@@ -419,7 +433,10 @@ static void AddSubUnits( Unit *thus, Unit::XML &xml, const std::string &subunits
 
             else
                 xml.units[a]->Kill();
-        } else {thus->SubUnits.prepend( xml.units[a] ); }}
+        } else {
+            thus->SubUnits.prepend( xml.units[a] );
+        }
+    }
 }
 
 void AddDocks( Unit *thus, Unit::XML &xml, const string &docks )
@@ -434,7 +451,7 @@ void AddDocks( Unit *thus, Unit::XML &xml, const string &docks )
         int nelem = 0;
         while ( ( ofs = docks.find( '{', ofs ) ) != string::npos )
             nelem++, ofs++;
-        thus->image->dockingports.reserve( nelem*overlap+thus->image->dockingports.size() );
+        thus->pImage->dockingports.reserve( nelem*overlap+thus->pImage->dockingports.size() );
         ofs = 0;
     }
     while ( ( where = docks.find( '{', ofs ) ) != string::npos ) {
@@ -450,10 +467,14 @@ void AddDocks( Unit *thus, Unit::XML &xml, const string &docks )
             double size    = nextElementFloat( docks, elemstart, elemend );
             double minsize = nextElementFloat( docks, elemstart, elemend );
             for (int i = 0; i < overlap; i++)
-                thus->image->dockingports.push_back( DockingPorts( pos.Cast()*xml.unitscale, size*xml.unitscale, minsize
-                                                                   *xml.unitscale, internal ) );
-        } else {ofs = string::npos; }}
+                thus->pImage->dockingports.push_back( DockingPorts( pos.Cast()*xml.unitscale, size*xml.unitscale, minsize
+                                                                    *xml.unitscale, internal ) );
+        } else {
+            ofs = string::npos;
+        }
+    }
 }
+
 void AddLights( Unit *thus, Unit::XML &xml, const string &lights )
 {
     static float default_halo_activation =
@@ -480,7 +501,10 @@ void AddLights( Unit *thus, Unit::XML &xml, const string &lights )
             double act_speed = nextElementFloat( lights, elemstart, elemend, default_halo_activation );
 
             thus->addHalo( filename.c_str(), pos*xml.unitscale, scale.Cast(), halocolor, "", act_speed );
-        } else {ofs = string::npos; }}
+        } else {
+            ofs = string::npos;
+        }
+    }
 }
 
 static void ImportCargo( Unit *thus, const string &imports )
@@ -493,7 +517,7 @@ static void ImportCargo( Unit *thus, const string &imports )
         int nelem = 0;
         while ( ( ofs = imports.find( '{', ofs ) ) != string::npos )
             nelem++, ofs++;
-        thus->image->cargo.reserve( nelem+thus->image->cargo.size() );
+        thus->pImage->cargo.reserve( nelem+thus->pImage->cargo.size() );
         ofs = 0;
     }
     while ( ( where = imports.find( '{', ofs ) ) != string::npos ) {
@@ -508,8 +532,12 @@ static void ImportCargo( Unit *thus, const string &imports )
             double quantstddev = nextElementFloat( imports, elemstart, elemend );
 
             thus->ImportPartList( filename, price, pricestddev, quant, quantstddev );
-        } else {ofs = string::npos; }}
+        } else {
+            ofs = string::npos;
+        }
+    }
 }
+
 static void AddCarg( Unit *thus, const string &cargos )
 {
     string::size_type where, when, ofs = 0;
@@ -517,7 +545,7 @@ static void AddCarg( Unit *thus, const string &cargos )
         int nelem = 0;
         while ( ( ofs = cargos.find( '{', ofs ) ) != string::npos )
             nelem++, ofs++;
-        thus->image->cargo.reserve( nelem+thus->image->cargo.size() );
+        thus->pImage->cargo.reserve( nelem+thus->pImage->cargo.size() );
         ofs = 0;
     }
     while ( ( where = cargos.find( '{', ofs ) ) != string::npos ) {
@@ -538,41 +566,48 @@ static void AddCarg( Unit *thus, const string &cargos )
             carg.mission          = nextElementBool( cargos, elemstart, elemend, false );
 
             thus->AddCargo( carg, false );
-        } else {ofs = string::npos; }}
+        } else {
+            ofs = string::npos; 
+        }
+    }
 }
+
 void HudDamage( float *dam, const string &damages )
 {
     if (dam) {
         string::size_type elemstart = 0, elemend = string::npos;
-        for (int i = 0; i < 1+MAXVDUS+UnitImages::NUMGAUGES; ++i)
+        for (int i = 0; i < 1+MAXVDUS+UnitImages< void >::NUMGAUGES; ++i)
             dam[i] = nextElementFloat( damages, elemstart, elemend, 1 );
     }
 }
+
 string WriteHudDamage( Unit *un )
 {
     string ret;
     const string semi = ";";
-    if (un->image->cockpit_damage) {
-        for (int i = 0; i < 1+MAXVDUS+UnitImages::NUMGAUGES; ++i) {
-            ret += XMLSupport::tostring( un->image->cockpit_damage[i] );
+    if (un->pImage->cockpit_damage) {
+        for (int i = 0; i < 1+MAXVDUS+UnitImages< void >::NUMGAUGES; ++i) {
+            ret += XMLSupport::tostring( un->pImage->cockpit_damage[i] );
             ret += semi;
         }
     }
     return ret;
 }
+
 string WriteHudDamageFunc( Unit *un )
 {
     string ret;
     const string semi = ";";
-    if (un->image->cockpit_damage) {
-        int numg = 1+MAXVDUS+UnitImages::NUMGAUGES;
+    if (un->pImage->cockpit_damage) {
+        int numg = 1+MAXVDUS+UnitImages< void >::NUMGAUGES;
         for (int i = numg; i < 2*numg; ++i) {
-            ret += XMLSupport::tostring( un->image->cockpit_damage[i] );
+            ret += XMLSupport::tostring( un->pImage->cockpit_damage[i] );
             ret += semi;
         }
     }
     return ret;
 }
+
 void AddSounds( Unit *thus, string sounds )
 {
     if (sounds.length() != 0) {
@@ -627,19 +662,22 @@ void AddSounds( Unit *thus, string sounds )
         thus->sound->jump = AUDCreateSound( ssound, false );
     }
 }
+
 void LoadCockpit( Unit *thus, const string &cockpit )
 {
     string::size_type elemstart = 0, elemend = string::npos;
-    thus->image->cockpitImage    = nextElementString( cockpit, elemstart, elemend );
-    thus->image->CockpitCenter.i = nextElementFloat( cockpit, elemstart, elemend );
-    thus->image->CockpitCenter.j = nextElementFloat( cockpit, elemstart, elemend );
-    thus->image->CockpitCenter.k = nextElementFloat( cockpit, elemstart, elemend );
+    thus->pImage->cockpitImage    = nextElementString( cockpit, elemstart, elemend );
+    thus->pImage->CockpitCenter.i = nextElementFloat( cockpit, elemstart, elemend );
+    thus->pImage->CockpitCenter.j = nextElementFloat( cockpit, elemstart, elemend );
+    thus->pImage->CockpitCenter.k = nextElementFloat( cockpit, elemstart, elemend );
 }
+
 static string str( string inp, string def )
 {
     if (inp.length() == 0) return def;
     return inp;
 }
+
 static int AssignIf( const string &inp, float &val, float &val1, float &val2 )
 {
     if ( inp.length() ) {
@@ -667,29 +705,46 @@ float getFuelConversion()
 }
 
 const std::string EMPTY_STRING( "" );
-#define LOADROW_OPTIMIZER 0x348299ab
-#define FORCE_OPTIMIZER 1 /*After all, it's always used in the end*/
+
+#define LOADROW_OPTIMIZER ((0x348299ab))
+
+ /*After all, it's always used in the end*/
+#define FORCE_OPTIMIZER (1)
+
 #define OPTIMIZER_INDEX( Variable ) OPTIDX_##Variable
-#define INIT_OPTIMIZER( keys, Variable ) OPTIMIZER_INDEX( Variable ) = ( keys.push_back( #Variable ), (keys.size()-1) )
+
+#define INIT_OPTIMIZER( keys, Variable ) do{OPTIMIZER_INDEX(Variable)=(keys.push_back(#Variable),(keys.size()-1));}while(0)
+
 #define DEF_OPTIMIZER( Variable ) static unsigned int OPTIMIZER_INDEX( Variable ) = CSVTable::optimizer_undefined;
+
 #if FORCE_OPTIMIZER
-#define OPTIM_GET( row, table,                                                                                    \
-                   variable ) ( (table->optimizer_indexes[OPTIMIZER_INDEX( variable )]                            \
-                                 == CSVTable::optimizer_undefined) ? EMPTY_STRING : row[table->optimizer_indexes[ \
-                                                                                            OPTIMIZER_INDEX( variable )]] )
+
+#define OPTIM_GET( row, table, variable )                                                      \
+    ((                                                                                         \
+        (table->optimizer_indexes[OPTIMIZER_INDEX(variable)] == CSVTable::optimizer_undefined) \
+        ? EMPTY_STRING                                                                         \
+        : row[ table->optimizer_indexes[OPTIMIZER_INDEX(variable)] ]                           \
+    ))
+
 #else
-#define OPTIM_GET( row, table,                                                                                                      \
-                   variable ) (use_optimizer ? ( ( (OPTIMIZER_INDEX( variable ) == CSVTable::optimizer_undefined)                   \
-                                                  || (table->optimizer_indexes[OPTIMIZER_INDEX( variable )]                         \
-                                                      == CSVTable::optimizer_undefined) ) ? EMPTY_STRING : row[table->              \
-                                                                                                               optimizer_indexes    \
-                                                                                                               [                    \
-                                                                                                                   OPTIMIZER_INDEX( \
-                                                                                                                       variable )   \
-                                                                                                               ]                    \
-                                                ] ) : row[#                                                                         \
-                                                          variable                                                                  \
-                               ])
+
+#define OPTIM_GET( row, table, variable )                                    \
+    ((                                                                       \
+        use_optimizer                                                        \
+        ? (                                                                  \
+            (                                                                \
+                (OPTIMIZER_INDEX(variable) == CSVTable::optimizer_undefined) \
+                || (                                                         \
+                    table->optimizer_indexes[OPTIMIZER_INDEX(variable)]      \
+                    == CSVTable::optimizer_undefined                         \
+                   )                                                         \
+            )                                                                \
+            ? EMPTY_STRING                                                   \
+            : row[table->optimizer_indexes[OPTIMIZER_INDEX(variable )]]      \
+        )                                                                    \
+        : row[#variable]                                                     \
+    ))
+
 #endif
 
 void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
@@ -965,15 +1020,15 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     //begin the geometry (and things that depend on stats)
     double start = queryTime();
     fullname = OPTIM_GET( row, table, Name );
-    //image->description=OPTIM_GET(row,table,Description);
+    //pImage->description=OPTIM_GET(row,table,Description);
     if ( ( tmpstr = OPTIM_GET( row, table, Hud_image ) ).length() != 0 ) {
         std::string fac = FactionUtil::GetFaction( faction );
         fac += "_";
         fac += tmpstr;
-        image->hudImage = createVSSprite( fac.c_str() );
-        if ( !isVSSpriteLoaded( image->hudImage ) ) {
-            deleteVSSprite( image->hudImage );
-            image->hudImage = createVSSprite( tmpstr.c_str() );
+        pImage->pHudImage = createVSSprite( fac.c_str() );
+        if ( !isVSSpriteLoaded( pImage->pHudImage ) ) {
+            deleteVSSprite( pImage->pHudImage );
+            pImage->pHudImage = createVSSprite( tmpstr.c_str() );
         }
     }
     if ( ( tmpstr = OPTIM_GET( row, table, FaceCamera ) ).length() != 0 )
@@ -994,9 +1049,9 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     graphicOptions.NoDamageParticles  = stoi( OPTIM_GET( row, table, NoDamageParticles ), 0 );
     if (graphicOptions.NumAnimationPoints > 0)
         graphicOptions.Animating = 0;
-    xml.unitscale    = stof( OPTIM_GET( row, table, Unit_Scale ), 1 );
+    xml.unitscale     = stof( OPTIM_GET( row, table, Unit_Scale ), 1 );
     if (!xml.unitscale) xml.unitscale = 1;
-    image->unitscale = xml.unitscale;
+    pImage->unitscale = xml.unitscale;
     double meshest = queryTime();
     AddMeshes( xml.meshes, xml.randomstartframe, xml.randomstartseconds, xml.unitscale, OPTIM_GET( row,
                                                                                                    table,
@@ -1014,18 +1069,18 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     double mountst = queryTime();
     AddMounts( this, xml, OPTIM_GET( row, table, Mounts ) );
     double cargot  = queryTime();
-    this->image->CargoVolume = stof( OPTIM_GET( row, table, Hold_Volume ) );
-    this->image->HiddenCargoVolume = stof( OPTIM_GET( row, table, Hidden_Hold_Volume ) );
-    this->image->UpgradeVolume     = stof( OPTIM_GET( row, table, Upgrade_Storage_Volume ) );
-    this->image->equipment_volume  = stof( OPTIM_GET( row, table, Equipment_Space ) );
+    this->pImage->CargoVolume = stof( OPTIM_GET( row, table, Hold_Volume ) );
+    this->pImage->HiddenCargoVolume = stof( OPTIM_GET( row, table, Hidden_Hold_Volume ) );
+    this->pImage->UpgradeVolume     = stof( OPTIM_GET( row, table, Upgrade_Storage_Volume ) );
+    this->pImage->equipment_volume  = stof( OPTIM_GET( row, table, Equipment_Space ) );
     ImportCargo( this, OPTIM_GET( row, table, Cargo_Import ) );     //if this changes change planet_generic.cpp
     AddCarg( this, OPTIM_GET( row, table, Cargo ) );
     double soundst = queryTime();
     AddSounds( this, OPTIM_GET( row, table, Sounds ) );
     LoadCockpit( this, OPTIM_GET( row, table, Cockpit ) );
-    image->CockpitCenter.i = stof( OPTIM_GET( row, table, CockpitX ) )*xml.unitscale;
-    image->CockpitCenter.j = stof( OPTIM_GET( row, table, CockpitY ) )*xml.unitscale;
-    image->CockpitCenter.k = stof( OPTIM_GET( row, table, CockpitZ ) )*xml.unitscale;
+    pImage->CockpitCenter.i = stof( OPTIM_GET( row, table, CockpitX ) )*xml.unitscale;
+    pImage->CockpitCenter.j = stof( OPTIM_GET( row, table, CockpitY ) )*xml.unitscale;
+    pImage->CockpitCenter.k = stof( OPTIM_GET( row, table, CockpitZ ) )*xml.unitscale;
     Mass = stof( OPTIM_GET( row, table, Mass ), 1.0 );
     Momentofinertia = stof( OPTIM_GET( row, table, Moment_Of_Inertia ), 1.0 );
     fuel = stof( OPTIM_GET( row, table, Fuel_Capacity ) );
@@ -1206,7 +1261,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     recharge   = stof( OPTIM_GET( row, table, Reactor_Recharge ) );
     jump.drive = XMLSupport::parse_bool( OPTIM_GET( row, table, Jump_Drive_Present ) ) ? -1 : -2;
     jump.delay = stoi( OPTIM_GET( row, table, Jump_Drive_Delay ) );
-    image->forcejump = XMLSupport::parse_bool( OPTIM_GET( row, table, Wormhole ) );
+    pImage->forcejump = XMLSupport::parse_bool( OPTIM_GET( row, table, Wormhole ) );
     graphicOptions.RecurseIntoSubUnitsOnCollision = stob( OPTIM_GET( row,
                                                                      table,
                                                                      Collide_Subunits ),
@@ -1264,34 +1319,34 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     computer.radar.lockcone     = cos( stof( OPTIM_GET( row, table, Lock_Cone ), 180 )*VS_PI/180 );
     cloakmin = (int) (stof( OPTIM_GET( row, table, Cloak_Min ) )*2147483136);
     if (cloakmin < 0) cloakmin = 0;
-    image->cloakglass = XMLSupport::parse_bool( OPTIM_GET( row, table, Cloak_Glass ) );
-    if ( (cloakmin&0x1) && !image->cloakglass )
+    pImage->cloakglass = XMLSupport::parse_bool( OPTIM_GET( row, table, Cloak_Glass ) );
+    if ( (cloakmin&0x1) && !pImage->cloakglass )
         cloakmin -= 1;
-    if ( (cloakmin&0x1) == 0 && image->cloakglass )
+    if ( (cloakmin&0x1) == 0 && pImage->cloakglass )
         cloakmin += 1;
     if ( !XMLSupport::parse_bool( OPTIM_GET( row, table, Can_Cloak ) ) )
         cloaking = -1;
     else
         cloaking = (int) (-2147483647)-1;
-    image->cloakrate    = (int) ( 2147483136.*stof( OPTIM_GET( row, table, Cloak_Rate ) ) );     //short fix
-    image->cloakenergy  = stof( OPTIM_GET( row, table, Cloak_Energy ) );
-    image->repair_droid = stoi( OPTIM_GET( row, table, Repair_Droid ) );
-    image->ecm     = stoi( OPTIM_GET( row, table, ECM_Rating ) );
+    pImage->cloakrate    = (int) ( 2147483136.*stof( OPTIM_GET( row, table, Cloak_Rate ) ) );     //short fix
+    pImage->cloakenergy  = stof( OPTIM_GET( row, table, Cloak_Energy ) );
+    pImage->repair_droid = stoi( OPTIM_GET( row, table, Repair_Droid ) );
+    pImage->ecm    = stoi( OPTIM_GET( row, table, ECM_Rating ) );
 
     this->HeatSink = stof( OPTIM_GET( row, table, Heat_Sink_Rating ) );
-    if (image->ecm < 0) image->ecm *= -1;
-    if (image->cockpit_damage) {
-        HudDamage( image->cockpit_damage, OPTIM_GET( row, table, Hud_Functionality ) );
-        HudDamage( image->cockpit_damage+1+MAXVDUS+UnitImages::NUMGAUGES, OPTIM_GET( row, table, Max_Hud_Functionality ) );
+    if (pImage->ecm < 0) pImage->ecm *= -1;
+    if (pImage->cockpit_damage) {
+        HudDamage( pImage->cockpit_damage, OPTIM_GET( row, table, Hud_Functionality ) );
+        HudDamage( pImage->cockpit_damage+1+MAXVDUS+UnitImages< void >::NUMGAUGES, OPTIM_GET( row, table, Max_Hud_Functionality ) );
     }
-    image->LifeSupportFunctionality    = stof( OPTIM_GET( row, table, Lifesupport_Functionality ) );
-    image->LifeSupportFunctionalityMax = stof( OPTIM_GET( row, table, Max_Lifesupport_Functionality ) );
-    image->CommFunctionality = stof( OPTIM_GET( row, table, Comm_Functionality ) );
-    image->CommFunctionalityMax = stof( OPTIM_GET( row, table, Max_Comm_Functionality ) );
-    image->fireControlFunctionality    = stof( OPTIM_GET( row, table, FireControl_Functionality ) );
-    image->fireControlFunctionalityMax = stof( OPTIM_GET( row, table, Max_FireControl_Functionality ) );
-    image->SPECDriveFunctionality = stof( OPTIM_GET( row, table, SPECDrive_Functionality ) );
-    image->SPECDriveFunctionalityMax   = stof( OPTIM_GET( row, table, Max_SPECDrive_Functionality ) );
+    pImage->LifeSupportFunctionality    = stof( OPTIM_GET( row, table, Lifesupport_Functionality ) );
+    pImage->LifeSupportFunctionalityMax = stof( OPTIM_GET( row, table, Max_Lifesupport_Functionality ) );
+    pImage->CommFunctionality = stof( OPTIM_GET( row, table, Comm_Functionality ) );
+    pImage->CommFunctionalityMax = stof( OPTIM_GET( row, table, Max_Comm_Functionality ) );
+    pImage->fireControlFunctionality    = stof( OPTIM_GET( row, table, FireControl_Functionality ) );
+    pImage->fireControlFunctionalityMax = stof( OPTIM_GET( row, table, Max_FireControl_Functionality ) );
+    pImage->SPECDriveFunctionality = stof( OPTIM_GET( row, table, SPECDrive_Functionality ) );
+    pImage->SPECDriveFunctionalityMax   = stof( OPTIM_GET( row, table, Max_SPECDrive_Functionality ) );
     computer.slide_start = stoi( OPTIM_GET( row, table, Slide_Start ) );
     computer.slide_end   = stoi( OPTIM_GET( row, table, Slide_End ) );
     double upgradet = queryTime();
@@ -1309,9 +1364,9 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
         } else {tflags = tractorPush; } setTractorability( (enum tractorHow) tflags );
     }
     double explodet = queryTime();
-    this->image->explosion_type = OPTIM_GET( row, table, Explosion );
-    if ( image->explosion_type.get().length() ) {
-        cache_ani( image->explosion_type );
+    this->pImage->explosion_type = OPTIM_GET( row, table, Explosion );
+    if ( pImage->explosion_type.get().length() ) {
+        cache_ani( pImage->explosion_type );
     } else {
         static std::string expani = vs_config->getVariable( "graphics", "explosion_animation", "explosion_orange.ani" );
         cache_ani( expani );
@@ -1419,7 +1474,15 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     CheckAccessory( this );     //turns on the ceerazy rotation for any accessories
     this->setAverageGunSpeed();
     double endt = queryTime();
-    //printf ("spr %f mesh %f subun %f mount %f carg %f sound %f upg %f exp %f light %f tree %f\n",spritet-start,subunt-meshest,mountst-subunt,cargot-mountst,soundst-cargot,upgradet-soundst,explodet-upgradet, lightt-explodet, treet-lightt, endt-treet);
+#if 0
+    printf
+    (
+       "spr %f mesh %f subun %f mount %f carg %f \
+        sound %f upg %f exp %f light %f tree %f\n",
+        spritet-start, subunt-meshest, mountst-subunt, cargot-mountst, soundst-cargot,
+        upgradet-soundst, explodet-upgradet, lightt-explodet, treet-lightt, endt-treet
+    );
+#endif
 }
 
 CSVRow GetUnitRow( string filename, bool subu, int faction, bool readlast, bool &rread )
@@ -1466,12 +1529,13 @@ void Unit::WriteUnit( const char *modifications )
         f.Write( towrite.c_str(), towrite.length() );
         f.Close();
     } else {
-        if (image->unitwriter)
-            image->unitwriter->Write( modifications );
+        if (pImage->unitwriter)
+            pImage->unitwriter->Write( modifications );
         for (un_iter ui = getSubUnits(); (*ui) != NULL; ++ui)
             (*ui)->WriteUnit( modifications );
     }
 }
+
 using XMLSupport::tostring;
 
 static void mapToStringVec( vsUMap< string, string >a, vector< string > &key, vector< string > &value )
@@ -1485,22 +1549,27 @@ static string tos( float val )
 {
     return XMLSupport::tostring( val );
 }
+
 static string tos( double val )
 {
     return XMLSupport::tostring( (float) val );
 }
+
 static string tos( unsigned int val )
 {
     return XMLSupport::tostring( val );
 }
+
 static string tos( bool val )
 {
     return XMLSupport::tostring( (int) val );
 }
+
 static string tos( int val )
 {
     return XMLSupport::tostring( val );
 }
+
 string Unit::WriteUnitString()
 {
     static bool UNITTAB = XMLSupport::parse_bool( vs_config->getVariable( "physics", "UnitTable", "false" ) );
@@ -1518,10 +1587,10 @@ string Unit::WriteUnitString()
                     if (jj != 0)
                         unit[row.getKey( jj )] = row[jj];
                 //mutable things
-                unit["Equipment_Space"] = XMLSupport::tostring( image->equipment_volume );
-                unit["Hold_Volume"] = XMLSupport::tostring( image->CargoVolume );
-                unit["Hidden_Hold_Volume"]     = XMLSupport::tostring( image->HiddenCargoVolume );
-                unit["Upgrade_Storage_Volume"] = XMLSupport::tostring( image->UpgradeVolume );
+                unit["Equipment_Space"] = XMLSupport::tostring( pImage->equipment_volume );
+                unit["Hold_Volume"] = XMLSupport::tostring( pImage->CargoVolume );
+                unit["Hidden_Hold_Volume"]     = XMLSupport::tostring( pImage->HiddenCargoVolume );
+                unit["Upgrade_Storage_Volume"] = XMLSupport::tostring( pImage->UpgradeVolume );
                 string mountstr;
                 double unitScale = stof( unit["Unit_Scale"], 1 );
                 {
@@ -1668,7 +1737,7 @@ string Unit::WriteUnitString()
                 unit["Reactor_Recharge"] = tos( recharge );
                 unit["Jump_Drive_Present"] = tos( jump.drive >= -1 );
                 unit["Jump_Drive_Delay"] = tos( jump.delay );
-                unit["Wormhole"] = tos( image->forcejump != 0 );
+                unit["Wormhole"] = tos( pImage->forcejump != 0 );
                 unit["Outsystem_Jump_Cost"] = tos( jump.energy );
                 unit["Warp_Usage_Cost"] = tos( jump.insysenergy );
                 unit["Afterburner_Usage_Cost"]        = tos( afterburnenergy );
@@ -1700,24 +1769,24 @@ string Unit::WriteUnitString()
                 unit["Lock_Cone"]                     = tos( acos( computer.radar.lockcone )*180./VS_PI );
                 unit["Cloak_Min"]                     = tos( cloakmin/2147483136. );
                 unit["Can_Cloak"]                     = tos( cloaking != -1 );
-                unit["Cloak_Rate"]                    = tos( fabs( image->cloakrate/2147483136. ) );
-                unit["Cloak_Energy"]                  = tos( image->cloakenergy );
-                unit["Cloak_Glass"]                   = tos( image->cloakglass );
-                unit["Repair_Droid"]                  = tos( image->repair_droid );
-                unit["ECM_Rating"]                    = tos( image->ecm > 0 ? image->ecm : -image->ecm );
+                unit["Cloak_Rate"]                    = tos( fabs( pImage->cloakrate/2147483136. ) );
+                unit["Cloak_Energy"]                  = tos( pImage->cloakenergy );
+                unit["Cloak_Glass"]                   = tos( pImage->cloakglass );
+                unit["Repair_Droid"]                  = tos( pImage->repair_droid );
+                unit["ECM_Rating"]                    = tos( pImage->ecm > 0 ? pImage->ecm : -pImage->ecm );
                 unit["Hud_Functionality"]             = WriteHudDamage( this );
                 unit["Max_Hud_Functionality"]         = WriteHudDamageFunc( this );
                 unit["Heat_Sink_Rating"]              = tos( this->HeatSink );
-                unit["Lifesupport_Functionality"]     = tos( image->LifeSupportFunctionality );
-                unit["Max_Lifesupport_Functionality"] = tos( image->LifeSupportFunctionalityMax );
-                unit["Comm_Functionality"]            = tos( image->CommFunctionality );
-                unit["Max_Comm_Functionality"]        = tos( image->CommFunctionalityMax );
-                unit["Comm_Functionality"]            = tos( image->CommFunctionality );
-                unit["Max_Comm_Functionality"]        = tos( image->CommFunctionalityMax );
-                unit["FireControl_Functionality"]     = tos( image->fireControlFunctionality );
-                unit["Max_FireControl_Functionality"] = tos( image->fireControlFunctionalityMax );
-                unit["SPECDrive_Functionality"]       = tos( image->SPECDriveFunctionality );
-                unit["Max_SPECDrive_Functionality"]   = tos( image->SPECDriveFunctionalityMax );
+                unit["Lifesupport_Functionality"]     = tos( pImage->LifeSupportFunctionality );
+                unit["Max_Lifesupport_Functionality"] = tos( pImage->LifeSupportFunctionalityMax );
+                unit["Comm_Functionality"]            = tos( pImage->CommFunctionality );
+                unit["Max_Comm_Functionality"]        = tos( pImage->CommFunctionalityMax );
+                unit["Comm_Functionality"]            = tos( pImage->CommFunctionality );
+                unit["Max_Comm_Functionality"]        = tos( pImage->CommFunctionalityMax );
+                unit["FireControl_Functionality"]     = tos( pImage->fireControlFunctionality );
+                unit["Max_FireControl_Functionality"] = tos( pImage->fireControlFunctionalityMax );
+                unit["SPECDrive_Functionality"]       = tos( pImage->SPECDriveFunctionality );
+                unit["Max_SPECDrive_Functionality"]   = tos( pImage->SPECDriveFunctionalityMax );
                 unit["Slide_Start"]                   = tos( computer.slide_start );
                 unit["Slide_End"]                     = tos( computer.slide_end );
                 unit["Cargo_Import"]                  = unit["Upgrades"] = "";                 //make sure those are empty
@@ -1737,13 +1806,14 @@ string Unit::WriteUnitString()
         }
         fprintf( stderr, "Failed to locate base mesh for %s %s %s\n", csvRow.get().c_str(), name.get().c_str(), fullname.c_str() );
     } else {
-        if (image->unitwriter)
-            ret = image->unitwriter->WriteString();
+        if (pImage->unitwriter)
+            ret = pImage->unitwriter->WriteString();
         for (un_iter ui = getSubUnits(); (*ui) != NULL; ++ui)
             ret = ret+( (*ui)->WriteUnitString() );
     }
     return ret;
 }
+
 void UpdateMasterPartList( Unit *ret )
 {
     for (unsigned int i = 0; i < _Universe->numPlayers(); ++i) {
@@ -1778,6 +1848,7 @@ void UpdateMasterPartList( Unit *ret )
         }
     }
 }
+
 Unit* Unit::makeMasterPartList()
 {
     static std::string    mpl = vs_config->getVariable( "data", "master_part_list", "master_part_list" );

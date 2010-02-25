@@ -25,11 +25,11 @@
 
 #ifndef _VEGACONFIG_H_
 #define _VEGACONFIG_H_
+
 #include "config.h"
 #include <expat.h>
 #include <string>
 #include <gnuhash.h>
-
 #include "configxml.h"
 #include "xml_support.h"
 #include "easydom.h"
@@ -39,29 +39,24 @@ using std::string;
 
 using XMLSupport::AttributeList;
 
-typedef vsUMap< string, KBHandler >CommandMap;
-typedef vsUMap< string, int >      KeyMap;
+typedef vsUMap< string, KBHandler > CommandMap;
+typedef vsUMap< string, int >       KeyMap;
 
 class GameVegaConfig : public VegaConfig
 {
-public: GameVegaConfig( const char *configfile );
-
+public:
+    explicit GameVegaConfig( const char *configfile );
 #define AXIS_X 0
 #define AXIS_Y 1
 #define AXIS_Z 2
 #define AXIS_THROTTLE 3
-
 private:
     void initCommandMap();
     void initKeyMap();
-
     CommandMap command_map;
     KeyMap     key_map;
-
     int hs_value_index;
-
 //vector<vColor *> colors;
-
     void bindKeys();
     void doBindings( configNode *node );
     void checkBind( configNode *node );

@@ -16,9 +16,11 @@
 ***************************************************************************/
 #include <string>
 #include <stdio.h>
+
 #ifndef _WIN32
 #include <unistd.h>
 #endif
+
 using std::string;
 #include "common.h"
 
@@ -50,16 +52,17 @@ const char *datadirs[] = {
     "/opt/share/vegastrike/data4.x",
 };
 
+static int   bogus_int; //added by chuck_starchaser to squash a warning or two
+static char *bogus_str; //added by chuck_starchaser to squash a warning or two
+
 string getdatadir()
 {
     string datadir;
     char   tmppwd[65536];
-
-    getcwd( tmppwd, 32768 );
-
+    bogus_str = getcwd( tmppwd, 32768 );
     unsigned int i = 0;
     for (; i < ( sizeof (datadirs)/sizeof (datadirs[0]) ); i++) {
-        chdir( datadirs[i] );
+        bogus_int = chdir( datadirs[i] );
         FILE *tfp = fopen( "vegastrike.config", "r" );
         if (tfp) {
             fclose( tfp );
@@ -72,7 +75,7 @@ string getdatadir()
         for (i = 0; i < ( sizeof (datadirs)/sizeof (datadirs[0]) ); i++)
             printf( "Tried %s\n", datadirs[i] );
         datadir = tmppwd;
-        chdir( tmppwd );
+        bogus_int = chdir( tmppwd );
     }
     //Set data dir
     else if (datadirs[i][0] != '/') {

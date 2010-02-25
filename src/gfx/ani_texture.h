@@ -1,3 +1,6 @@
+#ifndef __ANI_TEXTURE_H__
+#define __ANI_TEXTURE_H__
+
 #include "aux_texture.h"
 #include "vsfilesystem.h"
 #include "vid_file.h"
@@ -24,7 +27,7 @@ class AnimatedTexture : public Texture
     vector< Vector >frames_maxtc; //Maximum tcoords for each frame
     vector< Vector >frames_mintc; //Minimum tcoords for each frame
 
-    VideoFile *vidSource;
+    VidFile *vidSource;
 
     StringPool::Reference    wrapper_file_path;
     VSFileSystem::VSFileType wrapper_file_type;
@@ -163,4 +166,6 @@ public:
                                                  enum FILTER ismipmapped = BILINEAR,
                                                  bool detailtex = false );
 };
+
+#endif
 

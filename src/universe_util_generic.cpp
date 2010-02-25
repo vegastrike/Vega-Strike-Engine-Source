@@ -30,7 +30,7 @@
 #include "cmd/unit_find.h"
 
 #include "python/init.h"
-#include <Python.h>
+#include "cs_python.h"
 #include "options.h"
 
 extern vs_options game_options;

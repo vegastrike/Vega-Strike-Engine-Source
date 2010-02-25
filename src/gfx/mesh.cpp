@@ -46,8 +46,8 @@
 #include <float.h>
 #include <algorithm>
 
-#define LOD_HYSTHERESIS_DIVIDER 20
-#define LOD_HYSTHERESIS_MAXENLARGEMENT_FACTOR 1.1
+#define LOD_HYSTHERESIS_DIVIDER (20)
+#define LOD_HYSTHERESIS_MAXENLARGEMENT_FACTOR (1.1)
 
 using std::list;
 Hashtable< std::string, Mesh, 503 >Mesh::meshHashTable;
@@ -104,10 +104,12 @@ void Mesh::InitUnit()
 
     initTechnique( "fixed" );
 }
+
 Mesh::Mesh()
 {
     InitUnit();
 }
+
 bool Mesh::LoadExistant( Mesh *oldmesh )
 {
     *this = *oldmesh;
@@ -115,6 +117,7 @@ bool Mesh::LoadExistant( Mesh *oldmesh )
     orig  = oldmesh;
     return true;
 }
+
 bool Mesh::LoadExistant( const string filehash, const Vector &scale, int faction )
 {
     Mesh *oldmesh;
@@ -155,14 +158,17 @@ Mesh::Mesh( const Mesh &m )
     if ( LoadExistant( oldmesh->orig != NULL ? oldmesh->orig : oldmesh ) )
         return;
 }
+
 void Mesh::setConvex( bool b )
 {
     this->convex = b;
     if (orig && orig != this)
         orig->setConvex( b );
 }
+
 using namespace VSFileSystem;
 extern Hashtable< std::string, std::vector< Mesh* >, MESH_HASTHABLE_SIZE >bfxmHashTable;
+
 Mesh::Mesh( std::string filename, const Vector &scale, int faction, Flightgroup *fg, bool orig ) : hash_name( filename )
 {
     this->convex = false;
@@ -199,6 +205,7 @@ Mesh::Mesh( std::string filename, const Vector &scale, int faction, Flightgroup 
         fprintf( stderr, "fallback, %s unable to be loaded as bfxm\n", filename.c_str() );
     }
 }
+
 Mesh::Mesh( const char *filename,
             const Vector &scale,
             int faction,
@@ -359,7 +366,7 @@ inline bool OpenWithin( const QVector &query,
         return (query.j >= mn.j-err) && (query.i >= mn.i-err) && (query.j <= mx.j+err) && (query.i <= mx.i+err);
     }
 }
-bool Mesh::queryBoundingBox( const QVector &eye, const QVector &end, const float err )
+bool Mesh::queryBoundingBox( const QVector &eye, const QVector &end, const float err ) const
 {
     QVector slope( end-eye );
     QVector IntersectXYZ;
@@ -399,7 +406,7 @@ bool Mesh::queryBoundingBox( const QVector &eye, const QVector &end, const float
     }
     return false;
 }
-bool Mesh::queryBoundingBox( const QVector &start, const float err )
+bool Mesh::queryBoundingBox( const QVector &start, const float err ) const
 {
     return start.i >= mn.i-err && start.j >= mn.j-err && start.k >= mn.k-err
            && start.i <= mx.i+err && start.j <= mx.j+err && start.k <= mx.k+err;

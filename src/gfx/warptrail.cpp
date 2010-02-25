@@ -4,14 +4,18 @@
 #include "cmd/unit_generic.h"
 #include "gfx/camera.h"
 #include "config_xml.h"
+
 struct warptrails
 {
     vector< Mesh* >factions;
     vector< struct WarpTrail* >warps;
     void Draw();
 };
+
 warptrails wt;
+
 Mesh * GetWarpMesh( int faction, warptrails *wt );
+
 struct WarpTrail
 {
     QVector start;
@@ -88,14 +92,17 @@ void warptrails::Draw()
             i--;
         }
 }
+
 void AddWarp( Unit *un, QVector beg, float tim )
 {
     wt.warps.push_back( new WarpTrail( un, beg, tim ) );
 }
+
 void WarpTrailDraw()
 {
     wt.Draw();
 }
+
 Mesh * GetWarpMesh( int faction, warptrails *w )
 {
     using namespace VSFileSystem;

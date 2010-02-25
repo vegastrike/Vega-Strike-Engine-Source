@@ -6,7 +6,7 @@
 #include "vsfilesystem.h"
 #include "xml_support.h"
 #ifndef M_PI
-#define M_PI 3.1415926536F
+#define M_PI (3.1415926536F)
 #endif
 #include "gfx/camera.h"
 
@@ -31,23 +31,27 @@ extern AnimatedTexture * createAnimatedTexture( char const *c, int i, enum FILTE
 
 using XMLSupport::tostring;
 int pixelscalesize = 30;
-float SphereMesh::GetT( float rho, float rho_min, float rho_max )
+
+float SphereMesh::GetT( float rho, float rho_min, float rho_max ) const
 {
     return 1-(rho-rho_min)/(rho_max-rho_min);
 }
-float SphereMesh::GetS( float theta, float theta_min, float theta_max )
+
+float SphereMesh::GetS( float theta, float theta_min, float theta_max ) const
 {
     return 1-(theta-theta_min)/(theta_max-theta_min);
 }
-float CityLights::GetT( float rho, float rho_min, float rho_max )
+
+float CityLights::GetT( float rho, float rho_min, float rho_max ) const
 {
     return wrapy*SphereMesh::GetT( rho, rho_min, rho_max );
 }
 
-float CityLights::GetS( float theta, float theta_min, float theta_max )
+float CityLights::GetS( float theta, float theta_min, float theta_max ) const
 {
     return wrapx*SphereMesh::GetS( theta, theta_min, theta_max );
 }
+
 string truncateByPipe( string &input )
 {
     string::size_type i = input.find( "|" );
@@ -60,6 +64,7 @@ string truncateByPipe( string &input )
     }
     return ret;
 }
+
 void SphereMesh::InitSphere( float radius,
                              int stacks,
                              int slices,
@@ -94,7 +99,6 @@ void SphereMesh::InitSphere( float radius,
     this->orig = AllocNewMeshesEachInSizeofMeshSpace( numspheres );     //FIXME::RISKY::MIGHT HAVE DIFFERENT SIZES!! DON"T YOU DARE ADD XTRA VARS TO SphereMesh calsshave to!
     oldmesh    = this->orig;
     numlods    = numspheres;
-
     meshHashTable.Put( hash_name, oldmesh );
     //VSFileSystem::Fprintf (stderr,"\nput %s\n",hash_name.c_str());
     radialSize = radius;     //MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!
@@ -127,47 +131,37 @@ void SphereMesh::InitSphere( float radius,
             /* Code below adapted from gluSphere */
             drho   = (rho_max-rho_min)/(float) stacks;
             dtheta = (theta_max-theta_min)/(float) slices;
-
             ds     = 1.0/slices;
             dt     = 1.0/stacks;
             t = 1.0;             /* because loop now runs from 0 */
-
             imin   = 0;
             imax   = stacks;
-
             int  numQuadstrips   = stacks;
             //numQuadstrips = 0;
             int *QSOffsets       = new int[numQuadstrips];
-
             //draw intermediate stacks as quad strips
             int  numvertex       = stacks*(slices+1)*2;
             GFXVertex     *vertexlist = new GFXVertex[numvertex];
-
             GFXVertex     *vl    = vertexlist;
             enum POLYTYPE *modes = new enum POLYTYPE[numQuadstrips];
             /*   SetOrientation(Vector(1,0,0),
              *    Vector(0,0,-1),
              *    Vector(0,1,0));//that's the way prop*/                                                                                  //taken care of in loading
-
             float rhol[2];
             float thetal[2];
-#define g_rho( i ) rhol[(i)&1]
-#define g_theta( i ) thetal[(i)&1]
-
+#define g_rho( i ) (rhol[(i)&1])
+#define g_theta( i ) (thetal[(i)&1])
             g_rho( 0 ) = rho_min;
             for (i = imin; i < imax; i++) {
                 GFXVertex *vertexlist = vl+(i*(slices+1)*2);
                 g_rho( i+1 ) = (i+1)*drho+rho_min;
-
                 s = 0.0;
                 g_theta( 0 ) = 0;
                 for (j = 0; j <= slices; j++) {
                     g_theta( j+1 ) = (j+1)*dtheta;
-
                     x = -sin( g_theta( j ) )*sin( g_rho( i ) );
                     y = cos( g_theta( j ) )*sin( g_rho( i ) );
                     z = nsign*cos( g_rho( i ) );
-
                     vertexlist[j*2+fir].i = x*normalscale;
                     vertexlist[j*2+fir].k = -y*normalscale;
                     vertexlist[j*2+fir].j = z*normalscale;
@@ -176,11 +170,9 @@ void SphereMesh::InitSphere( float radius,
                     vertexlist[j*2+fir].x = x*radius;
                     vertexlist[j*2+fir].z = -y*radius;
                     vertexlist[j*2+fir].y = z*radius;
-
                     x = -sin( g_theta( j ) )*sin( g_rho( i+1 ) );
                     y = cos( g_theta( j ) )*sin( g_rho( i+1 ) );
                     z = nsign*cos( g_rho( i+1 ) );
-
                     vertexlist[j*2+sec].i = x*normalscale;
                     vertexlist[j*2+sec].k = -y*normalscale;
                     vertexlist[j*2+sec].j = z*normalscale;                     //double negative
@@ -189,7 +181,6 @@ void SphereMesh::InitSphere( float radius,
                     vertexlist[j*2+sec].x = x*radius;
                     vertexlist[j*2+sec].z = -y*radius;
                     vertexlist[j*2+sec].y = z*radius;
-
                     s += ds;
                 }
                 t -= dt;
@@ -198,7 +189,6 @@ void SphereMesh::InitSphere( float radius,
             }
 #undef g_rho
 #undef g_theta
-
             vlist = new GFXVertexList( modes, numvertex, vertexlist, numQuadstrips, QSOffsets );
             delete[] vertexlist;
             delete[] modes;
@@ -254,6 +244,7 @@ void SphereMesh::InitSphere( float radius,
     }
     draw_queue     = odq;
 }
+
 void SphereMesh::Draw( float lod, bool centered, const Matrix &m )
 {
     if (centered) {

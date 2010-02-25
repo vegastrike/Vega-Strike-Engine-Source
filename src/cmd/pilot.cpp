@@ -18,11 +18,15 @@ Pilot::Pilot( int faction )
     comm_face     = NULL;
     gender = 0;
 }
+
 void Pilot::SetComm( Unit *parent )
 {
     this->faction = parent->faction;
     //GET BETTER REACTION TIME AND RANK HERE
-    comm_face     = FactionUtil::GetRandCommAnimation( faction, parent, gender );
+//this #ifndef hack below by chuck_starchaser, to get around missing faction_util.o in vegaserver make list
+#ifndef VEGASERVER_COMPILING
+    comm_face = FactionUtil::GetRandCommAnimation( faction, parent, gender );
+#endif
 }
 
 float Pilot::adjustSpecificRelationship( Unit *parent, void *aggressor, float factor, int faction )
@@ -86,7 +90,7 @@ float Pilot::getAnger( const Unit *parent, const Unit *target ) const
                 cachedCargoNum = target->numCargo();
                 good = true;
                 for (unsigned int i = 0; i < cachedCargoNum; ++i) {
-                    Cargo *c = &target->image->cargo[i];
+                    Cargo *c = &target->pImage->cargo[i];
                     if (c->quantity != 0 && c->GetCategory().find( "upgrades" ) == string::npos) {
                         good = false;
                         break;
@@ -131,14 +135,18 @@ float Pilot::GetEffectiveRelationship( const Unit *parent, const Unit *target ) 
 }
 
 extern float myroundclamp( float i );
+
 Animation* Pilot::getCommFace( Unit *parent, float mood, unsigned char &sex )
 {
     vector< Animation* > *ani = getCommFaces( sex );
+//this #ifndef hack below by chuck_starchaser, to get around missing faction_util.o in vegaserver make list
+#ifndef VEGASERVER_COMPILING
     if (ani == NULL) {
         ani = FactionUtil::GetRandCommAnimation( parent->faction, parent, sex );
         if (ani == NULL)
             return NULL;
     }
+#endif
     if (ani->size() == 0)
         return NULL;
     mood += .1;

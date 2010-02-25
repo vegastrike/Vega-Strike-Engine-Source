@@ -12,9 +12,9 @@ enum VIEWSTYLE
     CP_FIXEDPOS, CP_FIXEDPOSTARGET, CP_NUMVIEWS
 };
 #ifdef NETCOMM_WEBCAM
-#define MAXVDUS 13
+#define MAXVDUS (13)
 #else
-#define MAXVDUS 12
+#define MAXVDUS (12)
 #endif
 class Unit;
 class Camera;
@@ -34,7 +34,7 @@ protected:
     enum VIEWSTYLE view;
     int   currentcamera;
     float radar_time;
-    float gauge_time[UnitImages::NUMGAUGES];
+    float gauge_time[UnitImages < void > ::NUMGAUGES];
 /// 8 armor vals and 1 for startfuel
 
 /// 8 armor vals and 1 for startfuel

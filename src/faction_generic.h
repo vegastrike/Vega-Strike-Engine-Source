@@ -11,6 +11,7 @@ class Animation;
 class Unit;
 class Texture;
 typedef vsUMap< std::string, float >MapStringFloat;
+
 class Faction
 {
 public:
@@ -78,7 +79,6 @@ public:
 ///Figures out the relationships of each faction with each other
     static void ParseAllAllies( /*Universe * thisuni*/ );
     void ParseAllies( /*Universe * thisuni,*/ unsigned int whichfaction );
-
     static void LoadXML( const char *factionfile, char *xmlbuffer = NULL, int buflength = 0 );
     static void beginElement( void *userData, const XML_Char *name, const XML_Char **atts );
     static void endElement( void *userData, const XML_Char *name );
@@ -113,26 +113,32 @@ int numnums( const char *str );
 ///returns the index of the faction with that name
 //int GetFaction (const char *factionname);
 int GetNumAnimation( int faction );
-const char * GetFaction( int faction );
 class Unit * GetContraband( int faction );
+
+const char * GetFaction( int faction );
+
 /**
  * Returns the relationship between myfaction and theirfaction
  * 1 is happy. 0 is neutral (btw 1 and 0 will not attack)
  * -1 is mad. <0 will attack
  */
 int GetFactionIndex( std::string name );
+
 inline int GetUpgradeFaction()
 {
     return upgradefac;
 }
+
 inline int GetNeutralFaction()
 {
     return neutralfac;
 }
+
 inline int GetPlanetFaction()
 {
     return planetfac;
 }
+
 inline float GetIntRelation( const int myfaction, const int theirfaction )
 {
     return factions[myfaction]->faction[theirfaction].relationship;

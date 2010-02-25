@@ -11,8 +11,6 @@ struct glVertex
     float     x;
     float     y;
     float     z;
-
-    //glVertex(){};
     glVertex& SetTexCoord( float s, float t )
     {
         this->s = s;

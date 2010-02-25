@@ -1,6 +1,9 @@
+#ifndef __UNIT_CLICK_CPP__
+#define __UNIT_CLICK_CPP__
+
 #include "vegastrike.h"
 #include "gfx/mesh.h"
-//#include "unit.h"
+#include "unit.h"
 //#include "unit_template.h"
 #include "gfx/bounding_box.h"
 extern Vector mouseline;
@@ -59,4 +62,6 @@ bool GameUnit< UnitType >::querySphereClickList( int mouseX, int mouseY, float e
             return true;
     return false;
 }
+
+#endif
 

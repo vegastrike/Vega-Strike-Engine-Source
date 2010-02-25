@@ -98,18 +98,18 @@ void AnimatedTexture::MakeActive( int stage, int pass )
                     Transfer( 65535, GFXFALSE );
                 }
             }
-            catch (::VideoFile::EndOfStreamException e) {
+            catch (::VidFile::EndOfStreamException e) {
                 if (GetLoop() && curtime > 0) {
                     setTime( 0 );
                     MakeActive( stage, pass );
                     return;
                 }
             }
-            catch (::VideoFile::Exception e) {
-                VSFileSystem::vs_fprintf( stderr, "\nVideoFile exception: %s\n", e.what() );
+            catch (::VidFile::Exception e) {
+                VSFileSystem::vs_fprintf( stderr, "\nVidFile exception: %s\n", e.what() );
             }
+            Texture::MakeActive( stage, pass );
         }
-        Texture::MakeActive( stage, pass );
         break;
     case 1:
         if ( !vidMode && GetInterpolateFrames() && (active != nextactive)
@@ -395,7 +395,7 @@ void AnimatedTexture::LoadVideoSource( VSFileSystem::VSFile &f )
     vidMode = true;
 
     try {
-        vidSource     = new::VideoFile();
+        vidSource     = new::VidFile();
         vidSource->open( wrapper_file_path, gl_options.max_movie_dimension );
 
         physicsactive = vidSource->getDuration();
@@ -404,7 +404,7 @@ void AnimatedTexture::LoadVideoSource( VSFileSystem::VSFile &f )
 
         loadSuccess   = true;
     }
-    catch (::VideoFile::Exception e) {
+    catch (::VidFile::Exception e) {
         loadSuccess = false;
     }
     if (loadSuccess) {

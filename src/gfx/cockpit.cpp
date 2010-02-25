@@ -68,9 +68,11 @@ static float mymax( float a, float b )
 using namespace std;
 extern float rand01();
 using VSFileSystem::SoundFile;
-#define SWITCH_CONST .9
-#define VERYNEAR_CONST 0.004f /* The smaller VERYNEAR_CONST is, the worse Z-Buffer precision will be. So keep this above 0.004) */
-#define COCKPITZ_HEADROOM 1.01f /*so that znear/zfar are not too close to max/min values, and account for off-center cockpits */
+#define SWITCH_CONST (.9)
+/* The smaller VERYNEAR_CONST is, the worse Z-Buffer precision will be. So keep this above 0.004) */
+#define VERYNEAR_CONST (0.004f)
+/*so that znear/zfar are not too close to max/min values, and account for off-center cockpits */
+#define COCKPITZ_HEADROOM (1.01f)
 
 static GFXColor RetrColor( const string &name, GFXColor def = GFXColor( 1, 1, 1, 1 ) )
 {
@@ -82,7 +84,7 @@ extern Unit * getTopLevelOwner();
 static soundContainer disableautosound;
 static soundContainer enableautosound;
 
-#define sqr( x ) (x*x)
+#define sqr( x ) ( ( (x) )*( (x) ) )
 std::string GameCockpit::GetNavSelectedSystem()
 {
     return AccessNavSystem()->getSelectedSystem();
@@ -1219,16 +1221,16 @@ float GameCockpit::LookupTargetStat( int stat, Unit *target )
 {
     switch (stat)
     {
-    case UnitImages::TARGETSHIELDF:
+    case UnitImages< void >::TARGETSHIELDF:
         return target->FShieldData();
 
-    case UnitImages::TARGETSHIELDR:
+    case UnitImages< void >::TARGETSHIELDR:
         return target->RShieldData();
 
-    case UnitImages::TARGETSHIELDL:
+    case UnitImages< void >::TARGETSHIELDL:
         return target->LShieldData();
 
-    case UnitImages::TARGETSHIELDB:
+    case UnitImages< void >::TARGETSHIELDB:
         return target->BShieldData();
     }
     return 1;
@@ -1249,16 +1251,17 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
     if (shield8) {
         switch (stat)
         {
-        case UnitImages::SHIELDF:
-        case UnitImages::SHIELDR:
-        case UnitImages::SHIELDL:
-        case UnitImages::SHIELDB:
-        case UnitImages::SHIELD4:
-        case UnitImages::SHIELD5:
-        case UnitImages::SHIELD6:
-        case UnitImages::SHIELD7:
-            if (target->shield.shield.max[stat-UnitImages::SHIELDF])
-                return target->shield.shield.cur[stat-UnitImages::SHIELDF]/target->shield.shield.max[stat-UnitImages::SHIELDF];
+        case UnitImages< void >::SHIELDF:
+        case UnitImages< void >::SHIELDR:
+        case UnitImages< void >::SHIELDL:
+        case UnitImages< void >::SHIELDB:
+        case UnitImages< void >::SHIELD4:
+        case UnitImages< void >::SHIELD5:
+        case UnitImages< void >::SHIELD6:
+        case UnitImages< void >::SHIELD7:
+            if (target->shield.shield.max[stat-UnitImages < void > ::SHIELDF])
+                return target->shield.shield.cur[stat-UnitImages < void
+                                                 > ::SHIELDF]/target->shield.shield.max[stat-UnitImages < void > ::SHIELDF];
             else return 0;
         default:
             break;
@@ -1266,29 +1269,29 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
     }
     switch (stat)
     {
-    case UnitImages::SHIELDF:
+    case UnitImages< void >::SHIELDF:
         return target->FShieldData();
 
-    case UnitImages::SHIELDR:
+    case UnitImages< void >::SHIELDR:
         return target->RShieldData();
 
-    case UnitImages::SHIELDL:
+    case UnitImages< void >::SHIELDL:
         return target->LShieldData();
 
-    case UnitImages::SHIELDB:
+    case UnitImages< void >::SHIELDB:
         return target->BShieldData();
 
-    case UnitImages::ARMORF:
-    case UnitImages::ARMORR:
-    case UnitImages::ARMORL:
-    case UnitImages::ARMORB:
-    case UnitImages::ARMOR4:
-    case UnitImages::ARMOR5:
-    case UnitImages::ARMOR6:
-    case UnitImages::ARMOR7:
+    case UnitImages< void >::ARMORF:
+    case UnitImages< void >::ARMORR:
+    case UnitImages< void >::ARMORL:
+    case UnitImages< void >::ARMORB:
+    case UnitImages< void >::ARMOR4:
+    case UnitImages< void >::ARMOR5:
+    case UnitImages< void >::ARMOR6:
+    case UnitImages< void >::ARMOR7:
         target->ArmorData( armordat );
         if (armor8) {
-            return armordat[stat-UnitImages::ARMORF]/StartArmor[stat-UnitImages::ARMORF];
+            return armordat[stat-UnitImages < void > ::ARMORF]/StartArmor[stat-UnitImages < void > ::ARMORF];
         } else {
             for (armori = 0; armori < 8; ++armori) {
                 if (armordat[armori] > StartArmor[armori])
@@ -1298,41 +1301,41 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
         }
         switch (stat)
         {
-        case UnitImages::ARMORR:
+        case UnitImages< void >::ARMORR:
             return .25*(armordat[0]+armordat[1]+armordat[4]+armordat[5]);
 
-        case UnitImages::ARMORL:
+        case UnitImages< void >::ARMORL:
             return .25*(armordat[2]+armordat[3]+armordat[6]+armordat[7]);
 
-        case UnitImages::ARMORB:
+        case UnitImages< void >::ARMORB:
             return .25*(armordat[1]+armordat[3]+armordat[5]+armordat[7]);
 
-        case UnitImages::ARMORF:
+        case UnitImages< void >::ARMORF:
         default:
             return .25*(armordat[0]+armordat[2]+armordat[4]+armordat[6]);
         }
-    case UnitImages::FUEL:
+    case UnitImages< void >::FUEL:
         if (target->FuelData() > maxfuel)
             maxfuel = target->FuelData();
         if (maxfuel > 0) return target->FuelData()/maxfuel;
         return 0;
 
-    case UnitImages::ENERGY:
+    case UnitImages< void >::ENERGY:
         return target->EnergyData();
 
-    case UnitImages::WARPENERGY:
+    case UnitImages< void >::WARPENERGY:
         {
             static bool warpifnojump =
                 XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "display_warp_energy_if_no_jump_drive",
                                                                 "true" ) );
             return (warpifnojump || target->GetJumpStatus().drive != -2) ? target->WarpEnergyData() : 0;
         }
-    case UnitImages::HULL:
+    case UnitImages< void >::HULL:
         if ( maxhull < target->GetHull() )
             maxhull = target->GetHull();
         return target->GetHull()/maxhull;
 
-    case UnitImages::EJECT:
+    case UnitImages< void >::EJECT:
         {
             int go =
                 ( ( (target->GetHull()/maxhull) < .25 )
@@ -1358,7 +1361,7 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
             }
             return go;
         }
-    case UnitImages::LOCK:
+    case UnitImages< void >::LOCK:
         {
             static float locklight_time = XMLSupport::parse_float( vs_config->getVariable( "graphics", "locklight_time", "1" ) );
             bool res = false;
@@ -1368,14 +1371,14 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
             }
             return ( res || ( (UniverseUtil::GetGameTime()-last_locktime) < locklight_time ) ) ? 1.0f : 0.0f;
         }
-    case UnitImages::MISSILELOCK:
+    case UnitImages< void >::MISSILELOCK:
         {
             static float locklight_time = XMLSupport::parse_float( vs_config->getVariable( "graphics", "locklight_time", "1" ) );
             bool res = target->graphicOptions.missilelock;
             if (res) last_mlocktime = UniverseUtil::GetGameTime();
             return ( res || ( (UniverseUtil::GetGameTime()-last_mlocktime) < locklight_time ) ) ? 1.0f : 0.0f;
         }
-    case UnitImages::COLLISION:
+    case UnitImages< void >::COLLISION:
         {
             static double collidepanic =
                 XMLSupport::parse_float( vs_config->getVariable( "physics", "collision_inertial_time", "1.25" ) );
@@ -1383,27 +1386,27 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
 
             break;
         }
-    case UnitImages::ECM:
-        return target->GetImageInformation().ecm > 0 ? 1 : 0;
+    case UnitImages< void >::ECM:
+        return target->GetImageInformation().ecm != 0 ? 1 : 0;
 
-    case UnitImages::WARPFIELDSTRENGTH:
+    case UnitImages< void >::WARPFIELDSTRENGTH:
         return target->graphicOptions.WarpFieldStrength;
 
-    case UnitImages::JUMP:
+    case UnitImages< void >::JUMP:
         return jumpok ? 1 : 0;
 
-    case UnitImages::KPS:
-    case UnitImages::SETKPS:
-    case UnitImages::MAXKPS:
-    case UnitImages::MAXCOMBATKPS:
-    case UnitImages::MAXCOMBATABKPS:
+    case UnitImages< void >::KPS:
+    case UnitImages< void >::SETKPS:
+    case UnitImages< void >::MAXKPS:
+    case UnitImages< void >::MAXCOMBATKPS:
+    case UnitImages< void >::MAXCOMBATABKPS:
         {
             static bool use_relative_velocity =
                 XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "display_relative_velocity", "true" ) );
             float value;
             switch (stat)
             {
-            case UnitImages::KPS:
+            case UnitImages< void >::KPS:
                 if (target->graphicOptions.WarpFieldStrength != 1.0) {
                     if ( use_relative_velocity && target->computer.velocity_ref.GetUnit() ) {
                         if (target->computer.velocity_ref.GetUnit()->graphicOptions.WarpFieldStrength != 1.0) {
@@ -1434,16 +1437,16 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
                     }
                 }
                 break;
-            case UnitImages::SETKPS:
+            case UnitImages< void >::SETKPS:
                 value = target->GetComputerData().set_speed;
                 break;
-            case UnitImages::MAXKPS:
+            case UnitImages< void >::MAXKPS:
                 value = target->GetComputerData().max_speed();
                 break;
-            case UnitImages::MAXCOMBATKPS:
+            case UnitImages< void >::MAXCOMBATKPS:
                 value = target->GetComputerData().max_combat_speed;
                 break;
-            case UnitImages::MAXCOMBATABKPS:
+            case UnitImages< void >::MAXCOMBATABKPS:
                 value = target->GetComputerData().max_combat_ab_speed;
                 break;
             default:
@@ -1455,7 +1458,7 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
             else
                 return display_in_meters ? value : value*3.6;          //JMS 6/28/05 - converted back to raw meters/second
         }
-    case UnitImages::MASSEFFECT:
+    case UnitImages< void >::MASSEFFECT:
         {
             float basemass = atof( UniverseUtil::LookupUnitStat( target->name, "", "Mass" ).c_str() );
             if (basemass > 0)
@@ -1463,7 +1466,7 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
             else
                 return 0;
         }
-    case UnitImages::AUTOPILOT:
+    case UnitImages< void >::AUTOPILOT:
         {
             static int  wasautopilot = 0;
             int abletoautopilot = 0;
@@ -1508,7 +1511,7 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
             }
             return abletoautopilot;
         }
-    case UnitImages::COCKPIT_FPS:
+    case UnitImages< void >::COCKPIT_FPS:
         if (fpsval >= 0 && fpsval < .5*FLT_MAX)
             numtimes -= .1+fpsval;
         if (numtimes <= 0) {
@@ -1517,106 +1520,106 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
         }
         if (fpsval)
             return 1./fpsval;
-    case UnitImages::AUTOPILOT_MODAL:
+    case UnitImages< void >::AUTOPILOT_MODAL:
         if (target->autopilotactive)
-            return (float) UnitImages::ACTIVE;
+            return (float) UnitImages< void >::ACTIVE;
         else
-            return (float) UnitImages::OFF;
-    case UnitImages::SPEC_MODAL:
+            return (float) UnitImages< void >::OFF;
+    case UnitImages< void >::SPEC_MODAL:
         if (target->graphicOptions.WarpRamping)
-            return (float) UnitImages::SWITCHING;
+            return (float) UnitImages< void >::SWITCHING;
         else if (target->graphicOptions.InWarp)
-            return (float) UnitImages::ACTIVE;
+            return (float) UnitImages< void >::ACTIVE;
         else
-            return (float) UnitImages::OFF;
-    case UnitImages::FLIGHTCOMPUTER_MODAL:
+            return (float) UnitImages< void >::OFF;
+    case UnitImages< void >::FLIGHTCOMPUTER_MODAL:
         if (target->inertialmode)
-            return (float) UnitImages::OFF;
+            return (float) UnitImages< void >::OFF;
         else
-            return (float) UnitImages::ON;
-    case UnitImages::TURRETCONTROL_MODAL:
+            return (float) UnitImages< void >::ON;
+    case UnitImages< void >::TURRETCONTROL_MODAL:
         if (0 == target->turretstatus)
-            return (float) UnitImages::NOTAPPLICABLE;
+            return (float) UnitImages< void >::NOTAPPLICABLE;
         else if (2 == target->turretstatus)          //FIXME -- need to check if turrets are active
-            return (float) UnitImages::ACTIVE;
+            return (float) UnitImages< void >::ACTIVE;
         else if (3 == target->turretstatus)          //FIXME -- need to check if turrets are in FireAtWill state
-            return (float) UnitImages::FAW;
+            return (float) UnitImages< void >::FAW;
         else
-            return (float) UnitImages::OFF;
-    case UnitImages::ECM_MODAL:
-        if (target->GetImageInformation().ecm < 0)
-            return (float) UnitImages::READY;
-        else if (target->GetImageInformation().ecm > 0)
-            return (float) UnitImages::ACTIVE;
+            return (float) UnitImages< void >::OFF;
+    case UnitImages< void >::ECM_MODAL:
+ //       if (target->GetImageInformation().ecm < 0)
+ //           return (float) UnitImages< void >::READY; else... //ecm is unsigned --chuck_starchaser
+        if (target->GetImageInformation().ecm != 0)
+            return (float) UnitImages< void >::ACTIVE;
         else
-            return (float) UnitImages::NOTAPPLICABLE;
-    case UnitImages::CLOAK_MODAL:
+            return (float) UnitImages< void >::NOTAPPLICABLE;
+    case UnitImages< void >::CLOAK_MODAL:
         if (-1 == target->cloaking)
-            return (float) UnitImages::NOTAPPLICABLE;
+            return (float) UnitImages< void >::NOTAPPLICABLE;
         else if ( ( (int) (-2147483647)-1 ) == target->cloaking )
-            return (float) UnitImages::READY;
+            return (float) UnitImages< void >::READY;
         else if (target->cloaking == target->cloakmin)
-            return (float) UnitImages::ACTIVE;
+            return (float) UnitImages< void >::ACTIVE;
         else
-            return (float) UnitImages::SWITCHING;
-    case UnitImages::TRAVELMODE_MODAL:
+            return (float) UnitImages< void >::SWITCHING;
+    case UnitImages< void >::TRAVELMODE_MODAL:
         if ( target->CombatMode() )
-            return (float) UnitImages::MANEUVER;
+            return (float) UnitImages< void >::MANEUVER;
         else
-            return (float) UnitImages::TRAVEL;
-    case UnitImages::RECIEVINGFIRE_MODAL:
+            return (float) UnitImages< void >::TRAVEL;
+    case UnitImages< void >::RECIEVINGFIRE_MODAL:
         if (!target)          //FIXME
-            return (float) UnitImages::WARNING;
+            return (float) UnitImages< void >::WARNING;
         else
-            return (float) UnitImages::NOMINAL;
-    case UnitImages::RECEIVINGMISSILES_MODAL:
+            return (float) UnitImages< void >::NOMINAL;
+    case UnitImages< void >::RECEIVINGMISSILES_MODAL:
         if (!target)          //FIXME
-            return (float) UnitImages::WARNING;
+            return (float) UnitImages< void >::WARNING;
         else
-            return (float) UnitImages::NOMINAL;
-    case UnitImages::RECEIVINGMISSILELOCK_MODAL:
+            return (float) UnitImages< void >::NOMINAL;
+    case UnitImages< void >::RECEIVINGMISSILELOCK_MODAL:
         if (!target)          //FIXME
-            return (float) UnitImages::WARNING;
+            return (float) UnitImages< void >::WARNING;
         else
-            return (float) UnitImages::NOMINAL;
-    case UnitImages::RECEIVINGTARGETLOCK_MODAL:
+            return (float) UnitImages< void >::NOMINAL;
+    case UnitImages< void >::RECEIVINGTARGETLOCK_MODAL:
         if (!target)          //FIXME
-            return (float) UnitImages::WARNING;
+            return (float) UnitImages< void >::WARNING;
         else
-            return (float) UnitImages::NOMINAL;
-    case UnitImages::COLLISIONWARNING_MODAL:
+            return (float) UnitImages< void >::NOMINAL;
+    case UnitImages< void >::COLLISIONWARNING_MODAL:
         if (!target)          //FIXME
-            return (float) UnitImages::WARNING;
+            return (float) UnitImages< void >::WARNING;
         else
-            return (float) UnitImages::NOMINAL;
-    case UnitImages::CANJUMP_MODAL:
+            return (float) UnitImages< void >::NOMINAL;
+    case UnitImages< void >::CANJUMP_MODAL:
         if (-2 == target->GetJumpStatus().drive)
-            return (float) UnitImages::NODRIVE;
+            return (float) UnitImages< void >::NODRIVE;
         else if (target->GetWarpEnergy() < target->GetJumpStatus().energy)
-            return (float) UnitImages::NOTENOUGHENERGY;
+            return (float) UnitImages< void >::NOTENOUGHENERGY;
         else if (target->graphicOptions.InWarp)          //FIXME
-            return (float) UnitImages::OFF;
+            return (float) UnitImages< void >::OFF;
         else if (jumpok)
-            return (float) UnitImages::READY;
+            return (float) UnitImages< void >::READY;
         else
-            return (float) UnitImages::TOOFAR;
-    case UnitImages::CANDOCK_MODAL:
+            return (float) UnitImages< void >::TOOFAR;
+    case UnitImages< void >::CANDOCK_MODAL:
         /*if(!target){ //FIXME
-         *       return (float)UnitImages::READY;
+         *       return (float)UnitImages<void>::READY;
          *  } else if(!target){ //FIXME
-         *       return (float)UnitImages::TOOFAR;
+         *       return (float)UnitImages<void>::TOOFAR;
          *  } else if(target->graphicOptions.InWarp){
-         *       return (float)UnitImages::OFF;
+         *       return (float)UnitImages<void>::OFF;
          *  } else {
-         *       return (float)UnitImages::NOMINAL;
+         *       return (float)UnitImages<void>::NOMINAL;
          *  }*/
         Unit*todock = target->Target();
         if ( todock && (todock->CanDockWithMe( target, 1 ) != -1) ) {
             return (todock->CanDockWithMe( target, 0 ) != -1)
-                   ? (float) UnitImages::READY
-                   : (float) UnitImages::TOOFAR;
+                   ? (float) UnitImages< void >::READY
+                   : (float) UnitImages< void >::TOOFAR;
         }
-        return (float) UnitImages::NOMINAL;
+        return (float) UnitImages< void >::NOMINAL;
     }
     return 1;
 }
@@ -1626,7 +1629,7 @@ void GameCockpit::DrawTargetGauges( Unit *target )
     int i;
     //printf ("(debug)UNIT NAME:%s\n",UnitUtil::getName(target).c_str());
     //printf ("(debug)TARGETSHIELDF:%1.2f\n",target->FShieldData());
-    for (i = UnitImages::TARGETSHIELDF; i < UnitImages::KPS; i++)
+    for (i = UnitImages< void >::TARGETSHIELDF; i < UnitImages< void >::KPS; i++)
         if (gauges[i])
             gauges[i]->Draw( LookupTargetStat( i, target ) );
     if (!text)
@@ -1636,14 +1639,11 @@ void GameCockpit::DrawTargetGauges( Unit *target )
 void GameCockpit::DrawGauges( Unit *un )
 {
     int i;
-    for (i = 0; i < UnitImages::TARGETSHIELDF; i++)
+    for (i = 0; i < UnitImages< void >::TARGETSHIELDF; i++) {
         if (gauges[i]) {
             gauges[i]->Draw( LookupUnitStat( i, un ) );
-/*      if (rand01()>un->GetImageInformation().cockpit_damage[0]) {
- *       static Animation gauge_ani("static.ani",true,.1,BILINEAR);
- *       gauge_ani.DrawAsVSSprite(Radar);
- *     }*/
-            float damage = un->GetImageInformation().cockpit_damage[(1+MAXVDUS+i)%(MAXVDUS+1+UnitImages::NUMGAUGES)];
+            float damage =
+                un->GetImageInformation().cockpit_damage[(1+MAXVDUS+i)%(MAXVDUS+1+UnitImages < void > ::NUMGAUGES)];
             if (gauge_time[i] >= 0) {
                 if ( damage > .0001 && ( cockpit_time > ( gauge_time[i]+(1-damage) ) ) )
                     if (rand01() > SWITCH_CONST)
@@ -1658,8 +1658,7 @@ void GameCockpit::DrawGauges( Unit *un )
                     gauge_time[i] = cockpit_time;
             }
         }
-    //if gauges
-    //for
+    }
     if (!text)
         return;
     GFXColorf( textcol );
@@ -1670,7 +1669,7 @@ void GameCockpit::DrawGauges( Unit *un )
         XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "textwidthapproxHACK", "0.0175" ) );
     bool automatte = (0 == origbgcol.a);
     if (automatte) text->bgcol = GFXColor( 0, 0, 0, background_alpha );
-    for (i = UnitImages::KPS; i < UnitImages::AUTOPILOT_MODAL; i++)
+    for (i = UnitImages< void >::KPS; i < UnitImages< void >::AUTOPILOT_MODAL; i++) {
         if (gauges[i]) {
             float sx, sy, px, py;
             gauges[i]->GetSize( sx, sy );
@@ -1681,21 +1680,22 @@ void GameCockpit::DrawGauges( Unit *un )
             float tmp2 = 0;
             char  ourchar[64];
             int   len  = sprintf( ourchar, "%.0f", tmp );
-            if (i == UnitImages::KPS) {
+            if (i == UnitImages< void >::KPS) {
                 float c = 300000000.0f;
                 if (tmp > c/10) {
                     tmp2 = tmp/c;
                     len  = sprintf( ourchar, "%.2f C", tmp2 );
                 }
             }
-            if (i == UnitImages::MASSEFFECT)
+            if (i == UnitImages< void >::MASSEFFECT)
                 len = sprintf( ourchar, "MASS:%.0f%% (base)", tmp );
             GFXColorf( textcol );
             //text->SetSize (px+textwidthapproxHACK*(float)len,-2);
             text->SetSize( 2, -2 );
             text->Draw( string( ourchar ), 0, false, false, automatte );
         }
-    for (i = UnitImages::AUTOPILOT_MODAL; i < UnitImages::NUMGAUGES; i++)
+    }
+    for (i = UnitImages< void >::AUTOPILOT_MODAL; i < UnitImages< void >::NUMGAUGES; i++) {
         if (gauges[i]) {
             float sx, sy, px, py;
             gauges[i]->GetSize( sx, sy );
@@ -1708,46 +1708,46 @@ void GameCockpit::DrawGauges( Unit *un )
             std::string modevalue;
             switch (i)
             {
-            case UnitImages::AUTOPILOT_MODAL:
+            case UnitImages< void >::AUTOPILOT_MODAL:
                 modename = "AUTO:";
                 break;
-            case UnitImages::SPEC_MODAL:
+            case UnitImages< void >::SPEC_MODAL:
                 modename = "SPEC:";
                 break;
-            case UnitImages::FLIGHTCOMPUTER_MODAL:
+            case UnitImages< void >::FLIGHTCOMPUTER_MODAL:
                 modename = "FCMP:";
                 break;
-            case UnitImages::TURRETCONTROL_MODAL:
+            case UnitImages< void >::TURRETCONTROL_MODAL:
                 modename = "TCNT:";
                 break;
-            case UnitImages::ECM_MODAL:
+            case UnitImages< void >::ECM_MODAL:
                 modename = "ECM :";
                 break;
-            case UnitImages::CLOAK_MODAL:
+            case UnitImages< void >::CLOAK_MODAL:
                 modename = "CLK :";
                 break;
-            case UnitImages::TRAVELMODE_MODAL:
+            case UnitImages< void >::TRAVELMODE_MODAL:
                 modename = "GCNT:";
                 break;
-            case UnitImages::RECIEVINGFIRE_MODAL:
+            case UnitImages< void >::RECIEVINGFIRE_MODAL:
                 modename = "RFIR:";
                 break;
-            case UnitImages::RECEIVINGMISSILES_MODAL:
+            case UnitImages< void >::RECEIVINGMISSILES_MODAL:
                 modename = "RMIS:";
                 break;
-            case UnitImages::RECEIVINGMISSILELOCK_MODAL:
+            case UnitImages< void >::RECEIVINGMISSILELOCK_MODAL:
                 modename = "RML :";
                 break;
-            case UnitImages::RECEIVINGTARGETLOCK_MODAL:
+            case UnitImages< void >::RECEIVINGTARGETLOCK_MODAL:
                 modename = "RTL :";
                 break;
-            case UnitImages::COLLISIONWARNING_MODAL:
+            case UnitImages< void >::COLLISIONWARNING_MODAL:
                 modename = "COL :";
                 break;
-            case UnitImages::CANJUMP_MODAL:
+            case UnitImages< void >::CANJUMP_MODAL:
                 modename = "JUMP:";
                 break;
-            case UnitImages::CANDOCK_MODAL:
+            case UnitImages< void >::CANDOCK_MODAL:
                 modename = "DOCK:";
                 break;
             default:
@@ -1755,46 +1755,46 @@ void GameCockpit::DrawGauges( Unit *un )
             }
             switch (ivalue)
             {
-            case UnitImages::OFF:
+            case UnitImages< void >::OFF:
                 modevalue = "OFF";
                 break;
-            case UnitImages::ON:
+            case UnitImages< void >::ON:
                 modevalue = "ON";
                 break;
-            case UnitImages::SWITCHING:
+            case UnitImages< void >::SWITCHING:
                 modevalue = "<>";
                 break;
-            case UnitImages::ACTIVE:
+            case UnitImages< void >::ACTIVE:
                 modevalue = "ACTIVE";
                 break;
-            case UnitImages::FAW:
+            case UnitImages< void >::FAW:
                 modevalue = "FAW";
                 break;
-            case UnitImages::MANEUVER:
+            case UnitImages< void >::MANEUVER:
                 modevalue = "MANEUVER";
                 break;
-            case UnitImages::TRAVEL:
+            case UnitImages< void >::TRAVEL:
                 modevalue = "TRAVEL";
                 break;
-            case UnitImages::NOTAPPLICABLE:
+            case UnitImages< void >::NOTAPPLICABLE:
                 modevalue = "N / A";
                 break;
-            case UnitImages::READY:
+            case UnitImages< void >::READY:
                 modevalue = "READY";
                 break;
-            case UnitImages::NODRIVE:
+            case UnitImages< void >::NODRIVE:
                 modevalue = "NO DRIVE";
                 break;
-            case UnitImages::TOOFAR:
+            case UnitImages< void >::TOOFAR:
                 modevalue = "TOO FAR";
                 break;
-            case UnitImages::NOTENOUGHENERGY:
+            case UnitImages< void >::NOTENOUGHENERGY:
                 modevalue = "LOW ENERGY";
                 break;
-            case UnitImages::WARNING:
+            case UnitImages< void >::WARNING:
                 modevalue = "WARNING!";
                 break;
-            case UnitImages::NOMINAL:
+            case UnitImages< void >::NOMINAL:
                 modevalue = " - ";
                 break;
             default:
@@ -1805,6 +1805,7 @@ void GameCockpit::DrawGauges( Unit *un )
             text->SetSize( 2, -2 );
             text->Draw( modename+modevalue, 0, false, false, automatte );
         }
+    }
     text->bgcol = origbgcol;
     GFXColor4f( 1, 1, 1, 1 );
 }
@@ -1850,7 +1851,7 @@ void GameCockpit::Delete()
          *  }
          */
     }
-    for (i = 0; i < UnitImages::NUMGAUGES; i++)
+    for (i = 0; i < UnitImages< void >::NUMGAUGES; i++)
         if (gauges[i]) {
             delete gauges[i];
             gauges[i] = NULL;
@@ -1880,7 +1881,7 @@ void GameCockpit::Delete()
 void GameCockpit::InitStatic()
 {
     int i;
-    for (i = 0; i < UnitImages::NUMGAUGES; i++)
+    for (i = 0; i < UnitImages< void >::NUMGAUGES; i++)
         gauge_time[i] = 0;
     for (i = 0; i < MAXVDUS; i++)
         vdu_time[i] = 0;
@@ -1904,7 +1905,7 @@ GameCockpit::GameCockpit( const char *file, Unit *parent, const std::string &pil
         headtrans.push_back( Matrix() );
         Identity( headtrans.back() );
     }
-    for (i = 0; i < UnitImages::NUMGAUGES; i++)
+    for (i = 0; i < UnitImages< void >::NUMGAUGES; i++)
         gauges[i] = NULL;
     Radar[0] = Radar[1] = Pit[0] = Pit[1] = Pit[2] = Pit[3] = NULL;
 
@@ -2494,15 +2495,15 @@ void GameCockpit::Draw()
                 theta  += shake_speed*GetElapsedTime()*sqrt( fabs( shakin ) )/10;                 //For small shakes, slower shakes
                 wtheta += warp_shake_speed*GetElapsedTime();                 //SPEC-related shaking
 
-                float self_kps = ( (GetParent() != NULL) ? LookupUnitStat( UnitImages::KPS, GetParent() ) : 0 );
+                float self_kps = ( (GetParent() != NULL) ? LookupUnitStat( UnitImages< void >::KPS, GetParent() ) : 0 );
                 float self_setkps   =
-                    max( 1.0f, ( (GetParent() != NULL) ? LookupUnitStat( UnitImages::SETKPS, GetParent() ) : 0 ) );
+                    max( 1.0f, ( (GetParent() != NULL) ? LookupUnitStat( UnitImages< void >::SETKPS, GetParent() ) : 0 ) );
                 float warp_strength =
                     max( 0.0f,
                         min( max( 0.0f,
                                  min( 1.0f,
                                       self_kps/self_setkps ) ),
-                             ( (GetParent() != NULL) ? LookupUnitStat( UnitImages::WARPFIELDSTRENGTH,
+                             ( (GetParent() != NULL) ? LookupUnitStat( UnitImages< void >::WARPFIELDSTRENGTH,
                                                                       GetParent() ) : 0.0f )/warp_shake_ref ) );
                 if (shakin > shake_limit) shakin = shake_limit;
                 headtrans.front().p.i = shake_mag*shakin*cos( theta )*cockpitradial/100;                 //AccessCamera()->GetPosition().i+shakin*cos(theta);
@@ -3234,7 +3235,8 @@ static void FaceCamTarget( Cockpit *cp, int cam, Unit *un )
 
 static void ShoveCamBehindUnit( int cam, Unit *un, float zoomfactor )
 {
-    QVector unpos = ( un->GetPlanetOrbit() && !un->isSubUnit() ) ? un->LocalPosition() : un->Position();
+    //commented out by chuck_starchaser; --never used
+    QVector unpos = (/*un->GetPlanetOrbit() && !un->isSubUnit()*/ NULL) ? un->LocalPosition() : un->Position();
     _Universe->AccessCamera( cam )->SetPosition(
         unpos-_Universe->AccessCamera()->GetR().Cast()*(un->rSize()+g_game.znear*2)*zoomfactor,
         un->GetWarpVelocity(), un->GetAngularVelocity(), un->GetAcceleration() );
@@ -3242,7 +3244,8 @@ static void ShoveCamBehindUnit( int cam, Unit *un, float zoomfactor )
 
 static void ShoveCamBelowUnit( int cam, Unit *un, float zoomfactor )
 {
-    QVector unpos = ( un->GetPlanetOrbit() && !un->isSubUnit() ) ? un->LocalPosition() : un->Position();
+    //commented out by chuck_starchaser; --never used
+    QVector unpos = (/*un->GetPlanetOrbit() && !un->isSubUnit()*/ NULL) ? un->LocalPosition() : un->Position();
     Vector  p, q, r;
     _Universe->AccessCamera( cam )->GetOrientation( p, q, r );
     static float ammttoshovecam = XMLSupport::parse_float( vs_config->getVariable( "graphics", "shove_camera_down", ".3" ) );
@@ -3424,9 +3427,9 @@ void GameCockpit::SetupViewPort( bool clip )
             theta += shake_speed*GetElapsedTime();
             if (stable_lowarpref == stable_hiwarpref) stable_hiwarpref = stable_lowarpref+1;
             if (shake_lowarpref == shake_hiwarpref) shake_hiwarpref = shake_lowarpref+1;
-            float warpfieldstrength    = LookupUnitStat( UnitImages::WARPFIELDSTRENGTH, un );
-            float refkps = (refkpsoverride > 0) ? refkpsoverride : LookupUnitStat( UnitImages::MAXCOMBATABKPS, un );               //This one is stable, as opposed to SETKPS - for full stability, use the override (user override of governor settings will create weird behaviour if done under SPEC)
-            float kps = LookupUnitStat( UnitImages::KPS, un );
+            float warpfieldstrength    = LookupUnitStat( UnitImages< void >::WARPFIELDSTRENGTH, un );
+            float refkps = (refkpsoverride > 0) ? refkpsoverride : LookupUnitStat( UnitImages< void >::MAXCOMBATABKPS, un );               //This one is stable, as opposed to SETKPS - for full stability, use the override (user override of governor settings will create weird behaviour if done under SPEC)
+            float kps = LookupUnitStat( UnitImages< void >::KPS, un );
             float st_warpfieldstrength =
                 pow( (max( stable_lowarpref,
                           min( stable_asymptotic ? FLT_MAX : stable_hiwarpref,
@@ -3492,9 +3495,9 @@ Camera* GameCockpit::AccessCamera( int num )
  * Draw the arrow pointing to the target.
  */
 //THETA : angle between the arrow head and the two branches (divided by 2) (20 degrees here).
-#define TARGET_ARROW_COS_THETA 0.93969262078590838405410927732473
-#define TARGET_ARROW_SIN_THETA 0.34202014332566873304409961468226
-#define TARGET_ARROW_SIZE 0.05
+#define TARGET_ARROW_COS_THETA (0.93969262078590838405410927732473)
+#define TARGET_ARROW_SIN_THETA (0.34202014332566873304409961468226)
+#define TARGET_ARROW_SIZE (0.05)
 
 void GameCockpit::DrawArrowToTarget( Unit *un, Unit *target )
 {

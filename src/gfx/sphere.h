@@ -5,15 +5,15 @@
 #include "quaternion.h"
 #include <assert.h>
 #ifndef M_PI
-#define M_PI 3.1415926536F
+#define M_PI (3.1415926536F)
 #endif
 
 class SphereMesh : public Mesh
 {
 //no local vars allowed
 protected:
-    virtual float GetT( float rho, float rho_min, float rho_max );
-    virtual float GetS( float theta, float theta_min, float theta_max );
+    virtual float GetT( float rho, float rho_min, float rho_max ) const;
+    virtual float GetS( float theta, float theta_min, float theta_max ) const;
     virtual Mesh * AllocNewMeshesEachInSizeofMeshSpace( int num )
     {
         assert( sizeof (Mesh) == sizeof (*this) );
@@ -39,7 +39,7 @@ public: SphereMesh() : Mesh()
     {
         setConvex( true );
     }
-    virtual int MeshType()
+    virtual int MeshType() const
     {
         return 1;
     }
@@ -80,6 +80,7 @@ public: SphereMesh() : Mesh()
     void Draw( float lod, bool centered = false, const Matrix &m = identity_matrix );
     virtual void ProcessDrawQueue( int whichpass, int which, bool zsort, const QVector &sortctr );
 };
+
 class CityLights : public SphereMesh
 {
 //no local vars allowed
@@ -87,8 +88,8 @@ class CityLights : public SphereMesh
     static float wrapx;
     static float wrapy;
 protected:
-    virtual float GetT( float rho, float rho_min, float rho_max );
-    virtual float GetS( float theta, float theta_min, float theta_max );
+    virtual float GetT( float rho, float rho_min, float rho_max ) const;
+    virtual float GetS( float theta, float theta_min, float theta_max ) const;
     virtual Mesh * AllocNewMeshesEachInSizeofMeshSpace( int num )
     {
         assert( sizeof (Mesh) == sizeof (*this) );

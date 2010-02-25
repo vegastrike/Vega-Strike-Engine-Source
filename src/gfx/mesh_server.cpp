@@ -10,15 +10,15 @@ void winsys_exit( int code )
 }
 #endif
 
-int Mesh::getNumTextureFrames()
+int Mesh::getNumTextureFrames() const
 {
     return 1;
 }
-double Mesh::getTextureCumulativeTime()
+double Mesh::getTextureCumulativeTime() const
 {
     return 0;
 }
-float Mesh::getTextureFramesPerSecond()
+float Mesh::getTextureFramesPerSecond() const
 {
     return 0;
 }
@@ -35,7 +35,7 @@ Texture* Mesh::TempGetTexture( struct MeshXML*, int index, std::string factionna
 {
     return NULL;
 }
-const GFXMaterial& Mesh::GetMaterial()
+const GFXMaterial& Mesh::GetMaterial() const
 {
     static GFXMaterial tmp;
     return tmp;

@@ -16,7 +16,7 @@ namespace CockpitXML
 {
 enum Names
 {
-    UNKNOWN=UnitImages::NUMGAUGES,
+    UNKNOWN=UnitImages< void >::NUMGAUGES,
     COCKPIT,
     MESH,
     CROSSHAIRS,
@@ -48,7 +48,7 @@ enum Names
     LEFT,
     RIGHT,
     NETWORK,
-//use the UnitImages enum for the gauge values instead!
+//use the UnitImages<void> enum for the gauge values instead!
 /*    KARMORF,
  *     KARMORB,
  *     KARMORR,
@@ -87,64 +87,64 @@ const EnumMap::Pair element_names[] = {
     EnumMap::Pair( "RightVDU",          RVDU ),
     EnumMap::Pair( "Panel",             PANEL ),
     EnumMap::Pair( "Crosshairs",        CROSSHAIRS ),
-    EnumMap::Pair( "ArmorF",            UnitImages::ARMORF ),
-    EnumMap::Pair( "ArmorR",            UnitImages::ARMORR ),
-    EnumMap::Pair( "ArmorL",            UnitImages::ARMORL ),
-    EnumMap::Pair( "ArmorB",            UnitImages::ARMORB ),
-    EnumMap::Pair( "ArmorFRT",          UnitImages::ARMORF ),
-    EnumMap::Pair( "ArmorBRT",          UnitImages::ARMORR ),
-    EnumMap::Pair( "ArmorFLT",          UnitImages::ARMORL ),
-    EnumMap::Pair( "ArmorBLT",          UnitImages::ARMORB ),
-    EnumMap::Pair( "ArmorFRB",          UnitImages::ARMOR4 ),
-    EnumMap::Pair( "ArmorBRB",          UnitImages::ARMOR5 ),
-    EnumMap::Pair( "ArmorFLB",          UnitImages::ARMOR6 ),
-    EnumMap::Pair( "ArmorBLB",          UnitImages::ARMOR7 ),
-    EnumMap::Pair( "ShieldF",           UnitImages::SHIELDF ),
-    EnumMap::Pair( "ShieldR",           UnitImages::SHIELDR ),
-    EnumMap::Pair( "ShieldL",           UnitImages::SHIELDL ),
-    EnumMap::Pair( "ShieldB",           UnitImages::SHIELDB ),
-    EnumMap::Pair( "ShieldFRT",         UnitImages::SHIELDF ),
-    EnumMap::Pair( "ShieldBRT",         UnitImages::SHIELDR ),
-    EnumMap::Pair( "ShieldFLT",         UnitImages::SHIELDL ),
-    EnumMap::Pair( "ShieldBLT",         UnitImages::SHIELDB ),
-    EnumMap::Pair( "ShieldFRB",         UnitImages::SHIELD4 ),
-    EnumMap::Pair( "ShieldBRB",         UnitImages::SHIELD5 ),
-    EnumMap::Pair( "ShieldFLB",         UnitImages::SHIELD6 ),
-    EnumMap::Pair( "ShieldBLB",         UnitImages::SHIELD7 ),
-    EnumMap::Pair( "Fuel",              UnitImages::FUEL ),
-    EnumMap::Pair( "Energy",            UnitImages::ENERGY ),
-    EnumMap::Pair( "Eject",             UnitImages::EJECT ),
-    EnumMap::Pair( "Lock",              UnitImages::LOCK ),
-    EnumMap::Pair( "MissileLock",       UnitImages::MISSILELOCK ),
-    EnumMap::Pair( "Jump",              UnitImages::JUMP ),
-    EnumMap::Pair( "ECM",               UnitImages::ECM ),
-    EnumMap::Pair( "Hull",              UnitImages::HULL ),
-    EnumMap::Pair( "WarpEnergy",        UnitImages::WARPENERGY ),
-    EnumMap::Pair( "Speed",             UnitImages::KPS ),
-    EnumMap::Pair( "SetSpeed",          UnitImages::SETKPS ),
-    EnumMap::Pair( "Auto",              UnitImages::AUTOPILOT ),
-    EnumMap::Pair( "Collision",         UnitImages::COLLISION ),
-    EnumMap::Pair( "FPS",               UnitImages::COCKPIT_FPS ),
-    EnumMap::Pair( "WarpFieldStrength", UnitImages::WARPFIELDSTRENGTH ),
-    EnumMap::Pair( "MASSEFFECT",        UnitImages::MASSEFFECT ),
-    EnumMap::Pair( "MAUTO",             UnitImages::AUTOPILOT_MODAL ),
-    EnumMap::Pair( "MSPEC",             UnitImages::SPEC_MODAL ),
-    EnumMap::Pair( "MFLIGHTCOMP",       UnitImages::FLIGHTCOMPUTER_MODAL ),
-    EnumMap::Pair( "MTURRET",           UnitImages::TURRETCONTROL_MODAL ),
-    EnumMap::Pair( "MECM",              UnitImages::ECM_MODAL ),
-    EnumMap::Pair( "MCLOAK",            UnitImages::CLOAK_MODAL ),
-    EnumMap::Pair( "MTRAVEL",           UnitImages::TRAVELMODE_MODAL ),
-    EnumMap::Pair( "MRECFIRE",          UnitImages::RECIEVINGFIRE_MODAL ),
-    EnumMap::Pair( "MRECMISSILE",       UnitImages::RECEIVINGMISSILES_MODAL ),
-    EnumMap::Pair( "MRECMLOCK",         UnitImages::RECEIVINGMISSILELOCK_MODAL ),
-    EnumMap::Pair( "MRECTLOCK",         UnitImages::RECEIVINGTARGETLOCK_MODAL ),
-    EnumMap::Pair( "MCOLLISIONWARNING", UnitImages::COLLISIONWARNING_MODAL ),
-    EnumMap::Pair( "MJUMP",             UnitImages::CANJUMP_MODAL ),
-    EnumMap::Pair( "MDOCK",             UnitImages::CANDOCK_MODAL ),
-    EnumMap::Pair( "TargetShieldF",     UnitImages::TARGETSHIELDF ),
-    EnumMap::Pair( "TargetShieldB",     UnitImages::TARGETSHIELDB ),
-    EnumMap::Pair( "TargetShieldR",     UnitImages::TARGETSHIELDR ),
-    EnumMap::Pair( "TargetShieldL",     UnitImages::TARGETSHIELDL )
+    EnumMap::Pair( "ArmorF",            UnitImages< void >::ARMORF ),
+    EnumMap::Pair( "ArmorR",            UnitImages< void >::ARMORR ),
+    EnumMap::Pair( "ArmorL",            UnitImages< void >::ARMORL ),
+    EnumMap::Pair( "ArmorB",            UnitImages< void >::ARMORB ),
+    EnumMap::Pair( "ArmorFRT",          UnitImages< void >::ARMORF ),
+    EnumMap::Pair( "ArmorBRT",          UnitImages< void >::ARMORR ),
+    EnumMap::Pair( "ArmorFLT",          UnitImages< void >::ARMORL ),
+    EnumMap::Pair( "ArmorBLT",          UnitImages< void >::ARMORB ),
+    EnumMap::Pair( "ArmorFRB",          UnitImages< void >::ARMOR4 ),
+    EnumMap::Pair( "ArmorBRB",          UnitImages< void >::ARMOR5 ),
+    EnumMap::Pair( "ArmorFLB",          UnitImages< void >::ARMOR6 ),
+    EnumMap::Pair( "ArmorBLB",          UnitImages< void >::ARMOR7 ),
+    EnumMap::Pair( "ShieldF",           UnitImages< void >::SHIELDF ),
+    EnumMap::Pair( "ShieldR",           UnitImages< void >::SHIELDR ),
+    EnumMap::Pair( "ShieldL",           UnitImages< void >::SHIELDL ),
+    EnumMap::Pair( "ShieldB",           UnitImages< void >::SHIELDB ),
+    EnumMap::Pair( "ShieldFRT",         UnitImages< void >::SHIELDF ),
+    EnumMap::Pair( "ShieldBRT",         UnitImages< void >::SHIELDR ),
+    EnumMap::Pair( "ShieldFLT",         UnitImages< void >::SHIELDL ),
+    EnumMap::Pair( "ShieldBLT",         UnitImages< void >::SHIELDB ),
+    EnumMap::Pair( "ShieldFRB",         UnitImages< void >::SHIELD4 ),
+    EnumMap::Pair( "ShieldBRB",         UnitImages< void >::SHIELD5 ),
+    EnumMap::Pair( "ShieldFLB",         UnitImages< void >::SHIELD6 ),
+    EnumMap::Pair( "ShieldBLB",         UnitImages< void >::SHIELD7 ),
+    EnumMap::Pair( "Fuel",              UnitImages< void >::FUEL ),
+    EnumMap::Pair( "Energy",            UnitImages< void >::ENERGY ),
+    EnumMap::Pair( "Eject",             UnitImages< void >::EJECT ),
+    EnumMap::Pair( "Lock",              UnitImages< void >::LOCK ),
+    EnumMap::Pair( "MissileLock",       UnitImages< void >::MISSILELOCK ),
+    EnumMap::Pair( "Jump",              UnitImages< void >::JUMP ),
+    EnumMap::Pair( "ECM",               UnitImages< void >::ECM ),
+    EnumMap::Pair( "Hull",              UnitImages< void >::HULL ),
+    EnumMap::Pair( "WarpEnergy",        UnitImages< void >::WARPENERGY ),
+    EnumMap::Pair( "Speed",             UnitImages< void >::KPS ),
+    EnumMap::Pair( "SetSpeed",          UnitImages< void >::SETKPS ),
+    EnumMap::Pair( "Auto",              UnitImages< void >::AUTOPILOT ),
+    EnumMap::Pair( "Collision",         UnitImages< void >::COLLISION ),
+    EnumMap::Pair( "FPS",               UnitImages< void >::COCKPIT_FPS ),
+    EnumMap::Pair( "WarpFieldStrength", UnitImages< void >::WARPFIELDSTRENGTH ),
+    EnumMap::Pair( "MASSEFFECT",        UnitImages< void >::MASSEFFECT ),
+    EnumMap::Pair( "MAUTO",             UnitImages< void >::AUTOPILOT_MODAL ),
+    EnumMap::Pair( "MSPEC",             UnitImages< void >::SPEC_MODAL ),
+    EnumMap::Pair( "MFLIGHTCOMP",       UnitImages< void >::FLIGHTCOMPUTER_MODAL ),
+    EnumMap::Pair( "MTURRET",           UnitImages< void >::TURRETCONTROL_MODAL ),
+    EnumMap::Pair( "MECM",              UnitImages< void >::ECM_MODAL ),
+    EnumMap::Pair( "MCLOAK",            UnitImages< void >::CLOAK_MODAL ),
+    EnumMap::Pair( "MTRAVEL",           UnitImages< void >::TRAVELMODE_MODAL ),
+    EnumMap::Pair( "MRECFIRE",          UnitImages< void >::RECIEVINGFIRE_MODAL ),
+    EnumMap::Pair( "MRECMISSILE",       UnitImages< void >::RECEIVINGMISSILES_MODAL ),
+    EnumMap::Pair( "MRECMLOCK",         UnitImages< void >::RECEIVINGMISSILELOCK_MODAL ),
+    EnumMap::Pair( "MRECTLOCK",         UnitImages< void >::RECEIVINGTARGETLOCK_MODAL ),
+    EnumMap::Pair( "MCOLLISIONWARNING", UnitImages< void >::COLLISIONWARNING_MODAL ),
+    EnumMap::Pair( "MJUMP",             UnitImages< void >::CANJUMP_MODAL ),
+    EnumMap::Pair( "MDOCK",             UnitImages< void >::CANDOCK_MODAL ),
+    EnumMap::Pair( "TargetShieldF",     UnitImages< void >::TARGETSHIELDF ),
+    EnumMap::Pair( "TargetShieldB",     UnitImages< void >::TARGETSHIELDB ),
+    EnumMap::Pair( "TargetShieldR",     UnitImages< void >::TARGETSHIELDR ),
+    EnumMap::Pair( "TargetShieldL",     UnitImages< void >::TARGETSHIELDL )
 };
 const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair( "UNKNOWN",       UNKNOWN ),
@@ -313,60 +313,60 @@ void GameCockpit::beginElement( const string &name, const AttributeList &attribu
                 Pit[counter] = false;
             }
         break;
-    case UnitImages::SHIELD4:
-    case UnitImages::SHIELD5:
-    case UnitImages::SHIELD6:
-    case UnitImages::SHIELD7:
+    case UnitImages< void >::SHIELD4:
+    case UnitImages< void >::SHIELD5:
+    case UnitImages< void >::SHIELD6:
+    case UnitImages< void >::SHIELD7:
         shield8 = true;
         goto pastarmor8;
-    case UnitImages::ARMOR4:
-    case UnitImages::ARMOR5:
-    case UnitImages::ARMOR6:
-    case UnitImages::ARMOR7:
+    case UnitImages< void >::ARMOR4:
+    case UnitImages< void >::ARMOR5:
+    case UnitImages< void >::ARMOR6:
+    case UnitImages< void >::ARMOR7:
         armor8 = true;
 pastarmor8:
-    case UnitImages::JUMP:
-    case UnitImages::MISSILELOCK:
-    case UnitImages::ECM:
-    case UnitImages::ARMORF:
-    case UnitImages::ARMORR:
-    case UnitImages::ARMORL:
-    case UnitImages::ARMORB:
-    case UnitImages::FUEL:
-    case UnitImages::SHIELDF:
-    case UnitImages::SHIELDL:
-    case UnitImages::SHIELDR:
-    case UnitImages::SHIELDB:
-    case UnitImages::TARGETSHIELDF:
-    case UnitImages::TARGETSHIELDB:
-    case UnitImages::TARGETSHIELDR:
-    case UnitImages::TARGETSHIELDL:
-    case UnitImages::ENERGY:
-    case UnitImages::WARPENERGY:
-    case UnitImages::EJECT:
-    case UnitImages::LOCK:
-    case UnitImages::HULL:
-    case UnitImages::KPS:
-    case UnitImages::SETKPS:
-    case UnitImages::AUTOPILOT:
-    case UnitImages::COLLISION:
-    case UnitImages::COCKPIT_FPS:
-    case UnitImages::WARPFIELDSTRENGTH:
-    case UnitImages::MASSEFFECT:
-    case UnitImages::AUTOPILOT_MODAL:
-    case UnitImages::SPEC_MODAL:
-    case UnitImages::FLIGHTCOMPUTER_MODAL:
-    case UnitImages::TURRETCONTROL_MODAL:
-    case UnitImages::ECM_MODAL:
-    case UnitImages::CLOAK_MODAL:
-    case UnitImages::TRAVELMODE_MODAL:
-    case UnitImages::RECIEVINGFIRE_MODAL:
-    case UnitImages::RECEIVINGMISSILES_MODAL:
-    case UnitImages::RECEIVINGMISSILELOCK_MODAL:
-    case UnitImages::RECEIVINGTARGETLOCK_MODAL:
-    case UnitImages::COLLISIONWARNING_MODAL:
-    case UnitImages::CANJUMP_MODAL:
-    case UnitImages::CANDOCK_MODAL:
+    case UnitImages< void >::JUMP:
+    case UnitImages< void >::MISSILELOCK:
+    case UnitImages< void >::ECM:
+    case UnitImages< void >::ARMORF:
+    case UnitImages< void >::ARMORR:
+    case UnitImages< void >::ARMORL:
+    case UnitImages< void >::ARMORB:
+    case UnitImages< void >::FUEL:
+    case UnitImages< void >::SHIELDF:
+    case UnitImages< void >::SHIELDL:
+    case UnitImages< void >::SHIELDR:
+    case UnitImages< void >::SHIELDB:
+    case UnitImages< void >::TARGETSHIELDF:
+    case UnitImages< void >::TARGETSHIELDB:
+    case UnitImages< void >::TARGETSHIELDR:
+    case UnitImages< void >::TARGETSHIELDL:
+    case UnitImages< void >::ENERGY:
+    case UnitImages< void >::WARPENERGY:
+    case UnitImages< void >::EJECT:
+    case UnitImages< void >::LOCK:
+    case UnitImages< void >::HULL:
+    case UnitImages< void >::KPS:
+    case UnitImages< void >::SETKPS:
+    case UnitImages< void >::AUTOPILOT:
+    case UnitImages< void >::COLLISION:
+    case UnitImages< void >::COCKPIT_FPS:
+    case UnitImages< void >::WARPFIELDSTRENGTH:
+    case UnitImages< void >::MASSEFFECT:
+    case UnitImages< void >::AUTOPILOT_MODAL:
+    case UnitImages< void >::SPEC_MODAL:
+    case UnitImages< void >::FLIGHTCOMPUTER_MODAL:
+    case UnitImages< void >::TURRETCONTROL_MODAL:
+    case UnitImages< void >::ECM_MODAL:
+    case UnitImages< void >::CLOAK_MODAL:
+    case UnitImages< void >::TRAVELMODE_MODAL:
+    case UnitImages< void >::RECIEVINGFIRE_MODAL:
+    case UnitImages< void >::RECEIVINGMISSILES_MODAL:
+    case UnitImages< void >::RECEIVINGMISSILELOCK_MODAL:
+    case UnitImages< void >::RECEIVINGTARGETLOCK_MODAL:
+    case UnitImages< void >::COLLISIONWARNING_MODAL:
+    case UnitImages< void >::CANJUMP_MODAL:
+    case UnitImages< void >::CANDOCK_MODAL:
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
