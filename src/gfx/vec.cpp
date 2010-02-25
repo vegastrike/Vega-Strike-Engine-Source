@@ -25,7 +25,7 @@
 #include "vec.h"
 #include <boost/version.hpp>
 #if BOOST_VERSION != 102800
-#if defined (_MSC_VER) && _MSC_VER<=1200
+#if defined (_MSC_VER) && _MSC_VER <= 1200
 #define Vector Vactor
 #endif
 #include <boost/python/class.hpp>
@@ -34,7 +34,7 @@
 #include <boost/python/to_python_value.hpp>
 #include <boost/python/converter/builtin_converters.hpp>
 #include <boost/python.hpp>
-#if defined (_MSC_VER) && _MSC_VER<=1200
+#if defined (_MSC_VER) && _MSC_VER <= 1200
 #undef Vector
 #endif
 #else
@@ -51,172 +51,167 @@
 //extern Vector _CamQ;
 //extern Vector _CamR;
 
-
 //extern float _CamTransConst;
 
-
-Vector::Vector (PyObject * p) {
-	Vector vec(0,0,0);
-	PyArg_ParseTuple(p,"fff",&vec.i,&vec.j,&vec.k);
-	*this=vec;
+Vector::Vector( PyObject *p )
+{
+    Vector vec( 0, 0, 0 );
+    PyArg_ParseTuple( p, "fff", &vec.i, &vec.j, &vec.k );
+    *this = vec;
 }
-QVector::QVector (PyObject * p) {
-	QVector vec(0,0,0);
- 	PyArg_ParseTuple(p,"ddd",&vec.i,&vec.j,&vec.k);
-	*this=vec;
+QVector::QVector( PyObject *p )
+{
+    QVector vec( 0, 0, 0 );
+    PyArg_ParseTuple( p, "ddd", &vec.i, &vec.j, &vec.k );
+    *this = vec;
 }
-
 
 /////////////////////////////////////////////////////////////
-//   Yaws a unit vector
+//Yaws a unit vector
 /////////////////////////////////////////////////////////////
 
-void Vector::Yaw(float rad) //only works with unit vector
+void Vector::Yaw( float rad ) //only works with unit vector
 {
-	float theta;
-	
-	if (i>0)
-		theta = (float)atan(k/i);
-	else if (i<0)
-		theta = PI+(float)atan(k/i);
-	else if (k<=0 && i==0)
-		theta = -PI/2;
-	else if (k>0 && i==0)
-		theta = PI/2;
-
-	theta += rad;
-	i = cosf(theta);
-	k = sinf(theta); 
+    float theta;
+    if (i > 0)
+        theta = (float) atan( k/i );
+    else if (i < 0)
+        theta = PI+(float) atan( k/i );
+    else if (k <= 0 && i == 0)
+        theta = -PI/2;
+    else if (k > 0 && i == 0)
+        theta = PI/2;
+    theta += rad;
+    i      = cosf( theta );
+    k      = sinf( theta );
 }
 
-void Vector::Roll(float rad)
+void Vector::Roll( float rad )
 {
-	float theta;
-	
-	if (i>0)
-		theta = (float)atan(j/i);
-	else if (i<0)
-		theta = PI+(float)atan(j/i);
-	else if (j<=0 && i==0)
-		theta = -PI/2;
-	else if (j>0 && i==0)
-		theta = PI/2;
-	
-	theta += rad; 
-	i = cosf(theta);
-	j = sinf(theta); 
+    float theta;
+    if (i > 0)
+        theta = (float) atan( j/i );
+    else if (i < 0)
+        theta = PI+(float) atan( j/i );
+    else if (j <= 0 && i == 0)
+        theta = -PI/2;
+    else if (j > 0 && i == 0)
+        theta = PI/2;
+    theta += rad;
+    i      = cosf( theta );
+    j      = sinf( theta );
 }
 
-void Vector::Pitch(float rad)
+void Vector::Pitch( float rad )
 {
-	float theta;
-	
-	if (k>0)
-		theta = (float)atan(j/k);
-	else if (k<0)
-		theta = PI+(float)atan(j/k);
-	else if (j<=0 && k==0)
-		theta = -PI/2;
-	else if (j>0 && k==0)
-		theta = PI/2;
-	
-	theta += rad;
-	k = cosf(theta);
-	j = sinf(theta);
+    float theta;
+    if (k > 0)
+        theta = (float) atan( j/k );
+    else if (k < 0)
+        theta = PI+(float) atan( j/k );
+    else if (j <= 0 && k == 0)
+        theta = -PI/2;
+    else if (j > 0 && k == 0)
+        theta = PI/2;
+    theta += rad;
+    k      = cosf( theta );
+    j      = sinf( theta );
 }
 
-void Yaw (float rad, Vector &p,Vector &q, Vector &r)
+void Yaw( float rad, Vector &p, Vector &q, Vector &r )
 {
-	Vector temp1, temp2, temp3;
-	temp1.i=1;
-	temp1.j =0;
-	temp1.k =0;
-	temp1.Yaw (rad);
-	temp2.i = temp1.i * p.i + temp1.j * q.i + temp1.k * r.i;
-	temp2.j = temp1.i * p.j + temp1.j * q.j + temp1.k * r.j;
-	temp2.k = temp1.i*p.k   + temp1.j * q.k + temp1.k * r.k;
-	temp1.i= 0;
-	temp1.j =0;
-	temp1.k =1;
-	temp1.Yaw (rad);
-	temp3.i = temp1.i * p.i + temp1.j * q.i + temp1.k * r.i;
-	temp3.j = temp1.i * p.j + temp1.j * q.j + temp1.k * r.j;
-	temp3.k = temp1.i*p.k   + temp1.j * q.k + temp1.k * r.k;
-	p = temp2;
-	r = temp3;
+    Vector temp1, temp2, temp3;
+    temp1.i = 1;
+    temp1.j = 0;
+    temp1.k = 0;
+    temp1.Yaw( rad );
+    temp2.i = temp1.i*p.i+temp1.j*q.i+temp1.k*r.i;
+    temp2.j = temp1.i*p.j+temp1.j*q.j+temp1.k*r.j;
+    temp2.k = temp1.i*p.k+temp1.j*q.k+temp1.k*r.k;
+    temp1.i = 0;
+    temp1.j = 0;
+    temp1.k = 1;
+    temp1.Yaw( rad );
+    temp3.i = temp1.i*p.i+temp1.j*q.i+temp1.k*r.i;
+    temp3.j = temp1.i*p.j+temp1.j*q.j+temp1.k*r.j;
+    temp3.k = temp1.i*p.k+temp1.j*q.k+temp1.k*r.k;
+    p = temp2;
+    r = temp3;
 }
 
-void Pitch (float rad,Vector &p, Vector &q, Vector &r)
+void Pitch( float rad, Vector &p, Vector &q, Vector &r )
 {
-	Vector temp1, temp2, temp3;
-	temp1.i=0;
-	temp1.j =1;
-	temp1.k =0;
-	temp1.Pitch (rad);
-	temp2.i = temp1.i * p.i + temp1.j * q.i + temp1.k * r.i;
-	temp2.j = temp1.i * p.j + temp1.j * q.j + temp1.k * r.j;
-	temp2.k = temp1.i*p.k   + temp1.j * q.k + temp1.k * r.k;
-	temp1.i= 0;
-	temp1.j =0;
-	temp1.k =1;
-	temp1.Pitch (rad);
-	temp3.i = temp1.i * p.i + temp1.j * q.i + temp1.k * r.i;
-	temp3.j = temp1.i * p.j + temp1.j * q.j + temp1.k * r.j;
-	temp3.k = temp1.i*p.k   + temp1.j * q.k + temp1.k * r.k;
-	q = temp2;
-	r = temp3;
+    Vector temp1, temp2, temp3;
+    temp1.i = 0;
+    temp1.j = 1;
+    temp1.k = 0;
+    temp1.Pitch( rad );
+    temp2.i = temp1.i*p.i+temp1.j*q.i+temp1.k*r.i;
+    temp2.j = temp1.i*p.j+temp1.j*q.j+temp1.k*r.j;
+    temp2.k = temp1.i*p.k+temp1.j*q.k+temp1.k*r.k;
+    temp1.i = 0;
+    temp1.j = 0;
+    temp1.k = 1;
+    temp1.Pitch( rad );
+    temp3.i = temp1.i*p.i+temp1.j*q.i+temp1.k*r.i;
+    temp3.j = temp1.i*p.j+temp1.j*q.j+temp1.k*r.j;
+    temp3.k = temp1.i*p.k+temp1.j*q.k+temp1.k*r.k;
+    q = temp2;
+    r = temp3;
 }
-void Roll (float rad,Vector &p, Vector &q, Vector &r)
+void Roll( float rad, Vector &p, Vector &q, Vector &r )
 {
-	Vector temp1, temp2, temp3;
-	temp1.i=1;
-	temp1.j =0;
-	temp1.k =0;
-	temp1.Roll (rad);
-	temp2.i = temp1.i * p.i + temp1.j * q.i + temp1.k * r.i;
-	temp2.j = temp1.i * p.j + temp1.j * q.j + temp1.k * r.j;
-	temp2.k = temp1.i*p.k   + temp1.j * q.k + temp1.k * r.k;
-	temp1.i= 0;
-	temp1.j =1;
-	temp1.k =0;
-	temp1.Roll (rad);
-	temp3.i = temp1.i * p.i + temp1.j * q.i + temp1.k * r.i;
-	temp3.j = temp1.i * p.j + temp1.j * q.j + temp1.k * r.j;
-	temp3.k = temp1.i*p.k   + temp1.j * q.k + temp1.k * r.k;
-	p = temp2;
-	q = temp3;
+    Vector temp1, temp2, temp3;
+    temp1.i = 1;
+    temp1.j = 0;
+    temp1.k = 0;
+    temp1.Roll( rad );
+    temp2.i = temp1.i*p.i+temp1.j*q.i+temp1.k*r.i;
+    temp2.j = temp1.i*p.j+temp1.j*q.j+temp1.k*r.j;
+    temp2.k = temp1.i*p.k+temp1.j*q.k+temp1.k*r.k;
+    temp1.i = 0;
+    temp1.j = 1;
+    temp1.k = 0;
+    temp1.Roll( rad );
+    temp3.i = temp1.i*p.i+temp1.j*q.i+temp1.k*r.i;
+    temp3.j = temp1.i*p.j+temp1.j*q.j+temp1.k*r.j;
+    temp3.k = temp1.i*p.k+temp1.j*q.k+temp1.k*r.k;
+    p = temp2;
+    q = temp3;
 }
-void ResetVectors (Vector &p, Vector &q, Vector &r)
+void ResetVectors( Vector &p, Vector &q, Vector &r )
 {
-	p.i = q.j = r.k = 1;
-	p.j = p.k= q.i = q.k = r.i = r.j = 0;
+    p.i = q.j = r.k = 1;
+    p.j = p.k = q.i = q.k = r.i = r.j = 0;
 }
 
-void MakeRVector (Vector &p,Vector &q, Vector &r) {
-  ScaledCrossProduct (p,q,r);
-  ScaledCrossProduct (r,p,q);
-  Normalize (p);
-
+void MakeRVector( Vector &p, Vector &q, Vector &r )
+{
+    ScaledCrossProduct( p, q, r );
+    ScaledCrossProduct( r, p, q );
+    Normalize( p );
 }
 
 //Makes a non-colinear vector q to given r. assumes magnitude of r is nonzero, does not check
-Vector MakeNonColinearVector(const Vector &p){
-	Vector q(p);
-	if((p.i==p.j) == 0){
-		q.i=p.k;
-		q.j=p.i;
-		q.k=p.j;
-	}else{
-		q.i=-p.j;
-		q.j=p.i;
-		q.k=p.k;
-	}
-	return q;
+Vector MakeNonColinearVector( const Vector &p )
+{
+    Vector q( p );
+    if ( (p.i == p.j) == 0 ) {
+        q.i = p.k;
+        q.j = p.i;
+        q.k = p.j;
+    } else {
+        q.i = -p.j;
+        q.j = p.i;
+        q.k = p.k;
+    }
+    return q;
 }
 
-void Orthogonize(Vector &p, Vector &q, Vector &r)
+void Orthogonize( Vector &p, Vector &q, Vector &r )
 {
-	Normalize(r);
-	ScaledCrossProduct (r,p,q); //result of scaled cross put into q
-	ScaledCrossProduct (q,r,p); //result of scaled cross put back into p
+    Normalize( r );
+    ScaledCrossProduct( r, p, q );     //result of scaled cross put into q
+    ScaledCrossProduct( q, r, p );     //result of scaled cross put back into p
 }
+

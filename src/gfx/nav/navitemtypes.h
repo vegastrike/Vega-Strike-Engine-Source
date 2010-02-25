@@ -1,25 +1,21 @@
 #ifndef _NAVITEMTYPES_H_
 #define _NAVITEMTYPES_H_
 
-
-
 enum NAVITEMTYPES
 {
-	navsun,
-	navplanet,
-	navplayer,
-	navcurrentplayer,
-	navstation,
-	navfighter,
-	navcapship,
-	navmissile,
-	navasteroid,
-	navnebula,
-	navjump,
-	navambiguous
+    navsun,
+    navplanet,
+    navplayer,
+    navcurrentplayer,
+    navstation,
+    navfighter,
+    navcapship,
+    navmissile,
+    navasteroid,
+    navnebula,
+    navjump,
+    navambiguous
 };
-
-
 
 #define navsunsize 0.03
 #define navplanetsize 0.02
@@ -34,5 +30,5 @@ enum NAVITEMTYPES
 #define navjumpsize 0.0125
 #define navambiguoussize 0.01
 
-
 #endif
+

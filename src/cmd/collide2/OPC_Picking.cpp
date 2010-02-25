@@ -181,7 +181,8 @@ float min_dist, float max_dist, const Point& view_point, CullModeCallback callba
 	return false;
 }
 
+#endif
+
 } // namespace Opcode
 
-#endif
 

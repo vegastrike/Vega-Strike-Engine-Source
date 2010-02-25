@@ -21,11 +21,9 @@
 
 namespace VsnetDownload
 {
-
 namespace Client
 {
-
-// forward declaration
+//forward declaration
 class Manager;
 
 /** The virtual base class of all class that are notified by the client download
@@ -114,248 +112,243 @@ class NoteFile;
 class FileSet;
 
 /*------------------------------------------------------------*
- * declaration VsnetDownload::Client::Notify
- *------------------------------------------------------------*/
+* declaration VsnetDownload::Client::Notify
+*------------------------------------------------------------*/
 
 class Notify
 {
 public:
     virtual void notify( State s, VSError e ) = 0;
-    virtual void setTotalBytes( int sz ) { }
-    virtual void addBytes( int sz ) { }
+    virtual void setTotalBytes( int sz ) {}
+    virtual void addBytes( int sz ) {}
 };
 
-typedef boost::shared_ptr<Notify> NotifyPtr;
+typedef boost::shared_ptr< Notify >NotifyPtr;
 
 /*------------------------------------------------------------*
- * declaration VsnetDownload::Client::NotifyMe
- *------------------------------------------------------------*/
+* declaration VsnetDownload::Client::NotifyMe
+*------------------------------------------------------------*/
 
 class NotifyMe : public Notify
 {
-public:
-    NotifyMe( );
-    virtual ~NotifyMe( ) { }
+public: NotifyMe();
+    virtual ~NotifyMe() {}
 
     virtual void notify( State s, VSError e );
     virtual void setTotalBytes( int sz );
     virtual void addBytes( int sz );
 
-    inline bool done( ) const {
-        return ( _state == Completed );
+    inline bool done() const
+    {
+        return _state == Completed;
     }
 
-    inline bool ok( ) const {
-        return ( _error == Ok );
+    inline bool ok() const
+    {
+        return _error == Ok;
     }
 
-    inline int total( ) const {
+    inline int total() const
+    {
         return _total;
     }
 
-    inline int offset( ) const {
+    inline int offset() const
+    {
         return _offset;
     }
 
 private:
-    State _state;
+    State   _state;
     VSError _error;
-    int   _total;
-    int   _offset;
+    int     _total;
+    int     _offset;
 };
 
 /*------------------------------------------------------------*
- * declaration VsnetDownload::Client::Item
- *------------------------------------------------------------*/
+* declaration VsnetDownload::Client::Item
+*------------------------------------------------------------*/
 
 class Item
 {
-public:
-    Item( SOCKETALT sock, const std::string& filename, VSFileSystem::VSFileType=VSFileSystem::UnknownFile, NotifyPtr notify = NotifyPtr() );
-    virtual ~Item( );
+public: Item( SOCKETALT sock, const std::string &filename, VSFileSystem::VSFileType = VSFileSystem::UnknownFile,
+             NotifyPtr notify = NotifyPtr() );
+    virtual ~Item();
 
-    State state( ) const;
-    VSError error( ) const;
+    State state() const;
+    VSError error() const;
 
     void changeState( State s );
     void changeState( State s, VSError e );
 
-	void setFileType( VSFileSystem::VSFileType ft);
-	VSFileSystem::VSFileType getFileType();
+    void setFileType( VSFileSystem::VSFileType ft );
+    VSFileSystem::VSFileType getFileType();
 
     void setSize( int len );
-    void append( unsigned char* buffer, int bufsize );
+    void append( unsigned char *buffer, int bufsize );
 
-    const std::string& getFilename( ) const;
-    SOCKETALT          getSock() const;
-    int                get_fd() const;
+    const std::string& getFilename() const;
+    SOCKETALT getSock() const;
+    int get_fd() const;
 
 protected:
     virtual void childSetSize( int len ) = 0;
-    virtual void childAppend( unsigned char* buffer, int bufsize ) = 0;
+    virtual void childAppend( unsigned char *buffer, int bufsize ) = 0;
 
-    void    protected_replace_notifier( NotifyPtr ptr );
-	VSFileSystem::VSFileType _filetype;
+    void protected_replace_notifier( NotifyPtr ptr );
+    VSFileSystem::VSFileType _filetype;
 
 private:
-    SOCKETALT         _sock;
+    SOCKETALT _sock;
     const std::string _filename;
 
-    mutable VSMutex _mx;
-    State           _state;
-    VSError           _error;
-    NotifyPtr       _notify;
+    mutable VSMutex   _mx;
+    State     _state;
+    VSError   _error;
+    NotifyPtr _notify;
 };
 
 /*------------------------------------------------------------*
- * declaration VsnetDownload::Client::File
- *------------------------------------------------------------*/
+* declaration VsnetDownload::Client::File
+*------------------------------------------------------------*/
 
 class File : public Item
 {
-public:
-    File( SOCKETALT          sock,
-          const std::string& filename,
-          std::string        localbasepath,
-		  VSFileSystem::VSFileType ft,
-          NotifyPtr          notify = NotifyPtr() );
+public: File( SOCKETALT sock, const std::string &filename, std::string localbasepath, VSFileSystem::VSFileType ft,
+             NotifyPtr notify = NotifyPtr() );
 
-    File( const std::string& destfile,
-          SOCKETALT          sock,
-          const std::string& filename,
-          std::string        localbasepath,
-		  VSFileSystem::VSFileType ft,
-          NotifyPtr          notify = NotifyPtr() );
+    File( const std::string &destfile, SOCKETALT sock, const std::string &filename, std::string localbasepath,
+         VSFileSystem::VSFileType ft,
+         NotifyPtr notify = NotifyPtr() );
 
-    virtual ~File( );
+    virtual ~File();
 
 protected:
     virtual void childSetSize( int len );
-    virtual void childAppend( unsigned char* buffer, int bufsize );
+    virtual void childAppend( unsigned char *buffer, int bufsize );
 
 private:
-    std::string    _destfile;
-    std::string    _localbasepath;
-    VSFileSystem::VSFile * _of;
-    int            _len;
-    int            _offset;
+    std::string _destfile;
+    std::string _localbasepath;
+    VSFileSystem::VSFile *_of;
+    int _len;
+    int _offset;
 };
 
 /*------------------------------------------------------------*
- * declaration VsnetDownload::Client::NoteFile
- *------------------------------------------------------------*/
+* declaration VsnetDownload::Client::NoteFile
+*------------------------------------------------------------*/
 
 class NoteFile : public File
 {
 private:
     NotifyPtr _me;
 
-    inline const NotifyMe* me() const {
-    	return (NotifyMe*)_me.get();
+    inline const NotifyMe * me() const
+    {
+        return (NotifyMe*) _me.get();
     }
 
-public:
-    NoteFile( SOCKETALT          sock,
-              const std::string& filename,
-			  VSFileSystem::VSFileType ft,
-              std::string        localbasepath );
-    NoteFile( SOCKETALT          sock,
-              const std::string& filename,
-			  VSFileSystem::VSFileType ft );
-    NoteFile( const std::string& destfile,
-              SOCKETALT          sock,
-              const std::string& filename,
-			  VSFileSystem::VSFileType ft );
+public: NoteFile( SOCKETALT sock, const std::string &filename, VSFileSystem::VSFileType ft, std::string localbasepath );
+    NoteFile( SOCKETALT sock, const std::string &filename, VSFileSystem::VSFileType ft );
+    NoteFile( const std::string &destfile, SOCKETALT sock, const std::string &filename, VSFileSystem::VSFileType ft );
 
-    virtual ~NoteFile( );
+    virtual ~NoteFile();
 
-    inline bool done( ) const {
+    inline bool done() const
+    {
         return me()->done();
     }
 
-    inline bool ok( ) const {
+    inline bool ok() const
+    {
         return me()->ok();
     }
 
-    inline int total( ) const {
+    inline int total() const
+    {
         return me()->total();
     }
 
-    inline int offset( ) const {
+    inline int offset() const
+    {
         return me()->offset();
     }
 };
 
 /*------------------------------------------------------------*
- * declaration VsnetDownload::Client::Buffer
- *------------------------------------------------------------*/
+* declaration VsnetDownload::Client::Buffer
+*------------------------------------------------------------*/
 
 class Buffer : public Item
 {
-
     typedef unsigned char uchar;
     NotifyPtr _me;
 
-    inline const NotifyMe* me() const {
-    	return (NotifyMe*)_me.get();
+    inline const NotifyMe * me() const
+    {
+        return (NotifyMe*) _me.get();
     }
 
-public:
-    Buffer( SOCKETALT          sock,
-            const std::string& filename,
-			VSFileSystem::VSFileType ft );
+public: Buffer( SOCKETALT sock, const std::string &filename, VSFileSystem::VSFileType ft );
 
-    virtual ~Buffer( );
+    virtual ~Buffer();
 
-    boost::shared_array<uchar> getBuffer( ) const;
-	int                        getSize() { return this->_len; }
+    boost::shared_array< uchar >getBuffer() const;
+    int getSize()
+    {
+        return this->_len;
+    }
 
-    inline bool done( ) const {
+    inline bool done() const
+    {
         return me()->done();
     }
 
-    inline bool ok( ) const {
+    inline bool ok() const
+    {
         return me()->ok();
     }
 
-    inline int total( ) const {
+    inline int total() const
+    {
         return me()->total();
     }
 
-    inline int offset( ) const {
+    inline int offset() const
+    {
         return me()->offset();
     }
 
 protected:
     virtual void childSetSize( int len );
-    virtual void childAppend( unsigned char* buffer, int bufsize );
+    virtual void childAppend( unsigned char *buffer, int bufsize );
 
 private:
-    boost::shared_array<uchar> _buf;
-    int                        _len;
-    int                        _offset;
+    boost::shared_array< uchar >_buf;
+    int _len;
+    int _offset;
 };
 
 /*------------------------------------------------------------*
- * declaration VsnetDownload::Client::TestItem
- *------------------------------------------------------------*/
+* declaration VsnetDownload::Client::TestItem
+*------------------------------------------------------------*/
 
-class TestItem : public Item, public NotifyMe
+class TestItem : public Item
+    , public NotifyMe
 {
-public:
-    TestItem( SOCKETALT sock,
-              const std::string& filename );
+public: TestItem( SOCKETALT sock, const std::string &filename );
 
-    virtual ~TestItem( ) { }
+    virtual ~TestItem() {}
 
 protected:
-    virtual void childSetSize( int len ) { }
-    virtual void childAppend( unsigned char* buffer, int bufsize ) { }
+    virtual void childSetSize( int len ) {}
+    virtual void childAppend( unsigned char *buffer, int bufsize ) {}
 };
 
 /*------------------------------------------------------------*
- * declaration VsnetDownload::Client::FileSet
- *------------------------------------------------------------*/
+* declaration VsnetDownload::Client::FileSet
+*------------------------------------------------------------*/
 
 /** We can't really support blocking until a set of files has been
  *  downloaded inside this class. The problem is that the variables
@@ -375,34 +368,29 @@ protected:
  */
 class FileSet
 {
-public:
-    FileSet( boost::shared_ptr<Manager> mgr,
-             SOCKETALT                  sock,
-             std::list<std::string>     filesnames,
-             std::string                localbasepath );
+public: FileSet( boost::shared_ptr< Manager >mgr, SOCKETALT sock, std::list< std::string >filesnames, std::string localbasepath );
 
-    bool isDone( ) const;
+    bool isDone() const;
     void update( std::string s, bool v );
 
 private:
-    std::map<std::string,int> _files;
-    int                       _to_go;
+    std::map< std::string, int >_files;
+    int _to_go;
 
 private:
     class NotifyConclusion;
 };
 
 /*------------------------------------------------------------*
- * declaration VsnetDownload::Client::Notify_f
- *------------------------------------------------------------*/
+* declaration VsnetDownload::Client::Notify_f
+*------------------------------------------------------------*/
 
 class Notify_f : public Notify
 {
 public:
     typedef void (*NotifyFunction)( std::string str, State s, VSError e, int total, int offset );
 
-public:
-    Notify_f( std::string filename, NotifyFunction fun );
+public: Notify_f( std::string filename, NotifyFunction fun );
     virtual ~Notify_f();
 
     virtual void notify( State s, VSError e );
@@ -412,36 +400,34 @@ public:
 private:
     std::string    _filename;
     NotifyFunction _fun;
-    int            _total;
-    int            _offset;
+    int _total;
+    int _offset;
 };
 
 /*------------------------------------------------------------*
- * declaration VsnetDownload::Client::Notify_fp
- *------------------------------------------------------------*/
+* declaration VsnetDownload::Client::Notify_fp
+*------------------------------------------------------------*/
 
 struct Notify_fp : public NotifyPtr
 {
-    Notify_fp( std::string filename, Notify_f::NotifyFunction fun )
-        : NotifyPtr( new Notify_f(filename,fun) )
-    { }
+    Notify_fp( std::string filename, Notify_f::NotifyFunction fun ) :
+        NotifyPtr( new Notify_f( filename, fun ) )
+    {}
 };
 
 /*------------------------------------------------------------*
- * declaration VsnetDownload::Client::VSNotify
- *------------------------------------------------------------*/
+* declaration VsnetDownload::Client::VSNotify
+*------------------------------------------------------------*/
 
 class VSNotify : public Notify
 {
-	public:
-		void notify( State s, VSError e);
-    	void setTotalBytes( int sz );
-    	void addBytes( int sz );
+public:
+    void notify( State s, VSError e );
+    void setTotalBytes( int sz );
+    void addBytes( int sz );
 };
-
-}; // namespace Client
-
-}; // namespace VsnetDownload
+}; //namespace Client
+}; //namespace VsnetDownload
 
 #endif /* VSNET_DLOADITEM_H */
 

@@ -11,105 +11,97 @@ using std::hex;
 
 #include "vsnet_headers.h"
 
-std::ostream& operator<<( std::ostream& ostr, const ServerSocket& s )
+std::ostream&operator<<( std::ostream &ostr, const ServerSocket &s )
 {
-    ostr << "( s=" << s.get_fd() << " l=" << s._srv_ip << " )";
+    ostr<<"( s="<<s.get_fd()<<" l="<<s._srv_ip<<" )";
     return ostr;
 }
 
-bool operator==( const ServerSocket& l, const ServerSocket& r )
+bool operator==( const ServerSocket &l, const ServerSocket &r )
 {
-    return (l.get_fd() == r.get_fd());
+    return l.get_fd() == r.get_fd();
 }
 
 void ServerSocket::child_disconnect( const char *s )
 {
-    if( get_fd() > 0 )
-    {
+    if (get_fd() > 0)
         VsnetOSS::close_socket( get_fd() );
-    }
-    COUT << s << " :\tWarning: disconnected" << strerror(errno) << endl;
+    COUT<<s<<" :\tWarning: disconnected"<<strerror( errno )<<endl;
 }
 
 bool ServerSocketTCP::lower_selected( int datalen )
 {
-    COUT << endl
-         << endl
-         << "------------------------------------------" << endl
-         << "ServerSocketTCP for " << get_fd() << " selected" << endl
-         << "------------------------------------------" << endl
-         << endl
-         << endl;
+    COUT<<endl
+    <<endl
+    <<"------------------------------------------"<<endl
+    <<"ServerSocketTCP for "<<get_fd()<<" selected"<<endl
+    <<"------------------------------------------"<<endl
+    <<endl
+    <<endl;
 
     struct sockaddr_in remote_ip;
-#if defined (_WIN32) || defined(MAC_OS_X_VERSION_10_3) || defined(MAC_OS_X_VERSION_10_2) || defined(MAC_OS_X_VERSION_10_1) 
+#if defined (_WIN32) || defined (MAC_OS_X_VERSION_10_3) || defined (MAC_OS_X_VERSION_10_2) || defined (MAC_OS_X_VERSION_10_1)
     int
 #else
-    socklen_t          
+    socklen_t
 #endif
-    len = sizeof( struct sockaddr_in );
-    int sock = ::accept( get_fd(), (sockaddr *)&remote_ip, &len );
-    if( sock > 0 )
-    {
-        COUT << "accepted new sock " << sock  << endl;
+    len = sizeof (struct sockaddr_in);
+    int sock = ::accept( get_fd(), (sockaddr*) &remote_ip, &len );
+    if (sock > 0) {
+        COUT<<"accepted new sock "<<sock<<endl;
         SOCKETALT newsock( sock, SOCKETALT::TCP, remote_ip, *_set );
-        _ac_mx.lock( );
-	    _accepted_connections.push( newsock );
-        _ac_mx.unlock( );
+        _ac_mx.lock();
+        _accepted_connections.push( newsock );
+        _ac_mx.unlock();
         if (_set) _set->add_pending( get_fd() );
-		return true;
-    }
-    else
-    {
-        COUT << "accept failed" << endl;
-        COUT << "Error accepting new conn: " << vsnetLastError() << endl;
-		return false;
+        return true;
+    } else {
+        COUT<<"accept failed"<<endl;
+        COUT<<"Error accepting new conn: "<<vsnetLastError()<<endl;
+        return false;
     }
 }
 
-ServerSocketTCP::ServerSocketTCP( int fd, const AddressIP& adr, SocketSet& set )
-    : ServerSocket( fd, adr, "ServerSocketTCP", set )
-{ }
+ServerSocketTCP::ServerSocketTCP( int fd, const AddressIP &adr, SocketSet &set ) :
+    ServerSocket( fd, adr, "ServerSocketTCP", set )
+{}
 
-bool ServerSocketTCP::isActive( )
+bool ServerSocketTCP::isActive()
 {
-    _ac_mx.lock( );
-    bool ret = ( _accepted_connections.empty() == false );
-    _ac_mx.unlock( );
+    _ac_mx.lock();
+    bool ret = (_accepted_connections.empty() == false);
+    _ac_mx.unlock();
     return ret;
 }
 
-SOCKETALT ServerSocketTCP::acceptNewConn( )
+SOCKETALT ServerSocketTCP::acceptNewConn()
 {
-    _ac_mx.lock( );
-    if( !_accepted_connections.empty() )
-    {
-        COUT << "A connection has been accepted" << endl;
+    _ac_mx.lock();
+    if ( !_accepted_connections.empty() ) {
+        COUT<<"A connection has been accepted"<<endl;
         SOCKETALT ret( _accepted_connections.front() );
         _accepted_connections.pop();
-        _ac_mx.unlock( );
+        _ac_mx.unlock();
         return ret;
-    }
-    else
-    {
-        COUT << "No accepted TCP connection" << endl;
-        _ac_mx.unlock( );
+    } else {
+        COUT<<"No accepted TCP connection"<<endl;
+        _ac_mx.unlock();
         if (_set) _set->rem_pending( get_fd() );
         SOCKETALT ret;
         return ret;
     }
 }
 
-ServerSocketUDP::ServerSocketUDP( int fd, const AddressIP& adr, SocketSet& set )
-    : ServerSocket( fd, adr, "ServerSocketUDP", set )
-{ }
+ServerSocketUDP::ServerSocketUDP( int fd, const AddressIP &adr, SocketSet &set ) :
+    ServerSocket( fd, adr, "ServerSocketUDP", set )
+{}
 
-bool ServerSocketUDP::isActive( )
+bool ServerSocketUDP::isActive()
 {
     return false;
 }
 
-SOCKETALT ServerSocketUDP::acceptNewConn( )
+SOCKETALT ServerSocketUDP::acceptNewConn()
 {
     SOCKETALT ret( get_fd(), SOCKETALT::UDP, _srv_ip, *_set );
     return ret;

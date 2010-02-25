@@ -24,51 +24,57 @@
 
 #include "gfx/vec.h"
 
+static const float oocc = (float) 0.0000000000000000111265005605; //1/c^2
+static const float c    = (float) 299792458.0;
+static const float co10 = (float) 29979245.8;
+float copysign( float x, float y );
 
-
-static const float oocc = (float)0.0000000000000000111265005605; //   1/c^2
-static const float c = (float)299792458.0;
-static const float co10 = (float)29979245.8;
-float copysign (float x, float y);
-
-struct Force {
-	Vector F;
-	float t;
+struct Force
+{
+    Vector F;
+    float  t;
 };
 const int forcemax = 64;
-class PhysicsSystem {
-	float mass, MomentOfInertia;
-	Vector NetForce;
-	Vector NetTorque;
-	Vector AngularVelocity;
-	Vector Velocity;
-	QVector *pos;
-	Vector *p, *q, *r;
-	int NumActiveForces;
-	Force ActiveForces [forcemax];
-	int NumActiveTorques;
-	Force ActiveTorques [forcemax];
-public:
-	PhysicsSystem(float M, float I, QVector *pos, Vector *p, Vector *q, Vector *r);
-//	~PhysicsSystem();
-	virtual void Rotate (const Vector &axis);
-	virtual void JettisonReactionMass (const Vector &Direction, float speed, float mass);
-	virtual void JettisonMass (const Vector &Direction, float speed, float mass);
-	virtual void ResistiveLiquidTorque (float ResistiveForceCoef);
-	virtual void ResistiveTorque (float ResistiveForceCoef);
-	virtual void ResistiveLiquidForce (float ResistiveForceCoef);
-	virtual void ResistiveForce (float ResistiveForceCoef);
-	virtual void ResistiveThrust (float strength);
-	virtual void ResistiveTorqueThrust (float strength,const Vector &Position);
-	virtual void ApplyForce(const Vector &Vforce, float time);
-	virtual void ApplyTorque (const Vector &Vforce, const Vector &Location, float time);
-	virtual void ApplyLocalTorque (const Vector &Vforce, const Vector &Location, float time);
-	virtual void ApplyBalancedLocalTorque (const Vector &Vforce, const Vector &Location, float time);
-	void ApplyImpulses (float Time);
-	void SetVelocity(Vector v) { Velocity = v;}
-	void SetAngularVelocity(Vector w) {AngularVelocity = w;}
+class PhysicsSystem
+{
+    float    mass, MomentOfInertia;
+    Vector   NetForce;
+    Vector   NetTorque;
+    Vector   AngularVelocity;
+    Vector   Velocity;
+    QVector *pos;
+    Vector  *p, *q, *r;
+    int NumActiveForces;
+    Force    ActiveForces[forcemax];
+    int NumActiveTorques;
+    Force    ActiveTorques[forcemax];
+public: PhysicsSystem( float M, float I, QVector *pos, Vector *p, Vector *q, Vector *r );
+//~PhysicsSystem();
+    virtual void Rotate( const Vector &axis );
+    virtual void JettisonReactionMass( const Vector &Direction, float speed, float mass );
+    virtual void JettisonMass( const Vector &Direction, float speed, float mass );
+    virtual void ResistiveLiquidTorque( float ResistiveForceCoef );
+    virtual void ResistiveTorque( float ResistiveForceCoef );
+    virtual void ResistiveLiquidForce( float ResistiveForceCoef );
+    virtual void ResistiveForce( float ResistiveForceCoef );
+    virtual void ResistiveThrust( float strength );
+    virtual void ResistiveTorqueThrust( float strength, const Vector &Position );
+    virtual void ApplyForce( const Vector &Vforce, float time );
+    virtual void ApplyTorque( const Vector &Vforce, const Vector &Location, float time );
+    virtual void ApplyLocalTorque( const Vector &Vforce, const Vector &Location, float time );
+    virtual void ApplyBalancedLocalTorque( const Vector &Vforce, const Vector &Location, float time );
+    void ApplyImpulses( float Time );
+    void SetVelocity( Vector v )
+    {
+        Velocity = v;
+    }
+    void SetAngularVelocity( Vector w )
+    {
+        AngularVelocity = w;
+    }
 
-	virtual void Update ();
+    virtual void Update();
 };
 
 #endif
+

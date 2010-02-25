@@ -17,11 +17,12 @@
 //class DummyUnit:GameUnit<Unit> {DummyUnit ():GameUnit<Unit>(1){}};
 //class DummyBuilding:GameUnit<Building> {DummyBuilding ():GameUnit<Building>(1){}};
 //class DummyEnhancement:GameUnit<Enhancement> {DummyEnhancement ():GameUnit<Enhancement>(1){}};
-template class GameUnit<Enhancement>;
-template class GameUnit<Nebula>;
-template class GameUnit<Asteroid>;
-template class GameUnit<Unit>;
-template class GameUnit<Building>;
-template class GameUnit<Missile>;
-template class GameUnit<Planet>;
+template class GameUnit< Enhancement >;
+template class GameUnit< Nebula >;
+template class GameUnit< Asteroid >;
+template class GameUnit< Unit >;
+template class GameUnit< Building >;
+template class GameUnit< Missile >;
+template class GameUnit< Planet >;
 #endif
+

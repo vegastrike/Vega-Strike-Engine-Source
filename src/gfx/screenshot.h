@@ -1,1 +1,2 @@
-void Screenshot (const KBData&, KBSTATE);
+void Screenshot( const KBData &, KBSTATE );
+

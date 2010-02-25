@@ -8,73 +8,71 @@
  */
 #undef USE_PTHREAD
 #undef USE_NO_THREAD
-#if defined(USE_NET_THREAD_POSIX)
+#if defined (USE_NET_THREAD_POSIX)
 #  define USE_PTHREAD
 #else
 #  define USE_NO_THREAD
 #endif
 
 /*------------------------------------------------------------*
- * declaration of VSThread                                    *
- *------------------------------------------------------------*/
+* declaration of VSThread                                    *
+*------------------------------------------------------------*/
 
 class VSThread
 {
+public: VSThread( bool detached );
+    virtual ~VSThread();
+
+    void start();
+    void join();
+
+    virtual void run() = 0;
+
 public:
-    VSThread( bool detached );
-    virtual ~VSThread( );
-
-    void start( );
-    void join( );
-
-    virtual void run( ) = 0;
-
-public:
-    /// global initialization function for the thread subsystem
-    static void init( );
+/// global initialization function for the thread subsystem
+    static void init();
 
 private:
     struct Private;
-    Private* _internal;
+    Private *_internal;
 };
 
 /*------------------------------------------------------------*
- * declaration of VSMutex                                     *
- *------------------------------------------------------------*/
+* declaration of VSMutex                                     *
+*------------------------------------------------------------*/
 
 class VSMutex
 {
-public:
-    VSMutex( );
-    ~VSMutex( );
+public: VSMutex();
+    ~VSMutex();
 
-    void lock( );
-    void unlock( );
+    void lock();
+    void unlock();
 
 protected:
     struct Private;
-    Private* _internal;
+    Private *_internal;
 
     friend class VSCond;
 };
 
 /*------------------------------------------------------------*
- * declaration of VSCond                                      *
- *------------------------------------------------------------*/
+* declaration of VSCond                                      *
+*------------------------------------------------------------*/
 
 class VSCond
 {
-public:
-    VSCond( );
-    ~VSCond( );
+public: VSCond();
+    ~VSCond();
 
-    void wait( VSMutex& mx );
-    void signal( );
-    void broadcast( );
+    void wait( VSMutex &mx );
+    void signal();
+    void broadcast();
 
 private:
     struct Private;
-    Private* _internal;
+    Private *_internal;
 };
 
 #endif /* VSNET_THREAD_H */
+

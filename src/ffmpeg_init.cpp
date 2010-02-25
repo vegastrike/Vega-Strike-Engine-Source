@@ -1,5 +1,5 @@
 //
-// C++ Implementation: vid_file
+//C++ Implementation: vid_file
 //
 
 #include "vsfilesystem.h"
@@ -9,78 +9,78 @@
 #include <string.h>
 #include <utility>
 
-// define a 128k buffer for video streamers
+//define a 128k buffer for video streamers
 #define BUFFER_SIZE 128*(1<<10)
 
 #ifndef ENOENT
 #define ENOENT 2
 #endif
 
-
-/* FOLLOWING CODE IS ONLY INCLUDED IF YOU HAVE FFMPEG */
-/* ******************************************** */
+/*
+ * FOLLOWING CODE IS ONLY INCLUDED IF YOU HAVE FFMPEG
+ * ********************************************
+ */
 #ifdef HAVE_FFMPEG
 #ifdef _WIN32
 #define offset_t xoffset_t
 #endif
 
 #ifndef offset_t
-    #if (LIBAVCODEC_VERSION_MAJOR >= 52) || (LIBAVCODEC_VERSION_INT >= ((51<<16)+(49<<8)+0))  ||   defined(__amd64__) || defined(_M_AMD64)   ||   defined(__x86_64) || defined(__x86_64__)
-        typedef int64_t offset_t;
+    #if (LIBAVCODEC_VERSION_MAJOR >= 52) || (LIBAVCODEC_VERSION_INT >= ( ( 51<<16)+(49<<8)+0 ) ) || defined (__amd64__) \
+    || defined (_M_AMD64) || defined (__x86_64) || defined (__x86_64__)
+typedef int64_t offset_t;
     #else
-        typedef int offset_t;
+typedef int     offset_t;
     #endif
 #endif
 
 using namespace VSFileSystem;
 
-extern "C" int _url_open(URLContext *h, const char *filename, int flags)
+extern "C" int _url_open( URLContext *h, const char *filename, int flags )
 {
-    if (strncmp(filename,"vsfile:",7)!=0)
-        return AVERROR(ENOENT);
-    
-    const char* type = strchr(filename+7, '|');
-    std::string path(filename+7, type?type-filename-7:strlen(filename+7));
-    VSFileType vstype = ( type ? (VSFileType)atoi(type) : VideoFile );
-    
-    VSFile *f = new VSFile();
-    if (f->OpenReadOnly(path, vstype) > Ok) {
+    if (strncmp( filename, "vsfile:", 7 ) != 0)
+        return AVERROR( ENOENT );
+    const char *type   = strchr( filename+7, '|' );
+    std::string path( filename+7, type ? type-filename-7 : strlen( filename+7 ) );
+    VSFileType  vstype = (type ? (VSFileType) atoi( type ) : VideoFile);
+
+    VSFile     *f = new VSFile();
+    if (f->OpenReadOnly( path, vstype ) > Ok) {
         delete f;
-        return AVERROR(ENOENT);
+        return AVERROR( ENOENT );
     } else {
         h->priv_data = f;
         return 0;
     }
 }
 
-extern "C" int _url_close(URLContext *h)
+extern "C" int _url_close( URLContext *h )
 {
-    delete (VSFile*)(h->priv_data);
+    delete (VSFile*) (h->priv_data);
     return 0;
 }
 
-extern "C" int _url_read(URLContext *h, unsigned char *buf, int size)
+extern "C" int _url_read( URLContext *h, unsigned char *buf, int size )
 {
-    return ((VSFile*)(h->priv_data))->Read(buf, size);
-} 
+    return ( (VSFile*) (h->priv_data) )->Read( buf, size );
+}
 
-extern "C" int _url_write(URLContext *h, unsigned char *buf, int size)
+extern "C" int _url_write( URLContext *h, unsigned char *buf, int size )
 {
-    // read-only please
+    //read-only please
     return 0;
-} 
+}
 
-extern "C" offset_t _url_seek(URLContext *h, offset_t pos, int whence)
+extern "C" offset_t _url_seek( URLContext *h, offset_t pos, int whence )
 {
     if (whence != AVSEEK_SIZE) {
-        ((VSFile*)(h->priv_data))->GoTo(long(pos));
-        return ((VSFile*)(h->priv_data))->GetPosition();
+        ( (VSFile*) (h->priv_data) )->GoTo( long(pos) );
+        return ( (VSFile*) (h->priv_data) )->GetPosition();
     } else {
-        return ((VSFile*)(h->priv_data))->Size();
+        return ( (VSFile*) (h->priv_data) )->Size();
     }
 }
 
-    
 struct URLProtocol vsFileProtocol = {
     "vsfile",
     _url_open,
@@ -90,46 +90,41 @@ struct URLProtocol vsFileProtocol = {
     _url_close,
 };
 
-namespace FFMpeg {
-
-    void initLibraries()
-    {
-        static bool initted = false;
-        if (!initted) {
-            initted = true;
-            av_register_all();
-            register_protocol(&vsFileProtocol);
-        }
+namespace FFMpeg
+{
+void initLibraries()
+{
+    static bool initted = false;
+    if (!initted) {
+        initted = true;
+        av_register_all();
+        register_protocol( &vsFileProtocol );
     }
-
+}
 };
 
-
-
-
-
-// Workaround for a missing export in libavcodec 52.47.0
+//Workaround for a missing export in libavcodec 52.47.0
 #if (LIBAVCODEC_VERSION_MAJOR == 52 && LIBAVCODEC_VERSION_MINOR == 47 && LIBAVCODEC_VERSION_MICRO == 0)
 extern "C" {
-    void av_free_packet(AVPacket *pkt)
-    {
-        if (pkt) {
-            if (pkt->destruct) pkt->destruct(pkt);
-            pkt->data = NULL; pkt->size = 0;
-        }
-    } 
+void av_free_packet( AVPacket *pkt )
+{
+    if (pkt) {
+        if (pkt->destruct) pkt->destruct( pkt );
+        pkt->data = NULL;
+        pkt->size = 0;
+    }
+}
 }
 #endif
 
-#else // No FFMPEG
+#else //No FFMPEG
 
-namespace FFMpeg {
-
-    void initLibraries()
-    {
-        // No-op stub
-    };
-
+namespace FFMpeg
+{
+void initLibraries()
+{
+    //No-op stub
+}
 };
 
 #endif

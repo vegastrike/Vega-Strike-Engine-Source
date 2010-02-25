@@ -1,13 +1,12 @@
 //
-// C++ Interface: FFMpeg initialization
+//C++ Interface: FFMpeg initialization
 //
 #ifndef __FFMPEG_INIT_H__INCLUDED__
 #define __FFMPEG_INIT_H__INCLUDED__
 
-namespace FFMpeg {
-
-    void initLibraries();
-
+namespace FFMpeg
+{
+void initLibraries();
 };
 
 #ifdef HAVE_FFMPEG
@@ -16,7 +15,7 @@ extern "C" {
 #ifdef _WIN32
 #define HAVE_FFMPEG_SWSCALE_H
 #endif
-    #ifdef HAVE_FFMPEG_SWSCALE_H // Not sure how many people have swscale.
+    #ifdef HAVE_FFMPEG_SWSCALE_H //Not sure how many people have swscale.
         #include <ffmpeg/swscale.h>
     #else
         #ifdef HAVE_LIBSWSCALE_SWSCALE_H
@@ -44,4 +43,5 @@ extern "C" {
 
 #endif
 
-#endif//__FFMPEG_INIT_H__INCLUDED__
+#endif //__FFMPEG_INIT_H__INCLUDED__
+

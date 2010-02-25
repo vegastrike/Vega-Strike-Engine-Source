@@ -36,573 +36,635 @@ using std::string;
 using namespace VSFileSystem;
 
 ///holds all the textures in a huge hash table
-Hashtable<string, Texture, 4007> texHashTable;
-Hashtable<string, bool, 4007> badtexHashTable;
+Hashtable< string, Texture, 4007 >texHashTable;
+Hashtable< string, bool, 4007 >   badtexHashTable;
 ///returns if a texture exists
-Texture * Texture::Exists (string s, string a) {
-  return Texture::Exists (s+a);
+Texture* Texture::Exists( string s, string a )
+{
+    return Texture::Exists( s+a );
 }
-Texture * Texture::Exists (string s) {
-  Texture * tmp = texHashTable.Get(VSFileSystem::GetHashName(s));
-  if (tmp==NULL){
-    string tmpo;
-    tmp = texHashTable.Get (VSFileSystem::GetSharedTextureHashName (s));
-  }
-  if (tmp)
-    return tmp->Original();
-  return tmp;
-}
-
-bool Texture::operator < (const Texture & b) const {
-  return Original()<b.Original();
+Texture* Texture::Exists( string s )
+{
+    Texture *tmp = texHashTable.Get( VSFileSystem::GetHashName( s ) );
+    if (tmp == NULL) {
+        string tmpo;
+        tmp = texHashTable.Get( VSFileSystem::GetSharedTextureHashName( s ) );
+    }
+    if (tmp)
+        return tmp->Original();
+    return tmp;
 }
 
-bool Texture::operator == (const Texture & b) const {
-  return Original()==b.Original();
+bool Texture::operator<( const Texture &b ) const
+{
+    return Original() < b.Original();
 }
 
-void Texture::setReference(Texture *other)
+bool Texture::operator==( const Texture &b ) const
+{
+    return Original() == b.Original();
+}
+
+void Texture::setReference( Texture *other )
 {
     original = other;
     original->refcount++;
 
-	// Copy shared attributes
-	texfilename = other->texfilename;
-	data = other->data;
-	name = other->name;
-	bound = other->bound;
-	boundSizeX = other->boundSizeX;
-	boundSizeY = other->boundSizeY;
-	boundMode = other->boundMode;
-	texture_target = other->texture_target;
-	image_target = other->image_target;
+    //Copy shared attributes
+    texfilename    = other->texfilename;
+    data           = other->data;
+    name           = other->name;
+    bound          = other->bound;
+    boundSizeX     = other->boundSizeX;
+    boundSizeY     = other->boundSizeY;
+    boundMode      = other->boundMode;
+    texture_target = other->texture_target;
+    image_target   = other->image_target;
 }
 
-GFXBOOL Texture::checkold(const string &s, bool shared, string & hashname)
+GFXBOOL Texture::checkold( const string &s, bool shared, string &hashname )
 {
-  hashname = shared?VSFileSystem::GetSharedTextureHashName(s):VSFileSystem::GetHashName(s);
-  Texture *oldtex= texHashTable.Get (hashname);
-  if(oldtex!=NULL) {
-	//*this = *oldtex;//will be obsoleted--unpredictable results with string()
-    setReference(oldtex);
-	//cerr<<"Found cached texture : "<<s<<" with hashname="<<hashname<<endl;
-    return GFXTRUE;
-  } else {
-    return GFXFALSE;
-  }
+    hashname = shared ? VSFileSystem::GetSharedTextureHashName( s ) : VSFileSystem::GetHashName( s );
+    Texture *oldtex = texHashTable.Get( hashname );
+    if (oldtex != NULL) {
+        //*this = *oldtex;//will be obsoleted--unpredictable results with string()
+        setReference( oldtex );
+        //cerr<<"Found cached texture : "<<s<<" with hashname="<<hashname<<endl;
+        return GFXTRUE;
+    } else {
+        return GFXFALSE;
+    }
 }
-void Texture::modold (const string &s, bool shared, string & hashname) {
-  hashname = shared?VSFileSystem::GetSharedTextureHashName(s):VSFileSystem::GetHashName(s);
-  Texture * oldtex = new Texture;
-  //  oldtex->InitTexture();new calls this
-  oldtex->name=-1;
-  oldtex->refcount=1;
-  oldtex->original=NULL;
-  oldtex->palette=NULL;
-  oldtex->data=NULL;
-  texHashTable.Put(hashname, oldtex);
-  original = oldtex;
+void Texture::modold( const string &s, bool shared, string &hashname )
+{
+    hashname = shared ? VSFileSystem::GetSharedTextureHashName( s ) : VSFileSystem::GetHashName( s );
+    Texture *oldtex = new Texture;
+    //oldtex->InitTexture();new calls this
+    oldtex->name     = -1;
+    oldtex->refcount = 1;
+    oldtex->original = NULL;
+    oldtex->palette  = NULL;
+    oldtex->data     = NULL;
+    texHashTable.Put( hashname, oldtex );
+    original         = oldtex;
 }
 
 void Texture::InitTexture()
 {
-	bound = false;
-	original = 0;
-	refcount = 0;
-	name = -1;
-	palette = NULL;
-	data = NULL;
-	mintcoord = Vector(0.0f,0.0f,0.0f);
-	maxtcoord = Vector(1.0f,1.0f,1.0f);
-	address_mode = DEFAULT_ADDRESS_MODE;
+    bound = false;
+    original     = 0;
+    refcount     = 0;
+    name         = -1;
+    palette      = NULL;
+    data         = NULL;
+    mintcoord    = Vector( 0.0f, 0.0f, 0.0f );
+    maxtcoord    = Vector( 1.0f, 1.0f, 1.0f );
+    address_mode = DEFAULT_ADDRESS_MODE;
 }
 
 void Texture::setold()
 {
-  //	*original = *this;//will be obsoleted in new C++ standard unpredictable results when using string() (and its strangeass copy constructor)
-  *original = *this;
-  //memcpy (original, this, sizeof (Texture));
-	original->original = NULL;
-	original->refcount++;
+    //*original = *this;//will be obsoleted in new C++ standard unpredictable results when using string() (and its strangeass copy constructor)
+    *original = *this;
+    //memcpy (original, this, sizeof (Texture));
+    original->original = NULL;
+    original->refcount++;
 }
-const Texture * Texture::Original() const {
-  if (original) {
-    return original->Original();
-  }else {
-    return this;
-  }
-}
-Texture * Texture::Original() {
-  if (original) {
-    return original->Original();
-  }else {
-    return this;
-  }
-}
-
-Texture *Texture::Clone () {
-  Texture * retval = new Texture();
-  Texture * target = Original();
-  *retval = *target;
-  //  memcpy (this, target, sizeof (Texture));
-  if (retval->name!=-1) {
-    retval->original = target;
-    retval->original->refcount++;
-  } else {
-    retval->original = NULL;
-  }
-  retval->refcount = 0;
-  return retval;
-  //assert (!original->original);
-  
-}
-void Texture::FileNotFound(const string &texfilename) {
-	  // We may need to remove from texHashTable if we found the file but it is a bad one
-	  texHashTable.Delete (texfilename);
-
-	  setbad( texfilename);
-	  name=-1;
-	  data = NULL;
-	  if( original != NULL)
-	  {
-	  	original->name=-1;
-	  	delete original;
-	  	original=NULL;
-	  }
-	  palette=NULL;
-
-	  return;
-}
-
-bool Texture::checkbad(const string & s)
+const Texture* Texture::Original() const
 {
-  string hashname = VSFileSystem::GetSharedTextureHashName(s);
-  bool * found=NULL;
-  found = badtexHashTable.Get (hashname);
-  if(found!=NULL) {
-	return true;
-  }
-  hashname = VSFileSystem::GetHashName(s);
-  found= badtexHashTable.Get (hashname);
-  if(found!=NULL) {
-	return true;
-  }
-  return false;
+    if (original)
+        return original->Original();
+    else
+        return this;
 }
-
-void Texture::setbad( const string & s)
+Texture* Texture::Original()
 {
-	// Put both current path+texfile and shared texfile since they both have been looked for
-	bool * b = new bool( true);
-	if( VSFileSystem::current_path.back()!="")
-		badtexHashTable.Put( VSFileSystem::GetHashName(s), b);
-	badtexHashTable.Put( VSFileSystem::GetSharedTextureHashName(s), b);
+    if (original)
+        return original->Original();
+    else
+        return this;
 }
 
-Texture::Texture(int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, enum ADDRESSMODE address_mode)
+Texture* Texture::Clone()
 {
-  InitTexture();
-  data = NULL;
-  ismipmapped  = mipmap;
-  palette = NULL;
-  texture_target =target;
-  image_target=imagetarget;
-  this->stage = stage;
+    Texture *retval = new Texture();
+    Texture *target = Original();
+    *retval = *target;
+    //memcpy (this, target, sizeof (Texture));
+    if (retval->name != -1) {
+        retval->original = target;
+        retval->original->refcount++;
+    } else {
+        retval->original = NULL;
+    }
+    retval->refcount = 0;
+    return retval;
+    //assert (!original->original);
 }
-
-Texture::Texture(VSFile * f, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load, int maxdimension,GFXBOOL detailtexture,GFXBOOL nocache,enum ADDRESSMODE address_mode, Texture *main)
+void Texture::FileNotFound( const string &texfilename )
 {
+    //We may need to remove from texHashTable if we found the file but it is a bad one
+    texHashTable.Delete( texfilename );
 
-  data = NULL;
-  ismipmapped  = mipmap;
-  InitTexture();
-  palette = NULL;
-  texture_target =target;
-  image_target=imagetarget;
-  this->stage = stage;
-  data = this->ReadImage( f, NULL, true, NULL);
-
-	if (data)
-	{
-		if(mode >= _DXT1 && mode <= _DXT5){
-			if((int)data[0] == 0){
-				detailtexture = NEAREST;
-				ismipmapped = NEAREST;
-			}
-		}
-
-        if (main)
-		  Bind(main,maxdimension,detailtexture);
-        else
-          Bind(maxdimension,detailtexture);
-        
-		free(data);
-		data = NULL;
-		if (!nocache) setold();
-	}
-	else
-		FileNotFound(texfilename);
+    setbad( texfilename );
+    name = -1;
+    data = NULL;
+    if (original != NULL) {
+        original->name = -1;
+        delete original;
+        original = NULL;
+    }
+    palette = NULL;
 }
 
-Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load, int maxdimension,GFXBOOL detailtexture,GFXBOOL nocache,enum ADDRESSMODE address_mode,Texture *main)
+bool Texture::checkbad( const string &s )
+{
+    string hashname = VSFileSystem::GetSharedTextureHashName( s );
+    bool  *found    = NULL;
+    found    = badtexHashTable.Get( hashname );
+    if (found != NULL)
+        return true;
+    hashname = VSFileSystem::GetHashName( s );
+    found    = badtexHashTable.Get( hashname );
+    if (found != NULL)
+        return true;
+    return false;
+}
+
+void Texture::setbad( const string &s )
+{
+    //Put both current path+texfile and shared texfile since they both have been looked for
+    bool *b = new bool(true);
+    if (VSFileSystem::current_path.back() != "")
+        badtexHashTable.Put( VSFileSystem::GetHashName( s ), b );
+    badtexHashTable.Put( VSFileSystem::GetSharedTextureHashName( s ), b );
+}
+
+Texture::Texture( int stage,
+                  enum FILTER mipmap,
+                  enum TEXTURE_TARGET target,
+                  enum TEXTURE_IMAGE_TARGET imagetarget,
+                  enum ADDRESSMODE address_mode )
 {
     InitTexture();
-    Load(FileName,stage,mipmap,target,imagetarget,force_load,maxdimension,detailtexture,nocache,address_mode,main);
+    data = NULL;
+    ismipmapped    = mipmap;
+    palette        = NULL;
+    texture_target = target;
+    image_target   = imagetarget;
+    this->stage    = stage;
 }
 
-void Texture::Load(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load, int maxdimension,GFXBOOL detailtexture,GFXBOOL nocache,enum ADDRESSMODE address_mode,Texture *main)
+Texture::Texture( VSFile *f,
+                  int stage,
+                  enum FILTER mipmap,
+                  enum TEXTURE_TARGET target,
+                  enum TEXTURE_IMAGE_TARGET imagetarget,
+                  GFXBOOL force_load,
+                  int maxdimension,
+                  GFXBOOL detailtexture,
+                  GFXBOOL nocache,
+                  enum ADDRESSMODE address_mode,
+                  Texture *main )
 {
-  if (data) free(data);
-  if (palette) free(palette);
-  data = NULL;
-  palette = NULL;
-  ismipmapped  = mipmap;
-  texture_target =target;
-  image_target=imagetarget;
-  this->stage = stage;
-  this->address_mode = address_mode;
-  string texfn = string(FileName);
-  if(checkbad(texfn))
-  	return;
-  if (!nocache) {
-	  string tempstr;
-      if (  checkold(texfn,false,tempstr)
-		  ||checkold(texfn,true,tempstr)  ) {
-        texfilename = tempstr;
-        return;
-      }
-  }
-
-  //VSFileSystem::vs_fprintf (stderr,"1.Loading bmp file %s ",FileName);
-	char *t= strdup (FileName);
-	int tmp = strlen(FileName);
-	if (tmp>3) {
-	  t[tmp-3] = 'a';
-	  t[tmp-2] = 'l';
-	  t[tmp-1] = 'p';
-	}
-	VSFile f2;
-	VSError err2=VSFileSystem::FileNotFound;
-	if (t){
-		if (t[0]!='\0'){
-		static bool use_alphamap              = parse_bool(vs_config->getVariable("graphics",
-                                                  "bitmap_alphamap",
-                                                  "true"));
-		if (use_alphamap)
-		    err2 = f2.OpenReadOnly(t, TextureFile);
-		}
-	}
-
-	
-	if(err2<=Ok) {
-	  //texfilename += string(t);
-	}
-	//	this->texfilename = texfilename;
-	//strcpy (filename,texfilename.c_str());
-	VSFile f;
-	VSError err;
-	if (FileName)
-	  if (FileName[0])
-	    err = f.OpenReadOnly (FileName, TextureFile);
-	bool shared = (err==Shared);
-	free ( t);
-	if (err<=Ok&&g_game.use_textures==0&&!force_load) {
-	  f.Close();
-	  err = Unspecified;
-	}
-	if (err>Ok)
-	{
-		FileNotFound(texfn);
-//		VSFileSystem::vs_fprintf (stderr, "\n%s, not found\n",FileName);
-		if (err2<=Ok) {
-			f2.Close();
-		}
-		return;
-	}
-	if (!nocache) {
-		string tempstr;
-		modold (texfn,shared,tempstr);
-		texfilename = tempstr;
-	}
-	if (texfn.find("white")==string::npos)
-		bootstrap_draw("Loading "+string(FileName));
-	
-	//	strcpy(filename, FileName);
-	if( err2>Ok)
-		data = this->ReadImage( &f, NULL, true, NULL);
-	else
-		data = this->ReadImage( &f, NULL, true, &f2);
-	if (data)
-	{
-		if(mode >= _DXT1 && mode <= _DXT5){
-			if((int)data[0] == 0){
-				detailtexture = NEAREST;
-				ismipmapped = NEAREST;
-			}
-		}
-        
+    data = NULL;
+    ismipmapped    = mipmap;
+    InitTexture();
+    palette        = NULL;
+    texture_target = target;
+    image_target   = imagetarget;
+    this->stage    = stage;
+    data           = this->ReadImage( f, NULL, true, NULL );
+    if (data) {
+        if (mode >= _DXT1 && mode <= _DXT5) {
+            if ( (int) data[0] == 0 ) {
+                detailtexture = NEAREST;
+                ismipmapped   = NEAREST;
+            }
+        }
         if (main)
-          Bind(main,maxdimension,detailtexture);
+            Bind( main, maxdimension, detailtexture );
         else
-          Bind(maxdimension,detailtexture);
-        
-		free(data);
-		data = NULL;
-		if (!nocache) setold();
-	}
-	else
-		FileNotFound(texfilename);
-	f.Close();
-	if( f2.Valid())
-		f2.Close();
-	//VSFileSystem::vs_fprintf (stderr," Load Success\n");
+            Bind( maxdimension, detailtexture );
+        free( data );
+        data = NULL;
+        if (!nocache) setold();
+    } else {
+        FileNotFound( texfilename );
+    }
 }
 
-Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, enum FILTER  mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval, GFXBOOL force_load, int maxdimension,GFXBOOL detailtexture,GFXBOOL nocache,enum ADDRESSMODE address_mode,Texture *main)
+Texture::Texture( const char *FileName,
+                  int stage,
+                  enum FILTER mipmap,
+                  enum TEXTURE_TARGET target,
+                  enum TEXTURE_IMAGE_TARGET imagetarget,
+                  GFXBOOL force_load,
+                  int maxdimension,
+                  GFXBOOL detailtexture,
+                  GFXBOOL nocache,
+                  enum ADDRESSMODE address_mode,
+                  Texture *main )
 {
     InitTexture();
-    Load(FileNameRGB, FileNameA, stage, mipmap, target, imagetarget, alpha, zeroval, force_load, maxdimension, detailtexture, nocache,address_mode,main);
+    Load( FileName, stage, mipmap, target, imagetarget, force_load, maxdimension, detailtexture, nocache, address_mode, main );
 }
 
-void Texture::Load (const char * FileNameRGB, const char *FileNameA, int stage, enum FILTER  mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval, GFXBOOL force_load, int maxdimension,GFXBOOL detailtexture,GFXBOOL nocache,enum ADDRESSMODE address_mode,Texture *main)
+void Texture::Load( const char *FileName,
+                    int stage,
+                    enum FILTER mipmap,
+                    enum TEXTURE_TARGET target,
+                    enum TEXTURE_IMAGE_TARGET imagetarget,
+                    GFXBOOL force_load,
+                    int maxdimension,
+                    GFXBOOL detailtexture,
+                    GFXBOOL nocache,
+                    enum ADDRESSMODE address_mode,
+                    Texture *main )
 {
-  if (data) free(data);
-  if (palette) free(palette);
-  data = NULL;
-  palette = NULL;
-  ismipmapped  = mipmap;
-
-	this->stage = stage;
+    if (data) free( data );
+    if (palette) free( palette );
+    data = NULL;
+    palette = NULL;
+    ismipmapped = mipmap;
+    texture_target     = target;
+    image_target       = imagetarget;
+    this->stage        = stage;
     this->address_mode = address_mode;
-	texture_target=target;
-	image_target=imagetarget;
-	string texfn = string(FileNameRGB) + string("|") + string(FileNameA);
-    if (!nocache) {
-	  string tempstr;
-      if (  checkold(texfn,false,tempstr)
-		  ||checkold(texfn,true,tempstr)  ) {
-        texfilename = tempstr;
+    string texfn = string( FileName );
+    if ( checkbad( texfn ) )
         return;
-      }
-    }
-	//VSFileSystem::vs_fprintf (stderr,"2.Loading bmp file %s alp %s ",FileNameRGB,FileNameA);
-	//this->texfilename = texfilename;
-	//strcpy (filename,texfilename.c_str());
-	VSFile f;
-	VSError err = Unspecified;
-	err = f.OpenReadOnly(FileNameRGB, TextureFile);
     if (!nocache) {
-	    bool shared = (err==Shared);
-		string tempstr;
-	    modold (texfn,shared,tempstr);
-		texfilename = tempstr;
+        string tempstr;
+        if ( checkold( texfn, false, tempstr )
+            || checkold( texfn, true, tempstr ) ) {
+            texfilename = tempstr;
+            return;
+        }
     }
-	if (err<=Ok&&g_game.use_textures==0&&!force_load) {
-	  f.Close();
-	  err = Unspecified;
-	}
-	if (err>Ok)
-	{
-	  FileNotFound(texfilename);
-	  return;
-	}
-	VSFile f1;
-	VSError err1=Unspecified;
-	bool shared1;
-	if (FileNameA)
-	{
-           static bool use_alphamap 
-              = parse_bool(vs_config->getVariable("graphics",
-                                                  "bitmap_alphamap",
-                                                  "true"));
-           if (use_alphamap) {
-              std::string tmp;
-              f1.OpenReadOnly( FileNameA, TextureFile);
-              
-              shared1 = (err1==Shared);
-              if (err1>Ok)
-                 {
-                    data = NULL;
-                    FileNameA = NULL;
-                 }
-           }else FileNameA=0;
-	}
-	if( err1>Ok)
-		data = this->ReadImage( &f, NULL, true, NULL);
-	else
-		data = this->ReadImage( &f, NULL, true, &f1);
-	if (data)
-	{
-		if(mode >= _DXT1 && mode <= _DXT5){
-			if((int)data[0] == 0){
-				detailtexture = NEAREST;
-				ismipmapped = NEAREST;
-			}
-		}
-	  
-      if (main)
-        Bind(main,maxdimension,detailtexture);
-      else
-        Bind(maxdimension,detailtexture);
-      
-      free(data);
-	  data = NULL;
-	  if (!nocache) setold();
-	}
-	else
-		FileNotFound( texfilename);
-	f.Close();
-	if (err1<=Ok) {
-	  f1.Close();
-	}
-	//VSFileSystem::vs_fprintf (stderr,"Load Success\n");
+    //VSFileSystem::vs_fprintf (stderr,"1.Loading bmp file %s ",FileName);
+    char *t   = strdup( FileName );
+    int   tmp = strlen( FileName );
+    if (tmp > 3) {
+        t[tmp-3] = 'a';
+        t[tmp-2] = 'l';
+        t[tmp-1] = 'p';
+    }
+    VSFile  f2;
+    VSError err2 = VSFileSystem::FileNotFound;
+    if (t) {
+        if (t[0] != '\0') {
+            static bool use_alphamap = parse_bool( vs_config->getVariable( "graphics",
+                                                                           "bitmap_alphamap",
+                                                                           "true" ) );
+            if (use_alphamap)
+                err2 = f2.OpenReadOnly( t, TextureFile );
+        }
+    }
+    if (err2 <= Ok) {
+        //texfilename += string(t);
+    }
+    //this->texfilename = texfilename;
+    //strcpy (filename,texfilename.c_str());
+    VSFile  f;
+    VSError err;
+    if (FileName)
+        if (FileName[0])
+            err = f.OpenReadOnly( FileName, TextureFile );
+    bool shared = (err == Shared);
+    free( t );
+    if (err <= Ok && g_game.use_textures == 0 && !force_load) {
+        f.Close();
+        err = Unspecified;
+    }
+    if (err > Ok) {
+        FileNotFound( texfn );
+//VSFileSystem::vs_fprintf (stderr, "\n%s, not found\n",FileName);
+        if (err2 <= Ok)
+            f2.Close();
+        return;
+    }
+    if (!nocache) {
+        string tempstr;
+        modold( texfn, shared, tempstr );
+        texfilename = tempstr;
+    }
+    if (texfn.find( "white" ) == string::npos)
+        bootstrap_draw( "Loading "+string( FileName ) );
+    //strcpy(filename, FileName);
+    if (err2 > Ok)
+        data = this->ReadImage( &f, NULL, true, NULL );
+    else
+        data = this->ReadImage( &f, NULL, true, &f2 );
+    if (data) {
+        if (mode >= _DXT1 && mode <= _DXT5) {
+            if ( (int) data[0] == 0 ) {
+                detailtexture = NEAREST;
+                ismipmapped   = NEAREST;
+            }
+        }
+        if (main)
+            Bind( main, maxdimension, detailtexture );
+        else
+            Bind( maxdimension, detailtexture );
+        free( data );
+        data = NULL;
+        if (!nocache) setold();
+    } else {
+        FileNotFound( texfilename );
+    }
+    f.Close();
+    if ( f2.Valid() )
+        f2.Close();
+    //VSFileSystem::vs_fprintf (stderr," Load Success\n");
+}
+
+Texture::Texture( const char *FileNameRGB,
+                  const char *FileNameA,
+                  int stage,
+                  enum FILTER mipmap,
+                  enum TEXTURE_TARGET target,
+                  enum TEXTURE_IMAGE_TARGET imagetarget,
+                  float alpha,
+                  int zeroval,
+                  GFXBOOL force_load,
+                  int maxdimension,
+                  GFXBOOL detailtexture,
+                  GFXBOOL nocache,
+                  enum ADDRESSMODE address_mode,
+                  Texture *main )
+{
+    InitTexture();
+    Load( FileNameRGB,
+          FileNameA,
+          stage,
+          mipmap,
+          target,
+          imagetarget,
+          alpha,
+          zeroval,
+          force_load,
+          maxdimension,
+          detailtexture,
+          nocache,
+          address_mode,
+          main );
+}
+
+void Texture::Load( const char *FileNameRGB,
+                    const char *FileNameA,
+                    int stage,
+                    enum FILTER mipmap,
+                    enum TEXTURE_TARGET target,
+                    enum TEXTURE_IMAGE_TARGET imagetarget,
+                    float alpha,
+                    int zeroval,
+                    GFXBOOL force_load,
+                    int maxdimension,
+                    GFXBOOL detailtexture,
+                    GFXBOOL nocache,
+                    enum ADDRESSMODE address_mode,
+                    Texture *main )
+{
+    if (data) free( data );
+    if (palette) free( palette );
+    data = NULL;
+    palette = NULL;
+    ismipmapped = mipmap;
+
+    this->stage = stage;
+    this->address_mode = address_mode;
+    texture_target     = target;
+    image_target       = imagetarget;
+    string texfn = string( FileNameRGB )+string( "|" )+string( FileNameA );
+    if (!nocache) {
+        string tempstr;
+        if ( checkold( texfn, false, tempstr )
+            || checkold( texfn, true, tempstr ) ) {
+            texfilename = tempstr;
+            return;
+        }
+    }
+    //VSFileSystem::vs_fprintf (stderr,"2.Loading bmp file %s alp %s ",FileNameRGB,FileNameA);
+    //this->texfilename = texfilename;
+    //strcpy (filename,texfilename.c_str());
+    VSFile  f;
+    VSError err = Unspecified;
+    err = f.OpenReadOnly( FileNameRGB, TextureFile );
+    if (!nocache) {
+        bool   shared = (err == Shared);
+        string tempstr;
+        modold( texfn, shared, tempstr );
+        texfilename = tempstr;
+    }
+    if (err <= Ok && g_game.use_textures == 0 && !force_load) {
+        f.Close();
+        err = Unspecified;
+    }
+    if (err > Ok) {
+        FileNotFound( texfilename );
+        return;
+    }
+    VSFile  f1;
+    VSError err1 = Unspecified;
+    bool    shared1;
+    if (FileNameA) {
+        static bool use_alphamap =
+            parse_bool( vs_config->getVariable( "graphics",
+                                                "bitmap_alphamap",
+                                                "true" ) );
+        if (use_alphamap) {
+            std::string tmp;
+            f1.OpenReadOnly( FileNameA, TextureFile );
+
+            shared1 = (err1 == Shared);
+            if (err1 > Ok) {
+                data = NULL;
+                FileNameA = NULL;
+            }
+        } else {FileNameA = 0; }}
+    if (err1 > Ok)
+        data = this->ReadImage( &f, NULL, true, NULL );
+    else
+        data = this->ReadImage( &f, NULL, true, &f1 );
+    if (data) {
+        if (mode >= _DXT1 && mode <= _DXT5) {
+            if ( (int) data[0] == 0 ) {
+                detailtexture = NEAREST;
+                ismipmapped   = NEAREST;
+            }
+        }
+        if (main)
+            Bind( main, maxdimension, detailtexture );
+        else
+            Bind( maxdimension, detailtexture );
+        free( data );
+        data = NULL;
+        if (!nocache) setold();
+    } else {
+        FileNotFound( texfilename );
+    }
+    f.Close();
+    if (err1 <= Ok)
+        f1.Close();
+    //VSFileSystem::vs_fprintf (stderr,"Load Success\n");
 }
 Texture::~Texture()
-	{
-		if(original == NULL)
-		{
-		  /**DEPRECATED
-			if(data != NULL)
-			{
-				delete [] data;
-
-				data = NULL;
-			}
-		  */
-            UnBind();
-            if (palette !=NULL) {
-              free(palette);
-              palette = NULL;
-            }
-		}
-		else
-		{
-			original->refcount--;
-			if(original->refcount == 0)
-				delete original;
-		}
-	}
+{
+    if (original == NULL) {
+        /**DEPRECATED
+         *     if(data != NULL)
+         *     {
+         *             delete [] data;
+         *
+         *             data = NULL;
+         *     }
+         */
+        UnBind();
+        if (palette != NULL) {
+            free( palette );
+            palette = NULL;
+        }
+    } else {
+        original->refcount--;
+        if (original->refcount == 0)
+            delete original;
+    }
+}
 
 void Texture::UnBind()
 {
-    if (name!=-1) {
-      texHashTable.Delete (texfilename);
-      GFXDeleteTexture(name);
-      name = -1;
+    if (name != -1) {
+        texHashTable.Delete( texfilename );
+        GFXDeleteTexture( name );
+        name = -1;
     }
     //glDeleteTextures(1, &name);
 }
 
-void Texture::Transfer (int maxdimension,GFXBOOL detailtexture)
+void Texture::Transfer( int maxdimension, GFXBOOL detailtexture )
 {
-	//Implement this in D3D
-	//if(mode == _8BIT)
-	//	glColorTable(GL_SHARED_TEXTURE_PALETTE_EXT, GL_RGB8, 256, GL_RGB, GL_UNSIGNED_BYTE, palette);
-	
-	TEXTUREFORMAT internformat;
-	
+    //Implement this in D3D
+    //if(mode == _8BIT)
+    //glColorTable(GL_SHARED_TEXTURE_PALETTE_EXT, GL_RGB8, 256, GL_RGB, GL_UNSIGNED_BYTE, palette);
+
+    TEXTUREFORMAT internformat;
     switch (mode)
     {
-    // send DXT1,DXT3,DXT5 ...need to have the function call other glcompressedTexImage2D function 
-    case _DXT1:     internformat = DXT1; break;
-    case _DXT1RGBA: internformat = DXT1RGBA; break;
-    case _DXT3:     internformat = DXT3; break;
-    case _DXT5:     internformat = DXT5; break;
-    case _24BITRGBA:internformat = RGBA32; break;
-    case _24BIT:    internformat = RGB24; break;
-    case _8BIT:     internformat = PALETTE8; break;
-    default: return;
-    };
-	
-	if (img_sides == SIDE_SINGLE) {
-        GFXTransferTexture(data, name, sizeX, sizeY, internformat, image_target, maxdimension, detailtexture);
+    //send DXT1,DXT3,DXT5 ...need to have the function call other glcompressedTexImage2D function
+    case _DXT1:
+        internformat = DXT1;
+        break;
+    case _DXT1RGBA:
+        internformat = DXT1RGBA;
+        break;
+    case _DXT3:
+        internformat = DXT3;
+        break;
+    case _DXT5:
+        internformat = DXT5;
+        break;
+    case _24BITRGBA:
+        internformat = RGBA32;
+        break;
+    case _24BIT:
+        internformat = RGB24;
+        break;
+    case _8BIT:
+        internformat = PALETTE8;
+        break;
+    default:
+        return;
+    }
+    if (img_sides == SIDE_SINGLE) {
+        GFXTransferTexture( data, name, sizeX, sizeY, internformat, image_target, maxdimension, detailtexture );
     } else {
-        GFXTransferTexture(data, name, sizeX, sizeY, internformat, CUBEMAP_POSITIVE_X, maxdimension, detailtexture, 0);
-        GFXTransferTexture(data, name, sizeX, sizeY, internformat, CUBEMAP_NEGATIVE_X, maxdimension, detailtexture, 1);
-        GFXTransferTexture(data, name, sizeX, sizeY, internformat, CUBEMAP_POSITIVE_Y, maxdimension, detailtexture, 2);
-        GFXTransferTexture(data, name, sizeX, sizeY, internformat, CUBEMAP_NEGATIVE_Y, maxdimension, detailtexture, 3);
-        GFXTransferTexture(data, name, sizeX, sizeY, internformat, CUBEMAP_POSITIVE_Z, maxdimension, detailtexture, 4);
-        GFXTransferTexture(data, name, sizeX, sizeY, internformat, CUBEMAP_NEGATIVE_Z, maxdimension, detailtexture, 5);
+        GFXTransferTexture( data, name, sizeX, sizeY, internformat, CUBEMAP_POSITIVE_X, maxdimension, detailtexture, 0 );
+        GFXTransferTexture( data, name, sizeX, sizeY, internformat, CUBEMAP_NEGATIVE_X, maxdimension, detailtexture, 1 );
+        GFXTransferTexture( data, name, sizeX, sizeY, internformat, CUBEMAP_POSITIVE_Y, maxdimension, detailtexture, 2 );
+        GFXTransferTexture( data, name, sizeX, sizeY, internformat, CUBEMAP_NEGATIVE_Y, maxdimension, detailtexture, 3 );
+        GFXTransferTexture( data, name, sizeX, sizeY, internformat, CUBEMAP_POSITIVE_Z, maxdimension, detailtexture, 4 );
+        GFXTransferTexture( data, name, sizeX, sizeY, internformat, CUBEMAP_NEGATIVE_Z, maxdimension, detailtexture, 5 );
     }
-	
 }
-int Texture::Bind(int maxdimension,GFXBOOL detailtexture)
+int Texture::Bind( int maxdimension, GFXBOOL detailtexture )
 {
-    if (!bound||(boundSizeX!=sizeX)||(boundSizeY!=sizeY)||(boundMode!=mode)) {
+    if ( !bound || (boundSizeX != sizeX) || (boundSizeY != sizeY) || (boundMode != mode) ) {
         UnBind();
+        switch (mode)
+        {
+        case _DXT1:
+            GFXCreateTexture( sizeX, sizeY, DXT1, &name, NULL, stage, ismipmapped, texture_target, address_mode );
+            break;
+        case _DXT1RGBA:
+            GFXCreateTexture( sizeX, sizeY, DXT1RGBA, &name, NULL, stage, ismipmapped, texture_target, address_mode );
+            break;
 
-        switch(mode)
-	    {
-		case _DXT1:
-			GFXCreateTexture(sizeX, sizeY,DXT1 , &name, NULL, stage,ismipmapped, texture_target, address_mode);
-			break;
-		case _DXT1RGBA:
-			GFXCreateTexture(sizeX, sizeY,DXT1RGBA , &name, NULL, stage,ismipmapped, texture_target, address_mode);
-			break;
+        case _DXT3:
+            GFXCreateTexture( sizeX, sizeY, DXT3, &name, NULL, stage, ismipmapped, texture_target, address_mode );
+            break;
+        case _DXT5:
+            GFXCreateTexture( sizeX, sizeY, DXT5, &name, NULL, stage, ismipmapped, texture_target, address_mode );
+            break;
 
-		case _DXT3:
-			GFXCreateTexture(sizeX, sizeY,DXT3 , &name, NULL, stage,ismipmapped, texture_target, address_mode);
-			break;
-		case _DXT5:
-			GFXCreateTexture(sizeX, sizeY,DXT5 , &name, NULL, stage,ismipmapped, texture_target, address_mode);
-			break;
-
-	    case _24BITRGBA:
-		    //GFXCreateTexture(sizeX, sizeY, RGBA32, &name, NULL, stage);
-		    GFXCreateTexture(sizeX, sizeY, RGBA32, &name, NULL, stage,ismipmapped, texture_target, address_mode);
-		    break;
-	    case _24BIT:
-		    //not supported by most cards, so i use rgba32
-		    //GFXCreateTexture(sizeX, sizeY, RGB24, &name);
-		    GFXCreateTexture(sizeX, sizeY, RGB24, &name, NULL, stage,ismipmapped,texture_target, address_mode);
-		    break;
-	    case _8BIT:
-		    GFXCreateTexture(sizeX, sizeY, PALETTE8, &name, (char *)palette, stage,ismipmapped,texture_target, address_mode);
-		    break;
-	    }
+        case _24BITRGBA:
+            //GFXCreateTexture(sizeX, sizeY, RGBA32, &name, NULL, stage);
+            GFXCreateTexture( sizeX, sizeY, RGBA32, &name, NULL, stage, ismipmapped, texture_target, address_mode );
+            break;
+        case _24BIT:
+            //not supported by most cards, so i use rgba32
+            //GFXCreateTexture(sizeX, sizeY, RGB24, &name);
+            GFXCreateTexture( sizeX, sizeY, RGB24, &name, NULL, stage, ismipmapped, texture_target, address_mode );
+            break;
+        case _8BIT:
+            GFXCreateTexture( sizeX, sizeY, PALETTE8, &name, (char*) palette, stage, ismipmapped, texture_target, address_mode );
+            break;
+        }
     }
-    boundSizeX=sizeX;
-    boundSizeY=sizeY;
-    boundMode=mode;
-    bound=true;
+    boundSizeX = sizeX;
+    boundSizeY = sizeY;
+    boundMode  = mode;
+    bound = true;
 
-	Transfer(maxdimension,detailtexture);
-
-	return name;
-
-}
-
-int Texture::Bind(Texture *other, int maxdimension, GFXBOOL detailtexture)
-{
-    UnBind();
-    
-    boundSizeX=other->boundSizeX;
-    boundSizeY=other->boundSizeY;
-    boundMode=other->boundMode;
-    bound=other->bound;
-    name=other->name;
-
-    Transfer(maxdimension,detailtexture);
+    Transfer( maxdimension, detailtexture );
 
     return name;
 }
 
-void Texture::Prioritize (float priority) {
-  GFXPrioritizeTexture (name, priority);
-}
-static void ActivateWhite(int stage) {
-	static Texture * white = new Texture("white.bmp",0,MIPMAP,TEXTURE2D,TEXTURE_2D, 1 );
-	if (white->LoadSuccess())
-		white->MakeActive(stage);
-}
-void Texture::MakeActive(int stag, int pass)
+int Texture::Bind( Texture *other, int maxdimension, GFXBOOL detailtexture )
 {
-  static bool missing=false;
-  if ((name==-1)||(pass!=0)) {
-	ActivateWhite(stag);
-  } else {
-    GFXActiveTexture(stag);
-    GFXSelectTexture(name,stag);
-    GFXTextureAddressMode(address_mode,texture_target); //In case it changed - it's possible
-  }
+    UnBind();
+
+    boundSizeX = other->boundSizeX;
+    boundSizeY = other->boundSizeY;
+    boundMode  = other->boundMode;
+    bound = other->bound;
+    name  = other->name;
+
+    Transfer( maxdimension, detailtexture );
+
+    return name;
 }
+
+void Texture::Prioritize( float priority )
+{
+    GFXPrioritizeTexture( name, priority );
+}
+static void ActivateWhite( int stage )
+{
+    static Texture *white = new Texture( "white.bmp", 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1 );
+    if ( white->LoadSuccess() )
+        white->MakeActive( stage );
+}
+void Texture::MakeActive( int stag, int pass )
+{
+    static bool missing = false;
+    if ( (name == -1) || (pass != 0) ) {
+        ActivateWhite( stag );
+    } else {
+        GFXActiveTexture( stag );
+        GFXSelectTexture( name, stag );
+        GFXTextureAddressMode( address_mode, texture_target );         //In case it changed - it's possible
+    }
+}
+

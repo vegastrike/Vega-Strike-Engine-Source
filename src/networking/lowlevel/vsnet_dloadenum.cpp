@@ -1,20 +1,19 @@
 #include <config.h>
 
 #include "vsnet_dloadenum.h"
-// #include "vsnet_dloadmgr.h"
-// #include "vsnet_notify.h"
-// #include "vsnet_cmd.h"
-// #include "netbuffer.h"
-// #include "packet.h"
+//#include "vsnet_dloadmgr.h"
+//#include "vsnet_notify.h"
+//#include "vsnet_cmd.h"
+//#include "netbuffer.h"
+//#include "packet.h"
 
 using namespace std;
 
 namespace VsnetDownload
 {
-
 /*------------------------------------------------------------*
- * definition VsnetDownload::Subcommand
- *------------------------------------------------------------*/
+* definition VsnetDownload::Subcommand
+*------------------------------------------------------------*/
 
 /** Protocol:
  *
@@ -42,7 +41,7 @@ namespace VsnetDownload
  *    CMD_DOWNLOAD, object serial 0, COMPRESS|SENDRELIABLE|LOPRI
  *    char                       : subcommand DownloadError
  *    ( int16 stringlen, char* ) : failed filename
- *    
+ *
  *  download entire file in one packet
  *    CMD_DOWNLOAD, object serial 0, COMPRESS|SENDRELIABLE|LOPRI
  *    char                       : subcommand Download
@@ -71,39 +70,39 @@ namespace VsnetDownload
  *    char*                      : payload
  */
 
-std::ostream& operator<<( std::ostream& ostr, Subcommand e )
+std::ostream&operator<<( std::ostream &ostr, Subcommand e )
 {
-    switch( e )
+    switch (e)
     {
-    case ResolveRequest :
-        ostr << "ResolveRequest";
+    case ResolveRequest:
+        ostr<<"ResolveRequest";
         break;
-    case ResolveResponse :
-        ostr << "ResolveResponse";
+    case ResolveResponse:
+        ostr<<"ResolveResponse";
         break;
-    case DownloadRequest :
-        ostr << "DownloadRequest";
+    case DownloadRequest:
+        ostr<<"DownloadRequest";
         break;
-    case DownloadError :
-        ostr << "DownloadError";
+    case DownloadError:
+        ostr<<"DownloadError";
         break;
-    case Download :
-        ostr << "Download";
+    case Download:
+        ostr<<"Download";
         break;
-    case DownloadFirstFragment :
-        ostr << "DownloadFirstFragment";
+    case DownloadFirstFragment:
+        ostr<<"DownloadFirstFragment";
         break;
-    case DownloadFragment :
-        ostr << "DownloadFragment";
+    case DownloadFragment:
+        ostr<<"DownloadFragment";
         break;
-    case DownloadLastFragment :
-        ostr << "DownloadLastFragment";
+    case DownloadLastFragment:
+        ostr<<"DownloadLastFragment";
         break;
-    case UnexpectedSubcommand :
-        ostr << "UnexpectedSubcommand";
+    case UnexpectedSubcommand:
+        ostr<<"UnexpectedSubcommand";
         break;
-    default :
-        ostr << "missing case";
+    default:
+        ostr<<"missing case";
         break;
     }
     return ostr;
@@ -111,76 +110,73 @@ std::ostream& operator<<( std::ostream& ostr, Subcommand e )
 
 namespace Client
 {
-
 /*------------------------------------------------------------*
- * definition VsnetDownload::Client::State
- *------------------------------------------------------------*/
+* definition VsnetDownload::Client::State
+*------------------------------------------------------------*/
 
-std::ostream& operator<<( std::ostream& ostr, State s )
+std::ostream&operator<<( std::ostream &ostr, State s )
 {
-    switch( s )
+    switch (s)
     {
-    case Idle :
-        ostr << "Idle";
+    case Idle:
+        ostr<<"Idle";
         break;
-    case Queued :
-        ostr << "Queued";
+    case Queued:
+        ostr<<"Queued";
         break;
-    case Resolving :
-        ostr << "Resolving";
+    case Resolving:
+        ostr<<"Resolving";
         break;
-    case Resolved :
-        ostr << "Resolved";
+    case Resolved:
+        ostr<<"Resolved";
         break;
-    case Requested :
-        ostr << "Requested";
+    case Requested:
+        ostr<<"Requested";
         break;
-    case FragmentReceived :
-        ostr << "FragmentReceived";
+    case FragmentReceived:
+        ostr<<"FragmentReceived";
         break;
-    case Completed :
-        ostr << "Completed";
+    case Completed:
+        ostr<<"Completed";
         break;
-    default :
-        ostr << "unknown";
+    default:
+        ostr<<"unknown";
         break;
-    };
+    }
     return ostr;
 }
 /*------------------------------------------------------------*
- * definition VsnetDownload::Client::Error
- *------------------------------------------------------------*/
+* definition VsnetDownload::Client::Error
+*------------------------------------------------------------*/
 
-std::ostream& operator<<( std::ostream& ostr, VSError e )
+std::ostream&operator<<( std::ostream &ostr, VSError e )
 {
-    switch( e )
+    switch (e)
     {
-    case Ok :
-        ostr << "Ok";
+    case Ok:
+        ostr<<"Ok";
         break;
-    case SocketError :
-        ostr << "SocketError";
+    case SocketError:
+        ostr<<"SocketError";
         break;
-    case FileNotFound :
-        ostr << "FileNotFound";
+    case FileNotFound:
+        ostr<<"FileNotFound";
         break;
-    case LocalPermissionDenied :
-        ostr << "LocalPermissionDenied";
+    case LocalPermissionDenied:
+        ostr<<"LocalPermissionDenied";
         break;
-    case RemotePermissionDenied :
-        ostr << "RemotePermissionDenied";
+    case RemotePermissionDenied:
+        ostr<<"RemotePermissionDenied";
         break;
-    case DownloadInterrupted :
-        ostr << "DownloadInterrupted";
+    case DownloadInterrupted:
+        ostr<<"DownloadInterrupted";
         break;
-    default :
-        ostr << "unknown";
+    default:
+        ostr<<"unknown";
         break;
-    };
+    }
     return ostr;
 }
-
-}; // namespace Client
-
-}; // namespace VsnetDownload
+}; //namespace Client
+}; //namespace VsnetDownload
 

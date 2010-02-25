@@ -6,4 +6,5 @@ using std::vector;
 #include <stdlib.h>
 #include <stdio.h>
 
-void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile); //Translate BFXM file Inputfile to text file Outputfile
+void BFXMToXmesh( FILE *Inputfile, FILE *Outputfile ); //Translate BFXM file Inputfile to text file Outputfile
+

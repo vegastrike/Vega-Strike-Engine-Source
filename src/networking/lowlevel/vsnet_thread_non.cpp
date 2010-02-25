@@ -6,72 +6,58 @@ using namespace std;
 #ifdef USE_NO_THREAD
 
 /*------------------------------------------------------------*
- * definition of VSThread                                     *
- *------------------------------------------------------------*/
+* definition of VSThread                                     *
+*------------------------------------------------------------*/
 
-void VSThread::init( )
-{
-}
+void VSThread::init()
+{}
 
 VSThread::VSThread( bool )
-{
-}
+{}
 
-VSThread::~VSThread( )
-{
-}
+VSThread::~VSThread()
+{}
 
-void VSThread::start( )
-{
-}
+void VSThread::start()
+{}
 
-void VSThread::join( )
-{
-}
+void VSThread::join()
+{}
 
 /*------------------------------------------------------------*
- * definition of VSMutex                                      *
- *------------------------------------------------------------*/
+* definition of VSMutex                                      *
+*------------------------------------------------------------*/
 
-VSMutex::VSMutex( )
-{
-}
+VSMutex::VSMutex()
+{}
 
-VSMutex::~VSMutex( )
-{
-}
+VSMutex::~VSMutex()
+{}
 
-void VSMutex::lock( )
-{
-}
+void VSMutex::lock()
+{}
 
-void VSMutex::unlock( )
-{
-}
+void VSMutex::unlock()
+{}
 
 /*------------------------------------------------------------*
- * definition of VSCond                                       *
- *------------------------------------------------------------*/
+* definition of VSCond                                       *
+*------------------------------------------------------------*/
 
-VSCond::VSCond( )
-{
-}
+VSCond::VSCond()
+{}
 
-VSCond::~VSCond( )
-{
-}
+VSCond::~VSCond()
+{}
 
-void VSCond::wait( VSMutex& mx )
-{
-}
+void VSCond::wait( VSMutex &mx )
+{}
 
-void VSCond::signal( )
-{
-}
+void VSCond::signal()
+{}
 
-void VSCond::broadcast( )
-{
-}
+void VSCond::broadcast()
+{}
 
 #endif /* USE_NO_THREAD */
 

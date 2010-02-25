@@ -3,17 +3,15 @@
 
 #include "vsnet_headers.h"
 
-
 class VSPipe
 {
-public:
-    VSPipe( );
-    int  write( const char* buf, int size );
-    int  read( char* buf, int size );
-    int  closewrite( );
-    int  closeread( );
-    int  getread( ) const;
-    bool ok( ) const;
+public: VSPipe();
+    int write( const char *buf, int size );
+    int read( char *buf, int size );
+    int closewrite();
+    int closeread();
+    int getread() const;
+    bool ok() const;
 
 private:
     bool _failed;

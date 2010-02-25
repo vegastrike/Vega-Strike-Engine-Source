@@ -35,62 +35,61 @@
 
 namespace VSFileSystem
 {
-	class VSFile;
+class VSFile;
 };
 
-class Animation: public AnimatedTexture {
+class Animation : public AnimatedTexture
+{
+    GFXColor mycolor;
 
-  GFXColor mycolor;
+    Matrix   local_transformation;
 
-  Matrix local_transformation;
+    float    height; //half the height so you can do fancy vector translatons to campspace
 
-  float height; //half the height so you can do fancy vector translatons to campspace
+    float    width;
 
-  float width;
+    unsigned char options;
 
-  unsigned char options;
+    void InitAnimation();
 
-  void InitAnimation();
+public: Animation();
 
-public:
+    Animation( VSFileSystem::VSFile *f, bool Rep = 0, float priority = .1, enum FILTER ismipmapped = MIPMAP, bool camorient =
+                  false, bool appear_near_by_radius = false, const GFXColor &col = GFXColor( 1, 1, 1,
+                                                                                             1 ) );
+    Animation( const char*, bool Rep = 0, float priority = .1, enum FILTER ismipmapped = MIPMAP, bool camorient = false,
+              bool appear_near_by_radius = false, const GFXColor &col = GFXColor( 1, 1, 1,
+                                                                                  1 ) );
 
-  Animation();
+    ~Animation();
 
-  Animation(VSFileSystem::VSFile * f, bool Rep=0, float priority=.1,enum FILTER ismipmapped=MIPMAP,bool camorient=false, bool appear_near_by_radius=false, const GFXColor &col=GFXColor(1,1,1,1));
-  Animation(const char *, bool Rep=0, float priority=.1,enum FILTER ismipmapped=MIPMAP,bool camorient=false, bool appear_near_by_radius=false, const GFXColor &col=GFXColor(1,1,1,1));
+    void Draw();
+    void SetFaceCam( bool face );
+    void SetInterpolate( bool interp );
+    bool CalculateOrientation( Matrix &result );
 
-  ~Animation();
+    void DrawNow( const Matrix &final_orientation );
 
-  void Draw();
-  void SetFaceCam(bool face);
-  void SetInterpolate(bool interp);
-  bool CalculateOrientation (Matrix &result);
+    void DrawNoTransform( bool cross = true, bool blendoption = false );
 
-  void DrawNow(const Matrix & final_orientation);
+    void DrawAsVSSprite( class VSSprite*spr );
 
-  void DrawNoTransform (bool cross=true, bool blendoption=false);
+    static void ProcessDrawQueue( std::vector< Animation* >&, float );
 
-  void DrawAsVSSprite (class VSSprite *spr);
+    static void ProcessDrawQueue();
 
-  static void ProcessDrawQueue(std::vector <Animation *> &,float);
+    static void ProcessFarDrawQueue( float );
 
-  static void ProcessDrawQueue();
+    void SetDimensions( float wid, float hei );
 
-  static void ProcessFarDrawQueue(float);
+    void GetDimensions( float &wid, float &hei );
 
-  void SetDimensions(float wid, float hei);
+    QVector Position();
 
-  void GetDimensions (float &wid, float & hei);
+    void SetPosition( const QVector& );
 
-  QVector Position();
-
-  void SetPosition (const QVector &);
-
-  void SetOrientation(const Vector &p, const Vector &q, const Vector &r);
-
+    void SetOrientation( const Vector &p, const Vector &q, const Vector &r );
 };
-
-
 
 #endif
 

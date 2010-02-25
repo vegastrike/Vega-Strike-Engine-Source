@@ -1,10 +1,6 @@
-void atexit (void (*fn)(void)) {
-}
+void atexit( void (*fn)( void ) ) {}
 
-void stat64() {
+void stat64() {}
 
-}
+void lstat64() {}
 
-void lstat64() {
-
-}

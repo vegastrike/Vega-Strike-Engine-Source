@@ -1,14 +1,14 @@
 #ifndef _3DMANIP_H_
 #define _3DMANIP_H_
-#include "config.h" // for Solaris
+#include "config.h" //for Solaris
 #include "macosx_math.h"
 #include <math.h>
 
 #ifdef SOLARIS
-extern float __sqrtf( float);
-extern float __cosf( float);
-extern float __sinf( float);
-extern float __tanf( float);
+extern float __sqrtf( float );
+extern float __cosf( float );
+extern float __sinf( float );
+extern float __tanf( float );
 #define sqrtf __sqrtf
 #define cosf __cosf
 #define sinf __sinf
@@ -41,33 +41,39 @@ extern float __tanf( float);
 #undef XVector
 #undef YVector
 
-inline Vector QVector::operator =(const Vector &a) {
-  i=a.i;
-  j=a.j;
-  k=a.k;
-  return a;
+inline Vector QVector::operator=( const Vector &a )
+{
+    i = a.i;
+    j = a.j;
+    k = a.k;
+    return a;
 }
-inline QVector::QVector (const Vector &a) {
-  i=a.i;
-  j=a.j;
-  k=a.k;
+inline QVector::QVector( const Vector &a )
+{
+    i = a.i;
+    j = a.j;
+    k = a.k;
 }
-inline QVector Vector::operator = (const QVector &a) {
-  i=a.i;
-  j=a.j;
-  k=a.k;
-  return a;
+inline QVector Vector::operator=( const QVector &a )
+{
+    i = a.i;
+    j = a.j;
+    k = a.k;
+    return a;
 }
-inline Vector::Vector (const QVector &a) {
-  i=a.i;
-  j=a.j;
-  k=a.k;
+inline Vector::Vector( const QVector &a )
+{
+    i = a.i;
+    j = a.j;
+    k = a.k;
 }
-inline QVector Vector::Cast() const{
-  return QVector (i,j,k);
+inline QVector Vector::Cast() const
+{
+    return QVector( i, j, k );
 }
-inline Vector QVector::Cast() const{
-  return Vector (i,j,k);
+inline Vector QVector::Cast() const
+{
+    return Vector( i, j, k );
 }
 
 #endif

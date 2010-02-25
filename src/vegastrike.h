@@ -1,17 +1,17 @@
-/* 
- * Vega Strike 
+/*
+ * Vega Strike
  * Copyright (C) 2001-2002 Daniel Horn
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -26,16 +26,14 @@
 #define _VEGASTRIKE_H_
 
 #if 0
-static const float SIMULATION_ATOM = (float)(1.0/10.0);
-  extern float simulation_atom_var; // not used, just dummy to compile
+static const float SIMULATION_ATOM = (float) (1.0/10.0);
+extern float simulation_atom_var;   //not used, just dummy to compile
 #else
 extern float simulation_atom_var;
 #define SIMULATION_ATOM (simulation_atom_var)
 #endif
 
-
 #include <config.h>
-
 
 #include "macosx_math.h"
 #include <math.h>
@@ -53,9 +51,9 @@ extern float simulation_atom_var;
 #include <limits.h>
 #include <stdarg.h>
 #include "debug_vs.h"
-#if defined( WIN32 ) || defined( __CYGWIN__ )
-    /* Note that this will define WIN32 for us, if it isn't defined already
-     */
+#if defined (WIN32) || defined (__CYGWIN__)
+/* Note that this will define WIN32 for us, if it isn't defined already
+ */
 #  include <windows.h>
 //#include <wingdi.h>
 #include <time.h>
@@ -67,7 +65,7 @@ extern float simulation_atom_var;
 #endif /* defined( WIN32 ) || defined( __CYGWIN__ ) */
 
 #ifndef NO_GFX
-#if defined(__APPLE__) || defined(MACOSX)
+#if defined (__APPLE__) || defined (MACOSX)
     #include <OpenGL/gl.h>
     #include <OpenGL/glu.h>
     #include <GLUT/glut.h>
@@ -91,20 +89,18 @@ extern float simulation_atom_var;
 
 #include <float.h>
 
-#if defined(HAVE_MATH_H)
+#if defined (HAVE_MATH_H)
 #include <math.h>
 #endif
-#if  defined(HAVE_FINITE) || defined(BSD)
-#define FINITE(x) (finite(x))
-#define ISNAN(x) (isnan(x))
+#if  defined (HAVE_FINITE) || defined (BSD)
+#define FINITE( x ) ( finite( x ) )
+#define ISNAN( x ) ( isnan( x ) )
 #else
-#define FINITE(x) (_finite(x))
-#define ISNAN(x) (_isnan(x))
+#define FINITE( x ) ( _finite( x ) )
+#define ISNAN( x ) ( _isnan( x ) )
 #endif
 
-
 #define BUFF_LEN 512
-
 
 #endif
 

@@ -19,12 +19,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-
-
-
-
-
-
 #ifndef _CMD_ORDER_H
 
 #define _CMD_ORDER_H
@@ -47,130 +41,191 @@
  */
 //#define ORDERDEBUG
 class Animation;
-typedef std::vector<class varInst *> olist_t;
-class Order {
- private:
+typedef std::vector< class varInst* >olist_t;
+class Order
+{
+private:
 
- protected:
-  virtual ~Order ();
-  ///The unit this order is attached to
-  Unit * parent;
-  ///The bit code (from ORDERTYPES) that this order is (for parallel execution)
-  unsigned int type; 
-  
-  unsigned int subtype;
-  ///Whether or not this order is done
-  bool done;
-  ///If this order applies to a group of units (as in form up with this group)
-  UnitContainer group;
-  ///If this order applies to a physical location in world space
-  QVector targetlocation;
-  ///The queue of suborders that will be executed in parallel according to bit code
-  std::vector<Order*> suborders;
-  ///a bunch of communications that have not been answered CommunicationMessages are actually containing reference to a nice Finite State Machine that can allow a player to have a reasonable conversation with an AI
-  std::list<class CommunicationMessage *>messagequeue;
-  ///changes the local relation of this unit to another...may inform superiors about "good" or bad! behavior depending on the AI
-  virtual void Destructor();
- protected:
-  /// this function calls the destructor (needs to be overridden for python;
+protected:
+    virtual ~Order();
+///The unit this order is attached to
+    Unit *parent;
+///The bit code (from ORDERTYPES) that this order is (for parallel execution)
+    unsigned int type;
 
- public:
+    unsigned int subtype;
+///Whether or not this order is done
+    bool done;
+///If this order applies to a group of units (as in form up with this group)
+    UnitContainer group;
+///If this order applies to a physical location in world space
+    QVector targetlocation;
+///The queue of suborders that will be executed in parallel according to bit code
+    std::vector< Order* >suborders;
+///a bunch of communications that have not been answered CommunicationMessages are actually containing reference to a nice Finite State Machine that can allow a player to have a reasonable conversation with an AI
+    std::list< class CommunicationMessage* >messagequeue;
+///changes the local relation of this unit to another...may inform superiors about "good" or bad! behavior depending on the AI
+    virtual void Destructor();
+protected:
+/// this function calls the destructor (needs to be overridden for python;
 
-  virtual void ChooseTarget() {/*not implemented see fire.cpp*/}
-  virtual bool PursueTarget(Unit *,bool isleader) {return false;}
-  ///clears the messasges of this order
-  void ClearMessages();
-  ///The varieties of order types  MOVEMENT,FACING, and WEAPON orders may not be mutually executed (lest one engine goes left, the other right)
-  enum ORDERTYPES { MOVEMENT =1, FACING = 2, WEAPON = 4, CLOAKING=8, ALLTYPES=(1|2|4|8)};
-  enum SUBORDERTYPES {SLOCATION=1, STARGET=2, SSELF=4};
-  ///The default constructor setting everything to NULL and no dependency on order
-  Order (): targetlocation(0,0,0){parent = NULL;type=0;subtype=0,done=false; actionstring=""; VSCONSTRUCT1('O')}
-  ///The constructor that specifies what order dependencies this order has
-  Order(int ttype,int subtype): targetlocation(0,0,0){parent = NULL;type = ttype;done=false; actionstring=""; VSCONSTRUCT1('O')}
-  ///The virutal function that unrefs all memory then calls Destruct () which takes care of unreffing this or calling delete on this
-  virtual void Destroy();
+public:
 
-  ///The function that gets called and executes all queued suborders 
-  virtual void Execute();
-  ///returns a pointer to the first order that may be bitwised ored with that type
-  Order* queryType (unsigned int type);
-	///returns a pointer to the first order that may be bitwise ored with any type 
-	Order* queryAny(unsigned int type);
-  ///Erases all orders that bitwise OR with that type
-  void eraseType (unsigned int type);
-  ///Attaches a group of targets to this order (used for strategery-type games)
-  bool AttachOrder (Unit *targets);
-  ///Attaches a navigation point to this order
-  bool AttachOrder (QVector target);
-  ///Attaches a group (form up) to this order
-  bool AttachSelfOrder (Unit *targets);
-  ///Enqueues another order that will be executed (in parallel perhaps) when next void Execute() is called
-  Order* EnqueueOrder (Order * ord);
-  ///Replaces the first order of that type in the order queue
-  Order* ReplaceOrder (Order * ord);
-  bool Done() {return done;}
-  int getType() {return type;}
-  int getSubType () {return subtype;}
-  ///Sets the parent of this Unit.  Any virtual functions must call this one
-  virtual void SetParent(Unit *parent1) {parent = parent1;};
-  Unit * GetParent() {return parent;}
-  ///Sends a communication message from the Unit (encapulated in c) to this unit
-  virtual void Communicate (const class CommunicationMessage &c);
-  ///processes a single message...generally called by the Messages() func
-  virtual void ProcessCommMessage(class CommunicationMessage &c);
-  ///responds (or does not) to certain messages in the message queue
-  virtual void ProcessCommunicationMessages(float CommRepsonseTime, bool RemoveMessageProcessed);
-  /// return pointer to order or NULL if not found
-  Order *findOrder(Order *ord);
-  /// erase that order from the list
-  void eraseOrder(Order *ord);
-  /// enqueue order as first order
-  Order* EnqueueOrderFirst (Order *ord);
-  /// returns the orderlist (NULL for orders that haven't got any)
-  virtual olist_t* getOrderList(){ return NULL;};
-  virtual void AdjustRelationTo (Unit * un, float factor);
+    virtual void ChooseTarget()
+    {
+        /*not implemented see fire.cpp*/
+    }
+    virtual bool PursueTarget( Unit*, bool isleader )
+    {
+        return false;
+    }
+///clears the messasges of this order
+    void ClearMessages();
+///The varieties of order types  MOVEMENT,FACING, and WEAPON orders may not be mutually executed (lest one engine goes left, the other right)
+    enum ORDERTYPES {MOVEMENT=1, FACING=2, WEAPON=4, CLOAKING=8, ALLTYPES=(1|2|4|8)};
+    enum SUBORDERTYPES {SLOCATION=1, STARGET=2, SSELF=4};
+///The default constructor setting everything to NULL and no dependency on order
+    Order() : targetlocation( 0, 0, 0 )
+    {
+        parent  = NULL;
+        type    = 0;
+        subtype = 0, done = false;
+        actionstring = "";
+        VSCONSTRUCT1( 'O' )
+    }
+///The constructor that specifies what order dependencies this order has
+    Order( int ttype, int subtype ) : targetlocation( 0, 0, 0 )
+    {
+        parent = NULL;
+        type   = ttype;
+        done   = false;
+        actionstring = "";
+        VSCONSTRUCT1( 'O' )
+    }
+///The virutal function that unrefs all memory then calls Destruct () which takes care of unreffing this or calling delete on this
+    virtual void Destroy();
 
-  virtual std::string getOrderDescription() { return "empty"; };
+///The function that gets called and executes all queued suborders
+    virtual void Execute();
+///returns a pointer to the first order that may be bitwised ored with that type
+    Order * queryType( unsigned int type );
+///returns a pointer to the first order that may be bitwise ored with any type
+    Order * queryAny( unsigned int type );
+///Erases all orders that bitwise OR with that type
+    void eraseType( unsigned int type );
+///Attaches a group of targets to this order (used for strategery-type games)
+    bool AttachOrder( Unit *targets );
+///Attaches a navigation point to this order
+    bool AttachOrder( QVector target );
+///Attaches a group (form up) to this order
+    bool AttachSelfOrder( Unit *targets );
+///Enqueues another order that will be executed (in parallel perhaps) when next void Execute() is called
+    Order * EnqueueOrder( Order *ord );
+///Replaces the first order of that type in the order queue
+    Order * ReplaceOrder( Order *ord );
+    bool Done()
+    {
+        return done;
+    }
+    int getType()
+    {
+        return type;
+    }
+    int getSubType()
+    {
+        return subtype;
+    }
+///Sets the parent of this Unit.  Any virtual functions must call this one
+    virtual void SetParent( Unit *parent1 )
+    {
+        parent = parent1;
+    }
+    Unit * GetParent()
+    {
+        return parent;
+    }
+///Sends a communication message from the Unit (encapulated in c) to this unit
+    virtual void Communicate( const class CommunicationMessage &c );
+///processes a single message...generally called by the Messages() func
+    virtual void ProcessCommMessage( class CommunicationMessage&c );
+///responds (or does not) to certain messages in the message queue
+    virtual void ProcessCommunicationMessages( float CommRepsonseTime, bool RemoveMessageProcessed );
+/// return pointer to order or NULL if not found
+    Order * findOrder( Order *ord );
+/// erase that order from the list
+    void eraseOrder( Order *ord );
+/// enqueue order as first order
+    Order * EnqueueOrderFirst( Order *ord );
+/// returns the orderlist (NULL for orders that haven't got any)
+    virtual olist_t * getOrderList()
+    {
+        return NULL;
+    }
+    virtual void AdjustRelationTo( Unit *un, float factor );
 
-  ///searches the suborders recursively for the first order that has an orderlist
-  Order *findOrderList();
-  std::string createFullOrderDescription(int level=0);
-  void setActionString(std::string astring) { actionstring=astring; };
-  std::string getActionString() { return actionstring; };
-  virtual float getMood() {return 0;}
- protected:
-  std::string  actionstring;
+    virtual std::string getOrderDescription()
+    {
+        return "empty";
+    }
+
+///searches the suborders recursively for the first order that has an orderlist
+    Order * findOrderList();
+    std::string createFullOrderDescription( int level = 0 );
+    void setActionString( std::string astring )
+    {
+        actionstring = astring;
+    }
+    std::string getActionString()
+    {
+        return actionstring;
+    }
+    virtual float getMood()
+    {
+        return 0;
+    }
+protected:
+    std::string actionstring;
 };
 ///Convenience order factory for "clicking to create an order"
-class OrderFactory {
+class OrderFactory
+{
 public:
-  virtual int type () {return 0;}
-  OrderFactory(){}
-  virtual Order * newOrder() {return new Order;}
+    virtual int type()
+    {
+        return 0;
+    }
+    OrderFactory() {}
+    virtual Order * newOrder()
+    {
+        return new Order;
+    }
 };
 ///Executes another order for a number of seconds
-class ExecuteFor:  public Order {
+class ExecuteFor : public Order
+{
+private:
 
- private:
-
-  ///The child order to execute
-  Order * child;
-  ///the time it has executed the child order for
-  float time;
-  ///the total time it can execute child order
-  float maxtime;
- protected:
-  virtual ~ExecuteFor () {}
- public:
-
-  ExecuteFor (Order * chld, float seconds): Order(chld->getType(),chld->getSubType()),child(chld),time(0),maxtime(seconds) {}
-  ///Executes child order and then any suborders that may be pertinant
-  void Execute ();
-  ///Removes this order
-  virtual void Destroy () {
-    child->Destroy();
-    Order::Destroy();
-  }
+///The child order to execute
+    Order *child;
+///the time it has executed the child order for
+    float  time;
+///the total time it can execute child order
+    float  maxtime;
+protected:
+    virtual ~ExecuteFor() {}
+public: ExecuteFor( Order *chld, float seconds ) : Order( chld->getType(), chld->getSubType() )
+        , child( chld )
+        , time( 0 )
+        , maxtime( seconds ) {}
+///Executes child order and then any suborders that may be pertinant
+    void Execute();
+///Removes this order
+    virtual void Destroy()
+    {
+        child->Destroy();
+        Order::Destroy();
+    }
 };
 
 #endif
+

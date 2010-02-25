@@ -24,27 +24,27 @@
 class SphereMesh;
 class Texture;
 class StarVlist;
-class Background {
-  bool Enabled;
-  StarVlist *stars;
-  Texture *up;
-  Texture *left;
-  Texture *front;
-  Texture *right;
-  Texture *back;
-  Texture *down;
-  SphereMesh * SphereBackground;
-public:
-  Background(const char *file, int numstars, float spread, std::string starfilename);
-  ~Background();
-  void EnableBG (bool);
-  void Draw();
-  struct BackgroundClone{
-    Texture * backups[7];
-    void FreeClone();
-  };
-  BackgroundClone Cache();
-  
+class Background
+{
+    bool        Enabled;
+    StarVlist  *stars;
+    Texture    *up;
+    Texture    *left;
+    Texture    *front;
+    Texture    *right;
+    Texture    *back;
+    Texture    *down;
+    SphereMesh *SphereBackground;
+public: Background( const char *file, int numstars, float spread, std::string starfilename );
+    ~Background();
+    void EnableBG( bool );
+    void Draw();
+    struct BackgroundClone
+    {
+        Texture *backups[7];
+        void     FreeClone();
+    };
+    BackgroundClone Cache();
 };
 
 #endif
