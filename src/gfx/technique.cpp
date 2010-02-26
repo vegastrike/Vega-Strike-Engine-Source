@@ -170,23 +170,20 @@ static Technique::Pass::DepthFunction parseDepthFunction( const std::string &s )
         enumMap["always"]  = Technique::Pass::Always;
         enumMap["never"]   = Technique::Pass::Never;
     }
-    
-    static Technique::Pass::BlendMode parseBlendMode(const std::string &s)
-    {
-        static map<string, Technique::Pass::BlendMode> enumMap;
-        if (enumMap.empty()) {
-            enumMap["default"]     = Technique::Pass::Default;
-            enumMap["add"]         = Technique::Pass::Add;
-            enumMap["multiply"]    = Technique::Pass::Multiply;
-            enumMap["alpha_blend"] = Technique::Pass::AlphaBlend;
-            enumMap["decal"]       = Technique::Pass::Decal;
-            enumMap["premult_alpha"]=Technique::Pass::PremultAlphaBlend;
-        }
-        return parseEnum(s, enumMap);
-    }
     return parseEnum(s, enumMap);
 }
     
+static Technique::Pass::PolyMode parsePolyMode(const std::string &s)
+{
+    static map<string, Technique::Pass::PolyMode> enumMap;
+    if (enumMap.empty()) {
+        enumMap["point"]  = Technique::Pass::Point;
+        enumMap["line"]   = Technique::Pass::Line;
+        enumMap["fill"]   = Technique::Pass::Fill;
+    }
+    return parseEnum(s, enumMap);
+}
+
 static Technique::Pass::ShaderParam::Semantic parseAutoParamSemantic( const std::string &s )
 {
     static map< string, Technique::Pass::ShaderParam::Semantic >enumMap;
