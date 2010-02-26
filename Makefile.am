@@ -898,9 +898,6 @@ LIBENGINE_COMMON = \
   src/VSFileXMLSerializer.h \
   src/VSFileXMLSerializer.cpp
 
-#VEGASERVER_COMPILING added by chuck_starchaser, to switch between
-# unit.cpp including unit.h, and unit.h including unit.cpp
-#vegaserver_CXXFLAGS = -D VEGASERVER_COMPILING
 vegaserver_SOURCES = \
   $(LIBENGINE_COMMON) \
   $(LIBCMDSERVER) \

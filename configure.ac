@@ -284,15 +284,15 @@ AC_ARG_ENABLE(cubemap, AC_HELP_STRING([--enable-cubemap], [Produce an executable
 		VS_CXXFLAGS="${VS_CXXFLAGS} ${CUBEMAP_FLAGS}"
 	fi)
 
-
-AC_ARG_ENABLE(release, AC_HELP_STRING([--enable-release=LEVEL], [Produce an executable with optimizations (LEVEL=2)]), 
+#Default optimization level changed from 2 to 3, as 3 seems to be MUCH faster. --chuck_starchaser.
+AC_ARG_ENABLE(release, AC_HELP_STRING([--enable-release=LEVEL], [Produce an executable with optimizations (LEVEL=3)]), 
 	if test $enableval = no -o $enableval = 0; then
 		optimizationlevel=0
 		VS_CXXFLAGS="${VS_CXXFLAGS} -O0"
 	else
 		optimizationlevel=$enableval
 		if test $enableval = yes ; then
-			optimizationlevel=2
+			optimizationlevel=3
 		fi
 		AC_MSG_NOTICE(Enabling optimizations with -O$optimizationlevel)
 		VS_CXXFLAGS="${VS_CXXFLAGS} -O$optimizationlevel -ffast-math"
