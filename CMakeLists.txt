@@ -428,6 +428,7 @@ SET(VEGASTRIKE_SOURCES ${LIBGUI_SOURCES}
 					   src/cmd/unit_functions.cpp 
 					   src/cmd/unit_interface.cpp
 					   src/cmd/unit_util.cpp
+					   src/cmd/images.cpp
 					   src/gldrv/gl_program.cpp
 					   src/gldrv/gl_clip.cpp
 					   src/gldrv/gl_fog.cpp

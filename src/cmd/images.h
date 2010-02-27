@@ -204,7 +204,7 @@ template < typename BOGUS >
 //added by chuck starchaser, to try to break dependency to VSSprite in vegaserver
 struct UnitImages
 {
-    UnitImages();
+    UnitImages(){ VSCONSTRUCT1('i'); pHudImage=NULL; pExplosion=NULL;}
 /*    {
 *       VSCONSTRUCT1( 'i' )
 *  //        pHudImage = NULL;

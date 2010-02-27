@@ -553,7 +553,7 @@ void GameStarSystem::createBackground( StarSystem::StarXML *xml )
     string  bglight = xml->backgroundname+"_light.image";
     string  bgfile  = xml->backgroundname+"_light.image";
     VSFile  f;
-    VSError err     = f.OpenReadOnly( bgfile, TextureFile );
+    VSError err     = f.OpenReadOnly( bgfile, VSFileSystem::TextureFile );
     if (err > Ok)
         EnvironmentMapGeneratorMain( xml->backgroundname.c_str(), bglight.c_str(), 0, xml->reflectivity, 1 );
     else
