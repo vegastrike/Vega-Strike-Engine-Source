@@ -164,10 +164,7 @@ void Universe::Init( const char *gal )
     this->galaxy = new GalaxyXML::Galaxy( gal );
     static bool firsttime = false;
     if (!firsttime) {
-//this #ifndef hack below by chuck_starchaser, to get around missing faction_util.o in vegaserver make list
-#ifndef VEGASERVER_COMPILING
         LoadFactionXML( "factions.xml" );
-#endif
         firsttime = true;
     }
     script_system = NULL;

@@ -215,22 +215,8 @@ public: GameUnit( int dummy );
     Matrix WarpMatrix( const Matrix &ctm ) const;
 };
 
-/*
- ***************************************************************************
- **** Since we now use templates, we have to include GameUnit related    ***
- **** .cpp files in unit.h to avoid problems with some compilers         ***
- ***************************************************************************
- */
-
-//#include "unit.cpp" --chuck_starchaser commenting out the root of all evil
-#ifdef VEGASERVER_COMPILING
-#include "unit.cpp"
-#endif
-
 /////////////////////////////////////////////////////
 //forward declarations of explicit instantiations, added by chuck_starchaser:
-
-#ifndef VEGASERVER_COMPILING
 
 class Asteroid;
 template < class Asteroid >
@@ -259,8 +245,6 @@ class GameUnit;
 class Enhancement;
 template < class Enhancement >
 class GameUnit;
-
-#endif
 
 /////////////////////////////////////////////////////
 

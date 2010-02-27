@@ -19,15 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#ifdef VEGASERVER_COMPILING
-#ifndef __UNIT_CPP__
-#define __UNIT_CPP__
-#endif
-#else
 #include "unit.h"
-#endif
-
-#ifndef __UNIT_CPP__
 
 #include "vsfilesystem.h"
 #include "vs_globals.h"
@@ -731,8 +723,6 @@ void GameUnit< UnitType >::SwapInHalos()
 /////////////////////////////////////////////////////
 //explicit instantiations, added by chuck_starchaser:
 
-#ifndef VEGASERVER_COMPILING
-
  #include "cmd/asteroid_generic.h"
 template class GameUnit< Asteroid >;
 
@@ -768,9 +758,5 @@ template class GameUnit< Enhancement >;
 //#include "cmd/cont_terrain.h"
 //template class GameUnit< ContinuousTerrain >;
 
-#endif
-
 /////////////////////////////////////////////////////
-
-#endif
 

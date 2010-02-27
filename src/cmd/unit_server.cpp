@@ -21,15 +21,7 @@
  
 #include "unit_factory.h"
 
-#ifdef VEGASERVER_COMPILING
-#ifndef __UNIT_CPP__
-#define __UNIT_CPP__
-#endif
-#else
 #include "unit.h"
-#endif
-
-#ifndef __UNIT_CPP__
 
 #include "vsfilesystem.h"
 #include "vs_globals.h"
@@ -775,8 +767,6 @@ void GameUnit< UnitType >::SwapInHalos()
 /////////////////////////////////////////////////////
 //explicit instantiations, added by chuck_starchaser:
 
-#ifndef VEGASERVER_COMPILING
-
  #include "cmd/asteroid_generic.h"
  template class GameUnit< Asteroid >;
 
@@ -812,9 +802,5 @@ void GameUnit< UnitType >::SwapInHalos()
 // #include "cmd/cont_terrain.h"
 // template class GameUnit< ContinuousTerrain >;
 
-#endif
-
 /////////////////////////////////////////////////////
-
-#endif
 
