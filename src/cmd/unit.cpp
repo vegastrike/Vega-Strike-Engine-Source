@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-
+#include "unit.h"
 #include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "file_main.h"
@@ -723,25 +723,25 @@ void GameUnit< UnitType >::SwapInHalos()
 
 
  #include "cmd/asteroid_generic.h"
-//template class GameUnit< Asteroid >;
+template class GameUnit< Asteroid >;
 
  #include "cmd/building_generic.h"
-//template class GameUnit< Building >;
+template class GameUnit< Building >;
 
  #include "cmd/planet_generic.h"
-//template class GameUnit< Planet >;
+template class GameUnit< Planet >;
 
  #include "cmd/unit_generic.h"
-//template class GameUnit< Unit >;
+template class GameUnit< Unit >;
 
  #include "cmd/missile_generic.h"
-//template class GameUnit< Missile >;
+template class GameUnit< Missile >;
 
  #include "cmd/nebula.h"
-//template class GameUnit< Nebula >;
+template class GameUnit< Nebula >;
 
  #include "cmd/enhancement.h"
-//template class GameUnit< Enhancement >;
+template class GameUnit< Enhancement >;
 
 //The unit types below don't compile; --probably they don't inherit from Unit.
 

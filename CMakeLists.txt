@@ -430,6 +430,7 @@ SET(VEGASTRIKE_SOURCES ${LIBGUI_SOURCES}
                        src/cmd/faction_xml.cpp
                        src/cmd/pilot.cpp
                        src/cmd/images.cpp
+                       src/cmd/unit.cpp
 					   src/gldrv/gl_program.cpp
 					   src/gldrv/gl_clip.cpp
 					   src/gldrv/gl_fog.cpp

@@ -253,7 +253,7 @@ class Enhancement;
 template < class Enhancement >
 class GameUnit;
 
-#include "unit.cpp"
+//#include "unit.cpp"
 /////////////////////////////////////////////////////
 
 #endif

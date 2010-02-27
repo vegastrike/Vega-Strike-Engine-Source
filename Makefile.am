@@ -996,6 +996,7 @@ vegastrike_SOURCES = \
   src/cmd/unit_template.h \
   src/cmd/unit_util.cpp \
   src/cmd/unit_util.h \
+  src/cmd/unit.cpp \
   src/cmd/unit.h \
   src/gldrv/gl_program.cpp \
   src/gldrv/gl_clip.cpp \
