@@ -8,9 +8,11 @@
 #include <utility>
 #include <cstring>
 
-using namespace std;
+//using namespace std;
 
 namespace Audio {
+
+    using std::min;
 
     Stream::Stream(const std::string& path) throw(Exception)
     {

@@ -7,10 +7,13 @@
 #include <string>
 #include <shared/data_path.h>
 
-using namespace std;
+using std::string;
 
 void CG_Cloak::cgLoadMedia( string pathname, string filename )
 {
+    using std::cout;
+    using std::endl;
+    
     data_path media;
     media.path.push_back( "." );
     media.path.push_back( pathname );

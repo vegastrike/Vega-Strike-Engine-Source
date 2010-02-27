@@ -63,7 +63,6 @@
 
 extern vs_options  game_options;
 
-using namespace std;
 extern std::string global_username;
 #define KEYDOWN( name, key ) (name[key]&0x80)
 

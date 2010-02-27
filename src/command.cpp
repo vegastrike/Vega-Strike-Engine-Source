@@ -1,5 +1,4 @@
 #include "command.h"
-#include <sstream>
 #include "cs_python.h"
 #include <pyerrors.h>
 #include <pythonrun.h>
@@ -8,13 +7,23 @@
 #include "vs_random.h"
 #include "python/python_class.h"
 #include <vector>
-#include <string>
 
 #ifdef HAVE_SDL
 #   include <SDL/SDL.h>
 #endif
 
-using namespace std;
+#include <string>
+#include <iomanip>
+#include <sstream>
+
+using std::string;
+using std::cout;
+using std::endl;
+using std::ostringstream;
+using std::ios;
+using std::setiosflags;
+using std::setw;
+using std::exception;
 
 //Introduction Comments {{{
 //The {{{ and }}} symbols are VIM Fold Markers.
@@ -265,6 +274,7 @@ using namespace std;
 //}}}
 
 //Coms object {{{
+
 
 coms::coms( TFunctor *t_in )
 {
@@ -530,7 +540,6 @@ void commandI::dummy( vector< string* > *d )
 //}}}
 //list all the commands {{{
 
-#include <iomanip>
 void commandI::pcommands()
 {
     int x = 0;

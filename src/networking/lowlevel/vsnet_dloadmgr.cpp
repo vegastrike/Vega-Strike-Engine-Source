@@ -10,7 +10,6 @@
 #include "networking/lowlevel/netbuffer.h"
 #include "networking/lowlevel/packet.h"
 
-using namespace std;
 
 extern void getZoneInfoBuffer( unsigned short zoneid, NetBuffer &netbuf );
 

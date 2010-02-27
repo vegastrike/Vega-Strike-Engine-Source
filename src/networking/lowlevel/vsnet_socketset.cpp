@@ -8,7 +8,6 @@
 #include "vsnet_pipe.h"
 #include "vsnet_dloadmgr.h"
 
-using namespace std;
 
 SocketSet::SocketSet( bool blockmainthread ) :
     VSThread( false )

@@ -30,14 +30,22 @@
 #include "navscreen.h"
 
 #include <vector>
+using std::vector;
 #include <deque>
+using std::deque;
 #include <list>
+using std::list;
 #include <set>
+using std::set;
 #include <map>
+using std::map;
 #include <string>
+using std::string;
 #include <iostream>
+using std::cout;
+using std::endl;
+using std::pair;
 
-using namespace std;
 //*******************************************************************//
 ////
 //NavPath Class                          //

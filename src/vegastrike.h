@@ -51,12 +51,24 @@ extern float simulation_atom_var;
 #include <limits.h>
 #include <stdarg.h>
 #include "debug_vs.h"
+
 #if defined (WIN32) || defined (__CYGWIN__)
 /* Note that this will define WIN32 for us, if it isn't defined already
  */
 #  include <windows.h>
 //#include <wingdi.h>
 #include <time.h>
+
+//added by chuck starchaser
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+//using std::min;
+//using std::max;
+
 #else
 #include <sys/time.h>
 #include <sys/stat.h>

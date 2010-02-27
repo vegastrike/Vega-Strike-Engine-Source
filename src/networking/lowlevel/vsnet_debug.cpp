@@ -1,7 +1,5 @@
 #include "vsnet_debug.h"
 
-using namespace std;
-
 #include <time.h>
 #include <cstring>
 #if !defined (_WIN32)
@@ -9,6 +7,9 @@ using namespace std;
 #else
 #include <winsock.h>
 #endif
+
+using std::ostream;
+using std::clog;
 
 struct TimeTriggerStruct {};
 

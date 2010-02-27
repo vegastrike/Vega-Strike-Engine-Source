@@ -11,8 +11,6 @@
 #include "navscreen.h"
 #include "navitemtypes.h"
 
-//using namespace std;
-
 class navdrawnode
 {
 public:

@@ -96,9 +96,10 @@ Unit * DockToSavedBases( int playernum, QVector &safevec )
     return ( closestUnit && closestUnit->isDocked( plr ) ) ? closestUnit : NULL;
 }
 
-using namespace std;
+
 Cockpit* Universe::isPlayerStarship( const Unit *doNotDereference )
 {
+    using std::vector;
     if (!doNotDereference)
         return NULL;
     for (std::vector< Cockpit* >::iterator iter = cockpit.begin(); iter < cockpit.end(); iter++)
@@ -205,10 +206,11 @@ Universe::~Universe()
 
 void Universe::LoadStarSystem( StarSystem *s )
 {
-    cerr<<"Loading a starsystem"<<endl;
+    std::cerr<<"Loading a starsystem"<<std::endl;
     star_system.push_back( s );
     SortStarSystems( star_system, s );     //dont' want instadie
 }
+
 bool Universe::StillExists( StarSystem *s )
 {
     return std::find( star_system.begin(), star_system.end(), s ) != star_system.end();
@@ -233,6 +235,7 @@ void Universe::UnloadStarSystem( StarSystem *s )
 {
     //not sure what to do here? serialize?
 }
+
 StarSystem* Universe::Init( string systemfile, const Vector &centr, const string planetname )
 {
     string fullname = systemfile+".system";

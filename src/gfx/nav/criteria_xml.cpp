@@ -35,8 +35,9 @@
 #include "vsfilesystem.h"
 
 using XMLSupport::AttributeList;
-using namespace std;
 using namespace VSFileSystem;
+using std::set;
+using std::string;
 
 void CriteriaContains::beginElement( void *userData, const XML_Char *name, const XML_Char **atts )
 {

@@ -22,10 +22,10 @@
 #include "textinputdisplay.h"
 #include "lin_time.h"
 #include "guidefs.h"
+using std::vector;
+using std::string;
 
-using namespace std;
-
-TextInputDisplay::TextInputDisplay( std::vector< unsigned int > *keyboard_input_queue, const char *disallowed )
+TextInputDisplay::TextInputDisplay( vector< unsigned int > *keyboard_input_queue, const char *disallowed )
 {
     isFocused = false;
     if (keyboard_input_queue)
@@ -61,10 +61,10 @@ bool TextInputDisplay::processKeypress( unsigned int c )
 
 void TextInputDisplay::draw()
 {
-    std::string text = this->text();
+    string text = this->text();
     if (!this->isFocused) {
         if (passwordChar) {
-            std::string text1;
+            string text1;
             text1.insert( 0u, text.length(), passwordChar );
             this->setText( text1 );
         }

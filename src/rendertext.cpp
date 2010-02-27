@@ -13,7 +13,13 @@
 #include <sstream>
 #include <string>
 #include <vector>
-using namespace std;
+
+using std::vector;
+using std::string;
+using std::ostringstream;
+using std::cout;
+using std::endl;
+
 //****************
 //Console Rendering System by Rogue
 //2005-08-a-few-days

@@ -116,8 +116,6 @@ std::string getDisplayCategory( const Cargo &cargo )
     return cargo.category;
 }
 
-using namespace std;
-
 //The separator used between categories in a category string.
 static const char CATEGORY_SEP = '/';
 //Tag that says this is a category not an item.

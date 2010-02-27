@@ -44,8 +44,6 @@
 
 vector< unsigned int >nav_keyboard_queue;
 
-using namespace std;
-
 //The separator used between categories in a category string.
 static const char  CATEGORY_SEP = '/';
 //Tag that says this is a category not an item.

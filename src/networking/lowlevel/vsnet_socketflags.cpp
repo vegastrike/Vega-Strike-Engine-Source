@@ -7,7 +7,8 @@
 
 #include "vsnet_socketflags.h"
 
-using namespace std;
+using std::ostream;
+using std::hex;
 
 /***********************************************************************
 * PCKTFLAGS

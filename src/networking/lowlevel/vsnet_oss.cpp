@@ -17,8 +17,6 @@
 
 #include "vsnet_oss.h"
 
-using namespace std;
-
 namespace VsnetOSS
 {
 INLINE int close_socket( int fd )

@@ -16,11 +16,12 @@
 #include <vorbis/vorbisfile.h>
 #include "vsfilesystem.h"
 
-using namespace std;
 
 namespace Audio {
 
     namespace __impl {
+    
+        using std::numeric_limits;
     
         size_t OggData::read_func(void *ptr, size_t size, size_t nmemb, void *datasource)
         {

@@ -65,7 +65,9 @@ static float mymax( float a, float b )
     return (a > b) ? a : b;
 }
 
-using namespace std;
+using std::min;
+using std::max;
+
 extern float rand01();
 using VSFileSystem::SoundFile;
 #define SWITCH_CONST (.9)

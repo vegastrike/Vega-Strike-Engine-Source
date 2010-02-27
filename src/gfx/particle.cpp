@@ -7,7 +7,6 @@
 #include "camera.h"
 #include "aux_texture.h"
 #include "gldrv/gl_globals.h"
-using namespace std;
 
 ParticleTrail particleTrail( 500 );
 void ParticleTrail::ChangeMax( unsigned int max )

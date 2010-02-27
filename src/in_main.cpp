@@ -25,7 +25,8 @@
 #endif
 #include <queue>
 #include <list>
-using namespace std;
+using std::queue;
+using std::list;
 
 #include "in_kb.h"
 #include "in_mouse.h"

@@ -25,8 +25,6 @@
 
 #include <algorithm>
 
-using namespace std;
-
 /* The EventManager class contains the basic event loop and the code
  * to support the EventResponder chain.  There should be only one
  * instance of this class running in an application.

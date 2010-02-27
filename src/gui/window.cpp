@@ -33,8 +33,6 @@
 #include "gfx/aux_texture.h"
 #include "gfx/sprite.h"
 
-using namespace std;
-
 //The outside boundaries of the window.
 void Window::setRect( const Rect &r )
 {

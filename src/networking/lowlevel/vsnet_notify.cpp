@@ -6,7 +6,6 @@
 #include "vsnet_notify.h"
 #include "vsnet_debug.h"
 
-using namespace std;
 
 namespace VsnetDownload
 {

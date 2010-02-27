@@ -24,17 +24,18 @@
 #include "vsfilesystem.h"
 
 using namespace VSFileSystem;
-using namespace std;
+using std::string;
+using std::vector;
 
 static VSRandom starsysrandom( time( NULL ) );
 static void seedrand( unsigned long seed )
 {
     starsysrandom = VSRandom( seed );
 }
-static int stringhash( const std::string &key )
+static int stringhash( const string &key )
 {
     unsigned int k = 0;
-    std::string::const_iterator start = key.begin();
+    string::const_iterator start = key.begin();
     for (; start != key.end(); start++)
         k += (k*128)+*start;
     return k;
@@ -45,9 +46,9 @@ static unsigned int ssrand()
     return starsysrandom.rand();
 }
 
-static std::string GetWrapXY( std::string cname, int &wrapx, int &wrapy )
+static string GetWrapXY( string cname, int &wrapx, int &wrapy )
 {
-    std::string wrap = cname;
+    string wrap = cname;
     wrapx = wrapy = 1;
     string::size_type pos = wrap.find( "wrapx" );
     if (pos != string::npos) {
@@ -811,9 +812,9 @@ void MakePlanet( float radius, int entitytype, string texturename, int texturenu
     string planetlites = _Universe->getGalaxy()->getPlanetVariable( texturename, "lights", "" );
     if ( !planetlites.empty() ) {
         planetlites = ' '+planetlites;
-        std::vector< std::string::size_type >lites;
+        vector< string::size_type >lites;
         lites.push_back( 0 );
-        while (lites.back() != std::string::npos)
+        while (lites.back() != string::npos)
             lites.push_back( planetlites.find( lites.back()+1, ' ' ) );
         unsigned randomnum = rnd( 0, lites.size()-1 );
         cname = planetlites.substr( lites[randomnum]+1, lites[randomnum+1] );
@@ -925,7 +926,7 @@ void MakePlanet( float radius, int entitytype, string texturename, int texturenu
             int    wrapx     = 1;
             int    wrapy     = 1;
             if ( ringname.empty() ) {
-                static std::string defringname = vs_config->getVariable( "galaxy",
+                static string defringname = vs_config->getVariable( "galaxy",
                                                                          "DefaultRingTexture",
                                                                          "planets/ring.pngwrapx36wrapy2" );
                 ringname = defringname;
@@ -1223,7 +1224,7 @@ void readnames( vector< string > &entity, const char *filename )
     f.Close();
 }
 
-void readplanetentity( vector< StarInfo > &starinfos, std::string planetlist, unsigned int numstars )
+void readplanetentity( vector< StarInfo > &starinfos, string planetlist, unsigned int numstars )
 {
     if (numstars < 1) {
         numstars = 1;

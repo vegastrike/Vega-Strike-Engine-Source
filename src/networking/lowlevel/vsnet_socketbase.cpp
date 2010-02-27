@@ -9,8 +9,6 @@
 #include "vsnet_socketbase.h"
 #include "vsnet_socketset.h"
 
-using namespace std;
-
 /***********************************************************************
 * VsnetSocket - definition
 ***********************************************************************/

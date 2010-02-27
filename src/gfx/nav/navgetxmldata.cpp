@@ -1,5 +1,7 @@
 #include "navgetxmldata.h"
 
+using std::string;
+
 string retrievedata( string data, string type )
 {
     int length = data.size();

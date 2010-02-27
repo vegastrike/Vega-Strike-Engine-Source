@@ -32,7 +32,6 @@
 #include "unit_csv.h"
 //#define DESTRUCTDEBUG
 #include "base.h"
-using namespace std;
 
 extern unsigned int apply_float_to_unsigned_int( float tmp );  //Short fix
 extern vector< Mesh* >MakeMesh( unsigned int mysize );

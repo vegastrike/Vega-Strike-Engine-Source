@@ -11,8 +11,6 @@
 #include "vsnet_socketudp.h"
 #include "vsnet_socketset.h"
 
-using namespace std;
-
 LOCALCONST_DEF( SOCKETALT, bool, TCP, 1 )
 LOCALCONST_DEF( SOCKETALT, bool, UDP, 0 )
 /***********************************************************************

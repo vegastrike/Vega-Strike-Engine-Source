@@ -13,11 +13,13 @@
 
 #include "utils.h"
 
-using namespace std;
-
 namespace Audio {
 
     namespace __impl {
+    
+        using std::string;
+        using std::min;
+        using std::map;
     
         struct TemplateManagerData {
             struct TemplateList {

@@ -25,8 +25,6 @@
 
 #include "ffmpeg_init.h"
 
-using namespace std;
-
 namespace Audio {
 
     /**

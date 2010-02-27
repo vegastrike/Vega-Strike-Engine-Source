@@ -10,11 +10,10 @@
 #include "vsnet_debug.h"
 #include "packet.h"
 
-using namespace std;
-
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::flush;
 
 /***********************************************************************
 * VsnetUDPSocket - definition

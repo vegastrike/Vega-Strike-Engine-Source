@@ -1,6 +1,7 @@
 #include "csv.h"
 #include "vsfilesystem.h"
-using namespace std;
+
+using std::string;
 
 static string::size_type findQuot( string s, string chr, unsigned int offset = 0 )
 {

@@ -11,11 +11,10 @@
 #include "vsnet_debug.h"
 #include "packet.h"
 
-using namespace std;
-
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::ostream;
 
 /***********************************************************************
 * VsnetTCPSocket::Blob - declaration
@@ -310,7 +309,7 @@ void VsnetTCPSocket::dump( std::ostream &ostr ) const
     ostr<<"( s="<<get_fd()<<" TCP r="<<_remote_ip<<" )";
 }
 
-ostream&operator<<( ostream &ostr, const VsnetSocket &s )
+ostream & operator<<( ostream &ostr, const VsnetSocket &s )
 {
     s.dump( ostr );
     return ostr;

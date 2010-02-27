@@ -18,7 +18,6 @@
 #define OGG_BUFFER_SIZE 4096*2*2
 #endif
 
-using namespace std;
 
 namespace Audio {
 

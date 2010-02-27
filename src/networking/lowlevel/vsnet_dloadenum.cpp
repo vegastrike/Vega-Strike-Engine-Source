@@ -7,7 +7,6 @@
 //#include "netbuffer.h"
 //#include "packet.h"
 
-using namespace std;
 
 namespace VsnetDownload
 {

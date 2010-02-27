@@ -2,11 +2,10 @@
 #define _NAVGETXMLDATA_H_
 
 #include <string>
-#include <fstream>
 
-using namespace std;
+//using std::string; NO!, don't use any using whatsoever in header files; not kosher.
 
-string retrievedata( string data, string type );
+std::string retrievedata( std::string data, std::string type );
 
 #endif
 

@@ -34,7 +34,8 @@
 #include "savegame.h"
 #include "universe_util.h"
 
-using namespace std;
+using std::string;
+using std::set;
 
 /////////////////////////////////////////////////////////////////
 
@@ -46,7 +47,7 @@ bool CriteriaRoot::isDestination( unsigned system ) const
         return false;
 }
 
-std::string CriteriaRoot::getDescription() const
+string CriteriaRoot::getDescription() const
 {
     if (m_child)
         return m_child->getDescription();
@@ -54,7 +55,7 @@ std::string CriteriaRoot::getDescription() const
         return "";
 }
 
-std::string CriteriaRoot::getText() const
+string CriteriaRoot::getText() const
 {
     return "";
 }
@@ -124,7 +125,7 @@ bool CriteriaNot::isDestination( unsigned system ) const
     return !( m_child->isDestination( system ) );
 }
 
-std::string CriteriaNot::getDescription() const
+string CriteriaNot::getDescription() const
 {
     assert( m_child != NULL );
 
@@ -134,7 +135,7 @@ std::string CriteriaNot::getDescription() const
     return temp;
 }
 
-std::string CriteriaNot::getText() const
+string CriteriaNot::getText() const
 {
     return "NOT";
 }
@@ -264,7 +265,7 @@ bool CriteriaAnd::isDestination( unsigned system ) const
     return m_left->isDestination( system ) && m_right->isDestination( system );
 }
 
-std::string CriteriaAnd::getDescription() const
+string CriteriaAnd::getDescription() const
 {
     assert( m_left != NULL );
     assert( m_right != NULL );
@@ -277,7 +278,7 @@ std::string CriteriaAnd::getDescription() const
     return temp;
 }
 
-std::string CriteriaAnd::getText() const
+string CriteriaAnd::getText() const
 {
     return "AND";
 }
@@ -304,7 +305,7 @@ bool CriteriaOr::isDestination( unsigned system ) const
     return m_left->isDestination( system ) || m_right->isDestination( system );
 }
 
-std::string CriteriaOr::getDescription() const
+string CriteriaOr::getDescription() const
 {
     assert( m_left != NULL );
     assert( m_right != NULL );
@@ -317,7 +318,7 @@ std::string CriteriaOr::getDescription() const
     return temp;
 }
 
-std::string CriteriaOr::getText() const
+string CriteriaOr::getText() const
 {
     return "OR";
 }
@@ -365,14 +366,14 @@ bool CriteriaContains::isDestination( unsigned system ) const
     string texture     = _Universe->getGalaxy()->getPlanetVariable( m_value, "texture", "" );
     if (texture == "")
         return false;
-    set< string >types = getPlanetTypesFromXML( name.c_str() );
+    set< string > types = getPlanetTypesFromXML( name.c_str() );
     for (set< string >::iterator i = types.begin(); i != types.end(); ++i)
         if ( (*i).find( texture, 0 ) != string::npos )
             return true;
     return false;
 }
 
-std::string CriteriaContains::getDescription() const
+string CriteriaContains::getDescription() const
 {
     string temp = "CONTAINS(";
     temp += m_value;
@@ -380,7 +381,7 @@ std::string CriteriaContains::getDescription() const
     return temp;
 }
 
-std::string CriteriaContains::getText() const
+string CriteriaContains::getText() const
 {
     return getDescription();
 }
@@ -402,7 +403,7 @@ bool CriteriaOwnedBy::isDestination( unsigned system ) const
         return false;
 }
 
-std::string CriteriaOwnedBy::getDescription() const
+string CriteriaOwnedBy::getDescription() const
 {
     string temp = "OWNEDBY(";
     temp += m_value;
@@ -410,7 +411,7 @@ std::string CriteriaOwnedBy::getDescription() const
     return temp;
 }
 
-std::string CriteriaOwnedBy::getText() const
+string CriteriaOwnedBy::getText() const
 {
     return getDescription();
 }
@@ -433,7 +434,7 @@ bool CriteriaSector::isDestination( unsigned system ) const
         return false;
 }
 
-std::string CriteriaSector::getDescription() const
+string CriteriaSector::getDescription() const
 {
     string temp = "SECTOR(";
     temp += m_value;
@@ -441,7 +442,7 @@ std::string CriteriaSector::getDescription() const
     return temp;
 }
 
-std::string CriteriaSector::getText() const
+string CriteriaSector::getText() const
 {
     return getDescription();
 }

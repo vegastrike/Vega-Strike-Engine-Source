@@ -19,8 +19,9 @@
 
 #include "options.h"
 
-using namespace std;
 using namespace XMLDOM;
+using std::map;
+using std::auto_ptr;
 
 #ifdef _MSC_VER
 //Undefine those nasty MS macros - why god why!?

@@ -48,14 +48,11 @@
 #include "unit_find.h"
 #include "pilot.h"
 
-//cannot seem to get min and max working properly across win and lin without using namespace std
-//using namespace std; //FIXME ... There must be a better way...
-
+//cannot seem to get min and max working properly across win and lin any other way...
 static float mymax( float a, float b )
 {
     return a < b ? b : a;
 }
-
 static float mymin( float a, float b )
 {
     return a < b ? a : b;
@@ -6743,6 +6740,7 @@ bool Quit( const char *input_buffer )
 }
 
 using std::string;
+
 void Tokenize( const string &str, vector< string > &tokens, const string &delimiters = " " )
 {
     //Skip delimiters at beginning.
@@ -9259,7 +9257,8 @@ void Unit::SortCargo()
 }
 
 using XMLSupport::tostring;
-using namespace std;
+using std::string;
+
 std::string CargoToString( const Cargo &cargo )
 {
     string missioncargo;

@@ -325,7 +325,10 @@ void Faction::LoadXML( const char *filename, char *xmlbuffer, int buflength )
 {
     using namespace FactionXML;
     using namespace VSFileSystem;
-    using namespace std;
+    using std::cout;
+    using std::endl;
+    using std::pair;
+    
     unitlevel = 0;
     FILE     *inFile;
     const int chunk_size = 16384;
