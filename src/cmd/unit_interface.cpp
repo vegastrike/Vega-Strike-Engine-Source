@@ -376,6 +376,8 @@ void UpgradingInfo::SetMode( enum BaseMode mod, enum SubMode smod )
             curcategory.push_back( "starships" );
         }
         break;
+    default:
+      	break;
     }
     if (mode == NEWSMODE && mod != NEWSMODE && readnews) {
         muzak->Skip();
@@ -398,6 +400,8 @@ void UpgradingInfo::SetMode( enum BaseMode mod, enum SubMode smod )
         break;
     case STOP_MODE:
         title = "Viewing Mission Briefing. Press End to exit.";
+        break;
+    default:
         break;
     }
     COMMIT->ModifyName( ButtonText.c_str() );
@@ -594,6 +598,8 @@ void UpgradingInfo::SetupCargoList()
             case CONFIRM_MODE:
                 CargoList->AddTextItem( "Yes", "Yes" );
                 CargoList->AddTextItem( "No", "No" );
+                break;
+            default:
                 break;
             }
         } else {
@@ -881,7 +887,7 @@ string BasicRepair( Unit *parent, string title )
     }
     return title;
 }
-Cargo GetCargoForOwnerStarship( Cockpit *cp, int i );
+Cargo GetCargoForOwnerStarship( Cockpit *cp, size_t i );
 Cargo GetCargoForOwnerStarshipName( Cockpit *cp, std::string nam, int &ind );
 
 void SwapInNewShipName( Cockpit *cp, std::string newfilename, int SwappingShipsIndex )
@@ -1088,6 +1094,8 @@ void UpgradingInfo::CommitItem( const char *inp_buf, int button, int state )
                     CompleteTransactionConfirm();
                 else
                     SetMode( mode, NORMAL );
+            default:
+                break;
             }
             break;
         case BUYMODE:
@@ -1184,6 +1192,8 @@ void UpgradingInfo::CompleteTransactionAfterTurretSelect()
         case DOWNGRADEMODE:
             canupgrade = un->canDowngrade( NewPart, mountoffset, subunitoffset, percentage, downgradelimiter );
             break;
+        default:
+            break;
         }
         if (!canupgrade) {
             title = (mode == DOWNGRADEMODE) ? string( "You do not have exactly what you wish to sell. Continue?" ) : string(
@@ -1260,6 +1270,8 @@ void UpgradingInfo::CompleteTransactionConfirm()
                     bas->AddCargo( part );
                 }
             }
+            break;
+        default:
             break;
         }
     }
@@ -1371,8 +1383,8 @@ std::string GetNumKills( Unit *un )
     if (killlist->size() > 0)
         text += " | Kills";
     text += "\\";
-    int    numfactions = FactionUtil::GetNumFactions();
-    int    i = 0;
+    size_t    numfactions = FactionUtil::GetNumFactions();
+    size_t    i = 0;
     string factionname = "factionname";
     float  relation    = 0.0;
     while (i < numfactions) {
@@ -1460,9 +1472,9 @@ vector< CargoColor >& UpgradingInfo::MakeMissionsFromSavegame( Unit *base )
         TempCargo.clear();
         return TempCargo;
     }
-    int len = getSaveStringLength( playernum, miss_script );
+    size_t len = getSaveStringLength( playernum, miss_script );
     assert( len == getSaveStringLength( playernum, miss_name ) && len == getSaveStringLength( playernum, miss_desc ) );
-    unsigned int i = 0;
+    size_t i = 0;
     for (i = 0; i < len; i++) {
         string m     = getSaveString( playernum, miss_name, i );
         int    count = 1;
@@ -1516,7 +1528,7 @@ vector< CargoColor >& UpgradingInfo::FilterCargo( Unit *un, const string filtert
     }
     return TempCargo;
 }
-Cargo GetCargoForOwnerStarship( Cockpit *cp, int i )
+Cargo GetCargoForOwnerStarship( Cockpit *cp, size_t i )
 {
     Cargo c;
     c.quantity = 1;
@@ -1536,7 +1548,7 @@ Cargo GetCargoForOwnerStarship( Cockpit *cp, int i )
 }
 Cargo GetCargoForOwnerStarshipName( Cockpit *cp, std::string nam, int &ind )
 {
-    for (unsigned int i = 1; i < cp->unitfilename.size(); i += 2)
+    for (size_t i = 1; i < cp->unitfilename.size(); i += 2)
         if (cp->unitfilename[i] == nam) {
             ind = i;
             return GetCargoForOwnerStarship( cp, i );
@@ -1591,9 +1603,10 @@ vector< CargoColor >& UpgradingInfo::GetCargoFor( Unit *un )
         //curcategory.clear();
         //curcategory.push_back (string("briefings"));
         return MakeActiveMissionCargo();
+    default:    	
+    	VSFileSystem::vs_fprintf (stderr,"Error in picking cargo lists");
+    	return TempCargo;
     }
-    VSFileSystem::vs_fprintf( stderr, "Error in picking cargo lists" );
-    return TempCargo;
 }
 vector< CargoColor >& UpgradingInfo::GetCargoList()
 {
@@ -1630,7 +1643,7 @@ vector< CargoColor >& UpgradingInfo::GetCargoList()
         if ( buyer.GetUnit() ) {
             GetCargoFor( relevant );
             vector< CargoColor >tmp;
-            for (unsigned int i = 0; i < TempCargo.size(); i++)
+            for (vector< CargoColor >::size_type i = 0; i < TempCargo.size(); i++)
                 if ( match( curcategory.begin(), curcategory.end(),
                             TempCargo[i].cargo.GetCategory().begin(), TempCargo[i].cargo.GetCategory().end(), false ) )
                     tmp.push_back( TempCargo[i] );
@@ -1641,7 +1654,7 @@ vector< CargoColor >& UpgradingInfo::GetCargoList()
             static bool cleardowngrades   =
                 XMLSupport::parse_bool( vs_config->getVariable( "physics", "only_show_best_downgrade", "true" ) );
             if (cleardowngrades) {
-                for (unsigned int i = 0; i < mylist.size(); ++i)
+                for (vector< CargoColor >::size_type i = 0; i < mylist.size(); ++i)
                     if ( downgrademap.find( mylist[i].cargo.content ) == downgrademap.end() ) {
                         mylist.erase( mylist.begin()+i );
                         i--;
@@ -1650,6 +1663,8 @@ vector< CargoColor >& UpgradingInfo::GetCargoList()
             }
             return mylist;
         }
+        break;
+    default:
         break;
     }
     if (relevant)

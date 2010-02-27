@@ -230,14 +230,14 @@ static void setup_sdl_video_mode()
     height = g_game.y_resolution;
     if ( ( screen = SDL_SetVideoMode( width, height, bpp, video_flags ) )
         == NULL ) {
-        VSFileSystem::vs_fprintf( stderr, "Couldn't initialize video: %s",
+        VSFileSystem::vs_dprintf( 1, "Couldn't initialize video: %s",
                                  SDL_GetError() );
         for (int counter = 0; screen == NULL && counter < 2; ++counter) {
             for (int bpd = 4; bpd > 1; --bpd) {
                 SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, bpd*8 );
                 if ( ( screen = SDL_SetVideoMode( width, height, bpp, video_flags|SDL_ANYFORMAT ) )
                     == NULL )
-                    VSFileSystem::vs_fprintf( stderr, "Couldn't initialize video bpp %d depth %d: %s\n",
+                    VSFileSystem::vs_dprintf( 1, "Couldn't initialize video bpp %d depth %d: %s\n",
                                              bpp, bpd*8, SDL_GetError() );
                 else
                     break;
@@ -250,11 +250,11 @@ static void setup_sdl_video_mode()
             }
         }
         if (screen == NULL) {
-            printf( "FAILED to initialize video\n" );
+            VSFileSystem::vs_fprintf( stderr, "FAILED to initialize video\n" );
             exit( 1 );
         }
     }
-    printf( "Setting Screen to w %d h %d and pitch of %d and %d bpp %d bytes per pix mode\n",
+    VSFileSystem::vs_dprintf( 3, "Setting Screen to w %d h %d and pitch of %d and %d bpp %d bytes per pix mode\n",
             screen->w,
             screen->h,
             screen->pitch,
@@ -499,7 +499,7 @@ void winsys_atexit( winsys_atexit_func_t func )
 {
     static bool called = false;
     if (called != false)
-        VSFileSystem::vs_fprintf( stderr, "winsys_atexit called twice" );
+        VSFileSystem::vs_dprintf( 1, "winsys_atexit called twice" );
     called = true;
     //atexit_func = func;
     //atexit (func);
@@ -602,7 +602,7 @@ static void glut_keyboard_cb( unsigned char ch, int x, int y )
     if (keyboard_func) {
         int gm = glutGetModifiers();
         if (gm)
-            printf( "Down Modifier %d for char %d %c\n", gm, (int) ch, ch );
+            VSFileSystem::dprintf('3', "Down Modifier %d for char %d %c\n", gm, (int) ch, ch );
         if (gm&GLUT_ACTIVE_CTRL)
             ch = AdjustKeyCtrl( ch );
         (*keyboard_func)(ch, gm, false, x, y);
@@ -620,7 +620,7 @@ static void glut_keyboard_up_cb( unsigned char ch, int x, int y )
     if (keyboard_func) {
         int gm = glutGetModifiers();
         if (gm)
-            printf( "Up Modifier %d for char %d %c\n", gm, (int) ch, ch );
+            VSFileSystem::dprintf('3',"Up Modifier %d for char %d %c\n", gm, (int) ch, ch );
         if (gm&GLUT_ACTIVE_CTRL)
             ch = AdjustKeyCtrl( ch );
         (*keyboard_func)(ch, gm, true, x, y);
@@ -736,14 +736,14 @@ void winsys_init( int *argc, char **argv, char *window_title, char *icon_title )
     char str[1024];
     sprintf( str, "%dx%d:%d@60", g_game.x_resolution, g_game.y_resolution, gl_options.color_depth );
     glutGameModeString( str );
-    fprintf( stderr, "Game Mode Params %dx%d at depth %d @ %d Hz\n", glutGameModeGet( GLUT_GAME_MODE_WIDTH ),
+    VSFileSystem::dprintf('3', "Game Mode Params %dx%d at depth %d @ %d Hz\n", glutGameModeGet( GLUT_GAME_MODE_WIDTH ),
             glutGameModeGet( GLUT_GAME_MODE_WIDTH ), glutGameModeGet( GLUT_GAME_MODE_PIXEL_DEPTH ),
             glutGameModeGet( GLUT_GAME_MODE_REFRESH_RATE ) );
     /* Create a window */
     if ( gl_options.fullscreen && (glutGameModeGet( GLUT_GAME_MODE_POSSIBLE ) != -1) ) {
         glutInitWindowPosition( 0, 0 );
         glutEnterGameMode();
-        fprintf( stderr, "Game Mode Params %dx%d at depth %d @ %d Hz\n", glutGameModeGet(
+        VSFileSystem::dprintf('3', "Game Mode Params %dx%d at depth %d @ %d Hz\n", glutGameModeGet(
                     GLUT_GAME_MODE_WIDTH ), glutGameModeGet( GLUT_GAME_MODE_WIDTH ), glutGameModeGet(
                     GLUT_GAME_MODE_PIXEL_DEPTH ), glutGameModeGet( GLUT_GAME_MODE_REFRESH_RATE ) );
     } else {

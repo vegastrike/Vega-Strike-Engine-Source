@@ -194,7 +194,6 @@ SET(LIBCMD_SOURCES src/cmd/alphacurve.cpp
 				   src/cmd/collide.cpp
 				   src/cmd/container.cpp
 				   src/cmd/csv.cpp
-				   src/cmd/faction_xml.cpp
 				   src/cmd/missile_generic.cpp
 				   src/cmd/mount.cpp
 				   src/cmd/nebula_generic.cpp
@@ -208,7 +207,6 @@ SET(LIBCMD_SOURCES src/cmd/alphacurve.cpp
 				   src/cmd/unit_functions_generic.cpp 
 				   src/cmd/unit_generic.cpp 
 				   src/cmd/fg_util.cpp
-				   src/cmd/pilot.cpp
 				   src/cmd/unit_util_generic.cpp
 				   src/cmd/unit_xml.cpp 
 				   src/cmd/weapon_xml.cpp )
@@ -219,7 +217,11 @@ SET(LIBCMDSERVER_SOURCES src/cmd/atmosphere_server.cpp
 						 src/cmd/bolt_server.cpp
 						 src/cmd/unit_factory_server.cpp
 						 src/cmd/unit_functions_server.cpp
-						 src/cmd/unit_util_server.cpp )
+						 src/cmd/unit_util_server.cpp
+                         src/cmd/unit_server.cpp 
+                         src/cmd/pilot_server.cpp 
+                         src/cmd/images_server.cpp 
+                         src/cmd/faction_xml_server.cpp )
 
 
 SET(LIBGFXGENERIC_SOURCES src/gfx/bounding_box.cpp
@@ -228,7 +230,6 @@ SET(LIBGFXGENERIC_SOURCES src/gfx/bounding_box.cpp
 						  src/gfx/lerp.cpp
 						  src/gfx/matrix.cpp
 						  src/gfx/mesh_bxm.cpp
-						  src/gfx/mesh_bin.cpp 
 						  src/gfx/mesh_poly.cpp
 						  src/gfx/mesh_xml.cpp
 						  src/gfx/mesh.cpp
@@ -254,6 +255,7 @@ SET(LIBGFXCLIENT_SOURCES src/gfx/ani_texture.cpp
 						 src/gfx/jpeg_memory.cpp
 						 src/gfx/loc_select.cpp
 						 src/gfx/masks.cpp
+                         src/gfx/mesh_bin.cpp
 						 src/gfx/mesh_fx.cpp
 						 src/gfx/mesh_gfx.cpp
 						 src/gfx/nav/criteria_xml.cpp
@@ -290,11 +292,10 @@ SET(LIBGFXCLIENT_SOURCES src/gfx/ani_texture.cpp
 						 src/gfx/warptrail.cpp )
 
 SET(LIBGFXSERVER_SOURCES src/gfx/sphere_server.cpp
-					   src/gfx/halo_system.cpp
-					   src/gfx/camera.cpp
 						 src/gfx/vsbox_server.cpp
 						 src/gfx/mesh_server.cpp 
-						 src/gfx/background_server.cpp )
+						 src/gfx/background_server.cpp
+                        src/gfx/mesh_bin_server.cpp )
 
 
 #add_library(posh  src/posh.cpp )
@@ -349,8 +350,7 @@ SET(LIBROOTCLIENT_SOURCES src/cg_global.cpp
 						  src/universe_util.cpp
 						  src/universe.cpp )
 						  
-SET(LIBROOTSERVER_SOURCES  src/faction_util_server.cpp
-						   src/force_feedback_server.cpp
+SET(LIBROOTSERVER_SOURCES  src/force_feedback_server.cpp
 						   src/gfxlib_struct_server.cpp
 						   src/libaudioserver.cpp
 						   src/libserver.cpp
@@ -423,12 +423,13 @@ SET(VEGASTRIKE_SOURCES ${LIBGUI_SOURCES}
 					   src/cmd/script/script_call_briefing.cpp
 					   src/cmd/script/script_call_unit.cpp
 					   src/cmd/terrain.cpp
-					   src/cmd/unit.cpp 
 					   src/cmd/unit_factory.cpp 
 					   src/cmd/unit_functions.cpp 
 					   src/cmd/unit_interface.cpp
 					   src/cmd/unit_util.cpp
-					   src/cmd/images.cpp
+                       src/cmd/faction_xml.cpp
+                       src/cmd/pilot.cpp
+                       src/cmd/images.cpp
 					   src/gldrv/gl_program.cpp
 					   src/gldrv/gl_clip.cpp
 					   src/gldrv/gl_fog.cpp
@@ -463,35 +464,35 @@ SET(VEGASERVER_SOURCES ${LIBCMDSERVER_SOURCES}
 if(COMMAND cmake_policy)					   
 	cmake_policy(SET CMP0003 OLD) 
 endif(COMMAND cmake_policy)
-SET(CMAKE_CXX_FLAGS_DEBUG " -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_DEBUG " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during debug builds."
     FORCE )
-SET( CMAKE_C_FLAGS_DEBUG " -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
+SET( CMAKE_C_FLAGS_DEBUG " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during debug builds."
     FORCE )
 
 
-SET(CMAKE_CXX_FLAGS_RELEASE " -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_RELEASE " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during release builds."
     FORCE )
-SET( CMAKE_C_FLAGS_RELEASE " -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET( CMAKE_C_FLAGS_RELEASE " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during release builds."
     FORCE )
 
-SET(CMAKE_CXX_FLAGS_REWITHDEBINFO " -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -g3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_REWITHDEBINFO " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -g3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during release builds."
     FORCE )
-SET( CMAKE_C_FLAGS_RELWITHDEBINFO " -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -g3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET( CMAKE_C_FLAGS_RELWITHDEBINFO " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -g3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during release builds."
     FORCE )
 
 
 
 # Setup maintainer mode flags
-SET(CMAKE_CXX_FLAGS_MAINTAINER " -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_MAINTAINER " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during maintainer builds."
     FORCE )
-SET( CMAKE_C_FLAGS_MAINTAINER " -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
+SET( CMAKE_C_FLAGS_MAINTAINER " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during maintainer builds."
     FORCE )
 SET( CMAKE_EXE_LINKER_FLAGS_MAINTAINER
@@ -510,10 +511,10 @@ MARK_AS_ADVANCED(
 
 
 # Setup profiler mode flags
-SET(CMAKE_CXX_FLAGS_PROFILER "-pg -g2 -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -O3" CACHE STRING
+SET(CMAKE_CXX_FLAGS_PROFILER "-pg -g2 -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -O3" CACHE STRING
     "Flags used by the C++ compiler during profiler builds."
     FORCE )
-SET( CMAKE_C_FLAGS_PROFILER "-pg -g2 -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -O3" CACHE STRING
+SET( CMAKE_C_FLAGS_PROFILER "-pg -g2 -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -O3" CACHE STRING
     "Flags used by the C compiler during profiler builds."
     FORCE )
 SET( CMAKE_EXE_LINKER_FLAGS_PROFILER

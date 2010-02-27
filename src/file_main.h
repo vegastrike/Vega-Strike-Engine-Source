@@ -18,6 +18,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+ #ifndef _FILE_MAIN_H_
+ #define _FILE_MAIN_H_
 #include <stdio.h>
 #include <string.h>
 //#include "gfxlib.h"
@@ -161,3 +163,4 @@ inline void SetPosition( long position )
     fpread.GoTo( position );
 }
 
+#endif

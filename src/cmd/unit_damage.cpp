@@ -1,6 +1,7 @@
 #ifndef __UNIT_DAMAGE_CPP__
 #define __UNIT_DAMAGE_CPP__
-
+#include <string>
+#include <vector>
 #include "unit.h"
 //#include "unit_template.h"
 #include "unit_factory.h"
@@ -31,9 +32,10 @@
 #include "unit_csv.h"
 //#define DESTRUCTDEBUG
 #include "base.h"
+using namespace std;
 
 extern unsigned int apply_float_to_unsigned_int( float tmp );  //Short fix
-extern std::vector< Mesh* >MakeMesh( unsigned int mysize );
+extern vector< Mesh* >MakeMesh( unsigned int mysize );
 
 template < class UnitType >
 void GameUnit< UnitType >::Split( int level )
@@ -44,37 +46,36 @@ void GameUnit< UnitType >::Split( int level )
             (*su)->Split( level );
     static float debrismassmult = XMLSupport::parse_float( vs_config->getVariable( "physics", "debris_mass", ".00001" ) );
     Vector PlaneNorm;
-    int    i;
-    for (i = 0; i < nummesh();) {
+    for (int i = 0; i < nummesh();) {
         if (this->meshdata[i]) {
             if (this->meshdata[i]->getBlendDst() == ONE) {
                 delete this->meshdata[i];
                 this->meshdata.erase( this->meshdata.begin()+i );
             } else {i++; }} else {this->meshdata.erase( this->meshdata.begin()+i ); }}
     int    nm = this->nummesh();
-    std::string fac = FactionUtil::GetFaction( this->faction );
+    string fac = FactionUtil::GetFaction( this->faction );
 
     CSVRow unit_stats( LookupUnitRow( this->name, fac ) );
     unsigned int num_chunks = unit_stats.success() ? atoi( unit_stats["Num_Chunks"].c_str() ) : 0;
     if (nm <= 0 && num_chunks == 0)
         return;
-    std::vector< Mesh* >old = this->meshdata;
+    vector< Mesh* >old = this->meshdata;
     Mesh *shield = old.back();
     old.pop_back();
 
     vector< unsigned int >meshsizes;
     if ( num_chunks && unit_stats.success() ) {
         size_t i;
-        std::vector< Mesh* >nw;
+        vector< Mesh* >nw;
         unsigned int which_chunk = rand()%num_chunks;
-        std::string  chunkname   = UniverseUtil::LookupUnitStat( this->name, fac, "Chunk_"+XMLSupport::tostring( which_chunk ) );
-        std::string  dir = UniverseUtil::LookupUnitStat( this->name, fac, "Directory" );
+        string  chunkname   = UniverseUtil::LookupUnitStat( this->name, fac, "Chunk_"+XMLSupport::tostring( which_chunk ) );
+        string  dir = UniverseUtil::LookupUnitStat( this->name, fac, "Directory" );
         VSFileSystem::current_path.push_back( unit_stats.getRoot() );
         VSFileSystem::current_subdirectory.push_back( "/"+dir );
         VSFileSystem::current_type.push_back( UnitFile );
         float randomstartframe   = 0;
         float randomstartseconds = 0;
-        std::string scalestr     = UniverseUtil::LookupUnitStat( this->name, fac, "Unit_Scale" );
+        string scalestr     = UniverseUtil::LookupUnitStat( this->name, fac, "Unit_Scale" );
         int   scale = atoi( scalestr.c_str() );
         if (scale == 0) scale = 1;
         AddMeshes( nw, randomstartframe, randomstartseconds, scale, chunkname, this->faction,
@@ -88,9 +89,9 @@ void GameUnit< UnitType >::Split( int level )
         old = nw;
     } else {
         for (int split = 0; split < level; split++) {
-            std::vector< Mesh* >nw;
+            vector< Mesh* >nw;
             size_t oldsize = old.size();
-            for (i = 0; i < oldsize; i++) {
+            for (size_t i = 0; i < oldsize; i++) {
                 PlaneNorm.Set( rand()-RAND_MAX/2, rand()-RAND_MAX/2, rand()-RAND_MAX/2+.5 );
                 PlaneNorm.Normalize();
                 nw.push_back( NULL );
@@ -117,8 +118,8 @@ void GameUnit< UnitType >::Split( int level )
         delete shield;
     nm = old.size()-1;
     unsigned int k = 0;
-    std::vector< Mesh* >tempmeshes;
-    for (i = 0; i < meshsizes.size(); i++) {
+    vector< Mesh* >tempmeshes;
+    for (vector<Mesh *>::size_type i=0;i<meshsizes.size();i++) {
         Unit *splitsub;
         tempmeshes.clear();
         tempmeshes.reserve( meshsizes[i] );
@@ -268,10 +269,10 @@ float GameUnit< UnitType >::DealDamageToShield( const Vector &pnt, float &damage
  */
 
 extern Animation * GetVolatileAni( unsigned int );
-extern unsigned int AddAnimation( const QVector&, const float, bool, const std::string&, float percentgrow );
+extern unsigned int AddAnimation( const QVector&, const float, bool, const string&, float percentgrow );
 
 extern Animation * getRandomCachedAni();
-extern std::string getRandomCachedAniString();
+extern string getRandomCachedAniString();
 extern void disableSubUnits( Unit *un );
 
 template < class UnitType >
@@ -284,7 +285,7 @@ bool GameUnit< UnitType >::Explode( bool drawit, float timeit )
         mission->DirectorShipDestroyed( this );
         disableSubUnits( this );
         this->pImage->timeexplode = 0;
-        static std::string expani = vs_config->getVariable( "graphics", "explosion_animation", "explosion_orange.ani" );
+        static string expani = vs_config->getVariable( "graphics", "explosion_animation", "explosion_orange.ani" );
 
         string bleh = this->pImage->explosion_type;
         if ( bleh.empty() )
@@ -316,7 +317,7 @@ bool GameUnit< UnitType >::Explode( bool drawit, float timeit )
         bool    sub    = this->isSubUnit();
         Unit   *un     = NULL;
         if (!sub)
-            if ( un = _Universe->AccessCockpit( 0 )->GetParent() ) {
+            if (( un = _Universe->AccessCockpit( 0 )->GetParent() )) {
                 static float explosion_closeness =
                     XMLSupport::parse_float( vs_config->getVariable( "audio", "explosion_closeness", ".8" ) );
                 exploc = un->Position()*explosion_closeness+exploc*(1-explosion_closeness);
@@ -405,7 +406,7 @@ bool GameUnit< UnitType >::Explode( bool drawit, float timeit )
     bool alldone = this->pImage->pExplosion ? !this->pImage->pExplosion->Done() : false;
     if ( !this->SubUnits.empty() ) {
         Unit *su;
-        for (un_iter ui = this->getSubUnits(); su = *ui; ++ui) {
+        for (un_iter ui = this->getSubUnits(); (su = *ui); ++ui) {
             bool temp = su->Explode( drawit, timeit );
             if (su->GetImageInformation().pExplosion)
                 alldone |= temp;
@@ -413,9 +414,9 @@ bool GameUnit< UnitType >::Explode( bool drawit, float timeit )
     }
     static float phatloot = XMLSupport::parse_float( vs_config->getVariable( "physics", "eject_cargo_on_blowup", "0" ) );
     if ( (phatloot > 0) && (this->numCargo() > 0) ) {
-        int dropcount = (int) floor( this->numCargo()/phatloot )+1;
+        size_t dropcount = (size_t) floor( this->numCargo()/phatloot )+1;
         if ( dropcount > this->numCargo() ) dropcount = this->numCargo();
-        for (int i = 0; i < dropcount; i++)
+        for (size_t i = 0; i < dropcount; i++)
             this->EjectCargo( this->numCargo()-1 );              //Ejecting the last one is somewhat faster
     }
     return alldone || (!timealldone);

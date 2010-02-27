@@ -1,3 +1,7 @@
+
+#ifndef _BASE_UTIL_H_
+#define _BASE_UTIL_H_
+
 #include "config.h"
 #include <string>
 #include <boost/version.hpp>
@@ -131,3 +135,4 @@ void refreshBaseComputerUI( const class Cargo *dirtyCarg );
 void ExitGame();
 }
 
+#endif

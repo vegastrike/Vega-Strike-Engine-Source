@@ -19,8 +19,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "unit.h"
-
 #include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "file_main.h"
@@ -233,7 +231,7 @@ bool GameUnit< UnitType >::queryFrustum( double frustum[6][4] ) const
             return true;
     }
     const Unit *un;
-    for (un_fkiter iter = this->SubUnits.constFastIterator(); un = *iter; ++iter)
+    for (un_fkiter iter = this->SubUnits.constFastIterator(); (un = *iter); ++iter)
         if ( ( (GameUnit< UnitType >*)un )->queryFrustum( frustum ) )
             return true;
     return false;
@@ -304,7 +302,7 @@ void GameUnit< UnitType >::DrawNow( const Matrix &mato, float lod )
             this->meshdata[i]->Draw( lod, mat, d, cloak );
     }
     Unit *un;
-    for (un_iter iter = this->SubUnits.createIterator(); un = *iter; ++iter) {
+    for (un_iter iter = this->SubUnits.createIterator(); (un = *iter); ++iter) {
         Matrix temp;
         un->curr_physical_state.to_matrix( temp );
         Matrix submat;
@@ -506,7 +504,7 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
             Unit  *un;
             double backup = interpolation_blend_factor;
             int    cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
-            for (un_iter iter = this->SubUnits.createIterator(); un = *iter; ++iter) {
+            for (un_iter iter = this->SubUnits.createIterator(); (un = *iter); ++iter) {
                 float backup = SIMULATION_ATOM;
                 if (this->sim_atom_multiplier && un->sim_atom_multiplier)
                     SIMULATION_ATOM = SIMULATION_ATOM*un->sim_atom_multiplier/this->sim_atom_multiplier;
@@ -723,26 +721,27 @@ void GameUnit< UnitType >::SwapInHalos()
 /////////////////////////////////////////////////////
 //explicit instantiations, added by chuck_starchaser:
 
+
  #include "cmd/asteroid_generic.h"
-template class GameUnit< Asteroid >;
+//template class GameUnit< Asteroid >;
 
  #include "cmd/building_generic.h"
-template class GameUnit< Building >;
+//template class GameUnit< Building >;
 
  #include "cmd/planet_generic.h"
-template class GameUnit< Planet >;
+//template class GameUnit< Planet >;
 
  #include "cmd/unit_generic.h"
-template class GameUnit< Unit >;
+//template class GameUnit< Unit >;
 
  #include "cmd/missile_generic.h"
-template class GameUnit< Missile >;
+//template class GameUnit< Missile >;
 
  #include "cmd/nebula.h"
-template class GameUnit< Nebula >;
+//template class GameUnit< Nebula >;
 
  #include "cmd/enhancement.h"
-template class GameUnit< Enhancement >;
+//template class GameUnit< Enhancement >;
 
 //The unit types below don't compile; --probably they don't inherit from Unit.
 
@@ -758,5 +757,7 @@ template class GameUnit< Enhancement >;
 //#include "cmd/cont_terrain.h"
 //template class GameUnit< ContinuousTerrain >;
 
+
 /////////////////////////////////////////////////////
+
 

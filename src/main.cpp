@@ -166,7 +166,7 @@ void cleanup( void )
 #endif
     if (Network != NULL) {
         cout<<"Number of players"<<_Universe->numPlayers()<<endl;
-        for (int i = 0; i < _Universe->numPlayers(); i++)
+        for (size_t i = 0; i < _Universe->numPlayers(); i++)
             if ( Network[i].isInGame() )
                 Network[i].logout( false );
         delete[] Network;
@@ -677,7 +677,7 @@ void bootstrap_main_loop()
             && mission->getVariable( "savegame",
                                      "" ).length() != 0
             && XMLSupport::parse_bool( vs_config->getVariable( "AI", "dockOnLoad", "true" ) ) ) {
-            for (int i = 0; i < _Universe->numPlayers(); i++) {
+            for (size_t i = 0; i < _Universe->numPlayers(); i++) {
                 QVector vec;
                 DockToSavedBases( i, vec );
             }
@@ -685,7 +685,7 @@ void bootstrap_main_loop()
         cout<<"Loading completed, now network init"<<endl;
         //Send a network msg saying we are ready and also send position info
         if (Network != NULL) {
-            int l;
+            size_t l;
             /*
              *  for(l=0; l<_Universe->numPlayers(); l++)
              *  {

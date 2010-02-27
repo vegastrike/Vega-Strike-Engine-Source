@@ -320,10 +320,10 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
     static bool verbose_debug = XMLSupport::parse_bool( vs_config->getVariable( "data", "verbose_debug", "false" ) );
     int dummy = 0;
     if ( ( mipmap&(MIPMAP|TRILINEAR) ) && !isPowerOfTwo( width, dummy ) )
-        VSFileSystem::vs_fprintf( stderr, "Width %d not a power of two", width );
+        VSFileSystem::vs_dprintf( 1, "Width %d not a power of two", width );
     //assert (false);
     if ( ( mipmap&(MIPMAP|TRILINEAR) ) && !isPowerOfTwo( height, dummy ) )
-        VSFileSystem::vs_fprintf( stderr, "Height %d not a power of two", height );
+        VSFileSystem::vs_dprintf( 1, "Height %d not a power of two", height );
     //assert (false);
 
     GFXActiveTexture( texturestage );
@@ -337,8 +337,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
             (*handle)++;
     }
     if ( (*handle) == textures.size() ) {
-        if (verbose_debug)
-            VSFileSystem::vs_fprintf( stderr, "x" );
+	VSFileSystem::vs_dprintf( 3, "x" );
         textures.push_back( GLTexture() );
         textures.back().palette = NULL;
         textures.back().alive   = GFXTRUE;
@@ -380,16 +379,14 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
         textures[*handle].targets = GL_TEXTURE_CUBE_MAP_EXT;
         break;
     }
-    if (verbose_debug)
-        VSFileSystem::vs_fprintf( stderr, "y" );
+    VSFileSystem::vs_dprintf( 3, "y" );
     //for those libs with stubbed out handle gen't
     textures[*handle].name = *handle+1;
     //VSFileSystem::vs_fprintf (stderr,"Texture Handle %d",*handle);
     textures[*handle].alive = GFXTRUE;
     textures[*handle].texturestage = texturestage;
     textures[*handle].mipmapped    = mipmap;
-    if (verbose_debug)
-        VSFileSystem::vs_fprintf( stderr, "z" );
+    VSFileSystem::vs_dprintf( 3, "z" );
     glGenTextures( 1, &textures[*handle].name );
     glBindTexture( textures[*handle].targets, textures[*handle].name );
     activetexture[texturestage] = *handle;
@@ -416,14 +413,12 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
     textures[*handle].iheight = height;
     textures[*handle].palette = NULL;
     if (palette && textureformat == PALETTE8) {
-        if (verbose_debug)
-            VSFileSystem::vs_fprintf( stderr, " palette " );
+	VSFileSystem::vs_dprintf( 3, " palette " );
         textures[*handle].palette = (GLubyte*) malloc( sizeof (GLubyte)*1024 );
         ConvertPalette( textures[*handle].palette, (unsigned char*) palette );
     }
     textures[*handle].textureformat = GetUncompressedTextureFormat( textureformat );
-    if (verbose_debug)
-        VSFileSystem::vs_fprintf( stderr, "w" );
+    VSFileSystem::vs_dprintf( 3, "w" );
     //GFXActiveTexture(0);
     return GFXTRUE;
 }
@@ -661,6 +656,8 @@ GLenum GetImageTarget( TEXTURE_IMAGE_TARGET imagetarget )
     case CUBEMAP_NEGATIVE_Z:
         image2D = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT;
         break;
+    default:
+        break;
     }
     return image2D;
 }
@@ -776,7 +773,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture( unsigned char *buffer,
     //Otherwise maxdimension is set by some user argument based on quality settings.
     if (maxdimension == 65536)
         maxdimension = gl_options.max_texture_dimension;
-    VSFileSystem::vs_fprintf( stderr,
+    VSFileSystem::vs_dprintf( 3,
                               "Transferring %dx%d texture, page %d (eff: %dx%d - limited at %d - %d mips), onto name %d (%s)\n",
                               textures[handle].iwidth,
                               textures[handle].iheight,
@@ -845,7 +842,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture( unsigned char *buffer,
                                    maxdimension,
                                    1 );
                 buffer = tempbuf;
-                VSFileSystem::vs_fprintf( stderr, "Downsampled %dx%d texture (target: %dx%d - limited at %d)\n",
+                VSFileSystem::vs_dprintf( 2, "Downsampled %dx%d texture (target: %dx%d - limited at %d)\n",
                                           textures[handle].iwidth,
                                           textures[handle].iheight,
                                           textures[handle].width,

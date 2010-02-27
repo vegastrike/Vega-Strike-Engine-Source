@@ -12,7 +12,7 @@ case "$with_boost" in
 esac
 
 if (test "x${with_boost}" = "xsystem"); then 
-BOOST_CPPFLAGS='-I/usr/include'
+BOOST_CPPFLAGS='-I/usr/include -DBOOST_PYTHON_NO_PY_SIGNATURES '
 with_boost_ver=$with_boost
 
 

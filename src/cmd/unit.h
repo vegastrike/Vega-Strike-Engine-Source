@@ -94,8 +94,8 @@ public: GameUnit( int dummy );
  **** GFX/MESHES STUFF                                                              ***
  **************************************************************************************
  */
+ 	double sparkle_accum;
     std::auto_ptr< HaloSystem >phalos;
-    double sparkle_accum;
 ///vector <Mesh *> StealMeshes();
 ///Process all meshes to be deleted
 ///Split this mesh with into 2^level submeshes at arbitrary planes
@@ -215,6 +215,13 @@ public: GameUnit( int dummy );
     Matrix WarpMatrix( const Matrix &ctm ) const;
 };
 
+/*
+ ***************************************************************************
+ **** Since we now use templates, we have to include GameUnit related    ***
+ **** .cpp files in unit.h to avoid problems with some compilers         ***
+ ***************************************************************************
+ */
+
 /////////////////////////////////////////////////////
 //forward declarations of explicit instantiations, added by chuck_starchaser:
 
@@ -246,6 +253,7 @@ class Enhancement;
 template < class Enhancement >
 class GameUnit;
 
+#include "unit.cpp"
 /////////////////////////////////////////////////////
 
 #endif

@@ -22,6 +22,7 @@ Pilot::Pilot( int faction )
 void Pilot::SetComm( Unit *parent )
 {
     this->faction = parent->faction;
+    //GET BETTER REACTION TIME AND RANK HERE
 }
 
 float Pilot::adjustSpecificRelationship( Unit *parent, void *aggressor, float factor, int faction )
@@ -134,12 +135,7 @@ extern float myroundclamp( float i );
 Animation* Pilot::getCommFace( Unit *parent, float mood, unsigned char &sex )
 {
     vector< Animation* > *ani = getCommFaces( sex );
-//stuff below commented out by chuck_starchaser, to get around missing faction_util.o in vegaserver make list
-/*    if (ani == NULL) {
-        ani = FactionUtil::GetRandCommAnimation( parent->faction, parent, sex );
-        if (ani == NULL)
-            return NULL;
-    }*/
+//this #ifndef hack below by chuck_starchaser, to get around missing faction_util.o in vegaserver make list
     if (ani->size() == 0)
         return NULL;
     mood += .1;

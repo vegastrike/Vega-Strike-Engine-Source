@@ -55,7 +55,7 @@ bool GameUnit< UnitType >::TransferUnitToSystem( unsigned int kk, StarSystem* &s
             ret = true;
 
             Unit *unit;
-            for (un_iter iter = pendingjump[kk]->orig->getUnitList().createIterator(); unit = *iter; ++iter) {
+            for (un_iter iter = pendingjump[kk]->orig->getUnitList().createIterator(); (unit = *iter); ++iter) {
                 if (unit->Threat() == this)
                     unit->Threaten( NULL, 0 );
                 if (unit->VelocityReference() == this)
@@ -90,7 +90,7 @@ bool GameUnit< UnitType >::TransferUnitToSystem( unsigned int kk, StarSystem* &s
             if (pendingjump[kk]->final_location.i == 0
                 && pendingjump[kk]->final_location.j == 0
                 && pendingjump[kk]->final_location.k == 0)
-                for (un_iter iter = pendingjump[kk]->dest->getUnitList().createIterator(); primary = *iter; ++iter) {
+                for (un_iter iter = pendingjump[kk]->dest->getUnitList().createIterator(); (primary = *iter); ++iter) {
                     vector< Unit* >tmp;
                     tmp = ComparePrimaries( primary, pendingjump[kk]->orig );
                     if ( !tmp.empty() )

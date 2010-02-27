@@ -57,7 +57,7 @@ bool GameUnit< UnitType >::querySphereClickList( int mouseX, int mouseY, float e
             return true;
     }
     Unit *su;
-    for (un_iter ui = this->getSubUnits(); su = *ui; ++ui)
+    for (un_iter ui = this->getSubUnits(); (su = *ui); ++ui)
         if ( (su)->querySphereClickList( mouseX, mouseY, err, activeCam ) )
             return true;
     return false;
