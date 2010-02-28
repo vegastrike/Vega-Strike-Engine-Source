@@ -58,6 +58,9 @@ using VSFileSystem::SaveFile;
 #include <direct.h>
 #include <config.h>
 #include <string.h>
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif //tells VCC not to generate min/max macros
 #include <windows.h>
 #include <stdlib.h>
 struct dirent

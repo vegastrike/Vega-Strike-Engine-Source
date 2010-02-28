@@ -71,6 +71,9 @@ void ModifyMouseSensitivity( int &x, int &y )
 #ifdef BASE_MAKER
  #include <stdio.h>
  #ifdef _WIN32
+  #ifndef NOMINMAX
+   #define NOMINMAX
+  #endif //tells VCC not to generate min/max macros
   #include <windows.h>
  #endif
 static char makingstate = 0;

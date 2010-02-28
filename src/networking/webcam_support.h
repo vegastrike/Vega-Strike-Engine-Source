@@ -314,6 +314,9 @@ public:
  * #endif
  */
 #ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif //tells VCC not to generate min/max macros
 #include <windows.h>
 #endif
 #include <string>

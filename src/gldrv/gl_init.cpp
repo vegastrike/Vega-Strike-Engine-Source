@@ -44,6 +44,9 @@
 #include <stdlib.h>
 
 #else
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif //tells VCC not to generate min/max macros
 #include <windows.h>
 #endif
 #define GL_GLEXT_PROTOTYPES 1

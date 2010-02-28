@@ -11,6 +11,9 @@
 #include "unit_generic.h"
 #include "vsfilesystem.h"
 #ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif //tells VCC not to generate min/max macros
 #include <windows.h>
 #include <io.h>
 #include <fcntl.h>

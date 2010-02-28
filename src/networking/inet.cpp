@@ -1,6 +1,9 @@
 #include "config.h"
 #if defined (_WIN32)
 #define in_addr_t unsigned long
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif //tells VCC not to generate min/max macros
 #include <windows.h>
 #else
 #define SOCKET_ERROR -1

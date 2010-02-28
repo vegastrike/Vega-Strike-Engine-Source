@@ -4,6 +4,9 @@
 //#ifdef USE_WINSOCK2
 //#define _WIN32_WINNT 0x0400
 //#endif
+        #ifndef NOMINMAX
+        #define NOMINMAX
+        #endif //tells VCC not to generate min/max macros
         #include <windows.h>
 #else
         #include <netdb.h>

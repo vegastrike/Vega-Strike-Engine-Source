@@ -29,7 +29,10 @@
     #include <GLUT/glut.h>
 #else
 #ifdef _WIN32
-        #include <windows.h>
+    #ifndef NOMINMAX
+        #define NOMINMAX
+    #endif //tells VCC not to generate min/max macros
+    #include <windows.h>
 #else
     #include <GL/gl.h>
 #endif

@@ -37,8 +37,9 @@ extern float simulation_atom_var;
 
 #include "macosx_math.h"
 #include <math.h>
+
 #ifdef HAVE_IEEEFP_H
-#include <ieeefp.h>
+ #include <ieeefp.h>
 #endif
 
 #include <stdlib.h>
@@ -55,46 +56,38 @@ extern float simulation_atom_var;
 #if defined (WIN32) || defined (__CYGWIN__)
 /* Note that this will define WIN32 for us, if it isn't defined already
  */
-#  include <windows.h>
-//#include <wingdi.h>
-#include <time.h>
-
-//added by chuck starchaser
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
-//using std::min;
-//using std::max;
-
+ #ifndef NOMINMAX
+  #define NOMINMAX
+ #endif //tells VCC not to generate min/max macros
+ #include <windows.h>
+ //#include <wingdi.h>
+ #include <time.h>
 #else
-#include <sys/time.h>
-#include <sys/stat.h>
-#include <unistd.h>
-//#include "command.h"
+ #include <sys/time.h>
+ #include <sys/stat.h>
+ #include <unistd.h>
+ //#include "command.h"
 #endif /* defined( WIN32 ) || defined( __CYGWIN__ ) */
 
 #ifndef NO_GFX
-#if defined (__APPLE__) || defined (MACOSX)
-    #include <OpenGL/gl.h>
-    #include <OpenGL/glu.h>
-    #include <GLUT/glut.h>
-#else
-#define __glext_h_
-#include <GL/gl.h>
-    #include <GL/glu.h>
-    #include <GL/glut.h>
-#undef __glext_h_
-#endif
+ #if defined (__APPLE__) || defined (MACOSX)
+  #include <OpenGL/gl.h>
+  #include <OpenGL/glu.h>
+  #include <GLUT/glut.h>
+ #else
+  #define __glext_h_
+  #include <GL/gl.h>
+  #include <GL/glu.h>
+  #include <GL/glut.h>
+  #undef __glext_h_
+ #endif
 #endif
 
 #ifndef PI
-#   define PI 3.14159265358979323846
+ #define PI 3.14159265358979323846
 #endif
 #ifndef M_PI
-#   define M_PI 3.1415926535
+ #define M_PI 3.1415926535
 #endif
 
 #define PROG_NAME "vegastrike"
@@ -102,14 +95,14 @@ extern float simulation_atom_var;
 #include <float.h>
 
 #if defined (HAVE_MATH_H)
-#include <math.h>
+ #include <math.h>
 #endif
 #if  defined (HAVE_FINITE) || defined (BSD)
-#define FINITE( x ) ( finite( x ) )
-#define ISNAN( x ) ( isnan( x ) )
+ #define FINITE( x ) ( finite( x ) )
+ #define ISNAN( x ) ( isnan( x ) )
 #else
-#define FINITE( x ) ( _finite( x ) )
-#define ISNAN( x ) ( _isnan( x ) )
+ #define FINITE( x ) ( _finite( x ) )
+ #define ISNAN( x ) ( _isnan( x ) )
 #endif
 
 #define BUFF_LEN 512

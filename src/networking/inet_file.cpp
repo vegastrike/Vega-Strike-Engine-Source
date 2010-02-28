@@ -1,6 +1,9 @@
 #if defined (_WIN32)
 #define in_addr_t unsigned long
 #include <wchar.h>
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif //tells VCC not to generate min/max macros
 #include <windows.h>
 #include <io.h>
 #else

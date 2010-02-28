@@ -30,6 +30,9 @@
 #include "gfx/matrix.h"
 #include "vs_globals.h"
 #ifdef WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif //tells VCC not to generate min/max macros
 #include <windows.h>
 #ifndef M_PI
 # define M_PI 3.14159265358979323846            /* pi */

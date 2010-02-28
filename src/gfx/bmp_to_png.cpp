@@ -53,6 +53,9 @@ typedef struct
 } RGBQUAD;
 
 #else
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif //tells VCC not to generate min/max macros
 #include <windows.h>
 #include <wingdi.h>
 

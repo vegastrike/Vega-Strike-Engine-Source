@@ -19,6 +19,9 @@
 #if !defined (_WIN32) && !defined (__CYGWIN__)
         #include <stdlib.h>
 #else
+        #ifndef NOMINMAX
+        #define NOMINMAX
+        #endif //tells VCC not to generate min/max macros
         #include <windows.h>
 #endif
 

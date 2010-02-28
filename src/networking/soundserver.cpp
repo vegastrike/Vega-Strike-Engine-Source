@@ -13,6 +13,9 @@ typedef int Mix_Music;
 #include <signal.h>
 #include <string>
 #ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif //tells VCC not to generate min/max macros
 #include <direct.h>
 #include <windows.h>
 #include <fcntl.h>

@@ -19,6 +19,9 @@
  * #endif
  */
 #if defined (_WIN32) && !defined (__CYGWIN__)
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif //tells VCC not to generate min/max macros
 #include <windows.h>
 #endif
 #include "vsfilesystem.h"

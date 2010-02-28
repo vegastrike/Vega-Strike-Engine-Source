@@ -26,6 +26,9 @@ static double firsttime;
 VSRandom vsrandom( time( NULL ) );
 
 #ifdef WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif //tells VCC not to generate min/max macros
 #include <windows.h>
 static LONGLONG ttime;
 static LONGLONG newtime = 0;
@@ -103,13 +106,20 @@ void setTimeCompression( float tc )
 }
 
 #ifdef _WIN32
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif //tells VCC not to generate min/max macros
+
 #include <windows.h>
 
 void micro_sleep( unsigned int n )
 {
     Sleep( n/1000 );
 }
+
 #elif defined (IRIX)
+
 #include <unistd.h>
 
 void micro_sleep( unsigned int n )
