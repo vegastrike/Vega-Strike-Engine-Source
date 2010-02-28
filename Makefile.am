@@ -703,7 +703,7 @@ vegastrike_LDADD_1 = $(noinst_LIBRARIES) \
 	-lz
 if BOOSTSYSTEM
   vegastrike_LDADD = $(vegastrike_LDADD_1) \
-    -lboost_python-st
+    -lboost_python
 else
   vegastrike_LDADD = $(vegastrike_LDADD_1)
 endif  
@@ -714,7 +714,7 @@ vegaserver_LDADD_1 = $(noinst_LIBRARIES) \
 	-lz
 if BOOSTSYSTEM
   vegaserver_LDADD = $(vegaserver_LDADD_1) \
-    -lboost_python-st
+    -lboost_python
 else
   vegaserver_LDADD = $(vegaserver_LDADD_1)
 endif  
