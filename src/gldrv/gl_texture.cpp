@@ -953,13 +953,10 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture( unsigned char *buffer,
                 //mipmaps.
                 if (mips == 0) {
                     size = ( (width+3)/4 )*( (height+3)/4 )*blocksize;
-                    textures[handle].mipmapped = NEAREST;
                     //We need to reverse some parameters that are set cuz
                     //we're supposed to have mipmaps here.  But ani_texture hates us.
                     glTexParameteri( textures[handle].targets, GL_TEXTURE_BASE_LEVEL, 0 );
                     glTexParameteri( textures[handle].targets, GL_TEXTURE_MAX_LEVEL, 0 );
-                    glTexParameteri( textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-                    glTexParameteri( textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
                     glCompressedTexImage2D_p( image2D, 0, internalformat, width, height, 0, size, buffer+offset1 );
                 }
                 /* END HACK */
