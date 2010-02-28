@@ -542,6 +542,9 @@ TechniquePtr Technique::getTechnique( const std::string &name )
         while ( !ptr->isCompiled() ) {
             try {
                 ptr->compile();
+                VSFileSystem::vs_fprintf( stdout,
+                                         "Compilation of technique %s successful\n",
+                                         ptr->getName().c_str() );
             }
             catch (ProgramCompileError e) {
                 std::string fallback = ptr->getFallback();
