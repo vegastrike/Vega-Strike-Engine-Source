@@ -2,12 +2,13 @@
 #define __FIRST_H__
 /* Always include this file first */
 
+
 //When including windows.h, it must come before other headers;
 //but you should tell VCC not to generate min and max macros...
 #ifdef WIN32
 #define NOMINMAX
-#include <windows.h>
 #define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 #endif
 
 //After windows.h, we can include algorithm by default, as it
@@ -32,23 +33,23 @@ inline T operator abs( T const & t )
 template < typename T >
 inline T operator+( T const & a, T const & b )
 {
-    return T temp(a) += b;
+    return T(a) += b;
 }
 template < typename T >
 inline T operator-( T const & a, T const & b )
 {
-    return T temp(a) -= b;
+    return T(a) -= b;
 }
-template < typename T >
-inline T operator*( T const & a, T const & b )
-{
-    return T temp(a) *= b;
-}
-template < typename T >
-inline T operator/( T const & a, T const & b )
-{
-    return T temp(a) /= b;
-}
+
+//another thing we need universally is errors.h, as it handles asserts, exceptions and logs
+#include "errors/errors.h"
+
+//and finally units, as everything uses parameters, and all parameters should have units
+#include "units/number.h"
+#include "units/radians.h"
+#include "units/steradians.h"
+#include "units/shininess.h"
+
 
 #endif
 

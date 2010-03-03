@@ -57,12 +57,22 @@ void cube::compute_side_and_scoords_from_ccoords( ccoords const & cc, side_and_c
         if( X2 > Z2 )
         {
             //this is either the left side or the right side
-            X > 0 ? s = eLeft : s = eRight;
+            if( X > 0 )
+            {
+                s = eLeft;
+                //cc = ccoords(  0.5f,    U,    V );
+                u =  Y;  v =  Z;
+            }
+            else
+            {
+                s = eRight;
+                //cc = ccoords( -0.5f,   -U,    V );
+                u = -Y;  v =  Z;
+            }
         }
         else
         {
-            //this is either the front or the back
-            Z > 0 ? s = eFront : s = eBack;
+            goto front_or_back;
         }
     }
     else
@@ -70,43 +80,36 @@ void cube::compute_side_and_scoords_from_ccoords( ccoords const & cc, side_and_c
         if( Y2 > Z2 )
         {
             //this is either up or down sides
-            Y > 0 ? s = eUp : s = eDown;
+            if( Y > 0 )
+            {
+                s = eUp;
+                //cc = ccoords(    -U,  0.5,   -V );
+                u = -X;  v = -Z;
+            }
+            else
+            {
+                s = eDown;
+                //cc = ccoords(    -U, -0.5,    V );
+                u =  X;  v =  Z;
+            }
         }
         else
         {
+front_or_back:
             //this is either the front or the back
-            Z > 0 ? s = eFront : s = eBack;
+            if( Z > 0 )
+            {
+                s = eFront;
+                //cc = ccoords(     U,    V,  0.5 );
+                u =  X;  v =  Y;
+            }
+            else
+            {
+                s = eBack;
+                //cc = ccoords(     U,   -V, -0.5 );
+                u =  X;  v = -Y;
+            }
         }
-    }
-    switch( s )
-    {
-    case eLeft:
-        //cc = ccoords(  0.5f,    U,    V );
-        u =  Y;  v =  Z;
-        break;
-    case eRight:
-        //cc = ccoords( -0.5f,   -U,    V );
-        u = -Y;  v =  Z;
-        break;
-    case eUp:
-        //cc = ccoords(    -U,  0.5,   -V );
-        u = -X;  v = -Z;
-        break;
-    case eDown:
-        //cc = ccoords(    -U, -0.5,    V );
-        u =  X;  v =  Z;
-        break;
-    case eFront:
-        //cc = ccoords(     U,    V,  0.5 );
-        u =  X;  v =  Y;
-        break;
-    case eBack:
-        //cc = ccoords(     U,   -V, -0.5 );
-        u =  X;  v = -Y;
-        break;
-    default:
-        vs_assert( 0, "bad side enum in switch" );
-        break;
     }
     snc = side_and_coords( s, scoords( u, v ) );
     #undef Z
