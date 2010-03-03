@@ -15,11 +15,6 @@ class filter
     steradians          solid_angle_;
     float               shininess_;
     //etceteras...
-    double acc_red_;
-    double acc_grn_;
-    double acc_blu_;
-    double acc_weight_;
-    size_t count_;
 public:
     virtual ~filter();
     filter
