@@ -246,12 +246,18 @@ void BFXMToXmeshOrOBJ( FILE *Inputfile, FILE *Outputfile, FILE *OutputObj, FILE 
                     if (isxmesh)
                         fprintf( Outputfile, " texture" );
                     break;
-                }
-                if (texindex)
+                case TECHNIQUE:
                     if (isxmesh)
-                        fprintf( Outputfile, "%d", texindex );
+                        fprintf( Outputfile, " technique" );
+                    break;
+                default:
+                    assert( false |! "Bad case in switch(textype) in file from_BFXM.cpp." );
+                    break;
+                }
+                if (isxmesh && texindex)
+                    fprintf( Outputfile, "%d", texindex ); //adds 2 or 3 or 4 or 5 to "texture"
                 if (isxmesh)
-                    fprintf( Outputfile, "=\"%s\" ", texname.c_str() );
+                    fprintf( Outputfile, "=\"%s\" ", texname.c_str() ); //does a technique name get here via "texname"??? --chuck
                 string textyp;
                 switch (texindex)
                 {
