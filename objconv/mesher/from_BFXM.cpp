@@ -251,7 +251,7 @@ void BFXMToXmeshOrOBJ( FILE *Inputfile, FILE *Outputfile, FILE *OutputObj, FILE 
                         fprintf( Outputfile, " technique" );
                     break;
                 default:
-                    assert( false |! "Bad case in switch(textype) in file from_BFXM.cpp." );
+                    assert( false ||! "Bad case in switch(textype) in file from_BFXM.cpp." );
                     break;
                 }
                 if (isxmesh && texindex)

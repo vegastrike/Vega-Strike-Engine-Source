@@ -10,6 +10,7 @@ class  ccoords;
 class  fvector;
 
 /*
+NOT SURE ABOUT THIS ANYMORE:
 * This file/class computes the face and coordinates where a ray intersects a surrounding cube; and
 * viceversa: having a face and face coordinates, it gives us a 3d fvector, or "ray".
 * But it will probably do more than that, namely, give us the rectangular sub-areas intersected by
@@ -34,10 +35,6 @@ class  fvector;
 class cube
 {
 public:
-    //get cube coords (3d) from side and signed side uv's:
-    static void compute_ccoords_from_side_and_scoords( side_and_coords const & snc, ccoords & cc );
-    //conversely, get side and signed uv's from cube coords:
-    static void compute_side_and_scoords_from_ccoords( ccoords const & cc, side_and_coords & snc );
 };
 
 
