@@ -258,13 +258,11 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateLight( int &light, const GFXLight &templatecopy, 
             break;
     if ( light == _llights->size() )
         _llights->push_back( gfx_light() );
-    fprintf (stderr,"GFXLIGHTCREATE %d\n", _llights->size() );
     return (*_llights)[light].Create( templatecopy, global );
 }
 
 void /*GFXDRVAPI*/ GFXDeleteLight( const int light )
 {
-    fprintf (stderr,"GFXLIGHTDESTROY %d\n",(int) _llights->size() );
     (*_llights)[light].Kill();
 }
 
