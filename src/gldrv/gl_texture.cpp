@@ -337,7 +337,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
             (*handle)++;
     }
     if ( (*handle) == textures.size() ) {
+#if 0
 	VSFileSystem::vs_dprintf( 3, "x" );
+#endif
         textures.push_back( GLTexture() );
         textures.back().palette = NULL;
         textures.back().alive   = GFXTRUE;
@@ -379,14 +381,18 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
         textures[*handle].targets = GL_TEXTURE_CUBE_MAP_EXT;
         break;
     }
+#if 0
     VSFileSystem::vs_dprintf( 3, "y" );
+#endif
     //for those libs with stubbed out handle gen't
     textures[*handle].name = *handle+1;
     //VSFileSystem::vs_fprintf (stderr,"Texture Handle %d",*handle);
     textures[*handle].alive = GFXTRUE;
     textures[*handle].texturestage = texturestage;
     textures[*handle].mipmapped    = mipmap;
+#if 0
     VSFileSystem::vs_dprintf( 3, "z" );
+#endif
     glGenTextures( 1, &textures[*handle].name );
     glBindTexture( textures[*handle].targets, textures[*handle].name );
     activetexture[texturestage] = *handle;
@@ -418,7 +424,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
         ConvertPalette( textures[*handle].palette, (unsigned char*) palette );
     }
     textures[*handle].textureformat = GetUncompressedTextureFormat( textureformat );
+#if 0
     VSFileSystem::vs_dprintf( 3, "w" );
+#endif
     //GFXActiveTexture(0);
     return GFXTRUE;
 }
@@ -773,6 +781,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture( unsigned char *buffer,
     //Otherwise maxdimension is set by some user argument based on quality settings.
     if (maxdimension == 65536)
         maxdimension = gl_options.max_texture_dimension;
+#if 0
     VSFileSystem::vs_dprintf( 3,
                               "Transferring %dx%d texture, page %d (eff: %dx%d - limited at %d - %d mips), onto name %d (%s)\n",
                               textures[handle].iwidth,
@@ -785,6 +794,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture( unsigned char *buffer,
                               textures[handle].name,
                               GetImageTargetName( imagetarget )
                             );
+#endif
     if (maxdimension == 44) {
         detail_texture = 0;
         maxdimension   = 256;
