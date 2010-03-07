@@ -198,7 +198,7 @@ void RText::conoutf( string &s, int a, int b, int c )
                     customer += s[burger];
             conline( customer, 1 );
             customer.erase();
-        } else if (customer.size() >= WORDWRAP) {
+        } else if ( customer.size() >= static_cast<size_t>(WORDWRAP) ) {
             customer += s[burger];
             string fliptheburger;
             while (customer[customer.size()-1] != ' ') {

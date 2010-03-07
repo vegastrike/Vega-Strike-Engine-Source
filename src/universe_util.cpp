@@ -206,7 +206,7 @@ bool isSplashScreenShowing()
 
 void sendCustom( int cp, string cmd, string args, string id )
 {
-    if ( cp < 0 || cp >= _Universe->numPlayers() ) {
+    if ( cp < 0 || cp >= static_cast<int>(_Universe->numPlayers()) ) {
         fprintf( stderr, "sendCustom %s with invalid player %d\n", cmd.c_str(), cp );
         return;
     }

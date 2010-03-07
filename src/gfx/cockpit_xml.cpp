@@ -238,7 +238,7 @@ void GameCockpit::beginElement( const string &name, const AttributeList &attribu
     float     boty         = -10;
     short     rows         = 13;
     short     cols         = 15;
-    int       default_mode = VDU::TARGET;
+    unsigned int default_mode = VDU::TARGET;
     VSSprite *oldpit       = NULL;
     bool      replaced[4]  = {false, false, false, false};
     int       counter      = 0;

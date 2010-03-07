@@ -3,6 +3,10 @@
 
 #include <string>
 
+#ifndef uint
+typedef unsigned int uint;
+#endif
+
 class vs_options
 {
 public: vs_options() {}
@@ -19,7 +23,7 @@ public: vs_options() {}
     std::string custompython;
     bool quick_savegame_summaries;
     int  garbagecollectfrequency;
-    int  numoldsystems;
+    uint numoldsystems;
     bool deleteoldsystems;
     char vsdebug;
 
@@ -110,7 +114,7 @@ public: vs_options() {}
     double respawn_unit_size;
     float  auto_pilot_planet_radius_percent;
     std::string campaigns;              //WRONG SECTION ...change after 0.5
-    int    NumRunningSystems;
+    uint   NumRunningSystems;
     float  InactiveSystemTime;
 
 /* Data Options */

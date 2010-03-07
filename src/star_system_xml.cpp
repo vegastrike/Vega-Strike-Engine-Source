@@ -1351,43 +1351,43 @@ addlightprop:
             if ( ( (elem == UNIT || elem == NEBULA || elem == ENHANCEMENT
                     || elem == ASTEROID) || (xml->ct == NULL && xml->parentterrain == NULL) ) && (xml->unitlevel > 2) ) {
                 assert( xml->moons.size() != 0 );
-                Unit   *un;
+                Unit   *un = NULL; //FIXME !!! un appears to never be allocated memory !!! "= NULL" added by chuck_starchaser
                 Planet *plan = xml->moons.back()->GetTopPlanet( xml->unitlevel-1 );
                 if (elem == UNIT) {
                     Flightgroup *fg = getStaticBaseFlightgroup( faction );
                     plan->AddSatellite( un = UnitFactory::createUnit( filename, false, faction, "", fg, fg->nr_ships-1 ) );
-                    un->SetSerial( serial );
-                    un->setFullname( fullname );
+                    un->SetSerial( serial ); //FIXME un de-referenced before allocation
+                    un->setFullname( fullname ); //FIXME un de-referenced before allocation
                 } else if (elem == NEBULA) {
                     Flightgroup *fg = getStaticNebulaFlightgroup( faction );
                     plan->AddSatellite( un = UnitFactory::createNebula( filename, false, faction, fg, fg->nr_ships-1 ) );
-                    un->SetSerial( serial );
+                    un->SetSerial( serial ); //FIXME un de-referenced before allocation
                 } else if (elem == ASTEROID) {
                     Flightgroup *fg = getStaticAsteroidFlightgroup( faction );
                     plan->AddSatellite( un =
                                            UnitFactory::createAsteroid( filename, faction, fg, fg->nr_ships-1, scalex
                                                                         < 0 ? -scalex : scalex ) );
-                    un->SetSerial( serial );
+                    un->SetSerial( serial ); //FIXME un de-referenced before allocation
                 } else if (elem == ENHANCEMENT) {
                     plan->AddSatellite( un = UnitFactory::createEnhancement( filename, faction, string( "" ) ) );
-                    un->SetSerial( serial );
+                    un->SetSerial( serial ); //FIXME un de-referenced before allocation
                 }
                 {
                     for (unsigned int i = 0; i < dest.size(); ++i)
-                        un->AddDestination( dest[i] );
+                        un->AddDestination( dest[i] ); //FIXME un de-referenced before allocation
                     dest.clear();
                 }
                 un->SetAI( new PlanetaryOrbit( un, velocity, position, R, S, QVector( 0, 0, 0 ), plan ) );
                 //xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,NULL,vector <char *>(),xml->unitlevel-((xml->parentterrain==NULL&&xml->ct==NULL)?1:2),ourmat,curlights,true,faction);
                 if (elem == UNIT && un->faction != neutralfaction) {
-                    un->SetTurretAI();
-                    un->EnqueueAI( new Orders::FireAt( 15 ) );
+                    un->SetTurretAI(); //FIXME un de-referenced before allocation
+                    un->EnqueueAI( new Orders::FireAt( 15 ) ); //FIXME un de-referenced before allocation
                 }
                 if (scalex < 0 && elem != ASTEROID)
-                    SetSubunitRotation( un, -scalex );
+                    SetSubunitRotation( un, -scalex ); //FIXME un de-referenced before allocation
                 //cheating so nothing collides at top lev
-                un->SetOwner( getTopLevelOwner() );
-                un->SetAngularVelocity( ComputeRotVel( rotvel, R, S ) );
+                un->SetOwner( getTopLevelOwner() ); //FIXME un de-referenced before allocation
+                un->SetAngularVelocity( ComputeRotVel( rotvel, R, S ) ); //FIXME un de-referenced before allocation
             } else {
                 if ( (elem == BUILDING || elem == VEHICLE) && xml->ct == NULL && xml->parentterrain != NULL ) {
                     Unit *b =

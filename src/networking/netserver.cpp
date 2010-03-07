@@ -1337,7 +1337,8 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                 //Wow! So much code just to perform an upgrade!
 
                 string templateName;
-                int    faction;
+                int    faction; //FIXME If neither the seller nor the buyer is the sender, faction is uninitialized!!!
+                faction = 0; //FIXME This line temporarily added by chuck_starchaser
                 const string unitDir = GetUnitDir( sender->name.get().c_str() );
                 if (seller == sender) {
                     templateName = unitDir+".blank";
@@ -1347,9 +1348,9 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                     templateName = unitDir+".template";
                 }
                 //Get the "limiter" for the upgrade.  Stats can't increase more than this.
-                const Unit *templateUnit = UnitConstCache::getCachedConst( StringIntKey( templateName, faction ) );
+                const Unit *templateUnit = UnitConstCache::getCachedConst( StringIntKey( templateName, faction ) ); //FIXME faction uninitialized!!!
                 if (!templateUnit)
-                    templateUnit = UnitConstCache::setCachedConst( StringIntKey( templateName, faction ),
+                    templateUnit = UnitConstCache::setCachedConst( StringIntKey( templateName, faction ), //FIXME faction uninitialized!!!
                                                                   UnitFactory::createUnit( templateName.c_str(), true, faction ) );
                 if (templateUnit->name == LOAD_FAILED)
                     templateUnit = NULL;

@@ -643,7 +643,7 @@ void GamePlanet::setAtmosphere( Atmosphere *t )
 void GamePlanet::Kill( bool erasefromsave )
 {
     Unit *tmp;
-    for (un_iter iter = satellites.createIterator(); tmp = *iter; ++iter)
+    for (un_iter iter = satellites.createIterator(); (tmp=*iter)!=NULL; ++iter)
         tmp->SetAI( new Order );
     /* probably not FIXME...right now doesn't work on paged out systems... not a big deal */
     for (unsigned int i = 0; i < this->lights.size(); i++)

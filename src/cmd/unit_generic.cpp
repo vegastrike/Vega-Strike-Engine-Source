@@ -7459,7 +7459,7 @@ bool Unit::UpAndDownGrade( const Unit *up,
         Comparer = AGreaterB;
     }
     double resultdoub;
-    int    retval;
+    int    retval = 0; //"= 0" added by chuck_starchaser to shut off a warning about its possibly being used uninitialized
     double temppercent;
 
     static Unit *blankship     = NULL;

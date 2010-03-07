@@ -76,6 +76,7 @@ QVector::QVector( PyObject *p )
 void Vector::Yaw( float rad ) //only works with unit vector
 {
     float theta;
+    theta = 0.0f; //FIXME This line added temporarily by chuck_starchaser
     if (i > 0)
         theta = (float) atan( k/i );
     else if (i < 0)
@@ -84,7 +85,7 @@ void Vector::Yaw( float rad ) //only works with unit vector
         theta = -PI/2;
     else if (k > 0 && i == 0)
         theta = PI/2;
-    theta += rad;
+    theta += rad; //FIXME If none of the if's is true, theta is uninitialized!
     i      = cosf( theta );
     k      = sinf( theta );
 }
@@ -92,6 +93,7 @@ void Vector::Yaw( float rad ) //only works with unit vector
 void Vector::Roll( float rad )
 {
     float theta;
+    theta = 0.0f; //FIXME This line added temporarily by chuck_starchaser
     if (i > 0)
         theta = (float) atan( j/i );
     else if (i < 0)
@@ -100,7 +102,7 @@ void Vector::Roll( float rad )
         theta = -PI/2;
     else if (j > 0 && i == 0)
         theta = PI/2;
-    theta += rad;
+    theta += rad; //FIXME If none of the if's is true, theta is uninitialized!
     i      = cosf( theta );
     j      = sinf( theta );
 }
@@ -108,6 +110,7 @@ void Vector::Roll( float rad )
 void Vector::Pitch( float rad )
 {
     float theta;
+    theta = 0.0f; //FIXME This line added temporarily by chuck_starchaser
     if (k > 0)
         theta = (float) atan( j/k );
     else if (k < 0)
@@ -116,7 +119,7 @@ void Vector::Pitch( float rad )
         theta = -PI/2;
     else if (j > 0 && k == 0)
         theta = PI/2;
-    theta += rad;
+    theta += rad; //FIXME If none of the if's is true, theta is uninitialized!
     k      = cosf( theta );
     j      = sinf( theta );
 }

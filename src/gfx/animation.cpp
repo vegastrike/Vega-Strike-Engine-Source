@@ -184,16 +184,17 @@ void Animation::ProcessDrawQueue( std::vector< Animation* > &animationdrawqueue,
     }
     //Delete flagged ones
     i = 0;
-    while (i < animationdrawqueue.size() && animationdrawqueue[i])
+    while (i < static_cast<int>(animationdrawqueue.size()) && animationdrawqueue[i])
         ++i;
     j = i;
-    while ( i < animationdrawqueue.size() ) {
-        while (i < animationdrawqueue.size() && !animationdrawqueue[i])
+    while ( i < static_cast<int>(animationdrawqueue.size()) ) {
+        while (i < static_cast<int>(animationdrawqueue.size()) && !animationdrawqueue[i])
             ++i;
-        while (i < animationdrawqueue.size() && animationdrawqueue[i])
+        while (i < static_cast<int>(animationdrawqueue.size()) && animationdrawqueue[i])
             animationdrawqueue[j++] = animationdrawqueue[i++];
     }
-    animationdrawqueue.resize( j );
+    if( j >= 0 )
+        animationdrawqueue.resize( j );
 }
 bool Animation::CalculateOrientation( Matrix &result )
 {

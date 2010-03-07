@@ -124,7 +124,7 @@ soundContainer::~soundContainer()
 
 void GameCockpit::ReceivedTargetInfo()
 {
-    for (int j = 0; j < vdu.size(); j++)
+    for (size_t j = 0; j < vdu.size(); j++)
         vdu[j]->ReceivedTargetData();
 }
 
@@ -561,7 +561,7 @@ void GameCockpit::DrawTargetBoxes()
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
     GFXDisable( LIGHTING );
     Unit *target;
-    for (un_iter uiter = unitlist->createIterator(); target = *uiter; ++uiter)
+    for (un_iter uiter = unitlist->createIterator(); (target=*uiter)!=NULL; ++uiter)
         if (target != un) {
             QVector  Loc( target->Position() );
 
@@ -718,7 +718,7 @@ void GameCockpit::DrawTurretTargetBoxes()
 
     //This avoids rendering the same target box more than once
     std::set< void* >drawn_targets;
-    for (un_iter iter = parun->getSubUnits(); un = *iter; ++iter) {
+    for (un_iter iter = parun->getSubUnits(); (un=*iter)!=NULL; ++iter) {
         if (!un)
             return;
         if (un->GetNebula() != NULL)
@@ -1154,7 +1154,7 @@ void GameCockpit::DrawEliteBlips( Unit *un )
         DrawRadarCircles( xcent, ycent, xsize, ysize, textcol );
     static bool draw_significant_blips =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "draw_significant_blips", "true" ) );
-    for (un_iter iter = drawlist->createIterator(); target = *iter; ++iter) {
+    for (un_iter iter = drawlist->createIterator(); (target=*iter)!=NULL; ++iter) {
         if (target != un) {
             static bool autolanding_enable =
                 XMLSupport::parse_bool( vs_config->getVariable( "physics", "AutoLandingEnable", "false" ) );
@@ -2530,11 +2530,11 @@ void GameCockpit::Draw()
                 float driftmag = cockpitradial*oaccel.Magnitude();
 
                 //if (COCKPITZ_PARTITIONS>1) GFXClear(GFXFALSE,GFXFALSE,GFXTRUE);//only clear stencil buffer
-                static int COCKPITZ_PARTITIONS =
+                static size_t COCKPITZ_PARTITIONS =
                     XMLSupport::parse_int( vs_config->getVariable( "graphics", "cockpit_z_partitions", "1" ) );                                         //Should not be needed if VERYNEAR_CONST is propperly set, but would be useful with stenciled inverse order rendering.
                 float zrange = cockpitradial*(1-VERYNEAR_CONST)+driftmag;
                 float zfloor = cockpitradial*VERYNEAR_CONST;
-                for (j = COCKPITZ_PARTITIONS-1; j < COCKPITZ_PARTITIONS; j--) {
+                for (j = COCKPITZ_PARTITIONS-1; j < COCKPITZ_PARTITIONS; j--) { //FIXME This is a program lockup!!! (actually, no; j is a size_t...)
                     AccessCamera()->UpdateGFX( GFXTRUE,
                                                GFXTRUE,
                                                GFXTRUE,

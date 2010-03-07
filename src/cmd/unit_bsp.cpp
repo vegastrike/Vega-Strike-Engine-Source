@@ -74,18 +74,18 @@ static void display_bsp_tree( bsp_tree *tree );
 //can divide 3 or 4 sized planes
 void dividePlane( const bsp_polygon &tri, const bsp_tree &unificator, bsp_polygon &back, bsp_polygon &front )
 {
-    enum INTERSECT_TYPE oldflag;
-    enum INTERSECT_TYPE flag;
+    enum INTERSECT_TYPE oldflag; //FIXME old flag used uninitialized below...
+    enum INTERSECT_TYPE flag; //FIXME flag used uninitialized below... Were these meant to be static? Even so...
     Vector int_point;
     front.v = vector< TVECTOR > ();
     back.v  = vector< TVECTOR > ();
     for (unsigned int i = 0; i < tri.v.size(); i++) {
         flag = whereIs( tri.v[i], unificator );
-        if (flag == BSPG_INTERSECT) {
+        if (flag == BSPG_INTERSECT) { //FIXME flag was never initialized!!!
             front.v.push_back( tri.v[i] );
             back.v.push_back( tri.v[i] );
         } else {
-            if (i != 0 && oldflag != BSPG_INTERSECT && flag != oldflag) {
+            if (i != 0 && oldflag != BSPG_INTERSECT && flag != oldflag) { //FIXME oldflag is not initialized!!!
                 //need to add the intersection point in!
                 if ( intersectionPoint( unificator, tri.v[i-1], tri.v[i], int_point ) ) {
                     front.v.push_back( int_point );

@@ -541,10 +541,11 @@ void beginElement( const string &name, const AttributeList &attributes, XML *xml
         xml->striptemp.flatshade = 0;
         break;
     case XML::VERTEX:
-        unsigned int32bit index;
+    {
+        unsigned int32bit index = 0; //FIXME Not all cases below initialized index; "=0" added temporarily by chuck_starchaser
         float32bit s, t;
-        s = 0;
-        t = 0;
+        s = 0.0f;
+        t = 0.0f;
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
             switch ( XML::attribute_map.lookup( (*iter).name ) )
             {
@@ -669,7 +670,9 @@ void beginElement( const string &name, const AttributeList &attributes, XML *xml
         }
         xml->curpolyindex += 1;
         break;
+    }
     case XML::LOD:     //FIXME?
+    {
         xml->lodtemp = LODholder();
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
             switch ( XML::attribute_map.lookup( (*iter).name ) )
@@ -692,9 +695,12 @@ void beginElement( const string &name, const AttributeList &attributes, XML *xml
         }
         xml->LODs.push_back( xml->lodtemp );
         break;
+    }
     case XML::LOGO:
-        unsigned int32bit typ;
+    {
+        unsigned int32bit typ = 0; //FIXME Not all cases below initialized! "=0" added temporarily by chuck_starchaser
         float32bit rot, siz, offset;
+        rot = siz = offset = 0.0f; //FIXME Not all cases below initialized! This line added temporarily by chuck_starchaser
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
             switch ( XML::attribute_map.lookup( (*iter).name ) )
             {
@@ -721,6 +727,7 @@ void beginElement( const string &name, const AttributeList &attributes, XML *xml
         xml->logos[xml->logos.size()-1].size   = siz;
         xml->logos[xml->logos.size()-1].offset = offset;
         break;
+    }
     case XML::REF:     //FIXME
         {
             unsigned int32bit ind = 0;

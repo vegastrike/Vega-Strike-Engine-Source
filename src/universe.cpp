@@ -286,7 +286,7 @@ void GameUniverse::StartDraw()
     RESETTIME();
 #endif
     GFXBeginScene();
-    unsigned int i;
+    size_t i;
     StarSystem  *lastStarSystem = NULL;
     for (i = 0; i < cockpit.size(); ++i) {
         SetActiveCockpit( i );

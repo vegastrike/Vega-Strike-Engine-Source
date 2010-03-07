@@ -793,6 +793,8 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
     *inmemfile;
 
     float minx, miny, minz, maxx, maxy, maxz;
+    minx = miny = minz = 77777777.77;
+    maxx = maxy = maxz = -77777777.77;
     bool  firstpoint = true;
     //CHECK MAGIC WORD
     fseek( Inputfile, 0, SEEK_SET );

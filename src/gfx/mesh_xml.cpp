@@ -261,8 +261,9 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
     AttributeList::const_iterator iter;
     float flotsize = 1;
     MeshXML::Names elem = (MeshXML::Names) MeshXML::element_map.lookup( name );
-    MeshXML::Names top;
-    if (xml->state_stack.size() > 0) top = *xml->state_stack.rbegin();
+    MeshXML::Names top; //FIXME If state stack is empty, top is used uninitialized !!!
+    if (xml->state_stack.size() > 0)
+        top = *xml->state_stack.rbegin();
     xml->state_stack.push_back( elem );
     bool texture_found = false;
     switch (elem)
@@ -510,18 +511,18 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
         assert( texture_found );
         break;
     case MeshXML::POINTS:
-        assert( top == MeshXML::MESH );
+        assert( top == MeshXML::MESH ); //FIXME top was never initialized if state stack was empty
         //assert(xml->load_stage == 1);
         xml->load_stage = 2;
         break;
     case MeshXML::POINT:
-        assert( top == MeshXML::POINTS );
+        assert( top == MeshXML::POINTS ); //FIXME top was never initialized if state stack was empty
 
         memset( &xml->vertex, 0, sizeof (xml->vertex) );
         xml->point_state = 0;         //Point state is used to check that all necessary attributes are recorded
         break;
     case MeshXML::LOCATION:
-        assert( top == MeshXML::POINT );
+        assert( top == MeshXML::POINT ); //FIXME top was never initialized if state stack was empty
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
             switch ( MeshXML::attribute_map.lookup( (*iter).name ) )
             {
@@ -808,14 +809,16 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
             xml->lodsize.push_back( flotsize );
         break;
     case MeshXML::VERTEX:
+    {
         assert(
             top == MeshXML::TRI || top == MeshXML::QUAD || top == MeshXML::LINE || top == MeshXML::TRISTRIP || top
             == MeshXML::TRIFAN || top == MeshXML::QUADSTRIP || top == MeshXML::LINESTRIP );
         //assert(xml->load_stage==4);
 
         xml->vertex_state = 0;
-        unsigned int index;
-        float s, t;
+        unsigned int index=0; //FIXME not all switch cases initialize index --"=0" added temporarily by chuck_starchaser
+        float s, t; //FIXME not all switch cases initialize s and t ...
+        s = t = 0.0f; //This initialization line to "=0.0f" added temporarily by chuck_starchaser
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
             switch ( MeshXML::attribute_map.lookup( (*iter).name ) )
             {
@@ -847,19 +850,19 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
                == (MeshXML::V_POINT
                    |MeshXML::V_S
                    |MeshXML::V_T) );
-        assert( index < xml->vertices.size() );
+        assert( index < xml->vertices.size() ); //FIXME not all switch cases initialize index
 
         memset( &xml->vertex, 0, sizeof (xml->vertex) );
-        xml->vertex = xml->vertices[index];
-        xml->vertexcount[index] += 1;
+        xml->vertex = xml->vertices[index]; //FIXME not all switch cases initialize index
+        xml->vertexcount[index] += 1; //FIXME not all switch cases initialize index
         if ( (!xml->vertex.i) && (!xml->vertex.j) && (!xml->vertex.k) )
             if (!xml->recalc_norm)
                 xml->recalc_norm = true;
         //xml->vertex.x*=scale;
         //xml->vertex.y*=scale;
         //xml->vertex.z*=scale;//FIXME
-        xml->vertex.s = s;
-        xml->vertex.t = t;
+        xml->vertex.s = s; //FIXME not all cases in switch above initialized s and t
+        xml->vertex.t = t; //FIXME not all cases in switch above initialized s and t
         xml->active_list->push_back( xml->vertex );
         xml->active_ind->push_back( index );
         if (xml->reverse) {
@@ -873,13 +876,17 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
         }
         xml->num_vertices--;
         break;
+    }
     case MeshXML::LOGO:
+    {
         assert( top == MeshXML::MESH );
         //assert (xml->load_stage==4);
         xml->load_stage   = 5;
         xml->vertex_state = 0;
-        unsigned int typ;
-        float rot, siz, offset;
+        unsigned int typ; //FIXME Not all cases below initialize typ
+        float rot, siz, offset; //FIXME Not all cases below initialize rot, siz or offset
+        typ = 0; //FIXME this line temporarily added by chuck_starchaser
+        rot = siz = offset = 0.0f; //FIXME this line temporarily added by chuck_starchaser
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
             switch ( MeshXML::attribute_map.lookup( (*iter).name ) )
             {
@@ -926,6 +933,7 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
         xml->logos[xml->logos.size()-1].size   = siz;
         xml->logos[xml->logos.size()-1].offset = offset;
         break;
+    }
     case MeshXML::REF:
         {
             assert( top == MeshXML::LOGO );

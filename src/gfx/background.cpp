@@ -329,7 +329,7 @@ void Background::Draw()
             skybox_rendering_sequence[3].tex = right;
             skybox_rendering_sequence[4].tex = back;
             skybox_rendering_sequence[5].tex = down;
-            for (int skr = 0; skr < sizeof (skybox_rendering_sequence)/sizeof (skybox_rendering_sequence[0]); skr++) {
+            for (size_t skr = 0; skr < sizeof (skybox_rendering_sequence)/sizeof (skybox_rendering_sequence[0]); skr++) {
                 Texture *tex = skybox_rendering_sequence[skr].tex;
                 int lyr;
 
@@ -384,19 +384,19 @@ void Background::Draw()
 
 #ifdef NV_CUBE_MAP
               #define VERTEX( i )                                    \
-    s1 = stca[skybox_rendering_sequence[skr].tcoord[i][0]];          \
-    t1 = ttca[skybox_rendering_sequence[skr].tcoord[i][1]];          \
-    s2 = stca[skybox_rendering_sequence[skr].tcoord[i][2]];          \
+    s1 = stca[size_t(skybox_rendering_sequence[skr].tcoord[i][0])];          \
+    t1 = ttca[size_t(skybox_rendering_sequence[skr].tcoord[i][1])];          \
+    s2 = stca[size_t(skybox_rendering_sequence[skr].tcoord[i][2])];          \
     glTexCoord3f( s1, t1, s2 );                                      \
     GFXVertex3f( skybox_rendering_sequence[skr].vertices[i][0]*size, \
                  skybox_rendering_sequence[skr].vertices[i][1]*size, \
                  skybox_rendering_sequence[skr].vertices[i][2]*size );
 #else
               #define VERTEX( i )                                    \
-    s1 = stca[skybox_rendering_sequence[skr].tcoord[i][0]];          \
-    t1 = ttca[skybox_rendering_sequence[skr].tcoord[i][1]];          \
-    s2 = stca[skybox_rendering_sequence[skr].tcoord[i][2]];          \
-    t2 = ttca[skybox_rendering_sequence[skr].tcoord[i][3]];          \
+    s1 = stca[size_t(skybox_rendering_sequence[skr].tcoord[i][0])];          \
+    t1 = ttca[size_t(skybox_rendering_sequence[skr].tcoord[i][1])];          \
+    s2 = stca[size_t(skybox_rendering_sequence[skr].tcoord[i][2])];          \
+    t2 = ttca[size_t(skybox_rendering_sequence[skr].tcoord[i][3])];          \
     if (!multitex) GFXTexCoord2f( s1, t1 );                          \
     else GFXTexCoord4f( s1, t1, s2, t2 );                            \
     GFXVertex3f( skybox_rendering_sequence[skr].vertices[i][0]*size, \

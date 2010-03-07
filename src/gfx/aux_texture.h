@@ -37,6 +37,7 @@
 ;
 class Texture : public::VSImage
 {
+    typedef unsigned int uint;
 public:
     void FileNotFound( const std::string& ); //undoes what it did to hash table when file is not located
 ///The file name used to load this texture
@@ -55,7 +56,7 @@ public:
     Texture    *original;
 ///For re-biding
     bool        bound;
-    int         boundSizeX, boundSizeY;
+    uint        boundSizeX, boundSizeY;
     VSImageMode boundMode;
 ///The number of references on the original data
     int         refcount;

@@ -136,8 +136,9 @@ public:
     virtual bool processCommand( const EventCommandId &command, Control *control );
 
 //CONSTRUCTION
-public: Window( void );
-    virtual ~Window( void );
+public:
+    virtual ~Window();
+    Window();
 
 //INTERNAL IMPLEMENTATION
 protected:
@@ -151,8 +152,8 @@ protected:
     GFXColor          m_outlineColor;           //Color of outline around control.
     float             m_outlineWidth;           //Width of outline (in pixels).
     GuiTexture        m_texture;                //Background texture.
-    GroupControl     *m_controls;   //List of controls that are in this window.
     bool              m_deleteOnClose; //True = delete window object when closed.
+    GroupControl     *m_controls;   //List of controls that are in this window.
     WindowController *m_controller; //Object that controls this window.
 };
 

@@ -189,7 +189,7 @@ void WindowManager::draw()
     //maintained.  First entry is the bottom window, last is the top window.
     //FIXME mbyron -- I think the event manager needs to get involved with window z-order.
     //(Mouse events should go to windows in zorder, shouldn't they?)
-    for (int i = 0; i < m_windows.size(); i++) {
+    for (size_t i = 0; i < m_windows.size(); i++) {
         if ( m_windows[i]->controller() )
             m_windows[i]->controller()->draw();
         if ( i < m_windows.size() ) m_windows[i]->draw();

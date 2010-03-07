@@ -82,7 +82,7 @@ void TextInputDisplay::draw()
         } else if (c != '\0' && c < 256) {
             bool allowed = true;
             for (int j = 0; disallowed[j]; ++j)
-                if (c == disallowed[j]) {
+                if ( c == static_cast<unsigned int>(disallowed[j]) ) {
                     allowed = false;
                     break;
                 }

@@ -57,9 +57,9 @@ void FSM::beginElement( const string &name, const AttributeList attributes )
     AttributeList::const_iterator iter;
     Names  elem  = (Names) element_map.lookup( name );
     string nam;
-    float  val;
+    float  val = 0.0f;  //FIXME "= 0.0f" added by chuck_starchaser without knowing what value to use
     int    sound = -1;
-    unsigned char sexe;
+    unsigned char sexe = 0; //FIXME "= 0" added by chuck_starchaser without knowing what value to use
     switch (elem)
     {
     case SOUND:
@@ -75,7 +75,7 @@ void FSM::beginElement( const string &name, const AttributeList attributes )
             }
         }
         if (sound != -1)
-            nodes.back().AddSound( sound, sexe );
+            nodes.back().AddSound( sound, sexe ); //FIXME sexe was used uninitialized until I added = 0 --chuck_starchaser
         break;
     case UNKNOWN:
         unitlevel++;
@@ -105,7 +105,7 @@ void FSM::beginElement( const string &name, const AttributeList attributes )
                     }
                 }
             }
-            nodes.push_back( Node( messages, val ) );
+            nodes.push_back( Node( messages, val ) ); //FIXME val was used uninitialized until I added = 0 --chuck_starchaser
             break;
         }
     case EDGE:

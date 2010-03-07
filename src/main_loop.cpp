@@ -399,7 +399,7 @@ void Inside( const KBData&, KBSTATE newState )
         string cockpit = "disabled-cockpit.cpt";
         if ( _Universe->AccessCockpit()->GetParent() )
             cockpit = _Universe->AccessCockpit()->GetParent()->getCockpit();
-        Unit  *u;
+        Unit  *u = NULL; //= NULL just to shut off a warning about its possibly being used uninitialized --chuck_starchaser
         if ( (_Universe->AccessCockpit()->GetParent() != NULL)
             && (_Universe->AccessCockpit()->GetParent()->name == "return_to_cockpit")
             && (_Universe->AccessCockpit()->GetParent()->owner != NULL)
@@ -1067,7 +1067,7 @@ void main_loop()
     if (myterrain)
         myterrain->AdjustTerrain( _Universe->activeStarSystem() );
     if (Network != NULL)
-        for (int jj = 0; jj < _Universe->numPlayers(); jj++)
+        for (size_t jj = 0; jj < _Universe->numPlayers(); jj++)
             Network[jj].checkMsg( NULL );
     //Network[jj].sendMsg();
 }

@@ -503,8 +503,9 @@ void NetClient::receiveUnitDamage( NetBuffer &netbuf, Unit *un )
         un->Destroy();
         un = NULL;         //Assume it is dead for the purposes of this function.
     }
-    if (damages&Unit::SHIELD_DAMAGED)
+    if (damages&Unit::SHIELD_DAMAGED) {
         SETNOTNULL( un, un->shield, netbuf.getShield() );
+    }
     if (damages&Unit::ARMOR_DAMAGED) {
         SETNOTNULL( un, un->armor, netbuf.getArmor() );
         SETNOTNULL( un, un->hull, netbuf.getFloat() );

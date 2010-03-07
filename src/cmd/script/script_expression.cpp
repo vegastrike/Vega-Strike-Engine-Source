@@ -453,7 +453,7 @@ bool Mission::checkBoolExpr( missionNode *node, int mode )
 
 bool Mission::doAndOr( missionNode *node, int mode )
 {
-    bool ok;
+    bool ok; //FIXME !! Not all branches result in ok being initialized
     //no difference between parse/run
     if (node->tag == DTAG_AND_EXPR)
         ok = true;
@@ -473,7 +473,7 @@ bool Mission::doAndOr( missionNode *node, int mode )
     if (mode == SCRIPT_PARSE)
         if (i < 2)
             warning( "less than two arguments for and/or" );
-    return ok;
+    return ok; //FIXME ok not initialized by all paths --chuck_starchaser
 }
 
 /* *********************************************************** */

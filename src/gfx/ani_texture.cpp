@@ -481,7 +481,8 @@ void AnimatedTexture::LoadAni( VSFileSystem::VSFile &f, int stage, enum FILTER i
     string defMt = XMLSupport::parse_option_value( options, "maxt", "1" );
     string defMr = XMLSupport::parse_option_value( options, "maxr", "1" );
 
-    int    midframe;
+    int    midframe; //FIXME midframe not initialized by all paths below
+    midframe = 0; //FIXME this line temporarily added by chuck_starchaser
     bool   loadall;
     if (!vidMode)
         loadall = !( g_game.use_animations == 0 || (g_game.use_animations != 0 && g_game.use_textures == 0) );
@@ -502,9 +503,9 @@ void AnimatedTexture::LoadAni( VSFileSystem::VSFile &f, int stage, enum FILTER i
     char file[512] = "white.bmp";
     char alp[512]  = "white.bmp";
     char opt[512]  = "";
-    int  i = 0, j = 0;
+    size_t i = 0, j = 0;
     for (; i < numframes; i++)
-        if ( loadall || (i == midframe) ) {
+        if ( loadall || (i == midframe) ) { //FIXME midframe used without guaranteed initialization
             //if() added by Klauss
             int numgets = 0;
             while ( numgets <= 0 && !f.Eof() ) {
@@ -593,7 +594,7 @@ void AnimatedTexture::LoadAni( VSFileSystem::VSFile &f, int stage, enum FILTER i
 void AnimatedTexture::LoadFrame( int frame )
 {
     if ( !vidMode || (Decal == NULL) || (*Decal == NULL) ) return;
-    if ( (frame < 0) || (frame >= numframes) ) return;
+    if ( (frame < 0) || (frame >= static_cast<int>(numframes)) ) return;
     if ( (activebound >= 0) && (activebound < numframes) && (frames[frame] == frames[activebound]) ) return;
     const char *temp   = frames[frame].get().c_str();
     char   file[512]   = "white.bmp";
