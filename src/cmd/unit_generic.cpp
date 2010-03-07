@@ -6513,7 +6513,7 @@ bool Unit::UnDock( Unit *utdw )
         else
             this->owner = NULL;
     }
-    cerr<<"Asking to undock"<<endl;
+    VSFileSystem::vs_dprintf(3,"Asking to undock\n");
     if ( Network != NULL && !SERVER && !_Universe->netLocked() ) {
         cerr<<"Sending an undock notification"<<endl;
         int playernum = _Universe->whichPlayerStarship( this );
