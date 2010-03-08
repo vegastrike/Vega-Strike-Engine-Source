@@ -115,7 +115,7 @@ void Mesh::DrawNow( float lod, bool centered, const Matrix &m, int cloak, float 
 void Mesh::ProcessZFarMeshes( bool ) {}
 
 void Mesh::ProcessUndrawnMeshes( bool pushSpecialEffects, bool ) {}
-void Mesh::ProcessDrawQueue( int, int, bool, const QVector& ) {}
+void Mesh::ProcessDrawQueue( size_t, int, bool, const QVector& ) {}
 
 void Mesh::EnableSpecialFX() {}
 

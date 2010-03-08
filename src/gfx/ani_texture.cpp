@@ -48,7 +48,7 @@ void AnimatedTexture::MakeActive( int stage, int pass )
     case 0:
         if (!vidMode) {
             if ( GetInterpolateFrames() && (active != nextactive) ) {
-                if ( gl_options.Multitexture && ( (stage+1) < gl_options.Multitexture ) ) {
+                if ( gl_options.Multitexture && ( (stage+1) < static_cast<int>(gl_options.Multitexture) ) ) {
                     if (Decal && Decal[nextactive%numframes])
                         Decal[nextactive%numframes]->MakeActive( stage+1 );
 
@@ -113,7 +113,7 @@ void AnimatedTexture::MakeActive( int stage, int pass )
         break;
     case 1:
         if ( !vidMode && GetInterpolateFrames() && (active != nextactive)
-            && !( gl_options.Multitexture && ( (stage+1) < gl_options.Multitexture ) ) ) {
+            && !( gl_options.Multitexture && ( (stage+1) < static_cast<int>(gl_options.Multitexture) ) ) ) {
             if (Decal && Decal[nextactive%numframes])
                 Decal[nextactive%numframes]->MakeActive( stage );
 
@@ -135,7 +135,7 @@ bool AnimatedTexture::SetupPass( int pass, int stage, const enum BLENDFUNC src, 
     {
     case -1:
         if ( !vidMode && GetInterpolateFrames() ) {
-            if ( !( gl_options.Multitexture && ( (stage+1) < gl_options.Multitexture ) ) )
+            if ( !( gl_options.Multitexture && ( (stage+1) < static_cast<int>(gl_options.Multitexture) ) ) )
                 GFXColorf( multipass_interp_basecolor );                  //Restore old color
             else
                 //GFXTextureEnv(texstage,GFXMODULATETEXTURE); //Most expect this
@@ -503,8 +503,8 @@ void AnimatedTexture::LoadAni( VSFileSystem::VSFile &f, int stage, enum FILTER i
     char file[512] = "white.bmp";
     char alp[512]  = "white.bmp";
     char opt[512]  = "";
-    size_t i = 0, j = 0;
-    for (; i < numframes; i++)
+    int i = 0, j = 0;
+    for (; i < static_cast<int>(numframes); i++)
         if ( loadall || (i == midframe) ) { //FIXME midframe used without guaranteed initialization
             //if() added by Klauss
             int numgets = 0;
@@ -656,7 +656,7 @@ bool AnimatedTexture::LoadSuccess()
 unsigned int AnimatedTexture::numLayers() const
 {
     if ( GetInterpolateFrames() && (active != nextactive) && gl_options.Multitexture
-        && ( (texstage+1) < gl_options.Multitexture ) )
+        && ( (texstage+1) < static_cast<int>(gl_options.Multitexture) ) )
         return 2;
 
     else
@@ -666,7 +666,7 @@ unsigned int AnimatedTexture::numLayers() const
 unsigned int AnimatedTexture::numPasses() const
 {
     if ( GetInterpolateFrames() && (active != nextactive) ) {
-        if ( gl_options.Multitexture && ( (texstage+1) < gl_options.Multitexture ) )
+        if ( gl_options.Multitexture && ( (texstage+1) < static_cast<int>(gl_options.Multitexture) ) )
             return 1;
         else
             return 2;

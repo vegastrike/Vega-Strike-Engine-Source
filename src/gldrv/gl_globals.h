@@ -300,7 +300,7 @@ extern queue< GFXStats >statsqueue;
 typedef struct
 {
     int  fullscreen;
-    int  Multitexture;
+    size_t  Multitexture;
     int  PaletteExt;
     int  display_lists;
     int  mipmap;    //0 = nearest 1 = linear 2 = mipmap

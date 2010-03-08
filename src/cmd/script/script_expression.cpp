@@ -454,6 +454,7 @@ bool Mission::checkBoolExpr( missionNode *node, int mode )
 bool Mission::doAndOr( missionNode *node, int mode )
 {
     bool ok; //FIXME !! Not all branches result in ok being initialized
+    ok = true; //this line added temporarily by chuck_starchaser
     //no difference between parse/run
     if (node->tag == DTAG_AND_EXPR)
         ok = true;

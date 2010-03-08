@@ -196,7 +196,7 @@ protected:
 ///The technique used to render this mesh
     TechniquePtr      technique;
 ///The decal relevant to this mesh
-    vector< Texture* >Decal;
+    vector< Texture* > Decal;
     Texture *detailTexture;
     vector< Vector >  detailPlanes;
     float   polygon_offset;
@@ -227,10 +227,10 @@ protected:
 
 private:
 ///Implement fixed-function draw queue processing (the referenced pass must be of Fixed type) - internal usage
-    void ProcessFixedDrawQueue( int whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr );
+    void ProcessFixedDrawQueue( size_t whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr );
 
 ///Implement programmable draw queue processing (the referenced pass must be of Shader type) - internal usage
-    void ProcessShaderDrawQueue( int whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr );
+    void ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr );
 
 ///Activate a texture unit - internal usage
     void activateTextureUnit( const Technique::Pass::TextureUnit &tu, bool deflt = false );
@@ -327,7 +327,7 @@ public: Mesh();
 ///Draws lod pixels wide, mesh at Transformation NOW. If centered, then will center on camera and disable cull
     void DrawNow( float lod, bool centered, const Matrix &m = identity_matrix, int cloak = -1, float nebdist = 0 ); //short fix
 ///Will draw all undrawn meshes of this type
-    virtual void ProcessDrawQueue( int whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr );
+    virtual void ProcessDrawQueue( size_t whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr );
 ///Will draw all undrawn far meshes beyond the range of zbuffer (better be convex).
     virtual void SelectCullFace( int whichdrawqueue );
     virtual void RestoreCullFace( int whichdrawqueue );

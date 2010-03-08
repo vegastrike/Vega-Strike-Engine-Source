@@ -95,7 +95,8 @@ struct CubeCoord
 {
     float s;
     float t;
-    char  TexMap;    //0 = front, 1=back,2=right,3=left,4=up,5=down
+    unsigned int TexMap;    //0 = front, 1=back,2=right,3=left,4=up,5=down
+    unsigned int padding;  //added by chuck_starchaser
 };
 
 static float abso( float x )

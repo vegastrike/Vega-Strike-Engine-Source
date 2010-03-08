@@ -245,10 +245,10 @@ void Animation::DrawNow( const Matrix &final_orientation )
     if ( (g_game.use_animations || g_game.use_textures) && (!Done() || (options&ani_repeat)) )
     {
         GFXLoadMatrixModel( final_orientation );
-        int lyr;
-        int numlayers = numLayers();
+        size_t lyr;
+        size_t numlayers = numLayers();
         bool multitex = (numlayers > 1);
-        int numpasses = numPasses();
+        size_t numpasses = numPasses();
         float     ms = mintcoord.i, Ms = maxtcoord.i;
         float     mt = mintcoord.j, Mt = maxtcoord.j;
         BLENDFUNC src, dst;
@@ -258,7 +258,7 @@ void Animation::DrawNow( const Matrix &final_orientation )
             if (lyr < numlayers)
                 GFXTextureCoordGenMode( lyr, NO_GEN, NULL, NULL );
         }
-        for (int pass = 0; pass < numpasses; pass++) {
+        for (size_t pass = 0; pass < numpasses; pass++) {
             if ( SetupPass( pass, 0, src, dst ) ) {
                 MakeActive( 0, pass );
                 GFXTextureEnv( 0, GFXMODULATETEXTURE );
@@ -302,10 +302,10 @@ void Animation::DrawAsVSSprite( VSSprite *spr )
             GFXBlendMode( SRCALPHA, INVSRCALPHA );
         else
             GFXBlendMode( ONE, ZERO );
-        int lyr;
-        int numlayers = numLayers();
+        size_t lyr;
+        size_t numlayers = numLayers();
         bool multitex = (numlayers > 1);
-        int numpasses = numPasses();
+        size_t numpasses = numPasses();
         float     ms = mintcoord.i, Ms = maxtcoord.i;
         float     mt = mintcoord.j, Mt = maxtcoord.j;
         GFXDisable( CULLFACE );
@@ -317,7 +317,7 @@ void Animation::DrawAsVSSprite( VSSprite *spr )
             GFXToggleTexture( (lyr < numlayers), lyr );
             if (lyr < numlayers) GFXTextureCoordGenMode( lyr, NO_GEN, NULL, NULL );
         }
-        for (int pass = 0; pass < numpasses; pass++)
+        for (size_t pass = 0; pass < numpasses; pass++)
             if ( SetupPass( pass, 0, src, dst ) ) {
                 MakeActive( 0, pass );
                 GFXTextureEnv( 0, GFXMODULATETEXTURE );
@@ -351,10 +351,10 @@ void Animation::DrawNoTransform( bool cross, bool blendoption )
 {
     bool doitagain = false;
     if (g_game.use_animations == 0 && g_game.use_textures == 0) {} else if ( !Done() || (options&ani_repeat) ) {
-        int   lyr;
-        int   numlayers = numLayers();
+        size_t lyr;
+        size_t numlayers = numLayers();
         bool  multitex  = (numlayers > 1);
-        int   numpasses = numPasses();
+        size_t numpasses = numPasses();
         float ms = mintcoord.i, Ms = maxtcoord.i;
         float mt = mintcoord.j, Mt = maxtcoord.j;
         if (blendoption) {
@@ -371,7 +371,7 @@ void Animation::DrawNoTransform( bool cross, bool blendoption )
             GFXToggleTexture( (lyr < numlayers), lyr );
             if (lyr < numlayers) GFXTextureCoordGenMode( lyr, NO_GEN, NULL, NULL );
         }
-        for (int pass = 0; pass < numpasses; pass++)
+        for (size_t pass = 0; pass < numpasses; pass++)
             if ( SetupPass( pass, 0, src, dst ) ) {
                 MakeActive( 0, pass );
                 GFXTextureEnv( 0, GFXMODULATETEXTURE );

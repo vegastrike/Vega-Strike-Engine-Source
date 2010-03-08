@@ -286,7 +286,7 @@ public:
         void addShaderParam( const std::string &name, ShaderParam::Semantic semantic, bool optional );
 
 /** Get the number of texture units in this pass */
-        int getNumTextureUnits() const
+        size_t getNumTextureUnits() const
         {
             return textureUnits.size();
         }
@@ -298,7 +298,7 @@ public:
         }
 
 /** Get the number of shader params in this pass */
-        int getNumShaderParams() const
+        size_t getNumShaderParams() const
         {
             return shaderParams.size();
         }
@@ -317,12 +317,12 @@ public:
     };
 
 protected:
-    typedef std::vector< Pass >PassList;
+    typedef std::vector< Pass > PassList;
     PassList passes;
 
 public:
 /** Create a technique by loading and parsing the definition in [name].technique */
-    Technique( const std::string &name );
+    explicit Technique( const std::string &name );
 
     ~Technique();
 

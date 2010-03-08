@@ -18,7 +18,7 @@
 #include "universe_util.h"
 #include <utility>
 
-extern vector< Logo* >undrawn_logos;
+extern vector< Logo* > undrawn_logos;
 
 #include <exception>
 
@@ -132,8 +132,8 @@ public:
                         SLESSX( *atu.texture, *btu.texture );
                     } else if (atu.sourceType == Technique::Pass::TextureUnit::Decal) {
                         //Compare decal textures
-                        const Texture *ta = ( atu.sourceIndex < orig->Decal.size() ) ? orig->Decal[atu.sourceIndex] : NULL;
-                        const Texture *tb = ( btu.sourceIndex < b.orig->Decal.size() ) ? b.orig->Decal[btu.sourceIndex] : NULL;
+                        const Texture *ta = ( atu.sourceIndex < static_cast<int>(orig->Decal.size()) ) ? orig->Decal[atu.sourceIndex] : NULL;
+                        const Texture *tb = ( btu.sourceIndex < static_cast<int>(b.orig->Decal.size()) ) ? b.orig->Decal[btu.sourceIndex] : NULL;
                         PLESSX( ta, tb );
                     }
                 } else {
@@ -442,11 +442,11 @@ void Mesh::Draw( float lod, const Matrix &m, float toofar, int cloak, float nebd
         //c.mat[13]=pos.j;
         //c.mat[14]=pos.k;//to translate to local_pos which is now obsolete!
 
-        origmesh->draw_queue[c.mesh_seq].push_back( c );
+        origmesh->draw_queue[static_cast<size_t>(c.mesh_seq)].push_back( c );
         if ( !( origmesh->will_be_drawn&(1<<c.mesh_seq) ) ) {
             origmesh->will_be_drawn |= (1<<c.mesh_seq);
             for (int passno = 0, npasses = origmesh->technique->getNumPasses(); passno < npasses; ++passno)
-                undrawn_meshes[c.mesh_seq].push_back( OrigMeshContainer( origmesh, toofar-rSize(), passno ) );
+                undrawn_meshes[static_cast<size_t>(c.mesh_seq)].push_back( OrigMeshContainer( origmesh, toofar-rSize(), passno ) );
         }
         will_be_drawn |= (1<<c.mesh_seq);
     }
@@ -720,7 +720,7 @@ bool SetupSpecMapFirstPass( Texture **decal,
     }
     bool retval = false;
     skip_glowpass = false;
-    int  detailoffset = 2;
+    size_t  detailoffset = 2;
     if ( !nomultienv && (decalSize > 1) && (decal[1]) ) {
         detailoffset = 1;
         GFXSelectMaterialHighlights( mat,
@@ -949,7 +949,7 @@ void RestoreSpecMapState( bool envMap, bool write_to_depthmap, float polygonoffs
     GFXPopBlendMode();
 }
 
-void Mesh::ProcessDrawQueue( int whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr )
+void Mesh::ProcessDrawQueue( size_t whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr )
 {
     //Process the pass for all queued instances
     const Technique::Pass &pass = technique->getPass( whichpass );
@@ -964,6 +964,8 @@ void Mesh::ProcessDrawQueue( int whichpass, int whichdrawqueue, bool zsort, cons
 
 void Mesh::activateTextureUnit( const Technique::Pass::TextureUnit &tu, bool deflt )
 {
+    //I'm leaving target and source index as int's because I tried to change technique.h's target and source to size_t's
+    //and had problems. So I'll just add static casts to int to the unsigned/size_t other sides in comparisons --chuck_starchaser
     int targetIndex = tu.targetIndex;
     int sourceIndex = deflt ? tu.defaultIndex : tu.sourceIndex;
     Technique::Pass::TextureUnit::SourceType sourceType = deflt ? tu.defaultType : tu.sourceType;
@@ -1025,7 +1027,7 @@ void Mesh::activateTextureUnit( const Technique::Pass::TextureUnit &tu, bool def
                 "Texture Unit for technique requested a missing texture (detail default given that cannot be found)" );
         break;
     case Technique::Pass::TextureUnit::Decal:
-        if ( ( sourceIndex < Decal.size() ) && Decal[sourceIndex] )
+        if ( ( sourceIndex < static_cast<int>(Decal.size()) ) && Decal[sourceIndex] )
             //Mesh has the referenced decal
             Decal[sourceIndex]->MakeActive( targetIndex );
         else if (!deflt)
@@ -1048,10 +1050,13 @@ void Mesh::activateTextureUnit( const Technique::Pass::TextureUnit &tu, bool def
         default: throw Exception( "Texture Unit for technique of unhandled kind" );
         }
         break;
+    case Technique::Pass::TextureUnit::None: //chuck_starchaser
+    default:
+        break;
     }
 }
 
-void Mesh::ProcessShaderDrawQueue( int whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr )
+void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr )
 {
     const Technique::Pass &pass = technique->getPass( whichpass );
 
@@ -1202,7 +1207,7 @@ void Mesh::ProcessShaderDrawQueue( int whichpass, int whichdrawqueue, bool zsort
     //Set shader parameters (instance-independent only)
     int activeLightsArrayParam = 0;
     int numLightsParam = 0;
-    for (unsigned int spi = 0; spi < pass.getNumShaderParams(); ++spi) {
+    for (size_t spi = 0; spi < pass.getNumShaderParams(); ++spi) {
         const Technique::Pass::ShaderParam &sp = pass.getShaderParam( spi );
         if (sp.id >= 0) {
             switch (sp.semantic)
@@ -1228,12 +1233,15 @@ void Mesh::ProcessShaderDrawQueue( int whichpass, int whichdrawqueue, bool zsort
             case Technique::Pass::ShaderParam::ActiveLightsArray:
                 activeLightsArrayParam = sp.id;
                 break;
+            case Technique::Pass::ShaderParam::CloakingPhase: //chuck_starchaser
+            default:
+                break;
             }
         }
     }
     //Activate texture units
-    unsigned int tui;
-    unsigned int tuimask = 0;
+    size_t tui;
+    size_t tuimask = 0;
     for (tui = 0; tui < pass.getNumTextureUnits(); ++tui) {
         const Technique::Pass::TextureUnit &tu = pass.getTextureUnit( tui );
         if (tu.targetIndex < 0)
@@ -1301,14 +1309,14 @@ void Mesh::ProcessShaderDrawQueue( int whichpass, int whichdrawqueue, bool zsort
 
             //Render, iterating per light if/as requested
             bool popGlobals = false;
-            int  maxiter    = 1;
+            size_t maxiter    = 1;
             int  maxlights  = lights.size()+numGlobalLights;
-            int  nlights    = 0;
+            size_t nlights    = 0;
             if (pass.perLightIteration) {
                 maxlights = pass.perLightIteration;
                 maxiter   = pass.maxIterations;
             }
-            for (int iter = 0, lightnum = 0, nlights = lights.size()+numGlobalLights;
+            for (size_t iter = 0, lightnum = 0, nlights = lights.size()+numGlobalLights;
                  (iter < maxiter) && ( (pass.perLightIteration == 0 && lightnum == 0) || (lightnum < nlights) );
                  ++iter, lightnum += nlights) {
                 //Setup transform and lights
@@ -1345,6 +1353,15 @@ void Mesh::ProcessShaderDrawQueue( int whichpass, int whichdrawqueue, bool zsort
                         case Technique::Pass::ShaderParam::Damage:
                             GFXShaderConstant( sp.id, c.damage/255.f );
                             break;
+                        case Technique::Pass::ShaderParam::EnvColor: //chuck_starchaser
+                        case Technique::Pass::ShaderParam::DetailPlane0:
+                        case Technique::Pass::ShaderParam::DetailPlane1:
+                        case Technique::Pass::ShaderParam::NumLights:
+                        case Technique::Pass::ShaderParam::ActiveLightsArray:
+                        case Technique::Pass::ShaderParam::GameTime:
+                        case Technique::Pass::ShaderParam::Constant:
+                        default:
+                            break;
                         }
                     }
                 }
@@ -1354,7 +1371,7 @@ void Mesh::ProcessShaderDrawQueue( int whichpass, int whichdrawqueue, bool zsort
                 GFXPopGlobalEffects();
             for (; fxLightsBase < lights.size(); ++fxLightsBase)
                 GFXDeleteLight( lights[fxLightsBase] );
-            int lastPass = technique->getNumPasses();
+            size_t lastPass = technique->getNumPasses();
             if ( 0 != forcelogos && whichpass == lastPass && !(c.cloaked&MeshDrawContext::NEARINVIS) )
                 forcelogos->Draw( c.mat );
             if ( 0 != squadlogos && whichpass == lastPass && !(c.cloaked&MeshDrawContext::NEARINVIS) )
@@ -1381,7 +1398,7 @@ void Mesh::ProcessShaderDrawQueue( int whichpass, int whichdrawqueue, bool zsort
 #define HASDECAL( pass ) ( ( (NUM_PASSES > pass) && Decal[pass] ) )
 #define SAFEDECAL( pass ) ( (HASDECAL( pass ) ? Decal[pass] : black) )
 
-void Mesh::ProcessFixedDrawQueue( int whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr )
+void Mesh::ProcessFixedDrawQueue( size_t whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr )
 {
     const Technique::Pass &pass = technique->getPass( whichpass );
 
@@ -1397,7 +1414,7 @@ void Mesh::ProcessFixedDrawQueue( int whichpass, int whichdrawqueue, bool zsort,
             Decal[tu.targetIndex] = tu.texture.get();
             break;
         case Technique::Pass::TextureUnit::Decal:
-            if ( ( tu.sourceIndex < this->Decal.size() ) && this->Decal[tu.sourceIndex] ) {
+            if ( ( tu.sourceIndex < static_cast<int>(this->Decal.size()) ) && this->Decal[tu.sourceIndex] ) {
                 //Mesh has the referenced decal
                 Decal[tu.targetIndex] = this->Decal[tu.sourceIndex];
             } else {
@@ -1410,15 +1427,25 @@ void Mesh::ProcessFixedDrawQueue( int whichpass, int whichdrawqueue, bool zsort,
                     break;
                 case Technique::Pass::TextureUnit::Decal:
                     //Decal reference as default - risky, but may be cool
-                    if ( ( tu.defaultIndex < this->Decal.size() ) && this->Decal[tu.defaultIndex] )
+                    if ( ( tu.defaultIndex < static_cast<int>(this->Decal.size()) ) && this->Decal[tu.defaultIndex] )
                         //Valid reference, activate
                         Decal[tu.targetIndex] = this->Decal[tu.defaultIndex];
                     else
                         //Invalid reference, activate global default (null)
                         Decal[tu.targetIndex] = NULL;
                     break;
+                case Technique::Pass::TextureUnit::None: //chuck_starchaser
+                case Technique::Pass::TextureUnit::Environment:
+                case Technique::Pass::TextureUnit::Detail:
+                default:
+                    break;
                 }
             }
+            break;
+        case Technique::Pass::TextureUnit::None: //chuck_starchaser
+        case Technique::Pass::TextureUnit::Environment:
+        case Technique::Pass::TextureUnit::Detail:
+        default:
             break;
         }
     }
@@ -1604,8 +1631,11 @@ void Mesh::ProcessFixedDrawQueue( int whichpass, int whichdrawqueue, bool zsort,
         {
         case BASE_PASS:
             if ( DecalSize > ( whichpass = ( ( nomultienv && HASDECAL( ENVSPEC_TEX ) ) ? DAMAGE_PASS : ENVSPEC_PASS ) ) )
-                if ( (nomultienv && whichpass == ENVSPEC_PASS) || HASDECAL( whichpass ) ) break;
-                else break;
+            {
+                if ( (nomultienv && whichpass == ENVSPEC_PASS) || HASDECAL( whichpass ) )
+                    break;
+            }
+            break; //FIXME Nothing is done here! --chuck_starchaser
         case ENVSPEC_PASS:
             if (whichpass == ENVSPEC_PASS) {
                 //Might come from BASE_PASS and want to go to DAMAGE_PASS
@@ -1625,8 +1655,11 @@ void Mesh::ProcessFixedDrawQueue( int whichpass, int whichdrawqueue, bool zsort,
             }
         case DAMAGE_PASS:
             if ( DecalSize > (whichpass = GLOW_PASS) )
-                if ( HASDECAL( whichpass ) ) break;
-                else break;
+            {
+                if ( HASDECAL( whichpass ) )
+                    break;
+            }
+            break; //FIXME Nothing is done here! --chuck_starchaser
         default:
             whichpass++;             //always increment pass number, otherwise infinite loop espresso
         }
@@ -1677,11 +1710,11 @@ void Mesh::CreateLogos( MeshXML *xml, int faction, Flightgroup *fg )
                 norm1.Set( 0, 1, 0 );
                 norm2.Set( 1, 0, 0 );
                 if (xml->logos[ind].refpnt.size() > 2) {
-                    if (xml->logos[ind].refpnt[0] < xml->vertices.size()
+                    if (   xml->logos[ind].refpnt[0] < static_cast<int>(xml->vertices.size())
                         && xml->logos[ind].refpnt[0] >= 0
-                        && xml->logos[ind].refpnt[1] < xml->vertices.size()
+                        && xml->logos[ind].refpnt[1] < static_cast<int>(xml->vertices.size())
                         && xml->logos[ind].refpnt[1] >= 0
-                        && xml->logos[ind].refpnt[2] < xml->vertices.size()
+                        && xml->logos[ind].refpnt[2] < static_cast<int>(xml->vertices.size())
                         && xml->logos[ind].refpnt[2] >= 0) {
                         norm2 = Vector( xml->vertices[xml->logos[ind].refpnt[1]].x
                                         -xml->vertices[xml->logos[ind].refpnt[0]].x,

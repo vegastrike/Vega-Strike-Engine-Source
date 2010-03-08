@@ -262,6 +262,7 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
     float flotsize = 1;
     MeshXML::Names elem = (MeshXML::Names) MeshXML::element_map.lookup( name );
     MeshXML::Names top; //FIXME If state stack is empty, top is used uninitialized !!!
+    top = MeshXML::UNKNOWN; //FIXME this line temporarily added by chuck_starchaser
     if (xml->state_stack.size() > 0)
         top = *xml->state_stack.rbegin();
     xml->state_stack.push_back( elem );

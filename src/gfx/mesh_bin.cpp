@@ -257,7 +257,7 @@ void Mesh::LoadBinary( const char *filename, int faction )
     float  *rotations  = new float[numforcelogo];
     float  *offset     = new float[numforcelogo];
     char    polytype;
-    int     offst;
+    int     offst; //FIXME
     Vector *Ref;
     Ref = new Vector[numforcelogo];
     for (ii = 0; ii < numforcelogo; ii++) {
@@ -325,6 +325,9 @@ void Mesh::LoadBinary( const char *filename, int faction )
             Ref[ii].j = vertexlist[offst].y-vertexlist[offst+3].y;
             Ref[ii].k = vertexlist[offst].z-vertexlist[offst+3].z;
             break;
+        default:
+            offst = 0.0f; //FIXME added by chuck_starchaser to shut off warnings; please verify correctness
+            break;
         }
         switch (polytype)
         {
@@ -339,6 +342,8 @@ void Mesh::LoadBinary( const char *filename, int faction )
             Ref[ii].j = -Ref[ii].j;
             Ref[ii].k = -Ref[ii].k;
             break;
+        default:
+            break; //FIXME added by chuck_starchaser to shut off warnings; please verify correctness
         }
         PolyNormal[ii] = PolygonNormal(
             Vector( vertexlist[offst].x, vertexlist[offst].y, vertexlist[offst].z ),
@@ -462,6 +467,9 @@ void Mesh::LoadBinary( const char *filename, int faction )
             Ref[ii].j = vertexlist[offst].y-vertexlist[offst+3].y;
             Ref[ii].k = vertexlist[offst].z-vertexlist[offst+3].z;
             break;
+        default:
+            offst = 0.0f; //FIXME added by chuck_starchaser to shut off warnings; please verify correctness
+            break;
         }
         switch (polytype)
         {
@@ -476,6 +484,8 @@ void Mesh::LoadBinary( const char *filename, int faction )
             Ref[ii].j = -Ref[ii].j;
             Ref[ii].k = -Ref[ii].k;
             break;
+        default:
+            break; //FIXME added by chuck_starchaser to shut off warnings; please verify correctness
         }
         PolyNormal[ii] = PolygonNormal(
             Vector( vertexlist[offst].x, vertexlist[offst].y, vertexlist[offst].z ),

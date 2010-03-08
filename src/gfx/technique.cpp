@@ -250,21 +250,21 @@ static void parseFloat4( const std::string &s, float value[4] )
 
 using namespace __impl;
 
-Technique::Pass::Pass() :
-    type( FixedPass )
+Technique::Pass::Pass()
+    : program( 0 )
+    , type( FixedPass )
     , colorWrite( true )
     , zWrite( True )
     , perLightIteration( 0 )
     , maxIterations( 0 )
-    , program( 0 )
     , blendMode( Default )
-    , sequence( 0 )
     , depthFunction( LEqual )
     , cullMode( DefaultFace )
     , polyMode( Fill )
     , offsetFactor( 0 )
     , offsetUnits( 0 )
     , lineWidth( 1 )
+    , sequence( 0 )
 {}
 
 Technique::Pass::~Pass()
@@ -321,6 +321,10 @@ void Technique::Pass::addTextureUnit( const string &source,
         if (dsep == string::npos) throw InvalidParameters( "File reference missing path" );
         newTU.defaultPath.assign( deflt, dsep+1, string::npos );
         break;
+    case TextureUnit::None: //FIXME added by chuck_starchaser; please verify correctness
+    case TextureUnit::Environment: //FIXME added by chuck_starchaser; please verify correctness
+    default: //FIXME added by chuck_starchaser; please verify correctness
+        break; //FIXME added by chuck_starchaser; please verify correctness
     }
 }
 
