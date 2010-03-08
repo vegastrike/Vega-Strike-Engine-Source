@@ -1568,7 +1568,6 @@ static GFXColor MountColor( Mount *mnt )
     case Mount::DESTROYED:
         mountcolor = GFXColor( 1, 0, 0, 1 );
         return mountcolor;
-drawme:
     case Mount::INACTIVE:
         mountcolor = GFXColor( 1, 1, 1, 1 );
         return mountcolor;
@@ -1825,8 +1824,8 @@ void VDU::Draw( GameCockpit *parentcp, Unit *parent, const GFXColor &color )
     float delautotime = UniverseUtil::GetGameTime()-parentcp->autoMessageTime;
     static float auto_switch_lim =
         XMLSupport::parse_float( vs_config->getVariable( "graphics", "auto_message_nav_switch_time_lim", ".15" ) );
-    if (delautotime < auto_switch_lim && parentcp->autoMessage.length() != 0) {
-        if ( thismode.back() != COMM && (posmodes&NAV != 0) ) {
+    if ( (delautotime<auto_switch_lim) && (parentcp->autoMessage.length()!=0) ) {
+        if ( (thismode.back()!=COMM) && ((posmodes&NAV)!=0) ) {
             thismode.back() = NAV;
             parentcp->autoMessageTime -= auto_switch_lim*1.125;
         }
@@ -1922,6 +1921,8 @@ void VDU::Draw( GameCockpit *parentcp, Unit *parent, const GFXColor &color )
     case OBJECTIVES:
         DrawVDUObjectives( parent );
         break;
+    default:
+        break; //FIXME --chuck_starchaser; please verify correctness and/or add a errlog or throw
     }
 }
 
@@ -1952,6 +1953,13 @@ void UpdateViewstyle( VIEWSTYLE &vs )
         break;
     case CP_TARGET:
         vs = CP_PANTARGET;
+        break;
+    case CP_VIEWTARGET: //FIXME cases not previously handled in switch --added by chuck_starchaser; please verify correctness
+    case CP_FIXED:
+    case CP_FIXEDPOS:
+    case CP_FIXEDPOSTARGET:
+    case CP_NUMVIEWS:
+    default:
         break;
     }
 }

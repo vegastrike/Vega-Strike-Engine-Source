@@ -510,14 +510,14 @@ void NavigationSystem::DrawMission()
     drawdescription( " ", ( originx+(0.3*deltax) ), (originy), 1, 1, 0, screenoccupation, GFXColor( .3, 1, .3, 1 ) );
     drawdescription( " ", ( originx+(0.3*deltax) ), (originy), 1, 1, 0, screenoccupation, GFXColor( .3, 1, .3, 1 ) );
 
-    int    numfactions    = FactionUtil::GetNumFactions();
-    int    i = 0;
+    size_t numfactions    = FactionUtil::GetNumFactions();
+    size_t i = 0;
     string factionname    = "factionname";
     float  relation       = 0.0;
     static string disallowedFactions = vs_config->getVariable( "graphics", "unprintable_factions", "" );
     static string disallowedExtension = vs_config->getVariable( "graphics", "unprintable_faction_extension", "citizen" );
     int    totkills       = 0;
-    int    fac_loc_before = 0, fac_loc = 0, fac_loc_after = 0;
+    size_t fac_loc_before = 0, fac_loc = 0, fac_loc_after = 0;
     for (; i < numfactions; ++i) {
         factionname = FactionUtil::GetFactionName( i );
         if (factionname != "neutral" && factionname != "privateer" && factionname != "planets" && factionname != "upgrades") {

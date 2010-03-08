@@ -290,7 +290,7 @@ bool NavPath::evaluate()
 {
     NavigationSystem::CachedSystemIterator &systemIter = _Universe->AccessCockpit()->AccessNavSystem()->systemIter;
     path.clear();
-    static int max_size = XMLSupport::parse_int( vs_config->getVariable( "graphics", "nav_max_search_size", "16384" ) );
+    static size_t max_size = XMLSupport::parse_int( vs_config->getVariable( "graphics", "nav_max_search_size", "16384" ) );
     if ( !isComplete() )
         return false;
     if ( isAbsolute() ) {
@@ -308,7 +308,7 @@ bool NavPath::evaluate()
         unsigned midNode;
         unsigned midNodePrevOri;
         unsigned midNodePrevDest;
-
+        midNodePrevOri = midNodePrevDest = 0; //to shut up a warning about possibly used uninitialized --chuck_starchaser
         bool     oriTurn = true;
         deque< unsigned > *front;
         unsigned visitMark;
@@ -396,7 +396,7 @@ bool NavPath::evaluate()
         deque< unsigned > frontier = source->initSearchQueue();
         set< unsigned >   origins;
         bool     found = false;
-        unsigned index, destIndex;
+        unsigned index, destIndex = 0;
         for (unsigned i = 0; i < frontier.size(); ++i) {
             index = frontier.front();
             frontier.pop_front();

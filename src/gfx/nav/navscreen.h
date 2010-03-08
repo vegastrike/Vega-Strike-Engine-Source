@@ -149,7 +149,7 @@ private:
     class navscreenoccupied*screenoccupation;
     class Mesh*mesh[NAVTOTALMESHCOUNT];
     int   reverse;
-    int   rotations;
+    int   rotations; //tried to change to unsigned but gazillions of comparisons to int crop up --chuck_starchaser
     int   axis;
     int   configmode;
 

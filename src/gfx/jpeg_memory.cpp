@@ -156,7 +156,7 @@ void jpeg_decompress( unsigned char *dst, unsigned char *src, int size, int *w, 
 {
     struct jpeg_decompress_struct cinfo;
     struct jpeg_error_mgr jerr;
-    int line_size, y;
+    size_t line_size, y;
     unsigned char *dstcur;
 
     cinfo.err = jpeg_std_error( &jerr );

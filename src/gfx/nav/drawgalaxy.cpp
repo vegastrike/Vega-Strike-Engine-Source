@@ -158,15 +158,6 @@ static void DrawNode( int type,
 
 class systemdrawnode
 {
-public:
-    bool operator<( const systemdrawnode &a ) const
-    {
-        return source < a.source;
-    }
-    bool operator==( const systemdrawnode &a ) const
-    {
-        return source == a.source;
-    }
     int   type;
     float size;
     float x;
@@ -180,6 +171,19 @@ public:
     char     color;
     GFXColor race;
     navscreenoccupied *screenoccupation;
+public:
+    unsigned getIndex() const
+    {
+        return index;
+    }
+    friend bool operator<( const systemdrawnode &a,  const systemdrawnode &b )
+    {
+        return a.source < b.source;
+    }
+    friend bool operator==( const systemdrawnode &a,  const systemdrawnode &b )
+    {
+        return a.source == b.source;
+    }
     systemdrawnode( int type,
                     float size,
                     float x,
@@ -188,25 +192,31 @@ public:
                     unsigned index,
                     navscreenoccupied *so,
                     bool moused,
-                    GFXColor race ) :
-        type( type )
+                    GFXColor race )
+        : type( type )
         , size( size )
         , x( x )
         , y( y )
-        , source( source )
         , index( index )
+        , source( source )
         , moused( moused )
         , color( GetSystemColor( source ) )
         , race( race )
-        , screenoccupation( so ) {}
-    systemdrawnode() : size( SYSTEM_DEFAULT_SIZE )
+        , screenoccupation( so )
+    {
+    }
+    systemdrawnode()
+        : size( SYSTEM_DEFAULT_SIZE )
         , x( 0 )
         , y( 0 )
+        , index( 0 )
+        , source()
         , moused( false )
         , color( 'v' )
         , race( GrayColor )
-        , screenoccupation( NULL ) {}
-
+        , screenoccupation( NULL )
+    {
+    }
     void draw( bool mouseover = false, bool willclick = false )
     {
         DrawNode( type, size, x, y, source, screenoccupation, moused, race, mouseover, willclick );
@@ -344,8 +354,8 @@ NavigationSystem::CachedSystemIterator::SystemInfo::SystemInfo( const string &na
     //Eww... double for loop!
     UpdateColor();
     if (csi) {
-        for (int i = 0; i < destinations.size(); ++i)
-            for (int j = 0; j < csi->systems.size(); ++j)
+        for (size_t i = 0; i < destinations.size(); ++i)
+            for (size_t j = 0; j < csi->systems.size(); ++j)
                 if ( (*csi)[j].name == destinations[i] ) {
                     lowerdestinations.push_back( j );
                     if ( std::find( (*csi)[j].lowerdestinations.begin(), (*csi)[j].lowerdestinations.end(),
@@ -379,7 +389,7 @@ void NavigationSystem::CachedSystemIterator::SystemInfo::loadData( map< string, 
 
     UpdateColor();
     const vector< std::string > &destinations = _Universe->getAdjacentStarSystems( name );
-    for (int i = 0; i < destinations.size(); ++i)
+    for (size_t i = 0; i < destinations.size(); ++i)
         if (index_table->count( destinations[i] ) != 0)
             lowerdestinations.push_back( (*index_table)[destinations[i]] );
 }
@@ -1027,7 +1037,7 @@ void NavigationSystem::DrawGalaxy()
         if (mouse_wentdown[2] == 1)             //mouse button went down for mouse button 2(standard)
             rotations += 1;
     }
-    if ( rotations >= mouselist.size() )        //dont rotate more than there is
+    if ( rotations >= static_cast<int>(mouselist.size()) )        //dont rotate more than there is
         rotations = 0;
     systemdrawlist tmpv;
     int siz = mouselist.size();
@@ -1042,7 +1052,7 @@ void NavigationSystem::DrawGalaxy()
         if (mouse_wentdown[0] == 1) {
             //mouse button went down for mouse button 1
             unsigned oldselection = systemselectionindex;
-            systemselectionindex = mouselist.back().index;
+            systemselectionindex = mouselist.back().getIndex();
             //JUST FOR NOW, target == current selection. later it'll be used for other shit, that will then set target.
             if (systemselectionindex == oldselection)
                 setFocusedSystemIndex( systemselectionindex );
