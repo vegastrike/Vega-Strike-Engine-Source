@@ -79,7 +79,8 @@ GFXLight::GFXLight( const bool enabled,
                     const GFXColor &attenuate,
                     const GFXColor &direction,
                     float exp,
-                    float cutoff )
+                    float cutoff,
+                    float size )
 {
     target  = -1;
     options = 0;
@@ -91,6 +92,7 @@ GFXLight::GFXLight( const bool enabled,
     memcpy( this->direction, &direction, sizeof (this->direction) );
     this->exp    = exp;
     this->cutoff = cutoff;
+    this->size   = size;
     apply_attenuate( attenuated() );
     if (enabled)
         this->enable();

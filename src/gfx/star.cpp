@@ -466,13 +466,12 @@ void Stars::Draw()
         static float star_spread_attenuation =
             XMLSupport::parse_float( vs_config->getVariable( "graphics", "star_spread_attenuation", ".2" ) );
         GFXPushGlobalEffects();
-        GFXLight     FadeLight( true, GFXColor( cp.i, cp.j, cp.k ), GFXColor( 0, 0, 0, 1 ), GFXColor( 0, 0, 0, 1 ), GFXColor(
-                                   1,
-                                   1,
-                                   1,
-                                   1 ),
-                               GFXColor( .01, 0, 1/(star_spread_attenuation*star_spread_attenuation*spread*spread) ) );
-        GFXCreateLight( ligh, FadeLight, true );
+        GFXLight fadeLight( true, GFXColor( cp.i, cp.j, cp.k ), 
+                            GFXColor( 0, 0, 0, 1 ), 
+                            GFXColor( 0, 0, 0, 1 ), 
+                            GFXColor( 1, 1, 1, 1 ),
+                            GFXColor( .01, 0, 1/(star_spread_attenuation*star_spread_attenuation*spread*spread) ) );
+        GFXCreateLight( ligh, fadeLight, true );
         GFXEnable( LIGHTING );
     } else {
         GFXDisable( LIGHTING );

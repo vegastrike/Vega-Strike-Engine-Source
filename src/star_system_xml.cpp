@@ -377,7 +377,7 @@ static Vector ComputeRotVel( float rotvel, const QVector &r, const QVector &s )
     }
 }
 
-static void GetLights( const vector< GFXLight > &origlights, vector< GFXLightLocal > &curlights, const char *str )
+static void GetLights( const vector< GFXLight > &origlights, vector< GFXLightLocal > &curlights, const char *str, float lightSize )
 {
     int   tint;
     char  isloc;
@@ -389,6 +389,9 @@ static void GetLights( const vector< GFXLight > &origlights, vector< GFXLightLoc
         assert( tint < (int) origlights.size() );
         lloc.ligh    = origlights[tint];
         lloc.islocal = (numel > 1 && isloc == 'l');
+        
+        lloc.ligh.setSize(lightSize);
+        
         curlights.push_back( lloc );
         while ( isspace( *st ) )
             ++st;
@@ -1078,7 +1081,7 @@ addlightprop:
                 insideout = XMLSupport::parse_bool( (*iter).value );
                 break;
             case LIGHT:
-                GetLights( xml->lights, curlights, (*iter).value.c_str() );
+                GetLights( xml->lights, curlights, (*iter).value.c_str(), radius );
                 //assert (parse_int ((*iter).value)<xml->lights.size());
                 //curlights.push_back (xml->lights[parse_int ((*iter).value)]);
                 break;

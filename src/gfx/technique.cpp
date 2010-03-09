@@ -196,6 +196,8 @@ static Technique::Pass::ShaderParam::Semantic parseAutoParamSemantic( const std:
         enumMap["DetailPlane1"]      = Technique::Pass::ShaderParam::DetailPlane1;
         enumMap["NumLights"]         = Technique::Pass::ShaderParam::NumLights;
         enumMap["ActiveLightsArray"] = Technique::Pass::ShaderParam::ActiveLightsArray;
+        enumMap["ApparentLightSizeArray"] = 
+                                       Technique::Pass::ShaderParam::ApparentLightSizeArray;
         enumMap["GameTime"]          = Technique::Pass::ShaderParam::GameTime;
     }
     return parseEnum( s, enumMap );

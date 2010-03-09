@@ -5,17 +5,93 @@
 #include "hashtable_3d.h"
 #include "gl_light.h"
 
-void GFXUploadLightState( int max_light_location, int active_light_array, bool shader )
+#include <math.h>
+#include "gfx/matrix.h"
+
+void GFXUploadLightState( int max_light_location, int active_light_array, int apparent_light_size_array, bool shader )
 {
-    int maxlight = 0;
+    // FIXME: (klauss) Very bad thing: static variables initialized with heap-allocated arrays...
     static GLint *lightData = new GLint[GFX_MAX_LIGHTS];
-    int maxval   = 0;
-    for (int i = 0; i < (int) GFX_MAX_LIGHTS; ++i) {
-        lightData[i] = 0;         //glIsEnabled(GL_LIGHT0+i);
-        if (GLLights[i].options&OpenGLL::GL_ENABLED)
-            lightData[i] = 1;
-        if (lightData[i]) maxval = i;
+    static float *lightSizes = new float[GFX_MAX_LIGHTS*4];
+    
+    Matrix modelview;
+    
+    if (shader) {
+        // if we're using shaders, we'll need the modelview matrix
+        // to properly compute light-model apparent light sizes
+        GFXGetMatrixModel(modelview);
     }
+    
+    size_t maxval = 0;
+    for (size_t i = 0; i < GFX_MAX_LIGHTS; ++i) {
+        if (GLLights[i].options & OpenGLL::GL_ENABLED) {
+            lightData[i] = 1;
+            maxval = i;
+            
+            // Only bother with apparent light size if there is a shader
+            if (shader) {
+                // We'll compute apparent light size by transforming the origin
+                // position by the modelview matrix, and computing the apparent
+                // size of a lightsource to that center and the proper size
+                // as entered in _gllights.
+                //
+                // This assumes the modelview matrix will be already set to
+                // the proper value when the light is enabled. It should.
+                //
+                // NOTE: We explicitly ignore rotation and scaling parts of the
+                // matrix. For one, rotation is meaningless for this calculation.
+                // For two, scaling would be nullified when scaling both distance
+                // and light size, so it would only waste time.
+                
+                const gfx_light &light = (*_llights)[GLLights[i].index];
+                QVector lightPos = light.getPosition() - modelview.p;
+                
+                double lightDistance = lightPos.Magnitude();
+                double lightSize = light.getSize();
+                float lightCosAngle;
+                float lightSolidAngle;
+                
+                // NOTE: assuming lightSize > 0, the following condition
+                //  assures a nonzero distance to light, which would produce
+                //  NaNs in the following math.
+                if (lightDistance > lightSize) {
+                    // Light cos angle is:
+                    //  Vector(1, 0, 0) . Vector(lightDistance, lightSize, 0).Normalize()
+                    // Which happens to resolve to:
+                    lightCosAngle = float(lightDistance / (lightDistance + lightSize));
+                    
+                    // Light steradians is:
+                    //  Steradians = Fractional Area * 4 * Pi
+                    //  Fractional Area = Apparent light area / Sky area at light distance
+                    //  Apparent light area = Pi * lightSize^2
+                    //  Sky area = 4 * Pi * lightDistance^2
+                    // Do the math...
+                    lightSolidAngle = float(M_PI
+                        * ( lightSize / lightDistance )
+                        * ( lightSize / lightDistance ));
+                } else {
+                    // nil distance, avoid infinites that kill shaders
+                    // NOTE: the constants aren't capricious, they're the right
+                    //  constants for a light coming from all around.
+                    lightCosAngle = 0.f;
+                    lightSolidAngle = 4.f * M_PI;
+                }
+                
+                lightSizes[i*4+0] = float(lightSize);
+                lightSizes[i*4+1] = lightCosAngle;
+                lightSizes[i*4+2] = lightSolidAngle;
+                lightSizes[i*4+3] = 0.f;
+            }
+        }
+        else {
+            lightData[i] = 0;
+            lightSizes[i*4+0] = 0.f;
+            lightSizes[i*4+1] = 0.f;
+            lightSizes[i*4+2] = 0.f;
+            lightSizes[i*4+3] = 0.f;
+        }
+    }
+    
     if (!shader) {
         //only bother with actual GL state in the event of lack of shaders
         for (int i = 0; i < (int) GFX_MAX_LIGHTS; ++i) {
@@ -25,12 +101,15 @@ void GFXUploadLightState( int max_light_location, int active_light_array, bool s
             else if (lightData[i] && !isenabled)
                 glEnable( GL_LIGHT0+i );
         }
+    } else {
+        //only bother with shader constants it there is a shader
+        if (active_light_array >= 0)
+            GFXShaderConstantv( active_light_array, GFX_MAX_LIGHTS, (int*) lightData );
+        if (max_light_location >= 0)
+            GFXShaderConstanti( max_light_location, maxval );
+        if (apparent_light_size_array >= 0)
+            GFXShaderConstant4v( apparent_light_size_array, GFX_MAX_LIGHTS, (float*)lightSizes );
     }
-    //FIXME bottom line is debug only
-    if (active_light_array >= 0)
-        GFXShaderConstantv( active_light_array, GFX_MAX_LIGHTS, (int*) lightData );
-    if (max_light_location >= 0)
-        GFXShaderConstanti( max_light_location, maxval );
 }
 
 #define GFX_HARDWARE_LIGHTING

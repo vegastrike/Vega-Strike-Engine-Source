@@ -72,12 +72,11 @@ public:
         TTL = TTD = delta = 0;
     }
 ///Makes a meshFX given TTL and delta values.
-    MeshFX( const float TTL, const float delta, const bool enabled, const GFXColor &vect, const GFXColor &diffuse =
-               GFXColor( 0, 0, 0, 1 ), const GFXColor &specular = GFXColor( 0, 0, 0, 1 ), const GFXColor &ambient = GFXColor(
-               0,
-               0,
-               0,
-               1 ), const GFXColor &attenuate = GFXColor( 1, 0, 0 ) );
+    MeshFX( const float TTL, const float delta, const bool enabled, const GFXColor &vect, 
+            const GFXColor &diffuse = GFXColor( 0, 0, 0, 1 ), 
+            const GFXColor &specular = GFXColor( 0, 0, 0, 1 ), 
+            const GFXColor &ambient = GFXColor( 0, 0, 0, 1 ), 
+            const GFXColor &attenuate = GFXColor( 1, 0, 0 ) );
 ///Merges two MeshFX in a given way to seamlessly blend multiple hits on a shield
     void MergeLights( const MeshFX &other );
 ///updates the growth and death of the FX. Returns false if dead

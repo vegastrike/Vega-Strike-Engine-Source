@@ -9,7 +9,8 @@ GFXLight::GFXLight( const bool enabled,
                     const GFXColor &attenuate,
                     const GFXColor &direction,
                     float exp,
-                    float cutoff ) {}
+                    float cutoff,
+                    float size ) {}
 void GFXVertexList::RefreshDisplayList() {}
 
 void GFXVertexList::BeginDrawState( GFXBOOL lock ) {}

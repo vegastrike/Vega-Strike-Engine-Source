@@ -1205,8 +1205,9 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
     GFXActivateShader( pass.getCompiledProgram() );
 
     //Set shader parameters (instance-independent only)
-    int activeLightsArrayParam = 0;
-    int numLightsParam = 0;
+    int activeLightsArrayParam = -1;
+    int apparentLightSizeArrayParam = -1;
+    int numLightsParam = -1;
     for (size_t spi = 0; spi < pass.getNumShaderParams(); ++spi) {
         const Technique::Pass::ShaderParam &sp = pass.getShaderParam( spi );
         if (sp.id >= 0) {
@@ -1232,6 +1233,9 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
                 break;
             case Technique::Pass::ShaderParam::ActiveLightsArray:
                 activeLightsArrayParam = sp.id;
+                break;
+            case Technique::Pass::ShaderParam::ApparentLightSizeArray:
+                apparentLightSizeArrayParam = sp.id;
                 break;
             case Technique::Pass::ShaderParam::CloakingPhase: //chuck_starchaser
             default:
@@ -1334,10 +1338,13 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
                 GFXLoadMatrixModel( c.mat );
 
                 //Set shader parameters (instance-specific only)
+                // NOTE: keep after GFXLoadMatrixModel
                 GFXUploadLightState(
                     numLightsParam,
                     activeLightsArrayParam,
+                    apparentLightSizeArrayParam,
                     true );
+                
                 for (unsigned int spi = 0; spi < pass.getNumShaderParams(); ++spi) {
                     const Technique::Pass::ShaderParam &sp = pass.getShaderParam( spi );
                     if (sp.id >= 0) {

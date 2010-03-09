@@ -469,7 +469,7 @@ int GFXShaderConstantv( int name, unsigned int numvals, const float *value );
 int GFXShaderConstantv( int name, unsigned int numvals, const int *value );
 bool GFXDefaultShaderSupported();
 void GFXReloadDefaultShader();
-void GFXUploadLightState( int max_light_location, int active_light_array, bool shader );
+void GFXUploadLightState( int max_light_location, int active_light_array, int apparent_light_size_array, bool shader );
 bool GFXShaderReloaded();
 #endif
 

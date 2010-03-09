@@ -182,7 +182,21 @@ public:
                 GameTime,
 
                 /** Not an auto-param, a manual param, with constant value */
-                Constant
+                Constant,
+                
+                /** LightApparentSizeArray
+                 * An float4 array with apparent sizes of all lights
+                 * (only active ones have valid data).
+                 *
+                 * The components each have a different "view" of "apparent size"
+                 *   x : the worldspace size of the light
+                 *   y : cos(angle) where anlgle is the angle formed by the light
+                 *       vector towards the center and the light vector towards
+                 *       the edge of the light source.
+                 *   z : solid angle of the light source in steradians
+                 *   w : reserved
+                 */
+                ApparentLightSizeArray
             };
 
             std::string name;

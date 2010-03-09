@@ -353,7 +353,10 @@ public:
     float direction[3];
     float exp;
     float cutoff;
-public: GFXLight()
+    float size;
+    
+public: 
+    GFXLight()
     {
         //vect[0]=vect[1]=vect[2]=vect[3]=0;
         vect[0] = vect[1] = vect[2] = 0;
@@ -366,24 +369,29 @@ public: GFXLight()
         target = -1; //physical GL light its saved in
 
         direction[0] = direction[1] = direction[2] = 0.0;
-        exp = 0.0;
-        cutoff = 180.0;
+        exp = 0.0f;
+        cutoff = 180.0f;
+        size = 0.0f;
     }
 
-    GFXLight( const bool enabled, const GFXColor &vect, const GFXColor &diffuse = GFXColor( 0,
-                                                                                            0,
-                                                                                            0,
-                                                                                            1 ), const GFXColor &specular =
-                  GFXColor( 0, 0, 0, 1 ), const GFXColor &ambient = GFXColor( 0,
-                                                                              0,
-                                                                              0,
-                                                                              1 ), const GFXColor &attenuate =
-                  GFXColor( 1, 0, 0 ), const GFXColor &direction = GFXColor( 0,
-                                                                             0,
-                                                                             0 ), float exp = 0.0, float cutoff = 180.0 );
+    GFXLight( const bool enabled, const GFXColor &vect, 
+              const GFXColor &diffuse = GFXColor( 0, 0, 0, 1 ), 
+              const GFXColor &specular = GFXColor( 0, 0, 0, 1 ), 
+              const GFXColor &ambient = GFXColor( 0, 0, 0, 1 ), 
+              const GFXColor &attenuate = GFXColor( 1, 0, 0 ), 
+              const GFXColor &direction = GFXColor( 0, 0, 0 ), 
+              float exp = 0.0f, 
+              float cutoff = 180.0f,
+              float size = 0.0f );
 
     void SetProperties( enum LIGHT_TARGET, const GFXColor &color );
     GFXColor GetProperties( enum LIGHT_TARGET ) const;
+    
+    void setSize(float size_) { size = size_; }
+    float getSize() const { return size; }
+    
+    Vector getPosition() const { return Vector(vect[0], vect[1], vect[2]); }
+    
     void disable();
     void enable();
     bool attenuated() const;
