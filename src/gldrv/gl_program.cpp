@@ -370,7 +370,7 @@ int GFXShaderConstant( int name, float v1 )
     return 0;
 }
 
-int GFXShaderConstantv( int name, int count, const float *values )
+int GFXShaderConstantv( int name, unsigned int count, const float *values )
 {
     if (1
 #ifndef __APPLE__
@@ -383,7 +383,7 @@ int GFXShaderConstantv( int name, int count, const float *values )
     return 0;
 }
 
-int GFXShaderConstant4v( int name, int count, const float *values )
+int GFXShaderConstant4v( int name, unsigned int count, const float *values )
 {
     if (1
 #ifndef __APPLE__
