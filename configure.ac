@@ -741,7 +741,9 @@ fi
 AC_DEFUN([CHECK_FOR_PNG_LIB], [
     AC_MSG_CHECKING([for $PNG_LIB_NAME library])
     LIBS="$PNG_LDOPTS -l$PNG_LIB_NAME"
-    AC_TRY_LINK( , , have_png_lib=yes, have_png_lib=no )
+    AC_TRY_LINK([#include <png.h>], 
+                [unsigned char head[8]; png_sig_cmp(head,0,8); png_set_expand_gray_1_2_4_to_8(NULL);], 
+                have_png_lib=yes, have_png_lib=no )
     AC_MSG_RESULT([$have_png_lib])
 ]) 
 
