@@ -268,7 +268,7 @@ int main( int argc, char *argv[] )
     Python::test();
 #endif
     std::vector< std::vector< char > >temp = ROLES::getAllRolePriorities();
-#if defined (HAVE_SDL)
+#if defined (HAVE_SDL)  
 #ifndef NO_SDL_JOYSTICK
     //&& defined(HAVE_SDL_MIXER)
     if ( SDL_InitSubSystem( SDL_INIT_JOYSTICK ) ) {
@@ -827,7 +827,7 @@ std::string ParseCommandLine( int argc, char **lpCmdLine )
                         cout<<helpmessage;
                         exit( 0 );
                     }
-                    g_game.vsdebug = lpCmdLine[i][8];
+                    g_game.vsdebug = lpCmdLine[i][8] - '0';
                     ++i;
                 }
             }
