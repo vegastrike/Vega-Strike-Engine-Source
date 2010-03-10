@@ -602,7 +602,7 @@ static void glut_keyboard_cb( unsigned char ch, int x, int y )
     if (keyboard_func) {
         int gm = glutGetModifiers();
         if (gm)
-            VSFileSystem::dprintf('3', "Down Modifier %d for char %d %c\n", gm, (int) ch, ch );
+            VSFileSystem::vs_dprintf('3', "Down Modifier %d for char %d %c\n", gm, (int) ch, ch );
         if (gm&GLUT_ACTIVE_CTRL)
             ch = AdjustKeyCtrl( ch );
         (*keyboard_func)(ch, gm, false, x, y);
@@ -620,7 +620,7 @@ static void glut_keyboard_up_cb( unsigned char ch, int x, int y )
     if (keyboard_func) {
         int gm = glutGetModifiers();
         if (gm)
-            VSFileSystem::dprintf('3',"Up Modifier %d for char %d %c\n", gm, (int) ch, ch );
+            VSFileSystem::vs_dprintf('3',"Up Modifier %d for char %d %c\n", gm, (int) ch, ch );
         if (gm&GLUT_ACTIVE_CTRL)
             ch = AdjustKeyCtrl( ch );
         (*keyboard_func)(ch, gm, true, x, y);
@@ -736,14 +736,14 @@ void winsys_init( int *argc, char **argv, char *window_title, char *icon_title )
     char str[1024];
     sprintf( str, "%dx%d:%d@60", g_game.x_resolution, g_game.y_resolution, gl_options.color_depth );
     glutGameModeString( str );
-    VSFileSystem::dprintf('3', "Game Mode Params %dx%d at depth %d @ %d Hz\n", glutGameModeGet( GLUT_GAME_MODE_WIDTH ),
+    VSFileSystem::vs_dprintf('3', "Game Mode Params %dx%d at depth %d @ %d Hz\n", glutGameModeGet( GLUT_GAME_MODE_WIDTH ),
             glutGameModeGet( GLUT_GAME_MODE_WIDTH ), glutGameModeGet( GLUT_GAME_MODE_PIXEL_DEPTH ),
             glutGameModeGet( GLUT_GAME_MODE_REFRESH_RATE ) );
     /* Create a window */
     if ( gl_options.fullscreen && (glutGameModeGet( GLUT_GAME_MODE_POSSIBLE ) != -1) ) {
         glutInitWindowPosition( 0, 0 );
         glutEnterGameMode();
-        VSFileSystem::dprintf('3', "Game Mode Params %dx%d at depth %d @ %d Hz\n", glutGameModeGet(
+        VSFileSystem::vs_dprintf('3', "Game Mode Params %dx%d at depth %d @ %d Hz\n", glutGameModeGet(
                     GLUT_GAME_MODE_WIDTH ), glutGameModeGet( GLUT_GAME_MODE_WIDTH ), glutGameModeGet(
                     GLUT_GAME_MODE_PIXEL_DEPTH ), glutGameModeGet( GLUT_GAME_MODE_REFRESH_RATE ) );
     } else {

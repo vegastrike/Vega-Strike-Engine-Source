@@ -465,27 +465,74 @@ SET(VEGASERVER_SOURCES ${LIBCMDSERVER_SOURCES}
 if(COMMAND cmake_policy)					   
 	cmake_policy(SET CMP0003 OLD) 
 endif(COMMAND cmake_policy)
-SET(CMAKE_CXX_FLAGS_DEBUG " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
+
+OPTION(CPUAMD_k8  "Enable AMD K8 optimizations" 
+    OFF )
+    
+OPTION(CPUAMD_k9  "Enable AMD K9 (sse3) optimizations"
+    OFF )
+OPTION(CPUAMD_k10  "Enable AMD K10 optimizations"
+    OFF )
+OPTION(CPUINTEL_p4 "Enable Intel P4 optimizations"
+    OFF )
+OPTION(CPUINTEL_prescott  "Enable Intel P4 (sse3) optimizations"
+    OFF )
+OPTION(CPUINTEL_nocona "Enable Intel P4 (64bit) optimizations"
+    OFF )
+OPTION(CPUINTEL_core2 "Enable Intel Core2 optimizations"
+    OFF )
+
+
+SET(CPU_OPTS  )
+MARK_AS_ADVANCED( CPU_OPTS )
+
+IF(CPUAMD_k8)
+    SET(CPU_OPTS "-mtune=athlon64 -mfpmath=sse -msse2 -mmmx -m3dnow")
+ELSEIF(CPUAMD_K9)
+    SET(CPU_OPTS "-mtune=k8-sse3 -mfpmath=sse -msse3 -mmmx -m3dnow")
+ELSEIF(CPUINTEL_p4)
+    SET(CPU_OPTS "-mtune=pentium4 -mfpmath=sse -msse2 -mmmx")
+ELSEIF(CPUINTEL_prescott)
+    SET(CPU_OPTS "-mtune=prescott -mfpmath=sse -msse3 -mmmx" )
+ELSEIF(CPUINTEL_nocona)
+    SET(CPU_OPTS "-mtune=nocona -mfpmath=sse -msse3 -mmmx")
+ELSEIF(CPUINTEL_core2)
+    SET(CPU_OPTS "-mtune=core2 -mfpmath=sse -msse3 -mmmx")
+ENDIF(CPUAMD_k8)
+
+
+
+SET(CMAKE_CXX_FLAGS_DEBUG " ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during debug builds."
-    FORCE )
-SET( CMAKE_C_FLAGS_DEBUG " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
+     FORCE )
+SET( CMAKE_C_FLAGS_DEBUG "  ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during debug builds."
-    FORCE )
+     FORCE )
 
 
-SET(CMAKE_CXX_FLAGS_RELEASE " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_RELEASE  "${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during release builds."
+    FORCE)
+SET( CMAKE_C_FLAGS_RELEASE "${CPU_OPTS}  -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+    "Flags used by the C compiler during release builds." 
     FORCE )
-SET( CMAKE_C_FLAGS_RELEASE " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
-    "Flags used by the C compiler during release builds."
-    FORCE )
-
-SET(CMAKE_CXX_FLAGS_REWITHDEBINFO " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Bsymbolic" CACHE STRING "Release linker flags"
+     FORCE )
+MARK_AS_ADVANCED( CLEAR
+    CMAKE_CXX_FLAGS_RELEASE )
+MARK_AS_ADVANCED(
+    CMAKE_C_FLAGS_RELEASE
+    CMAKE_EXE_LINKER_FLAGS_RELEASE
+)
+SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "  ${CPU_OPTS}  -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during release builds."
-    FORCE )
-SET( CMAKE_C_FLAGS_RELWITHDEBINFO " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+     FORCE )
+SET( CMAKE_C_FLAGS_RELWITHDEBINFO "  ${CPU_OPTS}  -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during release builds."
-    FORCE )
+     FORCE )
+    MARK_AS_ADVANCED(
+    CMAKE_CXX_FLAGS_RELWITHDEBINFO
+    CMAKE_C_FLAGS_RELWITHDEBINFO )
 
 
 
@@ -495,15 +542,15 @@ SET(CMAKE_CXX_FLAGS_MAINTAINER " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -
     FORCE )
 SET( CMAKE_C_FLAGS_MAINTAINER " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during maintainer builds."
-    FORCE )
+     FORCE )
 SET( CMAKE_EXE_LINKER_FLAGS_MAINTAINER
     "" CACHE STRING
     "Flags used for linking binaries during maintainer builds."
-    FORCE )
+     FORCE )
 SET( CMAKE_SHARED_LINKER_FLAGS_MAINTAINER
     "" CACHE STRING
     "Flags used by the shared libraries linker during maintainer builds."
-    FORCE )
+     FORCE )
 MARK_AS_ADVANCED(
     CMAKE_CXX_FLAGS_MAINTAINER
     CMAKE_C_FLAGS_MAINTAINER
@@ -512,16 +559,16 @@ MARK_AS_ADVANCED(
 
 
 # Setup profiler mode flags
-SET(CMAKE_CXX_FLAGS_PROFILER "-pg -g2 -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -O3" CACHE STRING
+SET(CMAKE_CXX_FLAGS_PROFILER " ${CPU_OPTS} -O2 -pg -g2 -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -O3" CACHE STRING
     "Flags used by the C++ compiler during profiler builds."
-    FORCE )
-SET( CMAKE_C_FLAGS_PROFILER "-pg -g2 -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -O3" CACHE STRING
+     FORCE )
+SET( CMAKE_C_FLAGS_PROFILER " ${CPU_OPTS} -O2 -pg -g2 -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -O3" CACHE STRING
     "Flags used by the C compiler during profiler builds."
-    FORCE )
+     FORCE )
 SET( CMAKE_EXE_LINKER_FLAGS_PROFILER
-    "" CACHE STRING
+    "-Bsymbolic " CACHE STRING
     "Flags used for linking binaries during profiler builds."
-    FORCE )
+     FORCE )
 SET( CMAKE_SHARED_LINKER_FLAGS_PROFILER
     "" CACHE STRING
     "Flags used by the shared libraries linker during profiler builds."
@@ -533,12 +580,11 @@ MARK_AS_ADVANCED(
     CMAKE_SHARED_LINKER_FLAGS_PROFILER )
 
 
-# Set the default build type to maintainer
-IF(NOT CMAKE_BUILD_TYPE)
-  SET(CMAKE_BUILD_TYPE Maintainer CACHE STRING
-      "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Maintainer Profiler."
-      FORCE)
-ENDIF(NOT CMAKE_BUILD_TYPE)
+# Set the default build type to Release
+#IF(NOT CMAKE_BUILD_TYPE)
+  SET(CMAKE_BUILD_TYPE Release CACHE STRING
+      "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Maintainer Profiler.")
+#ENDIF(NOT CMAKE_BUILD_TYPE)
 
 IF(CMAKE_BUILD_TYPE MATCHES "[Mm][Aa][Ii][Nn][Tt][Aa][Ii][Nn][Ee][Rr]")
   ADD_DEFINITIONS(-DGCC_HASVISIBILITY)
@@ -805,7 +851,7 @@ add_dependencies(vegaserver mesh_tool)
 add_dependencies(vegaserver vssetup)
 # Debug crap 
 get_directory_property(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
-message("Building with CFLAGS: ${CMAKE_CXX_FLAGS}")
+#message("Building with CFLAGS: ${CMAKE_CXX_FLAGS}")
 #message("Linking with : ${TST_LIBS}")
 #message("including : ${TEMP_DIRECTORY}")
 # End Debug Crap 
