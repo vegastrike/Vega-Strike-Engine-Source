@@ -78,7 +78,7 @@ unsigned char * ReadPNG( FILE *fp,
     if (img_color_type == PNG_COLOR_TYPE_PALETTE)
         png_set_palette_to_rgb( png_ptr );
     if (img_color_type == PNG_COLOR_TYPE_GRAY && img_depth < 8)
-        png_set_gray_1_2_4_to_8( png_ptr );
+        png_set_expand_gray_1_2_4_to_8( png_ptr );
     png_set_expand( png_ptr );
     png_read_update_info( png_ptr, info_ptr );
     row_pointers = (unsigned char**) malloc( sizeof (unsigned char*)*sizeY );
