@@ -81,7 +81,7 @@ static inline bool readPng( FILE *fp, Texture::FileData *data, Texture::TextureT
     if (strip_16 && ctype == PNG_COLOR_TYPE_PALETTE)
         png_set_palette_to_rgb( png_ptr );
     if (ctype == PNG_COLOR_TYPE_GRAY && data->bpp < 8)
-        png_set_gray_1_2_4_to_8( png_ptr );
+        png_set_expand_gray_1_2_4_to_8( png_ptr );
     png_set_expand( png_ptr );
     png_read_update_info( png_ptr, info_ptr );
     png_get_IHDR( png_ptr,
@@ -229,7 +229,7 @@ static inline Format getFormat( FILE *fp )
         unsigned char sig[8];
         bogus_return = fread( sig, sizeof (char), 8, fp );
         fseek( fp, 0, SEEK_SET );
-        if ( png_check_sig( sig, 8 ) )
+        if ( !png_sig_cmp( sig, 0, 8 ) )
             return FORMAT_PNG;
     }
     {
