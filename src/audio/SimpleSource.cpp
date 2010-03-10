@@ -11,10 +11,10 @@ namespace Audio {
     {
     }
 
-    SimpleSource::SimpleSource(SharedPtr<Sound> sound, bool looping) throw() :
-        Source(sound, looping),
-        scene(0),
-        playing(false)
+    SimpleSource::SimpleSource(SharedPtr<Sound> sound, bool looping) throw()
+        : Source(sound, looping)
+        , playing(false)
+        , scene(0)
     {
     }
     

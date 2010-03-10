@@ -9,13 +9,13 @@
 
 namespace Audio {
 
-    Listener::Listener() throw() :
-        cosAngleRange(1,1),
-        position(0,0,0),
-        atDirection(0,0,1),
-        upDirection(0,1,0),
-        velocity(0,0,0),
-        radius(1)
+    Listener::Listener() throw()
+        : position(0,0,0)
+        , atDirection(0,0,1)
+        , upDirection(0,1,0)
+        , velocity(0,0,0)
+        , radius(1)
+        , cosAngleRange(1,1)
     {
     }
     

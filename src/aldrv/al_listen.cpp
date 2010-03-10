@@ -12,7 +12,9 @@
 #include "vs_globals.h"
 #include "vsfilesystem.h"
 #include "config_xml.h"
+
 using std::vector;
+
 struct Listener
 {
     Vector pos;
@@ -29,18 +31,22 @@ struct Listener
         ,  rsize( 1 ) {}
 }
 mylistener;
+
 unsigned int totalplaying   = 0;
 const unsigned int hashsize = 47;
+
 struct ApproxSound
 {
     int soundname;
 };
+
 typedef std::vector< ApproxSound >ApproxSoundVec;
 static ApproxSoundVec playingbuffers[hashsize];
 int hash_sound( unsigned int buffer )
 {
     return buffer%hashsize;
 }
+
 float AUDDistanceSquared( const int sound )
 {
 #ifdef HAVE_AL
@@ -50,10 +56,12 @@ float AUDDistanceSquared( const int sound )
     return 0.0;
 #endif
 }
+
 QVector AUDListenerLocation()
 {
     return mylistener.pos.Cast();
 }
+
 char AUDQueryAudability( const int sound, const Vector &pos, const Vector &vel, const float gain )
 {
 #ifdef HAVE_AL
@@ -108,6 +116,7 @@ char AUDQueryAudability( const int sound, const Vector &pos, const Vector &vel, 
 #endif
     return 1;
 }
+
 void AUDAddWatchedPlayed( const int sound, const Vector &pos )
 {
 #ifdef HAVE_AL
@@ -122,13 +131,14 @@ void AUDAddWatchedPlayed( const int sound, const Vector &pos )
     }
 #endif
 }
+
 typedef std::vector< int >vecint;
 vecint soundstodelete;
 
 void AUDRefreshSounds()
 {
 #ifdef HAVE_AL
-    static int i = 0;
+    static unsigned int i = 0;
     if (i >= hashsize) {
         i = 0;
     } else {
@@ -160,6 +170,7 @@ void AUDRefreshSounds()
     }
 #endif
 }
+
 void AUDListener( const QVector &pos, const Vector &vel )
 {
 #ifdef HAVE_AL
@@ -174,12 +185,14 @@ void AUDListener( const QVector &pos, const Vector &vel )
     //printf ("(%f,%f,%f) <%f %f %f>\n",pos.i,pos.j,pos.k,vel.i,vel.j,vel.k);
 #endif
 }
+
 void AUDListenerSize( const float rSize )
 {
 #ifdef HAVE_AL
     mylistener.rsize = rSize*rSize;
 #endif
 }
+
 void AUDListenerOrientation( const Vector &p, const Vector &q, const Vector &r )
 {
 #ifdef HAVE_AL
@@ -192,6 +205,7 @@ void AUDListenerOrientation( const Vector &p, const Vector &q, const Vector &r )
         alListenerfv( AL_ORIENTATION, orient );
 #endif
 }
+
 void AUDSoundGain( int sound, float gain, bool music )
 {
 #ifdef HAVE_AL

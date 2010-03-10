@@ -106,7 +106,7 @@ void WarpTrailDraw()
 Mesh * GetWarpMesh( int faction, warptrails *w )
 {
     using namespace VSFileSystem;
-    while ( faction >= w->factions.size() )
+    while ( faction >= static_cast<int>(w->factions.size()) )
         w->factions.push_back( NULL );
     string  fac = FactionUtil::GetFaction( faction );
     fac += "_warp.bfxm";

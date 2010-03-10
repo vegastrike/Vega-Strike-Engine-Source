@@ -1518,7 +1518,7 @@ bool ChooseTargets( Unit *me, bool (*typeofunit)( Unit*, Unit* ), bool reverse )
     UnitCollection *drawlist = &_Universe->activeStarSystem()->getUnitList();
     vector< Unit* > vec;
     Unit *target;
-    for (un_iter iter = drawlist->createIterator(); target = *iter; ++iter)
+    for (un_iter iter = drawlist->createIterator(); (target=*iter)!=NULL; ++iter)
         vec.push_back( target );
     if (vec.size() == 0)
         return false;
@@ -1579,7 +1579,7 @@ void ChooseSubTargets( Unit *me )
         return;
     }
     Unit *tUnit;
-    for (; tUnit = *uniter; ++uniter)
+    for ( ; (tUnit=*uniter)!=NULL; ++uniter)
         if ( tUnit == me->Target() ) {
             ++uniter;
             tUnit = *uniter;
@@ -2460,7 +2460,7 @@ void FireKeyboard::Execute()
             if (targ) {
                 CommunicationMessage *mymsg = GetTargetMessageQueue( targ, resp );
                 FSM *fsm = FactionUtil::GetConversation( parent->faction, targ->faction );
-                if ( mymsg == NULL || mymsg->curstate >= fsm->nodes.size() ) {
+                if ( mymsg == NULL || mymsg->curstate >= static_cast<int>(fsm->nodes.size()) ) {
                     CommunicationMessage c( parent, targ, i, NULL, parent->pilot->getGender() );
                     unsigned int whichspeech = DoSpeech( targ, targ, *c.getCurrentState() );
                     int sound = c.getCurrentState()->GetSound( c.sex, whichspeech );
@@ -2519,7 +2519,7 @@ void FireKeyboard::Execute()
             offset = 0;
         else
             offset -= 3;
-        for (; offset < parent->numCargo(); ++offset) {
+        for ( ; offset < static_cast<int>(parent->numCargo()); ++offset) {
             Cargo *tmp = &parent->GetCargo( offset );
             if ( tmp->GetCategory().find( "upgrades" ) == string::npos && (missiontoo || tmp->mission == false) ) {
                 parent->EjectCargo( offset );
@@ -2534,7 +2534,7 @@ void FireKeyboard::Execute()
     //i think this ejects the pilot? yep it does
     if (f().eject == PRESS) {
         f().eject = DOWN;
-        Cockpit *cp;
+        Cockpit *cp = NULL;
         if ( (parent->name != "eject") && (parent->name != "Pilot") && ( cp = _Universe->isPlayerStarship( parent ) ) )
             cp->Eject();
     }
@@ -2542,7 +2542,7 @@ void FireKeyboard::Execute()
     if (f().ejectdock == PRESS) {
         f().ejectdock = DOWN;
         Unit    *utdw = parent;
-        Cockpit *cp;          //check if docking ports exist, no docking ports = no need to ejectdock so don't do anything
+        Cockpit *cp = NULL;          //check if docking ports exist, no docking ports = no need to ejectdock so don't do anything
         if ( (SelectDockPort( utdw, parent ) > -1) && ( cp = _Universe->isPlayerStarship( parent ) ) )
             cp->EjectDock();              //use specialized ejectdock in the future
 //DockedScript(parent,utdw);

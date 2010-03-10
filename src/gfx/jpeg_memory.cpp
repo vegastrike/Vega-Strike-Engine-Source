@@ -182,7 +182,7 @@ void jpeg_decompress_from_file( unsigned char *dst, char *file, int size, int *w
 {
     struct jpeg_decompress_struct cinfo;
     struct jpeg_error_mgr jerr;
-    int   line_size, y;
+    int   line_size;
     unsigned char *dstcur;
     FILE *infile;
     if ( ( infile = fopen( file, "rb" ) ) == NULL ) {
@@ -200,7 +200,7 @@ void jpeg_decompress_from_file( unsigned char *dst, char *file, int size, int *w
     line_size = cinfo.output_width*cinfo.output_components;
 
     dstcur    = dst;
-    for (y = 0; y < cinfo.output_height; y++) {
+    for (size_t y = 0; y < cinfo.output_height; y++) {
         jpeg_read_scanlines( &cinfo, (JSAMPARRAY) &dstcur, 1 );
         dstcur += line_size;
     }

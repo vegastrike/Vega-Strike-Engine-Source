@@ -61,10 +61,10 @@ namespace Audio {
                 rbufferEnd = ((char*)rbuffer) + rbufferSize;
             }
             
-            size_t remaining = min( bufferSize, (unsigned int)((char*)rbufferEnd - (char*)curBufferPos) );
+            size_t remaining = min( bufferSize, (unsigned int)((char*)rbufferEnd - (char*)curBufferPos) ); //is there no std::ptrdiff?
             memcpy(buffer, curBufferPos, remaining);
-            (char*&)buffer += remaining;
-            (char*&)curBufferPos += remaining;
+            reinterpret_cast<char*&>(buffer) += remaining; //gcc warns about strict aliasing rules being violated
+            reinterpret_cast<char*&>(curBufferPos) += remaining; //gcc warns about strict aliasing rules being violated
             bufferSize -= remaining;
             rode += remaining;
         }

@@ -130,7 +130,7 @@ void blutLoadWAVMemory( ALbyte *memory, ALenum
                             memset( ( (char*) *data )+ChunkHdr.Size, 0, 31 );
                             Stream += ChunkHdr.Size;
                             if (FmtHdr.BitsPerSample == 16)
-                                for (i = 0; i < (ChunkHdr.Size/2); i++)
+                                for (size_t i = 0; i < (ChunkHdr.Size/2); ++i)
                                     SwapBytes( &(*(unsigned short**) data)[i] );
                         }
                     } else if (FmtHdr.Format == 0x0011) {
@@ -256,7 +256,7 @@ int mem_seek( void *datasource, ogg_int64_t offset, int whence )
             }
         }
     } else if (whence == SEEK_SET) {
-        if (offset > fp->size)
+        if (offset > static_cast<int>(fp->size))
             return -1;
         fp->loc = offset;
         return 0;

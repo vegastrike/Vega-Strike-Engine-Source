@@ -426,8 +426,8 @@ void QuadTree::LoadXML( const char *filename, const Vector &Scales, const float 
             f.Close();
         }
         //LoadData();
-        unsigned long xsize;
-        unsigned long zsize;
+        unsigned long xsize = 0;
+        unsigned long zsize = 0;
         //fp = VSFileSystem::vs_open (xml->data[i].terrainfile.c_str(),"rb");
         f.OpenReadOnly( xml->data[i].terrainfile.c_str(), UnknownFile );
         if (err <= Ok) {

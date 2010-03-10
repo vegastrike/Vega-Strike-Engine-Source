@@ -46,7 +46,7 @@ string retrievedata( string data, string type )
                     //***********************************
                     if (possibletype == type) {
                         //cout << possibletype;
-                        int    returncounter = counter;
+                        size_t returncounter = counter;
                         string returnstring  = "";
                         returncounter += 1;                             //pass the =
                         while (data[returncounter] == ' ')

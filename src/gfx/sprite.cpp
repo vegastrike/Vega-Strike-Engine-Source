@@ -230,8 +230,8 @@ void VSSprite::Draw()
 {
     if (surface) {
         //don't do anything if no surface
-        int   lyr;
-        int   numlayers = surface->numLayers();
+        size_t lyr;
+        size_t numlayers = surface->numLayers();
         bool  multitex  = (numlayers > 1);
         int   numpasses = surface->numPasses();
         float ms = surface->mintcoord.i, Ms = surface->maxtcoord.i;
