@@ -57,9 +57,9 @@ inline float max3(float a, float b, float c)
 void csOPCODECollider::GeometryInitialize (const std::vector <bsp_polygon> &polygons )
 {
 	OPCODECREATE OPCC;
-	int  tri_count = 0;
-	int  vert_count = 0;
-	for(int i = 0; i <(int)polygons.size();++i) {
+	unsigned int  tri_count = 0;
+	std::vector<Vector>::size_type  vert_count = 0;
+	for(std::vector<bsp_polygon>::size_type i = 0; i <polygons.size();++i) {
 		vert_count += polygons[i].v.size();
 	}
 	tri_count = vert_count / 3;
@@ -72,13 +72,13 @@ void csOPCODECollider::GeometryInitialize (const std::vector <bsp_polygon> &poly
 
 		csBox3 tmp;
 		tmp.StartBoundingBox ();
-		int last = 0;
+		unsigned int last = 0;
 		
 		/* Copies the Vector's in bsp_polygon to Point's in vertholder.
 		* This sucks but i dont see anyway around it */
-		for (int i = 0; i < (int)polygons.size(); ++i) {
+		for (std::vector<bsp_polygon>::size_type i = 0; i < polygons.size(); ++i) {
 			const bsp_polygon *p = (&polygons[i]);
-			for(int j = 0; j < (int) p->v.size();++j) {
+			for(std::vector<Vector>::size_type j = 0; j < p->v.size();++j) {
 				vertholder[last++].Set (p->v[j].i , p->v[j].j , p->v[j].k);
 				tmp.AddBoundingVertex (p->v[j]);
 			}
@@ -231,7 +231,7 @@ void csOPCODECollider::CopyCollisionPairs(csOPCODECollider* col1,
 {
 	if(!col1 || !col2) return;
 
-	int N_pairs = (int) TreeCollider.GetNbPairs ();
+	unsigned int  N_pairs = TreeCollider.GetNbPairs ();
 	if (N_pairs == 0) return;
 
 	const Pair* colPairs=TreeCollider.GetPairs ();
@@ -241,7 +241,7 @@ void csOPCODECollider::CopyCollisionPairs(csOPCODECollider* col1,
 	size_t oldlen = pairs.Length ();
 	pairs.SetLength (oldlen + N_pairs);
 	
-	for (int i = 0 ; i < N_pairs ; ++i) {
+	for (unsigned int i = 0 ; i < N_pairs ; ++i) {
 		j = 3 * colPairs[i].id0;
 		pairs[oldlen].a1 = vertholder0[j];
 		pairs[oldlen].b1 = vertholder0[j+1];

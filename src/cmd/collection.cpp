@@ -320,7 +320,7 @@ inline void UnitCollection::erase( list< Unit* >::iterator &it2 )
     //Purpose : This special case is to reduce the size of the list in the
     //situation where removedIters isn't being processed.
     if (activeIters.size() > 1)
-        for (int i = 0; i < activeIters.size(); ++i)
+        for (vector<UnitCollection::UnitIterator*>::size_type i = 0; i < activeIters.size(); ++i)
             if (activeIters[i]->it == it2) {
                 removedIters.push_back( it2 );
                 (*it2)->UnRef();

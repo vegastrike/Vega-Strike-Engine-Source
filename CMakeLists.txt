@@ -466,14 +466,22 @@ if(COMMAND cmake_policy)
 	cmake_policy(SET CMP0003 OLD) 
 endif(COMMAND cmake_policy)
 
-OPTION(CPUAMD_k8  "Enable AMD K8 optimizations" 
+# Set the default build type to Release
+IF(NOT CMAKE_BUILD_TYPE)
+	SET(CMAKE_BUILD_TYPE Release CACHE STRING
+      "Debug, Release, RelWithDebInfo, Maintainer, Profiler"
+      FORCE )
+ENDIF(NOT CMAKE_BUILD_TYPE)
+
+
+# Provide boolean options for enabling various cpu optimizations.
+OPTION(CPUAMD_k8  "Enable AMD K8 optimizations (Athlon through athlon64)" 
     OFF )
-    
-OPTION(CPUAMD_k9  "Enable AMD K9 (sse3) optimizations"
+OPTION(CPUAMD_k9  "Enable AMD K9 (sse3) optimizations (Athlon64 AM3) "
     OFF )
-OPTION(CPUAMD_k10  "Enable AMD K10 optimizations"
+OPTION(CPUAMD_k10  "Enable AMD K10 optimizations (Athlon2)"
     OFF )
-OPTION(CPUINTEL_p4 "Enable Intel P4 optimizations"
+OPTION(CPUINTEL_p4 "Enable Intel P4 optimizations (1st gen P4's)"
     OFF )
 OPTION(CPUINTEL_prescott  "Enable Intel P4 (sse3) optimizations"
     OFF )
@@ -483,33 +491,47 @@ OPTION(CPUINTEL_core2 "Enable Intel Core2 optimizations"
     OFF )
 
 
+# Hide our temporary variable and initialize it to empty
 SET(CPU_OPTS  )
 MARK_AS_ADVANCED( CPU_OPTS )
 
+# Depending on the boolean chosen above, set CPU_OPTS to the correct cpu opts
 IF(CPUAMD_k8)
-    SET(CPU_OPTS "-mtune=athlon64 -mfpmath=sse -msse2 -mmmx -m3dnow")
+    SET(CPU_OPTS "-mtune=athlon64 -mfpmath=sse -msse2 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations ")
 ELSEIF(CPUAMD_K9)
-    SET(CPU_OPTS "-mtune=k8-sse3 -mfpmath=sse -msse3 -mmmx -m3dnow")
+    SET(CPU_OPTS "-mtune=k8-sse3 -mfpmath=sse -msse3 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations ")
 ELSEIF(CPUINTEL_p4)
-    SET(CPU_OPTS "-mtune=pentium4 -mfpmath=sse -msse2 -mmmx")
+    SET(CPU_OPTS "-mtune=pentium4 -mfpmath=sse -msse2 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations ")
 ELSEIF(CPUINTEL_prescott)
-    SET(CPU_OPTS "-mtune=prescott -mfpmath=sse -msse3 -mmmx" )
+    SET(CPU_OPTS "-mtune=prescott -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations " )
 ELSEIF(CPUINTEL_nocona)
-    SET(CPU_OPTS "-mtune=nocona -mfpmath=sse -msse3 -mmmx")
+    SET(CPU_OPTS "-mtune=nocona -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations ")
 ELSEIF(CPUINTEL_core2)
-    SET(CPU_OPTS "-mtune=core2 -mfpmath=sse -msse3 -mmmx")
+    SET(CPU_OPTS "-mtune=core2 -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations ")
 ENDIF(CPUAMD_k8)
 
 
-
+# Debug target block. 
 SET(CMAKE_CXX_FLAGS_DEBUG " ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during debug builds."
      FORCE )
 SET( CMAKE_C_FLAGS_DEBUG "  ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during debug builds."
      FORCE )
+MARK_AS_ADVANCED(
+	CMAKE_CXX_FLAGS_DEBUG
+	CMAKE_C_FLAGS_DEBUG)
+IF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+	MARK_AS_ADVANCED( CLEAR
+    	CMAKE_CXX_FLAGS_DEBUG )
+ELSE("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+    MARK_AS_ADVANCED( FORCE 
+    	CMAKE_CXX_FLAGS_DEBUG )
+ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 
 
+
+# Release Target block 
 SET(CMAKE_CXX_FLAGS_RELEASE  "${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during release builds."
     FORCE)
@@ -518,12 +540,20 @@ SET( CMAKE_C_FLAGS_RELEASE "${CPU_OPTS}  -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGN
     FORCE )
 SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Bsymbolic" CACHE STRING "Release linker flags"
      FORCE )
-MARK_AS_ADVANCED( CLEAR
-    CMAKE_CXX_FLAGS_RELEASE )
 MARK_AS_ADVANCED(
     CMAKE_C_FLAGS_RELEASE
-    CMAKE_EXE_LINKER_FLAGS_RELEASE
-)
+    CMAKE_CXX_FLAGS_RELEASE
+    CMAKE_EXE_LINKER_FLAGS_RELEASE)
+IF("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+	MARK_AS_ADVANCED( CLEAR
+    	CMAKE_CXX_FLAGS_RELEASE )
+ELSE("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+	MARK_AS_ADVANCED( FORCE
+		CMAKE_CXX_FLAGS_RELEASE )
+ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+
+
+# Release with debugging symbols Target block
 SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "  ${CPU_OPTS}  -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during release builds."
      FORCE )
@@ -533,10 +563,17 @@ SET( CMAKE_C_FLAGS_RELWITHDEBINFO "  ${CPU_OPTS}  -DNV_CUBE_MAP -DBOOST_PYTHON_N
     MARK_AS_ADVANCED(
     CMAKE_CXX_FLAGS_RELWITHDEBINFO
     CMAKE_C_FLAGS_RELWITHDEBINFO )
+IF("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+	MARK_AS_ADVANCED( CLEAR
+    	CMAKE_CXX_FLAGS_RELWITHDEBINFO )
+ELSE("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+	MARK_AS_ADVANCED( FORCE
+		CMAKE_CXX_FLAGS_RELWITHDEBINFO )
+ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
 
 
 
-# Setup maintainer mode flags
+# Maintainer Target block
 SET(CMAKE_CXX_FLAGS_MAINTAINER " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during maintainer builds."
     FORCE )
@@ -556,9 +593,16 @@ MARK_AS_ADVANCED(
     CMAKE_C_FLAGS_MAINTAINER
     CMAKE_EXE_LINKER_FLAGS_MAINTAINER
     CMAKE_SHARED_LINKER_FLAGS_MAINTAINER )
+IF("${CMAKE_BUILD_TYPE}" STREQUAL "Maintainer")
+	MARK_AS_ADVANCED( CLEAR
+    	CMAKE_CXX_FLAGS_MAINTAINER )
+ELSE("${CMAKE_BUILD_TYPE}" STREQUAL "Maintainer")
+	MARK_AS_ADVANCED( FORCE
+		CMAKE_CXX_FLAGS_MAINTAINER )    
+ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Maintainer")
 
 
-# Setup profiler mode flags
+# Profiler Target block
 SET(CMAKE_CXX_FLAGS_PROFILER " ${CPU_OPTS} -O2 -pg -g2 -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -O3" CACHE STRING
     "Flags used by the C++ compiler during profiler builds."
      FORCE )
@@ -569,33 +613,34 @@ SET( CMAKE_EXE_LINKER_FLAGS_PROFILER
     "-Bsymbolic " CACHE STRING
     "Flags used for linking binaries during profiler builds."
      FORCE )
-SET( CMAKE_SHARED_LINKER_FLAGS_PROFILER
-    "" CACHE STRING
-    "Flags used by the shared libraries linker during profiler builds."
-    FORCE )
 MARK_AS_ADVANCED(
     CMAKE_CXX_FLAGS_PROFILER
     CMAKE_C_FLAGS_PROFILER
     CMAKE_EXE_LINKER_FLAGS_PROFILER
     CMAKE_SHARED_LINKER_FLAGS_PROFILER )
+IF("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
+	MARK_AS_ADVANCED( CLEAR
+    	CMAKE_CXX_FLAGS_PROFILER )
+ELSE("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")   
+	MARK_AS_ADVANCED( FORCE
+		 CMAKE_CXX_FLAGS_PROFILER )
+ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
 
-
-# Set the default build type to Release
-#IF(NOT CMAKE_BUILD_TYPE)
-  SET(CMAKE_BUILD_TYPE Release CACHE STRING
-      "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Maintainer Profiler.")
-#ENDIF(NOT CMAKE_BUILD_TYPE)
 
 IF(CMAKE_BUILD_TYPE MATCHES "[Mm][Aa][Ii][Nn][Tt][Aa][Ii][Nn][Ee][Rr]")
   ADD_DEFINITIONS(-DGCC_HASVISIBILITY)
 ENDIF(CMAKE_BUILD_TYPE MATCHES "[Mm][Aa][Ii][Nn][Tt][Aa][Ii][Nn][Ee][Rr]")
 
+
+# Turn off compiling vegastrike bin
+OPTION(DISABLE_CLIENT "Disable building the vegastrike bin"
+		OFF )
 IF(NOT DISABLE_CLIENT)
 	add_executable(vegastrike ${VEGASTRIKE_SOURCES})
 ENDIF(NOT DISABLE_CLIENT)
 
-add_executable(vegaserver ${VEGASERVER_SOURCES})
 
+add_executable(vegaserver ${VEGASERVER_SOURCES})
 
 
 include (CheckIncludeFile)
@@ -756,7 +801,7 @@ IF(FFMPEG_FOUND)
 		SET(HAVE_FFMPEG_SWSCALE_H 1)
 	ENDIF(swscale1_FOUND)
 ELSE(FFMPEG_FOUND)
-	message("What the hell, no FFMpeg")
+	message("What the hell, no FFMpeg, dont worry, it's not required yet")
 ENDIF(FFMPEG_FOUND)
 
 FIND_LIBRARY(DL_LIB dl)
@@ -767,7 +812,7 @@ SET(TST_LIBS ${TST_LIBS} ${DL_LIB} ${UTIL_LIB})
 # Still need to add CEGUI and OGRE find packages
 
 
-#These are boolean options the user can enable/disable via ccmake
+# Multiplayer networking option 
 OPTION(USE_NET_THREAD_POSIX "Enable Posix net threads" OFF)
 if(NOT USE_NET_THREAD_POSIX)
 	SET(USE_NET_THREAD_NONE 1)
@@ -784,7 +829,6 @@ CHECK_INCLUDE_FILE(wctype.h HAVE_WCTYPE_H)
 CHECK_INCLUDE_FILE(inttypes.h HAVE_INTTYPES_H)
 CHECK_INCLUDE_FILE(zlib.h HAVE_ZLIB_H)
 CHECK_INCLUDE_FILE(math.h HAVE_MATH_H)
-
 CHECK_INCLUDE_FILE_CXX(tr1/unordered_map HAVE_TR1_UNORDERED_MAP)
 
 CHECK_FUNCTION_EXISTS(gettimeofday HAVE_GETTIMEOFDAY)
@@ -851,8 +895,47 @@ add_dependencies(vegaserver mesh_tool)
 add_dependencies(vegaserver vssetup)
 # Debug crap 
 get_directory_property(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
+message("Default build type is Release, no cpu opts enabled. ")
 #message("Building with CFLAGS: ${CMAKE_CXX_FLAGS}")
 #message("Linking with : ${TST_LIBS}")
 #message("including : ${TEMP_DIRECTORY}")
 # End Debug Crap 
 
+MARK_AS_ADVANCED(FORCE
+	AVCODEC_LIBRARY
+	AVFORMAT_LIBRARY
+	AVUTIL_LIBRARY
+	CMAKE_BACKWARDS_COMPATIBILITY
+	DL_LIB
+	FFMPEG_INCLUDE_DIR
+	GTK2_ATK_INCLUDE_DIR
+	GTK2_ATK_LIBRARY
+	GTK2_CAIRO_INCLUDE_DIR
+	GTK2_CAIRO_LIBRARY
+	GTK2_GDK_INCLUDE_DIR
+	GTK2_GDK_LIBRARY
+	GTK2_GDK_PIXBUF_LIBRARY
+	GTK2_GLIBCONFIG_INCLUDE_DIR
+	GTK2_GLIB_INCLUDE_DIR
+	GTK2_GLIB_LIBRARY
+	GTK2_GMODULE_LIBRARY
+	GTK2_GOBJECT_LIBRARY
+	GTK2_PANGO_INCLUDE_DIR
+	GTK2_PANGO_LIBRARY
+	GTK2_GTHREAD_LIBRARY
+	GTK2_GTKGL_INCLUDE_DIR
+	GTK2_GTKGL_LIBRARY
+	GTK2_GTK_INCLUDE_DIR
+	GTK2_GTK_LIBRARY
+	LIBRARY_OUTPUT_PATH
+	OPENAL_INCLUDE_DIR
+	OPENAL_LIBRARY
+	SDLMAIN_LIBRARY
+	SDL_INCLUDE_DIR
+	SDL_LIBRARY
+	UTIL_LIB
+	ogg_INCLUDE_DIR
+	ogg_LIBRARY
+	vorbis_INCLUDE_DIR
+	vorbis_LIBRARY
+	vorbisfile_LIBRARY )

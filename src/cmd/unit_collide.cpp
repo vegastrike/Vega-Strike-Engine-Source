@@ -253,80 +253,6 @@ bool Unit::InsideCollideTree( Unit *smaller,
     return false;
 }
 
-Unit* Unit::BeamInsideCollideTree( const QVector &start, const QVector &end, QVector &pos, Vector &norm, double &distance )
-{
-    QVector r( end-start );
-    double  mag  = r.Magnitude();
-    if (mag > 0)
-        r = r*(1./mag);
-    bool    temp = true;
-    if (this->colTrees == NULL)
-        temp = true;
-    else if (this->colTrees->colTree( this, Vector( 0, 0, 0 ) ) == NULL)
-        temp = true;
-    if (temp) {
-        float dis = distance;
-        Unit *ret = queryBSP( start, end, norm, dis );
-        distance = dis;
-        pos = start+r*distance;
-        return ret;
-    }
-    QVector p( -r.k, r.i, -r.j );
-    QVector q;
-    ScaledCrossProduct( r, p, q );
-    ScaledCrossProduct( q, r, p );
-    csOPCODECollider::ResetCollisionPairs();
-    //printf ("Col %s %s\n",name.c_str(),smaller->name.c_str());
-    const csReversibleTransform bigtransform( cumulative_transformation_matrix );
-    Matrix smallerMat( p.Cast(), q.Cast(), r.Cast() );
-    smallerMat.p = start;
-    const csReversibleTransform smalltransform( smallerMat );
-    bsp_polygon tri;
-    tri.v.push_back( Vector( -mag/1024.0f, 0, 0 ) );
-    tri.v.push_back( Vector( -mag/1024.0f, 0, mag ) );
-    tri.v.push_back( Vector( mag/1024.0f, 0, mag ) );
-    tri.v.push_back( Vector( mag/1024.0f, 0, 0 ) );
-    vector< bsp_polygon >mesh;
-    mesh.push_back( tri );
-    csOPCODECollider     smallColTree( mesh );
-    if ( smallColTree.Collide( *(this->colTrees)->colTree( this, Vector( 0, 0, 0 ) ),
-                               &smalltransform,
-                               &bigtransform ) ) {
-        static int crashcount = 0;
-
-        //VSFileSystem::vs_fprintf (stderr,"%s Beam Crashez %d\n", name.get().c_str(),crashcount++);
-        csCollisionPair *mycollide = csOPCODECollider::GetCollisions();
-        int numHits = csOPCODECollider::GetCollisionPairCount();
-        if (numHits) {
-            //printf ("num hits %d",numHits);
-            /*
-             *  pos.Set((mycollide[0].a1.x+mycollide[0].b1.x+mycollide[0].c1.x)/3,
-             *                (mycollide[0].a1.y+mycollide[0].b1.y+mycollide[0].c1.y)/3,
-             *                (mycollide[0].a1.z+mycollide[0].b1.z+mycollide[0].c1.z)/3);
-             *  pos = Transform (smaller->cumulative_transformation_matrix,smallpos);
-             */
-            pos.Set( (mycollide[0].a2.x+mycollide[0].b2.x+mycollide[0].c2.x)/3.0f,
-                    (mycollide[0].a2.y+mycollide[0].b2.y+mycollide[0].c2.y)/3.0f,
-                    (mycollide[0].a2.z+mycollide[0].b2.z+mycollide[0].c2.z)/3.0f );
-            pos = Transform( cumulative_transformation_matrix, pos );
-            csVector3 sn, bn;
-            sn.Cross( mycollide[0].b1-mycollide[0].a1, mycollide[0].c1-mycollide[0].a1 );
-            bn.Cross( mycollide[0].b2-mycollide[0].a2, mycollide[0].c2-mycollide[0].a2 );
-            sn.Normalize();
-            bn.Normalize();
-            //smallNormal.Set (sn.x,sn.y,sn.z);
-            norm.Set( bn.x, bn.y, bn.z );
-            //smallNormal = TransformNormal (smaller->cumulative_transformation_matrix,smallNormal);
-            norm     = TransformNormal( cumulative_transformation_matrix, norm );
-            distance = (pos-start).Magnitude();
-            return this;
-        }
-    }
-    //FIXME
-    //doesn't check all i*j options of subunits vs subunits
-    return false;
-}
-
 inline float mysqr( float a )
 {
     return a*a;
@@ -410,8 +336,8 @@ bool Unit::Collide( Unit *target )
 
 float globQueryShell( QVector st, QVector dir, float radius )
 {
-    double temp1 = radius;
-    double a, b, c;
+    float temp1 = radius;
+    float a, b, c;
     c  = st.Dot( st );
     c  = c-temp1*temp1;
     b  = 2.0f*( dir.Dot( st ) );

@@ -771,7 +771,7 @@ void ExecuteDirector()
 
 Unit* StarSystem::nextSignificantUnit()
 {
-    return sigIter.current();
+    return(*sigIter);
 }
 
 void StarSystem::Update( float priority )
@@ -881,9 +881,9 @@ void StarSystem::Update( float priority, bool executeDirector )
     if ( sigIter.isDone() )
         sigIter = drawList.createIterator();
     else
-        sigIter.advance();
-    while ( !sigIter.isDone() && !UnitUtil::isSignificant( sigIter.current() ) )
-        sigIter.advance();
+        ++sigIter;
+    while ( !sigIter.isDone() && !UnitUtil::isSignificant( *sigIter) )
+        ++sigIter;
     //If it is done, leave it NULL for this frame then.
 
     //WARNING cockpit does not get here...

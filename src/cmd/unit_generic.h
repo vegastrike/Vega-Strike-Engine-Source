@@ -1366,7 +1366,6 @@ public:
         return false;
     }
 
-    Unit * BeamInsideCollideTree( const QVector &start, const QVector &end, QVector &pos, Vector &norm, double &distance );
     bool InsideCollideTree( Unit *smaller,
                             QVector &bigpos,
                             Vector &bigNormal,

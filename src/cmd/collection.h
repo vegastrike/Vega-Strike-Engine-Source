@@ -6,8 +6,8 @@
 #define _UNITCOLLECTION_H_
 
 //Collection type:
-#define USE_OLD_COLLECTION
-//#define USE_STL_COLLECTION
+//#define USE_OLD_COLLECTION
+#define USE_STL_COLLECTION
 
 #if defined (USE_OLD_COLLECTION)
 #include "oldcollection.h"
