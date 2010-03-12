@@ -111,7 +111,7 @@ const Unit * getUnitFromUpgradeName( string upgrade_name, int myunitfaction = 0 
     int upfac = FactionUtil::GetUpgradeFaction();
     const Unit *NewPart = UnitConstCache::getCachedConst( StringIntKey( input_buffer, upfac ) );
     if (!NewPart) {
-        NewPart = NewPart = UnitConstCache::setCachedConst( StringIntKey( input_buffer,
+        NewPart = UnitConstCache::setCachedConst( StringIntKey( input_buffer,
                                                                           upfac ),
                                                            UnitFactory::createUnit( input_buffer, true, upfac ) );
     }
@@ -687,9 +687,9 @@ void CargoToMission( const char *item, TextArea *ta, Unit *buyer )
     if (!miss_from_cargolist) {
         std::string mydesc, myname;
         int playernum = UnitUtil::isPlayerStarship( buyer );
-        int len = getSaveStringLength( playernum, miss_name );
+        size_t len = getSaveStringLength( playernum, miss_name );
         assert( len == getSaveStringLength( playernum, miss_desc ) );
-        for (unsigned int i = 0; i < len; i++)
+        for (size_t i = 0; i < len; i++)
             if (getSaveString( playernum, miss_name, i ) == item1) {
                 mydesc = getSaveString( playernum, miss_desc, i );
                 myname = beautify( getSaveString( playernum, miss_name, i ) );
@@ -770,7 +770,7 @@ bool UpgradingInfo::SelectItem( const char *item, int button, int buttonstate )
             if (bas) {
                 int cargonumber;
                 sscanf( item, "%d", &cargonumber );
-                if ( cargonumber >= CurrentList->size() ) {
+                if ( cargonumber >= static_cast<int>(CurrentList->size()) ) {
                     if (CurrentList->size() == 1)
                         cargonumber = 0;
                     else if (CurrentList->size() > 1)
@@ -840,6 +840,9 @@ bool UpgradingInfo::SelectItem( const char *item, int button, int buttonstate )
     case MISSIONMODE:
         CargoToMission( item, CargoInfo, this->buyer.GetUnit() );
         break;
+    case MAXMODE: //FIXME added by chuck_starchaser to shut up a warning; please verify correctness
+    default:
+        break;
     }
     return false;
 }
@@ -895,7 +898,7 @@ void SwapInNewShipName( Cockpit *cp, std::string newfilename, int SwappingShipsI
     Unit *parent = cp->GetParent();
     if (parent) {
         if (SwappingShipsIndex != -1) {
-            while (cp->unitfilename.size() <= SwappingShipsIndex+1)
+            while (static_cast<int>(cp->unitfilename.size()) <= SwappingShipsIndex+1)
                 cp->unitfilename.push_back( "" );
             cp->unitfilename[SwappingShipsIndex]   = parent->name;
             cp->unitfilename[SwappingShipsIndex+1] = _Universe->activeStarSystem()->getFileName();
@@ -912,9 +915,9 @@ void SwapInNewShipName( Cockpit *cp, std::string newfilename, int SwappingShipsI
         }
     } else if (SwappingShipsIndex != -1) {
         //if parent is dead
-        if (cp->unitfilename.size() > SwappingShipsIndex)          //erase the ship we have
+        if (static_cast<int>(cp->unitfilename.size()) > SwappingShipsIndex)          //erase the ship we have
             cp->unitfilename.erase( cp->unitfilename.begin()+SwappingShipsIndex );
-        if (cp->unitfilename.size() > SwappingShipsIndex)
+        if (static_cast<int>(cp->unitfilename.size()) > SwappingShipsIndex) //FIXME Any reason why this is repeated twice?
             cp->unitfilename.erase( cp->unitfilename.begin()+SwappingShipsIndex );
     }
     cp->unitfilename.front() = newfilename;
@@ -1011,11 +1014,9 @@ void UpgradingInfo::CommitItem( const char *inp_buf, int button, int state )
                                                                "My_Fleet" ) ) != curcategory.end(), &buyer, this );
                 break;
             }
-
         case UPGRADEMODE:
         case ADDMODE:
         case DOWNGRADEMODE:
-
             {
                 char *unitdir = GetUnitDir( un->name.get().c_str() );
                 std::string templnam   = ( string( unitdir )+string( ".template" ) );
@@ -1119,7 +1120,7 @@ void UpgradingInfo::CommitItem( const char *inp_buf, int button, int state )
         case MISSIONMODE:
             if ( ( un = this->base.GetUnit() ) ) {
                 unsigned int index;
-                static int   max_missions = XMLSupport::parse_int( vs_config->getVariable( "physics", "max_missions", "4" ) );
+                static size_t max_missions = XMLSupport::parse_int( vs_config->getVariable( "physics", "max_missions", "4" ) );
                 if (active_missions.size() < max_missions) {
                     std::string myscript;
                     title = ( (string( "Accepted Mission " )+input_buffer).c_str() );
@@ -1127,9 +1128,9 @@ void UpgradingInfo::CommitItem( const char *inp_buf, int button, int state )
                         XMLSupport::parse_bool( vs_config->getVariable( "cargo", "missions_from_cargolist", "false" ) );
                     if (!miss_from_cargolist) {
                         int playernum = UnitUtil::isPlayerStarship( this->buyer.GetUnit() );
-                        int len = getSaveStringLength( playernum, miss_name );
+                        size_t len = getSaveStringLength( playernum, miss_name );
                         assert( len == getSaveStringLength( playernum, miss_script ) );
-                        for (unsigned int i = 0; i < len; i++)
+                        for (size_t i = 0; i < len; i++)
                             if (getSaveString( playernum, miss_name, i ) == input_buffer) {
                                 myscript = getSaveString( playernum, miss_script, i );
                                 eraseSaveString( playernum, miss_script, i );
@@ -1138,7 +1139,7 @@ void UpgradingInfo::CommitItem( const char *inp_buf, int button, int state )
                                 break;
                             }
                         LoadMission( "", myscript, false );
-                        unsigned int leng = active_missions.size();
+                        size_t leng = active_missions.size();
                         if (leng > 0)
                             active_missions[leng-1]->mission_name = input_buffer;
                     } else if ( NULL != un->GetCargo( input_buffer, index ) ) {
@@ -1153,6 +1154,12 @@ void UpgradingInfo::CommitItem( const char *inp_buf, int button, int state )
                     title = ("Mission BBS::Too Many Missions In Progress");
                 }
             }
+            break;
+        case BRIEFINGMODE: //FIXME These cases added by chuck_starchaser to shut up a warning; please verify correctness
+        case NEWSMODE:
+        case SAVEMODE:
+        case MAXMODE:
+        default:
             break;
         }
     }

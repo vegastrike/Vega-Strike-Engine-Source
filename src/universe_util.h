@@ -299,7 +299,7 @@ void StopAllSounds( void );
 unsigned int getCurrentPlayer();
 ///this gets the number of active players
 int getNumPlayers();
-int maxMissions();
+unsigned int maxMissions();
 bool networked();
 bool isserver();
 //Forwards this request onto the server if this is a client, or send back to client.

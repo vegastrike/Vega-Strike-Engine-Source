@@ -84,7 +84,7 @@ void Terrain::EnableDraw()
 void Terrain::Collide()
 {
     Unit *unit;
-    for (un_iter iter = _Universe->activeStarSystem()->getUnitList().createIterator(); unit = *iter; ++iter)
+    for (un_iter iter = _Universe->activeStarSystem()->getUnitList().createIterator(); (unit=*iter)!=NULL; ++iter)
         Collide( unit );
 }
 static GFXColor getTerrainColor()

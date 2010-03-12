@@ -360,7 +360,7 @@ int Music::SelectTracks( int layer )
     if (!g_game.music_enabled)
         return 0;
     static bool random    = XMLSupport::parse_bool( vs_config->getVariable( "audio", "shuffle_songs", "true" ) );
-    static int  maxrecent =
+    static size_t  maxrecent =
         XMLSupport::parse_int( vs_config->getVariable( "audio", "shuffle_songs.history_depth", MAX_RECENT_HISTORY ) );
     static std::string dj_script = vs_config->getVariable( "sound", "dj_script", "modules/dj.py" );
     if ( (BaseInterface::CurrentBase || loopsleft > 0) && lastlist < (int) playlist.size() && lastlist >= 0 ) {

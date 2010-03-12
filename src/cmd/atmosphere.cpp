@@ -38,7 +38,7 @@ Atmosphere::Atmosphere( const Parameters &params ) : user_params( params )
 
 Atmosphere::~Atmosphere()
 {
-    for (int a = 0; a < sunboxes.size(); ++a)
+    for (size_t a = 0; a < sunboxes.size(); ++a)
         delete sunboxes[a];
 }
 
@@ -56,13 +56,13 @@ void Atmosphere::Update( const QVector &position, const Matrix &tmatrix )
 {
     Planet     *currPlanet;
     StarSystem *system = _Universe->activeStarSystem();
-    for (int a = 0; a < (int) sunboxes.size(); a++)
+    for (size_t a = 0; a < sunboxes.size(); ++a)
         delete sunboxes[a];
     sunboxes.clear();
     QVector localDir;
     float   rho1 = 0.0;
     Unit   *primary;
-    for (un_iter iter = system->getUnitList().createIterator(); primary = *iter; ++iter)
+    for (un_iter iter = system->getUnitList().createIterator(); (primary=*iter)!=NULL; ++iter)
         if ( primary->isUnit() == PLANETPTR && (currPlanet = (GamePlanet*) primary)->hasLights() ) {
             //const std::vector <int> & lights = currPlanet->activeLights();
             /* for now just assume all planets with lights are really bright */

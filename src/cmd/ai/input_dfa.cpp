@@ -48,7 +48,7 @@ void InputDFA::NewLocationSelect()
     Unit  *un;
     int    cnt = 0;
     Vector RunningTotal( 0, 0, 0 );
-    for (un_iter ui = selected->createIterator(); un = *ui; ++ui) {
+    for (un_iter ui = selected->createIterator(); (un=*ui)!=NULL; ++ui) {
         RunningTotal += un->Position().Cast();
         cnt++;
     }
@@ -92,7 +92,7 @@ void InputDFA::TargetSelect( KBSTATE k, int x, int y, int delx, int dely, int mo
         //executeOrders from selected->target;
         if (k == RELEASE && CurDFA->targetted != NULL) {
             Unit *un;
-            for (un_iter tmp = CurDFA->selected->createIterator(); un = *tmp; ++tmp) {
+            for (un_iter tmp = CurDFA->selected->createIterator(); (un=*tmp)!=NULL; ++tmp) {
                 Order *nAI = CurDFA->orderfac->newOrder();
                 if (CurDFA->targetted) {
                     Unit *tar = CurDFA->targetted->front();
@@ -122,7 +122,7 @@ void InputDFA::LocSelect( KBSTATE k, int x, int y, int delx, int dely, int mod )
     if (k == PRESS) {
         Unit  *un;
         Vector tmplocselvec = CurDFA->locsel->GetVector().Cast();
-        for (un_iter tmp = CurDFA->selected->createIterator(); un = *tmp; ++tmp) {
+        for (un_iter tmp = CurDFA->selected->createIterator(); (un=*tmp)!=NULL; ++tmp) {
             Order *nAI = CurDFA->orderfac->newOrder();
             nAI->AttachOrder( tmplocselvec.Cast() );
             if (CurDFA->queueOrder)
@@ -376,7 +376,7 @@ void InputDFA::UnselectAll()
     case NONE:
         if (selected) {
             Unit *tUnit;
-            for (un_iter it = selected->createIterator(); tUnit = *it; ++it)
+            for (un_iter it = selected->createIterator(); (tUnit=*it)!=NULL; ++it)
                 tUnit->Deselect();
             delete selected;
             selected = NULL;
@@ -400,7 +400,7 @@ void InputDFA::replaceCollection( UnitCollection *newcol )
         UnselectAll();
         selected = newcol;
         Unit *tUnit;
-        for (un_iter it = selected->createIterator(); tUnit = *it; ++it)
+        for (un_iter it = selected->createIterator(); (tUnit=*it)!=NULL; ++it)
             tUnit->Select();
         break;
     case TARGET_SELECT:
@@ -419,7 +419,7 @@ void InputDFA::appendCollection( UnitCollection *newcol )
     case NONE:
         if (selected) {
             Unit   *tUnit;
-            for (un_iter it = newcol->createIterator(); tUnit = *it; ++it)
+            for (un_iter it = newcol->createIterator(); (tUnit=*it)!=NULL; ++it)
                 tUnit->Select();
             un_iter tmpit = newcol->createIterator();
             selected->append( &tmpit );

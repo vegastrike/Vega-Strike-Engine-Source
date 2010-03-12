@@ -34,7 +34,7 @@ namespace BaseUtil
 inline BaseInterface::Room * CheckRoom( int room )
 {
     if (!BaseInterface::CurrentBase) return 0;
-    if ( room < 0 || room >= BaseInterface::CurrentBase->rooms.size() ) return 0;
+    if ( room < 0 || room >= static_cast<int>(BaseInterface::CurrentBase->rooms.size()) ) return 0;
     return BaseInterface::CurrentBase->rooms[room];
 }
 int Room( std::string text )
@@ -90,7 +90,7 @@ void SetTexture( int room, std::string index, std::string file )
 {
     BaseInterface::Room *newroom = CheckRoom( room );
     if (!newroom) return;
-    for (int i = 0; i < newroom->objs.size(); i++)
+    for (size_t i = 0; i < newroom->objs.size(); i++)
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index)
                 //FIXME: Will crash if not a Sprite object.
@@ -101,7 +101,7 @@ void SetTextureSize( int room, std::string index, float w, float h )
 {
     BaseInterface::Room *newroom = CheckRoom( room );
     if (!newroom) return;
-    for (int i = 0; i < newroom->objs.size(); i++)
+    for (size_t i = 0; i < newroom->objs.size(); i++)
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index)
                 //FIXME: Will crash if not a Sprite object.
@@ -112,7 +112,7 @@ void SetTexturePos( int room, std::string index, float x, float y )
 {
     BaseInterface::Room *newroom = CheckRoom( room );
     if (!newroom) return;
-    for (int i = 0; i < newroom->objs.size(); i++)
+    for (size_t i = 0; i < newroom->objs.size(); i++)
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index)
                 //FIXME: Will crash if not a Sprite object.
@@ -123,7 +123,7 @@ void PlayVideo( int room, std::string index )
 {
     BaseInterface::Room *newroom = CheckRoom( room );
     if (!newroom) return;
-    for (int i = 0; i < newroom->objs.size(); i++)
+    for (size_t i = 0; i < newroom->objs.size(); i++)
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
                 //FIXME: Will crash if not a Sprite object.
@@ -167,7 +167,7 @@ void SetTextBoxText( int room, std::string index, std::string text )
 {
     BaseInterface::Room *newroom = CheckRoom( room );
     if (!newroom) return;
-    for (int i = 0; i < newroom->objs.size(); i++)
+    for (size_t i = 0; i < newroom->objs.size(); i++)
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index)
                 //FIXME: Will crash if not a Text object.
@@ -178,7 +178,7 @@ void SetLinkArea( int room, std::string index, float x, float y, float wid, floa
 {
     BaseInterface::Room *newroom = CheckRoom( room );
     if (!newroom) return;
-    for (int i = 0; i < newroom->links.size(); i++)
+    for (size_t i = 0; i < newroom->links.size(); i++)
         if (newroom->links[i]) {
             if (newroom->links[i]->index == index) {
                 newroom->links[i]->x   = x;
@@ -192,7 +192,7 @@ void SetLinkText( int room, std::string index, std::string text )
 {
     BaseInterface::Room *newroom = CheckRoom( room );
     if (!newroom) return;
-    for (int i = 0; i < newroom->links.size(); i++)
+    for (size_t i = 0; i < newroom->links.size(); i++)
         if (newroom->links[i])
             if (newroom->links[i]->index == index)
                 newroom->links[i]->text = text;
@@ -201,7 +201,7 @@ void SetLinkPython( int room, std::string index, std::string python )
 {
     BaseInterface::Room *newroom = CheckRoom( room );
     if (!newroom) return;
-    for (int i = 0; i < newroom->links.size(); i++)
+    for (size_t i = 0; i < newroom->links.size(); i++)
         if (newroom->links[i])
             if (newroom->links[i]->index == index)
                 newroom->links[i]->Relink( python );
@@ -210,7 +210,7 @@ void SetLinkRoom( int room, std::string index, int to )
 {
     BaseInterface::Room *newroom = CheckRoom( room );
     if (!newroom) return;
-    for (int i = 0; i < newroom->links.size(); i++)
+    for (size_t i = 0; i < newroom->links.size(); i++)
         if (newroom->links[i]) {
             if (newroom->links[i]->index == index)
                 //FIXME: Will crash if not a Goto object.
@@ -219,8 +219,7 @@ void SetLinkRoom( int room, std::string index, int to )
 }
 void SetLinkEventMask( int room, std::string index, std::string maskdef )
 {
-    int i;
-
+    size_t i;
     //c=click, u=up, d=down, e=enter, l=leave, m=move
     unsigned int mask = 0;
     for (i = 0; i < maskdef.length(); ++i) {
@@ -506,7 +505,7 @@ void SetKeyStatusEventData( unsigned int modmask )
 {
     BoostPythonDictionary &data = _GetEventData();
     //Keyboard modifiers (for kb+mouse)
-    if (modmask == ~0)
+    if (modmask == UINT_MAX )
         modmask = pullActiveModifiers();
     data["modifiers"] = modmask;
     data["alt"] = ( (modmask&KB_MOD_ALT) != 0 );

@@ -109,7 +109,7 @@ static void SetupViewport()
 #undef mymin
 BaseInterface::Room::~Room()
 {
-    int i;
+    size_t i;
     for (i = 0; i < links.size(); i++)
         if (links[i])
             delete links[i];
@@ -249,7 +249,7 @@ void BaseInterface::Room::BaseShip::Draw( BaseInterface *base )
 
 void BaseInterface::Room::Draw( BaseInterface *base )
 {
-    int i;
+    size_t i;
     for (i = 0; i < objs.size(); i++)
         if (objs[i]) {
             GFXBlendMode( SRCALPHA, INVSRCALPHA );
@@ -290,7 +290,7 @@ void BaseInterface::Room::Draw( BaseInterface *base )
             XMLSupport::parse_float( vs_config->getVariable( "graphics", "base_locationmarker_textcolor_g", "1" ) );
         static float text_color_b  =
             XMLSupport::parse_float( vs_config->getVariable( "graphics", "base_locationmarker_textcolor_b", "1" ) );
-        for (int i = 0; i < links.size(); i++)          //loop through all links and draw a marker for each
+        for (size_t i = 0; i < links.size(); i++)          //loop through all links and draw a marker for each
             if (links[i]) {
                 if ( (links[i]->alpha < 1) || (draw_always) ) {
                     if (draw_always) links[i]->alpha = 1;                          //set all alphas to visible
@@ -354,7 +354,7 @@ void BaseInterface::Room::Draw( BaseInterface *base )
             XMLSupport::parse_float( vs_config->getVariable( "graphics", "base_locationmarker_textoffset_x", "0" ) );
         static float text_offset_y =
             XMLSupport::parse_float( vs_config->getVariable( "graphics", "base_locationmarker_textoffset_y", "0" ) );
-        for (int i = 0; i < links.size(); i++)          //loop through all links and draw a marker for each
+        for (size_t i = 0; i < links.size(); i++)          //loop through all links and draw a marker for each
             if (links[i]) {
                 //Debug marker
                 if (debug_markers) {
@@ -545,7 +545,7 @@ void BaseInterface::Room::BaseTalk::Draw( BaseInterface *base )
 
 int BaseInterface::Room::MouseOver( BaseInterface *base, float x, float y )
 {
-    for (int i = 0; i < links.size(); i++)
+    for (size_t i = 0; i < links.size(); i++)
         if (links[i]) {
             if ( x >= links[i]->x
                 && x <= (links[i]->x+links[i]->wid)
@@ -588,7 +588,7 @@ void base_main_loop()
     UpdateTime();
     Music::MuzakCycle();
     if (Network != NULL)
-        for (int jj = 0; jj < _Universe->numPlayers(); jj++)
+        for (size_t jj = 0; jj < _Universe->numPlayers(); jj++)
             Network[jj].checkMsg( NULL );
     GFXBeginScene();
     if (createdbase) {
@@ -711,7 +711,7 @@ void BaseInterface::Room::Click( BaseInterface *base, float x, float y, int butt
         }
 #else
         if ( state == WS_MOUSE_UP && links.size() ) {
-            int count = 0;
+            size_t count = 0;
             while ( count++ < links.size() ) {
                 Link *curlink = links[base->curlinkindex++%links.size()];
                 if (curlink) {
@@ -732,12 +732,12 @@ void BaseInterface::MouseOver( int xbeforecalc, int ybeforecalc )
 {
     float x, y;
     CalculateRealXAndY( xbeforecalc, ybeforecalc, &x, &y );
-    int   i = rooms[curroom]->MouseOver( this, x, y );
+    int   i = rooms[curroom]->MouseOver( this, x, y ); //FIXME Whatever this is, it shouldn't be named just "i"; & possibly should be size_t
     Room::Link *link    = 0;
     Room::Link *hotlink = 0;
     if (i >= 0)
         link = rooms[curroom]->links[i];
-    if ( lastmouseindex >= 0 && lastmouseindex < rooms[curroom]->links.size() )
+    if ( lastmouseindex >= 0 && lastmouseindex < static_cast<int>(rooms[curroom]->links.size()) )
         hotlink = rooms[curroom]->links[lastmouseindex];
     if ( hotlink && (lastmouseindex != i) )
         hotlink->MouseLeave( this, x, y, getMouseButtonMask() );
@@ -769,7 +769,7 @@ void BaseInterface::MouseOver( int xbeforecalc, int ybeforecalc )
     if (!draw_always) {
         float cx, cy, wid, hei;
         float dist_cur2link;
-        for (i = 0; i < rooms[curroom]->links.size(); i++) {
+        for (i = 0; i < static_cast<int>(rooms[curroom]->links.size()); i++) {
             cx = ( rooms[curroom]->links[i]->x+(rooms[curroom]->links[i]->wid/2) );               //get the center of the location
             cy = ( rooms[curroom]->links[i]->y+(rooms[curroom]->links[i]->hei/2) );               //get the center of the location
             dist_cur2link = sqrt( pow( (cx-x), 2 )+pow( (cy-y), 2 ) );
@@ -872,7 +872,7 @@ void BaseInterface::Key( unsigned int ch, unsigned int mod, bool release, int x,
 void BaseInterface::GotoLink( int linknum )
 {
     othtext.SetText( "" );
-    if (rooms.size() > linknum && linknum >= 0) {
+    if (static_cast<int>(rooms.size()) > linknum && linknum >= 0) {
         curlinkindex   = 0;
         curroom = linknum;
         curtext.SetText( rooms[curroom]->deftext );
@@ -904,7 +904,7 @@ BaseInterface::~BaseInterface()
 #endif
     CurrentBase = 0;
     restore_main_loop();
-    for (int i = 0; i < rooms.size(); i++)
+    for (size_t i = 0; i < rooms.size(); i++)
         delete rooms[i];
 }
 void base_main_loop();
@@ -1420,7 +1420,7 @@ void BaseInterface::Draw()
     if ( un && (!base) ) {
         VSFileSystem::vs_fprintf( stderr, "Error: Base NULL" );
         mission->msgcenter->add( "game", "all", "[Computer] Docking unit destroyed. Emergency launch initiated." );
-        for (int i = 0; i < un->pImage->dockedunits.size(); i++)
+        for (size_t i = 0; i < un->pImage->dockedunits.size(); i++)
             if (un->pImage->dockedunits[i]->uc.GetUnit() == base)
                 un->FreeDockingPort( i );
         Terminate();

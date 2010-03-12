@@ -130,7 +130,7 @@ unsigned int getCurrentPlayer()
 {
     return _Universe->CurrentCockpit();
 }
-int maxMissions()
+unsigned int maxMissions()
 {
     return game_options.max_missions;
 }

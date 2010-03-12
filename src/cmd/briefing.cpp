@@ -14,9 +14,9 @@ Briefing::Ship::Ship( const char *filename, int faction, const Vector &position 
     cloak    = 1;
     SetPosition( position );
 }
-void Briefing::SetCloak( int w, float c )
+void Briefing::SetCloak( int w, float c ) //FIXME This could use better names than "w" and "c" --chuck starchaser
 {
-    if ( w >= 0 && w < starships.size() )
+    if ( w >= 0 && w < static_cast<int>(starships.size()) )
         starships[w]->cloak = c;
 }
 bool UpdatePosition( Vector &res, Vector cur, Vector fin, float speed )

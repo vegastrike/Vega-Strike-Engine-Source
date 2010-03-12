@@ -272,7 +272,7 @@ public:
             virtual void Draw( ::BaseInterface*base );
 //Talk * caller;
 //int sayindex;
-            int   curchar;
+            unsigned int curchar;
             float curtime;
             virtual ~BaseTalk() {}
             std::string message;

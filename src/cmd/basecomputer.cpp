@@ -2605,7 +2605,7 @@ void BaseComputer::loadListPicker( TransactionList &tlist,
     //Iterate through the list and load the picker from it.
     string currentCategory = "--ILLEGAL CATEGORY--";     //Current category we are adding cells to.
     SimplePickerCell *parentCell = NULL;                //Place to add new items.  NULL = Add to picker.
-    for (int i = 0; i < tlist.masterList.size(); i++) {
+    for (size_t i = 0; i < tlist.masterList.size(); i++) {
         Cargo &item = tlist.masterList[i].cargo;
         std::string icategory = getDisplayCategory( item );
         if (icategory != currentCategory) {
@@ -2757,10 +2757,10 @@ void BaseComputer::loadMasterList( Unit *un,
                                    TransactionList &tlist )
 {
     vector< CargoColor > *items = &tlist.masterList;
-    for (unsigned int i = 0; i < un->numCargo(); i++) {
+    for (size_t i = 0; i < un->numCargo(); i++) {
         bool filter    = filtervec.empty();
         bool invfilter = true;
-        int  vecindex;
+        size_t vecindex;
         for (vecindex = 0; !filter && ( vecindex < filtervec.size() ); vecindex++)
             if (un->GetCargo( i ).GetCategory().find( filtervec[vecindex] ) != string::npos)
                 filter = true;
@@ -3152,26 +3152,29 @@ void BaseComputer::loadMissionsMasterList( TransactionList &tlist )
         return;
     }
     //Number of strings to look at.  And make sure they match!
-    const int stringCount = getSaveStringLength( playerNum, MISSION_NAMES_LABEL );
+    const size_t stringCount = getSaveStringLength( playerNum, MISSION_NAMES_LABEL );
     if (Network == NULL)
         //these aren't sent over the network.
         assert( stringCount == getSaveStringLength( playerNum, MISSION_SCRIPTS_LABEL ) );
     assert( stringCount == getSaveStringLength( playerNum, MISSION_DESC_LABEL ) );
     //Make sure we have different names for all the missions.
     //This changes the savegame -- it removes ambiguity for good.
-    for (int current = 0; current < stringCount; current++) {
+    for (size_t current = 0; current < stringCount; current++) {
         const string currentName = getSaveString( playerNum, MISSION_NAMES_LABEL, current );
-        int count = 1;
+        size_t count = 1;
         //Check whether any after the current one have the same name.
         for (unsigned int check = current+1; check < stringCount; ++check) {
             const string checkName = getSaveString( playerNum, MISSION_NAMES_LABEL, check );
             if (check == current)
+            {
                 //Found identical names.  Add a "count" at the end.
-                putSaveString( playerNum, MISSION_NAMES_LABEL, current, checkName+"_"+tostring( count++ ) );
+                putSaveString( playerNum, MISSION_NAMES_LABEL, current, checkName+"_"+tostring( static_cast<int>(count) ) );
+                ++count;
+            }
         }
     }
     //Create an entry for for each mission.
-    for (int i = 0; i < stringCount; i++) {
+    for (size_t i = 0; i < stringCount; i++) {
         CargoColor c;
         //Take any categories out of the name and put them in the cargo.category.
         if (Network == NULL) {
@@ -3271,7 +3274,7 @@ bool BaseComputer::acceptMission( const EventCommandId &command, Control *contro
         return false;
     }
     const int playernum   = UnitUtil::isPlayerStarship( playerUnit );
-    const int stringCount = getSaveStringLength( playernum, MISSION_NAMES_LABEL );
+    const size_t stringCount = getSaveStringLength( playernum, MISSION_NAMES_LABEL );
     if (Network == NULL)
         assert( stringCount == getSaveStringLength( playernum, MISSION_SCRIPTS_LABEL ) );
     string    qualifiedName;
@@ -3280,7 +3283,7 @@ bool BaseComputer::acceptMission( const EventCommandId &command, Control *contro
     else
         qualifiedName = item->GetCategory()+CATEGORY_SEP+item->GetContent();
     string finalScript;
-    for (unsigned int i = 0; i < stringCount; i++)
+    for (size_t i = 0; i < stringCount; i++)
         if (getSaveString( playernum, MISSION_NAMES_LABEL, i ) == qualifiedName) {
             if (Network == NULL) {
                 finalScript = getSaveString( playernum, MISSION_SCRIPTS_LABEL, i );
@@ -4130,7 +4133,7 @@ Cargo CreateCargoForOwnerStarship( Cockpit *cockpit, int i )
     cargo.price    = 0;
 
     bool needsTransport = true;
-    if ( i+1 < cockpit->unitfilename.size() ) {
+    if ( i+1 < static_cast<int>(cockpit->unitfilename.size()) ) {
         if ( cockpit->unitfilename[i+1] == _Universe->activeStarSystem()->getFileName() )
             //Ship is in this system -- doesn't need transport.
             needsTransport = false;
@@ -4149,7 +4152,7 @@ Cargo CreateCargoForOwnerStarship( Cockpit *cockpit, int i )
 //Create a Cargo for an owned starship from the name.
 Cargo CreateCargoForOwnerStarshipName( Cockpit *cockpit, std::string name, int &index )
 {
-    for (int i = 1; i < cockpit->unitfilename.size(); i += 2)
+    for (size_t i = 1; i < cockpit->unitfilename.size(); i += 2)
         if (cockpit->unitfilename[i] == name) {
             index = i;
             return CreateCargoForOwnerStarship( cockpit, i );
@@ -4163,11 +4166,11 @@ void SwapInNewShipName( Cockpit *cockpit, const std::string &newFileName, int sw
     Unit *parent = cockpit->GetParent();
     if (parent) {
         if (swappingShipsIndex != -1) {
-            while (cockpit->unitfilename.size() <= swappingShipsIndex+1)
+            while (static_cast<int>(cockpit->unitfilename.size()) <= swappingShipsIndex+1)
                 cockpit->unitfilename.push_back( "" );
             cockpit->unitfilename[swappingShipsIndex]   = parent->name;
             cockpit->unitfilename[swappingShipsIndex+1] = _Universe->activeStarSystem()->getFileName();
-            for (int i = 1; i < cockpit->unitfilename.size(); i += 2)
+            for (size_t i = 1; i < cockpit->unitfilename.size(); i += 2)
                 if (cockpit->unitfilename[i] == newFileName) {
                     cockpit->unitfilename.erase( cockpit->unitfilename.begin()+i );
                     if ( i < cockpit->unitfilename.size() )
@@ -4180,9 +4183,9 @@ void SwapInNewShipName( Cockpit *cockpit, const std::string &newFileName, int sw
         }
     } else if (swappingShipsIndex != -1) {
         //if parent is dead
-        if (cockpit->unitfilename.size() > swappingShipsIndex)          //erase the ship we have
+        if (static_cast<int>(cockpit->unitfilename.size()) > swappingShipsIndex)          //erase the ship we have
             cockpit->unitfilename.erase( cockpit->unitfilename.begin()+swappingShipsIndex );
-        if (cockpit->unitfilename.size() > swappingShipsIndex)
+        if (static_cast<int>(cockpit->unitfilename.size()) > swappingShipsIndex) //FIXME Any reason this repeat the previous two lines? --chuck_starchaser
             cockpit->unitfilename.erase( cockpit->unitfilename.begin()+swappingShipsIndex );
     }
     cockpit->unitfilename.front() = newFileName;
@@ -4303,7 +4306,7 @@ void BaseComputer::loadShipDealerControls( void )
 
     //Add in the starships owned by this player.
     Cockpit *cockpit = _Universe->AccessCockpit();
-    for (int i = 1; i < cockpit->unitfilename.size(); i += 2) {
+    for (size_t i = 1; i < cockpit->unitfilename.size(); i += 2) {
         CargoColor cargoColor;
         cargoColor.cargo = CreateCargoForOwnerStarship( cockpit, i );
         m_transList1.masterList.push_back( cargoColor );
@@ -4330,7 +4333,7 @@ bool sellShip( Unit *baseUnit, Unit *playerUnit, std::string shipname, BaseCompu
         shipCargo = UniverseUtil::GetMasterPartList()->GetCargo( shipname, tempInt );
     if (shipCargo) {
         //now we can actually do the selling
-        for (int i = 1; i < cockpit->unitfilename.size(); i += 2)
+        for (size_t i = 1; i < cockpit->unitfilename.size(); i += 2)
             if (cockpit->unitfilename[i] == shipname) {
                 if ( Network && !_Universe->netLocked() ) {
                     Network[0].shipRequest( shipname, Subcmd::SellShip );
@@ -4394,7 +4397,7 @@ bool buyShip( Unit *baseUnit,
         }
     } else {
         Cockpit *cockpit = _Universe->AccessCockpit();
-        for (int i = 1; i < cockpit->unitfilename.size(); i += 2)
+        for (size_t i = 1; i < cockpit->unitfilename.size(); i += 2)
             if (cockpit->unitfilename[i] == content)
                 return false;
         //can't buy a ship you own
@@ -4570,18 +4573,18 @@ bool BaseComputer::showPlayerInfo( const EventCommandId &command, Control *contr
     text += "#b#";
 
     //A line for each faction.
-    const int     numFactions = FactionUtil::GetNumFactions();
-    int i = 0;
+    const size_t numFactions = FactionUtil::GetNumFactions();
+    size_t i = 0;
     static string disallowedFactions = vs_config->getVariable( "graphics", "unprintable_factions", "" );
     int    totkills = 0;
     size_t fac_loc_before = 0, fac_loc = 0, fac_loc_after = 0;
     for (; i < numFactions; i++) {
         Unit *currentplayer    = UniverseUtil::getPlayerX( UniverseUtil::getCurrentPlayer() );
         float relation         = 0;
-        int upgrades           = FactionUtil::GetUpgradeFaction();
-        int planets            = FactionUtil::GetPlanetFaction();
-        static int privateer   = FactionUtil::GetFactionIndex( "privateer" );
-        int        neutral     = FactionUtil::GetNeutralFaction();
+        size_t upgrades           = FactionUtil::GetUpgradeFaction();
+        size_t planets            = FactionUtil::GetPlanetFaction();
+        static size_t privateer   = FactionUtil::GetFactionIndex( "privateer" );
+        size_t        neutral     = FactionUtil::GetNeutralFaction();
         if (i < killList->size() && i != upgrades && i != planets && i != neutral && i != privateer)
             totkills += (int) (*killList)[i];
         string     factionname = FactionUtil::GetFactionName( i );
@@ -4762,7 +4765,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     string expstatcolor      = "#c.6:.7:.8#";
     string nametemp          = "";
     string model = "";
-    int    nameindex         = 0;
+    size_t nameindex         = 0;
     int    replacement_mode  = -1;
     if (mode) {
         replacement_mode = GetModeFromName( item.GetContent().c_str() );
@@ -4777,7 +4780,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         nametemp = playerUnit->getFullname();
         if (nametemp == "") {
             const std::string &name = playerUnit->name.get();
-            for (nameindex = 0; ( nameindex < name.size() ) && name[nameindex] != '.'; nameindex++)
+            for (nameindex = 0; ( nameindex < name.size() ) && name[nameindex] != '.'; ++nameindex)
                 nametemp += name[nameindex];
         }
         if ( nametemp.length() )
@@ -5796,7 +5799,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         //handle SubUnits
         Unit *sub;
         int   i = 1;
-        for (un_iter ki = playerUnit->getSubUnits(); sub = *ki; ++ki, ++i) {
+        for (un_iter ki = playerUnit->getSubUnits(); (sub=*ki)!=NULL; ++ki, ++i) {
             if (i == 1) text += "#n##n##c0:1:.5#"+prefix+"[SUB UNITS]#-c";
             PRETTY_ADD( "#n#"+prefix+"#c0:1:.2#[#-csub unit ", i, 0 );
             text += "#c0:1:.2#]#-c#n#";
