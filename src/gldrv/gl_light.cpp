@@ -154,6 +154,9 @@ void /*GFXDRVAPI*/ GFXLight::SetProperties( enum LIGHT_TARGET lighttarg, const G
         attenuate[1] = color.g;
         attenuate[2] = color.b;
         break;
+    case EMISSION:
+    default:
+        break;
     }
     apply_attenuate( attenuated() );
 }
@@ -234,7 +237,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor( const GFXBOOL spec )
 
 GFXBOOL /*GFXDRVAPI*/ GFXLightContextAmbient( const GFXColor &amb )
 {
-    if ( _currentContext >= _ambient_light.size() )
+    if ( _currentContext >= static_cast<int>(_ambient_light.size()) )
         return GFXFALSE;
     (_ambient_light[_currentContext]) = amb;
     //(_ambient_light[_currentContext])[1]=amb.g;
@@ -247,7 +250,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXLightContextAmbient( const GFXColor &amb )
 
 GFXBOOL /*GFXDRVAPI*/ GFXGetLightContextAmbient( GFXColor &amb )
 {
-    if ( _currentContext >= _ambient_light.size() )
+    if ( _currentContext >= static_cast<int>(_ambient_light.size()) )
         return GFXFALSE;
     amb = (_ambient_light[_currentContext]);
     return GFXTRUE;
@@ -255,10 +258,10 @@ GFXBOOL /*GFXDRVAPI*/ GFXGetLightContextAmbient( GFXColor &amb )
 
 GFXBOOL /*GFXDRVAPI*/ GFXCreateLight( int &light, const GFXLight &templatecopy, const bool global )
 {
-    for (light = 0; light < _llights->size(); light++)
+    for (light = 0; light < static_cast<int>(_llights->size()); light++)
         if ( (*_llights)[light].Target() == -2 )
             break;
-    if ( light == _llights->size() )
+    if ( light == static_cast<int>(_llights->size()) )
         _llights->push_back( gfx_light() );
     return (*_llights)[light].Create( templatecopy, global );
 }
@@ -279,7 +282,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXSetLight( const int light, const enum LIGHT_TARGET lt, 
 
 GFXBOOL /*GFXDRVAPI*/ GFXEnableLight( int light )
 {
-    assert( light >= 0 && light <= _llights->size() );
+    assert( light >= 0 && light <= static_cast<int>(_llights->size()) );
     //return FALSE;
     if ( (*_llights)[light].Target() == -2 )
         return GFXFALSE;
@@ -289,7 +292,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXEnableLight( int light )
 
 GFXBOOL /*GFXDRVAPI*/ GFXDisableLight( int light )
 {
-    assert( light >= 0 && light <= _llights->size() );
+    assert( light >= 0 && light <= static_cast<int>(_llights->size()) );
     if ( (*_llights)[light].Target() == -2 )
         return GFXFALSE;
     (*_llights)[light].Disable();

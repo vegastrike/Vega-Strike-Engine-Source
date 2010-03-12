@@ -329,14 +329,14 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
     GFXActiveTexture( texturestage );
     //case 3:  ... 3 pass... are you insane? well look who's talking to himself! oh.. good point :)
     *handle = 0;
-    while ( *handle < textures.size() ) {
+    while ( *handle < static_cast<int>(textures.size()) ) {
         if (!textures[*handle].alive)
             //VSFileSystem::vs_fprintf (stderr,"got dead tex");
             break;
         else
             (*handle)++;
     }
-    if ( (*handle) == textures.size() ) {
+    if ( (*handle) == static_cast<int>(textures.size()) ) {
 #if 0
 	VSFileSystem::vs_dprintf( 3, "x" );
 #endif
@@ -531,7 +531,7 @@ static void DownSampleTexture( unsigned char **newbuf,
         int ostride = newwidth*pixsize;
         int istride = width*pixsize;
         const unsigned char *irow[2] = {oldbuf, oldbuf+istride};
-        unsigned int temp[4];
+        unsigned int temp[4] = { 0,0,0,0 };
         for (i = 0; i < newheight; i++, irow[0] += 2*istride, irow[1] += 2*istride, orow += ostride)
             for (j = k = 0; j < newwidth; j++, k += pixsize) {
                 (temp[0] = irow[0][(k<<1)+0]),
@@ -640,7 +640,7 @@ GLenum GetTextureFormat( TEXTUREFORMAT textureformat )
 
 GLenum GetImageTarget( TEXTURE_IMAGE_TARGET imagetarget )
 {
-    GLenum image2D;
+    GLenum image2D = GL_TEXTURE_2D;
     switch (imagetarget)
     {
     case TEXTURE_2D:
@@ -665,6 +665,7 @@ GLenum GetImageTarget( TEXTURE_IMAGE_TARGET imagetarget )
         image2D = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT;
         break;
     default:
+        assert(0 ||! "Bad case in file gl_texture.cpp, line 668 as of this writing.");
         break;
     }
     return image2D;
@@ -1084,7 +1085,7 @@ void /*GFXDRVAPI*/ GFXDeleteTexture( int handle )
 
 void GFXInitTextureManager()
 {
-    for (int handle = 0; handle < textures.size(); handle++) {
+    for (size_t handle = 0; handle < textures.size(); ++handle) {
         textures[handle].palette = NULL;
         textures[handle].width = textures[handle].height = textures[handle].iwidth = textures[handle].iheight = 0;
         textures[handle].texturestage  = 0;
@@ -1099,13 +1100,13 @@ void GFXInitTextureManager()
 
 void GFXDestroyAllTextures()
 {
-    for (int handle = 0; handle < textures.size(); handle++)
+    for (size_t handle = 0; handle < textures.size(); handle++)
         GFXDeleteTexture( handle );
 }
 
 void GFXTextureCoordGenMode( int stage, GFXTEXTURECOORDMODE tex, const float params[4], const float paramt[4] )
 {
-    if (stage && stage >= gl_options.Multitexture) return;
+    if (stage && stage >= static_cast<int>(gl_options.Multitexture)) return;
     GFXActiveTexture( stage );
     switch (tex)
     {
@@ -1156,7 +1157,7 @@ void GFXTextureCoordGenMode( int stage, GFXTEXTURECOORDMODE tex, const float par
 
 void /*GFXDRVAPI*/ GFXSelectTexture( int handle, int stage )
 {
-    if (stage && stage >= gl_options.Multitexture) return;
+    if (stage && stage >= static_cast<int>(gl_options.Multitexture)) return;
     if (activetexture[stage] != handle) {
         GFXActiveTexture( stage );
         activetexture[stage] = handle;
@@ -1167,7 +1168,7 @@ void /*GFXDRVAPI*/ GFXSelectTexture( int handle, int stage )
 
 void GFXTextureEnv( int stage, GFXTEXTUREENVMODES mode, float arg2 )
 {
-    if (stage && stage >= gl_options.Multitexture) return;
+    if (stage && stage >= static_cast<int>(gl_options.Multitexture)) return;
     GLenum type;
     GFXActiveTexture( stage );
     switch (mode)
@@ -1268,7 +1269,7 @@ ENVMODE:
 
 void GFXTextureWrap( int stage, GFXTEXTUREWRAPMODES mode, enum TEXTURE_TARGET target )
 {
-    if (stage && stage >= gl_options.Multitexture) return;
+    if (stage && stage >= static_cast<int>(gl_options.Multitexture)) return;
     GFXActiveTexture( stage );
     GLenum tt = GetGLTextureTarget( target );
     GLenum e1 = GL_REPEAT;

@@ -112,15 +112,15 @@ void ddsDecompress( unsigned char* &buffer, unsigned char* &data, TEXTUREFORMAT 
 {
     unsigned char *pos_out = NULL, *pos_in = NULL;
     int bpp = 4;
-    unsigned int   sx, sy, x, y;
+    unsigned int   sx, sy;
 
     sx      = (width < 4) ? width : 4;
     sy      = (height < 4) ? width : 4;
     data    = (unsigned char*) malloc( height*width*bpp );
     pos_out = data;
     pos_in  = buffer;
-    for (y = 0; y < height; y += 4)
-        for (x = 0; x < width; x += 4) {
+    for (int y = 0; y < height; y += 4)
+        for (int x = 0; x < width; x += 4) {
             pos_out = data+(y*width+x)*bpp;
             if (internformat == DXT3) {
                 decode_dxt3_alpha( pos_out+3, pos_in, sx, sy, width*bpp );

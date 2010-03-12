@@ -181,6 +181,10 @@ void /*GFXDRVAPI*/ GFXBegin( const enum POLYTYPE ptype )
     case GFXPOINT:
         mode = GL_POINTS;
         break;
+    default:
+        mode = GL_POINTS;
+        assert( 0 ||! "Bad case in gl_misc.cpp." );
+        break;
     }
     glBegin( mode );
 }

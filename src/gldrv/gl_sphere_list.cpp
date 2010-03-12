@@ -62,7 +62,7 @@ GFXSphereVertexList::GFXSphereVertexList( float radius, int detail, bool Insideo
     radius = 100000.0f;
     static vector< GFXVertexList* >vlists[4];
     int which = (Insideout ? 1 : 0)+(reverse_normals ? 2 : 0);
-    while ( detail >= vlists[which].size() )
+    while ( detail >= static_cast<int>(vlists[which].size()) )
         vlists[which].insert( vlists[which].end(), 1+detail-vlists[which].size(), NULL );
     if (vlists[which][detail] == 0) {
         int slices;
@@ -113,13 +113,13 @@ GFXSphereVertexList::GFXSphereVertexList( float radius, int detail, bool Insideo
 
         float rhol[2];
         float thetal[2];
-#define g_rho( i ) rhol[i&1]
-#define g_theta( i ) thetal[i&1]
+#define g_rho( i ) ((rhol[((i))&1]))
+#define g_theta( i ) ((thetal[((i))&1]))
 
         g_rho( 0 ) = rho_min;
         for (i = imin; i < imax; i++) {
             GFXVertex *vertexlist = vl+(i*(slices+1)*2);
-            g_rho( i+1 ) = (i+1)*drho+rho_min;
+            g_rho( i+1 ) = (i+1)*drho+rho_min; //FIXME These macros are horrible
 
             s = 0.0;
             g_theta( 0 ) = 0;

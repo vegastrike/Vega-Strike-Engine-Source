@@ -74,11 +74,11 @@ GLenum GetGLTextureTarget( enum TEXTURE_TARGET texture_target )
     return tt;
 }
 
-int activeTextureStage = -1;
+int activeTextureStage = -1; //FIXME Shouldn't this be a member of a class?, or at least be an official global variable?
 
 static inline bool _GFXActiveTextureValid()
 {
-    return !(activeTextureStage && activeTextureStage >= gl_options.Multitexture);
+    return !( activeTextureStage && (activeTextureStage >= static_cast<int>(gl_options.Multitexture)) );
 }
 
 extern GFXBOOL GFXLIGHTING;
@@ -163,7 +163,7 @@ void /*GFXDRVAPI*/ GFXEnable( const STATE state )
 
 void GFXToggleTexture( bool enable, int whichstage, enum TEXTURE_TARGET target )
 {
-    if ( (whichstage < gl_options.Multitexture) || (whichstage == 0) ) {
+    if ( (whichstage < static_cast<int>(gl_options.Multitexture)) || (whichstage == 0) ) {
         GLenum tt  = GetGLTextureTarget( target );
         GLenum btt = (enable ? tt : 0);
         if (bTex[whichstage] != btt) {

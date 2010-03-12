@@ -23,7 +23,7 @@ void GFXUploadLightState( int max_light_location, int active_light_array, int ap
     }
     
     size_t maxval = 0;
-    for (size_t i = 0; i < GFX_MAX_LIGHTS; ++i) {
+    for (size_t i = 0; i < static_cast<unsigned>(GFX_MAX_LIGHTS); ++i) {
         if (GLLights[i].options & OpenGLL::GL_ENABLED) {
             lightData[i] = 1;
             maxval = i;

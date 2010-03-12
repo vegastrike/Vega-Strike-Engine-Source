@@ -130,7 +130,7 @@ void /*GFXDRVAPI*/ GFXSelectMaterialHighlights( const unsigned int number,
 
 void /*GFXDRVAPI*/ GFXSelectMaterial( const unsigned int number )
 {
-    if (1 || number != selectedmaterial) {
+    if (1 || static_cast<int>(number) != selectedmaterial) { //FIXME Last time I checked true or anything was true
         float matvect[4];
         matvect[0] = materialinfo[number].ar;
         matvect[1] = materialinfo[number].ag;

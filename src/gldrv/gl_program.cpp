@@ -212,7 +212,7 @@ GameSpeed GFXGetFramerate()
     double framerate = 1./(thistime-lasttime);
     static double toofast   = 80;
     static double tooslow   = 29;
-    static int    lim = 10;
+    static unsigned lim = 10;
     static int    penalty   = 10;
     static float  lowratio  = .125;
     static float  highratio = .75;
