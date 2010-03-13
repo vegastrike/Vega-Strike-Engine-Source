@@ -268,7 +268,8 @@ void GFXTextureAddressMode( const ADDRESSMODE mode, enum TEXTURE_TARGET target )
     case BORDER:
         wm1 = GL_CLAMP;
         wm2 = GL_CLAMP_TO_BORDER_ARB;
-        glTexParameterfv( GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, BColor );                                                         //nobreak
+        glTexParameterfv( GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, BColor );
+        //nobreak
     case CLAMP:
         wm1 = GL_CLAMP;
         wm2 = GL_CLAMP_TO_EDGE_EXT;
@@ -278,12 +279,16 @@ void GFXTextureAddressMode( const ADDRESSMODE mode, enum TEXTURE_TARGET target )
         return;              //won't work
     }
     glTexParameteri( tt, GL_TEXTURE_WRAP_S, wm1 );
-    if (target != TEXTURE1D) glTexParameteri( tt, GL_TEXTURE_WRAP_T, wm1 );
-    if (target == TEXTURE3D) glTexParameteri( tt, GL_TEXTURE_WRAP_R, wm1 );
+    if (target != TEXTURE1D) 
+	    glTexParameteri( tt, GL_TEXTURE_WRAP_T, wm1 );
+    if (target == TEXTURE3D || target == CUBEMAP) 
+    	glTexParameteri( tt, GL_TEXTURE_WRAP_R, wm1 );
     if (wm2) {
         glTexParameteri( tt, GL_TEXTURE_WRAP_S, wm2 );
-        if (target != TEXTURE1D) glTexParameteri( tt, GL_TEXTURE_WRAP_T, wm2 );
-        if (target == TEXTURE3D) glTexParameteri( tt, GL_TEXTURE_WRAP_R, wm2 );
+        if (target != TEXTURE1D) 
+    		glTexParameteri( tt, GL_TEXTURE_WRAP_T, wm2 );
+        if (target == TEXTURE3D || target == CUBEMAP) 
+            glTexParameteri( tt, GL_TEXTURE_WRAP_R, wm2 );
     }
 }
 

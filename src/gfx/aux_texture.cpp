@@ -668,6 +668,26 @@ void Texture::MakeActive( int stag, int pass )
     if ( (name == -1) || (pass != 0) ) {
         ActivateWhite( stag );
     } else {
+        // Lazy-init default address mode
+        // So that texture_target is properly initiated 
+        // by the time we do
+        if (address_mode == DEFAULT_ADDRESS_MODE) {
+            switch (texture_target)
+            {
+            case TEXTURE1D:
+            case TEXTURE2D:
+        #ifdef GL_EXT_texture3D
+            case TEXTURE3D:
+        #endif
+            default:
+                address_mode = WRAP;
+                break;
+            case CUBEMAP:
+                address_mode = CLAMP;
+                break;
+            }
+        }
+    
         GFXActiveTexture( stag );
         GFXSelectTexture( name, stag );
         GFXTextureAddressMode( address_mode, texture_target );         //In case it changed - it's possible

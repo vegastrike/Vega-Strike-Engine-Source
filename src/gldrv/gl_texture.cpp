@@ -319,50 +319,27 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
 {
     static bool verbose_debug = XMLSupport::parse_bool( vs_config->getVariable( "data", "verbose_debug", "false" ) );
     int dummy = 0;
+
     if ( ( mipmap&(MIPMAP|TRILINEAR) ) && !isPowerOfTwo( width, dummy ) )
         VSFileSystem::vs_dprintf( 1, "Width %d not a power of two", width );
-    //assert (false);
     if ( ( mipmap&(MIPMAP|TRILINEAR) ) && !isPowerOfTwo( height, dummy ) )
         VSFileSystem::vs_dprintf( 1, "Height %d not a power of two", height );
-    //assert (false);
 
     GFXActiveTexture( texturestage );
-    //case 3:  ... 3 pass... are you insane? well look who's talking to himself! oh.. good point :)
+
     *handle = 0;
     while ( *handle < static_cast<int>(textures.size()) ) {
         if (!textures[*handle].alive)
-            //VSFileSystem::vs_fprintf (stderr,"got dead tex");
             break;
         else
             (*handle)++;
     }
     if ( (*handle) == static_cast<int>(textures.size()) ) {
-#if 0
-	VSFileSystem::vs_dprintf( 3, "x" );
-#endif
         textures.push_back( GLTexture() );
         textures.back().palette = NULL;
         textures.back().alive   = GFXTRUE;
         textures.back().name    = -1;
         textures.back().width   = textures.back().height = textures.back().iwidth = textures.back().iheight = 1;
-    }
-    if (address_mode == DEFAULT_ADDRESS_MODE) {
-        switch (texture_target)
-        {
-        case TEXTURE1D:
-        case TEXTURE2D:
-#ifdef GL_EXT_texture3D
-        case TEXTURE3D:
-            address_mode = WRAP;
-            break;
-#endif
-        case CUBEMAP:
-            address_mode = CLAMP;
-            break;
-        default:
-            address_mode = WRAP;
-            break;
-        }
     }
     switch (texture_target)
     {
@@ -381,18 +358,11 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
         textures[*handle].targets = GL_TEXTURE_CUBE_MAP_EXT;
         break;
     }
-#if 0
-    VSFileSystem::vs_dprintf( 3, "y" );
-#endif
     //for those libs with stubbed out handle gen't
     textures[*handle].name = *handle+1;
-    //VSFileSystem::vs_fprintf (stderr,"Texture Handle %d",*handle);
     textures[*handle].alive = GFXTRUE;
     textures[*handle].texturestage = texturestage;
     textures[*handle].mipmapped    = mipmap;
-#if 0
-    VSFileSystem::vs_dprintf( 3, "z" );
-#endif
     glGenTextures( 1, &textures[*handle].name );
     glBindTexture( textures[*handle].targets, textures[*handle].name );
     activetexture[texturestage] = *handle;
@@ -419,15 +389,12 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
     textures[*handle].iheight = height;
     textures[*handle].palette = NULL;
     if (palette && textureformat == PALETTE8) {
-	VSFileSystem::vs_dprintf( 3, " palette " );
+	    VSFileSystem::vs_dprintf( 3, " palette " );
         textures[*handle].palette = (GLubyte*) malloc( sizeof (GLubyte)*1024 );
         ConvertPalette( textures[*handle].palette, (unsigned char*) palette );
     }
     textures[*handle].textureformat = GetUncompressedTextureFormat( textureformat );
-#if 0
-    VSFileSystem::vs_dprintf( 3, "w" );
-#endif
-    //GFXActiveTexture(0);
+
     return GFXTRUE;
 }
 
