@@ -340,7 +340,7 @@ void Background::Draw()
                 const bool   multitex  = true;
                 const int    numpasses = 1;
                 static const float edge_fixup =
-                    XMLSupport::parse_float( vs_config->getVariable( "graphics", "background_edge_fixup", "2" ) );
+                    XMLSupport::parse_float( vs_config->getVariable( "graphics", "background_edge_fixup", "0" ) );
                 const float  ms      = 0.f, Ms = 1.f-edge_fixup/tex->boundSizeX;
                 const float  mt      = 0.f, Mt = 1.f-edge_fixup/tex->boundSizeY;
                 const float  _stca[] = {-1.f, -Ms, ms, Ms, +1.f}, _ttca[] = {-1.f, -Mt, mt, Mt, +1.f};
