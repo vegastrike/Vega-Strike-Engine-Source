@@ -71,7 +71,7 @@ GameVegaConfig::GameVegaConfig( const char *configfile ) : VegaConfig( configfil
         for (int v = 0; v < MAX_VALUES; v++)
             hatswitch[h][v] = 2.0;
     }
-    for (int i = 0; i <= MAX_AXES; i++) {
+    for (int i = 0; i < MAX_AXES; i++) {
         axis_axis[i] = -1;
         axis_joy[i]  = -1;
     }
