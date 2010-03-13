@@ -23,6 +23,7 @@
 #include "gfxlib_struct.h"
 #include "vegastrike.h"
 #include "vs_globals.h"
+#include "vsfilesystem.h"
 #include <assert.h>
 #ifndef NO_GFX //Server cannot depend on GL, but still needs a mesh library.
 #include "gl_globals.h"
@@ -34,6 +35,8 @@
 #ifndef GFX_SCALE
 #define GFX_SCALE 1./1024.
 #endif
+
+#include "gnuhash.h"
 
 GFXVertexList *next;
 
@@ -50,7 +53,22 @@ struct VertexCompare
 {
     bool operator()( const GFXVertex *a, const GFXVertex *b ) const
     {
-        return memcmp( a, b, sizeof (GFXVertex) ) < 0;
+        if ((sizeof(GFXVertex) % sizeof(unsigned int)) != 0) {
+            return memcmp( a, b, sizeof (GFXVertex) ) < 0;
+        } else {
+            // faster memcmp, since it gets unrolled by the compiler
+            const unsigned int *ia = reinterpret_cast<const unsigned int*>(a);
+            const unsigned int *ib = reinterpret_cast<const unsigned int*>(b);
+            
+            for (size_t i=0; i < (sizeof(*a) / sizeof(*ia)); ++i) {
+                if (ia[i] < ib[i])
+                    return true;
+                else if (ia[i] > ib[i])
+                    return false;
+            }
+            
+            return false;
+        }
     }
 };
 
@@ -59,7 +77,7 @@ struct VertexCompare
 void GFXOptimizeList( GFXVertex *old, int numV, GFXVertex **nw, int *nnewV, unsigned int **ind )
 {
     std::map< GFXVertex*, int, VertexCompare >vtxcache;
-
+    
     *ind   = (unsigned int*) malloc( sizeof (unsigned int)*numV );
     *nw    = (GFXVertex*) malloc( numV*sizeof (GFXVertex) );
     *nnewV = 0;
@@ -75,6 +93,8 @@ void GFXOptimizeList( GFXVertex *old, int numV, GFXVertex **nw, int *nnewV, unsi
             (*nnewV) = (*nnewV)+1;
         }
     }
+    
+    VSFileSystem::vs_dprintf(3, "Optimized vertex list - vertices: %d -> %d\n", numV, *nnewV);
 }
 
 void GFXVertexList::Init( enum POLYTYPE *poly,

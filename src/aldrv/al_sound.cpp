@@ -427,6 +427,8 @@ using namespace VSFileSystem;
 
 bool AUDLoadSoundFile( const char *s, struct AUDSoundProperties *info, bool use_fileptr )
 {
+    VSFileSystem::vs_dprintf(3, "Loading sound file %s\n", s);
+    
     info->success = false;
     vector< char >dat;
     if (use_fileptr) {

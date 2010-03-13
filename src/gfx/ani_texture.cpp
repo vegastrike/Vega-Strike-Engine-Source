@@ -17,6 +17,16 @@
 using std::set;
 static set< AnimatedTexture* >anis;
 
+static inline unsigned int intmin( unsigned int a, unsigned int b )
+{
+    return a < b ? a : b;
+}
+
+static inline unsigned int intmax( unsigned int a, unsigned int b )
+{
+    return a < b ? b : a;
+}
+
 static enum ADDRESSMODE parseAddressMode( const string &addrmodestr, ADDRESSMODE defaultAddressMode )
 {
     enum ADDRESSMODE addrmode = defaultAddressMode;
@@ -43,6 +53,46 @@ static void ActivateWhite( int stage )
 
 void AnimatedTexture::MakeActive( int stage, int pass )
 {
+    // Set active frame and texture coordinates
+    if (timeperframe && !vidSource) {
+        unsigned int numframes = numFrames();
+        unsigned int active    = ( (unsigned int) (curtime/timeperframe) );
+        if ( GetLoop() )
+            active %= numframes;
+
+        else
+            active = intmin( active, numframes-1 );
+        unsigned int nextactive = ( GetLoopInterp() ? ( (active+1)%numframes ) : intmin( active+1, numframes-1 ) );
+        float fraction = (curtime/timeperframe)-(unsigned int) (curtime/timeperframe);
+        if (fraction < 0) fraction += 1.0f;
+        this->active     = active;
+        this->nextactive = nextactive;
+        this->active_fraction = fraction;
+        if (!vidMode) {
+            if ( GetInterpolateTCoord() && (active != nextactive) ) {
+                if (Decal && Decal[active] && Decal[nextactive]) {
+                    this->maxtcoord = (1-fraction)*Decal[active]->maxtcoord+fraction*Decal[nextactive]->maxtcoord;
+                    this->mintcoord = (1-fraction)*Decal[active]->mintcoord+fraction*Decal[nextactive]->mintcoord;
+                }
+            } else if (Decal && Decal[active]) {
+                this->maxtcoord = Decal[active]->maxtcoord;
+                this->mintcoord = Decal[active]->mintcoord;
+            }
+        } else {
+            if ( GetInterpolateTCoord() && (active != nextactive) ) {
+                if ( frames_maxtc.size() < intmax( active, nextactive ) ) {
+                    this->maxtcoord = (1-fraction)*frames_maxtc[active]+fraction*frames_maxtc[nextactive];
+                    this->mintcoord = (1-fraction)*frames_mintc[active]+fraction*frames_mintc[nextactive];
+                }
+            } else if ( active < frames_maxtc.size() ) {
+                this->maxtcoord = frames_maxtc[active];
+                this->mintcoord = frames_mintc[active];
+            }
+        }
+        active = ( (unsigned int) (curtime/timeperframe) )%numframes;
+    }
+    
+    // Effectively activate texture units
     switch (pass)
     {
     case 0:
@@ -177,56 +227,9 @@ bool AnimatedTexture::Done()
     return curtime >= numframes*timeperframe;
 }
 
-static unsigned int intmin( unsigned int a, unsigned int b )
-{
-    return a < b ? a : b;
-}
-
-static unsigned int intmax( unsigned int a, unsigned int b )
-{
-    return a < b ? b : a;
-}
-
 void AnimatedTexture::setTime( double tim )
 {
     curtime = tim;
-    if (timeperframe && !vidSource) {
-        unsigned int numframes = numFrames();
-        unsigned int active    = ( (unsigned int) (curtime/timeperframe) );
-        if ( GetLoop() )
-            active %= numframes;
-
-        else
-            active = intmin( active, numframes-1 );
-        unsigned int nextactive = ( GetLoopInterp() ? ( (active+1)%numframes ) : intmin( active+1, numframes-1 ) );
-        float fraction = (curtime/timeperframe)-(unsigned int) (curtime/timeperframe);
-        if (fraction < 0) fraction += 1.0f;
-        this->active     = active;
-        this->nextactive = nextactive;
-        this->active_fraction = fraction;
-        if (!vidMode) {
-            if ( GetInterpolateTCoord() && (active != nextactive) ) {
-                if (Decal && Decal[active] && Decal[nextactive]) {
-                    this->maxtcoord = (1-fraction)*Decal[active]->maxtcoord+fraction*Decal[nextactive]->maxtcoord;
-                    this->mintcoord = (1-fraction)*Decal[active]->mintcoord+fraction*Decal[nextactive]->mintcoord;
-                }
-            } else if (Decal && Decal[active]) {
-                this->maxtcoord = Decal[active]->maxtcoord;
-                this->mintcoord = Decal[active]->mintcoord;
-            }
-        } else {
-            if ( GetInterpolateTCoord() && (active != nextactive) ) {
-                if ( frames_maxtc.size() < intmax( active, nextactive ) ) {
-                    this->maxtcoord = (1-fraction)*frames_maxtc[active]+fraction*frames_maxtc[nextactive];
-                    this->mintcoord = (1-fraction)*frames_mintc[active]+fraction*frames_mintc[nextactive];
-                }
-            } else if ( active < frames_maxtc.size() ) {
-                this->maxtcoord = frames_maxtc[active];
-                this->mintcoord = frames_mintc[active];
-            }
-        }
-        active = ( (unsigned int) (curtime/timeperframe) )%numframes;
-    }
 }
 
 using namespace VSFileSystem;
