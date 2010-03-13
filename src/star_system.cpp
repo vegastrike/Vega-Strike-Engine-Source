@@ -525,27 +525,29 @@ void GameStarSystem::createBackground( StarSystem::StarXML *xml )
 {
 #ifdef NV_CUBE_MAP
     printf( "using NV_CUBE_MAP\n" );
-    LightMap[0] = new Texture( (xml->backgroundname+"_light.cube").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X );
+    static int max_cube_size = XMLSupport::parse_int( vs_config->getVariable( "graphics", "max_cubemap_size", "1024" ) );
+    LightMap[0] = new Texture( (xml->backgroundname+"_light.cube").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X,
+                              GFXFALSE, max_cube_size );
     if ( LightMap[0]->LoadSuccess() && LightMap[0]->isCube() ) {
-        LightMap[1] = LightMap[2] = LightMap[3] =
-                                        LightMap[4] = LightMap[5] = 0;
+        LightMap[1] = LightMap[2] = LightMap[3] = LightMap[4] = LightMap[5] = 0;
     } else {
         delete LightMap[0];
-        LightMap[0] = new Texture( (xml->backgroundname+"_right.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X );
+        LightMap[0] = new Texture( (xml->backgroundname+"_right.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X,
+                                  GFXFALSE, max_cube_size );
         LightMap[1] = new Texture( (xml->backgroundname+"_left.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_X,
-                                  GFXFALSE, 65536, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                                  GFXFALSE, max_cube_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                                   LightMap[0] );
         LightMap[2] = new Texture( (xml->backgroundname+"_up.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_Y,
-                                  GFXFALSE, 65536, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                                  GFXFALSE, max_cube_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                                   LightMap[0] );
         LightMap[3] = new Texture( (xml->backgroundname+"_down.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_Y,
-                                  GFXFALSE, 65536, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                                  GFXFALSE, max_cube_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                                   LightMap[0] );
-        LightMap[4] = new Texture( (xml->backgroundname+"_front.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_Z,
-                                  GFXFALSE, 65536, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+        LightMap[4] = new Texture( (xml->backgroundname+"_front.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_Z,
+                                  GFXFALSE, max_cube_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                                   LightMap[0] );
-        LightMap[5] = new Texture( (xml->backgroundname+"_back.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_Z,
-                                  GFXFALSE, 65536, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+        LightMap[5] = new Texture( (xml->backgroundname+"_back.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_Z,
+                                  GFXFALSE, max_cube_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                                   LightMap[0] );
     }
 #else
