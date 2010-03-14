@@ -17,30 +17,27 @@ class mem_cubemap;
 class filter_one_texel
 {
     mem_cubemap const & source_;
-    radians             radius_;
-    void init_constants();
-    steradians          solid_angle_;
     float               shininess_;
+    void                init_constants();
+    radians             radius_;
+    steradians          solid_angle_;
     //etceteras...
-    double acc_red_;
-    double acc_grn_;
-    double acc_blu_;
-    double acc_weight_;
-    size_t count_;
+    dRGBAcol            accumulator; //weight in alpha channel
 public:
     virtual ~filter_one_texel();
     filter_one_texel
     (
         mem_cubemap const & source
-      , radians const & radius
+      , mem_cubemap const & target
+      , Shininess const & shininess
     )
     : source_(source)
     , target_(target)
-    , radius_(radius)
+    , shininess_(shininess)
     {
         init_constants();
     }
-    fcolor operator()( fvector const * ray );
+    fRGBAcol operator()( fvector const * ray );
 };
 
 

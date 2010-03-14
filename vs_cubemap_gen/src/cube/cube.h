@@ -31,10 +31,21 @@ NOT SURE ABOUT THIS ANYMORE:
 * Back means negative Z
 */
 
+#include <memory>
+
+struct cube_impl;
+enum eSides;
+
 //class cube is being used like a namespace here; but I think it will eventually be a real class :)
 class cube
 {
+    std::auto_ptr<cube_impl> impl_;
+    cube( cube const & ); //no copying
+    cube & operator=( cube const & ); //no copying
 public:
+    cube();
+    mem_texture const & get_buffer() const;
+    mem_texture       & get_buffer();
 };
 
 

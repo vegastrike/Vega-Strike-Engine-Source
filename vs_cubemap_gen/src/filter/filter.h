@@ -10,9 +10,9 @@ class filter
 {
     mem_cubemap const & source_;
     mem_cubemap       & target_;
-    radians             radius_;
+    Radians             radius_;
     void init_constants();
-    steradians          solid_angle_;
+    Steradians          solid_angle_;
     float               shininess_;
     //etceteras...
 public:
@@ -21,7 +21,7 @@ public:
     (
         mem_cubemap const & source
       , mem_cubemap const & target
-      , radians const & radius
+      , Radians const & radius
     )
     : source_(source)
     , target_(target)
