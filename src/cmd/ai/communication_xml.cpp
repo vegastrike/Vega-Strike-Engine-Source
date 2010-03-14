@@ -50,13 +50,13 @@ void FSM::beginElement( void *userData, const XML_Char *names, const XML_Char **
     ( (FSM*) userData )->beginElement( names, AttributeList( atts ) );
 }
 
-extern int createSound( string file, bool val );
 void FSM::beginElement( const string &name, const AttributeList attributes )
 {
     using namespace CommXML;
     AttributeList::const_iterator iter;
     Names  elem  = (Names) element_map.lookup( name );
     string nam;
+    string filename;
     float  val = 0.0f;  //FIXME "= 0.0f" added by chuck_starchaser without knowing what value to use
     int    sound = -1;
     unsigned char sexe = 0; //FIXME "= 0" added by chuck_starchaser without knowing what value to use
@@ -70,12 +70,12 @@ void FSM::beginElement( const string &name, const AttributeList attributes )
                 sexe  = XMLSupport::parse_int( (*iter).value );
                 break;
             case FILENAME:
-                sound = createSound( (*iter).value, false );
+                filename = (*iter).value;
                 break;
             }
         }
-        if (sound != -1)
-            nodes.back().AddSound( sound, sexe ); //FIXME sexe was used uninitialized until I added = 0 --chuck_starchaser
+        if (!filename.empty())
+            nodes.back().AddSound( filename, sexe ); //FIXME sexe was used uninitialized until I added = 0 --chuck_starchaser
         break;
     case UNKNOWN:
         unitlevel++;

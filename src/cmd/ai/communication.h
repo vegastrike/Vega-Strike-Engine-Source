@@ -9,13 +9,14 @@ public:
     struct Node
     {
         vector< std::string > messages;
+        vector< std::string > soundfiles; //messages.size() sound file path for each sex
         vector< int >sounds; //messages.size() sound for each sex
         float messagedelta;
         vector< unsigned int >edges;
-        int   GetSound( unsigned char sex, unsigned int multiple ) const;
+        int   GetSound( unsigned char sex, unsigned int multiple );
         bool  StopSound( unsigned char sex );
         std::string GetMessage( unsigned int &multiple ) const;
-        void  AddSound( int sound, unsigned char sex );
+        void  AddSound( std::string soundfile, unsigned char sex );
         Node( const vector< std::string > &message, float messagedel ) : messages( message )
             , messagedelta( messagedel )
         {

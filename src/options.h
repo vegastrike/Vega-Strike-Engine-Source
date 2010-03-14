@@ -44,6 +44,8 @@ public: vs_options() {}
     std::string compress_change;
     std::string compress_stop;
     int compress_interval;
+    
+    bool comm_preload;
 
 /* Unit Audio Options */
     std::string jumpleave;

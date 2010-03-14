@@ -3,6 +3,7 @@
 #include "config_xml.h"
 #include <assert.h>
 #include "audiolib.h"
+#include "options.h"
 
 FSM::FSM( const char *filename )
 {
@@ -137,13 +138,23 @@ std::string FSM::Node::GetMessage( unsigned int &multiple ) const
     return messages[multiple];
 }
 
-int FSM::Node::GetSound( unsigned char sex, unsigned int multiple ) const
+// createSound, implemented in unit_functions.cpp / libaudioserver.cpp
+// FIXME: this variability makes it hard to use proper include files
+extern int createSound( std::string file, bool val );
+
+int FSM::Node::GetSound( unsigned char sex, unsigned int multiple ) 
 {
     unsigned int index = multiple+( (unsigned int) sex )*messages.size();
-    if ( index < sounds.size() )
-        return sounds[index];
-    else
+    if ( index < sounds.size() ) {
+        if (sounds[index] < 0) {
+            sounds[index] = createSound(soundfiles[index], false);
+            return sounds[index];
+        } else {
+            return sounds[index];
+        }
+    } else {
         return -1;
+    }
 }
 
 bool FSM::Node::StopSound( unsigned char sex )
@@ -151,7 +162,7 @@ bool FSM::Node::StopSound( unsigned char sex )
     unsigned int index = ( (unsigned int) sex )*messages.size();
     bool ret = false;
     for (unsigned int i = index; i < index+messages.size() && i < sounds.size(); ++i)
-        if ( AUDIsPlaying( sounds[i] ) ) {
+        if ( sounds[i] > 0 && AUDIsPlaying( sounds[i] ) ) {
             AUDStopPlaying( sounds[i] );
             ret = true;
         }
@@ -167,14 +178,24 @@ bool FSM::StopAllSounds( unsigned char sex )
     return ret;
 }
 
-void FSM::Node::AddSound( int sounde, unsigned char sex )
+void FSM::Node::AddSound( std::string soundfile, unsigned char sex )
 {
+    static std::string emptystr;
+    
     for (int multiple = 0;; ++multiple) {
         unsigned int index = ( (unsigned int) sex )*messages.size()+multiple;
-        while ( index >= sounds.size() )
+        while ( index >= sounds.size() ) {
             sounds.push_back( -1 );
-        if (sounds[index] == -1) {
-            sounds[index] = sounde;
+            soundfiles.push_back(emptystr);
+        }
+        
+        if (soundfiles[index].empty()) {
+            soundfiles[index] = soundfile;
+        
+            // Preload sound if configured to do so
+            if (game_options.comm_preload)
+                GetSound(sex, multiple);
+            
             break;
         }
     }

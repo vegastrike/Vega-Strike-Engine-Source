@@ -38,6 +38,8 @@ void vs_options::init()
     compress_stop            = vs_config->getVariable( "cockpitaudio", "compress_stop", "compress_end" );
     compress_interval        = XMLSupport::parse_int( vs_config->getVariable( "cockpitaudio", "compress_interval", "3" ) );
 
+    comm_preload             = XMLSupport::parse_bool( vs_config->getVariable( "cockpitaudio", "comm_preload", "false" ) );
+
     /* Unit Audio Options */
     jumpleave                = vs_config->getVariable( "unitaudio", "jumpleave", "sfx43.wav" );
 
