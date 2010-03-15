@@ -8,6 +8,10 @@
 #include <math.h>
 #include "gfx/matrix.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338328
+#endif
+
 void GFXUploadLightState( int max_light_location, int active_light_array, int apparent_light_size_array, bool shader )
 {
     // FIXME: (klauss) Very bad thing: static variables initialized with heap-allocated arrays...
