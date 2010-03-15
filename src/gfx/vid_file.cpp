@@ -19,10 +19,16 @@
 #endif
 #include <sys/types.h>
 
-#ifdef _WIN32
-#define offset_t (xoffset_t)
-#endif
-#include "ffmpeg_init.h"
+//<<<<<<< .mine
+//#ifdef _WIN32
+//#define offset_t xoffset_t
+//#endif
+//=======
+//#ifdef _WIN32
+//#define offset_t (xoffset_t)
+//#endif
+//>>>>>>> .r12720
+//#include "ffmpeg_init.h"
 
 /*
  * FOLLOWING CODE IS ONLY INCLUDED IF YOU HAVE FFMPEG

@@ -21,9 +21,9 @@
  * ********************************************
  */
 #ifdef HAVE_FFMPEG
-#ifdef _WIN32
-#define offset_t xoffset_t
-#endif
+//#ifdef _WIN32
+//#define offset_t xoffset_t
+//#endif
 
 #ifndef offset_t
     #if (LIBAVCODEC_VERSION_MAJOR >= 52) || (LIBAVCODEC_VERSION_INT >= ( ( 51<<16)+(49<<8)+0 ) ) || defined (__amd64__) \
