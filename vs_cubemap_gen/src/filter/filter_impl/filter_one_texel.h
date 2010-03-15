@@ -9,30 +9,29 @@
 * and the solid angle of that source texel, as perceived from the center of the cube.
 */
 
-class mem_cubemap;
+class cube;
 #include "../../units/radians.h"
 #include "../../units/steradians.h"
 
 
 class filter_one_texel
 {
-    mem_cubemap const & source_;
-    float               shininess_;
-    void                init_constants();
-    radians             radius_;
-    steradians          solid_angle_;
-    //etceteras...
-    dRGBAcol            accumulator; //weight in alpha channel
+    mem_tex<S> const & src_tex_;
+    Shininess          shininess_;
+    void               init_constants();
+    Radians            max_radius_;
+    float              cosa_;
+    float              sina_;
+    dRGBAcol           accumulator; //weights accumulated in alpha channel
+    void plane_min_max( float len_sqr, float x, float y, float& minx, float& maxx,  float& miny,  float& maxy );
 public:
     virtual ~filter_one_texel();
     filter_one_texel
     (
-        mem_cubemap const & source
-      , mem_cubemap const & target
+        mem_tex<S> const & source
       , Shininess const & shininess
     )
     : source_(source)
-    , target_(target)
     , shininess_(shininess)
     {
         init_constants();

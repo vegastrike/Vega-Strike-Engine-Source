@@ -1,16 +1,15 @@
 #ifndef __FVECTOR_H__
 #define __FVECTOR_H__
 
-
-class fvector
+//fvector used to be a class, but it's a struct for speed reasons, to appear as a POD to the compiler
+struct fvector
 {
-   float x_, y_, z_;
-public:
+    float x_, y_, z_;
+    float w_; //not used; just padding for alignment, for now.
     fvector(): x(0.0f), y(0.0f), z(0.0f) {}
     explicit fvector( ccoords const & cc );
-    float get_x() const { return x_; }
-    float get_y() const { return y_; }
-    float get_z() const { return z_; }
+    void normalize();
+    void fast_renormalize();
 };
 
 

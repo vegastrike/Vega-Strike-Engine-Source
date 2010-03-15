@@ -6,21 +6,21 @@ class mem_cubemap;
 #include "../units/steradians.h"
 
 
-class filter
+class filter_mip
 {
-    mem_cubemap const & source_;
-    mem_cubemap       & target_;
-    Radians             radius_;
+    mem_tex<S> const & source_;
+    mem_tex<S>       & target_;
+    Radians            radius_;
     void init_constants();
-    Steradians          solid_angle_;
-    float               shininess_;
+    Steradians         solid_angle_;
+    float              shininess_;
     //etceteras...
 public:
-    virtual ~filter();
+    virtual ~filter_mip();
     filter
     (
-        mem_cubemap const & source
-      , mem_cubemap const & target
+        mem_tex<S> const & source
+      , mem_tex<S> const & target
       , Radians const & radius
     )
     : source_(source)

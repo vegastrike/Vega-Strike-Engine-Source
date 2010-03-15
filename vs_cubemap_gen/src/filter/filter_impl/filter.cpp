@@ -19,7 +19,7 @@ void filter::do_it()
                 icoords ic( i, j );
                 fRGBAcolor *pt = tmt.pTexel( s, ic );
                 ccoords cc = ccoords( side_and_coords( s, scoords( ucoords( ic ) ) ) );
-                v = cc.get_vector(); 
+                v = fvector( cc );
                 *pt = flt_one_tex( v );
             }
         }

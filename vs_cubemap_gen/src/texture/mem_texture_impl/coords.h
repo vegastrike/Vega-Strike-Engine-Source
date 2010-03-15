@@ -93,7 +93,6 @@ public:
     float get_x() const { return x_; }
     float get_y() const { return y_; }
     float get_z() const { return z_; }
-    fvector get_vector() const;
 };
 
 
