@@ -60,7 +60,6 @@ WRAPPED0( float, rSize, 0 )
 #else
 WRAPPED1( double, getMinDis, QVector, pnt, 0 )  //for clicklist
 WRAPPED3( float, querySphere, QVector, start, QVector, end, float, my_unit_radius, 0 )
-WRAPPED3( int, queryBoundingBox, QVector, origin, Vector, direction, float, err, 0 )
 voidWRAPPED0( PrimeOrders )
 voidWRAPPED1( LoadAIScript, std::string, aiscript )
 WRAPPED0( bool, LoadLastPythonAIScript, false )

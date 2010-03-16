@@ -512,9 +512,6 @@ void Mesh::LoadBinary( const char *filename, int faction )
     myMatNum = readi( fp );
     fp.Close();
 
-    //Load the BSP tree
-    //bspTree = new BSPTree((filename + string(".bsp")).c_str());
-
     delete[] vertexlist;
     delete[] PolyNormal;
     delete[] center;

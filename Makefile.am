@@ -425,8 +425,6 @@ LIBCMD = \
   src/cmd/planet_generic.h \
   src/cmd/role_bitmask.cpp \
   src/cmd/role_bitmask.h \
-  src/cmd/unit_bsp.cpp \
-  src/cmd/unit_bsp.h \
   src/cmd/unit_collide.cpp \
   src/cmd/unit_collide.h \
   src/cmd/unit_const_cache.cpp \
@@ -507,10 +505,6 @@ endif
 
 LIBGFX = \
   src/gfx/aux_texture.h \
-  src/gfx/bounding_box.cpp \
-  src/gfx/bounding_box.h \
-  src/gfx/bsp.cpp \
-  src/gfx/bsp.h \
   src/gfx/cockpit_generic.cpp \
   src/gfx/cockpit_generic.h \
   src/gfx/halo_system.h \

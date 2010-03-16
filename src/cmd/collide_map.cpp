@@ -116,7 +116,7 @@ public:
         updateBackpointer( collidable );
     }
 };
-extern bool debugPerformance();
+//extern bool debugPerformance();
 void CollideArray::flatten()
 {
     sorted.resize( count );
@@ -126,10 +126,11 @@ void CollideArray::flatten()
     RadiusUpdate< -1, true >collideUpdate( this );
     for (ptrdiff_t i = len; i >= 0; i--) {
         Collidable *tmp;
-        if (i < (int) len && (tmp = &unsorted[i])->radius != 0.0f) {
+        if (i < static_cast<ptrdiff_t>(len) && (tmp = &unsorted[i])->radius != 0.0f) {
             sorted[--index] = *tmp;
             collideUpdate( *tmp, index );
         }
+        
         std::list< CollidableBackref >::iterator listend = toflattenhints[i].end();
         for (std::list< CollidableBackref >::iterator j = toflattenhints[i].begin();
              j != listend;
@@ -140,6 +141,7 @@ void CollideArray::flatten()
             }
         toflattenhints[i].resize( 0 );
     }
+    /*
     if ( 0 && debugPerformance() ) {
         unsigned int oo = 0;
         std::vector< Collidable >::iterator ii, jj = sorted.begin(), sortedend = sorted.end();
@@ -151,6 +153,7 @@ void CollideArray::flatten()
         printf( "sorted list %d is %d long with %d elements out of order\n",
                 location_index, (unsigned int) sorted.size(), oo );
     }
+    */
     std::sort( sorted.begin(), sorted.end() );
     unsorted = sorted;
 
@@ -186,7 +189,7 @@ public: CopyExample( CollideArray::ResizableArray::iterator beg, CollideArray::R
     {
         assert( examplebegin != exampleend );
         while ( !(examplebegin->radius > 0) ) {
-            examplebegin++;
+            ++examplebegin;
             assert( examplebegin != exampleend );
         }
         collidable = *examplebegin++;
@@ -206,6 +209,7 @@ void CollideArray::flatten( CollideArray &hint )
 {
     if (location_index == Unit::UNIT_ONLY) {
         sorted.resize( count );
+        /*
         if ( 0 && debugPerformance() ) {
             size_t tmpcount = 0;
             for (size_t ii = 0; ii < hint.sorted.size(); ++ii)
@@ -213,6 +217,7 @@ void CollideArray::flatten( CollideArray &hint )
             if (count != tmpcount)
                 printf( "Actual count is %u, local count is %u\n", (unsigned int) count, (unsigned int) tmpcount );
         }
+        */
         for_each( toflattenhints.begin(), toflattenhints.end(), resizezero() );
         toflattenhints.resize( count+1 );
 

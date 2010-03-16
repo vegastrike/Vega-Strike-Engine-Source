@@ -9,7 +9,7 @@
 #include "gfx/animation.h"
 #include "gfx/mesh.h"
 #include "gfx/halo.h"
-#include "gfx/bsp.h"
+//#include "gfx/bsp.h"
 #include "vegastrike.h"
 #include "unit_collide.h"
 #include <float.h>

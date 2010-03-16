@@ -199,7 +199,6 @@ SET(LIBCMD_SOURCES src/cmd/alphacurve.cpp
 				   src/cmd/nebula_generic.cpp
 				   src/cmd/planet_generic.cpp
 				   src/cmd/role_bitmask.cpp
-				   src/cmd/unit_bsp.cpp
 				   src/cmd/unit_collide.cpp
 				   src/cmd/unit_const_cache.cpp
 				   src/cmd/unit_csv.cpp
@@ -224,9 +223,7 @@ SET(LIBCMDSERVER_SOURCES src/cmd/atmosphere_server.cpp
                          src/cmd/faction_xml_server.cpp )
 
 
-SET(LIBGFXGENERIC_SOURCES src/gfx/bounding_box.cpp
-						  src/gfx/bsp.cpp
-						  src/gfx/cockpit_generic.cpp
+SET(LIBGFXGENERIC_SOURCES src/gfx/cockpit_generic.cpp
 						  src/gfx/lerp.cpp
 						  src/gfx/matrix.cpp
 						  src/gfx/mesh_bxm.cpp

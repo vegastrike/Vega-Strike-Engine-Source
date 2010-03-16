@@ -231,7 +231,6 @@ void DisplayType( VSFileSystem::VSFileType type, std::ostream &ostr )
         CASE( VSFileSystem::VideoFile )
         CASE( VSFileSystem::VSSpriteFile )
         CASE( VSFileSystem::MissionFile )
-        CASE( VSFileSystem::BSPFile )
         CASE( VSFileSystem::MusicFile )
         CASE( VSFileSystem::AccountFile )
         CASE( VSFileSystem::ZoneBuffer )
@@ -905,7 +904,6 @@ void InitPaths( string conf, string subdir )
     Directories[SaveFile]    = "save";
     Directories[MusicFile]   = "music";
     Directories[PythonFile]  = "bases";
-    Directories[BSPFile]     = "generatedbsp";
     Directories[AccountFile] = "accounts";
 
     simulation_atom_var = atof( vs_config->getVariable( "general", "simulation_atom", "0.1" ).c_str() );
@@ -919,7 +917,6 @@ void InitPaths( string conf, string subdir )
     CreateDirectoryHome( sharedsectors+"/"+universe_name );
     CreateDirectoryHome( sharedsounds );
     CreateDirectoryHome( "save" );
-    CreateDirectoryHome( "generatedbsp" );
 
     //We will be able to automatically add mods files (set of resources or even directory structure similar to the data tree)
     //by just adding a subdirectory named with the mod name in the subdirectory "mods"...
@@ -1263,7 +1260,6 @@ VSError LookForFile( VSFile &f, VSFileType type, VSFileMode mode )
     case VideoFile:
     case VSSpriteFile:
     case MissionFile:
-    case BSPFile:
     case MusicFile:
     case AccountFile:
     case ZoneBuffer:
@@ -1634,11 +1630,6 @@ VSError VSFile::OpenCreateWrite( const char *filenam, VSFileType type )
             return LocalPermissionDenied;
     } else if (type == SaveFile) {
         string fpath( homedir+"/save/"+this->filename );
-        this->fp = fopen( fpath.c_str(), "wb" );
-        if (!fp)
-            return LocalPermissionDenied;
-    } else if (type == BSPFile) {
-        string fpath( homedir+"/generatedbsp/"+this->filename );
         this->fp = fopen( fpath.c_str(), "wb" );
         if (!fp)
             return LocalPermissionDenied;
@@ -2094,7 +2085,6 @@ case a:           \
         CASE( VSFileSystem::AnimFile )
         CASE( VSFileSystem::VSSpriteFile )
         CASE( VSFileSystem::MissionFile )
-        CASE( VSFileSystem::BSPFile )
         CASE( VSFileSystem::MusicFile )
         CASE( VSFileSystem::AccountFile )
         CASE( VSFileSystem::ZoneBuffer )

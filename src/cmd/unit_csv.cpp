@@ -6,7 +6,7 @@
 #include "unit_collide.h"
 #include "collide2/Stdafx.h"
 #include "collide2/CSopcodecollider.h"
-#include "gfx/bsp.h"
+//#include "gfx/bsp.h"
 #include "unit_factory.h"
 #include "audiolib.h"
 #include "unit_xml.h"
@@ -44,7 +44,6 @@ extern void pushMesh( std::vector< Mesh* >&mesh,
                       double texturestarttime );
 void addShieldMesh( Unit::XML*xml, const char *filename, const float scale, int faction, class Flightgroup*fg );
 void addRapidMesh( Unit::XML*xml, const char *filename, const float scale, int faction, class Flightgroup*fg );
-void addBSPMesh( Unit::XML*xml, const char *filename, const float scale, int faction, class Flightgroup*fg );
 
 static vector< string >parseSemicolon( string inp )
 {
@@ -758,13 +757,11 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     xml.calculated_role    = false;
     xml.damageiterator     = 0;
     xml.shieldmesh = NULL;
-    xml.bspmesh    = NULL;
     xml.rapidmesh  = NULL;
-    xml.hasBSP     = true;
     xml.hasColTree = true;
     xml.unitlevel  = 0;
     xml.unitscale  = 1;
-    xml.data = xml.shieldmesh = xml.bspmesh = xml.rapidmesh = NULL;     //was uninitialized memory
+    xml.data = xml.shieldmesh = xml.rapidmesh = NULL;     //was uninitialized memory
 
     string tmpstr;
     csvRow   = row[0];
@@ -881,9 +878,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     DEF_OPTIMIZER( Explosion );
     DEF_OPTIMIZER( Light );
     DEF_OPTIMIZER( Shield_Mesh );
-    DEF_OPTIMIZER( BSP_Mesh );
     DEF_OPTIMIZER( Rapid_Mesh );
-    DEF_OPTIMIZER( Use_BSP );
     DEF_OPTIMIZER( Use_Rapid );
     DEF_OPTIMIZER( NoDamageParticles );
     DEF_OPTIMIZER( Spec_Interdiction );
@@ -1006,9 +1001,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
             INIT_OPTIMIZER( keys, Explosion );
             INIT_OPTIMIZER( keys, Light );
             INIT_OPTIMIZER( keys, Shield_Mesh );
-            INIT_OPTIMIZER( keys, BSP_Mesh );
             INIT_OPTIMIZER( keys, Rapid_Mesh );
-            INIT_OPTIMIZER( keys, Use_BSP );
             INIT_OPTIMIZER( keys, Use_Rapid );
             INIT_OPTIMIZER( keys, NoDamageParticles );
             INIT_OPTIMIZER( keys, Spec_Interdiction );
@@ -1388,32 +1381,22 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     //Begin the Pow-w-w-war Zone Collide Tree Generation
     double treet = queryTime();
     {
-        xml.bspmesh_str   = OPTIM_GET( row, table, BSP_Mesh );
         xml.rapidmesh_str = OPTIM_GET( row, table, Rapid_Mesh );
-        vector< bsp_polygon >polies;
+        vector< mesh_polygon >polies;
 
         std::string collideTreeHash = VSFileSystem::GetHashName( modification+"#"+row[0] );
         this->colTrees = collideTrees::Get( collideTreeHash );
         if (this->colTrees)
             this->colTrees->Inc();
-        BSPTree *bspTree   = NULL;
-        BSPTree *bspShield = NULL;
         csOPCODECollider *colShield = NULL;
         csOPCODECollider *colTree = NULL;
         string   tmpname   = row[0];       //key
         if (!this->colTrees) {
             string val;
-            xml.hasBSP     = 1;
             xml.hasColTree = 1;
-            if ( ( val = OPTIM_GET( row, table, Use_BSP ) ).length() )
-                xml.hasBSP = XMLSupport::parse_bool( val );
             if ( ( val = OPTIM_GET( row, table, Use_Rapid ) ).length() )
                 xml.hasColTree = XMLSupport::parse_bool( val );
             if (xml.shieldmesh) {
-                if ( !CheckBSP( (tmpname+"_shield.bsp").c_str() ) )
-                    BuildBSPTree( (tmpname+"_shield.bsp").c_str(), false, meshdata.back() );
-                if ( CheckBSP( (tmpname+"_shield.bsp").c_str() ) )
-                    bspShield = new BSPTree( (tmpname+"_shield.bsp").c_str() );
                 if ( meshdata.back() ) {
                     meshdata.back()->GetPolys( polies );
                     colShield = new csOPCODECollider( polies );
@@ -1423,19 +1406,6 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
                 addRapidMesh( &xml, xml.rapidmesh_str.c_str(), xml.unitscale, faction, getFlightgroup() );
             else
                 xml.rapidmesh = NULL;
-            if ( xml.bspmesh_str.length() )
-                addBSPMesh( &xml, xml.bspmesh_str.c_str(), xml.unitscale, faction, getFlightgroup() );
-            else
-                xml.bspmesh = NULL;
-            if (xml.hasBSP) {
-                tmpname += ".bsp";
-                if ( !CheckBSP( tmpname.c_str() ) )
-                    BuildBSPTree( tmpname.c_str(), false, xml.bspmesh );
-                if ( CheckBSP( tmpname.c_str() ) )
-                    bspTree = new BSPTree( tmpname.c_str() );
-            } else {
-                bspTree = NULL;
-            }
             polies.clear();
             if (xml.rapidmesh)
                 xml.rapidmesh->GetPolys( polies );
@@ -1446,23 +1416,17 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
                                        ? &polies : NULL );
             }
             this->colTrees = new collideTrees( collideTreeHash,
-                                               bspTree,
-                                               bspShield,
                                                csrc,
                                                colShield );
             if (xml.rapidmesh && xml.hasColTree) {
                 //if we have a special rapid mesh we need to generate things now
-                for (int i = 1; i < collideTreesMaxTrees; ++i)
+                for (unsigned int i = 1; i < collideTreesMaxTrees; ++i)
                     if (!this->colTrees->rapidColliders[i]) {
                         unsigned int which = 1<<i;
                         this->colTrees->rapidColliders[i] =
                             getCollideTree( Vector( 1, 1, which ),
                                             &polies );
                     }
-            }
-            if (xml.bspmesh) {
-                delete xml.bspmesh;
-                xml.bspmesh = NULL;
             }
             if (xml.rapidmesh) {
                 delete xml.rapidmesh;

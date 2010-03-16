@@ -34,8 +34,8 @@
 #include "networking/netclient.h"
 #include "gfx/cockpit_generic.h"
 #include "universe_generic.h"
-#include "unit_bsp.h"
-#include "gfx/bounding_box.h"
+//#include "unit_bsp.h"
+//#include "gfx/bounding_box.h"
 #include "csv.h"
 #include "vs_random.h"
 #include "galaxy_xml.h"
@@ -297,43 +297,6 @@ void Unit::BackupState()
     this->old_state.setOrientation( this->curr_physical_state.orientation );
     this->old_state.setVelocity( this->Velocity );
     this->old_state.setAcceleration( this->net_accel );
-}
-
-void Unit::BuildBSPTree( const char *filename, bool vplane, Mesh *hull )
-{
-    bsp_tree *bsp = NULL;
-    bsp_tree  temp_node;
-    vector< bsp_polygon >tri;
-    vector< bsp_tree >   triplane;
-    if (hull != NULL)
-        hull->GetPolys( tri );
-    else
-        for (int j = 0; j < nummesh(); ++j)
-            meshdata[j]->GetPolys( tri );
-    for (unsigned int i = 0; i < tri.size(); ++i) {
-        if ( !Cross( tri[i], temp_node ) ) {
-            vector< bsp_polygon >::iterator ee = tri.begin();
-            ee += i;
-            tri.erase( ee );
-            i--;
-            continue;
-        }
-        //Calculate 'd'
-        temp_node.d  = (double) ( (temp_node.a*tri[i].v[0].i)+(temp_node.b*tri[i].v[0].j)+(temp_node.c*tri[i].v[0].k) );
-        temp_node.d *= -1.0f;
-        triplane.push_back( temp_node );
-        //bsp=put_plane_in_tree3(bsp,&temp_node,&temp_poly3);
-    }
-    bsp = buildbsp( bsp, tri, triplane, vplane ? VPLANE_ALL : 0 );
-    if (bsp) {
-        VSError err = fo.OpenCreateWrite( filename, BSPFile );
-        if (err <= Ok) {
-            write_bsp_tree( bsp, 0 );
-            fo.Close();
-            bsp_stats( bsp );
-            FreeBSP( &bsp );
-        }
-    }
 }
 
 bool isMissile( const weapon_info *weap )
@@ -923,10 +886,6 @@ Unit::~Unit()
 #endif
     delete sound;
     delete pilot;
-#ifdef DESTRUCTDEBUG
-    VSFileSystem::vs_fprintf( stderr, "%d %x %x", 4, bspTree, bspShield );
-    fflush( stderr );
-#endif
 #ifdef DESTRUCTDEBUG
     VSFileSystem::vs_fprintf( stderr, "%d", 5 );
     fflush( stderr );
@@ -6144,66 +6103,6 @@ float Unit::querySphereClickList( const QVector &st, const QVector &dir, float e
         }
     }
     return adjretval;
-}
-
-bool Unit::queryBoundingBox( const QVector &pnt, float err )
-{
-    int i;
-    BoundingBox *bbox = NULL;
-    for (i = 0; i < nummesh(); ++i) {
-        bbox = meshdata[i]->getBoundingBox();
-        bbox->Transform( cumulative_transformation_matrix );
-        if ( bbox->Within( pnt, err ) ) {
-            delete bbox;
-            return true;
-        }
-        delete bbox;
-    }
-    Unit *su;
-    for (un_iter ui = getSubUnits(); (su = *ui); ++ui)
-        if ( (su)->queryBoundingBox( pnt, err ) )
-            return true;
-    return false;
-}
-
-int Unit::queryBoundingBox( const QVector &origin, const Vector &direction, float err )
-{
-    int i;
-    int retval = 0;
-    BoundingBox *bbox = NULL;
-    for (i = 0; i < nummesh(); ++i) {
-        bbox = meshdata[i]->getBoundingBox();
-        bbox->Transform( cumulative_transformation_matrix );
-        switch ( bbox->Intersect( origin, direction.Cast(), err ) )
-        {
-        case 1:
-            delete bbox;
-            return 1;
-
-        case -1:
-            delete bbox;
-            retval = -1;
-            break;
-        case 0:
-            delete bbox;
-            break;
-        }
-    }
-    Unit *su;
-    for (un_iter iter = getSubUnits(); (su = *iter); ++iter) {
-        switch ( su->queryBoundingBox( origin, direction, err ) )
-        {
-        case 1:
-            return 1;
-
-        case -1:
-            retval = -1;
-            break;
-        case 0:
-            break;
-        }
-    }
-    return retval;
 }
 
 /*

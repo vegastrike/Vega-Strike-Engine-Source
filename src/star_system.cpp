@@ -241,7 +241,7 @@ void GameStarSystem::SwapOut()
 extern double saved_interpolation_blend_factor;
 extern double interpolation_blend_factor;
 extern bool   cam_setup_phase;
-extern bool debugPerformance();
+//extern bool debugPerformance();
 
 //Class for use of UnitWithinRangeLocator template
 //Used to do distance based pre-culling for draw function based on sorted search structure
@@ -477,7 +477,7 @@ void GameStarSystem::Draw( bool DrawCockpit )
     //GFXHudMode (false);
     //}
     double fintime = queryTime()-starttime;
-    if ( debugPerformance() ) {
+/*    if ( debugPerformance() ) {
         printf( "draw: %f setup %f units %f maxunit %f processmesh %f ",
                 fintime,
                 setupdrawtime,
@@ -485,6 +485,7 @@ void GameStarSystem::Draw( bool DrawCockpit )
                 maxdrawtime,
                 processmesh );
     }
+*/
 }
 
 extern void update_ani_cache();

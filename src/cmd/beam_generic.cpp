@@ -370,7 +370,8 @@ bool Beam::Collide( Unit *target, Unit *firer, Unit *superunit )
         return false;
     }
     float distance;
-    Vector normal;     //apply shields
+    Vector normal;     //apply shields                            
+
     QVector direction( this->direction.Cast() );
     QVector end( center+direction.Scale( curlength ) );
     enum clsptr type = target->isUnit();
@@ -446,9 +447,10 @@ bool Beam::Collide( Unit *target, Unit *firer, Unit *superunit )
         }
     }
     Unit *colidee;
-    if ( ( colidee = target->queryBSP( center, end, normal, distance ) ) ) {
-        if ( !( scoop && (tractor || repulsor) ) )
+    if ( ( colidee = target->rayCollide( center, end, normal, distance ) ) ) {
+        if ( !( scoop && (tractor || repulsor) ) ){
             this->curlength = distance;
+        }
         float curlength = distance;
         impact |= IMPACT;
         GFXColor coltmp( Col );

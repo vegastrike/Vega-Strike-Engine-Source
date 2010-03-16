@@ -19,7 +19,7 @@
 #include "gfx/cockpit_generic.h"
 //#include "unit_bsp.h"
 #include "unit_collide.h"
-#include "gfx/bsp.h"
+//#include "gfx/bsp.h"
 #include "unit_generic.h"
 #include "gfx/sphere.h"
 #include "role_bitmask.h"
@@ -125,7 +125,6 @@ enum Names
     SUBUNIT,
     MESHFILE,
     SHIELDMESH,
-    BSPMESH,
     RAPIDMESH,
     MOUNT,
     MESHLIGHT,
@@ -234,7 +233,6 @@ enum Names
     DOCKINTERNAL,
     WORMHOLE,
     RAPID,
-    USEBSP,
     AFTERBURNENERGY,
     MISSING,
     UNITSCALE,
@@ -273,7 +271,7 @@ enum Names
     TEXTURESTARTTIME
 };
 
-const EnumMap::Pair element_names[38] = {
+const EnumMap::Pair element_names[37] = {
     EnumMap::Pair( "UNKNOWN",       UNKNOWN ),
     EnumMap::Pair( "Unit",          UNIT ),
     EnumMap::Pair( "SubUnit",       SUBUNIT ),
@@ -281,7 +279,6 @@ const EnumMap::Pair element_names[38] = {
     EnumMap::Pair( "MeshFile",      MESHFILE ),
     EnumMap::Pair( "ShieldMesh",    SHIELDMESH ),
     EnumMap::Pair( "RapidMesh",     RAPIDMESH ),
-    EnumMap::Pair( "BSPMesh",       BSPMESH ),
     EnumMap::Pair( "Light",         MESHLIGHT ),
     EnumMap::Pair( "Defense",       DEFENSE ),
     EnumMap::Pair( "Armor",         ARMOR ),
@@ -314,7 +311,7 @@ const EnumMap::Pair element_names[38] = {
     EnumMap::Pair( "Description",   DESCRIPTION ),
 };
 
-const EnumMap::Pair attribute_names[120] = {
+const EnumMap::Pair attribute_names[119] = {
     EnumMap::Pair( "UNKNOWN",                 UNKNOWN ),
     EnumMap::Pair( "missing",                 MISSING ),
     EnumMap::Pair( "file",                    XFILE ),
@@ -408,7 +405,6 @@ const EnumMap::Pair attribute_names[120] = {
     EnumMap::Pair( "crypto_method",           NETCOMM_CRYPTO ),
     EnumMap::Pair( "DockInternal",            DOCKINTERNAL ),
     EnumMap::Pair( "RAPID",                   RAPID ),
-    EnumMap::Pair( "BSP",                     USEBSP ),
     EnumMap::Pair( "Wormhole",                WORMHOLE ),
     EnumMap::Pair( "Scale",                   UNITSCALE ),
     EnumMap::Pair( "Price",                   PRICE ),
@@ -437,8 +433,8 @@ const EnumMap::Pair attribute_names[120] = {
     EnumMap::Pair( "WarpDriveRating",         WARPDRIVERATING )
 };
 
-const EnumMap element_map( element_names, 38 );
-const EnumMap attribute_map( attribute_names, 120 );
+const EnumMap element_map( element_names, 37 );
+const EnumMap attribute_map( attribute_names, 119 );
 } //end of namespace
 
 std::string delayucharStarHandler( const XMLType &input, void *mythis )
@@ -473,11 +469,6 @@ void addShieldMesh( Unit::XML *xml, const char *filename, const float scale, int
 void addRapidMesh( Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg )
 {
     xml->rapidmesh = Mesh::LoadMesh( filename, Vector( scale, scale, scale ), faction, fg );
-}
-
-void addBSPMesh( Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg )
-{
-    xml->bspmesh = Mesh::LoadMesh( filename, Vector( scale, scale, scale ), faction, fg );
 }
 
 void pushMesh( std::vector< Mesh* > &meshes,
@@ -615,30 +606,6 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             case RAPID:
                 ADDDEFAULT;
                 xml->hasColTree = parse_bool( (*iter).value );
-                break;
-            }
-        }
-        break;
-    case BSPMESH:
-        ADDTAG;
-        assert( xml->unitlevel == 1 );
-        xml->unitlevel++;
-        xml->hasBSP = false;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
-            switch ( attribute_map.lookup( (*iter).name ) )
-            {
-            case XFILE:
-                ADDDEFAULT;
-                addBSPMesh( xml, (*iter).value.c_str(), xml->unitscale, faction, NULL );
-                xml->hasBSP = true;
-                break;
-            case RAPID:
-                ADDDEFAULT;
-                xml->hasColTree = parse_bool( (*iter).value );
-                break;
-            case USEBSP:
-                ADDDEFAULT;
-                xml->hasBSP = parse_bool( (*iter).value );
                 break;
             }
         }
@@ -2043,9 +2010,7 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
     xml->damageiterator     = 0;
     xml->unitModifications  = modifications;
     xml->shieldmesh = NULL;
-    xml->bspmesh    = NULL;
     xml->rapidmesh  = NULL;
-    xml->hasBSP     = true;
     xml->hasColTree = true;
     xml->unitlevel  = 0;
     xml->unitscale  = 1;
@@ -2056,28 +2021,6 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
         XML_Parse( parser, xmlbuffer->c_str(), xmlbuffer->length(), 1 );
     else
         XML_Parse( parser, ( f.ReadFull() ).c_str(), f.Size(), 1 );
-    /*
-     *  else
-     *  {
-     *       do {
-     * #ifdef BIDBG
-     *             char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
-     * #else
-     *             char buf[chunk_size];
-     * #endif
-     *             int length;
-     *             length = VSFileSystem::vs_read (buf,1, chunk_size,inFile);
-     *             //length = inFile.gcount();
-     * #ifdef BIDBG
-     *             XML_ParseBuffer(parser, length, VSFileSystem::vs_feof(inFile));
-     * #else
-     *             XML_Parse (parser,buf,length,VSFileSystem::vs_feof(inFile));
-     * #endif
-     *       } while(!VSFileSystem::vs_feof(inFile));
-     *       VSFileSystem::vs_close (inFile);
-     *  }
-     */
-    //f.Close();
     XML_ParserFree( parser );
     //Load meshes into subunit
     pImage->unitwriter->EndTag( "Unit" );
@@ -2121,23 +2064,16 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
     }
     pImage->unitscale = xml->unitscale;
     string tmpname( filename );
-#ifndef PLEASEDONTCOMMENTRANDOMTHINGSOUT
-    vector< bsp_polygon >polies;
+    vector< mesh_polygon >polies;
 
     this->colTrees = collideTrees::Get( collideTreeHash );
     if (this->colTrees)
         this->colTrees->Inc();
-    BSPTree *bspTree   = NULL;
-    BSPTree *bspShield = NULL;
     csOPCODECollider *colShield = NULL;
     csOPCODECollider *colTree   = NULL;
     if (xml->shieldmesh) {
         meshdata.back() = xml->shieldmesh;
         if (!this->colTrees) {
-            if ( !CheckBSP( (tmpname+"_shield.bsp").c_str() ) )
-                BuildBSPTree( (tmpname+"_shield.bsp").c_str(), false, meshdata.back() );
-            if ( CheckBSP( (tmpname+"_shield.bsp").c_str() ) )
-                bspShield = new BSPTree( (tmpname+"_shield.bsp").c_str() );
             if ( meshdata.back() ) {
                 meshdata.back()->GetPolys( polies );
                 colShield = new csOPCODECollider( polies );
@@ -2145,35 +2081,13 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
         }
     } else {
         Mesh *tmp = NULL;
-        if (!this->colTrees) {
-#if 0
-            tmp = new SphereMesh( rSize(), 8, 8, vs_config->getVariable( "graphics", "shield_texture",
-                                                                         "shield.bmp" ).c_str(), NULL, false, ONE, ONE );                                 ///shield not used right now for collisions
-            tmp->GetPolys( polies );
-            if (xml->hasColTree)
-                colShield = new csOPCODECollider( polies );
-            else
-#endif
-            colShield = NULL;
-        }
         static int shieldstacks = XMLSupport::parse_int( vs_config->getVariable( "graphics", "shield_detail", "16" ) );
         static std::string shieldtex = vs_config->getVariable( "graphics", "shield_texture", "shield.bmp" );
         meshdata.back() = new SphereMesh( rSize(), shieldstacks, shieldstacks, shieldtex.c_str(), NULL, false, ONE, ONE );
         tmp = meshdata.back();
-        bspShield = NULL;
-        colShield = NULL;
     }
     meshdata.back()->EnableSpecialFX();
     if (!this->colTrees) {
-        if (xml->hasBSP) {
-            tmpname += ".bsp";
-            if ( !CheckBSP( tmpname.c_str() ) )
-                BuildBSPTree( tmpname.c_str(), false, xml->bspmesh );
-            if ( CheckBSP( tmpname.c_str() ) )
-                bspTree = new BSPTree( tmpname.c_str() );
-        } else {
-            bspTree = NULL;
-        }
         polies.clear();
         if (xml->rapidmesh)
             xml->rapidmesh->GetPolys( polies );
@@ -2183,36 +2097,31 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
                                    xml->rapidmesh
                                    ? &polies : NULL );
         this->colTrees = new collideTrees( collideTreeHash,
-                                           bspTree,
-                                           bspShield,
                                            csrc,
                                            colShield );
         if (xml->rapidmesh && xml->hasColTree)          //if we have a speciaal rapid mesh we need to generate things now
-            for (int i = 1; i < collideTreesMaxTrees; ++i)
+            for (unsigned int i = 1; i < collideTreesMaxTrees; ++i)
                 if (!this->colTrees->rapidColliders[i]) {
                     unsigned int which = 1<<i;
                     this->colTrees->rapidColliders[i] = getCollideTree( Vector( which, which, which ),
                                                                         &polies );
                 }
     }
-    if (xml->bspmesh)
-        delete xml->bspmesh;
     if (xml->rapidmesh)
         delete xml->rapidmesh;
-#endif
     delete xml;
 }
 
-csOPCODECollider* Unit::getCollideTree( const Vector &scale, const std::vector< bsp_polygon > *pol )
+csOPCODECollider* Unit::getCollideTree( const Vector &scale, const std::vector< mesh_polygon > *pol )
 {
-    vector< bsp_polygon >polies;
+    vector< mesh_polygon >polies;
     if (!pol)
         for (int j = 0; j < nummesh(); j++)
             meshdata[j]->GetPolys( polies );
     else
         polies = *pol;
     if (scale.i != 1 || scale.j != 1 || scale.k != 1) {
-        for (vector< bsp_polygon >::iterator i = polies.begin(); i != polies.end(); ++i)
+        for (vector< mesh_polygon >::iterator i = polies.begin(); i != polies.end(); ++i)
             for (unsigned int j = 0; j < i->v.size(); ++j) {
                 i->v[j].i *= scale.i;
                 i->v[j].j *= scale.j;

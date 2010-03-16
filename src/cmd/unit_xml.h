@@ -5,7 +5,6 @@
 
 void addShieldMesh( Unit::XML*xml, const char *filename, const float scale, int faction, class Flightgroup*fg );
 void addRapidMesh( Unit::XML*xml, const char *filename, const float scale, int faction, class Flightgroup*fg );
-void addBSPMesh( Unit::XML*xml, const char *filename, const float scale, int faction, class Flightgroup*fg );
 void pushMesh( Unit::XML*xml,
                const char *filename,
                const float scale,

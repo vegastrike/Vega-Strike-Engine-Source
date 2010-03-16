@@ -555,13 +555,13 @@ void StarSystem::Statistics::RemoveUnit( Unit *un )
             }
     }
 }
-
+/*
 bool debugPerformance()
 {
     static bool dp = XMLSupport::parse_bool( vs_config->getVariable( "physics", "debug_performance", "false" ) );
     return dp;
 }
-
+*/
 //Variables for debugging purposes only - eliminate later
 unsigned int physicsframecounter = 1;
 unsigned int theunitcounter = 0;
@@ -683,7 +683,7 @@ void StarSystem::UpdateUnitPhysics( bool firstframe )
             collidetime += dd-cc;
             bolttime    += cc-c0;
             //Book-keeping for debug - remove later
-            if ( debugPerformance() ) {
+ /*           if ( debugPerformance() ) {
                 int movingavgindex = physicsframecounter%128;
                 movingtotal = movingtotal-movingavgarray[movingavgindex]+theunitcounter;
                 movingavgarray[movingavgindex] = theunitcounter;
@@ -702,6 +702,7 @@ void StarSystem::UpdateUnitPhysics( bool firstframe )
                         bolttime,
                         flattentime );
             }
+*/
             //end debug bookkeeping
             current_sim_location = (current_sim_location+1)%SIM_QUEUE_SIZE;
             ++physicsframecounter;
@@ -891,8 +892,9 @@ void StarSystem::Update( float priority, bool executeDirector )
     //WARNING cockpit does not get here...
     _Universe->popActiveStarSystem();
     //VSFileSystem::vs_fprintf (stderr,"bf:%lf",interpolation_blend_factor);
-    if ( debugPerformance() )
+/*    if ( debugPerformance() )
         printf( "SS Update: pyth: %f tot: %f\n", pythontime, queryTime()-beginss );
+*/
 }
 
 /*

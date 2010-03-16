@@ -47,9 +47,8 @@ class BoundingBox;
 
 #define MESH_HASTHABLE_SIZE (503)
 
-///Struct vertex format returned by GetPolys
-///Struct polygon format returned by GetPolys
-struct bsp_polygon
+// Struct polygon format returned by GetPolys, usually a triangle
+struct mesh_polygon
 {
     std::vector< Vector >v;
 };
@@ -294,8 +293,8 @@ public: Mesh();
         return Decal[i];
     }
     void SetBlendMode( BLENDFUNC src, BLENDFUNC dst, bool lodcascade = false );
-///Gets all polygons in this mesh for BSP computation
-    void GetPolys( vector< bsp_polygon >& );
+///Gets all polygons in this mesh for collision computation
+    void GetPolys( vector< mesh_polygon >& );
 ///Sets the material of this mesh to mat (affects original as well)
     void SetMaterial( const GFXMaterial &mat );
 //Gets the material back from the mesh.

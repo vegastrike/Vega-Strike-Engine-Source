@@ -81,7 +81,7 @@ void LaunchOneParticle( const Matrix &mat, const Vector &vel, unsigned int seed,
             }
         }
         if (!done) {
-            //get it from the BSP
+            // maybe ray collision?
         }
         if (!done) {
             unsigned int siz = (unsigned int) ( 2*mush->rSize() );

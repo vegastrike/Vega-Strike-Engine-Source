@@ -156,7 +156,7 @@ bool Bolt::Collide( Unit *target )
     Vector normal;
     float  distance;
     Unit  *affectedSubUnit;
-    if ( ( affectedSubUnit = target->queryBSP( prev_position, cur_position, normal, distance ) ) ) {
+    if ( ( affectedSubUnit = target->rayCollide( prev_position, cur_position, normal, distance ) ) ) {
         //ignore return
         if (target == owner) return false;
         enum clsptr type = target->isUnit();

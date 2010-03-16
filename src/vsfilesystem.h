@@ -62,7 +62,6 @@ enum VSFileType
     VideoFile,                                  //Loaded from movies subdir
     VSSpriteFile,                                                       //Loaded from current path or from sprites subdir
     MissionFile,                                                //Loaded from mission subdir
-    BSPFile,                                                            //Loaded from homedir/generatedbsp and written in homedir/generatedbsp
     MusicFile,                                                          //Loaded from homedir
     AccountFile,                                                //Loaded from datadir/accounts and written in datadir/accounts
     //Buffer types

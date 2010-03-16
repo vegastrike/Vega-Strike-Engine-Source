@@ -6,7 +6,7 @@
 #include "gfx/mesh.h"
 #include "unit_collide.h"
 #include "physics.h"
-#include "gfx/bsp.h"
+//#include "gfx/bsp.h"
 
 #include "collide2/CSopcodecollider.h"
 #include "collide2/csgeom2/optransfrm.h"
@@ -17,13 +17,11 @@
 #include "vs_globals.h"
 #include "configxml.h"
 static Hashtable< std::string, collideTrees, 127 >unitColliders;
-collideTrees::collideTrees( const std::string &hk, BSPTree *bT, BSPTree *bS, csOPCODECollider *cT,
+collideTrees::collideTrees( const std::string &hk, csOPCODECollider *cT,
                             csOPCODECollider *cS ) : hash_key( hk )
-    , bspTree( bT )
-    , bspShield( bS )
     , colShield( cS )
 {
-    for (int i = 0; i < collideTreesMaxTrees; ++i)
+    for (unsigned int i = 0; i < collideTreesMaxTrees; ++i)
         rapidColliders[i] = NULL;
     rapidColliders[0] = cT;
 
@@ -38,7 +36,7 @@ csOPCODECollider* collideTrees::colTree( Unit *un, const Vector &othervelocity )
     float magsqr = un->GetVelocity().MagnitudeSquared();
     float newmagsqr    = (un->GetVelocity()-othervelocity).MagnitudeSquared();
     float speedsquared = const_factor*const_factor*(magsqr > newmagsqr ? newmagsqr : magsqr);
-    static int max_collide_trees = XMLSupport::parse_int( vs_config->getVariable( "physics", "max_collide_trees", "16384" ) );
+    static unsigned int max_collide_trees = static_cast<unsigned int>(XMLSupport::parse_int( vs_config->getVariable( "physics", "max_collide_trees", "16384" ) ));
     if (un->rSize()*un->rSize() > SIMULATION_ATOM*SIMULATION_ATOM*speedsquared || max_collide_trees == 1)
         return rapidColliders[0];
     if (rapidColliders[0] == NULL)
@@ -48,10 +46,8 @@ csOPCODECollider* collideTrees::colTree( Unit *un, const Vector &othervelocity )
     float movement = sqrtf( speedsquared )*SIMULATION_ATOM;
 
     //Force pow to 0 in order to avoid nan problems...
-    int   pow = 0;   //(int)ceil(log (movement/un->rSize())/loge2);
+    unsigned int   pow = 0;   //(int)ceil(log (movement/un->rSize())/loge2);
 //pow=collideTreesMaxTrees-1;
-    if (pow < 0)
-        pow = 0;
     if (pow >= collideTreesMaxTrees || pow >= max_collide_trees)
         pow = collideTreesMaxTrees-1;
     int val = 1<<pow;
@@ -69,13 +65,9 @@ void collideTrees::Dec()
     refcount--;
     if (refcount == 0) {
         unitColliders.Delete( hash_key );
-        if (bspTree)
-            delete bspTree;
-        for (int i = 0; i < collideTreesMaxTrees; ++i)
+        for (unsigned int i = 0; i < collideTreesMaxTrees; ++i)
             if (rapidColliders[i])
                 delete rapidColliders[i];
-        if (bspShield)
-            delete bspShield;
         if (colShield)
             delete colShield;
         delete this;

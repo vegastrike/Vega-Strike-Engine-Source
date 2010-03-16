@@ -81,26 +81,7 @@ public: UnitHash3d( StarSystem *ss )
             }
         }
     }
-    void updateBloc( unsigned int whichblock )
-    {
-        un_iter ui =
-            table[whichblock
-                  %COLLIDETABLESIZE][(whichblock
-                                      /COLLIDETABLESIZE)
-                                     %COLLIDETABLESIZE][( (whichblock
-                                                           /COLLIDETABLESIZE)
-                                                         /COLLIDETABLESIZE )%COLLIDETABLESIZE].createIterator();
-        Unit *un;
-        while ( (un = *ui) = NULL ) {
-            if ( un == debugUnit || !un->InCorrectStarSystem( activeStarSystem ) ) {
-                fprintf( stderr,
-                         "Collide Queue Error. Not anywhere near fatal. Report with mission name to hellcatv@hotmail.com" );
-                ui.remove();
-            } else {
-                ++ui;
-            }
-        }
-    }
+    
 ///Hashes a single value to a value on the collide table truncated to all 3d constraints.  Consider using a swizzle
     int hash_int( const double aye )
     {
@@ -285,7 +266,8 @@ public: CollideTable( StarSystem *ss ) : blocupdate( 0 )
         , c( ss ) {}
     void Update()
     {
-        c.updateBloc( blocupdate++ );
+        ++blocupdate;
+       // c.updateBloc( blocupdate++ );
     }
     UnitHash3d< char[coltablesize], char[coltableacc], char[tablehuge] >c;
 };
@@ -297,16 +279,11 @@ void KillCollideTable( LineCollide *lc, StarSystem *ss );
 bool EradicateCollideTable( LineCollide *lc, StarSystem *ss );
 
 class csOPCODECollider;
-
-class BSPTree;
-const int collideTreesMaxTrees = 8;
+const unsigned int collideTreesMaxTrees = 16;
 struct collideTrees
 {
     std::string hash_key;
-    ///The bsp tree of this unit (used when shields down/unit-unit collisions)
-    BSPTree    *bspTree;
-    BSPTree    *bspShield;
-
+    
     csOPCODECollider *rapidColliders[collideTreesMaxTrees];
 
     bool usingColTree() const
@@ -315,12 +292,13 @@ struct collideTrees
     }
 
     csOPCODECollider * colTree( Unit *un, const Vector &othervelocity );     //gets the appropriately scaled unit collide tree
-    ///The bsp tree of the shields of this unit (used for beams)
+    
+    // Not sure at the moment where we decide to collide to the shield ...since all we ever compare to is colTree in Collide()
+    // Yet, this is used somewhere.
     csOPCODECollider *colShield;
 
     int refcount;
-
-    collideTrees( const std::string &hk, BSPTree *bT, BSPTree *bS, csOPCODECollider *cT, csOPCODECollider *cS );
+    collideTrees( const std::string &hk, csOPCODECollider *cT, csOPCODECollider *cS );
     void Inc()
     {
         refcount++;

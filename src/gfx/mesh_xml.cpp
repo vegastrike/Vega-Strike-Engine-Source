@@ -1181,6 +1181,7 @@ void CopyFile( VSFile &src, VSFile &dst )
     while ( ( hm = src.Read( srcptr, sizeof (srcstruct) ) ) )
         dst.Write( srcptr, hm );
 }
+/*
 
 bool loadObj( VSFile &f, std::string str )
 {
@@ -1220,6 +1221,7 @@ bool loadObj( VSFile &f, std::string str )
     f.Close();
     inputmtl.Close();
     LaunchConverter( inputpath.c_str(), outputpath.c_str() );
+   
     output.OpenReadOnly( "output.bfxm", BSPFile );
     if ( isBFXM( output ) ) {
         output.Close();
@@ -1230,7 +1232,7 @@ bool loadObj( VSFile &f, std::string str )
     }
     return false;
 }
-
+*/
 const bool USE_RECALC_NORM = true;
 const bool FLAT_SHADE = true;
 
@@ -1294,12 +1296,14 @@ vector< Mesh* >Mesh::LoadMeshes( const char *filename,
     bool isbfxm = (bfxm[0] == 'B' && bfxm[1] == 'F' && bfxm[2] == 'X' && bfxm[3] == 'M');
     if ( isbfxm || strstr( filename, ".obj" ) ) {
         if (!isbfxm) {
-            if ( !loadObj( f, filename ) ) {
+        	// NOTE : Commented out following block, probably not needed anymore
+/*            if ( !loadObj( f, filename ) ) {
                 VSFileSystem::vs_fprintf( stderr, "Cannot Open Mesh File %s\n", filename );
+*/
 //cleanexit=1;
 //winsys_exit(1);
-                return vector< Mesh* > ();
-            }
+            //    return vector< Mesh* > ();
+           // }
         }
         f.GoTo( 0 );
         hash_name =

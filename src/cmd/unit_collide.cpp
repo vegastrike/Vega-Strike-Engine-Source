@@ -9,7 +9,7 @@
 #include "gfx/mesh.h"
 #include "unit_collide.h"
 #include "physics.h"
-#include "gfx/bsp.h"
+//#include "gfx/bsp.h"
 
 #include "collide2/CSopcodecollider.h"
 #include "collide2/csgeom2/optransfrm.h"
@@ -146,7 +146,8 @@ bool Unit::Inside( const QVector &target, const float radius, Vector &normal, fl
     normal = ( target-Position() ).Cast();
     ::Normalize( normal );
     //if its' in the sphre, that's enough
-    if ( isPlanet() == true || queryBSP( target, radius, normal, dist, false ) )
+    //if ( isPlanet() == true || queryBSP( target, radius, normal, dist, false ) )
+    if(isPlanet() )
         return true;
     return false;
 }
@@ -173,8 +174,8 @@ bool Unit::InsideCollideTree( Unit *smaller,
     //printf ("Col %s %s\n",name.c_str(),smaller->name.c_str());
     Unit *bigger = this;
 
-    csReversibleTransform bigtransform( /*WarpMatrixForCollisions(bigger)*/ bigger->cumulative_transformation_matrix );
-    csReversibleTransform smalltransform( /*WarpMatrixForCollisions(smaller)*/ smaller->cumulative_transformation_matrix );
+    csReversibleTransform bigtransform( bigger->cumulative_transformation_matrix );
+    csReversibleTransform smalltransform( smaller->cumulative_transformation_matrix );
     smalltransform.SetO2TTranslation( csVector3( smaller->cumulative_transformation_matrix.p
                                                  -bigger->cumulative_transformation_matrix.p ) );
     bigtransform.SetO2TTranslation( csVector3( 0, 0, 0 ) );
@@ -187,9 +188,7 @@ bool Unit::InsideCollideTree( Unit *smaller,
         //VSFileSystem::vs_fprintf (stderr,"%s Crashez to %s %d\n", bigger->name.c_str(), smaller->name.c_str(),crashcount++);
         csCollisionPair *mycollide = csOPCODECollider::GetCollisions();
         unsigned int     numHits   = csOPCODECollider::GetCollisionPairCount();
-        //maybe we should access the collider directly.
         if (numHits) {
-//printf ("%s hit %s\n",smaller->name.c_str(),bigger->name.c_str());
             smallpos.Set( (mycollide[0].a1.x+mycollide[0].b1.x+mycollide[0].c1.x)/3.0f,
                          (mycollide[0].a1.y+mycollide[0].b1.y+mycollide[0].c1.y)/3.0f,
                          (mycollide[0].a1.z+mycollide[0].b1.z+mycollide[0].c1.z)/3.0f );
@@ -280,18 +279,6 @@ bool Unit::Collide( Unit *target )
     if (targetisUnit == ASTEROIDPTR && thisisUnit == ASTEROIDPTR)
         return false;
     std::multimap< Unit*, Unit* > *last_collisions = &_Universe->activeStarSystem()->last_collisions;
-
-//The following code was commented out to investigate it's effect on falling into textures
-//where we dont want to when a unit is resting on it.
-/*	std::multimap<Unit*,Unit*>::iterator iter;
- *       iter=last_collisions->find(target);
- *       for (;iter!=last_collisions->end()&&iter->first==target;++iter) {
- *               if (iter->second==this) {
- *                       //printf ("No double collision\n"); (litters debug output, and I bet it's not needed now)
- *                       return false;
- *               }
- *       }
- */
     last_collisions->insert( std::pair< Unit*, Unit* > ( this, target ) );
     //unit v unit? use point sampling?
     if ( ( this->DockedOrDocking()&(DOCKED_INSIDE|DOCKED) ) || ( target->DockedOrDocking()&(DOCKED_INSIDE|DOCKED) ) )
@@ -316,21 +303,19 @@ bool Unit::Collide( Unit *target )
             if ( !bigger->isDocked( smaller ) && !smaller->isDocked( bigger ) )
                 bigger->reactToCollision( smaller, bigpos, bigNormal, smallpos, smallNormal, 10 );
             else return false;
-        } else {return false; }} else {
+        } else {return false; }
+    } else {
         Vector normal( -1, -1, -1 );
         float  dist = 0.0;
         if ( bigger->Inside( smaller->Position(), smaller->rSize(), normal, dist ) ) {
             if ( !bigger->isDocked( smaller ) && !smaller->isDocked( bigger ) )
                 bigger->reactToCollision( smaller, bigger->Position(), normal, smaller->Position(), -normal, dist );
             else return false;
-        } else {return false; }}
-    //UNUSED BUT GOOD  float elast = .5*(smallcsReversibleTransform (cumulative_transformation_matrix),er->GetElasticity()+bigger->GetElasticity());
-    //BAD  float speedagainst = (normal.Dot (smaller->GetVelocity()-bigger->GetVelocity()));
-    //BADF  smaller->ApplyForce (normal * fabs(elast*speedagainst)/SIMULATION_ATOM);
-    //BAD  bigger->ApplyForce (normal * -fabs((elast+1)*speedagainst*smaller->GetMass()/bigger->GetMass())/SIMULATION_ATOM);
-    //deal damage similarly to beam damage!!  Apply some sort of repel force
-
-    //NOT USED BUT GOOD  Vector farce = normal*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM));
+        } else { 
+            return(false);
+        }
+        
+    } 
     return true;
 }
 
@@ -365,109 +350,14 @@ float globQuerySphere( QVector start, QVector end, QVector pos, float radius )
     return globQueryShell( st, end-start, radius );
 }
 
-Unit* Unit::queryBSP( const QVector &pt, float err, Vector &norm, float &dist, bool ShieldBSP )
-{
-    int i;
-    if ( ( !SubUnits.empty() ) && graphicOptions.RecurseIntoSubUnitsOnCollision ) {
-        un_fiter i = SubUnits.fastIterator();
-        for (Unit *un; (un = *i); ++i) {
-            Unit *retval;
-            if ( ( retval = un->queryBSP( pt, err, norm, dist, ShieldBSP ) ) )
-                return retval;
-        }
-    }
-    QVector st( InvTransform( cumulative_transformation_matrix, pt ) );
-    bool    temp = false;
-    for (i = 0; i < nummesh() && !temp; i++)
-        temp |= meshdata[i]->queryBoundingBox( st, err );
-    if (!temp)
-        return NULL;
-    BSPTree*const *tmpBsp;
-    BSPTree *myNull = NULL;
-    if (this->colTrees) {
-        tmpBsp = ShieldUp( st.Cast() ) ? &this->colTrees->bspShield : &this->colTrees->bspTree;
-        if (this->colTrees->bspTree && !ShieldBSP)
-            tmpBsp = &this->colTrees->bspTree;
-    } else {
-        tmpBsp = &myNull;
-    }
-    if ( !(*tmpBsp) ) {
-        dist = ( st-meshdata[i-1]->Position().Cast() ).Magnitude()-err-meshdata[i-1]->rSize();
-        return this;
-    }
-    if ( (*tmpBsp)->intersects( st.Cast(), err, norm, dist ) ) {
-        norm = ToWorldCoordinates( norm );
-        norm.Normalize();
-        return this;
-    }
-    return NULL;
-}
-
-bool testRayVersusBB( Vector Min, Vector Max, const QVector &start, const Vector &end, Vector &Coord )
-{
-    const float  eps = 0.00001f;
-    unsigned int i;
-    float bbmin[3];
-    float bbmax[3];
-    float dir[3];
-    float finalCoord[3];
-    bool  Inside = true;
-    float origin[3];
-    float tmax[3];
-    tmax[0]   = tmax[1] = tmax[2] = -1.0f;
-    origin[0] = start.i;
-    origin[1] = start.j;
-    origin[2] = start.k;
-    bbmin[0]  = Min.i;
-    bbmin[1]  = Min.j;
-    bbmin[2]  = Min.k;
-    bbmax[0]  = Max.i;
-    bbmax[1]  = Max.j;
-    bbmax[2]  = Max.k;
-    dir[0]    = end.i-start.i;
-    dir[1]    = end.j-start.j;
-    dir[2]    = end.k-start.k;
-    for (i = 0; i < 3; ++i) {
-        if (origin[i] > bbmax[i]) {
-            finalCoord[i] = bbmax[i];
-            if (dir[i] != 0.0f)
-                tmax[i] = (bbmax[i]-origin[i])/dir[i];
-            Inside = false;
-        } else if (origin[i] < bbmin[i]) {
-            finalCoord[i] = bbmin[i];
-            if (dir[i] != 0.0f)
-                tmax[i] = (bbmin[i]-origin[i])/dir[i];
-            Inside = false;
-        }
-    }
-    if (Inside) {
-        Coord = start.Cast();
-        return true;
-    }
-    unsigned int WhichPlane = 0;
-    if (tmax[1] > tmax[WhichPlane]) WhichPlane = 1;
-    if (tmax[2] > tmax[WhichPlane]) WhichPlane = 2;
-    if (tmax[WhichPlane] < 0)
-        return false;
-    for (i = 0; i < 3; i++)
-        if (i != WhichPlane) {
-            finalCoord[i] = origin[i]+tmax[WhichPlane]*dir[i];
-            if (finalCoord[i]+eps< bbmin[i] || finalCoord[i] >bbmax[i]+eps) return false;
-        }
-    Coord = Vector( finalCoord[0], finalCoord[1], finalCoord[2] );
-    if (tmax[0] >= 0 && tmax[0] <= 1 && tmax[1] >= 0 && tmax[1] <= 1 && tmax[2] >= 0 && tmax[2] <= 1)
-        return true;
-    return false;
-}
-
-bool testRayInsideBB( const Vector &Min, const Vector &Max, const QVector &start, const Vector &end, Vector &Coord )
-{
-    if (start.i > Min.i && start.j > Min.j && start.k > Min.k && start.i < Max.i && start.j < Max.j && start.k < Max.k)
-        return true;
-    return testRayVersusBB( Min, Max, start, end, Coord );
-}
-
-Unit* Unit::queryBSP( const QVector &start, const QVector &end, Vector &norm, float &distance, bool ShieldBSP )
+/* 
+    * This is our ray / bolt collision routine for now.   
+    * Basically, this is called on a ship unit to see if any ray or bolt given by some simple vectors collide with it
+    *  We should probably first check against shields and then against the colTree to see if we hit the shields first
+    *  Not sure yet if that would work though...  more importantly, we might have to modify end in here in order 
+    *  to tell calling code that the bolt should stop at a given point. 
+*/
+Unit* Unit::rayCollide( const QVector &start, const QVector &end, Vector &norm, float &distance)
 {
     Unit *tmp;
     float rad = this->rSize();
@@ -476,72 +366,40 @@ Unit* Unit::queryBSP( const QVector &start, const QVector &end, Vector &norm, fl
             rad += tmp->rSize();
     if ( !globQuerySphere( start, end, cumulative_transformation_matrix.p, rad ) )
         return NULL;
-    static bool use_bsp_tree = XMLSupport::parse_bool( vs_config->getVariable( "physics", "beam_bsp", "false" ) );
     if (graphicOptions.RecurseIntoSubUnitsOnCollision) {
         if ( !SubUnits.empty() ) {
             un_fiter i( SubUnits.fastIterator() );
             for (Unit *un; (un = *i); ++i)
-                if ( ( tmp = un->queryBSP( start, end, norm, distance, ShieldBSP ) ) != 0 )
+                if ( ( tmp = un->rayCollide( start, end, norm, distance) ) != 0 )
                     return tmp;
         }
     }
-    BSPTree *myNull = NULL;
-    BSPTree*const *tmpBsp = &myNull;
     QVector  st( InvTransform( cumulative_transformation_matrix, start ) );
     QVector  ed( InvTransform( cumulative_transformation_matrix, end ) );
-    if (use_bsp_tree) {
-        if (this->colTrees) {
-            tmpBsp = ShieldUp( st.Cast() ) ? &this->colTrees->bspShield : &this->colTrees->bspTree;
-            if (this->colTrees->bspTree && !ShieldBSP)
-                tmpBsp = &this->colTrees->bspTree;
-            tmpBsp = &this->colTrees->bspTree;
-        }
-    }
-    //for (;tmpBsp!=NULL;tmpBsp=((ShieldUp(st.Cast())&&(tmpBsp!=((this->colTrees?&this->colTrees->bspTree:&myNull))))?((this->colTrees?&this->colTrees->bspTree:&myNull)):NULL)) {
-    static bool sphere_test = XMLSupport::parse_bool( vs_config->getVariable( "physics", "sphere_collision", "true" ) );
-    static bool bb_test     = XMLSupport::parse_bool( vs_config->getVariable( "physics", "bounding_box_collision", "false" ) );
-
-    distance = querySphereNoRecurse( start, end );
-    if (distance || !sphere_test) {
-        if ( !(*tmpBsp) ) {
-            Vector coord;
-            unsigned int nm = nummesh();
-            Unit  *retval   = NULL;
-            if (bb_test) {
-                for (unsigned int i = 0; i < nm; ++i)
-                    if ( testRayVersusBB( meshdata[i]->corner_min(), meshdata[i]->corner_max(), st, ed, coord ) ) {
-                        norm     = TransformNormal( cumulative_transformation_matrix, coord );
-                        distance = (coord-st).Magnitude();
-                        //normal points out from center
-                        norm.Normalize();
-                        ed     = coord.Cast();
-                        retval = this;
-                    }
-            } else {
-                norm     = ( distance*(start-end) ).Cast();
-                distance = norm.Magnitude();
-                norm     = (norm.Cast()+start).Cast();
-                norm.Normalize();                 //normal points out from center
-                retval   = this;
+    static bool sphere_test = XMLSupport::parse_bool( vs_config->getVariable( "physics", "sphere_collision", "false" ) );
+    //distance = querySphereNoRecurse( start, end );
+    if (distance > 0.0f || !sphere_test) {
+        Vector coord;
+        unsigned int nm = nummesh();
+        
+        /* Set up points and ray to send to ray collider. */
+        Opcode::Point rayOrigin(st.i,st.j,st.k);
+        Opcode::Point rayDirection(ed.i,ed.j,ed.k);
+        Opcode::Ray boltbeam(rayOrigin,rayDirection);
+        if(this->colTrees){
+            // Retrieve the correct scale'd collider from the unit's collide tree. 
+            csOPCODECollider *tmpCol  = this->colTrees->colTree( this, this->GetWarpVelocity() );
+            if(tmpCol->rayCollide(boltbeam)){
+                // NOTE:   Here is where we need to retrieve the point on the ray that we collided with the mesh, and set it to end, create the normal and set distance
+                return(this);
             }
-            return retval;
+        } else {
+            return(NULL);
         }
     } else {
-        return NULL;
-        /*bool temp=false;
-         *       for (i=0;i<nummesh()&&!temp;i++) {
-         *  temp = (1==meshdata[i]->queryBoundingBox (st,ed,0));
-         *  }
-         *  if (!temp) {
-         *  return NULL;
-         *  }*/
+        return (NULL);
     }
-    if ( ( distance = (*tmpBsp)->intersects( st.Cast(), ed.Cast(), norm ) ) != 0 ) {
-        norm = ToWorldCoordinates( norm );
-        return this;
-    }
-    //}
-    return NULL;
+    return(NULL);
 }
 
 bool Unit::querySphere( const QVector &pnt, float err ) const

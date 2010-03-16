@@ -138,11 +138,7 @@ public: GameUnit( int dummy );
 ///Updates the collide Queue with any possible change in sectors
 ///Queries if this unit is within a given frustum
     bool queryFrustum( double frustum[6][4] ) const;
-/// Queries bounding box with a point, radius err
-    bool queryBoundingBox( const QVector &pnt, float err );
-///Queries the bounding box with a ray.  1 if ray hits in front... -1 if ray
-///hits behind.  0 if ray misses
-    int queryBoundingBox( const QVector &origin, const Vector &direction, float err );
+
 ///Queries the bounding sphere with a duo of mouse coordinates that project
 ///to the center of a ship and compare with a sphere...pretty fast*/
     bool querySphereClickList( int, int, float err, Camera *activeCam );
@@ -193,12 +189,10 @@ public: GameUnit( int dummy );
  *       vector<Mesh*> meshes;
  *       vectorstring> meshes_str;
  *       Mesh * shieldmesh;
- *       Mesh * bspmesh;
  *       Mesh * rapidmesh;
  *       void * data;
  *       vector<Unit*> units;
  *       int unitlevel;
- *       bool hasBSP;
  *       bool hasColTree;
  *       enum restr {YRESTR=1, PRESTR=2, RRESTR=4};
  *       const char * unitModifications;

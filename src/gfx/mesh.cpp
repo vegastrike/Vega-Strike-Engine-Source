@@ -24,8 +24,8 @@
 #include "mesh.h"
 #include "matrix.h"
 #include "camera.h"
-#include "bounding_box.h"
-#include "bsp.h"
+//#include "bounding_box.h"
+//#include "bsp.h"
 #include <assert.h>
 #include <math.h>
 #include "cmd/nebula_generic.h"
@@ -372,7 +372,7 @@ inline bool OpenWithin( const QVector &query,
         return (query.j >= mn.j-err) && (query.i >= mn.i-err) && (query.j <= mx.j+err) && (query.i <= mx.i+err);
     }
 }
-
+/*
 bool Mesh::queryBoundingBox( const QVector &eye, const QVector &end, const float err ) const
 {
     QVector slope( end-eye );
@@ -427,4 +427,4 @@ BoundingBox* Mesh::getBoundingBox()
                                         QVector( 0, 0, mn.k ), QVector( 0, 0, mx.k ) );
     return tbox;
 }
-
+*/

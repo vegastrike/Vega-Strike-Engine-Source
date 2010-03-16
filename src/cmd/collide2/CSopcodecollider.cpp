@@ -35,7 +35,7 @@ using namespace Opcode;
 
 static CS_DECLARE_GROWING_ARRAY_REF (pairs,csCollisionPair);
 
-csOPCODECollider::csOPCODECollider (const std::vector <bsp_polygon> &polygons)
+csOPCODECollider::csOPCODECollider (const std::vector <mesh_polygon> &polygons)
 {
 	m_pCollisionModel = 0;
 	vertholder = 0;
@@ -44,8 +44,10 @@ csOPCODECollider::csOPCODECollider (const std::vector <bsp_polygon> &polygons)
 	TreeCollider.SetFullBoxBoxTest(false);
 	TreeCollider.SetTemporalCoherence(false);
 	opcMeshInt.SetCallback (&MeshCallback, this);
-
 	GeometryInitialize (polygons);
+    CollisionFace collFace;
+    rCollider.SetFirstContact(true);
+    
 }
 
 
@@ -54,12 +56,12 @@ inline float min3 (float a, float b, float c)
 inline float max3(float a, float b, float c)
 { return (a > b ? (a > c ? a : (c > b ? c : b)) : (b > c ? b : c)); }
 
-void csOPCODECollider::GeometryInitialize (const std::vector <bsp_polygon> &polygons )
+void csOPCODECollider::GeometryInitialize (const std::vector <mesh_polygon> &polygons )
 {
 	OPCODECREATE OPCC;
 	unsigned int  tri_count = 0;
 	std::vector<Vector>::size_type  vert_count = 0;
-	for(std::vector<bsp_polygon>::size_type i = 0; i <polygons.size();++i) {
+	for(std::vector<mesh_polygon>::size_type i = 0; i <polygons.size();++i) {
 		vert_count += polygons[i].v.size();
 	}
 	tri_count = vert_count / 3;
@@ -74,10 +76,10 @@ void csOPCODECollider::GeometryInitialize (const std::vector <bsp_polygon> &poly
 		tmp.StartBoundingBox ();
 		unsigned int last = 0;
 		
-		/* Copies the Vector's in bsp_polygon to Point's in vertholder.
+		/* Copies the Vector's in mesh_polygon to Point's in vertholder.
 		* This sucks but i dont see anyway around it */
-		for (std::vector<bsp_polygon>::size_type i = 0; i < polygons.size(); ++i) {
-			const bsp_polygon *p = (&polygons[i]);
+		for (std::vector<mesh_polygon>::size_type i = 0; i < polygons.size(); ++i) {
+			const mesh_polygon *p = (&polygons[i]);
 			for(std::vector<Vector>::size_type j = 0; j < p->v.size();++j) {
 				vertholder[last++].Set (p->v[j].i , p->v[j].j , p->v[j].k);
 				tmp.AddBoundingVertex (p->v[j]);
@@ -126,6 +128,16 @@ void csOPCODECollider::MeshCallback (udword triangle_index,
 	triangle.Vertex[2] = &vertholder [index + 2];
 }
 
+bool csOPCODECollider::rayCollide(const Ray &boltbeam)
+{
+    return(rCollider.Collide(boltbeam,*m_pCollisionModel));
+}
+
+void csOPCODECollider::RayCallback (const CollisionFace &faceHit, void* user_data)
+{
+    csOPCODECollider* collider = (csOPCODECollider*)user_data;
+    collider->collFace = faceHit;
+}
 
 bool csOPCODECollider::Collide( csOPCODECollider &otherCollider,
 								const csReversibleTransform *trans1,
@@ -214,6 +226,7 @@ size_t csOPCODECollider::GetCollisionPairCount()
 void csOPCODECollider::SetOneHitOnly(bool on)
 {
 	TreeCollider.SetFirstContact(on);
+    rCollider.SetFirstContact(on);
 }
 
 

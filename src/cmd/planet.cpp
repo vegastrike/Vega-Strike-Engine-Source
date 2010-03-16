@@ -5,7 +5,7 @@
 #include "gfxlib.h"
 #include "gfx/sphere.h"
 #include "collection.h"
-#include "gfx/bsp.h"
+//#include "gfx/bsp.h"
 #include "ai/order.h"
 #include "gfxlib_struct.h"
 #include "vs_globals.h"

@@ -1257,7 +1257,7 @@ public:
 public:
     class csOPCODECollider * getCollideTree( const Vector &scale = Vector( 1,
                                                                            1,
-                                                                           1 ), const std::vector< struct bsp_polygon >* = NULL );
+                                                                           1 ), const std::vector< struct mesh_polygon >* = NULL );
 //Because accessing in daughter classes member function from Unit * instances
     Order *aistate;
     Order * getAIState() const
@@ -1313,19 +1313,13 @@ public:
     void SetRecursiveOwner( Unit *target );
 
 //Shouldn't do anything here - but needed by Python
-//Queries the BSP tree with a world space st and end point. Returns the normal and distance on the line of the intersection
-    Unit * queryBSP( const QVector &st, const QVector &end, Vector &normal, float &distance, bool ShieldBSP = true );
-//queries the BSP with a world space pnt, radius err.  Returns the normal and distance of the plane to the shield. If Unit returned not NULL, that subunit hit
-    Unit * queryBSP( const QVector &pnt, float err, Vector &normal, float &dist, bool ShieldBSP );
+//Queries the ray collider with a world space st and end point. Returns the normal and distance on the line of the intersection
+    Unit * rayCollide( const QVector &st, const QVector &end, Vector &normal, float &distance);
 
 //fils in corner_min,corner_max and radial_size
 //Uses Box stuff -> only in NetUnit and Unit
     void calculate_extent( bool update_collide_queue );
 
-//To let only in Unit class
-//Builds a BSP tree from either the hull or else the current meshdata[] array
-//if hull==NULL, then use meshdata **
-    void BuildBSPTree( const char *filename, bool vplane = false, Mesh *hull = NULL );
 //Uses mesh stuff (only rSize()) : I have to find something to do
     bool Inside( const QVector &position, const float radius, Vector &normal, float &dist );
 //Uses collide and Universe stuff -> put in NetUnit
@@ -1345,16 +1339,6 @@ public:
         return false;
     }
 
-/**
- * Queries bounding box with a point, radius err
- * Uses GFX :(
- * Try to use in NetUnit thought
- * Queries the bounding box with a ray.  1 if ray hits in front... -1 if ray
- * hits behind.
- * 0 if ray misses
- **/
-    bool queryBoundingBox( const QVector &pnt, float err );
-    int queryBoundingBox( const QVector &origin, const Vector &direction, float err );
 /**
  * Queries the bounding sphere with a duo of mouse coordinates that project
  * to the center of a ship and compare with a sphere...pretty fast
@@ -1537,15 +1521,12 @@ struct Unit::XML
     std::vector< Mesh* > meshes;
     std::vector< std::string >meshes_str;
     Mesh *shieldmesh;
-    Mesh *bspmesh;
     Mesh *rapidmesh;
     std::string shieldmesh_str;
-    std::string bspmesh_str;
     std::string rapidmesh_str;
     void *data;
     std::vector< Unit* >units;
     int   unitlevel;
-    bool  hasBSP;
     bool  hasColTree;
     enum restr {YRESTR=1, PRESTR=2, RRESTR=4};
     const char *unitModifications;

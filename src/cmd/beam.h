@@ -19,6 +19,7 @@ private:
     unsigned int   decal;
     GFXVertexList *vlist;
     LineCollide    CollideInfo;
+    
     unsigned int   numframes;
     float    speed; //lite speed
     float    texturespeed;

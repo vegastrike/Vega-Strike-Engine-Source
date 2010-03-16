@@ -149,7 +149,7 @@ public:
                                                                                                q.k ),
                                    VS_BOOST_MAKE_TUPLE( r.i, r.j, r.k ) );
     }
-    boost::python::tuple queryBSP( QVector st, QVector en, bool ShieldBSP )
+    boost::python::tuple rayCollide( QVector st, QVector en)
     {
         {
             CHECKME VS_BOOST_MAKE_TUPLE( 0, VS_BOOST_MAKE_TUPLE( 0, 0, 1 ), 0 );
@@ -157,7 +157,7 @@ public:
         float dist;
         UnitWrapper un;
         Vector nml;
-        un = unit->queryBSP( st, en, nml, dist, ShieldBSP );
+        un = unit->rayCollide( st, en, nml, dist);
         boost::python::tuple ret = VS_BOOST_MAKE_TUPLE( un, nml, dist );
         return ret;
     }

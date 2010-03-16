@@ -47,7 +47,7 @@ void Mesh::Fork( Mesh* &x, Mesh* &y, float a, float b, float c, float d )
     int inc    = 3;
     int offset = 0;
     int last   = numtris;
-    bsp_polygon tmppolygon;
+    mesh_polygon tmppolygon;
     for (int l = 0; l < 2; l++) {
         for (i = 0; i < last; i++) {
             if ( ( !(numtqy[l] < last/3
@@ -168,7 +168,7 @@ void Mesh::Fork( Mesh* &x, Mesh* &y, float a, float b, float c, float d )
     delete[] Y;
 }
 
-void Mesh::GetPolys( vector< bsp_polygon > &polys )
+void Mesh::GetPolys( vector< mesh_polygon > &polys )
 {
     int numtris;
     int numquads;
@@ -184,7 +184,7 @@ void Mesh::GetPolys( vector< bsp_polygon > &polys )
     int inc    = 3;
     int offset = 0;
     int last   = numtris;
-    bsp_polygon tmppolygon;
+    mesh_polygon tmppolygon;
     for (int l = 0; l < 2; l++) {
         for (i = 0; i < last; i++) {
             polys.push_back( tmppolygon );

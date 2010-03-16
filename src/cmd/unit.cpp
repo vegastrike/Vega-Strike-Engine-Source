@@ -35,7 +35,7 @@
 #include "gfx/vsbox.h"
 #include "bolt.h"
 #include "gfx/lerp.h"
-#include "gfx/bsp.h"
+//#include "gfx/bsp.h"
 #include "audiolib.h"
 #include "gfx/cockpit.h"
 #include "config_xml.h"
@@ -56,7 +56,7 @@
 //#include "gfx/animation.h"
 #include "gfx/point_to_cam.h"
 
-#include "unit_bsp.h"
+//#include "unit_bsp.h"
 //these .cpp files should be renamed to .h; they contain template functions...
 //--some of them GameUnit<> member functions, at that --chuck_starchaser
 #include "unit_jump.cpp"

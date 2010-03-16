@@ -9,7 +9,7 @@ void DefineOddUnitFunctions (boost::python::class_builder <UnitWrapper> &Class) 
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::SetVelocityReference,"SetVelocityReference");
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::GetVelocityReference,"GetVelocityReference");
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::GetOrientation,"GetOrientation");
-  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::queryBSP,"queryBSP");
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::rayCollide,"rayCollide");
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::cosAngleTo,"cosAngleTo");
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::cosAngleToITTS,"cosAngleToITTS");
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::cosAngleFromMountTo,"cosAngleFromMountTo");
