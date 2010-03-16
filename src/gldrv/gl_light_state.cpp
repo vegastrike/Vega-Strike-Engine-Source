@@ -50,39 +50,38 @@ void GFXUploadLightState( int max_light_location, int active_light_array, int ap
                 QVector lightPos = light.getPosition() - modelview.p;
                 
                 double lightDistance = lightPos.Magnitude();
-                double lightSize = light.getSize();
-                float lightCosAngle;
-                float lightSolidAngle;
-                
+                double lightSize = light.getSize() * 0.5;
+                double lightCosAngle;
+                double lightSolidAngle;
                 // NOTE: assuming lightSize > 0, the following condition
                 //  assures a nonzero distance to light, which would produce
                 //  NaNs in the following math.
-                if (lightDistance > lightSize) {
+                if (lightDistance >= lightSize) {
                     // Light cos angle is:
                     //  Vector(1, 0, 0) . Vector(lightDistance, lightSize, 0).Normalize()
                     // Which happens to resolve to:
-                    lightCosAngle = float(lightDistance / (lightDistance + lightSize));
-                    
+                    //lightCosAngle = float(lightDistance / (lightDistance + lightSize));
+                    lightCosAngle = lightDistance / sqrt( lightDistance*lightDistance + lightSize*lightSize );
+                    lightSolidAngle = 2.0 * M_PI * ( 1.0 - lightCosAngle );
                     // Light steradians is:
                     //  Steradians = Fractional Area * 4 * Pi
                     //  Fractional Area = Apparent light area / Sky area at light distance
                     //  Apparent light area = Pi * lightSize^2
                     //  Sky area = 4 * Pi * lightDistance^2
                     // Do the math...
-                    lightSolidAngle = float(M_PI
+/*                    lightSolidAngle = float(M_PI
                         * ( lightSize / lightDistance )
-                        * ( lightSize / lightDistance ));
+                        * ( lightSize / lightDistance ));*/
                 } else {
                     // nil distance, avoid infinites that kill shaders
                     // NOTE: the constants aren't capricious, they're the right
                     //  constants for a light coming from all around.
-                    lightCosAngle = 0.f;
-                    lightSolidAngle = 4.f * M_PI;
+                    lightCosAngle = 0.0;
+                    lightSolidAngle = 2.0 * M_PI;
                 }
-                
                 lightSizes[i*4+0] = float(lightSize);
-                lightSizes[i*4+1] = lightCosAngle;
-                lightSizes[i*4+2] = lightSolidAngle;
+                lightSizes[i*4+1] = float(lightCosAngle);
+                lightSizes[i*4+2] = float(lightSolidAngle);
                 lightSizes[i*4+3] = 0.f;
             }
         }
