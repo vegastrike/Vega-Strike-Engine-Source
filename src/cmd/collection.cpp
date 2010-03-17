@@ -142,18 +142,6 @@ const Unit* UnitCollection::ConstIterator::next()
     return NULL;
 }
 
-bool UnitCollection::ConstIterator::isDone()
-{
-    if ( col && it != col->u.end() )
-        return false;
-    return true;
-}
-
-bool UnitCollection::ConstIterator::notDone()
-{
-    return !isDone();
-}
-
 inline void UnitCollection::ConstIterator::advance()
 {
     if ( !col || it == col->u.end() ) return;
@@ -197,11 +185,6 @@ UnitCollection::UnitCollection( const UnitCollection &uc )
         append( *in );
         ++in;
     }
-}
-
-UnitCollection::~UnitCollection()
-{
-    destr();
 }
 
 void UnitCollection::insert_unique( Unit *unit )

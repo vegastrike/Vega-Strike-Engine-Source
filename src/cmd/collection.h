@@ -109,8 +109,16 @@ public: ConstIterator() : col( NULL ) {}
         ~ConstIterator();
         ConstIterator& operator=( const ConstIterator &orig );
         const Unit * next();
-        bool isDone();
-        bool notDone();
+        inline bool isDone()
+        {
+            if ( col && it != col->u.end() )
+                return false;
+            return true;
+        }
+        inline bool notDone()
+        {
+             return !isDone();
+        }
         void advance();
         const ConstIterator& operator++();
         const ConstIterator operator++( int );
@@ -131,7 +139,10 @@ protected:
 
     UnitCollection();
     UnitCollection( const UnitCollection& );
-    ~UnitCollection();
+    inline ~UnitCollection()
+    {
+         destr();
+    }
 
 /* Iterator creation functions. We use this to set the col pointer */
     inline UnitIterator createIterator()
