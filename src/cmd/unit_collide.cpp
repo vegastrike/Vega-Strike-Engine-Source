@@ -376,8 +376,8 @@ Unit* Unit::rayCollide( const QVector &start, const QVector &end, Vector &norm, 
     }
     QVector  st( InvTransform( cumulative_transformation_matrix, start ) );
     QVector  ed( InvTransform( cumulative_transformation_matrix, end ) );
-    static bool sphere_test = XMLSupport::parse_bool( vs_config->getVariable( "physics", "sphere_collision", "false" ) );
-    //distance = querySphereNoRecurse( start, end );
+    static bool sphere_test = XMLSupport::parse_bool( vs_config->getVariable( "physics", "sphere_collision", "true" ) );
+    distance = querySphereNoRecurse( start, end );
     if (distance > 0.0f || !sphere_test) {
         Vector coord;
         unsigned int nm = nummesh();

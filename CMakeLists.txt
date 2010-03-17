@@ -491,22 +491,22 @@ OPTION(CPUINTEL_core2 "Enable Intel Core2 optimizations"
 # Hide our temporary variable and initialize it to empty
 SET(CPU_OPTS  )
 MARK_AS_ADVANCED( CPU_OPTS )
-
+SET(CPU_SMP "1" CACHE STRING 
+    "Number of CPU's in system")
 # Depending on the boolean chosen above, set CPU_OPTS to the correct cpu opts
 IF(CPUAMD_k8)
-    SET(CPU_OPTS "-mtune=athlon64 -mfpmath=sse -msse2 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops -ftree-parallelize-loops=2")
+    SET(CPU_OPTS "-mtune=athlon64 -mfpmath=sse -msse2 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops -ftree-parallelize-loops=${CPU_SMP}")
 ELSEIF(CPUAMD_K9)
-    SET(CPU_OPTS "-mtune=k8-sse3 -mfpmath=sse -msse3 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops -ftree-parallelize-loops=2")
+    SET(CPU_OPTS "-mtune=k8-sse3 -mfpmath=sse -msse3 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops -ftree-parallelize-loops=${CPU_SMP}")
 ELSEIF(CPUINTEL_p4)
-    SET(CPU_OPTS "-mtune=pentium4 -mfpmath=sse -msse2 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops -ftree-parallelize-loops=2")
+    SET(CPU_OPTS "-mtune=pentium4 -mfpmath=sse -msse2 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops -ftree-parallelize-loops=${CPU_SMP}")
 ELSEIF(CPUINTEL_prescott)
-    SET(CPU_OPTS "-mtune=prescott -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops -ftree-parallelize-loops=2" )
+    SET(CPU_OPTS "-mtune=prescott -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops -ftree-parallelize-loops=${CPU_SMP}" )
 ELSEIF(CPUINTEL_nocona)
-    SET(CPU_OPTS "-mtune=nocona -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops -ftree-parallelize-loops=2")
+    SET(CPU_OPTS "-mtune=nocona -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops -ftree-parallelize-loops=${CPU_SMP}")
 ELSEIF(CPUINTEL_core2)
-    SET(CPU_OPTS "-mtune=core2 -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops -ftree-parallelize-loops=2")
+    SET(CPU_OPTS "-mtune=core2 -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops -ftree-parallelize-loops=${CPU_SMP}")
 ENDIF(CPUAMD_k8)
-
 
 # Debug target block. 
 SET(CMAKE_CXX_FLAGS_DEBUG " ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
