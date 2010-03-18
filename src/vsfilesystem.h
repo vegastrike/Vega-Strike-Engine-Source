@@ -79,7 +79,7 @@ void DisplayType( VSFileType type, std::ostream &ostr );
 
 int GetReadBytes( char *fmt, va_list ap );
 
-typedef vsUMap< string, VSError >FileLookupCache;
+typedef vsUMap< string, VSError > FileLookupCache;
 VSError CachedFileLookup( FileLookupCache &cache, const string &file, VSFileType type );
 
 /*

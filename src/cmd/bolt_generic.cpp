@@ -59,6 +59,7 @@ Bolt::Bolt( const weapon_info *typ,
         q->balls[decal].push_back( *this );
     }
 }
+
 size_t nondecal_index( Collidable::CollideRef b )
 {
     return b.bolt_index>>8;
@@ -125,6 +126,8 @@ public: UpdateBolt( StarSystem *ss, CollideMap *collidemap )
 
 namespace vsalg
 {
+//
+
 template < typename IT, typename F >
 void for_each( IT start, IT end, F f )
 {
@@ -133,6 +136,8 @@ void for_each( IT start, IT end, F f )
     while (start != end)
         f( *start++ );
 }
+
+//
 }
 
 class UpdateBolts
@@ -145,12 +150,14 @@ public: UpdateBolts( StarSystem *ss, CollideMap *collidemap ) : sub( ss, collide
         vsalg::for_each( collidableList.begin(), collidableList.end(), sub );
     }
 };
+
 void Bolt::UpdatePhysics( StarSystem *ss )
 {
     CollideMap *cm = ss->collidemap[Unit::UNIT_BOLT];
     vsalg::for_each( cm->sorted.begin(), cm->sorted.end(), UpdateBolt( ss, cm ) );
     vsalg::for_each( cm->toflattenhints.begin(), cm->toflattenhints.end(), UpdateBolts( ss, cm ) );
 }
+
 bool Bolt::Collide( Unit *target )
 {
     Vector normal;
@@ -196,6 +203,7 @@ bool Bolt::Collide( Unit *target )
     }
     return false;
 }
+
 Bolt* Bolt::BoltFromIndex( StarSystem *ss, Collidable::CollideRef b )
 {
     size_t ind = nondecal_index( b );
@@ -204,6 +212,7 @@ Bolt* Bolt::BoltFromIndex( StarSystem *ss, Collidable::CollideRef b )
     else
         return &ss->bolts->bolts[b.bolt_index&0x7f][ind];
 }
+
 bool Bolt::CollideAnon( Collidable::CollideRef b, Unit *un )
 {
     Bolt *tmp = BoltFromIndex( _Universe->activeStarSystem(), b );
@@ -213,6 +222,7 @@ bool Bolt::CollideAnon( Collidable::CollideRef b, Unit *un )
     }
     return false;
 }
+
 //union Collidable::CollideRef;  Perhaps not needed?
 Collidable::CollideRef Bolt::BoltIndex( int index, int decal, bool isBall )
 {
@@ -234,7 +244,6 @@ void BoltDestroyGeneric( Bolt *whichbolt, unsigned int index, int decal, bool is
     else
         target = &q->balls;
     vector< Bolt > *vec = &(*target)[decal];
-    int fsize = vec->size();
     if (&(*vec)[index] == whichbolt) {
         unsigned int tsize = vec->size();
         CollideMap  *cm    = _Universe->activeStarSystem()->collidemap[Unit::UNIT_BOLT];
@@ -249,30 +258,6 @@ void BoltDestroyGeneric( Bolt *whichbolt, unsigned int index, int decal, bool is
         VSFileSystem::vs_fprintf( stderr, "Bolt Fault Nouveau! Not found in draw queue! No Chance to recover\n" );
         fflush( stderr );
         assert( 0 );
-        /*
-         *  vector <Bolt>::iterator tmp= std::find ((*target)[decal].begin(),(*target)[decal].end(),*whichbolt);
-         *  if (tmp!=(*target)[decal].end()) {
-         *  (*target)[decal].erase(tmp);
-         *  } else {
-         *  //might as well look for potential faults! Doesn't cost us time
-         *  VSFileSystem::vs_fprintf (stderr,"Bolt Fault! Not found in draw queue! Attempting to recover\n");
-         *  for (vector <vector <Bolt> > *srch = &q->bolts;srch!=NULL;srch=&q->balls) {
-         *   for (unsigned int mdecal=0;mdecal<(*srch).size();mdecal++) {
-         *     vector <Bolt>::iterator mtmp= (*srch)[mdecal].begin();
-         *     while (mtmp!=(*srch)[mdecal].end()) {
-         *       std::find ((*srch)[mdecal].begin(),(*srch)[mdecal].end(),*whichbolt);
-         *       if (mtmp!=(*srch)[mdecal].end()) {
-         *         (*srch)[mdecal].erase (mtmp);
-         *         VSFileSystem::vs_fprintf (stderr,"Bolt Fault Recovered\n");
-         *       }
-         *     }
-         *   }
-         *   if (srch==&q->balls) {
-         *     break;
-         *   }
-         *  }
-         *  }
-         */
     }
 }
 

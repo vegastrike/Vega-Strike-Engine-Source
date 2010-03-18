@@ -336,7 +336,6 @@ bool AggressiveAI::ProcessLogicItem( const AIEvents::AIEvresult &item )
     float value = 0.0;
 
     static float game_speed = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
-    static float game_accel = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_accel", "1" ) );
     switch ( abs( item.type ) )
     {
     case DISTANCE:
@@ -821,7 +820,6 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                             float psize     = parent->radial_size;
                             int   Ypos = 0;
                             int   Xpos = 0;
-                            int   position  = int( floor( (fgnum%3)*0.5*alternate ) );
 //nice square formation, how many of these are you going to have anyway? Max 9, then go back. Should be enough.
                             switch (fgnum%9)
                             {
@@ -943,10 +941,6 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                             CommunicationMessage c( parent, leader, NULL, 0 );
 //this order is only valid for cargo wingmen, other wingmen will not comply
                             c.SetCurrentState( c.fsm->GetYesNode(), NULL, 0 );
-                            static float esc_percent = XMLSupport::parse_float( vs_config->getVariable( "AI",
-                                                                                                        "Targetting",
-                                                                                                        "EscortDistance",
-                                                                                                        "10.0" ) );
                             static float turn_leader = XMLSupport::parse_float( vs_config->getVariable( "AI",
                                                                                                         "Targetting",
                                                                                                         "TurnLeaderDist",
@@ -983,11 +977,9 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
  *             ReplaceOrder (ord);
  */
 
-                            int   alternate = fgnum%2 ? 1 : -1;
                             float psize     = parent->radial_size;
                             int   Ypos = 0;
                             int   Xpos = 0;
-                            int   position  = int( floor( (fgnum%3)*0.5*alternate ) );
 //nice square formation, how many of these are you going to have anyway? Max 9, then go back. Should be enough.
                             switch (fgnum%9)
                             {
@@ -1031,8 +1023,6 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                                 Xpos = 0;
                                 Ypos = 0;
                             }
-                            float dist     = (leader->radial_size+parent->radial_size);
-                            float formdist = esc_percent*(1+fgnum*2)*alternate*(dist);
                             //if i am a cargo wingman go close for pickup
                             //if i am the capship, go close for pickup
                             if ( (parent->owner == leader->owner) || parent->owner == leader ) {
@@ -1369,7 +1359,6 @@ static Unit * ChooseNavPoint( Unit *parent, Unit **otherdest, float *lurk_on_arr
                 srcdst[0] = srcdst[1];
             if ( srcdst[1] == ss->getFileName() )
                 srcdst[1] = srcdst[0];
-            size_t rand8 = thirdRand%8;
             if (thirdRand < 2) {
                 vsUMap< std::string, UnitContainer >::iterator i = stats->jumpPoints.find( srcdst[thirdRand] );
                 if ( i != stats->jumpPoints.end() ) {

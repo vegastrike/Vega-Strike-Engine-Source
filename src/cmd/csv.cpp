@@ -3,61 +3,11 @@
 
 using std::string;
 
-static string::size_type findQuot( string s, string chr, unsigned int offset = 0 )
+vector< string > readCSV( string s, string delim )
 {
-    if ( offset >= s.length() )
-        return string::npos;
-    string::size_type quot = s.substr( offset ).find( chr );
-    if (quot != string::npos)
-        return quot+offset;
-    return quot;     //string::npos
-}
-static string elimiQuote( string s, string delim = "\"\"\"" )
-{
-    string ret;
-    int    sl = s.length();
-    ret.reserve( sl );
-    for (int i = 0; i < sl; i++) {
-        if ( (i+1 < sl) && (s[i] == '\"') && (s[i+1] == '\"') )
-            ret += s[i++];
-
-        else if (s[i] != '\"')
-            ret += s[i];
-    }
-    return ret;
-    /*
-     *  string ret;
-     *  string::size_type where=findQuot(s,delim);
-     *  bool even = true;
-     *  if (where==string::npos && delim!="\""){
-     *  s=elimiQuote(s,"\"");
-     *  }
-     *  while(where!=string::npos){
-     *  string tmp=s.substr(0,where);
-     *  if (even && delim!="\""){
-     *   tmp=elimiQuote(tmp,"\"");
-     *  }
-     *  ret=ret+tmp;
-     *  even = !even;
-     *  s=s.substr(where+delim.length());
-     *  where=findQuot(s,delim);
-     *  }
-     *  ret=ret+s;
-     *  return ret;
-     */
-}
-vector< string >readCSV( string s, string delim )
-{
-    //Proposed readCSV code -- begin
-    //Working this way should be much more efficient, and
-    //also allows flexibility in separators (if you specify
-    //delim=",;", the first , or ; it finds specifies that that
-    //is a delimiter. Doing so and using ; as delimiter provides
-    //both excel and current file compatibility.
-    //Sadly, addQuote has to change in an incompatible way...
     vector< string >l;
     string as;
-    unsigned int    spos = 0, epos = 0, i = 0;
+    unsigned int    epos = 0;
     unsigned int    sl   = s.length();
     bool insert;
     bool quote  = false;
@@ -94,75 +44,10 @@ vector< string >readCSV( string s, string delim )
     }
     if ( !as.empty() ) l.push_back( as );
     return l;
-    //Proposed readCSV code -- end
-    /*
-     *  // Original readCSV code -- begin
-     *   vector <std::string> l;
-     *   std::string::size_type loc;
-     *   int sub1=s.find ("\r");
-     *   s=s.substr(0,sub1);
-     *   int sub2=s.find("\n");
-     *   s=s.substr(0,sub2);
-     *   int trip=1;
-     *   string::size_type quot3 = findQuot(s,"\"\"\"");
-     *   string::size_type quot1 = findQuot(s,"\"");
-     *   string::size_type quot;
-     *   string::size_type sem=string::npos;
-     *   if (quot3==string::npos || (quot1!=string::npos && quot1<quot3)){
-     *     trip=0;
-     *       quot=quot1;
-     *   }else{
-     *     quot=quot3;
-     *   }
-     *   sem = s.find(delim);
-     *   while (sem!=string::npos){
-     *     string::size_type equot=0;
-     *     while (quot<sem && quot!=string::npos){
-     *       if (trip){
-     *         equot=findQuot(s,"\"\"\"",quot+1);
-     *       }else{
-     *         equot=findQuot(s,"\"",quot+1);
-     *       }
-     *       quot3=findQuot(s,"\"\"\"",equot+1);
-     *       quot1 = findQuot(s,"\"",equot+1);
-     *       trip=1;
-     *       quot=quot3;
-     *       if (quot3==string::npos || (quot1!=string::npos && quot1<quot3)){
-     *         quot=quot1;
-     *         trip=0;
-     *         if (equot==string::npos)
-     *           break;
-     *       }
-     *     }
-     *     sem = s.substr(equot).find(delim);
-     *     if (sem!=string::npos){
-     *       sem=sem+equot;
-     *     }else{
-     *       break;
-     *     }
-     *     l.push_back(elimiQuote(s.substr(0,sem)));
-     *     s=s.substr(sem+delim.length());
-     *     sem = s.find(delim);
-     *     quot3=findQuot(s,"\"\"\"");
-     *     quot1 = findQuot(s,"\"");
-     *     quot=quot3;
-     *     trip=1;
-     *     if (quot3==-1 || (quot1!=-1 && quot1<quot3)){
-     *       quot=quot1;
-     *       trip=0;
-     *     }
-     *   }
-     *   s=elimiQuote(s);
-     *   if (s.length()){
-     *     l.push_back(s);
-     *   }
-     *   return l;
-     *  // Original readCSV code -- end
-     */
 }
+
 static string addQuote( string s, string delim = ",;" )
 {
-    //Proposed addQuote code -- begin
     if (s.find_first_of( delim+"\"" ) != string::npos) {
         if (s.find( '\"' ) != string::npos) {
             //Replace " by ""
@@ -180,22 +65,8 @@ static string addQuote( string s, string delim = ",;" )
         s.insert( s.end(), 1, '\"' );
     }
     return s;
-    //Proposed addQuote code -- end
-
-    /*
-     *  // Original addQuote code -- begin
-     *  if (s.find(delim)!=string::npos) {
-     *  if (s.find("\"")!=string::npos) {
-     *   return string("\"\"\"")+s+string("\"\"\"");
-     *  }else {
-     *   return string("\"")+s+"\"";
-     *  }
-     *  }else {
-     *  return s;
-     *  }
-     *  // Original addQuote code -- end
-     */
 }
+
 string writeCSV( const vector< string > &key, const vector< string > &table, string delim )
 {
     unsigned int i;
@@ -216,6 +87,7 @@ string writeCSV( const vector< string > &key, const vector< string > &table, str
     }
     return ret;
 }
+
 void CSVTable::Init( string data )
 {
     //Clear optimizer
@@ -223,7 +95,6 @@ void CSVTable::Init( string data )
     optimizer_keys.clear();
     optimizer_indexes.clear();
     optimizer_type  = ~0;
-    //Proposed Init code -- begin
     const string delim( ",;" );
     const char  *cdata = data.c_str();
     const char  *csep  = strchr( cdata, '\n' );
@@ -261,56 +132,12 @@ void CSVTable::Init( string data )
         else
             table.pop_back();
     }
-    //Proposed Init code -- end
-    /*
-     *  // Original Init code -- begin
-     *  std::string::size_type where=data.find('\n');
-     *  if (where==string::npos) return;
-     *  std::string buffer = data.substr(0,where);
-     *  data=data.substr(where+1);
-     *  key = readCSV(buffer.c_str());
-     *  for( unsigned int i=0;i<key.size();++i) {
-     *  columns[key[i] ]=i;
-     *  }
-     *  while (data.length()) {
-     *  where=data.find("\n");
-     *  if (where!=std::string::npos) {
-     *    buffer = data.substr(0,where);
-     *    data=data.substr(where+1);
-     *  }else {
-     *    buffer=data;
-     *    data="";
-     *  }
-     *  vector<string> strs = readCSV(buffer.c_str());
-     *  unsigned int row = table.size()/key.size();
-     *  while (strs.size()>key.size()) {
-     *     fprintf (stderr,"error in csv, line %d: %s has no key",row+1,strs.back().c_str());
-     *     strs.pop_back();
-     *  }
-     *  while(strs.size()<key.size()) {
-     *     strs.push_back("");
-     *  }
-     *  assert(strs.size()==key.size());
-     *  table.insert(table.end(),strs.begin(),strs.end());
-     *  if (strs.size()) {
-     *     rows[strs[0] ] = row;
-     *  }else {
-     *     table.pop_back();
-     *  }
-     *  }
-     *  // Original Init code -- end
-     */
 }
+
 CSVTable::CSVTable( string data, string root )
 {
     this->rootdir = root;
     Init( data );
-//VSFileSystem::VSFile f;
-//VSFileSystem::VSError err = f.OpenReadOnly(filename,VSFileSystem::UnknownFile);
-//if (err<=VSFileSystem::Ok) {
-//Init(f);
-//f.Close();
-//}
 }
 
 CSVTable::CSVTable( VSFileSystem::VSFile &f, string root )
@@ -318,16 +145,19 @@ CSVTable::CSVTable( VSFileSystem::VSFile &f, string root )
     this->rootdir = root;
     Init( f.ReadFull() );
 }
+
 CSVRow::CSVRow( CSVTable *parent, string key )
 {
     this->parent = parent;
     iter = parent->rows[key]*parent->key.size();
 }
+
 CSVRow::CSVRow( CSVTable *parent, unsigned int i )
 {
     this->parent = parent;
     iter = i*parent->key.size();
 }
+
 const string& CSVRow::operator[]( const string &col ) const
 {
     static string empty_string;
@@ -338,14 +168,17 @@ const string& CSVRow::operator[]( const string &col ) const
     else
         return parent->table[iter+(*i).second];
 }
+
 const string& CSVRow::operator[]( unsigned int col ) const
 {
     return parent->table[iter+col];
 }
+
 const string& CSVRow::getKey( unsigned int which ) const
 {
     return parent->key[which];
 }
+
 bool CSVTable::RowExists( string name, unsigned int &where )
 {
     vsUMap< string, int >::iterator i = rows.find( name );
@@ -354,6 +187,7 @@ bool CSVTable::RowExists( string name, unsigned int &where )
     where = (*i).second;
     return true;
 }
+
 bool CSVTable::ColumnExists( string name, unsigned int &where )
 {
     vsUMap< string, int >::iterator i = columns.find( name );
@@ -362,7 +196,9 @@ bool CSVTable::ColumnExists( string name, unsigned int &where )
     where = (*i).second;
     return true;
 }
-vector< CSVTable* >unitTables;
+
+vector< CSVTable* > unitTables;
+
 string CSVRow::getRoot()
 {
     if (parent)
@@ -370,7 +206,8 @@ string CSVRow::getRoot()
     fprintf( stderr, "Error getting root for unit\n" );
     return "";
 }
-void CSVTable::SetupOptimizer( vector< string >keys, unsigned int type )
+
+void CSVTable::SetupOptimizer( vector< string > keys, unsigned int type )
 {
     optimizer_setup = true;
     optimizer_type  = type;

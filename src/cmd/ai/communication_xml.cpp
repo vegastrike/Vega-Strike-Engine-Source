@@ -58,7 +58,6 @@ void FSM::beginElement( const string &name, const AttributeList attributes )
     string nam;
     string filename;
     float  val = 0.0f;  //FIXME "= 0.0f" added by chuck_starchaser without knowing what value to use
-    int    sound = -1;
     unsigned char sexe = 0; //FIXME "= 0" added by chuck_starchaser without knowing what value to use
     switch (elem)
     {

@@ -14,6 +14,7 @@
 #include "vs_random.h"
 #include "lin_time.h" //DEBUG ONLY
 #include "cmd/pilot.h"
+
 static bool NoDockWithClear()
 {
     static bool nodockwithclear = XMLSupport::parse_bool( vs_config->getVariable( "physics", "dock_with_clear_planets", "true" ) );
@@ -106,10 +107,12 @@ void FireAt::ReInit( float aggressivitylevel )
     lastchangedtarg = 0.0-targrand.uniformInc( 0, 1 )*mintimetoswitch;
     had_target = false;
 }
+
 FireAt::FireAt( float aggressivitylevel ) : CommunicatingAI( WEAPON, STARGET )
 {
     ReInit( aggressivitylevel );
 }
+
 FireAt::FireAt() : CommunicatingAI( WEAPON, STARGET )
 {
     static float aggr = XMLSupport::parse_float( vs_config->getVariable( "AI", "Firing", "Aggressivity", "15" ) );
@@ -130,6 +133,7 @@ struct TargetAndRange
         this->relation = rel;
     }
 };
+
 struct RangeSortedTurrets
 {
     Unit *tur;
@@ -144,6 +148,7 @@ struct RangeSortedTurrets
         return gunrange < o.gunrange;
     }
 };
+
 struct TurretBin
 {
     float maxrange;
@@ -182,7 +187,7 @@ struct TurretBin
                 }
             }
             if (!foundfinal) {
-                for (unsigned int f = 0; f < 2 && !foundfinal; f++)
+                for (unsigned int f = 0; f < 2 && !foundfinal; f++) {
                     for (unsigned int i = 0; i < lotsize[f]; i++) {
                         const int index = (count+i)%lotsize[f];
                         if (listOfTargets[f][index].range < uniter->gunrange) {
@@ -195,10 +200,12 @@ struct TurretBin
                             }
                         }
                     }
+                }
             }
         }
     }
 };
+
 void AssignTBin( Unit *su, vector< TurretBin > &tbin )
 {
     unsigned int bnum = 0;
@@ -224,6 +231,7 @@ void AssignTBin( Unit *su, vector< TurretBin > &tbin )
         tbin[bnum].maxrange = grange;
     tbin[bnum].turret.push_back( RangeSortedTurrets( su, grange ) );
 }
+
 float Priority( Unit *me, Unit *targ, float gunrange, float rangetotarget, float relationship, char *rolepriority )
 {
     if (relationship >= 0)
@@ -268,11 +276,13 @@ float Priority( Unit *me, Unit *targ, float gunrange, float rangetotarget, float
     float range_priority01 = .5*gunrange/rangetotarget;     //number between 0 and 1 for most ships 1 is best
     return range_priority01*role_priority01+inertial_priority+threat_priority;
 }
+
 float Priority( Unit *me, Unit *targ, float gunrange, float rangetotarget, float relationship )
 {
     char rolepriority = 0;
     return Priority( me, targ, gunrange, rangetotarget, relationship, &rolepriority );
 }
+
 template < class T, size_t n >
 class StaticTuple
 {
@@ -291,6 +301,7 @@ public:
         return vec[index];
     }
 };
+
 template < size_t numTuple >
 class ChooseTargetClass
 {
@@ -410,8 +421,11 @@ public:
 };
 
 int numpolled[2] = {0, 0};   //number of units that searched for a target
+
 int prevpollindex[2] = {10000, 10000};   //previous number of units touched (doesn't need to be precise)
+
 int pollindex[2] = {1, 1};   //current count of number of units touched (doesn't need to be precise)  -- used for "fairness" heuristic
+
 void FireAt::ChooseTargets( int numtargs, bool force )
 {
     float gunspeed, gunrange, missilerange;
@@ -469,11 +483,7 @@ void FireAt::ChooseTargets( int numtargs, bool force )
     }
     //not   allowed to switch targets
     numprocessed++;
-
-    Unit   *un = NULL;
     vector< TurretBin >tbin;
-
-    float   priority = 0;
     Unit   *su = NULL;
     un_iter subun    = parent->getSubUnits();
     for (; (su = *subun) != NULL; ++subun) {
@@ -569,6 +579,7 @@ void FireAt::ChooseTargets( int numtargs, bool force )
     parent->LockTarget( true );
     SignalChosenTarget();
 }
+
 /* Proper choosing of targets
  *  void FireAt::ChooseTargets (int num) {
  *  UnitCollection tmp;
@@ -583,6 +594,7 @@ void FireAt::ChooseTargets( int numtargs, bool force )
  *  }
  *
  */
+ 
 bool FireAt::ShouldFire( Unit *targ, bool &missilelock )
 {
     float dist;
@@ -656,6 +668,7 @@ FireAt::~FireAt()
     fflush( stderr );
 #endif
 }
+
 unsigned int FireBitmask( Unit *parent, bool shouldfire, bool firemissile )
 {
     unsigned int firebitm = ROLES::EVERYTHING_ELSE;
@@ -676,10 +689,10 @@ unsigned int FireBitmask( Unit *parent, bool shouldfire, bool firemissile )
     }
     return firebitm;
 }
+
 void FireAt::FireWeapons( bool shouldfire, bool lockmissile )
 {
     static float missiledelay     = XMLSupport::parse_float( vs_config->getVariable( "AI", "MissileGunDelay", "4" ) );
-    static float missiledelayprob = XMLSupport::parse_float( vs_config->getVariable( "AI", "MissileGunDelayProbability", ".25" ) );
     bool fire_missile = lockmissile && rand() < RAND_MAX*missileprobability*SIMULATION_ATOM;
     delay += SIMULATION_ATOM;
     if ( shouldfire && delay < parent->pilot->getReactionTime() )
@@ -690,12 +703,6 @@ void FireAt::FireWeapons( bool shouldfire, bool lockmissile )
         lastmissiletime = UniverseUtil::GetGameTime();
     else if (UniverseUtil::GetGameTime()-lastmissiletime < missiledelay && !fire_missile)
         return;
-    /*
-     *  static int retro=FactionUtil::GetFactionIndex("retro");
-     *  static int pirates=FactionUtil::GetFactionIndex("pirates");
-     *  if (parent->faction==retro||parent->faction==pirates) {
-     *  printf ("real %d\n",shouldfire);
-     *  }*/
     parent->Fire( FireBitmask( parent, shouldfire, fire_missile ), true );
 }
 
@@ -710,6 +717,7 @@ bool FireAt::isJumpablePlanet( Unit *targ )
     }
     return istargetjumpableplanet;
 }
+
 using std::string;
 void FireAt::PossiblySwitchTarget( bool unused )
 {
@@ -725,10 +733,10 @@ void FireAt::PossiblySwitchTarget( bool unused )
             ChooseTarget();
     }
 }
+
 void FireAt::Execute()
 {
     lastchangedtarg -= SIMULATION_ATOM;
-
     bool missilelock = false;
     bool tmp = done;
     Order::Execute();

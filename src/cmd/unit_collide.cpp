@@ -152,11 +152,6 @@ bool Unit::Inside( const QVector &target, const float radius, Vector &normal, fl
     return false;
 }
 
-static float tmpmax( float a, float b )
-{
-    return a > b ? a : b;
-}
-
 bool Unit::InsideCollideTree( Unit *smaller,
                               QVector &bigpos,
                               Vector &bigNormal,
@@ -380,8 +375,6 @@ Unit* Unit::rayCollide( const QVector &start, const QVector &end, Vector &norm, 
     distance = querySphereNoRecurse( start, end );
     if (distance > 0.0f || !sphere_test) {
         Vector coord;
-        unsigned int nm = nummesh();
-        
         /* Set up points and ray to send to ray collider. */
         Opcode::Point rayOrigin(st.i,st.j,st.k);
         Opcode::Point rayDirection(ed.i,ed.j,ed.k);

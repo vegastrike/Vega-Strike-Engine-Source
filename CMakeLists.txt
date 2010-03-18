@@ -495,7 +495,7 @@ SET(CPU_SMP "1" CACHE STRING
     "Number of CPU's in system")
 # Depending on the boolean chosen above, set CPU_OPTS to the correct cpu opts
 IF(CPUAMD_k8)
-    SET(CPU_OPTS "-mtune=athlon64 -mfpmath=sse -msse2 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops -ftree-parallelize-loops=${CPU_SMP}")
+    SET(CPU_OPTS "-mtune=athlon64 -mfpmath=sse -msse2 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -fprefetch-loop-arrays -ftree-parallelize-loops=${CPU_SMP}")
 ELSEIF(CPUAMD_K9)
     SET(CPU_OPTS "-mtune=k8-sse3 -mfpmath=sse -msse3 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops -ftree-parallelize-loops=${CPU_SMP}")
 ELSEIF(CPUINTEL_p4)
@@ -509,7 +509,7 @@ ELSEIF(CPUINTEL_core2)
 ENDIF(CPUAMD_k8)
 
 # Debug target block. 
-SET(CMAKE_CXX_FLAGS_DEBUG " ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_DEBUG " ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during debug builds."
      FORCE )
 SET( CMAKE_C_FLAGS_DEBUG "  ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
@@ -529,7 +529,7 @@ ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 
 
 # Release Target block 
-SET(CMAKE_CXX_FLAGS_RELEASE  "${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_RELEASE  "${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -Wall -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during release builds."
     FORCE)
 SET( CMAKE_C_FLAGS_RELEASE "${CPU_OPTS}  -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING

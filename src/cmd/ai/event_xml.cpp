@@ -154,21 +154,17 @@ void GeneralAIEventEnd( void *userData, const XML_Char *name )
         eam->result.back().pop_back();
     }
 }
+
 void LoadAI( const char *filename, ElemAttrMap &result, const string &faction )
 {
     //returns obedience
     using namespace VSFileSystem;
-    const int    chunk_size    = 16384;
-
     static float cfg_obedience = XMLSupport::parse_float( vs_config->getVariable( "AI",
                                                                                   "Targetting",
                                                                                   "obedience",
                                                                                   ".99" ) );
     result.obedience = cfg_obedience;
-
     result.maxtime   = 10;
-    //full_filename = string("ai/events/") + faction+string("/")+filename;
-    //FILE * inFile = VSFileSystem::vs_open (full_filename.c_str(), "r");
     VSFile  f;
     VSError err;
     err = f.OpenReadOnly( filename, AiFile );
@@ -202,17 +198,8 @@ void LoadAI( const char *filename, ElemAttrMap &result, const string &faction )
     XML_SetUserData( parser, &result );
     XML_SetElementHandler( parser, &GeneralAIEventBegin, &GeneralAIEventEnd );
     XML_Parse( parser, ( f.ReadFull() ).c_str(), f.Size(), 1 );
-    /*
-     *  do {
-     *  char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
-     *  int length;
-     *  length = VSFileSystem::vs_read (buf,1, chunk_size,inFile);
-     *  XML_ParseBuffer(parser, length, VSFileSystem::vs_feof(inFile));
-     *  } while(!VSFileSystem::vs_feof(inFile));
-     */
     f.Close();
     XML_ParserFree( parser );
-//assert (result.level==0);
     if (result.level != 0)
         fprintf( stderr, "Error loading AI script %s for faction %s. Final count not zero.\n", filename, faction.c_str() );
     result.level = 0;

@@ -840,10 +840,6 @@ void AIScript::LoadXML()
 #ifdef AIDBG
     VSFileSystem::vs_fprintf( stderr, "echd" );
 #endif
-
-    const int chunk_size = 16384;
-    //full_filename = string("ai/script/") + filename;
-    //FILE * inFile = VSFileSystem::vs_open (full_filename.c_str(), "r");
     VSFile    f;
     VSError   err = f.OpenReadOnly( filename, AiFile );
 #ifdef AIDBG
@@ -853,22 +849,16 @@ void AIScript::LoadXML()
         VSFileSystem::vs_fprintf( stderr, "cannot find AI script %s\n", filename );
         return;
     }
-#ifndef _WIN32
-    //VSFileSystem::vs_fprintf (stderr, "Loading AIscript: %s\n", filename);
-#endif
 #ifdef BIDBG
     VSFileSystem::vs_fprintf( stderr, "nxml" );
 #endif
     xml = new AIScriptXML;
-
     xml->unitlevel  = 0;
     xml->terminate  = true;
     xml->afterburn  = true;
-
     xml->acc = 2;
     xml->defaultvec = QVector( 0, 0, 0 );
     xml->defaultf   = 0;
-
 #ifdef BIDBG
     VSFileSystem::vs_fprintf( stderr, "parscrea" );
 #endif
@@ -880,37 +870,11 @@ void AIScript::LoadXML()
 #ifdef BIDBG
     VSFileSystem::vs_fprintf( stderr, "elha" );
 #endif
-
     XML_SetElementHandler( parser, &AIScript::beginElement, &AIScript::endElement );
 #ifdef BIDBG
     VSFileSystem::vs_fprintf( stderr, "do" );
 #endif
-
     XML_Parse( parser, ( f.ReadFull() ).c_str(), f.Size(), 1 );
-    /*
-     *  do {
-     * #ifdef BIDBG
-     *  VSFileSystem::vs_fprintf (stderr,"bufget");
-     *  char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
-     *  VSFileSystem::vs_fprintf (stderr,"%xebufget",buf);
-     * #else
-     *  char buf[chunk_size];
-     * #endif
-     *  int length;
-     *
-     *
-     *  length = VSFileSystem::vs_read (buf,1 ,chunk_size,inFile);
-     *  //length = inFile.gcount();
-     * #ifdef BIDBG
-     *  VSFileSystem::vs_fprintf (stderr,"pars%d",length);
-     *  XML_ParseBuffer(parser, length, Feof(inFile));
-     *  VSFileSystem::vs_fprintf (stderr,"ed");
-     * #else
-     *  XML_Parse (parser,buf,length,VSFileSystem::vs_feof(inFile));
-     * #endif
-     *
-     *  } while(!VSFileSystem::vs_feof(inFile));
-     */
 #ifdef BIDBG
     VSFileSystem::vs_fprintf( stderr, "%xxml_free", parser );
     fflush( stderr );
@@ -934,13 +898,13 @@ void AIScript::LoadXML()
     VSFileSystem::vs_fprintf( stderr, "xml%x", xml );
     fflush( stderr );
 #endif
-
     delete xml;
 #ifdef BIDBG
     VSFileSystem::vs_fprintf( stderr, "\\xml\n" );
     fflush( stderr );
 #endif
 }
+
 AIScript::AIScript( const char *scriptname ) : Order( Order::MOVEMENT|Order::FACING, STARGET )
 {
     filename = new char[strlen( scriptname )+1];

@@ -103,7 +103,6 @@ void Nebula::beginElem( const std::string &name, const AttributeList &atts )
 using namespace VSFileSystem;
 void Nebula::LoadXML( const char *filename )
 {
-    const int   chunk_size = 16384;
     VSFile      f;
     VSError     err = f.OpenReadOnly( filename, UnitFile );
     static bool usefog     = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "fog", "true" ) );
@@ -118,26 +117,7 @@ void Nebula::LoadXML( const char *filename )
     XML_Parser parser = XML_ParserCreate( NULL );
     XML_SetUserData( parser, this );
     XML_SetElementHandler( parser, &Nebula::beginElement, &Nebula_endElement );
-
     XML_Parse( parser, ( f.ReadFull() ).c_str(), f.Size(), 1 );
-    /*
-     *  do {
-     * #ifdef BIDBG
-     *       char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
-     * #else
-     *       char buf[chunk_size];
-     * #endif
-     *       int length;
-     *       length = VSFileSystem::vs_read (buf,1, chunk_size,inFile);
-     *       //length = inFile.gcount();
-     *
-     * #ifdef BIDBG
-     *       XML_ParseBuffer(parser, length, VSFileSystem::vs_feof(inFile));
-     * #else
-     *       XML_Parse(parser, buf,length, VSFileSystem::vs_feof(inFile));
-     * #endif
-     *  } while(!VSFileSystem::vs_feof(inFile));
-     */
     XML_ParserFree( parser );
     f.Close();
 }
@@ -156,6 +136,7 @@ Nebula::Nebula( const char *unitfile, bool SubU, int faction, Flightgroup *fg, i
 {
     this->InitNebula( unitfile, SubU, faction, fg, fg_snumber );
 }
+
 void Nebula::reactToCollision( Unit *smaller,
                                const QVector &biglocation,
                                const Vector &bignormal,
@@ -167,6 +148,7 @@ void Nebula::reactToCollision( Unit *smaller,
         SetNebula( this );
     smaller->SetNebula( this );
 }
+
 void Nebula::UpdatePhysics2( const Transformation &trans,
                              const Transformation &old_physical_state,
                              const Vector &accel,

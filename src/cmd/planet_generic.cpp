@@ -87,46 +87,17 @@ void PlanetaryOrbit::Execute()
     if (done)
         return;
     QVector origin( targetlocation );
-    unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
     static float orbit_centroid_averaging = XMLSupport::parse_float( vs_config->getVariable( "physics", "orbit_averaging", "16" ) );
     float   averaging = (float) orbit_centroid_averaging/(float) (parent->predicted_priority+1.0f);
     if (averaging < 1.0f) averaging = 1.0f;
     if (subtype&SSELF) {
         Unit *unit = group.GetUnit();
         if (unit) {
-            float my_multiplier = parent->sim_atom_multiplier;
-            /*
-             *  if (mining&&0) {
-             *  printf ("[%.2f %.2f %.2f]->%.2f\n[%.2f %.2f %.2f->]\n",
-             *  orbiting_average.i,
-             *  orbiting_average.j,
-             *  orbiting_average.k,
-             *  averaging,
-             *  unit->curr_physical_state.position.i,
-             *  unit->curr_physical_state.position.j,
-             *  unit->curr_physical_state.position.k
-             *  );
-             *  }
-             */
-            double blend_factor = calc_blend_factor( saved_interpolation_blend_factor,
-                                                     unit->sim_atom_multiplier,
-                                                     unit->cur_sim_queue_slot,
-                                                     cur_sim_frame );
             unsigned int o = current_orbit_frame++;
             current_orbit_frame %= NUM_ORBIT_AVERAGE;
             if (current_orbit_frame == 0)
                 orbit_list_filled = true;
-            QVector desired = unit->prev_physical_state.position;             //+ unit->Velocity*SIMULATION_ATOM;
-            //*(1-blend_factor)+blend_factor*unit->curr_physical_state.position;
-            /*
-             *  if ((orbiting_average[o].i==0&&
-             *  orbiting_average[o].j==0&&
-             *  orbiting_average[o].k==0)) {
-             *  orbiting_average[o]= desired;
-             *  }else {
-             *  orbiting_average[o]=orbiting_average*((averaging-1.0f)/averaging)+desired*(1.0f/averaging);
-             *  }
-             */
+            QVector desired = unit->prev_physical_state.position;
             if (orbiting_average[o].i == 0 && orbiting_average[o].j == 0 && orbiting_average[o].k == 0) {
                 //clear all of them.
                 for (o = 0; o < NUM_ORBIT_AVERAGE; o++)
@@ -219,21 +190,10 @@ void PlanetaryOrbit::Execute()
               );
     }
     parent->Velocity = parent->cumulative_velocity = ( ( ( destination-parent->LocalPosition() )*(1./SIMULATION_ATOM) ).Cast() );
-    /*
-     *  if (parent->rSize()>1440&&parent->rSize()<1450) {//mining base
-     *  static float lastvelocity=parent->Velocity.Magnitude();
-     *  float thisvelocity=parent->Velocity.Magnitude();
-     *  if (fabs(thisvelocity-lastvelocity)>100) {
-     *   printf ("speed change from %f to %f\n",thisvelocity,lastvelocity)
-     *  }
-     *  }
-     */
-    //const int Unreasonable_value=(int)(100000/SIMULATION_ATOM);
     static float Unreasonable_value =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "planet_ejection_stophack", "2000" ) );
     float v2 = parent->Velocity.Dot( parent->Velocity );
-    //double uglinesscheck=velocity*velocity*(x_size+y_size)*(x_size+y_size)*4*PI*PI;
-    if (v2 > Unreasonable_value*Unreasonable_value /*||v2>uglinesscheck*/) {
+    if (v2 > Unreasonable_value*Unreasonable_value ) {
         parent->Velocity.Set( 0, 0, 0 );
         parent->cumulative_velocity.Set( 0, 0, 0 );
         parent->SetCurPosition( origin-focus+sum_orbiting_average+x_offset+y_offset );

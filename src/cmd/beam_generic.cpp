@@ -81,10 +81,6 @@ void Beam::Init( const Transformation &trans, const weapon_info &cln, void *own,
     numframes      = 0;
     static int  radslices  = XMLSupport::parse_int( vs_config->getVariable( "graphics", "tractor.scoop_rad_slices", "10" ) )|1;    //Must be odd
     static int  longslices = XMLSupport::parse_int( vs_config->getVariable( "graphics", "tractor.scoop_long_slices", "10" ) );
-    static bool scoop = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "tractor.scoop", "true" ) );
-    bool tractor = (damagerate < 0 && phasedamage > 0);
-    bool repulsor     = (damagerate > 0 && phasedamage < 0);
-    bool doscoop = ( scoop && (tractor || repulsor) );
     lastlength = 0;
     curlength  = SIMULATION_ATOM*speed;
     lastthick  = 0;
@@ -156,9 +152,6 @@ void Beam::RecalculateVertices( const Matrix &trans )
                                *(1-interpolation_blend_factor) : thickness;
     float ethick             = ( thick/( (thickness > 0) ? thickness : 1.0f ) )*(doscoop ? curlength*scooptanangle : 0);
     const float invfadelen   = thick*fadeinlength;
-    const float invfadethick = (doscoop ? invfadelen/len*ethick : 0)+thick;
-    const float fadethick    = (doscoop ? fadelen/len*ethick : 0)+thick;
-    const float endthick     = (doscoop ? ethick+thick : thick);
     const float invfadealpha = mymax( 0.0f, mymin( 1.0f, 1.0f-mysqr( invfadelen/len ) ) );
     const float fadealpha    = mymax( 0.0f, mymin( 1.0f, 1.0f-mysqr( fadelen/len ) ) );
     const float endalpha     = 0.0f;

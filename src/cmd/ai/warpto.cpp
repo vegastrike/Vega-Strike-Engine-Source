@@ -2,11 +2,13 @@
 #include "cmd/unit_util.h"
 #include "universe_util.h"
 #include "config_xml.h"
+
 float max_allowable_travel_time()
 {
     static float mat = XMLSupport::parse_float( vs_config->getVariable( "AI", "max_allowable_travel_time", "15" ) );
     return mat;
 }
+
 bool DistanceWarrantsWarpTo( Unit *parent, float dist, bool following )
 {
     //first let us decide whether the target is far enough to warrant using warp
@@ -35,6 +37,7 @@ bool DistanceWarrantsWarpTo( Unit *parent, float dist, bool following )
     }
     return false;
 }
+
 bool DistanceWarrantsTravelTo( Unit *parent, float dist, bool following )
 {
     //first let us decide whether the target is far enough to warrant using warp
@@ -46,16 +49,12 @@ bool DistanceWarrantsTravelTo( Unit *parent, float dist, bool following )
         return true;
     return false;
 }
+
 bool TargetWorthPursuing( Unit *parent, Unit *target )
 {
-    Unit *un;
-    /*
-     *  for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();(un=*i)!=NULL;++i) {
-     *  /// DO SOMETHING
-     *  }
-     */
     return true;
 }
+
 static void ActuallyWarpTo( Unit *parent, const QVector &tarpos, Vector tarvel, Unit *MatchSpeed = NULL )
 {
     Vector vel = parent->GetVelocity();
@@ -86,6 +85,7 @@ static void ActuallyWarpTo( Unit *parent, const QVector &tarpos, Vector tarvel, 
     else
         parent->computer.velocity_ref.SetUnit( MatchSpeed );
 }
+
 void WarpToP( Unit *parent, Unit *target, bool following )
 {
     float dist = UnitUtil::getSignificantDistance( parent, target );
@@ -104,6 +104,7 @@ void WarpToP( Unit *parent, Unit *target, bool following )
         parent->graphicOptions.InWarp = 0;
     }
 }
+
 void WarpToP( Unit *parent, const QVector &target, float radius, bool following )
 {
     float dist = (parent->Position()-target).Magnitude()-radius-parent->rSize();
