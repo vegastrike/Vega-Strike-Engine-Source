@@ -56,7 +56,7 @@ void GFXUploadLightState( int max_light_location, int active_light_array, int ap
                 // NOTE: assuming lightSize > 0, the following condition
                 //  assures a nonzero distance to light, which would produce
                 //  NaNs in the following math.
-                if (lightDistance >= lightSize) {
+                if (lightDistance > lightSize) {
                     // Light cos angle is:
                     //  Vector(1, 0, 0) . Vector(lightDistance, lightSize, 0).Normalize()
                     // Which happens to resolve to:

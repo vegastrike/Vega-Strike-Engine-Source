@@ -175,6 +175,8 @@ bool Unit::InsideCollideTree( Unit *smaller,
                                                  -bigger->cumulative_transformation_matrix.p ) );
     bigtransform.SetO2TTranslation( csVector3( 0, 0, 0 ) );
     //we're only gonna lerp the positions for speed here... gahh!
+    
+    // Check for shield collisions here prior to checking for mesh on mesh or ray collisions below. 
     csOPCODECollider *tmpCol = smaller->colTrees->colTree( smaller, bigger->GetWarpVelocity() );
     if ( tmpCol
         && ( tmpCol->Collide( *bigger->colTrees->colTree( bigger,
