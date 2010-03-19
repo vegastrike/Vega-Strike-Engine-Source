@@ -43,12 +43,6 @@ GFXVertexList *next;
 extern GFXBOOL bTex0;
 extern GFXBOOL bTex1;
 
-static bool iseq( float a, float b )
-{
-    const float eps = .001;
-    return fabs( a-b ) < eps;
-}
-
 struct VertexCompare
 {
     bool operator()( const GFXVertex *a, const GFXVertex *b ) const
@@ -83,7 +77,6 @@ void GFXOptimizeList( GFXVertex *old, int numV, GFXVertex **nw, int *nnewV, unsi
     *nnewV = 0;
     int i;
     for (i = 0; i < numV; i++) {
-        int j;
         std::map< GFXVertex*, int, VertexCompare >::const_iterator it = vtxcache.find( old+i );
         if ( it != vtxcache.end() ) {
             (*ind)[i] = it->second;

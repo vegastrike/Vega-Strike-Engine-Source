@@ -39,7 +39,6 @@ static unsigned int& getMouseButtonMask()
 static void biModifyMouseSensitivity( int &x, int &y, bool invert )
 {
     int xrez = g_game.x_resolution;
-    int yrez = g_game.y_resolution;
     static int   whentodouble = XMLSupport::parse_int( vs_config->getVariable( "joystick", "double_mouse_position", "1280" ) );
     static float factor = XMLSupport::parse_float( vs_config->getVariable( "joystick", "double_mouse_factor", "2" ) );
     if (xrez >= whentodouble) {
@@ -62,8 +61,10 @@ static void biModifyMouseSensitivity( int &x, int &y, bool invert )
         if (y < 0) y = 0;
     }
 }
+
 static bool createdbase  = false;
 static int  createdmusic = -1;
+
 void ModifyMouseSensitivity( int &x, int &y )
 {
     biModifyMouseSensitivity( x, y, false );
@@ -504,14 +505,6 @@ void BaseInterface::Room::BasePython::Relink( const std::string &python )
 
 void BaseInterface::Room::BaseTalk::Draw( BaseInterface *base )
 {
-/*	GFXColor4f(1,1,1,1);
- *       GFXBegin(GFXLINESTRIP);
- *               GFXVertex3f(caller->x,caller->y,0);
- *               GFXVertex3f(caller->x+caller->wid,caller->y,0);
- *               GFXVertex3f(caller->x+caller->wid,caller->y+caller->hei,0);
- *               GFXVertex3f(caller->x,caller->y+caller->hei,0);
- *               GFXVertex3f(caller->x,caller->y,0);
- *       GFXEnd();*/
     //FIXME: should be called from draw()
     if (hastalked) return;
     curtime += GetElapsedTime()/getTimeCompression();
@@ -520,7 +513,6 @@ void BaseInterface::Room::BaseTalk::Draw( BaseInterface *base )
                       this ) == active_talks.end() )
         || ( curchar >= message.size() && curtime > ( ( delay*message.size() )+2 ) ) ) {
         curtime = 0;
-        BaseObj *self = this;
         std::vector< BaseObj* >::iterator ind = std::find( base->rooms[base->curroom]->objs.begin(),
                                                            base->rooms[base->curroom]->objs.end(),
                                                            this );
@@ -557,7 +549,6 @@ int BaseInterface::Room::MouseOver( BaseInterface *base, float x, float y )
 }
 
 BaseInterface*BaseInterface::CurrentBase = NULL;
-static BaseInterface *lastBaseDoNotDereference = NULL;
 
 bool RefreshGUI( void )
 {
@@ -746,11 +737,8 @@ void BaseInterface::MouseOver( int xbeforecalc, int ybeforecalc )
     if (link)
         link->MouseMove( this, x, y, getMouseButtonMask() );
     lastmouseindex = i;
-
     static float overcolor[4]     = {1, .666666667, 0, 1};
-    static bool  donecolor1       = (vs_config->getColor( "default", "base_mouse_over", overcolor, true ), true);
     static float inactivecolor[4] = {0, 1, 0, 1};
-    static bool  donecolor2       = (vs_config->getColor( "default", "base_mouse_passive", inactivecolor, true ), true);
     if (link)
         curtext.SetText( link->text );
     else
@@ -767,19 +755,18 @@ void BaseInterface::MouseOver( int xbeforecalc, int ybeforecalc )
     static float defined_distance =
         fabs( XMLSupport::parse_float( vs_config->getVariable( "graphics", "base_locationmarker_distance", "0.5" ) ) );
     if (!draw_always) {
-        float cx, cy, wid, hei;
+        float cx, cy;
         float dist_cur2link;
         for (i = 0; i < static_cast<int>(rooms[curroom]->links.size()); i++) {
-            cx = ( rooms[curroom]->links[i]->x+(rooms[curroom]->links[i]->wid/2) );               //get the center of the location
-            cy = ( rooms[curroom]->links[i]->y+(rooms[curroom]->links[i]->hei/2) );               //get the center of the location
+            cx = ( rooms[curroom]->links[i]->x+(rooms[curroom]->links[i]->wid/2) ); //get the x center of the location
+            cy = ( rooms[curroom]->links[i]->y+(rooms[curroom]->links[i]->hei/2) ); //get the y center of the location
             dist_cur2link = sqrt( pow( (cx-x), 2 )+pow( (cy-y), 2 ) );
             if (dist_cur2link < defined_distance)
                 rooms[curroom]->links[i]->alpha = ( 1-(dist_cur2link/defined_distance) );
             else
                 rooms[curroom]->links[i]->alpha = 1;
-            //if
-        }         //for i
-    }     //if !draw_always
+        }
+    }
 }
 
 void BaseInterface::Click( int xint, int yint, int button, int state )
@@ -907,8 +894,10 @@ BaseInterface::~BaseInterface()
     for (size_t i = 0; i < rooms.size(); i++)
         delete rooms[i];
 }
+
 void base_main_loop();
 int shiftup( int );
+
 static void base_keyboard_cb( unsigned int ch, unsigned int mod, bool release, int x, int y )
 {
     //Set modifiers
@@ -931,6 +920,7 @@ static void base_keyboard_cb( unsigned int ch, unsigned int mod, bool release, i
         base_keyboard_queue.push_back( shiftedch );
     }
 }
+
 void BaseInterface::InitCallbacks()
 {
     winsys_set_keyboard_func( base_keyboard_cb );
@@ -938,7 +928,7 @@ void BaseInterface::InitCallbacks()
     winsys_set_motion_func( ActiveMouseOverWin );
     winsys_set_passive_motion_func( PassiveMouseOverWin );
     CurrentBase = this;
-//UpgradeCompInterface(caller,baseun);
+    //UpgradeCompInterface(caller,baseun);
     CallComp    = false;
     static bool simulate_while_at_base =
         XMLSupport::parse_bool( vs_config->getVariable( "physics", "simulate_while_docked", "false" ) );
@@ -947,9 +937,8 @@ void BaseInterface::InitCallbacks()
 }
 
 BaseInterface::Room::Talk::Talk( const std::string &ind, const std::string &pythonfile ) :
-    BaseInterface::Room::Link( ind, pythonfile )
+    BaseInterface::Room::Link( ind, pythonfile ), index(-1)
 {
-    index = -1;
 #ifndef BASE_MAKER
     gameMessage last;
     int    i = 0;
@@ -973,6 +962,7 @@ BaseInterface::Room::Talk::Talk( const std::string &ind, const std::string &pyth
     }
 #endif
 }
+
 double compute_light_dot( Unit *base, Unit *un )
 {
     StarSystem *ss    = base->getStarSystem();
@@ -1020,6 +1010,7 @@ const char * compute_time_of_day( Unit *base, Unit *un )
 }
 
 extern void ExecuteDirector();
+
 BaseInterface::BaseInterface( const char *basefile, Unit *base, Unit *un ) :
     curtext( getConfigColor( "Base_Text_Color_Foreground",
                             GFXColor( 0, 1, 0, 1 ) ), getConfigColor( "Base_Text_Color_Background", GFXColor( 0, 0, 0, 1 ) ) )
@@ -1086,6 +1077,7 @@ void InitCallbacks( void )
     if (BaseInterface::CurrentBase)
         BaseInterface::CurrentBase->InitCallbacks();
 }
+
 void TerminateCurrentBase( void )
 {
     if (BaseInterface::CurrentBase) {
@@ -1093,6 +1085,7 @@ void TerminateCurrentBase( void )
         BaseInterface::CurrentBase = NULL;
     }
 }
+
 void CurrentBaseUnitSet( Unit *un )
 {
     if (BaseInterface::CurrentBase)
@@ -1118,6 +1111,7 @@ void BaseInterface::Room::Comp::Click( BaseInterface *base, float x, float y, in
         }
     }
 }
+
 void BaseInterface::Terminate()
 {
     Unit *un  = caller.GetUnit();
@@ -1131,6 +1125,7 @@ void BaseInterface::Terminate()
     restore_main_loop();
     delete this;
 }
+
 extern void SwitchUnits( Unit *ol, Unit *nw );
 extern void SwitchUnits2( Unit *nw );
 extern void abletodock( int dock );
@@ -1140,7 +1135,6 @@ extern vector< int >turretcontrol;
 
 void BaseInterface::Room::Launch::Click( BaseInterface *base, float x, float y, int button, int state )
 {
-    static int numtimes = 0;
     if (state == WS_MOUSE_UP) {
         Link::Click( base, x, y, button, state );
         static bool auto_undock_var = XMLSupport::parse_bool( vs_config->getVariable( "physics", "AutomaticUnDock", "true" ) );
@@ -1170,18 +1164,11 @@ void BaseInterface::Room::Launch::Click( BaseInterface *base, float x, float y, 
             if (playa->name == "return_to_cockpit")
                 if (playa->faction == playa->faction)
                     playa->owner = bas;
-            /*          if (playa->name=="return_to_cockpit")
-             *           {
-             *           // triggers changing to parent unit.
-             *           while (turretcontrol.size()<=_Universe->CurrentCockpit())
-             *           turretcontrol.push_back(0);
-             *           turretcontrol[_Universe->CurrentCockpit()]=1;
-             *           }
-             */
         }
         base->Terminate();
     }
 }
+
 inline float aynrand( float min, float max )
 {
     return ( (float) ( rand() )/RAND_MAX )*(max-min)+min;
@@ -1193,12 +1180,12 @@ inline QVector randyVector( float min, float max )
                    aynrand( min, max ),
                    aynrand( min, max ) );
 }
+
 void BaseInterface::Room::Eject::Click( BaseInterface *base, float x, float y, int button, int state )
 {
-    static int numtimes = 0;
     if (state == WS_MOUSE_UP) {
         Link::Click( base, x, y, button, state );
-        static bool auto_undock = XMLSupport::parse_bool( vs_config->getVariable( "physics", "AutomaticUnDock", "true" ) );
+        XMLSupport::parse_bool( vs_config->getVariable( "physics", "AutomaticUnDock", "true" ) );
         Unit *bas   = base->baseun.GetUnit();
         Unit *playa = base->caller.GetUnit();
         if (playa && bas) {
@@ -1216,7 +1203,6 @@ void BaseInterface::Room::Eject::Click( BaseInterface *base, float x, float y, i
                 playa->SetOwner( bas );
                 static float velmul = XMLSupport::parse_float( vs_config->getVariable( "physics", "eject_cargo_speed", "1" ) );
                 playa->SetVelocity( bas->Velocity*velmul+randyVector( -.25, .25 ).Cast() );
-                //SwitchUnit(bas,playa);
             }
             playa->UnDock( bas );
             CommunicationMessage c( bas, playa, NULL, 0 );

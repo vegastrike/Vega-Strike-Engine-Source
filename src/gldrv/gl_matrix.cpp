@@ -154,29 +154,6 @@ static void RotateFloatMatrix( float dest[], const float m1[], const Matrix &m2 
     dest[15] = m1[15];
 }
 
-static void InvRotateFloatMatrix( float dest[], const float m1[], const Matrix &m2 )
-{
-    dest[0]  = m1[0]*m2.r[0]+m1[4]*m2.r[3]+m1[8]*m2.r[6];
-    dest[1]  = m1[1]*m2.r[0]+m1[5]*m2.r[3]+m1[9]*m2.r[6];
-    dest[2]  = m1[2]*m2.r[0]+m1[6]*m2.r[3]+m1[10]*m2.r[6];
-    dest[3]  = m1[3]*m2.r[0]+m1[7]*m2.r[3]+m1[11]*m2.r[6];
-
-    dest[4]  = m1[0]*m2.r[1]+m1[4]*m2.r[4]+m1[8]*m2.r[7];
-    dest[5]  = m1[1]*m2.r[1]+m1[5]*m2.r[4]+m1[9]*m2.r[7];
-    dest[6]  = m1[2]*m2.r[1]+m1[6]*m2.r[4]+m1[10]*m2.r[7];
-    dest[7]  = m1[3]*m2.r[1]+m1[7]*m2.r[4]+m1[11]*m2.r[7];
-
-    dest[8]  = m1[0]*m2.r[2]+m1[4]*m2.r[5]+m1[8]*m2.r[8];
-    dest[9]  = m1[1]*m2.r[2]+m1[5]*m2.r[5]+m1[9]*m2.r[8];
-    dest[10] = m1[2]*m2.r[2]+m1[6]*m2.r[5]+m1[10]*m2.r[8];
-    dest[11] = m1[3]*m2.r[2]+m1[7]*m2.r[5]+m1[11]*m2.r[8];
-
-    dest[12] = m1[12];
-    dest[13] = m1[13];
-    dest[14] = m1[14];
-    dest[15] = m1[15];
-}
-
 void ConstructAndLoadProjection()
 {
     float t[16];

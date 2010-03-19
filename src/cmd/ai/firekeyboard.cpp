@@ -46,235 +46,22 @@ struct FIREKEYBOARDTYPE
 {
     FIREKEYBOARDTYPE()
     {
-        toggleautotracking = togglewarpdrive = toggleglow = toggleanimation = lockkey = ECMkey = commKeys[0] = commKeys[1] =
-                                                                                                                   commKeys[2]
-                                                                                                                       =
-                                                                                                                           commKeys
-                                                                                                                           [3]
-                                                                                                                               =
-                                                                                                                                   commKeys
-                                                                                                                                   [
-                                                                                                                                       4
-                                                                                                                                   ]
-                                                                                                                                       =
-                                                                                                                                           commKeys
-                                                                                                                                           [
-                                                                                                                                               5
-                                                                                                                                           ]
-                                                                                                                                               =
-                                                                                                                                                   commKeys
-                                                                                                                                                   [
-                                                                                                                                                       6
-                                                                                                                                                   ]
-                                                                                                                                                       =
-                                                                                                                                                           commKeys
-                                                                                                                                                           [
-                                                                                                                                                               7
-                                                                                                                                                           ]
-                                                                                                                                                               =
-                                                                                                                                                                   commKeys
-                                                                                                                                                                   [
-                                                                                                                                                                       8
-                                                                                                                                                                   ]
-                                                                                                                                                                       =
-                                                                                                                                                                           commKeys
-                                                                                                                                                                           [
-                                                                                                                                                                               9
-                                                                                                                                                                           ]
-                                                                                                                                                                               =
-                                                                                                                                                                                   turretaikey
-                                                                                                                                                                                       =
-                                                                                                                                                                                           turretoffkey
-                                                                                                                                                                                               =
-                                                                                                                                                                                                   turretfaw
-                                                                                                                                                                                                       =
-                                                                                                                                                                                                           saveTargetKeys
-                                                                                                                                                                                                           [
-                                                                                                                                                                                                               0
-                                                                                                                                                                                                           ]
-                                                                                                                                                                                                               =
-                                                                                                                                                                                                                   saveTargetKeys
-                                                                                                                                                                                                                   [
-                                                                                                                                                                                                                       1
-                                                                                                                                                                                                                   ]
-                                                                                                                                                                                                                       =
-                                                                                                                                                                                                                           saveTargetKeys
-                                                                                                                                                                                                                           [
-                                                                                                                                                                                                                               2
-                                                                                                                                                                                                                           ]
-                                                                                                                                                                                                                               =
-                                                                                                                                                                                                                                   saveTargetKeys
-                                                                                                                                                                                                                                   [
-                                                                                                                                                                                                                                       3
-                                                                                                                                                                                                                                   ]
-                                                                                                                                                                                                                                       =
-                                                                                                                                                                                                                                           saveTargetKeys
-                                                                                                                                                                                                                                           [
-                                                                                                                                                                                                                                               4
-                                                                                                                                                                                                                                           ]
-                                                                                                                                                                                                                                               =
-                                                                                                                                                                                                                                                   saveTargetKeys
-                                                                                                                                                                                                                                                   [
-                                                                                                                                                                                                                                                       5
-                                                                                                                                                                                                                                                   ]
-                                                                                                                                                                                                                                                       =
-                                                                                                                                                                                                                                                           saveTargetKeys
-                                                                                                                                                                                                                                                           [
-                                                                                                                                                                                                                                                               6
-                                                                                                                                                                                                                                                           ]
-                                                                                                                                                                                                                                                               =
-                                                                                                                                                                                                                                                                   saveTargetKeys
-                                                                                                                                                                                                                                                                   [
-                                                                                                                                                                                                                                                                       7
-                                                                                                                                                                                                                                                                   ]
-                                                                                                                                                                                                                                                                       =
-                                                                                                                                                                                                                                                                           saveTargetKeys
-                                                                                                                                                                                                                                                                           [
-                                                                                                                                                                                                                                                                               8
-                                                                                                                                                                                                                                                                           ]
-                                                                                                                                                                                                                                                                               =
-                                                                                                                                                                                                                                                                                   saveTargetKeys
-                                                                                                                                                                                                                                                                                   [
-                                                                                                                                                                                                                                                                                       9
-                                                                                                                                                                                                                                                                                   ]
-                                                                                                                                                                                                                                                                                       =
-                                                                                                                                                                                                                                                                                           turretaikey
-                                                                                                                                                                                                                                                                                               =
-                                                                                                                                                                                                                                                                                                   restoreTargetKeys
-                                                                                                                                                                                                                                                                                                   [
-                                                                                                                                                                                                                                                                                                       0
-                                                                                                                                                                                                                                                                                                   ]
-                                                                                                                                                                                                                                                                                                       =
-                                                                                                                                                                                                                                                                                                           restoreTargetKeys
-                                                                                                                                                                                                                                                                                                           [
-                                                                                                                                                                                                                                                                                                               1
-                                                                                                                                                                                                                                                                                                           ]
-                                                                                                                                                                                                                                                                                                               =
-                                                                                                                                                                                                                                                                                                                   restoreTargetKeys
-                                                                                                                                                                                                                                                                                                                   [
-                                                                                                                                                                                                                                                                                                                       2
-                                                                                                                                                                                                                                                                                                                   ]
-                                                                                                                                                                                                                                                                                                                       =
-                                                                                                                                                                                                                                                                                                                           restoreTargetKeys
-                                                                                                                                                                                                                                                                                                                           [
-                                                                                                                                                                                                                                                                                                                               3
-                                                                                                                                                                                                                                                                                                                           ]
-                                                                                                                                                                                                                                                                                                                               =
-                                                                                                                                                                                                                                                                                                                                   restoreTargetKeys
-                                                                                                                                                                                                                                                                                                                                   [
-                                                                                                                                                                                                                                                                                                                                       4
-                                                                                                                                                                                                                                                                                                                                   ]
-                                                                                                                                                                                                                                                                                                                                       =
-                                                                                                                                                                                                                                                                                                                                           restoreTargetKeys
-                                                                                                                                                                                                                                                                                                                                           [
-                                                                                                                                                                                                                                                                                                                                               5
-                                                                                                                                                                                                                                                                                                                                           ]
-                                                                                                                                                                                                                                                                                                                                               =
-                                                                                                                                                                                                                                                                                                                                                   restoreTargetKeys
-                                                                                                                                                                                                                                                                                                                                                   [
-                                                                                                                                                                                                                                                                                                                                                       6
-                                                                                                                                                                                                                                                                                                                                                   ]
-                                                                                                                                                                                                                                                                                                                                                       =
-                                                                                                                                                                                                                                                                                                                                                           restoreTargetKeys
-                                                                                                                                                                                                                                                                                                                                                           [
-                                                                                                                                                                                                                                                                                                                                                               7
-                                                                                                                                                                                                                                                                                                                                                           ]
-                                                                                                                                                                                                                                                                                                                                                               =
-                                                                                                                                                                                                                                                                                                                                                                   restoreTargetKeys
-                                                                                                                                                                                                                                                                                                                                                                   [
-                                                                                                                                                                                                                                                                                                                                                                       8
-                                                                                                                                                                                                                                                                                                                                                                   ]
-                                                                                                                                                                                                                                                                                                                                                                       =
-                                                                                                                                                                                                                                                                                                                                                                           restoreTargetKeys
-                                                                                                                                                                                                                                                                                                                                                                           [
-                                                                                                                                                                                                                                                                                                                                                                               9
-                                                                                                                                                                                                                                                                                                                                                                           ]
-                                                                                                                                                                                                                                                                                                                                                                               =
-                                                                                                                                                                                                                                                                                                                                                                                   turretaikey
-                                                                                                                                                                                                                                                                                                                                                                                       =
-                                                                                                                                                                                                                                                                                                                                                                                           UP;
-
-        missiontargetkey = rmissiontargetkey = ejectdock = eject = ejectcargo = ejectnonmissioncargo = firekey = missilekey =
-                                                                                                                     jfirekey =
-                                                                                                                         jtargetkey
-                                                                                                                              =
-                                                                                                                                 jmissilekey
-                                                                                                                                     =
-                                                                                                                                         weapk
-                                                                                                                                             =
-                                                                                                                                                 misk
-                                                                                                                                                     =
-                                                                                                                                                         rweapk
-                                                                                                                                                             =
-                                                                                                                                                                 rmisk
-                                                                                                                                                                     =
-                                                                                                                                                                         cloakkey
-                                                                                                                                                                             =
-                                                                                                                                                                                 neartargetkey
-                                                                                                                                                                                     =
-                                                                                                                                                                                         targetskey
-                                                                                                                                                                                             =
-                                                                                                                                                                                                 targetukey
-                                                                                                                                                                                                     =
-                                                                                                                                                                                                         threattargetkey
-                                                                                                                                                                                                             =
-                                                                                                                                                                                                                 picktargetkey
-                                                                                                                                                                                                                     =
-                                                                                                                                                                                                                         subtargetkey
-                                                                                                                                                                                                                             =
-                                                                                                                                                                                                                                 targetkey
-                                                                                                                                                                                                                                     =
-                                                                                                                                                                                                                                         rneartargetkey
-                                                                                                                                                                                                                                             =
-                                                                                                                                                                                                                                                 rtargetskey
-                                                                                                                                                                                                                                                     =
-                                                                                                                                                                                                                                                         rtargetukey
-                                                                                                                                                                                                                                                             =
-                                                                                                                                                                                                                                                                 rthreattargetkey
-                                                                                                                                                                                                                                                                     =
-                                                                                                                                                                                                                                                                         rpicktargetkey
-                                                                                                                                                                                                                                                                             =
-                                                                                                                                                                                                                                                                                 rtargetkey
-                                                                                                                                                                                                                                                                                     =
-                                                                                                                                                                                                                                                                                         nearturrettargetkey
-                                                                                                                                                                                                                                                                                             =
-                                                                                                                                                                                                                                                                                                 threatturrettargetkey
-                                                                                                                                                                                                                                                                                                     =
-                                                                                                                                                                                                                                                                                                         pickturrettargetkey
-                                                                                                                                                                                                                                                                                                             =
-                                                                                                                                                                                                                                                                                                                 turrettargetkey
-                                                                                                                                                                                                                                                                                                                     =
-                                                                                                                                                                                                                                                                                                                         enslave
-                                                                                                                                                                                                                                                                                                                             =
-                                                                                                                                                                                                                                                                                                                                 freeslave
-                                                                                                                                                                                                                                                                                                                                     =
-                                                                                                                                                                                                                                                                                                                                         incomingmissiletargetkey
-                                                                                                                                                                                                                                                                                                                                             =
-                                                                                                                                                                                                                                                                                                                                                 rincomingmissiletargetkey
-                                                                                                                                                                                                                                                                                                                                                     =
-                                                                                                                                                                                                                                                                                                                                                         nearesthostilekey
-                                                                                                                                                                                                                                                                                                                                                             =
-                                                                                                                                                                                                                                                                                                                                                                 nearestdangeroushostilekey
-                                                                                                                                                                                                                                                                                                                                                                     =
-                                                                                                                                                                                                                                                                                                                                                                         missiletargetkey
-                                                                                                                                                                                                                                                                                                                                                                             =
-                                                                                                                                                                                                                                                                                                                                                                                 rmissiletargetkey
-                                                                                                                                                                                                                                                                                                                                                                                     =
-                                                                                                                                                                                                                                                                                                                                                                                         nearestfriendlykey
-                                                                                                                                                                                                                                                                                                                                                                                             =
-                                                                                                                                                                                                                                                                                                                                                                                                 nearestbasekey
-                                                                                                                                                                                                                                                                                                                                                                                                     =
-                                                                                                                                                                                                                                                                                                                                                                                                         nearestplanetkey
-                                                                                                                                                                                                                                                                                                                                                                                                             =
-                                                                                                                                                                                                                                                                                                                                                                                                                 nearestjumpkey
-                                                                                                                                                                                                                                                                                                                                                                                                                     =
-                                                                                                                                                                                                                                                                                                                                                                                                                         UP;
-
-            shieldpowerstate = 1;
+toggleautotracking = togglewarpdrive = toggleglow = toggleanimation = lockkey = ECMkey = commKeys[0] = commKeys[1] = commKeys[2] = UP;
+commKeys[3] = commKeys[4] = commKeys[5] = commKeys[6] = commKeys[7] = commKeys[8] = commKeys[9] = turretaikey = UP;
+turretoffkey = turretfaw = saveTargetKeys[0] = saveTargetKeys[1] = saveTargetKeys[2] = saveTargetKeys[3] = saveTargetKeys[4] = UP;
+saveTargetKeys[5] = saveTargetKeys[6] = saveTargetKeys[7] = saveTargetKeys[8] = saveTargetKeys[9] = turretaikey = restoreTargetKeys[0] = UP;
+restoreTargetKeys[1] = restoreTargetKeys[2] =restoreTargetKeys[3] = restoreTargetKeys[4] = restoreTargetKeys[5] = restoreTargetKeys[6] = UP;
+restoreTargetKeys[7]= restoreTargetKeys[8] = restoreTargetKeys[9] = turretaikey = missiontargetkey = rmissiontargetkey =  UP;
+ejectdock = eject = ejectcargo = ejectnonmissioncargo = firekey = missilekey = jfirekey = jtargetkey = jmissilekey = weapk = misk = UP;
+rweapk = rmisk = cloakkey = neartargetkey = targetskey = targetukey = threattargetkey = picktargetkey = subtargetkey = targetkey = UP;
+rneartargetkey = rtargetskey = rtargetukey = rthreattargetkey = rpicktargetkey = rtargetkey = nearturrettargetkey = threatturrettargetkey = UP;
+pickturrettargetkey = turrettargetkey = enslave = freeslave = incomingmissiletargetkey = rincomingmissiletargetkey = nearesthostilekey = UP;
+nearestdangeroushostilekey = missiletargetkey = rmissiletargetkey = nearestfriendlykey = nearestbasekey = nearestplanetkey = nearestjumpkey = UP;
+        shieldpowerstate = 1;
 #ifdef CAR_SIM
-            blinkleftkey     = blinkrightkey = headlightkey = sirenkey = UP;
+        blinkleftkey     = blinkrightkey = headlightkey = sirenkey = UP;
 #endif
-            doc = und = req = 0;
+        doc = und = req = 0;
     }
     KBSTATE firekey;
     float   shieldpowerstate;
@@ -658,10 +445,8 @@ void FireKeyboard::UnDockKey( const KBData&, KBSTATE k )
 void FireKeyboard::EjectKey( const KBData&, KBSTATE k )
 {
     if (k == PRESS) {
-        LeadMe( "", "I am ejecting! Record the current location of my ship.", false );         //used to clear group target
-
+        LeadMe( "", "I am ejecting! Record the current location of my ship.", false ); //used to clear group target
         LeadMe( "e", "Then get over here and pick me up!", false );
-
         g().eject = k;
     }
 }
@@ -756,7 +541,6 @@ void FireKeyboard::FireKey( const KBData&, KBSTATE k )
         return;
     if (k == UP && g().firekey == RELEASE) {} else {
         g().firekey = k;
-        //printf("firekey %d %d\n",k,key);
     }
 }
 
@@ -990,6 +774,7 @@ void FireKeyboard::HeadlightKey( const KBData&, KBSTATE k )
 
 extern unsigned int DoSpeech( Unit *un, Unit *player_un, const FSM::Node &convNode );
 extern Unit * GetThreat( Unit *par, Unit *leader );
+
 void HelpOut( bool crit, std::string conv )
 {
     Unit *un = _Universe->AccessCockpit()->GetParent();
@@ -1027,7 +812,7 @@ void FireKeyboard::JoinFg( const KBData&, KBSTATE k )
                     if (fg) {
                         if ( fg != un->getFlightgroup() ) {
                             if ( un->getFlightgroup() )
-                                un->getFlightgroup()->Decrement( un );
+    un->getFlightgroup()->Decrement( un );
                             fg->nr_ships_left++;
                             fg->nr_ships++;
                             un->SetFg( fg, fg->nr_ships_left-1 );
@@ -1156,184 +941,6 @@ void FireKeyboard::MissileKey( const KBData&, KBSTATE k )
         g().missilekey = k;
 }
 
-#if 0
-void FireKeyboard::ChooseNearTargets( bool turret, bool reverse )
-{
-    UnitCollection::UnitIterator iter = _Universe->activeStarSystem()->getUnitList().createIterator();
-    Unit *un;
-    float range = FLT_MAX;
-    while ( ( un = iter.current() ) ) {
-        Vector t;
-        bool   tmp = parent->InRange( un );
-        t = parent->LocalCoordinates( un );
-        if ( tmp && t.Dot( t ) < range && t.k > 0 && parent->isEnemy( un ) ) {
-            range = t.Dot( t );
-            if (turret)
-                parent->TargetTurret( un );
-            parent->Target( un );
-        }
-        iter.advance();
-    }
-#ifdef ORDERDEBUG
-    VSFileSystem::vs_fprintf( stderr, "i4%x", iter );
-    fflush( stderr );
-#endif
-
-#ifdef ORDERDEBUG
-    VSFileSystem::vs_fprintf( stderr, "i4\n" );
-    fflush( stderr );
-#endif
-}
-void FireKeyboard::ChooseThreatTargets( bool turret, bool reverse )
-{
-    static int index = 0;
-    UnitCollection *drawlist = &_Universe->activeStarSystem()->getUnitList();
-    un_iter    iter  = drawlist->createIterator();
-    Unit *target;
-    std::vector< Unit* >vec;      //not saving across frames
-    Unit *threat     = parent->Threat();
-    if (target)
-        vec.push_back( threat );
-    while ( ( target = iter.current() ) != NULL ) {
-        if (target->Target() == parent && target != threat)
-            vec.push_back( target );
-        iter.advance();
-    }
-    if ( !vec.empty() ) {
-        if (reverse) {
-            index--;
-            if (index < 0) {
-                index = vec.size()-index;
-                if (index < 0)
-                    index = 0;
-            }
-        } else {
-            index++;
-        }
-        target = vec[index%vec.size()];
-        parent->Target( target );
-        if (turret)
-            parent->TargetTurret( target );
-    }
-}
-
-void FireKeyboard::PickTargets( bool Turrets, bool reverse )
-{
-    UnitCollection::UnitIterator uiter = _Universe->activeStarSystem()->getUnitList().createIterator();
-
-    float smallest_angle = PI;
-
-    Unit *other = uiter.current();
-    Unit *found_unit     = NULL;
-    while (other) {
-        if ( other != parent && parent->InRange( other ) ) {
-            Vector  p, q, r;
-            QVector vectothem = QVector( other->Position()-parent->Position() ).Normalize();
-            parent->GetOrientation( p, q, r );
-            double  angle     = acos( vectothem.Dot( r.Cast() ) );
-            if (angle < smallest_angle) {
-                found_unit     = other;
-                smallest_angle = angle;
-            }
-        }
-        uiter.advance();
-        other = uiter.current();
-    }
-    if (Turrets)
-        parent->TargetTurret( found_unit );
-    parent->Target( found_unit );
-}
-void FireKeyboard::ChooseRTargets( bool turret, bool significant )
-{
-    Unit   *targ  = parent->Target();
-    Unit   *oldun = NULL;
-    Unit   *un    = NULL;
-    un_iter i;
-    for (i = _Universe->activeStarSystem()->getUnitList().createIterator();
-         (un = *i) != NULL;
-         ++i) {
-        if (un == targ)
-            break;
-        else if ( un != parent && parent->InRange( un, true, significant ) )
-            oldun = un;
-    }
-    if (oldun == NULL)      //get us the last
-        for (i = _Universe->activeStarSystem()->getUnitList().createIterator();
-             (un = *i) != NULL;
-             ++i)
-            if (un != parent)
-                oldun = un;
-    parent->Target( oldun );
-    if (turret)
-        parent->TargetTurret( un );
-}
-
-void FireKeyboard::ChooseTargets( bool turret, bool significant, bool reverse )
-{
-    parent->LockTarget( false );
-    if (reverse) {
-        ChooseRTargets( turret, significant );
-        return;
-    }
-    UnitCollection::UnitIterator iter = _Universe->activeStarSystem()->getUnitList().createIterator();
-    Unit *un;
-    bool  found = false;
-    bool  find  = false;
-    while ( ( un = iter.current() ) ) {
-        //how to choose a target?? "if looks particularly juicy... :-) tmp.prepend (un);
-        //Vector t;
-        if ( un == parent->Target() ) {
-            iter.advance();
-            found = true;
-            continue;
-        }
-        if ( !parent->InRange( un, true, significant ) ) {
-            iter.advance();
-            continue;
-        }
-        iter.advance();
-        if (found) {
-            find = true;
-            if (turret)
-                parent->TargetTurret( un );
-            parent->Target( un );
-            break;
-        }
-    }
-    //if ((un = iter->current())) {
-
-    //}
-#ifdef ORDERDEBUG
-    VSFileSystem::vs_fprintf( stderr, "i5%x", iter );
-    fflush( stderr );
-#endif
-
-#ifdef ORDERDEBUG
-    VSFileSystem::vs_fprintf( stderr, "i5\n" );
-    fflush( stderr );
-#endif
-    if (!find) {
-        iter = _Universe->activeStarSystem()->getUnitList().createIterator();
-        while ( ( un = iter.current() ) ) {
-            //how to choose a target?? "if looks particularly juicy... :-) tmp.prepend (un);
-            //Vector t;
-            if ( un == parent->Target() ) {
-                iter.advance();
-                continue;
-            }
-            if ( !parent->InRange( un ) ) {
-                iter.advance();
-                continue;
-            }
-            if (turret)
-                parent->TargetTurret( un );
-            parent->Target( un );
-            break;
-        }
-    }
-}
-#endif
-
 static bool isNotTurretOwner( Unit *parent, Unit *un )
 {
     return parent->isSubUnit() == false || un != parent->owner;
@@ -1444,7 +1051,7 @@ bool TargNear( Unit *me, Unit *target )
            && TargAll( me,
                        target ) && target->isUnit() != MISSILEPTR
            && ( can_target_sun || !UnitUtil::isSun( target ) ) && isNotTurretOwner( me,
-                                                                                    target );
+   target );
 }
 
 //Target the nearest unit of a specified type
@@ -1624,7 +1231,7 @@ static bool UnDockNow( Unit *me, Unit *targ )
                 ret = true;
     return ret;
 }
-//#include <cmd/music.h>
+
 void Enslave( Unit*, bool );
 
 void abletodock( int dock )
@@ -1716,12 +1323,6 @@ void abletodock( int dock )
     }
 }
 
-static bool NoDockWithClear()
-{
-    static bool nodockwithclear = XMLSupport::parse_bool( vs_config->getVariable( "physics", "dock_with_clear_planets", "true" ) );
-    return nodockwithclear;
-}
-
 static bool SuperDock( Unit *parent, Unit *target )
 {
     if ( UnitUtil::isCloseEnoughToDock( parent, target ) ) {
@@ -1742,7 +1343,7 @@ static bool TryDock( Unit *parent, Unit *targ, unsigned char playa, int severity
         XMLSupport::parse_bool( vs_config->getVariable( "AI", "can_dock_to_enemy_base", "true" ) );
     static bool   nojumpinSPEC = XMLSupport::parse_bool( vs_config->getVariable( "physics", "noSPECJUMP", "true" ) );
     bool SPEC_interference     = targ && parent && nojumpinSPEC
-                                 && (targ->graphicOptions.InWarp || parent->graphicOptions.InWarp);
+     && (targ->graphicOptions.InWarp || parent->graphicOptions.InWarp);
     unsigned char gender = 0;
     vector< Animation* > *anim = NULL;
     if (SPEC_interference)
@@ -1786,10 +1387,10 @@ static bool ExecuteRequestClearenceKey( Unit *parent, Unit *endt )
         endt->graphicOptions.InWarp = 0;
         static float clearencetime = ( XMLSupport::parse_float( vs_config->getVariable( "general", "dockingtime", "20" ) ) );
         endt->EnqueueAIFirst( new ExecuteFor( new Orders::MatchVelocity( Vector( 0, 0, 0 ),
-                                                                         Vector( 0, 0, 0 ),
-                                                                         true,
-                                                                         false,
-                                                                         true ), clearencetime ) );
+                    Vector( 0, 0, 0 ),
+                    true,
+                    false,
+                    true ), clearencetime ) );
     }
     return tmp;
 }
@@ -1798,7 +1399,6 @@ static void DoDockingOps( Unit *parent, Unit *targ, unsigned char playa, unsigne
 {
     static int maxseverity = XMLSupport::parse_bool( vs_config->getVariable( "AI", "dock_to_area", "false" ) ) ? 2 : 1;
     Unit *endt = targ;
-    bool  nodockwithclear  = NoDockWithClear();
     bool  wasdock = vectorOfKeyboardInput[playa].doc;
     if (vectorOfKeyboardInput[playa].doc) {
         bool isDone = false;
@@ -1847,8 +1447,8 @@ static void DoDockingOps( Unit *parent, Unit *targ, unsigned char playa, unsigne
         bool request = ExecuteRequestClearenceKey( parent, endt );
         if (!request) {
             mission->msgcenter->add( "game",
-                                     "all",
-                                     "[Computer] Cannot dock with insubstantidisabal object, target another object and retry." );
+         "all",
+         "[Computer] Cannot dock with insubstantidisabal object, target another object and retry." );
             abletodock( 0 );
             return;
         } else if (!wasdock) {
@@ -2090,7 +1690,6 @@ void FireKeyboard::Execute()
             static bool allow_special_with_weapons =
                 XMLSupport::parse_bool( vs_config->getVariable( "physics", "special_and_normal_gun_combo", "true" ) );
             if (!allow_special_with_weapons) {
-                bool badness = false;
                 bool special = false;
                 bool normal  = false;
                 int  nm = parent->GetNumMounts();
@@ -2099,16 +1698,16 @@ void FireKeyboard::Execute()
                     if (parent->mounts[i].status == Mount::ACTIVE) {
                         special = special || (parent->mounts[i].type->size&weapon_info::SPECIAL) != 0;
                         normal  = normal
-                                  || ( parent->mounts[i].type->size
-                                      &(weapon_info::LIGHT|weapon_info::MEDIUM|weapon_info::HEAVY|weapon_info::CAPSHIPLIGHT
-                                        |weapon_info::CAPSHIPHEAVY) ) != 0;
+      || ( parent->mounts[i].type->size
+          &(weapon_info::LIGHT|weapon_info::MEDIUM|weapon_info::HEAVY|weapon_info::CAPSHIPLIGHT
+            |weapon_info::CAPSHIPHEAVY) ) != 0;
                     }
                 for (i = 0; i < nm; ++i)
                     if (special && normal) {
                         //parent->ToggleWepaon(false,true);
                         if (parent->mounts[i].status == Mount::ACTIVE)
                             if ( (parent->mounts[i].type->size&weapon_info::SPECIAL) != 0 )
-                                parent->mounts[i].status = Mount::INACTIVE;
+    parent->mounts[i].status = Mount::INACTIVE;
                     }
             }
             parent->Fire( ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS, false );

@@ -120,6 +120,8 @@ bool isPowerOfTwo( int num, int &which )
     return true;
 }
 
+#ifdef __APPLE__
+
 static GLint round2( GLint n )
 {
     GLint m;
@@ -303,8 +305,8 @@ static GLint appleBuild2DMipmaps( GLenum target,
     return retval;
 }
 
-#ifdef __APPLE__
 #define gluBuild2DMipmaps appleBuild2DMipmaps
+
 #endif
 
 GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
@@ -317,16 +319,12 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
                                         enum TEXTURE_TARGET texture_target,
                                         enum ADDRESSMODE address_mode )
 {
-    static bool verbose_debug = XMLSupport::parse_bool( vs_config->getVariable( "data", "verbose_debug", "false" ) );
     int dummy = 0;
-
     if ( ( mipmap&(MIPMAP|TRILINEAR) ) && !isPowerOfTwo( width, dummy ) )
         VSFileSystem::vs_dprintf( 1, "Width %d not a power of two", width );
     if ( ( mipmap&(MIPMAP|TRILINEAR) ) && !isPowerOfTwo( height, dummy ) )
         VSFileSystem::vs_dprintf( 1, "Height %d not a power of two", height );
-
     GFXActiveTexture( texturestage );
-
     *handle = 0;
     while ( *handle < static_cast<int>(textures.size()) ) {
         if (!textures[*handle].alive)
@@ -394,7 +392,6 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
         ConvertPalette( textures[*handle].palette, (unsigned char*) palette );
     }
     textures[*handle].textureformat = GetUncompressedTextureFormat( textureformat );
-
     return GFXTRUE;
 }
 
@@ -425,7 +422,7 @@ static void DownSampleTexture( unsigned char **newbuf,
 {
     assert( pixsize <= 4 );
 
-    int i, j, k, l, m, n, o, p;
+    int i, j, k, l, m, n, o;
     if (MAX_TEXTURE_SIZE < maxwidth)
         maxwidth = MAX_TEXTURE_SIZE;
     if (MAX_TEXTURE_SIZE < maxheight)
@@ -640,7 +637,6 @@ GLenum GetImageTarget( TEXTURE_IMAGE_TARGET imagetarget )
 
 const char * GetImageTargetName( TEXTURE_IMAGE_TARGET imagetarget )
 {
-    GLenum image2D;
     switch (imagetarget)
     {
     case TEXTURE_1D:
@@ -896,18 +892,12 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture( unsigned char *buffer,
                 else
                     glTexParameteri( textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST );
             }
-            int count = 0;
-            static int blankout = XMLSupport::parse_int( vs_config->getVariable( "graphics", "detail_texture_blankout", "3" ) );
-            static int fullout  =
-                XMLSupport::parse_int( vs_config->getVariable( "graphics", "detail_texture_full_color", "1" ) )-1;
-            float numdivisors   = logsize > fullout+blankout ? ( 1./(logsize-fullout-blankout) ) : 1;
-            float detailscale   = 1;
+            XMLSupport::parse_int( vs_config->getVariable( "graphics", "detail_texture_full_color", "1" ) );
             //If we are DDS and we need to generate mipmaps (almost everything gets sent here, even non-3d visuals)
             if (internformat >= DXT1 && internformat <= DXT5) {
                 int size = 0;
                 int i    = 0;
                 unsigned int offset = 0;
-
                 //The following takes into account C/C++'s catenation of floats to int
                 //by adding 3, we ensure that when width or height is 1, we get a 1 rather than 0
                 //from the division by 4. Because of catenation, all other numbers will result with

@@ -154,7 +154,7 @@ Music::Music( Unit *parent ) : random( false )
         fNET_startup();
         int pipesw[2];
         int pipesr[2];
-        socketw = socketr = -1;         //FIXME
+        socketw = socketr = -1;         //FIXME  --"How?" --chuck_starchaser
 #ifdef _WIN32
 #define pipe _pipe
 #endif
@@ -256,6 +256,8 @@ void Music::ChangeVolume( float inc, int layer )
             muzak[layer]._SetVolume( muzak[layer].soft_vol+inc, false, 0.1 );
     }
 }
+
+#ifdef USE_SOUNDSERVER
 static float tmpmin( float a, float b )
 {
     return a < b ? a : b;
@@ -264,6 +266,7 @@ static float tmpmax( float a, float b )
 {
     return a < b ? b : a;
 }
+#endif
 
 void Music::_SetVolume( float vol, bool hardware, float latency_override )
 {
@@ -411,9 +414,9 @@ readerThread(
     input )
 {
     Music *me = (Music*) input;
-    int    socketr = me->socketr;
     me->threadalive = 1;
 #ifdef USE_SOUNDSERVER
+    int    socketr = me->socketr;
     while (!me->killthread) {
         printf( "Reading from socket %d\n", socketr );
         char data = fNET_fgetc( socketr );
@@ -422,7 +425,7 @@ readerThread(
             me->moredata = 1;
         micro_sleep( 100000 );
     }
-#else /* USE_SOUNDSERVER */
+#else
     while (!me->killthread) {
 #ifdef _WIN32
         WaitForSingleObject( me->musicinfo_mutex, INFINITE );
@@ -430,7 +433,6 @@ readerThread(
         checkerr( pthread_mutex_lock( &me->musicinfo_mutex ) );
 #endif
         if (me->killthread) break;
-        //fprintf(stderr,"readerThread: LOADING set TRUE, LOADED set FALSE\n");
         me->music_loading = true;
         me->music_loaded  = false;
         me->music_load_info->success = false;

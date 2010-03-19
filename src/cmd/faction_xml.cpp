@@ -1,9 +1,6 @@
-//#include <gfx/aux_texture.h>
-//#include "gfx/animation.h"
 #include <vector>
 #include <string>
 #include <gnuhash.h>
-
 #include <expat.h>
 #include "vegastrike.h"
 #include "xml_support.h"
@@ -12,10 +9,10 @@
 #include "unit_factory.h"
 #include "cmd/music.h"
 #include "faction_generic.h"
-//#include "faction_util.h"
-static int unitlevel;
+
 using namespace XMLSupport;
-//using std::sort;
+
+static int unitlevel;
 
 static FSM * getFSM( const std::string &value )
 {
@@ -31,28 +28,10 @@ static FSM * getFSM( const std::string &value )
     return NULL;
 }
 
-#if 0
-static FSM * getFSM( const std::string &value )
-{
-    static vsUMap< const std::string, FSM* >    fsms;
-    vsUMap< const std::string, FSM* >::iterator i = fsms.find( value );
-    if ( i != fsms.end() ) {
-        return (*i).second;
-    } else {
-        if (value != "FREE_THIS_LOAD") {
-            FSM *retval = new FSM( value.c_str() );
-            fsms.insert( pair< const std::string, FSM* > ( value, retval ) );
-            return retval;
-        } else {
-            for (i = fsms.begin(); i != fsms.end(); i++)
-                delete ( (*i).second );
-            return NULL;
-        }
-    }
-}
-#endif
 namespace FactionXML
 {
+//
+
 enum Names
 {
     UNKNOWN,
@@ -95,6 +74,7 @@ const EnumMap::Pair element_names[] = {
     EnumMap::Pair( "Explosion",     EXPLOSION ),
     EnumMap::Pair( "ShipModifier",  SHIPMODIFIER )
 };
+
 const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair( "UNKNOWN",       UNKNOWN ),
     EnumMap::Pair( "name",          NAME ),
@@ -116,30 +96,28 @@ const EnumMap::Pair attribute_names[] = {
 };
 
 const EnumMap element_map( element_names, 10 );
+
 const EnumMap attribute_map( attribute_names, 17 );
+
+//
 }
 
 static vector< std::string >contrabandlists;
+
 void Faction::beginElement( void *userData, const XML_Char *names, const XML_Char **atts )
 {
     using namespace FactionXML;
-    //Universe * thisuni = (Universe *) userData;
-//((Universe::Faction*)userData)->beginElement(name, AttributeList(atts));
     AttributeList attributes = AttributeList( atts );
     string name     = names;
     AttributeList::const_iterator iter;
     Names  elem     = (Names) element_map.lookup( name );
-    char   RGBfirst = 0;
     std::string secString;
     std::string secStringAlph;
     switch (elem)
     {
     case UNKNOWN:
         unitlevel++;
-
-//cerr << "Unknown element start tag '" << name << "' detected " << endl;
         return;
-
     case FACTIONS:
         assert( unitlevel == 0 );
         unitlevel++;
@@ -302,18 +280,15 @@ void Faction::beginElement( void *userData, const XML_Char *names, const XML_Cha
         break;
     }
 }
+
 void Faction::endElement( void *userData, const XML_Char *name )
 {
     using namespace FactionXML;
-//((Faction*)userData)->endElement(name);
-
-//void Faction::endElement(const string &name) {
     Names elem = (Names) element_map.lookup( name );
     switch (elem)
     {
     case UNKNOWN:
         unitlevel--;
-//cerr << "Unknown element end tag '" << name << "' detected " << endl;
         break;
     default:
         unitlevel--;
@@ -327,11 +302,8 @@ void Faction::LoadXML( const char *filename, char *xmlbuffer, int buflength )
     using namespace VSFileSystem;
     using std::cout;
     using std::endl;
-    using std::pair;
-    
+    using std::pair;    
     unitlevel = 0;
-    FILE     *inFile;
-    const int chunk_size = 16384;
     VSFile    f;
     VSError   err;
     if (buflength == 0 || xmlbuffer == NULL) {
@@ -345,48 +317,20 @@ void Faction::LoadXML( const char *filename, char *xmlbuffer, int buflength )
     XML_Parser parser = XML_ParserCreate( NULL );
     XML_SetUserData( parser, NULL );
     XML_SetElementHandler( parser, &Faction::beginElement, &Faction::endElement );
-    if (buflength != 0 && xmlbuffer != NULL) {
+    if (buflength != 0 && xmlbuffer != NULL)
         XML_Parse( parser, xmlbuffer, buflength, 1 );
-    } else {
+    else
         XML_Parse( parser, ( f.ReadFull() ).c_str(), f.Size(), 1 );
-        /*
-         *  do {
-         * #ifdef BIDBG
-         *     char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
-         * #else
-         *     char buf[chunk_size];
-         * #endif
-         *     int length;
-         *     length = VSFileSystem::vs_read (buf,1, chunk_size,inFile);
-         *     //length = inFile.gcount();
-         * #ifdef BIDBG
-         *     XML_ParseBuffer(parser, length, VSFileSystem::vs_feof(inFile));
-         * #else
-         *     XML_Parse(parser, buf,length, VSFileSystem::vs_feof(inFile));
-         * #endif
-         *  } while(!VSFileSystem::vs_feof(inFile));
-         */
-        f.Close();
-    }
     XML_ParserFree( parser );
     ParseAllAllies();
     vsUMap< string, bool >cache;
-    for (unsigned int i = 0; i < factions.size(); i++)
+    for (unsigned int i = 0; i < factions.size(); i++) {
         for (unsigned int j = 0; j < factions[i]->faction.size(); j++) {
             Faction *fact      = factions[i];
             string   myname    = fact->factionname;
             string   jointname = myname+"to"+factions[j]->factionname;
             string   fname;
             if (fact->faction[j].conversation == NULL) {
-                /* THE FOLLOWING APPEARS TO BE DEAD CODE -- COMMENTING OUT FOR NOW
-                 *  //if (factions[i]->faction[j].stats.index != 0)	  {
-                 *  if (0) {//we just want OUR faction to use that file when communicating with ANYONE  -- if we want certain factions to have *special* comm info for each other, then we can specify the conversation flag
-                 *       fname = factions[factions[i]->faction[j].stats.index]->factionname;
-                 *  }else {
-                 *       fname = factions[i]->factionname;
-                 *  }
-                 */
-
                 //Looking for a file is somewhat expensive - a cache speeds up a lot this N^2 loop.
                 //I know... not a great improvement... but bare with me - I hate N^2 loops.
                 bool foundjointname = false;
@@ -413,14 +357,12 @@ void Faction::LoadXML( const char *filename, char *xmlbuffer, int buflength )
                     fname = myname;
                 else
                     fname = "neutral";
-                factions[i]->faction[j].conversation = getFSM( /*"communications/" +*/ fname+".xml" );
-            } else {
-                //printf ("Already have converastion for %s with %s\n",fname.c_str(),factions[j]->factionname);
+                factions[i]->faction[j].conversation = getFSM( fname+".xml" );
             }
         }
+    }
     char *munull = NULL;
     cache.clear();
-
     FactionUtil::LoadSerializedFaction( munull );
 }
 

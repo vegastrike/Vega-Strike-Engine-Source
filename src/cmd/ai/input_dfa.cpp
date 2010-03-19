@@ -19,6 +19,7 @@ static float GetX( float x )
 {
     return ( (float) 2*x )/g_game.x_resolution-1;
 }
+
 static float GetY( float x )
 {
     return 1-( (float) 2*x )/g_game.y_resolution;
@@ -41,6 +42,7 @@ void InputDFA::OrderHandler( const KBData &keys, KBSTATE k )
         }
     }
 }
+
 void InputDFA::NewLocationSelect()
 {
     if (selected == NULL)
@@ -58,6 +60,7 @@ void InputDFA::NewLocationSelect()
         delete locsel;
     locsel = new CoordinateSelect( RunningTotal.Cast() );
 }
+
 void InputDFA::BindOrder( int key, OrderFactory *ofac )
 {
     /*  if (orderbindings[KEYMAP_SIZE])
@@ -70,6 +73,7 @@ void InputDFA::BindOrder( int key, OrderFactory *ofac )
     BindKey( key, 0, InputDFA::OrderHandler, num );
 #endif
 }
+
 void InputDFA::SetOrder( OrderFactory *ofac )
 {
     if (orderfac) {
@@ -77,6 +81,7 @@ void InputDFA::SetOrder( OrderFactory *ofac )
     }
     orderfac = ofac;
 }
+
 //Equiv of nonselect, but for Targets instead of selected ships
 void InputDFA::TargetSelect( KBSTATE k, int x, int y, int delx, int dely, int mod )
 {
@@ -235,19 +240,15 @@ void InputDFA::ClickSelect( KBSTATE k, int x, int y, int delx, int dely, int mod
 //this function is bound in the NONE state...
 void InputDFA::NoneSelect( KBSTATE k, int x, int y, int delx, int dely, int mod )
 {
-    //Vector v = GFXDeviceToEye(x,y);
     float xs, ys;
-
     CurDFA->MouseArrow.GetSize( xs, ys );
     CurDFA->MouseArrow.SetPosition( .5*xs+GetX( x ), .5*ys+GetY( y ) );
-
     static int kmod;
     if (k == RESET)
         return;          ///little hack to prevent the function from being 'primed' with reset and continuing on an infinite loop again and again and again
     if (mod&ACTIVE_CTRL)
         return;          //you don't want control pressed
     if (k == PRESS) {
-        //Vector v = GFXDeviceToEye(x,y);
         CurDFA->SelectBox.SetPosition( GetX( x ), GetY( y ) );
         CurDFA->Selecting = false;
         kmod = mod;
@@ -261,8 +262,6 @@ void InputDFA::NoneSelect( KBSTATE k, int x, int y, int delx, int dely, int mod 
             if (CurDFA->state == TARGET_SELECT) VSFileSystem::vs_fprintf( stderr, " to target\n" );
 
             else VSFileSystem::vs_fprintf( stderr, " to select\n" );
-//cerr << *sel << endl;
-
             CurDFA->replaceCollection( tmpcollection );
             CurDFA->SetStateSomeSelected();
         } else {
@@ -275,7 +274,6 @@ void InputDFA::NoneSelect( KBSTATE k, int x, int y, int delx, int dely, int mod 
     }
     if (k == DOWN) {
         if (delx || dely) {
-            //Vector v = GFXDeviceToEye(x-CurDFA->prevx, y-CurDFA->prevy) - GFXDeviceToEye(0,0);
             float dumbx, dumby;
             dumbx = -GetX( x )+GetX( CurDFA->prevx );
             dumby = -GetY( y )+GetY( CurDFA->prevy );
@@ -289,21 +287,8 @@ void InputDFA::NoneSelect( KBSTATE k, int x, int y, int delx, int dely, int mod 
         CurDFA->Selecting = false;
         UnitCollection *tmpcol = CurDFA->clickList->requestIterator( CurDFA->prevx, CurDFA->prevy, x, y );
         CurDFA->replaceCollection( tmpcol );
-        Unit *tUnit;
         if ( tmpcol->front() )
             CurDFA->SetStateSomeSelected();
-/*
- *       for(un_iter tmp2 = tmpcol->createIterator();tUnit = *tmp2;++tmp2){
- *     VSFileSystem::vs_fprintf (stderr,"None::replacing SelectBox Units");if (CurDFA->state==TARGET_SELECT) VSFileSystem::vs_fprintf (stderr," to target");else VSFileSystem::vs_fprintf (stderr," to select");
- *     while(tmp2->current()) {
- *       tmp2->advance();
- *     }
- *     CurDFA->SetStateSomeSelected();
- *   }else {
- *     VSFileSystem::vs_fprintf (stderr,"None::select box missed");
- *   }
- *   delete tmp2;
- */
     }
 }
 
@@ -327,6 +312,7 @@ InputDFA::~InputDFA()
     if (locsel)
         delete locsel;
 }
+
 /**
  *  enum State InputDFA::startOver() {
  *  switch (state) {
@@ -353,6 +339,7 @@ InputDFA::~InputDFA()
  *  return UNITS_SELECTED;
  *  }
  */
+ 
 UnitCollection* InputDFA::getCollection()
 {
     switch (state)
@@ -367,6 +354,7 @@ UnitCollection* InputDFA::getCollection()
     }
     return selected;
 }
+
 void InputDFA::UnselectAll()
 {
     switch (state)
@@ -390,6 +378,7 @@ void InputDFA::UnselectAll()
         break;
     }
 }
+
 void InputDFA::replaceCollection( UnitCollection *newcol )
 {
     switch (state)
@@ -471,6 +460,7 @@ void InputDFA::SetStateNone()
  *  }
  *  }
  */
+ 
 void InputDFA::SetStateSomeSelected()
 {
     switch (state)
