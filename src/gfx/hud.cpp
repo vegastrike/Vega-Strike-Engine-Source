@@ -38,6 +38,7 @@ static bool isInside()
     if (BaseInterface::CurrentBase) return true;
     return false;
 }
+
 const std::string& getStringFont( bool &changed, bool force_inside = false, bool whatinside = false )
 {
     static std::string whichfont = vs_config->getVariable( "graphics", "font", "helvetica12" );
@@ -51,6 +52,7 @@ const std::string& getStringFont( bool &changed, bool force_inside = false, bool
         lastinside = inside;
     } else {changed = false; } return inside ? whichdockedfont : whichfont;
 }
+
 const std::string& getStringFontForHeight( bool &changed )
 {
     static std::string whichfont = vs_config->getVariable( "graphics", "font", "helvetica12" );
@@ -62,6 +64,7 @@ const std::string& getStringFontForHeight( bool &changed )
         lastinside = inside;
     } else {changed = false; } return inside ? whichdockedfont : whichfont;
 }
+
 void * getFont( bool forceinside = false, bool whichinside = false )
 {
     bool changed = false;
@@ -86,6 +89,7 @@ void * getFont( bool forceinside = false, bool whichinside = false )
     }
     return retval;
 }
+
 float getFontHeight()
 {
     bool changed = false;
@@ -121,7 +125,9 @@ TextPlane::TextPlane( const GFXColor &c, const GFXColor &bgcol )
     myFontMetrics.Set( .06, .08, 0 );
     SetPos( 0, 0 );
 }
+
 TextPlane::~TextPlane() {}
+
 int TextPlane::Draw( int offset )
 {
     return Draw( myText, offset, true, false, true );
@@ -159,14 +165,17 @@ static unsigned char HexToChar( char a )
         return 10+a-'A';
     return 0;
 }
+
 static unsigned char TwoCharToByte( char a, char b )
 {
     return 16*HexToChar( a )+HexToChar( b );
 }
+
 static float TwoCharToFloat( char a, char b )
 {
     return TwoCharToByte( a, b )/255.;
 }
+
 void DrawSquare( float left, float right, float top, float bot )
 {
     GFXBegin( GFXQUAD );
@@ -178,9 +187,9 @@ void DrawSquare( float left, float right, float top, float bot )
     GFXVertex3f( right, bot, 0 );
     GFXVertex3f( left, bot, 0 );
     GFXVertex3f( left, top, 0 );
-
     GFXEnd();
 }
+
 float charWidth( char c, float myFontMetrics )
 {
     static bool use_bit = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "high_quality_font", "false" ) );
@@ -189,6 +198,7 @@ float charWidth( char c, float myFontMetrics )
     float dubyawid = use_bit ? glutBitmapWidth( fnt, 'W' ) : glutStrokeWidth( fnt, 'W' );
     return charwid*myFontMetrics/dubyawid;
 }
+
 bool doNewLine( string::const_iterator begin,
                 string::const_iterator end,
                 float cur_pos,
@@ -207,6 +217,7 @@ bool doNewLine( string::const_iterator begin,
     }
     return cur_pos+( (begin+1 != end) ? charWidth( *begin, metrics ) : 0 ) >= end_pos;
 }
+
 int TextPlane::Draw( const string &newText, int offset, bool startlower, bool force_highquality, bool automatte )
 {
     int  retval = 1;
@@ -227,7 +238,7 @@ int TextPlane::Draw( const string &newText, int offset, bool startlower, bool fo
     myFontMetrics.i /= .5*g_game.x_resolution;
     myFontMetrics.j /= .5*g_game.y_resolution;
     float tmp, row, col;
-    float origcol, origrow;
+    float origcol;
     GetPos( row, col );
     GetPos( row, origcol );
     float rowheight = use_bit ? getFontHeight() : myFontMetrics.j;
@@ -246,15 +257,11 @@ int TextPlane::Draw( const string &newText, int offset, bool startlower, bool fo
             glDisable( GL_LINE_SMOOTH );
     }
     GFXColorf( this->col );
-
     GFXDisable( DEPTHTEST );
     GFXDisable( CULLFACE );
-
     GFXDisable( LIGHTING );
-
     GFXDisable( TEXTURE0 );
     GFXDisable( TEXTURE1 );
-
     glPushMatrix();
     glLoadIdentity();
     if (!automatte && drawbg) {
@@ -262,13 +269,11 @@ int TextPlane::Draw( const string &newText, int offset, bool startlower, bool fo
         DrawSquare( col, this->myDims.i, row-rowheight*.25, row+rowheight );
     }
     GFXColorf( this->col );
-
     int entercount = 0;
     for (; entercount < offset && text_it != newText.end(); text_it++)
         if (*text_it == '\n')
             entercount++;
     glTranslatef( col, row, 0 );
-    //glRasterPos2f (g_game.x_resolution*(1-(col+1)/2),g_game.y_resolution*(row+1)/2);
     glRasterPos2f( 0, 0 );
     float scalex = 1;
     float scaley = 1;

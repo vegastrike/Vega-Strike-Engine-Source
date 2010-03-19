@@ -60,12 +60,14 @@ static float usedPrice( float percentage )
     static float shipSellback = XMLSupport::parse_float( vs_config->getVariable( "economics", "upgrade_sellback_price", ".5" ) );
     return shipSellback*percentage;
 }
+
 bool final_cat( const std::string &cat )
 {
     if ( cat.empty() )
         return false;
     return std::find( cat.begin(), cat.end(), '*' ) == cat.end();
 }
+
 static string getLevel( const string &input, int level )
 {
     char *ret   = strdup( input.c_str() );
@@ -82,6 +84,7 @@ static string getLevel( const string &input, int level )
     free( ret );
     return retval;
 }
+
 static bool match( vector< string >::const_iterator cat,
                    vector< string >::const_iterator endcat,
                    string::const_iterator item,
@@ -105,6 +108,7 @@ static bool match( vector< string >::const_iterator cat,
         return endcat == (cat+1);
     }
 }
+
 const Unit * getUnitFromUpgradeName( string upgrade_name, int myunitfaction = 0 )
 {
     const char *input_buffer = upgrade_name.c_str();
@@ -125,6 +129,7 @@ const Unit * getUnitFromUpgradeName( string upgrade_name, int myunitfaction = 0 
     }
     return NewPart;
 }
+
 UpgradingInfo::UpgradingInfo( Unit *un, Unit *base, vector< BaseMode >modes ) : base( base )
     , buyer( un )
     , mode( BUYMODE )
@@ -211,6 +216,7 @@ UpgradingInfo::UpgradingInfo( Unit *un, Unit *base, vector< BaseMode >modes ) : 
         _Universe->SetActiveCockpit( tmpcockpit );
     }
 }
+
 UpgradingInfo::~UpgradingInfo()
 {
     /*    if (templ){
@@ -229,6 +235,7 @@ UpgradingInfo::~UpgradingInfo()
         delete Modes[i];
     delete[] Modes;
 }
+
 void UpgradingInfo::Render()
 {
     //GFXSubwindow (0,0,g_game.x_resolution,g_game.y_resolution);
@@ -255,8 +262,6 @@ void UpgradingInfo::Render()
             }
 
 #endif
-
-
     StartGUIFrame(
 #ifdef USE_BRIEFINGS
         mode == BRIEFINGMODE ? GFXFALSE : GFXTRUE
@@ -300,6 +305,7 @@ void UpgradingInfo::Render()
         Modes[i]->Refresh();
     EndGUIFrame( drawovermouse );
 }
+
 void UpgradingInfo::SetMode( enum BaseMode mod, enum SubMode smod )
 {
     bool resetcat = false;
@@ -415,16 +421,17 @@ void UpgradingInfo::SetMode( enum BaseMode mod, enum SubMode smod )
         where = 0;
     }
 }
+
 bool UpgradingInfo::beginswith( const vector< std::string > &cat, const std::string &s )
 {
     if ( cat.empty() )
         return false;
     return cat.front() == s;
 }
+
 void UpgradingInfo::SetupCargoList()
 {
     CurrentList = &GetCargoList();
-    //std::sort (CurrentList->begin(),CurrentList->end());
     CargoList->ClearList();
 #ifdef USE_BRIEFINGS
     if (mode == BRIEFINGMODE) {
@@ -476,8 +483,6 @@ void UpgradingInfo::SetupCargoList()
                 title += string( "Category: " )+curcategory.back()+"  ";
                 if (mode == BUYMODE || mode == SELLMODE || curcategory.size() > 1) {
                     CargoList->AddTextItem( "[Back To Categories]", "[Back To Categories]", NULL, GFXColor( 0, 1, .5, 1 ) );
-                } else {
-                    //CargoList->AddTextItem ("","",NULL,GFXColor(0,0,0,1));
                 }
                 for (unsigned int i = 0; i < CurrentList->size(); i++) {
                     if ( match( curcategory.begin(), curcategory.end(), (*CurrentList)[i].cargo.GetCategory().begin(),
@@ -490,7 +495,6 @@ void UpgradingInfo::SetupCargoList()
                             (*CurrentList)[i].color = GFXColor( 1, 1, 1, 1 );
                         Unit *un     = buyer.GetUnit();
                         Cockpit *cpt = NULL;
-                        static bool     gottencolor = false;
                         static GFXColor nomoney( 0, 0, 0, -1 );
                         if (nomoney.a < 0) {
                             float color[4] = {1, 0, 0, 1};
@@ -514,8 +518,6 @@ void UpgradingInfo::SetupCargoList()
                             } else if ( (mode == SELLMODE) && bas ) {
                                 if ( !( bas->CanAddCargo( (*CurrentList)[i].cargo ) ) )
                                     (*CurrentList)[i].color = nomoney;
-                                //} else if ((mode==DOWNGRADEMODE||mode==UPGRADEMODE||mode==BRIEFINGMODE||mode==SAVEMODE||mode==NEWSMODE) {
-                                //do nothing (Upgrades,Downgrades,briefings,saves and news don't take up cargo space)
                             } else if (mode == MISSIONMODE) {
                                 if ( active_missions.size() >= UniverseUtil::maxMissions() )
                                     (*CurrentList)[i].color = nomoney;
@@ -607,6 +609,7 @@ void UpgradingInfo::SetupCargoList()
         }
     }
 }
+
 UpgradingInfo *upgr;
 unsigned int   player_upgrading;
 
@@ -1252,11 +1255,9 @@ void UpgradingInfo::CompleteTransactionConfirm()
             price = (float) ( part.price*( 1-usedPrice( percentage ) ) );
             if ( (_Universe->AccessCockpit()->credits > price) ) {
                 _Universe->AccessCockpit()->credits -= price;
-
                 un->Upgrade( NewPart, mountoffset, subunitoffset, addmultmode, true, percentage, templ );
                 unsigned int removalindex;
                 if ( ( bas = base.GetUnit() ) ) {
-                    Cargo *tmp = bas->GetCargo( part.content, removalindex );
                     bas->RemoveCargo( removalindex, 1, false );
                 }
             }
@@ -1265,9 +1266,6 @@ void UpgradingInfo::CompleteTransactionConfirm()
             break;
         case DOWNGRADEMODE:
             canupgrade = un->canDowngrade( NewPart, mountoffset, subunitoffset, percentage, downgradelimiter );
-            //if (part.content=="jump_drive") {
-            //part.price/=3;
-            //}
             price = part.price*usedPrice( percentage );
             _Universe->AccessCockpit()->credits += price;
             if ( un->Downgrade( NewPart, mountoffset, subunitoffset, percentage, downgradelimiter ) ) {
@@ -1285,9 +1283,11 @@ void UpgradingInfo::CompleteTransactionConfirm()
     SetMode( mode, NORMAL );
     SelectLastSelected();
 }
+
 //type=1 is mouse click
 //type=2 is mouse drag
 //type=3 is mouse movement
+
 void UpgradingInfo::ProcessMouse( int type, int x, int y, int button, int state )
 {
     int   ours  = 0;

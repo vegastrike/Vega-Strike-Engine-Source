@@ -138,9 +138,6 @@ void GameUnit< UnitType >::UpdatePhysics2( const Transformation &trans,
     this->cumulative_transformation.Compose( trans, transmat );
     this->cumulative_transformation.to_matrix( this->cumulative_transformation_matrix );
     this->cumulative_velocity = TransformNormal( transmat, this->Velocity )+cum_vel;
-
-    Transformation *ct;
-    Matrix *ctm = NULL;
     unsigned int    i;
     if (lastframe) {
         char   tmp  = 0;
@@ -161,7 +158,6 @@ void GameUnit< UnitType >::UpdatePhysics2( const Transformation &trans,
             //printf ("Too much time in physics: fx: %f exp: %f \n",blah1-blah,blah2-blah1);
         }
     }
-    //UnitType::UpdatePhysics2 (trans,old_physical_state,accel,difficulty,transmat, cum_vel,  lastframe,uc);
 }
 
 /****************************** ONLY SOUND/GFX STUFF LEFT IN THOSE FUNCTIONS *********************************/

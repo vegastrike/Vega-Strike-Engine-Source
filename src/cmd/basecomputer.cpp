@@ -397,14 +397,6 @@ extern const Unit * makeTemplateUpgrade( string name, int faction );
 //Ported from old code.  Not sure what it does.
 const Unit * getUnitFromUpgradeName( const string &upgradeName, int myUnitFaction = 0 );
 
-//Lowerifies a string.
-static std::string& tolower( std::string &loweritem )
-{
-    for (unsigned int i = 0; i < loweritem.size(); i++)
-        loweritem[i] = tolower( loweritem[i] );
-    return loweritem;
-}
-
 //Takes in a category of an upgrade or cargo and returns true if it is any type of mountable weapon.
 extern bool isWeapon( std::string name );
 
@@ -3113,7 +3105,6 @@ void BaseComputer::loadLoadSaveControls( void )
     //Get news from save game.
     Unit *playerUnit = m_player.GetUnit();
     if (playerUnit) {
-        const int playerNum = UnitUtil::isPlayerStarship( playerUnit );
         struct dirent **dirlist;
         std::string     savedir = VSFileSystem::homedir+"/save/";
         int ret = scandir( savedir.c_str(), &dirlist, nodirs, (scancompare)&datesort );
@@ -4639,7 +4630,6 @@ bool BaseComputer::showPlayerInfo( const EventCommandId &command, Control *contr
 //does not work with negative numbers!!
 void prettyPrintFloat( char *buffer, float f, int digitsBefore, int digitsAfter )
 {
-    float dbgval    = f;
     int   bufferPos = 0;
     if ( !FINITE( f ) ) {
         buffer[0] = 'n';
@@ -4736,8 +4726,6 @@ static const char *WeaponTypeStrings[] = {
 void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, Cargo &item )
 {
     static Unit *blankUnit   = UnitFactory::createUnit( "upgrading_dummy_unit", 1, FactionUtil::GetFactionIndex( "upgrades" ) );
-    static float game_speed  = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
-    static float game_accel  = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_accel", "1" ) );
     static float warpenratio = XMLSupport::parse_float( vs_config->getVariable( "physics", "warp_energy_multiplier", "0.12" ) );
     static float warpbleed   = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpbleed", "20" ) );
     static float shield_maintenance_cost =

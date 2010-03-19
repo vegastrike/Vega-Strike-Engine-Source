@@ -46,17 +46,18 @@ static double lasttime;
 #endif
 static double elapsedtime     = .1;
 static double timecompression = 1;
+
 double getNewTime()
 {
 #ifdef _WIN32
     return dblnewtime-firsttime;
-
 #else
     return newtime-firsttime;
 #endif
 }
 
 class NetClient;
+
 int timecount;
 
 void inc_time_compression( const KBData&, KBSTATE a )
@@ -66,6 +67,7 @@ void inc_time_compression( const KBData&, KBSTATE a )
         timecount++;
     }
 }
+
 void dec_time_compression( const KBData&, KBSTATE a )
 {
     if (a == PRESS) {
@@ -73,6 +75,7 @@ void dec_time_compression( const KBData&, KBSTATE a )
         timecount--;
     }
 }
+
 void reset_time_compression( const KBData&, KBSTATE a )
 {
     if (a == PRESS) {
@@ -80,6 +83,7 @@ void reset_time_compression( const KBData&, KBSTATE a )
         timecount = 0;
     }
 }
+
 void pause_key( const KBData &s, KBSTATE a )
 {
     static bool paused = false;
@@ -99,6 +103,7 @@ float getTimeCompression()
 {
     return timecompression;
 }
+
 void setTimeCompression( float tc )
 {
     timecompression = tc;
@@ -168,28 +173,27 @@ double GetElapsedTime()
 {
     return elapsedtime;
 }
+
 double queryTime()
 {
 #ifdef WIN32
     LONGLONG tmpnewtime;
     QueryPerformanceCounter( (LARGE_INTEGER*) &tmpnewtime );
     return ( (double) tmpnewtime )/(double) freq-firsttime;
-
 #elif defined (HAVE_GETTIMEOFDAY)
     struct timeval tv;
     (void) gettimeofday( &tv, NULL );
     double tmpnewtime = (double) tv.tv_sec+(double) tv.tv_usec*1.e-6;
     return tmpnewtime-firsttime;
-
 #elif defined (HAVE_SDL)
     double tmpnewtime = SDL_GetTicks()*1.e-3;
     return tmpnewtime-firsttime;
-
 #else
 # error "We have no way to determine the time on this system."
     return 0.;
 #endif
 }
+
 void UpdateTime()
 {
 #ifdef WIN32
@@ -200,24 +204,22 @@ void UpdateTime()
         dblnewtime = 0.;
     else
         dblnewtime = ( (double) newtime )/( (double) freq );
-    static double  ftime = firsttime = dblnewtime;
+    firsttime = dblnewtime;
 #elif defined (HAVE_GETTIMEOFDAY)
     struct timeval tv;
     (void) gettimeofday( &tv, NULL );
-
     lasttime    = newtime;
     newtime     = (double) tv.tv_sec+(double) tv.tv_usec*1.e-6;
     elapsedtime = newtime-lasttime;
-    static double ftime = firsttime = newtime;
+    firsttime = newtime;
 #elif defined (HAVE_SDL)
     lasttime    = newtime;
     newtime     = SDL_GetTicks()*1.e-3;
     elapsedtime = newtime-lasttime;
-    static double ftime = firsttime = newtime;
+    firsttime = newtime;
 #else
 # error "We have no way to determine the time on this system."
 #endif
-
     elapsedtime *= timecompression;
 }
 

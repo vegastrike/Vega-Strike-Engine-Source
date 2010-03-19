@@ -43,8 +43,6 @@ csOPCODECollider* collideTrees::colTree( Unit *un, const Vector &othervelocity )
         return NULL;
     if (un->rSize() <= 0.)      //Shouldn't happen bug I've seen this for asteroid fields...
         return NULL;
-    float movement = sqrtf( speedsquared )*SIMULATION_ATOM;
-
     //Force pow to 0 in order to avoid nan problems...
     unsigned int   pow = 0;   //(int)ceil(log (movement/un->rSize())/loge2);
 //pow=collideTreesMaxTrees-1;
@@ -56,10 +54,12 @@ csOPCODECollider* collideTrees::colTree( Unit *un, const Vector &othervelocity )
         rapidColliders[pow] = un->getCollideTree( Vector( 1, 1, val ) );
     return rapidColliders[pow];
 }
+
 collideTrees* collideTrees::Get( const std::string &hash_key )
 {
     return unitColliders.Get( hash_key );
 }
+
 void collideTrees::Dec()
 {
     refcount--;
@@ -84,10 +84,12 @@ bool TableLocationChanged( const QVector &Mini, const QVector &minz )
            || _Universe->activeStarSystem()->collidetable->c.hash_int( Mini.k )
            != _Universe->activeStarSystem()->collidetable->c.hash_int( minz.k );
 }
+
 bool TableLocationChanged( const LineCollide &lc, const QVector &minx, const QVector &maxx )
 {
     return TableLocationChanged( lc.Mini, minx ) || TableLocationChanged( lc.Maxi, maxx );
 }
+
 void KillCollideTable( LineCollide *lc, StarSystem *ss )
 {
     if (lc->type == LineCollide::UNIT)
@@ -95,6 +97,7 @@ void KillCollideTable( LineCollide *lc, StarSystem *ss )
     else
         printf( "such collide types as %d not allowed", lc->type );
 }
+
 bool EradicateCollideTable( LineCollide *lc, StarSystem *ss )
 {
     if (lc->type == LineCollide::UNIT) {
@@ -104,6 +107,7 @@ bool EradicateCollideTable( LineCollide *lc, StarSystem *ss )
         return false;
     }
 }
+
 void AddCollideQueue( LineCollide &tmp, StarSystem *ss )
 {
     if (tmp.type == LineCollide::UNIT)
@@ -121,6 +125,7 @@ bool lcwithin( const LineCollide &lc, const LineCollide &tmp )
                                     && lc.Maxi.j >tmp.Mini.j
                       && lc.Maxi.k >tmp.Mini.k;
 }
+
 bool usehuge_table()
 {
     const unsigned int  A    = 9301;
@@ -130,15 +135,19 @@ bool usehuge_table()
     seed = (seed*A+C)%M;
     return seed < (M/100);
 }
+
 size_t nondecal_index( Collidable::CollideRef b );
+
 bool Bolt::Collide( Collidable::CollideRef index )
 {
     return _Universe->activeStarSystem()->collidemap[Unit::UNIT_BOLT]->CheckCollisions( this, **location );
 }
+
 static bool beamCheckCollision( QVector pos, float len, const Collidable &un )
 {
     return (un.GetPosition()-pos).MagnitudeSquared() <= len*len+2*len*un.radius+un.radius*un.radius;
 }
+
 void Beam::CollideHuge( const LineCollide &lc, Unit *targetToCollideWith, Unit *firer, Unit *superunit )
 {
     QVector x0 = center;
@@ -161,13 +170,11 @@ void Beam::CollideHuge( const LineCollide &lc, Unit *targetToCollideWith, Unit *
         } else {
             ++tmore;
         }
-        double t  = v.Dot( x0 )/v.Dot( v );         //find where derivative of radius is zero
         double r0 = x0.i;
         double r1 = x0.i+v.i;
         double minlook   = r0 < r1 ? r0 : r1;
         double maxlook   = r0 < r1 ? r1 : r0;
         bool   targcheck = false;
-
         maxlook += ( maxlook-(*superunit->location[Unit::UNIT_ONLY])->getKey() )+2*curlength;           //double damage, yo
         minlook += ( minlook-(*superunit->location[Unit::UNIT_ONLY])->getKey() )-2*curlength*curlength;
         //(a+2*b)^2-(a+b)^2 = 3b^2+2ab = 2b^2+(a+b)^2-a^2

@@ -21,7 +21,6 @@
 CSVRow LookupUnitRow( const string &unitname, const string &faction )
 {
     string hashname = unitname+"__"+faction;
-    unsigned int where;     //gets munged
     for (vector< CSVTable* >::reverse_iterator i = unitTables.rbegin(); i != unitTables.rend(); ++i) {
         unsigned int where;
         if ( (*i)->RowExists( hashname, where ) )
@@ -44,32 +43,6 @@ extern void pushMesh( std::vector< Mesh* >&mesh,
                       double texturestarttime );
 void addShieldMesh( Unit::XML*xml, const char *filename, const float scale, int faction, class Flightgroup*fg );
 void addRapidMesh( Unit::XML*xml, const char *filename, const float scale, int faction, class Flightgroup*fg );
-
-static vector< string >parseSemicolon( string inp )
-{
-    vector< string >  ret;
-    string::size_type where;
-    string::size_type ofs = 0;
-    while ( ( where = inp.find( ';', ofs ) ) != string::npos ) {
-        ret.push_back( inp.substr( ofs, where-ofs ) );
-        ofs = where+1;
-    }
-    ret.push_back( inp.substr( ofs ) );
-    return ret;
-}
-
-static vector< vector< string > >parseBracketSemicolon( string inp )
-{
-    vector< vector< string > >ret;
-    string::size_type where, when;
-    string::size_type ofs = 0;
-    while ( ( where = inp.find( '{', ofs ) ) != string::npos ) {
-        if ( ( when = inp.find( '}', where+1 ) ) != string::npos ) {
-            ret.push_back( parseSemicolon( inp.substr( where+1, when-where-1 ) ) );
-            ofs = when+1;
-        } else {ofs = string::npos; }}
-    return ret;
-}
 
 static void UpgradeUnit( Unit *un, const std::string &upgrades )
 {
@@ -231,18 +204,6 @@ static int stoi( const string &inp, int def = 0 )
 extern bool CheckAccessory( Unit* );
 
 extern int parseMountSizes( const char *str );
-
-static Mount * createMount( const std::string &name,
-                            int ammo,
-                            int volume,
-                            float xyscale,
-                            float zscale,
-                            float func,
-                            float maxfunc,
-                            bool banked )                                                                                                      //short fix
-{
-    return new Mount( name.c_str(), ammo, volume, xyscale, zscale, func, maxfunc, banked );
-}
 
 static void AddMounts( Unit *thus, Unit::XML &xml, const std::string &mounts )
 {
@@ -671,12 +632,6 @@ void LoadCockpit( Unit *thus, const string &cockpit )
     thus->pImage->CockpitCenter.k = nextElementFloat( cockpit, elemstart, elemend );
 }
 
-static string str( string inp, string def )
-{
-    if (inp.length() == 0) return def;
-    return inp;
-}
-
 static int AssignIf( const string &inp, float &val, float &val1, float &val2 )
 {
     if ( inp.length() ) {
@@ -749,7 +704,6 @@ const std::string EMPTY_STRING( "" );
 void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
 {
     CSVTable *table = row.getParent();
-
     Unit::XML xml;
     xml.unitModifications  = modification.c_str();
     xml.randomstartframe   = ( (float) rand() )/RAND_MAX;
@@ -762,7 +716,6 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     xml.unitlevel  = 0;
     xml.unitscale  = 1;
     xml.data = xml.shieldmesh = xml.rapidmesh = NULL;     //was uninitialized memory
-
     string tmpstr;
     csvRow   = row[0];
     DEF_OPTIMIZER( FaceCamera );
@@ -1008,10 +961,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
         }
         table->SetupOptimizer( keys, LOADROW_OPTIMIZER );
     }
-    bool   use_optimizer = (table && table->optimizer_setup && table->optimizer_type == LOADROW_OPTIMIZER);
-
     //begin the geometry (and things that depend on stats)
-    double start = queryTime();
     fullname = OPTIM_GET( row, table, Name );
     //pImage->description=OPTIM_GET(row,table,Description);
     if ( ( tmpstr = OPTIM_GET( row, table, Hud_image ) ).length() != 0 ) {
@@ -1026,7 +976,6 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     }
     if ( ( tmpstr = OPTIM_GET( row, table, FaceCamera ) ).length() != 0 )
         graphicOptions.FaceCamera = XMLSupport::parse_bool( tmpstr ) ? 1 : 0;
-    double spritet = queryTime();
     std::string llegacy_combat_role( OPTIM_GET( row, table, Combat_Role ) );
     std::string lunit_role( OPTIM_GET( row, table, Unit_Role ) );
     std::string lattack_preference( OPTIM_GET( row, table, Attack_Preference ) );
@@ -1045,12 +994,10 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     xml.unitscale     = stof( OPTIM_GET( row, table, Unit_Scale ), 1 );
     if (!xml.unitscale) xml.unitscale = 1;
     pImage->unitscale = xml.unitscale;
-    double meshest = queryTime();
     AddMeshes( xml.meshes, xml.randomstartframe, xml.randomstartseconds, xml.unitscale, OPTIM_GET( row,
                                                                                                    table,
                                                                                                    Mesh ), faction,
               getFlightgroup() );
-    double subunt = queryTime();
     AddDocks( this, xml, OPTIM_GET( row, table, Dock ) );
     AddSubUnits( this, xml, OPTIM_GET( row, table, Sub_Units ), faction, modification );
 
@@ -1059,16 +1006,13 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     corner_min = Vector( FLT_MAX, FLT_MAX, FLT_MAX );
     corner_max = Vector( -FLT_MAX, -FLT_MAX, -FLT_MAX );
     calculate_extent( false );
-    double mountst = queryTime();
     AddMounts( this, xml, OPTIM_GET( row, table, Mounts ) );
-    double cargot  = queryTime();
     this->pImage->CargoVolume = stof( OPTIM_GET( row, table, Hold_Volume ) );
     this->pImage->HiddenCargoVolume = stof( OPTIM_GET( row, table, Hidden_Hold_Volume ) );
     this->pImage->UpgradeVolume     = stof( OPTIM_GET( row, table, Upgrade_Storage_Volume ) );
     this->pImage->equipment_volume  = stof( OPTIM_GET( row, table, Equipment_Space ) );
     ImportCargo( this, OPTIM_GET( row, table, Cargo_Import ) );     //if this changes change planet_generic.cpp
     AddCarg( this, OPTIM_GET( row, table, Cargo ) );
-    double soundst = queryTime();
     AddSounds( this, OPTIM_GET( row, table, Sounds ) );
     LoadCockpit( this, OPTIM_GET( row, table, Cockpit ) );
     pImage->CockpitCenter.i = stof( OPTIM_GET( row, table, CockpitX ) )*xml.unitscale;
@@ -1087,7 +1031,6 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     armor.frontrightbottom = stof( OPTIM_GET( row, table, Armor_Front_Bottom_Right ) );
     armor.backleftbottom   = stof( OPTIM_GET( row, table, Armor_Back_Bottom_Left ) );
     armor.backrightbottom  = stof( OPTIM_GET( row, table, Armor_Back_Bottom_Right ) );
-
     int    shieldcount = 0;
     Shield two;
     Shield four;
@@ -1103,7 +1046,6 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
                              two.shield2fb.back, four.shield4fbrl.back, eight.shield8.backlefttop );
     shieldcount += AssignIf( OPTIM_GET( row, table, Shield_Back_Top_Right ),
                              two.shield2fb.back, four.shield4fbrl.back, eight.shield8.backrighttop );
-
     shieldcount += AssignIf( OPTIM_GET( row, table, Shield_Front_Bottom_Left ),
                              two.shield2fb.front, four.shield4fbrl.left, eight.shield8.frontleftbottom );
     shieldcount += AssignIf( OPTIM_GET( row, table, Shield_Front_Bottom_Right ),
@@ -1112,14 +1054,12 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
                              two.shield2fb.back, four.shield4fbrl.left, eight.shield8.backleftbottom );
     shieldcount += AssignIf( OPTIM_GET( row, table, Shield_Back_Bottom_Right ),
                              two.shield2fb.back, four.shield4fbrl.right, eight.shield8.backrightbottom );
-
     two.shield2fb.frontmax = two.shield2fb.front;
     two.shield2fb.backmax = two.shield2fb.back;
     four.shield4fbrl.frontmax = four.shield4fbrl.front;
     four.shield4fbrl.backmax = four.shield4fbrl.back;
     four.shield4fbrl.rightmax = four.shield4fbrl.right;
     four.shield4fbrl.leftmax = four.shield4fbrl.left;
-
     eight.shield8.frontlefttopmax     = eight.shield8.frontlefttop;
     eight.shield8.frontrighttopmax    = eight.shield8.frontrighttop;
     eight.shield8.backrighttopmax     = eight.shield8.backrighttop;
@@ -1342,9 +1282,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     pImage->SPECDriveFunctionalityMax   = stof( OPTIM_GET( row, table, Max_SPECDrive_Functionality ) );
     computer.slide_start = stoi( OPTIM_GET( row, table, Slide_Start ) );
     computer.slide_end   = stoi( OPTIM_GET( row, table, Slide_End ) );
-    double upgradet = queryTime();
     UpgradeUnit( this, OPTIM_GET( row, table, Upgrades ) );
-
     {
         std::string   tractorability = OPTIM_GET( row, table, Tractorability );
         unsigned char tflags;
@@ -1356,7 +1294,6 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
                 tflags |= tractorIn;
         } else {tflags = tractorPush; } setTractorability( (enum tractorHow) tflags );
     }
-    double explodet = queryTime();
     this->pImage->explosion_type = OPTIM_GET( row, table, Explosion );
     if ( pImage->explosion_type.get().length() ) {
         cache_ani( pImage->explosion_type );
@@ -1364,9 +1301,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
         static std::string expani = vs_config->getVariable( "graphics", "explosion_animation", "explosion_orange.ani" );
         cache_ani( expani );
     }
-    double lightt = queryTime();
     AddLights( this, xml, OPTIM_GET( row, table, Light ) );
-
     xml.shieldmesh_str = OPTIM_GET( row, table, Shield_Mesh );
     if ( xml.shieldmesh_str.length() ) {
         addShieldMesh( &xml, xml.shieldmesh_str.c_str(), xml.unitscale, faction, getFlightgroup() );
@@ -1377,9 +1312,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
         meshdata.back() = new SphereMesh( rSize(), shieldstacks, shieldstacks, shieldtex.c_str(), NULL, false, ONE, ONE );
     }
     meshdata.back()->EnableSpecialFX();
-
     //Begin the Pow-w-w-war Zone Collide Tree Generation
-    double treet = queryTime();
     {
         xml.rapidmesh_str = OPTIM_GET( row, table, Rapid_Mesh );
         vector< mesh_polygon >polies;
@@ -1389,7 +1322,6 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
         if (this->colTrees)
             this->colTrees->Inc();
         csOPCODECollider *colShield = NULL;
-        csOPCODECollider *colTree = NULL;
         string   tmpname   = row[0];       //key
         if (!this->colTrees) {
             string val;
@@ -1434,19 +1366,8 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
             }
         }
     }
-
     CheckAccessory( this );     //turns on the ceerazy rotation for any accessories
     this->setAverageGunSpeed();
-    double endt = queryTime();
-#if 0
-    printf
-    (
-       "spr %f mesh %f subun %f mount %f carg %f \
-        sound %f upg %f exp %f light %f tree %f\n",
-        spritet-start, subunt-meshest, mountst-subunt, cargot-mountst, soundst-cargot,
-        upgradet-soundst, explodet-upgradet, lightt-explodet, treet-lightt, endt-treet
-    );
-#endif
 }
 
 CSVRow GetUnitRow( string filename, bool subu, int faction, bool readlast, bool &rread )

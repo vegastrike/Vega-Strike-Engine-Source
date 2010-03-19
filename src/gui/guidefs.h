@@ -220,14 +220,14 @@ GFXColor GUI_OPAQUE_MEDIUM_GRAY(); //(0.5,0.5,0.5);
 GFXColor GUI_OPAQUE_DARK_GRAY(); //(0.75,0.75,0.75);
 
 //Whether a color is clear -- totally transparent.
-static bool isClear( const GFXColor &c )
+inline bool isClear( const GFXColor &c )
 {
     return c.a <= 0.0;
 }
 
 //Compare two colors.
 //Used in upgrade/downgrade to decide whether an item is OK.
-static bool equalColors( const GFXColor &c1, const GFXColor &c2 )
+inline bool equalColors( const GFXColor &c1, const GFXColor &c2 )
 {
     return c1.r == c2.r && c1.g == c2.g && c1.b == c2.b && c1.a == c2.a;
 }

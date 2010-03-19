@@ -162,7 +162,7 @@ void cleanup( void )
 #endif
 #else
     while (!cleanexit)
-        int i = 1;
+        int i = 1; //FIXME: WHAT THE HELL IS THIS???!!! meant to be Sleep(0)? unused variable warning. --chuck_starchaser
 #endif
     if (Network != NULL) {
         cout<<"Number of players"<<_Universe->numPlayers()<<endl;
@@ -175,7 +175,6 @@ void cleanup( void )
     if (cloak_cg->vertexProgram) cgDestroyProgram( cloak_cg->vertexProgram );
     if (cloak_cg->shaderContext) cgDestroyContext( cloak_cg->shaderContext );
 #endif
-
     Music::CleanupMuzak();
     winsys_shutdown();
     //write_config_file();

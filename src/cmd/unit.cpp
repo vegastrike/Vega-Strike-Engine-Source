@@ -312,25 +312,19 @@ void GameUnit< UnitType >::DrawNow( const Matrix &mato, float lod )
     float  haloalpha   = 1;
     if (cloak >= 0)
         haloalpha = ( (float) cloak )/2147483647;
-    float  enginescale = this->GetVelocity().MagnitudeSquared();
 #ifdef CAR_SIM
     Vector Scale( 1, pImage->ecm, computer.set_speed );
 #else
     float  cmas = this->computer.max_ab_speed()*this->computer.max_ab_speed();
     if (cmas == 0)
         cmas = 1;
-    /*if (enginescale>cmas)
-     *  enginescale=cmas;
-     *  Vector Scale (1,1,enginescale/(cmas));*/
-    Vector Scale( 1, 1, 1 );     //Now HaloSystem should handle it
+        Vector Scale( 1, 1, 1 );         //Now, HaloSystem handles that
 #endif
-
     int    nummounts = this->GetNumMounts();
     for (i = 0; (int) i < nummounts; i++) {
         static bool draw_mounts = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "draw_weapons", "false" ) );
         Mount *mahnt = &this->mounts[i];
         if (draw_mounts)
-//Mesh * gun = WeaponMeshCache::getCachedMutable (mounts[i]->type->weapon_name);
             if (mahnt->xyscale != 0 && mahnt->zscale != 0) {
                 Mesh *gun = mahnt->type->gun;
                 if (gun && mahnt->status != Mount::UNCHOSEN) {
@@ -616,8 +610,6 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
         if (damagelevel < .99 && numm > 0 && this->GetHull() > 0) {
             unsigned int switcher    = (damagelevel > .8) ? 1
                                        : (damagelevel > .6) ? 2 : (damagelevel > .4) ? 3 : (damagelevel > .2) ? 4 : 5;
-            const unsigned long thus = (unsigned long) this;
-
             static float sparklerate = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparklerate", "5" ) );
             sparkle_accum += GetElapsedTime()*sparklerate;
             int spawn = (int) (sparkle_accum);
