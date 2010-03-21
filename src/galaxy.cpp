@@ -15,6 +15,7 @@
 extern vs_options game_options;
 using namespace XMLSupport;
 using namespace GalaxyXML;
+
 string RemoveDotSystem( const char *input )
 {
     int   sl  = strlen( input );
@@ -68,6 +69,7 @@ void ClampIt( float &prop, float min, float max )
     if (prop > max)
         prop = max;
 }
+
 void ClampIt( int &prop, int min, int max )
 {
     if (prop < min)
@@ -75,6 +77,7 @@ void ClampIt( int &prop, int min, int max )
     if (prop > max)
         prop = max;
 }
+
 static void clampSystem( SystemInfo &si, const SystemInfo &min, const SystemInfo &max )
 {
     ClampIt( si.sunradius, min.sunradius, max.sunradius );
@@ -105,6 +108,7 @@ void GetSystemXProp( Galaxy *galaxy, std::string sector, std::string minmax, Sys
     si.backgrounds   = getVarEitherSectionOrSub( galaxy, sector, minmax, "backgroundlist", "background.txt" );
     si.force         = parse_bool( getVarEitherSectionOrSub( galaxy, sector, minmax, "force", "false" ) );
 }
+
 SystemInfo GetSystemMin( Galaxy *galaxy )
 {
     SystemInfo si;
@@ -123,29 +127,28 @@ static float av01()
 {
     return ( float( rand() ) )/( ( ( (float) RAND_MAX )+1 ) );
 }
+
 static float sqav01()
 {
     float tmp = av01();
     return tmp*tmp;
 }
-static float fav( float in1, float in2 )
-{
-    return in1+(in2-in1)*av01();
-}
+
 static float fsqav( float in1, float in2 )
 {
     return sqav01()*(in2-in1)+in1;
 }
-//not including in2
+
 static int rnd( int in1, int in2 )
 {
     return (int) ( in1+(in2-in1)*( float( rand() ) )/( ( (float) RAND_MAX )+1 ) );
 }
-//inclusive
+
 static int iav( int in1, int in2 )
 {
     return rnd( in1, in2+1 );
 }
+
 static int isqav( int in1, int in2 )
 {
     return (int) ( in1+(in2+1-in1)*sqav01() );
@@ -236,12 +239,14 @@ std::string Universe::getGalaxyProperty( const std::string &sys, const std::stri
     return galaxy->getVariable( sector, name, prop,
                                galaxy->getVariable( sector, prop, galaxy->getVariable( "unknown_sector", "min", prop, "" ) ) );
 }
+
 std::string Universe::getGalaxyPropertyDefault( const std::string &sys, const std::string &prop, const std::string def )
 {
     string sector = getStarSystemSector( sys );
     string name   = RemoveDotSystem( getStarSystemName( sys ).c_str() );
     return galaxy->getVariable( sector, name, prop, def );
 }
+
 const vector< std::string >& Universe::getAdjacentStarSystems( const std::string &file ) const
 {
     string sector = getStarSystemSector( file );

@@ -20,6 +20,7 @@ double saved_interpolation_blend_factor;
 double interpolation_blend_factor;
 bool   cam_setup_phase = false;
 extern const char *DamagedCategory;
+
 int cloakVal( int cloak, int cloakmin, int cloakrate, bool cloakglass )
 {
     //Short fix ?
@@ -33,6 +34,7 @@ int cloakVal( int cloak, int cloakmin, int cloakrate, bool cloakglass )
         cloak += 1;
     return cloak;
 }
+
 const Unit * getUnitFromUpgradeName( const string &upgradeName, int myUnitFaction = 0 )
 {
     const char *name     = upgradeName.c_str();
@@ -67,11 +69,13 @@ int SelectDockPort( Unit *utdw, Unit *parent )
         }
     return num;
 }
+
 //From unit_customize.cpp
 Unit * CreateGameTurret( std::string tur, int faction )
 {
     return UnitFactory::createUnit( tur.c_str(), true, faction );
 }
+
 void SetShieldZero( Unit *un )
 {
     switch (un->shield.number)
@@ -290,6 +294,7 @@ int parseMountSizes( const char *str )
         ans |= lookupMountSize( tmp[i] );
     return ans;
 }
+
 void DealPossibleJumpDamage( Unit *un )
 {
     float speed  = un->GetVelocity().Magnitude();
@@ -312,7 +317,6 @@ void DealPossibleJumpDamage( Unit *un )
 
 void Enslave( Unit *parent, bool enslave )
 {
-    bool free = !enslave;
     unsigned int   i;
     vector< Cargo >ToBeChanged;
     unsigned int   numcargo = parent->numCargo();

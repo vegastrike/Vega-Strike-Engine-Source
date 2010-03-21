@@ -61,13 +61,10 @@ string varToString( varInst *vi )
     {
     case VAR_FLOAT:
         return XMLSupport::tostring( (float) vi->float_val );
-
     case VAR_INT:
         return XMLSupport::tostring( vi->int_val );
-
     case VAR_BOOL:
         return XMLSupport::tostring( vi->bool_val );
-
     case VAR_OBJECT:
     default:
         if (vi->objectname == "string")
@@ -89,7 +86,6 @@ void Mission::doCall_toxml( string module, varInst *ovi )
 varInst* Mission::doCall( missionNode *node, int mode, string module, string method )
 {
     varInst *vi = NULL;
-
     callback_module_type module_id = node->script.callback_module_id;
     if (module_id == CMT_UNIT) {
         vi = call_unit( node, mode );
@@ -157,15 +153,6 @@ varInst* Mission::doCall( missionNode *node, int mode, string module, string met
                 speed.j = getFloatArg( node, mode, 5 );
                 speed.k = getFloatArg( node, mode, 6 );
             }
-            /*
-             *  if (mode==SCRIPT_RUN) {
-             *  int sound = AUDCreateSoundWAV (soundName,false);
-             *  AUDAdjustSound (sound,loc,speed);
-             *  AUDStartPlaying (sound);
-             *  AUDDeleteSound(sound);
-             *  //won't actually toast it until it stops
-             *  }
-             */
             vi = newVarInst( VI_TEMP );
             vi->type = VAR_VOID;
         } else if (method_id == CMT_STD_playSoundCockpit) {
@@ -176,12 +163,6 @@ varInst* Mission::doCall( missionNode *node, int mode, string module, string met
             loc.i    = getFloatArg( node, mode, 1 );
             loc.j    = getFloatArg( node, mode, 2 );
             loc.k    = getFloatArg( node, mode, 3 );
-            float size = getFloatArg( node, mode, 4 );
-            /*
-             *  if (mode==SCRIPT_RUN) {
-             *  AddAnimation(loc,size,true,aniName,1);
-             *  }
-             */
             vi       = newVarInst( VI_TEMP );
             vi->type = VAR_VOID;
         }
@@ -235,7 +216,6 @@ varInst* Mission::doCall( missionNode *node, int mode )
         //does not work yet
         string   object = node->attr_value( "object" );
         assert( 0 );
-        //varInst *ovi=lookupVariable(object);
         varInst *ovi    = NULL;
         if (ovi == NULL) {
             fatalError( node, mode, "no object found with name "+object );
@@ -253,9 +233,7 @@ varInst* Mission::doCall( missionNode *node, int mode )
         module = "_"+module;
     }
     string   method = node->script.name;
-
     varInst *vi     = NULL;
-
     vi = doCall( node, mode, module, method );
     if (vi == NULL) {
         fatalError( node, mode, "no such callback named "+module+"."+node->script.name );
@@ -269,12 +247,9 @@ varInst* Mission::doCall( missionNode *node, int mode )
 varInst* Mission::call_isNull( missionNode *node, int mode )
 {
     varInst *ovi   = getObjectArg( node, mode );
-
     varInst *viret = newVarInst( VI_TEMP );
-
     viret->type     = VAR_BOOL;
     viret->bool_val = (ovi->object == NULL);
-
     deleteVarInst( ovi );
     return viret;
 }
@@ -282,19 +257,15 @@ varInst* Mission::call_isNull( missionNode *node, int mode )
 varInst* Mission::call_setNull( missionNode *node, int mode )
 {
     varInst *ovi = getObjectArg( node, mode );
-
     ovi->object = NULL;
-
     varInst *viret = newVarInst( VI_TEMP );
     viret->type = VAR_VOID;
-
     deleteVarInst( ovi );
     return viret;
 }
 
 varInst* Mission::call_terminateMission( missionNode *node, int mode )
 {
-    //varInst *ovi=getObjectArg(node,mode);
     getBoolArg( node, mode, 0 );
     if (mode == SCRIPT_RUN)
         terminateMission();
@@ -307,12 +278,9 @@ varInst* Mission::call_float_cast( missionNode *node, int mode )
 {
     missionNode *snode = getArgument( node, mode, 0 );
     int intval = checkIntExpr( snode, mode );
-
     varInst     *viret = newVarInst( VI_TEMP );
-
     viret->type = VAR_FLOAT;
     viret->float_val = (float) intval;
-
     return viret;
 }
 
@@ -320,12 +288,9 @@ varInst* Mission::call_int_cast( missionNode *node, int mode )
 {
     missionNode *snode = getArgument( node, mode, 0 );
     double floatval    = checkFloatExpr( snode, mode );
-
     varInst     *viret = newVarInst( VI_TEMP );
-
     viret->type    = VAR_INT;
     viret->int_val = (int) floatval;
-
     return viret;
 }
 
@@ -334,9 +299,7 @@ varInst* Mission::call_isequal( missionNode *node, int mode )
     varInst     *ovi = getObjectArg( node, mode );
     missionNode *other_node = getArgument( node, mode, 1 );
     varInst     *other_vi   = checkObjectExpr( other_node, mode );
-
     varInst     *viret = newVarInst( VI_TEMP );
-
     viret->type = VAR_BOOL;
     bool res = false;
     if (mode == SCRIPT_RUN) {
@@ -346,7 +309,6 @@ varInst* Mission::call_isequal( missionNode *node, int mode )
     }
     deleteVarInst( ovi );
     deleteVarInst( other_vi );
-
     viret->bool_val = res;
     return viret;
 }
@@ -354,7 +316,6 @@ varInst* Mission::call_isequal( missionNode *node, int mode )
 varInst* Mission::callGetGameTime( missionNode *node, int mode )
 {
     varInst *vi = newVarInst( VI_TEMP );
-
     vi->type = VAR_FLOAT;
     if (mode == SCRIPT_RUN)
         vi->float_val = gametime;
@@ -364,7 +325,6 @@ varInst* Mission::callGetGameTime( missionNode *node, int mode )
 varInst* Mission::callResetTimeCompression( missionNode *node, int mode )
 {
     varInst *vi = newVarInst( VI_TEMP );
-
     vi->type = VAR_VOID;
     if (mode == SCRIPT_RUN)
         setTimeCompression( 1.0 );
@@ -454,7 +414,6 @@ varInst* Mission::call_io_printmsglist( missionNode *node, int mode )
     }
     varInst *viret = newVarInst( VI_TEMP );
     viret->type = VAR_VOID;
-
     return viret;
 }
 
@@ -463,7 +422,6 @@ varInst* Mission::call_io_message( missionNode *node, int mode )
     missionNode *args[3];
     varInst     *args_vi[3];
     string args_str[3];
-
     int    delay = (int) getIntArg( node, mode, 0 );
     for (int i = 0; i < 3; i++) {
         args[i]    = getArgument( node, mode, i+1 );
@@ -476,7 +434,6 @@ varInst* Mission::call_io_message( missionNode *node, int mode )
         msgcenter->add( args_str[0], args_str[1], args_str[2], delay );
     varInst *viret = newVarInst( VI_TEMP );
     viret->type = VAR_VOID;
-
     return viret;
 }
 
@@ -484,13 +441,9 @@ varInst* Mission::call_io_message( missionNode *node, int mode )
 string Mission::replaceNewline( string origstr )
 {
     string ostr     = origstr;
-
     int    breakpos = ostr.find( "\\n", 0 );
     if (breakpos >= 0) {
-        //printf("breakpos=%d\n",breakpos);
-
         string newstr = ostr.replace( breakpos, 2, "\n" );
-
         return replaceNewline( newstr );
     } else {
         return ostr;
@@ -503,10 +456,8 @@ varInst* Mission::call_io_sprintf( missionNode *node, int mode )
     missionNode *outstr_node = getArgument( node, mode, 0 );
     varInst     *outstr_vi   = checkObjectExpr( outstr_node, mode );
     string *outstrptr = getStringObject( outstr_node, mode, outstr_vi );
-
     char    outbuffer[1024];
     string  outstring;
-
     missionNode *stringnode = getArgument( node, mode, 1 );
     if (stringnode->tag != DTAG_CONST) {
         fatalError( node, mode, "only const string allowed for second arg of sprintf" );
@@ -521,27 +472,14 @@ varInst* Mission::call_io_sprintf( missionNode *node, int mode )
     int     current_arg = 2;
     string *fullstringptr;
     string  fullstring;
-
     fullstringptr = (string*) str_vi->object;
     fullstring    = *fullstringptr;
-
     fullstring    = replaceNewline( fullstring );
-
-    //cout << "printf string-" << fullstring << "-" << endl;
-
-    //if(mode==SCRIPT_RUN){
-
     string endstring = fullstring;
     while (current_arg < nr_of_args) {
         int    breakpos     = endstring.find( "%", 0 );
-
         string beforestring = endstring.substr( 0, breakpos );
-
-        //printf("beforestr=-%s-","%s", beforestring.c_str());
-
         string breakstring = endstring.substr( breakpos, 2 );
-        //printf("breakstr=-%s-\n",breakstring.c_str());
-        //printf("**");
         if (breakstring[1] == 'f') {
             missionNode *anode = getArgument( node, mode, current_arg );
             double res = checkFloatExpr( anode, mode );
@@ -569,7 +507,6 @@ varInst* Mission::call_io_sprintf( missionNode *node, int mode )
                     assert( 0 );
                 }
                 string *strptr = (string*) res_vi->object;
-
                 sprintf( outbuffer, "%s", beforestring.c_str() );
                 outstring += outbuffer;
                 sprintf( outbuffer, "%s", strptr->c_str() );
@@ -577,19 +514,14 @@ varInst* Mission::call_io_sprintf( missionNode *node, int mode )
             }
             deleteVarInst( res_vi );
         }
-        //printf("++");
-
         endstring = endstring.substr( breakpos+2, endstring.size()-(breakpos+2) );
-        //printf("endstr=-%s-\n",endstring.c_str());
-
         current_arg++;
-    }     //while
+    }
     if (mode == SCRIPT_RUN) {
         sprintf( outbuffer, "%s", endstring.c_str() );
         outstring   += outbuffer;
         (*outstrptr) = outstring;
     }
-    //printf("--end==\n");
     varInst *viret = newVarInst( VI_TEMP );
     viret->type = VAR_VOID;
     deleteVarInst( str_vi );
@@ -614,27 +546,14 @@ varInst* Mission::call_io_printf( missionNode *node, int mode )
     int     current_arg = 1;
     string *fullstringptr;
     string  fullstring;
-
     fullstringptr = (string*) str_vi->object;
     fullstring    = *fullstringptr;
-
     fullstring    = replaceNewline( fullstring );
-
-    //cout << "printf string-" << fullstring << "-" << endl;
-
-    //if(mode==SCRIPT_RUN){
-
     string endstring = fullstring;
     while (current_arg < nr_of_args) {
         int    breakpos     = endstring.find( "%", 0 );
-
         string beforestring = endstring.substr( 0, breakpos );
-
-        //printf("beforestr=-%s-","%s", beforestring.c_str());
-
         string breakstring = endstring.substr( breakpos, 2 );
-        //printf("breakstr=-%s-\n",breakstring.c_str());
-        //printf("**");
         if (breakstring[1] == 'f') {
             missionNode *anode = getArgument( node, mode, current_arg );
             double res = checkFloatExpr( anode, mode );
@@ -674,16 +593,11 @@ varInst* Mission::call_io_printf( missionNode *node, int mode )
             }
             deleteVarInst( res_vi );
         }
-        //printf("++");
-
         endstring = endstring.substr( breakpos+2, endstring.size()-(breakpos+2) );
-        //printf("endstr=-%s-\n",endstring.c_str());
-
         current_arg++;
-    }     //while
+    }
     if (mode == SCRIPT_RUN)
         printf( "%s", endstring.c_str() );
-    //printf("--end==\n");
     varInst *viret = newVarInst( VI_TEMP );
     viret->type = VAR_VOID;
     deleteVarInst( str_vi );
@@ -691,22 +605,10 @@ varInst* Mission::call_io_printf( missionNode *node, int mode )
     return viret;
 }
 
-/*
- * #include "cmd/music.h"
- *  extern Music *muzak;
- */
-
 varInst* Mission::call_musicAddList( missionNode *node, int mode )
 {
     varInst *vi  = newVarInst( VI_TEMP );
     vi->type    = VAR_INT;
-    string   str = getStringArgument( node, mode, 0 );
-    /*
-     *  if(mode==SCRIPT_RUN){
-     *  int ret=muzak->Addlist(str.c_str());
-     *  vi->int_val=ret;
-     *  }
-     */
     vi->int_val = 0;
     return vi;
 }
@@ -715,12 +617,6 @@ varInst* Mission::call_musicPlaySong( missionNode *node, int mode )
 {
     varInst *vi  = newVarInst( VI_TEMP );
     vi->type = VAR_VOID;
-    string   str = getStringArgument( node, mode, 0 );
-    /*
-     *  if(mode==SCRIPT_RUN){
-     *  muzak->GotoSong(str);
-     *  }
-     */
     return vi;
 }
 
@@ -728,12 +624,6 @@ varInst* Mission::call_musicPlayList( missionNode *node, int mode )
 {
     varInst *vi = newVarInst( VI_TEMP );
     vi->type = VAR_VOID;
-    int which   = (int) getIntArg( node, mode, 0 );
-    /*
-     *  if(mode==SCRIPT_RUN){
-     *  muzak->SkipRandSong(which);
-     *  }
-     */
     return vi;
 }
 

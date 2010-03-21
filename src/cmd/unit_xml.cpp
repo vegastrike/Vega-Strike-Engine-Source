@@ -503,8 +503,6 @@ void pushMesh( std::vector< Mesh* > &meshes,
             if (fps > 0 && frames > 1) {
                 ran *= frames/fps;
             } else {
-                static float anitime =
-                    XMLSupport::parse_float( vs_config->getVariable( "graphics", "max_animation_time", "1000" ) );
                 ran *= 1000;
             }
             meshes.back()->setTextureCumulativeTime( ran );
@@ -964,7 +962,6 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             Q.k = 0;
         }
         R.Normalize();
-
         CrossProduct( Q, R, P );
         CrossProduct( R, P, Q );
         Q.Normalize();
@@ -981,7 +978,6 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         //->curr_physical_state=xml->units[indx]->prev_physical_state;
         setAverageGunSpeed();
         break;
-
     case SUBUNIT:
         ADDTAG;
         assert( xml->unitlevel == 1 );
@@ -1034,16 +1030,15 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
                 break;
             case RESTRICTED:
                 ADDDEFAULT;
-                fbrltb[0] = parse_float( (*iter).value );                   //minimum dot turret can have with "fore" vector
+                fbrltb[0] = parse_float( (*iter).value ); //minimum dot turret can have with "fore" vector
                 break;
             }
         }
         //Q.Normalize();
         //R.Normalize();
-
         //CrossProduct (Q,R,P);
         indx = xml->units.size();
-        xml->units.push_back( UnitFactory::createUnit( filename.c_str(), true, faction, xml->unitModifications, NULL ) );         //I set here the fg arg to NULL
+        xml->units.push_back( UnitFactory::createUnit( filename.c_str(), true, faction, xml->unitModifications, NULL ) ); //I set here the fg arg to NULL
         if (xml->units.back()->name == "LOAD_FAILED") {
             xml->units.back()->limits.yaw = 0;
             xml->units.back()->limits.pitch = 0;
@@ -1056,8 +1051,6 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         R.Normalize();
         xml->units[indx]->prev_physical_state = xml->units[indx]->curr_physical_state;
         xml->units[indx]->SetPosition( pos );
-        //xml->units[indx]->prev_physical_state= Transformation(Quaternion::from_vectors(P,Q,R),pos);
-        //xml->units[indx]->curr_physical_state=xml->units[indx]->prev_physical_state;
         xml->units[indx]->limits.structurelimits = R.Cast();
         xml->units[indx]->limits.limitmin = fbrltb[0];
         xml->units[indx]->name = filename;
@@ -1078,7 +1071,6 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         break;
     case NETCOM:
         {
-            int    playernum = _Universe->whichPlayerStarship( this );
             float  minfreq   = 0, maxfreq = 0;
             bool   video     = false, secured = false;
             string method;
@@ -1104,7 +1096,6 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
                     break;
                 }
             }
-            //Network[playernum].createNetComm( minfreq, maxfreq, video, secured, method);
         }
     case JUMP:
         {
@@ -1436,7 +1427,6 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         }
         break;
     case HULL:
-
         assert( xml->unitlevel == 2 );
         xml->unitlevel++;
         maxhull = 0;
@@ -1495,9 +1485,7 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             }
         }
         break;
-
     case ENGINE:
-
         assert( xml->unitlevel == 2 );
         xml->unitlevel++;
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
@@ -1530,7 +1518,6 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             }
         }
         break;
-
     case COMPUTER:
         ADDTAG;
         assert( xml->unitlevel == 1 );
@@ -1629,7 +1616,6 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             }
         }
         break;
-
     case YAW:
         ADDTAG;
         xml->yprrestricted += Unit::XML::YRESTR;
@@ -1715,9 +1701,7 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             }
         }
         break;
-
     case UNIT:
-
         assert( xml->unitlevel == 0 );
         xml->unitlevel++;
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
@@ -1793,12 +1777,10 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             }
         }
         break;
-
     case THRUST:
         assert( xml->unitlevel == 1 );
         xml->unitlevel++;
         break;
-
     case ENERGY:
         assert( xml->unitlevel == 1 );
         xml->unitlevel++;
@@ -1813,13 +1795,11 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             }
         }
         break;
-
     case RESTRICTED:
         ADDTAG;
         assert( xml->unitlevel == 1 );
         xml->unitlevel++;
         break;
-
     case UNKNOWN:
         ADDTAG;
     default:
@@ -1846,26 +1826,13 @@ void Unit::endElement( const string &name )
     switch (elem)
     {
     case UNKNOWN:
-
         xml->unitlevel--;
-//cerr << "Unknown element end tag '" << name << "' detected " << endl;
         break;
     default:
         xml->unitlevel--;
         break;
     }
 }
-/*
- *  unsigned char Unit::RecomputeRole() {
- *       //combat_role = 0;
- *       unsigned int mount_bitmask;
- *       for (unsigned int i=0;i<mounts.size();i++) {
- *               mount_bitmask |=mounts[i].type->role_bits;
- *       }
- *
- *       return combatRole();
- *  } VERY VERY LEGACY--no idea why or who did this
- */
 
 using namespace VSFileSystem;
 
@@ -1877,12 +1844,7 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
     shield.number = 0;
     string filename( f.GetFilename() );
     graphicOptions.RecurseIntoSubUnitsOnCollision = !isSubUnit();
-    const int   chunk_size = 16384;
-    //rrestricted=yrestricted=prestricted=false;
     std::string collideTreeHash = VSFileSystem::GetHashName( string( modifications )+"#"+filename );
-    //std::cout<<std::endl;
-    //cout<<"Loading XML unit : "<<filename<<" in "<<curdir[0]<<endl;
-    //std::cout<<std::endl;
     pImage->unitwriter = new XMLSerializer( name.get().c_str(), modifications, this );
     pImage->unitwriter->AddTag( "Unit" );
     string *myhudim = &pImage->unitwriter->randomdata[0];
@@ -1892,8 +1854,8 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
         pImage->unitwriter->AddTag( "Jump" );
         pImage->unitwriter->AddElement( "missing", lessNeg1Handler, XMLType( &jump.drive ) );
         pImage->unitwriter->AddElement( "warpDriveRating", floatStarHandler, XMLType( &jump.warpDriveRating ) );
-        pImage->unitwriter->AddElement( "jumpenergy", floatStarHandler, XMLType( &jump.energy ) );         //short fix
-        pImage->unitwriter->AddElement( "insysenergy", floatStarHandler, XMLType( &jump.insysenergy ) );         //short fix
+        pImage->unitwriter->AddElement( "jumpenergy", floatStarHandler, XMLType( &jump.energy ) ); //short fix
+        pImage->unitwriter->AddElement( "insysenergy", floatStarHandler, XMLType( &jump.insysenergy ) ); //short fix
         pImage->unitwriter->AddElement( "delay", delayucharStarHandler, XMLType( &jump.delay ) );
         pImage->unitwriter->AddElement( "damage", ucharStarHandler, XMLType( &jump.damage ) );
         pImage->unitwriter->AddElement( "wormhole", ucharStarHandler, XMLType( &pImage->forcejump ) );
@@ -1907,7 +1869,6 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
             pImage->unitwriter->EndTag( "CockpitDamage" );
         }
     }
-
     {
         pImage->unitwriter->AddTag( "Defense" );
         pImage->unitwriter->AddElement( "HudImage", stringStarHandler, XMLType( myhudim ) );
@@ -1964,7 +1925,6 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
 
         pImage->unitwriter->EndTag( "Energy" );
     }
-
     {
         pImage->unitwriter->AddTag( "Stats" );
         pImage->unitwriter->AddElement( "mass", massSerializer, XMLType( &Mass ) );
@@ -1993,16 +1953,6 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
         pImage->unitwriter->EndTag( "Thrust" );
     }
     pImage->CockpitCenter.Set( 0, 0, 0 );
-
-    /*
-     *  if( Network!=NULL)
-     *  {
-     *     int playernum = _Universe->whichPlayerStarship( this);
-     *     // Delete the current netcomm device if there is one
-     *     Network[playernum].destroyNetComm();
-     *  }
-     */
-
     xml = new XML();
     xml->randomstartframe   = ( (float) rand() )/RAND_MAX;
     xml->randomstartseconds = 0;
@@ -2029,8 +1979,6 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
     corner_min = Vector( FLT_MAX, FLT_MAX, FLT_MAX );
     corner_max = Vector( -FLT_MAX, -FLT_MAX, -FLT_MAX );
     warpenergy = maxwarpenergy;
-    //if (jump.energy>warpenergy)
-    //warpenergy=jump.energy;
     *myhudim   = xml->hudimage;
     unsigned int a;
     if ( xml->mountz.size() ) {
@@ -2038,8 +1986,6 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
         for (a = 0; a < xml->mountz.size(); a++)
             mounts.push_back( *xml->mountz[a] );
     }
-    //mounts[a]=*xml->mountz[a];
-    //delete xml->mountz[a];			//do it stealthily... no cons/destructor
     unsigned char parity = 0;
     for (a = 0; a < xml->mountz.size(); a++) {
         static bool half_sounds = XMLSupport::parse_bool( vs_config->getVariable( "audio", "every_other_mount", "false" ) );
@@ -2050,7 +1996,7 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
                     b = a+1;
             mounts[b].sound = AUDCreateSound( mounts[b].type->sound, mounts[b].type->type != weapon_info::PROJECTILE );
         } else if ( (!half_sounds) || mounts[a].type->type == weapon_info::PROJECTILE ) {
-            mounts[a].sound = AUDCreateSound( mounts[a].type->sound, mounts[a].type->type != weapon_info::PROJECTILE );             //lloping also flase in unit_customize
+            mounts[a].sound = AUDCreateSound( mounts[a].type->sound, mounts[a].type->type != weapon_info::PROJECTILE ); //lloping also flase in unit_customize
         }
         if (a > 0)
             if (mounts[a].sound == mounts[a-1].sound && mounts[a].sound != -1)
@@ -2059,18 +2005,13 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
     for (a = 0; a < xml->units.size(); a++)
         SubUnits.prepend( xml->units[a] );
     calculate_extent( false );
-    if ( !isSubUnit() ) {
-        //UpdateCollideQueue();
-    }
     pImage->unitscale = xml->unitscale;
     string tmpname( filename );
     vector< mesh_polygon >polies;
-
     this->colTrees = collideTrees::Get( collideTreeHash );
     if (this->colTrees)
         this->colTrees->Inc();
     csOPCODECollider *colShield = NULL;
-    csOPCODECollider *colTree   = NULL;
     if (xml->shieldmesh) {
         meshdata.back() = xml->shieldmesh;
         if (!this->colTrees) {

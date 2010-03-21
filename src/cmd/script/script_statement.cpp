@@ -125,7 +125,7 @@ void Mission::doWhile( missionNode *node, int mode )
         node->script.while_arg[0] = (missionNode*) node->subnodes[0];
         node->script.while_arg[1] = (missionNode*) node->subnodes[1];
 
-        bool res = checkBoolExpr( node->script.while_arg[0], mode );
+        bool res = checkBoolExpr( node->script.while_arg[0], mode ); //FIXME unused variable 'res' --chuck_starchaser
 
         checkStatement( node->script.while_arg[1], mode );
     } else {

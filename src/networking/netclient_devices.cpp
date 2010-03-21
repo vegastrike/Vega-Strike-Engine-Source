@@ -222,7 +222,6 @@ void NetClient::missionRequest( unsigned short packetType, string mission, int p
 
 void NetClient::communicationRequest( const CommunicationMessage &c, ObjSerial sendTo )
 {
-    FSM::Node *myNode = c.getCurrentState();
     NetBuffer  netbuf;
     netbuf.addSerial( sendTo );
     int edge = c.edgenum;

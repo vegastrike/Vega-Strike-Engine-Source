@@ -41,11 +41,14 @@ static bool nameIsAsteroid( std::string name )
 
 namespace UnitUtil
 {
+//
+
 template < typename T >
 static inline T mymin( T a, T b )
 {
     return (a < b) ? a : b;
 }
+
 template < typename T >
 static inline T mymax( T a, T b )
 {
@@ -59,19 +62,21 @@ bool isAsteroid( const Unit *my_unit )
     if (!my_unit) return false;
     return my_unit->isUnit() == ASTEROIDPTR || nameIsAsteroid( my_unit->name );
 }
+
 bool isCapitalShip( const Unit *my_unit )
 {
     if (!my_unit) return false;
-    bool res = false;
     static unsigned int capitaltypes = ROLES::getCapitalRoles();
     return ( ( 1<<(unsigned int) my_unit->unitRole() )&capitaltypes ) != 0;
 }
+
 bool hasDockingUnits( const Unit *my_unit )
 {
     if (!my_unit) return false;
     return (my_unit->DockedOrDocking()&Unit::DOCKING_UNITS)
            || ( my_unit->hasPendingClearanceRequests() );
 }
+
 int getPhysicsPriority( Unit *un )
 {
     static const bool FORCE_TOP_PRIORITY = XMLSupport::parse_bool(
@@ -155,39 +160,28 @@ int getPhysicsPriority( Unit *un )
         vs_config->getVariable( "physics", "priorities", "asteroid_high", "2" ) );
     static const int   ASTEROID_LOW_PRIORITY    = XMLSupport::parse_int(
         vs_config->getVariable( "physics", "priorities", "asteroid.low", "32" ) );
-
-    static const int   TOP_PRIORITY  = XMLSupport::parse_int(
-        vs_config->getVariable( "physics", "priorities", "top", "1" ) );
     static const int   HIGH_PRIORITY = XMLSupport::parse_int(
         vs_config->getVariable( "physics", "priorities", "high", SERVER ? "1" : "2" ) );
     static const int   MEDIUMHIGH_PRIORITY = XMLSupport::parse_int(
         vs_config->getVariable( "physics", "priorities", "mediumhigh", "4" ) );
     static const int   MEDIUM_PRIORITY     = XMLSupport::parse_int(
         vs_config->getVariable( "physics", "priorities", "medium", "8" ) );
-    static const int   MEDIUMLOW_PRIORITY  = XMLSupport::parse_int(
-        vs_config->getVariable( "physics", "priorities", "mediumlow", "16" ) );
     static const int   LOW_PRIORITY = XMLSupport::parse_int(
         vs_config->getVariable( "physics", "priorities", "low", "32" ) );
-
     static const int   NOT_VISIBLE_COMBAT_HIGH   = XMLSupport::parse_int(
         vs_config->getVariable( "physics", "priorities", "notvisible_combat_high", "10" ) );
     static const int   NOT_VISIBLE_COMBAT_MEDIUM = XMLSupport::parse_int(
         vs_config->getVariable( "physics", "priorities", "notvisible_combat_medium", "20" ) );
     static const int   NOT_VISIBLE_COMBAT_LOW    = XMLSupport::parse_int(
         vs_config->getVariable( "physics", "priorities", "notvisible_combat_low", "40" ) );
-
     static const int   NO_ENEMIES     = XMLSupport::parse_int(
         vs_config->getVariable( "physics", "priorities", "no_enemies", "64" ) );
     static const int   INERT_PRIORITY = XMLSupport::parse_int(
         vs_config->getVariable( "physics", "priorities", "inert", "64" ) );
-
     static const float _PLAYERTHREAT_DISTANCE_FACTOR = XMLSupport::parse_float(
         vs_config->getVariable( "physics", "priorities", "playerthreat_distance_factor", "2" ) );
     static const float _THREAT_DISTANCE_FACTOR    = XMLSupport::parse_float(
         vs_config->getVariable( "physics", "priorities", "threat_distance_factor", "1" ) );
-
-    static const bool  DYNAMIC_THROTTLE_ENABLE    = XMLSupport::parse_bool(
-        vs_config->getVariable( "physics", "priorities", "dynamic_throttle.enable", "true" ) );
     static const float DYNAMIC_THROTTLE_MINFACTOR = XMLSupport::parse_float(
         vs_config->getVariable( "physics", "priorities", "dynamic_throttle.mindistancefactor", "0.25" ) );
     static const float DYNAMIC_THROTTLE_MAXFACTOR = XMLSupport::parse_float(
@@ -195,7 +189,6 @@ int getPhysicsPriority( Unit *un )
     static const float DYNAMIC_THROTTLE_TARGETFPS = XMLSupport::parse_float(
         vs_config->getVariable( "physics", "priorities", "dynamic_throttle.targetfps", "30" ) );
     static const float DYNAMIC_THROTTLE_TARGETELAPSEDTIME = 1.f/DYNAMIC_THROTTLE_TARGETFPS;
-
     static float DYNAMIC_THROTTLE_FACTOR = 1.f;
     static float lastThrottleAdjust = 0;
     if (UniverseUtil::GetGameTime() != lastThrottleAdjust) {
@@ -206,12 +199,7 @@ int getPhysicsPriority( Unit *un )
     }
     const float PLAYERTHREAT_DISTANCE_FACTOR = _PLAYERTHREAT_DISTANCE_FACTOR*DYNAMIC_THROTTLE_FACTOR;
     const float THREAT_DISTANCE_FACTOR = _THREAT_DISTANCE_FACTOR*DYNAMIC_THROTTLE_FACTOR;
-
-    //Here we assume that SIM_QUEUE_SIZE is >=64
-    const int   LOWEST_PRIORITY = SIM_QUEUE_SIZE;
-
     Unit *parent        = cockpit->GetParent();
-
     float gun_range     = 0;
     float missile_range = 0;
     float dist = cpdist;
@@ -237,7 +225,6 @@ int getPhysicsPriority( Unit *un )
         case Unit::scheduleRoid:
             if (dist < tooclose)
                 return ASTEROID_HIGH_PRIORITY;
-
             else
                 return ASTEROID_LOW_PRIORITY;
         }
@@ -255,13 +242,12 @@ int getPhysicsPriority( Unit *un )
     if ( _Universe->isPlayerStarship( targ ) ) {
         if ( UnitUtil::getDistance( targ, un ) <= PLAYERTHREAT_DISTANCE_FACTOR*mymax( gun_range, missile_range ) )
             return un->isJumppoint() ? PLAYER_PRIORITY : HIGH_PRIORITY;
-
-        else                                                                               //Needs to accurately collide with it...
+        else //Needs to accurately collide with it...
             return MEDIUMHIGH_PRIORITY;
     }
     if (un->graphicOptions.WarpRamping || un->graphicOptions.RampCounter != 0) {
         static float compwarprampuptime =
-            XMLSupport::parse_float( vs_config->getVariable( "physics", "computerwarprampuptime", "10" ) );                                 //for the heck of it.  NOTE, variable also in unit_generic.cpp
+            XMLSupport::parse_float( vs_config->getVariable( "physics", "computerwarprampuptime", "10" ) ); //for the heck of it.  NOTE, variable also in unit_generic.cpp
         static float warprampdowntime   = XMLSupport::parse_float( vs_config->getVariable( "physics", "warprampdowntime", "0.5" ) );
         float lowest_priority_time = SIM_QUEUE_SIZE*SIMULATION_ATOM;
 
@@ -281,8 +267,7 @@ int getPhysicsPriority( Unit *un )
             return MEDIUM_PRIORITY;
         } else {
             if (system_installation)
-                return SIM_QUEUE_SIZE/ORBIT_PRIORITY;                  //so that the averaging can still keep track of parent jumps
-
+                return SIM_QUEUE_SIZE/ORBIT_PRIORITY; //so that the averaging can still keep track of parent jumps
             return INERT_PRIORITY;
         }
     }
@@ -292,10 +277,8 @@ int getPhysicsPriority( Unit *un )
     if ( dist < 2*PLAYERTHREAT_DISTANCE_FACTOR*mymax( missile_range, gun_range ) ) {
         if (dist < tooclose*PLAYERTHREAT_DISTANCE_FACTOR)
             return MEDIUMHIGH_PRIORITY;
-
         else if (dist < 2*gun_range*PLAYERTHREAT_DISTANCE_FACTOR)
             return MEDIUM_PRIORITY;
-
         else
             return LOW_PRIORITY;
     }
@@ -311,8 +294,7 @@ int getPhysicsPriority( Unit *un )
     }
     if (dist < tooclose*THREAT_DISTANCE_FACTOR)
         return MEDIUMHIGH_PRIORITY;
-
-    else                                         //May not have weapons (hence missile_range|gun_range == 0)
+    else //May not have weapons (hence missile_range|gun_range == 0)
         return NO_ENEMIES;
 }
 
@@ -332,21 +314,25 @@ void orbit( Unit *my_unit, Unit *orbitee, float speed, QVector R, QVector S, QVe
         my_unit->SetOwner( getTopLevelOwner() );
     }
 }
+
 string getFactionName( const Unit *my_unit )
 {
     if (!my_unit) return "";
     return FactionUtil::GetFaction( my_unit->faction );
 }
+
 int getFactionIndex( const Unit *my_unit )
 {
     if (!my_unit) return 0;
     return my_unit->faction;
 }
+
 void setFactionIndex( Unit *my_unit, int factionname )
 {
     if (!my_unit) return;
     my_unit->SetFaction( factionname );
 }
+
 void setFactionName( Unit *my_unit, string factionname )
 {
     if (!my_unit) return;
@@ -364,11 +350,7 @@ float getFactionRelation( const Unit *my_unit, const Unit *their_unit )
         relation += UniverseUtil::getRelationModifierInt( their_cp, my_unit->faction );
     return relation;
 }
-/*
- *  void adjustFactionRelation (Unit *my_unit, Unit *their_unit, float delta) {
- *       //
- *  }
- */
+
 float getRelationToFaction( const Unit *my_unit, int other_faction )
 {
     float relation = FactionUtil::GetIntRelation( my_unit->faction, other_faction );
@@ -377,6 +359,7 @@ float getRelationToFaction( const Unit *my_unit, int other_faction )
         relation += UniverseUtil::getRelationModifierInt( my_cp, other_faction );
     return relation;
 }
+
 float getRelationFromFaction( const Unit *their_unit, int my_faction )
 {
     float relation = FactionUtil::GetIntRelation( my_faction, their_unit->faction );
@@ -391,16 +374,19 @@ string getName( const Unit *my_unit )
     if (!my_unit) return "";
     return my_unit->name;
 }
+
 void setName( Unit *my_unit, string name )
 {
     if (!my_unit) return;
     my_unit->name = name;
 }
+
 void SetHull( Unit *my_unit, float newhull )
 {
     if (!my_unit) return;
     my_unit->hull = newhull;
 }
+
 float getCredits( const Unit *my_unit )
 {
     if (!my_unit) return 0;
@@ -410,6 +396,7 @@ float getCredits( const Unit *my_unit )
         viret = tmp->credits;
     return viret;
 }
+
 void addCredits( const Unit *my_unit, float credits )
 {
     if (!my_unit) return;
@@ -420,6 +407,7 @@ void addCredits( const Unit *my_unit, float credits )
             VSServer->sendCredits( my_unit->GetSerial(), tmp->credits );
     }
 }
+
 const string& getFlightgroupNameCR( const Unit *my_unit )
 {
     static const string empty_string;
@@ -431,10 +419,12 @@ const string& getFlightgroupNameCR( const Unit *my_unit )
     else
         return empty_string;
 }
+
 string getFlightgroupName( const Unit *my_unit )
 {
     return getFlightgroupNameCR( my_unit );
 }
+
 Unit * getFlightgroupLeader( Unit *my_unit )
 {
     if (!my_unit) return 0;
@@ -444,6 +434,7 @@ Unit * getFlightgroupLeader( Unit *my_unit )
         ret_unit = 0;
     return ret_unit;
 }
+
 bool setFlightgroupLeader( Unit *my_unit, Unit *un )
 {
     if (!my_unit || !un) return false;
@@ -454,10 +445,12 @@ bool setFlightgroupLeader( Unit *my_unit, Unit *un )
         return false;
     }
 }
+
 string getFgDirective( const Unit *my_unit )
 {
     return getFgDirectiveCR( my_unit );
 }
+
 static const string& getFgDirectiveCR( const Unit *my_unit )
 {
     static string emptystr;
@@ -470,6 +463,7 @@ static const string& getFgDirectiveCR( const Unit *my_unit )
     else
         return fgdirdef;
 }
+
 bool setFgDirective( Unit *my_unit, string inp )
 {
     if (!my_unit) return false;
@@ -479,11 +473,13 @@ bool setFgDirective( Unit *my_unit, string inp )
     }
     return false;
 }
+
 int getFgSubnumber( Unit *my_unit )
 {
     if (!my_unit) return -1;
     return my_unit->getFgSubnumber();
 }
+
 int removeCargo( Unit *my_unit, string s, int quantity, bool erasezero )
 {
     if (!my_unit) return 0;
@@ -494,6 +490,7 @@ int removeCargo( Unit *my_unit, string s, int quantity, bool erasezero )
         quantity = 0;
     return quantity;
 }
+
 void RecomputeUnitUpgrades( Unit *un )
 {
     if (un == NULL) return;
@@ -532,16 +529,16 @@ bool repair( Unit *my_unit )
         return false;
     return my_unit->RepairUpgrade();
 }
+
 float upgrade( Unit *my_unit, string file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts )
 {
     if (!my_unit) return 0;
     double percentage = 0;
-    //printf ("upgrading %s %s %d %d %s\n",my_unit->name.get().c_str(),file.c_str(),mountoffset, subunitoffset,loop_through_mounts?"true":"false");
-    //fflush (stdout);
     percentage = my_unit->Upgrade( file, mountoffset, subunitoffset, force, loop_through_mounts );
     my_unit->SetTurretAI();
     return percentage;
 }
+
 int removeWeapon( Unit *my_unit, string weapon_name, int mountoffset, bool loop )
 {
     if (!my_unit) return -1;
@@ -557,6 +554,7 @@ int removeWeapon( Unit *my_unit, string weapon_name, int mountoffset, bool loop 
     }
     return -1;
 }
+
 int addCargo( Unit *my_unit, Cargo carg )
 {
     if (!my_unit) return 0;
@@ -571,12 +569,14 @@ int addCargo( Unit *my_unit, Cargo carg )
     }
     return carg.quantity;
 }
+
 int forceAddCargo( Unit *my_unit, Cargo carg )
 {
     if (!my_unit) return 0;
     my_unit->AddCargo( carg );
     return carg.quantity;
 }
+
 int hasCargo( const Unit *my_unit, string mycarg )
 {
     if (!my_unit) return 0;
@@ -586,6 +586,7 @@ int hasCargo( const Unit *my_unit, string mycarg )
         return 0;
     return c->quantity;
 }
+
 bool JumpTo( Unit *unit, string system )
 {
     if (unit != NULL)
@@ -593,6 +594,7 @@ bool JumpTo( Unit *unit, string system )
     else
         return false;
 }
+
 string getUnitSystemFile( const Unit *un )
 {
     if (!un)
@@ -600,6 +602,7 @@ string getUnitSystemFile( const Unit *un )
     const StarSystem *ss = un->getStarSystem();
     return ss->getFileName();
 }
+
 bool incrementCargo( Unit *my_unit, float percentagechange, int quantity )
 {
     if (!my_unit) return false;
@@ -618,6 +621,7 @@ bool incrementCargo( Unit *my_unit, float percentagechange, int quantity )
     }
     return false;
 }
+
 bool decrementCargo( Unit *my_unit, float percentagechange )
 {
     if (!my_unit) return false;
@@ -653,6 +657,7 @@ Cargo GetCargo( const Unit *my_unit, std::string cargname )
     ret.quantity = 0;
     return ret;
 }
+
 bool isDockableUnit( const Unit *my_unit )
 {
     if (!my_unit) return false;
@@ -668,6 +673,7 @@ bool isDockableUnit( const Unit *my_unit )
            )
            && (my_unit->DockingPortLocations().size() > 0);
 }
+
 bool isCloseEnoughToDock( const Unit *my_unit, const Unit *un )
 {
     static bool superdock = XMLSupport::parse_bool( vs_config->getVariable( "physics", "dock_within_base_shield", "false" ) );
@@ -679,12 +685,14 @@ bool isCloseEnoughToDock( const Unit *my_unit, const Unit *un )
         return true;
     return false;
 }
+
 float getDistance( const Unit *my_unit, const Unit *un )
 {
     if (my_unit == NULL || un == NULL)
         return FLT_MAX;
     return ( my_unit->Position()-un->Position() ).Magnitude()-my_unit->rSize()-un->rSize();
 }
+
 float getSignificantDistance( const Unit *un, const Unit *sig )
 {
     if (un == NULL || sig == NULL)
@@ -698,6 +706,7 @@ float getSignificantDistance( const Unit *un, const Unit *sig )
         dist = dist-(un->rSize()*planetpct);
     return dist;
 }
+
 bool isSun( const Unit *my_unit )
 {
     if (!my_unit) return false;
@@ -709,6 +718,7 @@ bool isSun( const Unit *my_unit )
         res = ( (Planet*) my_unit )->hasLights();
     return res;
 }
+
 bool isSignificant( const Unit *my_unit )
 {
     if (!my_unit) return false;
@@ -718,15 +728,18 @@ bool isSignificant( const Unit *my_unit )
     res = (typ == PLANETPTR || typ == ASTEROIDPTR || typ == NEBULAPTR || s == "Base");
     return res && !isSun( my_unit );
 }
+
 int isPlayerStarship( const Unit *un )
 {
     return _Universe->whichPlayerStarship( un );
 }
+
 void setSpeed( Unit *my_unit, float speed )
 {
     if (my_unit)
         my_unit->GetComputerData().set_speed = speed;
 }
+
 float maxSpeed( const Unit *my_unit )
 {
     if (!my_unit)
@@ -739,6 +752,7 @@ float maxAfterburnerSpeed( const Unit *my_unit )
         return 0;
     return my_unit->ViewComputerData().max_ab_speed();
 }
+
 void setECM( Unit *my_unit, int NewECM )
 {
     //short fix
@@ -746,6 +760,7 @@ void setECM( Unit *my_unit, int NewECM )
         return;
     my_unit->GetImageInformation().ecm = NewECM;
 }
+
 int getECM( const Unit *my_unit )
 {
     //short fix
@@ -753,6 +768,7 @@ int getECM( const Unit *my_unit )
         return 0;
     return my_unit->pImage->ecm;
 }
+
 static bool ishere( const Unit *par, const Unit *look )
 {
     const Unit *un;
@@ -764,6 +780,7 @@ static bool ishere( const Unit *par, const Unit *look )
     }
     return false;
 }
+
 Unit * owner( const Unit *un )
 {
     Unit *found = NULL;
@@ -775,6 +792,7 @@ Unit * owner( const Unit *un )
         }
     return found;
 }
+
 void performDockingOperations( Unit *un, Unit *unitToDockWith, int actually_dock )
 {
     if (un && unitToDockWith) {
@@ -783,6 +801,7 @@ void performDockingOperations( Unit *un, Unit *unitToDockWith, int actually_dock
         un->PrimeOrders( new Orders::DockingOps( unitToDockWith, ai, actually_dock, true ) );
     }
 }
+
 float PercentOperational( Unit *un, std::string name, std::string category, bool countHullAndArmorAsFull )
 {
     if (!un) return 0;
@@ -814,9 +833,9 @@ float PercentOperational( Unit *un, std::string name, std::string category, bool
         if ( un->canUpgrade( upgrade, -1, -1, 0, true, percent, makeTemplateUpgrade( un->name, un->faction ), false ) ) {
             if (percent > 0 && percent < 1)
                 return percent;
-            else if (percent >= 1)              //FIXME workaround for sensors -- see below comment, not sure why sensors report erroneous functional percentage
+            else if (percent >= 1) //FIXME workaround for sensors -- see below comment, not sure why sensors report erroneous functional percentage
                 return 1.0;
-            else return .5;              //FIXME does not interact well with radar type
+            else return .5; //FIXME does not interact well with radar type
         } else if (percent > 0) {
             return percent;
         }
@@ -829,5 +848,7 @@ void setMissionRelevant( Unit *un )
     if (un && mission->runtime.pymissions)
         mission->runtime.pymissions->relevant_units.push_back( new UnitContainer( un ) );
 }
+
+//
 }
 

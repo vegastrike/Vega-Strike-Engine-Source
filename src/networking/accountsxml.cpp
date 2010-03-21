@@ -83,12 +83,14 @@ enum Names
     SERVERIP,
     SERVERPORT
 };
+
 const EnumMap::Pair element_names[] = {
     EnumMap::Pair( "UNKNOWN",  UNKNOWN ), //don't add anything until below Admin so it maps to enum ACCOUNT_TYPE
     EnumMap::Pair( "PLAYER",   PLAYER ),
     EnumMap::Pair( "ADMIN",    ADMIN ),
     EnumMap::Pair( "ACCOUNTS", ACCOUNTS )
 };
+
 const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair( "UNKNOWN",    UNKNOWN ),
     EnumMap::Pair( "NAME",       NAME ),
@@ -96,6 +98,7 @@ const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair( "SERVERIP",   SERVERIP ),
     EnumMap::Pair( "SERVERPORT", SERVERPORT ),
 };
+
 const EnumMap element_map( element_names, 4 );
 const EnumMap attribute_map( attribute_names, 5 );
 string  curname;
@@ -196,6 +199,8 @@ void endElement( void *userData, const XML_Char *name )
         break;
     }
 }
+
+//
 }
 
 using namespace accountXML;
@@ -232,9 +237,9 @@ Account * getAcctAddress( SOCKETALT ser )
                 return iter->second;
     return NULL;
 }
+
 void LoadAccounts( const char *filename )
 {
-    const int   chunk_size = 16384;
     file = filename;
     VSFile      f;
     VSError     err    = f.OpenReadOnly( filename, AccountFile );
@@ -247,6 +252,7 @@ void LoadAccounts( const char *filename )
     f.Close();
     XML_ParserFree( parser );
 }
+
 void addAcct( string key, Account *acct )
 {
     accounttable[strtoupper( key )] = acct;
@@ -256,6 +262,7 @@ Account * getAcctNoReload( const string &key )
 {
     return accounttable[strtoupper( key )];
 }
+
 Account * getAcctTemplate( const string &key )
 {
     Account *acct = accounttable[strtoupper( key )];

@@ -111,9 +111,6 @@ void NetServer::save()
     using namespace VSFileSystem;
 
     Packet    pckt;
-    Cockpit  *cp;
-    Unit     *un;
-    FILE     *fp = NULL;
     string    xmlstr, savestr;
     //unsigned int xmllen, savelen, nxmllen, nsavelen;
     NetBuffer netbuf;
@@ -158,7 +155,6 @@ bool NetServer::saveAccount( int i )
             //cerr<<"Unable to generate CSV and Save data for player."<<endl;
             return false;
         std::string snetbuf;
-        bool found = false;
         //Loop through clients to find the one corresponding to the unit (we need its serial)
         //Fix CMD_RESPAWN.  I expect the client to do the same thing here.
         clt->savegame.clear();
@@ -171,8 +167,6 @@ bool NetServer::saveAccount( int i )
         addSimpleString( snetbuf, savestr );
         addSimpleString( snetbuf, xmlstr );
         if ( !acct_sock->sendstr( snetbuf ) ) {
-            //buffer = new char[savestr.length() + xmlstr.length() + 2*sizeof( unsigned int)];
-            //SaveNetUtil::GetSaveBuffer( savestr, xmlstr, buffer);
             COUT<<"ERROR sending SAVE to account server for "<<clt->callsign<<" ("<<un->GetSerial()<<")"<<endl;
             return false;
         }

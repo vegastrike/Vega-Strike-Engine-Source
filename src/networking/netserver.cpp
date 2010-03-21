@@ -190,7 +190,6 @@ void NetServer::start( int argc, char **argv )
     double curtime        = 0;
     double snaptime       = 0;
     double planettime     = 0;
-    double damagetime     = 0;
     acct_con = 1;
     nbchars  = 0;
     memset( input_buffer, 0, MAXINPUT );
@@ -246,7 +245,6 @@ void NetServer::start( int argc, char **argv )
     if (serverport == NULL)
         serverport = configport.c_str();
     string tmp;
-    unsigned short tmpport = ACCT_PORT;
     acctserver = XMLSupport::parse_bool( vs_config->getVariable( "server", "useaccountserver",
                                                                 vs_config->getVariable( "network", "use_account_server",
                                                                                         "false" ) ) );
@@ -411,7 +409,6 @@ void NetServer::start( int argc, char **argv )
                 delete acct_sock;
             acct_sock = new VsnetHTTPSocket( acctsrv, _sock_set );
             if ( acct_sock->valid() ) {
-                int nbclients_here = allClients.size();
                 LI  i;
                 int j = 0;
                 COUT<<">>> Reconnected accountserver on socket "<<*acct_sock<<" done."<<endl;
@@ -475,21 +472,9 @@ void NetServer::start( int argc, char **argv )
             snapchanged = 0;
             snaptime    = curtime;
         }
-#ifndef NET_SHIELD_SYSTEM_1
-        //Time to send shield and damage info
-        /*
-         *  if( (curtime - damagetime)>DAMAGE_ATOM)
-         *  {
-         *     zonemgr->broadcastDamage();
-         *     damagetime = curtime;
-         *  }
-         */
-#endif
-
         sendNewUnitQueue();
         //Check for automatic server status save time (in seconds)
         //curtime = getNewTime();
-        //if( curtime - savetime > period*60)
         if ( (curtime-savetime) > SAVE_ATOM ) {
             //Not implemented
             cout<<">>> Saving server status... Time="<<curtime<<endl;
@@ -871,26 +856,8 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
             UniverseUtil::receivedCustom( cp, trusted, cmd, args, id );
             break;
         }
-//case CMD_ACK :
-///*** RECEIVED AN ACK FOR A PACKET : comparison on packet timestamp and the client serial in it ***/
-///*** We must make sure those 2 conditions are enough ***/
-//COUT<<">>> ACK =( "<<packet.getTimestamp()<<" )= ---------------------------------------------------"<<endl;
-//// packet.ack( );
-//break;
-
     //SHOULD NOT BE USED ANYMORE
     case CMD_ASKFILE:
-        /*
-         *  char nbfiles = netbuf.getChar();
-         *  string file;
-         *  for( char i=0; i<nbfiles; i++)
-         *  {
-         *       file = netbuf.getString();
-         *       // Add the file to a queue in the download thread
-         *       // with client serial in order to send him the file later
-         *       //DownloadQueue.add( file, clt->serial);
-         *  }
-         */
         break;
     case CMD_SAVEACCOUNTS:
         COUT<<"Received a save request for "
@@ -908,7 +875,6 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
             un->hull = 0;
             un->Destroy();
         }
-        //COUT << "CMD_KILL not implented."<<endl;
         break;
     case CMD_RESPAWN:
         COUT<<"Received a respawning request for "
@@ -919,7 +885,7 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
             if (oldun == NULL || oldun->GetHull() <= 0) {
                 zonemgr->removeClient( clt );
                 if (oldun) oldun->Kill( true, true );
-                Cockpit *cp = loadCockpit( clt );                                       //Should find existing cp.
+                Cockpit *cp = loadCockpit( clt ); //Should find existing cp.
                 loadFromSavegame( clt, cp );
                 //actually cp not used
                 this->addClient( clt );
@@ -1062,22 +1028,14 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
             break;
             //Everything handled by Magic.  We don't need this any more.
             string    newsystem        = netbuf.getString();
-            ObjSerial jumpserial       = netbuf.getSerial();
-            unsigned short zonenum     = netbuf.getShort();
-            unsigned char *client_hash = 0;
-            unsigned char *server_hash;
 #ifdef CRYPTO
-            server_hash = new unsigned char[FileUtil::Hash.DigestSize()];
-            client_hash = netbuf.getBuffer( FileUtil::Hash.DigestSize() );
+            unsigned char *server_hash = new unsigned char[FileUtil::Hash.DigestSize()];
+            unsigned char *client_hash = netbuf.getBuffer( FileUtil::Hash.DigestSize() );
 #endif
             cerr<<"ATTEMPTING TO JUMP, BUT JUMP UNIMPLEMENTED"<<endl;
-
             bool found = false;
             NetBuffer   netbuf2;
-
-            StarSystem *sts;
             Cockpit    *cp;
-
             un = clt->game_unit.GetUnit();
             if (un == NULL) {
                 COUT<<"ERROR --> Received a jump request from non-existing UNIT"<<endl;
@@ -1089,23 +1047,12 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                     if (adjacent[i] == newsystem)
                         found = true;
                 if (found) {
-                    Unit *jumpun = zonemgr->getUnit( jumpserial, zonenum );
                     //Then activate jump drive to say we want to jump
                     un->ActivateJumpDrive();
                     //The jump reply is sent in Unit::jumpReactToCollision()
                     //In the meantime we create the star system if it isn't loaded yet
                     //The starsystem maybe loaded for nothing if the client has not enough warp energy to jump
                     //but that's no big deal since they all will be loaded finally
-                    /*
-                     *  if( !(sts = _Universe->getStarSystem( newsystem+".system")))
-                     *       zonemgr->addZone( newsystem);
-                     *
-                     *  clt->jumpfile = newsystem;
-                     *  if( FileUtil::HashCompare( newsystem, client_hash, SystemFile) )
-                     *       clt->jumpok = 1;
-                     *  else
-                     *       clt->jumpok = 2;
-                     */
                 }
             }
 #ifdef CRYPTO
@@ -1136,7 +1083,7 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                 if (temp < stringCount) stringCount = temp;
                 temp = getSaveStringLength( playernum, MISSION_SCRIPTS_LABEL );
                 if (temp < stringCount) stringCount = temp;
-                for (unsigned int i = 0; i < stringCount; i++)
+                for (unsigned int i = 0; i < stringCount; i++) {
                     if (getSaveString( playernum, MISSION_NAMES_LABEL, i ) == qualname) {
                         finalScript = getSaveString( playernum, MISSION_SCRIPTS_LABEL, i );
                         eraseSaveString( playernum, MISSION_SCRIPTS_LABEL, i );
@@ -1144,6 +1091,7 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                         eraseSaveString( playernum, MISSION_DESC_LABEL, i );
                         break;
                     }
+                }
                 if ( finalScript.empty() ) break;
                 unsigned int oldcp = _Universe->CurrentCockpit();
                 _Universe->SetActiveCockpit( playernum );
@@ -1173,9 +1121,9 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                 oldNode = fsm->getDefaultState( parent->getRelation( targ ) );
                 if ( node < 0 || (unsigned int) node >= fsm->nodes.size() )
                     break;
-                newNode = node;                 //fixme make sure it's a default node, or go to a special one.
+                newNode = node; //fixme make sure it's a default node, or go to a special one.
             } else {
-                oldNode = node;                 //fixme validate
+                oldNode = node; //fixme validate
                 if ( oldNode < 0 || (unsigned int) node >= fsm->nodes.size() )
                     break;
                 if ( (unsigned int) newEdge >= fsm->nodes[oldNode].edges.size() )
@@ -1199,32 +1147,22 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
             std::string cargoName  = netbuf.getString();
             int      mountOffset   = ( (int) netbuf.getInt32() );
             int      subunitOffset = ( (int) netbuf.getInt32() );
-
-//ObjSerial sender_ser = packet.getSerial();
             Unit    *sender     = clt->game_unit.GetUnit();
             Cockpit *sender_cpt = _Universe->isPlayerStarship( sender );
             if (!sender || !sender->getStarSystem() || !sender_cpt) break;
             zone = sender->getStarSystem()->GetZone();
-
             unsigned int cargIndex = UINT_MAX;
-
             Unit *seller = zonemgr->getUnit( seller_ser, zone );
             Unit *buyer  = zonemgr->getUnit( buyer_ser, zone );
             Unit *docked = NULL;
             {
                 const Unit *un;
-                for (un_kiter ui = sender->getStarSystem()->getUnitList().constIterator(); (un = *ui); ++ui)
+                for (un_kiter ui = sender->getStarSystem()->getUnitList().constIterator(); (un = *ui); ++ui) {
                     if ( un->isDocked( sender ) ) {
-                        docked = const_cast< Unit* > (un);                      //Stupid STL.
+                        docked = const_cast< Unit* > (un); //Stupid STL.
                         break;
                     }
-                /*
-                 *  if (!docked) {
-                 *       fprintf(stderr, "Player id %d attempted transaction with cargo %s while undocked\n",
-                 *                       sender?sender->GetSerial():-1, cargoName.c_str());
-                 *       break;
-                 *  }
-                 */
+                }
             }
             if (docked) {
                 if (seller == sender) {

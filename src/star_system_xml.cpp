@@ -323,7 +323,6 @@ static bool ConfigCondition( const string &cond )
     char varname[64];
     char op[3];
     char varval[64];
-
     bool ok = 3 == sscanf( cond.c_str(), "%63[-a-zA-Z_0-9] %2[<>=!] %63[-0-9.Ee]",
                            varname,
                            op,
@@ -334,10 +333,8 @@ static bool ConfigCondition( const string &cond )
     varname[sizeof (varname)/sizeof (*varname)-1] = 0;
     op[sizeof (op)/sizeof (*op)-1] = 0;
     varval[sizeof (varval)/sizeof (*varval)-1]    = 0;
-
     //try to parse varval - if not parseable as float, assume it's a string
     char *endptr = 0;
-    float fval   = (float) ( strtod( varval, &endptr ) );     //VC++ does not have strtof.
     bool  rv;
     if (endptr == varval) {
         string sval = vs_config->getVariable( "graphics", varname, "0.0" );

@@ -414,17 +414,13 @@ void Unit::reactToCollision( Unit *smalle,
     }
     //don't bounce if you can Juuuuuuuuuuuuuump
     if ( !jumpReactToCollision( smalle ) ) {
-        static float bouncepercent = XMLSupport::parse_float( vs_config->getVariable( "physics", "BouncePercent", ".1" ) );
         static float kilojoules_per_damage  =
             XMLSupport::parse_float( vs_config->getVariable( "physics", "kilojoules_per_unit_damage", "5400" ) );
         static float collision_scale_factor =
             XMLSupport::parse_float( vs_config->getVariable( "physics", "collision_damage_scale", "1.0" ) );
         static float inelastic_scale = XMLSupport::parse_float( vs_config->getVariable( "physics", "inelastic_scale", ".8" ) );
         static float mintime =
-            XMLSupport::parse_float( vs_config->getVariable( "physics", "minimum_time_between_recorded_player_collisions",
-                                                             "0.1" ) );
-        static float minvel  = XMLSupport::parse_float( vs_config->getVariable( "physics", "minimum_collision_velocity", "5" ) );
-
+            XMLSupport::parse_float( vs_config->getVariable( "physics", "minimum_time_between_recorded_player_collisions", "0.1" ) );
         float m1 = smalle->GetMass(), m2 = GetMass();
         if (m1 < 1e-6f || m2 < 1e-6f) {
             if (m1 <= 0) m1 = 0.0f;
@@ -435,7 +431,8 @@ void Unit::reactToCollision( Unit *smalle,
         //Compute linear velocity of points of impact by taking into account angular velocities
         Vector small_velocity = smalle->GetVelocity()-smalle->GetAngularVelocity().Cross( smalllocation-smalle->Position() );
         Vector big_velocity   = GetVelocity()-GetAngularVelocity().Cross( biglocation-Position() );
-        //Compute reference frame conversions to align along force normals (newZ)(currently using bignormal - will experiment to see if both are needed for sufficient approximation)
+        //Compute reference frame conversions to align along force normals (newZ)(currently using bignormal
+        // - will experiment to see if both are needed for sufficient approximation)
         Vector orthoz = ( (m2*bignormal)-(m1*smallnormal) ).Normalize();
         Vector orthox = MakeNonColinearVector( orthoz );
         Vector orthoy( 0, 0, 0 );
@@ -456,7 +453,6 @@ void Unit::reactToCollision( Unit *smalle,
         big_velocity_aligned.k   = (big_velocity_aligned.k*(m2-m1)/(m1+m2)+( 2.0f*m1/(m1+m2) )*small_velocity_aligned.k);
         Vector SmallerElastic_vf = Transform( fromNewRef, small_velocity_aligned );
         Vector ThisElastic_vf    = Transform( fromNewRef, big_velocity_aligned );
-
         //HACK ALERT:
         //following code referencing minvel and time between collisions attempts
         //to alleviate ping-pong problems due to collisions being detected
@@ -466,16 +462,13 @@ void Unit::reactToCollision( Unit *smalle,
         //actual collision location before applying forces
         Cockpit *thcp = _Universe->isPlayerStarship( this );
         Cockpit *smcp = _Universe->isPlayerStarship( smalle );
-
         bool     isnotplayerorhasbeenmintime = true;
         //Need to incorporate normals of colliding polygons somehow, without overiding directions of travel.
         //We'll use the point object approximation for the magnitude of damage, and then apply the force along the appropriate normals
-
         //ThisElastic_vf=((ThisElastic_vf.Magnitude()>minvel||!thcp)?ThisElastic_vf.Magnitude():minvel)*smallnormal;
         //SmallerElastic_vf=((SmallerElastic_vf.Magnitude()>minvel||!smcp)?SmallerElastic_vf.Magnitude():minvel)*bignormal;
         Vector ThisFinalVelocity    = inelastic_scale*Inelastic_vf+(1.0f-inelastic_scale)*ThisElastic_vf;
         Vector SmallerFinalVelocity = inelastic_scale*Inelastic_vf+(1.0f-inelastic_scale)*SmallerElastic_vf;
-
         //float LargeKE = (0.5)*m2*GetVelocity().MagnitudeSquared();
         //float SmallKE = (0.5)*m1*smalle->GetVelocity().MagnitudeSquared();
         //float FinalInelasticKE = Inelastic_vf.MagnitudeSquared()*(0.5)*(m1+m2);
@@ -487,10 +480,8 @@ void Unit::reactToCollision( Unit *smalle,
         //Damage distribution (NOTE: currently arbitrary - no known good model for calculating how much energy object endures as a result of the collision)
         float large_damage = (0.25f*SmallDeltaE+0.75f*LargeDeltaE)/kilojoules_per_damage*collision_scale_factor;
         float small_damage = (0.25f*LargeDeltaE+0.75f*SmallDeltaE)/kilojoules_per_damage*collision_scale_factor;
-
         //Vector ThisDesiredVelocity = ThisElastic_vf*(1-inelastic_scale/2)+Inelastic_vf*inelastic_scale/2;
         //Vector SmallerDesiredVelocity = SmallerElastic_vf*(1-inelastic_scale)+Inelastic_vf*inelastic_scale;
-
         //FIXME need to resolve 2 problems -
         //1) SIMULATION_ATOM for small != SIMULATION_ATOM for large (below smforce line should mostly address this)
         //2) Double counting due to collision occurring for each object in a different physics frame.
@@ -501,26 +492,16 @@ void Unit::reactToCollision( Unit *smalle,
         Vector thisforce = (ThisFinalVelocity-big_velocity)*GetMass()/SIMULATION_ATOM;
         if (thcp) {
             if ( (getNewTime()-thcp->TimeOfLastCollision) > mintime )
-                //if((ThisFinalVelocity-GetVelocity()).Magnitude()>minvel){
                 thcp->TimeOfLastCollision = getNewTime();
-            //}
             else
                 isnotplayerorhasbeenmintime = false;
         }
         if (smcp) {
             if ( (getNewTime()-smcp->TimeOfLastCollision) > mintime )
-                //if((SmallerFinalVelocity-smalle->GetVelocity()).Magnitude()>minvel){
                 smcp->TimeOfLastCollision = getNewTime();
-            //}
             else
                 isnotplayerorhasbeenmintime = false;
         }
-        /*
-         *  if(isnotplayerorhasbeenmintime){
-         *       UniverseUtil::IOmessage(0,"game","all",string("c1")+XMLSupport::tostring((float)getNewTime())+string(" DE_s ")+XMLSupport::tostring(SmallDeltaE)+string(" DE_l ")+XMLSupport::tostring(LargeDeltaE)+string(" resultant damages ")+XMLSupport::tostring(small_damage)+string(" ")+XMLSupport::tostring(large_damage));//+string(" inelastic factor ")+XMLSupport::tostring(inelastic_scale)+string(" collision factor ")+XMLSupport::tostring(collision_scale_factor));
-         *       UniverseUtil::IOmessage(0,"game","all",string("c2")+string(" TFV ")+XMLSupport::tostring(ThisFinalVelocity.Magnitude())+string(" SFV ")+XMLSupport::tostring(SmallerFinalVelocity.Magnitude())+string(" pVF ")+XMLSupport::tostring(Inelastic_vf.Magnitude())+string(" ")+XMLSupport::tostring(ThisElastic_vf.Magnitude())+string(" ")+XMLSupport::tostring(SmallerElastic_vf.Magnitude()));
-         *  }
-         */
         if (Network != NULL) {
             //Only player units can move in network mode.
             if (thcp)
@@ -528,11 +509,12 @@ void Unit::reactToCollision( Unit *smalle,
             else if (smcp)
                 smalle->ApplyForce( smforce-thisforce );
         } else {
-            //Collision force caps primarily for AI-AI collisions. Once the AIs get a real collision avoidance system, we can turn damage for AI-AI collisions back on, and then we can remove these caps.
+            //Collision force caps primarily for AI-AI collisions. Once the AIs get a real collision avoidance system, we can
+            // turn damage for AI-AI collisions back on, and then we can remove these caps.
             static float maxTorqueMultiplier =
-                XMLSupport::parse_float( vs_config->getVariable( "physics", "maxCollisionTorqueMultiplier", ".67" ) );                                      //value, in seconds of desired maximum recovery time
+                XMLSupport::parse_float( vs_config->getVariable( "physics", "maxCollisionTorqueMultiplier", ".67" ) ); //value, in seconds of desired maximum recovery time
             static float maxForceMultiplier  =
-                XMLSupport::parse_float( vs_config->getVariable( "physics", "maxCollisionForceMultiplier", "5" ) );                                     //value, in seconds of desired maximum recovery time
+                XMLSupport::parse_float( vs_config->getVariable( "physics", "maxCollisionForceMultiplier", "5" ) ); //value, in seconds of desired maximum recovery time
             if ( (smalle->isUnit() != MISSILEPTR) && isnotplayerorhasbeenmintime ) {
                 //for torque... smalllocation -- approximation hack of MR^2 for rotational inertia (moment of inertia currently just M)
                 Vector torque    = smforce/(smalle->radial_size*smalle->radial_size);
@@ -574,8 +556,6 @@ void Unit::reactToCollision( Unit *smalle,
                 this->ApplyForce( force-torque );
             }
         }
-        /*    smalle->curr_physical_state = smalle->prev_physical_state;
-         *         this->curr_physical_state = this->prev_physical_state;*/
         static int upgradefac =
             XMLSupport::parse_bool( vs_config->getVariable( "physics", "cargo_deals_collide_damage",
                                                             "false" ) ) ? -1 : FactionUtil::GetUpgradeFaction();
@@ -637,41 +617,13 @@ void Unit::reactToCollision( Unit *smalle,
              *  else
              *       printf ("Damage avoided due to cargo\n"); */
         }
-        //OLDE METHODE
-        //smalle->ApplyDamage (biglocation.Cast(),bignormal,.33*g_game.difficulty*(  .5*fabs((smalle->GetVelocity()-this->GetVelocity()).MagnitudeSquared())*this->mass*SIMULATION_ATOM),smalle,GFXColor(1,1,1,2),NULL);
-        //this->ApplyDamage (smalllocation.Cast(),smallnormal, .33*g_game.difficulty*(.5*fabs((smalle->GetVelocity()-this->GetVelocity()).MagnitudeSquared())*smalle->mass*SIMULATION_ATOM),this,GFXColor(1,1,1,2),NULL);
-        //each mesh with each mesh? naw that should be in one way collide
     }
-}
-
-static Unit * getFuelUpgrade()
-{
-    return UnitFactory::createUnit( "add_fuel", true, FactionUtil::GetUpgradeFaction() );
-}
-
-static float getFuelAmt()
-{
-    Unit *un  = getFuelUpgrade();
-    float ret = un->FuelData();
-    un->Kill();
-    return ret;
-}
-
-static float GetJumpFuelQuantity()
-{
-    static float f = getFuelAmt();
-    return f;
 }
 
 void Unit::ActivateJumpDrive( int destination )
 {
-    //const int jumpfuelratio=1;
     if ( ( ( docked&(DOCKED|DOCKED_INSIDE) ) == 0 ) && jump.drive != -2 )
-        /*if (1warpenergy>=jump.energy&&(jump.energy>=0)) {*/
         jump.drive = destination;
-    //float fuel_used=0;
-    //warpenergy-=jump.energy; //don't spend energy until later
-    /*}*/
 }
 
 void Unit::DeactivateJumpDrive()
@@ -2697,19 +2649,9 @@ void Unit::UpdateSubunitPhysics( Unit *subunit,
 
 float CalculateNearestWarpUnit( const Unit *thus, float minmultiplier, Unit **nearest_unit, bool count_negative_warp_units )
 {
-    static float  autopilot_term_distance =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "auto_pilot_termination_distance", "6000" ) );
     static float  smallwarphack     = XMLSupport::parse_float( vs_config->getVariable( "physics", "minwarpeffectsize", "100" ) );
     static float  bigwarphack       =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "maxwarpeffectsize", "10000000" ) );
-    //Pi^2
-    static float  warpMultiplierMin =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "warpMultiplierMin", "9.86960440109" ) );
-    //C
-    static float  warpMultiplierMax =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "warpMultiplierMax", "300000000" ) );
-    //Pi^2 * C
-    static float  warpMaxEfVel      = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpMaxEfVel", "2960881320" ) );
     //Boundary between multiplier regions 1&2. 2 is "high" mult
     static double warpregion1       = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpregion1", "5000000" ) );
     //Boundary between multiplier regions 0&1 0 is mult=1
@@ -2733,7 +2675,7 @@ float CalculateNearestWarpUnit( const Unit *thus, float minmultiplier, Unit **ne
     }
     for (un_fiter iter = _Universe->activeStarSystem()->gravitationalUnits().fastIterator();
          (planet = *iter) || testthis;
-         ++iter)
+         ++iter) {
         if ( !planet || !planet->Killed() ) {
             if (planet == NULL) {
                 planet   = testthis;
@@ -2748,7 +2690,8 @@ float CalculateNearestWarpUnit( const Unit *thus, float minmultiplier, Unit **ne
                     && (planet->specInterdiction > 0 || count_negative_warp_units) ) {
                     shiphack = 1/fabs( planet->specInterdiction );
                     if (thus->specInterdiction != 0 && thus->graphicOptions.specInterdictionOnline != 0)
-                        //only counters artificial interdiction ... or maybe it cheap ones shouldn't counter expensive ones!? or expensive ones should counter planets...this is safe now, for gameplay
+                        //only counters artificial interdiction ... or maybe it cheap ones shouldn't counter expensive ones!? or
+                        // expensive ones should counter planets...this is safe now, for gameplay
                         shiphack *= fabs( thus->specInterdiction );
                 }
             }
@@ -2760,13 +2703,9 @@ float CalculateNearestWarpUnit( const Unit *thus, float minmultiplier, Unit **ne
             QVector dir     = thus->Position()-planet->Position();
             double  udist   = dir.Magnitude();
             float   sigdist = UnitUtil::getSignificantDistance( thus, planet );
-            if ( planet->isPlanet() && udist < (1<<28) )              //If distance is viable as a float approximation and it's an actual celestial body
+            if ( planet->isPlanet() && udist < (1<<28) ) //If distance is viable as a float approximation and it's an actual celestial body
                 udist = sigdist;
-            //QVector veldiff=thus->Velocity*thus->graphicOptions.WarpFieldStrength-planet->Velocity*planet->graphicOptions.WarpFieldStrength;
-            //double velproj=veldiff.Dot(dir*(1./udist));OBSOLETE WITH NEW SPEC CALCULATIONS
-            int itercount = 0;
             do {
-                //+(velproj<0?velproj*SIMULATION_ATOM:0);
                 double dist = udist;
                 if (dist < 0) dist = 0;
                 dist *= shiphack;
@@ -2774,16 +2713,16 @@ float CalculateNearestWarpUnit( const Unit *thus, float minmultiplier, Unit **ne
                     multipliertemp = pow( (dist-effectiverad-warpregion0), curvedegree )*upcurvek;
                 else
                     multipliertemp = 1;
-                //minmultiplier=1;
                 if (multipliertemp < minmultiplier) {
                     minmultiplier = multipliertemp;
                     *nearest_unit = planet;
                     //eventually use new multiplier to compute
                 } else {break; }
-            } while (0);                                                     //++itercount<=1); only repeat 1 iter right now
+            } while (0);
             if (!testthis)
-                break;                  //don't want the ++
+                break; //don't want the ++
         }
+    }
     return minmultiplier;
 }
 
@@ -2819,11 +2758,6 @@ void Unit::AddVelocity( float difficulty )
         graphicOptions.WarpRamping = 0;
     }
     if (graphicOptions.InWarp == 1 || graphicOptions.RampCounter != 0) {
-        static float  autopilot_term_distance =
-            XMLSupport::parse_float( vs_config->getVariable( "physics", "auto_pilot_termination_distance", "6000" ) );
-        static float  smallwarphack     =
-            XMLSupport::parse_float( vs_config->getVariable( "physics", "minwarpeffectsize", "100" ) );
-        static float  WARPMEMORYEFFECT  = XMLSupport::parse_float( vs_config->getVariable( "physics", "WarpMemoryEffect", "0.9" ) );
         //Pi^2
         static float  warpMultiplierMin =
             XMLSupport::parse_float( vs_config->getVariable( "physics", "warpMultiplierMin", "9.86960440109" ) );
@@ -2832,20 +2766,7 @@ void Unit::AddVelocity( float difficulty )
             XMLSupport::parse_float( vs_config->getVariable( "physics", "warpMultiplierMax", "300000000" ) );
         //Pi^2 * C
         static float  warpMaxEfVel   = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpMaxEfVel", "2960881320" ) );
-        //Boundary between multiplier regions 1&2. 2 is "high" mult
-        static double warpregion1    = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpregion1", "5000000" ) );
-        //Boundary between multiplier regions 0&1 0 is mult=1
-        static double warpregion0    = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpregion0", "5000" ) );
-        //Mult at 1-2 boundary
-        static double warpcruisemult = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpcruisemult", "5000" ) );
-        //degree of curve
-        static double curvedegree    = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpcurvedegree", "1.5" ) );
-        //coefficient so as to agree with above
-        static double upcurvek = warpcruisemult/pow( (warpregion1-warpregion0), curvedegree );
         //inverse fractional effect of ship vs real big object
-        static float  def_inv_interdiction = 1.
-                                             /XMLSupport::parse_float( vs_config->getVariable( "physics",
-                                                                                               "default_interdiction", ".125" ) );
         float minmultiplier = warpMultiplierMax*graphicOptions.MaxWarpMultiplier;
         Unit *nearest_unit  = NULL;
         minmultiplier = CalculateNearestWarpUnit( this, minmultiplier, &nearest_unit, true );
@@ -2876,7 +2797,7 @@ void Unit::AddVelocity( float difficulty )
         v *= minmultiplier;
         float vmag = sqrt( v.i*v.i+v.j*v.j+v.k*v.k );
         if (vmag > warpMaxEfVel) {
-            v *= warpMaxEfVel/vmag;             //HARD LIMIT
+            v *= warpMaxEfVel/vmag; //HARD LIMIT
             minmultiplier *= warpMaxEfVel/vmag;
         }
         graphicOptions.WarpFieldStrength = minmultiplier;
@@ -2891,10 +2812,6 @@ void Unit::AddVelocity( float difficulty )
     static float WARPMEMORYEFFECT = XMLSupport::parse_float( vs_config->getVariable( "physics", "WarpMemoryEffect", "0.9" ) );
     graphicOptions.WarpFieldStrength = lastWarpField*WARPMEMORYEFFECT+(1.0-WARPMEMORYEFFECT)*graphicOptions.WarpFieldStrength;
     curr_physical_state.position     = curr_physical_state.position+(v*SIMULATION_ATOM*difficulty).Cast();
-    /*
-     *  if (!is_null(location)&&activeStarSystem){
-     *  location=activeStarSystem->collidemap->changeKey(location,Collidable(this));// do we need this?
-     */
     //now we do this later in update physics
     //I guess you have to, to be robust}
 }
@@ -2927,11 +2844,6 @@ void Unit::UpdatePhysics2( const Transformation &trans,
         cumulative_transformation.to_matrix( cumulative_transformation_matrix );
         cumulative_velocity = TransformNormal( transmat, Velocity )+cum_vel;
     }
-}
-
-static float tempmin( float a, float b )
-{
-    return a > b ? b : a;
 }
 
 static QVector RealPosition( Unit *un )
@@ -3482,13 +3394,8 @@ Vector Unit::ClampTorque( const Vector &amt1 )
         Res.j = copysign( fuelclamp*limits.yaw, amt1.j );
     if (fabs( amt1.k ) > fuelclamp*limits.roll)
         Res.k = copysign( fuelclamp*limits.roll, amt1.k );
-    //static float fuelenergytomassconversionconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","FuelEnergyDensity","343596000000000.0")); // note that we have KiloJoules, so it's to the 14th
-    //static float Deuteriumconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Deuterium","1/0.6"));
-    //static float Antimatterconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Antimatter","250/0.6"));
     static float Lithium6constant =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "LithiumRelativeEfficiency_Lithium", "1" ) );
-    //Fuel Mass in metric tons expended per generation of 100MJ assuming 5,000,000m/s exit velocity
-    static float FMEC_factor = XMLSupport::parse_float( vs_config->getVariable( "physics", "FMEC_factor", "0.000000008" ) );
     //1/5,000,000 m/s
     static float FMEC_exit_vel_inverse =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "FMEC_exit_vel", "0.0000002" ) );
@@ -3656,12 +3563,8 @@ Vector Unit::ClampThrust( const Vector &amt1, bool afterburn )
         Res.k = ablimit;
     if (amt1.k < -limits.retro)
         Res.k = -limits.retro;
-    //static float Deuteriumconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Deuterium","1/0.6"));
-    //static float Antimatterconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Antimatter","250/0.6"));
     static float Lithium6constant =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "DeuteriumRelativeEfficiency_Lithium", "1" ) );
-    //Fuel Mass in metric tons expended per generation of 100MJ assuming 5,000,000m/s exit velocity
-    static float FMEC_factor = XMLSupport::parse_float( vs_config->getVariable( "physics", "FMEC_factor", "0.000000008" ) );
     //1/5,000,000 m/s
     static float FMEC_exit_vel_inverse =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "FMEC_exit_vel", "0.0000002" ) );
@@ -3879,15 +3782,12 @@ void Unit::RegenShields()
     const float  dischargerate  = (1-(1-discharge_per_second)*SIMULATION_ATOM);
     static float min_shield_discharge =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "min_shield_speeding_discharge", ".1" ) );
-    static float speed_leniency =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "speed_shield_drain_leniency", "1.18" ) );
-    static float low_power_mode = XMLSupport::parse_float( vs_config->getVariable( "physics", "low_power_mode_energy", "10" ) );
+    static float low_power_mode =
+        XMLSupport::parse_float( vs_config->getVariable( "physics", "low_power_mode_energy", "10" ) );
     static float max_shield_lowers_recharge    =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "max_shield_recharge_drain", "0" ) );
     static bool  max_shield_lowers_capacitance =
         XMLSupport::parse_bool( vs_config->getVariable( "physics", "max_shield_lowers_capacitance", "false" ) );
-    static bool  use_max_shield_value    =
-        XMLSupport::parse_bool( vs_config->getVariable( "physics", "use_max_shield_energy_usage", "false" ) );
     static bool  reactor_uses_fuel       =
         XMLSupport::parse_bool( vs_config->getVariable( "physics", "reactor_uses_fuel", "false" ) );
     static float reactor_idle_efficiency =
@@ -3895,9 +3795,7 @@ void Unit::RegenShields()
     static float VSD = XMLSupport::parse_float( vs_config->getVariable( "physics", "VSD_MJ_yield", "5.4" ) );
     //Fuel Mass in metric tons expended per generation of 100MJ
     static float FMEC_factor     = XMLSupport::parse_float( vs_config->getVariable( "physics", "FMEC_factor", "0.000000008" ) );
-    //Fudge factor -> increase fuel expenditure
-    static float FMEC_efficiency = XMLSupport::parse_float( vs_config->getVariable( "physics", "FMEC_efficiency", "2" ) );
-    int   rechargesh = 1;                        //used ... oddly
+    int   rechargesh = 1; //used ... oddly
     float maxshield = totalShieldEnergyCapacitance( shield );
     bool  velocity_discharge     = false;
     float rec = 0;
@@ -3929,12 +3827,6 @@ void Unit::RegenShields()
                 //sqrtf(g_game.difficulty);
                 rec *= g_game.difficulty;
         }
-        /*
-         *  if ((computer.max_combat_ab_speed>4)&&(GetVelocity().MagnitudeSquared()>(computer.max_combat_ab_speed*speed_leniency*computer.max_combat_ab_speed*speed_leniency))) {
-         *       rec=0;
-         *       velocity_discharge=true;
-         *  }
-         */
         if (graphicOptions.InWarp && !shields_in_spec) {
             rec = 0;
             velocity_discharge = true;
@@ -5246,7 +5138,6 @@ float Unit::DealDamageToHullReturnArmor( const Vector &pnt, float damage, float*
         }
     }
     //short fix
-    unsigned int biggerthan = float_to_int( *targ );
     float absdamage = damage >= 0 ? damage : -damage;
     float denom     = (*targ+hull);
     percent = (denom > absdamage && denom != 0) ? absdamage/denom : (denom == 0 ? 0.0 : 1.0);
@@ -5383,7 +5274,6 @@ float Unit::DealDamageToHullReturnArmor( const Vector &pnt, float damage, float*
 #endif
             PrimeOrders();
             maxenergy = energy = 0;
-
             Split( rand()%3+1 );
 #ifndef ISUCK
             Destroy();
@@ -5407,7 +5297,6 @@ bool withinShield( const ShieldFacing &facing, float theta, float rho )
 
 float Unit::DealDamageToShield( const Vector &pnt, float &damage )
 {
-    int    index;
     float  percent = 0;
     float *targ    = NULL;                       //short fix
     float  theta   = atan2( pnt.i, pnt.k );
@@ -5441,7 +5330,6 @@ float Unit::DealDamageToShield( const Vector &pnt, float &damage )
 bool Unit::ShieldUp( const Vector &pnt ) const
 {
     const int    shieldmin  = 5;
-    int index;
     static float nebshields = XMLSupport::parse_float( vs_config->getVariable( "physics", "nebula_shield_recharge", ".5" ) );
     if (nebula != NULL || nebshields > 0)
         return false;
@@ -6122,7 +6010,6 @@ bool Unit::EndRequestClearance( Unit *targ )
     if ( ( lookcleared =
               std::find( targ->pImage->clearedunits.begin(), targ->pImage->clearedunits.end(),
                          this ) ) != targ->pImage->clearedunits.end() ) {
-        int whichdockport;
         targ->pImage->clearedunits.erase( lookcleared );
         return true;
     } else {
@@ -6132,14 +6019,6 @@ bool Unit::EndRequestClearance( Unit *targ )
 
 bool Unit::RequestClearance( Unit *dockingunit )
 {
-#if 0
-    static float clearencetime = ( XMLSupport::parse_float( vs_config->getVariable( "general", "dockingtime", "20" ) ) );
-    EnqueueAIFirst( new ExecuteFor( new Orders::MatchVelocity( Vector( 0, 0, 0 ),
-                                                               Vector( 0, 0, 0 ),
-                                                               true,
-                                                               false,
-                                                               true ), clearencetime ) );
-#endif
     if ( std::find( pImage->clearedunits.begin(), pImage->clearedunits.end(), dockingunit ) == pImage->clearedunits.end() )
         pImage->clearedunits.push_back( dockingunit );
     return true;
@@ -6192,7 +6071,6 @@ void Unit::PerformDockingOperations()
             continue;
         }
         //Transformation t = un->prev_physical_state;
-        float tmp;                                       //short fix
         un->prev_physical_state = un->curr_physical_state;
         un->curr_physical_state = HoldPositionWithRespectTo( un->curr_physical_state, prev_physical_state, curr_physical_state );
         un->NetForce        = Vector( 0, 0, 0 );
@@ -7256,6 +7134,67 @@ static bool cell_has_recursive_data( const string &name, unsigned int fac, const
     return retval;
 }
 
+#define STDUPGRADE_SPECIFY_DEFAULTS( my, oth, temp, noth, dgradelimer, dgradelimerdefault, clamp, value_to_lookat ) \
+    do {                                                                                                            \
+        retval =                                                                                                    \
+            (                                                                                                       \
+                UpgradeFloat(                                                                                       \
+                    resultdoub,                                                                                     \
+                    my,                                                                                             \
+                    oth,                                                                                            \
+                    (templ != NULL) ? temp : 0,                                                                     \
+                    Adder, Comparer, noth, noth,                                                                    \
+                    Percenter, temppercent,                                                                         \
+                    forcetransaction,                                                                               \
+                    templ != NULL,                                                                                  \
+                    (downgradelimit != NULL) ? dgradelimer : dgradelimerdefault,                                    \
+                    AGreaterB,                                                                                      \
+                    clamp,                                                                                          \
+                    force_change_on_nothing                                                                         \
+                            )                                                                                       \
+            );                                                                                                      \
+        if (retval == UPGRADEOK)                                                                                    \
+        {                                                                                                           \
+            if (touchme)                                                                                            \
+                my = resultdoub;                                                                                    \
+            percentage += temppercent;                                                                              \
+            ++numave;                                                                                               \
+            can_be_redeemed = true;                                                                                 \
+            if (gen_downgrade_list)                                                                                 \
+                AddToDowngradeMap( up->name, oth, ( (char*) &value_to_lookat )-(char*) this, tempdownmap );         \
+        }                                                                                                           \
+        else if (retval != NOTTHERE)                                                                                \
+        {                                                                                                           \
+            if (retval == CAUSESDOWNGRADE)                                                                          \
+                needs_redemption = true;                                                                            \
+            else                                                                                                    \
+                cancompletefully = false;                                                                           \
+        }                                                                                                           \
+    }                                                                                                               \
+    while (0)
+
+#define STDUPGRADE( my, oth, temp, noth )                \
+    do {STDUPGRADE_SPECIFY_DEFAULTS( my,                 \
+                                     oth,                \
+                                     temp,               \
+                                     noth,               \
+                                     downgradelimit->my, \
+                                     blankship->my,      \
+                                     false,              \
+                                     this->my ); }       \
+    while (0)
+
+#define STDUPGRADECLAMP( my, oth, temp, noth )                 \
+    do {STDUPGRADE_SPECIFY_DEFAULTS( my,                       \
+                                     oth,                      \
+                                     temp,                     \
+                                     noth,                     \
+                                     downgradelimit->my,       \
+                                     blankship->my,            \
+                                     !force_change_on_nothing, \
+                                     this->my ); }             \
+    while (0)
+
 bool Unit::UpAndDownGrade( const Unit *up,
                            const Unit *templ,
                            int mountoffset,
@@ -7341,11 +7280,9 @@ bool Unit::UpAndDownGrade( const Unit *up,
             tmax_pitch_down   = XMLSupport::parse_float( angleStarHandler( XMLType( &tmax_pitch_down ), NULL ) );
             tmax_roll_right   = XMLSupport::parse_float( angleStarHandler( XMLType( &tmax_roll_right ), NULL ) );
             tmax_roll_left    = XMLSupport::parse_float( angleStarHandler( XMLType( &tmax_roll_left ), NULL ) );
-
             tlimits_yaw       = XMLSupport::parse_float( angleStarHandler( XMLType( &tlimits_yaw ), NULL ) );
             tlimits_pitch     = XMLSupport::parse_float( angleStarHandler( XMLType( &tlimits_pitch ), NULL ) );
             tlimits_roll      = XMLSupport::parse_float( angleStarHandler( XMLType( &tlimits_roll ), NULL ) );
-
             tlimits_forward   = XMLSupport::parse_float( accelStarHandler( XMLType( &tlimits_forward ), NULL ) );
             tlimits_retro     = XMLSupport::parse_float( accelStarHandler( XMLType( &tlimits_retro ), NULL ) );
             tlimits_lateral   = XMLSupport::parse_float( accelStarHandler( XMLType( &tlimits_lateral ), NULL ) );
@@ -7360,7 +7297,6 @@ bool Unit::UpAndDownGrade( const Unit *up,
     double resultdoub;
     int    retval = 0; //"= 0" added by chuck_starchaser to shut off a warning about its possibly being used uninitialized
     double temppercent;
-
     static Unit *blankship     = NULL;
     static bool  initblankship = false;
     if (!initblankship) {
@@ -7368,67 +7304,6 @@ bool Unit::UpAndDownGrade( const Unit *up,
         initblankship = true;
         blankship     = UnitFactory::createServerSideUnit( "upgrading_dummy_unit", true, FactionUtil::GetUpgradeFaction() );
     }
-#define STDUPGRADE_SPECIFY_DEFAULTS( my, oth, temp, noth, dgradelimer, dgradelimerdefault, clamp, value_to_lookat ) \
-    do {                                                                                                            \
-        retval =                                                                                                    \
-            (                                                                                                       \
-                UpgradeFloat(                                                                                       \
-                    resultdoub,                                                                                     \
-                    my,                                                                                             \
-                    oth,                                                                                            \
-                    (templ != NULL) ? temp : 0,                                                                     \
-                    Adder, Comparer, noth, noth,                                                                    \
-                    Percenter, temppercent,                                                                         \
-                    forcetransaction,                                                                               \
-                    templ != NULL,                                                                                  \
-                    (downgradelimit != NULL) ? dgradelimer : dgradelimerdefault,                                    \
-                    AGreaterB,                                                                                      \
-                    clamp,                                                                                          \
-                    force_change_on_nothing                                                                         \
-                            )                                                                                       \
-            );                                                                                                      \
-        if (retval == UPGRADEOK)                                                                                    \
-        {                                                                                                           \
-            if (touchme)                                                                                            \
-                my = resultdoub;                                                                                    \
-            percentage += temppercent;                                                                              \
-            ++numave;                                                                                               \
-            can_be_redeemed = true;                                                                                 \
-            if (gen_downgrade_list)                                                                                 \
-                AddToDowngradeMap( up->name, oth, ( (char*) &value_to_lookat )-(char*) this, tempdownmap );         \
-        }                                                                                                           \
-        else if (retval != NOTTHERE)                                                                                \
-        {                                                                                                           \
-            if (retval == CAUSESDOWNGRADE)                                                                          \
-                needs_redemption = true;                                                                            \
-            else                                                                                                    \
-                cancompletefully = false;                                                                           \
-        }                                                                                                           \
-    }                                                                                                               \
-    while (0)
-
-#define STDUPGRADE( my, oth, temp, noth )                \
-    do {STDUPGRADE_SPECIFY_DEFAULTS( my,                 \
-                                     oth,                \
-                                     temp,               \
-                                     noth,               \
-                                     downgradelimit->my, \
-                                     blankship->my,      \
-                                     false,              \
-                                     this->my ); }       \
-    while (0)
-
-#define STDUPGRADECLAMP( my, oth, temp, noth )                 \
-    do {STDUPGRADE_SPECIFY_DEFAULTS( my,                       \
-                                     oth,                      \
-                                     temp,                     \
-                                     noth,                     \
-                                     downgradelimit->my,       \
-                                     blankship->my,            \
-                                     !force_change_on_nothing, \
-                                     this->my ); }             \
-    while (0)
-
     //set up vars for "LookupUnitStat" to check for empty cells
     string upgrade_name = up->name;
     //Check warp stuff
@@ -7437,7 +7312,6 @@ bool Unit::UpAndDownGrade( const Unit *up,
                                     "Spec_Interdiction|Warp_Min_Multiplier|Warp_Max_Multiplier" ) ) {
         if ( !csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data( upgrade_name, up->faction, "Spec_Interdiction" ) ) {
-            bool neg   = specInterdiction < 0;
             bool upneg = up->specInterdiction < 0;
             bool interdictionUnits = specInterdiction > 0;
             specInterdiction = fabs( specInterdiction );
@@ -7501,9 +7375,7 @@ bool Unit::UpAndDownGrade( const Unit *up,
         || cell_has_recursive_data( upgrade_name, up->faction, "Reactor_Recharge" ) )
         STDUPGRADE( recharge, up->recharge, templ->recharge, 0 );
     static bool unittable = XMLSupport::parse_bool( vs_config->getVariable( "physics", "UnitTable", "false" ) );
-
     //Uncommon fields (capacities... rates... etc...)
-    //pImage->ecm = abs( pImage->ecm ); --ecm is unsigned --chuck_starchaser
     if ( !csv_cell_null_check || force_change_on_nothing
         || cell_has_recursive_data( upgrade_name, up->faction,
                                     "Heat_Sink_Rating|Repair_Droid|Hold_Volume|Upgrade_Storage_Volume|Equipment_Space|Hidden_Cargo_Volume|ECM_Rating|Primary_Capacitor|Warp_Capacitor" ) )
@@ -7664,7 +7536,6 @@ bool Unit::UpAndDownGrade( const Unit *up,
                 bb = shield.shield8.backrightbottommax;
                 cc = shield.shield8.frontleftbottommax;
                 dd = shield.shield8.backleftbottommax;
-
                 STDUPGRADE( shield.shield8.frontrighttopmax,
                             up->shield.shield8.frontrighttopmax,
                             templ->shield.shield8.frontrighttopmax,
@@ -7911,13 +7782,16 @@ bool Unit::UpAndDownGrade( const Unit *up,
     return cancompletefully;
 }
 
+#undef STDUPGRADECLAMP
+#undef STDUPGRADE
+#undef STDUPGRADE_SPECIFY_DEFAULTS
+
 bool Unit::ReduceToTemplate()
 {
     vector< Cargo >savedCargo;
     savedCargo.swap( pImage->cargo );
     vector< Mount >savedWeap;
     savedWeap.swap( mounts );
-    int upfac = FactionUtil::GetUpgradeFaction();
     const Unit    *temprate = makeFinalBlankUpgrade( name, faction );
     bool   success = false;
     double pct     = 0;
@@ -8077,11 +7951,12 @@ extern bool isWeapon( std::string name );
 //item must be non-null... but baseUnit or credits may be NULL.
 bool Unit::RepairUpgradeCargo( Cargo *item, Unit *baseUnit, float *credits )
 {
+    assert( (item!=NULL) |! "Unit::RepairUpgradeCargo got a null item." ); //added by chuck_starchaser
     double itemPrice = baseUnit ? baseUnit->PriceCargo( item->content ) : item->price;
     if ( isWeapon( item->category ) ) {
         const Unit *upgrade = getUnitFromUpgradeName( item->content, this->faction );
         if ( upgrade->GetNumMounts() ) {
-            double price = itemPrice;             //RepairPrice probably won't work for mounts.
+            double price = itemPrice; //RepairPrice probably won't work for mounts.
             if ( !credits || price <= (*credits) ) {
                 if (credits) (*credits) -= price;
                 const Mount *mnt = &upgrade->mounts[0];
@@ -8109,13 +7984,9 @@ bool Unit::RepairUpgradeCargo( Cargo *item, Unit *baseUnit, float *credits )
         return false;
     } else {
         Cargo     sold;
-        const int quantity = 1;
         bool notadditive   = (item->GetContent().find( "add_" ) != 0 && item->GetContent().find( "mult_" ) != 0);
         if (notadditive || item->GetCategory().find( DamagedCategory ) == 0) {
             Cargo itemCopy = *item;                 //Copy this because we reload master list before we need it.
-
-            //this->SellCargo(item->content, quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
-            //UnitUtil::RecomputeUnitUpgrades(this);
             const Unit *un = getUnitFromUpgradeName( item->content, this->faction );
             if (un) {
                 double percentage = UnitUtil::PercentOperational( this, item->content, item->category, false );
@@ -8472,14 +8343,7 @@ void Unit::EjectCargo( unsigned int index )
                     }
                     arot = erot;
                     cargo->PrimeOrders();
-                    Order *ai = cargo->aistate;
                     cargo->aistate = NULL;
-
-                    //cargo->is_ejectdock = true; // ugly, but i hope it doesn't mess anything up. Checked by undocking.
-                    //this->is_ejectdock = false;
-                    //cargo->PrimeOrders (new Orders::DockingOps (this, ai,actually_dock!=0));
-                    //cargo->SetAI (new Orders::DockingOps (this, ai,actually_dock!=0));
-                    //cargo->SetTurretAI();
                 } else {
                     string tmpnam = tmpcontent+".cargo";
                     static std::string nam( "Name" );
@@ -9246,20 +9110,22 @@ bool isWeapon( std::string name )
     return false;
 }
 
+#define REPAIRINTEGRATED( functionality, max_functionality ) \
+    do {                                                     \
+        if (functionality < max_functionality)               \
+        {                                                    \
+            (functionality) += ammt_repair;                  \
+            if ( (functionality) > (max_functionality) )     \
+                (functionality) = (max_functionality);       \
+        }                                                    \
+    }                                                        \
+    while (0)
+
 void Unit::Repair()
 {
-    //note work slows down under time compression!
-
     static float repairtime = XMLSupport::parse_float( vs_config->getVariable( "physics", "RepairDroidTime", "180" ) );
     static float checktime  = XMLSupport::parse_float( vs_config->getVariable( "physics", "RepairDroidCheckTime", "5" ) );
-    static bool  continuous = XMLSupport::parse_bool( vs_config->getVariable( "physics", "RepairDroidContinuous", "true" ) );
     if ( (repairtime <= 0) || (checktime <= 0) ) return;
-    /*
-     *  if (pImage->next_repair_time==FLT_MAX)
-     *  pImage->next_repair_time = UniverseUtil::GetGameTime();
-     */
-    //float workunit = pImage->repair_droid*SIMULATION_ATOM/repairtime;//a droid completes 1 work unit in repairtime
-    //if (pImage->repair_droid&&vsrandom.uniformInc(0,1)<workunit) {
     if (pImage->repair_droid) {
         if ( pImage->next_repair_time == -FLT_MAX || pImage->next_repair_time <= UniverseUtil::GetGameTime() ) {
             unsigned int numcargo = numCargo();
@@ -9307,25 +9173,10 @@ void Unit::Repair()
             }
         }
         float ammt_repair = SIMULATION_ATOM/repairtime;
-
-#define REPAIRINTEGRATED( functionality, max_functionality ) \
-    do {                                                     \
-        if (functionality < max_functionality)               \
-        {                                                    \
-            (functionality) += ammt_repair;                  \
-            if ( (functionality) > (max_functionality) )     \
-                (functionality) = (max_functionality);       \
-        }                                                    \
-    }                                                        \
-    while (0)
-
         REPAIRINTEGRATED( pImage->LifeSupportFunctionality, pImage->LifeSupportFunctionalityMax );
         REPAIRINTEGRATED( pImage->fireControlFunctionality, pImage->fireControlFunctionalityMax );
         REPAIRINTEGRATED( pImage->SPECDriveFunctionality, pImage->SPECDriveFunctionalityMax );
         REPAIRINTEGRATED( pImage->CommFunctionality, pImage->CommFunctionalityMax );
-
-#undef REPAIRINTEGRATED
-
         unsigned int numg  = (1+UnitImages< void >::NUMGAUGES+MAXVDUS);
         unsigned int which = vsrandom.genrand_int31()%numg;
         static float hud_repair_quantity = XMLSupport::parse_float( vs_config->getVariable( "physics", "hud_repair_unit", ".25" ) );
@@ -9348,6 +9199,8 @@ void Unit::Repair()
         }
     }
 }
+
+#undef REPAIRINTEGRATED
 
 bool Unit::isTractorable( enum tractorHow how ) const
 {

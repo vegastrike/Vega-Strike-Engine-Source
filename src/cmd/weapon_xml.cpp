@@ -251,7 +251,6 @@ void beginElement( void *userData, const char *name, const char **atts )
         XMLSupport::parse_float( vs_config->getVariable( "physics", "gun_speed", "1" ) )*(adj_gun_speed ? game_speed : 1);
     static int    gamma = (int) ( 20*XMLSupport::parse_float( vs_config->getVariable( "graphics", "weapon_gamma", "1.35" ) ) );
     AttributeList attributes( atts );
-    //weapon_info * debugtmp = &tmpweapon;
     enum weapon_info::WEAPON_TYPE weaptyp;
     Names elem = (Names) element_map.lookup( string( name ) );
 #ifdef TESTBEAMSONLY
@@ -264,14 +263,12 @@ void beginElement( void *userData, const char *name, const char **atts )
     case UNKNOWN:
         break;
     case WEAPONS:
-        //assert (level==-1);
         level++;
         break;
     case BOLT:
     case BEAM:
     case BALL:
     case PROJECTILE:
-        //assert (level==0);
         level++;
         switch (elem)
         {
@@ -313,13 +310,11 @@ void beginElement( void *userData, const char *name, const char **atts )
                 tmpweapon.MntSize( lookupMountSize( (*iter).value.c_str() ) );
                 break;
             default:
-                //assert (0);
                 break;
             }
         }
         break;
     case APPEARANCE:
-        //assert (level==1);
         level++;
         counts++;
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
@@ -363,7 +358,6 @@ void beginElement( void *userData, const char *name, const char **atts )
                     XMLSupport::parse_float( (*iter).value );
                 break;
             default:
-                //assert (0);
                 break;
             }
         }
@@ -372,11 +366,9 @@ void beginElement( void *userData, const char *name, const char **atts )
             tmpweapon.b = (tmpweapon.b+color_step*5)/255.;
             tmpweapon.g = (tmpweapon.g+color_step/5)/255.;
             tmpweapon.r = (tmpweapon.r+color_step*2)/255.;
-            //tmpweapon.a = (tmpweapon.a + color_step*5)/255.;
         }
         break;
     case ENERGY:
-        //assert (level==1);
         level++;
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
             switch ( attribute_map.lookup( (*iter).name ) )
@@ -502,6 +494,8 @@ void beginElement( void *userData, const char *name, const char **atts )
     }
 }
 
+#undef Gamma_Needed
+
 void endElement( void *userData, const XML_Char *name )
 {
     Names elem = (Names) element_map.lookup( name );
@@ -533,7 +527,9 @@ void endElement( void *userData, const XML_Char *name )
         break;
     }
 }
-} //namespace BeamXML
+
+//namespace BeamXML
+}
 
 using namespace BeamXML;
 using namespace VSFileSystem;
@@ -547,8 +543,6 @@ weapon_info * getTemplate( const string &kkey )
         if ( !WeaponMeshCache::getCachedMutable( wi->weapon_name ) ) {
             static string sharedmountdir = vs_config->getVariable( "data", "mountlocation", "weapons" );
             static FileLookupCache lookup_cache;
-
-            //string meshshell=VSFileSystem::sharedmeshes+"/"+sharedmountdir+string ("/") + key;
             string meshname = strtolower( kkey )+".bfxm";
             if (CachedFileLookup( lookup_cache, meshname, MeshFile ) <= Ok) {
                 WeaponMeshCache::setCachedMutable( wi->weapon_name, wi->gun =
@@ -564,7 +558,6 @@ weapon_info * getTemplate( const string &kkey )
 void LoadWeapons( const char *filename )
 {
     using namespace VSFileSystem;
-    const int  chunk_size = 16384;
     VSFile     f;
     VSError    err    = f.OpenReadOnly( filename, UnknownFile );
     if (err > Ok)
@@ -572,25 +565,6 @@ void LoadWeapons( const char *filename )
     XML_Parser parser = XML_ParserCreate( NULL );
     XML_SetElementHandler( parser, &beginElementXML_Char, &endElement );
     XML_Parse( parser, ( f.ReadFull() ).c_str(), f.Size(), 1 );
-
-    /*
-     *  do {
-     * #ifdef BIDBG
-     *  char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
-     * #else
-     *  char buf[chunk_size];
-     * #endif
-     *  int length;
-     *
-     *  length = VSFileSystem::vs_read (buf,1, chunk_size,inFile);
-     *  //length = inFile.gcount();
-     * #ifdef BIDBG
-     *  XML_ParseBuffer(parser, length, VSFileSystem::vs_feof(inFile));
-     * #else
-     *  XML_Parse (parser,buf,length,VSFileSystem::vs_feof (inFile));
-     * #endif
-     *  } while(!VSFileSystem::vs_feof(inFile));
-     */
     f.Close();
     XML_ParserFree( parser );
 }

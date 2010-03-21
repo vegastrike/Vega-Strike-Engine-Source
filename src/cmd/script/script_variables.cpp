@@ -471,12 +471,12 @@ void Mission::doSetVar( missionNode *node, int mode )
             }
             vi = global_var->script.varinst;
         }
-        if (vi->type == VAR_BOOL) {
-            bool res = checkBoolExpr( expr, mode );
+        if (vi->type == VAR_BOOL) { //FIXME I can't imagine the purpose of these these... --chuck_starchaser
+            bool res = checkBoolExpr( expr, mode ); //FIXME ???!
         } else if (vi->type == VAR_FLOAT) {
-            double res = checkFloatExpr( expr, mode );
+            double res = checkFloatExpr( expr, mode ); //FIXME ???!
         } else if (vi->type == VAR_INT) {
-            float res = checkIntExpr( expr, mode );
+            float res = checkIntExpr( expr, mode ); //FIXME ???!
         } else if (vi->type == VAR_OBJECT) {
             debug( 3, node, mode, "setvar object" );
             varInst *ovi = checkObjectExpr( expr, mode );

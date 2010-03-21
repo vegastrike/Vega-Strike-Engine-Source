@@ -600,7 +600,6 @@ void NetClient::receiveUnitDamage( NetBuffer &netbuf, Unit *un )
 void NetClient::inGame()
 {
     NetBuffer netbuf;
-    char flags   = 0;
     Unit     *un = this->game_unit.GetUnit();
     if (!un)
         cout<<"Trying to ingame dead unit";

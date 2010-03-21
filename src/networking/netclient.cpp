@@ -583,7 +583,6 @@ int NetClient::recvMsg( Packet *outpacket, timeval *timeout )
                 //NETFIXME: Broken code... shouldn't write to client's stuff
                 //Also, shouldn't open files Read-only and then write to them.
                 //Also it shouldn't exit(1)...
-                FILE  *fp;
                 string filename;
                 string file;
                 filename = netbuf.getString();
@@ -1522,7 +1521,6 @@ void NetClient::Reconnect( std::string srvipadr, unsigned short port )
     UniverseUtil::showSplashScreen( "" );
     //necessary? usually we would ask acctserver for it .. or pass it in NetClient::getConfigServerAddress(srvipadr, port);
     for (unsigned int k = 0; k < _Universe->numPlayers(); ++k) {
-        bool   ret = false;
         string err;
         if ( !srvipadr.empty() )
             Network[k].SetCurrentServerAddress( srvipadr, port );

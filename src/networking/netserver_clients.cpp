@@ -41,6 +41,7 @@ void NetServer::broadcastUnit( Unit *un, unsigned short zone )
 {
     newUnits.push_back( un );
 }
+
 void NetServer::sendNewUnitQueue()
 {
     unsigned short vers[4] = {0, 4951, 4952, 65535};
@@ -327,12 +328,14 @@ Quaternion MinRotationFromDirections( Vector start, Vector finish, double &theta
     rotation = rotation.Scale( 1./mag );
     return Quaternion( s, rotation*sin( theta*.5 ) );
 }
+
 Vector ApplyQuaternion( const Quaternion &quat, Vector input )
 {
     Matrix tmp;
     quat.to_matrix( tmp );
     return TransformNormal( tmp, input );
 }
+
 /*
  **************************************************************
  **** Adds the client update to current client's zone snapshot
@@ -466,10 +469,12 @@ ClientState aim_assist( ClientState cs,
     fprintf( stderr, "Got non-finite result for aim_assist (client sent bad info?)\n" );
     return cs;
 }
+
 ClientState aim_assist( ClientState cs, ClientState ocs /*old*/, Unit *target, Vector targetpos, Vector targetvel )
 {
     return aim_assist( cs, ocs, target->Position(), target->Velocity, targetpos, targetvel );
 }
+
 ClientState aim_assist_debug( float x,
                               float y,
                               float z,
@@ -611,6 +616,7 @@ void AddWriteSave( std::string &netbuf, int cpnum )
     addSimpleString( netbuf, savestr );
     addSimpleString( netbuf, xmlstr );
 }
+
 void AcctLogout( VsnetHTTPSocket *acct_sock, ClientPtr clt )
 {
     if (acct_sock == NULL) return;
@@ -619,8 +625,7 @@ void AcctLogout( VsnetHTTPSocket *acct_sock, ClientPtr clt )
 
         Unit    *un     = clt->game_unit.GetUnit();
         int      cpnum  = _Universe->whichPlayerStarship( un );
-        Cockpit *cp     = cpnum == -1 ? NULL : _Universe->AccessCockpit( cpnum );
-        bool     dosave = false;     //(cp!=NULL&&un!=NULL&&_Universe->star_system.size()>0&&cp->activeStarSystem&&clt->jumpok==0);
+        bool     dosave = false;
         if (clt->loginstate < Client::INGAME)
             dosave = false;
         addSimpleChar( netbuf, dosave ? ACCT_SAVE_LOGOUT : ACCT_LOGOUT );
@@ -632,6 +637,7 @@ void AcctLogout( VsnetHTTPSocket *acct_sock, ClientPtr clt )
             COUT<<"ERROR sending LOGOUT to account server"<<endl;
     }
 }
+
 void NetServer::disconnect( ClientPtr clt, const char *debug_from_file, int debug_from_line )
 {
     COUT<<"enter "<<__PRETTY_FUNCTION__<<endl

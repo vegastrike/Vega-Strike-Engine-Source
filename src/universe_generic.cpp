@@ -105,12 +105,9 @@ Cockpit* Universe::isPlayerStarship( const Unit *doNotDereference )
     for (std::vector< Cockpit* >::iterator iter = cockpit.begin(); iter < cockpit.end(); iter++)
         if ( doNotDereference == ( *(iter) )->GetParent() )
             return *(iter);
-    //for (unsigned int i=0;i<cockpit.size();i++) {
-//if (doNotDereference==cockpit[i]->GetParent())
-//return cockpit[i];
-//}
     return NULL;
 }
+
 int Universe::whichPlayerStarship( const Unit *doNotDereference )
 {
     if (!doNotDereference)
@@ -120,6 +117,7 @@ int Universe::whichPlayerStarship( const Unit *doNotDereference )
             return i;
     return -1;
 }
+
 void Universe::SetActiveCockpit( int i )
 {
 #ifdef VS_DEBUG
@@ -128,6 +126,7 @@ void Universe::SetActiveCockpit( int i )
 #endif
     current_cockpit = i;
 }
+
 void Universe::SetActiveCockpit( Cockpit *cp )
 {
     for (unsigned int i = 0; i < cockpit.size(); i++)
@@ -136,11 +135,13 @@ void Universe::SetActiveCockpit( Cockpit *cp )
             return;
         }
 }
+
 void Universe::SetupCockpits( vector< string >playerNames )
 {
     for (unsigned int i = 0; i < playerNames.size(); i++)
         cockpit.push_back( new Cockpit( "", NULL, playerNames[i] ) );
 }
+
 void SortStarSystems( std::vector< StarSystem* > &ss, StarSystem *drawn )
 {
     if ( ( *ss.begin() ) == drawn )
@@ -157,11 +158,11 @@ void SortStarSystems( std::vector< StarSystem* > &ss, StarSystem *drawn )
         }
     }
 }
+
 void Universe::Init( const char *gal )
 {
     ROLES::getAllRolePriorities();
     LoadWeapons( VSFileSystem::weapon_list.c_str() );
-
     this->galaxy = new GalaxyXML::Galaxy( gal );
     static bool firsttime = false;
     if (!firsttime) {
@@ -191,15 +192,6 @@ Universe::Universe() :
 
 Universe::~Universe()
 {
-    //unsigned int i;
-    /*
-     *  for (i=0;i<factions.size();i++) {
-     *  delete factions[i];
-     *  }
-     *  for (i=0;i<cockpit.size();i++) {
-     *  delete cockpit[i];
-     *  }
-     */
     factions.clear();
     cockpit.clear();
 }
@@ -224,11 +216,8 @@ bool Universe::netLocked()
 void Universe::netLock( bool enable )
 {
     network_lock = false;
-    if (Network || SERVER) {
-//printf(" *** %sd network_lock *** \n",
-//enable?"!!! Enable":"Disable");
+    if (Network || SERVER)
         network_lock = enable;
-    }
 }
 
 void Universe::UnloadStarSystem( StarSystem *s )
@@ -296,22 +285,18 @@ void Universe::Generate2( StarSystem *ss )
 {
     static bool firsttime = true;
     LoadStarSystem( ss );
-
     pushActiveStarSystem( ss );
     static int num_times_to_simulate_new_star_system =
         XMLSupport::parse_int( vs_config->getVariable( "physics", "num_times_to_simulate_new_star_system", "20" ) );
     for (unsigned int tume = 0; tume <= num_times_to_simulate_new_star_system*SIM_QUEUE_SIZE+1; ++tume)
-        //ss->ExecuteUnitAI();
         ss->UpdateUnitPhysics( true );
     //notify the director that a new system is loaded (gotta have at least one active star system)
     StarSystem *old_script_system = script_system;
-
     script_system = ss;
     VSFileSystem::vs_fprintf( stderr, "Loading Star System %s\n", ss->getFileName().c_str() );
     const vector< std::string > &adjacent = getAdjacentStarSystems( ss->getFileName() );
     for (unsigned int i = 0; i < adjacent.size(); i++) {
         VSFileSystem::vs_fprintf( stderr, " Next To: %s\n", adjacent[i].c_str() );
-        const vector< std::string > &adj = getAdjacentStarSystems( adjacent[i] );
     }
     static bool first = true;
     if (!first)
@@ -363,7 +348,6 @@ void InitUnitTables()
 {
     VSFile  allUnits;
     VSError err;
-
     static string unitdata = vs_config->getVariable( "data", "UnitCSV", "modunits.csv" );
     while (unitdata.length() != 0) {
         string::size_type where = unitdata.find( " " ), where2 = where;

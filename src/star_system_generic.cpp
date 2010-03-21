@@ -196,13 +196,13 @@ StarSystem::~StarSystem()
     delete[] name;
     //delete systemInputDFA;
     /* //FIXME  after doign so much debugging I think you shouldn't delete this
-     *  for (int i=0;i<numprimaries;i++) {
+    //FIXME SQUARED: The purpose of comments is to clarify; NOT to mystify. --chuck_starchaser
+     *  for (int i=0;i<numprimaries;i++) { 
      *  delete primaries[i];
      *  }
      *  delete [] primaries;
      *
      */
-
     Unit *unit;
     //VSFileSystem::vs_fprintf (stderr,"|t%f i%lf|",GetElapsedTime(),interpolation_blend_factor);
     for (un_iter iter = drawList.createIterator(); (unit = *iter); ++iter)
@@ -403,9 +403,9 @@ void StarSystem::ExecuteUnitAI()
 }
 
 //sorry boyz...I'm just a tourist with a frag nav console--could you tell me where I am?
-Unit * getTopLevelOwner()                //returns terrible memory--don't dereference...ever...not even aligned
+Unit * getTopLevelOwner() //returns terrible memory--don't dereference...ever...not even aligned
 {
-    return (Unit*) 0x31337;
+    return (Unit*) 0x31337; //FIXME How about telling us a little story behind this function? --chuck_starchaser
 }
 
 void CarSimUpdate( Unit *un, float height )
@@ -500,6 +500,7 @@ void StarSystem::Statistics::CheckVitals( StarSystem *ss )
         checkIter = 0;                           //start over with list
     }
 }
+
 void StarSystem::Statistics::AddUnit( Unit *un )
 {
     float rel = UnitUtil::getRelationFromFaction( un, system_faction );
@@ -555,13 +556,7 @@ void StarSystem::Statistics::RemoveUnit( Unit *un )
             }
     }
 }
-/*
-bool debugPerformance()
-{
-    static bool dp = XMLSupport::parse_bool( vs_config->getVariable( "physics", "debug_performance", "false" ) );
-    return dp;
-}
-*/
+
 //Variables for debugging purposes only - eliminate later
 unsigned int physicsframecounter = 1;
 unsigned int theunitcounter = 0;
@@ -590,7 +585,6 @@ void StarSystem::UpdateUnitPhysics( bool firstframe )
 {
     static bool phytoggle  = true;
     static int  batchcount = SIM_QUEUE_SIZE-1;
-    double updatebegin     = queryTime();
     double aitime = 0;
     double phytime = 0;
     double collidetime     = 0;
@@ -611,7 +605,6 @@ void StarSystem::UpdateUnitPhysics( bool firstframe )
             //scheduling also require a constant base priority, since otherwise priority changes
             //will wreak havoc with subunit interpolation. Luckily again, we only need
             //randomization on priority changes, so we're fine.
-
             try {
                 Unit *unit = NULL;
                 for (un_iter iter = physics_buffer[current_sim_location].createIterator(); (unit = *iter); ++iter) {
@@ -670,7 +663,6 @@ void StarSystem::UpdateUnitPhysics( bool firstframe )
                 int   priority = unit->sim_atom_multiplier;
                 float backup   = SIMULATION_ATOM;
                 SIMULATION_ATOM *= priority;
-
                 unsigned int newloc = (current_sim_location+priority)%SIM_QUEUE_SIZE;
                 unit->CollideAll();
                 SIMULATION_ATOM = backup;
@@ -682,28 +674,6 @@ void StarSystem::UpdateUnitPhysics( bool firstframe )
             double dd = queryTime();
             collidetime += dd-cc;
             bolttime    += cc-c0;
-            //Book-keeping for debug - remove later
- /*           if ( debugPerformance() ) {
-                int movingavgindex = physicsframecounter%128;
-                movingtotal = movingtotal-movingavgarray[movingavgindex]+theunitcounter;
-                movingavgarray[movingavgindex] = theunitcounter;
-                printf( "PhysFrame:%u - %u, %u, %u t:%f ai:%f:%f:ctc_%d,tp_%f p:%f c:%f b:%f fl:%f\n",
-                        physicsframecounter,
-                        theunitcounter,
-                        movingtotal/128,
-                        totalprocessed/physicsframecounter,
-                        queryTime()-updatebegin,
-                        aitime,
-                        aggfire,
-                        numprocessed,
-                        targetpick,
-                        phytime,
-                        collidetime,
-                        bolttime,
-                        flattentime );
-            }
-*/
-            //end debug bookkeeping
             current_sim_location = (current_sim_location+1)%SIM_QUEUE_SIZE;
             ++physicsframecounter;
             totalprocessed += theunitcounter;
@@ -732,6 +702,7 @@ extern void NebulaUpdate( StarSystem *ss );
 extern void reset_time_compression( const KBData &, KBSTATE );
 
 extern float getTimeCompression();
+
 //server
 void ExecuteDirector()
 {
@@ -802,15 +773,12 @@ void StarSystem::Update( float priority )
     }
     SIMULATION_ATOM = normal_simulation_atom;
     _Universe->popActiveStarSystem();
-    //VSFileSystem::vs_fprintf (stderr,"bf:%lf",interpolation_blend_factor);
 }
 
 //client
 void StarSystem::Update( float priority, bool executeDirector )
 {
-    Unit  *unit;
     bool   firstframe = true;
-    double beginss    = queryTime();
     double pythontime = 0;
     ///this makes it so systems without players may be simulated less accurately
     for (unsigned int k = 0; k < _Universe->numPlayers(); ++k)
@@ -819,7 +787,6 @@ void StarSystem::Update( float priority, bool executeDirector )
     float normal_simulation_atom = SIMULATION_ATOM;
     SIMULATION_ATOM /= ( priority/getTimeCompression() );
     ///just be sure to restore this at the end
-
     time += GetElapsedTime();
     _Universe->pushActiveStarSystem( this );
     //WARNING PERFORMANCE HACK!!!!!
@@ -829,11 +796,9 @@ void StarSystem::Update( float priority, bool executeDirector )
     if ( time/SIMULATION_ATOM >= (1./PHY_NUM) ) {
         //Chew up all SIMULATION_ATOMs that have elapsed since last update
         while ( time/SIMULATION_ATOM >= (1./PHY_NUM) ) {
-            //UnitCollection::UnitIterator iter;
             if (current_stage == MISSION_SIMULATION) {
                 TerrainCollide();
                 UpdateAnimatedTexture();
-                //iter = units.createIterator();
                 Unit::ProcessDeleteQueue();
                 double pythonidea = queryTime();
                 if ( (run_only_player_starsystem
@@ -841,7 +806,6 @@ void StarSystem::Update( float priority, bool executeDirector )
                     if (executeDirector)
                         ExecuteDirector();
                 pythontime = queryTime()-pythonidea;
-
                 static int dothis = 0;
                 if ( this == _Universe->getActiveStarSystem( 0 ) )
                     if ( (++dothis)%2 == 0 )
@@ -852,11 +816,10 @@ void StarSystem::Update( float priority, bool executeDirector )
                 current_stage = PROCESS_UNIT;
             } else if (current_stage == PROCESS_UNIT) {
                 UpdateUnitPhysics( firstframe );
-                UpdateMissiles();                 //do explosions
+                UpdateMissiles(); //do explosions
                 collidetable->Update();
                 if ( this == _Universe->getActiveStarSystem( 0 ) )
                     UpdateCameraSnds();
-                //iter = drawList.createIterator();
                 bolttime      = queryTime();
                 bolttime      = queryTime()-bolttime;
                 current_stage = MISSION_SIMULATION;
@@ -873,7 +836,6 @@ void StarSystem::Update( float priority, bool executeDirector )
                     SIMULATION_ATOM = normal_simulation_atom;
                     _Universe->SetActiveCockpit( i );
                     _Universe->popActiveStarSystem();
-
                     return;
                 }
             }
@@ -886,15 +848,10 @@ void StarSystem::Update( float priority, bool executeDirector )
     while ( !sigIter.isDone() && !UnitUtil::isSignificant( *sigIter) )
         ++sigIter;
     //If it is done, leave it NULL for this frame then.
-
     //WARNING cockpit does not get here...
     SIMULATION_ATOM = normal_simulation_atom;
     //WARNING cockpit does not get here...
     _Universe->popActiveStarSystem();
-    //VSFileSystem::vs_fprintf (stderr,"bf:%lf",interpolation_blend_factor);
-/*    if ( debugPerformance() )
-        printf( "SS Update: pyth: %f tot: %f\n", pythontime, queryTime()-beginss );
-*/
 }
 
 /*
@@ -926,6 +883,7 @@ StarSystem * GetLoadedStarSystem( const char *system )
 }
 
 std::vector< unorigdest* >pendingjump;
+
 bool PendingJumpsEmpty()
 {
     return pendingjump.empty();
@@ -972,7 +930,6 @@ void StarSystem::ProcessPendingJumps()
         //In non-networking mode or in networking mode or a netplayer wants to jump and is ready or a non-player jump
         if ( Network == NULL || playernum < 0 || ( Network != NULL && playernum >= 0 && Network[playernum].readyToJump() ) ) {
             Unit *un = pendingjump[kk]->un.GetUnit();
-
             StarSystem *savedStarSystem = _Universe->activeStarSystem();
             //Download client descriptions of the new zone (has to be blocking)
             if (Network != NULL)
@@ -1011,18 +968,6 @@ void StarSystem::ProcessPendingJumps()
 
 double calc_blend_factor( double frac, int priority, unsigned int when_it_will_be_simulated, int cur_simulation_frame )
 {
-    /*	bool is_at_end=when_it_will_be_simulated==SIM_QUEUE_SIZE;
-     *  if (cur_simulation_frame>when_it_will_be_simulated) {
-     *       when_it_will_be_simulated+=SIM_QUEUE_SIZE;
-     *  }
-     *  double distance = when_it_will_be_simulated-cur_simulation_frame;//number between for next SIM_FRAME and SIM_QUEUE_SIZE-1
-     *  double when_it_was_simulated=when_it_will_be_simulated-(double)priority;
-     *  double fraction_of_physics_frame=(cur_simulation_frame-when_it_was_simulated+frac-1)/priority;
-     *  if (is_at_end) {
-     *         return 1;
-     *  }else {
-     *         return fraction_of_physics_frame;
-     *  }*/
     if (when_it_will_be_simulated == SIM_QUEUE_SIZE) {
         return 1;
     } else {
@@ -1099,18 +1044,6 @@ bool StarSystem::JumpTo( Unit *un, Unit *jumppoint, const std::string &system, b
             pendingjump.push_back( new unorigdest( un, jumppoint, this, ss, un->GetJumpStatus().delay, ani, justloaded,
                                                   save_coordinates ? ComputeJumpPointArrival( un->Position(), this->getFileName(),
                                                                                               system ) : QVector( 0, 0, 0 ) ) );
-#if 0
-            UnitImages *im = &un->GetImageInformation();
-            for (unsigned int i = 0; i <= im->dockedunits.size(); ++i) {
-                Unit *unk = NULL;
-                if ( i < im->dockedunits.size() )
-                    im->dockedunits[i]->uc.GetUnit();
-                else
-                    unk = im->DockedTo.GetUnit();
-                if (unk != NULL)
-                    TentativeJumpTo( this, unk, jumppoint, system );
-            }
-#endif
         } else {
 #ifdef JUMP_DEBUG
             VSFileSystem::vs_fprintf( stderr, "Failed to retrieve!\n" );

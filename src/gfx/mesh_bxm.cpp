@@ -308,9 +308,7 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
 #endif
 
     vector< OrigMeshLoader >meshes;
-    int32bit intbuf;
     int32bit word32index = 0;
-    Mesh    *mesh = 0;
     union chunk32
     {
         int32bit   i32val;
@@ -341,11 +339,8 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
     Inputfile.Read( inmemfile, Inputlength );
     Inputfile.Close();
 #endif
-    int32bit Inputlength32 = Inputlength/4;
     //Extract superheader fields
-    word32index += 1;
-    int32bit version = VSSwapHostIntToLittle( inmemfile[word32index].i32val );
-    word32index += 2;
+    word32index += 3;
     int32bit Superheaderlength  = VSSwapHostIntToLittle( inmemfile[word32index].i32val );
     int32bit NUMFIELDSPERVERTEX = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );             //Number of fields per vertex:integer (8)
     int32bit NUMFIELDSPERPOLYGONSTRUCTURE    = VSSwapHostIntToLittle( inmemfile[word32index+2].i32val );             //Number of fields per polygon structure: integer (1)
@@ -450,33 +445,23 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             mesh->SetBlendMode( (BLENDFUNC) bsrc, (BLENDFUNC) bdst );
 
             string   detailtexturename    = "";
-            int32bit detailtexturenamelen = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //detailtexture name length
+            int32bit detailtexturenamelen = VSSwapHostIntToLittle( inmemfile[word32index].i32val ); //detailtexture name length
             word32index += 1;
-            int32bit stringindex = 0;
-            /*int32bit namebound=(detailtexturenamelen+3)/4;
-             *  for(stringindex=0;stringindex<namebound;stringindex++){
-             *     for(int32bit bytenum=0;bytenum<4;bytenum++){ // Extract chars
-             *             if(inmemfile[word32index].c8val[bytenum]){ //If not padding
-             *         detailtexturename+=inmemfile[word32index].c8val[bytenum]; //Append char to end of string
-             *       }
-             *     }
-             *     word32index+=1;
-             *  }*/
             READSTRING( inmemfile, word32index, detailtexturenamelen, detailtexturename );
             if (detailtexturename.size() != 0) {
                 bxmfprintf( Outputfile, " detailtexture=\"%s\" ", detailtexturename.c_str() );
                 mesh->detailTexture = mesh->TempGetTexture( &xml, detailtexturename, FactionUtil::GetFaction(
-                                                                xml.faction ), GFXTRUE );                                                      //LoadTexture(detailtexturename);
+                                                                xml.faction ), GFXTRUE ); //LoadTexture(detailtexturename);
             } else {
                 mesh->detailTexture = 0;
             }
             vector< Mesh_vec3f >Detailplanes;                     //store detail planes until finish printing mesh attributes
-            int32bit numdetailplanes = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of detailplanes
+            int32bit numdetailplanes = VSSwapHostIntToLittle( inmemfile[word32index].i32val ); //number of detailplanes
             word32index += 1;
             for (int32bit detailplane = 0; detailplane < numdetailplanes; detailplane++) {
-                float32bit x = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                         //x-coord
-                float32bit y = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //y-coord
-                float32bit z = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //z-coord
+                float32bit x = VSSwapHostFloatToLittle( inmemfile[word32index].f32val ); //x-coord
+                float32bit y = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val ); //y-coord
+                float32bit z = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val ); //z-coord
                 word32index += 3;
                 Mesh_vec3f temp;
                 temp.x = x;

@@ -96,12 +96,12 @@ void SphereMesh::InitSphere( float radius,
     if ( LoadExistant( hash_name, Vector( radius, radius, radius ), 0 ) ) {
         return;
     } else {}
-    this->orig = AllocNewMeshesEachInSizeofMeshSpace( numspheres );     //FIXME::RISKY::MIGHT HAVE DIFFERENT SIZES!! DON"T YOU DARE ADD XTRA VARS TO SphereMesh calsshave to!
+    this->orig = AllocNewMeshesEachInSizeofMeshSpace( numspheres ); //FIXME::RISKY::MIGHT HAVE...
+    //... DIFFERENT SIZES!!  DON"T YOU DARE ADD XTRA VARS TO SphereMesh calsshave to!
     oldmesh    = this->orig;
     numlods    = numspheres;
     meshHashTable.Put( hash_name, oldmesh );
-    //VSFileSystem::Fprintf (stderr,"\nput %s\n",hash_name.c_str());
-    radialSize = radius;     //MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!
+    radialSize = radius; //MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!
     mn = Vector( -radialSize, -radialSize, -radialSize );
     mx = Vector( radialSize, radialSize, radialSize );
     vector< MeshDrawContext > *odq = NULL;
@@ -109,8 +109,6 @@ void SphereMesh::InitSphere( float radius,
         draw_queue = new vector< MeshDrawContext >[NUM_ZBUF_SEQ+1];
         if (subclass || rho_max != M_PI || rho_min != 0.0 || theta_min != 0.0 || theta_max != 2*M_PI)
             odq = draw_queue;
-        //stacks = origst/(l+1);
-        //slices = origsl/(l+1);
         vlist = NULL;
         if (subclass) {
             if (stacks > 12) {
@@ -123,17 +121,17 @@ void SphereMesh::InitSphere( float radius,
             float drho, dtheta;
             float x, y, z;
             float s, t, ds, dt;
-            int   i, j, it, jt, imin, imax;
+            int   i, j, imin, imax;
             float nsign = Insideout ? -1.0 : 1.0;
             float normalscale = reverse_normals ? -1.0 : 1.0;
-            int   fir   = 0;           //Insideout?1:0;
-            int   sec   = 1;           //Insideout?0:1;
+            int   fir   = 0; //Insideout?1:0;
+            int   sec   = 1; //Insideout?0:1;
             /* Code below adapted from gluSphere */
             drho   = (rho_max-rho_min)/(float) stacks;
             dtheta = (theta_max-theta_min)/(float) slices;
             ds     = 1.0/slices;
             dt     = 1.0/stacks;
-            t = 1.0;             /* because loop now runs from 0 */
+            t = 1.0;  /* because loop now runs from 0 */
             imin   = 0;
             imax   = stacks;
             int  numQuadstrips   = stacks;
@@ -144,9 +142,6 @@ void SphereMesh::InitSphere( float radius,
             GFXVertex     *vertexlist = new GFXVertex[numvertex];
             GFXVertex     *vl    = vertexlist;
             enum POLYTYPE *modes = new enum POLYTYPE[numQuadstrips];
-            /*   SetOrientation(Vector(1,0,0),
-             *    Vector(0,0,-1),
-             *    Vector(0,1,0));//that's the way prop*/                                                                                  //taken care of in loading
             float rhol[2];
             float thetal[2];
 #define g_rho( i ) (rhol[(i)&1])
@@ -165,8 +160,8 @@ void SphereMesh::InitSphere( float radius,
                     vertexlist[j*2+fir].i = x*normalscale;
                     vertexlist[j*2+fir].k = -y*normalscale;
                     vertexlist[j*2+fir].j = z*normalscale;
-                    vertexlist[j*2+fir].s = GetS( g_theta( j ), theta_min, theta_max );                     //1-s;//insideout?1-s:s;
-                    vertexlist[j*2+fir].t = GetT( g_rho( i ), rho_min, rho_max );                     //t;
+                    vertexlist[j*2+fir].s = GetS( g_theta( j ), theta_min, theta_max ); //1-s;//insideout?1-s:s;
+                    vertexlist[j*2+fir].t = GetT( g_rho( i ), rho_min, rho_max ); //t;
                     vertexlist[j*2+fir].x = x*radius;
                     vertexlist[j*2+fir].z = -y*radius;
                     vertexlist[j*2+fir].y = z*radius;
@@ -175,9 +170,9 @@ void SphereMesh::InitSphere( float radius,
                     z = nsign*cos( g_rho( i+1 ) );
                     vertexlist[j*2+sec].i = x*normalscale;
                     vertexlist[j*2+sec].k = -y*normalscale;
-                    vertexlist[j*2+sec].j = z*normalscale;                     //double negative
-                    vertexlist[j*2+sec].s = GetS( g_theta( j ), theta_min, theta_max );                     //1-s;//insideout?1-s:s;
-                    vertexlist[j*2+sec].t = GetT( g_rho( i+1 ), rho_min, rho_max );                     //t - dt;
+                    vertexlist[j*2+sec].j = z*normalscale; //double negative
+                    vertexlist[j*2+sec].s = GetS( g_theta( j ), theta_min, theta_max ); //1-s;//insideout?1-s:s;
+                    vertexlist[j*2+sec].t = GetT( g_rho( i+1 ), rho_min, rho_max ); //t - dt;
                     vertexlist[j*2+sec].x = x*radius;
                     vertexlist[j*2+sec].z = -y*radius;
                     vertexlist[j*2+sec].y = z*radius;
@@ -249,8 +244,6 @@ void SphereMesh::Draw( float lod, bool centered, const Matrix &m )
 {
     if (centered) {
         Matrix m1( m );
-        //float m1[16];
-        //memcpy (m1,m,sizeof (float)*16);
         m1.p = QVector( _Universe->AccessCamera()->GetPosition().Transform( m1 ) );
         Mesh::Draw( lod, m1 );
     } else {
@@ -285,19 +278,6 @@ CityLights::CityLights( float radius,
     setConvex( true );
     wrapx = zzwrapx;
     wrapy = zzwrapy;
-    /*    if (texture!=NULL) {
-     *   string wrap = string(texture);
-     *   string::size_type pos =wrap.find ("wrapx");
-     *   if (pos!=string::npos) {
-     *     string Wrapx = wrap.substr (pos+5,wrap.length());
-     *     sscanf(Wrapx.c_str(),"%f",&wrapx);
-     *     pos = Wrapx.find ("wrapy");
-     *     if (pos!=string::npos) {
-     *       string Wrapy = Wrapx.substr (pos+5,Wrapx.length());
-     *       sscanf (Wrapy.c_str(),"%f",&wrapy);
-     *     }
-     *   }
-     *  }*/
     FILTER filter =
         (FILTER) XMLSupport::parse_int( vs_config->getVariable( "graphics", "CityLightFilter",
                                                                XMLSupport::tostring( ( (int) TRILINEAR ) ) ) );

@@ -1358,9 +1358,7 @@ void Mesh::LoadXML( VSFileSystem::VSFile &f,
                     bool origthis,
                     const vector< string > &textureOverride )
 {
-    const int chunk_size = 16384;
     std::vector< unsigned int >ind;
-
     MeshXML  *xml = new MeshXML;
     xml->mesh = this;
     xml->fg   = fg;
@@ -1378,27 +1376,7 @@ void Mesh::LoadXML( VSFileSystem::VSFile &f,
     XML_Parser parser = XML_ParserCreate( NULL );
     XML_SetUserData( parser, xml );
     XML_SetElementHandler( parser, &Mesh::beginElement, &Mesh::endElement );
-
     XML_Parse( parser, ( f.ReadFull() ).c_str(), f.Size(), 1 );
-
-    /*
-     *  do {
-     * #ifdef BIDBG
-     *  char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
-     * #else
-     *  char buf[chunk_size];
-     * #endif
-     *  int length;
-     *
-     *  length = VSFileSystem::vs_read(buf,1, chunk_size,inFile);
-     *  //length = inFile.gcount();
-     * #ifdef BIDBG
-     *  XML_ParseBuffer(parser, length, VSFileSystem::vs_feof(inFile));
-     * #else
-     *  XML_Parse (parser,buf,length,VSFileSystem::vs_feof(inFile));
-     * #endif
-     *  } while(!VSFileSystem::vs_feof(inFile));
-     */
     XML_ParserFree( parser );
     //Now, copy everything into the mesh data structures
     if (xml->load_stage != 5) {
@@ -1536,12 +1514,6 @@ static void ClearTangents( vector< GFXVertex > &vertices )
         it->SetTangent( Vector( 0, 0, 0 ), 0 );
 }
 
-static void ClearNormals( vector< GFXVertex > &vertices )
-{
-    for (vector< GFXVertex >::iterator it = vertices.begin(); it != vertices.end(); ++it)
-        it->SetNormal( Vector( 0, 0, 0 ) );
-}
-
 static float faceTSPolarity( const Vector &T, const Vector &B, const Vector &N )
 {
     if (T.Cross( B ).Dot( N ) >= 0.f)
@@ -1586,14 +1558,6 @@ static void computeTangentspace( vector< GFXVertex > &vertices, int i1, int i2, 
     T.Normalize();
     B.Normalize();
     N.Normalize();
-}
-
-static Vector computeTangent( vector< GFXVertex > &vertices, int i1, int i2, int i3, float &polarity )
-{
-    Vector T, B, N;
-    computeTangentspace( vertices, i1, i2, i3, T, B, N );
-    polarity = faceTSPolarity( T, B, N );
-    return T;
 }
 
 static void SumTangent( vector< GFXVertex > &vertices, int i1, int i2, int i3, vector< float > &weights )
@@ -1740,7 +1704,7 @@ void Mesh::PostProcessLoading( MeshXML *xml, const vector< string > &textureOver
         }
     }
     a = 0;
-    std::vector< unsigned int >ind;
+    std::vector< unsigned int > ind;
     for (a = 0; a < xml->tris.size(); a += 3)
         for (j = 0; j < 3; j++) {
             int ix = xml->triind[a+j];
@@ -1868,7 +1832,7 @@ void Mesh::PostProcessLoading( MeshXML *xml, const vector< string > &textureOver
     for (index = 0; index < xml->linestrips.size(); index++)
         totalvertexsize += xml->linestrips[index].size();
     index = 0;
-    vector< GFXVertex >vertexlist( totalvertexsize );
+    vector< GFXVertex > vertexlist( totalvertexsize );
 
     mn    = Vector( FLT_MAX, FLT_MAX, FLT_MAX );
     mx    = Vector( -FLT_MAX, -FLT_MAX, -FLT_MAX );
