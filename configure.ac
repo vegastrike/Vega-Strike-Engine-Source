@@ -278,11 +278,17 @@ AC_ARG_ENABLE(debug-nooptimization, AC_HELP_STRING([--enable-debug-nooptimizatio
 		VS_CXXFLAGS="${VS_CXXFLAGS} ${DEBUG_NOOPT}"
 	fi)
 
-AC_ARG_ENABLE(cubemap, AC_HELP_STRING([--enable-cubemap], [Produce an executable with that uses dds environment mapping]), 
+AC_ARG_ENABLE(cubemap, AC_HELP_STRING([--disable-cubemap], [Produce an executable without cube map support]),[ 
 	if test $enableval = yes ; then
-		AC_MSG_NOTICE(Enabling dds cubmap support with $CUBEMAP_FLAGS)
+		AC_MSG_NOTICE([Enabling dds cubmap support with $CUBEMAP_FLAGS])
 		VS_CXXFLAGS="${VS_CXXFLAGS} ${CUBEMAP_FLAGS}"
-	fi)
+	else
+	    AC_MSG_NOTICE([Disabling dds cubemap support (skipping $CUBEMAP_FLAGS)])
+	fi
+	],[
+	AC_MSG_NOTICE([Enabling dds cubmap support with $CUBEMAP_FLAGS])
+	VS_CXXFLAGS="${VS_CXXFLAGS} ${CUBEMAP_FLAGS}"
+	])
 
 #Default optimization level changed from 2 to 3, as 3 seems to be MUCH faster. --chuck_starchaser.
 #Update: 3 breaks vegaserver :( back to 2 for now. (I'll be back...)
