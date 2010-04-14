@@ -1712,8 +1712,10 @@ VSError VSFile::ReadLine( void *ptr, size_t length )
 
 string VSFile::ReadFull()
 {
-    if (this->Size() < 0)
+    if (this->Size() < 0) {
         cerr<<"Attempt to call ReadFull on a bad file "<<this->filename<<endl;
+        return string();
+    }
     if (!UseVolumes[alt_type] || this->volume_type == VSFSNone) {
         char *content  = new char[this->Size()+1];
         content[this->Size()] = 0;
