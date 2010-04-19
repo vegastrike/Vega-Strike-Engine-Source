@@ -40,10 +40,11 @@ extern "C" int _url_open( URLContext *h, const char *filename, int flags )
 {
     if (strncmp( filename, "vsfile:", 7 ) != 0)
         return AVERROR( ENOENT );
+    
     const char *type   = strchr( filename+7, '|' );
     std::string path( filename+7, type ? type-filename-7 : strlen( filename+7 ) );
-    VSFileType  vstype = (type ? (VSFileType) atoi( type ) : VideoFile);
-
+    VSFileType  vstype = ( (type && *type) ? (VSFileType) atoi( type+1 ) : VideoFile);
+    
     VSFile     *f = new VSFile();
     if (f->OpenReadOnly( path, vstype ) > Ok) {
         delete f;

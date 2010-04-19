@@ -21,23 +21,39 @@ extern "C" {
         #ifdef HAVE_LIBSWSCALE_SWSCALE_H
             #include <libswscale/swscale.h>
         #else
-            #define DEPRECATED_IMG_CONVERT 1
+            #ifdef HAVE_SWSCALE_H
+                #include <swscale.h>
+            #else
+                #define DEPRECATED_IMG_CONVERT 1
+            #endif
         #endif
     #endif
     #ifdef HAVE_LIBAVCODEC_AVCODEC_H
         #include <libavcodec/avcodec.h>
     #else
-        #include <ffmpeg/avcodec.h>
+        #ifdef HAVE_AVCODEC_H
+            #include <avcodec.h>
+        #else
+            #include <ffmpeg/avcodec.h>
+        #endif
     #endif
     #ifdef HAVE_LIBAVFORMAT_AVFORMAT_H
         #include <libavformat/avformat.h>
     #else
-        #include <ffmpeg/avformat.h>
+        #ifdef HAVE_AVFORMAT_H
+            #include <avformat.h>
+        #else
+            #include <ffmpeg/avformat.h>
+        #endif
     #endif
     #ifdef HAVE_LIBAVFORMAT_AVIO_H
         #include <libavformat/avio.h>
     #else
-        #include <ffmpeg/avio.h>
+        #ifdef HAVE_AVIO_H
+            #include <avio.h>
+        #else
+            #include <ffmpeg/avio.h>
+        #endif
     #endif
 }
 
