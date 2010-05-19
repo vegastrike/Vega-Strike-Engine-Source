@@ -169,7 +169,7 @@ void GameCockpit::LocalToEliteRadar( const Vector &pos, float &s, float &t, floa
     h = pos.j/1000.0;
 }
 
-GFXColor GameCockpit::unitToColor( Unit *un, Unit *target, char ifflevel )
+GFXColor GameCockpit::unitToColor( Unit *un, Unit *target, char ifflevel, char &sequence )
 {
     static GFXColor basecol    = RetrColor( "base", GFXColor( -1, -1, -1, -1 ) );
     static GFXColor jumpcol    = RetrColor( "jump", GFXColor( 0, 1, 1, .8 ) );
@@ -179,6 +179,7 @@ GFXColor GameCockpit::unitToColor( Unit *un, Unit *target, char ifflevel )
     static GFXColor cargocol   = RetrColor( "cargo", GFXColor( .6, .2, 0, 1 ) );
     int cargofac = FactionUtil::GetUpgradeFaction();
     static GFXColor black_and_white = RetrColor( "black_and_white", GFXColor( .5, .5, .5 ) );
+    sequence = 0;
     if (ifflevel == 0)
         return black_and_white;
     if (target->GetDestinations().size() > 0 && ifflevel > 1)
@@ -207,12 +208,24 @@ GFXColor GameCockpit::unitToColor( Unit *un, Unit *target, char ifflevel )
     if (basecol.r > 0 && basecol.g > 0 && basecol.b > 0 && UnitUtil::getFlightgroupName( target ) == "Base" && ifflevel > 0)
         return basecol;
     //other spaceships
+        
+    float relation;
+    
     static bool reltocolor =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "DrawTheirRelationColor", "true" ) );
     if (reltocolor)
-        return relationToColor( target->getRelation( un ) );
+        relation = target->getRelation( un );
     else
-        return relationToColor( un->getRelation( target ) );
+        relation = un->getRelation( target );
+    
+    if (relation > 0)
+        sequence = 1;
+    else if (relation < 0)
+        sequence = -1;
+    else
+        sequence = 0;
+    
+    return relationToColor( relation );
 }
 
 GFXColor GameCockpit::relationToColor( float relation )
@@ -822,7 +835,7 @@ void GameCockpit::DrawTacticalTargetBox()
     }
 }
 
-void GameCockpit::drawUnToTarget( Unit *un, Unit *target, float xcent, float ycent, float xsize, float ysize, bool reardar )
+void GameCockpit::drawUnToTarget( Unit *un, Unit *target, float xcent, float ycent, float xsize, float ysize, bool reardar, std::vector<GameCockpit::BlipEntry> &out )
 {
     static GFXColor black_and_white   = DockBoxColor( "black_and_white" );
     static GFXColor communicating     = DockBoxColor( "communicating" );
@@ -839,45 +852,35 @@ void GameCockpit::drawUnToTarget( Unit *un, Unit *target, float xcent, float yce
     if (draw_blips_behind == false && localcoord.k < 0) return;
     float    s, t;
     this->LocalToRadar( localcoord, s, t );
-    GFXColor localcol( this->unitToColor( un, target, un->GetComputerData().radar.iff ) );
+    
+    out.resize(out.size()+1);
+    BlipEntry &blip = out.back();
+    
+    GFXColor localcol( this->unitToColor( un, target, un->GetComputerData().radar.iff, blip.sequence ) );
     float    fade = float(localcoord.Magnitude()/un->GetComputerData().radar.maxrange);
-    fade =
-        mymin( 1.f,
-              mymax( 0.f,
-                    (fade < fademidpoint) ? (0.5f*fade/fademidpoint) : ( 0.5f+0.5f
-                                                                        *(fade-fademidpoint)/(1.0f-fademidpoint) ) ) );
+    fade = mymin( 1.f, mymax( 0.f,
+            (fade < fademidpoint) ? (0.5f*fade/fademidpoint) 
+                                  : ( 0.5f+0.5f*(fade-fademidpoint)/(1.0f-fademidpoint) ) ) );
     if ( target == un->Target() )
         fade = 0;
     localcol.a *= fade*fademax+(1.0f-fade)*fademin;
     if (1) {
         unsigned int s = vdu.size();
-        for (unsigned int i = 0; i < s; ++i)
-            if (vdu[i]->GetCommunicating() == target)
+        for (unsigned int i = 0; i < s; ++i) {
+            if (vdu[i]->GetCommunicating() == target) {
                 localcol = communicating;
+               break;
+            }
+        }
     }
-    GFXColorf( localcol );
-
+    
+    blip.color = localcol;
+    
     float  rerror = ( (un->GetNebula() != NULL) ? .03 : 0 )+(target->GetNebula() != NULL ? .06 : 0);
     Vector v( xcent+xsize*(s-.5*rerror+( rerror*rand() )/RAND_MAX),
               ycent+ysize*(t+ -.5*rerror+( rerror*rand() )/RAND_MAX), 0 );
-    GFXVertexf( v );
-    if ( target == un->Target() ) {
-        //GFXEnd();
-        //GFXBegin(GFXLINE);
-        GFXVertexf( v );
-        GFXVertex3f( (float) (v.i+(7.8)/g_game.x_resolution), v.j, v.k );             //I need to tell it to use floats...
-        GFXVertex3f( (float) (v.i-(7.5)/g_game.x_resolution), v.j, v.k );             //otherwise, it gives an error about
-        GFXVertex3f( v.i, (float) (v.j-(7.5)/g_game.y_resolution), v.k );             //not knowning whether to use floats
-        GFXVertex3f( v.i, (float) (v.j+(7.8)/g_game.y_resolution), v.k );             //or doubles.
-
-        GFXVertex3f( (float) (v.i+(3.9)/g_game.x_resolution), v.j, v.k );             //I need to tell it to use floats...
-        GFXVertex3f( (float) (v.i-(3.75)/g_game.x_resolution), v.j, v.k );             //otherwise, it gives an error about
-        GFXVertex3f( v.i, (float) (v.j-(3.75)/g_game.y_resolution), v.k );             //not knowning whether to use floats
-        GFXVertex3f( v.i, (float) (v.j+(3.9)/g_game.y_resolution), v.k );             //or doubles.
-
-        //GFXEnd();
-        //GFXBegin (GFXPOINT);
-    }
+    blip.vertex = v;
+    blip.bigger = ( target == un->Target() );
 }
 
 void GameCockpit::Eject()
@@ -1021,7 +1024,46 @@ class DrawUnitBlip
     float *ycent;
     bool  *reardar;
     int    numradar;
-public: DrawUnitBlip() {}
+    std::vector<GameCockpit::BlipEntry> out;
+    std::vector<size_t> shuffle;
+    
+    class ShuffleComparator {
+        const std::vector<GameCockpit::BlipEntry> &data;
+    public:
+        ShuffleComparator(const std::vector<GameCockpit::BlipEntry> &_data) : data(_data) {}
+        
+        bool operator()(size_t a, size_t b) const
+        {
+            return data[a].sequence < data[b].sequence;
+        }
+    };
+    
+public: 
+    
+    void sortBlips()
+    {
+        // Initialize shuffle
+        while (shuffle.size() < out.size())
+            shuffle.push_back(shuffle.size());
+        if (shuffle.size() > out.size())
+            shuffle.resize(out.size());
+        
+        // Compute sequence-sorted shuffle
+        ShuffleComparator cmp(out);
+        std::sort(shuffle.begin(), shuffle.end(), cmp);
+    }
+    
+    const std::vector<GameCockpit::BlipEntry>& getBlips() const
+    { 
+        return out; 
+    }
+    
+    const std::vector<size_t>& getShuffle() const
+    { 
+        return shuffle; 
+    }
+    
+    DrawUnitBlip() {}
     void init( Unit *un,
                GameCockpit *parent,
                int numradar,
@@ -1029,7 +1071,8 @@ public: DrawUnitBlip() {}
                float *ysize,
                float *xcent,
                float *ycent,
-               bool *reardar )
+               bool *reardar
+               )
     {
         this->un = un;
         this->parent     = parent;
@@ -1069,13 +1112,13 @@ public: DrawUnitBlip() {}
                 XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "min_radarblip_size", "0" ) );
             if (target->radial_size > minblipsize)
                 for (rad = 0; rad < numradar; ++rad)
-                    parent->drawUnToTarget( un, target, xcent[rad], ycent[rad], xsize[rad], ysize[rad], reardar[rad] );
+                    parent->drawUnToTarget( un, target, xcent[rad], ycent[rad], xsize[rad], ysize[rad], reardar[rad], out );
             if (target->isPlanet() == PLANETPTR && target->radial_size > 0) {
                 Unit *sub = NULL;
                 for (un_iter i = target->getSubUnits(); (sub = *i) != NULL; ++i)
                     if (target->radial_size > minblipsize)
                         for (rad = 0; rad < numradar; ++rad)
-                            parent->drawUnToTarget( un, sub, xcent[rad], ycent[rad], xsize[rad], ysize[rad], reardar[rad] );
+                            parent->drawUnToTarget( un, sub, xcent[rad], ycent[rad], xsize[rad], ysize[rad], reardar[rad], out );
             }
         }
         return true;
@@ -1084,9 +1127,6 @@ public: DrawUnitBlip() {}
 
 void GameCockpit::DrawBlips( Unit *un )
 {
-    Unit *target;
-    float s, t;
-
     float xsize[2], ysize[2], xcent[2], ycent[2];
     bool  reardar[2];
     int   numradar = 0;
@@ -1126,6 +1166,34 @@ void GameCockpit::DrawBlips( Unit *un )
         if (targ && !foundtarget)
             unitLocator.action.acquire( targ, UnitUtil::getDistance( un, targ ) );
     }
+    
+    unitLocator.action.sortBlips();
+    const std::vector<BlipEntry> &blips = unitLocator.action.getBlips();
+    const std::vector<size_t> &shuffle = unitLocator.action.getShuffle();
+    
+    assert(blips.size() == shuffle.size());
+    
+    for (std::vector<size_t>::const_iterator it = shuffle.begin(); it != shuffle.end(); ++it) {
+        const BlipEntry &blip = blips[*it];
+        
+        GFXColorf( blip.color );
+        GFXVertexf( blip.vertex );
+        if ( blip.bigger ) {
+            Vector v = blip.vertex;
+            
+            GFXVertexf( v );
+            GFXVertex3f( (float) (v.i+(7.8)/g_game.x_resolution), v.j, v.k );             //I need to tell it to use floats...
+            GFXVertex3f( (float) (v.i-(7.5)/g_game.x_resolution), v.j, v.k );             //otherwise, it gives an error about
+            GFXVertex3f( v.i, (float) (v.j-(7.5)/g_game.y_resolution), v.k );             //not knowning whether to use floats
+            GFXVertex3f( v.i, (float) (v.j+(7.8)/g_game.y_resolution), v.k );             //or doubles.
+
+            GFXVertex3f( (float) (v.i+(3.9)/g_game.x_resolution), v.j, v.k );             //I need to tell it to use floats...
+            GFXVertex3f( (float) (v.i-(3.75)/g_game.x_resolution), v.j, v.k );             //otherwise, it gives an error about
+            GFXVertex3f( v.i, (float) (v.j-(3.75)/g_game.y_resolution), v.k );             //not knowning whether to use floats
+            GFXVertex3f( v.i, (float) (v.j+(3.9)/g_game.y_resolution), v.k );             //or doubles.
+        }
+    }
+    
     GFXEnd();
     GFXPointSize( 1 );
     GFXColor4f( 1, 1, 1, 1 );
