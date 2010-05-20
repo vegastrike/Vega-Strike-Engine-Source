@@ -57,7 +57,7 @@ void findObjectsFromPosition( CollideMap *cm,
                                          && tmore != cmend
                                          && !check->cullmore( tmore ) ) {
                 float rad = (*tmore)->radius;
-                if ( rad != 0.0f && ( check->BoltsOrUnits() || ( (check->UnitsOnly() == rad) > 0 ) ) ) {
+                if (rad!=0.0f&&(check->BoltsOrUnits()||(check->UnitsOnly()==(rad>0)))) {
                     float trad =
                         check->NeedDistance() ? ( (*tmore)->GetPosition()-thispos ).Magnitude()-fabs( rad )-thisrad : 0;
                     if ( !check->acquire( trad, tmore ) )
