@@ -196,6 +196,7 @@ double queryTime()
 
 void UpdateTime()
 {
+    static bool first=true;
 #ifdef WIN32
     QueryPerformanceCounter( (LARGE_INTEGER*) &newtime );
     elapsedtime = ( (double) (newtime-ttime) )/freq;
@@ -204,23 +205,27 @@ void UpdateTime()
         dblnewtime = 0.;
     else
         dblnewtime = ( (double) newtime )/( (double) freq );
-    firsttime = dblnewtime;
+    if (first)
+        firsttime = dblnewtime;
 #elif defined (HAVE_GETTIMEOFDAY)
     struct timeval tv;
     (void) gettimeofday( &tv, NULL );
     lasttime    = newtime;
     newtime     = (double) tv.tv_sec+(double) tv.tv_usec*1.e-6;
     elapsedtime = newtime-lasttime;
-    firsttime = newtime;
+    if (first)
+        firsttime = newtime;
 #elif defined (HAVE_SDL)
     lasttime    = newtime;
     newtime     = SDL_GetTicks()*1.e-3;
     elapsedtime = newtime-lasttime;
-    firsttime = newtime;
+    if (first)
+        firsttime = newtime;
 #else
 # error "We have no way to determine the time on this system."
 #endif
     elapsedtime *= timecompression;
+    first=false;
 }
 
 void setNewTime( double newnewtime )

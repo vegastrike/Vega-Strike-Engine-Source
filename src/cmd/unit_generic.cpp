@@ -1846,7 +1846,7 @@ void Unit::Threaten( Unit *targ, float danger )
 
 std::string Unit::getCockpit() const
 {
-    return pImage->cockpitImage;
+    return pImage->cockpitImage.get();
 }
 
 void Unit::Select()
