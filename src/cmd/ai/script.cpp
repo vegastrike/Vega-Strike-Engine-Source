@@ -10,7 +10,7 @@
 #include "cmd/unit_generic.h"
 #include "hard_coded_scripts.h"
 #include "universe_util.h"
-
+#include <assert.h>
 typedef vsUMap< string, CCScript* >HardCodedMap;
 static HardCodedMap MakeHardCodedScripts()
 {
@@ -69,6 +69,9 @@ static HardCodedMap MakeHardCodedScripts()
     tmp.insert( MyPair( "roll perpendicular", &RollFacePerpendicular ) );
     tmp.insert( MyPair( "roll perpendicular slow", &RollFacePerpendicularSlow ) );
     tmp.insert( MyPair( "roll perpendicular fast", &RollFacePerpendicularFast ) );
+    if (tmp.find("roll perpendicular fast")==tmp.end()){
+        exit(1);
+    }
     return tmp;
 }
 
@@ -776,12 +779,13 @@ void AIScript::LoadXML()
     using namespace VSFileSystem;
     string     full_filename = filename;
     bool doroll = false;
-    if (full_filename.length() > 5 && full_filename[0] == 'r' && full_filename[1] == 'o' && full_filename[2] == 'l'
+    HardCodedMap::const_iterator iter = hard_coded_scripts.find( full_filename );
+    if (iter==hard_coded_scripts.end() && full_filename.length() > 5 && full_filename[0] == 'r' && full_filename[1] == 'o' && full_filename[2] == 'l'
         && full_filename[3] == 'l' && full_filename[4] == ' ') {
         doroll = true;
         full_filename = full_filename.substr( 5 );
+        iter = hard_coded_scripts.find( full_filename );
     }
-    HardCodedMap::const_iterator iter = hard_coded_scripts.find( full_filename );
     if ( iter != hard_coded_scripts.end() ) {
         //VSFileSystem::vs_fprintf (stderr,"hcscript %s\n",filename);
         CCScript *myscript = (*iter).second;
@@ -847,6 +851,9 @@ void AIScript::LoadXML()
 #endif
     if (err > Ok) {
         VSFileSystem::vs_fprintf( stderr, "cannot find AI script %s\n", filename );
+        if (hard_coded_scripts.find(filename)!=hard_coded_scripts.end()) {
+            assert(0);
+        }
         return;
     }
 #ifdef BIDBG
