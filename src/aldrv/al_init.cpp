@@ -155,7 +155,7 @@ bool AUDInit()
         return false;
     int attrlist[] = {ALC_FREQUENCY, g_game.audio_frequency_mode, 0};
 #ifdef _WIN32
-    dev = alcOpenDevice( (ALubyte*) "DirectSound3D" );
+    dev = alcOpenDevice(  "DirectSound3D" );
 #else
 #ifdef __APPLE__
     dev = alcOpenDevice( "sdl" );
