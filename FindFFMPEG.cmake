@@ -37,6 +37,7 @@ else (FFMPEG_LIBRARIES AND FFMPEG_INCLUDE_DIRS)
     PATHS
       ${_FFMPEGIncDir}
       /usr/include
+      /usr/include/libavcodec
       /usr/local/include
       /opt/local/include
       /sw/include

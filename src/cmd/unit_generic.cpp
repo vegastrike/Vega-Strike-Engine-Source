@@ -4452,9 +4452,10 @@ void Unit::DamageRandSys( float dam, const Vector &vec, float randnum, float deg
         if (pImage->cockpit_damage[which] < .1)
             pImage->cockpit_damage[which] = 0;
         //DAMAGE COCKPIT
-        if (randnum >= .85) {
-            //Set the speed to a random speed
-            computer.set_speed = ( rand01()*computer.max_speed()*(5/3) )-( computer.max_speed()*(2/3) );
+        if (randnum >= .85) {//do 25% damage to a gauge
+            pImage->cockpit_damage[which] *= .75;
+            if (pImage->cockpit_damage[which] < .1)
+                pImage->cockpit_damage[which] = 0;
         } else if (randnum >= .775) {
             computer.itts = false;             //Set the computer to not have an itts
         } else if (randnum >= .7) {
@@ -4660,14 +4661,14 @@ void Unit::DamageRandSys( float dam, const Vector &vec, float randnum, float deg
             if (dam < mindam)
                 dam = mindam;
             this->recharge *= dam;
-        } else if (randnum >= .3) {
+        } else if (randnum >= .2) {
             static float mindam =
                 XMLSupport::parse_float( vs_config->getVariable( "physics", "min_maxenergy_shot_damage", "0.2" ) );
             if (dam < mindam)
                 dam = mindam;
             this->maxenergy *= dam;
-        } else if (randnum >= .2) {
-            this->jump.damage += float_to_int( 100*(1-dam) );
+            //users complain about this one since they find out about it later } else if (randnum >= .2) {
+            //                                   this->jump.damage += float_to_int( 100*(1-dam) );
         } else if (pImage->repair_droid > 0) {
             pImage->repair_droid--;
         }
