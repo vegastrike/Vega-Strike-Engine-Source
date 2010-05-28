@@ -399,12 +399,16 @@ Mesh::~Mesh()
     }
 }
 
-void Mesh::Draw( float lod, const Matrix &m, float toofar, int cloak, float nebdist, unsigned char hulldamage, bool renormalize ) //short fix
+void Mesh::Draw( float lod, const Matrix &m, float toofar, int cloak, float nebdist, unsigned char hulldamage, bool renormalize, const MeshFX*mfx ) //short fix
 {
     Mesh *origmesh = getLOD( lod );
     if (origmesh->rSize() > 0) {
         //Vector pos (local_pos.Transform(m));
         MeshDrawContext c( m );
+        if (mfx) {
+            c.xtraFX=*mfx;
+            c.useXtraFX=true;
+        }
         UpdateFX( GetElapsedTime() );
         c.SpecialFX = &LocalFX;
         c.damage    = hulldamage;
@@ -1308,6 +1312,12 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
                 GFXCreateLight( light, (*c.SpecialFX)[i], true );
                 lights.push_back( light );
             }
+            if (c.useXtraFX) {
+                int light;
+                GFXLoadMatrixModel( c.mat );
+                GFXCreateLight( light, c.xtraFX, true );
+                lights.push_back( light );
+            }
             //Fog
             SetupFogState( c.cloaked );
 
@@ -1597,6 +1607,11 @@ void Mesh::ProcessFixedDrawQueue( size_t whichpass, int whichdrawqueue, bool zso
                 for (unsigned int j = 0; j < c.SpecialFX->size(); j++) {
                     int ligh;
                     GFXCreateLight( ligh, (*c.SpecialFX)[j], true );
+                    specialfxlight.push_back( ligh );
+                }
+                if (c.useXtraFX) {
+                    int ligh;
+                    GFXCreateLight( ligh, c.xtraFX, true );
                     specialfxlight.push_back( ligh );
                 }
                 SetupFogState( c.cloaked );

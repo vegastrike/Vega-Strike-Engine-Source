@@ -268,7 +268,30 @@ void HaloSystem::Draw( const Matrix &trans,
             Matrix m = trans;
             ScaleMatrix( m, Vector( scale.i*i->size.i, scale.j*i->size.j, scale.k*i->size.k*value/maxvalue ) );
             m.p = Transform( trans, i->loc );
-            mesh->Draw( 50000000000000.0, m, 1, halo_alpha, nebdist );
+            static float percentColorChange=XMLSupport::parse_float(vs_config->getVariable("graphics","percent_afterburner_color_change",".5"));
+            static float abRedness=XMLSupport::parse_float(vs_config->getVariable("graphics","afterburner_color_red","1.0"));
+            static float abGreenness=XMLSupport::parse_float(vs_config->getVariable("graphics","afterburner_color_green","0.0"));
+            static float abBlueness=XMLSupport::parse_float(vs_config->getVariable("graphics","afterburner_color_blue","0.0"));
+            static float percentRedness=XMLSupport::parse_float(vs_config->getVariable("graphics","engine_color_red","1.0"));
+            static float percentGreenness=XMLSupport::parse_float(vs_config->getVariable("graphics","engine_color_green","1.0"));
+            static float percentBlueness=XMLSupport::parse_float(vs_config->getVariable("graphics","engine_color_blue","1.0"));
+            GFXColor blend=GFXColor(percentRedness,percentGreenness,percentBlueness,1);
+            
+            if (value>maxvalue*percentColorChange) {
+                float test=value-maxvalue*percentColorChange;
+                test/=maxvalue*percentColorChange;
+                if (!(test<1.0)) test=1.0;
+                blend=GFXColor(abRedness*test+percentRedness*(1.0-test),abGreenness*test+percentGreenness*(1.0-test),abBlueness*test+percentBlueness*(1.0-test),1.0);
+                
+            }
+            MeshFX xtraFX=MeshFX(1.0,1.0,
+                                 true,
+                                 GFXColor(1,1,1,1),
+                                 GFXColor(1,1,1,1),
+                                 GFXColor(1,1,1,1),
+                                 blend);
+                                 
+            mesh->Draw( 50000000000000.0, m, 1, halo_alpha, nebdist, 0,false,&xtraFX );
             if (hullpercent < .99) {
                 static float sparklerate = XMLSupport::parse_float( vs_config->getVariable( "graphics", "halosparklerate", "20" ) );
                 sparkle_accum += GetElapsedTime()*sparklerate;

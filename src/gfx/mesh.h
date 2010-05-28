@@ -90,6 +90,8 @@ struct MeshDrawContext
     Matrix   mat;
     ///The special FX vector pointing to all active special FX
     vector< MeshFX > *SpecialFX;
+    MeshFX xtraFX;
+    bool useXtraFX;
     GFXColor CloakFX;
     enum CLK {NONE=0x0, CLOAK=0x1, FOG=0x2, NEARINVIS=0x4, GLASSCLOAK=0x8, RENORMALIZE=0x10};
     char     cloaked;
@@ -99,7 +101,7 @@ struct MeshDrawContext
         ,    CloakFX( 1, 1, 1, 1 )
         ,    cloaked( NONE )
         ,    damage( 0 )
-    {}
+    {useXtraFX=false;}
 };
 using XMLSupport::EnumMap;
 using XMLSupport::AttributeList;
@@ -321,7 +323,8 @@ public: Mesh();
                int cloak = -1,
                float nebdist = 0,
                unsigned char damage = 0,
-               bool renormalize_normals = false );                                                                                                               //short fix
+               bool renormalize_normals = false,
+               const MeshFX*mfx=NULL);  //short fix
 ///Draws lod pixels wide, mesh at Transformation NOW. If centered, then will center on camera and disable cull
     void DrawNow( float lod, bool centered, const Matrix &m = identity_matrix, int cloak = -1, float nebdist = 0 ); //short fix
 ///Will draw all undrawn meshes of this type

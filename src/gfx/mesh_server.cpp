@@ -106,7 +106,7 @@ Mesh::~Mesh()
     }
 }
 
-void Mesh::Draw( float lod, const Matrix &m, float toofar, int cloak, float nebdist, unsigned char damage, bool renormalize ) //short fix
+void Mesh::Draw( float lod, const Matrix &m, float toofar, int cloak, float nebdist, unsigned char damage, bool renormalize , const MeshFX*) //short fix
 {}
 void Mesh::DrawNow( float lod, bool centered, const Matrix &m, int cloak, float nebdist )
 {
