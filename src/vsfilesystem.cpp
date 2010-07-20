@@ -65,7 +65,15 @@ void usedSerial( ObjSerial ser, bool used )
 ObjSerial getUniqueSerial()
 {
     int offset = (SERVER ? 2 : 1);
-
+    size_t maxserial=(1<<(sizeof(ObjSerial)*8));
+    if (usedSerials.size()>=maxserial/3) {
+        static bool firstBadness=true;
+        if (firstBadness) {
+            fprintf(stderr,"Error recycling used serial since serial map is completely full at size %d\n",(int)usedSerials.size());
+            firstBadness=false;
+        }
+        return ((rand()%(maxserial/3-1))+1)*3;//OFFSET..set to emergency zero
+    }
     std::map< ObjSerial, bool >::const_iterator iter;
     ObjSerial ret;
     do {
