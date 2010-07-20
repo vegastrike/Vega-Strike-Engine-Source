@@ -374,8 +374,8 @@ Unit* Unit::rayCollide( const QVector &start, const QVector &end, Vector &norm, 
     QVector  st( InvTransform( cumulative_transformation_matrix, start ) );
     QVector  ed( InvTransform( cumulative_transformation_matrix, end ) );
     static bool sphere_test = XMLSupport::parse_bool( vs_config->getVariable( "physics", "sphere_collision", "true" ) );
-    distance = querySphereNoRecurse( start, end );
-    if (distance > 0.0f || !sphere_test) {
+    distance = querySphereNoRecurse( start, end );    
+    if (distance > 0.0f || (this->colTrees&&this->colTrees->colTree( this, this->GetWarpVelocity() )&&!sphere_test)) {
         Vector coord;
         /* Set up points and ray to send to ray collider. */
         Opcode::Point rayOrigin(st.i,st.j,st.k);
@@ -384,12 +384,21 @@ Unit* Unit::rayCollide( const QVector &start, const QVector &end, Vector &norm, 
         if(this->colTrees){
             // Retrieve the correct scale'd collider from the unit's collide tree. 
             csOPCODECollider *tmpCol  = this->colTrees->colTree( this, this->GetWarpVelocity() );
-            if(tmpCol->rayCollide(boltbeam)){
+            QVector del(end-start);
+            //Normalize(del);
+            norm = ((start+del*distance)-Position()).Cast();
+            Normalize(norm);
+            //RAY COLLIDE does not yet set normal, use that of the sphere center to current loc
+            if (tmpCol==NULL) {
+                
+                return this;
+            }
+            if(tmpCol->rayCollide(boltbeam,norm,distance)){
                 // NOTE:   Here is where we need to retrieve the point on the ray that we collided with the mesh, and set it to end, create the normal and set distance
                 return(this);
             }
-        } else {
-            return(NULL);
+        } else {//no col trees = a sphere
+            return(this);
         }
     } else {
         return (NULL);

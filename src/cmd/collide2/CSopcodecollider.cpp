@@ -128,15 +128,35 @@ void csOPCODECollider::MeshCallback (udword triangle_index,
 	triangle.Vertex[2] = &vertholder [index + 2];
 }
 
-bool csOPCODECollider::rayCollide(const Ray &boltbeam)
+bool csOPCODECollider::rayCollide(const Ray &boltbeam, Vector&norm, float&distance)
 {
-    return(rCollider.Collide(boltbeam,*m_pCollisionModel));
+    rCollider.SetHitCallback(&csOPCODECollider::RayCallback);
+    rCollider.SetUserData(this);
+    rCollider.SetFirstContact(false);
+    //rCollider.SetClosestHit(true);
+    collFace.mDistance=FLT_MAX;
+    bool retval=rCollider.Collide(boltbeam,*m_pCollisionModel);
+    rCollider.SetUserData(NULL);
+    if (retval) {
+        retval=collFace.mDistance!=FLT_MAX;
+        if (retval) {
+            distance=collFace.mDistance;
+            printf("Opcode actually reported a hit at %f meters!\n",distance);
+        }else {
+            return true;//FIXME: buggy! this should return FALSE but the math is obviously broken with opcode, so opcode is rarely telling us about intersections
+        }
+        //FIXME set normal
+    }
+    return retval;
 }
 
 void csOPCODECollider::RayCallback (const CollisionFace &faceHit, void* user_data)
 {
     csOPCODECollider* collider = (csOPCODECollider*)user_data;
-    collider->collFace = faceHit;
+    if (collider) {
+        if (collider->collFace.mDistance> faceHit.mDistance)
+            collider->collFace = faceHit;
+    }
 }
 
 bool csOPCODECollider::Collide( csOPCODECollider &otherCollider,

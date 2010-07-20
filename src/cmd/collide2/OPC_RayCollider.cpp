@@ -132,13 +132,13 @@ using namespace Opcode;
 	#define HANDLE_CONTACT(prim_index, flag)													\
 		SET_CONTACT(prim_index, flag)															\
 																								\
-		if(mHitCallback)	(mHitCallback)(mStabbedFace, mUserData);
+		if(mHitCallback)	(mHitCallback)(mStabbedFace, mUserData);else{}
 
 	#define UPDATE_CACHE					\
 		if(cache && GetContactStatus())		\
 		{									\
 			*cache	= mStabbedFace.mFaceID;	\
-		}
+		}else{}
 #else
 
 	#define HANDLE_CONTACT(prim_index, flag)													\
@@ -161,7 +161,7 @@ using namespace Opcode;
 					*Current = mStabbedFace;													\
 				}																				\
 			}																					\
-		}
+		}else{}
 
 	#define UPDATE_CACHE												\
 		if(cache && GetContactStatus() && mStabbedFaces)				\
@@ -169,7 +169,7 @@ using namespace Opcode;
 			const CollisionFace* Current = mStabbedFaces->GetFaces();	\
 			if(Current)	*cache	= Current->mFaceID;						\
 			else		*cache	= INVALID_ID;							\
-		}
+		}else{}
 #endif
 
 #define SEGMENT_PRIM(prim_index, flag)														\
@@ -185,7 +185,7 @@ using namespace Opcode;
 		{																					\
 			HANDLE_CONTACT(prim_index, flag)												\
 		}																					\
-	}
+	}else{}
 
 #define RAY_PRIM(prim_index, flag)															\
 	/* Request vertices from the app */														\
@@ -195,7 +195,7 @@ using namespace Opcode;
 	if(RayTriOverlap(*VP.Vertex[0], *VP.Vertex[1], *VP.Vertex[2]))							\
 	{																						\
 		HANDLE_CONTACT(prim_index, flag)													\
-	}
+	}else{}
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

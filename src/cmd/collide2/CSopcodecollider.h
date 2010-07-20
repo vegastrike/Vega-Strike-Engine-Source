@@ -112,7 +112,7 @@ class csOPCODECollider
 		int inline GetColliderType () const {return CS_MESH_COLLIDER;}
 		
         /* Collides the bolt or beam with this collider, returning true if it occurred */
-        bool rayCollide (const Opcode::Ray &boltbeam);
+    bool rayCollide (const Opcode::Ray &boltbeam, Vector&norm, float&distance);
         
         
         
