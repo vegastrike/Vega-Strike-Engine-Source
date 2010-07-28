@@ -140,10 +140,6 @@ int selectbigpk3s( const struct dirent * entry )
     return 0;
 }
 
-//added by chuck_starchaser (dan_w):
-static char *bogus; //to receive ignored return value of getcwd(), to stop the warnings
-static int   bogus2; //to receive return of chdir, to stop warnings
-
 namespace VSFileSystem
 {
 std::string vegastrike_cwd;
@@ -153,9 +149,12 @@ void ChangeToProgramDirectory( char *argv0 )
     {
         char pwd[8192];
         pwd[0]    = '\0';
-        bogus = getcwd( pwd, 8191 );
-        pwd[8191] = '\0';
-        vegastrike_cwd = pwd;
+        if (NULL != getcwd( pwd, 8191 )) {
+            pwd[8191] = '\0';
+            vegastrike_cwd = pwd;
+        } else {
+            VSFileSystem::vs_fprintf( stderr, "Cannot change to program directory: path too long");
+        }
     }
     int   ret     = -1;       /* Should it use argv[0] directly? */
     char *program = argv0;
@@ -196,8 +195,10 @@ void ChangeToProgramDirectory( char *argv0 )
     while ( (*c != '/') && (*c != '\\') && c > parentdir )          /* back up to parent */
         c--;
     *c = '\0';                         /* cut off last part (binary name) */
-    if (strlen( parentdir ) > 0)
-        bogus2 = chdir( parentdir );               /* chdir to the binary app's parent */
+    if (strlen( parentdir ) > 0) {
+        if (chdir( parentdir ))               /* chdir to the binary app's parent */
+            VSFileSystem::vs_fprintf( stderr, "Cannot change to program directory.");
+    }
     delete[] parentdir;
 }
 
@@ -611,17 +612,24 @@ void InitDataDirectory()
         //Test if the dir exist and contains config_file
         if (FileExists( (*vsit), config_file ) >= 0) {
             cerr<<"Found data in "<<(*vsit)<<endl;
-            bogus = getcwd( tmppath, 16384 );
-            if ( (*vsit).substr( 0, 1 ) == "." )
-                datadir = string( tmppath )+"/"+(*vsit);
-            else
-                datadir = (*vsit);
+            if (NULL != getcwd( tmppath, 16384 )) {
+                if ( (*vsit).substr( 0, 1 ) == "." )
+                    datadir = string( tmppath )+"/"+(*vsit);
+                else
+                    datadir = (*vsit);
+            } else {
+                VSFileSystem::vs_fprintf( stderr, "Cannot get current path: path too long");
+            }
+            
             if (chdir( datadir.c_str() ) < 0) {
                 cerr<<"Error changing to datadir"<<endl;
                 exit( 1 );
             }
-            bogus = getcwd( tmppath, 16384 );
-            datadir = string( tmppath );
+            if (NULL != getcwd( tmppath, 16384 )) {
+                datadir = string( tmppath );
+            } else {
+                VSFileSystem::vs_fprintf( stderr, "Cannot get current path: path too long");
+            }
 
             cerr<<"Using "<<datadir<<" as data directory"<<endl;
             break;

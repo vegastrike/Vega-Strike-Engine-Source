@@ -207,10 +207,12 @@ int main( int argc, char *argv[] )
     mission_name[0] = '\0';
     {
         char pwd[8192] = "";
-        static char *bogus_return; //added by chuck_starchaser to squash a warning
-        bogus_return = getcwd( pwd, 8191 );
-        pwd[8191] = '\0';
-        printf( " In path %s\n", pwd );
+        if (NULL != getcwd( pwd, 8191 )) {
+            pwd[8191] = '\0';
+            printf( " In path %s\n", pwd );
+        } else {
+            printf( " In path <<path too long>>\n" );
+        }
     }
 #ifdef _WIN32
     OSVERSIONINFO osvi;

@@ -52,17 +52,16 @@ const char *datadirs[] = {
     "/opt/share/vegastrike/data4.x",
 };
 
-static int   bogus_int; //added by chuck_starchaser to squash a warning or two
-static char *bogus_str; //added by chuck_starchaser to squash a warning or two
-
 string getdatadir()
 {
     string datadir;
     char   tmppwd[65536];
-    bogus_str = getcwd( tmppwd, 32768 );
+    if (NULL == getcwd( tmppwd, 32768 ))
+        tmppwd[0] = '\0';
     unsigned int i = 0;
     for (; i < ( sizeof (datadirs)/sizeof (datadirs[0]) ); i++) {
-        bogus_int = chdir( datadirs[i] );
+        if( chdir( datadirs[i] ) )
+            continue;
         FILE *tfp = fopen( "vegastrike.config", "r" );
         if (tfp) {
             fclose( tfp );
@@ -75,7 +74,8 @@ string getdatadir()
         for (i = 0; i < ( sizeof (datadirs)/sizeof (datadirs[0]) ); i++)
             printf( "Tried %s\n", datadirs[i] );
         datadir = tmppwd;
-        bogus_int = chdir( tmppwd );
+        if( chdir( tmppwd ) )
+            printf( "Unable to set current directory to data directory\n" );
     }
     //Set data dir
     else if (datadirs[i][0] != '/') {

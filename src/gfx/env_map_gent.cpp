@@ -268,9 +268,10 @@ struct Texmp
     unsigned char D[lmwid][lmwid][3];
 };
 
-static char * makebgname( char *tmp, char const *InputName, char const *add, char const *suffix )
+static char * makebgname( char *tmp, size_t size, const char *InputName, const char *add, const char *suffix )
 {
-    return strcat( strcat( strcpy( tmp, InputName ), add ), suffix );
+    snprintf(tmp, size, "%s%s%s", InputName, add, suffix);
+    return tmp;
 }
 
 static void Spherize( CubeCoord Tex[lmwid][lmwid], CubeCoord gluSph[lmwid][lmwid], unsigned char Col[] )
@@ -281,37 +282,39 @@ static void Spherize( CubeCoord Tex[lmwid][lmwid], CubeCoord gluSph[lmwid][lmwid
     if (!Data)
         return;          //borken down and down Data[5], right Data[3]
 
-    char *tmp    = (char*) malloc( strlen( InputName )+60 );
-    static char const dot_image[8] = ".image";
-    static char const dot_bmp[8] = ".bmp";
-    char const *suffix = dot_image;
+    size_t tmpsize = strlen( InputName )+60;
+    char *tmp    = (char*) malloc( tmpsize );
+    const char *suffix = ".image";
     {
         std::string temp( InputName );
         if (VSFileSystem::LookForFile( temp+"_up.image", TextureFile ) > VSFileSystem::Ok) {
             //greater than Ok means failed to load.
             if (VSFileSystem::LookForFile( temp+"_sphere.image", TextureFile ) > VSFileSystem::Ok)
                 if (VSFileSystem::LookForFile( temp+".image", TextureFile ) > VSFileSystem::Ok)
-                    suffix = dot_bmp;
+                    suffix = ".bmp";
         }
         //backwards compatibility
     }
-    if ( !( LoadTex( makebgname( tmp, InputName, "_front",
+    if ( !( LoadTex( makebgname( tmp, tmpsize, InputName, "_front",
                                  suffix ),
                      Data[0].D )
-           && LoadTex( makebgname( tmp, InputName, "_back",
+           && LoadTex( makebgname( tmp, tmpsize, InputName, "_back",
                                    suffix ),
                        Data[1].D )
-           && LoadTex( makebgname( tmp, InputName, "_left",
+           && LoadTex( makebgname( tmp, tmpsize, InputName, "_left",
                                    suffix ),
                        Data[2].D )
-           && LoadTex( makebgname( tmp, InputName, "_right",
+           && LoadTex( makebgname( tmp, tmpsize, InputName, "_right",
                                    suffix ),
                        Data[3].D )
-           && LoadTex( makebgname( tmp, InputName, "_up",
+           && LoadTex( makebgname( tmp, tmpsize, InputName, "_up",
                                    suffix ),
-                       Data[4].D ) && LoadTex( makebgname( tmp, InputName, "_down", suffix ), Data[5].D ) ) ) {
-        if ( !LoadTex( makebgname( tmp, InputName, "_sphere", suffix ), Data[0].D ) )
-            LoadTex( makebgname( tmp, InputName, "", suffix ), Data[0].D );
+                       Data[4].D ) 
+           && LoadTex( makebgname( tmp, tmpsize, InputName, "_down", 
+                                   suffix ), Data[5].D ) ) ) 
+    {
+        if ( !LoadTex( makebgname( tmp, tmpsize, InputName, "_sphere", suffix ), Data[0].D ) )
+            LoadTex( makebgname( tmp, tmpsize, InputName, "", suffix ), Data[0].D );
         sphere = true;
         Tex    = gluSph;
     }

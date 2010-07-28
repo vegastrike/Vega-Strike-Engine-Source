@@ -1662,10 +1662,10 @@ char printHex( unsigned int hex )
 }
 
 static char suc_col_str[8]     = "#000000";
-static char suc_gt_plusone[8]  = "#00FF00";
-static char suc_gt_minusone[8] = "#FF0000";
+static const char suc_gt_plusone[8]  = "#00FF00";
+static const char suc_gt_minusone[8] = "#FF0000";
 
-inline char * GetColorFromSuccess( float suc )
+inline const char * GetColorFromSuccess( float suc )
 {
     if (suc >= 1)
         return suc_gt_plusone;

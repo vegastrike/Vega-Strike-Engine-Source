@@ -309,7 +309,6 @@ void /*GFXDRVAPI*/ GFXCreateLightContext( int &con_number )
         SetupGLLightGlobals();
     }
     con_number = _local_lights_dat.size();
-    _currentContext = con_number;
     _ambient_light.push_back( GFXColor( 0, 0, 0, 1 ) );
     _local_lights_dat.push_back( vector< gfx_light > () );
     GFXSetLightContext( con_number );
