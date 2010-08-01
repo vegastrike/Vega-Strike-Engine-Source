@@ -893,8 +893,11 @@ LIBAUDIO = \
   src/audio/renderers/OpenAL/OpenALRenderableListener.cpp \
   src/audio/renderers/OpenAL/OpenALRenderableSource.h \
   src/audio/renderers/OpenAL/OpenALRenderableSource.cpp \
+  src/audio/renderers/OpenAL/OpenALRenderableStreamingSource.h \
+  src/audio/renderers/OpenAL/OpenALRenderableStreamingSource.cpp \
   src/audio/renderers/OpenAL/OpenALSimpleSound.h \
   src/audio/renderers/OpenAL/OpenALSimpleSound.cpp \
+  src/audio/renderers/OpenAL/OpenALStreamingSound.cpp \
   src/audio/renderers/OpenAL/OpenALHelpers.h \
   src/audio/renderers/OpenAL/OpenALHelpers.cpp \
   src/audio/test.cpp \
@@ -1065,8 +1068,18 @@ base_maker_SOURCES = \
   objconv/basemaker/base_maker_texture.cpp \
   objconv/basemaker/base_maker_texture.h
 
+if HAVE_OGRE
+if BOOSTSYSTEM
+  MESHER_BOOST_LIBS = -lboost_thread
+else
+  MESHER_BOOST_LIBS = 
+endif
+else
+  MESHER_BOOST_LIBS = 
+endif
+
 mesher_CXXFLAGS = $(OGRE_CFLAGS) -I../../src -I../..
-mesher_LDFLAGS = $(OGRE_LIBS)
+mesher_LDADD = $(OGRE_LIBS) -lexpat $(MESHER_BOOST_LIBS)
 mesher_SRC = \
   objconv/mesher/Converter.cpp \
   objconv/mesher/expat.h  \
@@ -1103,7 +1116,8 @@ mesher_SOURCES = $(mesher_SRC) \
 else
 mesher_SOURCES = $(mesher_SRC)
 endif
-tempgen_LDFLAGS = -lexpat
+
+tempgen_LDADD = -lexpat
 tempgen_CPPFLAGS = -I../../src
 tempgen_SOURCES = \
   objconv/MeshParse/template_generator.cpp \
@@ -1141,7 +1155,7 @@ vsrextract_SOURCES= \
   tools/vsrextract.cpp \
   tools/vsrtools.h
 
-vssetup_LDFLAGS = $(GTK_LIBS)
+vssetup_LDADD = $(GTK_LIBS)
 vssetup_CXXFLAGS= $(GTK_CFLAGS)
 vssetup_SOURCES = \
     setup/src/c/setup.cpp \
