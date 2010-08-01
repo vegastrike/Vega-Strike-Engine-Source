@@ -131,7 +131,8 @@ static ALCcontext *context_id = NULL;
 #endif
 bool AUDInit()
 {
-    g_game.sound_enabled = false;
+    g_game.sound_enabled = 
+    g_game.music_enabled = false;
 #ifdef HAVE_AL
     usedoppler    = XMLSupport::parse_bool( vs_config->getVariable( "audio", "Doppler", "false" ) );
     usepositional = XMLSupport::parse_bool( vs_config->getVariable( "audio", "Positional", "true" ) );
@@ -150,9 +151,9 @@ bool AUDInit()
     maxallowedsingle     = XMLSupport::parse_int( vs_config->getVariable( "audio", "MaxSingleSounds", "8" ) );
     g_game.max_sound_sources = 
     maxallowedtotal      = XMLSupport::parse_int( vs_config->getVariable( "audio", "MaxTotalSounds", "20" ) );
-    g_game.sound_enabled = XMLSupport::parse_bool( vs_config->getVariable( "audio", "Sound", "true" ) );
-    g_game.music_enabled = XMLSupport::parse_bool( vs_config->getVariable( "audio", "Music", "true" ) );
-    if (!g_game.sound_enabled && !g_game.music_enabled)
+    bool sound_enabled = XMLSupport::parse_bool( vs_config->getVariable( "audio", "Sound", "true" ) );
+    bool music_enabled = XMLSupport::parse_bool( vs_config->getVariable( "audio", "Music", "true" ) );
+    if (!sound_enabled && !music_enabled)
         return false;
     int attrlist[] = {ALC_FREQUENCY, g_game.audio_frequency_mode, 0};
 #ifdef _WIN32
@@ -188,6 +189,10 @@ bool AUDInit()
         alGenSources( 1, &cursrc );
         alGetEr = alGetError();
     }
+    
+    g_game.sound_enabled = sound_enabled;
+    g_game.music_enabled = music_enabled;
+    
     return true;
 #endif
     return false;
