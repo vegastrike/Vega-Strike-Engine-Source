@@ -42,7 +42,7 @@ struct ApproxSound
 
 typedef std::vector< ApproxSound >ApproxSoundVec;
 static ApproxSoundVec playingbuffers[hashsize];
-int hash_sound( unsigned int buffer )
+unsigned int hash_sound( unsigned int buffer )
 {
     return buffer%hashsize;
 }
@@ -79,7 +79,7 @@ char AUDQueryAudability( const int sound, const Vector &pos, const Vector &vel, 
     static float max_cutoff = XMLSupport::parse_float( vs_config->getVariable( "audio", "audio_cutoff_distance", "1000000" ) );
     if ( !(mag < max_cutoff*max_cutoff) )
         return 0;
-    int hashed = hash_sound( sounds[sound].buffer );
+    unsigned int hashed = hash_sound( sounds[sound].buffer );
     if ( ( !unusedsrcs.empty() ) && playingbuffers[hashed].size() < maxallowedsingle ) return 1;
     ///could theoretically "steal" buffer from playing sound at this point
     if ( playingbuffers[hashed].empty() )
@@ -122,7 +122,7 @@ void AUDAddWatchedPlayed( const int sound, const Vector &pos )
 #ifdef HAVE_AL
     totalplaying++;
     if (sounds[sound].buffer != (ALuint) 0) {
-        int h = hash_sound( sounds[sound].buffer );
+        unsigned int h = hash_sound( sounds[sound].buffer );
         if (sounds[sound].source == 0)
             VSFileSystem::vs_fprintf( stderr, "adding null sound" );
         playingbuffers[h].push_back( ApproxSound() );
