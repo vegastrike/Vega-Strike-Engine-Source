@@ -846,6 +846,7 @@ LIBAUDIO = \
   src/audio/Source.cpp \
   src/audio/Types.h \
   src/audio/Vector.h \
+  src/audio/Matrix.h \
   src/audio/SourceTemplate.h \
   src/audio/SourceTemplate.cpp \
   src/audio/SceneManager.h \
@@ -856,6 +857,8 @@ LIBAUDIO = \
   src/audio/utils.cpp \
   src/audio/RenderableSource.h \
   src/audio/RenderableSource.cpp \
+  src/audio/RenderableListener.h \
+  src/audio/RenderableListener.cpp \
   src/audio/Listener.h \
   src/audio/Listener.cpp \
   src/audio/Scene.h \
@@ -864,6 +867,12 @@ LIBAUDIO = \
   src/audio/SimpleSource.cpp \
   src/audio/SimpleScene.h \
   src/audio/SimpleScene.cpp \
+  src/audio/SimpleSound.h \
+  src/audio/SimpleSound.cpp \
+  src/audio/SoundBuffer.h \
+  src/audio/SoundBuffer.cpp \
+  src/audio/TemplateManager.h \
+  src/audio/TemplateManager.cpp \
   src/audio/codecs/Codec.cpp \
   src/audio/codecs/Codec.h \
   src/audio/codecs/FFStream.cpp \
@@ -875,7 +884,22 @@ LIBAUDIO = \
   src/audio/codecs/OggCodec.cpp \
   src/audio/codecs/OggCodec.h \
   src/audio/codecs/FFCodec.cpp \
-  src/audio/codecs/FFCodec.h
+  src/audio/codecs/FFCodec.h \
+  src/audio/renderers/OpenAL/al.h \
+  src/audio/renderers/OpenAL/OpenALRenderer.h \
+  src/audio/renderers/OpenAL/BorrowedOpenALRenderer.h \
+  src/audio/renderers/OpenAL/OpenALRenderer.cpp \
+  src/audio/renderers/OpenAL/OpenALRenderableListener.h \
+  src/audio/renderers/OpenAL/OpenALRenderableListener.cpp \
+  src/audio/renderers/OpenAL/OpenALRenderableSource.h \
+  src/audio/renderers/OpenAL/OpenALRenderableSource.cpp \
+  src/audio/renderers/OpenAL/OpenALSimpleSound.h \
+  src/audio/renderers/OpenAL/OpenALSimpleSound.cpp \
+  src/audio/renderers/OpenAL/OpenALHelpers.h \
+  src/audio/renderers/OpenAL/OpenALHelpers.cpp \
+  src/audio/test.cpp \
+  src/audio/test.h 
+
 
 LIBENGINE_COMMON = \
   $(PRECOMPILED) \
@@ -1183,4 +1207,4 @@ headers:
 .PHONY: clean-local
 clean-local:
 	rm -f `find . -name '*.h.gch'`
-noinst_HEADERS = src/gfx/vid_file.h
+noinst_HEADERS = OpenALRenderer.h src/gfx/vid_file.h

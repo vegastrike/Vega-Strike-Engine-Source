@@ -86,6 +86,11 @@ namespace Audio {
             return TVector3<T>(x-other.x, y-other.y, z-other.z); 
         }
         
+        TVector3<T> operator-() const
+        { 
+            return TVector3<T>(-x, -y, -z); 
+        }
+        
         TVector3<T> operator*(const TVector3<T> &other) const
         { 
             return TVector3<T>(x*other.x, y*other.y, z*other.z); 
@@ -133,7 +138,7 @@ namespace Audio {
         
         T distanceSquared(const TVector3<T> &other) const
         {
-            return normSquared(other - *this);
+            return (other - *this).normSquared();
         }
         
         T distance(const TVector3<T> &other) const
@@ -153,6 +158,11 @@ namespace Audio {
         void normalize()
         {
             *this /= norm();
+        }
+        
+        TVector3<T> normalized() const
+        {
+            return *this / norm();
         }
     };
 

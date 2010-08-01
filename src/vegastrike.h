@@ -33,14 +33,7 @@ extern float simulation_atom_var;
 #define SIMULATION_ATOM (simulation_atom_var)
 #endif
 
-#include <config.h>
-
-#include "macosx_math.h"
-#include <math.h>
-
-#ifdef HAVE_IEEEFP_H
- #include <ieeefp.h>
-#endif
+#include "vs_math.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -83,27 +76,7 @@ extern float simulation_atom_var;
  #endif
 #endif
 
-#ifndef PI
- #define PI 3.14159265358979323846
-#endif
-#ifndef M_PI
- #define M_PI 3.1415926535
-#endif
-
 #define PROG_NAME "vegastrike"
-
-#include <float.h>
-
-#if defined (HAVE_MATH_H)
- #include <math.h>
-#endif
-#if  defined (HAVE_FINITE) || defined (BSD)
- #define FINITE( x ) ( finite( x ) )
- #define ISNAN( x ) ( isnan( x ) )
-#else
- #define FINITE( x ) ( _finite( x ) )
- #define ISNAN( x ) ( _isnan( x ) )
-#endif
 
 #define BUFF_LEN 512
 

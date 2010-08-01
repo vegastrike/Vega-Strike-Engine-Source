@@ -4,6 +4,7 @@
 
 #include "RenderableSource.h"
 #include "config.h"
+#include <stdio.h>
 
 namespace Audio {
 
@@ -21,7 +22,13 @@ namespace Audio {
     void RenderableSource::startPlaying(Timestamp start) 
         throw(Exception)
     {
-        startPlayingImpl(start);
+        try {
+            startPlayingImpl(start);
+        } catch(EndOfStreamException) {
+            // Silently discard EOS, results in the more transparent
+            // behavior of simply notifying listeners of source
+            // termination ASAP, which is also accurate.
+        };
     }
     
     void RenderableSource::stopPlaying() 
@@ -53,12 +60,20 @@ namespace Audio {
         return getPlayingTimeImpl();
     }
     
-    void RenderableSource::update(UpdateFlags flags) 
+    void RenderableSource::update(int flags, const Listener& sceneListener) 
         throw()
     {
         try {
-            updateImpl(flags);
-        } catch(Exception e) {}
+            updateImpl(flags, sceneListener);
+        } catch(Exception e) {
+            fprintf(stderr, "Ignoring exception in renderable update: %s", e.what());
+        }
+    }
+    
+    void RenderableSource::seek(Timestamp time) 
+        throw(Exception)
+    {
+        seekImpl(time);
     }
 
 };

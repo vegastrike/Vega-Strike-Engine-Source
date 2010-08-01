@@ -294,7 +294,6 @@ SET(LIBGFXSERVER_SOURCES src/gfx/sphere_server.cpp
 						 src/gfx/background_server.cpp
                         src/gfx/mesh_bin_server.cpp )
 
-
 #add_library(posh  src/posh.cpp )
 
 SET(LIBROOTGENERIC_SOURCES src/configxml.cpp
@@ -354,24 +353,38 @@ SET(LIBROOTSERVER_SOURCES  src/force_feedback_server.cpp
 						   src/universe_util_server.cpp )
 						   
 SET(LIBAUDIO_SOURCES src/audio/CodecRegistry.cpp
-					 src/audio/Stream.cpp
-					 src/audio/Sound.cpp
-					 src/audio/Source.cpp
-					 src/audio/SourceTemplate.cpp
-					 src/audio/SceneManager.cpp
-					 src/audio/Renderer.cpp
-					 src/audio/utils.cpp
-					 src/audio/RenderableSource.cpp
-					 src/audio/Listener.cpp
-					 src/audio/Scene.cpp
-					 src/audio/SimpleSource.cpp
-					 src/audio/SimpleScene.cpp
-					 src/audio/codecs/Codec.cpp
-					 src/audio/codecs/FFStream.cpp
-					 src/audio/codecs/OggStream.cpp
-					 src/audio/codecs/OggData.cpp
-					 src/audio/codecs/OggCodec.cpp
-					 src/audio/codecs/FFCodec.cpp )
+                     src/audio/Listener.cpp
+                     src/audio/RenderableListener.cpp
+                     src/audio/RenderableSource.cpp
+                     src/audio/Renderer.cpp
+                     src/audio/Scene.cpp
+                     src/audio/SceneManager.cpp
+                     src/audio/SimpleScene.cpp
+                     src/audio/SimpleSound.cpp
+                     src/audio/SimpleSource.cpp
+                     src/audio/SoundBuffer.cpp
+                     src/audio/Sound.cpp
+                     src/audio/Source.cpp
+                     src/audio/SourceTemplate.cpp
+                     src/audio/Stream.cpp
+                     src/audio/TemplateManager.cpp
+                     src/audio/test.cpp
+                     src/audio/utils.cpp
+                     src/audio/CodecRegistry.cpp
+                     src/audio/codecs/Codec.cpp
+                     src/audio/codecs/FFCodec.cpp
+                     src/audio/codecs/FFStream.cpp
+                     src/audio/codecs/OggCodec.cpp
+                     src/audio/codecs/OggData.cpp
+                     src/audio/codecs/OggStream.cpp
+                     src/audio/renderers/OpenAL/OpenALHelpers.cpp
+                     src/audio/renderers/OpenAL/OpenALRenderableListener.cpp
+                     src/audio/renderers/OpenAL/OpenALRenderableSource.cpp
+                     src/audio/renderers/OpenAL/OpenALRenderableStreamingSource.cpp
+                     src/audio/renderers/OpenAL/OpenALRenderer.cpp
+                     src/audio/renderers/OpenAL/OpenALSimpleSound.cpp
+                     src/audio/renderers/OpenAL/OpenALStreamingSound.cpp
+                     )
 
 
 add_library(engine_com ${LIBAI_SOURCES}
@@ -551,10 +564,10 @@ ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 
 
 # Release with debugging symbols Target block
-SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "  ${CPU_OPTS}  -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "  ${CPU_OPTS}  -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -g2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during release builds."
      FORCE )
-SET( CMAKE_C_FLAGS_RELWITHDEBINFO "  ${CPU_OPTS}  -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET( CMAKE_C_FLAGS_RELWITHDEBINFO "  ${CPU_OPTS}  -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -g2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during release builds."
      FORCE )
     MARK_AS_ADVANCED(
@@ -636,8 +649,11 @@ IF(NOT DISABLE_CLIENT)
 	add_executable(vegastrike ${VEGASTRIKE_SOURCES})
 ENDIF(NOT DISABLE_CLIENT)
 
-
-add_executable(vegaserver ${VEGASERVER_SOURCES})
+OPTION(DISABLE_SERVER "Disable building the vegaserver bin"
+        OFF )
+IF(NOT DISABLE_SERVER)
+    add_executable(vegaserver ${VEGASERVER_SOURCES})
+ENDIF(NOT DISABLE_SERVER)
 
 
 include (CheckIncludeFile)
@@ -657,12 +673,21 @@ ELSE(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_PATH)
 ENDIF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_PATH)
 
 # Find Boost with boost_python library
-find_package(Boost COMPONENTS python)
+# Note: must test for >1.38 first, because 1.36 isn't really compatible
+find_package(Boost 1.38 COMPONENTS python)
 IF(Boost_FOUND)
     SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
 	SET(TST_INCLUDES ${TST_INCLUDES} ${Boost_INCLUDE_DIRS})
 	SET(TST_LIBS ${TST_LIBS} ${Boost_LIBRARIES})
 	include_directories(${TST_INCLUDES})
+ELSE(Boost_FOUND)
+    find_package(Boost 1.35 COMPONENTS python)
+ENDIF(Boost_FOUND)
+IF(Boost_FOUND)
+        SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
+    	SET(TST_INCLUDES ${TST_INCLUDES} ${Boost_INCLUDE_DIRS})
+	    SET(TST_LIBS ${TST_LIBS} ${Boost_LIBRARIES})
+        include_directories(${TST_INCLUDES})
 ELSE(Boost_FOUND)
     SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
 	message("-- Using Internal Boost !")
@@ -680,7 +705,9 @@ ELSE(Boost_FOUND)
 	IF(NOT DISABLE_CLIENT)
 		add_dependencies(vegastrike boost_python)
 	ENDIF(NOT DISABLE_CLIENT)
-	add_dependencies(vegaserver boost_python)
+	IF(NOT DISABLE_SERVER)
+	    add_dependencies(vegaserver boost_python)
+	ENDIF(NOT DISABLE_SERVER)
 ENDIF(Boost_FOUND)
 
 IF(NOT DISABLE_CLIENT) ##########
@@ -793,8 +820,12 @@ IF(FFMPEG_FOUND)
 	SET(TST_INCLUDES ${TST_INCLUDES} ${FFMPEG_INCLUDE_DIRS})
 	SET(TST_LIBS ${TST_LIBS} ${FFMPEG_LIBRARIES})
 	add_definitions(${FFMPEG_DEFINITIONS})
-	SET(HAVE_FFMPEG 1)
-	message("-- FFMPEG Found: ${FFMPEG_LIBRARIES}")
+	SET(HAVE_FFMPEG 1 )
+	IF(swscale1_FOUND)
+	        message("FFmpeg's libswscale found.")
+	ELSE(swscale1_FOUND)
+		message("FFMpeg's libswscale not found... depending on your ffmpeg version, VS might not build.")
+	ENDIF(swscale1_FOUND)
 ELSE(FFMPEG_FOUND)
 	message("-- FFMPEG Not Found")
 ENDIF(FFMPEG_FOUND)

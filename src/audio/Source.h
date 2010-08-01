@@ -14,6 +14,8 @@ namespace Audio {
     // Forward declarations
     
     class Sound;
+    class Listener;
+    class SourceListener;
     
 
     /**
@@ -37,6 +39,8 @@ namespace Audio {
         SharedPtr<Sound> soundPtr;
         SharedPtr<RenderableSource> rendererDataPtr;
         SharedPtr<UserData> userDataPtr;
+        long userDataLong;
+        SharedPtr<SourceListener> sourceListenerPtr;
         
     protected:
         LVector3 position;
@@ -51,7 +55,11 @@ namespace Audio {
         
         Scalar gain;
         
-        bool looping;
+        struct {
+            int looping : 1;
+            int attenuated : 1;
+            int relative : 1;
+        } flags;
         
         Timestamp lastKnownPlayingTime;
         Timestamp lastKnownPlayingTimeTime;
@@ -64,7 +72,7 @@ namespace Audio {
             /** position, velocity & direction */
             int location : 1;
             
-            /** min/max angle, radius, pf radius ratios, reference freqs */
+            /** min/max angle, radius, pf radius ratios, reference freqs, attenuation */
             int attributes : 1;
             
             /** gain */
@@ -83,6 +91,14 @@ namespace Audio {
                 gain = 0;
                 soundPtr = 0;
                 soundAttributes = 0;
+            }
+            
+            void setAll()
+            {
+                location = 1;
+                attributes = 1;
+                gain = 1;
+                soundAttributes = 1;
             }
         } dirty;
         
@@ -159,16 +175,33 @@ namespace Audio {
         void setGain(Scalar g) throw() { gain = g; dirty.gain = 1; }
         
         /** Is the source in looping mode? */
-        bool isLooping() const throw() { return looping; }
+        bool isLooping() const throw() { return flags.looping != 0; }
         
         /** Set the source's looping mode */
-        void setLooping(bool loop) throw() { looping = loop; dirty.soundAttributes = 1; }
+        void setLooping(bool loop) throw() { flags.looping = loop ? 1 : 0; dirty.soundAttributes = 1; }
+        
+        /** Is the source using distance attenuation? */
+        bool isAttenuated() const throw() { return flags.attenuated != 0; }
+        
+        /** Set whether the source uses distance attenuation */
+        void setAttenuated(bool attenuated) throw() { flags.attenuated = attenuated ? 1 : 0; dirty.attributes = 1; }
+        
+        /** Is the source's position always relative to the root listener?
+         * @remarks Relative sources are useful for interphase sounds, music,
+         *      comm streams, and all those sources which are not anchored
+         *      to a real 3D object, but rather to the listener itself.
+         */
+        bool isRelative() const throw() { return flags.relative != 0; }
+        
+        /** Set whether the source's position is always relative to the root listener. */
+        void setRelative(bool relative) throw() { flags.relative = relative ? 1 : 0; dirty.attributes = 1; }
         
         /** Play the source
-         * @remarks If the source isn't playing, rewind and play from the beginning.
+         * @param start an optional timestamp to start playing from.
+         * @remarks Rewind and play from the beginning. If the source is playing, it is reset.
          *      May not take effect immediately.
          */
-        void startPlaying() throw(Exception);
+        void startPlaying(Timestamp start = 0) throw(Exception);
         
         /** Stop a playing source
          * @remarks If the source is playing, stop it. Otherwise, do nothing.
@@ -207,16 +240,28 @@ namespace Audio {
         Timestamp getWouldbePlayingTime() const throw();
         
         /** Get renderer-specific data associated (and destroyed) with this sound source */
-        SharedPtr<RenderableSource> getRendererData() const throw() { return rendererDataPtr; }
+        SharedPtr<RenderableSource> getRenderable() const throw() { return rendererDataPtr; }
         
         /** Set renderer-specific data to be associated (and destroyed) with this sound source */
-        void setRendererData(SharedPtr<RenderableSource> ptr) throw() { rendererDataPtr = ptr; }
+        void setRenderable(SharedPtr<RenderableSource> ptr) throw();
         
         /** Get user-specific data associated (and destroyed) with this sound source */
-        SharedPtr<UserData> getUserData() const throw() { return userDataPtr; }
+        SharedPtr<UserData> getUserDataPtr() const throw() { return userDataPtr; }
         
         /** Set user-specific data to be associated (and destroyed) with this sound source */
-        void setUserData(SharedPtr<UserData> ptr) throw() { userDataPtr = ptr; }
+        void setUserDataLong(SharedPtr<UserData> ptr) throw() { userDataPtr = ptr; }
+        
+        /** Get user-specific data associated with this sound source */
+        long getUserDataLong() const throw() { return userDataLong; }
+        
+        /** Get user-specific data associated with this sound source */
+        void setUserDataLong(long data) throw() { userDataLong = data; }
+        
+        /** Get an event listener associated with this sound source */
+        SharedPtr<SourceListener> getSourceListener() const throw() { return sourceListenerPtr; }
+        
+        /** Set an event listener to be associated with this sound source */
+        void setSourceListener(SharedPtr<SourceListener> ptr) throw() { sourceListenerPtr = ptr; }
         
         /** Get the associated sound stream */
         SharedPtr<Sound> getSound() const throw() { return soundPtr; }
@@ -224,8 +269,21 @@ namespace Audio {
         /** Set the associated sound stream - Only for SceneManagers to call */
         void setSound(SharedPtr<Sound> ptr) throw() { soundPtr = ptr; dirty.soundPtr = 1; }
         
-        /** Convenience function to update the attached renderable, if present, and active. */
-        void updateRenderable(RenderableSource::UpdateFlags flags) const throw();
+        /** Convenience function to update the attached renderable, if present, and active. 
+         * @param flags see RenderableSource::UpdateFlags
+         * @param sceneListener the listener to which this source is associated
+         */
+        void updateRenderable(int flags, const Listener& sceneListener) throw();
+        
+        /** Seek to the specified position
+         * @note It may not be supported by the renderer on all sources.
+         *      Streaming sources are guaranteed to perform a rough seek on a best effort
+         *      basis, meaning the effective time after the seek may be off a bit, and
+         *      the process may be costly.
+         *       Seeking in non-streaming sources may not be supported at all.
+         * @throws EndOfStreamException if you try to seek past the end
+         */
+        void seek(Timestamp time) throw(Exception);
         
     protected:
         /** Set the last known playing time, update the measurement timestamp as well.
@@ -248,6 +306,24 @@ namespace Audio {
         
         /** @see isPlaying.*/
         virtual bool isPlayingImpl() const throw(Exception) = 0;
+    
+        // The following section contains package-private stuff
+        // They're intended for plugin developers, and not end users
+    public:
+        
+        /**
+         * Notifies source listeners (if any) that the source
+         * has begun actually playing.
+         *
+         * @remarks Usually, listener notifications are automatic. In the
+         *      case of rendering start (actual playing), it's not as
+         *      easy, since the renderer and scene manager have ultimate
+         *      control over it. It's the renderer's responsability, thus,
+         *      to fire this notification event when it's begun rendering.
+         *          All other events take place immediately, so they're
+         *      automatically handled by Source's implementation.
+         */
+        void _notifyPlaying() throw();
     };
 
 };

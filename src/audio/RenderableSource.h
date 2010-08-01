@@ -13,6 +13,7 @@ namespace Audio {
     // Forward declarations
     
     class Source;
+    class Listener;
     
 
     /**
@@ -43,10 +44,11 @@ namespace Audio {
         virtual ~RenderableSource();
         
         enum UpdateFlags {
-            UPDATE_ALL,
-            UPDATE_LOCATION,
-            UPDATE_ATTRIBUTES,
-            UPDATE_EFFECTS
+            UPDATE_ALL          = 0x0F,
+            UPDATE_LOCATION     = 0x01,
+            UPDATE_ATTRIBUTES   = 0x02,
+            UPDATE_EFFECTS      = 0x04,
+            UPDATE_GAIN         = 0x08
         };
         
         /** Play the source from the specified timestamp 
@@ -72,14 +74,28 @@ namespace Audio {
         /** Get the attached source */
         Source* getSource() const throw() { return source; }
         
+        /** Seek to the specified position
+         * @note It may not be supported by the renderer on all sources.
+         *      Streaming sources are guaranteed to perform a rough seek on a best effort
+         *      basis, meaning the effective time after the seek may be off a bit, and
+         *      the process may be costly.
+         *       Seeking in non-streaming sources may not be supported at all.
+         * @throws EndOfStreamException if you try to seek past the end
+         */
+        void seek(Timestamp time) throw(Exception);
+        
         /** Update the underlying API with dirty attributes 
          * @param flags You may specify which attributes to update. Not all attributes are
          *      equally costly, so you'll want to ease up on some, pump up some others.
+         *      You may or-combine flags.
+         * @param sceneListener A reference listener. If it is the root listener attached
+         *      to the renderer, no special translation is done, but if it is not, coordinates
+         *      will be first translated to listener-space.
          * @remarks Although the implementation may throw exceptions, the interface will
          *      ignore them (just log them or something like that). Updates are non-critical
          *      and may fail silently.
          */
-        void update(UpdateFlags flags) throw();
+        void update(int flags, const Listener& sceneListener) throw();
         
         // The following section contains all the virtual functions that need be implemented
         // by a concrete Sound class. All are protected, so the interface is independent
@@ -101,7 +117,10 @@ namespace Audio {
         virtual Timestamp getPlayingTimeImpl() const throw(Exception) = 0;
         
         /** @see update. */
-        virtual void updateImpl(UpdateFlags flags) throw(Exception) = 0;
+        virtual void updateImpl(int flags, const Listener& sceneListener) throw(Exception) = 0;
+        
+        /** @see seek. */
+        virtual void seekImpl(Timestamp time) throw(Exception) = 0;
     };
 
 };

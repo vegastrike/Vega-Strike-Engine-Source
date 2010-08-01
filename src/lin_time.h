@@ -36,6 +36,9 @@ void setNewTime( double newnewtime );
 //Always use this except at the beginning of a frame.
 double queryTime();
 
+//like query time, but returns a monotonous increasing sequence
+double realTime();
+
 extern float getTimeCompression();
 extern void setTimeCompression( float tc );
 

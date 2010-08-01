@@ -2,6 +2,8 @@
 // C++ implementation: Audio::__impl::OggData
 //
 
+#include "config.h"
+
 #ifdef HAVE_OGG
 #include <sys/types.h>
 #include <stdint.h>

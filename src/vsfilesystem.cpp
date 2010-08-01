@@ -1929,7 +1929,7 @@ bool VSFile::Eof()
         eof = vs_feof( this->fp );
     } else {
         if (q_volume_format == vfmtVSR) {} else if (q_volume_format == vfmtPK3) {
-            eof = ( offset == this->Size() );
+            eof = (this->Size() < 0) || ( offset == (unsigned long)this->Size() );
         }
     }
     return eof;

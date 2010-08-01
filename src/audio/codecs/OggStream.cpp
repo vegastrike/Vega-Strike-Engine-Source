@@ -2,6 +2,8 @@
 // C++ Implementation: Audio::OggStream
 //
 
+#include "config.h"
+
 #ifdef HAVE_OGG
 
 #include "OggStream.h"
@@ -26,7 +28,7 @@ namespace Audio {
     {
         if ( file.OpenReadOnly(path, type) <= VSFileSystem::Ok )
             throw FileOpenException("Error opening file \"" + path + "\"");
-        oggData = new __impl::OggData(file, getFormat(), 0);
+        oggData = new __impl::OggData(file, getFormatInternal(), 0);
         
         // Cache duration in case ov_time_total gets expensive
         duration = ov_time_total( &oggData->vorbisFile, oggData->streamIndex );

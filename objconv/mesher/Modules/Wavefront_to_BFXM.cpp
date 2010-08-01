@@ -26,8 +26,8 @@ namespace Converter {
 					string mtl   = ObjGetMtl(Inputfile,input.c_str());
 					FILE * InputMtl = fopen (mtl.c_str(),"r");
 					if (!InputMtl) {
-						fclose(Inputfile);
-						return RC_INVALID_INPUT;
+						cerr << "Warning: material file \"" << mtl.c_str() 
+                             << "\" not found. Using neutral material." << endl;
 					}
 					FILE * Outputfile=fopen(output.c_str(),"wb+");
 					if (!Outputfile) {

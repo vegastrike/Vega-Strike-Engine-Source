@@ -2,10 +2,11 @@
 // C++ Implementation: Audio::OggStream
 //
 
+#include "config.h"
+
 #ifdef HAVE_FFMPEG
 
 #include "FFStream.h"
-#include "config.h"
 
 #include <utility>
 #include <limits>
@@ -24,6 +25,15 @@
 #endif
 
 #include "ffmpeg_init.h"
+
+#if (defined(AVCODEC_MAX_AUDIO_FRAME_SIZE) && ((AVCODEC_MAX_AUDIO_FRAME_SIZE) > (BUFFER_SIZE)))
+
+    #undef BUFFER_SIZE
+    #define BUFFER_SIZE ((AVCODEC_MAX_AUDIO_FRAME_SIZE*3)/2)
+
+#endif
+
+using namespace std;
 
 namespace Audio {
 
@@ -61,6 +71,9 @@ namespace Audio {
             size_t sampleBufferAlloc; // in bytes
             uint64_t sampleBufferStart; // in samples
             
+            std::string filepath;
+            VSFileSystem::VSFileType filetype;
+            int audioStreamIndex;
             
             FFData(const std::string &path, VSFileSystem::VSFileType type, Format &fmt, int streamIdx) throw(Exception) :
                 pFormatCtx(0),
@@ -69,7 +82,10 @@ namespace Audio {
                 pStream(0),
                 packetBuffer(0),
                 packetBufferSize(0),
-                sampleBufferBase(0)
+                sampleBufferBase(0),
+                filepath(path),
+                filetype(type),
+                audioStreamIndex(streamIdx)
             {
                 packet.data = 0;
                 
@@ -85,7 +101,7 @@ namespace Audio {
                 
                 if (  (0 != av_open_input_file(&pFormatCtx, npath.c_str(), NULL, BUFFER_SIZE, NULL))
                     ||(0 >  av_find_stream_info(pFormatCtx))  )
-                    throw FileOpenException(errbase + " (wrong format or)"); 
+                    throw FileOpenException(errbase + " (wrong format or file not found)"); 
                 
                 // Dump format info in case we want to know...
                 #ifdef VS_DEBUG
@@ -95,7 +111,7 @@ namespace Audio {
                 // Find audio stream
                 pCodecCtx = 0;
                 streamIndex = -1;
-                for (int i=0; (pCodecCtx==0) && (i < pFormatCtx->nb_streams); ++i)
+                for (unsigned int i=0; (pCodecCtx==0) && (i < pFormatCtx->nb_streams); ++i)
                     if ((pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_AUDIO) && (streamIdx-- == 0))
                         pCodecCtx = (pStream = pFormatCtx->streams[streamIndex = i])->codec;
                 if (pCodecCtx == 0)
@@ -163,6 +179,11 @@ namespace Audio {
                     av_close_input_file(pFormatCtx);
             }
             
+            bool saneTimeStamps() const throw()
+            {
+                return pCodecCtx->time_base.num != 0;
+            }
+            
             int64_t timeToPts(double time) const throw()
             {
                 return int64_t(floor(time * pCodecCtx->time_base.den / pCodecCtx->time_base.num));
@@ -225,7 +246,7 @@ namespace Audio {
                 if (used < 0)
                     throw PacketDecodeException();
                 
-                if (used > packetBufferSize)
+                if ((size_t)used > packetBufferSize)
                     used = packetBufferSize;
                 
                 (char*&)packetBuffer += used;
@@ -247,7 +268,7 @@ namespace Audio {
     FFStream::FFStream(const std::string& path, int streamIndex, VSFileSystem::VSFileType type) throw(Exception)
         : Stream(path)
     {
-        ffData = new __impl::FFData(path, type, getFormat(), streamIndex);
+        ffData = new __impl::FFData(path, type, getFormatInternal(), streamIndex);
     }
 
     FFStream::~FFStream()
@@ -268,8 +289,11 @@ namespace Audio {
     
     void FFStream::seekImpl(double position) throw(Exception)
     {
+        if (position < 0)
+            position = 0;
+        
         // Translate float time to frametime
-        int64_t targetSample = int64_t(position * getFormat().sampleFrequency);
+        uint64_t targetSample = uint64_t(position * getFormat().sampleFrequency);
         
         if (   (targetSample >= ffData->sampleBufferStart) 
             && (targetSample < ffData->sampleBufferStart + ffData->sampleBufferSize)   ) 
@@ -280,10 +304,22 @@ namespace Audio {
             ffData->sampleBufferStart += advance;
             ffData->sampleBufferSize -= advance;
         } else {
-            // rough seek
-            avcodec_flush_buffers(ffData->pCodecCtx);
-            av_seek_frame(ffData->pFormatCtx, ffData->streamIndex, ffData->timeToPts(position), AVSEEK_FLAG_BACKWARD);
-            ffData->syncPts();
+            if (ffData->saneTimeStamps()) {
+                // rough seek
+                avcodec_flush_buffers(ffData->pCodecCtx);
+                av_seek_frame(ffData->pFormatCtx, ffData->streamIndex, ffData->timeToPts(position), 
+                    (targetSample < ffData->sampleBufferStart + ffData->sampleBufferSize) ? AVSEEK_FLAG_BACKWARD : 0);
+                ffData->syncPts();
+            } else if (targetSample < ffData->sampleBufferStart) {
+                // cannot seek but have to seek backwards, so...
+                // ...close the file and reopen (yack)
+                std::string path = ffData->filepath;
+                VSFileSystem::VSFileType type = ffData->filetype;
+                int streamIndex = ffData->audioStreamIndex;
+                
+                delete ffData;
+                ffData = new __impl::FFData(path, type, getFormatInternal(), streamIndex);
+            }
             
             // just skip data (big steps)
             do {

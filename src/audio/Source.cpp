@@ -3,6 +3,7 @@
 //
 
 #include "Source.h"
+#include "SourceListener.h"
 #include "config.h"
 #include "utils.h"
 
@@ -12,14 +13,28 @@ namespace Audio {
 
     Source::Source(SharedPtr<Sound> sound, bool _looping) throw() :
         soundPtr(sound),
-        cosAngleRange(1,1),
+        
+        // Some safe defaults
+        position(0,0,0),
+        direction(0,0,1),
+        velocity(0,0,0),
+        
+        cosAngleRange(-1,-1),
+        
+        radius(1),
+        
         pfRadiusRatios(1,1),
         referenceFreqs(250,5000),
+        
         gain(1),
-        looping(_looping),
+        
         lastKnownPlayingTime(0),
         lastKnownPlayingTimeTime( getRealTime() )
     {
+        // Some default flags
+        setLooping(_looping);
+        setRelative(false);
+        setAttenuated(true);
     }
     
     Source::~Source()
@@ -33,9 +48,10 @@ namespace Audio {
         return timestamp;
     }
 
-    void Source::startPlaying() throw(Exception)
+    void Source::startPlaying(Timestamp start) throw(Exception)
     {
-        startPlayingImpl( setLastKnownPlayingTime(0) );
+        dirty.setAll();
+        startPlayingImpl( setLastKnownPlayingTime(start) );
     }
     
     void Source::stopPlaying() throw()
@@ -52,14 +68,32 @@ namespace Audio {
                 setLastKnownPlayingTime( getPlayingTime() );
             } catch(Exception e) { }
             
+            // Must notify the listener, if any
+            if (sourceListenerPtr.get() != 0 && sourceListenerPtr->wantPlayEvents())
+                sourceListenerPtr->onPrePlay(*this, false);
+            
             rendererDataPtr->stopPlaying();
+            
+            // Must notify the listener, if any
+            if (sourceListenerPtr.get() != 0 && sourceListenerPtr->wantPlayEvents())
+                sourceListenerPtr->onPostPlay(*this, false);
         }
     }
     
     void Source::continuePlaying() throw(Exception)
     {
-        if (rendererDataPtr.get() && isPlaying() && !isActive())
+        if (rendererDataPtr.get() && isPlaying() && !isActive()) {
+            // Must notify the listener, if any
+            if (sourceListenerPtr.get() != 0 && sourceListenerPtr->wantPlayEvents())
+                sourceListenerPtr->onPrePlay(*this, true);
+            
             rendererDataPtr->startPlaying( getWouldbePlayingTime() );
+            
+            // Must notify the listener, if any
+            if (sourceListenerPtr.get() != 0 && sourceListenerPtr->wantPlayEvents())
+                sourceListenerPtr->onPrePlay(*this, true);
+            
+        }
     }
     
     Timestamp Source::getPlayingTime() const throw()
@@ -113,11 +147,72 @@ namespace Audio {
         dirty.attributes = 1; 
     }
     
-    void Source::updateRenderable(RenderableSource::UpdateFlags flags) const 
+    void Source::updateRenderable(int flags, const Listener& sceneListener) 
         throw()
     {
-        if (rendererDataPtr.get() && isActive())
-            rendererDataPtr->update(flags);
+        if (rendererDataPtr.get()) {
+            int oflags = flags;
+            
+            if (!dirty.attributes)
+                flags &= ~RenderableSource::UPDATE_ATTRIBUTES;
+            if (!dirty.gain)
+                flags &= ~RenderableSource::UPDATE_GAIN;
+            
+            // Must always update location... listeners might move around.
+            flags |= RenderableSource::UPDATE_LOCATION;
+            
+            // Must nofity listener, if any
+            if (sourceListenerPtr.get() != 0 && sourceListenerPtr->wantUpdateEvents())
+                sourceListenerPtr->onUpdate(*this, flags);
+            
+            rendererDataPtr->update(flags, sceneListener);
+            
+            if (oflags == RenderableSource::UPDATE_ALL) {
+                dirty.reset();
+            } else {
+                if (flags & RenderableSource::UPDATE_LOCATION)
+                    dirty.location = 0;
+                if (flags & RenderableSource::UPDATE_ATTRIBUTES)
+                    dirty.attributes = 0;
+                if (flags & RenderableSource::UPDATE_GAIN)
+                    dirty.gain = 0;
+            }
+            
+            switch(flags) {
+            case RenderableSource::UPDATE_ALL:
+                dirty.reset();
+                break;
+            case RenderableSource::UPDATE_EFFECTS:
+            case RenderableSource::UPDATE_ATTRIBUTES:
+                dirty.attributes = 0;
+            case RenderableSource::UPDATE_LOCATION:
+                dirty.location = 0;
+            };
+        }
+    }
+    
+    void Source::setRenderable(SharedPtr<RenderableSource> ptr) 
+        throw() 
+    { 
+        // Notify at/detachment to listener, if any
+        if (sourceListenerPtr.get() != 0 && sourceListenerPtr->wantAttachEvents())
+            sourceListenerPtr->onPreAttach(*this, ptr.get() != 0);
+        
+        rendererDataPtr = ptr; 
+        
+        // Notify at/detachment to listener, if any
+        if (sourceListenerPtr.get() != 0 && sourceListenerPtr->wantAttachEvents())
+            sourceListenerPtr->onPostAttach(*this, ptr.get() != 0);
+    }
+    
+    void Source::seek(Timestamp time) 
+        throw(Exception)
+    {
+        if (rendererDataPtr.get() && isPlaying() && isActive()) {
+            rendererDataPtr->seek(time);
+        } else {
+            setLastKnownPlayingTime(time);
+        }
     }
 
 };

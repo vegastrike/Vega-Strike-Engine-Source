@@ -194,6 +194,27 @@ double queryTime()
 #endif
 }
 
+double realTime()
+{
+#ifdef WIN32
+    LONGLONG tmpnewtime;
+    QueryPerformanceCounter( (LARGE_INTEGER*) &tmpnewtime );
+    return ( (double) tmpnewtime )/(double) freq;
+#elif defined (HAVE_GETTIMEOFDAY)
+    struct timeval tv;
+    (void) gettimeofday( &tv, NULL );
+    double tmpnewtime = (double) tv.tv_sec+(double) tv.tv_usec*1.e-6;
+#elif defined (HAVE_SDL)
+    double tmpnewtime = SDL_GetTicks()*1.e-3;
+#else
+# error "We have no way to determine the time on this system."
+    double tmpnewtime = 0.;
+#endif
+
+    static double reallyfirsttime = tmpnewtime;
+    return tmpnewtime - reallyfirsttime;
+}
+
 void UpdateTime()
 {
     static bool first=true;

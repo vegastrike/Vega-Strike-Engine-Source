@@ -19,7 +19,7 @@
 //#include <fenv.h>
 #include "config.h"
 #include "cs_python.h"
-
+#include "audio/test.h"
 #if defined (HAVE_SDL)
 #include <SDL/SDL.h>
 #endif
@@ -57,6 +57,11 @@
 #include "cmd/music.h"
 #include "ship_commands.h"
 #include "gamemenu.h"
+
+
+#include "audio/SceneManager.h"
+#include "audio/TemplateManager.h"
+#include "audio/renderers/OpenAL/BorrowedOpenALRenderer.h"
 
 #include <time.h>
 #ifndef _WIN32
@@ -138,8 +143,14 @@ VegaConfig * createVegaConfig( char *file )
 }
 
 extern bool soundServerPipes();
-std::string ParseCommandLine( int argc, char **CmdLine );
-void VSExit( int code )
+std::string ParseCommandLine(int argc, char ** CmdLine);
+/**
+ * Returns an exit code >= 0 if the game is supposed to exit rightaway
+ * Returns an exit code < 0 if the game can continue loading.
+ */
+int readCommandLineOptions(int argc, char ** argv);
+
+void VSExit( int code)
 {
     Music::CleanupMuzak();
     winsys_exit( code );
@@ -162,7 +173,7 @@ void cleanup( void )
 #endif
 #else
     while (!cleanexit)
-        int i = 1; //FIXME: WHAT THE HELL IS THIS???!!! meant to be Sleep(0)? unused variable warning. --chuck_starchaser
+        usleep(10000);
 #endif
     if (Network != NULL) {
         cout<<"Number of players"<<_Universe->numPlayers()<<endl;
@@ -196,6 +207,53 @@ void bootstrap_first_loop();
 //WTF! this causes windowed creation to fail... please justify yourself ;-)  #undef main
 #endif
 void nothinghappens( unsigned int, unsigned int, bool, int, int ) {}
+
+void initSceneManager()
+{
+    cout << "Creating scene manager..." << endl;
+    Audio::SceneManager *sm = new Audio::SceneManager();
+    
+    cout << "Creating template manager..." << endl;
+    new Audio::TemplateManager();
+    
+    if (Audio::SceneManager::getSingleton() == 0)
+        throw Audio::Exception("Singleton null after SceneManager instantiation");
+
+    sm->setMaxSources( g_game.max_sound_sources );
+}
+
+void initALRenderer()
+{
+    cerr << "  Initializing renderer..." << endl;
+    Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
+    
+    if (g_game.sound_enabled) {
+        SharedPtr<Audio::Renderer> renderer(new Audio::BorrowedOpenALRenderer);
+        renderer->setMeterDistance(1.0);
+        renderer->setDopplerFactor(0.0);
+        
+        sm->setRenderer( renderer );
+    }
+}
+
+void initScenes()
+{
+    Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
+    
+    sm->createScene("video");
+    sm->createScene("music");
+    sm->createScene("cockpit");
+    sm->createScene("base");
+    sm->createScene("space");
+    
+    sm->setSceneActive("video", true);
+}
+
+void closeRenderer()
+{
+    cerr << "Shutting down renderer..." << endl;
+    Audio::SceneManager::getSingleton()->setRenderer( SharedPtr<Audio::Renderer>() );
+}
 
 //int allexcept=FE_DIVBYZERO|FE_INVALID;//|FE_OVERFLOW|FE_UNDERFLOW;
 extern void InitUnitTables();
@@ -261,15 +319,22 @@ int main( int argc, char *argv[] )
         strcpy( mission_name, defmis.c_str() );
         cerr<<"MISSION_NAME is empty using : "<<mission_name<<endl;
     }
+    
+
+    int exitcode;
+    if ((exitcode = readCommandLineOptions(argc,argv)) >= 0)
+        return exitcode;
+
     //might overwrite the default mission with the command line
     InitUnitTables();
 #ifdef HAVE_PYTHON
-    Python::init();
+      Python::init();
 
-    Python::test();
+      Python::test();
 #endif
-    std::vector< std::vector< char > >temp = ROLES::getAllRolePriorities();
-#if defined (HAVE_SDL)  
+
+    std::vector<std::vector <char > > temp = ROLES::getAllRolePriorities();
+#if defined(HAVE_SDL)
 #ifndef NO_SDL_JOYSTICK
     //&& defined(HAVE_SDL_MIXER)
     if ( SDL_InitSubSystem( SDL_INIT_JOYSTICK ) ) {
@@ -289,6 +354,11 @@ int main( int argc, char *argv[] )
     Music::InitMuzak();
     /* Set up a function to clean up when program exits */
     winsys_atexit( cleanup );
+    
+    initSceneManager();
+    initALRenderer();
+    initScenes();
+    
     /*
      * #if defined(HAVE_SDL) && defined(HAVE_SDL_MIXER)
      *
@@ -311,6 +381,8 @@ int main( int argc, char *argv[] )
 
     //Unregister commands - and cleanup memory
     UninitShipCommands();
+    
+    closeRenderer();
 
     return 0;
 }
@@ -717,16 +789,17 @@ void bootstrap_main_loop()
 const char helpmessage[] =
     "Command line options for vegastrike\n"
     "\n"
-    " -D -d     Specify data directory\n"
-    " -N -n     Number of players\n"
-    " -M -m     Specify a mod to play\n"
-    " -P -p     Specify player location\n"
-    " -J -j     Start in a specific system\n"
-    " -A -a     Normal resolution (800x600)\n"
-    " -H -h     High resolution (1024x768)\n"
-    " -V -v     Super high resolution (1280x1024)\n"
-    " --net     Networking Enabled (Experimental)\n"
-    " --debug[=#] Enable debugging output, 1 major warnings, 2 medium, 3 developer notes\n"
+    " -D -d \t Specify data directory\n"
+    " -N -n \t Number of players\n"
+    " -M -m \t Specify a mod to play\n"
+    " -P -p \t Specify player location\n"
+    " -J -j \t Start in a specific system\n"
+    " -A -a \t Normal resolution (800x600)\n"
+    " -H -h \t High resolution (1024x768)\n"
+    " -V -v \t Super high resolution (1280x1024)\n"
+    " --net \t Networking Enabled (Experimental)\n"
+    " --debug[=#] \t Enable debugging output, 1 major warnings, 2 medium, 3 developer notes\n"
+    " --test-audio \t Run audio tests\n"
     "\n";
 std::string ParseCommandLine( int argc, char **lpCmdLine )
 {
@@ -840,4 +913,15 @@ std::string ParseCommandLine( int argc, char **lpCmdLine )
     }
     return retstr;
 }
-
+#undef main
+int readCommandLineOptions(int argc, char ** argv)
+{
+    for (int i=1; i < argc; ++i) {
+        if (argv[i][0] == '-') {
+            if (strcmp("--test-audio", argv[i])==0) {
+                return Audio::Test::main(argc, argv);
+            }
+        }
+    }
+    return -1;
+}

@@ -11,6 +11,9 @@ int Room( std::string text )
 void Texture( int room, std::string index, std::string file, float x, float y ) {}
 void Video( int room, std::string index, std::string file, float x, float y ) {}
 void VideoStream( int room, std::string index, std::string file, float x, float y, float w, float h ) {}
+void PlayVideo( int room, std::string index ) {}
+void StopVideo( int room, std::string index ) {}
+void SetDJEnabled( bool enabled ) {}
 void Ship( int room, std::string index, QVector pos, Vector Q, Vector R ) {}
 void Link( int room, std::string index, float x, float y, float wid, float hei, std::string text, int to )
 {

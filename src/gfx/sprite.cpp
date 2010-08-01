@@ -42,6 +42,9 @@
 # define M_PI_2 (1.57079632679489661923)
 #endif
 
+#include "audio/Types.h"
+#include "audio/Source.h"
+
 static float *mview = NULL;
 
 using namespace VSFileSystem;
@@ -65,13 +68,15 @@ static void cacheInsert( const char *file, VSSprite *spr )
     sprite_cache.insert( std::pair< std::string, VSSprite* > ( hashName, spr ) );
 }
 
-VSSprite::VSSprite( Texture *_surface, float _xcenter, float _ycenter, float _width, float _height, float _s, float _t ) :
+VSSprite::VSSprite( Texture *_surface, float _xcenter, float _ycenter, float _width, float _height, float _s, float _t, bool _isAnimation ) :
     xcenter( _xcenter )
     , ycenter( _ycenter )
     , widtho2( _width/2 )
     , heighto2( _height/2 )
     , maxs( _s )
     , maxt( _t )
+    , rotation( 0 )
+    , isAnimation(_isAnimation)
 {
     surface = _surface;
 }
@@ -315,17 +320,36 @@ void VSSprite::GetRotation( float &rot )
     rot = rotation;
 }
 
-void VSSprite::SetTimeSource( int source )
+void VSSprite::SetTimeSource( SharedPtr<Audio::Source> source )
 {
     if (isAnimation)
         ( (AnimatedTexture*) surface )->SetTimeSource( source );
 }
 
-int VSSprite::GetTimeSource() const
+SharedPtr<Audio::Source> VSSprite::GetTimeSource() const
 {
     if (isAnimation)
         return ( (AnimatedTexture*) surface )->GetTimeSource();
     else
-        return 0;
+        return SharedPtr<Audio::Source>();
 }
 
+void VSSprite::ClearTimeSource()
+{
+    if (isAnimation)
+        ( (AnimatedTexture*) surface )->ClearTimeSource();
+}
+
+bool VSSprite::Done() const
+{
+    if (isAnimation)
+        return ( (AnimatedTexture*) surface )->Done();
+    else
+        return false;
+}
+
+void VSSprite::Reset() 
+{
+    if (isAnimation)
+        ( (AnimatedTexture*) surface )->Reset();
+}

@@ -8,6 +8,9 @@
 #include <stdio.h>
 #include "../SharedPool.h"
 
+#include "audio/Types.h"
+#include "audio/Source.h"
+
 class AnimatedTexture : public Texture
 {
     Texture    **Decal;
@@ -21,7 +24,7 @@ class AnimatedTexture : public Texture
     bool detailTex;
     enum FILTER ismipmapped;
     int  texstage;
-    int  timeSource;
+    SharedPtr<Audio::Source> timeSource;
 
     vector< StringPool::Reference >frames; //Filenames for each frame
     vector< Vector >frames_maxtc; //Maximum tcoords for each frame
@@ -56,6 +59,7 @@ protected:
     double curtime;
 
     bool   constframerate;
+    bool   done;
 
 public:
     virtual void setTime( double tim );
@@ -140,24 +144,17 @@ public:
     {
         return (options&optLoop) != 0;
     }
-    int GetTimeSource() const
+    SharedPtr<Audio::Source> GetTimeSource() const
     {
-        return (options&optSoundTiming) ? timeSource : 0;
+        return (options&optSoundTiming) ? timeSource : SharedPtr<Audio::Source>();
     }
-    void SetTimeSource( int source )
-    {
-        timeSource = source;
-        if (source)
-            options |= optSoundTiming;
-
-        else
-            options &= ~optSoundTiming;
-    }
+    void SetTimeSource( SharedPtr<Audio::Source> source );
+    void ClearTimeSource();
     static void UpdateAllPhysics();
     static void UpdateAllFrame();
 //resets the animation to beginning
     void Reset();
-    bool Done();
+    bool Done() const;
     virtual bool LoadSuccess();
 
 //Some useful factory methods -- also defined in ani_texture.cpp

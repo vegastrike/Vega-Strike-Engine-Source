@@ -7,16 +7,24 @@
 #include "gfx/sprite.h"
 #include <stdio.h>
 
+#include "audio/Types.h"
+#include "audio/Source.h"
+
 //#define BASE_MAKER
 //#define BASE_XML //in case you want to write out XML instead...
 
 #define BASE_EXTENSION ".py"
+
+void RunPython( const char *filnam );
 
 class BaseInterface
 {
     int  curlinkindex;
     int  lastmouseindex;    //Last link index to be under the mouse
     bool drawlinkcursor;
+    bool enabledj;
+    bool terminate_scheduled;
+    bool midloop;
     TextPlane curtext;
 public:
     class Room
@@ -230,11 +238,14 @@ public:
 public:
             virtual void Draw( ::BaseInterface*base );
             VSSprite     spr;
+            SharedPtr<Audio::Source> soundsource;
+            std::string soundscene;
+            
 #ifdef BASE_MAKER
             std::string  texfile;
             virtual void EndXML( FILE *fp );
 #endif
-            virtual ~BaseVSSprite() {}
+            virtual ~BaseVSSprite();
             BaseVSSprite( const std::string &spritefile, const std::string &ind );
             void SetSprite( const std::string &spritefile );
             void SetPos( float posx, float posy )
@@ -249,6 +260,7 @@ public:
             {
                 spr.SetTime( t );
             }
+            bool isPlaying() const;
 
 protected: BaseVSSprite( const std::string &ind, const VSSprite &sprite ) : BaseObj( ind )
                 , spr( sprite ) {}
@@ -256,6 +268,9 @@ protected: BaseVSSprite( const std::string &ind, const VSSprite &sprite ) : Base
 
         class BaseVSMovie : public BaseVSSprite
         {
+            std::string callback;
+            bool playing;
+            
 public:
             virtual ~BaseVSMovie() {}
             BaseVSMovie( const std::string &moviefile, const std::string &ind );
@@ -263,6 +278,11 @@ public:
 
             float GetTime() const;
             void SetTime( float t );
+            
+            const std::string& getCallback() const { return callback; }
+            void setCallback(const std::string &callback) { this->callback = callback; }
+            
+            virtual void Draw( ::BaseInterface*base );
         };
 
         class BaseTalk : public BaseObj
@@ -328,6 +348,9 @@ public:
     BaseInterface( const char *basefile, Unit *base, Unit *un );
     ~BaseInterface();
     void Draw();
+    
+    void setDJEnabled(bool enabled);
+    bool isDJEnabled() const { return enabledj; }
 };
 
 #endif

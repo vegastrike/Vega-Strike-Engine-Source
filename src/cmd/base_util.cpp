@@ -8,6 +8,7 @@
 #include "universe_util.h"
 #include "basecomputer.h"
 #include "main_loop.h"
+#include "music.h"
 
 #include <boost/version.hpp>
 #if BOOST_VERSION != 102800
@@ -27,7 +28,23 @@ typedef boost::python::dictionary BoostPythonDictionary;
 
 #include "in_kb.h"
 
+
+#include "audio/SceneManager.h"
+#include "audio/Sound.h"
+#include "audio/Source.h"
+#include "audio/SourceListener.h"
+#include "audio/Renderer.h"
+#include "audio/Scene.h"
+
 extern float getFontHeight();
+
+using Audio::Source;
+using Audio::Sound;
+using Audio::SceneManager;
+using Audio::SourceListener;
+using Audio::LVector3;
+using Audio::Vector3;
+
 
 namespace BaseUtil
 {
@@ -37,6 +54,64 @@ inline BaseInterface::Room * CheckRoom( int room )
     if ( room < 0 || room >= static_cast<int>(BaseInterface::CurrentBase->rooms.size()) ) return 0;
     return BaseInterface::CurrentBase->rooms[room];
 }
+
+
+/*
+ * Ad-hoc listener used to trigger end-of-stream behavior
+ */
+
+class VideoAudioStreamListener : public SourceListener
+{
+    int sourceRoom;
+    std::string index;
+    
+public:
+    VideoAudioStreamListener(int sourceRoom, const std::string &index)
+    {
+        // Just play events
+        events.attach =
+        events.update = 0;
+        events.play = 1;
+        
+        this->sourceRoom = sourceRoom;
+        this->index = index;
+    }
+    
+    virtual void onPreAttach(Source &source, bool detach) {};
+    virtual void onPostAttach(Source &source, bool detach) {};
+    virtual void onPrePlay(Source &source, bool stop) {};
+    virtual void onPostPlay(Source &source, bool stop) {};
+    virtual void onUpdate(Source &source, int updateFlags) {};
+    
+    virtual void onEndOfStream(Source &source) 
+    {
+        // Verify context before switching rooms
+        if (BaseInterface::CurrentBase != NULL) {
+            if (BaseUtil::GetCurRoom() == sourceRoom) {
+                // We're in the right context, switch to target room
+                BaseInterface::Room *room = CheckRoom( sourceRoom );
+                
+                if (!room) 
+                    return;
+                
+                for (size_t i = 0; i < room->objs.size(); i++) {
+                    if (room->objs[i]) {
+                        if (room->objs[i]->index == index) {
+                            //FIXME: Will crash if not a Movie object.
+                            BaseInterface::Room::BaseVSMovie *movie = 
+                                dynamic_cast< BaseInterface::Room::BaseVSMovie* > (room->objs[i]);
+                            
+                            if (!movie->getCallback().empty())
+                                RunPython(movie->getCallback().c_str());
+                        }
+                    }
+                }
+            }
+        }
+    };
+};
+
+
 int Room( std::string text )
 {
     if (!BaseInterface::CurrentBase) return -1;
@@ -58,33 +133,92 @@ void Texture( int room, std::string index, std::string file, float x, float y )
         ( (BaseInterface::Room::BaseVSSprite*) newroom->objs.back() )->spr.GetPosition( tx, ty );
     dynamic_cast< BaseInterface::Room::BaseVSSprite* > ( newroom->objs.back() )->spr.SetPosition( x+tx, y+ty );
 }
+
+SharedPtr<Source> CreateVideoSoundStream( const std::string &afile, const std::string &scene )
+{
+    SharedPtr<Sound> sound = SceneManager::getSingleton()->getRenderer()->getSound(
+        afile,
+        VSFileSystem::VideoFile,
+        true);
+    
+    SharedPtr<Source> source = SceneManager::getSingleton()->createSource(
+        sound,
+        false);
+    
+    source->setAttenuated(false);
+    source->setRelative(true);
+    source->setPosition(LVector3(0,0,1));
+    source->setDirection(Vector3(0,0,-1));
+    source->setVelocity(Vector3(0,0,0));
+    source->setRadius(1.0);
+    source->setGain(1.0);
+    
+    SceneManager::getSingleton()->getScene(scene)->add(source);
+    
+    return source;
+}
+
+void DestroyVideoSoundStream( SharedPtr<Source> source, const std::string &scene )
+{
+    if (source->isPlaying())
+        source->stopPlaying();
+    SceneManager::getSingleton()->getScene(scene)->remove(source);
+}
+
 void Video( int room, std::string index, std::string vfile, std::string afile, float x, float y )
 {
     BaseInterface::Room *newroom = CheckRoom( room );
     if (!newroom) return;
     BaseUtil::Texture( room, index, vfile, x, y );
 
-    int sndstream = AUDCreateMusic( afile );
-    dynamic_cast< BaseInterface::Room::BaseVSSprite* > ( newroom->objs.back() )->spr.SetTimeSource( sndstream );
+    BaseInterface::Room::BaseVSSprite *baseSprite = dynamic_cast< BaseInterface::Room::BaseVSSprite* > ( newroom->objs.back() );
+
+    if (!afile.empty()) {
+        baseSprite->soundscene = "video";
+        baseSprite->soundsource = CreateVideoSoundStream( afile, baseSprite->soundscene );
+        baseSprite->spr.SetTimeSource( baseSprite->soundsource );
+    }
 }
 void VideoStream( int room, std::string index, std::string streamfile, float x, float y, float w, float h )
 {
     BaseInterface::Room *newroom = CheckRoom( room );
-    if (!newroom) return;
-    static bool addspritepos     = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "offset_sprites_by_pos", "true" ) );
-    float tx = 0, ty = 0;
-
-    BaseInterface::Room::BaseVSSprite *newobj = new BaseInterface::Room::BaseVSMovie( streamfile, index );
-    if (addspritepos)
-        newobj->spr.GetPosition( tx, ty );
-    newobj->spr.SetPosition( x+tx, y+ty );
-    newobj->spr.SetSize( w, h );
+    if (!newroom) {
+        fprintf(stderr, "ERROR: Room not found!!\n");
+        return;
+    }
+    BaseInterface::Room::BaseVSMovie *newobj = new BaseInterface::Room::BaseVSMovie( streamfile, index );
+    newobj->SetPos( x, y );
+    newobj->SetSize( w, h );
 
 #ifdef BASE_MAKER
     newobj->texfile = file;
 #endif
 
+    fprintf(stdout, "INFO: Added video stream %s\n", streamfile.c_str());
+
     newroom->objs.push_back( newobj );
+}
+void SetVideoCallback( int room, std::string index, std::string callback)
+{
+    BaseInterface::Room *newroom = CheckRoom( room );
+    if (!newroom) return;
+    for (size_t i = 0; i < newroom->objs.size(); i++) {
+        if (newroom->objs[i]) {
+            if (newroom->objs[i]->index == index) {
+                //FIXME: Will crash if not a Sprite object.
+                BaseInterface::Room::BaseVSMovie *movie = 
+                    dynamic_cast< BaseInterface::Room::BaseVSMovie* > (newroom->objs[i]);
+                movie->setCallback(callback);
+                
+                if (movie->soundsource.get() != NULL) {
+                    SharedPtr<SourceListener> transitionListener(
+                        new VideoAudioStreamListener(room, index) );
+                    
+                    movie->soundsource->setSourceListener(transitionListener);
+                }
+            }
+        }
+    }
 }
 void SetTexture( int room, std::string index, std::string file )
 {
@@ -127,11 +261,35 @@ void PlayVideo( int room, std::string index )
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
                 //FIXME: Will crash if not a Sprite object.
-                int snd = dynamic_cast< BaseInterface::Room::BaseVSSprite* > (newroom->objs[i])->spr.GetTimeSource();
-                if (snd)
-                    AUDStartPlaying( snd );
+                SharedPtr<Source> source = dynamic_cast< BaseInterface::Room::BaseVSSprite* > (newroom->objs[i])->soundsource;
+                if (source.get() != NULL) {
+                    if (!source->isPlaying())
+                        source->startPlaying();
+                }
             }
         }
+}
+void StopVideo( int room, std::string index )
+{
+    BaseInterface::Room *newroom = CheckRoom( room );
+    if (!newroom) return;
+    for (size_t i = 0; i < newroom->objs.size(); i++)
+        if (newroom->objs[i]) {
+            if (newroom->objs[i]->index == index) {
+                //FIXME: Will crash if not a Sprite object.
+                SharedPtr<Source> source = dynamic_cast< BaseInterface::Room::BaseVSSprite* > (newroom->objs[i])->soundsource;
+                if (source.get() != NULL) {
+                    if (source->isPlaying())
+                        source->stopPlaying();
+                }
+            }
+        }
+}
+void SetDJEnabled( bool enabled )
+{
+    BaseInterface::CurrentBase->setDJEnabled(enabled);
+    if (!enabled) 
+        Music::Stop();
 }
 void Ship( int room, std::string index, QVector pos, Vector Q, Vector R )
 {

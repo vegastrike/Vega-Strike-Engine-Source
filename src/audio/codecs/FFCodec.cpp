@@ -2,6 +2,8 @@
 // C++ Implementation: Audio::FFCodec
 //
 
+#include "config.h"
+
 #ifdef HAVE_FFMPEG
 
 #include "../CodecRegistry.h"
@@ -42,7 +44,7 @@ namespace Audio {
     }
 
     static CodecRegistration registration(new FFCodec());
-
+    
 };
 
 #endif

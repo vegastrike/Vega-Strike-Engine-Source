@@ -153,6 +153,8 @@ void AnimatedTexture::MakeActive( int stage, int pass )
                     setTime( 0 );
                     MakeActive( stage, pass );
                     return;
+                } else {
+                    done = true;
                 }
             }
             catch (::VidFile::Exception e) {
@@ -209,22 +211,22 @@ void AnimatedTexture::UpdateAllFrame()
 {
     double elapsed = GetElapsedTime();
     for (set< AnimatedTexture* >::iterator iter = anis.begin(); iter != anis.end(); iter++) {
-        if ( (*iter)->GetTimeSource() )
-            (*iter)->setTime( AUDGetCurrentPosition( (*iter)->GetTimeSource() ) );
-
+        AnimatedTexture *ani = *iter;
+        if (ani->options & optSoundTiming)
+            ani->setTime( ani->GetTimeSource()->getPlayingTime() );
         else
-            (*iter)->setTime( (*iter)->curTime()+elapsed );
+            ani->setTime( ani->curTime()+elapsed );
     }
 }
 
-bool AnimatedTexture::Done()
+bool AnimatedTexture::Done() const
 {
     //return physicsactive<0;
     //Explosions aren't working right, and this would fix them.
     //I don't see the reason for using physics frames as reference, all AnimatedTextures
     //I've seen are gaphic-only entities (bolts use their own time-keeping system, for instance)
     //If I'm wrong, and the above line is crucial, well... feel free to fix it.
-    return curtime >= numframes*timeperframe;
+    return vidSource ? done : curtime >= numframes*timeperframe;
 }
 
 void AnimatedTexture::setTime( double tim )
@@ -278,6 +280,7 @@ void AnimatedTexture::AniInit()
     constframerate     = true;
     options            = optLoop;
     defaultAddressMode = DEFAULT_ADDRESS_MODE;
+    done               = false;
 }
 //AnimatedTexture::AnimatedTexture (FILE * fp, int stage, enum FILTER imm, bool detailtex){
 //AniInit();
@@ -369,6 +372,7 @@ void AnimatedTexture::Reset()
     activebound   = -1;
     img_sides     = SIDE_SINGLE;
     physicsactive = numframes*timeperframe;
+    done          = false;
 }
 
 static void alltrim( string &str )
@@ -444,6 +448,10 @@ AnimatedTexture* AnimatedTexture::CreateVideoTexture( const std::string &fname,
         rv->LoadVideoSource( f );
     else
         fprintf( stderr, "CreateVideoTexture could not find %s\n", fname.c_str() );
+    
+    // Videos usually don't want to be looped, so set non-looping as default
+    rv->SetLoop(false);
+    
     return rv;
 }
 
@@ -678,3 +686,18 @@ unsigned int AnimatedTexture::numPasses() const
     }
 }
 
+void AnimatedTexture::SetTimeSource( SharedPtr<Audio::Source> source )
+{
+    timeSource = source;
+    if (source)
+        options |= optSoundTiming;
+
+    else
+        options &= ~optSoundTiming;
+}
+
+void AnimatedTexture::ClearTimeSource()
+{
+    timeSource.reset();
+    options &= ~optSoundTiming;
+}

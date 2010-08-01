@@ -44,8 +44,12 @@ namespace Audio {
         
         Scalar gain;
         
-        bool looping;
-        bool streaming;
+        struct {
+            int looping : 1;
+            int streaming : 1;
+            int attenuated : 1;
+            int relative : 1;
+        } flags;
         
     public:
         /** Construct a template 
@@ -112,16 +116,30 @@ namespace Audio {
         void setGain(Scalar g) throw() { gain = g; }
         
         /** Is the source in looping mode? */
-        bool isLooping() const throw() { return looping; }
+        bool isLooping() const throw() { return flags.looping != 0; }
         
         /** Set the source's looping mode */
-        void setLooping(bool loop) throw() { looping = loop; }
+        void setLooping(bool loop) throw() { flags.looping = loop ? 1 : 0; }
+        
+        /** Is the source's position always relative to the root listener?
+         * @see Source::isRelative()
+         */
+        bool isRelative() const throw() { return flags.relative != 0; }
+        
+        /** Set whether the source's position is always relative to the root listener */
+        void setRelative(bool relative) throw() { flags.relative = relative ? 1 : 0; }
+        
+        /** Is the source using distance attenuation? */
+        bool isAttenuated() const throw() { return flags.attenuated != 0; }
+        
+        /** Set whether the source will use distance attenuation */
+        void setAttenuated(bool loop) throw() { flags.attenuated = (loop ? 1 : 0); }
         
         /** Is the source in streaming mode? */
-        bool isStreaming() const throw() { return looping; }
+        bool isStreaming() const throw() { return flags.streaming != 0; }
         
         /** Set the source's streaming mode */
-        void setStreaming(bool stream) throw() { streaming = stream; }
+        void setStreaming(bool stream) throw() { flags.streaming = stream ? 1 : 0; }
         
     };
 

@@ -61,6 +61,8 @@
 
 #include "options.h"
 
+#include "audio/SceneManager.h"
+
 extern vs_options  game_options;
 
 extern std::string global_username;
@@ -1070,5 +1072,9 @@ void main_loop()
         for (size_t jj = 0; jj < _Universe->numPlayers(); jj++)
             Network[jj].checkMsg( NULL );
     //Network[jj].sendMsg();
+    
+    //Commit audio scene status to renderer
+    if (g_game.sound_enabled)
+        Audio::SceneManager::getSingleton()->commit();
 }
 

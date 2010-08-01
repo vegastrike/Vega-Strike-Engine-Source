@@ -834,6 +834,12 @@ AM_CONDITIONAL(BOOSTSYSTEM,test "x$ACENABLE" != "xno")
 dnl Turn use of stencil buffer on/off
 AC_ARG_ENABLE(stencil-buffer, AC_HELP_STRING([--enable-stencil-buffer], [Use if your hardware has a stencil buffer]),VS_CPPFLAGS="${VS_CPPFLAGS} -DUSE_STENCIL_BUFFER=1")
 
+[no_cubemap=0]
+AC_ARG_ENABLE(cubemap, AC_HELP_STRING([--disable-cubemap], [Use if your hardware does not have cubemap support (anyone in the last 5 years does)]),[no_cubemap=1])
+if (test x$no_cubemap = x0); then
+    VS_CPPFLAGS="${VS_CPPFLAGS} -DNV_CUBE_MAP=1"
+[fi]
+
 AC_ARG_ENABLE(nvidia-cg, AC_HELP_STRING([--enable-nvidia-cg], 
 	[Use if you have the NVidia SDK and CG compiler or compatible to get shader support (very experimental)]))
 if test "x$nvidia-cg" = "xyes"; then

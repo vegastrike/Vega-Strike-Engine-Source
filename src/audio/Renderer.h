@@ -10,6 +10,7 @@
 #include "Exceptions.h"
 #include "Singleton.h"
 #include "Types.h"
+#include "Format.h"
 
 #include "vsfilesystem.h"
 
@@ -36,6 +37,8 @@ namespace Audio {
     {
     private:
         Scalar meterDistance;
+        Scalar dopplerFactor;
+        Format outputFormat;
     
     public:
         /** Initialize the renderer with default or config-driven settings.
@@ -63,6 +66,9 @@ namespace Audio {
             VSFileSystem::VSFileType type = VSFileSystem::UnknownFile, 
             bool streaming = false) throw(Exception) = 0;
         
+        /** Return whether the specified sound has been created using this renderer or not */
+        virtual bool owns(SharedPtr<Sound> sound) = 0;
+        
         /** Attach a source to this renderer
          * @remarks A source may only be attached to one renderer. If the source was attached already,
          *      an exception will be thrown.
@@ -87,7 +93,7 @@ namespace Audio {
         /** Detach a listener from this renderer.
          * @remarks Immediately frees any allocated resources.
          */
-        virtual void detach(SharedPtr<Listener> source) throw() = 0;
+        virtual void detach(SharedPtr<Listener> listener) throw() = 0;
         
         
         
@@ -102,6 +108,48 @@ namespace Audio {
          */
         virtual Scalar getMeterDistance() const throw();
         
+        
+        /** Sets how much the doppler effect will be accounted for.
+         * @remarks This sets a semi-opaque value which controls how much of the doppler
+         *      effect will be simulated. All that is required is that 0 maps to fully
+         *      disabled doppler effect, 1 maps to a realistic effect, in between
+         *      a disimulated effect, and above 1 an exaggerated effect.
+         *          The spec is purposefully vague on the specifics.
+         */
+        virtual void setDopplerFactor(Scalar factor) throw();
+        
+        /** Gets how much the doppler effect will be accounted for.
+         * @see setDopplerFactor
+         */
+        virtual Scalar getDopplerFactor() const throw();
+        
+        
+        
+        /** Sets the (preferred) output format.
+         * @remarks Renderers are encouraged to set their effective output format
+         *      to the closest "better" format, where better is defined as either
+         *      having heigher sampling frequency, bit depth, or number of channels.
+         *          The effective output format, if known, must be reflected in
+         *      subsequent calls to getOutputFormat.
+         */
+        virtual void setOutputFormat(const Format &format) throw(Exception);
+        
+        /** Gets the distance in world units that represents one meter.
+         * @see setMeterDistance
+         */
+        virtual const Format& getOutputFormat() const throw();
+        
+        /**
+         * Begins a transaction
+         * @remarks state changes will be piled up and applied
+         *      at commit. This is, though, an optional feature: renderers may choose
+         *      not to implement it, and perform state changes immediately. In any
+         *      case, the result ought to be the same.
+         */
+        virtual void beginTransaction() throw(Exception);
+        
+        /** @see begin() */
+        virtual void commitTransaction() throw(Exception);
     };
 
 };

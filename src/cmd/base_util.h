@@ -26,6 +26,10 @@ class dict;
         #include <map>
 #endif
 
+#include "audio/Types.h"
+#include "audio/Stream.h"
+
+
 namespace BaseUtil
 {
 #if defined (HAVE_PYTHON)
@@ -46,6 +50,9 @@ void SetTexture( int room, std::string index, std::string file );
 void SetTextureSize( int room, std::string index, float w, float h );
 void SetTexturePos( int room, std::string index, float x, float y );
 void PlayVideo( int room, std::string index );
+void StopVideo( int room, std::string index );
+void SetVideoCallback( int room, std::string index, std::string callback);
+void SetDJEnabled( bool enabled );
 void Ship( int room, std::string index, QVector pos, Vector R, Vector Q );
 void LinkPython( int room,
                  std::string index,
@@ -115,6 +122,10 @@ void SetCurRoom( int room );
 int GetNumRoom();
 bool BuyShip( std::string name, bool my_fleet, bool force_base_inventory );
 bool SellShip( std::string name );
+
+//Sound streaming
+SharedPtr<Audio::Source> CreateVideoSoundStream( const std::string &afile, const std::string &scene );
+void DestroyVideoSoundStream( SharedPtr<Audio::Source> source, const std::string &scene );
 
 //GUI events
 void SetEventData( Dictionary data );

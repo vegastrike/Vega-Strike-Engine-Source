@@ -47,7 +47,7 @@ namespace Audio {
         Stream(const std::string& path) throw(Exception);
         
         /** Internal write access to stream format, for derived classes */
-        Format& getFormat() throw() { return streamFormat; }
+        Format& getFormatInternal() throw() { return streamFormat; }
     
     public:
         virtual ~Stream();

@@ -24,14 +24,16 @@ namespace Audio {
      * @remarks This class implements the scene interface for a basic Scene manager.
      *
      */
-    class SimpleScene : public Scene
+    class SimpleScene : public Scene, public SharedFromThis<SimpleScene>
     {
         typedef std::set<SharedPtr<Source> > SourceSet;
         
         Listener listener;
         
         SourceSet activeSources;
-        SourceSet inactiveSources;
+        
+    public:
+        typedef SourceSet::iterator SourceIterator;
     
     public:
     
@@ -64,6 +66,12 @@ namespace Audio {
         
         /** Notify the scene of a source that starts or stops playing. */
         virtual void notifySourcePlaying(SharedPtr<Source> source, bool playing) throw(Exception);
+        
+        /** Gets an iterator over active sources */ 
+        SourceIterator getActiveSources() throw();
+        
+        /** Gets the ending iterator of active sources */
+        SourceIterator getActiveSourcesEnd() throw();
         
     protected:
         void attach(SimpleSource *source) throw();

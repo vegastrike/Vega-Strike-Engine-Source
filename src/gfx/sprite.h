@@ -25,6 +25,9 @@
 
 #include "quaternion.h"
 
+#include "audio/Types.h"
+#include "audio/Source.h"
+
 namespace VSFileSystem
 {
 class VSFile;
@@ -49,7 +52,7 @@ public:
     VSSprite( const char *file, enum FILTER texturefilter = BILINEAR, GFXBOOL force = GFXFALSE );
 //Construct a sprite out of a preloaded texture
 //@Note will take ownership of 'surface'
-    VSSprite( Texture *surface, float xcenter, float ycenter, float width, float height, float s = 0.f, float t = 0.f );
+    VSSprite( Texture *surface, float xcenter, float ycenter, float width, float height, float s = 0.f, float t = 0.f, bool isAnimation = false );
     VSSprite( const VSSprite &source );
     ~VSSprite();
 //Return true if sprite was loaded successfully
@@ -85,8 +88,11 @@ public:
     void GetPosition( float &x1, float &y1 );
     void SetSize( float s1, float s2 );
     void GetSize( float &x1, float &y1 );
-    void SetTimeSource( int source );
-    int GetTimeSource() const;
+    void SetTimeSource( SharedPtr<Audio::Source> source );
+    void ClearTimeSource();
+    bool Done() const;
+    void Reset();
+    SharedPtr<Audio::Source> GetTimeSource() const;
 //float &Rotation(){return rotation;};
     Texture * getTexture()
     {

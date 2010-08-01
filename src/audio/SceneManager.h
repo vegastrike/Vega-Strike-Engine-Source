@@ -10,6 +10,7 @@
 #include "Exceptions.h"
 #include "Singleton.h"
 #include "Types.h"
+#include "VirtualIterator.h"
 
 
 namespace Audio {
@@ -20,10 +21,11 @@ namespace Audio {
     class SourceTemplate;
     class Source;
     class Sound;
+    class Listener;
     
     namespace __impl {
         
-        // Forward declaration of internal template manager data
+        // Forward declaration of internal scene manager data
         struct SceneManagerData;
         
     };
@@ -58,9 +60,18 @@ namespace Audio {
     {
     private:
         AutoPtr<__impl::SceneManagerData> data;
+        
+    public:
+        typedef VirtualIterator<SharedPtr<Scene> > SceneIterator;
+    
+    protected:
+        /** Returns the renderer
+         * @remarks Throws an exception if no renderer has been set
+         */
+        const SharedPtr<Renderer>& internalRenderer() const;
     
     public:
-        /** Construct an empty registry 
+        /** Construct a new instance of the manager 
          * @remarks End-users of the class shouldn't be using this. Singletons need it.
          *      Instead, end-users should use the Root class to find manager plugins they
          *      like.
@@ -72,6 +83,7 @@ namespace Audio {
         /** Create a new source based on the speicified sound
          * @remarks All the attributes will hold unspecified values, so you have to fill them in.}
          * @note The sound must be associated to the correct renderer, or bad things will happen.
+         * @see Renderer, which creates sounds.
          */
         virtual SharedPtr<Source> createSource(SharedPtr<Sound> sound, bool looping = false) throw(Exception);
         
@@ -79,6 +91,14 @@ namespace Audio {
          * @remarks All location information will hold unspecified values, so you have to fill them in.
          */
         SharedPtr<Source> createSource(SharedPtr<SourceTemplate> tpl) throw(Exception);
+        
+        /** Create a new source based on the specified template, but overriding its sound resource.
+         * @remarks All location information will hold unspecified values, so you have to fill them in.
+         *      @par It's useful to have "mode" templates that can be used to spawn many sources based
+         *      on many different streams. Eg: a "music" template for spawning music tracks, a "radio"
+         *      template for spawning radio voiceovers, etc...
+         */
+        SharedPtr<Source> createSource(SharedPtr<SourceTemplate> tpl, const std::string &name) throw(Exception);
         
         /** Destroy a source created with this manager */
         virtual void destroySource(SharedPtr<Source> source) throw();
@@ -102,6 +122,25 @@ namespace Audio {
             Vector3 velocity,
             Scalar radius) throw(Exception);
         
+        /** Convenience API to play a source once and forget. 
+         * @param tpl The source template from which a source should be instanced
+         * @param soundName The name of the sound stream from which the source will be created, overriding the template's
+         * @param sceneName The name of the scene to which the source should be attached
+         * @param position The initial position of the source
+         * @param direction The direction of the (if directional) source
+         * @param velocity The movement velocity of the source
+         * @param radius The base radius of the source
+         * @remarks The source should not be looping, and an exception will be thrown if it is.
+         */
+        void playSource(
+            SharedPtr<SourceTemplate> tpl, 
+            const std::string &soundName,
+            const std::string &sceneName,
+            LVector3 position,
+            Vector3 direction,
+            Vector3 velocity,
+            Scalar radius) throw(Exception);
+        
         /** Create a new named scene */
         virtual SharedPtr<Scene> createScene(const std::string &name) throw(DuplicateObjectException);
         
@@ -109,7 +148,7 @@ namespace Audio {
         virtual SharedPtr<Scene> getScene(const std::string &name) const throw(NotFoundException);
         
         /** Destroy an existing scene by its name */
-        virtual void destroyScene(const std::string &name) const throw(NotFoundException);
+        virtual void destroyScene(const std::string &name) throw(NotFoundException);
         
         /** Sets the active state of a scene */
         virtual void setSceneActive(const std::string &name, bool active) throw(NotFoundException);
@@ -117,6 +156,25 @@ namespace Audio {
         /** Get the active state of a scene */
         virtual bool getSceneActive(const std::string &name) throw(NotFoundException);
         
+        /** Get the root listener
+         * @remarks Renderers can only have one listener. Sources attached to scenes
+         *      require translation into the reference listener. It is usually convenient
+         *      to apply some listener changes directly into the root listener rather than
+         *      into the scenes. For instance, if one scene represents the cockpit and
+         *      another the ship's exterior, the cockpit listener will be fixed and the
+         *      exterior listener will move with the ship. But if the user wants to 
+         *      "look to the right", the best way to achieve this would be to rotate
+         *      the renderer's listener to the right rather than rotate all sources
+         *      to the left (what would be required if the listeners of each scene
+         *      were rotated, since they're "artificial" listeners).
+         */
+        virtual SharedPtr<Listener> getRootListener() const throw();
+        
+        /** Get an iterator over all scenes */
+        virtual SharedPtr<SceneIterator> getSceneIterator() const throw();
+        
+        /** Get an iterator over all active scenes */
+        virtual SharedPtr<SceneIterator> getActiveSceneIterator() const throw();
         
         /** Set a new renderer
          * @param renderer A new renderer to be used.
@@ -124,11 +182,80 @@ namespace Audio {
          *      to switch renderers at any point, but the operation is rather costly: all
          *      sounds must be unloaded and recreated, all active sources must be detached and
          *      reattached.
+         * @note Overriding implementations must call the base implementation, since 
+         *      getRenderer is not overridable.
          */
         virtual void setRenderer(SharedPtr<Renderer> renderer) throw(Exception);
         
         /** Get the current renderer */
         SharedPtr<Renderer> getRenderer() const throw();
+        
+        
+        /********* Scene cycle **********/
+        
+        /** Commit changes done between frames
+         * @remarks Depending on the underlying implementation, changes applied to sources
+         *      may or may not be immediately available to the renderer. Calling commit()
+         *      ensures that they are. Furthermore, some scene managers may use commit
+         *      boundaries to ensure frame coherence (the renderer receives information 
+         *      coherent to the state as it was at the commit), though this is certainly not
+         *      a requirement.
+         *      @par The process may be lengthy and throw various exceptions.
+         */
+        virtual void commit() throw(Exception);
+        
+        /** Return position update frequency 
+         * @remarks Source position updates are a very important kind of update that needs to be
+         *      performed regularly and quite often. They are costly (all active sources have
+         *      to be updated). This value specifies how often they're updated, however the
+         *      actual interval may vary depending on the implementation (it's a mere guideline).
+         */
+        Duration getPositionUpdateFrequency() const throw();
+        
+        /** Return listener update frequency 
+         * @remarks Position updates are a very important kind of update that needs to be
+         *      performed regularly and quite often - even more so for listeners. 
+         *      Since there are very few listeners (one per scene), they're perhaps not so
+         *      costly, or perhaps so? (depending on the underlying implementation).
+         *      This value specifies how often they're updated, however the
+         *      actual interval may vary depending on the implementation (it's a mere guideline).
+         */
+        Duration getListenerUpdateFrequency() const throw();
+        
+        /** Return attribute update frequency 
+         * @remarks Source attribute updates are rare but necessary.
+         *      They are very costly since all active sources must be updated (and each update
+         *      is far more costly than simple position updates).
+         *      This value specifies how often they're updated, however the
+         *      actual interval may vary depending on the implementation (it's a mere guideline).
+         */
+        Duration getAttributeUpdateFrequency() const throw();
+        
+        /** Return source activation frequency 
+         * @remarks Sources may become active or inactive over time, and depending on the impementation
+         *      the effects may not be immediate. More so, since there's a "maximum renderable sources"
+         *      limit, activation may depend on a lot of factors, and not just a call to startPlaying().
+         *      So, activation updates are the costlier of all updates since it involves evaluating
+         *      and prioritizing all sources in all scenes, not just active ones (sources). Frequent
+         *      activation passes are however necessary (but perhaps not that often) since otherwise
+         *      sources that didn't start off as active may never become so.
+         */
+        Duration getActivationFrequency() const throw();
+        
+        /** @see getPositionUpdateFrequency */
+        virtual void setPositionUpdateFrequency(Duration interval) const throw();
+        
+        /** @see getListenerUpdateFrequency */
+        virtual void setListenerUpdateFrequency(Duration interval) const throw();
+        
+        /** @see getAttributeUpdateFrequency */
+        virtual void setAttributeUpdateFrequency(Duration interval) const throw();
+        
+        /** @see getActivationFrequency */
+        virtual void setActivationFrequency(Duration interval) const throw();
+        
+        
+        /********* Culling parameters **********/
         
         
         /** Get the maximum number of simultaneous sources that can be playing at a time
@@ -141,7 +268,7 @@ namespace Audio {
          */
         virtual unsigned int getMaxSources() const throw();
         
-        /** Set the maximum number of simultaneous sources thta can be playing at a time
+        /** Set the maximum number of simultaneous sources that can be playing at a time
          * @param n The maximum number of simultaneous playing sources desired.
          * @remarks This is not guaranteed to success. If failure arises, either no change
          *      or a seemingly approximate change will be made (ie: if the specified number
@@ -149,10 +276,61 @@ namespace Audio {
          * @see getMaxSources
          */
         virtual void setMaxSources(unsigned int n) throw(Exception);
+        
+        /** Get the minimum gain that would be culled off
+         * @remarks This value specifies the minimum gain of active sources. If a source
+         *      ends having a lesser gain, it is ignored and deactivated, to conserve resources.
+         *      @par The manager is free to approximate such determination in order to optimize
+         *      culling: for instance, it could, given attenuation factors and the like, compute
+         *      a maximum distance that would result in gains potentially greater than this value
+         *      to avoid processing of any source beyond that distance. However, such a computation
+         *      is required to be conservative (never cull sources that would fall outside of the
+         *      culling rule based on actual gain), and as such may be difficult without aid.
+         *      @see For more culling options: get/setMaxDistance
+         */
+        virtual float getMinGain() const throw();
+    
+        /** Set the minimum gain that would be culled off
+         * @param gain The new minimum gain.
+         * @see getMinGain
+         */
+        virtual void setMinGain(float gain) throw(Exception);
+        
+        /** Get the maximum distance of active sources
+         * @remarks This value specifies the maximum distance of active sources. If a source
+         *      is at a greater distance from the listener, it is ignored and deactivated, 
+         *      to conserve resources.
+         *      @see For more culling options: get/setMinGain
+         */
+        virtual double getMaxDistance() const throw();
+    
+        /** Set the maximum distance of active sources
+         * @param distance The new limit.
+         * @see getMaxDistance
+         */
+        virtual void setMaxDistance(double distance) throw(Exception);
+        
+        
+        /*********** Notification events ************/
+        
+        /** Notify the scene manager of a source that starts or stops playing. */
+        virtual void notifySourcePlaying(SharedPtr<Source> source, SharedPtr<Scene> scene, bool playing) throw(Exception);
     
     protected:
         /** Add a new scene @see createScene */
         void addScene(SharedPtr<Scene> scene) throw(DuplicateObjectException);
+        
+        /** Synchronize activation state with the scenes */
+        virtual void activationPhaseImpl() throw(Exception);
+        
+        /** Synchronize source positions/attributes with the renderer */
+        virtual void updateSourcesImpl(bool withAttributes) throw(Exception);
+        
+        /** Synchronize listeners
+         * @remarks Since renderer implementations require one listener, this only updates
+         *      the root listener. Scene listeners fall under the category of position updates.
+         */
+        virtual void updateListenerImpl(bool withAttributes) throw(Exception);
     };
 
 };

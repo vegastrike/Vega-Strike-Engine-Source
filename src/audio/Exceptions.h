@@ -6,6 +6,7 @@
 
 #include <string>
 #include <exception>
+#include "Format.h"
 
 namespace Audio {
 
@@ -106,6 +107,30 @@ namespace Audio {
     };
     
     /**
+     * Resource already loaded exception
+     * @remarks thrown when an attempt to load a resource that has already been loaded is made,
+     *      within a context where transparent failure is not desirable, or such decision left
+     *      to the caller (such cases should be explicitly documented).
+     */
+    class ResourceAlreadyLoadedException : public Exception {
+    public:
+        ResourceAlreadyLoadedException() {}
+        ResourceAlreadyLoadedException(const ResourceAlreadyLoadedException &other) : Exception(other) {}
+        explicit ResourceAlreadyLoadedException(const std::string &message) : Exception(message) {}
+    };
+    
+    /**
+     * Invalid parameters exception
+     * @remarks thrown when a call to a method with invalid parameters is made.
+     */
+    class InvalidParametersException : public Exception {
+    public:
+        InvalidParametersException() {}
+        InvalidParametersException(const InvalidParametersException &other) : Exception(other) {}
+        explicit InvalidParametersException(const std::string &message) : Exception(message) {}
+    };
+    
+    /**
      * Attempted to create an object that already existed
      */
     class DuplicateObjectException : public Exception {
@@ -123,6 +148,37 @@ namespace Audio {
             Exception(std::string("Object with name \"") + name + "\" does not exist") {}
     };
     
+    /**
+     * Request for unimplemented features
+     */
+    class NotImplementedException : public Exception {
+    public:
+        explicit NotImplementedException(const std::string &name) : 
+            Exception(name + " has not been implemented yet") {}
+    };
+    
+    /**
+     * Unsupported format requested
+     */
+    class UnsupportedFormatException : public Exception {
+        Format format;
+    public:
+        explicit UnsupportedFormatException(const std::string &where, const Format &fmt) : 
+            Exception(std::string("Unsupported format (" + where + ")")),
+            format(fmt)
+        {}
+        
+        const Format& getFormat() const throw() { return format; }
+    };
+
+    /**
+     * Ran out of memory while performing some operation
+     */
+    class OutOfMemoryException : public Exception {
+    public:
+        OutOfMemoryException() {}
+    };
+
 };
 
 #endif//__AUDIO_EXCEPTIONS_H__INCLUDED__

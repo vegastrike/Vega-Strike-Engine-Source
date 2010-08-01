@@ -6,6 +6,8 @@
 #include "SimpleSource.h"
 #include "config.h"
 
+#include "SceneManager.h"
+
 namespace Audio {
 
     SimpleScene::SimpleScene(const std::string &name) throw() :
@@ -21,8 +23,6 @@ namespace Audio {
             (*it)->stopPlaying();
             detach(dynamic_cast<SimpleSource*>(it->get()));
         }
-        for (it = inactiveSources.begin(); it != inactiveSources.end(); ++it)
-            detach(dynamic_cast<SimpleSource*>(it->get()));
     }
 
     void SimpleScene::add(SharedPtr<Source> source) 
@@ -46,13 +46,12 @@ namespace Audio {
     void SimpleScene::notifySourcePlaying(SharedPtr<Source> source, bool playing) 
         throw(Exception)
     {
-        if (playing) {
-            inactiveSources.erase(source);
+        if (playing) 
             activeSources.insert(source);
-        } else {
+        else
             activeSources.erase(source);
-            inactiveSources.insert(source);
-        }
+        
+        SceneManager::getSingleton()->notifySourcePlaying(source, shared_from_this(), playing);
     }
     
     void SimpleScene::attach(SimpleSource *source) 
@@ -65,6 +64,20 @@ namespace Audio {
         throw()
     {
         source->notifySceneAttached(0);
+    }
+    
+    /** Gets an iterator over active sources */ 
+    SimpleScene::SourceIterator SimpleScene::getActiveSources() 
+        throw()
+    {
+        return activeSources.begin();
+    }
+    
+    /** Gets the ending iterator of active sources */
+    SimpleScene::SourceIterator SimpleScene::getActiveSourcesEnd() 
+        throw()
+    {
+        return activeSources.end();
     }
     
 };

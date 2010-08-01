@@ -7,6 +7,7 @@
 #include "config.h"
 
 #include <algorithm>
+#include <iostream>
 
 template<> Audio::CodecRegistry* Singleton<Audio::CodecRegistry>::_singletonInstance = 0;
 
@@ -29,17 +30,26 @@ namespace Audio {
     
     void CodecRegistry::add(Codec* codec, int priority) throw()
     {
-        if (codecPriority.find(codec) != codecPriority.end()) {
+        if (codecPriority.find(codec) == codecPriority.end()) {
             codecPriority[codec] = priority;
             nameCodec[codec->getName()] = codec;
             
+            std::cout << "Registering codec " << codec->getName().c_str();
+            
             const Codec::Extensions *ext = codec->getExtensions();
             if (ext) {
-                for (Codec::Extensions::const_iterator it = ext->begin(); it != ext->end(); ++it) 
+                for (Codec::Extensions::const_iterator it = ext->begin(); it != ext->end(); ++it) {
+                    std::cout << " " << it->c_str();
                     extensionCodecs[*it].insert(codec);
+                }
             } else {
+                std::cout << " as universal";
                 universalCodecs.insert(codec);
             }
+            
+            std::cout << "." << std::endl;
+        } else {
+            std::cout << "Codec " << codec->getName().c_str() << " already registered" << std::endl;
         }
     }
     
@@ -138,6 +148,8 @@ namespace Audio {
     CodecRegistration::CodecRegistration(Codec* _codec, int priority) throw()
         : codec(_codec)
     {
+        if (!CodecRegistry::getSingleton())
+            new CodecRegistry();
         CodecRegistry::getSingleton()->add(codec);
     }
     

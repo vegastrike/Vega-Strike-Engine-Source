@@ -2,6 +2,8 @@
 // C++ Implementation: Audio::OggCodec
 //
 
+#include "config.h"
+
 #ifdef HAVE_OGG
 
 #include "../CodecRegistry.h"

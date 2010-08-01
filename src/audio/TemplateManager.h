@@ -49,7 +49,7 @@ namespace Audio {
     class TemplateManager : public Singleton<TemplateManager>
     {
     private:
-        AutoPtr<TemplateManagerData> data;
+        AutoPtr<__impl::TemplateManagerData> data;
     
     public:
         /** Construct a new manager 
@@ -84,8 +84,45 @@ namespace Audio {
          */
         const std::string& getDefaultDefinitionFile() const throw();
         
-        /** Get a source template by its name */
+        /** Get a source template by its key */
         SharedPtr<SourceTemplate> getSourceTemplate(const std::string &name) throw(Exception);
+        
+        /** Add a manually-created template 
+          * @param name the name portion of the template's key
+          * @param tpl the template to be added
+          * @param perm if true, a strong reference will be held and the template will become
+          *       permanently loaded.
+          * @remarks The key to the newly added template will always be :[name] (empty path),
+          *       denoting dynamically-created templates.
+          * @note Since the manager only holds weak references to templates if perm is not given, 
+          *       you must hold onto a reference at least, or the manager will "forget" you added 
+          *       this resource.
+          * @throws ResourceAlreadyLoadedException, when the key already has an associated template.
+          */
+        void addSourceTemplate(const std::string &name, SharedPtr<SourceTemplate> tpl, bool perm = true) throw(ResourceAlreadyLoadedException);
+    
+        /** Add a manually-created template 
+          * @param path the path portion of the template's key
+          * @param name the name portion of the template's key
+          * @param tpl the template to be added
+          * @param perm if true, a strong reference will be held and the template will become
+          *       permanently loaded.
+          * @remarks The key to the newly added template will always be [path]:[name].
+          *       Using this method is discouraged if collission with filesystem-based templates
+          *       would be possible (pick paths that don't map to file system paths)
+          * @note Since the manager only holds weak references to templates if perm is not given, 
+          *       you must hold onto a reference at least, or the manager will "forget" you added 
+          *       this resource.
+          * @throws ResourceAlreadyLoadedException, when the key already has an associated template.
+          */
+        void addSourceTemplate(const std::string &path, const std::string &name, SharedPtr<SourceTemplate> tpl, bool perm = true) throw(ResourceAlreadyLoadedException);
+    
+    protected:
+    
+        /** Get a source template by its key */
+        SharedPtr<SourceTemplate> loadSourceTemplate(const std::string &name) throw(Exception);
+        
+        
     };
     
 };

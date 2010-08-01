@@ -30,6 +30,9 @@
 #include "in_mouse.h"
 #include "in_kb.h"
 
+#include "audio/SceneManager.h"
+
+
 static unsigned int& getMouseButtonMask()
 {
     static unsigned int mask = 0;
@@ -134,12 +137,33 @@ static FILTER BlurBases()
     static bool blur_bases = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "blur_bases", "true" ) );
     return blur_bases ? BILINEAR : NEAREST;
 }
+
 BaseInterface::Room::BaseVSSprite::BaseVSSprite( const std::string &spritefile, const std::string &ind ) :
     BaseObj( ind )
-    , spr( spritefile.c_str(), BlurBases(), GFXTRUE ) {}
+    , spr( spritefile.c_str(), BlurBases(), GFXTRUE ) 
+{
+}
+
+BaseInterface::Room::BaseVSSprite::~BaseVSSprite()
+{
+    if (soundsource.get() != NULL)
+        BaseUtil::DestroyVideoSoundStream(soundsource, soundscene);
+    spr.ClearTimeSource();
+}
+
 
 BaseInterface::Room::BaseVSMovie::BaseVSMovie( const std::string &moviefile, const std::string &ind ) :
-    BaseVSSprite( ind, VSSprite( AnimatedTexture::CreateVideoTexture( moviefile ), 0, 0, 2, 2 ) ) {}
+    BaseVSSprite( ind, VSSprite( AnimatedTexture::CreateVideoTexture( moviefile ), 0, 0, 2, 2, 0, 0, true ) ) 
+{
+    playing = false;
+    soundscene = "video";
+    if (g_game.sound_enabled) {
+        soundsource = BaseUtil::CreateVideoSoundStream( moviefile, soundscene );
+        spr.SetTimeSource( soundsource );
+    } else {
+        spr.Reset();
+    }
+}
 
 void BaseInterface::Room::BaseVSSprite::SetSprite( const std::string &spritefile )
 {
@@ -165,6 +189,17 @@ void BaseInterface::Room::BaseVSMovie::SetMovie( const std::string &moviefile )
     spr.~VSSprite();
     new (&spr)VSSprite( AnimatedTexture::CreateVideoTexture( moviefile ), x, y, w, h );
     spr.SetRotation( rot );
+    
+    if (soundsource.get() != NULL)
+        BaseUtil::DestroyVideoSoundStream(soundsource, soundscene);
+    soundscene = "video";
+    playing = false;
+    if (g_game.sound_enabled) {
+        soundsource = BaseUtil::CreateVideoSoundStream( moviefile, soundscene );
+        spr.SetTimeSource( soundsource );
+    } else {
+        spr.Reset();
+    }
 }
 
 float BaseInterface::Room::BaseVSMovie::GetTime() const
@@ -186,6 +221,39 @@ void BaseInterface::Room::BaseVSSprite::Draw( BaseInterface *base )
     GFXEnable( TEXTURE0 );
     spr.Draw();
     GFXAlphaTest( ALWAYS, 0 );
+    
+    // Play the associated source if it isn't playing
+    if (soundsource.get() != NULL) {
+        if (!soundsource->isPlaying())
+            soundsource->startPlaying();
+    }
+}
+
+void BaseInterface::Room::BaseVSMovie::Draw( BaseInterface *base )
+{
+    BaseInterface::Room::BaseVSSprite::Draw( base );
+    
+    if (soundsource.get() == NULL) {
+        // If it's not playing, mark as playing, and reset the sprite's animation
+        // (it's not automatic without a time source)
+        if (!playing) {
+            playing = true;
+            spr.Reset();
+        }
+        
+        // If there is no sound source, and the sprite is an animated sprite, and
+        // it's finished, then we must invoke the callback
+        if (!getCallback().empty() && spr.Done()) {
+            RunPython(getCallback().c_str());
+            playing = false;
+        }
+    }
+}
+
+bool BaseInterface::Room::BaseVSSprite::isPlaying() const
+{
+    return soundsource.get() != NULL
+        && soundsource->isPlaying();
 }
 
 void BaseInterface::Room::BaseShip::Draw( BaseInterface *base )
@@ -221,15 +289,14 @@ void BaseInterface::Room::BaseShip::Draw( BaseInterface *base )
         int light = 0;
         GFXCreateLight( light,
                         GFXLight( true,
-                                  GFXColor( 1, 1, 1,
-                                            1 ),
-                                  GFXColor( 1, 1, 1,
-                                            1 ),
-                                  GFXColor( 1, 1, 1,
-                                            1 ), GFXColor( .1, .1, .1, 1 ), GFXColor( 1, 0, 0 ), GFXColor( 1,
-                                                                                                           1,
-                                                                                                           1,
-                                                                                                           0 ), 24 ), true );
+                                  GFXColor( 1, 1, 1, 1 ),
+                                  GFXColor( 1, 1, 1, 1 ),
+                                  GFXColor( 1, 1, 1, 1 ), 
+                                  GFXColor( 0.1, 0.1, 0.1, 1 ), 
+                                  GFXColor( 1, 0, 0 ), 
+                                  GFXColor( 1, 1, 1, 0 ), 
+                                  24 ), 
+                        true );
 
         (un)->DrawNow( final, FLT_MAX );
         GFXDeleteLight( light );
@@ -300,7 +367,7 @@ void BaseInterface::Room::Draw( BaseInterface *base )
 
                     /* draw marker */
                     static string spritefile_marker = vs_config->getVariable( "graphics", "base_locationmarker_sprite", "" );
-                    if ( spritefile_marker.length() ) {
+                    if ( spritefile_marker.length() && links[i]->text.find("XXX") != 0 ) {
                         static VSSprite *spr_marker = new VSSprite( spritefile_marker.c_str() );
                         float wid, hei;
                         spr_marker->GetSize( wid, hei );
@@ -1020,7 +1087,10 @@ BaseInterface::BaseInterface( const char *basefile, Unit *base, Unit *un ) :
     CurrentBase    = this;
     CallComp       = false;
     lastmouseindex = 0;
+    enabledj       = true;
     createdbase    = true;
+    midloop        = false;
+    terminate_scheduled = false;
     createdmusic   = -1;
     caller = un;
     curroom = 0;
@@ -1114,16 +1184,20 @@ void BaseInterface::Room::Comp::Click( BaseInterface *base, float x, float y, in
 
 void BaseInterface::Terminate()
 {
-    Unit *un  = caller.GetUnit();
-    int   cpt = UnitUtil::isPlayerStarship( un );
-    if (un && cpt >= 0) {
-        vector< string >vec;
-        vec.push_back( string() );
-        saveStringList( cpt, mission_key, vec );
+    if (midloop) {
+        terminate_scheduled = true;
+    } else {
+        Unit *un  = caller.GetUnit();
+        int   cpt = UnitUtil::isPlayerStarship( un );
+        if (un && cpt >= 0) {
+            vector< string >vec;
+            vec.push_back( string() );
+            saveStringList( cpt, mission_key, vec );
+        }
+        BaseInterface::CurrentBase = NULL;
+        restore_main_loop();
+        delete this;
     }
-    BaseInterface::CurrentBase = NULL;
-    restore_main_loop();
-    delete this;
 }
 
 extern void SwitchUnits( Unit *ol, Unit *nw );
@@ -1362,6 +1436,9 @@ static void AnimationDraw()
 }
 void BaseInterface::Draw()
 {
+    // Some operations cannot be performed in the middle of a Draw() loop
+    midloop = true;
+    
     GFXColor( 0, 0, 0, 0 );
     SetupViewport();
     StartGUIFrame( GFXTRUE );
@@ -1411,6 +1488,16 @@ void BaseInterface::Draw()
                 un->FreeDockingPort( i );
         Terminate();
     }
+    
+    //Commit audio scene status to renderer
+    if (g_game.sound_enabled)
+        Audio::SceneManager::getSingleton()->commit();
+    
+    // Some operations cannot be performed in the middle of a Draw() loop
+    // If any of them are scheduled for deferred execution, do so now
+    midloop = false;
+    if (terminate_scheduled)
+        Terminate();
 }
 
 void BaseInterface::ProcessKeyboardBuffer()
@@ -1427,3 +1514,7 @@ void BaseInterface::ProcessKeyboardBuffer()
     }
 }
 
+void BaseInterface::setDJEnabled(bool enabled)
+{
+    enabledj = enabled;
+}

@@ -243,6 +243,9 @@ public:
 
     bool seek( float time )
     {
+        if (time < 0)
+            time = 0;
+        
         //Translate float time to frametime
         int64_t targetPTS = int64_t( floor( double(time)*pCodecCtx->time_base.den/pCodecCtx->time_base.num ) );
         if ( (targetPTS >= fbPTS) && (targetPTS < pNextFrameYUV->pts) ) {
@@ -256,8 +259,9 @@ public:
             }
             //frame forward
             try {
-                while (pNextFrameYUV->pts < targetPTS)
+                while (pNextFrameYUV->pts < targetPTS) {
                     nextFrame();
+                }
                 convertFrame();
                 nextFrame();
             }

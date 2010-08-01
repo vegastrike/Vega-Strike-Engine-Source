@@ -44,6 +44,7 @@ typedef struct
     int   music_enabled;
     int   sound_volume;
     int   music_volume;
+    int   max_sound_sources;
     int   warning_level;
     int   capture_mouse;
     float MouseSensitivityX;

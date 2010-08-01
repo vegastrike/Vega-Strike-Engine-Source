@@ -909,9 +909,17 @@ void Music::CleanupMuzak()
 
 void Music::MuzakCycle()
 {
-    if (muzak)
+    if (muzak) {
+        if (BaseInterface::CurrentBase != NULL) {
+            if (!BaseInterface::CurrentBase->isDJEnabled()) {
+                // Bail out... they don't want us running
+                return;
+            }
+        }
+        
         for (int i = 0; i < muzak_count; i++)
             muzak[i].Listen();
+    }
 }
 
 void Music::Stop( int layer )
