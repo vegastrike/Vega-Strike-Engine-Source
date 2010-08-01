@@ -4631,7 +4631,7 @@ bool BaseComputer::showPlayerInfo( const EventCommandId &command, Control *contr
 void prettyPrintFloat( char *buffer, float f, int digitsBefore, int digitsAfter )
 {
     int   bufferPos = 0;
-    if ( !FINITE( f ) ) {
+    if ( !FINITE( f ) || ISNAN( f ) ) {
         buffer[0] = 'n';
         buffer[1] = '/';
         buffer[2] = 'a';
