@@ -702,6 +702,7 @@ void GFXAlphaTest( const enum DEPTHFUNC df, const float ref )
     case GEQUAL:
         tmp = GL_GEQUAL;
         break;
+    default:
     case ALWAYS:
         tmp = GL_ALWAYS;
         break;

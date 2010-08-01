@@ -1256,8 +1256,9 @@ void UpgradingInfo::CompleteTransactionConfirm()
             if ( (_Universe->AccessCockpit()->credits > price) ) {
                 _Universe->AccessCockpit()->credits -= price;
                 un->Upgrade( NewPart, mountoffset, subunitoffset, addmultmode, true, percentage, templ );
-                unsigned int removalindex;
                 if ( ( bas = base.GetUnit() ) ) {
+                    unsigned int removalindex = 0;
+                    bas->GetCargo( part.content, removalindex );
                     bas->RemoveCargo( removalindex, 1, false );
                 }
             }
