@@ -6,25 +6,41 @@
 #ifdef HAVE_OGRE
 #include "OgreDefaultHardwareBufferManager.h"
 
+
 #include "xml_support.h"
 
 #include <limits>
+#include <vector>
 
-using namespace Ogre;
 using namespace std;
+
+// Ogre >= 1.7.0 conflicts with the std namespace, in a very nasty way
+// They define the standard collection types to be different stuff:
+//      a struct containing just a typedef. It's a pain to work with.
+// So we can't "using namespace Ogre"
+
+using Ogre::MeshPtr;
+using Ogre::Vector3;
+using Ogre::Real;
+using Ogre::String;
+
 //Crappy globals
 //NB some of these are not directly used, but are required to
 //instantiate the singletons used in the dlls
-static LogManager *logMgr;
-static Math *mth;
-static MaterialManager *matMgr;
-static SkeletonManager *skelMgr;
-static MeshSerializer *meshSerializer;
-static SkeletonSerializer   *skeletonSerializer;
-static DefaultHardwareBufferManager *bufferManager;
-static MeshManager    *meshMgr;
-static ResourceGroupManager *rgm;
+static Ogre::LogManager *logMgr;
+static Ogre::Math *mth;
+static Ogre::MaterialManager *matMgr;
+static Ogre::SkeletonManager *skelMgr;
+static Ogre::MeshSerializer *meshSerializer;
+static Ogre::SkeletonSerializer   *skeletonSerializer;
+static Ogre::DefaultHardwareBufferManager *bufferManager;
+static Ogre::MeshManager    *meshMgr;
+static Ogre::ResourceGroupManager *rgm;
 static string templatePath;
+
+#if (OGRE_VERSION >= 0x010700)
+static Ogre::LodStrategyManager *lodMgr;
+#endif
 
 static string LoadString( const string &filename )
 {
@@ -111,20 +127,20 @@ static string getMaterialHash( const GFXMaterial &mat,
     static const char hexdigs[] = "0123456789ABCDEF";
     static char tmp[16];
     string ret;
-    for (int i = 0; i < sizeof (mat); i++) {
+    for (size_t i = 0; i < sizeof (mat); i++) {
         ret += hexdigs[( ( (char*) &mat )[i]>>4 )];
         ret += hexdigs[( ( (char*) &mat )[i]&0xF )];
     }
     ret += (reflect ? '1' : '0');
     ret += (lighting ? '1' : '0');
     ret += (cullface ? '1' : '0');
-    sprintf( tmp, "%06UX", (unsigned long) blend_src );
+    sprintf( tmp, "%06X", (unsigned int) blend_src );
     ret += tmp;
-    sprintf( tmp, "%06UX", (unsigned long) blend_dst );
+    sprintf( tmp, "%06X", (unsigned int) blend_dst );
     ret += tmp;
-    sprintf( tmp, "%06UX", *(unsigned long*) &polygon_offset );
+    sprintf( tmp, "%06X", *(unsigned int*) &polygon_offset );
     ret += tmp;
-    sprintf( tmp, "%06UX", *(unsigned long*) &alpha_test );
+    sprintf( tmp, "%06X", *(unsigned int*) &alpha_test );
     ret += tmp;
 
     return ret;
@@ -135,7 +151,7 @@ static string getMaterialHash( const Mesh_vec3f &v )
     static const char hexdigs[] = "0123456789ABCDEF";
     static char tmp[16];
     string ret;
-    for (int i = 0; i < sizeof (v); i++) {
+    for (size_t i = 0; i < sizeof (v); i++) {
         ret += hexdigs[( ( (char*) &v )[i]>>4 )];
         ret += hexdigs[( ( (char*) &v )[i]&0xF )];
     }
@@ -215,17 +231,21 @@ namespace OgreMeshConverter
 {
 void ConverterInit()
 {
-    logMgr  = new LogManager();
+    logMgr  = new Ogre::LogManager();
     logMgr->createLog( "mesher.log" );
-    rgm     = new ResourceGroupManager();
-    mth     = new Math();
-    meshMgr = new MeshManager();
-    matMgr  = new MaterialManager();
+    rgm     = new Ogre::ResourceGroupManager();
+    mth     = new Ogre::Math();
+    meshMgr = new Ogre::MeshManager();
+    matMgr  = new Ogre::MaterialManager();
     matMgr->initialise();
-    skelMgr = new SkeletonManager();
-    meshSerializer     = new MeshSerializer();
-    skeletonSerializer = new SkeletonSerializer();
-    bufferManager = new DefaultHardwareBufferManager();     //needed because we don't have a rendersystem
+    skelMgr = new Ogre::SkeletonManager();
+    meshSerializer     = new Ogre::MeshSerializer();
+    skeletonSerializer = new Ogre::SkeletonSerializer();
+    bufferManager = new Ogre::DefaultHardwareBufferManager();     //needed because we don't have a rendersystem
+
+#if (OGRE_VERSION >= 0x010700)
+    lodMgr  = new Ogre::LodStrategyManager();
+#endif
 }
 
 void ConverterClose()
@@ -254,8 +274,8 @@ void * Init()
 {
     struct outputContext *ctxt = new struct outputContext;
     ctxt->name = "export-mesh-"+getID();
-    ctxt->top  = MeshManager::getSingleton().createManual( ctxt->name,
-                                                           ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
+    ctxt->top  = Ogre::MeshManager::getSingleton().createManual( ctxt->name,
+                                                                 Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
     ctxt->cur_lod_level = 0;
     ctxt->sv_usenorm    = ctxt->sv_usetex = false;
     ctxt->min = ctxt->max = Vector3( 0, 0, 0 );
@@ -318,10 +338,11 @@ void * Init( const char *inputfile, const char *matfile )
     {
         std::ifstream fi;
         fi.open( inputfile, std::ios_base::in|std::ios_base::binary );
-        DataStreamPtr stream( new FileStreamDataStream( String( inputfile ), &fi, false ) );         //Do not free fi
+        Ogre::DataStreamPtr stream( new Ogre::FileStreamDataStream( String( inputfile ), &fi, false ) );         //Do not free fi
 
         ctxt->name = "export-mesh-"+getID();
-        ctxt->top  = MeshManager::getSingleton().createManual( ctxt->name, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
+        ctxt->top  = Ogre::MeshManager::getSingleton().createManual( ctxt->name, 
+                                                                     Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
 
         meshSerializer->importMesh( stream, ctxt->top.getPointer() );
 
@@ -462,10 +483,10 @@ static void SetupBlendTplVars( map< string, string > &vars, int src, int dst )
         blend = "scene_blend alpha_blend";
     else
         blend = "scene_blend $(SCENE_BLEND_SRC) $(SCENE_BLEND_DST=zero)";
-    if ( ( src > sizeof (blendnames)/sizeof (blendnames[0]) )
-        || ( dst > sizeof (blendnames)/sizeof (blendnames[0]) )
-        || (src < 0)
+    if (   (src < 0)
         || (dst < 0)
+        || ( size_t(src) > sizeof(blendnames)/sizeof(blendnames[0]) )
+        || ( size_t(dst) > sizeof(blendnames)/sizeof(blendnames[0]) )
         || ( (srcblend = blendnames[src]) == "?" )
         || ( (dstblend = blendnames[dst]) == "?" ) ) {
         //Oops... must use extended blending
@@ -500,8 +521,8 @@ static string AddMaterial( void *outputcontext, const XML &xml )
         int tex[4] = {-1, -1, -1, -1};
         {
             for (vector< textureholder >::size_type i = 0; i < xml.textures.size(); i++)
-                if ( (xml.textures[i].index >= 0)
-                    && ( xml.textures[i].index < ( sizeof (tex)/sizeof (tex[0]) ) )
+                if (   (xml.textures[i].index >= 0)
+                    && (size_t(xml.textures[i].index) < ( sizeof(tex)/sizeof(tex[0]) ))
                     && (xml.textures[i].type != UNKNOWN)
                     && (xml.textures[i].name.size() > 0) )
                     tex[xml.textures[i].index] = int(i);
@@ -668,7 +689,7 @@ static void AddSharedVertexData( void *outputcontext, const XML &xml, bool texco
     ctxt->sv_usetex  = ctxt->sv_usetex || texcoord;
 }
 
-static VertexData * CreateVertexBuffers( const vector< GFXVertex > &vertices,
+static Ogre::VertexData * CreateVertexBuffers( const vector< GFXVertex > &vertices,
                                          bool texcoord,
                                          bool normals,
                                          Vector3 &min,
@@ -676,11 +697,11 @@ static VertexData * CreateVertexBuffers( const vector< GFXVertex > &vertices,
                                          Real &maxsqr,
                                          vector< unsigned int > *indices = 0 )
 {
-    VertexData *data = new VertexData();
+    Ogre::VertexData *data = new Ogre::VertexData();
     data->vertexCount = vertices.size();
 
-    VertexDeclaration   *decl = data->vertexDeclaration;
-    VertexBufferBinding *bind = data->vertexBufferBinding;
+    Ogre::VertexDeclaration   *decl = data->vertexDeclaration;
+    Ogre::VertexBufferBinding *bind = data->vertexBufferBinding;
 
     //--If we're given indices, prepare a list of used/unused ones--
     vector< bool >used;
@@ -702,30 +723,30 @@ static VertexData * CreateVertexBuffers( const vector< GFXVertex > &vertices,
     size_t offset = 0, ofs_p, ofs_n, ofs_t;
 
     //Position (always)
-    decl->addElement( 0, ofs_p = offset, VET_FLOAT3, VES_POSITION );
-    offset += VertexElement::getTypeSize( VET_FLOAT3 );
+    decl->addElement( 0, ofs_p = offset, Ogre::VET_FLOAT3, Ogre::VES_POSITION );
+    offset += Ogre::VertexElement::getTypeSize( Ogre::VET_FLOAT3 );
     //Normals
     if (normals || true) {
         //Forcing inclusion, because otherwise AutoTangents will fail
-        decl->addElement( 0, ofs_n = offset, VET_FLOAT3, VES_NORMAL );
-        offset += VertexElement::getTypeSize( VET_FLOAT3 );
+        decl->addElement( 0, ofs_n = offset, Ogre::VET_FLOAT3, Ogre::VES_NORMAL );
+        offset += Ogre::VertexElement::getTypeSize( Ogre::VET_FLOAT3 );
     }
     //Texture coordinates
     if (texcoord || true) {
         //Forcing inclusion, because otherwise AutoTangents will fail
-        decl->addElement( 0, ofs_t = offset, VET_FLOAT2, VES_TEXTURE_COORDINATES, 0 );
-        offset += VertexElement::getTypeSize( VET_FLOAT2 );
+        decl->addElement( 0, ofs_t = offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES, 0 );
+        offset += Ogre::VertexElement::getTypeSize( Ogre::VET_FLOAT2 );
     }
     //--Bind--
-    HardwareVertexBufferSharedPtr vbuf = HardwareBufferManager::getSingleton().
+    Ogre::HardwareVertexBufferSharedPtr vbuf = Ogre::HardwareBufferManager::getSingleton().
                                          createVertexBuffer( offset,
                                                              data->vertexCount,
-                                                             HardwareBuffer::HBU_STATIC_WRITE_ONLY,
+                                                             Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY,
                                                              false );
     bind->setBinding( 0, vbuf );
 
     //--Fill it--
-    char *pVert = (char*) ( vbuf->lock( HardwareBuffer::HBL_DISCARD ) );
+    char *pVert = (char*) ( vbuf->lock( Ogre::HardwareBuffer::HBL_DISCARD ) );
     for (size_t i = 0, j = 0; i < vertices.size(); ++i) {
         if (indices && !used[i])
             continue;
@@ -763,22 +784,22 @@ static VertexData * CreateVertexBuffers( const vector< GFXVertex > &vertices,
     return data;
 }
 
-static HardwareIndexBufferSharedPtr CreateIndexBuffer( const vector< unsigned int >indices )
+static Ogre::HardwareIndexBufferSharedPtr CreateIndexBuffer( const vector< unsigned int >indices )
 {
     bool   use32BitIndexes = false;
     size_t i;
     for (i = 0; !use32BitIndexes && i < indices.size(); i++)
         use32BitIndexes = ( indices[i] > (unsigned int) numeric_limits< unsigned short >::max() );
-    HardwareIndexBufferSharedPtr buf = HardwareBufferManager::getSingleton().createIndexBuffer(
-        use32BitIndexes ? HardwareIndexBuffer::IT_32BIT : HardwareIndexBuffer::IT_16BIT,
-        indices.size(), HardwareBuffer::HBU_DYNAMIC, false );
+    Ogre::HardwareIndexBufferSharedPtr buf = Ogre::HardwareBufferManager::getSingleton().createIndexBuffer(
+        use32BitIndexes ? Ogre::HardwareIndexBuffer::IT_32BIT : Ogre::HardwareIndexBuffer::IT_16BIT,
+        indices.size(), Ogre::HardwareBuffer::HBU_DYNAMIC, false );
     if (use32BitIndexes) {
-        unsigned int *p = (unsigned int*) buf->lock( HardwareBuffer::HBL_DISCARD );
+        unsigned int *p = (unsigned int*) buf->lock( Ogre::HardwareBuffer::HBL_DISCARD );
         for (i = 0; i < indices.size(); i++)
             p[i] = (unsigned int) indices[i];
         buf->unlock();
     } else {
-        unsigned short *p = (unsigned short*) buf->lock( HardwareBuffer::HBL_DISCARD );
+        unsigned short *p = (unsigned short*) buf->lock( Ogre::HardwareBuffer::HBL_DISCARD );
         for (i = 0; i < indices.size(); i++)
             p[i] = (unsigned short) indices[i];
         buf->unlock();
@@ -829,11 +850,11 @@ static void AddMesh( void *outputcontext, const XML &xml, const string &matname,
     //---- Primitives ----
     MeshPtr m = ctxt->top;
     if ( xml.lines.size() ) {
-        const int idxPerElement = ( sizeof (xml.lines[0].indexref)/sizeof (xml.lines[0].indexref[0]) );
-        SubMesh  *sm = m->createSubMesh();
+        const size_t idxPerElement = ( sizeof (xml.lines[0].indexref)/sizeof (xml.lines[0].indexref[0]) );
+        Ogre::SubMesh  *sm = m->createSubMesh();
         sm->setMaterialName( matname );
         sm->useSharedVertices     = useSharedVert;
-        sm->operationType         = RenderOperation::OT_LINE_LIST;
+        sm->operationType         = Ogre::RenderOperation::OT_LINE_LIST;
         sm->indexData->indexCount = xml.lines.size()*idxPerElement;
 
         vector< GFXVertex >   vertices;
@@ -851,11 +872,11 @@ static void AddMesh( void *outputcontext, const XML &xml, const string &matname,
         sm->indexData->indexBuffer = CreateIndexBuffer( indices );
     }
     if ( xml.tris.size() ) {
-        const int idxPerElement = ( sizeof (xml.tris[0].indexref)/sizeof (xml.tris[0].indexref[0]) );
-        SubMesh  *sm = m->createSubMesh();
+        const size_t idxPerElement = ( sizeof (xml.tris[0].indexref)/sizeof (xml.tris[0].indexref[0]) );
+        Ogre::SubMesh  *sm = m->createSubMesh();
         sm->setMaterialName( matname );
         sm->useSharedVertices     = useSharedVert;
-        sm->operationType         = RenderOperation::OT_TRIANGLE_LIST;
+        sm->operationType         = Ogre::RenderOperation::OT_TRIANGLE_LIST;
         sm->indexData->indexCount = xml.tris.size()*idxPerElement;
 
         vector< GFXVertex >   vertices;
@@ -874,10 +895,10 @@ static void AddMesh( void *outputcontext, const XML &xml, const string &matname,
     }
     if ( xml.quads.size() ) {
         //No quads... triangulate...
-        SubMesh *sm = m->createSubMesh();
+        Ogre::SubMesh *sm = m->createSubMesh();
         sm->setMaterialName( matname );
         sm->useSharedVertices     = useSharedVert;
-        sm->operationType         = RenderOperation::OT_TRIANGLE_LIST;
+        sm->operationType         = Ogre::RenderOperation::OT_TRIANGLE_LIST;
         sm->indexData->indexCount = xml.quads.size()*3*2;
 
         vector< GFXVertex >   vertices;
@@ -912,10 +933,10 @@ static void AddMesh( void *outputcontext, const XML &xml, const string &matname,
         for (size_t i = 0; i < xml.linestrips.size(); ++i) {
             const strip &s = xml.linestrips[i];
             if ( s.points.size() ) {
-                SubMesh *sm = m->createSubMesh();
+                Ogre::SubMesh *sm = m->createSubMesh();
                 sm->setMaterialName( matname );
                 sm->useSharedVertices     = useSharedVert;
-                sm->operationType         = RenderOperation::OT_LINE_STRIP;
+                sm->operationType         = Ogre::RenderOperation::OT_LINE_STRIP;
                 sm->indexData->indexCount = s.points.size();
 
                 vector< GFXVertex >   vertices;
@@ -942,10 +963,10 @@ static void AddMesh( void *outputcontext, const XML &xml, const string &matname,
         for (size_t i = 0; i < xml.tristrips.size(); ++i) {
             const strip &s = xml.tristrips[i];
             if ( s.points.size() ) {
-                SubMesh *sm = m->createSubMesh();
+                Ogre::SubMesh *sm = m->createSubMesh();
                 sm->setMaterialName( matname );
                 sm->useSharedVertices     = useSharedVert;
-                sm->operationType         = RenderOperation::OT_TRIANGLE_STRIP;
+                sm->operationType         = Ogre::RenderOperation::OT_TRIANGLE_STRIP;
                 sm->indexData->indexCount = s.points.size();
 
                 vector< GFXVertex >   vertices;
@@ -972,10 +993,10 @@ static void AddMesh( void *outputcontext, const XML &xml, const string &matname,
         for (size_t i = 0; i < xml.trifans.size(); ++i) {
             const strip &s = xml.trifans[i];
             if ( s.points.size() ) {
-                SubMesh *sm = m->createSubMesh();
+                Ogre::SubMesh *sm = m->createSubMesh();
                 sm->setMaterialName( matname );
                 sm->useSharedVertices     = useSharedVert;
-                sm->operationType         = RenderOperation::OT_TRIANGLE_FAN;
+                sm->operationType         = Ogre::RenderOperation::OT_TRIANGLE_FAN;
                 sm->indexData->indexCount = s.points.size();
 
                 vector< GFXVertex >   vertices;
@@ -1006,10 +1027,10 @@ static void AddMesh( void *outputcontext, const XML &xml, const string &matname,
                 //...but if we don't care about triangulation (and GL specs don't ever
                 //say that it has to be done some particular way, even if it's common),
                 //then we can simply treat them as triangle strips.
-                SubMesh *sm = m->createSubMesh();
+                Ogre::SubMesh *sm = m->createSubMesh();
                 sm->setMaterialName( matname );
                 sm->useSharedVertices     = useSharedVert;
-                sm->operationType         = RenderOperation::OT_TRIANGLE_STRIP;
+                sm->operationType         = Ogre::RenderOperation::OT_TRIANGLE_STRIP;
                 sm->indexData->indexCount = s.points.size();
 
                 vector< GFXVertex >   vertices;
@@ -1047,22 +1068,22 @@ void Add( void *outputcontext, const XML &memfile )
     AddMesh( outputcontext, memfile, AddMaterial( outputcontext, memfile ), MaterialHasTextures( memfile ), true );
 }
 
-static void AutoOrganiseBuffers( VertexData *data, MeshPtr mesh )
+static void AutoOrganiseBuffers( Ogre::VertexData *data, Ogre::MeshPtr mesh )
 {
 #if (OGRE_VERSION_MAJOR == 1) && (OGRE_VERSION_MINOR < 1)
-    VertexDeclaration *newDcl =
+    Ogre::VertexDeclaration *newDcl =
         data->vertexDeclaration->getAutoOrganisedDeclaration(
             mesh->hasSkeleton() );
 #else
-    VertexDeclaration *newDcl =
+    Ogre::VertexDeclaration *newDcl =
         data->vertexDeclaration->getAutoOrganisedDeclaration(
             mesh->hasSkeleton(), mesh->hasVertexAnimation() || (mesh->getPoseCount() > 0) );
 #endif
     if ( *newDcl != *(data->vertexDeclaration) ) {
         //Usages don't matter here since we're onlly exporting
-        BufferUsageList bufferUsages;
+        Ogre::BufferUsageList bufferUsages;
         for (size_t u = 0; u <= newDcl->getMaxSource(); ++u)
-            bufferUsages.push_back( HardwareBuffer::HBU_STATIC_WRITE_ONLY );
+            bufferUsages.push_back( Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY );
         data->reorganiseBuffers( newDcl, bufferUsages );
     }
 }
@@ -1075,10 +1096,10 @@ void Optimize( void *outputcontext )
     if (newMesh->sharedVertexData)
         AutoOrganiseBuffers( newMesh->sharedVertexData, newMesh );
     //Dedicated geometry
-    Mesh::SubMeshIterator smIt = newMesh->getSubMeshIterator();
+    Ogre::Mesh::SubMeshIterator smIt = newMesh->getSubMeshIterator();
     unsigned short idx = 0;
     while ( smIt.hasMoreElements() ) {
-        SubMesh *sm = smIt.getNext();
+        Ogre::SubMesh *sm = smIt.getNext();
         if (!sm->useSharedVertices)
             AutoOrganiseBuffers( sm->vertexData, newMesh );
     }
@@ -1091,12 +1112,23 @@ void AutoLOD( void *outputcontext, bool force, int numLod, float reductionFactor
     if ( force || (newMesh->getNumLodLevels() <= 1) ) {
         if (newMesh->getNumLodLevels() <= 1)
             newMesh->removeLodLevels();
-        const ProgressiveMesh::VertexReductionQuota quota = ProgressiveMesh::VRQ_PROPORTIONAL;
+        const Ogre::ProgressiveMesh::VertexReductionQuota quota = Ogre::ProgressiveMesh::VRQ_PROPORTIONAL;
         const Real reduction  = Real( 1-reductionFactor );
-        const Real distFactor = ( (reduction > 0.00001) ? 1/reduction : 1 );
-        Mesh::LodDistanceList distanceList;
-
+        
         Real currDist = refDistance;
+        
+    #if (OGRE_VERSION >= 0x010700)
+        Ogre::Mesh::LodValueList distanceList;
+
+        // pixel area is squared length, and length is proportional to triangle count
+        const Real distFactor = reductionFactor * reductionFactor; 
+        newMesh->setLodStrategy(Ogre::LodStrategyManager::getSingletonPtr()->
+            getStrategy( "PixelCount" ) );
+    #else
+        Ogre::Mesh::LodDistanceList distanceList;
+        const Real distFactor = ( (reduction > 0.00001) ? 1/reduction : 1 );
+    #endif
+
         for (int iLod = 0; iLod < numLod; ++iLod, currDist *= distFactor)
             distanceList.push_back( currDist );
         newMesh->generateLodLevels( distanceList, quota, reduction );
@@ -1117,18 +1149,18 @@ void DoneMeshes( void *outputcontext )
                                                            ctxt->max,
                                                            ctxt->maxsqr );
     //Set bounds
-    const AxisAlignedBox &currBox = m->getBounds();
+    const Ogre::AxisAlignedBox &currBox = m->getBounds();
     Real currRadius = m->getBoundingSphereRadius();
     if ( currBox.isNull() ) {
         //do not pad the bounding box
-        m->_setBounds( AxisAlignedBox( ctxt->min, ctxt->max ), false );
-        m->_setBoundingSphereRadius( Math::Sqrt( ctxt->maxsqr ) );
+        m->_setBounds( Ogre::AxisAlignedBox( ctxt->min, ctxt->max ), false );
+        m->_setBoundingSphereRadius( Ogre::Math::Sqrt( ctxt->maxsqr ) );
     } else {
-        AxisAlignedBox newBox( ctxt->min, ctxt->max );
+        Ogre::AxisAlignedBox newBox( ctxt->min, ctxt->max );
         newBox.merge( currBox );
         //do not pad the bounding box
         m->_setBounds( newBox, false );
-        m->_setBoundingSphereRadius( std::max( Math::Sqrt( ctxt->maxsqr ), currRadius ) );
+        m->_setBoundingSphereRadius( std::max( Ogre::Math::Sqrt( ctxt->maxsqr ), currRadius ) );
     }
 }
 
@@ -1141,7 +1173,12 @@ void AutoEdgeList( void *outputcontext )
 void AutoTangents( void *outputcontext )
 {
     struct outputContext *ctxt = (struct outputContext*) outputcontext;
-    Ogre::VertexElementSemantic oves;
+    
+    Ogre::VertexElementSemantic oves
+    #if (OGRE_VERSION >= 0x010700)
+        = Ogre::VES_TANGENT;
+    #endif
+    
     unsigned short src, dest;
     ctxt->top->suggestTangentVectorBuildParams( oves, src, dest );
     ctxt->top->buildTangentVectors( oves, src, dest );

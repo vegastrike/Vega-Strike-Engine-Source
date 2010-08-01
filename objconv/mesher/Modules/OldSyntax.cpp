@@ -69,14 +69,14 @@ public:
 					string inf,outf,op;
 					switch(mMode[0]) {
 					case 'o': inf = "Wavefront"; break;
-					case 'm': inf = "OgreMesh"; break;
+					case 'm': inf = "Ogre"; break;
 					case 'b': inf = "BFXM"; break;
 					case 'x': inf = "XMesh"; break;
 					default:  cerr << "Error: unknown input format" << endl;
 					}
 					switch(mMode[1]) {
 					case 'o': outf = "Wavefront"; break;
-					case 'm': outf = "OgreMesh"; break;
+					case 'm': outf = "Ogre"; break;
 					case 'b': outf = "BFXM"; break;
 					case 'x': outf = "XMesh"; break;
 					default:  cerr << "Error: unknown output format" << endl;

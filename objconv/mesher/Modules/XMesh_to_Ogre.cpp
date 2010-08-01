@@ -3,6 +3,8 @@
 #include "../from_BFXM.h"
 #include "../to_OgreMesh.h"
 
+#ifdef HAVE_OGRE
+
 namespace Converter {
 
 	class XMeshToOgreImpl : public ConversionImpl
@@ -52,6 +54,7 @@ namespace Converter {
 					OgreMeshConverter::DoneMeshes(data);
 					OgreMeshConverter::Dump(data, output.c_str(), mtl.c_str());
 					OgreMeshConverter::ConverterClose();
+                    return RC_OK;
 				} else {
 					return RC_NOT_IMPLEMENTED;
 				}
@@ -63,14 +66,15 @@ namespace Converter {
 		virtual void conversionHelp(const std::string &inputFormat, const std::string &outputFormat, const std::string &opCode) const
 		{
 			if (  (inputFormat.empty() || inputFormat == "BFXM")
-				&&(outputFormat.empty()|| outputFormat== "Wavefront")
-				&&(opCode.empty() || (opCode == "create"))  )
+				&&(outputFormat.empty()|| outputFormat== "Ogre")
+				&&(opCode.empty() || (opCode == "create") || (opCode == "append") || (opCode == "optimize"))  )
 			{
-				std::cout << "BFXM -> Wavefront\n"
-					 << "\tSupported operations: create\n"
-					 << "\nNotes: Wavefront files usually come in pairs, with an .obj and a .mtl\n"
-					 << "\tfile. So, two files will be created: the output file, and another with\n"
-					 << "\tthe same name but .mtl extension.\n"
+				std::cout << "BFXM -> Ogre\n"
+					 << "\tSupported operations: create, append, optimize\n"
+					 << "\nNotes: create and append will work as usual.\n"
+					 << "\tThey will produce a .mesh and .material file.\n"
+					 << "\toptimize will take the output and optimize it,\n"
+					 << "\tignoring its input.\n"
 					 << std::endl;
 			}
 		}
@@ -80,3 +84,5 @@ namespace Converter {
 	ConversionImplDeclaration<XMeshToOgreImpl> my_converter_declaration;
 
 }
+
+#endif

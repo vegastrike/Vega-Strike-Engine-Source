@@ -16,6 +16,7 @@
 #cmakedefine HAVE_PYTHON 1
 #cmakedefine _GNU_SOURCE 1
 #cmakedefine HAVE_OGG 1
+#cmakedefine HAVE_OGRE 1
 #cmakedefine HAVE_SDL 1
 #cmakedefine SDL_WINDOWING 1
 #cmakedefine HAVE_AL 1
