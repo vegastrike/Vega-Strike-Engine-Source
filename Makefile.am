@@ -1221,4 +1221,4 @@ headers:
 .PHONY: clean-local
 clean-local:
 	rm -f `find . -name '*.h.gch'`
-noinst_HEADERS = OpenALRenderer.h src/gfx/vid_file.h
+noinst_HEADERS = src/gfx/vid_file.h
