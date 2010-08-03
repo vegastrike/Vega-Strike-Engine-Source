@@ -1,9 +1,10 @@
-#include <Ogre.h>
-#define HAVE_OGRE 1
-
-#include "to_OgreMesh.h"
+#include "config.h"
 
 #ifdef HAVE_OGRE
+
+#include <Ogre.h>
+#include "to_OgreMesh.h"
+
 #include "OgreDefaultHardwareBufferManager.h"
 
 
@@ -1174,10 +1175,11 @@ void AutoTangents( void *outputcontext )
 {
     struct outputContext *ctxt = (struct outputContext*) outputcontext;
     
-    Ogre::VertexElementSemantic oves
-    #if (OGRE_VERSION >= 0x010700)
-        = Ogre::VES_TANGENT;
-    #endif
+    Ogre::VertexElementSemantic oves;
+    
+#if (OGRE_VERSION >= 0x010700)
+    oves = Ogre::VES_TANGENT;
+#endif
     
     unsigned short src, dest;
     ctxt->top->suggestTangentVectorBuildParams( oves, src, dest );
