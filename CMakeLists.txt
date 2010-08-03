@@ -370,7 +370,6 @@ SET(LIBAUDIO_SOURCES src/audio/CodecRegistry.cpp
                      src/audio/TemplateManager.cpp
                      src/audio/test.cpp
                      src/audio/utils.cpp
-                     src/audio/CodecRegistry.cpp
                      src/audio/codecs/Codec.cpp
                      src/audio/codecs/FFCodec.cpp
                      src/audio/codecs/FFStream.cpp
