@@ -101,8 +101,10 @@ public:
                             BaseInterface::Room::BaseVSMovie *movie = 
                                 dynamic_cast< BaseInterface::Room::BaseVSMovie* > (room->objs[i]);
                             
-                            if (!movie->getCallback().empty())
+                            if (!movie->getCallback().empty()) {
                                 RunPython(movie->getCallback().c_str());
+                                break;
+                            }
                         }
                     }
                 }
