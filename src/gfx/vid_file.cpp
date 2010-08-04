@@ -19,17 +19,6 @@
 #endif
 #include <sys/types.h>
 
-//<<<<<<< .mine
-//#ifdef _WIN32
-//#define offset_t xoffset_t
-//#endif
-//=======
-//#ifdef _WIN32
-//#define offset_t (xoffset_t)
-//#endif
-//>>>>>>> .r12720
-//#include "ffmpeg_init.h"
-
 /*
  * FOLLOWING CODE IS ONLY INCLUDED IF YOU HAVE FFMPEG
  * ********************************************
@@ -71,6 +60,7 @@ private:
 
     uint64_t    fbPTS;
     uint64_t    sizePTS;
+    uint64_t    prevPTS;
 
     void convertFrame()
     {
@@ -84,7 +74,11 @@ private:
             sws_scale( pSWSCtx, pNextFrameYUV->data, pNextFrameYUV->linesize, 0,
                        pCodecCtx->height, pFrameRGB->data, pFrameRGB->linesize );
 #endif
+            prevPTS = fbPTS;
             fbPTS = pNextFrameYUV->pts;
+            
+            if (prevPTS > fbPTS)
+                prevPTS = fbPTS;
 
             std::swap( pNextFrameYUV, pFrameYUV );
         }
@@ -233,7 +227,7 @@ public:
         frameBufferStride = pFrameRGB->linesize[0];
 
         //Initialize timebase counter
-        fbPTS   = pFrameYUV->pts = 0;
+        fbPTS = prevPTS = pFrameYUV->pts = 0;
 
 #ifndef DEPRECATED_IMG_CONVERT
         pSWSCtx = sws_getContext( pCodecCtx->width, pCodecCtx->height, pCodecCtx->pix_fmt,
@@ -248,13 +242,19 @@ public:
         
         //Translate float time to frametime
         int64_t targetPTS = int64_t( floor( double(time)*pCodecCtx->time_base.den/pCodecCtx->time_base.num ) );
-        if ( (targetPTS >= fbPTS) && (targetPTS < pNextFrameYUV->pts) ) {
+        if ( (targetPTS >= prevPTS) && (targetPTS < pNextFrameYUV->pts) ) {
             //same frame
             return false;
         } else {
             if (targetPTS < fbPTS) {
                 //frame backwards
-                av_seek_frame( pFormatCtx, videoStreamIndex, targetPTS, AVSEEK_FLAG_BACKWARD );
+                int64_t backPTS = targetPTS - 1 - pCodecCtx->time_base.den/pCodecCtx->time_base.num/2;
+                if (backPTS < 0)
+                    backPTS = 0;
+                    
+                fprintf(stderr, "Seeking hard to %ld\n", prevPTS);
+                av_seek_frame( pFormatCtx, videoStreamIndex, backPTS, AVSEEK_FLAG_BACKWARD );
+                
                 nextFrame();
             }
             //frame forward
@@ -263,6 +263,7 @@ public:
                     nextFrame();
                 }
                 convertFrame();
+                fprintf(stderr, "Seeked to %ld\n", pNextFrameYUV->pts);
                 nextFrame();
             }
             catch (VidFile::EndOfStreamException e) {
