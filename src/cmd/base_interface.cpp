@@ -187,7 +187,7 @@ void BaseInterface::Room::BaseVSMovie::SetMovie( const std::string &moviefile )
 
     //See notes above
     spr.~VSSprite();
-    new (&spr)VSSprite( AnimatedTexture::CreateVideoTexture( moviefile ), x, y, w, h );
+    new (&spr)VSSprite( AnimatedTexture::CreateVideoTexture( moviefile ), x, y, w, h, 0, 0, true );
     spr.SetRotation( rot );
     
     if (soundsource.get() != NULL)
@@ -231,8 +231,6 @@ void BaseInterface::Room::BaseVSSprite::Draw( BaseInterface *base )
 
 void BaseInterface::Room::BaseVSMovie::Draw( BaseInterface *base )
 {
-    BaseInterface::Room::BaseVSSprite::Draw( base );
-    
     if (soundsource.get() == NULL) {
         // If it's not playing, mark as playing, and reset the sprite's animation
         // (it's not automatic without a time source)
@@ -240,7 +238,11 @@ void BaseInterface::Room::BaseVSMovie::Draw( BaseInterface *base )
             playing = true;
             spr.Reset();
         }
-        
+    }
+    
+    BaseInterface::Room::BaseVSSprite::Draw( base );
+    
+    if (soundsource.get() == NULL) {
         // If there is no sound source, and the sprite is an animated sprite, and
         // it's finished, then we must invoke the callback
         if (!getCallback().empty() && spr.Done()) {

@@ -56,7 +56,8 @@ public: EndOfStreamException() {}
         explicit EndOfStreamException( const std::string &message ) : Exception( message ) {}
     };
 
-public: VidFile() throw ();
+public: 
+    VidFile() throw ();
     ~VidFile();
 
     bool isOpen() const throw ();

@@ -226,8 +226,11 @@ public:
         frameBufferSize   = pFrameRGB->linesize[0]*height;
         frameBufferStride = pFrameRGB->linesize[0];
 
-        //Initialize timebase counter
-        fbPTS = prevPTS = pFrameYUV->pts = 0;
+        //Initialize timebase counters
+        prevPTS = 
+        fbPTS = 
+        pFrameYUV->pts = 
+        pNextFrameYUV->pts = 0;
 
 #ifndef DEPRECATED_IMG_CONVERT
         pSWSCtx = sws_getContext( pCodecCtx->width, pCodecCtx->height, pCodecCtx->pix_fmt,
@@ -252,18 +255,19 @@ public:
                 if (backPTS < 0)
                     backPTS = 0;
                     
-                fprintf(stderr, "Seeking hard to %ld\n", prevPTS);
                 av_seek_frame( pFormatCtx, videoStreamIndex, backPTS, AVSEEK_FLAG_BACKWARD );
                 
+                prevPTS = backPTS;
                 nextFrame();
             }
             //frame forward
             try {
                 while (pNextFrameYUV->pts < targetPTS) {
+                    prevPTS = pNextFrameYUV->pts;
                     nextFrame();
+                    fprintf(stderr, "skipping to %ld (at %ld-%ld)\n", targetPTS, prevPTS, pNextFrameYUV->pts);
                 }
                 convertFrame();
-                fprintf(stderr, "Seeked to %ld\n", pNextFrameYUV->pts);
                 nextFrame();
             }
             catch (VidFile::EndOfStreamException e) {
