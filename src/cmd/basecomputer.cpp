@@ -2208,9 +2208,7 @@ void BaseComputer::updateTransactionControlsForSelection( TransactionList *tlist
     string descString;
     char   tempString[2048];
     Unit  *baseUnit = m_base.GetUnit();
-    if (tlist->transaction == ACCEPT_MISSION) {
-        descString = item.description;
-    } else {
+    if (tlist->transaction != ACCEPT_MISSION) {
         //Do the money.
         switch (tlist->transaction)
         {
