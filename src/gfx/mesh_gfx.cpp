@@ -11,8 +11,8 @@
 #include "gfx/technique.h"
 #include "mesh_xml.h"
 #include "gldrv/gl_globals.h"
-#if defined (CG_SUPPORT)
 #include "gldrv/gl_light.h"
+#if defined (CG_SUPPORT)
 #include "cg_global.h"
 #endif
 #include "universe_util.h"
@@ -1062,8 +1062,17 @@ void Mesh::activateTextureUnit( const Technique::Pass::TextureUnit &tu, bool def
 
 void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr )
 {
-    const Technique::Pass &pass = technique->getPass( whichpass );
+    if (!technique->isCompiled(GFXGetProgramVersion())) {
+        try {
+            technique->compile();
+        }
+        catch (Exception &e) {
+            VSFileSystem::vs_dprintf(1, "Technique recompilation failed: %s\n", e.what());
+        }
+    }
 
+    const Technique::Pass &pass = technique->getPass( whichpass );
+    
     //First of all, decide zwrite, so we can skip the pass if !zwrite && !cwrite
     bool zwrite;
     if (whichdrawqueue == MESH_SPECIAL_FX_ONLY) {
@@ -1294,7 +1303,7 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
         //but... WTH... nothing is thread safe in VS.
         //Also: Be careful with reentrancy... right now, this section is not reentrant.
         static vector< int >lights;
-        int numGlobalLights   = 0;
+        int numGlobalLights   = _GLLightsEnabled;
         MeshDrawContext    &c = cur_draw_queue[zsort ? indices[i] : i];
         if (c.mesh_seq == whichdrawqueue) {
             lights.clear();
@@ -1332,9 +1341,11 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
             }
             for (size_t iter = 0, lightnum = 0, nlights = lights.size()+numGlobalLights;
                  (iter < maxiter) && ( (pass.perLightIteration == 0 && lightnum == 0) || (lightnum < nlights) );
-                 ++iter, lightnum += nlights) {
+                 ++iter, lightnum += nlights) 
+            {
                 //Setup transform and lights
                 int npasslights = std::max( 0, maxlights-(lightnum ? 0 : numGlobalLights) );
+                
                 GFXLoadIdentity( MODEL );
                 if (lightnum > 0) {
                     GFXPushGlobalEffects();
@@ -1342,7 +1353,6 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
                 }
                 if ( (lightnum+npasslights) > lights.size() )
                     GFXPickLights( lights.begin()+lightnum, lights.end() );
-
                 else
                     GFXPickLights( lights.begin()+lightnum, lights.begin()+lightnum+npasslights );
                 GFXLoadMatrixModel( c.mat );

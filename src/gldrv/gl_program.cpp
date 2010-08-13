@@ -7,8 +7,10 @@
 #include <map>
 
 typedef std::map< std::pair< std::string, std::string >, int >ProgramCache;
+typedef std::map< int, std::pair< std::string, std::string > >ProgramICache;
 
 static ProgramCache programCache;
+static ProgramICache programICache;
 
 static ProgramCache::key_type cacheKey( const std::string &vp, const std::string &fp )
 {
@@ -125,7 +127,9 @@ int GFXCreateProgram( const char *vprogram, const char *fprogram )
     ProgramCache::const_iterator it = programCache.find( key );
     if ( it != programCache.end() )
         return it->second;
-    return programCache[key] = GFXCreateProgramNoCache( vprogram, fprogram );
+    int rv = programCache[key] = GFXCreateProgramNoCache( vprogram, fprogram );
+    programICache[rv] = key;
+    return rv;
 }
 
 int GFXCreateProgram( char *vprogram, char *fprogram )
@@ -133,7 +137,25 @@ int GFXCreateProgram( char *vprogram, char *fprogram )
     return GFXCreateProgram( (const char*) vprogram, (const char*) fprogram );
 }
 
+void GFXDestroyProgram( int program )
+{
+    // Find program
+    ProgramICache::iterator it = programICache.find( program );
+    if (it != programICache.end()) {
+        /*
+        if (glDeleteProgram_p)
+            glDeleteProgram_p( program );
+        */
+        // FIXME: Real problem here with program leakage, 
+        //      but cannot destroy like this, brings all kind of issues
+        //      since the caller may not hold the only reference.
+        programCache.erase(it->second);
+        programICache.erase(it);
+    }
+}
+
 static int  programChanged = false;
+static int  programVersion = 0;
 static int  defaultprog    = 0;
 static int  lowfiprog = 0;
 static int  hifiprog  = 0;
@@ -172,6 +194,11 @@ int getDefaultProgram()
 
 void GFXReloadDefaultShader()
 {
+    VSFileSystem::vs_fprintf(stderr, "Reloading all shaders\n");
+    
+    // Increasing the timestamp makes all programs elsewhere recompile
+    ++programVersion;
+    
     bool islow = (lowfiprog == defaultprog);
     if (glDeleteProgram_p && defaultprog) {
         glDeleteProgram_p( lowfiprog );
@@ -441,5 +468,10 @@ int GFXNamedShaderConstant( char *progID, const char *name )
     if (progID)
         programname = programCache[cacheKey( progID, progID )];
     return GFXNamedShaderConstant( programname, name );
+}
+
+int GFXGetProgramVersion()
+{
+    return programVersion;
 }
 

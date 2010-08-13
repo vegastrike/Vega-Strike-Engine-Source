@@ -239,10 +239,12 @@ static void parseFloat4( const std::string &s, float value[4] )
 {
     string::size_type ini = 0, end;
     int i = 0;
-    while (ini != string::npos) {
+    while (i < 4 && ini != string::npos) {
         value[i++] = parseFloat( s.substr( ini, end = s.find_first_of( ',', ini ) ) );
         ini = ( (end == string::npos) ? end : (end+1) );
     }
+    if (i >= 4 && ini != string::npos)
+        VSFileSystem::vs_dprintf(1, "WARNING: invalid float4: %s\n", s.c_str());
     while (i < 4)
         value[i++] = 0;
 }
@@ -293,7 +295,8 @@ void Technique::Pass::addTextureUnit( const string &source,
     string::size_type ssep = string::npos, dsep = string::npos;
     newTU.sourceType = parseSourceType( source, ssep );
     newTU.defaultType     = parseSourceType( deflt, dsep );
-    newTU.targetIndex     = target;
+    newTU.targetIndex     = 
+    newTU.origTargetIndex = target;
     newTU.targetParamName = paramName;
     newTU.targetParamId   = -1;
     newTU.texKind = texKind;
@@ -358,46 +361,70 @@ void Technique::Pass::addShaderParam( const string &name, ShaderParam::Semantic 
 void Technique::Pass::compile()
 {
     if (type == ShaderPass) {
-        int prog = program;         //BEGIN TRANSACTION
+        int prog = program; // BEGIN TRANSACTION
+
+        if (prog != 0 && programVersion != GFXGetProgramVersion()) {
+            GFXDestroyProgram(program);
+            prog = 0;
+        }
+
         if (prog == 0) {
             prog = GFXCreateProgram( vertexProgram.c_str(), fragmentProgram.c_str() );
-            if (prog == 0) throw ProgramCompileError(
+            if (prog == 0) 
+                throw ProgramCompileError(
                     "Error compiling program vp:\""+vertexProgram
                     +"\" fp:\""+fragmentProgram+"\"" );
+            else
+                VSFileSystem::vs_dprintf( 1, "Successfully compiled and linked program \"%s+%s\"\n",
+                                          vertexProgram.c_str(), fragmentProgram.c_str() );
         }
+        
         for (ShaderParamList::iterator it = shaderParams.begin(); it != shaderParams.end(); ++it) {
             it->id = GFXNamedShaderConstant( prog, it->name.c_str() );
-            if (it->id < 0 && !it->optional) throw ProgramCompileError( "Cannot resolve shader constant \""+it->name+"\"" );
+            if (it->id < 0) {
+                if (!it->optional) 
+                    throw ProgramCompileError( "Cannot resolve shader constant \""+it->name+"\"" );
+                else
+                    VSFileSystem::vs_dprintf( 1, "Cannot resolve <<optional>> shader constant \"%s\" in program \"%s+%s\"\n", 
+                                              it->name.c_str(), vertexProgram.c_str(), fragmentProgram.c_str() );
+            }
         }
         int lastTU = -1;
         for (TextureUnitList::iterator tit = textureUnits.begin(); tit != textureUnits.end(); ++tit) {
             if (tit->sourceType == TextureUnit::File) {
+                // Yep, we don't want to reload textures
                 if (tit->texture.get() == 0) {
                     tit->texture.reset( new Texture( tit->sourcePath.c_str() ) );
                     if ( !tit->texture->LoadSuccess() ) throw InvalidParameters(
                             "Cannot load texture file \""+tit->sourcePath+"\"" );
                 }
             } else if (tit->defaultType == TextureUnit::File) {
+                // Yep, we don't want to reload textures
                 if (tit->texture.get() == 0) {
                     tit->texture.reset( new Texture( tit->defaultPath.c_str() ) );
                     if ( !tit->texture->LoadSuccess() ) throw InvalidParameters(
                             "Cannot load texture file \""+tit->defaultPath+"\"" );
                 }
             }
-            if (!tit->targetParamName.empty() && tit->targetParamId < 0) {
+            if (!tit->targetParamName.empty()) {
                 tit->targetParamId = GFXNamedShaderConstant( prog, tit->targetParamName.c_str() );
                 if (tit->targetParamId < 0) {
-                    if (tit->targetIndex >= 0)
+                    if (tit->origTargetIndex >= 0)
                         throw ProgramCompileError(
                             "Cannot resolve shader constant \""+tit->targetParamName+"\"" );
+                    else
+                        tit->targetIndex = -1;
                 } else {
-                    if (tit->targetIndex < 0)
+                    if (tit->origTargetIndex < 0)
                         tit->targetIndex = lastTU+1;
                     lastTU = std::max( tit->targetIndex, lastTU );
                 }
             }
         }
-        program = prog;         //COMMIT ;)
+        
+        // COMMIT ;-)
+        program = prog;         
+        programVersion = GFXGetProgramVersion();
     }
 }
 
@@ -407,9 +434,16 @@ bool Technique::Pass::isCompiled() const
     return (type != ShaderPass) || (program != 0);
 }
 
+/** Return whether the pass has been compiled or not with a matching program version */
+bool Technique::Pass::isCompiled(int programVersion) const
+{
+    return (type != ShaderPass) || (program != 0 && this->programVersion == programVersion);
+}
+
 Technique::Technique( const string &nam ) :
     name( nam )
     , compiled( false )
+    , programVersion( 0 )
 {
     static string passTag( "pass" );
     static string techniqueTag( "technique" );
@@ -452,9 +486,9 @@ Technique::Technique( const string &nam ) :
                 passes.resize( passes.size()+1 );
                 Pass &pass = passes.back();
 
-                pass.type = parsePassType( el->getAttributeValue( "type", "" ) );
-                pass.colorWrite = parseBool( el->getAttributeValue( "cwrite", "true" ) );
-                pass.zWrite = parseTristate( el->getAttributeValue( "zwrite", "auto" ) );
+                pass.type              = parsePassType( el->getAttributeValue( "type", "" ) );
+                pass.colorWrite        = parseBool( el->getAttributeValue( "cwrite", "true" ) );
+                pass.zWrite            = parseTristate( el->getAttributeValue( "zwrite", "auto" ) );
                 pass.perLightIteration = parseIteration( el->getAttributeValue( "iteration", "once" ) );
                 pass.maxIterations     = parseInt( el->getAttributeValue( "maxiterations", "0" ) );
                 pass.blendMode         = parseBlendMode( el->getAttributeValue( "blend", "default" ) );
@@ -491,6 +525,9 @@ Technique::Technique( const string &nam ) :
                                 el->getAttributeValue( "default", "" ),
                                 el->getAttributeValue( "name", "" ),
                                 parseTexKind( el->getAttributeValue( "kind", "" ) ) );
+                            VSFileSystem::vs_dprintf(2, "Added texture unit #%d \"%s\"\n",
+                                                     pass.getNumTextureUnits(),
+                                                     el->getAttributeValue( "name","" ).c_str());
                         } else if (el->tagName() == paramTag) {
                             float value[4];
                             parseFloat4( el->getAttributeValue( "value", "" ), value );
@@ -498,11 +535,21 @@ Technique::Technique( const string &nam ) :
                                 el->getAttributeValue( "name", "" ),
                                 value,
                                 parseBool( el->getAttributeValue( "optional", "false" ) ) );
+                            VSFileSystem::vs_dprintf(2, "Added constant #%d \"%s\" with value (%.2f,%.2f,%.2f,%.2f) as %s\n",
+                                                     pass.getNumShaderParams(),
+                                                     el->getAttributeValue( "name","" ).c_str(),
+                                                     value[0], value[1], value[2], value[3],
+                                                     (parseBool( el->getAttributeValue( "optional", "false" ) ) ? "optional" : "required"));
                         } else if (el->tagName() == autoParamTag) {
                             pass.addShaderParam(
                                 el->getAttributeValue( "name", "" ),
                                 parseAutoParamSemantic( el->getAttributeValue( "semantic", "" ) ),
                                 parseBool( el->getAttributeValue( "optional", "false" ) ) );
+                            VSFileSystem::vs_dprintf(2, "Added param #%d \"%s\" with semantic %s as %s\n",
+                                                     pass.getNumShaderParams(),
+                                                     el->getAttributeValue( "name","" ).c_str(),
+                                                     el->getAttributeValue( "semantic", "" ).c_str(),
+                                                     (parseBool( el->getAttributeValue( "optional", "false" ) ) ? "optional" : "required"));
                         } else {
                             //TODO: Warn about unrecognized (hence ignored) tag
                         }
@@ -528,10 +575,11 @@ Technique::~Technique()
 
 void Technique::compile()
 {
-    if (!compiled) {
+    if (!compiled || (GFXGetProgramVersion() != programVersion)) {
         for (PassList::iterator it = passes.begin(); it != passes.end(); ++it)
             it->compile();
         compiled = true;
+        programVersion = GFXGetProgramVersion();
     }
 }
 

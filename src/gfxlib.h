@@ -451,6 +451,7 @@ enum GFXTEXTURECOORDMODE
 void GFXTextureCoordGenMode( int stage, GFXTEXTURECOORDMODE tex, const float params[4], const float paramt[4] );
 
 int GFXCreateProgram( const char *vertex, const char *fragment );
+void GFXDestroyProgram( int program );
 //program created if necessary and active
 int GFXActivateShader( const char *program = NULL /*null for default prog*/ );
 int GFXActivateShader( int program );
@@ -471,5 +472,6 @@ bool GFXDefaultShaderSupported();
 void GFXReloadDefaultShader();
 void GFXUploadLightState( int max_light_location, int active_light_array, int apparent_light_size_array, bool shader );
 bool GFXShaderReloaded();
+int GFXGetProgramVersion();
 #endif
 
