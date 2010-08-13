@@ -311,6 +311,7 @@ typedef struct
     char smooth_shade;
     int  max_texture_dimension;
     int  max_movie_dimension;
+    bool pot_video_textures;
     bool s3tc;
     bool ext_clamp_to_edge;
     bool ext_clamp_to_border;

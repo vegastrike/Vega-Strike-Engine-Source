@@ -414,7 +414,7 @@ void AnimatedTexture::LoadVideoSource( VSFileSystem::VSFile &f )
 
     try {
         vidSource     = new::VidFile();
-        vidSource->open( wrapper_file_path, gl_options.max_movie_dimension );
+        vidSource->open( wrapper_file_path, gl_options.max_movie_dimension, gl_options.pot_video_textures );
 
         physicsactive = vidSource->getDuration();
         timeperframe  = 1.0/vidSource->getFrameRate();

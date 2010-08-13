@@ -21,6 +21,7 @@
 #define ARRAY_LENGTH( a ) ( sizeof (a)/sizeof (a[0]) )
 
 std::string strtoupper( const std::string &foo );
+std::string strtolower( const std::string &foo );
 
 namespace XMLSupport
 {

@@ -28,6 +28,7 @@
 #include "winsys.h"
 #include <assert.h>
 #include "gfxlib.h"
+#include <string>
 
 #if !defined (_WIN32) && !defined (__CYGWIN__)
 
@@ -187,6 +188,41 @@ int vsExtensionSupported( const char *extension )
         start = terminator;
     }
     return 0;
+}
+
+bool vsVendorMatch( const char *vendor )
+{
+    static const GLubyte *_glvendor = NULL;
+
+    if (_glvendor == NULL) {
+        _glvendor = glGetString( GL_VENDOR );
+        if (_glvendor != NULL)
+            VSFileSystem::vs_dprintf(1, "OpenGL Vendor: %s\n", (const char*)_glvendor);
+    }
+
+    if (_glvendor != NULL) {
+        // NOTE: Don't be fooled by substrings withing words
+        //      Should match whole-words ONLY
+        
+        static const std::string glvendor = strtolower(std::string((const char*)_glvendor));
+        static const std::string::size_type glvendor_sz = glvendor.length();
+        std::string svendor = strtolower(vendor);
+        std::string::size_type svendor_sz = svendor.length();
+        std::string::size_type pos = glvendor.find(svendor);
+        
+        if (pos == std::string::npos)
+            return false;
+        
+        if ((pos > 0) && isalnum(glvendor[pos-1]))
+            return false;
+        
+        if ((pos+svendor_sz) < glvendor_sz && isalnum(glvendor[pos+svendor_sz]))
+            return false;
+        
+        return true;
+    } else {
+        return false;
+    }
 }
 
 void init_opengl_extensions()
@@ -464,6 +500,16 @@ void GFXInit( int argc, char **argv )
         XMLSupport::parse_int( vs_config->getVariable( "graphics", "max_texture_dimension", "65536" ) );
     gl_options.max_movie_dimension   =
         XMLSupport::parse_int( vs_config->getVariable( "graphics", "max_movie_dimension", "65536" ) );
+    gl_options.pot_video_textures    =
+        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "pot_video_textures", 
+            (   vsExtensionSupported( "GL_ARB_texture_non_power_of_two" )
+             && vsVendorMatch("nvidia")  ) ? "false" : "true" ) );
+    
+    if (gl_options.pot_video_textures)
+        VSFileSystem::vs_dprintf(1, "Forcing POT video textures\n");
+    else
+        VSFileSystem::vs_dprintf(3, "Using NPOT video textures\n");
+    
     gl_options.smooth_shade        = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "SmoothShade", "true" ) );
     gl_options.mipmap = XMLSupport::parse_int( vs_config->getVariable( "graphics", "mipmapdetail", "2" ) );
     gl_options.compression         = XMLSupport::parse_int( vs_config->getVariable( "graphics", "texture_compression", "0" ) );

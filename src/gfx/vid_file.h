@@ -62,7 +62,7 @@ public:
 
     bool isOpen() const throw ();
 
-    void open( const std::string &path, size_t maxDimension = 65535 ) throw (Exception);
+    void open( const std::string &path, size_t maxDimension = 65535, bool forcePOT = false ) throw (Exception);
     void close() throw ();
 
 /** Seeks to the specified time

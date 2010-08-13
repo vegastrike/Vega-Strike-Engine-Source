@@ -53,6 +53,7 @@ private:
 
 /** Framebuffer dimensions limit, useful for bandwidth-limited GPUs */
     size_t      fbDimensionLimit;
+    bool        fbForcePOT;
 
 #ifndef DEPRECATED_IMG_CONVERT
     SwsContext *pSWSCtx;
@@ -135,7 +136,7 @@ public:
     size_t   width;
     size_t   height;
 
-    VidFileImpl( size_t maxDimensions ) :
+    VidFileImpl( size_t maxDimensions, bool forcePOT ) :
         pFormatCtx( 0 )
         , pCodecCtx( 0 )
         , pCodec( 0 )
@@ -148,6 +149,7 @@ public:
         , packetBufferSize( 0 )
         , frameReady( false )
         , fbDimensionLimit( maxDimensions )
+        , fbForcePOT( forcePOT )
     {
         packet.data = 0;
     }
@@ -209,12 +211,21 @@ public:
         //Get some info
         frameRate = float(pStream->r_frame_rate.num)/float(pStream->r_frame_rate.den);
         duration  = float(pStream->duration*pStream->time_base.num)/float(pStream->time_base.den);
-        width     = pCodecCtx->width;
-        height    = pCodecCtx->height;
-        while ( (width > fbDimensionLimit) || (height > fbDimensionLimit) ) {
-            width  /= 2;
-            height /= 2;
+        
+        //Get POT dimensions
+        if (fbForcePOT) {
+            width = height = 1;
+            while (width < pCodecCtx->width && width <= (fbDimensionLimit/2)) width *= 2;
+            while (height < pCodecCtx->height && height <= (fbDimensionLimit/2)) height *= 2;
+        } else {
+            width = pCodecCtx->width;
+            height = pCodecCtx->height;
+            while ( (width > fbDimensionLimit) || (height > fbDimensionLimit) ) {
+                width  /= 2;
+                height /= 2;
+            }
         }
+        
         //Allocate RGB frame buffer
         pFrameRGB         = avcodec_alloc_frame();
         if (pFrameRGB == 0) throw VidFile::Exception( "Problem during RGB framebuffer initialization" );
@@ -283,10 +294,9 @@ public:
 class VidFileImpl
 {
 private:
-//Compile error.
-    VidFileImpl() {}
+    VidFileImpl(size_t, bool) {}
 public:
-//Avoid having to put ifdef's everywhere.
+    //Avoid having to put ifdef's everywhere.
     float frameRate, duration;
     int   width, height;
     void *frameBuffer;
@@ -315,11 +325,11 @@ bool VidFile::isOpen() const throw ()
     return impl != NULL;
 }
 
-void VidFile::open( const std::string &path, size_t maxDimension ) throw (Exception)
+void VidFile::open( const std::string &path, size_t maxDimension, bool forcePOT ) throw (Exception)
 {
 #ifdef HAVE_FFMPEG
     if (!impl)
-        impl = new VidFileImpl( maxDimension );
+        impl = new VidFileImpl( maxDimension, forcePOT );
     if (impl)
         impl->open( path );
 #endif
