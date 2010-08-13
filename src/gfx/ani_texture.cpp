@@ -144,7 +144,7 @@ void AnimatedTexture::MakeActive( int stage, int pass )
                 //vidSource leaves frame data in its framebuffer, and our image data is initialized
                 //to point to that framebuffer, so all we need to do is transfer it to the GL.
                 if ( vidSource->seek( curtime ) ) {
-                    VSFileSystem::vs_fprintf( stderr, "Transferring video frame\n" );
+                    VSFileSystem::vs_dprintf( 1, "Transferring video frame\n" );
                     Transfer( 65535, GFXFALSE );
                 }
             }
@@ -158,7 +158,7 @@ void AnimatedTexture::MakeActive( int stage, int pass )
                 }
             }
             catch (::VidFile::Exception e) {
-                VSFileSystem::vs_fprintf( stderr, "\nVidFile exception: %s\n", e.what() );
+                VSFileSystem::vs_dprintf( 1, "\nVidFile exception: %s\n", e.what() );
             }
             Texture::MakeActive( stage, pass );
         }
