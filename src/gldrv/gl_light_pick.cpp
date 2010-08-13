@@ -142,32 +142,20 @@ void GFXPickLights( const Vector &center, const float radius, vector< int > &lig
     //Beware if re-using rndvar !! Because rand returns an int and on 64 bits archs sizeof( void*) != sizeof( int) !!!
     //void * rndvar = (void *)rand();
     int         lightsenabled = _GLLightsEnabled;
-    LineCollide tmpcollide;
     tmp = QVector( radius, radius, radius );
-    tmpcollide.Mini     = center.Cast()-tmp;
-    tmpcollide.Maxi     = center.Cast()+tmp;
-    tmpcollide.hhuge    = false;     //fixme!! may well be hhuge...don't have enough room in tmppickt
-    tmpcollide.object.i = 0;     //FIXME, should this be -1?
-    tmpcollide.type     = LineCollide::UNIT;
-    //FIXMESPEEDHACK    veclinecol *tmppickt[lighthuge+1];
-    //FIXMESPEEDHACK    if (radius < CTACC) {
+
     veclinecol *tmppickt[2];
     lighttable.Get( center.Cast(), tmppickt );
-    //FIXMESPEEDHACK} else {
-    //FIXMESPEEDHACKsizeget = lighttable.Get (&tmpcollide, tmppickt);
-    //FIXMESPEEDHACK}
+
     for (int j = 0; j < 2; j++) {
         veclinecol::iterator i;
-        //VSFileSystem::vs_fprintf (stderr,"pixked size %d",tmppickt[j]->size());
-        for (i = tmppickt[j]->begin(); i != tmppickt[j]->end(); i++)
-            //warning::duplicates may Exist
-            //FIXMESPEEDHACKif (i->lc->lastchecked!=rndvar) {
-            //FIXMESPEEDHACKi->lc->lastchecked = rndvar;
+
+        for (i = tmppickt[j]->begin(); i != tmppickt[j]->end(); i++) {
             if ( picklight( *i->lc, center, radius, lightsenabled, i->GetIndex() ) ) {
                 lights.push_back( i->GetIndex() );
                 lightsenabled++;
             }
-        //FIXMESPEEDHACK}
+        }
     }
     std::sort( lights.begin(), lights.end(), lightsort( center, radius ) );
 }

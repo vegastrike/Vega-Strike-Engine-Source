@@ -357,7 +357,8 @@ Unit* Planet::beginElement( QVector x,
                             float pos,
                             float gravity,
                             float radius,
-                            const char *filename,
+                            const string &filename,
+                            const string &technique,
                             BLENDFUNC blendSrc,
                             BLENDFUNC blendDst,
                             const vector< string > &dest,
@@ -375,23 +376,15 @@ Unit* Planet::beginElement( QVector x,
         un_iter satiterator = satellites.createIterator();
         assert( *satiterator );
         if ( (*satiterator)->isUnit() == PLANETPTR ) {
-            un = ( (Planet*) (*satiterator) )->beginElement( x,
-                                                             y,
-                                                             vely,
-                                                             rotvel,
-                                                             pos,
-                                                             gravity,
-                                                             radius,
-                                                             filename,
-                                                             blendSrc,
-                                                             blendDst,
+            un = ( (Planet*) (*satiterator) )->beginElement( x, y, vely, rotvel, pos,
+                                                             gravity, radius,
+                                                             filename, technique, 
+                                                             blendSrc, blendDst,
                                                              dest,
                                                              level-1,
-                                                             ourmat,
-                                                             ligh,
+                                                             ourmat, ligh,
                                                              isunit,
-                                                             faction,
-                                                             fullname,
+                                                             faction, fullname,
                                                              inside_out );
         } else {
             VSFileSystem::vs_fprintf( stderr, "Planets are unable to orbit around units" );
@@ -400,7 +393,7 @@ Unit* Planet::beginElement( QVector x,
         if (isunit == true) {
             Unit *sat_unit  = NULL;
             Flightgroup *fg = getStaticBaseFlightgroup( faction );
-            satellites.prepend( sat_unit = UnitFactory::createUnit( filename, false, faction, "", fg, fg->nr_ships-1 ) );
+            satellites.prepend( sat_unit = UnitFactory::createUnit( filename.c_str(), false, faction, "", fg, fg->nr_ships-1 ) );
             sat_unit->setFullname( fullname );
             un = sat_unit;
             un_iter satiterator( satellites.createIterator() );
@@ -410,11 +403,10 @@ Unit* Planet::beginElement( QVector x,
             Planet *p;
             if (dest.size() != 0)
                 radius = ScaleJumpRadius( radius );
-            satellites.prepend( p =
-                                   UnitFactory::createPlanet( x, y, vely, rotvel, pos, gravity, radius, filename, blendSrc,
-                                                              blendDst, dest,
-                                                              QVector( 0, 0,
-                                                                       0 ), this, ourmat, ligh, faction, fullname, inside_out ) );
+            satellites.prepend( p = UnitFactory::createPlanet( x, y, vely, rotvel, pos, gravity, radius, 
+                                                               filename, technique, 
+                                                               blendSrc, blendDst, dest,
+                                                               QVector( 0, 0, 0 ), this, ourmat, ligh, faction, fullname, inside_out ) );
             un = p;
             p->SetOwner( this );
         }
@@ -444,7 +436,8 @@ void Planet::InitPlanet( QVector x,
                          float pos,
                          float gravity,
                          float radius,
-                         const char *filename,
+                         const string &filename,
+                         const string &technique,
                          const vector< string > &dest,
                          const QVector &orbitcent,
                          Unit *parent,
@@ -496,7 +489,7 @@ void Planet::InitPlanet( QVector x,
             pImage->dockingports.push_back( DockingPorts( Vector( 0, 0, 0 ), dock, 0, true ) );
         }
     }
-    string tempname = ( ::getCargoUnitName( filename ) );
+    string tempname = ( ::getCargoUnitName( filename.c_str() ) );
     setFullname( tempname );
 
     int    tmpfac   = faction;
@@ -540,7 +533,8 @@ Planet::Planet( QVector x,
                 float pos,
                 float gravity,
                 float radius,
-                const char *filename,
+                const string &filename,
+                const string &technique,
                 const vector< string > &dest,
                 const QVector &orbitcent,
                 Unit *parent,
@@ -552,19 +546,13 @@ Planet::Planet( QVector x,
     inside = false;
     terraintrans = NULL;
     atmospheric  = false;
-    this->InitPlanet( x,
-                      y,
-                      vely,
-                      rotvel,
+    this->InitPlanet( x, y, vely, rotvel,
                       pos,
-                      gravity,
-                      radius,
-                      filename,
+                      gravity, radius,
+                      filename, technique,
                       dest,
-                      orbitcent,
-                      parent,
-                      faction,
-                      fullname,
+                      orbitcent, parent,
+                      faction, fullname,
                       inside_out,
                       lights_num );
     corner_min.i = corner_min.j = corner_min.k = -this->radius;

@@ -161,7 +161,8 @@ Planet* UnitFactory::createPlanet( QVector x,
                                    float pos,
                                    float gravity,
                                    float radius,
-                                   const char *filename,
+                                   const std::string &filename,
+                                   const std::string &technique,
                                    BLENDFUNC sr,
                                    BLENDFUNC ds,
                                    const vector< string > &dest,
@@ -176,7 +177,7 @@ Planet* UnitFactory::createPlanet( QVector x,
 {
     _Universe->netLock( true );
     Planet *p = new Planet( x, y, vely, rotvel, pos, gravity, radius,
-                           filename, dest, orbitcent, parent, faction,
+                           filename, technique, dest, orbitcent, parent, faction,
                            fullname, inside_out, ligh.size() );
     _Universe->netLock( false );
     if (netcreate)

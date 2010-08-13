@@ -69,6 +69,7 @@ void SphereMesh::InitSphere( float radius,
                              int stacks,
                              int slices,
                              const char *texture,
+                             const std::string &technique,
                              const char *alpha,
                              bool Insideout,
                              const BLENDFUNC a,
@@ -91,7 +92,7 @@ void SphereMesh::InitSphere( float radius,
     ab[2]     = '\0';
     ab[1]     = b+'0';
     ab[0]     = a+'0';
-    hash_name = string( "@@Sphere" )+"#"+texture+"#"+XMLSupport::tostring( stacks )+"#"+XMLSupport::tostring( slices )+ab+"#"
+    hash_name = string( "@@Sphere" )+"#"+texture+"#"+technique+"#"+XMLSupport::tostring( stacks )+"#"+XMLSupport::tostring( slices )+ab+"#"
                 +XMLSupport::tostring( rho_min )+"#"+XMLSupport::tostring( rho_max );
     if ( LoadExistant( hash_name, Vector( radius, radius, radius ), 0 ) ) {
         return;
@@ -231,7 +232,7 @@ void SphereMesh::InitSphere( float radius,
             else if (l == 3)
                 lodsize *= 1.5;
         }
-        initTechnique( "" );
+        initTechnique( technique );
         oldmesh[l] = *this;
         refcount   = 0;
         orig = oldorig;
@@ -285,6 +286,7 @@ CityLights::CityLights( float radius,
                 stacks,
                 slices,
                 texture,
+                "",
                 NULL,
                 insideout,
                 a,

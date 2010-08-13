@@ -146,7 +146,8 @@ enum Names
     VARNAME,
     VARVALUE,
     CONDITION,
-    EXPRESSION
+    EXPRESSION,
+    TECHNIQUE
 };
 
 const EnumMap::Pair element_names[] = {
@@ -173,7 +174,7 @@ const EnumMap::Pair element_names[] = {
     EnumMap::Pair( "SpaceElevator",     SPACEELEVATOR ),
     EnumMap::Pair( "Fog",               FOG ),
     EnumMap::Pair( "FogElement",        FOGELEMENT ),
-    EnumMap::Pair( "Condition",         CONDITION )
+    EnumMap::Pair( "Condition",         CONDITION ),
 };
 const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair( "UNKNOWN",               UNKNOWN ),
@@ -244,7 +245,8 @@ const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair( "VarName",               VARNAME ),
     EnumMap::Pair( "VarValue",              VARVALUE ),
     EnumMap::Pair( "Condition",             CONDITION ),
-    EnumMap::Pair( "expression",            EXPRESSION )
+    EnumMap::Pair( "expression",            EXPRESSION ),
+    EnumMap::Pair( "technique",             TECHNIQUE )
 };
 
 //By Klauss - more flexible this way
@@ -469,6 +471,7 @@ void StarSystem::beginElement( const string &name, const AttributeList &attribut
     LIGHT_TARGET tmptarg    = POSITION;
     xml->cursun.j = 0;
     string       citylights;
+    string       technique;
     ObjSerial    serial     = 0;
     float        scaleatmos = 10;
     char        *nebfile;
@@ -494,7 +497,7 @@ void StarSystem::beginElement( const string &name, const AttributeList &attribut
     int     numwraps = 1;
     float   scalex   = 1;
     vector< string >dest;
-    char   *filename = NULL;
+    string  filename;
     string  fullname = "unknw";
     float   gravity  = 0;
     float   velocity = 0;
@@ -1041,9 +1044,9 @@ addlightprop:
         ++xml->unitlevel;
         S = QVector( 1, 0, 0 );
         R = QVector( 0, 0, 1 );
-        filename    = new char[1];
-        filename[0] = '\0';
+        filename    = string( "" );
         citylights  = string( "" );
+        technique   = string( "" );
         blendSrc    = ONE;
         blendDst    = ZERO;
         serial = 0;
@@ -1059,13 +1062,14 @@ addlightprop:
                 bootstrap_draw( "Loading "+fullname );
                 break;
             case XFILE:
-                delete[] filename;
-                filename = new char[strlen( (*iter).value.c_str() )+1];
-                strcpy( filename, (*iter).value.c_str() );
+                filename = (*iter).value;
                 break;
             case DESTINATION:
                 dest   = ParseDestinations( (*iter).value );
                 isdest = true;
+                break;
+            case TECHNIQUE:
+                technique = (*iter).value;
                 break;
             case ALPHA:
                 parse_dual_alpha( (*iter).value.c_str(), blendSrc, blendDst );
@@ -1191,15 +1195,14 @@ addlightprop:
         radius *= xml->scale;
         if (xml->unitlevel > 2) {
             assert( xml->moons.size() != 0 );
-            Unit *un = xml->moons[xml->moons.size()-1]->beginElement( R, S, velocity, ComputeRotVel( rotvel,
-                                                                                                     R,
-                                                                                                     S ), position, gravity,
-                                                                      radius, filename, blendSrc, blendDst, dest,
+            fprintf(stderr, "Creating planet %s with texture %s and technique %s - unitlevel > 2", fullname.c_str(), filename.c_str(), technique.c_str());
+            Unit *un = xml->moons[xml->moons.size()-1]->beginElement( R, S, velocity, ComputeRotVel( rotvel, R, S ), 
+                                                                      position, gravity, radius, 
+                                                                      filename, technique, blendSrc, blendDst, dest,
                                                                       xml->unitlevel-1, ourmat, curlights, false,
                                                                       faction
                                                                       != 0 ? faction : FactionUtil::GetFactionIndex(
-                                                                          UniverseUtil::GetGalaxyFaction(
-                                                                              truncatedfilename ) ),
+                                                                            UniverseUtil::GetGalaxyFaction( truncatedfilename ) ),
                                                                       fullname, insideout );
             if (un) {
                 un->SetOwner( getTopLevelOwner() );
@@ -1207,24 +1210,27 @@ addlightprop:
             }
         } else {
             Planet *planet;
+            fprintf(stderr, "Creating planet %s with texture %s and technique %s - unitlevel <= 2", fullname.c_str(), filename.c_str(), technique.c_str());
             xml->moons.push_back( ( planet =
                                        UnitFactory::createPlanet( R, S, velocity,
-                                                                  ComputeRotVel( rotvel, R,
-                                                                                 S ), position, gravity, radius, filename,
+                                                                  ComputeRotVel( rotvel, R, S ), 
+                                                                  position, gravity, radius, 
+                                                                  filename, technique, 
                                                                   blendSrc, blendDst, dest, xml->cursun.Cast()
                                                                   +xml->systemcentroid.Cast(),
                                                                   NULL, ourmat, curlights, faction
-                                                                  != 0 ? faction : FactionUtil::GetFactionIndex( UniverseUtil::
-                                                                                                                GetGalaxyFaction(
-                                                                                                                    truncatedfilename ) ),
+                                                                  != 0 ? faction : FactionUtil::GetFactionIndex( 
+                                                                        UniverseUtil::GetGalaxyFaction( truncatedfilename ) ),
                                                                   fullname,
                                                                   insideout ) ) );
 
             xml->moons[xml->moons.size()-1]->SetPosAndCumPos( R+S+xml->cursun.Cast()+xml->systemcentroid.Cast() );
             xml->moons.back()->SetOwner( getTopLevelOwner() );
             planet->SetSerial( serial );
+            
+            break;
+            
         }
-        delete[] filename;
         break;
     case CONDITION:
         for (iter = attributes.begin(); iter != attributes.end(); ++iter) {
@@ -1256,8 +1262,7 @@ addlightprop:
         R = QVector( 0, 0, 1 );
         nebfile     = new char[1];
         nebfile[0]  = '\0';
-        filename    = new char[1];
-        filename[0] = '\0';
+        filename    = string( "" );
         fullname    = "unkn-unit";
         scalex = game_options.AsteroidDifficulty;
         for (iter = attributes.begin(); iter != attributes.end(); ++iter) {
@@ -1270,9 +1275,7 @@ addlightprop:
                 fullname = (*iter).value;
                 break;
             case XFILE:
-                delete[] filename;
-                filename = new char[strlen( (*iter).value.c_str() )+1];
-                strcpy( filename, (*iter).value.c_str() );
+                filename = (*iter).value;
                 break;
             case NEBFILE:
                 delete[] nebfile;
@@ -1355,21 +1358,21 @@ addlightprop:
                 Planet *plan = xml->moons.back()->GetTopPlanet( xml->unitlevel-1 );
                 if (elem == UNIT) {
                     Flightgroup *fg = getStaticBaseFlightgroup( faction );
-                    plan->AddSatellite( un = UnitFactory::createUnit( filename, false, faction, "", fg, fg->nr_ships-1 ) );
+                    plan->AddSatellite( un = UnitFactory::createUnit( filename.c_str(), false, faction, "", fg, fg->nr_ships-1 ) );
                     un->SetSerial( serial ); //FIXME un de-referenced before allocation
                     un->setFullname( fullname ); //FIXME un de-referenced before allocation
                 } else if (elem == NEBULA) {
                     Flightgroup *fg = getStaticNebulaFlightgroup( faction );
-                    plan->AddSatellite( un = UnitFactory::createNebula( filename, false, faction, fg, fg->nr_ships-1 ) );
+                    plan->AddSatellite( un = UnitFactory::createNebula( filename.c_str(), false, faction, fg, fg->nr_ships-1 ) );
                     un->SetSerial( serial ); //FIXME un de-referenced before allocation
                 } else if (elem == ASTEROID) {
                     Flightgroup *fg = getStaticAsteroidFlightgroup( faction );
                     plan->AddSatellite( un =
-                                           UnitFactory::createAsteroid( filename, faction, fg, fg->nr_ships-1, scalex
+                                           UnitFactory::createAsteroid( filename.c_str(), faction, fg, fg->nr_ships-1, scalex
                                                                         < 0 ? -scalex : scalex ) );
                     un->SetSerial( serial ); //FIXME un de-referenced before allocation
                 } else if (elem == ENHANCEMENT) {
-                    plan->AddSatellite( un = UnitFactory::createEnhancement( filename, faction, string( "" ) ) );
+                    plan->AddSatellite( un = UnitFactory::createEnhancement( filename.c_str(), faction, string( "" ) ) );
                     un->SetSerial( serial ); //FIXME un de-referenced before allocation
                 }
                 {
@@ -1390,9 +1393,8 @@ addlightprop:
                 un->SetAngularVelocity( ComputeRotVel( rotvel, R, S ) ); //FIXME un de-referenced before allocation
             } else {
                 if ( (elem == BUILDING || elem == VEHICLE) && xml->ct == NULL && xml->parentterrain != NULL ) {
-                    Unit *b =
-                        UnitFactory::createBuilding( xml->parentterrain, elem == VEHICLE, filename, false, faction, string(
-                                                        "" ) );
+                    Unit *b = UnitFactory::createBuilding( 
+                            xml->parentterrain, elem == VEHICLE, filename.c_str(), false, faction, string("") );
                     b->SetSerial( serial );
                     b->SetPosAndCumPos( xml->cursun.Cast()+xml->systemcentroid.Cast() );
                     b->EnqueueAI( new Orders::AggressiveAI( "default.agg.xml" ) );
@@ -1403,7 +1405,8 @@ addlightprop:
                         dest.clear();
                     }
                 } else if ( (elem == BUILDING || elem == VEHICLE) && xml->ct != NULL ) {
-                    Unit *b = UnitFactory::createBuilding( xml->ct, elem == VEHICLE, filename, false, faction );
+                    Unit *b = UnitFactory::createBuilding( 
+                            xml->ct, elem == VEHICLE, filename.c_str(), false, faction );
                     b->SetSerial( serial );
                     //b->SetPlanetOrbitData( (PlanetaryTransform*) xml->parentterrain ); commented out by chuck_starchaser; --never used
                     b->SetPosAndCumPos( xml->cursun.Cast()+xml->systemcentroid.Cast() );
@@ -1419,23 +1422,23 @@ addlightprop:
                 } else {
                     if (elem == UNIT) {
                         Flightgroup *fg = getStaticBaseFlightgroup( faction );
-                        Unit *moon_unit = UnitFactory::createUnit( filename, false, faction, "", fg, fg->nr_ships-1 );
+                        Unit *moon_unit = UnitFactory::createUnit( filename.c_str(), false, faction, "", fg, fg->nr_ships-1 );
                         moon_unit->SetSerial( serial );
                         moon_unit->setFullname( fullname );
                         xml->moons.push_back( (Planet*) moon_unit );
                     } else if (elem == NEBULA) {
                         Flightgroup *fg = getStaticNebulaFlightgroup( faction );
-                        xml->moons.push_back( (Planet*) UnitFactory::createNebula( filename, false, faction, fg, fg->nr_ships-1 ) );
+                        xml->moons.push_back( (Planet*) UnitFactory::createNebula( filename.c_str(), false, faction, fg, fg->nr_ships-1 ) );
                     } else if (elem == ASTEROID) {
                         Flightgroup *fg = getStaticAsteroidFlightgroup( faction );
                         Planet *ast;
                         xml->moons.push_back( ast =
-                                                 (Planet*) UnitFactory::createAsteroid( filename, faction, fg, fg->nr_ships-1,
+                                                 (Planet*) UnitFactory::createAsteroid( filename.c_str(), faction, fg, fg->nr_ships-1,
                                                                                         scalex ) );
                         ast->SetSerial( serial );
                     } else if (elem == ENHANCEMENT) {
                         Planet *enh;
-                        xml->moons.push_back( enh = (Planet*) UnitFactory::createEnhancement( filename, faction, string( "" ) ) );
+                        xml->moons.push_back( enh = (Planet*) UnitFactory::createEnhancement( filename.c_str(), faction, string( "" ) ) );
                         enh->SetSerial( serial );
                     }
                     {
@@ -1458,7 +1461,6 @@ addlightprop:
                 }
             }
         }
-        delete[] filename;
         delete[] nebfile;
         break;
     default:

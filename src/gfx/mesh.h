@@ -153,6 +153,8 @@ private:
 
 protected:
     void PostProcessLoading( struct MeshXML *xml, const vector< string > &overrideTexture );
+
+public:
     void initTechnique( const string &technique );
 
 private: Mesh( const char *filename, const Vector &scalex, int faction, class Flightgroup *fg, bool orig,

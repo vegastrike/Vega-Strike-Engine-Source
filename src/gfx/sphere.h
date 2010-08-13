@@ -4,6 +4,8 @@
 #include "mesh.h"
 #include "quaternion.h"
 #include <assert.h>
+#include <string>
+
 #ifndef M_PI
 #define M_PI (3.1415926536F)
 #endif
@@ -23,6 +25,7 @@ protected:
                      int stacks,
                      int slices,
                      const char *texture,
+                     const std::string &technique, 
                      const char *alpha = NULL,
                      bool insideout = false,
                      const BLENDFUNC a = ONE,
@@ -49,6 +52,7 @@ public: SphereMesh() : Mesh()
                 int stacks,
                 int slices,
                 const char *texture,
+                const std::string &technique, 
                 const char *alpha = NULL,
                 bool insideout = false,
                 const BLENDFUNC a = ONE,
@@ -65,6 +69,7 @@ public: SphereMesh() : Mesh()
                     stacks,
                     slices,
                     texture,
+                    technique,
                     alpha,
                     insideout,
                     a,

@@ -1309,7 +1309,8 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     } else {
         static int shieldstacks = XMLSupport::parse_int( vs_config->getVariable( "graphics", "shield_detail", "16" ) );
         static std::string shieldtex = vs_config->getVariable( "graphics", "shield_texture", "shield.bmp" );
-        meshdata.back() = new SphereMesh( rSize(), shieldstacks, shieldstacks, shieldtex.c_str(), NULL, false, ONE, ONE );
+        static std::string shieldtechnique = vs_config->getVariable( "graphics", "shield_technique", "" );
+        meshdata.back() = new SphereMesh( rSize(), shieldstacks, shieldstacks, shieldtex.c_str(), shieldtechnique, NULL, false, ONE, ONE );
     }
     meshdata.back()->EnableSpecialFX();
     //Begin the Pow-w-w-war Zone Collide Tree Generation

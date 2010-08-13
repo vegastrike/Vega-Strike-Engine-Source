@@ -193,7 +193,7 @@ Planet* UnitFactory::parsePlanetBuffer( NetBuffer &netbuf )
     cerr<<"NETCREATE PLANET : "<<file<<endl;
 
     return UnitFactory::createPlanet( x, y, vely, rotvel, pos, gravity, radius,
-                                      file.c_str(),
+                                      file, string(""), 
                                       (BLENDFUNC) sr, (BLENDFUNC) ds, dest, orbitcent, un, mat, lights, faction, fullname,
                                       insideout, serial );
 }

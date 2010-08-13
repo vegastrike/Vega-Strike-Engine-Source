@@ -76,7 +76,7 @@ Background::Background( const char *file, int numstars, float spread, std::strin
             temp   = string( file )+"_sphere.bmp";
             suffix = ".bmp";             //backwards compatibility
         }
-        SphereBackground = new SphereMesh( 20, 8, 8, temp.c_str(), NULL, true );
+        SphereBackground = new SphereMesh( 20, 8, 8, temp.c_str(), "", NULL, true );
         //SphereBackground->Pitch(PI*.5);//that's the way prophecy's textures are set up
         //SphereBackground->SetOrientation(Vector(1,0,0),
         //Vector(0,0,-1),

@@ -241,7 +241,7 @@ void GamePlanet::AddAtmosphere( const std::string &texture,
     Mesh *shield = meshdata.back();
     meshdata.pop_back();
     static int stacks = XMLSupport::parse_int( vs_config->getVariable( "graphics", "planet_detail", "24" ) );
-    meshdata.push_back( new SphereMesh( radius, stacks, stacks, texture.c_str(), NULL, inside_out, blendSrc, blendDst ) );
+    meshdata.push_back( new SphereMesh( radius, stacks, stacks, texture.c_str(), string(), NULL, inside_out, blendSrc, blendDst ) );
     if ( meshdata.back() ) {
         //By klauss - this needs to be done for most atmospheres
         GFXMaterial a = {
@@ -290,7 +290,8 @@ GamePlanet::GamePlanet( QVector x,
                         float pos,
                         float gravity,
                         float radius,
-                        const char *textname,
+                        const string &textname,
+                        const string &technique,
                         BLENDFUNC blendSrc,
                         BLENDFUNC blendDst,
                         const vector< string > &dest,
@@ -366,17 +367,9 @@ GamePlanet::GamePlanet( QVector x,
     if (!wormhole) {
         static int stacks = XMLSupport::parse_int( vs_config->getVariable( "graphics", "planet_detail", "24" ) );
         atmospheric = !(blendSrc == ONE && blendDst == ZERO);
-        meshdata.push_back( new SphereMesh( radius, stacks, stacks, textname, NULL, inside_out, blendSrc, blendDst ) );
+        meshdata.push_back( new SphereMesh( radius, stacks, stacks, textname.c_str(), technique, NULL, inside_out, blendSrc, blendDst ) );
 
         meshdata.back()->setEnvMap( GFXFALSE );
-        /*if (meshdata.back()->numTextures()>1) {
-         *  if (meshdata.back()->texture(1)==0) {
-         *     meshdata.back()->SetMaterial (ourmat);
-         *  }
-         *  }else {
-         *  meshdata.back()->SetMaterial (ourmat);
-         *  }*/                                                                                                                                                                                                                                                //By Klauss (Why?)
-
         meshdata.back()->SetMaterial( ourmat );
         meshdata.push_back( NULL );
     }
@@ -417,19 +410,13 @@ GamePlanet::GamePlanet( QVector x,
             }
         }
     }
-    this->InitPlanet( x,
-                      y,
-                      vely,
-                      rotvel,
+    this->InitPlanet( x, y, vely, rotvel,
                       pos,
-                      gravity,
-                      radius,
-                      textname,
+                      gravity, radius,
+                      textname, technique, 
                       dest,
-                      orbitcent,
-                      parent,
-                      faction,
-                      fgid,
+                      orbitcent, parent,
+                      faction, fgid,
                       inside_out,
                       nlights );
 }

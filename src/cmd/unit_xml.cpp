@@ -2024,7 +2024,8 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
         Mesh *tmp = NULL;
         static int shieldstacks = XMLSupport::parse_int( vs_config->getVariable( "graphics", "shield_detail", "16" ) );
         static std::string shieldtex = vs_config->getVariable( "graphics", "shield_texture", "shield.bmp" );
-        meshdata.back() = new SphereMesh( rSize(), shieldstacks, shieldstacks, shieldtex.c_str(), NULL, false, ONE, ONE );
+        static std::string shieldtechnique = vs_config->getVariable( "graphics", "shield_technique", "" );
+        meshdata.back() = new SphereMesh( rSize(), shieldstacks, shieldstacks, shieldtex.c_str(), shieldtechnique, NULL, false, ONE, ONE );
         tmp = meshdata.back();
     }
     meshdata.back()->EnableSpecialFX();

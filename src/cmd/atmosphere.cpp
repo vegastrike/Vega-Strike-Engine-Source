@@ -33,7 +33,7 @@ void Atmosphere::setArray1( float c0[3], const GFXColor &c1 )
 Atmosphere::Atmosphere( const Parameters &params ) : user_params( params )
     , divisions( 64 )
 {
-    dome = new SphereMesh( params.radius, divisions, divisions, "white.bmp", NULL, true, ONE, ZERO, false, 0, M_PI/2 );
+    dome = new SphereMesh( params.radius, divisions, divisions, "white.bmp", "", NULL, true, ONE, ZERO, false, 0, M_PI/2 );
 }
 
 Atmosphere::~Atmosphere()
