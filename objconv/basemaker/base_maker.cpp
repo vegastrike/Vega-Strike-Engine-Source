@@ -1510,15 +1510,6 @@ bool LinkStage3Goto( std::string input, unsigned int unusedindexdat, void *dat1,
     return sscanf( input.c_str(), "%d", reinterpret_cast< int* > (dat1) ) >= 1;
 }
 
-static inline string strtolower( const string &foo )
-{
-    string rval;
-    string::const_iterator src = foo.begin();
-    while ( src != foo.end() )
-        rval += tolower( *src++ );
-    return rval;
-}
-
 bool LinkStage3Comp( std::string input, unsigned int unused, void *dat1, void *dat2, const void *dat3, float x, float y )
 {
     int modearg = DISPLAY_MODE_COUNT;

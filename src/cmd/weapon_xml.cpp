@@ -534,8 +534,6 @@ void endElement( void *userData, const XML_Char *name )
 using namespace BeamXML;
 using namespace VSFileSystem;
 
-extern string strtolower( const string &foo );
-
 weapon_info * getTemplate( const string &kkey )
 {
     weapon_info *wi = lookuptable.Get( strtoupper( kkey ) );
