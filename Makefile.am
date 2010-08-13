@@ -1066,7 +1066,9 @@ EXTRA_DIST += $(pkgdata_DATA)
 base_maker_SOURCES = \
   objconv/basemaker/base_maker.cpp \
   objconv/basemaker/base_maker_texture.cpp \
-  objconv/basemaker/base_maker_texture.h
+  objconv/basemaker/base_maker_texture.h \
+  src/xml_support.cpp \
+  src/xml_support.h 
 
 if HAVE_OGRE
 if BOOSTSYSTEM
