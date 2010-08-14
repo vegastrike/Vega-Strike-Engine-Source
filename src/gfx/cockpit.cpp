@@ -1456,7 +1456,7 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
             return (getNewTime()-TimeOfLastCollision) < collidepanic;
         }
     case UnitImages< void >::ECM:
-        return target->GetImageInformation().ecm != 0 ? 1 : 0;
+        return (target->GetImageInformation().ecm > 0) ? 1 : 0;
 
     case UnitImages< void >::WARPFIELDSTRENGTH:
         return target->graphicOptions.WarpFieldStrength;
@@ -1615,9 +1615,9 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
         else
             return (float) UnitImages< void >::OFF;
     case UnitImages< void >::ECM_MODAL:
- //       if (target->GetImageInformation().ecm < 0)
- //           return (float) UnitImages< void >::READY; else... //ecm is unsigned --chuck_starchaser
-        if (target->GetImageInformation().ecm != 0)
+        if (target->GetImageInformation().ecm < 0)
+            return (float) UnitImages< void >::READY;
+        else if (target->GetImageInformation().ecm > 0)
             return (float) UnitImages< void >::ACTIVE;
         else
             return (float) UnitImages< void >::NOTAPPLICABLE;

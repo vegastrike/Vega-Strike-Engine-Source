@@ -226,7 +226,7 @@ struct UnitImages
     //Box *selectionBox;
     float        *cockpit_damage;     //0 is radar, 1 to MAXVDU is vdus and >MAXVDU is gauges
     ///how likely to fool missiles
-    unsigned int  ecm;    //short fix
+    int  ecm;    // -1 = inactive, 0 = not available, 1 = active
     ///holds the info for the repair bot type. 0 is no bot;
     unsigned char repair_droid;
     float next_repair_time;
