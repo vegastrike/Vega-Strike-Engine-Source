@@ -582,6 +582,7 @@ public:
             char  iff;
             bool  locked;
             bool  canlock;
+            bool  trackingactive;
             RADARLIM() : maxrange( 0 )
                 , maxcone( 0 )
                 , lockcone( 0 )

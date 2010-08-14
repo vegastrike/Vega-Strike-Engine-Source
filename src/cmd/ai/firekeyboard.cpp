@@ -1998,13 +1998,7 @@ void FireKeyboard::Execute()
     }
     if (f().toggleautotracking == PRESS) {
         f().toggleautotracking = DOWN;
-        if (autotrackingtoggle == 1) {
-            autotrackingtoggle = parent->GetComputerData().radar.trackingcone;
-            parent->GetComputerData().radar.trackingcone = 1;
-        } else {
-            parent->GetComputerData().radar.trackingcone = autotrackingtoggle;
-            autotrackingtoggle = 1;
-        }
+        parent->GetComputerData().radar.trackingactive = !parent->GetComputerData().radar.trackingactive;
     }
     if (f().misk == PRESS || f().rmisk == PRESS) {
         bool forward;

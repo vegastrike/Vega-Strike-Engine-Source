@@ -1158,6 +1158,7 @@ void Unit::Init()
     computer.radar.locked        = false;
     computer.radar.maxcone       = -1;
     computer.radar.trackingcone  = minTrackingNum;
+    computer.radar.trackingactive= true;
     computer.radar.lockcone      = lc;
     computer.radar.mintargetsize = 0;
     computer.radar.iff           = 0;
@@ -2447,8 +2448,10 @@ void Unit::UpdatePhysics( const Transformation &trans,
                 static bool must_lock_to_autotrack =
                     XMLSupport::parse_bool( vs_config->getVariable( "physics", "must_lock_to_autotrack", "true" ) );
                 Unit *autotarg     =
-                    ( (mounts[i].size&weapon_info::AUTOTRACKING) && (mounts[i].time_to_lock <= 0)
-                     && (player_cockpit == NULL || TargetLocked() || !must_lock_to_autotrack) ) ? target : NULL;
+                    (   (mounts[i].size&weapon_info::AUTOTRACKING) 
+                     && (mounts[i].time_to_lock <= 0)
+                     && (player_cockpit == NULL || TargetLocked() || !must_lock_to_autotrack)
+                     && (computer.radar.trackingactive)  ) ? target : NULL;
                 float trackingcone = computer.radar.trackingcone;
                 if ( CloseEnoughToAutotrack( this, target, trackingcone ) ) {
                     if (autotarg)
@@ -2477,8 +2480,12 @@ void Unit::UpdatePhysics( const Transformation &trans,
             int autotrack = 0;
             static bool must_lock_to_autotrack =
                 XMLSupport::parse_bool( vs_config->getVariable( "physics", "must_lock_to_autotrack", "true" ) );
-            if ( ( 0 != (mounts[i].size&weapon_info::AUTOTRACKING)
-                  && ( (Network != NULL && !SERVER) || player_cockpit == NULL || TargetLocked() || !must_lock_to_autotrack ) ) )
+            if (   ( 0 != (mounts[i].size&weapon_info::AUTOTRACKING) )
+                && computer.radar.trackingactive
+                && (   (Network != NULL && !SERVER) 
+                     || player_cockpit == NULL
+                     || TargetLocked()
+                     || !must_lock_to_autotrack )  )
                 autotrack = computer.itts ? 2 : 1;
             float trackingcone = computer.radar.trackingcone;
             if ( CloseEnoughToAutotrack( this, target, trackingcone ) ) {

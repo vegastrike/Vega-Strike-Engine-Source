@@ -575,8 +575,9 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
             if (this->mounts[i].ref.gun)
                 this->mounts[i].ref.gun->Draw( *ct, this->WarpMatrix( *ctm ),
                                                ( (this->mounts[i].size&weapon_info::AUTOTRACKING)
-                                                && this->mounts[i].time_to_lock
-                                                <= 0 ) ? Unit::Target() : NULL, this->computer.radar.trackingcone );
+                                                && (this->mounts[i].time_to_lock <= 0)
+                                                && (this->computer.radar.trackingactive) ) ? Unit::Target() : NULL, 
+                                               this->computer.radar.trackingcone );
     }
     float haloalpha = 1;
     if (cloak >= 0)
