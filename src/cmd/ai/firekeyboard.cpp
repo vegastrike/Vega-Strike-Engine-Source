@@ -531,8 +531,6 @@ void FireKeyboard::ECMKey( const KBData&, KBSTATE k )
 {
     if (k == PRESS)
         g().ECMkey = k;
-    if (k == RELEASE)
-        g().ECMkey = k;
 }
 
 void FireKeyboard::FireKey( const KBData&, KBSTATE k )
