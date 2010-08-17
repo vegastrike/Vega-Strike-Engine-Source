@@ -28,16 +28,17 @@ class Unit;
 class UnitCollection
 {
 public:
-/*
- * UnitIterator is the "node" class for UnitCollection.
- * It's meant to mimic std::iterator's for the most part, but
- * Python code doesn't use them that way so we had to keep some
- * functions for backwards compatibility.
- * Operators supported : ++(), ()++, =, *
- */
+    /*
+     * UnitIterator is the "node" class for UnitCollection.
+     * It's meant to mimic std::iterator's for the most part, but
+     * Python code doesn't use them that way so we had to keep some
+     * functions for backwards compatibility.
+     * Operators supported : ++(), ()++, =, *
+     */
     class UnitIterator
     {
-public: UnitIterator() : col( NULL ) {}
+    public: 
+        UnitIterator() : col( NULL ) {}
         UnitIterator( const UnitIterator& );
         UnitIterator( UnitCollection* );
         virtual ~UnitIterator();
@@ -52,22 +53,23 @@ public: UnitIterator() : col( NULL ) {}
         {
             return !isDone();
         }
-/*   Request the current unit to be removed */
+        
+        /*   Request the current unit to be removed */
         void remove();
 
-/*  Move argument list to the beginning of current list */
+        /*  Move argument list to the beginning of current list */
         void moveBefore( UnitCollection& );
 
-/* Insert unit before current unit */
+        /* Insert unit before current unit */
         void preinsert( class Unit* );
 
-/* Insert unit after current unit */
+        /* Insert unit after current unit */
         void postinsert( class Unit*unit );
 
-/* increment to next valid unit (may iterate many times) */
+        /* increment to next valid unit (may iterate many times) */
         void advance();
 
-/* same as advance, only it returns the unit at the same time */
+        /* same as advance, only it returns the unit at the same time */
         Unit * next();
 
         UnitIterator& operator=( const UnitIterator& );
@@ -91,19 +93,22 @@ public: UnitIterator() : col( NULL ) {}
 
 protected:
         friend class UnitCollection;
-//Pointer back to the collection we were spawned from
+        //Pointer back to the collection we were spawned from
         UnitCollection *col;
-//Current position in the list
+        
+        //Current position in the list
         std::list< class Unit* >::iterator it;
     };
-/* This class is to be used when no changes to the list are made
- * and the iterator doesn't persist across physics frames.
- * that is to say, these should only be used as temporary iterators
- * in loops where the list is not modified.
- */
+    
+    /* This class is to be used when no changes to the list are made
+     * and the iterator doesn't persist across physics frames.
+     * that is to say, these should only be used as temporary iterators
+     * in loops where the list is not modified.
+     */
     class ConstIterator
     {
-public: ConstIterator() : col( NULL ) {}
+    public: 
+        ConstIterator() : col( NULL ) {}
         ConstIterator( const ConstIterator& );
         ConstIterator( const UnitCollection* );
         ~ConstIterator();
@@ -127,13 +132,13 @@ public: ConstIterator() : col( NULL ) {}
             if ( it != col->u.end() && !col->empty() ) return *it;
             return NULL;
         }
-protected:
+    protected:
         friend class UnitCollection;
         const UnitCollection *col;
         std::list< class Unit* >::const_iterator it;
     };
 
-/* backwards compatibility only.  Typedefs suck. dont use them. */
+    /* backwards compatibility only.  Typedefs suck. dont use them. */
     typedef ConstIterator ConstFastIterator;
     typedef UnitIterator  FastIterator;
 
@@ -144,7 +149,7 @@ protected:
          destr();
     }
 
-/* Iterator creation functions. We use this to set the col pointer */
+    /* Iterator creation functions. We use this to set the col pointer */
     inline UnitIterator createIterator()
     {
         return UnitIterator( this );
@@ -162,8 +167,8 @@ protected:
         return ConstFastIterator( this );
     }
 
-/* Traverses entire list and only inserts if no matches are found
- * Do not use in any fast-code paths */
+    /* Traverses entire list and only inserts if no matches are found
+     * Do not use in any fast-code paths */
     void insert_unique( Unit* );
     inline bool empty() const
     {
@@ -171,45 +176,45 @@ protected:
         return true;
     }
 
-/* Add a unit or iterator to the front of the list. */
+    /* Add a unit or iterator to the front of the list. */
     void prepend( Unit* );
     void prepend( UnitIterator* );
 
-/* Add a unit or iterator to the back of the list. */
+    /* Add a unit or iterator to the back of the list. */
     void append( class Unit* );
     void append( UnitIterator* );
 
-/* This is how iterators insert units. Always inserts before iterator */
+    /* This is how iterators insert units. Always inserts before iterator */
     void insert( std::list< Unit* >::iterator&, Unit* );
 
-/* Whipes out entire list only if no iterators are being held.
- * No code uses this function as of 0.5 release */
+    /* Whipes out entire list only if no iterators are being held.
+     * No code uses this function as of 0.5 release */
     void clear();
 
     bool contains( const class Unit* ) const;
 
-/* We only erase the unit from the list under the following conditions:
- * 1. if we have less than 4 iterators being held
- * 2. if none of those iterators are referencing the requested unit
- * Otherwise the Unit pointer is removed from the list and set to NULL,
- * and the iterator is referenced on another list to be deleted
- * the delete list is processed when the number of iterators hits 1 or 0.
- * The reason for this is so we can be scalable to 20,000+ units and
- * modifications to the list by multiple held iterators dont bog us down
- */
+    /* We only erase the unit from the list under the following conditions:
+     * 1. if we have less than 4 iterators being held
+     * 2. if none of those iterators are referencing the requested unit
+     * Otherwise the Unit pointer is removed from the list and set to NULL,
+     * and the iterator is referenced on another list to be deleted
+     * the delete list is processed when the number of iterators hits 1 or 0.
+     * The reason for this is so we can be scalable to 20,000+ units and
+     * modifications to the list by multiple held iterators dont bog us down
+     */
     void erase( std::list< class Unit* >::iterator& );
 
-/* traverse list and remove all matching Units.
- * Do not use in fast-path code */
+    /* traverse list and remove all matching Units.
+     * Do not use in fast-path code */
     bool remove( const class Unit* );
 
-/* Returns number of non-null units in list */
+    /* Returns number of non-null units in list */
     inline const int size() const
     {
         return u.size()-removedIters.size();
     }
 
-/* Returns last non-null unit in list. May be Killed() */
+    /* Returns last non-null unit in list. May be Killed() */
     inline Unit * back()
     {
         for (std::list< Unit* >::reverse_iterator it = u.rbegin(); it != u.rend(); ++it)
@@ -218,7 +223,7 @@ protected:
         return NULL;
     }
 
-/* Returns first non-null unit in list. May be Killed() */
+    /* Returns first non-null unit in list. May be Killed() */
     inline Unit * front()
     {
         for (std::list< Unit* >::iterator it = u.begin(); it != u.end(); ++it)
@@ -231,34 +236,34 @@ private:
     friend class UnitIterator;
     friend class ConstIterator;
 
-/* Does not clear list.  It sets all the Unit pointers to null
- * And sets all the current iterator's collection pointers to NULL.
- * Effectively shutting the list down so it can be destroyed safely. */
+    /* Does not clear list.  It sets all the Unit pointers to null
+     * And sets all the current iterator's collection pointers to NULL.
+     * Effectively shutting the list down so it can be destroyed safely. */
     void destr();
 
-/* Nothing uses this operator as of 0.5, but maybe someday */
+    /* Nothing uses this operator as of 0.5, but maybe someday */
     const UnitCollection& operator=( const UnitCollection& );
 
-/* An iterator "registers" with a collection when it is created
- * This is how a collection tracks how many iterators are being held
- * and what position they are all holding
- */
+    /* An iterator "registers" with a collection when it is created
+     * This is how a collection tracks how many iterators are being held
+     * and what position they are all holding
+     */
     void reg( UnitCollection::UnitIterator* );
 
-/* Unregistering has the added function of clearing the list of
- * Null unit pointers to be removed from the collection when
- * we are down to our last active iterator */
+    /* Unregistering has the added function of clearing the list of
+     * Null unit pointers to be removed from the collection when
+     * we are down to our last active iterator */
     void unreg( UnitCollection::UnitIterator* );
 
-/* This is a list of the current iterators being held */
+    /* This is a list of the current iterators being held */
     std::vector< class UnitCollection::UnitIterator* >activeIters;
 
-/* This is a list of positions in the collection that are pointing to
- * NULL units, positions that should be removed from the collection
- * but couldn't because another iterator was referencing it. */
+    /* This is a list of positions in the collection that are pointing to
+     * NULL units, positions that should be removed from the collection
+     * but couldn't because another iterator was referencing it. */
     std::vector< std::list< class Unit* >::iterator >removedIters;
 
-/* Main collection */
+    /* Main collection */
     std::list< class Unit* >u;
 };
 
