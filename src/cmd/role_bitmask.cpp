@@ -35,22 +35,27 @@ vector< char >& getPriority( unsigned char rolerow )
     }
     return getAllRolePriorities()[rolerow];
 }
-vsUMap< string, int >rolemap;
+
+static vsUMap< string, int > rolemap;
+static vsUMap< int, string > irolemap;
+
 unsigned char InternalGetRole( const std::string &s )
 {
-    vsUMap< string, int >::iterator i = rolemap.find( strtoupper( s ) );
+    vsUMap< string, int >::const_iterator i = rolemap.find( strtoupper( s ) );
     if ( i != rolemap.end() )
         return (*i).second;
     return 0;
 }
-std::string InternalGetStrRole( unsigned char c )
+const std::string& InternalGetStrRole( unsigned char c )
 {
-    vsUMap< string, int >::iterator i = rolemap.begin();
-    for (; i != rolemap.end(); ++i)
-        if ( (*i).second == c )
-            return (*i).first;
-    return rolemap.size() ? ( *rolemap.begin() ).first : std::string( "" );
+    static const std::string empty;
+    
+    vsUMap< int, string >::const_iterator i = irolemap.find( c );
+    if ( i != irolemap.end() )
+        return (*i).second;
+    return rolemap.size() ? rolemap.begin()->first : empty;
 }
+
 vector< vector< string > >buildscripts()
 {
     vector< vector< string > >scripts;
@@ -135,9 +140,11 @@ vector< vector< char > >buildroles()
         vector< string >vec = readCSV( temp );
         //VSFileSystem::vs_fprintf (stderr," SIZE %d\n",vec.size());
         unsigned int    i;
-        for (i = 1; i < vec.size(); i++)
+        for (i = 1; i < vec.size(); i++) {
             //VSFileSystem::vs_fprintf (stderr," %s AS %d\n",vec[i].c_str(),i);
             rolemap.insert( pair< string, int > ( strtoupper( vec[i] ), i-1 ) );
+            irolemap.insert( pair< int, string > ( i-1, strtoupper( vec[i] ) ) );
+        }
         vector< vector< char > >tmprolepriorities;
         vector< string >tmpnamelist;
         while (f.ReadLine( temp, len ) == Ok) {
@@ -163,6 +170,7 @@ vector< vector< char > >buildroles()
                         if (rolePriorities[j].size() == 0)
                             break;
                     rolemap[tmpnamelist[i]] = j;
+                    irolemap[j] = tmpnamelist[i];
                 }
                 if (j != -1) {
                     while (rolePriorities.size() <= (unsigned int) j)
@@ -195,7 +203,7 @@ unsigned char getRole( const std::string &s )
     //int temp = maxRoleValue();
     return InternalGetRole( s );
 }
-std::string getRole( unsigned char c )
+const std::string& getRole( unsigned char c )
 {
     //int temp = maxRoleValue();
     return InternalGetStrRole( c );

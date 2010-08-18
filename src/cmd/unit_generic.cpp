@@ -1845,7 +1845,7 @@ void Unit::Threaten( Unit *targ, float danger )
     }
 }
 
-std::string Unit::getCockpit() const
+const std::string& Unit::getCockpit() const
 {
     return pImage->cockpitImage.get();
 }
@@ -8975,12 +8975,12 @@ void Unit::setAttackPreference( const std::string &s )
     attackPreference( ROLES::getRole( s ) );
 }
 
-std::string Unit::getUnitRole() const
+const std::string& Unit::getUnitRole() const
 {
     return ROLES::getRole( unitRole() );
 }
 
-std::string Unit::getAttackPreference() const
+const std::string& Unit::getAttackPreference() const
 {
     return ROLES::getRole( attackPreference() );
 }
@@ -8993,13 +8993,18 @@ void Unit::setCombatRole( const std::string &s )
 }
 
 //legacy function for python
-std::string Unit::getCombatRole() const
+const std::string& Unit::getCombatRole() const
 {
     static unsigned char inert = ROLES::getRole( "INERT" );
     unsigned char retA = unitRole();
     unsigned char retB = attackPreference();
+    
     //often missions used this to render items either uninteresting or not attacking...so want to prioritize that behavior
-    if (retA == inert || retB == inert) return "INERT";
+    if (retA == inert || retB == inert) {
+        static const std::string INERT("INERT");
+        return INERT;
+    }
+    
     return ROLES::getRole( retA );
 }
 

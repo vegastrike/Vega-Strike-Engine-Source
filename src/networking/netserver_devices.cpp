@@ -180,10 +180,10 @@ void NetServer::sendCargoSnapshot( ObjSerial cltser, const UnitCollection &list 
 void NetServer::sendSaveData( int cp,
                               unsigned short type,
                               int pos,
-                              string *key,
+                              const string *key,
                               Mission *miss,
-                              string *strValue,
-                              float *floatValue )
+                              const string *strValue,
+                              const float *floatValue )
 {
     /* Note to self: This function will do absolutely nothing
      *  until it is implemented. */
@@ -273,7 +273,7 @@ void NetServer::sendDamages( ObjSerial serial,
     }
 }
 
-void NetServer::sendCustom( int cp, string command, string args, string id )
+void NetServer::sendCustom( int cp, const string &command, const string &args, const string &id )
 {
     Packet    p2;
     NetBuffer netbuf;
@@ -294,7 +294,7 @@ void NetServer::sendCustom( int cp, string command, string args, string id )
              NULL, clt->tcp_sock, __FILE__, __LINE__ );
 }
 
-void NetServer::sendMessage( string from, string to, string message, float delay )
+void NetServer::sendMessage( const string &from, const string &to, const string &message, float delay )
 {
     NetBuffer  netbuf;
     netbuf.addString( from );
@@ -404,7 +404,7 @@ void NetServer::sendKill( ObjSerial serial, unsigned short zone )
         zonemgr->removeClient( clt );
 }
 
-void NetServer::sendJumpFinal( ClientPtr clt, string server_ip, unsigned short server_port )
+void NetServer::sendJumpFinal( ClientPtr clt, const string &server_ip, unsigned short server_port )
 {
     Packet    p2;
     NetBuffer buf;
@@ -416,7 +416,7 @@ void NetServer::sendJumpFinal( ClientPtr clt, string server_ip, unsigned short s
         logoutList.push_back( clt );
 }
 
-void NetServer::sendJump( Unit *un, Unit *dst, std::string dststr )
+void NetServer::sendJump( Unit *un, Unit *dst, const string &dststr )
 {
     ClientPtr clt = this->getClientFromSerial( un->GetSerial() );
     if (!clt) return;

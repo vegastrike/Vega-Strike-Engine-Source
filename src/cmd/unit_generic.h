@@ -461,11 +461,11 @@ public:
     void unitRole( unsigned char );
 //following 2 are legacy functions for python export only
     void setCombatRole( const std::string &s );
-    std::string getCombatRole() const;
+    const std::string& getCombatRole() const;
 //end legacy functions
-    std::string getUnitRole() const;
+    const std::string& getUnitRole() const;
     void setUnitRole( const std::string &s );
-    std::string getAttackPreference() const;
+    const std::string& getAttackPreference() const;
     void setAttackPreference( const std::string &s );
 protected:
     unsigned char attack_preference;
@@ -490,7 +490,7 @@ public:
 //Process all meshes to be deleted
     static void ProcessDeleteQueue();
 //Returns the cockpit name so that the controller may load a new cockpit
-    std::string getCockpit() const;
+    const std::string& getCockpit() const;
 
 //Shouldn't do anything here - but needed by Python
     class Cockpit * GetVelocityDifficultyMult( float& ) const;
@@ -1455,7 +1455,7 @@ public:
     {
         fullname = name;
     }
-    std::string getFullname() const
+    const string& getFullname() const
     {
         return fullname;
     }

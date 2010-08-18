@@ -243,7 +243,7 @@ public: Mesh();
     float getFramesPerSecond() const;
     float getCurrentFrame() const;
     void setCurrentFrame( float );
-    int getNumAnimationFrames( string which = "" ) const;
+    int getNumAnimationFrames( const string &which = string() ) const;
     int getNumLOD() const;
     int getNumTextureFrames() const;
     float getTextureFramesPerSecond() const;

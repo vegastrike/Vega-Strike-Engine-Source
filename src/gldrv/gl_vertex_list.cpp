@@ -74,18 +74,19 @@ void GFXOptimizeList( GFXVertex *old, int numV, GFXVertex **nw, int *nnewV, unsi
     
     *ind   = (unsigned int*) malloc( sizeof (unsigned int)*numV );
     *nw    = (GFXVertex*) malloc( numV*sizeof (GFXVertex) );
-    *nnewV = 0;
+    int _nnewV = *nnewV = 0;
     int i;
     for (i = 0; i < numV; i++) {
         std::map< GFXVertex*, int, VertexCompare >::const_iterator it = vtxcache.find( old+i );
         if ( it != vtxcache.end() ) {
             (*ind)[i] = it->second;
         } else {
-            memcpy( (*nw)+(*nnewV), old+i, sizeof (GFXVertex) );
-            vtxcache[old+i] = ( (*ind)[i] ) = (*nnewV);
-            (*nnewV) = (*nnewV)+1;
+            memcpy( (*nw)+_nnewV, old+i, sizeof (GFXVertex) );
+            vtxcache[old+i] = ( (*ind)[i] ) = _nnewV;
+            ++_nnewV;
         }
     }
+    *nnewV = _nnewV;
     
     VSFileSystem::vs_dprintf(3, "Optimized vertex list - vertices: %d -> %d\n", numV, *nnewV);
 }

@@ -43,10 +43,11 @@ ClientPtr NetServer::getClientFromSerial( ObjSerial serial )
 }
 
 //WARNING: ipadr is NULL since we are getting this packet from acctserver, not the client itself.
-bool NetServer::loginAccept( std::string inetbuf, ClientPtr clt, int newacct, char flags )
+bool NetServer::loginAccept( const string &_inetbuf, ClientPtr clt, int newacct, char flags )
 {
     COUT<<"enter "<<__PRETTY_FUNCTION__<<endl;
 
+    string    inetbuf = _inetbuf;
     string    callsign;
     string    unused;
     NetBuffer netbuf;

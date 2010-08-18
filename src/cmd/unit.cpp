@@ -380,25 +380,23 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
 {
     //Quick shortcut for camera setup phase
     bool myparent = ( this == _Universe->AccessCockpit()->GetParent() );
-    /*bool ormygrampa = myparent||(_Universe->AccessCockpit()->GetParent()&&(this==_Universe->AccessCockpit()->GetParent()->owner));
-     *  bool topparent = _Universe->AccessCockpit()->GetParent()&&(_Universe->AccessCockpit()->GetParent()->owner == NULL);
-     *  if (cam_setup_phase&&!ormygrampa&&(topparent||UnitType::SubUnits.empty()))
-     *   return;*/
+
 #ifdef VARIABLE_LENGTH_PQR
     const float     vlpqrScaleFactor = SizeScaleFactor;
 #else
     const float     vlpqrScaleFactor = 1.f;
 #endif
+
     Matrix         *ctm;
     Matrix invview;
     Transformation *ct;
-    //if (cam_setup_phase) {
+
     this->cumulative_transformation = linear_interpolate( this->prev_physical_state,
                                                           this->curr_physical_state,
                                                           interpolation_blend_factor );
     this->cumulative_transformation.Compose( parent, parentMatrix );
     this->cumulative_transformation.to_matrix( this->cumulative_transformation_matrix );
-    //}
+
     ctm = &this->cumulative_transformation_matrix;
     ct  = &this->cumulative_transformation;
     if (this->graphicOptions.FaceCamera == 1) {
@@ -410,31 +408,39 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
         float   magq = parentMatrix.getQ().Magnitude();
         CalculateOrientation( pos, p, q, r, wid, hei, 0, false, ctm );
         VectorAndPositionToMatrix( invview, p*magp, q*magq, r*magr, ctm->p );
-//_Universe->AccessCamera()->GetView(invview);
         ctm = &invview;
     }
+
 #ifdef PERFRAMESOUND
     AUDAdjustSound( sound.engine, cumulative_transformation.position, GetVelocity() );
 #endif
+
     int cloak = this->cloaking;
     if (this->cloaking > this->cloakmin) {
         cloak = (int) (this->cloaking-interpolation_blend_factor*this->pImage->cloakrate*SIMULATION_ATOM);
         cloak = cloakVal( cloak, this->cloakmin, this->pImage->cloakrate, this->pImage->cloakglass );
     }
+    
     unsigned int i;
     if ( (this->hull < 0) && (!cam_setup_phase) )
         Explode( true, GetElapsedTime() );
+    
     float damagelevel = 1.0f;
     unsigned char chardamage = 0;
     if (this->hull < this->maxhull && !cam_setup_phase) {
         damagelevel = this->hull/this->maxhull;
         chardamage  = ( 255-(unsigned char) (damagelevel*255) );
     }
+    
     bool On_Screen = false;
     if ( ( !(this->invisible&UnitType::INVISUNIT) ) && ( ( !(this->invisible&UnitType::INVISCAMERA) ) || (!myparent) ) ) {
         if (!cam_setup_phase) {
+            Camera *camera = _Universe->AccessCamera();
+            QVector camerapos = camera->GetPosition();
+            
             float minmeshradius =
-                ( _Universe->AccessCamera()->GetVelocity().Magnitude()+this->Velocity.Magnitude() )*SIMULATION_ATOM;
+                ( camera->GetVelocity().Magnitude()+this->Velocity.Magnitude() )*SIMULATION_ATOM;
+            
             unsigned int numKeyFrames = this->graphicOptions.NumAnimationPoints;
             for (i = 0; i < this->meshdata.size(); i++) {
                 //NOTE LESS THAN OR EQUALS...to cover shield mesh
@@ -449,22 +455,13 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                         if ( flickerDamage( this, damagelevel ) )
                             continue;
                 }
-                QVector TransformedPosition = Transform( *ctm,
-                                                        this->meshdata[i]->Position().Cast() );
-#if 0
-                //This is a test of the box in frustum setup to be used with terrain
-                GFXBoxInFrustumModel( ctm );
-                int tmp = GFXBoxInFrustum( meshdata[i]->corner_min(), meshdata[i]->corner_max() );
-                if ( (d == 0) != (tmp == 0) )
-                    VSFileSystem::vs_fprintf( stderr, "Mismatch for %s with Box being %d", name.c_str(), tmp );
-#endif
-                //VSFileSystem::vs_fprintf (stderr,"%s %d ",name.c_str(),i);
+                QVector TransformedPosition = Transform( *ctm, this->meshdata[i]->Position().Cast() );
+
                 double d = GFXSphereInFrustum( TransformedPosition,
                                                minmeshradius+this->meshdata[i]->clipRadialSize()*vlpqrScaleFactor );
-                //VSFileSystem::vs_fprintf (stderr,"\n");
                 if (d) {
                     //d can be used for level of detail shit
-                    d = ( TransformedPosition-_Universe->AccessCamera()->GetPosition() ).Magnitude();
+                    d = ( TransformedPosition-camerapos ).Magnitude();
                     double rd  = d-this->meshdata[i]->rSize();
                     double pixradius = this->meshdata[i]->rSize()*perspectiveFactor(
                         (rd < g_game.znear) ? g_game.znear : rd );
@@ -473,12 +470,13 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                         //if the radius is at least half a pixel at detail 1 (equivalent to pixradius >= 0.5 / detail)
                         float currentFrame = this->meshdata[i]->getCurrentFrame();
                         this->meshdata[i]->Draw( lod, this->WarpMatrix( *ctm ), d, i == this->meshdata.size()-1 ? -1 : cloak,
-                                                 (_Universe->AccessCamera()->GetNebula() == this->nebula && this->nebula
+                                                 (camera->GetNebula() == this->nebula && this->nebula
                                                   != NULL) ? -1 : 0, chardamage );                                                                                                                                                            //cloakign and nebula
                         On_Screen = true;
                         unsigned int numAnimFrames = 0;
+                        static const string default_animation;
                         if ( this->meshdata[i]->getFramesPerSecond()
-                            && ( numAnimFrames = this->meshdata[i]->getNumAnimationFrames( "" ) ) ) {
+                            && ( numAnimFrames = this->meshdata[i]->getNumAnimationFrames( default_animation ) ) ) {
                             float currentprogress = floor(
                                 this->meshdata[i]->getCurrentFrame()*numKeyFrames/(float) numAnimFrames );
                             if (numKeyFrames

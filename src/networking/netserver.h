@@ -120,7 +120,7 @@ class NetServer
 		void			addClient( ClientPtr clt);		// Add the client in the game
 		void			chooseShip( ClientPtr clt, Packet &p);	// Client has chosen a ship to fly in.
 		void			localLogin( ClientPtr clt, Packet &p);	// No account server... client will choose a ship.
-		bool			loginAccept( std::string inetbuf,ClientPtr clt, int newacct, char flags);
+		bool			loginAccept( const std::string &inetbuf, ClientPtr clt, int newacct, char flags);
 		void			serverTimeInitUDP( ClientPtr clt, NetBuffer &netbuf);
 		void			removeClient( ClientPtr clt);		// Remove the client from the game
 		ClientPtr       newConnection_udp( const AddressIP& ipadr);
@@ -170,13 +170,13 @@ class NetServer
 	
 		bool			saveAccount(int cpnum );
 	
-		void	sendCustom( int cp, string cmd, string args, string id);
+		void	sendCustom( int cp, const string &cmd, const string &args, const string &id);
 		void	sendDamages( ObjSerial serial, unsigned short zone, float hull, const Shield &shields, const Armor &armor,
 							float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color);
 		//void	sendDamages( ObjSerial serial, Vector & pnt, Vector & normal, float amt, GFXColor & color, float phasedamage);
 		void	sendKill( ObjSerial serial, unsigned short zone);
-		void	sendJump( Unit * src, Unit *jumppoint,std::string destination);
-		void	sendJumpFinal( ClientPtr clt, string server, unsigned short port );
+		void	sendJump( Unit * src, Unit *jumppoint, const string &destination);
+		void	sendJumpFinal( ClientPtr clt, const string &server, unsigned short port );
 		void	sendForcePosition( ClientPtr clt );
 
 		void	invalidateSnapshot( ) { snapchanged = 1; }
@@ -189,11 +189,11 @@ class NetServer
 		void	addUnitCargoSnapshot( const Unit *un, NetBuffer &netbuf);
 		void	sendCargoSnapshot( ObjSerial serial, const UnitCollection &unitlist);
 
-		void	sendMessage(string from, string to, string message, float delay);
+		void	sendMessage(const string &from, const string &to, const string &message, float delay);
 		void	sendCommunication(Unit *from, Unit *to, const class CommunicationMessage *c);
-		void	sendSaveData( int cp, unsigned short packetType, int pos, string *key,
+		void	sendSaveData( int cp, unsigned short packetType, int pos, const string *key,
 							  Mission *miss, // Mission number for objectives.
-							  string *strValue, float *floatValue);
+							  const string *strValue, const float *floatValue);
 		void	sendMission( int cp, unsigned short packetType, string mission, int pos);
 
 		void	addSystem( string & sysname, string & system);

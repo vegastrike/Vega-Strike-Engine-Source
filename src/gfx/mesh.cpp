@@ -54,7 +54,7 @@ Hashtable< std::string, Mesh, 503 >Mesh::meshHashTable;
 Hashtable< std::string, std::vector< int >, 503 >Mesh::animationSequences;
 Vector mouseline;
 
-int Mesh::getNumAnimationFrames( string which ) const
+int Mesh::getNumAnimationFrames( const string &which ) const
 {
     if ( which.empty() ) {
         vector< int > *animSeq = animationSequences.Get( hash_name );

@@ -15,7 +15,7 @@ std::vector< std::vector< char > >& getAllRolePriorities();
 unsigned int maxRoleValue();
 //getRole returns a number between 0 and 32 that's the discrete log
 unsigned char getRole( const std::string &role );
-std::string getRole( unsigned char role );
+const std::string& getRole( unsigned char role );
 
 //returns the getRoles or'd together
 unsigned int readBitmask( const std::string &s );
