@@ -92,6 +92,8 @@ void GFXOptimizeList( GFXVertex *old, int numV, GFXVertex **nw, int *nnewV, unsi
             ++_nnewV;
         }
     }
+    if (quickpath && i > 0)
+        memcpy( *nw, old, sizeof(GFXVertex)*size_t(i) );
     *nnewV = _nnewV;
     
     VSFileSystem::vs_dprintf(3, "Optimized vertex list - vertices: %d -> %d\n", numV, *nnewV);
