@@ -76,12 +76,18 @@ void GFXOptimizeList( GFXVertex *old, int numV, GFXVertex **nw, int *nnewV, unsi
     *nw    = (GFXVertex*) malloc( numV*sizeof (GFXVertex) );
     int _nnewV = *nnewV = 0;
     int i;
+    bool quickpath = true;
     for (i = 0; i < numV; i++) {
         std::map< GFXVertex*, int, VertexCompare >::const_iterator it = vtxcache.find( old+i );
         if ( it != vtxcache.end() ) {
+            if (quickpath && i > 0) {
+                quickpath = false;
+                memcpy( *nw, old, sizeof(GFXVertex)*size_t(i) );
+            }
             (*ind)[i] = it->second;
         } else {
-            memcpy( (*nw)+_nnewV, old+i, sizeof (GFXVertex) );
+            if (!quickpath)
+                memcpy( (*nw)+_nnewV, old+i, sizeof (GFXVertex) );
             vtxcache[old+i] = ( (*ind)[i] ) = _nnewV;
             ++_nnewV;
         }
