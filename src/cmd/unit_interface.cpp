@@ -19,6 +19,7 @@
 #include "unit_const_cache.h"
 #include "configxml.h"
 #include "unit_util.h"
+#include "save_util.h"
 #include "load_mission.h"
 
 #ifdef _WIN32
@@ -27,10 +28,6 @@
 
 extern int GetModeFromName( const char* );
 extern void ModifyMouseSensitivity( int&, int& );
-extern unsigned int getSaveStringLength( int whichcp, string key );
-extern unsigned int eraseSaveString( int whichcp, string key, unsigned int num );
-extern std::string getSaveString( int whichcp, string key, unsigned int num );
-extern void putSaveString( int whichcp, string key, unsigned int num, std::string s );
 
 static const char *miss_script = "mission_scripts";
 static const char *miss_name   = "mission_names";

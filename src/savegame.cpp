@@ -390,10 +390,24 @@ std::vector< float >& SaveGame::getMissionData( const std::string &magic_number 
     return missiondata->m[magic_number];
 }
 
+const std::vector< float >& SaveGame::readMissionData( const std::string &magic_number ) const
+{
+    static const std::vector< float > empty;
+    MissionFloatDat::MFD::const_iterator it = missiondata->m.find( magic_number );
+    return ( it == missiondata->m.end() ) ? empty : it->second;
+}
+
 unsigned int SaveGame::getMissionDataLength( const std::string &magic_number ) const
 {
     MissionFloatDat::MFD::const_iterator it = missiondata->m.find( magic_number );
     return ( it == missiondata->m.end() ) ? 0 : it->second.size();
+}
+
+const std::vector< string >& SaveGame::readMissionStringData( const std::string &magic_number ) const
+{
+    static const std::vector< string > empty;
+    MissionStringDat::MSD::const_iterator it = missionstringdata->m.find( magic_number );
+    return ( it == missionstringdata->m.end() ) ? empty : it->second;
 }
 
 std::vector< string >& SaveGame::getMissionStringData( const std::string &magic_number )

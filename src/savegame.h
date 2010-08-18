@@ -58,10 +58,26 @@ public: ~SaveGame();
     {
         callsign = cs;
     }
+    
+    /** Get read-write access to mission data */
     std::vector< float >& getMissionData( const std::string &magic_number );
+    
+    /** Get read-only access to mission data - note: returns empty stub if key isn't found */
+    const std::vector< float >& readMissionData( const std::string &magic_number ) const;
+    
+    /** Get mission data length (read-only) */
     unsigned int getMissionDataLength( const std::string &magic_number ) const;
+    
+    /** Get read-write access to mission string data */
     std::vector< std::string >& getMissionStringData( const std::string &magic_number );
+    
+    /** Get read-only access to mission string data - note: returns empty stub if key isn't found */
+    const std::vector< std::string >& readMissionStringData( const std::string &magic_number ) const;
+    
+    /** Get mission string data length (read-only) */
     unsigned int getMissionStringDataLength( const std::string &magic_number ) const;
+    
+    
     SaveGame( const std::string &pilotname );
     void PurgeZeroStarships();
     float GetSavedCredits();

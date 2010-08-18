@@ -28,6 +28,7 @@
 using VSFileSystem::SaveFile;
 #include "savegame.h"
 #include "universe_util.h"
+#include "save_util.h"
 #include <algorithm>                //For std::sort.
 #include <set>
 #include "load_mission.h"
@@ -211,10 +212,6 @@ static GFXColor MOUNT_POINT_FULL()
 static const char*const MISSION_SCRIPTS_LABEL = "mission_scripts";
 static const char*const MISSION_NAMES_LABEL   = "mission_names";
 static const char*const MISSION_DESC_LABEL    = "mission_descriptions";
-extern unsigned int getSaveStringLength( int whichcp, string key );
-extern unsigned int eraseSaveString( int whichcp, string key, unsigned int num );
-extern std::string getSaveString( int whichcp, string key, unsigned int num );
-extern void putSaveString( int whichcp, string key, unsigned int num, std::string s );
 
 //Some new declarations.
 //These should probably be in a header file somewhere.
@@ -246,9 +243,9 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
 //build the previous description for a ship purchase item
 string buildShipDescription( Cargo &item, string &descriptiontexture );
 //build the previous description from a cargo purchase item
-string buildCargoDescription( Cargo &item );
+string buildCargoDescription( const Cargo &item, BaseComputer &computer, float price );
 //put in buffer a pretty prepresentation of the POSITIVE float f (ie 4,732.17)
-void prettyPrintFloat( char *buffer, float f, int digitsBefore, int digitsAfter );
+void prettyPrintFloat( char *buffer, float f, int digitsBefore, int digitsAfter, int bufferLen = 128 );
 string buildUpgradeDescription( Cargo &item );
 int basecargoassets( Unit *base, string cargoname );
 
@@ -399,6 +396,39 @@ const Unit * getUnitFromUpgradeName( const string &upgradeName, int myUnitFactio
 
 //Takes in a category of an upgrade or cargo and returns true if it is any type of mountable weapon.
 extern bool isWeapon( std::string name );
+
+
+
+#define PRETTY_ADD( str, val, digits )                        \
+    do {                                                      \
+        text += "#n#";                                        \
+        text += prefix;                                       \
+        text += str;                                          \
+        prettyPrintFloat( conversionBuffer, val, 0, digits ); \
+        text += conversionBuffer;                             \
+    }                                                         \
+    while (0)
+
+#define PRETTY_ADDN( str, val, digits )                       \
+    do {                                                      \
+        text += str;                                          \
+        prettyPrintFloat( conversionBuffer, val, 0, digits ); \
+        text += conversionBuffer;                             \
+    }                                                         \
+    while (0)
+
+#define PRETTY_ADDU( str, val, digits, unit )                 \
+    do {                                                      \
+        text += "#n#";                                        \
+        text += prefix;                                       \
+        text += str;                                          \
+        prettyPrintFloat( conversionBuffer, val, 0, digits ); \
+        text += conversionBuffer;                             \
+        text += " ";                                          \
+        text += unit;                                         \
+    }                                                         \
+    while (0)
+
 
 //CONSTRUCTOR.
 BaseComputer::BaseComputer( Unit *player, Unit *base, const std::vector< DisplayMode > &modes ) :
@@ -2206,6 +2236,7 @@ void BaseComputer::updateTransactionControlsForSelection( TransactionList *tlist
     }
     //The description string.
     string descString;
+    string tailString;
     char   tempString[2048];
     Unit  *baseUnit = m_base.GetUnit();
     if (tlist->transaction != ACCEPT_MISSION) {
@@ -2215,11 +2246,10 @@ void BaseComputer::updateTransactionControlsForSelection( TransactionList *tlist
         case BUY_CARGO:
             if (item.GetDescription() == "" || item.GetDescription()[0] != '@') {
                 buildShipDescription( item, descriptiontexture ); //Check for ship
-                item.description = buildCargoDescription( item ); //do first, so can override default image, if so desired
-                string temp;
-                temp += item.description;
+                string temp = item.description; //do first, so can override default image, if so desired
                 if ( ( string::npos != temp.find( '@' ) ) && ("" != descriptiontexture) ) //not already pic-annotated, has non-null ship pic
-                    item.description = "@"+descriptiontexture+"@"+item.description;
+                    temp = "@"+descriptiontexture+"@"+temp;
+                item.description = temp;
             }
             if (item.GetCategory().find( "My_Fleet" ) != string::npos) {
                 //This ship is in my fleet -- the price is just the transport cost to get it to
@@ -2231,6 +2261,7 @@ void BaseComputer::updateTransactionControlsForSelection( TransactionList *tlist
                 sprintf( tempString, "Cargo volume: %.2f;  Mass: %.2f#n1.5#", item.volume, item.mass );
             }
             descString += tempString;
+            tailString = buildCargoDescription( item, *this, item.price );
             break;
         case BUY_UPGRADE:
             if (item.content == BASIC_REPAIR_NAME) {
@@ -2278,11 +2309,10 @@ void BaseComputer::updateTransactionControlsForSelection( TransactionList *tlist
         case SELL_CARGO:
             if (item.GetDescription() == "" || item.GetDescription()[0] != '@') {
                 buildShipDescription( item, descriptiontexture ); //Check for ship
-                item.description = buildCargoDescription( item ); //do first, so can override default image, if so desired
-                string temp;
-                temp += item.description;
+                string temp = item.description; //do first, so can override default image, if so desired
                 if ( ( string::npos != temp.find( '@' ) ) && ("" != descriptiontexture) ) //not already pic-annotated, has non-null ship pic
-                    item.description = "@"+descriptiontexture+"@"+item.description;
+                    temp = "@"+descriptiontexture+"@"+item.description;
+                item.description = temp;
             }
             if (item.mission)
                 sprintf( tempString, "Destroy evidence of mission cargo. Credit received: 0.00." );
@@ -2292,10 +2322,12 @@ void BaseComputer::updateTransactionControlsForSelection( TransactionList *tlist
             descString += tempString;
             sprintf( tempString, "Cargo volume: %.2f;  Mass: %.2f#n1.5#", item.volume, item.mass );
             descString += tempString;
+            if (!item.mission)
+                tailString = buildCargoDescription( item, *this, baseUnit->PriceCargo( item.content ) );
             break;
         case SELL_UPGRADE:
 
-//********************************************************************************************
+            //********************************************************************************************
             {
                 double percent_working = m_player.GetUnit() ? UnitUtil::PercentOperational(
                     m_player.GetUnit(), item.content, item.category, false ) : 0.0;
@@ -2328,6 +2360,7 @@ void BaseComputer::updateTransactionControlsForSelection( TransactionList *tlist
     }
     //Description.
     descString += item.description;
+    descString += tailString;
 
     //Change the description control.
     string::size_type   pic;
@@ -4235,51 +4268,232 @@ string buildUpgradeDescription( Cargo &item )
     return str;
 }
 
-string buildCargoDescription( Cargo &item )
+class PriceSort {
+    const vector<float> &price;
+    bool reverse;
+
+public:
+    PriceSort(const vector<float> &_price, bool _reverse) 
+        : price(_price)
+        , reverse(_reverse)
+    {
+    }
+    
+    bool operator()(size_t a, size_t b)
+    {
+        if (reverse)
+            return price[a] > price[b];
+        else
+            return price[a] < price[b];
+    }
+};
+
+void trackPrice(int whichplayer, const Cargo &item, float price, const string &systemName, const string &baseName, 
+    /*out*/ vector<string> &highest, /*out*/ vector<string> &lowest)
 {
-    //load the Unit
-    string blnk;     //modifications to an upgrade item???
-    /*
-     *  Flightgroup* flightGroup=new Flightgroup();//sigh
-     *  int fgsNumber=0;
-     *   current_unit_load_mode=NO_MESH;
-     *  Unit* newPart = UnitFactory::createUnit(item.content.c_str(), false, FactionUtil::GetFaction("upgrades"),blnk,flightGroup,fgsNumber);
-     *   current_unit_load_mode=DEFAULT;
-     *   string str="";
-     *   string hudimage;
-     *  string texturedescription;
-     *   if(newPart->getHudImage()) {
-     *  if(newPart->getHudImage()->getTexture()) {
-     *   hudimage = newPart->getHudImage()->getTexture()->texfilename;
-     *   string::size_type doublepng = hudimage.find(".png");
-     *   if(doublepng==string::npos) doublepng=hudimage.find(".jpg");
-     *   if(doublepng!=string::npos) {
-     *     std::string shipname= hudimage.substr(doublepng+4);
-     *     if(shipname.find(".png")!=string::npos||shipname.find(".jpg")!=string::npos) {
-     *       hudimage = hudimage.substr(0,doublepng+4-shipname.length());
-     *       string shipnoblank = item.content.substr(0,item.content.find("."));
-     *       string::size_type ship = hudimage.rfind(shipnoblank);
-     *       if(ship!=string::npos) {
-     *         texturedescription="../units/"+shipnoblank+"/"+shipname;
-     *       }else{
-     *         texturedescription=shipname;
-     *       }
-     *             }
-     *           }else {
-     *     texturedescription = hudimage.substr(hudimage.find(item.content));
-     *           }
-     *     }
-     *   }
-     *   delete newPart;
-     *  if(texturedescription!=""){
-     *  str+="@"+texturedescription+"@";
-     *  }
-     *
-     *
-     *  str+=item.description;
-     *  return str;
-     */
-    return item.description;
+    static size_t toprank = (size_t)
+        XMLSupport::parse_int( vs_config->getVariable( "general", "trade_interface_tracks_prices_toprank", "10" ) ); 
+
+    VSFileSystem::vs_dprintf(1, "Ranking item %s/%s at %s/%s\n", 
+        item.category.get().c_str(), item.content.get().c_str(),
+        systemName.c_str(), baseName.c_str());
+    fflush(stderr);
+    
+    // Recorded prices are always sorted, so we first do a quick check to avoid 
+    // triggering savegame serialization without reason
+    string itemkey = string(item.category) + "/" + item.content;
+    string hilock = itemkey + "?hi?loc";
+    string lolock = itemkey + "?lo?loc";
+    string hipricek = itemkey + "?hi?pcs";
+    string lopricek = itemkey + "?lo?pcs";
+    
+    // First record the given item's price and update the ranking lists
+    {
+        string locname = "#b#" + baseName + "#-b# in the #b#" + systemName + "#-b# system";
+        
+        {
+            bool resort = false;
+            {
+                // Limited lifetime iterator (points to invalid data after save data manipulation)
+                const vector<string> &recordedHighestLocs = getStringList(whichplayer, hilock);
+                const vector<float> &recordedHighestPrices = getSaveData(whichplayer, hipricek);
+                vector<string>::const_iterator prev = std::find(
+                    recordedHighestLocs.begin(), recordedHighestLocs.end(), 
+                    locname);
+                    
+                if (prev != recordedHighestLocs.end()) {
+                    size_t index = prev - recordedHighestLocs.begin();
+                    putSaveData(whichplayer, hipricek, index, price);
+                    resort = true;
+                } else if (recordedHighestPrices.size() < toprank || recordedHighestPrices.back() < price) {
+                    // Track new top price
+                    pushSaveString(whichplayer, hilock, locname);
+                    pushSaveData(whichplayer, hipricek, price);
+                    resort = true;
+                }
+            }
+            
+            if (resort) {
+                // Re-get lists, the ones we got earlier could be empty stubs
+                const vector<string> &locs = getStringList(whichplayer, hilock);
+                const vector<float> &prices = getSaveData(whichplayer, hipricek);
+                vector<size_t> indices;
+                
+                indices.resize(prices.size());
+                { for (size_t i=0; i<prices.size(); ++i)
+                    indices[i] = i; }
+                
+                std::sort(indices.begin(), indices.end(), PriceSort(prices, true));
+                
+                vector<string> newlocs;
+                vector<float> newprices;
+                
+                newlocs.reserve(locs.size());
+                newprices.reserve(prices.size());
+                { for (size_t i=0; i<indices.size() && i<toprank; ++i) {
+                    newlocs.push_back(locs[indices[i]]);
+                    newprices.push_back(prices[indices[i]]);
+                } }
+                
+                // Save new rank list
+                saveDataList(whichplayer, hipricek, newprices);
+                saveStringList(whichplayer, hilock, newlocs);
+            }
+        }
+        
+        {
+            bool resort = false;
+            {
+                // Limited lifetime iterator (points to invalid data after save data manipulation)
+                const vector<string> &recordedLowestLocs = getStringList(whichplayer, lolock);
+                const vector<float> &recordedLowestPrices = getSaveData(whichplayer, lopricek);
+                vector<string>::const_iterator prev = std::find(
+                    recordedLowestLocs.begin(), recordedLowestLocs.end(), 
+                    locname);
+                    
+                if (prev != recordedLowestLocs.end()) {
+                    size_t index = prev - recordedLowestLocs.begin();
+                    putSaveData(whichplayer, lopricek, index, price);
+                    resort = true;
+                } else if (recordedLowestPrices.size() < toprank || recordedLowestPrices.back() > price) {
+                    // Track new top price
+                    pushSaveString(whichplayer, lolock, locname);
+                    pushSaveData(whichplayer, lopricek, price);
+                    resort = true;
+                }
+            }
+            
+            if (resort) {
+                // Re-get lists, the ones we got earlier could be empty stubs
+                const vector<string> &locs = getStringList(whichplayer, lolock);
+                const vector<float> &prices = getSaveData(whichplayer, lopricek);
+                vector<size_t> indices;
+                
+                indices.resize(prices.size());
+                { for (size_t i=0; i<prices.size(); ++i)
+                    indices[i] = i; }
+                
+                std::sort(indices.begin(), indices.end(), PriceSort(prices, false));
+                
+                vector<string> newlocs;
+                vector<float> newprices;
+                
+                newlocs.reserve(locs.size());
+                newprices.reserve(prices.size());
+                { for (size_t i=0; i<indices.size() && i<toprank; ++i) {
+                    newlocs.push_back(locs[indices[i]]);
+                    newprices.push_back(prices[indices[i]]);
+                } }
+                
+                // Save new rank list
+                saveDataList(whichplayer, lopricek, newprices);
+                saveStringList(whichplayer, lolock, newlocs);
+            }
+        }
+    }
+
+    // Now build the top-ranking descriptions
+    {
+        const vector<string> &recordedHighestLocs = getStringList(whichplayer, hilock);
+        const vector<string> &recordedLowestLocs = getStringList(whichplayer, lolock);
+        const vector<float> &recordedHighestPrices = getSaveData(whichplayer, hipricek);
+        const vector<float> &recordedLowestPrices = getSaveData(whichplayer, lopricek);
+        
+        string prefix = "   ";
+        char conversionBuffer[128];
+        
+        VSFileSystem::vs_dprintf(1,"Tracking data:\n");
+        VSFileSystem::vs_dprintf(1,"  highest locs: (%d)\n", recordedHighestLocs.size());
+        { for (size_t i=0; i < recordedHighestLocs.size(); ++i) {
+            VSFileSystem::vs_dprintf(1, "    %d : %s\n", i, recordedHighestLocs[i].c_str());
+        } }
+        
+        VSFileSystem::vs_dprintf(1,"  highest prices: (%d)\n", recordedHighestPrices.size());
+        { for (size_t i=0; i < recordedHighestPrices.size(); ++i) {
+            VSFileSystem::vs_dprintf(1, "    %d : %.2f\n", i, recordedHighestPrices[i]);
+        } }
+        
+        VSFileSystem::vs_dprintf(1,"  loest locs: (%d)\n", recordedLowestLocs.size());
+        { for (size_t i=0; i < recordedLowestLocs.size(); ++i) {
+            VSFileSystem::vs_dprintf(1, "    %d : %s\n", i, recordedLowestLocs[i].c_str());
+        } }
+        
+        VSFileSystem::vs_dprintf(1,"  lowest prices: (%d)\n", recordedLowestPrices.size());
+        { for (size_t i=0; i < recordedLowestPrices.size(); ++i) {
+            VSFileSystem::vs_dprintf(1, "    %d : %.2f\n", i, recordedLowestPrices[i]);
+        } }
+        
+        fflush(stderr);
+        
+        
+        highest.clear();
+        highest.resize(recordedHighestPrices.size());
+        { for (size_t i=0; i < recordedHighestPrices.size(); ++i) {
+            string &text = highest[i];
+            PRETTY_ADD( "", recordedHighestPrices[i], 2 );
+            text += " (at " + recordedHighestLocs[i] + ")";
+            
+            VSFileSystem::vs_dprintf(1, "Highest item %s\n", text.c_str());
+        } }
+        
+        lowest.clear();
+        lowest.resize(recordedLowestPrices.size());
+        { for (size_t i=0; i < recordedLowestPrices.size(); ++i) {
+            string &text = lowest[i];
+            PRETTY_ADD( "", recordedLowestPrices[i], 2 );
+            text += " (at " + recordedLowestLocs[i] + ")";
+            
+            VSFileSystem::vs_dprintf(1, "Lowest item %s\n", text.c_str());
+        } }
+    }
+}
+
+string buildCargoDescription( const Cargo &item, BaseComputer &computer, float price )
+{
+    static bool trackBestPrices =
+        XMLSupport::parse_bool( vs_config->getVariable( "general", "trade_interface_tracks_prices", "true" ) ); 
+
+    string desc;
+    
+    if (trackBestPrices && computer.m_base.GetUnit() != NULL) {
+        int cp = _Universe->whichPlayerStarship( computer.m_player.GetUnit() );
+        vector<string> highest, lowest;
+        trackPrice(cp, item, price, UniverseUtil::getSystemName(), computer.m_base.GetUnit()->getFullname(), highest, lowest );
+        
+        if (highest.size()) {
+            desc += "#n##n##b#Highest prices seen#-b#:";
+            for (vector<string>::const_iterator i=highest.begin(); i!=highest.end(); ++i)
+                desc += *i;
+        }
+        
+        if (lowest.size()) {
+            desc += "#n##n##b#Lowest prices seen#-b#:";
+            for (vector<string>::const_iterator i=lowest.begin(); i!=lowest.end(); ++i)
+                desc += *i;
+        }
+    }
+
+    return desc;
 }
 
 //Load the controls for the SHIP_DEALER display.
@@ -4626,7 +4840,7 @@ bool BaseComputer::showPlayerInfo( const EventCommandId &command, Control *contr
 }
 
 //does not work with negative numbers!!
-void prettyPrintFloat( char *buffer, float f, int digitsBefore, int digitsAfter )
+void prettyPrintFloat( char *buffer, float f, int digitsBefore, int digitsAfter, int bufferLen )
 {
     int   bufferPos = 0;
     if ( !FINITE( f ) || ISNAN( f ) ) {
@@ -4648,12 +4862,12 @@ void prettyPrintFloat( char *buffer, float f, int digitsBefore, int digitsAfter 
         temp /= 10.0f;
     }
     //printf("before=%i\n",before);
-    while (before < digitsBefore) {
+    while (bufferPos < (bufferLen-4-digitsAfter) && before < digitsBefore) {
         buffer[bufferPos++] = '0';
         digitsBefore--;
     }
     if (before) {
-        for (int p = before; p > 0; p--) {
+        for (int p = before; bufferPos < (bufferLen-4-digitsAfter) && p > 0; p--) {
             temp = f;
             float substractor = 1;
             for (int i = 0; i < p-1; i++) {
@@ -4673,45 +4887,19 @@ void prettyPrintFloat( char *buffer, float f, int digitsBefore, int digitsAfter 
         buffer[bufferPos] = 0;
         return;
     }
-    buffer[bufferPos++] = '.';
+    
+    if (bufferPos < bufferLen)
+        buffer[bufferPos++] = '.';
+    
     temp = f;
-    for (int i = 0; i < digitsAfter; i++) {
+    for (int i = 0; bufferPos < (bufferLen-1) && i < digitsAfter; i++) {
         temp *= 10;
         buffer[bufferPos++] = '0'+( ( (int) temp )%10 );
     }
-    buffer[bufferPos] = 0;
+    if (bufferPos < bufferLen)
+        buffer[bufferPos] = 0;
     //printf("******************* %f is, I think %s\n",dbgval,buffer);
 }
-
-#define PRETTY_ADD( str, val, digits )                        \
-    do {                                                      \
-        text += "#n#";                                        \
-        text += prefix;                                       \
-        text += str;                                          \
-        prettyPrintFloat( conversionBuffer, val, 0, digits ); \
-        text += conversionBuffer;                             \
-    }                                                         \
-    while (0)
-
-#define PRETTY_ADDN( str, val, digits )                       \
-    do {                                                      \
-        text += str;                                          \
-        prettyPrintFloat( conversionBuffer, val, 0, digits ); \
-        text += conversionBuffer;                             \
-    }                                                         \
-    while (0)
-
-#define PRETTY_ADDU( str, val, digits, unit )                 \
-    do {                                                      \
-        text += "#n#";                                        \
-        text += prefix;                                       \
-        text += str;                                          \
-        prettyPrintFloat( conversionBuffer, val, 0, digits ); \
-        text += conversionBuffer;                             \
-        text += " ";                                          \
-        text += unit;                                         \
-    }                                                         \
-    while (0)
 
 static const char *WeaponTypeStrings[] = {
     "UNKNOWN",
@@ -4734,7 +4922,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         XMLSupport::parse_float( vs_config->getVariable( "physics", "shield_energy_capacitance", ".2" ) );
 
     float  Wconv  = warpenratio == 0.0 ? 0.0 : (1.0/warpenratio);      //converts from reactor to warp energy scales
-    char   conversionBuffer[2048];
+    char   conversionBuffer[128];
     string prefix = "";
     for (int i = 0; i < subunitlevel; i++)
         prefix += "  ";
