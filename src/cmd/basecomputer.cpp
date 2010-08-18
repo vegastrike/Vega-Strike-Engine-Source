@@ -4478,7 +4478,12 @@ string buildCargoDescription( const Cargo &item, BaseComputer &computer, float p
     if (trackBestPrices && computer.m_base.GetUnit() != NULL) {
         int cp = _Universe->whichPlayerStarship( computer.m_player.GetUnit() );
         vector<string> highest, lowest;
-        trackPrice(cp, item, price, UniverseUtil::getSystemName(), computer.m_base.GetUnit()->getFullname(), highest, lowest );
+        
+        const string &baseName = (computer.m_base.GetUnit()->isUnit() == PLANETPTR) ?
+              computer.m_base.GetUnit()->name.get()
+            : computer.m_base.GetUnit()->getFullname();
+        
+        trackPrice(cp, item, price, UniverseUtil::getSystemName(), baseName, highest, lowest );
         
         if (highest.size()) {
             desc += "#n##n##b#Highest prices seen#-b#:";
