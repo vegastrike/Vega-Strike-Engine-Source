@@ -91,7 +91,7 @@ public:
             return NULL;
         }
 
-protected:
+    protected:
         friend class UnitCollection;
         //Pointer back to the collection we were spawned from
         UnitCollection *col;
