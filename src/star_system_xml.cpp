@@ -246,7 +246,8 @@ const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair( "VarValue",              VARVALUE ),
     EnumMap::Pair( "Condition",             CONDITION ),
     EnumMap::Pair( "expression",            EXPRESSION ),
-    EnumMap::Pair( "technique",             TECHNIQUE )
+    EnumMap::Pair( "technique",             TECHNIQUE ),
+    EnumMap::Pair( "unit",                  UNIT )
 };
 
 //By Klauss - more flexible this way
@@ -498,6 +499,7 @@ void StarSystem::beginElement( const string &name, const AttributeList &attribut
     float   scalex   = 1;
     vector< string >dest;
     string  filename;
+    string  unitname;
     string  fullname = "unknw";
     float   gravity  = 0;
     float   velocity = 0;
@@ -1071,6 +1073,9 @@ addlightprop:
             case TECHNIQUE:
                 technique = (*iter).value;
                 break;
+            case UNIT:
+                unitname = (*iter).value;
+                break;
             case ALPHA:
                 parse_dual_alpha( (*iter).value.c_str(), blendSrc, blendDst );
                 break;
@@ -1198,7 +1203,7 @@ addlightprop:
             fprintf(stderr, "Creating planet %s with texture %s and technique %s - unitlevel > 2", fullname.c_str(), filename.c_str(), technique.c_str());
             Unit *un = xml->moons[xml->moons.size()-1]->beginElement( R, S, velocity, ComputeRotVel( rotvel, R, S ), 
                                                                       position, gravity, radius, 
-                                                                      filename, technique, blendSrc, blendDst, dest,
+                                                                      filename, technique, unitname, blendSrc, blendDst, dest,
                                                                       xml->unitlevel-1, ourmat, curlights, false,
                                                                       faction
                                                                       != 0 ? faction : FactionUtil::GetFactionIndex(
@@ -1215,7 +1220,7 @@ addlightprop:
                                        UnitFactory::createPlanet( R, S, velocity,
                                                                   ComputeRotVel( rotvel, R, S ), 
                                                                   position, gravity, radius, 
-                                                                  filename, technique, 
+                                                                  filename, technique, unitname, 
                                                                   blendSrc, blendDst, dest, xml->cursun.Cast()
                                                                   +xml->systemcentroid.Cast(),
                                                                   NULL, ourmat, curlights, faction

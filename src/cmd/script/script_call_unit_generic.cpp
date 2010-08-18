@@ -977,7 +977,7 @@ Unit* Mission::call_unit_launch( CreateFlightgroup *fg, int type, const string &
             if (bsrc[0] != '\0')
                 s = parse_alpha( bsrc );
             my_unit = UnitFactory::createPlanet( QVector( 0, 0, 0 ), QVector( 0, 0, 0 ), 0, Vector( 0, 0, 0 ), 
-                                                 0, 0, radius, tex, "", s,
+                                                 0, 0, radius, tex, "", "", s,
                                                  d, ParseDestinations( destinations ),
                                                  QVector( 0, 0, 0 ), NULL, mat,
                                                  vector< GFXLightLocal > (), faction_nr, nam, getUniqueSerial() );

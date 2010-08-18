@@ -28,8 +28,6 @@
 #include "vsfilesystem.h"
 #include "gfx/camera.h"
 
-extern string getCargoUnitName( const char *name );
-
 GamePlanet::GamePlanet() :
     GameUnit< Planet > ( 0 )
 {
@@ -292,6 +290,7 @@ GamePlanet::GamePlanet( QVector x,
                         float radius,
                         const string &textname,
                         const string &technique,
+                        const string &unitname,
                         BLENDFUNC blendSrc,
                         BLENDFUNC blendDst,
                         const vector< string > &dest,
@@ -413,7 +412,7 @@ GamePlanet::GamePlanet( QVector x,
     this->InitPlanet( x, y, vely, rotvel,
                       pos,
                       gravity, radius,
-                      textname, technique, 
+                      textname, technique, unitname, 
                       dest,
                       orbitcent, parent,
                       faction, fgid,

@@ -42,6 +42,7 @@ protected:
                 float radius,
                 const std::string &filename,
                 const std::string &technique,
+                const std::string &unitname,
                 BLENDFUNC blendsrc,
                 BLENDFUNC blenddst,
                 const std::vector< std::string > &dest,

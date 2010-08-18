@@ -359,6 +359,7 @@ Unit* Planet::beginElement( QVector x,
                             float radius,
                             const string &filename,
                             const string &technique,
+                            const string &unitname,
                             BLENDFUNC blendSrc,
                             BLENDFUNC blendDst,
                             const vector< string > &dest,
@@ -378,7 +379,7 @@ Unit* Planet::beginElement( QVector x,
         if ( (*satiterator)->isUnit() == PLANETPTR ) {
             un = ( (Planet*) (*satiterator) )->beginElement( x, y, vely, rotvel, pos,
                                                              gravity, radius,
-                                                             filename, technique, 
+                                                             filename, technique, unitname,
                                                              blendSrc, blendDst,
                                                              dest,
                                                              level-1,
@@ -404,7 +405,7 @@ Unit* Planet::beginElement( QVector x,
             if (dest.size() != 0)
                 radius = ScaleJumpRadius( radius );
             satellites.prepend( p = UnitFactory::createPlanet( x, y, vely, rotvel, pos, gravity, radius, 
-                                                               filename, technique, 
+                                                               filename, technique, unitname, 
                                                                blendSrc, blendDst, dest,
                                                                QVector( 0, 0, 0 ), this, ourmat, ligh, faction, fullname, inside_out ) );
             un = p;
@@ -438,6 +439,7 @@ void Planet::InitPlanet( QVector x,
                          float radius,
                          const string &filename,
                          const string &technique,
+                         const string &unitname,
                          const vector< string > &dest,
                          const QVector &orbitcent,
                          Unit *parent,
@@ -489,7 +491,7 @@ void Planet::InitPlanet( QVector x,
             pImage->dockingports.push_back( DockingPorts( Vector( 0, 0, 0 ), dock, 0, true ) );
         }
     }
-    string tempname = ( ::getCargoUnitName( filename.c_str() ) );
+    string tempname = unitname.empty() ? ::getCargoUnitName( filename.c_str() ) : unitname;
     setFullname( tempname );
 
     int    tmpfac   = faction;
@@ -535,6 +537,7 @@ Planet::Planet( QVector x,
                 float radius,
                 const string &filename,
                 const string &technique,
+                const string &unitname,
                 const vector< string > &dest,
                 const QVector &orbitcent,
                 Unit *parent,
@@ -549,7 +552,7 @@ Planet::Planet( QVector x,
     this->InitPlanet( x, y, vely, rotvel,
                       pos,
                       gravity, radius,
-                      filename, technique,
+                      filename, technique, unitname,
                       dest,
                       orbitcent, parent,
                       faction, fullname,
