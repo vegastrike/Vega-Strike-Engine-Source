@@ -343,9 +343,8 @@ GamePlanet::GamePlanet( QVector x,
                     jump->meshdata.pop_back();
                 }
                 jump->meshdata.push_back( shield );
-                un_iter i;
                 Unit   *su;
-                for (i = jump->getSubUnits(); (su = *i) != NULL; ++i)
+                for (un_kiter i = jump->viewSubUnits(); (su = *i) != NULL; ++i)
                     SubUnits.prepend( su );
                 jump->SubUnits.clear();
 /*			  for (i=jump->getSubUnits();(su=*i)!=NULL;) {
