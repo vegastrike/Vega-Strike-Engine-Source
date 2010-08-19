@@ -300,7 +300,7 @@ void UpgradingInfo::Render()
     COMMIT->Refresh();
     for (unsigned int i = 0; Modes[i] != 0; i++)
         Modes[i]->Refresh();
-    EndGUIFrame( drawovermouse );
+    EndGUIFrame( drawovermouse ? MOUSE_POINTER_HOVER : MOUSE_POINTER_NORMAL );
 }
 
 void UpgradingInfo::SetMode( enum BaseMode mod, enum SubMode smod )

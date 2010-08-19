@@ -814,10 +814,10 @@ void BaseInterface::MouseOver( int xbeforecalc, int ybeforecalc )
         curtext.SetText( rooms[curroom]->deftext );
     if (link && link->pythonfile != "#") {
         curtext.col    = GFXColor( overcolor[0], overcolor[1], overcolor[2], overcolor[3] );
-        drawlinkcursor = true;
+        mousePointerStyle = MOUSE_POINTER_HOVER;
     } else {
         curtext.col    = GFXColor( inactivecolor[0], inactivecolor[1], inactivecolor[2], inactivecolor[3] );
-        drawlinkcursor = false;
+        mousePointerStyle = MOUSE_POINTER_NORMAL;
     }
     static bool  draw_always =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "base_locationmarker_drawalways", "false" ) );
@@ -932,7 +932,7 @@ void BaseInterface::GotoLink( int linknum )
         curlinkindex   = 0;
         curroom = linknum;
         curtext.SetText( rooms[curroom]->deftext );
-        drawlinkcursor = false;
+        mousePointerStyle = MOUSE_POINTER_NORMAL;
     } else {
 #ifndef BASE_MAKER
         VSFileSystem::vs_fprintf( stderr, "\nWARNING: base room #%d tried to go to an invalid index: #%d", curroom, linknum );
@@ -1457,10 +1457,7 @@ void BaseInterface::Draw()
 
     curtext.GetCharSize( x, y );
     curtext.SetPos( -.99, -1+(y*1.5) );
-//if (!drawlinkcursor)
-//GFXColor4f(0,1,0,1);
-//else
-//GFXColor4f(1,.333333,0,1);
+
     if (curtext.GetText().find( "XXX" ) != 0) {
         GFXColor tmpbg     = curtext.bgcol;
         bool     automatte = (0 == tmpbg.a);
@@ -1469,7 +1466,7 @@ void BaseInterface::Draw()
         curtext.bgcol = tmpbg;
     }
     othtext.SetPos( -.99, 1 );
-//GFXColor4f(0,.5,1,1);
+
     if (othtext.GetText().length() != 0) {
         GFXColor tmpbg     = othtext.bgcol;
         bool     automatte = (0 == tmpbg.a);
@@ -1478,7 +1475,7 @@ void BaseInterface::Draw()
         othtext.bgcol = tmpbg;
     }
     SetupViewport();
-    EndGUIFrame( drawlinkcursor );
+    EndGUIFrame( mousePointerStyle );
     glViewport( 0, 0, g_game.x_resolution, g_game.y_resolution );
     Unit *un   = caller.GetUnit();
     Unit *base = baseun.GetUnit();

@@ -6,6 +6,7 @@
 #include "gfx/hud.h"
 #include "gfx/sprite.h"
 #include <stdio.h>
+#include "gui/glut_support.h"
 
 #include "audio/Types.h"
 #include "audio/Source.h"
@@ -21,7 +22,7 @@ class BaseInterface
 {
     int  curlinkindex;
     int  lastmouseindex;    //Last link index to be under the mouse
-    bool drawlinkcursor;
+    MousePointerStyle mousePointerStyle;
     bool enabledj;
     bool terminate_scheduled;
     bool midloop;

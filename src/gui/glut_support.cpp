@@ -179,17 +179,28 @@ void DrawGlutMouse( int mousex, int mousey, VSSprite *spr )
     spr->SetPosition( tempx, tempy );
 }
 extern void ConditionalCursorDraw( bool );
-void EndGUIFrame( bool drawmouseover )
+void EndGUIFrame( MousePointerStyle pointerStyle )
 {
     static VSSprite MouseOverVSSprite( "mouseover.spr", BILINEAR, GFXTRUE );
     static VSSprite MouseVSSprite( "mouse.spr", BILINEAR, GFXTRUE );
     static Texture  dummy( "white.bmp", 0, NEAREST, TEXTURE2D, TEXTURE_2D, GFXTRUE );
-    dummy.MakeActive();
-    GFXDisable( CULLFACE );
-    DrawGlutMouse( mmx, mmy, drawmouseover ? &MouseOverVSSprite : &MouseVSSprite );
-    //GFXEndScene();bad things...only call this once
-    GFXHudMode( false );
-    GFXEnable( CULLFACE );
-    ConditionalCursorDraw( true );
+    
+    if (pointerStyle != MOUSE_POINTER_NONE) {
+        dummy.MakeActive();
+        GFXDisable( CULLFACE );
+        
+        VSSprite *whichSprite = &MouseVSSprite;
+        switch(pointerStyle) {
+        case MOUSE_POINTER_NORMAL:  whichSprite = &MouseVSSprite; break;
+        case MOUSE_POINTER_HOVER:   whichSprite = &MouseOverVSSprite; break;
+        }
+        
+        DrawGlutMouse( mmx, mmy, whichSprite );
+        
+        //GFXEndScene();bad things...only call this once
+        GFXHudMode( false );
+        GFXEnable( CULLFACE );
+        ConditionalCursorDraw( true );
+    }
 }
 

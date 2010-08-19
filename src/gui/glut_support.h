@@ -26,13 +26,19 @@
 #include "gfxlib.h"
 using std::vector;
 
+enum MousePointerStyle {
+    MOUSE_POINTER_NONE,
+    MOUSE_POINTER_NORMAL,
+    MOUSE_POINTER_HOVER
+};
+
 void ShowColor( float x, float y, float wid, float hei, float red, float green, float blue, float alpha );
 void ShowText( float x, float y, float wid, int size, const char *string, int no_end );
 float WidthOfChar( char chr );
 void SetSoftwareMousePosition( int x, int y );
 void StartGUIFrame( GFXBOOL clear = GFXTRUE );
 void DrawGlutMouse( int mousex, int mousey, class VSSprite*spr );
-void EndGUIFrame( bool drawmouseover );
+void EndGUIFrame( MousePointerStyle pointerStyle );
 extern int HAS_ALPHA;
 
 #endif    //GLUT_SUPPORT_H
