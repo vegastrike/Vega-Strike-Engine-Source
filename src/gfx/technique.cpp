@@ -142,6 +142,7 @@ static Technique::Pass::BlendMode parseBlendMode(const std::string &s)
         enumMap["alpha_blend"] = Technique::Pass::AlphaBlend;
         enumMap["decal"]       = Technique::Pass::Decal;
         enumMap["premult_alpha"]=Technique::Pass::PremultAlphaBlend;
+        enumMap["multi_alpha_blend"]=Technique::Pass::MultiAlphaBlend;
     }
     return parseEnum(s, enumMap);
 }

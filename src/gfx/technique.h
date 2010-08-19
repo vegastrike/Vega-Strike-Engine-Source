@@ -76,7 +76,10 @@ public:
             Decal,
             
             /** Blend function ONE INVSRCALPHA */
-            PremultAlphaBlend
+            PremultAlphaBlend,
+            
+            /** Blend function ALPHA INVSRCALPHA for the first pass, ALPHA ONE for subsequent passes */
+            MultiAlphaBlend
         };
 
         enum DepthFunction

@@ -1191,6 +1191,7 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
         GFXBlendMode( ONE, ONE );
         break;
     case Technique::Pass::AlphaBlend:
+    case Technique::Pass::MultiAlphaBlend:
         GFXBlendMode( SRCALPHA, INVSRCALPHA );
         break;
     case Technique::Pass::Decal:
@@ -1345,6 +1346,10 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
             {
                 //Setup transform and lights
                 int npasslights = std::max( 0, maxlights-(lightnum ? 0 : numGlobalLights) );
+                
+                //MultiAlphaBlend stuff
+                if (pass.blendMode == Technique::Pass::MultiAlphaBlend && iter > 0)
+                    GFXBlendMode( SRCALPHA, ONE );
                 
                 GFXLoadIdentity( MODEL );
                 if (lightnum > 0) {
