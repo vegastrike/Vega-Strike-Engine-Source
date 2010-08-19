@@ -84,7 +84,7 @@ public:
             advance();
             return *this;
         }
-        inline class Unit* operator*()
+        inline Unit* operator*()
         {
             if ( col && it != col->u.end() )
                 return *it;
@@ -113,7 +113,7 @@ public:
         ConstIterator( const UnitCollection* );
         ~ConstIterator();
         ConstIterator& operator=( const ConstIterator &orig );
-        const Unit * next();
+        Unit * next();
         inline bool isDone()
         {
             if ( col && it != col->u.end() )
@@ -127,7 +127,7 @@ public:
         void advance();
         const ConstIterator& operator++();
         const ConstIterator operator++( int );
-        inline const class Unit* operator*() const
+        inline Unit* operator*() const
         {
             if ( it != col->u.end() && !col->empty() ) return *it;
             return NULL;

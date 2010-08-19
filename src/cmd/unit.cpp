@@ -469,9 +469,10 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                     if (lod >= 0.5 && pixradius >= 0.5) {
                         //if the radius is at least half a pixel at detail 1 (equivalent to pixradius >= 0.5 / detail)
                         float currentFrame = this->meshdata[i]->getCurrentFrame();
-                        this->meshdata[i]->Draw( lod, this->WarpMatrix( *ctm ), d, i == this->meshdata.size()-1 ? -1 : cloak,
-                                                 (camera->GetNebula() == this->nebula && this->nebula
-                                                  != NULL) ? -1 : 0, chardamage );                                                                                                                                                            //cloakign and nebula
+                        this->meshdata[i]->Draw( lod, this->WarpMatrix( *ctm ), d, 
+                                                 i == this->meshdata.size()-1 ? -1 : cloak,
+                                                 (camera->GetNebula() == this->nebula && this->nebula != NULL) ? -1 : 0, 
+                                                 chardamage );                                                                                                                                                            //cloakign and nebula
                         On_Screen = true;
                         unsigned int numAnimFrames = 0;
                         static const string default_animation;
@@ -480,8 +481,8 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                             float currentprogress = floor(
                                 this->meshdata[i]->getCurrentFrame()*numKeyFrames/(float) numAnimFrames );
                             if (numKeyFrames
-                                && floor( currentFrame*numKeyFrames/(float) numAnimFrames )
-                                != currentprogress) {
+                                && floor( currentFrame*numKeyFrames/(float) numAnimFrames ) != currentprogress) 
+                            {
                                 this->graphicOptions.Animating = 0;
                                 this->meshdata[i]->setCurrentFrame( .1+currentprogress*numAnimFrames/(float) numKeyFrames );
                             } else if (!this->graphicOptions.Animating) {
@@ -496,7 +497,7 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
             Unit  *un;
             double backup = interpolation_blend_factor;
             int    cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
-            for (un_iter iter = this->SubUnits.createIterator(); (un = *iter); ++iter) {
+            for (un_kiter iter = this->SubUnits.constIterator(); (un = *iter); ++iter) {
                 float backup = SIMULATION_ATOM;
                 if (this->sim_atom_multiplier && un->sim_atom_multiplier)
                     SIMULATION_ATOM = SIMULATION_ATOM*un->sim_atom_multiplier/this->sim_atom_multiplier;

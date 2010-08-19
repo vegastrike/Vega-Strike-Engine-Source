@@ -134,7 +134,7 @@ UnitCollection::ConstIterator::ConstIterator( const UnitCollection *orig )
 UnitCollection::ConstIterator::~ConstIterator()
 {}
 
-const Unit* UnitCollection::ConstIterator::next()
+Unit* UnitCollection::ConstIterator::next()
 {
     advance();
     if ( col && it != col->u.end() )
@@ -249,18 +249,16 @@ void UnitCollection::insert( list< Unit* >::iterator &temp, Unit *unit )
 
 void UnitCollection::clear()
 {
-    if ( !activeIters.empty() ) return;
-    printf( "being called here\n" );
-/*	while(!removedIters.empty()){
- *               u.erase(removedIters.back());
- *               removedIters.pop_back();
- *       }
- */
-    for (list< Unit* >::iterator it = u.begin(); it != u.end();) {
+    if ( !activeIters.empty() ) {
+        fprintf(stderr, "WARNING! Attempting to clear a collection with active iterators!\n" );
+        return;
+    }
+
+    for (list< Unit* >::iterator it = u.begin(); it != u.end(); ++it) {
         (*it)->UnRef();
         (*it) = NULL;
-        it    = u.erase( it );
     }
+    u.clear();
 }
 
 void UnitCollection::destr()
