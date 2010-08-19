@@ -574,7 +574,7 @@ void GameCockpit::DrawTargetBoxes()
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
     GFXDisable( LIGHTING );
     Unit *target;
-    for (un_iter uiter = unitlist->createIterator(); (target=*uiter)!=NULL; ++uiter)
+    for (un_kiter uiter = unitlist->constIterator(); (target=*uiter)!=NULL; ++uiter) {
         if (target != un) {
             QVector  Loc( target->Position() );
 
@@ -592,6 +592,7 @@ void GameCockpit::DrawTargetBoxes()
                 }
             }
         }
+    }
 }
 
 void GameCockpit::DrawTargetBox()
@@ -731,7 +732,7 @@ void GameCockpit::DrawTurretTargetBoxes()
 
     //This avoids rendering the same target box more than once
     std::set< void* >drawn_targets;
-    for (un_iter iter = parun->getSubUnits(); (un=*iter)!=NULL; ++iter) {
+    for (un_kiter iter = parun->viewSubUnits(); (un=*iter)!=NULL; ++iter) {
         if (!un)
             return;
         if (un->GetNebula() != NULL)
@@ -1115,7 +1116,7 @@ public:
                     parent->drawUnToTarget( un, target, xcent[rad], ycent[rad], xsize[rad], ysize[rad], reardar[rad], out );
             if (target->isPlanet() == PLANETPTR && target->radial_size > 0) {
                 Unit *sub = NULL;
-                for (un_iter i = target->getSubUnits(); (sub = *i) != NULL; ++i)
+                for (un_kiter i = target->viewSubUnits(); (sub = *i) != NULL; ++i)
                     if (target->radial_size > minblipsize)
                         for (rad = 0; rad < numradar; ++rad)
                             parent->drawUnToTarget( un, sub, xcent[rad], ycent[rad], xsize[rad], ysize[rad], reardar[rad], out );
@@ -1159,7 +1160,7 @@ void GameCockpit::DrawBlips( Unit *un )
         Unit *u;
         bool  foundtarget = false;
         Unit *targ = un->Target();
-        for (un_iter i = _Universe->activeStarSystem()->gravitationalUnits().createIterator(); (u = *i) != NULL; ++i) {
+        for (un_kiter i = _Universe->activeStarSystem()->gravitationalUnits().constIterator(); (u = *i) != NULL; ++i) {
             unitLocator.action.acquire( u, UnitUtil::getDistance( un, u ) );
             if (u == targ) foundtarget = true;
         }
@@ -1222,7 +1223,7 @@ void GameCockpit::DrawEliteBlips( Unit *un )
         DrawRadarCircles( xcent, ycent, xsize, ysize, textcol );
     static bool draw_significant_blips =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "draw_significant_blips", "true" ) );
-    for (un_iter iter = drawlist->createIterator(); (target=*iter)!=NULL; ++iter) {
+    for (un_kiter iter = drawlist->constIterator(); (target=*iter)!=NULL; ++iter) {
         if (target != un) {
             static bool autolanding_enable =
                 XMLSupport::parse_bool( vs_config->getVariable( "physics", "AutoLandingEnable", "false" ) );

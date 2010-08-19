@@ -2920,8 +2920,7 @@ bool Unit::AutoPilotToErrorMessage( Unit *target,
         return false;
     }
     if (target->isUnit() == PLANETPTR) {
-        un_iter i    = target->getSubUnits();
-        Unit   *targ = *i;
+        Unit   *targ = *(target->viewSubUnits());
         if (targ && 0 == targ->graphicOptions.FaceCamera)
             return AutoPilotToErrorMessage( targ, ignore_energy_requirements, failuremessage, recursive_level );
     }
@@ -4347,7 +4346,7 @@ void Unit::ApplyNetDamage( Vector &pnt, Vector &normal, float amt, float ppercen
 Unit * findUnitInStarsystem( void *unitDoNotDereference )
 {
     Unit *un;
-    for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator(); (un = *i) != NULL; ++i)
+    for (un_kiter i = _Universe->activeStarSystem()->getUnitList().constIterator(); (un = *i) != NULL; ++i)
         if (un == unitDoNotDereference)
             return un;
     return NULL;
@@ -5464,9 +5463,8 @@ void Unit::Target( Unit *targ )
         } else {
             if (jump.drive != -1) {
                 bool    found = false;
-                un_iter i     = _Universe->activeStarSystem()->getUnitList().createIterator();
                 Unit   *u;
-                for (; (u = *i) != NULL; ++i)
+                for (un_kiter i = _Universe->activeStarSystem()->getUnitList().constIterator(); (u = *i) != NULL; ++i)
                     if ( !u->GetDestinations().empty() ) {
                         if ( std::find( u->GetDestinations().begin(), u->GetDestinations().end(),
                                        targ->activeStarSystem->getFileName() ) != u->GetDestinations().end() ) {
@@ -5911,7 +5909,7 @@ double Unit::getMinDis( const QVector &pnt )
             minsofar = tmpvar;
     }
     Unit *su;
-    for (un_iter ui = getSubUnits(); (su = *ui); ++ui) {
+    for (un_kiter ui = viewSubUnits(); (su = *ui); ++ui) {
         tmpvar = su->getMinDis( pnt );
         if (tmpvar < minsofar)
             minsofar = tmpvar;

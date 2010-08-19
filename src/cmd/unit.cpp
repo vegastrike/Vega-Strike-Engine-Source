@@ -302,7 +302,7 @@ void GameUnit< UnitType >::DrawNow( const Matrix &mato, float lod )
             this->meshdata[i]->Draw( lod, mat, d, cloak );
     }
     Unit *un;
-    for (un_iter iter = this->SubUnits.createIterator(); (un = *iter); ++iter) {
+    for (un_kiter iter = this->SubUnits.constIterator(); (un = *iter); ++iter) {
         Matrix temp;
         un->curr_physical_state.to_matrix( temp );
         Matrix submat;
