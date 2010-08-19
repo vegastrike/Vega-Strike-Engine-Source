@@ -1200,7 +1200,7 @@ addlightprop:
         radius *= xml->scale;
         if (xml->unitlevel > 2) {
             assert( xml->moons.size() != 0 );
-            fprintf(stderr, "Creating planet %s with texture %s and technique %s - unitlevel > 2", fullname.c_str(), filename.c_str(), technique.c_str());
+            fprintf(stderr, "Creating planet %s with texture %s and technique %s - unitlevel > 2\n", fullname.c_str(), filename.c_str(), technique.c_str());
             Unit *un = xml->moons[xml->moons.size()-1]->beginElement( R, S, velocity, ComputeRotVel( rotvel, R, S ), 
                                                                       position, gravity, radius, 
                                                                       filename, technique, unitname, blendSrc, blendDst, dest,
@@ -1215,7 +1215,7 @@ addlightprop:
             }
         } else {
             Planet *planet;
-            fprintf(stderr, "Creating planet %s with texture %s and technique %s - unitlevel <= 2", fullname.c_str(), filename.c_str(), technique.c_str());
+            fprintf(stderr, "Creating planet %s with texture %s and technique %s - unitlevel <= 2\n", fullname.c_str(), filename.c_str(), technique.c_str());
             xml->moons.push_back( ( planet =
                                        UnitFactory::createPlanet( R, S, velocity,
                                                                   ComputeRotVel( rotvel, R, S ), 
