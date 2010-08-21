@@ -188,14 +188,17 @@ typedef uint64 uintmax_t;
 // _WCHAR_T_DEFINED and _WCTYPE_T_DEFINED have been #defined; newer versions of
 // MSVC will provide them; older ones will not.  If all else fails, then we
 // fake up these types on our own. glibc also #defines _WINT_T when wint_t is
-// available, so we double-check that, as well.
+// available, so we double-check that, as well. Many modern compilaers also
+// allow us to check for wint_t directly, so we also do that (seems to be
+// necessary in FreeBSD).
 #include <stddef.h>
 #if defined(HAVE_WCTYPE_H)
 #include <wctype.h>
 #endif
-#if !defined(CS_HAVE_WINT_T) && !defined(_WCTYPE_T_DEFINED) && \
-    !defined(_WINT_T)
-typedef wchar_t wint_t;
+#if !((defined(CS_HAVE_WINT_T) && defined(_WCTYPE_T_DEFINED)) || defined(_WINT_T))
+#ifndef wint_t
+    typedef wchar_t wint_t;
+#endif
 #define _WCTYPE_T_DEFINED
 #define _WINT_T
 #endif
