@@ -18,6 +18,7 @@
 #include "xml_support.h"
 
 #include "options.h"
+#include "audio/Exceptions.h"
 
 using namespace XMLDOM;
 using std::map;
@@ -457,10 +458,20 @@ Technique::Technique( const string &nam ) :
     VSFileXMLSerializer serializer;
     serializer.options = 0;     //only tags interest us
     serializer.initialise();
-    serializer.importXML(
-        game_options.techniquesBasePath+"/"
-        +game_options.techniquesSubPath+"/"
-        +name+".technique" );
+    
+    try {
+        // Try a specialized version
+        serializer.importXML(
+            game_options.techniquesBasePath+"/"
+            +game_options.techniquesSubPath+"/"
+            +name+".technique" );
+    } catch(Audio::FileOpenException e) {
+        VSFileSystem::vs_dprintf(1, "Cannot find specialized technique, trying generic: %s\n", e.what());
+        // Else try a default
+        serializer.importXML(
+            game_options.techniquesBasePath+"/"
+            +name+".technique" );
+    }
 
     auto_ptr< XMLDOM::XMLDocument >doc( serializer.close() );
 
