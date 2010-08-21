@@ -14,9 +14,8 @@ bool VSFileXMLSerializer::importXML( const std::string &path )
 bool VSFileXMLSerializer::importXML( const std::string &path, VSFileSystem::VSFileType fileType )
 {
     VSFileSystem::VSFile file;
-    if (file.OpenReadOnly( path, fileType ) > VSFileSystem::Ok) throw Audio::FileOpenException( string(
-                                                                                                    "Cannot open \"" )+path
-                                                                                                +"\"" );
+    if (file.OpenReadOnly( path, fileType ) > VSFileSystem::Ok) 
+        throw Audio::FileOpenException( string("Cannot open \"" )+path+"\"" );
     char   buffer[4096];
     size_t rode;
     while ( ( rode = file.Read( buffer, 4096 ) ) )
