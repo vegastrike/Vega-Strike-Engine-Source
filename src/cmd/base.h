@@ -271,6 +271,8 @@ protected: BaseVSSprite( const std::string &ind, const VSSprite &sprite ) : Base
         {
             std::string callback;
             bool playing;
+            bool hidePointer;
+            double hidePointerTime;
             
 public:
             virtual ~BaseVSMovie() {}
@@ -279,6 +281,9 @@ public:
 
             float GetTime() const;
             void SetTime( float t );
+
+            bool GetHidePointer() const { return hidePointer; };
+            void SetHidePointer( bool hide );
             
             const std::string& getCallback() const { return callback; }
             void setCallback(const std::string &callback) { this->callback = callback; }

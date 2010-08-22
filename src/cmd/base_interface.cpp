@@ -163,6 +163,13 @@ BaseInterface::Room::BaseVSMovie::BaseVSMovie( const std::string &moviefile, con
     } else {
         spr.Reset();
     }
+    SetHidePointer(true);
+}
+
+void BaseInterface::Room::BaseVSMovie::SetHidePointer( bool hide )
+{
+    hidePointer = hide;
+    hidePointerTime = realTime();
 }
 
 void BaseInterface::Room::BaseVSSprite::SetSprite( const std::string &spritefile )
@@ -237,6 +244,17 @@ void BaseInterface::Room::BaseVSMovie::Draw( BaseInterface *base )
         if (!playing) {
             playing = true;
             spr.Reset();
+        }
+    }
+    
+    // Hide mouse pointer
+    if (base && hidePointer && base->mousePointerStyle != MOUSE_POINTER_NONE) {
+        double time = realTime();
+        if (hidePointerTime < 0.0) {
+            hidePointerTime = time + 1.0;
+        } else if (time > hidePointerTime) {
+            base->mousePointerStyle = MOUSE_POINTER_NONE;
+            hidePointerTime = -1.0;
         }
     }
     
