@@ -78,6 +78,7 @@ struct dirent
 //end for directory thing
 extern const char *DamagedCategory;
 
+
 int BaseComputer:: dirty = 0;
 
 static GFXColor UnsaturatedColor( float r, float g, float b, float a = 1.0f )
@@ -347,6 +348,16 @@ const BaseComputer::WctlTableEntry WctlBase< BaseComputer >::WctlCommandTable[] 
 
     BaseComputer::WctlTableEntry( "", "", NULL )
 };
+
+template<typename T> inline T mymin(T a, T b)
+{
+    return (a<b) ? a : b;
+}
+
+template<typename T> inline T mymax(T a, T b)
+{
+    return (a>b) ? a : b;
+}
 
 //Take underscores out of a string and capitalize letters after spaces.
 static std::string beautify( const string &input )
@@ -4339,8 +4350,8 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                 const vector<float> &prices = getSaveData(whichplayer, hipricek);
                 vector<size_t> indices;
                 
-                indices.resize(prices.size());
-                { for (size_t i=0; i<prices.size(); ++i)
+                indices.resize(mymin(prices.size(),locs.size()));
+                { for (size_t i=0; i<indices.size(); ++i)
                     indices[i] = i; }
                 
                 std::sort(indices.begin(), indices.end(), PriceSort(prices, true));
@@ -4348,8 +4359,8 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                 vector<string> newlocs;
                 vector<float> newprices;
                 
-                newlocs.reserve(locs.size());
-                newprices.reserve(prices.size());
+                newlocs.reserve(indices.size());
+                newprices.reserve(indices.size());
                 { for (size_t i=0; i<indices.size() && i<toprank; ++i) {
                     newlocs.push_back(locs[indices[i]]);
                     newprices.push_back(prices[indices[i]]);
@@ -4389,8 +4400,8 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                 const vector<float> &prices = getSaveData(whichplayer, lopricek);
                 vector<size_t> indices;
                 
-                indices.resize(prices.size());
-                { for (size_t i=0; i<prices.size(); ++i)
+                indices.resize(mymin(prices.size(),locs.size()));
+                { for (size_t i=0; i<indices.size(); ++i)
                     indices[i] = i; }
                 
                 std::sort(indices.begin(), indices.end(), PriceSort(prices, false));
@@ -4398,8 +4409,8 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                 vector<string> newlocs;
                 vector<float> newprices;
                 
-                newlocs.reserve(locs.size());
-                newprices.reserve(prices.size());
+                newlocs.reserve(indices.size());
+                newprices.reserve(indices.size());
                 { for (size_t i=0; i<indices.size() && i<toprank; ++i) {
                     newlocs.push_back(locs[indices[i]]);
                     newprices.push_back(prices[indices[i]]);
