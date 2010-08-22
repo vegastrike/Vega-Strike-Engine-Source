@@ -720,7 +720,7 @@ bool SetupSpecMapFirstPass( Texture **decal,
                                     GFXColor( 0, 0, 0, 0 ),
                                     GFXColor( 0, 0, 0, 0 ) );
         GFXBlendMode( ONE, ONE );
-        GFXDepthFunc( EQUAL );
+        GFXDepthFunc( LEQUAL );
     }
     bool retval = false;
     skip_glowpass = false;
@@ -774,7 +774,7 @@ void RestoreFirstPassState( Texture *detailTexture,
                             bool nomultienv )
 {
     GFXPopBlendMode();
-    if (!nomultienv) GFXDepthFunc( LESS );
+    if (!nomultienv) GFXDepthFunc( LEQUAL );
     if (detailTexture || skipped_glowpass) {
         static float tempo[4] = {1, 0, 0, 0};
         _Universe->activeStarSystem()->activateLightMap();
@@ -815,7 +815,7 @@ void SetupEnvmapPass( Texture *decal, unsigned int mat, int passno )
         GFXToggleTexture( false, 0 );
     }
     GFXTextureEnv( 0, ( (passno != 2) ? GFXREPLACETEXTURE : GFXMODULATETEXTURE ) );
-    GFXDepthFunc( passno ? EQUAL : LESS );
+    GFXDepthFunc( LEQUAL );
 }
 
 void RestoreEnvmapState()
@@ -827,7 +827,7 @@ void RestoreEnvmapState()
     GFXEnable( LIGHTING );
     GFXTextureCoordGenMode( 0, NO_GEN, dummy, dummy );
     GFXTextureEnv( 0, GFXMODULATETEXTURE );
-    GFXDepthFunc( LESS );
+    GFXDepthFunc( LEQUAL );
     GFXPopBlendMode();
     GFXToggleTexture( false, 0 );
 }
@@ -851,7 +851,7 @@ void SetupSpecMapSecondPass( Texture *decal,
     //float a,b;
     //GFXGetPolygonOffset(&a,&b);
     //GFXPolygonOffset (a, b-1-polygon_offset); //Not needed, since we use GL_EQUAL and appeal to invariance
-    GFXDepthFunc( EQUAL );     //By Klauss - this, with invariance, assures correct rendering (and avoids z-buffer artifacts at low res)
+    GFXDepthFunc( LEQUAL );     //By Klauss - this, with invariance, assures correct rendering (and avoids z-buffer artifacts at low res)
     GFXDisable( DEPTHWRITE );
     if (envMap) {
         int stage = gl_options.Multitexture ? 1 : 0;
@@ -888,7 +888,7 @@ void SetupGlowMapFourthPass( Texture *decal,
     //float a,b;
     //GFXGetPolygonOffset(&a,&b);
     //GFXPolygonOffset (a, b-2-polygon_offset);
-    GFXDepthFunc( EQUAL );     //By Klauss - this, with invariance, assures correct rendering (and avoids z-buffer artifacts at low res)
+    GFXDepthFunc( LEQUAL );     //By Klauss - this, with invariance, assures correct rendering (and avoids z-buffer artifacts at low res)
     GFXDisable( DEPTHWRITE );
     GFXDisable( TEXTURE1 );
 }
@@ -903,7 +903,7 @@ void SetupDamageMapThirdPass( Texture *decal, unsigned int mat, float polygon_of
     //float a,b;
     //GFXGetPolygonOffset(&a,&b);
     //GFXPolygonOffset (a, b-DAMAGE_PASS-polygon_offset);
-    GFXDepthFunc( EQUAL );     //By Klauss - this, with invariance, assures correct rendering (and avoids z-buffer artifacts at low res)
+    GFXDepthFunc( LEQUAL );     //By Klauss - this, with invariance, assures correct rendering (and avoids z-buffer artifacts at low res)
     GFXDisable( DEPTHWRITE );
     GFXDisable( TEXTURE1 );
 }
@@ -913,7 +913,7 @@ void RestoreGlowMapState( bool write_to_depthmap, float polygonoffset, float NOT
     float a, b;
     //GFXGetPolygonOffset(&a,&b);
     //GFXPolygonOffset (a, b+polygonoffset+NOT_USED_BUT_BY_HELPER);
-    GFXDepthFunc( LESS );     //By Klauss - restore original depth function
+    GFXDepthFunc( LEQUAL );     //By Klauss - restore original depth function
     static bool force_write_to_depthmap =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "force_glowmap_restore_write_to_depthmap", "true" ) );
     if (force_write_to_depthmap || write_to_depthmap)
@@ -932,7 +932,7 @@ void RestoreSpecMapState( bool envMap, bool write_to_depthmap, float polygonoffs
     //float a,b;
     //GFXGetPolygonOffset(&a,&b);
     //GFXPolygonOffset (a, b+1+polygonoffset); //Not needed anymore, since InitSpecMapSecondPass() no longer messes with polygon offsets
-    GFXDepthFunc( LESS );     //By Klauss - restore original depth function
+    GFXDepthFunc( LEQUAL );     //By Klauss - restore original depth function
     if (envMap) {
         if (gl_options.Multitexture) {
             GFXActiveTexture( 1 );
@@ -1060,51 +1060,11 @@ void Mesh::activateTextureUnit( const Technique::Pass::TextureUnit &tu, bool def
     }
 }
 
-void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr )
+static void setupGLState(const Technique::Pass &pass, bool zwrite, BLENDFUNC blendSrc, BLENDFUNC blendDst, int material, unsigned char alphatest, int whichdrawqueue)
 {
-    if (!technique->isCompiled(GFXGetProgramVersion())) {
-        try {
-            technique->compile();
-        }
-        catch (Exception &e) {
-            VSFileSystem::vs_dprintf(1, "Technique recompilation failed: %s\n", e.what());
-        }
-    }
-
-    const Technique::Pass &pass = technique->getPass( whichpass );
-    
-    //First of all, decide zwrite, so we can skip the pass if !zwrite && !cwrite
-    bool zwrite;
-    if (whichdrawqueue == MESH_SPECIAL_FX_ONLY) {
-        //Special effects pass - no zwrites... no zwrites...
-        zwrite = false;
-    } else {
-        //Near draw queue - write to z-buffer if in auto mode and not translucent
-        zwrite = (blendDst == ZERO);
-        switch (pass.zWrite)
-        {
-        case Technique::Pass::Auto:
-            break;
-        case Technique::Pass::True:
-            zwrite = true;
-            break;
-        case Technique::Pass::False:
-            zwrite = false;
-            break;
-        }
-    }
-    //If we're not writing anything... why go on?
-    if (!pass.colorWrite && !zwrite)
-        return;
-    float zero[4] = {0, 0, 0, 0};
-    float envmaprgba[4]   = {1, 1, 1, 0};
-    float noenvmaprgba[4] = {0.5, 0.5, 0.5, 1.0};
-
-    vector< MeshDrawContext > &cur_draw_queue = draw_queue[whichdrawqueue];
     //Setup color/z writes, culling, etc...
     if (pass.colorWrite)
         GFXEnable( COLORWRITE );
-
     else
         GFXDisable( COLORWRITE );
     {
@@ -1158,7 +1118,8 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
     if (pass.cullMode == Technique::Pass::None) {
         GFXDisable( CULLFACE );
     } else if (pass.cullMode == Technique::Pass::DefaultFace) {
-        SelectCullFace( whichdrawqueue );
+        //Not handled by this helper function, since it depends on mesh data
+        //SelectCullFace( whichdrawqueue );
     } else {
         POLYFACE face;
         GFXEnable( CULLFACE );
@@ -1178,13 +1139,13 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
         GFXCullFace( face );
     }
     GFXPolygonOffset( pass.offsetFactor, pass.offsetUnits );
+
     if (zwrite)
         GFXEnable( DEPTHWRITE );
-
     else
         GFXDisable( DEPTHWRITE );
+    
     //Setup blend mode
-    GFXPushBlendMode();
     switch (pass.blendMode)
     {
     case Technique::Pass::Add:
@@ -1208,13 +1169,65 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
         GFXBlendMode( blendSrc, blendDst );
         break;
     }
+    
     GFXEnable( LIGHTING );
-    GFXSelectMaterial( myMatNum );
+    GFXSelectMaterial( material );
+    
     //If we're doing zwrite, alpha test is more or less mandatory for correct results
     if (alphatest)
         GFXAlphaTest( GEQUAL, alphatest/255.0 );
     else if (zwrite)
         GFXAlphaTest( GREATER, 0 );
+    
+}
+
+void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr )
+{
+    if (!technique->isCompiled(GFXGetProgramVersion())) {
+        try {
+            technique->compile();
+        }
+        catch (Exception &e) {
+            VSFileSystem::vs_dprintf(1, "Technique recompilation failed: %s\n", e.what());
+        }
+    }
+
+    const Technique::Pass &pass = technique->getPass( whichpass );
+    
+    //First of all, decide zwrite, so we can skip the pass if !zwrite && !cwrite
+    bool zwrite;
+    if (whichdrawqueue == MESH_SPECIAL_FX_ONLY) {
+        //Special effects pass - no zwrites... no zwrites...
+        zwrite = false;
+    } else {
+        //Near draw queue - write to z-buffer if in auto mode and not translucent
+        zwrite = (blendDst == ZERO);
+        switch (pass.zWrite)
+        {
+        case Technique::Pass::Auto:
+            break;
+        case Technique::Pass::True:
+            zwrite = true;
+            break;
+        case Technique::Pass::False:
+            zwrite = false;
+            break;
+        }
+    }
+    //If we're not writing anything... why go on?
+    if (!pass.colorWrite && !zwrite)
+        return;
+    float zero[4] = {0, 0, 0, 0};
+    float envmaprgba[4]   = {1, 1, 1, 0};
+    float noenvmaprgba[4] = {0.5, 0.5, 0.5, 1.0};
+
+    vector< MeshDrawContext > &cur_draw_queue = draw_queue[whichdrawqueue];
+    
+    GFXPushBlendMode();
+    setupGLState(pass, zwrite, blendSrc, blendDst, myMatNum, alphatest, whichdrawqueue);
+    if (pass.cullMode == Technique::Pass::DefaultFace)
+        SelectCullFace( whichdrawqueue ); // Default not handled by setupGLState, it depends on mesh data
+    
     //Activate shader
     GFXActivateShader( pass.getCompiledProgram() );
 
@@ -1430,10 +1443,34 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
 #define HASDECAL( pass ) ( ( (NUM_PASSES > pass) && Decal[pass] ) )
 #define SAFEDECAL( pass ) ( (HASDECAL( pass ) ? Decal[pass] : black) )
 
-void Mesh::ProcessFixedDrawQueue( size_t whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr )
+void Mesh::ProcessFixedDrawQueue( size_t techpass, int whichdrawqueue, bool zsort, const QVector &sortctr )
 {
-    const Technique::Pass &pass = technique->getPass( whichpass );
-
+    const Technique::Pass &pass = technique->getPass( techpass );
+    
+    //First of all, decide zwrite, so we can skip the pass if !zwrite && !cwrite
+    bool zwrite;
+    if (whichdrawqueue == MESH_SPECIAL_FX_ONLY) {
+        //Special effects pass - no zwrites... no zwrites...
+        zwrite = false;
+    } else {
+        //Near draw queue - write to z-buffer if in auto mode and not translucent
+        zwrite = (blendDst == ZERO);
+        switch (pass.zWrite)
+        {
+        case Technique::Pass::Auto:
+            break;
+        case Technique::Pass::True:
+            zwrite = true;
+            break;
+        case Technique::Pass::False:
+            zwrite = false;
+            break;
+        }
+    }
+    //If we're not writing anything... why go on?
+    if (!pass.colorWrite && !zwrite)
+        return;
+    
     //Map texture units
     Texture *Decal[NUM_PASSES];
     memset( Decal, 0, sizeof (Decal) );
@@ -1497,25 +1534,21 @@ void Mesh::ProcessFixedDrawQueue( size_t whichpass, int whichdrawqueue, bool zso
     size_t DecalSize = NUM_PASSES;
     while ( (DecalSize > 0) && HASDECAL( DecalSize-1 ) )
         --DecalSize;
+    
     //Restore texture units
     for (unsigned int i = 2; i < gl_options.Multitexture; ++i)
         GFXToggleTexture( false, i );
     bool last_pass = !DecalSize;
-    if ( getLighting() ) {
-        GFXSelectMaterial( myMatNum );
-        GFXEnable( LIGHTING );
-    } else {
+    
+    // Set up GL state from technique-specified values
+    setupGLState(pass, zwrite, blendSrc, blendDst, myMatNum, alphatest, whichdrawqueue);
+    if (pass.cullMode == Technique::Pass::DefaultFace)
+        SelectCullFace( whichdrawqueue ); // Default not handled by setupGLState, it depends on mesh data
+    if ( !getLighting() ) {
         GFXDisable( LIGHTING );
         GFXColor4f( 1, 1, 1, 1 );
     }
-    bool write_to_depthmap = !(blendDst != ZERO);
-    if (write_to_depthmap)
-        GFXEnable( DEPTHWRITE );
-
-    else
-        GFXDisable( DEPTHWRITE );
-    SelectCullFace( whichdrawqueue );
-    GFXBlendMode( blendSrc, blendDst );
+    
     GFXEnable( TEXTURE0 );
     if (alphatest)
         GFXAlphaTest( GEQUAL, alphatest/255.0 );
@@ -1543,6 +1576,9 @@ void Mesh::ProcessFixedDrawQueue( size_t whichpass, int whichdrawqueue, bool zso
     bool skipglowpass = false;
     bool nomultienv   = false;
     int  nomultienv_passno = 0;
+
+    size_t whichpass = BASE_PASS;
+    
     if ( !gl_options.Multitexture && getEnvMap() ) {
         if ( HASDECAL( ENVSPEC_TEX ) ) {
             whichpass = ENVSPEC_PASS;
@@ -1651,16 +1687,16 @@ void Mesh::ProcessFixedDrawQueue( size_t whichpass, int whichdrawqueue, bool zso
                 break;
             case ENVSPEC_PASS:
                 if (!nomultienv)
-                    RestoreSpecMapState( ( splitpass1 ? false : getEnvMap() ), write_to_depthmap, polygon_offset );
+                    RestoreSpecMapState( ( splitpass1 ? false : getEnvMap() ), zwrite, polygon_offset );
 
                 else
                     RestoreEnvmapState();
                 break;
             case DAMAGE_PASS:
-                RestoreDamageMapState( write_to_depthmap, polygon_offset );                 //nothin
+                RestoreDamageMapState( zwrite, polygon_offset );                 //nothin
                 break;
             case GLOW_PASS:
-                RestoreGlowMapState( write_to_depthmap, polygon_offset );
+                RestoreGlowMapState( zwrite, polygon_offset );
                 break;
             }
         }
@@ -1703,7 +1739,7 @@ void Mesh::ProcessFixedDrawQueue( size_t whichpass, int whichdrawqueue, bool zso
     }
     if (alphatest) GFXAlphaTest( ALWAYS, 0 );       //Are you sure it was supposed to be after vlist->EndDrawState()? It makes more sense to put it here...
     if ( !getLighting() ) GFXEnable( LIGHTING );
-    if (!write_to_depthmap) GFXEnable( DEPTHWRITE );       //risky--for instance logos might be fubar!
+    if (!zwrite) GFXEnable( DEPTHWRITE );       //risky--for instance logos might be fubar!
     RestoreCullFace( whichdrawqueue );
 }
 
