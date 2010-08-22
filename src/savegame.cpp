@@ -440,7 +440,13 @@ string SaveGame::WriteMissionData()
     ret += XMLSupport::tostring( (int) missiondata->m.size() );
     for (MissionFloatDat::MFD::iterator i = missiondata->m.begin(); i != missiondata->m.end(); i++) {
         unsigned int siz = (*i).second.size();
-        ret += string( "\n" )+(*i).first+string( " " )+XMLSupport::tostring( siz )+" ";
+        
+        // Escape spaces within the key by replacing them with a special char ¬
+        string k = (*i).first;
+        { for (size_t i=0,len=k.length(); i<len; ++i)
+            if (k[i] == ' ') k[i] = '`'; }
+        
+        ret += string( "\n" )+k+string( " " )+XMLSupport::tostring( siz )+" ";
         for (unsigned int j = 0; j < siz; j++)
             ret += XMLSupport::tostring( (*i).second[j] )+" ";
     }
@@ -453,12 +459,12 @@ std::string scanInString( char* &buf )
     char c[2] = {'\n', '\0'};
     while ( *buf && isspace( *buf ) )
         buf++;
-    c[0] = *buf;
-    while ( *buf && ( !isspace( *buf ) ) ) {
-        c[0] = *buf;
-        str += c;
+    char *start = buf;
+    while ( *buf && ( !isspace( *buf ) ) )
         buf++;
-    }
+    str.resize(buf - start);
+    for (size_t i=0; start < buf; ++i)
+        str[i] = *(start++);
     return str;
 }
 
@@ -473,6 +479,11 @@ void SaveGame::ReadMissionData( char* &buf, bool select_data, const std::set< st
     for (int i = 0; i < mdsize; i++) {
         int    md_i_size;
         string mag_num( scanInString( buf2 ) );
+        
+        // Unescape spaces within the key by replacing the special char ¬
+        { for (size_t i=0,len=mag_num.length(); i<len; ++i)
+            if (mag_num[i] == '`') mag_num[i] = ' '; }
+        
         sscanf( buf2, "%d ", &md_i_size );
         //Put ptr to point after the number we just read
         buf2 += hopto( buf2, ' ', '\n', 0 );
