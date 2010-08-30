@@ -713,7 +713,7 @@ void winsys_warp_pointer( int x, int y )
  *  \date    Created:  2000-10-19
  *  \date    Modified: 2000-10-19
  */
-void winsys_init( int *argc, char **argv, char *window_title, char *icon_title )
+void winsys_init( int *argc, char **argv, char const *window_title, char const *icon_title )
 {
     int width, height;
     int glutWindow;
