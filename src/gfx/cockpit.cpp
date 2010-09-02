@@ -219,9 +219,9 @@ GFXColor GameCockpit::unitToColor( Unit *un, Unit *target, char ifflevel, char &
         relation = un->getRelation( target );
     
     if (relation > 0)
-        sequence = 1;
-    else if (relation < 0)
         sequence = -1;
+    else if (relation < 0)
+        sequence = 1;
     else
         sequence = 0;
     
