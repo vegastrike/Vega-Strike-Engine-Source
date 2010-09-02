@@ -490,15 +490,14 @@ void SaveGame::ReadMissionData( char* &buf, bool select_data, const std::set< st
         vector< float > *vecfloat = 0;
         bool skip = true;
         if ( !select_data || select_data_filter.count( mag_num ) ) {
-            missiondata->m[mag_num] = vector< float > ();
             vecfloat = &missiondata->m[mag_num];
+            vecfloat->clear();
             vecfloat->reserve(md_i_size);
             skip = false;
         }
         for (int j = 0; j < md_i_size; j++) {
             if (!skip) {
-                double float_val;
-                sscanf( buf2, "%lf ", &float_val );
+                double float_val = atof(buf2);
                 vecfloat->push_back( float_val );
             }
             //Put ptr to point after the number we just read
@@ -571,8 +570,9 @@ void SaveGame::ReadMissionStringData( char* &buf, bool select_data, const std::s
         vector< string > *vecstring = 0;
         bool skip = true;
         if ( !select_data || select_data_filter.count( mag_num ) ) {
-            missionstringdata->m[mag_num] = vector< string > ();
             vecstring = &missionstringdata->m[mag_num];
+            vecstring->clear();
+            vecstring->reserve(md_i_size);
             skip = false;
         }
         for (int j = 0; j < md_i_size; j++) {
