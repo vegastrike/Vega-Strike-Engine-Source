@@ -492,6 +492,7 @@ void SaveGame::ReadMissionData( char* &buf, bool select_data, const std::set< st
         if ( !select_data || select_data_filter.count( mag_num ) ) {
             missiondata->m[mag_num] = vector< float > ();
             vecfloat = &missiondata->m[mag_num];
+            vecfloat->reserve(md_i_size);
             skip = false;
         }
         for (int j = 0; j < md_i_size; j++) {
