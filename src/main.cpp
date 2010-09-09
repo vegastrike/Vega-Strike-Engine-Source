@@ -64,7 +64,7 @@
 #include "audio/renderers/OpenAL/BorrowedOpenALRenderer.h"
 
 #include <time.h>
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined (__HAIKU__)
 #include <sys/signal.h>
 #endif
 

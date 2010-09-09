@@ -162,6 +162,17 @@
 #endif
 
 /* ------------------------------------------------------------------
+** Haiku
+** ------------------------------------------------------------------
+*/
+#if defined(__HAIKU__) || defined FORCE_DOXYGEN
+#  define POSH_OS_HAIKU /**<if defined, target OS is a Haiku derivative */
+#  if !defined FORCE_DOXYGEN
+#     define POSH_OS_STRING "Haiku"
+#  endif
+#endif
+
+/* ------------------------------------------------------------------
 ** Cygwin32
 ** ------------------------------------------------------------------
 */

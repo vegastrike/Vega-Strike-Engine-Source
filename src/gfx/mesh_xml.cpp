@@ -17,7 +17,7 @@
 #include <direct.h>
 #include <process.h>
 #endif
-#if !defined (_WIN32) && !(defined (__APPLE__) || defined (MACOSX ) ) && !defined (BSD)
+#if !defined (_WIN32) && !(defined (__APPLE__) || defined (MACOSX ) ) && !defined (BSD) && !defined(__HAIKU__)
 #include <values.h>
 #endif
 #include "xml_support.h"

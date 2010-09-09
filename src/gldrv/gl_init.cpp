@@ -67,7 +67,7 @@
 //typedef void (APIENTRY * PFNGLLOCKARRAYSEXTPROC) (GLint first, GLsizei count);
 //typedef void (APIENTRY * PFNGLUNLOCKARRAYSEXTPROC) (void);
 
-#if !defined (__APPLE__) && !defined (MACOSX) && !defined (WIN32)
+#if !defined (__APPLE__) && !defined (MACOSX) && !defined (WIN32)  && !defined (__HAIKU__)
     # define GLX_GLXEXT_PROTOTYPES 1
     # define GLX_GLXEXT_LEGACY 1
     # include <GL/glx.h>
@@ -145,10 +145,14 @@ typedef void ( *(*get_gl_proc_fptr_t)(const GLubyte*) )();
 #ifdef _WIN32
 typedef char*GET_GL_PTR_TYP;
 #define GET_GL_PROC wglGetProcAddress
-
 #else
-typedef GLubyte*GET_GL_PTR_TYP;
-#define GET_GL_PROC glXGetProcAddressARB
+	#if defined(__HAIKU__)
+	    typedef char * GET_GL_PTR_TYP;
+		#define GET_GL_PROC glutGetProcAddress
+	#else
+		typedef GLubyte*GET_GL_PTR_TYP;
+		#define GET_GL_PROC glXGetProcAddressARB
+	#endif
 #endif
 
 #if defined (CG_SUPPORT)

@@ -3102,7 +3102,7 @@ static int nodirs( const struct dirent * entry )
      *     if (strstr(entry->d_name,autosave.c_str()))
      *       return 0;
      */
-#if defined (_WIN32)
+#if defined (_WIN32) || defined(__HAIKU__)
     //Have to check if we have the full path or just relative (which would be a problem)
     std::string tmp = VSFileSystem::homedir+"/save/"+entry->d_name;
     struct stat s;
@@ -3131,7 +3131,7 @@ static int datesort( const void *v1, const void *v2 )
     return s1.st_mtime-s2.st_mtime;
 }
 
-#if (defined (_WIN32) && !defined (__CYGWIN__ ) ) || (defined (__GLIBC_MINOR__) && __GLIBC_MINOR__ >= 10)
+#if (defined (_WIN32) && !defined (__CYGWIN__ ) ) || (defined (__GLIBC_MINOR__) && __GLIBC_MINOR__ >= 10) || defined(__HAIKU__)
 typedef int (*scancompare)( const struct dirent **v1, const struct dirent **v2 );
 #else
 typedef int (*scancompare)( const void *v1, const void *v2 );

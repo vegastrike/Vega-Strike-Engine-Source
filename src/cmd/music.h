@@ -4,6 +4,9 @@
 #include <vector>
 #include <string>
 #include <list>
+#if defined(__HAIKU__)
+#include <pthread.h>
+#endif
 
 namespace Muzak
 {
