@@ -190,11 +190,12 @@ inline XVector operator*=( XVector &lval, const QFLOAT &obj )
 
 inline void Normalize( XVector &r )
 {
-    QFLOAT size = XSQRT( r.i*r.i+r.j*r.j+r.k*r.k );
-    if (size > 0.000001) {
-        r.i /= size;
-        r.j /= size;
-        r.k /= size;
+    QFLOAT size = r.i*r.i+r.j*r.j+r.k*r.k;
+    if (size > 0.00000000001) {
+        QFLOAT isize = QFLOAT(1.0) / XSQRT(size);
+        r.i *= isize;
+        r.j *= isize;
+        r.k *= isize;
     }
 }
 
