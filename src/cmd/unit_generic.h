@@ -40,6 +40,7 @@ void UncheckUnit( class Unit*un );
 
 #include <string>
 #include <set>
+#include <map>
 #include "cmd/unit_armorshield.h"
 #include "gfx/matrix.h"
 #include "gfx/quaternion.h"
@@ -545,6 +546,10 @@ public:
         return NULL;
     }
 //Not needed just in Unit class
+    
+    // Uses GFX, so generic version is a no-op. 
+    // GameUnit variants (clientside) would apply the overrides to their GFX techniques
+    virtual void applyTechniqueOverrides(const std::map<std::string, std::string> &overrides);
 
 /*
  **************************************************************************************

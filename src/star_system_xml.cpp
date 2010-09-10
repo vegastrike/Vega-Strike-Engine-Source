@@ -24,6 +24,10 @@ extern vs_options game_options;
 
 #include <stdlib.h>
 
+#include <string>
+#include <vector>
+#include <map>
+
 /*
  * #include "cmd/cont_terrain.h"
  * #include "gfx/aux_texture.h"
@@ -33,6 +37,7 @@ extern vs_options game_options;
  */
 using std::string;
 using std::vector;
+using std::map;
 
 extern const vector< string >& ParseDestinations( const string &value );
 extern void bootstrap_draw( const string &message, Animation *SplashScreen = NULL );
@@ -147,7 +152,8 @@ enum Names
     VARVALUE,
     CONDITION,
     EXPRESSION,
-    TECHNIQUE
+    TECHNIQUE,
+    OVERRIDE
 };
 
 const EnumMap::Pair element_names[] = {
@@ -247,7 +253,8 @@ const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair( "Condition",             CONDITION ),
     EnumMap::Pair( "expression",            EXPRESSION ),
     EnumMap::Pair( "technique",             TECHNIQUE ),
-    EnumMap::Pair( "unit",                  UNIT )
+    EnumMap::Pair( "unit",                  UNIT ),
+    EnumMap::Pair( "override",              OVERRIDE )
 };
 
 //By Klauss - more flexible this way
@@ -498,6 +505,7 @@ void StarSystem::beginElement( const string &name, const AttributeList &attribut
     int     numwraps = 1;
     float   scalex   = 1;
     vector< string >dest;
+    map< string, string > paramOverrides;
     string  filename;
     string  unitname;
     string  fullname = "unknw";
@@ -1051,6 +1059,7 @@ addlightprop:
         technique   = string( "" );
         blendSrc    = ONE;
         blendDst    = ZERO;
+        paramOverrides.clear();
         serial = 0;
         for (iter = attributes.begin(); iter != attributes.end(); ++iter) {
             switch ( attribute_map.lookup( (*iter).name ) )
@@ -1192,6 +1201,16 @@ addlightprop:
             case GRAVITY:
                 gravity = parse_float( (*iter).value );
                 break;
+                
+            case OVERRIDE:
+                {
+                    string::size_type eqpos = (*iter).value.find_first_of('=');
+                    if (eqpos != string::npos) {
+                        string name = (*iter).value.substr(0,eqpos);
+                        string value = (*iter).value.substr(eqpos+1);
+                        paramOverrides[name] = value;
+                    }
+                }
             }
         }
         if (isdest == true)
@@ -1212,6 +1231,7 @@ addlightprop:
             if (un) {
                 un->SetOwner( getTopLevelOwner() );
                 un->SetSerial( serial );
+                un->applyTechniqueOverrides(paramOverrides);
             }
         } else {
             Planet *planet;
@@ -1232,6 +1252,7 @@ addlightprop:
             xml->moons[xml->moons.size()-1]->SetPosAndCumPos( R+S+xml->cursun.Cast()+xml->systemcentroid.Cast() );
             xml->moons.back()->SetOwner( getTopLevelOwner() );
             planet->SetSerial( serial );
+            planet->applyTechniqueOverrides(paramOverrides);
             
             break;
             

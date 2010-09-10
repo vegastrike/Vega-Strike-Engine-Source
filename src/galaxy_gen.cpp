@@ -284,6 +284,8 @@ float jumpcompactness = 2;
 struct PlanetInfo
 {
     string name;
+    string unitname;
+    string technique;
     unsigned int num;     //The texture number for the city lights
     unsigned int moonlevel;     //0==top-level planet, 1==first-level moon, 2 is second-level moon... probably won't be used.
     unsigned int numstarbases;     //Number of starbases allocated to orbit around this planet. Usually 1 or 0 but quite possibly more.
@@ -787,7 +789,7 @@ void MakeBigUnit( int callingentitytype, string name = string(), float orbitalra
 }
 void MakeMoons( float callingradius, int callingentitytype );
 void MakeJumps( float callingradius, int callingentitytype, int numberofjumps );
-void MakePlanet( float radius, int entitytype, string texturename, int texturenum, int numberofjumps, int numberofstarbases )
+void MakePlanet( float radius, int entitytype, string texturename, string unitname, string technique, int texturenum, int numberofjumps, int numberofstarbases )
 {
     if (entitytype == JUMP) {
         MakeJump( radius );
@@ -819,7 +821,11 @@ void MakePlanet( float radius, int entitytype, string texturename, int texturenu
         unsigned randomnum = rnd( 0, lites.size()-1 );
         cname = planetlites.substr( lites[randomnum]+1, lites[randomnum+1] );
     }
-    f.Fprintf( "<Planet name=\"%s\" file=\"%s\" ", thisname.c_str(), texturename.c_str() );
+    f.Fprintf( "<Planet name=\"%s\" file=\"%s\" unit=\"%s\" ", thisname.c_str(), texturename.c_str(), unitname.c_str() );
+    if (!technique.empty())
+        f.Fprintf( "technique=\"%s\" ", technique.c_str() );
+    if (texturename.find_first_of('|') != string::npos)
+        f.Fprintf("Red=\"0\" Green=\"0\" Blue=\"0\" DRed=\"0.87\" DGreen=\"0.87\" DBlue=\"0.87\" SRed=\"0.85\" SGreen=\"0.85\" SBlue=\"0.85\" ");
     f.Fprintf( "ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ", RR.i, RR.j, RR.k, SS.i, SS.j, SS.k );
     f.Fprintf( "radius=\"%f\" ", radius );
     f.Fprintf( "x=\"%f\" y=\"%f\" z=\"%f\" ", center.i, center.j, center.k );
@@ -1014,7 +1020,9 @@ void MakeMoons( float callingradius, int callingentitytype )
     while (planetoffset < stars[staroffset].planets.size() && stars[staroffset].planets[planetoffset].moonlevel == moonlevel) {
         PlanetInfo &infos = stars[staroffset].planets[planetoffset++];
         MakePlanet(
-            ( .5+.5*grand() )*callingradius, callingentitytype == STAR ? PLANET : MOON, infos.name, infos.num, infos.numjumps,
+            ( .5+.5*grand() )*callingradius, callingentitytype == STAR ? PLANET : MOON, 
+                   infos.name, infos.unitname, infos.technique, 
+                   infos.num, infos.numjumps,
             infos.numstarbases );
     }
 }
@@ -1066,8 +1074,7 @@ void beginStar()
     unsigned int numu;
     if (numstarentities) {
         numu = numnaturalphenomena
-               /(numstarentities
-                 -staroffset)
+               /(numstarentities-staroffset)
                +( grand() < float( numnaturalphenomena%(numstarentities-staroffset) )/(numstarentities-staroffset) );
     } else {
         numu = 1;
@@ -1251,21 +1258,50 @@ void readplanetentity( vector< StarInfo > &starinfos, string planetlist, unsigne
         starinfos[u%numstars].planets.back().moonlevel = nummoon;
         {
             GalaxyXML::Galaxy *galaxy = _Universe->getGalaxy();
+            
+            static const string numtag("#num#");
+            static const string empty;
+            static const string::size_type numlen = numtag.length();
+            string::size_type numpos;
+            
+            // Get planet name and texture
             string planetname  = galaxy->getPlanetNameFromInitial( planetlist.substr( j, i == string::npos ? string::npos : i-j ) );
             string texturename = galaxy->getPlanetVariable( planetname, "texture", "No texture supplied in <planets>!" );
-            starinfos[u
-                      %numstars].planets.back().num =
-                rnd( XMLSupport::parse_int( galaxy->getPlanetVariable( planetname, "texture_min",
-                                                                       "0" ) ),
-                    XMLSupport::parse_int( galaxy->getPlanetVariable( planetname, "texture_max", "0" ) ) );
-            string ext = galaxy->getPlanetVariable( planetname, "texture_ext", "png" );
-            starinfos[u
-                      %numstars].planets.back().name = texturename
-                                                       +( starinfos[u%numstars].planets.back().num
-                                                         == 0 ? "" : XMLSupport::tostring( starinfos[u
-                                                                                                     %numstars].planets.back().
-                                                                                           num ) )+'.'+ext;
-            //should now have texname[min-max].png
+            
+            // Get unit name, deriving a default name from its texture
+            string defunitname = texturename.substr(0, texturename.find_first_of('|'));
+            if (defunitname.find_last_of('/') != string::npos)
+                defunitname = defunitname.substr(defunitname.find_last_of('/')+1);
+            defunitname = defunitname.substr(0, defunitname.find_last_of('.'));
+            
+            numpos=0;
+            while ((numpos = defunitname.find(numtag, numpos)) != string::npos)
+                defunitname.replace(numpos, numlen, empty);
+            
+            string unitname    = galaxy->getPlanetVariable( planetname, "unit", defunitname );
+            
+            // Get planet rendering technique
+            string techniquename=galaxy->getPlanetVariable( planetname, "technique", "" );
+            
+            // Replace randomized number placeholder tags
+            starinfos[u%numstars].planets.back().num =
+                rnd( XMLSupport::parse_int( galaxy->getPlanetVariable( planetname, "texture_min", "0" ) ),
+                     XMLSupport::parse_int( galaxy->getPlanetVariable( planetname, "texture_max", "0" ) ) );
+            
+            char num[32];
+            if (starinfos[u%numstars].planets.back().num == 0)
+                num[0] = 0;
+            else
+                snprintf(num, sizeof(num), "%d", starinfos[u%numstars].planets.back().num);
+            
+            numpos=0;
+            while ((numpos = texturename.find(numtag, numpos)) != string::npos)
+                texturename.replace(numpos, numlen, num);
+            
+            // Store info
+            starinfos[u%numstars].planets.back().name = texturename;
+            starinfos[u%numstars].planets.back().unitname = unitname;
+            starinfos[u%numstars].planets.back().technique = techniquename;
         }
         starinfos[u%numstars].planets.back().numstarbases = 0;
         starinfos[u%numstars].planets.back().numjumps     = 0;

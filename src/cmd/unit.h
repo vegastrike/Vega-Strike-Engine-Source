@@ -29,6 +29,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <memory>
 class HaloSystem;
 class GFXColor;
@@ -119,6 +120,9 @@ public: GameUnit( int dummy );
                   const GFXColor &col,
                   std::string halo_type,
                   float halo_speed );
+    
+    virtual void applyTechniqueOverrides(const std::map<std::string, std::string> &overrides);
+    
 /*
  **************************************************************************************
  **** STAR SYSTEM STUFF                                                             ***

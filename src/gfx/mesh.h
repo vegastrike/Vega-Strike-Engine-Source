@@ -156,6 +156,10 @@ protected:
 
 public:
     void initTechnique( const string &technique );
+    
+    // Low-level access to the technique
+    TechniquePtr getTechnique() const { return technique; }
+    void setTechnique(TechniquePtr tech) { technique = tech; }
 
 private: Mesh( const char *filename, const Vector &scalex, int faction, class Flightgroup *fg, bool orig,
               const std::vector< std::string > &textureOverride = std::vector< std::string > () );

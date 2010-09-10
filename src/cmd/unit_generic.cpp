@@ -9260,3 +9260,7 @@ void Unit::RequestPhysics()
         getStarSystem()->RequestPhysics( this, cur_sim_queue_slot );
 }
 
+void Unit::applyTechniqueOverrides(const std::map<std::string, std::string> &overrides)
+{
+    // No-op
+}

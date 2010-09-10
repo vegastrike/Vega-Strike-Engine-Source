@@ -479,10 +479,43 @@ void Galaxy::setupPlanetTypeMaps()
         SubHeirarchy::iterator i = planet_types->getHeirarchy().begin();
         for (; i != planet_types->getHeirarchy().end(); ++i) {
             string name = (*i).first;
-            string val  = (*i).second["texture"];
-            string::size_type slash = val.rfind( "/" );
-            if (slash != string::npos)
-                val = val.substr( slash+1 );
+            
+            string val;
+            
+            {
+                static const string _unit("unit");
+                const string &unit = (*i).second[_unit];
+                
+                if (!unit.empty()) {
+                    val = unit;
+                } else {
+                    static const string _texture("texture");
+                    const string &tex = (*i).second[_texture];
+                    if (!tex.empty()) {
+                        val = tex;
+                        
+                        // Filter out irrelevant texture bits
+                        // We only want the base name of the diffuse map
+                        // Texture formats are: <path>/<diffse>.<extension>|<path>/<specular>.<extension>|...
+                        string::size_type pipe = val.find_first_of('|');
+                        if (pipe != string::npos)
+                            val = val.substr( 0, pipe );
+                        string::size_type slash = val.find_last_of('/');
+                        if (slash != string::npos)
+                            val = val.substr( slash+1 );
+                        string::size_type dot = val.find_last_of('.');
+                        if (dot != string::npos)
+                            val = val.substr( 0, dot );
+                        
+                        static const string numtag = "#num#";
+                        static const string::size_type numtaglen = numtag.length();
+                        string::size_type tagpos;
+                        while (string::npos != (tagpos = val.find(numtag)))
+                            val.erase(tagpos, numtaglen);
+                    }
+                }
+            }
+            
             if ( texture2name.find( val ) != texture2name.end() ) {
                 printf( "name conflict %s has texture %s and %s has texture %s\n",
                        name.c_str(),
