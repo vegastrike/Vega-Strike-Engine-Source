@@ -80,7 +80,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXGetLightContextAmbient( GFXColor &amb );
 ///picks and activates local lights near to "center"
 void /*GFXDRVAPI*/ GFXPickLights( const Vector &center, const float radius );
 ///picks and does not activate local lights near to "center"
-void /*GFXDRVAPI*/ GFXPickLights( const Vector &center, const float radius, vector< int > &lights, const int maxlights );
+void /*GFXDRVAPI*/ GFXPickLights( const Vector &center, const float radius, vector< int > &lights, const int maxlights, const bool pickglobals );
 ///activates local lights picked by GFXPickLight
 void /*GFXDRVAPI*/ GFXPickLights( vector< int >::const_iterator begin, vector< int >::const_iterator end );
 ///Sets the light model to have separate specular color (if available)
@@ -450,7 +450,7 @@ enum GFXTEXTURECOORDMODE
 };
 void GFXTextureCoordGenMode( int stage, GFXTEXTURECOORDMODE tex, const float params[4], const float paramt[4] );
 
-int GFXCreateProgram( const char *vertex, const char *fragment );
+int GFXCreateProgram( const char *vertex, const char *fragment, const char *extra_defines );
 void GFXDestroyProgram( int program );
 //program created if necessary and active
 int GFXActivateShader( const char *program = NULL /*null for default prog*/ );
@@ -470,7 +470,7 @@ int GFXShaderConstantv( int name, unsigned int numvals, const float *value );
 int GFXShaderConstantv( int name, unsigned int numvals, const int *value );
 bool GFXDefaultShaderSupported();
 void GFXReloadDefaultShader();
-void GFXUploadLightState( int max_light_location, int active_light_array, int apparent_light_size_array, bool shader );
+void GFXUploadLightState( int max_light_location, int active_light_array, int apparent_light_size_array, bool shader, vector<int>::const_iterator begin, vector<int>::const_iterator end );
 bool GFXShaderReloaded();
 int GFXGetProgramVersion();
 #endif

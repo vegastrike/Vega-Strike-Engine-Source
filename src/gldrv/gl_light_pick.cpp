@@ -136,7 +136,7 @@ struct lightsort
 
 typedef vector< LineCollideStar >veclinecol;
 
-void GFXPickLights( const Vector &center, const float radius, vector< int > &lights, const int maxlights )
+void GFXPickLights( const Vector &center, const float radius, vector< int > &lights, const int maxlights, const bool pickglobals )
 {
     QVector     tmp;
     //Beware if re-using rndvar !! Because rand returns an int and on 64 bits archs sizeof( void*) != sizeof( int) !!!
@@ -144,6 +144,16 @@ void GFXPickLights( const Vector &center, const float radius, vector< int > &lig
     int         lightsenabled = _GLLightsEnabled;
     tmp = QVector( radius, radius, radius );
 
+    if (lightsenabled && pickglobals) {
+        // Push global lights into the picked set
+        for (int i = 0; i < GFX_MAX_LIGHTS; ++i) {
+            if ((GLLights[i].options & (OpenGLL::GL_ENABLED|OpenGLL::GLL_LOCAL)) == OpenGLL::GL_ENABLED) {
+                // It's global and enabled
+                lights.push_back(GLLights[i].index);
+            }
+        }
+    }
+    
     veclinecol *tmppickt[2];
     lighttable.Get( center.Cast(), tmppickt );
 
@@ -163,7 +173,7 @@ void GFXPickLights( const Vector &center, const float radius, vector< int > &lig
 void GFXPickLights( const Vector &center, const float radius )
 {
     swappicked();
-    GFXPickLights( center, radius, *newpicked, 8 );
+    GFXPickLights( center, radius, *newpicked, 8, false );
     gfx_light::dopickenables();
 }
 

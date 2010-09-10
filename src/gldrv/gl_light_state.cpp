@@ -11,7 +11,7 @@
 #define M_PI 3.14159265358979323846264338328
 #endif
 
-void GFXUploadLightState( int max_light_location, int active_light_array, int apparent_light_size_array, bool shader )
+void GFXUploadLightState( int max_light_location, int active_light_array, int apparent_light_size_array, bool shader, vector<int>::const_iterator begin, vector<int>::const_iterator end )
 {
     // FIXME: (klauss) Very bad thing: static variables initialized with heap-allocated arrays...
     static GLint *lightData = new GLint[GFX_MAX_LIGHTS];
@@ -19,15 +19,16 @@ void GFXUploadLightState( int max_light_location, int active_light_array, int ap
     
     Matrix modelview;
     
-    if (shader) {
-        // if we're using shaders, we'll need the modelview matrix
-        // to properly compute light-model apparent light sizes
-        GFXGetMatrixModel(modelview);
-    }
+    // if we're using shaders, we'll need the modelview matrix
+    // to properly compute light-model apparent light sizes
+    GFXGetMatrixModel(modelview);
     
     size_t maxval = 0;
-    for (size_t i = 0; i < static_cast<unsigned>(GFX_MAX_LIGHTS); ++i) {
-        if (GLLights[i].options & OpenGLL::GL_ENABLED) {
+    size_t i = 0;
+    
+    for (vector<int>::const_iterator lightit = begin; lightit != end; ++i, ++lightit) {
+        const gfx_light &light = (*_llights)[*lightit];
+        if (light.enabled()) {
             lightData[i] = 1;
             maxval = i;
             
@@ -46,7 +47,6 @@ void GFXUploadLightState( int max_light_location, int active_light_array, int ap
                 // For two, scaling would be nullified when scaling both distance
                 // and light size, so it would only waste time.
                 
-                const gfx_light &light = (*_llights)[GLLights[i].index];
                 QVector lightPos = light.getPosition() - modelview.p;
                 
                 double lightDistance = lightPos.Magnitude();
@@ -94,9 +94,17 @@ void GFXUploadLightState( int max_light_location, int active_light_array, int ap
         }
     }
     
+    for (; i < (size_t)GFX_MAX_LIGHTS; ++i) {
+        lightData[i] = 0;
+        lightSizes[i*4+0] = 0.f;
+        lightSizes[i*4+1] = 0.f;
+        lightSizes[i*4+2] = 0.f;
+        lightSizes[i*4+3] = 0.f;
+    }
+    
     if (!shader) {
         //only bother with actual GL state in the event of lack of shaders
-        for (int i = 0; i < (int) GFX_MAX_LIGHTS; ++i) {
+        for (size_t i = 0; i < (size_t) GFX_MAX_LIGHTS; ++i) {
             int isenabled = glIsEnabled( GL_LIGHT0+i );
             if (isenabled && !lightData[i])
                 glDisable( GL_LIGHT0+i );
@@ -105,6 +113,14 @@ void GFXUploadLightState( int max_light_location, int active_light_array, int ap
         }
     } else {
         //only bother with shader constants it there is a shader
+        GFXLoadIdentity( MODEL );
+        for (size_t i = 0; i <= maxval; ++i) {
+            if (lightData[i]) {
+                const gfx_light &light = (*_llights)[*(begin+i)];
+                light.ContextSwitchClobberLight(GL_LIGHT0+i, -1);
+            }
+        }
+        GFXLoadMatrixModel( modelview );
         if (active_light_array >= 0)
             GFXShaderConstantv( active_light_array, GFX_MAX_LIGHTS, (int*) lightData );
         if (max_light_location >= 0)
@@ -200,13 +216,13 @@ void gfx_light::Kill()
 ** having two different lights with the same stats and pos is unlikely at best
 */
 
-void gfx_light::SendGLPosition( const GLenum target )
+void gfx_light::SendGLPosition( const GLenum target ) const
 {
     float v[4] = {vect[0], vect[1], vect[2], 1};
     glLightfv( target, GL_POSITION, v );
 }
 
-inline void gfx_light::ContextSwitchClobberLight( const GLenum gltarg, const int original )
+inline void gfx_light::ContextSwitchClobberLight( const GLenum gltarg, const int original ) const
 {
     glLightf( gltarg, GL_CONSTANT_ATTENUATION, attenuate[0]*atten0scale );
     glLightf( gltarg, GL_LINEAR_ATTENUATION, attenuate[1]*atten1scale );

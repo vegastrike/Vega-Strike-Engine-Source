@@ -1338,7 +1338,7 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
             if (whichdrawqueue != MESH_SPECIAL_FX_ONLY) {
                 int maxPerPass   = pass.perLightIteration ? pass.perLightIteration : 1;
                 int maxPassCount = pass.perLightIteration ? (pass.maxIterations ? pass.maxIterations : 32) : 1;
-                GFXPickLights( Vector( c.mat.p.i, c.mat.p.j, c.mat.p.k ), rSize(), lights, maxPerPass*maxPassCount );
+                GFXPickLights( Vector( c.mat.p.i, c.mat.p.j, c.mat.p.k ), rSize(), lights, maxPerPass*maxPassCount, true );
             }
             //FX lights
             size_t fxLightsBase = lights.size();
@@ -1360,41 +1360,50 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
             //Render, iterating per light if/as requested
             bool popGlobals = false;
             size_t maxiter    = 1;
-            int  maxlights  = lights.size()+numGlobalLights;
+            int  maxlights  = lights.size();
             size_t nlights    = 0;
             if (pass.perLightIteration) {
                 maxlights = pass.perLightIteration;
                 maxiter   = pass.maxIterations;
             }
-            for (size_t iter = 0, lightnum = 0, nlights = lights.size()+numGlobalLights;
+            
+            int npasslights = 0;
+            for (size_t iter = 0, lightnum = 0, nlights = lights.size();
                  (iter < maxiter) && ( (pass.perLightIteration == 0 && lightnum == 0) || (lightnum < nlights) );
-                 ++iter, lightnum += nlights) 
+                 ++iter, lightnum += npasslights) 
             {
                 //Setup transform and lights
-                int npasslights = std::max( 0, maxlights-(lightnum ? 0 : numGlobalLights) );
+                npasslights = std::max( 0, std::min( int(nlights) - int(lightnum), int(maxlights) ) );
                 
                 //MultiAlphaBlend stuff
-                if (pass.blendMode == Technique::Pass::MultiAlphaBlend && iter > 0)
-                    GFXBlendMode( SRCALPHA, ONE );
+                if (iter > 0) {
+                    switch (pass.blendMode) {
+                        case Technique::Pass::MultiAlphaBlend:
+                            GFXBlendMode( SRCALPHA, ONE );
+                            break;
+                        case Technique::Pass::Default:
+                            GFXBlendMode( blendSrc, ONE );
+                            break;
+                        default:
+                            break;
+                    }
+                }
                 
-                GFXLoadIdentity( MODEL );
-                if (lightnum > 0) {
+                GFXLoadMatrixModel( c.mat );
+                if (lightnum == 0) {
                     GFXPushGlobalEffects();
                     popGlobals = true;
                 }
-                if ( (lightnum+npasslights) > lights.size() )
-                    GFXPickLights( lights.begin()+lightnum, lights.end() );
-                else
-                    GFXPickLights( lights.begin()+lightnum, lights.begin()+lightnum+npasslights );
-                GFXLoadMatrixModel( c.mat );
-
+                
                 //Set shader parameters (instance-specific only)
                 // NOTE: keep after GFXLoadMatrixModel
                 GFXUploadLightState(
                     numLightsParam,
                     activeLightsArrayParam,
                     apparentLightSizeArrayParam,
-                    true );
+                    true,
+                    lights.begin() + lightnum,
+                    lights.begin() + lightnum + npasslights );
                 
                 for (unsigned int spi = 0; spi < pass.getNumShaderParams(); ++spi) {
                     const Technique::Pass::ShaderParam &sp = pass.getShaderParam( spi );

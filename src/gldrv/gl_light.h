@@ -28,12 +28,12 @@ public: gfx_light() : GFXLight() {}
 ///Returns the number this light is in the _llights list
     int lightNum();
 ///Returns if this light was saved as a local light
-    bool LocalLight()
+    bool LocalLight() const
     {
         return (options&GFX_LOCAL_LIGHT) != 0;
     }
 ///Retursn if this light is enabled
-    bool enabled()
+    bool enabled() const
     {
         return (options&GFX_LIGHT_ENABLED) != 0;
     }
@@ -53,7 +53,7 @@ public: gfx_light() : GFXLight() {}
     void Kill();
 
 ///properly utilizes union to send to OGL
-    void SendGLPosition( const GLenum target );
+    void SendGLPosition( const GLenum target ) const;
 
 ///replaces target GL light in the implementation. Sets this->target! Checks for -1 and calls ContextSwitch to clobber completely
     void ClobberGLLight( const int target );
@@ -62,7 +62,7 @@ public: gfx_light() : GFXLight() {}
     inline void FinesseClobberLight( const GLenum target, const int original );
 
 ///replaces target GL light, copying all state sets this->target!
-    inline void ContextSwitchClobberLight( const GLenum target, const int original );
+    inline void ContextSwitchClobberLight( const GLenum target, const int original ) const;
 
 /**
  * for global lights, clobbers SOMETHING for sure, calls GLenable

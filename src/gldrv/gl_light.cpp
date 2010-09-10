@@ -39,11 +39,19 @@ vector< gfx_light > *_llights = NULL;
 //currently stored GL lights!
 OpenGLLights *GLLights        = NULL; //{-1,-1,-1,-1,-1,-1,-1,-1};
 static stack< bool* >   GlobalEffects;
+static stack< bool* >   GlobalEffectsFreelist;
 static stack< GFXColor >GlobalEffectsAmbient;
 
 void /*GFXDRVAPI*/ GFXPushGlobalEffects()
 {
-    bool *tmp = new bool[GFX_MAX_LIGHTS];
+    bool *tmp;
+    if (GlobalEffectsFreelist.empty()) {
+        tmp = new bool[GFX_MAX_LIGHTS];
+    } else {
+        tmp = GlobalEffectsFreelist.top();
+        GlobalEffectsFreelist.pop();
+    }
+    
     unpicklights();     //costly but necessary to get rid of pesky local enables that shoudln't be tagged to get reenabled
     for (int i = 0; i < GFX_MAX_LIGHTS; i++) {
         tmp[i] = ( 0 != (GLLights[i].options&OpenGLL::GL_ENABLED) );
@@ -64,8 +72,13 @@ GFXBOOL /*GFXDRVAPI*/ GFXPopGlobalEffects()
     for (int i = 0; i < GFX_MAX_LIGHTS; i++)
         if (GlobalEffects.top()[i])
             glEnable( GL_LIGHT0+i );
-    delete[] GlobalEffects.top();
+    
+    if (GlobalEffectsFreelist.size() >= 10)
+        delete[] GlobalEffects.top();
+    else
+        GlobalEffectsFreelist.push(GlobalEffects.top());
     GlobalEffects.pop();
+    
     GFXLightContextAmbient( GlobalEffectsAmbient.top() );
     GlobalEffectsAmbient.pop();
     return true;
