@@ -435,17 +435,40 @@ void init_opengl_extensions()
     }
     if ( vsExtensionSupported( "GL_EXT_texture_edge_clamp" ) || vsExtensionSupported( "GL_SGIS_texture_edge_clamp" ) ) {
         VSFileSystem::vs_dprintf( 3, "OpenGL::S3TC Texture Clamp-to-Edge supported\n" );
-        //should be true;
+        // should be true
     } else {
-        gl_options.ext_clamp_to_edge = 0;
+        gl_options.ext_clamp_to_edge = false;
         VSFileSystem::vs_dprintf( 1, "OpenGL::S3TC Texture Clamp-to-Edge unsupported\n" );
     }
     if ( vsExtensionSupported( "GL_ARB_texture_border_clamp" ) || vsExtensionSupported( "GL_SGIS_texture_border_clamp" ) ) {
         VSFileSystem::vs_dprintf( 3, "OpenGL::S3TC Texture Clamp-to-Border supported\n" );
-        //should be true;
+        // should be true
     } else {
-        gl_options.ext_clamp_to_border = 0;
+        gl_options.ext_clamp_to_border = false;
         VSFileSystem::vs_dprintf( 1, "OpenGL::S3TC Texture Clamp-to-Border unsupported\n" );
+    }
+    if ( vsExtensionSupported( "GL_ARB_framebuffer_sRGB" ) || vsExtensionSupported( "GL_EXT_framebuffer_sRGB" ) ) {
+        VSFileSystem::vs_dprintf( 3, "OpenGL::sRGB Framebuffer supported\n" );
+        GLboolean srgbCapable = true;
+        
+        if ( vsExtensionSupported( "GL_EXT_framebuffer_sRGB" ) ) {
+            // TODO: GL_EXT_framebuffer_sRGB allows us to query sRGB capability easily.
+            // The ARB variant requires us to use GLX and GLW stuff, which would be harder to do portably
+            // For now, we'll just assume the ARB variant supports it, since it's quite probable that it
+            // does for most framebuffer visuals.
+            srgbCapable = false;
+            glGetBooleanv(GL_FRAMEBUFFER_SRGB_CAPABLE_EXT, &srgbCapable);
+        }
+        
+        if (srgbCapable) {
+            gl_options.ext_srgb_framebuffer = true;
+        } else {
+            VSFileSystem::vs_dprintf( 1, "OpenGL::sRGB Framebuffer unsupported by visual\n" );
+            gl_options.ext_srgb_framebuffer = false;
+        }
+    } else {
+        gl_options.ext_srgb_framebuffer = false;
+        VSFileSystem::vs_dprintf( 1, "OpenGL::sRGB Framebuffer unsupported\n" );
     }
     if ( GFXDefaultShaderSupported() )
         if (gl_options.Multitexture < 16)
@@ -524,8 +547,7 @@ void GFXInit( int argc, char **argv )
     gl_options.display_lists       = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "displaylists", "false" ) );
     gl_options.s3tc = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "s3tc", "true" ) );
     gl_options.ext_clamp_to_edge   = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "ext_clamp_to_edge", "true" ) );
-    gl_options.ext_clamp_to_border =
-        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "ext_clamp_to_border", "true" ) );
+    gl_options.ext_clamp_to_border = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "ext_clamp_to_border", "true" ) );
 
     vs_config->getColor( "space_background", clearcol );
     glClearColor( clearcol[0], clearcol[1], clearcol[2], clearcol[3] );

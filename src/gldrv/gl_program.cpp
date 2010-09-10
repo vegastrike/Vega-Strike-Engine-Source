@@ -5,16 +5,24 @@
 #include "gfxlib.h"
 #include "lin_time.h"
 #include <map>
+#include <set>
 
-typedef std::map< std::pair< std::string, std::string >, int >ProgramCache;
-typedef std::map< int, std::pair< std::string, std::string > >ProgramICache;
+typedef std::pair< unsigned int , std::pair< std::string, std::string > > ProgramCacheKey;
+typedef std::map< ProgramCacheKey, int >ProgramCache;
+typedef std::map< int, ProgramCacheKey >ProgramICache;
 
 static ProgramCache programCache;
 static ProgramICache programICache;
 
-static ProgramCache::key_type cacheKey( const std::string &vp, const std::string &fp )
+static ProgramCache::key_type cacheKey( const std::string &vp, const std::string &fp, const char *defines )
 {
-    return std::pair< std::string, std::string > ( vp, fp );
+    unsigned int defhash = 0;
+    if (defines != NULL) {
+        defhash = 0xBA0BAB00;
+        while (*defines) 
+            defhash ^= (defhash * 127) | *(defines++);
+    }
+    return std::pair< unsigned int , std::pair< std::string, std::string > > (defhash, std::pair< std::string, std::string > ( vp, fp ));
 }
 
 void printLog( GLuint obj, bool shader )
@@ -29,7 +37,86 @@ void printLog( GLuint obj, bool shader )
         fprintf( stderr, "%s\n", infoLog );
 }
 
-static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram )
+static VSFileSystem::VSError getProgramSource(const std::string &path, std::vector<std::string> &lines, std::set<std::string> &processed_includes, char *buf, size_t buflen)
+{
+    std::string dirname = path.substr(0,path.find_last_of('/'));
+    
+    VSFileSystem::VSFile f;
+    VSFileSystem::VSError err = f.OpenReadOnly( path.c_str(), UnknownFile );
+    
+    const char *include_directive = "#include \"";
+    const size_t include_directive_len = 10;
+    size_t lineno = 0;
+    
+    if (err <= Ok) {
+        processed_includes.insert(path);
+        
+        while (Ok == f.ReadLine(buf, buflen)) {
+            ++lineno;
+            if (strncmp(buf, include_directive, include_directive_len) == 0) {
+                // Process include directives
+                char *eos = strchr(buf+include_directive_len, '\"');
+                if (eos != NULL) {
+                    *eos = 0;
+                    std::string includepath = dirname + "/" + std::string(buf+include_directive_len);
+                    if (processed_includes.count(includepath) == 0) {
+                        // Set up line numbers for include file
+                        lines.push_back("#line 0\n");
+                        
+                        VSFileSystem::VSError ierr = getProgramSource(includepath, lines, processed_includes, buf, buflen);
+                        if (ierr > Ok) {
+                            f.Close();
+                            VSFileSystem::vs_fprintf(stderr, "ERROR: included from %s\n", path.c_str());
+                            return ierr;
+                        } else {
+                            // Append a blank line to avoid issues and restore line numbers
+                            lines.push_back("\n");
+                            snprintf(buf, buflen, "#line %d\n", lineno);
+                            lines.push_back(buf);
+                        }
+                    } else {
+                        // Insert blank line to keep line numbers consistent
+                        lines.push_back("\n");
+                    }
+                } else {
+                    VSFileSystem::vs_fprintf(stderr, "WARNING: broken include directive at file %s, line %d - skipping\n",
+                        path.c_str(), lineno);
+                }
+            } else {
+                // Append a line to the list
+                lines.push_back(buf);
+            }
+        }
+        
+        f.Close();
+    } else {
+        VSFileSystem::vs_fprintf(stderr, "ERROR: at %s\n", path.c_str());
+    }
+    return err;
+}
+
+static VSFileSystem::VSError getProgramSource(const std::string &path, std::string &source)
+{
+    std::set<std::string> processed_includes;
+    std::vector<std::string> lines;
+    char buf[16384];
+    
+    source.clear();
+    
+    VSFileSystem::VSError err = getProgramSource(path, lines, processed_includes, buf, sizeof(buf));
+    
+    if (err <= Ok) {
+        size_t sourcelen=0;
+        for (std::vector<std::string>::const_iterator it = lines.begin(); it != lines.end(); ++it)
+            sourcelen += it->length();
+        source.reserve(sourcelen);
+        for (std::vector<std::string>::const_iterator it = lines.begin(); it != lines.end(); ++it)
+            source += *it;
+    }
+    return err;
+}
+
+static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram, const char *extra_defines )
 {
     if (vprogram[0] == '\0' && fprogram[0] == '\0') return 0;
 #ifndef __APPLE__
@@ -45,14 +132,12 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram )
     while ( ( errCode = glGetError() ) != GL_NO_ERROR )
         printf( "Error code %s\n", gluErrorString( errCode ) );
     VSFileSystem::VSFile vf, ff;
-    std::string vpfilename = "programs/";
-    vpfilename += vprogram;
-    vpfilename += ".vp";
-    std::string fpfilename = "programs/";
-    fpfilename += fprogram;
-    fpfilename += ".fp";
-    VSFileSystem::VSError vperr = vf.OpenReadOnly( vpfilename.c_str(), UnknownFile );
-    VSFileSystem::VSError fperr = ff.OpenReadOnly( fpfilename.c_str(), UnknownFile );
+    std::string vpfilename = std::string("programs/") + vprogram + ".vp";
+    std::string fpfilename = std::string("programs/") + fprogram + ".fp";
+    
+    std::string vertexprg, fragprg;
+    VSFileSystem::VSError vperr = getProgramSource(vpfilename, vertexprg);
+    VSFileSystem::VSError fperr = getProgramSource(fpfilename, fragprg);
     if ( (vperr > Ok) || (fperr > Ok) ) {
         if (vperr > Ok)
             fprintf( stderr, "Vertex Program Error: Failed to open file %s\n", vpfilename.c_str() );
@@ -60,13 +145,16 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram )
             fprintf( stderr, "Fragment Program Error: Failed to open file %s\n", fpfilename.c_str() );
         return 0;
     }
+    
+    if (extra_defines != NULL) {
+        vertexprg = std::string(extra_defines) + "\n#line 0\n" + vertexprg;
+        fragprg   = std::string(extra_defines) + "\n#line 0\n" + fragprg;
+    }
+    
     GLint vproghandle = 0;
     GLint fproghandle = 0;
     GLint sp = glCreateProgram_p();
     if (vperr <= Ok) {
-        std::string vertexprg;
-        vertexprg   = vf.ReadFull();
-        vf.Close();
         vproghandle = glCreateShader_p( GL_VERTEX_SHADER );
         const char *tmp = vertexprg.c_str();
         glShaderSource_p( vproghandle, 1, &tmp, NULL );
@@ -82,9 +170,6 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram )
         glAttachShader_p( sp, vproghandle );
     }
     if (fperr <= Ok) {
-        std::string fragprg;
-        fragprg     = ff.ReadFull();
-        ff.Close();
         fproghandle = glCreateShader_p( GL_FRAGMENT_SHADER );
         const char *tmp = fragprg.c_str();
         glShaderSource_p( fproghandle, 1, &tmp, NULL );
@@ -121,20 +206,20 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram )
     return sp;
 }
 
-int GFXCreateProgram( const char *vprogram, const char *fprogram )
+int GFXCreateProgram( const char *vprogram, const char *fprogram, const char *extra_defines )
 {
-    ProgramCache::key_type key = cacheKey( vprogram, fprogram );
+    ProgramCache::key_type key = cacheKey( vprogram, fprogram, extra_defines );
     ProgramCache::const_iterator it = programCache.find( key );
     if ( it != programCache.end() )
         return it->second;
-    int rv = programCache[key] = GFXCreateProgramNoCache( vprogram, fprogram );
+    int rv = programCache[key] = GFXCreateProgramNoCache( vprogram, fprogram, extra_defines );
     programICache[rv] = key;
     return rv;
 }
 
-int GFXCreateProgram( char *vprogram, char *fprogram )
+int GFXCreateProgram( char *vprogram, char *fprogram, char *extra_defines )
 {
-    return GFXCreateProgram( (const char*) vprogram, (const char*) fprogram );
+    return GFXCreateProgram( (const char*) vprogram, (const char*) fprogram, (const char*) extra_defines );
 }
 
 void GFXDestroyProgram( int program )
@@ -180,10 +265,10 @@ int getDefaultProgram()
         if (hifiProgramName.length() == 0) {
             lowfiprog = hifiprog = 0;
         } else {
-            lowfiprog = GFXCreateProgram( lowfiProgramName.c_str(), lowfiProgramName.c_str() );
-            if (lowfiprog == 0) lowfiprog = GFXCreateProgram( hifiProgramName.c_str(), hifiProgramName.c_str() );
-            hifiprog  = GFXCreateProgram( hifiProgramName.c_str(), hifiProgramName.c_str() );
-            if (hifiprog == 0) hifiprog = GFXCreateProgram( lowfiProgramName.c_str(), lowfiProgramName.c_str() );
+            lowfiprog = GFXCreateProgram( lowfiProgramName.c_str(), lowfiProgramName.c_str(), NULL );
+            if (lowfiprog == 0) lowfiprog = GFXCreateProgram( hifiProgramName.c_str(), hifiProgramName.c_str(), NULL );
+            hifiprog  = GFXCreateProgram( hifiProgramName.c_str(), hifiProgramName.c_str(), NULL );
+            if (hifiprog == 0) hifiprog = GFXCreateProgram( lowfiProgramName.c_str(), lowfiProgramName.c_str(), NULL );
         }
         defaultprog    = hifiprog;
         programChanged = true;
@@ -206,16 +291,16 @@ void GFXReloadDefaultShader()
     }
     programChanged = true;
     if (islow) {
-        hifiprog    = GFXCreateProgram( hifiProgramName.c_str(), hifiProgramName.c_str() );
-        if (hifiprog == 0) hifiprog = GFXCreateProgram( lowfiProgramName.c_str(), lowfiProgramName.c_str() );
-        lowfiprog   = GFXCreateProgram( lowfiProgramName.c_str(), lowfiProgramName.c_str() );
-        if (lowfiprog == 0) lowfiprog = GFXCreateProgram( hifiProgramName.c_str(), hifiProgramName.c_str() );
+        hifiprog    = GFXCreateProgram( hifiProgramName.c_str(), hifiProgramName.c_str(), NULL );
+        if (hifiprog == 0) hifiprog = GFXCreateProgram( lowfiProgramName.c_str(), lowfiProgramName.c_str(), NULL );
+        lowfiprog   = GFXCreateProgram( lowfiProgramName.c_str(), lowfiProgramName.c_str(), NULL );
+        if (lowfiprog == 0) lowfiprog = GFXCreateProgram( hifiProgramName.c_str(), hifiProgramName.c_str(), NULL );
         defaultprog = lowfiprog;
     } else {
-        lowfiprog   = GFXCreateProgram( lowfiProgramName.c_str(), lowfiProgramName.c_str() );
-        if (lowfiprog == 0) lowfiprog = GFXCreateProgram( hifiProgramName.c_str(), hifiProgramName.c_str() );
-        hifiprog    = GFXCreateProgram( hifiProgramName.c_str(), hifiProgramName.c_str() );
-        if (hifiprog == 0) hifiprog = GFXCreateProgram( lowfiProgramName.c_str(), lowfiProgramName.c_str() );
+        lowfiprog   = GFXCreateProgram( lowfiProgramName.c_str(), lowfiProgramName.c_str(), NULL );
+        if (lowfiprog == 0) lowfiprog = GFXCreateProgram( hifiProgramName.c_str(), hifiProgramName.c_str(), NULL );
+        hifiprog    = GFXCreateProgram( hifiProgramName.c_str(), hifiProgramName.c_str(), NULL );
+        if (hifiprog == 0) hifiprog = GFXCreateProgram( lowfiProgramName.c_str(), lowfiProgramName.c_str(), NULL );
         defaultprog = hifiprog;
     }
 }
@@ -343,7 +428,7 @@ int GFXActivateShader( const char *program )
     int defaultprogram = getDefaultProgram();
     int curprogram     = defaultprogram;
     if (program)
-        curprogram = GFXCreateProgram( program, program );
+        curprogram = GFXCreateProgram( program, program, NULL );
     return GFXActivateShader( curprogram );
 }
 
@@ -466,7 +551,7 @@ int GFXNamedShaderConstant( char *progID, const char *name )
 {
     int programname = defaultprog;
     if (progID)
-        programname = programCache[cacheKey( progID, progID )];
+        programname = programCache[cacheKey( progID, progID, NULL )];
     return GFXNamedShaderConstant( programname, name );
 }
 

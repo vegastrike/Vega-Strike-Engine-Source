@@ -32,6 +32,7 @@ public:
         
         /** Fragment Program file before compilation */
         std::string fragmentProgram;
+        
 public:
         enum Tristate
         {
@@ -146,7 +147,7 @@ public:
                 /** Separated cube texture */
                 TexSepCube
             };
-
+            
             SourceType sourceType;
             SourceType defaultType;
 
@@ -244,6 +245,12 @@ public:
         /** Type of pass - shader or fixed pipeline */
         Type type;
 
+        /** Shaders are aware of SRGB frambuffers, so everything should be set up
+         * for sRGB blending if sRGB framebuffers are available. Shaders will be compiled
+         * with SRGB_FRAMEBUFFER set to 0 (not supported) or 1 (supported).
+         */
+        bool sRGBAware;
+        
         /** Whether to write the color buffer or not */
         bool colorWrite;
 
@@ -338,6 +345,12 @@ public:
             return textureUnits[index];
         }
 
+        /** Get the specified texture unit */
+        TextureUnit& getTextureUnit( int index )
+        {
+            return textureUnits[index];
+        }
+
         /** Get the number of shader params in this pass */
         size_t getNumShaderParams() const
         {
@@ -346,6 +359,12 @@ public:
 
         /** Get the specified shader param */
         const ShaderParam& getShaderParam( int index ) const
+        {
+            return shaderParams[index];
+        }
+
+        /** Get the specified shader param */
+        ShaderParam& getShaderParam( int index )
         {
             return shaderParams[index];
         }
@@ -368,6 +387,9 @@ public:
     /** Create a technique by loading and parsing the definition in [name].technique */
     explicit Technique( const std::string &name );
 
+    /** Create a technique by copying another technique */
+    explicit Technique( const Technique &src );
+    
     ~Technique();
 
     const std::string& getName() const
@@ -398,6 +420,10 @@ public:
         return passes.size();
     }
     const Pass& getPass( int idx ) const
+    {
+        return passes[idx];
+    }
+    Pass& getPass( int idx )
     {
         return passes[idx];
     }

@@ -315,6 +315,7 @@ typedef struct
     bool s3tc;
     bool ext_clamp_to_edge;
     bool ext_clamp_to_border;
+    bool ext_srgb_framebuffer;
     bool smooth_lines;
     bool smooth_points;
 } gl_options_t;
@@ -349,3 +350,10 @@ extern gl_options_t gl_options;
         #endif
     #endif
 #endif
+
+// Not all platforms define GL_FRAMEBUFFER_SRGB stuff
+#ifndef GL_FRAMEBUFFER_SRGB_EXT
+    #define GL_FRAMEBUFFER_SRGB_EXT 0x8DB9
+    #define GL_FRAMEBUFFER_SRGB_CAPABLE_EXT 0x8DBA
+#endif
+

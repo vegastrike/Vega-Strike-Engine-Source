@@ -544,6 +544,8 @@ void Mesh::ProcessZFarMeshes( bool nocamerasetup )
     undrawn_meshes[a].clear();
 
     GFXDeactivateShader();
+    if (gl_options.ext_srgb_framebuffer)
+        glDisable( GL_FRAMEBUFFER_SRGB_EXT );
 
     Animation::ProcessFarDrawQueue( -FLT_MAX );
 }
@@ -595,7 +597,11 @@ void Mesh::ProcessUndrawnMeshes( bool pushSpecialEffects, bool nocamerasetup )
         }
         undrawn_logos.clear();
     }
+    
+    // Restore state
     GFXDeactivateShader();
+    if (gl_options.ext_srgb_framebuffer)
+        glDisable( GL_FRAMEBUFFER_SRGB_EXT );
 }
 
 void Mesh::RestoreCullFace( int whichdrawqueue )
@@ -1180,6 +1186,12 @@ static void setupGLState(const Technique::Pass &pass, bool zwrite, BLENDFUNC ble
     else if (zwrite)
         GFXAlphaTest( GREATER, 0 );
     
+    if (gl_options.ext_srgb_framebuffer) {
+        if (pass.sRGBAware) 
+            glEnable( GL_FRAMEBUFFER_SRGB_EXT );
+        else
+            glDisable( GL_FRAMEBUFFER_SRGB_EXT );
+    }
 }
 
 void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr )

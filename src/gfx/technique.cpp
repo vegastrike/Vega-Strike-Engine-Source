@@ -18,6 +18,7 @@
 #include "xml_support.h"
 
 #include "options.h"
+#include "gldrv/gl_globals.h"
 #include "audio/Exceptions.h"
 
 using namespace XMLDOM;
@@ -371,7 +372,19 @@ void Technique::Pass::compile()
         }
 
         if (prog == 0) {
-            prog = GFXCreateProgram( vertexProgram.c_str(), fragmentProgram.c_str() );
+            std::string defines;
+            
+            // Automatic defines
+            if (sRGBAware) {
+                if (gl_options.ext_srgb_framebuffer)
+                    defines += "#define SRGB_FRAMEBUFFER 1\n";
+                else
+                    defines += "#define SRGB_FRAMEBUFFER 0\n";
+            }
+            
+            // Compile program
+            prog = GFXCreateProgram( vertexProgram.c_str(), fragmentProgram.c_str(), 
+                                     (defines.empty() ? NULL : defines.c_str()) );
             if (prog == 0) 
                 throw ProgramCompileError(
                     "Error compiling program vp:\""+vertexProgram
@@ -511,6 +524,7 @@ Technique::Technique( const string &nam ) :
                 pass.offsetUnits       = parseFloat( el->getAttributeValue( "polygon_offset_units", "0" ) );
                 pass.offsetFactor      = parseFloat( el->getAttributeValue( "polygon_offset_factor", "0" ) );
                 pass.lineWidth         = parseFloat( el->getAttributeValue( "line_width", "1" ) );
+                pass.sRGBAware         = parseBool( el->getAttributeValue( "srgb_aware", "false" ) );
                 nextSequence           = pass.sequence+1;
 
                 string vp, fp;
@@ -579,6 +593,19 @@ Technique::Technique( const string &nam ) :
             }
         }
     }
+}
+
+Technique::Technique( const Technique &src ) :
+    name( src.name )
+    , fallback( src.fallback )
+    , compiled( false )
+    , programVersion( 0 )
+    , passes( src.passes )
+{
+    // Not much else to do
+    // Compiled techniques are still valid, and setting any parameter
+    // that would invalidate it would result in recompilation
+    // FIXME: should result in recompilation, not necessarily true now
 }
 
 Technique::~Technique()
