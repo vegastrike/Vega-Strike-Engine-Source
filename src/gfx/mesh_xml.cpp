@@ -1530,6 +1530,8 @@ static float faceTSWeight( vector< GFXVertex > &vertices, int i1, int i2, int i3
     Vector v2( vertices[i3].x-vertices[i1].x,
                vertices[i3].y-vertices[i1].y,
                vertices[i3].z-vertices[i1].z );
+    v1.Normalize();
+    v2.Normalize();
     return 1.f-fabsf( v1.Dot( v2 ) );
 }
 
@@ -1692,7 +1694,7 @@ void Mesh::PostProcessLoading( MeshXML *xml, const vector< string > &textureOver
         for ( i = j = 0, n = xml->trifans.size(); i < n; j += xml->trifans[i++].size() )
             SumNormals( xml->vertices, xml->trifanind, j, j+xml->trifans[i].size(), GFXTRIFAN, weights );
         for ( i = j = 0, n = xml->linestrips.size(); i < n; j += xml->linestrips[i++].size() )
-            SumNormals( xml->vertices, xml->linestripind, j, j+xml->linestrips[i].size(), GFXTRIFAN, weights );
+            SumNormals( xml->vertices, xml->linestripind, j, j+xml->linestrips[i].size(), GFXLINESTRIP, weights );
         NormalizeNormals( xml->vertices, weights );
     } else {
         //Flip normals - someone thought VS should flips normals, ask him why.
