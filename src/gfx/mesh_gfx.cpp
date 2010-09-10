@@ -73,7 +73,7 @@ public:
 
         const Technique::Pass &pass = orig->technique->getPass( passno );
         this->orig = orig;
-        this->d = d;
+        this->d = -d;
         this->passno = passno;
         this->sequence    = pass.sequence;
         this->program     = pass.getCompiledProgram();
@@ -83,7 +83,7 @@ public:
                  && (orig->blendDst == ZERO)
                  && (orig->blendSrc != DESTCOLOR) )
               ) ? 0 : 1;
-        this->zsort = ( transparent && ( (orig->blendDst != ONE) || (orig->blendSrc != ONE) ) ) ? 1 : 0;
+        this->zsort = ( transparent && ( (pass.blendMode != Technique::Pass::Default) || (orig->blendDst != ONE) || (orig->blendSrc != ONE) ) ) ? 1 : 0;
 
         assert( this->passno == passno );
         assert( this->sequence == pass.sequence );
@@ -110,6 +110,7 @@ public:
         SLESS( zsort );   //And the ones that need z-sort last
         if (zsort)
             SLESS( d );
+        SLESS( passno );  //Make sure lesser passes render first
         SLESS( program ); //group same program together (with fixed-fn at the beginning)
         //Fixed-fn passes have program == 0
         if (program == 0) {
