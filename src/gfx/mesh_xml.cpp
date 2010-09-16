@@ -1642,32 +1642,38 @@ static void SumTangents( vector< GFXVertex > &vertices,
 
 static void NormalizeTangents( vector< GFXVertex > &vertices, vector< float > &weights )
 {
-    for (size_t i = 0, n = vertices.size(); i < n; ++i)
+    for (size_t i = 0, n = vertices.size(); i < n; ++i) {
         if (weights[i] > 0) {
             //Average (shader will normalize)
-            float iw = (weights[i] < 0.001) ? 0.f : (1.f/weights[i]);
+            float iw = (weights[i] < 0.001) ? 1.f : (1.f/weights[i]);
             vertices[i].tx *= iw;
             vertices[i].ty *= iw;
             vertices[i].tz *= iw;
             vertices[i].tw *= iw;
         }
+        
+        // Don't let null vectors around (they create NaNs within shaders when normalized)
+        // Since they happen regularly on sphere polar caps, replace them with a suitable value there (+x)
+        if (Vector(vertices[i].tx, vertices[i].ty, vertices[i].tz).MagnitudeSquared() < 0.00001)
+            vertices[i].tx = 0.001;
+    }
 }
 
 static void NormalizeNormals( vector< GFXVertex > &vertices, vector< float > &weights )
 {
-    for (size_t i = 0, n = vertices.size(); i < n; ++i)
+    for (size_t i = 0, n = vertices.size(); i < n; ++i) {
         if (weights[i] > 0) {
             //Renormalize
             float mag = vertices[i].GetNormal().Magnitude();
             if (mag < 0.001)
-                mag = 0.f;
-
+                mag = 1.f;
             else
                 mag = 1.f/mag;
             vertices[i].i *= mag;
             vertices[i].j *= mag;
             vertices[i].k *= mag;
         }
+    }
 }
 
 void Mesh::PostProcessLoading( MeshXML *xml, const vector< string > &textureOverride )

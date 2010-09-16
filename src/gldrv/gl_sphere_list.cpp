@@ -139,8 +139,8 @@ GFXSphereVertexList::GFXSphereVertexList( float radius, int detail, bool Insideo
                 vertexlist[j*2+fir].j  = z*normalscale;
 
                 //tangent
-                vertexlist[j*2+fir].tx = -y*normalscale;
-                vertexlist[j*2+fir].tz = -x*normalscale;
+                vertexlist[j*2+fir].tx = -ty*normalscale;
+                vertexlist[j*2+fir].tz = -tx*normalscale;
                 vertexlist[j*2+fir].ty = 0;
                 vertexlist[j*2+fir].tw = nsign*normalscale;
 #define GetS( theta, theta_min, theta_max ) ( 1-(theta-theta_min)/(theta_max-theta_min) )
