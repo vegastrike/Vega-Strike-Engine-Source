@@ -36,14 +36,14 @@ struct Quaternion
         return Quaternion( s*rval.s-DotProduct( v, rval.v ),
                           s*rval.v+rval.s*v+v.Cross( rval.v ) );
     }
-    inline Quaternion operator*=( const Quaternion &rval )
+    inline Quaternion& operator*=( const Quaternion &rval )
     {
         return *this = *this*rval;
     }
-    Quaternion Normalize()
+    Quaternion& Normalize()
     {
         float mag = Magnitude();
-        v  = v*( ( (float) 1.0 )/mag );
+        v *= 1.0f / mag;
         s /= mag;
         return *this;
     }
