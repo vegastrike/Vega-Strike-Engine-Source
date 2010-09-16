@@ -1524,12 +1524,16 @@ static float faceTSPolarity( const Vector &T, const Vector &B, const Vector &N )
 
 static float faceTSWeight( vector< GFXVertex > &vertices, int i1, int i2, int i3 )
 {
-    Vector v1( vertices[i2].x-vertices[i1].x,
-               vertices[i2].y-vertices[i1].y,
-               vertices[i2].z-vertices[i1].z );
-    Vector v2( vertices[i3].x-vertices[i1].x,
-               vertices[i3].y-vertices[i1].y,
-               vertices[i3].z-vertices[i1].z );
+    const GFXVertex &vtx1 = vertices[i1];
+    const GFXVertex &vtx2 = vertices[i2];
+    const GFXVertex &vtx3 = vertices[i3];
+    
+    Vector v1( vtx2.x-vtx1.x,
+               vtx2.y-vtx1.y,
+               vtx2.z-vtx1.z );
+    Vector v2( vtx3.x-vtx1.x,
+               vtx3.y-vtx1.y,
+               vtx3.z-vtx1.z );
     v1.Normalize();
     v2.Normalize();
     return 1.f-fabsf( v1.Dot( v2 ) );
@@ -1537,19 +1541,23 @@ static float faceTSWeight( vector< GFXVertex > &vertices, int i1, int i2, int i3
 
 static void computeTangentspace( vector< GFXVertex > &vertices, int i1, int i2, int i3, Vector &T, Vector &B, Vector &N )
 {
+    const GFXVertex &v1 = vertices[i1];
+    const GFXVertex &v2 = vertices[i2];
+    const GFXVertex &v3 = vertices[i3];
+    
     //compute deltas. I think that the fact we use (*2-*1) and (*3-*1) is arbitrary, but I could be wrong
-    Vector p0( vertices[i1].x, vertices[i1].y, vertices[i1].z );
-    Vector p1( vertices[i2].x, vertices[i2].y, vertices[i2].z );
-    Vector p2( vertices[i3].x, vertices[i3].y, vertices[i3].z );
+    Vector p0( v1.x, v1.y, v1.z );
+    Vector p1( v2.x, v2.y, v2.z );
+    Vector p2( v3.x, v3.y, v3.z );
     p1 -= p0;
     p2 -= p0;
 
     float s1, t1;
     float s2, t2;
-    s1 = vertices[i2].s-vertices[i1].s;
-    s2 = vertices[i3].s-vertices[i1].s;
-    t1 = vertices[i2].t-vertices[i1].t;
-    t2 = vertices[i3].t-vertices[i1].t;
+    s1 = v2.s-v1.s;
+    s2 = v3.s-v1.s;
+    t1 = v2.t-v1.t;
+    t2 = v3.t-v1.t;
 
     //and now a myracle happens...
     T  = t2*p1-t1*p2;
@@ -1570,24 +1578,28 @@ static void SumTangent( vector< GFXVertex > &vertices, int i1, int i2, int i3, v
 
     float  p = faceTSPolarity( T, B, N )*w;
     T *= w;
+    
+    GFXVertex &v1 = vertices[i1];
+    GFXVertex &v2 = vertices[i2];
+    GFXVertex &v3 = vertices[i3];
 
-    vertices[i1].tx += T.x;
-    vertices[i1].ty += T.y;
-    vertices[i1].tz += T.z;
-    vertices[i1].tw += p;
-    weights[i1]     += w;
+    v1.tx += T.x;
+    v1.ty += T.y;
+    v1.tz += T.z;
+    v1.tw += p;
+    weights[i1] += w;
 
-    vertices[i2].tx += T.x;
-    vertices[i2].ty += T.y;
-    vertices[i2].tz += T.z;
-    vertices[i2].tw += p;
-    weights[i2]     += w;
+    v2.tx += T.x;
+    v2.ty += T.y;
+    v2.tz += T.z;
+    v2.tw += p;
+    weights[i2] += w;
 
-    vertices[i3].tx += T.x;
-    vertices[i3].ty += T.y;
-    vertices[i3].tz += T.z;
-    vertices[i3].tw += p;
-    weights[i3]     += w;
+    v3.tx += T.x;
+    v3.ty += T.y;
+    v3.tz += T.z;
+    v3.tw += p;
+    weights[i3] += w;
 }
 
 static void SumTangents( vector< GFXVertex > &vertices,
@@ -1643,35 +1655,41 @@ static void SumTangents( vector< GFXVertex > &vertices,
 static void NormalizeTangents( vector< GFXVertex > &vertices, vector< float > &weights )
 {
     for (size_t i = 0, n = vertices.size(); i < n; ++i) {
-        if (weights[i] > 0) {
+        GFXVertex &v = vertices[i];
+        float w = weights[i];
+        
+        if (w > 0) {
             //Average (shader will normalize)
-            float iw = (weights[i] < 0.001) ? 1.f : (1.f/weights[i]);
-            vertices[i].tx *= iw;
-            vertices[i].ty *= iw;
-            vertices[i].tz *= iw;
-            vertices[i].tw *= iw;
+            float iw = (w < 0.001) ? 1.f : (1.f / w);
+            v.tx *= iw;
+            v.ty *= iw;
+            v.tz *= iw;
+            v.tw *= iw;
         }
         
         // Don't let null vectors around (they create NaNs within shaders when normalized)
         // Since they happen regularly on sphere polar caps, replace them with a suitable value there (+x)
-        if (Vector(vertices[i].tx, vertices[i].ty, vertices[i].tz).MagnitudeSquared() < 0.00001)
-            vertices[i].tx = 0.001;
+        if (Vector(v.tx, v.ty, v.tz).MagnitudeSquared() < 0.00001)
+            v.tx = 0.001;
     }
 }
 
 static void NormalizeNormals( vector< GFXVertex > &vertices, vector< float > &weights )
 {
     for (size_t i = 0, n = vertices.size(); i < n; ++i) {
-        if (weights[i] > 0) {
+        GFXVertex &v = vertices[i];
+        float w = weights[i];
+        
+        if (w > 0) {
             //Renormalize
-            float mag = vertices[i].GetNormal().Magnitude();
-            if (mag < 0.001)
+            float mag = v.GetNormal().MagnitudeSquared();
+            if (mag < 0.00001)
                 mag = 1.f;
             else
-                mag = 1.f/mag;
-            vertices[i].i *= mag;
-            vertices[i].j *= mag;
-            vertices[i].k *= mag;
+                mag = 1.f/sqrt(mag);
+            v.i *= mag;
+            v.j *= mag;
+            v.k *= mag;
         }
     }
 }
