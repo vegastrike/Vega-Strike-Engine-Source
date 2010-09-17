@@ -7,6 +7,10 @@
 #include <map>
 #include <set>
 
+#if _MSC_VER >= 1300
+#define snprintf _snprintf
+#endif
+
 typedef std::pair< unsigned int , std::pair< std::string, std::string > > ProgramCacheKey;
 typedef std::map< ProgramCacheKey, int >ProgramCache;
 typedef std::map< int, ProgramCacheKey >ProgramICache;

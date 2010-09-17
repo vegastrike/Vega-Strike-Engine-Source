@@ -18,6 +18,11 @@
 #include <wingdi.h>
 #endif
 
+#if _MSC_VER >= 1300
+#define snprintf _snprintf
+#endif
+
+
 #define NumLights 1
 static char *InputName      = NULL;
 static char *OutputName     = NULL;

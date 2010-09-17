@@ -18,6 +18,11 @@
 #ifndef _WIN32
 #include <ctype.h>
 #endif
+
+#if _MSC_VER >= 1300
+#define snprintf _snprintf
+#endif
+
 #ifndef M_PI
 #define M_PI 3.1415926536
 #endif

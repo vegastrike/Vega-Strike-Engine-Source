@@ -635,9 +635,9 @@ void LoadCockpit( Unit *thus, const string &cockpit )
 static int AssignIf( const string &inp, float &val, float &val1, float &val2 )
 {
     if ( inp.length() ) {
-        val  = stof( inp );
-        val1 = stof( inp );
-        val2 = stof( inp );
+        val  = ::stof( inp );
+        val1 = ::stof( inp );
+        val2 = ::stof( inp );
         return 1;
     }
     return 0;
@@ -646,7 +646,7 @@ static int AssignIf( const string &inp, float &val, float &val1, float &val2 )
 static int AssignIfDeg( const string &inp, float &val )
 {
     if ( inp.length() ) {
-        val = stof( inp )*VS_PI/180;
+        val = ::stof( inp )*VS_PI/180;
         return 1;
     }
     return 0;
@@ -1007,30 +1007,30 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     corner_max = Vector( -FLT_MAX, -FLT_MAX, -FLT_MAX );
     calculate_extent( false );
     AddMounts( this, xml, OPTIM_GET( row, table, Mounts ) );
-    this->pImage->CargoVolume = stof( OPTIM_GET( row, table, Hold_Volume ) );
-    this->pImage->HiddenCargoVolume = stof( OPTIM_GET( row, table, Hidden_Hold_Volume ) );
-    this->pImage->UpgradeVolume     = stof( OPTIM_GET( row, table, Upgrade_Storage_Volume ) );
-    this->pImage->equipment_volume  = stof( OPTIM_GET( row, table, Equipment_Space ) );
+    this->pImage->CargoVolume = ::stof( OPTIM_GET( row, table, Hold_Volume ) );
+    this->pImage->HiddenCargoVolume = ::stof( OPTIM_GET( row, table, Hidden_Hold_Volume ) );
+    this->pImage->UpgradeVolume     = ::stof( OPTIM_GET( row, table, Upgrade_Storage_Volume ) );
+    this->pImage->equipment_volume  = ::stof( OPTIM_GET( row, table, Equipment_Space ) );
     ImportCargo( this, OPTIM_GET( row, table, Cargo_Import ) );     //if this changes change planet_generic.cpp
     AddCarg( this, OPTIM_GET( row, table, Cargo ) );
     AddSounds( this, OPTIM_GET( row, table, Sounds ) );
     LoadCockpit( this, OPTIM_GET( row, table, Cockpit ) );
-    pImage->CockpitCenter.i = stof( OPTIM_GET( row, table, CockpitX ) )*xml.unitscale;
-    pImage->CockpitCenter.j = stof( OPTIM_GET( row, table, CockpitY ) )*xml.unitscale;
-    pImage->CockpitCenter.k = stof( OPTIM_GET( row, table, CockpitZ ) )*xml.unitscale;
+    pImage->CockpitCenter.i = ::stof( OPTIM_GET( row, table, CockpitX ) )*xml.unitscale;
+    pImage->CockpitCenter.j = ::stof( OPTIM_GET( row, table, CockpitY ) )*xml.unitscale;
+    pImage->CockpitCenter.k = ::stof( OPTIM_GET( row, table, CockpitZ ) )*xml.unitscale;
     Mass = stof( OPTIM_GET( row, table, Mass ), 1.0 );
     Momentofinertia = stof( OPTIM_GET( row, table, Moment_Of_Inertia ), 1.0 );
-    fuel = stof( OPTIM_GET( row, table, Fuel_Capacity ) );
-    hull = maxhull = stof( OPTIM_GET( row, table, Hull ) );
-    specInterdiction = stof( OPTIM_GET( row, table, Spec_Interdiction ) );
-    armor.frontlefttop     = stof( OPTIM_GET( row, table, Armor_Front_Top_Left ) );
-    armor.frontrighttop    = stof( OPTIM_GET( row, table, Armor_Front_Top_Right ) );
-    armor.backlefttop      = stof( OPTIM_GET( row, table, Armor_Back_Top_Left ) );
-    armor.backrighttop     = stof( OPTIM_GET( row, table, Armor_Back_Top_Right ) );
-    armor.frontleftbottom  = stof( OPTIM_GET( row, table, Armor_Front_Bottom_Left ) );
-    armor.frontrightbottom = stof( OPTIM_GET( row, table, Armor_Front_Bottom_Right ) );
-    armor.backleftbottom   = stof( OPTIM_GET( row, table, Armor_Back_Bottom_Left ) );
-    armor.backrightbottom  = stof( OPTIM_GET( row, table, Armor_Back_Bottom_Right ) );
+    fuel = ::stof( OPTIM_GET( row, table, Fuel_Capacity ) );
+    hull = maxhull = ::stof( OPTIM_GET( row, table, Hull ) );
+    specInterdiction = ::stof( OPTIM_GET( row, table, Spec_Interdiction ) );
+    armor.frontlefttop     = ::stof( OPTIM_GET( row, table, Armor_Front_Top_Left ) );
+    armor.frontrighttop    = ::stof( OPTIM_GET( row, table, Armor_Front_Top_Right ) );
+    armor.backlefttop      = ::stof( OPTIM_GET( row, table, Armor_Back_Top_Left ) );
+    armor.backrighttop     = ::stof( OPTIM_GET( row, table, Armor_Back_Top_Right ) );
+    armor.frontleftbottom  = ::stof( OPTIM_GET( row, table, Armor_Front_Bottom_Left ) );
+    armor.frontrightbottom = ::stof( OPTIM_GET( row, table, Armor_Front_Bottom_Right ) );
+    armor.backleftbottom   = ::stof( OPTIM_GET( row, table, Armor_Back_Bottom_Left ) );
+    armor.backrightbottom  = ::stof( OPTIM_GET( row, table, Armor_Back_Bottom_Right ) );
     int    shieldcount = 0;
     Shield two;
     Shield four;
@@ -1180,65 +1180,65 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
         AssignIfDeg( row[shieldname+"_Min_Rho"], shield.range[iter].rhomin );
         AssignIfDeg( row[shieldname+"_Max_Rho"], shield.range[iter].rhomax );
     }
-    shield.leak = (char) (stof( OPTIM_GET( row, table, Shield_Leak ) )*100.0);
-    shield.recharge   = stof( OPTIM_GET( row, table, Shield_Recharge ) );
-    shield.efficiency = stof( OPTIM_GET( row, table, Shield_Efficiency ), 1.0 );
+    shield.leak = (char) (::stof( OPTIM_GET( row, table, Shield_Leak ) )*100.0);
+    shield.recharge   = ::stof( OPTIM_GET( row, table, Shield_Recharge ) );
+    shield.efficiency = ::stof( OPTIM_GET( row, table, Shield_Efficiency ), 1.0 );
 
     static bool WCfuelhack = XMLSupport::parse_bool( vs_config->getVariable( "physics", "fuel_equals_warp", "false" ) );
-    maxwarpenergy     = warpenergy = stof( OPTIM_GET( row, table, Warp_Capacitor ) );
+    maxwarpenergy     = warpenergy = ::stof( OPTIM_GET( row, table, Warp_Capacitor ) );
 
-    graphicOptions.MinWarpMultiplier = stof( OPTIM_GET( row, table, Warp_Min_Multiplier ), 1.0 );
-    graphicOptions.MaxWarpMultiplier = stof( OPTIM_GET( row, table, Warp_Max_Multiplier ), 1.0 );
+    graphicOptions.MinWarpMultiplier = ::stof( OPTIM_GET( row, table, Warp_Min_Multiplier ), 1.0 );
+    graphicOptions.MaxWarpMultiplier = ::stof( OPTIM_GET( row, table, Warp_Max_Multiplier ), 1.0 );
 
-    maxenergy  = energy = stof( OPTIM_GET( row, table, Primary_Capacitor ) );
-    recharge   = stof( OPTIM_GET( row, table, Reactor_Recharge ) );
+    maxenergy  = energy = ::stof( OPTIM_GET( row, table, Primary_Capacitor ) );
+    recharge   = ::stof( OPTIM_GET( row, table, Reactor_Recharge ) );
     jump.drive = XMLSupport::parse_bool( OPTIM_GET( row, table, Jump_Drive_Present ) ) ? -1 : -2;
-    jump.delay = stoi( OPTIM_GET( row, table, Jump_Drive_Delay ) );
+    jump.delay = ::stoi( OPTIM_GET( row, table, Jump_Drive_Delay ) );
     pImage->forcejump = XMLSupport::parse_bool( OPTIM_GET( row, table, Wormhole ) );
     graphicOptions.RecurseIntoSubUnitsOnCollision = stob( OPTIM_GET( row,
                                                                      table,
                                                                      Collide_Subunits ),
                                                           graphicOptions.RecurseIntoSubUnitsOnCollision ? true : false ) ? 1
                                                     : 0;
-    jump.energy = stof( OPTIM_GET( row, table, Outsystem_Jump_Cost ) );
-    jump.insysenergy = stof( OPTIM_GET( row, table, Warp_Usage_Cost ) );
+    jump.energy = ::stof( OPTIM_GET( row, table, Outsystem_Jump_Cost ) );
+    jump.insysenergy = ::stof( OPTIM_GET( row, table, Warp_Usage_Cost ) );
     if (WCfuelhack) fuel = warpenergy = warpenergy+jump.energy*0.1f;       //this is required to make sure we don't trigger the "globally out of fuel" if we use all warp charges -- save some afterburner for later!!!
-    afterburnenergy  = stof( OPTIM_GET( row, table, Afterburner_Usage_Cost ), 32767 );
-    afterburntype    = stoi( OPTIM_GET( row, table, Afterburner_Type ) );     //type 1 == "use fuel", type 0 == "use reactor energy", type 2 ==(hopefully) "use jump fuel" 3: NO AFTERBURNER
-    limits.yaw = stof( OPTIM_GET( row, table, Maneuver_Yaw ) )*VS_PI/180.;
-    limits.pitch     = stof( OPTIM_GET( row, table, Maneuver_Pitch ) )*VS_PI/180.;
-    limits.roll      = stof( OPTIM_GET( row, table, Maneuver_Roll ) )*VS_PI/180.;
+    afterburnenergy  = ::stof( OPTIM_GET( row, table, Afterburner_Usage_Cost ), 32767 );
+    afterburntype    = ::stoi( OPTIM_GET( row, table, Afterburner_Type ) );     //type 1 == "use fuel", type 0 == "use reactor energy", type 2 ==(hopefully) "use jump fuel" 3: NO AFTERBURNER
+    limits.yaw = ::stof( OPTIM_GET( row, table, Maneuver_Yaw ) )*VS_PI/180.;
+    limits.pitch     = ::stof( OPTIM_GET( row, table, Maneuver_Pitch ) )*VS_PI/180.;
+    limits.roll      = ::stof( OPTIM_GET( row, table, Maneuver_Roll ) )*VS_PI/180.;
     {
         std::string t, tn, tp;
         t  = OPTIM_GET( row, table, Yaw_Governor );
         tn = OPTIM_GET( row, table, Yaw_Governor_Right );
         tp = OPTIM_GET( row, table, Yaw_Governor_Left );
-        computer.max_yaw_right = stof( tn.length() > 0 ? tn : t )*VS_PI/180.;
-        computer.max_yaw_left = stof( tp.length() > 0 ? tp : t )*VS_PI/180.;
+        computer.max_yaw_right = ::stof( tn.length() > 0 ? tn : t )*VS_PI/180.;
+        computer.max_yaw_left = ::stof( tp.length() > 0 ? tp : t )*VS_PI/180.;
         t  = OPTIM_GET( row, table, Pitch_Governor );
         tn = OPTIM_GET( row, table, Pitch_Governor_Up );
         tp = OPTIM_GET( row, table, Pitch_Governor_Down );
-        computer.max_pitch_up = stof( tn.length() > 0 ? tn : t )*VS_PI/180.;
-        computer.max_pitch_down = stof( tp.length() > 0 ? tp : t )*VS_PI/180.;
+        computer.max_pitch_up = ::stof( tn.length() > 0 ? tn : t )*VS_PI/180.;
+        computer.max_pitch_down = ::stof( tp.length() > 0 ? tp : t )*VS_PI/180.;
         t  = OPTIM_GET( row, table, Roll_Governor );
         tn = OPTIM_GET( row, table, Roll_Governor_Right );
         tp = OPTIM_GET( row, table, Roll_Governor_Left );
-        computer.max_roll_right = stof( tn.length() > 0 ? tn : t )*VS_PI/180.;
-        computer.max_roll_left = stof( tp.length() > 0 ? tp : t )*VS_PI/180.;
+        computer.max_roll_right = ::stof( tn.length() > 0 ? tn : t )*VS_PI/180.;
+        computer.max_roll_left = ::stof( tp.length() > 0 ? tp : t )*VS_PI/180.;
     }
     static float game_accel = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_accel", "1" ) );
     static float game_speed = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
-    limits.afterburn = stof( OPTIM_GET( row, table, Afterburner_Accel ) )*game_accel*game_speed;
-    limits.forward   = stof( OPTIM_GET( row, table, Forward_Accel ) )*game_accel*game_speed;
-    limits.retro     = stof( OPTIM_GET( row, table, Retro_Accel ) )*game_accel*game_speed;
+    limits.afterburn = ::stof( OPTIM_GET( row, table, Afterburner_Accel ) )*game_accel*game_speed;
+    limits.forward   = ::stof( OPTIM_GET( row, table, Forward_Accel ) )*game_accel*game_speed;
+    limits.retro     = ::stof( OPTIM_GET( row, table, Retro_Accel ) )*game_accel*game_speed;
     limits.lateral   = .5
-                       *( stof( OPTIM_GET( row, table,
-                                           Left_Accel ) )+stof( OPTIM_GET( row, table, Right_Accel ) ) )*game_accel*game_speed;
+                       *( ::stof( OPTIM_GET( row, table,
+                                             Left_Accel ) )+::stof( OPTIM_GET( row, table, Right_Accel ) ) )*game_accel*game_speed;
     limits.vertical  = .5
-                       *( stof( OPTIM_GET( row, table,
-                                           Top_Accel ) )+stof( OPTIM_GET( row, table, Bottom_Accel ) ) )*game_accel*game_speed;
-    computer.max_combat_speed    = stof( OPTIM_GET( row, table, Default_Speed_Governor ) )*game_speed;
-    computer.max_combat_ab_speed = stof( OPTIM_GET( row, table, Afterburner_Speed_Governor ) )*game_speed;
+                       *( ::stof( OPTIM_GET( row, table,
+                                             Top_Accel ) )+::stof( OPTIM_GET( row, table, Bottom_Accel ) ) )*game_accel*game_speed;
+    computer.max_combat_speed    = ::stof( OPTIM_GET( row, table, Default_Speed_Governor ) )*game_speed;
+    computer.max_combat_ab_speed = ::stof( OPTIM_GET( row, table, Afterburner_Speed_Governor ) )*game_speed;
     computer.itts = stob( OPTIM_GET( row, table, ITTS ), true );
     computer.radar.canlock = stob( OPTIM_GET( row, table, Can_Lock ), true );
     {
@@ -1250,7 +1250,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     computer.radar.maxcone      = cos( stof( OPTIM_GET( row, table, Max_Cone ), 180 )*VS_PI/180 );
     computer.radar.trackingcone = cos( stof( OPTIM_GET( row, table, Tracking_Cone ), 180 )*VS_PI/180 );
     computer.radar.lockcone     = cos( stof( OPTIM_GET( row, table, Lock_Cone ), 180 )*VS_PI/180 );
-    cloakmin = (int) (stof( OPTIM_GET( row, table, Cloak_Min ) )*2147483136);
+    cloakmin = (int) (::stof( OPTIM_GET( row, table, Cloak_Min ) )*2147483136);
     if (cloakmin < 0) cloakmin = 0;
     pImage->cloakglass = XMLSupport::parse_bool( OPTIM_GET( row, table, Cloak_Glass ) );
     if ( (cloakmin&0x1) && !pImage->cloakglass )
@@ -1261,27 +1261,27 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
         cloaking = -1;
     else
         cloaking = (int) (-2147483647)-1;
-    pImage->cloakrate    = (int) ( 2147483136.*stof( OPTIM_GET( row, table, Cloak_Rate ) ) );     //short fix
-    pImage->cloakenergy  = stof( OPTIM_GET( row, table, Cloak_Energy ) );
-    pImage->repair_droid = stoi( OPTIM_GET( row, table, Repair_Droid ) );
-    pImage->ecm    = stoi( OPTIM_GET( row, table, ECM_Rating ) );
+    pImage->cloakrate    = (int) ( 2147483136.*::stof( OPTIM_GET( row, table, Cloak_Rate ) ) );     //short fix
+    pImage->cloakenergy  = ::stof( OPTIM_GET( row, table, Cloak_Energy ) );
+    pImage->repair_droid = ::stoi( OPTIM_GET( row, table, Repair_Droid ) );
+    pImage->ecm    = ::stoi( OPTIM_GET( row, table, ECM_Rating ) );
 
-    this->HeatSink = stof( OPTIM_GET( row, table, Heat_Sink_Rating ) );
+    this->HeatSink = ::stof( OPTIM_GET( row, table, Heat_Sink_Rating ) );
     if (pImage->ecm < 0) pImage->ecm *= -1;
     if (pImage->cockpit_damage) {
         HudDamage( pImage->cockpit_damage, OPTIM_GET( row, table, Hud_Functionality ) );
         HudDamage( pImage->cockpit_damage+1+MAXVDUS+UnitImages< void >::NUMGAUGES, OPTIM_GET( row, table, Max_Hud_Functionality ) );
     }
-    pImage->LifeSupportFunctionality    = stof( OPTIM_GET( row, table, Lifesupport_Functionality ) );
-    pImage->LifeSupportFunctionalityMax = stof( OPTIM_GET( row, table, Max_Lifesupport_Functionality ) );
-    pImage->CommFunctionality = stof( OPTIM_GET( row, table, Comm_Functionality ) );
-    pImage->CommFunctionalityMax = stof( OPTIM_GET( row, table, Max_Comm_Functionality ) );
-    pImage->fireControlFunctionality    = stof( OPTIM_GET( row, table, FireControl_Functionality ) );
-    pImage->fireControlFunctionalityMax = stof( OPTIM_GET( row, table, Max_FireControl_Functionality ) );
-    pImage->SPECDriveFunctionality = stof( OPTIM_GET( row, table, SPECDrive_Functionality ) );
-    pImage->SPECDriveFunctionalityMax   = stof( OPTIM_GET( row, table, Max_SPECDrive_Functionality ) );
-    computer.slide_start = stoi( OPTIM_GET( row, table, Slide_Start ) );
-    computer.slide_end   = stoi( OPTIM_GET( row, table, Slide_End ) );
+    pImage->LifeSupportFunctionality    = ::stof( OPTIM_GET( row, table, Lifesupport_Functionality ) );
+    pImage->LifeSupportFunctionalityMax = ::stof( OPTIM_GET( row, table, Max_Lifesupport_Functionality ) );
+    pImage->CommFunctionality = ::stof( OPTIM_GET( row, table, Comm_Functionality ) );
+    pImage->CommFunctionalityMax = ::stof( OPTIM_GET( row, table, Max_Comm_Functionality ) );
+    pImage->fireControlFunctionality    = ::stof( OPTIM_GET( row, table, FireControl_Functionality ) );
+    pImage->fireControlFunctionalityMax = ::stof( OPTIM_GET( row, table, Max_FireControl_Functionality ) );
+    pImage->SPECDriveFunctionality = ::stof( OPTIM_GET( row, table, SPECDrive_Functionality ) );
+    pImage->SPECDriveFunctionalityMax   = ::stof( OPTIM_GET( row, table, Max_SPECDrive_Functionality ) );
+    computer.slide_start = ::stoi( OPTIM_GET( row, table, Slide_Start ) );
+    computer.slide_end   = ::stoi( OPTIM_GET( row, table, Slide_End ) );
     UpgradeUnit( this, OPTIM_GET( row, table, Upgrades ) );
     {
         std::string   tractorability = OPTIM_GET( row, table, Tractorability );

@@ -198,7 +198,11 @@ typedef uint64 uintmax_t;
 #endif
 #if !((defined(CS_HAVE_WINT_T) && defined(_WCTYPE_T_DEFINED)) || defined(_WINT_T) || defined(_WINT_T_DECLARED))
 #ifndef wint_t
+#if _MSC_VER >= 1300
+    typedef unsigned short wint_t;
+#else
     typedef wchar_t wint_t;
+#endif
 #endif
 #define _WCTYPE_T_DEFINED
 #define _WINT_T

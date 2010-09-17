@@ -59,7 +59,7 @@ static std::pair< bool, VSSprite* >cacheLookup( const char *file )
     if ( it != sprite_cache.end() )
         return std::pair< bool, VSSprite* > ( true, it->second );
     else
-        return std::pair< bool, VSSprite* > ( false, 0 );
+        return std::pair< bool, VSSprite* > ( false, (VSSprite*)NULL );
 }
 
 static void cacheInsert( const char *file, VSSprite *spr )
