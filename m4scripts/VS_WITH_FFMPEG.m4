@@ -56,7 +56,7 @@ if (test x$no_ffmpeg = x1); then
         LIBS="$saved_LIBS"
       fi
       if test "x$no_ffmpeg" = "x0"; then
-        VS_CPPFLAGS="${VS_CPPFLAGS} -DHAVE_FFMPEG"
+        VS_CPPFLAGS="${VS_CPPFLAGS} -DHAVE_FFMPEG -D__STDC_CONSTANT_MACROS"
       fi
     fi
   fi
