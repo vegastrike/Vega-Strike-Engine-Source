@@ -5,7 +5,7 @@
 #  MATH_INCLUDE_DIRS - the Math include directory
 #  MATH_LIBRARIES - Link these to use Math lib
 
-
+if (NOT BEOS)
 if (MATH_LIBRARIES AND MATH_INCLUDE_DIRS)
   # in cache already
   set(MATH_FOUND TRUE)
@@ -50,4 +50,4 @@ else (MATH_LIBRARIES AND MATH_INCLUDE_DIRS)
   mark_as_advanced(MATH_INCLUDE_DIRS MATH_LIBRARIES)
 
 endif (MATH_LIBRARIES AND MATH_INCLUDE_DIRS)
-
+endif (NOT BEOS)

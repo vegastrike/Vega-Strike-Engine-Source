@@ -4,7 +4,9 @@ double DONTUSE__NXSwapBigDoubleToLittleEndian( double x );
 
 #include "config.h"
 
-#if defined (__APPLE__) || defined (MACOSX) || defined (BSD) || defined (__FreeBSD__)
+#if defined (__HAIKU__) //For unknow reasons, Haiku don't fit into any case below
+    #include <endian.h>
+#elif defined (__APPLE__) || defined (MACOSX) || defined (BSD) || defined (__FreeBSD__)
     #include <machine/endian.h>
 #else
 

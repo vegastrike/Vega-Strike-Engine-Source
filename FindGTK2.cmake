@@ -13,7 +13,7 @@
 #  BSD license.
 #  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
-
+if (NOT BEOS)
 set(GTK2_DEBUG OFF)
 
 macro(GTK2_DEBUG_MESSAGE _message)
@@ -452,4 +452,4 @@ else (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
 
   endif (UNIX)
 endif (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
-
+endif (NOT BEOS)

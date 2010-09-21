@@ -743,6 +743,7 @@ ELSE(OPENAL_FOUND)
 	message("!! We aint got no sound")
 ENDIF(OPENAL_FOUND)
 
+IF (NOT BEOS)
 #Find SDL
 find_package(SDL)
 IF(SDL_FOUND)
@@ -754,6 +755,7 @@ IF(SDL_FOUND)
 ELSE(SDL_FOUND)
 	message("!! How will we render to OpenGL without SDL?")
 ENDIF(SDL_FOUND)
+ENDIF (NOT BEOS)
 
 #find Vorbis
 find_package(Vorbis REQUIRED)
@@ -804,6 +806,7 @@ ELSE(EXPAT_FOUND)
 ENDIF(EXPAT_FOUND)
 
 #find Math
+IF (NOT BEOS)
 find_package(MATH REQUIRED)
 IF(MATH_FOUND)
 	SET(TST_INCLUDES ${TST_INCLUDES} ${MATH_INCLUDE_DIRS})
@@ -811,6 +814,7 @@ IF(MATH_FOUND)
 ELSE(MATH_FOUND)
 	message("!! Without math we have nothing")
 ENDIF(MATH_FOUND)
+ENDIF (NOT BEOS)
 
 #Find FFMpeg
 
@@ -842,8 +846,12 @@ ELSE(OGRE_FOUND)
     message("-- Ogre Not Found: compiling without")
 ENDIF(OGRE_FOUND)
 
-FIND_LIBRARY(DL_LIB dl)
-FIND_LIBRARY(UTIL_LIB util)
+IF(NOT BEOS)
+	FIND_LIBRARY(DL_LIB dl)
+	FIND_LIBRARY(UTIL_LIB util)
+ELSE (NOT BEOS)
+	FIND_LIBRARY(UTIL_LIB network)
+ENDIF(NOT BEOS)
 
 SET(TST_LIBS ${TST_LIBS} ${DL_LIB} ${UTIL_LIB})
 
@@ -897,6 +905,8 @@ if(UNIX)
 	
 elseif(WIN32)
 	SET(HOSTOS "WIN32")
+elseif(BEOS)
+	SET(HOSTOS "HAIKU")
 else(UNIX)
 	SET(HOSTOS "APPLE")
 endif(UNIX)
