@@ -347,6 +347,7 @@ SET(LIBROOTCLIENT_SOURCES src/cg_global.cpp
 						  src/universe.cpp )
 						  
 SET(LIBROOTSERVER_SOURCES  src/force_feedback_server.cpp
+						   src/faction_util_server.cpp
 						   src/gfxlib_struct_server.cpp
 						   src/libaudioserver.cpp
 						   src/libserver.cpp

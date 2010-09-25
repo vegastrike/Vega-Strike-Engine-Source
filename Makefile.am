@@ -828,6 +828,7 @@ librootgeneric = \
 
 librootserver = \
   src/force_feedback_server.cpp \
+  src/faction_util_server.cpp \
   src/gfxlib_struct_server.cpp \
   src/libaudioserver.cpp \
   src/libserver.cpp \
