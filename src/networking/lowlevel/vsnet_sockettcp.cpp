@@ -356,8 +356,7 @@ bool VsnetTCPSocket::lower_selected( int datalen )
             assert( (unsigned int) _incomplete_header < sizeof (Header) );              //len is coded in sizeof(Header) bytes
             unsigned int len = sizeof (Header)-_incomplete_header;
             char *b = (char*) &_header;
-            unsigned int ret = VsnetOSS::recv( get_fd(), &b[_incomplete_header], len, 0 );
-            assert( ret <= len );
+            int ret = VsnetOSS::recv( get_fd(), &b[_incomplete_header], len, 0 );
             if (ret <= 0) {
                 if ( ret == 0 || vsnetEConnAborted() || vsnetEConnReset() ) {
                     COUT<<"Connection closed in header"<<endl;
@@ -379,6 +378,7 @@ bool VsnetTCPSocket::lower_selected( int datalen )
                 }
                 return successful;
             }
+            assert( (unsigned int)ret <= len );
             if (ret > 0) _incomplete_header += ret;
             if (datalen != -1) datalen -= ret;
             if ( _incomplete_header == sizeof (Header) ) {
@@ -401,8 +401,6 @@ bool VsnetTCPSocket::lower_selected( int datalen )
                     if (_set) _set->add_pending( _sq_fd );
                     return true;
                 } else if ( vsnetEConnAborted() ) {
-                    static int i = 0;
-                    //if (i++<1000||i%1023==0)
                     perror( "receiving TCP packet" );
                     if (get_fd() == -1) {
                         perror( "receiving dead TCP packet" );

@@ -743,7 +743,7 @@ int NetClient::recvMsg( Packet *outpacket, timeval *timeout )
                     }
                     Cockpit *ps = _Universe->isPlayerStarship( un );
                     for (j = 0; j < mount_num; ++j) {
-                        unsigned int mnt = netbuf.getInt32();
+                        unsigned int mnt = (unsigned int)netbuf.getInt32();
                         if (mnt < un->mounts.size() && mnt >= 0) {
                             if ( ps == NULL || !preEmptiveClientFire( un->mounts[mnt].type ) ) {
                                 un->mounts[mnt].processed = Mount::ACCEPTED;
@@ -788,7 +788,7 @@ int NetClient::recvMsg( Packet *outpacket, timeval *timeout )
                         (*i).status = Mount::INACTIVE;
                 }
                 for (j = 0; j < mount_num; ++j) {
-                    unsigned int mnt = netbuf.getInt32();
+                    unsigned int mnt = (unsigned int)netbuf.getInt32();
                     if (mnt < un->mounts.size() && mnt >= 0) {
                         un->mounts[mnt].processed = Mount::UNFIRED;
                         un->mounts[mnt].status    = Mount::ACTIVE;
@@ -1026,7 +1026,7 @@ int NetClient::recvMsg( Packet *outpacket, timeval *timeout )
                         un->pImage->CargoVolume = cargvol;
                         un->pImage->UpgradeVolume = upgvol;
                     }
-                    unsigned int numcargo = netbuf.getInt32();
+                    unsigned int numcargo = (unsigned int)netbuf.getInt32();
                     bool mission = false;
                     if (numcargo < 0) {
                         mission  = true;
@@ -1035,7 +1035,7 @@ int NetClient::recvMsg( Packet *outpacket, timeval *timeout )
                     Cargo carg;
                     for (i = 0; i < numcargo; i++) {
                         unsigned int mplind;
-                        unsigned int quantity = netbuf.getInt32();
+                        unsigned int quantity = (unsigned int)netbuf.getInt32();
                         string str = netbuf.getString();
                         if (un) {
                             Cargo *foundcarg = mpl->GetCargo( str.c_str(), mplind );
@@ -1078,8 +1078,8 @@ int NetClient::recvMsg( Packet *outpacket, timeval *timeout )
                     _Universe->pushActiveStarSystem( _Universe->AccessCockpit()->activeStarSystem );
                     while ( !Mission::getNthPlayerMission( cp, pos+1 ) )
                         LoadMission( "", "import Director; temp=Director.Mission()", false );
-                    string::size_type pos = qualname.find( '/' );
-                    string cat = qualname.substr( 0, pos );
+                    string::size_type tpos = qualname.find( '/' );
+                    string cat = qualname.substr( 0, tpos );
                     active_missions.back()->mission_name = cat;
                     _Universe->popActiveStarSystem();
                     _Universe->SetActiveCockpit( oldcp );

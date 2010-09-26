@@ -520,7 +520,7 @@ void NetClient::receiveUnitDamage( NetBuffer &netbuf, Unit *un )
         SETNOTNULL( un, un->computer.radar.lockcone, netbuf.getFloat() );
         SETNOTNULL( un, un->computer.radar.trackingcone, netbuf.getFloat() );
         SETNOTNULL( un, un->computer.radar.maxrange, netbuf.getFloat() );
-        unsigned int numvdus = (unsigned int) netbuf.getChar();
+        unsigned int numvdus = (unsigned int)(unsigned char)netbuf.getChar();
         for (it = 0; it < numvdus; ++it) {
             float dam = netbuf.getFloat8();
             if (un && it < 1+UnitImages< void >::NUMGAUGES+MAXVDUS)
@@ -529,7 +529,7 @@ void NetClient::receiveUnitDamage( NetBuffer &netbuf, Unit *un )
     }
     if (damages&Unit::MOUNT_DAMAGED) {
         SETNOTNULL( un, un->pImage->ecm, netbuf.getShort() );
-        unsigned int nummounts = (unsigned int) netbuf.getShort();
+        unsigned int nummounts = (unsigned int)(unsigned short) netbuf.getShort();
         for (it = 0; it < nummounts; ++it) {
             Mount::STATUS  tmpstatus = (Mount::STATUS) netbuf.getChar();
             int ammo  = netbuf.getInt32();

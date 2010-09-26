@@ -947,7 +947,7 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         }
         zone = un->getStarSystem()->GetZone();
         mis  = netbuf.getChar();
-        mount_num = netbuf.getUInt32();
+        mount_num = (unsigned int)netbuf.getInt32();
         //Find the unit
         //Set the concerned mount as ACTIVE and others as INACTIVE
         un = zonemgr->getUnit( target_serial, zone );
@@ -967,7 +967,7 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                 (*i).status = Mount::INACTIVE;
             }
             for (unsigned int j = 0; j < mount_num; ++j) {
-                unsigned int mnt = netbuf.getUInt32();
+                unsigned int mnt = (unsigned int)netbuf.getInt32();
                 if (mnt < un->mounts.size() && mnt >= 0)
                     un->mounts[mnt].status = Mount::ACTIVE;
                 else
@@ -984,7 +984,7 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         break;
     case CMD_UNFIREREQUEST:
         target_serial = netbuf.getSerial();
-        mount_num     = netbuf.getUInt32();
+        mount_num     = (unsigned int)netbuf.getInt32();
         un = clt->game_unit.GetUnit();
         if (!un) {
             COUT<<"ERROR --> Received an unfire order for dead UNIT"<<endl;
@@ -1006,7 +1006,7 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
             for (; i != un->mounts.end(); ++i)
                 (*i).status = Mount::INACTIVE;
             for (unsigned int j = 0; j < mount_num; j++) {
-                unsigned int mnt = netbuf.getInt32();
+                unsigned int mnt = (unsigned int)netbuf.getInt32();
                 if (mnt < un->mounts.size() && mnt >= 0)
                     un->mounts[mnt].status = Mount::ACTIVE;
                 else

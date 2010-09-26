@@ -305,7 +305,7 @@ void NetServer::sendMessage( const string &from, const string &to, const string 
     if (to[0] == 'p') {
         int playerto = -1;
         sscanf( tostr+1, "%d", &playerto );
-        if ( playerto != -1 && playerto < (int) _Universe->numPlayers() ) {
+        if ( playerto != -1 && (unsigned int) playerto < _Universe->numPlayers() ) {
             Cockpit  *cp  = _Universe->AccessCockpit( playerto );
             Unit     *un  = cp->GetParent();
             if (!un) return;
@@ -425,7 +425,6 @@ void NetServer::sendJump( Unit *un, Unit *dst, const string &dststr )
         WaitListEntry entry;
         if ( waitList.find( clt->callsign ) != waitList.end() )
             return;
-        Cockpit    *cp = _Universe->AccessCockpit( cpnum );
         std::string netbuf;
         std::string fn = dststr;
         if (getSaveStringLength( cpnum, "jump_from" ) < 1)
