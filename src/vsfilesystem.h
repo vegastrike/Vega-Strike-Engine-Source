@@ -330,10 +330,6 @@ public:
 public: VSFile();
     VSFile( const char *buffer, long size, VSFileType type = ZoneBuffer, VSFileMode = ReadOnly );
     VSFile( const char *filename, VSFileType type = UnknownFile, VSFileMode = ReadOnly );
-    VSFile( const string &filename, VSFileType type = UnknownFile )
-    {
-        VSFile::VSFile( filename.c_str(), type );
-    }
     ~VSFile();
 
     FILE * GetFP()
