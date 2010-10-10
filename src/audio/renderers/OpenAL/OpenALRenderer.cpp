@@ -139,7 +139,7 @@ namespace Audio {
                         #endif
                     }
                     
-                    alDevice = alcOpenDevice((ALCubyte*)(deviceSpecifier));
+                    alDevice = alcOpenDevice((ALCstring)(deviceSpecifier));
                     
                     if (!alDevice)
                         checkAlError();
