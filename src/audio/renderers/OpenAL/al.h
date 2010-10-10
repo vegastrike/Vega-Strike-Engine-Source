@@ -24,8 +24,8 @@ typedef ALuint ALBufferHandle;
 #define ALC_INVALID_ENUM ALC_ILLEGAL_ENUM
 #endif
 
-#if !defined(ALC_MAJOR_VERSION) || !defined(ALC_MINOR_VERSION) || ALC_MAJOR_VERSION < 0x1000 || ALC_MINOR_VERSION < 0x1001
-#define ALCstring const ALCubyte*
+#if !defined(ALC_MAJOR_VERSION) || !defined(ALC_MINOR_VERSION) || ALC_MAJOR_VERSION < 0x1000 || (ALC_MAJOR_VERSION == 0x1000 && ALC_MINOR_VERSION < 0x1002)
+#define ALCstring ALCubyte*
 #else
 #define ALCstring const ALCchar*
 #endif
