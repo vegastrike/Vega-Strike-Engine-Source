@@ -8,14 +8,6 @@
 #define checkAlError() Audio::__impl::OpenAL::_checkAlErrorAt(alGetError(), __FILE__, __LINE__)
 #define clearAlError() Audio::__impl::OpenAL::_clearAlError();
 
-#ifndef AL_SEC_OFFSET
-/* Supported on Windows, but the headers might be out of date. */
-#define AL_SEC_OFFSET 0x1024
-#endif
-#ifndef ALC_INVALID_ENUM
-#define ALC_INVALID_ENUM ALC_ILLEGAL_ENUM
-#endif
-
 namespace Audio {
     namespace __impl {
         namespace OpenAL {

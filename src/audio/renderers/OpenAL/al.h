@@ -16,6 +16,14 @@ typedef ALuint ALBufferHandle;
 
 #define AL_NULL_BUFFER (ALBufferHandle(0))
 
+#ifndef AL_SEC_OFFSET
+/* Supported on Windows, but the headers might be out of date. */
+#define AL_SEC_OFFSET 0x1024
+#endif
+#if (!defined(ALC_INVALID_ENUM) && defined(ALC_ILLEGAL_ENUM))
+#define ALC_INVALID_ENUM ALC_ILLEGAL_ENUM
+#endif
+
 
 #endif//__AL_INCLUDES__INCLUDED__
 
