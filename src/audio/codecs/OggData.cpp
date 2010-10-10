@@ -6,7 +6,9 @@
 
 #ifdef HAVE_OGG
 #include <sys/types.h>
+#ifdef HAVE_STDINT_H
 #include <stdint.h>
+#endif
 #include "OggData.h"
 #include "config.h"
 #include "../Format.h"

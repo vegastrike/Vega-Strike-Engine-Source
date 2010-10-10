@@ -139,7 +139,7 @@ namespace Audio {
                         #endif
                     }
                     
-                    alDevice = alcOpenDevice(deviceSpecifier);
+                    alDevice = alcOpenDevice((ALCubyte*)(deviceSpecifier));
                     
                     if (!alDevice)
                         checkAlError();
@@ -195,6 +195,9 @@ namespace Audio {
                 void suspend()
                     throw (Exception)
                 {
+                    // FIXME: There's a residual error here on Windows. Can't track down where it's from.
+                    alGetError();
+                    checkAlError();
                     alcMakeContextCurrent(alContext);
                     alcSuspendContext(alContext);
                     checkAlError();
@@ -386,7 +389,11 @@ namespace Audio {
         
         // Set doppler factor and speed of sound
         alDopplerFactor(getDopplerFactor());
+#ifdef _WIN32
+        alDopplerVelocity(speedOfSound);
+#else
         alSpeedOfSound(speedOfSound);
+#endif
         
         data->dirty.dopplerFactor = 0;
         

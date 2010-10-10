@@ -24,7 +24,7 @@ namespace Audio {
                 case AL_NO_ERROR : return;
                 default: 
                     {
-                        const char* errdesc = alGetString(error);
+                        const char* errdesc = (const char *)alGetString(error);
                         char s_lineno[32];
                         char s_errcode_buf[32];
                         const char *s_errcode;
@@ -41,7 +41,10 @@ namespace Audio {
                             s_errcode = s_errcode_buf;
                         };
                         
-                        throw Exception("OpenAL error: " + std::string(errdesc ? errdesc : "unknown") + s_errcode + " at " + filename + ":" + s_lineno);
+                        std::string error("OpenAL error: ");
+                        error += std::string(errdesc ? errdesc : "unknown") + s_errcode + " at " + filename + ":" + s_lineno;
+                        fprintf(stderr, "%s\n", error.c_str());
+                        throw Exception(error);
                     }
                 }
             }
@@ -53,7 +56,7 @@ namespace Audio {
             }
             
             ALenum asALFormat(const Format &format)
-                throw()
+                throw (Exception)
             {
                 ALenum alformat;
                 switch(format.bitsPerSample) {
