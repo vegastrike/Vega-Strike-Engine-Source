@@ -66,7 +66,13 @@ extern "C" int _url_read( URLContext *h, unsigned char *buf, int size )
     return ( (VSFile*) (h->priv_data) )->Read( buf, size );
 }
 
-extern "C" int _url_write( URLContext *h, unsigned char *buf, int size )
+// Changed on June 1, 2010. During minor version 67.
+// See http://git.ffmpeg.org/?p=ffmpeg;a=commitdiff;h=2967315b9ee7afa15d2849b473e359f50a815696
+extern "C" int _url_write( URLContext *h,
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(52, 67, 0)
+				const
+#endif
+					unsigned char *buf, int size )
 {
     //read-only please
     return 0;

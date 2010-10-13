@@ -20,14 +20,17 @@ typedef ALuint ALBufferHandle;
 /* Supported on Windows, but the headers might be out of date. */
 #define AL_SEC_OFFSET 0x1024
 #endif
+
+// Windows AL calls it "ILLEGAL" not "INVALID".....?
 #if (!defined(ALC_INVALID_ENUM) && defined(ALC_ILLEGAL_ENUM))
 #define ALC_INVALID_ENUM ALC_ILLEGAL_ENUM
 #endif
 
-#if !defined(ALC_MAJOR_VERSION) || !defined(ALC_MINOR_VERSION) || ALC_MAJOR_VERSION < 0x1000 || (ALC_MAJOR_VERSION == 0x1000 && ALC_MINOR_VERSION < 0x1002)
-#define ALCstring ALCubyte*
-#else
+// Both are major=0x1000 and minor=0x1001, but are completely different!?!?!?
+#ifdef ALC_VERSION_0_1
 #define ALCstring const ALCchar*
+#else
+#define ALCstring ALCubyte*
 #endif
 
 #endif//__AL_INCLUDES__INCLUDED__
