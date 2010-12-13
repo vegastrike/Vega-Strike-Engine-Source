@@ -527,10 +527,39 @@ void GFXInit( int argc, char **argv )
         XMLSupport::parse_int( vs_config->getVariable( "graphics", "max_texture_dimension", "65536" ) );
     gl_options.max_movie_dimension   =
         XMLSupport::parse_int( vs_config->getVariable( "graphics", "max_movie_dimension", "65536" ) );
+        
+    gl_options.rect_textures    =
+        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "rect_textures", 
+            (   vsExtensionSupported( "GL_ARB_texture_non_power_of_two" )
+             || vsExtensionSupported( "GL_ARB_texture_rectangle" )
+             || vsExtensionSupported( "GL_NV_texture_rectangle" )  
+            ) ? "true" : "false" ) );
+
+    if (gl_options.rect_textures) {
+        VSFileSystem::vs_dprintf(3, "RECT textures supported\n");
+        
+        // Fetch max rect textue dimension
+        GLint max_rect_dimension = 65535;
+        glGetIntegerv(
+            GL_MAX_RECTANGLE_TEXTURE_SIZE_ARB, 
+            &max_rect_dimension);
+        
+        gl_options.max_rect_dimension = max_rect_dimension;
+        VSFileSystem::vs_dprintf(3, "RECT max texture dimension: %d\n", max_rect_dimension);
+    }
+        
     gl_options.pot_video_textures    =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "pot_video_textures", 
-            (   vsExtensionSupported( "GL_ARB_texture_non_power_of_two" )
-             && vsVendorMatch("nvidia")  ) ? "false" : "true" ) );
+            (   gl_options.rect_textures
+             || (   vsExtensionSupported( "GL_ARB_texture_non_power_of_two" )
+                 && vsVendorMatch("nvidia")  )
+            ) ? "false" : "true" ) );
+    
+    if (!gl_options.pot_video_textures && gl_options.rect_textures) {
+        // Enforce max rect texture for movies, which use them
+        if (gl_options.max_movie_dimension > gl_options.max_rect_dimension)
+            gl_options.max_movie_dimension = gl_options.max_rect_dimension;
+    }
     
     if (gl_options.pot_video_textures)
         VSFileSystem::vs_dprintf(1, "Forcing POT video textures\n");

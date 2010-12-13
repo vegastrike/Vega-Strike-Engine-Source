@@ -575,6 +575,13 @@ public:
         class RADARLIM
         {
 public:
+	    enum IffType {
+		IFF_NONE = 0,
+		IFF_FRIEND_FOE,
+		IFF_OBJECT_TYPE,
+		IFF_OBJECT_SIZE,
+		IFF_THREAT_ASSESSMENT
+	    };
 //the max range the radar can handle
             float maxrange;
 //the dot with (0,0,1) indicating the farthest to the side the radar can handle.
@@ -593,9 +600,10 @@ public:
                 , lockcone( 0 )
                 , trackingcone( 0 )
                 , mintargetsize( 0 )
-                , iff( 0 )
+                , iff( IFF_NONE )
                 , locked( false )
-                , canlock( false ) {}
+                , canlock( false )
+	    {}
         }
         radar;
 //The nav point the unit may be heading for

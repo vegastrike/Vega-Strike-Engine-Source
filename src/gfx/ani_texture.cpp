@@ -430,8 +430,26 @@ void AnimatedTexture::LoadVideoSource( VSFileSystem::VSFile &f )
         sizeY = vidSource->getHeight();
         mode  = _24BIT;
         data  = (unsigned char*) vidSource->getFrameBuffer();
+        
+        if ((ismipmapped == BILINEAR || ismipmapped == NEAREST) && gl_options.rect_textures) {
+            texture_target = TEXTURERECT;
+            image_target = TEXTURE_RECTANGLE;
+        }
+        
         Bind( 65535, GFXFALSE );
 
+        maxtcoord.x = sizeX-0.5f;
+        maxtcoord.y = sizeY-0.5f;
+        mintcoord.x = 0.5f;
+        mintcoord.y = 0.5f;
+        
+        if (image_target != TEXTURE_RECTANGLE) {
+            maxtcoord.x /= sizeX;
+            maxtcoord.y /= sizeY;
+            mintcoord.x /= sizeX;
+            mintcoord.y /= sizeY;
+        }
+        
         anis.insert( this );
     }
 }

@@ -682,6 +682,7 @@ void Texture::MakeActive( int stag, int pass )
             default:
                 address_mode = WRAP;
                 break;
+            case TEXTURERECT:
             case CUBEMAP:
                 address_mode = CLAMP;
                 break;

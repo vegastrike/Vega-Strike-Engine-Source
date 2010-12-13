@@ -68,6 +68,9 @@ GLenum GetGLTextureTarget( enum TEXTURE_TARGET texture_target )
         tt = GL_TEXTURE_CUBE_MAP_EXT;
         break;
 #endif
+    case TEXTURERECT:
+        tt = GL_TEXTURE_RECTANGLE_ARB;
+        break;
     default:
         assert( false );
     }

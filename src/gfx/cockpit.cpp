@@ -1,8 +1,9 @@
+// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
+
 /// Draws cockpit parts
 /// Draws gauges, info strings, radar, ...
 
 #include <boost/version.hpp>
-
 #if BOOST_VERSION != 102800
 #include <boost/python/object.hpp>
 #include <boost/python/dict.hpp>
@@ -50,6 +51,8 @@
 #include "main_loop.h"
 #include <set>
 #include <string>
+#include <algorithm>
+#include <functional>
 #include "cmd/unit_const_cache.h"
 #include "options.h"
 
@@ -169,7 +172,7 @@ void GameCockpit::LocalToEliteRadar( const Vector &pos, float &s, float &t, floa
     h = pos.j/1000.0;
 }
 
-GFXColor GameCockpit::unitToColor( Unit *un, Unit *target, char ifflevel, char &sequence )
+GFXColor GameCockpit::unitToColor( Unit *un, Unit *target, char ifflevel )
 {
     static GFXColor basecol    = RetrColor( "base", GFXColor( -1, -1, -1, -1 ) );
     static GFXColor jumpcol    = RetrColor( "jump", GFXColor( 0, 1, 1, .8 ) );
@@ -179,12 +182,12 @@ GFXColor GameCockpit::unitToColor( Unit *un, Unit *target, char ifflevel, char &
     static GFXColor cargocol   = RetrColor( "cargo", GFXColor( .6, .2, 0, 1 ) );
     int cargofac = FactionUtil::GetUpgradeFaction();
     static GFXColor black_and_white = RetrColor( "black_and_white", GFXColor( .5, .5, .5 ) );
-    sequence = 0;
-    if (ifflevel == 0)
+
+    if (ifflevel == Unit::Computer::RADARLIM::IFF_NONE)
         return black_and_white;
-    if (target->GetDestinations().size() > 0 && ifflevel > 1)
+    if (target->GetDestinations().size() > 0 && ifflevel >= Unit::Computer::RADARLIM::IFF_OBJECT_TYPE)
         return jumpcol;
-    if (ifflevel > 1) {
+    if (ifflevel >= Unit::Computer::RADARLIM::IFF_OBJECT_TYPE) {
         if (target->isUnit() == PLANETPTR) {
             Planet *plan = static_cast< Planet* > (target);
             if ( plan->hasLights() )
@@ -205,7 +208,7 @@ GFXColor GameCockpit::unitToColor( Unit *un, Unit *target, char ifflevel, char &
     if (target->Target() == un)
         //the other ships is targetting me
         return targetting;
-    if (basecol.r > 0 && basecol.g > 0 && basecol.b > 0 && UnitUtil::getFlightgroupName( target ) == "Base" && ifflevel > 0)
+    if (basecol.r > 0 && basecol.g > 0 && basecol.b > 0 && UnitUtil::getFlightgroupName( target ) == "Base" && ifflevel >= Unit::Computer::RADARLIM::IFF_FRIEND_FOE)
         return basecol;
     //other spaceships
         
@@ -217,13 +220,6 @@ GFXColor GameCockpit::unitToColor( Unit *un, Unit *target, char ifflevel, char &
         relation = target->getRelation( un );
     else
         relation = un->getRelation( target );
-    
-    if (relation > 0)
-        sequence = -1;
-    else if (relation < 0)
-        sequence = 1;
-    else
-        sequence = 0;
     
     return relationToColor( relation );
 }
@@ -836,54 +832,6 @@ void GameCockpit::DrawTacticalTargetBox()
     }
 }
 
-void GameCockpit::drawUnToTarget( Unit *un, Unit *target, float xcent, float ycent, float xsize, float ysize, bool reardar, std::vector<GameCockpit::BlipEntry> &out )
-{
-    static GFXColor black_and_white   = DockBoxColor( "black_and_white" );
-    static GFXColor communicating     = DockBoxColor( "communicating" );
-    static bool     draw_blips_behind =
-        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "draw_radar_blips_behind", "true" ) );
-
-    static float    fademax = XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "BlipRangeMaxFade", "1.0" ) );
-    static float    fademin = XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "BlipRangeMinFade", "1.0" ) );
-    static float    fademidpoint =
-        XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "BlipRangeFadeMidpoint", "0.2" ) );
-    Vector localcoord( un->LocalCoordinates( target ) );
-    if (reardar)
-        localcoord.k = -localcoord.k;
-    if (draw_blips_behind == false && localcoord.k < 0) return;
-    float    s, t;
-    this->LocalToRadar( localcoord, s, t );
-    
-    out.resize(out.size()+1);
-    BlipEntry &blip = out.back();
-    
-    GFXColor localcol( this->unitToColor( un, target, un->GetComputerData().radar.iff, blip.sequence ) );
-    float    fade = float(localcoord.Magnitude()/un->GetComputerData().radar.maxrange);
-    fade = mymin( 1.f, mymax( 0.f,
-            (fade < fademidpoint) ? (0.5f*fade/fademidpoint) 
-                                  : ( 0.5f+0.5f*(fade-fademidpoint)/(1.0f-fademidpoint) ) ) );
-    if ( target == un->Target() )
-        fade = 0;
-    localcol.a *= fade*fademax+(1.0f-fade)*fademin;
-    if (1) {
-        unsigned int s = vdu.size();
-        for (unsigned int i = 0; i < s; ++i) {
-            if (vdu[i]->GetCommunicating() == target) {
-                localcol = communicating;
-               break;
-            }
-        }
-    }
-    
-    blip.color = localcol;
-    
-    float  rerror = ( (un->GetNebula() != NULL) ? .03 : 0 )+(target->GetNebula() != NULL ? .06 : 0);
-    Vector v( xcent+xsize*(s-.5*rerror+( rerror*rand() )/RAND_MAX),
-              ycent+ysize*(t+ -.5*rerror+( rerror*rand() )/RAND_MAX), 0 );
-    blip.vertex = v;
-    blip.bigger = ( target == un->Target() );
-}
-
 void GameCockpit::Eject()
 {
     ejecting = true;
@@ -1014,279 +962,678 @@ static void DoAutoLanding( Cockpit *thus, Unit *un, Unit *target )
     }
 }
 
-class DrawUnitBlip
+class CollectRadarBlips
 {
-    Unit  *un;
-    Unit  *makeBigger;
-    GameCockpit *parent;
-    float *xsize;
-    float *ysize;
-    float *xcent;
-    float *ycent;
-    bool  *reardar;
-    int    numradar;
-    std::vector<GameCockpit::BlipEntry> out;
-    std::vector<size_t> shuffle;
-    
-    class ShuffleComparator {
-        const std::vector<GameCockpit::BlipEntry> &data;
-    public:
-        ShuffleComparator(const std::vector<GameCockpit::BlipEntry> &_data) : data(_data) {}
-        
-        bool operator()(size_t a, size_t b) const
-        {
-            return data[a].sequence < data[b].sequence;
-        }
-    };
-    
-public: 
-    
-    void sortBlips()
+public:
+    typedef GameCockpit::BlipCollection BlipCollection;
+
+    CollectRadarBlips()
+        : cockpit(0),
+          unit(0)
+    {}
+
+    void init(GameCockpit *cockpit, Unit *unit)
     {
-        // Initialize shuffle
-        while (shuffle.size() < out.size())
-            shuffle.push_back(shuffle.size());
-        if (shuffle.size() > out.size())
-            shuffle.resize(out.size());
-        
-        // Compute sequence-sorted shuffle
-        ShuffleComparator cmp(out);
-        std::sort(shuffle.begin(), shuffle.end(), cmp);
+        this->cockpit = cockpit;
+        this->unit = unit;
     }
-    
-    const std::vector<GameCockpit::BlipEntry>& getBlips() const
-    { 
-        return out; 
-    }
-    
-    const std::vector<size_t>& getShuffle() const
-    { 
-        return shuffle; 
-    }
-    
-    DrawUnitBlip() {}
-    void init( Unit *un,
-               GameCockpit *parent,
-               int numradar,
-               float *xsize,
-               float *ysize,
-               float *xcent,
-               float *ycent,
-               bool *reardar
-               )
+
+    bool acquire(Unit *target, float distance)
     {
-        this->un = un;
-        this->parent     = parent;
-        this->makeBigger = un->Target();
-        this->numradar   = numradar;
-        this->xsize      = xsize;
-        this->ysize      = ysize;
-        this->xcent      = xcent;
-        this->ycent      = ycent;
-        this->reardar    = reardar;
-    }
-    bool acquire( Unit *target, float distance )
-    {
-        if (target != un) {
+        static bool draw_significant_blips =
+            XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "draw_significant_blips", "true" ) );
+        static bool untarget_out_cone  =
+            XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "untarget_beyond_cone", "false" ) );
+        static float minblipsize =
+            XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "min_radarblip_size", "0" ) );
+
+        if (target != unit) {
+            // FIXME: Move to a more appropriate place
+            // static bool autolanding_enable =
+            //     XMLSupport::parse_bool( vs_config->getVariable( "physics", "AutoLandingEnable", "false" ) );
+            // if (autolanding_enable) {
+            //     GFXEnd();
+            //     DoAutoLanding( cockpit, unit, target );
+            //     GFXBegin( GFXPOINT );
+            // }
+            bool isCurrentTarget = (unit->Target() == target);
             double dist;
-            int    rad;
-            static bool draw_significant_blips =
-                XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "draw_significant_blips", "true" ) );
-            static bool untarget_out_cone  =
-                XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "untarget_beyond_cone", "false" ) );
-            static bool autolanding_enable =
-                XMLSupport::parse_bool( vs_config->getVariable( "physics", "AutoLandingEnable", "false" ) );
-            if (autolanding_enable) {
-                GFXEnd();
-                DoAutoLanding( parent, un, target );
-                GFXBegin( GFXPOINT );
-            }
-            if ( !un->InRange( target, dist, makeBigger == target && untarget_out_cone, true, true ) ) {
-                if (makeBigger == target)
-                    un->Target( NULL );
+            if ( !unit->InRange( target, dist, isCurrentTarget && untarget_out_cone, true, true ) ) {
+                if (isCurrentTarget)
+                    unit->Target(NULL);
                 return true;
             }
-            if (makeBigger != target && draw_significant_blips == false && getTopLevelOwner() == target->owner && distance
-                > un->GetComputerData().radar.maxrange)
+            if (isCurrentTarget &&
+                !draw_significant_blips &&
+                getTopLevelOwner() == target->owner &&
+                distance > unit->GetComputerData().radar.maxrange)
                 return true;
-            static float minblipsize =
-                XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "min_radarblip_size", "0" ) );
+
+            // Blips will be sorted later as different radars need to sort them differently
             if (target->radial_size > minblipsize)
-                for (rad = 0; rad < numradar; ++rad)
-                    parent->drawUnToTarget( un, target, xcent[rad], ycent[rad], xsize[rad], ysize[rad], reardar[rad], out );
-            if (target->isPlanet() == PLANETPTR && target->radial_size > 0) {
+            {
+                GameCockpit::Blip blip;
+                blip.target = target;
+                blip.distance = distance;
+                blip.position = unit->LocalCoordinates(target);
+                collection.push_back(blip);
+            }
+            if (target->isPlanet() == PLANETPTR && target->radial_size > 0)
+            {
                 Unit *sub = NULL;
                 for (un_kiter i = target->viewSubUnits(); (sub = *i) != NULL; ++i)
+                {
                     if (target->radial_size > minblipsize)
-                        for (rad = 0; rad < numradar; ++rad)
-                            parent->drawUnToTarget( un, sub, xcent[rad], ycent[rad], xsize[rad], ysize[rad], reardar[rad], out );
+                    {
+                        GameCockpit::Blip blip;
+                        blip.target = sub;
+                        blip.distance = distance;
+                        blip.position = unit->LocalCoordinates(target);
+                        collection.push_back(blip);
+                    }
+                }
             }
         }
         return true;
     }
+
+    const BlipCollection& GetBlips() const { return collection; }
+
+private:
+    GameCockpit *cockpit;
+    Unit *unit;
+    BlipCollection collection;
 };
 
-void GameCockpit::DrawBlips( Unit *un )
+GameCockpit::RadarDisplay::RadarDisplay(GameCockpit *cockpit)
+    : cockpit(cockpit),
+      randomGenerator(randomEngine, randomDistribution)
 {
-    float xsize[2], ysize[2], xcent[2], ycent[2];
-    bool  reardar[2];
-    int   numradar = 0;
-    GFXDisable( TEXTURE0 );
-    GFXDisable( LIGHTING );
-    for (int i = 0; i < 2; ++i) {
-        if (Radar[numradar]) {
-            Radar[numradar]->GetSize( xsize[numradar], ysize[numradar] );
-            xsize[numradar] = fabs( xsize[numradar] );
-            ysize[numradar] = fabs( ysize[numradar] );
-            Radar[numradar]->GetPosition( xcent[numradar], ycent[numradar] );
-            if ( (!g_game.use_sprites) || Radar[numradar]->LoadSuccess() )
-                DrawRadarCircles( xcent[numradar], ycent[numradar], xsize[numradar], ysize[numradar], textcol );
-            reardar[numradar] = i ? true : false;
-            numradar++;
-        }
-    }
-    GFXPointSize( 2 );
-    GFXBegin( GFXPOINT );
-    static float unitRad =
-        XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "radar_search_extra_radius", "1000" ) );
-
-    UnitWithinRangeLocator< DrawUnitBlip >unitLocator( un->GetComputerData().radar.maxrange, unitRad );
-    unitLocator.action.init( un, this, numradar, xsize, ysize, xcent, ycent, reardar );
-    if ( !is_null( un->location[Unit::UNIT_ONLY] ) )
-        findObjects( _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY], un->location[Unit::UNIT_ONLY], &unitLocator );
-    static bool allGravUnits =
-        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "draw_gravitational_objects", "true" ) );
-    if (allGravUnits) {
-        Unit *u;
-        bool  foundtarget = false;
-        Unit *targ = un->Target();
-        for (un_kiter i = _Universe->activeStarSystem()->gravitationalUnits().constIterator(); (u = *i) != NULL; ++i) {
-            unitLocator.action.acquire( u, UnitUtil::getDistance( un, u ) );
-            if (u == targ) foundtarget = true;
-        }
-        if (targ && !foundtarget)
-            unitLocator.action.acquire( targ, UnitUtil::getDistance( un, targ ) );
-    }
-    
-    unitLocator.action.sortBlips();
-    const std::vector<BlipEntry> &blips = unitLocator.action.getBlips();
-    const std::vector<size_t> &shuffle = unitLocator.action.getShuffle();
-    
-    assert(blips.size() == shuffle.size());
-    
-    for (std::vector<size_t>::const_iterator it = shuffle.begin(); it != shuffle.end(); ++it) {
-        const BlipEntry &blip = blips[*it];
-        
-        GFXColorf( blip.color );
-        GFXVertexf( blip.vertex );
-        if ( blip.bigger ) {
-            Vector v = blip.vertex;
-            
-            GFXVertexf( v );
-            GFXVertex3f( (float) (v.i+(7.8)/g_game.x_resolution), v.j, v.k );             //I need to tell it to use floats...
-            GFXVertex3f( (float) (v.i-(7.5)/g_game.x_resolution), v.j, v.k );             //otherwise, it gives an error about
-            GFXVertex3f( v.i, (float) (v.j-(7.5)/g_game.y_resolution), v.k );             //not knowning whether to use floats
-            GFXVertex3f( v.i, (float) (v.j+(7.8)/g_game.y_resolution), v.k );             //or doubles.
-
-            GFXVertex3f( (float) (v.i+(3.9)/g_game.x_resolution), v.j, v.k );             //I need to tell it to use floats...
-            GFXVertex3f( (float) (v.i-(3.75)/g_game.x_resolution), v.j, v.k );             //otherwise, it gives an error about
-            GFXVertex3f( v.i, (float) (v.j-(3.75)/g_game.y_resolution), v.k );             //not knowning whether to use floats
-            GFXVertex3f( v.i, (float) (v.j+(3.9)/g_game.y_resolution), v.k );             //or doubles.
-        }
-    }
-    
-    GFXEnd();
-    GFXPointSize( 1 );
-    GFXColor4f( 1, 1, 1, 1 );
-    GFXEnable( TEXTURE0 );
 }
 
-void GameCockpit::DrawEliteBlips( Unit *un )
+float GameCockpit::RadarDisplay::GetDangerRate(Unit *myself, Unit *target)
 {
-    if (!Radar[0])
-        return;
-    static GFXColor black_and_white  = DockBoxColor( "black_and_white" );
-    Unit::Computer::RADARLIM *radarl = &un->GetComputerData().radar;
-    UnitCollection *drawlist = &_Universe->activeStarSystem()->getUnitList();
-    Unit *target;
-    Unit *makeBigger = un->Target();
-    float s, t, es, et, eh;
-    float xsize, ysize, xcent, ycent;
-    Radar[0]->GetSize( xsize, ysize );
-    xsize = fabs( xsize );
-    ysize = fabs( ysize );
-    Radar[0]->GetPosition( xcent, ycent );
-    GFXDisable( TEXTURE0 );
-    GFXDisable( LIGHTING );
-    GFXEnable( SMOOTH );
-    if ( Radar[0]->LoadSuccess() )
-        DrawRadarCircles( xcent, ycent, xsize, ysize, textcol );
-    static bool draw_significant_blips =
-        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "draw_significant_blips", "true" ) );
-    for (un_kiter iter = drawlist->constIterator(); (target=*iter)!=NULL; ++iter) {
-        if (target != un) {
-            static bool autolanding_enable =
-                XMLSupport::parse_bool( vs_config->getVariable( "physics", "AutoLandingEnable", "false" ) );
-            if (autolanding_enable)
-                DoAutoLanding( this, un, target );
-            double mm;
-            static bool untarget_out_cone =
-                XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "untarget_beyond_cone", "false" ) );
-            if ( !un->InRange( target, mm, makeBigger == target && untarget_out_cone, true, true ) ) {
-                if (makeBigger == target)
-                    un->Target( NULL );
-                continue;
-            }
-            if (makeBigger != target && draw_significant_blips == false && getTopLevelOwner() == target->owner)
-                continue;
-            Vector localcoord( un->LocalCoordinates( target ) );
-
-            LocalToRadar( localcoord, s, t );
-            LocalToEliteRadar( localcoord, es, et, eh );
-
-            GFXColor localcol( unitToColor( un, target, radarl->iff ) );
-            GFXColorf( localcol );
-            int headsize = 4;
-#if 1
-            if (target == makeBigger)
-                headsize = 6;
-            //cout << "localcoord" << localcoord << " s=" << s << " t=" << t << endl;
-#endif
-
-            float xerr, yerr, y2, x2;
-            float rerror = ( (un->GetNebula() != NULL) ? .03 : 0 )+(target->GetNebula() != NULL ? .06 : 0);
-            xerr = xcent+xsize*(es-.5*rerror+( rerror*rand() )/RAND_MAX);
-            yerr = ycent+ysize*(et+ -.5*rerror+( rerror*rand() )/RAND_MAX);
-            x2   = xcent+xsize*( (es+0)-.5*rerror+( rerror*rand() )/RAND_MAX );
-            y2   = ycent+ysize*( (et+t)-.5*rerror+( rerror*rand() )/RAND_MAX );
-
-            //printf("xerr,yerr: %f %f xcent %f xsize %f\n",xerr,yerr,xcent,xsize);
-
-            ///draw the foot
-            GFXPointSize( 2 );
-            GFXBegin( GFXPOINT );
-            GFXVertex3f( xerr, yerr, 0 );
-            GFXEnd();
-
-            ///draw the leg
-            GFXBegin( GFXLINESTRIP );
-            GFXVertex3f( x2, yerr, 0 );
-            GFXVertex3f( x2, y2, 0 );
-            GFXEnd();
-
-            ///draw the head
-            GFXPointSize( headsize );
-            GFXBegin( GFXPOINT );
-            GFXVertex3f( xerr, y2, 0 );
-            GFXEnd();
-
-            GFXPointSize( 1 );
+    const bool isTargettingMe = (myself == target->Target());
+    if (isTargettingMe)
+    {
+        const bool isMissile = ((target->isUnit() == MISSILEPTR) && (target->faction != FactionUtil::GetUpgradeFaction()));
+        if (isMissile)
+        {
+            return 20.0;
+        }
+        else if (myself->isEnemy(target) && UnitUtil::isCapitalShip(target))
+        {
+            // An enemy capital ship targetting me
+            return 7.5;
         }
     }
-    GFXDisable( SMOOTH );
-    GFXPointSize( 1 );
-    GFXColor4f( 1, 1, 1, 1 );
-    GFXEnable( TEXTURE0 );
+    return 0.0;
+}
+
+void GameCockpit::RadarDisplay::RadarJitter(float errorOffset, float errorRange, Vector& position)
+{
+    position.x += -0.5 * errorOffset + (errorRange * randomGenerator());
+    position.y += -0.5 * errorOffset + (errorRange * randomGenerator());
+    position.z += -0.5 * errorOffset + (errorRange * randomGenerator());
+}
+
+class SphericRadarDisplay : public GameCockpit::RadarDisplay
+{
+public:
+    SphericRadarDisplay(GameCockpit *cockpit)
+        : RadarDisplay(cockpit),
+          radarTime(0.0)
+    {}
+
+    void Draw(Unit *myself, const RadarInfo& leftRadar, const RadarInfo& rightRadar, const BlipCollection& blips)
+    {
+        radarTime += GetElapsedTime();
+        GFXEnable(SMOOTH);
+
+        blipSorting.resize(blips.size());
+        for (size_t i = 0; i < blipSorting.size(); ++i)
+        {
+            blipSorting[i] = i;
+        }
+        Sort(blips, blipSorting);
+
+        // FIXME: DrawRadarCircles
+        DrawFront(myself, leftRadar, blips);
+
+        // FIXME: DrawRadarCircles
+        DrawRear(myself, rightRadar, blips);
+
+        GFXDisable(SMOOTH);
+        GFXPointSize(1);
+    }
+
+protected:
+    void DrawFront(Unit *myself,
+                   const RadarInfo& radarInfo,
+                   const BlipCollection& blips)
+    {
+        // Draw all blips in front of the ship
+
+        for (BlipIndices::const_iterator it = blipSorting.begin(); it != blipSorting.end(); ++it)
+        {
+            const BlipCollection::value_type& current = blips[*it];
+
+            if (current.position.k < 0)
+                continue;
+            GFXColor blipColor(GetUnitColor(myself, current.target));
+            DrawBlipAt(myself, current.target, radarInfo, current.position, current.distance, blipColor);
+        }
+    }
+
+    void DrawRear(Unit *myself,
+                  const RadarInfo& radarInfo,
+                  const BlipCollection& blips)
+    {
+        // Draw all blips behind the ship
+
+        for (BlipIndices::const_iterator it = blipSorting.begin(); it != blipSorting.end(); ++it)
+        {
+            const BlipCollection::value_type& current = blips[*it];
+
+            Vector position(current.position);
+            if (position.k >= 0)
+                continue;
+            position.k = -position.k;
+            GFXColor blipColor(GetUnitColor(myself, current.target));
+            DrawBlipAt(myself, current.target, radarInfo, position, current.distance, blipColor);
+        }
+    }
+
+    struct SortingOrder
+        : public std::binary_function<BlipIndices::value_type, BlipIndices::value_type, bool>
+    {
+        SortingOrder(const BlipCollection& data) : data(data) {}
+
+        result_type operator() (first_argument_type first, second_argument_type second) const
+        {
+            return data[first].distance > data[second].distance;
+        }
+
+    protected:
+        const BlipCollection& data;
+    };
+
+    void Sort(const BlipCollection& blips,
+              BlipIndices& result)
+    {
+        // Sort according to distance from unit
+        std::sort(result.begin(), result.end(), SortingOrder(blips));
+    }
+
+    void DrawBlipAt(Unit *myself,
+                    Unit *target,
+                    const GameCockpit::RadarInfo& radarInfo,
+                    const Vector& position,
+                    float distance,
+                    const GFXColor& color)
+    {
+        Vector scaledPosition = Vector(-position.x, position.y, position.z) / float(2.0 * position.Magnitude());
+
+        float blipSize = 2.0;
+        const bool useObjectSize = (radarInfo.iff >= Unit::Computer::RADARLIM::IFF_OBJECT_SIZE);
+        if (useObjectSize)
+        {
+            float scaledDistance = log10(distance) / log10(radarInfo.maxRange);
+            if (scaledDistance > 1.0)
+                scaledDistance = 1.0;
+            if (scaledDistance < 0.0)
+                scaledDistance = 0;
+
+            blipSize = log10(target->rSize()) / scaledDistance;
+            if (blipSize < 1.0)
+                blipSize = 1.0;
+        }
+
+        const bool isTaintedByNebula = (myself->GetNebula() != NULL);
+        if (isTaintedByNebula)
+        {
+            RadarJitter(0.0, 0.02, scaledPosition);
+            if (scaledPosition.Magnitude() > 1.0)
+                return;
+        }
+        else
+        {
+            const bool isNebula = (target->GetNebula() != NULL);
+            const bool isEcmActive = (UnitUtil::getECM(target) > 0);
+            if (isNebula || isEcmActive)
+            {
+                float error = 0.01 * blipSize;
+                RadarJitter(error, error, scaledPosition);
+                if (scaledPosition.Magnitude() > 1.0)
+                    return;
+            }
+        }
+
+
+        Vector v(radarInfo.xPosition + radarInfo.xSize * scaledPosition.x,
+                 radarInfo.yPosition + radarInfo.ySize * scaledPosition.y,
+                 0);
+
+        const bool isActiveTarget = (target == myself->Target());
+        const bool isTargettingMe = (myself == target->Target());
+
+        GFXColor headColor = color;
+        const bool useThreatAssessment = (radarInfo.iff >= Unit::Computer::RADARLIM::IFF_THREAT_ASSESSMENT);
+        if (useThreatAssessment)
+        {
+            float dangerRate = GetDangerRate(myself, target);
+            if (dangerRate > 0.0)
+            {
+                // Blinking blip
+                headColor.a *= cosf(dangerRate * radarTime);
+            }
+        }
+
+        if (isActiveTarget)
+        {
+	    GFXLineWidth(1);
+            // Crosshair
+            GFXBegin(GFXLINE);
+            float size = 2.5 * blipSize;
+            float xsize = size / g_game.x_resolution;
+            float ysize = size / g_game.y_resolution;
+            GFXVertex3f(v.x - xsize, v.y);
+            GFXVertex3f(v.x + xsize, v.y);
+            GFXVertex3f(v.x, v.y - ysize);
+            GFXVertex3f(v.x, v.y + ysize);
+	    GFXEnd();
+        }
+        GFXPointSize(blipSize);
+        GFXBegin(GFXPOINT);
+        GFXColorf(headColor);
+        GFXVertexf(v);
+        GFXEnd();
+    }
+
+protected:
+    float radarTime;
+    BlipIndices blipSorting;
+};
+
+class CartesianRadarDisplay : public GameCockpit::RadarDisplay
+{
+public:
+    CartesianRadarDisplay(GameCockpit *cockpit)
+        : RadarDisplay(cockpit),
+          radarTime(0.0)
+    {
+        // camera_y shifts down (and up for negative numbers)
+        cameraPosition = Vector(0.0, -0.25, 1.0); // 0, 0, 1
+        cameraPosition.Normalize();
+
+        // theta_x shifts up (and down for negative numbers)
+        // theta_y shifts to left (and right for negative numbers)
+        // theta_z rotates counterclockwise (and clockwise for negative numbers)
+        cameraAngle = Vector(-M_PI/4, 0.0, 0.0); // 0, 0, 0
+
+        viewerPosition = Vector(0.0, -0.5, 1.0); // 0, 0, 1
+        viewerPosition.Normalize();
+
+        Matrix perspectiveX(Vector(1, 0, 0),
+                            Vector(0, cos(cameraAngle.x), sin(cameraAngle.x)),
+                            Vector(0, -sin(cameraAngle.x), cos(cameraAngle.x)));
+        Matrix perspectiveY(Vector(cos(cameraAngle.y), 0, -sin(cameraAngle.y)),
+                            Vector(0, 1, 0),
+                            Vector(sin(cameraAngle.y), 0, cos(cameraAngle.y)));
+        Matrix perspectiveZ(Vector(cos(cameraAngle.z), sin(cameraAngle.z), 0),
+                            Vector(-sin(cameraAngle.z), cos(cameraAngle.z), 0),
+                            Vector(0, 0, 1));
+        perspective = perspectiveX * perspectiveY * perspectiveZ;
+
+    }
+
+    void Draw(Unit *myself, const RadarInfo& leftRadar, const RadarInfo& rightRadar, const BlipCollection& blips)
+    {
+        radarTime += GetElapsedTime();
+        GFXEnable(SMOOTH);
+
+        blipSorting.resize(blips.size());
+        for (size_t i = 0; i < blipSorting.size(); ++i)
+        {
+            blipSorting[i] = i;
+        }
+        Sort(blips, blipSorting);
+
+        // FIXME: DrawRadarCircles
+        DrawNear(myself, leftRadar, blips);
+
+        // FIXME: DrawRadarCircles
+        DrawDistant(myself, rightRadar, blips);
+
+        GFXDisable(SMOOTH);
+        GFXPointSize(1);
+    }
+
+protected:
+    void DrawNear(Unit *myself,
+                  const RadarInfo& radarInfo,
+                  const BlipCollection& blips)
+    {
+        // Draw all near blips (distance scaled)
+
+        float maxRange = radarInfo.closeRange;
+
+        DrawGround(radarInfo);
+        DrawBeam(radarInfo, 1.0);
+
+        for (BlipIndices::const_iterator it = blipSorting.begin(); it != blipSorting.end(); ++it)
+        {
+            const BlipCollection::value_type& current = blips[*it];
+
+            if (current.distance > maxRange)
+                continue;
+
+            Vector position(current.position);
+            GFXColor blipColor(GetUnitColor(myself, current.target));
+            float blipSize = 2.0;
+            const bool useObjectSize = (radarInfo.iff >= Unit::Computer::RADARLIM::IFF_OBJECT_SIZE);
+            if (useObjectSize)
+            {
+                blipSize *= 2.0 * log10(current.distance / maxRange);
+            }
+            // scale = log10(current.target->rSize()) / scale;
+            DrawBlipAt(myself, current.target, radarInfo, position, current.distance, maxRange, blipColor, blipSize);
+        }
+    }
+
+    void DrawDistant(Unit *myself,
+                     const RadarInfo& radarInfo,
+                     const BlipCollection& blips)
+    {
+        // Draw all distant blips (size scaled)
+
+        float minRange = radarInfo.closeRange;
+        float maxRange = radarInfo.maxRange;
+
+        DrawGround(radarInfo);
+        DrawBeam(radarInfo, 0.3);
+
+        for (BlipIndices::const_iterator it = blipSorting.begin(); it != blipSorting.end(); ++it)
+        {
+            const BlipCollection::value_type& current = blips[*it];
+
+            if ((current.distance < minRange) || (current.distance > maxRange))
+                continue;
+
+            Vector position(current.position);
+            GFXColor blipColor(GetUnitColor(myself, current.target));
+            float blipSize = 2.0;
+            if (radarInfo.iff >= Unit::Computer::RADARLIM::IFF_OBJECT_SIZE)
+            {
+                blipSize = log10(current.target->rSize());
+            }
+            DrawBlipAt(myself, current.target, radarInfo, position, current.distance, maxRange, blipColor, blipSize);
+        }
+    }
+
+    struct SortingOrder
+        : public std::binary_function<BlipIndices::value_type, BlipIndices::value_type, bool>
+    {
+        SortingOrder(const BlipCollection& data) : data(data) {}
+
+        result_type operator() (first_argument_type first, second_argument_type second) const
+        {
+            return data[first].position.z < data[second].position.z;
+        }
+
+    protected:
+        const BlipCollection& data;
+    };
+
+    void Sort(const BlipCollection& blips,
+              BlipIndices& result)
+    {
+        // Sort according to depth (which is approximately the depth seen from the camera)
+        std::sort(result.begin(), result.end(), SortingOrder(blips));
+    }
+
+    void DrawBlipAt(Unit *myself,
+                    Unit *target,
+                    const GameCockpit::RadarInfo& radarInfo,
+                    const Vector& position,
+                    float distance,
+                    float maxRange,
+                    const GFXColor& color,
+                    float blipSize)
+    {
+        Vector scaledPosition = Vector(position.x, -position.y, -position.z) / float(2.0 * maxRange);
+        if (scaledPosition.Magnitude() > 1.0)
+            return;
+
+        // FIXME: Integrate radar into damage/repair system
+        const bool isTaintedByNebula = (myself->GetNebula() != NULL);
+        if (isTaintedByNebula)
+        {
+            RadarJitter(0.0, 0.01, scaledPosition);
+        }
+        else
+        {
+            const bool isNebula = (target->GetNebula() != NULL);
+            const bool isEcmActive = (UnitUtil::getECM(target) > 0);
+            if (isNebula || isEcmActive)
+            {
+                // FIXME: errorMagnitude must be between 0 (no error) and 1 (maximum error)
+                float errorMagnitude = (myself->GetImageInformation().cockpit_damage[0]); // 0 is radar (images.h)
+                errorMagnitude = 1.0; // FIXME
+                float errorOffset = (scaledPosition.x > 0.0 ? 0.01 : -0.01) * errorMagnitude;
+                float errorRange = 0.01 * errorMagnitude;
+                RadarJitter(errorOffset, errorRange, scaledPosition);
+            }
+        }
+
+        Vector headPosition = Transform(perspective, scaledPosition - cameraPosition);
+        float headX = (headPosition.x - viewerPosition.x) * (viewerPosition.z / headPosition.z);
+        float headY = (headPosition.y - viewerPosition.y) * (viewerPosition.z / headPosition.z);
+        Vector head(radarInfo.xPosition + radarInfo.xSize * headX,
+                    radarInfo.yPosition + radarInfo.ySize * headY,
+                    0);
+
+        Vector scaledGround(scaledPosition.x, 0, scaledPosition.z);
+        Vector groundPosition = Transform(perspective, scaledGround - cameraPosition);
+        float groundX = (groundPosition.x - viewerPosition.x) * (viewerPosition.z / groundPosition.z);
+        float groundY = (groundPosition.y - viewerPosition.y) * (viewerPosition.z / groundPosition.z);
+        Vector ground(radarInfo.xPosition + radarInfo.xSize * groundX,
+                      radarInfo.yPosition + radarInfo.ySize * groundY,
+                      0);
+
+        const bool isBelowGround = (scaledPosition.y > 0);
+        const bool isActiveTarget = (target == myself->Target());
+        const bool isTargettingMe = (myself == target->Target());
+
+        float colorScale = distance / maxRange;
+        colorScale = (1.0 - colorScale) / (1.0 + colorScale);
+
+        // Draw head
+        GFXColor headColor = color;
+        // Blips below ground are muted
+        if (isBelowGround)
+            headColor.a /= 4;
+        const bool useThreatAssessment = (radarInfo.iff >= Unit::Computer::RADARLIM::IFF_THREAT_ASSESSMENT);
+        if (useThreatAssessment)
+        {
+            float dangerRate = GetDangerRate(myself, target);
+            if (dangerRate > 0.0)
+            {
+                // Blinking blip
+                headColor.a *= cosf(dangerRate * radarTime);
+            }
+        }
+        GFXColorf(headColor);
+        GFXPointSize(blipSize);
+        GFXBegin(GFXPOINT);
+        GFXVertexf(head);
+        GFXEnd();
+
+        // Draw leg
+        GFXColor legColor = headColor;
+        legColor.a /= 2;
+        GFXLineWidth(0.2);
+        GFXColorf(legColor);
+        if (isActiveTarget && (radarInfo.iff >= Unit::Computer::RADARLIM::IFF_OBJECT_SIZE))
+        {
+            GFXBegin(GFXPOLY);
+            GFXVertexf(head);
+            GFXVertexf(ground);
+            GFXVertex3f(radarInfo.xPosition, radarInfo.yPosition, 0.0f);
+            GFXEnd();
+        }
+        else
+        {
+            GFXBegin(GFXLINE);
+            GFXVertexf(head);
+            GFXVertexf(ground);
+            GFXEnd();
+        }
+
+        if (isActiveTarget)
+        {
+            // Diamond
+	    GFXLineWidth(1);
+            GFXColorf(headColor);
+            GFXBegin(GFXLINESTRIP);
+            float size = 6.0 * blipSize;
+            if (size < 6.0)
+                size = 6.0;
+            float xsize = size / g_game.x_resolution;
+            float ysize = size / g_game.y_resolution;
+            float beginX = head.i - xsize;
+            GFXVertex3f(beginX, head.y);
+            GFXVertex3f(head.x, head.y - ysize);
+            GFXVertex3f(head.x + xsize, head.y);
+            GFXVertex3f(head.x, head.y + ysize);
+            GFXVertex3f(beginX, head.y);
+	    GFXEnd();
+        }
+    }
+
+    // FIXME: Remove circles from data/textures/cockpits/disabled/panel.image
+    void DrawGround(const RadarInfo& radarInfo)
+    {
+        GFXColor groundColor(0.0, 1.0, 0.0, 0.3); // FIXME
+        float angle = cosf(cameraAngle.x);
+        const float outer = 0.5;
+        const float middle = (2.0 / 3.0) * outer;
+        const float inner = outer / 3.0;
+        float xcone = cosf(radarInfo.lockCone);
+        float ycone = sinf(radarInfo.lockCone);
+
+        GFXLineWidth(0.5);
+        GFXColorf(groundColor);
+        GFXCircle(radarInfo.xPosition, radarInfo.yPosition, radarInfo.xSize * inner, angle * radarInfo.ySize * inner);
+        GFXCircle(radarInfo.xPosition, radarInfo.yPosition, radarInfo.xSize * outer, angle * radarInfo.ySize * outer);
+        GFXCircle(radarInfo.xPosition, radarInfo.yPosition, radarInfo.xSize * middle, angle * radarInfo.ySize * middle);
+
+        GFXLineWidth(0.2);
+        GFXBegin(GFXLINE);
+        GFXVertex3f(radarInfo.xPosition + (radarInfo.xSize * outer) * xcone, radarInfo.yPosition + (angle * radarInfo.ySize * outer) * ycone, 0);
+        GFXVertex3f(radarInfo.xPosition + (radarInfo.xSize * inner) * xcone, radarInfo.yPosition + (angle * radarInfo.ySize * inner) * ycone, 0);
+        GFXVertex3f(radarInfo.xPosition - (radarInfo.xSize * outer) * xcone, radarInfo.yPosition + (angle * radarInfo.ySize * outer) * ycone, 0);
+        GFXVertex3f(radarInfo.xPosition - (radarInfo.xSize * inner) * xcone, radarInfo.yPosition + (angle * radarInfo.ySize * inner) * ycone, 0);
+        GFXEnd();
+        GFXLineWidth(1);
+    }
+
+    void DrawBeam(const RadarInfo& radarInfo, float rate)
+    {
+        GFXColor beamColor(0.0, 1.0, 0.0, 0.2); // FIXME
+        float angle = cosf(cameraAngle.x);
+        GFXLineWidth(0.5);
+        GFXColorf(beamColor);
+        GFXCircle(radarInfo.xPosition,
+                  radarInfo.yPosition,
+                  cosf(rate * radarTime) * radarInfo.xSize / 2,
+                  angle * cosf(rate * radarTime) * radarInfo.ySize / 2);
+        GFXEnd();
+    }
+
+protected:
+    Vector cameraPosition;
+    Vector cameraAngle;
+    Vector viewerPosition;
+    Matrix perspective;
+    float radarTime;
+    BlipIndices blipSorting;
+};
+
+void GameCockpit::DrawBlips(Unit *myself)
+{
+    static float maxUnitRadius =
+        XMLSupport::parse_float(vs_config->getVariable("graphics", "hud", "radar_search_extra_radius", "1000"));
+    static bool allGravUnits =
+        XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "draw_gravitational_objects", "true"));
+
+    GFXDisable(TEXTURE0);
+    GFXDisable(LIGHTING);
+
+    float maxRange = myself->GetComputerData().radar.maxrange;
+
+    // Find all units within range
+    UnitWithinRangeLocator<CollectRadarBlips> unitLocator(maxRange, maxUnitRadius);
+    unitLocator.action.init(this, myself);
+    if (! is_null(myself->location[Unit::UNIT_ONLY]))
+    {
+        findObjects(_Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY],
+                    myself->location[Unit::UNIT_ONLY],
+                    &unitLocator);
+    }
+    if (allGravUnits)
+    {
+        Unit *target = myself->Target();
+        Unit *gravUnit;
+        bool foundtarget = false;
+        for (un_kiter i = _Universe->activeStarSystem()->gravitationalUnits().constIterator();
+             (gravUnit = *i) != NULL;
+             ++i)
+        {
+            unitLocator.action.acquire(gravUnit, UnitUtil::getDistance(myself, gravUnit));
+            if (gravUnit == target)
+                foundtarget = true;
+        }
+        if (target && !foundtarget)
+            unitLocator.action.acquire(target, UnitUtil::getDistance(myself, target));
+    }
+
+    assert(radarDisplay);
+
+    // FIXME: Distinguish between combat and flight mode? (myself->CombatMode())
+
+    float iff = myself->GetComputerData().radar.iff;
+    // FIXME: For debugging purposes only (until you can buy sensors with this IFF level)
+    static bool radarIff =
+        XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "radarIff", "false"));
+    if (radarIff)
+        iff = Unit::Computer::RADARLIM::IFF_THREAT_ASSESSMENT;
+
+    RadarInfo leftRadar;
+    Radar[0]->GetPosition(leftRadar.xPosition, leftRadar.yPosition);
+    Radar[0]->GetSize(leftRadar.xSize, leftRadar.ySize);
+    leftRadar.xSize = fabs(leftRadar.xSize);
+    leftRadar.ySize = fabs(leftRadar.ySize);
+    leftRadar.closeRange = 30000.0; // FIXME
+    leftRadar.maxRange = maxRange;
+    leftRadar.lockCone = myself->GetComputerData().radar.lockcone;
+    leftRadar.iff = iff;
+
+    RadarInfo rightRadar;
+    Radar[1]->GetPosition(rightRadar.xPosition, rightRadar.yPosition);
+    Radar[1]->GetSize(rightRadar.xSize, rightRadar.ySize);
+    rightRadar.xSize = fabs(rightRadar.xSize);
+    rightRadar.ySize = fabs(rightRadar.ySize);
+    rightRadar.closeRange = leftRadar.closeRange;
+    rightRadar.maxRange = leftRadar.maxRange;
+    rightRadar.lockCone = leftRadar.lockCone;
+    rightRadar.iff = leftRadar.iff;
+
+    const BlipCollection& blips = unitLocator.action.GetBlips();
+
+    radarDisplay->Draw(myself, leftRadar, rightRadar, blips);
+
+    GFXEnable(TEXTURE0);
 }
 
 float GameCockpit::LookupTargetStat( int stat, Unit *target )
@@ -1895,6 +2242,8 @@ void GameCockpit::Init( const char *file )
 
 void GameCockpit::Delete()
 {
+    Cockpit::Delete();
+
     int i;
     if (text) {
         delete text;
@@ -1911,7 +2260,6 @@ void GameCockpit::Delete()
         AUDDeleteSound( soundfile, false );
         soundfile = -1;
     }
-    viewport_offset = cockpit_offset = 0;
     for (i = 0; i < 4; i++) {
         /*
          *  if (Pit[i]) {
@@ -1959,9 +2307,11 @@ void GameCockpit::InitStatic()
 }
 
 /***** WARNING CHANGED ORDER *****/
-GameCockpit::GameCockpit( const char *file, Unit *parent, const std::string &pilot_name ) : Cockpit( file, parent, pilot_name )
+GameCockpit::GameCockpit( const char *file, Unit *parent, const std::string &pilot_name )
+    : Cockpit( file, parent, pilot_name )
     , shake_time( 0 )
     , shake_type( 0 )
+    , radarDisplay(0)
     , textcol( 1, 1, 1, 1 )
     , text( NULL )
 {
@@ -1996,8 +2346,17 @@ GameCockpit::GameCockpit( const char *file, Unit *parent, const std::string &pil
     draw_line_to_itts   = st_draw_line_to_itts;
     always_itts   = st_always_itts;
     steady_itts   = st_steady_itts;
-    radar_type    = st_radar_type;
     last_locktime = last_mlocktime = -FLT_MAX;
+
+    // FIXME: Make part of equipment that can be bought
+    if (st_radar_type == "Elite")
+    {
+        radarDisplay = new CartesianRadarDisplay(this);
+    }
+    else
+    {
+        radarDisplay = new SphericRadarDisplay(this);
+    }
 
     //Compute the screen limits. Used to display the arrow pointing to the selected target.
     static float st_projection_limit_y = XMLSupport::parse_float( vs_config->getVariable( "graphics", "fov", "78" ) );
@@ -2767,10 +3126,7 @@ void GameCockpit::Draw()
             DrawGauges( un );
             if (Radar) {
                 //Radar->Draw();
-                if (radar_type == "Elite")
-                    DrawEliteBlips( un );
-                else
-                    DrawBlips( un );
+                DrawBlips( un );
                 /*	if (rand01()>un->GetImageInformation().cockpit_damage[0]) {
                  *  static Animation radar_ani("round_static.ani",true,.1,BILINEAR);
                  *  radar_ani.DrawAsVSSprite(Radar);
@@ -3198,6 +3554,7 @@ void SwitchUnits2( Unit *nw )
 GameCockpit::~GameCockpit()
 {
     Delete();
+    delete radarDisplay;
     int i;
     for (i = 0; i < 4; i++)
         if (Pit[i]) {

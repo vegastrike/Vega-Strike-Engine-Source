@@ -355,6 +355,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
     case CUBEMAP:
         textures[*handle].targets = GL_TEXTURE_CUBE_MAP_EXT;
         break;
+    case TEXTURERECT:
+        textures[*handle].targets = GL_TEXTURE_RECTANGLE_ARB;
+        break;
     }
     //for those libs with stubbed out handle gen't
     textures[*handle].name = *handle+1;
@@ -628,6 +631,9 @@ GLenum GetImageTarget( TEXTURE_IMAGE_TARGET imagetarget )
     case CUBEMAP_NEGATIVE_Z:
         image2D = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT;
         break;
+    case TEXTURE_RECTANGLE:
+        image2D = GL_TEXTURE_RECTANGLE_ARB;
+        break;
     default:
         assert(0 ||! "Bad case in file gl_texture.cpp, line 668 as of this writing.");
         break;
@@ -666,6 +672,9 @@ const char * GetImageTargetName( TEXTURE_IMAGE_TARGET imagetarget )
     case CUBEMAP_NEGATIVE_Z:
         return "CUBEMAP_NEGATIVE_Z";
 
+    case TEXTURE_RECTANGLE:
+        return "TEXTURE_RECTANGLE";
+        
     default:
         return "UNK";
     }

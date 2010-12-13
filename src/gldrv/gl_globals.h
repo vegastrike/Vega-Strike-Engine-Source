@@ -311,6 +311,8 @@ typedef struct
     char smooth_shade;
     int  max_texture_dimension;
     int  max_movie_dimension;
+    int  max_rect_dimension;
+    bool rect_textures;
     bool pot_video_textures;
     bool s3tc;
     bool ext_clamp_to_edge;
@@ -350,6 +352,12 @@ extern gl_options_t gl_options;
         #endif
     #endif
 #endif
+
+#ifndef GL_TEXTURE_RECTANGLE_ARB
+    #define GL_TEXTURE_RECTANGLE_ARB          0x84F5
+    #define GL_MAX_RECTANGLE_TEXTURE_SIZE_ARB 0x84F8
+#endif
+
 
 // Not all platforms define GL_FRAMEBUFFER_SRGB stuff
 #ifndef GL_FRAMEBUFFER_SRGB_EXT

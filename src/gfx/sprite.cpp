@@ -249,10 +249,10 @@ void VSSprite::Draw()
         BLENDFUNC src, dst;
         GFXGetBlendMode( src, dst );
         for (lyr = 0; (lyr < gl_options.Multitexture) || (lyr < numlayers); lyr++) {
-            GFXToggleTexture( (lyr < numlayers), lyr );
+            GFXToggleTexture( (lyr < numlayers), lyr, surface->texture_target );
             if (lyr < numlayers) GFXTextureCoordGenMode( lyr, NO_GEN, NULL, NULL );
         }
-        for (int pass = 0; pass < numpasses; pass++)
+        for (int pass = 0; pass < numpasses; pass++) {
             if ( surface->SetupPass( pass, 0, src, dst ) ) {
                 surface->MakeActive( 0, pass );
                 GFXTextureEnv( 0, GFXMODULATETEXTURE );
@@ -279,9 +279,10 @@ void VSSprite::Draw()
                 GFXVertexf( ul );
                 GFXEnd();
             }
+        }
         surface->SetupPass( -1, 0, src, dst );
         for (lyr = 0; lyr < numlayers; lyr++)
-            GFXToggleTexture( false, lyr );
+            GFXToggleTexture( false, lyr, surface->texture_target );
         GFXEnable( CULLFACE );
     }
 }
