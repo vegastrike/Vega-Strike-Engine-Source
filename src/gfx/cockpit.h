@@ -1,5 +1,3 @@
-// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
-
 #ifndef _COCKPIT_H_
 #define _COCKPIT_H_
 #include "gfx/cockpit_generic.h"
@@ -7,7 +5,6 @@
 #include "gfxlib_struct.h"
 #include <vector>
 #include <list>
-#include <boost/random.hpp>
 using namespace XMLSupport;
 class TextPlane;
 class VSSprite;
@@ -64,60 +61,7 @@ struct soundArray
 
 class GameCockpit : public Cockpit
 {
-public:
-    struct RadarInfo
-    {
-        float xPosition;
-        float yPosition;
-        float xSize;
-        float ySize;
-        float closeRange;
-        float maxRange;
-        float lockCone;
-        char iff;
-    };
-
-    struct Blip
-    {
-        Unit *target;
-        Vector position;
-        float distance;
-    };
-    
-    typedef std::vector<Blip> BlipCollection;
-    typedef std::vector<size_t> BlipIndices;
-
-    class RadarDisplay
-    {
-    public:
-        typedef GameCockpit::RadarInfo RadarInfo;
-        typedef GameCockpit::BlipCollection BlipCollection;
-        typedef GameCockpit::BlipIndices BlipIndices;
-
-    public:
-        RadarDisplay(GameCockpit *);
-
-        virtual void Draw(Unit *, const RadarInfo&, const RadarInfo&, const BlipCollection&) = 0;
-
-        inline GFXColor GetUnitColor(Unit *myself, Unit *target)
-        {
-            return cockpit->unitToColor(myself, target, myself->GetComputerData().radar.iff);
-        }
-
-    protected:
-        float GetDangerRate(Unit *myUnit, Unit *target);
-        void RadarJitter(float, float, Vector&);
-
-    protected:
-        GameCockpit *cockpit;
-        boost::mt19937 randomEngine;
-        boost::normal_distribution<float> randomDistribution;
-        boost::variate_generator<boost::mt19937&, boost::normal_distribution<float> > randomGenerator;
-    };
-
 private:
-    friend class RadarDisplay;
-
     Camera    cam[NUM_CAM];
     float     vdu_time[MAXVDUS];
 ///saved values to compare with current values (might need more for damage)
@@ -134,7 +78,6 @@ private:
     int       soundfile;
     VSSprite *Pit[4];
     VSSprite *Radar[2];
-    RadarDisplay *radarDisplay;
 ///Video Display Units (may need more than 2 in future)
     std::vector< VDU* >vdu;
 /// An information string displayed in the VDU.
@@ -160,16 +103,17 @@ private:
     GFXColor friendly, enemy, neutral, targeted, targetting, planet;
 //gets the color by relation
     GFXColor relationToColor( float relation );
-//gets the color by looking closer at the unit
-    GFXColor unitToColor( Unit *un, Unit *target, char ifflevel );
+//gets the color by looking closer at the unit, and a sequence number representing the blip's priority
+    GFXColor unitToColor( Unit *un, Unit *target, char ifflevel, char &sequence );
+    
+    GFXColor unitToColor( Unit *un, Unit *target, char ifflevel )
+    {
+        char seq;
+        return unitToColor( un, target, ifflevel, seq );
+    }
     
 //the style of the radar (WC|Elite)
-    enum RadarType
-    {
-        RADAR_TYPE_DEFAULT,
-        RADAR_TYPE_ELITE
-    };
-    enum RadarType radar_type;
+    string radar_type;
 /// Used to display the arrow pointing to the currently selected target.
     float  projection_limit_x, projection_limit_y;
     float  inv_screen_aspect_ratio; //Precomputed division 1 / g_game.aspect.
@@ -194,8 +138,10 @@ private:
     void DrawTurretTargetBoxes();
     void DrawTacticalTargetBox();
     void DrawCommunicatingBoxes();
-///Draws all the blips on the radar.
+///Draws all teh blips on the radar.
     void DrawBlips( Unit *un );
+///Draws all teh blips on the radar in Elite-style
+    void DrawEliteBlips( Unit *un );
 ///Draws target gauges
     void DrawTargetGauges( Unit *target );
 ///Draws unit gauges
@@ -273,6 +219,16 @@ public:
     {
         cam[currentcamera].UpdateGFX();
     }
+    
+    struct BlipEntry {
+        bool bigger;
+        char sequence;
+        GFXColor color;
+        Vector vertex;
+    };
+    
+    /// Add the corresponding BlipEntry into out.
+    void drawUnToTarget( Unit *a, Unit *b, float xcent, float ycent, float xsize, float ysize, bool reardar, std::vector<BlipEntry> &out);
     
     virtual bool SetDrawNavSystem( bool );
     virtual bool CanDrawNavSystem();

@@ -1161,7 +1161,7 @@ void Unit::Init()
     computer.radar.trackingactive= true;
     computer.radar.lockcone      = lc;
     computer.radar.mintargetsize = 0;
-    computer.radar.iff           = Computer::RADARLIM::IFF_NONE;
+    computer.radar.iff           = 0;
 
     flightgroup                  = NULL;
     flightgroup_subnumber        = 0;
@@ -4465,7 +4465,7 @@ void Unit::DamageRandSys( float dam, const Vector &vec, float randnum, float deg
         } else if (randnum >= .775) {
             computer.itts = false;             //Set the computer to not have an itts
         } else if (randnum >= .7) {
-	    if (computer.radar.iff > Computer::RADARLIM::IFF_NONE)
+            if (computer.radar.iff > 0)
                 //set the radar to not have color
                 computer.radar.iff -= 1;
         } else if (randnum >= .5) {
