@@ -601,7 +601,7 @@ public:
     virtual int numQuads() const;
 ///Looks up the index in the appropriate short, char or int array
     unsigned int GetIndex( int offset ) const;
-    POLYTYPE *GetPoyType() const;
+    POLYTYPE *GetPolyType() const;
     int *GetOffsets() const;
     int GetNumLists() const;
     bool hasColor() const;

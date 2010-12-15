@@ -585,7 +585,7 @@ GFXVertexList::GFXVertexList()
     memset( this, 0, sizeof (GFXVertexList) );
 } //private, only for inheriters
 
-POLYTYPE *GFXVertexList::GetPoyType() const
+POLYTYPE *GFXVertexList::GetPolyType() const
 {
 	return mode;
 }
